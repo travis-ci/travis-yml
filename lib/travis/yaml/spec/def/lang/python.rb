@@ -18,7 +18,7 @@ module Travis
           register :virtualenv
 
           def define
-            map :system_site_packages, to: :scalar, cast: :bool
+            map :system_site_packages, to: :bool
           end
         end
       end

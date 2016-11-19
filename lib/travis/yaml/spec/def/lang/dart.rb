@@ -10,7 +10,7 @@ module Travis
           def define
             name :dart, alias: :dartlang
             matrix :dart
-            map :with_content_shell, to: :scalar, cast: :bool
+            map :with_content_shell, to: :bool
           end
         end
       end

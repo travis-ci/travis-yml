@@ -1,5 +1,7 @@
+before_deploy: "echo 'ready?'"
 deploy:
   provider: openshift
 
-  on:
-    all_branches: true
+after_deploy:
+  - ./after_deploy_1.sh
+  - ./after_deploy_2.sh

@@ -1,6 +1,6 @@
 describe Travis::Yaml, 'addon: coverity_scan' do
   let(:msgs)   { subject.msgs }
-  let(:addons) { subject.to_h[:addons] }
+  let(:addons) { subject.serialize[:addons] }
 
   subject { described_class.apply(config.merge(language: 'ruby')) }
 

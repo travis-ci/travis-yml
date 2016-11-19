@@ -8,8 +8,10 @@ module Travis
           register :seq
 
           def type(*types)
+            return @types if types.empty?
             opts = types.last.is_a?(Hash) ? types.pop : {}
-            types.any? ? @types = resolve(types, opts) : @types
+            types = resolve(types, opts)
+            @types ? @types.concat(types) : @types = types
           end
 
           def types
@@ -25,6 +27,7 @@ module Travis
           end
 
           def prefix(prefix, opts = {})
+            opts[:type] = Array(opts[:type]) if opts[:type]
             self.opts[:prefix] = { key: prefix }.merge(opts)
           end
 

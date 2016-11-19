@@ -8,11 +8,11 @@ module Travis
 
             def define
               super
-              map :file,       to: :scalar
-              map :user,       to: :scalar, cast: :secure
-              map :key,        to: :scalar
-              map :passphrase, to: :scalar, cast: :secure
-              map :dry_run,    to: :scalar, cast: :bool, alias: :'dry-run'
+              map :file,       to: :str
+              map :user,       to: :str, secure: true
+              map :key,        to: :str, secure: true
+              map :passphrase, to: :str, secure: true
+              map :dry_run,    to: :bool
             end
           end
         end

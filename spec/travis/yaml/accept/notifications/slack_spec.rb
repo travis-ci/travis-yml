@@ -1,6 +1,5 @@
 describe Travis::Yaml, 'notifications: slack' do
-  let(:msgs)  { subject.msgs }
-  let(:slack) { subject.to_h[:notifications][:slack] }
+  let(:slack) { subject.serialize[:notifications][:slack] }
 
   subject { described_class.apply(config) }
 
@@ -22,7 +21,7 @@ describe Travis::Yaml, 'notifications: slack' do
   describe 'given a hash with an unknown template var' do
     let(:config) { { notifications: { slack: { rooms: 'room', template: ['%{wat}'] } } } }
     it { expect(slack[:template]).to be_nil }
-    it { expect(msgs).to include [:error, :'notifications.slack', :unknown_var, 'unknown template variable "wat"'] }
+    it { expect(msgs).to include [:error, :'notifications.slack.template', :unknown_var, var: 'wat'] }
   end
 
   describe 'callbacks' do

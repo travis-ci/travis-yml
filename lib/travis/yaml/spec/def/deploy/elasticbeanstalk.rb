@@ -9,15 +9,15 @@ module Travis
 
             def define
               super
-              map :access_key_id,           to: :scalar, cast: :secure, alias: :'access-key-id'
-              map :securet_access_key,      to: :scalar, cast: :secure, alias: :'secret-access-key'
-              map :region,                  to: :scalar
-              map :app,                     to: :scalar
-              map :env,                     to: :scalar
-              map :zip_file,                to: :scalar
-              map :bucket_name,             to: :scalar
-              map :bucket_path,             to: :scalar
-              map :only_create_app_version, to: :scalar, cast: :bool
+              map :access_key_id,           to: :str, secure: true
+              map :securet_access_key,      to: :str, secure: true
+              map :region,                  to: :str
+              map :app,                     to: :str
+              map :env,                     to: :str
+              map :zip_file,                to: :str
+              map :bucket_name,             to: :str
+              map :bucket_path,             to: :str
+              map :only_create_app_version, to: :bool
             end
           end
         end

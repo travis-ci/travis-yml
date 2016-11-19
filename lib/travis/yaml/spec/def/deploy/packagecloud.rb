@@ -10,12 +10,12 @@ module Travis
 
             def define
               super
-              map :username,     to: :scalar, cast: :secure
-              map :token,        to: :scalar, cast: :secure
-              map :repository,   to: :scalar
-              map :local_dir,    to: :scalar, alias: %i(local-dir)
-              map :dist,         to: :scalar
-              map :package_glob, to: :scalar
+              map :username,     to: :str, secure: true
+              map :token,        to: :str, secure: true
+              map :repository,   to: :str
+              map :local_dir,    to: :str
+              map :dist,         to: :str
+              map :package_glob, to: :str
             end
           end
         end

@@ -1,15 +1,15 @@
 describe Travis::Yaml::Spec::Def::Language do
-  let(:spec) { described_class.new.spec }
+  let(:root) { Travis::Yaml::Spec::Def::Root.new }
+  let(:spec) { described_class.new(root).spec }
 
   it do
-    expect(spec).to eq(
+    expect(except(spec, :values)).to eq(
       name: :language,
       type: :fixed,
-      alias: ['lang'],
       defaults: [
         { value: 'ruby' }
       ],
-      downcase: true
+      downcase: true,
     )
   end
 end

@@ -1,27 +1,29 @@
 describe Travis::Yaml::Spec::Def::R do
-  let(:spec) { Travis::Yaml.spec }
-  let(:lang) { spec[:map][:language][:types][0] }
-  let(:r) { spec[:map][:r][:types][0] }
-  let(:apt_packages) { spec[:map][:apt_packages][:types][0] }
-  let(:bioc_packages) { spec[:map][:bioc_packages][:types][0] }
-  let(:bioc_required) { spec[:map][:bioc_required][:types][0] }
-  let(:bioc_use_devel) { spec[:map][:bioc_use_devel][:types][0] }
-  let(:brew_packages) { spec[:map][:brew_packages][:types][0] }
-  let(:cran) { spec[:map][:cran][:types][0] }
-  let(:disable_homebrew) { spec[:map][:disable_homebrew][:types][0] }
-  let(:latex) { spec[:map][:latex][:types][0] }
-  let(:pandoc) { spec[:map][:pandoc][:types][0] }
-  let(:pandoc_version) { spec[:map][:pandoc_version][:types][0] }
-  let(:r_binary_packages) { spec[:map][:r_binary_packages][:types][0] }
-  let(:r_build_args) { spec[:map][:r_build_args][:types][0] }
-  let(:r_check_args) { spec[:map][:r_check_args][:types][0] }
-  let(:r_check_revdep) { spec[:map][:r_check_revdep][:types][0] }
-  let(:r_github_packages) { spec[:map][:r_github_packages][:types][0] }
-  let(:r_packages) { spec[:map][:r_packages][:types][0] }
-  let(:warnings_are_errors) { spec[:map][:warnings_are_errors][:types][0] }
-  let(:remotes) { spec[:map][:Remotes][:types][0] }
-  let(:repos) { spec[:map][:repos][:types][0] }
-  
+  let(:spec)    { Travis::Yaml.spec }
+  let(:support) { Travis::Yaml.support }
+  let(:lang)    { spec[:map][:language][:types][0] }
+  let(:r)       { support[:map][:r][:types][0] }
+
+  let(:apt_packages)        { support[:map][:apt_packages][:types][0] }
+  let(:bioc_packages)       { support[:map][:bioc_packages][:types][0] }
+  let(:bioc_required)       { support[:map][:bioc_required][:types][0] }
+  let(:bioc_use_devel)      { support[:map][:bioc_use_devel][:types][0] }
+  let(:brew_packages)       { support[:map][:brew_packages][:types][0] }
+  let(:cran)                { support[:map][:cran][:types][0] }
+  let(:disable_homebrew)    { support[:map][:disable_homebrew][:types][0] }
+  let(:latex)               { support[:map][:latex][:types][0] }
+  let(:pandoc)              { support[:map][:pandoc][:types][0] }
+  let(:pandoc_version)      { support[:map][:pandoc_version][:types][0] }
+  let(:r_binary_packages)   { support[:map][:r_binary_packages][:types][0] }
+  let(:r_build_args)        { support[:map][:r_build_args][:types][0] }
+  let(:r_check_args)        { support[:map][:r_check_args][:types][0] }
+  let(:r_check_revdep)      { support[:map][:r_check_revdep][:types][0] }
+  let(:r_github_packages)   { support[:map][:r_github_packages][:types][0] }
+  let(:r_packages)          { support[:map][:r_packages][:types][0] }
+  let(:warnings_are_errors) { support[:map][:warnings_are_errors][:types][0] }
+  let(:remotes)             { support[:map][:remotes][:types][0] }
+  let(:repos)               { support[:map][:repos][:types][0] }
+
   it { expect(lang[:values]).to include(value: 'r') }
   it { expect(r[:only][:language]).to include('r') }
   it { expect(apt_packages[:only][:language]).to include('r') }

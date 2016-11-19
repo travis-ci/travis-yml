@@ -11,14 +11,14 @@ module Travis
 
             def define
               super
-              map :username,            to: :scalar, cast: :secure
-              map :password,            to: :scalar, cast: :secure
-              map :organization,        to: :scalar
-              map :api,                 to: :scalar
-              map :space,               to: :scalar
-              map :key,                 to: :scalar
-              map :manifest,            to: :scalar
-              map :skip_ssl_validation, to: :scalar, cast: :bool
+              map :username,            to: :str, secure: true
+              map :password,            to: :str, secure: true
+              map :organization,        to: :str
+              map :api,                 to: :str
+              map :space,               to: :str
+              map :key,                 to: :str
+              map :manifest,            to: :str
+              map :skip_ssl_validation, to: :bool
             end
           end
         end

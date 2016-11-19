@@ -3,13 +3,13 @@ describe Travis::Yaml::Spec::Def::Addons do
 
   let(:addons) do
     %i(
-      apt apt_packages browserstack artifacts code_climate coverity_scan deploy
-      hostname hosts jwt sauce_connect ssh_known_hosts sonarqube firefox
-      mariadb postgresql rethinkdb
+      apt apt_packages browserstack artifacts code_climate coverity_scan
+      hostname hosts jwt sauce_connect ssh_known_hosts sonarqube srcclr firefox
+      mariadb postgresql rethinkdb deploy
     )
   end
 
-  it { expect(except(spec, :map)).to eq(name: :addons, type: :map, strict: true) }
+  it { expect(except(spec, :map, :alias)).to eq(name: :addons, type: :map, strict: true) }
   it { expect(spec[:map].keys).to eq addons }
 
   describe 'apt_packages' do
@@ -34,7 +34,7 @@ describe Travis::Yaml::Spec::Def::Addons do
 
   describe 'sonarqube' do
     let(:addon) { spec[:map][:sonarqube] }
-    it { expect(addon).to eq(key: :sonarqube, types: [type: :scalar, cast: [:bool]]) }
+    it { expect(addon).to eq(key: :sonarqube, types: [{ type: :map, strict: false }, { type: :scalar, strict: false, cast: :bool }]) }
   end
 
   describe 'firefox' do

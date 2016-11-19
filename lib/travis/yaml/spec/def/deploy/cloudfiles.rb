@@ -9,11 +9,11 @@ module Travis
 
             def define
               super
-              map :username,  to: :scalar, cast: :secure
-              map :api_key,   to: :scalar, cast: :secure
-              map :region,    to: :scalar
-              map :container, to: :scalar
-              map :dot_match, to: :scalar, cast: :bool
+              map :username,  to: :str, secure: true
+              map :api_key,   to: :str, secure: true
+              map :region,    to: :str
+              map :container, to: :str
+              map :dot_match, to: :bool
             end
           end
         end

@@ -8,7 +8,7 @@ module Travis
 
             def define
               super
-              map :script, to: :scalar
+              map :script, to: :str # TODO should be a seq?
             end
           end
         end

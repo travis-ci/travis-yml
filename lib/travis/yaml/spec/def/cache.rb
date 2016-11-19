@@ -9,18 +9,19 @@ module Travis
         class Cache < Type::Map
           register :cache
 
-          TYPES = %i(apt bundler cargo ccache cocoapods packages pip)
+          TYPES = %i(apt bundler cargo ccache cocoapods npm packages pip yarn)
 
           def define
-            normalize :cache, types: TYPES
+            change :cache, types: TYPES # really? enable all the caches?
 
             TYPES.each do |type|
-              map type, to: :scalar, cast: :bool
+              map type, to: :bool
             end
 
-            map :edge, to: :scalar, cast: :bool, edge: true
+            map :edge, to: :bool, edge: true
             map :directories, to: :seq
-            map :timeout, to: :scalar
+            map :timeout, to: :str
+            map :branch, to: :str
           end
         end
       end

@@ -8,13 +8,24 @@ describe Travis::Yaml::Spec::Def::Notification::Email do
         {
           name: :email,
           type: :map,
-          normalize: [
+          alias: ['emails'],
+          change: [
             {
-              name: :enabled
+              name: :inherit,
+              keys: [
+                :disabled,
+                :on_start,
+                :on_success,
+                :on_failure
+              ]
+            },
+            {
+              name: :enable
             }
           ],
           prefix: {
-            key: :recipients
+            key: :recipients,
+            type: [:str, :secure, :seq]
           },
           map: {
             enabled: {
@@ -22,13 +33,16 @@ describe Travis::Yaml::Spec::Def::Notification::Email do
               types: [
                 {
                   type: :scalar,
-                  cast: [
-                    :bool
-                  ],
-                  defaults: [
-                    { value: true }
-                  ],
-                  required: true
+                  cast: :bool,
+                }
+              ]
+            },
+            disabled: {
+              key: :disabled,
+              types: [
+                {
+                  type: :scalar,
+                  cast: :bool,
                 }
               ]
             },
@@ -45,6 +59,29 @@ describe Travis::Yaml::Spec::Def::Notification::Email do
                 }
               ]
             },
+            on_start: {
+              key: :on_start,
+              types: [
+                {
+                  name: :callback,
+                  type: :fixed,
+                  values: [
+                    {
+                      value: 'always',
+                      alias: ['true']
+                    },
+                    {
+                      value: 'never',
+                      alias: ['false']
+                    },
+                    {
+                      value: 'change',
+                      alias: ['changed']
+                    }
+                  ]
+                }
+              ]
+            },
             on_success: {
               key: :on_success,
               types: [
@@ -53,13 +90,16 @@ describe Travis::Yaml::Spec::Def::Notification::Email do
                   type: :fixed,
                   values: [
                     {
-                      value: 'always'
+                      value: 'always',
+                      alias: ['true']
                     },
                     {
-                      value: 'never'
+                      value: 'never',
+                      alias: ['false']
                     },
                     {
-                      value: 'change'
+                      value: 'change',
+                      alias: ['changed']
                     }
                   ]
                 }
@@ -73,13 +113,16 @@ describe Travis::Yaml::Spec::Def::Notification::Email do
                   type: :fixed,
                   values: [
                     {
-                      value: 'always'
+                      value: 'always',
+                      alias: ['true']
                     },
                     {
-                      value: 'never'
+                      value: 'never',
+                      alias: ['false']
                     },
                     {
-                      value: 'change'
+                      value: 'change',
+                      alias: ['changed']
                     }
                   ]
                 }

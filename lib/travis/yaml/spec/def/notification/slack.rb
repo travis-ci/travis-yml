@@ -7,15 +7,16 @@ module Travis
             register :slack
 
             def define
-              prefix :rooms
-              normalize :inherit, keys: [:on_success, :on_failure]
+              prefix :rooms, type: [:str, :secure, :seq]
+              change :inherit, keys: Notifications::INHERIT
+              change :enable
 
-              map :rooms,            to: :seq, cast: :secure
+              map :enabled,          to: :bool
+              map :disabled,         to: :bool
+              map :rooms,            to: :seq, secure: true
               map :template,         to: :templates
-              map :on_pull_requests, to: :scalar, cast: :bool
+              map :on_pull_requests, to: :bool
               maps *Notifications::CALLBACKS
-
-              # normalize { |value| Normalize.new(:rooms, value).apply }
             end
           end
         end

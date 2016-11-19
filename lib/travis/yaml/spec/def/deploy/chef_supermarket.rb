@@ -9,9 +9,9 @@ module Travis
 
             def define
               super
-              map :user_id,           to: :scalar, cast: :secure
-              map :client_key,        to: :scalar, cast: :secure
-              map :cookbook_category, to: :scalar
+              map :user_id,           to: :str, secure: true
+              map :client_key,        to: :str, secure: true
+              map :cookbook_category, to: :str
             end
           end
         end

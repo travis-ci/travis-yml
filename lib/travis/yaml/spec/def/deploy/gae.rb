@@ -11,13 +11,13 @@ module Travis
 
             def define
               super
-              map :project,                  to: :scalar
-              map :keyfile,                  to: :scalar
-              map :config,                   to: :scalar
-              map :version,                  to: :scalar
-              map :no_promote,               to: :scalar, cast: :bool
-              map :no_stop_previous_version, to: :scalar, cast: :bool
-              map :verbosity,                to: :scalar
+              map :project,                  to: :str
+              map :keyfile,                  to: :str
+              map :config,                   to: :str
+              map :version,                  to: :str
+              map :no_promote,               to: :bool
+              map :no_stop_previous_version, to: :bool
+              map :verbosity,                to: :str
             end
           end
         end

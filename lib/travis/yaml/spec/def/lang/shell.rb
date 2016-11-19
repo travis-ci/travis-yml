@@ -8,7 +8,7 @@ module Travis
           register :shell
 
           def define
-            name :shell, alias: %i(generic bash sh)
+            name :shell, alias: %i(generic bash sh minimal)
           end
         end
       end

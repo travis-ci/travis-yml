@@ -13,17 +13,17 @@ module Travis
 
             def define
               super
-              map :access_key_id,       to: :scalar, cast: :secure, alias: :'access-key-id'
-              map :secret_access_key,   to: :scalar, cast: :secure, alias: :'secret-access-key'
-              map :application,         to: :scalar
-              map :deployment_group,    to: :scalar
+              map :access_key_id,       to: :str, secure: true
+              map :secret_access_key,   to: :str, secure: true
+              map :application,         to: :str
+              map :deployment_group,    to: :str
               map :revision_type,       to: :fixed, values: %i(s3 github), ignore_case: true # TODO test this
-              map :commit_id,           to: :scalar
-              map :repository,          to: :scalar
-              map :region,              to: :scalar
-              map :wait_until_deployed, to: :scalar, cast: :bool, alias: :'wait-until-deployed'
-              map :bucket,              to: :scalar
-              map :key,                 to: :scalar
+              map :commit_id,           to: :str
+              map :repository,          to: :str
+              map :region,              to: :str
+              map :wait_until_deployed, to: :bool
+              map :bucket,              to: :str
+              map :key,                 to: :str
             end
           end
         end

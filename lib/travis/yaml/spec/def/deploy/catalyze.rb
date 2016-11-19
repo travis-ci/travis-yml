@@ -9,8 +9,8 @@ module Travis
 
             def define
               super
-              map :target, to: :scalar
-              map :path,   to: :scalar
+              map :target, to: :str
+              map :path,   to: :str
             end
           end
         end

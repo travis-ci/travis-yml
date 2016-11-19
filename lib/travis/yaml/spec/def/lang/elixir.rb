@@ -10,7 +10,7 @@ module Travis
           def define
             name :elixir
             matrix :elixir
-            matrix :otp_release, alias: :otp_release
+            matrix :otp_release
           end
         end
       end

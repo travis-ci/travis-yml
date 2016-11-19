@@ -7,22 +7,45 @@ describe Travis::Yaml::Spec::Def::Addons, 'apt' do
       types: [
         name: :apt,
         type: :map,
+        prefix: {
+          key: :packages
+        },
         map: {
-          sources: {
-            key: :sources,
-            types: [
-              {
-                type: :seq,
-                types: [type: :scalar]
-              }
-            ]
-          },
           packages: {
             key: :packages,
             types: [
               {
                 type: :seq,
-                types: [type: :scalar]
+                types: [
+                  type: :scalar
+                ]
+              }
+            ]
+          },
+          sources: {
+            key: :sources,
+            types: [
+              {
+                name: :apt_sources,
+                type: :seq,
+                types: [
+                  {
+                    type: :scalar,
+                    strict: false
+                  },
+                  {
+                    type: :map,
+                    strict: false,
+                  }
+                ]
+              }
+            ]
+          },
+          dist: {
+            key: :dist,
+            types: [
+              {
+                type: :scalar
               }
             ]
           }

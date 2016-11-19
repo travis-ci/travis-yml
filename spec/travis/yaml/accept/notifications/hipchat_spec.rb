@@ -1,6 +1,5 @@
 describe Travis::Yaml, 'notifications: hipchat' do
-  let(:msgs)    { subject.msgs }
-  let(:hipchat) { subject.to_h[:notifications][:hipchat] }
+  let(:hipchat) { subject.serialize[:notifications][:hipchat] }
 
   subject { described_class.apply(config) }
 
@@ -22,7 +21,7 @@ describe Travis::Yaml, 'notifications: hipchat' do
   describe 'given a hash with an unknown template var' do
     let(:config) { { notifications: { hipchat: { rooms: 'room', template: ['%{wat}'] } } } }
     it { expect(hipchat[:template]).to be_nil }
-    it { expect(msgs).to include [:error, :'notifications.hipchat', :unknown_var, 'unknown template variable "wat"'] }
+    it { expect(msgs).to include [:error, :'notifications.hipchat.template', :unknown_var, var: 'wat'] }
   end
 
   describe 'callbacks' do

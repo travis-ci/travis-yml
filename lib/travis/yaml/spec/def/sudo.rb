@@ -8,8 +8,6 @@ module Travis
           register :sudo
 
           def define
-            normalize :required
-            required
             default false
             cast :bool
           end

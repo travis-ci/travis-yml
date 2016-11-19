@@ -15,18 +15,18 @@ module Travis
 
             def define
               super
-              map :access_key_id,     to: :scalar, cast: :secure, required: true
-              map :secret_access_key, to: :scalar, cast: :secure, required: true
-              map :region,            to: :scalar
-              map :function_name,     to: :scalar, required: true
-              map :role,              to: :scalar, required: true
-              map :handler_name,      to: :scalar, required: true
-              map :module_name,       to: :scalar
-              map :zip,               to: :scalar
-              map :description,       to: :scalar
-              map :timeout,           to: :scalar
-              map :memory_size,       to: :scalar
-              map :runtime,           to: :scalar
+              map :access_key_id,     to: :str, secure: true, required: true
+              map :secret_access_key, to: :str, secure: true, required: true
+              map :region,            to: :str
+              map :function_name,     to: :str, required: true
+              map :role,              to: :str, required: true
+              map :handler_name,      to: :str, required: true
+              map :module_name,       to: :str
+              map :zip,               to: :str
+              map :description,       to: :str
+              map :timeout,           to: :str
+              map :memory_size,       to: :str
+              map :runtime,           to: :str
             end
           end
         end

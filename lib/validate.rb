@@ -1,43 +1,22 @@
 require 'active_record'
-require 'sqlite3'
 require 'json'
 require 'yaml'
 require 'optparse'
 require 'travis/yaml'
 require 'validate/check'
-require 'validate/summary'
+require 'validate/export'
+require 'validate/inspect'
+require 'validate/local'
+require 'validate/report'
+require 'validate/review'
 
 $stdout.sync = true
 
-OK = [
-  :empty_config,
-  :edge,
-  :flagged,
-]
-
-OK_ISH = [
-  :empty
-]
-
-DETAILS = [
-  :invalid_type,
-  :invalid_seq,
-  :empty,
-  :unknown_value,
-  :unknown_key,
-  :cast,
-  :unsupported,
-  :invalid_format,
-  :required,
-  :unknown_default,
-  :parse_error,
-  :unknown_var
-]
-
 opts = {
-  details: [],
-  from: 41_000_000,
-  count: 1_000_000,
+  from:  45_000_000,
+  # count: 10_000_000,
+  count:  2_500_000,
+  clean: false,
 }
 
 OptionParser.new do |o|
@@ -49,19 +28,38 @@ OptionParser.new do |o|
     opts[:count] = value.to_i
   end
 
-  o.on '--details DETAILS', 'Details' do |value|
-    opts[:details] = value.split(',').map(&:to_sym)
+  o.on '--counts', 'Counts' do
+    opts[:counts] = true
+  end
+
+  o.on '--details', 'Details' do
+    opts[:details] = true
+  end
+
+  o.on '--clean', 'Cleanup previous results' do
+    opts[:clean] = true
   end
 end.parse!
-
-opts[:details] = DETAILS if opts[:details] == [:all]
 
 case ARGV.shift || 'summary'
 when 'fetch'
   require 'validate/fetch'
   Fetch.new(opts[:from], opts[:count]).run
 when 'check'
-  Check.new(ids: ARGV).run
-when 'summary'
-  Summary.new(opts.merge(ids: ARGV)).run
+  ids = ARGF.read unless $stdin.tty?
+  ids = ids.split("\n").map(&:strip).reject { |id| id =~ /[^0-9]/ } if ids
+  ids ||= ARGV
+  Check.new(opts.merge(ids: ids)).run
+when 'report'
+  Report.new(opts.merge(ids: ARGV)).run
+when 'export'
+  Export.new(codes: ARGV).run
+when 'inspect'
+  Inspect.new(code: ARGV.shift.gsub(/\W/, ''), str: ARGV.join(' ')).run
+when 'import'
+  Import.new.run
+when 'review'
+  Review.new.run
+else
+  puts 'Unknown command'
 end

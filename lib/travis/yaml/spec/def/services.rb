@@ -28,7 +28,7 @@ module Travis
             value :mysql
             value :neo4j
             value :postgresql,     alias: :postgres
-            value :rabbitmq
+            value :rabbitmq,       alias: :'rabbitmq-server'
             value :'redis-server', alias: :redis
             value :riak
           end

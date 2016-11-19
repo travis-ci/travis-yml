@@ -18,6 +18,7 @@ require 'travis/yaml/spec/def/deploy/divshot'
 require 'travis/yaml/spec/def/deploy/elasticbeanstalk'
 require 'travis/yaml/spec/def/deploy/engineyard'
 require 'travis/yaml/spec/def/deploy/exoscale'
+require 'travis/yaml/spec/def/deploy/firebase'
 require 'travis/yaml/spec/def/deploy/gae'
 require 'travis/yaml/spec/def/deploy/gcs'
 require 'travis/yaml/spec/def/deploy/hackage'
@@ -50,15 +51,13 @@ module Travis
           register :deploys
 
           def define
-            type Type::Lookup[:provider], *%i(
-              anynines appfog atlas azure_web_apps bintray bitballoon boxfuse
-              catalyze chef_supermarket cloud66 cloudcontrol cloudfiles
-              cloudfoundry codedeploy deis divshot elasticbeanstalk engineyard
-              exoscale gae gcs hackage heroku lambda launchpad modulus
-              nodejitsu npm openshift opsworks packagecloud pages puppetforge
-              pypi releases rubygems s3 scalingo script surge testfairy
-            )
-            prefix :provider, type: :scalar
+            type Type::Lookup[:provider]
+
+            Def::Deploy.providers.each do |provider|
+              type provider
+            end
+
+            prefix :provider, type: :str
           end
         end
       end

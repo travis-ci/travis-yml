@@ -10,7 +10,7 @@ module Travis
           def define
             name :php
             matrix :php
-            map :composer_args, to: :scalar
+            map :composer_args, to: :str
           end
         end
       end

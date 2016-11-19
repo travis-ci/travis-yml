@@ -8,24 +8,33 @@ describe Travis::Yaml::Spec::Def::Deploy::Codedeploy do
       strict: false,
       prefix: {
         key: :provider,
-        type: :scalar
-      }
+        type: [:str]
+      },
+      types: [
+        {
+          name: :deploy_branches,
+          type: :map,
+          strict: false,
+          deprecated: :branch_specific_option_hash
+        }
+      ]
     )
   end
 
   it do
-    expect(except(spec[:map], :provider, :on, :skip_cleanup, :edge)).to eq(
+    expect(except(spec[:map], :provider, :on, :skip_cleanup, :allow_failure, :edge)).to eq(
       access_key_id: {
         key: :access_key_id,
         types: [
           {
             type: :scalar,
-            cast: [
-              :secure
-            ],
-            alias: [
-              "access-key-id"
-            ]
+            secure: true,
+          },
+          {
+            name: :deploy_branches,
+            type: :map,
+            strict: false,
+            deprecated: :branch_specific_option_hash
           }
         ]
       },
@@ -34,12 +43,13 @@ describe Travis::Yaml::Spec::Def::Deploy::Codedeploy do
         types: [
           {
             type: :scalar,
-            cast: [
-              :secure
-            ],
-            alias: [
-              "secret-access-key"
-            ]
+            secure: true,
+          },
+          {
+            name: :deploy_branches,
+            type: :map,
+            strict: false,
+            deprecated: :branch_specific_option_hash
           }
         ]
       },
@@ -48,6 +58,12 @@ describe Travis::Yaml::Spec::Def::Deploy::Codedeploy do
         types: [
           {
             type: :scalar
+          },
+          {
+            name: :deploy_branches,
+            type: :map,
+            strict: false,
+            deprecated: :branch_specific_option_hash
           }
         ]
       },
@@ -56,6 +72,12 @@ describe Travis::Yaml::Spec::Def::Deploy::Codedeploy do
         types: [
           {
             type: :scalar
+          },
+          {
+            name: :deploy_branches,
+            type: :map,
+            strict: false,
+            deprecated: :branch_specific_option_hash
           }
         ]
       },
@@ -73,6 +95,12 @@ describe Travis::Yaml::Spec::Def::Deploy::Codedeploy do
               }
             ],
             ignore_case: true
+          },
+          {
+            name: :deploy_branches,
+            type: :map,
+            strict: false,
+            deprecated: :branch_specific_option_hash
           }
         ]
       },
@@ -81,6 +109,12 @@ describe Travis::Yaml::Spec::Def::Deploy::Codedeploy do
         types: [
           {
             type: :scalar
+          },
+          {
+            name: :deploy_branches,
+            type: :map,
+            strict: false,
+            deprecated: :branch_specific_option_hash
           }
         ]
       },
@@ -89,6 +123,12 @@ describe Travis::Yaml::Spec::Def::Deploy::Codedeploy do
         types: [
           {
             type: :scalar
+          },
+          {
+            name: :deploy_branches,
+            type: :map,
+            strict: false,
+            deprecated: :branch_specific_option_hash
           }
         ]
       },
@@ -97,6 +137,12 @@ describe Travis::Yaml::Spec::Def::Deploy::Codedeploy do
         types: [
           {
             type: :scalar
+          },
+          {
+            name: :deploy_branches,
+            type: :map,
+            strict: false,
+            deprecated: :branch_specific_option_hash
           }
         ]
       },
@@ -105,12 +151,13 @@ describe Travis::Yaml::Spec::Def::Deploy::Codedeploy do
         types: [
           {
             type: :scalar,
-            cast: [
-              :bool
-            ],
-            alias: [
-              "wait-until-deployed"
-            ]
+            cast: :bool,
+          },
+          {
+            name: :deploy_branches,
+            type: :map,
+            strict: false,
+            deprecated: :branch_specific_option_hash
           }
         ]
       },
@@ -119,6 +166,12 @@ describe Travis::Yaml::Spec::Def::Deploy::Codedeploy do
         types: [
           {
             type: :scalar
+          },
+          {
+            name: :deploy_branches,
+            type: :map,
+            strict: false,
+            deprecated: :branch_specific_option_hash
           }
         ]
       },
@@ -127,6 +180,12 @@ describe Travis::Yaml::Spec::Def::Deploy::Codedeploy do
         types: [
           {
             type: :scalar
+          },
+          {
+            name: :deploy_branches,
+            type: :map,
+            strict: false,
+            deprecated: :branch_specific_option_hash
           }
         ]
       }

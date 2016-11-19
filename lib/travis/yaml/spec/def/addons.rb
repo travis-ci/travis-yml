@@ -23,18 +23,20 @@ module Travis
             map :artifacts,       to: :artifacts
             map :code_climate,    to: :code_climate
             map :coverity_scan,   to: :coverity_scan
-            map :deploy,          to: :deploys
-            map :hostname,        to: :scalar
+            map :hostname,        to: :str
             map :hosts,           to: :seq
             map :jwt,             to: :jwts
             map :sauce_connect,   to: :sauce_connect
             map :ssh_known_hosts, to: :seq
-            map :sonarqube,       to: :scalar, cast: :bool
+            map :sonarqube,       to: [:map, :bool]
+            map :srcclr,          to: [:map, :bool]
 
-            map :firefox,         to: :scalar
-            map :mariadb,         to: :scalar
-            map :postgresql,      to: :scalar
-            map :rethinkdb,       to: :scalar
+            map :firefox,         to: :str
+            map :mariadb,         to: :str
+            map :postgresql,      to: :str
+            map :rethinkdb,       to: :str
+
+            map :deploy,          to: :deploys
           end
         end
       end

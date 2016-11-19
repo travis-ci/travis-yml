@@ -11,7 +11,7 @@ describe Travis::Yaml::Spec::Def::Addons, 'jwts' do
           types: [
             {
               type: :scalar,
-              cast: :secure
+              secure: true
             }
           ]
         }

@@ -6,29 +6,14 @@ module Travis
   module Yaml
     module Spec
       module Def
-        class BranchConditions < Type::Map
-          register :branch_conditions
+        class Branches < Type::Map
+          register :branches
 
           def define
-            map :only,   to: :branches
-            map :except, to: :branches
-            prefix :only
-          end
+            prefix :only, type: [:str, :seq]
 
-          class Branches < Type::Seq
-            register :branches
-
-            def define
-              type :branch
-            end
-          end
-
-          class Branch < Type::Scalar
-            register :branch
-
-            def define
-              cast :str, :regex
-            end
+            map :only,   to: :seq
+            map :except, to: :seq, alias: :exclude
           end
         end
       end

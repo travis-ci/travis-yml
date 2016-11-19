@@ -16,8 +16,8 @@ module Travis
             opts[:defaults] ||= []
           end
 
-          def cast(*types)
-            opts[:cast] = types
+          def cast(type)
+            opts[:cast] = type
           end
 
           def downcase

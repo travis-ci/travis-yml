@@ -1,11 +1,49 @@
 describe Travis::Yaml::Spec::Def::Android do
-  let(:spec)    { Travis::Yaml.spec }
-  let(:lang)    { spec[:map][:language][:types][0] }
-  let(:jdks)    { spec[:map][:jdk][:types][0] }
-  let(:android) { spec[:map][:android][:types][0] }
+  let(:lang)    { Travis::Yaml.spec[:map][:language][:types][0][:values] }
+  let(:android) { Travis::Yaml.support[:map][:android] }
 
-  it { expect(lang[:values]).to include(value: 'android') }
+  it { expect(lang).to include(value: 'android') }
 
-  it { expect(jdks[:only][:language]).to include('android') }
-  it { expect(android[:only][:language]).to include('android') }
+  it do
+    expect(android).to eq(
+      key: :android,
+      types: [
+        name: :android_config,
+        type: :map,
+        only: {
+          language: [
+            "android"
+          ]
+        },
+        map: {
+          components: {
+            key: :components,
+            types: [
+              {
+                type: :seq,
+                types: [
+                  {
+                    type: :scalar
+                  }
+                ]
+              }
+            ]
+          },
+          licenses: {
+            key: :licenses,
+            types: [
+              {
+                type: :seq,
+                types: [
+                  {
+                    type: :scalar
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    )
+  end
 end

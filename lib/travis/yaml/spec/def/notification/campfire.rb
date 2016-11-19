@@ -7,10 +7,13 @@ module Travis
             register :campfire
 
             def define
-              prefix :rooms
-              normalize :inherit, keys: [:on_success, :on_failure]
+              prefix :rooms, type: [:str, :secure, :seq]
+              change :inherit, keys: Notifications::INHERIT
+              change :enable
 
-              map :rooms,    to: :seq, cast: :secure
+              map :enabled,  to: :bool
+              map :disabled, to: :bool
+              map :rooms,    to: :seq, secure: true
               map :template, to: :templates
               maps *Notifications::CALLBACKS
             end

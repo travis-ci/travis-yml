@@ -1,6 +1,5 @@
 describe Travis::Yaml, 'services' do
-  let(:msgs) { subject.msgs.reject { |msg| msg.first == :info } }
-  let(:services) { subject.to_h[:services] }
+  let(:services) { subject.serialize[:services] }
 
   subject { described_class.apply(input) }
 
@@ -92,5 +91,10 @@ describe Travis::Yaml, 'services' do
     let(:input) { { services: ['riak'] } }
     it { expect(services).to eq ['riak'] }
     it { expect(msgs).to be_empty }
+  end
+
+  describe 'service (alias)' do
+    let(:input) { { service: 'redis' } }
+    it { expect(services).to eq ['redis-server'] }
   end
 end

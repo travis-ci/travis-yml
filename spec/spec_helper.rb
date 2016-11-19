@@ -1,9 +1,15 @@
 require 'awesome_print'
 require 'travis/yaml'
 require 'support/helpers'
+require 'support/node'
 
 RSpec.configure do |c|
-  c.include Spec::Helpers
+  c.include Spec::Support::Hash
+  c.include Spec::Support::Node
+
+  c.after :suite do
+    # `which jq && (bin/spec | jq '.' > spec.json)`
+  end
 end
 
 if ENV['STACKPROF']
@@ -14,7 +20,8 @@ if ENV['STACKPROF']
       StackProf.start(
         mode: ENV['STACKPROF'].to_sym,
         interval: 1000,
-        out: 'tmp/stackprof-cpu-myapp.dump'
+        out: 'tmp/stackprof-cpu-myapp.dump',
+        raw: true
       )
     end
 

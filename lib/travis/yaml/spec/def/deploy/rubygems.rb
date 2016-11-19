@@ -8,10 +8,10 @@ module Travis
 
             def define
               super
-              map :gem,     to: [:scalar, :map]
-              map :file,    to: :scalar
-              map :gemspec, to: :scalar
-              map :api_key, to: [:scalar, :map], cast: :secure
+              map :gem,     to: :scalar
+              map :file,    to: :str
+              map :gemspec, to: :str
+              map :api_key, to: :scalar, secure: true
             end
           end
         end

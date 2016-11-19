@@ -1,13 +1,18 @@
 describe Travis::Yaml, 'deploy' do
-  let(:msgs)   { subject.msgs }
-  let(:deploy) { subject.to_h[:deploy] }
+  let(:deploy) { subject.serialize[:deploy] }
 
-  subject { described_class.apply({ language: 'ruby', sudo: false }.merge(input)) }
+  subject { described_class.apply(input) }
+
+  describe 'given true' do
+    let(:input) { { deploy: true } }
+    it { expect(deploy).to be nil }
+    it { expect(msgs).to include [:error, :'deploy', :invalid_type, expected: :map, actual: :bool, value: true] }
+  end
 
   describe 'given an empty hash' do
     let(:input) { { deploy: {} } }
     it { expect(deploy).to be_nil }
-    it { expect(msgs).to include([:error, :deploy, :empty, 'dropping empty section :deploy']) }
+    it { expect(msgs).to include([:warn, :root, :empty, key: :deploy]) }
   end
 
   describe 'given a string' do
@@ -16,11 +21,17 @@ describe Travis::Yaml, 'deploy' do
     it { expect(msgs).to be_empty }
   end
 
+  describe 'provider given as a hash' do
+    let(:input) { { deploy: { provider: { provider: 'heroku' } } } }
+    it { expect(deploy).to be_nil }
+    it { expect(msgs).to include [:error, :'deploy.provider', :invalid_type, expected: :str, actual: :map, value: { provider: 'heroku' }] }
+  end
+
   describe 'given a hash' do
     describe 'without a provider' do
       let(:input) { { deploy: { foo: 'foo' } } }
       it { expect(deploy).to be_nil }
-      it { expect(msgs).to include [:error, :deploy, :required, 'missing required key :provider'] }
+      it { expect(msgs).to include [:error, :deploy, :required, key: :provider] }
     end
 
     describe 'with a provider' do
@@ -75,7 +86,7 @@ describe Travis::Yaml, 'deploy' do
 
     describe 'given a hash' do
       let(:input) { { deploy: { provider: 'heroku', on: { ruby: '2.3.0', repo: 'foo/bar', tags: true } } } }
-      it { expect(deploy).to eq [provider: 'heroku', on: { ruby: '2.3.0', repo: 'foo/bar', tags: true }] }
+      it { expect(deploy).to eq [provider: 'heroku', on: { rvm: '2.3.0', repo: 'foo/bar', tags: true }] }
     end
 
     describe 'repo' do
@@ -87,19 +98,77 @@ describe Travis::Yaml, 'deploy' do
       let(:input) { { deploy: { provider: 'heroku', on: { all_branches: true } } } }
       it { expect(deploy).to eq [provider: 'heroku', on: { all_branches: true }] }
     end
+
+    describe 'language specific setting' do
+      let(:input) { { deploy: { provider: 'heroku', on: { ruby: '2.3.1' } } } }
+      it { expect(deploy).to eq [provider: 'heroku', on: { rvm: '2.3.1' }] }
+    end
+
+    describe 'language specific setting (with an alias)' do
+      let(:input) { { deploy: { provider: 'heroku', on: { ruby: '2.3.1' } } } }
+      it { expect(deploy).to eq [provider: 'heroku', on: { rvm: '2.3.1' }] }
+    end
+
+    describe 'branch specific option hashes (holy shit. example for a valid hash from travis-build)' do
+      let(:input) { { deploy: { provider: 'heroku', on: { branch: { production: { bucket: 'production_branch' } } } } } }
+      it { expect(deploy).to eq [provider: 'heroku', on: { branch: { production: { bucket: 'production_branch' } } }] }
+      it { expect(msgs).to be_empty }
+    end
+
+    describe 'option specific branch hashes (deprecated, according to travis-build)' do
+      let(:input) { { deploy: { provider: 'heroku', run: { production: 'production' } } } }
+      it { expect(deploy).to eq [provider: 'heroku', run: { production: 'production' }] }
+      it { expect(msgs).to include [:warn, :'deploy.run', :deprecated, key: :run, info: :branch_specific_option_hash] }
+    end
+
+    describe 'migrating :tags, with :tags already given' do
+      let(:input) { { deploy: { provider: 'releases', tags: true, on: { tags: true } } } }
+      # not possible because deploy is not strict?
+      xit { expect(msgs).to include [:warn, :deploy, :migrate, key: :tags, to: :on, value: true] }
+    end
   end
 
-  # shouldn't this be an explicit :app key instead?
-  # https://docs.travis-ci.com/user/deployment/heroku/#Deploying-Custom-Application-Names
-  describe 'with branch specific settings' do
-    let(:input) { { deploy: { provider: 'heroku', app: { master: 'production', dev: 'staging' } } } }
-    it { expect(deploy).to eq [provider: 'heroku', app: { master: 'production', dev: 'staging' }] }
+  describe 'allow_failure' do
+    let(:input) { { deploy: { provider: 'heroku', allow_failure: true } } }
+    it { expect(deploy).to eq [provider: 'heroku', allow_failure: true] }
   end
 
-  # TODO would need very specific validation
   describe 'branches in settings that are not in the condition' do
     let(:input) { { deploy: { provider: 'heroku', app: { master: 'production', dev: 'staging' }, on: 'master' } } }
-    xit { expect(deploy).to eq [provider: 'heroku', app: { master: 'production' }, on: { branch: ['master'] }] }
+    it { expect(deploy).to eq [provider: 'heroku', app: { master: 'production', dev: 'staging' }, on: { branch: ['master'] }] }
+    # would need very specific validation
     xit { expect(msgs).to include [:error, :dev, :invalid_branch, 'branch "dev" not permitted by deploy condition, dropping'] }
+  end
+
+  describe 'edge' do
+    describe 'given a bool' do
+      let(:input) { { deploy: { provider: 'heroku', edge: true } } }
+      it { expect(deploy).to eq [provider: 'heroku', edge: true] }
+    end
+
+    describe 'given a hash' do
+      let(:input) { { deploy: { provider: 'heroku', edge: { source: 'source', branch: 'branch' } } } }
+      it { expect(deploy).to eq [provider: 'heroku', edge: { source: 'source', branch: 'branch' }] }
+    end
+  end
+
+  describe 'misplaced keys' do
+    let(:input) { { deploy: { edge: true }, provider: 'heroku', api_key: 'api_key' } }
+    it { expect(deploy).to eq [provider: 'heroku', edge: true, api_key: 'api_key'] }
+    it { expect(msgs).to include [:warn, :root, :migrate, key: :provider, to: :deploy, value: 'heroku'] }
+    it { expect(msgs).to include [:warn, :root, :migrate, key: :api_key, to: :deploy, value: 'api_key'] }
+  end
+
+  describe 'misplaced keys (2)' do
+    let(:input) { { deploy: { edge: true }, api_key: 'api_key', provider: 'heroku' } }
+    it { expect(deploy).to eq [provider: 'heroku', edge: true, api_key: 'api_key'] }
+    it { expect(msgs).to include [:warn, :root, :migrate, key: :provider, to: :deploy, value: 'heroku'] }
+    it { expect(msgs).to include [:warn, :root, :migrate, key: :api_key, to: :deploy, value: 'api_key'] }
+  end
+
+  describe 'misplaced key that would result in an invalid node if migrated' do
+    let(:input) { { file: 'file' } }
+    it { expect(deploy).to be_nil }
+    it { expect(msgs).to include [:error, :root, :misplaced_key, key: :file, value: 'file'] }
   end
 end

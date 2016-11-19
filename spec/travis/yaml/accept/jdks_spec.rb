@@ -1,34 +1,33 @@
 describe Travis::Yaml do
-  let(:msgs)  { subject.msgs }
-  let(:value) { subject.to_h }
+  let(:value) { subject.serialize }
 
   subject { described_class.apply(input) }
 
   describe 'on linux, ruby, jruby' do
-    let(:input) { { sudo: false, language: 'ruby', ruby: ['jruby'], jdk: ['7'] } }
+    let(:input) { { language: 'ruby', rvm: ['jruby'], jdk: ['default'] } }
 
-    it { expect(value[:jdk]).to eq ['7'] }
+    it { expect(value[:jdk]).to eq ['default'] }
     it { expect(msgs).to be_empty }
   end
 
-  describe 'on linux, ruby, mri' do
-    let(:input) { { sudo: false, language: 'ruby', ruby: ['2.3.0'], jdk: ['7'] } }
-
-    xit { expect(value[:jdk]).to be_nil }
-    xit { expect(msgs).to include [] }
-  end
-
   describe 'on osx' do
-    let(:input) { { sudo: false, language: 'ruby', os: 'osx', ruby: ['jruby'], jdk: ['7'] } }
+    let(:input) { { language: 'ruby', os: 'osx', rvm: ['jruby'], jdk: ['default'] } }
 
     it { expect(value[:jdk]).to be_nil }
-    it { expect(msgs).to include [:error, :jdk, :unsupported, 'jdk (["7"]) is not supported on os "osx"'] }
+    it { expect(msgs).to include [:error, :jdk, :unsupported, on_key: :os, on_value: 'osx', key: :jdk, value: ['default']] }
   end
 
   describe 'on osx (alias mac)' do
-    let(:input) { { sudo: false, language: 'ruby', os: 'mac', ruby: ['jruby'], jdk: ['7'] } }
+    let(:input) { { language: 'ruby', os: 'mac', rvm: ['jruby'], jdk: ['default'] } }
 
     it { expect(value[:jdk]).to be_nil }
-    it { expect(msgs).to include [:error, :jdk, :unsupported, 'jdk (["7"]) is not supported on os "osx"'] }
+    it { expect(msgs).to include [:error, :jdk, :unsupported, on_key: :os, on_value: 'osx', key: :jdk, value: ['default']] }
+  end
+
+  describe 'on multios' do
+    let(:input) { { language: 'ruby', os: ['linux', 'osx'], jdk: ['default'] } }
+
+    it { expect(value[:jdk]).to eq ['default'] }
+    it { expect(msgs).to be_empty }
   end
 end

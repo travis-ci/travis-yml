@@ -9,24 +9,48 @@ describe Travis::Yaml::Spec::Def::Notification::Slack do
           name: :slack,
           type: :map,
           prefix: {
-            key: :rooms
+            key: :rooms,
+            type: [:str, :secure, :seq]
           },
-          normalize: [
-            name: :inherit,
-            keys: [
-              :on_success,
-              :on_failure
-            ]
+          change: [
+            {
+              name: :inherit,
+              keys: [
+                :disabled,
+                :on_start,
+                :on_success,
+                :on_failure
+              ]
+            },
+            {
+              name: :enable
+            },
           ],
           map: {
+            enabled: {
+              key: :enabled,
+              types: [
+                {
+                  type: :scalar,
+                  cast: :bool,
+                }
+              ]
+            },
+            disabled: {
+              key: :disabled,
+              types: [
+                {
+                  type: :scalar,
+                  cast: :bool,
+                }
+              ]
+            },
             rooms: {
               key: :rooms,
               types: [
                 {
                   type: :seq,
-                  cast: [
-                    :secure
-                  ],
+                  secure: true,
                   types: [
                     {
                       type: :scalar
@@ -45,7 +69,7 @@ describe Travis::Yaml::Spec::Def::Notification::Slack do
                     {
                       name: :template,
                       type: :scalar,
-                      conform: [
+                      validate: [
                         {
                           name: :template,
                           vars: [
@@ -54,21 +78,21 @@ describe Travis::Yaml::Spec::Def::Notification::Slack do
                             'repository_name',
                             'build_number',
                             'build_id',
-                            'pull_request',
-                            'pull_request_number',
+                            'build_url',
                             'branch',
                             'commit',
-                            'author',
                             'commit_subject',
                             'commit_message',
+                            'author',
+                            'pull_request',
+                            'pull_request_number',
+                            'pull_request_url',
+                            'compare_url',
                             'result',
                             'duration',
+                            'elapsed_time',
                             'message',
-                            'compare_url',
-                            'build_url',
-                            'pull_request_url'
                           ],
-                          stage: :validate
                         }
                       ]
                     }
@@ -81,8 +105,29 @@ describe Travis::Yaml::Spec::Def::Notification::Slack do
               types: [
                 {
                   type: :scalar,
-                  cast: [
-                    :bool
+                  cast: :bool,
+                }
+              ]
+            },
+            on_start: {
+              key: :on_start,
+              types: [
+                {
+                  name: :callback,
+                  type: :fixed,
+                  values: [
+                    {
+                      value: 'always',
+                      alias: ['true']
+                    },
+                    {
+                      value: 'never',
+                      alias: ['false']
+                    },
+                    {
+                      value: 'change',
+                      alias: ['changed']
+                    }
                   ]
                 }
               ]
@@ -95,13 +140,16 @@ describe Travis::Yaml::Spec::Def::Notification::Slack do
                   type: :fixed,
                   values: [
                     {
-                      value: 'always'
+                      value: 'always',
+                      alias: ['true']
                     },
                     {
-                      value: 'never'
+                      value: 'never',
+                      alias: ['false']
                     },
                     {
-                      value: 'change'
+                      value: 'change',
+                      alias: ['changed']
                     }
                   ]
                 }
@@ -115,13 +163,16 @@ describe Travis::Yaml::Spec::Def::Notification::Slack do
                   type: :fixed,
                   values: [
                     {
-                      value: 'always'
+                      value: 'always',
+                      alias: ['true']
                     },
                     {
-                      value: 'never'
+                      value: 'never',
+                      alias: ['false']
                     },
                     {
-                      value: 'change'
+                      value: 'change',
+                      alias: ['changed']
                     }
                   ]
                 }

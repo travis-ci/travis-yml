@@ -10,37 +10,16 @@ module Travis
           register :matrix
 
           def define
-            map :include,        to: :matrix_includes
+            prefix :include, only: prefix_keys
+
+            map :include,        to: :matrix_entries
             map :exclude,        to: :matrix_entries
-            map :allow_failures, to: :matrix_entries
-            map :fast_finish,    to: :scalar, cast: :bool
+            map :allow_failures, to: :matrix_entries, alias: :allowed_failures
+            map :fast_finish,    to: :bool, alias: :fast_failure
           end
 
-          class Includes < Type::Seq
-            register :matrix_includes
-
-            def define
-              type :matrix_include
-            end
-          end
-
-          class Include < Type::Map
-            register :matrix_include
-
-            def define
-              strict false
-
-              map :addons
-              map :cache
-              map :git
-              map :services
-              map :source_key,   to: :scalar, cast: :secure
-
-              # TODO can't just include :env
-              # map :env
-
-              maps *Root::STAGES, to: :seq
-            end
+          def prefix_keys
+            Entry.new(root).spec[:map].keys + root.includes[:support].spec[:map].keys
           end
 
           class Entries < Type::Seq
@@ -55,16 +34,14 @@ module Travis
             register :matrix_entry
 
             def define
-              strict false
-              type :matrix_value
-            end
-          end
+              self.include :job, :support
 
-          class Value < Type::Scalar
-            register :matrix_value
-
-            def define
-              validate :matrix
+              map :language
+              map :os
+              map :dist
+              map :sudo
+              map :env, to: :env_var
+              map :compiler, to: :compilers, on: %i(c cpp)
             end
           end
         end

@@ -1,25 +1,23 @@
-describe Travis::Yaml::Spec::Def::BranchConditions do
+describe Travis::Yaml::Spec::Def::Branches do
   let(:spec) { described_class.new.spec }
 
   it do
     expect(spec).to eq(
-      name: :branch_conditions,
+      name: :branches,
       type: :map,
       prefix: {
-        key: :only
+        key: :only,
+        type: [:str, :seq]
       },
       map: {
         only: {
           key: :only,
           types: [
             {
-              name: :branches,
               type: :seq,
               types: [
                 {
-                  name: :branch,
                   type: :scalar,
-                  cast: [:str, :regex]
                 }
               ]
             }
@@ -29,13 +27,11 @@ describe Travis::Yaml::Spec::Def::BranchConditions do
           key: :except,
           types: [
             {
-              name: :branches,
               type: :seq,
+              alias: ['exclude'],
               types: [
                 {
-                  name: :branch,
                   type: :scalar,
-                  cast: [:str, :regex]
                 }
               ]
             }

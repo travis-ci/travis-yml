@@ -2,7 +2,7 @@ describe Travis::Yaml::Spec::Type::Scalar do
   let(:type) do
     Class.new(described_class) do
       def define
-        cast :secure
+        secure
         default 'foo'
         downcase
         flagged
@@ -11,7 +11,7 @@ describe Travis::Yaml::Spec::Type::Scalar do
         only language: :java
         except os: :osx
 
-        normalize :foo
+        change :foo
         validate :bar
       end
     end
@@ -21,15 +21,15 @@ describe Travis::Yaml::Spec::Type::Scalar do
     expect(type.new.spec).to eq(
       name: nil,
       type: :scalar,
-      cast: [:secure],
+      secure: true,
       defaults: [value: 'foo'],
       downcase: true,
       edge: true,
       flagged: true,
       only: { language: ['java'] },
       except: { os: ['osx'] },
-      normalize: [{ name: :foo }],
-      conform: [{ name: :bar, stage: :validate }]
+      change: [{ name: :foo }],
+      validate: [{ name: :bar }]
     )
   end
 end

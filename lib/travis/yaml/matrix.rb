@@ -1,6 +1,8 @@
+require 'travis/yaml/support/obj'
+
 module Travis
   module Yaml
-    class Matrix < Struct.new(:spec, :config)
+    class Matrix < Obj.new(:spec, :config)
       def rows
         rows = expand
         rows = rows + included

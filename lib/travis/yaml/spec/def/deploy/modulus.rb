@@ -8,8 +8,8 @@ module Travis
 
             def define
               super
-              map :api_key,      to: :scalar, cast: :secure
-              map :project_name, to: :scalar
+              map :api_key,      to: :str, secure: true
+              map :project_name, to: :str
             end
           end
         end

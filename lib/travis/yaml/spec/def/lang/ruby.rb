@@ -11,11 +11,11 @@ module Travis
           def define
             name :ruby
 
-            matrix :ruby, alias: :rvm
-            matrix :gemfile
+            matrix :rvm, alias: :ruby
+            matrix :gemfile, alias: :gemfiles
             matrix :jdk, to: :jdks
 
-            map :bundler_args, to: :scalar
+            map :bundler_args, to: :str
           end
         end
       end

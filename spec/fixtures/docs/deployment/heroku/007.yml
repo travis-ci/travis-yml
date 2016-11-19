@@ -1,4 +1,6 @@
 deploy:
   provider: heroku
   api_key: ...
-  run: "rake db:migrate"
+  run:
+    - "rake db:migrate"
+    - "rake cleanup"

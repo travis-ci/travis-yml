@@ -1,32 +1,33 @@
 describe Travis::Yaml::Spec do
   let(:type) do
     Class.new(described_class::Type::Map) do
-      def initialize
-        map :language, required: true, alias: :lang
+      def define
+        map :language, to: [:scalar, :seq], required: true, alias: :lang
       end
     end
   end
 
+  let(:spec) { type.new.spec }
+
   it do
-    expect(type.new.spec).to eq(
-     name: nil,
+    expect(spec).to eq(
       type: :map,
-      strict: true,
       map: {
         language: {
           key: :language,
           types: [
             {
-              name: :language,
-              type: :fixed,
+              type: :scalar,
               required: true,
-              alias: [
-                'lang'
-              ],
-              defaults: [
-                { value: 'ruby' }
-              ],
-              downcase: true,
+              alias: ['lang']
+            },
+            {
+              type: :seq,
+              required: true,
+              alias: ['lang'],
+              types: [
+                type: :scalar
+              ]
             }
           ]
         }

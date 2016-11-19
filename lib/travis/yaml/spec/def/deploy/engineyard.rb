@@ -9,12 +9,13 @@ module Travis
 
             def define
               super
-              map :username,    to: :scalar, cast: :secure
-              map :password,    to: :scalar, cast: :secure
-              map :api_key,     to: :scalar, cast: :secure, alias: :'api-key'
-              map :app,         to: [:scalar, :map]
-              map :environment, to: :map, strict: false
-              map :migrate,     to: :scalar
+              map :username,    to: :str, secure: true
+              map :password,    to: :str, secure: true
+              map :api_key,     to: :str, secure: true
+              map :app,         to: :str
+              # TODO where is this env evaluated?
+              map :environment, to: :str
+              map :migrate,     to: :str
             end
           end
         end

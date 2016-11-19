@@ -10,15 +10,15 @@ module Travis
 
             def define
               super
-              map :user,       to: :scalar, cast: :secure
-              map :secret,     to: :scalar, cast: :secure
-              map :configfile, to: :scalar
-              map :payload,    to: :scalar
-              map :app,        to: :scalar
-              map :version,    to: :scalar
-              map :env,        to: :scalar
-              map :image,      to: :scalar
-              map :extra_args, to: :scalar
+              map :user,       to: :str, secure: true
+              map :secret,     to: :str, secure: true
+              map :configfile, to: :str
+              map :payload,    to: :str
+              map :app,        to: :str
+              map :version,    to: :str
+              map :env,        to: :str
+              map :image,      to: :str
+              map :extra_args, to: :str
             end
           end
         end

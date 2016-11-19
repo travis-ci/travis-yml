@@ -4,6 +4,7 @@ ENV['DOCS'] ||= 'true' if $*.join.include?(File.basename(__FILE__))
 
 # TODO
 SKIP = [
+  'deployment/006',          # unknown awesome-experimental-provider
   'deployment/releases/003', # dropping section :global with mapping
   'multi-os/005'             # matrix include with python/os
 ]
@@ -22,14 +23,14 @@ def detect_lang(config)
 end
 
 describe Travis::Yaml do
-  let(:msgs)     { subject.msgs.reject { |msg| msg.first == :info } }
-  let(:hash)     { subject.to_h }
+  let(:msgs)     { subject.msgs.reject { |msg| msg[0] == :debug || msg[0] == :info || msg[2] == :underscore_key } }
+  let(:hash)     { subject.serialize }
   let(:defaults) { { language: lang } }
 
   subject { described_class.apply(defaults.merge(config)) }
 
   def filter(msgs)
-    # msgs.reject { |msg| msg[0] == :warn && msg[2] == :cast }
+    msgs = msgs.reject { |msg| msg[2] == :clean_key } # TODO fix the docs?
     msgs
   end
 

@@ -1,17 +1,12 @@
 require 'travis/yaml/spec/type/conditions'
+require 'travis/yaml/support/obj'
 
 module Travis
   module Yaml
     module Spec
       module Type
-        class Mappings
+        class Mappings < Obj.new(map: {})
           include Helper::Common
-
-          attr_reader :map
-
-          def initialize
-            @map = {}
-          end
 
           def [](key)
             map[key]

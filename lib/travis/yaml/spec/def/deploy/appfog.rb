@@ -13,13 +13,13 @@ module Travis
 
             def define
               super
-              map :user,         to: [:scalar, :map], cast: :secure
-              map :password,     to: [:scalar, :map], cast: :secure
-              map :email,        to: [:scalar, :map], cast: :secure
-              map :api_key,      to: [:scalar, :map], cast: :secure
+              map :user,         to: [:scalar, :map], secure: true
+              map :password,     to: [:scalar, :map], secure: true
+              map :api_key,      to: [:scalar, :map], secure: true
+              map :email,        to: [:scalar, :map]
               map :app,          to: [:scalar, :map]
               map :address,      to: :seq
-              map :metadata,     to: :scalar
+              map :metadata,     to: :str
               map :after_deploy, to: :seq
             end
           end

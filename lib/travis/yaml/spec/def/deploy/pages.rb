@@ -9,14 +9,14 @@ module Travis
 
             def define
               super
-              map :github_token,  to: :scalar, cast: :secure, alias: :'github-token'
-              map :repo,          to: :scalar
-              map :target_branch, to: :scalar, alias: :'target-branch'
-              map :local_dir,     to: :scalar, alias: :'local-dir'
-              map :fqdn,          to: :scalar
-              map :project_name,  to: :scalar, alias: :'project-name'
-              map :email,         to: :scalar, cast: :secure
-              map :name,          to: :scalar
+              map :github_token,  to: :str, secure: true
+              map :repo,          to: :str
+              map :target_branch, to: :str
+              map :local_dir,     to: :str
+              map :fqdn,          to: :str
+              map :project_name,  to: :str
+              map :email,         to: :str
+              map :name,          to: :str
             end
           end
         end

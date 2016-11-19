@@ -8,9 +8,9 @@ describe Travis::Yaml::Spec::Def::Addons, 'artifacts' do
         {
           name: :artifacts,
           type: :map,
-          normalize: [
+          change: [
             {
-              name: :enabled
+              name: :enable
             }
           ],
           map: {
@@ -19,9 +19,7 @@ describe Travis::Yaml::Spec::Def::Addons, 'artifacts' do
               types: [
                 {
                   type: :scalar,
-                  cast: [
-                    :bool
-                  ]
+                  cast: :bool
                 }
               ]
             },
@@ -30,9 +28,6 @@ describe Travis::Yaml::Spec::Def::Addons, 'artifacts' do
               types: [
                 {
                   type: :scalar,
-                  cast: [
-                    :secure
-                  ]
                 }
               ]
             },
@@ -41,9 +36,6 @@ describe Travis::Yaml::Spec::Def::Addons, 'artifacts' do
               types: [
                 {
                   type: :scalar,
-                  cast: [
-                    :secure
-                  ]
                 }
               ]
             },
@@ -52,22 +44,29 @@ describe Travis::Yaml::Spec::Def::Addons, 'artifacts' do
               types: [
                 {
                   type: :scalar,
-                  cast: [
-                    :secure
-                  ]
+                  secure: true,
+                  alias: [
+                    'aws_access_key',
+                    'access_key'
+                  ],
                 }
-              ]
+              ],
             },
             secret: {
               key: :secret,
               types: [
                 {
                   type: :scalar,
-                  cast: [
-                    :secure
-                  ]
+                  secure: true,
+                  alias: [
+                    'secret_key',
+                    'secret_access_key',
+                    'aws_secret',
+                    'aws_secret_key',
+                    'aws_secret_access_key'
+                  ],
                 }
-              ]
+              ],
             },
             paths: {
               key: :paths,
@@ -102,7 +101,9 @@ describe Travis::Yaml::Spec::Def::Addons, 'artifacts' do
               key: :target_paths,
               types: [
                 {
-                  type: :scalar
+                  type: :scalar,
+                  only: {},
+                  except: {}
                 }
               ]
             },
@@ -111,9 +112,7 @@ describe Travis::Yaml::Spec::Def::Addons, 'artifacts' do
               types: [
                 {
                   type: :scalar,
-                  cast: [
-                    :bool
-                  ]
+                  cast: :bool
                 }
               ]
             },
@@ -133,14 +132,39 @@ describe Travis::Yaml::Spec::Def::Addons, 'artifacts' do
                 }
               ]
             },
-            s3_region: {
-              key: :s3_region,
+            region: {
+              key: :region,
+              types: [
+                {
+                  type: :scalar,
+                  alias: ['s3_region'],
+                }
+              ]
+            },
+            permissions: {
+              key: :permissions,
               types: [
                 {
                   type: :scalar
                 }
               ]
-            }
+            },
+            working_dir: {
+              key: :working_dir,
+              types: [
+                {
+                  type: :scalar
+                }
+              ]
+            },
+            cache_control: {
+              key: :cache_control,
+              types: [
+                {
+                  type: :scalar
+                }
+              ]
+            },
           }
         }
       ]

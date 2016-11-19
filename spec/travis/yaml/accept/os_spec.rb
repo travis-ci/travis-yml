@@ -1,7 +1,7 @@
 describe Travis::Yaml, 'os' do
-  let(:msgs) { subject.msgs.reject { |msg| msg.first == :info } }
-  let(:lang) { subject.to_h[:language] }
-  let(:os)   { subject.to_h[:os] }
+  let(:config) { subject.serialize }
+  let(:lang)   { config[:language] }
+  let(:os)     { config[:os] }
 
   subject { described_class.apply(input) }
 
@@ -11,9 +11,15 @@ describe Travis::Yaml, 'os' do
     it { expect(msgs).to be_empty }
   end
 
-  describe 'sets a valid os' do
+  describe 'given a string' do
     let(:input) { { os: 'osx' } }
     it { expect(os).to eq ['osx'] }
+  end
+
+  describe 'given an array' do
+    let(:input) { { language: 'ruby', os: ['linux', 'osx'] } }
+    it { expect(lang).to eq 'ruby' }
+    it { expect(os).to eq ['linux', 'osx'] }
   end
 
   describe 'ignores case' do
@@ -24,7 +30,7 @@ describe Travis::Yaml, 'os' do
   describe 'drops an unknown values' do
     let(:input) { { os: 'windows' } }
     it { expect(os).to eq ['linux'] }
-    it { expect(msgs).to include([:error, :os, :unknown_value, 'dropping unknown value "windows"']) }
+    it { expect(msgs).to include([:warn, :os, :unknown_default, value: 'windows', default: 'linux']) }
   end
 
   describe 'supports aliases' do
@@ -39,27 +45,35 @@ describe Travis::Yaml, 'os' do
   end
 
   describe 'does not complain about the default os' do
-    let(:input) { { language: 'objective_c' } }
+    let(:input) { { language: 'objective-c' } }
     it { expect(msgs).to be_empty }
   end
 
   describe 'drops an os unsupported by the language' do
-    let(:input) { { os: 'osx', language: 'python' } }
+    let(:input) { { os: 'osx', language: 'php' } }
     it { expect(os).to eq ['linux'] }
-    it { expect(msgs).to include [:error, :os, :unsupported, 'os ("osx") is not supported on language "python"'] }
+    it { expect(msgs).to include [:error, :os, :unsupported, on_key: :language, on_value: 'php', key: :os, value: 'osx'] }
   end
 
   describe 'complains about jdk on osx' do
     let(:input) { { os: 'osx', language: 'java', jdk: 'default' } }
     it { expect(os).to eq ['osx'] }
-    it { expect(msgs).to include [:error, :jdk, :unsupported, 'jdk ("default") is not supported on os "osx"'] }
-    it { expect(subject.to_h[:language]).to be == 'java' }
-    it { expect(subject.to_h[:jdk]).to be_nil }
+    it { expect(msgs).to include [:error, :jdk, :unsupported, on_key: :os, on_value: 'osx', key: :jdk, value: ['default']] }
+    it { expect(subject.serialize[:language]).to be == 'java' }
+    it { expect(subject.serialize[:jdk]).to be_nil }
   end
 
-  describe 'foo' do
-    let(:input) { { language: 'ruby', os: ['linux', 'osx'] } }
-    it { expect(lang).to eq 'ruby' }
-    it { expect(os).to eq ['linux', 'osx'] }
+  describe 'given a mixed, nested array' do
+    let(:input) { { os: ['linux', os: 'osx'] } }
+    it { expect(os).to eq ['linux'] }
+    it { expect(msgs).to include [:error, :os, :invalid_type, expected: :str, actual: :map, value: { os: 'osx' }] }
+  end
+
+  describe 'given a mixed, nested array, with an unsupported key on root' do
+    let(:input) { { osx_image: 'image', os: ['linux', os: 'osx'] } }
+    it { expect(os).to eq ['linux'] }
+    it { expect(msgs).to include [:error, :os, :invalid_type, expected: :str, actual: :map, value: { os: 'osx' }] }
+    it { expect(msgs).to include [:error, :osx_image, :unsupported, on_key: :os, on_value: 'linux', key: :osx_image, value: 'image'] }
+    it { expect(msgs.size).to eq 2 }
   end
 end

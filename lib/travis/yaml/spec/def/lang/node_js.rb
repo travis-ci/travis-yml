@@ -13,10 +13,10 @@ module Travis
           # FORMAT = /^((iojs)|(iojs\-v\d+\.\d+(\.\d+)?)|(\d+(\.\d+(\.\d+)?)?)|stable|node)$/
 
           def define
-            name :node_js, alias: %i(javascript node nodejs node-js node.js)
+            name :node_js, alias: %i(javascript js node nodejs node-js node.js)
             # matrix :node_js, format: FORMAT
-            matrix :node_js
-            map :npm_args, to: :scalar
+            matrix :node_js, alias: %i(javascript js node nodejs)
+            map :npm_args, to: :str
           end
         end
       end

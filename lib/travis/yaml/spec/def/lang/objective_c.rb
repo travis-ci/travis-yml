@@ -8,15 +8,18 @@ module Travis
           register :objective_c
 
           def define
-            name :objective_c, alias: %i(objc obj_c objective-c swift)
+            name :'objective-c',  alias: %i(objc obj_c objective_c swift)
 
-            matrix :xcode_sdk
+            matrix :rvm,          alias: :ruby
+            matrix :gemfile
             matrix :xcode_scheme
-            matrix :podfile
+            matrix :xcode_sdk
 
-            map :xcode_project,   to: :scalar
-            map :xcode_workspace, to: :scalar
-            map :xctool_args,     to: :scalar
+            map :podfile,         to: :str
+            map :bundler_args,    to: :str
+            map :xcode_project,   to: :str
+            map :xcode_workspace, to: :str
+            map :xctool_args,     to: :str
           end
         end
       end

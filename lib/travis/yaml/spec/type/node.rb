@@ -1,12 +1,13 @@
 require 'travis/yaml/helper/common'
 require 'travis/yaml/spec/type/conditions'
 require 'travis/yaml/support/registry'
+require 'travis/yaml/support/obj'
 
 module Travis
   module Yaml
     module Spec
       module Type
-        class Node
+        class Node < Obj.new(parent: nil, opts: {})
           include Helper::Common, Registry
 
           class << self
@@ -20,11 +21,8 @@ module Travis
             end
           end
 
-          attr_reader :parent
-
-          def initialize(parent = nil, opts = {})
-            @parent = parent
-            @opts = opts
+          def initialize(*)
+            super
             define if respond_to?(:define)
           end
 
@@ -32,35 +30,41 @@ module Travis
             parent ? parent.root : self
           end
 
-          def aliases(name = nil)
-            aliases = opts[:alias] ||= []
-            return aliases unless name
-            aliases << name.to_s
-            aliases.uniq!
+          def root?
+            parent.nil?
           end
 
-          def normalize(name, opts = {})
-            normalizers << compact({ name: name }.merge(opts))
+          def strict(strict = true)
+            opts[:strict] = strict
           end
 
-          def normalizers
-            opts[:normalize] = []
+          def underscore(underscore = true)
+            opts[:underscore] = underscore
+          end
+
+          def aliases(aliases)
+            opts[:alias] ||= []
+            opts[:alias] += Array(aliases).map(&:to_s)
+          end
+
+          def change(name, opts = {})
+            changes << compact({ name: name }.merge(opts))
+          end
+
+          def changes
+            opts[:change] ||= []
           end
 
           def validate(name, opts = {})
-            conform(name, opts.merge(stage: :validate))
+            validations << compact({ name: name }.merge(opts))
           end
 
-          def prepare(name, opts = {})
-            conform(name, opts.merge(stage: :prepare))
+          def validations
+            opts[:validate] = []
           end
 
-          def conform(name, opts = {})
-            conformers << compact({ name: name }.merge(opts))
-          end
-
-          def conformers
-            opts[:conform] = []
+          def secure
+            opts[:secure] = true
           end
 
           def required
@@ -73,6 +77,10 @@ module Travis
 
           def edge
             opts[:edge] = true
+          end
+
+          def deprecated(info)
+            opts[:deprecated] = info
           end
 
           def only(opts)
@@ -91,9 +99,9 @@ module Travis
             opts[:expand] ||= []
           end
 
-          def opts
-            @opts ||= {}
-          end
+          # def opts
+          #   @opts ||= {}
+          # end
 
           def spec
             spec = {}

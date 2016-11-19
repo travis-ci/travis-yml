@@ -8,7 +8,7 @@ module Travis
           register :csharp
 
           def define
-            name :csharp
+            name :csharp, alias: ['c#', 'fsharp', 'f#']
             matrix :dotnet
             matrix :mono
             matrix :solution

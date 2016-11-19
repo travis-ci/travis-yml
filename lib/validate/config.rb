@@ -1,25 +1,31 @@
-class Config < Struct.new(:request)
-  def check
-    return result unless yaml = normalize(request.config)
-    config = Travis::Yaml.load(yaml)
-    result.concat(config.msgs)
-    filter(result)
-  # rescue => e
-  #   result << [:travis_yaml_error, e.message] if e.message.include?('Travis::Yaml::Parser::Psych')
-  #   result
+class Config
+  attr_reader :request
+
+  def initialize(request)
+    @request = request
+  end
+
+  def msgs
+    return result unless yaml
+    Timeout.timeout(30) do
+      result.concat(config.msgs)
+    end
+    result
   rescue => e
+    puts "\nRequest: #{request.id}"
     puts e.message, e.backtrace
     puts request.config
     exit
   end
 
+  def to_hash
+    config.to_hash
+  end
+
   private
 
-    def filter(result)
-      skip   = OK + OK_ISH
-      result = result.reject { |level, key, *| level == :info }
-      result = result.reject { |level, key, *| key && skip.include?(key) }
-      result
+    def config
+      @config ||= Travis::Yaml.load(yaml)
     end
 
     def result
@@ -30,25 +36,29 @@ class Config < Struct.new(:request)
       request.id
     end
 
-    def normalize(config)
-      if config.nil? || config.empty?
-        result << [:warn, :config, :empty_config]
-        return
+    def yaml
+      @yaml ||= begin
+        config = request.config
+
+        if config.nil? || config.empty?
+          result << [:warn, :config, :empty_config]
+          return
+        end
+
+        config = YAML.load(config)
+
+        if config.nil? || config.empty?
+          result << [:warn, :config, :empty_config]
+          return
+        end
+
+        if config['.result'] == 'parse_error'
+          result << [:error, :config, :parse_error]
+          return
+        end
+
+        config.delete('.result')
+        YAML.dump(config)
       end
-
-      config = YAML.load(config)
-
-      if config.nil? || config.empty?
-        result << [:warn, :config, :empty_config]
-        return
-      end
-
-      if config['.result'] == 'parse_error'
-        result << [:error, :config, :parse_error]
-        return
-      end
-
-      config.delete('.result')
-      YAML.dump(config)
     end
 end

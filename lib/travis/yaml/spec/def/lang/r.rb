@@ -12,24 +12,26 @@ module Travis
 
             matrix :r
 
+            map :r_packages,          to: :seq
+            map :r_binary_packages,   to: :seq
+            map :r_github_packages,   to: :seq
             map :apt_packages,        to: :seq
             map :bioc_packages,       to: :seq
-            map :bioc_required,       to: :scalar, cast: :bool
-            map :bioc_use_devel,      to: :scalar, cast: :bool
-            map :brew_packages,       to: :scalar
-            map :cran,                to: :scalar
-            map :disable_homebrew,    to: :scalar, cast: :bool
-            map :latex,               to: :scalar
-            map :pandoc,              to: :scalar
-            map :pandoc_version,      to: :scalar
-            map :r_binary_packages,   to: :seq
-            map :r_build_args,        to: :scalar
-            map :r_check_args,        to: :scalar
-            map :r_check_revdep,      to: :scalar
-            map :r_github_packages,   to: :seq
-            map :r_packages,          to: :seq
-            map :warnings_are_errors, to: :scalar, cast: :bool
-            map :Remotes,             to: :scalar
+            map :brew_packages,       to: :seq
+
+            map :bioc,                to: :str # test
+            map :bioc_required,       to: :bool, alias: :use_bioc
+            map :bioc_use_devel,      to: :bool
+            map :cran,                to: :str
+            map :disable_homebrew,    to: :bool
+            map :latex,               to: :bool
+            map :pandoc,              to: :bool
+            map :pandoc_version,      to: :str
+            map :r_build_args,        to: :str
+            map :r_check_args,        to: :str
+            map :r_check_revdep,      to: :bool
+            map :warnings_are_errors, to: :bool
+            map :remotes,             to: :str # TODO this does not seem to be used in travis-build?
             map :repos,               to: :map
           end
         end

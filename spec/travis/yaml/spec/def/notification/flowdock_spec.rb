@@ -9,24 +9,48 @@ describe Travis::Yaml::Spec::Def::Notification::Flowdock do
           name: :flowdock,
           type: :map,
           prefix: {
-            key: :api_token
+            key: :api_token,
+            type: [:str, :secure]
           },
-          normalize: [
-            name: :inherit,
-            keys: [
-              :on_success,
-              :on_failure
-            ]
+          change: [
+            {
+              name: :inherit,
+              keys: [
+                :disabled,
+                :on_start,
+                :on_success,
+                :on_failure
+              ]
+            },
+            {
+              name: :enable
+            }
           ],
           map: {
+            enabled: {
+              key: :enabled,
+              types: [
+                {
+                  type: :scalar,
+                  cast: :bool,
+                }
+              ]
+            },
+            disabled: {
+              key: :disabled,
+              types: [
+                {
+                  type: :scalar,
+                  cast: :bool,
+                }
+              ]
+            },
             api_token: {
               key: :api_token,
               types: [
                 {
                   type: :scalar,
-                  cast: [
-                    :secure
-                  ]
+                  secure: true
                 }
               ]
             },
@@ -40,7 +64,7 @@ describe Travis::Yaml::Spec::Def::Notification::Flowdock do
                     {
                       name: :template,
                       type: :scalar,
-                      conform: [
+                      validate: [
                         {
                           name: :template,
                           vars: [
@@ -49,23 +73,46 @@ describe Travis::Yaml::Spec::Def::Notification::Flowdock do
                             'repository_name',
                             'build_number',
                             'build_id',
-                            'pull_request',
-                            'pull_request_number',
+                            'build_url',
                             'branch',
                             'commit',
-                            'author',
                             'commit_subject',
                             'commit_message',
+                            'author',
+                            'pull_request',
+                            'pull_request_number',
+                            'pull_request_url',
+                            'compare_url',
                             'result',
                             'duration',
+                            'elapsed_time',
                             'message',
-                            'compare_url',
-                            'build_url',
-                            'pull_request_url'
                           ],
-                          stage: :validate
                         }
                       ]
+                    }
+                  ]
+                }
+              ]
+            },
+            on_start: {
+              key: :on_start,
+              types: [
+                {
+                  name: :callback,
+                  type: :fixed,
+                  values: [
+                    {
+                      value: 'always',
+                      alias: ['true']
+                    },
+                    {
+                      value: 'never',
+                      alias: ['false']
+                    },
+                    {
+                      value: 'change',
+                      alias: ['changed']
                     }
                   ]
                 }
@@ -79,13 +126,16 @@ describe Travis::Yaml::Spec::Def::Notification::Flowdock do
                   type: :fixed,
                   values: [
                     {
-                      value: 'always'
+                      value: 'always',
+                      alias: ['true']
                     },
                     {
-                      value: 'never'
+                      value: 'never',
+                      alias: ['false']
                     },
                     {
-                      value: 'change'
+                      value: 'change',
+                      alias: ['changed']
                     }
                   ]
                 }
@@ -99,13 +149,16 @@ describe Travis::Yaml::Spec::Def::Notification::Flowdock do
                   type: :fixed,
                   values: [
                     {
-                      value: 'always'
+                      value: 'always',
+                      alias: ['true']
                     },
                     {
-                      value: 'never'
+                      value: 'never',
+                      alias: ['false']
                     },
                     {
-                      value: 'change'
+                      value: 'change',
+                      alias: ['changed']
                     }
                   ]
                 }

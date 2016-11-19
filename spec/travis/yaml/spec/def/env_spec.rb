@@ -5,6 +5,7 @@ describe Travis::Yaml::Spec::Def::Env do
     expect(spec).to eq(
       name: :env,
       type: :map,
+      strict: false,
       prefix: {
         key: :matrix
       },
@@ -15,15 +16,12 @@ describe Travis::Yaml::Spec::Def::Env do
             {
               name: :env_vars,
               type: :seq,
-              normalize: [name: :vars],
+              strict: false,
+              change: [name: :env],
               types: [
                 {
-                  name: :env_var,
                   type: :scalar,
-                  cast: [
-                    :str,
-                    :secure
-                  ]
+
                 }
               ]
             }
@@ -35,15 +33,11 @@ describe Travis::Yaml::Spec::Def::Env do
             {
               name: :env_vars,
               type: :seq,
-              normalize: [name: :vars],
+              strict: false,
+              change: [name: :env],
               types: [
                 {
-                  name: :env_var,
                   type: :scalar,
-                  cast: [
-                    :str,
-                    :secure
-                  ]
                 }
               ]
             }

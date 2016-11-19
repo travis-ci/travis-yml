@@ -9,31 +9,30 @@ module Travis
             register :artifacts
 
             def define
-              normalize :enabled
+              change :enable
 
-              map :enabled,      to: :scalar, cast: :bool
-              map :bucket,       to: :scalar, cast: :secure
-              map :endpoint,     to: :scalar, cast: :secure
-              map :key,          to: :scalar, cast: :secure
-              map :secret,       to: :scalar, cast: :secure
-              map :paths,        to: :seq
+              map :enabled,       to: :bool
+              map :bucket,        to: :str
+              map :endpoint,      to: :str
+              map :key,           to: :str, secure: true, alias: %i(aws_access_key access_key) # TODO validate these
+              map :secret,        to: :str, secure: true, alias: %i(secret_key secret_access_key aws_secret aws_secret_key aws_secret_access_key)
+              map :paths,         to: :seq
 
-              map :branch,       to: :scalar
-              map :log_format,   to: :scalar
-              map :target_paths, to: :scalar
+              map :branch,        to: :str
+              map :log_format,    to: :str
+              map :target_paths,  to: :str
 
-              map :debug,        to: :scalar, cast: :bool
-              map :concurrency,  to: :scalar
-              map :max_size,     to: :scalar
+              map :debug,         to: :bool
+              map :concurrency,   to: :str
+              map :max_size,      to: :str
 
-              map :s3_region,    to: :scalar
+              map :region,        to: :str, alias: :s3_region
 
-              # TODO how about these keys, can be found in actual configs
-              #
-              # map :aws_access_key, to: :scalar
-              # map :aws_secret_key, to: :scalar
-              # map :s3_bucket ,     to: :scalar
-              # map :working_dir,    to: :scalar
+              # TODO how about these keys, can be found in actual configs, but not in the docs
+              map :permissions,   to: :str
+              map :working_dir,   to: :str
+              map :cache_control, to: :str
+              map :target_paths,  to: :str
             end
           end
         end

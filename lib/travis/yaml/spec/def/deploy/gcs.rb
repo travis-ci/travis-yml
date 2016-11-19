@@ -11,15 +11,15 @@ module Travis
 
             def define
               super
-              map :access_key_id,     to: :scalar, cast: :secure, alias: :'access-key-id'
-              map :secret_access_key, to: :scalar, cast: :secure, alias: :'secret-access-key'
-              map :bucket,            to: :scalar
-              map :upload_dir,        to: :scalar, alias: :'upload-dir'
-              map :local_dir,         to: :scalar, alias: :'local-dir'
-              map :dot_match,         to: :scalar, cast: :bool
-              map :acl,               to: :scalar
-              map :cache_control,     to: :scalar
-              map :detect_encoding,   to: :scalar, cast: :bool
+              map :access_key_id,     to: :str, secure: true
+              map :secret_access_key, to: :str, secure: true
+              map :bucket,            to: :str
+              map :upload_dir,        to: :str
+              map :local_dir,         to: :str
+              map :dot_match,         to: :bool
+              map :acl,               to: :str
+              map :cache_control,     to: :str
+              map :detect_encoding,   to: :bool
             end
           end
         end

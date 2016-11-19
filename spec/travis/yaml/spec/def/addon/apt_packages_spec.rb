@@ -6,7 +6,9 @@ describe Travis::Yaml::Spec::Def::Addons, 'apt_packages' do
       key: :apt_packages,
       types: [
         type: :seq,
-        types: [type: :scalar]
+        types: [
+          type: :scalar
+        ]
       ]
     )
   end

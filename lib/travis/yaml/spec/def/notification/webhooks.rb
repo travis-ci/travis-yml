@@ -7,11 +7,13 @@ module Travis
             register :webhooks
 
             def define
-              prefix :urls
-              normalize :inherit, keys: [:on_start, :on_success, :on_failure]
+              prefix :urls, type: [:str, :secure, :seq]
+              change :inherit, keys: Notifications::INHERIT
+              change :enable
 
-              map :urls, to: :seq
-              map :on_start, to: :callback
+              map :enabled,  to: :bool
+              map :disabled, to: :bool
+              map :urls,     to: :seq
               maps *Notifications::CALLBACKS
             end
           end

@@ -8,8 +8,8 @@ module Travis
 
             def define
               super
-              map :project, to: :scalar
-              map :domain,  to: :scalar
+              map :project, to: :str
+              map :domain,  to: :str
             end
           end
         end

@@ -9,9 +9,9 @@ module Travis
 
             def define
               super
-              map :access_token, to: :scalar, cast: :secure
-              map :site_id,      to: :scalar
-              map :local_dir,    to: :scalar
+              map :access_token, to: :str, secure: true
+              map :site_id,      to: :str
+              map :local_dir,    to: :str
             end
           end
         end

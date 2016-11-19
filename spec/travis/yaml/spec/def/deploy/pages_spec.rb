@@ -8,24 +8,33 @@ describe Travis::Yaml::Spec::Def::Deploy::Pages do
       strict: false,
       prefix: {
         key: :provider,
-        type: :scalar
-      }
+        type: [:str]
+      },
+      types: [
+        {
+          name: :deploy_branches,
+          type: :map,
+          strict: false,
+          deprecated: :branch_specific_option_hash
+        }
+      ]
     )
   end
 
   it do
-    expect(except(spec[:map], :provider, :on, :skip_cleanup, :edge)).to eq(
+    expect(except(spec[:map], :provider, :on, :skip_cleanup, :allow_failure, :edge)).to eq(
       github_token: {
         key: :github_token,
         types: [
           {
             type: :scalar,
-            cast: [
-              :secure
-            ],
-            alias: [
-              "github-token"
-            ]
+            secure: true,
+          },
+          {
+            name: :deploy_branches,
+            type: :map,
+            strict: false,
+            deprecated: :branch_specific_option_hash
           }
         ]
       },
@@ -34,6 +43,12 @@ describe Travis::Yaml::Spec::Def::Deploy::Pages do
         types: [
           {
             type: :scalar
+          },
+          {
+            name: :deploy_branches,
+            type: :map,
+            strict: false,
+            deprecated: :branch_specific_option_hash
           }
         ]
       },
@@ -42,9 +57,12 @@ describe Travis::Yaml::Spec::Def::Deploy::Pages do
         types: [
           {
             type: :scalar,
-            alias: [
-              "target-branch"
-            ]
+          },
+          {
+            name: :deploy_branches,
+            type: :map,
+            strict: false,
+            deprecated: :branch_specific_option_hash
           }
         ]
       },
@@ -53,9 +71,12 @@ describe Travis::Yaml::Spec::Def::Deploy::Pages do
         types: [
           {
             type: :scalar,
-            alias: [
-              "local-dir"
-            ]
+          },
+          {
+            name: :deploy_branches,
+            type: :map,
+            strict: false,
+            deprecated: :branch_specific_option_hash
           }
         ]
       },
@@ -64,6 +85,12 @@ describe Travis::Yaml::Spec::Def::Deploy::Pages do
         types: [
           {
             type: :scalar
+          },
+          {
+            name: :deploy_branches,
+            type: :map,
+            strict: false,
+            deprecated: :branch_specific_option_hash
           }
         ]
       },
@@ -72,9 +99,12 @@ describe Travis::Yaml::Spec::Def::Deploy::Pages do
         types: [
           {
             type: :scalar,
-            alias: [
-              "project-name"
-            ]
+          },
+          {
+            name: :deploy_branches,
+            type: :map,
+            strict: false,
+            deprecated: :branch_specific_option_hash
           }
         ]
       },
@@ -83,9 +113,12 @@ describe Travis::Yaml::Spec::Def::Deploy::Pages do
         types: [
           {
             type: :scalar,
-            cast: [
-              :secure
-            ]
+          },
+          {
+            name: :deploy_branches,
+            type: :map,
+            strict: false,
+            deprecated: :branch_specific_option_hash
           }
         ]
       },
@@ -94,6 +127,12 @@ describe Travis::Yaml::Spec::Def::Deploy::Pages do
         types: [
           {
             type: :scalar
+          },
+          {
+            name: :deploy_branches,
+            type: :map,
+            strict: false,
+            deprecated: :branch_specific_option_hash
           }
         ]
       }

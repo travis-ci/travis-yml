@@ -1,18 +1,17 @@
 describe Travis::Yaml, 'notifications: flowdock' do
-  let(:msgs)     { subject.msgs }
-  let(:flowdock) { subject.to_h[:notifications][:flowdock] }
+  let(:flowdock) { subject.serialize[:notifications][:flowdock] }
 
   subject { described_class.apply(config) }
 
   describe 'given a string' do
     let(:config) { { notifications: { flowdock: 'token' } } }
-    it { expect(flowdock).to eq(api_token: 'token') }
+    it { expect(flowdock).to eq api_token: 'token', enabled: true }
   end
 
   describe 'given a hash with an unknown template var' do
     let(:config) { { notifications: { flowdock: { api_token: 'token', template: ['%{wat}'] } } } }
     it { expect(flowdock[:template]).to be_nil }
-    it { expect(msgs).to include [:error, :'notifications.flowdock', :unknown_var, 'unknown template variable "wat"'] }
+    it { expect(msgs).to include [:error, :'notifications.flowdock.template', :unknown_var, var: 'wat'] }
   end
 
   describe 'callbacks' do

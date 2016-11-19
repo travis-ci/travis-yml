@@ -8,11 +8,11 @@ module Travis
 
             def define
               super
-              map :site,     to: :scalar
-              map :slot,     to: :scalar
-              map :username, to: :scalar, cast: :secure
-              map :password, to: :scalar, cast: :secure
-              map :verbose,  to: :scalar, cast: :bool
+              map :site,     to: :str
+              map :slot,     to: :str
+              map :username, to: :str, secure: true
+              map :password, to: :str, secure: true
+              map :verbose,  to: :bool
             end
           end
         end

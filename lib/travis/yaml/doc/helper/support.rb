@@ -1,63 +1,20 @@
 require 'travis/yaml/helper/common'
+require 'travis/yaml/doc/value/support'
 
 module Travis
   module Yaml
-    module Doc
-      class Support < Struct.new(:node, :opts)
+    module Helper
+      module Support
+
         include Helper::Common
 
-        attr_reader :msgs
-
-        def initialize(*)
-          super
+        def relevant?
+          support.supported?
         end
 
-        def supported?
-          return msgs.empty? if msgs
-          @msgs = []
-          required
-          excluded
-          msgs.empty?
+        def support
+          @support ||= Doc::Value::Support.new(node.supporting, only(spec.spec, :only, :except))
         end
-        alias relevant? supported?
-
-        private
-
-          def required
-            key = only.keys.detect do |key|
-              given  = to_a(node.root[key])
-              values = to_a(only[key]).map(&:to_s)
-              given.empty? || given.-(values).any?
-            end
-            msg(key) if key
-          end
-
-          def excluded
-            key = except.keys.detect do |key|
-              given  = to_a(node.root[key])
-              values = to_a(except[key]).map(&:to_s)
-              given.any? && given.&(values).any?
-            end
-            msg(key) if key
-          end
-
-          def msg(key)
-            value = node.root[key]
-            value = value.first if value.is_a?(Array)
-            @msgs << [key, value]
-          end
-
-          def only
-            opts[:only] || {}
-          end
-
-          def except
-            opts[:except] || {}
-          end
-
-          def support
-            super || Support.new
-          end
       end
     end
   end

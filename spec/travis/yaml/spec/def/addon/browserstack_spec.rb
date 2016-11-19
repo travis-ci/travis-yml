@@ -14,9 +14,7 @@ describe Travis::Yaml::Spec::Def::Addons, 'browserstack' do
               types: [
                 {
                   type: :scalar,
-                  cast: [
-                    :str
-                  ]
+                  cast: :str
                 }
               ]
             },
@@ -25,9 +23,7 @@ describe Travis::Yaml::Spec::Def::Addons, 'browserstack' do
               types: [
                 {
                   type: :scalar,
-                  cast: [
-                    :secure
-                  ]
+                  secure: true,
                 }
               ]
             },
@@ -36,9 +32,7 @@ describe Travis::Yaml::Spec::Def::Addons, 'browserstack' do
               types: [
                 {
                   type: :scalar,
-                  cast: [
-                    :bool
-                  ]
+                  cast: :bool
                 }
               ]
             },
@@ -79,9 +73,7 @@ describe Travis::Yaml::Spec::Def::Addons, 'browserstack' do
               types: [
                 {
                   type: :scalar,
-                  cast: [
-                    :secure
-                  ]
+                  secure: true,
                 }
               ]
             }

@@ -2,7 +2,7 @@ module Travis
   module Yaml
     module Spec
       module Type
-        class Lookup < Struct.new(:opts)
+        class Lookup
           Node.register :lookup, self
 
           class << self
@@ -13,6 +13,9 @@ module Travis
             def keys
               @keys
             end
+          end
+
+          def initialize(*)
           end
 
           def spec

@@ -6,6 +6,27 @@ describe Travis::Yaml::Spec::Def::Git do
       name: :git,
       type: :map,
       map: {
+        strategy: {
+          key: :strategy,
+          types: [
+            {
+              type: :fixed,
+              values: [
+                { value: 'clone' },
+                { value: 'tarball' }
+              ]
+            }
+          ]
+        },
+        quiet: {
+          key: :quiet,
+          types: [
+            {
+              type: :scalar,
+              cast: :bool
+            }
+          ]
+        },
         depth: {
           key: :depth,
           types: [
@@ -22,19 +43,15 @@ describe Travis::Yaml::Spec::Def::Git do
           types: [
             {
               type: :scalar,
-              cast: [:bool]
+              cast: :bool
             }
           ]
         },
-        strategy: {
-          key: :strategy,
+        submodules_depth: {
+          key: :submodules_depth,
           types: [
             {
-              type: :fixed,
-              values: [
-                { value: 'clone' },
-                { value: 'tarball' }
-              ]
+              type: :scalar
             }
           ]
         }

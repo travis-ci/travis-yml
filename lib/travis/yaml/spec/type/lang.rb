@@ -2,14 +2,17 @@ module Travis
   module Yaml
     module Spec
       module Type
-        class Lang < Node
+        class Lang < Map
           include Registry
+
+          def language
+            parent.parent
+          end
 
           def name(name = nil, opts = {})
             return @name unless name
             @name = name.to_s
-            opts[:alias] = Array(opts[:alias]).map(&:to_s) if opts[:alias]
-            parent.value(name, opts)
+            language.value(name, opts)
           end
 
           def only(opts)
@@ -23,16 +26,16 @@ module Travis
           def matrix(key, opts = {})
             opts = opts.merge(only: { language: [name] })
             opts[:to] ||= :seq
-            root.matrix(key, opts)
+            parent.matrix(key, opts)
           end
 
           def map(key, opts = {})
             opts = opts.merge(only: { language: [name] })
-            root.map(key, opts)
+            parent.map(key, opts)
           end
 
           def value
-            parent.values.detect { |value| value[:value] == name }
+            lang.values.detect { |value| value[:value] == name }
           end
         end
       end

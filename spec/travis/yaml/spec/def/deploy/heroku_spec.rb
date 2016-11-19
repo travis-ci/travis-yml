@@ -8,18 +8,43 @@ describe Travis::Yaml::Spec::Def::Deploy::Heroku do
       strict: false,
       prefix: {
         key: :provider,
-        type: :scalar
-      }
+        type: [:str]
+      },
+      types: [
+        {
+          name: :deploy_branches,
+          type: :map,
+          strict: false,
+          deprecated: :branch_specific_option_hash
+        }
+      ]
     )
   end
 
   it do
-    expect(except(spec[:map], :provider, :on, :skip_cleanup, :edge)).to eq(
+    expect(except(spec[:map], :provider, :on, :skip_cleanup, :allow_failure, :edge)).to eq(
       strategy: {
         key: :strategy,
         types: [
           {
-            type: :scalar
+            name: :heroku_strategy,
+            type: :fixed,
+            defaults: [
+              { value: 'api' }
+            ],
+            values: [
+              { value: 'api' },
+              { value: 'git' },
+              { value: 'anvil', deprecated: 'will be removed in v1.1.0', version: '1.0' },
+              { value: 'git-ssh', deprecated: 'will be removed in v1.1.0', version: '1.0' },
+              { value: 'git-deploy-key', deprecated: 'will be removed in v1.1.0', version: '1.0' }
+            ]
+          },
+          {
+            name: :deploy_branches,
+            type: :map,
+            strict: false,
+            deprecated: :branch_specific_option_hash
           }
         ]
       },
@@ -28,6 +53,12 @@ describe Travis::Yaml::Spec::Def::Deploy::Heroku do
         types: [
           {
             type: :scalar
+          },
+          {
+            name: :deploy_branches,
+            type: :map,
+            strict: false,
+            deprecated: :branch_specific_option_hash
           }
         ]
       },
@@ -36,23 +67,12 @@ describe Travis::Yaml::Spec::Def::Deploy::Heroku do
         types: [
           {
             type: :scalar,
-            strict: false
           },
           {
             name: :deploy_branches,
             type: :map,
             strict: false,
-            map: {},
-            types: [
-              {
-                name: :branch,
-                type: :scalar,
-                cast: [
-                  :str,
-                  :regex
-                ]
-              }
-            ]
+            deprecated: :branch_specific_option_hash
           }
         ]
       },
@@ -61,23 +81,13 @@ describe Travis::Yaml::Spec::Def::Deploy::Heroku do
         types: [
           {
             type: :scalar,
-            cast: [
-              :secure
-            ],
-            alias: [
-              "api-key"
-            ]
+            secure: true,
           },
           {
+            name: :deploy_branches,
             type: :map,
-            cast: [
-              :secure
-            ],
-            alias: [
-              "api-key"
-            ],
             strict: false,
-            map: {}
+            deprecated: :branch_specific_option_hash
           }
         ]
       },
@@ -91,6 +101,12 @@ describe Travis::Yaml::Spec::Def::Deploy::Heroku do
                 type: :scalar
               }
             ]
+          },
+          {
+            name: :deploy_branches,
+            type: :map,
+            strict: false,
+            deprecated: :branch_specific_option_hash
           }
         ]
       }

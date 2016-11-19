@@ -1,4 +1,7 @@
+before_deploy: "echo 'ready?'"
 deploy:
   provider: heroku
-  api_key: ...
-  strategy: git
+
+after_deploy:
+  - ./after_deploy_1.sh
+  - ./after_deploy_2.sh

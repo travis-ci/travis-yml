@@ -8,21 +8,33 @@ describe Travis::Yaml::Spec::Def::Deploy::Pypi do
       strict: false,
       prefix: {
         key: :provider,
-        type: :scalar
-      }
+        type: [:str]
+      },
+      types: [
+        {
+          name: :deploy_branches,
+          type: :map,
+          strict: false,
+          deprecated: :branch_specific_option_hash
+        }
+      ]
     )
   end
 
   it do
-    expect(except(spec[:map], :provider, :on, :skip_cleanup, :edge)).to eq(
+    expect(except(spec[:map], :provider, :on, :skip_cleanup, :allow_failure, :edge)).to eq(
       user: {
         key: :user,
         types: [
           {
             type: :scalar,
-            cast: [
-              :secure
-            ]
+            secure: true,
+          },
+          {
+            name: :deploy_branches,
+            type: :map,
+            strict: false,
+            deprecated: :branch_specific_option_hash
           }
         ]
       },
@@ -31,9 +43,13 @@ describe Travis::Yaml::Spec::Def::Deploy::Pypi do
         types: [
           {
             type: :scalar,
-            cast: [
-              :secure
-            ]
+            secure: true,
+          },
+          {
+            name: :deploy_branches,
+            type: :map,
+            strict: false,
+            deprecated: :branch_specific_option_hash
           }
         ]
       },
@@ -42,9 +58,13 @@ describe Travis::Yaml::Spec::Def::Deploy::Pypi do
         types: [
           {
             type: :scalar,
-            cast: [
-              :secure
-            ]
+            secure: true,
+          },
+          {
+            name: :deploy_branches,
+            type: :map,
+            strict: false,
+            deprecated: :branch_specific_option_hash
           }
         ]
       },
@@ -53,6 +73,12 @@ describe Travis::Yaml::Spec::Def::Deploy::Pypi do
         types: [
           {
             type: :scalar
+          },
+          {
+            name: :deploy_branches,
+            type: :map,
+            strict: false,
+            deprecated: :branch_specific_option_hash
           }
         ]
       },
@@ -61,6 +87,12 @@ describe Travis::Yaml::Spec::Def::Deploy::Pypi do
         types: [
           {
             type: :scalar
+          },
+          {
+            name: :deploy_branches,
+            type: :map,
+            strict: false,
+            deprecated: :branch_specific_option_hash
           }
         ]
       },
@@ -69,6 +101,12 @@ describe Travis::Yaml::Spec::Def::Deploy::Pypi do
         types: [
           {
             type: :scalar
+          },
+          {
+            name: :deploy_branches,
+            type: :map,
+            strict: false,
+            deprecated: :branch_specific_option_hash
           }
         ]
       }

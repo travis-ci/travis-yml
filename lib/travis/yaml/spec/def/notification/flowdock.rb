@@ -7,14 +7,15 @@ module Travis
             register :flowdock
 
             def define
-              prefix :api_token
-              normalize :inherit, keys: [:on_success, :on_failure]
+              prefix :api_token, type: [:str, :secure]
+              change :inherit, keys: Notifications::INHERIT
+              change :enable
 
-              map :api_token, to: :scalar, cast: :secure
+              map :enabled,   to: :bool
+              map :disabled,  to: :bool
+              map :api_token, to: :str, secure: true
               map :template,  to: :templates
               maps *Notifications::CALLBACKS
-
-              # normalize { |value| Normalize.new(:api_token, value, :str).apply }
             end
           end
         end

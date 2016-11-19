@@ -10,8 +10,8 @@ module Travis
           def define
             name :haxe
             matrix :haxe
-            matrix :hxml, to: :seq
-            map :neko, to: :scalar
+            map :hxml, to: :seq
+            map :neko, to: :str
           end
         end
       end

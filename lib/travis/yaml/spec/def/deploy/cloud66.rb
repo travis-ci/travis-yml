@@ -8,7 +8,7 @@ module Travis
 
             def define
               super
-              map :redeployment_hook, to: :scalar
+              map :redeployment_hook, to: :str
             end
           end
         end

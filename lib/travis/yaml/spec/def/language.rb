@@ -39,7 +39,8 @@ module Travis
           def define
             default :ruby
             downcase
-            aliases :lang
+
+            root.includes[:support] = Support.new(self)
           end
         end
       end

@@ -1,8 +1,10 @@
+require 'travis/yaml/support/obj'
+
 module Travis
   module Yaml
     module Spec
       module Type
-        class Mapping < Struct.new(:key, :types)
+        class Mapping < Obj.new(:key, :types)
           include Helper::Common
 
           KEYS = [:only, :except]

@@ -4,11 +4,13 @@ module Travis
   module Yaml
     module Spec
       module Def
-        # TODO check with Hiro
-        # see https://github.com/travis-ci/travis-ci/issues/2320
+        # TODO check with Hiro, see https://github.com/travis-ci/travis-ci/issues/2320
+        # however, python is listed in the docs: https://docs.travis-ci.com/user/osx-ci-environment/#Runtimes
+        # also, node_js now seems to be supported: https://github.com/travis-ci/travis-ci/issues/2311#issuecomment-205549262
         UNSUPPORTED = {
-          linux: %i(objective_c),
-          osx:   %i(node_js python php perl erlang groovy clojure scala haskell)
+          linux: %i(objective-c),
+          # TODO list supported languages instead?
+          osx:   %i(php perl erlang groovy clojure scala haskell)
         }
 
         class Oss < Type::Seq
@@ -27,8 +29,10 @@ module Travis
           def define
             downcase
 
-            value :linux, alias: %i(ubuntu),        except: { language: UNSUPPORTED[:linux] }
-            value :osx,   alias: %i(mac macos ios), except: { language: UNSUPPORTED[:osx] }
+            default :linux, except: { language: UNSUPPORTED[:linux] }
+            default :osx,   except: { language: UNSUPPORTED[:osx] }
+            value   :linux, alias: %i(ubuntu),        except: { language: UNSUPPORTED[:linux] }
+            value   :osx,   alias: %i(mac macos ios), except: { language: UNSUPPORTED[:osx] }
           end
         end
       end

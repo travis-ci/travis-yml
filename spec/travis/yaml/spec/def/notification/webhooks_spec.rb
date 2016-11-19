@@ -8,21 +8,44 @@ describe Travis::Yaml::Spec::Def::Notification::Webhooks do
         {
           name: :webhooks,
           type: :map,
-          alias: [
-            'webhook'
-          ],
+          alias: ['webhook'],
           prefix: {
-            key: :urls
+            key: :urls,
+            type: [:str, :secure, :seq]
           },
-          normalize: [
-            name: :inherit,
-            keys: [
-              :on_start,
-              :on_success,
-              :on_failure
-            ]
+          change: [
+            {
+              name: :inherit,
+              keys: [
+                :disabled,
+                :on_start,
+                :on_success,
+                :on_failure
+              ]
+            },
+            {
+              name: :enable
+            },
           ],
           map: {
+            enabled: {
+              key: :enabled,
+              types: [
+                {
+                  type: :scalar,
+                  cast: :bool,
+                }
+              ]
+            },
+            disabled: {
+              key: :disabled,
+              types: [
+                {
+                  type: :scalar,
+                  cast: :bool,
+                }
+              ]
+            },
             urls: {
               key: :urls,
               types: [
@@ -44,13 +67,16 @@ describe Travis::Yaml::Spec::Def::Notification::Webhooks do
                   type: :fixed,
                   values: [
                     {
-                      value: 'always'
+                      value: 'always',
+                      alias: ['true']
                     },
                     {
-                      value: 'never'
+                      value: 'never',
+                      alias: ['false']
                     },
                     {
-                      value: 'change'
+                      value: 'change',
+                      alias: ['changed']
                     }
                   ]
                 }
@@ -64,13 +90,16 @@ describe Travis::Yaml::Spec::Def::Notification::Webhooks do
                   type: :fixed,
                   values: [
                     {
-                      value: 'always'
+                      value: 'always',
+                      alias: ['true']
                     },
                     {
-                      value: 'never'
+                      value: 'never',
+                      alias: ['false']
                     },
                     {
-                      value: 'change'
+                      value: 'change',
+                      alias: ['changed']
                     }
                   ]
                 }
@@ -84,13 +113,16 @@ describe Travis::Yaml::Spec::Def::Notification::Webhooks do
                   type: :fixed,
                   values: [
                     {
-                      value: 'always'
+                      value: 'always',
+                      alias: ['true']
                     },
                     {
-                      value: 'never'
+                      value: 'never',
+                      alias: ['false']
                     },
                     {
-                      value: 'change'
+                      value: 'change',
+                      alias: ['changed']
                     }
                   ]
                 }

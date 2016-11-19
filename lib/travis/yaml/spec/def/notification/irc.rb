@@ -7,20 +7,21 @@ module Travis
             register :irc
 
             def define
-              prefix :channels
-              normalize :inherit, keys: [:on_success, :on_failure]
+              prefix :channels, type: [:str, :secure, :seq]
+              change :inherit, keys: Notifications::INHERIT
+              change :enable
 
-              map :channels,          to: :seq,    cast: :secure
-              map :channel_key,       to: :scalar, cast: :secure
-              map :password,          to: :scalar, cast: :secure
-              map :nickserv_password, to: :scalar, cast: :secure
-              map :nick,              to: :scalar, cast: :secure
-              map :use_notice,        to: :scalar, cast: :bool
-              map :skip_join,         to: :scalar, cast: :bool
+              map :enabled,           to: :bool
+              map :disabled,          to: :bool
+              map :channels,          to: :seq, secure: true
+              map :channel_key,       to: :str, secure: true
+              map :password,          to: :str, secure: true
+              map :nickserv_password, to: :str, secure: true
+              map :nick,              to: :str
+              map :use_notice,        to: :bool
+              map :skip_join,         to: :bool
               map :template,          to: :templates
               maps *Notifications::CALLBACKS
-
-              # normalize { |value| Normalize.new(:channels, value).apply }
             end
           end
         end

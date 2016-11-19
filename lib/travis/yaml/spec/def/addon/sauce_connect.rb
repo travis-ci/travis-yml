@@ -7,14 +7,14 @@ module Travis
             register :sauce_connect
 
             def define
-              normalize :enabled
+              change :enable
 
-              map :enabled,             to: :scalar, cast: :bool
-              map :username,            to: :scalar, cast: :secure
-              map :access_key,          to: :scalar, cast: :secure
-              map :direct_domains,      to: :scalar
-              map :tunnel_domains,      to: :scalar
-              map :no_ssl_bump_domains, to: :scalar
+              map :enabled,             to: :bool # TODO what is this useful for?
+              map :username,            to: :str, secure: true
+              map :access_key,          to: :str, secure: true
+              map :direct_domains,      to: :str
+              map :tunnel_domains,      to: :str
+              map :no_ssl_bump_domains, to: :str
             end
           end
         end

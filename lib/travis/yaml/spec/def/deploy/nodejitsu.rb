@@ -9,8 +9,8 @@ module Travis
 
             def define
               super
-              map :username, to: :scalar, cast: :secure
-              map :api_key,  to: :scalar, cast: :secure
+              map :username, to: :str, secure: true
+              map :api_key,  to: :str, secure: true
             end
           end
         end

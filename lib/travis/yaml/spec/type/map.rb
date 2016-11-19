@@ -9,6 +9,11 @@ module Travis
         class Map < Node
           register :map
 
+          def include(*features)
+            opts[:include] ||= []
+            opts[:include] += features
+          end
+
           def skip?(key)
             skip.include?(key)
           end
@@ -27,11 +32,8 @@ module Travis
             @types ||= []
           end
 
-          def strict(strict = true)
-            opts[:strict] = strict
-          end
-
           def prefix(prefix, opts = {})
+            opts[:type] = Array(opts[:type]) if opts[:type]
             self.opts[:prefix] = { key: prefix }.merge(opts)
           end
 
@@ -46,7 +48,7 @@ module Travis
 
           def map(key, opts = {})
             opts  = normalize_opts(opts)
-            types = resolve(opts.delete(:to) || key, opts)
+            types = resolve(opts.delete(:to) || key, opts) + self.types
             mappings.add(key, key, types)
             root.expand(key) if opts[:expand]
           end
@@ -54,7 +56,8 @@ module Travis
           def resolve(types, opts)
             Array(types).map do |type|
               next type.new(self) if type.is_a?(Class)
-              const = Node[type]
+              const = Node[[:bool, :str].include?(type) ? :scalar : type]
+              opts  = opts.merge(cast: :bool) if type == :bool
               opts  = opts.merge(strict: false) if const == Map
               const.new(self, opts)
             end
@@ -64,7 +67,6 @@ module Travis
             opts[:defaults] = [{ value: opts.delete(:default) }] if opts[:default]
             opts[:values]   = normalize_values(opts[:values]) if opts[:values]
             opts[:alias]    = normalize_aliases(opts[:alias]) if opts[:alias]
-            opts[:cast]     = Array(opts[:cast])  if opts[:cast]
             opts
           end
 
@@ -82,12 +84,12 @@ module Travis
 
           def spec
             spec = {}
-            spec = spec.merge(name: registry_key) unless registry_key == :map
-            spec = spec.merge(type: :map)
+            spec[:name] = registry_key unless registry_key == :map
+            spec[:type] = :map
             spec = spec.merge(opts)
-            spec = spec.merge(map: mappings.spec)
-            spec = spec.merge(types: Array(types).map(&:spec)) if types.any?
-            spec
+            spec[:map] = mappings.spec
+            spec[:types] = Array(types).map(&:spec) unless types.empty?
+            compact(spec)
           end
 
           def opts

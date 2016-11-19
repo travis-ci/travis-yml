@@ -7,15 +7,14 @@ module Travis
             register :email
 
             def define
-              normalize :enabled
+              prefix :recipients, type: [:str, :secure, :seq]
+              change :inherit, keys: Notifications::INHERIT
+              change :enable
 
-              prefix :recipients
-
-              map :enabled,    to: :scalar, cast: :bool, default: true, required: true
+              map :enabled,    to: :bool
+              map :disabled,   to: :bool
               map :recipients, to: :seq
               maps *Notifications::CALLBACKS
-
-              # normalize { |value| Normalize.new(:recipients, value).apply }
             end
           end
         end

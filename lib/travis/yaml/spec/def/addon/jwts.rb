@@ -9,7 +9,7 @@ module Travis
             register :jwts
 
             def define
-              type :scalar, cast: :secure
+              type :scalar, secure: true
             end
           end
         end

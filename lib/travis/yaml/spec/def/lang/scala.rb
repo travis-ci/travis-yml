@@ -12,7 +12,7 @@ module Travis
             name :scala
             matrix :scala
             matrix :jdk, to: :jdks
-            map :sbt_args, to: :scalar
+            map :sbt_args, to: :str
           end
         end
       end

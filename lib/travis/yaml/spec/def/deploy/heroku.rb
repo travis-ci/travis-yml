@@ -11,11 +11,28 @@ module Travis
 
             def define
               super
-              map :strategy,  to: :scalar
-              map :buildpack, to: :scalar
-              map :app,       to: [:scalar, :deploy_branches]
-              map :api_key,   to: [:scalar, :map], cast: :secure, alias: :'api-key'
+              map :strategy,  to: :heroku_strategy
+              map :buildpack, to: :str
+              map :app,       to: :str
+              map :api_key,   to: :str, secure: true
               map :run,       to: :seq
+            end
+          end
+
+          class HerokuStrategy < Type::Fixed
+            register :heroku_strategy
+
+            DEPRECATED = 'will be removed in v1.1.0'
+
+            def define
+              default :api
+              value :api
+              value :git
+              # TODO remove, anvil has been turned off on 2015-02-19
+              # https://devcenter.heroku.com/changelog-items/613
+              value :anvil, deprecated: DEPRECATED, version: '1.0'
+              value :'git-ssh', deprecated: DEPRECATED, version: '1.0'
+              value :'git-deploy-key', deprecated: DEPRECATED, version: '1.0'
             end
           end
         end
@@ -23,3 +40,4 @@ module Travis
     end
   end
 end
+

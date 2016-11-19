@@ -10,9 +10,11 @@ module Travis
           register :git
 
           def define
-            map :depth,      to: :scalar, default: 50
-            map :submodules, to: :scalar, cast: :bool
-            map :strategy,   to: :fixed, values: [:clone, :tarball]
+            map :strategy,         to: :fixed, values: [:clone, :tarball]
+            map :quiet,            to: :bool
+            map :depth,            to: :str, default: 50
+            map :submodules,       to: :bool
+            map :submodules_depth, to: :str
           end
         end
       end

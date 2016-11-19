@@ -11,7 +11,7 @@ module Travis
           def define
             name :clojure
             matrix :jdk, to: :jdks
-            map :lein, to: :scalar
+            map :lein, to: :str
           end
         end
       end

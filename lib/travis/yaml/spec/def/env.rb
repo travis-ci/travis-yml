@@ -10,27 +10,29 @@ module Travis
           register :env
 
           def define
+            strict false
+            prefix :matrix
+
             map :global, to: :env_vars
             map :matrix, to: :env_vars
-
-            prefix :matrix
           end
+        end
 
-          class Vars < Type::Seq
-            register :env_vars
+        class EnvVars < Type::Seq
+          register :env_vars
 
-            def define
-              normalize :vars
-              type :env_var
-            end
+          def define
+            strict false
+            change :env
           end
+        end
 
-          class Var < Type::Scalar
-            register :env_var
+        class EnvVar < Type::Scalar
+          register :env_var
 
-            def define
-              cast :str, :secure
-            end
+          def define
+            strict false
+            change :env
           end
         end
       end

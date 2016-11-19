@@ -1,6 +1,5 @@
 describe Travis::Yaml, 'dist' do
-  let(:msgs) { subject.msgs }
-  let(:dist) { subject.to_h[:dist] }
+  let(:dist) { subject.serialize[:dist] }
 
   subject { described_class.apply(config) }
 
@@ -22,7 +21,7 @@ describe Travis::Yaml, 'dist' do
   describe 'drops an unknown dist' do
     let(:config) { { dist: 'unknown' } }
     it { expect(dist).to eq 'precise' }
-    it { expect(msgs).to include([:warn, :dist, :unknown_default, 'dropping unknown value "unknown", defaulting to "precise"']) }
+    it { expect(msgs).to include([:warn, :dist, :unknown_default, value: 'unknown', default: 'precise']) }
   end
 
   describe 'supports aliases' do
@@ -33,6 +32,6 @@ describe Travis::Yaml, 'dist' do
   describe 'supports arrays, but warns' do
     let(:config) { { dist: ['trusty'] } }
     it { expect(dist).to eq 'trusty' }
-    it { expect(msgs).to include([:warn, :dist, :invalid_seq, 'unexpected sequence, using the first value ("trusty")']) }
+    it { expect(msgs).to include([:warn, :dist, :invalid_seq, value: 'trusty']) }
   end
 end

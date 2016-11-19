@@ -8,9 +8,9 @@ module Travis
 
             def define
               super
-              map :email,      to: :scalar, cast: :secure
-              map :password,   to: :scalar, cast: :secure
-              map :deployment, to: :scalar
+              map :email,      to: :str, secure: true
+              map :password,   to: :str, secure: true
+              map :deployment, to: :str
             end
           end
         end

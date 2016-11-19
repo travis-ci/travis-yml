@@ -1,21 +1,22 @@
 describe Travis::Yaml, 'deploy s3' do
-  let(:msgs)   { subject.msgs }
-  let(:deploy) { subject.to_h[:deploy] }
+  let(:deploy) { subject.serialize[:deploy] }
 
   subject { described_class.apply(input) }
 
+  let(:provider)          { 's3' }
   let(:access_key_id)     { 'access_key_id' }
   let(:secret_access_key) { 'secret_access_key' }
+  let(:upload_dir)        { :upload_dir }
 
   let(:input) do
     {
       deploy: {
-        provider: 's3',
+        provider: provider,
         access_key_id: access_key_id,
         secret_access_key: secret_access_key,
         bucket: 'bucket',
         region: 'region',
-        upload_dir: 'upload_dir',
+        upload_dir => 'upload_dir',
         storage_class: 'storage_class',
         local_dir: 'local_dir',
         detect_encoding: true,
@@ -41,5 +42,15 @@ describe Travis::Yaml, 'deploy s3' do
   describe 'secret_access_key given as a secure string' do
     let(:secret_access_key) { { secure: 'secure' } }
     it { expect(deploy).to eq [input[:deploy]] }
+  end
+
+  describe 'uppercase provider' do
+    let(:provider) { 'S3' }
+    it { expect(deploy).to eq [input[:deploy].merge(provider: 's3')] }
+  end
+
+  describe 'upload-dir (dasherized key)' do
+    let(:upload_dir) { :'upload-dir' }
+    it { expect(deploy[0][:upload_dir]).to eq 'upload_dir' }
   end
 end

@@ -10,7 +10,7 @@ describe Travis::Yaml::Spec::Def::Oss do
           value: 'linux',
             except: {
               language: [
-                :objective_c
+                :'objective-c'
               ]
             }
         },
@@ -18,8 +18,6 @@ describe Travis::Yaml::Spec::Def::Oss do
             value: 'osx',
             except: {
               language: [
-                :node_js,
-                :python,
                 :php,
                 :perl,
                 :erlang,
@@ -36,6 +34,30 @@ describe Travis::Yaml::Spec::Def::Oss do
           name: :os,
           type: :fixed,
           downcase: true,
+          defaults: [
+            {
+              value: 'linux',
+                except: {
+                  language: [
+                    :'objective-c'
+                  ]
+                }
+            },
+            {
+                value: 'osx',
+                except: {
+                  language: [
+                    :php,
+                    :perl,
+                    :erlang,
+                    :groovy,
+                    :clojure,
+                    :scala,
+                    :haskell
+                  ]
+                }
+              }
+          ],
           values: [
             {
               value: 'linux',
@@ -44,7 +66,7 @@ describe Travis::Yaml::Spec::Def::Oss do
               ],
               except: {
                 language: [
-                  :objective_c
+                  :'objective-c'
                 ]
               }
             },
@@ -57,8 +79,6 @@ describe Travis::Yaml::Spec::Def::Oss do
               ],
               except: {
                 language: [
-                  :node_js,
-                  :python,
                   :php,
                   :perl,
                   :erlang,

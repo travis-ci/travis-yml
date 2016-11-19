@@ -10,15 +10,15 @@ module Travis
 
             def define
               super
-              map :token,    to: :scalar, cast: :secure
-              map :app,      to: :scalar
+              map :token,    to: :str, secure: true
+              map :app,      to: :str
               map :exclude,  to: :seq
               map :include,  to: :seq
-              map :address , to: :scalar
-              map :vcs,      to: :scalar, cast: :bool
+              map :address , to: :str
+              map :vcs,      to: :bool
               map :metadata, to: :seq
-              map :debug,    to: :scalar, cast: :bool
-              map :version,  to: :scalar
+              map :debug,    to: :bool
+              map :version,  to: :str
             end
           end
         end

@@ -5,10 +5,11 @@ module Travis
         module ClassMethods
           def memoize(name)
             prepend Module.new {
-              define_method(name) do |*args, &block|
-                var = "@#{name.to_s.gsub(/[\W]/, '')}".to_sym
-                return instance_variable_get(var) if instance_variable_defined?(var)
-                instance_variable_set(var, super(*args, &block))
+              define_method(name) do |*args|
+                raise 'cannot pass arguments to memoized method %p' % name unless args.empty?
+                result = super()
+                singleton_class.send(:define_method, name) { result }
+                result
               end
             }
           end

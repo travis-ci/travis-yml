@@ -1,4 +1,3 @@
-require 'travis/yaml/spec/def/lang/compilers'
 require 'travis/yaml/spec/type/lang'
 
 module Travis
@@ -10,7 +9,6 @@ module Travis
 
           def define
             name :c
-            matrix :compiler, to: :compilers, required: true, on: %i(c cpp)
           end
         end
       end

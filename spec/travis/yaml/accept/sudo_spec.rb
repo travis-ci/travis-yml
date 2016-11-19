@@ -1,6 +1,5 @@
 describe Travis::Yaml, 'sudo' do
-  let(:msgs) { subject.msgs }
-  let(:sudo) { subject.to_h[:sudo] }
+  let(:sudo) { subject.serialize[:sudo] }
 
   subject { described_class.apply(config) }
 
@@ -22,5 +21,11 @@ describe Travis::Yaml, 'sudo' do
   describe 'given required' do
     let(:config) { { sudo: 'required' } }
     it { expect(sudo).to be true }
+  end
+
+  describe 'given enabled' do
+    let(:config) { { sudo: 'enabled' } }
+    it { expect(sudo).to be true }
+    it { expect(info).to include [:info, :sudo, :cast, given_value: 'enabled', given_type: :str, value: true, type: :bool] }
   end
 end

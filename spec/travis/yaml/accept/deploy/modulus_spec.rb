@@ -1,6 +1,5 @@
 describe Travis::Yaml, 'deploy modulus' do
-  let(:msgs)   { subject.msgs }
-  let(:deploy) { subject.to_h[:deploy] }
+  let(:deploy) { subject.serialize[:deploy] }
 
   subject { described_class.apply(input) }
 

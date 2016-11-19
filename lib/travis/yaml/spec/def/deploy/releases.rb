@@ -15,14 +15,14 @@ module Travis
 
             def define
               super
-              map :user,           to: :scalar, cast: :secure
-              map :password,       to: :scalar, cast: :secure
-              map :api_key,        to: :scalar, cast: :secure
-              map :repo,           to: :scalar
+              map :user,           to: :str, secure: true
+              map :password,       to: :str, secure: true
+              map :api_key,        to: :str, secure: true
+              map :repo,           to: :str
               map :file,           to: [:seq, :scalar]
-              map :file_glob,      to: :scalar
-              map :overwrite,      to: :scalar
-              map :release_number, to: :scalar, alias: :'release-number'
+              map :file_glob,      to: :str
+              map :overwrite,      to: :str
+              map :release_number, to: :str
             end
           end
         end

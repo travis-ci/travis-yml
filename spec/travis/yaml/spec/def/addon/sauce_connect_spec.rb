@@ -8,9 +8,9 @@ describe Travis::Yaml::Spec::Def::Addons, 'sauce_connect' do
         {
           name: :sauce_connect,
           type: :map,
-          normalize: [
+          change: [
             {
-              name: :enabled
+              name: :enable
             }
           ],
           map: {
@@ -19,9 +19,7 @@ describe Travis::Yaml::Spec::Def::Addons, 'sauce_connect' do
               types: [
                 {
                   type: :scalar,
-                  cast: [
-                    :bool
-                  ]
+                  cast: :bool
                 }
               ]
             },
@@ -30,9 +28,7 @@ describe Travis::Yaml::Spec::Def::Addons, 'sauce_connect' do
               types: [
                 {
                   type: :scalar,
-                  cast: [
-                    :secure
-                  ]
+                  secure: true,
                 }
               ]
             },
@@ -41,9 +37,7 @@ describe Travis::Yaml::Spec::Def::Addons, 'sauce_connect' do
               types: [
                 {
                   type: :scalar,
-                  cast: [
-                    :secure
-                  ]
+                  secure: true,
                 }
               ]
             },

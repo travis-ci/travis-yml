@@ -9,7 +9,7 @@ module Travis
 
           def define
             name :erlang
-            matrix :otp_release, alias: :otp_release
+            matrix :otp_release
           end
         end
       end

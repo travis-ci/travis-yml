@@ -7,10 +7,13 @@ module Travis
             register :pushover
 
             def define
-              normalize :inherit, keys: [:on_success, :on_failure]
+              change :inherit, keys: Notifications::INHERIT
+              change :enable
 
-              map :api_key,  to: :scalar, cast: :secure
-              map :users,    to: :seq,    cast: :secure
+              map :enabled,  to: :bool
+              map :disabled, to: :bool
+              map :api_key,  to: :str, secure: true
+              map :users,    to: :seq, secure: true
               map :template, to: :templates
               maps *Notifications::CALLBACKS
             end

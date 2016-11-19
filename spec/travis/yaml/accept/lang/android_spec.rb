@@ -1,6 +1,5 @@
 describe Travis::Yaml do
-  let(:msgs)    { subject.msgs }
-  let(:config)  { subject.to_h }
+  let(:config)  { subject.serialize }
   let(:android) { config[:android] }
 
   subject { described_class.apply(input) }
@@ -38,7 +37,21 @@ describe Travis::Yaml do
     describe 'disallows android' do
       let(:input) { { language: 'go', android: { components: ['foo'] } } }
       it { expect(android).to be_nil }
-      it { expect(msgs).to include [:error, :android, :unsupported, 'android ({:components=>["foo"]}) is not supported on language "go"'] }
+      it { expect(msgs).to include [:error, :android, :unsupported, on_key: :language, on_value: 'go', key: :android, value: { components: ['foo'] }] }
+    end
+  end
+
+  describe 'android' do
+    describe 'given an array of hashes' do
+      let(:input) { { language: 'android', android: [{ components: ['foo'] }, { components: ['bar'] }] } }
+      it { expect(android).to eq components: ['foo', 'bar'] }
+      it { expect(msgs).to include [:warn, :android, :invalid_seq, value: { components: ['foo', 'bar'] }] }
+    end
+
+    describe 'given an array of hashes with unknown keys' do
+      let(:input) { { language: 'android', android: [{ target: 'android-8' }, { target: 'android-10' }] } }
+      it { expect(android).to be_nil }
+      it { expect(msgs).to include [:warn, :android, :invalid_seq, value: { target: 'android-8' }] }
     end
   end
 end

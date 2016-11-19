@@ -1,11 +1,11 @@
 describe Travis::Yaml, 'deploy elasticbeanstalk' do
-  let(:msgs)   { subject.msgs }
-  let(:deploy) { subject.to_h[:deploy] }
+  let(:deploy) { subject.serialize[:deploy] }
 
   subject { described_class.apply(input) }
 
   let(:access_key_id)     { 'access_key_id' }
   let(:secret_access_key) { 'secret_access_key' }
+  let(:env)               { 'env' }
 
   let(:input) do
     {
@@ -15,7 +15,7 @@ describe Travis::Yaml, 'deploy elasticbeanstalk' do
         securet_access_key: secret_access_key,
         region: 'region',
         app: 'app',
-        env: 'env',
+        env: env,
         zip_file: 'zip_file',
         bucket_name: 'bucket_name',
         bucket_path: 'bucket_path',
@@ -35,6 +35,11 @@ describe Travis::Yaml, 'deploy elasticbeanstalk' do
 
   describe 'secret_access_key given as a secure string' do
     let(:secret_access_key) { { secure: 'secure' } }
+    it { expect(deploy).to eq [input[:deploy]] }
+  end
+
+  describe 'env given as a hash' do
+    let(:env) { { production: 'production', staging: 'staging' } }
     it { expect(deploy).to eq [input[:deploy]] }
   end
 end

@@ -56,7 +56,7 @@ module Travis
       end
 
       def registry
-        @registry ||= respond_to?(:superclass) && superclass.respond_to?(:registry) ? superclass.registry : Registry.new
+        @registry ||= superclass.respond_to?(:registry) ? superclass.registry : Registry.new
       end
     end
 

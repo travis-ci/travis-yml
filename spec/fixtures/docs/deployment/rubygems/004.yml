@@ -1,6 +1,9 @@
 deploy:
-  provider: rubygems
-  api_key: ...
-  gem:
-    master: my-gem
-    old: my-gem-old
+  - provider: rubygems
+    gem: my-gem
+    api_key: ...
+    on: master
+  - provider: openshift
+    gem: my-gem-old
+    api_key: ...
+    on: old

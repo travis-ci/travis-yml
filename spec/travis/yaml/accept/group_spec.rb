@@ -1,6 +1,5 @@
 describe Travis::Yaml, 'group' do
-  let(:msgs)  { subject.msgs }
-  let(:group) { subject.to_h[:group] }
+  let(:group) { subject.serialize[:group] }
 
   subject { described_class.apply(config) }
 
@@ -11,6 +10,6 @@ describe Travis::Yaml, 'group' do
 
   describe 'adds msgs about feature flags' do
     let(:config) { { group: 'stable' } }
-    it { expect(msgs).to include [:info, :group, :flagged, 'your repository must be feature flagged for :group to be used'] }
+    it { expect(info).to include [:info, :group, :flagged, key: :group] }
   end
 end

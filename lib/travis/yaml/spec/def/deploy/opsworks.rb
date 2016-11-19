@@ -11,14 +11,14 @@ module Travis
 
             def define
               super
-              map :access_key_id,       to: :scalar, cast: :secure, alias: :'access-key-id'
-              map :secret_access_key,   to: :scalar, cast: :secure, alias: :'secret-access-key'
-              map :app_id,              to: :scalar, alias: :'app-id'
-              map :instance_ids,        to: :scalar, alias: :'instance-ids'
-              map :layer_ids,           to: :scalar, alias: :'layer-ids'
-              map :migrate,             to: :scalar, cast: :bool
-              map :wait_until_deployed, to: :scalar, alias: :'wait-until-deployed'
-              map :custom_json,         to: :scalar
+              map :access_key_id,       to: :str, secure: true
+              map :secret_access_key,   to: :str, secure: true
+              map :app_id,              to: :str
+              map :instance_ids,        to: :str
+              map :layer_ids,           to: :str
+              map :migrate,             to: :bool
+              map :wait_until_deployed, to: :str
+              map :custom_json,         to: :str
             end
           end
         end

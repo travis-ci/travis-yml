@@ -8,9 +8,9 @@ module Travis
 
             def define
               super
-              map :slug,               to: :scalar, required: true
-              map :oauth_token,        to: :scalar, required: true, cast: :secure
-              map :oauth_token_secret, to: :scalar, required: true, cast: :secure
+              map :slug,               to: :str, required: true
+              map :oauth_token,        to: :str, required: true, secure: true
+              map :oauth_token_secret, to: :str, required: true, secure: true
             end
           end
         end

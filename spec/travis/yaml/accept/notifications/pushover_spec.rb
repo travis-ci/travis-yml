@@ -1,6 +1,5 @@
 describe Travis::Yaml, 'notifications: pushover' do
-  let(:msgs)     { subject.msgs }
-  let(:pushover) { subject.to_h[:notifications][:pushover] }
+  let(:pushover) { subject.serialize[:notifications][:pushover] }
 
   subject { described_class.apply(config) }
 
@@ -12,7 +11,7 @@ describe Travis::Yaml, 'notifications: pushover' do
   describe 'given a hash with an unknown template var' do
     let(:config) { { notifications: { pushover: { api_key: 'key', template: ['%{wat}'] } } } }
     it { expect(pushover[:template]).to be_nil }
-    it { expect(msgs).to include [:error, :'notifications.pushover', :unknown_var, 'unknown template variable "wat"'] }
+    it { expect(msgs).to include [:error, :'notifications.pushover.template', :unknown_var, var: 'wat'] }
   end
 
   describe 'callbacks' do
