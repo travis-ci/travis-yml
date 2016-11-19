@@ -1,0 +1,8 @@
+addons:
+  sonarqube: true
+env:
+  global:
+    - secure: '*********' # defines SONAR_TOKEN=abcdef0123456789
+script:
+  # other script steps might be done before running the actual SonarQube analysis
+  - sonar-scanner -Dsonar.login=$SONAR_TOKEN
