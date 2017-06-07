@@ -9,6 +9,7 @@ module Travis
             def define
               super
               map :project,  to: :str
+              map :message,  to: :str
               map :token,    to: :str, secure: true
             end
           end
