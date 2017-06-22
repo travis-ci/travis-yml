@@ -1,27 +1,80 @@
+GIT
+  remote: https://github.com/travis-ci/travis-config
+  revision: 765b9523d13c6252e05a9966d94436af23aff646
+  specs:
+    travis-config (1.1.2)
+      hashr (~> 2.0)
+
+GIT
+  remote: https://github.com/travis-ci/travis-sso
+  revision: 8b41951a7a1905978ae3bb6ecaffa88f2f22d3d7
+  specs:
+    travis-sso (0.0.1)
+      multi_json
+      rack
+      rotp
+      yubikey
+
 GEM
   remote: https://rubygems.org/
   specs:
-    puma (3.6.1)
+    activemodel (5.1.1)
+      activesupport (= 5.1.1)
+    activerecord (5.1.1)
+      activemodel (= 5.1.1)
+      activesupport (= 5.1.1)
+      arel (~> 8.0)
+    activesupport (5.1.1)
+      concurrent-ruby (~> 1.0, >= 1.0.2)
+      i18n (~> 0.7)
+      minitest (~> 5.1)
+      tzinfo (~> 1.1)
+    amatch (0.3.1)
+      tins (~> 1.0)
+    arel (8.0.0)
+    concurrent-ruby (1.0.5)
+    connection_pool (2.2.1)
+    hashr (2.0.1)
+    i18n (0.8.4)
+    minitest (5.10.2)
+    multi_json (1.12.1)
+    pg (0.21.0)
+    puma (3.6.0)
     rack (1.6.5)
     rack-protection (1.5.3)
       rack
-    rack-ssl (1.4.1)
-      rack
-    sinatra (1.4.7)
+    redis (3.3.2)
+    rotp (3.3.0)
+    safe_yaml (1.0.4)
+    sidekiq (4.2.6)
+      concurrent-ruby (~> 1.0)
+      connection_pool (~> 2.2, >= 2.2.0)
+      rack-protection (>= 1.5.0)
+      redis (~> 3.2, >= 3.2.1)
+    sinatra (1.4.8)
       rack (~> 1.5)
       rack-protection (~> 1.4)
       tilt (>= 1.3, < 3)
-    tilt (2.0.5)
-    will_paginate (3.1.5)
+    thread_safe (0.3.6)
+    tilt (2.0.7)
+    tins (1.14.0)
+    tzinfo (1.2.3)
+      thread_safe (~> 0.1)
+    yubikey (1.4.1)
 
 PLATFORMS
   ruby
 
 DEPENDENCIES
+  activerecord
+  amatch
+  pg
   puma
-  rack-ssl
+  safe_yaml
+  sidekiq
   sinatra
-  will_paginate
+  travis-config!
+  travis-sso!
 
 BUNDLED WITH
-   1.12.5
+   1.14.6
