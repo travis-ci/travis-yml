@@ -9,6 +9,6 @@ gem 'safe_yaml'
 gem 'sinatra'
 gem 'sidekiq'
 gem 'puma'
+gem 'sentry-raven'
 gem 'travis-config', git: 'https://github.com/travis-ci/travis-config'
 gem 'travis-sso', git: 'https://github.com/travis-ci/travis-sso'
-
