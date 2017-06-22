@@ -1,6 +1,6 @@
 source 'https://rubygems.org'
 
-gem 'activerecord'
+gem 'activerecord', '~> 5.0'
 gem 'pg'
 gem 'amatch'
 gem 'safe_yaml'
