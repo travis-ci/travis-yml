@@ -27,7 +27,7 @@ in the UI, and links to the documentation, suggesting fixes.
 yaml = 'rvm: 2.3'
 config = Travis::Yaml.load(yaml)
 
-config.to_h
+config.serialize
 # {
 #   language: 'ruby',
 #   os: ['linux'],
