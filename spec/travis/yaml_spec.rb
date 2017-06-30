@@ -43,7 +43,7 @@ describe Travis::Yaml do
     end
 
     describe 'alias' do
-      let(:msg) { [:info, :key, :alias, alias: 'rvm', name: 'ruby'] }
+      let(:msg) { [:info, :key, :alias, alias: 'rvm', value: 'ruby'] }
       it { should eq '[info] on key: rvm is an alias for ruby, using ruby' }
     end
 
