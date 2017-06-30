@@ -43,7 +43,7 @@ module Travis
       unknown_default: 'dropping unknown value: %{value}, defaulting to: %{default}',
       unknown_var:     'unknown template variable %{var}',
       invalid_key:     '%{key} is not a valid key',
-      invalid_type:    'dropping unexpected %{type} (%{value})',
+      invalid_type:    'dropping unexpected %{actual}, expected %{expected} (%{value})',
       invalid_format:  'dropping invalid format: %{value}',
       invalid_seq:     'unexpected sequence, using the first value (%{value})',
       # invalid_value:   '%{value} is not a valid value on this key',

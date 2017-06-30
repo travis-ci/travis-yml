@@ -113,8 +113,8 @@ describe Travis::Yaml do
     end
 
     describe 'invalid_type' do
-      let(:msg) { [:info, :key, :invalid_type, type: :seq, value: 'value'] }
-      it { should eq '[info] on key: dropping unexpected :seq (value)' }
+      let(:msg) { [:info, :key, :invalid_type, actual: :seq, expected: :map, value: 'value'] }
+      it { should eq '[info] on key: dropping unexpected :seq, expected :map (value)' }
     end
 
     describe 'invalid_format' do
