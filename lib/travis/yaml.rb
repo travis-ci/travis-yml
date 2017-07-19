@@ -37,6 +37,7 @@ module Travis
       clean_key:       'key %{original} contains special characters, using %{key}',
       clean_value:     'value %{original} is not known, but %{value} is, using %{value}',
       underscore_key:  'key %{original} is camelcased, using %{key}',
+      migrate:         'migrating %{key} to %{to} (value: %{value})',
       misplaced_key:   'dropping misplaced key %{key} (%{value})',
       unknown_key:     'dropping unknown key %{key} (%{value})',
       unknown_value:   'dropping unknown value: %{value}',
