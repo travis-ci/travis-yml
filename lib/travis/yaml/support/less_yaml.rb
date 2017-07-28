@@ -1,7 +1,9 @@
-require 'psych'
-require 'safe_yaml'
+$: << File.expand_path('../../../../../vendor/less_yaml/lib', __FILE__)
 
-module SafeYAML
+require 'psych'
+require 'less_yaml'
+
+module LessYAML
   OPTIONS[:default_mode] = :safe
 
   # TODO talk to Dan Tao about a public api for this

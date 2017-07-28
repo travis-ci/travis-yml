@@ -18,11 +18,9 @@ Gem::Specification.new do |s|
   s.require_path = 'lib'
 
   s.add_dependency 'amatch'
-  s.add_dependency 'safe_yaml'
 
   s.add_development_dependency 'rspec'
   s.add_development_dependency 'activerecord'
   s.add_development_dependency 'pg'
   s.add_development_dependency 'awesome_print'
-  
 end

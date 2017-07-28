@@ -1,4 +1,4 @@
-describe SafeYAML do
+describe LessYAML do
   subject { described_class.load(input) }
 
   describe 'loading true' do

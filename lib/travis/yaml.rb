@@ -7,7 +7,7 @@ require 'travis/yaml/helper/deyaml'
 require 'travis/yaml/helper/expand'
 require 'travis/yaml/matrix'
 require 'travis/yaml/spec/def/root'
-require 'travis/yaml/support/safe_yaml'
+require 'travis/yaml/support/less_yaml'
 
 Integer = Fixnum unless defined?(Integer) # Ruby 2.4
 
