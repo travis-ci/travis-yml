@@ -54,7 +54,7 @@ module Travis
       include Helper::Deyaml
 
       def load(yaml, opts = {})
-        hash = YAML.load(yaml, raise_on_unknown_tag: true)
+        hash = YAML.load(yaml.strip, raise_on_unknown_tag: true) || {}
         apply(hash, opts)
       end
 

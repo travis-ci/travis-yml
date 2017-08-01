@@ -9,6 +9,13 @@ describe Travis::Yaml do
     end
   end
 
+  describe 'load' do
+    describe 'when passed \n' do
+      let(:config) { Travis::Yaml.load("\n") }
+      it { expect { config }.to_not raise_error }
+    end
+  end
+
   describe 'expanded' do
     let(:spec) { Travis::Yaml.expanded }
 
