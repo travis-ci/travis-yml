@@ -255,4 +255,9 @@ describe Travis::Yaml, 'root' do
     it { expect(subject.serialize[:file]).to be_nil }
     it { expect(msgs).to include [:error, :root, :misplaced_key, key: :file, value: 'file'] }
   end
+
+  describe 'aliases :matrix to :jobs' do
+    let(:input) { { jobs: { rvm: '2.3' } } }
+    it { expect(value[:matrix][:include]).to eq [{ rvm: '2.3' }] }
+  end
 end

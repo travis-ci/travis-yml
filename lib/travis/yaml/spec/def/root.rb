@@ -36,7 +36,7 @@ module Travis
             map    :sudo,          required: true
             matrix :env
             matrix :compiler,      to: :compilers, on: %i(c cpp)
-            map    :matrix
+            map    :matrix,        alias: :jobs
             map    :notifications
 
             includes[:job] = Job.new(self)
