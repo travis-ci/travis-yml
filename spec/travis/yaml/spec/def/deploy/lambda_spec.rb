@@ -197,6 +197,106 @@ describe Travis::Yaml::Spec::Def::Deploy::Lambda do
             deprecated: :branch_specific_option_hash
           }
         ]
+      },
+      environment_variables: {
+        key: :environment_variables, 
+        types: [
+          {
+            type: :scalar, 
+            secure: true
+          },
+          {
+            type: :map, 
+            secure: true,
+            strict: false
+          },
+          {
+            name: :deploy_branches,
+            type: :map, 
+            strict: false,
+            deprecated: :branch_specific_option_hash
+          }
+        ]
+      },
+      security_group_ids: {
+        key: :security_group_ids, 
+        types: [
+          {
+            type: :seq, 
+            types: [
+              {
+                type: :scalar
+              }
+            ]
+          },
+          {
+            name: :deploy_branches,
+            type: :map, 
+            strict: false,
+            deprecated: :branch_specific_option_hash
+          }
+        ]
+      },
+      subnet_ids: {
+        key: :subnet_ids, 
+        types: [
+          {
+            type: :seq, 
+            types: [
+              {
+                type: :scalar
+              }
+            ]
+          },
+          {
+            name: :deploy_branches,
+            type: :map, 
+            strict: false,
+            deprecated: :branch_specific_option_hash
+          }
+        ]
+      },
+      kms_key_arn: {
+        key: :kms_key_arn, 
+        types: [
+          {
+            type: :scalar
+          },
+          {
+            name: :deploy_branches,
+            type: :map, 
+            strict: false,
+            deprecated: :branch_specific_option_hash
+          }
+        ]
+      },
+      dead_letter_config: {
+        key: :dead_letter_config, 
+        types: [
+          {
+            type: :scalar
+          },
+          {
+            name: :deploy_branches,
+            type: :map, 
+            strict: false,
+            deprecated: :branch_specific_option_hash
+          }
+        ]
+      },
+      tracing_mode: {
+        key: :tracing_mode, 
+        types: [
+          {
+            type: :scalar
+          },
+          {
+            name: :deploy_branches,
+            type: :map, 
+            strict: false,
+            deprecated: :branch_specific_option_hash
+          }
+        ]
       }
     )
   end
