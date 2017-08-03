@@ -27,6 +27,10 @@ describe Travis::Yaml::Spec::Def::Root do
 
   it { expect(map.keys).to eq keys }
 
+  it 'aliases :matrix to :jobs' do
+    expect(map[:matrix][:types][0][:alias]).to eq ['jobs']
+  end
+
   it do
     expect(spec[:includes][:job][:map][:osx_image]).to eq(
       key: :osx_image,

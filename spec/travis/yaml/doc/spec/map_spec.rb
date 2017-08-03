@@ -9,6 +9,7 @@ describe Travis::Yaml::Doc::Spec::Map do
     it do
       expect(spec.aliases).to eq(
         language:      [:lang],
+        matrix:        [:jobs],
         branches:      [:branch],
         node_js:       [:javascript, :js, :node, :nodejs],
         rvm:           [:ruby],
