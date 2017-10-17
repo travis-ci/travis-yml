@@ -149,6 +149,12 @@ describe Travis::Yaml, 'root' do
     end
   end
 
+  describe 'condition' do
+    let(:input) { { if: 'branch = main' } }
+    it { expect(value[:if]).to eq 'branch = main' }
+    it { expect(msgs).to be_empty }
+  end
+
   stages = %i(before_install install before_script script after_script after_result
     after_success after_failure before_deploy after_deploy before_cache)
 

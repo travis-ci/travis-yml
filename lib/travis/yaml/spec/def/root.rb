@@ -8,6 +8,7 @@ require 'travis/yaml/spec/def/language'
 require 'travis/yaml/spec/def/matrix'
 require 'travis/yaml/spec/def/notifications'
 require 'travis/yaml/spec/def/os'
+require 'travis/yaml/spec/def/stages'
 require 'travis/yaml/spec/def/sudo'
 require 'travis/yaml/spec/type/map'
 
@@ -36,7 +37,8 @@ module Travis
             map    :sudo,          required: true
             matrix :env
             matrix :compiler,      to: :compilers, on: %i(c cpp)
-            map    :matrix
+            map    :matrix,        alias: :jobs
+            map    :stages
             map    :notifications
 
             includes[:job] = Job.new(self)

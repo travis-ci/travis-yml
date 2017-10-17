@@ -23,6 +23,8 @@ module Travis
             map :deploy,     to: :deploys
             map :git
             map :source_key, to: :str, secure: true
+            map :stage,      to: :str
+            map :if,         to: :str
 
             map :before_install, to: :seq
             map :install,        to: :seq
