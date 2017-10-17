@@ -17,7 +17,7 @@ module Travis
             case node.parent.type
             when :map then pick_map
             when :seq then pick_seq
-            else raise "unexpected parent type: #{node.parent.type}"
+            else raise UnexpectedParentType, node.parent.type
             end
           end
 

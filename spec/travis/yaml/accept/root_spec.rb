@@ -12,7 +12,7 @@ describe Travis::Yaml, 'root' do
 
   describe 'given a non-hash' do
     let(:input) { 'foo' }
-    it { expect { value }.to raise_error(ArgumentError) }
+    it { expect { value }.to raise_error(Travis::Yaml::UnexpectedConfigFormat) }
   end
 
   describe 'moves required keys to the front' do

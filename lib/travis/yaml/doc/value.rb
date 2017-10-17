@@ -33,7 +33,7 @@ module Travis
             when Array
               value.flatten.map { |value| build(nil, key, value, opts) }
             else
-              raise "unexpected value: #{value.inspect}"
+              raise UnexpectedValue, value.inspect
             end
           end
       end

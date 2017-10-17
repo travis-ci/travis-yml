@@ -1,4 +1,5 @@
 require 'yaml'
+require 'travis/yaml/errors'
 require 'travis/yaml/doc/change'
 require 'travis/yaml/doc/validate'
 require 'travis/yaml/doc/value'
@@ -68,7 +69,7 @@ module Travis
       end
 
       def apply(input, opts = {})
-        raise ArgumentError, 'input must be a Hash' unless input.is_a?(Hash)
+        raise UnexpectedConfigFormat, 'Input must be a hash' unless input.is_a?(Hash)
         input = deyaml(input)
         node = build(input, opts)
         node = Doc::Change.apply(expanded, node)
@@ -105,7 +106,7 @@ module Travis
 
       def msg(msg)
         level, key, code, args = msg
-        msg = MSGS[code] || raise('Unknown msg %p' % code)
+        msg = MSGS[code] || raise(UnknownMessage, 'Unknown message %p' % code)
         msg = msg % args.map { |key, value| [key, value.is_a?(Symbol) ? value.inspect : value] }.to_h if args
         msg = '[%s] on %s: %s' % [level, key, msg]
         msg

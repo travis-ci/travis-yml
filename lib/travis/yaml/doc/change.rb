@@ -125,7 +125,7 @@ module Travis
 
           def catching(spec, node, &block)
             stack << node.id
-            raise "Stack size to high: #{stack.size}" if stack.size >= MAX_STACK
+            raise StackTooHigh, "Stack size #{stack.size}" if stack.size >= MAX_STACK
             node, changed = catch(stack.last, &block)
             changed ? reset(node) : stack.pop
             [node, changed]
