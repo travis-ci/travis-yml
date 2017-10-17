@@ -1,6 +1,6 @@
 require 'travis/yaml/web/router'
-require 'travis/yaml/web/v1/routes/home'
-require 'travis/yaml/web/v1/routes/parse'
+require 'travis/yaml/web/v1/home'
+require 'travis/yaml/web/v1/parse'
 
 module Travis::Yaml::Web
   module V1
@@ -12,8 +12,8 @@ module Travis::Yaml::Web
 
     def router
       @router ||= Router.new(
-        '/' => V1::Routes::Home.new,
-        '/parse' => V1::Routes::Parse.new
+        '/' => V1::Home.new,
+        '/parse' => V1::Parse.new
       )
     end
   end
