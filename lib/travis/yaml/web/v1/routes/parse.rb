@@ -1,7 +1,7 @@
 require 'travis/yaml'
-require 'travis/yaml/web/routes/route'
+require 'travis/yaml/web/v1/routes/route'
 
-module Travis::Yaml::Web::Routes
+module Travis::Yaml::Web::V1::Routes
   class Parse
     include Route
 

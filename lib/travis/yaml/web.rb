@@ -1,18 +1,25 @@
-require 'travis/yaml/web/routes/home'
-require 'travis/yaml/web/routes/parse'
+require 'travis/yaml/web/v1'
 
 module Travis
   module Yaml
-    class Web
+    module Web
+      extend self
+
       def call(env)
-        router.call(env)
+        req = Rack::Request.new(env)
+        prefix = ?/ + req.path_info.split(?/)[1]
+        versions.each do |p, app|
+          if p == prefix
+            req.path_info = req.path_info[p.size..-1]
+            req.script_name = req.script_name + p
+            return app.call(env)
+          end
+        end
+        [404, {}, []]
       end
 
-      def router
-        @router ||= Rack::URLMap.new(
-          '/' => Routes::Home.new,
-          '/parse' => Routes::Parse.new
-        )
+      def versions
+        { '/v1'.freeze => V1 }
       end
     end
   end
