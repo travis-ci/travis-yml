@@ -150,9 +150,17 @@ describe Travis::Yaml, 'root' do
   end
 
   describe 'condition' do
-    let(:input) { { if: 'branch = main' } }
-    it { expect(value[:if]).to eq 'branch = main' }
-    it { expect(msgs).to be_empty }
+    describe 'parses' do
+      let(:input) { { if: 'branch = main' } }
+      it { expect(value[:if]).to eq 'branch = main' }
+      it { expect(msgs).to be_empty }
+    end
+
+    describe 'parse error' do
+      let(:input) { { if: 'wat.kaputt' } }
+      it { expect(value[:if]).to be nil }
+      it { expect(msgs).to include [:error, :if, :invalid_cond, value: 'wat.kaputt'] }
+    end
   end
 
   stages = %i(before_install install before_script script after_script after_result

@@ -18,6 +18,7 @@ Gem::Specification.new do |s|
   s.require_path = 'lib'
 
   s.add_dependency 'amatch'
+  s.add_dependency 'travis-conditions'
 
   s.add_development_dependency 'rspec'
   s.add_development_dependency 'activerecord'
