@@ -1,6 +1,6 @@
 require 'oj'
 require 'travis/yaml'
-require 'travis/yaml/web/v1/routes/route'
+require 'travis/yaml/web/route'
 
 module Travis::Yaml::Web::V1::Routes
   class Parse
