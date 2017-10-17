@@ -1,4 +1,5 @@
 require 'travis/yaml/doc/validate/alert'
+require 'travis/yaml/doc/validate/condition'
 require 'travis/yaml/doc/validate/default'
 require 'travis/yaml/doc/validate/empty'
 require 'travis/yaml/doc/validate/flags'
@@ -31,8 +32,8 @@ module Travis
             UnsupportedKey, UnsupportedValue, Default, Required
           ],
           scalar: [
-            Format, Alert, Flags, Version, InvalidType, UnsupportedKey,
-            Default, Required
+            Format, Condition, Alert, Flags, Version, InvalidType,
+            UnsupportedKey, Default, Required
           ],
         }
 

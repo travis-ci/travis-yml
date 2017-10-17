@@ -47,6 +47,7 @@ module Travis
       invalid_type:    'dropping unexpected %{actual}, expected %{expected} (%{value})',
       invalid_format:  'dropping invalid format: %{value}',
       invalid_seq:     'unexpected sequence, using the first value (%{value})',
+      invalid_cond:    'unable to parse condition (%{value})',
       # invalid_value:   '%{value} is not a valid value on this key',
     }
 

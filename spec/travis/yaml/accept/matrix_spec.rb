@@ -100,9 +100,17 @@ describe Travis::Yaml, 'matrix' do
     end
 
     describe 'given a condition' do
-      let(:input) { { matrix: { include: [if: 'branch = master'] } } }
-      it { expect(matrix[:include]).to eq [if: 'branch = master'] }
-      it { expect(msgs).to be_empty }
+      describe 'parses' do
+        let(:input) { { matrix: { include: [if: 'branch = main'] } } }
+        it { expect(matrix[:include]).to eq [if: 'branch = main'] }
+        it { expect(msgs).to be_empty }
+      end
+
+      describe 'parse error' do
+        let(:input) { { matrix: { include: [script: 'foo', if: 'wat.kaputt'] } } }
+        it { expect(matrix[:if]).to be nil }
+        it { expect(msgs).to include [:error, :'matrix.include.if', :invalid_cond, value: 'wat.kaputt'] }
+      end
     end
 
     describe 'given a misplaced key' do
