@@ -1,3 +1,4 @@
+require 'oj'
 require 'travis/yaml/web/route'
 
 module Travis::Yaml::Web
@@ -6,7 +7,7 @@ module Travis::Yaml::Web
       include Route
 
       def get(env)
-        [200, {}, ['Hello, world!'.freeze]]
+        [200, { 'Content-Type' => 'application/json' }, [Oj.dump('version' => 'v1')]]
       end
     end
   end

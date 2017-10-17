@@ -7,10 +7,37 @@ describe Travis::Yaml::Web::V1 do
     described_class
   end
 
+  describe 'GET /' do
+    let!(:response) do
+      get '/'
+      Oj.load(last_response.body)
+    end
+
+    it 'is ok' do
+      expect(last_response.status).to be 200
+    end
+
+    it 'is json' do
+      expect(last_response.headers['Content-Type']).to eq 'application/json'
+    end
+
+    it 'returns version' do
+      expect(response['version']).to eq 'v1'
+    end
+  end
+
   describe 'POST /parse' do
     let!(:response) do
       post '/parse', 'rvm: 2.3', {}
-      response = Oj.load(last_response.body)
+      Oj.load(last_response.body)
+    end
+
+    it 'is ok' do
+      expect(last_response.status).to be 200
+    end
+
+    it 'is json' do
+      expect(last_response.headers['Content-Type']).to eq 'application/json'
     end
 
     it 'returns version' do
