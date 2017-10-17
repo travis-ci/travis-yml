@@ -3,6 +3,12 @@ describe Travis::Yaml, 'matrix' do
 
   subject { described_class.apply(input) }
 
+  describe 'aliased to :jobs' do
+    let(:matrix) { subject.serialize[:matrix] }
+    let(:input) { { jobs: { fast_finish: 'true' } } }
+    it { expect(matrix[:fast_finish]).to be true }
+  end
+
   describe 'fast_finish' do
     let(:input) { { matrix: { fast_finish: 'true' } } }
     it { expect(matrix[:fast_finish]).to be true }
@@ -51,8 +57,8 @@ describe Travis::Yaml, 'matrix' do
     end
 
     describe 'given an array of hashes' do
-      let(:input) { { matrix: { include: [{ rvm: '2.3' }] } } }
-      it { expect(matrix[:include]).to eq [{ rvm: '2.3' }] }
+      let(:input) { { matrix: { include: [{ rvm: '2.3', stage: 'one' }] } } }
+      it { expect(matrix[:include]).to eq [{ rvm: '2.3', stage: 'one' }] }
     end
 
     describe 'given a hash' do
@@ -90,6 +96,12 @@ describe Travis::Yaml, 'matrix' do
     describe 'given branches' do
       let(:input) { { matrix: { include: [branches: { only: ['master'] }] } } }
       it { expect(matrix[:include]).to eq [branches: { only: ['master'] }] }
+      it { expect(msgs).to be_empty }
+    end
+
+    describe 'given a condition' do
+      let(:input) { { matrix: { include: [if: 'branch = master'] } } }
+      it { expect(matrix[:include]).to eq [if: 'branch = master'] }
       it { expect(msgs).to be_empty }
     end
 

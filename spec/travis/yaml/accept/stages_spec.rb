@@ -1,60 +1,15 @@
 describe Travis::Yaml, 'stages' do
-  let(:config) { subject.serialize }
+  let(:stages) { subject.serialize[:stages] }
 
-  subject { described_class.apply(input) }
+  subject { described_class.apply(config) }
 
-  describe 'script' do
-    describe 'given a string' do
-      let(:input) { { script: 'foo' } }
-      it { expect(config[:script]).to eq ['foo'] }
-    end
-
-    describe 'given an array' do
-      let(:input) { { script: ['foo', 'bar'] } }
-      it { expect(config[:script]).to eq ['foo', 'bar'] }
-    end
-
-    describe 'after env' do
-      let(:input) { { env: ['FOO=foo'], script: 'foo' } }
-      it { expect(config[:script]).to eq ['foo'] }
-    end
+  describe 'given an array of strings' do
+    let(:config) { { stages: ['one'] } }
+    it { expect(stages).to eq [name: 'one'] }
   end
 
-  stages = %i(
-    before_install
-    install
-    before_script
-    script
-    after_script
-    after_result
-    after_success
-    after_failure
-    before_deploy
-    after_deploy
-    before_cache
-  )
-
-  stages.each do |stage|
-    describe stage.to_s do
-      describe 'given a string' do
-        let(:input) { { stage => 'foo' } }
-        it { expect(config[stage]).to eq ['foo'] }
-      end
-
-      describe 'given an array' do
-        let(:input) { { stage => ['foo'] } }
-        it { expect(config[stage]).to eq ['foo'] }
-      end
-    end
-  end
-
-  describe 'on_success (alias)' do
-    let(:input) { { on_success: 'foo' } }
-    it { expect(config[:after_success]).to eq ['foo'] }
-  end
-
-  describe 'on_failure (alias)' do
-    let(:input) { { on_failure: 'foo' } }
-    it { expect(config[:after_failure]).to eq ['foo'] }
+  describe 'given an array of hashes' do
+    let(:config) { { stages: [name: 'one', if: 'branch = main'] } }
+    it { expect(stages).to eq [name: 'one', if: 'branch = main'] }
   end
 end
