@@ -13,11 +13,11 @@ module Travis::Yaml::Web
         body = req.body.read
         config = Travis::Yaml.load(body)
 
-        [200, { 'Content-Type' => 'application/json' }, [Oj.dump(Decorators::Config.new(config).decorate)]]
-      rescue Travis::Yaml::InputError => e
-        [400, { 'Content-Type' => 'application/json' } , [Oj.dump(Decorators::Error.new(e).decorate)]]
-      rescue Travis::Yaml::InternalError => e
-        [500, { 'Content-Type' => 'application/json' } , [Oj.dump(Decorators::Error.new(e).decorate)]]
+        [200, headers, body(Decorators::Config, config)]
+      rescue Travis::Yaml::InputError => error
+        [400, headers, body(Decorators::Error, error)]
+      rescue Travis::Yaml::InternalError => error
+        [500, headers, body(Decorators::Error, error)]
       end
     end
   end

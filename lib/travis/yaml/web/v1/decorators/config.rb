@@ -7,7 +7,7 @@ module Travis::Yaml::Web::V1
         @config = config
       end
 
-      def decorate
+      def call
         {
           'version' => 'v1',
           'messages' => @config.msgs.map { |m| Travis::Yaml.msg(m) },

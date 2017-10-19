@@ -5,7 +5,7 @@ module Travis::Yaml::Web::V1
         @error = error
       end
 
-      def decorate
+      def call
         {
           'version' => 'v1',
           'error_type' => name,

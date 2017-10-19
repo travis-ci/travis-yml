@@ -7,7 +7,7 @@ module Travis::Yaml::Web
       include Route
 
       def get(env)
-        [200, { 'Content-Type' => 'application/json' }, [Oj.dump('version' => 'v1')]]
+        [200, headers, [Oj.dump('version' => 'v1')]]
       end
     end
   end
