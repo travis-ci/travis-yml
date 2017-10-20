@@ -46,7 +46,7 @@ describe Travis::Yaml::Web::V1 do
 
     it 'returns parsed config' do
       post '/parse', 'rvm: 2.3', {}
-      expect(response['config']).to include(rvm: ['2.3'])
+      expect(response['config']).to include('rvm' => ['2.3'])
     end
 
     it 'returns messages' do

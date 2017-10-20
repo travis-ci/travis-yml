@@ -11,7 +11,7 @@ module Travis::Yaml::Web::Route
 
   def body(decorator, obj)
     [
-      Oj.dump(decorator.new(obj).call)
+      Oj.dump(decorator.new(obj).call, mode: :strict)
     ]
   end
 
