@@ -8,10 +8,12 @@ module Travis::Yaml::Web::V1
       end
 
       def call
+        result = @config.serialize
         {
           'version' => 'v1',
           'messages' => @config.msgs.map { |m| Travis::Yaml.msg(m) },
-          'config' => @config.serialize
+          'config' => result,
+          'matrix' => Travis::Yaml.matrix(result).rows
         }
       end
     end

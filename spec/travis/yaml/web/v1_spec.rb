@@ -56,6 +56,11 @@ describe Travis::Yaml::Web::V1 do
       ]
     end
 
+    it 'returns expanded matrix' do
+      post '/parse', 'rvm: 2.3', {}
+      expect(response['matrix'].size).to eq 1
+    end
+
     context 'input error' do
       before do
         post '/parse', 'hello', {}

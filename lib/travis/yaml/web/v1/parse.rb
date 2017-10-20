@@ -11,7 +11,9 @@ module Travis::Yaml::Web
       def post(env)
         req = Rack::Request.new(env)
         body = req.body.read
-        config = Travis::Yaml.load(body)
+        query = Rack::Utils.parse_query(req.query_string)
+        alert = query['alert'] == 'true'
+        config = Travis::Yaml.load(body, alert: alert)
 
         [200, headers, body(Decorators::Config, config)]
       rescue Travis::Yaml::InputError => error
