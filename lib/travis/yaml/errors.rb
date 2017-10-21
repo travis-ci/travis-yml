@@ -9,7 +9,7 @@ module Travis
     class UnknownMessage < InternalError; end
     
     # Errors relating to user input
-    class InputError < StandardError; end
+    class InputError < Error; end
     class UnexpectedConfigFormat < InputError; end
     class UnexpectedParentType < InputError; end
     class UnexpectedValue < InputError; end
