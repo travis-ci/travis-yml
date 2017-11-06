@@ -12,7 +12,7 @@ module Travis::Yaml::Web
         req = Rack::Request.new(env)
         body = req.body.read
         query = Rack::Utils.parse_query(req.query_string)
-        alert = query['alert'] == 'true'
+        alert = query['alert'.freeze] == 'true'.freeze
         config = Travis::Yaml.load(body, alert: alert)
 
         [200, headers, body(Decorators::Config, config)]

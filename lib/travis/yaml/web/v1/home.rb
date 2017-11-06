@@ -7,7 +7,7 @@ module Travis::Yaml::Web
       include Route
 
       def get(env)
-        [200, headers, [Oj.dump('version' => 'v1')]]
+        [200, headers, [Oj.dump('version'.freeze => 'v1'.freeze)]]
       end
     end
   end

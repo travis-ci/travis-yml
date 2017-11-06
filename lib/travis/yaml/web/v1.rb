@@ -13,9 +13,9 @@ module Travis::Yaml::Web
 
     def router
       @router ||= Router.new(
-        '/' => V1::Home.new,
-        '/parse' => V1::Parse.new,
-        '/expand' => V1::Expand.new
+        '/'.freeze => V1::Home.new,
+        '/parse'.freeze => V1::Parse.new,
+        '/expand'.freeze => V1::Expand.new
       )
     end
   end

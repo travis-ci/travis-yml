@@ -6,7 +6,7 @@ module Travis::Yaml::Web::Route
   end
 
   def headers
-    { 'Content-Type' => 'application/json' }
+    { 'Content-Type'.freeze => 'application/json'.freeze }
   end
 
   def body(decorator, obj)

@@ -9,8 +9,8 @@ module Travis::Yaml::Web::V1
 
       def call
         {
-          'version' => 'v1',
-          'matrix' => Travis::Yaml.matrix(@config).rows
+          'version'.freeze => 'v1',
+          'matrix'.freeze => Travis::Yaml.matrix(@config).rows
         }
       end
     end

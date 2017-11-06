@@ -48,10 +48,22 @@ describe Travis::Yaml::Web::V1 do
       post '/parse', 'rvm: 2.3', {}
       expect(response['config']).to include('rvm' => ['2.3'])
     end
-
-    it 'returns messages' do
+    
+    it 'returns structured message attrs' do
       post '/parse', 'rvm: 2.3', {}
       expect(response['messages']).to eq [
+        {
+          'level' => 'info',
+          'key' => 'language',
+          'code' => 'default',
+          'args' => { 'key' => 'language', 'default' => 'ruby' }
+        }
+      ]
+    end
+
+    it 'returns full messages' do
+      post '/parse', 'rvm: 2.3', {}
+      expect(response['full_messages']).to eq [
         '[info] on language: missing :language, defaulting to: ruby'
       ]
     end
