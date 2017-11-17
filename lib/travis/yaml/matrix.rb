@@ -6,11 +6,11 @@ module Travis
       def rows
         rows = expand
         rows = rows + included
+        rows = with_default(rows)
         rows = without_excluded(rows)
         rows = with_env_arrays(rows)
         rows = with_global_env(rows)
         rows = with_shared(rows)
-        rows = with_default(rows)
         rows = uniq(rows)
         rows
       end

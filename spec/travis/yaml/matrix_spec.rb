@@ -150,7 +150,7 @@ describe Travis::Yaml, 'matrix' do
     it { expect(matrix.rows).to eq rows }
   end
 
-  describe 'matrix exclude' do
+  describe 'matrix exclude (1)' do
     let(:input) do
       {
         env:    { matrix: ['foo', 'bar'] },
@@ -168,5 +168,17 @@ describe Travis::Yaml, 'matrix' do
     end
 
     it { expect(matrix.rows).to eq rows }
+  end
+
+  describe 'matrix exclude (2)' do
+    let(:input) do
+      {
+        scala: ['2.11.8'],
+        jdk: 'oraclejdk8',
+        matrix: { exclude: [{ scala: '2.11.8', jdk: 'oraclejdk8' }] },
+      }
+    end
+
+    it { expect(matrix.rows).to eq [] }
   end
 end
