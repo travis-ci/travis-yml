@@ -11,7 +11,7 @@ module Travis::Yaml::Web
       def post(env)
         req = Rack::Request.new(env)
         body = req.body.read
-        config = Oj.load(body, mode: :strict, empty_string: false)
+        config = Oj.load(body, symbol_keys: true, mode: :strict, empty_string: false)
 
         [200, headers, body(Decorators::Matrix, config)]
       rescue Oj::Error, EncodingError => error
