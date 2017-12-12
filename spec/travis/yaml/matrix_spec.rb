@@ -111,6 +111,23 @@ describe Travis::Yaml, 'matrix' do
     it { expect(matrix.rows).to eq rows }
   end
 
+  describe 'with env array' do
+    let(:input) do
+      {
+        env: ['FOO=1', 'FOO=2']
+      }
+    end
+
+    let(:rows) do
+      [
+        { language: 'ruby', dist: 'precise', sudo: false, os: 'linux', env: ['FOO=1'] },
+        { language: 'ruby', dist: 'precise', sudo: false, os: 'linux', env: ['FOO=2'] }
+      ]
+    end
+
+    it { expect(matrix.rows).to eq rows }
+  end
+
   describe 'matrix include' do
     let(:input) do
       {

@@ -62,12 +62,12 @@ module Travis
         end
 
         def global_env
-          config[:env] && config[:env][:global]
+          config[:env] && config[:env].is_a?(Hash) && config[:env][:global]
         end
 
         def values
           values = config.select { |key, _| keys.include?(key) }
-          values = values.map { |key, value| key == :env ? value[:matrix] : value }
+          values = values.map { |key, value| key == :env && value.is_a?(Hash) ? value[:matrix] : value }
           values = values.map { |value| Array(value) }
           values
         end
