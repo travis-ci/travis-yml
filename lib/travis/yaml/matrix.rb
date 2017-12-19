@@ -46,7 +46,7 @@ module Travis
         end
 
         def with_os(rows)
-          rows.map { |row| { os: config[:os].first }.merge(row) }
+          rows.map { |row| { os: Array(config[:os]).first }.merge(row) }
         end
 
         def with_default(rows)
