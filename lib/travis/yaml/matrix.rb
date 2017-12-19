@@ -46,7 +46,10 @@ module Travis
         end
 
         def with_os(rows)
-          rows.map { |row| { os: Array(config[:os]).first }.merge(row) }
+          return rows unless config[:os]
+          rows.map do |row|
+            { os: Array(config[:os]).first }.merge(row)
+          end
         end
 
         def with_default(rows)
