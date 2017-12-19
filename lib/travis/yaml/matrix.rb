@@ -11,6 +11,7 @@ module Travis
         rows = with_env_arrays(rows)
         rows = with_global_env(rows)
         rows = with_shared(rows)
+        rows = with_os(rows)
         rows = uniq(rows)
         rows
       end
@@ -42,6 +43,10 @@ module Travis
 
         def with_shared(rows)
           rows.map { |row| shared.merge(row) }
+        end
+
+        def with_os(rows)
+          rows.map { |row| { os: config[:os].first }.merge(row) }
         end
 
         def with_default(rows)

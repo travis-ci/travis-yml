@@ -141,11 +141,10 @@ describe Travis::Yaml, 'matrix' do
       [
         { language: 'ruby', dist: 'precise', sudo: false, os: 'linux', env: ['foo'], rvm: '2.2' },
         { language: 'ruby', dist: 'precise', sudo: false, os: 'linux', env: ['foo'], rvm: '2.3' },
-        { language: 'ruby', dist: 'precise', sudo: false, env: ['bar'], rvm: '2.4' },
+        { language: 'ruby', dist: 'precise', sudo: false, os: 'linux', env: ['bar'], rvm: '2.4' },
       ]
     end
 
-    # TODO does not include the os to the matrix include
     it { expect(matrix.rows).to eq rows }
   end
 
