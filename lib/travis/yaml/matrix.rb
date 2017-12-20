@@ -1,3 +1,4 @@
+require 'active_support/core_ext/hash/slice'
 require 'travis/yaml/support/obj'
 
 module Travis
@@ -74,27 +75,27 @@ module Travis
         end
 
         def values
-          values = config.select { |key, _| keys.include?(key) }
+          values = config.select { |key, value| keys.include?(key) && ![[], nil].include?(value) }
           values = values.map { |key, value| key == :env && value.is_a?(Hash) ? value[:matrix] : value }
           values = values.map { |value| Array(value) }
           values
         end
 
         def shared
-          @shared ||= config.reject { |key, _| key == :matrix || keys.include?(key) }
+          @shared ||= config.reject { |key, value| key == :matrix || keys.include?(key) || [[], nil].include?(value) }
         end
 
         def uniq(rows)
+          keys = rows.map(&:keys).flatten.uniq
           rows.each.with_index do |one, i|
             rows.delete_if.with_index do |other, j|
-              keys  = other.keys & one.keys
-              other == one.select { |key, _| keys.include?(key) } unless i == j
+              other.slice(*keys) == one.slice(*keys) unless i == j
             end
           end
         end
 
         def keys
-          @keys ||= config.keys & expand_keys
+          @keys ||= (config.keys & expand_keys).select { |k| ![[], nil].include?(config[k]) }
         end
 
         def expand_keys
