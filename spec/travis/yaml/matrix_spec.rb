@@ -37,7 +37,7 @@ describe Travis::Yaml, 'matrix' do
         os: 'linux',
         matrix: {
           include: [
-            { env: 'foo' }
+            { os: 'osx', env: 'foo' }
           ]
         }
       }
@@ -45,7 +45,7 @@ describe Travis::Yaml, 'matrix' do
 
     let(:rows) do
       [
-        { os: 'linux', env: ['foo'] }
+        { os: 'osx', env: ['foo'] }
       ]
     end
 
