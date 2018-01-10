@@ -59,11 +59,13 @@ module Travis
         end
 
         def included
-          config[:matrix] && config[:matrix][:include] || []
+          return [] unless config[:matrix]
+          [config[:matrix].fetch(:include, [])].flatten
         end
 
         def excluded
-          config[:matrix] && config[:matrix][:exclude] || []
+          return [] unless config[:matrix]
+          [config[:matrix].fetch(:exclude, [])].flatten
         end
 
         def excluded?(row)

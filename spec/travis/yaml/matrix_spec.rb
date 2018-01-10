@@ -215,4 +215,21 @@ describe Travis::Yaml, 'matrix' do
 
     it { expect(matrix.rows).to eq rows }
   end
+
+  describe 'include as hash' do
+    let(:input) do
+      {
+        dist: 'trusty',
+        matrix: { include: { env: ['distribution=debian'] } }
+      }
+    end
+
+    let(:rows) do
+      [
+        { dist: 'trusty', env: ['distribution=debian'] }
+      ]
+    end
+
+    it { expect(matrix.rows).to eq rows }
+  end
 end
