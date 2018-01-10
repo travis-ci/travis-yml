@@ -31,6 +31,71 @@ describe Travis::Yaml, 'matrix' do
     it { expect(matrix.rows).to eq rows }
   end
 
+  describe 'matrix (1 from include, redundant expand key at root)' do
+    let(:input) do
+      {
+        os: 'linux',
+        matrix: {
+          include: [
+            { env: 'foo' }
+          ]
+        }
+      }
+    end
+
+    let(:rows) do
+      [
+        { os: 'linux', env: ['foo'] }
+      ]
+    end
+
+    it { expect(matrix.rows).to eq rows }
+  end
+
+  describe 'matrix (1 from include, multi-value expand key at root)' do
+    let(:input) do
+      {
+        os: ['linux', 'osx'],
+        matrix: {
+          include: [
+            { env: 'foo' }
+          ]
+        }
+      }
+    end
+
+    let(:rows) do
+      [
+        { os: 'linux' },
+        { os: 'osx' },
+        { os: 'linux', env: ['foo'] }
+      ]
+    end
+
+    it { expect(matrix.rows).to eq rows }
+  end
+
+  describe 'matrix (1 with non-expand key at root)' do
+    let(:input) do
+      {
+        language: 'rust',
+        matrix: {
+          include: [
+            { env: 'foo' }
+          ]
+        }
+      }
+    end
+
+    let(:rows) do
+      [
+        { language: 'rust', env: ['foo'] }
+      ]
+    end
+
+    it { expect(matrix.rows).to eq rows }
+  end
+
   describe 'matrix (2)' do
     let(:input) do
       {

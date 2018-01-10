@@ -21,6 +21,11 @@ describe Travis::Yaml, 'root' do
     it { expect(value.keys).to eq [:language, :os, :dist, :sudo, :osx_image] }
   end
 
+  describe 'given only matrix include' do
+    let(:input) { { matrix: { include: [{ env: 'foo'}] } } }
+    it { expect(value.keys).to eq [:language, :os, :dist, :sudo, :matrix] }
+  end
+
   describe 'typos' do
     describe 'corrects a known key' do
       let(:input) { { csript: 'foo' } }

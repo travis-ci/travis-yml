@@ -6,7 +6,7 @@ module Travis
     class Matrix < Obj.new(:spec, :config)
       def rows
         rows = expand
-        rows = rows + included
+        rows = with_included(rows)
         rows = with_default(rows)
         rows = without_excluded(rows)
         rows = with_env_arrays(rows)
@@ -27,6 +27,18 @@ module Travis
           rows = Array(values.inject { |lft, rgt| lft.product(rgt) } || [])
           rows = rows.map { |row| keys.zip(Array(row).flatten).to_h }
           rows
+        end
+
+        def with_included(rows)
+          # If there's one row at this point, and it has single-entry
+          # expand values, and we also have matrix includes, remove the row
+          # because it's probably an unnecessary duplicate.
+          # TODO: verify this
+          if rows.size == 1 && rows.first.slice(*expand_keys).all? { |_, v| Array(v).size == 1 } && included.any?
+            included
+          else
+            rows + included
+          end
         end
 
         def without_excluded(rows)
