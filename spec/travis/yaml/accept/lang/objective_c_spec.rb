@@ -30,7 +30,7 @@ describe Travis::Yaml do
     describe "alias #{name}" do
       let(:lang) { name }
       it { expect(config[:language]).to eq 'objective-c' }
-      it { expect(info).to include [:info, :language, :alias, alias: name, value: 'objective-c'] }
+      it { expect(info).to include [:info, :language, :alias, alias: name, actual: 'objective-c'] }
     end
   end
 

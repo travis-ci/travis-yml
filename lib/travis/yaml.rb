@@ -23,7 +23,7 @@ module Travis
     # in the client
     MSGS = {
       alert:           'using a plain string as a secure',
-      alias:           '%{alias} is an alias for %{value}, using %{value}',
+      alias:           '%{alias} is an alias for %{actual}, using %{actual}',
       cast:            'casting value %{given_value} (%{given_type}) to %{value} (%{type})',
       default:         'missing %{key}, defaulting to: %{default}',
       downcase:        'downcasing %{value}',

@@ -60,7 +60,7 @@ module Travis
             end
 
             def dealias(node)
-              node.info :alias, alias: node.value, value: aliased(node)
+              node.info :alias, alias: node.value, actual: aliased(node)
               node.set(aliased(node))
             end
 
