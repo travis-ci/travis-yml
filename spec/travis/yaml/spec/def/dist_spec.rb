@@ -6,12 +6,12 @@ describe Travis::Yaml::Spec::Def::Dist do
       name: :dist,
       type: :fixed,
       defaults: [
-        { value: 'precise' }
+        { value: 'trusty' }
       ],
       downcase: true,
       values: [
-        { value: 'precise' },
         { value: 'trusty' },
+        { value: 'precise' },
         { value: 'osx', alias: ['mac', 'macos', 'ios'] }
       ]
     )
