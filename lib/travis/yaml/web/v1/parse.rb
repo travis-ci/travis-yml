@@ -16,7 +16,7 @@ module Travis::Yaml::Web
         config = Travis::Yaml.load(body, alert: alert)
 
         [200, headers, body(Decorators::Config, config)]
-      rescue Travis::Yaml::InputError => error
+      rescue Travis::Yaml::InputError, Psych::SyntaxError => error
         [400, headers, body(Decorators::Error, error)]
       rescue Travis::Yaml::InternalError => error
         [500, headers, body(Decorators::Error, error)]

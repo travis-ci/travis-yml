@@ -83,6 +83,21 @@ describe Travis::Yaml::Web::V1 do
       end
     end
 
+    context 'psych error' do
+      before do
+        post '/parse', '********', {}
+      end
+
+      it 'is bad request' do
+        expect(last_response.status).to eq 400
+      end
+
+      it 'returns syntax error' do
+        expect(response['error_type']).to eq 'syntax_error'
+        expect(response['error_message']).to match 'did not find expected alphabetic or numeric character while scanning an alias'
+      end
+    end
+
     context 'internal error' do
       before do
         allow(Travis::Yaml).to receive(:load).and_raise(Travis::Yaml::StackTooHigh, 'Stack size 100000')
