@@ -17,9 +17,11 @@ use Rack::SslEnforcer if Travis::Yaml::Web::Env.production?
 use Travis::Yaml::Web::BasicAuth
 run Travis::Yaml::Web
 
-require 'raven'
-Raven.configure do |config|
-  config.dsn = ENV['SENTRY_DSN']
+if ENV['SENTRY_DSN']
+  require 'raven'
+  Raven.configure do |config|
+    config.dsn = ENV['SENTRY_DSN']
+  end
 end
 
 use Raven::Rack
