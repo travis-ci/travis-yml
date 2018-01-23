@@ -40,15 +40,15 @@ describe Travis::Yaml, 'language' do
   describe 'supports value aliases' do
     let(:input) { { language: 'jvm' } }
     it { expect(lang).to eq 'java' }
-    it { expect(info).to include [:info, :language, :alias, alias: 'jvm', value: 'java'] }
-    it { expect(info).to_not include [:info, :language, :alias, alias: 'java', value: 'java'] }
+    it { expect(info).to include [:info, :language, :alias, alias: 'jvm', actual: 'java'] }
+    it { expect(info).to_not include [:info, :language, :alias, alias: 'java', actual: 'java'] }
   end
 
   describe 'supports value alias with an array' do
     let(:input) { { language: ['C++', 'java'] } }
     it { expect(lang).to eq 'cpp' }
     it { expect(msgs).to include [:warn, :language, :invalid_seq, value: 'C++'] }
-    it { expect(info).to include [:info, :language, :alias, alias: 'c++', value: 'cpp'] }
+    it { expect(info).to include [:info, :language, :alias, alias: 'c++', actual: 'cpp'] }
   end
 
   describe 'supports arrays, but warns' do

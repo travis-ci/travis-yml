@@ -1,7 +1,9 @@
 require 'awesome_print'
-require 'travis/yaml'
+require 'rack/test'
 require 'support/helpers'
 require 'support/node'
+require 'travis/yaml'
+require 'travis/yaml/web'
 
 RSpec.configure do |c|
   c.include Spec::Support::Hash

@@ -25,7 +25,9 @@ module Travis
 
             def unknown(parent, node)
               type = misplaced?(node.key) ? :misplaced_key : :unknown_key
-              parent.msg :error, type, key: node.key, value: node.raw
+              unless node.key.to_s.start_with?('_')
+                parent.msg :error, type, key: node.key, value: node.raw
+              end
               parent.delete(node)
             end
 

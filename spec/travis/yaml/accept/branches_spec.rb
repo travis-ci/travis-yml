@@ -83,7 +83,7 @@ describe Travis::Yaml, 'branches' do
   describe 'exclude (alias)' do
     let(:input) { { branches: { exclude: 'master' } } }
     it { expect(branches).to eq except: ['master'] }
-    it { expect(info).to include [:info, :branches, :alias, alias: :exclude, key: :except] }
+    it { expect(info).to include [:info, :branches, :alias, alias: :exclude, actual: :except] }
   end
 
   describe 'given an unknown key' do

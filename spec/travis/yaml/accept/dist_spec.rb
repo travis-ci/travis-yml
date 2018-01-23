@@ -3,14 +3,14 @@ describe Travis::Yaml, 'dist' do
 
   subject { described_class.apply(config) }
 
-  describe 'defaults to precise' do
+  describe 'defaults to trusty' do
     let(:config) { {} }
-    it { expect(dist).to eq 'precise' }
+    it { expect(dist).to eq 'trusty' }
   end
 
   describe 'sets a dist value' do
-    let(:config) { { dist: 'trusty' } }
-    it { expect(dist).to eq 'trusty' }
+    let(:config) { { dist: 'precise' } }
+    it { expect(dist).to eq 'precise' }
   end
 
   describe 'ignores case' do
@@ -20,8 +20,8 @@ describe Travis::Yaml, 'dist' do
 
   describe 'drops an unknown dist' do
     let(:config) { { dist: 'unknown' } }
-    it { expect(dist).to eq 'precise' }
-    it { expect(msgs).to include([:warn, :dist, :unknown_default, value: 'unknown', default: 'precise']) }
+    it { expect(dist).to eq 'trusty' }
+    it { expect(msgs).to include([:warn, :dist, :unknown_default, value: 'unknown', default: 'trusty']) }
   end
 
   describe 'supports aliases' do

@@ -16,7 +16,7 @@ describe Travis::Yaml::Doc::Change::Keys do
   describe 'given an aliased key' do
     let(:value) { { ruby: nil } }
     it { expect(keys).to include :rvm }
-    it { expect(msgs).to include [:info, :root, :alias, alias: :ruby, key: :rvm] }
+    it { expect(msgs).to include [:info, :root, :alias, alias: :ruby, actual: :rvm] }
   end
 
   describe 'downcase' do
@@ -120,35 +120,35 @@ describe Travis::Yaml::Doc::Change::Keys do
       let(:value) { { :'-ruby' => '2.3' } }
       it { expect(keys).to include :rvm }
       it { expect(msgs).to include [:warn, :root, :clean_key, original: :'-ruby', key: :ruby] }
-      it { expect(msgs).to include [:info, :root, :alias, alias: :ruby, key: :rvm] }
+      it { expect(msgs).to include [:info, :root, :alias, alias: :ruby, actual: :rvm] }
     end
 
     describe 'given an aliased key with a tailing dash' do
       let(:value) { { :'ruby-' => '2.3' } }
       it { expect(keys).to include :rvm }
       it { expect(msgs).to include [:warn, :root, :clean_key, original: :'ruby-', key: :ruby] }
-      it { expect(msgs).to include [:info, :root, :alias, alias: :ruby, key: :rvm] }
+      it { expect(msgs).to include [:info, :root, :alias, alias: :ruby, actual: :rvm] }
     end
 
     describe 'given an aliased key with a leading colon' do
       let(:value) { { :':ruby' => '2.3' } }
       it { expect(keys).to include :rvm }
       it { expect(msgs).to include [:warn, :root, :clean_key, original: :':ruby', key: :ruby] }
-      it { expect(msgs).to include [:info, :root, :alias, alias: :ruby, key: :rvm] }
+      it { expect(msgs).to include [:info, :root, :alias, alias: :ruby, actual: :rvm] }
     end
 
     describe 'given an aliased, misplaced, dasherized key' do
       let(:value) { { :'on-failure' => 'foo' } }
       it { expect(keys).to include :after_failure }
       it { expect(msgs).to include [:warn, :root, :underscore_key, original: :'on-failure', key: :on_failure] }
-      it { expect(msgs).to include [:info, :root, :alias, alias: :on_failure, key: :after_failure] }
+      it { expect(msgs).to include [:info, :root, :alias, alias: :on_failure, actual: :after_failure] }
     end
 
     describe 'given an aliased, misplaced, spaced key' do
       let(:value) { { :'on failure' => 'foo' } }
       it { expect(keys).to include :after_failure }
       it { expect(msgs).to include [:warn, :root, :clean_key, original: :'on failure', key: :on_failure] }
-      it { expect(msgs).to include [:info, :root, :alias, alias: :on_failure, key: :after_failure] }
+      it { expect(msgs).to include [:info, :root, :alias, alias: :on_failure, actual: :after_failure] }
     end
   end
 

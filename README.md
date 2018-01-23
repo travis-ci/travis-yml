@@ -31,7 +31,7 @@ config.serialize
 # {
 #   language: 'ruby',
 #   os: ['linux'],
-#   dist: 'precise',
+#   dist: 'trusty',
 #   sudo: false
 # }
 

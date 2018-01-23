@@ -1,3 +1,4 @@
+require 'active_support/core_ext/hash/slice'
 require 'travis/yaml/support/obj'
 
 module Travis
@@ -5,12 +6,13 @@ module Travis
     class Matrix < Obj.new(:spec, :config)
       def rows
         rows = expand
-        rows = rows + included
+        rows = with_included(rows)
         rows = with_default(rows)
         rows = without_excluded(rows)
         rows = with_env_arrays(rows)
         rows = with_global_env(rows)
         rows = with_shared(rows)
+        rows = with_os(rows)
         rows = uniq(rows)
         rows
       end
@@ -25,6 +27,18 @@ module Travis
           rows = Array(values.inject { |lft, rgt| lft.product(rgt) } || [])
           rows = rows.map { |row| keys.zip(Array(row).flatten).to_h }
           rows
+        end
+
+        def with_included(rows)
+          # If there's one row at this point, and it has single-entry
+          # expand values, and we also have matrix includes, remove the row
+          # because it's probably an unnecessary duplicate.
+          # TODO: verify this
+          if rows.size == 1 && rows.first.slice(*expand_keys).all? { |_, v| Array(v).size == 1 } && included.any?
+            included
+          else
+            rows + included
+          end
         end
 
         def without_excluded(rows)
@@ -44,17 +58,26 @@ module Travis
           rows.map { |row| shared.merge(row) }
         end
 
+        def with_os(rows)
+          return rows unless config[:os]
+          rows.map do |row|
+            { os: Array(config[:os]).first }.merge(row)
+          end
+        end
+
         def with_default(rows)
           rows << shared if rows.empty?
           rows
         end
 
         def included
-          config[:matrix] && config[:matrix][:include] || []
+          return [] unless config[:matrix]
+          [config[:matrix][:include] || []].flatten
         end
 
         def excluded
-          config[:matrix] && config[:matrix][:exclude] || []
+          return [] unless config[:matrix]
+          [config[:matrix][:exclude] || []].flatten
         end
 
         def excluded?(row)
@@ -66,27 +89,27 @@ module Travis
         end
 
         def values
-          values = config.select { |key, _| keys.include?(key) }
+          values = config.select { |key, value| keys.include?(key) && ![[], nil].include?(value) }
           values = values.map { |key, value| key == :env && value.is_a?(Hash) ? value[:matrix] : value }
           values = values.map { |value| Array(value) }
           values
         end
 
         def shared
-          @shared ||= config.reject { |key, _| key == :matrix || keys.include?(key) }
+          @shared ||= config.reject { |key, value| key == :matrix || keys.include?(key) || [[], nil].include?(value) }
         end
 
         def uniq(rows)
+          keys = rows.map(&:keys).flatten.uniq
           rows.each.with_index do |one, i|
             rows.delete_if.with_index do |other, j|
-              keys  = other.keys & one.keys
-              other == one.select { |key, _| keys.include?(key) } unless i == j
+              other.slice(*keys) == one.slice(*keys) unless i == j
             end
           end
         end
 
         def keys
-          @keys ||= config.keys & expand_keys
+          @keys ||= (config.keys & expand_keys).select { |k| ![[], nil].include?(config[k]) }
         end
 
         def expand_keys

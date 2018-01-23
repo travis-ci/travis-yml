@@ -67,7 +67,7 @@ module Travis
           def dealias(key)
             other = spec.aliased[key.to_sym]
             return key if !other || key == other
-            node.parent.info :alias, alias: key, key: other
+            node.parent.info :alias, alias: key, actual: other
             other
           end
 

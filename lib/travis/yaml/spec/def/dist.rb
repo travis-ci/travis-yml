@@ -8,11 +8,11 @@ module Travis
           register :dist
 
           def define
-            default :precise
+            default :trusty
             downcase
 
-            value :precise
             value :trusty
+            value :precise
             value :osx, alias: %i(mac macos ios)
           end
         end

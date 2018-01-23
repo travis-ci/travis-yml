@@ -18,7 +18,7 @@ describe Travis::Yaml, 'root' do
   describe 'given emails (alias)' do
     let(:input) { { notifications: { emails: false } } }
     it { expect(notifications).to eq email: { enabled: false } }
-    it { expect(info).to include [:info, :notifications, :alias, alias: :emails, key: :email] }
+    it { expect(info).to include [:info, :notifications, :alias, alias: :emails, actual: :email] }
     it { expect(msgs).to be_empty }
   end
 
@@ -65,7 +65,7 @@ describe Travis::Yaml, 'root' do
   describe 'on_failure given true' do
     let(:input) { { notifications: { email: true, on_failure: true } } }
     it { expect(notifications).to eq email: { enabled: true, on_failure: 'always' }, on_failure: 'always' }
-    it { expect(info).to include [:info, :'notifications.on_failure', :alias, alias: 'true', value: 'always'] }
+    it { expect(info).to include [:info, :'notifications.on_failure', :alias, alias: 'true', actual: 'always'] }
   end
 
   describe 'given on-sucsess (typo, dasherized)' do

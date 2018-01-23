@@ -12,13 +12,13 @@ describe Travis::Yaml do
   describe 'alias c++' do
     let(:input) { { language: 'c++' } }
     it { expect(lang).to eq 'cpp' }
-    it { expect(info).to include [:info, :language, :alias, alias: 'c++', value: 'cpp'] }
+    it { expect(info).to include [:info, :language, :alias, alias: 'c++', actual: 'cpp'] }
   end
 
   describe 'alias C++' do
     let(:input) { { language: 'C++' } }
     it { expect(lang).to eq 'cpp' }
     it { expect(info).to include [:info, :language, :downcase, value: 'C++'] }
-    it { expect(info).to include [:info, :language, :alias, alias: 'c++', value: 'cpp'] }
+    it { expect(info).to include [:info, :language, :alias, alias: 'c++', actual: 'cpp'] }
   end
 end
