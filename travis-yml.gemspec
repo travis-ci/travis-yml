@@ -22,6 +22,7 @@ Gem::Specification.new do |s|
   s.add_dependency 'oj'
   s.add_dependency 'puma'
   s.add_dependency 'rack'
+  s.add_dependency 'rack-cors'
   s.add_dependency 'rack-ssl-enforcer'
   s.add_dependency 'travis-conditions'
   s.add_dependency 'travis-config'
