@@ -19,7 +19,6 @@ run Travis::Yaml::Web
 
 require 'raven'
 Raven.configure do |config|
-  return unless ENV['SENTRY_DSN']
   config.dsn = ENV['SENTRY_DSN']
 end
 
