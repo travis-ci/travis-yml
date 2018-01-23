@@ -12,6 +12,17 @@ if Travis::Yaml::Web::Env.staging?
     end
   end
 end
+
 use Rack::SslEnforcer if Travis::Yaml::Web::Env.production?
 use Travis::Yaml::Web::BasicAuth
 run Travis::Yaml::Web
+
+if ENV['ENV'] == 'production'
+  require 'raven'
+  Raven.configure do |config|
+    return unless ENV['SENTRY_DSN']
+    config.dsn = ENV['SENTRY_DSN']
+  end
+end
+
+use Raven::Rack

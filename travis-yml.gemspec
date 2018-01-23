@@ -24,6 +24,7 @@ Gem::Specification.new do |s|
   s.add_dependency 'rack'
   s.add_dependency 'rack-cors'
   s.add_dependency 'rack-ssl-enforcer'
+  s.add_dependency 'sentry-raven'
   s.add_dependency 'travis-conditions'
   s.add_dependency 'travis-config'
 
