@@ -8,7 +8,7 @@ if Travis::Yaml::Web::Env.staging?
   use Rack::Cors do
     allow do
       origins '*'
-      resource '*'
+      resource '*', headers: :any, methods: :post
     end
   end
 end
