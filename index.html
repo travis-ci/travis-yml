@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en" class="h-100">
+	<head>
+		<title>travis-yml tester</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="utf8">
+		<link href="https://fonts.googleapis.com/css?family=Cousine|Open+Sans" rel="stylesheet">
+		<link rel="stylesheet" href="https://unpkg.com/tachyons@4.9.0/css/tachyons.min.css"/>
+		<style type="text/css">
+			* {
+				font-family: 'Open Sans', sans-serif;
+			}
+			pre {
+				outline: 0;
+			}
+			.code {
+				font-family: 'Cousine', monospace;
+			}
+      .error {
+        color: red;
+      }
+      .grey {
+        background: #f6f6f6;
+      }
+      .spinner {
+        display: inline-block;
+				width: 14px;
+				height: 14px;
+				background-color: #333;
+
+				border-radius: 100%;  
+				-webkit-animation: sk-scaleout 1.0s infinite ease-in-out;
+				animation: sk-scaleout 1.0s infinite ease-in-out;
+			}
+
+			@-webkit-keyframes sk-scaleout {
+				0% { -webkit-transform: scale(0) }
+				100% {
+					-webkit-transform: scale(1.0);
+					opacity: 0;
+				}
+			}
+
+			@keyframes sk-scaleout {
+				0% { 
+					-webkit-transform: scale(0);
+					transform: scale(0);
+				} 100% {
+					-webkit-transform: scale(1.0);
+					transform: scale(1.0);
+					opacity: 0;
+				}
+			}
+		</style>
+	</head>
+	<body class="h-100">
+		<div class="w-90-ns center h-75">
+			<h1>travis-yml tester</h1>
+
+      <div class="cf h-100">
+        <div class="fl w-100 w-third-l h-100">
+          <div class="ba bg-white ph3 pv2 code h-100 grey">
+            <h2>.travis.yml</h2>
+						<pre contenteditable class="h-100" id="yml-raw"># paste config here</pre>
+					</div>
+        </div>
+        <div class="fl w-100 w-third-l h-100">
+          <div class="bl br bl-0-l br-0-l bt-l bb-l bg-white ph3 pv2 code h-100">
+            <h2>Parsed and validated config <span id="parse-spin"></spin></h2>
+						<div class="h-100" id="yml-parse">
+              <div id="msgs"></div>
+              <pre id="config"></pre>
+            </div>
+					</div>
+        </div>
+        <div class="fl w-100 w-third-l h-100">
+          <div class="ba bg-white ph3 pv2 code h-100">
+            <h2>Job matrix <span id="expanded-spin"></spin></h2>
+						<pre class="h-100" id="yml-expanded"></pre>
+					</div>
+        </div>
+      </div>
+    </div>
+
+    <script type="text/javascript" src="https://unpkg.com/whatwg-fetch@2.0.3/fetch.js"></script>
+    <script type="text/javascript">
+      window.onload = function() { console.log('Loaded!');
+
+        var raw = document.getElementById('yml-raw');
+        var parse = document.getElementById('yml-parse');
+        var msgs = document.getElementById('msgs');
+        var config = document.getElementById('config');
+        var expanded = document.getElementById('yml-expanded');
+
+        var parseSpin = document.getElementById('parse-spin');
+        var expandedSpin = document.getElementById('expanded-spin');
+
+        var token = 'jfnCqbJlbvxZlX40uE0DKg';
+        var parseURL = 'https://yml-staging.travis-ci.org/v1/parse';
+        var expandURL = 'https://yml-staging.travis-ci.org/v1/expand';
+
+        var throttle = function(fn, ms, scope) {
+          var wait = false;
+          return function() {
+            var t = scope || this;
+            var a = arguments;
+            if (!wait) {
+              wait = true;
+              setTimeout(function() {
+                fn.apply(t, a)
+                wait = false;
+              }, ms);
+            }
+          };
+        };
+
+        var parseReq = function(yml) {
+          fetch(parseURL, {
+            method: 'POST',
+            headers: { 'Authorization': 'Basic ' + btoa('x:' + token) },
+            body: yml
+          }).then(parseRender);
+        };
+
+        var expandReq = throttle(function(config) {
+          fetch(expandURL, {
+            method: 'POST',
+            headers: { 'Authorization': 'Basic ' + btoa('x:' + token) },
+            body: JSON.stringify(config)
+          }).then(expandRender);
+        }, 500);
+
+        var parseRender = function(response) {
+          msgs.innerText = '';
+          config.innerText = '';
+          expanded.innerText = '';
+
+          if (response.status >= 400) {
+            response.json().then(parseError);
+          } else {
+            response.json().then(parseSuccess);
+          }
+
+          parseSpin.classList.remove('spinner');
+        };
+
+        var parseError = function(json) {
+          parse.classList.add('error');
+          config.innerText = json.error_type + ': ' + json.error_message;
+        };
+
+        var parseSuccess = function(json) {
+          parse.classList.remove('error');
+          if (json.full_messages.length > 0) { msgs.innerText = json.full_messages.join('\n\n'); }
+          config.innerText = JSON.stringify(json.config, null, '  ');
+          expandedSpin.classList.add('spinner');
+          expandReq(json.config);
+        };
+
+        var expandRender = function(response) {
+          if (response.status >= 400) {
+            response.json().then(expandError);
+          } else {
+            response.json().then(expandSuccess);
+          }
+
+          expandedSpin.classList.remove('spinner');
+        };
+
+        var expandError = function(json) {
+          expanded.classList.add('error');
+          expanded.innerText = JSON.stringify(json);
+        };
+
+        var expandSuccess = function(json) {
+          expanded.classList.remove('error');
+          expanded.innerText = JSON.stringify(json.matrix, null, '  ');
+        };
+
+        raw.addEventListener('input', throttle(function(input) {
+          parseSpin.classList.add('spinner');
+          parseReq(input.target.innerText);
+        }, 500));
+      };
+    </script>
+	</body>
+</html>
