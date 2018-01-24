@@ -332,4 +332,4 @@ support keys discussed before).
 Because of the deep nesting that these keys then have, a huge amount of
 additional whitespace is added on top of that, resulting in a total spec size
 of ~20MB, making the spec pretty much impossible to read for humans, and
-expensive to download (in case we'd want to use it in JS client for example)..
+expensive to download (in case we'd want to use it in JS client for example).
