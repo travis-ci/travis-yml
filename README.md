@@ -1,4 +1,4 @@
-This is meant as a replacement for [travis-yaml](https://github.com/travis-ci/travis-yaml).
+This is a replacement for [travis-yaml](https://github.com/travis-ci/travis-yaml).
 
 # Travis CI build config processing
 
@@ -48,7 +48,7 @@ config.msgs.map { |msg| Travis::Yaml.msg(msg) }
 # ]
 ```
 
-# YAML
+## YAML
 
 Diverging from the YAML specification this library does not:
 
@@ -67,7 +67,7 @@ For these reasons:
   could be given as integers are going to be passed through the Bash build
   script. Bash does not distinguish integers from strings.
 
-# Types
+## Types
 
 Borrowing from YAML's terminology the library uses:
 
@@ -85,7 +85,7 @@ disallows keys that are not known.
 Some scalars are marked as wanting a `Secure`, so we can alert the user if they
 pass a string.
 
-# Build config specification
+## Build config specification
 
 The spec is included to the repository as [spec.json](https://github.com/travis-ci/travis-yml/blob/master/spec.json).
 
@@ -138,7 +138,7 @@ target nodes at load time, and kept in memory from there on. We currently have
 * `job` (shared by `root`, `matrix.*`, keys like `addons`, `branches`, `caches` etc.)
 * `support` (language specific keys, such as `rvm`, `python` etc.)
 
-# Loading the spec
+## Loading the spec
 
 Before the spec can be applied to an actual build configuration it will be
 expanded (i.e. shared sections will be included to nodes that require them),
@@ -148,7 +148,7 @@ can be memoized for better performance.
 The method `Travis::Yaml.expanded` returns the fully expanded, object oriented
 tree.
 
-# Applying the spec to a build config
+## Applying the spec to a build config
 
 This representation of the spec can be applied to a build configuration by:
 
@@ -227,7 +227,7 @@ Section specific validations:
 
 * `template`: unset the value if unknown variable names are used in a notification template
 
-## Summary
+### Summary
 
 There are three sets of classes that are used to build trees:
 
@@ -242,7 +242,7 @@ memory, is static, and remains unchanged.
 For each build config we then apply all relevant changes (`Doc::Change`) and
 all relevant validations (`Doc::Validate`) to each node.
 
-# Expanding a build matrix
+## Expanding a build matrix
 
 A given build configuration can be expanded to job matrix configurations by:
 
@@ -271,7 +271,7 @@ will be expanded to:
 ]
 ```
 
-# Tests
+## Tests
 
 Tests can be run against YAML examples contained in the documentation. These
 are not executed by default, but need to be opted in to either by defining an
@@ -290,7 +290,7 @@ DOCS=true rspec
 rspec spec/docs_spec.rb
 ```
 
-# Includes
+## Includes
 
 (TODO join with the above?)
 
@@ -333,3 +333,86 @@ Because of the deep nesting that these keys then have, a huge amount of
 additional whitespace is added on top of that, resulting in a total spec size
 of ~20MB, making the spec pretty much impossible to read for humans, and
 expensive to download (in case we'd want to use it in JS client for example).
+
+## Web API
+
+This gem also contains a web API for parsing and expanding a build config,
+which is used by travis-gatekeeper when processing a build request.
+
+To start the server:
+
+```
+$ foreman start web
+```
+
+The API contains three endpoints:
+
+**Home**
+
+```
+$ curl -X GET /v1 | jq .
+```
+
+```json
+{
+  "version": "v1"
+}
+```
+
+**Parse**
+
+The body of the request should be raw YAML. The response contains parsing messages and the validated and normalised config.
+
+```
+$ curl -X POST --data-binary @travis.yml /v1/parse | jq .
+```
+
+```json
+{
+  "version": "v1",
+  "messages": [
+    {
+      "level": "info",
+      "key": "language",
+      "code": "default",
+      "args": {
+        "key": "language",
+        "default": "ruby"
+      }
+    }
+  ],
+  "full_messages": [
+    "[info] on language: missing :language, defaulting to: ruby"
+  ],
+  "config": {
+    "language": "ruby",
+    "os": [
+      "linux"
+    ],
+    "dist": "trusty",
+    "sudo": false
+  }
+}
+```
+
+**Expand**
+
+The body of the request should be the JSON config found in the response from **/v1/parse**. The response will contain the expanded matrix of jobs.
+
+```
+$ curl -X POST --data-binary @config.json /v1/expand | jq .
+```
+
+```json
+{
+  "version": "v1",
+  "matrix": [
+    {
+      "os": "linux",
+      "language": "ruby",
+      "dist": "trusty",
+      "sudo": false
+    }
+  ]
+}
+```
