@@ -44,6 +44,6 @@ describe Travis::Yaml, 'deploy lambda' do
   describe 'function_name given as a map' do
     let(:function_name) { { production: 'production' } }
     it { expect(deploy).to eq [input[:deploy]] }
-    it { expect(msgs).to include [:warn, :'deploy.function_name', :deprecated, key: :function_name, info: :branch_specific_option_hash] }
+    it { expect(msgs).to include [:warn, :'deploy.function_name', :deprecated, given: :function_name, info: :branch_specific_option_hash] }
   end
 end

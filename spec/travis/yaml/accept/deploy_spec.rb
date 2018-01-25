@@ -118,7 +118,7 @@ describe Travis::Yaml, 'deploy' do
     describe 'option specific branch hashes (deprecated, according to travis-build)' do
       let(:input) { { deploy: { provider: 'heroku', run: { production: 'production' } } } }
       it { expect(deploy).to eq [provider: 'heroku', run: { production: 'production' }] }
-      it { expect(msgs).to include [:warn, :'deploy.run', :deprecated, key: :run, info: :branch_specific_option_hash] }
+      it { expect(msgs).to include [:warn, :'deploy.run', :deprecated, given: :run, info: :branch_specific_option_hash] }
     end
 
     describe 'migrating :tags, with :tags already given' do

@@ -7,7 +7,7 @@ describe Travis::Yaml, 'osx_image' do
     describe 'on osx' do
       let(:input) { { os: 'osx', osx_image: 'xcode8.2' } }
       it { expect(value[:osx_image]).to eq 'xcode8.2' }
-      it { expect(info).to include [:info, :osx_image, :edge, key: :osx_image] }
+      it { expect(info).to include [:info, :osx_image, :edge, given: :osx_image] }
     end
 
     describe 'on linux' do
@@ -19,7 +19,7 @@ describe Travis::Yaml, 'osx_image' do
     describe 'on multios' do
       let(:input) { { os: ['linux', 'osx'], osx_image: 'xcode8.2' } }
       it { expect(value[:osx_image]).to eq 'xcode8.2' }
-      it { expect(info).to include [:info, :osx_image, :edge, key: :osx_image] }
+      it { expect(info).to include [:info, :osx_image, :edge, given: :osx_image] }
     end
   end
 
