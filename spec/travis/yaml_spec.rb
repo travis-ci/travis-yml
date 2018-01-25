@@ -64,6 +64,11 @@ describe Travis::Yaml do
       it { should eq '[info] on key: missing :key, defaulting to: default' }
     end
 
+    describe 'deprecated' do
+      let(:msg) { [:info, :key, :deprecated, key: :key, info: 'something'] }
+      it { should eq '[info] on key: :key is deprecated' }
+    end
+
     describe 'downcase' do
       let(:msg) { [:info, :key, :downcase, value: 'FOO'] }
       it { should eq '[info] on key: downcasing FOO' }
