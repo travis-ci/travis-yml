@@ -8,9 +8,15 @@ describe Travis::Yaml, 'dist' do
     it { expect(dist).to eq 'trusty' }
   end
 
-  describe 'sets a dist value' do
+  describe 'sets precise' do
     let(:config) { { dist: 'precise' } }
     it { expect(dist).to eq 'precise' }
+  end
+
+  describe 'sets xenial' do
+    let(:config) { { dist: 'xenial' } }
+    it { expect(dist).to eq 'xenial' }
+    it { expect(subject.msgs).to include([:info, :dist, :edge, { given: 'xenial' }]) }
   end
 
   describe 'ignores case' do

@@ -37,6 +37,10 @@ module Travis
             opts[:deprecated]
           end
 
+          def edge?
+            !!opts[:edge]
+          end
+
           def alias_for?(other)
             aliases.include?(other.to_s.downcase)
           end

@@ -75,7 +75,7 @@ describe Travis::Yaml do
     end
 
     describe 'edge' do
-      let(:msg) { [:info, :key, :edge, key: :key] }
+      let(:msg) { [:info, :key, :edge, given: :key] }
       it { should eq '[info] on key: :key is experimental and might be removed in the future' }
     end
 

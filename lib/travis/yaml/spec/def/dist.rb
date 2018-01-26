@@ -13,6 +13,7 @@ module Travis
 
             value :trusty
             value :precise
+            value :xenial, edge: true
             value :osx, alias: %i(mac macos ios)
           end
         end

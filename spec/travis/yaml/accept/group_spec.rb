@@ -10,6 +10,6 @@ describe Travis::Yaml, 'group' do
 
   describe 'adds msgs about feature flags' do
     let(:config) { { group: 'stable' } }
-    it { expect(info).to include [:info, :group, :flagged, key: :group] }
+    it { expect(info).to include [:info, :group, :flagged, given: :group] }
   end
 end

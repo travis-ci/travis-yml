@@ -9,20 +9,20 @@ describe Travis::Yaml::Doc::Validate::Flags do
     let(:opts) { { edge: true } }
 
     it { expect(node.value).to eq 'value' }
-    it { expect(node.msgs).to include [:info, :key, :edge, key: :key] }
+    it { expect(node.msgs).to include [:info, :key, :edge, given: :key] }
   end
 
   describe 'flagged' do
     let(:opts) { { flagged: true } }
 
     it { expect(node.value).to eq 'value' }
-    it { expect(node.msgs).to include [:info, :key, :flagged, key: :key] }
+    it { expect(node.msgs).to include [:info, :key, :flagged, given: :key] }
   end
 
   describe 'deprecated' do
     let(:opts) { { deprecated: :info } }
 
     it { expect(node.value).to eq 'value' }
-    it { expect(node.msgs).to include [:warn, :key, :deprecated, key: :key, info: :info] }
+    it { expect(node.msgs).to include [:warn, :key, :deprecated, given: :key, info: :info] }
   end
 end
