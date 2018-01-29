@@ -80,7 +80,7 @@ describe Travis::Yaml do
     end
 
     describe 'flagged' do
-      let(:msg) { [:info, :key, :flagged, key: :key] }
+      let(:msg) { [:info, :key, :flagged, given: :key] }
       it { should eq '[info] on key: your repository must be feature flagged for :key to be used' }
     end
 
