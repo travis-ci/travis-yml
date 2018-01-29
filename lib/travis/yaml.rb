@@ -29,7 +29,7 @@ module Travis
       deprecated:      '%{key} is deprecated',
       downcase:        'downcasing %{value}',
       edge:            '%{given} is experimental and might be removed in the future',
-      flagged:         'your repository must be feature flagged for %{key} to be used',
+      flagged:         'your repository must be feature flagged for %{given} to be used',
       irrelevant:      'specified %{key}, but this setting is not relevant for the %{on_key} %{on_value}',
       unsupported:     '%{key} (%{value}) is not supported on the %{on_key} %{on_value}',
       required:        'missing required key %{key}',
