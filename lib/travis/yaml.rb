@@ -26,7 +26,7 @@ module Travis
       alias:           '%{alias} is an alias for %{actual}, using %{actual}',
       cast:            'casting value %{given_value} (%{given_type}) to %{value} (%{type})',
       default:         'missing %{key}, defaulting to: %{default}',
-      deprecated:      '%{key} is deprecated',
+      deprecated:      '%{given} is deprecated',
       downcase:        'downcasing %{value}',
       edge:            '%{given} is experimental and might be removed in the future',
       flagged:         'your repository must be feature flagged for %{given} to be used',
