@@ -65,7 +65,7 @@ describe Travis::Yaml do
     end
 
     describe 'deprecated' do
-      let(:msg) { [:info, :key, :deprecated, key: :key, info: 'something'] }
+      let(:msg) { [:info, :key, :deprecated, given: :key, info: 'something'] }
       it { should eq '[info] on key: :key is deprecated' }
     end
 
