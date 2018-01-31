@@ -7,7 +7,7 @@ describe Travis::Yaml, 'stack' do
   describe 'accepts fixed value with edge message' do
     let(:input) { { stack: 'connie' } }
     specify { expect(stack).to eq 'connie' }
-    specify { expect(subject.msgs).to include [:info, :stack, :edge, { given: 'connie' }] }
+    specify { expect(subject.msgs).to include [:info, :stack, :edge, { given: :stack }] }
   end
 
   describe 'downcases value' do

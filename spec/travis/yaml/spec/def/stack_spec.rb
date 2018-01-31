@@ -6,15 +6,16 @@ describe Travis::Yaml::Spec::Def::Stack do
       name: :stack,
       downcase: true,
       type: :fixed,
+      edge: true,
       values: [
-        { value: 'connie', edge: true },
-        { value: 'amethyst', edge: true },
-        { value: 'garnet', edge: true },
-        { value: 'stevonnie', edge: true },
-        { value: 'opal', edge: true },
-        { value: 'sardonyx', edge: true },
-        { value: 'onion', edge: true },
-        { value: 'cookiecat', edge: true }
+        { value: 'connie' },
+        { value: 'amethyst' },
+        { value: 'garnet' },
+        { value: 'stevonnie' },
+        { value: 'opal' },
+        { value: 'sardonyx' },
+        { value: 'onion' },
+        { value: 'cookiecat' }
       ]
     )
   end

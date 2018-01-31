@@ -11,9 +11,10 @@ module Travis
 
           def define
             downcase
+            edge
 
             VALUES.each do |stack|
-              value stack, edge: true
+              value stack
             end
           end
         end
