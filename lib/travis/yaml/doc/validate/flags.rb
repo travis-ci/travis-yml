@@ -18,10 +18,11 @@ module Travis
           private
 
             def flag
-              edge_key   if edge_key?
-              edge_value if edge_value?
-              flagged    if spec.flagged?
-              deprecated if deprecated?
+              edge_key         if edge_key?
+              edge_value       if edge_value?
+              flagged          if spec.flagged?
+              deprecated_key   if deprecated_key?
+              deprecated_value if deprecated_value?
             end
 
             def edge_key
@@ -44,13 +45,17 @@ module Travis
               node.info :flagged, given: node.key
             end
 
-            def deprecated?
-              spec.deprecated? || deprecated_value?
+            def deprecated_key
+              args = { given: node.key, info: info }
+              node.warn :deprecated, args
             end
 
-            def deprecated
-              args = { given: node.key, info: info }
-              args[:value] = value.value if deprecated_value? && value
+            def deprecated_key?
+              spec.deprecated?
+            end
+
+            def deprecated_value
+              args = { given: value.value, info: info }
               node.warn :deprecated, args
             end
 
