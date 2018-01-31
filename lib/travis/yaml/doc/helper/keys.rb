@@ -33,6 +33,7 @@ module Travis
           pip
           prose
           sdk
+          slack
           start_script
           trusty
           vimscript

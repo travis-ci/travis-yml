@@ -74,6 +74,12 @@ describe Travis::Yaml, 'language' do
     it { expect(lang).to eq 'cpp' }
   end
 
+  describe 'supports stack names as interim measure' do
+    let(:input) { { language: '__connie__' } }
+    it { expect(lang).to eq '__connie__' }
+    it { expect(msgs).to include [:warn, :language, :deprecated, { given: "__connie__", info: true }]  }
+  end
+
   describe 'unexpected seq with an aliased value' do
     let(:input) { { language: ['C++', 'java'] } }
     it { expect(lang).to eq 'cpp' }

@@ -49,7 +49,7 @@ describe Travis::Yaml::Helper::Keys do
       wget
       yarn
     ).map do |key|
-      describe "does not corrects they key #{key}" do
+      describe "does not correct the key #{key}" do
         let(:spec) { Travis::Yaml.expanded }
         let(:keys) { spec.keys + spec.alias_names }
         it { expect(find_key(keys, key)).to eq nil }

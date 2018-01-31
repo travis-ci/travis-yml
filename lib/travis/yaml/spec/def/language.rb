@@ -27,6 +27,7 @@ require 'travis/yaml/spec/def/lang/rust'
 require 'travis/yaml/spec/def/lang/scala'
 require 'travis/yaml/spec/def/lang/shell'
 require 'travis/yaml/spec/def/lang/smalltalk'
+require 'travis/yaml/spec/def/lang/worker_stacks'
 require 'travis/yaml/spec/type/fixed'
 
 module Travis

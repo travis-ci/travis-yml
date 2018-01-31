@@ -8,6 +8,7 @@ require 'travis/yaml/spec/def/language'
 require 'travis/yaml/spec/def/matrix'
 require 'travis/yaml/spec/def/notifications'
 require 'travis/yaml/spec/def/os'
+require 'travis/yaml/spec/def/stack'
 require 'travis/yaml/spec/def/stages'
 require 'travis/yaml/spec/def/sudo'
 require 'travis/yaml/spec/type/map'
@@ -40,6 +41,7 @@ module Travis
             map    :matrix,        alias: :jobs
             map    :stages
             map    :notifications
+            map    :stack
 
             includes[:job] = Job.new(self)
           end
