@@ -1,4 +1,5 @@
 require 'active_support/core_ext/hash/slice'
+require 'active_support/core_ext/hash/except'
 require 'travis/yaml/support/obj'
 
 module Travis
@@ -13,6 +14,7 @@ module Travis
         rows = with_global_env(rows)
         rows = with_shared(rows)
         rows = with_os(rows)
+        rows = cleaned(rows)
         rows = uniq(rows)
         rows
       end
@@ -97,6 +99,10 @@ module Travis
 
         def shared
           @shared ||= config.reject { |key, value| key == :matrix || keys.include?(key) || [[], nil].include?(value) }
+        end
+
+        def cleaned(rows)
+          rows.map { |row| row.except(:version) }
         end
 
         def uniq(rows)
