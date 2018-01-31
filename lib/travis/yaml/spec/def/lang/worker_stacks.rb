@@ -1,11 +1,10 @@
+require 'travis/yaml/spec/def/stack'
 require 'travis/yaml/spec/type/lang'
 
 module Travis
   module Yaml
     module Spec
-      WORKER_STACKS = [:connie, :amethyst, :garnet, :stevonnie, :opal, :sardonyx, :onion, :cookiecat]
-
-      WORKER_STACKS.each do |stack|
+      Def::Stack::VALUES.each do |stack|
         klass = Def.const_set(stack.capitalize, Class.new(Type::Lang))
         klass.register :"__#{stack}__"
         klass.class_eval do
