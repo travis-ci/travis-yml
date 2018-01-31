@@ -297,4 +297,18 @@ describe Travis::Yaml, 'matrix' do
 
     it { expect(matrix.rows).to eq rows }
   end
+
+  describe 'removes version' do
+    let(:input) do
+      { version: '= 0', language: 'shell' }
+    end
+
+    let(:rows) do
+      [
+        { language: 'shell' }
+      ]
+    end
+
+    it { expect(matrix.rows).to eq rows }
+  end
 end
