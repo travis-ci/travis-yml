@@ -26,7 +26,7 @@ describe Travis::Yaml, 'addon: artifacts' do
     it { expect(artifacts[:paths]).to        eq ['foo']  }
     it { expect(artifacts[:branch]).to       eq 'branch' }
     it { expect(artifacts[:log_format]).to   eq 'format' }
-    it { expect(artifacts[:target_paths]).to eq 'bar'    }
+    it { expect(artifacts[:target_paths]).to eq ['bar']  }
     it { expect(artifacts[:debug]).to        eq true     }
     it { expect(artifacts[:concurrency]).to  eq '40'     }
     it { expect(artifacts[:max_size]).to     eq '1024'   }
