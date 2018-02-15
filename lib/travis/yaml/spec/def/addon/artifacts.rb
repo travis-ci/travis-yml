@@ -20,7 +20,7 @@ module Travis
 
               map :branch,        to: :str
               map :log_format,    to: :str
-              map :target_paths,  to: :str
+              map :target_paths,  to: :seq
 
               map :debug,         to: :bool
               map :concurrency,   to: :str
@@ -32,7 +32,6 @@ module Travis
               map :permissions,   to: :str
               map :working_dir,   to: :str
               map :cache_control, to: :str
-              map :target_paths,  to: :str
             end
           end
         end

@@ -101,9 +101,10 @@ describe Travis::Yaml::Spec::Def::Addons, 'artifacts' do
               key: :target_paths,
               types: [
                 {
-                  type: :scalar,
-                  only: {},
-                  except: {}
+                  type: :seq,
+                  types: [
+                    { type: :scalar }
+                  ]
                 }
               ]
             },
