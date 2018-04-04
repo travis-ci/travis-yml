@@ -2,6 +2,7 @@ require 'travis/yaml/spec/type/map'
 require 'travis/yaml/spec/def/addon/apt'
 require 'travis/yaml/spec/def/addon/artifacts'
 require 'travis/yaml/spec/def/addon/browserstack'
+require 'travis/yaml/spec/def/addon/chrome'
 require 'travis/yaml/spec/def/addon/code_climate'
 require 'travis/yaml/spec/def/addon/coverity_scan'
 require 'travis/yaml/spec/def/addon/jwts'
@@ -21,6 +22,7 @@ module Travis
             map :apt_packages,    to: :seq
             map :browserstack,    to: :browserstack
             map :artifacts,       to: :artifacts
+            map :chrome,          to: :chrome
             map :code_climate,    to: :code_climate
             map :coverity_scan,   to: :coverity_scan
             map :hostname,        to: :str
