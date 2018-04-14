@@ -107,9 +107,8 @@ describe Travis::Yaml, 'matrix' do
       end
 
       describe 'parse error' do
-        let(:input) { { matrix: { include: [script: 'foo', if: 'wat.kaputt'] } } }
-        it { expect(matrix[:if]).to be nil }
-        it { expect(msgs).to include [:error, :'matrix.include.if', :invalid_cond, value: 'wat.kaputt'] }
+        let(:input) { { matrix: { include: [script: 'foo', if: 'a NOT b'] } } }
+        it { expect { matrix }.to raise_error described_class::InvalidCondition }
       end
     end
 
