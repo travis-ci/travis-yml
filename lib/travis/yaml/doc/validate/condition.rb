@@ -12,8 +12,9 @@ module Travis
             sender env)
 
           def apply
-            return node if !apply? || parses?
-            parse_error
+            return node unless apply?
+            validate!
+            node
           end
 
           private
@@ -22,15 +23,14 @@ module Travis
               node.key == :if && node.value
             end
 
-            def parses?
-              Travis::Conditions.parse(node.value, keys: KEYWORDS)
-              true
+            def validate!
+              Travis::Conditions.parse(node.value, keys: KEYWORDS, version: version)
             rescue Travis::Conditions::ParseError
-              false
+              raise InvalidCondition.new(node.value)
             end
 
-            def parse_error
-              node.error :invalid_cond, value: node.value
+            def version
+              node.root[:conditions]&.value == 'v0' ? :v0 : :v1
             end
         end
       end

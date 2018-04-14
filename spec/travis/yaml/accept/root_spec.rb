@@ -162,9 +162,8 @@ describe Travis::Yaml, 'root' do
     end
 
     describe 'parse error' do
-      let(:input) { { if: 'wat.kaputt' } }
-      it { expect(value[:if]).to be nil }
-      it { expect(msgs).to include [:error, :if, :invalid_cond, value: 'wat.kaputt'] }
+      let(:input) { { if: 'a NOT b' } }
+      it { expect { value }.to raise_error described_class::InvalidCondition }
     end
   end
 

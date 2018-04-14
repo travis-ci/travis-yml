@@ -25,6 +25,15 @@ module Travis
           end
         end
 
+        class Conditions < Type::Fixed
+          register :conditions
+          def define
+            default :v1
+            value :v0
+            value :v1
+          end
+        end
+
         class Root < Type::Map
           register :root
 
@@ -42,6 +51,7 @@ module Travis
             map    :stages
             map    :notifications
             map    :stack
+            map    :conditions,    to: :conditions, default: :v1
 
             includes[:job] = Job.new(self)
           end
