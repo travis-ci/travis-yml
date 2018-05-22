@@ -46,7 +46,7 @@ describe Travis::Yaml do
 
     describe 'alert' do
       let(:msg) { [:error, :key, :alert] }
-      it { should eq '[error] on key: using a plain string as a secure' }
+      it { should eq '[error] on key: this string should probably be encrypted' }
     end
 
     describe 'alias' do
@@ -61,7 +61,7 @@ describe Travis::Yaml do
 
     describe 'default' do
       let(:msg) { [:info, :key, :default, key: :key, default: 'default'] }
-      it { should eq '[info] on key: missing :key, defaulting to: default' }
+      it { should eq '[info] on key: missing :key, using the default default' }
     end
 
     describe 'deprecated' do
@@ -71,22 +71,22 @@ describe Travis::Yaml do
 
     describe 'downcase' do
       let(:msg) { [:info, :key, :downcase, value: 'FOO'] }
-      it { should eq '[info] on key: downcasing FOO' }
+      it { should eq '[info] on key: lowercasing FOO' }
     end
 
     describe 'edge' do
       let(:msg) { [:info, :key, :edge, given: :key] }
-      it { should eq '[info] on key: :key is experimental and might be removed in the future' }
+      it { should eq '[info] on key: :key is experimental and might be removed without notice' }
     end
 
     describe 'flagged' do
       let(:msg) { [:info, :key, :flagged, given: :key] }
-      it { should eq '[info] on key: your repository must be feature flagged for :key to be used' }
+      it { should eq '[info] on key: please email support@travis-ci.org to enable :key' }
     end
 
     describe 'irrelevant' do
       let(:msg) { [:info, :key, :irrelevant, on_key: :language, on_value: 'ruby', key: :key, value: 'value'] }
-      it { should eq '[info] on key: specified :key, but this setting is not relevant for the :language ruby' }
+      it { should eq '[info] on key: you used :key, but it is not relevant for the :language ruby' }
     end
 
     describe 'unsupported' do
@@ -96,7 +96,7 @@ describe Travis::Yaml do
 
     describe 'required' do
       let(:msg) { [:info, :key, :required, key: :key] }
-      it { should eq '[info] on key: missing required key :key' }
+      it { should eq '[info] on key: you need to specify :key' }
     end
 
     describe 'empty' do
@@ -116,7 +116,7 @@ describe Travis::Yaml do
 
     describe 'unknown_default' do
       let(:msg) { [:info, :key, :unknown_default, value: 'value', default: 'default'] }
-      it { should eq '[info] on key: dropping unknown value: value, defaulting to: default' }
+      it { should eq '[info] on key: dropping unknown value: value, defaulting to default' }
     end
 
     describe 'unknown_var' do
@@ -131,7 +131,7 @@ describe Travis::Yaml do
 
     describe 'invalid_format' do
       let(:msg) { [:info, :key, :invalid_format, value: 'value'] }
-      it { should eq '[info] on key: dropping invalid format: value' }
+      it { should eq '[info] on key: dropping invalid format value' }
     end
 
     describe 'invalid_seq' do

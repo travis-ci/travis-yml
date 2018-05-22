@@ -64,7 +64,7 @@ describe Travis::Yaml::Web::V1 do
     it 'returns full messages' do
       post '/parse', 'rvm: 2.3', {}
       expect(response['full_messages']).to eq [
-        '[info] on language: missing :language, defaulting to: ruby'
+        '[info] on language: missing :language, using the default ruby'
       ]
     end
 
