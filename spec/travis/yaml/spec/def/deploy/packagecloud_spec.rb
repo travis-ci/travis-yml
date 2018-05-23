@@ -108,6 +108,21 @@ describe Travis::Yaml::Spec::Def::Deploy::Packagecloud do
             deprecated: :branch_specific_option_hash
           }
         ]
+      },
+      force: {
+        key: :force,
+        types: [
+          {
+            type: :scalar,
+            cast: :bool
+          },
+          {
+            name: :deploy_branches,
+            type: :map,
+            strict: false,
+            deprecated: :branch_specific_option_hash
+          }
+        ]
       }
     )
   end
