@@ -92,9 +92,6 @@ describe Travis::Yaml::Spec::Def::Deploy::Deploy do
               value: 'engineyard'
             },
             {
-              value: 'exoscale'
-            },
-            {
               value: 'firebase'
             },
             {
