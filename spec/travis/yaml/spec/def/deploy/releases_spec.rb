@@ -53,6 +53,21 @@ describe Travis::Yaml::Spec::Def::Deploy::Releases do
           }
         ]
       },
+      prerelease: {
+        key: :prerelease,
+        types: [
+          {
+            type: :scalar,
+            cast: :bool,
+          },
+          {
+            name: :deploy_branches,
+            type: :map,
+            strict: false,
+            deprecated: :branch_specific_option_hash
+          }
+        ]
+      },
       api_key: {
         key: :api_key,
         types: [
