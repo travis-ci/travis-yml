@@ -116,9 +116,6 @@ describe Travis::Yaml::Spec::Def::Deploy::Deploy do
               value: 'modulus'
             },
             {
-              value: 'nodejitsu'
-            },
-            {
               value: 'npm'
             },
             {
