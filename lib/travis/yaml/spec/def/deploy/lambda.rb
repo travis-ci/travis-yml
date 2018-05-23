@@ -33,6 +33,7 @@ module Travis
               map :dead_letter_config,    to: :str
               map :kms_key_arn,           to: :str
               map :tracing_mode,          to: :str
+              map :publish,               to: :bool
             end
           end
         end

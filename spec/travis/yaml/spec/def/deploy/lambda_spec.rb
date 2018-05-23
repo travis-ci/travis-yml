@@ -297,6 +297,21 @@ describe Travis::Yaml::Spec::Def::Deploy::Lambda do
             deprecated: :branch_specific_option_hash
           }
         ]
+      },
+      publish: {
+        key: :publish, 
+        types: [
+          {
+            type: :scalar,
+            cast: :bool,
+          },
+          {
+            name: :deploy_branches,
+            type: :map, 
+            strict: false,
+            deprecated: :branch_specific_option_hash
+          }
+        ]
       }
     )
   end
