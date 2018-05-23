@@ -222,7 +222,22 @@ describe Travis::Yaml::Spec::Def::Deploy::S3 do
             deprecated: :branch_specific_option_hash
           }
         ]
-      }
+      },
+      server_side_encryption: {
+        key: :server_side_encryption,
+        types: [
+          {
+            type: :scalar,
+            cast: :bool,
+          },
+          {
+            name: :deploy_branches,
+            type: :map,
+            strict: false,
+            deprecated: :branch_specific_option_hash
+          }
+        ]
+      },
     )
   end
 end
