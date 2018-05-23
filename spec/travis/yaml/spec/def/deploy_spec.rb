@@ -53,6 +53,9 @@ describe Travis::Yaml::Spec::Def::Deploy::Deploy do
               value: 'bitballoon'
             },
             {
+              value: 'bluemixcf'
+            },
+            {
               value: 'boxfuse'
             },
             {
