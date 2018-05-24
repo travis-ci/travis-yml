@@ -10,6 +10,7 @@ module Travis
               super
               map :project,  to: :str
               map :token,    to: :str, secure: true
+              map :message,  to: :str
             end
           end
         end
