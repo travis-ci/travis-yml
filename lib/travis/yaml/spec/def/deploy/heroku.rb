@@ -22,14 +22,10 @@ module Travis
           class HerokuStrategy < Type::Fixed
             register :heroku_strategy
 
-            DEPRECATED = 'will be removed in v1.1.0'
-
             def define
               default :api
               value :api
               value :git
-              value :'git-ssh', deprecated: DEPRECATED, version: '1.0'
-              value :'git-deploy-key', deprecated: DEPRECATED, version: '1.0'
             end
           end
         end
