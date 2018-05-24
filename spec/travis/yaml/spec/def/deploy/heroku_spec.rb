@@ -35,7 +35,6 @@ describe Travis::Yaml::Spec::Def::Deploy::Heroku do
             values: [
               { value: 'api' },
               { value: 'git' },
-              { value: 'anvil', deprecated: 'will be removed in v1.1.0', version: '1.0' },
               { value: 'git-ssh', deprecated: 'will be removed in v1.1.0', version: '1.0' },
               { value: 'git-deploy-key', deprecated: 'will be removed in v1.1.0', version: '1.0' }
             ]

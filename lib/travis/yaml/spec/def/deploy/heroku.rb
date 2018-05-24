@@ -28,9 +28,6 @@ module Travis
               default :api
               value :api
               value :git
-              # TODO remove, anvil has been turned off on 2015-02-19
-              # https://devcenter.heroku.com/changelog-items/613
-              value :anvil, deprecated: DEPRECATED, version: '1.0'
               value :'git-ssh', deprecated: DEPRECATED, version: '1.0'
               value :'git-deploy-key', deprecated: DEPRECATED, version: '1.0'
             end
