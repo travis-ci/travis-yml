@@ -288,7 +288,14 @@ describe Travis::Yaml::Spec::Def::Deploy::Lambda do
         key: :tracing_mode, 
         types: [
           {
-            type: :scalar
+            type: :fixed,
+            values: [
+              { value: 'Active' },
+              { value: 'PassThrough' }
+            ],
+            defaults: [
+              { value: :PassThrough }
+            ]
           },
           {
             name: :deploy_branches,
@@ -297,7 +304,42 @@ describe Travis::Yaml::Spec::Def::Deploy::Lambda do
             deprecated: :branch_specific_option_hash
           }
         ]
-      }
+      },
+      publish: {
+        key: :publish, 
+        types: [
+          {
+            type: :scalar,
+            cast: :bool,
+          },
+          {
+            name: :deploy_branches,
+            type: :map, 
+            strict: false,
+            deprecated: :branch_specific_option_hash
+          }
+        ]
+      },
+      function_tags: {
+        key: :function_tags, 
+        types: [
+          {
+            type: :scalar, 
+            secure: true
+          },
+          {
+            type: :map, 
+            secure: true,
+            strict: false
+          },
+          {
+            name: :deploy_branches,
+            type: :map, 
+            strict: false,
+            deprecated: :branch_specific_option_hash
+          }
+        ]
+      },
     )
   end
 end

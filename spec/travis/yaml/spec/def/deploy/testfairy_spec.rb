@@ -66,48 +66,6 @@ describe Travis::Yaml::Spec::Def::Deploy::Testfairy do
           }
         ]
       },
-      keystore_file: {
-        key: :keystore_file,
-        types: [
-          {
-            type: :scalar,
-          },
-          {
-            name: :deploy_branches,
-            type: :map,
-            strict: false,
-            deprecated: :branch_specific_option_hash
-          }
-        ]
-      },
-      storepass: {
-        key: :storepass,
-        types: [
-          {
-            type: :scalar
-          },
-          {
-            name: :deploy_branches,
-            type: :map,
-            strict: false,
-            deprecated: :branch_specific_option_hash
-          }
-        ]
-      },
-      alias: {
-        key: :alias,
-        types: [
-          {
-            type: :scalar
-          },
-          {
-            name: :deploy_branches,
-            type: :map,
-            strict: false,
-            deprecated: :branch_specific_option_hash
-          }
-        ]
-      },
       testers_groups: {
         key: :testers_groups,
         types: [

@@ -22,17 +22,10 @@ module Travis
           class HerokuStrategy < Type::Fixed
             register :heroku_strategy
 
-            DEPRECATED = 'will be removed in v1.1.0'
-
             def define
               default :api
               value :api
               value :git
-              # TODO remove, anvil has been turned off on 2015-02-19
-              # https://devcenter.heroku.com/changelog-items/613
-              value :anvil, deprecated: DEPRECATED, version: '1.0'
-              value :'git-ssh', deprecated: DEPRECATED, version: '1.0'
-              value :'git-deploy-key', deprecated: DEPRECATED, version: '1.0'
             end
           end
         end

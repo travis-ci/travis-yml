@@ -16,6 +16,7 @@ module Travis
               map :local_dir,    to: :str
               map :dist,         to: :str
               map :package_glob, to: :str
+              map :force,        to: :bool
             end
           end
         end

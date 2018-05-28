@@ -10,20 +10,21 @@ module Travis
 
             def define
               super
-              map :access_key_id,         to: :str, secure: true
-              map :secret_access_key,     to: :str, secure: true
-              map :bucket,                to: :str
-              map :region,                to: :str
-              map :upload_dir,            to: :str
-              map :storage_class,         to: :str
-              map :local_dir,             to: :str
-              map :detect_encoding,       to: :bool
-              map :cache_control,         to: :str
-              map :expires,               to: :str
-              map :acl,                   to: :str
-              map :dot_match,             to: :bool
-              map :index_document_suffix, to: :str
-              map :default_text_charset,  to: :str
+              map :access_key_id,          to: :str, secure: true
+              map :secret_access_key,      to: :str, secure: true
+              map :bucket,                 to: :str
+              map :region,                 to: :str
+              map :upload_dir,             to: :str
+              map :storage_class,          to: :str
+              map :local_dir,              to: :str
+              map :detect_encoding,        to: :bool
+              map :cache_control,          to: :str
+              map :expires,                to: :str
+              map :acl,                    to: :str
+              map :dot_match,              to: :bool
+              map :index_document_suffix,  to: :str
+              map :default_text_charset,   to: :str
+              map :server_side_encryption, to: :bool
             end
           end
         end

@@ -14,9 +14,6 @@ module Travis
               map :api_key,             to: :str, secure: true
               map :app_file,            to: :str
               map :symbols_file,        to: :str
-              map :keystore_file,       to: :str
-              map :storepass,           to: :str
-              map :alias,               to: :str
               map :testers_groups,      to: :str
               map :notify,              to: :bool
               map :auto_update,         to: :bool

@@ -1,9 +1,9 @@
-describe Travis::Yaml::Spec::Def::Deploy::Heroku do
+describe Travis::Yaml::Spec::Def::Deploy::BluemixCloudfoundry do
   let(:spec) { described_class.new.spec }
 
   it do
     expect(except(spec, :map)).to eq(
-      name: :heroku,
+      name: :bluemixcf,
       type: :map,
       strict: false,
       prefix: {
@@ -23,58 +23,8 @@ describe Travis::Yaml::Spec::Def::Deploy::Heroku do
 
   it do
     expect(except(spec[:map], :provider, :on, :skip_cleanup, :allow_failure, :edge)).to eq(
-      strategy: {
-        key: :strategy,
-        types: [
-          {
-            name: :heroku_strategy,
-            type: :fixed,
-            defaults: [
-              { value: 'api' }
-            ],
-            values: [
-              { value: 'api' },
-              { value: 'git' }
-            ]
-          },
-          {
-            name: :deploy_branches,
-            type: :map,
-            strict: false,
-            deprecated: :branch_specific_option_hash
-          }
-        ]
-      },
-      buildpack: {
-        key: :buildpack,
-        types: [
-          {
-            type: :scalar
-          },
-          {
-            name: :deploy_branches,
-            type: :map,
-            strict: false,
-            deprecated: :branch_specific_option_hash
-          }
-        ]
-      },
-      app: {
-        key: :app,
-        types: [
-          {
-            type: :scalar,
-          },
-          {
-            name: :deploy_branches,
-            type: :map,
-            strict: false,
-            deprecated: :branch_specific_option_hash
-          }
-        ]
-      },
-      api_key: {
-        key: :api_key,
+      username: {
+        key: :username,
         types: [
           {
             type: :scalar,
@@ -88,16 +38,97 @@ describe Travis::Yaml::Spec::Def::Deploy::Heroku do
           }
         ]
       },
-      run: {
-        key: :run,
+      password: {
+        key: :password,
         types: [
           {
-            type: :seq,
-            types: [
-              {
-                type: :scalar
-              }
-            ]
+            type: :scalar,
+            secure: true,
+          },
+          {
+            name: :deploy_branches,
+            type: :map,
+            strict: false,
+            deprecated: :branch_specific_option_hash
+          }
+        ]
+      },
+      organization: {
+        key: :organization,
+        types: [
+          {
+            type: :scalar
+          },
+          {
+            name: :deploy_branches,
+            type: :map,
+            strict: false,
+            deprecated: :branch_specific_option_hash
+          }
+        ]
+      },
+      api: {
+        key: :api,
+        types: [
+          {
+            type: :scalar
+          },
+          {
+            name: :deploy_branches,
+            type: :map,
+            strict: false,
+            deprecated: :branch_specific_option_hash
+          }
+        ]
+      },
+      space: {
+        key: :space,
+        types: [
+          {
+            type: :scalar
+          },
+          {
+            name: :deploy_branches,
+            type: :map,
+            strict: false,
+            deprecated: :branch_specific_option_hash
+          }
+        ]
+      },
+      region: {
+        key: :region,
+        types: [
+          {
+            type: :scalar
+          },
+          {
+            name: :deploy_branches,
+            type: :map,
+            strict: false,
+            deprecated: :branch_specific_option_hash
+          }
+        ]
+      },
+      manifest: {
+        key: :manifest,
+        types: [
+          {
+            type: :scalar
+          },
+          {
+            name: :deploy_branches,
+            type: :map,
+            strict: false,
+            deprecated: :branch_specific_option_hash
+          }
+        ]
+      },
+      skip_ssl_validation: {
+        key: :skip_ssl_validation,
+        types: [
+          {
+            type: :scalar,
+            cast: :bool,
           },
           {
             name: :deploy_branches,

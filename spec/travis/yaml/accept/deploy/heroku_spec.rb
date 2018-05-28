@@ -27,15 +27,4 @@ describe Travis::Yaml, 'deploy heroku' do
     let(:api_key) { { secure: 'secure' } }
     it { expect(deploy[:api_key]).to eq secure: 'secure' }
   end
-
-  describe 'strategy anvil' do
-    let(:strategy) { 'anvil' }
-    it { expect(deploy[:strategy]).to eq 'anvil' }
-
-    describe 'given a version greater than 1.0.0' do
-      let(:input) { { version: '~> 1.1', deploy: { provider: 'heroku', strategy: 'anvil' } } }
-      it { expect(deploy[:strategy]).to eq 'api' }
-      it { expect(msgs).to include [:warn, :'deploy.strategy', :deprecated, { given: 'anvil', info: 'will be removed in v1.1.0' }] }
-    end
-  end
 end

@@ -53,6 +53,9 @@ describe Travis::Yaml::Spec::Def::Deploy::Deploy do
               value: 'bitballoon'
             },
             {
+              value: 'bluemixcf'
+            },
+            {
               value: 'boxfuse'
             },
             {
@@ -89,9 +92,6 @@ describe Travis::Yaml::Spec::Def::Deploy::Deploy do
               value: 'engineyard'
             },
             {
-              value: 'exoscale'
-            },
-            {
               value: 'firebase'
             },
             {
@@ -114,9 +114,6 @@ describe Travis::Yaml::Spec::Def::Deploy::Deploy do
             },
             {
               value: 'modulus'
-            },
-            {
-              value: 'nodejitsu'
             },
             {
               value: 'npm'

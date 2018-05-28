@@ -23,6 +23,7 @@ module Travis
               map :file_glob,      to: :str
               map :overwrite,      to: :str
               map :release_number, to: :str
+              map :prerelease,     to: :bool
             end
           end
         end
