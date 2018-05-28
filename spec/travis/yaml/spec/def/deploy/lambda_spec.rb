@@ -294,7 +294,7 @@ describe Travis::Yaml::Spec::Def::Deploy::Lambda do
               { value: 'PassThrough' }
             ],
             defaults: [
-              { value: 'PassThrough' }
+              { value: :PassThrough }
             ]
           },
           {
