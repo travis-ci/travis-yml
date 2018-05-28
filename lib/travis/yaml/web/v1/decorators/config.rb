@@ -3,6 +3,8 @@ require 'travis/yaml'
 module Travis::Yaml::Web::V1
   module Decorators
     class Config
+      LEVELS = %i(error warning info)
+
       def initialize(config)
         @config = config
       end
@@ -20,7 +22,7 @@ module Travis::Yaml::Web::V1
       private
 
       def messages
-        @config.msgs.map do |level, key, code, args|
+        sort(@config.msgs).map do |level, key, code, args|
           {
             'level'.freeze => level,
             'key'.freeze => key,
@@ -31,7 +33,11 @@ module Travis::Yaml::Web::V1
       end
 
       def full_messages
-        @config.msgs.map { |m| Travis::Yaml.msg(m) }
+        sort(@config.msgs).map { |m| Travis::Yaml.msg(m) }
+      end
+
+      def sort(msgs)
+        msgs.sort_by { |msg| LEVELS.index(msg.first) }
       end
     end
   end

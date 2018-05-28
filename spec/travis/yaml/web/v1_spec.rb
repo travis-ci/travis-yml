@@ -61,6 +61,14 @@ describe Travis::Yaml::Web::V1 do
       ]
     end
 
+    it 'sorts messages by severity' do
+      post '/parse', "rvm: 2.3\nbutt: true", {}
+      expect(response['messages'].map { |m| m['level'] }).to eq [
+        'error',
+        'info'
+      ]
+    end
+
     it 'returns full messages' do
       post '/parse', 'rvm: 2.3', {}
       expect(response['full_messages']).to eq [
