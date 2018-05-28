@@ -135,6 +135,20 @@ describe Travis::Yaml::Spec::Def::Deploy::Pages do
             deprecated: :branch_specific_option_hash
           }
         ]
+      },
+      github_url: {
+        key: :github_url,
+        types: [
+          {
+            type: :scalar
+          },
+          {
+            name: :deploy_branches,
+            type: :map,
+            strict: false,
+            deprecated: :branch_specific_option_hash
+          }
+        ]
       }
     )
   end

@@ -17,6 +17,7 @@ module Travis
               map :project_name,  to: :str
               map :email,         to: :str
               map :name,          to: :str
+              map :github_url,    to: :str
             end
           end
         end
