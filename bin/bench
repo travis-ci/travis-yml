@@ -10,7 +10,7 @@ require 'validate/local'
 require 'validate/record/message'
 
 configs = Record::Request.find([584594, 657002]).pluck(:config)
-configs = configs.map { |config| YAML.load(config) }
+configs = configs.map { |config| LessYAML.load(config) }
 ActiveRecord::Base.clear_active_connections!
 
 Travis::Yaml.expanded

@@ -9,7 +9,7 @@ class Inspect < Struct.new(:opts)
       result, record, msg = *msg
       puts format(result, record.request_id, msg)
       puts
-      config = YAML.load(Record::Request.find(record.request_id).config)
+      config = LessYAML.load(Record::Request.find(record.request_id).config)
       part = only(config, record.key.split('.').first)
       puts part.empty? ? config : part
     end

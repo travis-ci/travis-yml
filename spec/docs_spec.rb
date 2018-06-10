@@ -15,7 +15,7 @@ LANG = {
 }
 
 def load_config(path)
-  YAML.load(File.read(path))
+  LessYAML.load(File.read(path))
 end
 
 def detect_lang(config)

@@ -4,7 +4,7 @@ require 'timeout'
 ENV['REQUESTS'] ||= 'true' if $*.join.include?(File.basename(__FILE__))
 
 def load_config(path)
-  YAML.load(File.read(path))
+  LessYAML.load(File.read(path))
 end
 
 describe Travis::Yaml do
