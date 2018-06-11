@@ -1,7 +1,7 @@
 $: << File.expand_path('../../../../../vendor/less_yaml/lib', __FILE__)
 
 require 'psych'
-require 'less_yaml'
+require 'less_yaml/load'
 
 module LessYAML
   OPTIONS[:default_mode] = :safe

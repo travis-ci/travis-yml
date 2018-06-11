@@ -45,7 +45,7 @@ class Config
           return
         end
 
-        config = YAML.load(config)
+        config = LessYAML.load(config)
 
         if config.nil? || config.empty?
           result << [:warn, :config, :empty_config]
