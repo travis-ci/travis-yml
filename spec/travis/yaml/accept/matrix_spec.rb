@@ -87,6 +87,11 @@ describe Travis::Yaml, 'matrix' do
       it { expect(matrix[:include]).to eq [{ rvm: '2.3', env: 'FOO=foo BAR=bar' }] }
     end
 
+    describe 'given a name' do
+      let(:input) { { jobs: { include: [name: 'name'] } } }
+      it { expect(matrix[:include]).to eq [name: 'name'] }
+    end
+
     describe 'given addons' do
       let(:input) { { matrix: { include: [addons: { apt: { packages: ['package'] } }] } } }
       it { expect(matrix[:include]).to eq [{ addons: { apt: { packages: ['package'] } } }] }

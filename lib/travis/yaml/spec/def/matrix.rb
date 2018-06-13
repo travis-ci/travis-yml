@@ -36,6 +36,7 @@ module Travis
             def define
               self.include :job, :support
 
+              map :name, to: :str
               map :language
               map :os
               map :dist
