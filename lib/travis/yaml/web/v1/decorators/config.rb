@@ -3,7 +3,7 @@ require 'travis/yaml'
 module Travis::Yaml::Web::V1
   module Decorators
     class Config
-      LEVELS = %i(error warning info other)
+      LEVELS = %i(error warning info)
 
       def initialize(config)
         @config = config
@@ -37,7 +37,7 @@ module Travis::Yaml::Web::V1
       end
 
       def sort(msgs)
-        msgs.sort_by { |msg| LEVELS.index(msg.first || :other) }
+        msgs.sort_by { |msg| LEVELS.index(msg.first) || 99 }
       end
     end
   end
