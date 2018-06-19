@@ -5,6 +5,7 @@ describe Travis::Yaml::Spec::Def::R do
   let(:r)       { support[:map][:r][:types][0] }
 
   let(:apt_packages)        { support[:map][:apt_packages][:types][0] }
+  let(:bioc_check)          { support[:map][:bioc_check][:types][0] }
   let(:bioc_packages)       { support[:map][:bioc_packages][:types][0] }
   let(:bioc_required)       { support[:map][:bioc_required][:types][0] }
   let(:bioc_use_devel)      { support[:map][:bioc_use_devel][:types][0] }
@@ -27,6 +28,7 @@ describe Travis::Yaml::Spec::Def::R do
   it { expect(lang[:values]).to include(value: 'r') }
   it { expect(r[:only][:language]).to include('r') }
   it { expect(apt_packages[:only][:language]).to include('r') }
+  it { expect(bioc_check[:only][:language]).to include('r') }
   it { expect(bioc_packages[:only][:language]).to include('r') }
   it { expect(bioc_required[:only][:language]).to include('r') }
   it { expect(bioc_use_devel[:only][:language]).to include('r') }
