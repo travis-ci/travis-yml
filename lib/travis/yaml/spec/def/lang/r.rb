@@ -20,6 +20,7 @@ module Travis
             map :brew_packages,       to: :seq
 
             map :bioc,                to: :str # test
+            map :bioc_check           to: :bool
             map :bioc_required,       to: :bool, alias: :use_bioc
             map :bioc_use_devel,      to: :bool
             map :cran,                to: :str
