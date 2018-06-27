@@ -28,6 +28,7 @@ module Travis
       default:         'missing %{key}, using the default %{default}',
       deprecated:      '%{given} is deprecated', # Do we need to say stop using it? or?
       downcase:        'using lower case of %{value}',
+      duplicate_names: 'duplicate job names: %{value}',
       edge:            '%{given} is experimental and might be removed without notice', #is without notice accurate?
       flagged:         'please email support@travis-ci.com to enable %{given}',
       irrelevant:      'you used %{key}, but it is not relevant for the %{on_key} %{on_value}',
