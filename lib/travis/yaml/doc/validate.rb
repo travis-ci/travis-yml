@@ -1,6 +1,7 @@
 require 'travis/yaml/doc/validate/alert'
 require 'travis/yaml/doc/validate/condition'
 require 'travis/yaml/doc/validate/default'
+require 'travis/yaml/doc/validate/duplicate_names'
 require 'travis/yaml/doc/validate/empty'
 require 'travis/yaml/doc/validate/flags'
 require 'travis/yaml/doc/validate/format'
@@ -25,7 +26,7 @@ module Travis
           ],
           seq: [
             Flags, Version, InvalidType, UnsupportedKey, Default, Required,
-            Empty
+            Empty, DuplicateNames
           ],
           fixed: [
             Format, Alert, Flags, Version, UnknownValue, InvalidType,

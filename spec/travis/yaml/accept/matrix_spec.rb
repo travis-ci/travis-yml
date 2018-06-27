@@ -92,6 +92,12 @@ describe Travis::Yaml, 'matrix' do
       it { expect(matrix[:include]).to eq [name: 'name'] }
     end
 
+    describe 'given duplicate names' do
+      let(:input) { { jobs: { include: [{ name: 'name' }, { name: 'name' }] } } }
+      it { expect(matrix[:include]).to eq [{ name: 'name' }, { name: 'name' }] }
+      it { expect(msgs).to include [:warn, :'matrix.include', :duplicate_names, value: ['name']] }
+    end
+
     describe 'given addons' do
       let(:input) { { matrix: { include: [addons: { apt: { packages: ['package'] } }] } } }
       it { expect(matrix[:include]).to eq [{ addons: { apt: { packages: ['package'] } } }] }
