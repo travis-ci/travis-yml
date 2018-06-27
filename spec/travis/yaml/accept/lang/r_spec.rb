@@ -39,7 +39,7 @@ describe Travis::Yaml do
   it { expect(config[:r_binary_packages]).to   eq ['package'] }
   it { expect(config[:r_github_packages]).to   eq ['package'] }
   it { expect(config[:r_packages]).to          eq ['package'] }
-  it { expect(config[:bioc_check]).to       eq true }
+  it { expect(config[:bioc_check]).to          eq true }
   it { expect(config[:bioc_required]).to       eq true }
   it { expect(config[:bioc_use_devel]).to      eq true }
   it { expect(config[:cran]).to                eq 'https://cloud.r-project.org' }
