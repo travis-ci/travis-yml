@@ -71,7 +71,7 @@ describe Travis::Yaml do
 
     describe 'downcase' do
       let(:msg) { [:info, :key, :downcase, value: 'FOO'] }
-      it { should eq '[info] on key: lowercasing FOO' }
+      it { should eq '[info] on key: using lower case of FOO' }
     end
 
     describe 'edge' do
