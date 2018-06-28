@@ -81,7 +81,7 @@ describe Travis::Yaml do
 
     describe 'flagged' do
       let(:msg) { [:info, :key, :flagged, given: :key] }
-      it { should eq '[info] on key: please email support@travis-ci.org to enable :key' }
+      it { should eq '[info] on key: please email support@travis-ci.com to enable :key' }
     end
 
     describe 'irrelevant' do
