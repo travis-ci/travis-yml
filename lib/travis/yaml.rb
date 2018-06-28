@@ -22,33 +22,34 @@ module Travis
     # these are meant as examples. we might want to determine the translation
     # in the client
     MSGS = {
-      alert:           'using a plain string as a secure',
+      alert:           'this string should probably be encrypted',
       alias:           '%{alias} is an alias for %{actual}, using %{actual}',
       cast:            'casting value %{given_value} (%{given_type}) to %{value} (%{type})',
-      default:         'missing %{key}, defaulting to: %{default}',
-      deprecated:      '%{given} is deprecated',
-      downcase:        'downcasing %{value}',
-      edge:            '%{given} is experimental and might be removed in the future',
-      flagged:         'your repository must be feature flagged for %{given} to be used',
-      irrelevant:      'specified %{key}, but this setting is not relevant for the %{on_key} %{on_value}',
+      default:         'missing %{key}, using the default %{default}',
+      deprecated:      '%{given} is deprecated', # Do we need to say stop using it? or?
+      downcase:        'using lower case of %{value}',
+      edge:            '%{given} is experimental and might be removed without notice', #is without notice accurate?
+      flagged:         'please email support@travis-ci.com to enable %{given}',
+      irrelevant:      'you used %{key}, but it is not relevant for the %{on_key} %{on_value}',
       unsupported:     '%{key} (%{value}) is not supported on the %{on_key} %{on_value}',
-      required:        'missing required key %{key}',
+      required:        'you need to specify %{key}',
       empty:           'dropping empty section %{key}',
       find_key:        'key %{original} is not known, but %{key} is, using %{key}',
       find_value:      'value %{original} is not known, but %{value} is, using %{value}',
-      clean_key:       'key %{original} contains special characters, using %{key}',
+      clean_key:       'key %{original} contains unsupported characters, using %{key}',
       clean_value:     'value %{original} is not known, but %{value} is, using %{value}',
       underscore_key:  'key %{original} is camelcased, using %{key}',
-      migrate:         'migrating %{key} to %{to} (value: %{value})',
+      migrate:         'migrating %{key} to %{to} (value: %{value})', # does this need action?
       misplaced_key:   'dropping misplaced key %{key} (%{value})',
       unknown_key:     'dropping unknown key %{key} (%{value})',
       unknown_value:   'dropping unknown value: %{value}',
-      unknown_default: 'dropping unknown value: %{value}, defaulting to: %{default}',
+      unknown_default: 'dropping unknown value: %{value}, defaulting to %{default}',
       unknown_var:     'unknown template variable %{var}',
       invalid_key:     '%{key} is not a valid key',
       invalid_type:    'dropping unexpected %{actual}, expected %{expected} (%{value})',
-      invalid_format:  'dropping invalid format: %{value}',
-      invalid_seq:     'unexpected sequence, using the first value (%{value})'
+      invalid_format:  'dropping invalid format %{value}',
+      invalid_seq:     'unexpected sequence, using the first value (%{value})',
+      invalid_cond:    'unable to parse condition (%{value})',
       # invalid_value:   '%{value} is not a valid value on this key',
     }
 
