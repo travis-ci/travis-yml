@@ -27,7 +27,7 @@ module Travis
       cast:            'casting value %{given_value} (%{given_type}) to %{value} (%{type})',
       default:         'missing %{key}, using the default %{default}',
       deprecated:      '%{given} is deprecated', # Do we need to say stop using it? or?
-      downcase:        'lowercasing %{value}',
+      downcase:        'using lower case of %{value}',
       edge:            '%{given} is experimental and might be removed without notice', #is without notice accurate?
       flagged:         'please email support@travis-ci.org to enable %{given}',
       irrelevant:      'you used %{key}, but it is not relevant for the %{on_key} %{on_value}',
