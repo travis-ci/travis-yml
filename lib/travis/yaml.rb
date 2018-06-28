@@ -29,7 +29,7 @@ module Travis
       deprecated:      '%{given} is deprecated', # Do we need to say stop using it? or?
       downcase:        'using lower case of %{value}',
       edge:            '%{given} is experimental and might be removed without notice', #is without notice accurate?
-      flagged:         'please email support@travis-ci.org to enable %{given}',
+      flagged:         'please email support@travis-ci.com to enable %{given}',
       irrelevant:      'you used %{key}, but it is not relevant for the %{on_key} %{on_value}',
       unsupported:     '%{key} (%{value}) is not supported on the %{on_key} %{on_value}',
       required:        'you need to specify %{key}',
