@@ -6,7 +6,7 @@ Looks like `allow_failures` can be restricted to a branch like this: https://git
 
 * spec all classes in spec/doc
 * compare languages with travis-build
-* talk to Hiro/Henrik about what's actually supported on osx
+* talk to Hiro about what's actually supported on osx
 * confirm the SafeYaml patch does not mess with AR deserialization
 * create a list of common mistakes (e.g. how to comment in yaml, don't nest hashes in arrays)
 
