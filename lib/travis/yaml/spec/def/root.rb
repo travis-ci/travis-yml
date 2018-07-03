@@ -40,18 +40,19 @@ module Travis
           def define
             self.include :job, :support
 
-            map    :version,       to: :str, format: ::Version::REQUIRE
-            map    :language,      required: true, alias: :lang
-            matrix :os,            required: true, to: :oss
-            map    :dist,          required: true
-            map    :sudo,          required: true
+            map    :version,        to: :str, format: ::Version::REQUIRE
+            map    :language,       required: true, alias: :lang
+            matrix :os,             required: true, to: :oss
+            map    :dist,           required: true
+            map    :sudo,           required: true
             matrix :env
-            matrix :compiler,      to: :compilers, on: %i(c cpp)
-            map    :matrix,        alias: :jobs
+            matrix :compiler,       to: :compilers, on: %i(c cpp)
+            map    :matrix,         alias: :jobs
             map    :stages
             map    :notifications
             map    :stack
-            map    :conditions,    to: :conditions, default: :v1
+            map    :conditions,     to: :conditions, default: :v1
+            map    :filter_secrets, to: :bool
 
             includes[:job] = Job.new(self)
           end
