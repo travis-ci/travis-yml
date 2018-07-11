@@ -7,7 +7,9 @@ module Travis
 
       def call(env)
         req = Rack::Request.new(env)
-        prefix = ?/ + req.path_info.split(?/)[1]
+        path_info = req.path_info.split(?/)[1]
+        path_info = "" if !path_info
+        prefix = ?/ + path_info
         versions.each do |p, app|
           if p == prefix
             req.path_info = req.path_info[p.size..-1]
