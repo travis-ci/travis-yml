@@ -1,5 +1,5 @@
 source 'https://rubygems.org'
 
-gem 'travis-conditions', git: 'https://github.com/travis-ci/travis-conditions', ref: 'v1.0.0'
+gem 'travis-conditions', '~> 1.0.5'
 
 gemspec
