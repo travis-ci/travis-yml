@@ -53,6 +53,7 @@ module Travis
             map    :stack
             map    :conditions,     to: :conditions, default: :v1
             map    :filter_secrets, to: :bool
+            map    :trace,          to: :bool
 
             includes[:job] = Job.new(self)
           end
