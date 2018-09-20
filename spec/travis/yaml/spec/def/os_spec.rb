@@ -15,19 +15,32 @@ describe Travis::Yaml::Spec::Def::Oss do
             }
         },
         {
-            value: 'osx',
-            except: {
-              language: [
-                :php,
-                :perl,
-                :erlang,
-                :groovy,
-                :clojure,
-                :scala,
-                :haskell
-              ]
-            }
+          value: 'osx',
+          except: {
+            language: [
+              :php,
+              :perl,
+              :erlang,
+              :groovy,
+              :clojure,
+              :scala,
+              :haskell
+            ]
           }
+        },
+        {
+          value: 'windows',
+          only: {
+            language: [
+              :bash,
+              :csharp,
+              :powershell,
+              :script,
+              :sh,
+              :shell
+            ]
+          }
+        }
       ],
       types: [
         {
@@ -37,26 +50,39 @@ describe Travis::Yaml::Spec::Def::Oss do
           defaults: [
             {
               value: 'linux',
-                except: {
-                  language: [
-                    :'objective-c'
-                  ]
-                }
+              except: {
+                language: [
+                  :'objective-c'
+                ]
+              }
             },
             {
-                value: 'osx',
-                except: {
-                  language: [
-                    :php,
-                    :perl,
-                    :erlang,
-                    :groovy,
-                    :clojure,
-                    :scala,
-                    :haskell
-                  ]
-                }
+              value: 'osx',
+              except: {
+                language: [
+                  :php,
+                  :perl,
+                  :erlang,
+                  :groovy,
+                  :clojure,
+                  :scala,
+                  :haskell
+                ]
               }
+            },
+            {
+              value: 'windows',
+              only: {
+                language: [
+                  :bash,
+                  :csharp,
+                  :powershell,
+                  :script,
+                  :sh,
+                  :shell
+                ]
+              }
+            }
           ],
           values: [
             {
@@ -86,6 +112,22 @@ describe Travis::Yaml::Spec::Def::Oss do
                   :clojure,
                   :scala,
                   :haskell
+                ]
+              }
+            },
+            {
+              value: 'windows',
+              alias: [
+                'win'
+              ],
+              only: {
+                language: [
+                  :bash,
+                  :csharp,
+                  :powershell,
+                  :script,
+                  :sh,
+                  :shell
                 ]
               }
             }

@@ -28,9 +28,9 @@ describe Travis::Yaml, 'os' do
   end
 
   describe 'drops an unknown values' do
-    let(:input) { { os: 'windows' } }
+    let(:input) { { os: 'forth' } }
     it { expect(os).to eq ['linux'] }
-    it { expect(msgs).to include([:warn, :os, :unknown_default, value: 'windows', default: 'linux']) }
+    it { expect(msgs).to include([:warn, :os, :unknown_default, value: 'forth', default: 'linux']) }
   end
 
   describe 'supports aliases' do

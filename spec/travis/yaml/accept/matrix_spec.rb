@@ -130,9 +130,9 @@ describe Travis::Yaml, 'matrix' do
     end
 
     describe 'given an unknown os' do
-      let(:input) { { matrix: { include: { os: 'windows' } } } }
+      let(:input) { { matrix: { include: { os: 'forth' } } } }
       it { expect(matrix[:include]).to eq [os: 'linux'] }
-      it { expect(msgs).to include [:warn, :'matrix.include.os', :unknown_default, value: 'windows', default: 'linux'] }
+      it { expect(msgs).to include [:warn, :'matrix.include.os', :unknown_default, value: 'forth', default: 'linux'] }
     end
   end
 
