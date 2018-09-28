@@ -12,6 +12,16 @@ module Travis
           # TODO list supported languages instead?
           osx:   %i(php perl erlang groovy clojure scala haskell)
         }
+        SUPPORTED = {
+          windows: %i(
+            bash
+            csharp
+            powershell
+            script
+            sh
+            shell
+          )
+        }
 
         class Oss < Type::Seq
           register :oss
@@ -20,6 +30,7 @@ module Travis
             type Os
             default :linux, except: { language: UNSUPPORTED[:linux] }
             default :osx,   except: { language: UNSUPPORTED[:osx] }
+            default :windows, only: { language: SUPPORTED[:windows] }
           end
         end
 
@@ -31,8 +42,10 @@ module Travis
 
             default :linux, except: { language: UNSUPPORTED[:linux] }
             default :osx,   except: { language: UNSUPPORTED[:osx] }
+            default :windows, only: { language: SUPPORTED[:windows] }
             value   :linux, alias: %i(ubuntu),        except: { language: UNSUPPORTED[:linux] }
             value   :osx,   alias: %i(mac macos ios), except: { language: UNSUPPORTED[:osx] }
+            value   :windows, alias: %i(win),           only: { language: SUPPORTED[:windows] }
           end
         end
       end
