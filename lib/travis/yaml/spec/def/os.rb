@@ -16,6 +16,7 @@ module Travis
           windows: %i(
             bash
             csharp
+            node_js
             powershell
             script
             sh
