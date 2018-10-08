@@ -14,6 +14,7 @@ module Travis
 
             value :stable
             value :edge
+            value :dev
           end
         end
       end
