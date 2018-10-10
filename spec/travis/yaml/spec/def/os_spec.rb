@@ -34,6 +34,7 @@ describe Travis::Yaml::Spec::Def::Oss do
             language: [
               :bash,
               :csharp,
+              :node_js,
               :powershell,
               :script,
               :sh,
@@ -76,6 +77,7 @@ describe Travis::Yaml::Spec::Def::Oss do
                 language: [
                   :bash,
                   :csharp,
+                  :node_js,
                   :powershell,
                   :script,
                   :sh,
@@ -124,6 +126,7 @@ describe Travis::Yaml::Spec::Def::Oss do
                 language: [
                   :bash,
                   :csharp,
+                  :node_js,
                   :powershell,
                   :script,
                   :sh,

@@ -12,7 +12,8 @@ describe Travis::Yaml::Spec::Def::Group do
       flagged: true,
       values: [
         { value: 'stable' },
-        { value: 'edge' }
+        { value: 'edge' },
+        { value: 'dev' },
       ]
     )
   end
