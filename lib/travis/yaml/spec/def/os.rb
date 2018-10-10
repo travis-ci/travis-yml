@@ -16,8 +16,10 @@ module Travis
           windows: %i(
             bash
             csharp
+            go
             node_js
             powershell
+            rust
             script
             sh
             shell
