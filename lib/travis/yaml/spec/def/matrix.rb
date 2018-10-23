@@ -41,7 +41,7 @@ module Travis
               map :os
               map :dist
               map :sudo
-              map :env, to: :env_var
+              map :env, to: :env_vars
               map :compiler, to: :compilers, on: %i(c cpp)
             end
           end

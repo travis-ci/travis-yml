@@ -216,14 +216,14 @@ describe Travis::Yaml, 'root' do
 
   describe 'given a misplaced key (up), with the target being a hash' do
     let(:input) { { matrix: { include: [{ env: 'FOO=foo' }] }, allow_failures: [rvm: '2.4'] } }
-    it { expect(value[:matrix]).to eq include: [{ env: 'FOO=foo' }], allow_failures: [rvm: '2.4'] }
+    it { expect(value[:matrix]).to eq include: [{ env: ['FOO=foo'] }], allow_failures: [rvm: '2.4'] }
     it { expect(msgs).to include [:warn, :root, :migrate, key: :allow_failures, to: :matrix, value: [rvm: '2.4']] }
     it { expect(msgs.size).to eq 1 }
   end
 
   describe 'given a misplaced key (up), with the target being a seq' do
     let(:input) { { matrix: [{ env: 'FOO=foo' }], allow_failures: [rvm: '2.4'] } }
-    it { expect(value[:matrix]).to eq include: [{ env: 'FOO=foo' }], allow_failures: [rvm: '2.4'] }
+    it { expect(value[:matrix]).to eq include: [{ env: ['FOO=foo'] }], allow_failures: [rvm: '2.4'] }
     it { expect(msgs).to include [:warn, :root, :migrate, key: :allow_failures, to: :matrix, value: [rvm: '2.4']] }
     it { expect(msgs.size).to eq 1 }
   end

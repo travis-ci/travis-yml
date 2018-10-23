@@ -34,8 +34,8 @@ describe Travis::Yaml, 'env' do
   end
 
   describe 'given an array of secure strings' do
-    let(:input) { { env: [{ secure: 'secure' }] } }
-    it { expect(env[:matrix]).to eq [{ secure: 'secure' }] }
+    let(:input) { { env: [{ secure: 'one' }, { secure: 'two' }] } }
+    it { expect(env[:matrix]).to eq [{ secure: 'one' }, { secure: 'two' }] }
     it { expect(msgs).to be_empty }
   end
 
