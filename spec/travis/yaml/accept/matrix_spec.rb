@@ -74,17 +74,17 @@ describe Travis::Yaml, 'matrix' do
 
     describe 'given an array of hashes (with env given as a hash)' do
       let(:input) { { matrix: { include: [{ rvm: '2.3', env: { FOO: 'foo' } }] } } }
-      it { expect(matrix[:include]).to eq [{ rvm: '2.3', env: 'FOO=foo' }] }
+      it { expect(matrix[:include]).to eq [{ rvm: '2.3', env: ['FOO=foo'] }] }
     end
 
     describe 'given an array of hashes (with env given as a string)' do
       let(:input) { { matrix: { include: [{ rvm: '2.3', env: 'FOO=foo' }] } } }
-      it { expect(matrix[:include]).to eq [{ rvm: '2.3', env: 'FOO=foo' }] }
+      it { expect(matrix[:include]).to eq [{ rvm: '2.3', env: ['FOO=foo'] }] }
     end
 
     describe 'given an array of hashes (with env given as an array of strings)' do
       let(:input) { { matrix: { include: [{ rvm: '2.3', env: ['FOO=foo', 'BAR=bar'] }] } } }
-      it { expect(matrix[:include]).to eq [{ rvm: '2.3', env: 'FOO=foo BAR=bar' }] }
+      it { expect(matrix[:include]).to eq [{ rvm: '2.3', env: ['FOO=foo', 'BAR=bar'] }] }
     end
 
     describe 'given a name' do
@@ -125,7 +125,7 @@ describe Travis::Yaml, 'matrix' do
 
     describe 'given a misplaced key' do
       let(:input) { { matrix: { include: { env: { DEBUG: 'true' } } } } }
-      it { expect(matrix[:include]).to eq [env: 'DEBUG=true'] }
+      it { expect(matrix[:include]).to eq [env: ['DEBUG=true']] }
       it { expect(msgs).to be_empty }
     end
 
@@ -152,6 +152,28 @@ describe Travis::Yaml, 'matrix' do
         let(:input) { { matrix: { key => true } } }
         it { expect(matrix).to be nil }
         it { expect(msgs).to include [:error, :"matrix.#{key}", :invalid_type, expected: :map, actual: :bool, value: true] }
+      end
+
+      describe 'env' do
+        describe 'given as string' do
+          let(:input) { { matrix: { key => [{ env: 'FOO=foo BAR=bar' }] } } }
+          it { expect(matrix[key]).to eq [{ env: ['FOO=foo BAR=bar'] }] }
+        end
+
+        describe 'given as an array of strings' do
+          let(:input) { { matrix: { key => [{ env: ['FOO=foo', 'BAR=bar'] }] } } }
+          it { expect(matrix[key]).to eq [{ env: ['FOO=foo', 'BAR=bar'] }] }
+        end
+
+        describe 'given as a hash' do
+          let(:input) { { matrix: { key => [{ env: { FOO: 'foo', BAR: 'bar' } }] } } }
+          it { expect(matrix[key]).to eq [{ env: ['FOO=foo', 'BAR=bar'] }] }
+        end
+
+        describe 'given as an array of hashes' do
+          let(:input) { { matrix: { key => [{ env: [{ FOO: 'foo' }, { BAR: 'bar' }] }] } } }
+          it { expect(matrix[key]).to eq [{ env: ['FOO=foo', 'BAR=bar'] }] }
+        end
       end
 
       describe 'given an irrelevant key' do
