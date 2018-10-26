@@ -4,6 +4,7 @@ require 'travis/yaml/spec/def/addon/artifacts'
 require 'travis/yaml/spec/def/addon/browserstack'
 require 'travis/yaml/spec/def/addon/code_climate'
 require 'travis/yaml/spec/def/addon/coverity_scan'
+require 'travis/yaml/spec/def/addon/homebrew'
 require 'travis/yaml/spec/def/addon/jwts'
 require 'travis/yaml/spec/def/addon/sauce_connect'
 
@@ -23,6 +24,7 @@ module Travis
             map :artifacts,       to: :artifacts
             map :code_climate,    to: :code_climate
             map :coverity_scan,   to: :coverity_scan
+            map :homebrew,        to: :homebrew
             map :hostname,        to: :str
             map :hosts,           to: :seq
             map :jwt,             to: :jwts
