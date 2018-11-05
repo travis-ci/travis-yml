@@ -6,7 +6,7 @@ describe Travis::Yaml, 'root' do
 
   describe 'default' do
     let(:input) { {} }
-    it { expect(value).to eq(language: 'ruby', os: ['linux'], dist: 'trusty', sudo: false) }
+    it { expect(value).to eq(language: 'ruby', os: ['linux'], dist: 'trusty') }
     it { expect(info).to include [:info, :language, :default, key: :language, default: 'ruby'] }
   end
 
@@ -17,13 +17,13 @@ describe Travis::Yaml, 'root' do
 
   describe 'moves required keys to the front' do
     let(:input) { { osx_image: 'image', os: 'osx', language: 'ruby' } }
-    it { expect(value).to eq language: 'ruby', os: ['osx'], dist: 'trusty', sudo: false, osx_image: 'image'  }
-    it { expect(value.keys).to eq [:language, :os, :dist, :sudo, :osx_image] }
+    it { expect(value).to eq language: 'ruby', os: ['osx'], dist: 'trusty', osx_image: 'image'  }
+    it { expect(value.keys).to eq [:language, :os, :dist, :osx_image] }
   end
 
   describe 'given only matrix include' do
     let(:input) { { matrix: { include: [{ env: 'foo'}] } } }
-    it { expect(value.keys).to eq [:language, :os, :dist, :sudo, :matrix] }
+    it { expect(value.keys).to eq [:language, :os, :dist, :matrix] }
   end
 
   describe 'typos' do

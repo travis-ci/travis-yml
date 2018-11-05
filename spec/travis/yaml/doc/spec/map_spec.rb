@@ -21,11 +21,11 @@ describe Travis::Yaml::Doc::Spec::Map do
   end
 
   describe 'required' do
-    it { expect(spec.required.map(&:key)).to eq [:language, :os, :dist, :sudo] }
+    it { expect(spec.required.map(&:key)).to eq [:language, :os, :dist] }
   end
 
   describe 'required_keys' do
-    it { expect(spec.required_keys).to eq [:language, :os, :dist, :sudo] }
+    it { expect(spec.required_keys).to eq [:language, :os, :dist] }
   end
 
   describe 'all_keys' do
