@@ -7,7 +7,7 @@ describe Travis::Yaml, 'addon: snaps' do
     describe 'snaps' do
       describe 'given a string' do
         let(:config) { { addons: { snaps: 'travis' } } }
-        it { expect(addons[:addons]).to eq ['travis'] }
+        it { expect(addons[:snaps]).to eq ['travis'] }
       end
   
       describe 'given an array' do
