@@ -10,7 +10,6 @@ module Travis
             register :snaps
 
             def define
-              downcase
               type :scalar, :seq, strict: false
             end
           end

@@ -14,11 +14,6 @@ describe Travis::Yaml, 'addon: snaps' do
         let(:config) { { addons: { snaps: ['travis', 'aws-cli'] } } }
         it { expect(addons[:snaps]).to eq ['travis', 'aws-cli'] }
       end
-
-      describe 'given an array of mixed case strings' do
-        let(:config) { { addons: { snaps: ['Travis', 'AWS-cli'] } } }
-        it { expect(addons[:snaps]).to eq ['travis', 'aws-cli'] }
-      end
     end
   end
   
