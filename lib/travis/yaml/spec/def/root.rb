@@ -44,7 +44,7 @@ module Travis
             map    :language,       required: true, alias: :lang
             matrix :os,             required: true, to: :oss
             map    :dist,           required: true
-            map    :sudo,           required: true
+            map    :sudo
             matrix :env
             matrix :compiler,       to: :compilers, on: %i(c cpp)
             map    :matrix,         alias: :jobs

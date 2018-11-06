@@ -8,7 +8,6 @@ module Travis
           register :sudo
 
           def define
-            default false
             cast :bool
           end
         end

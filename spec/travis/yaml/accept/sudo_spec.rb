@@ -3,9 +3,9 @@ describe Travis::Yaml, 'sudo' do
 
   subject { described_class.apply(config) }
 
-  describe 'defaults to true' do
+  describe 'no default' do
     let(:config) { {} }
-    it { expect(sudo).to be false }
+    it { expect(sudo).to be nil }
   end
 
   describe 'given true' do
