@@ -10,7 +10,7 @@ module Travis
             register :snaps
 
             def define
-              type :scalar, :seq, strict: false
+              type :seq
             end
           end
         end
