@@ -4,7 +4,7 @@ describe Travis::Yaml::Spec::Def::Addons do
   let(:addons) do
     %i(
       apt apt_packages browserstack artifacts code_climate coverity_scan
-      homebrew hostname hosts jwt sauce_connect ssh_known_hosts sonarqube
+      homebrew hostname hosts jwt sauce_connect snaps ssh_known_hosts sonarqube
       srcclr firefox mariadb postgresql rethinkdb deploy
     )
   end

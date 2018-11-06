@@ -7,6 +7,7 @@ require 'travis/yaml/spec/def/addon/coverity_scan'
 require 'travis/yaml/spec/def/addon/homebrew'
 require 'travis/yaml/spec/def/addon/jwts'
 require 'travis/yaml/spec/def/addon/sauce_connect'
+require 'travis/yaml/spec/def/addon/snaps'
 
 module Travis
   module Yaml
@@ -29,6 +30,7 @@ module Travis
             map :hosts,           to: :seq
             map :jwt,             to: :jwts
             map :sauce_connect,   to: :sauce_connect
+            map :snaps,           to: :snaps
             map :ssh_known_hosts, to: :seq
             map :sonarqube,       to: [:map, :bool]
             map :srcclr,          to: [:map, :bool]
