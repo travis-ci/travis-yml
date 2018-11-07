@@ -10,7 +10,17 @@ module Travis
             register :snaps
 
             def define
-              type :scalar, :map, strict: false
+              type :scalar, :snap
+            end
+          end
+
+          class Snap < Type::Map
+            register :snap
+
+            def define
+              map :name, to: :str
+              map :classic, to: :bool
+              map :channel, to: :str
             end
           end
         end
