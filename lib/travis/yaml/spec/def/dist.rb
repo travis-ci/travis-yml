@@ -13,7 +13,7 @@ module Travis
 
             value :trusty
             value :precise
-            value :xenial, edge: true
+            value :xenial
             value :osx, alias: %i(mac macos ios)
             value :'server-2016', edge: true
           end
