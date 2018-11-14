@@ -12,7 +12,7 @@ describe Travis::Yaml::Spec::Def::Dist do
       values: [
         { value: 'trusty' },
         { value: 'precise' },
-        { value: 'xenial', edge: true },
+        { value: 'xenial' },
         { value: 'osx', alias: ['mac', 'macos', 'ios'] },
         { value: 'server-2016', edge: true }
       ]

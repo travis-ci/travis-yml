@@ -16,7 +16,6 @@ describe Travis::Yaml, 'dist' do
   describe 'sets xenial' do
     let(:config) { { dist: 'xenial' } }
     it { expect(dist).to eq 'xenial' }
-    it { expect(subject.msgs).to include([:info, :dist, :edge, { given: 'xenial' }]) }
   end
 
   describe 'ignores case' do
