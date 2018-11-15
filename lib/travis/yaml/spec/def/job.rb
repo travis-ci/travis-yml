@@ -1,4 +1,5 @@
 require 'travis/yaml/spec/def/addons'
+#require 'travis/yaml/spec/def/arch'
 require 'travis/yaml/spec/def/cache'
 require 'travis/yaml/spec/def/deploys'
 require 'travis/yaml/spec/def/deploy'
@@ -16,6 +17,7 @@ module Travis
           def define
             map :group
             map :osx_image,  to: :str, edge: true, only: { os: :osx }
+            #map :arch
             map :services
             map :addons
             map :branches,   alias: :branch
