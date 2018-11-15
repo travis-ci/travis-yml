@@ -39,6 +39,7 @@ module Travis
               map :name, to: :str
               map :language
               map :os
+              map :arch
               map :dist
               map :sudo
               map :env, to: :env_vars

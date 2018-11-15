@@ -1,8 +1,18 @@
 require 'travis/yaml/spec/type/fixed'
+require 'travis/yaml/spec/type/seq'
+
 module Travis
   module Yaml
     module Spec
       module Def
+        class Archs < Type::Seq
+          register :archs
+
+          def define
+            type Arch
+          end
+        end
+
         class Arch < Type::Fixed
           register :arch
           def define

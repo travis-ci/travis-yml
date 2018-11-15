@@ -14,6 +14,7 @@ module Travis
         rows = with_global_env(rows)
         rows = with_shared(rows)
         rows = with_os(rows)
+        rows = with_arch(rows)
         rows = cleaned(rows)
         rows = uniq(rows)
         rows
@@ -64,6 +65,13 @@ module Travis
           return rows unless config[:os]
           rows.map do |row|
             { os: Array(config[:os]).first }.merge(row)
+          end
+        end
+
+        def with_arch(rows)
+          return rows unless config[:arch]
+          rows.map do |row|
+            { arch: Array(config[:arch]).first }.merge(row)
           end
         end
 

@@ -44,7 +44,7 @@ module Travis
             map    :version,        to: :str, format: ::Version::REQUIRE
             map    :language,       required: true, alias: :lang
             matrix :os,             required: true, to: :oss
-            matrix :arch
+            matrix :arch,           to: :archs
             map    :dist,           required: true
             map    :sudo
             matrix :env
