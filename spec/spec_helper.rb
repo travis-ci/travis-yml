@@ -8,10 +8,6 @@ require 'travis/yaml/web'
 RSpec.configure do |c|
   c.include Spec::Support::Hash
   c.include Spec::Support::Node
-
-  c.after :suite do
-    # `which jq && (bin/spec | jq '.' > spec.json)`
-  end
 end
 
 if ENV['STACKPROF']
