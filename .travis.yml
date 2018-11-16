@@ -3,4 +3,7 @@ language: ruby
 cache: bundler
 
 script:
-  - bundle exec rspec spec
+- bundle exec rspec spec
+- bundle exec rake update_spec
+- git diff --exit-code
+- git diff --cached --exit-code

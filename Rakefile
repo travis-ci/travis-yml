@@ -2,6 +2,7 @@ require 'active_record'
 require 'pathname'
 require 'zlib'
 
+ENV['TOP'] = `git rev-parse --show-toplevel`.strip
 ENV['DATABASE_URL'] ||= 'postgresql://localhost/travis_yaml'
 
 path = Pathname.new(__FILE__).dirname.join('db/migrate')
@@ -10,6 +11,19 @@ MIGRATIONS_DIR = ENV['MIGRATIONS_DIR'] || [path]
 ActiveRecord::Base.logger = Logger.new STDOUT
 ActiveRecord::Base.establish_connection
 config = ActiveRecord::Base.configurations['default_env']
+
+desc 'update top-level spec.json'
+task :update_spec do
+  top = Pathname.new(ENV.fetch('TOP'))
+  $LOAD_PATH.unshift(top.join('lib').to_s)
+
+  require 'travis/yaml'
+
+  top.join('spec.json').write(
+    JSON.pretty_generate(Travis::Yaml.spec)
+  )
+  puts 'Updated spec.json'
+end
 
 namespace :db do
   desc 'Create the database'
