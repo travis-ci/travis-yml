@@ -21,7 +21,7 @@ task :update_spec do
 
   srand(1)
   top.join('spec.json').write(
-    JSON.pretty_generate(Travis::Yaml.spec)
+    JSON.pretty_generate(Travis::Yaml.spec.sort.to_h)
   )
   puts 'Updated spec.json'
 end
