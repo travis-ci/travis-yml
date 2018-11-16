@@ -19,6 +19,7 @@ task :update_spec do
 
   require 'travis/yaml'
 
+  srand(1)
   top.join('spec.json').write(
     JSON.pretty_generate(Travis::Yaml.spec)
   )
