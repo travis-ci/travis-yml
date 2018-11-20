@@ -4,7 +4,7 @@ describe Travis::Yaml::Spec::Def::Root do
 
   let(:expand) do
     %i(
-      jdk crystal dotnet mono solution d dart elixir otp_release go ghc haxe
+      jdk crystal dotnet mono solution d dart elixir otp_release elm go ghc haxe
       julia node_js rvm gemfile xcode_scheme xcode_sdk perl perl6 php python r
       rust scala smalltalk os arch env compiler
     )
