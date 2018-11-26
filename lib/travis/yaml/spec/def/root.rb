@@ -1,3 +1,4 @@
+require 'travis/yaml/spec/def/arch'
 require 'travis/yaml/spec/def/branches'
 require 'travis/yaml/spec/def/compilers'
 require 'travis/yaml/spec/def/dist'
@@ -43,6 +44,7 @@ module Travis
             map    :version,        to: :str, format: ::Version::REQUIRE
             map    :language,       required: true, alias: :lang
             matrix :os,             required: true, to: :oss
+            matrix :arch,           to: :archs
             map    :dist,           required: true
             map    :sudo
             matrix :env
