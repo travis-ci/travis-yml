@@ -8,12 +8,7 @@ describe Travis::Yaml::Spec::Def::Group do
       defaults: [
         { value: 'stable' }
       ],
-      downcase: true,
-      flagged: true,
-      values: [
-        { value: 'stable' },
-        { value: 'edge' }
-      ]
+      downcase: true
     )
   end
 end

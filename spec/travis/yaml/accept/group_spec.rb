@@ -8,8 +8,8 @@ describe Travis::Yaml, 'group' do
     it { expect(group).to eq 'stable' }
   end
 
-  describe 'adds msgs about feature flags' do
-    let(:config) { { group: 'stable' } }
-    it { expect(info).to include [:info, :group, :flagged, given: :group] }
+  describe 'set arbitrary group value' do
+    let(:config) { { group: 'arbitrary' } }
+    it { expect(group).to eq 'arbitrary' }
   end
 end

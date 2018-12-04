@@ -10,10 +10,6 @@ module Travis
           def define
             default :stable
             downcase
-            flagged
-
-            value :stable
-            value :edge
           end
         end
       end
