@@ -4,7 +4,7 @@ module Travis
   module Yaml
     module Spec
       module Def
-        class Group < Type::Fixed
+        class Group < Type::Scalar
           register :group
 
           def define

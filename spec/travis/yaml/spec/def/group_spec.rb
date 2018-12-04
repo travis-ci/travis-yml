@@ -4,7 +4,7 @@ describe Travis::Yaml::Spec::Def::Group do
   it do
     expect(spec).to eq(
       name: :group,
-      type: :fixed,
+      type: :scalar,
       defaults: [
         { value: 'stable' }
       ],
