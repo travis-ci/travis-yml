@@ -18,10 +18,10 @@ task :update_spec do
   $LOAD_PATH.unshift(top.join('lib').to_s)
 
   require 'travis/yaml'
+  require 'neatjson'
 
-  srand(1)
   top.join('spec.json').write(
-    JSON.pretty_generate(Travis::Yaml.spec.sort.to_h)
+    JSON.neat_generate(Travis::Yaml.spec, sort: true, wrap: true)
   )
   puts 'Updated spec.json'
 end
