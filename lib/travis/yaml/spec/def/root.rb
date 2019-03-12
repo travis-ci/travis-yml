@@ -4,6 +4,7 @@ require 'travis/yaml/spec/def/compilers'
 require 'travis/yaml/spec/def/dist'
 require 'travis/yaml/spec/def/env'
 require 'travis/yaml/spec/def/git'
+require 'travis/yaml/spec/def/imports'
 require 'travis/yaml/spec/def/job'
 require 'travis/yaml/spec/def/language'
 require 'travis/yaml/spec/def/matrix'
@@ -42,6 +43,7 @@ module Travis
             self.include :job, :support
 
             map    :version,        to: :str, format: ::Version::REQUIRE
+            map    :import,         to: :imports
             map    :language,       required: true, alias: :lang
             matrix :os,             required: true, to: :oss
             matrix :arch,           to: :archs

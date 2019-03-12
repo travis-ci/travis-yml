@@ -12,8 +12,8 @@ describe Travis::Yaml::Spec::Def::Root do
 
   let(:keys) do
     %i(
-      version language os arch dist sudo env compiler matrix stages notifications
-      stack conditions filter_secrets trace
+      version import language os arch dist sudo env compiler matrix stages
+      notifications stack conditions filter_secrets trace
     )
   end
 
