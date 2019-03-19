@@ -46,7 +46,7 @@ module Travis
 
             def num2str?
               # e.g. `git: depth: 10`, as given in our docs (?)
-              value.is_a?(Fixnum) && spec.cast == :str
+              value.is_a?(Integer) && spec.cast == :str
             end
 
             # def str2bool?

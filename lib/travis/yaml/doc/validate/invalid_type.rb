@@ -15,7 +15,7 @@ module Travis
             NilClass:   :nil,
             TrueClass:  :bool,
             FalseClass: :bool,
-            Fixnum:     :str,
+            Integer:    :str,
             String:     :str,
             Regexp:     :str,
             Secure:     :secure,
