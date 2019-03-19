@@ -123,6 +123,32 @@ describe Travis::Yaml::Web::V1 do
     end
   end
 
+  describe 'POST /parse (multipart)' do
+    let(:travis_yml) { tempfile(['.travis', '.yml'], "rvm: 2.6.2\nenv:\n  FOO: foo") }
+    let(:import_yml) { tempfile(['.import', '.yml'], "script: echo foo\nenv:\n  BAR: bar") }
+
+    def tempfile(name, content)
+      Tempfile.new(name).tap { |f| f.write(content) && f.rewind }
+    end
+
+    def upload(file)
+      Rack::Test::UploadedFile.new(file)
+    end
+
+    before do
+      post "/parse?merge_mode=deep_merge", '', {
+        'config://.travis.yml' => upload(travis_yml),
+        'config://import.yml' => upload(import_yml),
+        'CONTENT_TYPE' => 'multipart/form-data'
+      }
+    end
+
+    it { expect(last_response.status).to eq 200 }
+    it { expect(response['config']['rvm']).to eq ['2.6.2'] }
+    it { expect(response['config']['script']).to eq ['echo foo'] }
+    it { expect(response['config']['env']['matrix']).to eq ['BAR=bar', 'FOO=foo'] }
+  end
+
   describe 'POST /expand' do
     it 'is ok' do
       post '/expand', '{"rvm":"2.3"}', {}
@@ -155,7 +181,6 @@ describe Travis::Yaml::Web::V1 do
 
       it 'returns error' do
         expect(response['error_type']).to eq 'encoding_error'
-        expect(response['error_message']).to match 'Empty input at line 1, column 1'
         expect(response['error_message']).to match /Empty input.*at line 1, column 1/
       end
     end
