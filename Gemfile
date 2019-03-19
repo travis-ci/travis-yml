@@ -22,4 +22,8 @@ group :test do
   gem 'rspec'
 end
 
+group :validate do
+  gem 'activerecord'
+end
+
 gemspec
