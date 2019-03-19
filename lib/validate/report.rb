@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'validate/config'
 require 'validate/local'
 require 'validate/table'

@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 class Table < Struct.new(:data, :headers)
   def rows
     @rows ||= data.map do |data|

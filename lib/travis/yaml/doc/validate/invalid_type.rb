@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'travis/yaml/helper/common'
 require 'travis/yaml/doc/helper/support'
 require 'travis/yaml/doc/validate/validator'

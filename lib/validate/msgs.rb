@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module Msgs
   def alias(msg)
     [msg.key, msg.args['alias'], msg.args['name']].join(' ')

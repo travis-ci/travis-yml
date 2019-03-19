@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'travis/yaml/spec/def/stack'
 require 'travis/yaml/spec/type/lang'
 

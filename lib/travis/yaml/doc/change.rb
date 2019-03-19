@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'travis/yaml/doc/change/cache'
 require 'travis/yaml/doc/change/cast'
 require 'travis/yaml/doc/change/downcase'

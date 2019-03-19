@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'travis/yaml/doc/validate/alert'
 require 'travis/yaml/doc/validate/condition'
 require 'travis/yaml/doc/validate/default'

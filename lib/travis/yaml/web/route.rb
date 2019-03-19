@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'oj'
 
 module Travis::Yaml::Web::Route

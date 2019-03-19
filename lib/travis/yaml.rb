@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'yaml'
 require 'travis/yaml/errors'
 require 'travis/yaml/doc/change'

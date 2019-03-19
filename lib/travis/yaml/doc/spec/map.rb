@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'travis/yaml/doc/spec/node'
 require 'travis/yaml/helper/common'
 require 'travis/yaml/helper/merge'

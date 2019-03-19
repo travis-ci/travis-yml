@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'amatch'
 require 'travis/yaml/support/obj'
 

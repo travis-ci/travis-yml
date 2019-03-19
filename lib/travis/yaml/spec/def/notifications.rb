@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'travis/yaml/spec/def/notification/campfire'
 require 'travis/yaml/spec/def/notification/email'
 require 'travis/yaml/spec/def/notification/flowdock'

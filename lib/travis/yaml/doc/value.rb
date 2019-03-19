@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'travis/yaml/doc/value/map'
 require 'travis/yaml/doc/value/node'
 require 'travis/yaml/doc/value/scalar'

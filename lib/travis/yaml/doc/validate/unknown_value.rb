@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'travis/yaml/doc/validate/validator'
 require 'travis/yaml/doc/helper/match'
 require 'travis/yaml/helper/memoize'
