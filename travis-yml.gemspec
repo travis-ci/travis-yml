@@ -17,23 +17,7 @@ Gem::Specification.new do |s|
   s.platform     = Gem::Platform::RUBY
   s.require_path = 'lib'
 
-  s.add_dependency 'amatch'
-  s.add_dependency 'oj'
-  s.add_dependency 'puma'
-  s.add_dependency 'rack'
-  s.add_dependency 'rack-cors'
-  s.add_dependency 'rack-ssl-enforcer'
-  s.add_dependency 'sentry-raven'
-  s.add_dependency 'travis-conditions'
-  s.add_dependency 'travis-config'
-
-  s.add_development_dependency 'activerecord'
-  s.add_development_dependency 'awesome_print'
-  s.add_development_dependency 'foreman'
-  s.add_development_dependency 'neatjson'
-  s.add_development_dependency 'pg'
-  s.add_development_dependency 'pry'
-  s.add_development_dependency 'rack-test'
-  s.add_development_dependency 'rake'
-  s.add_development_dependency 'rspec'
+  s.add_dependency 'amatch', '~> 0.4.0'
+  s.add_dependency 'oj', '~> 3.7.10'
+  s.add_dependency 'travis-conditions', '~> 1.0.5'
 end
