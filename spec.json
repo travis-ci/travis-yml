@@ -617,294 +617,6 @@
                                 }
                               ]
                             },
-                            "provider":{
-                              "key":"provider",
-                              "types":[
-                                {
-                                  "name":"provider",
-                                  "required":true,
-                                  "type":"fixed",
-                                  "values":[
-                                    {
-                                      "value":"deploy"
-                                    },
-                                    {
-                                      "value":"anynines"
-                                    },
-                                    {
-                                      "value":"appfog"
-                                    },
-                                    {
-                                      "value":"atlas"
-                                    },
-                                    {
-                                      "value":"azure_web_apps"
-                                    },
-                                    {
-                                      "value":"bintray"
-                                    },
-                                    {
-                                      "value":"bitballoon"
-                                    },
-                                    {
-                                      "value":"bluemixcf"
-                                    },
-                                    {
-                                      "value":"boxfuse"
-                                    },
-                                    {
-                                      "value":"catalyze"
-                                    },
-                                    {
-                                      "value":"chef_supermarket"
-                                    },
-                                    {
-                                      "value":"cloud66"
-                                    },
-                                    {
-                                      "value":"cloudcontrol"
-                                    },
-                                    {
-                                      "value":"cloudfiles"
-                                    },
-                                    {
-                                      "value":"cloudfoundry"
-                                    },
-                                    {
-                                      "value":"codedeploy"
-                                    },
-                                    {
-                                      "value":"deis"
-                                    },
-                                    {
-                                      "value":"divshot"
-                                    },
-                                    {
-                                      "value":"elasticbeanstalk"
-                                    },
-                                    {
-                                      "value":"engineyard"
-                                    },
-                                    {
-                                      "value":"firebase"
-                                    },
-                                    {
-                                      "value":"gae"
-                                    },
-                                    {
-                                      "value":"gcs"
-                                    },
-                                    {
-                                      "value":"hackage"
-                                    },
-                                    {
-                                      "value":"heroku"
-                                    },
-                                    {
-                                      "value":"lambda"
-                                    },
-                                    {
-                                      "value":"launchpad"
-                                    },
-                                    {
-                                      "value":"modulus"
-                                    },
-                                    {
-                                      "value":"npm"
-                                    },
-                                    {
-                                      "value":"openshift"
-                                    },
-                                    {
-                                      "value":"opsworks"
-                                    },
-                                    {
-                                      "value":"packagecloud"
-                                    },
-                                    {
-                                      "value":"pages"
-                                    },
-                                    {
-                                      "value":"puppetforge"
-                                    },
-                                    {
-                                      "value":"pypi"
-                                    },
-                                    {
-                                      "value":"releases"
-                                    },
-                                    {
-                                      "value":"rubygems"
-                                    },
-                                    {
-                                      "value":"s3"
-                                    },
-                                    {
-                                      "value":"scalingo"
-                                    },
-                                    {
-                                      "value":"script"
-                                    },
-                                    {
-                                      "value":"surge"
-                                    },
-                                    {
-                                      "value":"testfairy"
-                                    }
-                                  ]
-                                }
-                              ]
-                            },
-                            "skip_cleanup":{
-                              "key":"skip_cleanup",
-                              "types":[
-                                {
-                                  "cast":"bool",
-                                  "type":"scalar"
-                                }
-                              ]
-                            }
-                          },
-                          "name":"deploy",
-                          "prefix":{
-                            "key":"provider",
-                            "type":[
-                              "str"
-                            ]
-                          },
-                          "strict":false,
-                          "type":"map",
-                          "types":[
-                            {
-                              "deprecated":"branch_specific_option_hash",
-                              "name":"deploy_branches",
-                              "strict":false,
-                              "type":"map"
-                            }
-                          ]
-                        },
-                        {
-                          "map":{
-                            "allow_failure":{
-                              "key":"allow_failure",
-                              "types":[
-                                {
-                                  "cast":"bool",
-                                  "type":"scalar"
-                                }
-                              ]
-                            },
-                            "edge":{
-                              "key":"edge",
-                              "types":[
-                                {
-                                  "edge":true,
-                                  "map":{
-                                    "branch":{
-                                      "key":"branch",
-                                      "types":[
-                                        {
-                                          "type":"scalar"
-                                        }
-                                      ]
-                                    },
-                                    "source":{
-                                      "key":"source",
-                                      "types":[
-                                        {
-                                          "type":"scalar"
-                                        }
-                                      ]
-                                    }
-                                  },
-                                  "name":"deploy_edge",
-                                  "type":"map"
-                                },
-                                {
-                                  "cast":"bool",
-                                  "edge":true,
-                                  "type":"scalar"
-                                }
-                              ]
-                            },
-                            "on":{
-                              "key":"on",
-                              "types":[
-                                {
-                                  "include":[
-                                    "support"
-                                  ],
-                                  "map":{
-                                    "all_branches":{
-                                      "key":"all_branches",
-                                      "types":[
-                                        {
-                                          "cast":"bool",
-                                          "type":"scalar"
-                                        }
-                                      ]
-                                    },
-                                    "branch":{
-                                      "key":"branch",
-                                      "types":[
-                                        {
-                                          "alias":[
-                                            "branches"
-                                          ],
-                                          "type":"seq",
-                                          "types":[
-                                            {
-                                              "type":"scalar"
-                                            }
-                                          ]
-                                        },
-                                        {
-                                          "alias":[
-                                            "branches"
-                                          ],
-                                          "strict":false,
-                                          "type":"map"
-                                        }
-                                      ]
-                                    },
-                                    "condition":{
-                                      "key":"condition",
-                                      "types":[
-                                        {
-                                          "type":"scalar"
-                                        }
-                                      ]
-                                    },
-                                    "repo":{
-                                      "key":"repo",
-                                      "types":[
-                                        {
-                                          "type":"scalar"
-                                        }
-                                      ]
-                                    },
-                                    "tags":{
-                                      "key":"tags",
-                                      "types":[
-                                        {
-                                          "cast":"bool",
-                                          "type":"scalar"
-                                        }
-                                      ]
-                                    }
-                                  },
-                                  "name":"deploy_conditions",
-                                  "prefix":{
-                                    "key":"branch",
-                                    "type":[
-                                      "str",
-                                      "seq"
-                                    ]
-                                  },
-                                  "type":"map"
-                                }
-                              ]
-                            },
                             "organization":{
                               "key":"organization",
                               "types":[
@@ -943,9 +655,6 @@
                                   "type":"fixed",
                                   "values":[
                                     {
-                                      "value":"deploy"
-                                    },
-                                    {
                                       "value":"anynines"
                                     },
                                     {
@@ -992,6 +701,9 @@
                                     },
                                     {
                                       "value":"deis"
+                                    },
+                                    {
+                                      "value":"deploy"
                                     },
                                     {
                                       "value":"divshot"
@@ -1388,9 +1100,6 @@
                                   "type":"fixed",
                                   "values":[
                                     {
-                                      "value":"deploy"
-                                    },
-                                    {
                                       "value":"anynines"
                                     },
                                     {
@@ -1437,6 +1146,9 @@
                                     },
                                     {
                                       "value":"deis"
+                                    },
+                                    {
+                                      "value":"deploy"
                                     },
                                     {
                                       "value":"divshot"
@@ -1796,9 +1508,6 @@
                                   "type":"fixed",
                                   "values":[
                                     {
-                                      "value":"deploy"
-                                    },
-                                    {
                                       "value":"anynines"
                                     },
                                     {
@@ -1845,6 +1554,9 @@
                                     },
                                     {
                                       "value":"deis"
+                                    },
+                                    {
+                                      "value":"deploy"
                                     },
                                     {
                                       "value":"divshot"
@@ -2143,9 +1855,6 @@
                                   "type":"fixed",
                                   "values":[
                                     {
-                                      "value":"deploy"
-                                    },
-                                    {
                                       "value":"anynines"
                                     },
                                     {
@@ -2192,6 +1901,9 @@
                                     },
                                     {
                                       "value":"deis"
+                                    },
+                                    {
+                                      "value":"deploy"
                                     },
                                     {
                                       "value":"divshot"
@@ -2548,9 +2260,6 @@
                                   "type":"fixed",
                                   "values":[
                                     {
-                                      "value":"deploy"
-                                    },
-                                    {
                                       "value":"anynines"
                                     },
                                     {
@@ -2597,6 +2306,9 @@
                                     },
                                     {
                                       "value":"deis"
+                                    },
+                                    {
+                                      "value":"deploy"
                                     },
                                     {
                                       "value":"divshot"
@@ -2880,9 +2592,6 @@
                                   "type":"fixed",
                                   "values":[
                                     {
-                                      "value":"deploy"
-                                    },
-                                    {
                                       "value":"anynines"
                                     },
                                     {
@@ -2929,6 +2638,9 @@
                                     },
                                     {
                                       "value":"deis"
+                                    },
+                                    {
+                                      "value":"deploy"
                                     },
                                     {
                                       "value":"divshot"
@@ -3239,9 +2951,6 @@
                                   "type":"fixed",
                                   "values":[
                                     {
-                                      "value":"deploy"
-                                    },
-                                    {
                                       "value":"anynines"
                                     },
                                     {
@@ -3288,6 +2997,9 @@
                                     },
                                     {
                                       "value":"deis"
+                                    },
+                                    {
+                                      "value":"deploy"
                                     },
                                     {
                                       "value":"divshot"
@@ -3669,9 +3381,6 @@
                                   "type":"fixed",
                                   "values":[
                                     {
-                                      "value":"deploy"
-                                    },
-                                    {
                                       "value":"anynines"
                                     },
                                     {
@@ -3718,6 +3427,9 @@
                                     },
                                     {
                                       "value":"deis"
+                                    },
+                                    {
+                                      "value":"deploy"
                                     },
                                     {
                                       "value":"divshot"
@@ -4015,9 +3727,6 @@
                                   "type":"fixed",
                                   "values":[
                                     {
-                                      "value":"deploy"
-                                    },
-                                    {
                                       "value":"anynines"
                                     },
                                     {
@@ -4064,6 +3773,9 @@
                                     },
                                     {
                                       "value":"deis"
+                                    },
+                                    {
+                                      "value":"deploy"
                                     },
                                     {
                                       "value":"divshot"
@@ -4346,9 +4058,6 @@
                                   "type":"fixed",
                                   "values":[
                                     {
-                                      "value":"deploy"
-                                    },
-                                    {
                                       "value":"anynines"
                                     },
                                     {
@@ -4395,6 +4104,9 @@
                                     },
                                     {
                                       "value":"deis"
+                                    },
+                                    {
+                                      "value":"deploy"
                                     },
                                     {
                                       "value":"divshot"
@@ -4649,9 +4361,6 @@
                                   "type":"fixed",
                                   "values":[
                                     {
-                                      "value":"deploy"
-                                    },
-                                    {
                                       "value":"anynines"
                                     },
                                     {
@@ -4698,6 +4407,9 @@
                                     },
                                     {
                                       "value":"deis"
+                                    },
+                                    {
+                                      "value":"deploy"
                                     },
                                     {
                                       "value":"divshot"
@@ -4995,9 +4707,6 @@
                                   "type":"fixed",
                                   "values":[
                                     {
-                                      "value":"deploy"
-                                    },
-                                    {
                                       "value":"anynines"
                                     },
                                     {
@@ -5044,6 +4753,9 @@
                                     },
                                     {
                                       "value":"deis"
+                                    },
+                                    {
+                                      "value":"deploy"
                                     },
                                     {
                                       "value":"divshot"
@@ -5327,9 +5039,6 @@
                                   "type":"fixed",
                                   "values":[
                                     {
-                                      "value":"deploy"
-                                    },
-                                    {
                                       "value":"anynines"
                                     },
                                     {
@@ -5376,6 +5085,9 @@
                                     },
                                     {
                                       "value":"deis"
+                                    },
+                                    {
+                                      "value":"deploy"
                                     },
                                     {
                                       "value":"divshot"
@@ -5715,9 +5427,6 @@
                                   "type":"fixed",
                                   "values":[
                                     {
-                                      "value":"deploy"
-                                    },
-                                    {
                                       "value":"anynines"
                                     },
                                     {
@@ -5764,6 +5473,9 @@
                                     },
                                     {
                                       "value":"deis"
+                                    },
+                                    {
+                                      "value":"deploy"
                                     },
                                     {
                                       "value":"divshot"
@@ -6132,9 +5844,6 @@
                                   "type":"fixed",
                                   "values":[
                                     {
-                                      "value":"deploy"
-                                    },
-                                    {
                                       "value":"anynines"
                                     },
                                     {
@@ -6181,6 +5890,9 @@
                                     },
                                     {
                                       "value":"deis"
+                                    },
+                                    {
+                                      "value":"deploy"
                                     },
                                     {
                                       "value":"divshot"
@@ -6558,9 +6270,6 @@
                                   "type":"fixed",
                                   "values":[
                                     {
-                                      "value":"deploy"
-                                    },
-                                    {
                                       "value":"anynines"
                                     },
                                     {
@@ -6607,6 +6316,9 @@
                                     },
                                     {
                                       "value":"deis"
+                                    },
+                                    {
+                                      "value":"deploy"
                                     },
                                     {
                                       "value":"divshot"
@@ -6713,6 +6425,294 @@
                             }
                           },
                           "name":"deis",
+                          "prefix":{
+                            "key":"provider",
+                            "type":[
+                              "str"
+                            ]
+                          },
+                          "strict":false,
+                          "type":"map",
+                          "types":[
+                            {
+                              "deprecated":"branch_specific_option_hash",
+                              "name":"deploy_branches",
+                              "strict":false,
+                              "type":"map"
+                            }
+                          ]
+                        },
+                        {
+                          "map":{
+                            "allow_failure":{
+                              "key":"allow_failure",
+                              "types":[
+                                {
+                                  "cast":"bool",
+                                  "type":"scalar"
+                                }
+                              ]
+                            },
+                            "edge":{
+                              "key":"edge",
+                              "types":[
+                                {
+                                  "edge":true,
+                                  "map":{
+                                    "branch":{
+                                      "key":"branch",
+                                      "types":[
+                                        {
+                                          "type":"scalar"
+                                        }
+                                      ]
+                                    },
+                                    "source":{
+                                      "key":"source",
+                                      "types":[
+                                        {
+                                          "type":"scalar"
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  "name":"deploy_edge",
+                                  "type":"map"
+                                },
+                                {
+                                  "cast":"bool",
+                                  "edge":true,
+                                  "type":"scalar"
+                                }
+                              ]
+                            },
+                            "on":{
+                              "key":"on",
+                              "types":[
+                                {
+                                  "include":[
+                                    "support"
+                                  ],
+                                  "map":{
+                                    "all_branches":{
+                                      "key":"all_branches",
+                                      "types":[
+                                        {
+                                          "cast":"bool",
+                                          "type":"scalar"
+                                        }
+                                      ]
+                                    },
+                                    "branch":{
+                                      "key":"branch",
+                                      "types":[
+                                        {
+                                          "alias":[
+                                            "branches"
+                                          ],
+                                          "type":"seq",
+                                          "types":[
+                                            {
+                                              "type":"scalar"
+                                            }
+                                          ]
+                                        },
+                                        {
+                                          "alias":[
+                                            "branches"
+                                          ],
+                                          "strict":false,
+                                          "type":"map"
+                                        }
+                                      ]
+                                    },
+                                    "condition":{
+                                      "key":"condition",
+                                      "types":[
+                                        {
+                                          "type":"scalar"
+                                        }
+                                      ]
+                                    },
+                                    "repo":{
+                                      "key":"repo",
+                                      "types":[
+                                        {
+                                          "type":"scalar"
+                                        }
+                                      ]
+                                    },
+                                    "tags":{
+                                      "key":"tags",
+                                      "types":[
+                                        {
+                                          "cast":"bool",
+                                          "type":"scalar"
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  "name":"deploy_conditions",
+                                  "prefix":{
+                                    "key":"branch",
+                                    "type":[
+                                      "str",
+                                      "seq"
+                                    ]
+                                  },
+                                  "type":"map"
+                                }
+                              ]
+                            },
+                            "provider":{
+                              "key":"provider",
+                              "types":[
+                                {
+                                  "name":"provider",
+                                  "required":true,
+                                  "type":"fixed",
+                                  "values":[
+                                    {
+                                      "value":"anynines"
+                                    },
+                                    {
+                                      "value":"appfog"
+                                    },
+                                    {
+                                      "value":"atlas"
+                                    },
+                                    {
+                                      "value":"azure_web_apps"
+                                    },
+                                    {
+                                      "value":"bintray"
+                                    },
+                                    {
+                                      "value":"bitballoon"
+                                    },
+                                    {
+                                      "value":"bluemixcf"
+                                    },
+                                    {
+                                      "value":"boxfuse"
+                                    },
+                                    {
+                                      "value":"catalyze"
+                                    },
+                                    {
+                                      "value":"chef_supermarket"
+                                    },
+                                    {
+                                      "value":"cloud66"
+                                    },
+                                    {
+                                      "value":"cloudcontrol"
+                                    },
+                                    {
+                                      "value":"cloudfiles"
+                                    },
+                                    {
+                                      "value":"cloudfoundry"
+                                    },
+                                    {
+                                      "value":"codedeploy"
+                                    },
+                                    {
+                                      "value":"deis"
+                                    },
+                                    {
+                                      "value":"deploy"
+                                    },
+                                    {
+                                      "value":"divshot"
+                                    },
+                                    {
+                                      "value":"elasticbeanstalk"
+                                    },
+                                    {
+                                      "value":"engineyard"
+                                    },
+                                    {
+                                      "value":"firebase"
+                                    },
+                                    {
+                                      "value":"gae"
+                                    },
+                                    {
+                                      "value":"gcs"
+                                    },
+                                    {
+                                      "value":"hackage"
+                                    },
+                                    {
+                                      "value":"heroku"
+                                    },
+                                    {
+                                      "value":"lambda"
+                                    },
+                                    {
+                                      "value":"launchpad"
+                                    },
+                                    {
+                                      "value":"modulus"
+                                    },
+                                    {
+                                      "value":"npm"
+                                    },
+                                    {
+                                      "value":"openshift"
+                                    },
+                                    {
+                                      "value":"opsworks"
+                                    },
+                                    {
+                                      "value":"packagecloud"
+                                    },
+                                    {
+                                      "value":"pages"
+                                    },
+                                    {
+                                      "value":"puppetforge"
+                                    },
+                                    {
+                                      "value":"pypi"
+                                    },
+                                    {
+                                      "value":"releases"
+                                    },
+                                    {
+                                      "value":"rubygems"
+                                    },
+                                    {
+                                      "value":"s3"
+                                    },
+                                    {
+                                      "value":"scalingo"
+                                    },
+                                    {
+                                      "value":"script"
+                                    },
+                                    {
+                                      "value":"surge"
+                                    },
+                                    {
+                                      "value":"testfairy"
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            "skip_cleanup":{
+                              "key":"skip_cleanup",
+                              "types":[
+                                {
+                                  "cast":"bool",
+                                  "type":"scalar"
+                                }
+                              ]
+                            }
+                          },
+                          "name":"deploy",
                           "prefix":{
                             "key":"provider",
                             "type":[
@@ -6890,9 +6890,6 @@
                                   "type":"fixed",
                                   "values":[
                                     {
-                                      "value":"deploy"
-                                    },
-                                    {
                                       "value":"anynines"
                                     },
                                     {
@@ -6939,6 +6936,9 @@
                                     },
                                     {
                                       "value":"deis"
+                                    },
+                                    {
+                                      "value":"deploy"
                                     },
                                     {
                                       "value":"divshot"
@@ -7264,9 +7264,6 @@
                                   "type":"fixed",
                                   "values":[
                                     {
-                                      "value":"deploy"
-                                    },
-                                    {
                                       "value":"anynines"
                                     },
                                     {
@@ -7313,6 +7310,9 @@
                                     },
                                     {
                                       "value":"deis"
+                                    },
+                                    {
+                                      "value":"deploy"
                                     },
                                     {
                                       "value":"divshot"
@@ -7667,9 +7667,6 @@
                                   "type":"fixed",
                                   "values":[
                                     {
-                                      "value":"deploy"
-                                    },
-                                    {
                                       "value":"anynines"
                                     },
                                     {
@@ -7716,6 +7713,9 @@
                                     },
                                     {
                                       "value":"deis"
+                                    },
+                                    {
+                                      "value":"deploy"
                                     },
                                     {
                                       "value":"divshot"
@@ -7998,9 +7998,6 @@
                                   "type":"fixed",
                                   "values":[
                                     {
-                                      "value":"deploy"
-                                    },
-                                    {
                                       "value":"anynines"
                                     },
                                     {
@@ -8047,6 +8044,9 @@
                                     },
                                     {
                                       "value":"deis"
+                                    },
+                                    {
+                                      "value":"deploy"
                                     },
                                     {
                                       "value":"divshot"
@@ -8373,9 +8373,6 @@
                                   "type":"fixed",
                                   "values":[
                                     {
-                                      "value":"deploy"
-                                    },
-                                    {
                                       "value":"anynines"
                                     },
                                     {
@@ -8422,6 +8419,9 @@
                                     },
                                     {
                                       "value":"deis"
+                                    },
+                                    {
+                                      "value":"deploy"
                                     },
                                     {
                                       "value":"divshot"
@@ -8790,9 +8790,6 @@
                                   "type":"fixed",
                                   "values":[
                                     {
-                                      "value":"deploy"
-                                    },
-                                    {
                                       "value":"anynines"
                                     },
                                     {
@@ -8839,6 +8836,9 @@
                                     },
                                     {
                                       "value":"deis"
+                                    },
+                                    {
+                                      "value":"deploy"
                                     },
                                     {
                                       "value":"divshot"
@@ -9122,9 +9122,6 @@
                                   "type":"fixed",
                                   "values":[
                                     {
-                                      "value":"deploy"
-                                    },
-                                    {
                                       "value":"anynines"
                                     },
                                     {
@@ -9171,6 +9168,9 @@
                                     },
                                     {
                                       "value":"deis"
+                                    },
+                                    {
+                                      "value":"deploy"
                                     },
                                     {
                                       "value":"divshot"
@@ -9468,9 +9468,6 @@
                                   "type":"fixed",
                                   "values":[
                                     {
-                                      "value":"deploy"
-                                    },
-                                    {
                                       "value":"anynines"
                                     },
                                     {
@@ -9517,6 +9514,9 @@
                                     },
                                     {
                                       "value":"deis"
+                                    },
+                                    {
+                                      "value":"deploy"
                                     },
                                     {
                                       "value":"divshot"
@@ -9959,9 +9959,6 @@
                                   "type":"fixed",
                                   "values":[
                                     {
-                                      "value":"deploy"
-                                    },
-                                    {
                                       "value":"anynines"
                                     },
                                     {
@@ -10008,6 +10005,9 @@
                                     },
                                     {
                                       "value":"deis"
+                                    },
+                                    {
+                                      "value":"deploy"
                                     },
                                     {
                                       "value":"divshot"
@@ -10446,9 +10446,6 @@
                                   "type":"fixed",
                                   "values":[
                                     {
-                                      "value":"deploy"
-                                    },
-                                    {
                                       "value":"anynines"
                                     },
                                     {
@@ -10495,6 +10492,9 @@
                                     },
                                     {
                                       "value":"deis"
+                                    },
+                                    {
+                                      "value":"deploy"
                                     },
                                     {
                                       "value":"divshot"
@@ -10778,9 +10778,6 @@
                                   "type":"fixed",
                                   "values":[
                                     {
-                                      "value":"deploy"
-                                    },
-                                    {
                                       "value":"anynines"
                                     },
                                     {
@@ -10827,6 +10824,9 @@
                                     },
                                     {
                                       "value":"deis"
+                                    },
+                                    {
+                                      "value":"deploy"
                                     },
                                     {
                                       "value":"divshot"
@@ -11096,9 +11096,6 @@
                                   "type":"fixed",
                                   "values":[
                                     {
-                                      "value":"deploy"
-                                    },
-                                    {
                                       "value":"anynines"
                                     },
                                     {
@@ -11145,6 +11142,9 @@
                                     },
                                     {
                                       "value":"deis"
+                                    },
+                                    {
+                                      "value":"deploy"
                                     },
                                     {
                                       "value":"divshot"
@@ -11441,9 +11441,6 @@
                                   "type":"fixed",
                                   "values":[
                                     {
-                                      "value":"deploy"
-                                    },
-                                    {
                                       "value":"anynines"
                                     },
                                     {
@@ -11490,6 +11487,9 @@
                                     },
                                     {
                                       "value":"deis"
+                                    },
+                                    {
+                                      "value":"deploy"
                                     },
                                     {
                                       "value":"divshot"
@@ -11830,9 +11830,6 @@
                                   "type":"fixed",
                                   "values":[
                                     {
-                                      "value":"deploy"
-                                    },
-                                    {
                                       "value":"anynines"
                                     },
                                     {
@@ -11879,6 +11876,9 @@
                                     },
                                     {
                                       "value":"deis"
+                                    },
+                                    {
+                                      "value":"deploy"
                                     },
                                     {
                                       "value":"divshot"
@@ -12204,9 +12204,6 @@
                                   "type":"fixed",
                                   "values":[
                                     {
-                                      "value":"deploy"
-                                    },
-                                    {
                                       "value":"anynines"
                                     },
                                     {
@@ -12253,6 +12250,9 @@
                                     },
                                     {
                                       "value":"deis"
+                                    },
+                                    {
+                                      "value":"deploy"
                                     },
                                     {
                                       "value":"divshot"
@@ -12695,9 +12695,6 @@
                                   "type":"fixed",
                                   "values":[
                                     {
-                                      "value":"deploy"
-                                    },
-                                    {
                                       "value":"anynines"
                                     },
                                     {
@@ -12744,6 +12741,9 @@
                                     },
                                     {
                                       "value":"deis"
+                                    },
+                                    {
+                                      "value":"deploy"
                                     },
                                     {
                                       "value":"divshot"
@@ -13042,9 +13042,6 @@
                                   "type":"fixed",
                                   "values":[
                                     {
-                                      "value":"deploy"
-                                    },
-                                    {
                                       "value":"anynines"
                                     },
                                     {
@@ -13091,6 +13088,9 @@
                                     },
                                     {
                                       "value":"deis"
+                                    },
+                                    {
+                                      "value":"deploy"
                                     },
                                     {
                                       "value":"divshot"
@@ -13418,9 +13418,6 @@
                                   "type":"fixed",
                                   "values":[
                                     {
-                                      "value":"deploy"
-                                    },
-                                    {
                                       "value":"anynines"
                                     },
                                     {
@@ -13467,6 +13464,9 @@
                                     },
                                     {
                                       "value":"deis"
+                                    },
+                                    {
+                                      "value":"deploy"
                                     },
                                     {
                                       "value":"divshot"
@@ -13830,9 +13830,6 @@
                                   "type":"fixed",
                                   "values":[
                                     {
-                                      "value":"deploy"
-                                    },
-                                    {
                                       "value":"anynines"
                                     },
                                     {
@@ -13879,6 +13876,9 @@
                                     },
                                     {
                                       "value":"deis"
+                                    },
+                                    {
+                                      "value":"deploy"
                                     },
                                     {
                                       "value":"divshot"
@@ -14218,9 +14218,6 @@
                                   "type":"fixed",
                                   "values":[
                                     {
-                                      "value":"deploy"
-                                    },
-                                    {
                                       "value":"anynines"
                                     },
                                     {
@@ -14267,6 +14264,9 @@
                                     },
                                     {
                                       "value":"deis"
+                                    },
+                                    {
+                                      "value":"deploy"
                                     },
                                     {
                                       "value":"divshot"
@@ -14649,9 +14649,6 @@
                                   "type":"fixed",
                                   "values":[
                                     {
-                                      "value":"deploy"
-                                    },
-                                    {
                                       "value":"anynines"
                                     },
                                     {
@@ -14698,6 +14695,9 @@
                                     },
                                     {
                                       "value":"deis"
+                                    },
+                                    {
+                                      "value":"deploy"
                                     },
                                     {
                                       "value":"divshot"
@@ -15067,9 +15067,6 @@
                                   "type":"fixed",
                                   "values":[
                                     {
-                                      "value":"deploy"
-                                    },
-                                    {
                                       "value":"anynines"
                                     },
                                     {
@@ -15116,6 +15113,9 @@
                                     },
                                     {
                                       "value":"deis"
+                                    },
+                                    {
+                                      "value":"deploy"
                                     },
                                     {
                                       "value":"divshot"
@@ -15384,9 +15384,6 @@
                                   "type":"fixed",
                                   "values":[
                                     {
-                                      "value":"deploy"
-                                    },
-                                    {
                                       "value":"anynines"
                                     },
                                     {
@@ -15433,6 +15430,9 @@
                                     },
                                     {
                                       "value":"deis"
+                                    },
+                                    {
+                                      "value":"deploy"
                                     },
                                     {
                                       "value":"divshot"
@@ -15714,9 +15714,6 @@
                                   "type":"fixed",
                                   "values":[
                                     {
-                                      "value":"deploy"
-                                    },
-                                    {
                                       "value":"anynines"
                                     },
                                     {
@@ -15763,6 +15760,9 @@
                                     },
                                     {
                                       "value":"deis"
+                                    },
+                                    {
+                                      "value":"deploy"
                                     },
                                     {
                                       "value":"divshot"
@@ -16133,9 +16133,6 @@
                                   "type":"fixed",
                                   "values":[
                                     {
-                                      "value":"deploy"
-                                    },
-                                    {
                                       "value":"anynines"
                                     },
                                     {
@@ -16182,6 +16179,9 @@
                                     },
                                     {
                                       "value":"deis"
+                                    },
+                                    {
+                                      "value":"deploy"
                                     },
                                     {
                                       "value":"divshot"
@@ -17163,294 +17163,6 @@
                         }
                       ]
                     },
-                    "provider":{
-                      "key":"provider",
-                      "types":[
-                        {
-                          "name":"provider",
-                          "required":true,
-                          "type":"fixed",
-                          "values":[
-                            {
-                              "value":"deploy"
-                            },
-                            {
-                              "value":"anynines"
-                            },
-                            {
-                              "value":"appfog"
-                            },
-                            {
-                              "value":"atlas"
-                            },
-                            {
-                              "value":"azure_web_apps"
-                            },
-                            {
-                              "value":"bintray"
-                            },
-                            {
-                              "value":"bitballoon"
-                            },
-                            {
-                              "value":"bluemixcf"
-                            },
-                            {
-                              "value":"boxfuse"
-                            },
-                            {
-                              "value":"catalyze"
-                            },
-                            {
-                              "value":"chef_supermarket"
-                            },
-                            {
-                              "value":"cloud66"
-                            },
-                            {
-                              "value":"cloudcontrol"
-                            },
-                            {
-                              "value":"cloudfiles"
-                            },
-                            {
-                              "value":"cloudfoundry"
-                            },
-                            {
-                              "value":"codedeploy"
-                            },
-                            {
-                              "value":"deis"
-                            },
-                            {
-                              "value":"divshot"
-                            },
-                            {
-                              "value":"elasticbeanstalk"
-                            },
-                            {
-                              "value":"engineyard"
-                            },
-                            {
-                              "value":"firebase"
-                            },
-                            {
-                              "value":"gae"
-                            },
-                            {
-                              "value":"gcs"
-                            },
-                            {
-                              "value":"hackage"
-                            },
-                            {
-                              "value":"heroku"
-                            },
-                            {
-                              "value":"lambda"
-                            },
-                            {
-                              "value":"launchpad"
-                            },
-                            {
-                              "value":"modulus"
-                            },
-                            {
-                              "value":"npm"
-                            },
-                            {
-                              "value":"openshift"
-                            },
-                            {
-                              "value":"opsworks"
-                            },
-                            {
-                              "value":"packagecloud"
-                            },
-                            {
-                              "value":"pages"
-                            },
-                            {
-                              "value":"puppetforge"
-                            },
-                            {
-                              "value":"pypi"
-                            },
-                            {
-                              "value":"releases"
-                            },
-                            {
-                              "value":"rubygems"
-                            },
-                            {
-                              "value":"s3"
-                            },
-                            {
-                              "value":"scalingo"
-                            },
-                            {
-                              "value":"script"
-                            },
-                            {
-                              "value":"surge"
-                            },
-                            {
-                              "value":"testfairy"
-                            }
-                          ]
-                        }
-                      ]
-                    },
-                    "skip_cleanup":{
-                      "key":"skip_cleanup",
-                      "types":[
-                        {
-                          "cast":"bool",
-                          "type":"scalar"
-                        }
-                      ]
-                    }
-                  },
-                  "name":"deploy",
-                  "prefix":{
-                    "key":"provider",
-                    "type":[
-                      "str"
-                    ]
-                  },
-                  "strict":false,
-                  "type":"map",
-                  "types":[
-                    {
-                      "deprecated":"branch_specific_option_hash",
-                      "name":"deploy_branches",
-                      "strict":false,
-                      "type":"map"
-                    }
-                  ]
-                },
-                {
-                  "map":{
-                    "allow_failure":{
-                      "key":"allow_failure",
-                      "types":[
-                        {
-                          "cast":"bool",
-                          "type":"scalar"
-                        }
-                      ]
-                    },
-                    "edge":{
-                      "key":"edge",
-                      "types":[
-                        {
-                          "edge":true,
-                          "map":{
-                            "branch":{
-                              "key":"branch",
-                              "types":[
-                                {
-                                  "type":"scalar"
-                                }
-                              ]
-                            },
-                            "source":{
-                              "key":"source",
-                              "types":[
-                                {
-                                  "type":"scalar"
-                                }
-                              ]
-                            }
-                          },
-                          "name":"deploy_edge",
-                          "type":"map"
-                        },
-                        {
-                          "cast":"bool",
-                          "edge":true,
-                          "type":"scalar"
-                        }
-                      ]
-                    },
-                    "on":{
-                      "key":"on",
-                      "types":[
-                        {
-                          "include":[
-                            "support"
-                          ],
-                          "map":{
-                            "all_branches":{
-                              "key":"all_branches",
-                              "types":[
-                                {
-                                  "cast":"bool",
-                                  "type":"scalar"
-                                }
-                              ]
-                            },
-                            "branch":{
-                              "key":"branch",
-                              "types":[
-                                {
-                                  "alias":[
-                                    "branches"
-                                  ],
-                                  "type":"seq",
-                                  "types":[
-                                    {
-                                      "type":"scalar"
-                                    }
-                                  ]
-                                },
-                                {
-                                  "alias":[
-                                    "branches"
-                                  ],
-                                  "strict":false,
-                                  "type":"map"
-                                }
-                              ]
-                            },
-                            "condition":{
-                              "key":"condition",
-                              "types":[
-                                {
-                                  "type":"scalar"
-                                }
-                              ]
-                            },
-                            "repo":{
-                              "key":"repo",
-                              "types":[
-                                {
-                                  "type":"scalar"
-                                }
-                              ]
-                            },
-                            "tags":{
-                              "key":"tags",
-                              "types":[
-                                {
-                                  "cast":"bool",
-                                  "type":"scalar"
-                                }
-                              ]
-                            }
-                          },
-                          "name":"deploy_conditions",
-                          "prefix":{
-                            "key":"branch",
-                            "type":[
-                              "str",
-                              "seq"
-                            ]
-                          },
-                          "type":"map"
-                        }
-                      ]
-                    },
                     "organization":{
                       "key":"organization",
                       "types":[
@@ -17489,9 +17201,6 @@
                           "type":"fixed",
                           "values":[
                             {
-                              "value":"deploy"
-                            },
-                            {
                               "value":"anynines"
                             },
                             {
@@ -17538,6 +17247,9 @@
                             },
                             {
                               "value":"deis"
+                            },
+                            {
+                              "value":"deploy"
                             },
                             {
                               "value":"divshot"
@@ -17934,9 +17646,6 @@
                           "type":"fixed",
                           "values":[
                             {
-                              "value":"deploy"
-                            },
-                            {
                               "value":"anynines"
                             },
                             {
@@ -17983,6 +17692,9 @@
                             },
                             {
                               "value":"deis"
+                            },
+                            {
+                              "value":"deploy"
                             },
                             {
                               "value":"divshot"
@@ -18342,9 +18054,6 @@
                           "type":"fixed",
                           "values":[
                             {
-                              "value":"deploy"
-                            },
-                            {
                               "value":"anynines"
                             },
                             {
@@ -18391,6 +18100,9 @@
                             },
                             {
                               "value":"deis"
+                            },
+                            {
+                              "value":"deploy"
                             },
                             {
                               "value":"divshot"
@@ -18689,9 +18401,6 @@
                           "type":"fixed",
                           "values":[
                             {
-                              "value":"deploy"
-                            },
-                            {
                               "value":"anynines"
                             },
                             {
@@ -18738,6 +18447,9 @@
                             },
                             {
                               "value":"deis"
+                            },
+                            {
+                              "value":"deploy"
                             },
                             {
                               "value":"divshot"
@@ -19094,9 +18806,6 @@
                           "type":"fixed",
                           "values":[
                             {
-                              "value":"deploy"
-                            },
-                            {
                               "value":"anynines"
                             },
                             {
@@ -19143,6 +18852,9 @@
                             },
                             {
                               "value":"deis"
+                            },
+                            {
+                              "value":"deploy"
                             },
                             {
                               "value":"divshot"
@@ -19426,9 +19138,6 @@
                           "type":"fixed",
                           "values":[
                             {
-                              "value":"deploy"
-                            },
-                            {
                               "value":"anynines"
                             },
                             {
@@ -19475,6 +19184,9 @@
                             },
                             {
                               "value":"deis"
+                            },
+                            {
+                              "value":"deploy"
                             },
                             {
                               "value":"divshot"
@@ -19785,9 +19497,6 @@
                           "type":"fixed",
                           "values":[
                             {
-                              "value":"deploy"
-                            },
-                            {
                               "value":"anynines"
                             },
                             {
@@ -19834,6 +19543,9 @@
                             },
                             {
                               "value":"deis"
+                            },
+                            {
+                              "value":"deploy"
                             },
                             {
                               "value":"divshot"
@@ -20215,9 +19927,6 @@
                           "type":"fixed",
                           "values":[
                             {
-                              "value":"deploy"
-                            },
-                            {
                               "value":"anynines"
                             },
                             {
@@ -20264,6 +19973,9 @@
                             },
                             {
                               "value":"deis"
+                            },
+                            {
+                              "value":"deploy"
                             },
                             {
                               "value":"divshot"
@@ -20561,9 +20273,6 @@
                           "type":"fixed",
                           "values":[
                             {
-                              "value":"deploy"
-                            },
-                            {
                               "value":"anynines"
                             },
                             {
@@ -20610,6 +20319,9 @@
                             },
                             {
                               "value":"deis"
+                            },
+                            {
+                              "value":"deploy"
                             },
                             {
                               "value":"divshot"
@@ -20892,9 +20604,6 @@
                           "type":"fixed",
                           "values":[
                             {
-                              "value":"deploy"
-                            },
-                            {
                               "value":"anynines"
                             },
                             {
@@ -20941,6 +20650,9 @@
                             },
                             {
                               "value":"deis"
+                            },
+                            {
+                              "value":"deploy"
                             },
                             {
                               "value":"divshot"
@@ -21195,9 +20907,6 @@
                           "type":"fixed",
                           "values":[
                             {
-                              "value":"deploy"
-                            },
-                            {
                               "value":"anynines"
                             },
                             {
@@ -21244,6 +20953,9 @@
                             },
                             {
                               "value":"deis"
+                            },
+                            {
+                              "value":"deploy"
                             },
                             {
                               "value":"divshot"
@@ -21541,9 +21253,6 @@
                           "type":"fixed",
                           "values":[
                             {
-                              "value":"deploy"
-                            },
-                            {
                               "value":"anynines"
                             },
                             {
@@ -21590,6 +21299,9 @@
                             },
                             {
                               "value":"deis"
+                            },
+                            {
+                              "value":"deploy"
                             },
                             {
                               "value":"divshot"
@@ -21873,9 +21585,6 @@
                           "type":"fixed",
                           "values":[
                             {
-                              "value":"deploy"
-                            },
-                            {
                               "value":"anynines"
                             },
                             {
@@ -21922,6 +21631,9 @@
                             },
                             {
                               "value":"deis"
+                            },
+                            {
+                              "value":"deploy"
                             },
                             {
                               "value":"divshot"
@@ -22261,9 +21973,6 @@
                           "type":"fixed",
                           "values":[
                             {
-                              "value":"deploy"
-                            },
-                            {
                               "value":"anynines"
                             },
                             {
@@ -22310,6 +22019,9 @@
                             },
                             {
                               "value":"deis"
+                            },
+                            {
+                              "value":"deploy"
                             },
                             {
                               "value":"divshot"
@@ -22678,9 +22390,6 @@
                           "type":"fixed",
                           "values":[
                             {
-                              "value":"deploy"
-                            },
-                            {
                               "value":"anynines"
                             },
                             {
@@ -22727,6 +22436,9 @@
                             },
                             {
                               "value":"deis"
+                            },
+                            {
+                              "value":"deploy"
                             },
                             {
                               "value":"divshot"
@@ -23104,9 +22816,6 @@
                           "type":"fixed",
                           "values":[
                             {
-                              "value":"deploy"
-                            },
-                            {
                               "value":"anynines"
                             },
                             {
@@ -23153,6 +22862,9 @@
                             },
                             {
                               "value":"deis"
+                            },
+                            {
+                              "value":"deploy"
                             },
                             {
                               "value":"divshot"
@@ -23259,6 +22971,294 @@
                     }
                   },
                   "name":"deis",
+                  "prefix":{
+                    "key":"provider",
+                    "type":[
+                      "str"
+                    ]
+                  },
+                  "strict":false,
+                  "type":"map",
+                  "types":[
+                    {
+                      "deprecated":"branch_specific_option_hash",
+                      "name":"deploy_branches",
+                      "strict":false,
+                      "type":"map"
+                    }
+                  ]
+                },
+                {
+                  "map":{
+                    "allow_failure":{
+                      "key":"allow_failure",
+                      "types":[
+                        {
+                          "cast":"bool",
+                          "type":"scalar"
+                        }
+                      ]
+                    },
+                    "edge":{
+                      "key":"edge",
+                      "types":[
+                        {
+                          "edge":true,
+                          "map":{
+                            "branch":{
+                              "key":"branch",
+                              "types":[
+                                {
+                                  "type":"scalar"
+                                }
+                              ]
+                            },
+                            "source":{
+                              "key":"source",
+                              "types":[
+                                {
+                                  "type":"scalar"
+                                }
+                              ]
+                            }
+                          },
+                          "name":"deploy_edge",
+                          "type":"map"
+                        },
+                        {
+                          "cast":"bool",
+                          "edge":true,
+                          "type":"scalar"
+                        }
+                      ]
+                    },
+                    "on":{
+                      "key":"on",
+                      "types":[
+                        {
+                          "include":[
+                            "support"
+                          ],
+                          "map":{
+                            "all_branches":{
+                              "key":"all_branches",
+                              "types":[
+                                {
+                                  "cast":"bool",
+                                  "type":"scalar"
+                                }
+                              ]
+                            },
+                            "branch":{
+                              "key":"branch",
+                              "types":[
+                                {
+                                  "alias":[
+                                    "branches"
+                                  ],
+                                  "type":"seq",
+                                  "types":[
+                                    {
+                                      "type":"scalar"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "alias":[
+                                    "branches"
+                                  ],
+                                  "strict":false,
+                                  "type":"map"
+                                }
+                              ]
+                            },
+                            "condition":{
+                              "key":"condition",
+                              "types":[
+                                {
+                                  "type":"scalar"
+                                }
+                              ]
+                            },
+                            "repo":{
+                              "key":"repo",
+                              "types":[
+                                {
+                                  "type":"scalar"
+                                }
+                              ]
+                            },
+                            "tags":{
+                              "key":"tags",
+                              "types":[
+                                {
+                                  "cast":"bool",
+                                  "type":"scalar"
+                                }
+                              ]
+                            }
+                          },
+                          "name":"deploy_conditions",
+                          "prefix":{
+                            "key":"branch",
+                            "type":[
+                              "str",
+                              "seq"
+                            ]
+                          },
+                          "type":"map"
+                        }
+                      ]
+                    },
+                    "provider":{
+                      "key":"provider",
+                      "types":[
+                        {
+                          "name":"provider",
+                          "required":true,
+                          "type":"fixed",
+                          "values":[
+                            {
+                              "value":"anynines"
+                            },
+                            {
+                              "value":"appfog"
+                            },
+                            {
+                              "value":"atlas"
+                            },
+                            {
+                              "value":"azure_web_apps"
+                            },
+                            {
+                              "value":"bintray"
+                            },
+                            {
+                              "value":"bitballoon"
+                            },
+                            {
+                              "value":"bluemixcf"
+                            },
+                            {
+                              "value":"boxfuse"
+                            },
+                            {
+                              "value":"catalyze"
+                            },
+                            {
+                              "value":"chef_supermarket"
+                            },
+                            {
+                              "value":"cloud66"
+                            },
+                            {
+                              "value":"cloudcontrol"
+                            },
+                            {
+                              "value":"cloudfiles"
+                            },
+                            {
+                              "value":"cloudfoundry"
+                            },
+                            {
+                              "value":"codedeploy"
+                            },
+                            {
+                              "value":"deis"
+                            },
+                            {
+                              "value":"deploy"
+                            },
+                            {
+                              "value":"divshot"
+                            },
+                            {
+                              "value":"elasticbeanstalk"
+                            },
+                            {
+                              "value":"engineyard"
+                            },
+                            {
+                              "value":"firebase"
+                            },
+                            {
+                              "value":"gae"
+                            },
+                            {
+                              "value":"gcs"
+                            },
+                            {
+                              "value":"hackage"
+                            },
+                            {
+                              "value":"heroku"
+                            },
+                            {
+                              "value":"lambda"
+                            },
+                            {
+                              "value":"launchpad"
+                            },
+                            {
+                              "value":"modulus"
+                            },
+                            {
+                              "value":"npm"
+                            },
+                            {
+                              "value":"openshift"
+                            },
+                            {
+                              "value":"opsworks"
+                            },
+                            {
+                              "value":"packagecloud"
+                            },
+                            {
+                              "value":"pages"
+                            },
+                            {
+                              "value":"puppetforge"
+                            },
+                            {
+                              "value":"pypi"
+                            },
+                            {
+                              "value":"releases"
+                            },
+                            {
+                              "value":"rubygems"
+                            },
+                            {
+                              "value":"s3"
+                            },
+                            {
+                              "value":"scalingo"
+                            },
+                            {
+                              "value":"script"
+                            },
+                            {
+                              "value":"surge"
+                            },
+                            {
+                              "value":"testfairy"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    "skip_cleanup":{
+                      "key":"skip_cleanup",
+                      "types":[
+                        {
+                          "cast":"bool",
+                          "type":"scalar"
+                        }
+                      ]
+                    }
+                  },
+                  "name":"deploy",
                   "prefix":{
                     "key":"provider",
                     "type":[
@@ -23436,9 +23436,6 @@
                           "type":"fixed",
                           "values":[
                             {
-                              "value":"deploy"
-                            },
-                            {
                               "value":"anynines"
                             },
                             {
@@ -23485,6 +23482,9 @@
                             },
                             {
                               "value":"deis"
+                            },
+                            {
+                              "value":"deploy"
                             },
                             {
                               "value":"divshot"
@@ -23810,9 +23810,6 @@
                           "type":"fixed",
                           "values":[
                             {
-                              "value":"deploy"
-                            },
-                            {
                               "value":"anynines"
                             },
                             {
@@ -23859,6 +23856,9 @@
                             },
                             {
                               "value":"deis"
+                            },
+                            {
+                              "value":"deploy"
                             },
                             {
                               "value":"divshot"
@@ -24213,9 +24213,6 @@
                           "type":"fixed",
                           "values":[
                             {
-                              "value":"deploy"
-                            },
-                            {
                               "value":"anynines"
                             },
                             {
@@ -24262,6 +24259,9 @@
                             },
                             {
                               "value":"deis"
+                            },
+                            {
+                              "value":"deploy"
                             },
                             {
                               "value":"divshot"
@@ -24544,9 +24544,6 @@
                           "type":"fixed",
                           "values":[
                             {
-                              "value":"deploy"
-                            },
-                            {
                               "value":"anynines"
                             },
                             {
@@ -24593,6 +24590,9 @@
                             },
                             {
                               "value":"deis"
+                            },
+                            {
+                              "value":"deploy"
                             },
                             {
                               "value":"divshot"
@@ -24919,9 +24919,6 @@
                           "type":"fixed",
                           "values":[
                             {
-                              "value":"deploy"
-                            },
-                            {
                               "value":"anynines"
                             },
                             {
@@ -24968,6 +24965,9 @@
                             },
                             {
                               "value":"deis"
+                            },
+                            {
+                              "value":"deploy"
                             },
                             {
                               "value":"divshot"
@@ -25336,9 +25336,6 @@
                           "type":"fixed",
                           "values":[
                             {
-                              "value":"deploy"
-                            },
-                            {
                               "value":"anynines"
                             },
                             {
@@ -25385,6 +25382,9 @@
                             },
                             {
                               "value":"deis"
+                            },
+                            {
+                              "value":"deploy"
                             },
                             {
                               "value":"divshot"
@@ -25668,9 +25668,6 @@
                           "type":"fixed",
                           "values":[
                             {
-                              "value":"deploy"
-                            },
-                            {
                               "value":"anynines"
                             },
                             {
@@ -25717,6 +25714,9 @@
                             },
                             {
                               "value":"deis"
+                            },
+                            {
+                              "value":"deploy"
                             },
                             {
                               "value":"divshot"
@@ -26014,9 +26014,6 @@
                           "type":"fixed",
                           "values":[
                             {
-                              "value":"deploy"
-                            },
-                            {
                               "value":"anynines"
                             },
                             {
@@ -26063,6 +26060,9 @@
                             },
                             {
                               "value":"deis"
+                            },
+                            {
+                              "value":"deploy"
                             },
                             {
                               "value":"divshot"
@@ -26505,9 +26505,6 @@
                           "type":"fixed",
                           "values":[
                             {
-                              "value":"deploy"
-                            },
-                            {
                               "value":"anynines"
                             },
                             {
@@ -26554,6 +26551,9 @@
                             },
                             {
                               "value":"deis"
+                            },
+                            {
+                              "value":"deploy"
                             },
                             {
                               "value":"divshot"
@@ -26992,9 +26992,6 @@
                           "type":"fixed",
                           "values":[
                             {
-                              "value":"deploy"
-                            },
-                            {
                               "value":"anynines"
                             },
                             {
@@ -27041,6 +27038,9 @@
                             },
                             {
                               "value":"deis"
+                            },
+                            {
+                              "value":"deploy"
                             },
                             {
                               "value":"divshot"
@@ -27324,9 +27324,6 @@
                           "type":"fixed",
                           "values":[
                             {
-                              "value":"deploy"
-                            },
-                            {
                               "value":"anynines"
                             },
                             {
@@ -27373,6 +27370,9 @@
                             },
                             {
                               "value":"deis"
+                            },
+                            {
+                              "value":"deploy"
                             },
                             {
                               "value":"divshot"
@@ -27642,9 +27642,6 @@
                           "type":"fixed",
                           "values":[
                             {
-                              "value":"deploy"
-                            },
-                            {
                               "value":"anynines"
                             },
                             {
@@ -27691,6 +27688,9 @@
                             },
                             {
                               "value":"deis"
+                            },
+                            {
+                              "value":"deploy"
                             },
                             {
                               "value":"divshot"
@@ -27987,9 +27987,6 @@
                           "type":"fixed",
                           "values":[
                             {
-                              "value":"deploy"
-                            },
-                            {
                               "value":"anynines"
                             },
                             {
@@ -28036,6 +28033,9 @@
                             },
                             {
                               "value":"deis"
+                            },
+                            {
+                              "value":"deploy"
                             },
                             {
                               "value":"divshot"
@@ -28376,9 +28376,6 @@
                           "type":"fixed",
                           "values":[
                             {
-                              "value":"deploy"
-                            },
-                            {
                               "value":"anynines"
                             },
                             {
@@ -28425,6 +28422,9 @@
                             },
                             {
                               "value":"deis"
+                            },
+                            {
+                              "value":"deploy"
                             },
                             {
                               "value":"divshot"
@@ -28750,9 +28750,6 @@
                           "type":"fixed",
                           "values":[
                             {
-                              "value":"deploy"
-                            },
-                            {
                               "value":"anynines"
                             },
                             {
@@ -28799,6 +28796,9 @@
                             },
                             {
                               "value":"deis"
+                            },
+                            {
+                              "value":"deploy"
                             },
                             {
                               "value":"divshot"
@@ -29241,9 +29241,6 @@
                           "type":"fixed",
                           "values":[
                             {
-                              "value":"deploy"
-                            },
-                            {
                               "value":"anynines"
                             },
                             {
@@ -29290,6 +29287,9 @@
                             },
                             {
                               "value":"deis"
+                            },
+                            {
+                              "value":"deploy"
                             },
                             {
                               "value":"divshot"
@@ -29588,9 +29588,6 @@
                           "type":"fixed",
                           "values":[
                             {
-                              "value":"deploy"
-                            },
-                            {
                               "value":"anynines"
                             },
                             {
@@ -29637,6 +29634,9 @@
                             },
                             {
                               "value":"deis"
+                            },
+                            {
+                              "value":"deploy"
                             },
                             {
                               "value":"divshot"
@@ -29964,9 +29964,6 @@
                           "type":"fixed",
                           "values":[
                             {
-                              "value":"deploy"
-                            },
-                            {
                               "value":"anynines"
                             },
                             {
@@ -30013,6 +30010,9 @@
                             },
                             {
                               "value":"deis"
+                            },
+                            {
+                              "value":"deploy"
                             },
                             {
                               "value":"divshot"
@@ -30376,9 +30376,6 @@
                           "type":"fixed",
                           "values":[
                             {
-                              "value":"deploy"
-                            },
-                            {
                               "value":"anynines"
                             },
                             {
@@ -30425,6 +30422,9 @@
                             },
                             {
                               "value":"deis"
+                            },
+                            {
+                              "value":"deploy"
                             },
                             {
                               "value":"divshot"
@@ -30764,9 +30764,6 @@
                           "type":"fixed",
                           "values":[
                             {
-                              "value":"deploy"
-                            },
-                            {
                               "value":"anynines"
                             },
                             {
@@ -30813,6 +30810,9 @@
                             },
                             {
                               "value":"deis"
+                            },
+                            {
+                              "value":"deploy"
                             },
                             {
                               "value":"divshot"
@@ -31195,9 +31195,6 @@
                           "type":"fixed",
                           "values":[
                             {
-                              "value":"deploy"
-                            },
-                            {
                               "value":"anynines"
                             },
                             {
@@ -31244,6 +31241,9 @@
                             },
                             {
                               "value":"deis"
+                            },
+                            {
+                              "value":"deploy"
                             },
                             {
                               "value":"divshot"
@@ -31613,9 +31613,6 @@
                           "type":"fixed",
                           "values":[
                             {
-                              "value":"deploy"
-                            },
-                            {
                               "value":"anynines"
                             },
                             {
@@ -31662,6 +31659,9 @@
                             },
                             {
                               "value":"deis"
+                            },
+                            {
+                              "value":"deploy"
                             },
                             {
                               "value":"divshot"
@@ -31930,9 +31930,6 @@
                           "type":"fixed",
                           "values":[
                             {
-                              "value":"deploy"
-                            },
-                            {
                               "value":"anynines"
                             },
                             {
@@ -31979,6 +31976,9 @@
                             },
                             {
                               "value":"deis"
+                            },
+                            {
+                              "value":"deploy"
                             },
                             {
                               "value":"divshot"
@@ -32260,9 +32260,6 @@
                           "type":"fixed",
                           "values":[
                             {
-                              "value":"deploy"
-                            },
-                            {
                               "value":"anynines"
                             },
                             {
@@ -32309,6 +32306,9 @@
                             },
                             {
                               "value":"deis"
+                            },
+                            {
+                              "value":"deploy"
                             },
                             {
                               "value":"divshot"
@@ -32679,9 +32679,6 @@
                           "type":"fixed",
                           "values":[
                             {
-                              "value":"deploy"
-                            },
-                            {
                               "value":"anynines"
                             },
                             {
@@ -32728,6 +32725,9 @@
                             },
                             {
                               "value":"deis"
+                            },
+                            {
+                              "value":"deploy"
                             },
                             {
                               "value":"divshot"
@@ -38076,7 +38076,7 @@
       "key":"version",
       "types":[
         {
-          "format":"(?-mix:^(~\u003e|\u003e|\u003e=|=|\u003c=|\u003c) (\\d+(?:\\.\\d+)?(?:\\.\\d+)?)$)",
+          "format":"(?-mix:^(~>|>|>=|=|<=|<) (\\d+(?:\\.\\d+)?(?:\\.\\d+)?)$)",
           "type":"scalar"
         }
       ]
