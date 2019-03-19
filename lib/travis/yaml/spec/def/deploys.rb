@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'travis/yaml/spec/def/deploy'
 require 'travis/yaml/spec/def/deploy/anynines'
 require 'travis/yaml/spec/def/deploy/appfog'

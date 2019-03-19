@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'travis/yaml/doc/helper/lookup'
 require 'travis/yaml/support/obj'
 

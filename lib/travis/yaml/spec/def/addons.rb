@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'travis/yaml/spec/type/map'
 require 'travis/yaml/spec/def/addon/apt'
 require 'travis/yaml/spec/def/addon/artifacts'

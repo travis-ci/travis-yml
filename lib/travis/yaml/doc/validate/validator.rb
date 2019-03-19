@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'travis/yaml/helper/memoize'
 require 'travis/yaml/support/registry'
 require 'travis/yaml/support/obj'

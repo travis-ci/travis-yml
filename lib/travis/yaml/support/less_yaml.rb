@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 $: << File.expand_path('../../../../../vendor/less_yaml/lib', __FILE__)
 
 require 'psych'

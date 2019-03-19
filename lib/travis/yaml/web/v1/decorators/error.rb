@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module Travis::Yaml::Web::V1
   module Decorators
     class Error

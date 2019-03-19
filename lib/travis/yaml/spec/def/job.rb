@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'travis/yaml/spec/def/addons'
 require 'travis/yaml/spec/def/cache'
 require 'travis/yaml/spec/def/deploys'

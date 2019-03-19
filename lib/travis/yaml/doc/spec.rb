@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'travis/yaml/doc/spec/fixed'
 require 'travis/yaml/doc/spec/lookup'
 require 'travis/yaml/doc/spec/map'

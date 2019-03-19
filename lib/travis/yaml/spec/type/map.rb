@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'travis/yaml/spec/type/mapping'
 require 'travis/yaml/spec/type/mappings'
 require 'travis/yaml/spec/type/node'

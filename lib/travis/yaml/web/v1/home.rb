@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'oj'
 require 'travis/yaml/web/route'
 

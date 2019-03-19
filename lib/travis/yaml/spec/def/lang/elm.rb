@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'travis/yaml/spec/type/lang'
 
 module Travis
