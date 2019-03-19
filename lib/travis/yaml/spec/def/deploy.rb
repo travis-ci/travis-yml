@@ -10,7 +10,7 @@ module Travis
         module Deploy
           def self.providers
             @providers ||= begin
-              names  = self.constants
+              names  = self.constants.sort
               consts = names.map { |name| const_get(name) }
               keys   = consts.map(&:registry_key)
               keys - %i(provider deploy_conditions deploy_branches deploy_edge heroku_strategy)

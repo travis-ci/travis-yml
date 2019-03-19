@@ -32,9 +32,6 @@ describe Travis::Yaml::Spec::Def::Deploy::Deploy do
           required: true,
           values: [
             {
-              value: 'deploy'
-            },
-            {
               value: 'anynines'
             },
             {
@@ -81,6 +78,9 @@ describe Travis::Yaml::Spec::Def::Deploy::Deploy do
             },
             {
               value: 'deis'
+            },
+            {
+              value: 'deploy'
             },
             {
               value: 'divshot'

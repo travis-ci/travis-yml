@@ -15,12 +15,12 @@ module Travis
             Regexp     => :str,
           }
 
-          TRUES  = ['true', 'on', 'yes', 'enabled', 'required']
-          FALSES = ['false', 'off', 'no', 'disabled', 'not required']
-          BOOLS  = TRUES + FALSES
+          TRUES   = ['true', 'on', 'yes', 'enabled', 'required']
+          FALSES  = ['false', 'off', 'no', 'disabled', 'not required']
+          BOOLS   = TRUES + FALSES
 
-          TRUE   = /(#{TRUES.join('|')})/
-          FALSE  = /(#{FALSES.join('|')})/
+          TRUE    = /(#{TRUES.join('|')})/
+          FALSE   = /(#{FALSES.join('|')})/
 
           def apply?
             type != given && !value.is_a?(Hash)
@@ -42,7 +42,7 @@ module Travis
 
             def to_bool(value)
               case value
-              when Fixnum  then value != 0
+              when Integer then value != 0
               when Float   then value != 0.0
               when FALSE   then false
               when TRUE    then true
