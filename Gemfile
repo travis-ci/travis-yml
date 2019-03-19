@@ -1,5 +1,7 @@
 source 'https://rubygems.org'
 
+ruby File.read('.ruby-version').chomp
+
 group :web do
   gem 'puma', '~> 3.12.0'
   gem 'rack', '~> 2.0.6'
