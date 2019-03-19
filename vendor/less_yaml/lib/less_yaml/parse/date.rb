@@ -1,3 +1,5 @@
+require 'date'
+
 module LessYAML
   class Parse
     class Date
