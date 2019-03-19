@@ -121,41 +121,42 @@ describe Travis::Yaml::Web::V1 do
         expect(response['error_message']).to eq 'Stack size 100000'
       end
     end
+  end
 
-    describe 'POST /expand' do
-      it 'is ok' do
-        post '/expand', '{"rvm":"2.3"}', {}
-        expect(last_response.status).to eq 200
+  describe 'POST /expand' do
+    it 'is ok' do
+      post '/expand', '{"rvm":"2.3"}', {}
+      expect(last_response.status).to eq 200
+    end
+
+    it 'is json' do
+      post '/expand', '{"rvm":"2.3"}', {}
+      expect(last_response.headers['Content-Type']).to eq 'application/json'
+    end
+
+    it 'returns version' do
+      post '/expand', '{"rvm":"2.3"}', {}
+      expect(response['version']).to eq 'v1'
+    end
+
+    it 'returns expanded matrix' do
+      post '/expand', '{"rvm":"2.3"}', {}
+      expect(response['matrix']).to eq [{ 'rvm' => '2.3' }]
+    end
+
+    context 'input error' do
+      before do
+        post '/expand', '', {}
       end
 
-      it 'is json' do
-        post '/expand', '{"rvm":"2.3"}', {}
-        expect(last_response.headers['Content-Type']).to eq 'application/json'
+      it 'is bad request' do
+        expect(last_response.status).to eq 400
       end
 
-      it 'returns version' do
-        post '/expand', '{"rvm":"2.3"}', {}
-        expect(response['version']).to eq 'v1'
-      end
-
-      it 'returns expanded matrix' do
-        post '/expand', '{"rvm":"2.3"}', {}
-        expect(response['matrix']).to eq [{ 'rvm' => '2.3' }]
-      end
-
-      context 'input error' do
-        before do
-          post '/expand', '', {}
-        end
-
-        it 'is bad request' do
-          expect(last_response.status).to eq 400
-        end
-
-        it 'returns error' do
-          expect(response['error_type']).to eq 'encoding_error'
-          expect(response['error_message']).to match /Empty input.*at line 1, column 1/
-        end
+      it 'returns error' do
+        expect(response['error_type']).to eq 'encoding_error'
+        expect(response['error_message']).to match 'Empty input at line 1, column 1'
+        expect(response['error_message']).to match /Empty input.*at line 1, column 1/
       end
     end
   end
