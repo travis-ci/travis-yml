@@ -17,7 +17,6 @@ Gem::Specification.new do |s|
   s.platform     = Gem::Platform::RUBY
   s.require_path = 'lib'
 
-  s.add_dependency 'activesupport'
   s.add_dependency 'amatch'
   s.add_dependency 'oj'
   s.add_dependency 'puma'

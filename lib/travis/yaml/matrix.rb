@@ -1,10 +1,11 @@
-require 'active_support/core_ext/hash/slice'
-require 'active_support/core_ext/hash/except'
+require 'travis/yaml/helper/common'
 require 'travis/yaml/support/obj'
 
 module Travis
   module Yaml
     class Matrix < Obj.new(:spec, :config)
+      include Helper::Common
+
       def rows
         rows = expand
         rows = with_included(rows)
@@ -37,7 +38,7 @@ module Travis
           # expand values, and we also have matrix includes, remove the row
           # because it's probably an unnecessary duplicate.
           # TODO: verify this
-          if rows.size == 1 && rows.first.slice(*expand_keys).all? { |_, v| Array(v).size == 1 } && included.any?
+          if rows.size == 1 && only(rows.first, *expand_keys).all? { |_, v| Array(v).size == 1 } && included.any?
             included
           else
             rows + included
@@ -110,14 +111,14 @@ module Travis
         end
 
         def cleaned(rows)
-          rows.map { |row| row.except(:version) }
+          rows.map { |row| except(row, :version) }
         end
 
         def uniq(rows)
           keys = rows.map(&:keys).flatten.uniq
           rows.each.with_index do |one, i|
             rows.delete_if.with_index do |other, j|
-              other.slice(*keys) == one.slice(*keys) unless i == j
+              only(other, *keys) == only(one, *keys) unless i == j
             end
           end
         end
