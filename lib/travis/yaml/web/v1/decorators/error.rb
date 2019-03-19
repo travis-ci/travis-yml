@@ -8,17 +8,17 @@ module Travis::Yaml::Web::V1
 
       def call
         {
-          'version'.freeze => 'v1',
-          'error_type'.freeze => name,
-          'error_message'.freeze => @error.message,
+          'version' => 'v1',
+          'error_type' => name,
+          'error_message' => @error.message,
         }
       end
 
       private
 
       def name
-        name = @error.class.name.split('::'.freeze).last
-        name.gsub(/([A-Z])([A-Z])/, '\1_\2'.freeze).gsub(/([a-z])([A-Z])/, '\1_\2'.freeze).downcase
+        name = @error.class.name.split('::').last
+        name.gsub(/([A-Z])([A-Z])/, '\1_\2').gsub(/([a-z])([A-Z])/, '\1_\2').downcase
       end
     end
   end

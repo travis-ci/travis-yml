@@ -13,10 +13,10 @@ module Travis::Yaml::Web::V1
       def call
         result = @config.serialize
         {
-          'version'.freeze => 'v1',
-          'messages'.freeze => messages,
-          'full_messages'.freeze => full_messages,
-          'config'.freeze => result
+          'version' => 'v1',
+          'messages' => messages,
+          'full_messages' => full_messages,
+          'config' => result
         }
       end
 
@@ -25,10 +25,10 @@ module Travis::Yaml::Web::V1
       def messages
         sort(@config.msgs).map do |level, key, code, args|
           {
-            'level'.freeze => level,
-            'key'.freeze => key,
-            'code'.freeze => code,
-            'args'.freeze => args
+            'level' => level,
+            'key' => key,
+            'code' => code,
+            'args' => args
           }
         end
       end

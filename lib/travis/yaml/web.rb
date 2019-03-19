@@ -22,7 +22,7 @@ module Travis
       end
 
       def versions
-        { '/v1'.freeze => V1 }
+        { '/v1' => V1 }
       end
     end
   end
