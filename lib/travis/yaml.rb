@@ -7,7 +7,9 @@ require 'travis/yaml/doc/value'
 require 'travis/yaml/doc/spec'
 require 'travis/yaml/helper/deyaml'
 require 'travis/yaml/helper/expand'
+require 'travis/yaml/load'
 require 'travis/yaml/matrix'
+require 'travis/yaml/part'
 require 'travis/yaml/spec/def/root'
 require 'travis/yaml/support/less_yaml'
 
@@ -58,9 +60,8 @@ module Travis
     class << self
       include Helper::Deyaml
 
-      def load(yaml, opts = {})
-        hash = LessYAML.load(yaml.strip, raise_on_unknown_tag: true) || {}
-        apply(hash, opts)
+      def load(parts, opts = {})
+        apply(Load.apply(parts), opts)
       end
 
       def expanded
@@ -72,7 +73,7 @@ module Travis
       end
 
       def apply(input, opts = {})
-        raise UnexpectedConfigFormat, 'Input must be a hash' unless input.is_a?(Hash)
+        unexpected_format! unless input.is_a?(Hash)
         input = deyaml(input)
         node = build(input, opts)
         node = Doc::Change.apply(expanded, node)
@@ -113,6 +114,10 @@ module Travis
         msg = msg % args.map { |key, value| [key, value.is_a?(Symbol) ? value.inspect : value] }.to_h if args
         msg = '[%s] on %s: %s' % [level, key, msg]
         msg
+      end
+
+      def unexpected_format!
+        raise UnexpectedConfigFormat, 'Input must be a hash'
       end
     end
   end
