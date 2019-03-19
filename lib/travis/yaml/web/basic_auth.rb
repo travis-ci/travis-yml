@@ -25,7 +25,7 @@ module Travis::Yaml::Web
     end
 
     def not_authenticated
-      [401, { 'WWW-Authenticate'.freeze => 'Basic realm="Restricted area"'.freeze }, []]
+      [401, { 'WWW-Authenticate' => 'Basic realm="Restricted area"' }, []]
     end
   end
 end

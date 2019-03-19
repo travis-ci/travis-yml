@@ -4,7 +4,7 @@ module Travis::Yaml::Web
     extend self
 
     def env
-      ENV['RACK_ENV'.freeze] || ENV['ENV'.freeze]
+      ENV['RACK_ENV'] || ENV['ENV']
     end
 
     %w{development staging test production}.each do |e|
