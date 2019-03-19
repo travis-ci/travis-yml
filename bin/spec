@@ -3,6 +3,21 @@
 $: << 'lib'
 
 require 'travis/yaml'
-require 'json'
+require 'neatjson'
 
-puts JSON.dump(Travis::Yaml.spec)
+PATH = 'spec.json'
+
+def spec
+  JSON.neat_generate(Travis::Yaml.spec, sort: true, wrap: true)
+end
+
+def update
+  File.write(PATH, spec.chomp)
+  puts "Updated #{PATH}"
+end
+
+def update?
+  $stdout.tty?
+end
+
+update? ? update : puts(spec)
