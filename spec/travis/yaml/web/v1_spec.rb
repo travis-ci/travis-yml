@@ -48,7 +48,7 @@ describe Travis::Yaml::Web::V1 do
       post '/parse', 'rvm: 2.3', {}
       expect(response['config']).to include('rvm' => ['2.3'])
     end
-    
+
     it 'returns structured message attrs' do
       post '/parse', 'rvm: 2.3', {}
       expect(response['messages']).to eq [
@@ -154,7 +154,7 @@ describe Travis::Yaml::Web::V1 do
 
         it 'returns error' do
           expect(response['error_type']).to eq 'encoding_error'
-          expect(response['error_message']).to match 'Empty input at line 1, column 1'
+          expect(response['error_message']).to match /Empty input.*at line 1, column 1/
         end
       end
     end
