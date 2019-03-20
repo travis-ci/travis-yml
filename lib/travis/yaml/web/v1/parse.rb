@@ -10,6 +10,8 @@ module Travis::Yaml
       class Parse
         include Route
 
+        MIME_TYPE = 'application/vnd.travis-ci.configs+json'
+
         def post(env)
           [200, headers, body(Decorators::Config, parse(env))]
         rescue Travis::Yaml::InputError, Psych::SyntaxError => error
@@ -21,22 +23,22 @@ module Travis::Yaml
         def parse(env)
           req = Rack::Request.new(env)
           query = Rack::Utils.parse_query(req.query_string)
-          body = multipart?(env) ? multiparts(env, query) : req.body.read
           alert = query['alert'] == 'true'
-          Travis::Yaml.load(body, alert: alert)
+          body = req.body.read
+          data = configs?(env) ? configs(body) : body
+          Travis::Yaml.load(data, alert: alert)
         end
 
-        def multipart?(env)
-          env['CONTENT_TYPE'].start_with?('multipart')
+        def configs?(env)
+          env['CONTENT_TYPE'] == MIME_TYPE
         end
 
         PREFIX = 'config://'
 
-        def multiparts(env, query)
-          modes = [:merge] + query.fetch('merge_mode', '').split(',')
-          parts = env.select { |key, _| key.start_with?(PREFIX) }
-          parts = parts.map { |key, file| [key.sub(PREFIX, ''), file.read] }
-          parts.map.with_index { |(src, str), i| Part.new(str, src, modes[i]) }
+        def configs(json)
+          Oj.load(json).map do |part|
+            Part.new(*part.values_at(*%w(config source merge_mode)))
+          end
         end
       end
     end
