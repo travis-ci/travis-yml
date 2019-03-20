@@ -124,24 +124,19 @@ describe Travis::Yaml::Web::V1 do
   end
 
   describe 'POST /parse (multipart)' do
-    let(:travis_yml) { tempfile(['.travis', '.yml'], "rvm: 2.6.2\nenv:\n  FOO: foo") }
-    let(:import_yml) { tempfile(['.import', '.yml'], "script: echo foo\nenv:\n  BAR: bar") }
+    let(:travis_yml) { "rvm: 2.6.2\nenv:\n  FOO: foo" }
+    let(:import_yml) { "script: echo foo\nenv:\n  BAR: bar" }
 
-    def tempfile(name, content)
-      Tempfile.new(name).tap { |f| f.write(content) && f.rewind }
+    let(:data) do
+      [
+        { 'config' => travis_yml, 'source' => '.travis.yml', 'merge_mode' => 'merge' },
+        { 'config' => import_yml, 'source' => 'import.yml',  'merge_mode' => 'deep_merge' },
+      ]
     end
 
-    def upload(file)
-      Rack::Test::UploadedFile.new(file)
-    end
+    let(:headers) { { 'CONTENT_TYPE' => 'application/vnd.travis-ci.configs+json' } }
 
-    before do
-      post "/parse?merge_mode=deep_merge", '', {
-        'config://.travis.yml' => upload(travis_yml),
-        'config://import.yml' => upload(import_yml),
-        'CONTENT_TYPE' => 'multipart/form-data'
-      }
-    end
+    before { post '/parse', Oj.dump(data), headers }
 
     it { expect(last_response.status).to eq 200 }
     it { expect(response['config']['rvm']).to eq ['2.6.2'] }
