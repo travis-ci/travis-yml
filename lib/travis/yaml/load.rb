@@ -3,15 +3,15 @@ module Travis
     module Load
       def self.apply(parts)
         parts = [parts] unless parts.is_a?(Array)
-        parts = parts.map { |str| Parse.new(str).apply }
+        parts = parts.map { |part| Parse.new(part).apply }
         Merge.new(parts).apply
       end
 
       class Parse
-        attr_reader :str
+        attr_reader :part
 
-        def initialize(str)
-          @str = str
+        def initialize(part)
+          @part = part
         end
 
         def apply
@@ -23,22 +23,22 @@ module Travis
         private
 
           def format
-            str.start_with?('{') ? :json : :yaml
+            part.start_with?('{') ? :json : :yaml
           end
 
           def parse_json
-            Oj.load(str)
+            Oj.load(part.to_s)
           end
 
           def parse_yaml
-            LessYAML.load(str.to_s, raise_on_unknown_tag: true) || {}
+            LessYAML.load(part.to_s, raise_on_unknown_tag: true) || {}
           end
 
           def config_for(hash)
             Config.new(hash).tap do |config|
-              next unless str.respond_to?(:src)
-              config.merge_mode = str.merge_mode
-              config.src = str.src
+              next unless part.respond_to?(:src)
+              config.merge_mode = part.merge_mode
+              config.src = part.src
             end
           end
 
@@ -56,8 +56,8 @@ module Travis
 
         private
 
-          def merge_mode(str)
-            str.respond_to?(:merge_mode) ? str.merge_mode : :merge
+          def merge_mode(part)
+            part.respond_to?(:merge_mode) ? part.merge_mode : :merge
           end
 
           def replace(lft, rgt)
