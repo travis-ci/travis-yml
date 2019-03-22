@@ -7,7 +7,12 @@ module Travis
     module Doc
       module Change
         class Migrate < Base
+          def apply?
+            node.key != :merge_mode
+          end
+
           def apply
+            return unless apply?
             Down.new(spec, node, opts).apply
             Up.new(spec, node, opts).apply
           end

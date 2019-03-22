@@ -186,7 +186,7 @@ describe Travis::Yaml, 'root' do
     end
   end
 
-  ['.configured', ':.configured', ':".configured"', '.result', ':.result', ':".result"'].each do |key|
+  ['merge_mode', '.configured', ':.configured', ':".configured"', '.result', ':.result', ':".result"'].each do |key|
     describe "silently removes #{key} etc" do
       let(:input) { { key => 'foo' } }
       it { expect(value[key]).to be_nil }
