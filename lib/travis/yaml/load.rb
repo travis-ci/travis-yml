@@ -4,7 +4,7 @@ module Travis
       def self.apply(parts)
         parts = [parts] unless parts.is_a?(Array)
         parts = parts.map { |part| Parse.new(part).apply }
-        Merge.new(parts).apply
+        Merge.new(parts).apply.to_h
       end
 
       class Parse
