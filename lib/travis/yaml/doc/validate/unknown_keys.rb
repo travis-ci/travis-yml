@@ -26,9 +26,7 @@ module Travis
 
             def unknown(parent, node)
               type = misplaced?(node.key) ? :misplaced_key : :unknown_key
-              unless node.key.to_s.start_with?('_')
-                parent.msg :error, type, key: node.key, value: node.raw
-              end
+              parent.msg :error, type, key: node.key, value: node.raw unless ignore_unknown?(node.key)
               parent.delete(node)
             end
 
@@ -38,6 +36,10 @@ module Travis
 
             def misplaced?(key)
               Yaml.keys.include?(key)
+            end
+
+            def ignore_unknown?(key)
+              key.to_s.start_with?('_') || key == :merge_mode
             end
         end
       end
