@@ -19,7 +19,7 @@ end
 
 group :test do
   gem 'awesome_print'
-  gem 'rack-test', git: 'https://github.com/rack-test/rack-test'
+  gem 'rack-test'
   gem 'rake'
   gem 'rspec'
 end
