@@ -61,7 +61,7 @@ module Travis
           end
 
           def replace(lft, rgt)
-            rgt
+            lft
           end
 
           def merge(lft, rgt)
@@ -72,8 +72,8 @@ module Travis
             rgt.is_a?(Hash) && lft.is_a?(Hash) ? rgt.merge(lft, &DEEP_MERGE) : lft || rgt
           end
 
-          def deep_merge(hash, other)
-            hash.merge(other, &DEEP_MERGE)
+          def deep_merge(lft, rgt)
+            rgt.merge(lft, &DEEP_MERGE)
           end
       end
     end
