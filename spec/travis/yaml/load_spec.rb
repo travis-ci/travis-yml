@@ -1,29 +1,61 @@
 describe Travis::Yaml::Load do
-  subject { described_class.apply(parts) }
-
-  describe 'given a single string' do
-    let(:parts) { 'foo: bar' }
-    it { should eq 'foo' => 'bar' }
+  let(:api) do
+    <<~yml
+      script: ./api
+      env:
+        api: true
+        foo: 1
+    yml
   end
 
-  describe 'given an array of strings' do
-    let(:parts) { ["foo:\n bar: baz", "foo:\n baz: buz"] }
-    it { should eq 'foo' => { 'bar' => 'baz' } }
+  let(:travis_yml) do
+    <<~yml
+      script: ./travis_yml
+      env:
+        travis_yml: true
+        foo: 2
+    yml
+  end
+
+  let(:import) do
+    <<~yml
+      script: ./import
+      env:
+        import: true
+        foo: 3
+    yml
+  end
+
+  subject { described_class.apply(parts).to_h }
+
+  describe 'given a single string' do
+    let(:parts) { api }
+    it { should eq 'script' => './api', 'env' => { 'api' => true, 'foo' => '1' }  }
+  end
+
+  describe 'given an array of strings (defaults to merge)' do
+    let(:parts) { [api, travis_yml, import] }
+    it { should eq 'script' => './api', 'env' => { 'api' => true, 'foo' => '1' }  }
   end
 
   describe 'given an array of Parts' do
-    let(:one) { Travis::Yaml::Part.new("foo:\n bar: baz\n one: one", 'one.yml', :merge) }
-    let(:two) { Travis::Yaml::Part.new("foo:\n baz: buz\n one: two", 'two.yml', mode) }
-    let(:parts) { [one, two] }
+    let(:parts) do
+      [
+        Travis::Yaml::Part.new(api, 'api.yml', nil),
+        Travis::Yaml::Part.new(travis_yml, '.travis.yml', mode),
+        Travis::Yaml::Part.new(import, 'import.yml', mode)
+      ]
+    end
 
     describe 'merge' do
       let(:mode) { :merge }
-      it { should eq 'foo' => { 'bar' => 'baz', 'one' => 'one' } }
+      it { should eq 'script' => './api', 'env' => { 'api' => true, 'foo' => '1' }  }
     end
 
     describe 'deep_merge' do
       let(:mode) { :deep_merge }
-      it { should eq 'foo' => { 'bar' => 'baz', 'baz' => 'buz', 'one' => 'one' } }
+      it { should eq 'script' => './api', 'env' => { 'api' => true, 'foo' => '1', 'travis_yml' => true, 'import' => true }  }
+      it { expect(subject['env'].to_a).to eq [['import', true], ['foo', '1'], ['travis_yml', true], ['api', true]] }
     end
   end
 end

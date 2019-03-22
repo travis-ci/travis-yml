@@ -124,24 +124,65 @@ describe Travis::Yaml::Web::V1 do
   end
 
   describe 'POST /parse (multipart)' do
-    let(:travis_yml) { "rvm: 2.6.2\nenv:\n  FOO: foo" }
-    let(:import_yml) { "script: echo foo\nenv:\n  BAR: bar" }
+    let(:headers) { { 'CONTENT_TYPE' => 'application/vnd.travis-ci.configs+json' } }
+
+    let(:api) do
+      <<~yml
+        rvm: 2.6.2
+        env:
+          API: true
+          FOO: 1
+      yml
+    end
+
+    let(:travis_yml) do
+      <<~yml
+        rvm: 2.2.2
+        script: ./script
+        env:
+          TRAVIS_YML: true
+          FOO: 2
+      yml
+    end
+
+    let(:import) do
+      <<~yml
+        language: ruby
+        env:
+          IMPORT: true
+          FOO: 3
+      yml
+    end
 
     let(:data) do
       [
-        { 'config' => travis_yml, 'source' => '.travis.yml', 'merge_mode' => 'merge' },
-        { 'config' => import_yml, 'source' => 'import.yml',  'merge_mode' => 'deep_merge' },
+        { 'config' => api,        'source' => 'api',         'merge_mode' => nil },
+        { 'config' => travis_yml, 'source' => '.travis.yml', 'merge_mode' => mode },
+        { 'config' => import,     'source' => 'import.yml',  'merge_mode' => mode },
       ]
     end
 
-    let(:headers) { { 'CONTENT_TYPE' => 'application/vnd.travis-ci.configs+json' } }
-
     before { post '/parse', Oj.dump(data), headers }
 
-    it { expect(last_response.status).to eq 200 }
-    it { expect(response['config']['rvm']).to eq ['2.6.2'] }
-    it { expect(response['config']['script']).to eq ['echo foo'] }
-    it { expect(response['config']['env']['matrix']).to eq ['BAR=bar', 'FOO=foo'] }
+    describe 'merge_mode: merge' do
+      let(:mode) { 'merge' }
+
+      it { expect(last_response.status).to eq 200 }
+      it { expect(response['config']['language']).to eq 'ruby' }
+      it { expect(response['config']['rvm']).to eq ['2.6.2'] }
+      it { expect(response['config']['script']).to eq ['./script'] }
+      it { expect(response['config']['env']['matrix']).to eq ['API=true', 'FOO=1'] }
+    end
+
+    describe 'merge_mode: deep_merge' do
+      let(:mode) { 'deep_merge' }
+
+      it { expect(last_response.status).to eq 200 }
+      it { expect(response['config']['language']).to eq 'ruby' }
+      it { expect(response['config']['rvm']).to eq ['2.6.2'] }
+      it { expect(response['config']['script']).to eq ['./script'] }
+      it { expect(response['config']['env']['matrix']).to eq ['IMPORT=true', 'FOO=1', 'TRAVIS_YML=true', 'API=true'] }
+    end
   end
 
   describe 'POST /expand' do
