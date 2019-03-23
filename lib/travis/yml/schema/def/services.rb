@@ -1,0 +1,44 @@
+# frozen_string_literal: true
+require 'travis/yml/schema/dsl/seq'
+require 'travis/yml/schema/dsl/enum'
+
+module Travis
+  module Yml
+    module Schema
+      module Def
+        class Services < Dsl::Seq
+          register :services
+
+          def define
+            normal
+            export
+            type Service
+          end
+        end
+
+        class Service < Dsl::Enum
+          register :service
+
+          def define
+             downcase
+
+            value :cassandra
+            value :couchdb
+            value :docker
+            value :elasticsearch
+            value :memcached,  alias: :memcache
+            value :mongodb
+            value :mysql
+            value :neo4j
+            value :postgresql, alias: :postgres
+            value :rabbitmq,   alias: :'rabbitmq-server'
+            value :redis,      alias: :'redis-server'
+            value :riak
+
+            export
+          end
+        end
+      end
+    end
+  end
+end
