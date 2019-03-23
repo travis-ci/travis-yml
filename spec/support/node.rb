@@ -4,7 +4,7 @@ module Spec
       def self.included(base)
         base.let(:debug) { subject.msgs.select { |msg| msg[0] == :debug } }
         base.let(:info)  { subject.msgs.select { |msg| msg[0] == :info } }
-        base.let(:msgs)  { subject.msgs.select { |msg| msg[0] == :warn || msg[0] == :error } }
+        base.let(:msgs)  { subject.msgs.reject { |msg| msg[0] == :debug || msg[0] == :info } }
       end
 
       def build(parent, key, value, opts = {})

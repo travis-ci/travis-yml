@@ -1,9 +1,7 @@
+require 'raven'
 require 'rack/cors'
 require 'rack/ssl-enforcer'
-require 'raven'
-require 'travis/yaml/web'
-require 'travis/yaml/web/basic_auth'
-require 'travis/yaml/web/env'
+require 'travis/yml/web'
 
 if Travis::Yaml::Web::Env.staging?
   use Rack::Cors do

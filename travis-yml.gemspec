@@ -1,11 +1,11 @@
 # encoding: utf-8
 
 $:.unshift File.expand_path('../lib', __FILE__)
-require 'travis/yaml/version'
+require 'travis/yml/version'
 
 Gem::Specification.new do |s|
   s.name         = 'travis-yml'
-  s.version      = Travis::Yaml::VERSION
+  s.version      = Travis::Yml::VERSION
   s.author       = 'Travis CI GmbH'
   s.email        = 'contact@travis-ci.com'
   s.homepage     = 'https://github.com/travis-ci/travis-yml'
@@ -19,5 +19,7 @@ Gem::Specification.new do |s|
 
   s.add_dependency 'amatch', '~> 0.4.0'
   s.add_dependency 'oj', '~> 3.7.10'
+  s.add_dependency 'regstry', '~> 1.0.0'
   s.add_dependency 'travis-conditions', '~> 1.0.5'
+  s.add_dependency 'travis-env_vars', '~> 0.1.1'
 end

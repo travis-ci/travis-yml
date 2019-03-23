@@ -1,0 +1,181 @@
+# frozen_string_literal: true
+require 'registry'
+
+module Travis
+  module Yml
+    module Schema
+      module Dsl
+        class Node < Obj.new(:parent, :node)
+          extend Forwardable
+          include Registry
+
+          class << self
+            def type
+              :node
+            end
+
+            def build(parent, type, opts = {})
+              Node.resolve(type).new(parent, opts)
+            end
+
+            # We only want to instantiate and define types in Schema::Def once,
+            # in order to optimize performance. Otherwise all deploy providers
+            # have to define all languages in order to include language support
+            # keys on deploy conditions (e.g. deploy.on.rvm), which means ~1200
+            # times the work (~40 providers, ~30 languages) for includes,
+            # slowing the process down from ~0.12s to ~1.4s.
+
+            def new(parent = nil, opts = {})
+              if registry_key && obj = Type::Node.exports[registry_key]
+                raise if opts.any?
+                obj.export? ? ref(parent, obj) : super(parent, obj)
+              else
+                obj = Type::Node[type].new(parent&.node, registry_key)
+                node = super(parent, obj)
+                node.define
+                node.assign(opts)
+                node.defaults if node.export?
+                node
+              end
+            end
+
+            def ref(parent, obj)
+              Ref.new(parent, namespace: obj.namespace, id: obj.id)
+            end
+
+            def resolve(type)
+              type.is_a?(Class) ? type : self[type]
+            end
+          end
+
+          def root
+            parent ? parent.root : self
+          end
+
+          def root?
+            parent.nil?
+          end
+
+          def defaults
+            node.set :title, default_title unless node.title?
+            node.set :examples, default_examples unless node.examples?
+          end
+
+          def define
+          end
+
+          def default_title
+            titleize(registry_key)
+          end
+
+          def default_examples
+            # strs = Examples.build(node).yaml
+          end
+
+          def assign(opts)
+            opts.each do |key, value|
+              case key
+              when :only, :except
+                supports(key => value)
+              else
+                send(key, value)
+              end
+            end
+          end
+
+          def is?(type)
+            is_a?(Node[type])
+          end
+
+          def str?
+            is?(:str)
+          end
+
+          def aliases(*aliases)
+            node.set :aliases, aliases.flatten
+          end
+          alias alias aliases
+
+          def changes(*objs)
+            objs = objs.flatten
+            opts = objs.last.is_a?(Hash) ? objs.pop : {}
+            changes = objs.map { |obj| { change: obj }.merge(opts) }
+            node.set :changes, changes
+          end
+          alias change changes
+
+          def deprecated(*)
+            node.set :deprecated, true
+          end
+
+          def description(description)
+            node.set :deprecated, description
+          end
+
+          def expand(*)
+            raise
+          end
+
+          def export?
+            node.export?
+          end
+
+          def export(*)
+            node.export
+          end
+
+          def edge(_ = nil)
+            node.set :flags, [:edge]
+          end
+
+          def example(*examples)
+            node.set :examples, examples
+          end
+          alias examples example
+
+          def internal(*)
+            node.set :flags, [:internal]
+          end
+
+          def key(key)
+            node.set :key, key
+          end
+
+          def namespace(namespace)
+            node.set :namespace, namespace
+          end
+
+          def normal(*)
+            node.set :normal, true
+          end
+
+          def required(*)
+            node.set :required, true
+          end
+
+          def title(title)
+            node.set :title, title
+          end
+
+          def unique(*)
+            node.set :unique, true
+          end
+
+          def supports(key, opts = nil)
+            opts = opts ? { key => opts } : key
+            opts = symbolize(to_strs(opts))
+            node.set :support, opts
+          end
+
+          def definitions
+            node.definitions
+          end
+
+          def schema
+            node.schema
+          end
+        end
+      end
+    end
+  end
+end

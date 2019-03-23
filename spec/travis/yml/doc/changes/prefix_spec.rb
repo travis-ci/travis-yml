@@ -1,0 +1,50 @@
+describe Travis::Yml::Doc::Change::Prefix do
+  subject { described_class.new(build_schema(schema), build_value(value)).apply }
+
+  let(:schema) do
+    {
+      type: :object,
+      properties: {
+        foo: {
+          type: :string
+        },
+        bar: {
+          type: :string
+        },
+      },
+      prefix: :foo
+    }
+  end
+
+  describe 'given a str' do
+    let(:value) { 'foo' }
+    it { should serialize_to foo: 'foo' }
+    it { should_not have_msg }
+  end
+
+  describe 'given a num' do
+    let(:value) { 1 }
+    it { should serialize_to foo: 1 }
+    it { should_not have_msg }
+  end
+
+  describe 'given a seq of strs' do
+    let(:value) { ['foo', 'bar'] }
+    it { should serialize_to foo: ['foo', 'bar'] }
+  end
+
+  describe 'given a map with the prefix key' do
+    let(:value) { { foo: 'str' } }
+    it { should serialize_to foo: 'str' }
+  end
+
+  describe 'given a map with a known key' do
+    let(:value) { { bar: 'str' } }
+    it { should serialize_to bar: 'str' }
+  end
+
+  describe 'given a map with an unknown key' do
+    let(:value) { { baz: 'str' } }
+    it { should serialize_to baz: 'str' }
+  end
+end

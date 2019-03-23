@@ -1,0 +1,6548 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "JSON schema for Travis CI configuration files",
+  "definitions": {
+    "secure": {
+      "$id": "secure",
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "secure": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": false,
+          "maxProperties": 1,
+          "normal": true
+        },
+        {
+          "type": "string",
+          "normal": true
+        }
+      ]
+    },
+    "secures": {
+      "$id": "secures",
+      "anyOf": [
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/secure"
+          },
+          "normal": true
+        },
+        {
+          "$ref": "#/definitions/secure"
+        }
+      ]
+    },
+    "strs": {
+      "$id": "strs",
+      "anyOf": [
+        {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "anyOf": [
+              {
+                "type": "string"
+              }
+            ]
+          },
+          "normal": true
+        },
+        {
+          "type": "string"
+        }
+      ]
+    },
+    "language": {
+      "android": {
+        "$id": "android",
+        "title": "Android",
+        "type": "object",
+        "properties": {
+          "jdk": {
+            "$ref": "#/definitions/strs"
+          },
+          "android": {
+            "type": "object",
+            "properties": {
+              "components": {
+                "$ref": "#/definitions/strs"
+              },
+              "licenses": {
+                "$ref": "#/definitions/strs"
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "normal": true,
+        "only": {
+          "jdk": {
+            "language": [
+              "android"
+            ]
+          },
+          "android": {
+            "language": [
+              "android"
+            ]
+          }
+        },
+        "except": {
+          "jdk": {
+            "os": [
+              "osx"
+            ]
+          }
+        }
+      },
+      "c": {
+        "$id": "c",
+        "title": "C",
+        "type": "object",
+        "normal": true
+      },
+      "clojure": {
+        "$id": "clojure",
+        "title": "Clojure",
+        "type": "object",
+        "properties": {
+          "jdk": {
+            "$ref": "#/definitions/strs"
+          },
+          "lein": {
+            "type": "string"
+          }
+        },
+        "normal": true,
+        "only": {
+          "jdk": {
+            "language": [
+              "clojure"
+            ]
+          },
+          "lein": {
+            "language": [
+              "clojure"
+            ]
+          }
+        },
+        "except": {
+          "jdk": {
+            "os": [
+              "osx"
+            ]
+          }
+        }
+      },
+      "cpp": {
+        "$id": "cpp",
+        "title": "Cpp",
+        "type": "object",
+        "normal": true
+      },
+      "crystal": {
+        "$id": "crystal",
+        "title": "Crystal",
+        "type": "object",
+        "properties": {
+          "crystal": {
+            "$ref": "#/definitions/strs"
+          }
+        },
+        "normal": true,
+        "only": {
+          "crystal": {
+            "language": [
+              "crystal"
+            ]
+          }
+        }
+      },
+      "csharp": {
+        "$id": "csharp",
+        "title": "Csharp",
+        "type": "object",
+        "properties": {
+          "dotnet": {
+            "$ref": "#/definitions/strs"
+          },
+          "mono": {
+            "$ref": "#/definitions/strs"
+          },
+          "solution": {
+            "$ref": "#/definitions/strs"
+          }
+        },
+        "normal": true,
+        "only": {
+          "dotnet": {
+            "language": [
+              "csharp"
+            ]
+          },
+          "mono": {
+            "language": [
+              "csharp"
+            ]
+          },
+          "solution": {
+            "language": [
+              "csharp"
+            ]
+          }
+        }
+      },
+      "d": {
+        "$id": "d",
+        "title": "D",
+        "type": "object",
+        "properties": {
+          "d": {
+            "$ref": "#/definitions/strs"
+          }
+        },
+        "normal": true,
+        "only": {
+          "d": {
+            "language": [
+              "d"
+            ]
+          }
+        }
+      },
+      "dart": {
+        "$id": "dart",
+        "title": "Dart",
+        "type": "object",
+        "properties": {
+          "dart": {
+            "$ref": "#/definitions/strs"
+          },
+          "with_content_shell": {
+            "type": "boolean"
+          }
+        },
+        "normal": true,
+        "only": {
+          "dart": {
+            "language": [
+              "dart"
+            ]
+          },
+          "with_content_shell": {
+            "language": [
+              "dart"
+            ]
+          }
+        }
+      },
+      "elixir": {
+        "$id": "elixir",
+        "title": "Elixir",
+        "type": "object",
+        "properties": {
+          "elixir": {
+            "$ref": "#/definitions/strs"
+          },
+          "otp_release": {
+            "$ref": "#/definitions/strs"
+          }
+        },
+        "normal": true,
+        "only": {
+          "elixir": {
+            "language": [
+              "elixir"
+            ]
+          },
+          "otp_release": {
+            "language": [
+              "elixir"
+            ]
+          }
+        }
+      },
+      "elm": {
+        "$id": "elm",
+        "title": "Elm",
+        "type": "object",
+        "properties": {
+          "elm": {
+            "$ref": "#/definitions/strs"
+          },
+          "elm_format": {
+            "type": "string"
+          },
+          "elm_test": {
+            "type": "string"
+          }
+        },
+        "normal": true,
+        "only": {
+          "elm": {
+            "language": [
+              "elm"
+            ]
+          },
+          "elm_format": {
+            "language": [
+              "elm"
+            ]
+          },
+          "elm_test": {
+            "language": [
+              "elm"
+            ]
+          }
+        }
+      },
+      "erlang": {
+        "$id": "erlang",
+        "title": "Erlang",
+        "type": "object",
+        "properties": {
+          "otp_release": {
+            "$ref": "#/definitions/strs"
+          }
+        },
+        "normal": true,
+        "only": {
+          "otp_release": {
+            "language": [
+              "erlang"
+            ]
+          }
+        }
+      },
+      "go": {
+        "$id": "go",
+        "title": "Go",
+        "type": "object",
+        "properties": {
+          "go": {
+            "$ref": "#/definitions/strs"
+          },
+          "gobuild_args": {
+            "type": "string"
+          },
+          "go_import_path": {
+            "type": "string"
+          },
+          "gimme_config": {
+            "type": "object",
+            "properties": {
+              "url": {
+                "type": "string"
+              },
+              "force_reinstall": {
+                "type": "boolean"
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "normal": true,
+        "only": {
+          "go": {
+            "language": [
+              "go"
+            ]
+          },
+          "gobuild_args": {
+            "language": [
+              "go"
+            ]
+          },
+          "go_import_path": {
+            "language": [
+              "go"
+            ]
+          },
+          "gimme_config": {
+            "language": [
+              "go"
+            ]
+          }
+        }
+      },
+      "groovy": {
+        "$id": "groovy",
+        "title": "Groovy",
+        "type": "object",
+        "properties": {
+          "jdk": {
+            "$ref": "#/definitions/strs"
+          }
+        },
+        "normal": true,
+        "only": {
+          "jdk": {
+            "language": [
+              "groovy"
+            ]
+          }
+        },
+        "except": {
+          "jdk": {
+            "os": [
+              "osx"
+            ]
+          }
+        }
+      },
+      "haskell": {
+        "$id": "haskell",
+        "title": "Haskell",
+        "type": "object",
+        "properties": {
+          "ghc": {
+            "$ref": "#/definitions/strs"
+          }
+        },
+        "normal": true,
+        "only": {
+          "ghc": {
+            "language": [
+              "haskell"
+            ]
+          }
+        }
+      },
+      "haxe": {
+        "$id": "haxe",
+        "title": "Haxe",
+        "type": "object",
+        "properties": {
+          "haxe": {
+            "$ref": "#/definitions/strs"
+          },
+          "hxml": {
+            "$ref": "#/definitions/strs"
+          },
+          "neko": {
+            "type": "string"
+          }
+        },
+        "normal": true,
+        "only": {
+          "haxe": {
+            "language": [
+              "haxe"
+            ]
+          },
+          "hxml": {
+            "language": [
+              "haxe"
+            ]
+          },
+          "neko": {
+            "language": [
+              "haxe"
+            ]
+          }
+        }
+      },
+      "java": {
+        "$id": "java",
+        "title": "Java",
+        "type": "object",
+        "properties": {
+          "jdk": {
+            "$ref": "#/definitions/strs"
+          }
+        },
+        "normal": true,
+        "only": {
+          "jdk": {
+            "language": [
+              "java"
+            ]
+          }
+        },
+        "except": {
+          "jdk": {
+            "os": [
+              "osx"
+            ]
+          }
+        }
+      },
+      "julia": {
+        "$id": "julia",
+        "title": "Julia",
+        "type": "object",
+        "properties": {
+          "julia": {
+            "$ref": "#/definitions/strs"
+          }
+        },
+        "normal": true,
+        "only": {
+          "julia": {
+            "language": [
+              "julia"
+            ]
+          }
+        }
+      },
+      "nix": {
+        "$id": "nix",
+        "title": "Nix",
+        "type": "object",
+        "normal": true
+      },
+      "node_js": {
+        "$id": "node_js",
+        "title": "Node Js",
+        "type": "object",
+        "properties": {
+          "node_js": {
+            "$ref": "#/definitions/strs"
+          },
+          "npm_args": {
+            "type": "string"
+          }
+        },
+        "normal": true,
+        "aliases": {
+          "node_js": [
+            "node"
+          ]
+        },
+        "only": {
+          "node_js": {
+            "language": [
+              "node_js"
+            ]
+          },
+          "npm_args": {
+            "language": [
+              "node_js"
+            ]
+          }
+        }
+      },
+      "objective-c": {
+        "$id": "objective-c",
+        "title": "Objective-c",
+        "type": "object",
+        "properties": {
+          "rvm": {
+            "$ref": "#/definitions/strs"
+          },
+          "gemfile": {
+            "$ref": "#/definitions/strs"
+          },
+          "xcode_scheme": {
+            "$ref": "#/definitions/strs"
+          },
+          "xcode_sdk": {
+            "$ref": "#/definitions/strs"
+          },
+          "podfile": {
+            "type": "string"
+          },
+          "bundler_args": {
+            "type": "string"
+          },
+          "xcode_project": {
+            "type": "string"
+          },
+          "xcode_workspace": {
+            "type": "string"
+          },
+          "xctool_args": {
+            "type": "string"
+          }
+        },
+        "normal": true,
+        "aliases": {
+          "rvm": [
+            "ruby"
+          ]
+        },
+        "only": {
+          "rvm": {
+            "language": [
+              "objective-c"
+            ]
+          },
+          "gemfile": {
+            "language": [
+              "objective-c"
+            ]
+          },
+          "xcode_scheme": {
+            "language": [
+              "objective-c"
+            ]
+          },
+          "xcode_sdk": {
+            "language": [
+              "objective-c"
+            ]
+          },
+          "podfile": {
+            "language": [
+              "objective-c"
+            ]
+          },
+          "bundler_args": {
+            "language": [
+              "objective-c"
+            ]
+          },
+          "xcode_project": {
+            "language": [
+              "objective-c"
+            ]
+          },
+          "xcode_workspace": {
+            "language": [
+              "objective-c"
+            ]
+          },
+          "xctool_args": {
+            "language": [
+              "objective-c"
+            ]
+          }
+        }
+      },
+      "perl": {
+        "$id": "perl",
+        "title": "Perl",
+        "type": "object",
+        "properties": {
+          "perl": {
+            "$ref": "#/definitions/strs"
+          }
+        },
+        "normal": true,
+        "only": {
+          "perl": {
+            "language": [
+              "perl"
+            ]
+          }
+        }
+      },
+      "perl6": {
+        "$id": "perl6",
+        "title": "Perl6",
+        "type": "object",
+        "properties": {
+          "perl6": {
+            "$ref": "#/definitions/strs"
+          }
+        },
+        "normal": true,
+        "only": {
+          "perl6": {
+            "language": [
+              "perl6"
+            ]
+          }
+        }
+      },
+      "php": {
+        "$id": "php",
+        "title": "Php",
+        "type": "object",
+        "properties": {
+          "php": {
+            "$ref": "#/definitions/strs"
+          },
+          "composer_args": {
+            "type": "string"
+          }
+        },
+        "normal": true,
+        "only": {
+          "php": {
+            "language": [
+              "php"
+            ]
+          },
+          "composer_args": {
+            "language": [
+              "php"
+            ]
+          }
+        }
+      },
+      "python": {
+        "$id": "python",
+        "title": "Python",
+        "type": "object",
+        "properties": {
+          "python": {
+            "$ref": "#/definitions/strs"
+          },
+          "virtualenv": {
+            "type": "object",
+            "properties": {
+              "system_site_packages": {
+                "type": "boolean"
+              }
+            }
+          }
+        },
+        "normal": true,
+        "only": {
+          "python": {
+            "language": [
+              "python"
+            ]
+          },
+          "virtualenv": {
+            "language": [
+              "python"
+            ]
+          }
+        },
+        "aliases": {
+          "virtualenv": [
+            "virtual_env"
+          ]
+        }
+      },
+      "r": {
+        "$id": "r",
+        "title": "R",
+        "type": "object",
+        "properties": {
+          "r": {
+            "$ref": "#/definitions/strs"
+          },
+          "r_packages": {
+            "$ref": "#/definitions/strs"
+          },
+          "r_binary_packages": {
+            "$ref": "#/definitions/strs"
+          },
+          "r_github_packages": {
+            "$ref": "#/definitions/strs"
+          },
+          "apt_packages": {
+            "$ref": "#/definitions/strs"
+          },
+          "bioc_packages": {
+            "$ref": "#/definitions/strs"
+          },
+          "brew_packages": {
+            "$ref": "#/definitions/strs"
+          },
+          "bioc": {
+            "type": "string"
+          },
+          "bioc_check": {
+            "type": "boolean"
+          },
+          "bioc_required": {
+            "type": "boolean"
+          },
+          "bioc_use_devel": {
+            "type": "boolean"
+          },
+          "cran": {
+            "type": "string"
+          },
+          "disable_homebrew": {
+            "type": "boolean"
+          },
+          "latex": {
+            "type": "boolean"
+          },
+          "pandoc": {
+            "type": "boolean"
+          },
+          "pandoc_version": {
+            "type": "string"
+          },
+          "r_build_args": {
+            "type": "string"
+          },
+          "r_check_args": {
+            "type": "string"
+          },
+          "r_check_revdep": {
+            "type": "boolean"
+          },
+          "warnings_are_errors": {
+            "type": "boolean"
+          },
+          "remotes": {
+            "type": "string"
+          },
+          "repos": {
+            "type": "object"
+          }
+        },
+        "normal": true,
+        "only": {
+          "r": {
+            "language": [
+              "r"
+            ]
+          },
+          "r_packages": {
+            "language": [
+              "r"
+            ]
+          },
+          "r_binary_packages": {
+            "language": [
+              "r"
+            ]
+          },
+          "r_github_packages": {
+            "language": [
+              "r"
+            ]
+          },
+          "apt_packages": {
+            "language": [
+              "r"
+            ]
+          },
+          "bioc_packages": {
+            "language": [
+              "r"
+            ]
+          },
+          "brew_packages": {
+            "language": [
+              "r"
+            ]
+          },
+          "bioc": {
+            "language": [
+              "r"
+            ]
+          },
+          "bioc_check": {
+            "language": [
+              "r"
+            ]
+          },
+          "bioc_required": {
+            "language": [
+              "r"
+            ]
+          },
+          "bioc_use_devel": {
+            "language": [
+              "r"
+            ]
+          },
+          "cran": {
+            "language": [
+              "r"
+            ]
+          },
+          "disable_homebrew": {
+            "language": [
+              "r"
+            ]
+          },
+          "latex": {
+            "language": [
+              "r"
+            ]
+          },
+          "pandoc": {
+            "language": [
+              "r"
+            ]
+          },
+          "pandoc_version": {
+            "language": [
+              "r"
+            ]
+          },
+          "r_build_args": {
+            "language": [
+              "r"
+            ]
+          },
+          "r_check_args": {
+            "language": [
+              "r"
+            ]
+          },
+          "r_check_revdep": {
+            "language": [
+              "r"
+            ]
+          },
+          "warnings_are_errors": {
+            "language": [
+              "r"
+            ]
+          },
+          "remotes": {
+            "language": [
+              "r"
+            ]
+          },
+          "repos": {
+            "language": [
+              "r"
+            ]
+          }
+        },
+        "aliases": {
+          "bioc_required": [
+            "use_bioc"
+          ]
+        }
+      },
+      "ruby": {
+        "$id": "ruby",
+        "title": "Ruby",
+        "type": "object",
+        "properties": {
+          "rvm": {
+            "$ref": "#/definitions/strs"
+          },
+          "gemfile": {
+            "$ref": "#/definitions/strs"
+          },
+          "jdk": {
+            "$ref": "#/definitions/strs"
+          },
+          "bundler_args": {
+            "type": "string"
+          }
+        },
+        "normal": true,
+        "aliases": {
+          "rvm": [
+            "ruby"
+          ],
+          "gemfile": [
+            "gemfiles"
+          ]
+        },
+        "only": {
+          "rvm": {
+            "language": [
+              "ruby"
+            ]
+          },
+          "gemfile": {
+            "language": [
+              "ruby"
+            ]
+          },
+          "jdk": {
+            "language": [
+              "ruby"
+            ]
+          },
+          "bundler_args": {
+            "language": [
+              "ruby"
+            ]
+          }
+        },
+        "except": {
+          "jdk": {
+            "os": [
+              "osx"
+            ]
+          }
+        }
+      },
+      "rust": {
+        "$id": "rust",
+        "title": "Rust",
+        "type": "object",
+        "properties": {
+          "rust": {
+            "$ref": "#/definitions/strs"
+          }
+        },
+        "normal": true,
+        "only": {
+          "rust": {
+            "language": [
+              "rust"
+            ]
+          }
+        }
+      },
+      "scala": {
+        "$id": "scala",
+        "title": "Scala",
+        "type": "object",
+        "properties": {
+          "scala": {
+            "$ref": "#/definitions/strs"
+          },
+          "jdk": {
+            "$ref": "#/definitions/strs"
+          },
+          "sbt_args": {
+            "type": "string"
+          }
+        },
+        "normal": true,
+        "only": {
+          "scala": {
+            "language": [
+              "scala"
+            ]
+          },
+          "jdk": {
+            "language": [
+              "scala"
+            ]
+          },
+          "sbt_args": {
+            "language": [
+              "scala"
+            ]
+          }
+        },
+        "except": {
+          "jdk": {
+            "os": [
+              "osx"
+            ]
+          }
+        }
+      },
+      "shell": {
+        "$id": "shell",
+        "title": "Shell",
+        "type": "object",
+        "normal": true
+      },
+      "smalltalk": {
+        "$id": "smalltalk",
+        "title": "Smalltalk",
+        "type": "object",
+        "properties": {
+          "smalltalk": {
+            "$ref": "#/definitions/strs"
+          },
+          "smalltalk_config": {
+            "$ref": "#/definitions/strs"
+          },
+          "smalltalk_edge": {
+            "type": "boolean"
+          }
+        },
+        "normal": true,
+        "only": {
+          "smalltalk": {
+            "language": [
+              "smalltalk"
+            ]
+          },
+          "smalltalk_config": {
+            "language": [
+              "smalltalk"
+            ]
+          },
+          "smalltalk_edge": {
+            "language": [
+              "smalltalk"
+            ]
+          }
+        }
+      },
+      "__connie__": {
+        "$id": "__connie__",
+        "title": "  Connie",
+        "type": "object",
+        "deprecated": true,
+        "normal": true
+      },
+      "__amethyst__": {
+        "$id": "__amethyst__",
+        "title": "  Amethyst",
+        "type": "object",
+        "deprecated": true,
+        "normal": true
+      },
+      "__garnet__": {
+        "$id": "__garnet__",
+        "title": "  Garnet",
+        "type": "object",
+        "deprecated": true,
+        "normal": true
+      },
+      "__stevonnie__": {
+        "$id": "__stevonnie__",
+        "title": "  Stevonnie",
+        "type": "object",
+        "deprecated": true,
+        "normal": true
+      },
+      "__opal__": {
+        "$id": "__opal__",
+        "title": "  Opal",
+        "type": "object",
+        "deprecated": true,
+        "normal": true
+      },
+      "__sardonyx__": {
+        "$id": "__sardonyx__",
+        "title": "  Sardonyx",
+        "type": "object",
+        "deprecated": true,
+        "normal": true
+      },
+      "__onion__": {
+        "$id": "__onion__",
+        "title": "  Onion",
+        "type": "object",
+        "deprecated": true,
+        "normal": true
+      },
+      "__cookiecat__": {
+        "$id": "__cookiecat__",
+        "title": "  Cookiecat",
+        "type": "object",
+        "deprecated": true,
+        "normal": true
+      }
+    },
+    "type": {
+      "languages": {
+        "$id": "languages",
+        "title": "Languages",
+        "oneOf": [
+          {
+            "$ref": "#/definitions/language/android"
+          },
+          {
+            "$ref": "#/definitions/language/c"
+          },
+          {
+            "$ref": "#/definitions/language/clojure"
+          },
+          {
+            "$ref": "#/definitions/language/cpp"
+          },
+          {
+            "$ref": "#/definitions/language/crystal"
+          },
+          {
+            "$ref": "#/definitions/language/csharp"
+          },
+          {
+            "$ref": "#/definitions/language/d"
+          },
+          {
+            "$ref": "#/definitions/language/dart"
+          },
+          {
+            "$ref": "#/definitions/language/elixir"
+          },
+          {
+            "$ref": "#/definitions/language/elm"
+          },
+          {
+            "$ref": "#/definitions/language/erlang"
+          },
+          {
+            "$ref": "#/definitions/language/go"
+          },
+          {
+            "$ref": "#/definitions/language/groovy"
+          },
+          {
+            "$ref": "#/definitions/language/haskell"
+          },
+          {
+            "$ref": "#/definitions/language/haxe"
+          },
+          {
+            "$ref": "#/definitions/language/java"
+          },
+          {
+            "$ref": "#/definitions/language/julia"
+          },
+          {
+            "$ref": "#/definitions/language/nix"
+          },
+          {
+            "$ref": "#/definitions/language/node_js"
+          },
+          {
+            "$ref": "#/definitions/language/objective-c"
+          },
+          {
+            "$ref": "#/definitions/language/perl"
+          },
+          {
+            "$ref": "#/definitions/language/perl6"
+          },
+          {
+            "$ref": "#/definitions/language/php"
+          },
+          {
+            "$ref": "#/definitions/language/python"
+          },
+          {
+            "$ref": "#/definitions/language/r"
+          },
+          {
+            "$ref": "#/definitions/language/ruby"
+          },
+          {
+            "$ref": "#/definitions/language/rust"
+          },
+          {
+            "$ref": "#/definitions/language/scala"
+          },
+          {
+            "$ref": "#/definitions/language/shell"
+          },
+          {
+            "$ref": "#/definitions/language/smalltalk"
+          },
+          {
+            "$ref": "#/definitions/language/__connie__"
+          },
+          {
+            "$ref": "#/definitions/language/__amethyst__"
+          },
+          {
+            "$ref": "#/definitions/language/__garnet__"
+          },
+          {
+            "$ref": "#/definitions/language/__stevonnie__"
+          },
+          {
+            "$ref": "#/definitions/language/__opal__"
+          },
+          {
+            "$ref": "#/definitions/language/__sardonyx__"
+          },
+          {
+            "$ref": "#/definitions/language/__onion__"
+          },
+          {
+            "$ref": "#/definitions/language/__cookiecat__"
+          }
+        ],
+        "normal": true
+      },
+      "group": {
+        "$id": "group",
+        "title": "Group",
+        "type": "string",
+        "downcase": true
+      },
+      "services": {
+        "$id": "services",
+        "title": "Services",
+        "anyOf": [
+          {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/type/service"
+            },
+            "normal": true
+          },
+          {
+            "$ref": "#/definitions/type/service"
+          }
+        ],
+        "normal": true
+      },
+      "service": {
+        "$id": "service",
+        "title": "Service",
+        "type": "string",
+        "downcase": true,
+        "enum": [
+          "cassandra",
+          "couchdb",
+          "docker",
+          "elasticsearch",
+          "memcached",
+          "mongodb",
+          "mysql",
+          "neo4j",
+          "postgresql",
+          "rabbitmq",
+          "redis",
+          "riak"
+        ],
+        "values": {
+          "memcached": {
+            "aliases": [
+              "memcache"
+            ]
+          },
+          "postgresql": {
+            "aliases": [
+              "postgres"
+            ]
+          },
+          "rabbitmq": {
+            "aliases": [
+              "rabbitmq-server"
+            ]
+          },
+          "redis": {
+            "aliases": [
+              "redis-server"
+            ]
+          }
+        }
+      },
+      "deploy_branches": {
+        "$id": "deploy_branches",
+        "title": "Deploy Branches",
+        "anyOf": [
+          {
+            "$ref": "#/definitions/strs"
+          }
+        ]
+      },
+      "deploy_conditions": {
+        "$id": "deploy_conditions",
+        "title": "Deploy Conditions",
+        "anyOf": [
+          {
+            "allOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "branch": {
+                    "$ref": "#/definitions/type/deploy_branches"
+                  },
+                  "repo": {
+                    "type": "string"
+                  },
+                  "condition": {
+                    "type": "string"
+                  },
+                  "all_branches": {
+                    "type": "boolean"
+                  },
+                  "tags": {
+                    "type": "boolean"
+                  }
+                },
+                "additionalProperties": false,
+                "normal": true,
+                "prefix": "branch",
+                "aliases": {
+                  "branch": [
+                    "branches"
+                  ]
+                }
+              },
+              {
+                "$ref": "#/definitions/type/languages"
+              }
+            ]
+          },
+          {
+            "$ref": "#/definitions/type/deploy_branches"
+          }
+        ]
+      },
+      "deploy_edge": {
+        "$id": "deploy_edge",
+        "title": "Deploy Edge",
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "source": {
+            "type": "string"
+          },
+          "branch": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false,
+        "flags": [
+          "edge"
+        ]
+      },
+      "app": {
+        "$id": "app",
+        "title": "App",
+        "anyOf": [
+          {
+            "type": "object",
+            "patternProperties": {
+              ".*": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "type": "string"
+          }
+        ]
+      },
+      "deploys": {
+        "$id": "deploys",
+        "title": "Deploys",
+        "anyOf": [
+          {
+            "type": "array",
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/definitions/deploy/anynines"
+                },
+                {
+                  "$ref": "#/definitions/deploy/appfog"
+                },
+                {
+                  "$ref": "#/definitions/deploy/atlas"
+                },
+                {
+                  "$ref": "#/definitions/deploy/azure_web_apps"
+                },
+                {
+                  "$ref": "#/definitions/deploy/bintray"
+                },
+                {
+                  "$ref": "#/definitions/deploy/bitballoon"
+                },
+                {
+                  "$ref": "#/definitions/deploy/bluemixcf"
+                },
+                {
+                  "$ref": "#/definitions/deploy/boxfuse"
+                },
+                {
+                  "$ref": "#/definitions/deploy/catalyze"
+                },
+                {
+                  "$ref": "#/definitions/deploy/chef_supermarket"
+                },
+                {
+                  "$ref": "#/definitions/deploy/cloud66"
+                },
+                {
+                  "$ref": "#/definitions/deploy/cloudcontrol"
+                },
+                {
+                  "$ref": "#/definitions/deploy/cloudfiles"
+                },
+                {
+                  "$ref": "#/definitions/deploy/cloudfoundry"
+                },
+                {
+                  "$ref": "#/definitions/deploy/codedeploy"
+                },
+                {
+                  "$ref": "#/definitions/deploy/deis"
+                },
+                {
+                  "$ref": "#/definitions/deploy/divshot"
+                },
+                {
+                  "$ref": "#/definitions/deploy/elasticbeanstalk"
+                },
+                {
+                  "$ref": "#/definitions/deploy/engineyard"
+                },
+                {
+                  "$ref": "#/definitions/deploy/firebase"
+                },
+                {
+                  "$ref": "#/definitions/deploy/gae"
+                },
+                {
+                  "$ref": "#/definitions/deploy/gcs"
+                },
+                {
+                  "$ref": "#/definitions/deploy/hackage"
+                },
+                {
+                  "$ref": "#/definitions/deploy/heroku"
+                },
+                {
+                  "$ref": "#/definitions/deploy/lambda"
+                },
+                {
+                  "$ref": "#/definitions/deploy/launchpad"
+                },
+                {
+                  "$ref": "#/definitions/deploy/modulus"
+                },
+                {
+                  "$ref": "#/definitions/deploy/npm"
+                },
+                {
+                  "$ref": "#/definitions/deploy/openshift"
+                },
+                {
+                  "$ref": "#/definitions/deploy/opsworks"
+                },
+                {
+                  "$ref": "#/definitions/deploy/packagecloud"
+                },
+                {
+                  "$ref": "#/definitions/deploy/pages"
+                },
+                {
+                  "$ref": "#/definitions/deploy/puppetforge"
+                },
+                {
+                  "$ref": "#/definitions/deploy/pypi"
+                },
+                {
+                  "$ref": "#/definitions/deploy/releases"
+                },
+                {
+                  "$ref": "#/definitions/deploy/rubygems"
+                },
+                {
+                  "$ref": "#/definitions/deploy/s3"
+                },
+                {
+                  "$ref": "#/definitions/deploy/scalingo"
+                },
+                {
+                  "$ref": "#/definitions/deploy/script"
+                },
+                {
+                  "$ref": "#/definitions/deploy/surge"
+                },
+                {
+                  "$ref": "#/definitions/deploy/testfairy"
+                }
+              ],
+              "normal": true,
+              "detect": "provider"
+            },
+            "normal": true
+          },
+          {
+            "$ref": "#/definitions/deploy/anynines"
+          },
+          {
+            "$ref": "#/definitions/deploy/appfog"
+          },
+          {
+            "$ref": "#/definitions/deploy/atlas"
+          },
+          {
+            "$ref": "#/definitions/deploy/azure_web_apps"
+          },
+          {
+            "$ref": "#/definitions/deploy/bintray"
+          },
+          {
+            "$ref": "#/definitions/deploy/bitballoon"
+          },
+          {
+            "$ref": "#/definitions/deploy/bluemixcf"
+          },
+          {
+            "$ref": "#/definitions/deploy/boxfuse"
+          },
+          {
+            "$ref": "#/definitions/deploy/catalyze"
+          },
+          {
+            "$ref": "#/definitions/deploy/chef_supermarket"
+          },
+          {
+            "$ref": "#/definitions/deploy/cloud66"
+          },
+          {
+            "$ref": "#/definitions/deploy/cloudcontrol"
+          },
+          {
+            "$ref": "#/definitions/deploy/cloudfiles"
+          },
+          {
+            "$ref": "#/definitions/deploy/cloudfoundry"
+          },
+          {
+            "$ref": "#/definitions/deploy/codedeploy"
+          },
+          {
+            "$ref": "#/definitions/deploy/deis"
+          },
+          {
+            "$ref": "#/definitions/deploy/divshot"
+          },
+          {
+            "$ref": "#/definitions/deploy/elasticbeanstalk"
+          },
+          {
+            "$ref": "#/definitions/deploy/engineyard"
+          },
+          {
+            "$ref": "#/definitions/deploy/firebase"
+          },
+          {
+            "$ref": "#/definitions/deploy/gae"
+          },
+          {
+            "$ref": "#/definitions/deploy/gcs"
+          },
+          {
+            "$ref": "#/definitions/deploy/hackage"
+          },
+          {
+            "$ref": "#/definitions/deploy/heroku"
+          },
+          {
+            "$ref": "#/definitions/deploy/lambda"
+          },
+          {
+            "$ref": "#/definitions/deploy/launchpad"
+          },
+          {
+            "$ref": "#/definitions/deploy/modulus"
+          },
+          {
+            "$ref": "#/definitions/deploy/npm"
+          },
+          {
+            "$ref": "#/definitions/deploy/openshift"
+          },
+          {
+            "$ref": "#/definitions/deploy/opsworks"
+          },
+          {
+            "$ref": "#/definitions/deploy/packagecloud"
+          },
+          {
+            "$ref": "#/definitions/deploy/pages"
+          },
+          {
+            "$ref": "#/definitions/deploy/puppetforge"
+          },
+          {
+            "$ref": "#/definitions/deploy/pypi"
+          },
+          {
+            "$ref": "#/definitions/deploy/releases"
+          },
+          {
+            "$ref": "#/definitions/deploy/rubygems"
+          },
+          {
+            "$ref": "#/definitions/deploy/s3"
+          },
+          {
+            "$ref": "#/definitions/deploy/scalingo"
+          },
+          {
+            "$ref": "#/definitions/deploy/script"
+          },
+          {
+            "$ref": "#/definitions/deploy/surge"
+          },
+          {
+            "$ref": "#/definitions/deploy/testfairy"
+          }
+        ],
+        "normal": true
+      },
+      "addons": {
+        "$id": "addons",
+        "title": "Addons",
+        "type": "object",
+        "properties": {
+          "apt": {
+            "$ref": "#/definitions/addon/apt"
+          },
+          "apt_packages": {
+            "$ref": "#/definitions/strs"
+          },
+          "browserstack": {
+            "$ref": "#/definitions/addon/browserstack"
+          },
+          "artifacts": {
+            "$ref": "#/definitions/addon/artifacts"
+          },
+          "code_climate": {
+            "$ref": "#/definitions/addon/code_climate"
+          },
+          "coverity_scan": {
+            "$ref": "#/definitions/addon/coverity_scan"
+          },
+          "homebrew": {
+            "$ref": "#/definitions/addon/homebrew"
+          },
+          "hostname": {
+            "type": "string"
+          },
+          "hosts": {
+            "$ref": "#/definitions/strs"
+          },
+          "jwt": {
+            "$ref": "#/definitions/addon/jwts"
+          },
+          "sauce_connect": {
+            "$ref": "#/definitions/addon/sauce_connect"
+          },
+          "snaps": {
+            "$ref": "#/definitions/addon/snaps"
+          },
+          "ssh_known_hosts": {
+            "$ref": "#/definitions/strs"
+          },
+          "sonarqube": {
+            "anyOf": [
+              {
+                "type": "object"
+              },
+              {
+                "type": "boolean"
+              }
+            ]
+          },
+          "srcclr": {
+            "anyOf": [
+              {
+                "type": "object"
+              },
+              {
+                "type": "boolean"
+              }
+            ]
+          },
+          "firefox": {
+            "type": "string"
+          },
+          "mariadb": {
+            "type": "string"
+          },
+          "postgresql": {
+            "type": "string"
+          },
+          "rethinkdb": {
+            "type": "string"
+          },
+          "deploy": {
+            "$ref": "#/definitions/type/deploys"
+          }
+        },
+        "additionalProperties": false,
+        "changes": [
+          {
+            "change": "enable"
+          }
+        ],
+        "aliases": {
+          "postgresql": [
+            "postgres"
+          ]
+        }
+      },
+      "branches": {
+        "$id": "branches",
+        "title": "Branches",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "only": {
+                "$ref": "#/definitions/strs"
+              },
+              "except": {
+                "$ref": "#/definitions/strs"
+              }
+            },
+            "additionalProperties": false,
+            "normal": true,
+            "prefix": "only",
+            "aliases": {
+              "except": [
+                "exclude"
+              ]
+            }
+          },
+          {
+            "$ref": "#/definitions/strs"
+          }
+        ]
+      },
+      "cache": {
+        "$id": "cache",
+        "title": "Cache",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "apt": {
+                "type": "boolean"
+              },
+              "bundler": {
+                "type": "boolean"
+              },
+              "cargo": {
+                "type": "boolean"
+              },
+              "ccache": {
+                "type": "boolean"
+              },
+              "cocoapods": {
+                "type": "boolean"
+              },
+              "npm": {
+                "type": "boolean"
+              },
+              "packages": {
+                "type": "boolean"
+              },
+              "pip": {
+                "type": "boolean"
+              },
+              "yarn": {
+                "type": "boolean"
+              },
+              "edge": {
+                "type": "boolean",
+                "flags": [
+                  "edge"
+                ]
+              },
+              "directories": {
+                "$ref": "#/definitions/strs"
+              },
+              "timeout": {
+                "type": "number"
+              },
+              "branch": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false,
+            "normal": true,
+            "prefix": "directories",
+            "changes": [
+              {
+                "change": "cache"
+              }
+            ]
+          },
+          {
+            "$ref": "#/definitions/strs"
+          }
+        ]
+      },
+      "git": {
+        "$id": "git",
+        "title": "Git",
+        "type": "object",
+        "properties": {
+          "strategy": {
+            "type": "string",
+            "enum": [
+              "clone",
+              "tarball"
+            ]
+          },
+          "quiet": {
+            "type": "boolean"
+          },
+          "depth": {
+            "type": "number"
+          },
+          "submodules": {
+            "type": "boolean"
+          },
+          "submodules_depth": {
+            "type": "number"
+          }
+        },
+        "additionalProperties": false
+      },
+      "job": {
+        "$id": "job",
+        "title": "Job",
+        "allOf": [
+          {
+            "type": "object",
+            "properties": {
+              "group": {
+                "$ref": "#/definitions/type/group"
+              },
+              "osx_image": {
+                "type": "string",
+                "flags": [
+                  "edge"
+                ]
+              },
+              "services": {
+                "$ref": "#/definitions/type/services"
+              },
+              "addons": {
+                "$ref": "#/definitions/type/addons"
+              },
+              "branches": {
+                "$ref": "#/definitions/type/branches"
+              },
+              "cache": {
+                "$ref": "#/definitions/type/cache"
+              },
+              "deploy": {
+                "$ref": "#/definitions/type/deploys"
+              },
+              "git": {
+                "$ref": "#/definitions/type/git"
+              },
+              "source_key": {
+                "$ref": "#/definitions/secure"
+              },
+              "if": {
+                "type": "string"
+              },
+              "before_install": {
+                "$ref": "#/definitions/strs"
+              },
+              "install": {
+                "$ref": "#/definitions/strs"
+              },
+              "after_install": {
+                "$ref": "#/definitions/strs"
+              },
+              "before_script": {
+                "$ref": "#/definitions/strs"
+              },
+              "script": {
+                "$ref": "#/definitions/strs"
+              },
+              "after_script": {
+                "$ref": "#/definitions/strs"
+              },
+              "after_result": {
+                "$ref": "#/definitions/strs"
+              },
+              "after_success": {
+                "$ref": "#/definitions/strs"
+              },
+              "after_failure": {
+                "$ref": "#/definitions/strs"
+              },
+              "before_deploy": {
+                "$ref": "#/definitions/strs"
+              },
+              "after_deploy": {
+                "$ref": "#/definitions/strs"
+              },
+              "before_cache": {
+                "$ref": "#/definitions/strs"
+              }
+            },
+            "only": {
+              "osx_image": {
+                "os": [
+                  "osx"
+                ]
+              }
+            },
+            "aliases": {
+              "branches": [
+                "branch"
+              ]
+            }
+          },
+          {
+            "$ref": "#/definitions/type/languages"
+          }
+        ]
+      },
+      "version": {
+        "$id": "version",
+        "title": "Version",
+        "type": "string",
+        "pattern": "^(~>|>|>=|=|<=|<) (\\d+(?:\\.\\d+)?(?:\\.\\d+)?)$"
+      },
+      "import": {
+        "$id": "import",
+        "title": "Import",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "source": {
+                "type": "string"
+              },
+              "mode": {
+                "type": "string",
+                "enum": [
+                  "merge",
+                  "deep_merge"
+                ]
+              }
+            },
+            "additionalProperties": false,
+            "normal": true,
+            "prefix": "source"
+          },
+          {
+            "type": "string"
+          }
+        ]
+      },
+      "imports": {
+        "$id": "imports",
+        "title": "Imports",
+        "anyOf": [
+          {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/type/import"
+            },
+            "normal": true
+          },
+          {
+            "$ref": "#/definitions/type/import"
+          }
+        ],
+        "normal": true
+      },
+      "language": {
+        "$id": "language",
+        "title": "Language",
+        "type": "string",
+        "downcase": true,
+        "defaults": [
+          {
+            "value": "ruby",
+            "only": {
+              "os": [
+                "linux",
+                "windows"
+              ]
+            }
+          },
+          {
+            "value": "objective-c",
+            "only": {
+              "os": [
+                "osx"
+              ]
+            }
+          }
+        ],
+        "enum": [
+          "android",
+          "c",
+          "clojure",
+          "cpp",
+          "crystal",
+          "csharp",
+          "d",
+          "dart",
+          "elixir",
+          "elm",
+          "erlang",
+          "go",
+          "groovy",
+          "haskell",
+          "haxe",
+          "java",
+          "julia",
+          "nix",
+          "node_js",
+          "objective-c",
+          "perl",
+          "perl6",
+          "php",
+          "python",
+          "r",
+          "ruby",
+          "rust",
+          "scala",
+          "shell",
+          "smalltalk",
+          "__connie__",
+          "__amethyst__",
+          "__garnet__",
+          "__stevonnie__",
+          "__opal__",
+          "__sardonyx__",
+          "__onion__",
+          "__cookiecat__"
+        ],
+        "values": {
+          "cpp": {
+            "aliases": [
+              "c++"
+            ]
+          },
+          "go": {
+            "aliases": [
+              "golang"
+            ]
+          },
+          "java": {
+            "aliases": [
+              "jvm"
+            ]
+          },
+          "node_js": {
+            "aliases": [
+              "javascript"
+            ]
+          },
+          "objective-c": {
+            "aliases": [
+              "objective_c",
+              "swift"
+            ]
+          },
+          "shell": {
+            "aliases": [
+              "bash",
+              "generic",
+              "minimal"
+            ]
+          },
+          "__connie__": {
+            "deprecated": true
+          },
+          "__amethyst__": {
+            "deprecated": true
+          },
+          "__garnet__": {
+            "deprecated": true
+          },
+          "__stevonnie__": {
+            "deprecated": true
+          },
+          "__opal__": {
+            "deprecated": true
+          },
+          "__sardonyx__": {
+            "deprecated": true
+          },
+          "__onion__": {
+            "deprecated": true
+          },
+          "__cookiecat__": {
+            "deprecated": true
+          }
+        }
+      },
+      "os": {
+        "$id": "os",
+        "title": "Os",
+        "type": "string",
+        "downcase": true,
+        "defaults": [
+          {
+            "value": "linux",
+            "except": {
+              "language": [
+                "objective-c"
+              ]
+            }
+          },
+          {
+            "value": "osx",
+            "except": {
+              "language": [
+                "php",
+                "perl",
+                "erlang",
+                "groovy",
+                "clojure",
+                "scala",
+                "haskell"
+              ]
+            }
+          },
+          {
+            "value": "windows",
+            "only": {
+              "language": [
+                "shell",
+                "csharp",
+                "powershell"
+              ]
+            }
+          }
+        ],
+        "enum": [
+          "linux",
+          "osx",
+          "windows"
+        ],
+        "values": {
+          "linux": {
+            "aliases": [
+              "ubuntu"
+            ],
+            "except": {
+              "language": [
+                "objective-c"
+              ]
+            }
+          },
+          "osx": {
+            "aliases": [
+              "mac",
+              "macos",
+              "ios"
+            ],
+            "except": {
+              "language": [
+                "php",
+                "perl",
+                "erlang",
+                "groovy",
+                "clojure",
+                "scala",
+                "haskell"
+              ]
+            }
+          },
+          "windows": {
+            "aliases": [
+              "win"
+            ],
+            "only": {
+              "language": [
+                "shell",
+                "csharp",
+                "powershell"
+              ]
+            }
+          }
+        }
+      },
+      "oss": {
+        "$id": "oss",
+        "title": "Oss",
+        "anyOf": [
+          {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/type/os"
+            },
+            "normal": true
+          },
+          {
+            "$ref": "#/definitions/type/os"
+          }
+        ],
+        "normal": true
+      },
+      "arch": {
+        "$id": "arch",
+        "title": "Arch",
+        "type": "string",
+        "downcase": true,
+        "enum": [
+          "amd64",
+          "ppc64le"
+        ],
+        "values": {
+          "amd64": {
+            "aliases": [
+              "x86_64"
+            ]
+          },
+          "ppc64le": {
+            "aliases": [
+              "power",
+              "ppc",
+              "ppc64"
+            ]
+          }
+        }
+      },
+      "archs": {
+        "$id": "archs",
+        "title": "Archs",
+        "anyOf": [
+          {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/type/arch"
+            },
+            "normal": true
+          },
+          {
+            "$ref": "#/definitions/type/arch"
+          }
+        ],
+        "normal": true
+      },
+      "dist": {
+        "$id": "dist",
+        "title": "Dist",
+        "type": "string",
+        "downcase": true,
+        "enum": [
+          "trusty",
+          "precise",
+          "xenial",
+          "server-2016"
+        ],
+        "values": {
+          "trusty": {
+            "only": {
+              "os": [
+                "linux"
+              ]
+            }
+          },
+          "precise": {
+            "only": {
+              "os": [
+                "linux"
+              ]
+            }
+          },
+          "xenial": {
+            "only": {
+              "os": [
+                "linux"
+              ]
+            }
+          },
+          "server-2016": {
+            "only": {
+              "os": [
+                "windows"
+              ]
+            },
+            "edge": true
+          }
+        }
+      },
+      "sudo": {
+        "$id": "sudo",
+        "title": "Sudo",
+        "anyOf": [
+          {
+            "type": "boolean",
+            "normal": true
+          },
+          {
+            "type": "string"
+          }
+        ]
+      },
+      "env_var": {
+        "$id": "env_var",
+        "title": "Env Var",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "secure": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false,
+            "normal": true,
+            "maxProperties": 1
+          },
+          {
+            "type": "object",
+            "patternProperties": {
+              "^(?!global|matrix)": {
+                "type": "string"
+              }
+            },
+            "normal": true,
+            "maxProperties": 1
+          },
+          {
+            "type": "string",
+            "pattern": "^[^=]+=[^=]+$"
+          }
+        ]
+      },
+      "env_vars": {
+        "$id": "env_vars",
+        "title": "Env Vars",
+        "anyOf": [
+          {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/type/env_var"
+            },
+            "normal": true,
+            "changes": [
+              {
+                "change": "env_vars"
+              }
+            ]
+          },
+          {
+            "$ref": "#/definitions/type/env_var"
+          }
+        ]
+      },
+      "env": {
+        "$id": "env",
+        "title": "Env",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "global": {
+                "$ref": "#/definitions/type/env_vars"
+              },
+              "matrix": {
+                "$ref": "#/definitions/type/env_vars"
+              }
+            },
+            "additionalProperties": false,
+            "normal": true,
+            "prefix": "matrix"
+          },
+          {
+            "$ref": "#/definitions/type/env_vars"
+          }
+        ]
+      },
+      "compilers": {
+        "$id": "compilers",
+        "title": "Compilers",
+        "$ref": "#/definitions/strs"
+      },
+      "stage": {
+        "$id": "stage",
+        "title": "Stage",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "if": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false,
+            "prefix": "name"
+          },
+          {
+            "type": "string"
+          }
+        ]
+      },
+      "matrix_entry": {
+        "$id": "matrix_entry",
+        "title": "Matrix Entry",
+        "allOf": [
+          {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "language": {
+                "$ref": "#/definitions/type/language"
+              },
+              "os": {
+                "$ref": "#/definitions/type/os"
+              },
+              "arch": {
+                "$ref": "#/definitions/type/arch"
+              },
+              "dist": {
+                "$ref": "#/definitions/type/dist"
+              },
+              "sudo": {
+                "$ref": "#/definitions/type/sudo"
+              },
+              "env": {
+                "$ref": "#/definitions/type/env_vars"
+              },
+              "stage": {
+                "$ref": "#/definitions/type/stage"
+              },
+              "compiler": {
+                "$ref": "#/definitions/type/compilers"
+              }
+            },
+            "additionalProperties": false,
+            "unique": [
+              "name"
+            ],
+            "required": [
+              "language"
+            ],
+            "only": {
+              "arch": {
+                "os": [
+                  "linux"
+                ]
+              },
+              "compiler": {
+                "language": [
+                  "c",
+                  "cpp"
+                ]
+              }
+            }
+          },
+          {
+            "$ref": "#/definitions/type/job"
+          }
+        ]
+      },
+      "matrix_entries": {
+        "$id": "matrix_entries",
+        "title": "Matrix Entries",
+        "anyOf": [
+          {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/type/matrix_entry"
+            },
+            "normal": true
+          },
+          {
+            "$ref": "#/definitions/type/matrix_entry"
+          }
+        ]
+      },
+      "matrix": {
+        "$id": "matrix",
+        "title": "Matrix",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "include": {
+                "$ref": "#/definitions/type/matrix_entries"
+              },
+              "exclude": {
+                "$ref": "#/definitions/type/matrix_entries"
+              },
+              "allow_failures": {
+                "$ref": "#/definitions/type/matrix_entries"
+              },
+              "fast_finish": {
+                "type": "boolean"
+              }
+            },
+            "additionalProperties": false,
+            "normal": true,
+            "prefix": "include",
+            "aliases": {
+              "allow_failures": [
+                "allowed_failures"
+              ],
+              "fast_finish": [
+                "fast_failure"
+              ]
+            }
+          },
+          {
+            "$ref": "#/definitions/type/matrix_entries"
+          }
+        ]
+      },
+      "stages": {
+        "$id": "stages",
+        "title": "Stages",
+        "anyOf": [
+          {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/type/stage"
+            },
+            "normal": true
+          },
+          {
+            "$ref": "#/definitions/type/stage"
+          }
+        ],
+        "normal": true
+      },
+      "notification_frequency": {
+        "$id": "notification_frequency",
+        "title": "Notification Frequency",
+        "type": "string",
+        "enum": [
+          "always",
+          "never",
+          "change"
+        ],
+        "values": {
+          "always": {
+            "aliases": [
+              "true"
+            ]
+          },
+          "never": {
+            "aliases": [
+              "false"
+            ]
+          },
+          "change": {
+            "aliases": [
+              "changed"
+            ]
+          }
+        }
+      },
+      "notifications": {
+        "$id": "notifications",
+        "title": "Notifications",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "campfire": {
+                "$ref": "#/definitions/notification/campfire"
+              },
+              "email": {
+                "$ref": "#/definitions/notification/email"
+              },
+              "flowdock": {
+                "$ref": "#/definitions/notification/flowdock"
+              },
+              "hipchat": {
+                "$ref": "#/definitions/notification/hipchat"
+              },
+              "irc": {
+                "$ref": "#/definitions/notification/irc"
+              },
+              "pushover": {
+                "$ref": "#/definitions/notification/pushover"
+              },
+              "slack": {
+                "$ref": "#/definitions/notification/slack"
+              },
+              "webhooks": {
+                "$ref": "#/definitions/notification/webhooks"
+              },
+              "on_success": {
+                "$ref": "#/definitions/type/notification_frequency"
+              },
+              "on_failure": {
+                "$ref": "#/definitions/type/notification_frequency"
+              }
+            },
+            "additionalProperties": false,
+            "normal": true,
+            "prefix": "email",
+            "changes": [
+              {
+                "change": "enable"
+              },
+              {
+                "change": "inherit",
+                "keys": [
+                  "on_success",
+                  "on_failure"
+                ]
+              }
+            ],
+            "aliases": {
+              "email": [
+                "emails"
+              ],
+              "webhooks": [
+                "webhook"
+              ]
+            }
+          },
+          {
+            "$ref": "#/definitions/notification/email"
+          }
+        ]
+      },
+      "stack": {
+        "$id": "stack",
+        "title": "Stack",
+        "type": "string",
+        "downcase": true,
+        "flags": [
+          "edge"
+        ],
+        "enum": [
+          "connie",
+          "amethyst",
+          "garnet",
+          "stevonnie",
+          "opal",
+          "sardonyx",
+          "onion",
+          "cookiecat"
+        ]
+      },
+      "conditions": {
+        "$id": "conditions",
+        "title": "Conditions",
+        "type": "string",
+        "enum": [
+          "v0",
+          "v1"
+        ]
+      }
+    },
+    "addon": {
+      "apt": {
+        "$id": "apt",
+        "title": "Apt",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "packages": {
+                "$ref": "#/definitions/strs"
+              },
+              "sources": {
+                "anyOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "name": {
+                              "type": "string"
+                            }
+                          },
+                          "additionalProperties": false,
+                          "normal": true,
+                          "prefix": "name"
+                        },
+                        {
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "normal": true
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string"
+                      }
+                    },
+                    "additionalProperties": false,
+                    "normal": true,
+                    "prefix": "name"
+                  },
+                  {
+                    "type": "string"
+                  }
+                ],
+                "normal": true
+              },
+              "dist": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false,
+            "prefix": "packages",
+            "normal": true,
+            "aliases": {
+              "packages": [
+                "package"
+              ],
+              "sources": [
+                "source"
+              ]
+            }
+          },
+          {
+            "$ref": "#/definitions/strs"
+          }
+        ]
+      },
+      "browserstack": {
+        "$id": "browserstack",
+        "title": "Browserstack",
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string"
+          },
+          "access_key": {
+            "$ref": "#/definitions/secure"
+          },
+          "forcelocal": {
+            "type": "boolean"
+          },
+          "only": {
+            "type": "string"
+          },
+          "proxyHost": {
+            "type": "string"
+          },
+          "proxyPort": {
+            "type": "string"
+          },
+          "proxyUser": {
+            "type": "string"
+          },
+          "proxyPass": {
+            "$ref": "#/definitions/secure"
+          }
+        },
+        "additionalProperties": false,
+        "normal": true
+      },
+      "artifacts": {
+        "$id": "artifacts",
+        "title": "Artifacts",
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "bucket": {
+            "type": "string"
+          },
+          "endpoint": {
+            "type": "string"
+          },
+          "key": {
+            "$ref": "#/definitions/secure"
+          },
+          "secret": {
+            "$ref": "#/definitions/secure"
+          },
+          "paths": {
+            "$ref": "#/definitions/strs"
+          },
+          "branch": {
+            "type": "string"
+          },
+          "log_format": {
+            "type": "string"
+          },
+          "target_paths": {
+            "$ref": "#/definitions/strs"
+          },
+          "debug": {
+            "type": "boolean"
+          },
+          "concurrency": {
+            "type": "number"
+          },
+          "max_size": {
+            "type": "number"
+          },
+          "region": {
+            "type": "string"
+          },
+          "permissions": {
+            "type": "string"
+          },
+          "working_dir": {
+            "type": "string"
+          },
+          "cache_control": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false,
+        "normal": true,
+        "aliases": {
+          "key": [
+            "aws_access_key",
+            "access_key"
+          ],
+          "secret": [
+            "secret_key",
+            "secret_access_key",
+            "aws_secret",
+            "aws_secret_key",
+            "aws_secret_access_key"
+          ],
+          "region": [
+            "s3_region"
+          ]
+        }
+      },
+      "code_climate": {
+        "$id": "code_climate",
+        "title": "Code Climate",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "repo_token": {
+                "$ref": "#/definitions/secure"
+              }
+            },
+            "additionalProperties": false,
+            "prefix": "repo_token",
+            "normal": true
+          },
+          {
+            "$ref": "#/definitions/secure"
+          }
+        ]
+      },
+      "coverity_scan": {
+        "$id": "coverity_scan",
+        "title": "Coverity Scan",
+        "type": "object",
+        "properties": {
+          "project": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "version": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": false,
+                "prefix": "name",
+                "required": [
+                  "name"
+                ]
+              },
+              {
+                "type": "string"
+              }
+            ]
+          },
+          "build_script_url": {
+            "type": "string"
+          },
+          "branch_pattern": {
+            "type": "string"
+          },
+          "notification_email": {
+            "type": "string"
+          },
+          "build_command": {
+            "type": "string"
+          },
+          "build_command_prepend": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false,
+        "normal": true
+      },
+      "homebrew": {
+        "$id": "homebrew",
+        "title": "Homebrew",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "update": {
+                "type": "boolean"
+              },
+              "packages": {
+                "$ref": "#/definitions/strs"
+              },
+              "casks": {
+                "$ref": "#/definitions/strs"
+              },
+              "taps": {
+                "$ref": "#/definitions/strs"
+              },
+              "brewfile": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false,
+            "prefix": "packages",
+            "normal": true
+          },
+          {
+            "$ref": "#/definitions/strs"
+          }
+        ]
+      },
+      "jwts": {
+        "$id": "jwts",
+        "title": "JSON Web Tokens",
+        "$ref": "#/definitions/secures"
+      },
+      "sauce_connect": {
+        "$id": "sauce_connect",
+        "title": "Sauce Connect",
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "username": {
+            "$ref": "#/definitions/secure"
+          },
+          "access_key": {
+            "$ref": "#/definitions/secure"
+          },
+          "direct_domains": {
+            "type": "string"
+          },
+          "tunnel_domains": {
+            "type": "string"
+          },
+          "no_ssl_bump_domains": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false,
+        "normal": true
+      },
+      "snaps": {
+        "$id": "snaps",
+        "title": "Snaps",
+        "anyOf": [
+          {
+            "type": "array",
+            "items": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string"
+                    },
+                    "classic": {
+                      "type": "boolean"
+                    },
+                    "channel": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": false,
+                  "normal": true,
+                  "prefix": "name"
+                },
+                {
+                  "type": "string"
+                }
+              ]
+            },
+            "normal": true
+          },
+          {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "classic": {
+                "type": "boolean"
+              },
+              "channel": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false,
+            "normal": true,
+            "prefix": "name"
+          },
+          {
+            "type": "string"
+          }
+        ],
+        "normal": true
+      }
+    },
+    "deploy": {
+      "anynines": {
+        "$id": "anynines",
+        "title": "Anynines",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "provider": {
+                "type": "string",
+                "enum": [
+                  "anynines"
+                ],
+                "strict": true
+              },
+              "on": {
+                "$ref": "#/definitions/type/deploy_conditions"
+              },
+              "allow_failure": {
+                "type": "boolean"
+              },
+              "skip_cleanup": {
+                "type": "boolean"
+              },
+              "edge": {
+                "$ref": "#/definitions/type/deploy_edge"
+              },
+              "username": {
+                "$ref": "#/definitions/secure"
+              },
+              "password": {
+                "$ref": "#/definitions/secure"
+              },
+              "organization": {
+                "type": "string"
+              },
+              "space": {
+                "type": "string"
+              }
+            },
+            "normal": true,
+            "prefix": "provider",
+            "changes": [
+              {
+                "change": "enable"
+              }
+            ],
+            "required": [
+              "provider"
+            ]
+          },
+          {
+            "type": "string",
+            "enum": [
+              "anynines"
+            ],
+            "strict": true
+          }
+        ]
+      },
+      "appfog": {
+        "$id": "appfog",
+        "title": "Appfog",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "provider": {
+                "type": "string",
+                "enum": [
+                  "appfog"
+                ],
+                "strict": true
+              },
+              "on": {
+                "$ref": "#/definitions/type/deploy_conditions"
+              },
+              "allow_failure": {
+                "type": "boolean"
+              },
+              "skip_cleanup": {
+                "type": "boolean"
+              },
+              "edge": {
+                "$ref": "#/definitions/type/deploy_edge"
+              },
+              "user": {
+                "$ref": "#/definitions/secure"
+              },
+              "api_key": {
+                "$ref": "#/definitions/secure"
+              },
+              "address": {
+                "$ref": "#/definitions/strs"
+              },
+              "metadata": {
+                "type": "string"
+              },
+              "after_deploy": {
+                "$ref": "#/definitions/strs"
+              },
+              "app": {
+                "$ref": "#/definitions/type/app"
+              },
+              "email": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "patternProperties": {
+                      ".*": {
+                        "$ref": "#/definitions/secure"
+                      }
+                    }
+                  },
+                  {
+                    "$ref": "#/definitions/secure"
+                  }
+                ]
+              },
+              "password": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "patternProperties": {
+                      ".*": {
+                        "$ref": "#/definitions/secure"
+                      }
+                    }
+                  },
+                  {
+                    "$ref": "#/definitions/secure"
+                  }
+                ]
+              }
+            },
+            "normal": true,
+            "prefix": "provider",
+            "changes": [
+              {
+                "change": "enable"
+              }
+            ],
+            "required": [
+              "provider"
+            ]
+          },
+          {
+            "type": "string",
+            "enum": [
+              "appfog"
+            ],
+            "strict": true
+          }
+        ]
+      },
+      "atlas": {
+        "$id": "atlas",
+        "title": "Atlas",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "provider": {
+                "type": "string",
+                "enum": [
+                  "atlas"
+                ],
+                "strict": true
+              },
+              "on": {
+                "$ref": "#/definitions/type/deploy_conditions"
+              },
+              "allow_failure": {
+                "type": "boolean"
+              },
+              "skip_cleanup": {
+                "type": "boolean"
+              },
+              "edge": {
+                "$ref": "#/definitions/type/deploy_edge"
+              },
+              "token": {
+                "$ref": "#/definitions/secure"
+              },
+              "app": {
+                "type": "string"
+              },
+              "exclude": {
+                "$ref": "#/definitions/strs"
+              },
+              "include": {
+                "$ref": "#/definitions/strs"
+              },
+              "address": {
+                "type": "string"
+              },
+              "vcs": {
+                "type": "boolean"
+              },
+              "metadata": {
+                "$ref": "#/definitions/strs"
+              },
+              "debug": {
+                "type": "boolean"
+              },
+              "version": {
+                "type": "string"
+              }
+            },
+            "normal": true,
+            "prefix": "provider",
+            "changes": [
+              {
+                "change": "enable"
+              }
+            ],
+            "required": [
+              "provider"
+            ]
+          },
+          {
+            "type": "string",
+            "enum": [
+              "atlas"
+            ],
+            "strict": true
+          }
+        ]
+      },
+      "azure_web_apps": {
+        "$id": "azure_web_apps",
+        "title": "Azure Web Apps",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "provider": {
+                "type": "string",
+                "enum": [
+                  "azure_web_apps"
+                ],
+                "strict": true
+              },
+              "on": {
+                "$ref": "#/definitions/type/deploy_conditions"
+              },
+              "allow_failure": {
+                "type": "boolean"
+              },
+              "skip_cleanup": {
+                "type": "boolean"
+              },
+              "edge": {
+                "$ref": "#/definitions/type/deploy_edge"
+              },
+              "site": {
+                "type": "string"
+              },
+              "slot": {
+                "type": "string"
+              },
+              "username": {
+                "$ref": "#/definitions/secure"
+              },
+              "password": {
+                "$ref": "#/definitions/secure"
+              },
+              "verbose": {
+                "type": "boolean"
+              }
+            },
+            "normal": true,
+            "prefix": "provider",
+            "changes": [
+              {
+                "change": "enable"
+              }
+            ],
+            "required": [
+              "provider"
+            ]
+          },
+          {
+            "type": "string",
+            "enum": [
+              "azure_web_apps"
+            ],
+            "strict": true
+          }
+        ]
+      },
+      "bintray": {
+        "$id": "bintray",
+        "title": "Bintray",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "provider": {
+                "type": "string",
+                "enum": [
+                  "bintray"
+                ],
+                "strict": true
+              },
+              "on": {
+                "$ref": "#/definitions/type/deploy_conditions"
+              },
+              "allow_failure": {
+                "type": "boolean"
+              },
+              "skip_cleanup": {
+                "type": "boolean"
+              },
+              "edge": {
+                "$ref": "#/definitions/type/deploy_edge"
+              },
+              "file": {
+                "type": "string"
+              },
+              "user": {
+                "$ref": "#/definitions/secure"
+              },
+              "key": {
+                "$ref": "#/definitions/secure"
+              },
+              "passphrase": {
+                "$ref": "#/definitions/secure"
+              },
+              "dry_run": {
+                "type": "boolean"
+              }
+            },
+            "normal": true,
+            "prefix": "provider",
+            "changes": [
+              {
+                "change": "enable"
+              }
+            ],
+            "required": [
+              "provider"
+            ]
+          },
+          {
+            "type": "string",
+            "enum": [
+              "bintray"
+            ],
+            "strict": true
+          }
+        ]
+      },
+      "bitballoon": {
+        "$id": "bitballoon",
+        "title": "Bitballoon",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "provider": {
+                "type": "string",
+                "enum": [
+                  "bitballoon"
+                ],
+                "strict": true
+              },
+              "on": {
+                "$ref": "#/definitions/type/deploy_conditions"
+              },
+              "allow_failure": {
+                "type": "boolean"
+              },
+              "skip_cleanup": {
+                "type": "boolean"
+              },
+              "edge": {
+                "$ref": "#/definitions/type/deploy_edge"
+              },
+              "access_token": {
+                "$ref": "#/definitions/secure"
+              },
+              "site_id": {
+                "type": "string"
+              },
+              "local_dir": {
+                "type": "string"
+              }
+            },
+            "normal": true,
+            "prefix": "provider",
+            "changes": [
+              {
+                "change": "enable"
+              }
+            ],
+            "required": [
+              "provider"
+            ]
+          },
+          {
+            "type": "string",
+            "enum": [
+              "bitballoon"
+            ],
+            "strict": true
+          }
+        ]
+      },
+      "bluemixcf": {
+        "$id": "bluemixcf",
+        "title": "Bluemixcf",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "provider": {
+                "type": "string",
+                "enum": [
+                  "bluemixcf"
+                ],
+                "strict": true
+              },
+              "on": {
+                "$ref": "#/definitions/type/deploy_conditions"
+              },
+              "allow_failure": {
+                "type": "boolean"
+              },
+              "skip_cleanup": {
+                "type": "boolean"
+              },
+              "edge": {
+                "$ref": "#/definitions/type/deploy_edge"
+              },
+              "username": {
+                "$ref": "#/definitions/secure"
+              },
+              "password": {
+                "$ref": "#/definitions/secure"
+              },
+              "organization": {
+                "type": "string"
+              },
+              "api": {
+                "type": "string"
+              },
+              "space": {
+                "type": "string"
+              },
+              "region": {
+                "type": "string"
+              },
+              "manifest": {
+                "type": "string"
+              },
+              "skip_ssl_validation": {
+                "type": "boolean"
+              }
+            },
+            "normal": true,
+            "prefix": "provider",
+            "changes": [
+              {
+                "change": "enable"
+              }
+            ],
+            "required": [
+              "provider"
+            ]
+          },
+          {
+            "type": "string",
+            "enum": [
+              "bluemixcf"
+            ],
+            "strict": true
+          }
+        ]
+      },
+      "boxfuse": {
+        "$id": "boxfuse",
+        "title": "Boxfuse",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "provider": {
+                "type": "string",
+                "enum": [
+                  "boxfuse"
+                ],
+                "strict": true
+              },
+              "on": {
+                "$ref": "#/definitions/type/deploy_conditions"
+              },
+              "allow_failure": {
+                "type": "boolean"
+              },
+              "skip_cleanup": {
+                "type": "boolean"
+              },
+              "edge": {
+                "$ref": "#/definitions/type/deploy_edge"
+              },
+              "user": {
+                "$ref": "#/definitions/secure"
+              },
+              "secret": {
+                "$ref": "#/definitions/secure"
+              },
+              "configfile": {
+                "type": "string"
+              },
+              "payload": {
+                "type": "string"
+              },
+              "app": {
+                "type": "string"
+              },
+              "version": {
+                "type": "string"
+              },
+              "env": {
+                "type": "string"
+              },
+              "image": {
+                "type": "string"
+              },
+              "extra_args": {
+                "type": "string"
+              }
+            },
+            "normal": true,
+            "prefix": "provider",
+            "changes": [
+              {
+                "change": "enable"
+              }
+            ],
+            "required": [
+              "provider"
+            ]
+          },
+          {
+            "type": "string",
+            "enum": [
+              "boxfuse"
+            ],
+            "strict": true
+          }
+        ]
+      },
+      "catalyze": {
+        "$id": "catalyze",
+        "title": "Catalyze",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "provider": {
+                "type": "string",
+                "enum": [
+                  "catalyze"
+                ],
+                "strict": true
+              },
+              "on": {
+                "$ref": "#/definitions/type/deploy_conditions"
+              },
+              "allow_failure": {
+                "type": "boolean"
+              },
+              "skip_cleanup": {
+                "type": "boolean"
+              },
+              "edge": {
+                "$ref": "#/definitions/type/deploy_edge"
+              },
+              "target": {
+                "type": "string"
+              },
+              "path": {
+                "type": "string"
+              }
+            },
+            "normal": true,
+            "prefix": "provider",
+            "changes": [
+              {
+                "change": "enable"
+              }
+            ],
+            "required": [
+              "provider"
+            ]
+          },
+          {
+            "type": "string",
+            "enum": [
+              "catalyze"
+            ],
+            "strict": true
+          }
+        ]
+      },
+      "chef_supermarket": {
+        "$id": "chef_supermarket",
+        "title": "Chef Supermarket",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "provider": {
+                "type": "string",
+                "enum": [
+                  "chef_supermarket"
+                ],
+                "strict": true
+              },
+              "on": {
+                "$ref": "#/definitions/type/deploy_conditions"
+              },
+              "allow_failure": {
+                "type": "boolean"
+              },
+              "skip_cleanup": {
+                "type": "boolean"
+              },
+              "edge": {
+                "$ref": "#/definitions/type/deploy_edge"
+              },
+              "user_id": {
+                "$ref": "#/definitions/secure"
+              },
+              "client_key": {
+                "$ref": "#/definitions/secure"
+              },
+              "cookbook_category": {
+                "type": "string"
+              }
+            },
+            "normal": true,
+            "prefix": "provider",
+            "changes": [
+              {
+                "change": "enable"
+              }
+            ],
+            "required": [
+              "provider"
+            ]
+          },
+          {
+            "type": "string",
+            "enum": [
+              "chef_supermarket"
+            ],
+            "strict": true
+          }
+        ]
+      },
+      "cloud66": {
+        "$id": "cloud66",
+        "title": "Cloud66",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "provider": {
+                "type": "string",
+                "enum": [
+                  "cloud66"
+                ],
+                "strict": true
+              },
+              "on": {
+                "$ref": "#/definitions/type/deploy_conditions"
+              },
+              "allow_failure": {
+                "type": "boolean"
+              },
+              "skip_cleanup": {
+                "type": "boolean"
+              },
+              "edge": {
+                "$ref": "#/definitions/type/deploy_edge"
+              },
+              "redeployment_hook": {
+                "type": "string"
+              }
+            },
+            "normal": true,
+            "prefix": "provider",
+            "changes": [
+              {
+                "change": "enable"
+              }
+            ],
+            "required": [
+              "provider"
+            ]
+          },
+          {
+            "type": "string",
+            "enum": [
+              "cloud66"
+            ],
+            "strict": true
+          }
+        ]
+      },
+      "cloudcontrol": {
+        "$id": "cloudcontrol",
+        "title": "Cloudcontrol",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "provider": {
+                "type": "string",
+                "enum": [
+                  "cloudcontrol"
+                ],
+                "strict": true
+              },
+              "on": {
+                "$ref": "#/definitions/type/deploy_conditions"
+              },
+              "allow_failure": {
+                "type": "boolean"
+              },
+              "skip_cleanup": {
+                "type": "boolean"
+              },
+              "edge": {
+                "$ref": "#/definitions/type/deploy_edge"
+              },
+              "email": {
+                "$ref": "#/definitions/secure"
+              },
+              "password": {
+                "$ref": "#/definitions/secure"
+              },
+              "deployment": {
+                "type": "string"
+              }
+            },
+            "normal": true,
+            "prefix": "provider",
+            "changes": [
+              {
+                "change": "enable"
+              }
+            ],
+            "required": [
+              "provider"
+            ]
+          },
+          {
+            "type": "string",
+            "enum": [
+              "cloudcontrol"
+            ],
+            "strict": true
+          }
+        ]
+      },
+      "cloudfiles": {
+        "$id": "cloudfiles",
+        "title": "Cloudfiles",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "provider": {
+                "type": "string",
+                "enum": [
+                  "cloudfiles"
+                ],
+                "strict": true
+              },
+              "on": {
+                "$ref": "#/definitions/type/deploy_conditions"
+              },
+              "allow_failure": {
+                "type": "boolean"
+              },
+              "skip_cleanup": {
+                "type": "boolean"
+              },
+              "edge": {
+                "$ref": "#/definitions/type/deploy_edge"
+              },
+              "username": {
+                "$ref": "#/definitions/secure"
+              },
+              "api_key": {
+                "$ref": "#/definitions/secure"
+              },
+              "region": {
+                "type": "string"
+              },
+              "container": {
+                "type": "string"
+              },
+              "dot_match": {
+                "type": "boolean"
+              }
+            },
+            "normal": true,
+            "prefix": "provider",
+            "changes": [
+              {
+                "change": "enable"
+              }
+            ],
+            "required": [
+              "provider"
+            ]
+          },
+          {
+            "type": "string",
+            "enum": [
+              "cloudfiles"
+            ],
+            "strict": true
+          }
+        ]
+      },
+      "cloudfoundry": {
+        "$id": "cloudfoundry",
+        "title": "Cloudfoundry",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "provider": {
+                "type": "string",
+                "enum": [
+                  "cloudfoundry"
+                ],
+                "strict": true
+              },
+              "on": {
+                "$ref": "#/definitions/type/deploy_conditions"
+              },
+              "allow_failure": {
+                "type": "boolean"
+              },
+              "skip_cleanup": {
+                "type": "boolean"
+              },
+              "edge": {
+                "$ref": "#/definitions/type/deploy_edge"
+              },
+              "username": {
+                "$ref": "#/definitions/secure"
+              },
+              "password": {
+                "$ref": "#/definitions/secure"
+              },
+              "organization": {
+                "type": "string"
+              },
+              "api": {
+                "type": "string"
+              },
+              "space": {
+                "type": "string"
+              },
+              "key": {
+                "type": "string"
+              },
+              "manifest": {
+                "type": "string"
+              },
+              "skip_ssl_validation": {
+                "type": "boolean"
+              }
+            },
+            "normal": true,
+            "prefix": "provider",
+            "changes": [
+              {
+                "change": "enable"
+              }
+            ],
+            "required": [
+              "provider"
+            ]
+          },
+          {
+            "type": "string",
+            "enum": [
+              "cloudfoundry"
+            ],
+            "strict": true
+          }
+        ]
+      },
+      "codedeploy": {
+        "$id": "codedeploy",
+        "title": "Codedeploy",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "provider": {
+                "type": "string",
+                "enum": [
+                  "codedeploy"
+                ],
+                "strict": true
+              },
+              "on": {
+                "$ref": "#/definitions/type/deploy_conditions"
+              },
+              "allow_failure": {
+                "type": "boolean"
+              },
+              "skip_cleanup": {
+                "type": "boolean"
+              },
+              "edge": {
+                "$ref": "#/definitions/type/deploy_edge"
+              },
+              "access_key_id": {
+                "$ref": "#/definitions/secure"
+              },
+              "secret_access_key": {
+                "$ref": "#/definitions/secure"
+              },
+              "application": {
+                "type": "string"
+              },
+              "deployment_group": {
+                "type": "string"
+              },
+              "revision_type": {
+                "type": "string",
+                "enum": [
+                  "s3",
+                  "github"
+                ]
+              },
+              "commit_id": {
+                "type": "string"
+              },
+              "repository": {
+                "type": "string"
+              },
+              "region": {
+                "type": "string"
+              },
+              "wait_until_deployed": {
+                "type": "boolean"
+              },
+              "bucket": {
+                "type": "string"
+              },
+              "key": {
+                "type": "string"
+              }
+            },
+            "normal": true,
+            "prefix": "provider",
+            "changes": [
+              {
+                "change": "enable"
+              }
+            ],
+            "required": [
+              "provider"
+            ]
+          },
+          {
+            "type": "string",
+            "enum": [
+              "codedeploy"
+            ],
+            "strict": true
+          }
+        ]
+      },
+      "deis": {
+        "$id": "deis",
+        "title": "Deis",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "provider": {
+                "type": "string",
+                "enum": [
+                  "deis"
+                ],
+                "strict": true
+              },
+              "on": {
+                "$ref": "#/definitions/type/deploy_conditions"
+              },
+              "allow_failure": {
+                "type": "boolean"
+              },
+              "skip_cleanup": {
+                "type": "boolean"
+              },
+              "edge": {
+                "$ref": "#/definitions/type/deploy_edge"
+              },
+              "controller": {
+                "type": "string"
+              },
+              "username": {
+                "$ref": "#/definitions/secure"
+              },
+              "password": {
+                "$ref": "#/definitions/secure"
+              },
+              "app": {
+                "type": "string"
+              },
+              "cli_version": {
+                "type": "string"
+              }
+            },
+            "normal": true,
+            "prefix": "provider",
+            "changes": [
+              {
+                "change": "enable"
+              }
+            ],
+            "required": [
+              "provider"
+            ]
+          },
+          {
+            "type": "string",
+            "enum": [
+              "deis"
+            ],
+            "strict": true
+          }
+        ]
+      },
+      "divshot": {
+        "$id": "divshot",
+        "title": "Divshot",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "provider": {
+                "type": "string",
+                "enum": [
+                  "divshot"
+                ],
+                "strict": true
+              },
+              "on": {
+                "$ref": "#/definitions/type/deploy_conditions"
+              },
+              "allow_failure": {
+                "type": "boolean"
+              },
+              "skip_cleanup": {
+                "type": "boolean"
+              },
+              "edge": {
+                "$ref": "#/definitions/type/deploy_edge"
+              },
+              "api_key": {
+                "$ref": "#/definitions/secure"
+              },
+              "environment": {
+                "type": "string"
+              }
+            },
+            "normal": true,
+            "prefix": "provider",
+            "changes": [
+              {
+                "change": "enable"
+              }
+            ],
+            "required": [
+              "provider"
+            ]
+          },
+          {
+            "type": "string",
+            "enum": [
+              "divshot"
+            ],
+            "strict": true
+          }
+        ]
+      },
+      "elasticbeanstalk": {
+        "$id": "elasticbeanstalk",
+        "title": "Elasticbeanstalk",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "provider": {
+                "type": "string",
+                "enum": [
+                  "elasticbeanstalk"
+                ],
+                "strict": true
+              },
+              "on": {
+                "$ref": "#/definitions/type/deploy_conditions"
+              },
+              "allow_failure": {
+                "type": "boolean"
+              },
+              "skip_cleanup": {
+                "type": "boolean"
+              },
+              "edge": {
+                "$ref": "#/definitions/type/deploy_edge"
+              },
+              "access_key_id": {
+                "$ref": "#/definitions/secure"
+              },
+              "securet_access_key": {
+                "$ref": "#/definitions/secure"
+              },
+              "region": {
+                "type": "string"
+              },
+              "app": {
+                "type": "string"
+              },
+              "env": {
+                "type": "string"
+              },
+              "zip_file": {
+                "type": "string"
+              },
+              "bucket_name": {
+                "type": "string"
+              },
+              "bucket_path": {
+                "type": "string"
+              },
+              "only_create_app_version": {
+                "type": "boolean"
+              }
+            },
+            "normal": true,
+            "prefix": "provider",
+            "changes": [
+              {
+                "change": "enable"
+              }
+            ],
+            "required": [
+              "provider"
+            ]
+          },
+          {
+            "type": "string",
+            "enum": [
+              "elasticbeanstalk"
+            ],
+            "strict": true
+          }
+        ]
+      },
+      "engineyard": {
+        "$id": "engineyard",
+        "title": "Engineyard",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "provider": {
+                "type": "string",
+                "enum": [
+                  "engineyard"
+                ],
+                "strict": true
+              },
+              "on": {
+                "$ref": "#/definitions/type/deploy_conditions"
+              },
+              "allow_failure": {
+                "type": "boolean"
+              },
+              "skip_cleanup": {
+                "type": "boolean"
+              },
+              "edge": {
+                "$ref": "#/definitions/type/deploy_edge"
+              },
+              "username": {
+                "$ref": "#/definitions/secure"
+              },
+              "password": {
+                "$ref": "#/definitions/secure"
+              },
+              "api_key": {
+                "$ref": "#/definitions/secure"
+              },
+              "app": {
+                "type": "string"
+              },
+              "environment": {
+                "type": "string"
+              },
+              "migrate": {
+                "type": "string"
+              }
+            },
+            "normal": true,
+            "prefix": "provider",
+            "changes": [
+              {
+                "change": "enable"
+              }
+            ],
+            "required": [
+              "provider"
+            ]
+          },
+          {
+            "type": "string",
+            "enum": [
+              "engineyard"
+            ],
+            "strict": true
+          }
+        ]
+      },
+      "firebase": {
+        "$id": "firebase",
+        "title": "Firebase",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "provider": {
+                "type": "string",
+                "enum": [
+                  "firebase"
+                ],
+                "strict": true
+              },
+              "on": {
+                "$ref": "#/definitions/type/deploy_conditions"
+              },
+              "allow_failure": {
+                "type": "boolean"
+              },
+              "skip_cleanup": {
+                "type": "boolean"
+              },
+              "edge": {
+                "$ref": "#/definitions/type/deploy_edge"
+              },
+              "project": {
+                "type": "string"
+              },
+              "token": {
+                "$ref": "#/definitions/secure"
+              },
+              "message": {
+                "type": "string"
+              }
+            },
+            "normal": true,
+            "prefix": "provider",
+            "changes": [
+              {
+                "change": "enable"
+              }
+            ],
+            "required": [
+              "provider"
+            ]
+          },
+          {
+            "type": "string",
+            "enum": [
+              "firebase"
+            ],
+            "strict": true
+          }
+        ]
+      },
+      "gae": {
+        "$id": "gae",
+        "title": "Gae",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "provider": {
+                "type": "string",
+                "enum": [
+                  "gae"
+                ],
+                "strict": true
+              },
+              "on": {
+                "$ref": "#/definitions/type/deploy_conditions"
+              },
+              "allow_failure": {
+                "type": "boolean"
+              },
+              "skip_cleanup": {
+                "type": "boolean"
+              },
+              "edge": {
+                "$ref": "#/definitions/type/deploy_edge"
+              },
+              "project": {
+                "type": "string"
+              },
+              "keyfile": {
+                "type": "string"
+              },
+              "config": {
+                "type": "string"
+              },
+              "version": {
+                "type": "string"
+              },
+              "no_promote": {
+                "type": "boolean"
+              },
+              "no_stop_previous_version": {
+                "type": "boolean"
+              },
+              "verbosity": {
+                "type": "string"
+              }
+            },
+            "normal": true,
+            "prefix": "provider",
+            "changes": [
+              {
+                "change": "enable"
+              }
+            ],
+            "required": [
+              "provider"
+            ]
+          },
+          {
+            "type": "string",
+            "enum": [
+              "gae"
+            ],
+            "strict": true
+          }
+        ]
+      },
+      "gcs": {
+        "$id": "gcs",
+        "title": "Gcs",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "provider": {
+                "type": "string",
+                "enum": [
+                  "gcs"
+                ],
+                "strict": true
+              },
+              "on": {
+                "$ref": "#/definitions/type/deploy_conditions"
+              },
+              "allow_failure": {
+                "type": "boolean"
+              },
+              "skip_cleanup": {
+                "type": "boolean"
+              },
+              "edge": {
+                "$ref": "#/definitions/type/deploy_edge"
+              },
+              "access_key_id": {
+                "$ref": "#/definitions/secure"
+              },
+              "secret_access_key": {
+                "$ref": "#/definitions/secure"
+              },
+              "bucket": {
+                "type": "string"
+              },
+              "upload_dir": {
+                "type": "string"
+              },
+              "local_dir": {
+                "type": "string"
+              },
+              "dot_match": {
+                "type": "boolean"
+              },
+              "acl": {
+                "type": "string"
+              },
+              "cache_control": {
+                "type": "string"
+              },
+              "detect_encoding": {
+                "type": "boolean"
+              }
+            },
+            "normal": true,
+            "prefix": "provider",
+            "changes": [
+              {
+                "change": "enable"
+              }
+            ],
+            "required": [
+              "provider"
+            ]
+          },
+          {
+            "type": "string",
+            "enum": [
+              "gcs"
+            ],
+            "strict": true
+          }
+        ]
+      },
+      "hackage": {
+        "$id": "hackage",
+        "title": "Hackage",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "provider": {
+                "type": "string",
+                "enum": [
+                  "hackage"
+                ],
+                "strict": true
+              },
+              "on": {
+                "$ref": "#/definitions/type/deploy_conditions"
+              },
+              "allow_failure": {
+                "type": "boolean"
+              },
+              "skip_cleanup": {
+                "type": "boolean"
+              },
+              "edge": {
+                "$ref": "#/definitions/type/deploy_edge"
+              },
+              "username": {
+                "$ref": "#/definitions/secure"
+              },
+              "password": {
+                "$ref": "#/definitions/secure"
+              }
+            },
+            "normal": true,
+            "prefix": "provider",
+            "changes": [
+              {
+                "change": "enable"
+              }
+            ],
+            "required": [
+              "provider"
+            ]
+          },
+          {
+            "type": "string",
+            "enum": [
+              "hackage"
+            ],
+            "strict": true
+          }
+        ]
+      },
+      "heroku": {
+        "$id": "heroku",
+        "title": "Heroku",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "provider": {
+                "type": "string",
+                "enum": [
+                  "heroku"
+                ],
+                "strict": true
+              },
+              "on": {
+                "$ref": "#/definitions/type/deploy_conditions"
+              },
+              "allow_failure": {
+                "type": "boolean"
+              },
+              "skip_cleanup": {
+                "type": "boolean"
+              },
+              "edge": {
+                "$ref": "#/definitions/type/deploy_edge"
+              },
+              "strategy": {
+                "type": "string",
+                "defaults": [
+                  {
+                    "value": "api"
+                  }
+                ],
+                "enum": [
+                  "api",
+                  "git"
+                ]
+              },
+              "buildpack": {
+                "type": "string"
+              },
+              "app": {
+                "$ref": "#/definitions/type/app"
+              },
+              "api_key": {
+                "$ref": "#/definitions/secure"
+              },
+              "run": {
+                "$ref": "#/definitions/strs"
+              }
+            },
+            "normal": true,
+            "prefix": "provider",
+            "changes": [
+              {
+                "change": "enable"
+              }
+            ],
+            "required": [
+              "provider"
+            ]
+          },
+          {
+            "type": "string",
+            "enum": [
+              "heroku"
+            ],
+            "strict": true
+          }
+        ]
+      },
+      "lambda": {
+        "$id": "lambda",
+        "title": "Lambda",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "provider": {
+                "type": "string",
+                "enum": [
+                  "lambda"
+                ],
+                "strict": true
+              },
+              "on": {
+                "$ref": "#/definitions/type/deploy_conditions"
+              },
+              "allow_failure": {
+                "type": "boolean"
+              },
+              "skip_cleanup": {
+                "type": "boolean"
+              },
+              "edge": {
+                "$ref": "#/definitions/type/deploy_edge"
+              },
+              "access_key_id": {
+                "$ref": "#/definitions/secure"
+              },
+              "secret_access_key": {
+                "$ref": "#/definitions/secure"
+              },
+              "region": {
+                "type": "string"
+              },
+              "function_name": {
+                "type": "string"
+              },
+              "role": {
+                "type": "string"
+              },
+              "handler_name": {
+                "type": "string"
+              },
+              "module_name": {
+                "type": "string"
+              },
+              "zip": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              },
+              "timeout": {
+                "type": "string"
+              },
+              "memory_size": {
+                "type": "string"
+              },
+              "runtime": {
+                "type": "string"
+              },
+              "environment_variables": {
+                "$ref": "#/definitions/secure"
+              },
+              "security_group_ids": {
+                "$ref": "#/definitions/strs"
+              },
+              "subnet_ids": {
+                "$ref": "#/definitions/strs"
+              },
+              "dead_letter_config": {
+                "type": "string"
+              },
+              "kms_key_arn": {
+                "type": "string"
+              },
+              "tracing_mode": {
+                "type": "string",
+                "enum": [
+                  "Active",
+                  "PassThrough"
+                ]
+              },
+              "publish": {
+                "type": "boolean"
+              },
+              "function_tags": {
+                "$ref": "#/definitions/secure"
+              }
+            },
+            "normal": true,
+            "prefix": "provider",
+            "changes": [
+              {
+                "change": "enable"
+              }
+            ],
+            "required": [
+              "provider"
+            ]
+          },
+          {
+            "type": "string",
+            "enum": [
+              "lambda"
+            ],
+            "strict": true
+          }
+        ]
+      },
+      "launchpad": {
+        "$id": "launchpad",
+        "title": "Launchpad",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "provider": {
+                "type": "string",
+                "enum": [
+                  "launchpad"
+                ],
+                "strict": true
+              },
+              "on": {
+                "$ref": "#/definitions/type/deploy_conditions"
+              },
+              "allow_failure": {
+                "type": "boolean"
+              },
+              "skip_cleanup": {
+                "type": "boolean"
+              },
+              "edge": {
+                "$ref": "#/definitions/type/deploy_edge"
+              },
+              "slug": {
+                "type": "string"
+              },
+              "oauth_token": {
+                "$ref": "#/definitions/secure"
+              },
+              "oauth_token_secret": {
+                "$ref": "#/definitions/secure"
+              }
+            },
+            "normal": true,
+            "prefix": "provider",
+            "changes": [
+              {
+                "change": "enable"
+              }
+            ],
+            "required": [
+              "provider",
+              "slug",
+              "oauth_token",
+              "oauth_token_secret"
+            ]
+          },
+          {
+            "type": "string",
+            "enum": [
+              "launchpad"
+            ],
+            "strict": true
+          }
+        ]
+      },
+      "modulus": {
+        "$id": "modulus",
+        "title": "Modulus",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "provider": {
+                "type": "string",
+                "enum": [
+                  "modulus"
+                ],
+                "strict": true
+              },
+              "on": {
+                "$ref": "#/definitions/type/deploy_conditions"
+              },
+              "allow_failure": {
+                "type": "boolean"
+              },
+              "skip_cleanup": {
+                "type": "boolean"
+              },
+              "edge": {
+                "$ref": "#/definitions/type/deploy_edge"
+              },
+              "api_key": {
+                "$ref": "#/definitions/secure"
+              },
+              "project_name": {
+                "type": "string"
+              }
+            },
+            "normal": true,
+            "prefix": "provider",
+            "changes": [
+              {
+                "change": "enable"
+              }
+            ],
+            "required": [
+              "provider"
+            ]
+          },
+          {
+            "type": "string",
+            "enum": [
+              "modulus"
+            ],
+            "strict": true
+          }
+        ]
+      },
+      "npm": {
+        "$id": "npm",
+        "title": "Npm",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "provider": {
+                "type": "string",
+                "enum": [
+                  "npm"
+                ],
+                "strict": true
+              },
+              "on": {
+                "$ref": "#/definitions/type/deploy_conditions"
+              },
+              "allow_failure": {
+                "type": "boolean"
+              },
+              "skip_cleanup": {
+                "type": "boolean"
+              },
+              "edge": {
+                "$ref": "#/definitions/type/deploy_edge"
+              },
+              "email": {
+                "$ref": "#/definitions/secure"
+              },
+              "api_key": {
+                "$ref": "#/definitions/secure"
+              }
+            },
+            "normal": true,
+            "prefix": "provider",
+            "changes": [
+              {
+                "change": "enable"
+              }
+            ],
+            "required": [
+              "provider"
+            ]
+          },
+          {
+            "type": "string",
+            "enum": [
+              "npm"
+            ],
+            "strict": true
+          }
+        ]
+      },
+      "openshift": {
+        "$id": "openshift",
+        "title": "Openshift",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "provider": {
+                "type": "string",
+                "enum": [
+                  "openshift"
+                ],
+                "strict": true
+              },
+              "on": {
+                "$ref": "#/definitions/type/deploy_conditions"
+              },
+              "allow_failure": {
+                "type": "boolean"
+              },
+              "skip_cleanup": {
+                "type": "boolean"
+              },
+              "edge": {
+                "$ref": "#/definitions/type/deploy_edge"
+              },
+              "user": {
+                "$ref": "#/definitions/secure"
+              },
+              "password": {
+                "$ref": "#/definitions/secure"
+              },
+              "domain": {
+                "type": "string"
+              },
+              "app": {
+                "type": "string"
+              },
+              "deployment_branch": {
+                "type": "string"
+              }
+            },
+            "normal": true,
+            "prefix": "provider",
+            "changes": [
+              {
+                "change": "enable"
+              }
+            ],
+            "required": [
+              "provider"
+            ]
+          },
+          {
+            "type": "string",
+            "enum": [
+              "openshift"
+            ],
+            "strict": true
+          }
+        ]
+      },
+      "opsworks": {
+        "$id": "opsworks",
+        "title": "Opsworks",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "provider": {
+                "type": "string",
+                "enum": [
+                  "opsworks"
+                ],
+                "strict": true
+              },
+              "on": {
+                "$ref": "#/definitions/type/deploy_conditions"
+              },
+              "allow_failure": {
+                "type": "boolean"
+              },
+              "skip_cleanup": {
+                "type": "boolean"
+              },
+              "edge": {
+                "$ref": "#/definitions/type/deploy_edge"
+              },
+              "access_key_id": {
+                "$ref": "#/definitions/secure"
+              },
+              "secret_access_key": {
+                "$ref": "#/definitions/secure"
+              },
+              "app_id": {
+                "type": "string"
+              },
+              "instance_ids": {
+                "type": "string"
+              },
+              "layer_ids": {
+                "type": "string"
+              },
+              "migrate": {
+                "type": "boolean"
+              },
+              "wait_until_deployed": {
+                "type": "string"
+              },
+              "custom_json": {
+                "type": "string"
+              }
+            },
+            "normal": true,
+            "prefix": "provider",
+            "changes": [
+              {
+                "change": "enable"
+              }
+            ],
+            "required": [
+              "provider"
+            ]
+          },
+          {
+            "type": "string",
+            "enum": [
+              "opsworks"
+            ],
+            "strict": true
+          }
+        ]
+      },
+      "packagecloud": {
+        "$id": "packagecloud",
+        "title": "Packagecloud",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "provider": {
+                "type": "string",
+                "enum": [
+                  "packagecloud"
+                ],
+                "strict": true
+              },
+              "on": {
+                "$ref": "#/definitions/type/deploy_conditions"
+              },
+              "allow_failure": {
+                "type": "boolean"
+              },
+              "skip_cleanup": {
+                "type": "boolean"
+              },
+              "edge": {
+                "$ref": "#/definitions/type/deploy_edge"
+              },
+              "username": {
+                "$ref": "#/definitions/secure"
+              },
+              "token": {
+                "$ref": "#/definitions/secure"
+              },
+              "repository": {
+                "type": "string"
+              },
+              "local_dir": {
+                "type": "string"
+              },
+              "dist": {
+                "type": "string"
+              },
+              "package_glob": {
+                "type": "string"
+              },
+              "force": {
+                "type": "boolean"
+              }
+            },
+            "normal": true,
+            "prefix": "provider",
+            "changes": [
+              {
+                "change": "enable"
+              }
+            ],
+            "required": [
+              "provider"
+            ]
+          },
+          {
+            "type": "string",
+            "enum": [
+              "packagecloud"
+            ],
+            "strict": true
+          }
+        ]
+      },
+      "pages": {
+        "$id": "pages",
+        "title": "Pages",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "provider": {
+                "type": "string",
+                "enum": [
+                  "pages"
+                ],
+                "strict": true
+              },
+              "on": {
+                "$ref": "#/definitions/type/deploy_conditions"
+              },
+              "allow_failure": {
+                "type": "boolean"
+              },
+              "skip_cleanup": {
+                "type": "boolean"
+              },
+              "edge": {
+                "$ref": "#/definitions/type/deploy_edge"
+              },
+              "github_token": {
+                "$ref": "#/definitions/secure"
+              },
+              "repo": {
+                "type": "string"
+              },
+              "target_branch": {
+                "type": "string"
+              },
+              "local_dir": {
+                "type": "string"
+              },
+              "fqdn": {
+                "type": "string"
+              },
+              "project_name": {
+                "type": "string"
+              },
+              "email": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "github_url": {
+                "type": "string"
+              },
+              "keep_history": {
+                "type": "boolean"
+              },
+              "verbose": {
+                "type": "boolean"
+              },
+              "allow_empty_commit": {
+                "type": "boolean"
+              },
+              "committer_from_gh": {
+                "type": "boolean"
+              },
+              "deployment_file": {
+                "type": "boolean"
+              }
+            },
+            "normal": true,
+            "prefix": "provider",
+            "changes": [
+              {
+                "change": "enable"
+              }
+            ],
+            "required": [
+              "provider"
+            ]
+          },
+          {
+            "type": "string",
+            "enum": [
+              "pages"
+            ],
+            "strict": true
+          }
+        ]
+      },
+      "puppetforge": {
+        "$id": "puppetforge",
+        "title": "Puppetforge",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "provider": {
+                "type": "string",
+                "enum": [
+                  "puppetforge"
+                ],
+                "strict": true
+              },
+              "on": {
+                "$ref": "#/definitions/type/deploy_conditions"
+              },
+              "allow_failure": {
+                "type": "boolean"
+              },
+              "skip_cleanup": {
+                "type": "boolean"
+              },
+              "edge": {
+                "$ref": "#/definitions/type/deploy_edge"
+              },
+              "user": {
+                "$ref": "#/definitions/secure"
+              },
+              "password": {
+                "$ref": "#/definitions/secure"
+              },
+              "url": {
+                "type": "string"
+              }
+            },
+            "normal": true,
+            "prefix": "provider",
+            "changes": [
+              {
+                "change": "enable"
+              }
+            ],
+            "required": [
+              "provider",
+              "user",
+              "password"
+            ]
+          },
+          {
+            "type": "string",
+            "enum": [
+              "puppetforge"
+            ],
+            "strict": true
+          }
+        ]
+      },
+      "pypi": {
+        "$id": "pypi",
+        "title": "Pypi",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "provider": {
+                "type": "string",
+                "enum": [
+                  "pypi"
+                ],
+                "strict": true
+              },
+              "on": {
+                "$ref": "#/definitions/type/deploy_conditions"
+              },
+              "allow_failure": {
+                "type": "boolean"
+              },
+              "skip_cleanup": {
+                "type": "boolean"
+              },
+              "edge": {
+                "$ref": "#/definitions/type/deploy_edge"
+              },
+              "user": {
+                "$ref": "#/definitions/secure"
+              },
+              "password": {
+                "$ref": "#/definitions/secure"
+              },
+              "api_key": {
+                "$ref": "#/definitions/secure"
+              },
+              "server": {
+                "type": "string"
+              },
+              "distributions": {
+                "type": "string"
+              },
+              "docs_dir": {
+                "type": "string"
+              }
+            },
+            "normal": true,
+            "prefix": "provider",
+            "changes": [
+              {
+                "change": "enable"
+              }
+            ],
+            "required": [
+              "provider"
+            ]
+          },
+          {
+            "type": "string",
+            "enum": [
+              "pypi"
+            ],
+            "strict": true
+          }
+        ]
+      },
+      "releases": {
+        "$id": "releases",
+        "title": "Releases",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "provider": {
+                "type": "string",
+                "enum": [
+                  "releases"
+                ],
+                "strict": true
+              },
+              "on": {
+                "$ref": "#/definitions/type/deploy_conditions"
+              },
+              "allow_failure": {
+                "type": "boolean"
+              },
+              "skip_cleanup": {
+                "type": "boolean"
+              },
+              "edge": {
+                "$ref": "#/definitions/type/deploy_edge"
+              },
+              "user": {
+                "$ref": "#/definitions/secure"
+              },
+              "password": {
+                "$ref": "#/definitions/secure"
+              },
+              "api_key": {
+                "$ref": "#/definitions/secure"
+              },
+              "repo": {
+                "type": "string"
+              },
+              "file": {
+                "$ref": "#/definitions/strs"
+              },
+              "file_glob": {
+                "type": "string"
+              },
+              "overwrite": {
+                "type": "string"
+              },
+              "release_number": {
+                "type": "string"
+              },
+              "prerelease": {
+                "type": "boolean"
+              }
+            },
+            "normal": true,
+            "prefix": "provider",
+            "changes": [
+              {
+                "change": "enable"
+              }
+            ],
+            "required": [
+              "provider"
+            ]
+          },
+          {
+            "type": "string",
+            "enum": [
+              "releases"
+            ],
+            "strict": true
+          }
+        ]
+      },
+      "rubygems": {
+        "$id": "rubygems",
+        "title": "Rubygems",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "provider": {
+                "type": "string",
+                "enum": [
+                  "rubygems"
+                ],
+                "strict": true
+              },
+              "on": {
+                "$ref": "#/definitions/type/deploy_conditions"
+              },
+              "allow_failure": {
+                "type": "boolean"
+              },
+              "skip_cleanup": {
+                "type": "boolean"
+              },
+              "edge": {
+                "$ref": "#/definitions/type/deploy_edge"
+              },
+              "gem": {
+                "type": "string"
+              },
+              "file": {
+                "type": "string"
+              },
+              "gemspec": {
+                "type": "string"
+              },
+              "api_key": {
+                "$ref": "#/definitions/secure"
+              }
+            },
+            "normal": true,
+            "prefix": "provider",
+            "changes": [
+              {
+                "change": "enable"
+              }
+            ],
+            "required": [
+              "provider"
+            ]
+          },
+          {
+            "type": "string",
+            "enum": [
+              "rubygems"
+            ],
+            "strict": true
+          }
+        ]
+      },
+      "s3": {
+        "$id": "s3",
+        "title": "S3",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "provider": {
+                "type": "string",
+                "enum": [
+                  "s3"
+                ],
+                "strict": true
+              },
+              "on": {
+                "$ref": "#/definitions/type/deploy_conditions"
+              },
+              "allow_failure": {
+                "type": "boolean"
+              },
+              "skip_cleanup": {
+                "type": "boolean"
+              },
+              "edge": {
+                "$ref": "#/definitions/type/deploy_edge"
+              },
+              "access_key_id": {
+                "$ref": "#/definitions/secure"
+              },
+              "secret_access_key": {
+                "$ref": "#/definitions/secure"
+              },
+              "bucket": {
+                "type": "string"
+              },
+              "region": {
+                "type": "string"
+              },
+              "upload_dir": {
+                "type": "string"
+              },
+              "storage_class": {
+                "type": "string"
+              },
+              "local_dir": {
+                "type": "string"
+              },
+              "detect_encoding": {
+                "type": "boolean"
+              },
+              "cache_control": {
+                "type": "string"
+              },
+              "expires": {
+                "type": "string"
+              },
+              "acl": {
+                "type": "string"
+              },
+              "dot_match": {
+                "type": "boolean"
+              },
+              "index_document_suffix": {
+                "type": "string"
+              },
+              "default_text_charset": {
+                "type": "string"
+              },
+              "server_side_encryption": {
+                "type": "boolean"
+              }
+            },
+            "normal": true,
+            "prefix": "provider",
+            "changes": [
+              {
+                "change": "enable"
+              }
+            ],
+            "required": [
+              "provider"
+            ]
+          },
+          {
+            "type": "string",
+            "enum": [
+              "s3"
+            ],
+            "strict": true
+          }
+        ]
+      },
+      "scalingo": {
+        "$id": "scalingo",
+        "title": "Scalingo",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "provider": {
+                "type": "string",
+                "enum": [
+                  "scalingo"
+                ],
+                "strict": true
+              },
+              "on": {
+                "$ref": "#/definitions/type/deploy_conditions"
+              },
+              "allow_failure": {
+                "type": "boolean"
+              },
+              "skip_cleanup": {
+                "type": "boolean"
+              },
+              "edge": {
+                "$ref": "#/definitions/type/deploy_edge"
+              },
+              "username": {
+                "$ref": "#/definitions/secure"
+              },
+              "password": {
+                "$ref": "#/definitions/secure"
+              },
+              "api_key": {
+                "$ref": "#/definitions/secure"
+              },
+              "remote": {
+                "type": "string"
+              },
+              "branch": {
+                "type": "string"
+              },
+              "app": {
+                "type": "string"
+              }
+            },
+            "normal": true,
+            "prefix": "provider",
+            "changes": [
+              {
+                "change": "enable"
+              }
+            ],
+            "required": [
+              "provider"
+            ]
+          },
+          {
+            "type": "string",
+            "enum": [
+              "scalingo"
+            ],
+            "strict": true
+          }
+        ]
+      },
+      "script": {
+        "$id": "script",
+        "title": "Script",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "provider": {
+                "type": "string",
+                "enum": [
+                  "script"
+                ],
+                "strict": true
+              },
+              "on": {
+                "$ref": "#/definitions/type/deploy_conditions"
+              },
+              "allow_failure": {
+                "type": "boolean"
+              },
+              "skip_cleanup": {
+                "type": "boolean"
+              },
+              "edge": {
+                "$ref": "#/definitions/type/deploy_edge"
+              },
+              "script": {
+                "type": "string"
+              }
+            },
+            "normal": true,
+            "prefix": "provider",
+            "changes": [
+              {
+                "change": "enable"
+              }
+            ],
+            "required": [
+              "provider"
+            ]
+          },
+          {
+            "type": "string",
+            "enum": [
+              "script"
+            ],
+            "strict": true
+          }
+        ]
+      },
+      "surge": {
+        "$id": "surge",
+        "title": "Surge",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "provider": {
+                "type": "string",
+                "enum": [
+                  "surge"
+                ],
+                "strict": true
+              },
+              "on": {
+                "$ref": "#/definitions/type/deploy_conditions"
+              },
+              "allow_failure": {
+                "type": "boolean"
+              },
+              "skip_cleanup": {
+                "type": "boolean"
+              },
+              "edge": {
+                "$ref": "#/definitions/type/deploy_edge"
+              },
+              "project": {
+                "type": "string"
+              },
+              "domain": {
+                "type": "string"
+              }
+            },
+            "normal": true,
+            "prefix": "provider",
+            "changes": [
+              {
+                "change": "enable"
+              }
+            ],
+            "required": [
+              "provider"
+            ]
+          },
+          {
+            "type": "string",
+            "enum": [
+              "surge"
+            ],
+            "strict": true
+          }
+        ]
+      },
+      "testfairy": {
+        "$id": "testfairy",
+        "title": "Testfairy",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "provider": {
+                "type": "string",
+                "enum": [
+                  "testfairy"
+                ],
+                "strict": true
+              },
+              "on": {
+                "$ref": "#/definitions/type/deploy_conditions"
+              },
+              "allow_failure": {
+                "type": "boolean"
+              },
+              "skip_cleanup": {
+                "type": "boolean"
+              },
+              "edge": {
+                "$ref": "#/definitions/type/deploy_edge"
+              },
+              "api_key": {
+                "$ref": "#/definitions/secure"
+              },
+              "app_file": {
+                "type": "string"
+              },
+              "symbols_file": {
+                "type": "string"
+              },
+              "testers_groups": {
+                "type": "string"
+              },
+              "notify": {
+                "type": "boolean"
+              },
+              "auto_update": {
+                "type": "boolean"
+              },
+              "video_quality": {
+                "type": "string"
+              },
+              "screenshot_quality": {
+                "type": "string"
+              },
+              "screenshot_interval": {
+                "type": "string"
+              },
+              "max_duration": {
+                "type": "string"
+              },
+              "advanced_options": {
+                "type": "string"
+              },
+              "data_only_wifi": {
+                "type": "boolean"
+              },
+              "record_on_backgroup": {
+                "type": "boolean"
+              },
+              "video": {
+                "type": "boolean"
+              },
+              "icon_watermark": {
+                "type": "boolean"
+              },
+              "metrics": {
+                "type": "string"
+              }
+            },
+            "normal": true,
+            "prefix": "provider",
+            "changes": [
+              {
+                "change": "enable"
+              }
+            ],
+            "required": [
+              "provider"
+            ]
+          },
+          {
+            "type": "string",
+            "enum": [
+              "testfairy"
+            ],
+            "strict": true
+          }
+        ]
+      }
+    },
+    "notification": {
+      "campfire": {
+        "$id": "campfire",
+        "title": "Campfire",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "rooms": {
+                "$ref": "#/definitions/secures"
+              },
+              "template": {
+                "anyOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "vars": [
+                        "repository",
+                        "repository_slug",
+                        "repository_name",
+                        "build_number",
+                        "build_id",
+                        "build_url",
+                        "branch",
+                        "commit",
+                        "commit_subject",
+                        "commit_message",
+                        "author",
+                        "pull_request",
+                        "pull_request_number",
+                        "pull_request_url",
+                        "compare_url",
+                        "result",
+                        "duration",
+                        "elapsed_time",
+                        "message"
+                      ]
+                    },
+                    "normal": true
+                  },
+                  {
+                    "type": "string",
+                    "vars": [
+                      "repository",
+                      "repository_slug",
+                      "repository_name",
+                      "build_number",
+                      "build_id",
+                      "build_url",
+                      "branch",
+                      "commit",
+                      "commit_subject",
+                      "commit_message",
+                      "author",
+                      "pull_request",
+                      "pull_request_number",
+                      "pull_request_url",
+                      "compare_url",
+                      "result",
+                      "duration",
+                      "elapsed_time",
+                      "message"
+                    ]
+                  }
+                ]
+              },
+              "enabled": {
+                "type": "boolean"
+              },
+              "disabled": {
+                "type": "boolean"
+              },
+              "on_success": {
+                "$ref": "#/definitions/type/notification_frequency"
+              },
+              "on_failure": {
+                "$ref": "#/definitions/type/notification_frequency"
+              }
+            },
+            "additionalProperties": false,
+            "prefix": "rooms",
+            "normal": true
+          },
+          {
+            "$ref": "#/definitions/secures"
+          }
+        ]
+      },
+      "email": {
+        "$id": "email",
+        "title": "Email",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "recipients": {
+                "$ref": "#/definitions/secures"
+              },
+              "enabled": {
+                "type": "boolean"
+              },
+              "disabled": {
+                "type": "boolean"
+              },
+              "on_success": {
+                "$ref": "#/definitions/type/notification_frequency"
+              },
+              "on_failure": {
+                "$ref": "#/definitions/type/notification_frequency"
+              }
+            },
+            "additionalProperties": false,
+            "prefix": "recipients",
+            "normal": true
+          },
+          {
+            "$ref": "#/definitions/secures"
+          }
+        ]
+      },
+      "flowdock": {
+        "$id": "flowdock",
+        "title": "Flowdock",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "api_token": {
+                "$ref": "#/definitions/secure"
+              },
+              "template": {
+                "anyOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "vars": [
+                        "repository",
+                        "repository_slug",
+                        "repository_name",
+                        "build_number",
+                        "build_id",
+                        "build_url",
+                        "branch",
+                        "commit",
+                        "commit_subject",
+                        "commit_message",
+                        "author",
+                        "pull_request",
+                        "pull_request_number",
+                        "pull_request_url",
+                        "compare_url",
+                        "result",
+                        "duration",
+                        "elapsed_time",
+                        "message"
+                      ]
+                    },
+                    "normal": true
+                  },
+                  {
+                    "type": "string",
+                    "vars": [
+                      "repository",
+                      "repository_slug",
+                      "repository_name",
+                      "build_number",
+                      "build_id",
+                      "build_url",
+                      "branch",
+                      "commit",
+                      "commit_subject",
+                      "commit_message",
+                      "author",
+                      "pull_request",
+                      "pull_request_number",
+                      "pull_request_url",
+                      "compare_url",
+                      "result",
+                      "duration",
+                      "elapsed_time",
+                      "message"
+                    ]
+                  }
+                ]
+              },
+              "enabled": {
+                "type": "boolean"
+              },
+              "disabled": {
+                "type": "boolean"
+              },
+              "on_success": {
+                "$ref": "#/definitions/type/notification_frequency"
+              },
+              "on_failure": {
+                "$ref": "#/definitions/type/notification_frequency"
+              }
+            },
+            "additionalProperties": false,
+            "prefix": "api_token",
+            "normal": true
+          },
+          {
+            "$ref": "#/definitions/secure"
+          }
+        ]
+      },
+      "hipchat": {
+        "$id": "hipchat",
+        "title": "Hipchat",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "rooms": {
+                "$ref": "#/definitions/secures"
+              },
+              "format": {
+                "type": "string",
+                "enum": [
+                  "html",
+                  "text"
+                ]
+              },
+              "notify": {
+                "type": "boolean"
+              },
+              "on_pull_requests": {
+                "type": "boolean"
+              },
+              "template": {
+                "anyOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "vars": [
+                        "repository",
+                        "repository_slug",
+                        "repository_name",
+                        "build_number",
+                        "build_id",
+                        "build_url",
+                        "branch",
+                        "commit",
+                        "commit_subject",
+                        "commit_message",
+                        "author",
+                        "pull_request",
+                        "pull_request_number",
+                        "pull_request_url",
+                        "compare_url",
+                        "result",
+                        "duration",
+                        "elapsed_time",
+                        "message"
+                      ]
+                    },
+                    "normal": true
+                  },
+                  {
+                    "type": "string",
+                    "vars": [
+                      "repository",
+                      "repository_slug",
+                      "repository_name",
+                      "build_number",
+                      "build_id",
+                      "build_url",
+                      "branch",
+                      "commit",
+                      "commit_subject",
+                      "commit_message",
+                      "author",
+                      "pull_request",
+                      "pull_request_number",
+                      "pull_request_url",
+                      "compare_url",
+                      "result",
+                      "duration",
+                      "elapsed_time",
+                      "message"
+                    ]
+                  }
+                ]
+              },
+              "enabled": {
+                "type": "boolean"
+              },
+              "disabled": {
+                "type": "boolean"
+              },
+              "on_success": {
+                "$ref": "#/definitions/type/notification_frequency"
+              },
+              "on_failure": {
+                "$ref": "#/definitions/type/notification_frequency"
+              }
+            },
+            "additionalProperties": false,
+            "prefix": "rooms",
+            "normal": true
+          },
+          {
+            "$ref": "#/definitions/secures"
+          }
+        ]
+      },
+      "irc": {
+        "$id": "irc",
+        "title": "IRC",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "channels": {
+                "$ref": "#/definitions/secures"
+              },
+              "channel_key": {
+                "$ref": "#/definitions/secure"
+              },
+              "password": {
+                "$ref": "#/definitions/secure"
+              },
+              "nickserv_password": {
+                "$ref": "#/definitions/secure"
+              },
+              "nick": {
+                "$ref": "#/definitions/secure"
+              },
+              "use_notice": {
+                "type": "boolean"
+              },
+              "skip_join": {
+                "type": "boolean"
+              },
+              "template": {
+                "anyOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "vars": [
+                        "repository",
+                        "repository_slug",
+                        "repository_name",
+                        "build_number",
+                        "build_id",
+                        "build_url",
+                        "branch",
+                        "commit",
+                        "commit_subject",
+                        "commit_message",
+                        "author",
+                        "pull_request",
+                        "pull_request_number",
+                        "pull_request_url",
+                        "compare_url",
+                        "result",
+                        "duration",
+                        "elapsed_time",
+                        "message"
+                      ]
+                    },
+                    "normal": true
+                  },
+                  {
+                    "type": "string",
+                    "vars": [
+                      "repository",
+                      "repository_slug",
+                      "repository_name",
+                      "build_number",
+                      "build_id",
+                      "build_url",
+                      "branch",
+                      "commit",
+                      "commit_subject",
+                      "commit_message",
+                      "author",
+                      "pull_request",
+                      "pull_request_number",
+                      "pull_request_url",
+                      "compare_url",
+                      "result",
+                      "duration",
+                      "elapsed_time",
+                      "message"
+                    ]
+                  }
+                ]
+              },
+              "enabled": {
+                "type": "boolean"
+              },
+              "disabled": {
+                "type": "boolean"
+              },
+              "on_success": {
+                "$ref": "#/definitions/type/notification_frequency"
+              },
+              "on_failure": {
+                "$ref": "#/definitions/type/notification_frequency"
+              }
+            },
+            "additionalProperties": false,
+            "prefix": "channels",
+            "normal": true
+          },
+          {
+            "$ref": "#/definitions/secures"
+          }
+        ]
+      },
+      "pushover": {
+        "$id": "pushover",
+        "title": "Pushover",
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "disabled": {
+            "type": "boolean"
+          },
+          "api_key": {
+            "$ref": "#/definitions/secure"
+          },
+          "users": {
+            "$ref": "#/definitions/secures"
+          },
+          "template": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "vars": [
+                    "repository",
+                    "repository_slug",
+                    "repository_name",
+                    "build_number",
+                    "build_id",
+                    "build_url",
+                    "branch",
+                    "commit",
+                    "commit_subject",
+                    "commit_message",
+                    "author",
+                    "pull_request",
+                    "pull_request_number",
+                    "pull_request_url",
+                    "compare_url",
+                    "result",
+                    "duration",
+                    "elapsed_time",
+                    "message"
+                  ]
+                },
+                "normal": true
+              },
+              {
+                "type": "string",
+                "vars": [
+                  "repository",
+                  "repository_slug",
+                  "repository_name",
+                  "build_number",
+                  "build_id",
+                  "build_url",
+                  "branch",
+                  "commit",
+                  "commit_subject",
+                  "commit_message",
+                  "author",
+                  "pull_request",
+                  "pull_request_number",
+                  "pull_request_url",
+                  "compare_url",
+                  "result",
+                  "duration",
+                  "elapsed_time",
+                  "message"
+                ]
+              }
+            ]
+          },
+          "on_success": {
+            "$ref": "#/definitions/type/notification_frequency"
+          },
+          "on_failure": {
+            "$ref": "#/definitions/type/notification_frequency"
+          }
+        },
+        "additionalProperties": false,
+        "normal": true
+      },
+      "slack": {
+        "$id": "slack",
+        "title": "Slack",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "rooms": {
+                "$ref": "#/definitions/secures"
+              },
+              "template": {
+                "anyOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "vars": [
+                        "repository",
+                        "repository_slug",
+                        "repository_name",
+                        "build_number",
+                        "build_id",
+                        "build_url",
+                        "branch",
+                        "commit",
+                        "commit_subject",
+                        "commit_message",
+                        "author",
+                        "pull_request",
+                        "pull_request_number",
+                        "pull_request_url",
+                        "compare_url",
+                        "result",
+                        "duration",
+                        "elapsed_time",
+                        "message"
+                      ]
+                    },
+                    "normal": true
+                  },
+                  {
+                    "type": "string",
+                    "vars": [
+                      "repository",
+                      "repository_slug",
+                      "repository_name",
+                      "build_number",
+                      "build_id",
+                      "build_url",
+                      "branch",
+                      "commit",
+                      "commit_subject",
+                      "commit_message",
+                      "author",
+                      "pull_request",
+                      "pull_request_number",
+                      "pull_request_url",
+                      "compare_url",
+                      "result",
+                      "duration",
+                      "elapsed_time",
+                      "message"
+                    ]
+                  }
+                ]
+              },
+              "enabled": {
+                "type": "boolean"
+              },
+              "disabled": {
+                "type": "boolean"
+              },
+              "on_success": {
+                "$ref": "#/definitions/type/notification_frequency"
+              },
+              "on_failure": {
+                "$ref": "#/definitions/type/notification_frequency"
+              },
+              "on_pull_requests": {
+                "type": "boolean"
+              }
+            },
+            "additionalProperties": false,
+            "prefix": "rooms",
+            "normal": true
+          },
+          {
+            "$ref": "#/definitions/secures"
+          }
+        ]
+      },
+      "webhooks": {
+        "$id": "webhooks",
+        "title": "Webhooks",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "urls": {
+                "$ref": "#/definitions/secures"
+              },
+              "on_start": {
+                "$ref": "#/definitions/type/notification_frequency"
+              },
+              "enabled": {
+                "type": "boolean"
+              },
+              "disabled": {
+                "type": "boolean"
+              },
+              "on_success": {
+                "$ref": "#/definitions/type/notification_frequency"
+              },
+              "on_failure": {
+                "$ref": "#/definitions/type/notification_frequency"
+              }
+            },
+            "additionalProperties": false,
+            "prefix": "urls",
+            "normal": true
+          },
+          {
+            "$ref": "#/definitions/secures"
+          }
+        ]
+      }
+    }
+  },
+  "aliases": [
+
+  ],
+  "expand": [
+    "arch",
+    "compiler",
+    "crystal",
+    "d",
+    "dart",
+    "dotnet",
+    "elixir",
+    "elm",
+    "env",
+    "gemfile",
+    "ghc",
+    "go",
+    "haxe",
+    "jdk",
+    "julia",
+    "mono",
+    "node_js",
+    "os",
+    "otp_release",
+    "perl",
+    "perl6",
+    "php",
+    "python",
+    "r",
+    "rust",
+    "rvm",
+    "scala",
+    "smalltalk",
+    "solution",
+    "xcode_scheme",
+    "xcode_sdk"
+  ],
+  "allOf": [
+    {
+      "type": "object",
+      "properties": {
+        "version": {
+          "$ref": "#/definitions/type/version"
+        },
+        "import": {
+          "$ref": "#/definitions/type/imports"
+        },
+        "language": {
+          "$ref": "#/definitions/type/language"
+        },
+        "os": {
+          "$ref": "#/definitions/type/oss"
+        },
+        "arch": {
+          "$ref": "#/definitions/type/archs"
+        },
+        "dist": {
+          "$ref": "#/definitions/type/dist"
+        },
+        "sudo": {
+          "$ref": "#/definitions/type/sudo"
+        },
+        "env": {
+          "$ref": "#/definitions/type/env"
+        },
+        "compiler": {
+          "$ref": "#/definitions/type/compilers"
+        },
+        "matrix": {
+          "$ref": "#/definitions/type/matrix"
+        },
+        "stages": {
+          "$ref": "#/definitions/type/stages"
+        },
+        "notifications": {
+          "$ref": "#/definitions/type/notifications"
+        },
+        "stack": {
+          "$ref": "#/definitions/type/stack"
+        },
+        "conditions": {
+          "$ref": "#/definitions/type/conditions"
+        },
+        "filter_secrets": {
+          "type": "boolean"
+        },
+        "trace": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "language",
+        "os"
+      ],
+      "only": {
+        "arch": {
+          "os": [
+            "linux"
+          ]
+        },
+        "compiler": {
+          "language": [
+            "c",
+            "cpp"
+          ]
+        }
+      },
+      "aliases": {
+        "matrix": [
+          "jobs"
+        ]
+      }
+    },
+    {
+      "$ref": "#/definitions/type/job"
+    }
+  ]
+}
