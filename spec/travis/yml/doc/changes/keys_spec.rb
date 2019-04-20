@@ -12,10 +12,12 @@ describe Travis::Yml::Doc::Change::Keys do
           type: :boolean
         }
       },
-      aliases: {
-        foo_bar: [
-          :foo
-        ]
+      keys: {
+        foo_bar: {
+          aliases: [
+            :foo
+          ]
+        },
       },
       additionalProperties: false
     }

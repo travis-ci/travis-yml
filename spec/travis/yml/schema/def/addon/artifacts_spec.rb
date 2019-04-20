@@ -61,21 +61,27 @@ describe Travis::Yml::Schema::Def::Addon::Artifacts, 'structure' do
         },
         additionalProperties: false,
         normal: true,
-        aliases: {
-          key: [
-            :aws_access_key,
-            :access_key
-          ],
-          secret: [
-            :secret_key,
-            :secret_access_key,
-            :aws_secret,
-            :aws_secret_key,
-            :aws_secret_access_key
-          ],
-          region: [
-            :s3_region
-          ]
+        keys: {
+          key: {
+            aliases: [
+              :aws_access_key,
+              :access_key
+            ],
+          },
+          secret: {
+            aliases: [
+              :secret_key,
+              :secret_access_key,
+              :aws_secret,
+              :aws_secret_key,
+              :aws_secret_access_key
+            ],
+          },
+          region: {
+            aliases: [
+              :s3_region
+            ]
+          }
         }
       )
     end

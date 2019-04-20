@@ -5,7 +5,7 @@ module Travis
   module Yml
     module Schema
       module Json
-        class Schema < Map
+        class Schema < Node
           register :schema
 
           SCHEMA = { '$schema': 'http://json-schema.org/draft-04/schema#' }
@@ -69,15 +69,18 @@ module Travis
             schema = schema.merge(
               title: node.title,
               definitions: definitions,
-              aliases: node.aliases,
               expand: node.expand,
             )
-            schema.merge(super)
+            schema.merge(all)
           end
 
           def definitions
             definitions = jsons(Type::Node.exports.values).map(&:definitions)
             merge(DEFINITIONS, *definitions)
+          end
+
+          def all
+            All.new(node.schema).schema
           end
         end
       end

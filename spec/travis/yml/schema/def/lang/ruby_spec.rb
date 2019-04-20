@@ -23,55 +23,59 @@ describe Travis::Yml::Schema::Def::Ruby, 'structure' do
             type: :string
           }
         },
-        normal: true,
-        aliases: {
-          rvm: [
-            :ruby
-          ],
-          gemfile: [
-            :gemfiles
-          ]
-        },
-        only: {
+        keys: {
           rvm: {
-            language: [
-              'ruby'
-            ]
+            aliases: [
+              :ruby
+            ],
+            only: {
+              language: [
+                'ruby'
+              ]
+            }
           },
           gemfile: {
-            language: [
-              'ruby'
-            ]
+            aliases: [
+              :gemfiles
+            ],
+            only: {
+              language: [
+                'ruby'
+              ]
+            }
           },
           jdk: {
-            language: [
-              'ruby'
-            ]
+            only: {
+              language: [
+                'ruby'
+              ]
+            },
+            except: {
+              os: [
+                'osx'
+              ]
+            }
           },
           bundler_args: {
-            language: [
-              'ruby'
-            ]
+            only: {
+              language: [
+                'ruby'
+              ]
+            }
           }
         },
-        except: {
-          jdk: {
-            os: [
-              'osx'
-            ]
-          }
-        }
+        normal: true
       )
     end
   end
 
-  # describe 'schema' do
-  #   subject { described_class.new.schema }
-  #
-  #   it do
-  #     should eq(
-  #       '$ref': '#/definitions/language/ruby'
-  #     )
-  #   end
-  # end
+  describe 'schema' do
+    subject { described_class.new.schema }
+
+    it do
+      should eq(
+        '$ref': '#/definitions/language/ruby'
+      )
+    end
+  end
 end

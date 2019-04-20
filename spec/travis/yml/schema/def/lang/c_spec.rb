@@ -14,13 +14,13 @@ describe Travis::Yml::Schema::Def::C, 'structure' do
     end
   end
 
-  # describe 'schema' do
-  #   subject { described_class.new.schema }
-  #
-  #   it do
-  #     should eq(
-  #       '$ref': '#/definitions/language/c'
-  #     )
-  #   end
-  # end
+  describe 'schema' do
+    subject { described_class.new.schema }
+
+    it do
+      should eq(
+        '$ref': '#/definitions/language/c'
+      )
+    end
+  end
 end

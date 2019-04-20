@@ -57,18 +57,6 @@ module Travis
           obj.is_a?(Array) ? obj : [obj].compact
         end
 
-        def to_syms(obj, *types)
-          types = [String] unless types.any?
-          case obj
-          when Hash
-            obj.map { |key, obj| [key, to_syms(obj, *types)] }.to_h
-          when Array
-            obj.map { |obj| types.any? { |type| obj.is_a?(type) } ? obj.to_s.to_sym : obj }
-          else
-            obj.is_a?(String) || types.any? { |type| obj.is_a?(type) } ? to_syms([obj], *types) : obj
-          end
-        end
-
         def to_strs(obj, *types)
           types = [Symbol] unless types.any?
           case obj
@@ -76,8 +64,24 @@ module Travis
             obj.map { |key, obj| [key, to_strs(obj, *types)] }.to_h
           when Array
             obj.map { |obj| types.any? { |type| obj.is_a?(type) } ? obj.to_s : obj }
+          when String, Symbol
+            to_strs([obj], *types)
           else
-            obj.is_a?(String) || types.any? { |type| obj.is_a?(type) } ? to_strs([obj], *types) : obj
+            types.any? { |type| obj.is_a?(type) } ? to_strs([obj], *types) : obj
+          end
+        end
+
+        def to_syms(obj, *types)
+          types = [String] unless types.any?
+          case obj
+          when Hash
+            obj.map { |key, obj| [key, to_syms(obj, *types)] }.to_h
+          when Array
+            obj.map { |obj| types.any? { |type| obj.is_a?(type) } ? obj.to_s.to_sym : obj }
+          when String, Symbol
+            to_syms([obj], *types)
+          else
+            types.any? { |type| obj.is_a?(type) } ? to_syms([obj], *types) : obj
           end
         end
 
@@ -156,12 +160,20 @@ module Travis
         end
 
         def ivars
-          instance_variables
+          instance_variables.map { |name| [name, instance_variable_get(name)] }.to_h
         end
 
         def ivar(*args)
           key, obj = *args
-          args.size == 1 ? instance_variable_get("@#{key}") : instance_variable_set("@#{key}", obj)
+          key = :"@#{key}"
+
+          if args.size == 1
+            instance_variable_get(key)
+          elsif obj.nil?
+            remove_instance_variable(key) if instance_variable_defined?(key)
+          else
+            instance_variable_set(key, obj)
+          end
         end
 
         extend self

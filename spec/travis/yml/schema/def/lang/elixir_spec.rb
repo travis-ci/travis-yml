@@ -17,30 +17,34 @@ describe Travis::Yml::Schema::Def::Elixir, 'structure' do
             '$ref': '#/definitions/strs'
           }
         },
-        normal: true,
-        only: {
+        keys: {
           elixir: {
-            language: [
-              'elixir'
-            ]
+            only: {
+              language: [
+                'elixir'
+              ]
+            }
           },
           otp_release: {
-            language: [
-              'elixir'
-            ]
+            only: {
+              language: [
+                'elixir'
+              ]
+            }
           }
-        }
+        },
+        normal: true
       )
     end
   end
 
-  # describe 'schema' do
-  #   subject { described_class.new.schema }
-  #
-  #   it do
-  #     should eq(
-  #       '$ref': '#/definitions/language/elixir'
-  #     )
-  #   end
-  # end
+  describe 'schema' do
+    subject { described_class.new.schema }
+
+    it do
+      should eq(
+        '$ref': '#/definitions/language/elixir'
+      )
+    end
+  end
 end

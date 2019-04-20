@@ -47,7 +47,9 @@ module Travis
   module Yml
     module Schema
       def self.schema
-        @schema ||= Schema::Def::Root.new.schema
+        node = Def::Root.new.node
+        node = Type::Expand.apply(node)
+        Json::Node[node.type].new(node).schema
       end
     end
   end

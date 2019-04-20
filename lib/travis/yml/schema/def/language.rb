@@ -52,7 +52,6 @@ module Travis
 
             export
           end
-          end
         end
       end
     end

@@ -17,30 +17,34 @@ describe Travis::Yml::Schema::Def::Dart, 'structure' do
             type: :boolean
           }
         },
-        normal: true,
-        only: {
+        keys: {
           dart: {
-            language: [
-              'dart'
-            ]
+            only: {
+              language: [
+                'dart'
+              ]
+            }
           },
           with_content_shell: {
-            language: [
-              'dart'
-            ]
+            only: {
+              language: [
+                'dart'
+              ]
+            }
           }
-        }
+        },
+        normal: true
       )
     end
   end
 
-  # describe 'schema' do
-  #   subject { described_class.new.schema }
-  #
-  #   it do
-  #     should eq(
-  #       '$ref': '#/definitions/language/dart'
-  #     )
-  #   end
-  # end
+  describe 'schema' do
+    subject { described_class.new.schema }
+
+    it do
+      should eq(
+        '$ref': '#/definitions/language/dart'
+      )
+    end
+  end
 end

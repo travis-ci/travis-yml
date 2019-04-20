@@ -17,35 +17,37 @@ describe Travis::Yml::Schema::Def::NodeJs, 'structure' do
             type: :string
           }
         },
-        normal: true,
-        aliases: {
-          node_js: [
-            :node
-          ]
-        },
-        only: {
+        keys: {
           node_js: {
-            language: [
-              'node_js'
-            ]
+            aliases: [
+              :node
+            ],
+            only: {
+              language: [
+                'node_js'
+              ]
+            }
           },
           npm_args: {
-            language: [
-              'node_js'
-            ]
+            only: {
+              language: [
+                'node_js'
+              ]
+            }
           }
-        }
+        },
+        normal: true
       )
     end
   end
 
-  # describe 'schema' do
-  #   subject { described_class.new.schema }
-  #
-  #   it do
-  #     should eq(
-  #       '$ref': '#/definitions/language/node_js'
-  #     )
-  #   end
-  # end
+  describe 'schema' do
+    subject { described_class.new.schema }
+
+    it do
+      should eq(
+        '$ref': '#/definitions/language/node_js'
+      )
+    end
+  end
 end

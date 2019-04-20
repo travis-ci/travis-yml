@@ -14,25 +14,27 @@ describe Travis::Yml::Schema::Def::Haskell, 'structure' do
             '$ref': '#/definitions/strs'
           }
         },
-        normal: true,
-        only: {
+        keys: {
           ghc: {
-            language: [
-              'haskell'
-            ]
+            only: {
+              language: [
+                'haskell'
+              ]
+            }
           }
-        }
+        },
+        normal: true
       )
     end
   end
 
-  # describe 'schema' do
-  #   subject { described_class.new.schema }
-  #
-  #   it do
-  #     should eq(
-  #       '$ref': '#/definitions/language/haskell'
-  #     )
-  #   end
-  # end
+  describe 'schema' do
+    subject { described_class.new.schema }
+
+    it do
+      should eq(
+        '$ref': '#/definitions/language/haskell'
+      )
+    end
+  end
 end

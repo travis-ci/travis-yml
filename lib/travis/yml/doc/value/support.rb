@@ -26,15 +26,13 @@ module Travis
             end
 
             def only
-              return unless only = support[:only]&.fetch(obj.to_sym, nil)
-              only.map do |key, value|
+              support.fetch(:only, {}).each do |key, value|
                 msg(key, Array(supporting[key]) - value)
               end
             end
 
             def except
-              return unless except = support[:except]&.fetch(obj.to_sym, nil)
-              except.each do |key, value|
+              support.fetch(:except, {}).each do |key, value|
                 msg(key, Array(supporting[key]) & value)
               end
             end

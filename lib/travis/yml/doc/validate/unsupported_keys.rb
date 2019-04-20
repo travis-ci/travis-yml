@@ -20,8 +20,9 @@ module Travis
             end
 
             def unsupported
+              # p schema.support(:arch)
               value.each do |key, value|
-                support = Value::Support.new(schema.support, value.supporting, key)
+                support = Value::Support.new(schema.support(key), value.supporting, key)
                 msgs(value, support.msgs) unless support.supported?
               end
             end

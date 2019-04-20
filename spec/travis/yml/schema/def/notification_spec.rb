@@ -47,6 +47,18 @@ describe Travis::Yml::Schema::Def::Notification::Notifications, 'structure' do
             additionalProperties: false,
             normal: true,
             prefix: :email,
+            keys: {
+              email: {
+                aliases: [
+                  :emails
+                ]
+              },
+              webhooks: {
+                aliases: [
+                  :webhook
+                ]
+              }
+            },
             changes: [
               {
                 change: :enable,
@@ -56,14 +68,6 @@ describe Travis::Yml::Schema::Def::Notification::Notifications, 'structure' do
                 keys: [:on_success, :on_failure]
               }
             ],
-            aliases: {
-              email: [
-                :emails
-              ],
-              webhooks: [
-                :webhook
-              ]
-            },
           },
           {
             '$ref': '#/definitions/notification/email'

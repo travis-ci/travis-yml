@@ -57,7 +57,7 @@ describe Travis::Yml::Schema::Def::Deploy::Appfog, 'structure' do
                       '.*' => {
                         '$ref': '#/definitions/secure'
                       }
-                    },
+                    }
                   },
                   {
                     '$ref': '#/definitions/secure'
@@ -72,7 +72,7 @@ describe Travis::Yml::Schema::Def::Deploy::Appfog, 'structure' do
                       '.*' => {
                         '$ref': '#/definitions/secure'
                       }
-                    },
+                    }
                   },
                   {
                     '$ref': '#/definitions/secure'
@@ -82,13 +82,13 @@ describe Travis::Yml::Schema::Def::Deploy::Appfog, 'structure' do
             },
             normal: true,
             prefix: :provider,
+            required: [
+              :provider
+            ],
             changes: [
               {
                 change: :enable
               }
-            ],
-            required: [
-              :provider
             ]
           },
           {
@@ -103,13 +103,13 @@ describe Travis::Yml::Schema::Def::Deploy::Appfog, 'structure' do
     end
   end
 
-  # describe 'schema' do
-  #   subject { described_class.new.schema }
-  #
-  #   it do
-  #     should eq(
-  #       '$ref': '#/definitions/deploy/appfog'
-  #     )
-  #   end
-  # end
+  describe 'schema' do
+    subject { described_class.new.schema }
+
+    it do
+      should eq(
+        '$ref': '#/definitions/deploy/appfog'
+      )
+    end
+  end
 end

@@ -13,7 +13,7 @@ module Travis
           end
 
           def detect(detect = nil)
-            node.set :detect, detect
+            node.detect = detect
           end
         end
       end

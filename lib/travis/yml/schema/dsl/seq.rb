@@ -17,10 +17,11 @@ module Travis
             schemas = types.map { |type| Node.build(self, type, opts).node }
             node.set :schemas, schemas
 
+            # shouldn't this happen in Map#mapped_opts?
             objs = schemas.map do |obj|
               obj = obj.lookup if obj.type == :ref
               obj.support.each do |key, opts|
-                node.parent.set :keys, key => { node.key => to_strs(opts) }
+                node.parent.set :keys, { node.key => { key => to_strs(opts) } }
               end
             end
           end

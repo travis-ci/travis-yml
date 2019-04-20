@@ -18,8 +18,16 @@ module Travis
             schemas.each(&block)
           end
 
+          def schemas=(schemas)
+            @schemas = flatten(schemas)
+          end
+
           def schemas
             @schemas ||= []
+          end
+
+          def flatten(schemas)
+            schemas.map { |schema| schema.is_a?(Any) ? schema.schemas : schema }.flatten
           end
 
           def to_h

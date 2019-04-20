@@ -43,16 +43,16 @@ describe Travis::Yml::Schema::Def::Deploy::Launchpad, 'structure' do
             },
             normal: true,
             prefix: :provider,
-            changes: [
-              {
-                change: :enable
-              }
-            ],
             required: [
               :provider,
               :slug,
               :oauth_token,
               :oauth_token_secret
+            ],
+            changes: [
+              {
+                change: :enable
+              }
             ]
           },
           {
@@ -67,13 +67,13 @@ describe Travis::Yml::Schema::Def::Deploy::Launchpad, 'structure' do
     end
   end
 
-  # describe 'schema' do
-  #   subject { described_class.new.schema }
-  #
-  #   it do
-  #     should eq(
-  #       '$ref': '#/definitions/deploy/launchpad'
-  #     )
-  #   end
-  # end
+  describe 'schema' do
+    subject { described_class.new.schema }
+
+    it do
+      should eq(
+        '$ref': '#/definitions/deploy/launchpad'
+      )
+    end
+  end
 end

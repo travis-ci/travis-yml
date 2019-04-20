@@ -196,10 +196,10 @@ module Travis
           #   []
           # end
 
-          def support
-            { only: {}, except: {} }.merge(only(opts, :only, :except))
-          end
-          memoize :support
+          # def support
+          #   { only: {}, except: {} }.merge(only(opts, :only, :except))
+          # end
+          # memoize :support
 
           def all_keys
             []

@@ -9,7 +9,8 @@ module Travis
           register :map
 
           def self.opts
-            @opts ||= super + %i(aliases format detect expand max_size prefix required strict support unique)
+            @opts ||= super + %i(aliases format detect expand keys max_size
+              prefix required strict support unique)
           end
 
           attr_writer :map
@@ -58,8 +59,11 @@ module Travis
           end
 
           def aliases
-            opts[:aliases] || {}
+            compact(opts[:keys].map do |key, opts|
+              opts.fetch(:aliases, []).map { |name| [name, key] }
+            end.flatten(1).to_h)
           end
+          memoize :aliases
 
           def format
             opts[:format]
@@ -117,6 +121,10 @@ module Travis
 
           def all_keys
             map.keys
+          end
+
+          def support(key)
+            only(opts[:keys][key] || {}, :only, :except)
           end
 
           def to_h

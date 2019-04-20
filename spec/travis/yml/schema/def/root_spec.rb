@@ -258,6 +258,8 @@ describe Travis::Yml::Schema::Def::Root, 'structure' do
     describe 'properties' do
       subject { Travis::Yml.schema[:allOf][0][:properties] }
 
+      # it { puts JSON.pretty_generate(subject) }
+
       it do
         expect(subject.keys.sort).to eq %i(
           arch
@@ -295,6 +297,42 @@ describe Travis::Yml::Schema::Def::Root, 'structure' do
       it { should include version:        { '$ref': '#/definitions/type/version' } }
       it { should include filter_secrets: { type: :boolean } }
       it { should include trace:          { type: :boolean } }
+    end
+
+    describe 'map' do
+      subject { Travis::Yml.schema[:allOf][0] }
+
+      it do
+        should include required: [
+          :language,
+          :os
+        ]
+      end
+
+      it do
+        should include keys: {
+          arch: {
+            only: {
+              os: [
+                'linux'
+              ]
+            }
+          },
+          compiler: {
+            only: {
+              language: [
+                'c',
+                'cpp'
+              ]
+            }
+          },
+          matrix: {
+            aliases: [
+              :jobs
+            ]
+          }
+        }
+      end
     end
   end
 end

@@ -77,135 +77,177 @@ describe Travis::Yml::Schema::Def::R, 'structure' do
             type: :object
           }
         },
-        normal: true,
-        only: {
+        keys: {
           r: {
-            language: [
-              'r'
-            ]
+            only: {
+              language: [
+                'r'
+              ]
+            }
           },
           r_packages: {
-            language: [
-              'r'
-            ]
+            only: {
+              language: [
+                'r'
+              ]
+            }
           },
           r_binary_packages: {
-            language: [
-              'r'
-            ]
+            only: {
+              language: [
+                'r'
+              ]
+            }
           },
           r_github_packages: {
-            language: [
-              'r'
-            ]
+            only: {
+              language: [
+                'r'
+              ]
+            }
           },
           apt_packages: {
-            language: [
-              'r'
-            ]
+            only: {
+              language: [
+                'r'
+              ]
+            }
           },
           bioc_packages: {
-            language: [
-              'r'
-            ]
+            only: {
+              language: [
+                'r'
+              ]
+            }
           },
           brew_packages: {
-            language: [
-              'r'
-            ]
+            only: {
+              language: [
+                'r'
+              ]
+            }
           },
           bioc: {
-            language: [
-              'r'
-            ]
+            only: {
+              language: [
+                'r'
+              ]
+            }
           },
           bioc_check: {
-            language: [
-              'r'
-            ]
+            only: {
+              language: [
+                'r'
+              ]
+            }
           },
           bioc_required: {
-            language: [
-              'r'
-            ]
+            aliases: [
+              :use_bioc
+            ],
+            only: {
+              language: [
+                'r'
+              ]
+            }
           },
           bioc_use_devel: {
-            language: [
-              'r'
-            ]
+            only: {
+              language: [
+                'r'
+              ]
+            }
           },
           cran: {
-            language: [
-              'r'
-            ]
+            only: {
+              language: [
+                'r'
+              ]
+            }
           },
           disable_homebrew: {
-            language: [
-              'r'
-            ]
+            only: {
+              language: [
+                'r'
+              ]
+            }
           },
           latex: {
-            language: [
-              'r'
-            ]
+            only: {
+              language: [
+                'r'
+              ]
+            }
           },
           pandoc: {
-            language: [
-              'r'
-            ]
+            only: {
+              language: [
+                'r'
+              ]
+            }
           },
           pandoc_version: {
-            language: [
-              'r'
-            ]
+            only: {
+              language: [
+                'r'
+              ]
+            }
           },
           r_build_args: {
-            language: [
-              'r'
-            ]
+            only: {
+              language: [
+                'r'
+              ]
+            }
           },
           r_check_args: {
-            language: [
-              'r'
-            ]
+            only: {
+              language: [
+                'r'
+              ]
+            }
           },
           r_check_revdep: {
-            language: [
-              'r'
-            ]
+            only: {
+              language: [
+                'r'
+              ]
+            }
           },
           warnings_are_errors: {
-            language: [
-              'r'
-            ]
+            only: {
+              language: [
+                'r'
+              ]
+            }
           },
           remotes: {
-            language: [
-              'r'
-            ]
+            only: {
+              language: [
+                'r'
+              ]
+            }
           },
           repos: {
-            language: [
-              'r'
-            ]
+            only: {
+              language: [
+                'r'
+              ]
+            }
           }
         },
-        aliases: {
-          bioc_required: [
-            :use_bioc
-          ]
-        }
+        normal: true
       )
     end
   end
 
-  # describe 'schema' do
-  #   subject { described_class.new.schema }
-  #
-  #   it do
-  #     should eq(
-  #       '$ref': '#/definitions/language/r'
-  #     )
-  #   end
-  # end
+  describe 'schema' do
+    subject { described_class.new.schema }
+
+    it do
+      should eq(
+        '$ref': '#/definitions/language/r'
+      )
+    end
+  end
 end

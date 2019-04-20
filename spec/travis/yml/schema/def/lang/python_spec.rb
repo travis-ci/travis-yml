@@ -22,35 +22,37 @@ describe Travis::Yml::Schema::Def::Python, 'structure' do
             }
           }
         },
-        normal: true,
-        only: {
+        keys: {
           python: {
-            language: [
-              'python'
-            ]
+            only: {
+              language: [
+                'python'
+              ]
+            }
           },
           virtualenv: {
-            language: [
-              'python'
-            ]
+            aliases: [
+              :virtual_env
+            ],
+            only: {
+              language: [
+                'python'
+              ]
+            }
           }
         },
-        aliases: {
-          virtualenv: [
-            :virtual_env
-          ]
-        }
+        normal: true
       )
     end
   end
 
-  # describe 'schema' do
-  #   subject { described_class.new.schema }
-  #
-  #   it do
-  #     should eq(
-  #       '$ref': '#/definitions/language/python'
-  #     )
-  #   end
-  # end
+  describe 'schema' do
+    subject { described_class.new.schema }
+
+    it do
+      should eq(
+        '$ref': '#/definitions/language/python'
+      )
+    end
+  end
 end

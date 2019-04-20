@@ -14,9 +14,11 @@ describe Travis::Yml::Doc::Validate, 'unsupported_keys' do
           }
         },
         additionalProperties: false,
-        only: {
+        keys: {
           arch: {
-            os: ['linux']
+            only: {
+              os: ['linux']
+            }
           }
         }
       }

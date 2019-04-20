@@ -17,30 +17,34 @@ describe Travis::Yml::Schema::Def::Php, 'structure' do
             type: :string
           }
         },
-        normal: true,
-        only: {
+        keys: {
           php: {
-            language: [
-              'php'
-            ]
+            only: {
+              language: [
+                'php'
+              ]
+            }
           },
           composer_args: {
-            language: [
-              'php'
-            ]
+            only: {
+              language: [
+                'php'
+              ]
+            }
           }
-        }
+        },
+        normal: true
       )
     end
   end
 
-  # describe 'schema' do
-  #   subject { described_class.new.schema }
-  #
-  #   it do
-  #     should eq(
-  #       '$ref': '#/definitions/language/php'
-  #     )
-  #   end
-  # end
+  describe 'schema' do
+    subject { described_class.new.schema }
+
+    it do
+      should eq(
+        '$ref': '#/definitions/language/php'
+      )
+    end
+  end
 end

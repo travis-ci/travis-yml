@@ -43,15 +43,15 @@ describe Travis::Yml::Schema::Def::Deploy::Puppetforge, 'structure' do
             },
             normal: true,
             prefix: :provider,
-            changes: [
-              {
-                change: :enable
-              }
-            ],
             required: [
               :provider,
               :user,
               :password
+            ],
+            changes: [
+              {
+                change: :enable
+              }
             ]
           },
           {
@@ -66,13 +66,13 @@ describe Travis::Yml::Schema::Def::Deploy::Puppetforge, 'structure' do
     end
   end
 
-  # describe 'schema' do
-  #   subject { described_class.new.schema }
-  #
-  #   it do
-  #     should eq(
-  #       '$ref': '#/definitions/deploy/puppetforge'
-  #     )
-  #   end
-  # end
+  describe 'schema' do
+    subject { described_class.new.schema }
+
+    it do
+      should eq(
+        '$ref': '#/definitions/deploy/puppetforge'
+      )
+    end
+  end
 end

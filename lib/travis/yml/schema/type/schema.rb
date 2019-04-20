@@ -13,7 +13,7 @@ module Travis
             :schema
           end
 
-          attr_accessor :title
+          attr_accessor :title, :schema
 
           def strict?
             false

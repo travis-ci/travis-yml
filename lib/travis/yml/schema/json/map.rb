@@ -30,24 +30,10 @@ module Travis
               patternProperties: pattern_properties,
               additionalProperties: strict? ? false : nil,
             }
-            schema = compact(schema.merge(opts))
-            schema = includes(schema) if node.includes.any?
-            # schema = prefix(schema) if node.prefix?
-            schema
+            compact(schema.merge(opts))
           end
 
           private
-
-            def includes(schema)
-              compact(
-                allOf: [schema, *jsons(node.includes).map(&:schema)],
-                normal: schema[:normal]
-              )
-            end
-
-            # def prefix(schema)
-            #   { anyOf: normals([schema, json(node[node.prefix]).schema]) }
-            # end
 
             def properties
               map = except(node, *patterns)
@@ -63,9 +49,9 @@ module Travis
               @patterns ||= node.keys.select { |key| key.to_s =~ PATTERN }
             end
 
-            def opts
-              merge(except(super, :keys), super[:keys] || {})
-            end
+            # def opts
+            #   merge(except(super, :keys), super[:keys] || {})
+            # end
 
             def remap(opts)
               opts.map { |key, value| [REMAP[key] || key, value] }.to_h
