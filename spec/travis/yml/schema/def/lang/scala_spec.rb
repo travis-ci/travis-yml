@@ -20,42 +20,46 @@ describe Travis::Yml::Schema::Def::Scala, 'structure' do
             type: :string
           }
         },
-        normal: true,
-        only: {
+        keys: {
           scala: {
-            language: [
-              'scala'
-            ]
+            only: {
+              language: [
+                'scala'
+              ]
+            }
           },
           jdk: {
-            language: [
-              'scala'
-            ]
+            only: {
+              language: [
+                'scala'
+              ]
+            },
+            except: {
+              os: [
+                'osx'
+              ]
+            }
           },
           sbt_args: {
-            language: [
-              'scala'
-            ]
+            only: {
+              language: [
+                'scala'
+              ]
+            }
           }
         },
-        except: {
-          jdk: {
-            os: [
-              'osx'
-            ]
-          }
-        }
+        normal: true
       )
     end
   end
 
-  # describe 'schema' do
-  #   subject { described_class.new.schema }
-  #
-  #   it do
-  #     should eq(
-  #       '$ref': '#/definitions/language/scala'
-  #     )
-  #   end
-  # end
+  describe 'schema' do
+    subject { described_class.new.schema }
+
+    it do
+      should eq(
+        '$ref': '#/definitions/language/scala'
+      )
+    end
+  end
 end

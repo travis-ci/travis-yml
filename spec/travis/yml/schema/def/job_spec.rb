@@ -90,15 +90,17 @@ describe Travis::Yml::Schema::Def::Job, 'structure' do
               '$ref': '#/definitions/strs'
             }
           },
-          aliases: {
-            branches: [
-              :branch
-            ]
-          },
-          only: {
+          keys: {
             osx_image: {
-              os: [
-                'osx'
+              only: {
+                os: [
+                  'osx'
+                ]
+              }
+            },
+            branches: {
+              aliases: [
+                :branch
               ]
             }
           }

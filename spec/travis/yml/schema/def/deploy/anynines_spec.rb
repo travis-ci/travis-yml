@@ -46,13 +46,13 @@ describe Travis::Yml::Schema::Def::Deploy::Anynines, 'structure' do
             },
             normal: true,
             prefix: :provider,
+            required: [
+              :provider
+            ],
             changes: [
               {
                 change: :enable
               }
-            ],
-            required: [
-              :provider
             ]
           },
           {
@@ -67,13 +67,13 @@ describe Travis::Yml::Schema::Def::Deploy::Anynines, 'structure' do
     end
   end
 
-  # describe 'schema' do
-  #   subject { described_class.new.schema }
-  #
-  #   it do
-  #     should eq(
-  #       '$ref': '#/definitions/deploy/anynines'
-  #     )
-  #   end
-  # end
+  describe 'schema' do
+    subject { described_class.new.schema }
+
+    it do
+      should eq(
+        '$ref': '#/definitions/deploy/anynines'
+      )
+    end
+  end
 end

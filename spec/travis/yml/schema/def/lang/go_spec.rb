@@ -32,40 +32,48 @@ describe Travis::Yml::Schema::Def::Go, 'structure' do
             additionalProperties: false
           }
         },
-        normal: true,
-        only: {
+        keys: {
           go: {
-            language: [
-              'go'
-            ]
+            only: {
+              language: [
+                'go'
+              ]
+            }
           },
           gobuild_args: {
-            language: [
-              'go'
-            ]
+            only: {
+              language: [
+                'go'
+              ]
+            }
           },
           go_import_path: {
-            language: [
-              'go'
-            ]
+            only: {
+              language: [
+                'go'
+              ]
+            }
           },
           gimme_config: {
-            language: [
-              'go'
-            ]
+            only: {
+              language: [
+                'go'
+              ]
+            }
           }
-        }
+        },
+        normal: true
       )
     end
   end
 
-  # describe 'schema' do
-  #   subject { described_class.new.schema }
-  #
-  #   it do
-  #     should eq(
-  #       '$ref': '#/definitions/language/go'
-  #     )
-  #   end
-  # end
+  describe 'schema' do
+    subject { described_class.new.schema }
+
+    it do
+      should eq(
+        '$ref': '#/definitions/language/go'
+      )
+    end
+  end
 end

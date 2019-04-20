@@ -26,10 +26,10 @@ describe Travis::Yml::Schema::Def::Addon::CoverityScan, 'structure' do
                   }
                 },
                 additionalProperties: false,
+                prefix: :name,
                 required: [
                   :name
                 ],
-                prefix: :name,
                 normal: true
               },
               {

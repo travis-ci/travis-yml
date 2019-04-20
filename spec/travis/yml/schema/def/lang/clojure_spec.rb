@@ -17,37 +17,39 @@ describe Travis::Yml::Schema::Def::Clojure, 'structure' do
             type: :string
           }
         },
-        normal: true,
-        only: {
+        keys: {
           jdk: {
-            language: [
-              'clojure'
-            ]
+            only: {
+              language: [
+                'clojure'
+              ]
+            },
+            except: {
+              os: [
+                'osx'
+              ]
+            }
           },
           lein: {
-            language: [
-              'clojure'
-            ]
+            only: {
+              language: [
+                'clojure'
+              ]
+            }
           }
         },
-        except: {
-          jdk: {
-            os: [
-              'osx'
-            ]
-          }
-        }
+        normal: true
       )
     end
   end
 
-  # describe 'schema' do
-  #   subject { described_class.new.schema }
-  #
-  #   it do
-  #     should eq(
-  #       '$ref': '#/definitions/language/clojure'
-  #     )
-  #   end
-  # end
+  describe 'schema' do
+    subject { described_class.new.schema }
+
+    it do
+      should eq(
+        '$ref': '#/definitions/language/clojure'
+      )
+    end
+  end
 end

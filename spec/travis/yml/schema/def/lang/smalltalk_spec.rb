@@ -20,35 +20,41 @@ describe Travis::Yml::Schema::Def::Smalltalk, 'structure' do
             type: :boolean
           }
         },
-        normal: true,
-        only: {
+        keys: {
           smalltalk: {
-            language: [
-              'smalltalk'
-            ]
+            only: {
+              language: [
+                'smalltalk'
+              ]
+            }
           },
           smalltalk_config: {
-            language: [
-              'smalltalk'
-            ]
+            only: {
+              language: [
+                'smalltalk'
+              ]
+            }
           },
           smalltalk_edge: {
-            language: [
-              'smalltalk'
-            ]
+            only: {
+              language: [
+                'smalltalk'
+              ]
+            }
           }
-        }
+        },
+        normal: true
       )
     end
   end
 
-  # describe 'schema' do
-  #   subject { described_class.new.schema }
-  #
-  #   it do
-  #     should eq(
-  #       '$ref': '#/definitions/language/smalltalk'
-  #     )
-  #   end
-  # end
+  describe 'schema' do
+    subject { described_class.new.schema }
+
+    it do
+      should eq(
+        '$ref': '#/definitions/language/smalltalk'
+      )
+    end
+  end
 end

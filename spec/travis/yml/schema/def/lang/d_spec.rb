@@ -14,25 +14,27 @@ describe Travis::Yml::Schema::Def::D, 'structure' do
             '$ref': '#/definitions/strs'
           }
         },
-        normal: true,
-        only: {
+        keys: {
           d: {
-            language: [
-              'd'
-            ]
+            only: {
+              language: [
+                'd'
+              ]
+            }
           }
-        }
+        },
+        normal: true
       )
     end
   end
 
-  # describe 'schema' do
-  #   subject { described_class.new.schema }
-  #
-  #   it do
-  #     should eq(
-  #       '$ref': '#/definitions/language/d'
-  #     )
-  #   end
-  # end
+  describe 'schema' do
+    subject { described_class.new.schema }
+
+    it do
+      should eq(
+        '$ref': '#/definitions/language/d'
+      )
+    end
+  end
 end

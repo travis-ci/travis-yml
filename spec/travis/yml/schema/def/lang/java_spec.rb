@@ -14,32 +14,32 @@ describe Travis::Yml::Schema::Def::Java, 'structure' do
             '$ref': '#/definitions/strs'
           }
         },
-        normal: true,
-        only: {
+        keys: {
           jdk: {
-            language: [
-              'java'
-            ]
+            only: {
+              language: [
+                'java'
+              ]
+            },
+            except: {
+              os: [
+                'osx'
+              ]
+            }
           }
         },
-        except: {
-          jdk: {
-            os: [
-              'osx'
-            ]
-          }
-        }
+        normal: true
       )
     end
   end
 
-  # describe 'schema' do
-  #   subject { described_class.new.schema }
-  #
-  #   it do
-  #     should eq(
-  #       '$ref': '#/definitions/language/java'
-  #     )
-  #   end
-  # end
+  describe 'schema' do
+    subject { described_class.new.schema }
+
+    it do
+      should eq(
+        '$ref': '#/definitions/language/java'
+      )
+    end
+  end
 end

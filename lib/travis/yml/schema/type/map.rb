@@ -12,7 +12,7 @@ module Travis
 
           register :map
 
-          opts %i(keys max_size prefix)
+          opts %i(keys max_size prefix required unique)
 
           def self.type
             :map
@@ -22,6 +22,10 @@ module Travis
 
           def mappings
             @mappings ||= {}
+          end
+
+          def includes?
+            includes.any?
           end
 
           def includes

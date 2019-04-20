@@ -104,15 +104,7 @@ module Travis
           end
 
           def aliases(*aliases)
-            aliases = aliases.flatten
-            if node.enum?
-              node.set :aliases, aliases
-            elsif node.parent.map?
-              node.parent.set :keys, aliases: { node.key => aliases }
-            else
-              # gotta find the parent that is a map?
-              node.set :aliases, aliases
-            end
+            node.set :aliases, aliases.flatten
           end
           alias alias aliases
 
@@ -170,11 +162,7 @@ module Travis
           end
 
           def required(*)
-            if node.parent.map?
-              node.parent.set :keys, { required: [node.key] }
-            else
-              raise
-            end
+            node.set :required, true
           end
 
           def title(title)

@@ -57,9 +57,7 @@ module Travis
           end
 
           def support
-            only(opts, :only, :except).map do |key, opts|
-              [key, { value.to_sym => opts }]
-            end.to_h
+            only(opts, :only, :except)
           end
           memoize :support
 

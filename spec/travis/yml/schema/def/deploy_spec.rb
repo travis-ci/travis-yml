@@ -36,14 +36,15 @@ describe Travis::Yml::Schema::Def::Deploy::Deploy, 'structure' do
                       type: :boolean
                     }
                   },
-                  prefix: :branch,
-                  normal: true,
-                  aliases: {
-                    branch: [
-                      :branches
-                    ]
-                  },
                   additionalProperties: false,
+                  prefix: :branch,
+                  keys: {
+                    branch: {
+                      aliases: [
+                        :branches
+                      ]
+                    }
+                  }
                 },
                 {
                   '$ref': '#/definitions/type/languages'

@@ -14,32 +14,32 @@ describe Travis::Yml::Schema::Def::Groovy, 'structure' do
             '$ref': '#/definitions/strs'
           }
         },
-        normal: true,
-        only: {
+        keys: {
           jdk: {
-            language: [
-              'groovy'
-            ]
+            only: {
+              language: [
+                'groovy'
+              ]
+            },
+            except: {
+              os: [
+                'osx'
+              ]
+            }
           }
         },
-        except: {
-          jdk: {
-            os: [
-              'osx'
-            ]
-          }
-        }
+        normal: true
       )
     end
   end
 
-  # describe 'schema' do
-  #   subject { described_class.new.schema }
-  #
-  #   it do
-  #     should eq(
-  #       '$ref': '#/definitions/language/groovy'
-  #     )
-  #   end
-  # end
+  describe 'schema' do
+    subject { described_class.new.schema }
+
+    it do
+      should eq(
+        '$ref': '#/definitions/language/groovy'
+      )
+    end
+  end
 end

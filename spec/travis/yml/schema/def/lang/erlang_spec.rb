@@ -14,25 +14,27 @@ describe Travis::Yml::Schema::Def::Erlang, 'structure' do
             '$ref': '#/definitions/strs'
           }
         },
-        normal: true,
-        only: {
+        keys: {
           otp_release: {
-            language: [
-              'erlang'
-            ]
+            only: {
+              language: [
+                'erlang'
+              ]
+            }
           }
-        }
+        },
+        normal: true
       )
     end
   end
 
-  # describe 'schema' do
-  #   subject { described_class.new.schema }
-  #
-  #   it do
-  #     should eq(
-  #       '$ref': '#/definitions/language/erlang'
-  #     )
-  #   end
-  # end
+  describe 'schema' do
+    subject { described_class.new.schema }
+
+    it do
+      should eq(
+        '$ref': '#/definitions/language/erlang'
+      )
+    end
+  end
 end

@@ -8,17 +8,7 @@ describe Travis::Yml::Doc::Value::Support do
   describe 'arch' do
     let(:obj) { :arch }
 
-    let(:support) do
-      {
-        only: {
-          arch: {
-            os: [
-              'linux'
-            ]
-          }
-        }
-      }
-    end
+    let(:support) { { only: { os: [ 'linux' ] } } }
 
     describe 'on linux' do
       let(:os) { 'linux' }
@@ -36,17 +26,7 @@ describe Travis::Yml::Doc::Value::Support do
   describe 'osx_image' do
     let(:obj) { :osx_image }
 
-    let(:support) do
-      {
-        only: {
-          osx_image: {
-            os: [
-             'osx'
-            ]
-          }
-        }
-      }
-    end
+    let(:support) { { only: { os: [ 'osx' ] } } }
 
     describe 'on linux' do
       let(:os) { 'linux' }
@@ -64,24 +44,7 @@ describe Travis::Yml::Doc::Value::Support do
   describe 'jdk' do
     let(:obj) { :jdk }
 
-    let(:support) do
-      {
-        only: {
-          jdk: {
-            language: [
-              'ruby'
-            ]
-          }
-        },
-        except: {
-          jdk: {
-            os: [
-              'osx'
-            ]
-          }
-        }
-      }
-    end
+    let(:support) { { only: { language: [ 'ruby' ] }, except: { os: [ 'osx' ] } } }
 
     describe 'on ruby' do
       let(:language) { 'ruby' }
@@ -117,17 +80,7 @@ describe Travis::Yml::Doc::Value::Support do
 
   describe 'linux' do
     let(:obj) { :linux }
-    let(:support) do
-      {
-        except: {
-          linux: {
-            language: [
-             'objective-c'
-            ]
-          }
-        }
-      }
-    end
+    let(:support) { { except: { language: [ 'objective-c' ] } } }
 
     describe 'on ruby' do
       let(:language) { 'ruby' }
@@ -144,17 +97,7 @@ describe Travis::Yml::Doc::Value::Support do
 
   describe 'osx' do
     let(:obj) { :osx }
-    let(:support) do
-      {
-        except: {
-          osx: {
-            language: [
-              'php'
-            ]
-          }
-        }
-      }
-    end
+    let(:support) { { except: { language: [ 'php' ] } } }
 
     describe 'on ruby' do
       let(:language) { 'ruby' }
@@ -171,17 +114,7 @@ describe Travis::Yml::Doc::Value::Support do
 
   describe 'windows' do
     let(:obj) { :windows }
-    let(:support) do
-      {
-        only: {
-          windows: {
-            language: [
-              'shell'
-            ]
-          }
-        }
-      }
-    end
+    let(:support) { { only: { language: [ 'shell' ] } } }
 
     describe 'on shell' do
       let(:language) { 'shell' }

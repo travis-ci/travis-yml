@@ -14,25 +14,27 @@ describe Travis::Yml::Schema::Def::Perl6, 'structure' do
             '$ref': '#/definitions/strs'
           }
         },
-        normal: true,
-        only: {
+        keys: {
           perl6: {
-            language: [
-              'perl6'
-            ]
+            only: {
+              language: [
+                'perl6'
+              ]
+            }
           }
-        }
+        },
+        normal: true
       )
     end
   end
 
-  # describe 'schema' do
-  #   subject { described_class.new.schema }
-  #
-  #   it do
-  #     should eq(
-  #       '$ref': '#/definitions/language/perl6'
-  #     )
-  #   end
-  # end
+  describe 'schema' do
+    subject { described_class.new.schema }
+
+    it do
+      should eq(
+        '$ref': '#/definitions/language/perl6'
+      )
+    end
+  end
 end

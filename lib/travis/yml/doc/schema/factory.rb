@@ -68,7 +68,7 @@ module Travis
 
               # hmmm. listing these keys here sucks pretty hard. which ones do
               # we not want to merge in anyway? apparently :strict is one
-              keys = [:aliases, :prefix, :required, :unique, :only, :except]
+              keys = [:aliases, :keys, :prefix, :required, :unique]
 
               opts = only(merge(*schemas.map(&:opts)), *keys)
               joined = map(except(schema, type).merge(opts))
@@ -89,7 +89,7 @@ module Travis
             end
 
             def map(schema)
-              node = Map.new(normalize(schema))
+              node = Map.new({ keys: {} }.merge(normalize(schema)))
               node.map = mappings(schema)
               if patterns = schema[:patternProperties]
                 raise if patterns.size > 1

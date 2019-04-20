@@ -42,27 +42,27 @@ describe Travis::Yml::Helper::Obj do
 
   describe :to_strs do
     describe 'by default' do
-      subject { to_strs(foo: { bar: { baz: :buz }, bam: true, bum: 1 }) }
-      it { should eq foo: { bar: { baz: ['buz'] }, bam: true, bum: 1 } }
+      subject { to_strs(foo: { bar: { baz: :buz }, bam: :bam, bum: true, bem: 1 }) }
+      it { should eq foo: { bar: { baz: ['buz'] }, bam: ['bam'], bum: true, bem: 1 } }
     end
 
     describe 'given types' do
-      subject { to_strs({ foo: { bar: { baz: :buz }, bam: true, bum: 1 } }, Object) }
-      it { should eq foo: { bar: { baz: ['buz'] }, bam: ['true'], bum: ['1'] } }
+      subject { to_strs({ foo: { bar: { baz: :buz }, bam: :bam, bum: true, bem: 1 } }, Object) }
+      it { should eq foo: { bar: { baz: ['buz'] }, bam: ['bam'], bum: ['true'], bem: ['1'] } }
     end
   end
 
   describe :to_syms do
-    let(:obj) { { foo: { bar: { baz: 'buz' }, bam: true, bum: 1 } } }
+    let(:obj) { { foo: { bar: { baz: 'buz' }, bam: :bam, bum: true, bem: 1 } } }
 
     describe 'by default' do
       subject { to_syms(obj) }
-      it { should eq foo: { bar: { baz: [:buz] }, bam: true, bum: 1 } }
+      it { should eq foo: { bar: { baz: [:buz] }, bam: [:bam], bum: true, bem: 1 } }
     end
 
     describe 'given types' do
       subject { to_syms(obj, Object) }
-      it { should eq foo: { bar: { baz: [:buz] }, bam: [:true], bum: [:'1'] } }
+      it { should eq foo: { bar: { baz: [:buz] }, bam: [:bam], bum: [:true], bem: [:'1'] } }
     end
   end
 

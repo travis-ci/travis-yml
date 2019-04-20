@@ -14,25 +14,27 @@ describe Travis::Yml::Schema::Def::Crystal, 'structure' do
             '$ref': '#/definitions/strs'
           }
         },
-        normal: true,
-        only: {
+        keys: {
           crystal: {
-            language: [
-              'crystal'
-            ]
+            only: {
+              language: [
+                'crystal'
+              ]
+            }
           }
-        }
+        },
+        normal: true
       )
     end
   end
 
-  # describe 'schema' do
-  #   subject { described_class.new.schema }
-  #
-  #   it do
-  #     should eq(
-  #       '$ref': '#/definitions/language/crystal'
-  #     )
-  #   end
-  # end
+  describe 'schema' do
+    subject { described_class.new.schema }
+
+    it do
+      should eq(
+        '$ref': '#/definitions/language/crystal'
+      )
+    end
+  end
 end

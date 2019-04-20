@@ -20,35 +20,41 @@ describe Travis::Yml::Schema::Def::Elm, 'structure' do
             type: :string
           }
         },
-        normal: true,
-        only: {
+        keys: {
           elm: {
-            language: [
-              'elm'
-            ]
+            only: {
+              language: [
+                'elm'
+              ]
+            }
           },
           elm_format: {
-            language: [
-              'elm'
-            ]
+            only: {
+              language: [
+                'elm'
+              ]
+            }
           },
           elm_test: {
-            language: [
-              'elm'
-            ]
+            only: {
+              language: [
+                'elm'
+              ]
+            }
           }
-        }
+        },
+        normal: true
       )
     end
   end
 
-  # describe 'schema' do
-  #   subject { described_class.new.schema }
-  #
-  #   it do
-  #     should eq(
-  #       '$ref': '#/definitions/language/elm'
-  #     )
-  #   end
-  # end
+  describe 'schema' do
+    subject { described_class.new.schema }
+
+    it do
+      should eq(
+        '$ref': '#/definitions/language/elm'
+      )
+    end
+  end
 end

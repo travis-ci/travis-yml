@@ -52,16 +52,20 @@ describe Travis::Yml::Schema::Def::Addon::Apt, 'structure' do
               }
             },
             additionalProperties: false,
-            normal: true,
             prefix: :packages,
-            aliases: {
-              packages: [
-                :package
-              ],
-              sources: [
-                :source
-              ]
-            }
+            keys: {
+              packages: {
+                aliases: [
+                  :package
+                ]
+              },
+              sources: {
+                aliases: [
+                  :source
+                ]
+              }
+            },
+            normal: true
           },
           {
             '$ref': '#/definitions/strs'

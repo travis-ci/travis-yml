@@ -23,10 +23,12 @@ describe Travis::Yml::Schema::Def::Branches, 'structure' do
             additionalProperties: false,
             normal: true,
             prefix: :only,
-            aliases: {
-              except: [
-                :exclude
-              ]
+            keys: {
+              except: {
+                aliases: [
+                  :exclude
+                ]
+              }
             }
           },
           {

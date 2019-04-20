@@ -20,35 +20,41 @@ describe Travis::Yml::Schema::Def::Csharp, 'structure' do
             '$ref': '#/definitions/strs'
           }
         },
-        normal: true,
-        only: {
+        keys: {
           dotnet: {
-            language: [
-              'csharp'
-            ]
+            only: {
+              language: [
+                'csharp'
+              ]
+            }
           },
           mono: {
-            language: [
-              'csharp'
-            ]
+            only: {
+              language: [
+                'csharp'
+              ]
+            }
           },
           solution: {
-            language: [
-              'csharp'
-            ]
+            only: {
+              language: [
+                'csharp'
+              ]
+            }
           }
-        }
+        },
+        normal: true
       )
     end
   end
 
-  # describe 'schema' do
-  #   subject { described_class.new.schema }
-  #
-  #   it do
-  #     should eq(
-  #       '$ref': '#/definitions/language/csharp'
-  #     )
-  #   end
-  # end
+  describe 'schema' do
+    subject { described_class.new.schema }
+
+    it do
+      should eq(
+        '$ref': '#/definitions/language/csharp'
+      )
+    end
+  end
 end

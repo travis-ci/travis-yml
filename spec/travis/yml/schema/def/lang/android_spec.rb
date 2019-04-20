@@ -26,37 +26,39 @@ describe Travis::Yml::Schema::Def::Android, 'structure' do
             additionalProperties: false
           }
         },
-        normal: true,
-        only: {
+        keys: {
           jdk: {
-            language: [
-              'android'
-            ]
+            only: {
+              language: [
+                'android'
+              ]
+            },
+            except: {
+              os: [
+                'osx'
+              ]
+            }
           },
           android: {
-            language: [
-              'android'
-            ]
+            only: {
+              language: [
+                'android'
+              ]
+            }
           }
         },
-        except: {
-          jdk: {
-            os: [
-              'osx'
-            ]
-          }
-        }
+        normal: true
       )
     end
   end
 
-  # describe 'schema' do
-  #   subject { described_class.new.schema }
-  #
-  #   it do
-  #     should eq(
-  #       '$ref': '#/definitions/language/android'
-  #     )
-  #   end
-  # end
+  describe 'schema' do
+    subject { described_class.new.schema }
+
+    it do
+      should eq(
+        '$ref': '#/definitions/language/android'
+      )
+    end
+  end
 end

@@ -38,70 +38,86 @@ describe Travis::Yml::Schema::Def::ObjectiveC, 'structure' do
             type: :string
           }
         },
-        normal: true,
-        aliases: {
-          rvm: [
-            :ruby
-          ]
-        },
-        only: {
+        keys: {
           rvm: {
-            language: [
-              'objective-c'
-            ]
+            aliases: [
+              :ruby
+            ],
+            only: {
+              language: [
+                'objective-c'
+              ]
+            }
           },
           gemfile: {
-            language: [
-              'objective-c'
-            ]
+            only: {
+              language: [
+                'objective-c'
+              ]
+            }
           },
           xcode_scheme: {
-            language: [
-              'objective-c'
-            ]
+            only: {
+              language: [
+                'objective-c'
+              ]
+            }
           },
           xcode_sdk: {
-            language: [
-              'objective-c'
-            ]
+            only: {
+              language: [
+                'objective-c'
+              ]
+            }
           },
           podfile: {
-            language: [
-              'objective-c'
-            ]
+            only: {
+              language: [
+                'objective-c'
+              ]
+            }
           },
           bundler_args: {
-            language: [
-              'objective-c'
-            ]
+            only: {
+              language: [
+                'objective-c'
+              ]
+            }
           },
           xcode_project: {
-            language: [
-              'objective-c'
-            ]
+            only: {
+              language: [
+                'objective-c'
+              ]
+            }
           },
           xcode_workspace: {
-            language: [
-              'objective-c'
-            ]
+            only: {
+              language: [
+                'objective-c'
+              ]
+            }
           },
           xctool_args: {
-            language: [
-              'objective-c'
-            ]
+            only: {
+              language: [
+                'objective-c'
+              ]
+            }
           }
-        }
+        },
+        normal: true
       )
     end
   end
 
-  # describe 'schema' do
-  #   subject { described_class.new.schema }
-  #
-  #   it do
-  #     should eq(
-  #       '$ref': '#/definitions/language/objective-c'
-  #     )
-  #   end
-  # end
+  describe 'schema' do
+    subject { described_class.new.schema }
+
+    it do
+      should eq(
+        '$ref': '#/definitions/language/objective-c'
+      )
+    end
+  end
 end

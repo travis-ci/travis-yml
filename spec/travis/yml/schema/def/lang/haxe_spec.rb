@@ -20,35 +20,41 @@ describe Travis::Yml::Schema::Def::Haxe, 'structure' do
             type: :string
           }
         },
-        normal: true,
-        only: {
+        keys: {
           haxe: {
-            language: [
-              'haxe'
-            ]
+            only: {
+              language: [
+                'haxe'
+              ]
+            }
           },
           hxml: {
-            language: [
-              'haxe'
-            ]
+            only: {
+              language: [
+                'haxe'
+              ]
+            }
           },
           neko: {
-            language: [
-              'haxe'
-            ]
+            only: {
+              language: [
+                'haxe'
+              ]
+            }
           }
-        }
+        },
+        normal: true
       )
     end
   end
 
-  # describe 'schema' do
-  #   subject { described_class.new.schema }
-  #
-  #   it do
-  #     should eq(
-  #       '$ref': '#/definitions/language/haxe'
-  #     )
-  #   end
-  # end
+  describe 'schema' do
+    subject { described_class.new.schema }
+
+    it do
+      should eq(
+        '$ref': '#/definitions/language/haxe'
+      )
+    end
+  end
 end

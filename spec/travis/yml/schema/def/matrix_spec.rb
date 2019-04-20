@@ -29,13 +29,17 @@ describe Travis::Yml::Schema::Def::Matrix, 'structure' do
               additionalProperties: false,
               normal: true,
               prefix: :include,
-              aliases: {
-                allow_failures: [
-                  :allowed_failures
-                ],
-                fast_finish: [
-                  :fast_failure
-                ],
+              keys: {
+                allow_failures: {
+                  aliases: [
+                    :allowed_failures
+                  ]
+                },
+                fast_finish: {
+                  aliases: [
+                    :fast_failure
+                  ]
+                }
               }
             },
             {

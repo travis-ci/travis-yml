@@ -42,24 +42,24 @@ describe Travis::Yml::Schema::Dsl::Map, 'mapping a node' do
   describe 'required' do
     let(:define) { -> { map :foo, to: :str, required: true } }
     it { expect(foo).to_not have_opts }
-    it { expect(map).to have_opts keys: { required: [:foo] } }
+    it { expect(map).to have_opts required: [:foo] }
   end
 
   describe 'unique' do
     let(:define) { -> { map :foo, to: :str, unique: true } }
     it { expect(foo).to_not have_opts }
-    it { expect(map).to have_opts keys: { unique: [:foo] } }
+    it { expect(map).to have_opts unique: [:foo] }
   end
 
   describe 'only' do
     let(:define) { -> { map :foo, to: :str, only: { os: 'linux' } } }
     it { expect(foo).to_not have_opts }
-    it { expect(map).to have_opts keys: { only: { foo: { os: ['linux'] } } } }
+    it { expect(map).to have_opts keys: { foo: { only: { os: ['linux'] } } } }
   end
 
   describe 'except' do
     let(:define) { -> { map :foo, to: :str, except: { os: 'linux' } } }
     it { expect(foo).to_not have_opts }
-    it { expect(map).to have_opts keys: { except: { foo: { os: ['linux'] } } } }
+    it { expect(map).to have_opts keys: { foo: { except: { os: ['linux'] } } } }
   end
 end

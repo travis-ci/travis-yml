@@ -7,7 +7,7 @@ describe Travis::Yml::Schema::Json::Map, 'mapping to any node' do
 
   describe 'alias' do
     before { map.map :foo, to: :str, alias: :bar }
-    it { should include aliases: { foo: [:bar] } }
+    it { should include keys: { foo: { aliases: [:bar] } } }
     it { should_not include alias: anything }
     it { should_not include properties: { foo: hash_including(alias: anything) } }
     it { should_not include properties: { foo: hash_including(aliases: anything) } }
@@ -57,13 +57,13 @@ describe Travis::Yml::Schema::Json::Map, 'mapping to any node' do
 
   describe 'only' do
     before { map.map :foo, to: :str, only: { os: 'linux' } }
-    it { should include only: { foo: { os: ['linux'] } } }
+    it { should include keys: { foo: { only: { os: ['linux'] } } } }
     it { should_not include properties: { foo: hash_including(only: anything) } }
   end
 
   describe 'except' do
     before { map.map :foo, to: :str, except: { os: 'linux' } }
-    it { should include except: { foo: { os: ['linux'] } } }
+    it { should include keys: { foo: { except: { os: ['linux'] } } } }
     it { should_not include properties: { foo: hash_including(except: anything) } }
   end
 end

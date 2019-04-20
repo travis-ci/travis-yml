@@ -34,6 +34,12 @@ module Travis
 
           attr_writer :namespace
 
+          def transform(type, opts = {})
+            opts = opts.merge(ivars)
+            node = Node[type].new(parent, opts)
+            node
+          end
+
           def initialize(parent = nil, opts = {})
             super(parent)
             @opts = {}
@@ -60,10 +66,13 @@ module Travis
           end
 
           def set(key, obj)
-            if opt?(key)
-              opt(key, obj)
-            else
-              ivar(key, obj)
+            opt?(key) ? opt(key, obj) : ivar(key, obj)
+          end
+
+          def unset(*keys)
+            keys.each do |key|
+              opt(key, nil)
+              ivar(key, nil)
             end
           end
 
@@ -113,7 +122,7 @@ module Travis
           end
 
           def is?(*types)
-            types.any? { |type| is_a?(type) }
+            types.any? { |type| is_a?(resolve(type)) }
           end
 
           def schema?
@@ -152,6 +161,10 @@ module Travis
             is_a?(Bool)
           end
 
+          def ref?
+            is_a?(Ref)
+          end
+
           def type
             self.class.type
           end
@@ -162,6 +175,10 @@ module Travis
 
           def examples
             @examples ||= []
+          end
+
+          def aliases?
+            aliases.any?
           end
 
           def aliases
@@ -219,6 +236,10 @@ module Travis
 
           def vars?
             @opts&.key?(:vars)
+          end
+
+          def ivars
+            super.map { |key, value| [key.to_s.sub('@', '').to_sym, value] }.to_h
           end
 
           # def full_key
