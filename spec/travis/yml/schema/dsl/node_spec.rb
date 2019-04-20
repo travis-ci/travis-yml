@@ -54,14 +54,14 @@ describe Travis::Yml::Schema::Dsl::Node do
 
   describe 'required' do
     before { dsl.required }
-    it { should be_required }
-    it { should_not have_opts }
+    xit { should be_required }
+    xit { should_not have_opts }
   end
 
   describe 'unique' do
     before { dsl.unique }
-    it { should be_unique }
-    it { should_not have_opts }
+    xit { should be_unique }
+    xit { should_not have_opts }
   end
 
   describe 'only' do

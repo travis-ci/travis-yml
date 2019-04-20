@@ -21,22 +21,14 @@ describe Travis::Yml::Schema::Def::Addon::Apt, 'structure' do
                   {
                     type: :array,
                     items: {
-                      anyOf: [
-                        {
-                          type: :object,
-                          properties: {
-                            name: {
-                              type: :string
-                            }
-                          },
-                          additionalProperties: false,
-                          prefix: :name,
-                          normal: true,
-                        },
-                        {
+                      type: :object,
+                      properties: {
+                        name: {
                           type: :string
                         }
-                      ]
+                      },
+                      additionalProperties: false,
+                      prefix: :name,
                     },
                     normal: true
                   },
@@ -79,13 +71,13 @@ describe Travis::Yml::Schema::Def::Addon::Apt, 'structure' do
     end
   end
 
-  describe 'schema' do
-    subject { described_class.new.schema }
-
-    it do
-      should eq(
-        '$ref': '#/definitions/addon/apt'
-      )
-    end
-  end
+  # describe 'schema' do
+  #   subject { described_class.new.schema }
+  #
+  #   it do
+  #     should eq(
+  #       '$ref': '#/definitions/addon/apt'
+  #     )
+  #   end
+  # end
 end

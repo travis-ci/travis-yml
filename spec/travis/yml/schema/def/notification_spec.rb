@@ -1,8 +1,9 @@
 describe Travis::Yml::Schema::Def::Notification::Notifications, 'structure' do
   describe 'definitions' do
     subject { Travis::Yml.schema[:definitions][:type][:notifications] }
+    # subject { described_class.new.definitions[:type][:notifications] }
 
-    # it { puts JSON.pretty_generate(subject) }
+    xit { puts JSON.pretty_generate(subject) }
 
     it do
       should eq(
@@ -44,6 +45,8 @@ describe Travis::Yml::Schema::Def::Notification::Notifications, 'structure' do
               },
             },
             additionalProperties: false,
+            normal: true,
+            prefix: :email,
             changes: [
               {
                 change: :enable,
@@ -53,7 +56,6 @@ describe Travis::Yml::Schema::Def::Notification::Notifications, 'structure' do
                 keys: [:on_success, :on_failure]
               }
             ],
-            normal: true,
             aliases: {
               email: [
                 :emails
@@ -62,7 +64,6 @@ describe Travis::Yml::Schema::Def::Notification::Notifications, 'structure' do
                 :webhook
               ]
             },
-            prefix: :email,
           },
           {
             '$ref': '#/definitions/notification/email'
@@ -72,13 +73,13 @@ describe Travis::Yml::Schema::Def::Notification::Notifications, 'structure' do
     end
   end
 
-  describe 'schema' do
-    subject { described_class.new.schema }
-
-    it do
-      should eq(
-        '$ref': '#/definitions/type/notifications'
-      )
-    end
-  end
+  # describe 'schema' do
+  #   subject { described_class.new.schema }
+  #
+  #   it do
+  #     should eq(
+  #       '$ref': '#/definitions/type/notifications'
+  #     )
+  #   end
+  # end
 end

@@ -159,8 +159,9 @@ module Travis
           instance_variables
         end
 
-        def ivar(key, obj = nil)
-          obj.nil? ? instance_variable_get("@#{key}") : instance_variable_set("@#{key}", obj)
+        def ivar(*args)
+          key, obj = *args
+          args.size == 1 ? instance_variable_get("@#{key}") : instance_variable_set("@#{key}", obj)
         end
 
         extend self

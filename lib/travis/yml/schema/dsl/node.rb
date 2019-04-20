@@ -26,16 +26,23 @@ module Travis
             # slowing the process down from ~0.12s to ~1.4s.
 
             def new(parent = nil, opts = {})
-              if registry_key && obj = Type::Node.exports[registry_key]
+              if registry_key && opts.empty? && obj = Type::Node.exports[registry_key]
                 raise if opts.any?
                 obj.export? ? ref(parent, obj) : super(parent, obj)
+                # super(parent, obj)
               else
-                obj = Type::Node[type].new(parent&.node, registry_key)
+                obj = Type::Node[type].new(parent&.node, id: registry_key)
                 node = super(parent, obj)
-                node.define
                 node.assign(opts)
-                node.defaults if node.export?
-                node
+                node.define
+
+                if node.export?
+                  obj = Type::Expand.apply(obj)
+                  Type::Node.exports[obj.id] = obj
+                  ref(node.parent, obj)
+                else
+                  node
+                end
               end
             end
 
@@ -56,20 +63,33 @@ module Travis
             parent.nil?
           end
 
-          def defaults
-            node.set :title, default_title unless node.title?
-            node.set :examples, default_examples unless node.examples?
+          def parent(*types)
+            return super() if types.empty?
+            return nil if root?
+            parent.is?(*types) ? parent : parent.parent(*types)
+          end
+
+          def is?(type)
+            is_a?(Node[type])
+          end
+
+          def enum?
+            is?(:enum)
+          end
+
+          def lang?
+            is?(:lang)
+          end
+
+          def map?
+            is?(:map)
+          end
+
+          def str?
+            is?(:str)
           end
 
           def define
-          end
-
-          def default_title
-            titleize(registry_key)
-          end
-
-          def default_examples
-            # strs = Examples.build(node).yaml
           end
 
           def assign(opts)
@@ -83,16 +103,16 @@ module Travis
             end
           end
 
-          def is?(type)
-            is_a?(Node[type])
-          end
-
-          def str?
-            is?(:str)
-          end
-
           def aliases(*aliases)
-            node.set :aliases, aliases.flatten
+            aliases = aliases.flatten
+            if node.enum?
+              node.set :aliases, aliases
+            elsif node.parent.map?
+              node.parent.set :keys, aliases: { node.key => aliases }
+            else
+              # gotta find the parent that is a map?
+              node.set :aliases, aliases
+            end
           end
           alias alias aliases
 
@@ -150,7 +170,11 @@ module Travis
           end
 
           def required(*)
-            node.set :required, true
+            if node.parent.map?
+              node.parent.set :keys, { required: [node.key] }
+            else
+              raise
+            end
           end
 
           def title(title)
@@ -164,7 +188,9 @@ module Travis
           def supports(key, opts = nil)
             opts = opts ? { key => opts } : key
             opts = symbolize(to_strs(opts))
-            node.set :support, opts
+            opts.each do |key, opts|
+              node.set :support, key => opts
+            end
           end
 
           def definitions

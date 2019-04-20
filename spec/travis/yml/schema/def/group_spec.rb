@@ -14,13 +14,13 @@ describe Travis::Yml::Schema::Def::Group, 'structure' do
     end
   end
 
-  describe 'schema' do
-    subject { described_class.new.schema }
-
-    it do
-      should eq(
-        '$ref': '#/definitions/type/group'
-      )
-    end
-  end
+  # describe 'schema' do
+  #   subject { described_class.new.schema }
+  #
+  #   it do
+  #     should eq(
+  #       '$ref': '#/definitions/type/group'
+  #     )
+  #   end
+  # end
 end

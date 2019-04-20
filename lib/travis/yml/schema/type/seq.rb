@@ -19,11 +19,16 @@ module Travis
           end
 
           def schemas
-            @schemas ||= [Str.new(self)]
+            # Str.new(self)
+            @schemas ||= []
           end
 
-          def support
-            merge(super, *schemas.map(&:support))
+          # def support
+          #   merge(super, *schemas.map(&:support))
+          # end
+
+          def to_h
+            Dump.new(self).to_h
           end
         end
       end

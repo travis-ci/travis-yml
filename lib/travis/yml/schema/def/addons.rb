@@ -26,8 +26,8 @@ module Travis
 
             type = Class.new(Dsl::Any) do
               def define
-                add :map, strict: false
-                add :bool
+                add :map,  normal: true, strict: false
+                add :bool, normal: true
               end
             end
 

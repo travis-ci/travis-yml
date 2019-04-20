@@ -96,13 +96,13 @@ describe Travis::Yml::Schema::Def::Notification::Flowdock, 'structure' do
     end
   end
 
-  describe 'schema' do
-    subject { described_class.new.schema }
-
-    it do
-      should eq(
-        '$ref': '#/definitions/notification/flowdock'
-      )
-    end
-  end
+  # describe 'schema' do
+  #   subject { described_class.new.schema }
+  #
+  #   it do
+  #     should eq(
+  #       '$ref': '#/definitions/notification/flowdock'
+  #     )
+  #   end
+  # end
 end

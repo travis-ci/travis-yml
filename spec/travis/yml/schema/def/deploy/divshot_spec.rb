@@ -61,13 +61,13 @@ describe Travis::Yml::Schema::Def::Deploy::Divshot, 'structure' do
     end
   end
 
-  describe 'schema' do
-    subject { described_class.new.schema }
-
-    it do
-      should eq(
-        '$ref': '#/definitions/deploy/divshot'
-      )
-    end
-  end
+  # describe 'schema' do
+  #   subject { described_class.new.schema }
+  #
+  #   it do
+  #     should eq(
+  #       '$ref': '#/definitions/deploy/divshot'
+  #     )
+  #   end
+  # end
 end

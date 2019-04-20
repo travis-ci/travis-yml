@@ -109,13 +109,13 @@ describe Travis::Yml::Schema::Def::Notification::Hipchat, 'structure' do
     end
   end
 
-  describe 'schema' do
-    subject { described_class.new.schema }
-
-    it do
-      should eq(
-        '$ref': '#/definitions/notification/hipchat'
-      )
-    end
-  end
+  # describe 'schema' do
+  #   subject { described_class.new.schema }
+  #
+  #   it do
+  #     should eq(
+  #       '$ref': '#/definitions/notification/hipchat'
+  #     )
+  #   end
+  # end
 end

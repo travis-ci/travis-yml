@@ -41,6 +41,7 @@ module Travis
             end
 
             def normals(schemas)
+              return schemas if normals?(schemas)
               schemas.map.with_index do |schema, ix|
                 ix == 0 ? normal(schema) : denormal(schema)
               end
@@ -63,7 +64,7 @@ module Travis
             end
 
             def opts
-              @opts ||= remap(node.opts.to_h)
+              @opts ||= compact(remap(node.opts.to_h))
             end
 
             def remap(opts)

@@ -33,13 +33,13 @@ describe Travis::Yml::Schema::Def::Groovy, 'structure' do
     end
   end
 
-  describe 'schema' do
-    subject { described_class.new.schema }
-
-    it do
-      should eq(
-        '$ref': '#/definitions/language/groovy'
-      )
-    end
-  end
+  # describe 'schema' do
+  #   subject { described_class.new.schema }
+  #
+  #   it do
+  #     should eq(
+  #       '$ref': '#/definitions/language/groovy'
+  #     )
+  #   end
+  # end
 end

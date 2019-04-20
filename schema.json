@@ -1063,56 +1063,48 @@
         "$id": "__connie__",
         "title": "  Connie",
         "type": "object",
-        "deprecated": true,
         "normal": true
       },
       "__amethyst__": {
         "$id": "__amethyst__",
         "title": "  Amethyst",
         "type": "object",
-        "deprecated": true,
         "normal": true
       },
       "__garnet__": {
         "$id": "__garnet__",
         "title": "  Garnet",
         "type": "object",
-        "deprecated": true,
         "normal": true
       },
       "__stevonnie__": {
         "$id": "__stevonnie__",
         "title": "  Stevonnie",
         "type": "object",
-        "deprecated": true,
         "normal": true
       },
       "__opal__": {
         "$id": "__opal__",
         "title": "  Opal",
         "type": "object",
-        "deprecated": true,
         "normal": true
       },
       "__sardonyx__": {
         "$id": "__sardonyx__",
         "title": "  Sardonyx",
         "type": "object",
-        "deprecated": true,
         "normal": true
       },
       "__onion__": {
         "$id": "__onion__",
         "title": "  Onion",
         "type": "object",
-        "deprecated": true,
         "normal": true
       },
       "__cookiecat__": {
         "$id": "__cookiecat__",
         "title": "  Cookiecat",
         "type": "object",
-        "deprecated": true,
         "normal": true
       }
     },
@@ -1244,23 +1236,6 @@
         "type": "string",
         "downcase": true
       },
-      "services": {
-        "$id": "services",
-        "title": "Services",
-        "anyOf": [
-          {
-            "type": "array",
-            "items": {
-              "$ref": "#/definitions/type/service"
-            },
-            "normal": true
-          },
-          {
-            "$ref": "#/definitions/type/service"
-          }
-        ],
-        "normal": true
-      },
       "service": {
         "$id": "service",
         "title": "Service",
@@ -1303,12 +1278,32 @@
           }
         }
       },
+      "services": {
+        "$id": "services",
+        "title": "Services",
+        "anyOf": [
+          {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/type/service"
+            },
+            "normal": true
+          },
+          {
+            "$ref": "#/definitions/type/service"
+          }
+        ]
+      },
       "deploy_branches": {
         "$id": "deploy_branches",
         "title": "Deploy Branches",
         "anyOf": [
           {
-            "$ref": "#/definitions/strs"
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "normal": true
           }
         ]
       },
@@ -1349,7 +1344,8 @@
               {
                 "$ref": "#/definitions/type/languages"
               }
-            ]
+            ],
+            "normal": true
           },
           {
             "$ref": "#/definitions/type/deploy_branches"
@@ -1386,10 +1382,12 @@
               ".*": {
                 "type": "string"
               }
-            }
+            },
+            "normal": true
           },
           {
-            "type": "string"
+            "type": "string",
+            "normal": true
           }
         ]
       },
@@ -1527,131 +1525,7 @@
               ],
               "normal": true,
               "detect": "provider"
-            },
-            "normal": true
-          },
-          {
-            "$ref": "#/definitions/deploy/anynines"
-          },
-          {
-            "$ref": "#/definitions/deploy/appfog"
-          },
-          {
-            "$ref": "#/definitions/deploy/atlas"
-          },
-          {
-            "$ref": "#/definitions/deploy/azure_web_apps"
-          },
-          {
-            "$ref": "#/definitions/deploy/bintray"
-          },
-          {
-            "$ref": "#/definitions/deploy/bitballoon"
-          },
-          {
-            "$ref": "#/definitions/deploy/bluemixcf"
-          },
-          {
-            "$ref": "#/definitions/deploy/boxfuse"
-          },
-          {
-            "$ref": "#/definitions/deploy/catalyze"
-          },
-          {
-            "$ref": "#/definitions/deploy/chef_supermarket"
-          },
-          {
-            "$ref": "#/definitions/deploy/cloud66"
-          },
-          {
-            "$ref": "#/definitions/deploy/cloudcontrol"
-          },
-          {
-            "$ref": "#/definitions/deploy/cloudfiles"
-          },
-          {
-            "$ref": "#/definitions/deploy/cloudfoundry"
-          },
-          {
-            "$ref": "#/definitions/deploy/codedeploy"
-          },
-          {
-            "$ref": "#/definitions/deploy/deis"
-          },
-          {
-            "$ref": "#/definitions/deploy/divshot"
-          },
-          {
-            "$ref": "#/definitions/deploy/elasticbeanstalk"
-          },
-          {
-            "$ref": "#/definitions/deploy/engineyard"
-          },
-          {
-            "$ref": "#/definitions/deploy/firebase"
-          },
-          {
-            "$ref": "#/definitions/deploy/gae"
-          },
-          {
-            "$ref": "#/definitions/deploy/gcs"
-          },
-          {
-            "$ref": "#/definitions/deploy/hackage"
-          },
-          {
-            "$ref": "#/definitions/deploy/heroku"
-          },
-          {
-            "$ref": "#/definitions/deploy/lambda"
-          },
-          {
-            "$ref": "#/definitions/deploy/launchpad"
-          },
-          {
-            "$ref": "#/definitions/deploy/modulus"
-          },
-          {
-            "$ref": "#/definitions/deploy/npm"
-          },
-          {
-            "$ref": "#/definitions/deploy/openshift"
-          },
-          {
-            "$ref": "#/definitions/deploy/opsworks"
-          },
-          {
-            "$ref": "#/definitions/deploy/packagecloud"
-          },
-          {
-            "$ref": "#/definitions/deploy/pages"
-          },
-          {
-            "$ref": "#/definitions/deploy/puppetforge"
-          },
-          {
-            "$ref": "#/definitions/deploy/pypi"
-          },
-          {
-            "$ref": "#/definitions/deploy/releases"
-          },
-          {
-            "$ref": "#/definitions/deploy/rubygems"
-          },
-          {
-            "$ref": "#/definitions/deploy/s3"
-          },
-          {
-            "$ref": "#/definitions/deploy/scalingo"
-          },
-          {
-            "$ref": "#/definitions/deploy/script"
-          },
-          {
-            "$ref": "#/definitions/deploy/surge"
-          },
-          {
-            "$ref": "#/definitions/deploy/testfairy"
+            }
           }
         ],
         "normal": true
@@ -1703,20 +1577,24 @@
           "sonarqube": {
             "anyOf": [
               {
-                "type": "object"
+                "type": "object",
+                "normal": true
               },
               {
-                "type": "boolean"
+                "type": "boolean",
+                "normal": true
               }
             ]
           },
           "srcclr": {
             "anyOf": [
               {
-                "type": "object"
+                "type": "object",
+                "normal": true
               },
               {
-                "type": "boolean"
+                "type": "boolean",
+                "normal": true
               }
             ]
           },
@@ -2009,8 +1887,7 @@
           {
             "$ref": "#/definitions/type/import"
           }
-        ],
-        "normal": true
+        ]
       },
       "language": {
         "$id": "language",
@@ -2237,8 +2114,7 @@
           {
             "$ref": "#/definitions/type/os"
           }
-        ],
-        "normal": true
+        ]
       },
       "arch": {
         "$id": "arch",
@@ -2278,8 +2154,7 @@
           {
             "$ref": "#/definitions/type/arch"
           }
-        ],
-        "normal": true
+        ]
       },
       "dist": {
         "$id": "dist",
@@ -2432,7 +2307,8 @@
               }
             },
             "additionalProperties": false,
-            "prefix": "name"
+            "prefix": "name",
+            "normal": true
           },
           {
             "type": "string"
@@ -2485,12 +2361,6 @@
               "arch": {
                 "os": [
                   "linux"
-                ]
-              },
-              "compiler": {
-                "language": [
-                  "c",
-                  "cpp"
                 ]
               }
             }
@@ -2567,8 +2437,7 @@
           {
             "$ref": "#/definitions/type/stage"
           }
-        ],
-        "normal": true
+        ]
       },
       "notification_frequency": {
         "$id": "notification_frequency",
@@ -2709,22 +2578,14 @@
                   {
                     "type": "array",
                     "items": {
-                      "anyOf": [
-                        {
-                          "type": "object",
-                          "properties": {
-                            "name": {
-                              "type": "string"
-                            }
-                          },
-                          "additionalProperties": false,
-                          "normal": true,
-                          "prefix": "name"
-                        },
-                        {
+                      "type": "object",
+                      "properties": {
+                        "name": {
                           "type": "string"
                         }
-                      ]
+                      },
+                      "additionalProperties": false,
+                      "prefix": "name"
                     },
                     "normal": true
                   },
@@ -2736,14 +2597,12 @@
                       }
                     },
                     "additionalProperties": false,
-                    "normal": true,
                     "prefix": "name"
                   },
                   {
                     "type": "string"
                   }
-                ],
-                "normal": true
+                ]
               },
               "dist": {
                 "type": "string"
@@ -2914,6 +2773,7 @@
                 },
                 "additionalProperties": false,
                 "prefix": "name",
+                "normal": true,
                 "required": [
                   "name"
                 ]
@@ -3013,28 +2873,20 @@
           {
             "type": "array",
             "items": {
-              "anyOf": [
-                {
-                  "type": "object",
-                  "properties": {
-                    "name": {
-                      "type": "string"
-                    },
-                    "classic": {
-                      "type": "boolean"
-                    },
-                    "channel": {
-                      "type": "string"
-                    }
-                  },
-                  "additionalProperties": false,
-                  "normal": true,
-                  "prefix": "name"
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
                 },
-                {
+                "classic": {
+                  "type": "boolean"
+                },
+                "channel": {
                   "type": "string"
                 }
-              ]
+              },
+              "additionalProperties": false,
+              "prefix": "name"
             },
             "normal": true
           },
@@ -3052,14 +2904,12 @@
               }
             },
             "additionalProperties": false,
-            "normal": true,
             "prefix": "name"
           },
           {
             "type": "string"
           }
-        ],
-        "normal": true
+        ]
       }
     },
     "deploy": {
@@ -6526,12 +6376,6 @@
         "arch": {
           "os": [
             "linux"
-          ]
-        },
-        "compiler": {
-          "language": [
-            "c",
-            "cpp"
           ]
         }
       },

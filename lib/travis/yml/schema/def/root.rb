@@ -26,6 +26,8 @@ module Travis
           def define
             title 'JSON schema for Travis CI configuration files'
 
+            include :job
+
             map    :version
             map    :import,         to: :imports
             map    :language
@@ -42,8 +44,6 @@ module Travis
             map    :conditions,     to: :conditions #, default: :v1
             map    :filter_secrets, to: :bool
             map    :trace,          to: :bool
-
-            include :job
           end
         end
       end

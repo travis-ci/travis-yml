@@ -25,6 +25,10 @@ module Travis
           def schemas
             @schemas ||= []
           end
+
+          def to_h
+            Dump.new(self).to_h
+          end
         end
       end
     end

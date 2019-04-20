@@ -79,13 +79,13 @@ describe Travis::Yml::Schema::Def::Deploy::Opsworks, 'structure' do
     end
   end
 
-  describe 'schema' do
-    subject { described_class.new.schema }
-
-    it do
-      should eq(
-        '$ref': '#/definitions/deploy/opsworks'
-      )
-    end
-  end
+  # describe 'schema' do
+  #   subject { described_class.new.schema }
+  #
+  #   it do
+  #     should eq(
+  #       '$ref': '#/definitions/deploy/opsworks'
+  #     )
+  #   end
+  # end
 end

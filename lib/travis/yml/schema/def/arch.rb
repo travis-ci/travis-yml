@@ -12,7 +12,7 @@ module Travis
           def define
             normal
             type Arch
-            supports :only, os: :linux
+            # supports :only, os: :linux
             export
           end
         end

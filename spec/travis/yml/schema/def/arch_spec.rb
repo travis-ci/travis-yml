@@ -2,6 +2,7 @@ describe Travis::Yml::Schema::Def::Archs, 'structure' do
   describe 'definitions' do
     describe 'archs' do
       subject { Travis::Yml.schema[:definitions][:type][:archs] }
+      # subject { described_class.new.definitions[:type][:archs] }
 
       # it { puts JSON.pretty_generate(subject) }
 
@@ -57,13 +58,13 @@ describe Travis::Yml::Schema::Def::Archs, 'structure' do
     end
   end
 
-  describe 'schema' do
-    subject { described_class.new.schema }
-
-    it do
-      should eq(
-        '$ref': '#/definitions/type/archs'
-      )
-    end
-  end
+  # describe 'schema' do
+  #   subject { described_class.new(nil, export: true).schema }
+  #
+  #   it do
+  #     should eq(
+  #       '$ref': '#/definitions/type/archs'
+  #     )
+  #   end
+  # end
 end

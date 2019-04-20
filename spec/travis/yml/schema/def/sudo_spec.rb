@@ -19,13 +19,13 @@ describe Travis::Yml::Schema::Def::Sudo, 'structure' do
     end
   end
 
-  describe 'schema' do
-    subject { described_class.new.schema }
-
-    it do
-      should eq(
-        '$ref': '#/definitions/type/sudo'
-      )
-    end
-  end
+  # describe 'schema' do
+  #   subject { described_class.new.schema }
+  #
+  #   it do
+  #     should eq(
+  #       '$ref': '#/definitions/type/sudo'
+  #     )
+  #   end
+  # end
 end

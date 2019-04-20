@@ -12,12 +12,6 @@ describe Travis::Yml::Schema::Def::Notification::Slack, 'structure' do
           {
             type: :object,
             properties: {
-              enabled: {
-                type: :boolean
-              },
-              disabled: {
-                type: :boolean
-              },
               rooms: {
                 '$ref': '#/definitions/secures'
               },
@@ -77,6 +71,12 @@ describe Travis::Yml::Schema::Def::Notification::Slack, 'structure' do
                   }
                 ]
               },
+              enabled: {
+                type: :boolean
+              },
+              disabled: {
+                type: :boolean
+              },
               on_pull_requests: {
                 type: :boolean
               },
@@ -99,13 +99,13 @@ describe Travis::Yml::Schema::Def::Notification::Slack, 'structure' do
     end
   end
 
-  describe 'schema' do
-    subject { described_class.new.schema }
-
-    it do
-      should eq(
-        '$ref': '#/definitions/notification/slack'
-      )
-    end
-  end
+  # describe 'schema' do
+  #   subject { described_class.new.schema }
+  #
+  #   it do
+  #     should eq(
+  #       '$ref': '#/definitions/notification/slack'
+  #     )
+  #   end
+  # end
 end

@@ -1,7 +1,5 @@
 describe Travis::Yml::Schema::Def::Deploy::Deploy, 'structure' do
   describe 'definitions' do
-    # it { puts JSON.pretty_generate(subject) }
-
     # describe 'deploys' do
     #   subject { Travis::Yml::Schema::Def::Deploy::Deploys.new(nil, {}).definitions[:type][:deploys] }
     #   it { puts JSON.pretty_generate(subject)[0..400] }
@@ -9,6 +7,8 @@ describe Travis::Yml::Schema::Def::Deploy::Deploy, 'structure' do
 
     describe 'deploy_conditions' do
       subject { Travis::Yml.schema[:definitions][:type][:deploy_conditions] }
+
+      # it { puts JSON.pretty_generate(subject) }
 
       it do
         should eq(
@@ -36,8 +36,8 @@ describe Travis::Yml::Schema::Def::Deploy::Deploy, 'structure' do
                       type: :boolean
                     }
                   },
-                  normal: true,
                   prefix: :branch,
+                  normal: true,
                   aliases: {
                     branch: [
                       :branches
@@ -89,13 +89,13 @@ describe Travis::Yml::Schema::Def::Deploy::Deploy, 'structure' do
                 '$ref': '#/definitions/type/deploy_edge'
               },
             },
+            prefix: :provider,
+            normal: true,
             changes: [
               {
                 change: :enable
               }
             ],
-            prefix: :provider,
-            normal: true,
             required: [:provider]
           },
           {

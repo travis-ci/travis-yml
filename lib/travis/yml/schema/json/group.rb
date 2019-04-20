@@ -13,7 +13,9 @@ module Travis
           def to_h
             schemas = jsons(node).map(&:schema)
             schemas = schemas.map { |schema| schema.key?(key) ? schema[key] : schema }
-            compact({ key => schemas.flatten.uniq }.merge(opts))
+            schemas = schemas.flatten.uniq
+            # schemas = normals(schemas) if type == :any # too aggressive
+            compact({ key => schemas }.merge(opts))
           end
         end
 

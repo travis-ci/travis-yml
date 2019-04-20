@@ -43,6 +43,10 @@ module Travis
           def strict?
             false?(@strict) ? false : true
           end
+
+          def to_h
+            Dump.new(self).to_h
+          end
         end
       end
     end

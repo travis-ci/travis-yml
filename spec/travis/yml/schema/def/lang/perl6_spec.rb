@@ -26,13 +26,13 @@ describe Travis::Yml::Schema::Def::Perl6, 'structure' do
     end
   end
 
-  describe 'schema' do
-    subject { described_class.new.schema }
-
-    it do
-      should eq(
-        '$ref': '#/definitions/language/perl6'
-      )
-    end
-  end
+  # describe 'schema' do
+  #   subject { described_class.new.schema }
+  #
+  #   it do
+  #     should eq(
+  #       '$ref': '#/definitions/language/perl6'
+  #     )
+  #   end
+  # end
 end

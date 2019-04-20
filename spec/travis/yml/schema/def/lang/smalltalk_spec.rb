@@ -42,13 +42,13 @@ describe Travis::Yml::Schema::Def::Smalltalk, 'structure' do
     end
   end
 
-  describe 'schema' do
-    subject { described_class.new.schema }
-
-    it do
-      should eq(
-        '$ref': '#/definitions/language/smalltalk'
-      )
-    end
-  end
+  # describe 'schema' do
+  #   subject { described_class.new.schema }
+  #
+  #   it do
+  #     should eq(
+  #       '$ref': '#/definitions/language/smalltalk'
+  #     )
+  #   end
+  # end
 end
