@@ -14,13 +14,13 @@ describe Travis::Yml::Schema::Def::Conditions, 'structure' do
     end
   end
 
-  describe 'schema' do
-    subject { described_class.new.schema }
-
-    it do
-      should eq(
-        '$ref': '#/definitions/type/conditions'
-      )
-    end
-  end
+  # describe 'schema' do
+  #   subject { described_class.new.schema }
+  #
+  #   it do
+  #     should eq(
+  #       '$ref': '#/definitions/type/conditions'
+  #     )
+  #   end
+  # end
 end

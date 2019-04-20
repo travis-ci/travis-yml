@@ -20,7 +20,7 @@ module Travis
           register :service
 
           def define
-             downcase
+            downcase
 
             value :cassandra
             value :couchdb

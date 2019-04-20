@@ -18,33 +18,6 @@ describe Travis::Yml::Schema::Json::Map do
     end
   end
 
-  describe 'prefix (transforms to anyOf)' do
-    let(:opts) { { prefix: :foo } }
-
-    before { node.map :foo, to: :str }
-
-    it do
-      should have_schema(
-        anyOf: [
-          {
-            type: :object,
-            additionalProperties: false,
-            properties: {
-              foo: {
-                type: :string
-              }
-            },
-            prefix: :foo,
-            normal: true
-          },
-          {
-            type: :string
-          }
-        ]
-      )
-    end
-  end
-
   describe 'strict' do
     describe 'default' do
       it do
@@ -109,8 +82,5 @@ describe Travis::Yml::Schema::Json::Map do
         unique: [:foo]
       )
     end
-  end
-
-  describe 'with an include (transforms to allOf)' do
   end
 end

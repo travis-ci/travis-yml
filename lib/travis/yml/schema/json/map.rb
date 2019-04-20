@@ -32,19 +32,22 @@ module Travis
             }
             schema = compact(schema.merge(opts))
             schema = includes(schema) if node.includes.any?
-            schema = prefix(schema) if node.prefix?
+            # schema = prefix(schema) if node.prefix?
             schema
           end
 
           private
 
             def includes(schema)
-              { allOf: [schema, *jsons(node.includes).map(&:schema)] }
+              compact(
+                allOf: [schema, *jsons(node.includes).map(&:schema)],
+                normal: schema[:normal]
+              )
             end
 
-            def prefix(schema)
-              { anyOf: [normal(schema), denormal(json(node[node.prefix]).schema)] }
-            end
+            # def prefix(schema)
+            #   { anyOf: normals([schema, json(node[node.prefix]).schema]) }
+            # end
 
             def properties
               map = except(node, *patterns)

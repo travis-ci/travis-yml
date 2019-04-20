@@ -34,13 +34,13 @@ describe Travis::Yml::Schema::Def::Php, 'structure' do
     end
   end
 
-  describe 'schema' do
-    subject { described_class.new.schema }
-
-    it do
-      should eq(
-        '$ref': '#/definitions/language/php'
-      )
-    end
-  end
+  # describe 'schema' do
+  #   subject { described_class.new.schema }
+  #
+  #   it do
+  #     should eq(
+  #       '$ref': '#/definitions/language/php'
+  #     )
+  #   end
+  # end
 end

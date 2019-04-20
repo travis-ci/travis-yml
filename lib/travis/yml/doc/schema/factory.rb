@@ -84,7 +84,7 @@ module Travis
 
             def seq(schema)
               node = Seq.new(normalize(schema))
-              node.schema = build(schema[:items])
+              node.schema = build(schema[:items]) if schema[:items]
               node
             end
 

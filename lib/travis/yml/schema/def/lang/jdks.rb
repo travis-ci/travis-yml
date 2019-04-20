@@ -10,6 +10,7 @@ module Travis
           register :jdks
 
           def define
+            supports :except, os: :osx
             type :jdk
             super
           end
@@ -19,7 +20,6 @@ module Travis
           register :jdk
 
           def define
-            supports :except, os: :osx
           end
         end
       end

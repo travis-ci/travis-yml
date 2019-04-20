@@ -92,13 +92,13 @@ describe Travis::Yml::Schema::Def::Deploy::Codedeploy, 'structure' do
     end
   end
 
-  describe 'schema' do
-    subject { described_class.new.schema }
-
-    it do
-      should eq(
-        '$ref': '#/definitions/deploy/codedeploy'
-      )
-    end
-  end
+  # describe 'schema' do
+  #   subject { described_class.new.schema }
+  #
+  #   it do
+  #     should eq(
+  #       '$ref': '#/definitions/deploy/codedeploy'
+  #     )
+  #   end
+  # end
 end

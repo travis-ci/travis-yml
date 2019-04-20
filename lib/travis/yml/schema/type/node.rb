@@ -3,13 +3,14 @@ require 'forwardable'
 require 'registry'
 require 'travis/yml/support/memoize'
 require 'travis/yml/schema/type/dump'
+require 'travis/yml/schema/type/expand'
 require 'travis/yml/schema/type/opts'
 
 module Travis
   module Yml
     module Schema
       module Type
-        class Node < Obj.new(parent: nil, id: nil)
+        class Node < Obj.new(parent: nil)
           extend Forwardable
           include Memoize, Opts, Registry
 
@@ -33,9 +34,16 @@ module Travis
 
           attr_writer :namespace
 
-          def initialize(*)
-            super
+          def initialize(parent = nil, opts = {})
+            super(parent)
             @opts = {}
+            assign(opts)
+          end
+
+          def assign(opts)
+            opts.each do |key, value|
+              set(key, value)
+            end
           end
 
           def namespace
@@ -51,7 +59,7 @@ module Travis
             @opts&.any?
           end
 
-          def set(key, obj = nil)
+          def set(key, obj)
             if opt?(key)
               opt(key, obj)
             else
@@ -70,7 +78,7 @@ module Travis
             when Array
               @opts[key] = (@opts[key] || []).concat(obj).uniq if obj.any?
             else
-              @opts[key] = obj
+              obj.nil? ? @opts.delete(key) : @opts[key] = obj
             end
           end
 
@@ -89,12 +97,23 @@ module Travis
             self.class.resolve(type)
           end
 
+          attr_reader :id
+
           def root
             parent ? parent.root : self
           end
 
           def root?
             parent.nil?
+          end
+
+          def parent(*types)
+            return super() if types.empty?
+            is?(*types) ? self : parent.parent(*types)
+          end
+
+          def is?(*types)
+            types.any? { |type| is_a?(type) }
           end
 
           def schema?
@@ -158,8 +177,8 @@ module Travis
           end
 
           def export
-            Node.exports[id] = self
             @export = true
+            @title = titleize(id) unless title # hmmmm.
           end
 
           def export?
@@ -198,6 +217,10 @@ module Travis
             !!@unique
           end
 
+          def vars?
+            @opts&.key?(:vars)
+          end
+
           # def full_key
           #   root? ? :root : [parent.full_key, id].join('.').split('.').uniq.join('.')
           # end
@@ -211,8 +234,12 @@ module Travis
           end
 
           def json
-            # puts '', caller[1..10] if caller.any? { |line| line.include?('json') && !line.include?('_spec.rb') }
-            Json::Node[type].new(self)
+            node = Expand.apply(self)
+            Json::Node[node.type].new(node)
+          end
+
+          def to_h
+            Dump.new(self).to_h
           end
 
           def dump

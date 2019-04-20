@@ -74,9 +74,10 @@ module Travis
                 def define
                   strict false
                   map '.*', to: :str
+                  normal
                 end
               }
-              add :str
+              add :str, normal: true
 
               export
             end

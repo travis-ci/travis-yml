@@ -199,13 +199,13 @@ describe Travis::Yml::Schema::Def::R, 'structure' do
     end
   end
 
-  describe 'schema' do
-    subject { described_class.new.schema }
-
-    it do
-      should eq(
-        '$ref': '#/definitions/language/r'
-      )
-    end
-  end
+  # describe 'schema' do
+  #   subject { described_class.new.schema }
+  #
+  #   it do
+  #     should eq(
+  #       '$ref': '#/definitions/language/r'
+  #     )
+  #   end
+  # end
 end

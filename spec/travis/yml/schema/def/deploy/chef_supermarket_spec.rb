@@ -64,13 +64,13 @@ describe Travis::Yml::Schema::Def::Deploy::ChefSupermarket, 'structure' do
     end
   end
 
-  describe 'schema' do
-    subject { described_class.new.schema }
-
-    it do
-      should eq(
-        '$ref': '#/definitions/deploy/chef_supermarket'
-      )
-    end
-  end
+  # describe 'schema' do
+  #   subject { described_class.new.schema }
+  #
+  #   it do
+  #     should eq(
+  #       '$ref': '#/definitions/deploy/chef_supermarket'
+  #     )
+  #   end
+  # end
 end

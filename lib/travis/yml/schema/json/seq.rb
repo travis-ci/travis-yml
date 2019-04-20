@@ -19,41 +19,20 @@ module Travis
           private
 
             def to_h
-              type = detect(:str, :secure)
-              type ? ref("#{type}s", opts) : seq
-            end
-
-            def seq
               schema = { type: :array, items: items }
               schema = compact(schema.merge(opts))
-              wrap(schema)
-            end
-
-            def wrap(schema)
-              schemas = [schema] + jsons(node).map(&:schema)
-              schemas = normals(flatten(schemas))
-              any(schemas, opts)
             end
 
             def items
-              items = jsons(node).map(&:schema)
-              items.size > 1 ?  any(normals(items)) : items.first
-            end
-
-            def flatten(schemas)
-              schemas.map { |schema| schema.key?(:anyOf) ? schema[:anyOf] : schema }.flatten
+              case node.size
+              when 0 then { type: :string }
+              when 1 then json(node.first).schema
+              else any(jsons(node).map(&:schema))
+              end
             end
 
             def any(schemas, opts = {})
-              { anyOf: schemas }.merge(except(opts, :normal))
-            end
-
-            def detect(*types)
-              types.detect { |type| all?(type) }
-            end
-
-            def all?(type)
-              node.all?(&:"#{type}?") && node.none?(&:enum?) && node.none?(&:opts?)
+              { anyOf: normals(schemas) }.merge(except(opts, :normal))
             end
         end
       end

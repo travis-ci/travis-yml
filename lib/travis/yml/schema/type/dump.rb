@@ -18,7 +18,7 @@ module Travis
             ai(to_h(node))
           end
 
-          def to_h(node)
+          def to_h(node = self.node)
             send(node.type, node)
           end
 
@@ -26,9 +26,12 @@ module Travis
             obj(node).merge(map: node.map { |key, node| [key, to_h(node)] }.to_h)
           end
 
+          alias schema map
+
           def group(node)
             obj(node).merge(schemas: node.map { |node| to_h(node) })
           end
+
           alias any group
           alias all group
           alias one group
@@ -37,9 +40,14 @@ module Travis
             obj(node).merge(schemas: node.map { |node| to_h(node) })
           end
 
-          def obj(node)
-            compact( id: node.id, type: node.type, key: node.key, opts: node.opts)
+          def ref(node)
+            obj(node).merge(ref: node.ref)
           end
+
+          def obj(node)
+            compact({ type: node.type, export: node.export? ? true : nil }.merge(node.opts))
+          end
+
           alias secure obj
           alias enum obj
           alias str obj

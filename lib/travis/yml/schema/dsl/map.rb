@@ -25,13 +25,22 @@ module Travis
 
           def map(key, opts = {})
             type = opts[:to] || key
-            opts = except(opts, :to).merge(key: key)
+            opts = { key: key }.merge(except(opts, :to))
 
-            child = Node.build(self, type)
-            mapping = Mapping.new(key, child, opts).tap(&:define)
-            node[key] = mapping.node
+            node[key] = Node.build(self, type, except(opts, :required, :only, :except)).node
 
-            node.set :keys, mapping.key_opts
+            # ugh.
+
+            obj = node[key]
+            obj = obj.lookup if obj.type == :ref
+
+            node.set :keys, unique: [key] if opts[:unique] || obj.unique?
+            node.set :keys, required: [key] if opts[:required] || obj.required?
+            node.set :keys, only: { key => to_strs(opts[:only]) } if opts[:only]
+            node.set :keys, except: { key => to_strs(opts[:except]) } if opts[:except]
+            obj.support.each do |type, opts|
+              node.set :keys, type => { key => to_strs(opts) }
+            end
           end
 
           def include(*types)

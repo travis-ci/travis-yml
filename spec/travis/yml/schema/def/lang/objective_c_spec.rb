@@ -95,13 +95,13 @@ describe Travis::Yml::Schema::Def::ObjectiveC, 'structure' do
     end
   end
 
-  describe 'schema' do
-    subject { described_class.new.schema }
-
-    it do
-      should eq(
-        '$ref': '#/definitions/language/objective-c'
-      )
-    end
-  end
+  # describe 'schema' do
+  #   subject { described_class.new.schema }
+  #
+  #   it do
+  #     should eq(
+  #       '$ref': '#/definitions/language/objective-c'
+  #     )
+  #   end
+  # end
 end

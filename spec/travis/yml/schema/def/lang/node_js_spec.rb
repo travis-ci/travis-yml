@@ -39,13 +39,13 @@ describe Travis::Yml::Schema::Def::NodeJs, 'structure' do
     end
   end
 
-  describe 'schema' do
-    subject { described_class.new.schema }
-
-    it do
-      should eq(
-        '$ref': '#/definitions/language/node_js'
-      )
-    end
-  end
+  # describe 'schema' do
+  #   subject { described_class.new.schema }
+  #
+  #   it do
+  #     should eq(
+  #       '$ref': '#/definitions/language/node_js'
+  #     )
+  #   end
+  # end
 end

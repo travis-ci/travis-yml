@@ -22,11 +22,19 @@ module Travis
         end
 
         class Lang < Dsl::Lang
+          # Collecting these values globally less than ideal, but at the moment
+          # i don't see a better way to communicate language names, aliases,
+          # and options from the Lang classes to the Language class.
+          def self.values(other = nil)
+            other ? @values = Helper::Obj.merge(values, other) : @values ||= {}
+          end
+
           def define
             namespace :language
             normal
             strict false
             export
+            super
           end
         end
 
@@ -40,25 +48,10 @@ module Travis
             default :ruby,          only: { os: [:linux, :windows] }
             default :'objective-c', only: { os: [:osx] }
 
-            langs.each do |name, opts|
-              value name, opts
-            end
+            value *Lang.values.map { |name, opts| opts.merge(value: name) }
 
             export
           end
-
-          def langs
-            Dsl::Node.registry.values.map do |const|
-              next unless const < Lang
-              # hmmm.
-              lang = Dsl::Node.build(self, const).node
-              opts = compact(
-                aliases: lang.aliases,
-                deprecated: lang.deprecated? ? true : nil,
-                flags: lang.flags
-              )
-              [lang.id, opts]
-            end.compact.to_h
           end
         end
       end

@@ -28,13 +28,13 @@ describe Travis::Yml::Schema::Def::Addon::CodeClimate, 'structure' do
     end
   end
 
-  describe 'schema' do
-    subject { described_class.new.schema }
-
-    it do
-      should eq(
-        '$ref': '#/definitions/addon/code_climate'
-      )
-    end
-  end
+  # describe 'schema' do
+  #   subject { described_class.new.schema }
+  #
+  #   it do
+  #     should eq(
+  #       '$ref': '#/definitions/addon/code_climate'
+  #     )
+  #   end
+  # end
 end

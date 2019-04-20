@@ -41,13 +41,13 @@ describe Travis::Yml::Schema::Def::Clojure, 'structure' do
     end
   end
 
-  describe 'schema' do
-    subject { described_class.new.schema }
-
-    it do
-      should eq(
-        '$ref': '#/definitions/language/clojure'
-      )
-    end
-  end
+  # describe 'schema' do
+  #   subject { described_class.new.schema }
+  #
+  #   it do
+  #     should eq(
+  #       '$ref': '#/definitions/language/clojure'
+  #     )
+  #   end
+  # end
 end

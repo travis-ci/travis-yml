@@ -17,6 +17,10 @@ module Travis
           def ref
             @ref || "#{namespace}/#{id}"
           end
+
+          def lookup
+            Type::Node.exports[id]
+          end
         end
       end
     end

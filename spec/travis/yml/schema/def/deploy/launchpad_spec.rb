@@ -67,13 +67,13 @@ describe Travis::Yml::Schema::Def::Deploy::Launchpad, 'structure' do
     end
   end
 
-  describe 'schema' do
-    subject { described_class.new.schema }
-
-    it do
-      should eq(
-        '$ref': '#/definitions/deploy/launchpad'
-      )
-    end
-  end
+  # describe 'schema' do
+  #   subject { described_class.new.schema }
+  #
+  #   it do
+  #     should eq(
+  #       '$ref': '#/definitions/deploy/launchpad'
+  #     )
+  #   end
+  # end
 end

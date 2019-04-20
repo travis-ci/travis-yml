@@ -70,13 +70,13 @@ describe Travis::Yml::Schema::Def::Deploy::Deis, 'structure' do
     end
   end
 
-  describe 'schema' do
-    subject { described_class.new.schema }
-
-    it do
-      should eq(
-        '$ref': '#/definitions/deploy/deis'
-      )
-    end
-  end
+  # describe 'schema' do
+  #   subject { described_class.new.schema }
+  #
+  #   it do
+  #     should eq(
+  #       '$ref': '#/definitions/deploy/deis'
+  #     )
+  #   end
+  # end
 end

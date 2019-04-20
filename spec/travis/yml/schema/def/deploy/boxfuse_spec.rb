@@ -82,13 +82,13 @@ describe Travis::Yml::Schema::Def::Deploy::Boxfuse, 'structure' do
     end
   end
 
-  describe 'schema' do
-    subject { described_class.new.schema }
-
-    it do
-      should eq(
-        '$ref': '#/definitions/deploy/boxfuse'
-      )
-    end
-  end
+  # describe 'schema' do
+  #   subject { described_class.new.schema }
+  #
+  #   it do
+  #     should eq(
+  #       '$ref': '#/definitions/deploy/boxfuse'
+  #     )
+  #   end
+  # end
 end

@@ -99,13 +99,13 @@ describe Travis::Yml::Schema::Def::Env, 'structure' do
     end
   end
 
-  describe 'schema' do
-    subject { described_class.new.schema }
-
-    it do
-      should eq(
-        '$ref': '#/definitions/type/env'
-      )
-    end
-  end
+  # describe 'schema' do
+  #   subject { described_class.new.schema }
+  #
+  #   it do
+  #     should eq(
+  #       '$ref': '#/definitions/type/env'
+  #     )
+  #   end
+  # end
 end

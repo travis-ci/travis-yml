@@ -16,6 +16,8 @@ module Travis
           register :job
 
           def define
+            include :languages
+
             strict false
 
             map :group
@@ -43,8 +45,6 @@ module Travis
             map :before_deploy,  to: :seq
             map :after_deploy,   to: :seq
             map :before_cache,   to: :seq
-
-            include :languages
 
             export
           end
