@@ -45,7 +45,7 @@ module Travis
           end
 
           def obj(node)
-            compact({ type: node.type, export: node.export? ? true : nil }.merge(node.opts))
+            compact({ type: node.type, export: node.export? ? true : nil, examples: node.examples }.merge(node.opts))
           end
 
           alias secure obj

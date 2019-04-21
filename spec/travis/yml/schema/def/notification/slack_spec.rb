@@ -99,13 +99,13 @@ describe Travis::Yml::Schema::Def::Notification::Slack, 'structure' do
     end
   end
 
-  # describe 'schema' do
-  #   subject { described_class.new.schema }
-  #
-  #   it do
-  #     should eq(
-  #       '$ref': '#/definitions/notification/slack'
-  #     )
-  #   end
-  # end
+  describe 'schema' do
+    subject { described_class.new.schema }
+
+    it do
+      should eq(
+        '$ref': '#/definitions/notification/slack'
+      )
+    end
+  end
 end

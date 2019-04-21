@@ -43,13 +43,13 @@ describe Travis::Yml::Schema::Def::Notification::Webhooks, 'structure' do
     end
   end
 
-  # describe 'schema' do
-  #   subject { described_class.new.schema }
-  #
-  #   it do
-  #     should eq(
-  #       '$ref': '#/definitions/notification/webhooks'
-  #     )
-  #   end
-  # end
+  describe 'schema' do
+    subject { described_class.new.schema }
+
+    it do
+      should eq(
+        '$ref': '#/definitions/notification/webhooks'
+      )
+    end
+  end
 end

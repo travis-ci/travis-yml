@@ -21,7 +21,7 @@ module Travis
             objs = schemas.map do |obj|
               obj = obj.lookup if obj.type == :ref
               obj.support.each do |key, opts|
-                node.parent.set :keys, { node.key => { key => to_strs(opts) } }
+                node.parent.set :keys, { node.key => { key => to_strs(opts) } } if node.parent
               end
             end
           end

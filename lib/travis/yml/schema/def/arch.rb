@@ -20,12 +20,12 @@ module Travis
           register :arch
 
           def define
-            # title 'Archictecture'
-            #
-            # description <<~str
-            #   The architecture that will be selected for the build environment.
-            # str
-            #
+            title 'Architecture'
+
+            description <<~str
+              The architecture that will be selected for the build environment.
+            str
+
             # examples <<~str
             #   arch: amd64
             # str

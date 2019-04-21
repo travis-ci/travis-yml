@@ -8,7 +8,7 @@ module Travis
         class Secure < Node
           register :secure
 
-          def example
+          def examples
             { secure: 'encrypted string' }
             # 'unencrypted string'
           end

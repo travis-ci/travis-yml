@@ -43,6 +43,12 @@ describe Travis::Yml::Schema::Def::Addon::Apt, 'structure' do
                     prefix: :name,
                   },
                   {
+                    type: :array,
+                    items: {
+                      type: :string
+                    }
+                  },
+                  {
                     type: :string
                   }
                 ]
@@ -75,13 +81,13 @@ describe Travis::Yml::Schema::Def::Addon::Apt, 'structure' do
     end
   end
 
-  # describe 'schema' do
-  #   subject { described_class.new.schema }
-  #
-  #   it do
-  #     should eq(
-  #       '$ref': '#/definitions/addon/apt'
-  #     )
-  #   end
-  # end
+  describe 'schema' do
+    subject { described_class.new.schema }
+
+    it do
+      should eq(
+        '$ref': '#/definitions/addon/apt'
+      )
+    end
+  end
 end

@@ -1,4 +1,4 @@
-This is a replacement for [travis-yaml](https://github.com/travis-ci/travis-yaml).
+This is a replacement for, and rewrite of [travis-yaml](https://github.com/travis-ci/travis-yaml).
 
 # Travis CI build config processing
 

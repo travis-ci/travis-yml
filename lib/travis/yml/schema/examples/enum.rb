@@ -8,6 +8,10 @@ module Travis
         class Enum < Scalar
           register :enum
 
+          def examples
+            enum[0, 2]
+          end
+
           def example
             enum.first
           end

@@ -11,10 +11,10 @@ module Travis
           # deprecated in favor of :if
 
           def define
-            # description <<~str
-            #   The branches your build will be run on.
-            # str
-            #
+            description <<~str
+              The branches your build will be run on.
+            str
+
             # examples <<~str,
             #   branch: master
             # str

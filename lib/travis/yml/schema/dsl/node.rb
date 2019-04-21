@@ -121,7 +121,7 @@ module Travis
           end
 
           def description(description)
-            node.set :deprecated, description
+            node.set :description, description.strip
           end
 
           def expand(*)
@@ -140,7 +140,7 @@ module Travis
             node.set :flags, [:edge]
           end
 
-          def example(*examples)
+          def example(examples)
             node.set :examples, examples
           end
           alias examples example

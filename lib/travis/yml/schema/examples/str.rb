@@ -8,12 +8,12 @@ module Travis
         class Str < Scalar
           register :str
 
-          def self.example
-            'a string'
+          def examples
+            ["#{example} one", "#{example} two"]
           end
 
           def example
-            node.key ? titleize(node.key) : self.class.example
+            node.example || opts[:example] || 'string'
           end
         end
       end

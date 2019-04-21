@@ -32,7 +32,8 @@ describe Travis::Yml::Schema::Def::Archs, 'structure' do
       it do
         should eq(
           '$id': :arch,
-          title: 'Arch',
+          title: 'Architecture',
+          description: 'The architecture that will be selected for the build environment.',
           type: :string,
           enum: [
             'amd64',
@@ -58,13 +59,13 @@ describe Travis::Yml::Schema::Def::Archs, 'structure' do
     end
   end
 
-  # describe 'schema' do
-  #   subject { described_class.new(nil, export: true).schema }
-  #
-  #   it do
-  #     should eq(
-  #       '$ref': '#/definitions/type/archs'
-  #     )
-  #   end
-  # end
+  describe 'schema' do
+    subject { described_class.new(nil, export: true).schema }
+
+    it do
+      should eq(
+        '$ref': '#/definitions/type/archs'
+      )
+    end
+  end
 end

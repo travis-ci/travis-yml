@@ -8,7 +8,9 @@ module Travis
         class Schema < Node
           register :schema
 
-          SCHEMA = { '$schema': 'http://json-schema.org/draft-04/schema#' }
+          SCHEMA = {
+            '$schema': 'http://json-schema.org/draft-04/schema#'
+          }
 
           DEFINITIONS = {
             secure: {
@@ -74,9 +76,18 @@ module Travis
             schema.merge(all)
           end
 
+          ORDER = [:type, :addon, :deploy, :language, :notification]
+
           def definitions
-            definitions = jsons(Type::Node.exports.values).map(&:definitions)
-            merge(DEFINITIONS, *definitions)
+            objs = merge(*jsons(Type::Node.exports.values).map(&:definitions))
+            objs = sort(objs)
+            objs = merge(DEFINITIONS, objs)
+            objs
+          end
+
+          def sort(objs)
+            objs = objs.map { |key, objs| [key, objs.sort.to_h] }.to_h
+            objs.sort { |lft, rgt| ORDER.index(lft[0]) <=> ORDER.index(rgt[0]) || 0 }.to_h
           end
 
           def all

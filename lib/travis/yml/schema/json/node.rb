@@ -10,7 +10,7 @@ module Travis
           extend Forwardable
           include Registry
 
-          def_delegators :node, :export?, :id, :namespace, :title, :type
+          def_delegators :node, :description, :export?, :id, :namespace, :title, :type
 
           def schema
             export? ? ref : to_h
@@ -27,7 +27,7 @@ module Travis
             end
 
             def meta
-              { '$id': id, title: title }
+              compact('$id': id, title: title, description: description)
             end
 
             def ref(*args)

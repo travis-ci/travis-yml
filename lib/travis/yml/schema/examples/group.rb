@@ -7,26 +7,26 @@ module Travis
       module Examples
         class Group < Node
           register :seq
-
-          def examples
-            [example]
-          end
-
-          def example
-            node.map { |node| build(node).example }
-          end
         end
+
+        # class All < Group
+        #   register :all
+        # end
+        #
+        # class One < Group
+        #   register :one
+        # end
 
         class Any < Group
           register :any
-        end
 
-        class All < Group
-          register :all
-        end
+          def examples
+            expand.map(&:example)
+          end
 
-        class One < Group
-          register :one
+          def expand
+            node.map { |node| build(node).expand }.flatten
+          end
         end
       end
     end
