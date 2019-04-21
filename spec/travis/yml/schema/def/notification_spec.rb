@@ -77,13 +77,13 @@ describe Travis::Yml::Schema::Def::Notification::Notifications, 'structure' do
     end
   end
 
-  # describe 'schema' do
-  #   subject { described_class.new.schema }
-  #
-  #   it do
-  #     should eq(
-  #       '$ref': '#/definitions/type/notifications'
-  #     )
-  #   end
-  # end
+  describe 'schema' do
+    subject { described_class.new.schema }
+
+    it do
+      should eq(
+        '$ref': '#/definitions/type/notifications'
+      )
+    end
+  end
 end

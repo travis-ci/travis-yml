@@ -35,13 +35,13 @@ describe Travis::Yml::Schema::Def::Addon::SauceConnect, 'structure' do
     end
   end
 
-  # describe 'schema' do
-  #   subject { described_class.new.schema }
-  #
-  #   it do
-  #     should eq(
-  #       '$ref': '#/definitions/addon/sauce_connect'
-  #     )
-  #   end
-  # end
+  describe 'schema' do
+    subject { described_class.new.schema }
+
+    it do
+      should eq(
+        '$ref': '#/definitions/addon/sauce_connect'
+      )
+    end
+  end
 end

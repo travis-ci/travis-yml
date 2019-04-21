@@ -9,6 +9,7 @@ describe Travis::Yml::Schema::Def::Branches, 'structure' do
       should eq(
         '$id': :branches,
         title: 'Branches',
+        description: 'The branches your build will be run on.',
         anyOf: [
           {
             type: :object,
@@ -39,13 +40,13 @@ describe Travis::Yml::Schema::Def::Branches, 'structure' do
     end
   end
 
-  # describe 'schema' do
-  #   subject { described_class.new.schema }
-  #
-  #   it do
-  #     should eq(
-  #       '$ref': '#/definitions/type/branches'
-  #     )
-  #   end
-  # end
+  describe 'schema' do
+    subject { described_class.new.schema }
+
+    it do
+      should eq(
+        '$ref': '#/definitions/type/branches'
+      )
+    end
+  end
 end

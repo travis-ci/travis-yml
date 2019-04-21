@@ -20,6 +20,10 @@ module Travis
           register :stage
 
           def define
+            examples \
+              name: 'job name',
+              if: 'branch = master'
+
             prefix :name
             map :name, to: :str
             map :if,   to: :str

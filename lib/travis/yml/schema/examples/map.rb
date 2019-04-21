@@ -9,13 +9,15 @@ module Travis
           register :map
 
           def examples
-            [example]
+            example
           end
 
           def example
-            node.map do |key, node|
+            obj = node.map do |key, child|
               next if key == :disabled || inherit?(key)
-              [key, build(node).example]
+              opts = { example: node.examples[key] }
+              child = build(child, opts)
+              [key, child.example]
             end.compact.to_h
           end
 

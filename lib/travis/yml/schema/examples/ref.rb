@@ -1,15 +1,15 @@
 # frozen_string_literal: true
-require 'travis/yml/schema/examples/scalar'
+require 'travis/yml/schema/examples/node'
 
 module Travis
   module Yml
     module Schema
       module Examples
-        class Num < Scalar
-          register :num
+        class Ref < Node
+          register :ref
 
-          def example
-            1
+          def expand
+            build(node.lookup).expand
           end
         end
       end

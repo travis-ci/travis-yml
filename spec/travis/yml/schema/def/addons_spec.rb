@@ -4,9 +4,7 @@ describe Travis::Yml::Schema::Def::Addons, 'structure' do
 
     let(:addons) { Travis::Yml.schema[:definitions][:type][:addons][:properties] }
     # let(:addons) { described_class.new.definitions[:type][:addons][:properties] }
-    # let(:defs)   { %i(apt browserstack code_climate homebrew jwts sauce_connect snaps) }
 
-    # subject { except(addons, *defs) }
     subject { addons }
 
     # it { puts JSON.pretty_generate(subject) }
@@ -30,14 +28,13 @@ describe Travis::Yml::Schema::Def::Addons, 'structure' do
     it { should include rethinkdb: { type: :string } }
   end
 
-  # describe 'schema' do
-  #   subject { described_class.new.schema }
-  #
-  #   it do
-  #     should eq(
-  #       '$ref': '#/definitions/type/addons'
-  #     )
-  #   end
-  # end
-end
+  describe 'schema' do
+    subject { described_class.new.schema }
 
+    it do
+      should eq(
+        '$ref': '#/definitions/type/addons'
+      )
+    end
+  end
+end

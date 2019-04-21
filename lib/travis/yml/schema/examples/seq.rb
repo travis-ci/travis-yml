@@ -8,12 +8,13 @@ module Travis
         class Seq < Node
           register :seq
 
-          def examples
-            [example]
+          def example
+            node.map { |node| build(node).examples }.flatten
           end
 
-          def example
-            node.map { |node| build(node).example }
+          def expand
+            nodes = node.map { |node| build(node).expand }.flatten.map(&:node)
+            nodes.map { |node| Seq.new(Type::Seq.new(nil, schemas: [node])) }
           end
         end
       end

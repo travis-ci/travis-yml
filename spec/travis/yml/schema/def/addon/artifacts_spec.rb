@@ -87,14 +87,14 @@ describe Travis::Yml::Schema::Def::Addon::Artifacts, 'structure' do
     end
   end
 
-  # describe 'schema' do
-  #   subject { described_class.new.schema }
-  #
-  #   it do
-  #     should eq(
-  #       '$ref': '#/definitions/addon/artifacts'
-  #     )
-  #   end
-  # end
+  describe 'schema' do
+    subject { described_class.new.schema }
+
+    it do
+      should eq(
+        '$ref': '#/definitions/addon/artifacts'
+      )
+    end
+  end
 end
 

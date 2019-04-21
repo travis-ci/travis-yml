@@ -17,6 +17,7 @@ require 'travis/yml/schema/examples/enum'
 require 'travis/yml/schema/examples/group'
 require 'travis/yml/schema/examples/map'
 require 'travis/yml/schema/examples/num'
+require 'travis/yml/schema/examples/ref'
 require 'travis/yml/schema/examples/secure'
 require 'travis/yml/schema/examples/seq'
 require 'travis/yml/schema/examples/str'
@@ -46,9 +47,17 @@ require 'travis/yml/schema/type/str'
 module Travis
   module Yml
     module Schema
-      def self.schema
-        node = Def::Root.new.node
-        node = Type::Expand.apply(node)
+      extend self
+
+      def schema
+        json(expand(Def::Root.new.node))
+      end
+
+      def expand(node)
+        Type::Expand.apply(node)
+      end
+
+      def json(node)
         Json::Node[node.type].new(node).schema
       end
     end

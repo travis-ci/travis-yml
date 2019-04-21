@@ -5,29 +5,33 @@ module Travis
   module Yml
     module Schema
       module Examples
-        def self.build(node)
-          Node[node.type].new(node)
+        def self.build(node, opts = {})
+          Node[node.type].new(node, opts)
         end
 
-        class Node < Obj.new(:node)
+        class Node < Obj.new(:node, opts: {})
           include Memoize, Registry
 
-          def yaml
-            examples.map do |example|
-              to_yaml(example)
-            end
+          def build(*args)
+            Examples.build(*args)
+          end
+
+          def key
+            opts[:key]
           end
 
           def examples
             raise
           end
 
-          def example
-            raise
+          def expand
+            self
           end
 
-          def build(*args)
-            Examples.build(*args)
+          def yaml
+            examples.map do |example|
+              to_yaml(example)
+            end
           end
 
           def to_yaml(obj)

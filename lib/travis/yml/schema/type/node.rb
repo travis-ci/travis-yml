@@ -174,8 +174,10 @@ module Travis
           end
 
           def examples
-            @examples ||= []
+            @examples ||= {}
           end
+
+          attr_accessor :example
 
           def aliases?
             aliases.any?
@@ -228,6 +230,10 @@ module Travis
 
           def title
             @title
+          end
+
+          def description
+            @description
           end
 
           def unique?
