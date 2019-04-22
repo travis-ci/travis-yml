@@ -12,10 +12,14 @@ module Travis
             @opts ||= super + %i(detect)
           end
 
-          attr_accessor :schemas
+          attr_writer :schemas
 
           def matches?(value)
             any? { |schema| schema.matches?(value) }
+          end
+
+          def schemas
+            @schemas ||= []
           end
 
           def [](ix)
@@ -32,6 +36,10 @@ module Travis
 
           def type
             :any
+          end
+
+          def default?
+            any?(&:default?)
           end
 
           def detect?

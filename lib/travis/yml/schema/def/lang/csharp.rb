@@ -12,7 +12,6 @@ module Travis
             matrix :dotnet
             matrix :mono
             matrix :solution
-            super
           end
         end
       end

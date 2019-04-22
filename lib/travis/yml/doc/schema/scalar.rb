@@ -15,7 +15,7 @@ module Travis
             true
           end
 
-          def defaults?
+          def default?
             defaults.any?
           end
 

@@ -29,7 +29,7 @@ describe Travis::Yml, 'language' do
     yaml %(
       language: sql
     )
-    it { should serialize_to language: 'ruby' }
+    it { should serialize_to language: 'ruby', os: ['linux'] }
     it { should have_msg [:warn, :language, :unknown_default, value: 'sql', default: 'ruby'] }
   end
 

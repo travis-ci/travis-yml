@@ -12,7 +12,6 @@ module Travis
           def define
             matrix :jdk, to: :jdks
             map :lein, to: :str
-            super
           end
         end
       end

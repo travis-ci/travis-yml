@@ -15,7 +15,7 @@ module Travis
 
           register :node
 
-          opts %i(changes deprecated flags normal only except)
+          opts %i(changes deprecated flags normal)
 
           class << self
             def def?
@@ -186,6 +186,14 @@ module Travis
             @aliases ||= []
           end
 
+          def change?(name)
+            changes.any? { |change| change[:change] == name }
+          end
+
+          def changes
+            opts[:changes] ||= []
+          end
+
           def deprecated?
             opts[:deprecated]
           end
@@ -221,10 +229,6 @@ module Travis
 
           def required?
             !!@required
-          end
-
-          def strict?
-            !false?(opts[:strict])
           end
 
           def support

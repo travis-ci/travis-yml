@@ -9,7 +9,7 @@ module Travis
           include Registry
 
           def self.opts
-            @opts ||= %i(id type changes deprecated flags normal required except only)
+            @opts ||= %i(id type changes deprecated flags normal required strict)
           end
 
           def initialize(opts)
@@ -122,51 +122,12 @@ module Travis
             opts[:prefix]
           end
 
-          # def version?
-          #   !!opts[:version]
-          # end
-          # memoize :version?
-          #
-          # def version
-          #   opts[:version]
-          # end
-
-          # def expand?
-          #   !!opts[:expand]
-          # end
-          # memoize :expand?
-
-          # def alias?(key)
-          #   key && aliased.key?(key.to_sym)
-          # end
-          #
-          # def aliases
-          #   opts[:alias] ? { key => alias_names.map(&:to_sym) } : {}
-          # end
-          # memoize :aliases
-          #
-          # def alias_names
-          #   Array(opts[:alias]).map(&:to_sym)
-          # end
-          # memoize :alias_names
-          #
-          # def aliased
-          #   swap(aliases).map { |key, value| [key, value.first] }.to_h
-          # end
-          # memoize :aliased
-
-          # def except
-          #   opts[:except] || {}
-          # end
-          # memoize :except
-          #
-          # def only
-          #   opts[:only] || {}
-          # end
-          # memoize :only
-
           def aliases
             {}
+          end
+
+          def default?
+            false
           end
 
           def required?
@@ -181,24 +142,13 @@ module Travis
             opts[:flags] ||= []
           end
 
-          # def deprecated?
-          #   !!opts[:deprecated]
-          # end
-          # memoize :deprecated?
-          #
-          # def deprecated
-          #   opts[:deprecated]
-          # end
-          # memoize :deprecated
-          #
-          # def required_keys
-          #   []
-          # end
+          def deprecated?
+            !!opts[:deprecated]
+          end
 
-          # def support
-          #   { only: {}, except: {} }.merge(only(opts, :only, :except))
-          # end
-          # memoize :support
+          def deprecated
+            opts[:deprecated]
+          end
 
           def all_keys
             []

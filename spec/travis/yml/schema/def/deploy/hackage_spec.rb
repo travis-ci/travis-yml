@@ -42,11 +42,6 @@ describe Travis::Yml::Schema::Def::Deploy::Hackage, 'structure' do
             prefix: :provider,
             required: [
               :provider
-            ],
-            changes: [
-              {
-                change: :enable
-              }
             ]
           },
           {

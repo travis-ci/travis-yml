@@ -10,11 +10,45 @@ describe Travis::Yml::Schema::Def::Julia, 'structure' do
         title: 'Julia',
         type: :object,
         properties: {
+          language: {
+            type: :string,
+            enum: [
+              'julia'
+            ],
+            downcase: true,
+            defaults: [
+              {
+                value: 'ruby',
+                only: {
+                  os: [
+                    'linux',
+                    'windows'
+                  ]
+                }
+              },
+              {
+                value: 'objective-c',
+                only: {
+                  os: [
+                    'osx'
+                  ]
+                }
+              }
+            ]
+          },
           julia: {
             '$ref': '#/definitions/strs'
           }
         },
+        normal: true,
         keys: {
+          language: {
+            only: {
+              language: [
+                'julia'
+              ]
+            }
+          },
           julia: {
             only: {
               language: [
@@ -22,8 +56,7 @@ describe Travis::Yml::Schema::Def::Julia, 'structure' do
               ]
             }
           }
-        },
-        normal: true
+        }
       )
     end
   end

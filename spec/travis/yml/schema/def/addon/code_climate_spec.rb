@@ -16,12 +16,20 @@ describe Travis::Yml::Schema::Def::Addon::CodeClimate, 'structure' do
                 '$ref': '#/definitions/secure'
               }
             },
-            normal: true,
+            additionalProperties: false,
             prefix: :repo_token,
-            additionalProperties: false
+            normal: true,
+            changes: [
+              {
+                change: :enable
+              }
+            ],
           },
           {
             '$ref': '#/definitions/secure'
+          },
+          {
+            type: :boolean
           }
         ]
       )

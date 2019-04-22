@@ -10,6 +10,32 @@ describe Travis::Yml::Schema::Def::Csharp, 'structure' do
         title: 'Csharp',
         type: :object,
         properties: {
+          language: {
+            type: :string,
+            enum: [
+              'csharp'
+            ],
+            downcase: true,
+            defaults: [
+              {
+                value: 'ruby',
+                only: {
+                  os: [
+                    'linux',
+                    'windows'
+                  ]
+                }
+              },
+              {
+                value: 'objective-c',
+                only: {
+                  os: [
+                    'osx'
+                  ]
+                }
+              }
+            ]
+          },
           dotnet: {
             '$ref': '#/definitions/strs'
           },
@@ -20,7 +46,15 @@ describe Travis::Yml::Schema::Def::Csharp, 'structure' do
             '$ref': '#/definitions/strs'
           }
         },
+        normal: true,
         keys: {
+          language: {
+            only: {
+              language: [
+                'csharp'
+              ]
+            }
+          },
           dotnet: {
             only: {
               language: [
@@ -42,8 +76,7 @@ describe Travis::Yml::Schema::Def::Csharp, 'structure' do
               ]
             }
           }
-        },
-        normal: true
+        }
       )
     end
   end

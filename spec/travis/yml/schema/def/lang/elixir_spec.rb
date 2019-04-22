@@ -10,6 +10,32 @@ describe Travis::Yml::Schema::Def::Elixir, 'structure' do
         title: 'Elixir',
         type: :object,
         properties: {
+          language: {
+            type: :string,
+            enum: [
+              'elixir'
+            ],
+            downcase: true,
+            defaults: [
+              {
+                value: 'ruby',
+                only: {
+                  os: [
+                    'linux',
+                    'windows'
+                  ]
+                }
+              },
+              {
+                value: 'objective-c',
+                only: {
+                  os: [
+                    'osx'
+                  ]
+                }
+              }
+            ]
+          },
           elixir: {
             '$ref': '#/definitions/strs'
           },
@@ -17,7 +43,15 @@ describe Travis::Yml::Schema::Def::Elixir, 'structure' do
             '$ref': '#/definitions/strs'
           }
         },
+        normal: true,
         keys: {
+          language: {
+            only: {
+              language: [
+                'elixir'
+              ]
+            }
+          },
           elixir: {
             only: {
               language: [
@@ -32,8 +66,7 @@ describe Travis::Yml::Schema::Def::Elixir, 'structure' do
               ]
             }
           }
-        },
-        normal: true
+        }
       )
     end
   end

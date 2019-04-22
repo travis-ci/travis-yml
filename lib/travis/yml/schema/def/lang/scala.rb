@@ -13,7 +13,6 @@ module Travis
             matrix :scala
             matrix :jdk, to: :jdks
             map :sbt_args, to: :str
-            super
           end
         end
       end

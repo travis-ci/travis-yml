@@ -48,10 +48,11 @@ module Travis
 
         VALIDATORS = {
           map: [
-            InvalidType, UnknownKeys, UnsupportedKeys, Compact, Required, Empty
+            InvalidType, UnknownKeys, UnsupportedKeys, Compact, Required,
+            Empty, Flags
           ],
           seq: [
-            InvalidType, Compact, Empty, Unique
+            InvalidType, Compact, Empty, Unique, Flags
           ],
           obj: [
             InvalidType, UnknownValue, UnsupportedValue, Default, Alert, Flags,

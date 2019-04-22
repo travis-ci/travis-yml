@@ -8,34 +8,33 @@ module Travis
     module Schema
       module Def
         module Deploy
-          def self.providers
-            @providers ||= begin
-              consts = ObjectSpace.each_object(::Class)
-              consts = consts.select { |const| const < Deploy }
-              consts.map(&:registry_key).sort
-            end
+          def self.provider_names
+            Deploy.registry.values.map(&:registry_key).sort.compact
           end
 
-          class Deploys < Dsl::Any
+          class Deploys < Dsl::Seq
             register :deploys
 
             def define
               normal
+              type Providers
+              export
+            end
+          end
 
-              add :seq, type: Class.new(Dsl::Any) {
-                def define
-                  normal
-                  add *Def::Deploy.providers
-                  detect :provider
-                end
-              }
+          class Providers < Dsl::Any
+            register :deploy_providers
 
+            def define
+              normal
+              add *Def::Deploy.provider_names
+              detect :provider
               export
             end
           end
 
           class Deploy < Dsl::Map
-            register :deploy
+            registry :deploy
 
             def define
               namespace :deploy
@@ -49,8 +48,6 @@ module Travis
               map :allow_failure, to: :bool
               map :skip_cleanup,  to: :bool
               map :edge,          to: :deploy_edge
-
-              change :enable
 
               # so called option specific branch hashes are valid, but
               # deprecated according to travis-build. e.g.:
@@ -107,7 +104,7 @@ module Travis
 
             def define
               add :seq, normal: true #, prefix: :branch
-              # add Branch
+              add Branch
               export
             end
           end
@@ -128,9 +125,12 @@ module Travis
 
             def define
               edge
+
               map :enabled, to: :bool
               map :source, to: :str
               map :branch, to: :str
+
+              change :enable
               export
             end
           end

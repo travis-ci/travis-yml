@@ -84,11 +84,6 @@ describe Travis::Yml::Schema::Def::Deploy::Testfairy, 'structure' do
             prefix: :provider,
             required: [
               :provider
-            ],
-            changes: [
-              {
-                change: :enable
-              }
             ]
           },
           {

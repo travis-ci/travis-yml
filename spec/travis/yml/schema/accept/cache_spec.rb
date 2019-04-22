@@ -1,4 +1,4 @@
-describe Travis::Yml::Schema, 'accept', slow: true do
+describe Travis::Yml, 'accept', slow: true do
   subject { described_class.schema }
 
   describe 'cache' do
@@ -14,7 +14,7 @@ describe Travis::Yml::Schema, 'accept', slow: true do
     it { should_not validate cache: { directories: [ foo: './foo' ] } }
 
     it { should validate cache: { timeout: 10 } }
-    xit { should_not validate cache: { timeout: '10' } }
+    it { should_not validate cache: { timeout: '10' } }
     it { should_not validate cache: { timeout: { value: 10 } } }
     it { should_not validate cache: { timeout: [ value: 10 ] } }
   end

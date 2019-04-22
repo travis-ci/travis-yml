@@ -66,7 +66,7 @@ module Travis
                 normal
                 map :'^(?!global|matrix)', to: :str
                 strict false
-                max_size 1
+                max_size 1 # TODO this isn't true
               end
             }
 

@@ -22,21 +22,29 @@ describe Travis::Yml::Schema::Def::Notification::Webhooks, 'structure' do
                 '$ref': '#/definitions/secures'
               },
               on_start: {
-                '$ref': '#/definitions/type/notification_frequency'
+                '$ref': '#/definitions/notification/frequency'
               },
               on_success: {
-                '$ref': '#/definitions/type/notification_frequency'
+                '$ref': '#/definitions/notification/frequency'
               },
               on_failure: {
-                '$ref': '#/definitions/type/notification_frequency'
+                '$ref': '#/definitions/notification/frequency'
               }
             },
             additionalProperties: false,
             normal: true,
             prefix: :urls,
+            changes: [
+              {
+                change: :enable,
+              }
+            ]
           },
           {
             '$ref': '#/definitions/secures'
+          },
+          {
+            type: :boolean
           }
         ]
       )

@@ -8,85 +8,45 @@ describe Travis::Yml::Schema::Def::Notification::Pushover, 'structure' do
       should eq(
         '$id': :pushover,
         title: 'Pushover',
-        type: :object,
-        properties: {
-          enabled: {
-            type: :boolean
-          },
-          disabled: {
-            type: :boolean
-          },
-          api_key: {
-            '$ref': '#/definitions/secure'
-          },
-          users: {
-            '$ref': '#/definitions/secures'
-          },
-          template: {
-            anyOf: [
-              {
-                type: :array,
-                items: {
-                  type: :string,
-                  vars: [
-                    'repository',
-                    'repository_slug',
-                    'repository_name',
-                    'build_number',
-                    'build_id',
-                    'build_url',
-                    'branch',
-                    'commit',
-                    'commit_subject',
-                    'commit_message',
-                    'author',
-                    'pull_request',
-                    'pull_request_number',
-                    'pull_request_url',
-                    'compare_url',
-                    'result',
-                    'duration',
-                    'elapsed_time',
-                    'message'
-                  ]
-                },
-                normal: true
+        normal: true,
+        anyOf: [
+          {
+            type: :object,
+            properties: {
+              enabled: {
+                type: :boolean
               },
+              disabled: {
+                type: :boolean
+              },
+              api_key: {
+                '$ref': '#/definitions/secure'
+              },
+              users: {
+                '$ref': '#/definitions/secures'
+              },
+              template: {
+                '$ref': '#/definitions/notification/templates'
+              },
+              on_success: {
+                '$ref': '#/definitions/notification/frequency'
+              },
+              on_failure: {
+                '$ref': '#/definitions/notification/frequency'
+              }
+            },
+            additionalProperties: false,
+            normal: true,
+            changes: [
               {
-                type: :string,
-                vars: [
-                  'repository',
-                  'repository_slug',
-                  'repository_name',
-                  'build_number',
-                  'build_id',
-                  'build_url',
-                  'branch',
-                  'commit',
-                  'commit_subject',
-                  'commit_message',
-                  'author',
-                  'pull_request',
-                  'pull_request_number',
-                  'pull_request_url',
-                  'compare_url',
-                  'result',
-                  'duration',
-                  'elapsed_time',
-                  'message'
-                ]
+                change: :enable,
               }
             ]
           },
-          on_success: {
-            '$ref': '#/definitions/type/notification_frequency'
-          },
-          on_failure: {
-            '$ref': '#/definitions/type/notification_frequency'
+          {
+            type: :boolean
           }
-        },
-        additionalProperties: false,
-        normal: true,
+        ]
       )
     end
   end

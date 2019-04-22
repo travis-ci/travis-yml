@@ -10,11 +10,45 @@ describe Travis::Yml::Schema::Def::Perl6, 'structure' do
         title: 'Perl6',
         type: :object,
         properties: {
+          language: {
+            type: :string,
+            enum: [
+              'perl6'
+            ],
+            downcase: true,
+            defaults: [
+              {
+                value: 'ruby',
+                only: {
+                  os: [
+                    'linux',
+                    'windows'
+                  ]
+                }
+              },
+              {
+                value: 'objective-c',
+                only: {
+                  os: [
+                    'osx'
+                  ]
+                }
+              }
+            ]
+          },
           perl6: {
             '$ref': '#/definitions/strs'
           }
         },
+        normal: true,
         keys: {
+          language: {
+            only: {
+              language: [
+                'perl6'
+              ]
+            }
+          },
           perl6: {
             only: {
               language: [
@@ -22,8 +56,7 @@ describe Travis::Yml::Schema::Def::Perl6, 'structure' do
               ]
             }
           }
-        },
-        normal: true
+        }
       )
     end
   end

@@ -45,11 +45,6 @@ describe Travis::Yml::Schema::Def::Deploy::Bitballoon, 'structure' do
             prefix: :provider,
             required: [
               :provider
-            ],
-            changes: [
-              {
-                change: :enable
-              }
             ]
           },
           {

@@ -91,7 +91,7 @@ describe Travis::Yml::Schema::Def::Matrix, 'structure' do
         subject { super()[:allOf][0][:properties] }
 
         it { should include name: { type: :string } }
-        it { should include language: { '$ref': '#/definitions/type/language' } }
+        # it { should include language: { '$ref': '#/definitions/type/language' } }
         it { should include os: { '$ref': '#/definitions/type/os' } }
         it { should include arch: { '$ref': '#/definitions/type/arch' } }
         it { should include dist: { '$ref': '#/definitions/type/dist' } }

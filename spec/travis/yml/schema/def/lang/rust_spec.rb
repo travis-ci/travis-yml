@@ -10,11 +10,45 @@ describe Travis::Yml::Schema::Def::Rust, 'structure' do
         title: 'Rust',
         type: :object,
         properties: {
+          language: {
+            type: :string,
+            enum: [
+              'rust'
+            ],
+            downcase: true,
+            defaults: [
+              {
+                value: 'ruby',
+                only: {
+                  os: [
+                    'linux',
+                    'windows'
+                  ]
+                }
+              },
+              {
+                value: 'objective-c',
+                only: {
+                  os: [
+                    'osx'
+                  ]
+                }
+              }
+            ]
+          },
           rust: {
             '$ref': '#/definitions/strs'
           }
         },
+        normal: true,
         keys: {
+          language: {
+            only: {
+              language: [
+                'rust'
+              ]
+            }
+          },
           rust: {
             only: {
               language: [
@@ -22,8 +56,7 @@ describe Travis::Yml::Schema::Def::Rust, 'structure' do
               ]
             }
           }
-        },
-        normal: true
+        }
       )
     end
   end

@@ -51,11 +51,6 @@ describe Travis::Yml::Schema::Def::Deploy::Openshift, 'structure' do
             prefix: :provider,
             required: [
               :provider
-            ],
-            changes: [
-              {
-                change: :enable
-              }
             ]
           },
           {

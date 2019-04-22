@@ -100,11 +100,6 @@ describe Travis::Yml::Schema::Def::Deploy::Lambda, 'structure' do
             prefix: :provider,
             required: [
               :provider
-            ],
-            changes: [
-              {
-                change: :enable
-              }
             ]
           },
           {

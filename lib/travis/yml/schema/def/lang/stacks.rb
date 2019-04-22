@@ -12,8 +12,7 @@ module Travis
 
             def define
               internal
-              deprecated
-              super
+              deprecated :experimental_stack_language
             end
           end
 

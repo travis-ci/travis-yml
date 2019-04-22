@@ -1,4 +1,4 @@
-describe Travis::Yml::Schema, 'accept deploy', slow: true do
+describe Travis::Yml, 'accept deploy', slow: true do
   subject { described_class.schema }
 
   xit { puts JSON.pretty_generate(subject[:definitions][:codedeploy]) }
@@ -41,7 +41,7 @@ describe Travis::Yml::Schema, 'accept deploy', slow: true do
     end
 
     describe 'revision_type' do
-      it { should validate deploy: { provider: :codedeploy, revision_type: 'str' } }
+      it { should validate deploy: { provider: :codedeploy, revision_type: 's3' } }
       it { should_not validate deploy: { provider: :codedeploy, revision_type: 1 } }
       it { should_not validate deploy: { provider: :codedeploy, revision_type: true } }
       it { should_not validate deploy: { provider: :codedeploy, revision_type: ['str'] } }

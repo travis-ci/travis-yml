@@ -33,8 +33,6 @@ module Travis
             map :warnings_are_errors, to: :bool
             map :remotes,             to: :str # this does not seem to be used in travis-build?
             map :repos,               to: :map, strict: false
-
-            super
           end
         end
       end

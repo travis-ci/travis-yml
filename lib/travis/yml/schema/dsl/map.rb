@@ -46,7 +46,7 @@ module Travis
           end
 
           def strict(obj = nil)
-            node.set :strict, false if false?(obj)
+            node.set :strict, !false?(obj)
           end
 
           # These can all be passed as options to #map, or defined on the

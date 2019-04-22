@@ -10,7 +10,6 @@ module Travis
 
           def define
             aliases *%i(bash generic minimal)
-            super
           end
         end
       end

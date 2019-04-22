@@ -48,11 +48,6 @@ describe Travis::Yml::Schema::Def::Deploy::Anynines, 'structure' do
             prefix: :provider,
             required: [
               :provider
-            ],
-            changes: [
-              {
-                change: :enable
-              }
             ]
           },
           {

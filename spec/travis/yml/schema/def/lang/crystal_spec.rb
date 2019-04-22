@@ -10,11 +10,45 @@ describe Travis::Yml::Schema::Def::Crystal, 'structure' do
         title: 'Crystal',
         type: :object,
         properties: {
+          language: {
+            type: :string,
+            enum: [
+              'crystal'
+            ],
+            downcase: true,
+            defaults: [
+              {
+                value: 'ruby',
+                only: {
+                  os: [
+                    'linux',
+                    'windows'
+                  ]
+                }
+              },
+              {
+                value: 'objective-c',
+                only: {
+                  os: [
+                    'osx'
+                  ]
+                }
+              }
+            ]
+          },
           crystal: {
             '$ref': '#/definitions/strs'
           }
         },
+        normal: true,
         keys: {
+          language: {
+            only: {
+              language: [
+                'crystal'
+              ]
+            }
+          },
           crystal: {
             only: {
               language: [
@@ -22,8 +56,7 @@ describe Travis::Yml::Schema::Def::Crystal, 'structure' do
               ]
             }
           }
-        },
-        normal: true
+        }
       )
     end
   end

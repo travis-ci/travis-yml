@@ -31,7 +31,6 @@ module Travis
           register :oss
 
           def define
-            required
             normal
             type Os
             export

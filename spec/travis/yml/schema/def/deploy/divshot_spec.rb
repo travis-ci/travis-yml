@@ -42,11 +42,6 @@ describe Travis::Yml::Schema::Def::Deploy::Divshot, 'structure' do
             prefix: :provider,
             required: [
               :provider
-            ],
-            changes: [
-              {
-                change: :enable
-              }
             ]
           },
           {

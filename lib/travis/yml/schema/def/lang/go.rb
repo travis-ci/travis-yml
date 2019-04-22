@@ -16,8 +16,6 @@ module Travis
             map :gobuild_args,    to: :str
             map :go_import_path,  to: :str
             map :gimme_config,    to: :gimme_config
-
-            super
           end
         end
 

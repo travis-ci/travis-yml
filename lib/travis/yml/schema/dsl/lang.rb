@@ -12,16 +12,12 @@ module Travis
             :lang
           end
 
-          def define
-            Def::Lang.values(registry_key => {})
-          end
-
           def aliases(*aliases)
-            Def::Lang.values(registry_key => { aliases: to_syms(aliases) })
+            language.set(:values, registry_key => { aliases: to_strs(aliases) })
           end
 
-          def deprecated(*)
-            Def::Lang.values(registry_key => { deprecated: true })
+          def deprecated(obj)
+            language.set(:values, registry_key => { deprecated: obj })
           end
 
           def matrix(key, opts = {})
@@ -33,6 +29,10 @@ module Travis
           def map(key, opts = {})
             opts = opts.merge(only: { language: registry_key })
             super
+          end
+
+          def language
+            node.mappings[:language]
           end
         end
       end

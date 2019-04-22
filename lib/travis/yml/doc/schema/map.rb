@@ -73,6 +73,15 @@ module Travis
             !format || Regexp.new(format).match?(key.to_s)
           end
 
+          def default?(key = nil)
+            defaults.include?(key)
+          end
+
+          def defaults
+            map.select { |_, node| node.default? }.keys
+          end
+          memoize :defaults
+
           def required?(key = nil)
             key ? required.include?(key) : !!opts[:required]
           end

@@ -8,35 +8,48 @@ describe Travis::Yml::Schema::Def::Addon::Browserstack, 'structure' do
       should eq(
         '$id': :browserstack,
         title: 'Browserstack',
-        type: :object,
-        properties: {
-          username: {
-            type: :string
+        normal: true,
+        anyOf: [
+          {
+            type: :object,
+            properties: {
+              username: {
+                type: :string
+              },
+              access_key: {
+                '$ref': '#/definitions/secure'
+              },
+              forcelocal: {
+                type: :boolean
+              },
+              only: {
+                type: :string
+              },
+              proxyHost: {
+                type: :string
+              },
+              proxyPort: {
+                type: :string
+              },
+              proxyUser: {
+                type: :string
+              },
+              proxyPass: {
+                '$ref': '#/definitions/secure'
+              }
+            },
+            additionalProperties: false,
+            changes: [
+              {
+                change: :enable
+              }
+            ],
+            normal: true
           },
-          access_key: {
-            '$ref': '#/definitions/secure'
-          },
-          forcelocal: {
+          {
             type: :boolean
-          },
-          only: {
-            type: :string
-          },
-          proxyHost: {
-            type: :string
-          },
-          proxyPort: {
-            type: :string
-          },
-          proxyUser: {
-            type: :string
-          },
-          proxyPass: {
-            '$ref': '#/definitions/secure'
           }
-        },
-        additionalProperties: false,
-        normal: true
+        ]
       )
     end
   end

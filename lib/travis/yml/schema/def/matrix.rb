@@ -36,6 +36,7 @@ module Travis
             def define
               include :job
 
+              strict false
               aliases :jobs
 
               map :name, to: :str, unique: true

@@ -8,53 +8,66 @@ describe Travis::Yml::Schema::Def::Addon::CoverityScan, 'structure' do
       should eq(
         '$id': :coverity_scan,
         title: 'Coverity Scan',
-        type: :object,
-        properties: {
-          project: {
-            anyOf: [
-              {
-                type: :object,
-                properties: {
-                  name: {
-                    type: :string
+        normal: true,
+        anyOf: [
+          {
+            type: :object,
+            properties: {
+              project: {
+                anyOf: [
+                  {
+                    type: :object,
+                    properties: {
+                      name: {
+                        type: :string
+                      },
+                      version: {
+                        type: :string
+                      },
+                      description: {
+                        type: :string
+                      }
+                    },
+                    additionalProperties: false,
+                    prefix: :name,
+                    required: [
+                      :name
+                    ],
+                    normal: true
                   },
-                  version: {
-                    type: :string
-                  },
-                  description: {
+                  {
                     type: :string
                   }
-                },
-                additionalProperties: false,
-                prefix: :name,
-                required: [
-                  :name
-                ],
-                normal: true
+                ]
               },
-              {
+              build_script_url: {
+                type: :string
+              },
+              branch_pattern: {
+                type: :string
+              },
+              notification_email: {
+                type: :string
+              },
+              build_command: {
+                type: :string
+              },
+              build_command_prepend: {
                 type: :string
               }
-            ]
+            },
+            additionalProperties: false,
+            changes: [
+              {
+                change: :enable
+              }
+            ],
+            normal: true
           },
-          build_script_url: {
-            type: :string
-          },
-          branch_pattern: {
-            type: :string
-          },
-          notification_email: {
-            type: :string
-          },
-          build_command: {
-            type: :string
-          },
-          build_command_prepend: {
-            type: :string
+          {
+            type: :boolean
           }
-        },
-        additionalProperties: false,
-        normal: true
+        ]
       )
     end
   end

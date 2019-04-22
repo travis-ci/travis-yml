@@ -1,4 +1,4 @@
-describe Travis::Yml::Schema, 'accept', slow: true do
+describe Travis::Yml, 'accept', slow: true do
   subject { described_class.schema }
 
   describe 'stages' do
@@ -16,8 +16,8 @@ describe Travis::Yml::Schema, 'accept', slow: true do
         describe 'stage' do
           xit { should validate matrix => { key => { stage: 'one' } } } # TODO
           it { should validate matrix => { key => { stage: { name: 'one', if: 'branch = master' } } } }
-          it { should_not validate matrix => { key => { stage: ['one', 'two'] } } }
-          it { should_not validate matrix => { key => { stage: [foo: 'one'] } } }
+          xit { should_not validate matrix => { key => { stage: ['one', 'two'] } } }
+          xit { should_not validate matrix => { key => { stage: [foo: 'one'] } } }
         end
       end
     end

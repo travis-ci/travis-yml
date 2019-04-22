@@ -15,8 +15,6 @@ module Travis
             matrix :jdk, to: :jdks
 
             map :bundler_args, to: :str
-
-            super
           end
         end
       end

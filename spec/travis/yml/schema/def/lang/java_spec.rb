@@ -10,11 +10,52 @@ describe Travis::Yml::Schema::Def::Java, 'structure' do
         title: 'Java',
         type: :object,
         properties: {
+          language: {
+            type: :string,
+            enum: [
+              'java'
+            ],
+            downcase: true,
+            defaults: [
+              {
+                value: 'ruby',
+                only: {
+                  os: [
+                    'linux',
+                    'windows'
+                  ]
+                }
+              },
+              {
+                value: 'objective-c',
+                only: {
+                  os: [
+                    'osx'
+                  ]
+                }
+              }
+            ],
+            values: {
+              java: {
+                aliases: [
+                  'jvm'
+                ]
+              }
+            }
+          },
           jdk: {
             '$ref': '#/definitions/strs'
           }
         },
+        normal: true,
         keys: {
+          language: {
+            only: {
+              language: [
+                'java'
+              ]
+            }
+          },
           jdk: {
             only: {
               language: [
@@ -27,8 +68,7 @@ describe Travis::Yml::Schema::Def::Java, 'structure' do
               ]
             }
           }
-        },
-        normal: true
+        }
       )
     end
   end

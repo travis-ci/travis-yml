@@ -30,10 +30,18 @@ describe Travis::Yml::Schema::Def::Addon::Homebrew, 'structure' do
             },
             additionalProperties: false,
             normal: true,
-            prefix: :packages
+            prefix: :packages,
+            changes: [
+              {
+                change: :enable
+              }
+            ],
           },
           {
             '$ref': '#/definitions/strs'
+          },
+          {
+            type: :boolean
           }
         ]
       )

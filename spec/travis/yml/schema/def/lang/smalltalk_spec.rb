@@ -10,6 +10,32 @@ describe Travis::Yml::Schema::Def::Smalltalk, 'structure' do
         title: 'Smalltalk',
         type: :object,
         properties: {
+          language: {
+            type: :string,
+            enum: [
+              'smalltalk'
+            ],
+            downcase: true,
+            defaults: [
+              {
+                value: 'ruby',
+                only: {
+                  os: [
+                    'linux',
+                    'windows'
+                  ]
+                }
+              },
+              {
+                value: 'objective-c',
+                only: {
+                  os: [
+                    'osx'
+                  ]
+                }
+              }
+            ]
+          },
           smalltalk: {
             '$ref': '#/definitions/strs'
           },
@@ -20,7 +46,15 @@ describe Travis::Yml::Schema::Def::Smalltalk, 'structure' do
             type: :boolean
           }
         },
+        normal: true,
         keys: {
+          language: {
+            only: {
+              language: [
+                'smalltalk'
+              ]
+            }
+          },
           smalltalk: {
             only: {
               language: [
@@ -42,8 +76,7 @@ describe Travis::Yml::Schema::Def::Smalltalk, 'structure' do
               ]
             }
           }
-        },
-        normal: true
+        }
       )
     end
   end

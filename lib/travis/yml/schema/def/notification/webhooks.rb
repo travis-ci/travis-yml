@@ -14,7 +14,7 @@ module Travis
               prefix :urls
 
               map :urls,     to: :seq, type: :secure
-              map :on_start, to: :notification_frequency
+              map :on_start, to: :frequency
 
               super
             end

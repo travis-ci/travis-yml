@@ -22,18 +22,26 @@ describe Travis::Yml::Schema::Def::Notification::Email, 'structure' do
                 '$ref': '#/definitions/secures'
               },
               on_success: {
-                '$ref': '#/definitions/type/notification_frequency'
+                '$ref': '#/definitions/notification/frequency'
               },
               on_failure: {
-                '$ref': '#/definitions/type/notification_frequency'
+                '$ref': '#/definitions/notification/frequency'
               },
             },
             additionalProperties: false,
             normal: true,
             prefix: :recipients,
+            changes: [
+              {
+                change: :enable,
+              }
+            ]
           },
           {
             '$ref': '#/definitions/secures'
+          },
+          {
+            type: :boolean
           }
         ]
       )

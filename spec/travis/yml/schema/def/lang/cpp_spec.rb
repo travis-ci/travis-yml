@@ -9,7 +9,51 @@ describe Travis::Yml::Schema::Def::Cpp, 'structure' do
         '$id': :cpp,
         title: 'Cpp',
         type: :object,
-        normal: true
+        properties: {
+          language: {
+            type: :string,
+            enum: [
+              'cpp'
+            ],
+            downcase: true,
+            defaults: [
+              {
+                value: 'ruby',
+                only: {
+                  os: [
+                    'linux',
+                    'windows'
+                  ]
+                }
+              },
+              {
+                value: 'objective-c',
+                only: {
+                  os: [
+                    'osx'
+                  ]
+                }
+              }
+            ],
+            values: {
+              cpp: {
+                aliases: [
+                  'c++'
+                ]
+              }
+            }
+          }
+        },
+        normal: true,
+        keys: {
+          language: {
+            only: {
+              language: [
+                'cpp'
+              ]
+            }
+          }
+        }
       )
     end
   end

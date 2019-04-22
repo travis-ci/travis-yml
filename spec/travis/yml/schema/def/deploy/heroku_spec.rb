@@ -60,11 +60,6 @@ describe Travis::Yml::Schema::Def::Deploy::Heroku, 'structure' do
             prefix: :provider,
             required: [
               :provider
-            ],
-            changes: [
-              {
-                change: :enable
-              }
             ]
           },
           {

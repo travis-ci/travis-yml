@@ -10,6 +10,32 @@ describe Travis::Yml::Schema::Def::Android, 'structure' do
         title: 'Android',
         type: :object,
         properties: {
+          language: {
+            type: :string,
+            enum: [
+              'android'
+            ],
+            downcase: true,
+            defaults: [
+              {
+                value: 'ruby',
+                only: {
+                  os: [
+                    'linux',
+                    'windows'
+                  ]
+                }
+              },
+              {
+                value: 'objective-c',
+                only: {
+                  os: [
+                    'osx'
+                  ]
+                }
+              }
+            ]
+          },
           jdk: {
             '$ref': '#/definitions/strs'
           },
@@ -26,7 +52,15 @@ describe Travis::Yml::Schema::Def::Android, 'structure' do
             additionalProperties: false
           }
         },
+        normal: true,
         keys: {
+          language: {
+            only: {
+              language: [
+                'android'
+              ]
+            }
+          },
           jdk: {
             only: {
               language: [
@@ -46,8 +80,7 @@ describe Travis::Yml::Schema::Def::Android, 'structure' do
               ]
             }
           }
-        },
-        normal: true
+        }
       )
     end
   end

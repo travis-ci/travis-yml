@@ -10,6 +10,32 @@ describe Travis::Yml::Schema::Def::Elm, 'structure' do
         title: 'Elm',
         type: :object,
         properties: {
+          language: {
+            type: :string,
+            enum: [
+              'elm'
+            ],
+            downcase: true,
+            defaults: [
+              {
+                value: 'ruby',
+                only: {
+                  os: [
+                    'linux',
+                    'windows'
+                  ]
+                }
+              },
+              {
+                value: 'objective-c',
+                only: {
+                  os: [
+                    'osx'
+                  ]
+                }
+              }
+            ]
+          },
           elm: {
             '$ref': '#/definitions/strs'
           },
@@ -20,7 +46,15 @@ describe Travis::Yml::Schema::Def::Elm, 'structure' do
             type: :string
           }
         },
+        normal: true,
         keys: {
+          language: {
+            only: {
+              language: [
+                'elm'
+              ]
+            }
+          },
           elm: {
             only: {
               language: [
@@ -42,8 +76,7 @@ describe Travis::Yml::Schema::Def::Elm, 'structure' do
               ]
             }
           }
-        },
-        normal: true
+        }
       )
     end
   end

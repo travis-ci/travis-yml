@@ -10,6 +10,39 @@ describe Travis::Yml::Schema::Def::Go, 'structure' do
         title: 'Go',
         type: :object,
         properties: {
+          language: {
+            type: :string,
+            enum: [
+              'go'
+            ],
+            downcase: true,
+            defaults: [
+              {
+                value: 'ruby',
+                only: {
+                  os: [
+                    'linux',
+                    'windows'
+                  ]
+                }
+              },
+              {
+                value: 'objective-c',
+                only: {
+                  os: [
+                    'osx'
+                  ]
+                }
+              }
+            ],
+            values: {
+              go: {
+                aliases: [
+                  'golang'
+                ]
+              }
+            }
+          },
           go: {
             '$ref': '#/definitions/strs'
           },
@@ -32,7 +65,15 @@ describe Travis::Yml::Schema::Def::Go, 'structure' do
             additionalProperties: false
           }
         },
+        normal: true,
         keys: {
+          language: {
+            only: {
+              language: [
+                'go'
+              ]
+            }
+          },
           go: {
             only: {
               language: [
@@ -61,8 +102,7 @@ describe Travis::Yml::Schema::Def::Go, 'structure' do
               ]
             }
           }
-        },
-        normal: true
+        }
       )
     end
   end

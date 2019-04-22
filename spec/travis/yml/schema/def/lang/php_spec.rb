@@ -10,6 +10,32 @@ describe Travis::Yml::Schema::Def::Php, 'structure' do
         title: 'Php',
         type: :object,
         properties: {
+          language: {
+            type: :string,
+            enum: [
+              'php'
+            ],
+            downcase: true,
+            defaults: [
+              {
+                value: 'ruby',
+                only: {
+                  os: [
+                    'linux',
+                    'windows'
+                  ]
+                }
+              },
+              {
+                value: 'objective-c',
+                only: {
+                  os: [
+                    'osx'
+                  ]
+                }
+              }
+            ]
+          },
           php: {
             '$ref': '#/definitions/strs'
           },
@@ -17,7 +43,15 @@ describe Travis::Yml::Schema::Def::Php, 'structure' do
             type: :string
           }
         },
+        normal: true,
         keys: {
+          language: {
+            only: {
+              language: [
+                'php'
+              ]
+            }
+          },
           php: {
             only: {
               language: [
@@ -32,8 +66,7 @@ describe Travis::Yml::Schema::Def::Php, 'structure' do
               ]
             }
           }
-        },
-        normal: true
+        }
       )
     end
   end

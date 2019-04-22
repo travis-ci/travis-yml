@@ -25,9 +25,8 @@ module Travis
               map :pushover, to: :pushover
               map :slack,    to: :slack
               map :webhooks, to: :webhooks
-              maps *STATUSES, to: :notification_frequency
+              maps *STATUSES, to: :frequency
 
-              change :enable
               change :inherit, keys: STATUSES
 
               export
@@ -35,14 +34,17 @@ module Travis
           end
 
           class Notification < Dsl::Map
+            registry :notification
+
             def define
               namespace :notification
               normal
 
               map :enabled,  to: :bool
               map :disabled, to: :bool
-              maps *STATUSES, to: :notification_frequency
+              maps *STATUSES, to: :frequency
 
+              change :enable
               export
             end
           end
@@ -51,7 +53,9 @@ module Travis
             register :templates
 
             def define
+              namespace :notification
               type :template
+              export
             end
           end
 
@@ -81,14 +85,18 @@ module Travis
             )
 
             def define
+              namespace :notification
               vars *VARS
+              export
             end
           end
 
           class Frequency < Dsl::Enum
-            register :notification_frequency
+            register :frequency
 
             def define
+              namespace :notification
+
               value :always, alias: 'true'
               value :never,  alias: 'false'
               value :change, alias: 'changed'

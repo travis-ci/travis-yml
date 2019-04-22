@@ -48,7 +48,7 @@ module Travis
         CHANGES = {
           all: [],
           any: [],
-          map: [Keys, Cache, Prefix, Pick, EnvVar, Enable, Inherit],
+          map: [Keys, Cache, Enable, Prefix, Pick, EnvVar, Inherit],
           seq: [Pick, Wrap, EnvVars],
           obj: [Pick, Cast, Downcase, Value],
         }

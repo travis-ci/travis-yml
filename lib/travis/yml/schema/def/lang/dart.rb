@@ -11,7 +11,6 @@ module Travis
           def define
             matrix :dart
             map :with_content_shell, to: :bool
-            super
           end
         end
       end

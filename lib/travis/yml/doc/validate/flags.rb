@@ -26,38 +26,38 @@ module Travis
               edge_value       if edge_value?
               # flagged          if schema.flagged?
               # deprecated_key   if deprecated_key?
+              deprecated       if deprecated?
               deprecated_value if deprecated_value?
               value
-            end
-
-            def edge_key
-              value.info :edge
             end
 
             def edge_key?
               schema.edge?
             end
 
-            def edge_value
-              value.info :edge, value: value.value
+            def edge_key
+              value.info :edge
             end
 
             def edge_value?
               # schema.fixed? && !!schema.values.find { |v| v.edge? && v.value == value.value }
             end
 
+            def edge_value
+              value.info :edge, value: value.value
+            end
+
             # def flagged
             #   value.info :flagged, given: value.key
             # end
-            #
-            # def deprecated_key
-            #   args = { given: value.key, info: info }
-            #   value.warn :deprecated, args
-            # end
-            #
-            # def deprecated_key?
-            #   schema.deprecated?
-            # end
+
+            def deprecated?
+              schema.deprecated?
+            end
+
+            def deprecated
+              value.warn :deprecated, deprecation: schema.deprecated
+            end
 
             def deprecated_value
               value.warn :deprecated, deprecation: :deprecated_value, value: value.value

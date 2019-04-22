@@ -29,7 +29,13 @@ module Spec
           "Expected the schema to not validate the config\n\n#{config.inspect}\n\nbut it did."
         end
 
+        DEFAULTS = {
+          language: 'ruby',
+          os: ['linux']
+        }
+
         def validate(schema)
+          config = DEFAULTS.merge(self.config)
           JSON::Validator.validate!(stringify(schema), config)
         rescue JSON::Schema::SchemaError, JSON::Schema::ValidationError => e
           @error = e.message

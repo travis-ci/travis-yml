@@ -10,11 +10,45 @@ describe Travis::Yml::Schema::Def::Erlang, 'structure' do
         title: 'Erlang',
         type: :object,
         properties: {
+          language: {
+            type: :string,
+            enum: [
+              'erlang'
+            ],
+            downcase: true,
+            defaults: [
+              {
+                value: 'ruby',
+                only: {
+                  os: [
+                    'linux',
+                    'windows'
+                  ]
+                }
+              },
+              {
+                value: 'objective-c',
+                only: {
+                  os: [
+                    'osx'
+                  ]
+                }
+              }
+            ]
+          },
           otp_release: {
             '$ref': '#/definitions/strs'
           }
         },
+        normal: true,
         keys: {
+          language: {
+            only: {
+              language: [
+                'erlang'
+              ]
+            }
+          },
           otp_release: {
             only: {
               language: [
@@ -22,8 +56,7 @@ describe Travis::Yml::Schema::Def::Erlang, 'structure' do
               ]
             }
           }
-        },
-        normal: true
+        }
       )
     end
   end

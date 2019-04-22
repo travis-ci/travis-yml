@@ -10,7 +10,6 @@ module Travis
 
           def define
             matrix :crystal
-            super
           end
         end
       end

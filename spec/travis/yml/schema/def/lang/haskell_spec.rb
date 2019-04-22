@@ -10,11 +10,45 @@ describe Travis::Yml::Schema::Def::Haskell, 'structure' do
         title: 'Haskell',
         type: :object,
         properties: {
+          language: {
+            type: :string,
+            enum: [
+              'haskell'
+            ],
+            downcase: true,
+            defaults: [
+              {
+                value: 'ruby',
+                only: {
+                  os: [
+                    'linux',
+                    'windows'
+                  ]
+                }
+              },
+              {
+                value: 'objective-c',
+                only: {
+                  os: [
+                    'osx'
+                  ]
+                }
+              }
+            ]
+          },
           ghc: {
             '$ref': '#/definitions/strs'
           }
         },
+        normal: true,
         keys: {
+          language: {
+            only: {
+              language: [
+                'haskell'
+              ]
+            }
+          },
           ghc: {
             only: {
               language: [
@@ -22,8 +56,7 @@ describe Travis::Yml::Schema::Def::Haskell, 'structure' do
               ]
             }
           }
-        },
-        normal: true
+        }
       )
     end
   end

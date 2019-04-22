@@ -27,24 +27,26 @@ module Travis
 
             def only
               support.fetch(:only, {}).each do |key, value|
-                msg(key, Array(supporting[key]) - value)
+                next if supporting(key) & value == value # multios
+                msg(key, supporting(key) - value)
               end
             end
 
             def except
               support.fetch(:except, {}).each do |key, value|
-                msg(key, Array(supporting[key]) & value)
+                next if supporting(key).-(value).any? # multios
+                msg(key, supporting(key) & value)
               end
-            end
-
-            def includes?(key, value)
-              value.include?(supporting[key].to_s)
             end
 
             def msg(key, values)
               values.each do |value|
                 @msgs << { on_key: key, on_value: value.to_s }
               end
+            end
+
+            def supporting(key)
+              Array(super()[key])
             end
         end
       end

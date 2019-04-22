@@ -54,27 +54,29 @@ module Travis
             end
 
             def all(schema)
-              join(:allOf, schema)
+              build(join(:allOf, schema))
             end
 
             def one(schema)
-              join(:oneOf, schema)
+              build(join(:oneOf, schema))
             end
 
             def join(type, schema)
-              schemas = build(schema[type])
+              objs = schema[type].map do |obj|
+                obj = resolve(obj)
+                key = %i(oneOf allOf).detect { |key| obj.key?(key) }
+                key ? join(key, obj) : obj
+              end
 
-              # hmmm. listing these keys here sucks pretty hard. which ones do
-              # we not want to merge in anyway? apparently :strict is one
-              keys = [:aliases, :keys, :prefix, :required, :unique]
-
-              opts = only(merge(*schemas.map(&:opts)), *keys)
-              joined = map(except(schema, type).merge(opts))
-              joined.map = merge(*schemas.map(&:map))
-              joined
+              obj = merge(*objs)
+              schema = except(schema, type)
+              schema = merge(schema, obj)
+              schema = schema.merge(strict: true)
+              schema
             end
 
             def any(schema)
+              return build(join(:anyOf, schema)) if schema[:$id] == :languages
               node = Any.new(normalize(schema))
               node.schemas = build(schema[:anyOf])
               node
@@ -108,7 +110,7 @@ module Travis
 
             def enum(schema) # ugh.
               schema = normalize(schema)
-              values = schema[:enum].map { |value| { value.to_sym => {} } }.inject(&:merge)
+              values = merge(*schema[:enum].map { |value| { value.to_sym => {} } })
               values = values.merge(schema[:values] || {})
               values = values.map { |key, value| { value: key.to_s }.merge(value) }
               Enum.new(except(schema, :enum).merge(values: values))
@@ -139,6 +141,10 @@ module Travis
               keys = ref.to_s.sub('#/definitions/', '').split('/').map(&:to_sym)
               defn = keys.inject(defs) { |defs, key| defs[key] || unknown(ref) }
               defn || unknown(ref)
+            end
+
+            def resolve(schema)
+              schema.key?(:'$ref') ? lookup(schema[:'$ref']) : schema
             end
 
             def unknown(ref)
@@ -181,8 +187,9 @@ module Travis
             end
 
             def strict?(schema)
+              return schema[:strict] if schema.key?(:strict)
               return false if schema.key?(:patternProperties)
-              false?(schema[:additionalProperties]) ? true : false
+              false?(schema[:additionalProperties])
             end
 
             def aliases(schema)
@@ -199,19 +206,19 @@ module Travis
               hash.reject { |key, _| keys.include?(key) }
             end
 
-            MERGE = -> (_, lft, rgt) do
-              if lft.is_a?(::Hash) && rgt.is_a?(::Hash)
-                lft.merge(rgt, &MERGE)
-              elsif lft.is_a?(::Array) && rgt.is_a?(::Array)
-                lft.dup.concat(rgt).uniq
-              else
-                rgt
-              end
-            end
-
-            def merge(*objs)
-              Array(objs).flatten.inject { |lft, rgt| lft.merge(rgt, &MERGE) } || {}
-            end
+            # MERGE = -> (_, lft, rgt) do
+            #   if lft.is_a?(::Hash) && rgt.is_a?(::Hash)
+            #     lft.merge(rgt, &MERGE)
+            #   elsif lft.is_a?(::Array) && rgt.is_a?(::Array)
+            #     lft.dup.concat(rgt).uniq
+            #   else
+            #     rgt
+            #   end
+            # end
+            #
+            # def merge(*objs)
+            #   Array(objs).flatten.inject { |lft, rgt| lft.merge(rgt, &MERGE) } || {}
+            # end
         end
       end
     end

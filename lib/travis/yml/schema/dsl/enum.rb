@@ -29,7 +29,7 @@ module Travis
           #    { osx: { alias: ['ios'], deprecated: true }
           #
           def values(*objs)
-            objs = objs.flatten
+            objs = objs.flatten.compact
 
             if objs.first.is_a?(Hash)
               node.set(:enum, to_enum(objs))

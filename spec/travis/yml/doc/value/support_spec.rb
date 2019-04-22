@@ -73,8 +73,8 @@ describe Travis::Yml::Doc::Value::Support do
 
     describe 'multios' do
       let(:os) { ['linux', 'osx'] }
-      xit { should be_supported }
-      xit { should_not have_msg }
+      it { should be_supported }
+      it { should_not have_msg }
     end
   end
 

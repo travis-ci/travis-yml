@@ -10,6 +10,32 @@ describe Travis::Yml::Schema::Def::Python, 'structure' do
         title: 'Python',
         type: :object,
         properties: {
+          language: {
+            type: :string,
+            enum: [
+              'python'
+            ],
+            downcase: true,
+            defaults: [
+              {
+                value: 'ruby',
+                only: {
+                  os: [
+                    'linux',
+                    'windows'
+                  ]
+                }
+              },
+              {
+                value: 'objective-c',
+                only: {
+                  os: [
+                    'osx'
+                  ]
+                }
+              }
+            ]
+          },
           python: {
             '$ref': '#/definitions/strs'
           },
@@ -22,7 +48,15 @@ describe Travis::Yml::Schema::Def::Python, 'structure' do
             }
           }
         },
+        normal: true,
         keys: {
+          language: {
+            only: {
+              language: [
+                'python'
+              ]
+            }
+          },
           python: {
             only: {
               language: [
@@ -40,8 +74,7 @@ describe Travis::Yml::Schema::Def::Python, 'structure' do
               ]
             }
           }
-        },
-        normal: true
+        }
       )
     end
   end

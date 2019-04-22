@@ -97,6 +97,7 @@ module Travis
               node = expand_includes(node) if node.includes?
               other = includes(node) if node.includes?
               other = prefix(other || node, node[node.prefix], node.prefix) if node.prefix?
+              other = enable(other || node) if node.change?(:enable)
               other || node
             end
 
@@ -154,6 +155,32 @@ module Travis
                 node.set :normal, ix == 0 ? true : nil
                 node.set :export, false
                 node.parent = any
+              end
+
+              any
+            end
+
+            # If the Map allows the change :enable we also want to accept a
+            # boolean.
+            #
+            # E.g.
+            #
+            #   map(change: enable) -> any(map, bool)
+            #
+            def enable(node)
+              if node.type == :any
+                any = node
+              else
+                any = node.transform(:any)
+                any.schemas = [node]
+                any.unset :changes, :keys
+              end
+
+              any.schemas << Bool.new(node.parent)
+
+              any.schemas.each.with_index do |node, ix|
+                node.set :normal, ix == 0 ? true : nil
+                node.set :export, false
               end
 
               any

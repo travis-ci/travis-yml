@@ -10,7 +10,6 @@ module Travis
 
           def define
             matrix :perl6
-            super
           end
         end
       end

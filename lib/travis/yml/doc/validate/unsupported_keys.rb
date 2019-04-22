@@ -21,10 +21,13 @@ module Travis
 
             def unsupported
               value.each do |key, value|
-                # puts
-                # p key, value.serialize
-                # p schema.support(key)
-                # p value.supporting
+                # if key == :arch
+                #   puts
+                #   p key
+                #   p value.serialize
+                #   p schema.support(key)
+                #   p value.supporting
+                # end
                 support = Value::Support.new(schema.support(key), value.supporting, key)
                 msgs(value, support.msgs) unless support.supported?
               end

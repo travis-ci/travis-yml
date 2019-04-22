@@ -10,6 +10,39 @@ describe Travis::Yml::Schema::Def::NodeJs, 'structure' do
         title: 'Node Js',
         type: :object,
         properties: {
+          language: {
+            type: :string,
+            enum: [
+              'node_js'
+            ],
+            downcase: true,
+            defaults: [
+              {
+                value: 'ruby',
+                only: {
+                  os: [
+                    'linux',
+                    'windows'
+                  ]
+                }
+              },
+              {
+                value: 'objective-c',
+                only: {
+                  os: [
+                    'osx'
+                  ]
+                }
+              }
+            ],
+            values: {
+              node_js: {
+                aliases: [
+                  'javascript'
+                ]
+              }
+            }
+          },
           node_js: {
             '$ref': '#/definitions/strs'
           },
@@ -17,7 +50,15 @@ describe Travis::Yml::Schema::Def::NodeJs, 'structure' do
             type: :string
           }
         },
+        normal: true,
         keys: {
+          language: {
+            only: {
+              language: [
+                'node_js'
+              ]
+            }
+          },
           node_js: {
             aliases: [
               :node
@@ -35,8 +76,7 @@ describe Travis::Yml::Schema::Def::NodeJs, 'structure' do
               ]
             }
           }
-        },
-        normal: true
+        }
       )
     end
   end

@@ -1,4 +1,4 @@
-describe Travis::Yml::Schema, 'accept deploy', slow: true do
+describe Travis::Yml, 'accept deploy', slow: true do
   subject { described_class.schema }
 
   xit { puts JSON.pretty_generate(subject[:definitions][:irc]) }
@@ -92,12 +92,6 @@ describe Travis::Yml::Schema, 'accept deploy', slow: true do
       it { should_not validate notifications: { irc: { template: true } } }
       it { should_not validate notifications: { irc: { template: {:foo=>'foo'} } } }
       it { should_not validate notifications: { irc: { template: [{:foo=>'foo'}] } } }
-    end
-
-    describe 'on_start' do
-      it { should validate notifications: { irc: { on_start: 'always' } } }
-      it { should_not validate notifications: { irc: { on_start: 1 } } }
-      it { should_not validate notifications: { irc: { on_start: true } } }
     end
 
     describe 'on_success' do

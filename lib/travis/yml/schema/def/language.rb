@@ -7,34 +7,34 @@ module Travis
   module Yml
     module Schema
       module Def
-        class Languages < Dsl::One
+        class Languages < Dsl::Any
           register :languages
 
           def define
             normal
-
-            Dsl::Node.registry.values.map do |const|
-              add const if const < Lang
-            end
-
+            add *Lang.registry.values
             export
           end
         end
 
         class Lang < Dsl::Lang
-          # Collecting these values globally less than ideal, but at the moment
-          # i don't see a better way to communicate language names, aliases,
-          # and options from the Lang classes to the Language class.
-          def self.values(other = nil)
-            other ? @values = Helper::Obj.merge(values, other) : @values ||= {}
-          end
+          registry :languages
 
-          def define
+          def before_define
             namespace :language
             normal
             strict false
+
+            # This sucks because now the :language key is known on deploy
+            # conditions (which need language specific keys). On the other
+            # hand, not having this key here would mean that on the JSON Schema
+            # level language specific keys would be valid on any language, not
+            # just the language that defines them.
+            map :language, values: registry_key
+          end
+
+          def after_define
             export
-            super
           end
         end
 
@@ -42,15 +42,10 @@ module Travis
           register :language
 
           def define
-            required
             downcase
 
             default :ruby,          only: { os: [:linux, :windows] }
             default :'objective-c', only: { os: [:osx] }
-
-            value *Lang.values.map { |name, opts| opts.merge(value: name) }
-
-            export
           end
         end
       end

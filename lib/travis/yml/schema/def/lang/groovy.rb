@@ -11,7 +11,6 @@ module Travis
 
           def define
             matrix :jdk, to: :jdks
-            super
           end
         end
       end

@@ -10,6 +10,32 @@ describe Travis::Yml::Schema::Def::Ruby, 'structure' do
         title: 'Ruby',
         type: :object,
         properties: {
+          language: {
+            type: :string,
+            enum: [
+              'ruby'
+            ],
+            downcase: true,
+            defaults: [
+              {
+                value: 'ruby',
+                only: {
+                  os: [
+                    'linux',
+                    'windows'
+                  ]
+                }
+              },
+              {
+                value: 'objective-c',
+                only: {
+                  os: [
+                    'osx'
+                  ]
+                }
+              }
+            ]
+          },
           rvm: {
             '$ref': '#/definitions/strs'
           },
@@ -23,7 +49,15 @@ describe Travis::Yml::Schema::Def::Ruby, 'structure' do
             type: :string
           }
         },
+        normal: true,
         keys: {
+          language: {
+            only: {
+              language: [
+                'ruby'
+              ]
+            }
+          },
           rvm: {
             aliases: [
               :ruby
@@ -63,8 +97,7 @@ describe Travis::Yml::Schema::Def::Ruby, 'structure' do
               ]
             }
           }
-        },
-        normal: true
+        }
       )
     end
   end
