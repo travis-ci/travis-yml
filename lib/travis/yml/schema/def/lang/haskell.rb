@@ -10,7 +10,6 @@ module Travis
 
           def define
             matrix :ghc
-            super
           end
         end
       end

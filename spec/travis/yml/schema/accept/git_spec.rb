@@ -1,4 +1,4 @@
-describe Travis::Yml::Schema, 'accept', slow: true do
+describe Travis::Yml, 'accept', slow: true do
   subject { described_class.schema }
 
   describe 'git' do
@@ -16,7 +16,7 @@ describe Travis::Yml::Schema, 'accept', slow: true do
     it { should_not validate git: { quiet: [ on: true ] } }
 
     it { should validate git: { depth: 1 } }
-    xit { should_not validate git: { depth: 'not-a-number' } }
+    it { should_not validate git: { depth: 'not-a-number' } }
     it { should_not validate git: { depth: [1] } }
     it { should_not validate git: { depth: { value: 1 } } }
     it { should_not validate git: { depth: [ value: 1 ] } }
@@ -28,7 +28,7 @@ describe Travis::Yml::Schema, 'accept', slow: true do
     it { should_not validate git: { submodules: [ on: true ] } }
 
     it { should validate git: { submodules_depth: 1 } }
-    xit { should_not validate git: { submodules_depth: 'not-a-number' } }
+    it { should_not validate git: { submodules_depth: 'not-a-number' } }
     it { should_not validate git: { submodules_depth: [1] } }
     it { should_not validate git: { submodules_depth: { value: 1 } } }
     it { should_not validate git: { submodules_depth: [ value: 1 ] } }
@@ -39,12 +39,12 @@ describe Travis::Yml::Schema, 'accept', slow: true do
       %i(include exclude).each do |key|
         describe 'env (on a hash)' do
           it { should validate matrix => { key => { git: { strategy: 'clone' } } } }
-          it { should_not validate matrix => { key => { git: { strategy: 'not-a-strategy' } } } }
+          xit { should_not validate matrix => { key => { git: { strategy: 'not-a-strategy' } } } }
         end
 
         describe 'env (on an array of hashes)' do
           it { should validate matrix => { key => [git: { strategy: 'clone' }] } }
-          it { should_not validate matrix => { key => [git: { strategy: 'not-a-strategy' }] } }
+          xit { should_not validate matrix => { key => [git: { strategy: 'not-a-strategy' }] } }
         end
       end
     end

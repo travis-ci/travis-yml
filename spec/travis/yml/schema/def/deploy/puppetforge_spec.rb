@@ -47,11 +47,6 @@ describe Travis::Yml::Schema::Def::Deploy::Puppetforge, 'structure' do
               :provider,
               :user,
               :password
-            ],
-            changes: [
-              {
-                change: :enable
-              }
             ]
           },
           {

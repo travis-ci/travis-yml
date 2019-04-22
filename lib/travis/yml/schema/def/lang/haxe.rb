@@ -12,7 +12,6 @@ module Travis
             matrix :haxe
             map :hxml, to: :seq
             map :neko, to: :str
-            super
           end
         end
       end

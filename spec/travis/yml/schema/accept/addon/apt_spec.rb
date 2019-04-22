@@ -1,6 +1,6 @@
 require 'json'
 
-describe Travis::Yml::Schema, 'accept', slow: true do
+describe Travis::Yml, 'accept', slow: true do
   subject { described_class.schema }
 
   describe 'apt' do
@@ -25,10 +25,7 @@ describe Travis::Yml::Schema, 'accept', slow: true do
     end
 
     describe 'dist' do
-      it { should validate addons: { apt: { dist: 'precise' } } }
-      it { should validate addons: { apt: { dist: 'xenial' } } }
-
-      it { should_not validate addons: { apt: { dist: 'not-a-dist' } } }
+      it { should validate addons: { apt: { dist: 'dist' } } }
       it { should_not validate addons: { apt: { dist: ['precise'] } } }
       it { should_not validate addons: { apt: { dist: [name: 'precise'] } } }
     end

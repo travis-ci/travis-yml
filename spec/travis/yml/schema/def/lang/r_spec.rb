@@ -10,6 +10,32 @@ describe Travis::Yml::Schema::Def::R, 'structure' do
         title: 'R',
         type: :object,
         properties: {
+          language: {
+            type: :string,
+            enum: [
+              'r'
+            ],
+            downcase: true,
+            defaults: [
+              {
+                value: 'ruby',
+                only: {
+                  os: [
+                    'linux',
+                    'windows'
+                  ]
+                }
+              },
+              {
+                value: 'objective-c',
+                only: {
+                  os: [
+                    'osx'
+                  ]
+                }
+              }
+            ]
+          },
           r: {
             '$ref': '#/definitions/strs'
           },
@@ -77,7 +103,15 @@ describe Travis::Yml::Schema::Def::R, 'structure' do
             type: :object
           }
         },
+        normal: true,
         keys: {
+          language: {
+            only: {
+              language: [
+                'r'
+              ]
+            }
+          },
           r: {
             only: {
               language: [
@@ -235,8 +269,7 @@ describe Travis::Yml::Schema::Def::R, 'structure' do
               ]
             }
           }
-        },
-        normal: true
+        }
       )
     end
   end

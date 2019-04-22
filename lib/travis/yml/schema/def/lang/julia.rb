@@ -10,7 +10,6 @@ module Travis
 
           def define
             matrix :julia
-            super
           end
         end
       end

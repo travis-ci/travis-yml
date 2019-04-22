@@ -21,8 +21,6 @@ module Travis
             map :xcode_project,   to: :str
             map :xcode_workspace, to: :str
             map :xctool_args,     to: :str
-
-            super
           end
         end
       end

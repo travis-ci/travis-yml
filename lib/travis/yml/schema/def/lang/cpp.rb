@@ -10,7 +10,6 @@ module Travis
 
           def define
             aliases :'c++'
-            super
           end
         end
       end

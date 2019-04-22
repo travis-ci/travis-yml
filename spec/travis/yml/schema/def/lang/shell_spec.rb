@@ -9,7 +9,53 @@ describe Travis::Yml::Schema::Def::Shell, 'structure' do
         '$id': :shell,
         title: 'Shell',
         type: :object,
-        normal: true
+        properties: {
+          language: {
+            type: :string,
+            enum: [
+              'shell'
+            ],
+            downcase: true,
+            defaults: [
+              {
+                value: 'ruby',
+                only: {
+                  os: [
+                    'linux',
+                    'windows'
+                  ]
+                }
+              },
+              {
+                value: 'objective-c',
+                only: {
+                  os: [
+                    'osx'
+                  ]
+                }
+              }
+            ],
+            values: {
+              shell: {
+                aliases: [
+                  'bash',
+                  'generic',
+                  'minimal'
+                ]
+              }
+            }
+          }
+        },
+        normal: true,
+        keys: {
+          language: {
+            only: {
+              language: [
+                'shell'
+              ]
+            }
+          }
+        }
       )
     end
   end

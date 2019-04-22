@@ -19,9 +19,9 @@ Gem::Specification.new do |s|
 
   s.add_dependency 'amatch', '~> 0.4.0'
   s.add_dependency 'oj', '~> 3.7.10'
-  s.add_dependency 'obj', '~> 1.0.0'
-  s.add_dependency 'memoyze', '~> 1.0.0'
-  s.add_dependency 'regstry', '~> 1.0.0'
+  s.add_dependency 'ruby-obj', '~> 1.0.0'
+  s.add_dependency 'memoyze', '~> 0.0.1'
+  s.add_dependency 'regstry', '~> 1.0.2'
   s.add_dependency 'travis-conditions', '~> 1.0.5'
   s.add_dependency 'travis-env_vars', '~> 0.1.1'
 end

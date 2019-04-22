@@ -29,12 +29,14 @@ module Travis
               if registry_key && opts.empty? && obj = Type::Node.exports[registry_key]
                 raise if opts.any?
                 obj.export? ? ref(parent, obj) : super(parent, obj)
-                # super(parent, obj)
               else
                 obj = Type::Node[type].new(parent&.node, id: registry_key)
+
                 node = super(parent, obj)
                 node.assign(opts)
+                node.before_define
                 node.define
+                node.after_define
 
                 if node.export?
                   obj = Type::Expand.apply(obj)
@@ -51,7 +53,7 @@ module Travis
             end
 
             def resolve(type)
-              type.is_a?(Class) ? type : self[type]
+              type.is_a?(Class) ? type : lookup(type)
             end
           end
 
@@ -89,7 +91,13 @@ module Travis
             is?(:str)
           end
 
+          def before_define
+          end
+
           def define
+          end
+
+          def after_define
           end
 
           def assign(opts)
@@ -117,8 +125,8 @@ module Travis
           end
           alias change changes
 
-          def deprecated(*)
-            node.set :deprecated, true
+          def deprecated(obj)
+            node.set :deprecated, obj
           end
 
           def description(description)

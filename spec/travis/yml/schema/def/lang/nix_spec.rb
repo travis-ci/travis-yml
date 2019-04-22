@@ -9,7 +9,44 @@ describe Travis::Yml::Schema::Def::Nix, 'structure' do
         '$id': :nix,
         title: 'Nix',
         type: :object,
-        normal: true
+        properties: {
+          language: {
+            type: :string,
+            enum: [
+              'nix'
+            ],
+            downcase: true,
+            defaults: [
+              {
+                value: 'ruby',
+                only: {
+                  os: [
+                    'linux',
+                    'windows'
+                  ]
+                }
+              },
+              {
+                value: 'objective-c',
+                only: {
+                  os: [
+                    'osx'
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        normal: true,
+        keys: {
+          language: {
+            only: {
+              language: [
+                'nix'
+              ]
+            }
+          }
+        }
       )
     end
   end

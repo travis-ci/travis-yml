@@ -12,7 +12,6 @@ module Travis
           def define
             aliases :jvm
             matrix :jdk, to: :jdks
-            super
           end
         end
       end

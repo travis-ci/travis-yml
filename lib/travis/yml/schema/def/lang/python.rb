@@ -11,8 +11,6 @@ module Travis
           def define
             matrix :python
             map :virtualenv, to: :virtualenv, strict: false, alias: :virtual_env
-
-            super
           end
         end
 

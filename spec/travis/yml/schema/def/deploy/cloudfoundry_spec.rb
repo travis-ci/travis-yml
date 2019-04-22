@@ -60,11 +60,6 @@ describe Travis::Yml::Schema::Def::Deploy::Cloudfoundry, 'structure' do
             prefix: :provider,
             required: [
               :provider
-            ],
-            changes: [
-              {
-                change: :enable
-              }
             ]
           },
           {

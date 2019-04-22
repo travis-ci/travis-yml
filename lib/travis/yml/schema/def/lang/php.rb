@@ -11,8 +11,6 @@ module Travis
           def define
             matrix :php
             map :composer_args, to: :str
-
-            super
           end
         end
       end

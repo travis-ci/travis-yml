@@ -10,7 +10,6 @@ module Travis
 
           def define
             matrix :rust
-            super
           end
         end
       end

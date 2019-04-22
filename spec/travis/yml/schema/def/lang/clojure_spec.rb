@@ -10,6 +10,32 @@ describe Travis::Yml::Schema::Def::Clojure, 'structure' do
         title: 'Clojure',
         type: :object,
         properties: {
+          language: {
+            type: :string,
+            enum: [
+              'clojure'
+            ],
+            downcase: true,
+            defaults: [
+              {
+                value: 'ruby',
+                only: {
+                  os: [
+                    'linux',
+                    'windows'
+                  ]
+                }
+              },
+              {
+                value: 'objective-c',
+                only: {
+                  os: [
+                    'osx'
+                  ]
+                }
+              }
+            ]
+          },
           jdk: {
             '$ref': '#/definitions/strs'
           },
@@ -17,7 +43,15 @@ describe Travis::Yml::Schema::Def::Clojure, 'structure' do
             type: :string
           }
         },
+        normal: true,
         keys: {
+          language: {
+            only: {
+              language: [
+                'clojure'
+              ]
+            }
+          },
           jdk: {
             only: {
               language: [
@@ -37,8 +71,7 @@ describe Travis::Yml::Schema::Def::Clojure, 'structure' do
               ]
             }
           }
-        },
-        normal: true
+        }
       )
     end
   end

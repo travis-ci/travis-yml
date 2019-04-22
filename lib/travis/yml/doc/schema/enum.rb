@@ -35,14 +35,6 @@ module Travis
             str && aliases.key?(str.to_sym)
           end
 
-          def deprecated?(str)
-            deprecated.include?(str)
-          end
-
-          def deprecated
-            opts[:deprecated] ||= []
-          end
-
           def strict?
             !!opts[:strict]
           end
@@ -56,9 +48,7 @@ module Travis
           end
 
           def values
-            Values.new(opts[:values].map { |value|
-              # p value
-              Value.new(value) })
+            Values.new(opts[:values].map { |value| Value.new(value) })
           end
           memoize :values
         end

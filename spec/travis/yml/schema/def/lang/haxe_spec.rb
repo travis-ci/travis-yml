@@ -10,6 +10,32 @@ describe Travis::Yml::Schema::Def::Haxe, 'structure' do
         title: 'Haxe',
         type: :object,
         properties: {
+          language: {
+            type: :string,
+            enum: [
+              'haxe'
+            ],
+            downcase: true,
+            defaults: [
+              {
+                value: 'ruby',
+                only: {
+                  os: [
+                    'linux',
+                    'windows'
+                  ]
+                }
+              },
+              {
+                value: 'objective-c',
+                only: {
+                  os: [
+                    'osx'
+                  ]
+                }
+              }
+            ]
+          },
           haxe: {
             '$ref': '#/definitions/strs'
           },
@@ -20,7 +46,15 @@ describe Travis::Yml::Schema::Def::Haxe, 'structure' do
             type: :string
           }
         },
+        normal: true,
         keys: {
+          language: {
+            only: {
+              language: [
+                'haxe'
+              ]
+            }
+          },
           haxe: {
             only: {
               language: [
@@ -42,8 +76,7 @@ describe Travis::Yml::Schema::Def::Haxe, 'structure' do
               ]
             }
           }
-        },
-        normal: true
+        }
       )
     end
   end

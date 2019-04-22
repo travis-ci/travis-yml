@@ -10,6 +10,32 @@ describe Travis::Yml::Schema::Def::Scala, 'structure' do
         title: 'Scala',
         type: :object,
         properties: {
+          language: {
+            type: :string,
+            enum: [
+              'scala'
+            ],
+            downcase: true,
+            defaults: [
+              {
+                value: 'ruby',
+                only: {
+                  os: [
+                    'linux',
+                    'windows'
+                  ]
+                }
+              },
+              {
+                value: 'objective-c',
+                only: {
+                  os: [
+                    'osx'
+                  ]
+                }
+              }
+            ]
+          },
           scala: {
             '$ref': '#/definitions/strs'
           },
@@ -20,7 +46,15 @@ describe Travis::Yml::Schema::Def::Scala, 'structure' do
             type: :string
           }
         },
+        normal: true,
         keys: {
+          language: {
+            only: {
+              language: [
+                'scala'
+              ]
+            }
+          },
           scala: {
             only: {
               language: [
@@ -47,8 +81,7 @@ describe Travis::Yml::Schema::Def::Scala, 'structure' do
               ]
             }
           }
-        },
-        normal: true
+        }
       )
     end
   end

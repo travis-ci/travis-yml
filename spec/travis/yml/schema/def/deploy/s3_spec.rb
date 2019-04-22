@@ -81,11 +81,6 @@ describe Travis::Yml::Schema::Def::Deploy::S3, 'structure' do
             prefix: :provider,
             required: [
               :provider
-            ],
-            changes: [
-              {
-                change: :enable
-              }
             ]
           },
           {

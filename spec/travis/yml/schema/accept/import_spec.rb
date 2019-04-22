@@ -1,4 +1,4 @@
-describe Travis::Yml::Schema, 'accept', slow: true do
+describe Travis::Yml, 'accept', slow: true do
   subject { described_class.schema }
 
   describe 'import' do

@@ -1,4 +1,4 @@
-describe Travis::Yml::Schema, 'accept deploy', slow: true do
+describe Travis::Yml, 'accept deploy', slow: true do
   subject { described_class.schema }
 
   xit { puts JSON.pretty_generate(subject[:definitions][:hipchat]) }
@@ -32,7 +32,7 @@ describe Travis::Yml::Schema, 'accept deploy', slow: true do
     end
 
     describe 'format' do
-      it { should validate notifications: { hipchat: { format: :hipchat } } }
+      it { should validate notifications: { hipchat: { format: 'html' } } }
       it { should_not validate notifications: { hipchat: { format: 1 } } }
       it { should_not validate notifications: { hipchat: { format: true } } }
       it { should_not validate notifications: { hipchat: { format: [:hipchat] } } }
@@ -65,12 +65,6 @@ describe Travis::Yml::Schema, 'accept deploy', slow: true do
       it { should_not validate notifications: { hipchat: { template: true } } }
       it { should_not validate notifications: { hipchat: { template: {:foo=>'foo'} } } }
       it { should_not validate notifications: { hipchat: { template: [{:foo=>'foo'}] } } }
-    end
-
-    describe 'on_start' do
-      it { should validate notifications: { hipchat: { on_start: 'always' } } }
-      it { should_not validate notifications: { hipchat: { on_start: 1 } } }
-      it { should_not validate notifications: { hipchat: { on_start: true } } }
     end
 
     describe 'on_success' do

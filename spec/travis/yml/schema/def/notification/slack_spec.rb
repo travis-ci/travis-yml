@@ -16,60 +16,7 @@ describe Travis::Yml::Schema::Def::Notification::Slack, 'structure' do
                 '$ref': '#/definitions/secures'
               },
               template: {
-                anyOf: [
-                  {
-                    type: :array,
-                    items: {
-                      type: :string,
-                      vars: [
-                        'repository',
-                        'repository_slug',
-                        'repository_name',
-                        'build_number',
-                        'build_id',
-                        'build_url',
-                        'branch',
-                        'commit',
-                        'commit_subject',
-                        'commit_message',
-                        'author',
-                        'pull_request',
-                        'pull_request_number',
-                        'pull_request_url',
-                        'compare_url',
-                        'result',
-                        'duration',
-                        'elapsed_time',
-                        'message'
-                      ]
-                    },
-                    normal: true
-                  },
-                  {
-                    type: :string,
-                    vars: [
-                      'repository',
-                      'repository_slug',
-                      'repository_name',
-                      'build_number',
-                      'build_id',
-                      'build_url',
-                      'branch',
-                      'commit',
-                      'commit_subject',
-                      'commit_message',
-                      'author',
-                      'pull_request',
-                      'pull_request_number',
-                      'pull_request_url',
-                      'compare_url',
-                      'result',
-                      'duration',
-                      'elapsed_time',
-                      'message'
-                    ]
-                  }
-                ]
+                '$ref': '#/definitions/notification/templates'
               },
               enabled: {
                 type: :boolean
@@ -81,18 +28,26 @@ describe Travis::Yml::Schema::Def::Notification::Slack, 'structure' do
                 type: :boolean
               },
               on_success: {
-                '$ref': '#/definitions/type/notification_frequency'
+                '$ref': '#/definitions/notification/frequency'
               },
               on_failure: {
-                '$ref': '#/definitions/type/notification_frequency'
+                '$ref': '#/definitions/notification/frequency'
               }
             },
             additionalProperties: false,
             normal: true,
             prefix: :rooms,
+            changes: [
+              {
+                change: :enable,
+              }
+            ]
           },
           {
             '$ref': '#/definitions/secures'
+          },
+          {
+            type: :boolean
           }
         ]
       )

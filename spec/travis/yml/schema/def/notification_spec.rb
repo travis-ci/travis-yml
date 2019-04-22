@@ -38,10 +38,10 @@ describe Travis::Yml::Schema::Def::Notification::Notifications, 'structure' do
                 '$ref': '#/definitions/notification/webhooks'
               },
               on_success: {
-                '$ref': '#/definitions/type/notification_frequency'
+                '$ref': '#/definitions/notification/frequency'
               },
               on_failure: {
-                '$ref': '#/definitions/type/notification_frequency'
+                '$ref': '#/definitions/notification/frequency'
               },
             },
             additionalProperties: false,
@@ -60,9 +60,6 @@ describe Travis::Yml::Schema::Def::Notification::Notifications, 'structure' do
               }
             },
             changes: [
-              {
-                change: :enable,
-              },
               {
                 change: :inherit,
                 keys: [:on_success, :on_failure]

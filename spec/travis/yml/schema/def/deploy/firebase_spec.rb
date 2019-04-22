@@ -45,11 +45,6 @@ describe Travis::Yml::Schema::Def::Deploy::Firebase, 'structure' do
             prefix: :provider,
             required: [
               :provider
-            ],
-            changes: [
-              {
-                change: :enable
-              }
             ]
           },
           {

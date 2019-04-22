@@ -24,7 +24,7 @@ module Travis
             end
 
             def default?
-              schema.defaults? && value.missing? && supported?
+              schema.default? && value.missing? && supported?
             end
 
             def invalid_type?

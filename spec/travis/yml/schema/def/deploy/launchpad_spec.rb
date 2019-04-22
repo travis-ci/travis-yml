@@ -48,11 +48,6 @@ describe Travis::Yml::Schema::Def::Deploy::Launchpad, 'structure' do
               :slug,
               :oauth_token,
               :oauth_token_secret
-            ],
-            changes: [
-              {
-                change: :enable
-              }
             ]
           },
           {

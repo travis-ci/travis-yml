@@ -9,7 +9,6 @@ module Travis
           register :c
 
           def define
-            super
           end
         end
       end

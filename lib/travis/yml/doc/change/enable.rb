@@ -8,27 +8,17 @@ module Travis
       module Change
         class Enable < Base
           def apply
-            other = apply? && enable? ? enable : value
-            other
+            apply? ? enable : value
           end
 
           def apply?
-            schema.map? && schema.change?(:enable)
-          end
-
-          def enable?
-            value.map?
+            schema.change?(:enable)
           end
 
           def enable
-            other = value.map do |key, value|
-              next [key, value] unless child = schema[key]
-              next [key, value] unless child = Schema.detect(child, build({})) if child.is?(:any) # hmmm.
-              other = Enable.new(child, value).apply
-              other = Normalize.new(child, other).apply
-              [key, other || value]
-            end
-            other = build(other.to_h)
+            other = value
+            other = Enable.new(schema, other).apply
+            other = Normalize.new(schema, other).apply
             other
           end
 

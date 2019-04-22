@@ -1,4 +1,4 @@
-describe Travis::Yml::Schema, 'accept deploy', slow: true do
+describe Travis::Yml, 'accept deploy', slow: true do
   subject { described_class.schema }
 
   xit { puts JSON.pretty_generate(subject[:definitions][:campfire]) }
@@ -38,12 +38,6 @@ describe Travis::Yml::Schema, 'accept deploy', slow: true do
       it { should_not validate notifications: { campfire: { template: true } } }
       it { should_not validate notifications: { campfire: { template: {:foo=>'foo'} } } }
       it { should_not validate notifications: { campfire: { template: [{:foo=>'foo'}] } } }
-    end
-
-    describe 'on_start' do
-      it { should validate notifications: { campfire: { on_start: 'always' } } }
-      it { should_not validate notifications: { campfire: { on_start: 1 } } }
-      it { should_not validate notifications: { campfire: { on_start: true } } }
     end
 
     describe 'on_success' do

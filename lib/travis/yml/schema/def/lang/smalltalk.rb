@@ -12,7 +12,6 @@ module Travis
             matrix :smalltalk
             map :smalltalk_config, to: :seq
             map :smalltalk_edge,   to: :bool
-            super
           end
         end
       end

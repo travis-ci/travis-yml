@@ -54,11 +54,6 @@ describe Travis::Yml::Schema::Def::Deploy::Scalingo, 'structure' do
             prefix: :provider,
             required: [
               :provider
-            ],
-            changes: [
-              {
-                change: :enable
-              }
             ]
           },
           {

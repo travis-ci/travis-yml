@@ -21,8 +21,8 @@ describe Travis::Yml, 'jdk' do
       jdk: default
     )
 
-    xit { should serialize_to language: 'ruby', os: ['linux', 'osx'], jdk: ['default'] }
-    xit { should_not have_msg }
+    it { should serialize_to language: 'ruby', os: ['linux', 'osx'], jdk: ['default'] }
+    it { should_not have_msg }
   end
 
   describe 'on osx' do

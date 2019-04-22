@@ -10,6 +10,40 @@ describe Travis::Yml::Schema::Def::ObjectiveC, 'structure' do
         title: 'Objective-c',
         type: :object,
         properties: {
+          language: {
+            type: :string,
+            enum: [
+              'objective-c'
+            ],
+            downcase: true,
+            defaults: [
+              {
+                value: 'ruby',
+                only: {
+                  os: [
+                    'linux',
+                    'windows'
+                  ]
+                }
+              },
+              {
+                value: 'objective-c',
+                only: {
+                  os: [
+                    'osx'
+                  ]
+                }
+              }
+            ],
+            values: {
+              'objective-c': {
+                aliases: [
+                  'objective_c',
+                  'swift'
+                ]
+              }
+            }
+          },
           rvm: {
             '$ref': '#/definitions/strs'
           },
@@ -38,7 +72,15 @@ describe Travis::Yml::Schema::Def::ObjectiveC, 'structure' do
             type: :string
           }
         },
+        normal: true,
         keys: {
+          language: {
+            only: {
+              language: [
+                'objective-c'
+              ]
+            }
+          },
           rvm: {
             aliases: [
               :ruby
@@ -105,8 +147,7 @@ describe Travis::Yml::Schema::Def::ObjectiveC, 'structure' do
               ]
             }
           }
-        },
-        normal: true
+        }
       )
     end
   end

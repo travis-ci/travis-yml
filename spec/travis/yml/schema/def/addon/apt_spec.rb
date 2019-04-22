@@ -71,10 +71,18 @@ describe Travis::Yml::Schema::Def::Addon::Apt, 'structure' do
                 ]
               }
             },
-            normal: true
+            normal: true,
+            changes: [
+              {
+                change: :enable
+              }
+            ],
           },
           {
             '$ref': '#/definitions/strs'
+          },
+          {
+            type: :boolean
           }
         ]
       )

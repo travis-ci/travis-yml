@@ -17,6 +17,10 @@ module Travis
           def self.type
             :enum
           end
+
+          def strict?
+            false?(opts[:strict]) ? false : true
+          end
         end
       end
     end

@@ -39,11 +39,6 @@ describe Travis::Yml::Schema::Def::Deploy::Cloud66, 'structure' do
             prefix: :provider,
             required: [
               :provider
-            ],
-            changes: [
-              {
-                change: :enable
-              }
             ]
           },
           {

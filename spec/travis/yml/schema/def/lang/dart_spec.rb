@@ -10,6 +10,32 @@ describe Travis::Yml::Schema::Def::Dart, 'structure' do
         title: 'Dart',
         type: :object,
         properties: {
+          language: {
+            type: :string,
+            enum: [
+              'dart'
+            ],
+            downcase: true,
+            defaults: [
+              {
+                value: 'ruby',
+                only: {
+                  os: [
+                    'linux',
+                    'windows'
+                  ]
+                }
+              },
+              {
+                value: 'objective-c',
+                only: {
+                  os: [
+                    'osx'
+                  ]
+                }
+              }
+            ]
+          },
           dart: {
             '$ref': '#/definitions/strs'
           },
@@ -17,7 +43,15 @@ describe Travis::Yml::Schema::Def::Dart, 'structure' do
             type: :boolean
           }
         },
+        normal: true,
         keys: {
+          language: {
+            only: {
+              language: [
+                'dart'
+              ]
+            }
+          },
           dart: {
             only: {
               language: [
@@ -32,8 +66,7 @@ describe Travis::Yml::Schema::Def::Dart, 'structure' do
               ]
             }
           }
-        },
-        normal: true
+        }
       )
     end
   end

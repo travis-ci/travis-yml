@@ -1,6 +1,6 @@
 require 'json'
 
-describe Travis::Yml::Schema, 'accept', slow: true do
+describe Travis::Yml, 'accept', slow: true do
   subject { described_class.schema }
 
   describe 'artifacts' do
@@ -95,9 +95,9 @@ describe Travis::Yml::Schema, 'accept', slow: true do
     end
 
     describe 'concurrency' do
-      it { should validate addons: { artifacts: { concurrency: 'str' } } }
+      it { should validate addons: { artifacts: { concurrency: 1 } } }
 
-      it { should_not validate addons: { artifacts: { concurrency: 1 } } }
+      it { should_not validate addons: { artifacts: { concurrency: 'str' } } }
       it { should_not validate addons: { artifacts: { concurrency: true } } }
       it { should_not validate addons: { artifacts: { concurrency: ['str'] } } }
       it { should_not validate addons: { artifacts: { concurrency: { name: 'str' } } } }
@@ -105,9 +105,8 @@ describe Travis::Yml::Schema, 'accept', slow: true do
     end
 
     describe 'max_size' do
-      it { should validate addons: { artifacts: { max_size: 'str' } } }
-
-      it { should_not validate addons: { artifacts: { max_size: 1 } } }
+      it { should validate addons: { artifacts: { max_size: 1 } } }
+      it { should_not validate addons: { artifacts: { max_size: 'str' } } }
       it { should_not validate addons: { artifacts: { max_size: true } } }
       it { should_not validate addons: { artifacts: { max_size: ['str'] } } }
       it { should_not validate addons: { artifacts: { max_size: { name: 'str' } } } }

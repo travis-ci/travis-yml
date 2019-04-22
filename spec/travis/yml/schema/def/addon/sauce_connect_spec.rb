@@ -8,29 +8,42 @@ describe Travis::Yml::Schema::Def::Addon::SauceConnect, 'structure' do
       should eq(
         '$id': :sauce_connect,
         title: 'Sauce Connect',
-        type: :object,
-        properties: {
-          enabled: {
+        normal: true,
+        anyOf: [
+          {
+            type: :object,
+            properties: {
+              enabled: {
+                type: :boolean
+              },
+              username: {
+                '$ref': '#/definitions/secure'
+              },
+              access_key: {
+                '$ref': '#/definitions/secure'
+              },
+              direct_domains: {
+                type: :string
+              },
+              tunnel_domains: {
+                type: :string
+              },
+              no_ssl_bump_domains: {
+                type: :string
+              }
+            },
+            additionalProperties: false,
+            normal: true,
+            changes: [
+              {
+                change: :enable
+              }
+            ],
+          },
+          {
             type: :boolean
-          },
-          username: {
-            '$ref': '#/definitions/secure'
-          },
-          access_key: {
-            '$ref': '#/definitions/secure'
-          },
-          direct_domains: {
-            type: :string
-          },
-          tunnel_domains: {
-            type: :string
-          },
-          no_ssl_bump_domains: {
-            type: :string
           }
-        },
-        additionalProperties: false,
-        normal: true
+        ]
       )
     end
   end

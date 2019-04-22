@@ -210,23 +210,23 @@ describe Travis::Yml, 'deploy' do
     describe 'branch specific option hashes (holy shit. example for a valid hash from travis-build)' do
       yaml %(
         deploy:
-          provider: heroku
-          on:
-            branch:
-              production:
-                bucket: production_branch
+          - provider: heroku
+            on:
+              branch:
+                production:
+                  bucket: production_branch
       )
-      xit { should serialize_to deploy: [provider: 'heroku', on: { branch: { production: { bucket: 'production_branch' } } }] }
-      xit { should_not have_msg }
+      it { should serialize_to deploy: [provider: 'heroku', on: { branch: { production: { bucket: 'production_branch' } } }] }
+      it { should have_msg [:warn, :'deploy.on.branch', :deprecated, deprecation: :branch_specific_option_hash] }
     end
 
     # kinda hard to support if we want strict structure on deploy keys
     describe 'option specific branch hashes (deprecated, according to travis-build)' do
       yaml %(
         deploy:
-          provider: heroku
-          run:
-            production: production
+          - provider: heroku
+            run:
+              production: production
       )
       xit { should serialize_to deploy: [provider: 'heroku', run: { production: 'production' }] }
       xit { should have_msg [:warn, :'deploy.run', :deprecated, given: :run, info: :branch_specific_option_hash] }
@@ -278,7 +278,7 @@ describe Travis::Yml, 'deploy' do
       # downstream code will probably be happy with this anyway, but we should
       # check travis-build and dpl
       it { should serialize_to deploy: [provider: 'heroku', edge: { enabled: true }] }
-      it { should_not have_msg }
+      it { should have_msg [:info, :'deploy.edge', :edge] }
     end
 
     describe 'given a map' do

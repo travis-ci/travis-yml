@@ -10,11 +10,45 @@ describe Travis::Yml::Schema::Def::Perl, 'structure' do
         title: 'Perl',
         type: :object,
         properties: {
+          language: {
+            type: :string,
+            enum: [
+              'perl'
+            ],
+            downcase: true,
+            defaults: [
+              {
+                value: 'ruby',
+                only: {
+                  os: [
+                    'linux',
+                    'windows'
+                  ]
+                }
+              },
+              {
+                value: 'objective-c',
+                only: {
+                  os: [
+                    'osx'
+                  ]
+                }
+              }
+            ]
+          },
           perl: {
             '$ref': '#/definitions/strs'
           }
         },
+        normal: true,
         keys: {
+          language: {
+            only: {
+              language: [
+                'perl'
+              ]
+            }
+          },
           perl: {
             only: {
               language: [
@@ -22,8 +56,7 @@ describe Travis::Yml::Schema::Def::Perl, 'structure' do
               ]
             }
           }
-        },
-        normal: true
+        }
       )
     end
   end

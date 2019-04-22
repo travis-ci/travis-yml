@@ -12,7 +12,6 @@ module Travis
           def define
             matrix :jdk, to: :jdks
             map :android, to: AndroidConfig
-            super
           end
         end
 

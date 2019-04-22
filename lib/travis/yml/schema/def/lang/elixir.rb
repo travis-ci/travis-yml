@@ -11,7 +11,6 @@ module Travis
           def define
             matrix :elixir
             matrix :otp_release
-            super
           end
         end
       end

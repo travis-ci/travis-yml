@@ -1,10 +1,9 @@
-describe Travis::Yml::Schema, 'accept', slow: true do
+describe Travis::Yml, 'accept', slow: true do
   subject { described_class.schema }
 
   describe 'branches' do
-    # TODO Turn a map with a prefix into an Any (like Seq)
-    xit { should validate branches: 'master' }
-    xit { should validate branches: ['master'] }
+    it { should validate branches: 'master' }
+    it { should validate branches: ['master'] }
 
     it { should validate branches: { only: 'master' } }
     it { should validate branches: { only: ['master'] } }

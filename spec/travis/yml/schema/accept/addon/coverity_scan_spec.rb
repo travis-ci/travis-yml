@@ -1,17 +1,18 @@
 require 'json'
 
-describe Travis::Yml::Schema, 'accept', slow: true do
+describe Travis::Yml, 'accept', slow: true do
   subject { described_class.schema }
 
   describe 'coverity_scan' do
     describe 'project' do
+      it { should validate addons: { coverity_scan: { project: 'str' } } }
+
       it { should validate addons: { coverity_scan: { project: { name: 'str' } } } }
       it { should validate addons: { coverity_scan: { project: { name: 'str', version: 'str' } } } }
       it { should validate addons: { coverity_scan: { project: { name: 'str', description: 'str' } } } }
 
       it { should_not validate addons: { coverity_scan: { project: 1 } } }
       it { should_not validate addons: { coverity_scan: { project: true } } }
-      it { should_not validate addons: { coverity_scan: { project: 'str' } } }
       it { should_not validate addons: { coverity_scan: { project: ['str'] } } }
       it { should_not validate addons: { coverity_scan: { project: { unknown: 'str' } } } }
       it { should_not validate addons: { coverity_scan: { project: [ name: 'str' ] } } }

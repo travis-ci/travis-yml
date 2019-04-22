@@ -10,7 +10,6 @@ module Travis
 
           def define
             matrix :d
-            super
           end
         end
       end

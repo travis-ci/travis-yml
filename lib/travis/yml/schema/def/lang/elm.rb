@@ -12,7 +12,6 @@ module Travis
             matrix :elm
             map :elm_format, to: :str
             map :elm_test,   to: :str
-            super
           end
         end
       end

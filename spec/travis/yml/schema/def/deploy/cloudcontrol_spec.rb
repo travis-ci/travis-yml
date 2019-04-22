@@ -45,11 +45,6 @@ describe Travis::Yml::Schema::Def::Deploy::Cloudcontrol, 'structure' do
             prefix: :provider,
             required: [
               :provider
-            ],
-            changes: [
-              {
-                change: :enable
-              }
             ]
           },
           {

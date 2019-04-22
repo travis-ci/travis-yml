@@ -28,6 +28,8 @@ module Travis
 
             include :job
 
+            strict false
+
             map    :version
             map    :import,         to: :imports
             map    :language

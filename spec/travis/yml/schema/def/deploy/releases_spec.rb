@@ -63,11 +63,6 @@ describe Travis::Yml::Schema::Def::Deploy::Releases, 'structure' do
             prefix: :provider,
             required: [
               :provider
-            ],
-            changes: [
-              {
-                change: :enable
-              }
             ]
           },
           {

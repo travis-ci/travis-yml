@@ -1,4 +1,4 @@
-describe Travis::Yml::Schema, 'accept deploy', slow: true do
+describe Travis::Yml, 'accept deploy', slow: true do
   subject { described_class.schema }
 
   xit { puts JSON.pretty_generate(subject[:definitions][:releases]) }
@@ -42,9 +42,9 @@ describe Travis::Yml::Schema, 'accept deploy', slow: true do
 
     describe 'file' do
       it { should validate deploy: { provider: :releases, file: 'str' } }
+      it { should validate deploy: { provider: :releases, file: ['str'] } }
       it { should_not validate deploy: { provider: :releases, file: 1 } }
       it { should_not validate deploy: { provider: :releases, file: true } }
-      it { should_not validate deploy: { provider: :releases, file: ['str'] } }
       it { should_not validate deploy: { provider: :releases, file: {:foo=>'foo'} } }
       it { should_not validate deploy: { provider: :releases, file: [{:foo=>'foo'}] } }
     end

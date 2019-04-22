@@ -9,7 +9,44 @@ describe Travis::Yml::Schema::Def::C, 'structure' do
         '$id': :c,
         title: 'C',
         type: :object,
-        normal: true
+        properties: {
+          language: {
+            type: :string,
+            enum: [
+              'c'
+            ],
+            downcase: true,
+            defaults: [
+              {
+                value: 'ruby',
+                only: {
+                  os: [
+                    'linux',
+                    'windows'
+                  ]
+                }
+              },
+              {
+                value: 'objective-c',
+                only: {
+                  os: [
+                    'osx'
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        normal: true,
+        keys: {
+          language: {
+            only: {
+              language: [
+                'c'
+              ]
+            }
+          }
+        }
       )
     end
   end

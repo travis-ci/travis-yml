@@ -98,6 +98,7 @@ describe Travis::Yml::Schema::Def::Root, 'structure' do
           deploy_branches
           deploy_conditions
           deploy_edge
+          deploy_providers
           deploys
           dist
           env
@@ -108,13 +109,11 @@ describe Travis::Yml::Schema::Def::Root, 'structure' do
           import
           imports
           job
-          language
           languages
           matrix
           matrix_entries
           matrix_entry
           notifications
-          notification_frequency
           os
           oss
           service
@@ -223,10 +222,13 @@ describe Travis::Yml::Schema::Def::Root, 'structure' do
           campfire
           email
           flowdock
+          frequency
           hipchat
           irc
           pushover
           slack
+          template
+          templates
           webhooks
         )
       }
@@ -287,7 +289,7 @@ describe Travis::Yml::Schema::Def::Root, 'structure' do
       it { should include dist:           { '$ref': '#/definitions/type/dist' } }
       it { should include env:            { '$ref': '#/definitions/type/env' } }
       it { should include import:         { '$ref': '#/definitions/type/imports' } }
-      it { should include language:       { '$ref': '#/definitions/type/language' } }
+      # it { should include language:       { '$ref': '#/definitions/type/language' } }
       it { should include matrix:         { '$ref': '#/definitions/type/matrix' } }
       it { should include notifications:  { '$ref': '#/definitions/type/notifications' } }
       it { should include os:             { '$ref': '#/definitions/type/oss' } }
@@ -302,12 +304,12 @@ describe Travis::Yml::Schema::Def::Root, 'structure' do
     describe 'map' do
       subject { Travis::Yml.schema[:allOf][0] }
 
-      it do
-        should include required: [
-          :language,
-          :os
-        ]
-      end
+      # it do
+      #   should include required: [
+      #     :language,
+      #     :os
+      #   ]
+      # end
 
       it do
         should include keys: {

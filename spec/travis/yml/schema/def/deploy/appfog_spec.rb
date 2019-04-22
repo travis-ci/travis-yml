@@ -84,11 +84,6 @@ describe Travis::Yml::Schema::Def::Deploy::Appfog, 'structure' do
             prefix: :provider,
             required: [
               :provider
-            ],
-            changes: [
-              {
-                change: :enable
-              }
             ]
           },
           {
