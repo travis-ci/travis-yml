@@ -1,13 +1,12 @@
 # frozen_string_literal: true
 require 'registry'
-require 'travis/yml/support/memoize'
 
 module Travis
   module Yml
     module Doc
       module Validate
         class Base < Obj.new(:schema, :value, :opts)
-          include Memoize, Registry
+          include Registry
 
           OBJS = {
             map:  {},

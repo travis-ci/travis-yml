@@ -1,4 +1,4 @@
-describe Travis::Yml::Schema::Type::Expand, 'seq', skip: true do
+describe Travis::Yml::Schema::Type::Expand, 'seq' do
   describe 'a seq' do
     let(:dsl) { Travis::Yml::Schema::Dsl::Seq.new }
 
@@ -11,13 +11,14 @@ describe Travis::Yml::Schema::Type::Expand, 'seq', skip: true do
       dsl.export
     end
 
-    describe 'given :strt' do
+    describe 'given :str' do
       let(:types) { [:str] }
 
       it do
         should eq(
           {
             type: :ref,
+            export: true,
             ref: 'strs',
           }
         )
@@ -31,6 +32,7 @@ describe Travis::Yml::Schema::Type::Expand, 'seq', skip: true do
         should eq(
           {
             type: :ref,
+            export: true,
             ref: 'strs',
             flags: [
               :edge
@@ -47,6 +49,7 @@ describe Travis::Yml::Schema::Type::Expand, 'seq', skip: true do
         should eq(
           {
             type: :any,
+            export: true,
             schemas: [
               {
                 type: :seq,
@@ -80,49 +83,42 @@ describe Travis::Yml::Schema::Type::Expand, 'seq', skip: true do
         should eq(
           {
             type: :any,
+            export: true,
             schemas: [
               {
                 type: :seq,
-                schemas: [
-                  {
-                    type: :any,
-                    schemas: [
-                      {
-                        type: :map,
-                        opts: {
-                          prefix: :foo
-                        },
-                        map: {
-                          foo: {
-                            type: :str
-                          }
-                        }
-                      },
-                      {
-                        type: :str
-                      }
-                    ]
-                  }
-                ]
-              },
-              {
-                type: :any,
+                normal: true,
                 schemas: [
                   {
                     type: :map,
-                    opts: {
-                      prefix: :foo
-                    },
+                    prefix: :foo,
                     map: {
                       foo: {
                         type: :str
                       }
                     }
-                  },
+                  }
+                ]
+              },
+              {
+                type: :map,
+                prefix: :foo,
+                map: {
+                  foo: {
+                    type: :str
+                  }
+                }
+              },
+              {
+                type: :seq,
+                schemas: [
                   {
                     type: :str
                   }
                 ]
+              },
+              {
+                type: :str
               }
             ]
           }

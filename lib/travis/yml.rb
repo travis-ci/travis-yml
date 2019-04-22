@@ -1,12 +1,14 @@
 # frozen_string_literal: true
+require 'obj'
+require 'memoize'
 require 'travis/yml/helper/obj'
-require 'travis/yml/support/obj'
 
-Obj.include Travis::Yml::Helper::Obj
+Obj.include Memoize, Travis::Yml::Helper::Obj
 
 require 'yaml'
 require 'travis/yml/errors'
 require 'travis/yml/doc'
+require 'travis/yml/docs'
 require 'travis/yml/helper/deyaml'
 require 'travis/yml/load'
 require 'travis/yml/matrix'
@@ -75,7 +77,7 @@ module Travis
       memoize :expand
 
       def schema
-        bench { Schema.schema }
+        bench { Schema.json }
       end
       memoize :schema
 

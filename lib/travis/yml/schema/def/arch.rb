@@ -10,6 +10,12 @@ module Travis
           register :archs
 
           def define
+            title 'Architectures'
+
+            description <<~str
+              The architectures that will be selected for the build environments.
+            str
+
             normal
             type Arch
             export

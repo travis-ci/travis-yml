@@ -9,18 +9,25 @@ describe Travis::Yml::Schema::Def::Archs, 'structure' do
       it do
         should eq(
           '$id': :archs,
-          title: 'Archs',
+          title: 'Architectures',
+          description: 'The architectures that will be selected for the build environments.',
           anyOf: [
             {
               type: :array,
               items: {
                 '$ref': '#/definitions/type/arch'
               },
+              flags: [
+                :expand
+              ],
               normal: true,
             },
             {
               '$ref': '#/definitions/type/arch'
             }
+          ],
+          flags: [
+            :expand
           ]
         )
       end

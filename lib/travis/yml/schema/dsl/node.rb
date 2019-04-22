@@ -110,8 +110,9 @@ module Travis
 
           def changes(*objs)
             objs = objs.flatten
-            opts = objs.last.is_a?(Hash) ? objs.pop : {}
-            changes = objs.map { |obj| { change: obj }.merge(opts) }
+            opts = objs.last.is_a?(Hash) && !objs.last.key?(:change) ? objs.pop : {}
+            changes = objs.map { |obj| obj.is_a?(Hash) ? obj : { change: obj } }
+            changes = changes.map { |obj| obj.merge(opts) }
             node.set :changes, changes
           end
           alias change changes
@@ -125,7 +126,7 @@ module Travis
           end
 
           def expand(*)
-            raise
+            node.set :flags, [:expand]
           end
 
           def export?

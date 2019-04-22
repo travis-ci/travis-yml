@@ -3,7 +3,7 @@ describe Travis::Yml::Schema::Def::Notification::Notifications, 'structure' do
     subject { Travis::Yml.schema[:definitions][:type][:notifications] }
     # subject { described_class.new.definitions[:type][:notifications] }
 
-    xit { puts JSON.pretty_generate(subject) }
+    # it { puts JSON.pretty_generate(subject) }
 
     it do
       should eq(

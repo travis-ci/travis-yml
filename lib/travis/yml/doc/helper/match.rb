@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 require 'amatch'
-require 'travis/yml/support/obj'
 
 module Travis
   module Yml

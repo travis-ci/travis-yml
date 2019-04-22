@@ -16,5 +16,5 @@ RSpec.configure do |c|
   c.include Spec::Support::Node
   c.include Spec::Support::Yaml
 
-  c.before(:suite) { Travis::Yml.write }
+  # c.before(:suite) { Travis::Yml.write }
 end

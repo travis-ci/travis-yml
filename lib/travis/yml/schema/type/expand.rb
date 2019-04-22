@@ -228,7 +228,8 @@ module Travis
             # return the reference to these.
             #
             def ref(ref, node)
-              ref = node.transform(:ref, ref: ref)
+              opts = merge(node.opts, *node.schemas.map(&:opts))
+              ref = node.transform(:ref, opts.merge(ref: ref))
               ref.set :namespace, node.namespace # ??
               ref
             end

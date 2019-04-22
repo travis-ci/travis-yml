@@ -10,7 +10,6 @@ require 'travis/yml/doc/change/pick'
 require 'travis/yml/doc/change/prefix'
 require 'travis/yml/doc/change/value'
 require 'travis/yml/doc/change/wrap'
-require 'travis/yml/support/obj'
 
 module Travis
   module Yml

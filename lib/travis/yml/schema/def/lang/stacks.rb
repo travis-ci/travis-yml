@@ -11,7 +11,7 @@ module Travis
             register :"__#{stack}__"
 
             def define
-              # internal
+              internal
               deprecated
               super
             end

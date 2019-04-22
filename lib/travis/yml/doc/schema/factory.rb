@@ -1,6 +1,4 @@
 # frozen_string_literal: true
-require 'travis/yml/support/obj'
-
 module Travis
   module Yml
     module Doc
@@ -110,8 +108,8 @@ module Travis
 
             def enum(schema) # ugh.
               schema = normalize(schema)
-              values = schema[:enum].map { |value| { value => {} } }.inject(&:merge)
-              values = values.merge(stringify(schema[:values] || {}))
+              values = schema[:enum].map { |value| { value.to_sym => {} } }.inject(&:merge)
+              values = values.merge(schema[:values] || {})
               values = values.map { |key, value| { value: key.to_s }.merge(value) }
               Enum.new(except(schema, :enum).merge(values: values))
             end

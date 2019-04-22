@@ -8,8 +8,17 @@ module Travis
         class Ref < Node
           register :ref
 
+          def examples
+            []
+          end
+
+          def example
+            "[ref:#{node.ref}]"
+          end
+
           def expand
-            build(node.lookup).expand
+            other = node.lookup
+            other ? build(other).expand : self
           end
         end
       end

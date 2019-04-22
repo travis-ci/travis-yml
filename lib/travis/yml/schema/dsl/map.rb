@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'travis/yml/schema/dsl/mapping'
-
 module Travis
   module Yml
     module Schema
@@ -15,7 +13,7 @@ module Travis
 
           def matrix(key, opts = {})
             node.root.expand(key)
-            map(key, opts)
+            map(key, opts.merge(expand: key))
           end
 
           def maps(*keys)
