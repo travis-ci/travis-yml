@@ -13,7 +13,7 @@ if Travis::Yaml::Web::Env.staging?
 end
 
 use Rack::SslEnforcer if Travis::Yaml::Web::Env.production?
-use Travis::Yaml::Web::BasicAuth
+use Travis::Yaml::Web::BasicAuth unless Travis::Yaml::Web::Env.test?
 
 if ENV['SENTRY_DSN']
   Raven.configure do |config|

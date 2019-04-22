@@ -3,23 +3,6 @@ describe Travis::Yml::Schema::Dsl::Node do
 
   subject { dsl.node}
 
-  describe 'caching' do
-    let(:const) do
-      Class.new(described_class[:str]) do
-        register :foo
-
-        def define
-          edge
-          export
-        end
-      end
-    end
-
-    # it do
-    #   puts Travis::Yml::Schema::Type::Node.exports[:foo].dump
-    # end
-  end
-
   describe 'changes' do
     describe 'given a strs' do
       before { dsl.change :one, :two }
@@ -54,14 +37,14 @@ describe Travis::Yml::Schema::Dsl::Node do
 
   describe 'required' do
     before { dsl.required }
-    xit { should be_required }
-    xit { should_not have_opts }
+    it { should be_required }
+    it { should_not have_opts }
   end
 
   describe 'unique' do
     before { dsl.unique }
-    xit { should be_unique }
-    xit { should_not have_opts }
+    it { should be_unique }
+    it { should_not have_opts }
   end
 
   describe 'only' do

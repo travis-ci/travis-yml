@@ -3,7 +3,7 @@ require 'erb'
 require 'travis/yml'
 
 AI = {
-  indent:        -2,      # Number of spaces for indenting.
+  indent:        -2,     # Number of spaces for indenting.
   index:         false,  # Display array indices.
   multiline:     true,   # Display in multiple lines.
   plain:         true,   # Use colors.

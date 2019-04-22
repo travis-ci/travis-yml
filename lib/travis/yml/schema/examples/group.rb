@@ -9,13 +9,13 @@ module Travis
           register :seq
         end
 
-        # class All < Group
-        #   register :all
-        # end
-        #
-        # class One < Group
-        #   register :one
-        # end
+        class All < Group
+          register :all
+        end
+
+        class One < Group
+          register :one
+        end
 
         class Any < Group
           register :any

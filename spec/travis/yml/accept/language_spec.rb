@@ -7,12 +7,14 @@ describe Travis::Yml, 'language' do
     it { should have_msg [:info, :language, :default, default: 'ruby'] }
   end
 
-  Travis::Yml::Schema::Def::Lang.registry.keys.each do |language|
+  langs = Travis::Yml::Schema::Def::Lang.registry
+  langs = langs.select { |key, const| const < Travis::Yml::Schema::Def::Lang }
+  langs.each do |language, const|
     describe 'known' do
       yaml %(
         language: #{language}
       )
-      xit { should serialize_to language: language.to_s }
+      it { should serialize_to language: language.to_s }
     end
   end
 

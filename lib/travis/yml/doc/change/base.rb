@@ -1,14 +1,9 @@
 # frozen_string_literal: true
-require 'travis/yml/support/obj'
-require 'travis/yml/support/memoize'
-
 module Travis
   module Yml
     module Doc
       module Change
         class Base < Obj.new(:schema, :value, opts: {})
-          include Memoize
-
           def build(*args)
             args = [value.parent, value.key, *args, value.opts] if args.size == 1
             Doc::Value.build(*args)

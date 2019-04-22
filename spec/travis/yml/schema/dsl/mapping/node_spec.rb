@@ -16,7 +16,7 @@ describe Travis::Yml::Schema::Dsl::Map, 'mapping a node' do
 
     describe 'given a change with opts' do
       let(:define) { -> { map :foo, to: :str, change: { change: :one, foo: :bar } } }
-      xit { expect(foo).to have_opts changes: [{ change: :one, foo: :bar }] }
+      it { expect(foo).to have_opts changes: [{ change: :one, foo: :bar }] }
       it { expect(map).to_not have_opts }
     end
   end

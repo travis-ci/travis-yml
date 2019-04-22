@@ -20,13 +20,16 @@ describe Travis::Yml::Schema::Def::Env, 'structure' do
                   '$ref': '#/definitions/type/env_vars'
                 }
               },
+              additionalProperties: false,
               normal: true,
               prefix: :matrix,
-              additionalProperties: false
             },
             {
               '$ref': '#/definitions/type/env_vars'
             }
+          ],
+          flags: [
+            :expand
           ]
         )
       end
@@ -55,7 +58,7 @@ describe Travis::Yml::Schema::Def::Env, 'structure' do
             {
               '$ref': '#/definitions/type/env_var'
             }
-          ]
+          ],
         )
       end
     end

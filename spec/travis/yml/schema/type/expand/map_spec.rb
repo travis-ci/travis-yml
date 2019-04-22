@@ -1,4 +1,4 @@
-describe Travis::Yml::Schema::Type::Expand, 'map', skip: true do
+describe Travis::Yml::Schema::Type::Expand, 'map' do
   describe 'a map' do
     let(:dsl)  { Travis::Yml::Schema::Dsl::Map.new }
 
@@ -67,7 +67,7 @@ describe Travis::Yml::Schema::Type::Expand, 'map', skip: true do
             map: {
               foo: {
                 type: :ref,
-                ref: '#/definitions/strs'
+                ref: 'strs'
               }
             }
           }
@@ -87,9 +87,8 @@ describe Travis::Yml::Schema::Type::Expand, 'map', skip: true do
           schemas: [
             {
               type: :map,
-              opts: {
-                prefix: :foo
-              },
+              prefix: :foo,
+              normal: true,
               map: {
                 foo: {
                   type: :str
@@ -125,18 +124,15 @@ describe Travis::Yml::Schema::Type::Expand, 'map', skip: true do
           schemas: [
             {
               type: :map,
-              opts: {
-                prefix: :foo
-              },
+              prefix: :foo,
+              normal: true,
               map: {
                 foo: {
                   type: :any,
                   schemas: [
                     {
                       type: :map,
-                      opts: {
-                        prefix: :bar
-                      },
+                      prefix: :bar,
                       map: {
                         bar: {
                           type: :str
@@ -151,23 +147,16 @@ describe Travis::Yml::Schema::Type::Expand, 'map', skip: true do
               },
             },
             {
-              type: :any,
-              schemas: [
-                {
-                  type: :map,
-                  opts: {
-                    prefix: :bar
-                  },
-                  map: {
-                    bar: {
-                      type: :str
-                    }
-                  }
-                },
-                {
+              type: :map,
+              prefix: :bar,
+              map: {
+                bar: {
                   type: :str
                 }
-              ]
+              }
+            },
+            {
+              type: :str
             }
           ]
         )

@@ -49,16 +49,17 @@ module Travis
     module Schema
       extend self
 
-      def schema
-        json(expand(Def::Root.new.node))
+      def json
+        node = expand(schema)
+        Json::Node[node.type].new(node).schema
       end
 
       def expand(node)
         Type::Expand.apply(node)
       end
 
-      def json(node)
-        Json::Node[node.type].new(node).schema
+      def schema
+        Def::Root.new.node
       end
     end
   end

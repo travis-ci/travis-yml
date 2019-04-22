@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 require 'forwardable'
 require 'registry'
-require 'travis/yml/support/memoize'
 require 'travis/yml/schema/type/dump'
 require 'travis/yml/schema/type/expand'
 require 'travis/yml/schema/type/opts'
@@ -12,7 +11,7 @@ module Travis
       module Type
         class Node < Obj.new(parent: nil)
           extend Forwardable
-          include Memoize, Opts, Registry
+          include Opts, Registry
 
           register :node
 
@@ -204,8 +203,16 @@ module Travis
             !!@export
           end
 
+          def flags?
+            flags.any?
+          end
+
           def flags
-            @opts[:flags]
+            @opts[:flags] ||= []
+          end
+
+          def internal?
+            flags.include?(:internal)
           end
 
           def key

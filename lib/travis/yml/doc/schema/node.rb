@@ -1,5 +1,4 @@
 # frozen_string_literal: true
-require 'travis/yml/support/memoize'
 require 'registry'
 
 module Travis
@@ -7,7 +6,7 @@ module Travis
     module Doc
       module Schema
         class Node < Obj.new(:opts)
-          include Memoize, Registry
+          include Registry
 
           def self.opts
             @opts ||= %i(id type changes deprecated flags normal required except only)

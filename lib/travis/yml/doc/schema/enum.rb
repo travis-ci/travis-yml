@@ -56,7 +56,9 @@ module Travis
           end
 
           def values
-            Values.new(opts[:values].map { |value| Value.new(value) })
+            Values.new(opts[:values].map { |value|
+              # p value
+              Value.new(value) })
           end
           memoize :values
         end

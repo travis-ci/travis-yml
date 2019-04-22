@@ -80,7 +80,7 @@ module Travis
 
           def definitions
             objs = merge(*jsons(Type::Node.exports.values).map(&:definitions))
-            objs = sort(objs)
+            # objs = sort(objs)
             objs = merge(DEFINITIONS, objs)
             objs
           end

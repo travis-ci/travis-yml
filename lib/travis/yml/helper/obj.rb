@@ -93,8 +93,12 @@ module Travis
           end
         end
 
-        def stringify(hash)
-          hash.map { |key, value| [key.to_s, value] }.to_h
+        def stringify(obj)
+          case obj
+          when Hash  then obj.map { |key, obj| [key.to_s, stringify(obj)] }.to_h
+          when Array then obj.map { |obj| stringify(obj) }
+          else obj
+          end
         end
 
         def compact(obj)

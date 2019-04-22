@@ -6,7 +6,7 @@ module Travis
     module Schema
       module Examples
         def self.build(node, opts = {})
-          Node[node.type].new(node, opts)
+          node ? Node[node.type].new(node, opts) : []
         end
 
         class Node < Obj.new(:node, opts: {})
@@ -21,7 +21,9 @@ module Travis
           end
 
           def examples
-            raise
+          end
+
+          def example
           end
 
           def expand
