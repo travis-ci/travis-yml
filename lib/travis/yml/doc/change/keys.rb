@@ -16,13 +16,13 @@ module Travis
           private
 
             def change(value)
-              value = defaults(value) if defaults?
+              value = required(value) if defaults?
               value = fix_keys(value)
               value
             end
 
-            def defaults(node)
-              keys = schema.defaults + value.keys
+            def required(node)
+              keys = schema.required + value.keys
               build(keys.uniq.map { |key| [key, value[key] || none] }.to_h)
             end
 

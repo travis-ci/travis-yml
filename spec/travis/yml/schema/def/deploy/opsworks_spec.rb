@@ -6,8 +6,8 @@ describe Travis::Yml::Schema::Def::Deploy::Opsworks, 'structure' do
 
     it do
       should eq(
-        '$id': :opsworks,
-        title: 'Opsworks',
+        '$id': :deploy_opsworks,
+        title: 'Deploy Opsworks',
         anyOf: [
           {
             type: :object,
@@ -20,7 +20,7 @@ describe Travis::Yml::Schema::Def::Deploy::Opsworks, 'structure' do
                 strict: true
               },
               on: {
-                '$ref': '#/definitions/type/deploy_conditions'
+                '$ref': '#/definitions/deploy/conditions'
               },
               allow_failure: {
                 type: :boolean
@@ -29,7 +29,7 @@ describe Travis::Yml::Schema::Def::Deploy::Opsworks, 'structure' do
                 type: :boolean
               },
               edge: {
-                '$ref': '#/definitions/type/deploy_edge'
+                '$ref': '#/definitions/deploy/edge'
               },
               access_key_id: {
                 '$ref': '#/definitions/secure'

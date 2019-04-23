@@ -6,8 +6,8 @@ describe Travis::Yml::Schema::Def::Deploy::Elasticbeanstalk, 'structure' do
 
     it do
       should eq(
-        '$id': :elasticbeanstalk,
-        title: 'Elasticbeanstalk',
+        '$id': :deploy_elasticbeanstalk,
+        title: 'Deploy Elasticbeanstalk',
         anyOf: [
           {
             type: :object,
@@ -20,7 +20,7 @@ describe Travis::Yml::Schema::Def::Deploy::Elasticbeanstalk, 'structure' do
                 strict: true
               },
               on: {
-                '$ref': '#/definitions/type/deploy_conditions'
+                '$ref': '#/definitions/deploy/conditions'
               },
               allow_failure: {
                 type: :boolean
@@ -29,7 +29,7 @@ describe Travis::Yml::Schema::Def::Deploy::Elasticbeanstalk, 'structure' do
                 type: :boolean
               },
               edge: {
-                '$ref': '#/definitions/type/deploy_edge'
+                '$ref': '#/definitions/deploy/edge'
               },
               access_key_id: {
                 '$ref': '#/definitions/secure'

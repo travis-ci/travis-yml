@@ -25,7 +25,7 @@ module Travis
             type = opts[:to] || key
             opts = { key: key }.merge(except(opts, :to))
 
-            node[key] = Node.build(self, type, except(opts, :alias, :required, :only, :except)).node
+            node[key] = build(self, type, except(opts, :alias, :only, :except)).node # :required
 
             mapped_opts(node[key], key, opts).each do |key, opts|
               node.set key, opts
@@ -33,7 +33,7 @@ module Travis
           end
 
           def include(*types)
-            types = types.map { |type| Node.build(self, type).node }
+            types = types.map { |type| build(self, type).node }
             node.includes.concat(types)
           end
 

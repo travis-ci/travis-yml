@@ -26,14 +26,12 @@ module Travis
           def define
             title 'JSON schema for Travis CI configuration files'
 
-            include :job
-
             strict false
 
             map    :version
             map    :import,         to: :imports
-            map    :language
-            matrix :os,             to: :oss
+            map    :language,       required: true
+            matrix :os,             required: true, to: :oss
             matrix :arch,           to: :archs
             map    :dist
             map    :sudo
@@ -46,6 +44,8 @@ module Travis
             map    :conditions,     to: :conditions #, default: :v1
             map    :filter_secrets, to: :bool
             map    :trace,          to: :bool
+
+            include :job
           end
         end
       end

@@ -1,4 +1,4 @@
-describe Travis::Yml::Doc::Validate, 'required', required: true do
+describe Travis::Yml::Doc::Validate, 'required', defaults: true do
   subject { described_class.apply(build_schema(schema), build_value(value, opts)) }
 
   describe 'str' do

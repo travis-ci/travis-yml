@@ -6,8 +6,6 @@ module Travis
     module Schema
       module Type
         class Lang < Map
-          # include Registry
-
           register :lang
 
           def schema

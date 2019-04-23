@@ -6,36 +6,10 @@ describe Travis::Yml::Schema::Def::Android, 'structure' do
 
     it do
       should eq(
-        '$id': :android,
-        title: 'Android',
+        '$id': :language_android,
+        title: 'Language Android',
         type: :object,
         properties: {
-          language: {
-            type: :string,
-            enum: [
-              'android'
-            ],
-            downcase: true,
-            defaults: [
-              {
-                value: 'ruby',
-                only: {
-                  os: [
-                    'linux',
-                    'windows'
-                  ]
-                }
-              },
-              {
-                value: 'objective-c',
-                only: {
-                  os: [
-                    'osx'
-                  ]
-                }
-              }
-            ]
-          },
           jdk: {
             '$ref': '#/definitions/strs'
           },
@@ -54,13 +28,6 @@ describe Travis::Yml::Schema::Def::Android, 'structure' do
         },
         normal: true,
         keys: {
-          language: {
-            only: {
-              language: [
-                'android'
-              ]
-            }
-          },
           jdk: {
             only: {
               language: [
@@ -81,16 +48,6 @@ describe Travis::Yml::Schema::Def::Android, 'structure' do
             }
           }
         }
-      )
-    end
-  end
-
-  describe 'schema' do
-    subject { described_class.new.schema }
-
-    it do
-      should eq(
-        '$ref': '#/definitions/language/android'
       )
     end
   end

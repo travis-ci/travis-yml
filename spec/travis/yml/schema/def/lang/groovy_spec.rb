@@ -6,49 +6,16 @@ describe Travis::Yml::Schema::Def::Groovy, 'structure' do
 
     it do
       should eq(
-        '$id': :groovy,
-        title: 'Groovy',
+        '$id': :language_groovy,
+        title: 'Language Groovy',
         type: :object,
         properties: {
-          language: {
-            type: :string,
-            enum: [
-              'groovy'
-            ],
-            downcase: true,
-            defaults: [
-              {
-                value: 'ruby',
-                only: {
-                  os: [
-                    'linux',
-                    'windows'
-                  ]
-                }
-              },
-              {
-                value: 'objective-c',
-                only: {
-                  os: [
-                    'osx'
-                  ]
-                }
-              }
-            ]
-          },
           jdk: {
             '$ref': '#/definitions/strs'
           }
         },
         normal: true,
         keys: {
-          language: {
-            only: {
-              language: [
-                'groovy'
-              ]
-            }
-          },
           jdk: {
             only: {
               language: [
@@ -62,16 +29,6 @@ describe Travis::Yml::Schema::Def::Groovy, 'structure' do
             }
           }
         }
-      )
-    end
-  end
-
-  describe 'schema' do
-    subject { described_class.new.schema }
-
-    it do
-      should eq(
-        '$ref': '#/definitions/language/groovy'
       )
     end
   end

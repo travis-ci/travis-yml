@@ -16,6 +16,10 @@ module Travis
             value.first
           end
 
+          def index(node)
+            value.index(node)
+          end
+
           def each(&block)
             value.each(&block) && self
           end

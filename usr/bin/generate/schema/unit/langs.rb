@@ -23,16 +23,6 @@ describe <%= const.to_s %>, 'structure' do
       )
     end
   end
-
-  describe 'schema' do
-    subject { described_class.new.schema }
-
-    it do
-      should eq(
-        '$ref': '#/definitions/language/<%= name %>'
-      )
-    end
-  end
 end
 tpl
 
@@ -55,7 +45,7 @@ def format(obj)
 end
 
 def spec(name)
-  const = Travis::Yml::Schema::Dsl::Lang[name]
+  const = Travis::Yml::Schema::Dsl::Node.lookup(name)
   schema = Travis::Yml.schema[:definitions][:language][name]
   schema = format(schema)
   schema = schema.split("\n")[1..-2].join("\n")

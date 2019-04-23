@@ -6,8 +6,8 @@ describe Travis::Yml::Schema::Def::Deploy::Testfairy, 'structure' do
 
     it do
       should eq(
-        '$id': :testfairy,
-        title: 'Testfairy',
+        '$id': :deploy_testfairy,
+        title: 'Deploy Testfairy',
         anyOf: [
           {
             type: :object,
@@ -20,7 +20,7 @@ describe Travis::Yml::Schema::Def::Deploy::Testfairy, 'structure' do
                 strict: true
               },
               on: {
-                '$ref': '#/definitions/type/deploy_conditions'
+                '$ref': '#/definitions/deploy/conditions'
               },
               allow_failure: {
                 type: :boolean
@@ -29,7 +29,7 @@ describe Travis::Yml::Schema::Def::Deploy::Testfairy, 'structure' do
                 type: :boolean
               },
               edge: {
-                '$ref': '#/definitions/type/deploy_edge'
+                '$ref': '#/definitions/deploy/edge'
               },
               api_key: {
                 '$ref': '#/definitions/secure'

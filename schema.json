@@ -151,25 +151,6 @@
           }
         }
       },
-      "app": {
-        "$id": "app",
-        "title": "App",
-        "anyOf": [
-          {
-            "type": "object",
-            "patternProperties": {
-              ".*": {
-                "type": "string"
-              }
-            },
-            "normal": true
-          },
-          {
-            "type": "string",
-            "normal": true
-          }
-        ]
-      },
       "arch": {
         "$id": "arch",
         "title": "Architecture",
@@ -327,237 +308,6 @@
           "v1"
         ]
       },
-      "deploy_branches": {
-        "$id": "deploy_branches",
-        "title": "Deploy Branches",
-        "anyOf": [
-          {
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
-            "normal": true
-          },
-          {
-            "type": "object",
-            "normal": true,
-            "deprecated": "branch_specific_option_hash"
-          }
-        ]
-      },
-      "deploy_conditions": {
-        "$id": "deploy_conditions",
-        "title": "Deploy Conditions",
-        "anyOf": [
-          {
-            "allOf": [
-              {
-                "type": "object",
-                "properties": {
-                  "branch": {
-                    "$ref": "#/definitions/type/deploy_branches"
-                  },
-                  "repo": {
-                    "type": "string"
-                  },
-                  "condition": {
-                    "type": "string"
-                  },
-                  "all_branches": {
-                    "type": "boolean"
-                  },
-                  "tags": {
-                    "type": "boolean"
-                  }
-                },
-                "additionalProperties": false,
-                "prefix": "branch",
-                "keys": {
-                  "branch": {
-                    "aliases": [
-                      "branches"
-                    ]
-                  }
-                }
-              },
-              {
-                "$ref": "#/definitions/type/languages"
-              }
-            ],
-            "normal": true
-          },
-          {
-            "$ref": "#/definitions/type/deploy_branches"
-          }
-        ]
-      },
-      "deploy_edge": {
-        "$id": "deploy_edge",
-        "title": "Deploy Edge",
-        "anyOf": [
-          {
-            "type": "object",
-            "properties": {
-              "enabled": {
-                "type": "boolean"
-              },
-              "source": {
-                "type": "string"
-              },
-              "branch": {
-                "type": "string"
-              }
-            },
-            "additionalProperties": false,
-            "flags": [
-              "edge"
-            ],
-            "changes": [
-              {
-                "change": "enable"
-              }
-            ],
-            "normal": true
-          },
-          {
-            "type": "boolean"
-          }
-        ],
-        "flags": [
-          "edge"
-        ]
-      },
-      "deploy_providers": {
-        "$id": "deploy_providers",
-        "title": "Deploy Providers",
-        "anyOf": [
-          {
-            "$ref": "#/definitions/deploy/anynines"
-          },
-          {
-            "$ref": "#/definitions/deploy/appfog"
-          },
-          {
-            "$ref": "#/definitions/deploy/atlas"
-          },
-          {
-            "$ref": "#/definitions/deploy/azure_web_apps"
-          },
-          {
-            "$ref": "#/definitions/deploy/bintray"
-          },
-          {
-            "$ref": "#/definitions/deploy/bitballoon"
-          },
-          {
-            "$ref": "#/definitions/deploy/bluemixcf"
-          },
-          {
-            "$ref": "#/definitions/deploy/boxfuse"
-          },
-          {
-            "$ref": "#/definitions/deploy/catalyze"
-          },
-          {
-            "$ref": "#/definitions/deploy/chef_supermarket"
-          },
-          {
-            "$ref": "#/definitions/deploy/cloud66"
-          },
-          {
-            "$ref": "#/definitions/deploy/cloudcontrol"
-          },
-          {
-            "$ref": "#/definitions/deploy/cloudfiles"
-          },
-          {
-            "$ref": "#/definitions/deploy/cloudfoundry"
-          },
-          {
-            "$ref": "#/definitions/deploy/codedeploy"
-          },
-          {
-            "$ref": "#/definitions/deploy/deis"
-          },
-          {
-            "$ref": "#/definitions/deploy/divshot"
-          },
-          {
-            "$ref": "#/definitions/deploy/elasticbeanstalk"
-          },
-          {
-            "$ref": "#/definitions/deploy/engineyard"
-          },
-          {
-            "$ref": "#/definitions/deploy/firebase"
-          },
-          {
-            "$ref": "#/definitions/deploy/gae"
-          },
-          {
-            "$ref": "#/definitions/deploy/gcs"
-          },
-          {
-            "$ref": "#/definitions/deploy/hackage"
-          },
-          {
-            "$ref": "#/definitions/deploy/heroku"
-          },
-          {
-            "$ref": "#/definitions/deploy/lambda"
-          },
-          {
-            "$ref": "#/definitions/deploy/launchpad"
-          },
-          {
-            "$ref": "#/definitions/deploy/modulus"
-          },
-          {
-            "$ref": "#/definitions/deploy/npm"
-          },
-          {
-            "$ref": "#/definitions/deploy/openshift"
-          },
-          {
-            "$ref": "#/definitions/deploy/opsworks"
-          },
-          {
-            "$ref": "#/definitions/deploy/packagecloud"
-          },
-          {
-            "$ref": "#/definitions/deploy/pages"
-          },
-          {
-            "$ref": "#/definitions/deploy/puppetforge"
-          },
-          {
-            "$ref": "#/definitions/deploy/pypi"
-          },
-          {
-            "$ref": "#/definitions/deploy/releases"
-          },
-          {
-            "$ref": "#/definitions/deploy/rubygems"
-          },
-          {
-            "$ref": "#/definitions/deploy/s3"
-          },
-          {
-            "$ref": "#/definitions/deploy/scalingo"
-          },
-          {
-            "$ref": "#/definitions/deploy/script"
-          },
-          {
-            "$ref": "#/definitions/deploy/surge"
-          },
-          {
-            "$ref": "#/definitions/deploy/testfairy"
-          }
-        ],
-        "normal": true,
-        "detect": "provider"
-      },
       "deploys": {
         "$id": "deploys",
         "title": "Deploys",
@@ -565,12 +315,12 @@
           {
             "type": "array",
             "items": {
-              "$ref": "#/definitions/type/deploy_providers"
+              "$ref": "#/definitions/deploy/providers"
             },
             "normal": true
           },
           {
-            "$ref": "#/definitions/type/deploy_providers"
+            "$ref": "#/definitions/deploy/providers"
           }
         ]
       },
@@ -1442,8 +1192,8 @@
     },
     "addon": {
       "apt": {
-        "$id": "apt",
-        "title": "Apt",
+        "$id": "addon_apt",
+        "title": "Addon Apt",
         "anyOf": [
           {
             "type": "object",
@@ -1522,8 +1272,8 @@
         ]
       },
       "artifacts": {
-        "$id": "artifacts",
-        "title": "Artifacts",
+        "$id": "addon_artifacts",
+        "title": "Addon Artifacts",
         "anyOf": [
           {
             "type": "object",
@@ -1614,8 +1364,8 @@
         "normal": true
       },
       "browserstack": {
-        "$id": "browserstack",
-        "title": "Browserstack",
+        "$id": "addon_browserstack",
+        "title": "Addon Browserstack",
         "anyOf": [
           {
             "type": "object",
@@ -1660,8 +1410,8 @@
         "normal": true
       },
       "code_climate": {
-        "$id": "code_climate",
-        "title": "Code Climate",
+        "$id": "addon_code_climate",
+        "title": "Addon Code Climate",
         "anyOf": [
           {
             "type": "object",
@@ -1688,8 +1438,8 @@
         ]
       },
       "coverity_scan": {
-        "$id": "coverity_scan",
-        "title": "Coverity Scan",
+        "$id": "addon_coverity_scan",
+        "title": "Addon Coverity Scan",
         "anyOf": [
           {
             "type": "object",
@@ -1752,8 +1502,8 @@
         "normal": true
       },
       "homebrew": {
-        "$id": "homebrew",
-        "title": "Homebrew",
+        "$id": "addon_homebrew",
+        "title": "Addon Homebrew",
         "anyOf": [
           {
             "type": "object",
@@ -1792,13 +1542,13 @@
         ]
       },
       "jwts": {
-        "$id": "jwts",
+        "$id": "addon_jwts",
         "title": "JSON Web Tokens",
         "$ref": "#/definitions/secures"
       },
       "sauce_connect": {
-        "$id": "sauce_connect",
-        "title": "Sauce Connect",
+        "$id": "addon_sauce_connect",
+        "title": "Addon Sauce Connect",
         "anyOf": [
           {
             "type": "object",
@@ -1837,8 +1587,8 @@
         "normal": true
       },
       "snaps": {
-        "$id": "snaps",
-        "title": "Snaps",
+        "$id": "addon_snaps",
+        "title": "Addon Snaps",
         "anyOf": [
           {
             "type": "array",
@@ -1890,8 +1640,8 @@
     },
     "deploy": {
       "anynines": {
-        "$id": "anynines",
-        "title": "Anynines",
+        "$id": "deploy_anynines",
+        "title": "Deploy Anynines",
         "anyOf": [
           {
             "type": "object",
@@ -1904,7 +1654,7 @@
                 "strict": true
               },
               "on": {
-                "$ref": "#/definitions/type/deploy_conditions"
+                "$ref": "#/definitions/deploy/conditions"
               },
               "allow_failure": {
                 "type": "boolean"
@@ -1913,7 +1663,7 @@
                 "type": "boolean"
               },
               "edge": {
-                "$ref": "#/definitions/type/deploy_edge"
+                "$ref": "#/definitions/deploy/edge"
               },
               "username": {
                 "$ref": "#/definitions/secure"
@@ -1943,9 +1693,28 @@
           }
         ]
       },
+      "app": {
+        "$id": "deploy_app",
+        "title": "Deploy App",
+        "anyOf": [
+          {
+            "type": "object",
+            "patternProperties": {
+              ".*": {
+                "type": "string"
+              }
+            },
+            "normal": true
+          },
+          {
+            "type": "string",
+            "normal": true
+          }
+        ]
+      },
       "appfog": {
-        "$id": "appfog",
-        "title": "Appfog",
+        "$id": "deploy_appfog",
+        "title": "Deploy Appfog",
         "anyOf": [
           {
             "type": "object",
@@ -1958,7 +1727,7 @@
                 "strict": true
               },
               "on": {
-                "$ref": "#/definitions/type/deploy_conditions"
+                "$ref": "#/definitions/deploy/conditions"
               },
               "allow_failure": {
                 "type": "boolean"
@@ -1967,7 +1736,7 @@
                 "type": "boolean"
               },
               "edge": {
-                "$ref": "#/definitions/type/deploy_edge"
+                "$ref": "#/definitions/deploy/edge"
               },
               "user": {
                 "$ref": "#/definitions/secure"
@@ -1985,7 +1754,7 @@
                 "$ref": "#/definitions/strs"
               },
               "app": {
-                "$ref": "#/definitions/type/app"
+                "$ref": "#/definitions/deploy/app"
               },
               "email": {
                 "anyOf": [
@@ -2034,8 +1803,8 @@
         ]
       },
       "atlas": {
-        "$id": "atlas",
-        "title": "Atlas",
+        "$id": "deploy_atlas",
+        "title": "Deploy Atlas",
         "anyOf": [
           {
             "type": "object",
@@ -2048,7 +1817,7 @@
                 "strict": true
               },
               "on": {
-                "$ref": "#/definitions/type/deploy_conditions"
+                "$ref": "#/definitions/deploy/conditions"
               },
               "allow_failure": {
                 "type": "boolean"
@@ -2057,7 +1826,7 @@
                 "type": "boolean"
               },
               "edge": {
-                "$ref": "#/definitions/type/deploy_edge"
+                "$ref": "#/definitions/deploy/edge"
               },
               "token": {
                 "$ref": "#/definitions/secure"
@@ -2103,8 +1872,8 @@
         ]
       },
       "azure_web_apps": {
-        "$id": "azure_web_apps",
-        "title": "Azure Web Apps",
+        "$id": "deploy_azure_web_apps",
+        "title": "Deploy Azure Web Apps",
         "anyOf": [
           {
             "type": "object",
@@ -2117,7 +1886,7 @@
                 "strict": true
               },
               "on": {
-                "$ref": "#/definitions/type/deploy_conditions"
+                "$ref": "#/definitions/deploy/conditions"
               },
               "allow_failure": {
                 "type": "boolean"
@@ -2126,7 +1895,7 @@
                 "type": "boolean"
               },
               "edge": {
-                "$ref": "#/definitions/type/deploy_edge"
+                "$ref": "#/definitions/deploy/edge"
               },
               "site": {
                 "type": "string"
@@ -2160,8 +1929,8 @@
         ]
       },
       "bintray": {
-        "$id": "bintray",
-        "title": "Bintray",
+        "$id": "deploy_bintray",
+        "title": "Deploy Bintray",
         "anyOf": [
           {
             "type": "object",
@@ -2174,7 +1943,7 @@
                 "strict": true
               },
               "on": {
-                "$ref": "#/definitions/type/deploy_conditions"
+                "$ref": "#/definitions/deploy/conditions"
               },
               "allow_failure": {
                 "type": "boolean"
@@ -2183,7 +1952,7 @@
                 "type": "boolean"
               },
               "edge": {
-                "$ref": "#/definitions/type/deploy_edge"
+                "$ref": "#/definitions/deploy/edge"
               },
               "file": {
                 "type": "string"
@@ -2217,8 +1986,8 @@
         ]
       },
       "bitballoon": {
-        "$id": "bitballoon",
-        "title": "Bitballoon",
+        "$id": "deploy_bitballoon",
+        "title": "Deploy Bitballoon",
         "anyOf": [
           {
             "type": "object",
@@ -2231,7 +2000,7 @@
                 "strict": true
               },
               "on": {
-                "$ref": "#/definitions/type/deploy_conditions"
+                "$ref": "#/definitions/deploy/conditions"
               },
               "allow_failure": {
                 "type": "boolean"
@@ -2240,7 +2009,7 @@
                 "type": "boolean"
               },
               "edge": {
-                "$ref": "#/definitions/type/deploy_edge"
+                "$ref": "#/definitions/deploy/edge"
               },
               "access_token": {
                 "$ref": "#/definitions/secure"
@@ -2268,8 +2037,8 @@
         ]
       },
       "bluemixcf": {
-        "$id": "bluemixcf",
-        "title": "Bluemixcf",
+        "$id": "deploy_bluemixcf",
+        "title": "Deploy Bluemixcf",
         "anyOf": [
           {
             "type": "object",
@@ -2282,7 +2051,7 @@
                 "strict": true
               },
               "on": {
-                "$ref": "#/definitions/type/deploy_conditions"
+                "$ref": "#/definitions/deploy/conditions"
               },
               "allow_failure": {
                 "type": "boolean"
@@ -2291,7 +2060,7 @@
                 "type": "boolean"
               },
               "edge": {
-                "$ref": "#/definitions/type/deploy_edge"
+                "$ref": "#/definitions/deploy/edge"
               },
               "username": {
                 "$ref": "#/definitions/secure"
@@ -2334,8 +2103,8 @@
         ]
       },
       "boxfuse": {
-        "$id": "boxfuse",
-        "title": "Boxfuse",
+        "$id": "deploy_boxfuse",
+        "title": "Deploy Boxfuse",
         "anyOf": [
           {
             "type": "object",
@@ -2348,7 +2117,7 @@
                 "strict": true
               },
               "on": {
-                "$ref": "#/definitions/type/deploy_conditions"
+                "$ref": "#/definitions/deploy/conditions"
               },
               "allow_failure": {
                 "type": "boolean"
@@ -2357,7 +2126,7 @@
                 "type": "boolean"
               },
               "edge": {
-                "$ref": "#/definitions/type/deploy_edge"
+                "$ref": "#/definitions/deploy/edge"
               },
               "user": {
                 "$ref": "#/definitions/secure"
@@ -2402,9 +2171,27 @@
           }
         ]
       },
+      "branches": {
+        "$id": "deploy_branches",
+        "title": "Deploy Branches",
+        "anyOf": [
+          {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "normal": true
+          },
+          {
+            "type": "object",
+            "normal": true,
+            "deprecated": "branch_specific_option_hash"
+          }
+        ]
+      },
       "catalyze": {
-        "$id": "catalyze",
-        "title": "Catalyze",
+        "$id": "deploy_catalyze",
+        "title": "Deploy Catalyze",
         "anyOf": [
           {
             "type": "object",
@@ -2417,7 +2204,7 @@
                 "strict": true
               },
               "on": {
-                "$ref": "#/definitions/type/deploy_conditions"
+                "$ref": "#/definitions/deploy/conditions"
               },
               "allow_failure": {
                 "type": "boolean"
@@ -2426,7 +2213,7 @@
                 "type": "boolean"
               },
               "edge": {
-                "$ref": "#/definitions/type/deploy_edge"
+                "$ref": "#/definitions/deploy/edge"
               },
               "target": {
                 "type": "string"
@@ -2451,8 +2238,8 @@
         ]
       },
       "chef_supermarket": {
-        "$id": "chef_supermarket",
-        "title": "Chef Supermarket",
+        "$id": "deploy_chef_supermarket",
+        "title": "Deploy Chef Supermarket",
         "anyOf": [
           {
             "type": "object",
@@ -2465,7 +2252,7 @@
                 "strict": true
               },
               "on": {
-                "$ref": "#/definitions/type/deploy_conditions"
+                "$ref": "#/definitions/deploy/conditions"
               },
               "allow_failure": {
                 "type": "boolean"
@@ -2474,7 +2261,7 @@
                 "type": "boolean"
               },
               "edge": {
-                "$ref": "#/definitions/type/deploy_edge"
+                "$ref": "#/definitions/deploy/edge"
               },
               "user_id": {
                 "$ref": "#/definitions/secure"
@@ -2502,8 +2289,8 @@
         ]
       },
       "cloud66": {
-        "$id": "cloud66",
-        "title": "Cloud66",
+        "$id": "deploy_cloud66",
+        "title": "Deploy Cloud66",
         "anyOf": [
           {
             "type": "object",
@@ -2516,7 +2303,7 @@
                 "strict": true
               },
               "on": {
-                "$ref": "#/definitions/type/deploy_conditions"
+                "$ref": "#/definitions/deploy/conditions"
               },
               "allow_failure": {
                 "type": "boolean"
@@ -2525,7 +2312,7 @@
                 "type": "boolean"
               },
               "edge": {
-                "$ref": "#/definitions/type/deploy_edge"
+                "$ref": "#/definitions/deploy/edge"
               },
               "redeployment_hook": {
                 "type": "string"
@@ -2547,8 +2334,8 @@
         ]
       },
       "cloudcontrol": {
-        "$id": "cloudcontrol",
-        "title": "Cloudcontrol",
+        "$id": "deploy_cloudcontrol",
+        "title": "Deploy Cloudcontrol",
         "anyOf": [
           {
             "type": "object",
@@ -2561,7 +2348,7 @@
                 "strict": true
               },
               "on": {
-                "$ref": "#/definitions/type/deploy_conditions"
+                "$ref": "#/definitions/deploy/conditions"
               },
               "allow_failure": {
                 "type": "boolean"
@@ -2570,7 +2357,7 @@
                 "type": "boolean"
               },
               "edge": {
-                "$ref": "#/definitions/type/deploy_edge"
+                "$ref": "#/definitions/deploy/edge"
               },
               "email": {
                 "$ref": "#/definitions/secure"
@@ -2598,8 +2385,8 @@
         ]
       },
       "cloudfiles": {
-        "$id": "cloudfiles",
-        "title": "Cloudfiles",
+        "$id": "deploy_cloudfiles",
+        "title": "Deploy Cloudfiles",
         "anyOf": [
           {
             "type": "object",
@@ -2612,7 +2399,7 @@
                 "strict": true
               },
               "on": {
-                "$ref": "#/definitions/type/deploy_conditions"
+                "$ref": "#/definitions/deploy/conditions"
               },
               "allow_failure": {
                 "type": "boolean"
@@ -2621,7 +2408,7 @@
                 "type": "boolean"
               },
               "edge": {
-                "$ref": "#/definitions/type/deploy_edge"
+                "$ref": "#/definitions/deploy/edge"
               },
               "username": {
                 "$ref": "#/definitions/secure"
@@ -2655,8 +2442,8 @@
         ]
       },
       "cloudfoundry": {
-        "$id": "cloudfoundry",
-        "title": "Cloudfoundry",
+        "$id": "deploy_cloudfoundry",
+        "title": "Deploy Cloudfoundry",
         "anyOf": [
           {
             "type": "object",
@@ -2669,7 +2456,7 @@
                 "strict": true
               },
               "on": {
-                "$ref": "#/definitions/type/deploy_conditions"
+                "$ref": "#/definitions/deploy/conditions"
               },
               "allow_failure": {
                 "type": "boolean"
@@ -2678,7 +2465,7 @@
                 "type": "boolean"
               },
               "edge": {
-                "$ref": "#/definitions/type/deploy_edge"
+                "$ref": "#/definitions/deploy/edge"
               },
               "username": {
                 "$ref": "#/definitions/secure"
@@ -2721,8 +2508,8 @@
         ]
       },
       "codedeploy": {
-        "$id": "codedeploy",
-        "title": "Codedeploy",
+        "$id": "deploy_codedeploy",
+        "title": "Deploy Codedeploy",
         "anyOf": [
           {
             "type": "object",
@@ -2735,7 +2522,7 @@
                 "strict": true
               },
               "on": {
-                "$ref": "#/definitions/type/deploy_conditions"
+                "$ref": "#/definitions/deploy/conditions"
               },
               "allow_failure": {
                 "type": "boolean"
@@ -2744,7 +2531,7 @@
                 "type": "boolean"
               },
               "edge": {
-                "$ref": "#/definitions/type/deploy_edge"
+                "$ref": "#/definitions/deploy/edge"
               },
               "access_key_id": {
                 "$ref": "#/definitions/secure"
@@ -2799,9 +2586,55 @@
           }
         ]
       },
+      "conditions": {
+        "$id": "deploy_conditions",
+        "title": "Deploy Conditions",
+        "anyOf": [
+          {
+            "allOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "branch": {
+                    "$ref": "#/definitions/deploy/branches"
+                  },
+                  "repo": {
+                    "type": "string"
+                  },
+                  "condition": {
+                    "type": "string"
+                  },
+                  "all_branches": {
+                    "type": "boolean"
+                  },
+                  "tags": {
+                    "type": "boolean"
+                  }
+                },
+                "additionalProperties": false,
+                "prefix": "branch",
+                "keys": {
+                  "branch": {
+                    "aliases": [
+                      "branches"
+                    ]
+                  }
+                }
+              },
+              {
+                "$ref": "#/definitions/type/languages"
+              }
+            ],
+            "normal": true
+          },
+          {
+            "$ref": "#/definitions/deploy/branches"
+          }
+        ]
+      },
       "deis": {
-        "$id": "deis",
-        "title": "Deis",
+        "$id": "deploy_deis",
+        "title": "Deploy Deis",
         "anyOf": [
           {
             "type": "object",
@@ -2814,7 +2647,7 @@
                 "strict": true
               },
               "on": {
-                "$ref": "#/definitions/type/deploy_conditions"
+                "$ref": "#/definitions/deploy/conditions"
               },
               "allow_failure": {
                 "type": "boolean"
@@ -2823,7 +2656,7 @@
                 "type": "boolean"
               },
               "edge": {
-                "$ref": "#/definitions/type/deploy_edge"
+                "$ref": "#/definitions/deploy/edge"
               },
               "controller": {
                 "type": "string"
@@ -2857,8 +2690,8 @@
         ]
       },
       "divshot": {
-        "$id": "divshot",
-        "title": "Divshot",
+        "$id": "deploy_divshot",
+        "title": "Deploy Divshot",
         "anyOf": [
           {
             "type": "object",
@@ -2871,7 +2704,7 @@
                 "strict": true
               },
               "on": {
-                "$ref": "#/definitions/type/deploy_conditions"
+                "$ref": "#/definitions/deploy/conditions"
               },
               "allow_failure": {
                 "type": "boolean"
@@ -2880,7 +2713,7 @@
                 "type": "boolean"
               },
               "edge": {
-                "$ref": "#/definitions/type/deploy_edge"
+                "$ref": "#/definitions/deploy/edge"
               },
               "api_key": {
                 "$ref": "#/definitions/secure"
@@ -2904,9 +2737,45 @@
           }
         ]
       },
+      "edge": {
+        "$id": "deploy_edge",
+        "title": "Deploy Edge",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "enabled": {
+                "type": "boolean"
+              },
+              "source": {
+                "type": "string"
+              },
+              "branch": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false,
+            "flags": [
+              "edge"
+            ],
+            "changes": [
+              {
+                "change": "enable"
+              }
+            ],
+            "normal": true
+          },
+          {
+            "type": "boolean"
+          }
+        ],
+        "flags": [
+          "edge"
+        ]
+      },
       "elasticbeanstalk": {
-        "$id": "elasticbeanstalk",
-        "title": "Elasticbeanstalk",
+        "$id": "deploy_elasticbeanstalk",
+        "title": "Deploy Elasticbeanstalk",
         "anyOf": [
           {
             "type": "object",
@@ -2919,7 +2788,7 @@
                 "strict": true
               },
               "on": {
-                "$ref": "#/definitions/type/deploy_conditions"
+                "$ref": "#/definitions/deploy/conditions"
               },
               "allow_failure": {
                 "type": "boolean"
@@ -2928,7 +2797,7 @@
                 "type": "boolean"
               },
               "edge": {
-                "$ref": "#/definitions/type/deploy_edge"
+                "$ref": "#/definitions/deploy/edge"
               },
               "access_key_id": {
                 "$ref": "#/definitions/secure"
@@ -2974,8 +2843,8 @@
         ]
       },
       "engineyard": {
-        "$id": "engineyard",
-        "title": "Engineyard",
+        "$id": "deploy_engineyard",
+        "title": "Deploy Engineyard",
         "anyOf": [
           {
             "type": "object",
@@ -2988,7 +2857,7 @@
                 "strict": true
               },
               "on": {
-                "$ref": "#/definitions/type/deploy_conditions"
+                "$ref": "#/definitions/deploy/conditions"
               },
               "allow_failure": {
                 "type": "boolean"
@@ -2997,7 +2866,7 @@
                 "type": "boolean"
               },
               "edge": {
-                "$ref": "#/definitions/type/deploy_edge"
+                "$ref": "#/definitions/deploy/edge"
               },
               "username": {
                 "$ref": "#/definitions/secure"
@@ -3034,8 +2903,8 @@
         ]
       },
       "firebase": {
-        "$id": "firebase",
-        "title": "Firebase",
+        "$id": "deploy_firebase",
+        "title": "Deploy Firebase",
         "anyOf": [
           {
             "type": "object",
@@ -3048,7 +2917,7 @@
                 "strict": true
               },
               "on": {
-                "$ref": "#/definitions/type/deploy_conditions"
+                "$ref": "#/definitions/deploy/conditions"
               },
               "allow_failure": {
                 "type": "boolean"
@@ -3057,7 +2926,7 @@
                 "type": "boolean"
               },
               "edge": {
-                "$ref": "#/definitions/type/deploy_edge"
+                "$ref": "#/definitions/deploy/edge"
               },
               "project": {
                 "type": "string"
@@ -3085,8 +2954,8 @@
         ]
       },
       "gae": {
-        "$id": "gae",
-        "title": "Gae",
+        "$id": "deploy_gae",
+        "title": "Deploy Gae",
         "anyOf": [
           {
             "type": "object",
@@ -3099,7 +2968,7 @@
                 "strict": true
               },
               "on": {
-                "$ref": "#/definitions/type/deploy_conditions"
+                "$ref": "#/definitions/deploy/conditions"
               },
               "allow_failure": {
                 "type": "boolean"
@@ -3108,7 +2977,7 @@
                 "type": "boolean"
               },
               "edge": {
-                "$ref": "#/definitions/type/deploy_edge"
+                "$ref": "#/definitions/deploy/edge"
               },
               "project": {
                 "type": "string"
@@ -3148,8 +3017,8 @@
         ]
       },
       "gcs": {
-        "$id": "gcs",
-        "title": "Gcs",
+        "$id": "deploy_gcs",
+        "title": "Deploy Gcs",
         "anyOf": [
           {
             "type": "object",
@@ -3162,7 +3031,7 @@
                 "strict": true
               },
               "on": {
-                "$ref": "#/definitions/type/deploy_conditions"
+                "$ref": "#/definitions/deploy/conditions"
               },
               "allow_failure": {
                 "type": "boolean"
@@ -3171,7 +3040,7 @@
                 "type": "boolean"
               },
               "edge": {
-                "$ref": "#/definitions/type/deploy_edge"
+                "$ref": "#/definitions/deploy/edge"
               },
               "access_key_id": {
                 "$ref": "#/definitions/secure"
@@ -3217,8 +3086,8 @@
         ]
       },
       "hackage": {
-        "$id": "hackage",
-        "title": "Hackage",
+        "$id": "deploy_hackage",
+        "title": "Deploy Hackage",
         "anyOf": [
           {
             "type": "object",
@@ -3231,7 +3100,7 @@
                 "strict": true
               },
               "on": {
-                "$ref": "#/definitions/type/deploy_conditions"
+                "$ref": "#/definitions/deploy/conditions"
               },
               "allow_failure": {
                 "type": "boolean"
@@ -3240,7 +3109,7 @@
                 "type": "boolean"
               },
               "edge": {
-                "$ref": "#/definitions/type/deploy_edge"
+                "$ref": "#/definitions/deploy/edge"
               },
               "username": {
                 "$ref": "#/definitions/secure"
@@ -3265,8 +3134,8 @@
         ]
       },
       "heroku": {
-        "$id": "heroku",
-        "title": "Heroku",
+        "$id": "deploy_heroku",
+        "title": "Deploy Heroku",
         "anyOf": [
           {
             "type": "object",
@@ -3279,7 +3148,7 @@
                 "strict": true
               },
               "on": {
-                "$ref": "#/definitions/type/deploy_conditions"
+                "$ref": "#/definitions/deploy/conditions"
               },
               "allow_failure": {
                 "type": "boolean"
@@ -3288,7 +3157,7 @@
                 "type": "boolean"
               },
               "edge": {
-                "$ref": "#/definitions/type/deploy_edge"
+                "$ref": "#/definitions/deploy/edge"
               },
               "strategy": {
                 "type": "string",
@@ -3306,7 +3175,7 @@
                 "type": "string"
               },
               "app": {
-                "$ref": "#/definitions/type/app"
+                "$ref": "#/definitions/deploy/app"
               },
               "api_key": {
                 "$ref": "#/definitions/secure"
@@ -3331,8 +3200,8 @@
         ]
       },
       "lambda": {
-        "$id": "lambda",
-        "title": "Lambda",
+        "$id": "deploy_lambda",
+        "title": "Deploy Lambda",
         "anyOf": [
           {
             "type": "object",
@@ -3345,7 +3214,7 @@
                 "strict": true
               },
               "on": {
-                "$ref": "#/definitions/type/deploy_conditions"
+                "$ref": "#/definitions/deploy/conditions"
               },
               "allow_failure": {
                 "type": "boolean"
@@ -3354,7 +3223,7 @@
                 "type": "boolean"
               },
               "edge": {
-                "$ref": "#/definitions/type/deploy_edge"
+                "$ref": "#/definitions/deploy/edge"
               },
               "access_key_id": {
                 "$ref": "#/definitions/secure"
@@ -3437,8 +3306,8 @@
         ]
       },
       "launchpad": {
-        "$id": "launchpad",
-        "title": "Launchpad",
+        "$id": "deploy_launchpad",
+        "title": "Deploy Launchpad",
         "anyOf": [
           {
             "type": "object",
@@ -3451,7 +3320,7 @@
                 "strict": true
               },
               "on": {
-                "$ref": "#/definitions/type/deploy_conditions"
+                "$ref": "#/definitions/deploy/conditions"
               },
               "allow_failure": {
                 "type": "boolean"
@@ -3460,7 +3329,7 @@
                 "type": "boolean"
               },
               "edge": {
-                "$ref": "#/definitions/type/deploy_edge"
+                "$ref": "#/definitions/deploy/edge"
               },
               "slug": {
                 "type": "string"
@@ -3491,8 +3360,8 @@
         ]
       },
       "modulus": {
-        "$id": "modulus",
-        "title": "Modulus",
+        "$id": "deploy_modulus",
+        "title": "Deploy Modulus",
         "anyOf": [
           {
             "type": "object",
@@ -3505,7 +3374,7 @@
                 "strict": true
               },
               "on": {
-                "$ref": "#/definitions/type/deploy_conditions"
+                "$ref": "#/definitions/deploy/conditions"
               },
               "allow_failure": {
                 "type": "boolean"
@@ -3514,7 +3383,7 @@
                 "type": "boolean"
               },
               "edge": {
-                "$ref": "#/definitions/type/deploy_edge"
+                "$ref": "#/definitions/deploy/edge"
               },
               "api_key": {
                 "$ref": "#/definitions/secure"
@@ -3539,8 +3408,8 @@
         ]
       },
       "npm": {
-        "$id": "npm",
-        "title": "Npm",
+        "$id": "deploy_npm",
+        "title": "Deploy Npm",
         "anyOf": [
           {
             "type": "object",
@@ -3553,7 +3422,7 @@
                 "strict": true
               },
               "on": {
-                "$ref": "#/definitions/type/deploy_conditions"
+                "$ref": "#/definitions/deploy/conditions"
               },
               "allow_failure": {
                 "type": "boolean"
@@ -3562,7 +3431,7 @@
                 "type": "boolean"
               },
               "edge": {
-                "$ref": "#/definitions/type/deploy_edge"
+                "$ref": "#/definitions/deploy/edge"
               },
               "email": {
                 "$ref": "#/definitions/secure"
@@ -3587,8 +3456,8 @@
         ]
       },
       "openshift": {
-        "$id": "openshift",
-        "title": "Openshift",
+        "$id": "deploy_openshift",
+        "title": "Deploy Openshift",
         "anyOf": [
           {
             "type": "object",
@@ -3601,7 +3470,7 @@
                 "strict": true
               },
               "on": {
-                "$ref": "#/definitions/type/deploy_conditions"
+                "$ref": "#/definitions/deploy/conditions"
               },
               "allow_failure": {
                 "type": "boolean"
@@ -3610,7 +3479,7 @@
                 "type": "boolean"
               },
               "edge": {
-                "$ref": "#/definitions/type/deploy_edge"
+                "$ref": "#/definitions/deploy/edge"
               },
               "user": {
                 "$ref": "#/definitions/secure"
@@ -3644,8 +3513,8 @@
         ]
       },
       "opsworks": {
-        "$id": "opsworks",
-        "title": "Opsworks",
+        "$id": "deploy_opsworks",
+        "title": "Deploy Opsworks",
         "anyOf": [
           {
             "type": "object",
@@ -3658,7 +3527,7 @@
                 "strict": true
               },
               "on": {
-                "$ref": "#/definitions/type/deploy_conditions"
+                "$ref": "#/definitions/deploy/conditions"
               },
               "allow_failure": {
                 "type": "boolean"
@@ -3667,7 +3536,7 @@
                 "type": "boolean"
               },
               "edge": {
-                "$ref": "#/definitions/type/deploy_edge"
+                "$ref": "#/definitions/deploy/edge"
               },
               "access_key_id": {
                 "$ref": "#/definitions/secure"
@@ -3710,8 +3579,8 @@
         ]
       },
       "packagecloud": {
-        "$id": "packagecloud",
-        "title": "Packagecloud",
+        "$id": "deploy_packagecloud",
+        "title": "Deploy Packagecloud",
         "anyOf": [
           {
             "type": "object",
@@ -3724,7 +3593,7 @@
                 "strict": true
               },
               "on": {
-                "$ref": "#/definitions/type/deploy_conditions"
+                "$ref": "#/definitions/deploy/conditions"
               },
               "allow_failure": {
                 "type": "boolean"
@@ -3733,7 +3602,7 @@
                 "type": "boolean"
               },
               "edge": {
-                "$ref": "#/definitions/type/deploy_edge"
+                "$ref": "#/definitions/deploy/edge"
               },
               "username": {
                 "$ref": "#/definitions/secure"
@@ -3773,8 +3642,8 @@
         ]
       },
       "pages": {
-        "$id": "pages",
-        "title": "Pages",
+        "$id": "deploy_pages",
+        "title": "Deploy Pages",
         "anyOf": [
           {
             "type": "object",
@@ -3787,7 +3656,7 @@
                 "strict": true
               },
               "on": {
-                "$ref": "#/definitions/type/deploy_conditions"
+                "$ref": "#/definitions/deploy/conditions"
               },
               "allow_failure": {
                 "type": "boolean"
@@ -3796,7 +3665,7 @@
                 "type": "boolean"
               },
               "edge": {
-                "$ref": "#/definitions/type/deploy_edge"
+                "$ref": "#/definitions/deploy/edge"
               },
               "github_token": {
                 "$ref": "#/definitions/secure"
@@ -3856,9 +3725,140 @@
           }
         ]
       },
+      "providers": {
+        "$id": "deploy_providers",
+        "title": "Deploy Providers",
+        "anyOf": [
+          {
+            "$ref": "#/definitions/deploy/anynines"
+          },
+          {
+            "$ref": "#/definitions/deploy/appfog"
+          },
+          {
+            "$ref": "#/definitions/deploy/atlas"
+          },
+          {
+            "$ref": "#/definitions/deploy/azure_web_apps"
+          },
+          {
+            "$ref": "#/definitions/deploy/bintray"
+          },
+          {
+            "$ref": "#/definitions/deploy/bitballoon"
+          },
+          {
+            "$ref": "#/definitions/deploy/bluemixcf"
+          },
+          {
+            "$ref": "#/definitions/deploy/boxfuse"
+          },
+          {
+            "$ref": "#/definitions/deploy/catalyze"
+          },
+          {
+            "$ref": "#/definitions/deploy/chef_supermarket"
+          },
+          {
+            "$ref": "#/definitions/deploy/cloud66"
+          },
+          {
+            "$ref": "#/definitions/deploy/cloudcontrol"
+          },
+          {
+            "$ref": "#/definitions/deploy/cloudfiles"
+          },
+          {
+            "$ref": "#/definitions/deploy/cloudfoundry"
+          },
+          {
+            "$ref": "#/definitions/deploy/codedeploy"
+          },
+          {
+            "$ref": "#/definitions/deploy/deis"
+          },
+          {
+            "$ref": "#/definitions/deploy/divshot"
+          },
+          {
+            "$ref": "#/definitions/deploy/elasticbeanstalk"
+          },
+          {
+            "$ref": "#/definitions/deploy/engineyard"
+          },
+          {
+            "$ref": "#/definitions/deploy/firebase"
+          },
+          {
+            "$ref": "#/definitions/deploy/gae"
+          },
+          {
+            "$ref": "#/definitions/deploy/gcs"
+          },
+          {
+            "$ref": "#/definitions/deploy/hackage"
+          },
+          {
+            "$ref": "#/definitions/deploy/heroku"
+          },
+          {
+            "$ref": "#/definitions/deploy/lambda"
+          },
+          {
+            "$ref": "#/definitions/deploy/launchpad"
+          },
+          {
+            "$ref": "#/definitions/deploy/modulus"
+          },
+          {
+            "$ref": "#/definitions/deploy/npm"
+          },
+          {
+            "$ref": "#/definitions/deploy/openshift"
+          },
+          {
+            "$ref": "#/definitions/deploy/opsworks"
+          },
+          {
+            "$ref": "#/definitions/deploy/packagecloud"
+          },
+          {
+            "$ref": "#/definitions/deploy/pages"
+          },
+          {
+            "$ref": "#/definitions/deploy/puppetforge"
+          },
+          {
+            "$ref": "#/definitions/deploy/pypi"
+          },
+          {
+            "$ref": "#/definitions/deploy/releases"
+          },
+          {
+            "$ref": "#/definitions/deploy/rubygems"
+          },
+          {
+            "$ref": "#/definitions/deploy/s3"
+          },
+          {
+            "$ref": "#/definitions/deploy/scalingo"
+          },
+          {
+            "$ref": "#/definitions/deploy/script"
+          },
+          {
+            "$ref": "#/definitions/deploy/surge"
+          },
+          {
+            "$ref": "#/definitions/deploy/testfairy"
+          }
+        ],
+        "normal": true,
+        "detect": "provider"
+      },
       "puppetforge": {
-        "$id": "puppetforge",
-        "title": "Puppetforge",
+        "$id": "deploy_puppetforge",
+        "title": "Deploy Puppetforge",
         "anyOf": [
           {
             "type": "object",
@@ -3871,7 +3871,7 @@
                 "strict": true
               },
               "on": {
-                "$ref": "#/definitions/type/deploy_conditions"
+                "$ref": "#/definitions/deploy/conditions"
               },
               "allow_failure": {
                 "type": "boolean"
@@ -3880,7 +3880,7 @@
                 "type": "boolean"
               },
               "edge": {
-                "$ref": "#/definitions/type/deploy_edge"
+                "$ref": "#/definitions/deploy/edge"
               },
               "user": {
                 "$ref": "#/definitions/secure"
@@ -3910,8 +3910,8 @@
         ]
       },
       "pypi": {
-        "$id": "pypi",
-        "title": "Pypi",
+        "$id": "deploy_pypi",
+        "title": "Deploy Pypi",
         "anyOf": [
           {
             "type": "object",
@@ -3924,7 +3924,7 @@
                 "strict": true
               },
               "on": {
-                "$ref": "#/definitions/type/deploy_conditions"
+                "$ref": "#/definitions/deploy/conditions"
               },
               "allow_failure": {
                 "type": "boolean"
@@ -3933,7 +3933,7 @@
                 "type": "boolean"
               },
               "edge": {
-                "$ref": "#/definitions/type/deploy_edge"
+                "$ref": "#/definitions/deploy/edge"
               },
               "user": {
                 "$ref": "#/definitions/secure"
@@ -3970,8 +3970,8 @@
         ]
       },
       "releases": {
-        "$id": "releases",
-        "title": "Releases",
+        "$id": "deploy_releases",
+        "title": "Deploy Releases",
         "anyOf": [
           {
             "type": "object",
@@ -3984,7 +3984,7 @@
                 "strict": true
               },
               "on": {
-                "$ref": "#/definitions/type/deploy_conditions"
+                "$ref": "#/definitions/deploy/conditions"
               },
               "allow_failure": {
                 "type": "boolean"
@@ -3993,7 +3993,7 @@
                 "type": "boolean"
               },
               "edge": {
-                "$ref": "#/definitions/type/deploy_edge"
+                "$ref": "#/definitions/deploy/edge"
               },
               "user": {
                 "$ref": "#/definitions/secure"
@@ -4039,8 +4039,8 @@
         ]
       },
       "rubygems": {
-        "$id": "rubygems",
-        "title": "Rubygems",
+        "$id": "deploy_rubygems",
+        "title": "Deploy Rubygems",
         "anyOf": [
           {
             "type": "object",
@@ -4053,7 +4053,7 @@
                 "strict": true
               },
               "on": {
-                "$ref": "#/definitions/type/deploy_conditions"
+                "$ref": "#/definitions/deploy/conditions"
               },
               "allow_failure": {
                 "type": "boolean"
@@ -4062,7 +4062,7 @@
                 "type": "boolean"
               },
               "edge": {
-                "$ref": "#/definitions/type/deploy_edge"
+                "$ref": "#/definitions/deploy/edge"
               },
               "gem": {
                 "type": "string"
@@ -4093,8 +4093,8 @@
         ]
       },
       "s3": {
-        "$id": "s3",
-        "title": "S3",
+        "$id": "deploy_s3",
+        "title": "Deploy S3",
         "anyOf": [
           {
             "type": "object",
@@ -4107,7 +4107,7 @@
                 "strict": true
               },
               "on": {
-                "$ref": "#/definitions/type/deploy_conditions"
+                "$ref": "#/definitions/deploy/conditions"
               },
               "allow_failure": {
                 "type": "boolean"
@@ -4116,7 +4116,7 @@
                 "type": "boolean"
               },
               "edge": {
-                "$ref": "#/definitions/type/deploy_edge"
+                "$ref": "#/definitions/deploy/edge"
               },
               "access_key_id": {
                 "$ref": "#/definitions/secure"
@@ -4180,8 +4180,8 @@
         ]
       },
       "scalingo": {
-        "$id": "scalingo",
-        "title": "Scalingo",
+        "$id": "deploy_scalingo",
+        "title": "Deploy Scalingo",
         "anyOf": [
           {
             "type": "object",
@@ -4194,7 +4194,7 @@
                 "strict": true
               },
               "on": {
-                "$ref": "#/definitions/type/deploy_conditions"
+                "$ref": "#/definitions/deploy/conditions"
               },
               "allow_failure": {
                 "type": "boolean"
@@ -4203,7 +4203,7 @@
                 "type": "boolean"
               },
               "edge": {
-                "$ref": "#/definitions/type/deploy_edge"
+                "$ref": "#/definitions/deploy/edge"
               },
               "username": {
                 "$ref": "#/definitions/secure"
@@ -4240,8 +4240,8 @@
         ]
       },
       "script": {
-        "$id": "script",
-        "title": "Script",
+        "$id": "deploy_script",
+        "title": "Deploy Script",
         "anyOf": [
           {
             "type": "object",
@@ -4254,7 +4254,7 @@
                 "strict": true
               },
               "on": {
-                "$ref": "#/definitions/type/deploy_conditions"
+                "$ref": "#/definitions/deploy/conditions"
               },
               "allow_failure": {
                 "type": "boolean"
@@ -4263,7 +4263,7 @@
                 "type": "boolean"
               },
               "edge": {
-                "$ref": "#/definitions/type/deploy_edge"
+                "$ref": "#/definitions/deploy/edge"
               },
               "script": {
                 "type": "string"
@@ -4285,8 +4285,8 @@
         ]
       },
       "surge": {
-        "$id": "surge",
-        "title": "Surge",
+        "$id": "deploy_surge",
+        "title": "Deploy Surge",
         "anyOf": [
           {
             "type": "object",
@@ -4299,7 +4299,7 @@
                 "strict": true
               },
               "on": {
-                "$ref": "#/definitions/type/deploy_conditions"
+                "$ref": "#/definitions/deploy/conditions"
               },
               "allow_failure": {
                 "type": "boolean"
@@ -4308,7 +4308,7 @@
                 "type": "boolean"
               },
               "edge": {
-                "$ref": "#/definitions/type/deploy_edge"
+                "$ref": "#/definitions/deploy/edge"
               },
               "project": {
                 "type": "string"
@@ -4333,8 +4333,8 @@
         ]
       },
       "testfairy": {
-        "$id": "testfairy",
-        "title": "Testfairy",
+        "$id": "deploy_testfairy",
+        "title": "Deploy Testfairy",
         "anyOf": [
           {
             "type": "object",
@@ -4347,7 +4347,7 @@
                 "strict": true
               },
               "on": {
-                "$ref": "#/definitions/type/deploy_conditions"
+                "$ref": "#/definitions/deploy/conditions"
               },
               "allow_failure": {
                 "type": "boolean"
@@ -4356,7 +4356,7 @@
                 "type": "boolean"
               },
               "edge": {
-                "$ref": "#/definitions/type/deploy_edge"
+                "$ref": "#/definitions/deploy/edge"
               },
               "api_key": {
                 "$ref": "#/definitions/secure"
@@ -4425,444 +4425,82 @@
     },
     "language": {
       "__amethyst__": {
-        "$id": "__amethyst__",
-        "title": "Amethyst",
+        "$id": "language___amethyst__",
+        "title": "Language   Amethyst",
         "type": "object",
-        "properties": {
-          "language": {
-            "type": "string",
-            "enum": [
-              "__amethyst__"
-            ],
-            "downcase": true,
-            "defaults": [
-              {
-                "value": "ruby",
-                "only": {
-                  "os": [
-                    "linux",
-                    "windows"
-                  ]
-                }
-              },
-              {
-                "value": "objective-c",
-                "only": {
-                  "os": [
-                    "osx"
-                  ]
-                }
-              }
-            ],
-            "values": {
-              "__amethyst__": {
-                "deprecated": "experimental_stack_language"
-              }
-            }
-          }
-        },
         "normal": true,
-        "keys": {
-          "language": {
-            "only": {
-              "language": [
-                "__amethyst__"
-              ]
-            }
-          }
-        },
         "flags": [
           "internal"
         ]
       },
       "__connie__": {
-        "$id": "__connie__",
-        "title": "Connie",
+        "$id": "language___connie__",
+        "title": "Language   Connie",
         "type": "object",
-        "properties": {
-          "language": {
-            "type": "string",
-            "enum": [
-              "__connie__"
-            ],
-            "downcase": true,
-            "defaults": [
-              {
-                "value": "ruby",
-                "only": {
-                  "os": [
-                    "linux",
-                    "windows"
-                  ]
-                }
-              },
-              {
-                "value": "objective-c",
-                "only": {
-                  "os": [
-                    "osx"
-                  ]
-                }
-              }
-            ],
-            "values": {
-              "__connie__": {
-                "deprecated": "experimental_stack_language"
-              }
-            }
-          }
-        },
         "normal": true,
-        "keys": {
-          "language": {
-            "only": {
-              "language": [
-                "__connie__"
-              ]
-            }
-          }
-        },
         "flags": [
           "internal"
         ]
       },
       "__cookiecat__": {
-        "$id": "__cookiecat__",
-        "title": "Cookiecat",
+        "$id": "language___cookiecat__",
+        "title": "Language   Cookiecat",
         "type": "object",
-        "properties": {
-          "language": {
-            "type": "string",
-            "enum": [
-              "__cookiecat__"
-            ],
-            "downcase": true,
-            "defaults": [
-              {
-                "value": "ruby",
-                "only": {
-                  "os": [
-                    "linux",
-                    "windows"
-                  ]
-                }
-              },
-              {
-                "value": "objective-c",
-                "only": {
-                  "os": [
-                    "osx"
-                  ]
-                }
-              }
-            ],
-            "values": {
-              "__cookiecat__": {
-                "deprecated": "experimental_stack_language"
-              }
-            }
-          }
-        },
         "normal": true,
-        "keys": {
-          "language": {
-            "only": {
-              "language": [
-                "__cookiecat__"
-              ]
-            }
-          }
-        },
         "flags": [
           "internal"
         ]
       },
       "__garnet__": {
-        "$id": "__garnet__",
-        "title": "Garnet",
+        "$id": "language___garnet__",
+        "title": "Language   Garnet",
         "type": "object",
-        "properties": {
-          "language": {
-            "type": "string",
-            "enum": [
-              "__garnet__"
-            ],
-            "downcase": true,
-            "defaults": [
-              {
-                "value": "ruby",
-                "only": {
-                  "os": [
-                    "linux",
-                    "windows"
-                  ]
-                }
-              },
-              {
-                "value": "objective-c",
-                "only": {
-                  "os": [
-                    "osx"
-                  ]
-                }
-              }
-            ],
-            "values": {
-              "__garnet__": {
-                "deprecated": "experimental_stack_language"
-              }
-            }
-          }
-        },
         "normal": true,
-        "keys": {
-          "language": {
-            "only": {
-              "language": [
-                "__garnet__"
-              ]
-            }
-          }
-        },
         "flags": [
           "internal"
         ]
       },
       "__onion__": {
-        "$id": "__onion__",
-        "title": "Onion",
+        "$id": "language___onion__",
+        "title": "Language   Onion",
         "type": "object",
-        "properties": {
-          "language": {
-            "type": "string",
-            "enum": [
-              "__onion__"
-            ],
-            "downcase": true,
-            "defaults": [
-              {
-                "value": "ruby",
-                "only": {
-                  "os": [
-                    "linux",
-                    "windows"
-                  ]
-                }
-              },
-              {
-                "value": "objective-c",
-                "only": {
-                  "os": [
-                    "osx"
-                  ]
-                }
-              }
-            ],
-            "values": {
-              "__onion__": {
-                "deprecated": "experimental_stack_language"
-              }
-            }
-          }
-        },
         "normal": true,
-        "keys": {
-          "language": {
-            "only": {
-              "language": [
-                "__onion__"
-              ]
-            }
-          }
-        },
         "flags": [
           "internal"
         ]
       },
       "__opal__": {
-        "$id": "__opal__",
-        "title": "Opal",
+        "$id": "language___opal__",
+        "title": "Language   Opal",
         "type": "object",
-        "properties": {
-          "language": {
-            "type": "string",
-            "enum": [
-              "__opal__"
-            ],
-            "downcase": true,
-            "defaults": [
-              {
-                "value": "ruby",
-                "only": {
-                  "os": [
-                    "linux",
-                    "windows"
-                  ]
-                }
-              },
-              {
-                "value": "objective-c",
-                "only": {
-                  "os": [
-                    "osx"
-                  ]
-                }
-              }
-            ],
-            "values": {
-              "__opal__": {
-                "deprecated": "experimental_stack_language"
-              }
-            }
-          }
-        },
         "normal": true,
-        "keys": {
-          "language": {
-            "only": {
-              "language": [
-                "__opal__"
-              ]
-            }
-          }
-        },
         "flags": [
           "internal"
         ]
       },
       "__sardonyx__": {
-        "$id": "__sardonyx__",
-        "title": "Sardonyx",
+        "$id": "language___sardonyx__",
+        "title": "Language   Sardonyx",
         "type": "object",
-        "properties": {
-          "language": {
-            "type": "string",
-            "enum": [
-              "__sardonyx__"
-            ],
-            "downcase": true,
-            "defaults": [
-              {
-                "value": "ruby",
-                "only": {
-                  "os": [
-                    "linux",
-                    "windows"
-                  ]
-                }
-              },
-              {
-                "value": "objective-c",
-                "only": {
-                  "os": [
-                    "osx"
-                  ]
-                }
-              }
-            ],
-            "values": {
-              "__sardonyx__": {
-                "deprecated": "experimental_stack_language"
-              }
-            }
-          }
-        },
         "normal": true,
-        "keys": {
-          "language": {
-            "only": {
-              "language": [
-                "__sardonyx__"
-              ]
-            }
-          }
-        },
         "flags": [
           "internal"
         ]
       },
       "__stevonnie__": {
-        "$id": "__stevonnie__",
-        "title": "Stevonnie",
+        "$id": "language___stevonnie__",
+        "title": "Language   Stevonnie",
         "type": "object",
-        "properties": {
-          "language": {
-            "type": "string",
-            "enum": [
-              "__stevonnie__"
-            ],
-            "downcase": true,
-            "defaults": [
-              {
-                "value": "ruby",
-                "only": {
-                  "os": [
-                    "linux",
-                    "windows"
-                  ]
-                }
-              },
-              {
-                "value": "objective-c",
-                "only": {
-                  "os": [
-                    "osx"
-                  ]
-                }
-              }
-            ],
-            "values": {
-              "__stevonnie__": {
-                "deprecated": "experimental_stack_language"
-              }
-            }
-          }
-        },
         "normal": true,
-        "keys": {
-          "language": {
-            "only": {
-              "language": [
-                "__stevonnie__"
-              ]
-            }
-          }
-        },
         "flags": [
           "internal"
         ]
       },
       "android": {
-        "$id": "android",
-        "title": "Android",
+        "$id": "language_android",
+        "title": "Language Android",
         "type": "object",
         "properties": {
-          "language": {
-            "type": "string",
-            "enum": [
-              "android"
-            ],
-            "downcase": true,
-            "defaults": [
-              {
-                "value": "ruby",
-                "only": {
-                  "os": [
-                    "linux",
-                    "windows"
-                  ]
-                }
-              },
-              {
-                "value": "objective-c",
-                "only": {
-                  "os": [
-                    "osx"
-                  ]
-                }
-              }
-            ]
-          },
           "jdk": {
             "$ref": "#/definitions/strs"
           },
@@ -4881,13 +4519,6 @@
         },
         "normal": true,
         "keys": {
-          "language": {
-            "only": {
-              "language": [
-                "android"
-              ]
-            }
-          },
           "jdk": {
             "only": {
               "language": [
@@ -4910,79 +4541,16 @@
         }
       },
       "c": {
-        "$id": "c",
-        "title": "C",
+        "$id": "language_c",
+        "title": "Language C",
         "type": "object",
-        "properties": {
-          "language": {
-            "type": "string",
-            "enum": [
-              "c"
-            ],
-            "downcase": true,
-            "defaults": [
-              {
-                "value": "ruby",
-                "only": {
-                  "os": [
-                    "linux",
-                    "windows"
-                  ]
-                }
-              },
-              {
-                "value": "objective-c",
-                "only": {
-                  "os": [
-                    "osx"
-                  ]
-                }
-              }
-            ]
-          }
-        },
-        "normal": true,
-        "keys": {
-          "language": {
-            "only": {
-              "language": [
-                "c"
-              ]
-            }
-          }
-        }
+        "normal": true
       },
       "clojure": {
-        "$id": "clojure",
-        "title": "Clojure",
+        "$id": "language_clojure",
+        "title": "Language Clojure",
         "type": "object",
         "properties": {
-          "language": {
-            "type": "string",
-            "enum": [
-              "clojure"
-            ],
-            "downcase": true,
-            "defaults": [
-              {
-                "value": "ruby",
-                "only": {
-                  "os": [
-                    "linux",
-                    "windows"
-                  ]
-                }
-              },
-              {
-                "value": "objective-c",
-                "only": {
-                  "os": [
-                    "osx"
-                  ]
-                }
-              }
-            ]
-          },
           "jdk": {
             "$ref": "#/definitions/strs"
           },
@@ -4992,13 +4560,6 @@
         },
         "normal": true,
         "keys": {
-          "language": {
-            "only": {
-              "language": [
-                "clojure"
-              ]
-            }
-          },
           "jdk": {
             "only": {
               "language": [
@@ -5021,99 +4582,22 @@
         }
       },
       "cpp": {
-        "$id": "cpp",
-        "title": "Cpp",
+        "$id": "language_cpp",
+        "title": "Language Cpp",
         "type": "object",
-        "properties": {
-          "language": {
-            "type": "string",
-            "enum": [
-              "cpp"
-            ],
-            "downcase": true,
-            "defaults": [
-              {
-                "value": "ruby",
-                "only": {
-                  "os": [
-                    "linux",
-                    "windows"
-                  ]
-                }
-              },
-              {
-                "value": "objective-c",
-                "only": {
-                  "os": [
-                    "osx"
-                  ]
-                }
-              }
-            ],
-            "values": {
-              "cpp": {
-                "aliases": [
-                  "c++"
-                ]
-              }
-            }
-          }
-        },
-        "normal": true,
-        "keys": {
-          "language": {
-            "only": {
-              "language": [
-                "cpp"
-              ]
-            }
-          }
-        }
+        "normal": true
       },
       "crystal": {
-        "$id": "crystal",
-        "title": "Crystal",
+        "$id": "language_crystal",
+        "title": "Language Crystal",
         "type": "object",
         "properties": {
-          "language": {
-            "type": "string",
-            "enum": [
-              "crystal"
-            ],
-            "downcase": true,
-            "defaults": [
-              {
-                "value": "ruby",
-                "only": {
-                  "os": [
-                    "linux",
-                    "windows"
-                  ]
-                }
-              },
-              {
-                "value": "objective-c",
-                "only": {
-                  "os": [
-                    "osx"
-                  ]
-                }
-              }
-            ]
-          },
           "crystal": {
             "$ref": "#/definitions/strs"
           }
         },
         "normal": true,
         "keys": {
-          "language": {
-            "only": {
-              "language": [
-                "crystal"
-              ]
-            }
-          },
           "crystal": {
             "only": {
               "language": [
@@ -5124,36 +4608,10 @@
         }
       },
       "csharp": {
-        "$id": "csharp",
-        "title": "Csharp",
+        "$id": "language_csharp",
+        "title": "Language Csharp",
         "type": "object",
         "properties": {
-          "language": {
-            "type": "string",
-            "enum": [
-              "csharp"
-            ],
-            "downcase": true,
-            "defaults": [
-              {
-                "value": "ruby",
-                "only": {
-                  "os": [
-                    "linux",
-                    "windows"
-                  ]
-                }
-              },
-              {
-                "value": "objective-c",
-                "only": {
-                  "os": [
-                    "osx"
-                  ]
-                }
-              }
-            ]
-          },
           "dotnet": {
             "$ref": "#/definitions/strs"
           },
@@ -5166,13 +4624,6 @@
         },
         "normal": true,
         "keys": {
-          "language": {
-            "only": {
-              "language": [
-                "csharp"
-              ]
-            }
-          },
           "dotnet": {
             "only": {
               "language": [
@@ -5197,49 +4648,16 @@
         }
       },
       "d": {
-        "$id": "d",
-        "title": "D",
+        "$id": "language_d",
+        "title": "Language D",
         "type": "object",
         "properties": {
-          "language": {
-            "type": "string",
-            "enum": [
-              "d"
-            ],
-            "downcase": true,
-            "defaults": [
-              {
-                "value": "ruby",
-                "only": {
-                  "os": [
-                    "linux",
-                    "windows"
-                  ]
-                }
-              },
-              {
-                "value": "objective-c",
-                "only": {
-                  "os": [
-                    "osx"
-                  ]
-                }
-              }
-            ]
-          },
           "d": {
             "$ref": "#/definitions/strs"
           }
         },
         "normal": true,
         "keys": {
-          "language": {
-            "only": {
-              "language": [
-                "d"
-              ]
-            }
-          },
           "d": {
             "only": {
               "language": [
@@ -5250,36 +4668,10 @@
         }
       },
       "dart": {
-        "$id": "dart",
-        "title": "Dart",
+        "$id": "language_dart",
+        "title": "Language Dart",
         "type": "object",
         "properties": {
-          "language": {
-            "type": "string",
-            "enum": [
-              "dart"
-            ],
-            "downcase": true,
-            "defaults": [
-              {
-                "value": "ruby",
-                "only": {
-                  "os": [
-                    "linux",
-                    "windows"
-                  ]
-                }
-              },
-              {
-                "value": "objective-c",
-                "only": {
-                  "os": [
-                    "osx"
-                  ]
-                }
-              }
-            ]
-          },
           "dart": {
             "$ref": "#/definitions/strs"
           },
@@ -5289,13 +4681,6 @@
         },
         "normal": true,
         "keys": {
-          "language": {
-            "only": {
-              "language": [
-                "dart"
-              ]
-            }
-          },
           "dart": {
             "only": {
               "language": [
@@ -5313,36 +4698,10 @@
         }
       },
       "elixir": {
-        "$id": "elixir",
-        "title": "Elixir",
+        "$id": "language_elixir",
+        "title": "Language Elixir",
         "type": "object",
         "properties": {
-          "language": {
-            "type": "string",
-            "enum": [
-              "elixir"
-            ],
-            "downcase": true,
-            "defaults": [
-              {
-                "value": "ruby",
-                "only": {
-                  "os": [
-                    "linux",
-                    "windows"
-                  ]
-                }
-              },
-              {
-                "value": "objective-c",
-                "only": {
-                  "os": [
-                    "osx"
-                  ]
-                }
-              }
-            ]
-          },
           "elixir": {
             "$ref": "#/definitions/strs"
           },
@@ -5352,13 +4711,6 @@
         },
         "normal": true,
         "keys": {
-          "language": {
-            "only": {
-              "language": [
-                "elixir"
-              ]
-            }
-          },
           "elixir": {
             "only": {
               "language": [
@@ -5376,36 +4728,10 @@
         }
       },
       "elm": {
-        "$id": "elm",
-        "title": "Elm",
+        "$id": "language_elm",
+        "title": "Language Elm",
         "type": "object",
         "properties": {
-          "language": {
-            "type": "string",
-            "enum": [
-              "elm"
-            ],
-            "downcase": true,
-            "defaults": [
-              {
-                "value": "ruby",
-                "only": {
-                  "os": [
-                    "linux",
-                    "windows"
-                  ]
-                }
-              },
-              {
-                "value": "objective-c",
-                "only": {
-                  "os": [
-                    "osx"
-                  ]
-                }
-              }
-            ]
-          },
           "elm": {
             "$ref": "#/definitions/strs"
           },
@@ -5418,13 +4744,6 @@
         },
         "normal": true,
         "keys": {
-          "language": {
-            "only": {
-              "language": [
-                "elm"
-              ]
-            }
-          },
           "elm": {
             "only": {
               "language": [
@@ -5449,49 +4768,16 @@
         }
       },
       "erlang": {
-        "$id": "erlang",
-        "title": "Erlang",
+        "$id": "language_erlang",
+        "title": "Language Erlang",
         "type": "object",
         "properties": {
-          "language": {
-            "type": "string",
-            "enum": [
-              "erlang"
-            ],
-            "downcase": true,
-            "defaults": [
-              {
-                "value": "ruby",
-                "only": {
-                  "os": [
-                    "linux",
-                    "windows"
-                  ]
-                }
-              },
-              {
-                "value": "objective-c",
-                "only": {
-                  "os": [
-                    "osx"
-                  ]
-                }
-              }
-            ]
-          },
           "otp_release": {
             "$ref": "#/definitions/strs"
           }
         },
         "normal": true,
         "keys": {
-          "language": {
-            "only": {
-              "language": [
-                "erlang"
-              ]
-            }
-          },
           "otp_release": {
             "only": {
               "language": [
@@ -5502,43 +4788,10 @@
         }
       },
       "go": {
-        "$id": "go",
-        "title": "Go",
+        "$id": "language_go",
+        "title": "Language Go",
         "type": "object",
         "properties": {
-          "language": {
-            "type": "string",
-            "enum": [
-              "go"
-            ],
-            "downcase": true,
-            "defaults": [
-              {
-                "value": "ruby",
-                "only": {
-                  "os": [
-                    "linux",
-                    "windows"
-                  ]
-                }
-              },
-              {
-                "value": "objective-c",
-                "only": {
-                  "os": [
-                    "osx"
-                  ]
-                }
-              }
-            ],
-            "values": {
-              "go": {
-                "aliases": [
-                  "golang"
-                ]
-              }
-            }
-          },
           "go": {
             "$ref": "#/definitions/strs"
           },
@@ -5563,13 +4816,6 @@
         },
         "normal": true,
         "keys": {
-          "language": {
-            "only": {
-              "language": [
-                "go"
-              ]
-            }
-          },
           "go": {
             "only": {
               "language": [
@@ -5601,49 +4847,16 @@
         }
       },
       "groovy": {
-        "$id": "groovy",
-        "title": "Groovy",
+        "$id": "language_groovy",
+        "title": "Language Groovy",
         "type": "object",
         "properties": {
-          "language": {
-            "type": "string",
-            "enum": [
-              "groovy"
-            ],
-            "downcase": true,
-            "defaults": [
-              {
-                "value": "ruby",
-                "only": {
-                  "os": [
-                    "linux",
-                    "windows"
-                  ]
-                }
-              },
-              {
-                "value": "objective-c",
-                "only": {
-                  "os": [
-                    "osx"
-                  ]
-                }
-              }
-            ]
-          },
           "jdk": {
             "$ref": "#/definitions/strs"
           }
         },
         "normal": true,
         "keys": {
-          "language": {
-            "only": {
-              "language": [
-                "groovy"
-              ]
-            }
-          },
           "jdk": {
             "only": {
               "language": [
@@ -5659,49 +4872,16 @@
         }
       },
       "haskell": {
-        "$id": "haskell",
-        "title": "Haskell",
+        "$id": "language_haskell",
+        "title": "Language Haskell",
         "type": "object",
         "properties": {
-          "language": {
-            "type": "string",
-            "enum": [
-              "haskell"
-            ],
-            "downcase": true,
-            "defaults": [
-              {
-                "value": "ruby",
-                "only": {
-                  "os": [
-                    "linux",
-                    "windows"
-                  ]
-                }
-              },
-              {
-                "value": "objective-c",
-                "only": {
-                  "os": [
-                    "osx"
-                  ]
-                }
-              }
-            ]
-          },
           "ghc": {
             "$ref": "#/definitions/strs"
           }
         },
         "normal": true,
         "keys": {
-          "language": {
-            "only": {
-              "language": [
-                "haskell"
-              ]
-            }
-          },
           "ghc": {
             "only": {
               "language": [
@@ -5712,36 +4892,10 @@
         }
       },
       "haxe": {
-        "$id": "haxe",
-        "title": "Haxe",
+        "$id": "language_haxe",
+        "title": "Language Haxe",
         "type": "object",
         "properties": {
-          "language": {
-            "type": "string",
-            "enum": [
-              "haxe"
-            ],
-            "downcase": true,
-            "defaults": [
-              {
-                "value": "ruby",
-                "only": {
-                  "os": [
-                    "linux",
-                    "windows"
-                  ]
-                }
-              },
-              {
-                "value": "objective-c",
-                "only": {
-                  "os": [
-                    "osx"
-                  ]
-                }
-              }
-            ]
-          },
           "haxe": {
             "$ref": "#/definitions/strs"
           },
@@ -5754,13 +4908,6 @@
         },
         "normal": true,
         "keys": {
-          "language": {
-            "only": {
-              "language": [
-                "haxe"
-              ]
-            }
-          },
           "haxe": {
             "only": {
               "language": [
@@ -5785,56 +4932,16 @@
         }
       },
       "java": {
-        "$id": "java",
-        "title": "Java",
+        "$id": "language_java",
+        "title": "Language Java",
         "type": "object",
         "properties": {
-          "language": {
-            "type": "string",
-            "enum": [
-              "java"
-            ],
-            "downcase": true,
-            "defaults": [
-              {
-                "value": "ruby",
-                "only": {
-                  "os": [
-                    "linux",
-                    "windows"
-                  ]
-                }
-              },
-              {
-                "value": "objective-c",
-                "only": {
-                  "os": [
-                    "osx"
-                  ]
-                }
-              }
-            ],
-            "values": {
-              "java": {
-                "aliases": [
-                  "jvm"
-                ]
-              }
-            }
-          },
           "jdk": {
             "$ref": "#/definitions/strs"
           }
         },
         "normal": true,
         "keys": {
-          "language": {
-            "only": {
-              "language": [
-                "java"
-              ]
-            }
-          },
           "jdk": {
             "only": {
               "language": [
@@ -5850,49 +4957,16 @@
         }
       },
       "julia": {
-        "$id": "julia",
-        "title": "Julia",
+        "$id": "language_julia",
+        "title": "Language Julia",
         "type": "object",
         "properties": {
-          "language": {
-            "type": "string",
-            "enum": [
-              "julia"
-            ],
-            "downcase": true,
-            "defaults": [
-              {
-                "value": "ruby",
-                "only": {
-                  "os": [
-                    "linux",
-                    "windows"
-                  ]
-                }
-              },
-              {
-                "value": "objective-c",
-                "only": {
-                  "os": [
-                    "osx"
-                  ]
-                }
-              }
-            ]
-          },
           "julia": {
             "$ref": "#/definitions/strs"
           }
         },
         "normal": true,
         "keys": {
-          "language": {
-            "only": {
-              "language": [
-                "julia"
-              ]
-            }
-          },
           "julia": {
             "only": {
               "language": [
@@ -5903,86 +4977,16 @@
         }
       },
       "nix": {
-        "$id": "nix",
-        "title": "Nix",
+        "$id": "language_nix",
+        "title": "Language Nix",
         "type": "object",
-        "properties": {
-          "language": {
-            "type": "string",
-            "enum": [
-              "nix"
-            ],
-            "downcase": true,
-            "defaults": [
-              {
-                "value": "ruby",
-                "only": {
-                  "os": [
-                    "linux",
-                    "windows"
-                  ]
-                }
-              },
-              {
-                "value": "objective-c",
-                "only": {
-                  "os": [
-                    "osx"
-                  ]
-                }
-              }
-            ]
-          }
-        },
-        "normal": true,
-        "keys": {
-          "language": {
-            "only": {
-              "language": [
-                "nix"
-              ]
-            }
-          }
-        }
+        "normal": true
       },
       "node_js": {
-        "$id": "node_js",
-        "title": "Node Js",
+        "$id": "language_node_js",
+        "title": "Language Node Js",
         "type": "object",
         "properties": {
-          "language": {
-            "type": "string",
-            "enum": [
-              "node_js"
-            ],
-            "downcase": true,
-            "defaults": [
-              {
-                "value": "ruby",
-                "only": {
-                  "os": [
-                    "linux",
-                    "windows"
-                  ]
-                }
-              },
-              {
-                "value": "objective-c",
-                "only": {
-                  "os": [
-                    "osx"
-                  ]
-                }
-              }
-            ],
-            "values": {
-              "node_js": {
-                "aliases": [
-                  "javascript"
-                ]
-              }
-            }
-          },
           "node_js": {
             "$ref": "#/definitions/strs"
           },
@@ -5992,13 +4996,6 @@
         },
         "normal": true,
         "keys": {
-          "language": {
-            "only": {
-              "language": [
-                "node_js"
-              ]
-            }
-          },
           "node_js": {
             "aliases": [
               "node"
@@ -6019,44 +5016,10 @@
         }
       },
       "objective-c": {
-        "$id": "objective-c",
-        "title": "Objective-c",
+        "$id": "language_objective-c",
+        "title": "Language Objective-c",
         "type": "object",
         "properties": {
-          "language": {
-            "type": "string",
-            "enum": [
-              "objective-c"
-            ],
-            "downcase": true,
-            "defaults": [
-              {
-                "value": "ruby",
-                "only": {
-                  "os": [
-                    "linux",
-                    "windows"
-                  ]
-                }
-              },
-              {
-                "value": "objective-c",
-                "only": {
-                  "os": [
-                    "osx"
-                  ]
-                }
-              }
-            ],
-            "values": {
-              "objective-c": {
-                "aliases": [
-                  "objective_c",
-                  "swift"
-                ]
-              }
-            }
-          },
           "rvm": {
             "$ref": "#/definitions/strs"
           },
@@ -6087,13 +5050,6 @@
         },
         "normal": true,
         "keys": {
-          "language": {
-            "only": {
-              "language": [
-                "objective-c"
-              ]
-            }
-          },
           "rvm": {
             "aliases": [
               "ruby"
@@ -6163,49 +5119,16 @@
         }
       },
       "perl": {
-        "$id": "perl",
-        "title": "Perl",
+        "$id": "language_perl",
+        "title": "Language Perl",
         "type": "object",
         "properties": {
-          "language": {
-            "type": "string",
-            "enum": [
-              "perl"
-            ],
-            "downcase": true,
-            "defaults": [
-              {
-                "value": "ruby",
-                "only": {
-                  "os": [
-                    "linux",
-                    "windows"
-                  ]
-                }
-              },
-              {
-                "value": "objective-c",
-                "only": {
-                  "os": [
-                    "osx"
-                  ]
-                }
-              }
-            ]
-          },
           "perl": {
             "$ref": "#/definitions/strs"
           }
         },
         "normal": true,
         "keys": {
-          "language": {
-            "only": {
-              "language": [
-                "perl"
-              ]
-            }
-          },
           "perl": {
             "only": {
               "language": [
@@ -6216,49 +5139,16 @@
         }
       },
       "perl6": {
-        "$id": "perl6",
-        "title": "Perl6",
+        "$id": "language_perl6",
+        "title": "Language Perl6",
         "type": "object",
         "properties": {
-          "language": {
-            "type": "string",
-            "enum": [
-              "perl6"
-            ],
-            "downcase": true,
-            "defaults": [
-              {
-                "value": "ruby",
-                "only": {
-                  "os": [
-                    "linux",
-                    "windows"
-                  ]
-                }
-              },
-              {
-                "value": "objective-c",
-                "only": {
-                  "os": [
-                    "osx"
-                  ]
-                }
-              }
-            ]
-          },
           "perl6": {
             "$ref": "#/definitions/strs"
           }
         },
         "normal": true,
         "keys": {
-          "language": {
-            "only": {
-              "language": [
-                "perl6"
-              ]
-            }
-          },
           "perl6": {
             "only": {
               "language": [
@@ -6269,36 +5159,10 @@
         }
       },
       "php": {
-        "$id": "php",
-        "title": "Php",
+        "$id": "language_php",
+        "title": "Language Php",
         "type": "object",
         "properties": {
-          "language": {
-            "type": "string",
-            "enum": [
-              "php"
-            ],
-            "downcase": true,
-            "defaults": [
-              {
-                "value": "ruby",
-                "only": {
-                  "os": [
-                    "linux",
-                    "windows"
-                  ]
-                }
-              },
-              {
-                "value": "objective-c",
-                "only": {
-                  "os": [
-                    "osx"
-                  ]
-                }
-              }
-            ]
-          },
           "php": {
             "$ref": "#/definitions/strs"
           },
@@ -6308,13 +5172,6 @@
         },
         "normal": true,
         "keys": {
-          "language": {
-            "only": {
-              "language": [
-                "php"
-              ]
-            }
-          },
           "php": {
             "only": {
               "language": [
@@ -6332,36 +5189,10 @@
         }
       },
       "python": {
-        "$id": "python",
-        "title": "Python",
+        "$id": "language_python",
+        "title": "Language Python",
         "type": "object",
         "properties": {
-          "language": {
-            "type": "string",
-            "enum": [
-              "python"
-            ],
-            "downcase": true,
-            "defaults": [
-              {
-                "value": "ruby",
-                "only": {
-                  "os": [
-                    "linux",
-                    "windows"
-                  ]
-                }
-              },
-              {
-                "value": "objective-c",
-                "only": {
-                  "os": [
-                    "osx"
-                  ]
-                }
-              }
-            ]
-          },
           "python": {
             "$ref": "#/definitions/strs"
           },
@@ -6376,13 +5207,6 @@
         },
         "normal": true,
         "keys": {
-          "language": {
-            "only": {
-              "language": [
-                "python"
-              ]
-            }
-          },
           "python": {
             "only": {
               "language": [
@@ -6403,36 +5227,10 @@
         }
       },
       "r": {
-        "$id": "r",
-        "title": "R",
+        "$id": "language_r",
+        "title": "Language R",
         "type": "object",
         "properties": {
-          "language": {
-            "type": "string",
-            "enum": [
-              "r"
-            ],
-            "downcase": true,
-            "defaults": [
-              {
-                "value": "ruby",
-                "only": {
-                  "os": [
-                    "linux",
-                    "windows"
-                  ]
-                }
-              },
-              {
-                "value": "objective-c",
-                "only": {
-                  "os": [
-                    "osx"
-                  ]
-                }
-              }
-            ]
-          },
           "r": {
             "$ref": "#/definitions/strs"
           },
@@ -6502,13 +5300,6 @@
         },
         "normal": true,
         "keys": {
-          "language": {
-            "only": {
-              "language": [
-                "r"
-              ]
-            }
-          },
           "r": {
             "only": {
               "language": [
@@ -6669,36 +5460,10 @@
         }
       },
       "ruby": {
-        "$id": "ruby",
-        "title": "Ruby",
+        "$id": "language_ruby",
+        "title": "Language Ruby",
         "type": "object",
         "properties": {
-          "language": {
-            "type": "string",
-            "enum": [
-              "ruby"
-            ],
-            "downcase": true,
-            "defaults": [
-              {
-                "value": "ruby",
-                "only": {
-                  "os": [
-                    "linux",
-                    "windows"
-                  ]
-                }
-              },
-              {
-                "value": "objective-c",
-                "only": {
-                  "os": [
-                    "osx"
-                  ]
-                }
-              }
-            ]
-          },
           "rvm": {
             "$ref": "#/definitions/strs"
           },
@@ -6714,13 +5479,6 @@
         },
         "normal": true,
         "keys": {
-          "language": {
-            "only": {
-              "language": [
-                "ruby"
-              ]
-            }
-          },
           "rvm": {
             "aliases": [
               "ruby"
@@ -6763,49 +5521,16 @@
         }
       },
       "rust": {
-        "$id": "rust",
-        "title": "Rust",
+        "$id": "language_rust",
+        "title": "Language Rust",
         "type": "object",
         "properties": {
-          "language": {
-            "type": "string",
-            "enum": [
-              "rust"
-            ],
-            "downcase": true,
-            "defaults": [
-              {
-                "value": "ruby",
-                "only": {
-                  "os": [
-                    "linux",
-                    "windows"
-                  ]
-                }
-              },
-              {
-                "value": "objective-c",
-                "only": {
-                  "os": [
-                    "osx"
-                  ]
-                }
-              }
-            ]
-          },
           "rust": {
             "$ref": "#/definitions/strs"
           }
         },
         "normal": true,
         "keys": {
-          "language": {
-            "only": {
-              "language": [
-                "rust"
-              ]
-            }
-          },
           "rust": {
             "only": {
               "language": [
@@ -6816,36 +5541,10 @@
         }
       },
       "scala": {
-        "$id": "scala",
-        "title": "Scala",
+        "$id": "language_scala",
+        "title": "Language Scala",
         "type": "object",
         "properties": {
-          "language": {
-            "type": "string",
-            "enum": [
-              "scala"
-            ],
-            "downcase": true,
-            "defaults": [
-              {
-                "value": "ruby",
-                "only": {
-                  "os": [
-                    "linux",
-                    "windows"
-                  ]
-                }
-              },
-              {
-                "value": "objective-c",
-                "only": {
-                  "os": [
-                    "osx"
-                  ]
-                }
-              }
-            ]
-          },
           "scala": {
             "$ref": "#/definitions/strs"
           },
@@ -6858,13 +5557,6 @@
         },
         "normal": true,
         "keys": {
-          "language": {
-            "only": {
-              "language": [
-                "scala"
-              ]
-            }
-          },
           "scala": {
             "only": {
               "language": [
@@ -6894,88 +5586,16 @@
         }
       },
       "shell": {
-        "$id": "shell",
-        "title": "Shell",
+        "$id": "language_shell",
+        "title": "Language Shell",
         "type": "object",
-        "properties": {
-          "language": {
-            "type": "string",
-            "enum": [
-              "shell"
-            ],
-            "downcase": true,
-            "defaults": [
-              {
-                "value": "ruby",
-                "only": {
-                  "os": [
-                    "linux",
-                    "windows"
-                  ]
-                }
-              },
-              {
-                "value": "objective-c",
-                "only": {
-                  "os": [
-                    "osx"
-                  ]
-                }
-              }
-            ],
-            "values": {
-              "shell": {
-                "aliases": [
-                  "bash",
-                  "generic",
-                  "minimal"
-                ]
-              }
-            }
-          }
-        },
-        "normal": true,
-        "keys": {
-          "language": {
-            "only": {
-              "language": [
-                "shell"
-              ]
-            }
-          }
-        }
+        "normal": true
       },
       "smalltalk": {
-        "$id": "smalltalk",
-        "title": "Smalltalk",
+        "$id": "language_smalltalk",
+        "title": "Language Smalltalk",
         "type": "object",
         "properties": {
-          "language": {
-            "type": "string",
-            "enum": [
-              "smalltalk"
-            ],
-            "downcase": true,
-            "defaults": [
-              {
-                "value": "ruby",
-                "only": {
-                  "os": [
-                    "linux",
-                    "windows"
-                  ]
-                }
-              },
-              {
-                "value": "objective-c",
-                "only": {
-                  "os": [
-                    "osx"
-                  ]
-                }
-              }
-            ]
-          },
           "smalltalk": {
             "$ref": "#/definitions/strs"
           },
@@ -6988,13 +5608,6 @@
         },
         "normal": true,
         "keys": {
-          "language": {
-            "only": {
-              "language": [
-                "smalltalk"
-              ]
-            }
-          },
           "smalltalk": {
             "only": {
               "language": [
@@ -7021,8 +5634,8 @@
     },
     "notification": {
       "campfire": {
-        "$id": "campfire",
-        "title": "Campfire",
+        "$id": "notification_campfire",
+        "title": "Notification Campfire",
         "anyOf": [
           {
             "type": "object",
@@ -7064,8 +5677,8 @@
         ]
       },
       "email": {
-        "$id": "email",
-        "title": "Email",
+        "$id": "notification_email",
+        "title": "Notification Email",
         "anyOf": [
           {
             "type": "object",
@@ -7104,8 +5717,8 @@
         ]
       },
       "flowdock": {
-        "$id": "flowdock",
-        "title": "Flowdock",
+        "$id": "notification_flowdock",
+        "title": "Notification Flowdock",
         "anyOf": [
           {
             "type": "object",
@@ -7147,8 +5760,8 @@
         ]
       },
       "frequency": {
-        "$id": "frequency",
-        "title": "Frequency",
+        "$id": "notification_frequency",
+        "title": "Notification Frequency",
         "type": "string",
         "enum": [
           "always",
@@ -7174,8 +5787,8 @@
         }
       },
       "hipchat": {
-        "$id": "hipchat",
-        "title": "Hipchat",
+        "$id": "notification_hipchat",
+        "title": "Notification Hipchat",
         "anyOf": [
           {
             "type": "object",
@@ -7230,7 +5843,7 @@
         ]
       },
       "irc": {
-        "$id": "irc",
+        "$id": "notification_irc",
         "title": "IRC",
         "anyOf": [
           {
@@ -7291,8 +5904,8 @@
         ]
       },
       "pushover": {
-        "$id": "pushover",
-        "title": "Pushover",
+        "$id": "notification_pushover",
+        "title": "Notification Pushover",
         "anyOf": [
           {
             "type": "object",
@@ -7334,8 +5947,8 @@
         "normal": true
       },
       "slack": {
-        "$id": "slack",
-        "title": "Slack",
+        "$id": "notification_slack",
+        "title": "Notification Slack",
         "anyOf": [
           {
             "type": "object",
@@ -7380,8 +5993,8 @@
         ]
       },
       "template": {
-        "$id": "template",
-        "title": "Template",
+        "$id": "notification_template",
+        "title": "Notification Template",
         "type": "string",
         "vars": [
           "repository",
@@ -7406,8 +6019,8 @@
         ]
       },
       "templates": {
-        "$id": "templates",
-        "title": "Templates",
+        "$id": "notification_templates",
+        "title": "Notification Templates",
         "anyOf": [
           {
             "type": "array",
@@ -7422,8 +6035,8 @@
         ]
       },
       "webhooks": {
-        "$id": "webhooks",
-        "title": "Webhooks",
+        "$id": "notification_webhooks",
+        "title": "Notification Webhooks",
         "anyOf": [
           {
             "type": "object",
@@ -7530,7 +6143,106 @@
                 ]
               }
             }
-          ]
+          ],
+          "enum": [
+            "android",
+            "c",
+            "clojure",
+            "cpp",
+            "crystal",
+            "csharp",
+            "d",
+            "dart",
+            "elixir",
+            "elm",
+            "erlang",
+            "go",
+            "groovy",
+            "haskell",
+            "haxe",
+            "java",
+            "julia",
+            "nix",
+            "node_js",
+            "objective-c",
+            "perl",
+            "perl6",
+            "php",
+            "python",
+            "r",
+            "ruby",
+            "rust",
+            "scala",
+            "shell",
+            "smalltalk",
+            "__connie__",
+            "__amethyst__",
+            "__garnet__",
+            "__stevonnie__",
+            "__opal__",
+            "__sardonyx__",
+            "__onion__",
+            "__cookiecat__"
+          ],
+          "values": {
+            "cpp": {
+              "aliases": [
+                "c++"
+              ]
+            },
+            "go": {
+              "aliases": [
+                "golang"
+              ]
+            },
+            "java": {
+              "aliases": [
+                "jvm"
+              ]
+            },
+            "node_js": {
+              "aliases": [
+                "javascript"
+              ]
+            },
+            "objective-c": {
+              "aliases": [
+                "objective_c",
+                "swift"
+              ]
+            },
+            "shell": {
+              "aliases": [
+                "bash",
+                "generic",
+                "minimal"
+              ]
+            },
+            "__connie__": {
+              "deprecated": "experimental_stack_language"
+            },
+            "__amethyst__": {
+              "deprecated": "experimental_stack_language"
+            },
+            "__garnet__": {
+              "deprecated": "experimental_stack_language"
+            },
+            "__stevonnie__": {
+              "deprecated": "experimental_stack_language"
+            },
+            "__opal__": {
+              "deprecated": "experimental_stack_language"
+            },
+            "__sardonyx__": {
+              "deprecated": "experimental_stack_language"
+            },
+            "__onion__": {
+              "deprecated": "experimental_stack_language"
+            },
+            "__cookiecat__": {
+              "deprecated": "experimental_stack_language"
+            }
+          }
         },
         "os": {
           "$ref": "#/definitions/type/oss"
@@ -7572,6 +6284,10 @@
           "type": "boolean"
         }
       },
+      "required": [
+        "language",
+        "os"
+      ],
       "keys": {
         "arch": {
           "only": {

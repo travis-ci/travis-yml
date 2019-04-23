@@ -1,5 +1,4 @@
 # frozen_string_literal: true
-# require 'travis/yml/doc/helper/support'
 require 'travis/yml/doc/value/factory'
 require 'travis/yml/doc/validate/base'
 
@@ -9,7 +8,6 @@ module Travis
       module Validate
         class Default < Base
           include Value::Factory
-          # include Helper::Support
 
           register :default
 
@@ -24,7 +22,7 @@ module Travis
             end
 
             def default?
-              schema.default? && value.missing? && supported?
+              schema.default? && value.missing? # && supported?
             end
 
             def invalid_type?
@@ -32,7 +30,7 @@ module Travis
             end
 
             def default
-              default = supported.value
+              default = supported&.value || defaults.first.value
               value.info :default, default: default
               build(value.parent, value.key, schema.seq? ? [default] : default, value.opts)
             end
@@ -47,8 +45,12 @@ module Travis
             memoize :supported
 
             def support(value)
-              support = schema.defaults.support(value.value)
+              support = defaults.support(value.value)
               Value::Support.new(support, supporting, value.value)
+            end
+
+            def defaults
+              schema.defaults
             end
 
             def supporting

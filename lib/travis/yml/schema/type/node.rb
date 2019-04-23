@@ -22,6 +22,15 @@ module Travis
               name.to_s.include?('Def')
             end
 
+            def exported(namespace, id)
+              exports[namespace]&.fetch(id, nil)
+            end
+
+            def export(obj)
+              exports[obj.namespace] ||= {}
+              exports[obj.namespace][obj.id] = obj
+            end
+
             def exports
               @exports ||= {}
             end
@@ -204,7 +213,6 @@ module Travis
 
           def export
             @export = true
-            @title = titleize(id) unless title # hmmmm.
           end
 
           def export?
@@ -240,7 +248,7 @@ module Travis
           end
 
           def title
-            @title
+            @title ||= titleize(namespace == :type ? id : "#{namespace}_#{id}")
           end
 
           def description

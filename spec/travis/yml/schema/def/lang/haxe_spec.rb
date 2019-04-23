@@ -6,36 +6,10 @@ describe Travis::Yml::Schema::Def::Haxe, 'structure' do
 
     it do
       should eq(
-        '$id': :haxe,
-        title: 'Haxe',
+        '$id': :language_haxe,
+        title: 'Language Haxe',
         type: :object,
         properties: {
-          language: {
-            type: :string,
-            enum: [
-              'haxe'
-            ],
-            downcase: true,
-            defaults: [
-              {
-                value: 'ruby',
-                only: {
-                  os: [
-                    'linux',
-                    'windows'
-                  ]
-                }
-              },
-              {
-                value: 'objective-c',
-                only: {
-                  os: [
-                    'osx'
-                  ]
-                }
-              }
-            ]
-          },
           haxe: {
             '$ref': '#/definitions/strs'
           },
@@ -48,13 +22,6 @@ describe Travis::Yml::Schema::Def::Haxe, 'structure' do
         },
         normal: true,
         keys: {
-          language: {
-            only: {
-              language: [
-                'haxe'
-              ]
-            }
-          },
           haxe: {
             only: {
               language: [
@@ -77,16 +44,6 @@ describe Travis::Yml::Schema::Def::Haxe, 'structure' do
             }
           }
         }
-      )
-    end
-  end
-
-  describe 'schema' do
-    subject { described_class.new.schema }
-
-    it do
-      should eq(
-        '$ref': '#/definitions/language/haxe'
       )
     end
   end

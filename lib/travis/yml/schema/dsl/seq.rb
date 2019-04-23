@@ -14,7 +14,7 @@ module Travis
 
           def type(*types)
             opts = types.last.is_a?(Hash) ? types.pop : {}
-            schemas = types.map { |type| Node.build(self, type, opts).node }
+            schemas = types.map { |type| build(self, type, opts).node }
             node.set :schemas, schemas
 
             # shouldn't this happen in Map#mapped_opts?

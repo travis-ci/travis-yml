@@ -6,36 +6,10 @@ describe Travis::Yml::Schema::Def::Dart, 'structure' do
 
     it do
       should eq(
-        '$id': :dart,
-        title: 'Dart',
+        '$id': :language_dart,
+        title: 'Language Dart',
         type: :object,
         properties: {
-          language: {
-            type: :string,
-            enum: [
-              'dart'
-            ],
-            downcase: true,
-            defaults: [
-              {
-                value: 'ruby',
-                only: {
-                  os: [
-                    'linux',
-                    'windows'
-                  ]
-                }
-              },
-              {
-                value: 'objective-c',
-                only: {
-                  os: [
-                    'osx'
-                  ]
-                }
-              }
-            ]
-          },
           dart: {
             '$ref': '#/definitions/strs'
           },
@@ -45,13 +19,6 @@ describe Travis::Yml::Schema::Def::Dart, 'structure' do
         },
         normal: true,
         keys: {
-          language: {
-            only: {
-              language: [
-                'dart'
-              ]
-            }
-          },
           dart: {
             only: {
               language: [
@@ -67,16 +34,6 @@ describe Travis::Yml::Schema::Def::Dart, 'structure' do
             }
           }
         }
-      )
-    end
-  end
-
-  describe 'schema' do
-    subject { described_class.new.schema }
-
-    it do
-      should eq(
-        '$ref': '#/definitions/language/dart'
       )
     end
   end

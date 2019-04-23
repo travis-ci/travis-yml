@@ -9,7 +9,7 @@ module Travis
           register :map
 
           def examples
-            example
+            expand.map(&:example)
           end
 
           def example
@@ -19,6 +19,35 @@ module Travis
               child = build(child, opts)
               [key, child.example]
             end.compact.to_h
+          end
+
+          def expand
+            maps = []
+
+            maps << required.merge(others).map do |key, node|
+              nodes = Array(build(node).expand)
+              nodes.map { |node| [key, node.node] }
+            end.flatten(1).to_h
+
+            anys.each do |key, any|
+              nodes = Array(build(any).expand)
+              nodes = nodes.map { |node| required.merge(key => node.node) }
+              maps.concat nodes
+            end
+
+            maps.map { |map| Map.new(Type::Map.new(nil, mappings: map)) }
+          end
+
+          def required
+            node.select { |_, node| node.required? }.to_h
+          end
+
+          def anys
+            node.select { |_, node| node.is?(:any) }.to_h
+          end
+
+          def others
+            except(node.mappings, *required.keys, *anys.keys)
           end
 
           def inherit?(key)

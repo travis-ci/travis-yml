@@ -6,8 +6,8 @@ describe Travis::Yml::Schema::Def::Deploy::S3, 'structure' do
 
     it do
       should eq(
-        '$id': :s3,
-        title: 'S3',
+        '$id': :deploy_s3,
+        title: 'Deploy S3',
         anyOf: [
           {
             type: :object,
@@ -20,7 +20,7 @@ describe Travis::Yml::Schema::Def::Deploy::S3, 'structure' do
                 strict: true
               },
               on: {
-                '$ref': '#/definitions/type/deploy_conditions'
+                '$ref': '#/definitions/deploy/conditions'
               },
               allow_failure: {
                 type: :boolean
@@ -29,7 +29,7 @@ describe Travis::Yml::Schema::Def::Deploy::S3, 'structure' do
                 type: :boolean
               },
               edge: {
-                '$ref': '#/definitions/type/deploy_edge'
+                '$ref': '#/definitions/deploy/edge'
               },
               access_key_id: {
                 '$ref': '#/definitions/secure'

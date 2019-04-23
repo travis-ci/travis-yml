@@ -16,7 +16,7 @@ describe Travis::Yml, 'puppetforge' do
     end
   end
 
-  describe 'missing user', required: true, defaults: true do
+  describe 'missing user', defaults: true do
     yaml %(
       deploy:
         provider: puppetforge
@@ -27,7 +27,7 @@ describe Travis::Yml, 'puppetforge' do
     it { should_not have_msg [:error, :deploy, :required, key: :password] }
   end
 
-  describe 'missing password', required: true, defaults: true do
+  describe 'missing password', defaults: true do
     yaml %(
       deploy:
         provider: puppetforge

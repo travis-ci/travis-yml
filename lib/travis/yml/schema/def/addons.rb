@@ -7,6 +7,8 @@ module Travis
       module Def
         module Addon
           class Addon < Dsl::Map
+            registry :addons
+
             def define
               namespace :addon
               normal
@@ -17,7 +19,6 @@ module Travis
         end
 
         class Addons < Dsl::Map
-          registry :addons
           register :addons
 
           def define

@@ -6,44 +6,10 @@ describe Travis::Yml::Schema::Def::ObjectiveC, 'structure' do
 
     it do
       should eq(
-        '$id': :'objective-c',
-        title: 'Objective-c',
+        '$id': :'language_objective-c',
+        title: 'Language Objective-c',
         type: :object,
         properties: {
-          language: {
-            type: :string,
-            enum: [
-              'objective-c'
-            ],
-            downcase: true,
-            defaults: [
-              {
-                value: 'ruby',
-                only: {
-                  os: [
-                    'linux',
-                    'windows'
-                  ]
-                }
-              },
-              {
-                value: 'objective-c',
-                only: {
-                  os: [
-                    'osx'
-                  ]
-                }
-              }
-            ],
-            values: {
-              'objective-c': {
-                aliases: [
-                  'objective_c',
-                  'swift'
-                ]
-              }
-            }
-          },
           rvm: {
             '$ref': '#/definitions/strs'
           },
@@ -74,13 +40,6 @@ describe Travis::Yml::Schema::Def::ObjectiveC, 'structure' do
         },
         normal: true,
         keys: {
-          language: {
-            only: {
-              language: [
-                'objective-c'
-              ]
-            }
-          },
           rvm: {
             aliases: [
               :ruby
@@ -148,16 +107,6 @@ describe Travis::Yml::Schema::Def::ObjectiveC, 'structure' do
             }
           }
         }
-      )
-    end
-  end
-
-  describe 'schema' do
-    subject { described_class.new.schema }
-
-    it do
-      should eq(
-        '$ref': '#/definitions/language/objective-c'
       )
     end
   end

@@ -29,7 +29,7 @@ describe Travis::Yml, 'launchpad' do
     end
   end
 
-  describe 'missing slug', required: true, defaults: true do
+  describe 'missing slug', defaults: true do
     yaml %(
       deploy:
         provider: launchpad
@@ -41,7 +41,7 @@ describe Travis::Yml, 'launchpad' do
     it { should_not have_msg [:error, :deploy, :required, key: :oauth_token] }
   end
 
-  describe 'missing oauth_token', required: true, defaults: true do
+  describe 'missing oauth_token', defaults: true do
     yaml %(
       deploy:
         provider: launchpad
@@ -53,7 +53,7 @@ describe Travis::Yml, 'launchpad' do
     it { should have_msg [:error, :deploy, :required, key: :oauth_token] }
   end
 
-  describe 'missing oauth_token_secret', required: true, defaults: true do
+  describe 'missing oauth_token_secret', defaults: true do
     yaml %(
       deploy:
         provider: launchpad

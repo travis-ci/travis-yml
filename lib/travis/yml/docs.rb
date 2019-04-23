@@ -104,7 +104,7 @@ module Travis
       def pages
         nodes.map do |node|
           [[node.namespace, node.id].join('/'), Page.new(node).render]
-        end
+        end.to_h
       end
 
       def index
@@ -115,7 +115,7 @@ module Travis
 
       def nodes
         Schema.schema
-        nodes = Schema::Type::Node.exports.values
+        nodes = Schema::Type::Node.exports.values.map(&:values).flatten
         nodes = nodes.reject(&:internal?)
         # nodes = [Schema::Def::Stages.new.node.lookup]
         nodes = sort(nodes)

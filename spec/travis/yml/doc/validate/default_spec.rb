@@ -3,7 +3,7 @@
 # Default and Required should be merged?
 #
 # describe Travis::Yml::Doc::Validate, 'default' do
-#   subject { described_class.apply(build_schema(schema), build_value(value, required: true, defaults: true)) }
+#   subject { described_class.apply(build_schema(schema), build_value(value, defaults: true)) }
 #
 #   describe 'str' do
 #     let(:schema) { { type: :string, defaults: [value: 'foo'] } }

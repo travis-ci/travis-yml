@@ -6,49 +6,16 @@ describe Travis::Yml::Schema::Def::Erlang, 'structure' do
 
     it do
       should eq(
-        '$id': :erlang,
-        title: 'Erlang',
+        '$id': :language_erlang,
+        title: 'Language Erlang',
         type: :object,
         properties: {
-          language: {
-            type: :string,
-            enum: [
-              'erlang'
-            ],
-            downcase: true,
-            defaults: [
-              {
-                value: 'ruby',
-                only: {
-                  os: [
-                    'linux',
-                    'windows'
-                  ]
-                }
-              },
-              {
-                value: 'objective-c',
-                only: {
-                  os: [
-                    'osx'
-                  ]
-                }
-              }
-            ]
-          },
           otp_release: {
             '$ref': '#/definitions/strs'
           }
         },
         normal: true,
         keys: {
-          language: {
-            only: {
-              language: [
-                'erlang'
-              ]
-            }
-          },
           otp_release: {
             only: {
               language: [
@@ -57,16 +24,6 @@ describe Travis::Yml::Schema::Def::Erlang, 'structure' do
             }
           }
         }
-      )
-    end
-  end
-
-  describe 'schema' do
-    subject { described_class.new.schema }
-
-    it do
-      should eq(
-        '$ref': '#/definitions/language/erlang'
       )
     end
   end

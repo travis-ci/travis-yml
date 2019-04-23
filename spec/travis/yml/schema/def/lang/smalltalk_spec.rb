@@ -6,36 +6,10 @@ describe Travis::Yml::Schema::Def::Smalltalk, 'structure' do
 
     it do
       should eq(
-        '$id': :smalltalk,
-        title: 'Smalltalk',
+        '$id': :language_smalltalk,
+        title: 'Language Smalltalk',
         type: :object,
         properties: {
-          language: {
-            type: :string,
-            enum: [
-              'smalltalk'
-            ],
-            downcase: true,
-            defaults: [
-              {
-                value: 'ruby',
-                only: {
-                  os: [
-                    'linux',
-                    'windows'
-                  ]
-                }
-              },
-              {
-                value: 'objective-c',
-                only: {
-                  os: [
-                    'osx'
-                  ]
-                }
-              }
-            ]
-          },
           smalltalk: {
             '$ref': '#/definitions/strs'
           },
@@ -48,13 +22,6 @@ describe Travis::Yml::Schema::Def::Smalltalk, 'structure' do
         },
         normal: true,
         keys: {
-          language: {
-            only: {
-              language: [
-                'smalltalk'
-              ]
-            }
-          },
           smalltalk: {
             only: {
               language: [
@@ -77,16 +44,6 @@ describe Travis::Yml::Schema::Def::Smalltalk, 'structure' do
             }
           }
         }
-      )
-    end
-  end
-
-  describe 'schema' do
-    subject { described_class.new.schema }
-
-    it do
-      should eq(
-        '$ref': '#/definitions/language/smalltalk'
       )
     end
   end

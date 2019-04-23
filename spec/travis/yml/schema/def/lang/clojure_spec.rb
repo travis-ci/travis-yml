@@ -6,36 +6,10 @@ describe Travis::Yml::Schema::Def::Clojure, 'structure' do
 
     it do
       should eq(
-        '$id': :clojure,
-        title: 'Clojure',
+        '$id': :language_clojure,
+        title: 'Language Clojure',
         type: :object,
         properties: {
-          language: {
-            type: :string,
-            enum: [
-              'clojure'
-            ],
-            downcase: true,
-            defaults: [
-              {
-                value: 'ruby',
-                only: {
-                  os: [
-                    'linux',
-                    'windows'
-                  ]
-                }
-              },
-              {
-                value: 'objective-c',
-                only: {
-                  os: [
-                    'osx'
-                  ]
-                }
-              }
-            ]
-          },
           jdk: {
             '$ref': '#/definitions/strs'
           },
@@ -45,13 +19,6 @@ describe Travis::Yml::Schema::Def::Clojure, 'structure' do
         },
         normal: true,
         keys: {
-          language: {
-            only: {
-              language: [
-                'clojure'
-              ]
-            }
-          },
           jdk: {
             only: {
               language: [
@@ -72,16 +39,6 @@ describe Travis::Yml::Schema::Def::Clojure, 'structure' do
             }
           }
         }
-      )
-    end
-  end
-
-  describe 'schema' do
-    subject { described_class.new.schema }
-
-    it do
-      should eq(
-        '$ref': '#/definitions/language/clojure'
       )
     end
   end

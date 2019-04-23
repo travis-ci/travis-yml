@@ -6,8 +6,8 @@ describe Travis::Yml::Schema::Def::Deploy::Heroku, 'structure' do
 
     it do
       should eq(
-        '$id': :heroku,
-        title: 'Heroku',
+        '$id': :deploy_heroku,
+        title: 'Deploy Heroku',
         anyOf: [
           {
             type: :object,
@@ -20,7 +20,7 @@ describe Travis::Yml::Schema::Def::Deploy::Heroku, 'structure' do
                 strict: true
               },
               on: {
-                '$ref': '#/definitions/type/deploy_conditions'
+                '$ref': '#/definitions/deploy/conditions'
               },
               allow_failure: {
                 type: :boolean
@@ -29,7 +29,7 @@ describe Travis::Yml::Schema::Def::Deploy::Heroku, 'structure' do
                 type: :boolean
               },
               edge: {
-                '$ref': '#/definitions/type/deploy_edge'
+                '$ref': '#/definitions/deploy/edge'
               },
               strategy: {
                 type: :string,
@@ -47,7 +47,7 @@ describe Travis::Yml::Schema::Def::Deploy::Heroku, 'structure' do
                 type: :string
               },
               app: {
-                '$ref': '#/definitions/type/app'
+                '$ref': '#/definitions/deploy/app'
               },
               api_key: {
                 '$ref': '#/definitions/secure'

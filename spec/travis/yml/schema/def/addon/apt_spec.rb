@@ -7,8 +7,8 @@ describe Travis::Yml::Schema::Def::Addon::Apt, 'structure' do
 
     it do
       should eq(
-        '$id': :apt,
-        title: 'Apt',
+        '$id': :addon_apt,
+        title: 'Addon Apt',
         anyOf: [
           {
             type: :object,

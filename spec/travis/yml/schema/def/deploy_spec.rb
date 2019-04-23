@@ -5,8 +5,8 @@ describe Travis::Yml::Schema::Def::Deploy::Deploy, 'structure' do
     #   it { puts JSON.pretty_generate(subject)[0..400] }
     # end
 
-    describe 'deploy_conditions' do
-      subject { Travis::Yml.schema[:definitions][:type][:deploy_conditions] }
+    describe 'conditions' do
+      subject { Travis::Yml.schema[:definitions][:deploy][:conditions] }
 
       # it { puts JSON.pretty_generate(subject) }
 
@@ -21,7 +21,7 @@ describe Travis::Yml::Schema::Def::Deploy::Deploy, 'structure' do
                   type: :object,
                   properties: {
                     branch: {
-                      '$ref': '#/definitions/type/deploy_branches'
+                      '$ref': '#/definitions/deploy/branches'
                     },
                     repo: {
                       type: :string
@@ -53,7 +53,7 @@ describe Travis::Yml::Schema::Def::Deploy::Deploy, 'structure' do
               normal: true
             },
             {
-              '$ref': '#/definitions/type/deploy_branches'
+              '$ref': '#/definitions/deploy/branches'
             }
           ]
         )

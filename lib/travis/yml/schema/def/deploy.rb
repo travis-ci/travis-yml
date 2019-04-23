@@ -9,7 +9,9 @@ module Travis
       module Def
         module Deploy
           def self.provider_names
-            Deploy.registry.values.map(&:registry_key).sort.compact
+            consts = Deploy.registry.values
+            consts = consts.select { |const| const < Deploy }
+            consts.map(&:registry_key).sort.compact
           end
 
           class Deploys < Dsl::Seq
@@ -23,7 +25,8 @@ module Travis
           end
 
           class Providers < Dsl::Any
-            register :deploy_providers
+            registry :deploy
+            register :providers
 
             def define
               normal
@@ -37,17 +40,16 @@ module Travis
             registry :deploy
 
             def define
-              namespace :deploy
               normal
 
               strict false
               prefix :provider
 
               map :provider,      to: :enum, values: registry_key, required: true, strict: true
-              map :on,            to: :deploy_conditions
+              map :on,            to: :conditions
               map :allow_failure, to: :bool
               map :skip_cleanup,  to: :bool
-              map :edge,          to: :deploy_edge
+              map :edge,          to: :edge
 
               # so called option specific branch hashes are valid, but
               # deprecated according to travis-build. e.g.:
@@ -57,13 +59,12 @@ module Travis
               #       develop: foo
               #       production: bar
 
-              # map :'.*', to: :deploy_branches
-
-              # export
+              # map :'.*', to: :branches
             end
           end
 
           class App < Dsl::Any
+            registry :deploy
             register :app
 
             def define
@@ -81,7 +82,8 @@ module Travis
           end
 
           class Conditions < Dsl::Map
-            register :deploy_conditions
+            registry :deploy
+            register :conditions
 
             def define
               include :languages
@@ -89,7 +91,7 @@ module Travis
               normal
               prefix :branch
 
-              map :branch,       to: :deploy_branches, alias: :branches
+              map :branch,       to: :branches, alias: :branches
               map :repo,         to: :str
               map :condition,    to: :str
               map :all_branches, to: :bool
@@ -100,7 +102,8 @@ module Travis
           end
 
           class Branches < Dsl::Any
-            register :deploy_branches
+            registry :deploy
+            register :branches
 
             def define
               add :seq, normal: true #, prefix: :branch
@@ -110,7 +113,8 @@ module Travis
           end
 
           class Branch < Dsl::Map
-            register :deploy_branch
+            registry :deploy
+            register :branch
 
             def define
               normal
@@ -121,7 +125,8 @@ module Travis
           end
 
           class Edge < Dsl::Map
-            register :deploy_edge
+            registry :deploy
+            register :edge
 
             def define
               edge

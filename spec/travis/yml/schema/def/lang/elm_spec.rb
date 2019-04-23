@@ -6,36 +6,10 @@ describe Travis::Yml::Schema::Def::Elm, 'structure' do
 
     it do
       should eq(
-        '$id': :elm,
-        title: 'Elm',
+        '$id': :language_elm,
+        title: 'Language Elm',
         type: :object,
         properties: {
-          language: {
-            type: :string,
-            enum: [
-              'elm'
-            ],
-            downcase: true,
-            defaults: [
-              {
-                value: 'ruby',
-                only: {
-                  os: [
-                    'linux',
-                    'windows'
-                  ]
-                }
-              },
-              {
-                value: 'objective-c',
-                only: {
-                  os: [
-                    'osx'
-                  ]
-                }
-              }
-            ]
-          },
           elm: {
             '$ref': '#/definitions/strs'
           },
@@ -48,13 +22,6 @@ describe Travis::Yml::Schema::Def::Elm, 'structure' do
         },
         normal: true,
         keys: {
-          language: {
-            only: {
-              language: [
-                'elm'
-              ]
-            }
-          },
           elm: {
             only: {
               language: [
@@ -77,16 +44,6 @@ describe Travis::Yml::Schema::Def::Elm, 'structure' do
             }
           }
         }
-      )
-    end
-  end
-
-  describe 'schema' do
-    subject { described_class.new.schema }
-
-    it do
-      should eq(
-        '$ref': '#/definitions/language/elm'
       )
     end
   end

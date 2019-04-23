@@ -6,8 +6,8 @@ describe Travis::Yml::Schema::Def::Deploy::Releases, 'structure' do
 
     it do
       should eq(
-        '$id': :releases,
-        title: 'Releases',
+        '$id': :deploy_releases,
+        title: 'Deploy Releases',
         anyOf: [
           {
             type: :object,
@@ -20,7 +20,7 @@ describe Travis::Yml::Schema::Def::Deploy::Releases, 'structure' do
                 strict: true
               },
               on: {
-                '$ref': '#/definitions/type/deploy_conditions'
+                '$ref': '#/definitions/deploy/conditions'
               },
               allow_failure: {
                 type: :boolean
@@ -29,7 +29,7 @@ describe Travis::Yml::Schema::Def::Deploy::Releases, 'structure' do
                 type: :boolean
               },
               edge: {
-                '$ref': '#/definitions/type/deploy_edge'
+                '$ref': '#/definitions/deploy/edge'
               },
               user: {
                 '$ref': '#/definitions/secure'

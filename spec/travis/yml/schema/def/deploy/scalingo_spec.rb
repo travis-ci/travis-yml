@@ -6,8 +6,8 @@ describe Travis::Yml::Schema::Def::Deploy::Scalingo, 'structure' do
 
     it do
       should eq(
-        '$id': :scalingo,
-        title: 'Scalingo',
+        '$id': :deploy_scalingo,
+        title: 'Deploy Scalingo',
         anyOf: [
           {
             type: :object,
@@ -20,7 +20,7 @@ describe Travis::Yml::Schema::Def::Deploy::Scalingo, 'structure' do
                 strict: true
               },
               on: {
-                '$ref': '#/definitions/type/deploy_conditions'
+                '$ref': '#/definitions/deploy/conditions'
               },
               allow_failure: {
                 type: :boolean
@@ -29,7 +29,7 @@ describe Travis::Yml::Schema::Def::Deploy::Scalingo, 'structure' do
                 type: :boolean
               },
               edge: {
-                '$ref': '#/definitions/type/deploy_edge'
+                '$ref': '#/definitions/deploy/edge'
               },
               username: {
                 '$ref': '#/definitions/secure'

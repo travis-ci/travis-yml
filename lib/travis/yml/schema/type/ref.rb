@@ -19,7 +19,7 @@ module Travis
           end
 
           def lookup
-            node = Type::Node.exports[id]
+            node = Type::Node.exported(namespace, id)
             node if node.is_a?(Node)
           end
         end

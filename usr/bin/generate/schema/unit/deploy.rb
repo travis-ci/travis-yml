@@ -55,7 +55,7 @@ def format(obj)
 end
 
 def spec(name)
-  const = Travis::Yml::Schema::Dsl::Node[name]
+  const = Travis::Yml::Schema::Dsl::Node.lookup(name)
   schema = Travis::Yml.schema[:definitions][:deploy][name]
   schema = format(schema)
   schema = schema.split("\n")[1..-2].join("\n")
