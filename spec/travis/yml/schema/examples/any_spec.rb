@@ -1,8 +1,4 @@
 describe Travis::Yml::Schema::Examples::Any do
-  def expand(node)
-    Travis::Yml::Schema.expand(node)
-  end
-
   subject { described_class.new(expand(const.new.node)).examples }
 
   describe 'archs' do

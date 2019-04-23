@@ -1,7 +1,7 @@
 describe Travis::Yml, 'root' do
   subject { described_class.apply(parse(yaml), opts) }
 
-  describe 'default', required: true, defaults: true do
+  describe 'default', defaults: true do
     yaml ''
     it { should serialize_to defaults }
     it { should have_msg [:info, :language, :default, default: 'ruby'] }

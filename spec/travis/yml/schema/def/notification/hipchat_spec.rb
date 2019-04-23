@@ -6,8 +6,8 @@ describe Travis::Yml::Schema::Def::Notification::Hipchat, 'structure' do
 
     it do
       should eq(
-        '$id': :hipchat,
-        title: 'Hipchat',
+        '$id': :notification_hipchat,
+        title: 'Notification Hipchat',
         anyOf: [
           {
             type: :object,

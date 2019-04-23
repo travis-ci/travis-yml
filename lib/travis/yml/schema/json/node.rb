@@ -10,6 +10,8 @@ module Travis
           extend Forwardable
           include Registry
 
+          registry :type
+
           def_delegators :node, :description, :export?, :id, :namespace, :title, :type
 
           def schema
@@ -27,12 +29,13 @@ module Travis
             end
 
             def meta
+              id = namespace == :type ? node.id : :"#{namespace}_#{node.id}"
               compact('$id': id, title: title, description: description)
             end
 
             def ref(*args)
               opts = args.last.is_a?(Hash) ? args.pop : {}
-              type = args.first || [namespace, id].join('/')
+              type = args.first || [node.registry_name, id].join('/')
               { '$ref': "#/definitions/#{type}" }.merge(opts)
             end
 

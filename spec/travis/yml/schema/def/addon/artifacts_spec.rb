@@ -6,8 +6,8 @@ describe Travis::Yml::Schema::Def::Addon::Artifacts, 'structure' do
 
     it do
       should eq(
-        '$id': :artifacts,
-        title: 'Artifacts',
+        '$id': :addon_artifacts,
+        title: 'Addon Artifacts',
         normal: true,
         anyOf: [
           {

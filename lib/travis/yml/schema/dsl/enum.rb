@@ -31,7 +31,9 @@ module Travis
           def values(*objs)
             objs = objs.flatten.compact
 
-            if objs.first.is_a?(Hash)
+            if objs.empty?
+              return
+            elsif objs.first.is_a?(Hash)
               node.set(:enum, to_enum(objs))
               node.set(:values, merge(compact(to_vals(remap(objs)))))
             else

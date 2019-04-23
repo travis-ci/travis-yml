@@ -6,43 +6,10 @@ describe Travis::Yml::Schema::Def::NodeJs, 'structure' do
 
     it do
       should eq(
-        '$id': :node_js,
-        title: 'Node Js',
+        '$id': :language_node_js,
+        title: 'Language Node Js',
         type: :object,
         properties: {
-          language: {
-            type: :string,
-            enum: [
-              'node_js'
-            ],
-            downcase: true,
-            defaults: [
-              {
-                value: 'ruby',
-                only: {
-                  os: [
-                    'linux',
-                    'windows'
-                  ]
-                }
-              },
-              {
-                value: 'objective-c',
-                only: {
-                  os: [
-                    'osx'
-                  ]
-                }
-              }
-            ],
-            values: {
-              node_js: {
-                aliases: [
-                  'javascript'
-                ]
-              }
-            }
-          },
           node_js: {
             '$ref': '#/definitions/strs'
           },
@@ -52,13 +19,6 @@ describe Travis::Yml::Schema::Def::NodeJs, 'structure' do
         },
         normal: true,
         keys: {
-          language: {
-            only: {
-              language: [
-                'node_js'
-              ]
-            }
-          },
           node_js: {
             aliases: [
               :node
@@ -77,16 +37,6 @@ describe Travis::Yml::Schema::Def::NodeJs, 'structure' do
             }
           }
         }
-      )
-    end
-  end
-
-  describe 'schema' do
-    subject { described_class.new.schema }
-
-    it do
-      should eq(
-        '$ref': '#/definitions/language/node_js'
       )
     end
   end

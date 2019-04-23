@@ -135,15 +135,12 @@ module Travis
             opts[:msgs] ||= []
           end
 
-          def full_key
-            keys = ancestors.map(&:key).uniq.compact
-            keys = [:root] if keys.empty?
-            keys.join('.').to_sym
+          def full_key(ext = true)
+            root? ? :root : full_keys.join('.').to_sym
           end
 
-          def ancestors
-            ancestors = parent.respond_to?(:ancestors) ? parent.ancestors : []
-            ancestors + [self]
+          def full_keys
+            root? ? [] : [*parent.full_keys, key].uniq
           end
 
           def walk(level = 0)

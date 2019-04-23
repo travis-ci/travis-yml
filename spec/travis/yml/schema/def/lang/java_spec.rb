@@ -6,56 +6,16 @@ describe Travis::Yml::Schema::Def::Java, 'structure' do
 
     it do
       should eq(
-        '$id': :java,
-        title: 'Java',
+        '$id': :language_java,
+        title: 'Language Java',
         type: :object,
         properties: {
-          language: {
-            type: :string,
-            enum: [
-              'java'
-            ],
-            downcase: true,
-            defaults: [
-              {
-                value: 'ruby',
-                only: {
-                  os: [
-                    'linux',
-                    'windows'
-                  ]
-                }
-              },
-              {
-                value: 'objective-c',
-                only: {
-                  os: [
-                    'osx'
-                  ]
-                }
-              }
-            ],
-            values: {
-              java: {
-                aliases: [
-                  'jvm'
-                ]
-              }
-            }
-          },
           jdk: {
             '$ref': '#/definitions/strs'
           }
         },
         normal: true,
         keys: {
-          language: {
-            only: {
-              language: [
-                'java'
-              ]
-            }
-          },
           jdk: {
             only: {
               language: [
@@ -69,16 +29,6 @@ describe Travis::Yml::Schema::Def::Java, 'structure' do
             }
           }
         }
-      )
-    end
-  end
-
-  describe 'schema' do
-    subject { described_class.new.schema }
-
-    it do
-      should eq(
-        '$ref': '#/definitions/language/java'
       )
     end
   end

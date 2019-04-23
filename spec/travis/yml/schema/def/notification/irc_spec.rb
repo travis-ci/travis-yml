@@ -6,7 +6,7 @@ describe Travis::Yml::Schema::Def::Notification::Irc, 'structure' do
 
     it do
       should eq(
-        '$id': :irc,
+        '$id': :notification_irc,
         title: 'IRC',
         anyOf: [
           {

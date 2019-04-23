@@ -1,7 +1,7 @@
 describe Travis::Yml, 'language' do
   subject { described_class.apply(parse(yaml), opts) }
 
-  describe 'defaults to ruby', required: true, defaults: true do
+  describe 'defaults to ruby', defaults: true do
     yaml ''
     it { should serialize_to language: 'ruby', os: ['linux'] }
     it { should have_msg [:info, :language, :default, default: 'ruby'] }
@@ -25,7 +25,7 @@ describe Travis::Yml, 'language' do
     it { should serialize_to language: 'ruby' }
   end
 
-  describe 'unknown value', v2: true, defaults: true do
+  describe 'unknown value', defaults: true do
     yaml %(
       language: sql
     )
@@ -50,7 +50,7 @@ describe Travis::Yml, 'language' do
     it { should serialize_to language: 'c' }
   end
 
-  describe 'given a map', required: true, defaults: true do
+  describe 'given a map', defaults: true do
     yaml %(
       language:
         php: hhvm

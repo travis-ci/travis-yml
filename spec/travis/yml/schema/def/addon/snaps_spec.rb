@@ -9,8 +9,8 @@ describe Travis::Yml::Schema::Def::Addon::Snaps, 'structure' do
       subject
       next
       should eq(
-        '$id': :snaps,
-        title: 'Snaps',
+        '$id': :addon_snaps,
+        title: 'Addon Snaps',
         anyOf: [
           {
             type: :array,

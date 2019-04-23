@@ -57,7 +57,7 @@ describe Travis::Yml, 'deploy' do
 
   describe 'given a map' do
     describe 'without a provider' do
-      let(:opts) { { required: true, defaults: true } }
+      let(:opts) { { defaults: true } }
       yaml %(
         deploy:
           foo: foo
@@ -204,6 +204,16 @@ describe Travis::Yml, 'deploy' do
               ruby: 2.3.1
         )
         it { should serialize_to deploy: [provider: 'heroku', on: { rvm: ['2.3.1'] }] }
+      end
+
+      describe 'language specific key on the wrong language' do
+        yaml %(
+          deploy:
+            provider: heroku
+            on:
+              python: 2.7
+        )
+        it { should serialize_to deploy: [provider: 'heroku', on: { python: ['2.7'] }] }
       end
     end
 

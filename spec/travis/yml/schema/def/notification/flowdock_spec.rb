@@ -6,8 +6,8 @@ describe Travis::Yml::Schema::Def::Notification::Flowdock, 'structure' do
 
     it do
       should eq(
-        '$id': :flowdock,
-        title: 'Flowdock',
+        '$id': :notification_flowdock,
+        title: 'Notification Flowdock',
         anyOf: [
           {
             type: :object,

@@ -6,8 +6,8 @@ describe Travis::Yml::Schema::Def::Deploy::Pages, 'structure' do
 
     it do
       should eq(
-        '$id': :pages,
-        title: 'Pages',
+        '$id': :deploy_pages,
+        title: 'Deploy Pages',
         anyOf: [
           {
             type: :object,
@@ -20,7 +20,7 @@ describe Travis::Yml::Schema::Def::Deploy::Pages, 'structure' do
                 strict: true
               },
               on: {
-                '$ref': '#/definitions/type/deploy_conditions'
+                '$ref': '#/definitions/deploy/conditions'
               },
               allow_failure: {
                 type: :boolean
@@ -29,7 +29,7 @@ describe Travis::Yml::Schema::Def::Deploy::Pages, 'structure' do
                 type: :boolean
               },
               edge: {
-                '$ref': '#/definitions/type/deploy_edge'
+                '$ref': '#/definitions/deploy/edge'
               },
               github_token: {
                 '$ref': '#/definitions/secure'

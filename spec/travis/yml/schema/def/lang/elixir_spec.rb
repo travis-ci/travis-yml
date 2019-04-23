@@ -6,36 +6,10 @@ describe Travis::Yml::Schema::Def::Elixir, 'structure' do
 
     it do
       should eq(
-        '$id': :elixir,
-        title: 'Elixir',
+        '$id': :language_elixir,
+        title: 'Language Elixir',
         type: :object,
         properties: {
-          language: {
-            type: :string,
-            enum: [
-              'elixir'
-            ],
-            downcase: true,
-            defaults: [
-              {
-                value: 'ruby',
-                only: {
-                  os: [
-                    'linux',
-                    'windows'
-                  ]
-                }
-              },
-              {
-                value: 'objective-c',
-                only: {
-                  os: [
-                    'osx'
-                  ]
-                }
-              }
-            ]
-          },
           elixir: {
             '$ref': '#/definitions/strs'
           },
@@ -45,13 +19,6 @@ describe Travis::Yml::Schema::Def::Elixir, 'structure' do
         },
         normal: true,
         keys: {
-          language: {
-            only: {
-              language: [
-                'elixir'
-              ]
-            }
-          },
           elixir: {
             only: {
               language: [
@@ -67,16 +34,6 @@ describe Travis::Yml::Schema::Def::Elixir, 'structure' do
             }
           }
         }
-      )
-    end
-  end
-
-  describe 'schema' do
-    subject { described_class.new.schema }
-
-    it do
-      should eq(
-        '$ref': '#/definitions/language/elixir'
       )
     end
   end

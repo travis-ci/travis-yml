@@ -6,49 +6,16 @@ describe Travis::Yml::Schema::Def::Haskell, 'structure' do
 
     it do
       should eq(
-        '$id': :haskell,
-        title: 'Haskell',
+        '$id': :language_haskell,
+        title: 'Language Haskell',
         type: :object,
         properties: {
-          language: {
-            type: :string,
-            enum: [
-              'haskell'
-            ],
-            downcase: true,
-            defaults: [
-              {
-                value: 'ruby',
-                only: {
-                  os: [
-                    'linux',
-                    'windows'
-                  ]
-                }
-              },
-              {
-                value: 'objective-c',
-                only: {
-                  os: [
-                    'osx'
-                  ]
-                }
-              }
-            ]
-          },
           ghc: {
             '$ref': '#/definitions/strs'
           }
         },
         normal: true,
         keys: {
-          language: {
-            only: {
-              language: [
-                'haskell'
-              ]
-            }
-          },
           ghc: {
             only: {
               language: [
@@ -57,16 +24,6 @@ describe Travis::Yml::Schema::Def::Haskell, 'structure' do
             }
           }
         }
-      )
-    end
-  end
-
-  describe 'schema' do
-    subject { described_class.new.schema }
-
-    it do
-      should eq(
-        '$ref': '#/definitions/language/haskell'
       )
     end
   end

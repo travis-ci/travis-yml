@@ -88,17 +88,12 @@ describe Travis::Yml::Schema::Def::Root, 'structure' do
       definitions = {
         type: %i(
           addons
-          app
           arch
           archs
           branches
           cache
           compilers
           conditions
-          deploy_branches
-          deploy_conditions
-          deploy_edge
-          deploy_providers
           deploys
           dist
           env
@@ -136,6 +131,11 @@ describe Travis::Yml::Schema::Def::Root, 'structure' do
           snaps
         ),
         deploy: %i(
+          app
+          branches
+          conditions
+          edge
+          providers
           anynines
           appfog
           atlas
@@ -304,12 +304,12 @@ describe Travis::Yml::Schema::Def::Root, 'structure' do
     describe 'map' do
       subject { Travis::Yml.schema[:allOf][0] }
 
-      # it do
-      #   should include required: [
-      #     :language,
-      #     :os
-      #   ]
-      # end
+      it do
+        should include required: [
+          :language,
+          :os
+        ]
+      end
 
       it do
         should include keys: {

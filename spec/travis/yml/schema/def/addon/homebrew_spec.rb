@@ -6,8 +6,8 @@ describe Travis::Yml::Schema::Def::Addon::Homebrew, 'structure' do
 
     it do
       should eq(
-        '$id': :homebrew,
-        title: 'Homebrew',
+        '$id': :addon_homebrew,
+        title: 'Addon Homebrew',
         anyOf: [
           {
             type: :object,

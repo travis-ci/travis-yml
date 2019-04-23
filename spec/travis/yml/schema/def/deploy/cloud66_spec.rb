@@ -6,8 +6,8 @@ describe Travis::Yml::Schema::Def::Deploy::Cloud66, 'structure' do
 
     it do
       should eq(
-        '$id': :cloud66,
-        title: 'Cloud66',
+        '$id': :deploy_cloud66,
+        title: 'Deploy Cloud66',
         anyOf: [
           {
             type: :object,
@@ -20,7 +20,7 @@ describe Travis::Yml::Schema::Def::Deploy::Cloud66, 'structure' do
                 strict: true
               },
               on: {
-                '$ref': '#/definitions/type/deploy_conditions'
+                '$ref': '#/definitions/deploy/conditions'
               },
               allow_failure: {
                 type: :boolean
@@ -29,7 +29,7 @@ describe Travis::Yml::Schema::Def::Deploy::Cloud66, 'structure' do
                 type: :boolean
               },
               edge: {
-                '$ref': '#/definitions/type/deploy_edge'
+                '$ref': '#/definitions/deploy/edge'
               },
               redeployment_hook: {
                 type: :string

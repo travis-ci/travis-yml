@@ -39,7 +39,7 @@ module Travis
             end
 
             def enabled?
-              value.enabled?(:required)
+              value.enabled?(:defaults)
             end
         end
       end

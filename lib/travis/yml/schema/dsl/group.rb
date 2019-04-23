@@ -8,7 +8,7 @@ module Travis
         class Group < Node
           def add(*types)
             opts = types.last.is_a?(Hash) ? types.pop : {}
-            schemas = types.map { |type| Node.build(self, type, opts).node }
+            schemas = types.map { |type| build(self, type, opts).node }
             node.schemas.concat(schemas)
           end
         end

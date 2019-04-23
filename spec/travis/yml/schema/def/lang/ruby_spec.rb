@@ -6,36 +6,10 @@ describe Travis::Yml::Schema::Def::Ruby, 'structure' do
 
     it do
       should eq(
-        '$id': :ruby,
-        title: 'Ruby',
+        '$id': :language_ruby,
+        title: 'Language Ruby',
         type: :object,
         properties: {
-          language: {
-            type: :string,
-            enum: [
-              'ruby'
-            ],
-            downcase: true,
-            defaults: [
-              {
-                value: 'ruby',
-                only: {
-                  os: [
-                    'linux',
-                    'windows'
-                  ]
-                }
-              },
-              {
-                value: 'objective-c',
-                only: {
-                  os: [
-                    'osx'
-                  ]
-                }
-              }
-            ]
-          },
           rvm: {
             '$ref': '#/definitions/strs'
           },
@@ -51,13 +25,6 @@ describe Travis::Yml::Schema::Def::Ruby, 'structure' do
         },
         normal: true,
         keys: {
-          language: {
-            only: {
-              language: [
-                'ruby'
-              ]
-            }
-          },
           rvm: {
             aliases: [
               :ruby
@@ -98,16 +65,6 @@ describe Travis::Yml::Schema::Def::Ruby, 'structure' do
             }
           }
         }
-      )
-    end
-  end
-
-  describe 'schema' do
-    subject { described_class.new.schema }
-
-    it do
-      should eq(
-        '$ref': '#/definitions/language/ruby'
       )
     end
   end

@@ -6,8 +6,8 @@ describe Travis::Yml::Schema::Def::Addon::SauceConnect, 'structure' do
 
     it do
       should eq(
-        '$id': :sauce_connect,
-        title: 'Sauce Connect',
+        '$id': :addon_sauce_connect,
+        title: 'Addon Sauce Connect',
         normal: true,
         anyOf: [
           {

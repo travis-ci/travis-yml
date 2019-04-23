@@ -1,5 +1,5 @@
 describe Travis::Yml, 'matrix' do
-  subject { described_class.apply(parse(yaml)) }
+  subject { described_class.apply(parse(yaml), opts) }
 
   describe 'fast_finish' do
     describe 'given true' do
@@ -260,6 +260,25 @@ describe Travis::Yml, 'matrix' do
         )
         it { should serialize_to empty }
         it { should have_msg [:error, :"matrix.#{key}", :invalid_type, expected: :seq, actual: :bool, value: true] }
+      end
+
+      describe 'default language', defaults: true do
+        yaml %(
+          matrix:
+            #{key}:
+              rvm: 2.3
+        )
+        it { should serialize_to language: 'ruby', os: ['linux'], matrix: { key => [rvm: ['2.3']] } }
+      end
+
+      describe 'given language' do
+        yaml %(
+          matrix:
+            #{key}:
+              language: ruby
+        )
+        it { should serialize_to matrix: { key => [language: 'ruby'] } }
+        it { should_not have_msg }
       end
 
       describe 'env' do

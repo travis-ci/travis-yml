@@ -1,7 +1,7 @@
 describe Travis::Yml, 'os' do
   subject { described_class.apply(parse(yaml), opts) }
 
-  describe 'defaults to linux', required: true, defaults: true do
+  describe 'defaults to linux', defaults: true do
     yaml ''
     it { should serialize_to defaults }
     it { should have_msg [:info, :os, :default, default: 'linux'] }
@@ -38,11 +38,11 @@ describe Travis::Yml, 'os' do
       it { should serialize_to os: ['linux'] }
     end
 
-    describe 'unknown', v2: true, defaults: true do
+    describe 'unknown', defaults: true do
       yaml %(
         os: unknown
       )
-      it { should serialize_to os: ['linux'] }
+      it { should serialize_to language: 'ruby', os: ['linux'] }
       it { should have_msg [:warn, :os, :unknown_default, value: 'unknown', default: 'linux'] }
     end
   end
@@ -87,7 +87,7 @@ describe Travis::Yml, 'os' do
     it { should have_msg [:error, :os, :invalid_type, expected: :enum, actual: :map, value: { os: 'osx' }] }
   end
 
-  describe 'defaults to osx for objective-c', required: true, defaults: true do
+  describe 'defaults to osx for objective-c', defaults: true do
     yaml %(
       language: objective-c
     )

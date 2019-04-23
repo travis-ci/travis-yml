@@ -34,8 +34,6 @@ module Travis
             register :matrix_entry
 
             def define
-              include :job
-
               strict false
               aliases :jobs
 
@@ -48,6 +46,8 @@ module Travis
               map :env, to: :env_vars
               map :stage
               map :compiler, to: :compilers
+
+              include :job
 
               export
             end

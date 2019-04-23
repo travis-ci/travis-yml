@@ -6,8 +6,8 @@ describe Travis::Yml::Schema::Def::Addon::Browserstack, 'structure' do
 
     it do
       should eq(
-        '$id': :browserstack,
-        title: 'Browserstack',
+        '$id': :addon_browserstack,
+        title: 'Addon Browserstack',
         normal: true,
         anyOf: [
           {

@@ -24,13 +24,7 @@ module Travis
             namespace :language
             normal
             strict false
-
-            # This sucks because now the :language key is known on deploy
-            # conditions (which need language specific keys). On the other
-            # hand, not having this key here would mean that on the JSON Schema
-            # level language specific keys would be valid on any language, not
-            # just the language that defines them.
-            map :language, values: registry_key
+            super
           end
 
           def after_define
@@ -46,6 +40,8 @@ module Travis
 
             default :ruby,          only: { os: [:linux, :windows] }
             default :'objective-c', only: { os: [:osx] }
+
+            # enum values will be registered from Dsl::Lang
           end
         end
       end

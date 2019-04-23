@@ -6,36 +6,10 @@ describe Travis::Yml::Schema::Def::R, 'structure' do
 
     it do
       should eq(
-        '$id': :r,
-        title: 'R',
+        '$id': :language_r,
+        title: 'Language R',
         type: :object,
         properties: {
-          language: {
-            type: :string,
-            enum: [
-              'r'
-            ],
-            downcase: true,
-            defaults: [
-              {
-                value: 'ruby',
-                only: {
-                  os: [
-                    'linux',
-                    'windows'
-                  ]
-                }
-              },
-              {
-                value: 'objective-c',
-                only: {
-                  os: [
-                    'osx'
-                  ]
-                }
-              }
-            ]
-          },
           r: {
             '$ref': '#/definitions/strs'
           },
@@ -105,13 +79,6 @@ describe Travis::Yml::Schema::Def::R, 'structure' do
         },
         normal: true,
         keys: {
-          language: {
-            only: {
-              language: [
-                'r'
-              ]
-            }
-          },
           r: {
             only: {
               language: [
@@ -270,16 +237,6 @@ describe Travis::Yml::Schema::Def::R, 'structure' do
             }
           }
         }
-      )
-    end
-  end
-
-  describe 'schema' do
-    subject { described_class.new.schema }
-
-    it do
-      should eq(
-        '$ref': '#/definitions/language/r'
       )
     end
   end

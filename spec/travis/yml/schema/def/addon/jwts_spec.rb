@@ -6,7 +6,7 @@ describe Travis::Yml::Schema::Def::Addon::Jwts, 'structure' do
 
     it do
       should eq(
-        '$id': :jwts,
+        '$id': :addon_jwts,
         title: 'JSON Web Tokens',
         '$ref': '#/definitions/secures'
       )

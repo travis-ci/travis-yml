@@ -6,8 +6,8 @@ describe Travis::Yml::Schema::Def::Notification::Slack, 'structure' do
 
     it do
       should eq(
-        '$id': :slack,
-        title: 'Slack',
+        '$id': :notification_slack,
+        title: 'Notification Slack',
         anyOf: [
           {
             type: :object,

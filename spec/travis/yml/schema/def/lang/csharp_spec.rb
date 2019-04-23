@@ -6,36 +6,10 @@ describe Travis::Yml::Schema::Def::Csharp, 'structure' do
 
     it do
       should eq(
-        '$id': :csharp,
-        title: 'Csharp',
+        '$id': :language_csharp,
+        title: 'Language Csharp',
         type: :object,
         properties: {
-          language: {
-            type: :string,
-            enum: [
-              'csharp'
-            ],
-            downcase: true,
-            defaults: [
-              {
-                value: 'ruby',
-                only: {
-                  os: [
-                    'linux',
-                    'windows'
-                  ]
-                }
-              },
-              {
-                value: 'objective-c',
-                only: {
-                  os: [
-                    'osx'
-                  ]
-                }
-              }
-            ]
-          },
           dotnet: {
             '$ref': '#/definitions/strs'
           },
@@ -48,13 +22,6 @@ describe Travis::Yml::Schema::Def::Csharp, 'structure' do
         },
         normal: true,
         keys: {
-          language: {
-            only: {
-              language: [
-                'csharp'
-              ]
-            }
-          },
           dotnet: {
             only: {
               language: [
@@ -77,16 +44,6 @@ describe Travis::Yml::Schema::Def::Csharp, 'structure' do
             }
           }
         }
-      )
-    end
-  end
-
-  describe 'schema' do
-    subject { described_class.new.schema }
-
-    it do
-      should eq(
-        '$ref': '#/definitions/language/csharp'
       )
     end
   end

@@ -9,13 +9,11 @@ module Travis
           extend Forwardable
           include Registry
 
+          registry :type
+
           class << self
             def type
               :node
-            end
-
-            def build(parent, type, opts = {})
-              Node.resolve(type).new(parent, opts)
             end
 
             # We only want to instantiate and define types in Schema::Def once,
@@ -26,11 +24,10 @@ module Travis
             # slowing the process down from ~0.12s to ~1.4s.
 
             def new(parent = nil, opts = {})
-              if registry_key && opts.empty? && obj = Type::Node.exports[registry_key]
-                raise if opts.any?
+              if registry_key && opts.empty? && obj = Type::Node.exported(registry_name, registry_key)
                 obj.export? ? ref(parent, obj) : super(parent, obj)
               else
-                obj = Type::Node[type].new(parent&.node, id: registry_key)
+                obj = Type::Node[type].new(parent&.node, namespace: registry_name, id: registry_key)
 
                 node = super(parent, obj)
                 node.assign(opts)
@@ -40,7 +37,7 @@ module Travis
 
                 if node.export?
                   obj = Type::Expand.apply(obj)
-                  Type::Node.exports[obj.id] = obj
+                  Type::Node.export(obj)
                   ref(node.parent, obj)
                 else
                   node
@@ -51,10 +48,14 @@ module Travis
             def ref(parent, obj)
               Ref.new(parent, namespace: obj.namespace, id: obj.id)
             end
+          end
 
-            def resolve(type)
-              type.is_a?(Class) ? type : lookup(type)
-            end
+          def build(parent, type, opts = {})
+            resolve(type).new(parent, opts)
+          end
+
+          def resolve(type)
+            type.is_a?(Class) ? type : self.class.lookup(type)
           end
 
           def root

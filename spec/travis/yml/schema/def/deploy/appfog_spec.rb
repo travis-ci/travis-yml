@@ -6,8 +6,8 @@ describe Travis::Yml::Schema::Def::Deploy::Appfog, 'structure' do
 
     it do
       should eq(
-        '$id': :appfog,
-        title: 'Appfog',
+        '$id': :deploy_appfog,
+        title: 'Deploy Appfog',
         anyOf: [
           {
             type: :object,
@@ -20,7 +20,7 @@ describe Travis::Yml::Schema::Def::Deploy::Appfog, 'structure' do
                 strict: true
               },
               on: {
-                '$ref': '#/definitions/type/deploy_conditions'
+                '$ref': '#/definitions/deploy/conditions'
               },
               allow_failure: {
                 type: :boolean
@@ -29,7 +29,7 @@ describe Travis::Yml::Schema::Def::Deploy::Appfog, 'structure' do
                 type: :boolean
               },
               edge: {
-                '$ref': '#/definitions/type/deploy_edge'
+                '$ref': '#/definitions/deploy/edge'
               },
               user: {
                 '$ref': '#/definitions/secure'
@@ -47,7 +47,7 @@ describe Travis::Yml::Schema::Def::Deploy::Appfog, 'structure' do
                 '$ref': '#/definitions/strs'
               },
               app: {
-                '$ref': '#/definitions/type/app'
+                '$ref': '#/definitions/deploy/app'
               },
               email: {
                 anyOf: [
