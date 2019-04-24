@@ -3,7 +3,13 @@ require 'rack/cors'
 require 'rack/ssl-enforcer'
 require 'travis/yml/web'
 
-if Travis::Yaml::Web::Env.staging?
+env = Travis::Yml::Web::Env
+
+if env.production?
+  use Rack::SslEnforcer
+  use Travis::Yml::Web::BasicAuth
+
+elsif env.staging?
   use Rack::Cors do
     allow do
       origins '*'
@@ -12,15 +18,12 @@ if Travis::Yaml::Web::Env.staging?
   end
 end
 
-use Rack::SslEnforcer if Travis::Yaml::Web::Env.production?
-use Travis::Yaml::Web::BasicAuth unless Travis::Yaml::Web::Env.test?
-
-if ENV['SENTRY_DSN']
+if dsn = ENV['SENTRY_DSN']
   Raven.configure do |config|
-    config.dsn = ENV['SENTRY_DSN']
+    config.dsn = dsn
   end
   use Raven::Rack
 end
 
-run Travis::Yaml::Web
+run Travis::Yml::Web
 
