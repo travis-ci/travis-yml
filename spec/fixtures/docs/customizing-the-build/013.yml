@@ -1,1 +1,13 @@
-script: ./scripts/run-tests.sh
+language: python
+matrix:
+  include:
+  - name: "3.5 Unit Test"
+    python: "3.5"
+    env: TEST_SUITE=suite_3_5_unit
+  - name: "3.5 Integration Tests"
+    python: "3.5"
+    env: TEST_SUITE=suite_3_5_integration
+  - name: "pypy Unit Tests"
+    python: "pypy"
+    env: TEST_SUITE=suite_pypy_unit
+script: ./test.py $TEST_SUITE

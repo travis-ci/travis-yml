@@ -8,11 +8,8 @@ module Travis
             register :modulus
 
             def define
-              super
               map :api_key,      to: :secure
               map :project_name, to: :str
-
-              export
             end
           end
         end

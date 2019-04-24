@@ -41,10 +41,34 @@ describe Travis::Yml::Schema::Def::Deploy::Engineyard, 'structure' do
                 '$ref': '#/definitions/secure'
               },
               app: {
-                type: :string
+                anyOf: [
+                  {
+                    type: :object,
+                    patternProperties: {
+                      '.*': {
+                        type: :string
+                      }
+                    }
+                  },
+                  {
+                    type: :string
+                  }
+                ]
               },
               environment: {
-                type: :string
+                anyOf: [
+                  {
+                    type: :object,
+                    patternProperties: {
+                      '.*': {
+                        type: :string
+                      }
+                    }
+                  },
+                  {
+                    type: :string
+                  }
+                ]
               },
               migrate: {
                 type: :string

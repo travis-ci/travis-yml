@@ -21,32 +21,32 @@ None.
 ## Examples
 
 ```yaml
-env:
+matrix:
 - secure: string
 ```
 
 ```yaml
-env:
+matrix:
 - "^(?!global|matrix)": string
 ```
 
 ```yaml
-env:
+matrix:
 - string one
 - string two
 ```
 
 ```yaml
-env:
+matrix:
   secure: string
 ```
 
 ```yaml
-env:
+matrix:
   "^(?!global|matrix)": string
 ```
 
 ```yaml
-env: string
+matrix: string
 
 ```

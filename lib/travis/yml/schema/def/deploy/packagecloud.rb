@@ -10,7 +10,6 @@ module Travis
             register :packagecloud
 
             def define
-              super
               map :username,     to: :secure
               map :token,        to: :secure
               map :repository,   to: :str
@@ -18,8 +17,6 @@ module Travis
               map :dist,         to: :str
               map :package_glob, to: :str
               map :force,        to: :bool
-
-              export
             end
           end
         end

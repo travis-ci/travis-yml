@@ -9,7 +9,6 @@ module Travis
             register :elasticbeanstalk
 
             def define
-              super
               map :access_key_id,           to: :secure
               map :securet_access_key,      to: :secure
               map :region,                  to: :str
@@ -19,8 +18,6 @@ module Travis
               map :bucket_name,             to: :str
               map :bucket_path,             to: :str
               map :only_create_app_version, to: :bool
-
-              export
             end
           end
         end

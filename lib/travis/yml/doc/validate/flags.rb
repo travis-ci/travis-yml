@@ -25,8 +25,8 @@ module Travis
               edge_key         if edge_key?
               edge_value       if edge_value?
               # flagged          if schema.flagged?
-              # deprecated_key   if deprecated_key?
               deprecated       if deprecated?
+              deprecated_key   if deprecated_key?
               deprecated_value if deprecated_value?
               value
             end
@@ -59,12 +59,23 @@ module Travis
               value.warn :deprecated, deprecation: schema.deprecated
             end
 
-            def deprecated_value
-              value.warn :deprecated, deprecation: :deprecated_value, value: value.value
+            def deprecated_key?
+              schema.map? # && schema.deprecated_key?(value.key)
+            end
+
+            def deprecated_key
+              value.keys.each do |key|
+                next unless deprecation = schema.deprecated_key(key)
+                value.warn :deprecated, deprecation: deprecation
+              end
             end
 
             def deprecated_value?
               schema.enum? && value.str? && schema.values.deprecated?(value.value)
+            end
+
+            def deprecated_value
+              value.warn :deprecated, deprecation: :deprecated_value, value: value.value
             end
 
             # def info

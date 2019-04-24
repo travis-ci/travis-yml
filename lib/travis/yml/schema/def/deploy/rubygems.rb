@@ -8,7 +8,6 @@ module Travis
             register :rubygems
 
             def define
-              super
               # TODO according to the docs :gem can be a :str or a :map
               # https://docs.travis-ci.com/user/deployment/rubygems/#gem-to-release
               #
@@ -16,12 +15,10 @@ module Travis
               #     master: my-gem
               #     old: my-gem-old
 
-              map :gem,     to: :str
+              map :api_key, to: :map, type: :secure
+              map :gem,     to: :map, type: :str
               map :file,    to: :str
               map :gemspec, to: :str
-              map :api_key, to: :secure
-
-              export
             end
           end
         end

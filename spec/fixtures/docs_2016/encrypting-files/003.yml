@@ -1,0 +1,5 @@
+env:
+  global:
+    secure: ... encoded secret ...
+before_install:
+  - openssl aes-256-cbc -k "$super_secret_password" -in super_secret.txt.enc -out super_secret.txt -d

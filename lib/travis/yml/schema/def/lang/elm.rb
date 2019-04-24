@@ -10,6 +10,8 @@ module Travis
 
           def define
             matrix :elm
+            matrix :node_js
+
             map :elm_format, to: :str
             map :elm_test,   to: :str
           end

@@ -8,12 +8,9 @@ module Travis
             register :cloudcontrol
 
             def define
-              super
               map :email,      to: :secure
               map :password,   to: :secure
               map :deployment, to: :str
-
-              export
             end
           end
         end

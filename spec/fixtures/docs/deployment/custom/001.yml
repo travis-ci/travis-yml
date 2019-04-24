@@ -1,6 +1,11 @@
 env:
   global:
-    - "FTP_USER=user"
-    - "FTP_PASSWORD=password"
+  - 'SFTP_USER=[user]'
+  - 'SFTP_PASSWORD=[password]'
+  - 'SFTP_KEY=[base64-encoded-rsa-key]'
 after_success:
-    "curl --ftp-create-dirs -T uploadfilename -u $FTP_USER:$FTP_PASSWORD ftp://sitename.com/directory/myfile"
+- echo "${SFTP_KEY}" | base64 --decode >/tmp/sftp_rsa
+- curl --ftp-create-dirs
+       -T filename
+       --key /tmp/sftp_rsa
+       sftp://${SFTP_USER}:${SFTP_PASSWORD}@example.com/directory/filename

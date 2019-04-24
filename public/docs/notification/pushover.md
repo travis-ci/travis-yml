@@ -19,7 +19,7 @@ None.
 ```yaml
 pushover:
   enabled: true
-  api_key: 
+  api_key: "[ref:secures]"
   users: "[ref:secures]"
   template: string
   on_success: always

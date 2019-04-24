@@ -21,18 +21,23 @@ None.
 apt:
   packages: "[ref:strs]"
   dist: string
+  update: true
 ```
 
 ```yaml
 apt:
   sources:
   - name: string
+    sourceline: string
+    key_url: string
 ```
 
 ```yaml
 apt:
   sources:
     name: string
+    sourceline: string
+    key_url: string
 ```
 
 ```yaml

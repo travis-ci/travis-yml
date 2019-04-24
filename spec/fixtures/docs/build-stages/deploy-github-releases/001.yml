@@ -1,0 +1,12 @@
+jobs:
+  include:
+    - script: echo "Running unit tests (1)"
+    - script: echo "Running unit tests (2)"
+    - stage: GitHub Release
+      script: echo "Deploying to GitHub releases ..."
+      deploy:
+        provider: releases
+        api_key: $GITHUB_OAUTH_TOKEN
+        skip_cleanup: true
+        on:
+          tags: true

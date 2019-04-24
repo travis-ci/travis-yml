@@ -46,7 +46,8 @@ describe Travis::Yml::Schema::Def::Services, 'structure' do
             'postgresql',
             'rabbitmq',
             'redis',
-            'riak'
+            'riak',
+            'xvfb'
           ],
           downcase: true,
           values: {
@@ -69,6 +70,13 @@ describe Travis::Yml::Schema::Def::Services, 'structure' do
               aliases: [
                 'redis-server'
               ]
+            },
+            xvfb: {
+              only: {
+                dist: [
+                  'xenial'
+                ]
+              }
             },
           }
         )

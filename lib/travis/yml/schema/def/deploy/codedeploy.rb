@@ -13,7 +13,6 @@ module Travis
             register :codedeploy
 
             def define
-              super
               map :access_key_id,       to: :secure
               map :secret_access_key,   to: :secure
               map :application,         to: :str
@@ -25,8 +24,6 @@ module Travis
               map :wait_until_deployed, to: :bool
               map :bucket,              to: :str
               map :key,                 to: :str
-
-              export
             end
           end
         end

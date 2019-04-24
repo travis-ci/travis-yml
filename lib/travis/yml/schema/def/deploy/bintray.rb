@@ -8,14 +8,11 @@ module Travis
             register :bintray
 
             def define
-              super
               map :file,       to: :str
               map :user,       to: :secure
               map :key,        to: :secure
               map :passphrase, to: :secure
               map :dry_run,    to: :bool
-
-              export
             end
           end
         end

@@ -1,0 +1,9 @@
+matrix:
+  include:
+  - stage: deploy
+    if: attribute=value
+    env:
+    - PRIOR_VERSION=$(git describe --abbrev=0 --tags)
+    - RELEASE_VERSION=$(grep to get version number)
+    script:
+    - '"$PRIOR_VERSION" = "$RELEASE_VERSION" && travis_terminate || echo "Deploying latest version ..."'

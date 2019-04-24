@@ -1,4 +1,7 @@
-install:
-  - wget https://protobuf.googlecode.com/files/protobuf-2.4.1.tar.gz
-  - tar -xzvf protobuf-2.4.1.tar.gz
-  - pushd protobuf-2.4.1 && ./configure --prefix=/usr && make && sudo make install && popd
+addons:
+  apt:
+    sources:
+    - deadsnakes
+    - sourceline: 'ppa:ubuntu-toolchain-r/test'
+    - sourceline: 'deb https://packagecloud.io/chef/stable/ubuntu/precise main'
+      key_url: 'https://packagecloud.io/gpg.key'

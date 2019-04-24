@@ -16,13 +16,12 @@ module Travis
             register :appfog
 
             def define
-              super
               map :user,         to: :secure
               map :api_key,      to: :secure
               map :address,      to: :seq
               map :metadata,     to: :str
               map :after_deploy, to: :seq
-              map :app,          to: :app
+              map :app,          to: :map, type: :str
 
               # extract to :secure_map?
               type = Class.new(Dsl::Any) do
@@ -39,8 +38,6 @@ module Travis
 
               map :email, to: type
               map :password, to: type
-
-              export
             end
           end
         end

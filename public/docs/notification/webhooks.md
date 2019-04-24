@@ -21,6 +21,8 @@ None.
 webhooks:
   urls: "[ref:secures]"
   on_start: always
+  on_cancel: always
+  on_error: always
   enabled: true
   on_success: always
   on_failure: always

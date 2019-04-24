@@ -23,9 +23,9 @@ deploy:
   allow_failure: true
   skip_cleanup: true
   edge: true
-  access_token: 
-  site_id: string
-  local_dir: string
+  access-token: 
+  site-id: 
+  local-dir: string
 ```
 
 ```yaml

@@ -8,15 +8,12 @@ module Travis
             register :scalingo
 
             def define
-              super
               map :username, to: :secure
               map :password, to: :secure
               map :api_key,  to: :secure
               map :remote,   to: :str
               map :branch,   to: :str
               map :app,      to: :str
-
-              export
             end
           end
         end

@@ -3,7 +3,7 @@ describe Travis::Yml::Schema::Def::Addon::Apt, 'structure' do
     subject { Travis::Yml.schema[:definitions][:addon][:apt] }
     # subject { described_class.new.definitions[:addon][:apt] }
 
-    # it { puts JSON.pretty_generate(subject) }
+    xit { puts JSON.pretty_generate(subject) }
 
     it do
       should eq(
@@ -25,6 +25,12 @@ describe Travis::Yml::Schema::Def::Addon::Apt, 'structure' do
                       properties: {
                         name: {
                           type: :string
+                        },
+                        sourceline: {
+                          type: :string
+                        },
+                        key_url: {
+                          type: :string
                         }
                       },
                       additionalProperties: false,
@@ -36,6 +42,12 @@ describe Travis::Yml::Schema::Def::Addon::Apt, 'structure' do
                     type: :object,
                     properties: {
                       name: {
+                        type: :string
+                      },
+                      sourceline: {
+                        type: :string
+                      },
+                      key_url: {
                         type: :string
                       }
                     },
@@ -55,6 +67,9 @@ describe Travis::Yml::Schema::Def::Addon::Apt, 'structure' do
               },
               dist: {
                 type: :string
+              },
+              update: {
+                type: :boolean
               }
             },
             additionalProperties: false,

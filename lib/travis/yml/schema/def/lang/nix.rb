@@ -9,6 +9,7 @@ module Travis
           register :nix
 
           def define
+            matrix :nix
           end
         end
       end

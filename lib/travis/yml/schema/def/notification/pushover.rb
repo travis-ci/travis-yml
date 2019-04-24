@@ -12,7 +12,7 @@ module Travis
             def define
               map :enabled,  to: :bool
               map :disabled, to: :bool
-              map :api_key,  to: :secure
+              map :api_key,  to: :seq, type: :secure
               map :users,    to: :seq, type: :secure
               map :template, to: :templates
 

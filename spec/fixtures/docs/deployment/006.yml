@@ -1,3 +1,6 @@
 deploy:
-  provider: awesome-experimental-provider
-  edge: true
+  provider: script
+  script: deploy.sh
+  on:
+    all_branches: true
+    condition: $TRAVIS_BRANCH =~ ^staging|production$

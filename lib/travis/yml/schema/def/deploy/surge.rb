@@ -8,11 +8,8 @@ module Travis
             register :surge
 
             def define
-              super
               map :project, to: :str
               map :domain,  to: :str
-
-              export
             end
           end
         end

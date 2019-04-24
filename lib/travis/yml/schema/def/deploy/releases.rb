@@ -15,18 +15,15 @@ module Travis
             register :releases
 
             def define
-              super
               map :user,           to: :secure
               map :password,       to: :secure
               map :api_key,        to: :secure
               map :repo,           to: :str
               map :file,           to: :seq
-              map :file_glob,      to: :str
-              map :overwrite,      to: :str
+              map :file_glob,      to: :bool
+              map :overwrite,      to: :bool
               map :release_number, to: :str
               map :prerelease,     to: :bool
-
-              export
             end
           end
         end

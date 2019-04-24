@@ -17,11 +17,11 @@ None.
 ## Examples
 
 ```yaml
-app:
+gem:
   ".*": string
 ```
 
 ```yaml
-app: string
+gem: string
 
 ```

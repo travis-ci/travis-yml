@@ -39,7 +39,7 @@ module Travis
           class Deploy < Dsl::Map
             registry :deploy
 
-            def define
+            def before_define
               normal
 
               strict false
@@ -60,22 +60,6 @@ module Travis
               #       production: bar
 
               # map :'.*', to: :branches
-            end
-          end
-
-          class App < Dsl::Any
-            registry :deploy
-            register :app
-
-            def define
-              add Class.new(Dsl::Map) {
-                def define
-                  strict false
-                  map '.*', to: :str
-                  normal
-                end
-              }
-              add :str, normal: true
 
               export
             end
@@ -154,6 +138,7 @@ require 'travis/yml/schema/def/deploy/bintray'
 require 'travis/yml/schema/def/deploy/bitballoon'
 require 'travis/yml/schema/def/deploy/bluemix_cloudfoundry'
 require 'travis/yml/schema/def/deploy/boxfuse'
+require 'travis/yml/schema/def/deploy/cargo'
 require 'travis/yml/schema/def/deploy/catalyze'
 require 'travis/yml/schema/def/deploy/chef_supermarket'
 require 'travis/yml/schema/def/deploy/cloud66'
@@ -185,5 +170,6 @@ require 'travis/yml/schema/def/deploy/rubygems'
 require 'travis/yml/schema/def/deploy/s3'
 require 'travis/yml/schema/def/deploy/scalingo'
 require 'travis/yml/schema/def/deploy/script'
+require 'travis/yml/schema/def/deploy/snap'
 require 'travis/yml/schema/def/deploy/surge'
 require 'travis/yml/schema/def/deploy/testfairy'

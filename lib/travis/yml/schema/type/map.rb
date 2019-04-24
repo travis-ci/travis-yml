@@ -20,6 +20,10 @@ module Travis
 
           def_delegators :mappings, :[]=, :[], :each, :keys, :key?, :values
 
+          def types
+            @types ||= {}
+          end
+
           def mappings
             @mappings ||= {}
           end
@@ -45,7 +49,7 @@ module Travis
           end
 
           def strict?
-            false?(@strict) ? false : true
+            mappings.empty? || false?(@strict) ? false : true
           end
 
           def to_h

@@ -32,6 +32,12 @@ module Travis
             end
           end
 
+          def type(*types)
+            types = types.flatten
+            node.set :types, types.map { |type| build(self, type).node }
+            node.set :strict, false
+          end
+
           def include(*types)
             types = types.map { |type| build(self, type).node }
             node.includes.concat(types)
@@ -53,12 +59,16 @@ module Travis
           # mapped type, but need to end up on the map.
           def mapped_opts(obj, key, mapped)
             obj = obj.lookup if obj.is?(:ref)
-            obj = obj.schemas.detect(&:map?) || obj if obj.is?(:any) # hmmm.
-            obj = obj.schemas.detect(&:seq?) || obj if obj.is?(:any)
+            obj = obj.types.detect(&:map?) || obj if obj.is?(:any) # hmmm.
+            obj = obj.types.detect(&:seq?) || obj if obj.is?(:any)
 
             opts = %i(alias).map do |attr|
               [:keys, { key => { aliases:  to_syms(mapped[attr]) } }] if mapped[attr]
             end.compact.to_h
+
+            opts = merge(opts, %i(deprecated).map do |attr|
+              [:keys, { key => { deprecated:  mapped[attr] } }] if mapped[attr]
+            end.compact.to_h)
 
             opts = merge(opts, %i(required unique).map do |attr|
               [attr, [key]] if mapped[attr] || obj.send("#{attr}?")

@@ -34,6 +34,7 @@ module Travis
             value :rabbitmq,   alias: :'rabbitmq-server'
             value :redis,      alias: :'redis-server'
             value :riak
+            value :xvfb,       only: { dist: 'xenial' }
 
             export
           end

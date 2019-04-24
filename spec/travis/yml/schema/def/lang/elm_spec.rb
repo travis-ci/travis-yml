@@ -13,6 +13,9 @@ describe Travis::Yml::Schema::Def::Elm, 'structure' do
           elm: {
             '$ref': '#/definitions/strs'
           },
+          node_js: {
+            '$ref': '#/definitions/strs'
+          },
           elm_format: {
             type: :string
           },
@@ -23,6 +26,13 @@ describe Travis::Yml::Schema::Def::Elm, 'structure' do
         normal: true,
         keys: {
           elm: {
+            only: {
+              language: [
+                'elm'
+              ]
+            }
+          },
+          node_js: {
             only: {
               language: [
                 'elm'

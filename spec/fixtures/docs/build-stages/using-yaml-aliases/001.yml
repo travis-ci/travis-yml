@@ -1,0 +1,21 @@
+rvm:
+  - 2.2
+  - 2.3
+
+script: bundle exec rspec
+
+jobs:
+  include:
+    - stage: deploy to staging
+      rvm: 2.3
+      install: skip # bundle install is not required
+      script: ./deploy.sh
+    - &test-staging
+      stage: test staging
+      rvm: 2.3
+      install: skip
+      script: ./test-staging.sh one
+    - <<: *test-staging
+      script: ./test-staging.sh two
+    - <<: *test-staging
+      script: ./test-staging.sh three

@@ -70,7 +70,7 @@ module Travis
             self
           end
 
-          SUPPORTING = [:language, :os]
+          SUPPORTING = [:language, :os, :dist]
 
           def supporting
             # return opts[:supporting] if opts[:supporting]

@@ -1,13 +1,13 @@
 describe Travis::Yml::Schema::Def::Deploy::BluemixCloudfoundry, 'structure' do
   describe 'definitions' do
-    subject { Travis::Yml.schema[:definitions][:deploy][:bluemixcf] }
+    subject { Travis::Yml.schema[:definitions][:deploy][:bluemixcloudfoundry] }
 
     # it { puts JSON.pretty_generate(subject) }
 
     it do
       should eq(
-        '$id': :deploy_bluemixcf,
-        title: 'Deploy Bluemixcf',
+        '$id': :deploy_bluemixcloudfoundry,
+        title: 'Deploy Bluemixcloudfoundry',
         anyOf: [
           {
             type: :object,
@@ -15,7 +15,7 @@ describe Travis::Yml::Schema::Def::Deploy::BluemixCloudfoundry, 'structure' do
               provider: {
                 type: :string,
                 enum: [
-                  'bluemixcf'
+                  'bluemixcloudfoundry'
                 ],
                 strict: true
               },
@@ -65,7 +65,7 @@ describe Travis::Yml::Schema::Def::Deploy::BluemixCloudfoundry, 'structure' do
           {
             type: :string,
             enum: [
-              'bluemixcf'
+              'bluemixcloudfoundry'
             ],
             strict: true
           }
@@ -79,7 +79,7 @@ describe Travis::Yml::Schema::Def::Deploy::BluemixCloudfoundry, 'structure' do
 
     it do
       should eq(
-        '$ref': '#/definitions/deploy/bluemixcf'
+        '$ref': '#/definitions/deploy/bluemixcloudfoundry'
       )
     end
   end

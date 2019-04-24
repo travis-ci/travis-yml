@@ -1,0 +1,12 @@
+env:
+- TEST_SUITE=integration_tests
+- TEST_SUITE=unit_tests
+
+script: bundle exec rake test:$TEST_SUITE
+
+jobs:
+  include:
+    - stage: deploy
+      env: TEST_SUITE=none
+      install: skip # bundle install is not required
+      script: ./deploy.sh

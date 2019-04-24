@@ -1,6 +1,6 @@
 describe Travis::Yml::Schema::Dsl::Any do
   let(:dsl) { Class.new(described_class).new }
-  let(:schema) { subject.schemas.first }
+  let(:schema) { subject.types.first }
 
   subject { dsl.node }
 

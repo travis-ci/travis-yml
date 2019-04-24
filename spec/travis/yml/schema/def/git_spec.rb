@@ -21,7 +21,20 @@ describe Travis::Yml::Schema::Def::Git, 'structure' do
             type: :boolean
           },
           depth: {
-            type: :number
+            anyOf: [
+              {
+                type: :number
+              },
+              {
+                type: :boolean
+              }
+            ]
+          },
+          lfs_skip_smudge: {
+            type: :boolean
+          },
+          sparse_checkout: {
+            type: :string
           },
           submodules: {
             type: :boolean

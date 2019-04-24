@@ -23,14 +23,14 @@ describe Travis::Yml::Schema::Dsl::Map do
   end
 
   describe 'strict' do
-    describe 'by default' do
+    describe 'no mappings' do
       let(:define) { -> {} }
-      it { expect(map).to be_strict }
+      it { expect(map).to_not be_strict }
       it { expect(map).to_not have_opts }
     end
 
-    describe 'given true' do
-      let(:define) { -> { strict true } }
+    describe 'given mappings' do
+      let(:define) { -> { map :foo, to: :str } }
       it { expect(map).to be_strict }
       it { expect(map).to_not have_opts }
     end

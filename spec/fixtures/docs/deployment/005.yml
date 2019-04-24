@@ -1,8 +1,8 @@
+language: node_js
 deploy:
-  provider: releases
-  api_key: "GITHUB OAUTH TOKEN"
-  file: "FILE TO UPLOAD"
-  skip_cleanup: true
+  provider: appfog
+  user: ...
+  api_key: ...
   on:
-    tags: true
-    rvm: 2.0.0
+    branch: staging
+    node_js: '0.11' # this should be quoted; otherwise, 0.10 would not work

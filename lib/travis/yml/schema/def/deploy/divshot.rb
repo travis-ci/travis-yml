@@ -8,11 +8,8 @@ module Travis
             register :divshot
 
             def define
-              super
               map :api_key,     to: :secure
               map :environment, to: :str
-
-              export
             end
           end
         end

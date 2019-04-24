@@ -7,9 +7,10 @@ module Travis
       module Dsl
         class Group < Node
           def add(*types)
+            types = types.flatten
             opts = types.last.is_a?(Hash) ? types.pop : {}
-            schemas = types.map { |type| build(self, type, opts).node }
-            node.schemas.concat(schemas)
+            types = types.map { |type| build(self, type, opts).node }
+            node.types.concat(types)
           end
         end
       end

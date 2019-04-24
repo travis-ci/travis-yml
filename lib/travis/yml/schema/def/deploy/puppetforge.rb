@@ -9,12 +9,9 @@ module Travis
             register :puppetforge
 
             def define
-              super
               map :user,     to: :secure, required: true
               map :password, to: :secure, required: true
               map :url,      to: :str
-
-              export
             end
           end
         end

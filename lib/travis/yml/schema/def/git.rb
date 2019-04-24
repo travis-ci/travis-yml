@@ -11,9 +11,11 @@ module Travis
           def define
             map :strategy,         to: :enum, values: [:clone, :tarball]
             map :quiet,            to: :bool
-            map :depth,            to: :num #, default: 50
+            map :depth,            to: :any, add: [:num, :bool]
             map :submodules,       to: :bool
             map :submodules_depth, to: :num
+            map :lfs_skip_smudge,  to: :bool
+            map :sparse_checkout,  to: :str
 
             export
           end

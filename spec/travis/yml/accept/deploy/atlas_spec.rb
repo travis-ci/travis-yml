@@ -136,9 +136,9 @@ describe Travis::Yml, 'atlas' do
       yaml %(
         deploy:
           provider: atlas
-          version: str
+          version: true
       )
-      it { should serialize_to deploy: [provider: 'atlas', version: 'str'] }
+      it { should serialize_to deploy: [provider: 'atlas', version: true] }
       it { should_not have_msg }
     end
   end

@@ -9,14 +9,11 @@ module Travis
             register :openshift
 
             def define
-              super
               map :user,              to: :secure
               map :password,          to: :secure
-              map :domain,            to: :str
-              map :app,               to: :str
+              map :domain,            to: :map, type: :str
+              map :app,               to: :map, type: :str
               map :deployment_branch, to: :str
-
-              export
             end
           end
         end

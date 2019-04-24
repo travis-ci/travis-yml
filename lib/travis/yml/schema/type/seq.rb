@@ -12,19 +12,18 @@ module Travis
 
           register :seq
 
-          def_delegators :schemas, :size, :first, :each
+          def_delegators :types, :size, :first, :each
 
           def self.type
             :seq
           end
 
-          def schemas
-            # Str.new(self)
-            @schemas ||= []
+          def types
+            @types ||= []
           end
 
           # def support
-          #   merge(super, *schemas.map(&:support))
+          #   merge(super, *types.map(&:support))
           # end
 
           def to_h

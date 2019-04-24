@@ -13,8 +13,10 @@ module Travis
               aliases :webhook
               prefix :urls
 
-              map :urls,     to: :seq, type: :secure
-              map :on_start, to: :frequency
+              map :urls,      to: :seq, type: :secure
+              map :on_start,  to: :frequency
+              map :on_cancel, to: :frequency
+              map :on_error,  to: :frequency
 
               super
             end

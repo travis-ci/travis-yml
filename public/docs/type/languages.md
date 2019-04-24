@@ -101,6 +101,23 @@ type:
 
 ```yaml
 type:
+  dart_task:
+  - test: string
+    dartanalyzer: string
+    dartfmt: true
+    install_dartium: true
+    xvfb: true
+```
+
+```yaml
+type:
+  dart_task:
+  - string one
+  - string two
+```
+
+```yaml
+type:
   elixir: "[ref:strs]"
   otp_release: "[ref:strs]"
 ```
@@ -155,8 +172,8 @@ type:
 ```
 
 ```yaml
-type: {}
-
+type:
+  nix: "[ref:strs]"
 ```
 
 ```yaml
@@ -173,6 +190,7 @@ type:
   xcode_sdk: "[ref:strs]"
   podfile: string
   bundler_args: string
+  xcode_destination: string
   xcode_project: string
   xcode_workspace: string
   xctool_args: string
@@ -256,6 +274,7 @@ type: {}
 type:
   smalltalk: "[ref:strs]"
   smalltalk_config: "[ref:strs]"
+  smalltalk_vm: "[ref:strs]"
   smalltalk_edge: true
 ```
 

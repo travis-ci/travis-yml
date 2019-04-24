@@ -9,11 +9,8 @@ module Travis
             register :catalyze
 
             def define
-              super
               map :target, to: :str
               map :path,   to: :str
-
-              export
             end
           end
         end

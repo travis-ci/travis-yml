@@ -24,7 +24,7 @@ module Travis
             # slowing the process down from ~0.12s to ~1.4s.
 
             def new(parent = nil, opts = {})
-              if registry_key && opts.empty? && obj = Type::Node.exported(registry_name, registry_key)
+              if registry_key && opts.empty? && obj = Type.exported(registry_name, registry_key)
                 obj.export? ? ref(parent, obj) : super(parent, obj)
               else
                 obj = Type::Node[type].new(parent&.node, namespace: registry_name, id: registry_key)
@@ -36,8 +36,8 @@ module Travis
                 node.after_define
 
                 if node.export?
-                  obj = Type::Expand.apply(obj)
-                  Type::Node.export(obj)
+                  obj = Type.transform(obj)
+                  Type.export(obj)
                   ref(node.parent, obj)
                 else
                   node

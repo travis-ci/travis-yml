@@ -8,10 +8,7 @@ module Travis
             register :script
 
             def define
-              super
               map :script, to: :str # TODO should be a seq?
-
-              export
             end
           end
         end

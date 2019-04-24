@@ -2,7 +2,7 @@
 require 'forwardable'
 require 'registry'
 require 'travis/yml/schema/type/dump'
-require 'travis/yml/schema/type/expand'
+require 'travis/yml/schema/type/forms'
 require 'travis/yml/schema/type/opts'
 
 module Travis
@@ -17,36 +17,7 @@ module Travis
 
           opts %i(changes deprecated flags normal)
 
-          class << self
-            def def?
-              name.to_s.include?('Def')
-            end
-
-            def exported(namespace, id)
-              exports[namespace]&.fetch(id, nil)
-            end
-
-            def export(obj)
-              exports[obj.namespace] ||= {}
-              exports[obj.namespace][obj.id] = obj
-            end
-
-            def exports
-              @exports ||= {}
-            end
-
-            def resolve(type)
-              type.is_a?(Class) ? type : self[type]
-            end
-          end
-
           attr_writer :namespace
-
-          def transform(type, opts = {})
-            opts = opts.merge(ivars)
-            node = Node[type].new(parent, opts)
-            node
-          end
 
           def initialize(parent = nil, opts = {})
             super(parent)
@@ -54,23 +25,20 @@ module Travis
             assign(opts)
           end
 
+          def resolve(type)
+            Type.resolve(type)
+          end
+
+          def transform(type, opts = {})
+            opts = opts.merge(ivars)
+            node = Node[type].new(parent, opts)
+            node
+          end
+
           def assign(opts)
             opts.each do |key, value|
               set(key, value)
             end
-          end
-
-          def namespace
-            @namespace || :type
-          end
-
-          def opts
-            # puts nil, caller[0..4] if caller.none? { |line| line.include?('json') }
-            @opts
-          end
-
-          def opts?
-            @opts&.any?
           end
 
           def set(key, obj)
@@ -82,10 +50,6 @@ module Travis
               opt(key, nil)
               ivar(key, nil)
             end
-          end
-
-          def opt?(key)
-            self.class.opts.include?(key)
           end
 
           def opt(key, obj)
@@ -110,12 +74,6 @@ module Travis
             end
           end
 
-          def resolve(type)
-            self.class.resolve(type)
-          end
-
-          attr_reader :id
-
           def root
             parent ? parent.root : self
           end
@@ -133,56 +91,30 @@ module Travis
             types.any? { |type| is_a?(resolve(type)) }
           end
 
-          def schema?
-           is_a?(Schema)
-          end
-
-          def map?
-            is_a?(Map)
-          end
-
-          def seq?
-            is_a?(Seq)
-          end
-
-          def enum?
-            is_a?(Enum)
-          end
-
-          def secure?
-            is_a?(Secure)
-          end
-
-          def scalar?
-            is_a?(Scalar)
-          end
-
-          def str?
-            is_a?(Str)
-          end
-
-          def num?
-            is_a?(Num)
-          end
-
-          def bool?
-            is_a?(Bool)
-          end
-
-          def ref?
-            is_a?(Ref)
+          %i(schema map seq enum secure scalar str num bool ref).each do |type|
+            define_method(:"#{type}?") { is?(type) }
           end
 
           def type
             self.class.type
           end
 
-          def examples?
-            examples.any?
+          attr_reader :id
+
+          def namespace
+            @namespace || :type
           end
 
-          def examples
-            @examples ||= {}
+          def opts
+            @opts
+          end
+
+          def opts?
+            @opts&.any?
+          end
+
+          def opt?(key)
+            self.class.opts.include?(key)
           end
 
           attr_accessor :example
@@ -205,6 +137,14 @@ module Travis
 
           def deprecated?
             opts[:deprecated]
+          end
+
+          def examples?
+            examples.any?
+          end
+
+          def examples
+            @examples ||= {}
           end
 
           def expand(key = nil)
@@ -280,7 +220,7 @@ module Travis
           end
 
           def json
-            node = Expand.apply(self)
+            node = Forms.apply(self)
             Json::Node[node.type].new(node)
           end
 

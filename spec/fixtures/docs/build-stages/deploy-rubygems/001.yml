@@ -1,0 +1,16 @@
+rvm:
+  - 2.2
+  - 2.3
+
+script: echo "Running tests against $(ruby -v) ..."
+
+jobs:
+  include:
+    - stage: gem release
+      rvm: 2.2
+      script: echo "Deploying to rubygems.org ..."
+      deploy:
+        provider: rubygems
+        gem: travis-build-stages-demo
+        api_key: $RUBYGEMS_API_KEY
+        on: deploy-gem-release

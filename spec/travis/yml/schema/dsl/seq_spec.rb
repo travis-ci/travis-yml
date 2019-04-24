@@ -5,6 +5,6 @@ describe Travis::Yml::Schema::Dsl::Seq do
 
   describe 'type' do
     before { dsl.type :num }
-    it { expect(subject.schemas.first).to be_num }
+    it { expect(subject.types.first).to be_num }
   end
 end

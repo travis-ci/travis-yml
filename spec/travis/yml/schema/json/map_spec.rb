@@ -12,7 +12,6 @@ describe Travis::Yml::Schema::Json::Map do
     it do
       should have_schema(
         type: :object,
-        additionalProperties: false,
         maxProperties: 1
       )
     end
@@ -23,7 +22,6 @@ describe Travis::Yml::Schema::Json::Map do
       it do
         should have_schema(
           type: :object,
-          additionalProperties: false
         )
       end
     end
@@ -34,7 +32,6 @@ describe Travis::Yml::Schema::Json::Map do
       it do
         should have_schema(
           type: :object,
-          additionalProperties: false
         )
       end
     end
@@ -80,6 +77,43 @@ describe Travis::Yml::Schema::Json::Map do
           }
         },
         unique: [:foo]
+      )
+    end
+  end
+
+  describe 'given a type' do
+    let(:opts) { { type: :str } }
+
+    it do
+      should have_schema(
+        type: :object,
+        patternProperties: {
+          '.*': {
+            type: :string
+          }
+        }
+      )
+    end
+  end
+
+  describe 'given types' do
+    let(:opts) { { type: [:map, :secure] } }
+
+    it do
+      should have_schema(
+        type: :object,
+        patternProperties: {
+          '.*': {
+            anyOf: [
+              {
+                type: :object
+              },
+              {
+                '$ref': '#/definitions/secure'
+              },
+            ]
+          }
+        }
       )
     end
   end

@@ -29,7 +29,7 @@ module Travis
           alias schema map
 
           def group(node)
-            obj(node).merge(schemas: node.map { |node| to_h(node) })
+            obj(node).merge(types: node.map { |node| to_h(node) })
           end
 
           alias any group
@@ -37,7 +37,7 @@ module Travis
           alias one group
 
           def seq(node)
-            obj(node).merge(schemas: node.map { |node| to_h(node) })
+            obj(node).merge(types: node.map { |node| to_h(node) })
           end
 
           def ref(node)

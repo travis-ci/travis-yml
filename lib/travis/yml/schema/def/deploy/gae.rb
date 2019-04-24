@@ -11,7 +11,6 @@ module Travis
             register :gae
 
             def define
-              super
               map :project,                  to: :str
               map :keyfile,                  to: :str
               map :config,                   to: :str
@@ -19,8 +18,6 @@ module Travis
               map :no_promote,               to: :bool
               map :no_stop_previous_version, to: :bool
               map :verbosity,                to: :str
-
-              export
             end
           end
         end

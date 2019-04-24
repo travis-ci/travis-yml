@@ -1,12 +1,12 @@
 describe Travis::Yml::Schema::Def::Deploy::ChefSupermarket, 'structure' do
   describe 'definitions' do
-    subject { Travis::Yml.schema[:definitions][:deploy][:chef_supermarket] }
+    subject { Travis::Yml.schema[:definitions][:deploy][:'chef-supermarket'] }
 
     # it { puts JSON.pretty_generate(subject) }
 
     it do
       should eq(
-        '$id': :deploy_chef_supermarket,
+        '$id': :'deploy_chef-supermarket',
         title: 'Deploy Chef Supermarket',
         anyOf: [
           {
@@ -15,7 +15,7 @@ describe Travis::Yml::Schema::Def::Deploy::ChefSupermarket, 'structure' do
               provider: {
                 type: :string,
                 enum: [
-                  'chef_supermarket'
+                  'chef-supermarket'
                 ],
                 strict: true
               },
@@ -50,7 +50,7 @@ describe Travis::Yml::Schema::Def::Deploy::ChefSupermarket, 'structure' do
           {
             type: :string,
             enum: [
-              'chef_supermarket'
+              'chef-supermarket'
             ],
             strict: true
           }
@@ -64,7 +64,7 @@ describe Travis::Yml::Schema::Def::Deploy::ChefSupermarket, 'structure' do
 
     it do
       should eq(
-        '$ref': '#/definitions/deploy/chef_supermarket'
+        '$ref': '#/definitions/deploy/chef-supermarket'
       )
     end
   end

@@ -10,8 +10,6 @@ module Travis
             register :s3
 
             def define
-              super
-
               map :access_key_id,          to: :secure
               map :secret_access_key,      to: :secure
               map :bucket,                 to: :str
@@ -27,8 +25,6 @@ module Travis
               map :index_document_suffix,  to: :str
               map :default_text_charset,   to: :str
               map :server_side_encryption, to: :bool
-
-              export
             end
           end
         end

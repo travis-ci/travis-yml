@@ -11,15 +11,11 @@ module Travis
             register :heroku
 
             def define
-              super
-
               map :strategy,  to: :heroku_strategy
               map :buildpack, to: :str
-              map :app,       to: :app
-              map :api_key,   to: :secure
+              map :app,       to: :map, type: :str
+              map :api_key,   to: :map, type: :secure
               map :run,       to: :seq
-
-              export
             end
           end
 

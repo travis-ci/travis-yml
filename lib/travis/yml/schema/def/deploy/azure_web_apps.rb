@@ -8,14 +8,11 @@ module Travis
             register :azure_web_apps
 
             def define
-              super
               map :site,     to: :str
               map :slot,     to: :str
               map :username, to: :secure
               map :password, to: :secure
               map :verbose,  to: :bool
-
-              export
             end
           end
         end

@@ -13,12 +13,13 @@ module Travis
           end
 
           def type(*types)
+            types = types.flatten
             opts = types.last.is_a?(Hash) ? types.pop : {}
-            schemas = types.map { |type| build(self, type, opts).node }
-            node.set :schemas, schemas
+            types = types.map { |type| build(self, type, opts).node }
+            node.set :types, types
 
             # shouldn't this happen in Map#mapped_opts?
-            objs = schemas.map do |obj|
+            objs = types.map do |obj|
               obj = obj.lookup if obj.type == :ref
               obj.support.each do |key, opts|
                 node.parent.set :keys, { node.key => { key => to_strs(opts) } } if node.parent

@@ -24,6 +24,7 @@ describe Travis::Yml do
         crystal
         d
         dart
+        dart_task
         dotnet
         elixir
         elm
@@ -35,6 +36,7 @@ describe Travis::Yml do
         jdk
         julia
         mono
+        nix
         node_js
         os
         otp_release
@@ -47,6 +49,8 @@ describe Travis::Yml do
         rvm
         scala
         smalltalk
+        smalltalk_config
+        smalltalk_vm
         solution
         xcode_scheme
         xcode_sdk
