@@ -69,11 +69,18 @@
           "apt_packages": {
             "$ref": "#/definitions/strs"
           },
+          "artifacts": {
+            "$ref": "#/definitions/addon/artifacts"
+          },
           "browserstack": {
             "$ref": "#/definitions/addon/browserstack"
           },
-          "artifacts": {
-            "$ref": "#/definitions/addon/artifacts"
+          "chrome": {
+            "type": "string",
+            "enum": [
+              "stable",
+              "beta"
+            ]
           },
           "code_climate": {
             "$ref": "#/definitions/addon/code_climate"
@@ -102,17 +109,31 @@
           "ssh_known_hosts": {
             "$ref": "#/definitions/strs"
           },
-          "sonarqube": {
-            "anyOf": [
-              {
-                "type": "object",
-                "normal": true
+          "sonarcloud": {
+            "type": "object",
+            "properties": {
+              "organization": {
+                "type": "string"
               },
-              {
-                "type": "boolean",
-                "normal": true
+              "token": {
+                "$ref": "#/definitions/secure"
+              },
+              "github_token": {
+                "$ref": "#/definitions/secure"
+              },
+              "branches": {
+                "$ref": "#/definitions/strs"
               }
-            ]
+            },
+            "additionalProperties": false,
+            "keys": {
+              "github_token": {
+                "deprecated": "deprecated_sonarcloud_github_token"
+              },
+              "branches": {
+                "deprecated": "deprecated_sonarcloud_branches"
+              }
+            }
           },
           "srcclr": {
             "anyOf": [
@@ -461,13 +482,26 @@
             "type": "boolean"
           },
           "depth": {
-            "type": "number"
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "boolean"
+              }
+            ]
           },
           "submodules": {
             "type": "boolean"
           },
           "submodules_depth": {
             "type": "number"
+          },
+          "lfs_skip_smudge": {
+            "type": "boolean"
+          },
+          "sparse_checkout": {
+            "type": "string"
           }
         },
         "additionalProperties": false
@@ -977,9 +1011,12 @@
             "value": "windows",
             "only": {
               "language": [
-                "shell",
-                "csharp",
-                "powershell"
+                "c",
+                "cpp",
+                "go",
+                "node_js",
+                "rust",
+                "shell"
               ]
             }
           }
@@ -1024,9 +1061,12 @@
             ],
             "only": {
               "language": [
-                "shell",
-                "csharp",
-                "powershell"
+                "c",
+                "cpp",
+                "go",
+                "node_js",
+                "rust",
+                "shell"
               ]
             }
           }
@@ -1071,7 +1111,8 @@
           "postgresql",
           "rabbitmq",
           "redis",
-          "riak"
+          "riak",
+          "xvfb"
         ],
         "values": {
           "memcached": {
@@ -1093,6 +1134,13 @@
             "aliases": [
               "redis-server"
             ]
+          },
+          "xvfb": {
+            "only": {
+              "dist": [
+                "xenial"
+              ]
+            }
           }
         }
       },
@@ -1210,6 +1258,12 @@
                       "properties": {
                         "name": {
                           "type": "string"
+                        },
+                        "sourceline": {
+                          "type": "string"
+                        },
+                        "key_url": {
+                          "type": "string"
                         }
                       },
                       "additionalProperties": false,
@@ -1221,6 +1275,12 @@
                     "type": "object",
                     "properties": {
                       "name": {
+                        "type": "string"
+                      },
+                      "sourceline": {
+                        "type": "string"
+                      },
+                      "key_url": {
                         "type": "string"
                       }
                     },
@@ -1240,6 +1300,9 @@
               },
               "dist": {
                 "type": "string"
+              },
+              "update": {
+                "type": "boolean"
               }
             },
             "additionalProperties": false,
@@ -1380,6 +1443,9 @@
                 "type": "boolean"
               },
               "only": {
+                "type": "string"
+              },
+              "app_path": {
                 "type": "string"
               },
               "proxyHost": {
@@ -1693,25 +1759,6 @@
           }
         ]
       },
-      "app": {
-        "$id": "deploy_app",
-        "title": "Deploy App",
-        "anyOf": [
-          {
-            "type": "object",
-            "patternProperties": {
-              ".*": {
-                "type": "string"
-              }
-            },
-            "normal": true
-          },
-          {
-            "type": "string",
-            "normal": true
-          }
-        ]
-      },
       "appfog": {
         "$id": "deploy_appfog",
         "title": "Deploy Appfog",
@@ -1754,7 +1801,19 @@
                 "$ref": "#/definitions/strs"
               },
               "app": {
-                "$ref": "#/definitions/deploy/app"
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "patternProperties": {
+                      ".*": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  {
+                    "type": "string"
+                  }
+                ]
               },
               "email": {
                 "anyOf": [
@@ -1843,17 +1902,17 @@
               "address": {
                 "type": "string"
               },
-              "vcs": {
-                "type": "boolean"
-              },
               "metadata": {
                 "$ref": "#/definitions/strs"
               },
               "debug": {
                 "type": "boolean"
               },
+              "vcs": {
+                "type": "boolean"
+              },
               "version": {
-                "type": "string"
+                "type": "boolean"
               }
             },
             "normal": true,
@@ -2011,13 +2070,13 @@
               "edge": {
                 "$ref": "#/definitions/deploy/edge"
               },
-              "access_token": {
+              "access-token": {
                 "$ref": "#/definitions/secure"
               },
-              "site_id": {
-                "type": "string"
+              "site-id": {
+                "$ref": "#/definitions/secure"
               },
-              "local_dir": {
+              "local-dir": {
                 "type": "string"
               }
             },
@@ -2036,9 +2095,9 @@
           }
         ]
       },
-      "bluemixcf": {
-        "$id": "deploy_bluemixcf",
-        "title": "Deploy Bluemixcf",
+      "bluemixcloudfoundry": {
+        "$id": "deploy_bluemixcloudfoundry",
+        "title": "Deploy Bluemixcloudfoundry",
         "anyOf": [
           {
             "type": "object",
@@ -2046,7 +2105,7 @@
               "provider": {
                 "type": "string",
                 "enum": [
-                  "bluemixcf"
+                  "bluemixcloudfoundry"
                 ],
                 "strict": true
               },
@@ -2096,7 +2155,7 @@
           {
             "type": "string",
             "enum": [
-              "bluemixcf"
+              "bluemixcloudfoundry"
             ],
             "strict": true
           }
@@ -2189,6 +2248,51 @@
           }
         ]
       },
+      "cargo": {
+        "$id": "deploy_cargo",
+        "title": "Deploy Cargo",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "provider": {
+                "type": "string",
+                "enum": [
+                  "cargo"
+                ],
+                "strict": true
+              },
+              "on": {
+                "$ref": "#/definitions/deploy/conditions"
+              },
+              "allow_failure": {
+                "type": "boolean"
+              },
+              "skip_cleanup": {
+                "type": "boolean"
+              },
+              "edge": {
+                "$ref": "#/definitions/deploy/edge"
+              },
+              "token": {
+                "$ref": "#/definitions/secure"
+              }
+            },
+            "normal": true,
+            "prefix": "provider",
+            "required": [
+              "provider"
+            ]
+          },
+          {
+            "type": "string",
+            "enum": [
+              "cargo"
+            ],
+            "strict": true
+          }
+        ]
+      },
       "catalyze": {
         "$id": "deploy_catalyze",
         "title": "Deploy Catalyze",
@@ -2237,8 +2341,8 @@
           }
         ]
       },
-      "chef_supermarket": {
-        "$id": "deploy_chef_supermarket",
+      "chef-supermarket": {
+        "$id": "deploy_chef-supermarket",
         "title": "Deploy Chef Supermarket",
         "anyOf": [
           {
@@ -2247,7 +2351,7 @@
               "provider": {
                 "type": "string",
                 "enum": [
-                  "chef_supermarket"
+                  "chef-supermarket"
                 ],
                 "strict": true
               },
@@ -2282,7 +2386,7 @@
           {
             "type": "string",
             "enum": [
-              "chef_supermarket"
+              "chef-supermarket"
             ],
             "strict": true
           }
@@ -2878,10 +2982,34 @@
                 "$ref": "#/definitions/secure"
               },
               "app": {
-                "type": "string"
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "patternProperties": {
+                      ".*": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  {
+                    "type": "string"
+                  }
+                ]
               },
               "environment": {
-                "type": "string"
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "patternProperties": {
+                      ".*": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  {
+                    "type": "string"
+                  }
+                ]
               },
               "migrate": {
                 "type": "string"
@@ -3175,10 +3303,34 @@
                 "type": "string"
               },
               "app": {
-                "$ref": "#/definitions/deploy/app"
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "patternProperties": {
+                      ".*": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  {
+                    "type": "string"
+                  }
+                ]
               },
               "api_key": {
-                "$ref": "#/definitions/secure"
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "patternProperties": {
+                      ".*": {
+                        "$ref": "#/definitions/secure"
+                      }
+                    }
+                  },
+                  {
+                    "$ref": "#/definitions/secure"
+                  }
+                ]
               },
               "run": {
                 "$ref": "#/definitions/strs"
@@ -3488,10 +3640,34 @@
                 "$ref": "#/definitions/secure"
               },
               "domain": {
-                "type": "string"
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "patternProperties": {
+                      ".*": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  {
+                    "type": "string"
+                  }
+                ]
               },
               "app": {
-                "type": "string"
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "patternProperties": {
+                      ".*": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  {
+                    "type": "string"
+                  }
+                ]
               },
               "deployment_branch": {
                 "type": "string"
@@ -3748,16 +3924,19 @@
             "$ref": "#/definitions/deploy/bitballoon"
           },
           {
-            "$ref": "#/definitions/deploy/bluemixcf"
+            "$ref": "#/definitions/deploy/bluemixcloudfoundry"
           },
           {
             "$ref": "#/definitions/deploy/boxfuse"
           },
           {
+            "$ref": "#/definitions/deploy/cargo"
+          },
+          {
             "$ref": "#/definitions/deploy/catalyze"
           },
           {
-            "$ref": "#/definitions/deploy/chef_supermarket"
+            "$ref": "#/definitions/deploy/chef-supermarket"
           },
           {
             "$ref": "#/definitions/deploy/cloud66"
@@ -3845,6 +4024,9 @@
           },
           {
             "$ref": "#/definitions/deploy/script"
+          },
+          {
+            "$ref": "#/definitions/deploy/snap"
           },
           {
             "$ref": "#/definitions/deploy/surge"
@@ -4011,10 +4193,10 @@
                 "$ref": "#/definitions/strs"
               },
               "file_glob": {
-                "type": "string"
+                "type": "boolean"
               },
               "overwrite": {
-                "type": "string"
+                "type": "boolean"
               },
               "release_number": {
                 "type": "string"
@@ -4064,17 +4246,41 @@
               "edge": {
                 "$ref": "#/definitions/deploy/edge"
               },
+              "api_key": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "patternProperties": {
+                      ".*": {
+                        "$ref": "#/definitions/secure"
+                      }
+                    }
+                  },
+                  {
+                    "$ref": "#/definitions/secure"
+                  }
+                ]
+              },
               "gem": {
-                "type": "string"
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "patternProperties": {
+                      ".*": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  {
+                    "type": "string"
+                  }
+                ]
               },
               "file": {
                 "type": "string"
               },
               "gemspec": {
                 "type": "string"
-              },
-              "api_key": {
-                "$ref": "#/definitions/secure"
               }
             },
             "normal": true,
@@ -4279,6 +4485,57 @@
             "type": "string",
             "enum": [
               "script"
+            ],
+            "strict": true
+          }
+        ]
+      },
+      "snap": {
+        "$id": "deploy_snap",
+        "title": "Deploy Snap",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "provider": {
+                "type": "string",
+                "enum": [
+                  "snap"
+                ],
+                "strict": true
+              },
+              "on": {
+                "$ref": "#/definitions/deploy/conditions"
+              },
+              "allow_failure": {
+                "type": "boolean"
+              },
+              "skip_cleanup": {
+                "type": "boolean"
+              },
+              "edge": {
+                "$ref": "#/definitions/deploy/edge"
+              },
+              "snap": {
+                "type": "string"
+              },
+              "channel": {
+                "type": "string"
+              },
+              "token": {
+                "$ref": "#/definitions/secure"
+              }
+            },
+            "normal": true,
+            "prefix": "provider",
+            "required": [
+              "provider"
+            ]
+          },
+          {
+            "type": "string",
+            "enum": [
+              "snap"
             ],
             "strict": true
           }
@@ -4675,6 +4932,44 @@
           "dart": {
             "$ref": "#/definitions/strs"
           },
+          "dart_task": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "test": {
+                          "type": "string"
+                        },
+                        "dartanalyzer": {
+                          "type": "string"
+                        },
+                        "dartfmt": {
+                          "type": "boolean"
+                        },
+                        "install_dartium": {
+                          "type": "boolean"
+                        },
+                        "xvfb": {
+                          "type": "boolean"
+                        }
+                      },
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            ],
+            "flags": [
+              "expand"
+            ]
+          },
           "with_content_shell": {
             "type": "boolean"
           }
@@ -4682,6 +4977,13 @@
         "normal": true,
         "keys": {
           "dart": {
+            "only": {
+              "language": [
+                "dart"
+              ]
+            }
+          },
+          "dart_task": {
             "only": {
               "language": [
                 "dart"
@@ -4735,6 +5037,9 @@
           "elm": {
             "$ref": "#/definitions/strs"
           },
+          "node_js": {
+            "$ref": "#/definitions/strs"
+          },
           "elm_format": {
             "type": "string"
           },
@@ -4745,6 +5050,13 @@
         "normal": true,
         "keys": {
           "elm": {
+            "only": {
+              "language": [
+                "elm"
+              ]
+            }
+          },
+          "node_js": {
             "only": {
               "language": [
                 "elm"
@@ -4980,7 +5292,21 @@
         "$id": "language_nix",
         "title": "Language Nix",
         "type": "object",
-        "normal": true
+        "properties": {
+          "nix": {
+            "$ref": "#/definitions/strs"
+          }
+        },
+        "normal": true,
+        "keys": {
+          "nix": {
+            "only": {
+              "language": [
+                "nix"
+              ]
+            }
+          }
+        }
       },
       "node_js": {
         "$id": "language_node_js",
@@ -5017,7 +5343,7 @@
       },
       "objective-c": {
         "$id": "language_objective-c",
-        "title": "Language Objective-c",
+        "title": "Language Objective C",
         "type": "object",
         "properties": {
           "rvm": {
@@ -5036,6 +5362,9 @@
             "type": "string"
           },
           "bundler_args": {
+            "type": "string"
+          },
+          "xcode_destination": {
             "type": "string"
           },
           "xcode_project": {
@@ -5089,6 +5418,13 @@
             }
           },
           "bundler_args": {
+            "only": {
+              "language": [
+                "objective-c"
+              ]
+            }
+          },
+          "xcode_destination": {
             "only": {
               "language": [
                 "objective-c"
@@ -5602,6 +5938,9 @@
           "smalltalk_config": {
             "$ref": "#/definitions/strs"
           },
+          "smalltalk_vm": {
+            "$ref": "#/definitions/strs"
+          },
           "smalltalk_edge": {
             "type": "boolean"
           }
@@ -5616,6 +5955,13 @@
             }
           },
           "smalltalk_config": {
+            "only": {
+              "language": [
+                "smalltalk"
+              ]
+            }
+          },
+          "smalltalk_vm": {
             "only": {
               "language": [
                 "smalltalk"
@@ -5917,7 +6263,7 @@
                 "type": "boolean"
               },
               "api_key": {
-                "$ref": "#/definitions/secure"
+                "$ref": "#/definitions/secures"
               },
               "users": {
                 "$ref": "#/definitions/secures"
@@ -6047,6 +6393,12 @@
               "on_start": {
                 "$ref": "#/definitions/notification/frequency"
               },
+              "on_cancel": {
+                "$ref": "#/definitions/notification/frequency"
+              },
+              "on_error": {
+                "$ref": "#/definitions/notification/frequency"
+              },
               "enabled": {
                 "type": "boolean"
               },
@@ -6085,6 +6437,7 @@
     "crystal",
     "d",
     "dart",
+    "dart_task",
     "dotnet",
     "elixir",
     "elm",
@@ -6096,6 +6449,7 @@
     "jdk",
     "julia",
     "mono",
+    "nix",
     "node_js",
     "os",
     "otp_release",
@@ -6108,6 +6462,8 @@
     "rvm",
     "scala",
     "smalltalk",
+    "smalltalk_config",
+    "smalltalk_vm",
     "solution",
     "xcode_scheme",
     "xcode_sdk"

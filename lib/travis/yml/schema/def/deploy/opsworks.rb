@@ -11,7 +11,6 @@ module Travis
             register :opsworks
 
             def define
-              super
               map :access_key_id,       to: :secure
               map :secret_access_key,   to: :secure
               map :app_id,              to: :str
@@ -20,8 +19,6 @@ module Travis
               map :migrate,             to: :bool
               map :wait_until_deployed, to: :str
               map :custom_json,         to: :str
-
-              export
             end
           end
         end

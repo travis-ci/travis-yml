@@ -9,6 +9,6 @@ describe Travis::Yml::Schema::Dsl::Map, 'mapping a seq' do
 
   describe 'type' do
     let(:define) { -> { map :foo, to: :seq, type: :num } }
-    it { expect(foo.schemas.first).to be_num }
+    it { expect(foo.types.first).to be_num }
   end
 end

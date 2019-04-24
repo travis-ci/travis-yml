@@ -47,10 +47,34 @@ describe Travis::Yml::Schema::Def::Deploy::Heroku, 'structure' do
                 type: :string
               },
               app: {
-                '$ref': '#/definitions/deploy/app'
+                anyOf: [
+                  {
+                    type: :object,
+                    patternProperties: {
+                      '.*': {
+                        type: :string
+                      }
+                    }
+                  },
+                  {
+                    type: :string
+                  }
+                ]
               },
               api_key: {
-                '$ref': '#/definitions/secure'
+                anyOf: [
+                  {
+                    type: :object,
+                    patternProperties: {
+                      '.*': {
+                        '$ref': '#/definitions/secure'
+                      }
+                    }
+                  },
+                  {
+                    '$ref': '#/definitions/secure'
+                  }
+                ]
               },
               run: {
                 '$ref': '#/definitions/strs'

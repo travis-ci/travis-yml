@@ -145,7 +145,7 @@ module Travis
         end
 
         def titleize(string)
-          string.to_s.split('_').map(&:capitalize).join(' ').strip
+          string.to_s.split(/[_\-]/).map(&:capitalize).join(' ').strip
         end
 
         def underscore(str)

@@ -131,7 +131,6 @@ describe Travis::Yml::Schema::Def::Root, 'structure' do
           snaps
         ),
         deploy: %i(
-          app
           branches
           conditions
           edge
@@ -142,10 +141,11 @@ describe Travis::Yml::Schema::Def::Root, 'structure' do
           azure_web_apps
           bintray
           bitballoon
-          bluemixcf
+          bluemixcloudfoundry
           boxfuse
+          cargo
           catalyze
-          chef_supermarket
+          chef-supermarket
           cloud66
           cloudcontrol
           cloudfiles
@@ -175,6 +175,7 @@ describe Travis::Yml::Schema::Def::Root, 'structure' do
           s3
           scalingo
           script
+          snap
           surge
           testfairy
         ),

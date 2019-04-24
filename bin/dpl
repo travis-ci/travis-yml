@@ -1,0 +1,117 @@
+#!/usr/bin/env ruby
+
+require 'fileutils'
+require 'optparse'
+require 'net/http'
+
+opts = {}
+
+ARGV.options do |o|
+  o.on("-f", "--fetch") { opts[:fetch] = true }
+  o.parse!
+end
+
+def fetch
+  readme = Net::HTTP.get(URI.parse(URL))
+  File.write("#{PATH}", readme)
+end
+
+URL = 'https://raw.githubusercontent.com/travis-ci/dpl/master/README.md'
+DIR = 'spec/fixtures/dpl'
+PATH = "spec/fixtures/dpl.md"
+
+PARTS = /^### ((?:[^:]+):.*?)(?=^### |\Z)/m
+NAME  = /dpl --provider="?([^\s"]+)"?/
+OPTS  = /#### Options(.*?)#/m
+OPT   = /(?:\*\*([^\*]+)\*\*([^$]*?)$)/
+BOOL  = /(true|false|passed)/
+DEFLT = /defaults to:? [`"]?([\w\- ]+)[`"\.]+/i
+
+FileUtils.rm_r(DIR)
+FileUtils.mkdir_p(DIR)
+
+fetch if opts[:fetch]
+
+def parts
+  readme = File.read(PATH)
+  parts = readme.scan(PARTS).flatten
+  parts.reject { |part| !part.include?('#### Options') }
+end
+
+def type(opt)
+  opt =~ BOOL ? :bool : :str
+end
+
+def value(opt)
+  return !!$1 if opt =~ BOOL
+  return $1 if opt =~ DEFLT
+  :str
+end
+
+
+parts.each do |part|
+  raise unless name = part =~ NAME && $1
+
+  opts = part =~ OPTS && $1
+  opts = opts.scan(OPT)
+  opts = opts.map { |key, opt| "  #{key}: #{value(opt)}" }.join("\n")
+
+  yaml = <<~yaml
+    provider: #{name}
+    opts:
+    #{opts}
+  yaml
+
+  File.write("#{DIR}/#{name}.yml", yaml)
+end
+
+
+
+
+# def parse(yaml, file, ix)
+#   config = YAML.load(yaml)
+#   raise 'not a hash' unless config.is_a?(Hash)
+#   config
+# rescue => e
+#   puts
+#   puts "unable to parse #{file}, chunk #{ix}"
+#   puts e.message
+#   puts yaml
+#   raise
+# end
+#
+# def unindent(str)
+#   width = str.scan(/^[ \t]*(?=\S)/).min.size || 0
+#   str.gsub(/^[ \t]{#{width}}/, '')
+# end
+#
+# source = '../docs-travis-ci-com/user'
+# target = 'spec/fixtures/docs'
+#
+# FileUtils.rm_rf(target)
+#
+# PATTERN = /```yaml(.*?)```\s*>?\s*{:\s*data-file="([^"]+)"\s*}/m
+#
+# Dir["#{source}/**/*.md"].sort.each do |path|
+#   content = File.read(path)
+#   path = path.sub(source, '').sub('.md', '')
+#   path = [target, path].join
+#
+#   yamls = content.scan(PATTERN)
+#   yamls = yamls.select { |_, src| src == '.travis.yml' }
+#   yamls = yamls.map(&:first)
+#
+#   yamls.each.with_index do |yaml, ix|
+#     yaml = unindent(yaml).strip
+#     yaml = yaml.gsub(/^\s*(\.)+$/, '')
+#     yaml = yaml.gsub('[always|never|change]', 'always')
+#     yaml = yaml.gsub('⋮', '')
+#     yaml = yaml.split("\n").map { |line| line.sub(/^> ?/, '') }.join("\n")
+#
+#     config = parse(yaml, path, ix)
+#
+#     ix = ix.+(1).to_s.rjust(3, '0')
+#     FileUtils.mkdir_p(path)
+#     File.write("#{path}/#{ix}.yml", yaml)
+#   end
+# end

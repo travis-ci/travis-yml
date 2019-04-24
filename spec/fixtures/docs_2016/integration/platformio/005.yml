@@ -1,0 +1,8 @@
+env:
+  - PLATFORMIO_CI_SRC=path/to/test/file.c PLATFORMIO_BUILD_FLAGS="-D SPECIFIC_MACROS_PER_TEST_ENV -I/extra/inc"
+  - PLATFORMIO_CI_SRC=examples/file.ino
+  - PLATFORMIO_CI_SRC=path/to/test/directory
+
+install:
+  - pip install -U platformio
+  - export PLATFORMIO_BUILD_FLAGS=-D GLOBAL_MACROS_FOR_ALL_TEST_ENV

@@ -15,7 +15,6 @@ module Travis
             register :lambda
 
             def define
-              super
               map :access_key_id,         to: :secure #, required: true
               map :secret_access_key,     to: :secure #, required: true
               map :region,                to: :str
@@ -36,8 +35,6 @@ module Travis
               map :tracing_mode,          to: :enum, values: %i(Active PassThrough) #, default: :PassThrough
               map :publish,               to: :bool
               map :function_tags,         to: :secure # TODO ?
-
-              export
             end
           end
         end

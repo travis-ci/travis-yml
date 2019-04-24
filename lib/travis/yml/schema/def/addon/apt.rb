@@ -15,6 +15,7 @@ module Travis
               map :packages, to: :seq, alias: :package
               map :sources,  to: Sources, alias: :source
               map :dist,     to: :str
+              map :update,   to: :bool
               super
             end
 
@@ -28,7 +29,9 @@ module Travis
             class Source < Dsl::Map
               def define
                 prefix :name
-                map :name, to: :str
+                map :name,       to: :str
+                map :sourceline, to: :str
+                map :key_url,    to: :str
               end
             end
           end

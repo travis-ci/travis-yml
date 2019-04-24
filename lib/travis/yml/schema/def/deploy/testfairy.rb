@@ -11,7 +11,6 @@ module Travis
             register :testfairy
 
             def define
-              super
               map :api_key,             to: :secure
               map :app_file,            to: :str
               map :symbols_file,        to: :str
@@ -28,8 +27,6 @@ module Travis
               map :video,               to: :bool
               map :icon_watermark,      to: :bool
               map :metrics,             to: :str
-
-              export
             end
           end
         end

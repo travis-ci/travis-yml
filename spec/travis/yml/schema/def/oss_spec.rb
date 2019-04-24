@@ -71,9 +71,12 @@ describe Travis::Yml::Schema::Def::Oss, 'structure' do
               value: 'windows',
               only: {
                 language: [
+                  'c',
+                  'cpp',
+                  'go',
+                  'node_js',
+                  'rust',
                   'shell',
-                  'csharp',
-                  'powershell',
                 ]
               }
             },
@@ -114,9 +117,12 @@ describe Travis::Yml::Schema::Def::Oss, 'structure' do
               ],
               only: {
                 language: [
+                  'c',
+                  'cpp',
+                  'go',
+                  'node_js',
+                  'rust',
                   'shell',
-                  'csharp',
-                  'powershell'
                 ]
               }
             },

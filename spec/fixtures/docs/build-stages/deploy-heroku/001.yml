@@ -1,0 +1,21 @@
+jobs:
+  include:
+    - stage: unit tests
+      script: "Running unit tests (1)"
+    - stage: unit tests
+      script: "Running unit tests (2)"
+    - stage: deploy to staging
+      script: skip
+      deploy: &heroku
+        provider: heroku
+        app: sf-stages-staging
+        api_key: $HEROKU_AUTH_TOKEN
+    - stage: test staging
+      script: 'curl http://sf-stages-staging.herokuapp.com'
+    - stage: deploy to production
+      script: skip
+      deploy:
+        <<: *heroku
+        app: sf-stages-production
+    - stage: test production
+      script: 'curl http://sf-stages-production.herokuapp.com'

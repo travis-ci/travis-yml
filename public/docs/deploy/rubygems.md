@@ -23,10 +23,10 @@ deploy:
   allow_failure: true
   skip_cleanup: true
   edge: true
+  api_key: 
   gem: string
   file: string
   gemspec: string
-  api_key:
 ```
 
 ```yaml

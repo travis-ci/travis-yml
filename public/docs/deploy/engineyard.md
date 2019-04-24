@@ -27,7 +27,7 @@ deploy:
   password: 
   api_key: 
   app: string
-  environment: string
+  environment: {}
   migrate: string
 ```
 

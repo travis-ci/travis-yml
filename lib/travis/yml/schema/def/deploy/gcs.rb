@@ -11,7 +11,6 @@ module Travis
             register :gcs
 
             def define
-              super
               map :access_key_id,     to: :secure
               map :secret_access_key, to: :secure
               map :bucket,            to: :str
@@ -21,8 +20,6 @@ module Travis
               map :acl,               to: :str
               map :cache_control,     to: :str
               map :detect_encoding,   to: :bool
-
-              export
             end
           end
         end

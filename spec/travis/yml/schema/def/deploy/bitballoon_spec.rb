@@ -31,13 +31,13 @@ describe Travis::Yml::Schema::Def::Deploy::Bitballoon, 'structure' do
               edge: {
                 '$ref': '#/definitions/deploy/edge'
               },
-              access_token: {
+              'access-token': {
                 '$ref': '#/definitions/secure'
               },
-              site_id: {
-                type: :string
+              'site-id': {
+                '$ref': '#/definitions/secure'
               },
-              local_dir: {
+              'local-dir': {
                 type: :string
               }
             },

@@ -24,6 +24,12 @@ describe Travis::Yml::Schema::Def::Notification::Webhooks, 'structure' do
               on_start: {
                 '$ref': '#/definitions/notification/frequency'
               },
+              on_cancel: {
+                '$ref': '#/definitions/notification/frequency'
+              },
+              on_error: {
+                '$ref': '#/definitions/notification/frequency'
+              },
               on_success: {
                 '$ref': '#/definitions/notification/frequency'
               },

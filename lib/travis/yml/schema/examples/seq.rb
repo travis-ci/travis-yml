@@ -14,7 +14,7 @@ module Travis
 
           def expand
             nodes = node.map { |node| build(node).expand }.flatten.map(&:node)
-            nodes.map { |node| Seq.new(Type::Seq.new(nil, schemas: [node])) }
+            nodes.map { |node| Seq.new(Type::Seq.new(nil, types: [node])) }
           end
         end
       end

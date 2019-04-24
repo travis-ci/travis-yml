@@ -1,0 +1,9 @@
+jobs:
+  include:
+    - script: ./test 1 # uses the default stage name "test"
+    - script: ./test 2
+    - stage: deploy
+      script: skip     # usually you do not want to rerun any tests
+      deploy: &heroku
+        provider: heroku
+        # ...

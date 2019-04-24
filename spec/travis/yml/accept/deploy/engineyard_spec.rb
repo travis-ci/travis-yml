@@ -52,14 +52,28 @@ describe Travis::Yml, 'engineyard' do
     end
   end
 
+  describe 'app' do
+    describe 'given a map' do
+      yaml %(
+        deploy:
+          provider: engineyard
+          app:
+            master: one
+      )
+      it { should serialize_to deploy: [provider: 'engineyard', app: { master: 'one' }] }
+      it { should_not have_msg }
+    end
+  end
+
   describe 'environment' do
     describe 'given a str' do
       yaml %(
         deploy:
           provider: engineyard
-          environment: str
+          environment:
+            master: staging
       )
-      it { should serialize_to deploy: [provider: 'engineyard', environment: 'str'] }
+      it { should serialize_to deploy: [provider: 'engineyard', environment: { master: 'staging' }] }
       it { should_not have_msg }
     end
   end

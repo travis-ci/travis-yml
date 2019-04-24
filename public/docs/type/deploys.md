@@ -173,6 +173,14 @@ Any of:
 
 * Map (Hash)
 * Enum (known String)
+* Any of:
+
+* Map (Hash)
+* Enum (known String)
+* Any of:
+
+* Map (Hash)
+* Enum (known String)
 
 ## Flags
 
@@ -313,9 +321,9 @@ deploy:
   allow_failure: true
   skip_cleanup: true
   edge: true
-  access_token: 
-  site_id: string
-  local_dir: string
+  access-token: 
+  site-id: 
+  local-dir: string
 ```
 
 ```yaml
@@ -325,7 +333,7 @@ deploy:
 
 ```yaml
 deploy:
-- provider: bluemixcf
+- provider: bluemixcloudfoundry
   on: {}
   allow_failure: true
   skip_cleanup: true
@@ -342,7 +350,7 @@ deploy:
 
 ```yaml
 deploy:
-- bluemixcf
+- bluemixcloudfoundry
 ```
 
 ```yaml
@@ -370,6 +378,21 @@ deploy:
 
 ```yaml
 deploy:
+- provider: cargo
+  on: {}
+  allow_failure: true
+  skip_cleanup: true
+  edge: true
+  token:
+```
+
+```yaml
+deploy:
+- cargo
+```
+
+```yaml
+deploy:
 - provider: catalyze
   on: {}
   allow_failure: true
@@ -386,7 +409,7 @@ deploy:
 
 ```yaml
 deploy:
-- provider: chef_supermarket
+- provider: chef-supermarket
   on: {}
   allow_failure: true
   skip_cleanup: true
@@ -398,7 +421,7 @@ deploy:
 
 ```yaml
 deploy:
-- chef_supermarket
+- chef-supermarket
 ```
 
 ```yaml
@@ -568,7 +591,7 @@ deploy:
   password: 
   api_key: 
   app: string
-  environment: string
+  environment: {}
   migrate: string
 ```
 
@@ -913,10 +936,10 @@ deploy:
   allow_failure: true
   skip_cleanup: true
   edge: true
+  api_key: 
   gem: string
   file: string
   gemspec: string
-  api_key:
 ```
 
 ```yaml
@@ -986,6 +1009,23 @@ deploy:
 ```yaml
 deploy:
 - script
+```
+
+```yaml
+deploy:
+- provider: snap
+  on: {}
+  allow_failure: true
+  skip_cleanup: true
+  edge: true
+  snap: string
+  channel: string
+  token:
+```
+
+```yaml
+deploy:
+- snap
 ```
 
 ```yaml
@@ -1166,9 +1206,9 @@ deploy:
   allow_failure: true
   skip_cleanup: true
   edge: true
-  access_token: 
-  site_id: string
-  local_dir: string
+  access-token: 
+  site-id: 
+  local-dir: string
 ```
 
 ```yaml
@@ -1178,7 +1218,7 @@ deploy: bitballoon
 
 ```yaml
 deploy:
-  provider: bluemixcf
+  provider: bluemixcloudfoundry
   on: {}
   allow_failure: true
   skip_cleanup: true
@@ -1194,7 +1234,7 @@ deploy:
 ```
 
 ```yaml
-deploy: bluemixcf
+deploy: bluemixcloudfoundry
 
 ```
 
@@ -1223,6 +1263,21 @@ deploy: boxfuse
 
 ```yaml
 deploy:
+  provider: cargo
+  on: {}
+  allow_failure: true
+  skip_cleanup: true
+  edge: true
+  token:
+```
+
+```yaml
+deploy: cargo
+
+```
+
+```yaml
+deploy:
   provider: catalyze
   on: {}
   allow_failure: true
@@ -1239,7 +1294,7 @@ deploy: catalyze
 
 ```yaml
 deploy:
-  provider: chef_supermarket
+  provider: chef-supermarket
   on: {}
   allow_failure: true
   skip_cleanup: true
@@ -1250,7 +1305,7 @@ deploy:
 ```
 
 ```yaml
-deploy: chef_supermarket
+deploy: chef-supermarket
 
 ```
 
@@ -1421,7 +1476,7 @@ deploy:
   password: 
   api_key: 
   app: string
-  environment: string
+  environment: {}
   migrate: string
 ```
 
@@ -1766,10 +1821,10 @@ deploy:
   allow_failure: true
   skip_cleanup: true
   edge: true
+  api_key: 
   gem: string
   file: string
   gemspec: string
-  api_key:
 ```
 
 ```yaml
@@ -1838,6 +1893,23 @@ deploy:
 
 ```yaml
 deploy: script
+
+```
+
+```yaml
+deploy:
+  provider: snap
+  on: {}
+  allow_failure: true
+  skip_cleanup: true
+  edge: true
+  snap: string
+  channel: string
+  token:
+```
+
+```yaml
+deploy: snap
 
 ```
 

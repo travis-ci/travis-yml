@@ -96,7 +96,7 @@ describe Travis::Yml, 'notifications: pushover' do
           pushover:
             api_key: str
       )
-      it { should serialize_to notifications: { pushover: { api_key: 'str' } } }
+      it { should serialize_to notifications: { pushover: { api_key: ['str'] } } }
       it { should_not have_msg }
     end
 
@@ -107,7 +107,7 @@ describe Travis::Yml, 'notifications: pushover' do
             api_key:
               secure: secure
       )
-      it { should serialize_to notifications: { pushover: { api_key: { secure: 'secure' } } } }
+      it { should serialize_to notifications: { pushover: { api_key: [secure: 'secure'] } } }
       it { should_not have_msg }
     end
 
@@ -119,8 +119,8 @@ describe Travis::Yml, 'notifications: pushover' do
             - str
             - other
       )
-      it { should serialize_to notifications: { pushover: { api_key: 'str' } } }
-      it { should have_msg [:warn, :'notifications.pushover.api_key', :invalid_seq, value: 'str'] }
+      it { should serialize_to notifications: { pushover: { api_key: ['str', 'other'] } } }
+      it { should_not have_msg }
     end
   end
 
@@ -213,7 +213,7 @@ describe Travis::Yml, 'notifications: pushover' do
                 api_key: str
               #{status}: #{value}
           )
-          it { should serialize_to notifications: { pushover: { api_key: 'str', status => value } } }
+          it { should serialize_to notifications: { pushover: { api_key: ['str'], status => value } } }
           it { should_not have_msg }
         end
       end

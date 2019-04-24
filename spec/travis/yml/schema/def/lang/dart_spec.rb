@@ -13,6 +13,44 @@ describe Travis::Yml::Schema::Def::Dart, 'structure' do
           dart: {
             '$ref': '#/definitions/strs'
           },
+          dart_task: {
+            anyOf: [
+              {
+                type: :array,
+                items: {
+                  anyOf: [
+                    {
+                      type: :object,
+                      properties: {
+                        test: {
+                          type: :string
+                        },
+                        dartanalyzer: {
+                          type: :string
+                        },
+                        dartfmt: {
+                          type: :boolean
+                        },
+                        install_dartium: {
+                          type: :boolean
+                        },
+                        xvfb: {
+                          type: :boolean
+                        }
+                      },
+                      additionalProperties: false
+                    },
+                    {
+                      type: :string
+                    }
+                  ]
+                }
+              }
+            ],
+            flags: [
+              :expand
+            ]
+          },
           with_content_shell: {
             type: :boolean
           }
@@ -20,6 +58,13 @@ describe Travis::Yml::Schema::Def::Dart, 'structure' do
         normal: true,
         keys: {
           dart: {
+            only: {
+              language: [
+                'dart'
+              ]
+            }
+          },
+          dart_task: {
             only: {
               language: [
                 'dart'

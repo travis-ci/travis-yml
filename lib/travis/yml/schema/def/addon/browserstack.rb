@@ -14,8 +14,9 @@ module Travis
               map :access_key,   to: :secure
               map :forcelocal,   to: :bool
               map :only,         to: :str
+              map :app_path,     to: :str
 
-              # TODO ugh, mixing snakecase and camelcase? underscore these.
+              # TODO mixing snakecase and camelcase? underscore these.
               map :proxyHost,    to: :str
               map :proxyPort,    to: :str
               map :proxyUser,    to: :str

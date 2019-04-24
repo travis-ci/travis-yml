@@ -8,10 +8,7 @@ module Travis
             register :cloud66
 
             def define
-              super
               map :redeployment_hook, to: :str
-
-              export
             end
           end
         end

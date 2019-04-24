@@ -41,8 +41,15 @@ module Travis
             end
 
             def pattern_properties
-              map = only(node, *patterns)
-              map.map { |key, node| [key, json(node).schema] }.to_h if map.any?
+              case node.types.size
+              when 0
+                map = only(node, *patterns)
+                map.map { |key, node| [key, json(node).schema] }.to_h if map.any?
+              when 1
+                { '.*': json(node.types.first).schema }
+              when 2
+                { '.*': any(node.types) }
+              end
             end
 
             def patterns
@@ -55,6 +62,11 @@ module Travis
 
             def remap(opts)
               opts.map { |key, value| [REMAP[key] || key, value] }.to_h
+            end
+
+            def any(nodes, opts = {})
+              any = { anyOf: nodes.map { |node| json(node).schema } }
+              any.merge(except(opts, :normal))
             end
         end
       end

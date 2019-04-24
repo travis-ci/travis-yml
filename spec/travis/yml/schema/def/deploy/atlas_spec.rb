@@ -56,7 +56,7 @@ describe Travis::Yml::Schema::Def::Deploy::Atlas, 'structure' do
                 type: :boolean
               },
               version: {
-                type: :string
+                type: :boolean
               }
             },
             normal: true,

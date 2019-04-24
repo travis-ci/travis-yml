@@ -23,7 +23,7 @@ module Travis
 
         ONLY = {
           windows: {
-            language: %i(shell csharp powershell)
+            language: %i(c cpp go node_js rust shell)
           }
         }
 

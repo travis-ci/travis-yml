@@ -32,7 +32,7 @@ module Travis
             end
 
             def any(schemas, opts = {})
-              { anyOf: normals(schemas) }.merge(except(opts, :normal))
+              { anyOf: schemas }.merge(except(opts, :normal))
             end
         end
       end

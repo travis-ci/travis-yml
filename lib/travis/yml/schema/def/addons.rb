@@ -22,28 +22,29 @@ module Travis
           register :addons
 
           def define
-            map :apt,             to: :apt
+            map :apt
             map :apt_packages,    to: :seq
-            map :browserstack,    to: :browserstack
-            map :artifacts,       to: :artifacts
-            map :code_climate,    to: :code_climate
-            map :coverity_scan,   to: :coverity_scan
-            map :homebrew,        to: :homebrew
+            map :artifacts
+            map :browserstack
+            map :chrome,          to: :enum, values: %i(stable beta)
+            map :code_climate
+            map :coverity_scan
+            map :homebrew
             map :hostname,        to: :str
             map :hosts,           to: :seq
             map :jwt,             to: :jwts
             map :sauce_connect,   to: :sauce_connect
-            map :snaps,           to: :snaps
+            map :snaps
             map :ssh_known_hosts, to: :seq
+            map :sonarcloud
 
+            # turn this into a proper addon definition. the map allows the key debug: true
             type = Class.new(Dsl::Any) do
               def define
                 add :map,  normal: true, strict: false
                 add :bool, normal: true
               end
             end
-
-            map :sonarqube,       to: type
             map :srcclr,          to: type
             map :firefox,         to: :str
             map :mariadb,         to: :str
@@ -68,3 +69,4 @@ require 'travis/yml/schema/def/addon/homebrew'
 require 'travis/yml/schema/def/addon/jwts'
 require 'travis/yml/schema/def/addon/sauce_connect'
 require 'travis/yml/schema/def/addon/snaps'
+require 'travis/yml/schema/def/addon/sonarcloud'

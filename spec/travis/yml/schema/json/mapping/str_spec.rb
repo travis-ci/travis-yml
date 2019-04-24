@@ -3,7 +3,7 @@ describe Travis::Yml::Schema::Json::Map, 'mapping to any node' do
 
   subject { described_class.new(map).node.schema }
 
-  it { should eq type: :object, additionalProperties: false }
+  it { should eq type: :object }
 
   describe 'alias' do
     before { map.map :foo, to: :str, alias: :bar }

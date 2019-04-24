@@ -9,16 +9,12 @@ module Travis
             register :engineyard
 
             def define
-              super
               map :username,    to: :secure
               map :password,    to: :secure
               map :api_key,     to: :secure
-              map :app,         to: :str
-              # TODO where is this env evaluated?
-              map :environment, to: :str
+              map :app,         to: :map, type: :str
+              map :environment, to: :map, type: :str
               map :migrate,     to: :str
-
-              export
             end
           end
         end

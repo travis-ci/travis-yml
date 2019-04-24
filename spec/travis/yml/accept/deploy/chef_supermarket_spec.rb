@@ -1,15 +1,15 @@
-describe Travis::Yml, 'chef_supermarket' do
+describe Travis::Yml, 'chef-supermarket' do
   subject { described_class.apply(parse(yaml)) }
 
   describe 'user_id' do
     describe 'given a secure' do
       yaml %(
         deploy:
-          provider: chef_supermarket
+          provider: chef-supermarket
           user_id:
             secure: secure
       )
-      it { should serialize_to deploy: [provider: 'chef_supermarket', user_id: { secure: 'secure' }] }
+      it { should serialize_to deploy: [provider: 'chef-supermarket', user_id: { secure: 'secure' }] }
       it { should_not have_msg }
     end
   end
@@ -18,11 +18,11 @@ describe Travis::Yml, 'chef_supermarket' do
     describe 'given a secure' do
       yaml %(
         deploy:
-          provider: chef_supermarket
+          provider: chef-supermarket
           client_key:
             secure: secure
       )
-      it { should serialize_to deploy: [provider: 'chef_supermarket', client_key: { secure: 'secure' }] }
+      it { should serialize_to deploy: [provider: 'chef-supermarket', client_key: { secure: 'secure' }] }
       it { should_not have_msg }
     end
   end
@@ -31,10 +31,10 @@ describe Travis::Yml, 'chef_supermarket' do
     describe 'given a str' do
       yaml %(
         deploy:
-          provider: chef_supermarket
+          provider: chef-supermarket
           cookbook_category: str
       )
-      it { should serialize_to deploy: [provider: 'chef_supermarket', cookbook_category: 'str'] }
+      it { should serialize_to deploy: [provider: 'chef-supermarket', cookbook_category: 'str'] }
       it { should_not have_msg }
     end
   end

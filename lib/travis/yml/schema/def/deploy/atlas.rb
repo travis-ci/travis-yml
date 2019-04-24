@@ -10,19 +10,15 @@ module Travis
             register :atlas
 
             def define
-              super
-
               map :token,    to: :secure
               map :app,      to: :str
               map :exclude,  to: :seq
               map :include,  to: :seq
               map :address , to: :str
-              map :vcs,      to: :bool
               map :metadata, to: :seq
               map :debug,    to: :bool
-              map :version,  to: :str
-
-              export
+              map :vcs,      to: :bool
+              map :version,  to: :bool
             end
           end
         end

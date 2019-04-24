@@ -8,11 +8,8 @@ module Travis
             register :hackage
 
             def define
-              super
               map :username, to: :secure
               map :password, to: :secure
-
-              export
             end
           end
         end

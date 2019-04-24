@@ -1,8 +1,0 @@
-addons:
-  sonarqube: true
-env:
-  global:
-    - secure: '*********' # defines SONAR_TOKEN=abcdef0123456789
-script:
-  # the following command line builds the project, runs the tests with coverage and then execute the SonarQube analysis
-  - mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent install sonar:sonar -Dsonar.login=$SONAR_TOKEN

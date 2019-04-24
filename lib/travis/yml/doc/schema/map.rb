@@ -82,6 +82,14 @@ module Travis
           end
           memoize :defaults
 
+          def deprecated_key?(key)
+            !!deprecated_key(key)
+          end
+
+          def deprecated_key(key)
+            opts[:keys]&.fetch(key, {})&.fetch(:deprecated, nil)
+          end
+
           def required?(key = nil)
             key ? required.include?(key) : !!opts[:required]
           end

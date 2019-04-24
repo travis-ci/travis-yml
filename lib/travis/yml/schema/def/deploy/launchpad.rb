@@ -8,12 +8,9 @@ module Travis
             register :launchpad
 
             def define
-              super
               map :slug,               to: :str, required: true
               map :oauth_token,        to: :secure, required: true
               map :oauth_token_secret, to: :secure, required: true
-
-              export
             end
           end
         end

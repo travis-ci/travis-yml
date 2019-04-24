@@ -19,6 +19,9 @@ describe Travis::Yml::Schema::Def::Addon::Browserstack, 'structure' do
               access_key: {
                 '$ref': '#/definitions/secure'
               },
+              app_path: {
+                type: :string
+              },
               forcelocal: {
                 type: :boolean
               },

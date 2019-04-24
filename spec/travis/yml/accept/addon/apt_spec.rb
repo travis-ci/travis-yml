@@ -115,6 +115,39 @@ describe Travis::Yml, 'addon: apt' do
       it { should serialize_to addons: { apt: { sources: [name: 'str'] } } }
       it { should have_msg [:info, :'addons.apt', :alias, alias: :source, key: :sources] }
     end
+
+    describe 'given a map with :name' do
+      yaml %(
+        addons:
+          apt:
+            sources:
+              name: str
+      )
+      it { should serialize_to addons: { apt: { sources: [name: 'str'] } } }
+      it { should_not have_msg }
+    end
+
+    describe 'given a map with :sourceline' do
+      yaml %(
+        addons:
+          apt:
+            sources:
+              sourceline: str
+      )
+      it { should serialize_to addons: { apt: { sources: [sourceline: 'str'] } } }
+      it { should_not have_msg }
+    end
+
+    describe 'given a map with :key_url' do
+      yaml %(
+        addons:
+          apt:
+            sources:
+              key_url: str
+      )
+      it { should serialize_to addons: { apt: { sources: [key_url: 'str'] } } }
+      it { should_not have_msg }
+    end
   end
 
   describe 'dist' do
@@ -124,6 +157,16 @@ describe Travis::Yml, 'addon: apt' do
           dist: dist
     )
     it { should serialize_to addons: { apt: { dist: 'dist' } } }
+    it { should_not have_msg }
+  end
+
+  describe 'update' do
+    yaml %(
+      addons:
+        apt:
+          update: true
+    )
+    it { should serialize_to addons: { apt: { update: true } } }
     it { should_not have_msg }
   end
 end

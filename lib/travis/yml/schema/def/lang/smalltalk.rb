@@ -10,8 +10,10 @@ module Travis
 
           def define
             matrix :smalltalk
-            map :smalltalk_config, to: :seq
-            map :smalltalk_edge,   to: :bool
+            matrix :smalltalk_config, to: :seq
+            matrix :smalltalk_vm,     to: :seq
+
+            map :smalltalk_edge, to: :bool
           end
         end
       end

@@ -18,9 +18,9 @@ describe Travis::Yml::Schema::Examples::Map do
     }
   end
 
-  subject { described_class.new(expand(const.new.node)).examples }
+  subject { described_class.new(transform(const.new.node)).examples }
 
-  it do
+  xit do
     should eq [
       { one: 'Uno', two: 'string' },
       { one: 'Uno', two: 1 },

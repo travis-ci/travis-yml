@@ -47,7 +47,19 @@ describe Travis::Yml::Schema::Def::Deploy::Appfog, 'structure' do
                 '$ref': '#/definitions/strs'
               },
               app: {
-                '$ref': '#/definitions/deploy/app'
+                anyOf: [
+                  {
+                    type: :object,
+                    patternProperties: {
+                      '.*': {
+                        type: :string
+                      }
+                    }
+                  },
+                  {
+                    type: :string
+                  }
+                ]
               },
               email: {
                 anyOf: [

@@ -47,10 +47,10 @@ describe Travis::Yml::Schema::Def::Deploy::Releases, 'structure' do
                 '$ref': '#/definitions/strs'
               },
               file_glob: {
-                type: :string
+                type: :boolean
               },
               overwrite: {
-                type: :string
+                type: :boolean
               },
               release_number: {
                 type: :string

@@ -27,8 +27,8 @@ describe Travis::Yml, 'invalid_type' do
 
     describe 'given a str' do
       let(:value) { { git: { depth: 'one' } } }
-      it { should serialize_to empty }
-      it { should have_msg [:error, :'git.depth', :invalid_type, expected: :num, actual: :str, value: 'one'] }
+      it { should serialize_to git: { depth: true } } # hmmm.
+      it { should_not have_msg }
     end
   end
 

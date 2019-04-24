@@ -10,14 +10,18 @@ module Travis
           register :unsupported_value
 
           def apply
-            unsupported if apply?
+            unsupported if apply? && unsupported?
             value
           end
 
           private
 
             def apply?
-              schema.enum? && value.scalar? && support
+              schema.enum? && value.scalar? && !!support
+            end
+
+            def unsupported?
+              !support.supported?
             end
 
             def unsupported

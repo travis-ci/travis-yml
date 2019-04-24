@@ -5,6 +5,7 @@ require 'travis/yml/helper/obj'
 
 Obj.include Memoize, Travis::Yml::Helper::Obj
 
+require 'json'
 require 'yaml'
 require 'travis/yml/errors'
 require 'travis/yml/doc'

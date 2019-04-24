@@ -8,13 +8,10 @@ module Travis
             register :anynines
 
             def define
-              super
               map :username,     to: :secure
               map :password,     to: :secure
               map :organization, to: :str
               map :space,        to: :str
-
-              export
             end
           end
         end

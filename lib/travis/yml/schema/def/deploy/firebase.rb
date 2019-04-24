@@ -8,12 +8,9 @@ module Travis
             register :firebase
 
             def define
-              super
               map :project,  to: :str
               map :token,    to: :secure
               map :message,  to: :str
-
-              export
             end
           end
         end

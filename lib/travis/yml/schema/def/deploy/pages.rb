@@ -9,7 +9,6 @@ module Travis
             register :pages
 
             def define
-              super
               map :github_token,       to: :secure
               map :repo,               to: :str
               map :target_branch,      to: :str
@@ -24,8 +23,6 @@ module Travis
               map :allow_empty_commit, to: :bool
               map :committer_from_gh,  to: :bool
               map :deployment_file,    to: :bool
-
-              export
             end
           end
         end

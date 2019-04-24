@@ -10,7 +10,6 @@ module Travis
             register :boxfuse
 
             def define
-              super
               map :user,       to: :secure
               map :secret,     to: :secure
               map :configfile, to: :str
@@ -20,8 +19,6 @@ module Travis
               map :env,        to: :str
               map :image,      to: :str
               map :extra_args, to: :str
-
-              export
             end
           end
         end

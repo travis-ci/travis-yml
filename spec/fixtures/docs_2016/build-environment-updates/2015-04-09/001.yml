@@ -1,0 +1,14 @@
+sudo: required
+before_install:
+  - sudo rm /etc/apt/sources.list.d/mysql.list
+  - sudo service mysql stop
+  - sudo rm -rf /var/lib/mysql
+  - sudo apt-get remove apparmor
+  - sudo apt-get remove --purge mysql-common mysql-community-server mysql-community-client mysql-client libmysqlclient18 libmysqlclient-dev mysql-server
+  - sudo apt-get autoremove
+  - sudo apt-get autoclean
+  - sudo apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confnew" install libmysqlclient-dev libmysqlclient18 mysql-client mysql-server
+  - mysql -u root -e "CREATE USER 'travis'@'%' IDENTIFIED BY ''"
+  - mysql -u root -e "CREATE USER 'travis'@'localhost' IDENTIFIED BY ''"
+  - mysql -u root -e "GRANT ALL PRIVILEGES ON *.* TO 'travis'@'%'"
+  - mysql -u root -e "GRANT ALL PRIVILEGES ON *.* TO 'travis'@'localhost'"

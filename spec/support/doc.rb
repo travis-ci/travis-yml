@@ -17,8 +17,8 @@ module Spec
         Travis::Yml::Doc::Value.build(nil, nil, value, opts)
       end
 
-      def expand(node)
-        Travis::Yml::Schema.expand(node)
+      def transform(node)
+        Travis::Yml::Schema::Type.transform(node)
       end
     end
   end

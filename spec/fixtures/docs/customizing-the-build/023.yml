@@ -1,0 +1,15 @@
+language: ruby
+
+rvm:
+- 2.0.0
+- 2.1.6
+
+env:
+  global:
+  - SECRET_VAR1=SECRET1
+  matrix:
+  - SECRET_VAR2=SECRET2
+
+matrix:
+  allow_failures:
+    - env: SECRET_VAR1=SECRET1 SECRET_VAR2=SECRET2

@@ -38,10 +38,34 @@ describe Travis::Yml::Schema::Def::Deploy::Openshift, 'structure' do
                 '$ref': '#/definitions/secure'
               },
               domain: {
-                type: :string
+                anyOf: [
+                  {
+                    type: :object,
+                    patternProperties: {
+                      '.*': {
+                        type: :string
+                      }
+                    }
+                  },
+                  {
+                    type: :string
+                  }
+                ]
               },
               app: {
-                type: :string
+                anyOf: [
+                  {
+                    type: :object,
+                    patternProperties: {
+                      '.*': {
+                        type: :string
+                      }
+                    }
+                  },
+                  {
+                    type: :string
+                  }
+                ]
               },
               deployment_branch: {
                 type: :string

@@ -7,7 +7,7 @@ describe Travis::Yml::Schema::Def::ObjectiveC, 'structure' do
     it do
       should eq(
         '$id': :'language_objective-c',
-        title: 'Language Objective-c',
+        title: 'Language Objective C',
         type: :object,
         properties: {
           rvm: {
@@ -26,6 +26,9 @@ describe Travis::Yml::Schema::Def::ObjectiveC, 'structure' do
             type: :string
           },
           bundler_args: {
+            type: :string
+          },
+          xcode_destination: {
             type: :string
           },
           xcode_project: {
@@ -79,6 +82,13 @@ describe Travis::Yml::Schema::Def::ObjectiveC, 'structure' do
             }
           },
           bundler_args: {
+            only: {
+              language: [
+                'objective-c'
+              ]
+            }
+          },
+          xcode_destination: {
             only: {
               language: [
                 'objective-c'

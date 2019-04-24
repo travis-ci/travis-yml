@@ -80,9 +80,9 @@ describe Travis::Yml, 'releases' do
       yaml %(
         deploy:
           provider: releases
-          file_glob: str
+          file_glob: true
       )
-      it { should serialize_to deploy: [provider: 'releases', file_glob: 'str'] }
+      it { should serialize_to deploy: [provider: 'releases', file_glob: true] }
       it { should_not have_msg }
     end
   end
@@ -92,9 +92,9 @@ describe Travis::Yml, 'releases' do
       yaml %(
         deploy:
           provider: releases
-          overwrite: str
+          overwrite: true
       )
-      it { should serialize_to deploy: [provider: 'releases', overwrite: 'str'] }
+      it { should serialize_to deploy: [provider: 'releases', overwrite: true] }
       it { should_not have_msg }
     end
   end

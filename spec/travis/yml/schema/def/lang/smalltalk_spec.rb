@@ -16,6 +16,9 @@ describe Travis::Yml::Schema::Def::Smalltalk, 'structure' do
           smalltalk_config: {
             '$ref': '#/definitions/strs'
           },
+          smalltalk_vm: {
+            '$ref': '#/definitions/strs'
+          },
           smalltalk_edge: {
             type: :boolean
           }
@@ -30,6 +33,13 @@ describe Travis::Yml::Schema::Def::Smalltalk, 'structure' do
             }
           },
           smalltalk_config: {
+            only: {
+              language: [
+                'smalltalk'
+              ]
+            }
+          },
+          smalltalk_vm: {
             only: {
               language: [
                 'smalltalk'

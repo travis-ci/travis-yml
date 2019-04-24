@@ -9,14 +9,11 @@ module Travis
             register :cloudfiles
 
             def define
-              super
               map :username,  to: :secure
               map :api_key,   to: :secure
               map :region,    to: :str
               map :container, to: :str
               map :dot_match, to: :bool
-
-              export
             end
           end
         end

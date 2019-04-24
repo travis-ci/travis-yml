@@ -42,6 +42,16 @@ describe Travis::Yml, 'services' do
     it { should serialize_to services: ['redis', 'postgresql'] }
   end
 
+  describe 'given xvfb on trusty' do
+    yaml %(
+      dist: trusty
+      services:
+      - xvfb
+    )
+    it { should serialize_to dist: 'trusty', services: ['xvfb'] }
+    it { should have_msg [:warn, :services, :unsupported, on_key: :dist, on_value: 'trusty', key: :services, value: 'xvfb'] }
+  end
+
   describe 'typo' do
     yaml %(
       services: redes

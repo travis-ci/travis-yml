@@ -11,7 +11,6 @@ module Travis
             register :cloudfoundry
 
             def define
-              super
               map :username,            to: :secure
               map :password,            to: :secure
               map :organization,        to: :str
@@ -20,8 +19,6 @@ module Travis
               map :key,                 to: :str
               map :manifest,            to: :str
               map :skip_ssl_validation, to: :bool
-
-              export
             end
           end
         end

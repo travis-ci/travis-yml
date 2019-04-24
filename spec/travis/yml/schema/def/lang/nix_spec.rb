@@ -9,7 +9,21 @@ describe Travis::Yml::Schema::Def::Nix, 'structure' do
         '$id': :language_nix,
         title: 'Language Nix',
         type: :object,
-        normal: true
+        properties: {
+          nix: {
+            '$ref': '#/definitions/strs'
+          }
+        },
+        normal: true,
+        keys: {
+          nix: {
+            only: {
+              language: [
+                'nix'
+              ]
+            }
+          }
+        }
       )
     end
   end

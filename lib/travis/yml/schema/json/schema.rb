@@ -79,7 +79,7 @@ module Travis
           ORDER = [:type, :addon, :deploy, :language, :notification]
 
           def definitions
-            objs = Type::Node.exports.values.map(&:values).flatten
+            objs = Type.exports.values.map(&:values).flatten
             objs = merge(*jsons(objs).map(&:definitions))
             objs = sort(objs)
             objs = merge(DEFINITIONS, objs)
