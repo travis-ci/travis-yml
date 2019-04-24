@@ -7,15 +7,20 @@ module Travis::Yml::Web
 
     def call(env)
       req = Rack::Request.new(env)
-      env_path = req.path_info.chomp(?/)
-      env_path = ?/ if env_path.empty?
+      path = req.path_info.chomp(?/)
+      path = ?/ if path.empty?
 
-      @map.each do |path, app|
-        next if env_path.nil? || path.nil?
-        return app.call(env) if env_path == path
+      @map.each do |pattern, app|
+        next if path.nil? || pattern.nil?
+        return app.call(env) if match?(pattern, path)
       end
 
       [404, {}, []]
+    end
+
+    def match?(pattern, path)
+      return pattern == path unless pattern.include?('/*')
+      path.start_with?(pattern.sub('/*', ''))
     end
   end
 end

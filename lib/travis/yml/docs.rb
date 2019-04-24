@@ -1,4 +1,5 @@
 require 'erb'
+require 'fileutils'
 
 module Travis
   module Yml
@@ -85,39 +86,57 @@ module Travis
           yml = yml.sub("'on'", 'on')
           yml.strip
         end
+
+        def write
+          FileUtils.mkdir_p(dir)
+          File.write(path, render)
+        end
+
+        def path
+          @path ||= "#{dir}/#{node.id}.md"
+        end
+
+        def dir
+          "public/docs/#{node.namespace}"
+        end
+      end
+
+      class Index < Page
+        def render
+          node.map do |node|
+            "* [#{node.title}](/v1/docs/#{node.namespace}/#{node.id})"
+          end.join("\n")
+        end
+
+        def path
+          "#{dir}/index.md"
+        end
+
+        def dir
+          'public/docs/'
+        end
       end
 
       extend self
       extend Helper::Obj
 
       def write
-        pages.map do |name, page|
-          File.write(path(name), page)
-        end
-        File.write(path(:index), index)
-      end
-
-      def path(name)
-        "public/#{name}.md"
+        pages.each(&:write)
+        index.write
       end
 
       def pages
-        nodes.map do |node|
-          [[node.namespace, node.id].join('/'), Page.new(node).render]
-        end.to_h
+        nodes.map { |node| Page.new(node) }
       end
 
       def index
-        nodes.map do |node|
-          "* [#{node.title}](/#{node.namespace}/#{node.id}]"
-        end.join("\n")
+        Index.new(nodes)
       end
 
       def nodes
         Schema.schema
         nodes = Schema::Type::Node.exports.values.map(&:values).flatten
         nodes = nodes.reject(&:internal?)
-        # nodes = [Schema::Def::Stages.new.node.lookup]
         nodes = sort(nodes)
         nodes
       end
