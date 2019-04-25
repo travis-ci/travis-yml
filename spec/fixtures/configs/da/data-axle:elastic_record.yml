@@ -1,0 +1,24 @@
+rvm: 2.5.3
+cache: bundler
+dist: xenial
+
+before_install:
+- wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-${ES_VERSION}.tar.gz
+- tar -xzf elasticsearch-${ES_VERSION}.tar.gz
+- ./elasticsearch-${ES_VERSION}/bin/elasticsearch -d
+
+before_script:
+- cp test/dummy/.env.example test/dummy/.env
+- wget --quiet --waitretry=1 --retry-connrefused --timeout=20 -O - http://127.0.0.1:9200
+- bundle exec rake app:db:setup
+- bundle exec rake app:index:reset
+
+env:
+  global:
+  - ES_VERSION=6.4.3
+
+services:
+- postgresql
+
+addons:
+  postgresql: 9.6

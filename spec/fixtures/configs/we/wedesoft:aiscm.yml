@@ -1,0 +1,17 @@
+sudo: required
+dist: xenial
+branches:
+  only:
+    - master
+language: c
+compiler:
+  - gcc
+before_install:
+  - sudo apt-get install colorgcc
+  - sudo sh doc/dependencies.sh
+install:
+  - ./bootstrap
+  - ./configure CC=colorgcc CFLAGS=-Wpedantic
+  - make -j
+script:
+  - make check -j

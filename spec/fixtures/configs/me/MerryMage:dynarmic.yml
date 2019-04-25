@@ -1,0 +1,53 @@
+language: cpp
+
+cache: ccache
+
+matrix:
+  include:
+    - env: NAME="Linux Build"
+      os: linux
+      dist: trusty
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - gcc-7
+            - g++-7
+            - ninja-build
+      install: ./.travis/build-x86_64-linux/deps.sh
+      script: ./.travis/build-x86_64-linux/build.sh
+    - env: NAME="Test - Fuzz against Unicorn"
+      os: linux
+      dist: trusty
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - gcc-7
+            - g++-7
+            - llvm-dev
+            - ninja-build
+      install: ./.travis/test-a64-on-x86_64-linux/deps.sh
+      script: ./.travis/test-a64-on-x86_64-linux/build.sh
+    - env: NAME="Test - SSE3 only"
+      os: linux
+      dist: trusty
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - gcc-7
+            - g++-7
+            - llvm-dev
+            - ninja-build
+      install: ./.travis/sse3-only-on-x86_64-linux/deps.sh
+      script: ./.travis/sse3-only-on-x86_64-linux/build.sh
+    - env: NAME="macOS Build"
+      os: osx
+      sudo: false
+      osx_image: xcode10
+      install: ./.travis/build-x86_64-macos/deps.sh
+      script: ./.travis/build-x86_64-macos/build.sh

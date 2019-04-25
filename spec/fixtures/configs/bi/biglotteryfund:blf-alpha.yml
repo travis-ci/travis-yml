@@ -1,0 +1,83 @@
+# Environment variables
+env:
+  global:
+    # travis encrypt AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
+    - secure: 'c4QsffnEeuQHFCKZEILmp744KoCXrHuOfTVrUDeuTa/1raBB8LxIda6uJj1ucq4BeovQ5gmy6Xu9aw1s8nUD1ZmuwuE/N4GpqXKa1lnFe31ry8/NRuEChf/jvPi0Jv91MXMmd4moXLUh7sNXVF4Xw5VZumXC6EhvsmwhpA8UoPvs3lNl2Tr4XIET8JN37R5hElX5jZNx89RglWeg8dHuSKA1t4BJFcfcYSCpaodyrBxejMGSyV2TCz9CTgh4z4iedy+Su2tvZCmyhU0sdgqX+FMUO2KeISM0ak+F91YBAX8DApQ0Y1QeZdqN80WhLbIogoIODdmiQzrAwbjqlJz6Qp53j3UTo+pAz1dpW5g9MjA3w1McnO6vrPmy/Oupkr2Lb4/uXvIs6bW5SlrvXqze+cbvRXEoKx4GUKyKlgiDW4lae1ZtrpJoVD18TUCi6NOG2oYCz9wg2b99CLTUVy4Ay9+95QnYq+TksWNThe1ZGLP9KHTJqHkw7l8QtXYiMoysNLCfhtWItY9RnvVCRBgD4mHs58Qg/HeciH8g3VIRHtOO/LA5ID5+ZdNGrf1PxXIVsnknzBH7amm5KkPOq0lmLeLstqYhkhv5aDPdPvYT/W+5IvFVmQhVKxvoRVw+XDYtLpdgBLXT2tdueig4YWAS7IrWvMEGz70aonJHewm/IT0='
+    # travis encrypt AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
+    - secure: 'b5DPZlVJ8wVMZBhXm6WkKXRg+Gp5nWycIVzZHsGrYPStd/QYbC76qoHAo6JgocpeiPNeLxD1F/E72v3qNL0ksM2mMJuJk9uEPV4B3RdguGbhbdhffj1KaSqFZz64O0AhRkNtzyj62ezM3iYRWFkE7ysdUDgXUmv76s8Xl65piS2F1ZVLC5xPX9aSsZPciLL3AiZzMgolGnjHTrvnny1mXFiyff5qhz7Ntr51VUeDiMbJT96OplBsF7A2ZnkIaKMjwQHgCjMUJpFue+yXFdqxOQieOMQyNHqIe783P+2spxiuPgamvwl9xI6VGOA3HFuLZSQ9UGC+xLFepRr6jH8H4ipqrDO6/6JgENVORNQbREzu5wjJSlVea19Utv+dGQvK+c/xoFHpH5ZFg9lZQLCSGwRtMYGYlrc1JODigMr81S0QTYpxgoldCow71za1xPXu9699uctYyduhK4LjjJQRFOwIdcJG+gyKxpApqKd22AFQ+I/dHfEX1nAAdpVF3Ap4eFSUfH2ENKNDCFhUsBLF0czcxaXDIRwGdYG21D2NDaJyozME54wBz3yiJjOnS7b9lc16Sq/gZUqdWqGlr7AVqYhz0QKUPfSnc+ql3DCs7bNoN4V5FYheQL9+mLuEcyz7ubz8VotTlR5dcb8vtQAoLPLk1rUBAeDe1/2MkdsH75E='
+
+dist: xenial
+
+# Defaults
+language: node_js
+node_js: '10'
+
+before_install:
+  # Required for Cypress on xenial
+  # Subset of https://docs.cypress.io/guides/guides/continuous-integration.html#Docker
+  - sudo apt-get install -y libgconf-2-4
+
+# Cache locations
+cache:
+  npm: true
+  directories:
+    - ~/.cache # Cypress installed into ~/.cache/Cypress
+
+script:
+  - npm run build-production
+  - npm run test-ci
+
+# Prepare artefact for deployment
+# Store a temporary env var to only run before_deploy once
+# (current behaviour is to run before_deploy once _per_ provider)
+# https://github.com/travis-ci/travis-ci/issues/2570#issuecomment-171262181
+before_deploy:
+  - >
+    if ! [ "$BEFORE_DEPLOY_RUN" ]; then
+      export BEFORE_DEPLOY_RUN=1;
+      npm prune --production > /dev/null 2>&1;
+      sh deploy/store_deploy_info.sh;
+      zip -qr latest * -x .\* -x "README.md" -x assets/\*;
+      mkdir -p dpl_cd_upload
+      mv latest.zip dpl_cd_upload/build-$TRAVIS_BUILD_NUMBER.zip
+    fi
+
+deploy:
+  - provider: s3
+    region: eu-west-1
+    bucket: blf-assets
+    access_key_id: $AWS_ACCESS_KEY_ID
+    secret_access_key: $AWS_SECRET_ACCESS_KEY
+    local_dir: public
+    upload-dir: assets
+    acl: public_read
+    cache_control: 'max-age=31536000'
+    skip_cleanup: true
+  - provider: s3
+    region: eu-west-2
+    bucket: blf-deployments
+    access_key_id: $AWS_ACCESS_KEY_ID
+    secret_access_key: $AWS_SECRET_ACCESS_KEY
+    local_dir: dpl_cd_upload
+    skip_cleanup: true
+    on:
+      repo: biglotteryfund/blf-alpha
+  - provider: codedeploy
+    region: eu-west-2
+    access_key_id: $AWS_ACCESS_KEY_ID
+    secret_access_key: $AWS_SECRET_ACCESS_KEY
+    bucket: blf-deployments
+    key: build-$TRAVIS_BUILD_NUMBER.zip
+    bundle_type: zip
+    application: BLF_WWW
+    deployment_group: Test_Fleet
+    on:
+      tags: false
+
+# Notifications
+notifications:
+  slack:
+    rooms:
+      secure: raHMwe3cIkMf3lqoXOeVmTXgZ7DBneG8qddfSHXxf8EQPahCWi1gYxXlAA5xzibJlnE/C0cSCQSxhNZd/C2gXKj0abWQXWAvFW5ETdYwOYVB111THLLuTRAcADTY9QJuRC4SY3EEj6yjMgMjaDLDn2kUm1VrEafYn4nKpKxEUEe0/qtqyWi++uaauwnIH+o7YbODT/xDLTNKwi5ZWVcAFuVLWM8GbP/g/IsteV73gifx022IdXZfCcbiGk5zhXtwX2kZaHEGEkSJCxUmpCz3194yKDH0Wo/pyNaCb4yC6mbTqEAjGSaETim/s6q62U35j4G+xj7IQrsqFd9sqjr+dQMyFhPpsCKbb2mDLxnsgsc3kgru0sogdY9XGf1rlg9gYWoc3TVV8lW25R3awQNgljXKFNxJoLBCPzqYkcnbDG4eIPi9HwJAysEaFz43kzy1g3ECdbynZ9+btZGHo9u9fsnhDf68mkTDrhY2EtLJ04tlyhFo6vxbW9FsEze6apjQHmlcPPj66YJkRlp7yVY10kUh4PkjnJhvLTEDHipVO3r650h1B9mXAIqKqHIG/sf3zFBvfhDNvkjNte2w1VH5ahOarcb/ReAD604lBSvnobNEOdcbe7axCEeBY2fjYrmsxYZgKTnkrB/T+2SyugqIvo7AGbFCtcpMQY55cTPfsJM=
+  webhooks:
+    secure: 'TgUaZM9PIn4u5IRDSNqHbJ8fKmKaFrbbTZzhJ2v2Ok1r7+haqlSoFjN3yN2q+HBCpy0sojbhcMEe2Me570fh63nPHFnkTPurTdhltZtcVS9ay4svgIZiseCpo/+LcSrFXuj9d5W/Faekcv14M/GHuclvovfFb+ZpVDcLkifLzTzUEp4RYG9iR1BbgvRCaPZXlg+83P61OHaLNettivoO1ut5g1pQQbWG8S6lnIbctjg0C3aU4YSWgj+lbf3EH38VfxPWDt5oGH3VMuF0KB0+tROIN5ysp8AF+I0oEp6baxKR1p5fjJ66I8mpxkB81YtVqSgCJjzeI3txvnAZFwmwzvyRbBtzITmdwafbE8svLkurqp5l3RsTyqzBzqWyVJaOPzZYSpOTbcz57i45x5EJ3qQ2ZZYcSmwCCFX67zSNy4ddRStTBCgTiIRf0/C1RCCpw4LwdhpOFnHFpWh2fPQCFa08uOMIOvqjzz+IAwsMBKuE7iNAL+7I2H4KE1Ebz3hljwPeekzGpWSHMuQKwfcMu8vBaCz/cYNV9NHw3W2/Fj4OmvIDRjzeYcdpV2QRzpKBXRp8ij+nFOAJXk7OoBJhFWDHpo26pBw80zSveqGd3fpe962vsnJrnWoqmaLlERjOm3U4WVkKhcqqYhpD7a3M33RihLl+9YoDRS44oB0G4lg='

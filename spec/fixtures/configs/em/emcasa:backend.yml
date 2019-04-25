@@ -1,0 +1,40 @@
+language: elixir
+
+elixir: 1.8.1
+otp_release: 21.1
+
+services:
+  - postgresql
+
+env:
+  - MIX_ENV=test
+
+sudo: false
+
+addons:
+  postgresql: "10"
+  apt:
+    packages:
+    - postgresql-10
+    - postgresql-client-10
+env:
+  global:
+  - PGPORT=5433
+  - POSTGRES_PORT=5433
+  - POSTGRES_USERNAME=travis_user
+cache:
+  directories:
+    - deps
+    - _build/
+
+before_script:
+  - sudo -u postgres psql -p 5433 -c "create user travis_user with superuser password 'postgres';"
+  - mix deps.get --only test
+  - mix ecto.create
+  - mix ecto.migrate
+
+script: mix coveralls.travis --umbrella
+
+notifications:
+  email:
+    on_success: never

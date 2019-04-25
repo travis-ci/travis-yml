@@ -1,0 +1,61 @@
+language: go
+
+services:
+  - docker
+addons:
+   apt:
+     sources:
+       - git-core
+     packages:
+       - git
+
+go:
+  - "1.11.4"
+
+before_install:
+  - BRANCH=${TRAVIS_PULL_REQUEST_BRANCH:-$TRAVIS_BRANCH}
+  - MODIFIED_DOCS=$(git diff --name-only $TRAVIS_COMMIT_RANGE | grep -E 'README.adoc|^docs/.*.adoc$' | wc -l)
+  - COMMITS_WITH_FORCED_GEN=$(git log --format=%B  $TRAVIS_COMMIT_RANGE | grep -i "\[gen docs\]" | wc -l)
+  - '[ $COMMITS_WITH_FORCED_GEN -gt 0 ] || [ $MODIFIED_DOCS -ge 1 ] && GENERATE_DOC=0 || GENERATE_DOC=1'
+  - '[ "${BRANCH}" == "master" ] && GENERATE_DOC=0 || GENERATE_DOC=1'
+  - 'if [ $GENERATE_DOC -eq 0 ]; then
+      git config user.name "${GH_USER}";
+      git config user.email "${GH_EMAIL}";
+      git config remote.origin.fetch +refs/heads/*:refs/remotes/origin/*;
+      git fetch origin gh-pages;
+      git worktree add -b gh-pages gh-pages origin/gh-pages;
+      GH_REF=$(git remote get-url origin | awk "{sub(/https:\/\//,\"https://${GH_TOKEN}@\")}; 1" | awk "{sub(/\.git/, \"\")} 1");
+      docker pull rochdev/alpine-asciidoctor:mini;
+    fi'
+
+install:
+  - curl https://raw.githubusercontent.com/golang/dep/1550da37d8fab9ed2dbc4bd04290e6c8dd3ff04a/install.sh | sh
+  - make tools
+  - make deps
+
+go_import_path: github.com/arquillian/ike-prow-plugins
+
+script:
+  - make build
+  - 'if [ $GENERATE_DOC -eq 0 ]; then
+        ./.asciidoctor/generate.sh --keep;
+     fi'
+
+after_success:
+  - 'if [ $GENERATE_DOC -eq 0 ]; then
+      echo "Publishing documentation to gh-pages";
+      cd gh-pages;
+      git add .;
+      git commit -m"docs: publishes new documentation";
+      git push --quiet "${GH_REF}" gh-pages > /dev/null 2>&1;
+    fi'
+
+after_error:
+  - 'if [ $GENERATE_DOC -eq 0 ]; then
+      docker logs adoc-to-html;
+    fi'
+
+after_failure:
+  - 'if [ $GENERATE_DOC -eq 0 ]; then
+      docker logs adoc-to-html;
+    fi'

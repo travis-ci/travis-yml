@@ -1,0 +1,29 @@
+language: python
+
+python: 
+    - "2.7"
+
+virtualenv:
+    system_site_packages: true
+
+before_install: 
+    # Environment setup
+    - sudo apt-get -qq update
+    - sudo apt-get install gettext python-gtk2 python-lxml git libxslt1-dev pkg-config libjpeg-dev build-essential python-all-dev
+    - sudo apt-get install python-nose
+    - pip install pip --upgrade
+    - pip install --upgrade gevent
+    - export VIRT_ROOT=/home/travis/virtualenv/python$TRAVIS_PYTHON_VERSION
+    - mkdir -p $VIRT_ROOT/share
+    # build before install
+    - python setup.py -q build
+
+install:
+    - pip install coveralls
+    - python setup.py -q install
+
+script:
+    - coverage run --source=bauble setup.py test
+
+after_success:
+    - coveralls

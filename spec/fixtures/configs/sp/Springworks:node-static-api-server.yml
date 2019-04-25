@@ -1,0 +1,23 @@
+sudo: false
+language: node_js
+node_js:
+  - '8'
+  - '10'
+cache:
+  directories:
+    - node_modules
+notifications:
+  email: false
+  slack:
+    secure: aX0oEq3Wqzkl8z5Z9Z0rYuHC+zCCkynAuip4bErlG5hf6gfScgUrYOv5DfE/pY3kajNBlPGk6aqlrajzJ3J0ZmrRqdI17h4MyG17/bmAmgYK+WQhaIrdxXL/+GW1lECJuxXja/L6IPq7je6lVBlxncmIlp/OqcTVlHDmC2idlQ8lMJskwF//k8hkA8NKBikQzisAaNH3qKCtSGLQyMqYHFD/U07wGfhS55cEUQp/mxYLTaEH85eTAoez/Am7uuvAsqli4TCK5Vj7v0pk5lrbC4+9q2aunlzi66IhR54YOLjMj3nogkaOoYEZNOr5HIq6YfXL33i2H67HvCS4uojZjmfagX/V2A1JHam7BTGqJGpaWHmRBCFSIq85o3myGCsN3lGactQkUpIVGxbRCviLbanfZRiTv8ld60JmAdVNqKgbCw5of2wshQtObN98Xnej9V+8+BNN3kAULlAUd3TMj+4JbNlFf2T5CEktR8qtwUjbxgr4/5RMRWpQgAFdRbnF9wtWr80Z+0sQbhHkI+dBBzKHEze1Z1+0O07EBTlD3H2GBlDD6HcBxZ9G/7kbLZvEnxya65wnAvQ5BT0xw7e9bNxnXCSwpYqEES2SvqYUd0IqadFlZucuiM6HtxzUCRVzphZoUgt4qAODgn7XQKvf6YLx7vEnJkptZUAduraNUj0=
+before_script:
+  - npm prune
+script:
+  - npm run lint
+  - npm test
+after_success:
+  - npm run coveralls
+  - npm run semantic-release
+branches:
+  except:
+    - /^v\d+\.\d+\.\d+$/

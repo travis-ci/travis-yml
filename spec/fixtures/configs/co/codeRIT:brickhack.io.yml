@@ -1,0 +1,29 @@
+language: ruby
+cache: bundler
+sudo: false
+bundler_args: --path vendor --local --without development
+env:
+  - DATABASE_URL="mysql2://travis@localhost/myapp_test"
+before_script:
+  - mysql -u root -e "CREATE DATABASE myapp_test;"
+  - mysql -u root -e "GRANT ALL PRIVILEGES ON myapp_test.* TO 'travis'@'%';";
+  - mysql_tzinfo_to_sql /usr/share/zoneinfo | mysql -u root mysql
+  - echo -e "Host csh-cloud.oweb.co\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
+script:
+  - bin/rails db:migrate db:test:prepare
+  - RUN_COVERAGE=travis bin/rails test
+  - bin/rails coverage:report
+deploy:
+  - provider: script
+    script: .travis/deploy_stage.sh
+    on:
+      branch: develop
+      repo: codeRIT/brickhack.io
+  - provider: script
+    script: .travis/deploy_prod.sh
+    on:
+      branch: master
+      repo: codeRIT/brickhack.io
+addons:
+  code_climate:
+    repo_token: c13cf427384c2291d3fac2745b3b4012541adab0993853175d89f91671762ddb

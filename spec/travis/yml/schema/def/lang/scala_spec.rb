@@ -11,10 +11,27 @@ describe Travis::Yml::Schema::Def::Scala, 'structure' do
         type: :object,
         properties: {
           scala: {
-            '$ref': '#/definitions/strs'
+            '$ref': '#/definitions/type/strs'
           },
           jdk: {
-            '$ref': '#/definitions/strs'
+            anyOf: [
+              {
+                type: :array,
+                items: {
+                  type: :string
+                },
+                flags: [
+                  :expand
+                ],
+                normal: true
+              },
+              {
+                type: :string
+              }
+            ],
+            flags: [
+              :expand
+            ]
           },
           sbt_args: {
             type: :string

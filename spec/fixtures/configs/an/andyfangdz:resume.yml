@@ -1,0 +1,41 @@
+language: node_js
+dist: trusty
+node_js:
+- 8
+addons:
+  apt:
+    packages:
+    - xvfb
+cache:
+  yarn: true
+  directories:
+    - node_modules
+before_install:
+- yarn global add greenkeeper-lockfile@1
+before_script: greenkeeper-lockfile-update
+after_script: greenkeeper-lockfile-upload
+install:
+- export DISPLAY=':99.0'
+- Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
+- yarn
+script: "./deploy.sh"
+deploy:
+  - provider: surge
+    project: "./build/"
+    domain: cv.andyfang.me
+    skip_cleanup: true
+
+  - provider: s3
+    access_key_id: AKIAIWZ7LCK2MGJNEIWA
+    bucket: s3.andyfang.me
+    skip_cleanup: true
+    local_dir: build
+    upload-dir: cv
+    secret_access_key:
+      secure: XAaXhmHN1dMnqNw991jmLNU+ZVhHg4xRZUoujEcjeHIC/egiSFIybqTXJjoyCOEYBu098dXWt/tfIB+kF4tHSsAzRhxujgG2/GGtuBGI9bWbAtKzb7wp1aoCJlPHXOqL3GhiLzDtqAxMjR1nhUF0Gq3Ol4K9GuP1tfLACg+FTjQzhmBBNl5Sbv0nudF9Rs05ouoyz60WC1UR3ci0l73NAm4QBxgJMlWbXMR6oQgBVLuspv9cm+hY9Bj4dbl33toAZ5Q3tvDM1vm6BfjqM2hXydDfeVRHbNcpP8MVXIDgBEvIm17vDdA93ol3Vlr2YXiKmPMI22PBpqt8vFC14HTNIWHg4FvWN0pEsx3ISOBpdpxRivBlUkbZXh+EVekZ5u9GYHVMBUbHAmQZjLpzrn1w+Iqy9KlWJhjQTtHbSaieIHRC+d1doxZTBwi3gSwYROy4PRoKQXknPWo7tzBdt+UWSsSK5d+OtQww81Lpj5CjDVYXCiJLqGk1oNx7P89GProzRlu1R5Dx8zkMQRN6l6ILCTyNVA++yaInRSoOlJ4ya8H1EaEstEd2BlDo2EbqBSMJPhCwTfD23ivocEPUypJ7fACtx6o9o89VM6+sBrAn3TN4NHN8KWJNHbKa68XoQ3MImhe57HByZtoyx5G1sp3fDMo5ceHfEzra2jAewbQflg4=
+env:
+  global:
+  - SURGE_LOGIN=andyfang.dz@gmail.com
+  - secure: Z4gZC+4KFNlHhf0XnmO6sDuYHZQdSBqJ5zpXcZuilJVupQiHos6uLEBXdYNJaKGStp8Zv94rEF+fr38i2kVbFevDVnTXUCyrbRsHk21PQ7tmguV8WSDw0sw8QnsubRLanLGas8DeIYVmCBc/ohM3EgjzEmDMTIt0mZRaeJrJB+tvLWVqQxEicfQF2XfJFnYNRwYr6Az3MvbTcUyQeJfO9EAjA0fa4IukMssTfPbKQhdIPEqtBRp8aYVUP6BEDAyaPa2EQ1NRAFIeBNSMYntzSQsQ5t6Ul/N2GhBXAEFfwP4cqKsw4SoO9Vaz/bFiECdD7WbBURpCr8qSfZXw+fBDKXu46T6lRIkmpRogaKIuVZQYX42zQ306u4CkC4hi75qByqM2M5+YWHJonMRjiHOKTGGWU95r5anTdJ7VT1gjb7gBBgkpVQ5jcXm80LAqU+L3W1CLLMKGLqy6vFmN0diSLQRpC7hWOpgk1SYJGN5svH/en9gz/GEj4wH91YcqxQ6238c/AclVbJh5lioz1co5u5t6ZaXU7zyIUaauXI/fXrt0NSzhpDwkdyNelbS+pylaMcsRuGxxW57mZgRxtdRqjJj4y4EOSmTfyFrU18jvnSIaJpFc/GTgdFETUgU70nlvIgTQAiVInb4IzvEgZB302TllIRFQKsmAAqvEcZGzLOw=
+  matrix:
+    secure: mERC4icF1dXkcosuBTHSUkn1rCuVkikcPKjkaasIUFhoBJnc2nVjZ40frU9q2mHxN8QIHcE4NDxKetoCI1GQ2BIZ1zd76zLiFJX5HOIN7NazCTrDgutJFl4UEnR2SbkNeoFPSzDO8nXdVeERl/cMN7QrvEdPTzCpQCqFcoXkUnQZE8p9X6y/lssTh7fzgZLO68HizT1wT1FCrUWBrtzeqI3uWme9ksSyBjxdcym7fnw83WOvucHbickDAYt4HuDhgCmMgByNKkItIV4IMBhYOSEJJep8awLdw8tjEVX3/tfsuiYgSXND2vk4xQQLT7fTFbrauUBO5aQoceHxTCT4OyOS9UzHsp572FOUnM3XbTXBjUYqDfbFPGwhV0TLh5t3vz0AEoiWq31DxHaU7jemurHemzlySiwU/BnW9IiJC3+HHdpfYO+/ea3blgsG3+q4NDzQ9kqz22BuMvmi1YA8tsxLmaK6ueNWOVVGOkdFzujSOh6IEzkwUZm9xlpXdY47LDSGkdPXfmReKUPVHBBtpQKqS4UekkJyxcJM26nVChTlRJ0rq+YpEodG9z6mRCYOLPQEen6esyIIvYTTivhBBUOf2Ntn1d+maAt2r0+3dJBwMYcifNH7HrRd8YT9UHHqjvdcExqWDHeeJ83NQS7xJK3ZoANyUNSUjbGR0iuNm5Y=

@@ -1,0 +1,31 @@
+language: java
+sudo: required
+addons:
+  mariadb: '10.1'
+jdk:
+- oraclejdk8
+before_install:
+- "echo $JAVA_OPTS"
+- "export JAVA_OPTS=-Xmx512m"
+- sudo apt-key adv --keyserver keys.gnupg.net --recv 6DA70622
+- sudo echo "deb http://downloads.ortussolutions.com/debs/noarch /" | sudo tee -a
+  /etc/apt/sources.list.d/commandbox.list
+install:
+- sudo apt-get update && sudo apt-get --assume-yes install commandbox
+- box install
+before_script:
+- mysql -u root -e 'create database muradb;'
+- box server start cfengine=lucee port=8080
+- cp core/tests/resources/cfapplication.cfm config/cfapplication.cfm
+- curl -X POST -F 'production_testbox=true' -F 'setupSubmitButton=true' -F 'action=doSetup' -F 'production_domain=localhost' -F 'production_dbtype=mysql' -F 'production_datasource=muraMySQLdb' -F 'production_adminemail=matt.levine@blueriver.com'  -F 'admin_username=admin'  -F 'admin_password=admin' http://localhost:8080/
+- curl -X GET 'http://localhost:8080/?appreload&applydbupdates'
+script: >
+  testResults="$(box testbox run runner='http://localhost:8080/core/tests/runner.cfm' reporter=text)";
+  echo "$testResults";
+  if grep -i "\[(Failures|Errors): [1-9][0-9]\?[0-9]\?\]\|\[Errors: [1-9][0-9]\?[0-9]\?\]\|<t[^>]*>\|<b[^>]*>" <<< $testResults;  then exit 1; fi
+notifications:
+    email: false
+branches:
+  only:
+  - master
+  - develop

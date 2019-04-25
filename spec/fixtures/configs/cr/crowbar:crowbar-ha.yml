@@ -1,0 +1,19 @@
+language: ruby
+sudo: false
+cache: bundler
+dist: trusty
+
+rvm: 2.1.9
+
+before_install:
+  - rvm @global do gem install bundler -v '< 2.0.0'
+
+matrix:
+  include:
+    - gemfile: Gemfile
+      env: RAKEDIR=.
+    - gemfile: chef/cookbooks/pacemaker/Gemfile
+      env: RAKEDIR=chef/cookbooks/pacemaker
+
+script: cd $RAKEDIR && bundle exec rake
+bundler_args: --without development

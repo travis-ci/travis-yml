@@ -1,0 +1,28 @@
+language: python
+python:
+    - "2.7"
+
+# Cache PlatformIO packages using Travis CI container-based infrastructure
+sudo: false
+cache:
+    directories:
+        - "~/.platformio"
+
+env:
+    - PLATFORMIO_CI_SRC=examples/BasicReceiver/BasicReceiver.ino
+    - PLATFORMIO_CI_SRC=examples/BasicSender/BasicSender.ino
+    - PLATFORMIO_CI_SRC=examples/TwoWayRangingResponder/TwoWayRangingResponder.ino
+    - PLATFORMIO_CI_SRC=examples/TwoWayRangingInitiator/TwoWayRangingInitiator.ino
+    - PLATFORMIO_CI_SRC=examples/SimpleAntennaCalibration/SimpleAntennaCalibration.ino
+    - PLATFORMIO_CI_SRC=examples/TransmitSpectrumPowerCalibration/TransmitSpectrumPowerCalibration.ino
+    - PLATFORMIO_CI_SRC=examples/BasicConnectivityTest/BasicConnectivityTest.ino
+    - PLATFORMIO_CI_SRC=examples/StandardRTLSTag_TWR/StandardRTLSTag_TWR.ino
+    - PLATFORMIO_CI_SRC=examples/StandardRTLSAnchorMain_TWR/StandardRTLSAnchorMain_TWR.ino
+    - PLATFORMIO_CI_SRC=examples/StandardRTLSAnchorB_TWR/StandardRTLSAnchorB_TWR.ino
+    - PLATFORMIO_CI_SRC=examples/StandardRTLSAnchorC_TWR/StandardRTLSAnchorC_TWR.ino
+
+install:
+    - pip install -U platformio
+
+script:
+    - platformio ci --lib="." --board=uno --board=pro8MHzatmega328 --board=pro16MHzatmega328

@@ -2,16 +2,10 @@
 
 
 
-## Type
+## Types
 
-Any of:
+* Hash
 
-* Sequence (Array)
-* Map (Hash)
-
-## Flags
-
-None.
 
 
 ## Examples

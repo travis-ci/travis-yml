@@ -1,0 +1,34 @@
+language: node_js
+
+# node_js: # not needed - `.nvmrc` at root-level
+
+cache:
+  yarn: true
+  directories:
+    - 'node_modules'
+    - ~/.cache
+  override:
+    - yarn cypress verify
+
+before_install:
+  - curl -o- -L https://yarnpkg.com/install.sh | bash -s -- --version 1.15.2
+  - export PATH="$HOME/.yarn/bin:$PATH"
+  - yarn global add greenkeeper-lockfile@2
+
+install:
+  - yarn --silent
+
+before_script:
+  - greenkeeper-lockfile-update
+  - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+  - chmod +x ./cc-test-reporter
+  - ./cc-test-reporter before-build
+
+script:
+  - yarn lint
+  - yarn test:ci
+  - yarn start-server-and-test dev http://localhost:3000 test:e2e:ci
+
+after_script:
+  - greenkeeper-lockfile-upload
+  - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT

@@ -1,0 +1,58 @@
+language: php
+
+php:
+  - 7.1
+  - 7.2
+
+env:
+  global:
+    - SELENIUM_VERSION="3.14.0"
+    - CHROMEDRIVER_VERSION="2.43"
+
+matrix:
+  include:
+    - php: 7.1
+      env: dependencies="--prefer-lowest --prefer-stable"
+    - php: 7.3
+      env: dependencies="--ignore-platform-reqs"
+    - php: 7.2
+      env: CHECK_CODESTYLE=1
+      before_install:
+        - phpenv config-rm xdebug.ini
+      before_script: ~
+      script:
+        - composer codestyle:check
+        - composer analyze
+      after_success: ~
+
+install:
+  - travis_retry composer self-update && composer --version
+  - travis_retry composer update --no-interaction $dependencies
+
+before_script:
+  - mkdir -p src-tests/logs/
+  - mkdir -p src-tests/coverage/
+  - mkdir chromedriver; wget -q -t 3 https://chromedriver.storage.googleapis.com/$CHROMEDRIVER_VERSION/chromedriver_linux64.zip; unzip chromedriver_linux64.zip -d chromedriver
+  - CHROMEDRIVER_PATH=$PWD/chromedriver/chromedriver
+  - SELENIUM_JAR=$(bin/steward install --no-interaction --no-ansi $SELENIUM_VERSION)
+  - export DISPLAY=:99.0
+  - sh -e /etc/init.d/xvfb start
+  - java -Dwebdriver.chrome.driver="$CHROMEDRIVER_PATH" -jar $SELENIUM_JAR -log selenium-server.log &
+  - until $(echo | nc localhost 4444); do sleep 1; echo Waiting for selenium-server to start...; done;
+
+script:
+  - stty cols 120
+  - cd src-tests && ../vendor/bin/phpunit --coverage-clover ./logs/clover.xml && cd ..
+
+after_script:
+  - cat selenium-server.log
+
+after_success:
+  - travis_retry php vendor/bin/php-coveralls -v
+
+cache:
+  directories:
+    - $HOME/.composer/cache
+
+addons:
+  chrome: stable

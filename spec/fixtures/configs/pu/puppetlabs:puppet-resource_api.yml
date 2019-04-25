@@ -1,0 +1,77 @@
+sudo: false
+language: ruby
+bundler_args: "--without development"
+script:
+  - echo travis_fold:start:DEBUG
+  - cat Gemfile.lock
+  - bundle list
+  - echo travis_fold:end:DEBUG
+  - bundle exec rake $CHECK
+cache: bundler
+branches:
+  except:
+  - release-prep
+matrix:
+  include:
+    - rvm: 2.4.3
+      env: PUPPET_GEM_VERSION='~> 5' COVERAGE=yes # 5.5
+    - env: RVM="jruby-1.7.26" PUPPET_GEM_VERSION='~> 5' JRUBY_OPTS="--debug" COVERAGE=yes
+      before_cache: pushd ~/.rvm && rm -rf archives rubies/ruby-2.2.7 rubies/ruby-2.3.4 && popd
+      cache:
+        bundler: true
+        directories: ~/.rvm
+      before_install: rvm use jruby-1.7.26 --install --binary --fuzzy
+    # disable coverage on jruby9k as this confuses codecov
+    - env: RVM="jruby-9.1.9.0" PUPPET_GEM_VERSION='~> 5' JRUBY_OPTS="--debug"
+      before_cache: pushd ~/.rvm && rm -rf archives rubies/ruby-2.2.7 rubies/ruby-2.3.4 && popd
+      cache:
+        bundler: false
+        directories: ~/.rvm
+      before_install: rvm use jruby-9.1.9.0 --install --binary --fuzzy
+    - rvm: 2.5.1
+      env: CHECK=rubocop
+    - rvm: 2.5.1
+      env: CHECK=license_finder
+      bundler_args: ""
+
+    - rvm: 2.4.3
+      env: PUPPET_GEM_VERSION='~> 5.4.0'
+    - rvm: 2.4.2
+      env: PUPPET_GEM_VERSION='~> 5.3.0'
+    - rvm: 2.4.1
+      env: PUPPET_GEM_VERSION='~> 5.2.0'
+    - rvm: 2.4.1
+      env: PUPPET_GEM_VERSION='~> 5.1.0'
+    - rvm: 2.4.1
+      env: PUPPET_GEM_VERSION='~> 5.0.0'
+    - rvm: 2.1.9
+      env: PUPPET_GEM_VERSION='~> 4'  COVERAGE=yes # 4.10
+      before_install:
+        - gem install bundler -v '< 2'
+    - rvm: 2.1.9
+      env: PUPPET_GEM_VERSION='~> 4.9.0'
+      before_install:
+        - gem install bundler -v '< 2'
+    - rvm: 2.1.9
+      env: PUPPET_GEM_VERSION='~> 4.8.0'
+      before_install:
+        - gem install bundler -v '< 2'
+    - rvm: 2.1.9
+      env: PUPPET_GEM_VERSION='~> 4.7.0'
+      before_install:
+        - gem install bundler -v '< 2'
+    - rvm: 2.5.1
+      env: PUPPET_GEM_VERSION='~> 6' # 6.0, soon 6.1
+    - rvm: 2.5.1
+      env: PUPPET_GEM_VERSION='~> 6.0'
+    - rvm: 2.5.1
+      env: PUPPET_GEM_VERSION='https://github.com/puppetlabs/puppet.git#master'
+    - rvm: 2.5.1
+      env: PUPPET_GEM_VERSION='https://github.com/puppetlabs/puppet.git#6.0.x'
+    - rvm: 2.4.3
+      env: PUPPET_GEM_VERSION='https://github.com/puppetlabs/puppet.git#5.5.x'
+    - rvm: 2.1.9
+      env: PUPPET_GEM_VERSION='https://github.com/puppetlabs/puppet.git#4.10.x'
+notifications:
+  slack:
+    secure: aPXZYNow8LsmmlS8PQU3FjL0bc7FqUUA95d++wZfIu7YAjGboIUiekxYouQ0XnY+Aig8InvbTOIgBHgGNheyr/YFbFS90/jtulbF8oW7BitW+imgjeAHDCwlQZTCc4FFYde/2pI7QTT8H5NpLR9mKxlTU77Sqr8gFAIybuPdHcKMYQZdEZS07ma2pUp7+GyKS6PDQpzW2+mDCz/wfi3/JdsUvc0mclCZ8vxySc66j5P1E6nFDMzuakBOjwJHpgeDpreapbmSUQLAX0a3ZsFP+N+SNduLotlV2BWnJK2gcO6rGFP4Fz1D0bGXuBnYYdIiB+9OgI3wtXg9y1SifNHUG3IrOBAA8CGNyrebTGKtH0TS2O+HZLbaNX2g6udD5e3156vys9wScmJuQ/rSkVtQfXf1qUm5eijvlXI+DIbssbZHqm6QQGyM4p3NoULmNmF1C85bQoZ4GF7b1P/8mstsVE/HUfnzRPNbwD0r6j1aE/ck3PKMi7ZAhIi0Ja9RnAgP3wi0t62uERYcJGGYEycWohMWnrf2w6GFwGeuoiwAkASdHOLX0/AOMPc4mBOjlc621o8uYMrrZqfF5CrOAvJ151USSsWn2AhXaibIvnHo6X91paNvvNpU/GYu3CUAl6q8OhYovvjtRVPVnhs2DrpgoRB+6NWHnzjRG/wr6Z9U+vA=

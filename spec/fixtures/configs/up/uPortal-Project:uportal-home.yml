@@ -1,0 +1,38 @@
+language: java
+sudo: false
+
+matrix:
+  fast_finish: true
+  include:
+    - os: linux
+      dist: trusty
+      jdk: oraclejdk8
+      env: BROWSERS=ChromeHeadlessNoSandbox,FirefoxHeadless
+    - os: linux
+      dist: trusty
+      jdk: openjdk8
+      env: BROWSERS=ChromeHeadlessNoSandbox,FirefoxHeadless
+    - os: osx
+      osx_image: xcode8.3
+      env: BROWSERS=ChromeHeadless,Safari
+
+addons:
+  chrome: stable
+  firefox: latest
+
+before_install:
+  - nvm install node
+  - npm install
+
+script:
+  - mvn package
+  - mvn checkstyle:check
+  - npm test -- --browsers $BROWSERS
+  - npm run lint-js
+  - npm run lint-md
+  - npm run lint-less
+
+cache:
+  directories:
+    - $HOME/.m2
+    - node_modules

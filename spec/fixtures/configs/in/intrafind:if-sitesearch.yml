@@ -1,0 +1,25 @@
+language: java
+
+sudo: false # use container based builds which are faster
+
+jdk:
+  - openjdk12
+
+branches:
+  only:
+    - master
+
+os:
+  - linux
+
+cache:
+  directories:
+    - $HOME/.gradle
+
+script:
+- "./gradlew clean build -x test"
+
+notifications:
+  email:
+    on_success: change
+    on_failure: change

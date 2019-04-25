@@ -1,0 +1,150 @@
+sudo: false
+language: c
+
+cache:
+  apt: true
+  directories:
+    - $HOME/Library/Caches/Homebrew
+
+addons:
+  apt:
+    sources:
+      - sourceline: 'ppa:ondrej/php'
+    packages:
+      - libmcrypt-dev
+      - libtidy-dev
+      - libicu-dev
+      - libzip-dev
+      - php5-cli
+      - re2c
+    update: true
+  homebrew:
+    packages:
+      - re2c
+      - libmcrypt
+      - openssl
+      - libxml2
+      - icu4c
+      - libzip
+    update: true
+
+matrix:
+  include:
+    - os: linux
+      env:
+        - PHP_BUILD_EXTRA_MAKE_ARGUMENTS="-j2"
+        - DEFINITION=5.2.17
+    - os: linux
+      env:
+        - PHP_BUILD_EXTRA_MAKE_ARGUMENTS="-j2"
+        - DEFINITION=5.3.29
+    - os: linux
+      env:
+        - PHP_BUILD_EXTRA_MAKE_ARGUMENTS="-j2"
+        - DEFINITION=5.4.45
+    - os: linux
+      env:
+        - PHP_BUILD_EXTRA_MAKE_ARGUMENTS="-j2"
+        - DEFINITION=5.5.38
+    - os: linux
+      env:
+        - PHP_BUILD_EXTRA_MAKE_ARGUMENTS="-j2"
+        - DEFINITION=5.6.40
+    - os: linux
+      env:
+        - PHP_BUILD_EXTRA_MAKE_ARGUMENTS="-j2"
+        - DEFINITION=7.0.33
+    - os: linux
+      env:
+        - PHP_BUILD_EXTRA_MAKE_ARGUMENTS="-j2"
+        - DEFINITION=7.1.28
+    - os: linux
+      env:
+        - PHP_BUILD_EXTRA_MAKE_ARGUMENTS="-j2"
+        - DEFINITION=7.2.17
+    - os: linux
+      env:
+        - PHP_BUILD_EXTRA_MAKE_ARGUMENTS="-j2"
+        - DEFINITION=7.3.4
+    - os: osx
+      osx_image: xcode8
+      env:
+        - PHP_BUILD_EXTRA_MAKE_ARGUMENTS="-j2"
+        - DEFINITION=5.2.17
+    - os: osx
+      osx_image: xcode9.4
+      env:
+        - PHP_BUILD_EXTRA_MAKE_ARGUMENTS="-j2"
+        - DEFINITION=5.3.29
+    - os: osx
+      osx_image: xcode9.4
+      env:
+        - PHP_BUILD_EXTRA_MAKE_ARGUMENTS="-j2"
+        - DEFINITION=5.4.45
+    - os: osx
+      osx_image: xcode9.4
+      env:
+        - PHP_BUILD_EXTRA_MAKE_ARGUMENTS="-j2"
+        - DEFINITION=5.5.38
+    - os: osx
+      osx_image: xcode9.4
+      env:
+        - PHP_BUILD_EXTRA_MAKE_ARGUMENTS="-j2"
+        - DEFINITION=5.6.40
+    - os: osx
+      osx_image: xcode9.4
+      env:
+        - PHP_BUILD_EXTRA_MAKE_ARGUMENTS="-j2"
+        - DEFINITION=7.0.33
+    - os: osx
+      osx_image: xcode9.4
+      env:
+        - PHP_BUILD_EXTRA_MAKE_ARGUMENTS="-j2"
+        - DEFINITION=7.1.28
+    - os: osx
+      osx_image: xcode9.4
+      env:
+        - PHP_BUILD_EXTRA_MAKE_ARGUMENTS="-j2"
+        - DEFINITION=7.2.17
+    - os: osx
+      osx_image: xcode9.4
+      env:
+        - PHP_BUILD_EXTRA_MAKE_ARGUMENTS="-j2"
+        - DEFINITION=7.3.4
+
+before_install:
+  - |
+    if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+        if [[ "$DEFINITION" =~ ^("5.2.".*|"5.3."[0-6])$ ]]; then
+            export PHP_BUILD_CONFIGURE_OPTS="--with-libdir=lib/x86_64-linux-gnu"
+        fi
+        if [[ "$DEFINITION" =~ ^("5.2.".*|"5.3.".*)$ ]]; then
+            sudo apt-get install -y autoconf2.13
+            export PHP_AUTOCONF=/usr/bin/autoconf2.13
+        fi
+    fi
+  - |
+    if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+        if [[ "$DEFINITION" =~ ^("5."[23]|"5.4."([0-9]|1[0-4])$) ]]; then
+            export LIBS="-lssl -lcrypto"
+        fi
+        if [[ "$DEFINITION" == "5.2.17" ]]; then
+            export PHP_BUILD_CONFIGURE_OPTS="$PHP_BUILD_CONFIGURE_OPTS --without-mysql --without-mysqli --without-pdo-mysql"
+        fi
+        if [[ "$DEFINITION" =~ ^("5.2.".*|"5.3.".*)$ ]]; then
+            brew install autoconf@2.13
+            export PHP_AUTOCONF=$(brew --prefix autoconf@2.13)/bin/autoconf213
+        fi
+    fi
+
+install:
+  - git clone https://github.com/sstephenson/bats
+  - bats/install.sh $HOME
+  - export PATH=$HOME/bin:$HOME/libexec:$PATH
+  - bats --version
+
+script:
+  - ./run-tests.sh $DEFINITION
+
+after_failure:
+  - head -1000 $(ls -r /tmp/php-build*.log | head -n 1)

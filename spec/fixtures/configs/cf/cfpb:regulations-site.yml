@@ -1,0 +1,22 @@
+language: python
+sudo: false
+python:
+- '2.7'
+before_install:
+- nvm use 6
+- npm install -g grunt-cli
+install:
+- pip install tox
+- ./frontendbuild.sh
+script:
+- tox
+- python2.7 setup.py bdist_wheel
+deploy:
+  provider: releases
+  skip_cleanup: true
+  api_key:
+    secure: NP1/DVXR4hpBiQWOADLoSqMPFrxzZUBUfwuGTwzIosH6+J10hesAki7HBBs6EFIlwaAisaA2Ygpcr8v4CA+Yi6C8bSgVJZL6oW1YRwLlQaOlJITHni21pyL+FcBZw1TEWaO+E8sPUMYvmjpWfgsvZsuAHbS6tVIVuYuFXHlRs9o=
+  file_glob: true
+  file: dist/*.whl
+  on:
+    tags: true

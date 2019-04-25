@@ -1,0 +1,21 @@
+language: java
+jdk: openjdk8
+sudo: false
+env:
+  global:
+  - LOC=secring.gpg
+  - secure: uMTg2AkQPDdP9ysoQqggMb54+TxHllJso6/xT9ns1GF55py4c5EwC9Vt4cmHKav3CDQmqztqQP9Baa8uJrHDjTH0KtsTTe8Hzv7YM7Ai+KzKR+eS40LTH/LB5Q7lj2pPwBqjhRfE2Zcnch5D3/qvbg39d6AELHgwczicfYyoZvc=
+  - secure: GASJrZV9yjUScysqTm+W3XK5hUOtX1fW7caXqh5Xjwl/bCJYnOdGkKRpQkql7VOEfmG7zFkg3qN/PvUUt6GkmnS5BOmb4fin4AXJQHtMAF9Lel4Tmp3NGIUMtFcIEKMm6UKRv7+LMI2dVMscWaL9YKpaMmp6F+yAjlmuPA93jlk=
+  - secure: IcJhZIgMgF/0SNZgE56xMVocntA57RTRiH9YrReu/9FeEyIlHk2si1/bLPgV6ns/oQi7pal34TCjY6Yrs9VqKC6j93rRIouIvTg0/mxV0QHytWXicxbaB8kAmTBjHmePFNlqAl0FpkcHJQ7O5cjy4gvVxxzin2jZP7Gvtw0PbeY=
+  - secure: HedklAPTdQAEhwsLhCwGco62/1Hq00nYgB+0MZYaVEb9KVdKxgZUswNidtzXVLha9TTOe3ewTmVjsd+Hs0wyyq6TZh8TUKlVPrJc1wd4wkurCK8JZjqUxBV2EydYmGM7j/CHpci1rcGv3QNQRwf2ZwfAoW5YPObJqqZvwk3GYgg=
+  - secure: g+rMdXQTBwVb5S58Mj2uKbhwLE1N+Rc/3qGIEzfLY8V5Jj2beak8uNH+m/7dmRPBYLaL6QP5ndt6cY47w3lcXWGa00xeve12BHk9i5dvzx4hDZ18PoWGA5iB/U1Aj4I8USrASliyb2dqHtQg0V2nixgHuNdlJiwDgRNROHAdsQg=
+install: /bin/true
+script:
+  - export BRANCH_NAME=$(if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then echo $TRAVIS_BRANCH; else echo $TRAVIS_PULL_REQUEST_BRANCH; fi)
+  - ./ci/script/build.sh
+#  - ./ci/script/run_integrated_tests.sh
+after_success:
+  - ./ci/script/deploy.sh
+cache:
+  directories:
+    - $HOME/.gradle

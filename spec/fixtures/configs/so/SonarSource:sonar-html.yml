@@ -1,0 +1,27 @@
+language: java
+sudo: false
+
+jdk:
+  - openjdk11
+
+
+script: ./travis.sh
+
+before_cache:
+  # remove all the artifacts that are installed in local repo because of mvn deploy
+  - rm -rf $HOME/.m2/repository/org/sonarsource/html
+  - find $HOME/.m2 -name resolver-status.properties -exec rm {} \;
+
+# Keep Maven local repository between builds:
+cache:
+  directories:
+    - '$HOME/.m2/repository'
+    - '$HOME/.sonar'
+    - '$HOME/jvm'
+
+notifications:
+  email: false
+  webhooks:
+    urls:
+      - secure: "SCvDhvWIDU4mp5OUUvZV8Qg49yQf84kZZ4lCtAsmnFvP0qj23Nr8iefdXUj9imhiRgdJe213H9Bm0gW6NuWznjZubEgBmy2IVR5qv8PibJCZZMKoKfvZX/0nZ+zIlVsvVG3PAQBOnKV9iHiMFzwxk4dGqcbXsfL3QAdUvkKc+G4="
+    on_start: always

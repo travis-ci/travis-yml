@@ -1,0 +1,10 @@
+language: node_js
+cache: yarn
+node_js:
+  - "8.9.4"
+before_script:
+  - yarn install --pure-lockfile
+  - yarn check --integrity
+script:
+  - yarn validate-ci
+  - jest --config=./jest.ci.js --runInBand

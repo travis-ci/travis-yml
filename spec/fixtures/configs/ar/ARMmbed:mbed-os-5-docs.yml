@@ -1,0 +1,106 @@
+# Language and cache settings
+language: python
+python: 2.7
+cache:
+  pip: true
+  directories:
+    - $HOME/.cache/apt
+
+# Common install step
+install:
+  # Make sure pipefail
+  - set -o pipefail
+  # Set up apt to cache
+  - mkdir -p $HOME/.cache/apt/partial
+  - sudo rm -rf /var/cache/apt/archives
+  - sudo ln -s $HOME/.cache/apt /var/cache/apt/archives
+  # Set up ppa to make sure arm-none-eabi-gcc is the correct version
+  - sudo add-apt-repository -y ppa:team-gcc-arm-embedded/ppa
+  # Fix for "The following signatures were invalid: KEYEXPIRED 1515625755" failed". See https://github.com/travis-ci/travis-ci/issues/9037
+  - sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 0C49F3730359A14518585931BC711F9BA15703C6
+  # Loop until update succeeds (timeouts can occur)
+  - travis_retry $(! sudo apt-get update 2>&1 | grep Failed)
+  # Finally install gcc-arm-embedded
+  - sudo apt-get install gcc-arm-embedded
+  # Get mbed-os
+  - git clone https://github.com/armmbed/mbed-os.git
+  # Install python dependencies
+  - pip install -r mbed-os/requirements.txt
+
+# CI matrix
+jobs:
+  include:
+    # native testing
+    - stage: test
+      env:
+        - NAME=code-snippets
+      script:
+        # Run script to validate code snippets
+        - ./check_tools/find_bad_code_snippets.sh
+        # Grep to find remaining TODOs
+        - |
+            TODO_COUNT=0
+            for f in $(find -name mbed-os -prune -o -name '*.md' -print)
+            do
+                for l in $(sed -n '/```.*TODO/I=' $f)
+                do
+                    echo "TODO in $f line $l"
+                    TODO_COUNT=$(expr $TODO_COUNT + 1)
+                done
+            done
+            echo "Total number of TODOs: $TODO_COUNT"
+        # Update status with number of found TODOs if we passed testing
+        - |
+            if [ "$TRAVIS_TEST_RESULT" -eq 0 ]
+            then
+                CURR=$TODO_COUNT
+                PREV=$(curl -u "$MBED_BOT" https://api.github.com/repos/$TRAVIS_REPO_SLUG/status/master \
+                    | jq -re "select(.sha != \"$TRAVIS_COMMIT\")
+                        | .statuses[] | select(.context == \"$STAGE/$NAME\").description
+                        | capture(\"(?<count>[0-9]+) TODOs\").count" \
+                    || echo 0)
+                STATUS="Passed, ${CURR} TODOs"
+                if [ "$PREV" -ne 0 ]
+                then
+                    STATUS="$STATUS ($(python -c "print '%+d' % ($CURR-$PREV)") TODOs)"
+                fi
+            fi
+
+# Manage statuses
+before_install:
+  - |
+    curl -u "$MBED_BOT" -X POST \
+        https://api.github.com/repos/$TRAVIS_REPO_SLUG/statuses/${TRAVIS_PULL_REQUEST_SHA:-$TRAVIS_COMMIT} \
+        -d "{
+            \"context\": \"travis-ci/$NAME\",
+            \"state\": \"pending\",
+            \"description\": \"${STATUS:-In progress}\",
+            \"target_url\": \"https://travis-ci.org/$TRAVIS_REPO_SLUG/jobs/$TRAVIS_JOB_ID\"
+        }"
+
+after_failure:
+  - |
+    curl -u "$MBED_BOT" -X POST \
+        https://api.github.com/repos/$TRAVIS_REPO_SLUG/statuses/${TRAVIS_PULL_REQUEST_SHA:-$TRAVIS_COMMIT} \
+        -d "{
+            \"context\": \"travis-ci/$NAME\",
+            \"state\": \"failure\",
+            \"description\": \"${STATUS:-Failed}\",
+            \"target_url\": \"https://travis-ci.org/$TRAVIS_REPO_SLUG/jobs/$TRAVIS_JOB_ID\"
+        }"
+
+after_success:
+  - |
+    curl -u "$MBED_BOT" -X POST \
+        https://api.github.com/repos/$TRAVIS_REPO_SLUG/statuses/${TRAVIS_PULL_REQUEST_SHA:-$TRAVIS_COMMIT} \
+        -d "{
+            \"context\": \"travis-ci/$NAME\",
+            \"state\": \"success\",
+            \"description\": \"${STATUS:-Passed}\",
+            \"target_url\": \"https://travis-ci.org/$TRAVIS_REPO_SLUG/jobs/$TRAVIS_JOB_ID\"
+        }"
+
+# Job control
+stages:
+    - name: test
+

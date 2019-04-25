@@ -1,0 +1,23 @@
+language: java
+jdk:
+- oraclejdk8
+cache:
+  directories:
+  - $HOME/.m2
+notifications:
+  slack:
+    secure: HDUuII4b9gvG7iYG+60bg6uU0ZPux9n7rplAGKNHa9z+DtMm6cBP9KN5qmu+25P+tV0vhgD8LNRij+62ekpUcTLWp6pXsCJlClEmr3NmZByP34nkBp5XJfrnWaf7L2s9MeI6O7OM+3Hk16WohSjwVdmvz479EECTR3jV6z1wodx+Zfr2YPmAVAsmsZHN4ItjPWks1g0cwbigdj8E41ZSldAahQvjlBGSrwrrS1tfb15KPLx9gRmPiotTFZfxgsbQwD1dLFHYm9uq/8imOAxkG9NKpGbtmv8kTHAUhEz/jGX5He+wsr/l3lX2Jg9LNyK9ZlUD4PVIQBw2K4Dwts/jqMIBdQaN0XhKaxtbrNpr2Frr9DXr4bxFZNxtPGsGP9WZW0tJXqYsLth9qRX36G+Cccl5tcaJWLwah3MhueIrSazwoSXe65TlI3+8jhrm1ErwgjZiSt8DfgOJx0SbDCtoztDqIeOr5h6/iTL1RMCrG6xwmYlRKYD27XQszPNHRporwVxPp34mv7gdc8jJi2z1DovvnIjf6YYxNeTBBXoqmTyFQYEQUYThFori8IQIUIaq+V9uglT+xgcDHvtdwnTW1GX8vaXUfwJPiG5UnKkXptwYvHRC0icKehNAMCyNEzj4J4+ahpDdARxHITE5Sifd2jSZu86b0zdW1UGE8Ibz7uk=
+
+before_script:
+  - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+  - chmod +x ./cc-test-reporter
+  - ./cc-test-reporter before-build
+
+after_script:
+  - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
+#
+# In case we want to disable coverage on pull requests.
+# - if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT; fi
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)

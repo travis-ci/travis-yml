@@ -1,0 +1,34 @@
+language: ruby
+sudo: required
+env:
+  CI: yes
+rvm:
+- 2.4
+services:
+  - docker
+before_install:
+  - mkdir -p ~/.aws && printf "[default]\nregion = $AWS_REGION\naws_access_key_id = $AWS_ACCESS_KEY_ID\naws_secret_access_key = $AWS_SECRET_ACCESS_KEY\n" > ~/.aws/credentials
+  - bin/build-docker $TRAVIS_BRANCH ${TRAVIS_COMMIT::8} $TRAVIS_BUILD_NUMBER
+  - docker-compose up -d db
+  - docker-compose up -d redis
+  - sleep 10
+  - docker-compose run web rake db:create
+install:
+  - gem install brakeman
+script:
+  - docker-compose run webtest "./node_modules/.bin/eslint app/assets/src --ext .js,.jsx"
+  - echo "quit" | docker-compose run webtest "rails dbconsole"
+  - docker-compose run webtest "rubocop -R --config .rubocop_todo.yml"
+  - docker-compose run webtest "rake db:drop db:create db:migrate db:seed"
+  - docker-compose run webtest "rails test"
+  - brakeman --no-pager || true
+env:
+  global:
+  - secure: l6JImOInd+PoLwf9hbAl6QmjXE4mShlG7SEkasSKk6XzT4npNTUqqYVVpNewr1f58U97SdHShv6WgxKIiUpX+adIBp9b59CsI7SCKxt1aSp9egyZE6F1ZIoqjmfH6o9U4dUkE32TJdG4Tn/QMd0fj3nCqathFIWFhato6ovqXmJpklJHH9BGbK330bEYG1LoUU3u/hIhBc8bAuNIO15eih1vMltYiSw5ScQxBMjcCskAjEeb8EA7i82pEpyD9iBWcIomw5Mrro0IInjJbudIQ5RukNZtI3zZXiSbR8m8VWzK8A8ixihHKRbBoLXn3X719s13FIJKL2Pn1utxMx4zrLLUx4iMafey2e8iG9C3JYyHu6UoR/E5hcSCdhHDmwiCiIQF8cHt2sZNVE33rEGdEkhsPgwlH16O6kBJmVOqaaihPN/yjzIyjxDoyknPfswpkiRiuqaa9XDXh5dgU0xHDfKic6ioAJvRMn0Ngbo7Ogi90rTaxksFFo7UAL9mChQaB+qtJk+tU0I7PFTR52ie62KcIAfqU3PFOo1jchmw7uEu/k8yNpZM4gar2gnl8gqe5dIVqkTDfNWBTlYX17dTqeHB7ZqCRKZzYcEZK8SVmw9fs/JTouwQK2nXgwEnp7dJdofvZgXhLZ4/ZhNniLn0ObDQauzYKPKgk819CtIb968=
+  - secure: pr2HWcvEFujWol7/1+EdcidDi/XmksumwU8Pp/JuzOhZahIGI7SQThGM7w772oh9qBHNIqgJA9scb+I+OkFj1vv42ByTkKDbxbf36spLYkXakuA/fIafZwQvF10FZxo5KGPKmVoZmaSX4bF+bvmuHLLRZSlwBY3nmeiHTOWZuFQ5dN+hWK2u4EVrVDlVz1kCYLwH5/DxVC8C1Qv5X0iYBAj1jPY+hd+zJ2+B+NwQaA1EzsPnorTOg60FOw8OG056R1/mn0SUwSzYy06K7+igWYTATx4mn1JZfO0aQtVDtIj+kKTKcXdKXbC6WOBUqwpbtOf64w65YjRq7kwmCrTzfLZrtotMkfntD2vdHWVmBE2AqL9MzeMEP7ftodVpmbwaOoPG6ia2dCj52VkgebIHcbbMfSx2qcsLbKjhBYLxCHS3rcYZcLjuzKDCYYywUX8iWCdGfKhQRWnEcmas7NTXWsyf45qGUdhIrMlgkDuwWFdOJVxuoXDtkoi3xKIjBRsxSu3lkXHdnznoIyFUMaEhQ+ahe4QmAqQPLGH7W5h3Qi+PpueXnMg5fMQ8n95vh+vHNz6F/2xpd8Oqdcsssf/GjxHclm5ngPEDTAZcvXUpsV47nB2kKPh4nnkVOCbfcKMypOpYQYlc7p7hVumc8lgCv1yq3KFzGtiB4k5odUv4doc=
+  - secure: Ok9pl7KWuB8K9xVOVkWGOJpvbXPyfJBZcJVXtBGA9KGJ96rHkeQgmO1II8ddT3bw1jpSvarZpkL1JAA3h9BZ+OA6Zwo/qVPlLv2Yo8CFDvKuGw8QQEyW2na5RPSu6bNBifwIsdiU782O6vzOtPhSKC4bxJZdcrAvshxDH85D+wWJ34xDNeXjBcRHN0MnRzCe7x8O0dYhNrIDVXmnlyI1OY69IUJ5rxPHNxyi2IZjgMIhZ50vGDjP9xw4TRkyT4b6PwLgpxKzYW6F6uEWXruh52R6hcaXVbPTabivEw05vGqhdgqvazRWu5XChUKAr6x4CoBG7ZGUWqTCyxhpBeWSdl5hobimgwXf0n7bT6bl99/WMzX/+4TE7LTz1eMd4+M7AnjAkLTy1iSra3ook0AmECG8OMlh5poQd6LdINCoeZDmlNwbzywJakvgdTStLiD+1WlZ54C598t4Nwbua7bIgjVjc1NOr1BHElzdSi8Wb92DfTR8GAOH+3j0azOJrT5lTnHeucCMBzynpPCJpVwlGK9aTKEzeHiesOBNP5aAjnJ99G+ytQxQiTjA61DtWg1Qc9IJdRnBDA0PN51J68zw6WtIzWvpg9Q4fIeP3/IogcJUcGjdTjXWWOk97jD35ckzhMGpiybFV/XOjrHQyC98hRs9dm3ZqBdGmlODzzoZIPE=
+notifications:
+  slack:
+    secure: ToieN3tJjRDoLTqOuoWQ5mFWTl9Pm4eNgDYDLar7AKp0YteDSsUBdqbTzdV8s4Gjmbb8/q5Lj9/FM1oZnW1n8RPxLKV1i8mCVfrQVl6c9ynLZCfs/FGYgsspe2NwaIPcDzeIFwwbmL9DzEGPR+1WkuYZe4Iiq0GnI0otajqx0VfBjUjbDNUVXZtZV26K24fykJ18+U+2OHUPAmoHHeUGKRnW1CLeyqvZQWommlo6aULHHi1cFc4HdiR0LR44mrk7wuZrQJwbvrWSYGl6QVBcDj/g6MjZKkS5HKmiCfw/quT32/YS8pDdK11g71aw+4svzfHkGsxhVBADI6EOkiqKfFkAjn2nARjey966Q8X6yit2BVASWD+T7r8COC31aVDwZtg5tNsYjmmhD+7NlXZswqeazz9cHi+4wJTBU4QyUzqYsyZZJIdORDAnLUOre+5eqzIT84dKU2JtAzqkHF9x/FrBJ3+km0ocbsRn746/Yk4htvL9HAo8ovnYy4NYnmNAEtc704mgnx60pytQAc97DxD4bvG4gujkv6mqrNrwm2GqavrmicW7OW6NZ+yCoR0qrFRUmElAlnFdafw/2x1HbZVf+scn6PJMTjIjjOPxrHwidU9ARkGTt8or+zbPmUK6l15QkZGEpXzVKJQ7rt92hywWSldh6StZNpP1wUpTnfQ=
+after_success:
+  - bin/push-docker $TRAVIS_BRANCH ${TRAVIS_COMMIT::8} $TRAVIS_BUILD_NUMBER

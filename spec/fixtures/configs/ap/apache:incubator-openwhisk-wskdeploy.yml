@@ -1,0 +1,111 @@
+# Licensed to the Apache Software Foundation (ASF) under one or more contributor
+# license agreements; and to You under the Apache License, Version 2.0.
+
+sudo: required
+language: go
+go:
+- 1.9
+services:
+- docker
+git:
+  depth: 3
+
+notifications:
+  email: false
+  webhooks:
+    urls:
+      # travis2slack webhook to enable DMs on openwhisk-team.slack.com to PR authors with TravisCI results
+      secure: "gfROHzycfSxU85pp/jscreWed1bABKlBa1w+fBH40mZDIYI9Dhgbnq1lqpkBLz51RasPsCmKvZP8j3gm5NunRJWwPeMk0ZmwPuBzVCiOdEr7r/SOr4hQM6CJjLuQWVg8gIR1ZeIQhIc+oHc8KGPDBJdSPo9b89QNCyVXNL47/M9KAKUn2ilwTdHaezlwGnT3yiTvhvYEQhwaXLxHHIfCtlQjPg+d8Ch93xYRCvqfKu4g3owr1bbZZE5AERH7dkKzq5HtzYAxr3M1UZLfSwiQfktnq4cGWrw9XxXCmENTm6HDKCLc7pcOvLZF5NqpItRd4Od1kma5lPKfR1qK8+SjyohpWqakhrJlnBe5x68zXyyq4Y48yuNuGXqVkdQ1faUF1gY0cE6KvsfFLYUvRXUmPZNYYd1xMaouUM6fiVRSyM/liuR8zK750umNRdgNNTlmYXQNJwg/YlF155hqIblf7Idf2Sg6AW5d7mUIvWa1VIemZpvxFb2wG0SUyADhNvTWFLpxmlIP9ddCzz+ZY5CWpe5ZYj2/snXp983fHgAoVEnxc4ifIlaUf1ALcK/BVGzJh5dgpD4JmyDK8C1YoP5hiMRtvbAetxYK9R8YNZs8Q3K2yZvdFgWrNQhW0OiDG5pIOPhg3vx8Syr886YSlYW+kp7QI3d18HFvCo3ZIZb/Qus="
+
+before_install:
+- "./tools/travis/cloneutils.sh"
+install:
+- export DEPLOY_BUILD_READY=false
+- go get -u golang.org/x/lint/golint
+- go get -u github.com/stretchr/testify
+- go get -u github.com/tools/godep
+before_script:
+- GO_FILES=$(find . -iname '*.go' -type f -not -path "./wski18n/i18n_resources.go")
+- export BAD_GO=$(gofmt -s -l $(echo $GO_FILES))
+- echo $BAD_GO
+- test -z "$BAD_GO"
+script:
+- echo $TRAVIS
+- echo $TRAVIS_PULL_REQUEST
+- echo $TRAVIS_SECURE_ENV_VARS
+- printenv
+- "./tools/travis/script.sh"
+after_success:
+- DEPLOY_BUILD_READY=true
+- if [ "$TRAVIS_EVENT_TYPE" == "cron" ] ; then
+    export DEPLOY_BUILD_READY=false;
+  fi
+
+after_script:
+- make clean
+before_deploy:
+- export build_file_name=wskdeploy
+- go get github.com/inconshreveable/mousetrap
+- export GIT_TAG="latest"
+- export TAG=false
+- if [ ! -z "$TRAVIS_TAG" ] ; then
+      export GIT_TAG=$TRAVIS_TAG;
+      export TAG=true;
+  fi
+- ./gradlew --console=plain releaseBinaries -PpackageVersion=$GIT_TAG -PgitCommit=$(git rev-parse HEAD) -PbuildDate=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+- "./tools/travis/build_tag_releases.sh $build_file_name $GIT_TAG"
+- export RELEASE_PKG_FILE="$(cd "$TRAVIS_BUILD_DIR/release" && ls ${zip_file_name}-*.tgz ${zip_file_name}-*.zip)"
+- echo "Deploying $RELEASE_PKG_FILE to GitHub releases."
+- if [ "$TRAVIS_BRANCH" == "master" ] && [ "$TRAVIS_EVENT_TYPE" == "push" ] && [ "$TRAVIS_OS_NAME" == "linux" ] ; then
+      git config --global user.email "builds@travis-ci.com";
+      git config --global user.name "Travis CI";
+      git tag -d $GIT_TAG;
+      git push -q https://$API_KEY@github.com/apache/incubator-openwhisk-wskdeploy :refs/tags/$GIT_TAG;
+      GIT_COMMITTER_DATE="$(git show --format=%aD | head -1)" git tag $GIT_TAG -a -m "Generated tag from Travis CI build $TRAVIS_BUILD_NUMBER";
+      git push -f -q https://$API_KEY@github.com/apache/incubator-openwhisk-wskdeploy $GIT_TAG;
+  fi
+- echo "TRAVIS_EVENT_TYPE is "
+- echo $TRAVIS_EVENT_TYPE
+- echo "GIT_TAG is "
+- echo $GIT_TAG
+
+deploy:
+- provider: releases
+  api_key:
+    secure: aQGcP7XKlgZEFZ57y4RzYRHfQAM5HEdaa7Y/vTxNepIsE7zY2945qT99UJnU1hfhSjP9jO5eNlHzo+AqJoUx70+iUIhMTyOp39Qp7wb74OKolkXwcntufzP7Ocron5IYUE311tf/kic3vRb5cwoaE2lGfx5PdCuozVjgpsDbIRvV5quQzNr68Toqe+yegKwAhprYRWHPnuIqGbkfa83csqFv6m0viC/gvtFOCB9/4zGCqk/K3CKrcr/5GvnFPxJoaJNfFA6umSZ9VaJjbIJmcXGD3nU+rWP0uEpvzGKIMYhmQq/0JuUTgvh4jnnT4OVZeTh6pMaUqtWH+3HDrOiLAiLjcfeT91j7ZXPnx8LvM6SuoRlvRCuXA2FYx9mz2Vx0TWV5TMqhj3okVO/CvvnMMWwKWOUDD/nSMLy93BM40NjD7zimGjocPsGAjTT9H1PSfau3fiiMjg6iMRWjUTfNY5ra5Wgb7W5G37XaCBJDBZL77Blq/tNWdV5qW4A3l4FWnH+LwOdTdhU35Lr5JWzMuEDdkvVgEv8AQjb07P/ODtBW6z3GRv9Rslg9T9ylxkgJpXoYwdXCbtYU8GNcFdJiDpTaVHrkMeLvHrBTRrDCSnCnRFc3AxsUtLklo7R/EX1wUoX+QcAGjh/AmJ4nJVP1C09913fx96WczkRX6ANg2Mw=
+  file_glob: true
+  file:
+    - release/${zip_file_name}-*.tgz
+    - release/${zip_file_name}-*.zip
+  overwrite: true
+  skip_cleanup: true
+  target_commitish: $TRAVIS_COMMIT
+  tag_name: $GIT_TAG
+  on:
+    repo: apache/incubator-openwhisk-wskdeploy
+    tags: $TAG
+    condition: "$DEPLOY_BUILD_READY = true"
+- provider: script
+  skip_cleanup: true
+  script: "./tools/travis/docker/publish.sh openwhisk wskdeploy ${TRAVIS_TAG}"
+  on:
+    repo: apache/incubator-openwhisk-wskdeploy
+    tags: true
+    condition: "$DEPLOY_BUILD_READY = true"
+env:
+  global:
+  - BLUEMIX_APIHOST=openwhisk.ng.bluemix.net
+  - secure: ClspSsyTZdDNen+qZFAN37gP6T0HO4hthuDMb/w/xekznNazoKajTh1XQg5ccQ9o7BuXt5/Mrv8ZbHIg4GQrW4puLxkqfdd956szTDznxU0zgOK23YwdPhf74Uga2ucXOJcNeOcfrgR6jtTQZ2TbS2u11PjC6yp7KKY1vYEJXsbTkJ761H7Geu4qY7PmZ0x/Srw+DwiR1ZXH/PKlZIHbOF1m6F5zkTWLpN+/8YcRUxYOs/oGtYqqz0TxNDmlUE0lh6El8iUtAGrCGxdmLK+FSPAMk4ILJOMoqeIzk/eeNr+w8eXhG29zJRz++e2jxr1kXc0OknOXroO9jmv+G6IicRrWG/Em4n/tDeuehFdRmdRDBoKSczpx3ws9qjzPahMJ5QJP3r19e8uQnSgHPJ00d4+H8P1cf46TucQNLQGuoeap+PhPTy69spXpwdyze50DaoQGVe7+nmO0RUJ13LUJZZDz2EFQg5jjx3cSwQRbT4rvMCCl1ByiyN4gJ3jwTEdPtXVVJaub9Z4aDk8GxROC/RT1SGhQmnfnMg0+H/chHpDo4M5mrNgYwRdMzgJScgRl4ShyZQF4fjvX8oT2KBbu5VGUslew8/Cgi4ezdXOJ6IGGmjzf0kdq+NLwQBKtAV/8YEWFDCTG3k1uUaw4/YlTq26kUwTqnBx4tT7/8Sh0uRI=
+  - secure: f8CKUxpI0xp2N78ifCQCpOg0/LAzZv7cDhuYZvWB++LJ1tdwN+aHxYCRaDLNI49fogDqCoeIcJCy2uVCmNGEXwcUsGJ0Z28qvRsewsgwwnrny8E+NyqmV/DFfAWvR095lwfQsBiqdGJLcOU2ZXvog3+y2p/I14LCInkThLJSMjA56IDqYkbp8OUy5ncLUZ726PVb/N40hw5TTpgf+yKcHXlXOmRYwH54jvxduxz0RnDSpFuV9k2qCMP10f2GZcWhFUCdOU8kYrTsMbo0Mk712Q1N49V/9QB9ZrMGIbQqufFvp+E/Wf/mL7ANyRmG0C6eOnVrtsnhjzVVJrpv0oyV53HOwmL1FrMzJE65V35B0fi8fUgslEgxnYLXeCxRetOFOyJIjTA/wIZ7uyWPrXQa+QbcQixMLYn4xe7iJHuA+d1u3b5SOcjD+eBa/s+ihISwQoKkeDja6cL+5bROTcccE0hNC4ivadPKsosGdCDdSCQhQlzGbXDGx0psYe7/9J0tGgfPsnPdn1TFyTvJRjGAQyZVULGltgAFBxcVNAoeeez36cMUVmnqsmR0wf1XHNQhCwBuBY4ujyQC74ichPgDYByhLGeQ7aiHBqt1n58AidB9eWjhjvrfEEni/S28bS2StqZ+uSQKHkdgFtWoCRnBbw+p0cdPfyO8g8vIlJpaAKY=
+    # Cloudant
+  - secure: NVP+kpAlZc1GdM2Er0EbWvG1ak6iIKgui6BrBq8lm+wSjkDXGtEnkvvvE8+IrYIvZaKurT71M0n4MfrQhEDUmxhXsQSP+ZPEB5VJD182OWMD4zfqsYmaqOsur50MOHeb4ZO6Bv0SrnCSvIcPqchXEqg3S2aYzSYtFjqW5jPECO8FOnCUu9STGN3bo2XJsMWpnhJrO+u9AYf/D6+LlD4+839gMUVUWy/vU4FTCsS5lTBwIwPV/0IBa1ivp8roteG4LOJH5LHHnUekgUt+wZgdmrny6hUTn9JMS2TzOgctHBoAiNyLzeXwvJSOPQ6w8gBFHYW1R5HlF64uaovqNnY6qLrtKyIIKNfYjqiFg250siEdm9FaFJlqqOOof6M8gfU1Ob/Ax0GthyHqjUcgNeUXd7K1BzDNWRC34wTcqXRlZyO8IvqYI21Zm1mDSNTRRA4Jw/Ajx7RLZknm5bOYwFblWCk06ULVYjhyIUcxGFUQqeIr3CQHu/V7BJthVtNPFTgOFLp8eFMaG2ACZcgS4wKyfvu5IQa1q4noWVrB8Yprft1x9+20lX4L+N//QJZLpjGX23OaBZrNMIgS6yPuD3e4UrlqOxbJC/BO1kpjLx+REdUtzp8dDCWpHd5ISS8V1Yr3p9Gk8Q6lnR0MIsGEW1t/3qMaEgw69OiWtV86f+zlBTs=
+  - secure: pQhw+jUrDK8+s8BV/5y7CXTfdzGxit0Ej1BAJcs9xcjIpLFFW1+d+n2bcXVk8F43lhsHeilmwfUnxnHkI48qGED4HBZ4cUpI6Ka69oP+hRZdBXQLHysZIHpSBC1vWPCN1SSV/wSc4bNTXopyr0XmtY/aRpOusunz8uIj218/44Z3S3lgNqLeMHaQjzo3/Dh0IXtTYYfdnHzMB/9z3WvS3ycZ5OfdWnNWZT4OEw1NIESjFe/+g/ioQLq16BtIIxFq3+R4ujvUSxZCuOa6V8636hs+DvBZAwBkUljNCgR8CCzFMOrYcqzViCmiNHmIH7xkNWyVCQyB2xLk4lSkavI04wLTajqz1bvDbSZN5zxcz7oSkeg1ng3waMSDEPuQBVj6IHq3LnNN81kCI1Fyx9stimR5qA0GGzayG1OjA5tlxEsqgv0lu87MWj2KevVNcpLdyJQ8h0AWknPAhliCiGINSZz5y96yN8P2HIIvh0Ioh0coty6wZNsskfMrifpoBrgRDHseb+7jnj6KYdtxse0dLVSCo07Brqhp4N1dvYnqxgh71LhuDVe+Yocu4hU0EtT7hOgoP/tl5XNTQ0fQCB3TdowZ+7QFkcv7z3FJjOI2mL6qXKQi8Cdi/624vT8mKVIdI8yNbymyhIVAhG8zapQ+3kObLBAU22xvsUMztds2EFE=
+    # MessageHub
+  - secure: caCbpNxXM+wn98yRhavvb9fkY3pH4Dssr9zbIBVdO3Vtgnii+DYjj2i5ZL0zoXAQUJxyFx97kcO+KbB4OnaEWxPJ6hZiygtosuIccZIzhZNFp1NnFxsPQgIXjD7j71Nc6OcOQed56GbItmPSrmzcMyYYtkifvf8cAxoHVwqsYgGx65E88FPaBM86PUyKbNR5nBSVcx5dpFlJ/E2CmNkG5DnW/o1u4+mJvOrgR827MctO2AEUMTLDOCuU1nxGJciM7bBwcKVL09/fC8RAF0AXrGabOxlhZGhVp+5K/ifzNoAk+l5WTDP8vNI2H/rWzfsat5oqCy2SHjs5l1rHIei9Wy6QfPSDA6e5wlNs1XzT2DnO6sLmCxHTBv/+GrF/Glr50FaTuPlYYBjt626WwEiJIJvmsPMziVnY1cjRonz0Owk23TCcpjDM/3IIAfcbI/ZKfHRp+bdehMxAqMGxuLWCV/6lX+QV0tlPun2t4TwrZlTNmQPE+zaLgdF36vfJdwVfx3+2XkHn1aYNq1LJKuwYKBPjUdUU9VcVcdErFKyNa7pFoSjE9tfJrP+B1xilEEPDAnrNlEp+i1h1FS3VGRBNlej72t3Wt0q5/UQEulinUgsKm51nGvNGrvwRImzyS8aq73rSJkac8/nXIw9m9DtWugMEMTnMBs0j2MxTsAfR6SQ=
+  - secure: 15ImIPDIDLZQbHMjPaY9Yx//Z7qoxS1A2J6NiZaGqEZXOfksskhRlLnxW2GIvy1wBEGMICevMqBWevG5/6csPwXzBe9nrqkfnGOYN7nakttZWHHqU7Jh5YnpCfzeyHzfxVtJKuB/vJvxE6Hp34aqwIAQL1R13Ci0BNAuxPjnhpIGf7b9wXjX3mQ24XVPC9smMeUCE66aZ9BxGkGM5KzCezdLvpWV7Mq0y6xbPFzS/1oZeXrrNqaVgLKXGjnumJNJ+Mf75tJj2Q2hMoGHcTY+FOiAz6ueIuNR6ZKHyHGYpo+PAZUMlpC/9P6tCjOegx82EWfKUquNOh0rJcGOoFWrcuQ8FBO7/qSA1KbzeW7Rs9mL+ZkxqRC6SbFoe39Wda7/PE625JTeocsNbvacbEKwPLtLgDo3NJi3Lt0aEi/oUVaAEgiFZh5GchfDD8S2dTYt+TnaKjzKou7vJ6mf1FeKBqLH8MO+lbfez1pMvUsoXzFoYjG89Uy57x+0DUE9492Tr5wDeIbsVngxDkMye98hAGgsu1qTA7/+vm94HYrTLw+7HrJh1FoNfGnDmEpbLmBXCBRLj7TFL8QoV3m3uLwWE7gU63VYAyuNKFnDRrWXndmlakjHQSpejGWwPaQgvLJwS9Dm3m28NkWr1j5c3QsJcGps8iigRdgjeDCepOjF6G8=
+    # DockerHub
+  - secure: R9bjVMNFBHgT3MhdN9e9aVP9jcOa99vN+XtYNBSiVP2gAfC+dFHA3U8wGj2Scho3rJI/Wd8KKNn2Lo5Wlc2tDFXVcKeLjF7nIHf74D5hLGdn6SNuvVPKCYSvnpA3QswfnHz7Y9wbYaQkjkHHkXktl4TwbsuKvMVso3Qgrc1KkQ6X8zzOtEdE9F0Md3Y508yfqxYat0qOOogN32brItJkp/9WMsLTtSZs/7iSFkRxKNCWctJx5mQ26tU/1b9NTCIipoyA+jmbrZNpot0M8b5nJ+8777FaBHhDdKayvQDcsAUpdSFzVOTby32+8Yk4E4PA2F2Q2BxEXe38GK7C3kRpYqHEkQ4lbF0LVjXwiSmEDe5tpdCn3U46/7f45v8JP1eRVearhHISOgwxM7v80S7k0fa0+xWFX0BCce05Rc6sxQzmUP/oRsqtYoBKovS4DK0cYA0dIMkJeJIoNKeyDaHn0tmSnaDxPxLQJz296Ffklyay6j8XIhWMyV0edpgu0rxq2ou+7f7zUL3Fld0ui3Bseb8MkXOIq10hR0hErLnhgKVT1jtYcz5qJ6nwS051rKJXrgnmSiAqQHtrSMRILC90xWxW9UoJt0roPhdW2+tbaaOM+JXZ7U0krw9rI0oAY+jiSX7LY7ESxMaL0Alhe7lFqk3DeRp5QWVMCmMoeG2vWOQ=
+  - secure: AA8dirvhPlK/pdm6hzanSkYnLi/b6loEAPrSMc/mNa7ZkNrTPyPBq3B/GkNW1AEmoTOr7JGGfLk33FuffqvqIXGam3bUtVWqZdNpa1pvR9MM4laaWSfBk5fakM6rOdq5UtoYHzr00NlIjz0g/CmTn4DRbGNa43F1CkXgH1XypoBUhZZGYkcMdWMX8qYm3e32kutKUFR2GUd0xoTR91EBgIxRh8sq6wkRlfNFOwrghldYMrLP4VlUTqC/usG5G0lU+U21PlW/k3QEOxe00K46W3qAQIWTFBl3q9fX912HJZwvTC29t5hDS9zsG4Vhj93O9mwHzTfjAE/+vkXRkvnx0FPVOHqSepAAffd4rAD3N4aLGVHpGqWobg5daKegbJmCeoSaknaodNrPYq6YjTUEz4n/ckjaB/RHECkutLZh1wtJgR1joQVfAdvn3WpIYRD3CkNN6v5y5sWnX4fkVL9tCcMcukTzk6U/mEtJr6f+RC8suSw0X1c6tr+rCyXJY6a4o5ZoIXxJ52LtQaKrEbFH6fkRC4aCVuLYUAIyYoeqauXqsGpNfhmkS36DLvx5ojfpXnBdTWwwJMflm24Ec9FdOnQCkRhKiZLIxu1jJS6gy0Pe4/Vt15WiRnt1t2I9F6wIk895G0Qz2yiIQ1MmpjCnMnY8BoT9Nqs78YOfnNtgax8=
+    # API_KEY used to generate the "latest" tag automatically
+  - secure: CHEYJanoGBV2W9LqBbnG312cOBj4FIWeiLLjfult/VDcjBlAQ71EzpBEv+H9c5J5ZmeRouQ3+dUC2wCJTCeTdzAOIi9Qci7tvTT8yYPShqGS3R1q+Hx1VBaGZhEDpxDcUDDGETBOQD6du7OTKOy+4bW0EdgZA6XENcIQNp5lCPVA2BMp8wI4vUgydbK3Po1vbj4KauBtk+XPU7cUkTxtw/QUyC5Eih6QphVovBIIngBSP917sO0ENwQHjOOkCb0rG1b5OnrAMOQSbpQsVgblv8caKINqnLG5aePN3YJCB5AFzXtQI515RQ9Tf8mX1XSceFtPwAfJhqLw8kHCoiu/ptLi/rxhuv1DTD+t+Y7413bMg/qIP08KKjyj+ScyeMRVnPEfNRC+z98Ka55FDhid9+FDx0uQ7ICDpi/TkCv8GDStk55vkSp3tYfNbORk453y4K6Yf7eS041ugfC3KejlmU2IPulwxQCFjFDZl7JMZo5NMOqBj6RUStWiF3DlxcM2M0I97B2cycwL6jTOlvFJUEFPoU9UIN9ICEYRdY33nxyG5qr+ymq0YgmZqmcjK3dGd5j32xXMqsDO+vrG+CnEpwht7uo6IQWYD44qsixe8J4HcoSYkm901mQYqT7VpNy6BXqHjPBSFUYkHaV/whT6QtCxKaaa7dg0s/jqi/zAnQY=
+  - zip_file_name=openwhisk_wskdeploy

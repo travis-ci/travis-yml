@@ -1,0 +1,26 @@
+git:
+  depth: 3
+env:
+  global:
+  - secure: "AzM98HKS2RDP+/WdvsFiEqTbVPwLBEAtNXDQPR7cV1gAEZoNhri/iINnRAHtECgVQDt2gKmxEiyOA07zMKPpt5PwhoyZUnICwxl1t2FOkTL4LlfI+3ew1rf4F8wmaSQX/BRT7b3IgyEI0RFRCow8KH49X8xdEtAFYJB3YFu2Y6M="
+  - secure: "BDNmD9y3mdZEQoFgXW2dC1FawofkThFwbITidMqeKLxSstNxQGKCpxOFAV604kaTGsf7ihpdm8WYE5IjHKTaoewdQ9hLXZPtswWXq5Ebe2gKHqJVNZa2bFD6hQBD2S7BLWWeAVIoLkyfV/QLnplOquUZTXWZ3TW2A+IXzQE+AnE="
+
+language: objective-c
+osx_image: xcode10
+compiler: clang
+jdk: oraclejdk8
+
+before_install:
+- brew update
+
+install:
+- brew install ant
+- brew install awscli
+#- brew tap caskroom/cask
+#- brew install brew-cask
+#- brew cask install java
+
+script:
+- export JAVA_HOME=$(/usr/libexec/java_home)
+- export LWJGL_BUILD_TYPE=nightly
+- ant compile-templates tests upload-native

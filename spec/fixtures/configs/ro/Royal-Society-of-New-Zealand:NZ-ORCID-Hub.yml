@@ -1,0 +1,49 @@
+sudo: required
+language: generic
+services:
+    - docker
+
+env:
+    - ENV=dev PGPORT=54321 GID=$(id -g) DOMAIN=build.orcidhub.org.nz PROD_BRANCH=prod UAT_BRANCH=prod DATABASE_URL=postgresql://orcidhub@db/orcidhub?options='-c statement_timeout=3000'
+
+before_install:
+    - sudo rm /usr/local/bin/docker-compose
+    - curl -L "https://github.com/docker/compose/releases/download/1.20.0/docker-compose-$(uname -s)-$(uname -m)" -o docker-compose
+    - chmod +x docker-compose
+    - sudo mv docker-compose /usr/local/bin
+
+install:
+    - gen-keys/genkey.sh $DOMAIN
+    - ls -l
+    - for t in sp server; do cp build-server.key .keys/${ENV}-$t.key; cp build-server.crt .keys/${ENV}-$t.crt; done
+    - mkdir -p pgdata data/redis archive backup
+    - export UID
+    - docker-compose up -d
+
+script:
+    - wait_pg_up() { until docker-compose exec db psql -U postgres -l; do echo "Waiting for postgres to start..."; sleep 1; done }
+    - docker-compose exec app find -name '__pycache__' -exec rm -rf {} \; || true
+    - docker-compose exec app flake8 orcid_hub
+    - grep -m1 -q 'PostgreSQL init process complete; ready for start up.' <(docker-compose logs -f db); wait_pg_up
+    - docker-compose exec db psql -U postgres -c "SELECT 1" && echo "DB IS RUNNING"
+    - docker-compose exec db psql -U orcidhub -d orcidhub -c "SELECT 1" && echo "DB orcidhub IS RUNNING"
+    - docker-compose exec app curl -k -s https://localhost/pyinfo -o /dev/null && echo "WSGI is working..."
+    - docker-compose exec app w3c_validator https://localhost https://localhost/about https://localhost/faq
+    - touch .keys/dkim.key
+    - docker-compose exec app ./pytest.sh
+    - docker-compose logs app
+
+after_success:
+    - echo "*** Deploying from $(curl ipv4.icanhazip.com)"
+    - docker-compose exec app coveralls
+    - docker-compose exec app python3.6 ./setup.py sdist
+    - docker-compose exec app twine upload -u "$PYPI_USER" -p "$PYPI_PASSWORD" --skip-existing dist/*
+    - eval "$(ssh-agent -s)"
+    - openssl rsa -in .travis/.deploy.key -out .travis/deploy.key -passin env:DEPLOY_KEY_PASSPHRASE
+    - chmod 400 .travis/deploy.key
+    - ssh-add .travis/deploy.key
+    - git remote add deploy ssh://ec2-user@dev.orcidhub.org.nz/~/repo.git
+    - git remote add test ssh://ec2-user@test.orcidhub.org.nz/~/repo.git
+    - git push deploy HEAD:$TRAVIS_BRANCH
+    - test "$TRAVIS_BRANCH" == "$UAT_BRANCH" -a "$TRAVIS_EVENT_TYPE" == "push" && git push test HEAD:$TRAVIS_BRANCH
+    - rm -f .travis/deploy.key

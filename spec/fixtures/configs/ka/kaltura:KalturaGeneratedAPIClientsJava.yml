@@ -1,0 +1,23 @@
+env:
+    - RUN_ENV=development 
+before_install:
+    - sudo apt-get update -qq
+    - sudo apt-get install maven
+language: java
+jdk:
+    - openjdk7
+    - oraclejdk8
+script: 
+    - sed -e "s#@YOUR_PARTNER_ID@#$PARTNER_ID#g" -e "s#@PARTNER_ID@#$PARTNER_ID#g" -e "s#@YOUR_ADMIN_SECRET@#$ADMIN_SECRET#g" -e "s#@SERVICE_URL@#https://www.kaltura.com#g" src/test/resources/test.template.properties > src/test/resources/test.properties
+    - ./testAPI/test.sh
+notifications:
+  email:
+    recipients:
+      - moshe.maor@kaltura.com
+      - jess.portnoy@kaltura.com
+      - noam.arad@kaltura.com
+      - Elad.cohen@kaltura.com
+      - Jonathan.Kanarek@kaltura.com
+      - nir.belinky@kaltura.com
+    on_success: change
+    on_failure: always

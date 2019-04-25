@@ -1,0 +1,45 @@
+# Require sudo
+sudo: required
+
+# Set services
+services:
+  - docker
+
+# Set allowed branches.
+branches:
+  only:
+  - dev-7.0-build
+  - dev-7.1-build
+  - dev-7.2-build
+  - dev-5.6-build
+
+before_install:
+  # Check Travis Back to build against.
+  - |
+    case $TRAVIS_BRANCH in
+      'dev-5.6-build' )
+          export BUILD=5.6;;
+      'dev-7.0-build' )
+          export BUILD=7.0;;
+      'dev-7.1-build' )
+          export BUILD=7.1;;
+      'dev-7.2-build' )
+          export BUILD=7.2;;
+    esac
+  # Update Docker Engine
+  - sudo apt-get update
+  - sudo apt-get -y -o Dpkg::Options::="--force-confnew" install docker-ce
+  # Get Latest docker-compose version
+  - DOCKER_COMPOSE_VERSION=$(curl -s https://api.github.com/repos/docker/compose/releases/latest | grep 'tag_name' | cut -d\" -f4)
+  # Remove and reinstall latest docker-compose
+  - sudo rm /usr/local/bin/docker-compose
+  - curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
+  - chmod +x docker-compose
+  - sudo mv docker-compose /usr/local/bin
+script:
+  # Build project
+  - docker-compose build --build-arg DOCKER_PHP_VERSION=$BUILD web
+  - docker-compose up -d
+  - docker ps
+  - docker-compose down
+

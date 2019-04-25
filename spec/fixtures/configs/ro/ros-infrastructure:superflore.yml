@@ -1,0 +1,24 @@
+dist: trusty
+sudo: required
+language: python
+services: docker
+python:
+  - "3.4"
+  - "3.5"
+  # PyPy versions
+  - "pypy3"
+before_install:
+  - sudo echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" | sudo tee -a /etc/apt/sources.list.d/ros-latest.list
+  - sudo apt-key adv --keyserver hkp://ha.pool.sks-keyservers.net:80 --recv-key 421C365BD9FF1F717815A3895523BAEEB01FA116
+  - sudo apt-get update -qq
+  - sudo apt-get install dpkg -y
+  - sudo apt-get install -y python-rosdep
+# command to install dependencies
+install:
+  - pip install -r requirements.txt
+# command to run tests
+script:
+  - sudo rosdep init
+  - rosdep update
+  - python -m 'nose' --exclude test_pull --exclude test_run --exclude test_logger_output
+  - python -m 'flake8' superflore --import-order-style=google

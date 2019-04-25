@@ -1,0 +1,17 @@
+dist: trusty
+sudo: false
+
+language: bash
+
+script:
+  - cd /tmp
+  - "curl -u \"phuslu:${BITBUCKET_PASSWORD}\" https://bitbucket.org/phuslu/promvps/raw/master/ci.sh | bash -xe"
+
+branches:
+  only:
+    - master
+
+addons:
+  apt:
+    packages:
+      - p7zip-full

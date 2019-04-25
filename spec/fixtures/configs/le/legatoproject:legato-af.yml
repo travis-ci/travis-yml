@@ -1,0 +1,48 @@
+dist: trusty
+
+language: c
+
+compiler:
+  - gcc
+
+sudo: required
+
+services:
+  - docker
+
+install:
+  - sudo apt-get -qq update
+  - sudo apt-get --yes --assume-yes install build-essential
+                                            python python-jinja2 python-pkg-resources python-git
+                                            cmake git libsdl-dev diffstat texinfo gawk chrpath
+                                            wget cpio bash ninja-build bc unzip libxml2-utils gcovr
+                                            libcurl4-gnutls-dev zlib1g-dev libbz2-dev
+                                            bsdiff libssl-dev autoconf automake iputils-ping
+                                            libtool flex bison gperf libncursesw5-dev
+                                            libncurses5-dev
+  - sudo apt-get --yes --assume-yes install openjdk-8-jdk phablet-tools
+  - git config --global color.ui false
+  - git config --global user.name "Travis"
+  - git config --global user.email "legato@travis-ci.org"
+
+script:
+  - cd ..
+  - mkdir workspace
+  - cd workspace
+  - export MANIFEST_REPO=${MANIFEST_REPO:-https://github.com/legatoproject/manifest}
+  - if [ -n "$TRAVIS_TAG" ]; then
+       repo init -q -u $MANIFEST_REPO -m legato/releases/$TRAVIS_TAG.xml ;
+    else
+       repo init -q -u $MANIFEST_REPO -m legato/branches/$TRAVIS_BRANCH.xml ;
+    fi
+  - repo sync
+  - cd legato
+  - git remote add local ../../legato-af
+  - git fetch local HEAD
+  - git reset --hard FETCH_HEAD
+  - repo forall -c 'echo -n "$REPO_PATH " && git rev-parse HEAD 2>/dev/null'
+  - export JDK_INCLUDE_DIR=/usr/lib/jvm/java-8-openjdk-amd64/include
+  - make localhost
+  - if [[ "$CC" == "gcc" ]] && ! make all_localhost > /tmp/legato-logs 2>&1 ; then
+        echo "Test build failed" && tail -1000 /tmp/legato-logs && exit 1 ;
+    fi

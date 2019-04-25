@@ -1,0 +1,67 @@
+sudo: false
+language: cpp
+
+addons:
+  apt:
+    packages:
+      - libboost-all-dev
+      #- sdcc
+      - build-essential
+      - g++-arm-linux-gnueabihf
+    
+env:
+  global:
+    - SDCC=3.3.0
+    - SDCC_DIR=/tmp/sdcc-$SDCC
+
+cache:
+  directories:
+    - $SDCC_DIR
+
+before_install:
+  - export PATH=$PATH:$SDCC_DIR/bin
+  - chmod +x ./scripts/build-sdcc.sh
+
+install:
+  - ./scripts/build-sdcc.sh
+
+before_script:
+  - sdcc --version
+
+script:
+  - (cd ./firmware/ver1 && make clean all)
+  - (cd ./firmware/ver2 && make clean all)
+  - (cd ./tool/test && make clean all)
+  - (cd ./tool && make clean all 
+    && (cd build_GCC 
+      && touch ${TRAVIS_COMMIT}.commit 
+      && tar zvcf ubuntu.$TRAVIS_BRANCH.tar.gz *.out *.commit) )
+  - (cd ./tool && BUILD_DIR=build_GCC_ARM CXX=arm-linux-gnueabihf-g++ make clean all 
+    && (cd build_GCC_ARM 
+      && touch ${TRAVIS_COMMIT}.commit 
+      && tar zvcf raspi.$TRAVIS_BRANCH.tar.gz *.out *.commit) )
+
+before_deploy:
+  - sed -e s%@TIMESTAMP@%"`ruby -e 'require "time"; print Time::parse(\`git log --format="%cd" -n 1\`.chomp).strftime("%Y%m%d_%H%M%S")'`"% .travis.bintray.json.in > .travis.bintray.json
+  - cat .travis.bintray.json
+
+deploy:
+  - provider: releases
+    api_key:
+      secure: $GITHUB_TOKEN
+    file: 
+      - ./firmware/ver1/build_by_sdcc/NinjaScanLight.hex
+      - ./firmware/ver1/build_by_sdcc/NinjaScanLight.omf
+      - ./firmware/ver2/build_by_sdcc/NinjaScanLight2.hex
+      - ./firmware/ver2/build_by_sdcc/NinjaScanLight2.omf
+    skip_cleanup: true
+    all_branches: true  # https://github.com/travis-ci/travis-ci/issues/1675
+    on:
+      tags: true
+  - provider: bintray
+    skip_cleanup: true
+    user: fenrir-naru
+    key:
+      secure: $BINTRAY_TOKEN
+    file: .travis.bintray.json
+    on: master

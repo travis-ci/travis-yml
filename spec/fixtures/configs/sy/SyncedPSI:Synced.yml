@@ -1,0 +1,70 @@
+language: ruby
+dist: trusty
+env:
+  global:
+  - PGPORT=5433
+  - ES_VERSION=5.6.9 ES_DOWNLOAD_URL=https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-${ES_VERSION}.tar.gz
+  - TRAVIS_NODE_VERSION=8.11.2
+before_install:
+  - sudo apt-get -qq update
+  - sudo apt-get install -y libjpeg-dev libpng-dev libtiff-dev libwebp-dev
+  - curl -o- -L https://yarnpkg.com/install.sh | bash -s -- --version 1.10.1
+  - export PATH="$HOME/.yarn/bin:$PATH"
+  - gem install -v 1.17.3 bundler
+install:
+  - wget ${ES_DOWNLOAD_URL}
+  - tar -xzf elasticsearch-${ES_VERSION}.tar.gz
+  - ./elasticsearch-${ES_VERSION}/bin/elasticsearch-plugin install analysis-smartcn
+  - ./elasticsearch-${ES_VERSION}/bin/elasticsearch &
+  - rm -rf ~/.nvm && git clone https://github.com/creationix/nvm.git ~/.nvm && (cd ~/.nvm && git checkout `git describe --abbrev=0 --tags`) && source ~/.nvm/nvm.sh && nvm install $TRAVIS_NODE_VERSION
+addons:
+  postgresql: "10"
+  apt:
+    packages:
+    - postgresql-10
+    - postgresql-client-10
+services:
+  - redis-server
+  - neo4j
+branches:
+  only:
+  - master
+  - develop
+cache:
+  yarn: true
+  bundler: true
+  directories:
+    - node_modules
+bundler_args: "--jobs=3 --retry=3 --without development production"
+rvm:
+  - 2.5
+node_js:
+  - "node"
+notifications:
+  email: false
+  slack:
+    rooms:
+      secure: X2VvyOob5kLVVBFEYZlQeCIwAIsIP0/m0jGd5kXFPdjpKSrykdvJoJsAFPJbhvNmC3IlFsWGweqVFSWBHgTjmP74vbO3ktRN7shtsFUlHldznnnN9fgMlbu8rvOjpmwOzk3sCmLizKgWpZhOZI8d/bnHQJlK/nLgtfIW1HW3tY+LVgX8qItU0hjFWLKyTeUsTSB9YFzKumrMOmM7+n7bnxtiu9lb3NPOvhd7X/imCHXn7q3e9FAdhiLgBJd/pRpl+F4IVZsiCZuzV4yd0cLnZHlIzhRBTWD6s0rNToxhwlNATRR8tV9IzmwKzAInFPX6Yid9l0cGdmWDOXH/pQgO1cM0tt5r5HV8Brlqvp+m/yx5O/Z61eVvHJctGU5P7g3C480nW5rq5mndFUd4opyxVxaie/aUx7dqw5atoGWHXyomDq+n42UiTydHmXiNlT1GZWu3/U1bUO+Ve/khLEzPGeLf+VPvhxTYd/UkGfe/a2cdNx2qg5n21yp4pZGgYkSOtmcxJ+x7l0OTdf6/PgqzhJzPP83f4IHriIJl2YMOzyWxQD3zo1eUtTyfk2cDCQ6pG1hwtxYGeCftK/lZDMzyxbtHxMnT7BJ9viOEzZhdDyhbPzQH4vKl/OrCQQfQAboLI6/MGoOHPgQqT/trdZCeeaSl6TqGmJuK+n75PSf1ZGE=
+    on_success: change
+before_script:
+  - yarn install --pure-lockfile
+  - bundle install --jobs=3 --retry=3 --without development --path=${BUNDLE_PATH:-vendor/bundle}
+  - bundle exec rake db:create db:migrate
+  - echo 'waiting for elasticsearch to come up'; wget -q --waitretry=1 --retry-connrefused -T 10 -O - http://127.0.0.1:9200
+script:
+  - bundle exec rspec spec
+  - yarn test
+
+deploy:
+  - provider: script
+    skip_cleanup: true
+    script: rvm use $TRAVIS_RUBY_VERSION do scripts/deploy.sh production
+    on:
+      branch: master
+      tags: false
+  - provider: script
+    skip_cleanup: true
+    script: rvm use $TRAVIS_RUBY_VERSION do scripts/deploy.sh staging
+    on:
+      branch: develop
+      tags: false

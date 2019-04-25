@@ -1,0 +1,32 @@
+language: ruby
+
+rvm:
+- 2.3.3
+
+install:
+- bundle install
+
+script:
+- |
+  if [[ $TRAVIS_PULL_REQUEST != "false" ]]; then
+    bash CI_scripts/pullrequest.sh
+  else
+    bash CI_scripts/merge.sh
+  fi
+
+after_success:
+- CI_scripts/convert_to_pages.sh
+
+env:
+  matrix:
+    secure: EagvD8BJ6We72U7uw91rcbOmHXQW1MeNEZYqF8BbFEZGMZX6omoLdVf3c/uuu2XfZHO3ADC1t4r+x6zariIyLXpfGOyOI6ohurzFC85GCUFiGFUipIXAbLMmNuSprdf65Bayi1vozAbOTZbgtVGudHJWucEV7+i3KUDBxFgyl/J7lKUPMzXRAovuPoAGSCMPovsK3l1hE97/bp7yxdTKDt1STx4OiYIpgA7hDhiZqknYQngUfPzesC080I3aUXmzyPxZpEcHjC4rT1BQYipmINLAEIe+5ZJqL5l5WgwY9IFyu74O+Kx8kUMLzsdtwTHFMhJofNpxea1qRVFl/GEQMBN6Jlm93cAfTeYwt5z++UCqu8+auoxhkWgw42BO7BEbex3SCNcAVMx4U3fVlFpUWBsCbR1rG7Kq4WaMjyS/agp4gQV7OWkCxbDC58ie8+Eb5MTzg2GaW/aZHVsyYamubyrY4CKDtPC3mEwhFYDKTEhBRZP2yXyFliMrDFO9/nEvN+CquNygPiaP9ddwzCSG11scg1l9r831XkfSRAoVjXj5CDPk83tASJne/dTueLq8mt+SslCGzGDvfA42AdAuj0y8B2zGnChCN+yoZTYG7LwvQ6HG4vXQEHPdpLW3U4r1DEZOETp8t75ZfeTyXjlNWVNDA2vNiMyXgSniTDOzH3Y=
+  global:
+    secure: 0MhqTChrHm0I007hRL9IVqdUWduIMRTnSLXDbrP8/cZir6Hsh2+CcQwvsP8uWYrPkBxZMRu+iaMUtsdNdh9JvWsTnIT8EVWfTaau87q9/8xue8/CBSaZQ8qPeSdUb4GSvy4cbrWAicEnKAfmnwMKaRcM46sEIf4SYQ91qo911n3yB3ZtjZ7CtVyrdJFEACQe0eh8mGccbBkMzgqmPu1SOfv+AsFR9MtmgABWt7DQRpkTSiUeuuxo6wzl4UxXhRghn0oO5llXiQbOZvlQK7Rh6MaLljsAcj4XacjaE8jX8nU7eV7ihUTSzQMSV5lT+CNflREdMa4qSO14UVpqnVAfa5SSCCaA0ryolZNEYhLwzku+vVcd/Fe+DR81K/GDW0RZyRs/HYFTboRHuKfGGCvnwBH0UkwjL/bYGVQ/DxKoC5CGumQ1STbFVKFgli6j0EnXwsGp6WyYlEKMAoDSPTOM0oQy8B0drJVriUJXuuUVy6aKLBq7t+M2hJZkFQVl/Wf2+HnXmymSj8kDY7ZjenlF6FmFOcZgTefpH6FuyTqfVQDO48Jl12anozYyrxrqvpI6YJYKXALajoPbm2dpHVLUVt+xpeoMu7zM22oWn766RBqgNuE/AmV6IiTxiKCj3vc+336a+E4sGt0Wsy/ATO/ChdGoP1wf0BjjcSO3PuYfYCg=
+
+deploy:
+  provider: pages
+  github_token: $PAGES_API_KEY
+  skip_cleanup: true
+  local_dir: docs
+  repo: stackiq/stackiq.github.io
+  target_branch: master

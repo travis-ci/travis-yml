@@ -1,0 +1,30 @@
+language: java
+sudo: required
+services:
+  - couchdb
+  - mysql
+addons:
+  postgresql: "9.6"
+install:
+  - echo "skip" # or anything that returns 0 status.
+  - sudo updatedb #Giving couchdb time to start.
+  - sudo netstat -tuplen # listing all the port for debug purpose.
+before_script:
+  - curl -X PUT http://localhost:5984/_config/admins/rootuser -d '"adminpass"'
+  - echo "USE mysql;\nUPDATE user SET password=PASSWORD('VA1913wm') WHERE user='root';\nFLUSH PRIVILEGES;\n" | mysql -u root 
+  - psql -c "CREATE ROLE opensrp_admin WITH LOGIN SUPERUSER PASSWORD 'admin';" -U postgres
+  - psql -c "CREATE DATABASE opensrp_test WITH OWNER = opensrp_admin;" -U postgres
+  - chmod +x assets/migrations/run_mybatis_migrations.sh
+  - sudo ./assets/migrations/run_mybatis_migrations.sh
+  - sudo mkdir -p /opt/multimedia
+  - sudo chown -R travis:travis /opt/multimedia
+script:
+  - javac -version
+  - java -version
+  - mvn --version
+  - mvn clean test
+notifications:
+  slack:
+    secure: Ueku2w/RdSfh1zEDErTbHi+hRx154fH10ykGcfrXPXhTVtWopG73BGDRKfVgU1MCokEo+2jtkRAuJB29R1PV8E3845wWJFs9ZPGcl0rjfx3qP2G/bCuARRHmBJ33YStROvaVF3ppNjJau7VinIF3giem+4WgtQ8KPmqqviDg8Tw=
+after_success:
+  - mvn clean test jacoco:report coveralls:report 

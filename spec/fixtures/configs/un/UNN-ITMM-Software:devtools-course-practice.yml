@@ -1,0 +1,49 @@
+notifications:
+  email: false
+
+language: cpp
+
+sudo: required
+dist: trusty
+
+addons:
+  apt:
+    packages:
+      - valgrind
+      - cppcheck
+
+env:
+  global:
+    - CTEST_EXT_COLOR_OUTPUT=TRUE
+    - CTEST_BUILD_FLAGS=-j4
+    - CTEST_WITH_SUBMIT=TRUE
+
+matrix:
+  include:
+    - os: linux
+      compiler: gcc
+      env: CTEST_TARGET_SYSTEM=Linux-gcc    CTEST_MODEL=Coverage
+    - os: linux
+      compiler: gcc
+      env: CTEST_TARGET_SYSTEM=Linux-gcc    CTEST_MODEL=MemCheck
+    - os: linux
+      compiler: gcc
+      env: CTEST_TARGET_SYSTEM=Linux-gcc    CTEST_MODEL=CodeCheck
+    - os: osx
+      compiler: clang
+      env: CTEST_TARGET_SYSTEM=MacOS-clang  CTEST_MODEL=Experimental
+
+install:
+  - if [ "${CTEST_MODEL}" == "Coverage" ]; then
+        wget https://codecov.io/bash -O $HOME/codecov;
+        chmod +x $HOME/codecov;
+    fi
+
+script:
+  - ctest -VV -S devtools_test.cmake
+
+after_success:
+  # Push coverage info on codecov.io
+  - if [ "${CTEST_MODEL}" == "Coverage" ]; then
+        $HOME/codecov -p dashboard/build;
+    fi

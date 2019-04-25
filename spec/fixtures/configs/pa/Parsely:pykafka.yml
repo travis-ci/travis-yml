@@ -1,0 +1,98 @@
+language: python
+sudo: required
+cache:
+  directories:
+    - $HOME/.cache/pip
+    - $HOME/.ccache
+matrix:
+  include:
+    - env: TOX_ENV=py27 KAFKA_VERSION=0.8.2.2
+      python: 2.7
+    - env: TOX_ENV=py27 KAFKA_VERSION=1.0.1
+      python: 2.7
+    - env: TOX_ENV=py34 KAFKA_VERSION=0.8.2.2
+      python: 3.4
+    - env: TOX_ENV=py34 KAFKA_VERSION=1.0.1
+      python: 3.4
+    - env: TOX_ENV=py35 KAFKA_VERSION=0.8.2.2
+      python: 3.5
+    - env: TOX_ENV=py35 KAFKA_VERSION=1.0.1
+      python: 3.5
+    - env: TOX_ENV=py36 KAFKA_VERSION=0.8.2.2
+      python: 3.6
+    - env: TOX_ENV=py36 KAFKA_VERSION=1.0.1
+      python: 3.6
+    - env: TOX_ENV=pypy KAFKA_VERSION=0.8.2.2
+      python: pypy
+    - env: TOX_ENV=pypy KAFKA_VERSION=1.0.1
+      python: pypy
+    - env: TOX_ENV=py27-gevent KAFKA_VERSION=0.8.2.2
+      python: 2.7
+    - env: TOX_ENV=py27-gevent KAFKA_VERSION=1.0.1
+      python: 2.7
+    - env: TOX_ENV=py36-gevent KAFKA_VERSION=0.8.2.2
+      python: 3.6
+    - env: TOX_ENV=py36-gevent KAFKA_VERSION=1.0.1
+      python: 3.6
+env:
+  global:
+      - PATH="/usr/lib/ccache:$PATH"
+      - KAFKA_BIN="$HOME/kafka-bin"
+
+addons:
+  apt:
+    packages:
+    - libev-dev
+    - libsnappy-dev
+    - zlib1g-dev  # for librdkafka
+
+notifications:
+  email:
+    - keith@parsely.com
+    - emmett@parsely.com
+    - yungchin@yungchin.nl
+
+install:
+    - |
+        if [ "$TRAVIS_PYTHON_VERSION" = "pypy" ]; then
+          export PYENV_ROOT="$HOME/.pyenv"
+          if [ -f "$PYENV_ROOT/bin/pyenv" ]; then
+            pushd "$PYENV_ROOT" && git pull && popd
+          else
+            rm -rf "$PYENV_ROOT" && git clone --depth 1 https://github.com/yyuu/pyenv.git "$PYENV_ROOT"
+          fi
+          export PYPY_VERSION="5.6.0"
+          "$PYENV_ROOT/bin/pyenv" install --skip-existing "pypy-$PYPY_VERSION"
+          virtualenv --python="$PYENV_ROOT/versions/pypy-$PYPY_VERSION/bin/python" "$HOME/virtualenvs/pypy-$PYPY_VERSION"
+          source "$HOME/virtualenvs/pypy-$PYPY_VERSION/bin/activate"
+        fi
+    - pip install -U pip setuptools
+    - pip install codecov kazoo tox testinstances
+    - wget https://github.com/edenhill/librdkafka/archive/0.9.1.tar.gz
+    - tar -xzf 0.9.1.tar.gz
+    - cd librdkafka-0.9.1/ && ./configure --prefix=$HOME
+    - make -j 2 && make -j 2 install && cd -
+
+before_script:
+    - export C_INCLUDE_PATH=$HOME/include:$C_INCLUDE_PATH
+    - export LIBRARY_PATH=$HOME/lib:$LIBRARY_PATH
+    - export LD_LIBRARY_PATH=$HOME/lib:$LD_LIBRARY_PATH
+    - export CFLAGS="-coverage"
+    - TEMPFILE=`tempfile`
+    - python -m pykafka.test.kafka_instance 3 --kafka-version $KAFKA_VERSION --download-dir $KAFKA_BIN --export-hosts $TEMPFILE &
+    - while true; do sleep 1; echo "Waiting for cluster..."; if [[ `grep ZOOKEEPER $TEMPFILE` ]]; then break; fi; done
+    - export `grep BROKERS $TEMPFILE`
+    - export `grep BROKERS_SSL $TEMPFILE`
+    - export `grep ZOOKEEPER $TEMPFILE`
+
+script:
+    - tox -e $TOX_ENV tests
+
+# Calculate coverage on success
+after_success:
+    # in the next release of codecov, these --gcov-args are probably automatic
+    - codecov --gcov-args="-b -c -o $(find . -type f -name '*.gcno' -exec dirname {} \;)"
+
+branches:
+  only:
+    - master

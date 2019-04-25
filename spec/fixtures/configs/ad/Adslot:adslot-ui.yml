@@ -1,0 +1,24 @@
+sudo: required
+language: node_js
+node_js:
+  - '8'
+  - '10'
+addons:
+  chrome: stable
+before_script:
+  - sudo chown root /opt/google/chrome/chrome-sandbox
+  - sudo chmod 4755 /opt/google/chrome/chrome-sandbox
+  - npm install -g npm@6.9.0
+script:
+  - npm -v
+  - commitlint-travis
+  - "! grep -R --exclude-dir='*/node_modules/*' --include=package-lock.json 'http:' ."
+  - npm test
+  - npm run dist
+after_success:
+  - npm run codecov
+notifications:
+  slack:
+    on_pull_requests: false
+    rooms:
+      secure: H48Xe12exmgzt0KchgGDtp/7+tKHctD/g02/Oo/aIZivJtAV1osdMEkEWu2RVhAZvg1PIBXcUJtC057EYVvXZn3d/EL8+fR4pgCnt7IQf5cdrPm2hgKo/4sDtUpxqQ/j1lDwU2h1kcoNPXajnY/aKs4g5m++O6K10JPUJpsgQ25Br7YqYPdJsABV5z7aB1w65dy6lmR7DMv6Q2LhWTzPoahNqGXGHcP8wAq/48Rxkm3O5iQFIxoNS6MVvpBgdgHjDNjSfMwRIwuBey6oyvfLjY0i7bBy/HBx5GoqiaB+ADcQ1Nmjz7RQARuyC/1+V6RV9DNXxBmKATl6WrfIj8WYWvATCtipjuXhVE6cooElyyCTBN0MU0CjRAnDaKQ0KKLjEJxUi1Aq2t9Teb6XyCZeTieXfsoh30sRhCbM/rhCyvfTPeOSs3OcuTU/QHS8rQoeO2LFcbr/Wx6v8oM65L8MezKw71MD3G8LWmiTLzVzTRykQz4XAOiswjM3Dv/qegWhg6S8DpmCSysdkMUpvcbxKj2DbnxU1uhx6EGTEgvco8gmeNHaVkNtT1sFF4IOVT1QQ0qja3Oj8D4fNXzvyfm/h8iNt9y9Wvw26FrPDVjARG5FuLBWE6KNll4YIEgjxspd+XqfbGrvO3k4nDqO1wvG3dMx+2eCtJwglAhhZxWNScw=

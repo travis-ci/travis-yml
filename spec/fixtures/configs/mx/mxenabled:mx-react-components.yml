@@ -1,0 +1,13 @@
+language: node_js
+node_js: "8.12"
+sudo: false
+script:
+  - npm ci
+  - npm run build
+  - npm audit
+  - npm test
+  - npm run bundlesize
+  - cd docs
+  - npm ci
+  - npm audit
+  - npm run bundlesize

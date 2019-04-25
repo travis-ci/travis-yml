@@ -1,0 +1,110 @@
+# see http://about.travis-ci.org/docs/user/languages/php/ for more hints
+language: php
+
+# list any PHP version you want to test against
+php:
+  # aliased to a recent 5.6.x version
+  - 5.6
+
+env:
+  - mysql
+
+services:
+  - mysql
+
+before_install:
+  - sudo apt-get update
+  - sudo apt-get -y install aptitude
+  - sudo apt-get -y install apache2 libapache2-mod-php5 php5-mysqlnd php5-gd php-pear php5-curl lynx-cur libxml2-dev software-properties-common tree perl
+  - sudo pip install --upgrade pycrypto urllib3
+  - sudo pip install simple-crypt MySQL-python pjson boto numpy boto3
+  - git clone https://github.com/UMMS-Biocore/dolphin-bin.git /home/travis/build/dolphin-bin
+  - git clone https://github.com/UMMS-Biocore/dolphin-genome-data.git /home/travis/build/dolphin-genome-data
+  - sudo sed -i '$ a\export PATH=$PATH:/home/travis/build/dolphin-bin' /etc/apache2/envvars
+  - export PATH=$PATH:/home/travis/build/dolphin-bin
+  - sudo mkdir -p /var/www/.java/.systemPrefs
+  - sudo mkdir /var/www/.java/.userPrefs
+  - sudo chmod -R 755 /var/www/.java
+  - sudo chown -R ${APACHE_RUN_USER}:${APACHE_RUN_GROUP} /var/www
+  - sudo sed -i '$ a\export JAVA_OPTS="-Djava.util.prefs.systemRoot=/var/www/.java Djava.util.prefs.userRoot=/var/www/.java/.userPrefs\"' /etc/apache2/envvars
+  - sudo cat /etc/apache2/envvars
+  - sudo wget https://phar.phpunit.de/phpunit-5.6.0.phar
+  - sudo chmod +x phpunit-5.6.0.phar
+  - sudo mv phpunit-5.6.0.phar /usr/local/bin/phpunit
+  - phpunit --version
+
+  
+install:
+  - git clone https://github.com/UMMS-Biocore/dolphin-tools.git /home/travis/build/dolphin_tools
+  - git clone https://github.com/UMMS-Biocore/dolphin-ui.git /home/travis/build/dolphin-ui
+
+before_script:
+  - sudo a2enmod actions
+  - sudo a2enmod rewrite
+  - sudo service apache2 restart
+  - mysql -u root -e "CREATE USER 'myproject'@'localhost' IDENTIFIED BY 'mypass'"
+  - mysql -u root -e "GRANT ALL PRIVILEGES ON *.* TO 'myproject'@'localhost' WITH GRANT OPTION;"
+  # update database
+  - sudo gzip -d db/biocoredb.sql.gz
+  - sudo mysql -e "CREATE DATABASE biocore;" -uroot
+  - sudo mysql -e "CREATE USER 'bioinfo'@'localhost' IDENTIFIED BY 'bioinfo2013'; GRANT ALL ON *.* TO 'bioinfo'@'localhost';" -uroot
+  - sudo mysql --user=bioinfo --password=bioinfo2013 biocore < db/biocoredb.sql
+  - sudo mysql -e "use biocore; INSERT INTO amazon_credentials ( aws_access_key_id, aws_secret_access_key, bucket ) VALUES ( 'test_access', 'test_secret', 'test_bucket' );" -uroot
+  - sudo mysql -e "use biocore; INSERT INTO ngs_organism (organism, organism_symbol) VALUES ('mousetest', 'mm10'); UPDATE ngs_samples SET organism_id = 1;" -uroot
+  # other dependencies
+  - sudo mkdir -p /home/travis/build/pub /home/travis/build/logs tmp/files tmp/logs tmp/logs/run4 tmp/logs/run5 tmp/logs/run6 tmp/logs/run7 tmp/logs/run8
+  - sudo ln -s $(pwd) /var/www/dolphin
+  - sudo ln -s /home/travis/build/pub public/pub
+  - printf "[Dolphin]\nSALT=test123\nPEPPER=test456\nMASTER=travis\nAMAZON=travis\nENCODE_ACCESS=test789\nENCODE_SECRET=test10\nVERIFY=test11\nDB_NAME=biocore\nDB_USER=bioinfo\nDB_PASSWORD=bioinfo2013\nDB_HOST=localhost\nDB_PORT=3306" > config/.salt
+  - export PATH=$PATH:/usr/local/bin/dolphin-bin
+  - sudo chmod -R 777 /home
+  - DOLPHIN_PARAMS_SECTION=Travis
+ 
+script:
+  - phpunit unitTesting/ngsimport_unittest.php
+  #	ajax
+  - phpunit unitTesting/ajax/tablegenerator_unittest.php
+  - phpunit unitTesting/ajax/statquerydb_unittest.php
+  - phpunit unitTesting/ajax/sessionrequests_unittest.php
+  - phpunit unitTesting/ajax/profiledb_unittest.php
+  - phpunit unitTesting/ajax/ngsquerydb_unittest.php
+  - phpunit unitTesting/ajax/ngsfastlanedb_unittest.php
+  - phpunit unitTesting/ajax/ngsalterdb_unittest.php
+  - phpunit unitTesting/ajax/ngs_tables_unittest.php
+  - phpunit unitTesting/ajax/kill_pid_unittest.php
+  - phpunit unitTesting/ajax/initialmappingdb_unittest.php
+  - phpunit unitTesting/ajax/dolphinfuncs_unittest.php
+  - phpunit unitTesting/ajax/dataservice_unittest.php
+  - phpunit unitTesting/ajax/datajobs_unittest.php
+  - phpunit unitTesting/ajax/dataerrorlogs_unittest.php
+  - phpunit unitTesting/ajax/dashboardquerydb_unittest.php
+  - phpunit unitTesting/ajax/browse_edit_unittest.php
+  - phpunit unitTesting/ajax/admindashboardquerydb_unittest.php
+  - phpunit unitTesting/ajax/adminstatquerydb_unittest.php
+  #	api
+  - phpunit unitTesting/api/funcs_unittest.php
+
+after_script:
+  - mysql -e "show databases;" -uroot
+  - mysql -e "use biocore; show tables;" -uroot
+  - mysql -e "use biocore; SELECT * FROM ngs_samples;" -uroot
+  - mysql -e "use biocore; SELECT * FROM ngs_lanes;" -uroot
+  - mysql -e "use biocore; SELECT * FROM ngs_experiment_series;" -uroot
+  - mysql -e "use biocore; SELECT * FROM ngs_dirs;" -uroot
+  - mysql -e "use biocore; SELECT * FROM ngs_runlist;" -uroot
+  - mysql -e "use biocore; SELECT * FROM ngs_runparams;" -uroot
+  - mysql -e "use biocore; SELECT * FROM report_list;" -uroot
+  - mysql -e "use biocore; SELECT * FROM ngs_createdtables;" -uroot
+  - mysql -e "use biocore; SELECT * FROM amazon_credentials;" -uroot
+  - mysql -e "use biocore; SELECT * FROM groups;" -uroot
+  - mysql -e "use biocore; SELECT * FROM user_group_requests;" -uroot
+  - mysql -e "use biocore; SELECT * FROM ngs_wkeylist;" -uroot
+  - mysql -e "use biocore; SELECT * FROM ngs_organism;" -uroot
+  - mysql -e "use biocore; SELECT * FROM ngs_fastq_files" -uroot
+  - mysql -e "use biocore; SELECT * FROM galaxy_runs" -uroot
+  - mysql -e "use biocore; SELECT * FROM users" -uroot
+  - mysql -e "use biocore; SELECT * FROM jobs" -uroot
+  - mysql -e "use biocore; SELECT * FROM services" -uroot
+  - mysql -e "use biocore; SELECT * FROM workflows" -uroot
+  - mysql -e "use biocore; SELECT * FROM service_run" -uroot
+  

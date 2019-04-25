@@ -1,0 +1,19 @@
+language:
+  - node_js
+  - ruby
+
+node_js:
+  - "node"
+
+sudo: false
+
+install:
+  - travis_retry gem install s3_website -v 3.4.0
+  - travis_retry npm install
+script:
+  - "travis_retry npm test"
+  - ./s3_deploy.sh
+cache:
+  bundler: true
+  directories:
+    - node_modules

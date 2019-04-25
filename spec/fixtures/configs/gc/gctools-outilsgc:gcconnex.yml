@@ -1,0 +1,63 @@
+language: php
+php:
+ - 5.6
+
+# This helps builds go quicker on Travis since it enables caching of dependencies
+# http://docs.travis-ci.com/user/workers/container-based-infrastructure/
+sudo: false
+
+matrix:
+  include:
+    # Lint checks for PHP code and composer.json
+    - php: 5.6
+      env: VARIA=true
+      install:
+       - phpenv rehash
+       - composer self-update
+       - composer install
+      script:
+       - composer validate
+
+    # Build and test javascript
+    - php: 5.6
+      env: VARIA=true
+      dist: precise
+      install:
+       - npm install
+      script:
+       - npm test
+
+    # End to end tests
+    - php: 5.6
+      env: E2E=true
+      install:
+       - composer self-update
+       - composer install
+       - mysql -e 'create database elgg;'
+       - echo "USE mysql; UPDATE user SET password=PASSWORD('password') WHERE user='root'; FLUSH PRIVILEGES;" | mysql -u root
+       - mkdir "${HOME}/elgg_data/"
+       - php -f ./install/cli/travis_installer.php
+       - php -S localhost:8888 index.php &
+       - sleep 3 # give Web server some time to bind to sockets, etc
+      script:
+       - curl -o - http://localhost:8888/ | grep "<title>Elgg Travis Site</title>"
+       - phpunit --coverage-clover=coverage.clover
+      after_script:
+       # Report unit test coverage metrics to scrutinizer
+       - wget https://scrutinizer-ci.com/ocular.phar
+       - php ocular.phar code-coverage:upload --format=php-clover coverage.clover
+
+services:
+ - mysql
+
+install:
+ - composer self-update
+ - composer install
+ - mysql -e 'create database elgg;'
+ - echo "USE mysql; UPDATE user SET password=PASSWORD('password') WHERE user='root'; FLUSH PRIVILEGES;" | mysql -u root
+ - mkdir "${HOME}/elgg_data/"
+ - php -f ./install/cli/travis_installer.php
+
+script:
+ - ./vendor/bin/phpunit
+ - php -f ./engine/tests/suite.php

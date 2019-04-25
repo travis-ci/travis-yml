@@ -1,0 +1,31 @@
+os:
+  - linux
+
+dist:
+  - trusty
+
+sudo:
+  - required
+
+services:
+  - docker
+
+before_script:
+  - sudo apt-get install -y linux-headers-$(uname -r)
+  - docker pull ubuntu:cosmic
+  - docker build --build-arg https_proxy=${https_proxy} -t test-cosmic .
+  - docker run -it -d --privileged -v /usr/src:/usr/src -v /lib/modules:/lib/modules -v /sys/devices/system/node:/sys/devices/system/node --name test-nff-go test-cosmic /bin/bash
+
+script:
+  - docker exec -i test-nff-go go mod download
+  - docker exec -i test-nff-go make
+  # Build standalone examples
+  - docker exec -i test-nff-go bash -c "cd examples && make gopacketParserExample && cd .."
+  - docker exec -i test-nff-go bash -c "cd examples && make nffPktgen && cd -"
+  - docker exec -i test-nff-go make -C examples/dpi
+  # Run unit tests
+  - docker exec -i test-nff-go sysctl -w vm.nr_hugepages=1024
+  - docker exec -i test-nff-go sh -c 'echo 1024 > /sys/devices/system/node/node0/hugepages/hugepages-2048kB/nr_hugepages'
+  - docker exec -i test-nff-go mkdir /mnt/huge
+  - docker exec -i test-nff-go mount -t hugetlbfs nodev /mnt/huge
+  - docker exec -i test-nff-go make citesting

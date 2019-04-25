@@ -1,0 +1,48 @@
+language: java
+
+matrix:
+  include:
+    - os: linux
+      jdk: oraclejdk8
+# the build for osx still does not work, DYLD_LIBRARY_PATH does not solve the problem
+#    - os: osx
+#      osx_image: xcode8 # fixing the issue with oraclejdk8 on macos
+
+python:
+    - "2.7"
+
+# required to compile z3
+addons:
+  apt:
+    packages:
+    - gcc-4.7
+    - g++-4.7
+
+cache:
+  directories:
+    - 3rdparty/z3
+    - $HOME/.m2
+
+# locally compile z3 and make it available via LD_LIBRARY_PATH
+before_install:
+  - pushd 3rdparty
+  - ./install-local.sh
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:"$PWD/lib"; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:"$PWD/lib"; fi
+  - popd
+
+branches:
+  only:
+  - master
+  - unstable
+
+script:
+    - mvn package && NO_MVN=1 ./test/run-integration && NO_MVN=1 ./test/run-tlaplus-suite
+
+notifications:
+    email:
+      recipients:
+        apalache-build@forsyte.at
+      on_success: change
+      on_failure: always
+

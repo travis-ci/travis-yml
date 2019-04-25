@@ -1,0 +1,61 @@
+language: cpp
+sudo: false
+
+matrix:
+  include:
+  - os: linux
+    env:
+    - _CC: gcc-4.8
+    - _CXX: g++-4.8
+    - CMAKE_URL=http://cmake.org/files/v3.8/cmake-3.8.2-Linux-x86_64.tar.gz
+    - CMAKE_DIRNAME=cmake-3.8.2-Linux-x86_64
+    addons:
+      apt:
+        sources:
+          - ubuntu-toolchain-r-test
+        packages:
+          - gcc-4.8
+          - g++-4.8
+  - os: osx
+    osx_image: xcode8
+    env:
+    - _CC: clang
+    - _CXX: clang++
+    - CMAKE_URL=http://cmake.org/files/v3.8/cmake-3.8.2-Darwin-x86_64.tar.gz
+    - CMAKE_DIRNAME=cmake-3.8.2-Darwin-x86_64/CMake.app/Contents
+
+before_install:
+  # Enforce whitespace guidelines
+  - ./scripts/whitespace_check.sh
+
+  # Enforce Leap Motion copyright notice
+  - ./scripts/copyright_check.sh
+
+  # Verify that our version numbers all line up
+  - ./scripts/version_number_updated.sh
+
+install:
+  # CMake 3.4
+  - curl -L $CMAKE_URL | tar xz
+
+before_script:
+  - export CC=$_CC
+  - export CXX=$_CXX
+  - $CXX --version
+  - export CPATH=/usr/include/c++/4.8:/usr/include/x86_64-linux-gnu/c++/4.8/:$CPATH
+  - export LD_LIBRARY_PATH=/usr/lib/gcc/x86_64-linux-gnu/4.8:$LD_LIBRARY_PATH
+
+script:
+  # Build Autowiring, run unit tests, and install
+  - $CMAKE_DIRNAME/bin/cmake . -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX:PATH=~/autowiring/
+  - make -j 4 || make
+  - ctest --output-on-failure --timeout 30
+  - make install > logfile 2>&1 || (cat logfile; false)
+  - cpack || (cat _CPack_Packages/Linux/TGZ/InstallOutput.log; exit 3)
+  - cd examples
+  - ../$CMAKE_DIRNAME/bin/cmake . -DCMAKE_PREFIX_PATH:PATH=~
+  - make
+
+
+after_failure:
+  - cat Testing/Temporary/LastTest.log 2> /dev/null

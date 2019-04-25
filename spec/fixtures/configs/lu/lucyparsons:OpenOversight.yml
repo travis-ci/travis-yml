@@ -1,0 +1,24 @@
+language: python
+dist: xenial
+sudo: required
+addons:
+  firefox: "45.4.0esr"
+python:
+  - "3.5"
+  - "3.6"
+  - "3.7"
+before_install:
+  - wget https://github.com/mozilla/geckodriver/releases/download/v0.11.1/geckodriver-v0.11.1-linux64.tar.gz
+  - mkdir geckodriver
+  - tar -xzf geckodriver-v0.11.1-linux64.tar.gz -C geckodriver
+  - export PATH=$PATH:$PWD/geckodriver
+install:
+before_script:
+  - pip install -r dev-requirements.txt
+  - pip install coveralls
+  - cd OpenOversight
+script:
+  - py.test -v -n 4 --dist=loadfile --cov=app
+  - cd .. && flake8 --ignore=E501,E722
+after_success:
+  - coveralls

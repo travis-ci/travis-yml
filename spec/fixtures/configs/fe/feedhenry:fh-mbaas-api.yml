@@ -1,0 +1,19 @@
+language: node_js
+sudo: required
+node_js:
+  - 6
+  - 8
+  - 10
+services:
+  - redis-server
+before_install:
+  - sudo apt-get update
+  - sudo apt-get install --assume-yes apache2-utils
+  - npm install -g grunt-cli
+  - npm config set strict-ssl false
+install: npm install
+env:
+  - MONGODB_VERSION=2.4
+  - MONGODB_VERSION=3.2
+script:
+  - grunt

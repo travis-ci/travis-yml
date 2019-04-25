@@ -1,0 +1,20 @@
+sudo: false
+language: node_js
+node_js: '8'
+cache:
+  yarn: true
+  directories:
+  - node_modules
+env:
+  matrix:
+  - CMD=build
+  - CMD=test
+  - CMD=lint
+script:
+- npm run $CMD
+after_success:
+- '[ "$CMD" == "test" ] && npm run coverage'
+notifications:
+  email: false
+  slack:
+    secure: a0Tkk5iB01syj/XeMKxu1azS0VbYV5x8e/adb1K5dWWVdN6QVShfWByqmzhpJah9GCHzxWYp6XeNFD1vNiVwZEzsR4MsqfZJiAVp9nZi5sGNd1PJL1qiZsUHNSt7VFr8oScBLFJOpP/0Ea7jZU2WjzQSlkear6rDUp3y9yS37MXPeXCCiwtzjelE1dH2TR8tSGFFUahTq8iUqq41tyI0EUHp0DgFkK3x7kbOSMtpXvMHdizzSZoXDClM4GZXHBVlkevaO0d1IwTwtAla3uEtO86b7kcyZzmaPXBBwnjGT2/hoC7n7T+6E8hceqioH36WyeNMcIr4N1/U3k89ysJJHMMoGWtd9LXX1qBjALfJ/Z3dp9v9f5jZP5XYDoHeb6EtC+nCiyeiOu/Cj6PLYoJoW9ktFzqx2Qx9SKev+hLB6MPPJxdE4VviIak6LpSQVJP37GbUZcdQpMTgXhdOaXdB8QHmuk6zrovN2S5EbyS2tz/aOQiczsUPM5jnBfiK1Bzme1lCUM+rADIA2VMkKGBzgVi66uCj2h9XOoD+FvwONZUnY+IB3BgwXzk5Jn3A2IMKnh2CTKewrS4Ogcdi9mNznOe2ZFkwVkfRF4NXNu5h/kEq8KSD5mgqJyaiEOV8iQu7KAC2KS0lsawKITo40ivWzFZ4aVKRAFZEic1e56H8a7I=

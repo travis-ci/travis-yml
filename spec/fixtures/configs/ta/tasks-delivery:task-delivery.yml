@@ -1,0 +1,115 @@
+language: java
+dist: trusty
+sudo: required
+group: deprecated-2017Q4
+
+jdk: openjdk8
+
+services:
+- docker
+
+cache:
+  directories:
+  - .autoconf
+  - $HOME/.m2
+  - _build
+  - deps
+
+before_install:
+- echo -e "machine github.com\n  login $GITHUB_TOKEN" >> ~/.netrc
+- git lfs pull
+
+install:
+- mvn -N io.takari:maven:wrapper
+- ./mvnw install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
+- chmod +x deploy_appveyor.sh
+
+branches:
+  only:
+  - dev
+  - master
+
+stages:
+- deploy test server
+- test
+- name: push docker test image
+  if: branch = dev
+- name: deploy prod and push docker image
+  if: branch = master
+
+jobs:
+  include:
+  - stage: deploy test server
+    env:
+    - BRANCH_TEST_DEPLOY=test-deploy
+    script:
+    - git branch ${BRANCH_TEST_DEPLOY}
+    - git push -f origin ${BRANCH_TEST_DEPLOY}
+    - ./deploy_appveyor.sh
+  - stage: test
+    os:
+    - linux
+    env:
+    - UNIT=unit-test
+    script:
+    - mvn test -P ${UNIT}
+  - stage: test
+    os:
+    - linux
+    env:
+    - API=api-test
+    script:
+    - docker-compose --file deploy.yml up --build -d
+    - sleep 60
+    - mvn test -P ${API}
+  - stage: test
+    os:
+    - linux
+    env:
+    - SELENIUM_CONFIG=linux-chrome
+    script:
+    - docker-compose --file selenium.yml up -d
+    - mvn test -P ${SELENIUM_CONFIG}
+  - stage: test
+    os:
+    - linux
+    env:
+    - SELENIUM_CONFIG=linux-firefox
+    script:
+    - docker-compose --file selenium.yml up -d
+    - mvn test -P ${SELENIUM_CONFIG}
+  #    - stage: test
+  #      os:
+  #        - osx
+  #      env:
+  #        - SELENIUM_CONFIG=osx-chrome
+  #      script:
+  #        - docker-compose --file selenium.yml up -d
+  #        - mvn test -P ${SELENIUM_CONFIG}
+  #    - stage: test
+  #      os:
+  #        - osx
+  #      env:
+  #        - SELENIUM_CONFIG=osx-firefox
+  #      script:
+  #        - docker-compose --file selenium.yml up -d
+  #        - mvn test -P ${SELENIUM_CONFIG}
+  - stage: push docker test image
+    env:
+    - IMAGE=fiodar/td:test
+    script:
+    - mvn clean package -DskipTests=true
+    - mvn docker:build
+    - docker login -u $DOCKER_USER -p $DOCKER_PASS
+    - docker push ${IMAGE}
+  - stage: deploy prod and push docker image
+    env:
+    - BRANCH_PROD=prod
+    - IMAGE=fiodar/td
+    script:
+    - git branch ${BRANCH_PROD}
+    - git push -f origin ${BRANCH_PROD}
+    - mvn clean package -DskipTests=true
+    - mvn docker:build
+    - docker login -u $DOCKER_USER -p $DOCKER_PASS
+    - docker push ${IMAGE}

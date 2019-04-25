@@ -1,0 +1,57 @@
+language: python
+conditions: v1
+python:
+- '2.7'
+- '3.4'
+- '3.5'
+- '3.6'
+- 'pypy'
+- 'pypy3.5'
+# blocklist branches
+branches:
+  except:
+  - requires-io-master
+install:
+  - pip install "setuptools>=21"
+  - pip install "pip>=9"
+  - pip install -r requirements-test.txt
+  - pip install .[tests] coveralls wheel
+script:
+  - pytest -vvv --capture=no --showlocals --cov mirakuru tests/
+after_success:
+  - coveralls
+jobs:
+  include:
+    - stage: linters
+      python: 3.6
+      install:
+        - pip install -r requirements-lint.txt
+        - pip install .[tests] coveralls wheel
+      script:
+        - pycodestyle
+        - pydocstyle
+        - pylint mirakuru tests
+        - rst-lint *.rst
+      after_success: skip
+    - stage: osx
+      language: generic
+      os: osx
+      before_install:
+        - pip3 install virtualenv
+        - virtualenv venv -p python3
+        - source venv/bin/activate
+      script:
+        - pytest -vvv --capture=no --showlocals --cov mirakuru tests/
+    - stage: deploy
+      python: 3.6
+      if: tag IS present
+      script: skip
+      deploy:
+        provider: pypi
+        user: fizyk
+        password:
+          secure: IBVXG0zLKsBkzdeoC33Lxir01jbvDHdjQ81CPC8PbDPCmUozXgf9eqRFV5VOIYQOboTBzQYRq7RB8efeNKSH3nKf73iahwIYf4ezIxRzUaMzoY4GkyrC/0fQhMk1lAjexrRM1f2o7TIAALPUDyB/EaRcPCBEghxscQEeTlAw08c=
+        on:
+          tags: true
+          repo: ClearcodeHQ/mirakuru
+        distributions: sdist bdist_wheel

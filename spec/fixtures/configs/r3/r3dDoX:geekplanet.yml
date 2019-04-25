@@ -1,0 +1,31 @@
+sudo: required
+
+services:
+- docker
+
+env:
+  global:
+  - secure: NqQ/yNyGuPHP1u/1kLcUMyuv/QaXv1tzLv5KFindZFiPflGQEtl37x/atVE2uxfPvQT0uYfvqpPSag+fXfCQzhY1adKNqQAkbPzoUhaASncohpOTTT6KF5eBwn8cu5n0hwPEyhtKsJNTzza9OuDwFOdxpLCmey2gu3NihhWMcEkimTXTZu+T8CBYE4lqRqAzRr38XFKq+uCdYvLewY2S2phpjYo3uBGgXqu4jGdCMIB5Xnw54CYXZVOuVKoAzq7Qij0kRePWW9NJqw6fJDKmxi2T0vXKUxMk0LslUUk9pXe2KFNLk8rYeHQwIVnfzqWLFAtE4QkqnXLwcTIYTA4yrU3Hh1bvfnzD5DPRYV7Hk5rSnUdtBq8qUZcKQMHV1Ln+idxVSENJ1N1zQcvs2zgU/I7JqTFbf3ksW72auA9+P3jwS3NyYud9TFhtNV4aGlaVE6dpiKO0wiTuPyO5NuwHP1w50q7H6y68fvovHyAsYQdTQcy5VQRmE+jbVixMW0XMoxooYHT3DvhsOMPcHWzmSHvsZgnhSPrYV4odyHOQCoqNPZxtqmVslVvl6U0lS2t0vw79AjV/RRREvo/FGLVkp3/h04S/QnKBAsGdtZEcwVqWHou1yn11b76pA2Fn01aCTJDusMwolMLgK+1p6nPJJE4aW5OgEK4QTy8UXxTjBAQ=
+  - secure: "ebfS+iWUFY+re6TT5rAgA62VVj6K7riA/GCkghZiryFhfq2w00fAYd5a6Pzw0v7lvwqV9Qi3JWBA6PIs0rgFbGcnrQPjhSk1Lf5tt2QTIaRTIPFx76hyuI/7GOTWC76bhSIJu5cuxGZsM30MfVEcnU4CB/Ukw7n/hM5PgQo/1ZaHM+8C7I/qSq5YT5R8hKVCwbnI+oVmiPNpitk573I/zkVzknjzQ7KqSKx+yh5jFgzzDwSrmxKW2VBNdQl5R29nWySJgN5CpOxQYPHrKscspF3/8/1xekE2F/ImZ8JyG9N959anFajLns73H5H5gV4kmMzIEGBgOAp/BIFWjNlB1+nwEkYx5WBZGIV30sox0ZuYgf5RKCpuFmUR7I/RFy/I809h/ozbrsOMgvcjT/ibSNGZYnwXK5+EI+3rfDYUOdNjcF8EWE9F17hhO3YHIYH3t2yHOpQry+Zku+7udVgzgoX3KCjpx5HB0pjTmWT5PUtNUrqXi1cgnKnpelbQeiPOJaXzB6cxubEVTR3xth9KJleOgMETraIxlNJMStmXHP3Rogz2JgwA+hJFRr+Xh9MPvfSjkTiie39/D/cklVw8lkF0vuMGic45RwWLUrlOKpKumpYxHLX72DdymHR15MeGJFztLV7yJA9cpfGeUXPrwsoq+xBr+o4iMnYAXnA/UMA="
+
+before_install:
+- openssl aes-256-cbc -K $encrypted_bdf53d70e2de_key -iv $encrypted_bdf53d70e2de_iv -in .heroku-netrc.enc -out .heroku-netrc -d
+- docker run -it -v "$(pwd)":/usr/app -w /usr/app r3ddox/node-pdftk:11.8.0 npm ci
+
+script:
+  - docker run -it -v "$(pwd)":/usr/app -w /usr/app r3ddox/node-pdftk:11.8.0 npm test
+
+before_deploy:
+- cat .heroku-netrc >> $HOME/.netrc
+
+deploy:
+- provider: script
+  script: scripts/deploy-staging.sh $HEROKU_TOKEN
+  skip_cleanup: true
+  on:
+    branch: develop
+- provider: script
+  script: scripts/deploy.sh $HEROKU_TOKEN
+  skip_cleanup: true
+  on:
+    tags: true

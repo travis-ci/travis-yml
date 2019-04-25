@@ -1,0 +1,46 @@
+---
+dist: trusty # Need this in order to use Chrome headless, as of 2/6/18
+bundler_args: --without development
+language: ruby
+cache: bundler
+rvm:
+  - 2.4.3
+sudo: required
+branches:
+  except:
+  - /^deploy-.*$/ # These are always just reset --hard's to other branches
+  - /^v[\d\.]+$/ # No need to test version tags as they are tested as part of their branch
+before_install:
+  - gem update bundler --no-rdoc --no-ri
+  - google-chrome-stable --headless --disable-gpu --no-sandbox --remote-debugging-port=9222 http://localhost &
+before_script:
+  - psql -c 'create database travis_ci_test;' -U postgres
+  - for f in $(find -name '*.example'); do cp "$f" "${f%.example}"; done
+  - cp config/database.yml.travis config/database.yml
+  # Remove recaptcha settings in local config so they are picked up from ENV. This is brittle
+  # and should go away when we get rid of local_config.rb some sweet day.
+  - sed -ri '/(public|private)_key = nil/d' config/initializers/local_config.rb
+  - bundle exec rake db:setup
+  - wget http://chromedriver.storage.googleapis.com/2.35/chromedriver_linux64.zip
+  - unzip chromedriver_linux64.zip
+  - sudo cp chromedriver /usr/local/bin/.
+  - export DISPLAY=:99.0
+  - yarn install
+script:
+  - bundle exec rspec --format progress
+  - yarn i18nExport
+  - yarn test
+env:
+  global:
+    # Set reCAPTCHA keys to dummy values
+    - RECAPTCHA_PUBLIC_KEY=6Lc6BAAAAAAAAChqRbQZcn_yyyyyyyyyyyyyyyyy
+    - RECAPTCHA_PRIVATE_KEY=6Lc6BAAAAAAAAKN3DRm6VA_xxxxxxxxxxxxxxxxx
+addons:
+  artifacts:
+    paths:
+    - $(ls /home/travis/build/thecartercenter/elmo/tmp/capybara/*.png | tr "\n" ":")
+  postgresql: "9.4"
+  chrome: stable
+notifications:
+  slack:
+    secure: N2dcQMxN6oZbCLgmB/fHhqv/+Su9FzAo3ULYbSd0lFz7PQgtUuEB6Hn13eSV7CIiAMPSM1Bfe0AFUJmSKOKYylF2k3kKuSL6jijnuK4AA4b9kNoPHt0wYEO+uAFO27pyvV+Uq21Gov8SWDVvRbQ3799c3Dl3/D3H6UhEAv7vgYY=

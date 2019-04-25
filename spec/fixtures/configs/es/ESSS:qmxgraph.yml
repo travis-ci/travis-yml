@@ -1,0 +1,38 @@
+language: python
+sudo: required
+dist: trusty
+
+env:
+  matrix:
+    - SCRIPT=lint
+    - SCRIPT=tests
+python:
+  - "3.5"
+  - "3.6"
+
+install:
+  # Setup using Conda (http://conda.pydata.org/docs/travis.html)
+  #
+  # For our case, it is a whole more interesting as:
+  # - pypi's PyQt package doesn't have QtWebKit bundled together
+  # - we could install PyQt & QtWebKit using apt however Travis CI doesn't
+  #   support virtualenv->system_site_packages option for Python 3.5 (
+  #   https://github.com/travis-ci/travis-ci/issues/4990)
+  - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
+  - bash miniconda.sh -b -p $HOME/miniconda
+  - export PATH="$HOME/miniconda/bin:$PATH"
+  - hash -r
+  - conda config --set always_yes yes --set changeps1 no
+  - conda config --add channels conda-forge
+  - conda info -a  # for debug reasons
+
+  - conda create -n qmxgraph python=$TRAVIS_PYTHON_VERSION coveralls pytest-cov
+  - conda env update -n qmxgraph
+  - source activate qmxgraph
+  - conda list  # for debug reasons
+
+script:
+  - scripts/run_travis_$SCRIPT.sh
+
+after_success:
+  - coveralls

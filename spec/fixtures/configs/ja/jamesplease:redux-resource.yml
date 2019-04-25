@@ -1,0 +1,17 @@
+language: node_js
+node_js:
+  - "8"
+sudo: false
+install:
+  # Install the deps in the root project
+  - npm i
+  # Install the nested deps, but the linked repositories won't work at this
+  # stage, because the deps aren't build
+  - npm run bootstrap
+  # Build the deps
+  - npm run build
+notifications:
+  email: false
+after_success:
+  # Upload to coveralls, but don't _fail_ if coveralls is down.
+  - cat coverage/lcov.info | node_modules/.bin/coveralls || echo "Coveralls upload failed"

@@ -1,0 +1,14 @@
+language: python
+python:
+- '3.5'
+before_install:
+- mv travis/travis_secrets.yaml secrets.yaml
+install:
+- pip3 install homeassistant
+script: "bash $TRAVIS_BUILD_DIR/travis/bin/check_config.sh"
+notifications:
+  slack:
+    secure: T0m0kJvNZFuevu7BLwwElt6vikUo+HQ8dimf8XB04U3dEP57noLObdFI35kLG1Crh6lzb2raAl7vMcET2tpVW+wjUM/aIoy0zMUCNaUnfVTquwqpXEC30Ns4Au48sPSN/dZYhZQn36ZYCnREjn8FL0E++tPxAqe+915eqG2lKDcnLlOCGk6JpzL95ZZ0amHkHR55mD8RnSWFQewv4V5EU0UZtd03xRaYr2gxtaPC0cOCmizMEgGzbFjrDnsIhb+s8RStFm/C1QmhtULriq3MmJ54ykfJBVvVUrOW++rNAZaT+4K570uk73sLApmQlMKmUfWv0wJJuCNPvh9BkF7nLbc78vDV7PI2DGerwUtdpw5NqJZCX94OiRt1DMN6J6ltyXN1qu3ykG5s5HmT9tiY876thY3ZzCXTA5PN2S8BPIH51w13SppgBEj/w8SOx4KDIohFc1TxkgtBfSIcYkIop3LZNhXgffTfkPoDFWImd9372cyJ8mQfwKExAmjQsZbNbIk1We9bXJ5oYXEN2aYL3tpjezabiz7NilVnQAOrEqj2P6/Y/Sl9WyZIw0iVt0Rd1qMf7MpirQbMVbKAmc48BmYqjcNp7FYx5YAQeOYhZzQIahRG5MCkak4PXhphkRMPDRhyR8QQF66ZkvtnpIWdvnPZgK2iflyhuerSla4vjuQ=
+  webhooks:
+    urls:
+      - https://www.the-dargans.co.uk/travis

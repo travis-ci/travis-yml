@@ -1,0 +1,19 @@
+language: java
+sudo: false
+
+jdk:
+  - oraclejdk8
+
+install: true
+script: ./travis.sh
+
+cache:
+  directories:
+    - '$HOME/.m2/repository'
+    - '$HOME/.sonar'
+
+notifications:
+  email: false
+  webhooks:
+    - secure: "rgVuvy+z1Ehv03JZGDx5a8JPNPB8McXRropGKUo6TKvlzidjYD7nVOVF0NNSuzfCV1ZjbhDxY7MTzXtWetJlIYCtJNOP2VtM1oPeJIT98TybIbzcgdlMjWd3RBxo5K4fK4qhgDPSX53WPSzot/TqO3gkqyrjKpvRADJDVCMeWEY="
+  on_start: always

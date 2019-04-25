@@ -1,0 +1,45 @@
+language: node_js
+node_js:
+  - "lts/*"
+sudo: required
+addons:
+  apt:
+    sources:
+      - google-chrome
+    packages:
+      - google-chrome-stable
+services:
+  - docker
+python:
+  - 3.6
+env:
+  global:
+    - DOCKER_COMPOSE_VERSION=1.21.1
+    - UID=2000
+    - DEFAULT_TEST_TIMEOUT=30000
+    - JOURNAL_TEST_TIMEOUT=180000
+before_install:
+  - sudo rm /usr/local/bin/docker-compose
+  - curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
+  - chmod +x docker-compose
+  - sudo mv docker-compose /usr/local/bin
+install:
+  - make init-ci
+before_script:
+  - docker-compose pull && docker-compose up -d
+  - export DISPLAY=:99.0
+  - sh -e /etc/init.d/xvfb start
+script:
+  - make test-backend
+  - make test-e2e
+  - make build-doc
+  - make stop
+deploy:
+  provider: pages
+  skip_cleanup: true
+  local_dir: doc/_build/html
+  github_token: $GITHUB_ACCESS_TOKEN # Set in travis-ci.org dashboard
+  on:
+    branch: master
+after_script:
+  - docker-compose logs

@@ -1,0 +1,22 @@
+language: node_js
+node_js:
+  - "10.12.0"
+sudo: false
+before_script:
+  - "cp src/js/config-template.js src/js/config.js"
+  - "npm install -g se-interpreter"
+script:
+  - "npm run autoTest"
+  - "se-interpreter tests/selenium/interpreter_config.json"
+env:
+  global:
+    - SAUCE_USERNAME=WeVote
+    - SAUCE_ACCESS_KEY=eb6e0454-e844-4a1a-a695-2d5830897566
+    - secure: "xPe0mHTsisrniOOce/bgc6G9dmClm0sT3uxfw6nknfV6PdL6FglVX2+ji9RdttHzvg4aLk4QURJLQjzuZsNhxSNeHNU1qtSuoFVwvFuQ7iFNvWFF6U06vbQayK488piEDm4AxXcgAuj4jtEvAmRNSrCPO31HGiBo5wGAA3Jgn/8y0F0VXWYcEk7qr57hT6l4+qZXMVIwp+6LksptLg1obAmYmF1Gprnlixv5VBvLJqABr/HbnUUg31RIGz459sKvdOG+R6eJPMNSp73pMg5NxGpxAwh21HYQI+R4qs8aQYgCM/2UAv3ujIleqzkG2J/9uSDT0sc6RRnFfAzX6DmYZKD6Sf9pWFgk4zS4jqnVIZpry7vrMUkZK0qeQpphB7otvCJB0cPbYwoiwdWOKxkRZXFR1BPOm5FdM9thhUsdMqSfGHnGVhq9NRPl4bQJOIltn8lYHj1z84jkEyVGmpU4XTDfrlSVbRCBV5WNn9w6bFtsPgoupX99xhsjDkJ4lSOlQj6Ul5ncAFLe9KCXdsGPq+y0BK6DQwY4xoBTsxTqDl5VvrN63wtzJ2Br5REz25j+Y9aagDgsRQGX4ue/RCxdf3PHj879cskz7cE+GP1GBRca/NKts2VVzgTKsinQDTN3zyFaZQR8ggShkvPvcvW+7xJf3UKkrN+KTMU5WjeMNlw="
+notifications:
+  slack: wevote:Ngu6uKzt4qRAvhrCPPoTIIVM
+  email:
+    - SauceLabs@WeVote.US
+addons:
+  jwt:
+    secure: "eb6e0454-e844-4a1a-a695-2d5830897566"

@@ -1,0 +1,69 @@
+# @desktop @mobile @enabled
+language: node_js
+node_js:
+- '8'
+cache: yarn
+notifications:
+    email:
+        recipients:
+            - preview-alerts@box.com
+aliases:
+    - &sauce-labs
+        if: type = cron
+        before_script:
+        - yarn run setup-travis &
+        - sleep 5
+        addons:
+          sauce_connect: true
+        script: travis_retry yarn run functional-tests-ci
+    - &sauce-labs-doc-desktop
+      <<: *sauce-labs
+      script: travis_retry yarn run functional-tests-ci --grep '(?=.*@desktop)(?=.*@doc)'
+    - &sauce-labs-image-desktop
+      <<: *sauce-labs
+      script: travis_retry yarn run functional-tests-ci --grep '(?=.*@desktop)(?=.*@image)'
+    - &sauce-labs-multiimage-desktop
+      <<: *sauce-labs
+      script: travis_retry yarn run functional-tests-ci --grep '(?=.*@desktop)(?=.*@multiimage)'
+    - &sauce-labs-ie
+      <<: *sauce-labs
+      script: travis_retry yarn run functional-tests-ci --grep @ie
+jobs:
+  include:
+  - script: yarn run ci
+  # Mac Chrome
+  - <<: *sauce-labs-doc-desktop
+    env: BROWSER_PLATFORM="macOS 10.13" BROWSER_NAME="chrome" FILE_ID="285567874839" FILE_VERSION_ID="300496591287"
+  # Mac Safari
+  - <<: *sauce-labs-doc-desktop
+    env: BROWSER_PLATFORM="macOS 10.13" BROWSER_NAME="safari" FILE_ID="285569765346" FILE_VERSION_ID="300498497346"
+  # Mac Firefox
+  - <<: *sauce-labs-doc-desktop
+    env: BROWSER_PLATFORM="macOS 10.13" BROWSER_NAME="firefox" FILE_ID="285568802145" FILE_VERSION_ID="300497533713"
+  # Windows Edge
+  - <<: *sauce-labs-doc-desktop
+    env: BROWSER_PLATFORM="Windows 10" BROWSER_NAME="MicrosoftEdge" FILE_ID="285567976309" FILE_VERSION_ID="300496707445"
+  # Windows IE
+  - <<: *sauce-labs-ie
+    env: BROWSER_PLATFORM="Windows 10" BROWSER_NAME="internet explorer" FILE_ID="285568624824" FILE_VERSION_ID="300497342136"
+  #
+  # IMAGE FUNCTIONAL TESTS
+  #
+  # Mac Chrome
+  - <<: *sauce-labs-image-desktop
+    env: BROWSER_PLATFORM="macOS 10.13" BROWSER_NAME="chrome" FILE_ID="303892614178" FILE_VERSION_ID="320034441058"
+  # Mac Safari
+  - <<: *sauce-labs-image-desktop
+    env: BROWSER_PLATFORM="macOS 10.13" BROWSER_NAME="safari" FILE_ID="303895192017" FILE_VERSION_ID="320037121713"
+  # Mac Firefox
+  - <<: *sauce-labs-image-desktop
+    env: BROWSER_PLATFORM="macOS 10.13" BROWSER_NAME="firefox" FILE_ID="303892847838" FILE_VERSION_ID="320034759822"
+  # Windows Edge
+  - <<: *sauce-labs-image-desktop
+    env: BROWSER_PLATFORM="Windows 10" BROWSER_NAME="MicrosoftEdge" FILE_ID="303895492882" FILE_VERSION_ID="320037438562"
+  #
+  # MULTI-PAGE IMAGE FUNCTIONAL TESTS
+  #
+  # Mac Chrome
+  - <<: *sauce-labs-multiimage-desktop
+    env: BROWSER_PLATFORM="macOS 10.13" BROWSER_NAME="chrome" FILE_ID="303903703739" FILE_VERSION_ID="320047230971"

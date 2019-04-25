@@ -1,0 +1,46 @@
+sudo: false
+language: ruby
+before_install:
+- gem install bundler -v "< 2"
+- openssl aes-256-cbc -K $encrypted_9f37634381c1_key -iv $encrypted_9f37634381c1_iv
+  -in keys.tar.gz.enc -out keys.tar.gz -d
+- tar xvf keys.tar.gz
+- eval "$(ssh-agent -s)"
+- chmod 600 ./keys/github_deploy_key
+- ssh-add ./keys/github_deploy_key
+- chmod 600 ./keys/container_deploy_key
+- ssh-add ./keys/container_deploy_key
+- echo -e "Host aircasting.org\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
+- chmod +x ./bin/deploy.sh
+cache:
+  bundler: true
+  directories:
+  - node_modules
+  - vendor/bundle
+  yarn: true
+addons:
+  apt:
+    packages:
+    - libgsl0-dev
+install:
+- bundle install --path=vendor/bundle
+- nvm install 8.10
+- node -v
+- npm i -g yarn
+- yarn
+before_script:
+- cp config/database.yml.travis config/database.yml
+- mysql -e 'create database aircasting_test;'
+- RAILS_ENV=test bundle exec rake db:migrate
+script:
+- yarn prettier --check "**/*.{scss,js}"
+- yarn test
+- yarn run elm-test app/javascript/elm/tests
+- yarn run elm-format --validate app/javascript/elm/
+- bundle exec rspec --color
+- ./bin/deploy.sh
+env:
+- secure: SB6cGWtgFS6K+Kp1zkwUgzF62lRIIJMTJOOzK/ozmtSMzhL2BqjTkVOtm83jkbNcpZm5bDumWUCPTml4snOBpid7V9gw+Ot2V8kUHd2AGPVi/3Rvglk9OL3dGz7P+32oNlF/tjjdVzQoAU2HdIwSaEVxdn3q9thSRJMwGo8HsPQ=
+notifications:
+  slack:
+    secure: bmp+mN1rGXtHTlWjDmJixpVcVVj+fTQvWJIJz1oNCq5xmNytAtzLCR1lRCIp2GzBHteR9A/j1+2YwzKz2ExHmnublmK80eVrwx+a4+ZanvqPGFWyHkfdfJDbZR8Z9655IlcTh+OUYzqqDVpccNwHD7uU3b7ZSJrjzjl0RpsamIA=

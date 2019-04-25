@@ -1,0 +1,44 @@
+language: cpp
+
+# We want to run the `*_severe` debug and test targets; thus, we need
+# to enable ptrace capability for (L/A)SAN which is currently not possible
+# with container-based builds on travis-ci
+# TODO: revert to `sudo: false` once the following are fixed/made possible
+# - https://github.com/google/sanitizers/issues/764
+# - https://github.com/travis-ci/travis-ci/issues/9033
+sudo: required
+
+matrix:
+  fast_finish: true
+
+# We want to run the `*_severe` debug and test targets; thus, we need
+# g++ >= 4.9 and clang++ >= 3.5
+compiler:
+  - clang
+  - gcc
+
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - gcc-4.9
+      - g++-4.9
+
+before_install:
+  - if [[ $CXX = g++ ]]; then export CXX="g++-4.9" CC="gcc-4.9"; fi
+
+script:
+  # compile and run optimized binary
+  - make clean bin bint_run
+  # compile and run debug binary
+  - make clean bin_debug_severe bint_run
+  # compile and run (severe) unit tests
+  - ASAN_OPTIONS=detect_leaks=1 LSAN_OPTIONS=suppressions=.LSAN_suppr.txt make clean test_severe test_run
+  # determine code coverage of unit tests
+  - make clean cov test_run
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash) || echo "Codecov did not collect coverage reports"
+  # clean up
+  - make clean

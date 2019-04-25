@@ -1,0 +1,47 @@
+language: ruby
+cache: bundler
+dist: trusty
+sudo: false
+rvm:
+- 2.4.2
+before_install: ""
+bundler_args: "--without development --path=~/.bundle"
+before_script:
+- bundle exec rake db:create db:migrate
+script:
+- "bundle exec rake"
+- "bundle exec bundle-audit update && bundle exec bundle-audit check"
+addons:
+  postgresql: '9.6'
+notifications:
+  irc:
+    channels:
+    - irc.freenode.net#theodi
+    template:
+    - "%{repository} %{branch} - %{message} %{build_url}"
+    on_success: change
+    on_failure: always
+deploy:
+  provider: heroku
+  strategy: api
+  api_key:
+    secure: YJnNMUmk/xpwehdo8uc3zaBwOY3LpmF1arjXQUIWE5cJ8a0XQ6CiyvccMKGIufKvqiyS5LX1ObQxbROZNyM2GLn5NB/Q6tBpGH8MuvVUVRELb1SUyirBLRjH6ojD7ObeEOkVs64FEXq/zYjOfi8/q+MOyxacK2ltt6VK8s0Nev4=
+  run:
+  - rake db:migrate
+  app: octopub
+  on:
+    repo: theodi/octopub
+env:
+  global:
+  - secure: Qyy4hRRC1BtmcGaipB3f8xX12eGMnwsvmDKTg2x/I2Jf17IevVG14hG6mDrk3DJ+27UiBj2YkABozIZA1rC/b7h2dFhnSJhaeaauAp2wHs2C1ndR/KYbrWOIon9B6SiNFFmqa8YmtYGHMvPHrWVfhkpQV8qqwbeRt5w8hRzpJMY=
+  - secure: hk/h4W5EiZSnivLgn72GT4IO9EBtC3cLgG621cXDtxlkdl7E9YuXuLNFvv8BkRYGAqllhG9g9RM8T18q5sIsTkJPS5ZUPH/v7x57bJPrRwxG2H92QE49+lIuywctW89yJg2h1QP6x3xLbPcWyMBgv40qRvCotno7HK6JGA0Gqac=
+  - secure: fBSSBQHODJ0HRuOFWRK9DO8JB28QXGvDKWFUPKvLNpHg9z/Md7Nn3YgfB+v3lOd6pdbxxhdDkumh25ALIt9OB+3H2DKG2gmNBcTXoz2/qxWuRExLYjb0/Kl3IqqCDto4tA08c/hCci2vbI7mG0f/n7yU2mmtL/sutt0kjsHD1Xk=
+  - secure: d3h+9MIwLwPoSOUquiS8gd3yjeykvqglE+ipfKIZ3mN3kwXQuMSLO77mW31daT8L14VL67MXX7oC9AWBJNZdPa1WOf0yhOACieHZJsy8DnAZTA7/WGcBq69Y1iDuqXjgUlt4gNS7dICezV8/ELib6LBQ0Nih5PnDYRg4dXjyd1s=
+  - secure: ZDAXMwY5NRA6yJ+yPg5c8DtM4eGaVEP/ENGUSd3lOYAIkNfLqLzbnTvT1eT/uu8J3NTxM1boHfOWJ2fOcR54ehLcp6PDTphEC64kW/RtX1WxOYu/LmDSsQJ2+QQImUHVWjaF9nwLwX3ZMMtF/xzoftik/Bauv2D5obkpu+K5KpI=
+  - secure: HQXISu2THYqcnzfuhfTXNufc9yMHpsM3y9l5S5veSQvedrsU1VwBIoIIf3xUxQ/82F62OMU2BalQVlUF5ciny2Jvglc99dN66XPfeDk4kVfDe/aFwKgkWxGHFd2/MWaIqeHJgSktFscrWjEMXLwCBFYYrorgAj8kGAvCx/nynjA=
+  - secure: I8dMEICQf5b/q53KUiyKY7DZIpTbosqqlfX06d3HUTJpnlTTQqjFXaCzjbW2DHsYBLV+bZMAwZPZJwLRwZFYhWS2I5F3XJXwBzajBB+XLKEZ9wTh6gkDYvgjWFw/x2weD+zd74nH1Mdfx+WSw8wcZyEo7agn5/sHi+Cj2uGIU+E=
+  - secure: OIfsYyI2QCAp1wj7vgE3RQDoMMPmJIUzAqsqDmedzwyk1D+u0rZlhp7Rt7oZc93CceQZoGcOtZaxgkHD8slOpYsRdnZlHkFjviX0qrCzVVrirC+Pl8Mq+VQdanIdH4wbQOLr3cDUK7gZPuGrTaxVG6/HjK9nljA/ftl4M6t9efc=
+  - secure: KroBEkZQQmceN2AvuPcOl422L5UU7lyCCvdO/y3JEE8Wz+iM3BDxx090m8zkqMGPDMiTY6igzAsFCchW/zZNyO7c3DHUE0Ru8mfdzDNvHpNqyv3LOm/xtoUmheOy99jR9UhPF1SoMT7kmhsmvAdusLYg5fxftVGZCBGOVeZ7HYA=
+  - secure: EHoBawMsUUdSilSRiOhr2Wn+44nwmhIVmxm1IQp1KRbNGQFK4Zj+Z+kwu8MrPQP/Df7D0NP2iuBzVVsfEhTcP+HUtrKnEA8HK/CaA7a6d+Z08255Q6OJuW+KEUB3JPU62Q1SLGeCVIf2CFu/Mth6LBDE0jyfxP5wY2FIWH3JZ6E=
+  - secure: CRnXBOUgf+jLLjOr0j9XFp6nLgTDQsXIt7pRJuoMzz0RyHtci8e2fN6IFxsO0ckj0I0yJzqe/GXFUls/36tEkp0cZZgWGiGbGkmocVX9+bIjz4wiZlZnyDjYtpXZgJUpcLokTupFfxOqdx8v2PML/WmbsOhoGH0RItbCe0eRAt0=
+  - secure: VQSUEGtByZGMLgBLMdJLLJC8IgC7d0F1n1AjdEVadDu8eSPABctgaXm5HfGGGFpTOqCnjSlNPHMHf7hO7Z6oNu/BBR3TnQtLNk3verjHMu6yVQDx/ghIlGymvlRaNyZLU2WsiSNj11BR1CWamkdKtJAlWbOoOR9qmRWPBljwEwA=

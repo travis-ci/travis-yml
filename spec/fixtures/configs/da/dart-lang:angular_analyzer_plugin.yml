@@ -1,0 +1,16 @@
+language: dart
+sudo: false
+dart:
+  - dev
+cache:
+  directories:
+before_script:
+  - git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
+  - export PATH=`pwd`/depot_tools:"$PATH"
+  - ./tools/get_deps.sh
+script:
+  - ./tools/check_format.sh
+  - ./tools/check_no_solo_tests.sh
+  - ./tools/travis.sh
+env:
+  - PACKAGE=angular_analyzer_plugin

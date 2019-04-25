@@ -1,0 +1,25 @@
+language: node_js
+node_js:
+  - "8"
+
+script:
+  - git pull --tags
+  - npm run build
+  - npm run test
+  - cp .travis.gitignore .gitignore
+
+cache:
+  directories:
+    - node_modules
+
+deploy:
+  provider: pages
+  skip_cleanup: true
+  github_token: $GITHUB_TOKEN
+  on:
+    branch: master
+
+notifications:
+  email:
+    on_success: change
+    on_failure: always

@@ -1,0 +1,57 @@
+language: __sardonyx__
+dist: xenial
+group: edge
+services:
+- postgresql
+filter_secrets: false
+cache:
+  bundler: true
+  directories:
+  - ${HOME}/bin
+env:
+  matrix:
+  - TRAVIS_JOB_BOARD_REGISTER_YML="${TRAVIS_BUILD_DIR}/.example-job-board-register-sardonyx.yml"
+  global:
+  - DPKG_MANIFEST_JSON="${TRAVIS_BUILD_DIR}/.example-dpkg-manifest.json"
+  - LANG=en_US.UTF-8
+  - NODE_ATTRIBUTES_YML="${TRAVIS_BUILD_DIR}/.example-node-attributes.yml"
+  - PACKER_CHEF_PREFIX="${TRAVIS_BUILD_DIR}/tmp"
+  - PATH="/opt/chefdk/bin:/opt/chefdk/embedded/bin:/opt/chef/bin:${HOME}/bin:${PATH}"
+  - REQUEST_INTERVAL=5
+  - SKIP_CHEFDK_REMOVAL='1'
+  - SPEC_ARGS='--tag ~dev'
+  - SPEC_RUNNER='bash -lc'
+  - SPEC_SUITES='travis_packer_templates'
+  - SYSTEM_INFO_JSON="${TRAVIS_BUILD_DIR}/.example_system_info.json"
+install:
+- if [[ -f .test-branch ]]; then
+    export TRAVIS_COOKBOOKS_TEST_BRANCH="$(cat .test-branch 2>/dev/null)";
+  fi
+- export GIT_DESC="$(git describe --always --dirty --tags)"
+- rvm use 2.5.3 --install --binary --fuzzy
+- gem update --system
+- bundle install --jobs=3 --retry=2 --path=vendor/bundle
+- ./bin/packer-build-install
+- ln -sv "${TRAVIS_BUILD_DIR}" "${TRAVIS_BUILD_DIR}/tmp/packer-chef-local"
+
+script:
+- make
+- bundle exec make test
+- make update-gce-images
+- git diff --exit-code
+- git diff --cached --exit-code
+- sudo lsof | grep dpkg || true
+- travis_retry bundle exec bash -xc 'sudo packer-scripts/run-serverspecs'
+- for f in ~/.*_rspec.json; do
+    echo "checking $f";
+    jq . < $f &>/dev/null;
+  done
+after_success:
+- if [[ $TRAVIS_JOB_BOARD_REGISTER_YML =~ sardonyx ]]; then
+    git fetch --unshallow;
+    bundle exec make packer-build-trigger;
+  else
+    echo 'no packer-build-trigger for you';
+  fi
+notifications:
+  email: false

@@ -1,0 +1,41 @@
+language: perl
+sudo: false
+env:
+    global:
+        - PERL_MONGO_WITH_ASSERTS=1
+services:
+  - mongodb
+perl:
+  - "blead"
+  - "5.24.0"
+  - "5.24.0-thr"
+  - "5.22.0"
+  - "5.20"
+  - "5.18"
+  - "5.16"
+  - "5.14"
+  - "5.12"
+  - "5.10"
+matrix:
+  include:
+    - perl: 5.18
+      env: COVERAGE=1
+  allow_failures:
+    - perl: "blead"
+before_install:
+  - git clone git://github.com/travis-perl/helpers ~/travis-perl-helpers
+  - source ~/travis-perl-helpers/init
+  - build-perl
+  - perl -V
+install:
+  - cpan-install ExtUtils::CBuilder Config::AutoConf Path::Tiny
+  - cpan-install --deps       # installs prereqs, including recommends
+  - cpan-install --coverage   # installs converage prereqs, if enabled
+  - cpan-install App::mymeta_requires # for listing deps
+before_script:
+  - coverage-setup
+script: perl Makefile.PL && make test
+after_script:
+  - mymeta-requires --report
+after_success:
+  - coverage-report

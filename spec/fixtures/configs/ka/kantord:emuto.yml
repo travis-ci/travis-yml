@@ -1,0 +1,31 @@
+language: node_js
+cache:
+  yarn: true
+  directories:
+    - ~/.npm
+notifications:
+  email: false
+install:
+    - yarn --ignore-engines
+    - npm install -g codecov
+node_js:
+  - '10'
+  - '9'
+  - '8'
+script:
+  - yarn test:eslint
+  - yarn test:flow
+  - yarn test --coverage
+  - codecov
+
+after_success:
+  - npm run travis-deploy-once "npm run semantic-release"
+branches:
+  except:
+    - /^v\d+\.\d+\.\d+$/
+
+deploy:
+  provider: script
+  script: ./.deploy-docs.sh
+  on:
+    branch: master

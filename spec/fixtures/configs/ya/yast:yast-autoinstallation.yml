@@ -1,0 +1,16 @@
+sudo: required
+language: bash
+services:
+  - docker
+
+before_install:
+  - docker build -t yast-autoyast-image .
+  # list the installed packages (just for easier debugging)
+  - docker run --rm -it yast-autoyast-image rpm -qa | sort
+
+script:
+  # the "yast-travis-ruby" script is included in the base yastdevel/ruby image
+  # see https://github.com/yast/docker-yast-ruby/blob/master/yast-travis-ruby
+  - docker run -it -e TRAVIS=1 -e TRAVIS_JOB_ID="$TRAVIS_JOB_ID" yast-autoyast-image yast-travis-ruby
+  - docker run -it -e TRAVIS=1 -e TRAVIS_JOB_ID="$TRAVIS_JOB_ID" yast-autoyast-image rake check:doc
+  - docker run -it -e TRAVIS=1 -e TRAVIS_JOB_ID="$TRAVIS_JOB_ID" yast-autoyast-image ./check_schema.sh

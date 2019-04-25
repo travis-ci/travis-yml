@@ -1,0 +1,81 @@
+language: python
+sudo: false
+
+matrix:
+  include:
+    # "Legacy" environments: oldest supported versions, without and with numba
+    - python: "2.7"
+      env: DEPS="numpy=1.8.2 scipy=0.12.0 matplotlib=1.3 pillow=2.1 pandas=0.13.0 scikit-image=0.9 pytables scikit-learn=0.14.1 pyyaml" BUILD_DOCS=false SKIP_SLOW=true
+    - python: "2.7"
+      env: DEPS="numpy=1.8.2 scipy=0.12.0 matplotlib=1.3 pillow=2.1 pandas=0.13.0 scikit-image=0.9 numba=0.13.4 pytables scikit-learn=0.14.1 pyyaml" BUILD_DOCS=false SKIP_SLOW=true
+    # "Typical" environments: package versions from 2016
+    - python: "2.7"
+      env: DEPS="numpy=1.10 scipy=0.17 matplotlib=1.5 pillow=3.1 pandas=0.18.1 scikit-image=0.12 pytables numba=0.23.1 scikit-learn=0.17.1 pyyaml" BUILD_DOCS=false SKIP_SLOW=true
+    - python: "3.5"
+      env: DEPS="numpy=1.10 scipy=0.17 matplotlib=1.5 pillow=3.1 pandas=0.18.1 scikit-image=0.12 pytables numba=0.23.1 scikit-learn=0.17.1 pyyaml" BUILD_DOCS=true SKIP_SLOW=true
+    # Environments with most recent versions, on python 2.7 and python 3.6
+    - python: "2.7"
+      env: DEPS="numpy scipy matplotlib pillow pandas scikit-image pyyaml pytables numba scikit-learn" BUILD_DOCS=false SKIP_SLOW=true
+    - python: "3.6"
+      env: DEPS="numpy scipy matplotlib pillow pandas scikit-image pyyaml pytables numba scikit-learn"  BUILD_DOCS=false SKIP_SLOW=false
+
+
+install:
+  - conda update --yes conda
+  - conda create -n testenv --yes $DEPS nose python=$TRAVIS_PYTHON_VERSION
+  - source activate testenv
+
+  # for debugging...
+  - echo $PATH
+  - which python
+  - conda info
+  - conda list
+
+before_install:
+  - if [ ${TRAVIS_PYTHON_VERSION:0:1} == "2" ]; then wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh; else wget http://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh; fi
+  - chmod +x miniconda.sh
+  - ./miniconda.sh -b -p /home/travis/mc
+  - export PATH=/home/travis/mc/bin:$PATH
+
+script:
+  - if [ $SKIP_SLOW == true ]; then nosetests --nologcapture -a '!slow'; else nosetests --nologcapture; fi
+  - |
+    if [ $BUILD_DOCS == true ]; then
+      conda config --append channels conda-forge
+      conda install --yes ipython=5.1.0 sphinx=1.4.8 numpydoc=0.6.0 nbconvert=4.2.0 sphinx_bootstrap_theme=0.4
+      cd $TRAVIS_BUILD_DIR/..
+      git clone https://github.com/soft-matter/trackpy-examples.git
+      cd trackpy/doc
+      # this expects the notebooks to be in ../../../trackpy-examples/notebooks/
+      make notebooks
+      make html
+    fi
+
+
+after_success:
+    - |
+      if [[ $TRAVIS_PULL_REQUEST == false && $TRAVIS_REPO_SLUG == 'soft-matter/trackpy' && $BUILD_DOCS == true && $TRAVIS_BRANCH == 'master' ]]; then
+        echo "Uploading documentation"
+        cd $TRAVIS_BUILD_DIR
+        openssl aes-256-cbc -K $encrypted_23ba5de49536_key -iv $encrypted_23ba5de49536_iv -in soft-matter-docs-deploy.enc -out soft-matter-docs-deploy -d
+        eval `ssh-agent -s`
+        chmod 600 soft-matter-docs-deploy
+        ssh-add soft-matter-docs-deploy
+        git config --global user.email "Travis@nomail"
+        git config --global user.name "Travis"
+        git config --global push.default simple
+        cd ..
+        git clone git@github.com:soft-matter/soft-matter.github.io.git ./doc-repo
+        cd doc-repo/trackpy
+        git checkout --orphan temp_branch
+        git rm -rf ./dev
+        mv $TRAVIS_BUILD_DIR/doc/_build/html ./dev
+        if [ -n "$TRAVIS_TAG" ]; then
+          cp -R dev $TRAVIS_TAG;
+        fi
+        git add -A
+        git commit -m "Docs build of trackpy commit $TRAVIS_COMMIT"
+        git branch -D master
+        git branch -m master
+        git push --set-upstream origin master --force
+      fi

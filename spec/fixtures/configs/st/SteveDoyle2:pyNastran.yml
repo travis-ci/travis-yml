@@ -1,0 +1,111 @@
+#os:
+# - linux
+# - osx
+
+dist: xenial
+language: python
+python:
+  - "2.7"
+  #- "3.5"
+  - "3.6"
+  - "3.7"
+  #  # https://github.com/travis-ci/travis-ci/issues/9815
+  #  dist: xenial
+  #  sudo: true
+#  - "3.5-dev" # 3.5 development branch
+#  - "nightly" # currently points to 3.6-dev
+
+#-------------------------------------------------
+# old-A
+
+#before_install:
+#  - sudo apt-get update -qq
+#  - sudo apt-get install -qq python-dev python-setuptools  python3-dev python3-setuptools libblas-dev liblapack-dev libatlas-base-dev gfortran
+#
+# command to install dependencies
+#install: "pip install -r requirements.txt"
+#
+# command to run tests
+#script: nosetests
+#script: "python pyNastran/all_tests.py"
+#-------------------------------------------------
+#new-B
+# per https://gist.github.com/dan-blanchard/7045057
+
+#notifications:
+#  email: false
+
+# Setup anaconda
+before_install:
+ - sudo -H pip install auxlib
+ - sudo pip install conda
+
+
+# per http://conda.pydata.org/docs/travis.html
+install:
+  - sudo apt-get update
+  - sudo apt-get install gfortran
+
+  # We do this conditionally because it saves us some downloading if the
+  # version is the same.
+
+   # not using latest because random crashes (2016/3/23)
+   #wget https://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh;
+   #wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
+
+    # 4.1.11 -> 4.5.4 (2018/8/19)
+  - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
+      wget https://repo.continuum.io/miniconda/Miniconda2-4.5.4-Linux-x86_64.sh -O miniconda.sh;
+    else
+      wget https://repo.continuum.io/miniconda/Miniconda3-4.5.4-Linux-x86_64.sh -O miniconda.sh;
+    fi
+  - bash miniconda.sh -b -p $HOME/miniconda
+  - export PATH="$HOME/miniconda/bin:$PATH"
+  - hash -r
+  - conda config --set always_yes yes --set changeps1 no
+  - conda update -q conda
+  # Useful for debugging any issues with conda
+  - conda info -a
+
+  - conda install psutil pip
+#  - pip install coveralls
+
+  # install dependencies
+  # if line per https://docs.travis-ci.com/user/multi-os/
+  - echo "python version=$TRAVIS_PYTHON_VERSION"
+
+  # PY2: numpy 1.14.2: pandas works in 0.20.3; broken in 0.22.0, 0.23.4
+  # PY3: numpy 1.14.2; pandas is fine: 0.22.0
+  - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]];     then conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION atlas numpy       scipy matplotlib pandas=0.20 h5py vtk pyqt; fi
+  - if [[ "$TRAVIS_PYTHON_VERSION" == "3.5" ]];     then conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION atlas numpy       scipy matplotlib pandas      h5py vtk pyqt; fi
+  - if [[ "$TRAVIS_PYTHON_VERSION" == "3.6" ]];     then conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION atlas numpy>=1.12 scipy matplotlib pandas      h5py vtk pyqt; fi
+  - if [[ "$TRAVIS_PYTHON_VERSION" == "3.7" ]];     then conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION atlas numpy>=1.12 scipy matplotlib pandas      h5py; fi
+  - if [[ "$TRAVIS_PYTHON_VERSION" == "nightly" ]]; then conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION atlas numpy<1.13  scipy matplotlib pandas; fi
+  - source activate test-environment
+  - conda list
+  - python setup.py develop
+
+
+# Run test
+script:
+  #- nosetests --with-cov --cov YOUR_PACKAGE_NAME_HERE --cov-config .coveragerc --logging-level=INFO
+  - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then coverage run pyNastran/all_tests.py; fi
+  - if [[ "$TRAVIS_PYTHON_VERSION" == "3.5" ]]; then python pyNastran/all_tests.py; fi
+  - if [[ "$TRAVIS_PYTHON_VERSION" == "3.6" ]]; then python pyNastran/all_tests.py; fi
+  - if [[ "$TRAVIS_PYTHON_VERSION" == "3.7" ]]; then python pyNastran/all_tests_no_gui.py; fi
+  - if [[ "$TRAVIS_PYTHON_VERSION" == "nightly" ]]; then python pyNastran/all_tests_no_gui.py; fi
+
+  # good
+  #- "python pyNastran/all_tests.py"
+  #- "python -m coverage run pyNastran/all_tests_no_gui.py"
+
+  # good
+  #- "coverage run pyNastran/all_tests_no_gui.py"
+
+# https://github.com/z4r/python-coveralls
+# Calculate coverage
+after_success:
+  - coveralls
+#  - codecov
+#after_success:
+#  - coveralls --config_file .coveragerc

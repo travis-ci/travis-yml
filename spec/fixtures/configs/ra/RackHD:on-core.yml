@@ -1,0 +1,34 @@
+language: node_js
+
+node_js:
+  - "4"
+  - "6"
+  - "8"
+
+services:
+ - mongodb
+ - rabbitmq
+
+script:
+ - mongo --version
+ - npm test
+
+env:
+  global:
+    - secure: "sZxSeXt9D7v4Rer4DZ7Npa42KBenZWwNIRuNnRNHpJV99HUps+YlUpARmnViXKFmIHLDA5XhKkiCdzeZWsy3oBvp9DkuMf6l4Ib19I83LojEQY5BZb2pWXQh4tDrPpm6q/gHuo9K6cUNMP2dSUQDLGch+vkAGDn33ruHrYLq4d8QSYL/b1zDbNoo4J0wgVnfwDvtCYZDQv3eIuVSGLb64EJeRuYyhoB2oGmMApGL9zaxtic/XVB1tqmB/vmQWiQ8wPOenMbc9MRD9mtTFygywYo//0uNPR5kgsony56h+pfGCvmMW+ea8YPCyCl0oZVb9/zdjfg9ZyHsqCzSiJx2QNKVJkjx8KTZ/E+xwdXXgLqNQgPy3bXjdbalHeTFUPKd3ZS5i1pWkhNl7qScKGASbzBCT8oKNqiFE79bgBPBOXDoGjlFisiU/zRu5kbXgVQICSTkb8FLk8jwV5LHZ5Vzm+sQ7rXZUxIoMmW/lCQPs0LtR8zMc6/kM+k6ARN/ld88ox6QcjcRpYFPS+tmv6EdcrJLR+m3Xx0GsbwA7oPXkgs+M8rO8Ry+lidUv26BeD5MV18ilVs9Upx+37/qfn7TO5xENJsJazuxcLGW0fN0TarcgQDLhpAf7x0ZB2eSKmqrlNBlAPmlKFqEZ1nmRjJJl2IURmUbdhgb2nVICAr+js4="
+
+
+after_success:
+  - ./node_modules/.bin/istanbul cover -x "**/spec/**" ./node_modules/.bin/_mocha --report lcovonly -- $(find spec -name '*-spec.js') -R spec --require spec/helper.js
+  - cat ./coverage/lcov.info | node_modules/.bin/coveralls
+  - chmod 755 ./build_children.sh
+  - ./build_children.sh
+
+notifications:
+  slack:
+    rooms:
+    - secure: "DZ+r6cHd9kzKl0BoW2MmLnLhyPNivsjYWyRqVwjYtwNnsMZFSfQ13B6gojEw28PJmVqDu6am/bOhwD6gka8xuu5Fu7In0LMpdL4aNmV6bg/8B8CooYFG+izaa/9Cjsk9t9RG8oZggqXl/U1g4FGweczjU6UC/8WUU/QFsud1GXDZtdLm/80i+/CC1pmhKx73zcgXNWj/j4YDhTY1r3rsEM4nk5m2/CvSo9nYLY4VvTxlH1uA3OVKqDdoMPP8nX6N12qIBYJceDI8uXrBPKFfP+y6V7paq5VNIxAFYxEKkB9AUnNENgPSKvsTP0RWicstYbFosbJHw4o09e/+sui8Mj0UuK4eRfyBdTuj1/kSeUTIYCBffVLXtN5o/Hsm88Ak1Dd7gczQBXMlNQl7nXR9g38m150AMyinvyx52ZdOXiBhPRBbF9riD2fCgjxoCq8W3cVmRaU25lI/YyAMDUGaaVBVjRJCuMEMnFlXJdV2pGPIglRuPrB6llGnyCwTPNlPdsvVjWzQ6j9gV7jQb2mVvjo4c8Lvs0KI0UEAVrysWaslYd1Wgdh8HGSlPJua9Xpo7rQs5wsRqSqFwIZ038NCXWvXtZc828//KvWC+1e26puQfIjwMR/y6cqzF09h7+GkSePxYxoCqbNgSZ/u6KrOx0FOe+E4BrLl5PEtO3Y2iAg="
+    on_success: never
+    on_failure: always
+    on_start: never
+    on_pull_requests: false

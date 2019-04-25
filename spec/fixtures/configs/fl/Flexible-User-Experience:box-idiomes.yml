@@ -1,0 +1,25 @@
+language: php
+
+php:
+  - 7.1
+
+before_script:
+  - mysql -e 'create database IF NOT EXISTS symfony;'
+  - cp app/config/parameters.yml.dist app/config/parameters.yml
+  - composer selfupdate
+  - composer install
+  - php app/console doctrine:databa:create --no-interaction --env=test
+  - php app/console doctrine:schema:create --no-interaction --env=test
+  - php app/console hautelook_alice:doctrine:fixtures:load --no-interaction --env=test
+
+script:
+  - vendor/phpunit/phpunit/phpunit -c app
+
+notifications:
+  email:
+    - david@flux.cat
+
+branches:
+  only:
+    - master
+    - devel

@@ -1,0 +1,40 @@
+sudo: false
+dist: trusty
+language: python
+python:
+  - "2.7"
+  - "3.4"
+  - "3.5"
+  - "3.6"
+  - "nightly"
+  - "pypy-5.4.1"
+  - "pypy-5.6.0"
+  - "pypy-5.7.1"
+  - "pypy2.7-5.8.0"
+  - "pypy3.5-5.8.0"
+matrix:
+  include:
+  - python: 3.7
+    dist: xenial
+    sudo: true
+services: mongodb
+before_install:
+  - pip install --upgrade pip setuptools
+install:
+  - pip install -r requirements.txt
+  - pip install coveralls
+env:
+  - ADAPTER=mongo
+  - ADAPTER=tiny
+script: coverage run --source=budy setup.py test
+after_success: coveralls
+deploy:
+  provider: pypi
+  user: joamag
+  password:
+    secure: jHJepEDrJtLlbY9NdMCsCcVCYZvvpa2OoU7qCqIrVVtmhzJXroN6/rp23WkWqQ3xr0mawslX6JXP3s+hvrRwVQhYdXDc0skrGLiAb/uB+fiLpCisWDfrTeAO3pvN+pChJplANHtz10htD9LFPNy+h/QwH5nv86r6cikPdU94dy8=
+  distributions: sdist bdist_wheel
+  on:
+    tags: true
+    python: "2.7"
+    condition: $ADAPTER = mongo

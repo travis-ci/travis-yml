@@ -1,0 +1,117 @@
+language: node_js
+node_js:
+  - '8'
+  - '9'
+  - '10'
+cache: yarn
+before_install:
+  - yarn global add lerna
+before_script:
+  - lerna bootstrap
+script:
+  - lerna run test:coverage --scope ringcentral-widgets-test --stream
+  - lerna run test --scope ringcentral-integration --stream
+
+jobs:
+  include:
+    - stage: commons npm release
+      if: tag =~ ^[0-9]+.[0-9]+.[0-9]+
+      node_js: "8"
+      script: yarn commons:prepare-release
+      before_deploy:
+        - cd release/ringcentral-integration
+      after_deploy:
+        - cd ../../
+      deploy:
+        provider: npm
+        email: embbnux@embbnux.com
+        skip_cleanup: true
+        api_key:
+          secure: Cpjded9XcB31vU0VXGlqkJX8jT/xX5diLbxZ7/dMT3g7zpEt5dgxVaWdGXEIN/klxQHrjgE/K2fMUEqtgFb7lbrk8EKgOSU3vy52h/NIgbC4tHE+8A6hoSk8DgbNNjiCZY4DjLS4EiUjbhyYUHog5ri/TPWfmfQW+XiVcWOu61WIzlm0ia0EVI+RcqbRvzf8YKFkVaVvqPu2cvfDPYBfzmn1u32hZtEzZR6VAtJBI0hhpeIj+97BxhgmNt5MmGf+q3ex0YnE0/9Qv74JT5KSUhjOQjGNEUW15GwTpWn083KKVG8RXGHvrtjvOwMVKRE3VVB64urNkOEODFcz1Yy0C0Nsv+EVYgR2F+yUXcwFOYPGPPC/a/7X8l+sxCBtDgZ3LomWSES1pBJvhtNNZt3/mhGaFB5pqBZeDAXCwlm3ysLOri0lcp25oNKdIbAMAl9PQOc5MmTtDX1dQ4XRCxq+GyHqAo3YcK/VX4sGNcCU/4a6fPi4VDyijzT5VQ709PJ4Zva5jc1qX/GFS9gmMgdr2hb5rhM9/M76WoRIaEe8YaxaaElrl5lBQsWY6e6ipGJRVXGh9ESRz5cYev7YqW/4ihzChZRad+VO7dzalWU8Xea56LmDjFuWSKzJTDNNKrNoGDHgMSm6fOlDhxgSFTVSRX6Pnqaf5UGqu2hQcjnK8So=
+        on:
+          node: '8'
+          tags: true
+          condition: "$TRAVIS_TAG =~ ^[0-9]+.[0-9]+.[0-9]+"
+    - stage: commons script release
+      node_js: "8"
+      if: branch = master AND type = push
+      script: yarn commons:prepare-release
+      deploy:
+        provider: script
+        skip_cleanup: true
+        script: yarn commons:start-release
+    - stage: widgets npm release
+      if: tag =~ ^[0-9]+.[0-9]+.[0-9]+
+      node_js: "8"
+      script: yarn widgets:prepare-release
+      before_deploy:
+        - cd release/ringcentral-widgets
+      after_deploy:
+        - cd ../../
+      deploy:
+        provider: npm
+        email: embbnux@embbnux.com
+        skip_cleanup: true
+        api_key:
+          secure: Cpjded9XcB31vU0VXGlqkJX8jT/xX5diLbxZ7/dMT3g7zpEt5dgxVaWdGXEIN/klxQHrjgE/K2fMUEqtgFb7lbrk8EKgOSU3vy52h/NIgbC4tHE+8A6hoSk8DgbNNjiCZY4DjLS4EiUjbhyYUHog5ri/TPWfmfQW+XiVcWOu61WIzlm0ia0EVI+RcqbRvzf8YKFkVaVvqPu2cvfDPYBfzmn1u32hZtEzZR6VAtJBI0hhpeIj+97BxhgmNt5MmGf+q3ex0YnE0/9Qv74JT5KSUhjOQjGNEUW15GwTpWn083KKVG8RXGHvrtjvOwMVKRE3VVB64urNkOEODFcz1Yy0C0Nsv+EVYgR2F+yUXcwFOYPGPPC/a/7X8l+sxCBtDgZ3LomWSES1pBJvhtNNZt3/mhGaFB5pqBZeDAXCwlm3ysLOri0lcp25oNKdIbAMAl9PQOc5MmTtDX1dQ4XRCxq+GyHqAo3YcK/VX4sGNcCU/4a6fPi4VDyijzT5VQ709PJ4Zva5jc1qX/GFS9gmMgdr2hb5rhM9/M76WoRIaEe8YaxaaElrl5lBQsWY6e6ipGJRVXGh9ESRz5cYev7YqW/4ihzChZRad+VO7dzalWU8Xea56LmDjFuWSKzJTDNNKrNoGDHgMSm6fOlDhxgSFTVSRX6Pnqaf5UGqu2hQcjnK8So=
+        on:
+          node: '8'
+          tags: true
+          condition: "$TRAVIS_TAG =~ ^[0-9]+.[0-9]+.[0-9]+"
+    - stage: widgets script release
+      if: branch = master AND type = push
+      node_js: "8"
+      script: yarn widgets:prepare-release
+      deploy:
+        provider: script
+        skip_cleanup: true
+        script: yarn widgets:start-release
+    # TODO: fix widget docs build
+    # - stage: widgets docs build
+    #   if: tag =~ ^[0-9]+.[0-9]+.[0-9]+
+    #   node_js: "8"
+    #   before_deploy:
+    #     - lerna run --scope ringcentral-widgets-docs build --stream
+    #   deploy:
+    #     provider: pages
+    #     skip_cleanup: true
+    #     github_token: $GITHUB_PAGES_TOKEN
+    #     local_dir: packages/ringcentral-widgets-docs/gh-pages
+    #     email: 'integrations@ringcentral.com'
+    #     name: 'RingCentral Integrations Team'
+    #     on:
+    #       node: '8'
+    #       tags: true
+    #       condition: "$TRAVIS_TAG =~ ^[0-9]+.[0-9]+.[0-9]+"
+    - stage: i18n script release
+      node_js: "8"
+      if: branch = master AND type = push
+      script: yarn i18n:prepare-release
+      deploy:
+        provider: script
+        skip_cleanup: true
+        script: yarn i18n:start-release
+    - stage: locale loader script release
+      node_js: "8"
+      if: branch = master AND type = push
+      script: yarn locale-loader:prepare-release
+      deploy:
+        provider: script
+        skip_cleanup: true
+        script: yarn locale-loader:start-release
+    - stage: phone number script release
+      node_js: "8"
+      if: branch = master AND type = push
+      script: yarn phone-number:prepare-release
+      deploy:
+        provider: script
+        skip_cleanup: true
+        script: yarn phone-number:start-release
+    - stage: glip widgets script release
+      if: branch = master AND type = push
+      node_js: "8"
+      script: yarn glip-widgets:prepare-release
+      deploy:
+        provider: script
+        skip_cleanup: true
+        script: yarn glip-widgets:start-release

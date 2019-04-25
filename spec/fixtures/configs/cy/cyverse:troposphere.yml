@@ -1,0 +1,44 @@
+---
+  sudo: required
+  group: deprecated-2017Q3
+  dist: trusty
+  language: node_js
+  node_js: 6.11
+  cache:
+    pip: true
+    directories:
+    - node_modules
+
+  services:
+    - postgresql
+
+  addons:
+    postgresql: "9.6"
+
+  install:
+    # setuptools and pip-tools are necessary for ./travis/check_properly_generated_requirements.sh
+    - pip install -U pip==9.0.3 setuptools
+    - pip install pip-tools==1.11.0
+    - pip install -r dev_requirements.txt
+    - npm install
+
+  before_script:
+    - sudo pg_dropcluster --stop 9.2 main
+    - sudo pg_dropcluster --stop 9.3 main
+    - sudo pg_dropcluster --stop 9.4 main
+    - sudo pg_dropcluster --stop 9.5 main
+    - export DJANGO_SETTINGS_MODULE=troposphere.settings
+    - psql -c "CREATE USER troposphere_db_user WITH PASSWORD 'troposphere_db_pass' CREATEDB;" -U postgres
+    - psql -c "CREATE DATABASE troposphere_db WITH OWNER troposphere_db_user;" -U postgres
+    - cp ./variables.ini.dist ./variables.ini
+    - ./configure
+    - export DJANGO_SETTINGS_MODULE=troposphere.settings
+
+  script:
+    - ./travis/check_properly_generated_requirements.sh
+    - ./manage.py makemigrations --dry-run --check
+    - ./manage.py test
+    - npm run build
+    - npm run lint
+      # The format command will error if there are unformatted files
+    - npm run format -- -l

@@ -1,0 +1,134 @@
+language: java
+dist: trusty
+sudo: false
+jdk:
+- oraclejdk8
+before_install:
+- df -h
+- openssl aes-256-cbc -K $encrypted_1cc7b892dc78_key -iv $encrypted_1cc7b892dc78_iv -in settings.xml.enc -out settings.xml -d
+- mv settings.xml ~/.m2/settings.xml
+
+script:
+# Creates the correct profile to run
+- cd org.uqbar.project.wollok.releng/
+- export PROFILES=normalProfile
+- export UPDATE_SITE=none
+- if [ $TRAVIS_PULL_REQUEST == "false" -a $TRAVIS_BRANCH == "dev" ] ; then export UPDATE_SITE="dev" ; fi
+- if [ $TRAVIS_PULL_REQUEST == "false" ] && [[ "$TRAVIS_TAG" =~ ^v[0-9.]* ]] ; then export UPDATE_SITE="stable" ; fi
+- echo "Running with profiles $PROFILES"
+- echo "Running with UPDATE_SITE $UPDATE_SITE"
+
+
+# Maven build
+- export MAVEN_OPTS=-Xmx2048m
+- mvn -e -Darguments='-Dtycho.disableP2Mirrors=true' -Dtycho.disableP2Mirrors=true -U -DTRAVIS_JOB_ID=$TRAVIS_JOB_ID clean install
+  jacoco:report coveralls:report -P $PROFILES
+# I will delete the org.uqbar.wollok in the .m2 repo, as it is generated in every run, and is useless
+- rm -rf /home/travis/.m2/repository/org/uqbar-project
+# Moved from before_deploy, because it runs for each deploy, not only once
+# I list the used space if there is a problem with the size of the build
+- df -h
+- du -h -d 4 ..
+# Generating the release
+- cd ..
+- mkdir results-server
+- mv org.uqbar.project.wollok.launch/target/org.uqbar.project.wollok.launch-*-wdk.zip results-server/
+- mkdir results-products
+- cp results-server/org.uqbar.project.wollok.launch-*-wdk.zip results-products/org.uqbar.project.wollok.launch-wdk.zip
+- mv org.uqbar.project.wollok.updatesite/target/org.uqbar.project.wollok.updatesite-*.zip results-products/
+- mv org.uqbar.project.wollok.updatesite/target/products/*.zip results-products/
+- mkdir results-update
+- unzip results-products/org.uqbar.project.wollok.updatesite-*.zip -d results-update/
+- ls results-server
+- ls results-products
+- df -h
+
+notifications:
+  webhooks:
+    urls:
+    - env.GITTER_URL
+    on_success: change
+    on_failure: always
+    on_start: never
+cache:
+  directories:
+  - $HOME/.m2
+
+# If there is an error I will try to upload the logs
+after_failure:
+# I list the used space if there is a problem with the size of the build
+- df -h
+- du -h -d 4 ..
+# I generate and upload a file with the output of the tests
+- cd ..
+- cd org.uqbar.project.wollok.tests
+- zip -r -9 target.zip target/
+- curl -T target.zip -u$BINTRAY_ID:$BINTRAY_API_KEY "https://api.bintray.com/content/wollok/TravisTestLog/WollokTestLogs/$TRAVIS_JOB_ID/target-$TRAVIS_JOB_ID.zip?publish=1&override=1"
+- cd target
+- zip -r -9 surefire-reports.zip surefire-reports/
+- curl -T surefire-reports.zip -u$BINTRAY_ID:$BINTRAY_API_KEY "https://api.bintray.com/content/wollok/TravisTestLog/WollokTestLogs/$TRAVIS_JOB_ID/surefire-reports-$TRAVIS_JOB_ID.zip?publish=1&override=1"
+- if [ -f work/data/.metadata/.log ] ; then curl -T work/data/.metadata/.log -u$BINTRAY_ID:$BINTRAY_API_KEY "https://api.bintray.com/content/wollok/TravisTestLog/WollokTestLogs/$TRAVIS_JOB_ID/log-$TRAVIS_JOB_ID.txt?publish=1&override=1" ; fi
+
+deploy:
+- provider: s3
+  access_key_id: AKIAJLCGMGO45ZQFSLJA
+  secret_access_key:
+    secure: S2sP/SZJVO4uJtMrUYud3/qyLm7bN5ohTZrxO3TzONA5qiHYFnQdX+WUiEgbtUL0OZI6ZR5L29E/SRuH07zKEfWODsA7PDsAF7XfpgYi3LC20tqHBMq+07w4HPnRI/K19SC6V1/lnEBCRyGuOd5RIpC3VXccTRcPZDQIAqUviR4=
+  bucket: wollokserverrepo
+  local_dir: results-server
+  upload-dir: $TRAVIS_BRANCH
+  acl: public_read
+  skip_cleanup: true
+  region: us-west-2
+  on:
+    repo: uqbar-project/wollok
+    branch:
+    - dev
+    - master
+    - dev-1.5
+
+- provider: s3
+  access_key_id: AKIAJLCGMGO45ZQFSLJA
+  secret_access_key:
+    secure: S2sP/SZJVO4uJtMrUYud3/qyLm7bN5ohTZrxO3TzONA5qiHYFnQdX+WUiEgbtUL0OZI6ZR5L29E/SRuH07zKEfWODsA7PDsAF7XfpgYi3LC20tqHBMq+07w4HPnRI/K19SC6V1/lnEBCRyGuOd5RIpC3VXccTRcPZDQIAqUviR4=
+  bucket: wollokversions
+  local_dir: results-products
+  upload-dir: $TRAVIS_TAG
+  acl: public_read
+  skip_cleanup: true
+  region: us-west-2
+  on:
+    repo: uqbar-project/wollok
+    tags: true
+
+# Uploading download products
+
+- provider: s3
+  access_key_id: AKIAJLCGMGO45ZQFSLJA
+  secret_access_key:
+    secure: S2sP/SZJVO4uJtMrUYud3/qyLm7bN5ohTZrxO3TzONA5qiHYFnQdX+WUiEgbtUL0OZI6ZR5L29E/SRuH07zKEfWODsA7PDsAF7XfpgYi3LC20tqHBMq+07w4HPnRI/K19SC6V1/lnEBCRyGuOd5RIpC3VXccTRcPZDQIAqUviR4=
+  bucket: wollokdownload
+  local_dir: results-products
+  upload-dir: wollok/products/$UPDATE_SITE
+  acl: public_read
+  skip_cleanup: true
+  region: us-west-2
+  on:
+    all_branches: true
+    condition: "$UPDATE_SITE =~ ^dev|stable$"
+
+# Uploading update site
+
+- provider: s3
+  access_key_id: AKIAJLCGMGO45ZQFSLJA
+  secret_access_key:
+    secure: S2sP/SZJVO4uJtMrUYud3/qyLm7bN5ohTZrxO3TzONA5qiHYFnQdX+WUiEgbtUL0OZI6ZR5L29E/SRuH07zKEfWODsA7PDsAF7XfpgYi3LC20tqHBMq+07w4HPnRI/K19SC6V1/lnEBCRyGuOd5RIpC3VXccTRcPZDQIAqUviR4=
+  bucket: wollokupdate
+  local_dir: results-update
+  upload-dir: wollok/$UPDATE_SITE
+  acl: public_read
+  skip_cleanup: true
+  region: us-west-2
+  on:
+    all_branches: true
+    condition: "$UPDATE_SITE =~ ^dev|stable$"

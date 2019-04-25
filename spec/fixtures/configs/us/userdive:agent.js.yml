@@ -1,0 +1,146 @@
+sudo: true
+language: node_js
+node_js: lts/*
+cache:
+  apt: true
+  yarn: true
+  directories:
+  - node_modules
+  - website/node_modules
+  - examples/node_modules
+  - examples/with-react/node_modules
+  - examples/with-angular/node_modules
+  - packages/agent/node_modules
+addons:
+  apt:
+    sources:
+    - sourceline: "deb https://artifacts.crowdin.com/repo/deb/ /"
+      key_url: https://artifacts.crowdin.com/repo/GPG-KEY-crowdin
+    - sourceline: 'deb https://dl.yarnpkg.com/debian/ stable main'
+      key_url: https://dl.yarnpkg.com/debian/pubkey.gpg
+    packages:
+    - crowdin
+    - default-jre
+    - rsync
+    - yarn
+env:
+  global:
+  - secure: mmnT2bR4F6fDEoBYC/6+8i5p16WkFDsXhz3ymTa9S6P7PkEnq2Y1yhgAjp01gZYimLlbR0RgATlXHsJFIkxXBcQ9UkWp7L7Y+FpeaJyYXJ0dvBD/v2JdDAKQcS3G7snAc6zYGHko3QxA+taOXU6eOwYTHzYZcVhUvf7k+AO4CcI4SX8+9ruoM6rYRp9Ql8AYV7GbquOcHYl/apImCrb5Eb0szX8OwR/R3PVnSXqBzaZgpvrBmqNOCa0Iyis2oTmo2ZSLJPjgrF5lbAkTneL/Mqk/nVAqInXeYOEI/VDngLAxrO/ANZB/kqjxTQHZlTpaz+mhKUY8cDb2KTXMb7HTmPeeq3dp/pv8ZmIgTInlPuE12A9oeGHfLSMqKoKwQQwYaIM4UNWJaTkJrByds+Qyc/QF6kG7RWklb9KynEFIUHmrynsbMuiSOG1vs/0c48qyNspL23khK4t0erd4NoOOVXc/ROXrgIr2gMpb4LzGz+f3ocEuidYGpVh7iUZ8b9CxcWG4mPWgzqvsFuKGrWhrH5LsC7B4KLvSMDslx36CnD1cBj27sbmylfFq8IHoZqiSEXsv7nZJyvM71ILbhm3i5OFpKn4RaRHfN5P8q7VMUyRjvxTe1ONnJXP4m2Ns1PThnHnaAMkDBQHRxhSBYJY6R7fKwx1M/fGa7Vwg6HLfqJ4=
+  - secure: euv17ubtD4RUWl1GgfjL/gTtHtfO8snBz9j1wOwRCQpEJskTjTR8UjLfXuPDdtnW3laO+B7Ur4rg4FBm9BSGBaocPrFiYEJ/wp8qO+ryV5AtyMlmbzwH2qsXVYI7MWQOXFy2zaMMC7w7NEXKfHIPlqpMYqP4SMGJlOTH8aLNa/ZEuwMEdYc3EFl3DMSEtGjE8QhJ0iXxgA7/PkutK+xlRTpRflRILMj57rV1onXOBx3elTi1ELvVOfDA5xVN+/7Aznw4wo7QqZHL6wxfspdjpoAsnOexfidFcJQUHlC4UiJP7glMrkhlhLprvGB3x1b4dQl1hnE+PQRkDBIk35YL+68UxQDMcYs+QZ0Mj154b4OdqZneZPygmxDCA8q2t8Pp+bJc8wQKEj0/837WvnKiiiYqd9NqHTrqCDaNdvm0c34K/0sO9I6j4CEfJplaXLMoQkXgaTZAJjsBRLRRJWj0NWOvZh54nnyJKg8zogLdx/p+/yMcXVVI6oZfbkWScdmN7sSHb2any+n0+qRFdRt56jzlRnvhTidzNhM3SR8DfnAZ04TT49wMr6Vt4gKg49WGtkda7FyMF97LHJOJZtX2Cf1Bgp+T7fl+tqUn66rVKmX21LGiCRYw1xwoDXeSzFNkySaIFWbLByzafnZCOXceKiHxlQUuxtkAneyhuuAx0Zg=
+  - secure: PhV3zfO/MZSfnzaeJnw2sK2pcMy0OFQMy4Kmyt8+CEfF06nHtLPVAlvk3q3Rs5DQ3YSqmz1AYgrBw6oYWqYijsp3DdcUDS7GF4n8M7HqP0cOvgjEECDnzIk9Q4VyIVR+zqoqSQOV4ZTSySzuPCj3eRa+Dfp0vki/4tgWqL/5iVHaKGXnQL6y6v3xi//BwdLYPQDBlp/Il4MjXF9/+fXFtj81FhU9k+6bCIvYyP4AAdoOh+FZJUZP8bJkP1t18+AouH+XGvii5mUrWDyTcTiany3PyVvV5VRfIvAGb+WdHDTxOMO/zrypTokBibGLiJlsd2g0Roj3t9m7KSoLMVbkV7+40ApMUBfLJTfbuuRyJD5GKDBCkqxNwjHOuA9jBPqz2IZ18DMgk8UJ9C/KaEYduSinNcSzMSK1YZS+8qDTH6znFzB0Fb21Tf1lR+V8WL5M/h9kaUAbq9D+bZXaHVFO1Hyob3lzSu73CLhflKggUDOJDLussgyo0mR4QTa9jgDqp18YyXbascbNqcIZcCiq3q5LvJX8/DrxromvarK8AqIzxzRW3e84cYsbhLLLdID4GVfRPAZz0hdmA8RWcRBPGfzZNl+LjBkbdZHIcNAV9XjynIVDbnT+Jw6r9aGvjGAML4tWqX7xOUvz33nSrLk3reHe+4vmT1pGD0r4UXUorqA=
+  - secure: WOeCng9yBvOTRBCryCuL7iNKXXR20t1urB88eIfJgIK/jQOHO536wuZRDuI4pKi5ZFLQ5HewgWaPzYUdpIv95D+S4j7+2BKM0rajmpAtw4i7QRRHSyQvmdqhppqstOsG8Y30VyVUPSRuMENlmMPKY4ExlmFv6pYconIjgMjylISY877s2ll121ZQGHRTQuIvi2m9hSpCRpXJ5XSoS7nVmwjqdE+78oWuLJ/AhNAr85RXWSTH1Rzq0dBOY5psQ0bbYpGmueSU/51WK4Nh8a2X8rl9GfAk5Z7fUORuWGhk45ReqiYVu2hEafdY3mg6e/i6lDkG+Ob5lgAcEK1j1Zj5b9RbP0hnU923D6EOmo7pVQamb+SPLjJmcRXO59Hy6s7gAn9qz+DJucuAirqAMivP3kuhq2+feHgBNzyA358ZpRzVcycRhubNWuBWsXa+9omgM5tzuaoummYaoHW5yyAA0MYXAT5119noTUG9uzK0SZMBaWHiIt5TUfQ2+/+htEdhDOAPEueEF+EVOloQUgnd1SR7KHDNPbiSWpZcYyWKh557v3+kSKvTDHZGAp8gwZD9ZeavQM52otqnxcnfhXSxtW77b0dMkH3dGoJKxW4uvtlEtvJCGM9rwSgowOcYRWGQ9wMV7VJweonN692k40aiBXxB3CAFnwbtttptABP8Gpc=
+stages:
+  - name: test
+  - name: cross-browser
+    if: type = pull_request OR branch = master
+  - name: deploy
+  - name: pre-release
+    if: branch =~ ^release
+before_install:
+- mkdir -p "$HOME/.yarn/bin"
+- ln -s /usr/bin/yarn "$HOME/.yarn/bin"
+- export PATH="$HOME/.yarn/bin:$PATH"
+jobs:
+  include:
+  - stage: test
+    env: Build Size
+    script:
+    - yarn postbuild
+    - yarn lint
+    - yarn test
+    - yarn coverage
+  - stage: pre-release
+    env: Dry Run
+    script:
+    - yarn dry-release
+  - stage: cross-browser
+    env: Cross browser
+    script:
+    - |
+        if git diff --name-only $TRAVIS_COMMIT_RANGE | grep -qE '.+'
+        then
+          echo "Checking $TRAVIS_COMMIT_RANGE for code file changes"
+          if ! git diff --name-only $TRAVIS_COMMIT_RANGE | grep -E '\.(ts|tsx|js|jsx|yml|json)$'
+          then
+            echo "Not found changes in code files. Skip Sauce CI."
+            exit 0
+          fi
+        fi
+        npm run ci:sauce
+  - stage: deploy
+    script:
+    - npm run build
+    deploy:
+    - provider: script
+      script: scripts/publish
+      skip_cleanup: true
+      on:
+        tags: true
+        repo: userdive/agent.js
+    - provider: s3
+      skip_cleanup: true
+      access_key_id: AKIAJGRQLUF4DJQRRPGA
+      secret_access_key:
+        secure: aTQLdKpTJORmb60PYD20AAp8D7hc6J9slNHewuqUcfIWO7KVq7PQovvJ0gRaBIcz3uPd0SZ5u8/sfrO4YXH4ChiFje/Qgwsgci6nqEwKtIULCqTNREkkTPqKKssYYq/6d3a35+9oXHsRroUa2qybX4YJHk6IXmY7QhQryn2RIN6eXpCX9pGnji7Ql30cq9QaH3sstE4pvjZux71+U6ee7OZtRJxZ13TvGQLGdhziQog10/8QVlRKgwQzYSIu5Ikga01I+ToMlkjJVGqku4KDCvXIdz7IL9KvUYIGgNGPeDIBy2rVNeP95UhYcPu9W41CM5zMVT0aO0n7CdfJ7/zoWkiI4O3uxOkmLk9noVzApClSVsYWTTz7uGJumPgM/URYlboxLoSA6PcSwvtQhrJ0RZTNtFpYPfreSveQhaQFF8F80S9C1ZSPBInMJB386Hp6/9a9ZZ9pbwK+zzKVAX2lNv+F7bavi1nBFd1vrW/tfMqJfMoiynZqZWAjPQdvNnMRO2cXM8vvJg9IOixRaOcU9UE/bDL2/6gOZ5BjrDcecOuLfTwp9M0F8ISUEBlZrFvecaYHKXZYoT8vHxW4APo7BCXCts/hcS2JzN3IL/U2hDtW5D030kphtTrzUmOs7J3SxMevl8m5yMjAjY2ma8Wz/y6ZHhEQ38o3atv0nwPsrzk=
+      bucket: s3-bucket-cdn-s3bucket-1rr97tspu1fmp
+      local-dir: cdn
+      upload-dir: agent/$TRAVIS_BRANCH
+      on:
+        all_branches: true
+        repo: userdive/agent.js
+    - provider: s3
+      skip_cleanup: true
+      access_key_id: AKIAJGRQLUF4DJQRRPGA
+      secret_access_key:
+        secure: aTQLdKpTJORmb60PYD20AAp8D7hc6J9slNHewuqUcfIWO7KVq7PQovvJ0gRaBIcz3uPd0SZ5u8/sfrO4YXH4ChiFje/Qgwsgci6nqEwKtIULCqTNREkkTPqKKssYYq/6d3a35+9oXHsRroUa2qybX4YJHk6IXmY7QhQryn2RIN6eXpCX9pGnji7Ql30cq9QaH3sstE4pvjZux71+U6ee7OZtRJxZ13TvGQLGdhziQog10/8QVlRKgwQzYSIu5Ikga01I+ToMlkjJVGqku4KDCvXIdz7IL9KvUYIGgNGPeDIBy2rVNeP95UhYcPu9W41CM5zMVT0aO0n7CdfJ7/zoWkiI4O3uxOkmLk9noVzApClSVsYWTTz7uGJumPgM/URYlboxLoSA6PcSwvtQhrJ0RZTNtFpYPfreSveQhaQFF8F80S9C1ZSPBInMJB386Hp6/9a9ZZ9pbwK+zzKVAX2lNv+F7bavi1nBFd1vrW/tfMqJfMoiynZqZWAjPQdvNnMRO2cXM8vvJg9IOixRaOcU9UE/bDL2/6gOZ5BjrDcecOuLfTwp9M0F8ISUEBlZrFvecaYHKXZYoT8vHxW4APo7BCXCts/hcS2JzN3IL/U2hDtW5D030kphtTrzUmOs7J3SxMevl8m5yMjAjY2ma8Wz/y6ZHhEQ38o3atv0nwPsrzk=
+      bucket: s3-bucket-cdn-s3bucket-1rr97tspu1fmp
+      local-dir: cdn
+      on:
+        branch: master
+        repo: userdive/agent.js
+    - provider: s3
+      skip_cleanup: true
+      access_key_id: AKIAJF4LQ6ECJ6VAO76Q
+      secret_access_key:
+        secure: ghhqHQK8bSCXAvnMuPk8n+uvJQUwaS0YOouGpmPTGU5shG2gzgitfEOz93g5S3EfuDhP8n2uGJXkqb9ORTJYyOJVNRqqCHKumk8a9Sf1DGGEpU+KMcoR0H7zY/Wi0noVMDvsxR1ZIgRxwj523nOaOCn/2eSKgtz7O1kqHDVCsY5VBznbv8Z1heyS3WQT9SXe52EGmQDo1qdpYfgZMWdqiqOCnzJZQ2LZ6TWguI4EfVDgtsJ7ptWNV3Ybik3CxPLw3Ozuweqwdo9KvBOD9JeUth41jTEbSLleTtvC+nheWAW38HjCT9D1HH9caMZpfF77wQuunjjRhDXttwBDCX8nYDKL6lZ6rpeelNqmQDgQQezsXlv5ZulLzlKuH3YaVMqIVTyZRDVrdzrDc2xnGal04PB8Y1ewgp9BtX44uLk1NsvKX3rcSGV34INQWGLzKQULLH0JdX4e9tQG6OZbZokLt1gvSqCv1r6gEHuRh6+EjYo+OL85qjd1rSHhL3vga9fYhxf/CblQI1EwxDwB7nzzSVjTovnXJN7dRrmxCbfKBpq4U/xzGxmvmvHuNY9bYAiTRK+2DIf5jdatkU8+/fEYcEWUQyOB3NPXYlGYV2i7w+7ixN9Uk/aNFLQxtoxODGHEdhICZqRSF9juKQj/ECi3RFH/WLiCmhaJQJOOhKrql2Q=
+      bucket: s3-bucket-cdn-s3bucket-jhnl18vt4xcz
+      local-dir: cdn
+      on:
+        tags: true
+        repo: userdive/agent.js
+    - provider: s3
+      skip_cleanup: true
+      access_key_id: AKIAIFPFPDK4BGODWSXA
+      secret_access_key:
+        secure: Y9Y6UAVfpKl4yAbRROtMWTj4D6dIFvMdvCyDLcXnE8RGDHapp0kclDP86y0fH91/UOn7BFo2YEgw2CChmHWOXId1nJhcw6YnKtqMTzQAzDhdiEQ4BaCDzqELgwP5f96IH4hXmZ5AJIJ8kwy0cXhoL9FAoVfiX0i5srNJX5GXB34zAt2itpPoQqE3N++fn3odsxfdXUqTB2couMr/2duAzbJQEJ2eCu2JCO1bj2g0xzTPw7gHvqhheUOxHtV4i6NgvAG6ZJMHDj7JMZ4E+amh+zHhtKaFOOGlLLidhB9/DH9yh6ibzQtXHKGYZvgRhjT5b6PLWi25KnWk28vnu7+lgCOCXWpvtPNsGjRUb2bbyawY02aWh+cNUyU1qCpKeCWCjZTGfsXsokL8c6QQn9KcurPGyQj+bICJasUCLOuzXUdXS4OuJcStoh3sW+w3jJ+74RMM01XPcSCcFsJOQSvooQzByXC52kruV9PnYN76zSfcLClhsFwL5DjcvDyQh10/FKcHT0LCHwHBGR/9tu9xC7El8mqvFQtAVlEG5maA1ygyUt21tAkgTegxMAYM4ty/qm4QQ4WY8jqx1fk5zLqcET8+uzS001JfeNKjpXJH1eD2rwV3sSQ9w4qwWWmtvfLrJ5/CiL5wvoxYrNf74bSgzH1KzokBhYx37VtVVLZxyoQ=
+      bucket: s3-bucket-cdn-s3bucket-9dacuvdjwe43
+      local-dir: cdn
+      on:
+        tags: true
+        repo: userdive/agent.js
+    - provider: s3
+      access_key_id: AKIAIPY6VYMCAAHTH4GA
+      secret_access_key:
+        secure: KkSvOhNHSND3YLSwUj5F0BZ/eUhW/0wvxSnMqKoP6Lc1kCqM0HEoysn359A4yByaBn9Gs+/7JF0o9sFZNfeQpYDXaydTlbHmobJEATQAG0D+Oozt3CYE9InQiVBWo+jMV/ia+CUxpbJDuig/uwoxrS5pqe+1LNkHwar47cT2k5XBUwtrFe36qnEDGfmJin3NIVt/MgIoBpNtf6G9ctjBpFcDaO5FhXaZwiyM2Mgnqno+9S2LAd0xPbOAOZijtKKiRObiY4ZdRSTXwkTfbfGfChcE2DghTh5bl0EjMQsSV3I8gdV6TyC7HGbbj/Q5EoLNbOYtJ8deMvwKzL3fh3wYXC9ZZYQm7TcY0nZ+62APZQsYkDl+tS0Fyteq9pWVy8OL3tfsecpmPWf/XtCOB11OnAcwPMYCANQnB6zpAlwIKSWW0fXL/4MKg4qG5S+PRLvxiUXFPMufFSZI+3dRf+OW1//ql37O+2p3hsbw2ZURytQHwy6g2pITWIYx86BId1Bd9Fx1typQpPJHgJJyARJ9TpWqv4/5N5WxHsJpGbs5MH+FIEInqxzflQUSqi0ncHsmBNSHFzLxs9GSXF/6bf/3SwqJhtrzQqRReBH9+oPzu96jw+1duy2jzXXGKmWFbtULrEA6h1A8CKkZr9r1RZ5LE8XcIMPOCRN5fPth99fNHjY=
+      skip_cleanup: true
+      bucket: s3-bucket-developers-s3bucket-3mp1ibbucnso
+      local-dir: website/build/USERDIVE
+      acl: public_read
+      on:
+        branch: master
+        repo: userdive/agent.js
+    - provider: s3
+      access_key_id: AKIAJLR4F33XRHF7DKJQ
+      secret_access_key:
+        secure: L/WzXUReP1JeT8RSMc1LoMo0in+Z0RhT0WecmIUxgAOG6dcrp7hjRUPECWq9W8RFaF1owVaZOUA/LDtyrjbzOf/Ah2VcPjj5PzKSXy4dg29jRwORw/bP/Uc+IIw8I4JADXbBUlpZKr4kCfoauGHTZtmSjOHySqTqOTKOxyXSdAx7GZyNt91uBESELV8fd5Gf4mD6/vUiAgAH1B5VJ5IewBTHZn8uNkI3rwUbwaMMvNz4ZGsqiQ8zIBktyZsBeKYvZN3I9mqmgX5diB+a8qxAruxyEBLCMc5tUqr/BkZAjPZbR5eK8++xh3TIJLAJMUQYadHYfMDJYKT8EECy2IIdi0fWw6OQkSauP3HjEeH3yUEQemcWthMQjsdE5YVAHW8YsQKcVWH2EhZPPjuUCF9eAimqtF80jbEF8GuXOcbxmGJzZIbXqExe5lVlUpHcdVFmEXCaFJb68lPywR9LJjp6xO5keB0RGb7dwrEW6TgN+8tvrF9jVV5l01JJ6to2LMzPwLhtWjkmQ/oK8nyBxEw7S/MuMuY7hJdUZhokAQcLZH72PhnqW/hQcAeVs2HP9UZNgh1Rms6asJq3RGtR90iG5kAX6xlo4I+JfHzNtVyweVqlCQH9B58+q4tbT/IRtlgaT34ficKYeOnzW2JTtjkMPiDyPlEOqXyv7TVzlGCDzww=
+      skip_cleanup: true
+      bucket: s3-bucket-developers-s3bucket-nm8a5fhkdfnh
+      local-dir: website/build/USERDIVE
+      acl: public_read
+      on:
+        tags: true
+        repo: userdive/agent.js
+notifications:
+  email: false
+  slack:
+    secure: U3uzO3B/0Ri3MeHJANkJwMNzEw6hrErULn26VPQvyQJ0k0FwjziUt9/rNy2dl1U1Nn378zz27aA+r3IA7MmxNZL09QoJuvwbRkXFm+GlQoN53dJkH/q3M/Hvak1A+ET2f537Ak9IfOGJa++aEPr6Pk0MC/abts0tDv1YVCic9uZMsJV8fBQX338lvHKJStwuHHCjlz3HmwoJZtilgpwtHlPl1UwAL6h3885Qm+mZ9pt6PGSy619ac39gF3dVKtw459wctwvlM5GJq8A+ixMlUrQhOnNtKuccKcUkyjxTFZ7iLPM3OODF4UYzoLm6+m/6wN1SlxPM+zinq1ugb+5b41axpWJrBAyj1KUIKzxJRbE0tIGfAVHopkJifwmuU+ypbHFQnxCg49+VSUyNrasuRIhwmIiRq0weYELgDVtu4O1hwp4UHokpd5OJ4eSdKWAt8qScaFBqZSgWkm8uMa6N2qQWfVA4uHaTS67uYfghxhbAtbR1IhsBwCbKiG2hl9MxZ0BFa+9/1NWIC61LnEtB7lo6fO4K2TpqR7lZ75+/RELROBAehdoI5iQqbUxe40PFePKDr8fCXDUaTs6al+35l+pYLPFz2dI8ave8TSlSYK4RFfdpZlM/Db4mHcI8FGc5woI+hc6u5jvT5cj71abMAqQ+Lwl4NcfjjJkAWq63PYU=

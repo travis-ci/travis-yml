@@ -1,0 +1,17 @@
+language: php
+
+php:
+    - 7.1
+
+env:
+# doctrine dabatase abstract layer has bug: https://github.com/doctrine/dbal/pull/2402
+#    - DATABASE_ENGINE=pdo_sqlite DATABASE_PATH = %kernel.cache_dir%/sqlite.db.cache
+    - DATABASE_ENGINE=pdo_mysql DATABASE_PORT=3306
+    - DATABASE_ENGINE=pdo_pgsql DATABASE_PORT=5432 DATABASE_USER=postgres
+
+before_script:
+    - cp app/config/parameters.yml.dist app/config/parameters.yml
+    - composer install --no-progress --no-interaction
+
+script:
+    - ant

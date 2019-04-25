@@ -1,0 +1,29 @@
+language: ruby
+sudo: true
+rvm:
+  - 2.6.2
+bundler_args: "--without production"
+cache:
+  bundler: true
+  directories:
+    - $HOME/.yarn-cache
+before_install:
+  - nvm install 6
+  - nvm use 6
+  - npm config set spin false
+  - npm install -g yarn
+  - "travis_retry gem update --system"
+script:
+  - RAILS_ENV=test bundle exec rake db:migrate
+  - bin/rails test:all
+before_script:
+  - export TZ=Asia/Tokyo
+  - cp config/database.yml.travis config/database.yml
+  - psql -c 'create database database_test' -U postgres
+  - bundle update
+  - yarn install
+services:
+  - elasticsearch
+addons:
+  chrome: stable
+  postgresql: "9.6"

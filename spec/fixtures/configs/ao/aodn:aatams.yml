@@ -1,0 +1,37 @@
+sudo: false  # use containter-based infrastructure
+
+
+language: groovy
+
+jdk:
+  - openjdk7
+
+cache:
+  directories:
+    - '$HOME/.m2/repository'
+    - '$HOME/.gvm'
+
+env:
+    global
+    - TZ="Australia/Hobart" JAVA_OPTS="-Xmx1G -Xms512m -XX:PermSize=64m -XX:MaxPermSize=512m"
+
+addons:
+  postgresql: "9.4"
+  apt:
+    packages:
+    - postgresql-9.4-postgis-2.3
+
+before_install:
+  - rm -rf '$HOME/.sdkman'
+  - curl -s "https://get.sdkman.io" | bash
+  - sed -i -e 's/sdkman_auto_answer.*/sdkman_auto_answer=true/g' "$HOME/.sdkman/etc/config"
+  - source "$HOME/.sdkman/bin/sdkman-init.sh"
+  - sdk install grails 1.3.7
+  - sdk use grails 1.3.7
+
+before_script:
+  - ./init_test_db.sh
+
+script:
+  - grails test-app --echoOut
+  - grails prod war

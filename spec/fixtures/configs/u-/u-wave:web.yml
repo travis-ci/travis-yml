@@ -1,0 +1,24 @@
+language: node_js
+node_js:
+  - stable
+  - 8.9
+
+before_install:
+  - nvm install-latest-npm
+  - npm install -g greenkeeper-lockfile@1
+before_script:
+  - greenkeeper-lockfile-update
+  - npm run build
+
+install:
+  # travis does npm ci by default
+  - npm install
+
+script:
+  - npm test
+    # Don't fail the build bc of this yet.
+  - npm run test:check-coverage || true
+  - npm run prod
+
+after_script:
+  - greenkeeper-lockfile-upload

@@ -1,0 +1,36 @@
+language: node_js
+node_js:
+  - 10.15.3
+branches:
+  only:
+    - master
+    - /^greenkeeper/.*$/
+cache: npm
+notifications:
+  slack:
+    secure: >-
+      52/l+r+wQ0vUkQ0B2nojtd/uSZSVQMuzb0+8awioyCHyBdSqGTuu4QJgTOPCaTcLNxNyZJsjQ2PoeKgikgRjAM99JFyVGdjKybhf7O4SxoaE8tknCNC++ZpX7a8XufnNFkosnX5Fxo+7Df3/EL0gReTEn/xm8Wd071MHgQQhptQxYYJalbGn28D+MkBIAzGmLK6TfFpxLHFh5JhJhmSG1xk03tYjcfwk1GT1xupuVaL4wY3g8sNrKYpD47KBAlP8SN1rG8ts/KW84jCmUHB/HzsqHjkR28U5fRFX7niHvfzPMuXSKIrzy9vtr5H0FOBFwz1CY3jPlVwRGC8SFilAFlrBHDztw4+JG7bpMVLenqgZSLF/5JRyXTgTkF5aYjs2vraMe+KvovvCvC26Nm/WQbw5+phauDTz0bjFoYYf+O+E1dDj50Tv5jCn5b8vDQgpG95rFmrzBaQKRksptgRyCk2sapWNPxoEvdkrNifv+LyzNQaoyIicFtYgCAyWvN7V5Vgm85dqn6kJanYXTyQyt8P6X3+Ke/9KxiR/5LkrOkCT+Sl3WFFbf9BV0FdDZKVOhtDHMShfCnRrzdJBZi68XZ1uQZP/EGAiGd7gNhmPWv4KY9UqSVkK+H8Avi3SfbzvCk8SjHL03x7/99Fdx5pVSqZgCH3RcTfBN4ErFspPhf0=
+script:
+  - npm run cover
+after_script:
+  - npm run docs
+jobs:
+  include:
+    - stage: docs
+      node_js: lts/*
+      skip_cleanup: 'true'
+      script:
+        - npm install -g --production coveralls codecov
+        - npm run cover
+        - codecov
+        - cat ./coverage/lcov.info | coveralls
+        - npm run lint
+        - npm run docs
+    - stage: release
+      node_js: lts/*
+      script: skip
+      deploy:
+        provider: script
+        skip_cleanup: 'true'
+        script:
+          - npx semantic-release

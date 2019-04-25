@@ -1,0 +1,24 @@
+language: node_js
+services: docker
+
+sudo: false
+
+node_js:
+  - "8.9"
+
+install:
+  - npm install
+
+env:
+  - ISLAND_USE_DEV_MODE=true RABBITMQ_HOST=amqp://localhost:5672 ISLAND_TRACEMQ_QUEUE=trace ISLAND_TRACEMQ_HOST=amqp://localhost:5672
+
+before_script:
+  - docker run -d -p 5672:5672 --name rabbitmq rabbitmq
+
+script:
+  - ISLAND_LOGGER_LEVEL=crit npm run coverage
+
+after_script:
+  - npm i coveralls && cat ./coverage/lcov-remap.info | coveralls
+  - npm i codeclimate-test-reporter && CODECLIMATE_REPO_TOKEN=9659b75eb35f7695fcbf58818e218f069a9a681206a9c9ea331e8b30fa386336 codeclimate-test-reporter < ./coverage/lcov-remap.info
+

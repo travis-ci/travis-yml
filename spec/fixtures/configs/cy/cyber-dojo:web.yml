@@ -1,0 +1,14 @@
+services: docker
+language: node_js
+
+before_script:
+    - curl -O https://raw.githubusercontent.com/cyber-dojo/cyber-dojo/master/shared/push_and_trigger.sh
+    - chmod +x push_and_trigger.sh
+
+script:
+    # pull images used in tests so test-duration does not include pull time
+    - docker pull cyberdojofoundation/ruby_mini_test:latest
+
+    - travis_retry ./pipe_build_up_test.sh \
+        && ./push_and_trigger.sh \
+              cyber-dojo/commander

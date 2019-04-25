@@ -1,0 +1,33 @@
+# Modified from https://github.com/biocore/scikit-bio/
+language: python
+env:
+  - PYTHON_VERSION=2.7 WITH_DOCTEST=False USE_CYTHON=True
+  - PYTHON_VERSION=3.5 WITH_DOCTEST=True USE_CYTHON=True
+  - PYTHON_VERSION=3.6 WITH_DOCTEST=True USE_CYTHON=True
+  - PYTHON_VERSION=3.7 WITH_DOCTEST=True USE_CYTHON=True
+before_install:
+  - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
+  - chmod +x miniconda.sh
+  - ./miniconda.sh -b
+  - export PATH=/home/travis/miniconda3/bin:$PATH
+install:
+  - conda create --yes -n env_name python=$PYTHON_VERSION pip click numpy scipy pep8 flake8 coverage future six "pandas>=0.20.0" nose h5py>=2.2.0 cython
+  - rm biom/*.c
+  - source activate env_name
+  - if [ ${PYTHON_VERSION} = "2.7" ]; then pip install pyqi; fi
+  - if [ ${PYTHON_VERSION} = "2.7" ]; then conda install --yes Sphinx=1.2.2; fi
+  - pip install coveralls
+  - pip install -e . --no-deps
+script:
+  - make test 
+  - biom show-install-info
+  - if [ ${PYTHON_VERSION} = "2.7" ]; then make -C doc html; fi
+  # we can only validate the tables if we have H5PY
+  - for table in examples/*hdf5.biom; do echo ${table}; biom validate-table -i ${table}; done
+  # validate JSON formatted tables
+  - for table in examples/*table.biom; do echo ${table}; biom validate-table -i ${table}; done;
+  - python biom/assets/exercise_api.py examples/rich_sparse_otu_table_hdf5.biom sample
+  - python biom/assets/exercise_api.py examples/rich_sparse_otu_table_hdf5.biom observation
+  - sh biom/assets/exercise_cli.sh
+after_success:
+  - coveralls

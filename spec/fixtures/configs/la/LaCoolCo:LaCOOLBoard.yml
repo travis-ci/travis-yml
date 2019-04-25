@@ -1,0 +1,51 @@
+language: python
+python:
+- '2.7'
+sudo: false
+install:
+- pip install -U platformio
+- platformio update
+script:
+- platformio run -t clean
+- patch/patch.sh
+- export RELEASE_VERSION=$(git describe --tags --always)
+- platformio run
+- export FIRMWARE=LaCOOLBoard-${RELEASE_VERSION}.bin
+- mkdir artifacts
+- cp .pioenvs/prod/firmware.bin ${FIRMWARE}
+- cp .pioenvs/minified/firmware.bin artifacts/minified-${RELEASE_VERSION}.bin
+- cp .pioenvs/prod/firmware.bin artifacts/prod-${RELEASE_VERSION}.bin
+- cp .pioenvs/heap/firmware.bin artifacts/heap-${RELEASE_VERSION}.bin
+- cp .pioenvs/debug/firmware.bin artifacts/debug-${RELEASE_VERSION}.bin
+- cp .pioenvs/trace/firmware.bin artifacts/trace-${RELEASE_VERSION}.bin
+notifications:
+  email:
+    recipients: build@lacool.co
+  slack:
+    secure: TxKrv7J+fHDe98JOmzKve1PLvmuTdK4/wzSKQx7vOIz4tyje+CQuFJMPOOvjkaJoS8jT+s0FR25q8r5QF1mFpIofBPvvLu/PL3KOaPDs2lE4HXHoQi4vZiCQnDJbpQhk4dxwLHqbQ/OHwZOm0qmVusB9EJjf81iTxr2jA09/neEtPE06Yn3FIU+XaxJYbI7VeN5SgOeOCroo931BvYjyEcUhMUuqVHPI5KuBkNJ1bc3fAQyg6KGi5jFs18Fugd6OZQGMV8aJf4l9weyTUXL60x9i6AUOoCSNb+pMAQYfG/bn7PWhQgsV8q+hB5cNESRpklNA6c4uLDWsdCb1/gI0NtNDdwg8oEmRpRJXf5W9/cCzWZFHrruFJm12wjNaSAy63a8bOF15Ve79ngGrUGHwSDjXA5JSeYrtvNVM9e4IWfmjcNK2JeXnhhnicAAPXPmxLLlyTtTsDWcmYy3b7rWcRmwzmRW2NCoQGctw2VndXOqk5ojl7iZSdNYI7JkeX9cLU4YfJPbnb2qviuENrvl14D/2hv4jozFGTd/6A8Z6Xs/qQxknfKrbS0BN4haA9X6hRPO0gs5qfMh4UrVM/wJ7N4tcWR/F4C6tkxdmH+tfAVTYLAnuhZRfqFhqxI5Ni50iWNYzFeweH3jZ/2CgYTeyj3Tj/BN27ityKjL76mZEzMc=
+deploy:
+- provider: releases
+  name: La COOL Board ${RELEASE_VERSION}
+  file_glob: true
+  file: "${FIRMWARE}"
+  api_key:
+    secure: rKQbtn2MgGMKqlc85hng89PcjDoU2H+lsIcXXTb56inOWUzINhtR+Uxjvixk9U5yNjX/KUYLzcZYWyxvybv0qlW7ZRH5LJsK0F/RFMp4t7u7IG/OCHjpixbLM3hlWynrraX1XULPbvM3UDpnGa8yzFt0oLk1pBaU85G91UAwRQOb5ZE/LcG+P5ZxrQLWzVxW8ezE6d1201/gDjeIyTlfRnL26k1rtkk+znVtCtBncuPRxfNGJyBX4Es2XzOgx8YQQAnQFp0eHYYsetOn/d3h3AbClNI8mG6p6sy3k/z1EhO3CCWypfEWuZ2wwopMDEA//Py+BoIZ4BLws0LwVbjI+dznfcexsXtCIAWHxEqiqqLQsQFxxk7L1hFa1m4aQjS6AGpy3rvJx+uQOPrcdP+749wjsxzIfp0eQgi4TcASI2AVtJPw/x0MyPerrlusf7mOhSdz+WC+M4AjSUoYGQzejFaWNZbDkDgYebrxqAcTHiHc2PVSjbLtAtM9FTtjRoMUF7Ys2jsHDpcfIGzT6pBFUHh3MotQAfB9oH/OvsNu5EB56lLdHsSl9sHfZNz5wLNbXcqW1sW9JlvFnDC8/t60WXv+lPBn1QI6DBA8kCTuO3HRRiFwVxTSe4T90Pep56sg+ALwBO8obER3JCNIGSh61BxM/TIV1s2oRYAp6wpxiOs=
+  on:
+    repo: LaCoolCo/LaCOOLBoard
+    tags: true
+- provider: s3
+  skip_cleanup: true
+  access_key_id: "${AWS_ACCESS_KEY_ID}"
+  secret_access_key: "${AWS_SECRET_ACCESS_KEY}"
+  region: "${AWS_DEFAULT_REGION}"
+  bucket: "cool-firmware-releases"
+  local_dir: "artifacts"
+  upload-dir: "${TRAVIS_BRANCH}"
+  on:
+    all_branches: true
+    repo: LaCoolCo/LaCOOLBoard
+env:
+  global:
+  - AWS_DEFAULT_REGION=eu-west-1
+  - secure: GXJ4wvpvqJr/mEJHgxQxDOxWQx4x8J0gg5oODiXk9bcqk574JxqupgOGTOEfgQ+u8jy6Ic0TfeQl2EEUvNEfjoudgalsFHVlZzi5n0gbOeuqm/+cz4NJlAM+WPecNbv+iihQ2lAwCxOcBIOI+K0tv2nQAA0B0salcTRvcRjLIuAP6t7HsGFxU6RSOeLPEZcDLtAJCs7tHY0T3KcACtbvI8eBc1zBKVdcxXXRTamU3JiFBM8uU94px4vHOc+5VatAUsH3VxKv1/jMLH7pBXaW7kt80MdzSbFKBQcwTtTVjwAku5Eoz44nWErsvB3fovVjs5JE7gF+noQh1mXpg5YY1FIa6IvzHP2EYrC79Ne7kru6N+zWnvfFSuFevjuwfh0CnyGl2qhjvIcRg2dD4K8YMzuQtj6TFkClXhHSzxhhpeTcz/Qgij83NPFOM4XDhmBEe/ViyJqrHEOnjOMKrkYgXMOW28mE2zHaCaFXRIyaU7HAZa5/6srSCdSSQ4BysFmJ0D8R7STkwQfipkSt2Zc99T55qeMYgpRNv4rYhPRNIaDPxmvVtcKbkpXrL1w6QtBdT/vO8FUYyylKcxP2HAplRTEOc3tR/c347rNsK2GC2ZOQN7VZg5FhIGdEnEoQdZnI0+YdQGCmPYsvrXhviTRYonjehcjUJae9Z/a56WTzDF0=
+  - secure: DRS+uLY6+SabtjbWBIFM7zvQTIJiVRe0NtmqTOH7GiEDQ8qLLRvxLSR8PbR5iK1E3pxTXaJynv9H5VBRhRbgVprecne3JuuGN27LBiBWIg71XwbmrKb4+xzP+KVbLVpimZYvFMfz9cB9af8aRtlQjwDHY+uPwewqS48ajTQXpOADaZC3nUDbxRHpc8bTY0OxSyeWNy0ZkPrL1LjwfD0VAxpi80WQT9e3aaR63vMEpSE4pEmqorlwRa3NgApfdVq7GirRWdSHhkZYf88MuGDdqnWH6srEbhlc7uCOFi/8TvRfgfDaduxm4ZirRmZfiI6dAUW5XIbDhhbEkl3NcvaMYJqMfw/SnhaNZHTUa5FsJILG1QwGsbhGyRE48hXWA9Xx2UXjAltdyNbNjxzGI2b+mTgfa1Ob9Pvt7UhKrzxg0E4EuYUusNQovN2kQouENI7FpaMZ5rYbX3zWNNtwJ+kpNzSqglAI8KprMOzQJJnCjaLOU++kbJI3qQKOcf05B7b/lh+MPj8JrJGhk2K3Bw1dRv66Ds+/bzfGV74ebHuP7GjKhdqE/BiGAkJrlUxLjn+0WHAgY1kdcWHFpL7/097Ja9MOvGHVijD4mz8NZGzZhvl11lyngSc6DW4/VmaoPyyZDMQhrZhMEjtH3jHzzn1WZeRd8B80EgqtUJraRcBa/0w=

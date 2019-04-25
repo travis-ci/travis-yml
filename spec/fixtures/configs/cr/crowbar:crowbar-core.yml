@@ -1,0 +1,39 @@
+language: ruby
+sudo: false
+cache: bundler
+dist: trusty
+
+rvm: 2.1.9
+
+env: SKIP_CHECKS=yes
+
+matrix:
+  include:
+    - gemfile: Gemfile
+      script:
+      - bundle exec danger
+    - gemfile: crowbar_framework/Gemfile
+      script:
+       - cd crowbar_framework
+       - bin/bundle install
+       - bin/rake db:create db:migrate
+       - bundle exec rake spec brakeman:run
+       # ignore rest-client issues, chef 10 requires that
+       - bin/bundle exec bundle-audit update
+       - bin/bundle exec bundle-audit check --ignore CVE-2015-1820 OSVDB-117461
+    - gemfile: chef/cookbooks/barclamp/Gemfile
+      script:
+       - cd chef/cookbooks/barclamp && bundle exec rake
+    - gemfile: crowbar_framework/Gemfile
+      script:
+       - crowbar_framework/bin/bundle exec knife cookbook test -c .knife-test.rb -a
+
+
+addons:
+  apt:
+    packages:
+      - libarchive-dev
+
+# pin bundler to avoid problems with old ruby and new deps
+before_install:
+  - rvm @global do gem install bundler -v '< 2.0.0'

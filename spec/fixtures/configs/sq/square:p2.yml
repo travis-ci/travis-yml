@@ -1,0 +1,31 @@
+language: go
+
+go:
+  - 1.9.2
+
+env:
+  - RACE=-race
+  - RACE=
+
+before_install:
+  - sudo apt-get update -qq
+  - sudo apt-get install -y runit
+
+install:
+  - gem install rake
+  - go get github.com/tools/godep
+  - go get github.com/kisielk/errcheck
+  - rake install
+  - wget https://releases.hashicorp.com/consul/0.7.1/consul_0.7.1_linux_amd64.zip
+  - unzip consul_0.7.1_linux_amd64.zip
+  - sudo mv consul /usr/bin/
+
+script:
+  - rake test_all
+  - integration/travis.sh
+  - rake errcheck
+  - go vet ./bin/... ./pkg/...
+
+sudo: required
+services:
+  - docker

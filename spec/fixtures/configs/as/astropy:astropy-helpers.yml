@@ -1,0 +1,121 @@
+# We set the language to c because python isn't supported on the MacOS X nodes
+# on Travis. However, the language ends up being irrelevant anyway, since we
+# install Python ourselves using conda.
+language: c
+
+os:
+    - osx
+    - linux
+
+# Setting sudo to false opts in to Travis-CI container-based builds.
+sudo: false
+
+env:
+  matrix:
+    - PYTHON_VERSION=3.5
+    - PYTHON_VERSION=3.6
+    - PYTHON_VERSION=3.7 SETUPTOOLS_VERSION=dev DEBUG=True
+      CONDA_DEPENDENCIES='sphinx cython numpy pytest-cov'
+      EVENT_TYPE='push pull_request cron'
+
+  global:
+    - CONDA_DEPENDENCIES="setuptools sphinx cython numpy pytest-cov"
+    - PIP_DEPENDENCIES="codecov"
+    - EVENT_TYPE='push pull_request'
+    - DEBUG=True
+
+matrix:
+  include:
+    # Do one build with sphinx-astropy as one of the tests bypasses the auto-
+    # installation but we want to make sure that test runs for coverage.
+    - os: linux
+      env: PYTHON_VERSION=3.6 PIP_DEPENDENCIES='codecov sphinx-astropy'
+    - os: linux
+      env: PYTHON_VERSION=3.6 SPHINX_VERSION='1.5' SETUPTOOLS_VERSION=30
+    - os: linux
+      env: PYTHON_VERSION=3.5 SPHINX_VERSION='1.5' SETUPTOOLS_VERSION=30
+           CONDA_DEPENDENCIES=`echo $CONDA_DEPENDENCIES sphinx-astropy 'numpydoc<0.9'`"
+    - os: linux
+      env: PYTHON_VERSION=3.6 PIP_DEPENDENCIES='git+https://github.com/sphinx-doc/sphinx.git#egg=sphinx codecov'
+           CONDA_DEPENDENCIES="setuptools cython numpy pytest-cov" EVENT_TYPE='push pull_request cron'
+    # Test without installing numpy beforehand to make sure everything works
+    # without assuming numpy is already installed
+    - os: linux
+      env: PYTHON_VERSION=3.6 CONDA_DEPENDENCIES='sphinx cython pytest-cov'
+
+    # Test conda's clang
+    - os: osx
+      env:
+        - PYTHON_VERSION=3.5
+        - CONDA_DEPENDENCIES="setuptools sphinx cython numpy pytest-cov clang llvm-openmp matplotlib"
+        - OPENMP_EXPECTED=True
+        - CCOMPILER=clang
+
+    # Test gcc on OSX
+    - os: osx
+      env:
+        - PYTHON_VERSION=3.5
+        - CONDA_DEPENDENCIES="setuptools sphinx cython numpy pytest-cov gcc sphinx-astropy"
+        - OPENMP_EXPECTED=True
+        - CCOMPILER=gcc
+
+  # Uncomment the following if there are issues in setuptools that we
+  # can't work around quickly - otherwise leave uncommented so that
+  # we notice when things go wrong.
+  #
+  # allow_failures:
+  #   - env: PYTHON_VERSION=3.6 SETUPTOOLS_VERSION=dev DEBUG=True
+  #          CONDA_DEPENDENCIES='sphinx cython numpy pytest-cov'
+  #          EVENT_TYPE='push pull_request cron'
+
+before_install:
+
+      # Test OSX without OpenMP support
+      # Since the matrix OSX tests use the OS shipped version of clang, they double up
+      # as exploratory tests for when the shipped version has automatic OpenMP support.
+      # These tests will then fail and at such a time a new one should be added
+      # to explicitly remove OpenMP support.
+    - if [ -z $OPENMP_EXPECTED ]; then
+        if [[ $TRAVIS_OS_NAME == osx ]]; then
+          export OPENMP_EXPECTED=False;
+        else
+          export OPENMP_EXPECTED=True;
+        fi
+      fi
+
+    # We need to use CCOMPILER otherwise Travis overwrites CC if we define it
+    # in env: above.
+    - if [ ! -z $CCOMPILER ]; then
+        export CC=$CCOMPILER;
+      fi
+
+    # Check CC variable
+    - echo $CC
+
+install:
+
+    - git clone git://github.com/astropy/ci-helpers.git
+    - source ci-helpers/travis/setup_conda.sh
+
+    # We cannot install the developer version of setuptools using pip because
+    # pip tries to remove the previous version of setuptools before the
+    # installation is complete, which causes issues. Instead, we just install
+    # setuptools manually.
+    - if [[ $SETUPTOOLS_VERSION == dev ]]; then git clone http://github.com/pypa/setuptools.git; cd setuptools; python bootstrap.py; python setup.py install; cd ..; fi
+
+before_script:
+    # Some of the tests use git commands that require a user to be configured
+    - git config --global user.name "A U Thor"
+    - git config --global user.email "author@example.com"
+
+script:
+    - pytest --cov astropy_helpers astropy_helpers
+
+    # In conftest.py we produce a .coverage.subprocess that contains coverage
+    # statistics for sub-processes, so we combine it with the main one here.
+    - mv .coverage .coverage.main
+    - coverage combine .coverage.main .coverage.subprocess
+    - coverage report
+
+after_success:
+    - codecov

@@ -1,0 +1,40 @@
+language: scala
+scala:
+    - 2.12.7
+
+jdk:
+    oraclejdk8
+
+sudo: required
+
+services:
+ - docker
+
+before_install:
+ - docker run --publish 7575:7474 --detach -it ehri/ehri-rest
+
+# Dummy SMTP server, which runs on 2500
+env:
+  - SMTP_PORT: 2500
+
+before_script:
+  - |
+    python -m smtpd -n -c DebuggingServer localhost:$SMTP_PORT &
+    SMTP_PID=$!
+
+after_script:
+  - kill $SMTP_PID
+
+# These directories are cached to S3 at the end of the build
+cache:
+  directories:
+    - $HOME/.ivy2/cache
+    - $HOME/.sbt/boot/
+
+before_cache:
+  #     # Tricks to avoid unnecessary cache updates
+  - find $HOME/.sbt -name "*.lock" -exec rm "{}" ";"
+  - find $HOME/.ivy2 -name "ivydata-*.properties" -exec rm "{}" ";"
+
+script:
+  - sbt ++$TRAVIS_SCALA_VERSION -J-XX:ReservedCodeCacheSize=256M test

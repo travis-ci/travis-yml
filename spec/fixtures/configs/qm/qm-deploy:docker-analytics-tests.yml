@@ -1,0 +1,70 @@
+language: php
+php:
+  - '7.2'
+pandoc_version: 2.0
+sudo: required
+services:
+  - docker
+  - mongodb
+  - mysql
+  - memcached
+addons:
+  apt:
+    sources:
+    - mysql-5.7-trusty
+    packages:
+    - mysql-server
+    - mysql-client
+before_cache:
+  # Save tagged docker images
+  - >
+    mkdir -p $HOME/docker && docker images -a --filter='dangling=false' --format '{{.Repository}}:{{.Tag}} {{.ID}}'
+    | xargs -n 2 -t sh -c 'test -e $HOME/docker/$1.tar.gz || docker save $0 | gzip -2 > $HOME/docker/$1.tar.gz'
+cache:
+  directories:
+    - $HOME/docker
+    #- QM-Docker
+    - $HOME/.composer/cache
+env:
+  global:
+    - REPO_TO_TEST=qm-api
+  matrix:
+    #- HUGO_VERSION=0.20.2 # Maybe use this for documentation at some point
+    - PHP_VERSION=7.2 BUILD_SERVICE="mysql workspace mongo"
+before_install:
+  - sudo mysql -e "use mysql; update user set authentication_string=PASSWORD('test_password') where User='root'; update user set plugin='mysql_native_password';FLUSH PRIVILEGES;"
+  - sudo mysql_upgrade -u root -ptest_password
+  - sudo service mysql restart
+  - mysql -u root -ptest_password -e 'CREATE DATABASE quantimodo_test;'
+  - sudo apt-get update
+  - sudo apt-get -y install pandoc
+  - chmod +x ./*.sh
+
+before_script:
+  - ./clone.sh
+  - chmod +x ./qm-api/tests/travis/*.sh
+  - ./qm-api/tests/travis/mark_pending_on_github.sh
+  - pecl channel-update pecl.php.net
+  - pecl -q install mongodb || true
+  - echo "extension=mongodb.so" >> `php --ini | grep "Loaded Configuration" | sed -e "s|.*:\s*||"`
+  - echo "extension = memcached.so" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
+  - ./qm-api/tests/travis/tideways.sh
+  - ./qm-api/tests/travis/xhgui.sh
+  - ./qm-api/tests/travis/composer.sh
+
+script:
+  - ./qm-api/tests/travis/phpunit.sh
+
+after_failure:
+  - ./qm-api/tests/travis/mark_failed_on_github.sh
+
+after_success:
+  - ./qm-api/tests/travis/mark_succeeded_on_github.sh
+
+notifications:
+  email: false
+  slack:
+    rooms:
+      - quantimodo:BijCp5nmBJtuwXTnJ1ALT6xo#web
+    on_success: never 
+    on_failure: always

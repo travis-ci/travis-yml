@@ -1,0 +1,12 @@
+language: node_js
+node_js:
+  "6"
+cache:
+  directories:
+    - node_modules
+script:
+  - npm run lint:js
+  - npm run test
+before_install: npm install greenkeeper-lockfile@1.9.0
+before_script: greenkeeper-lockfile-update
+after_script: greenkeeper-lockfile-upload

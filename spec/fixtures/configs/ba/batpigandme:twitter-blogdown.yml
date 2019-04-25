@@ -1,0 +1,17 @@
+language: r
+sudo: false
+cache: packages
+
+before_install:
+  - openssl aes-256-cbc -K $encrypted_d518c2cf7dea_key -iv $encrypted_d518c2cf7dea_iv -in twitter_token.rds.enc -out twitter_token.rds -d
+  - git config --global user.email "maraaverick@gmail.com"
+  - git config --global user.name "Mara Averick"
+
+script:
+  - Rscript R/fetch.R
+
+after_success:
+  - rm twitter_token.rds
+  - git add --all *
+  - git commit -m"Daily update"
+  - git push -q https://${GITHUB_PAT}@github.com/${TRAVIS_REPO_SLUG}.git HEAD:master

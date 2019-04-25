@@ -1,0 +1,72 @@
+language: C
+
+matrix:
+  include:
+    - os: linux
+      compiler: gcc
+      env:
+        - TEST_INTERVAL_LIB=gaol
+        - STATIC_OR_SHARED=
+        - PLUGINS="--with-optim --lp-lib=soplex"
+    - os: linux
+      compiler: gcc
+      env:
+        - TEST_INTERVAL_LIB=gaol
+        - STATIC_OR_SHARED=--enable-shared
+        - PLUGINS=
+    - os: linux
+      compiler: gcc
+      env:
+        - TEST_INTERVAL_LIB=filib
+        - STATIC_OR_SHARED=
+        - PLUGINS="--with-optim --lp-lib=soplex"
+    - os: linux
+      compiler: gcc
+      env:
+        - TEST_INTERVAL_LIB=filib
+        - STATIC_OR_SHARED=
+        - PLUGINS="--with-optim --lp-lib=clp"
+    - os: osx
+      compiler: clang
+      osx_image: xcode8.3
+      env:
+        - TEST_INTERVAL_LIB=gaol
+        - STATIC_OR_SHARED=
+        - PLUGINS="--with-optim --lp-lib=soplex"
+        - CXXFLAGS=-std=c++11
+    - os: osx
+      compiler: clang
+      osx_image: xcode8.3
+      env:
+        - TEST_INTERVAL_LIB=gaol
+        - STATIC_OR_SHARED=--enable-shared
+        - PLUGINS=
+        - CXXFLAGS=-std=c++11
+
+# only works on linux
+addons:
+  apt:
+    packages:
+      - python
+      - flex
+      - bison
+      - libcppunit-dev
+
+# need this to install dependencies on osx
+before_install:
+  - uname -a
+  - if [ "$TRAVIS_OS_NAME" = "osx" ] ; then brew update ; brew install flex bison cppunit; fi
+
+# TODO add --affine when tests are fixed
+install: 
+  - ./waf configure --prefix=$HOME ${STATIC_OR_SHARED} --interval-lib=${TEST_INTERVAL_LIB} ${PLUGINS} --with-ampl || cat __build__/*.log
+  - ./waf build install clean
+
+# command to run tests
+# TODO: add nonreg tests
+script:  
+  - ./waf utest
+#  - __build__/examples/optimizer04 benchs/benchs-optim/coconutbenchmark-library1/ex8_5_2.bch acidhc4 compo smearsumrel 1.e-8 1.e-8 100 1
+
+after_failure:
+  - cat __build__/*.log

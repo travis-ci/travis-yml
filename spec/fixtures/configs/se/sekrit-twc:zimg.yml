@@ -1,0 +1,68 @@
+dist: xenial
+sudo: false
+language: cpp
+
+matrix:
+  include:
+    # GCC 4.9.
+    - compiler: gcc
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - gcc-4.9
+            - g++-4.9
+      env: 
+        - MY_CC: gcc-4.9
+        - MY_CXX: g++-4.9
+    # GCC 8.
+    - compiler: gcc
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - gcc-8
+            - g++-8
+        coverity_scan:
+          project:
+            name: "sekrit-twc/zimg"
+            description: "Build submitted via Travis CI"
+          notification_email: noreply@example.com
+          build_command_prepend: "source .coverity-prepare.sh"
+          build_command: make
+          branch_pattern: coverity_scan
+      env: 
+        - MY_CC: gcc-8
+        - MY_CXX: g++-8
+        # The next declaration is the encrypted COVERITY_SCAN_TOKEN, created
+        #   via the "travis encrypt" command using the project repo's public key
+        - secure: "ZPVIqS6exYthp6FL6XQYyzz3Y17BKUP60bMj3X6vHk0aJ3d5jOVE4OEOjEY2uOnEWQej1a1ea0kBqpvljnrDUNZZjKdG7Auv0N8Dmg1RKznyjHLbqoGPD2Yj+ooYHT8qE7thCZC8v7axoCf2sObViWtZg3AmeqAMVxHGoG3OxRU="
+    # Clang/LLVM 5.0
+    - compiler: clang
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-xenial-8
+          packages:
+            - clang-8
+            # Needed for updated libstdc++.
+            - g++-8
+      env:
+        - MY_CC: clang-8
+        - MY_CXX: clang++-8
+    # Apple Clang
+    - os: osx
+      osx_image: xcode10.1
+      compiler: clang
+      env:
+        - MY_CC: clang
+        - MY_CXX: clang++
+
+install:
+  - export CC=$MY_CC
+  - export CXX=$MY_CXX
+script:
+  - ./.travis-script.sh

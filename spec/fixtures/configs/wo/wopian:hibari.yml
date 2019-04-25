@@ -1,0 +1,21 @@
+os:
+- linux
+#- osx
+language: node_js
+node_js:
+- node
+cache:
+  yarn: true
+sudo: false
+matrix:
+  fast_finish: true
+before_script: yarn lint
+script: yarn test
+after_script:
+- yarn global add codeclimate-test-reporter
+- codeclimate-test-reporter < test/coverage/lcov.info
+addons:
+  code_climate:
+    repo_token: 829b109b8cfb0095f7558e866e68432d58bb1643f354edc9046b77b7d7351f80
+notifications:
+  email: false

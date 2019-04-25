@@ -1,0 +1,57 @@
+dist: trusty
+language: python
+
+services:
+  - postgresql
+
+python:
+  - '2.7_with_system_site_packages'
+  - '3.6'
+
+addons:
+  postgresql: '9.4'
+  apt:
+    packages:
+      - postgresql-9.4-postgis-2.3
+
+env:
+  - DJANGO='>=1.8.19,<1.12'
+
+install:
+  - sudo -E apt-get -yq update &>> ~/apt-get-update.log
+  - sudo apt-get install binutils libav-tools
+  - sudo apt-get -yq install libgdal-dev
+  - gdal-config --version
+  - export C_INCLUDE_PATH=/usr/include/gdal
+  - export CPLUS_INCLUDE_PATH=/usr/include/gdal
+
+before_script:
+  - psql template1 postgres -c "CREATE EXTENSION hstore;"
+  - psql -c "CREATE USER django WITH PASSWORD 'django123';" -U postgres
+  - psql -c "ALTER ROLE django WITH superuser;" -U postgres
+  - psql -c "CREATE DATABASE geokey OWNER django;" -U postgres
+  - psql -d geokey -c "CREATE EXTENSION postgis;" -U postgres
+  - cp -r local_settings.example local_settings
+  - pip install --upgrade pip
+  - pip install coveralls
+  - pip install -r requirements-dev.txt
+  - pip install -e .
+  - pip install django$DJANGO
+  - python -c "import django; print('DJANGO %s' % django.get_version())"
+  - python -c "from geokey.version import get_version; print('GEOKEY %s' % get_version())"
+  - python manage.py migrate
+
+script:
+  - coverage run --source=geokey.core,geokey.applications,geokey.extensions,geokey.users,geokey.superusertools,geokey.projects,geokey.categories,geokey.contributions,geokey.subsets,geokey.socialinteractions manage.py test
+
+after_success:
+  - coveralls
+
+deploy:
+  provider: pypi
+  user: excites
+  password:
+    secure: EPsnf69HqWA8nT9ncgVuyhIJGZnR3Nrg8NUEzG4t1B1CTJfmwODC0Fb8Hybq25/0y6Fq3mBWE482xhscVHYvNh/7UnehU+y2riIj5iP+VYrfEuLzBN6ZkjYXOezafq6pzotwsj6JCDWKGmBE6Jy++FDsOFSzLK/R2p3HqnrnRpc=
+  on:
+    tags: true
+    python: '3.6'

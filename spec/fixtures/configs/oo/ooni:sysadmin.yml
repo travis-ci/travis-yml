@@ -1,0 +1,10 @@
+language: python
+python:
+  - "2.7"
+install:
+  - pip install ansible==2.4.2
+env:
+  # TRAVIS_VAULT_SECRET=... generated with scripts/mk-travis-vault-env
+  - secure: "Xxkqma06aY44kY6wjQo1H3RD17ZZMDi+gC0wr3armzXvv4eRJvtF4A7S6eUcAdU6KE5TOiDC4aensSOq+VfZTyxk453d1ZRjvognpRsbog0VIoQxHszgyosJizmqmIfw7CMEp98HQhw6sY0J7qUMMPrXLv8adbMUiDZsTTIVOEc="
+script:
+  - scripts/ansible-syntax-check

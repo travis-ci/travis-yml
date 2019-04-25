@@ -1,0 +1,123 @@
+language: smalltalk
+sudo: false
+
+branches:
+  except:
+    - windows
+    - /^v[0-9]/
+
+install:
+  # Move cache directory if it exists
+  - "[[ ! -d ${SMALLTALK_CI_CACHE} ]] || mv ${SMALLTALK_CI_CACHE} $(pwd)"
+
+script: bin/smalltalkci --self-test
+
+aliases:
+  - &ensure-smalltalkci-can-fail
+    smalltalk_config: .smalltalk_fail.ston
+    script: "! bin/smalltalkci --self-test"
+  - &with-gemstone-cache-enabled
+    cache:
+      directories:
+        - ${SMALLTALK_CI_CACHE}
+
+jobs:
+  include:
+    - stage: "Prioritized jobs"
+      smalltalk: Squeak64-5.2
+    - smalltalk: Pharo32-stable
+    - smalltalk: GemStone64-3.3.2
+      env: GSCI_CLIENTS="Pharo32-5.0 Pharo32-4.0 Pharo32-3.0"
+      <<: *with-gemstone-cache-enabled
+
+    - language: bash
+      smalltalk:
+      sudo: false
+      script: tests/all_tests.sh
+
+    - smalltalk: Squeak32-5.2
+      os: osx
+    - smalltalk: Pharo32-stable
+      os: osx
+    - smalltalk: GemStone64-3.3.2
+      os: osx
+      <<: *with-gemstone-cache-enabled
+
+    - smalltalk: Squeak32-5.2
+      <<: *ensure-smalltalkci-can-fail
+    - smalltalk: Pharo32-stable
+      <<: *ensure-smalltalkci-can-fail
+    - smalltalk: GemStone64-3.3.2
+      <<: *ensure-smalltalkci-can-fail
+      env: GSCI_CLIENTS="Pharo32-5.0 Pharo32-3.0" # latest and oldest clients
+      <<: *with-gemstone-cache-enabled
+
+    - stage: "Allowed failures"
+      smalltalk: Squeak64-trunk
+    - smalltalk: Pharo64-stable
+    - smalltalk: Pharo64-alpha
+    - smalltalk: Pharo32-alpha
+    - smalltalk: Moose32-trunk
+
+    - stage: "Linux jobs"
+      smalltalk: Squeak64-5.1
+    - smalltalk: Squeak32-5.0
+    - smalltalk: Squeak32-4.6
+    - smalltalk: Squeak32-4.5
+    - smalltalk: Pharo64-8.0
+    - smalltalk: Pharo64-7.0
+    - smalltalk: Pharo64-6.1
+    - smalltalk: Pharo64-6.0
+    - smalltalk: Pharo32-8.0
+    - smalltalk: Pharo32-7.0
+    - smalltalk: Pharo32-6.0
+    - smalltalk: Pharo32-6.1
+    - smalltalk: Pharo32-5.0
+    - smalltalk: Pharo32-4.0
+    - smalltalk: Pharo32-3.0
+    - smalltalk: Moose64-8.0
+    - smalltalk: Moose64-7.0
+    - smalltalk: Moose32-8.0
+    - smalltalk: Moose32-7.0
+    - smalltalk: Moose32-6.0
+    - smalltalk: GemStone64-3.2.15
+      <<: *with-gemstone-cache-enabled
+    - smalltalk: GemStone64-3.1.0.6
+      <<: *with-gemstone-cache-enabled
+
+    - stage: "Mac jobs"
+      smalltalk: Squeak64-5.1
+      os: osx
+    - smalltalk: Squeak32-5.0
+      os: osx
+    - smalltalk: Squeak32-4.6
+      os: osx
+    - smalltalk: Squeak32-4.5
+      os: osx
+    - smalltalk: Pharo32-8.0
+      os: osx
+    - smalltalk: Pharo32-7.0
+      os: osx
+    - smalltalk: Pharo32-6.0
+      os: osx
+    - smalltalk: Pharo32-6.1
+      os: osx
+    - smalltalk: Pharo32-5.0
+      os: osx
+    - smalltalk: Pharo32-4.0
+      os: osx
+    - smalltalk: Pharo32-3.0
+      os: osx
+#    - smalltalk: GemStone64-3.2.14
+#      os: osx
+##      env: GSCI_DEVKIT_BRANCH=dev  # only use for development
+#    - smalltalk: GemStone64-3.1.0.6
+#      os: osx
+##      env: GSCI_DEVKIT_BRANCH=dev  # only use for development
+
+  allow_failures:
+    - smalltalk: Squeak64-trunk
+    - smalltalk: Pharo64-alpha
+    - smalltalk: Pharo32-alpha
+    - smalltalk: Moose32-trunk
+  fast_finish: true

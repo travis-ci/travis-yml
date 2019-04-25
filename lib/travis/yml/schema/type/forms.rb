@@ -219,6 +219,7 @@ module Travis
 
           class Seq < Node
             register :seq
+            register :strs
 
             def apply(node)
               type = detect(node, :str, :secure)
@@ -251,7 +252,9 @@ module Travis
             #   seq(map, str) -> any(seq(map), map, seq(str), str)
             #
             def wrap(node)
-              types = node.first.is?(:any) ? node.types.first.types : node.types
+              types = [Str.new(node)] unless node.any?
+              types ||= node.first.is?(:any) ? node.types.first.types : node.types
+
               types = types.map do |schema|
                 seq = node.transform(:seq)
                 seq.types.replace([schema])
@@ -274,10 +277,11 @@ module Travis
             # For the predefined types :strs and :secures we can simply
             # return the reference to these.
             #
-            def ref(ref, node)
+            def ref(id, node)
               opts = merge(node.opts, *node.types.map(&:opts))
-              ref = node.transform(:ref, opts.merge(ref: ref))
-              ref.set :namespace, node.namespace # ??
+              ref = node.transform(:ref, opts)
+              ref.set :namespace, :type
+              ref.set :id, id.to_sym
               ref
             end
 
@@ -286,7 +290,15 @@ module Travis
             end
 
             def all?(node, type)
-              node.all?(&:"#{type}?") && node.none?(&:enum?) && node.none?(&:vars?)
+              nodes = node.map { |node| node.ref? ? node.lookup : node }
+              nodes.all?(&:"#{type}?") && node.id == :seq
+              # ugh, srsly? find better conditions.
+              # node.none?(&:enum?) &&
+              # node.none?(&:vars?) &&
+              # node.id != :strs &&
+              # !node.support? &&
+              # # !node.export? &&
+              # true
             end
           end
         end

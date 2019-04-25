@@ -1,0 +1,40 @@
+language: php
+sudo: false
+
+php:
+    - 5.4
+    - 5.6
+    - 7.1
+    - nightly
+
+matrix:
+    include:
+        - name: "Front-End"
+          language: node_js
+          node_js: 8
+          env: FRONT_END=true
+    allow_failures:
+        - php: nightly
+
+branches:
+    only:
+        - latest
+        - next
+        - /^greenkeeper/.*$/
+        - /^\d+\.\d+(\.\d+)?(-\S*)?$/
+
+env:
+    - WP_VERSION=latest WP_MULTISITE=0
+    - WP_VERSION=latest WP_MULTISITE=1
+    - WP_VERSION=4.6 WP_MULTISITE=0
+    - WP_VERSION=4.6 WP_MULTISITE=1
+
+before_script:
+    - bash bin/before_script.sh
+
+script:
+    - if [[ $FRONT_END != 'true' ]]; then composer test; fi
+    - if [[ $FRONT_END == 'true' ]]; then npm test; fi
+
+after_script:
+    - if [[ $FRONT_END == 'true' ]]; then greenkeeper-lockfile-upload; fi

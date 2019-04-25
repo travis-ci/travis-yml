@@ -1,0 +1,42 @@
+sudo: false
+
+cache:
+    directories:
+        - $HOME/.cache/pip
+
+language: python
+
+matrix:
+    include:
+        - python: 2.7
+          os: linux
+          env: TOXENV=py27
+        - python: 2.7
+          os: linux
+          env: TOXENV=pylama
+        - language: generic
+          os: osx
+          # 7.2 is OS X 10.11.x
+          # https://docs.travis-ci.com/user/languages/objective-c/#Supported-OS-X-iOS-SDK-versions
+          osx_image: xcode7.2
+          env: TOXENV=py27
+
+install:
+    - if [ "$TRAVIS_OS_NAME" = "osx" ]; then
+        curl -O -s https://bootstrap.pypa.io/get-pip.py;
+        python get-pip.py --user;
+        export PATH=$PATH:~/Library/Python/2.7/bin;
+        pip install --user tox virtualenv;
+      else
+        pip install tox virtualenv;
+      fi
+
+
+script:
+    - tox
+
+notifications:
+    email:
+        - dev-automation@lists.mozilla.org
+    irc:
+        - "irc.mozilla.org#automation"

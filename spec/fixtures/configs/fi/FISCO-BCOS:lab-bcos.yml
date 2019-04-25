@@ -1,0 +1,68 @@
+
+#------------------------------------------------------------------------------
+# TravisCI configuration file for FISCO-BCOS
+# ------------------------------------------------------------------------------
+# This file is part of FISCO-BCOS.
+#
+# FISCO-BCOS is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# FISCO-BCOS is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with FISCO-BCOS.  If not, see <http://www.gnu.org/licenses/>
+#
+# (c) 2016-2018 FISCO-BCOS contributors.
+#------------------------------------------------------------------------------
+language: cpp
+branches:
+  only:
+      - dev
+      - master
+      - release
+      - feature-meshchain
+env:
+    global:
+      - TRAVIS_BUILD_TYPE=RelWithDebInfo
+      - TRAVIS_TESTS=ON
+matrix:
+    include:
+        - os: linux
+          dist: trusty
+          sudo: required
+          node_js:
+              - "8"
+    env:
+        - ZIP_SUFFIX=ubuntu-trusty
+git:
+    depth: 2
+cache:
+  directories:
+  - $TRAVIS_BUILD_DIR/deps
+  - $TRAVIS_BUILD_DIR/build/test
+addons:
+  apt:
+    packages:
+    - cmake
+install: |
+    if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+      sudo chmod a+x ./tools/ci/*.sh &&  chmod a+x ./tools/ci/*.py && bash -x ./tools/ci/check-commit.sh;
+    fi
+script:
+    cd tools/ci && bash build.sh && cd ../../ && ./build/bin/test-fisco-bcos -- --testpath=test/data/ 
+after_success:
+    bash <(curl -s https://codecov.io/bash)
+after_failure:
+    cd tools/ci && bash clean_cache.sh 
+webhooks:
+    urls:
+      - https://webhooks.gitter.im/e/334c46f8aee9f5fb65dc
+    on_success: change  # options: [always|never|change] default: always
+    on_failure: always  # options: [always|never|change] default: always
+    on_start: never     # options: [always|never|change] default: always
+

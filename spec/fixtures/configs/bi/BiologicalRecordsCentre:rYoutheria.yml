@@ -1,0 +1,41 @@
+language: r
+cache: packages
+sudo: required
+
+# Install the suggested packages which
+# are needed for the vignette builds
+r_packages:
+  - knitr
+  - testthat
+  - covr
+
+## After success update the code coverage
+after_success:
+  - Rscript -e 'library(covr); codecov()'
+
+# Warnings don't fail build
+warnings_are_errors: false
+
+## Email notification if the package pass status changes
+notifications:
+email:
+  recipients:
+    - tomaug@ceh.ac.uk
+  on_success: change
+  on_failure: change
+
+## Set up the matrix of different runs
+env:
+  matrix:
+  - r: release
+    not_cran: true
+    r_check_args: "--no-manual"
+  - r: release
+    not_cran: false
+    r_check_args: "--no-manual --as--cran"
+  - r: devel
+    not_cran: true
+    r_check_args: "--no-manual"
+  - r: devel
+    not_cran: false
+    r_check_args: "--no-manual --as--cran"

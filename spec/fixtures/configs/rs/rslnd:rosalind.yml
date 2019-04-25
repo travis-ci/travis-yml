@@ -1,0 +1,33 @@
+sudo: required
+
+dist: trusty
+
+language: node_js
+
+node_js:
+  - '8.15.1'
+
+services:
+  - docker
+
+branches:
+  except:
+  - /^v/
+
+install:
+  - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+  - sudo apt-get -y update
+  - sudo apt-get -y install libstdc++6-7-dbg
+  - chmod +x ci.sh && ./ci.sh install
+
+env:
+  - METEOR_WAREHOUSE_URLBASE=https://d3fm2vapipm3k9.cloudfront.net
+
+script:
+  - ./ci.sh test
+  - travis_wait 30 sleep 1800 &
+  - ./ci.sh build
+
+notifications:
+  slack:
+    secure: RaBq7GOQxyEeEHfJg22qFqQovAMCSc1cKdpSizodVfBVSzm1iRAYB5eXpMl3wYiyi/+vT2VbLFBJMpZQnn+oRdB/q1VXGgEHlX9zcTBEkfUPkp3vCZATxMRuSj8NP1uVDWA0HZZgabX/yGXr8Q/6FTWFV/XYElO+7w8UVmtPvfdjHxDJm6c0Q2UjkGHEOlwtApBUbT+IPFOoBp2dd8JLVUTVbL19PrsvOPUh93KfIqP4uew2EEBQFArNR22/c3YCKtsXYgx3RVQc0jCZfLlEkXiJcZZVwanYUczBVbIOIYHeNlcoCHjL8iMLq003Xp6Gw3IlgwapzeGvO55sW9qOv/XFXTWQWKBdp40VegzoxnU0svMpx99g6wxtqHuRD/22Fv0hat1lQnVHgZwgh0XvBcDk0jLRW1FbpV37oRDSMiAMq1KnVlkvsYcTGWsMvrGDMaHBE6xABHdJpcYwRZTxV5DMnci5FSEcx5ieg0tCDAMuk6He3BgofvKmaV1W50JE/bBCseB/LN0Z1PUBl0pjdXEwovnt8iCg02CnYywAaVkFPjaMnVWzwpDSj9U+jELQpSIqKzBdoS0rlhC01hC4ymS+CA6BAzH86PutCh+BcXEyYOzhQBP1qxgQuuN9am1VXtd7ckGgK4AWyf57LzSy542IUNjbxYrykzGjjeK2Fuk=

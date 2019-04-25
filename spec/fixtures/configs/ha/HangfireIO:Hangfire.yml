@@ -1,0 +1,38 @@
+# Travis-CI Build for Hangfire
+# see travis-ci.org for details
+
+language: csharp
+sudo: required
+dist: trusty
+
+matrix:
+  include:
+    - dotnet: 1.1.11
+      mono: none
+      os: linux
+    - dotnet: 1.1.11
+      mono: none
+      os: osx
+    - mono: latest
+      os: linux
+    - mono: latest
+      os: osx
+
+# Run the build script
+script:
+  - if hash mono 2>/dev/null; 
+    then
+        travis_retry nuget install .nuget/packages.config -OutputDirectory packages;
+        travis_retry nuget restore Hangfire.sln;
+        msbuild /p:Configuration=Release /verbosity:minimal Hangfire.sln;
+        mono ./packages/xunit.runner.console.2.2.0/tools/xunit.console.exe ./tests/Hangfire.Core.Tests/bin/Release/net452/Hangfire.Core.Tests.dll;
+    else
+        travis_retry dotnet restore --disable-parallel;
+        dotnet test -c Release -f netcoreapp1.0 tests/Hangfire.Core.Tests/Hangfire.Core.Tests.csproj;
+    fi
+
+notifications:
+  slack:
+    secure: LZuLPI1Cj9DgNAtFsZ/zk1fWBDS2PTHHIjvtCV3Fa9qNajzna2qR6Ui3sM/FQirvoXp0JHAqNYkFDI216YativqabWXZp6dQgw3u64bdlc1IWxQ4C6XHpp8WVe1wsNi19vfwKVHfvaNXpvNp9OGHXkmoTS74arRtPhpzSXO/IXw=
+    on_success: change
+    on_failure: always

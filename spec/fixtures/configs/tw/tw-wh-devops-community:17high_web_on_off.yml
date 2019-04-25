@@ -1,0 +1,19 @@
+branches:
+  only:
+  - web_on
+  - web_off
+language: java
+jdk:
+  - oraclejdk8
+dist: trusty
+sudo: required
+before_install:
+  - pip install --user awscli
+  - export PATH=$PATH:$HOME/.local/bin
+  - chmod +x bin/*.sh
+script:
+  - bin/setup_cli.sh
+  - bin/turn_aws_ec2_on_off.sh
+branches:
+  only:
+  - /.*/

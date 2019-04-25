@@ -1,0 +1,28 @@
+language: node_js
+node_js:
+- node
+
+env:
+  global:
+    secure: etVeWNJqXx8o720t/z6M27vgf51OkOoYk6+k++FXzAO51oaDgfB9CvcoidSOJkDf5JLDc5EWsoQzoKyVG2u9MDhtAJd/SbmSivPyengCxK3zLHWr8lR3xg8CaMisl0hck14AZL6K2yDpueN8I7fNvRObrApWFmZx+N1r81QolsxZf5wzAy6PpIMJCaDJ31H9rpJITkweT3CNjzkCedPKMhrsZpA/lOviXQrtAchWewt+Q4UUXGgzwrff4NPVPIzbusYwOJT6ZJBXMuEe+1G+3lxVxi0X3S6svRkm70CODYfZXxEB8c3nQkL0nBOJA6ZMy/kRcYpG+qxsQa/+jkkeicAp4PGIlAgKnGQwmeeKUMbEw1Sg3wQGJ5vagUcvE67kgXR2UfH7QzUfE0biivAbujUqRM4Rhhikttygg3mSyYBnSAS0DeSgdjyAS3G1kG5OcXq8bRbc/pnJoTfz/HPBXiWZYXfI+9A/8n0kS2SEBP7IawTIIjeOOCxiDvqAzx3FtW6e3jUFDl0FaNXG15ZBKUVf3fhB4f0thYt2tPmncScd3USrcKHhzsTrw/ZrtALJLFzv64VPUFhnSLESAC/HbE+iTogMKk5BINjxKQ97fHV98iGBVZ4oLxbOmgS2oAugbhAJr76zGyruuPhPspGMx7RLdgMen2H2n4GJ2KrQb2c=
+  matrix:
+    - TEST_SUITE=test
+    - TEST_SUITE=checkstyle
+
+install: 
+- npm install
+- npm install -g codecov
+script:
+- if [ "$TEST_SUITE" == "test" ]; then ISTANBUL_EXTRA="--reporter lcovonly" npm run coverage && codecov; fi
+- if [ "$TEST_SUITE" == "checkstyle" ]; then npm run checkstyle; fi
+
+deploy:
+  provider: releases
+  api_key:
+    secure: GlDMtsM4IfjMF0N3+B8Y6suuxXtlirXtILEEWT2ZPKlFd4AeHDj2PzGR57wu13svIEdzyc9iq2zVOssRI3KS/iucnwbl16pRmr+n5A1bjfvKCeyVkHkSJjCKEDWpCTbRJT7Y+wbHnMsQoyWGxH9AXQneaeYtjBLpWcolRInJsYxx70rP2PaB/GRLY06fDnFcMI/IsTD72phEJOZ7FUs80js5ljLVUzW+NvROAz9KUw4/Yb5PJ/2kBgC5/JCg+RlbQ335buwrM+vOgVR3uXPCNj9Gb3DvSlUxsNJ1POO1YkShMrwZNtzwjNtgXBK+xuYn4RqjsbRthZAwOfTZ/dZaVBfVgrFEDIs2feJvZly93d+pYNbLSq5r21zE9856/jQGkQiPW8xpi8MEbzfscXwun0mvQ+SpSYOFoju/2eqXp7N+YH9UkT5AVSU9sQclwv4FOYw42NnXCu/4FQ/Qo7cbpwPPBhR5IUWBPmB+vbMBGsoWCgS5F9nzfNIJBV/U7rpw23TUlNbb6X3msVSPRaKK8tWphYij4br5J+V3dW0hg+otILSI52eRVQdHfnv8zxUNWDgaYUGPIrSdDaq2KrJNzr2oxXESzS6rx8HuIn28eh1e4VRXHDHO1EgrYnlXhnz2258hCuToc2IKTOTNBEvoAPvQLCeWzL2LdkUOHIQ5MFE=
+  file_glob: true
+  file: target/**/*.js
+  skip_cleanup: true
+  on:
+    repo: 125m125/ktapi-js
+    tags: true

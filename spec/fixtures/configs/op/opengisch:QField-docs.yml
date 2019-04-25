@@ -1,0 +1,53 @@
+language: python
+
+addons:
+  apt:
+    packages:
+      - texlive-latex-recommended
+      - texlive-latex-extra
+      - texlive-fonts-recommended
+
+notifications:
+  webhooks:
+    urls:
+      - https://webhooks.gitter.im/e/7d967d9679efbbc43466
+    on_success: change  # options: [always|never|change] default: always
+    on_failure: always  # options: [always|never|change] default: always
+    on_start: false     # default: false
+
+before_install:
+  - mkdir -p $HOME/texlive && curl -L https://github.com/urdh/texlive-blob/releases/download/20181009/texlive.tar.xz | tar -JxC $HOME/texlive
+
+install:
+# Sphinx requirements
+  - pip install -r requirements.txt
+# Latex requirements
+  - PATH=$HOME/texlive/bin/x86_64-linux:$PATH
+  - tlmgr option repository ctan
+  - tlmgr update --self
+  - tlmgr install combelow
+  - tlmgr install babel-french
+  - tlmgr install babel-german
+  - tlmgr install babel-romanian
+  - tlmgr install babel-italian
+  - tlmgr install babel-spanish
+
+before_script:
+  - ./scripts/ci/setup_git.sh
+  - ./scripts/ci/transifex_push.sh
+
+script:
+  - ./scripts/build-docs.sh
+
+after_success:
+  - ./scripts/ci/deploy-docs.sh
+
+env:
+  global:
+    # Transifex password
+    # Use the following to create the encrypted string
+    #
+    #     travis encrypt 'TRANSIFEX_PASSWORD=My super secret password\!'
+    #
+    # Make sure special characters like !<>()& etc are properly escaped.
+    - secure: "q49a4R6E8xZ9haKoIlJoIAl6vaz34c9VEz3HofW18zX8rJnj2VOQGwGMk45Gz5lu70sc9keYntnAEp7nji7xfLAsBv8Uc+Vw2KfkeMeXY5hkaCY9Cku3byplp6T5pAhGksCIfAR3dld4XBHaqrlDLCiNDAT1BYfXjwKA7/WzBuV1XeYM/8m3WIfgVPJnufN/YYcgnwHeLPhk55CshTRFXB1ExtbSh4yNA8JZ0piZJFVDWbKBwhNETDCL4JXrHLV5/hbS4UgCWXCTEEIArXVM+eHoR5amnYNaojU6YRL/phbIRXsFw1vgUMc1wBaNu2FxQmF5zlFBR3IAA3gekUyhq6H5u54CSZiJAuxHWi9NWlQ5gUG3CeYzGmDMQLn+gj02QuF+TbUU1UT44R/xHXzxPdLgDHR4JmiuVdRDia3NqkMlBL3ma1W9jMvvOL5TmzzR7RvGyLVLLzJX6Du9sOK1oyl9q9Sg4/Y7UC2vjczHHMtBNAilFAUZpGPDuBn2/0kk4bOuAofZ/ylEdjDNlp98QCPoomAEi7A4yjmUxv7igvXlvd/aeluJcpdrZSaWnHmkCE8cmSjwtN8NfAH4kZkIimpikKV2Qp+hs8A0BnGK6ldRVtzBoLQyU7R4Y71/3s+X1aaMiG59+4Zn60hzSn/UfC5sTFtKfHBNiBWUXpDxeXY="

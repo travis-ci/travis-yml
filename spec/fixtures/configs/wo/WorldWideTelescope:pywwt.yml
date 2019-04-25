@@ -1,0 +1,28 @@
+language: c
+
+sudo: false
+
+os:
+    - linux
+
+env:
+  matrix:
+    - PYTHON_VERSION=3.7 STABLE=true
+    - PYTHON_VERSION=3.7 STABLE=false
+  global:
+    - CONDA_DEPENDENCIES='jinja2 requests'
+
+before_install:
+
+  - git clone git://github.com/astropy/ci-helpers.git
+  - source ci-helpers/travis/setup_conda.sh
+
+  - conda install anaconda-client
+  - git clone https://github.com/glue-viz/conda-sync.git
+  - if [[ $STABLE == false ]]; then python conda-sync/sync.py --package reproject --source conda-forge --destination wwt; fi
+  - if [[ $STABLE == false ]]; then python conda-sync/sync.py --package astropy-healpix --source conda-forge --destination wwt; fi
+  - if [[ $STABLE == false ]]; then python conda-sync/sync.py --package ipyevents --source conda-forge --destination wwt; fi
+
+
+script:
+  - ./build_packages.sh

@@ -1,0 +1,63 @@
+# Since we really don't want any of Travis' Python
+language: generic
+sudo: required
+dist: xenial
+
+os:
+  - linux
+  - osx
+
+matrix:
+  fast_finish: true
+  allow_failures:
+    - os: osx
+
+env:
+  global:
+    - MINICONDA_DIR="$HOME/miniconda"
+  matrix:
+    - Python: 3.6
+    - Python: 3.7
+    - Python: 3.7 TASK="dev"
+
+before_install:
+  # Taken from: http://conda.pydata.org/docs/travis.html
+  - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then
+      wget https://repo.continuum.io/miniconda/Miniconda3-latest-MacOSX-x86_64.sh -O miniconda.sh;
+    else
+      wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
+    fi;
+  - bash miniconda.sh -b -p $MINICONDA_DIR
+  - export PATH="$MINICONDA_DIR/bin:$PATH"
+  - export QT_QPA_PLATFORM="offscreen"
+  - hash -r
+  - conda config --set always_yes yes --set changeps1 no
+  - conda update -q conda
+  - conda install -q pyyaml
+  - conda info -a
+  - sed -i -e "s/python=3/python=$Python/" environment.yml
+
+install:
+  - conda env create -q -f environment.yml
+  - source activate unidata
+  - if [[ $TASK == "dev" ]]; then
+      conda uninstall metpy;
+      pip install git+git://github.com/unidata/metpy.git;
+      conda uninstall siphon;
+      pip install git+git://github.com/unidata/siphon.git;
+    fi;
+  - python --version
+  - conda list
+
+before_script:
+  - if [[ $TRAVIS_OS_NAME == 'linux' ]]; then
+      export DISPLAY=:99.0;
+      sh -e /etc/init.d/xvfb start;
+      sleep 10;
+    fi;
+
+script:
+  - python notebooks_preprocess.py
+  - python run_notebooks.py
+  #- python notebooks/Command_Line_Tools/synopticplot.py  --gfslevel 850 --gfsfield Relative_humidity_isobaric --savefig --imgformat jpg
+  #- python notebooks/Command_Line_Tools/skewt.py --date 20170420 --hour 0 --station BMX  --savefig  --imgformat jpg

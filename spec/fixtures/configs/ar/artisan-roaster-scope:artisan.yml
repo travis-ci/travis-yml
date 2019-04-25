@@ -1,0 +1,58 @@
+language: python
+
+# safelist
+branches:
+  only:
+  - gh-pages
+  - master
+
+matrix:
+  allow_failures:
+    - env: ARTISAN_OS=rpi
+  include:
+  - os: linux
+    python: 3.6
+    sudo: required
+    dist: xenial
+    cache:
+      - pip
+      - bundler
+    env:
+      - ARTISAN_OS=linux
+  - os: linux
+    language: generic
+    sudo: required
+    env:
+      ARTISAN_OS=rpi
+  - os: osx
+    python: 3.6
+    language: generic
+    cache:
+      - pip
+    env:
+      - ARTISAN_OS=osx
+
+install:
+  - export GIT_VERSION=`git rev-parse --verify --short HEAD 2>/dev/null|| echo "???"`
+  - sed -i'' -e "s/__revision__ = '0'/__revision__ = '$GIT_VERSION'/" src/artisanlib/__init__.py
+  - .travis/install-${ARTISAN_OS}.sh
+  
+before_script:
+  - ulimit -c unlimited -S
+
+after_failure:
+  - find .  -name "core*"
+  - file src/core
+  - gdb -c src/core `which python3` -ex "thread apply all bt" -ex "set pagination 0" -batch
+
+script:
+  - .travis/script-${ARTISAN_OS}.sh
+
+after_success:
+  - cd src
+  - wget -c https://github.com/probonopd/uploadtool/raw/master/upload.sh
+  - export UPLOADTOOL_BODY="WARNING: pre-release builds may not work. Use at your own risk."
+  - if [ "$ARTISAN_OS" = "osx" ]; then bash upload.sh artisan*.dmg; else bash upload.sh artisan*.rpm artisan*.deb; fi 
+
+ 
+

@@ -1,0 +1,116 @@
+sudo: false
+
+language: python
+
+python:
+    - 3.6
+    - "3.7-dev"
+
+addons:
+    apt:
+        packages:
+        - graphviz
+        - imagemagick
+        - pgf
+        - texlive
+        - texlive-extra-utils
+        - texlive-fonts-recommended
+        - texlive-latex-extra
+        - texlive-latex-recommended
+        - texlive-xetex
+        # lmodern required for texlive-xetex to find fonts
+        - lmodern
+
+before_install:
+    # alias package
+    - PACKAGE=`pwd`/ide
+    - export PATH=$PATH:$PACKAGE/scr
+
+    # upgrade pip:
+    - pip install --upgrade pip
+
+    # install mypy:
+    - pip install mypy
+
+    # install lilypond:
+    - LILYPOND=/tmp/lilypond
+    - LILYPOND_URL=http://lilypond.org/download/binaries/linux-64/
+    - LILYPOND_SOURCE=lilypond-2.19.83-1.linux-64.sh
+    - wget -q -O $LILYPOND $LILYPOND_URL/$LILYPOND_SOURCE
+    - sh $LILYPOND --batch
+
+    # clone & install abjad dev branch:
+    - ABJAD=/tmp/abjad
+    - git clone -b trevor/dev https://github.com/Abjad/abjad.git $ABJAD
+    - pip install -e $ABJAD
+    - export MYPYPATH=$ABJAD
+
+    # clone & install rmakers:
+    - RMAKERS=/tmp/abjad-ext-rmakers
+    - git clone https://github.com/Abjad/abjad-ext-rmakers.git $RMAKERS
+    - pip install -e $RMAKERS
+    - export MYPYPATH=$MYPYPATH:$RMAKERS
+
+    # clone & install tonality:
+    - TONALITY=/tmp/abjad-ext-tonality
+    - git clone https://github.com/Abjad/abjad-ext-tonality.git $TONALITY
+    - pip install -e $TONALITY
+    - export MYPYPATH=$MYPYPATH:$TONALITY
+
+    # clone & install baca:
+    - BACA=/tmp/baca
+    - git clone https://github.com/trevorbaca/baca.git $BACA
+    - pip install -e $BACA
+    - export MYPYPATH=$MYPYPATH:$BACA
+    - export PATH=$PATH:$BACA/scr
+
+    # install uqbar:
+    - UQBAR=/tmp/uqbar
+    - pip install --no-deps --target $UQBAR uqbar
+    - export MYPYPATH=$MYPYPATH:$UQBAR
+
+    # set pythonpath:
+    - export PYTHONPATH=$PYTHONPATH:$PACKAGE/scores/blue_score
+    - export PYTHONPATH=$PYTHONPATH:$PACKAGE/scores/red_score
+    - export PYTHONPATH=$PYTHONPATH:$PACKAGE/scores/green_score
+
+    # make aliases and log files for tests
+    - mkdir -p $HOME/.abjad/ide
+    - touch $HOME/.abjad/ide/__aliases__.py
+    - touch $HOME/.abjad/ide/latex.log
+    - mkdir -p $HOME/.abjad/output
+    - touch $HOME/.abjad/output/lily.log
+
+    # log setup:
+    - echo $HOME
+    - echo $MYPYPATH
+    - echo $PATH
+    - echo $PYTHONPATH
+    - ls
+    - ls /tmp
+    - ls -a $HOME
+    - ls $HOME/.abjad
+    - ls $HOME/.abjad/ide
+    - pwd
+    - which baca-doctest
+    - which latex
+    - which mypy
+    - which prime-parser-tables
+    - which start-abjad-ide
+    - which xetex
+
+install:
+    - pip install pytest-helpers-namespace
+    - pip install coverage
+    - pip install -e . 
+    - prime-parser-tables
+
+script:
+    - mypy --ignore-missing-imports $PACKAGE
+    - start-abjad-ide q
+    - coverage run -a `which baca-doctest` $PACKAGE/*.py
+    - coverage run -a `which py.test` -rf $PACKAGE
+
+after_success:
+    - pip install coveralls
+    - coveralls

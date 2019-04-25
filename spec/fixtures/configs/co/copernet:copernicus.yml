@@ -1,0 +1,18 @@
+sudo: required
+
+language: go
+
+services:
+  - docker
+
+before_install:
+  - docker build -t copernet/copernicus .
+  - docker run -it -d --name copernicus -e TRAVIS_JOB_ID="$TRAVIS_JOB_ID" -e TRAVIS_BRANCH="$TRAVIS_BRANCH" copernet/copernicus
+script:
+  - docker exec copernicus /bin/bash -c 'cd /go/src/github.com/copernet/copernicus && ./check.sh'
+  - 'if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then docker exec copernicus goveralls -coverprofile=/go/src/github.com/copernet/copernicus/coverage.out -service=travis-ci -repotoken $COVERALLS_TOKEN; fi'
+  - docker exec copernicus /bin/bash -c 'cd /walle && pipenv run python test_runner.py' || ./dockerpush.sh $TRAVIS_JOB_ID
+notifications:
+  email:
+    on_success: change
+    on_failure: alwayss

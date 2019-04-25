@@ -1,0 +1,32 @@
+language: python
+sudo: false
+cache:
+  directories:
+    - $HOME/.cache/pip
+python:
+  - "3.4"
+  - "3.5"
+  - "3.6"
+  - "3.7"
+  - "3.7-dev"
+  - "3.8-dev"
+  - "pypy3.5"
+
+matrix:
+  fast_finish: true
+  allow_failures:
+    - python: '3.7-dev'
+    - python: '3.8-dev'
+
+dist:
+  - xenial
+
+install:
+  - travis_retry pip install --upgrade pip setuptools
+  - travis_retry pip install -r requirements.txt
+  - travis_retry pip install -r test-requirements.txt
+  - python setup.py --version
+
+# Run test
+script:
+  - pytest -vv

@@ -1,0 +1,34 @@
+language: r
+dist: xenial
+warnings_are_errors: true
+sudo: false
+cache: packages
+
+branches:
+  only:
+    - master
+    - stable
+    - /^v.*$/
+
+addons:
+  apt:
+    update: true
+    packages:
+    - libmagick++-dev
+
+before_install:
+  - chmod 755 ./.push_gh_pages.sh
+
+after_success:
+  - travis_wait 20 Rscript -e 'covr::coveralls()'
+  - test $TRAVIS_BRANCH = "stable" && test $TRAVIS_PULL_REQUEST = "false" && ./.push_gh_pages.sh
+
+deploy:
+  provider: releases
+  skip_cleanup: true
+  api_key:
+    secure: aPn6c+7FTyb8IcvlS6J3AdZcOaPldhfMqfd92XLUe0Dajs4zNKNhUOJUBenel5w6ziCDewqjic3Fb0U6IRwq2CxfK0nMbTs2C2xNA+B0KfFHBBMb9fN+1t9xWd/i3IqOpPX4kqtsBouXl30ix45gPikm6+wFAGIP5jRi8zVYXZSBA8/1vtKbtqT4zeNXIQh32pYtb7Ax552HXswmvQ2yncOtuuz0guAUryPoLE/bR5syM/R0VejqbsbtSge/PjWgOl33xp4p4dOqiVh6YTWdKw4A/f2Z4zbhVJvD4TRKfOSW/u3ZDXt2dQvaDs/jVi4FgvzcNkOQYzi7oHEEdks1hpG0os62YnNot+kFwU1lG14NBcYdOVRqdPlHHCcEUBhcWFS7Lv5dMKexCjxf1HZfGYO+S8J5bYCCT3LUL4aaO6cvttPOG6BNIEDmdc5ML2CSMK5QwI9pTious+tmRu0D0Ru5+rC1r7rEwNRNHOb5CaKwsfgFTfhxgNXLXsS+BDjC2UhWHAwAAPrIl4jAq+bpAXUbGeeY35oVOB5eFOA6VGS0E8iuGuDOVK1vmRRY4Q+3R43eN0JCR8oOXLpib39v2hT7U+EktZ68/6DdMxdDbREnNBbX8y6qPrnsRi5c2+ZP7z4Y2jgFnnvns8zuxdbtlCVxbbR7DbYpUxrlD67OV6c=
+  file: ${PKG_TARBALL}
+  on:
+    repo: angusmoore/arphit
+    tags: true

@@ -1,0 +1,32 @@
+language: go
+sudo: required
+
+services:
+  - docker
+
+go:
+  - "1.9"
+  - "1.10"
+  - tip
+
+matrix:
+  allow_failures:
+    - go: tip
+
+before_script:
+  - curl -L -s https://github.com/golang/dep/releases/download/v0.4.1/dep-linux-amd64 -o $GOPATH/bin/dep
+  - chmod +x $GOPATH/bin/dep
+  - docker pull camunda/zeebe:SNAPSHOT
+  - docker run --name zeebe -p 51015:51015 -e ZEEBE_LOG_LEVEL=debug -e JAVA_OPTS=-XX:MaxDirectMemorySize=4g -d camunda/zeebe:SNAPSHOT
+
+env:
+  - GOMAXPROCS=2
+
+script:
+  - dep ensure
+  - make test
+  - make cov
+  - bash <(curl -s https://codecov.io/bash) -t 893fb9d0-19f6-49ed-a105-d5189d89dc4a
+
+after_failure:
+  - docker logs zeebe

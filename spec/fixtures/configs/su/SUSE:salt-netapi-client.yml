@@ -1,0 +1,34 @@
+sudo: required
+language: java
+jdk:
+  - oraclejdk8
+  - oraclejdk11
+
+services:
+  - docker
+
+before_install:
+- docker pull mbologna/saltstack-master
+- docker pull mbologna/saltstack-minion
+- docker run -d --name saltmaster -p 8000:8000 -ti mbologna/saltstack-master
+- for i in {1..2}; do docker run -d --name saltminion$i --link saltmaster:salt mbologna/saltstack-minion ; done
+- docker ps -a
+- docker exec saltmaster /bin/sh -c "sleep 30; salt '*' test.ping"
+
+install: /bin/true
+script: mvn checkstyle:check javadoc:javadoc test package
+deploy:
+  provider: releases
+  api_key:
+    secure: braT4pMYLy0ocRgNt4MrI0kWUPnQF455RNLXBAf3+ArSiCMpaoQkwoDnauI155+Kaq2sXDuFg/vCdNQ0h4Rd33qEW5vg810wQQKj9lleDJmfv2W6/DxpTDnvySR4ChAWv9BZBMFIPhdv/dfZWgZBFHluvXw2Bi4UMF0GXsNPjYs=
+  file_glob: true
+  file: "target/salt-netapi-client-*.jar"
+  skip_cleanup: true
+  on:
+    repo: SUSE/salt-netapi-client
+    tags: true
+after_success:
+  - scripts/publish_javadoc.sh
+env:
+  global:
+    - secure: XvflMMZoyQSbsCdOD98rFxsEvd+c9aNUulPf0IIKpp6OFcl0lEoq6c4cEd0C/qBtlZgBNTYmnWfOpWcrNZABa2PXAbi0p9lw/5/L9UgnlEfWG0NbVbJ/arb2DidgnidvVT5GhNNn31/38zwVcJVyo3yjRmf72ZwPbZKWGygKkjc=

@@ -1,0 +1,32 @@
+# os: osx
+language: node_js
+
+env:
+  global:
+    secure: j4saMF6g/5TOv32qLpmM6W5uiE1job2uOsXFHAgyew+f95bwXPKZCFO88RABv74F9u5/8AnbpxCvJJxW8tNUkiJmg6dz3moVb32ly23GenjlBdEhMLlRjXValcRaw8dv/ujExV8LIauEWdkpUICj3uiVcSUyvCDh0Jd2kYm5nL8x+B5EPS9W+FjqfWV3vFMUtD9xK5dcU8KrtLHnDNDBQuMfoQgAWIfeIs/Ez/9MYD/3Yd7vSOpnd34JF8finvH2f+Zv3DBqNP72DzlPfKWXFYyacOyoDTZuzpgugWgAq4NB4PNt6Yi8oOIY3QtzeINYIlCCTr3/NuF8VqMmTQuGHJuFDX5HhUeSemrSdiWluwBIGbwKv9Jy1BfH/v6uEBwL6mO/G2fbxeComxy0PJ+epqxYfh4ilWjps8144zac8yef/OKGTY+rCz4G6ZlcGGzpkKiP9oQag6rxk7kEh9hkd1MW6HZe8qTQZ9vrU9TpZPtZhheAxyclvY8UMbkVP9vhTuVT5saXjnj82N5QiDNEv5gmnjTKhdZaef5K9XRA00Au0BrJuA/hOCtH4NXqbrSvFqX5M9dCDVOoUmlHA/Rhdld+AZSaEfZA53r+ANhqFXMXdjFz9YSsp7s9yDLTRZPIdLAdyeVt3Lxd0DPKrqVzEExrAvbdwdnUM/tZLWZBmZc=
+
+node_js:
+- 6.0.0
+
+before_install:
+- openssl aes-256-cbc -K $encrypted_6f87ceee0c54_key -iv $encrypted_6f87ceee0c54_iv -in google-services-private-key.pem.enc -out google-services-private-key.pem -d
+
+install: 
+- npm i -g npm
+- npm install
+- npm install -g gulp-cli
+- npm i --save lodash
+- npm install -g gulp
+- sudo apt-get update && sudo apt-get install imagemagick graphicsmagick
+# - sudo brew install imagemagick
+
+
+before_script:
+- git config --global user.name "MiKatre"
+- git config --global user.email "contact@cinetimes.org"
+- sed -i'' "s~https://github.com/cinetimes/cinetimes-fr~https://${GH_TOKEN}:x-oauth-basic@github.com/cinetimes/cinetimes-fr.git~" _config.yml
+
+script:
+- gulp resize
+- npm run build
+

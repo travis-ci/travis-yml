@@ -1,0 +1,15 @@
+sudo: false
+language: node_js
+node_js:
+  - "node"
+before_install: npm install -g greenkeeper-lockfile@1
+before_script: greenkeeper-lockfile-update
+after_script: greenkeeper-lockfile-upload
+# The script actions are to check the project is valid.
+# If using Travis for the project PLEASE MODIFY/REMOVE AS NEEDED.
+script:
+  - npm run lint
+  - npm run coverage
+  - npm run build:dev
+  - npm run build:prod
+  - npm run build:story

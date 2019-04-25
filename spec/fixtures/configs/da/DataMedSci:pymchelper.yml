@@ -1,0 +1,73 @@
+# before committing check this file here: https://lint.travis-ci.org/
+
+language: python
+
+git:
+  quiet: true
+
+matrix:
+    include:
+        - python: 2.7
+          env: TOXENV=py27
+        - python: 3.6
+          env: TOXENV=coverage
+        - python: 3.4
+          env: TOXENV=py34
+        - python: 3.5
+          env: TOXENV=py35
+        - python: 3.6
+          env: TOXENV=py36
+        - python: 3.7
+          env: TOXENV=py37
+        - python: 3.6
+          env: TOXENV=docs
+        - python: 2.7
+          env: TOXENV=pep8
+        - python: 3.6
+          env: TOXENV=pep8
+        - python: 3.7
+          env: TOXENV=packaging
+#    uncomment and adjust if you want to allow some failures
+#    allow_failures:
+#        - os: linux
+#          python: nightly
+#          env: TOXENV=py37
+
+# travis-ci runs by default on ancient Ubuntu 12.04 (precise)
+# following options will give us Ubuntu 14.04 (trusty)
+sudo: false
+dist: xenial
+
+install:
+  - travis_wait ./.travis/install_linux.sh
+
+script:
+  - travis_wait tox --notest && travis_retry tox -- -n 8
+# in case all previous commands in script section succeeded, run deploy (if tag is present)
+  - if [[ "$TRAVIS_TEST_RESULT" == "0" ]] && [[ $TOXENV == "packaging" ]]; then .travis/deploy_package.sh pypi ; fi
+
+deploy:
+  - provider: releases # deploy files to Github release page https://docs.travis-ci.com/user/deployment/releases/
+    api_key: # encoded github token
+      secure: sJCUpC/Igjwg98CX55newMpaUjXVv/hdQOi3oazOHJBxk4b2c8Re67to3YAttWu6546zMHWyfgAbgIUHq4cqUc71IbihlHwYCGIx756vT8qebLMQUHv+qtNllaXxrzfm9S3HIrNQG4KJfQOADYBqdXfLYccLWUCF6cTNi3ccWsHwxiHl3ekuCLOq58UnL1cF6PAv2ULGIrXIDWc80VgWH6TgtF8/GhZigCE5c8YkNRYReLf8O3ZgD+anunKLHmzwKnwVgikvjotZz4j9csmFRJotKGZeqgAk7Ux95PNlgM661RXSUiZxRwOlxEUPL/qEz7ExXB9FgNLbRnqhj83L1uueKDlvz2nTVa3wy5r80Q/bxeJ63evQu5rRMod8iKmQI1zZ5pwlQqrG0rt6dpL9nySf+80Gg9WT+wNvhxyyusbuNSe0Tgvg9BgLkXzrTX/4dSB5ERBXwbyUfCWAV8COExUONZeHAO8CACfJvi/ehDOERISFPIF+3uIhN+AuFfXwjk3edh1Kvxm+/Jt5NySujJPkCAadZ5PSJqBCwkGQRvDzrKGlGLDtpWNBvzBGfjlMbWtFLp8O/UNWBbQmdCLAlWfT7J0YtTp4s9ch4EPnTvaimsH0mWHkOv2FoYbLY82ArDW/jVwoF3zYlYDbyCT7cu7blfG5Zxbg4gyXnralUvw=
+    file: "./release_files/*" # list of files to upload
+    file_glob: true  # set to true if you want to use glob (* pattern) in file selection
+    overwrite: true # overwrite the file if already uploaded
+    skip_cleanup: true # keep generated files
+    on:
+      repo: DataMedSci/pymchelper 
+      tags: true # fire only when tag applied (release being made)
+      condition: $TOXENV == "packaging" && "$TRAVIS_TEST_RESULT" == "0" # fire for only one matrix element, if tests are OK
+  - provider: pypi # upload pip package to pypi https://docs.travis-ci.com/user/deployment/pypi/
+    user: grzanka
+    distributions: sdist bdist_wheel
+    skip_cleanup: true
+    skip_upload_docs: true
+    password:
+      secure: kmwue5PN2Yi+JpdGQs+/pnoRvNsmjnvbLCHSZWJBrR5A+DPR6/E4bs5r9RZxSlBT5tOtpf+Fekbk3jNwN9p+Dr5tBaDG2GdVbqo/vMsmw0MguZUK34+RFrC0v38ovwRY69O6owEVYZeu2YZgq6PZT20n/OSsQn+Ep7YBYCVjLnG+k49JcfBgMEX/p0aVTcFz2gicrrxlvcyiKW7EMSjSrpgmj1XjEw5l2NCOoXyEtTiIBfGruw9X0aN78jq1eX4E893NfY4zk2sK6pMDq0B3SagsOeufGnMtVjYxct34vRQlNtBonh7GZHOh95NPTFT5Md5HY0vibOKv8/MjzRjLQrlRxoMjm3lZflAwKYldE5GSbpZQPxx3X7DIGZY2Lo1DcGoxx6c8BiHaVhBi7ardMg84ItwSQtTcw1XTPXStYhNQwe9lqoFhfHKD2pfsSs2BGbzUeE6TsXKQrCs9c0lNaE2guuwTqUxWEIv4MC4svqGmLjTRyQDyyIh6fiBCIPlOGHs2XlMixiy+sRUXyr5YYILOTu8WNdA/UgqOAXkTvgzPomWVIFpZvS3lFASho4yW2iNUcrrWQHoEJiIODwOQWhqY4NpVRzfft07zFEiIWXXWZ8bNbGgztUtXiotv2YH5nwQgl38jMeCEX1qQz16NGGOS23ubbxpAbUE/8Ia5Ca0=
+    on:
+      repo: DataMedSci/pymchelper
+      tags: true
+      condition: $TOXENV == "packaging" && "$TRAVIS_TEST_RESULT" == "0"
+    
+    

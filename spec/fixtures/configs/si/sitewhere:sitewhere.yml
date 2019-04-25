@@ -1,0 +1,28 @@
+language: java
+jdk:
+- oraclejdk8
+services:
+- docker
+before_install:
+- docker pull openjdk:8-jre-alpine
+script:
+- |
+  echo "$DOCKER_REGISTRY_PASSWORD" | docker login -u "$DOCKER_REGISTRY_USERNAME" --password-stdin
+  if [[ "$TRAVIS_PULL_REQUEST" == "false" ]] && [[ "$TRAVIS_BRANCH" == "master" ]]; then
+    echo "On Branch $TRAVIS_BRANCH, building Latest images"
+    ./gradlew dockerPushLatest
+  elif [[ "$TRAVIS_PULL_REQUEST" == "false" ]] && [[ $TRAVIS_BRANCH =~ (^sitewhere-) ]]; then
+    echo "On Branch $TRAVIS_BRANCH, building Edge images"
+    ./gradlew dockerPushEdge
+  else
+    echo "On Branch $TRAVIS_BRANCH, checking build"
+    ./gradlew check
+  fi
+after_success:
+- wget https://raw.githubusercontent.com/DiscordHooks/travis-ci-discord-webhook/master/send.sh
+- chmod +x send.sh
+- "./send.sh success $WEBHOOK_URL"
+after_failure:
+- wget https://raw.githubusercontent.com/DiscordHooks/travis-ci-discord-webhook/master/send.sh
+- chmod +x send.sh
+- "./send.sh failure $WEBHOOK_URL"

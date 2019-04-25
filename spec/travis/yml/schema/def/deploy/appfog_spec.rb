@@ -32,19 +32,19 @@ describe Travis::Yml::Schema::Def::Deploy::Appfog, 'structure' do
                 '$ref': '#/definitions/deploy/edge'
               },
               user: {
-                '$ref': '#/definitions/secure'
+                '$ref': '#/definitions/type/secure'
               },
               api_key: {
-                '$ref': '#/definitions/secure'
+                '$ref': '#/definitions/type/secure'
               },
               address: {
-                '$ref': '#/definitions/strs'
+                '$ref': '#/definitions/type/strs'
               },
               metadata: {
                 type: :string
               },
               after_deploy: {
-                '$ref': '#/definitions/strs'
+                '$ref': '#/definitions/type/strs'
               },
               app: {
                 anyOf: [
@@ -67,12 +67,12 @@ describe Travis::Yml::Schema::Def::Deploy::Appfog, 'structure' do
                     type: :object,
                     patternProperties: {
                       '.*' => {
-                        '$ref': '#/definitions/secure'
+                        '$ref': '#/definitions/type/secure'
                       }
                     }
                   },
                   {
-                    '$ref': '#/definitions/secure'
+                    '$ref': '#/definitions/type/secure'
                   }
                 ]
               },
@@ -82,12 +82,12 @@ describe Travis::Yml::Schema::Def::Deploy::Appfog, 'structure' do
                     type: :object,
                     patternProperties: {
                       '.*' => {
-                        '$ref': '#/definitions/secure'
+                        '$ref': '#/definitions/type/secure'
                       }
                     }
                   },
                   {
-                    '$ref': '#/definitions/secure'
+                    '$ref': '#/definitions/type/secure'
                   }
                 ]
               }

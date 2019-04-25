@@ -1,0 +1,53 @@
+language: python
+python:
+ - 3.6
+
+sudo: required
+services:
+  - docker
+
+cache: pip
+
+addons:
+  apt:
+    packages:
+      - libssl-dev
+      - python3-dev
+
+before_install:
+  - cp requirements.txt requirements.orig
+  - printf '%s\n%s\n%s\n%s\n'
+           "git+https://github.com/coala/coala"
+           "git+https://github.com/coala/coala-bears"
+           "$(cat test-requirements.txt)"
+           "$(cat requirements.txt)"
+           > requirements.txt
+
+before_script:
+  # Docker will fail to build if coala-bears is included
+  # as one of the bears depends on its own version of
+  # libbrotli which doesnt compile without a lot of deps.
+  - mv requirements.orig requirements.txt
+
+script:
+  - coala --non-interactive -V
+  - python -m pytest
+  - docker build -t "corobo" .
+  - docker images
+  - >
+    docker run --user root corobo /bin/sh -c "
+        set -e -x
+        pip install -r test-requirements.txt;
+        find -name \"**.pyc\" -delete;
+        python -m pytest
+    "
+  - codecov
+
+notifications:
+  email: false
+  webhooks:
+    urls:
+      - https://webhooks.gitter.im/e/c15f764f44886af1cf87
+      - https://www.travisbuddy.com/
+    on_success: never
+    on_failure: always

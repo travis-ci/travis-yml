@@ -1,0 +1,38 @@
+sudo: required
+install: true
+env:
+  global:
+    secure: FNL+FZauJ7fy1rT4luEvPGuAErxyp4BicM5bXCD/dBHMNI6rhGDulMhnqdThAaR4DvhCXaBahrnNFs7gfilpdkQzz3zYVBqvjlyx4slIL6xRTKOwVo6X6tG804ZiJ2b8sMTCqBBn5xoVCjDcle+VCcQNp2oq/LoXGGPHdx/LcKY=
+git:
+  submodules: false
+before_install:
+  - sudo rm /usr/local/bin/docker-compose
+  - curl -L https://github.com/docker/compose/releases/download/1.21.0/docker-compose-Linux-x86_64 > docker-compose
+  - chmod +x docker-compose
+  - sudo mv docker-compose /usr/local/bin
+before_script:
+- sed -i -e 's/git@github.com:/https:\/\/github.com\//g' .gitmodules
+- git submodule update --init
+- ./bin/dev/test_server up -d
+- docker --version
+- docker-compose --version
+- docker ps
+- docker network ls
+- ./bin/dev/test_framework up -d
+- ./bin/dev/test_exec bash -c "/app/bin/wait-for-it.sh et3.et.127.0.0.1.nip.io:3100 -t 600"
+- ./bin/dev/test_exec bash -c "/app/bin/wait-for-it.sh selenium:4444 -t 600"
+- ./bin/dev/test_exec bundle
+script:
+- ./bin/dev/test_exec bash -c "ENVIRONMENT=local bundle exec parallel_cucumber features"
+addons:
+  apt:
+    packages:
+      - docker-ce
+      - realpath
+services:
+  - docker
+cache:
+  directories:
+  - $HOME/rubygems
+  - $HOME/node_modules
+  - /usr/local/rvm

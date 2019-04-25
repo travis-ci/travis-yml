@@ -1,0 +1,13 @@
+language: bash
+sudo: required
+services:
+- docker
+install:
+- curl -L https://raw.githubusercontent.com/hasadna/hasadna-k8s/master/apps_travis_script.sh | bash /dev/stdin install_helm
+script:
+- bash helm_lint_all.sh
+deploy:
+  provider: script
+  script: bash .travis_deploy.sh
+  on:
+    branch: master

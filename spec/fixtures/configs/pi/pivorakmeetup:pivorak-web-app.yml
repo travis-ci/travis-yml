@@ -1,0 +1,24 @@
+language: ruby
+dist: precise
+
+rvm:
+  - 2.3.1
+
+before_install:
+  - sudo /etc/init.d/postgresql stop
+  - wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+  - sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt/ precise-pgdg main 9.5" >> /etc/apt/sources.list.d/postgresql.list'
+  - sudo apt-get update
+  - sudo apt-get install postgresql-9.5
+
+before_script: cp config/database.yml.example config/database.yml && bundle exec rake
+  db:setup RAILS_ENV=test
+
+script: bundle exec rspec spec
+env:
+  global:
+    secure: VWsbAzw8ZK7VFyEZwanEbV5srrPHY+El2urwDP3tTZN9ril5kRRaXxNeI+63qZIpeo/JS31O8n3x0SnzLUQ2vzANrHrhX9DiwdV9+wU04wm7eVwWeCCunTsv97o4X83UDsghryRoZfq7ILQf6PPyjZJuqF1nBQvq6BOiLHnDclD0/iYuXLhhtBzRFZrf1mqXi7jjNaXcWZIwHe5HHgq8RYQoGY3gQ0XL5Nb6BMxd6cBqDtbi7MexEtYqmIlTnlpMtofBI59qHV0L0ZRPjbAM3NVCWxfC37yEfYrQmWAjRf8VbrZsykU9cVNh2FfrK7hK1iSdCAyGPDq+yMiYUfU6Tk7H9ecrLnSFIUe14IAaArtIpNsQ3OUpdoTpAYWLkyQakiEV/1MYe8DqXng7bJye7F5b4rKm2pU1NtWS60vN0BMYqlpMR56hiZSfimQ5bCvO0eXJTUP7OkTedA3mPIGtO96h73KzPvTyVJxsBoiKxPo2GDNnxcdte3028I1J4dD4ffa9PnZyeQB7XoWTIL6ELi/2hYzItMv3KJSjOxFXZeDyCeEGX6I3il1+KKJj74rgePMTK+xk8SptziFz2dYuv8lfRAaM862tLBF8oLTR7SErVUIbZ4Pt5DFRadnux4ZkppupzpeSqfC43FqrtJEdM46OiyNX9i8p5zkiZXuJTGU=
+
+after_success:
+  - "openssl aes-256-cbc -k $DEPLOY_KEY -in config/deploy_id_rsa_enc_travis -d -a -out config/deploy_id_rsa"
+  - "bundle exec cap staging deploy"

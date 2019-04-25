@@ -1,0 +1,34 @@
+language: node_js
+dist: trusty
+sudo: required
+
+node_js:
+  - "stable"
+
+cache:
+  directories:
+    - node_modules # NPM packages
+
+install:
+  - npm install
+
+script:
+  - npm run build
+  - echo "Removing unwanted files"
+  - rm -vf _book/.travis.yml
+  - rm -vf _book/*.yml
+  - rm -vf _book/*.md
+  - rm -vf _book/*.sh
+
+deploy:
+  - provider: pages
+    skip_cleanup: true
+    github_token: $GITHUB_TOKEN
+    local_dir: _book
+    target_branch: gh-pages
+    on:
+      branch: master
+
+branches:
+  only:
+    - master

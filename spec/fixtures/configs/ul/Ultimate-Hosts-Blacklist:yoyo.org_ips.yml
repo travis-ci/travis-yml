@@ -1,0 +1,40 @@
+addons:
+    apt:
+        packages:
+        - dos2unix
+cache:
+- pip
+dist: xenial
+env:
+    global:
+    -   secure: DUqkdLbWH3p7uy4fC1b+iKYBk22hefFBYLYQHvmB2evzifvLjxwP6vPEmZjaLqCFpHhrbkoW22VKZYnX/MBoivE68qtcQ15STQJQaif8f7GIphMXDLdIArlbBuivQ6Rf8hfGH8ojPXS1zs1KKPIvz8xYTq7ekZMOftHDBZwVUtnG8wG14dzqMwWRuRTPkzp2skc+D7fIgiK8C5xdPaCYsr6X1BDA6W1dZvDvzgsVeYP/Nqgr8clJOYQyFnUfYGDZ9l/ECuJ8RxKe1PQl+U1CNXLvs5sDcC01sNXvjZr7LDP+zz0q1u/zqbU0myJsEPNl8Vj/udIfMs+pClyQuEteqpvmqlTuL/Zyt/NtUa42H1DaHrL9lOt2L43KYXjySV2KtBbL1bZzTmcJzBhRkiVz25EnkSoU4F4AfSFp8Cz39tKgZBlg7PGKXRDzJTM2OeVbXy+NQObCPPgx0RyKUYObmIScpZfzmI8SObIqkf6u87c8GcQ7rWeUbyRCmXGo0BsiHdAdr0dLBwQ7S2l5BRmm3x0ei3UCGRCAVwqiuxaj9JcdMZK1hMza33rWHEVcqoAsE7YbPNFN6KCM80EFgc9GadUtYE01VqwueY85loTMXF1PU5/Xx05kpwn+Kd5CfNg6u8Dl9ZVyMO7BoE2EqaXYzhFJJ7c4g3v8TTUVCaGexIw=
+    -   GIT_NAME: Travis CI
+    -   GIT_EMAIL: dead-hosts@funilrys.com
+    -   TRAVIS_REPO_SLUG: Ultimate-Hosts-Blacklist/yoyo.org_ips
+    -   GIT_BRANCH: master
+    -   UPDATE_LOCATION: https://raw.githubusercontent.com/Ultimate-Hosts-Blacklist/repository-structure/master/update.py
+    -   ADMINISTATION_LOCATION: https://raw.githubusercontent.com/Ultimate-Hosts-Blacklist/repository-structure/master/administration.py
+install:
+- pip3 install --upgrade pip
+- pip3 install requests
+- pip3 install ultimate-hosts-blacklist-whitelist PyYaml
+- if [[ ! -f .admin ]]; then wget "${UPDATE_LOCATION}" -o /dev/null -O update.py &&
+    chmod +x update.py; else echo "No need to download/update update.py."; fi
+- if [[ ! -f .admin ]]; then wget "${ADMINISTATION_LOCATION}" -o /dev/null -O administration.py
+    && chmod +x administration.py; else echo "No need to download/update administration.py.";
+    fi
+language: python
+matrix:
+    fast_finish: true
+notifications:
+    email:
+        on_failure: always
+        on_success: never
+        recipients:
+        - dead-hosts@funilrys.com
+        - mitchellkrogza+ultimatehostsblacklist@gmail.com
+python:
+- '3.7'
+script:
+- python3 ./update.py
+sudo: required

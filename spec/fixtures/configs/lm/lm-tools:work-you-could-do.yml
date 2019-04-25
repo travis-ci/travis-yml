@@ -1,0 +1,18 @@
+language: ruby
+cache:
+  - bundler
+env:
+  - DATABASE_URL=postgres://postgres@localhost
+  - VCR_OFF=true DATABASE_URL=postgres://postgres@localhost
+before_script:
+  - bin/setup RAILS_ENV=test
+script:
+  - bin/test
+services:
+  - postgresql
+notifications:
+  slack:
+    rooms:
+      secure: "cdu2knhnau01oj4bAcPdLsFThQImhBAiS125UBBbhuKAcF3LTDvnxj94QNF281e4BlHKuq58h/l4Ikut1KDfykl6HhwkRx/KEQJxSuLtEz985Nlu8zcEkk5ar4f6A9rhvrhwtzWai9zkoHoFHOZwHD1/XmGl/2IeavEKFqYAo5hWrb50n+7Qj7OXVIpFf0/aktt30Vb0zOO0KEoFNNxSeDmVxV8k/0y+uXbb7pIqz+Yzx3qmXOlzqGfSqlLI/858Qx9SlG4/ncdyuUYu0HjTYO8Uzit+xJkb3eRIQRTMrow34G+EvTO7k7v7ftznYOuo0JQfI72gAJBY4HTp7rFKkjHV2GtQoS0404GSWccssQ83nhoHcpWMDZZNvYDy0L8G67pP6Nh/r+qNANJrCJ6lDXi42XSrb+SnLYKo6IHmwm2pBnlSlmyTDHfSSTVPnsvBUYqqCRu7Y45AfFguOPJTYuMSLQ5Z2nRd9jz/DDrIIf4RE5Nt2LBg6vN1L4HJFXR8Xwai+F5bWn7qKZcuvkyc5ySWW/nxP1zdihpi7yH3ciWgBUG4ofSIb901prBkc6Ge/ykAis67GYaeAHNRkz9SZ7c02vD1UctkM6N+KhVoe40m0XKszBlKjhi3El1eM/t8W4VyPtArwGYLqkiPNdDFjgJVSzv7HgTKilhIjVIhepA="
+    on_success: change
+    on_failure: always

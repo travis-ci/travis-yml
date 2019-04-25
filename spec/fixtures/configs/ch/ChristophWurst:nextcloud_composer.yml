@@ -1,0 +1,8 @@
+language: php
+script:
+  - git checkout $TRAVIS_BRANCH
+  - ./build.sh
+  - git status
+  - git diff-index HEAD
+  - ./push.sh
+

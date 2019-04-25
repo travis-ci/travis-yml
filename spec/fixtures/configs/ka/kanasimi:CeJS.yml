@@ -1,0 +1,38 @@
+# https://travis-ci.org/kanasimi/CeJS
+# http://docs.travis-ci.com/user/languages/javascript-with-nodejs/
+# http://lint.travis-ci.org/
+env:
+  global:
+    secure:
+
+language: node_js
+node_js:
+# FreeBSD ports node-devel
+# But it seems problems at v8 engine of Travis CI when running CeL.value_of()?
+# @see https://travis-ci.org/kanasimi/CeJS/jobs/86175787
+# @see https://ci.appveyor.com/project/kanasimi/cejs/build/job/co0jl2uj6r1m4ex8
+# It's OK at my FreeBSD under node.js v0.11.16.
+#  - "0.11"
+
+# Wikimedia Tool Labs: v0.10.25
+# Travis CI gets "CERT_UNTRUSTED" on node.js 0.10.25 after 2016/10/15. Stop the version temporarily.
+# https://thequietinnovator.com/2015/10/11/how-to-fix-nodejs-cert_untrusted-issues/
+#  - "0.10.25"
+  - "0.10"
+
+# 2016/10/23: Travis CI failed on node.js 0.11
+#  - "0.11"
+#  - "0.12"
+# sudo apt-get install nodejs @ Ubuntu-16.04.3
+#  - "4.2.6"
+# 2018-10-30, Version 10.13.0 'Dubnium' (LTS), @MylesBorins
+  - "10"
+# 2018-10-23, Version 11.0.0 (Current), @jasnell
+#  - "11"
+# 2019-04-23, Version 12.0.0 (Current), @BethGriggs
+  - "12"
+
+install:
+  - npm install
+
+deploy:

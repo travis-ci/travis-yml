@@ -1,0 +1,11 @@
+sudo: required
+
+services:
+    - docker
+
+script:
+    - cp -a .git/ backend/.git
+    - docker-compose run backend sh -c "coverage run --source=api,db,register,users,dictionary -m unittest && coverage xml && python-codacy-coverage -r coverage.xml"
+
+notifications:
+    email: false

@@ -1,0 +1,109 @@
+sudo: false
+language: python
+cache: pip
+matrix:
+  include:
+    # Django 1.11
+    # Wagtail 2.0
+    - env: TOXENV=py34-dj111-wt2
+      python: 3.4
+    - env: TOXENV=py35-dj111-wt2
+      python: 3.5
+    - env: TOXENV=py36-dj111-wt2
+      python: 3.6
+
+    # Wagtail 2.1
+    - env: TOXENV=py34-dj111-wt21
+      python: 3.4
+    - env: TOXENV=py35-dj111-wt21
+      python: 3.5
+    - env: TOXENV=py36-dj111-wt21
+      python: 3.6
+    
+    # Wagtail 2.2
+    - env: TOXENV=py34-dj111-wt22
+      python: 3.4
+    - env: TOXENV=py35-dj111-wt22
+      python: 3.5
+    - env: TOXENV=py36-dj111-wt22
+      python: 3.6
+    
+    # Wagtail 2.3
+    - env: TOXENV=py34-dj111-wt23
+      python: 3.4
+    - env: TOXENV=py35-dj111-wt23
+      python: 3.5
+    - env: TOXENV=py36-dj111-wt23
+      python: 3.6
+
+    # Django 2
+    # Wagtail 2.0
+    - env: TOXENV=py35-dj2-wt2
+      python: 3.5
+    - env: TOXENV=py36-dj2-wt2
+      python: 3.6
+    - env: TOXENV=py37-dj2-wt2
+      python: 3.7
+      sudo: true
+      dist: xenial
+
+    # Wagtail 2.1
+    - env: TOXENV=py35-dj2-wt21
+      python: 3.5
+    - env: TOXENV=py36-dj2-wt21
+      python: 3.6
+    - env: TOXENV=py37-dj2-wt21
+      python: 3.7
+      sudo: true
+      dist: xenial
+
+    # Wagtail 2.2
+    - env: TOXENV=py35-dj2-wt22
+      python: 3.5
+    - env: TOXENV=py36-dj2-wt22
+      python: 3.6
+    - env: TOXENV=py37-dj2-wt22
+      python: 3.7
+      sudo: true
+      dist: xenial
+
+    # Wagtail 2.3
+    - env: TOXENV=py35-dj2-wt23
+      python: 3.5
+    - env: TOXENV=py36-dj2-wt23
+      python: 3.6
+    - env: TOXENV=py37-dj2-wt23
+      python: 3.7
+      sudo: true
+      dist: xenial
+
+    # Django 2.1
+    # Wagtail 2.3
+    - env: TOXENV=py35-dj21-wt23
+      python: 3.5
+    - env: TOXENV=py36-dj21-wt23
+      python: 3.6
+    - env: TOXENV=py37-dj21-wt23
+      python: 3.7
+      sudo: true
+      dist: xenial
+
+    # Flake 8
+    - env: TOXENV=flake8
+      python: 3.6
+
+  allow_failures:
+    # wagtail dev
+    - env: TOXENV=wagtaildev
+      python: 3.6
+
+install:
+  - pip install codecov tox
+script:
+  - tox -e $TOXENV
+services:
+  - postgresql
+addons:
+    postgresql: 9.6
+after_success:
+  - codecov

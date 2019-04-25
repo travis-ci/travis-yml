@@ -1,0 +1,139 @@
+sudo: required
+dist: xenial
+language: python
+python: "3.7"
+
+jobs:
+  include:
+
+    - stage: code quality
+      name: "pylint lbrynet"
+      install:
+        - pip install astroid pylint
+        - pip install git+https://github.com/lbryio/torba.git#egg=torba
+        - pip install -e .
+      script: pylint lbrynet
+
+    - stage: test
+      name: "Unit Tests"
+      install:
+        - pip install coverage
+        - pip install git+https://github.com/lbryio/torba.git#egg=torba
+        - pip install -e .
+      script:
+        - HOME=/tmp coverage run -p --source=lbrynet -m unittest discover -vv tests.unit
+      after_success:
+        - coverage combine
+        - bash <(curl -s https://codecov.io/bash)
+
+    - name: "Integration Tests"
+      install:
+        - pip install tox-travis coverage
+        - pushd .. && git clone https://github.com/lbryio/torba.git && popd
+      script: tox
+      after_success:
+        - coverage combine tests/
+        - bash <(curl -s https://codecov.io/bash)
+
+    - name: "Run Examples"
+      install:
+        - pip install coverage
+        - pip install git+https://github.com/lbryio/torba.git#egg=torba
+        - pip install -e .
+      script:
+        - HOME=/tmp coverage run -p --source=lbrynet scripts/generate_json_api.py
+      after_success:
+        - coverage combine
+        - bash <(curl -s https://codecov.io/bash)
+
+    - stage: build
+      name: "Windows"
+      language: generic
+      services:
+        - docker
+      install:
+        - docker pull lbry/pyinstaller34_32bits:py371
+      script:
+        - python scripts/set_build.py
+        - docker run -v "$(pwd):/src/lbry" lbry/pyinstaller34_32bits:py371 lbry/scripts/wine_build.sh
+        - sudo zip -j dist/lbrynet-windows.zip dist/lbrynet.exe
+      deploy:
+        provider: releases
+        api_key: $GITHUB_OAUTH_TOKEN
+        file: dist/lbrynet-windows.zip
+        skip_cleanup: true
+        overwrite: true
+        draft: true
+        on:
+          tags: true
+      addons:
+        artifacts:
+          working_dir: dist
+          paths:
+            - lbrynet-windows.zip
+          target_paths:
+            - /daemon/build-${TRAVIS_BUILD_NUMBER}_commit-${TRAVIS_COMMIT:0:7}_branch-${TRAVIS_BRANCH}$([ ! -z ${TRAVIS_TAG} ] && echo _tag-${TRAVIS_TAG})
+
+    - &build
+      name: "Linux"
+      env: OS=linux
+      install:
+        - pip3 install pyinstaller
+        - pip3 install git+https://github.com/lbryio/torba.git
+        - python3 scripts/set_build.py
+        - pip3 install -e .
+      script:
+        - pyinstaller -F -n lbrynet lbrynet/extras/cli.py
+        - chmod +x dist/lbrynet
+        - zip -j dist/lbrynet-${OS}.zip dist/lbrynet
+        - ./dist/lbrynet --version
+      deploy:
+        provider: releases
+        api_key: $GITHUB_OAUTH_TOKEN
+        file: dist/lbrynet-${OS}.zip
+        skip_cleanup: true
+        overwrite: true
+        draft: true
+        on:
+          tags: true
+      addons:
+        artifacts:
+          working_dir: dist
+          paths:
+            - lbrynet-${OS}.zip
+          # artifact uploader thinks lbrynet is a directory, https://github.com/travis-ci/artifacts/issues/78
+          target_paths:
+            - /daemon/build-${TRAVIS_BUILD_NUMBER}_commit-${TRAVIS_COMMIT:0:7}_branch-${TRAVIS_BRANCH}$([ ! -z ${TRAVIS_TAG} ] && echo _tag-${TRAVIS_TAG})
+
+    - <<: *build
+      name: "Mac"
+      os: osx
+      osx_image: xcode8.3
+      language: generic
+      env: OS=mac
+      cache: false
+      before_install:
+        - brew upgrade python || true
+        - brew upgrade python || true
+    - if: tag IS present
+      stage: build
+      name: "Wallet Server Docker Image - Tagged Release"
+      script:
+          - set -e
+          - echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin
+          - travis_retry docker build -t lbry/wallet-server:$TRAVIS_TAG -f scripts/Dockerfile.wallet_server .
+          - docker push lbry/wallet-server:$TRAVIS_TAG
+    - if: tag IS blank AND branch = master AND NOT type IN (pull_request)
+      stage: build
+      name: "Wallet Server Docker Image - Master"
+      script:
+          - set -e
+          - echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin
+          - travis_retry docker build -t lbry/wallet-server:master -f scripts/Dockerfile.wallet_server .
+          - docker push lbry/wallet-server:master
+
+cache:
+  directories:
+    - $HOME/.cache/pip
+    - $HOME/Library/Caches/pip
+    - $TRAVIS_BUILD_DIR/.tox

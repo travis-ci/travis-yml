@@ -1,0 +1,15 @@
+united-build: 
+language: generic
+sudo: required
+services:
+- docker
+script:
+- docker run -v $(pwd):/root/enjoy --cap-add=SYS_ADMIN davidva/unibuild-30 /bin/sh -c "rm -f urpms && wget -c https://raw.githubusercontent.com/kuboosoft/united-build/master/urpms && chmod a+x urpms && /urpms -g UnitedRPMs/live555 -s live555.spec -r true -d 'dist .fc30' -c true -u true"
+notifications:
+  webhooks:
+    urls:
+      - https://webhooks.gitter.im/e/8bbc656ea297114ba4fd
+    on_success: always  # options: [always|never|change] default: always
+    on_failure: always  # options: [always|never|change] default: always
+    on_start: never     # options: [always|never|change] default: always
+

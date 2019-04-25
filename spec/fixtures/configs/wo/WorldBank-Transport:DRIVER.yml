@@ -1,0 +1,61 @@
+sudo: required
+env:
+  global:
+  - secure: oxvGUv2yST/hlrbnRqbmQdRBCXZUm+71wXXBv4LgyB6lgI92VcGMeNn+3rJEsNCONbpzAtpRCdwkKcf6HG2Cvrb4DiUTj5mAho5lUxkjEj3NQR7K9XsbJ4lUFLhfrCbGCjDcSlPMB/6I4/N9KmKCEB9R76QxETddaKOhHzZB3Yk=
+  - secure: ZhkaH7vzI3bpj8LvJv6rmCd4VmInxqT2b30HsvKRYDCC8PhkXqvLadEaBH3bNBQJsRYjLwf0ueaEclxiEwOElaspJkQdzb7tfRtqvNJEzY8jatVgIwc04uG2Wa+ZYGhjYHbQUbQGxwhMnh6C1XrtDtBi5BD9wIUhTle1ciELt5A=
+  - secure: TQY7zkefoGIjIvcH6MqMTL9vZMJM7ZmbeyXr4scoB85LhxgRs50WhFAfFqKW4karZ9/iwZa86LniAIgc24OSJ62S0H0QuLjHzMlyyNDK0fTimPs9nkCNcQGIiNhgMftrAoA+U6fTdRHk4Nwg+GbRkPzZOm+QwJEtWe4cp5hrtf8=
+  - secure: I69EcUo9LOve4HK54qGLJPdgov3AopDsTCOGp+3GvWJg9CeOuHdU8N7Ym84Xe5U3KPtxMIHDq+DwOdOjo0Im9kfPU65mmKc8bmymVVyZxUAldDaUbUC7fquvFcejoADB5r62SH7PzV4duvZeLXtZz5awOUO2HvMoE4i6VdJKu4M=
+  - secure: GuiAqvRAZ7ITaDouiN5QD5xvdvNZwSS6loqt20Fh50HH0yAYivbgEIWH/fm2ioPA2BmsK0xMFFkAitt08G4GT4chdxENR9Joe/0fnAskmT1+tEQswhelAZfe/i8IljwVwo+4Z/frZMFKA+9tdrrdRQN6nVa9JimxoSoawqivqmM=
+  - secure: rxJHlPjag0Ie6mFk5p40Rc+v0yegXXn+JLDwVJB5koZNOH4KNvDis+KG/VyZpLAXohd7Mrdqd87Z8xfzExur4Q10ubHyMMdLrgMDOTEx5j2S+8tt0kek+iFyTM4tsMi9H5MnS+zQ0MRNoF+Ay1tVi7XeHODMz/TKWGWsWzf+cvg=
+  - secure: wc2LNYrPX8OfaytX9iQi4Wp9CBdMzBEt2PGiJIzcxALl8CS/PnP4/efnSuuAW49zaKvtSZ2kwqXObH0E0PamcCufkR3QCbnG+pxuq+Zxu11152inz3FO8UiaYksmzBcO3tidGuehWFPr+ULinlbT3RYaItXmPoPTAfO5l/0r1F4=
+  - secure: hZNrcEi/XfMpdjegA9AAFm/XDM6+aP+NV7NfQAo4/P5IN2rBz20TEHcLmtDs0YODPnT0mneoqWaEM1V55VFZIp4FhDJetOA3nk+MhKpo6jAy+E5au+jJ8R5yWkwGAosedBBEYhU5T6iF073SpYcjfyun4fgC58o7yuYNoBISWVg=
+  - secure: fcgtvICGfCMqxgbF2A0i+FCImh/vNC5lTyBvwztPLShhIg0z/SxE1aDcHRGEFu5hkqw04B4kQN17XPpcRS2CKgne/Fv7n+k/7mPiVImTVk oWL/TZHPplmYFm9szQKR5RWnAVKcejjC4PK6E1w9jgwK+7U6usnPHF9BcvPpKOYN8=
+language: python
+python: "2.7.15"
+services:
+- docker
+install:
+- docker build -f ./app/Dockerfile.base -t "quay.io/azavea/driver-app:${TRAVIS_COMMIT:0:7}"
+  ./app
+- docker build -f ./schema_editor/Dockerfile -t "quay.io/azavea/driver-editor:${TRAVIS_COMMIT:0:7}"
+  ./schema_editor
+- docker build -f ./web/Dockerfile -t "quay.io/azavea/driver-web:${TRAVIS_COMMIT:0:7}"
+  ./web
+- docker build -f ./gradle/Dockerfile -t "quay.io/azavea/driver-gradle:${TRAVIS_COMMIT:0:7}"
+  ./gradle
+- docker build -f ./analysis_tasks/Dockerfile -t "quay.io/azavea/driver-analysis:${TRAVIS_COMMIT:0:7}"
+  ./analysis_tasks
+script: ".travis/script.sh"
+before_deploy:
+- docker login -p "${QUAY_PASSWORD}" -u "${QUAY_USER}" quay.io
+- pip install ansible==2.6.3.0
+- openssl aes-256-cbc -K "${encrypted_71b51a189c16_key}" -iv "${encrypted_71b51a189c16_iv}"
+  -in deployment/driver.pem.enc -out deployment/driver.pem -d
+- export PATH="$PATH:$HOME/.rvm/bin"
+- export PHANTOMJS_CDNURL=http://cnpmjs.org/downloads
+deploy:
+  - provider: script
+    script: ".travis/deploy_staging.sh"
+    skip_cleanup: true
+    on:
+      repo: WorldBank-Transport/DRIVER
+      branch: develop
+  - provider: script
+    script: ".travis/deploy.sh"
+    skip_cleanup: true
+    on:
+      repo: WorldBank-Transport/DRIVER
+      branch: master
+      tags: true
+
+after_deploy:
+- rm deployment/driver.pem
+- rm gradle/data/driver.keystore
+notifications:
+  slack:
+    secure: RVtR2f3Q+hyW+JeXXsf6TyS1f5OQi7HW35jW+Auu/ET1VxOtQ/Swheiil26a8h6XtEC51YL+SiUhhiAxeKCMz31O33LZ3AsWjOC3ercIjDXDBPVYiYCsSpKoMGPm1/+FXjHnMzEPvIrOo2vA9hLk0QGr8fEiDZ/pHcUxmtVOmWc=
+    on_success: change
+before_install:
+- '[ "${TRAVIS_PULL_REQUEST}" == "false" ] && openssl aes-256-cbc -K "${encrypted_1319bc8a028f_key}"
+  -iv "${encrypted_1319bc8a028f_iv}" -in deployment/driver.keystore.enc -out gradle/data/driver.keystore
+  -d || true'

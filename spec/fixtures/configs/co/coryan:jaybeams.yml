@@ -1,0 +1,70 @@
+language: cpp
+
+dist: trusty
+sudo: false
+
+matrix:
+  include:
+    - os: linux
+      compiler: clang
+      env: LINUX_BUILD=yes DISTRO=fedora DISTRO_VERSION=24
+    - os: linux
+      compiler: gcc
+      env: LINUX_BUILD=yes DISTRO=fedora DISTRO_VERSION=25 CMAKE_FLAGS="-DCOVERAGE:BOOL=true -DCMAKE_BUILD_TYPE=Debug" BUILD_EXTRA=COVERAGE
+    - os: linux
+      compiler: clang
+      env: LINUX_BUILD=yes DISTRO=fedora DISTRO_VERSION=25 \
+           CMAKE_FLAGS="-DCMAKE_BUILD_TYPE=Release" BUILD_EXTRA=check-style
+    - os: linux
+      compiler: gcc
+      env: LINUX_BUILD=yes DISTRO=ubuntu DISTRO_VERSION=16.04 CMAKE_FLAGS="-DCMAKE_BUILD_TYPE=Release" \
+           CREATE_RUNTIME_IMAGE=yes CREATE_ANALYSIS_IMAGE=yes
+    - os: linux
+      compiler: clang
+      env: LINUX_BUILD=yes DISTRO=ubuntu DISTRO_VERSION=17.04 \
+           BUILD_EXTRA=GENDOCS CMAKE_FLAGS="-DCMAKE_BUILD_TYPE=Debug -DSANITIZE_ADDRESS=ON"
+
+services:
+  - docker
+
+# This is the main section of the automated build ...
+script:
+  - ci/build-linux.sh
+
+after_success:
+  - ci/upload-coverage.sh
+  # ... upload the Doxygen documentation already created in the Doxygen doc ...
+  - ci/upload-docs.sh
+  # ... upload the coverity results ...
+  - ci/coverity-upload.sh
+  # ... on the right builds, create the runtime image and push to docker ...
+  - ci/create-runtime-image.sh
+  # ... on the right builds, create the analysis image and push to docker ...
+  - ci/create-analysis-image.sh
+
+# Cache the (saved) docker images.
+# With recent version of docker one can reuse a prior image as a
+# source cache, that can speed up the builds, as the dependencies and
+# images can be reused ...
+# TODO() - we need to add a cron job to rebuild without a cache every
+# so often, the dependencies do change and we want to validate that
+# the examples build with the newer versions.  That is easy to do with
+# a cron-based build in Travis that cleans up the cache every X days.
+cache:
+  directories:
+    - coverity
+    - docker-images/ubuntu/16.04
+    - docker-images/ubuntu/17.04
+    - docker-images/fedora/24
+    - docker-images/fedora/25
+
+before_cache:
+  - ci/cache-linux.sh
+
+install:
+  - ci/install-linux.sh
+  # ... if necessary, download Coverity ...
+  - if [ "x${COVERITY}" = "xyes" ]; then ci/coverity-install.sh; fi
+
+notifications:
+  email: false

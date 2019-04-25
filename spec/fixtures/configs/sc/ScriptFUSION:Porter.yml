@@ -1,0 +1,36 @@
+notifications:
+  email: false
+
+sudo: false
+
+language: php
+
+php:
+  - 5.5
+  - 5.6
+  - 7.0
+  - 7.1
+  - 7.2
+
+env:
+  matrix:
+    -
+    - DEPENDENCIES=--prefer-lowest
+
+matrix:
+  fast_finish: true
+
+cache:
+  directories:
+    - vendor
+
+install:
+  - alias composer=composer\ -n && composer selfupdate
+  - composer validate
+  - composer update $DEPENDENCIES
+
+script:
+  - composer test -- --coverage-clover=build/logs/clover.xml
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)

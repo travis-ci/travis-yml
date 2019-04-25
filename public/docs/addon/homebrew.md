@@ -2,17 +2,13 @@
 
 
 
-## Type
+## Types
 
-Any of:
-
-* Map (Hash)
-* 
+* Hash
+* Array of: String
+* String
 * Boolean
 
-## Flags
-
-None.
 
 
 ## Examples
@@ -20,14 +16,20 @@ None.
 ```yaml
 homebrew:
   update: true
-  packages: "[ref:strs]"
-  casks: "[ref:strs]"
-  taps: "[ref:strs]"
+  packages: string
+  casks: string
+  taps: string
   brewfile: string
 ```
 
 ```yaml
-homebrew: "[ref:strs]"
+homebrew:
+- string one
+- string two
+```
+
+```yaml
+homebrew: string
 
 ```
 

@@ -1,0 +1,45 @@
+language: node_js
+
+env:
+  global:
+  - ENCRYPTION_LABEL: d1e5f63af608
+
+node_js:
+- '6'
+
+before_install:
+- bash ./deployment/01_before_install.sh
+
+install:
+- bash ./deployment/02_install.sh
+
+before_script:
+- git config --global user.name = "Kendrick Arnett (via Travis CI)"
+- git config --global user.email = "kmarnett@gmail.com"
+- bash ./deployment/03_before_script.sh
+
+script:
+- bash ./deployment/04_script.sh
+
+after_success:
+before_deploy:
+# Publish to gh-pages
+- bash ./deployment/05_before_deploy.sh
+
+deploy:
+  skip_cleanup: true
+  provider: npm
+  email: kmarnett@gmail.com
+  api_key:
+    secure: mIzK5C+E8aXcKXekR99WDm/LmEjHcWEfCZ5NdbsO+xod0CP7Fsa+IwnR8wJYV76v5JKuF/pv16qUxCHT+I92Tl8F7kXXgXj8QgBlhFNjM8nl8DmmVc7XcEnwuoJz7jcAWAFonV61lTwrqhkODhAIjnJ6fcsizCncvS7ccH9icbPD+7LYDidNnk19nVkLKWBWilsJyn3vCNEpzccEoB8AOG10QXGh2ao88ls28xIIpNtCKWCKyuFSdTlQlV66Y86V3562RAh2+ENuyNfzAOLrfw9Jhb57/L3s1oVQWWUmkes5XcG+s7UXpyRd7c81O4CMG3PzE25wxA2vX9R9X2K8p72WQBBuBo7CWwQ/LnAJA3v6csblU6/u03ZyvS1gqAXFZB1ntCRXfSCzIXpfpdimf8D2p+VfuuNNAzq6ZEqI/ciTI25QlbUfakLLmhyE85jDbRqhE/V8T6+5PfVlW2WqgIaTV5jiKpdk7MkaPboqH7W0gfvi1IF4NTKcyuXHaE05S4j8wLt+SVQRTKX0FEe15hFnM18HmB2J9rOXOuZxPr7QhUYlZ4SZhSnjTbEbJS2l30c7Mu1yjAT25ATeyQuiU0qUhfrfrg3W0P4EGfkmmQ2GDvytXdBH/P72dMKCEpu61hGy+SvkYBa5sIvEYfnhBmIvhU+V+eZ/19ZV2UUGyrY=
+  on:
+    repo: Pier1/rocketbelt
+    branch: master
+    tags: true
+
+notifications:
+  slack:
+    on_success: change
+    on_failure: change
+    rooms:
+      secure: 1Tc0eEcA8hNT2RTQG9hrUCqqNvfAKpAlEeESZshWAccZwzlrWhfc/EJ/u5RKe2K+iniM1kUFhpEGZO2zMKFyJ1CGLGa85D/dCMmgEa1dKYJK0DEVgU+pTtiF0CgXyEgmoBrp3Q8aCZpJbqcAxBE6+RESEPCdfOMpHdS1TquVd6g9xRqRwzi/mckfb2fl6/3fVFWcZDdKYXEt7EEyAbuTZpvZi2FkmDYvnqVl43SHLKwrwkYaXVTvwEHr3W2szFO39Y263NsPvxKX2C4rkbvoQDx/2TEaSPKzUhQbTqvSMBuuYMEQHXLu9XyhuMya9hg6tXf/Fnajhq9tJyodT0mvxjbs1TvcGJvIe+SI9uufm1ykJ3eadknZCPR46xtjeSo9ncOhByaUv8qzDQjjVn9tjdlXkp1iGFD9cPhXz5fT8VlTzy72GiRgEnzs/6l7FLRuta4wSWVwi37Se0MuPRmIlJz4O0GzL6Mr+KkWVNhGV38YptCyyh4BeljGmjzk9OOIziHCsLr7/N2A5MAiRRKfHVLgc6UQICGnEm9UxXBJSbzcqZQ86sd+8ctPePzOdYkQGe+syR3VNvYbpzkC+DYHWGU0JG/ag5MmkAopLdZn6tzJ61gEUHcxNQ8Xhdc8gXMtQZJnXWYq3FY3DUq9D9ZTu2HePIznQnHpSBNF9T2z6Uo=

@@ -1,0 +1,48 @@
+sudo: required
+
+env:
+    global:
+        - PACKAGE="GitSavvy"
+        - SUBLIME_TEXT_VERSION="3"
+        - UNITTESTING_TAG="master"
+
+matrix:
+    include:
+        - name: Linux
+          os: linux
+          language: python
+          python: 3.3
+        - name: OSX
+          os: osx
+          language: generic
+
+before_install:
+    - curl -OL https://raw.githubusercontent.com/SublimeText/UnitTesting/master/sbin/travis.sh
+    - if [ "$TRAVIS_OS_NAME" == "linux"  ]; then
+            export DISPLAY=:99.0;
+            sh -e /etc/init.d/xvfb start;
+      fi
+    - git config --global user.email gitsavvy@gitsavvy.com
+    - git config --global user.name GitSavvy
+
+install:
+    - sh travis.sh bootstrap
+    - sh travis.sh install_package_control
+    - pip3 install python-coveralls pycodestyle;
+
+script:
+    - sh travis.sh run_tests --coverage
+    - sh travis.sh run_syntax_tests
+    - pycodestyle --statistics --count
+
+after_success:
+    - coveralls
+
+# deploy:
+#     provider: script
+#     script: ./scripts/deploy.sh
+#     on:
+#         branch: master
+
+notifications:
+    email: false

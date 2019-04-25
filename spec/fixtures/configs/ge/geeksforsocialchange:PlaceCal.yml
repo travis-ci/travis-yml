@@ -1,0 +1,34 @@
+env:
+  global:
+  - CC_TEST_REPORTER_ID=7e0e573cd74e3418226d922174406b38d5692b01d6464701fa57ce51e75eb72a
+  - secure: ZE9+HtzVkmD2MraxChjHpxNRtTdsYbMYvf/5LXI68ohCpAvO+toWohFyLjYkBVdSUMQ1u3YbW+EKiZ4lpKMOp+k7ZjlUoiKi1dBSBwUxDzPww/3PrwcMZiCI2HbwsyboYnJRt9pitcXvzfnIXRLnkfU+5LHzn5rLEa8Y9rt0VeZqdm9d2eRrsmD92l2dZg/6Ao+YrCuweOu+3gTMiA3WbxYiRNw6wuFfJ+7iwRroubAi2HRp3soOdZmFxOfUIcKrrc4UQOuIm3yQfb05ZvydlW70hxn//j6r22HuBV8G3LxNS0mRgA05JwltTwjFnDWbXCNwecQ23QsWIzqgBR0vXwJK+6dnSv3rU42YFLCEnKYDHNPtnAMEYO8OhIVMjwou6r5D5N8V/u9rFVUQUVrGiAg20cubcJeiQsP4R2R1JIImA2gN3zWW272Q7ybzZkNSOVtWu2QQiH7UtFCU1aNrg5A+Ppy15phVN2JzRXc5n0eo8j9LYZYJ8UEl5zXw37K0J8Pan9oHTmV/cNDhTE8NhaT4JgRB1LsCF2oJi5jFghkhON0W73GN76GYxetgYcE1bJ1iheY4PIto4fB3lY2Q3Knhdlv9/PlcTcEbD1+mUWRzKG8tke7R6aXyzfad6ohl7JSeo7zrCCb0pTvbUw6OdEvUNaVubP8gMFsIWktsuM8=
+  - secure: z/YV6QzoqYCohEilra+aAfBLB2P9h3Sb7NFIeYOnlLLilYJxUEsqQW2a01v9otcyXMC2mqYoFeClYmX0ZsmowwB71GGlwI5qnd3pA/mtIjDHz/2d/QyMn+QysOygOwB9h+bIi6KbLsqZ/ULD0x8eCEXgYyVtq5JTS3hgXOGabIS3ZSSc7p0WnCOX9sd0DphF1C4+RerQhWPGbFL/n8Eq6m8liFE+e83/n8lcfXDrxXcPzKegvJUT34knwIqAZylz1FZMsxTJDny46S2zR9kJB7CIwgbI6TzZGoR+S91s26CiupFp2F1l08nTOW4i5DfGR74Tnhdk40JE0iyGyHdTZbKAmtlzjg9oNOI7IOju7yOgZU2OxmXjZjvrt9QV4NsZ7C+K8i25LGwOxRXJS9mc4bjAPjX7mc1S+dq14aw7kMH2MJxUfdwBYsLyuWoeCb12wD8LAt1fXNxxWV4rvTgi0p90+KR/QmCUVnBef4zLSef8ObkBHFzwWPO9OSFXATmmzcjQjk3XnsoNnADTvxUvzH+FGJ53RB0NYN9QoIZx5hl/aqpx35uTfbcMgEYn6hxwwI+KlXAAifWsh2WhjCRn+bXZSI83/oh5nJ0i96VL8yZk0QPljf4vzfOxt89lfFvMG2BqyQ7l2WAB9fAvgE4OEvggGtkGDZi3ES51qrwZjlY=
+language: ruby
+dist: trusty
+addons:
+  postgresql: '9.6'
+before_script:
+    - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+    - chmod +x ./cc-test-reporter
+    - "./cc-test-reporter before-build"
+    - psql -c 'create database placecal_test;' -U postgres
+before_install:
+    - |
+      if [ "$TRAVIS_BRANCH" = "production" ]; then
+        openssl aes-256-cbc -k "$production_decrypt_key" -in $TRAVIS_BUILD_DIR/.travis/production-deploy.key.enc -out production-deploy.key -d
+      elif [ "$TRAVIS_BRANCH" = "master" ]; then
+        openssl aes-256-cbc -k "$staging_decrypt_key" -in $TRAVIS_BUILD_DIR/.travis/deploy.key.enc -out deploy.key -d
+      fi
+deploy:
+    - provider: script
+      skip_cleanup: true
+      script: bash scripts/staging.sh
+      on:
+        branch: master
+    - provider: script
+      skip_cleanup: true
+      script: bash scripts/production.sh
+      on:
+        branch: production
+after_script:
+    - "./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT"

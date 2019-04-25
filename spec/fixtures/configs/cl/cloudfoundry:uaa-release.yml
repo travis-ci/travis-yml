@@ -1,0 +1,111 @@
+matrix:
+  include:
+    - os: linux
+      dist: trusty
+      language: ruby
+      rvm:
+        - 2.3
+      env:
+        - TESTENV=default
+    - os: linux
+      dist: trusty
+      sudo: required
+      language: java
+      jdk: oraclejdk8
+      sudo: required
+      env:
+        - TESTENV=sqlserver
+    - os: linux
+      services:
+        - mysql
+      dist: trusty
+      sudo: required
+      language: java
+      jdk: oraclejdk8
+      sudo: required
+      env:
+        - TESTENV=mysql
+    - os: linux
+      services:
+        - postgresql
+      dist: trusty
+      sudo: required
+      language: java
+      jdk: oraclejdk8
+      sudo: required
+      env:
+        - TESTENV=postgresql
+
+cache:
+  apt: true
+  directories:
+  - $HOME/.gradle
+  - $HOME/.rvm/gems
+
+before_install:
+- mkdir -p $HOME/.gradle
+- cp $TRAVIS_BUILD_DIR/scripts/init.gradle $HOME/.gradle
+- git submodule update --init --recursive --force
+- cd src/uaa
+- git checkout develop
+- cd ../..
+install:
+- bundle install
+- bundle show rspec
+- cd src/uaa
+- if [ "$TESTENV" = "postgresql" ]; then
+    psql -c 'drop database if exists uaa;' -U postgres;
+    psql -c 'create database uaa;' -U postgres;
+    psql -c "drop user if exists root;" --dbname=uaa -U postgres;
+    psql -c "create user root with superuser password 'changeme';" --dbname=uaa -U postgres;
+    psql -c "show max_connections;" --dbname=uaa -U postgres;
+  fi
+- if [ "$TESTENV" = "mysql" ]; then
+    mysql -e 'drop database if exists uaa;';
+    mysql -e 'CREATE DATABASE uaa DEFAULT CHARACTER SET utf8 DEFAULT COLLATE utf8_general_ci;';
+    mysql -e "SET PASSWORD FOR 'root'@'localhost' = PASSWORD('changeme');";
+    mysql -u root -pchangeme -e "SET PASSWORD FOR 'root'@'127.0.0.1' = PASSWORD('changeme');";
+    mkdir -p /tmp/ssl;
+    openssl genrsa 2048 > /tmp/ssl/ca-key.pem;
+    openssl req -sha1 -new -x509 -nodes -days 365 -subj '/C=US/ST=Denial/L=Springfield/O=Dis/CN=www.example.com' -key /tmp/ssl/ca-key.pem > /tmp/ssl/ca-cert.pem;
+    openssl req -sha1 -newkey rsa:2048 -days 365 -subj '/C=US/ST=Denial/L=Springfield/O=Dis/CN=www.example.com' -nodes -keyout /tmp/ssl/server-key.pem > /tmp/ssl/server-req.pem;
+    openssl x509 -sha1 -req -in /tmp/ssl/server-req.pem -days 365 -CA /tmp/ssl/ca-cert.pem -CAkey /tmp/ssl/ca-key.pem -set_serial 01 > /tmp/ssl/server-cert.pem;
+    openssl rsa -in /tmp/ssl/server-key.pem -out /tmp/ssl/server-key.pem;
+    openssl req -sha1 -newkey rsa:2048 -days 365 -subj '/C=US/ST=Denial/L=Springfield/O=Dis/CN=www.example.com' -nodes -keyout /tmp/ssl/client-key.pem > /tmp/ssl/client-req.pem;
+    openssl x509 -sha1 -req -in /tmp/ssl/client-req.pem -days 365 -CA /tmp/ssl/ca-cert.pem -CAkey /tmp/ssl/ca-key.pem -set_serial 01 > /tmp/ssl/client-cert.pem;
+    openssl rsa -in /tmp/ssl/client-key.pem -out /tmp/ssl/client-key.pem;
+    sudo su -c "echo '[mysqld]' >> /etc/mysql/my.cnf";
+    sudo su -c "echo 'ssl=1' >> /etc/mysql/my.cnf";
+    sudo su -c "echo 'ssl-ca=/tmp/ssl/ca-cert.pem' >> /etc/mysql/my.cnf";
+    sudo su -c "echo 'ssl-cert=/tmp/ssl/server-cert.pem' >> /etc/mysql/my.cnf";
+    sudo su -c "echo 'ssl-key=/tmp/ssl/server-key.pem' >> /etc/mysql/my.cnf";
+    sudo service mysql restart;
+  fi
+- if [ "$TESTENV" = "sqlserver" ]; then
+    ./scripts/travis/sqlserver/install-mssqlserver-docker.sh;
+    ./gradlew -b mssql.gradle createSQLServerUAA;
+  fi
+- cd ../..
+
+script:
+- bundle exec rspec spec
+- if [ "$TESTENV" != "default" ]; then
+    cd src/uaa;
+    cp /tmp/uaa-release-tests/${TESTENV}.yml uaa/src/main/resources/uaa.yml;
+    cat uaa/src/main/resources/uaa.yml;
+    ./gradlew cloudfoundry-identity-uaa:test -Dspring.profiles.active=${TESTENV} --tests=org.cloudfoundry.identity.uaa.db.DatabaseConnectTest;
+  fi
+
+after_success:
+- for i in $(find $HOME/build/cloudfoundry/uaa-release/src/uaa -name reports -type d); do rm -rf $i; done
+
+addons:
+  artifacts:
+    key:
+      secure: "tCaFNvA8HLTXOlwyTXukx05hmk+55xU13MCQFzHeK8+Ze3rk8yskeIj6vHEHpWIQj5TWkg8udAv1t5PZPem8FTansxWklDkfv6+4+Yz1VBvEDJSQLmFkRLuLViwztrdy132l68gmk10ZARdiaA8MxwrFoauDmutkCfEYPx6HulV8W2+efMIbsNAFcFrkJKlmWHkwa8WtG1scfOPl5nMXmYP4hMYO9N9M6hIVQGyWuqvawhsInesgKo6bcKe+YHV2DwLH+rz5QaE3rzbzdrZcJvu8Eilrp/8r/nNX1XUN9P3qFkNvatP1tjUj3HdPBsynueWcDT1mSGfZjhAYi8TpqI7AaWmwC86QgE4d3GaxPzj6+KfvYCZhVXa4ghssb82FYt99daU3BD2VCpV73nH9ewIZuf61irxLaicIECx3f4djHp3SdZjiMMWpYoATNyqK65UFyPFTpBedn8pReImPeKbqVRHfmdGEZj7Tx+n0HGWMPyHMrwAmU7To1b6RPCXglgtgdTMkQmdSTibCHmeW/qcO2kwAtHzmaELoI7+5lChBtW6+p/gC2SI0CYtxohcpeqStboakCcEEagej00rR4daNAdS66L7Lh22UVitZxu5jBHKuzGWmwinwHP21szFIMXm5e/xJzO8BAgfEc9cM9PrEqJVxk1ko4Nz4+EbJiVY="
+    secret:
+      secure: "pj6BqkMfw8lPDZj7rjVZCWlSZA5J26GsCXfZytreL2y1CzqkkxWu9zM2SAfIB1CEjU3fO6FN/efIPK+txKspawFl2BdyVTQWMSZ28OVGgQfC5lVWNGtdmMs3chK3G7yEgCfXMS+47yS/Hq+Iwr4QGFIhKhaFEoxyipea/ryeztrk462HMseiLZxbhXnX3EvQfyIBbrSBPlvxEHxEsRuuIAwzsmISlYugULxhCiDlAX+i7RWr/Cyjzj+WACLx7G5WI8fHp2z4O7Mhqh92KQ+mMTSb1UioPigb5M+2IZPxhpoTq4o+N3iFiWPMf1x0tGDuV0/y+9AQD062Vmf7PqwcupLH4biEx43JXr3jUhww7UgioYL3tCr5nD95PtDbCfYiwao49TTAZ6zvO0JNi0yY/N+T+Mj1RUu7AX6Uf1GWzUHY7lfAEyZQvhKmNTtD2gGW4YE0iB0gqA4lx6ecRGpKO16GPpKYpu3tI6AF3a28aCm/2ld4bVDhi3yjIOATtLMmG9evlxv4IF+KUqGbjyt3Mss1HYPAoP1pdjZnbNmOAlh/i7nVcW/b/IKP8KFLMFEygP0DCg+JIO5sue0yFBXM1EIhVox3a0+fX6sEa4ZH2IvxXfzKTd+kSB2kUH70h3P5exItOzXOyyXF5BFHvzgs289uQLTl4VuiDvXuDXQeml0="
+    bucket: cf-id-uaa-release-travis-logs
+    debug: true
+    paths:
+    - $(find $HOME/build/cloudfoundry/uaa-release/src/uaa -name tests -type d | tr "\n" ":")

@@ -1,0 +1,30 @@
+language: ruby
+sudo: false
+dist: trusty
+sudo: required
+addons:
+  chrome: stable
+cache:
+  bundler: true
+
+before_install:
+  - gem update --system # https://docs.travis-ci.com/user/languages/ruby/#Upgrading-RubyGems
+  - gem uninstall -v '>= 2' -i $(rvm gemdir)@global -ax bundler || true
+  - gem install bundler -v '< 2'
+  - npm install -g karma karma-jasmine karma-chrome-launcher
+  - google-chrome-stable --headless --disable-gpu --remote-debugging-port=9222 http://localhost &
+
+rvm:
+  - 2.6.1
+  - 2.5.3
+  - 2.4.5
+
+env:
+  global:
+    - CHROME_BIN=google-chrome-stable
+    - NOKOGIRI_USE_SYSTEM_LIBRARIES=true
+  matrix:
+    - "RAILS_VERSION=5.2.2"
+    - "RAILS_VERSION=5.2.2 TEST_BOOTSTRAP=3"
+    - "RAILS_VERSION=5.1.6.1"
+    - "RAILS_VERSION=5.1.6.1 TEST_BOOTSTRAP=3"

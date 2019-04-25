@@ -1,0 +1,19 @@
+sudo: false
+language: node_js
+build: trusty
+
+node_js:
+  - "8.10"
+
+script:
+  - npm install -g yarn
+  - npm install
+  - make build-connect
+
+notifications:
+  webhooks:
+    urls:
+      - http://ci-bot.satoshilabs.com:5000/travis
+    on_success: always
+    on_failure: always
+    on_start: always

@@ -1,0 +1,35 @@
+language: android
+
+android:
+  components:
+    - tools
+    - build-tools-28.0.3
+    - android-28
+    - extra-android-m2repository
+  licenses:
+    - 'android-sdk-license-.+'
+
+jdk:
+  - oraclejdk8
+
+after_success:
+  - .buildscript/deploy_snapshot.sh
+
+notifications:
+  email: false
+
+env:
+  global:
+    - GRADLE_OPTS="-Xms128m"
+
+before_cache:
+  - rm -f $HOME/.gradle/caches/modules-2/modules-2.lock
+
+cache:
+  directories:
+  - $HOME/.m2
+  - $HOME/.gradle/caches/
+  - $HOME/.gradle/wrapper/
+
+script:
+  - ./gradlew checkstyle assembleRelease test

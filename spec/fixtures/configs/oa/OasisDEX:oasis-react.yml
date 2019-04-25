@@ -1,0 +1,52 @@
+language: node_js
+
+node_js:
+  - "8"
+
+before_install:
+  #yarn
+  - curl -o- -L https://yarnpkg.com/install.sh | bash -s -- --version 1.5.1
+  - export PATH=$HOME/.yarn/bin:$PATH
+
+cache:
+  yarn: true
+
+before_script:
+  #codeclimate
+  - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+  - chmod +x ./cc-test-reporter
+  - ./cc-test-reporter before-build
+
+script:
+  - yarn test --coverage
+
+after_script:
+  - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
+
+before_deploy:
+  - export PROD_BRANCH="master"
+  # for testing
+  - if [ $TRAVIS_BRANCH == $PROD_BRANCH ] && [ $TRAVIS_BRANCH != "master" ]; then export PUBLIC_URL="https://oasisdex.github.io/oasis-react"; fi
+  - yarn build
+  # to make gp work with client side routing
+  - if [ $TRAVIS_BRANCH = $PROD_BRANCH ]; then cp build/200.html build/404.html ; fi
+
+deploy:
+  - on: dev
+    provider: surge
+    project: ./build/
+    domain: oasisdex-dev.surge.sh
+    skip_cleanup: true
+  - on: staging
+    provider: surge
+    project: ./build/
+    domain: oasisdex-staging.surge.sh
+    skip_cleanup: true
+  - on: master
+    provider: pages
+    target-branch: gh-pages
+    local-dir: build/
+    skip-cleanup: true
+    github-token: $GITHUB_TOKEN
+    keep-history: true
+    fqdn: oasisdex.com

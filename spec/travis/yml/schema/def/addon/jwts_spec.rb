@@ -8,7 +8,18 @@ describe Travis::Yml::Schema::Def::Addon::Jwts, 'structure' do
       should eq(
         '$id': :addon_jwts,
         title: 'JSON Web Tokens',
-        '$ref': '#/definitions/secures'
+        anyOf: [
+          {
+            type: :array,
+            items: {
+              '$ref': '#/definitions/type/secure'
+            },
+            normal: true
+          },
+          {
+            '$ref': '#/definitions/type/secure'
+          }
+        ]
       )
     end
   end

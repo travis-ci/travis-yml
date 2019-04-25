@@ -1,0 +1,34 @@
+language: php
+
+cache:
+    directories:
+        - $HOME/.composer/cache
+
+php:
+    - 7.1
+    - 7.2
+    - nightly
+
+matrix:
+    fast_finish: true
+    allow_failures:
+        - php: nightly
+
+install:
+    - export PATH="$PATH:$HOME/.composer/vendor/bin"
+    - composer global require php-coveralls/php-coveralls ^1.0.0
+    - composer update --no-interaction
+
+before_script:
+    - if php -v | grep -q 'Xdebug'; then coverage="--coverage-xml"; fi
+    - vendor/bin/codecept build
+
+script:
+    - composer validate --strict
+    - composer outdated --direct --strict
+    - vendor/bin/php-cs-fixer fix --dry-run
+    - vendor/bin/phpstan analyse --level=max --configuration=phpstan.neon src tests
+    - vendor/bin/codecept run $coverage
+
+after_success:
+    - if [[ ! -z $coverage ]]; then coveralls; fi

@@ -1,0 +1,34 @@
+cache: pip
+
+matrix:
+  include:
+    - language: python
+      python: "3.6"
+      env: TOXENV=py36
+
+    - language: python
+      python: "3.6"
+      env: TOXENV=pep8
+
+addons:
+    postgresql: "9.6"
+
+install:
+    - pip install tox
+    - if [ "$TOXENV" = 'py36' ]; then pip install coveralls; fi
+
+script:
+    - tox -e $TOXENV
+
+after_success:
+    - if [ "$TOXENV" = 'py36' ]; then coveralls; fi
+
+deploy:
+    provider: pypi
+    distributions: "sdist bdist_wheel"
+    user: seantis
+    password:
+      secure: OfF5P5BYhD4EVe8qoGAbXTkQhUAIB7StGa/uVEFRfEgY2JiaF/MMa+0udMx1atacUU3F7IDcm95r7yVpPH4nFKDrxqKrSgnlmsmxkCU2YTRyThQimos2c+/h1BL1h4oK+k7v98jCGDO4tzQoNG5HVIxasBuE5p7NKvGBlkDlwlI=
+    on:
+        tags: true
+        condition: $TOXENV = py36

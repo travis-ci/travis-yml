@@ -1,0 +1,32 @@
+dist: trusty
+sudo: false
+language: python
+python:
+  - "3.6"
+
+addons:
+  apt:
+    sources:
+      - sourceline: 'deb http://repo.saltstack.com/apt/ubuntu/14.04/amd64/latest trusty main'
+        key_url: 'https://repo.saltstack.com/apt/ubuntu/14.04/amd64/latest/SALTSTACK-GPG-KEY.pub'
+    packages:
+      - salt-common
+      - rpm2cpio
+
+install:
+  - pip3 install coala coala-bears
+  - wget https://download.opensuse.org/repositories/systemsmanagement:/sumaform/SLE_12_SP3/x86_64/terraform.rpm
+  - rpm2cpio ./terraform.rpm | cpio --extract --make-directories --verbose "./usr/bin/terraform"
+  - wget https://download.opensuse.org/repositories/systemsmanagement:/sumaform/SLE_12_SP3/x86_64/terraform-provider-libvirt.rpm
+  - rpm2cpio ./terraform-provider-libvirt.rpm | cpio --extract --make-directories --verbose "./usr/bin/terraform-provider-libvirt"
+  - export PATH=$PATH:$PWD/usr/bin/
+
+before_script: terraform --version
+
+script:
+  - coala --ci
+  - bash .ci-travis/terraform-validation
+  - bash .ci-travis/salt-server-validation
+  - bash .ci-travis/salt-client-validation
+  - bash .ci-travis/salt-minion-validation
+  - bash .ci-travis/salt-ctl-validation

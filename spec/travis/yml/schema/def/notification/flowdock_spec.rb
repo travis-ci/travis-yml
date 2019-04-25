@@ -19,7 +19,7 @@ describe Travis::Yml::Schema::Def::Notification::Flowdock, 'structure' do
                 type: :boolean
               },
               api_token: {
-               '$ref': '#/definitions/secure'
+               '$ref': '#/definitions/type/secure'
               },
               template: {
                 '$ref': '#/definitions/notification/templates'
@@ -41,7 +41,7 @@ describe Travis::Yml::Schema::Def::Notification::Flowdock, 'structure' do
             ]
           },
           {
-            '$ref': '#/definitions/secure'
+            '$ref': '#/definitions/type/secure'
           },
           {
             type: :boolean

@@ -1,0 +1,39 @@
+language: ruby
+cache: bundler
+rvm:
+  2.5.5
+services:
+  - postgresql
+addons:
+  ssh_known_hosts: mrkos.uberspace.de
+  chrome: stable
+
+before_install:
+  - gem update --system
+  - gem install bundler
+  - bundle install
+
+before_script:
+  - psql -c 'create database travis_ci_test;' -U postgres
+  - cp config/database.travis.yml config/database.yml
+  - bundle exec rake db:create db:migrate
+
+script:
+  - bundle exec rubocop
+  - bin/rake
+  - bin/rails db:seed
+
+before_deploy:
+  - echo "${DEPLOY_PRIVATE_KEY}" | base64 --decode >/tmp/deploy_rsa
+  - eval "$(ssh-agent -s)"
+  - chmod 600 /tmp/deploy_rsa
+  - ssh-add /tmp/deploy_rsa
+  - rvm $TRAVIS_RUBY_VERSION do gem install bundler capistrano capistrano-rails capistrano-db-tasks whenever
+
+deploy:
+  provider: script
+  skip_cleanup: true
+  script:
+    - rvm $TRAVIS_RUBY_VERSION do cap production deploy
+  on:
+    branch: master

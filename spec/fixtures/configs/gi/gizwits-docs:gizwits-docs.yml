@@ -1,0 +1,29 @@
+language: node_js
+
+node_js:
+  - '6.11.2'
+
+branches:
+  only:
+    - master
+
+cache:
+  directories:
+    - node_modules
+
+before_install:
+  - openssl aes-256-cbc -K $encrypted_7172af91a13f_key -iv $encrypted_7172af91a13f_iv -in id_rsa.enc -out ~/.ssh/id_rsa -d
+  - chmod 600 ~/.ssh/id_rsa
+  - cp ssh_config ~/.ssh/config
+  - git config --global user.name 'gizwits-bot'
+  - git config --global user.email 'bot@gizwits.com'
+
+install:
+  - npm install
+
+script:
+  - npm run build
+
+after_success:
+  - git clone git@github.com:gizwits-docs/gizwits-docs.github.io.git .deploy_git
+  - npm run deploy

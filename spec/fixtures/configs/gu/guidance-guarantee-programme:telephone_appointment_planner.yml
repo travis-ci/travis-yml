@@ -1,0 +1,27 @@
+sudo: false
+language: ruby
+addons:
+  postgresql: '9.4'
+services:
+- redis-server
+- postgresql
+cache:
+  bundler: true
+  directories:
+  - $HOME/.phantomjs
+  - tmp/cache/assets/test
+  - tmp/cache/assets/sprockets
+before_script:
+- nvm install 7
+- nvm use 7
+- npm install
+- gem update --system
+- gem install bundler
+- bundle exec rails assets:precompile RAILS_ENV=test
+- bundle exec rails db:create db:migrate RAILS_ENV=test
+notifications:
+  slack:
+    secure: izFI8CV1BAc5Sk08/q84YijolWAY2Zm3JA4RPyilwjzfrro5v2lOM9rEX32W1fgPDu7hWq1bmqYcgxhVI+ecu2RFkI0iQklgNSe256HN7AKqRtSgtVx+3L6w8B9tBCJJ9wfj0lur/8x6oh8UwH8jExJmqtJbL3rxIq+O9N0/nJdf4jXR9vPHfFtprZwExQQTDQccqXkfyE+BqYRsFjoa/jL0utZlLt5kn8ErQPW/lDiSFvOA9OKk5o2ihQrndxkhAhZX6GbKp2aBP3xkom37aQZRyXsKIMXCz16+0IGOsTrW32j3lwLjsesb308Bp01e4q4ssp3a+2k5Hs2CKs0++b9Bb4GLpEl6Q63TGewUqK9/TXjvp7IWx5SOTQbktB5YLL6WmfR+j7MfD52VrEIHahEgJUwQQ+2+EG9MP0O8Qbs4Gek1FgGtpN7+rUS9WpOUIiGEjN7+uGd+PHTgSL7gf0kqrhtQcDHkP8KfI7KOrB1O0gO4DmdHNfJ184MXKEFlh7ULKtX08i8iB5GMVGQqsCuI7lfgR/P+u/SlIbPVu/aRoXpzo4e18UVpjBl9fR5mk6vroXqiR/5v4sHByFp5wn/QwvGszXjZcgmqTtZ7tyGGoq1IS6QdPr1Y0D/mBZT/O4N7QzG7fugPXwKOIfiktPooGt6CSVca5SHa13OkBrk=
+branches:
+  except:
+    - /^prototypes\/.*$/

@@ -1,0 +1,19 @@
+language: node_js
+
+node_js:
+  - "7"
+  - "8"
+  - "9"
+
+env:
+  - PACKAGE=idyll-ast
+  - PACKAGE=idyll-compiler
+  - PACKAGE=idyll-components
+  - PACKAGE=idyll-cli
+  - PACKAGE=idyll-document
+  - PACKAGE=idyll-layouts
+  - PACKAGE=idyll-themes
+
+cache: yarn
+
+script: cd packages/$PACKAGE && npm test

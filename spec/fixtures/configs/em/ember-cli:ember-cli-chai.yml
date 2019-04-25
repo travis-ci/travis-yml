@@ -1,0 +1,42 @@
+---
+language: node_js
+node_js:
+  - "6"
+
+branches:
+  except:
+    - /^dependabot\/.*$/
+
+addons:
+  chrome: stable
+
+cache:
+  yarn: true
+
+env:
+  global:
+    # See https://git.io/vdao3 for details.
+    - JOBS=1
+
+before_install:
+  - curl -o- -L https://yarnpkg.com/install.sh | bash
+  - export PATH=$HOME/.yarn/bin:$PATH
+
+install:
+  - yarn install --no-lockfile
+
+script:
+  - yarn test
+
+before_deploy:
+  - yarn global add auto-dist-tag
+  - auto-dist-tag --write
+
+deploy:
+  provider: npm
+  email: stefan.penner+ember-cli@gmail.com
+  api_key:
+    secure: e+NZpsOVSZ+FBv6MpPMn/UNhdPwWIC2nFNoDgEKS2NkG3sq54icnwmgZ+qCNWRqfB1ZBhWZlg5xm5MLoh7Ye5jbz50xdRMuum28I2Bejqzan4DuzoNbzL+ek0f14wahs6utcFiw3Jhj0XA4e2+Qe6hUVQRE/hzobOMPv710u6mw=
+  on:
+    tags: true
+    repo: ember-cli/ember-cli-chai

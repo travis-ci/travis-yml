@@ -11,7 +11,7 @@ describe Travis::Yml::Schema::Def::Dart, 'structure' do
         type: :object,
         properties: {
           dart: {
-            '$ref': '#/definitions/strs'
+            '$ref': '#/definitions/type/strs'
           },
           dart_task: {
             anyOf: [

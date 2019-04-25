@@ -1,0 +1,55 @@
+---
+
+dist: xenial # we need xenial to have mysql 5.7
+
+language: java
+
+install: mvn -V -DskipTests=true -Dmaven.javadoc.skip=true -B validate
+
+script: mvn -V --quiet clean verify -Dall-archs=true && find . -name "*.zip"
+
+notifications:
+  email:
+  - niklaus.giger@member.fsf.org
+
+jdk: openjdk8 # oraclejdk8 is no longer supported by travis-ci
+
+cache:
+  directories:
+  - $HOME/.m2
+
+addons:
+  postgresql: "9.6"
+
+services:
+  - mysql
+  - xvfb
+
+env:
+  global:
+  - PGPASSWORD=elexisTest
+  - JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk-amd64
+  - PATH=$(echo "$PATH" | sed -e 's/:\/usr\/local\/lib\/jvm\/openjdk11\/bin//')
+# Try to start xvfb as indicated by https://docs.travis-ci.com/user/gui-and-headless-browsers/#using-xvfb-directly
+#  - "/sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -ac -screen 0 1280x1024x24"
+#  - sleep 3
+
+before_install:
+  - java -version
+  # mysql fails currently with fist error in ch.elexis.core.data.tests
+  # testDatabaseUpdatedToRequiredVersion[mysql 5.1](ch.elexis.data.Test_DBInitialState)  Time elapsed: 0.001 sec  <<< ERROR!
+  # ch.rgw.tools.JdbcLinkSyntaxException: Fehler bei: INSERT INTO traces VALUES(1542366761342, 'travis-job-76cef79e-5c90-44d8-a68f-ab...', 'ut_user_h2', 'W globalCfg key [ElexisVersion] => value [3.7.0.qualifier]') (SQLState: 42S02)
+  - mysql -e 'SHOW VARIABLES LIKE "%case%";'
+  - echo "[mysqld]" | sudo tee /etc/mysql/mysql.conf.d/lowercase.cnf
+  - echo "lower_case_table_names = 1" | sudo tee --append /etc/mysql/mysql.conf.d/lowercase.cnf
+  - cat  /etc/mysql/mysql.conf.d/lowercase.cnf
+  - sudo service mysql restart
+  - mysql --version
+  - mysql -e 'SHOW VARIABLES LIKE "%case%";'
+  - mysql -e 'SHOW VARIABLES LIKE "%version%";'
+  - mysql -e 'CREATE DATABASE unittests;'
+  - mysql -e "grant all on unittests.* to elexisTest@localhost identified by 'elexisTest';"
+  - psql --version
+  - psql -c "create user elexisTest with UNENCRYPTED password 'elexisTest';" -U postgres
+  - psql -c "create database unittests;" -U postgres
+  - psql -c "grant all privileges on database unittests to elexisTest;" -U postgres

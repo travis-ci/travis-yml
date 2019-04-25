@@ -1,0 +1,29 @@
+language: ruby
+rvm:
+  - 2.4.4
+notifications:
+  slack: hacken-in:v0VPwCbdNxNY7oVfJGsFLAJS
+bundler_args: --without development
+before_install: gem install bundler
+before_script:
+  - psql -c 'create database test;' -U postgres
+env:
+- DATABASE_URL="postgres://travis:@localhost:5432"
+script: "bundle exec rake db:drop db:create db:migrate ci"
+sudo: false
+cache: bundler
+addons:
+  postgresql: "9.3"
+  code_climate:
+    repo_token: 6122247a9dd27a5926f1742443052dff7293cfc076a38ca47d7357538596c342
+after_success:
+  - bundle exec codeclimate-test-reporter
+deploy:
+  - provider: script
+    script: script/deploy-to-uberspace master
+    on:
+      branch: master
+  - provider: script
+    script: script/deploy-to-uberspace production
+    on:
+      tags: true

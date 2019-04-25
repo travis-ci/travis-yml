@@ -1,0 +1,42 @@
+language: perl
+notifications:
+  on_success: never
+  on_failure: always
+  irc: "irc.perl.org#makemaker"
+  email: false
+perl:
+  - "blead"
+  - "5.6.2"
+  - "5.8.1"
+  - "5.8.5"
+  - "5.8.7"
+  - "5.8.8"
+  - "5.8.9"
+  - "5.10.0"
+  - "5.10.1"
+  - "5.12.0"
+  - "5.12"
+  - "5.14.0"
+  - "5.14"
+  - "5.16.0"
+  - "5.16"
+  - "5.18.0"
+  - "5.18"
+  - "5.20"
+  - "5.22"
+  - "5.24"
+matrix:
+  allow_failures:
+    - perl: "blead"
+    - perl: "5.6.2"
+before_install:
+  - git clone git://github.com/haarg/perl-travis-helper ~/perl-travis-helper
+  - source ~/perl-travis-helper/init
+  - build-perl
+  - perl -V
+install:
+  - true
+script:
+  - perl Makefile.PL
+  - make test
+  - make disttest

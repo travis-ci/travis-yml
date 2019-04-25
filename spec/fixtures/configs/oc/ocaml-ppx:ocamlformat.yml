@@ -1,0 +1,22 @@
+language: c
+env:
+  - OCAML_VERSION=4.07.1
+cache:
+  directories:
+    - ${HOME}/.opam
+before_install:
+  - wget -O ${HOME}/opam https://github.com/ocaml/opam/releases/download/2.0.2/opam-2.0.2-x86_64-linux
+  - chmod +x ${HOME}/opam
+  - export PATH=${HOME}:${PATH}
+  - export OPAMYES=1
+  - export OPAMJOBS=2
+  - opam init --compiler=${OCAML_VERSION} --disable-sandboxing
+  - eval `opam config env`
+  - export OPAMVERBOSE=1
+install:
+  - opam update --upgrade
+  - opam pin add --no-action ocamlformat .
+  - opam install --deps-only ocamlformat
+script:
+  - make test
+  - opam install ocamlformat

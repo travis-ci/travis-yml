@@ -1,0 +1,120 @@
+dist: trusty
+language: python
+sudo: required
+
+
+python:
+  - 3.5
+
+
+addons:
+  firefox: "latest"
+  apt:
+    packages:
+      - mysql-server-5.6
+      - mysql-client-core-5.6
+      - mysql-client-5.6
+      - libmysqlclient-dev
+      - language-pack-fr
+
+
+git:
+  depth: 1
+
+
+matrix:
+  fast_finish: true
+
+
+env:
+  global:
+    - secure: "azmDZZQZzf88zpbkYpLpxI66vpEVyv+kniW0QdWAt4qlys8P5OcO3VJBR5YT85vlvnjN9b6raWQAL1ymee0WmVdTmzXed8XjZv7t9QXVw7pfezxMKlEftVp/4Cu4wtvbew0ViZXNWV2hNXHzEqlhgnoIOq94i0UzZ7grMrI0xm0="
+
+
+jobs:
+  include:
+    - name: tuto
+      env: ZDS_TEST_JOB="zds.tutorialv2"
+    - name: "test1 : member utils forum"
+      env: ZDS_TEST_JOB="zds.member zds.utils zds.forum"
+    - name: "test2 : front mp gallery pages featured notification searchv2"
+      env: ZDS_TEST_JOB="front zds.mp zds.gallery zds.pages zds.featured zds.notification zds.searchv2"
+    - name: selenium
+      env: ZDS_TEST_JOB="selenium"
+    - name: doc
+      env: ZDS_TEST_JOB="doc"
+
+
+notifications:
+  webhooks:
+    urls:
+      - "https://scalar.vector.im/api/neb/services/hooks/dHJhdmlzLWNpLyU0MHNhbmRob3NlJTNBc2FuZGhvc2UuZnIvJTIxd2dlbkt2dHpNY3NYREtiZEhZJTNBbWF0cml4Lm9yZw"
+    on_success: change
+    on_failure: always
+    on_start: never
+
+
+services:
+  - memcached
+
+
+cache:
+  apt: true
+  pip: true
+  yarn: true
+  directories:
+    - $HOME/.local/share/fonts
+    - $HOME/.texlive
+    - node_modules
+
+
+before_install:
+  - export HACK_VIRTUALENV=$VIRTUAL_ENV
+
+  - source ./scripts/travis_header.sh # Need to be sourced
+
+
+install:
+  - ./scripts/install_zds.sh --answer-yes --detect-os-version --travis-output $zds_install_argument
+
+
+script:
+  - source ./scripts/travis_run.sh
+
+
+after_success:
+  - du -sh $HOME/.texlive 2>/dev/null | true
+
+  - |
+    # upload coverage
+    if [[ "$ZDS_TEST_JOB" != "none" ]]; then
+      coveralls
+    fi
+
+  - |
+    # upload compiled assets
+    COMMIT_MSG=`git rev-list --format=%B --max-count=1 $TRAVIS_COMMIT`
+    if [[ "$ZDS_TEST_JOB" == *"front"* ]] && [[ "$TRAVIS_PULL_REQUEST" == false ]] && [[ ! -z "$TRAVIS_TAG" ]] && [[ ! "$TRAVIS_TAG" == *"-build" ]]
+    then
+      # Adding GitHub OAuth token to login
+      echo -e "machine github.com login $BOT_LOGIN\n password $BOT_PASSWORD" > $HOME/.netrc
+      git config --global url."https://".insteadOf git://
+      git config --global user.name "Build bot"
+      git config --global user.email "zestedesavoir@gmail.com"
+      git config --global push.default simple
+
+      # Run script
+      ./scripts/push_front.sh $TRAVIS_TAG
+    fi
+
+  - |
+    # upload built documentation to GitHub Pages
+    if [[ "$ZDS_TEST_JOB" == *"doc"* ]] && [[ "$TRAVIS_BRANCH" == "dev" ]]; then
+      # Adding GitHub OAuth token to login
+      echo -e "machine github.com login $BOT_LOGIN\n password $BOT_PASSWORD" > $HOME/.netrc \
+      && git config --global url."https://".insteadOf git:// \
+      && git config --global user.name "Build bot" \
+      && git config --global user.email "zestedesavoir@gmail.com" \
+      && git config --global push.default simple \
+      && ./scripts/push_doc.sh
+    fi

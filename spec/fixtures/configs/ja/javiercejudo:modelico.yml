@@ -1,0 +1,16 @@
+language: node_js
+node_js:
+  - '8'
+  - '6'
+  - '4'
+env:
+  global:
+    - SL_BROWSERS=SL_Chrome,SL_Firefox,SL_Edge,SL_IE_11,SL_Safari
+    - SAUCE_USERNAME=modelico
+    - secure: "havKfDayS9dnlTGPAnBCfOTjW5ruNkrr7POPI1bR6WF4YkxKrmZBtYUCgLJeZXnpJPCvn86u6at0YhVneLWcEquxOotZC3x0E0zGjpQB/X4c2okumJibyQ9hPAIA2ju28fD6Z21Z7l5PQGndtICsHcbSEL6tHsdAxD4i5jZ7pcdmgWcPdbR2FhLvNgTJbNT1x7WxEy7Vrh5lCFbD0JhL0yG/LxLi/co9YWNyKnrGjtbQ88SguZuwL1ZV1eWBIfvqzQuuSyNw6jz08Hx5onffY6ycty3B97mD7tkw0GYqBHVJg2yhXT2MKqxn3do6oDI1rTLWKZ7KU+Q3Wd5mTCaFm7JtmAYfaiPPyZt+K5pTw5sc98GZeBsV2n5LwVedPPq8gwoLY3bcWDN5fSPFxpnQNxo9j6aJxEbp1xbksKZBjlvaDQZMWgD/PiSHY8Am+oAqLjtjZifzFqlbE4zEKUpai3OK+Xd2ihNxVoZwuyFOEFpGD2Uf7ylZLPKiwYPFTOxtaZ7RXjmRj9WEl3N/wlIsae96iwzA/+wAUWNRhSyYglMdFScPqwqocMIWUlavxtyNHkJNacaTrKBtVUu8+a8J4klSV7tiSjV76W7COd4BbRVtw5xKANYl4tA1DxdfcgzrofcvGKhWQM4gdGCznU45oGkhPrUDhMvkDzWMuNodFRY="
+script:
+  - npm run build
+  - npm test
+  - npm run test-browsers
+after_success:
+  - npm run send-coverage

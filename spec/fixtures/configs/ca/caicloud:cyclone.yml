@@ -1,0 +1,32 @@
+language: go
+
+sudo: required
+
+services:
+  - docker
+
+go:
+  - 1.11
+
+git:
+  depth: 1
+
+go_import_path: github.com/caicloud/cyclone
+
+before_install:
+  - go get github.com/mattn/goveralls
+  - go get github.com/go-playground/overalls
+  - go get -u github.com/alecthomas/gometalinter
+  - gometalinter --install &> /dev/null
+
+install:
+  - go build -o cyclone-server github.com/caicloud/cyclone/cmd/server
+  - go build -o workflow-controller github.com/caicloud/cyclone/cmd/workflow/controller
+  - go build -o workflow-coordinator github.com/caicloud/cyclone/cmd/workflow/coordinator
+
+script:
+  - overalls -project=github.com/caicloud/cyclone -covermode=count -debug -ignore=Godeps,vendor,tests,.git,scripts,node_modules,docs,tools,build,hack,manifests,release,web,pkg/k8s,pkg/apis
+  - gometalinter --deadline=300s ./pkg/... ./cmd/...
+
+after_success:
+  - $HOME/gopath/bin/goveralls -service=travis-ci -coverprofile=overalls.coverprofile

@@ -1,0 +1,15 @@
+language: node_js
+node_js:
+  - '6.9.5'
+before_script:
+  - npm run lint
+  - npm run format
+script:
+  # test server
+  - npm run test-server
+  # cover
+  - npm run test-coverage
+
+notifications:
+  email:
+    on_failure: change

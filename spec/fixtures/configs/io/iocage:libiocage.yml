@@ -1,0 +1,12 @@
+language: python
+python:
+  - "3.6"
+sudo: false
+env:
+  - MYPYPATH="$TRAVIS_BUILD_DIR/.travis/mypy-stubs"
+install:
+  - make install-travis
+script:
+  - make check
+notifications:
+  email: false

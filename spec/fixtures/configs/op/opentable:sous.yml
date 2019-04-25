@@ -1,0 +1,92 @@
+sudo: required
+services:
+- docker
+language: go
+go:
+- '1.11.5'
+before_install:
+- bin/ci-setup
+install:
+- "./bin/vendor-check"
+script:
+- make reject-wip
+- sh -c "$TEST_COMMAND"
+after_script:
+- docker ps || true
+- docker logs testregistry_master_1 || true
+- docker logs testregistry_slave_1 || true
+after_success:
+- make coverage
+- bin/codecov -f /tmp/sous-cover/count_merged.txt
+env:
+  global:
+    - SOUS_TERSE_LOGGING=MSGONLY
+    - PGPORT=6543
+    - GIT_AUTHOR_NAME=SousCI
+    - GIT_COMMITTER_NAME=SousCI
+    - GIT_AUTHOR_EMAIL=sous@nowhere.in.particular.com
+    - GIT_COMMITTER_EMAIL=sous@nowhere.in.particular.com
+    - DOCKER_COMPOSE_VERSION=1.22.0
+    - VERBOSE=1
+    - secure: jQv4im3Imakryl54Z7qR2BEa1+Gq//sAwo3XP/1J6sSdtBjtOYY1SgdAYh7pVB111HV546vKPJqQ6GsAtHM7tjnVjlF1PabAHEWl/ZP3ZXj3SvuFNaV5j5PmrJvxPlK7nbr0uG6PPspxFkZg+X87GGIyFGCp7F3EWKIU6aX6rEeBbY/greAxISmtGYHrDwK4sQnMXl4+WoagbKwoi16fK94XweU2Etg40rLwtYRdRJTPMdhrinkkkfQ4Jga5uepsmkZFjgZJySgyEzxvVuUuEYHaQreRLHzJBjPXw96tQOGpw4OT5aRJjga6PlEJRp68pC3KPrzW7lQQMMCHpxrauEqR1r1ltg+UD2GIixAT80duOl7mD6aPyx3L04L/bg4u1sI26JyHN34X/mpg9OufE47zSOC48RicSA6y4D+ZyD/dubu626NScnLufAveWaVH/mu5brVZ3ni+8BgVqDW/vfIJTyELegz7DD9wS/xaoUVnAjnTH73efce8bDAaAOvpa4dlkZEcBDU2LjasP735FNh0/sLeVsuwhopMIKPsnpwce1Fxg83ls+KRDqXj8/l67Db5nQqTvsWk3S12nvrgPO1uX/we8fqwUKuLNlnU3befd7KugvUamixGoxlX65etwt4hvFWT11Qfv/IB7JXjLToUAfXm/QpiprEm/VqZWTM=
+    - secure: yoQHrMJeCnRumhKPRCvygeNUO8lHksOKfua5JZ69UwqIspfQlf27OrVJeJSqhFkpgUU9Xpo7m919RylLI9rHUaZDWGR3/S3/aoYfsmCZi8D5GJq4EsAhZba76LIEaYCJAueVX2RyHcSGVZQFoqp4V7AXwAO2yNVVdpgq4BaAauhvqU8BuCq0j/PVCGS2puossR/IO/KvBkzAaEuE+wr0MKzEEvhWDFfx61X5yDAp3U5e3sGJQzn3P8tqLSDLFLevYSevrjq4JxhOeDedGRPwdkf1RnMS5qq0W7aQ8aFQi4iE0GBFYNlFVE09oFA66HzJVwm1lf4bmqdMSJg8oDtP8XsOYltkiuUih1WRSvO+ZHuIHte9InWM4+jZh8VKO1othr+nVUMHapNq2EuZs+c7ELeOMFiCBpyWhTNoHn85F887rhaKUd6lnePuasErAAb4b7kZO+wVdkMcBE5yU6WKVTUIdOzcbqK9AXL2zia5KyttnFXqCbv3/z+k/t4AfxEr8sor+R2dPzB9W6CL0QMk3Bx7Hq6smtP6u2FWpH4wwu6TEfmnEifjErmWTBdDFscGFV4MLHI30KEWlu2bezbIKuFeKFBEi3hfabafdZsxpNh5NapVOX84J0xkDxFIKatj/RdhUyp0yPd1QczESfgWeoq1Xpw21scQh0Xk84NYAbc=
+    - secure: epBMihEWe88nk7XVkhZYfSbiOV5g38suqirLrB8DjgO/ft7DDlwpXDQH7N4oC42Qs55DyU+TY1fHvQdpcVKRxOxduFmv3kWJlbHHfPrPvLALaWYYe1kN8i5qyx5JHDPrUyouR7GohiJT7teeanNS6IsI1FJDsLJW242v/as2ES+sWYt9+lLdj+yKroA4BnikYZKYJ7+RLux85I1mV+Xr5N2cNBo5z+RKailxhWbZ4rMYJwEj1iV7bknQANeusenYFQayS6o/R7IX7Td3YOb+Fa5MechzHFkGuMSJ/D1Ha5hasg3JWnbe4ClNtqaEEHW48z7bpSRi9Fm9LX4c8og3cQv6Y6aeLpQoUFOW4NSU38oJxHq3C0n6LEvYMBr9++vkHjAFPZ9L8Tzs4ICb5dTeUzl1ULkrrequJVEl0f9QYECNKZvB9IZiX8qT+1D55imX61sdvae4W+1LIaWypoJXFl5MBxwzcPb8IpThHm2AYImgwVgVNJ7VHRslbhxaQrmcOdQFWzzB5MtFxNPHPnMY309HhFmFP4iYXZdbZQlNG5vZaOk6Wu+yzb1Vu7j7ayI/SDyLBN9hkKerel4D0oywiH+0bRe4ZfKKFp/ASEhVB8QgySpTCgJxADWTFGRb4P8PbBy80knmC2rpd0OUrfd4Lmpq5VSUbvk6qMrneUcdEf8=
+    - secure: m7L/KmWjZYprDZxlLk9QVLvWpS80fv2TUKUWE1ZDmo0fdurwtpIpOp9JYADkfk3vEuQ6au9VI7nzL9yipf+szxXSoQvl1D9mNV4bAfLd0u3zHJCrFzzfnIyBSuD/EqZp5Q0ZcaFXzwMSCsFLRYd6DE5F8rCXD33AVD2GZFaX19AktEN6RobpfYQvuVBE/AVCOYwMcJnEtcqFYN91by5owCWF+2Z9YC9NC6WBqFr7AvmI5xuwxrxmPYZl23EsEa+pIwoUUxKZDvnYTi6Lsdk6sBMKcLU2MaGs1hlPhluBpoppOJw7gsm7zeQdmyq5pGQaJTZlca7ubP1NlKoDbBHTRo5eSVoP0rjv1RxAIATk2O9hApCgn6kwRd8rLP/0UGkpUTnH2KhRCq4pl8PkafvzNVpr4VyZpLTPmHGYq322v7vre8XjYAYT3oHMwZgM9DKwBc8LJzB0LRbXRRn1QMk0emMhVpf9B4pqJv0zjoJav/DtIy1lB4l+dsm0Nn4Iq7uFlsz3JRmFvIY37wsNgV6JvVyJThiedo2Dio60srtLxtw01IiH5VQjHaKlrTR61S2voyArN4IOjpp1wx6WBe1ZPiCeURVbzHN50YySKC3VZJD5wcsIfW6dGAhO9yMNq25p6pOUZn+feKIJ7O6cQwatHuxbb0arcZKRceBizbpEdJc=
+  matrix:
+    - TEST_COMMAND="bundle && bundle exec danger"
+    - TEST_COMMAND="make test-integration"
+    - TEST_COMMAND="make compile-tests && make test-unit"
+    - TEST_COMMAND="GO_TEST_RUN=TestOTPL/db/simple make test-smoke"
+    - TEST_COMMAND="GO_TEST_RUN=TestOTPL/git/simple make test-smoke" 
+    - TEST_COMMAND="GO_TEST_RUN=TestSmoke/db/simple make test-smoke"
+    - TEST_COMMAND="GO_TEST_RUN=TestSmoke/db/split make test-smoke"
+    - TEST_COMMAND="GO_TEST_RUN=TestSmoke/git/simple make test-smoke"
+    - TEST_COMMAND="GO_TEST_RUN=TestSmoke/git/split make test-smoke"
+    - TEST_COMMAND="GO_TEST_RUN=TestBugs/git/simple make test-smoke"
+    - TEST_COMMAND="GO_TEST_RUN=TestDefs/git/simple make test-smoke"
+    - TEST_COMMAND="GO_TEST_RUN=TestDefs/db/simple make test-smoke"
+jobs:
+  include:
+    - stage: Release Binaries
+      if: tag =~ ^[0-9]
+      before_install: false
+      install:
+      - bundle
+      - make install-fpm
+      - make install-xgo
+      before_script:
+      - git clean -fd && git reset --hard HEAD
+      - make semvertagchk
+      - make tag-in-changelog-check
+      script:
+      - bundle exec make -j2 release
+      after_script: false
+      after_success: false
+      env:
+        matrix: false
+      deploy:
+        file_glob: true
+        provider: releases
+        file:
+        - artifacts/sous-darwin-amd64_*.tar.gz
+        - artifacts/sous-linux-amd64_*.tar.gz
+        - artifacts/sous*.deb
+        on:
+          tags: true
+        skip_cleanup: true
+        api_key:
+          secure: CDvIs31EtrSZ82I8pSNKKVwRWGEzyb+SBfpE718CpUYH2/GuZHSEFJrjmTT37tvwOk7zcA/fDhlEGnGu0gQW16gTWQTf4JjGy7i0nby5zQu4/NT2dKe35reAKhvzCPoee1rcT4YrhGLATU+S49fVO2/CdRn/S5tIlUZpywVrgLaTd8qsEoNvaBWKHjrbTZrp7K3qBRZHRqcaM1qgs//q35tbRVgDQdqIWwm/0cc3Q4oeRLAOlSc0uUrci9lZ7au3VsyfRImtLP5X7pYPw5Er1pKCdQxjxMGr0bf5pSzooq4kw2/mOFWA8RCSQKY8t8bvAmnNAF8iKqE6JO8RUiJn5a3viXPlt2vbI/jVmDNvIN3TzRk9tKKfBJbxH4gZrrEazZIuBPNWGGS4gXxJEISKgPXFoh/g3nP4nsyIMQv/w+Ye9M85NnBpJHhlnWRSAfpXdQ8y3KTxHKAJ2ofGpW1P085kidhhQJrTUst7RW1BeSGOk3V4AE53kLUnz5JbSf8BP+GqrsJb+JeDUaw0UwniOt5e8sSj5TXptDjUjQU0MC7uNUQkE3414EHJzJ8PNMboCv65rWawMYqN8irsXTadEUuE/dMxRUsECnNLcYPCRvbnJJV9HqhG2pdIxuYeRstuttgfB5QIw+LX4V/Dj0PHtXjDtH09yH+bdVvpRQdXIMY=
+notifications:
+  hipchat:
+    on_failure: always
+    on_success: change
+    template: |-
+      Travis: %{message}<br />
+      %{repository_slug}#%{build_number} (%{branch} : %{author}):<br />
+      <a href="%{compare_url}">%{commit_subject}</a><br />
+      Build: <a href="%{build_url}">%{build_number}</a>
+    format: html
+    rooms:
+      secure: MYcyZu5zXfvu72SKPt5vdF/LYtzKdybmL0RIIiiTJzGjb08Cz7LyvyfBBkFc9KWxHT3qK/swUUeCxLHYXHDFfzMDiWYPD+QB7Z2704f4/V8Vg3BjGz2CXlnNC3x1ehj3EbryMfg9C2K/dmYXI7YDjvZwT1iGM/63tMBZSUPE25mfnX6CoIpiIqznMB68JmJzTu9k8BxHKVOkwyvzmKKe7bcG+poiurXM60ly2qUqO11gmT019HOQMMUsxqVUXPoSALhZMArqXQzWG7t/408SGByI7CG1RwGuT8h+iGgsDMH4j30quormEG+y+7VzTjetRFae5BPZ0iCIu11p5atFc2ejNbDVGHdagK7H6hCuPzACWtRHDyVV1ZZ6Bv3pAtId1iCXeHebdagMe5BAsAv6G0Li+6WNQL3o7Tj6wSMPeJ/Zz9XwKHeoFocrERMhfCuhyx/M1mPZPYDVFZ/H4/GiNquDppRxUiCWK61XGmQI0fTY+R0mW6pX9l40oELV1kf6PoJCjYPRJI/kXqTi5x6dfLDctKhrUk662iXSailMtaJJKYREa30OvEaXjNrC0OSw+PTmK9zavVtsSkwkgRnBes1ZlYZnH3VKMGM0mV/L/aKzAAY9xsIuUOl8gvHK3NZ/yUWW58ncVqv+++cEM1ZxuFVuVFtIP/EpV5fc0h0/+Wc=
+  slack:
+    secure: fH8sMGe5YE2snHPSxrt2ZGDrcfEgA49yMzTVYY3L71Ycjd7BqHkJZZGBRC3yw11A01bcR4SKwQfYNGkZy1B1YfzaIYzKkn/0t7VUV84Q76JfsHtSO4ZgUO+Qe37jFRGEeHAn1nrOR20epGPzwUVUX/Ru1GVj1vZwtdVC2HMJDfyQ24PS32EFLmnMN/xWwmPdagybhMIDUGEaO22+S6Ls622Tnvi8T5p4MATKeyeFgqDu36TPVmUdyLZX8fBoD5p/Ii0HSN9B9WDFlzb3KTJWfsTOnmLOI00PqlZkHq17fidKNJMC/p2N/8PnfxkBnQ7St6PlDWxzsbHt2kXxfdxWE8w9f50rpnIuS0XRDRifRI767kxUNmNORXbEht3rmoYrBFOLFxGbCbIbgIOoGScVH3jRyB3hVkrj0ziuR5nFWLGAi/XAx0tU6le0mkIEgEC/TUrL+jA7FUU127z4Rp4NrJjQo3yrPpDOIbrYgxIFctPKzZBR5ArsjPWBMvDJna24422/ZtxvXXfwILSLJ4L+FC1PA10ZRfkL08+q96oJl4quxWwGgdNYavEsqnLfzwKcnas06LzkPmvf/9n/NZ6yhCMo0PI+KJzAapuKaFWGXYCvCl84/inBuw2IuZ7InX5QuqLoSHDJnEyJDnr7vh4KgYwWhrtRG79WwgTv7DgfvJQ=

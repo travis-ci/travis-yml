@@ -1,0 +1,48 @@
+language: php
+
+php: '7.3'
+
+install:
+    - composer install
+
+script:
+    # run tests for tested posts (with "tested: true" in header configuration)
+    - vendor/bin/phpunit
+
+    # by pass finals hook test
+    - vendor/bin/phpunit --config tests/Posts/Year2019/FinalMock/Hook/phpunit-with-hook.xml tests/Posts/Year2019/FinalMock/Hook
+    - vendor/bin/phpunit --config tests/Posts/Year2019/FinalMock/Listener/phpunit-with-listener.xml tests/Posts/Year2019/FinalMock/Listener
+
+    # static analysis
+    - composer check-cs
+    - composer phpstan
+
+    # test that website is generated
+    - vendor/bin/statie generate source
+
+    # dump contributors before deploy
+#    - |
+#      if [[ $TRAVIS_BRANCH == "master" && $TRAVIS_PULL_REQUEST == "false" ]]; then
+#          vendor/bin/statie dump-contributors
+#      fi
+
+# see docs: https://www.statie.org/docs/github-pages/
+deploy:
+    provider: pages
+    skip_cleanup: true
+    github_token: $GITHUB_TOKEN
+    on:
+        branch: master
+    local_dir: output
+
+after_deploy:
+    # tweets posts
+    - |
+      if [[ $TRAVIS_BRANCH == "master" && $TRAVIS_PULL_REQUEST == "false" ]]; then
+          vendor/bin/statie tweet-post
+      fi
+
+notifications:
+    email:
+        on_success: never
+        on_failure: always

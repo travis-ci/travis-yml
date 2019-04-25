@@ -1,0 +1,46 @@
+language: python
+sudo: false
+addons:
+  apt:
+    packages:
+      - lua5.2
+      - liblua5.2-dev
+cache: pip
+install:
+  - export PKG_CONFIG_PATH="$(python-config --prefix)/lib/pkgconfig:$PKG_CONFIG_PATH"
+  - echo "PKG_CONFIG_PATH=$PKG_CONFIG_PATH"
+  # The above two statements can be removed when/if https://github.com/travis-ci/travis-ci/issues/8217 is fixed
+  - pip install -U pip setuptools flake8
+script:
+  - flake8 .
+  - python setup.py test --addopts "--cov-report term-missing"
+jobs:
+   include:
+     - stage: build
+       python: "2.7"
+     - stage: build
+       python: "3.4"
+     - stage: build
+       python: "3.5"
+     - stage: build
+       python: "3.6"
+     - stage: build
+       python: "3.7"
+       dist: xenial
+     - stage: deploy
+       python: "3.6"
+       script: skip
+       install:
+         - pip install -U pip setuptools pyopenssl
+       deploy:
+         provider: pypi
+         user: eventbrite
+         password:
+           secure: NEMxpJWYikoIHVogbkJq45mcuXgbPBmjmSHrDxOJLbkYtGJpIMZjCe1VXtDIxyZks9rk6DztVJO/5OWb6uBTyDCkwqCGqMGQLoAPw0qNbbs9PibV/0pA5Z5MdZKHueOxydFP6jaZVdMm8or3jzaidbZevo/y4nhrvjjLX/Hyn6BEHJOai3wHQEf4OUAbkS7W/7ga1oBLgNypWmVPKUqXkszON8iVqzdrkhx3pJcWgJUIngb0GYr1WkzwFrKIN1SGb+K2hmYwWxdaRzqDs5YQdmWoywGeB0Lj0ho+yScEH5MdAYyfoUnRnftmWTZW38SskAAoUZsDIoqvPa3uA1vboo8/CJUwdu4j3Ta+BmZQQp3SRVXkZaHaaMLPnkmmIC+jEOvfCVLRQ9u2XE2tB86Yd0FGJM7JXGaNh0mGRZmbZamml5j3RMq2wCRS73STlZyaa9QOBeCBBoaKZk0orbcvZn2rfUMOdn6CmjycqflhscNsTFimClzhGDsjLKr67upsr9BDVAzN6Kh2Pcy9ka0qlu4iVJo5u7wo/LtfEvlV8tE8Qoqub0VnwLBJSFPILF/HONYrJ1Ux7avmJwU6Drn5UaC434VegJoXPrViXh2j+Z6+6HsnrCNoWlEsrhbkTMhSg/niyb/bVUgvvvWdpEk44soYKZp9Et2Qvbubq7ddg2Y=
+         distributions: "sdist bdist_wheel"
+         on:
+           tags: true
+stages:
+  - build
+  - name: deploy
+    if: tag =~ ^[0-9]+\.[0-9]+\.[0-9]+

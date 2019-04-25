@@ -1,0 +1,15 @@
+notifications:
+  email: false
+  slack: colmena-cms:o0Inc1h1waa9OKMvL4GiTbDW
+language: node_js
+node_js:
+  - '8'
+install:
+  - npm install -g @angular/cli lerna loopback-cli
+  - npm install
+  - lerna bootstrap
+script:
+  - npm run build
+cache:
+  directories:
+  - node_modules

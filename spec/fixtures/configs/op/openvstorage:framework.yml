@@ -1,0 +1,25 @@
+sudo: required
+dist: trusty
+language: python
+python:
+- '2.7'
+env:
+  global:
+  - secure: RO4COWWoNdY03jeYZPrt8H1D014UgW6/rvsG6CyleqfbJ9MGqyvUIDSTmiviRfHHVzZunOfQztHhaII7WZr7bJk6CH3bvd/H1s5TeZPaTwM/KzHDthKF8Vr16IQF7i1i5RE/QyROY0mqq2wY98op5198a1ErWKf4lMh5Y9TvhldbIn1i8IX5S9o9L7TzoH0Ii9s2D0esnXtngD66Sla6Pvh4exW8j6Y6rMAoql1nXt+RglYrXw0WVDefQx6uoI5RkuOxbocweonhkYwGbwWW0v7q8V6tAodk8W5Ener+caZ7Y73z+UBqbNjywjd+8yQE5UuUxzAktBzPseF9yU/kgBeVSeD9G4bHIc+FZVGG8UzU2X2y4WMqM39mOHBm59nvlaDL81bHxsavIjzOU67Qx5p9eHrWMGNrOiiX6+eyvJa8J+oHaTo9ywaISpp7SbwsLnphuWygMpT0leAEuXo2aeiu2PsASMFeTuYRs/CQ1u2DkuaRwwVmZbKaAKnGQW0mkBhqw83u+ZNQdtmUjyOtmJkfT7L/PSwVLT5by9xJagyHePfomoF6MlbN0U120xhX3mT93H1I23+MpsJR+jKIaTFoULhBRyUNf9fuJf6ANHYYPCBvse/wQcKh/iI5/cje/gYoMReNd8W9XIuzNuAPtwkWCZiKlRAUZpOMipLjTxU=
+  matrix:
+  - distribution: ubuntu:16.04
+notifications:
+  email: false
+  slack:
+    rooms:
+      secure: Ze8lCMV8b38bfesOMfmAYchAde0c23BMkz4PVc1g1p4sdGBSvrfGx15l8Mp4hfoOme51+wctGa38z42HiESCe0hjM2mEkh2OljxNs39Ug/ZpCBveEi63tt/tIfqBjm16Fvi73Y9LvjTOSKB7isaPaUMgh4QDEZJ0SgN7aIhP/9DOnKVPwX0AcYDO4Bk4Gu9wM9jMoe8wAE1lalZa7iTtTG5L+EtTbok3NhiRKxKRuNOSAtP/8aHsp46lZL64Fix3i6RKXE+DjU5hzXchMwF3Qp0hr63S9G+KnK6H3JRQEsUUdjYQ7nKDMZRI9VQUlncGCjTgz1xLcknhMZ/eAagm82youMkzPgE/HDpfirwWF+G0Vu8DIbKiAuXcfVElhw+d4aoE8HWQkTFxaP057br28NPI2QgPTMDldq3ZakoEgI3PvGyZx4mxYRUWqKKzgl8PQu9cMEfp2x3y+tvEqCxByDvfjZOYn627O1MvxsrLpKEP+6TNRY15q+bKbMXuAJmqD+Ez0KVMbxKVlHot+FXGbEjLQsZqfrD4nQqdweaeMa5Na3NUHXhzOQFk5TrD1PSmjaG7t47qn3T5aDkgBwsbgY8WR2eFkQhGSAHYE96QoSpxibe4eYYf+zXX0gcgHUMWh7T5tW5kvaq/vAcFT99hgsL07UWQ5DGOZCOpIctE2Ik=
+services:
+- docker
+before_install:
+- env | sort
+- docker --version
+script:
+  # Has to be under script or Travis won't take the exitcode of the output to mark the build
+- bash scripts/docker/install_docker.sh ${distribution} ${repo_url}
+after_failure:
+- docker logs fwk

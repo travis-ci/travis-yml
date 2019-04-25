@@ -1,0 +1,44 @@
+# Config file for automatic testing at travis-ci.org
+# This file will be regenerated if you run travis_pypi_setup.py
+
+sudo: required
+dist: trusty
+
+language: python
+python:
+    - "2.7"
+
+cache: pip
+
+addons:
+  apt:
+    packages:
+    - gir1.2-pango-1.0
+    - gir1.2-gtk-3.0
+    - libglib2.0-dev
+    - libgtk-3-dev
+    - python-gi
+    - python-cairo
+    - python-gi-cairo
+    # - python3-gobject Provided by python3-gi
+    #- python3-gi
+    #- python3-cairo
+    #- python3-gi-cairo
+
+virtualenv:
+  system_site_packages: true
+
+before_install:
+    #- pip install codecov
+  - pip install --upgrade pip
+  - pip install -r requirements/test.pip
+  - sudo apt-get install --only-upgrade libgtk-3-dev
+
+before_script:
+  - "export DISPLAY=:99.0"
+  - "sh -e /etc/init.d/xvfb start"
+  - sleep 3 # give xvfb some time to start
+# command to run tests, e.g. python setup.py test
+script:
+    - tox
+#- py.test --verbose tests

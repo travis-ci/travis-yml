@@ -1,0 +1,21 @@
+language: elixir
+elixir:
+  - 1.8.1
+otp_release:
+  - 21.2
+addons:
+  postgresql: '9.5'
+notifications:
+  email:
+    recipients:
+      - adam@apathydrive.com
+before_script:
+  - export PATH=`pwd`/elixir/bin:$PATH
+  - cp config/config.exs.example config/config.exs
+  - cp config/test.exs.example config/test.exs
+  - MIX_ENV=test mix do deps.get, compile
+  - psql -c 'create database travis_ci_test;' -U postgres
+script:
+  - mix test
+env:
+  - MIX_ENV=test DB_DATABASE=travis_ci_test DB_USERNAME=postgres DB_HOSTNAME=localhost DB_PASSWORD=

@@ -1,0 +1,64 @@
+language: node_js
+node_js:
+  - "lts/*"
+ 
+before_install:
+  # Upgrade PhantomJS to v2.1.1.
+  - "export PHANTOMJS_VERSION=2.1.1"
+  - "export PATH=$PWD/travis_phantomjs/phantomjs-$PHANTOMJS_VERSION-linux-x86_64/bin:$PATH"
+  - "if [ $(phantomjs --version) != $PHANTOMJS_VERSION ]; then rm -rf $PWD/travis_phantomjs; mkdir -p $PWD/travis_phantomjs; fi"
+  - "if [ $(phantomjs --version) != $PHANTOMJS_VERSION ]; then wget https://github.com/Medium/phantomjs/releases/download/v$PHANTOMJS_VERSION/phantomjs-$PHANTOMJS_VERSION-linux-x86_64.tar.bz2 -O $PWD/travis_phantomjs/phantomjs-$PHANTOMJS_VERSION-linux-x86_64.tar.bz2; fi"
+  - "if [ $(phantomjs --version) != $PHANTOMJS_VERSION ]; then tar -xvf $PWD/travis_phantomjs/phantomjs-$PHANTOMJS_VERSION-linux-x86_64.tar.bz2 -C $PWD/travis_phantomjs; fi"
+  - "phantomjs --version"  
+
+install:
+  # Hugo - https://gohugo.io/overview/installing/
+  - wget https://github.com/spf13/hugo/releases/download/v0.17/hugo_0.17-64bit.deb
+  - sudo dpkg -i hugo*.deb
+  - hugo version
+
+  # Node - https://nodejs.org/en/download/
+  - npm install
+  - npm install -g gulp http-server pa11y pa11y-ci
+
+  # S3 Sync - http://s3tools.org/download
+  - sudo pip install s3cmd
+
+  # ImageMagick - https://www.imagemagick.org/script/binary-releases.php
+  #- apt-get install imagemagick # Already Installed on Travis-CI
+
+script:
+  # Set Base Url based on branch
+  - case "$TRAVIS_BRANCH" in ("master") BASE_URL="https://mrmatt.io/" ;; ("release-staging") BASE_URL="https://beta.mrmatt.io/" ;; (*) BASE_URL="http://localhost:8080" ;; esac
+
+  # Build
+  - gulp publish --baseUrl=$BASE_URL
+
+  # Test
+  - http-server ./public --silent &
+  - pa11y-ci --sitemap http://localhost:8080/sitemap.xml --sitemap-find "$BASE_URL" --sitemap-replace "http://localhost:8080/"
+cache:
+  bundler: true
+  pip: true
+  directories:
+  - node_modules
+  - travis_phantomjs
+  - $(npm config get prefix)/bin/gulp
+  - $(npm config get prefix)/bin/http-server
+  - $(npm config get prefix)/bin/pa11y
+  - $(npm config get prefix)/bin/pa11y-ci
+deploy:
+  # Staging environment
+  - provider: script
+    skip_cleanup: true
+    script: chmod +x ./deploy.sh && ./deploy.sh beta.mrmatt.io 52361 $KEYCDN_APIKEY
+    on:
+      branch: release-staging
+  # Production environment
+  - provider: script
+    skip_cleanup: true
+    script: chmod +x ./deploy.sh && ./deploy.sh mrmatt.io 52360 $KEYCDN_APIKEY
+    on:
+      branch: master
+notifications:
+    email:

@@ -1,0 +1,23 @@
+language: php
+sudo: false
+dist: trusty
+
+env:
+  global:
+    - JTRACKER_ENVIRONMENT="travis"
+
+matrix:
+  fast_finish: true
+  include:
+    - php: 7.2
+    - php: 7.3
+    - php: nightly
+  allow_failures:
+    - php: nightly
+
+before_script:
+  - composer self-update
+  - composer install
+
+script:
+  - bin/jtracker test run

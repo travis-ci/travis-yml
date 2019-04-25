@@ -1,0 +1,64 @@
+language: generic
+
+
+matrix:
+  include:
+    - os: linux
+      python: 3.5
+      env:
+        - PYTHON_VERSION=3.5
+        - MINICONDA_URL=https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
+    - os: linux
+      python: 3.6
+      env:
+        - PYTHON_VERSION=3.6
+        - MINICONDA_URL=https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
+    - os: osx
+      python: 3.5
+      env:
+        - PYTHON_VERSION=3.5
+        - MINICONDA_URL=https://repo.continuum.io/miniconda/Miniconda3-latest-MacOSX-x86_64.sh
+    - os: osx
+      python: 3.6
+      env:
+        - PYTHON_VERSION=3.6
+        - MINICONDA_URL=https://repo.continuum.io/miniconda/Miniconda3-latest-MacOSX-x86_64.sh
+
+
+before_install:
+  - export MPLBACKEND='Agg'
+
+install:
+- wget $MINICONDA_URL -O miniconda.sh
+- bash miniconda.sh -b -p $HOME/miniconda
+- export PATH="$HOME/miniconda/bin:$PATH"
+- hash -r
+- conda config --set always_yes yes --set changeps1 no
+- conda update -q conda
+- conda info -a
+
+- conda create -q -n digicampipe python=$PYTHON_VERSION pip
+- conda env update -f environment.yml
+- source activate digicampipe
+- pip install --upgrade pip
+- pip install .
+script:
+- pytest digicampipe
+- make -C docs/ html
+- |
+  if [ "${TRAVIS_EVENT_TYPE}" == "cron" ]; then
+    travis_wait 30 pytest -c all_tests.ini digicampipe
+  fi
+env:
+  global:
+  - GITHUB_REPO: github.com/cta-sst-1m/digicampipe.git
+  - secure: kLTHK+/IvcLsozvC7cpphcn7MDSlKY0GTAYjlB/R4kR5BTlMVUJXVEYz1JPjUqdMQFu4OgurwAOi6P6G9Z3bhaBCMS9gBozEEOTWdtbc230NoSC3D02H+LPkYpmAvjMx9sW2l2rbSD03okXc/TK+IEcbBkosb/4fOB+YM77zWQ6JeDHrbDX11bFuLk2LbErCOal9Nxpiex6+6KDUyLVdxV4wcdOrTOJkCRL4/fJOUBejX1JGClpUMbMosxlFz+tcJ5hrLP9XFzfyMrcND3LBItjORJfD5VPdGCrNqAAHO0n0NT+TqTPwcoaMEXjhOm3lYw2u2kq8LEqBa1f5BxehR6y04xFy60QM7wyqYLg/C9TpYsCsp4iFvKAKcqn1IvBKV9P6xgPCGmgGf7a5YeoBcMMowatT7GKwCeF44TpBYl1lew2WxKWhtpmwjzsC5D6hJXxAkMAf96SIEK5J+cfeWI0T57eEfZlU0j/0ztxnlzIHkhre8oacUUlEGE2vxRLVEvr7GCfj81SpuRbyw0Yi+QtYF5VPNCUsNnTk7HUGPvUpmXo1ZCzn0FJ2NvFV2gd4MERHYK9WISR9wSeWEt4yTJ2N4pTFvxzHCEzL0uzCv0tpnVUVv2YfPu0hBHhVBHHPd3A3nCRIs9UuXN+O61aYEKwdFrC1yRiWMBBT+ZLuXa8=
+  - secure: V4konUGMX//pMfRauwZus5BKwMA2z+tK/j/CnZFQGGbeyxkCRY3FroJZ/tAIOaQs/Q4RcS7YpcQDyP83VBbT3TecEzUIsSsL2nDmhXFHSSSaKwjSRqF9zG5/ubhGaZNcGZd8RLGW5GvPUWprUo08jBnxzEYOSPYtM8qaqn/wFhaGQgMlWC48udP/yGroxU0qMZkXs7KAA02YsdF7/J/m665hXWj3ATCywA5dB9fVZl5DrYr6Sm6kVM+cHmJ0wtWGALajcjezWklft1ZnSKJGCoyjkP4pq1vGG5QUg3Nj+0eJwHU4d1hGhaUnN7GPUEPoeiqqd9IzUZKteArWVIW/RKnarxE9Za/GP38/osj86RboA0WjL6pmnEy4ZWe8P9QltEptouM843uWJLcpcs52T8Lyuww0gefrPPXdadBKQJNe/nyTlCnrbIDCa4PbZoJ+3SlOjDR5ER2P6TyNOmHNRyZT4uQcrYvguUoZgkVvgqVLPlxaByBcCHK+CyI4MH+hlrVg/djZEQWja5ivkc3nS2Hk7cFdjGUmdHRhNIKoAfdajhsH22mhL6seYiT+Reb/UUl67/xx8tie42f9AaKzxl/p07c6H+JlCNB4+vdshCsbHgUQ70Nfsv1a+KnlzE1MHBntNzBkbS8i4tB7Svl1n9JQPzn+lkPSdwKolcDCagM=
+  - secure: z19wcPrlooM7UJHuSIwqUIW6hpB2ZxHk262IQdjiAXgv8aydWquixvtCE68Kk1XwPkoHYOsDDI+DtvLUrclOOfNCghSfkC7+FiGF3aiKWfOrXQr6U9ocFywqz31QMgisugeU/iOJUeQ/Z42U+AdHvX7qOX8r7kBRcpCSwxZH/gu3MCRfpSsjfqJpJyfbdc0gYz4ITVs6kWS0tZ9408BPBnKoCJJYeSeT7SFks58+SyKN860ZoMW2YhEC6Q9GpdhjSI5P9r7Tl1A8ysMhx+gnq4fITJFZpMJ/oqOK6GIrvfm5Dq8YgsX2W6yFki8n7cMZuteZVAbHB8QUGiyJct3ZbFDD1ErzH7KUpfYqBWg2GTLfxCEqpgypbF+gTEIAm9bzKhU7CsAJdwbUFJkvZs6Rn1e58AM8wKL5pzizkExWouF6tQZlABcAPvRj/gA9wG63BsfHX1A2bNG5nxhNMYEOsKYwB/IgfmUhJkgH3RJyWXD4l6hbe9SGg0CW35z9viYRP+MEvGYnntaxS1myJF896CxtFz3IFiNOcNYb9oqc6pQeuseQsNsJrZUg5tD6yjwn7iR0Ui7n0rJsAscw7g1OnjDh7rX/CIrfunftJNzm/Xy9T1xiFAjSIBAgeJjjjA+WC4f70VfJNR52J6+YBV4WRtNvGKT8L2OjlwXMFN+vTY4=
+deploy:
+  provider: pages
+  skip_cleanup: true
+  github_token: $GITHUB_TOKEN
+  local_dir: docs/build/html
+  on:
+    branch: master

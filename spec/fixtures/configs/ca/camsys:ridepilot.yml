@@ -1,0 +1,38 @@
+sudo: false
+addons:
+  postgresql: "9.5"
+  apt:
+    packages:
+      - postgresql-9.5-postgis-2.3
+language: ruby
+cache: bundler
+bundler_args: "--without development"
+rvm:
+- 2.4.5
+before_install:
+  - gem install bundler
+before_script:
+- cp config/database.yml.travis config/database.yml
+- psql -U postgres -c "create extension postgis"
+- psql -c 'create database ridepilot_test;' -U postgres
+script:
+- bundle exec /usr/bin/env RAILS_ENV=test rails db:test:prepare
+- bundle exec /usr/bin/env RAILS_ENV=test rspec
+services:
+  - redis-server
+branches:
+  only:
+  - develop
+deploy:
+  provider: heroku
+  api_key:
+    secure: QANHV36CXtg5z3rjzL/gC4rwm+EaSpu5Qo72f9rg8B0JaDA5reRMJ3LLZCHj+oVwRIQcgwZZJJ9XKCU19GYk5L3C7hmO17m70SX+5vdtwAxNx3doUR6C6/JxjdLTLYL9uaiQC8fWbLttio0/tWAdfTjQfSXzt9k3YlnTwIO8DwJffS+ssq7I+aLguc0CEgj9pBW1Yyu1qx8xVgYW9pvfO1ZXPZjLO7BhAH8gHDZBizaFkP8OLG7OXrok6OGT2fIIIhxQ/Dccnzri4SvAQ5faP6WnPX2B9BseXzJhQTL26ErDux3hyyC4d1sv6ayo/BWbpsMzA44fCr11gJOQP4mCYnXwsqQTQqsHkcoS+MWAyN2rBewv5zTgnS9qnj+G3QXMc+lJ5GpQIOLw9cCPtzu7MeNt8WaskzISxONGVLRiMkWuGSWy7Eun6EgteTDRF7GN6jWT2yZ0LmhPnkJQk8ihB3gEjqe0rejFXVqAy/bM3BrmqV27QNFvcIRlCpXQvE0SZLm5XetICay6rgvpYczGM0FYX2eZ+tam7YvRa0NE9rSg5wWR8mMPDTTO1t7MoN4kabztKkcmsDhfxiUyCM5ducnoq2V+KpSJG2laGkb57WLSro09ZfsuL8t0rjnzOaxXq5fo/OKAjfCrFbVIW+r+alGJmKyt4aI3xYgXXQJYw+U=
+  run: rails db:migrate ridepilot:load_locales
+  app: ridepilot-int
+  strategy: api
+  on:
+    repo: camsys/ridepilot
+    branch: develop
+notifications:
+  #slack:
+    #secure: Qq78NTbeTtBlWrBCLk5ifHGySTA/jyyCu+dHT9JNtNrriIi/rcFXRW8FPqu1ukgdynGaPS8+PVQoD5sxp/HmuEpV53uUtqg8rR3PZc2+KVY3p/6GOqLfUJQY31nn/HKCFR7qudhhmICi/cOVsh3TnV2fk/Vmqu0iw5GM3xdEXSwe5JJrNCw72B8MGYoQu8BiBUCmouEaRzifIdNAiHBspZefmDfRm/0zRvMCYg/2qdvnU5NV/Fk0CM+PtYPri92tE2lqmhXTBDJZgPkzZGo9DBcWb+/NANJoE1Fr8q7lvD3sEJhiDC2wNUMsjzvOQWSfUmUp2zMgAnLV9aJ4uKTrVphD7DfgHnPi8KnNV1ThAEfjPTm+rnXNv+CtQfSnaex3GzZYmL37GRNnuLIzQmycn0NBapS4i4aMQhHiG0yu4/VRps1szHSllfJoYivnffChJHdmTw2Kty0WSvpCSiHZLcGenHihPTwr+wmQ38bYjy3zBaVDLgGhvOPPd8usgQfDFNL+kxzB0vKhOXx4V3KA9zkNSJb7uT5BzYSaqKWH9MM1wpFYpzlTh79Gw8N4mDiT0XDC7q416rlrFMI6tMMAEnimlCb+TqnWEtFyCH06HGc5iFCuEFqU+GfRW5npzoyjcA3IS1PYP0zydgaYm2+eCi1sdVEPbF6PZiTdZX0G748=

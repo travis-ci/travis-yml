@@ -1,0 +1,91 @@
+sudo: true
+language: python
+python:
+  - "3.6-dev"
+
+cache:
+  - pip
+  - directories:
+    - $HOME/google-cloud-sdk
+
+env:
+  global:
+    - CLOUDSDK_CORE_DISABLE_PROMPTS=1
+
+stages:
+  - test
+  - name: merge-deploy
+
+notifications:
+  email:
+    on_success: change
+    on_failure: always
+
+jobs:
+  include:
+    - stage: test
+      name: "Running Tests -- Python 3.6"
+      python: 3.6
+
+      before_install:
+        - if [ ! -d $HOME/google-cloud-sdk/bin ]; then
+            rm -rf $HOME/google-cloud-sdk;
+            curl https://sdk.cloud.google.com | bash > /dev/null;
+          fi
+        - source $HOME/google-cloud-sdk/path.bash.inc
+        - gcloud components update beta
+        - gcloud components install bigtable
+        - gcloud version
+        - python --version
+        - uname -a
+        - lsb_release -a
+        - chmod +x tox_install_command.sh
+
+      install:
+        - sudo apt update && sudo apt install -y build-essential libboost-dev
+        - pip install tox-travis codecov
+
+      before_script:
+        - virtualenv --version
+        - easy_install --version
+        - pip --version
+        - tox --version
+
+      script:
+        - pip install pip==18.1
+        - tox -v -- --cov-config .coveragerc --cov=pychunkedgraph
+
+      after_failure:
+        - more .tox/log/* | cat
+        - more .tox/*/log/* | cat
+
+      after_success:
+        - codecov
+
+    - stage: merge-deploy
+      name: "version bump and merge into master"
+      python: 3.6
+  
+      install:
+        - pip install bumpversion
+
+      before_script:
+        - "git clone https://gist.github.com/2c04596a45ccac57fe8dde0718ad58ee.git /tmp/travis-automerge"
+        - "chmod a+x /tmp/travis-automerge/auto_merge_travis_with_bumpversion.sh"
+
+      script:
+        - "BRANCHES_TO_MERGE_REGEX='develop' BRANCH_TO_MERGE_INTO=master /tmp/travis-automerge/auto_merge_travis_with_bumpversion.sh"
+
+    - stage: merge-deploy
+      name: "deploy to pypi"
+      python: 3.6
+
+      install:
+        - pip install twine
+
+      before_script:
+        - "git clone https://gist.github.com/cf9b261f26a1bf3fae6b59e7047f007a.git /tmp/travis-autodist"
+        - "chmod a+x /tmp/travis-autodist/pypi_dist.sh"
+
+      script:
+        - "BRANCHES_TO_DIST='develop' /tmp/travis-autodist/pypi_dist.sh"

@@ -1,0 +1,34 @@
+dist: precise
+
+language: java
+
+install: mvn install -Dhttps.protocols=TLSv1.2 -DskipTests=true -Dmaven.javadoc.skip=true -B -V
+
+addons:
+  hostname: dd-jmxfetch-testhost
+
+matrix:
+  fast_finish: true
+  include:
+    - jdk: oraclejdk8
+      env: 
+       - DESC="Oracle JDK8 linting"
+       - CMD="mvn verify -B -Dhttps.protocols=TLSv1.2 -DskipTests -Dlog4j.configuration=log4j.travis.properties"
+
+    - jdk: oraclejdk8
+      env: 
+       - DESC="Oracle JDK8 testing"
+       - CMD="mvn test -B -Dhttps.protocols=TLSv1.2 -Dcheckstyle.skip=true -Dlog4j.configuration=log4j.travis.properties"
+
+    - jdk: oraclejdk7
+      env: 
+       - DESC="Oracle JDK7 testing"
+       - CMD="mvn test -B -Dhttps.protocols=TLSv1.2 -Dcheckstyle.skip=true -Dlog4j.configuration=log4j.travis.properties"
+
+    - jdk: openjdk7
+      env: 
+       - DESC="OpenJDK7 testing"
+       - CMD="mvn test -B -Dhttps.protocols=TLSv1.2 -Dcheckstyle.skip=true -Dlog4j.configuration=log4j.travis.properties"
+
+script: echo "Running $DESC..." && (eval $CMD) 
+

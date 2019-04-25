@@ -1,0 +1,14 @@
+branches:
+  only:
+  - master
+
+language: swift
+osx_image: xcode10.2
+xcode_workspace: Eurofurence.xcworkspace
+xcode_scheme: Eurofurence
+
+install:
+  - gem install xcpretty
+
+script:
+  - xcodebuild -workspace Eurofurence.xcworkspace -scheme Eurofurence -destination "platform=iOS Simulator,name=iPhone 7" clean test | xcpretty && exit ${PIPESTATUS[0]}

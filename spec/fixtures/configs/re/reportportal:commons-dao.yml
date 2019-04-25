@@ -1,0 +1,12 @@
+language: java
+
+script: ./gradlew build --full-stacktrace
+
+jdk:
+  - oraclejdk8
+
+notifications:
+  slack: reportportal:fl6xWHVQp1jvsMmCJxYW9YKP
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)

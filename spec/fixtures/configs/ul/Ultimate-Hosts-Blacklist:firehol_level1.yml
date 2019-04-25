@@ -1,0 +1,40 @@
+addons:
+    apt:
+        packages:
+        - dos2unix
+cache:
+- pip
+dist: xenial
+env:
+    global:
+    -   secure: Tw6XqYj+7Q4v8i/qNtK6ql14bzoBI7uyg3mLtstX8fbF9WNtLPLoCDksVVyM+kq9Xe9/51xfeVa0YqEiat0EjmM9TJdF3D8IscjsXdE+VBttGepxTmvD0NoHf604TCh74j/7BZcamuZRTPBIQk42P/pjGfXsuLjHDecr4Jf9OVDFRAHqnGt/FRccjUbBO/1SdXdl21UgnALb1lGc90HmpDPGdBIqJn7pOinlwNfI1ra0GlqL85uG7QQoi7r5QHJ24BSr0t4N9IZr7FTgyByEOHvq8PT9mYI6506gL8iptwEzOEgpTp+SloblwPdGa06I+op0+nnyo01PB8viNTago+8phbRQ+zPAW+QA0Q1z9CSy9DMB1aJHEiiw9OvChk/DB9XtCYUoRONGGBugwIf8yLw+SQRhx0Jv32rFzllcI5+Hi+LfXkJ81rGKUxKZowma4q2qFD0Q0Y2zcblbx0OcZJCfnAkR1ji8xPJ9IhJQYZFVoqHar/B7RkxOETEouwjhExSwZaMDYJn2xtW4i/8GvSm2aDlqRbBihdm0bLd53p/5MWXwobetd3Hy4IaQUp7tOmW5YyKCLww6YjbXoW/k6yRXd/iyXymiu8MK6f/qQY3jNbmNSX8Udy0iqZB6eEOqSYpnrW4VI2nZqE47odUK8vjtMIrx41QYGrps7qIBSVA=
+    -   GIT_NAME: Travis CI
+    -   GIT_EMAIL: dead-hosts@funilrys.com
+    -   TRAVIS_REPO_SLUG: Ultimate-Hosts-Blacklist/firehol_level1
+    -   GIT_BRANCH: master
+    -   UPDATE_LOCATION: https://raw.githubusercontent.com/Ultimate-Hosts-Blacklist/repository-structure/master/update.py
+    -   ADMINISTATION_LOCATION: https://raw.githubusercontent.com/Ultimate-Hosts-Blacklist/repository-structure/master/administration.py
+install:
+- pip3 install --upgrade pip
+- pip3 install requests
+- pip3 install ultimate-hosts-blacklist-whitelist PyYaml
+- if [[ ! -f .admin ]]; then wget "${UPDATE_LOCATION}" -o /dev/null -O update.py &&
+    chmod +x update.py; else echo "No need to download/update update.py."; fi
+- if [[ ! -f .admin ]]; then wget "${ADMINISTATION_LOCATION}" -o /dev/null -O administration.py
+    && chmod +x administration.py; else echo "No need to download/update administration.py.";
+    fi
+language: python
+matrix:
+    fast_finish: true
+notifications:
+    email:
+        on_failure: always
+        on_success: never
+        recipients:
+        - dead-hosts@funilrys.com
+        - mitchellkrogza+ultimatehostsblacklist@gmail.com
+python:
+- '3.7'
+script:
+- python3 ./update.py
+sudo: required

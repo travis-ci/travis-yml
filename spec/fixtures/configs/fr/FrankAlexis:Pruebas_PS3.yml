@@ -1,0 +1,28 @@
+language: java
+dist: precise
+
+branches:
+  only:
+  - master
+  - develop
+  - jhonatan
+  - frank
+  - yoiner
+install:
+  - sudo pip install requests[security]
+  - sudo pip install coveralls
+
+jdk:
+  - oraclejdk8
+
+after_success:
+  - mvn clean test jacoco:report coveralls:report
+
+notifications:
+  email:
+    recipients:
+      - castrillonfrank114@gmail.com
+      - jhonatana.orozco@udea.edu.co  
+      - yoiner.gomez22@gmail.com 
+    on_success: change # default: change
+    on_failure: always # default: always 

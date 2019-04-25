@@ -1,0 +1,22 @@
+git:
+  submodules: false
+language: node_js
+node_js:
+- '8'
+install:
+- npm install
+script:
+- gulp views
+- gulp styles
+- gulp lint
+- gulp test
+deploy:
+  skip_cleanup: true
+  provider: script
+  script: bash deploy.sh
+  on:
+    all_branches: true
+    condition: $TRAVIS_BRANCH =~ ^master|stable$
+env:
+  global:
+    secure: "xJJI7QWis+m4UBloFKbC1skgIafa3im4eySXx6dVlMwTqYRrWeTl8gH6q46CWgfM4wK146enCsF5ATb/6cNsqb8VsZlLkO7zpeaDB+yHAcCmOSeHFbNIQBUS7kXomgQFgteOkZHFpgSEcDJUVGOuR/HSSLUB5rNiMZN3UznWwSs6A+HYBlKB3WNdj/FsFI0hgCaG3KEZrvXVCLrSseLhcRVbGprYHKiCBaVhURLNeo4GtFm1eJ+TcWDcDGuDzA5kCHDwvu0RogM7XbfdNzJup6xiE4h/V1YUorTQBRZNP9ehRuYEunzitfRQOoFyuRZ0nJNpPz0O4K05t2bX2VpH8vKzL/DPLxBT7eB6mLb7xbq5dPDiMA+bsVoG+HkhSVpQpwHcMUgkEfRbV4sZomGZtAjskUH7wnARGxH9Y03TVA/Oa0TC5zGWy09Y7EhmHnZv3YXLJcr6hfyrjxaKPLLlVgLXk5lHvPEJ+VNH65cMPL2gTiY/6GuvmarYfVQp7XftCDlpMIg9QjNGdiPCroP7xopqzMorsPccFQsjGq3h5RHLmnGDEqxxBIAt+Rb3Ck/v1JECJ40I+HO6oSsuXfdOvI2oYT0bStk0b4IVa/UV7VTxLT0yykkIlA+WS4/tnc9EUMXSOhqsQm2HFgCElh6Y4u1+zLpomhP9xY9N/llHpQ8="

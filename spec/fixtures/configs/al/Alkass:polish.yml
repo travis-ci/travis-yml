@@ -1,0 +1,14 @@
+sudo: required
+language: rust
+os:
+ - linux
+rust:
+ - stable
+ - beta
+ - nightly
+matrix:
+ allow_failures:
+  - rust: nightly
+script:
+- cargo build --release
+- make test

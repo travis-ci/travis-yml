@@ -1,0 +1,14 @@
+language: ruby
+rvm: 2.2
+cache: bundler
+script: make docs
+deploy:
+  provider: pages
+  local_dir: _site
+  name: bot50
+  email: bot@cs50.harvard.edu
+  fqdn: docs.cs50.net
+  github_token: $GITHUB_TOKEN
+  skip_cleanup: true
+  on:
+    branch: master

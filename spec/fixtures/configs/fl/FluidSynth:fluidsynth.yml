@@ -1,0 +1,73 @@
+language: c
+sudo: false
+os: linux
+dist: trusty
+addons:
+  apt:
+    sources:
+    - ubuntu-toolchain-r-test
+    - llvm-toolchain-trusty-6.0
+    - llvm-toolchain-trusty-7
+    packages:
+    - cmake-data
+    - cmake
+    - libglib2.0-0
+    - libsndfile-dev
+    - libasound2-dev
+    - libjack-dev
+    - portaudio19-dev
+    - libpulse-dev
+    - libdbus-glib-1-dev
+    - ladspa-sdk
+    - libsdl2-dev
+env:
+    - CMAKE_FLAGS="-Denable-profiling=1"
+    - CMAKE_FLAGS="-Denable-floats=1 -Denable-profiling=1"
+    - CMAKE_FLAGS="-Denable-floats=0"
+    - CMAKE_FLAGS="-Denable-trap-on-fpe=1"
+    - CMAKE_FLAGS="-Denable-fpe-check=1"
+    - CMAKE_FLAGS="-Denable-ipv6=0"
+    - CMAKE_FLAGS="-Denable-network=0"
+    - CMAKE_FLAGS="-Denable-aufile=0"
+    - CMAKE_FLAGS="-DBUILD_SHARED_LIBS=0"
+
+matrix:
+  include:
+    - os: osx
+      osx_image: xcode10
+
+    - os: linux
+      env:
+        - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7 && sudo apt-get install gcc-7"
+
+    - os: linux
+      env:
+        - MATRIX_EVAL="CC=gcc-8 && CXX=g++-8 && sudo apt-get install gcc-8"
+        - CMAKE_FLAGS="-Denable-debug=1 -DCMAKE_C_FLAGS_DEBUG=-fuse-ld=gold"
+
+    - os: linux
+      env:
+        - MATRIX_EVAL="CC=clang-3.8 && CXX=clang++-3.8 && sudo apt-get install clang-3.8"
+
+    - os: linux
+      env:
+        - MATRIX_EVAL="CC=clang-6.0 && CXX=clang++-6.0 && sudo apt-get install clang-6.0"
+
+    - os: linux
+      env:
+        - MATRIX_EVAL="CC=clang-7 && CXX=clang++-7 && sudo apt-get install clang-7"
+
+before_install:
+    - if [ $TRAVIS_OS_NAME = linux ]; then sudo apt-get update; else brew update; fi
+    - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install glib gettext libsndfile jack dbus-glib pulseaudio portaudio sdl2; fi # && brew link gettext
+    - eval "${MATRIX_EVAL}"
+    
+before_script:
+    - mkdir $HOME/fluidsynth_install/
+    - mkdir build && cd build
+    
+script:
+    - cmake -DCMAKE_INSTALL_PREFIX=$HOME/fluidsynth_install ${CMAKE_FLAGS} -Denable-portaudio=1 -Denable-ladspa=1 -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_VERBOSE_MAKEFILE=0 ..
+    - make -j4
+    - make check
+    - if [ $TRAVIS_OS_NAME = linux ]; then make install; fi # install only on linux, as CMAKE_INSTALL_PREFIX is ignored for frameworks on macosx and I cant tell whether that's correct or a bug.

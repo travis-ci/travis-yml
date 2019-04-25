@@ -1,0 +1,19 @@
+language: php
+php:
+- 5.5
+- 5.6
+- 7.0
+install:
+- composer install
+- npm install
+script:
+- ./vendor/bin/phing test
+after_success:
+- if [ "$TRAVIS_PHP_VERSION" != "7.0" ]; then ./vendor/bin/coveralls -vvv; fi
+notifications:
+  email:
+    recipients:
+    - bert@2dotstwice.be
+    - sander@2dotstwice.be
+    - kristof@2dotstwice.be
+    - thomas.jacobs@wunderkraut.com

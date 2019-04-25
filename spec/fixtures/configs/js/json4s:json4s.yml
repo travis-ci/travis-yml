@@ -1,0 +1,22 @@
+language: scala
+jdk: oraclejdk8
+scala:
+  - 2.11.12
+  - 2.12.8
+  - 2.13.0-RC1
+matrix:
+  include:
+  - scala: 2.12.8
+    jdk: oraclejdk11
+sudo: false
+cache:
+  directories:
+    - $HOME/.ivy2/cache
+    - $HOME/.sbt/launchers
+before_install:
+  - export TZ=Australia/Canberra
+script:
+  - travis_retry sbt "++${TRAVIS_SCALA_VERSION}!" test
+before_cache:
+  - find $HOME/.sbt -name "*.lock" | xargs rm
+  - find $HOME/.ivy2 -name "ivydata-*.properties" | xargs rm

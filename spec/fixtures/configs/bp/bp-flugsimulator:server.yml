@@ -1,0 +1,35 @@
+language: python
+
+cache: pip
+
+python: 
+  - "3.4"
+  - "3.5"
+  - "3.6"
+
+env:
+    # the Django version from requirements.txt is used
+  - $DENV=""
+    # the latest Django development version is used
+  - $DENV="pip install --upgrade --pre Django"
+
+# allow the Django pre version to fail without failing the entire build
+matrix:
+  fast_finish: true
+  allow_failures:
+    - env: $DENV="pip install --upgrade --pre Django"
+
+install:
+  - python install.py 
+  - $DENV
+  - pip install coverage
+  - pip install coveralls
+
+script:
+  - export PYTHONWARNINGS=all
+  - python manage.py check
+  - python manage.py test 
+  - coverage run manage.py test
+
+after_success:
+  coveralls

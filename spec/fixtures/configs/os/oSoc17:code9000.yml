@@ -1,0 +1,28 @@
+sudo: false
+matrix:
+  include:
+    - language: php
+      php: 7.0
+      before_script:
+        - cd api
+        - travis_retry composer self-update
+        - travis_retry composer update --no-interaction --prefer-source
+      script:
+        - phpunit --coverage-text --coverage-clover=coverage.clover
+
+    - language: node_js
+      node_js:
+        - "node"
+      cache: 
+        yarn: true,
+        directories:
+          - node_modules
+      before_script:
+        - npm install -g yarn
+        - cd web-app
+        - travis_retry yarn install
+      script:
+        - yarn build-css
+        - yarn lint
+        - travis_retry yarn test
+        - travis_retry yarn run build

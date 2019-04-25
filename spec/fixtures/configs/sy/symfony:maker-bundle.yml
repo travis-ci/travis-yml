@@ -1,0 +1,34 @@
+language: php
+
+dist: trusty
+sudo: false
+
+git:
+    depth: 1
+
+php:
+  - 7.0
+  - 7.1
+  - 7.2
+  - 7.3
+
+cache:
+    directories:
+        - $HOME/.composer/cache/files
+        - .phpunit
+        - vendor
+
+env:
+    global:
+        - SYMFONY_PHPUNIT_DIR=.phpunit
+
+before_install:
+    - phpenv config-rm xdebug.ini || echo "xdebug not available"
+
+install:
+    - composer update --no-suggest
+    - ./vendor/bin/simple-phpunit install
+
+script:
+    - ./vendor/bin/simple-phpunit
+    - ./vendor/bin/php-cs-fixer fix --dry-run --diff

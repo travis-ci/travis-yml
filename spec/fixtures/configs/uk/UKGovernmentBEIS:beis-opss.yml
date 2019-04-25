@@ -1,0 +1,125 @@
+sudo: required
+
+language: generic
+
+services:
+  - docker
+
+branches:
+  only:
+    - master
+    - staging
+    - prod
+
+cache:
+  directories:
+    - "~/bundle-cache"
+
+stages:
+  - Build
+  - name: Test
+    if: type = pull_request # This is designed to cut out unnecessary runs of the test suite. See PSD-821 for details.
+  - name: Deploy to int
+    if: branch = master AND type != pull_request
+  - name: Deploy to staging
+    if: branch = staging AND type != pull_request
+  - name: Deploy to production
+    if: branch = prod AND type != pull_request
+
+jobs:
+  include:
+    - stage: Build
+      before_install:
+        - mkdir -p ~/bundle-cache
+      install:
+        - BRANCH=${TRAVIS_BRANCH} BUILD_ID=${TRAVIS_BUILD_NUMBER} ./infrastructure/ci/build-docker-images.sh
+
+    - stage: Test
+      name: PSD Tests
+      script: COMPONENT=psd-web ./infrastructure/ci/test-if-changed.sh
+      env: &test_env
+        - COVERALLS_PARALLEL=true
+    - name: PSD Static Analysis
+      script: COMPONENT=psd-web ./infrastructure/ci/static-analysis-if-changed.sh
+    - name: Cosmetics Tests
+      script: COMPONENT=cosmetics-web ./infrastructure/ci/test-if-changed.sh
+      env: *test_env
+    - name: Cosmetics Static Analysis
+      script: COMPONENT=cosmetics-web ./infrastructure/ci/static-analysis-if-changed.sh
+
+    - stage: Deploy to int
+      name: Deploy PSD web
+      script: COMPONENT=psd-web ./infrastructure/ci/travis-wait.sh ./infrastructure/ci/deploy-if-changed.sh
+      env: &deploy_int_env
+        - SPACE=int
+        - BRANCH=${TRAVIS_BRANCH}
+        - BUILD_ID=${TRAVIS_BUILD_NUMBER}
+        - CF_STAGING_TIMEOUT=30 # Extend CF staging timeout to 30 minutes
+        - secure: qoP7Gbk7CpO6BXtgw4XfopbWMjO0ssO70BsK8sgDtA5vi2z7Bw+vPyjeAVg9vVzjbLl8TP0Bee+yterHZ7sZ5CEaZ+3QSFz+CO9QFoKFXW9E8TZC4NuNJoRun28MueNOJEF3PmT4rSJUlgfL1yrshezrjD5W5Ol9aTG70my0yZnJeyESfKAxFEypPAi9SetzZVvtX8co3I1ZKRoHfb9UHh5KhShl5RLbFQjBI77maCyI4w7GWP8gKPGX7423hIj5H2qvYGRyUYb6/NLQW51V0ra+yK21nBgNmqrzp9uV83iSpoMsRKU2sDV3hbux/YWmvzrvA1xgGf/YkJkXUMz3QAnps6nVrtTj5yF/7/m2xkLJXjZgpZ/343ou2gxJjiXg9+4TohTSIs9bqJV3nZPiodJKMOcuGUuzlxozSwtwmSp7iOkoDWZpDrAq4BdyEbUnl/Ys6vrwloahPYssamphXqVY3LC6pv3akNFsQpU/+Fq1aWoRVn2p6vTQ62TmqZcWNsYYIGeqn8zlIL+x2i5V1wwtfafLtQWFSearvXPOt/ZtinpaM1eV1ojb2ITopxJw7MEm1C3T9Psvw7jw1lZKAY76OqJTGzqvM5hYaIq7YeGGfg/PeA/+n5MFZj28dp/3FulHLS38ei76XIyNodh0UtK59JZ+b9ZopMPg4oQ/0Rc= # CF_USERNAME
+        - secure: qL7KTNWc6G5YwW4CT3rW4qaFkzvzp9ALr4IFN/PkeXRJOagM36oVpvW8h64fECUautNBabo1zGvsn6BH2Xri0hcVM/O2Pfk6x0D2T35ZSQAqofst/dKUL6XSaclYqWPm2RzZ96X0+Cb42U9CjQIFofbmRTc7aw/VxX8MP1IX/JF6PhKRYRq1nvYbQ4AbHezxbiQzkRNtLKBUqLIho1YbkbM7xk59/AiOfH4OOheL3FoddLaztKk0aI+llzJR1VRLK/p/P6oBpP1S6p5PrL63dvL41/8MMg0z3+558Le8kSqTdZ/zOa1/t30pwkFmtoGG2fp2ooZqRD9MwuYlP7rlZTPA/OCmZieHlpD3Bl/IRwDNHk/y431qTxxsl3SjRjB5TiqoeLgSt1WwumvZ7dHlSVwC5BEAIzNwVTDAK63B27LQQaNmaAFr9hy1V9j7hNRkbtQPvFyTKLkpEyv3/5qy9mN+ZdnAOir2qPvYTzJzqqMrcv5Yy/XkNxmkaqV33Gj28ngv8SMhqtiJdeTfhWqV4FY4QFhv9AGmGSARDkuE8l/4GLWn6Mh1CDVfBk6sMvxN7hosIC00RNw7UyHcEHTnYN2i19YnI4mfIGvO2+Xsh2cy04TKxGsD47ZKcKGseVaFSD1dRWuybsqWnSbSkz1pnTvtmyNcSW7/RPjenJh3Nrg= # CF_PASSWORD
+    - name: Deploy PSD worker
+      script: COMPONENT=psd-worker ./infrastructure/ci/deploy-if-changed.sh
+      env: *deploy_int_env
+    - name: Deploy Keycloak
+      script: COMPONENT=keycloak ./infrastructure/ci/deploy-if-changed.sh
+      env: *deploy_int_env
+    - name: Deploy Cosmetics web
+      script: COMPONENT=cosmetics-web ./infrastructure/ci/travis-wait.sh ./infrastructure/ci/deploy-if-changed.sh
+      env: *deploy_int_env
+    - name: Deploy Cosmetics worker
+      script: COMPONENT=cosmetics-worker ./infrastructure/ci/deploy-if-changed.sh
+      env: *deploy_int_env
+
+    - stage: Deploy to staging
+      name: Deploy PSD web
+      script: COMPONENT=psd-web ./infrastructure/ci/travis-wait.sh ./infrastructure/ci/deploy-if-changed.sh
+      env: &deploy_staging_env
+        - SPACE=staging
+        - BRANCH=${TRAVIS_BRANCH}
+        - BUILD_ID=${TRAVIS_BUILD_NUMBER}
+        - CF_STAGING_TIMEOUT=30 # Extend CF staging timeout to 30 minutes
+        - secure: oVIrfF2Kuqc764xtW7+KxbQRRR1OpuHg0t34DFUqwe/mpy6flHq8F6R0V9u3hlS5VzgWu36UYVq2atL0gzNs+ekzXyGpjCiEtDyIjdZIfyj9EADYaRwHpM/rNJ/HQHB5qx44RtCE7JSGV28EPkSbbYrwVhklud7Nkp9lDPno4GweAk2e0EYUXsUUyC638wX/u6eWiXKEk3nZhQKyPYfWMBbhsfjmft/nzkrEAtphJnNXPaPDR/vtRQlgXdMLaM/twY9wNK+Mih8dfc1UpSjRICIi4NGIX5Tu9Lh2r4HkaBJWL2KXn6Lxt/Q2LcpwimQ+/HEjuifp3YaCkXo6tIWtYny6kUwo3xWcg03IuhMJ87xbk8nxP6GCp1Qf4qYr2NI8hSNJPeKQlht5kRxkrhUoMHgSqv1CgITeUaY5s5mSE18ykQzgV9Zygs8crQv5komA5wQ1h00k/cvutjk0579tcBzivwAuzqaYrHaYNtqE7trYQ6fk1x4of2VrhS96CtPhlwFzvB+UyUNE+a9OZm223nVxbEWeUnJuVYnqag4Qt03maVh6LFCcbPrcmnFRLWwBMpdlS4xEjCNYRKwNCAvGMrp7918HZnOVFKZqUUP3lvIZJQehMEPJzMwmoDeq9Zn9P4fTk4N4ubuyQs2iVYTjxXdDHPoe9zd6in5gHQM8Uss= # CF_USERNAME
+        - secure: PoHAPCDTOagXFqpzmyDqkYpHWT/aU2Zkfc6EN15ZvqFO/W503qEej0fgPKyi3lrQvUIKA30iWlO/edzW4y82BNefqDYz1z046xpq5e/l7veEI7QUcqJ4VylWj/FSew/jSaWTvRt8PztMTXRWC8pyNYW97u5Vy+xi6YXjgfZDV7dqN9/mkXsqLuHAtModmjbQ2+45G4yE42FBvunljW25s43Ws+4EoUmDh5x5Q6ZoWz1WShKdRzDLO23Sc0ynmbXqqT8cVTWTFXqw0DI4ZJ/z+/h1VpNxFBpsJCiNTwiBXiyY5Sa3JQZg0SAPbsutqzuwzftiVSgly971GpZ3jBwa/gpm23PZ5fmbPs/hntTfSO1qNL+Vnr85h+1e/scBXgloWyy1MYPMtFVfpLKqy2tb0hrMBKaZePu+YDx5r3rHzazfeoas9t9BOmJkWBaLLNvpzLcThK0dOCEssRhjz+p79sG5x9AnUuGXnRVkv5yqKy62C5iyXje356MbOKy84UnfXKRJvvCHv9P9Oa+xCsJU9yQZxI1JqzyGDJy3geDYT7gdBfe7R9CCyNfmw96hpQfY2x6tC6aWTWOcYfb62s9prOjCVpBVqSSei3AZK+UHiSLixBAfsWPxG87q3MoH/moSoqkcARjcXcjQpwdGDl1VMlaKkt3AP1b9+wV+8ibvOEc= # CF_PASSWORD
+    - name: Deploy PSD worker
+      script: COMPONENT=psd-worker ./infrastructure/ci/deploy-if-changed.sh
+      env: *deploy_staging_env
+    - name: Deploy Keycloak
+      script: COMPONENT=keycloak ./infrastructure/ci/deploy-if-changed.sh
+      env: *deploy_staging_env
+    - name: Deploy Cosmetics web
+      script: COMPONENT=cosmetics-web ./infrastructure/ci/travis-wait.sh ./infrastructure/ci/deploy-if-changed.sh
+      env: *deploy_staging_env
+    - name: Deploy Cosmetics worker
+      script: COMPONENT=cosmetics-worker ./infrastructure/ci/deploy-if-changed.sh
+      env: *deploy_staging_env
+
+    - stage: Deploy to production
+      name: Deploy PSD web
+      script: COMPONENT=psd-web ./infrastructure/ci/travis-wait.sh ./infrastructure/ci/deploy-if-changed.sh
+      env: &deploy_prod_env
+        - SPACE=prod
+        - BRANCH=${TRAVIS_BRANCH}
+        - BUILD_ID=${TRAVIS_BUILD_NUMBER}
+        - CF_STAGING_TIMEOUT=30 # Extend CF staging timeout to 30 minutes
+        - secure: fXT1dyOFJiElJ1dLvPICDKhHFypSTa0+soCxxOuAcAMJK049h69GvkxDU9CKj471ZQwFs2PUYnGBu0r/J2hgAKDVIIN3ch3kJP7sEbi0ye8WXteIojIAelrcCuueKazhCORRPlJVOojXCMwtLpAyRi4qAev563jM+4CeivcY3W9xEmbZCMPuSsp/2cp5yVIQ0c/B4TgMG5T8tLLvPdUIHcHkxQURMJnFh10zVpSsUBwlCrVxAFNPLcaxVQyQ0xFEivw4HsYVrvfQ6Rh3i31PWAzupzb11ZolqQ1W43Z2jXCFAUjBZ48vMzsIsSMcws1kaPkN07R3Gtwuxurzp96AI68NoA+lf8xbzeCHsFkDO/rfmmVgXwi3nObXHUMInIazO4ZRwoHHoofl4YsmxPpYfkm1gtq15uh5/d8Xl7CWe7fU5xl0CPutpAOaPnoTcTzhMwaDyRVWzm0t4wzcBR2psKBi9c3kaRTFpz2K8K7xIuQ3ke2Smf+l6cZj0cgcb5OpdT79qLshgZPw3svsV8iS2akeq22Qg2qSPe2Mu8hhjAx0V1+nlnMuTeSOEa9s93QQR8jX2E4uqkWNo8zshKeCbMp591TnW8Hkzjzoi2m0sRDYZuRBbuIG0N2NqCnWspGamijGa8/zUbbFL1Cax9RmzIh24Hn6G1MyCa729ssdHZ0= # CF_USERNAME
+        - secure: gTAK8VwM2q6Tq/f26NgN2EYF8Q0L13G0MrPfI1SVoxURo570rXU1ojRfVvT9hjH/vwh4GJLhnEnE+c7klz7rrGv3/cjwCn9yjz0A9AbMOQnPqgD4wJkDVDTLguXWwMV/rsWGLwjiUKitQsoofeuaZ5dUCkBAHPup97Hu+KJ0BGizEHnYsGKRHehO8BOyTkmzKlCWrtp8mdB7vDNTFHC5r1/hDfpJbcwaQQAbpX39XrwfLrmrIYQlJpfHSE4wqA9uDs6UymILcKPB1jYLUai1xHfnH1+mBtsUVorZoqpAghrbuu/zgyahrEjCsPF+Nf/KkHOfiWzblro7AdU/Eigrq1u7ClSuKVmPRA49Onr9gAMJdaj+UUoV5imWl5i36bwQxqjedhPPRnQyEciLZRs4FGl5mXyzGbDdMU2LlKegkt0c+nRYJMrAVzaAM6ilyy8VnLR7ITyGZo57Byw0e2pXGTP4utMsr/stvd1QvzrwrkGcmJ407qWQaDW4++f1Ce/RVBf6JSSvpjQtg+3z3Zuu5kHbTfD4JjO2/dIYpGbJ49BeM5JXbHxNCwNcPOcvcoOE7ZphQ2nWZHhssU/GAt6JN0NROYgec98KrLuKACmFbF1x/ewjZfDJjK835CpafhnzF2rpg4ukCPg4DgKeEZ9orw9MqBXfai7XV1u30bVgNWc= # CF_PASSWORD
+    - name: Deploy PSD worker
+      script: COMPONENT=psd-worker ./infrastructure/ci/deploy-if-changed.sh
+      env: *deploy_prod_env
+    - name: Deploy Keycloak
+      script: COMPONENT=keycloak ./infrastructure/ci/deploy-if-changed.sh
+      env: *deploy_prod_env
+    - name: Deploy Cosmetics web
+      script: COMPONENT=cosmetics-web ./infrastructure/ci/travis-wait.sh ./infrastructure/ci/deploy-if-changed.sh
+      env: *deploy_prod_env
+    - name: Deploy Cosmetics worker
+      script: COMPONENT=cosmetics-worker ./infrastructure/ci/deploy-if-changed.sh
+      env: *deploy_prod_env
+
+notifications:
+  webhooks: https://coveralls.io/webhook
+
+env:
+  global:
+    - secure: PP1MBuv5m3nsdgVS0UaX2CZPh1Ar8s6k+OZOaNn0oq4JSbvZXm/aEOX50D2AA9pxhXJBC+4NC54pWse9bRIt0etmmC+coYetjVI91xOgH2QgLbEkkfRKE/RKmtKqLAOyvVAB+HvVO/YNetIRGgTQwTnhvmsGL2uj/YFntTLRm/oHZy2vc7leN0gFSzS6oNK4a2L2+Tvl/Ytqhn2f2GUZnVTGJZoDYJKBRdlXZ/ffOsyaLXE8a1mgnuAx/7IUBkvtFKPcXOOtoe0mCU8O1AWszkfSv8GI5OtM54DLrM1b9bU8erkkCzDDSNBj+qDbvaTeGeDf2TH6fmtXSOBZhGpCkAOmaxzqt8RbpemnxM+ij40bXSPrOVGOspn6aPBli/vOxcCzchhl13aYSsRwf1AV+0uViX5Mve3sJnIvIEPH6bblzkRtGjLEWLyqGLU9Gb9l4Fxhxwx0kPmjkNqyhHjSBwTDd7FyDNKQ2k0DRU8hxUqUcKkHliQepN1Ri0manztiS/pf0JF2HDmovLEKC3Ag1EniR9sD74d1TH2lsm70t+Gk/8DGOh2Lbwy94pjUD/GDp0opdGRB5BynsW8TFCehnw/GlWQe7f/U2/X+jZ2oO7jw0eGlC1E9stGfcct8YnENrvrc1iHVQ9JJ78ZzIhnJ3GfD4A7ZKCmXIqucYlrgWSw= # DOCKER_USERNAME
+    - secure: QF+c/OQR3qP+08J5dffdOFWypUIbYsHEeAZxl46AbR9iSaFxbCCltDAESdectTBN5I/RsVNezRfaZ1rtTCSo+F36qbpexwRkNQ/2B9+pnPr9pWkwvKvqlMAtotz8EkCjzG/DQvgMkaBxO8Q/bMv7/rCjv4Fvpmkb6k/MtyGgCcuhknK4kd2BhCEmJLcRr1Oin/SGgaZTRmlhhdZyzveO5Z5Y/8WyoMW6nXfGHOEv0JDcOQmURg2JN2vEhVKXkHlJ+Ij0ZDlL9ZCwuwCKcxe8BmgHMW1XidJwsHKPB/+q2AD8rHefKTU+CkKd55iNKZzD5p4Y8bqSJ1SbUQYaq6UaueqV1KKW7fXMmG8HLUP+rq28ZwnaMbTqdHlZeJHIkaKKS3ACgLOaCJN8lW13WTrHQBGgxE0PXpaSQCXhW9p7Dt0PEz4emsWarC3w0+Fx3t9yI5Zi6nTpEPIkGRgJQQXO6tW7wEzGlnPtQ0O+3kHb903DuwfKJPjmZ8MmTQsz7eP6qs07sKSMaCQ5eeDmAoKRcySM0iIMdgckGpDtYuZcgoGCuHxsGCOeVOjFsme+gPm7teHFRiH0pg0caNjLnTZer5UQBLGNLGSU4yTEgHjVmgZETEyh0fTAkBqiEfondGhCaoNUIrba5KFmC1tRDWyMsn8hr2H4Xyhmqi+OCqtc0L4= # DOCKER_PASSWORD

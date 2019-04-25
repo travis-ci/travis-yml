@@ -1,0 +1,22 @@
+language: rust
+cache: cargo
+rust:
+- stable
+- beta
+- nightly
+os: linux
+env: TYPE=default RUST_BACKTRACE=1
+matrix:
+  include:
+    - os: linux
+      rust: stable
+      env: TYPE=rustfmt RUST_BACKTRACE=1
+      script:
+        - cargo install -f rustfmt || exit 0
+        - cargo fmt -- --write-mode=diff
+    - os: linux
+      rust: nightly
+      env: TYPE=clippy RUST_BACKTRACE=1
+      script:
+        - cargo install -f clippy || exit 0
+        - cargo clippy

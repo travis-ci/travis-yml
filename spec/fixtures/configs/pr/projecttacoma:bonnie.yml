@@ -1,0 +1,37 @@
+language: ruby
+cache:
+  - bundler
+  - node_modules
+sudo: required
+addons:
+  chrome: stable
+rvm:
+  - "2.3.8"
+before_install:
+  - "export DISPLAY=:99.0"
+  - "sh -e /etc/init.d/xvfb start"
+  - npm install -g coffeelint
+  - npm install -g istanbul
+  - npm install -g codecov
+services: mongodb
+bundler_args: --without test development
+before_script:
+  - git config --global user.email "travis@travis.ci"
+  - git config --global user.name "Travis CI"
+  - bundle install
+  - wget http://chromedriver.storage.googleapis.com/2.44/chromedriver_linux64.zip
+  - unzip chromedriver_linux64.zip -d /tmp/chromedriver
+  - export PATH=$PATH:/tmp/chromedriver
+script:
+  - bundle exec rake teaspoon USE_COVERAGE=default
+  - codecov
+  - bundle exec brakeman -qAzw1
+  - bundle exec bundle-audit check --update
+  - bundle exec overcommit --sign
+  - bundle exec overcommit --run
+  - bundle exec rake test
+notifications:
+  email:
+    recipients:
+      - healthcare-ci@googlegroups.com
+    on_failure: change

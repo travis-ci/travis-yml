@@ -2,12 +2,13 @@
 
 
 
-## Type
+## Types
 
-Enum (known String)
+* String (known)
 
-## Flags
+## Values
 
-None.
+* `v0`
+* `v1`
 
 

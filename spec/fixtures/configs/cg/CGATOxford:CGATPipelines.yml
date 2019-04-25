@@ -1,0 +1,19 @@
+
+# use container-based infrastructure on Travis
+# http://docs.travis-ci.com/user/workers/container-based-infrastructure/
+# http://blog.travis-ci.com/2014-12-17-faster-builds-with-container-based-infrastructure/
+sudo: false
+
+language: python
+
+env:
+  global:
+    - TEST_ALL=1
+
+python:
+#  - "2.7"
+  - "3.5"
+
+script: 
+  - ./install-CGAT-tools.sh --travis
+

@@ -32,10 +32,10 @@ describe Travis::Yml::Schema::Def::Deploy::Packagecloud, 'structure' do
                 '$ref': '#/definitions/deploy/edge'
               },
               username: {
-                '$ref': '#/definitions/secure'
+                '$ref': '#/definitions/type/secure'
               },
               token: {
-                '$ref': '#/definitions/secure'
+                '$ref': '#/definitions/type/secure'
               },
               repository: {
                 type: :string

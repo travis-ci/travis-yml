@@ -1,0 +1,26 @@
+sudo: required
+services:
+- docker
+language: go
+sudo: required
+go:
+- "1.10"
+install:
+- PATH=/usr/lib/ccache:$PATH
+- sudo apt-get install bash gcc
+- make glide linter 
+script: 
+- make test_lint
+- make test_unit 
+- make test_integration_build 
+- make build 
+- make jupyter_image test_jupyter_lint test_jupyter_unit
+notifications:
+  slack:
+    rooms:
+      - 'intelsdi:k7XiVx2qAV7nCAMPXjRomNJ3'
+    on_success: 'never'
+    on_pull_requests: false
+cache:
+  directories:
+  - $HOME/.glide

@@ -1,0 +1,36 @@
+sudo: required
+
+dist: trusty
+
+language: python
+
+addons:
+  postgresql: '9.6'
+
+services:
+- postgresql
+- redis-server
+- docker
+
+cache: pip
+
+python:
+- '3.6'
+
+install:
+- pip install -U pip
+- make install
+- sudo rm /usr/local/bin/docker-compose
+- curl -L https://github.com/docker/compose/releases/download/1.11.2/docker-compose-`uname -s`-`uname -m` > docker-compose
+- chmod +x docker-compose
+- sudo mv docker-compose /usr/local/bin
+- pip freeze
+
+script:
+- make lint
+- make test
+- ./tests/end2end.sh
+
+after_success:
+- ls -lha
+- bash <(curl -s https://codecov.io/bash)

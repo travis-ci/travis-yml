@@ -1,0 +1,22 @@
+language: python
+
+python:
+  - "2.7"
+  - "3.6"
+
+install:
+    - ./configure etc/conf/dev
+
+script:
+    - bin/py.test -vvs
+
+notifications:
+    irc:
+        channels:
+          - "chat.freenode.net#aboutcode"
+    on_success: change
+    on_failure: always
+    use_notice: true
+    skip_join: true
+    template:
+      - "%{repository_slug}#%{build_number} (%{branch} - %{commit} : %{author}): %{message} : %{build_url}"

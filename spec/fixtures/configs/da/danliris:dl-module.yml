@@ -1,0 +1,21 @@
+language: node_js
+node_js:
+  - "6"
+env:
+- DB_CONNECTIONSTRING: "mongodb://127.0.0.1/dl-test"
+services:
+- mongodb
+addons: 
+  code_climate:
+      repo_token: 5c8399361dc0a0b0d65378b2c11675be17857c55bfc62e1460b4739083ee7f18
+  apt:
+    sources:
+    - sourceline: "deb [ arch=amd64 ] https://repo.mongodb.org/apt/ubuntu trusty/mongodb-org/3.6 multiverse"
+      key_url: "https://www.mongodb.org/static/pgp/server-3.6.asc"
+    packages:
+    - mongodb-org-server
+after_success:
+- mongo dl-test --eval "db.dropDatabase()"
+- npm run coveralls
+- npm run codeclimate
+cache: false

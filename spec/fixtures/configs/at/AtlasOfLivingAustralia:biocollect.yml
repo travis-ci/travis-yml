@@ -1,0 +1,40 @@
+language: groovy
+sudo: false
+jdk:
+- openjdk8
+branches:
+  only:
+  - master
+  - dev
+  - hotfix
+  - ecodata-client-plugin
+before_install:
+- rm -rf ~/.nvm && git clone https://github.com/creationix/nvm.git ~/.nvm && (cd ~/.nvm && git checkout `git describe --abbrev=0 --tags`) && source ~/.nvm/nvm.sh && nvm install $TRAVIS_NODE_VERSION
+- git clone --depth=50 --branch=dev https://github.com/AtlasOfLivingAustralia/ecodata-client-plugin.git ../ecodata-client-plugin
+- rm -rf ~/.sdkman
+- curl -s get.sdkman.io > ~/install_sdkman.sh
+- chmod 775 ~/install_sdkman.sh
+- "~/install_sdkman.sh"
+- echo "sdkman_auto_answer=true" > ~/.sdkman/etc/config
+- source ~/.sdkman/bin/sdkman-init.sh
+- GRAILS_VERSION=`grep '^\s*app.grails.version' application.properties | sed -e 's/^\s*app\.grails\.version=//g'
+  | tr -d "\r"`
+- echo "GRAILS_VERSION:$GRAILS_VERSION"
+- sdk install grails $GRAILS_VERSION || true
+before_script:
+- mkdir -p ~/.grails; wget -q -O ~/.grails/settings.groovy https://raw.githubusercontent.com/AtlasOfLivingAustralia/travis-build-configuration/master/travis_grails_settings_new.groovy
+- MAVEN_REPO="ala-repo-snapshot"; grep '^app\.version=' ./application.properties |
+  grep -q "\-SNAPSHOT"; if [ "$?" = "1" ]; then MAVEN_REPO="ala-repo-release"; fi;
+- echo "MAVEN_REPO:$MAVEN_REPO"
+- node --version
+- npm install
+script:
+- node_modules/karma/bin/karma start karma.conf.js --single-run --browsers PhantomJS
+- grails clean && grails refresh-dependencies --non-interactive && grails test-app
+  --non-interactive && grails prod maven-deploy --repository=$MAVEN_REPO --non-interactive
+  --stacktrace
+env:
+  global:
+  - TRAVIS_NODE_VERSION="0.10"
+  - secure: U/09fO5MoAMmyGXkFZUc6AXi/V1cow3vpWl2LDdp+ddqVdbvDqBr8fj5w9kpQZEwSRBcod7GKxKpB+DXnQj1yjFGnj2Fp34zwcoOPt4pxtJH++dUWNUVNELKrt3cC2CmuUy5zSXEDC6EhVufXb+AySAXHLzwT6/AVbx0iYheWLtik3YqkNZ2Ny75zgvSCc450Ucxdcazc70U7SqnnIthr9HpUxB566JP7lPLw6y0/yHRn8FMDkV3ICYaUnuSJdmsGWw4obagAu+FT9V424GBFPB6qmVfGS9G8IWKV/Was1CdftPbvWPhHtT0NpwpRxnGIQV6xDsFA2hztsc4H9jUvDJ794uvHfU9cjutR4C66+PxGYsohRuTIMz9VeAcPywY5hAtVWB0yFID5mA4yo1VQ3xvJCTknlsRVtVXenhMMQmEqUTRI37dV0czWl9hhjl644xYdfj0T+PSQrEh0NKLBcmmb4fxuI95YOO1IaKoY7+nrskhEyudgVX5Oj5JjV8TP+iXojMT927JN6cILvrprUQbhIVE5srOaZcPElieAvUVMShYfFKLF14EsPh0nkRrjikvMJwiFewomt6TlLpdN4XwTBrG20kKkuijOV7GlgEB7O/zbhfL16m2+lesI9hA7ylavKr1YqxENYa8ESUeurl66M4UJEXxSWbJkkGz08Q=
+  - secure: aDQyUOaNj+7D9ug0bhhtnxIbVikKnNrFc2GJe+cRgl0PgPHffuHVGndINcgJW6T3nlLkRwP8Z5Ic9Y2a+C0tzWxiGs2+sHHyw0VaASHzcxV5aH15jgb2MMOY2JkaYVSEp7rvlLeHfLposA1NcvTk9u9nKG0k8R96vTLH3c+cFc6wmKfOFtfUZKu+qi75idaxeHoFQGiNMjU81mzFUA5UeNsNEiazTp8x9HUlqWofOJfrzRzUcp1PKHTV1MJdWyeVDJHg+OWdiWKjA5F/gkpcIFfkxYuvb2WM63wTrYdHBEIfBeGWzFMmbHMwM0SEOkgJQVhEiOfIK67+S/p5hWl/R/gyaf9xj2eZ7DARNNIyuohyXYcOT0gzSoLRXSANU64nrwlgQAJOhHpgFOTdejpZm8XIEOyakCImnJxLjTEivBIujfqT80esomN7rcEj0dulM8uOy1fi4FeyonMyR65ZwduPFaOop93CFSgw9aHlFyRh6Z0n0YNCRbuWLPPRt9ZjaLte7eEIlf87CmS0DDS1vCtKjoHN165K/gpBTltmVZDqBfT70BqVG+DIf3oBZW7scroSlcdJj18axyCIxsPibbCu4ezHgNpM84J2+f7BSaBvKuh00csvu5P0e3h3laHI6jzc0MkWWbV6ZB5e7ctG2fptXIZxse3X0I1tdgL3x08=

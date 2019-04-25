@@ -1,0 +1,61 @@
+language: python
+python:
+  - "2.7"
+  - "pypy"
+  - "3.4"
+  - "3.5"
+  - "3.6"
+
+matrix:
+  include:
+    - python: "3.7"
+      dist: xenial
+      sudo: true
+
+    - name: Flake8
+      python: "3.6"
+      install:
+        - pip install tox
+      script: tox -e flake8
+
+    - name: Distribution packages
+      python: "3.6"
+      install: false
+      script: make travis-upload-dist
+
+sudo: false
+addons:
+  apt:
+    packages:
+      - libevent-dev
+cache:
+  directories:
+    - "$HOME/.cache/pip"
+branches:
+  only:
+    - master
+    - /^(?i:feature)-.*$/
+jobs:
+  fast_finish: true
+#  allow_failures:
+#    - python: 3.5
+#      env: TOXENV=py35-django-dev-fix
+
+script: sh ci/runtox.sh
+install:
+  - make
+  - pip install codecov
+before_script:
+  - pip freeze
+after_success:
+  - codecov -e DJANGO
+
+notifications:
+  webhooks:
+    urls:
+      - https://zeus.ci/hooks/0b589ca4-1165-11e8-b03b-0a580a28023f/public/provider/travis/webhook
+    on_success: always
+    on_failure: always
+    on_start: always
+    on_cancel: always
+    on_error: always

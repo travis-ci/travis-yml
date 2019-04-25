@@ -1,0 +1,39 @@
+cache: apt
+sudo: true
+language: python
+python:
+  - "2.7"
+  - "3.3"
+addons:
+  apt:
+    packages:
+    - libblas-dev
+    - liblapack-dev
+    - gfortran
+    - libhdf5-serial-dev
+    - libboost-all-dev
+
+before_install:
+  - wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O miniconda.sh;
+  - bash miniconda.sh -b -p $HOME/miniconda
+  - export PATH="$HOME/miniconda/bin:$PATH"
+  - hash -r
+  - conda config --set always_yes yes --set changeps1 no
+  - conda update -q conda
+  - conda info -a
+
+install:
+  - conda env create --file environment.yml
+  - source activate test-environment
+  - python setup.py install
+
+script:
+  - py.test scripts/configurator_tests/ -v
+  - py.test savu/test/travis -v --cov savu --cov-report term-missing
+
+after_script:
+  - coveralls
+  
+allow_failures:
+    - python: "3.3"
+

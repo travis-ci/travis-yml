@@ -1,0 +1,27 @@
+language: python
+dist: xenial
+python:
+- 3.7
+env:
+- AWS_DEFAULT_REGION=us-west-2 BOTO_CONFIG=/dev/null AWS_XRAY_SDK_ENABLED=false
+before_install:
+- sudo rm -f /etc/boto.cfg
+- pip install flake8
+- pip install tox
+- npm install -g dynalite
+- npm install -g kinesalite
+script:
+- export BOTO_CONFIG=/dev/null
+- mkdir ~/.aws
+- touch ~/.aws/credentials
+- echo '[default]' >> ~/.aws/credentials
+- echo 'aws_access_key_id=ABCDEFG'  >> ~/.aws/credentials
+- echo 'aws_secret_access_key=ABCDEFG'  >> ~/.aws/credentials
+- touch ~/.aws/config
+- echo '[default]' >> ~/.aws/config
+- echo 'output=json'  >> ~/.aws/config
+- echo 'region=us-west-2'  >> ~/.aws/config
+- cd python-modules && make -j 7 test-tox
+notifications:
+  slack:
+    secure: FVpmugohZ98gdZ/672iECx6M3yDnf89mahnNi5E517f0PXakS1lBphVwEJz58ZUbrSMYK3bURrsHNSgUsW3BNE+BD6TvtUDFzaIzODym/JvcJmuIBt/Nu/f6LIy3EuF7FqI855VNcGvF5R5akI2YCMGCMIDxu1oXqInCA+HRiuzniqdM/tNZQgmbT2ZnpAkenxpnSuUgghORTaQcwclk13GIwqVnwpRdUiti3zoETa3VDQ64u7+6BUZBKEFC3DVxwKbEJybwyx3dhAzMr9rXywJP+TnrWeh5ArcPuhJJesmPvdKYsLE4gdhTRo3V4/9ZtiwTuss/gu6S1USqirJjRWH9uGDDIC6MArX2C1Zn8Fbo7WO/My+reE0EBu0jo1a8DtM3MU3ACDimRHDQfp9ynU2tbetyfUXpqGfK5Me1NBl0ugWBW0VsHAq9ABuA4IEWB24Ju8BWSgrVrV9xkl9teFcssiXvFTw8VFCt29PjApgON7WsM/x349e951i5Yfw2DV6RSnSjY6vaK2SEAh43Ij+yvokAtHc5Fwyx8dvTbuANsJD0zlzOmYUcVfs6mkcLupU8WTg7dhXBagSh9UBvRo4RfUfetGM0CGT6QUFmrWqQij2WZwqfLPjS6SV1xk66iwmijZZfq1NsBMKeYlaiDXH+qkvrMZRSol4s31lAXaI=

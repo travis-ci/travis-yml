@@ -1,0 +1,105 @@
+git:
+  submodules: false
+language: scala
+sudo: required
+cache:
+  apt: true
+  directories:
+    $HOME/.ivy2
+    regression/install
+    emulator/verilator
+
+# packages needed to build riscv-tools
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - gcc-4.8
+      - g++-4.8
+      - gperf
+      - autoconf
+      - automake
+      - autotools-dev
+      - libmpc-dev
+      - libmpfr-dev
+      - libgmp-dev
+      - gawk
+      - build-essential
+      - bison
+      - flex
+      - texinfo
+      - device-tree-compiler
+      - libusb-1.0-0-dev
+      - python-pexpect
+
+
+# blacklist private branches
+branches:
+  except:
+    - hwacha
+    - boom
+    - /^hurricane.*$/
+
+# These branches are the only ones that
+# will build when "build branch updates"
+# is set in settings (branches which PR against
+# them are still built). With this set,
+# the above blacklist is not useful.
+# Adding this allows us to keep "Build Branch Updates"
+# set to 'ON'.
+
+branches:
+  only:
+  - master
+
+jobs:
+  include:
+    - stage: prepare cache-riscv-tools
+      script:
+        - travis_wait 120 make tools -C regression SUITE=none
+      before_install:
+        - export CXX=g++-4.8 CC=gcc-4.8
+      before_cache:
+        - ls -t regression/install | tail -n+2 | sed s@^@regression/install/@ | xargs rm -rf
+    - stage: prepare cache-verilator
+      script:
+        - travis_wait 120 make verilator -C regression SUITE=none
+      before_install:
+        - export CXX=g++-4.8 CC=gcc-4.8
+    - &test
+      stage: Test
+      script:
+        - travis_wait 100 make emulator-ndebug -C regression SUITE=UnittestSuite JVM_MEMORY=3G VERILATOR_THREADS=1
+        - travis_wait 100 make emulator-regression-tests -C regression SUITE=UnittestSuite JVM_MEMORY=3G VERILATOR_THREADS=1
+    - <<: *test
+      script:
+        - travis_wait 80 make emulator-ndebug -C regression SUITE=JtagDtmSuite JVM_MEMORY=3G
+        - travis_wait 80 make emulator-jtag-dtm-tests-32 -C regression SUITE=JtagDtmSuite JVM_MEMORY=3G
+        - travis_wait 80 make emulator-jtag-dtm-tests-64 -C regression SUITE=JtagDtmSuite JVM_MEMORY=3G
+        - travis_wait 80 make emulator-jtag-dtm-tests-32 -C regression SUITE=JtagDtmSuite JTAG_DTM_TEST=DebugTest JVM_MEMORY=3G
+        - travis_wait 80 make emulator-jtag-dtm-tests-64 -C regression SUITE=JtagDtmSuite JTAG_DTM_TEST=DebugTest JVM_MEMORY=3G
+    - <<: *test
+      script:
+        - travis_wait 80 make emulator-ndebug -C regression SUITE=JtagDtmSuite JTAG_DTM_ENABLE_SBA=on JVM_MEMORY=3G
+        - travis_wait 80 make emulator-jtag-dtm-tests-32 -C regression SUITE=JtagDtmSuite JTAG_DTM_TEST=MemTest64 JTAG_DTM_ENABLE_SBA=on JVM_MEMORY=3G
+        - travis_wait 80 make emulator-jtag-dtm-tests-64 -C regression SUITE=JtagDtmSuite JTAG_DTM_TEST=MemTest64 JTAG_DTM_ENABLE_SBA=on JVM_MEMORY=3G
+        - travis_wait 80 make emulator-jtag-dtm-tests-32 -C regression SUITE=JtagDtmSuite JTAG_DTM_TEST=MemTest32 JTAG_DTM_ENABLE_SBA=on JVM_MEMORY=3G
+        - travis_wait 80 make emulator-jtag-dtm-tests-64 -C regression SUITE=JtagDtmSuite JTAG_DTM_TEST=MemTest32 JTAG_DTM_ENABLE_SBA=on JVM_MEMORY=3G
+        - travis_wait 80 make emulator-jtag-dtm-tests-32 -C regression SUITE=JtagDtmSuite JTAG_DTM_TEST=MemTest8 JTAG_DTM_ENABLE_SBA=on JVM_MEMORY=3G
+        - travis_wait 80 make emulator-jtag-dtm-tests-64 -C regression SUITE=JtagDtmSuite JTAG_DTM_TEST=MemTest8 JTAG_DTM_ENABLE_SBA=on JVM_MEMORY=3G
+    - <<: *test
+      script:
+        - travis_wait 80 make emulator-ndebug -C regression SUITE=RocketSuiteB JVM_MEMORY=3G
+        - travis_wait 80 make emulator-regression-tests -C regression SUITE=RocketSuiteB JVM_MEMORY=3G
+    - <<: *test
+      script:
+        - travis_wait 80 make emulator-ndebug -C regression SUITE=RocketSuiteA JVM_MEMORY=3G
+        - travis_wait 80 make emulator-regression-tests -C regression SUITE=RocketSuiteA JVM_MEMORY=3G
+    - <<: *test
+      script:
+        - travis_wait 80 make emulator-ndebug -C regression SUITE=RocketSuiteC JVM_MEMORY=3G
+        - travis_wait 80 make emulator-regression-tests -C regression SUITE=RocketSuiteC JVM_MEMORY=3G
+    - <<: *test
+      script:
+        - make emulator-ndebug -C regression SUITE=Miscellaneous JVM_MEMORY=3G

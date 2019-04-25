@@ -1,0 +1,20 @@
+sudo: required
+services:
+  - docker
+before_script:
+  - curl -sL https://raw.githubusercontent.com/travis-ci/artifacts/master/install | bash
+script:
+  - ./run-tests.sh
+after_script:
+  - ./after-tests.sh
+notifications:
+  slack:
+    rooms:
+      secure: MrEpm6P0uj1TAFDyGonapgWJRmZAoB54Zd7EquFhAViITsvsxqgOoAaWOJ0TTqC92y+H+EnLoYlNDmAADGXYjQ8T0JBJgnwdQyTPQybYncNvofDZorkBfLWxYxmh5RGNmXX59bwgJNF3UA3H0znlT+dE1OMLRqcdh64sCiEj2zxMJUtCLNQWe6eT+TmYNo4OOwmCFuIiOVJX+Z26En4g2oLDtEIk+ywPfsHiYeWVVbZKEGoEwiSuqis6tcMsyin/pgTKMRvbe63qqrHDNNtY31XSZktEiTxb+i7Km9+Nw+ZwossEMGqa++VN/lj3F8SD7NyNNARY+GR84v9IYw3RfRy+G51W2mT6Q13GbOrRxs17Zg+Ml5qMqlu1GyLzOY2HmI3nux3UovoHosC6IDRDo7Tv3i18HsMs0s4KTgpJtvoz4TPy/VtPjNg/dbKu9QthJiBbAjt4EWoHbWn89b9MfxNL3xt2Au0f0pquaiVXyrT4qBkdHEL5sJOhsxiZ1rB5Nly3Bxb7cxp8bPD9ANUJy4NJx4roBu7uqLQsjZ0ZO+7d5IQfZ+F4/MfxSeWl5pEbWjXk9mg4SUmnfskGGzw0NGOTJ5Y3NwI6jcln7toXQXAqrK2GTECi5KPBVVZVhQGBzzhR3C5KifYQ90T1OmSM08hZk76G2UbECpW/ENVZxZU=
+    on_success: always
+    on_failure: always
+    on_start: always
+    template:
+      - "Build <%{build_url}|#%{build_number}> of %{repository}@%{branch} by %{author} %{result} in %{duration}"
+      - "%{commit_message}"
+      - "Artifacts (only valid on fails): https://testartifacts.eventespresso.com/build/%{build_id}"

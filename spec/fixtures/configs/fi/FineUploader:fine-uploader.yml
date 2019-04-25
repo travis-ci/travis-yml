@@ -1,0 +1,21 @@
+addons:
+  firefox: latest
+sudo: false
+language: python
+python:
+- 2.7
+env:
+  global:
+  - DISPLAY=:99.0
+  - DOCS_GH_REF: github.com/FineUploader/docs.fineuploader.com
+  # fineuploader-docs-bot access token has been moved to Travis-CI settings in the UI due to https://github.com/travis-ci/travis-ci/issues/7806
+install:
+  - . $HOME/.nvm/nvm.sh
+  - nvm install 5.0.0
+  - nvm use 5.0.0
+  - npm install
+before_script:
+- sh -e /etc/init.d/xvfb start
+script:
+- npm test
+- if [ $TRAVIS_TEST_RESULT -eq 0 ]; then make docs-travis; fi

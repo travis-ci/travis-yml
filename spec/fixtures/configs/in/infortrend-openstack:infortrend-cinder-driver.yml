@@ -1,0 +1,29 @@
+language: python
+
+matrix:
+  include:
+  - python: "2.7"
+    env: TEST_PY=py27
+  - python: "3.5"
+    env: TEST_PY=py35
+
+sudo: false
+
+install:
+  - pip install tox
+  - pip install flake8
+
+git:
+  depth: 1
+
+branches:
+  except:
+  - gh-pages
+
+before_script:
+  - flake8 infortrend/
+  - flake8 test/infortrend/
+  - chmod +x ./run_test.sh
+
+script:
+  ./run_test.sh $TEST_PY

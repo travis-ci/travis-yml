@@ -1,0 +1,30 @@
+## Documentation: http://docs.travis-ci.com/user/languages/julia/
+language: julia
+os:
+  - linux
+notifications:
+  email: false
+git:
+  depth: 99999999
+
+matrix:
+ fast_finish: true
+ allow_failures:
+   - julia: 1.1  # development versions
+     env: TEST_SUITE='using Pkg; Pkg.develop("LazySets"); Pkg.develop("MathematicalSystems"); Pkg.develop("HybridSystems"); Pkg.develop("TaylorModels"); Pkg.clone(pwd()); Pkg.build("Reachability"); Pkg.test("Reachability"; coverage=true)'
+ include:
+   - julia: 1.1  # master versions
+     env: TEST_SUITE='using Pkg; Pkg.clone(pwd()); Pkg.build("Reachability"); Pkg.test("Reachability"; coverage=true)'
+   - julia: 1.0  # master versions
+     env: TEST_SUITE='using Pkg; Pkg.clone(pwd()); Pkg.build("Reachability"); Pkg.test("Reachability"; coverage=true)'
+   - julia: 1.1  # development versions
+     env: TEST_SUITE='using Pkg; Pkg.develop("LazySets"); Pkg.develop("MathematicalSystems"); Pkg.develop("HybridSystems"); Pkg.develop("TaylorModels"); Pkg.clone(pwd()); Pkg.build("Reachability"); Pkg.test("Reachability"; coverage=true)'
+
+script:
+ - julia -e "$TEST_SUITE"
+
+after_success:
+  - julia -e 'using Pkg; Pkg.add("Documenter"); Pkg.pin(PackageSpec(name="Documenter", version="0.19.7"));'
+  - julia -e 'using Pkg; cd(Pkg.dir("Reachability")); include(joinpath("docs", "make.jl"))'
+  - julia -e 'using Pkg; Pkg.add("Coverage")'
+  - julia -e 'using Pkg; cd(Pkg.dir("Reachability")); using Coverage; Codecov.submit(Codecov.process_folder())'

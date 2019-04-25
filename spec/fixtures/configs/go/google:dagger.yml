@@ -1,0 +1,65 @@
+language: android
+
+os: linux
+dist: trusty
+sudo: required
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - libstdc++-4.9-dev # https://github.com/nodegit/nodegit/issues/853
+      - gcc-4.8
+      - g++-4.8
+
+jdk:
+  - &jdk_for_publishing oraclejdk8
+
+android:
+  components:
+    - tools
+    - tools # Duplicated as per https://github.com/travis-ci/travis-ci/issues/6040#issuecomment-219367943
+    - build-tools-26.0.2
+    - android-26
+    - platform-tools
+    - extra-android-m2repository
+
+before_install:
+  - wget https://github.com/bazelbuild/bazel/releases/download/"${BAZEL_VERSION}"/bazel_"${BAZEL_VERSION}"-linux-x86_64.deb
+  - sudo dpkg -i bazel_"${BAZEL_VERSION}"-linux-x86_64.deb
+  - sudo rm -f /etc/mavenrc
+  - wget http://www.us.apache.org/dist/maven/maven-3/3.1.1/binaries/apache-maven-3.1.1-bin.tar.gz
+  - tar -zxf apache-maven-3.1.1-bin.tar.gz
+  - export PATH="$PWD/apache-maven-3.1.1/bin:$PATH"
+  - mkdir travis_bin
+  - ln -s $(which gcc-4.8) travis_bin/gcc
+  - ln -s $(which g++-4.8) travis_bin/g++
+  - export PATH="${PWD}/travis_bin:${PATH}"
+
+script:
+  - bazel test --test_output errors //...
+  - pushd examples && mvn compile && popd
+
+env:
+  global:
+    # Encrypted credentials for deploying snapshots.
+    - secure: eGc3LHBRIPmTnXLM1YoIqG1do9BkpFI2pJm3fz5Cd8UaXtf7Oefa+Ts3rcn4ipee5A+lf8kEouPshSoaQs81KZ2/qf8rSTCIqeFjHR8hzmOVYo/0zRfS/VSUT0yqN+jeRhuNk3+A49RTPlcfJqPv3tyddtrM1vF7axhCJPQIRJM=
+    - secure: LTzrlqcSNeZTOV52D3ibY9RBdxY4Yu8dUOYhAonrWLE+eDTzuoyCzcPw8pEcYVNUi1rG6Q7v3QBDTnBztsPoCbcN5tEGjw5cQEbfEzSTkWaNCFjncWn36cLwx9lgbF+5Db/L0mYJ36unDKUpKVC8AgOtxQibfv/ffugfxxj8ohY=
+
+    # Encrypted GitHub access token to allow util/generate-latest-docs.sh to
+    # push Javadoc to gh-pages.
+    # This uses an access token created by cgdecker and will need to be updated
+    # (see util/generate-latest-docs.sh for a link) if he no longer has
+    # permission to push to the repo.
+    - secure: "UpTUhCQzAGbr5JetRg2GZxp/dPDep/7Il3yGeyDECopciWdx41OPk/QNqAXBhNtKuEaMVsmASyoteuhgaTryQdV4qUIGVOMhES6kbOlYy3nwK44VdsNeeepwVospyDyZbxMtXq5LuHWuTADmAl1mdjNPNoziXc523zjnUzUx/EQ="
+    - JDK_FOR_PUBLISHING: *jdk_for_publishing
+    - BAZEL_VERSION="0.24.1"
+
+after_success:
+  - util/generate-latest-docs.sh
+  - util/publish-snapshot-on-commit.sh
+
+branches:
+  only:
+    - master
+    - /^release.*$/

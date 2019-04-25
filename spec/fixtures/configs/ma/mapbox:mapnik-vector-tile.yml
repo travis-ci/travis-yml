@@ -1,0 +1,76 @@
+language: generic
+
+git:
+  depth: 10
+
+cache:
+  directories:
+  - $HOME/.ccache
+
+env:
+  global:
+   - CCACHE_TEMPDIR=/tmp/.ccache-temp
+   - CCACHE_COMPRESS=1
+
+matrix:
+  include:
+    - os: linux
+      sudo: false
+      compiler: ": gcc5"
+      env: JOBS=10 CXX="ccache g++-5"
+      addons:
+        apt:
+          sources: ['ubuntu-toolchain-r-test']
+          packages: [ 'libstdc++-5-dev','g++-5', 'xutils-dev']
+    - os: linux
+      sudo: false
+      compiler: ": clang"
+      env: JOBS=10 CXX="ccache clang++-4.0 -Qunused-arguments"
+      addons:
+        apt:
+          sources: ['ubuntu-toolchain-r-test']
+          packages: [ 'libstdc++-5-dev', 'xutils-dev']
+    # test a build with sse disabled
+    - os: linux
+      sudo: false
+      compiler: ": clang"
+      env: JOBS=10 SSE_MATH=false CXX="ccache clang++-4.0 -Qunused-arguments"
+      addons:
+        apt:
+          sources: ['ubuntu-toolchain-r-test']
+          packages: [ 'libstdc++-5-dev', 'xutils-dev']
+    - os: linux
+      sudo: false
+      compiler: ": clang-coverage"
+      env: JOBS=10 CXX="ccache clang++-4.0 -Qunused-arguments" COVERAGE=true
+      addons:
+        apt:
+          sources: ['ubuntu-toolchain-r-test']
+          packages: [ 'libstdc++-5-dev', 'xutils-dev']
+    - os: osx
+      compiler: clang
+      env: JOBS=10
+      # https://docs.travis-ci.com/user/languages/objective-c/#Supported-OS-X-iOS-SDK-versions
+      osx_image: xcode8.3 # upgrades clang from 6 -> 7
+
+before_install:
+ - ./install_mason.sh
+ - |
+   if [[ $(uname -s) == 'Linux' ]]; then
+     ./mason/mason install llvm-cov 4.0.1
+     ./mason/mason install clang++ 4.0.1
+     export PATH=$(./mason/mason prefix clang++ 4.0.1)/bin:${PATH}
+     which clang++
+     export PATH=$(./mason/mason prefix llvm-cov 4.0.1)/bin:${PATH}
+     which llvm-cov
+   fi
+
+install:
+ - source ./scripts/build.sh
+
+before_script:
+ - ./scripts/coverage.sh
+
+script:
+ # make sure tileinfo command works
+ - ./build/Debug/tileinfo examples/data/14_2620_6331.vector.mvt.z

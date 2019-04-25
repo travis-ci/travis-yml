@@ -2,16 +2,11 @@
 
 
 
-## Type
-
-Any of:
+## Types
 
 * Boolean
 * String
 
-## Flags
-
-None.
 
 
 ## Examples

@@ -1,0 +1,43 @@
+language: node_js
+
+node_js:
+  - "v6.9.5"
+
+sudo: false
+
+git:
+  depth: 1
+
+branches:
+  except:
+    - gh-pages
+
+env:
+  global:
+    - REPO="git@github.com:g0v/vue.vtaiwan.tw"
+    - secure: "F3qKWVelf1YZAspiQIr/y+hLHpmxDxUA4FSOeY7lve8Y1Rw3oWr54h0rZ1l1LMKbF+AIi827Equj27bguoHPM2uduwjfkzFKtLpLLuKG8Uvrf1w0w6klAiQdyktgXbQNg/oKnH9OXv/ZxGGS2ZoLn1ywij+yZ4r6/0ooiOYUIG+zyIUnMqee05CbeU3pbNCxtDcdyF5Puzpwas5LWLjsHt1+qmggn+a+rZdnxJCqPQqphCxgoHYRXK7K8uRUi09EquIFd+GZfPWrXI6RbGGKseARLQIp5qTCr3y+Cq8gpQXOI4Oy3BwzF+CSyjZE0+6cwz2qYvKf84Ro+HCK/1Uzbb6hGwDBd6aPkuBO7A6lkejnflERLcKqB8zGataA3+5+AuJft2U6wLUJjF21hXnFEv0PYFX2CX32qN3dXS01CMf7k9QeR0XgJJmo9dd4GF327cA78uQbGQ9sFrhqTHPVgpqO/UYcrv+bLFRHouzwD4/ZDjKsMzuEiCQ7OMPkF+2RhwpHcVwFx1AV/07eSo4Wfva7HtsP+DW0Tl+HnObSf3SnbOiSQApYQ3DOnVGvot8pf/VbzYBYCJMqNDvzxsGs9JWDZIyPXDWLtUhKr0jknlsBKr/S7CdZIVFjQQvrLqC5S79vGiquu/SRmV4wrdxHbUesGlS0etjRs2IZvjDg3Xo="
+
+
+cache:
+  directories:
+    - travis_phantomjs
+
+before_install:
+  # Upgrade PhantomJS to v2.1.1.
+  - "export PHANTOMJS_VERSION=2.1.1"
+  - "export PATH=$PWD/travis_phantomjs/phantomjs-$PHANTOMJS_VERSION-linux-x86_64/bin:$PATH"
+  - "if [ $(phantomjs --version) != $PHANTOMJS_VERSION ]; then rm -rf $PWD/travis_phantomjs; mkdir -p $PWD/travis_phantomjs; fi"
+  - "if [ $(phantomjs --version) != $PHANTOMJS_VERSION ]; then wget https://github.com/Medium/phantomjs/releases/download/v$PHANTOMJS_VERSION/phantomjs-$PHANTOMJS_VERSION-linux-x86_64.tar.bz2 -O $PWD/travis_phantomjs/phantomjs-$PHANTOMJS_VERSION-linux-x86_64.tar.bz2; fi"
+  - "if [ $(phantomjs --version) != $PHANTOMJS_VERSION ]; then tar -xvf $PWD/travis_phantomjs/phantomjs-$PHANTOMJS_VERSION-linux-x86_64.tar.bz2 -C $PWD/travis_phantomjs; fi"
+  - "phantomjs --version"
+
+
+before_script:
+  # check if we hit the bug: https://github.com/yarnpkg/yarn/issues/1607
+  - phantomjs --version
+
+script:
+  - node build/get-route.js
+  - yarn build:static
+
+after_success: .travis/after_success.sh

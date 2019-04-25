@@ -1,0 +1,75 @@
+sudo: required
+dist: trusty
+language: java
+jdk:
+- oraclejdk8
+addons:
+  firefox: "66.0"
+env:
+- TEST_SUITE="{'browsers':['BrowserStack'],'runNegTests':false,'runSimpleTests':false,'groupName':'iPhone'}"
+- TEST_SUITE="{'browsers':['BrowserStack'],'runNegTests':false,'runSimpleTests':false,'groupName':'iPad'}"
+- TEST_SUITE="{'browsers':['PhantomJS'],'runNegTests':true,'runSimpleTests':true}"
+- TEST_SUITE="{'browsers':['Chrome'],'runNegTests':false,'runSimpleTests':false}"
+- TEST_SUITE="{'browsers':['ChromeHeadless'],'runNegTests':false,'runSimpleTests':false}"
+- TEST_SUITE="{'browsers':['Marionette'],'runNegTests':false,'runSimpleTests':false}"
+- TEST_SUITE="{'browsers':['FirefoxHeadless'],'runNegTests':false,'runSimpleTests':false}"
+- TEST_SUITE="{'browsers':['Opera'],'runNegTests':false,'runSimpleTests':false}"
+- TEST_SUITE="{'browsers':['BrowserStack'],'runNegTests':false,'runSimpleTests':false,'groupName':'Edge'}"
+- TEST_SUITE="{'browsers':['BrowserStack'],'runNegTests':false,'runSimpleTests':false,'groupName':'Safari'}"
+- TEST_SUITE="{'browsers':['BrowserStack'],'runNegTests':false,'runSimpleTests':false,'groupName':'IE','additionalTags':'~@iefail'}"
+- TEST_SUITE="{'browsers':['BrowserStack'],'runNegTests':false,'runSimpleTests':false,'groupName':'Android'}"
+before_install:
+# https://github.com/travis-ci/travis-ci/issues/8520
+- sudo apt-get install dbus-x11
+#- sudo wget http://security.ubuntu.com/ubuntu/pool/main/g/gcc-5/gcc-5-base_5.4.0-6ubuntu1~16.04.9_amd64.deb
+#- sudo wget http://security.ubuntu.com/ubuntu/pool/main/g/gcc-5/libstdc++6_5.4.0-6ubuntu1~16.04.9_amd64.deb
+#- sudo wget http://mirrors.kernel.org/ubuntu/pool/main/i/icu/libicu55_55.1-7ubuntu0.3_amd64.deb
+#- sudo wget http://security.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.0.0_1.0.2g-1ubuntu4.10_amd64.deb
+#- sudo wget http://security.ubuntu.com/ubuntu/pool/main/o/openssl/libssl-dev_1.0.2g-1ubuntu4.10_amd64.deb
+#- sudo wget http://security.ubuntu.com/ubuntu/pool/main/o/openssl/openssl_1.0.2g-1ubuntu4.10_amd64.deb
+#- sudo dpkg -i gcc-5-base_5.4.0-6ubuntu1~16.04.9_amd64.deb
+#- sudo dpkg -i libstdc++6_5.4.0-6ubuntu1~16.04.9_amd64.deb
+#- sudo dpkg -i libicu55_55.1-7ubuntu0.3_amd64.deb
+#- sudo dpkg -i libssl1.0.0_1.0.2g-1ubuntu4.10_amd64.deb
+#- sudo dpkg -i libssl-dev_1.0.2g-1ubuntu4.10_amd64.deb
+#- sudo dpkg -i openssl_1.0.2g-1ubuntu4.10_amd64.deb
+#- sudo apt-get -f install
+- export CHROME_BIN=/usr/bin/google-chrome
+- export DISPLAY=:99.0
+- sh -e /etc/init.d/xvfb start
+- sudo apt-get update
+- sudo apt-get install -y libappindicator1 fonts-liberation
+- wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+#- wget https://dl.google.com/linux/direct/google-chrome-unstable_current_amd64.deb
+#- wget https://dl.google.com/linux/direct/google-chrome-beta_current_amd64.deb
+- sudo dpkg -i google-chrome*.deb
+- wget https://s3.amazonaws.com/iridium-cloud-support/opera-stable_58.0.3135.107_amd64.deb
+- sudo dpkg -i opera-*.deb
+- wget ${GPG_Keyring}
+- openssl aes-256-cbc -K $encrypted_a39daf039737_key -iv $encrypted_a39daf039737_iv -in iridium_github_pages.enc -out iridium_github_pages -d
+- chmod 600 iridium_github_pages
+- eval `ssh-agent -s`
+- ssh-add iridium_github_pages
+- rm -f iridium_github_pages
+- chmod +x travis_publish.sh
+- chmod +x travis_updatedocs.sh
+script: travis_retry ./gradlew -Dopera.binary=/usr/bin/opera -DtestBrowsers=${TEST_SUITE} check javadoc shadowJar --stacktrace
+deploy:
+  - provider: releases
+    api_key:
+      secure: BlmfOcFkBguFOSEO34UkZ/X/aBZjeHiCyuMbfx3IXQjK6IbR77I917CTdP4w855zS1ShM06M3mnDhyc0yL5WDOrJJ+xxPWBHCo+JPbW4dXILBd5NS3oGu4rA51MlvLw/2z9mi5EJ7iivCuVzQBzXrMnYZbKL+LMWDKeuLtrZ9mTVIlPLLyR2yxh3n5zlrVD3xzbdxUxaV2DnAYCc9QkT6aC78qOvg69yPqSV1hXm9EWkJdjid15fM3xfuwCUfYpfOxcSFeBciOLd6zzxDnnOj6avnqbzahuY7kIUUAHaWbj5rt1RrtUq0nPEVpS4PBTF5ANclcGQcAmHgY+eErAYnc4EAzi17QE4cVzM61LDN+/BwGnsU0N71XQiDGTrZ+6zWFLW9SjpBKLl9GRmJglbewUIsSkIbVfVsM5jB6kknDb73NPT1QrHnhwegKTf10qnkWSAhN4x95fkNwecR7j0XI5P6HIbDvJixEIebcbn+G77de/2UGNhJj86nAkVbvBpj7hIB7TM0nqYMz3b0BPB+CIPxEAiGH8XMjH/tPxYzWZtz+aCXO0rno/FirjR+Iz1BUhZKq3qGQkeiEiEhb/7A5ZMUouph4x/FZLMKLgmP/K5MIC3OBy4mUCMrI7LtYunoKG2+7HldjRMbCi8umST9R/4JpYTe2Ixb8Oyv91tJzg=
+    file:
+    - build/libs/IridiumApplicationTesting.jar
+    skip_cleanup: true
+    on:
+      tags: true
+  - provider: script
+    script: "./travis_publish.sh"
+    skip_cleanup: true
+    on:
+      tags: true
+  - provider: script
+    script: "./travis_updatedocs.sh"
+    skip_cleanup: true
+after_success:
+  - if [[ $TEST_SUITE = "{'browsers':['PhantomJS'],'runNegTests':true,'runSimpleTests':true}" ]]; then bash <(curl -s https://codecov.io/bash); fi

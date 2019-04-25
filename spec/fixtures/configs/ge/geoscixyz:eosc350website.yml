@@ -1,0 +1,18 @@
+language: python
+python:
+- 2.7
+sudo: false
+
+env:
+  - TEST_DIR=tests
+
+# command to install dependencies
+install:
+  - pip install -r requirements.txt
+
+# command to run tests
+script:
+    - nosetests $TEST_DIR
+
+notifications:
+  slack: ubcgif:1Z2lR3XYRSM3GHflG71ZHEN6

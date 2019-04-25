@@ -1,0 +1,20 @@
+language: python
+python:
+- '3.5'
+script: skip
+stages:
+  - syntax
+  - code_style
+  - linting
+jobs:
+  include:
+    - stage: syntax
+      name: "SQF validator from CBA"
+      script: python3 tools/sqf_validator.py
+    - stage: code_style
+      name: "config styling"
+      script: python3 tools/config_style_checker.py
+    - stage: linting
+      name: "sqflint"
+      install: pip install sqflint
+      script: bash tools/lint.sh -d . -C /tmp

@@ -1,0 +1,25 @@
+language: python
+dist: trusty
+sudo: false
+
+matrix:
+  include:
+  - python: 2.7
+    env: TOX_ENV=py27
+  - python: 3.5
+    env: TOX_ENV=py35
+  - python: 2.7
+    env: TOX_ENV=flake8
+  - python: 2.7
+    env: TOX_ENV=coveralls
+
+before_install:
+  - npm install -g typescript@3.0.3
+  - tsc --module amd --noImplicitAny --outdir datalab/notebook/static datalab/notebook/static/*.ts
+  # We use tox for actually running tests.
+  - pip install --upgrade pip tox
+  
+script:
+  # tox reads its configuration from tox.ini.
+  - tox -e $TOX_ENV
+

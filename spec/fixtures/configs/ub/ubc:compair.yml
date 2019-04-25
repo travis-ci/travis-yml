@@ -1,0 +1,115 @@
+language: python
+
+dist: xenial
+
+sudo: required
+
+services:
+  - docker
+  - mysql
+
+addons:
+  mariadb: '10.0'
+
+cache:
+  apt: true
+  directories:
+      - $HOME/.cache/pip
+      - $HOME/.cache/bower
+      - $HOME/.npm
+
+before_cache:
+  - rm -f $HOME/.cache/pip/log/debug.log
+
+python:
+  - "2.7"
+  - "3.6"
+  # there is no binary wheels for 3.7 and compiling it from source will fail
+  #- "3.7"
+
+stages:
+  - test
+  - acceptance test + deploy
+
+jobs:
+  fast_finish: true
+  include:
+    - &test-acceptance-chrome
+      stage: acceptance test + deploy
+      python: "3.6"
+      env: TEST_BROWSER_NAME=chrome TEST_BROWSER_VERSION=63 DISABLE_MOCK=false DB=sqlite DATABASE_URI="sqlite:///:memory:"
+      script: node_modules/.bin/gulp test:ci
+      addons:
+        sauce_connect: true
+    - &test-acceptance-firefox
+      <<: *test-acceptance-chrome
+      env: TEST_BROWSER_NAME=firefox TEST_BROWSER_VERSION=57 DISABLE_MOCK=false DB=sqlite DATABASE_URI="sqlite:///:memory:"
+    - stage: acceptance test + deploy
+      python: "3.6"
+      env: COMPILE_ASSETS=true
+      before_install: true
+      install: true
+      before_script:
+      - make docker-image
+      script:
+      # test image in prod mode
+      - docker-compose -f deploy/docker/docker-compose.yml up -d; sleep 10;
+      - curl -sSL http://localhost > /dev/null && curl -sS http://localhost/api/healthz > /dev/null
+      # copy assets from docker image for s3 deployment
+      - docker cp $(docker ps -q --filter "label=com.docker.compose.project=docker" --filter "label=com.docker.compose.service=app"):/code/compair/static/dist compair/static/dist
+      after_success:
+      - ./scripts/deploy_dockerhub.sh
+      - ./scripts/deploy.sh
+      after_failure:
+      - timeout 3s docker-compose logs app db web
+  allow_failures:
+    - env: TEST_BROWSER_NAME=chrome TEST_BROWSER_VERSION=63 DISABLE_MOCK=false DB=sqlite DATABASE_URI="sqlite:///:memory:"
+    - env: TEST_BROWSER_NAME=firefox TEST_BROWSER_VERSION=57 DISABLE_MOCK=false DB=sqlite DATABASE_URI="sqlite:///:memory:"
+
+env:
+  global:
+    # SAUCE_USERNAME
+    - secure: "imeWytgo5kReh6HgPqhaWlsK+oWN8TObyYlrrsA6CASmeJT6GEOpghXimJ8avNpGmcNHji+3GfWKuirUBew9RxAaiYkdjrFZ6nPibmt1HJJfiL1hQMHhp9rCnMBdxevH4/8Wl86bN5/YIwglXhqDplVEmrWqiHzKfw9BBRfOrVc="
+    # SAUCE_ACCESS_KEY
+    - secure: "D5aySdfAWW2Z5aJN3PSW4FBDKSGEbCSPgDUBEoAkwXbmpvZA29RqUP4O2P6wMC7CeVUI4A7+bAalsgIgYt3YLsT1QJE3IV679axHPDdEIP45oZy4+S7KkI4cCfI+R6lnwU7Lp/eW42lc+mugKLZ2hDs0mcx6+tHAoazGgIRyRzA="
+    # DOCKER_USER
+    - secure: "W1l1V7Sa0tpYfz+fU0NObz+FcaA3wIUjovuMWhQU7+sqMHAmhPM2ajsRb0bgUoCBN1SW4KAi3lo06fFkmQjxR2D/U1iSUY5ahIFG+W3E8V5zWNLg/mdywDM2acWByhMCMjiBHGPFdGkXXf3pLmc/6XLs3WnPuV2o84xte67zMEo="
+    # DOCKER_PASS
+    - secure: "f4Z8sNwOpoSm2R0TyEsowL+edxEixCJT3qdS7s2G9zVlRTBzU33VrvBTpfgIJuFdMlGKNV16iHL7iWiLtyGcq07HlgffJc1KKWZGG8JuhykB+GKSOh/lNX/AgIrIUDtmLEpi1/MSXmiFbISf60C4GYstxtMfHeC7/WsVsGyfk7A="
+    # Gitlab deployment key DEPLOYMENT_TOKEN
+    - secure: "VGcweRjhmDkVgx3tL3R6/RWmS2ulKWfc3R8u4taMQF1hBCkFLdunkNR5Am9stkHmXCbiaXBnn9uE5Yv7sFx09oVq+i9kdbrYoN2ujVsSI/1dTUA8vbNps8/GQpICrU3qcgEUwHX/2xTHbJqvtyV0eG98z3bBg8EHHdMIFEjiT0g="
+  matrix:
+    - DB=sqlite DATABASE_URI="sqlite:///:memory:"
+    - DB=mysql DATABASE_URI="mysql+pymysql://root@localhost/compair"
+
+before_install:
+  - nvm install 9.3
+
+install:
+  - sudo apt-get update -y
+  - sudo apt-get install -y --no-install-recommends --no-install-suggests libxmlsec1-dev
+  - make deps
+
+before_script:
+  - if [ '$DB' = 'mysql' ]; then mysql -e 'create database IF NOT EXISTS compair;'; fi
+
+script:
+  - nosetests
+  - node_modules/karma/bin/karma start compair/static/test/config/karma.conf.js --single-run --browsers PhantomJS
+
+deploy:
+  provider: s3
+  access_key_id:
+    secure: t5Z/xE/swbrwQE6NfzDt1W2Xd65yW14Nc0q+sg3YVOKpkBwAQawuHW1qekueA9RyqRRzDUIv73Cq9wGPY9QyNCun/Er7iL1x7VoxCNS1apgHWvQGHLYQSPCFoybnRuFdpmpcjdqt8lOqGIEpGZ5JAtVOm0IKLFQLS6DrEbFoCPY=
+  secret_access_key:
+    secure: NVwyasIminW4Uo9Mi5HdK8pFyrMyMt8/D8ya04R1enCNP5/IacXEASSwU+F6qURLUgO+VYI/EMn0g2VrK9mQjvNQpZX1dGiIu1dJMRjG1uRed6f+ZjQfouQfrXNDvMQFAGz58wE/+HdVQy0HSb0tOS1krCmFkfwfi+MGLfTTdr4=
+  bucket: "compair-assets"
+  skip_cleanup: true
+  local_dir: compair/static/dist
+  upload-dir: dist
+  on:
+    all_branches: true
+    condition: "$COMPILE_ASSETS = true"
+
+notifications:
+  slack: ubcctlt:cyfS7OeXqRjqhyrpIMHJ0SRd

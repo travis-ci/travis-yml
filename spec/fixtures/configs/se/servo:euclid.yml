@@ -1,0 +1,28 @@
+language: rust
+
+rust:
+  - 1.23.0
+  - stable
+  - beta
+  - nightly
+
+env:
+  - FEATURES=""
+  - FEATURES="--features serde"
+
+matrix:
+  include:
+    - rust: stable
+      env: FEATURES=""
+    - rust: stable
+      env: FEATURES="--features mint"
+    - rust: beta
+      env: FEATURES=""
+    - rust: nightly
+      env: FEATURES="--features unstable"
+    - rust: nightly
+      env: FEATURES="--features unstable,serde"
+
+script:
+  - cargo build $FEATURES
+  - cargo test --verbose $FEATURES

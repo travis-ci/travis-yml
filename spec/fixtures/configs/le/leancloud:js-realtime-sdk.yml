@@ -1,0 +1,27 @@
+language: node_js
+node_js:
+  - '10'
+sudo: false
+env:
+  global:
+    - APP_ID=Ol0Cw6zL1xP9IIqJpiSv9uYC
+    - APP_KEY=WWVkTzf8xlUTPS2dIKwuCkIz
+    - EXSITING_ROOM_ID=5638313660b28815a724df31
+    - SYS_CONV_ID=57bdb5965e1072004edd532c
+install:
+  - npm install codecov -g
+  - npm install
+script:
+  - npm test && codecov
+  - npm run docs
+after_success:
+  - if [[ "$TRAVIS_BRANCH" == "master" ]] && [[ "${TRAVIS_PULL_REQUEST}" = "false" ]]; then
+    ./script/deploy.sh;
+    ./script/release.sh;
+    fi
+  - if [[ "$TRAVIS_BRANCH" == "next" ]] && [[ "${TRAVIS_PULL_REQUEST}" = "false" ]]; then
+    ./script/release.sh next-dist;
+    fi
+  - if [[ "$TRAVIS_BRANCH" == "v4" ]] && [[ "${TRAVIS_PULL_REQUEST}" = "false" ]]; then
+    ./script/release.sh v4-dist;
+    fi

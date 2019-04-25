@@ -1,0 +1,12 @@
+# Note: YAML does not allow Tabs for indentation!
+
+language: node_js
+before_install:
+  - "npm install -g grunt-cli"
+script:
+  # Run code style checker and linter
+  - "grunt jscs"
+  - "grunt jshint"
+notifications:
+  slack: f112a:GOZb6ewuAf2AVxduDXzdiCTG
+  email: admin@arsnova.eu

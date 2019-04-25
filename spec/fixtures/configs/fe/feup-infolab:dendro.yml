@@ -1,0 +1,46 @@
+language: node_js
+
+sudo: true
+
+services:
+  - docker
+
+node_js:
+  - "8.10.0"
+
+env:
+  global:
+    - NVM_DIR="${TRAVIS_BUILD_DIR}"
+    - RUNNING_IN_TRAVIS=true
+
+cache:
+  directories:
+    - node_modules
+    - public/bower_components
+
+before_script:
+
+  # Disable services enabled by default
+  # http://docs.travis-ci.com/user/database-setup/#MySQL
+  - sudo /etc/init.d/mysql stop
+  - sudo /etc/init.d/postgresql stop
+  # The following did not work reliable
+  # - sudo service mysql stop
+  # - sudo service postgresql stop
+
+install:
+  - docker-compose build
+
+script:
+  - docker-compose up -d
+  - chmod +x ${TRAVIS_BUILD_DIR}/conf/scripts/check_if_dendro_boots.sh
+  - ${TRAVIS_BUILD_DIR}/conf/scripts/check_if_dendro_boots.sh 3001
+
+# after_success:
+#   - nvm use 8.10.0
+#   - npm run report-coverage
+
+# after_script:
+#  - docker stop $(docker ps -a -q) || true
+#  - docker rm -f $(docker ps -a -q) || true
+#  - docker rmi -f $(docker ps -a -q) || true

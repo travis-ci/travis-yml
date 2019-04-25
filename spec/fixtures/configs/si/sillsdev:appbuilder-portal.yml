@@ -1,0 +1,134 @@
+env:
+  global:
+    - DOCKER_COMPOSE_VERSION=1.17.0
+    - MOZ_HEADLESS=1
+    - PYTHON_VERSION=2.7.14
+
+stages:
+  - "Quality"
+  - "Tests"
+  - "Build"
+  - "Security"
+  - "Deploy"
+
+matrix:
+  allow_failures:
+    - name: "Frontend Typechecking"
+
+jobs:
+  include:
+    - stage: "Quality"
+      name: "Frontend Linting"
+      language: node_js
+      node_js: "8"
+
+      script: ./run yarn && ./run yarn lint --quiet
+
+    - stage: "Quality"
+      name: "Frontend Typechecking"
+      language: node_js
+      node_js: "8"
+      script: ./run yarn && ./run yarn tsc --noEmit
+
+    - stage: "Tests"
+      name: "Frontend Tests"
+      addons:
+        chrome: stable
+
+      language: node_js
+      node_js: "8"
+
+      # TODO: upload coverage to somewhere
+      script:
+       - npm install -g xml2js
+       - COVERAGE=true ./run yarn && ./run yarn test:ci
+
+    - stage: "Tests"
+      name: "Backend Tests"
+      language: generic
+      sudo: required
+      services:
+        - docker
+      addons:
+        apt:
+          packages:
+            - docker-ce
+      before_install:
+        # pip 10 is broken, I guess
+        - >
+          time (
+            sudo pip install --upgrade --force-reinstall pip==9.0.3
+            sudo pip install -U docker-compose
+            sudo chmod +x /usr/local/bin/docker-compose
+          )
+
+      script:
+        - echo "building docker containers..."
+        - time ( ./run ci:build > /dev/null 2>&1 )
+        - echo "docker containers built!"
+        - echo "Running the backend commands..."
+        - ( time ./run ci:api )
+
+    - stage: "Build"
+      name: "Build nginx"
+      language: generic
+      sudo: required
+      services:
+        - docker
+      addons:
+        apt:
+          packages:
+            - docker-ce
+      before_install:
+        - sudo pip install --upgrade --force-reinstall pip==9.0.3
+      script:
+        - time ./scripts/build-nginx.sh $TRAVIS_COMMIT $TRAVIS_BRANCH
+
+    - stage: "Build"
+      name: "Build API"
+      language: generic
+      sudo: required
+      services:
+        - docker
+      addons:
+        apt:
+          packages:
+            - docker-ce
+      before_install:
+        - sudo pip install --upgrade --force-reinstall pip==9.0.3
+      script:
+        - time ./scripts/build-api.sh $TRAVIS_COMMIT $TRAVIS_BRANCH
+
+
+    # - stage: "Security"
+    #   name: "Check CVE Security of nginx Container"
+    #   # if: branch IN (develop, master)
+    #   language: generic
+    #   sudo: required
+    #   services:
+    #     - docker
+    #   addons:
+    #     apt:
+    #       packages:
+    #         - docker-ce
+    #   script:
+    #     - echo "Nothing yet"
+
+
+    - stage: "Deploy"
+      name: "Build and Push Docker Images"
+      if: branch IN (develop, master) AND type IN (push, api)
+      language: generic
+      sudo: required
+      services:
+        - docker
+      addons:
+        apt:
+          packages:
+            - docker-ce
+      script:
+        - echo "Installing $PYTHON_VERSION..."
+        - pyenv install $PYTHON_VERSION -f
+        - pyenv global $PYTHON_VERSION
+        # Deploy
+        - time ./scripts/deploy-to-ecs.sh $TRAVIS_COMMIT $TRAVIS_BRANCH

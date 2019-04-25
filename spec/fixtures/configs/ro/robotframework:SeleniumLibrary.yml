@@ -1,0 +1,80 @@
+language: python
+sudo: required
+dist: trusty
+env:
+  global:
+    - JYTHON=false
+addons:
+  apt:
+    sources:
+      - google-chrome
+    packages:
+      - google-chrome-stable
+before_install:
+  - CDVERSION=`curl http://chromedriver.storage.googleapis.com/LATEST_RELEASE`
+  - wget --no-verbose http://chromedriver.storage.googleapis.com/$CDVERSION/chromedriver_linux64.zip
+  - unzip chromedriver_linux64.zip
+  - sudo chmod u+x chromedriver
+  - sudo mv chromedriver /usr/bin/
+matrix:
+  include:
+    - python: "3.7-dev"
+      env:
+        - BROWSER=headlesschrome
+        - SELENIUM=3.141.0
+        - ROBOTFRAMEWORK=3.1.1
+        - ROBOT_OPTIONS=--dotted
+        - INTERPRETER=python3
+    - python: "pypy3.5"
+      env:
+        - BROWSER=chrome
+        - SELENIUM=3.141.0
+        - ROBOTFRAMEWORK=3.1.1
+        - ROBOT_OPTIONS=--dotted
+        - INTERPRETER=pypy3
+    - python: "3.6"
+      env:
+        - BROWSER=headlesschrome
+        - SELENIUM=3.141.0
+        - ROBOTFRAMEWORK=3.1.1
+        - ROBOT_OPTIONS=--dotted
+        - INTERPRETER=python3
+        - JYTHON=true
+    - python: "3.4"
+      env:
+        - BROWSER=headlesschrome
+        - SELENIUM=3.141.0
+        - ROBOTFRAMEWORK=3.1.1
+        - ROBOT_OPTIONS=--dotted
+        - INTERPRETER=python3
+    - python: "2.7"
+      env:
+        - BROWSER=chrome
+        - SELENIUM=3.141.0
+        - ROBOTFRAMEWORK=3.0.4
+        - ROBOT_OPTIONS=--dotted
+        - INTERPRETER=python2
+before_script:
+  - "export DISPLAY=:99.0"
+  - "sh -e /etc/init.d/xvfb start"
+  - if [ "$JYTHON" == "true" ]; then
+      wget -O jython.jar http://search.maven.org/remotecontent?filepath=org/python/jython-installer/2.7.1/jython-installer-2.7.1.jar;
+      java -jar jython.jar -s -d ~/jython;
+      export PATH="~/jython/bin:$PATH";
+      export INTERPRETER=~/jython/bin/jython;
+    fi
+  - python -m pip install robotstatuschecker
+  - echo $INTERPRETER
+  - $INTERPRETER --version
+  - $INTERPRETER -m pip install .
+  - if [ "$JYTHON" == "true" ]; then
+      $INTERPRETER -m pip install mockito;
+      $INTERPRETER -m pip install robotstatuschecker;
+      $INTERPRETER -m pip install -r requirements.txt;
+    else
+      $INTERPRETER -m pip install -r requirements-dev.txt;
+    fi
+  - $INTERPRETER -m pip install selenium==$SELENIUM
+  - $INTERPRETER -m pip install robotframework==$ROBOTFRAMEWORK
+script:
+  - python atest/run.py $BROWSER --interpreter $INTERPRETER $ROBOT_OPTIONS

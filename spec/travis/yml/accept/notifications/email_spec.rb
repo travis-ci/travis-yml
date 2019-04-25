@@ -207,7 +207,7 @@ describe Travis::Yml, 'notifications: email' do
       it { should have_msg [:warn, :'notifications.email', :unknown_key, key: :unknown, value: 'str'] }
     end
 
-    describe 'does not prefix with :recipients, given a mixed array of hashes and strings' do
+    describe 'given a mixed array of hashes and strings' do
       yaml %(
         notifications:
           email:
@@ -218,7 +218,7 @@ describe Travis::Yml, 'notifications: email' do
       it { should have_msg [:error, :'notifications.email', :invalid_type, expected: :map, actual: :seq, value: ['str', { on_success: 'change' }]] }
     end
 
-    describe 'does not prefix with :recipients, given a mixed array of hashes and secure' do
+    describe 'given a mixed array of hashes and secure' do
       yaml %(
         notifications:
           email:

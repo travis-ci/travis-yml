@@ -1,0 +1,48 @@
+language: ruby
+cache: bundler
+sudo: required
+rvm:
+- 2.2.2
+services:
+- postgresql
+notifications:
+  email:
+  - jari@holderdeord.no
+  hipchat:
+    rooms:
+      secure: |-
+        dPDcvtGQXXzdj31ftZkRShrn+l1TCnTEPTdr6YVAfzAI1Ashzhr4yGvnNfMs
+        4lbxYDJfRxpTO5Xd1Hte5HH7c0ijoHEGjajySSl43+nLeShw+CWhuxKSbmCM
+        nICGbjLhNPSDTIg1QPO/AkUCF3YG6szmd3JX9XLathUrt0HOBTY=
+    on_success: always
+    on_failure: always
+    template:
+    - "%{author} | %{commit} | %{message} | %{build_url}"
+  slack:
+    secure: K239cqAqap9kYXuyDY7Y6B942caJjmAMrz64TuTfQVQsUf/Rud1ZwZ6sSXOTVgk9XbMebVrLB60AYo0MgYucrG++ZF9Cad7UbR47NTEZsHfa+dAchb96/HgzPlMzoG3CqQP8+bhJzbcO4WDi0toa3POi4ESjinXYy/AI55tIG6M=
+bundler_args: "--without development --path ~/.bundle"
+script: RAILS_ENV=test SPEC_OPTS=--backtrace bundle exec rake travis
+before_script:
+- sudo wget https://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-2.2.1.deb
+- sudo dpkg -i elasticsearch-2.2.1.deb
+- sudo service elasticsearch start
+- dpkg -s elasticsearch | grep --color=never Version
+- sudo cp config/search/words.nb.txt $ELASTICSEARCH_CONFIG_PATH/hdo.words.nb.txt
+- sudo cp config/search/synonyms.nb.txt $ELASTICSEARCH_CONFIG_PATH/hdo.synonyms.nb.txt
+- mv config/database.yml.travis config/database.yml
+- sh -e /etc/init.d/xvfb start
+- "./script/travis/npm_bootstrap.sh"
+- curl http://localhost:9200/ || echo 'failed to check ES'
+after_success:
+- openssl aes-256-cbc -K $encrypted_773fd9c2aa2a_key -iv $encrypted_773fd9c2aa2a_iv
+  -in config/deploy/deploy.enc -out config/deploy/deploy_dsa -d
+- '[[ "$TRAVIS_BRANCH" = "master" ]] && bundle exec cap -S revision="$TRAVIS_COMMIT"
+  production deploy:migrations deploy:cleanup'
+env:
+  global:
+  - DISPLAY=:99.0
+  - COVERAGE_THRESHOLD=80
+  - RUBY_GC_MALLOC_LIMIT=50000000
+  - WEBDRIVER_BROWSER=firefox
+  - ELASTICSEARCH_CONFIG_PATH=/etc/elasticsearch
+  - secure: nnTbf1vKvwZhbjyxbl5JFQhSahFlDPQDQ4MsF07YdLyxqoePUkq7TiMlq/KG+H/PBQ257PEUsCXqaiOqjqE5fXJEBMAxjiJO+H96fDvrk7ovsQTlNh7eJAGidGUDvXHKooFmRSWgODG2mA1WRaaq/HfK6PWeqeH9rbAefCpoFzc=

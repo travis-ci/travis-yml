@@ -1,0 +1,26 @@
+language: node_js
+cache: yarn
+node_js:
+- '6'
+script:
+- yarn run flow:check-now
+- yarn run lint
+- yarn run test --runInBand
+- yarn run build:debug
+before_deploy:
+  - git config --local user.name "travis"
+  - git config --local user.email "ammann@integreat-app.de"
+  - git tag "travis-$TRAVIS_COMMIT-$(date +'%Y%m%d%H%M%S')" $TRAVIS_COMMIT
+  - tar cf www.tar -C www .
+deploy:
+  provider: releases
+  api_key:
+    secure: RF6DXoqiVroHdcGdI0HWGkPTALGNPHE7HaVuboyOGKxkfXSMkFPAB5wdyyECKVFdKBWJMqcbZxuNHQY8Kj9CMtM+0BTh8sWiYQRzMbVn1GZSjQYD1YlDL1ZNi7LAEW4Os5aG3K950SWqJOTMTtJ4uNNBHCY1cGsxvnlk7Klv2rzY9RXyVtEY0KdmlXVfbXF8el7UHt/b2+wEaFnrY2WL+EVj6+R89pXKypiPAV6q5wdveyQriBudGrF4aU9NAR5ER9qsLMf3Mc3Lquyb4nhAL5CkBUP9fqEMeYCOwa1mZeUWEeXTcnTiYM4h86JNgZbV/aV6T7t1IeM3feyMT+6C3svc6Ln5ij6SmJiFYUf9faX/lV4fDWGdiPk6QjiFBQzEKuVO4EAyrfjcsbb/4I3X/2ugLwVv36nqYZygvLjqz0F1J4sTY8NzN06mJ5iWoRHIQt38b3x6jzOfEs2fIOb+f9BoSbN1WhQ6EJrjYhEq14tUyP5+klHvlAV9/Qda2At0Q65YXiXHGZ7H1gKNjpWFsbxc1khVfQ5IrFVyL7yC6VGcJitTa9WdfllaFL0mhLcIkFqokjz8p55+Zo5ZdLGgZPvBikUVGY1pcbmerZLsNbp47IcqKH1aqaJig2T+RpkP/1U/ZthBSb74HpMfLdfi/E0mpTbZv1pAzSoC5VY0wFE=
+  file: www.tar
+  overwrite: true
+  skip_cleanup: true
+  target_commitish: $TRAVIS_COMMIT
+  body: Automated release from Travis CI
+  on:
+    repo: Integreat/integreat-webapp
+    branch: develop

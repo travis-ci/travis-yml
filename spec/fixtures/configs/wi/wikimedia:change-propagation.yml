@@ -1,0 +1,27 @@
+language: node_js
+sudo: false
+
+node_js:
+  - "6"
+  - "10"
+
+env:
+  - KAFKA_HOME=../kafka KAFKA_VERSION=1.1.0 CXX=g++-4.8
+
+services:
+  - redis-server
+
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - g++-4.8
+      - oracle-java8-set-default
+
+before_script:
+- npm run install-kafka
+
+script: npm test && npm run start-kafka && npm run coverage && (npm run coveralls || exit 0)
+
+after_script: sh node_modules/kafka-test-tools/start_kafka.sh kill

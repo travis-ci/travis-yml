@@ -1,0 +1,64 @@
+language: cpp
+dist: trusty
+cache: ccache
+
+services:
+  - docker
+
+env:
+  global:
+    - PROJECT_DIR_ABS=$TRAVIS_BUILD_DIR
+    - DEPS_BRANCH_DOCKER="master"
+  matrix:
+    - GAZEBO_VERSION=gazebo8 BUILD_TYPE=Debug
+    - GAZEBO_VERSION=gazebo8 BUILD_TYPE=Release
+    - GAZEBO_VERSION=gazebo9 BUILD_TYPE=Debug
+    - GAZEBO_VERSION=gazebo9 BUILD_TYPE=Release
+
+compiler:
+   - gcc
+   - clang
+
+before_install:
+  - if [ ! $TRAVIS_BRANCH = "master" ] ; then DEPS_BRANCH_DOCKER="devel" ; fi
+  # Pull the docker image
+  - export DOCKER_IMAGE=robotology/robotology-tdd:${GAZEBO_VERSION}${DEPS_BRANCH_DOCKER}
+  - docker pull ${DOCKER_IMAGE}
+
+before_script:
+  # Run CMake into the persistent $PROJECT_DIR_ABS folder
+  - cd $PROJECT_DIR_ABS
+  - mkdir build
+  - >-
+    docker run -it --rm
+    -v "$HOME/.ccache:/root/.ccache"
+    -v "$PROJECT_DIR_ABS:/app" -w /app
+    -e CC=$CC
+    -e CXX=$CXX
+    ${DOCKER_IMAGE}
+    sh -c 'cd build && cmake -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DALLOW_IDL_GENERATION:BOOL=OFF ./..'
+
+script:
+  # Build the project
+  - >-
+    docker run -it --rm
+    -v "$HOME/.ccache:/root/.ccache"
+    -v "$PROJECT_DIR_ABS:/app" -w /app
+    -e CC=$CC
+    -e CXX=$CXX
+    ${DOCKER_IMAGE}
+    sh -c 'cd build && make -j2'
+  # Install the project and run the tests
+  - >-
+    docker run -it --rm
+    -v "$PROJECT_DIR_ABS:/app" -w /app
+    -v "$HOME/.ccache:/root/.ccache"
+    -e CC=$CC
+    -e CXX=$CXX
+    ${DOCKER_IMAGE}
+    sh -c 'cd build &&\
+           make install'
+
+notifications:
+  email:
+    - pegua1@gmail.com

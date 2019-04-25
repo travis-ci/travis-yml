@@ -1,0 +1,30 @@
+language: node_js
+
+node_js:
+  - "6"
+  - "8"
+  - "10"
+  - "11"
+
+env:
+  - TASK=default
+
+matrix:
+  include:
+    - node_js: "11"
+      env: TASK=travis-phantomjs
+
+install:
+  - npm install
+  - if [ $TRAVIS_NODE_VERSION = 6 ]; then npm run-script prepare; fi
+  - npm install -g nodeunit grunt-cli
+  - if [ $TASK = travis-phantomjs ]; then npm install -g browserify uglify-js; fi
+
+script:
+  - grunt $TASK
+
+sudo: required
+dist: trusty
+
+notifications:
+  slack: cocolab-stanford:X2Ebs0qIMVUidJBD1xZd2XU1

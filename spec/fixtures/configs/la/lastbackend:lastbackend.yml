@@ -1,0 +1,36 @@
+sudo: required
+language: go
+
+services:
+  - docker
+
+go:
+  - 1.11.x
+
+install:
+  - make deps
+
+before_install:
+  - curl -L  https://github.com/coreos/etcd/releases/download/v3.2.9/etcd-v3.2.9-linux-amd64.tar.gz -o etcd-v3.2.9-linux-amd64.tar.gz
+  - tar xzvf etcd-v3.2.9-linux-amd64.tar.gz
+  - ./etcd-v3.2.9-linux-amd64/etcd >> /dev/null&
+
+before_script:
+  - make test
+
+script:
+  - make build
+
+after_success:
+  - make docs
+
+notifications:
+  slack: $ST_TOKEN
+
+deploy:
+  - provider: pages
+    local_dir: docs/output
+    skip_cleanup: true
+    github_token: $GH_TOKEN # Set in travis-ci.org dashboard
+    on:
+      branch: master

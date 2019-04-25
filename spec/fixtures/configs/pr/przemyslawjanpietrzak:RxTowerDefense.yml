@@ -1,0 +1,22 @@
+language: node_js
+node_js: 8
+install:
+  - yarn install
+script:
+  - yarn lint
+  - yarn test
+  - yarn build
+
+deploy:
+  provider: s3
+  access_key_id: "$access_key_id"
+  secret_access_key: "$secret_access_key"
+  bucket: "rxtd-$TRAVIS_BRANCH"
+  acl: public_read
+  region: eu-central-1
+  local-dir: dist
+  skip_cleanup: true
+  on:
+    branch:
+      - master
+      - develop

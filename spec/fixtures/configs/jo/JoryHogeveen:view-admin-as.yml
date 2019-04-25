@@ -1,0 +1,78 @@
+# This uses newer and faster docker based build system
+sudo: false
+
+language: php
+
+notifications:
+  on_success: never
+  on_failure: change
+
+php:
+  - 7.3
+  - 7.2
+  - 7.1
+  - 7.0
+
+env:
+#    - WP_VERSION=bleeding WP_MULTISITE=0
+#    - WP_VERSION=bleeding-maintenance WP_MULTISITE=0
+    - WP_VERSION=latest WP_MULTISITE=0
+    - WP_VERSION=latest WP_MULTISITE=1
+
+#    - WP_VERSION=latest WP_MULTISITE=0
+#    - WP_VERSION=latest WP_MULTISITE=1
+#    - WP_VERSION=3.7 WP_MULTISITE=0
+#    - WP_VERSION=3.7 WP_MULTISITE=1
+#  - WP_PROJECT_TYPE=plugin WP_VERSION=latest WP_MULTISITE=1 WP_TEST_URL=http://localhost:12000 WP_TEST_USER=test WP_TEST_USER_PASS=test
+
+matrix:
+    allow_failures:
+      - php: 5.2
+      - php: nightly # PHP 7.x
+#     - env: WP_VERSION=bleeding WP_MULTISITE=0
+#     - env: WP_VERSION=bleeding-maintenance WP_MULTISITE=0
+
+    include:
+    - php: nightly
+      env: WP_VERSION=latest WP_MULTISITE=0
+    - php: 5.6
+      env: WP_VERSION=latest WP_MULTISITE=0
+    - php: 5.3
+      env: WP_VERSION=4.1 WP_MULTISITE=0
+      dist: precise
+    - php: 5.2
+      env: WP_VERSION=latest WP_MULTISITE=0
+      dist: precise
+    - php: 5.2
+      env: WP_VERSION=4.1 WP_MULTISITE=0
+      dist: precise
+
+## Cache composer bits
+cache:
+  apt: true
+  directories:
+    - vendor
+    - $HOME/.composer/cache
+
+before_script:
+  - if [[ $TRAVIS_PHP_VERSION != 'hhvm' && $TRAVIS_PHP_VERSION != 'nightly' ]]; then
+      phpenv config-rm xdebug.ini;
+    fi
+
+# Install composer packages before trying to activate themes or plugins
+  - if [[ $TRAVIS_PHP_VERSION != 5.2 ]]; then
+      composer self-update;
+      composer install --no-interaction --prefer-source;
+    fi
+
+#  - git clone https://github.com/Seravo/wordpress-test-template wp-tests
+  - bash bin/install-wp-tests.sh test root '' localhost $WP_VERSION
+
+script:
+# Use phpunit from composer
+  - if [[ $TRAVIS_PHP_VERSION != 5.2 ]]; then
+      vendor/bin/phpunit;
+    else
+      phpunit;
+    fi
+#  - cd tests/spec && bundle exec rspec test.rb

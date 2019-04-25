@@ -1,0 +1,14 @@
+language: go
+
+go:
+  - 1.9.1
+
+install:
+  - sh scripts/run_glide_up
+  - sh scripts/build_flex_driver
+  - sh scripts/build_provisioner
+
+script:
+  - sh scripts/run_glide_up
+  - sh scripts/run_units.sh
+

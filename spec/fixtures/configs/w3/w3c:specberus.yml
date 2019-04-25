@@ -1,0 +1,27 @@
+language: node_js
+node_js:
+  - "8"
+  - "10"
+before_install:
+  - npm i -g npm@latest
+script:
+  - npm run build
+after_script:
+  - npm run coveralls
+notifications:
+  email:
+    - denis@w3.org
+  irc:
+    channels:
+      - "irc.w3.org#pubrules"
+    skip_join: true
+    template:
+      - "%{branch} by %{author} (%{build_url}): %{message}"
+deploy:
+  provider: npm
+  email: web-human@w3.org
+  api_key:
+    secure: qPx+fMzf0AOVP1aIKGUrTTHcpoTkyYpsUq20rnDiqQbrNeMo44esOs4szPKtkwQYdM3iVY8AXMDBxej60g5dl4ZN2dy2FiuJnu9zy8ldsXJjEVTbMZT+nhQirJ17zczvP/AmBBY2s/MY5KUK69apgSuIa5nZNkfPjf1sBjfbnus=
+  on:
+    tags: true
+    repo: w3c/specberus

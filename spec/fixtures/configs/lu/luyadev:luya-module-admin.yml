@@ -1,0 +1,36 @@
+env:
+  global:
+    - CC_TEST_REPORTER_ID=c8387c181b15919319ac86be13d5e5022ec09aed1b8460572a793431080a52e3
+language: php
+php:
+  - 5.6
+  - 7.0
+  - 7.1
+  - 7.2
+  - 7.3
+  - nightly
+  
+matrix:
+    allow_failures:
+        - php: 5.6
+        - php: nightly
+  
+sudo: false
+
+install:
+  - travis_retry composer self-update && composer --version
+  - export PATH="$HOME/.composer/vendor/bin:$PATH"
+  - travis_retry composer install --prefer-dist --no-interaction
+
+before_script:
+  - mysql -e 'create database myapp_test;'  
+  - mysql -u root myapp_test < tests/data/sql/1.0.0.sql
+  - if [[ "$TRAVIS_PHP_VERSION" == "7.1" ]]; then PHPUNIT_FLAGS="--coverage-clover build/logs/clover.xml"; fi
+  - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+  - chmod +x ./cc-test-reporter
+
+script:
+  - vendor/bin/phpunit --verbose $PHPUNIT_FLAGS --configuration travis.phpunit.xml
+
+after_script:
+  - if [[ "$TRAVIS_PHP_VERSION" == "7.1" ]]; then ./cc-test-reporter after-build -t clover --exit-code $TRAVIS_TEST_RESULT; fi

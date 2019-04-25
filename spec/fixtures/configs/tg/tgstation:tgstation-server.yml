@@ -1,0 +1,54 @@
+sudo: false
+git:
+  depth: 1
+
+matrix:
+  include:
+    - env:
+      - DMAPI=true
+      - BYOND_MAJOR="511"
+      - BYOND_MINOR="1385"
+      - DMEName="tests/DMAPI/travistester.dme"
+      name: "DMAPI Unit Tests"
+      language: generic
+      cache:
+        directories:
+          - $HOME/BYOND-${BYOND_MAJOR}.${BYOND_MINOR}
+
+      addons:
+        apt:
+          packages:
+            - libc6-i386
+            - libstdc++6:i386
+    - env:
+      - DMAPI=false
+      - CONFIG=Debug
+      name: "Test Server Debug"
+      language: csharp
+      mono: none
+      dotnet: 2.1.300
+      services:
+        - mysql
+      cache:
+        directories:
+          - $HOME/.nuget/packages:
+    - env:
+      - DMAPI=false
+      - CONFIG=Release
+      name: "Test Server Release"
+      language: csharp
+      mono: none
+      dotnet: 2.1.300
+      services:
+        - mysql
+      cache:
+        directories:
+          - $HOME/.nuget/packages:
+
+install:
+  - if [ $DMAPI = true ]; then build/install_byond.sh; fi
+  - if [ $DMAPI = false ]; then dotnet restore tgstation-server.sln; fi
+
+script:
+  - if [ $DMAPI = true ]; then tests/DMAPI/build_byond.sh || travis_terminate 1; fi
+  - if [ $DMAPI = false ]; then build/test_core.sh; fi

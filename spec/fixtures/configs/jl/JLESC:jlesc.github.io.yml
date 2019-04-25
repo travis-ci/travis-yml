@@ -1,0 +1,27 @@
+language: ruby
+
+sudo: false
+
+# this is taken from .ruby-version from the repo
+# rvm:
+#   - 2.4.1
+
+cache:
+  - bundler
+
+branches:
+  except:
+    - master
+
+script:
+  - bundle exec jekyll build --trace
+  - bundle exec ./bin/report_generator.rb
+  - if [[ "${TRAVIS_BRANCH}" == "source" && "${TRAVIS_PULL_REQUEST}" == "false" ]]; then
+      openssl aes-256-cbc -K $encrypted_d352a8d3929a_key -iv $encrypted_d352a8d3929a_iv -in travis_deploy_rsa.enc -out travis_deploy_rsa -d;
+      chmod 0600 travis_deploy_rsa;
+      eval "$(ssh-agent -s)";
+      ssh-add travis_deploy_rsa;
+      git config --global user.email "travis@jlesc.github.io";
+      git config --global user.name "Travis CI Deployment";
+      bundle exec jgd --branch=master --url=git@github.com:JLESC/jlesc.github.io;
+    fi

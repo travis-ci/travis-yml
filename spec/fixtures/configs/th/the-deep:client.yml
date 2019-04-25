@@ -1,0 +1,47 @@
+sudo: required
+language: generic
+
+services:
+  - docker
+
+before_install:
+  - |
+    curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64\
+    > /tmp/cc-test-reporter
+  - chmod +x /tmp/cc-test-reporter
+  - npm install -g codecov
+  - curl https://s3.amazonaws.com/toggle-utils/docker_ci --output docker_ci && chmod +x docker_ci
+
+  - mkdir -p src/vendor
+  - git clone https://github.com/toggle-corp/react-store.git $REACT_STORE_DIR
+  - git --git-dir=$REACT_STORE_DIR/.git --no-pager show --pretty=fuller --quiet
+  - cp $REACT_STORE_DIR/stylesheets/_user-imports-sample.scss $REACT_STORE_DIR/stylesheets/_user-imports.scss
+
+  # Pull docker images
+  - ./docker_ci pull
+
+before_script:
+  - /tmp/cc-test-reporter before-build
+  # Build server
+  - ./docker_ci build
+
+script:
+  # Run test
+  - python -c "import fcntl; fcntl.fcntl(1, fcntl.F_SETFL, 0)"
+  - ./docker_ci action --name test
+
+after_success:
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+  - codecov
+  - /tmp/cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT -p /code/
+  # Push docker images
+  - ./docker_ci push --on on_test
+
+notifications:
+  slack:
+    rooms:
+      - secure: "gfOnZR7lqTcyh83fcmHZ8jQ9AH9Es1PzkRbFg94LF/lCoIAKQlvSJkGEjk1gehEKkQTLNj2rMJnZmws6rYQsDHYlQrz57Ez3bcyKZ8xQgT1ubMc2BU5xU5yHwYIdXDtIAFs1XD+kwwLdUeKWPTu4JJgKnCq3IjCzPxElvnzxcuPK535fYdVY6TQhYc0QQHjMhFLLL+GJKxA2L8q3TGMhkKANFRi7z76uU5qfmdiUaydUOHPHEioKS5z5N9kQOYn2JarHn39Pxo0KenNLge81uONhoA9rpxbcTj5htqROh2L265GF5WCVVPBKMQBaXvVlhDPBbOuBKjUsGKYSTzqu8OS68Gnn7mfTlYBFRgjLfMSdnGmvQBdsPbcJ5ZbLXa9gM5lFknOFbHzSgB6+wv9GhBLk7oeswpUfW8zvbewG9+27QisXaHMFpuwOdFtnl6eYB/Wim+q67PTCCwpFYZAer4F8sx3+aSUrtoD2rBwhI0DxFDkYBgKaAmjH1U204Wq+T3E1Vew2P+zwLQK5VWI0+vBQh7t7OQdl28rcD1QZwUVOnj7jCo/WYF9DK6YaUJ88GpREbzJSDZyMt4ayghMHmMgIFNLZ3NkOP+Z/zY7nYdeTtfIcyE1rLuC/PJ7uykd7/lW0T7l0QPTftcOvJI1GBEdLXZIf6S9xpop29udcljE="
+
+env:
+  global:
+    - REACT_STORE_DIR=src/vendor/react-store

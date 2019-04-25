@@ -1,0 +1,19 @@
+language: node_js
+sudo: false
+node_js:
+  - "8"
+cache: yarn
+before_script: yarn global add codecov
+script:
+  - yarn lint
+  - yarn test --coverage --maxWorkers=4
+  - yarn build
+after_success:
+  - codecov
+  - curl -sSL https://raw.githubusercontent.com/RedHatInsights/insights-frontend-builder-common/master/src/bootstrap.sh | bash -s
+env:
+    global:
+    - REPO="git@github.com:RedHatInsights/cost-management-build"
+    - REPO_DIR="cost-management-build"
+    - BRANCH=${TRAVIS_PULL_REQUEST_BRANCH:-$TRAVIS_BRANCH}
+    - APP_BUILD_DIR="public"

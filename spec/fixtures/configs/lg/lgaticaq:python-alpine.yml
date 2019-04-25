@@ -1,0 +1,18 @@
+---
+sudo: required
+
+services:
+  - docker
+
+env:
+  matrix:
+    - env:
+      VERSION: '3.6.3'
+    - env:
+      VERSION: '2.7.14'
+
+install:
+  - docker build -t "lgatica/python-alpine:$VERSION" "$VERSION"
+
+script:
+  - docker run --rm "lgatica/python-alpine:$VERSION" python --version

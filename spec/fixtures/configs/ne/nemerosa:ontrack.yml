@@ -1,0 +1,27 @@
+language: java
+sudo: required
+
+services:
+  - docker
+
+before_cache:
+  - rm -f $HOME/.gradle/caches/modules-2/modules-2.lock
+
+cache:
+  directories:
+    - $HOME/.gradle/caches/
+    - $HOME/.gradle/wrapper/
+
+jdk:
+  - oraclejdk8
+
+node_js:
+  - "0.10"
+
+before_install:
+  - npm install -g bower
+  - git config --global user.email "notifications@travis-ci.org"
+  - git config --global user.name "Travis CI"
+
+script:
+  - ./gradlew test integrationTest -x javadoc --stacktrace

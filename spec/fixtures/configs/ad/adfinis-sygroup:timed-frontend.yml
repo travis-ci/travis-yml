@@ -1,0 +1,33 @@
+---
+language: node_js
+node_js:
+  - "8"
+
+addons:
+  firefox: "56.0"
+  chrome: stable
+
+cache:
+  yarn: true
+
+before_install:
+  - export PATH=$PATH:`yarn global bin`
+  - yarn global add greenkeeper-lockfile@1
+
+install:
+  - yarn
+
+before_script:
+  - greenkeeper-lockfile-update
+
+script:
+  - yarn test
+
+after_script:
+  - greenkeeper-lockfile-upload
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
+
+env:
+  - COVERAGE=true JOBS=2

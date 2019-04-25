@@ -1,0 +1,25 @@
+sudo: required
+language: rust
+cache: cargo
+services:
+  - docker
+
+matrix:
+  include:
+    - rust: stable
+      env:
+        - CHANNEL="stable"
+    - rust: nightly
+      env:
+        - CHANNEL="nightly"
+        - KIND="build"
+    - rust: nightly
+      env:
+        - CHANNEL="nightly"
+        - KIND="integration"
+
+script: ./ci/travis.sh
+
+notifications:
+  email:
+    on_success: never

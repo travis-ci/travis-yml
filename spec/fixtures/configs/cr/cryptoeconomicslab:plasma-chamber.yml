@@ -1,0 +1,26 @@
+language: python
+python:
+  - "3.6"
+
+cache:
+  bundler: true
+  directories:
+    - node_modules
+
+before_install:
+  - pip install -U pip
+  - pip install vyper==0.1.0b9
+  - vyper --version
+  - nvm install v10.15.3
+  - npm install -g yarn
+  - npm install -g lerna
+
+install:
+  - lerna bootstrap
+
+script:
+  - yarn build:ci
+  - yarn test:ci
+
+dist: trusty
+sudo: false

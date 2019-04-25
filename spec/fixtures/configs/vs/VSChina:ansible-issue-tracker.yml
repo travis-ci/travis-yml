@@ -1,0 +1,16 @@
+language: node_js
+node_js:
+  - "8"
+
+branches:
+  only:
+    - sample
+  
+install:
+  - npm install
+
+script:
+  - travis_wait 50 npm start
+
+matrix:
+  fast_finish: true

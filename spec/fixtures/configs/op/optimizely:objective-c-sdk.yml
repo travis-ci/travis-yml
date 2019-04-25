@@ -1,0 +1,70 @@
+language: minimal
+os: linux
+
+# Integration tests need to run first to reset the PR build status to pending
+stages:
+  - 'Trigger Integration Tests'
+  - 'SourceClear and Lint'
+  - 'Unit Tests'
+
+jobs:
+  include:
+    - stage: 'Trigger Integration Tests'
+      language: minimal
+      os: linux
+      env:
+        - SDK=objective-c
+        - BUILD_NUMBER=$TRAVIS_BUILD_NUMBER
+        - TESTAPP_TAG=master
+      cache: false
+      before_install: skip
+      install: skip
+      before_script:
+        - mkdir $HOME/travisci-tools && pushd $HOME/travisci-tools && git init && git pull https://$CI_USER_TOKEN@github.com/optimizely/travisci-tools.git && popd
+      script:
+        - "$HOME/travisci-tools/fsc-trigger/trigger_fullstack-sdk-compat.sh"
+      after_success: travis_terminate 0
+
+    - stage: 'SourceClear and Lint'
+      language: objective-c
+      os: osx
+      addons:
+        srcclr: true
+      install: gem install cocoapods
+      script:
+        - pod spec lint --quick
+
+    - &unittests
+      stage: 'Unit Tests'
+      language: objective-c
+      os: osx
+      osx_image: xcode10.1
+      branches:
+        only:
+          - master
+      env: SCHEME=OptimizelySDKiOS TEST_SDK=iphonesimulator PLATFORM='iOS Simulator' OS=9.1 NAME='iPad Air'
+      name: PLATFORM='iOS Simulator' OS=9.1 NAME='iPad Air'
+      before_install:
+        - gem install slather --no-rdoc --no-ri --no-document --quiet
+      install:
+        - pod install --repo-update
+      script:
+        - if [[ "$TRAVIS_BRANCH" == "master" ]]; then xcodebuild -quiet -workspace OptimizelySDK.xcworkspace -scheme $SCHEME -configuration Release CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO -sdk $TEST_SDK -destination "platform=$PLATFORM,OS=$OS,name=$NAME" ONLY_ACTIVE_ARCH=YES -UseModernBuildSystem=YES test | xcpretty; test ${PIPESTATUS[0]} -eq 0 ; fi
+      after_success:
+        - slather
+        - sleep 5 # https://github.com/travis-ci/travis-ci/issues/4725
+    - <<: *unittests
+      env: SCHEME=OptimizelySDKiOS TEST_SDK=iphonesimulator PLATFORM='iOS Simulator' OS=12.1 NAME='iPhone Xs'
+      name: PLATFORM='iOS Simulator' OS=12.1 NAME='iPhone Xs'
+    - <<: *unittests
+      env: SCHEME=OptimizelySDKiOS TEST_SDK=iphonesimulator PLATFORM='iOS Simulator' OS=11.4 NAME='iPhone 8 Plus'
+      name: PLATFORM='iOS Simulator' OS=11.4 NAME='iPhone 8 Plus'
+    - <<: *unittests
+      env: SCHEME=OptimizelySDKiOS-Universal TEST_SDK=iphonesimulator PLATFORM='iOS Simulator' OS=10.3.1 NAME='iPhone 7'
+      name: PLATFORM='iOS Simulator' OS=10.3.1 NAME='iPhone 7'
+    - <<: *unittests
+      env: SCHEME=OptimizelySDKTVOS TEST_SDK=appletvsimulator PLATFORM='tvOS Simulator' OS=10.2 NAME='Apple TV 1080p'
+      name: PLATFORM='tvOS Simulator' OS=10.2 NAME='Apple TV 1080p'
+    - <<: *unittests
+      env: SCHEME=OptimizelySDKTVOS-Universal TEST_SDK=appletvsimulator PLATFORM='tvOS Simulator' OS=9.2 NAME='Apple TV 1080p'
+      name: PLATFORM='tvOS Simulator' OS=9.2 NAME='Apple TV 1080p'

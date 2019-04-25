@@ -1,0 +1,23 @@
+dist: trusty
+sudo: false
+
+language: go
+
+go:
+  - 1.11
+
+services:
+  - postgresql
+
+addons:
+  postgresql: "9.5"
+
+install:
+  # Prevent default install task that does a `go get -t ./...`
+  - true
+  - go get github.com/onsi/ginkgo/ginkgo
+  - go get github.com/maxbrunsfeld/counterfeiter
+
+script:
+  - export APP_ROOT="$TRAVIS_BUILD_DIR"
+  - make test

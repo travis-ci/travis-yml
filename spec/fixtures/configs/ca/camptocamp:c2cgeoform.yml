@@ -1,0 +1,47 @@
+language: python
+
+sudo: false
+
+dist: trusty
+
+python:
+  - "3.4"
+
+addons:
+  postgresql: "9.6"
+  apt:
+    packages:
+      - postgresql-9.6-postgis-2.3
+
+git:
+  depth: 1
+
+env:
+  global:
+  - secure: "XqebytZsr/yLZ/CfRywgtjVMAFpcBB2NwWmJiTwvyVucRTvsjzSARwm/hY62apdZIDtDeA6KWNdriMRHlABBPvUkGIxyOL7KQWGsMHgOWzcTfla2igeiRfxHvzIcPoKXGbzJd+WZWo6LFKGmIJ1vvI0AqJRxfLrg+syOI3cD2J8="
+
+install:
+- rm -rf ~/.nvm && git clone https://github.com/creationix/nvm.git ~/.nvm && (cd ~/.nvm && git checkout `git describe --abbrev=0 --tags`) && source ~/.nvm/nvm.sh && nvm install 6
+- npm -version
+- make build
+
+before_script:
+- psql -c "CREATE USER \"www-data\" WITH PASSWORD 'www-data';" -U postgres
+- psql -d postgres -c "CREATE DATABASE c2cgeoform_demo_tests OWNER \"www-data\";" -U postgres
+- psql -d c2cgeoform_demo_tests -c "CREATE EXTENSION postgis;" -U postgres
+
+script: make check && make test
+
+deploy:
+- provider: script
+  script: travis/deploy-pypi
+  on:
+    tags: true
+    repo: camptocamp/c2cgeoform
+    python: '3.4'
+- provider: script
+  script: travis/deploy-pypi
+  on:
+    condition: '"${TRAVIS_EVENT_TYPE}" = cron'
+    repo: camptocamp/c2cgeoform
+    python: '3.4'

@@ -1,0 +1,14 @@
+language: python
+python:
+  - "2.7"
+install:
+    - pip install pipenv
+    - pipenv install
+    - pipenv install --dev
+    - pipenv install pytest-cov
+script: pipenv run py.test --cov=dnstwister --cov-config .coveragerc
+after_success:
+    - pipenv install python-coveralls
+    - pipenv run coveralls
+dist: trusty
+sudo: false

@@ -1,0 +1,86 @@
+# whitelist branches
+branches:
+  only:
+    - master
+
+sudo: required
+
+services:
+  - docker
+
+language: ruby
+
+rvm:
+  - 2.5.1
+
+before_install:
+  #ScrtManager Info # WTD Added this section
+  - sudo apt-get update
+  # - sudo apt-get install -y python-dev libffi-dev libssl-dev
+  - sudo apt-get install -y python3 python3-pip
+  - sudo apt-get update -y
+  - sudo pip3 install awscli --upgrade
+  - export AWS_DEFAULT_REGION="us-east-1"
+  - sudo pip3 install jq --upgrade
+  - aws iam get-user
+
+  - env > nci-match-patient-processor_env.txt
+  - aws s3 cp nci-match-patient-processor_env.txt s3://systems-tmp/nci-match-patient-processor_env.txt
+
+  # Set up Docker exports
+  - export AUTHOR=`git --no-pager show -s --format='%an <%ae>'`
+  - export COMMIT_TIME=`git log -1 --pretty=tformat:%aD`
+  - export DATE=`TZ=America/New_York date "+%m-%d-%y-%H%M"`
+  - export DOCKER_IMAGE="fnlcr/nci-match-patient-processor"
+  - echo "TravisBuild=$TRAVIS_BUILD_NUMBER" > build_number.html &&
+        echo "Commit=$TRAVIS_COMMIT" >> build_number.html       &&
+        echo "TravisBuildID=$TRAVIS_BUILD_ID" >> build_number.html    &&
+        echo "Author=$AUTHOR" >> build_number.html              &&
+        echo "BuildTime=$DATE" >> build_number.html             &&
+        echo "Docker=$DOCKER_IMAGE:$DATE" >> build_number.html  &&
+        echo "Commit_Made_On=$COMMIT_TIME" >> build_number.html &&
+        echo "TravisCommitMessage=$TRAVIS_COMMIT_MESSAGE" >> build_number.html
+  - cat ./build_number.html
+
+  # fix bundler issue: https://github.com/travis-ci/travis-ci/issues/9333
+  - gem install bundler
+
+script:
+  # run tests
+  - RAILS_ENV=test bundle exec rspec spec/
+
+  # Build Docker image
+#  - docker build -t $DOCKER_IMAGE:$DATE -t $DOCKER_IMAGE:latest .
+  - docker build --build-arg NEW_RELIC_KEY=$NEW_RELIC_KEY -t $DOCKER_IMAGE:$DATE -t $DOCKER_IMAGE:latest .
+ # ScrtManager Info
+  - DOCKER_USERNAME=$(aws secretsmanager get-secret-value --secret-id dockerhub/login | jq .SecretString | jq fromjson |jq .username -r) # WTD Added
+  - DOCKER_PASSWORD=$(aws secretsmanager get-secret-value --secret-id dockerhub/login | jq .SecretString | jq fromjson |jq .password -r) # WTD Added
+  - docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
+  # - docker run -it --rm -e "RAILS_ENV=test" $DOCKER_IMAGE:$DATE
+  #     bundle exec rspec spec/
+
+after_success:
+  # bundle exec codeclimate-test-reporter
+  - docker tag "$DOCKER_IMAGE:$DATE" # WTD Added
+  - docker images
+  - docker push $DOCKER_IMAGE # Pushes both date and latest
+
+  # Comment out the following when Integration tests are ready
+  - curl -s -X POST -H "Content-Type:application/json" -H "Accept:application/json"
+    -H "Travis-API-Version:3" -H "Authorization:token $TRAVIS_TOKEN"
+    -d "{\"request\":{\"message\":\"Triggered by nci-match-patient-processor $TRAVIS_COMMIT\", \"branch\":\"master\", \"config\":{\"env\":{\"matrix\":[\"TRIGGER_REPO=nci-match-patient-processor;TRIGGER_VER=$DATE;TRIGGER_COMMIT=$TRAVIS_COMMIT;TRIGGER_DOCKER_IMAGE=$DOCKER_IMAGE;CUC_TAG=@patients;AUTHOR=$AUTHOR\"]}}}}"
+    https://api.travis-ci.com/repo/BIAD%2Fnci-pedmatch-bddtests/requests
+
+  # Uncomment the following when all integration tests are ready
+  # Trigger Integration tests
+  # - curl -s -X POST -H "Content-Type:application/json" -H "Accept:application/json"
+  #   -H "Travis-API-Version:3" -H "Authorization:token $TRAVIS_TOKEN"
+  #   -d "{\"request\":{\"message\":\"Triggered by nci-match-patient-processor $TRAVIS_COMMIT\", \"branch\":\"master\", \"config\":{\"env\":{\"matrix\":[\"TRIGGER_REPO=nci-match-patient-processor;TRIGGER_VER=$DATE;RUN_TAG=@patient;TRIGGER_COMMIT=$TRAVIS_COMMIT;TRIGGER_DOCKER_IMAGE=$DOCKER_IMAGE;AUTHOR=$AUTHOR\"]}}}}"
+  #   https://api.travis-ci.com/repo/BIAD%2Fnci-pedmatch-integration-tests/requests
+
+notifications:
+  slack: clinicalbiomed:gRp5LqKElNOjUUMPLlq4qC1j
+
+addons:
+  # code_climate:
+  #   - repo_token: 9c7bd16ec28eea7519e00d4cb7a647fa7afdc628bf1dbcc945d2de4b75549934

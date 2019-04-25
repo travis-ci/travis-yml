@@ -1,0 +1,26 @@
+language: php
+
+php:
+  - 7.1
+
+addons:
+  apt:
+    sources:
+      - mysql-5.7-trusty
+    packages:
+      - mysql-server
+      - mysql-client
+
+before_script:
+  - cp .env.travis .env
+  - mysql -e 'create database employee_portal_test;'
+  - composer self-update
+  - composer install --no-interaction
+  - php artisan migrate
+
+script:
+  - php artisan key:generate
+  - composer dump-autoload
+  - npm install
+  - npm run production
+  - vendor/bin/phpunit

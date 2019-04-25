@@ -1,0 +1,34 @@
+sudo: false
+language: perl
+cache:
+  directories:
+  - $HOME/perl5/perlbrew
+perl:
+  - "5.18"
+addons:
+  postgresql: 9.3
+services:
+  - redis-server
+env:
+  - PERL_CPANM_OPT="--mirror http://cpan.metacpan.org --notest --force --skip-satisfied --no-interactive"
+before_install:
+  - sudo apt-get update -q
+  - sudo apt-get install libdbd-pg-perl libjpeg-dev  libpng-dev libgif-dev
+  - cpanm -n DBIx::Class DBD::Pg
+  - cpanm -n App::Sqitch App::ForkProve
+  - sqitch --version
+
+install:
+  - cpanm -n Module::Install Catalyst::Devel Text::CSV JSON::Any MooseX::Types::JSON
+  - cpanm -n DBIx::Class::Optional::Dependencies
+  - cpanm -n --installdeps .
+before_script:
+  - psql -c 'create database iota_dev;' -U postgres
+  - sqitch deploy -t local
+script:
+  - forkprove -MIota -j 2 -lr t/
+
+notifications:
+  irc:
+    channels:
+      - "chat.freenode.net#iota"

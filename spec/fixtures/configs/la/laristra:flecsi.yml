@@ -1,0 +1,141 @@
+language: cpp
+
+sudo: required
+
+services:
+- docker
+
+env:
+  matrix:
+    - DISTRO=ubuntu RUNTIME=legion DOCKERHUB=true
+    - DISTRO=ubuntu RUNTIME=mpi DOCKERHUB=true WERROR=yes
+    - DISTRO=ubuntu_mpich RUNTIME=legion DOCKERHUB=true
+    - DISTRO=ubuntu_mpich RUNTIME=legion WERROR=yes
+    - DISTRO=ubuntu_mpich RUNTIME=mpi DOCKERHUB=true
+    - DISTRO=ubuntu_mpich RUNTIME=mpi WERROR=yes
+
+    - DISTRO=fedora RUNTIME=legion    DOCKERHUB=true
+    - DISTRO=fedora RUNTIME=legion    IGNORE_NOCI=true
+    - DISTRO=fedora RUNTIME=legion    WERROR=yes
+    - DISTRO=fedora RUNTIME=mpi    DOCKERHUB=true
+    - DISTRO=fedora RUNTIME=mpi    IGNORE_NOCI=true
+    - DISTRO=fedora RUNTIME=mpi    WERROR=yes
+#    - DISTRO=fedora RUNTIME=hpx    DOCKERHUB=true
+#    - DISTRO=fedora RUNTIME=hpx    WERROR=yes
+    - DISTRO=fedora_mpich RUNTIME=legion DOCKERHUB=true
+    - DISTRO=fedora_mpich RUNTIME=legion IGNORE_NOCI=true
+    - DISTRO=fedora_mpich RUNTIME=legion WERROR=yes
+    - DISTRO=fedora_mpich RUNTIME=mpi DOCKERHUB=true
+    - DISTRO=fedora_mpich RUNTIME=mpi IGNORE_NOCI=true
+    - DISTRO=fedora_mpich RUNTIME=mpi WERROR=yes
+#    - DISTRO=fedora RUNTIME=legion COVERAGE=ON
+#    - DISTRO=fedora RUNTIME=mpi    COVERAGE=ON
+#    - DISTRO=fedora RUNTIME=hpx    COVERAGE=ON
+
+matrix:
+  allow_failures:
+    - compiler: clang
+      env: DISTRO=ubuntu RUNTIME=mpi DOCKERHUB=true WERROR=yes 
+    - compiler: clang
+      env: DISTRO=ubuntu_mpich RUNTIME=legion WERROR=yes 
+    - compiler: gcc
+      env: DISTRO=fedora RUNTIME=legion    IGNORE_NOCI=true
+    - compiler: clang
+      env: DISTRO=fedora RUNTIME=legion    IGNORE_NOCI=true
+    - compiler: gcc
+      env: DISTRO=fedora_mpich RUNTIME=legion IGNORE_NOCI=true
+    - compiler: clang
+      env: DISTRO=fedora_mpich RUNTIME=legion IGNORE_NOCI=true
+    - compiler: clang
+      env: DISTRO=ubuntu_mpich RUNTIME=mpi WERROR=yes
+    - compiler: clang
+      env: DISTRO=fedora RUNTIME=mpi WERROR=yes
+    - compiler: clang
+      env: DISTRO=fedora RUNTIME=hpx    DOCKERHUB=true
+    - compiler: clang
+      env: DISTRO=fedora RUNTIME=hpx    IGNORE_NOCI=true
+    - compiler: clang
+      env: DISTRO=fedora RUNTIME=hpx    WERROR=yes
+    - compiler: clang
+      env: DISTRO=fedora RUNTIME=hpx    COVERAGE=ON
+
+before_install:
+ - git config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*"
+ - git fetch --unshallow && git fetch --tags #for versioning
+
+script:
+  - cp -vr docker ${HOME}/docker
+  - sed -i "1s/fedora/${DISTRO}/" ${HOME}/docker/Dockerfile
+  - cd ../../
+  - mv -v ${TRAVIS_REPO_SLUG} $HOME/docker
+  - cp -r $HOME/.ccache ${HOME}/docker/ccache
+  - if [[ ${CC} != gcc ]]; then TAG="_${CC}"; fi
+  - if [[ ${TRAVIS_BRANCH} != stable ]]; then TAG="${TAG}_${TRAVIS_BRANCH//[^a-zA-Z0-9]/_}"; fi
+  - travis_retry timeout 540 docker pull $(sed -n '1s/FROM //p' ${HOME}/docker/Dockerfile)
+  - docker build 
+                --build-arg LEGION=${LEGION} 
+                --build-arg RUNTIME=${RUNTIME} 
+                --build-arg CXXFLAGS="${WERROR:+-Werror} -Wno-deprecated-declarations"
+                --build-arg COVERAGE=${COVERAGE} --build-arg MINIMAL=${MINIMAL}
+                --build-arg CC=${CC} --build-arg CXX=${CXX}
+                --build-arg CI=${CI} --build-arg TRAVIS=${TRAVIS} --build-arg TRAVIS_OS_NAME=${DISTRO}
+                --build-arg IGNORE_NOCI=${IGNORE_NOCI}
+                --build-arg TRAVIS_BRANCH=${TRAVIS_BRANCH} --build-arg TRAVIS_JOB_NUMBER=${TRAVIS_JOB_NUMBER}
+                --build-arg TRAVIS_PULL_REQUEST=${TRAVIS_PULL_REQUEST} --build-arg TRAVIS_JOB_ID=${TRAVIS_JOB_ID}
+                --build-arg TRAVIS_TAG=${TRAVIS_TAG} --build-arg TRAVIS_REPO_SLUG=${TRAVIS_REPO_SLUG}
+                --build-arg TRAVIS_COMMIT=${TRAVIS_COMMIT}
+                -t ${TRAVIS_REPO_SLUG}:${DISTRO}_${RUNTIME}${TAG} ${HOME}/docker/ &&
+    rm -rf ${HOME}/.ccache &&
+    CON=$(docker run -d ${TRAVIS_REPO_SLUG}:${DISTRO}_${RUNTIME}${TAG} /bin/bash) &&
+    docker cp ${CON}:/home/flecsi/.ccache ${HOME}/
+
+after_success:
+  - shopt -s extglob && [[ ${TRAVIS_BRANCH} = @(master|stable) && ${DOCKERHUB} = true ]] && DEPLOY=yes
+  - if [[ ${DEPLOY} = yes && ${DOCKER_USERNAME} && ${DOCKER_PASSWORD} && ${TRAVIS_PULL_REQUEST} == false ]]; then
+      docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
+      docker push "${TRAVIS_REPO_SLUG}:${DISTRO}_${RUNTIME}${TAG}";
+    fi
+  - if [[ ${TRAVIS_JOB_NUMBER} = *.1 ]]; then
+      cd $HOME/docker/flecsi;
+      rm -rf cinch;
+      git fetch origin gh-pages && git checkout -b gh-pages FETCH_HEAD;
+      mkdir -p assets;
+      rm -rf assets/doxygen doc;
+      CON=$(docker run -d ${TRAVIS_REPO_SLUG}:${DISTRO}_${RUNTIME}${TAG}) && docker cp ${CON}:/home/flecsi/flecsi/build/doc . ;
+      mv doc/doxygen/html assets/doxygen;
+      for i in doc/*.pdf; do mv ${i} ${i%-0.0*}.pdf; done;
+      mv doc/*.pdf assets;
+      rm -rf doc;
+      git add --all assets/doxygen assets/*.pdf;
+      if [[ ${TRAVIS_BRANCH} = master && ${encrypted_5669a181ba27_key} && ${encrypted_5669a181ba27_iv} && ${TRAVIS_PULL_REQUEST} == false ]]; then
+        git config --global user.name "Automatic Deployment (Travis CI)";
+        git config --global user.email "flecsi-commit@lanl.gov";
+        git commit -m "Documentation Update";
+        openssl aes-256-cbc -K $encrypted_5669a181ba27_key -iv $encrypted_5669a181ba27_iv -in deploy.enc -out ~/.ssh/id_rsa -d;
+        chmod 600 ~/.ssh/id_rsa;
+        git push git@github.com:${TRAVIS_REPO_SLUG} gh-pages:gh-pages;
+      else
+        git status;
+        git diff --cached --no-color | head -n 500;
+      fi;
+    fi
+
+branches:
+  only:
+  - master
+  -  /^stable\/.*$/
+
+cache:
+  ccache: true
+
+compiler:
+  - gcc
+  - clang
+
+notifications:
+  branches:
+    only:
+      - stable
+  email:
+    recipients:
+      secure: OzppTS3kOkp5+052T8DMtXiNmUO5OttAY01kC1lDqwdPVAQiFvrnR3iqz/AJIJk5bNsI0vbmRtCBL4PnH3aUm7CUpXN3RF7vF0vpl0PxPMc/Ms4Trsrv96jqPyoJoACRqgk6W7/pdr8OXbYTh+7u2bO9/sUaZTDT/PbH9RQdKrDa2u+uebL9s0FTo/ObZSNXRAoXmSY46gDXzWbEVO2co6ETu4eXy/Bu0wvhB4jXneA+0sv8dXAmRmvL1tsxTeAEcV2MxLlaiVPAyvpCLzt3ZRvkohAjCeQaVTTo8hP0S7YdAMwUmAcMI8NASWVh8fcaFV72IsFkg7nD2Jiv7mRt52vwqDiJLw65LN9/+ltrK142F/nFUSeB9ynPBjbpXyEMl4nsBbO9hk5io4lKYQ/EJ2WJyCPaFtuy1fR9Gzrjj/LwKPw2WrxAlrlNYlIFdMDvltTXGegheVNePDHSOc6AS/32VW4A8fZh5gUAfB96XveRj0fGegCyFdIzErZg4fiZxOEDkqeB8sxuPnX+ylKr2gWsjpfs+etjnANVsgfPMOWaIsW8K2FqVIiTEoGGELoQHEe5uzOcXgtRQSbji2U28c5pRhNHdoitODwlTMVE/3WEiQksFGztR675LlPfF15+HyjWnAS/gN5vLIqmrQoZcp1+Pbr4ebxwTcL4JSGUaPs=

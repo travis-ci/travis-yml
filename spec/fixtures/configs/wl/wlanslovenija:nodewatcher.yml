@@ -1,0 +1,40 @@
+dist: trusty
+language: python
+python:
+ - 2.7
+env:
+  global:
+    - PYTHONPATH=.
+    - DB_1_ENV_PGSQL_ROLE_1_USERNAME=postgres
+    - DB_1_PORT_5432_TCP_ADDR=localhost
+    - DB_1_PORT_5432_TCP_PORT=""
+    - INFLUXDB_1_PORT_8086_TCP_ADDR=localhost
+services:
+ - docker
+ - postgresql
+addons:
+  postgresql: "9.5"
+  apt:
+    packages:
+     - postgresql-9.5-postgis-2.3
+before_install:
+ - docker run -d -p 8086:8086 -v /var/lib/influxdb influxdb
+ - sudo add-apt-repository --yes ppa:fontforge/fontforge
+ - sudo apt-get update
+ - cat packages.txt | grep -v postgresql- | grep -v libgeos-c1 | grep -v libgdal1i | sudo DEBIAN_FRONTEND=noninteractive xargs apt-get --no-install-recommends -y --force-yes install
+ - sudo DEBIAN_FRONTEND=noninteractive apt-get --no-install-recommends -y --force-yes install libgdal1h
+ - sudo rm -rf /dev/shm
+ - sudo ln -s /run/shm /dev/shm
+ - cp /usr/lib/python2.7/dist-packages/fontforge.* /home/travis/virtualenv/python2.7/lib/python2.7/site-packages
+install:
+ - pip install pep8
+ - pip install https://github.com/lamby/django-lint/archive/master.zip pylint
+ - sed -i 's/^-r.*$//g' requirements.txt
+ - cat requirements-readthedocs.txt requirements.txt | xargs -n 1 sh -c 'CPLUS_INCLUDE_PATH=/usr/include/gdal C_INCLUDE_PATH=/usr/include/gdal pip install $0 || exit 255'
+before_script:
+ - createdb nodewatcher
+ - psql -U postgres -c "create extension postgis" nodewatcher
+ - pep8 nodewatcher
+ - pylint nodewatcher || true
+script:
+ - python manage.py test --keepdb

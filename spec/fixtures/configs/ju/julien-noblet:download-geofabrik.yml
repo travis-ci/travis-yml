@@ -1,0 +1,161 @@
+language: go
+sudo: false
+go:
+- '1.12'
+- '1.11'
+- '1.10'
+- '1.9'
+- '1.8'
+- stable
+- tip
+before_install:
+- go get github.com/mattn/goveralls
+install:
+- go get -v github.com/mitchellh/gox
+- go get -t -v ./...
+script: go test -bench=. -benchmem -v ./...
+
+stages:
+- test
+- goveralls
+- Geofabrik
+- OSMfr
+- GisLab
+- Readme
+- build stable
+- build 1.7
+- build 1.8
+- build 1.9
+- build 1.10
+- build 1.11
+- build 1.12
+- build tip
+jobs:
+  include:
+  - stage: Geofabrik
+    if: tag IS present OR commit_message =~ /(yaml|YAML|\.yml|geofabrik|Geofabrik)/
+      AND type != pull_request
+    go: stable
+    script: make geofabrik
+    deploy:
+      provider: pages
+      skip-cleanup: true
+      github-token: $GITHUB_TOKEN
+      keep-history: true
+      target-branch: $TRAVIS_BRANCH
+      on:
+        all_branches: true
+  - stage: OSMfr
+    if: tag IS present OR commit_message =~ /(yaml|YAML|\.yml|osmfr|OSMfr|openstreetmap\.fr)/
+      AND type != pull_request
+    go: stable
+    script: make osmfr
+    deploy:
+      provider: pages
+      skip-cleanup: true
+      github-token: $GITHUB_TOKEN
+      keep-history: true
+      target-branch: $TRAVIS_BRANCH
+      on:
+        all_branches: true
+  - stage: GisLab
+    if: tag IS present OR commit_message =~ /(yaml|YAML|\.yml|gislab|GisLab)/
+      AND type != pull_request
+    go: stable
+    script: make gislab
+    deploy:
+      provider: pages
+      skip-cleanup: true
+      github-token: $GITHUB_TOKEN
+      keep-history: true
+      target-branch: $TRAVIS_BRANCH
+      on:
+        all_branches: true
+  - stage: Readme
+    if: tag IS present
+      AND type != pull_request
+    go: stable
+    script: make readme
+    deploy:
+      provider: pages
+      skip-cleanup: true
+      github-token: $GITHUB_TOKEN
+      keep-history: true
+      target-branch: $TRAVIS_BRANCH
+      on:
+        all_branches: true
+  - stage: goveralls
+    if: tag IS present OR commit_message !~ /(no-coverage|no-test)/
+    go: stable
+    script: 
+    - go test -bench=. -benchmem -v ./...
+    - "$GOPATH/bin/goveralls -service=travis-ci"
+  - stage: build 1.10
+    if: tag IS present OR ( commit_message =~ /(force-build|1_10)/
+      AND commit_message !~ /(no-build|no-1_10)/ )
+    go: stable
+    script: make
+  - stage: build 1.9
+    if: tag IS present OR ( commit_message =~ /(force-build|1_9)/
+      AND commit_message !~ /(no-build|no-1_9)/ )
+    go: '1.9'
+    script: make
+  - stage: build 1.8
+    if: tag IS present OR ( commit_message =~ /(force-build|1_8)/
+      AND commit_message !~ /(no-build|no-1_8)/ )
+    go: '1.8'
+    script: make
+  - stage: build 1.7
+    if: tag IS present OR ( commit_message =~ /(force-build|1_9)/
+      AND commit_message !~ /(no-build|no-1_7)/ )
+    go: '1.7'
+    script: make
+  - stage: build 1.11
+    if: tag IS present OR ( commit_message =~ /(force-build|1_11)/
+      AND commit_message !~ /(no-build|no-1_11)/ )
+    go: '1.11'
+    script: make
+  - stage: build 1.12
+    if: tag IS present OR ( commit_message =~ /(force-build|1_11)/
+      AND commit_message !~ /(no-build|no-1_11)/ )
+    go: '1.12'
+    script: make
+  - stage: build tip
+    if: tag IS present OR commit_message !~ /(no-build)/
+    go: tip
+    script: make
+  - stage: build stable
+    if: tag IS present OR commit_message !~ /(no-build)/
+    go: stable
+    script: make
+    deploy:
+      provider: releases
+      api_key:
+        secure: o+lsHtm1FV0Hu/FHOyujZE11pTJuexUwWQtbiYr21Z4+BEcDzVN+Pxr2s1JnmNKcl7wqNBVSyNAnXUpqUWcgwi9liM9dOn+DcHUAT4eMM/zTm9vgf1qjxfoDJK3suXLQlzRNGkygz6PFGZvICjSmJTDsGTNpEIezFdXupOvZgnc5CT7qp+xBB95tQlWfaRVeCkSKqRyOK09J+scliwJR6SZlGqBUSDkb9RPMxpZ2wjNYf8fWQFHtzBcutT9gFJZLE2WPei6or6jOm7i6Haaa7Pg4Lhrlge7N1fq6FsQbcHqLX3F349voN5Nt+TtxY3sIeACNHqNkEuxkQnjAkTKoF+DTODXnwOjp6Mp1xb4LK+ejfYUppF6384sFDmKIc7xNJU1Mmwp+Bqw1q3WNyYqAbwLTC/UIlADIVglOH9r8bLJGikRPJPR3QnEznIL06l5lM34wNicvhqSKSIf06kxAXwAK7QD6prBPuTmlCZFNDASDw7E/IjUd3tXTgYvj8Fb8pMa4jsb7Bafgbo2sliicFuC+ua7CWvTWjlsMSJPLkdbEJku1VSdTTTV/rK8sqRbgc/Q/8BOQm/6ZCGntWtHacsefopaMuJR7hhMUaviNZOsjUunn+fkTNWByLX2nHHJAuyNbAXgpxwIkGGZONvfNxgi8Dw2Oz5sM6EUcKxSxTBM=
+      file:
+      - download-geofabrik_darwin_386.zip
+      - download-geofabrik_darwin_amd64.zip
+      - download-geofabrik_freebsd_386.zip
+      - download-geofabrik_freebsd_amd64.zip
+      - download-geofabrik_freebsd_arm.zip
+      - download-geofabrik_linux_386.zip
+      - download-geofabrik_linux_amd64.zip
+      - download-geofabrik_linux_arm.zip
+      - download-geofabrik_linux_mips.zip
+      - download-geofabrik_linux_mips64.zip
+      - download-geofabrik_linux_mips64le.zip
+      - download-geofabrik_linux_mipsle.zip
+      - download-geofabrik_linux_s390x.zip
+      - download-geofabrik_netbsd_386.zip
+      - download-geofabrik_netbsd_amd64.zip
+      - download-geofabrik_netbsd_arm.zip
+      - download-geofabrik_openbsd_386.zip
+      - download-geofabrik_openbsd_amd64.zip
+      - download-geofabrik_windows_386.zip
+      - download-geofabrik_windows_amd64.zip
+      skip_cleanup: true
+      on:
+        tags: true
+env:
+  global:
+    secure: RDB5xi5zZQNqMbOMAG2hX25UyGWGcCjjuOtmtoMSVKhwvvfJgSp840UaT1X4fNlQWb9MXI2f/nWDA1j2XXLJCkCyBWlWgPAsWLi9DwalEFYBVlrAeT9prWHGfsAPa4UbMVnGFfWdNy3rcfOTJUt2FC77S9sxm0kHP4LyCKE459QdmTc5sn9Cb9LuVLtanzb19NImi3F00Wc9g2KoD1CZXncde6iv34NfKgdUGvFhMofensGgD3qAJsjiREC4Vk2oO+9z5dCQ/GmNlFDG/FVst80gsQYsi6m5K5suC+jvYAmFDaENDwgTsRuqYSVnlSxB3IRYkXUPtllKfvx1Z+8ARFxRrX1DWcUkxb2CKq/DIVFPYillA8Wpcr3iBw+S5Tc9Q1G7LQLbc6g0NohdUrIrORP3TwLkq8pmyd+w4SMurGDod1kNfmprNTbgVlLvhCNSpRtyA1YZ74/nRzti+a/TG8zwCbXrlBkSyVw3xmPehEQ0Uu8R3UssvymN1fxKpBDpvcub6nv0k+mRT7mnZvM8uclojrq1rS/2ecq0E0fCdHBZcpwzDG7E7k4KC8e122sLNe4sdscEQUh050gTBF2PkLy7fQF6P+UzkFgJvzd7EPJ99gwxwiMMfKQiR/qFZHZ+j+qIxipc91fA4l0Qn9J89wHVzXJJ5GSCWIX0gb8TNNw=

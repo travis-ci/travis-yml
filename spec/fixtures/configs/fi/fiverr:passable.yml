@@ -1,0 +1,57 @@
+language: node_js
+node_js:
+- '6'
+- '8'
+- node
+cache: npm
+
+env:
+  global:
+    - GIT_NAME: A1vy
+    - GIT_EMAIL: opensource@fiverr.com
+    - GITHUB_REPO: fiverr/passable
+    - GIT_SOURCE: docs
+
+before_script:
+- npm run build
+- npm run eslint
+- flow
+
+after_success:
+- if [ "$TRAVIS_NODE_VERSION" == "8" ]; then node ./scripts/make_version_file.js; fi
+- chmod +x ./scripts/push_tag_to_master.sh
+- if [ -n "$TRAVIS_TAG" -a "$TRAVIS_NODE_VERSION" == "8" ]; then ./scripts/push_tag_to_master.sh; fi
+- chmod +x ./scripts/docs.sh
+- if [ "$TRAVIS_BRANCH" == "master" -a "$TRAVIS_NODE_VERSION" == "8" -a "$TRAVIS_PULL_REQUEST" == "false" ]; then ./scripts/docs.sh; fi
+- chmod +x ./scripts/prepare_next.sh
+- if [ "$TRAVIS_BRANCH" != "master" -a "$TRAVIS_NODE_VERSION" == "8" ]; then ./scripts/prepare_next.sh; fi
+
+deploy:
+  - provider: npm
+    email: evyatar.a@fiverr.com
+    skip_cleanup: true
+    api_key: $NPM_TOKEN
+    on:
+      repo: fiverr/passable
+      branch: master
+      node: '8'
+  - provider: npm
+    email: evyatar.a@fiverr.com
+    skip_cleanup: true
+    api_key: $NPM_TOKEN
+    tag: "next"
+    on:
+      all_branches: true
+      condition: $TRAVIS_BRANCH = "next"
+      repo: fiverr/passable
+      node: '8'
+  - provider: npm
+    email: evyatar.a@fiverr.com
+    skip_cleanup: true
+    api_key: $NPM_TOKEN
+    tag: "${TRAVIS_COMMIT:(-6)}"
+    on:
+      all_branches: true
+      condition: $TRAVIS_BRANCH != "next" && $TRAVIS_BRANCH != "master"
+      repo: fiverr/passable
+      node: '8'

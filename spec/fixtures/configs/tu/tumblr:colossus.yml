@@ -1,0 +1,36 @@
+language: scala
+
+scala:
+- 2.12.2
+
+jdk: oraclejdk8
+
+sudo: false
+
+services:
+- memcached
+- redis
+
+cache:
+  directories:
+  - $HOME/.ivy2/cache
+  - $HOME/.sbt/boot/
+
+script:
+- sbt +clean +coverage +testAll +coverageReport +coverageAggregate
+
+before_cache:
+- find $HOME/.ivy2/cache -name "ivydata-*.properties" -print -delete
+- find $HOME/.sbt        -name "*.lock"               -print -delete
+  
+env:
+  global:
+  - secure: IV1pPmnkaBj2iqeHSoLkhEjAXVFkJgEghhe7SFJ/bL2lEzoqIHcudw1I1WHMEW9ANzo1pEZRCj0GFfNn5/HWD931wMOlXbEdX/B4vLw8KcHZQzWFEDUMYzGiV5xzDjSYTX8DwUDxy1UDNmOOkS3DYjY3FBWpw8qyuLaLmYGpC84=
+  - secure: EZRC7oP4UQXUVBkTIiviCHPoNRw1ur9rhFFqCV6qVpyNpg7uGtM4l882S598KKXW0C3oemXHEEdrF5t5cGozV2nIRYkuEb9K5Kb+1TIRMPZ3KTKGhKTE/5oObTnuIyggSp0ZQLoB7s5eRUup7O74UGkSYY8oJBqixDDhS5g9mwc=
+  - secure: XSIdWCu0lX25akXyl8gRc5C7YhASFwkaYWxk7GImBGoZ1apXou9zUGQtxLuOwWcG1HkRldGmwBZz6OqV135jxOcl6IO+brvd0WGPuWXqPDTWWU63K4GgA5oNh+Pbbd/MxGceYbQKkRAgGxeiB8WhOuoxbfHHsjBordp/tco5hX4=
+
+after_success:
+- if [[ "$TRAVIS_PULL_REQUEST" != "false" ]]; then bash <(curl -s https://codecov.io/bash);
+  elif [[ "$TRAVIS_BRANCH" = "master" || "$TRAVIS_BRANCH" = "develop" ]]; then bash
+  <(curl -s https://codecov.io/bash); fi
+- ./publish.sh

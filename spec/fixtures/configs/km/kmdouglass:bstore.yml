@@ -1,0 +1,42 @@
+# This script is based on the example at http://conda.pydata.org/docs/travis.html
+language: python
+python:
+  - "3.5"
+
+before_install:
+  # Download the test files
+  - cd ..
+  - git clone https://github.com/kmdouglass/bstore_test_files.git
+  - cd $TRAVIS_BUILD_DIR
+
+install:
+  - sudo apt-get update
+  # We do this conditionally because it saves us some downloading if the
+  # version is the same.
+  - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
+      wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O miniconda.sh;
+    else
+      wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
+    fi
+  - bash miniconda.sh -b -p $HOME/miniconda
+  - export PATH="$HOME/miniconda/bin:$PATH"
+  - hash -r
+  - conda config --set always_yes yes --set changeps1 no
+  - conda update -q conda
+  # Useful for debugging any issues with conda
+  - conda info -a
+
+  # Replace dep1 dep2 ... with your dependencies
+  - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION nose numpy scipy matplotlib scikit-learn pytables h5py pandas
+  - source activate test-environment
+  - conda install -c soft-matter trackpy
+  - conda install -c kmdouglass tifffile=0.10.0
+
+  # Install third party packages from pip
+  - easy_install pyhull
+  - pip install filelock
+
+  # Install this library
+  - python setup.py install
+
+script: nosetests

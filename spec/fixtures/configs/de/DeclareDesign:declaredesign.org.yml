@@ -1,0 +1,144 @@
+language: r
+pandoc_version: 2.5
+
+cache:
+  packages: true
+  directories:
+    - "$HOME/bin"
+    - "$HOME/cache"
+
+bioc_packages: Biobase
+
+addons:
+  apt:
+    packages:
+      - python3.5
+      - python3-pip
+
+env:
+  global:
+    # CONTENT_FOLDERS are the folders that we want to be cleared out and recreated every time the build runs. Put a folder
+    # here if your script depends on the existence of an empty folder at build-time.
+    # TOPLEVEL_FOLDERS are the folders that live at the toplevel of the website. For example, you can get to the folder
+    # `about` by going to `declaredesign.org/about`. This makes the `about` folder a toplevel folder.
+    # CONTENT_FOLDER is the folder where you want all the markdown files to live.
+    # PUBLISH_FOLDER is the folder where you want the rendered HTML files to be placed.
+    - BASE_URL='https://declaredesign.org'
+    - CONTENT_FOLDERS='content/r content/stata public/ content/library public/library/designs'
+    - TOPLEVEL_FOLDERS='categories conduct mida r  about library stata'
+    - CONTENT_FOLDER='content'
+    - PUBLISH_FOLDER='public'
+    - BLOG_FOLDER='blog'
+    - AWS_ACCESS_KEY_ID='AKIAID5245DAZ3JQXVZQ'
+    - secure: KOnPCpOOcZVRog3i2oiEYX/MDEgO+kuvfowaqdkAEfj4nkngPMdlLQqG5A/LDANaYPWILmg/MMxcrA7fWQqKmWV3jRBY0UKkOIuEqEGKjjLAfUHUkl8ugk5GEu1QpnuTpgj2Ful6WbDVReUKxa8BXEsdVlImKMv2Gdhy8rEmpMToAmbrY2IFwUVodCJ8J+YroTh5u/xh7epENcyXnBjVLcHPP5xp94jaJXDyTKofinSRA6AiE2HLYaOZpwKnzTqq9nxWoJlb2m2gtZKIaeDBauop0zTXFVLxIVuYH2S+umEJIG0MtPp4euHgDiduuA+NnF3LKbpLGWU1NxH1GmmPbwqGk/brdL0F2rNmB7r8Vjytsv72f4IFmGQm8uBxXVQMD81YWm2IQWd47vRK0cQgx+QN0J0E+hSE3dzDCax1wxUMUXearjdZI1DBNLEgPf9zjlFz871ljRvTk7+LZotet+7eU3EvEFC8CuG2dnM9Q/cey1HfusDJQ+sbT9796hhloCYJLXtMPL9ibTjz3y3Li1YXRd9b4q1AlNFh68hxXPdSUAFVUePYB8+gANGezTabQBNK7+Oj0zx0s1ydjiiyFHYjdVi96zK17V0fvYYQmXVN+/Ccw4MT6x+q/Lqw7WzRt7bgc37pQT+Gpg/wpguVawrY/AmroKiIstUHCxid8KM=
+    - secure: ztLAZpVtU6u+0DgkYlc9Fihe3IAVan+BAgoN57P8QdQszqCRUu406V5/tPBlRxVfS4oPljgLJgWAiZYySnRWSIcuuYEmEKWKgT13DlMgHw9UfJd1oh6/J4lERH4BqmpJcAJNpyH31chbvLzI2dydbl4QTH2BbqubuQEpebbvjJPztJss05dOinOVNiQFXV6RFM60DlVnIsvigfWn9AwNN7eoLWinSWGFBPDZBw6ZGxnYdn/lIgWMtLIbeZ1ks0vdRXAowwmGu2y9XaUycrVTqlr0vb9uf9GOMN0M2Clfs3UMx0aaWXgiqKM/mQ8AVQt6b07jtCNoFUPVq2zOsx1gj2/9+NMa5/rzr7YnrbkTU6SkYyPXWz6Q/gtVdDnb+aIWG7qRTw9ozDS7AKqPKBJsWbIsNxQkjZl0MC3hxWW+gNxHCCCAUGZec8QpiCXRnElEWwkoILqwLsWydp8XiZYkiRJ4xoNRaqPpRsh8HwCamg5l2qEfCAdsr/qwMRFoJB26ADIf/q+/vdcKdqakPXv2yx7z24zK/cn3MnKp//g9SjqjBO+XEpOW2LVqbD4oiA11qUB1bMy58NMetcciq7CbS5jL0SyjfC3jpYPUqb3tJ4KrhIPT0Rmg0lOnEraSzj42xQVKJh5DvTuOl9Si9CFK4EVyVYTrHPJUIIQDypfk7RM=
+  matrix:
+    - PACKAGE='DesignLibrary'
+      GITHUB_OWNER='DeclareDesign'
+      BRANCH='master'
+      HOME_FOLDER='library'
+      PKGDOWN_TEMPLATES='DesignLibrary_pkgdown_templates'
+      CUSTOM_SCRIPT='design_library.sh'
+    # This empty package entry will build all non-package files on the website
+    # (e.g., the blog posts, the about page, the code of conduct...)
+    - PACKAGE=''
+      GITHUB_OWNER=''
+      BRANCH=''
+      HOME_FOLDER=''
+      PKGDOWN_TEMPLATES=''
+      CUSTOM_SCRIPT=''
+    - PACKAGE='randomizr'
+      GITHUB_OWNER='DeclareDesign'
+      BRANCH='master'
+      HOME_FOLDER='r/randomizr'
+      PKGDOWN_TEMPLATES='pkgdown_templates'
+      CUSTOM_SCRIPT=''
+    - PACKAGE='strandomizr'
+      GITHUB_OWNER='DeclareDesign'
+      BRANCH='web'
+      HOME_FOLDER='stata/randomizr'
+      PKGDOWN_TEMPLATES='pkgdown_templates'
+      CUSTOM_SCRIPT=''
+    - PACKAGE='fabricatr'
+      GITHUB_OWNER='DeclareDesign'
+      BRANCH='master'
+      HOME_FOLDER='r/fabricatr'
+      PKGDOWN_TEMPLATES='pkgdown_templates'
+      CUSTOM_SCRIPT=''
+    - PACKAGE='estimatr'
+      GITHUB_OWNER='DeclareDesign'
+      BRANCH='master'
+      HOME_FOLDER='r/estimatr'
+      PKGDOWN_TEMPLATES='pkgdown_templates'
+      CUSTOM_SCRIPT=''
+    - PACKAGE='DeclareDesign'
+      GITHUB_OWNER='DeclareDesign'
+      BRANCH='master'
+      HOME_FOLDER='r/declaredesign'
+      PKGDOWN_TEMPLATES='pkgdown_templates'
+      CUSTOM_SCRIPT=''
+
+before_install:
+  - nvm install node
+  - nvm use node
+  - npm install npm@latest -g
+  - node --version
+  - npm --version
+  - npm install
+  - npm install Nick-Rivera/broken-link-checker -g
+  - npm install netlify-cli -g
+
+before_script:
+  - Rscript -e 'blogdown::install_hugo()'
+
+script:
+  - ./scripts/run_build_travis.sh
+
+jobs:
+  include:
+    - stage: check for broken links
+      script: blc https://declaredesign.org -ro --only-404 --hide-ok || exit 1
+
+# Unfortunately, the default name in Travis for the stage that uses all the
+# options from our build matrix is called Test.
+stages:
+  - test
+  - name: check for broken links
+    if: branch = master
+
+notifications:
+  slack:
+    rooms:
+    - secure: Id0J750ZSethSxB4dkWeEYxGtERd7awjoQ4qUW69cdzVjyadKgVQASp+QDFSDC73TwPrunYrEE1qghu7CvEoDXLb1cAaJSNGknmkoZ7XqNYF6z2emdzMv0maJHYclyBoXDwp7ak96Z8tH0vR0kf8aFm3yVimg756yuHdd7Vo7L6NeUKnaojRsnQFPFKV0FxBvC8ge288OWcO9KwUOlwFZ+/LlCAG+5b0CJD7hfGZCiXmCMvFCC9lmneo/NaxIVN06BwYLYBF/OfN/qLhkV38ai2RJcTR5PRYsiajOC/r+UDD6zljnuSLG/00FcvNpA5DkjKYBTKXZZ9W4MLOfAxExdhWG2CQGeA9ulV4n9VsRXP4lTpgdNvmZZfQSGdJTcV3QKWX0PbfKIMc64UkbTrFerTwmwVmyaejR6gcjDyL3+a48IQ6Ugss6sQ+WA5J240ydjRI/5YX5KGpHocsA5kLo0TOlpxpCftQ3SU4hBcLzmhHFGtQdK4XVohXlWcEiocIffGsbKfxCBpTGZMF/ngawxjyolG8dE7Lq6v0rzY8A3t0CzFoL/eVe53qzjwHDInZcC1MzfhSzJ7Ndc+NExWX7PkV52Ne1ubiex9uyJlW8N9waLf2yaYxFhigQaq5dXL+vsgcyig1xRnDrdqoZByr+JytzdLXsmEKYWD8IQmvq7s=
+    on_success: change
+    on_failure: change
+  email:
+    recipients:
+    - alex.coppock@yale.edu
+    - graeme.blair@ucla.edu
+    - jaspercooper@gmail.com
+    on_success: change
+    on_failure: change
+
+after_success:
+  - if [ "$TRAVIS_BUILD_STAGE_NAME" = Test ] && [ "$GITHUB_API_TOKEN" ]; then ./scripts/deploy_previews.sh "$GITHUB_API_TOKEN" "$TRAVIS_PULL_REQUEST" "$PACKAGE"; fi
+
+deploy:
+  provider: s3
+  access_key_id: AKIAID5245DAZ3JQXVZQ
+  secret_access_key:
+    secure: c81kea5I/WTM5NWlpEKkqZp3DMND+GYgwiWZL/VbZu3SJq/bxnU2xoZo9o85h3UY1ZYfuYVT+j1bKq/FBzy+hLmlKwGn1jlBfPdzQKCJPUcwdHndCcCli1Qsi1rxOEzZgvD5ATLP8raywGLdcy/RE2TIVDMAGgRaTN1i7CME4TSzfZtrCMUx1kJ+UKgp9OVa+q6Vc9PqzMdpOzjEVx/zUxd4n9oD1lsRf78Iy5sNrOK+2K7xBbUuGM9xPMJQc93iv0MuQUSEblndSqfwW/nZDUnq3ERWQtmH43h0rtOarnAR1QKWqbLKIY2HNgRQGHs1sjX4qWm1N+GZ05XAS6a59Gmn1FQ+4W3Lq8Sg8izOzBKvBFuIm9ZMJFR33bQ5DHjPGPu6+HOh5rKz9K7zo7UMUktHCjwKHXZxIxx3jtG8VF15o8xfv+HcYo6+WfNwPfZkdTmElC8+aIR6EYXf/bXxJmBT+TQ2Jkf0OduCryGiQ+L/0FdKsczMdKhiLKk/N5/F4gWTgHXyGyG/przyPJX9Ul+Vrhp66i4Yrunmom/8v8azAATgXIhVqHQYzWd7slxdaxXcT8lBGmJpclMg2niEwXtPf6Nx75JR8373sxmy95hFD2W0kq0BuI/AV1e2RStHO8PiJklB9J8V+ScFwD1LxiMbA32r9RWCtdvy28J6RNQ=
+  bucket: declaredesign.org
+  local-dir: public
+  region: us-west-1
+  skip_cleanup: true
+  on:
+    repo: DeclareDesign/declaredesign.org
+    branch: master
+    condition: $TRAVIS_BUILD_STAGE_NAME = Test
+
+# Invalidate CloudFront so that we see the latest version of the files.
+after_deploy:
+  - ./ecr_credentials.sh
+  - pip3 install --user awscli
+  - aws cloudfront create-invalidation --distribution-id "$DISTRIBUTION_ID" --paths '/*'

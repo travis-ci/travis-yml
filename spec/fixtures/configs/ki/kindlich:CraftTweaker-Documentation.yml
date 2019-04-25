@@ -1,0 +1,13 @@
+language: python
+sudo: false
+
+install:
+  - pip install mkdocs==0.16.3
+  - pip install git+https://github.com/linkchecker/linkchecker.git
+
+
+script:
+  - mkdocs build --clean --site-dir site
+  - linkchecker site/index.html --ignore-url="search\.html"
+
+cache: pip

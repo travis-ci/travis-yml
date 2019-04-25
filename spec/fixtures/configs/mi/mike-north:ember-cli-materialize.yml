@@ -1,0 +1,69 @@
+language: node_js
+node_js:
+- '8'
+sudo: false
+dist: trusty
+addons:
+  chrome: stable
+cache:
+  yarn: true
+yarn: true
+env:
+  global:
+  - JOBS=1
+
+stages:
+  - 'Tests'
+  - 'Additional Tests'
+  - 'Canary Tests'
+  - name: 'Deploy'
+    if: branch = master AND type = push
+
+jobs:
+  fail_fast: true
+  allow_failures:
+  - env: EMBER_TRY_SCENARIO=ember-canary
+  include:
+  - stage: Tests
+    name: Tests
+    install:
+    - yarn install --non-interactive && bower install
+    script:
+    - yarn lint:js && ember test
+  - name: Floating Dependencies
+    script:
+    - ember test
+  - stage: Additional Tests
+    node_js: 10
+    env: EMBER_TRY_SCENARIO=ember-1.13
+  - env: EMBER_TRY_SCENARIO=ember-lts-2.16
+  - env: EMBER_TRY_SCENARIO=ember-lts-2.18
+  - env: EMBER_TRY_SCENARIO=ember-release
+  - env: EMBER_TRY_SCENARIO=ember-beta
+  - env: EMBER_TRY_SCENARIO=ember-default-with-jquery
+  - stage: 'Canary Tests'
+    script:
+      - node_modules/.bin/ember try:one $EMBER_TRY_SCENARIO
+    env: EMBER_TRY_SCENARIO=ember-canary
+  - stage: 'Deploy'
+    name: 'Publish to npm'
+    install:
+      - yarn install --non-interactive
+    script: yarn semantic-release
+
+before_install:
+- curl -o- -L https://yarnpkg.com/install.sh | bash
+- export PATH=$HOME/.yarn/bin:$PATH
+- npm install -g bower
+install:
+- yarn install --no-lockfile --non-interactive && bower install
+script:
+- yarn lint:js && ember try:one $EMBER_TRY_SCENARIO
+deploy:
+  provider: heroku
+  api_key:
+    secure: MZDN5BsZUmmxIkOGDC1/fLem7B0E1xoTTX62P/UyzHaNTByQBEBilzhqxarfBVJ+jkrDHVLB4iPxeZKoQhphmdYCBDJvZlPTLmRcSaHBy+m80JfPvm9lkOuTVVklNjcJuwhSLC9rlRxNRL6sVbfJUgOwx/lFEKXyUYVc5Y1Cn6A=
+  app: ember-materialize-demo
+  on:
+    repo: mike-north/ember-cli-materialize
+    condition: "$EMBER_TRY_SCENARIO = ember-release"

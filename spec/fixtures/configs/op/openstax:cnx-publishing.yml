@@ -1,0 +1,63 @@
+dist: trusty
+sudo: required
+language: python
+# Note, /usr/bin/python is used because we must install to the system python
+# in order to make the package available to the plpython Postgres extension.
+python:
+  - "2.7"
+services:
+  - rabbitmq
+  - docker
+before_install:
+  - pip install flake8
+  - flake8 --exclude=cnxpublishing/tests *.py cnxpublishing/
+  - flake8 --max-line-length=200 cnxpublishing/tests
+
+  - sudo apt-get update
+  # remove zope.interface installed from aptitude
+  - sudo apt-get purge python-zope.interface
+
+  # Uninstall pytest as it is old and it will be installed further down
+  - pip uninstall -y pytest
+
+  # Stop local postgres
+  - sudo service postgresql stop
+
+  # Create cnx-db docker image
+  - docker-compose -f .travis-compose.yml up -d
+
+  # Installation for cnx-archive:
+  # * Install cnx-query-grammar
+  - pip install git+https://github.com/Connexions/cnx-query-grammar.git#egg=cnx-query-grammar
+  # * Install rhaptos.cnxmlutils
+  - pip install git+https://github.com/Connexions/rhaptos.cnxmlutils.git#egg=cnx-rhaptos.cnxmlutils
+
+  # Installation for cnx-publishing
+  # Install cnx-cssselect2, required by cnx-easybake
+  - pip install git+https://github.com/openstax/cnx-cssselect2.git#egg=cnx-cssselect2
+  # Install cnx-easybake
+  - pip install git+https://github.com/Connexions/cnx-easybake.git#egg=cnx-easybake
+  # * Install cnx-epub
+  - pip install git+https://github.com/Connexions/cnx-epub.git#egg=cnx-epub
+  # * Install cnx-db
+  - pip install git+https://github.com/Connexions/cnx-db.git#egg=cnx-db
+  # * Install cnx-archive
+  - pip install git+https://github.com/Connexions/cnx-archive.git#egg=cnx-archive
+  # Install the coverage utility and codecov reporting utility
+  - pip install coverage
+  - pip install codecov
+install:
+  - pip install ".[test]"
+before_script:
+  # Give cnxarchive superuser privileges on postgres
+  - docker-compose -f .travis-compose.yml exec db /bin/bash -c "echo 'ALTER USER cnxarchive WITH SUPERUSER' | psql -U postgres postgres"
+  # Stop init_venv from doing anything
+  - docker-compose -f .travis-compose.yml exec db /bin/bash -c "echo 'CREATE SCHEMA venv' | psql -U cnxarchive cnxarchive-testing"
+script:
+  # This is the same as `coverage run setup.py test`.
+  - AS_VENV_IMPORTABLE=false pytest cnxpublishing
+after_success:
+  # Report test coverage to codecov.io
+  - codecov
+notifications:
+  email: false

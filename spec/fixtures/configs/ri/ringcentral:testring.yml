@@ -1,0 +1,39 @@
+sudo: required
+
+git:
+  depth: 10
+
+addons:
+  chrome: stable
+
+language: node_js
+
+node_js:
+  - "10"
+  - "8"
+
+cache:
+  npm: true
+  directories:
+  - $HOME/.npm
+  - node_modules
+
+script: xvfb-run npm run build:ci
+
+stages:
+  - test
+  - name: npm release
+    if: tag IS present
+
+jobs:
+  include:
+    - stage: npm release
+      node_js: "10"
+      script: npm run build
+      deploy:
+        provider: script
+        script: npm run publish:ci
+        skip_cleanup: true
+        on:
+          tags: true
+          all_branches: true

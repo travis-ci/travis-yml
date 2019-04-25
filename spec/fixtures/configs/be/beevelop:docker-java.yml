@@ -1,0 +1,10 @@
+sudo: required
+
+services:
+  - docker
+
+script:
+  - docker build -t beevelop/java .
+  - docker run -d beevelop/java
+  - docker ps -a
+  - docker run beevelop/java /bin/sh -c "java -version"

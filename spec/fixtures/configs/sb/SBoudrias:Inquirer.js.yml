@@ -1,0 +1,17 @@
+sudo: false
+language: node_js
+node_js:
+  - 6
+  - 8
+  - 10
+  - node
+before_script:
+  - npm run bootstrap
+script:
+  - npm test
+after_success:
+  - npm run codecov
+env:
+  global:
+    - FORCE_COLOR=1
+    - secure: dHdnulkfL3Es9kaH0JVFwPk5VUeD7fdiMYdNaId09ZTa9mL9BvYcHmeVK5g1ZIm1F0+QmLeJwjO+4dq1yjRz6IFnpbgQSlhIbYjs+8zBc1v+HTZZfB/kFRIqHO0x4nJG8vKVa+Sg5tp0pI7hiCgevsrlvf4Pb6D0Cyx+faSGNrY=

@@ -1,0 +1,20 @@
+dist: xenial
+sudo: true
+language: python
+matrix:
+  include:
+  - python: 3.6.6
+    name: "python3.6 sphinx1.8"
+    env: sphinxconstraint="<2.0"
+  - python: 3.7.2
+    name: "python3.7 sphinx2.0"
+    env: sphinxconstraint=">=2.0"
+install: 
+    - pip install -r requirements.txt
+    - pip install git+https://github.com/fancycode/pylzma.git --upgrade --no-deps
+    - npm install
+    - pip install sphinx$sphinxconstraint
+    - pip install tkinterquickhelper --no-deps
+    - export PYTHONPATH=src
+script:
+    - python setup.py unittests

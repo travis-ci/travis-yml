@@ -1,0 +1,41 @@
+language: node_js
+node_js:
+- '8'
+env:
+  global:
+  - GH_USER_EMAIL="travis@example.org"
+  - GH_USER_NAME="cozy-bot"
+  - DEPLOY_REPOSITORY="git@github.com:konnectors/cozy-konnector-ameli.git"
+  - secure: fKee/eCi0hxQ/0YKX57Z86VsKuVV+uy2/tliPNfa6dnpoDm+searF5uB3jB0y6jDbQ20mDhkuXx+ovSIJBacVDzgzgtRVJFgXK7JAR+J6syXi9WpynbZDmyWHcs+gJ2uJAKPxGyZSaaZZO3CHz4UKARmgdYLv8veHHJZfuEtPHhhH9QlmM2Ss1/2p+FTQ/uUHlFv1i/yDi7iOba/he9diUt1RriqzHE0ohD+nVfq7QxdEZkP4U7JBmBdS0Vea4FW5xe4IRXpRRLigFzufqlEysHzU33eiXY+kg7cOtPgL9txvLH6ieqw3j3ZMYyYAq9uCFioqrBGXrcZ9Olz7QzbBjWBRJZkr4naSZMunxDdd0sw5ZEhC8znGup1wyPhVQ0/uM3H81SCzWM2XwByLBSum6gWSnLWN+LqR1wmxYGvN5W1UDtU03iG5EBYNZ9l3uOw08XjPCq+tBgpSewLnVf+2CJPuUNmfKa1UMqBPsskVdEd+/wgt0BIThjNZRImUZ7VUbN5NpoaX9wORXnkxvw/yW4qTiraR2wYHwNmURa1eRhtVleCv2UflCf4Gkms1ng4kSy+uYxYc0OU1mlb0D5JVFNni2E0NJY7b0K09BK59ZxR5g11FY4j1o8TyHW/EAbuEFvJ7kF+rMr/WuSZNd9jmffa71Zki9jnLvsrIb0CNJ4=
+cache:
+  yarn: true
+  directories:
+  - node_modules
+branches:
+  except:
+  - build
+  - latest
+script:
+- yarn lint
+- yarn build
+- yarn run check
+deploy:
+- provider: script
+  skip-cleanup: true
+  script: DEPLOY_BRANCH=build yarn deploy && yarn cozyPublish
+  on:
+    branch: master
+- provider: script
+  skip-cleanup: true
+  script: DEPLOY_BRANCH=build yarn deploy && yarn cozyPublish
+  on:
+    tags: true
+before_install:
+- openssl aes-256-cbc -K $encrypted_5e5225ed2e56_key -iv $encrypted_5e5225ed2e56_iv
+  -in github_deploy_key.enc -out /tmp/github_deploy_key -d
+- eval "$(ssh-agent -s)"
+- chmod 600 /tmp/github_deploy_key
+- ssh-add /tmp/github_deploy_key
+after_deploy:
+- rm /tmp/github_deploy_key
+- ssh-add -D

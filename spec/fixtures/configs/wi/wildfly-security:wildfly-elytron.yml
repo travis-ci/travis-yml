@@ -1,0 +1,30 @@
+language: java
+sudo: false
+install: true
+jdk:
+- openjdk11
+notifications:
+  email: false
+env:
+  global:
+    secure: EAmOqz5mDImXqnRH9RANHGTwzs3QHxWkdrz9dF+lECU1jfmmOFr2QP7Vp3WExLcX2J2j5erhRX1F9G9r2pLS2JkShKOgDmQ4rl/1FvQFppUhtuimnyw6sR+sp+VXZ5CCl1QowX+1uukjVlfxWDfYDNI1DUuHwbcQW8PnZj7z+IM=
+addons:
+  coverity_scan:
+    project:
+      name: wildfly-security/wildfly-elytron
+      description: Elytron Coverity Scan via Travis CI
+    notification_email: josef.cacek@gmail.com
+    build_command_prepend: mvn clean
+    build_command: mvn -DskipTests=true compile
+    branch_pattern: master
+  sonarqube:
+    organization: wildfly-security
+    token:
+      secure: Lul8OuAJ+kZG9eTdbsIow1yEqqcawRMHEPJxj43wQyVsmiDCxijUxRI0Rs4JI16evaosRcY/6rIhSPUwh8VxuNkoGXKMXv99YjTEqgpzpjOvhMWZM0dQPBcDWyCgJR0G3m26VQx1bGDDqaBfU3iHIy02judvBjgqpv/5EA9GWAE=
+script:
+# The 'version.sonar.plugin' property used in the following command is just a workaround for an incorrect version used in jboss-parent POM
+- mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent package sonar:sonar -Dversion.sonar.plugin=3.3.0.603
+cache:
+  directories:
+  - "$HOME/.m2/repository"
+  - "$HOME/.sonar/cache"

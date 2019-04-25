@@ -1,0 +1,75 @@
+dist: trusty
+language: java
+# We now cache the Maven dependencies directory for faster builds
+cache:
+  apt: true
+  directories:
+  - $HOME/.m2
+  - $HOME/.downloads
+sudo: true
+
+#addons:
+#  apt:
+#    sources:
+#      - sourceline: 'deb http://repos.azulsystems.com/ubuntu stable main'
+#        key_url: 'http://repos.azulsystems.com/RPM-GPG-KEY-azulsystems'
+#    packages:
+#      - zulu-8
+#      - zulu-9
+
+# Oracle JDK 8 and the OpenJDK 8 are both installed by default by TravisCI
+# Additionally, they both have the unlimited JCE policy installed as well.
+# This is why we do not explicitly installed them in our Travis CI
+# configuration.
+
+before_install:
+  - echo 'MAVEN_OPTS="-Dorg.slf4j.simpleLogger.defaultLogLevel=warn"' >~/.mavenrc
+  - mkdir -p $HOME/.downloads
+#  - wget -N -q -O $HOME/.downloads/ZuluJCEPolicies.zip 'https://cdn.azul.com/zcek/bin/ZuluJCEPolicies.zip'
+#  # The SHA256 checksum for JCE for Azul will break if Azul updates their archive.
+#  # If so, you will need to update the fingerprint below after verifying the
+#  # authenticity of the archive.
+#  - echo "8021a28b8cac41b44f1421fd210a0a0822fcaf88d62d2e70a35b2ff628a8675a  $HOME/.downloads/ZuluJCEPolicies.zip" | sha256sum -c
+#  - sudo unzip -o -j $HOME/.downloads/ZuluJCEPolicies.zip ZuluJCEPolicies/local_policy.jar ZuluJCEPolicies/US_export_policy.jar -d /usr/lib/jvm/zulu-8-amd64/jre/lib/security
+#  - sudo unzip -o -j $HOME/.downloads/ZuluJCEPolicies.zip ZuluJCEPolicies/local_policy.jar ZuluJCEPolicies/US_export_policy.jar -d /usr/lib/jvm/zulu-9-amd64/lib/security
+
+matrix:
+  fast_finish: true
+  include:
+    # checkstyle
+    - jdk: oraclejdk8
+      env:
+        - DESC="checkstyle"
+        - CMD="mvn clean checkstyle:check"
+        - LANG=en_US.utf8
+    # unit tests (oraclejdk8)
+    - jdk: oraclejdk8
+      env:
+        - DESC="oraclejdk8 unit tests"
+        - CMD="mvn clean test -Dcheckstyle.skip=true"
+        - LANG=en_US.utf8
+    # unit tests (openjdk8)
+    - jdk: openjdk8
+      env:
+        - DESC="openjdk8 unit tests"
+        - CMD="mvn clean test -Dcheckstyle.skip=true"
+        - LANG=en_US.utf8
+    # unit tests (zulu-8)
+#    - env:
+#        - JAVA_HOME=/usr/lib/jvm/zulu-8-amd64
+#        - DESC="zulu-8 unit tests"
+#        - CMD="mvn clean test -Dcheckstyle.skip=true"
+#        - LANG=en_US.utf8
+    - jdk: oraclejdk9
+      env:
+        - DESC="oraclejdk9 unit tests"
+        - CMD="mvn clean test -Dcheckstyle.skip=true"
+        - LANG=en_US.utf8
+    # unit tests (zulu-9)
+#    - env:
+#        - JAVA_HOME=/usr/lib/jvm/zulu-9-amd64
+#        - DESC="zulu-9 unit tests"
+#        - CMD="mvn clean test -Dcheckstyle.skip=true"
+#        - LANG=en_US.utf8
+
+script: echo ${CMD}; ${CMD}

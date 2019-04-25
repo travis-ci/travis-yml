@@ -1,0 +1,77 @@
+language: python
+sudo: true
+cache:
+  pip: true
+  directories:
+  - eggs
+  - .npm
+  - ~/.npm
+  - node_modules
+addons:
+  apt:
+    config:
+      retries: true
+    packages:
+    - oracle-java9-set-default
+    - bsdtar
+    - build-essential
+    - make
+    - graphviz
+  postgresql: '9.4'
+env:
+  global:
+  - JAVA_HOME=/usr/lib/jvm/java-8-oracle
+  - PATH="/usr/share/elasticsearch/bin:/usr/lib/postgresql/9.4/bin:$PATH"
+  - secure: |-
+      TcTEKSEjlu05k3azfO3LMc9NMiZMBqj1pOqg4FOxcprU3Bw7+k5aC/6wMUHI
+      mAt0ivzTh1Wbmtirj/XhXArlSVECBQUk7qoEnCDdDr8nhBsHem+N8T/51xGS
+      mbGuJKT/xECnR23FyFIYkzSwktnm+ZGdeFBYPhEwUl7zFDyemHCzLmn4h16P
+      bfssAfN4MGhzkwkMrgkW2DsSfmEGOjDZTt0JqwXR1FXPmCM0zpPZbrO1tguA
+      lxrRVHn4oQjApp1lN0x78cp1SY5EQBpwlGSr0DzLBHM7YW4sZaHpHRheq3eR
+      bn9po39bj+n5qpmwdlCe1o6AJ8NdphxxM1Cc1QBr8BD2pCjGioSkKyXECVgz
+      i/UrovLo9FbFuCSuh/uAiIF5asQdk3I/y49PwDqAJ+0Q3uJI2gKTRFpb6Ewy
+      3Vy1OGj966T3zgynE50ZHE7C86AxOCrR73dl9m1mBMHkv6xzFTeYYzSxFBd1
+      esnBJzv370jgxd9BsJ6M4fK74Sti8gbgeaVV9UAIO/N1CcyMzMKLl4t3LHRQ
+      dce/VzH1y+2xmMRk2ylQMsai92rwxqshyoj7abDG/0ScApUQui8kXYCCGx3P
+      bfJ0bgC0NAudtQaUgXbZN+efX90kodIXp4aSgbh41pW9VoFFhnU2wGt8Knnt
+      bLoEOSclE0Wslf1OrylHT3g=
+  - secure: |-
+      wZZgg67c7Qlhw+4Oi7wti4hR61A6zXiqbQ59lQwjVQqg5dY+OSmx0sVqRjrO7
+      Uqh6bp7lX9ygTVy4t5SWkmLjriUixgGkNGjLlSbMZFouNtE9Uxqasy6xzwQiV
+      lyhf+E9VaJ4iAJbV6yvnIvmBOa10l6ih2RiwYvybLxacqITscNUetXRpo+Qkr
+      EpUSrdXisxlMsMji77kHOZqrUXqRuWss3Y24na7i2RAOuV6tfQ1IPPDcZxj/+
+      uQWWGHHZCbonNm7lzFxMNrECnkbH5t4zWlOk7Pw96XgvTg0Kk64lEm5l3Z988
+      +6VjrmjE9xEJzlFrzF6XmzVYkcqn5hlKEHBYFjqNNuxQd6KTergxxj7GfAlSS
+      MKsiY7eeBD2i0oAX3A8OPI9oOGrcRRKzSqKcv5fEeCZ/vV+n/B5LxU2lT6Xq8
+      t47qsm7JptPr+M3tFw00mvAAhnuUR6hmD0VvMDpFNsu9X9ZPH0w1lLIJ5VQLb
+      4scjAlHg0CP//MpoVtnpmqpOCJi/cCUQmGjBvKnYcRDjeZVyV7TcrHXWY5gDX
+      dupbuu33llfRtSQ2anjqNY4MFKrEbtb6n4s2+SP4dVNV36VAe0f+Ujp0vDAk3
+      4heHupboqoOYsJaL9bmumjnGBvvFB5tngcvKV0HE54DvzOk+QmmdO1B2OXOT3
+      EYc4biKIhqDc=
+  - secure: gSD7QL9OtPYmyFMvJKUHNeJu38uKCO686g6U7LfnlcOL675wuBGOSfgYnD4mfJxK0EjuVppVuUclzAFS7SwLyH1K6MjFzL777FkU6uZEVvXpTdiLHi+yeiRTJUXDi3YVTKiL5JZIHiDhNhrhI8mEDrCBMZwCl08NVQE+YjavcIdBYHd5RGyxF3/iRapl77Yh3ugIvagSabZ7IClLvklL1eyM1chh5Sxk6kZYmsginjfPF5sQf6DsgpfYtLklLXioJ9Z9+Zr4alGrSV700mndp2gwnrtSvBhnWzTGNMgHw9VQCBl9gSkZyRW83/YoJJDR9ozZMeKoFbXobkZ/jIQYY700dII1z2YSaJhahOfbXgYbj8qmi9sB7daF4NjJVllpmi8769rFpB99frJE3vyT8SJeRK1vLWB0Yq5rXmnE99gpUp7zCgMHQhfXr1IZTPf7SHO3IFvG4cVfqDdXc+uxRfYneTAoEU9yufxkvIdLqBzg5+cwBFVEjvS25T63LXnu3CUj3Hbcp3B1hrk4hVp9nfRexTtmPeC0j1+SreWGz1BDmtXFD1fZBJCqwvfcS4HVT8F7HS/bUvyu0+Wm4YtUiQcFBORpswzq2PsRI3BSBc7GSeO46qYv2qRphVXgmqEhTIYEh/1q8lxUxbr19Q90Pco6AGgZwsERBWKXMYhe1/w=
+  - secure: Dzs4p1PuHdNXyBJu8FEWp839RhxvetKQrKonNeon3CvcN0xbxtICKr6ekj7+Y8hejxnUFGRwnypGmjbeee9evCC0bcvRQCjy/9aX7Kfuykn4IhvDAAYcWr533wqxC78A4TMyFJEJxYiZ4eJy+M/DnH+lr4zaoAwpsO1mxq92uPfjmj+gYZEAO5mvOUyCKQu5tKYYi9UTJ9Rxz0lJKRbaSQtEGRHs6+kU0qFc6QJGsYXXIbc/BOmfhKkrcJ+6jfvG7eli7cQSK1ve8h1VX0n/Eonk9heH4umCyTT2RTfhcARrc2ZwWYKXTka0jxmAck9gELcGEYOSV5dL/Qy9zykLeH7dL0UbNMnnrNY+89/b2WJfav9KtoG3e0dgiQZp5oMgC1MtkDxQif+V7In9baZA4rafgW+Bw/O3Uzz+VAPpl4xDVjk/29GLQ5iWnj9eJT9a7jIQIOMD6WKxAKH2O3XD6ZyUWvjKYEqT9BIxfchWnd+z2tIPDQBBI3Az+jDh6Quyrmb7AQVveTc+CtmzP98lhnIqAfIz8hwHyRgCo+i27wUGyKHMnKCJeHVSEPbANqXxeg1l8rgG5ht8H0AznkPpzTjajZRmZowDQRg9b9plM5AQsIxhPtAHBHAHcpXx8reN9NHrPuKLoMV3KRTUoq6UqTUrPz/qKCCSbaSbR7UNK7E=
+matrix:
+  include:
+  - python: '3.4'
+    env: UNIT=Test
+notifications:
+  slack:
+    secure: DQyUTk6evwPpO0P5+OPhBSgl+fGEerOjBlBwQliXAkDaMKH3Cpi4cTQ3ETR/+3g6bGqPGK+QJ1R+6Ht+hJD7dNomyVIoQmvF0P5afJtpk/A3cDILe90t76ET9jc/iBjWeUFQdokFUJ7Gt1GGYtI6e5XcVu/Qc/xqCvFMtsBN6mnBFuvcQki+WkoIIPPawyhfryCNOLo5vvbi4SZ5dZI+M0MGq9HQjOyF1sdIgKuXhxjupmL+kVPVXAq9kiOANYFkwbNsP9j0BTYW5wFHpAztBqz3NT6EchgCdue8tgV4hC4rRFvM/bsA4qz/TJ5wRRLBRXtnNtPcyhAqTiU+wC6qWt++fjSEMGe4KYqtRRV1YuxQiTVHN84t77DILLNfMh/6uSs0KijwOT+Oazwd/UsN1zYOH93AM4FZ0h92yyb6j6JQ+DUk4WFel1Zr4kZzhtHSPGw+K4fxY0zIt1qpaDPXjtZHQ0+LwIIMtwMp5bBcwDn9d1ADnUhUAuuIN2hHaXrVy4vP2hIcd0LzezBqvc7JXimyd5yRgUeOCTrKGkAeSo8VA7XIj0ZmlpQRYKNTJP+gz4Y6C/RCxISnFDF/vcX+IsDdvreZXJMplE1Aqxf0uR6Zj8Sr8q+QWGKydv6ettlLZuqDuv0l/l/9qpzYfRqLSZcetGRVFHHcR9wuQiDyums=
+before_install:
+- postgres --version
+- initdb --version
+- nvm install 10
+- node --version
+- npm config set python /usr/bin/python2.7
+install:
+# need to manually change the version of six used by Travis for some reason
+- pip uninstall -y six
+- pip install six==1.11.0
+- python bootstrap.py --buildout-version 2.9.5 --setuptools-version 37.0.0
+- bin/buildout -c || (echo "Retrying buildout" && bin/buildout )
+- pip install pytest==2.9.1
+- pip install coveralls
+- pip install codacy-coverage
+script:
+- if test -n "$UNIT"; then bin/test -v -v --timeout=400 --aws-auth --cov src/snovault --es search-fourfront-builds-uhevxdzfcv7mkm5pj5svcri3aq.us-east-1.es.amazonaws.com:80;
+  fi

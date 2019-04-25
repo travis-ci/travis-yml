@@ -1,0 +1,12 @@
+language: python
+python:
+  - "2.7"
+install:
+  - pip install --upgrade .
+  - pip install pylint
+  - pip install python-coveralls
+script:
+  - ./run_presubmit.sh
+after_success:
+  # Upload coverage data to coveralls.io.
+  - coveralls

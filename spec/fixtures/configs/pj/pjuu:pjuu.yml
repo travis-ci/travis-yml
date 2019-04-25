@@ -1,0 +1,31 @@
+language: python
+
+python:
+  - '3.5'
+  - '3.6'
+
+# Enable new container builds.
+sudo: false
+
+services:
+  - mongodb
+  - redis-server
+
+install:
+  - pip install -r requirements-dev.txt
+
+script:
+  - make flake
+  - make test 
+
+after_success:
+  - codecov
+
+notifications:
+  email: false
+  webhooks:
+    urls:
+      - secure: "GJVuWZAJIekY1skbh4LMgxhYs4foYnRFME/lBFjmE5W1S96C//xvuchBbSls/8NDg+6397ZZpqxUNPkDWCljvL0ieantM8u4qMd/pBFbplqRd/FsAexJaEzkuPO0cVDniHCaDqEVzwDeXxpqJqyJP1NaxV/4Jx/bBlTNj73WqkI="
+    on_success: always
+    on_failure: always
+    on_start: never

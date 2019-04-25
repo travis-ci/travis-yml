@@ -1,0 +1,23 @@
+sudo: false
+language: node_js
+node_js:
+  - "10"
+before_install:
+  - curl -o- -L https://yarnpkg.com/install.sh | bash -s --
+  - export PATH="$HOME/.yarn/bin:$PATH"
+install:
+  - yarn install --frozen-lockfile
+script:
+  - yarn test
+  - yarn build
+after_success:
+  - npm install codecov -g
+  - codecov
+cache:
+  yarn: true
+deploy:
+  provider: heroku
+  api_key:
+    secure: "LJYEcrfsgYScIkWgg7HXi+qNU3pIERSlLGGs57XjX958JVhcaem8f+mTwvfoyYqh9Pcj/NLjkd/5rvX4fMxK21iWQu2xTR8nHe7IQN73mGSWjsf4kr9N856uczFVnb96t5hukHrZhccm21JBFvbXFWY905OG4l06Ue2BZn66FQFSLM9oSVm5axdEjwfFMmHRgb2O+5xMha+Obbv5pxgOuXadwLrvlRC77+YPD9E1vxfl/FDraKzExpz+3nxgRm560ijQlmjT8rn4uSZFrtzNDMlRKbR9Xe2YZ4fzHdCHNKcpPsK8dVZkPGMkyXZUBClltphfH56yr6q32EtRPfYNBjdSSD94HUV5UNVIYUtX28VDsqBhDBT12oKIDXYmtFjLGbmFEgdV/vssGJ2JylLdlATFdlkUkkke+GXkS2UvGNWCDBT/Fy/IZk8QeVZPlamfGk+iavRbOyXah3M8AFw7CqMM7elTXsoLw+uFU9Wudd86sEBMt/nJFeT3n3QjnQ0u9EhKd/Yy9Y2rHNqVeh+UZukBtxYcmjqSRTS1SBnot9d5KnorCiWHzw3WjNqmgy3jUsg0VcRAGuPTaWiTdo9/kfuUE9//+NoTsano37nMCBgniQ7O+k0MPCu87PLyF5/HC+lUF36eogjdp0bZmBkwcQ+wjpwbaoP6qirIvKAF8VY="
+  app: close-issue-app
+  on: master

@@ -1,0 +1,29 @@
+sudo: false
+language: node_js
+cache:
+  yarn: true
+  directories:
+  - node_modules
+node_js:
+  # There's an open bug in Jest which causes all specs to fail.
+  # See: https://github.com/facebook/jest/issues/8069
+  #
+  # Pinning node to this version solves the problem for now.
+  - "11.10.1"
+script:
+  - yarn lint
+  - yarn test
+after_success:
+  - bash deploy_docs.sh
+deploy:
+  provider: npm
+  email: technik@propertybase.com
+  api_key:
+    secure: sP+UXvGB+loZizr2bPWGFBRSMB7glim3IBI9QtNDJaKJ0eO1tXSYw7RM6K++l4XV1GslQoGz12JuPBqoHqVStakyQOqTDqoCzHlxZ5+ua2N0Tl8lTsP+59E1W08GguvqWAl8hGTmXniP/OF4ovlqKi+aLB6sd0YDpx3ZuLX6ovG0PK+99LATBJXaluwJlXx3F0d3UHpcwfCG1gDcvCcKeuTardrGF7T/fZ+vIc2lm5q/ixpmvIi4cR8PazLVTSJw6JqVnH49r/LjoOPortaMECo8vlv2SXax9nRl/Fy7d7nr3+fg0ycdzmKFEMjmWcknLfonpFoXvI3ZdDEGrzbzrVT6bAFH5zoyuX1dC1LTpCG/V9YHrmRP87VzJ9uIR9TzVkHkz0x2MeYjLHLLnSkINUlfPQ984dL3u3eyXDQ81mGNkbYDCMO2i+cn/rDKeWH/fjUrFP3E6l6qoWwiTrlOMBr3HKQOy+HKepBeSLjXR0zpvfrPBdiiQyE1o293Kkc26UVDsw13+9tGeSpf7u9p0O4ncmsZykgxiTjBKOfhMq5Wc07FTn8CvT+663IZnVgZmU+mMlALjnTodw7+/cyc7QS6xtgazMG6+75+mEvzxU6PG/wKd1Ac4YZNPdxmKtpVopYLkxMSFyadGbF/5jiCv37gVk3u1TUVWY6UQFkv8AA=
+  on:
+    tags: true
+    repo: propertybase/react-lds
+  skip_cleanup: true
+env:
+  global:
+  - GITHUB_REPO: propertybase/react-lds

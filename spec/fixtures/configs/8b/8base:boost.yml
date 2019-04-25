@@ -1,0 +1,51 @@
+language: node_js
+node_js: 
+  - "11.10.1"
+
+env:
+  - NODE_PATH=src/
+
+addons:
+  apt:
+    packages:
+      - docker-ce
+  artifacts:
+    debug: true
+
+services:
+  - docker
+
+before_install:
+  - docker build -t=e2e-chrome e2e
+  - docker run --name dockerhost --cap-add=NET_ADMIN --cap-add=NET_RAW -d qoomon/docker-host
+  - docker run --privileged --name e2e-chrome --link dockerhost -p 9222:9222 -d e2e-chrome:latest
+  - curl -sL https://raw.githubusercontent.com/travis-ci/artifacts/master/install | bash
+
+install:
+  - curl -o- -L https://yarnpkg.com/install.sh | bash -s -- --version 1.6.0
+  - export ARTIFACTS_TARGET_PATHS="artifacts/$TRAVIS_REPO_SLUG/$TRAVIS_BUILD_NUMBER/$TRAVIS_JOB_NUMBER:artifacts/$TRAVIS_REPO_SLUG/$TRAVIS_COMMIT"
+  - export PATH="$HOME/.yarn/bin:$PATH"
+  - yarn install
+
+script:
+  - yarn eslint
+  - yarn test --verbose
+  - yarn flow
+  - yarn build
+  - yarn storybook &
+  - sleep 40
+  - yarn e2e:ci
+  - artifacts upload e2e/ || true
+  - killall5 node || echo "Server is stopped"
+
+deploy:
+  provider: npm
+  email: zouxuoz@gmail.com
+  skip_cleanup: true
+  script: yarn deploy-storybook
+  api_key:
+    secure: XMco38FVN4j9BA/fSBgXnpcm8E92LnRp4Yn83Uh8UBHyEMipAj48vNcBWHSyUmZGbq22197Hj0k9w2qeKCjmw5rnJ0LQHgStQIH82nsFdAS2uf4Ff1wWPiPGXpveSNAo5oytIwc9mjH/VtqdmR9f+h0SSV0epqB//clrtMdjKYTrpgLlYMfMDrqPCT1Rw/c+0WgwT+2iCFg6FHgEgM1oKeRqRX6hiy6EkMqDGc2/UnYDDn48Xd6wCl1Zq4oGmNmpuK23vzk3KJNzZ06k4GtLn+Wkw3/dB0aWGdgW2ibbSeEQrmcUvjxWfk84asolOhOfj3kpFr3mIFEZ0BYFgnZ0F37Z0UOX3vJZG1YTgnLHatVFdotryMPG+VKXlFWDzzSxKycYbYawuYjTpA3GJjE8eNjTGcZtRPDIKjyn8DOfdnI027aVGr6AZYcNlu0qu2j08WuKTWuZ94IwDrJJQYMhBefn2IqUg6ESdG4bl80nFhSXjFMfXPD/2QwbeUi1A8n4jDFZ3s45cqZiUZPvqQBE14SxtvMZYdmCb0sfWza5S67PEgEa1pwebB870MwXQhUnrb6lmWArvayjPypH/gS4VEt0OgiRPs6vaumb/bw2p+XvuxzleAvlWoXYsJxYRdSzEgncGlYklSXsDK+Xq/PDLqWop8jQUpfu6VyHiAYko9Q=
+  on:
+    tags: true
+    repo: 8base/boost
+    branch: master

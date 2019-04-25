@@ -1,0 +1,33 @@
+language: node_js
+node_js:
+  - "10"
+cache:
+  directories:
+    - node_modules
+
+before_install:
+  - npm install -g greenkeeper-lockfile@1
+  - npm install -g gulp-cli
+
+before_script:
+  - greenkeeper-lockfile-update
+
+script:
+  - gulp test-ci
+  - gulp html-hint
+  - gulp standard
+  - gulp check-handlebars
+
+after_script:
+  - greenkeeper-lockfile-upload
+
+after_success:
+  - npm install -g codeclimate-test-reporter
+  - codeclimate-test-reporter < lcov.info
+
+addons:
+  code_climate:
+    repo_token: a2bef0f29bab992cca5a1394240dbbf6a336c930ed8d50e96426a3db947d2a0a
+
+env:
+  - COOKIE_VALIDATION_PASSWORD=7044a01fe9e9e4960eb9be8c75bc61ca6360b2adb0cd84673f51da0e16b65249c04f5f358b4bfbcc03b64cce6baa95172148b68a5ac354d8153b60804ec09943

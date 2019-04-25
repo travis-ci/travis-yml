@@ -1,0 +1,211 @@
+# @file
+# .travis.yml - Drupal driver for Doctrine DBAL.
+
+language: php
+
+sudo: required
+
+php:
+  - 7.3
+
+branches:
+  except:
+    - /^dev-.*/
+
+env:
+  global:
+    # Oracle variables.
+    - ORACLE_DOWNLOAD_DIR="$HOME/oracle_download"
+    - ORACLE_BASEFILE=oracle-xe-11.2.0-1.0.x86_64.rpm.zip
+    # Drupal paths.
+    - DRUPAL_STAGING_DIR="$HOME/drupal_staging"
+    - DRUPAL_PATH="$HOME/drupal8"
+    - PATH="$PATH:$DRUPAL_PATH/vendor/bin:$HOME/.composer/vendor/bin"
+    # Installation variables.
+    - HOST_ADDR="127.0.0.1"
+    - HTTP_PORT="8080"
+    # Drupal PHPUnit test variables.
+    - SIMPLETEST_BASE_URL="http://$HOST_ADDR:$HTTP_PORT"
+    # Suppress deprecation handling.
+    #- SYMFONY_DEPRECATIONS_HELPER=disabled
+
+  matrix:
+    - DRUDBAL_ENV="mysql" TEST_ARGS="--group Database"
+    - DRUDBAL_ENV="dbal/mysql" TEST_ARGS="--group Database,Entity,Field"
+    - DRUDBAL_ENV="dbal/mysql" TEST_ARGS="--group Installer,Cache,Config"
+    - DRUDBAL_ENV="dbal/mysql" TEST_ARGS="--group field"
+    - DRUDBAL_ENV="dbal/mysql" TEST_ARGS="--group file"
+    - DRUDBAL_ENV="dbal/mysql" TEST_ARGS="--group views"
+    - DRUDBAL_ENV="dbal/mysqli" TEST_ARGS="--group Database,Entity,Field"
+    - DRUDBAL_ENV="dbal/mysqli" TEST_ARGS="--group Installer,Cache,Config"
+    - DRUDBAL_ENV="dbal/mysqli" TEST_ARGS="--group field"
+    - DRUDBAL_ENV="dbal/mysqli" TEST_ARGS="--group file"
+    - DRUDBAL_ENV="dbal/mysqli" TEST_ARGS="--group views"
+    - DRUDBAL_ENV="sqlite" TEST_ARGS="--group Database"
+    - DRUDBAL_ENV="dbal/sqlite/file" TEST_ARGS="--group Database,Entity,Field"
+    - DRUDBAL_ENV="dbal/sqlite/file" TEST_ARGS="--group Installer,Cache,Config"
+    - DRUDBAL_ENV="dbal/sqlite/file" TEST_ARGS="--group field"
+    - DRUDBAL_ENV="dbal/sqlite/file" TEST_ARGS="--group file"
+    - DRUDBAL_ENV="dbal/sqlite/file" TEST_ARGS="--group views"
+    - DRUDBAL_ENV="dbal/sqlite/memory" TEST_ARGS="--group Database,Installer,Cache,Config,Entity,Field"
+    - DRUDBAL_ENV="dbal/oci8" TEST_ARGS="--group Database"
+    - DRUDBAL_ENV="dbal/oci8" TEST_ARGS="--group Installer,Cache,Config"
+    - DRUDBAL_ENV="dbal/oci8" TEST_ARGS="--group views --testsuite kernel"
+
+matrix:
+  fast_finish: true
+  allow_failures:
+    - env: DRUDBAL_ENV="dbal/sqlite/file" TEST_ARGS="--group file"
+    - env: DRUDBAL_ENV="dbal/sqlite/memory" TEST_ARGS="--group Database,Installer,Cache,Config,Entity,Field"
+    - env: DRUDBAL_ENV="dbal/oci8" TEST_ARGS="--group Database"
+    - env: DRUDBAL_ENV="dbal/oci8" TEST_ARGS="--group Installer,Cache,Config"
+    - env: DRUDBAL_ENV="dbal/oci8" TEST_ARGS="--group views --testsuite kernel"
+
+cache:
+  directories:
+    #- $DRUPAL_STAGING_DIR
+    - $ORACLE_DOWNLOAD_DIR
+
+before_install:
+  # Set variables.
+  - |
+      if [[ "$DRUDBAL_ENV" == "mysql" ]]; then
+        export DBAL_URL="mysql://root:@$HOST_ADDR/drudbal"
+        export SIMPLETEST_DB="mysql://root:@$HOST_ADDR/drudbal#drudbal_"
+
+      elif [[ "$DRUDBAL_ENV" == "dbal/mysql" ]]; then
+        export DBAL_URL="mysql://root:@$HOST_ADDR/drudbal"
+        export SIMPLETEST_DB="dbal://root:@$HOST_ADDR/drudbal?dbal_driver=pdo_mysql"
+
+      elif [[ "$DRUDBAL_ENV" == "dbal/mysqli" ]]; then
+        export DBAL_URL="mysqli://root:@$HOST_ADDR/drudbal"
+        export SIMPLETEST_DB="dbal://root:@$HOST_ADDR/drudbal?dbal_driver=mysqli"
+
+      elif [[ "$DRUDBAL_ENV" == "sqlite" ]]; then
+        export DBAL_URL="sqlite:///sites/default/files/.ht.sqlite"
+        export SIMPLETEST_DB="sqlite://test_user:test_pass@test_host:3306/sites/default/files/.ht.sqlite"
+
+      elif [[ "$DRUDBAL_ENV" == "dbal/sqlite/file" ]]; then
+        export DBAL_URL="sqlite:///$DRUPAL_PATH/sqlite-drudbal"
+        export SIMPLETEST_DB="dbal://localhost/$DRUPAL_PATH/sqlite-drudbal?dbal_driver=pdo_sqlite"
+
+      elif [[ "$DRUDBAL_ENV" == "dbal/sqlite/memory" ]]; then
+        export DBAL_URL="sqlite:///:memory:"
+        export SIMPLETEST_DB="dbal://localhost/:memory:?dbal_driver=pdo_sqlite"
+
+      elif [[ "$DRUDBAL_ENV" == "dbal/oci8" ]]; then
+        export DBAL_URL="oci8://ORAROOT:DRUDBAL@$HOST_ADDR:1521/XE"
+        export SIMPLETEST_DB="dbal://ORAROOT:DRUDBAL@$HOST_ADDR:1521/XE?dbal_driver=oci8"
+
+      fi
+
+  # Get Oracle XE.
+  - |
+      if [[ "$DRUDBAL_ENV" == "dbal/oci8" ]]; then
+        export ORACLE_COOKIE=sqldev
+        export ORACLE_FILE=oracle11g/xe/$ORACLE_BASEFILE
+        export ORACLE_HOME=/u01/app/oracle/product/11.2.0/xe
+        export ORACLE_SID=XE
+        wget 'https://github.com/cbandy/travis-oracle/archive/v2.0.3.tar.gz'
+        mkdir -p .travis/oracle
+        tar x -C .travis/oracle --strip-components=1 -f v2.0.3.tar.gz
+        if [[ ! -f $ORACLE_DOWNLOAD_DIR/$ORACLE_BASEFILE ]]; then
+          .travis/oracle/download.sh
+          cp .travis/oracle/$ORACLE_BASEFILE $ORACLE_DOWNLOAD_DIR
+        fi
+        if [[ ! -f .travis/oracle/$ORACLE_BASEFILE ]]; then
+          cp $ORACLE_DOWNLOAD_DIR/$ORACLE_BASEFILE .travis/oracle/
+        fi
+        .travis/oracle/install.sh
+        chmod 777 $HOME/build/mondrake/drudbal/tests/travis_ci/$DRUDBAL_ENV/oracle_user.sh
+        $HOME/build/mondrake/drudbal/tests/travis_ci/$DRUDBAL_ENV/oracle_user.sh
+        # Install Oci8 extension for PHP.
+        echo $ORACLE_HOME | pecl install oci8
+      fi
+
+  # Remove XDebug.
+  - phpenv config-rm xdebug.ini || true
+  # Add APCu extension.
+  - echo "extension = apcu.so" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
+
+  # Stage Drupal core to get dependencies.
+  - |
+      if [[ ! -f $DRUPAL_STAGING_DIR/index.php ]]; then
+        git clone http://git.drupal.org/project/drupal.git $DRUPAL_STAGING_DIR
+        cd $DRUPAL_STAGING_DIR
+        git checkout 8.8.x
+        composer install --no-progress --no-suggest
+        composer run-script drupal-phpunit-upgrade
+        # Get Drupal Console
+        composer require "drupal/console" --no-progress --no-suggest
+        composer update doctrine/common --no-progress --no-suggest
+        # Get Doctrine DBAL
+        composer require "doctrine/dbal:^2.9" --no-progress --no-suggest
+      fi
+
+  # Copy staged Drupal core to running path.
+  - mkdir -p $DRUPAL_PATH
+  - cp -r $DRUPAL_STAGING_DIR/. $DRUPAL_PATH
+  - cd $DRUPAL_PATH
+
+  # Apply Drupal core patches.
+  # [#2867788] Log::findCaller fails to report the correct caller function with non-core drivers.
+  - curl https://www.drupal.org/files/issues/2867788-22_0.patch | git apply
+  # [#2871374] SelectTest::testVulnerableComment fails when driver overrides Select::__toString
+  - curl https://www.drupal.org/files/issues/2018-07-25/2871374-6.patch | git apply
+  # [#2874499] Test failures when db driver is set to not support transactions
+  #- curl https://www.drupal.org/files/issues/2018-08-23/2874499-12-transaction-enabled.patch | git apply
+  # [#2879677] Decouple getting table vs column comments in Schema
+  - curl https://www.drupal.org/files/issues/2018-08-01/2879677-8.patch | git apply
+  # [#2657888] Add Date function support in DTBNG
+  - curl https://www.drupal.org/files/issues/2657888-18.patch | git apply
+  # [#2912973] Mismatching call to databaseType() in LangcodeToAsciiUpdateTest
+  - curl https://www.drupal.org/files/issues/2912973-2.patch | git apply
+  # [#2992274] Installer tests fail if contrib driver hides database credentials form fields
+  - curl https://www.drupal.org/files/issues/2019-04-02/2992274-5.patch | git apply
+
+install:
+  # Copy the repo to the modules/contrib directory.
+  - mkdir -p $DRUPAL_PATH/modules/contrib/drudbal
+  - cp -r $HOME/build/mondrake/drudbal $DRUPAL_PATH/modules/contrib
+
+  # Patch DBAL for Oracle createSchema fixes https://github.com/doctrine/dbal/pull/2766
+  - |
+      if [[ "$DRUDBAL_ENV" == "dbal/oci8" ]]; then
+        cd $DRUPAL_PATH/vendor/doctrine/dbal
+        patch -p1 < $DRUPAL_PATH/modules/contrib/drudbal/tests/travis_ci/$DRUDBAL_ENV/dbal.patch
+      fi
+
+  # Create a directory for the driver, and symlink it to the module's one.
+  - mkdir -p $DRUPAL_PATH/drivers/lib/Drupal/Driver/Database/
+  - cd $DRUPAL_PATH/drivers/lib/Drupal/Driver/Database/
+  - ln -s $DRUPAL_PATH/modules/contrib/drudbal/drivers/lib/Drupal/Driver/Database/dbal dbal
+
+  # Patch tests for debugging if necessary.
+  - cd $DRUPAL_PATH
+  - if [[ -f $DRUPAL_PATH/modules/contrib/drudbal/tests/travis_ci/$DRUDBAL_ENV/test_debug.patch ]]; then git apply -v $DRUPAL_PATH/modules/contrib/drudbal/tests/travis_ci/$DRUDBAL_ENV/test_debug.patch; fi
+
+  # Install Drupal.
+  - cp $DRUPAL_PATH/modules/contrib/drudbal/tests/travis_ci/*.php $DRUPAL_PATH/core
+  - cd $DRUPAL_PATH/core
+  - php install_cli.php
+
+  # Get a webserver running.
+  - drupal server $HOST_ADDR:$HTTP_PORT &
+  - sleep 4s
+
+  # Post install tasks.
+  - drupal site:status || true
+
+script:
+  # Only run selected tests to avoid Travis timeout.
+  - $DRUPAL_PATH/vendor/bin/phpunit $TEST_ARGS
+
+after_script:
+  - cd $DRUPAL_PATH/modules/contrib/drudbal
+  - $DRUPAL_PATH/vendor/bin/phpcs
+
+notifications:
+  email:
+    on_success: never
+    on_failure: always

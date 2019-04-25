@@ -1,0 +1,39 @@
+language: generic
+
+matrix:
+  include:
+    - os: osx
+      osx_image: xcode10.2
+      addons:
+        homebrew:
+          packages:
+            - boost
+            - erlang
+            - python
+            - ant
+            - openssl
+    - os: linux
+      sudo: false
+      addons:
+        apt:
+          sources:
+            - boost-latest
+          packages:
+            - automake
+            - clang
+            - libboost1.55-all-dev
+            - python3
+            - erlang
+            - erlang-dev
+
+script:
+  - env | grep TRAVIS
+  - clang++ -v
+  - 'if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then CXX=clang++ ./configure --with-openssl=/usr/local/opt/openssl; fi'
+  - 'if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then CXX=clang++ ./configure; fi'
+  - touch TAGS.root TAGS.contrib
+  - make
+  - make cpp
+  - make python
+  - 'if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then make python3; fi'
+  - make java

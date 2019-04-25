@@ -1,0 +1,38 @@
+language: rust
+rust:
+  - stable
+  - beta
+  - nightly
+
+matrix:
+  include:
+  - os: osx
+    rust: stable
+
+branches:
+  only:
+  - staging
+  - trying
+  - master
+  - "/^stable\\d+(\\.\\d+)?$/"
+  - "/^v\\d++(\\.\\d+)?+(\\.\\d+)?+(\\.\\d+)?$/"
+
+cache: cargo
+
+before_deploy: 
+  - export BUILD_VERSION=$(echo "${TRAVIS_BRANCH//v/}")  
+  - cargo install -f cargo-deb
+  - cargo build --release
+  - cargo deb
+
+deploy:
+  provider: releases
+  api_key: $GITHUB_TOKEN
+  file:
+    - target/debian/krankerl_${BUILD_VERSION}_amd64.deb 
+    - target/release/krankerl
+  skip_cleanup: true
+  on:
+    tags: true
+    condition: $TRAVIS_RUST_VERSION == stable
+

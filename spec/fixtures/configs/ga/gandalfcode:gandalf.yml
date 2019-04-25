@@ -1,0 +1,46 @@
+sudo: required
+dist: trusty
+language: cpp
+compiler:
+  - clang
+  - gcc
+env:
+  - OPENMP=1 MPICPP=mpic++ OMP_NUM_THREADS=2 OMP_WAIT_POLICY=PASSIVE
+  - OPENMP=1 OMP_NUM_THREADS=4
+  - OPENMP=0 MPICPP=mpic++
+  - OPENMP=0
+matrix:
+  exclude:
+  - compiler: clang
+    env: OPENMP=1 OMP_NUM_THREADS=4
+  - compiler: clang
+    env: OPENMP=1 MPICPP=mpic++ OMP_NUM_THREADS=2 OMP_WAIT_POLICY=PASSIVE
+before_install:
+  - sudo apt-get update -qq
+  - sudo apt-get install -y openmpi-bin libopenmpi-dev
+  - sudo apt-get install -y  swig libgsl0-dev
+# Now install anaconda to handle the python packages that GANDALF depends on. See http://conda.pydata.org/docs/travis.html
+  - wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O miniconda.sh
+  - bash miniconda.sh -b -p $HOME/miniconda
+  - export PATH="$HOME/miniconda/bin:$PATH"
+  - hash -r
+  - conda config --set always_yes yes --set changeps1 no
+  - conda update -q conda
+  # Useful for debugging any issues with conda
+  - conda info -a
+
+
+  # Replace dep1 dep2 ... with your dependencies
+  - conda create -q -n test-environment python=2.7 numpy scipy matplotlib
+  - source activate test-environment
+  - pip install nose2 mpi4py
+script:
+ - export OMPI_CXX=$CXX
+ - export PYTHONPATH=$PYTHONPATH:$PWD/..
+ - export OMPI_MCA_mpi_yield_when_idle=1
+ - python --version
+ - which python
+ - make  -j 2 OPENMP=$OPENMP MPICPP=$MPICPP GSL=1
+ - nose2
+ - cd tests
+ - ./run_tests.sh

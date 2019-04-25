@@ -1,0 +1,104 @@
+language: go
+go:
+  - "1.11.x"
+sudo: required
+dist: xenial
+
+services:
+- docker
+
+install:
+- scripts/setup-tools-for-ubuntu.sh || travis_terminate 1
+- $(curl -sL https://raw.githubusercontent.com/travis-ci/artifacts/master/install | bash) || travis_terminate 1
+
+jobs:
+  include:
+  - stage: Tests
+    name: Unit tests
+    script:
+    - make test
+
+  - name: Backend E2E Tests - Minikube
+    script:
+    - scripts/setup-minikube-for-linux.sh || travis_terminate 1
+    - make -C enterprise-suite minikube-backend-tests
+    # update whitesource docker image CVE report based on above images
+    - curl -sLJO https://github.com/whitesource/fs-agent-distribution/raw/master/standAlone/whitesource-fs-agent.jar
+    - java -jar whitesource-fs-agent.jar -apiKey ${WHITESOURCE_API_KEY} -c enterprise-suite/.ws.conf
+
+  - name: Backend E2E Tests - Openshift
+    script:
+      - scripts/setup-openshift.sh || travis_terminate 1
+      - make -C enterprise-suite openshift-backend-tests
+
+  - name: Backend E2E Go Tests - Minikube
+    script:
+    - scripts/setup-minikube-for-linux.sh || travis_terminate 1
+    - GO111MODULE=on make -C enterprise-suite install-helm gotests
+
+  - name: Backend E2E Tests - Minikube Latest
+    # Only build latest in the daily cron - don't block PRs or master releases.
+    if: type in (cron)
+    script:
+    - scripts/setup-minikube-for-linux.sh || travis_terminate 1
+    - make -C enterprise-suite-latest minikube-backend-tests
+
+  - name: Frontend E2E Tests - Minikube
+    cache:
+      directories:
+        - ~/.npm
+        - ~/.cache
+    node_js: 9.4.0
+    script:
+    - scripts/setup-minikube-for-linux.sh || travis_terminate 1
+    - make -C enterprise-suite frontend-tests
+    after_script:
+    # Cypress videos.
+    - artifacts upload $(find . -name '*.mp4')
+    - artifacts upload $(find . -name '*.png')
+
+  - name: Frontend E2E Tests - Minikube Latest
+    # Only build latest in the daily cron - don't block PRs or master releases.
+    if: type in (cron)
+    cache:
+      directories:
+        - ~/.npm
+        - ~/.cache
+    node_js: 9.4.0
+    script:
+    - scripts/setup-minikube-for-linux.sh || travis_terminate 1
+    - make -C enterprise-suite-latest frontend-tests
+    after_script:
+      # Cypress videos.
+      - artifacts upload $(find . -name '*.mp4')
+      - artifacts upload $(find . -name '*.png')
+
+  - name: Reactive-sandbox test
+    script:
+    - make test CHARTS=reactive-sandbox
+
+  - stage: deploy
+    name: Deploy to GCS
+    # Only deploy for pushes to master (and if manually invoked)
+    if: type IN (push, api)
+    script:
+    # Decrypt credentials for GCS system account helmchart@es-repo.iam.gserviceaccount.com
+    - mkdir -p /tmp/resources || travis_terminate 1
+    - openssl aes-256-cbc -K $encrypted_f01ffbb90c44_key -iv $encrypted_f01ffbb90c44_iv -in resources/es-repo-7c1fefe17951.json.enc -out /tmp/resources/es-repo-7c1fefe17951.json -d || travis_terminate 1
+    - scripts/deploy-to-gcs.sh || travis_terminate 1
+    - scripts/trigger-build-helm-charts.sh
+
+branches:
+  only:
+  - master
+
+notifications:
+  email: false
+  slack:
+    rooms:
+      secure: AHDrkFweHIHLOY5VFaxgfLQKlARY5b8wM/jN3XGoEzvpECQgFrgUN/KNGUmYDlWJkmxuzr4lNpVKZe6gUgYUBwGbOO7uhLjpcoPJSYj9T2dj1Dddh9hEReDlgP/VCyPKQoPSX/8/ZJF1yq1vSAXC9es1ek4dyJAcEyWmH5uYYM2jslxNm6J64XFAwZKSo2gU98jEMvbGFfjbfdlDIRQJlKmMTpJMxvWJLHZFmLMAXgK2SB3htrS4lasOh775vEqMc4fS/Cmecb/KsVnDcYHUCYT2SZpNzkde8uCTPgB5XdZZf3F7zo1HK7+3a7eygIbWtGTDk9AUisODZLAjPTRDRVDyjSt7pNKbDhipGrYvWgt397WbvlXiDZ8TeOkWJdTf2E7RM5odtJL5ZF0XklnqOQMu2b/ZXlMq4vZTYAbsof5+Nw3Fw00iqCBEUd9J9nvaoQX/86cySWfU1N/NlptIG5hY4ro3tsrvSuIkmyBM6XN3GUFp8OexeNcCtaW40XO0qnzpbYv4be7Be6yG6fPhewO+5pOIM4mL8V+ryORAzK29MIU0L+9/gChmTxZ4YmUbksYYp1ifUlAmSnJAZcMXIy2DhqrWs9pszLKeGC4dzOxmNNzWGYnL1l2X137wRC0mfKK84Bxs1RiaToxWUQO88FXffI8c8xF7m/+Zir6vMq8=
+    on_success: change
+    on_failure: always
+    on_pull_requests: false
+    template:
+    - "Build <%{build_url}|#%{build_number}> (<%{compare_url}|%{commit}>) of %{repository_slug}@%{branch} by %{author} %{result} in %{elapsed_time}"

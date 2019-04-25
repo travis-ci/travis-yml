@@ -1,0 +1,13 @@
+language: objective-c
+osx_image: xcode10.1 # the current travis default is 9.4
+podfile: Podfile
+before_install:
+  - bundle install
+  - pod repo update
+  - pod install
+script:
+  - set -o pipefail && xcodebuild -workspace ooniprobe.xcworkspace/ -scheme ooniprobe CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO | xcpretty
+#  - xcodebuild clean test -workspace ooniprobe.xcworkspace/ -sdk iphonesimulator -scheme OONIProbeUITests -destination 'name=iPhone SE' CODE_SIGNING_REQUIRED=NO | xcpretty
+#  - xcodebuild clean test -workspace ooniprobe.xcworkspace/ -sdk iphonesimulator -scheme ooniprobe -destination 'name=iPhone SE'  | xcpretty
+  - set -o pipefail && xcodebuild clean test -workspace ooniprobe.xcworkspace/ -sdk iphonesimulator  -scheme ooniprobe -destination 'name=iPhone SE' CODE_SIGNING_REQUIRED=NO -only-testing:OONIProbeUnitTests | xcpretty
+

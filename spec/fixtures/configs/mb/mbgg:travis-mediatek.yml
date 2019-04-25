@@ -1,0 +1,21 @@
+language: c
+
+os:
+  - linux
+
+before_install:
+  - wget -c https://releases.linaro.org/components/toolchain/binaries/5.3-2016.02/arm-linux-gnueabihf/gcc-linaro-5.3-2016.02-x86_64_arm-linux-gnueabihf.tar.xz
+  - tar xf gcc-linaro-5.3-2016.02-x86_64_arm-linux-gnueabihf.tar.xz
+  - export PATH=$PATH:$PWD/gcc-linaro-5.3-2016.02-x86_64_arm-linux-gnueabihf/bin/
+  - arm-linux-gnueabihf-gcc --version
+  - sudo apt-get install bc git
+
+script:
+  - git clone https://github.com/mbgg/linux-mediatek.git linux-mediatek
+  - cd linux-mediatek
+  - git checkout for-next
+  - export ARCH=arm 
+  - export CROSS_COMPILE=arm-linux-gnueabihf- 
+  - make defconfig
+  - make dtbs
+  - make all

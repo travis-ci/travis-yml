@@ -1,0 +1,20 @@
+language: node_js
+node_js:
+  # latest in each series
+  - "6"
+  - "5"
+# Need a C++ compiler
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - g++-4.8
+env:
+  - CXX=g++-4.8
+before_script:
+  - npm install -g gulp
+  - cp sampleGlobalConstants_local.js GlobalConstants_local.js
+script:
+  - gulp buildLocal
+  - eslint --config .eslintrc src/js

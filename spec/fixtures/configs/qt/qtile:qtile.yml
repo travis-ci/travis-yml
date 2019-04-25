@@ -1,0 +1,57 @@
+sudo: false
+dist: xenial
+language: python
+
+matrix:
+    include:
+        - python: 3.5
+          env: TOXENV=py35
+        - python: 3.6
+          env: TOXENV=py36
+        - python: 3.7
+          env: TOXENV=py37
+        - python: pypy3.5-6.0
+          env: TOXENV=pypy3
+        - python: nightly
+          env: TOXENV=py-nightly
+        - python: 3.7
+          env: TOXENV=packaging
+        - python: 3.7
+          env: TOXENV=docs
+        - python: 3.5
+          env: TOXENV=pep8
+        - python: 3.7
+          env: TOXENV=pep8
+        - python: 3.7
+          env: TOXENV=mypy
+
+    allow_failures:
+        - python: nightly
+          env: TOXENV=py-nightly
+
+cache:
+  directories:
+    - $HOME/.cache/pip
+
+addons:
+  apt:
+    packages:
+    - x11-apps
+    - xserver-xephyr
+    - xvfb
+    - graphviz # for docs
+    - xterm
+
+
+install:
+  - pip install tox
+  - if [[ $TOXENV == py* ]]; then pip install coveralls; fi
+
+script:
+  - tox
+
+notifications:
+  email: false
+
+after_success:
+  - if [[ $TOXENV == py* ]]; then coveralls; fi

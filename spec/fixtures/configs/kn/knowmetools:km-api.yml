@@ -1,0 +1,44 @@
+---
+dist: xenial
+
+matrix:
+  include:
+    # Test suite for the application itself
+    - language: python
+      python: 3.6
+
+      cache: pip
+
+      env:
+        - DJANGO_IN_MEMORY_FILES=True DJANGO_SECRET_KEY=test PYTEST_ADDOPTS="-n0"
+
+      install:
+        - pip install --upgrade pip
+        - pip install --upgrade pipenv
+        - pipenv sync --dev
+
+      script:
+        - pipenv run black --check .
+        - pipenv run flake8
+        - COVERAGE_FILE=.coverage.unit pipenv run coverage run -m pytest -m "not integration" km_api/
+        - COVERAGE_FILE=.coverage.int pipenv run coverage run -m pytest -m "integration" km_api/
+        - COVERAGE_FILE=.coverage.e2e pipenv run coverage run -m pytest km_api/functional_tests/
+
+      after_success:
+        - pipenv run coverage combine
+        - pipenv run codecov
+
+    # Test building the docker image
+    - language: minimal
+
+      services:
+        - docker
+
+      script:
+        - docker build -t know-me-api .
+
+
+notifications:
+  email:
+    on_failure: always
+    on_success: never

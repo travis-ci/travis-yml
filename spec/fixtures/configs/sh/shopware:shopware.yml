@@ -1,0 +1,32 @@
+language: php
+
+php:
+  - 5.6
+  - 7.0
+  - 7.1
+  - 7.2
+
+sudo: false
+
+cache:
+   directories:
+     - $HOME/.composer/cache/files
+
+before_script:
+    - if [[ "$(php --version | grep -cim1 xdebug)" -ge 1 ]]; then phpenv config-rm xdebug.ini; fi
+
+script:
+    - ant -f build/build.xml -Dapp.host=localhost -Ddb.user=travis -Ddb.host=127.0.0.1 -Ddb.name=shopware build-continuous static-lint
+
+notifications:
+    email: false
+
+jobs:
+    include:
+    - stage: lint
+      php: 7.2
+      install:
+      - composer install && ant -f build/build.xml -Dapp.host=localhost -Ddb.user=travis -Ddb.host=127.0.0.1 -Ddb.name=shopware build-unit && curl -s -L "https://github.com/phpstan/phpstan/releases/download/0.11.5/phpstan.phar" > phpstan.phar && chmod +x phpstan.phar
+      script:
+      # Static analyzer check
+      - ./phpstan.phar analyze --no-progress -c .phpstan.neon

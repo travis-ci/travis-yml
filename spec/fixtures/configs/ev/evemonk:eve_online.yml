@@ -1,0 +1,94 @@
+language: ruby
+sudo: false
+cache: bundler
+rvm:
+  - 2.3.8
+  - 2.4.5
+  - 2.5.3
+  - 2.6.1
+  - ruby-head
+  - rbx-3
+
+gemfile:
+  - gemfiles/activesupport_42.gemfile
+  - gemfiles/activesupport_50.gemfile
+  - gemfiles/activesupport_51.gemfile
+  - gemfiles/activesupport_52.gemfile
+  - gemfiles/activesupport_edge.gemfile
+
+addons:
+  apt:
+    update: true
+
+matrix:
+  exclude:
+    - rvm: ruby-head
+      gemfile: gemfiles/activesupport_42.gemfile
+    - rvm: 2.6.1
+      gemfile: gemfiles/activesupport_42.gemfile
+    - rvm: 2.5.3
+      gemfile: gemfiles/activesupport_42.gemfile
+    - rvm: 2.3.8
+      gemfile: gemfiles/activesupport_edge.gemfile
+    - rvm: 2.4.5
+      gemfile: gemfiles/activesupport_edge.gemfile
+  include:
+    - rvm: jruby-9.2.5.0
+      gemfile: gemfiles/activesupport_42.gemfile
+      jdk: oraclejdk8
+      env: JRUBY_OPTS='--debug' # get more accurate coverage data
+    - rvm: jruby-9.2.5.0
+      gemfile: gemfiles/activesupport_50.gemfile
+      jdk: oraclejdk8
+      env: JRUBY_OPTS='--debug' # get more accurate coverage data
+    - rvm: jruby-9.2.5.0
+      gemfile: gemfiles/activesupport_51.gemfile
+      jdk: oraclejdk8
+      env: JRUBY_OPTS='--debug' # get more accurate coverage data
+    - rvm: jruby-9.2.5.0
+      gemfile: gemfiles/activesupport_52.gemfile
+      jdk: oraclejdk8
+      env: JRUBY_OPTS='--debug' # get more accurate coverage data
+    - rvm: jruby-head
+      gemfile: gemfiles/activesupport_42.gemfile
+      jdk: oraclejdk8
+      env: JRUBY_OPTS='--debug' # get more accurate coverage data
+    - rvm: jruby-head
+      gemfile: gemfiles/activesupport_50.gemfile
+      jdk: oraclejdk8
+      env: JRUBY_OPTS='--debug' # get more accurate coverage data
+    - rvm: jruby-head
+      gemfile: gemfiles/activesupport_51.gemfile
+      jdk: oraclejdk8
+      env: JRUBY_OPTS='--debug' # get more accurate coverage data
+    - rvm: jruby-head
+      gemfile: gemfiles/activesupport_52.gemfile
+      jdk: oraclejdk8
+      env: JRUBY_OPTS='--debug' # get more accurate coverage data
+    - rvm: jruby-head
+      gemfile: gemfiles/activesupport_edge.gemfile
+      jdk: oraclejdk8
+      env: JRUBY_OPTS='--debug' # get more accurate coverage data
+
+  allow_failures:
+    - rvm: ruby-head
+    - rvm: jruby-head
+    - rvm: rbx-3
+  fast_finish: true
+
+before_script:
+  - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+  - chmod +x ./cc-test-reporter
+  - ./cc-test-reporter before-build
+
+before_install:
+  - rm Gemfile.lock
+  - rm .ruby-version
+  - gem install bundler
+
+script:
+  - bundle exec rake
+  - bundle exec mdl README.md CHANGELOG.md TODO.md
+
+after_script:
+  - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT

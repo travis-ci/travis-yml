@@ -1,0 +1,23 @@
+language: android
+
+android:
+  components:
+  - build-tools-28.0.3
+  - android-26
+
+before_install:
+  - yes | sdkmanager "build-tools;28.0.3"
+
+script:
+  - ./gradlew test
+
+after_success:
+  - .utility/initiate-publish.sh
+
+env:
+  global:
+  - secure: kAObSZVQ6SGgIJsh++UYDWyF8AqvYI5xnAaL2CJRq2NUxAMsOwiJdM9Ey/HiOoSyzzII7Ve7Cyji1YE+YfHYOfs5x9iNMIwSRqQv9l8nry7GlzxLXt4OhFpM0EIeaNokzzwXYjiZ7TTLOtLuYCr7ssGTRGUrFCsBHI/+4dKS68k=
+  - secure: hLpLbEi5ThL/+qHuEmJvvJkzfBrXbyOjDbd9fSSYESSQuGUoEGH3UM7Ws6eJynv/G0w+xmJIQ4vlDbSBa53vaYwHB2l0Rhcoj3XHHvpMwlckIh/TGA+o4Bd5DHN61Jatm6ja8PFRAhNF4adsLUwObrE6Z9ydepKFYBWSjP4xEws=
+
+git:
+  depth: 9999999

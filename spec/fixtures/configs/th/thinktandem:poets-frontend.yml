@@ -1,0 +1,28 @@
+language: node_js
+dist: xenial
+node_js: 10
+services:
+  - docker
+sudo: required
+cache:
+  yarn: true
+  directories:
+    - node_modules
+before_install:
+  # Install Lando
+  - sudo apt-get -y update
+  - sudo apt-get -y install cgroup-bin curl
+  - curl -fsSL -o /tmp/lando.deb https://github.com/lando/lando/releases/download/v3.0.0-rc.13/lando-v3.0.0-rc.13.deb
+  - sudo dpkg -i /tmp/lando.deb
+  # Sanity check to make sure we are rolling
+  - node --version
+  - yarn --version
+  - lando version
+  - cp .env.travis .env
+install: lando start
+script:
+  # Run lint and styling checks
+  - lando yarn lint
+  # Run end to end tests
+  # TODO: lets enable this again when we can get it to run reliably in travis
+  # - lando test

@@ -1,0 +1,27 @@
+language: node_js
+cache:
+  directories:
+    - node_modules
+    - bower_components
+node_js:
+  - 5.4.0
+before_install:
+  - npm install -g grunt-cli
+install:
+  - npm install
+before_script:
+  - npm install -g bower
+  - bower install --force
+script:
+  - grunt build
+addons:
+  sauce_connect: true
+deploy:
+  provider: npm
+  email: blazej.krysiak@gmail.com
+  api_key:
+    secure: XF7TJRCaz5+otwBHl07ppHsWBYpwJ6sEw4PxzAvkljBcqsZv826nOECQjNaFT0CtfnwwpQ+rZhpl1sdB9BhndmbGgkjyXNGAa1rLzDnWGruh7FR80mpZ43LmEDNzgQcJqS70hj2uWcosRnveVhkllsVK3uf6gKTsl4TnBGWYPaU=
+  on:
+    tags: true
+    repo: Narzerus/angular-permission
+    branch: master

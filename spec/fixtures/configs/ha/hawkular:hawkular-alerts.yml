@@ -1,0 +1,49 @@
+sudo: false
+language: java
+jdk:
+- oraclejdk8
+notifications:
+  irc:
+    channels:
+    - chat.freenode.net#hawkular
+    on_success: change
+
+# manage the caches here https://travis-ci.org/hawkular/hawkular-alerts/caches
+cache:
+  directories: # keep in sync with CACHED_DIRECTORIES below
+  - $HOME/.m2/repository
+
+install:
+- mvn -version -B
+# unshallow is needed by license-maven-plugin
+- git fetch origin --unshallow
+script:
+- mvn -s .travis.maven.settings.xml verify -Dtest-env=perf -Dsrcdeps.quiet=false
+- mvn -s .travis.maven.settings.xml verify -Pitest
+env:
+  global:
+  - secure: TQJ1pIBM6dGgCQj59OiYxmKI2Nk+0XIT9His/iBt4FGRXHQ4BqWZuMVbtiX0ngGJbyg6Ntq9mJwmioGNl3tyK3jY9eqD/pWg8XjA9YAn+UINSBS3ooPYgAwIjTuJp6o7x9xExLEKCdzyttFjQ0BG+AkNvIEVyjSTZq7ky/ngbP4=
+  - secure: FxylCjpefGYtjx8tclzaruX6oGirSxSPr2GX6LrRsQVBhTcsCMJAyVfQur3Xobbm1WaJOOvSqFi8CUz7e2Fy6wNX10HaPZs0jGIFgnISATzBYZd3gC9nQwSDDtsvqE9J1cztXYaVtbtmTazLSRpPy5jUi5Trcqx3e/ZCQ2fnt7M=
+  # for pushing the swagger adoc documentation to the website repository
+  - secure: W06c620h/B/+Va2SoU+9wSHaop9HpULMSUCyo7lSb9lKGQ7JdNSC+MzgkQdjuYuzNM/WGGTPetV9IWCaQ13q6KrXCbxv9Jj2HD1wzalOG7rPSfhHz+7KkryIOO+PNwtV7pV04/R1bPqkfYfzfGVIfl/0NxGlq9gPHCT4EuUW/Zs=
+
+before_cache:
+# Clean the cached directories once their size exceeds the space left on the partition.
+# This is important because Travis zips the chached directories to a temporary file on the same partition.
+# Note that while we consider the summed size of all cached dirs, we remove only those ones that tend to grow over time
+- CACHED_DIRECTORIES=("$HOME/.m2/repository")
+- availBytes=$(df -P . | tail -1 | awk '{print $4}')
+- cachedBytes=$(du -cs "${CACHED_DIRECTORIES[@]}" | tail -1 | awk '{print $1}')
+- echo "Checking if the size of directories to cache ${cachedBytes} Bytes exceeds the free space ${availBytes} Bytes left on the current partition"
+- if [ "${cachedBytes}" -gt "${availBytes}" ] ; then
+    echo "Cleaning the cached dirs (${cachedBytes} Bytes) because their size exceeds the free space (${availBytes} Bytes) left on the current partition"
+    rm -Rf "$HOME/.m2"
+  fi
+
+after_success:
+- PROJECT_VERSION=`mvn --batch-mode org.apache.maven.plugins:maven-help-plugin:2.1.1:evaluate -Dexpression=project.version | grep -v '\['`
+- if [[ "$PROJECT_VERSION" =~ .*SNAPSHOT ]] && [[ "${TRAVIS_BRANCH}" = "master" ]] && [[ "${TRAVIS_PULL_REQUEST}" = "false" ]];
+  then
+    mvn -s .travis.maven.settings.xml deploy -DskipTests ;
+    ./.travis.swagger.sh ;
+  fi

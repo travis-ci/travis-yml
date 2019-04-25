@@ -1,0 +1,72 @@
+language: generic
+
+os:
+  - linux
+
+branches:
+  except:
+    - gh-pages
+
+git:
+  depth: 9999
+
+sudo: false
+
+env:
+  global:
+    - INSTALLDIR="$HOME/taucmdr-test"
+    - __TAUCMDR_PROGRESS_BARS__="disabled"
+
+before_install:
+  - |
+    if ${TRAVIS_SECURE_ENV_VARS} ; then
+      # encrypted with `travis encrypt-file`
+      openssl aes-256-cbc -K $encrypted_c48b4c75cf28_key -iv $encrypted_c48b4c75cf28_iv -in id_rsa_Travis2GH.enc -out id_rsa_Travis2GH -d
+      chmod 600 id_rsa_Travis2GH
+      encrypted_canary="Still have encrypted vars!"
+      unset -v ${!encrypted_@} # unset secret encrypted variables
+      echo "${encrypted_canary:-Ecrypted vars successfully unset.}"
+    fi
+  - git --version
+  - if [[ ! -d "${HOME}/bin" ]] ; then mkdir "${HOME}/bin" && export PATH="${HOME}/bin:${PATH}"; fi
+  - printf '#!/usr/bin/env bash\nssh -i %s/id_rsa_Travis2GH "$@"\n' "$(pwd)" > "${HOME}/bin/ssh_to_GH"
+  - chmod +x "${HOME}/bin/ssh_to_GH"
+  - export GIT_SSH="${HOME}/bin/ssh_to_GH"
+  - echo "Testing ssh to github.com" && ($GIT_SSH -T "git@github.com" || true)
+  - env | grep -iv 'token\|key\|encrypt' | sort # scrub tokens from output & sort
+  - mount
+
+# Test `make install` while boostraping Python 2.7 environment and required packages.
+install:
+  - make install INSTALLDIR="$INSTALLDIR" || (tail -1000 "$HOME/.local/taucmdr/debug_log" && false)
+  - export PATH="$INSTALLDIR/conda/bin:$PATH"
+  - which python
+  - which pip
+  - pip install --prefix "$INSTALLDIR/conda" -r requirements.txt
+
+# Use travis_wait to extend the expected runtime of the command.
+script:
+  - travis_wait 30 coverage run setup.py test
+
+after_failure:
+  - tail -1000 "$HOME/.local/taucmdr/debug_log"
+
+after_script:
+  - codecov --env TRAVIS_OS_NAME
+
+deploy:
+  provider: script
+  script: python setup.py build_sphinx --update-gh-pages --gh-origin-url "git@github.com:${TRAVIS_REPO_SLUG}.git" --gh-user-name "Travis-CI-bot" --gh-user-email "info@paratools.com" --gh-commit-msg "Updated documentation on Travis-CI job $TRAVIS_JOB_NUMBER at commit $TRAVIS_COMMIT"
+  skip_cleanup: true
+  on:
+    all_branches: true
+    condition: ( $TRAVIS_BRANCH = master || $TRAVIS_BRANCH = unstable ) && $TRAVIS_SECURE_ENV_VARS = true
+    repo: ParaToolsInc/taucmdr # Don't try to deploy on private forks
+
+notifications:
+  email:
+    recipients:
+      - taucmdr-notify@paratools.com
+    on_success: change  # options: [always|never|change]
+    on_failure: change
+    on_start: never

@@ -1,0 +1,174 @@
+# This is the config file for building GDAL and running its autotest suite
+# with Travis-ci.org
+
+matrix:
+  fast_finish: true
+  include:
+
+    - os: linux
+      compiler: gcc
+      language: cpp
+      sudo: required
+      dist: trusty
+      cache:
+        apt: true
+        directories:
+          - $HOME/.ccache
+      env:
+        - BUILD_NAME=ubuntu_1804
+        - DETAILS=""
+
+    - os: linux
+      compiler: clang
+      language: cpp
+      sudo: required
+      dist: trusty
+      cache:
+        apt: true
+        directories:
+          - $HOME/.ccache
+      env:
+        - BUILD_NAME=trusty_clang
+        - DETAILS="optimized build, no libtool"
+    - os: linux
+      compiler: clang
+      language: cpp
+      sudo: required
+      dist: trusty
+      cache:
+        apt: true
+        directories:
+          - $HOME/.ccache
+      env:
+        - BUILD_NAME=mingw_w64
+        - DETAILS="optimized build, libtool"
+    - os: linux
+      compiler: gcc
+      language: cpp
+      sudo: required
+      dist: trusty
+      cache:
+        apt: true
+        directories:
+          - $HOME/.ccache
+      env:
+        - BUILD_NAME=python3
+        - DETAILS=""
+    - os: linux
+      compiler: gcc
+      language: cpp
+      sudo: false
+      dist: trusty
+      cache:
+        apt: true
+        directories:
+          - $HOME/.ccache
+      apt:
+        packages:
+          - ccache
+      env:
+        - BUILD_NAME=android
+        - DETAILS=""
+    - os: linux
+      compiler: gcc
+      language: cpp
+      sudo: false
+      dist: precise
+      cache:
+        apt: true
+        directories:
+          - $HOME/.ccache
+      apt:
+        packages:
+          - ccache
+      env:
+        - BUILD_NAME=big_endian
+        - DETAILS=""
+    - os: linux
+      compiler: gcc
+      language: cpp
+      sudo: required
+      dist: precise
+      cache:
+        apt: true
+        directories:
+          - $HOME/.ccache
+      env:
+        - BUILD_NAME=gcc52_stdcpp14_sanitize
+        - DETAILS=""
+    - os: linux
+      compiler: gcc
+      language: cpp
+      sudo: required
+      dist: precise
+      cache:
+        apt: true
+        directories:
+          - $HOME/.ccache
+      env:
+        - BUILD_NAME=ubuntu_1604
+        - DETAILS=""
+    - os: linux
+      compiler: gcc
+      language: cpp
+      sudo: required
+      dist: trusty
+      cache:
+        apt: true
+        directories:
+          - $HOME/.ccache
+      env:
+        - BUILD_NAME=trusty_32bit
+        - DETAILS=""
+    - osx_image: xcode8
+      language: objective-c
+      compiler: clang
+      cache:
+        apt: true
+        directories:
+          - $HOME/.ccache
+      env:
+        - BUILD_NAME=osx
+        - DETAILS="debug build, libtool"
+
+    - os: linux
+      compiler: gcc
+      language: cpp
+      sudo: required
+      dist: trusty
+      cache:
+        apt: true
+      env:
+        - BUILD_NAME=csa_part_1
+        - DETAILS="CLang Static Analyzer part 1"
+
+    - os: linux
+      compiler: gcc
+      language: cpp
+      sudo: required
+      dist: trusty
+      cache:
+        apt: true
+      env:
+        - BUILD_NAME=csa_part_2
+        - DETAILS="CLang Static Analyzer part 2"
+
+before_install:
+  - ./gdal/ci/travis/${BUILD_NAME}/before_install.sh
+
+install:
+  - ./gdal/ci/travis/${BUILD_NAME}/install.sh
+
+script:
+  - ./gdal/ci/travis/${BUILD_NAME}/script.sh
+
+notifications:
+  email:
+    recipients:
+      - gdal-commits@lists.osgeo.org
+
+  irc:
+    channels:
+      - "irc.freenode.org#gdal"
+    use_notice: true
+    on_success: change

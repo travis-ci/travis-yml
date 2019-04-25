@@ -1,0 +1,70 @@
+language: node_js
+node_js:
+  - '10'
+  - '8'
+  - '6'
+  - '4'
+
+os: linux
+
+env:
+  - ESLINT_VERSION=5
+  - ESLINT_VERSION=4
+  - ESLINT_VERSION=3
+  - ESLINT_VERSION=2
+
+# osx backlog is often deep, so to be polite we can just hit these highlights
+matrix:
+  include:
+  - env: PACKAGE=resolvers/node
+    node_js: 10
+  - env: PACKAGE=resolvers/node
+    node_js: 8
+  - env: PACKAGE=resolvers/node
+    node_js: 6
+  - env: PACKAGE=resolvers/node
+    node_js: 4
+  - env: PACKAGE=resolvers/webpack
+    node_js: 10
+  - env: PACKAGE=resolvers/webpack
+    node_js: 8
+  - env: PACKAGE=resolvers/webpack
+    node_js: 6
+  - env: PACKAGE=resolvers/webpack
+    node_js: 4
+
+  - os: osx
+    env: ESLINT_VERSION=5
+    node_js: 10
+  - os: osx
+    env: ESLINT_VERSION=4
+    node_js: 8
+  - os: osx
+    env: ESLINT_VERSION=3
+    node_js: 6
+  - os: osx
+    env: ESLINT_VERSION=2
+    node_js: 4
+
+  exclude:
+  - node_js: '4'
+    env: ESLINT_VERSION=5
+  
+  fast_finish: true
+  allow_failures:
+  # issues with typescript deps in this version intersection
+  - node_js: '4'
+    env: ESLINT_VERSION=4
+
+before_install:
+  - 'nvm install-latest-npm'
+  - 'if [ -n "${PACKAGE-}" ]; then cd "${PACKAGE}"; fi'
+install:
+  - npm install
+  - 'if [ -n "${ESLINT_VERSION}" ]; then ./tests/dep-time-travel.sh; fi'
+
+script:
+  - 'npm test'
+
+after_success:
+  - npm run coveralls

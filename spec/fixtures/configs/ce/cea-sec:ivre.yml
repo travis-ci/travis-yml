@@ -1,0 +1,195 @@
+# This file is part of IVRE.
+# Copyright 2011 - 2019 Pierre LALET <pierre.lalet@cea.fr>
+#
+# IVRE is free software: you can redistribute it and/or modify it
+# under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# IVRE is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+# or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public
+# License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with IVRE. If not, see <http://www.gnu.org/licenses/>.
+
+sudo: required
+dist: xenial
+
+env:
+  # PostgreSQL 10.1, 9.6.6, 9.5.10
+  - DB=postgres POSTGRES_VERSION=9.5.10
+  - DB=postgres POSTGRES_VERSION=9.6.6
+  - DB=postgres POSTGRES_VERSION=10.1
+  # MongoDB
+  ## Previous releases
+  - DB=mongo MONGODB_VERSION=2.6.12
+  - DB=mongo MONGODB_VERSION=3.0.15
+  - DB=mongo MONGODB_VERSION=3.2.21
+  - DB=mongo MONGODB_VERSION=3.4.17
+  - DB=mongo MONGODB_VERSION=3.6.8
+  ## Current stable
+  - DB=mongo MONGODB_VERSION=4.0.2
+  ## Development release
+  - DB=mongo MONGODB_VERSION=4.1.3
+  # Neo4j
+  - DB=neo4j NEO4J_VERSION=3.5.1
+  # Sqlite
+  - DB=sqlite
+  # MaxMind (& utils)
+  - DB=maxmind
+
+language: python
+
+cache: pip
+
+python:
+  - 2.7
+  - 3.4
+  - 3.5
+  - 3.6
+  - 3.7
+
+matrix:
+  include:
+    - python: 3.3
+      dist: trusty
+      env: DB=postgres POSTGRES_VERSION=9.5.10
+    - python: 3.3
+      dist: trusty
+      env: DB=postgres POSTGRES_VERSION=9.6.6
+    - python: 3.3
+      dist: trusty
+      env: DB=postgres POSTGRES_VERSION=10.1
+    - python: 2.6
+      dist: trusty
+      env: DB=mongo MONGODB_VERSION=2.6.12
+    - python: 3.3
+      dist: trusty
+      env: DB=mongo MONGODB_VERSION=2.6.12
+    - python: 2.6
+      dist: trusty
+      env: DB=mongo MONGODB_VERSION=3.0.15
+    - python: 3.3
+      dist: trusty
+      env: DB=mongo MONGODB_VERSION=3.0.15
+    - python: 2.6
+      dist: trusty
+      env: DB=mongo MONGODB_VERSION=3.2.21
+    - python: 3.3
+      dist: trusty
+      env: DB=mongo MONGODB_VERSION=3.2.21
+    - python: 2.6
+      dist: trusty
+      env: DB=mongo MONGODB_VERSION=3.4.17
+    - python: 3.3
+      dist: trusty
+      env: DB=mongo MONGODB_VERSION=3.4.17
+    - python: 2.6
+      dist: trusty
+      env: DB=mongo MONGODB_VERSION=3.6.8
+    - python: 3.3
+      dist: trusty
+      env: DB=mongo MONGODB_VERSION=3.6.8
+    - python: 2.6
+      dist: trusty
+      env: DB=mongo MONGODB_VERSION=4.0.2
+    - python: 3.3
+      dist: trusty
+      env: DB=mongo MONGODB_VERSION=4.0.2
+    - python: 2.6
+      dist: trusty
+      env: DB=mongo MONGODB_VERSION=4.1.3
+    - python: 3.3
+      dist: trusty
+      env: DB=mongo MONGODB_VERSION=4.1.3
+    - python: 3.3
+      dist: trusty
+      env: DB=sqlite
+    - python: 2.6
+      dist: trusty
+      env: DB=maxmind
+    - python: 3.3
+      dist: trusty
+      env: DB=maxmind
+
+# PhantomJS is supposed to be installed
+# (https://docs.travis-ci.com/user/gui-and-headless-browsers/#Using-PhantomJS),
+# but we need tesseract
+addons:
+  apt:
+    packages:
+    - tesseract-ocr
+    - tesseract-ocr-osd
+    - tesseract-ocr-eng
+    - phantomjs
+
+install:
+  - source ./.travis/install_${DB}.sh
+  - pip install -U $PIP_INSTALL_OPTIONS .
+  - PYVERS=`python -c 'import sys;print("%d%d" % sys.version_info[:2])'`; if [ -f "requirements-$DB-$PYVERS.txt" ]; then  pip install -U $PIP_INSTALL_OPTIONS -r "requirements-$DB-$PYVERS.txt"; else pip install -U $PIP_INSTALL_OPTIONS -r "requirements-$DB.txt"; fi
+  # Python 2.6 needs unittest2, and coverage / codecov would install requests to a version which
+  # does not support Python 2.6
+  - test "$TRAVIS_PYTHON_VERSION" = 2.6 && pip install -U unittest2 'requests<=2.18.4' || true
+  - pip install -U $PIP_INSTALL_OPTIONS coverage codecov
+  # cleanup
+  - rm -rf ivre/
+
+# We need MongoDB 2.6
+# https://github.com/travis-ci/travis-ci/issues/2246
+#services: mongodb
+
+before_script:
+  # display version
+  - ivre version
+  # init DB
+  - test "$DB" = "maxmind" || test "$DB" = "neo4j" || ivre ipinfo --init < /dev/null || echo "ERROR failed to init passive database."
+  - test "$DB" = "maxmind" || test "$DB" = "neo4j" || ivre scancli --init < /dev/null || echo "ERROR failed to init nmap database."
+  - test "$DB" = "maxmind" || test "$DB" = "neo4j" || ivre view --init < /dev/null || echo "ERROR failed to init view database."
+  - test "$DB" != "neo4j" || ivre flowcli --init < /dev/null || echo "ERROR failed to init flow database."
+  - cat .travis/ivre.conf >> ~/.ivre.conf
+  - echo "NMAP_SHARE_PATH = '`pwd`/usr/local/nmap/share/nmap'" >> ~/.ivre.conf
+  # install p0f, Bro & Nmap (.tar files)
+  # for some reason, wget on travis-ci won't accept letsencrypt certificate
+  - BRO_VERSION="2.$((RANDOM % 2 + 5))"; echo "BRO_VERSION $BRO_VERSION"; for archive in tools-travis-ivre bro-${BRO_VERSION}_ubuntu-`awk -F = '/^DISTRIB_RELEASE=/ {print $2}' /etc/lsb-release` nmap-7.60_ubuntu-precise; do wget -q --no-check-certificate https://ivre.rocks/data/tests/${archive}.tar.bz2 -O - | tar jxf - ; done
+  # get GeoIP CSV files -- we are supposed to build them, but that's
+  # disabled in Travis since that's too slow
+  - wget -q --no-check-certificate -P `python -c 'from ivre import config; print(config.GEOIP_PATH)'` https://ivre.rocks/data/tests/db/GeoLite2-{ASN,City,Country}.dump-IPv4.csv.bz2; bunzip2 "/`python -c 'from ivre import config; print(config.GEOIP_PATH)'`/"GeoLite2-{ASN,City,Country}.dump-IPv4.csv.bz2
+  - export PATH="`pwd`/tools/bin:`pwd`/usr/local/bro/bin:`pwd`/usr/local/nmap/bin:$PATH"
+  - export LD_LIBRARY_PATH="`pwd`/tools/lib:`pwd`/usr/local/bro/lib"
+  - export BROPATH=".:`pwd`/usr/local/bro/share/bro:`pwd`/usr/local/bro/share/bro/policy:`pwd`/usr/local/bro/share/bro/site"
+  - cp tools/etc/p0f/* tests/
+  # install IVRE's Nmap scripts.
+  - cp `python -c "import ivre.config; print(ivre.config.guess_prefix('nmap_scripts'))"`/*.nse `pwd`/usr/local/nmap/share/nmap/scripts/
+  - for patch in `python -c "import ivre.config; print(ivre.config.guess_prefix('nmap_scripts'))"`/patches/*; do (cd `pwd`/usr/local/nmap/share/nmap && patch -p0 < $patch); done
+  - nmap --script-updatedb
+  # get samples
+  - mkdir tests/samples
+  - cp tests/results-public-samples tests/samples/results
+  - cp tests/iptables-samples tests/samples/iptables.log
+  ## Nmap Internet-wide Modbus scan (JSON format, shortened)
+  - wget -q --no-check-certificate -O tests/samples/Nmap-Modbus-IPv4.json.bz2 https://ivre.rocks/data/tests/Nmap-Modbus-IPv4-partial.json.bz2 # JSON files w/ Nmap scan results
+  ## Masscan sample scans (XML format)
+  - for file in test-probe-ike-ipsec-nat-t-probe-U4500.xml.bz2 test-probe-ike-probe-U500.xml.bz2 test-T22.xml.bz2 test-T443.xml.bz2 test-T102-s7comm.xml.bz2; do wget -q --no-check-certificate "https://ivre.rocks/data/tests/$file" -O "tests/samples/$file" ; done
+  ## Nmap IPv6 scans
+  - wget -q https://raw.githubusercontent.com/logstash-plugins/logstash-codec-nmap/master/spec/fixtures/ipv6_all.xml -O "tests/samples/ipv6_all.xml"
+  ## PCAP files from ivre.rocks
+  - wget -q --no-check-certificate -O - https://ivre.rocks/data/tests/dnsbl.pcap.bz2 | bunzip2 > tests/samples/dnsbl.pcap
+  ## PCAP files from the Wireshark project
+  - for file in dns.cap imap.cap http.cap telnet-raw.pcap nb6-startup.pcap nb6-http.pcap nb6-telephone.pcap nb6-hotspot.pcap Teredo.pcap sr-header.pcap; do wget -q "https://wiki.wireshark.org/SampleCaptures?action=AttachFile&do=get&target=$file" -O "tests/samples/$file"; done
+  - for file in SSHv2.cap; do wget -q "http://packetlife.net/captures/$file" -O "tests/samples/$file"; done
+  - wget -q 'https://www.cloudshark.org/captures/616566f75f0c/download' -O tests/samples/gre-sample.pcap
+  # 2015-09-18-Nuclear-EK-traffic comes from https://www.malware-traffic-analysis.net/2015/09/18/2015-09-18-Nuclear-EK-traffic.pcap.zip
+  - for file in banners.pcap 2015-09-18-Nuclear-EK-traffic.pcap; do wget -q --no-check-certificate -O tests/samples/$file https://ivre.rocks/data/tests/$file; done
+  - for file in tests/samples/*.cap; do mv "$file" "${file/.cap/.pcap}"; done
+  - export BRO_SAMPLES=`pwd`/usr/local/bro/testing
+  - ivre --version; echo; bro --version; echo; nmap --version
+
+script: (test "$DB" != "maxmind" || test "$TRAVIS_PYTHON_VERSION" = 2.6 || test "$TRAVIS_PYTHON_VERSION" = 3.3 || (flake8 --ignore= setup.py bin/ivre && flake8 --ignore=E402,W504 tests/tests.py && flake8 --ignore=W504 ivre/ && echo "flake8 OK (except W504)")) && (test "$DB" != "maxmind" || test "$TRAVIS_PYTHON_VERSION" != 3.7 || (codespell  --ignore-words=.travis/codespell_ignore `git ls-files | grep -vE '^web/static/(an|bs|d3|jq|lk)/|^data/|\.(png|gif)$'` && echo "codespell OK")) && cd tests/ && coverage erase && coverage run --parallel-mode tests.py --coverage && coverage combine && coverage report
+
+after_success:
+  - codecov
+
+after_failure:
+  - cat /tmp/webserver.log

@@ -1,0 +1,30 @@
+language: node_js
+
+services:
+  - docker
+
+script:
+  - ./autogen.sh --prefix=/usr --datarootdir=/share
+  - yarn run build
+  - docker build --tag web-ui .
+  - docker run -d --rm -it -e ENGINE_URL=https://localhost/ovirt-engine -p 3000:3000 --name web-ui web-ui
+  - >
+    for i in {1..7}; do
+      docker logs web-ui
+      docker logs web-ui 2>&1  | grep -Pzl 'error'
+      if [ $? -eq 0 ]; then
+        echo 'oVirt VM Portal did not start up successfully'
+        exit 1
+      fi
+      docker logs web-ui 2>&1  | grep -Pzl 'Please authenticate against oVirt running at https://localhost/ovirt-engine'
+      if [ $? -eq 0 ]; then
+        break
+      fi
+      if [ $i -eq 7 ]; then
+        echo 'oVirt VM Portal did not start up successfully'
+        exit 1
+      fi
+      sleep 2
+    done
+node_js:
+  - "8"

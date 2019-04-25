@@ -1,0 +1,16 @@
+language: python
+python:
+- '2.7'
+- '3.4'
+- '3.5'
+- '3.6'
+- 'pypy'
+install:
+  - pip install -r requirements.txt
+script:
+  - nosetests  --with-coverage --cover-package=lob
+after_success:
+  - coveralls
+notifications:
+  slack:
+    secure: aqg9JtvfexP2x6v9wicCfW2TSB9pFGOLFsuRTlkKM2HFfIM3O7YXX1nd3x7bwm7xuIXpBEDjqE9ImI4aM14k/ckkT3sS1GwZJuraV8zbkN3sAF1Zb3zgtXgb+jkt+hYITFjK5xPaaY3wd8+IJRna29tgxBhd9Yce7mQFQu5KbF4=

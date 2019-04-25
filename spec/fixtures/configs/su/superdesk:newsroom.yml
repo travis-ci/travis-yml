@@ -1,0 +1,41 @@
+language: python
+
+dist: trusty
+
+python:
+    - "3.5"
+
+services:
+    - mongodb
+    - redis-server
+
+addons:
+    apt:
+        sources:
+            - elasticsearch-2.x
+            - google-chrome
+        packages:
+            - elasticsearch
+            - google-chrome-stable
+
+cache:
+  - pip
+  - npm
+  - yarn
+
+before_install:
+    - sudo apt-get purge elasticsearch
+    - sudo apt-get install -y -t stable --allow-unauthenticated elasticsearch
+    - sudo service elasticsearch restart
+
+install:
+    - pip install -r requirements.txt
+    - pip install -r dev-requirements.txt
+    - yarn install
+
+script:
+    - flake8
+    - pytest --cov=newsroom
+    - npm run lint
+    - npm run test
+    - npm run build

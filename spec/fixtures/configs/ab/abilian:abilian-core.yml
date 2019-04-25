@@ -1,0 +1,50 @@
+dist: xenial
+
+language: python
+
+cache:
+  pip: true
+  directories:
+    - node_modules
+
+addons:
+  postgresql: "9.6"
+
+matrix:
+  include:
+    - python: 3.6
+      env: SQLALCHEMY_URI=postgresql://postgres@localhost/abilian
+    - python: 3.6
+      env: SQLALCHEMY_URI=sqlite://
+    - python: 3.6
+      env: TOXENV=lint
+    - python: 3.7
+      env: SQLALCHEMY_URI=postgresql://postgres@localhost/abilian
+    - python: 3.7
+      env: SQLALCHEMY_URI=sqlite://
+
+# Install OS and global dependencies
+before_install:
+  - sudo apt-get -qq update
+  - sudo apt-get install poppler-utils
+  - yarn global add less
+  - gem install travis
+
+install:
+  - pip install -U pip setuptools wheel tox tox-travis
+  - yarn
+
+# Create DB
+before_script:
+  - psql -c 'create database abilian;' -U postgres
+
+# Run tests
+script:
+  - tox
+
+notifications:
+  slack:
+    rooms:
+      - abilian:dTtRD7DHS4Dw3jfRrqytQWU6#code
+    on_success: change
+    on_failure: always

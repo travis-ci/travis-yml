@@ -1,0 +1,16 @@
+sudo: required
+dist: trusty
+language: java
+before_install:
+- sudo apt-get install cmake
+- sudo apt-get install libpthread-stubs0-dev
+- sudo apt-get install libnuma-dev
+before_script:
+- cd /tmp
+- git clone https://github.com/memkind/memkind.git
+- cd memkind && ./build.sh
+- make
+- sudo make install
+- cd ${TRAVIS_BUILD_DIR}
+script:
+- mvn clean -q -Ppersistent-memory test

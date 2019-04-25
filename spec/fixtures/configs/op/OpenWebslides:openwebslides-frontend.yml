@@ -1,0 +1,13 @@
+language: node_js
+node_js:
+- '8'
+cache: yarn
+script:
+- yarn run flow
+- yarn run lint
+- yarn run test-report --maxWorkers=4 && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js
+notifications:
+  slack:
+    secure: GTC1ns7DQcU7MwG7MilQX7tUWJY29pN0Jz8Mv7OLf/nL6dNuzAFKkNXiK8vMZHwbRd3wdmtFo4+vWbvVXQMiVk6+IYj45/gJRiGthk37Kese7ZBXMVOcgMEelG8qsHXeTgROCpnGYi1hAZH1zrtVCLY4SJymJMN39GMKqUi3CjzFLaf4uFuZsdQwPQnXinXbU37yN2t/LXzlgHzS0s5UOoY9Ygtxu5aQy2JzCanW13ed/rYWHIxyagRt5xCL4boCYF7CsHnI/z+ptmv9wWV/VSgvbgvKIMXiH3xhMjMyM+jf5kn6Lkqcb8EqA9zQwthssILw1ciqsVC2T/kQN3v3esqu7qdeL9f+owm7WkSYC+chbi3b2lhJwnHvPaMCTFDFisF3G45hzVA41o1sAr097tVEWE/S6nsWkFBTM1y06VyesbmAZx+mjm91TCBabuYbBEBhTn2/3uCi+nW01m5CvFjGBezJva1wM0T+Br7r+RMojqBGJaI94nygRnXsBAWWI+k949d3fIj14ueHcm4QK9VMICHZXB5dJbG6Rmb1ZJf39/e8uKP2+RE/fXKtD00if459t2oXP/S+ojUEbseo9RHDijOFbBLtSXXFhC7brLMNB/8Qu2vW6xeyLDFM1BqH81RVx/BRuPuG94oWBL3f46tFIp6sImDzI0/+fX+4bLU=
+  email: false
+  on_success: change

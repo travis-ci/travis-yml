@@ -1,0 +1,25 @@
+language: java
+sudo: false
+jdk:
+- oraclejdk8
+before_install:
+install: ./gradlew setupDecompWorkspace
+script: 
+- ./gradlew build
+before_cache:
+- rm -f $HOME/.gradle/caches/modules-2/modules-2.lock
+cache:
+  directories:
+  - "$HOME/.gradle/caches/"
+  - "$HOME/.gradle/wrapper/"
+deploy:
+  provider: releases
+  file_glob: true
+  api_key: $GITHUB_OAUTH
+  file: 
+  - "./build/libs/Bewitchment-*-*.jar"
+  - "./build/libs/Bewitchment-*-*-sources.jar"
+  - "./build/libs/Bewitchment-*-*-api.jar"
+  skip_cleanup: true
+  on:
+    tags: true

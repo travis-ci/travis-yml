@@ -11,13 +11,30 @@ describe Travis::Yml::Schema::Def::Ruby, 'structure' do
         type: :object,
         properties: {
           rvm: {
-            '$ref': '#/definitions/strs'
+            '$ref': '#/definitions/type/strs'
           },
           gemfile: {
-            '$ref': '#/definitions/strs'
+            '$ref': '#/definitions/type/strs'
           },
           jdk: {
-            '$ref': '#/definitions/strs'
+            anyOf: [
+              {
+                type: :array,
+                items: {
+                  type: :string
+                },
+                flags: [
+                  :expand
+                ],
+                normal: true
+              },
+              {
+                type: :string
+              }
+            ],
+            flags: [
+              :expand
+            ]
           },
           bundler_args: {
             type: :string

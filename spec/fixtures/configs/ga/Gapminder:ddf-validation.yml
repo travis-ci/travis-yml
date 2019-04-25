@@ -1,0 +1,19 @@
+language: node_js
+node_js:
+  - "6"
+script:
+  - npm run-script test-travis
+
+
+after_success:
+  .cicd/beta_npm_ver.js
+
+deploy:
+  provider: npm
+  email: vyacheslav.chub@valor-software.com
+  api_key:
+    secure: "Tkh6bVwnQC1pI5mfRdfcIB/O8cUKE6TYh/rIPFGOnADxZAsYXitPMNzt48/mnr91sUe/0SJOQu69Pv9pJiqn7EMk4XnNe18NZEfhUKw2Z6vOFor3D+Cmd7Nu/AgStgWotsu6QCAB5T6jwGmx0nPb7CYLqhvU8MqTTxQ3WZI/gX14HaoHsiRxCIh3fITOUdGCaTc2HdrKzijKFs4MhZDxnR+Jmazq5xddx9NEAgs/UTyzKgxhXxfKqrRbx5xYZ0M+qBdGduD4xHKEGwz8t80CYkWnbW6y3ARpdrHT4YkWhYwm8xfoOesNLTp7BBRW97l6dPw3N11TuM1z6z/bbKIepRTDVVxcz2fnqp4lPiHlbeNFSvdQ+9JrLrGSYneBR81qOfW7HcKiOe2FAiYa1EJyhT0jTyPEbfkzVpe/k0Y3HSZzg3TSbqZ01QshS1VAN8T6c2USfIu/VC/wlDyh37nyIk02hDJ5/zL1oxDV7Bsoc6iPluw9unecy64WcXPvY+mRMHsoT6bKDq49OBps5jd2WtaQ1SCPHFoNbP89qn9vRhYrWbWkFTXWWAvqEhweovjxVrXVCbaCf+/8P6ri6bS9CvGhpWl7PlnofmKRf1A064VWhk2aXc7sY+r3D3AK6h3/AMmvxHqsZI8GGt5BL+vw7Thft/d1JGzaPtli1jXbIjw="
+  on:
+    branch: develop
+    node: 6
+    condition: "-e /tmp/deployment.flag"

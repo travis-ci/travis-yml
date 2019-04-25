@@ -1,0 +1,18 @@
+dist: trusty
+sudo: false
+
+jobs:
+  include:
+    - stage: Update test results
+      if: type != cron
+      install: 
+        - pip install requests[security]
+        - pip install --user junitparser
+      script: bash .bin/update_report.sh
+    - stage: Clean up
+      if: type = cron
+      script: bash .bin/clean.sh
+
+notifications:
+  email: false
+

@@ -1,0 +1,132 @@
+---
+dist: xenial
+sudo: false
+
+language: cpp
+os:
+  - linux
+
+branches:
+  except:
+    - gh-pages
+
+env:
+  matrix:
+    - BUILD=Debug    MYCC=gcc-4.9    MYCXX=g++-4.9        FUZZ=0
+    - BUILD=Release  MYCC=gcc-4.9    MYCXX=g++-4.9        FUZZ=0
+    - BUILD=Debug    MYCC=gcc-7      MYCXX=g++-7          FUZZ=0
+    - BUILD=Release  MYCC=gcc-7      MYCXX=g++-7          FUZZ=0
+    - BUILD=Debug    MYCC=gcc-8      MYCXX=g++-8          FUZZ=0
+    - BUILD=Release  MYCC=gcc-8      MYCXX=g++-8          FUZZ=0
+    - BUILD=Debug    MYCC=clang-5.0  MYCXX=clang++-5.0    FUZZ=0
+    - BUILD=Release  MYCC=clang-5.0  MYCXX=clang++-5.0    FUZZ=0
+    - BUILD=Debug    MYCC=clang-6.0  MYCXX=clang++-6.0    FUZZ=0
+    - BUILD=Release  MYCC=clang-6.0  MYCXX=clang++-6.0    FUZZ=0
+    - BUILD=Debug    MYCC=clang-7    MYCXX=clang++-7      FUZZ=0
+    - BUILD=Release  MYCC=clang-7    MYCXX=clang++-7      FUZZ=0
+    - BUILD=Debug    MYCC=gcc-4.9    MYCXX=g++-4.9        FUZZ=1
+    - BUILD=Release  MYCC=gcc-4.9    MYCXX=g++-4.9        FUZZ=1
+    - BUILD=Debug    MYCC=gcc-7      MYCXX=g++-7          FUZZ=1
+    - BUILD=Release  MYCC=gcc-7      MYCXX=g++-7          FUZZ=1
+    - BUILD=Debug    MYCC=gcc-8      MYCXX=g++-8          FUZZ=1
+    - BUILD=Release  MYCC=gcc-8      MYCXX=g++-8          FUZZ=1
+    - BUILD=Debug    MYCC=clang-5.0  MYCXX=clang++-5.0    FUZZ=1
+    - BUILD=Release  MYCC=clang-5.0  MYCXX=clang++-5.0    FUZZ=1
+    - BUILD=Debug    MYCC=clang-6.0  MYCXX=clang++-6.0    FUZZ=1
+    - BUILD=Release  MYCC=clang-6.0  MYCXX=clang++-6.0    FUZZ=1
+    - BUILD=Debug    MYCC=clang-7    MYCXX=clang++-7      FUZZ=1
+    - BUILD=Release  MYCC=clang-7    MYCXX=clang++-7      FUZZ=1
+  global:
+    - PROJECT=quant
+    - secure: "MTff3c4sDIkFqXpYPVjSTc8uJlnfp3OVxcAVTb30yQWqKJ7XWcIEMMPNWPkwxh4UX3mA5rpCMeRyHNzbj+jqPHNKrYr8XxgXHi7zMX92/xrQToZLMFlYEGiae9q7kSwmwPcnDPRibynSoHuULHu+iuAFVe+Sg/NFE/5Ede8fi4lV4j+0pJ/7ruF5zUvcF92drHJL11hxoaQiIlwPto33tsDCAbBPqNpZa1U1Cgs+5WugIgN03Q5Kit8IFO5xZw5PSuVxY/u4E5BzlUU11jFKod7NTuaKTeSt/AJlkgFBbgKdxo7i29ALgWGfS7KZLaoYy3cAMOKwl3K8q71tB1+yl8iH5QF01BmQOzQlX+NZfKCw50HLGLKWBfaPcl2d4mfYkwhys+ocnoISGUF1pqLRiW01sPof7Cy/yHGwlth+Nt9OWC/AUlNv+UZMt9obD5pU6OSJCDrm2K/fQUm+sCpSPrG+565Fcf2Puo2JJvrD9oyYsm2cQ4ztXx9Mc1jHdobkgvOOhCwPiHWPs0DR8lcThznuZ9Y0D29lS+WeC8Bvbe3G4HKndGruAV7X9zDeS9+44H8boXe5o+thFqZVuidRa6FdsWC+t0rH6uc4MBDTSZ42zD6rIRUOpGx6muXdaZFSx2VeTnU6XxNsFfrZRu7aQHmCyTD1NY3gAUv0GcbbT6c="
+    # The next declaration is the encrypted COVERITY_SCAN_TOKEN, created
+    # via the "travis encrypt" command using the project repo's public key
+    - secure: "xpuYkQRBKDN0l7S2lVdbBw364qlxg0H7lRW2YroOaUsm1wd4YzzUKsuDG5vIJ0N7WZ0WWaECoa0HMleHVZ5ecY9GmwJ9AfLpfvGrrMyYF1XUkz3C3Xe653nZfK7mGMqPRC6zds5Y05u+goPBidhbXxU7cIS+i6nIrsB5HPa73F3AURNzTQKPfWwYcn3FbmTuheNPT4QujC+tt2g1rEbL5t2io+Hkwy114wntYoHbtbNPi64YorIu1oY9epHPbX61VdCZAuWjjdhn6qCjQaI4k45Bkdr/MDq0YB1cfaIQTOeN8t2EmzKKWufzke+0l7jGM8ISQtCOsQbBgYHb9P8nt6AL+PoxBO6/mMvf2bWOFGzECvEtfpfytBocI+YTsFG555YXGqy7DFYlcEeiyoUW0nTzesckT3n0amLw+TBA6STBw9bqobCAoiLKRg2xbNPMcKQmwuVjt+AFdfEVUUMNgm0z/43gzAkUNy2prH8yEBpcUkm7hpmv7k0dgVHl9OxxhjIIHvQm3LDtMUPmwqAEVGEVI+13DHcVBlzJm5BXqQGIb6q2BGi1WX/FvxiS4W1eRzZnzfnNxkpzcWu/msLhAYfk5vDuhR8k0A345o6vKZwIJC2G3nz5aHS5bdDcV7F/Tb4kAaxgpP/9VbFhE8GddkQzJiUE8mUbHcANyeE/5I0="
+
+addons:
+  apt:
+    update: true
+    sources:
+      - ubuntu-toolchain-r-test
+      - llvm-toolchain-xenial-6.0
+      - llvm-toolchain-xenial-7
+    packages:
+      - g++-4.9
+      - g++-7
+      - g++-8
+      - clang-5.0
+      - clang-6.0
+      - clang-7
+      - doxygen
+      - graphviz
+      - libev-dev
+      - libhttp-parser-dev
+      - libbsd-dev
+      - cmake
+  coverity_scan:
+    project:
+      name: "NTAP/$PROJECT"
+      description: "Build submitted via Travis CI"
+    notification_email: lars@netapp.com
+    build_command_prepend: |
+      if [ $BUILD = "Debug" -a $MYCC = "gcc-7" -a $FUZZ = 0 ]; then
+        sysctl vsyscall=emulate || true
+        cov-configure --comptype gcc --compiler $MYCC --template
+        cd $TRAVIS_BUILD_DIR
+        rm -rf build
+        mkdir build
+        cd build
+        cmake -DCMAKE_C_COMPILER=$MYCC -DCMAKE_CXX_COMPILER=$MYCXX \
+          -DCMAKE_BUILD_TYPE=$BUILD -DCMAKE_INSTALL_PREFIX:PATH=/tmp \
+          -DNO_SANITIZERS=True ..
+      fi
+    build_command: cov-build make VERBOSE=1
+    branch_pattern: coverity
+
+before_install:
+  # manually install latest openssl
+  - |
+    travis_retry wget \
+      -q https://www.openssl.org/source/openssl-1.1.1b.tar.gz
+    tar xf openssl-1.1.1b.tar.gz
+    cd openssl-1.1.1b
+    ./config --openssldir=/usr/local
+    sudo make -s install
+    sudo ldconfig /usr/local/lib
+
+script:
+  - |
+    if [ "${COVERITY_SCAN_BRANCH}" = 1 ]; then exit 0 ; fi
+    cd $TRAVIS_BUILD_DIR
+    rm -rf build
+    mkdir build
+    cd build
+    cmake -DCMAKE_C_COMPILER=$MYCC -DCMAKE_CXX_COMPILER=$MYCXX \
+      -DCMAKE_BUILD_TYPE=$BUILD -DCMAKE_INSTALL_PREFIX:PATH=/tmp \
+      -DNO_SANITIZERS=True -DFUZZER=$FUZZ ..
+    make
+
+after_success:
+  # update the documentation
+  - |
+    if [ $BUILD = "Debug" -a $MYCC = "gcc-7" -a $FUZZ = 0 ]; then
+      cd $TRAVIS_BUILD_DIR/build
+      git clone -b gh-pages https://git@github.com/NTAP/$PROJECT.git gh-pages
+      cd gh-pages
+      git config --global push.default simple
+      git config user.name "Travis CI"
+      git config user.email "travis@travis-ci.org"
+      rm -rf ./*
+      touch .nojekyll
+      doxygen $TRAVIS_BUILD_DIR/build/doc/Doxyfile 2>&1 | tee doxygen.log
+      if [ -d "html" ] && [ -f "html/index.html" ]; then
+          mv html/* .
+          git add --all
+          git commit -m "Update doxygen documentation on branch gh-pages." \
+              -m "Travis CI build ${TRAVIS_BUILD_NUMBER}." \
+              -m "Commit: ${TRAVIS_COMMIT}."
+          git push --force \
+            https://${GH_REPO_TOKEN}@github.com/NTAP/$PROJECT.git \
+            > /dev/null 2>&1
+      fi
+    fi

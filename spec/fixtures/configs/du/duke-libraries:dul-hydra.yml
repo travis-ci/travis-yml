@@ -1,0 +1,14 @@
+language: ruby
+before_install:
+  - sudo apt-get update -qq
+  - sudo apt-get install -qq libclamav6 libclamav-dev clamav clamav-data
+  - sudo apt-get install -qq libvips-dev
+  - gem install bundler
+rvm:
+  - 2.3.8
+cache: bundler
+script: "bundle exec rake dul_hydra:ci:build"
+# To exclude antivirus tests:
+# env:
+#   - SPEC_OPTS="--tag ~antivirus"
+# bundler_args: --without development production --deployment

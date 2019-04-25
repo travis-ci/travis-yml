@@ -1,0 +1,19 @@
+sudo: false
+language: node_js
+node_js:
+- 6
+- node
+branches:
+  only:
+  - v2.x.x
+  - master
+  - develop
+cache:
+  directories:
+  - node_modules
+notifications:
+  slack:
+    rooms:
+      secure: CHTfFWvztD+BI8A1tBIdPtsTBdO6w1L1gTE1dXsbYpmBHDvUG8yjBm5hihuiRjSGUUpdE138/iq8SSASQo/2770mGAvRCrYkT3DYQXFUb3ZK5gAWNiwWuja4ZXW4hmaeCt76NOu9876ntpMRJHATKsjNFM3ryk3fwp5xD20CWH0=
+    on_success: change # default: always
+    on_failure: always # default: always

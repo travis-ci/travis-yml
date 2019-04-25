@@ -11,16 +11,33 @@ describe Travis::Yml::Schema::Def::Android, 'structure' do
         type: :object,
         properties: {
           jdk: {
-            '$ref': '#/definitions/strs'
+            anyOf: [
+              {
+                type: :array,
+                items: {
+                  type: :string
+                },
+                flags: [
+                  :expand
+                ],
+                normal: true
+              },
+              {
+                type: :string
+              }
+            ],
+            flags: [
+              :expand
+            ]
           },
           android: {
             type: :object,
             properties: {
               components: {
-                '$ref': '#/definitions/strs'
+                '$ref': '#/definitions/type/strs'
               },
               licenses: {
-                '$ref': '#/definitions/strs'
+                '$ref': '#/definitions/type/strs'
               }
             },
             additionalProperties: false

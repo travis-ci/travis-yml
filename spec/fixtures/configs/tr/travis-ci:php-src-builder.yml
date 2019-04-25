@@ -1,0 +1,159 @@
+language: php
+
+matrix:
+  include:
+    - dist: xenial
+      group: edge
+      env:
+        - RELEASE=xenial
+      name: xenial
+      php: '5.6'
+      before_install:
+        - sudo rm -rf /var/lib/apt/lists/lock /var/cache/apt/archives/lock /var/lib/dpkg/lock
+        - sudo apt-get update
+        - command -v expect || sudo apt-get install expect
+        - |
+          if ! command -v phpenv; then
+            pushd $HOME
+            curl -L http://git.io/phpenv-installer | bash
+            popd
+            export PHPENV_ROOT="/home/travis/.phpenv"
+            if [ -d "${PHPENV_ROOT}" ]; then
+              export PATH="${PHPENV_ROOT}/bin:${PATH}"
+              eval "$(phpenv init -)"
+            fi
+          fi
+
+    - services:
+        - docker
+      env:
+        - RELEASE=trusty
+      name: trusty
+      php: '5.6'
+    - arch: ppc64le
+      dist: xenial
+      group: edge
+      language: minimal
+      env:
+        - RELEASE=xenial
+      name: xenial-ppc64le
+      before_install:
+        - sudo rm -rf /var/lib/apt/lists/lock /var/cache/apt/archives/lock /var/lib/dpkg/lock
+        - sudo apt-get update
+        - command -v expect || sudo apt-get install expect
+        - |
+          if ! command -v phpenv; then
+            pushd $HOME
+            curl -L http://git.io/phpenv-installer | bash
+            popd
+            export PHPENV_ROOT="/home/travis/.phpenv"
+            if [ -d "${PHPENV_ROOT}" ]; then
+              export PATH="${PHPENV_ROOT}/bin:${PATH}"
+              eval "$(phpenv init -)"
+            fi
+          fi
+
+env:
+  global:
+  - VERSION=master ALIAS=nightly
+  - ICU_RELEASE=59.1
+  - ICU_INSTALL_DIR=$HOME/.phpenv/versions/$VERSION
+  - PATH="$HOME/.phpenv/bin:$HOME/.php-build/bin:$PATH"
+
+before_install:
+  - php -f test.php || true
+
+install:
+- if [[ ! -d $HOME/.php-build ]]; then git clone https://github.com/php-build/php-build.git $HOME/.php-build; fi
+- rm -rf $HOME/.phpenv
+- git clone 'https://github.com/phpenv/phpenv.git' $HOME/.phpenv
+- eval "$($HOME/.phpenv/bin/phpenv init -)"
+- pushd $HOME/.php-build
+- git reset --hard HEAD
+- git checkout master
+- git pull
+- popd
+- if [[ $RELEASE != precise ]]; then unset ICU_RELEASE; fi # disable ICU installation for Trusty; see https://github.com/travis-ci/travis-ci/issues/3616#issuecomment-286302387
+- | # older distros don't ship a libjpeg.pc, add our own to pkg-config path
+  if ! pkg-config --exists libjpeg; then
+    export PKG_CONFIG_PATH=$PWD:$PKG_CONFIG_PATH
+  fi
+- ./bin/install-icu
+- export PKG_CONFIG_PATH=$ICU_INSTALL_DIR/lib/pkgconfig:$PKG_CONFIG_PATH
+- touch custom_configure_options
+- ./bin/install-libzip
+- ./bin/install-libsodium
+- ./bin/install-password-argon2
+- |
+  if [[ -f default_configure_options.$RELEASE-${VERSION%*.*} ]]; then
+    cp default_configure_options.$RELEASE-${VERSION%*.*} $HOME/.php-build/share/php-build/default_configure_options
+  else
+    cp default_configure_options.$RELEASE $HOME/.php-build/share/php-build/default_configure_options
+  fi
+- cat custom_configure_options >> $HOME/.php-build/share/php-build/default_configure_options
+- | # disable xdebug on master
+  if [[ $VERSION = master && $RELEASE != xenial ]]; then
+    sed -i -e '/install_xdebug_master/d' $HOME/.php-build/share/php-build/definitions/$VERSION
+  fi
+- |
+  if [[ $(lsb_release -cs) = "trusty" || $(lsb_release -cs) = "xenial" ]]; then
+    if [[ $HOSTTYPE == "powerpc64le" ]]; then
+      sudo ln /usr/include/powerpc64le-linux-gnu/gmp.h /usr/include/gmp.h
+      sudo ln -s /usr/lib/powerpc64le-linux-gnu/libldap_r-2.4.so.2 /usr/lib/libldap_r.so
+      sudo ln -s /usr/lib/powerpc64le-linux-gnu/liblber-2.4.so.2 /usr/lib/liblber.so
+    else
+      sudo ln /usr/include/x86_64-linux-gnu/gmp.h /usr/include/gmp.h
+      sudo ln -s /usr/lib/x86_64-linux-gnu/libldap_r.so /usr/lib/libldap_r.so
+      sudo ln -s /usr/lib/x86_64-linux-gnu/libldap.so /usr/lib/libldap.so
+      sudo ln -s /usr/lib/x86_64-linux-gnu/libldap.a /usr/lib/libldap.a
+      sudo ln -s /usr/lib/x86_64-linux-gnu/liblber.so /usr/lib/liblber.so
+    fi
+  fi
+
+before_script:
+- 'export LSB_RELEASE=${LSB_RELEASE:-$(lsb_release -rs || echo ${$(sw_vers -productVersion)%*.*})}'
+- 'export OS_NAME=${OS_NAME:-$(lsb_release -is | tr "A-Z" "a-z" || echo "osx")}'
+- 'export ARCH=${ARCH:-$(uname -m)}'
+- 'export INSTALL_DEST=${INSTALL_DEST:-$HOME/.phpenv/versions}'
+- __dots() { while true ; do echo -en . ; sleep 30 ; done } ; __dots &
+
+script:
+  - cat $HOME/.php-build/share/php-build/default_configure_options
+  - ./bin/compile
+  - | # disable 3rd-party extension builds on master
+    if [[ ! $VERSION =~ ^master$ ]]; then
+      (yes '' | ./bin/compile-extension-redis) &&
+      (./bin/compile-extension-mongo;
+      ./bin/compile-extension-mongodb) &&
+      ./bin/compile-extension-amqp &&
+      ./bin/compile-extension-apcu &&
+      ./bin/compile-extension-zmq &&
+      (./bin/compile-extension-memcache;
+      ./bin/compile-extension-memcached) &&
+      ./bin/compile-extension-ssh2 &&
+      sed -i '/^extension=/d' $INSTALL_DEST/$VERSION/etc/php.ini
+    fi
+
+after_success:
+  - ARTIFACTS_KEY='' ARTIFACTS_SECRET='' ARTIFACTS_BUCKET='' ARTIFACTS_PERMISSIONS='' GITHUB_TOKEN='' $INSTALL_DEST/$VERSION/bin/php -i
+  - $INSTALL_DEST/$VERSION/bin/php -m
+  - $INSTALL_DEST/$VERSION/bin/php -f test.php
+  - ldd $INSTALL_DEST/$VERSION/bin/php
+  - $INSTALL_DEST/$VERSION/bin/pecl config-show
+  - ./bin/archive
+
+after_failure:
+  - cat /tmp/php-build.*.log
+
+addons:
+  artifacts:
+    paths:
+    - $LSB_RELEASE/
+    target_paths: /binaries/$OS_NAME/$LSB_RELEASE/$ARCH
+  apt:
+    packages:
+      - libcurl4-openssl-dev
+      - libzip-dev
+      - libgmp3-dev
+      - libonig-dev
+      - expect

@@ -2,17 +2,12 @@
 
 
 
-## Type
+## Types
 
-Any of:
-
-* Map (Hash)
+* Hash
 * 
 * Boolean
 
-## Flags
-
-None.
 
 
 ## Examples

@@ -1,0 +1,52 @@
+language: python
+
+# for container-y goodness:
+sudo: false
+
+env:
+  secure: "Jm01l9DZppH7lp2H0EKURFz6GWw+SMABnOv9gCOVCQifXSAp5uVGB+cak4GM8iwKWMpM/BFi9h201iz/9YSsvuQjFNxms/b2uA3VnI2eXuoVkYytQ3sU4ZD3PnPo61Jfb9qVTLeUlJ/pczdFX+s036+0z07SwM035HkkLijHA8A="
+
+python:
+  - "3.6"
+  - "2.7"
+
+install:
+- "pip install --upgrade pip setuptools"
+- "pip install -Ue .[test]"
+
+script: coverage run -m pytest
+
+after_success:
+  - "COVERALLS_PARALLEL=true coveralls"
+
+jobs:
+  include:
+
+    - stage: coverage
+      if: type != cron
+      python: 3.6
+      after_success: skip
+
+      install: "pip install -U coveralls-check"
+      script: "coveralls-check $TRAVIS_COMMIT --parallel-build-number $TRAVIS_BUILD_NUMBER --repo-token $COVERALLS_REPO_TOKEN"
+
+    - stage: release
+      if: tag IS present
+      python: 3.6
+      script: skip
+      # work around https://github.com/travis-ci/travis-ci/issues/8337:
+      after_success: true
+
+      install:
+      - "pip install --upgrade pip setuptools"
+      - "pip install -Ue .[build]"
+      deploy:
+        provider: pypi
+        user: chrisw
+        password:
+          secure: f28D/cZT27Ejv++FA8Er1GIwD9KG6t82J/AHUlzGvbjQpP9js6TIgZ51nxhf/lhJrACNONOrd3XhjMc1QRgkCKOLHjSHpozO0qPa2lZ3+4c+BP5lZTXmI3uS8YBaidOpWFZjkxf38zK59yab7ntkl02UNibo5RWzoaYJIPcjizA=
+        on:
+          tags: true
+          repo: Simplistix/mush
+        skip_cleanup: true
+        distributions: "sdist bdist_wheel"

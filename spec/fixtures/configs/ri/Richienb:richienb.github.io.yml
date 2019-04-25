@@ -1,0 +1,81 @@
+# Set build language to Node JS
+language:               node_js
+
+# Set the version of Node JS to use
+node_js:                lts/*
+
+env:
+    # Ensure HTTPS is used
+    - NODE_TLS_REJECT_UNAUTHORIZED=1
+
+cache:
+    # Ensure packages cached via yarn are cached
+    yarn:               true
+    directories:
+        # Ensure npm packages are cached
+        - node_modules
+
+before_install:
+    # Configure access token to enable pushing to the repository
+    - git remote set-url origin https://Richienb:${github_token}@github.com/Richienb/richienb.github.io.git
+
+    # Set commit username
+    - git config --global user.name "ROS Bot"
+
+    # Set commit email
+    - git config --global user.email "richiebendall@gmail.com"
+
+install:
+    # Navigate to the source directory
+    - cd src
+
+    # Install the yarn package manager
+    - npm install -g yarn
+
+    # Install required packages
+    - yarn install --non-interactive --production
+
+script:
+    # Build the website with Webpack
+    - yarn build
+
+    # Generate the service worker
+    - yarn manifest
+
+    # Remove the unneeded node_modules folder
+    - rm -rf node_modules
+
+    # Generate Sitemap
+    - yarn sitemap
+
+    # Minify the HTML code
+    - yarn minify
+
+deploy:
+    provider:           pages
+    target_branch:      master
+    local_dir:          src
+    github_commit:      "CI | Built the website [skip ci]"
+    skip_cleanup:       true
+    github_token:       $github_token
+    keep_history:       false
+    fqdn:               www.richie-bendall.ml
+    committer_from_gh:  true
+    on:
+        branch:         development
+
+after_deploy:
+   # Clear CloudFlare cache
+   - |
+     curl --request DELETE "https://api.cloudflare.com/client/v4/zones/${cf_zone_id}/purge_cache" \
+      --header "X-Auth-Email: richiebendall@gmail.com" \
+      --header "X-Auth-Key: ${cf_api_key}" \
+      --header "Content-Type: application/json" \
+      --data '{"purge_everything":true}'
+
+   # Recrawl site for Google Search
+   - curl -s https://www.google.com/ping?sitemap=https://www.richie-bendall.ml/sitemap.xml > /dev/null && echo Google Search recrawl requested.
+
+notifications:
+   # Disable emails for build status notifications
+   email:              false

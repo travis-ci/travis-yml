@@ -1,0 +1,62 @@
+branches:
+  only:
+    - staging
+    - master
+    - trying
+
+language: java
+
+jdk: oraclejdk8
+
+env:
+  global:
+    - OLD_RUST_VERSION=1.28.0
+    - CURRENT_RUST_VERSION=1.34.0
+    - NIGHLY_RUST_VERSION=nightly-2019-03-08
+    - RUST_SRC_WITH_SYMLINK=$HOME/.rust-src
+
+matrix:
+  include:
+    # 183 platform
+    - name: idea-183/old-rust
+      env: RUST_VERSION=$OLD_RUST_VERSION ORG_GRADLE_PROJECT_platformVersion=183 ORG_GRADLE_PROJECT_ideaVersion=2018.3.2
+    - name: idea-183/stable-rust
+      env: RUST_VERSION=$CURRENT_RUST_VERSION ORG_GRADLE_PROJECT_platformVersion=183
+    - name: clion-183/stable-rust
+      env: RUST_VERSION=$CURRENT_RUST_VERSION ORG_GRADLE_PROJECT_platformVersion=183 ORG_GRADLE_PROJECT_baseIDE=clion
+    # 191 platform
+    - name: idea-191/nightly-rust
+      env: RUST_VERSION=$NIGHLY_RUST_VERSION ORG_GRADLE_PROJECT_platformVersion=191
+    - name: clion-191/nightly-rust
+      env: RUST_VERSION=$NIGHLY_RUST_VERSION ORG_GRADLE_PROJECT_platformVersion=191 ORG_GRADLE_PROJECT_baseIDE=clion
+
+install: true
+
+before_script:
+  - curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain $RUST_VERSION -y
+  - export PATH=$HOME/.cargo/bin:$PATH
+  - rustup component add rust-src
+  - if [ $RUST_VERSION != $OLD_RUST_VERSION ]; then rustup component add clippy-preview; fi # BACKCOMPAT: Rust 1.28.0
+  - rustup component add rustfmt-preview
+  - ln -s $(rustc --print sysroot)/lib/rustlib/src/rust/src $RUST_SRC_WITH_SYMLINK
+  - ./check-license.sh
+  - ./gradlew :resolveDependencies -Pkotlin.incremental=false --no-daemon
+  - ./gradlew assemble testClasses -Pkotlin.incremental=false --no-daemon
+
+script:
+  - travis_wait ./gradlew check -Pkotlin.incremental=false --no-daemon
+  - if [ $RUST_VERSION != $OLD_RUST_VERSION ]; then ./gradlew runPrettyPrintersTests --no-daemon; fi
+
+# https://docs.travis-ci.com/user/languages/java/#Caching
+before_cache:
+  - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+  - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+  - rm -f  $HOME/.gradle/caches/*/fileHashes/fileHashes.bin
+  - rm -f  $HOME/.gradle/caches/*/fileHashes/fileHashes.lock
+cache:
+  directories:
+    - $HOME/.gradle/caches/
+    - $HOME/.gradle/wrapper/
+    - $HOME/.cargo/registry/cache/
+    - $HOME/.cargo/registry/src/
+    - $HOME/.cargo/bin/

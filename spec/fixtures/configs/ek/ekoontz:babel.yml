@@ -1,0 +1,14 @@
+language: clojure
+lein: 2.6.1
+script: lein with-profile travis-ci test
+addons:
+  postgresql: "9.6"
+before_script:
+  - psql -c 'create database babel;' -U postgres
+  - psql -U postgres babel < src/sql/babel.sql
+sudo: false
+env:
+  global:
+    - JAVA_OPTS="-Xmx1G"
+jdk:
+  - oraclejdk8

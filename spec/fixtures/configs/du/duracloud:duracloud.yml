@@ -1,0 +1,81 @@
+language: java
+jdk:
+  - oraclejdk8
+notifications:
+  email:
+    recipients:
+      - cibuilds@duracloud.org
+    on_success: change
+    on_failure: always
+  slack: duraspace:vOBySuKUwM95j2kfbwh0SNxq
+before_install:
+  - chmod +x resources/travis/*.sh
+  - ./resources/travis/before-install.sh
+install:
+  - mvn install -DskipTests -DskipDeploy --batch-mode
+script:
+  - mvn test -DskipIntTests
+sudo: true
+deploy:
+  - provider: s3
+    access_key_id: $ARTIFACTS_KEY
+    secret_access_key: $ARTIFACTS_SECRET
+    bucket: $ARTIFACTS_BUCKET
+    region: $ARTIFACTS_REGION
+    skip_cleanup: true
+    local_dir: $TRAVIS_BUILD_DIR/target
+    upload-dir: duracloud/master
+    on:
+      branch: master
+  - provider: s3
+    access_key_id: $ARTIFACTS_KEY
+    secret_access_key: $ARTIFACTS_SECRET
+    bucket: $ARTIFACTS_BUCKET
+    region: $ARTIFACTS_REGION
+    skip_cleanup: true
+    local_dir: $TRAVIS_BUILD_DIR/target
+    upload-dir: duracloud/tagged-releases/$TRAVIS_TAG
+    on:
+      tags: true
+  - provider: s3
+    access_key_id: $ARTIFACTS_KEY
+    secret_access_key: $ARTIFACTS_SECRET
+    bucket: $ARTIFACTS_BUCKET
+    region: $ARTIFACTS_REGION
+    skip_cleanup: true
+    local_dir: $TRAVIS_BUILD_DIR/target
+    upload-dir: duracloud/develop
+    on:
+      branch: develop
+  - provider: releases
+    api_key:
+      secure: hNuckzskswfCkY5tXzY9uxFyp9M7ZAfAdo0ys5rtJa2vmT2zRymj3mAAfxO6WBchrEnEyd2amMUBYny2lItz3PuOQiYs8caxAjWFlxIsJhMRVIlLlrZpkYs7PMu9CD//Q8AdhhRFITIZj+i/iH50FeOXRy7Lhs/CuwyAMVIDkxU=
+    skip_cleanup: true
+    file-glob: true
+    file:
+      - "target/retrievaltool-*-driver.jar"
+      - "target/syncoptimize-*-driver.jar"
+      - "target/installation-package-*.zip"
+      - "target/duracloud-*-apidocs.zip"
+      - "target/duracloudsync-*.jar"
+      - "target/duracloudsync-*-linux-installer.run"
+      - "target/duracloudsync-*-osx-installer.zip"
+      - "target/duracloudsync-*-windows-installer.exe"
+      - "target/duracloud-beanstalk-v*.zip"
+      - "target/sha512sum-*.txt.asc"
+    on:
+      tags: true
+env:
+  global:
+    - secure: "FUmdsx25YfJtTbuJhXD+Y5HF8bAQBeAtOaLexyPefLCY6BlqbwQ4kjGQ/lbAmeCrnFlB5UnnqNyXtkVTB8ANqpqe59Z2uQydGrJVmLiHuGjgHRucEvI45ojaLq0c6ViWZBj5VgTUtDmeNSlP4Ibk/cRtJHtmo3BRM9pPA1WwQvM="
+    - # ^^ SONATYPE_USERNAME
+    - secure: "Q0tQKOEJknPPgQTRX8bBbDz+vCwxoiV83XBAlq4S5qhG7KJnRmiNbNjhgjGwm8j0H6efQO34vwuCqtDcLA1sw6F7TRdd0RY908HaCEbwL/D1CNC+9Bgj0fWRbKqrJb9S/TRYouoGxStjcjbsfemSTk9wvWaSz13AdMnIB2ixHk4="
+    - # ^^ SONATYPE_PASSWORD
+    - secure: "MVAIuG3nn5Y7RCqamR6/YaZ6mIZ0ulgJDKFClfsocL6zf+Jd0S6n/asXJJZpYLh7NiFoFsOD2OiPCraHRlJNMlylqNgko6YCZ8WkiUOayYUweSUUVkzob1i7OMyG/s1GVrJUJQGJ1Ds3i+J9qoau30gsFffkrYv4iTe3If/8iSg="
+    - # ^^ GPG_KEY_NAME
+    - secure: "BSEN+HcXsDUQaqW5aq5Wdwqgvlp82IsofhkOdhDEmU4xyEIZnDYFE0xfRZx+GY/DjS1Iq3LGSqUqTUBh+KfQtUqp6xWl2XVS6QvVrQ/qCVA3YYlLUN2RPQmfka5x9Zh4xksI+8bFjvmnW4zImGIWG+j9/j/KrEJOEnNNYtGh2dw="
+    - # ^^ GPG_PASSPHRASE
+after_success:
+  - chmod +x resources/travis/*.sh
+  - ./resources/travis/before-deploy.sh
+  - ./resources/travis/deploy.sh

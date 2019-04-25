@@ -1,0 +1,20 @@
+dist: trusty
+sudo: required
+language: scala
+scala:
+- 2.11.8
+script:
+  - sbt test it:test
+jdk:
+- oraclejdk8
+cache:
+  directories:
+    - '$HOME/.ivy2/cache'
+addons:
+  apt:
+    sources:
+      - mongodb-3.4-precise
+    packages:
+      - mongodb-org-server
+before_script:
+  - sudo service mongod restart

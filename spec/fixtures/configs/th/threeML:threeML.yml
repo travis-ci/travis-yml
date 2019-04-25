@@ -1,0 +1,120 @@
+sudo: required
+language: generic
+services:
+- docker
+os:
+- linux
+- osx
+osx_image: xcode6.4
+before_install:
+- |2
+
+  if [[ "$TRAVIS_EVENT_TYPE" == "cron" ]]; then
+
+      # A cron build. We install 3ML as a user would do (no docker, no nothing)
+
+      echo "Running within a Cron build."
+
+  else
+
+      # A normal test
+
+      if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+
+          echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin
+          docker pull giacomov/hawc-docker
+
+      else
+
+        # Install Miniconda
+        wget https://repo.continuum.io/miniconda/Miniconda2-latest-MacOSX-x86_64.sh -O miniconda.sh
+        bash miniconda.sh -b -p $HOME/miniconda
+        export PATH="$HOME/miniconda/bin:$PATH"
+
+        # Install conda-build
+        conda install -y conda-build
+
+        # Make sure conda-forge is first channel
+        conda config --add channels conda-forge
+
+        conda config --set always_yes true
+
+        # Create test environment
+        conda create --name test_env -c conda-forge python=2.7.9 pygmo=2 root5 pytest=3.10 codecov pytest-cov git
+
+      fi
+
+  fi
+before_script:
+- python -c 'import os,sys,fcntl; flags = fcntl.fcntl(sys.stdout, fcntl.F_GETFL);
+  fcntl.fcntl(sys.stdout, fcntl.F_SETFL, flags&~os.O_NONBLOCK);'
+script:
+- |2
+
+  if [[ "$TRAVIS_EVENT_TYPE" == "cron" ]]; then
+
+      # A cron build. We install 3ML as a user would do by using the install_3ML script
+
+      bash install_3ML.sh --batch
+
+      source threeML_init.sh
+
+      # Now run the tests
+      export MPLBACKEND='Agg'
+      export OMP_NUM_THREADS=1
+      export MKL_NUM_THREADS=1
+      export NUMEXPR_NUM_THREADS=1
+
+      pytest -vv --pyargs threeML
+
+      # Now remove the venv and start from scratch installing also root and xspec
+      source deactivate
+
+      conda config --set always_yes true
+      conda uninstall --name threeML --all
+
+      bash install_3ML.sh --batch --with-xspec-lite --with-root
+
+      source threeML_init.sh
+
+      # Now run the tests
+      export MPLBACKEND='Agg'
+      export OMP_NUM_THREADS=1
+      export MKL_NUM_THREADS=1
+      export NUMEXPR_NUM_THREADS=1
+
+      pytest -vv --pyargs threeML
+
+      # Now that we are here with everything installed, let's also test astromodels
+      pytest -vv --pyargs astromodels
+
+  else
+
+      if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+
+        docker run -e TRAVIS_PYTHON_VERSION=2.7 \
+                   -e TRAVIS_BRANCH \
+                   -e CONDA_UPLOAD_TOKEN \
+                   -e TRAVIS_OS_NAME \
+                   -e TRAVIS_BUILD_NUMBER \
+                   -e TRAVIS_BUILD_DIR \
+                   -e TRAVIS_EVENT_TYPE \
+                   -v ${TRAVIS_BUILD_DIR}:${TRAVIS_BUILD_DIR} \
+                   -it --rm -e user_id=`id -u` \
+                   giacomov/hawc-docker \
+                   /bin/bash -c "source ${TRAVIS_BUILD_DIR}/ci/build_and_test.sh"
+      else
+
+         chmod u+x ci/build_and_test.sh
+         export TRAVIS_PYTHON_VERSION=2.7
+         ./ci/build_and_test.sh
+
+      fi
+
+  fi
+env:
+  matrix:
+  - secure: PISjXVvxqmm196utoCI/Dcbn8U4GBLqSipdVEvt5J7FDKa7Ttl6ITxPMsqWZaK58NWcNKRA2xREStOMGB4TVhnnmkMsgrR1o77NCEFNC05Q/bh2RTAASHMNPAMIP5mLPToG/0gygWNviOx9atupIsfgyjscdL7ABzWWKNSwTGPwZsfRya8sLQFzz9DRhmaGIckReetN5XEc/jxg3D3+RWcL2BmDsG1akGt77PFkQ5CnQgvrzZMV9UMFLGfWVKwmI/UuBcZ0ANYWfIEbg3JWD2cDSOEI8cXZ5gSU5KykBV5OkoC1za92XCiuX7aWOVHXUQR3w1iIjCkf5pFzLIU+EwHjRFlggMfLRg7VSEdUzng/IIkORzgM82dmOHquu0PBywXGF9z8gRE8UZVZdnaw4l4IE1hJQF/GV7sqMdpzQlM2CIZTakVHHj7fSVbHz4CA1lREIFGyCuf0ItUdNzHquzLvJPqgohGfx8337CY0JPlelZHp1lsN5HcgitibN8a44E+zd+Kh5w7twgpD3tz8bQLrga9nyYHXlTUyF+ugBq1qmwYiqPDy/UoemqRu1Pzl/l3Co72U10P4/3qHKopaOZf0AxN7r00IN1lAA4XxtXH9/fVmbN1A58HlcTqRObSWsTzCA5eBv7NqVhpM7iO1Fz6RLlpcI67fOcp97soysmz0=
+  global:
+  - secure: pkvNpm2ODc7INi5L8RqyqdVK73nN+WkQuTIzL52L+dcQIVaLqWupAK1zuBq6NeqQEgQcTvRFP5oCbsYLPYY5sBKpU/1WhS+UL9l9bmhYvYIgv1fyH7eH3PLuKEIGTaAVoMHFLStA+WHIuyK5UsmcZouVKn6vLQDK+XeZiyNxU3T2bONyabRDmc5JgdAjh4vdjrRupqq3CfZjaVCOnD+NBAYIHPZZnQc+9Dt6W9n9fjEO0B+2zi7NZEEP3dgeGsmws9M2wzbPJciWkFAOLBg66mPrSl7Vcl8KwVqWI9Wcb2/ogKU+CB0et4vwOdltBMdy29IRb0fxHrpP+sucHu32r9rWCAxdAXOdOgh5neYs/f8QSvk1BLaL1bNmMXe+APajFvukdxLUuYczX38rBjtXdrjrJRZ0Eyj8YK0g3r2HupbJ9FWM+adQKRYN2KV5yaqK6rpWa1/5XiNnfZYbQTbpdWSukNn48jTACDvhNwEDP9XeJ+CR7EOv4lc69wG+XHnv4Mr94TQvq9i4OKXCgh1kI7OGVNrcAyTX8sGDYlK4oc8TD0/aq7bzzGQmyBRQdEp2bKjVQo7lDE6g8baj+F1iw+8cfAJ1DjS/0brHTQpsTStBnWQWxEHOWtUitOKGoNkRxUaWgiAEq/npUr/UrrENPUuHsP1V48NXsG0vYLmr9mw=
+  - secure: KBR7yxM33eyTSAFEUpP55oS9fq2MzcM3hlPaXpYQXOOZUFMjpSbmeBnDA3CozPS8oMCPqL6cS/cOxPXb4/XhWvQLcib8LIh5+iX9wmqWcJkpXXaZGPqe8mZ5x57GlspFTMSV3VzSzE2cLbCzuaGhmMCgwuue0BJPPEAaKLmiPfdA/gS2O6VvsLssTP+QqHybd3oqZE6DFVU9FW9O0g1q8QPS0tiaft0BeMMvzOLONgBU0shEuQ9S+gdUH/8qpyD4Uh+t3SzcRSTG5mGIG9Ke2DPTo8LUfveEg3o5wOfj3hvEionOPdBFV96M7JwV0a5g6xEPk1NbV6s6BwPgSN2fwoVSdwzhD2kPVMFqEBX8TliQFVrrbpK1z8y+4nTdjLfPLf+KtHfE2Twj9bxb1TyO26M1l8Vq9lqIMfqHzgI04S75IiLLmmRXOQRCKAFb1xsqn2kIkwnctGDb8AHvMdk10qrD2Ww6qls0WAp3IWvMZED+i1M3nGQeO2x5vDQQNWIZsx/QR/nGl7dW68mF8LwyTuE0hJyGG+SjH3IHUTPQKqkhy85npYQpNihUPtQGqIL6LSBh5GYC5SjEH93FLkCoxRo9z5e4MOMy1KBZT+y4H5XvAxKYDz44/FZVzEYhRSZ3OJsn0FogsuJv+bvQlSxXBEt1x9yzn7Pl62Sm7yrr05o=

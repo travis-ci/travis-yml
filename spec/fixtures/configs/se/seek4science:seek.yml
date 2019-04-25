@@ -1,0 +1,21 @@
+language: ruby
+
+addons:
+  apt:
+    packages:
+    - libcurl4-openssl-dev
+
+sudo: false
+
+cache: bundler
+
+branches:
+  only:
+    - gh-pages
+    - gh-pages-master
+
+script: bundle exec rake test
+
+notifications:
+  slack:
+    secure: fK3kbDHg/kwFCjxhFkg0wkOcwXoFwkfJJdRFwZQtnMDkY4yHNtr9SWIHWOiI9OceNgWLeHwvvm/7737WBWnTf4RF3mn0/D9xYtOn+DfV2gb1xXVjDb33oBQWrFN8P1x4xFNOMw38LQ46NYvsv6bfPmZRJpKuvHPVJUsBCINx14w=

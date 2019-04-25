@@ -1,0 +1,183 @@
+sudo: required
+services: docker
+dist: trusty
+language: c
+
+jobs:
+  include:
+    - stage: 'style checks'
+      name: 'python format'
+      language: 'python'
+      python: '3.6'
+      install: pip install --upgrade black
+      script: ./scripts/check-format
+      before_deploy: skip
+      deploy: skip
+      after_success: skip
+      after_failure: skip
+    - stage: 'style checks'
+      name: 'python lint'
+      language: 'python'
+      python: '3.6'
+      install: pip install 'pylint==2.2.2' --force-reinstall
+      script: pylint --rcfile=src/bindings/python/.pylintrc src/bindings/python/flux
+      before_deploy: skip
+      deploy: skip
+      after_success: skip
+      after_failure: skip
+    - name: "Ubuntu: no configure flags"
+      stage: test
+      compiler: gcc
+      env:
+       - PYTHON_VERSION=2.7
+    - name: "Ubuntu: py3.6 distcheck"
+      stage: test
+      compiler: gcc
+      env:
+       - DISTCHECK=t
+       - PYTHON_VERSION=3.6
+       - GITHUB_RELEASES_DEPLOY=t
+    - name: "Ubuntu: gcc-8 --with-flux-security/caliper, distcheck"
+      stage: test
+      compiler: gcc-8
+      env:
+       - CC=gcc-8
+       - CXX=g++-8
+       - ARGS="--with-flux-security --enable-caliper"
+       - DISTCHECK=t
+       - PYTHON_VERSION=2.7
+    - name: "Ubuntu: clang-6.0 chain-lint --with-flux-security"
+      stage: test
+      compiler: clang-6.0
+      env:
+       - CC=clang-6.0
+       - CXX=clang++-6.0
+       - chain_lint=t
+       - ARGS="--with-flux-security"
+       - PYTHON_VERSION=2.7
+    - name: "Ubuntu: COVERAGE=t, --with-flux-security --enable-caliper"
+      stage: test
+      compiler: gcc
+      env:
+       - COVERAGE=t
+       - ARGS="--with-flux-security --enable-caliper"
+       - PYTHON_VERSION=2.7
+    - name: "Ubuntu: TEST_INSTALL docker-deploy"
+      stage: test
+      compiler: gcc
+      env:
+       - ARGS="--with-flux-security --enable-caliper"
+       - TEST_INSTALL=t
+       - DOCKER_TAG=t
+       - PYTHON_VERSION=2.7
+    - name: "Centos 7: --with-flux-security --enable-caliper docker-deploy"
+      stage: test
+      compiler: gcc
+      env:
+       - ARGS="--with-flux-security --enable-caliper --prefix=/usr"
+       - IMG=centos7
+       - DOCKER_TAG=t
+       - PYTHON_VERSION=2.7
+    - name: "Centos 7: py3.4 --with-flux-security"
+      stage: test
+      compiler: gcc
+      env:
+       - ARGS="--with-flux-security --prefix=/usr"
+       - IMG=centos7
+       - PYTHON_VERSION=3.4
+
+stages:
+  - 'style checks'
+  - test
+
+env:
+  global:
+   - TAP_DRIVER_QUIET=1
+   - DOCKERREPO=fluxrm/flux-core
+   - DOCKER_USERNAME=travisflux
+   - secure: "Uga2i1Yu0PvWMFzOYvM9yxnAMDTgY17ZqeFlIN8MV3uoTCy6y61GULrMkKuhuI1sUfyugpFWVKIJo5jwTpsfG84f3o9lUTRgLPpTA2Xls8A/rmurF/QacVv6hZ2Zs2LQVlrM8BkT36TpT2NfWW2D2238kovqz3l5gIZKMClMvyk="
+
+cache:
+  directories:
+    - $HOME/.ccache
+
+before_install:
+ # work around persistent write error bug from make in travis
+ # see https://github.com/travis-ci/travis-ci/issues/4704#issuecomment-348435959
+ - python -c 'import os,sys,fcntl; flags = fcntl.fcntl(sys.stdout, fcntl.F_GETFL); fcntl.fcntl(sys.stdout, fcntl.F_SETFL, flags&~os.O_NONBLOCK);'
+ # die if non-blocking is still enabled
+ - python -c 'import os,sys,fcntl; flags = fcntl.fcntl(sys.stdout, fcntl.F_GETFL); exit(flags&os.O_NONBLOCK);'
+ # coveralls-lcov required only for coveralls upload:
+ - if test "$COVERAGE" = "t" ; then gem install coveralls-lcov; fi
+ - if test -z "${IMG}"; then IMG="bionic"; fi
+ #
+ #  Tag image if this build is on master or result of a tag:
+ - |
+  if test "$DOCKER_TAG" = "t" \
+    -a "$TRAVIS_REPO_SLUG" = "flux-framework/flux-core" \
+    -a "$TRAVIS_PULL_REQUEST" = "false" \
+    -a \( "$TRAVIS_BRANCH" = "master" -o -n "$TRAVIS_TAG" \); then
+     export TAGNAME="${DOCKERREPO}:${IMG}${TRAVIS_TAG:+-${TRAVIS_TAG}}"
+     echo "Tagging new image $TAGNAME"
+  fi
+
+script:
+ # Unshallow repository so git describe works.
+ # (The one inside docker-run-checks may fail if git version is too old)
+ - git fetch --unshallow --tags
+ - |
+  src/test/docker/docker-run-checks.sh -j2 \
+    --image=${IMG} \
+    ${TAGNAME:+--tag=${TAGNAME}} \
+    -- --enable-docs ${ARGS}
+
+after_success:
+ - ccache -s
+ # Upload coverage results for COVERAGE run
+ - |
+  if test "$COVERAGE" = "t"; \
+     then coveralls-lcov flux*-coverage.info; \
+     bash <(curl -s https://codecov.io/bash); \
+  fi
+ #  Deploy resulting docker image to Docker Hub with appropriate tag
+ - |
+  if test -n "$TAGNAME"; then
+     echo "$DOCKER_PASSWORD" | \
+       docker login -u "$DOCKER_USERNAME" --password-stdin && \
+     docker push ${TAGNAME}
+     # If this is the bionic build, then also tag without image name:
+     if echo "$TAGNAME" | grep -q "bionic"; then
+       t="${DOCKERREPO}:${TRAVIS_TAG:-latest}"
+       docker tag "$TAGNAME" ${t} && \
+       docker push ${t}
+     fi
+  fi
+
+after_failure:
+ - find . -name test-suite.log | xargs -i sh -c 'printf "===XXX {} XXX===";cat {}'
+ - find . -name t[0-9]*.output | xargs -i sh -c 'printf "\033[31mFound {}\033[39m\n";cat {}'
+ - find . -name *.broker.log | xargs -i sh -c 'printf "\033[31mFound {}\033[39m\n";cat {}'
+ - src/test/backtrace-all.sh
+ - grep -q 'configure. exit 1' config.log && cat config.log
+
+before_deploy:
+  # Get anchor (formatted properly) and base URI for latest tag in NEWS file
+  - export ANCHOR=$(sed -n '/^flux-core version/{s/\.//g; s/\s/-/gp;Q}' NEWS.md)
+  - export TAG_URI="https://github.com/${TRAVIS_REPO_SLUG}/blob/${TRAVIS_TAG}"
+  - export TARBALL=$(echo flux-core*.tar.gz)
+  - ls -l $TARBALL
+  - echo "Deploying tag ${TRAVIS_TAG} as $TARBALL"
+
+deploy:
+  provider: releases
+  skip_cleanup: true
+  file: $TARBALL
+  prerelease: true
+  body: "View [Release Notes](${TAG_URI}/NEWS.md#${ANCHOR}) for flux-core ${TRAVIS_TAG}"
+  api_key:
+    secure: I7ckZ7Ei9oLIe8WZ8OH3EgZz81IFCIekx+v/+g3sJa6q15URlfZhVVFtiUpsJRktHcb39AflWZiEIX+HdUZyXtuTt9IES1XBIKH7x/zUL0x6f1DZKAhBx9ktYzdO/M+SpmDUg6RYxcdjVmSHZ9u935TDo104U+dY0990ZSFrpco=
+  on:
+    # Only deploy from travis builder with GITHUB_RELEASES_DEPLOY set
+    condition: $GITHUB_RELEASES_DEPLOY = "t"
+    tags: true
+    repo: flux-framework/flux-core

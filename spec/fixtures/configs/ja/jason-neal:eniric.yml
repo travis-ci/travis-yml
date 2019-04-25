@@ -1,0 +1,44 @@
+dist: xenial # Required for Python 3.7
+sudo: true   # travis-ci/travis-ci#9069
+language: python
+python:
+    - 3.6
+    - 3.7
+
+cache:
+  directories:
+    - $HOME/.cache/pip
+    - $HOME/tests/data
+    - $HOME/data
+
+install:
+  - pip install --upgrade pip
+  # Install eniric requirements
+  - travis_retry pip install -r requirements_dev.txt
+  - travis_retry pip install -r requirements.txt
+
+  # Now install eniric
+  - pip install -e .[dev,test,docs,ci]
+
+before_script:
+  - export MPLBACKEND="AGG"  # Non-interactive
+  # - mv tests/config.yaml config.yaml
+
+  # Download the Data for eniric and testing
+  - download_eniric_data.sh  # Some files from Dropbox
+
+  # Prepare atmosphere models
+  - make atmos V=1
+  # - python scripts/split_atmmodel.py -b K H J Y Z TEST
+  # - python scripts/barycenter_broaden_atmmodel.py -b K H J Y Z TEST
+
+script:
+    - pytest --cov=eniric --cov-report term-missing --durations 5
+    - coverage xml -i
+
+    - rstcheck -r docs
+
+after_success:
+  - coveralls
+  - codeclimate-test-reporter
+  - python-codacy-coverage -r coverage.xml

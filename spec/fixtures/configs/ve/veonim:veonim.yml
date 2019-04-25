@@ -1,0 +1,34 @@
+sudo: false
+language: node_js
+node_js:
+- stable
+os:
+- osx
+- linux
+install:
+- npm install
+script:
+- npm run build
+- npm run test
+before_deploy:
+- npm run package
+deploy:
+  provider: releases
+  draft: true
+  prerelease: true
+  skip_cleanup: true
+  api_key:
+    secure: wcMBXxItD8wuR8jpiIHnMeyCToEgYWQQf5/MslJk2yuG259AQPJLWOkeHo/AuECv+HSRarOBc75j0MLki+cQXoo4lvTP0flqfm+KjnMDySOmFpHkstJz1qZrSTVQkLty3jWROunZizJmHK4W0Zdv6DzzXtkfaC2+QdaBtxNoe8KlAKkVwkMK3SKBRw1jIV0/nGVFSbKBwE0LEoeEoy7YEaENw/Iwh9L66n9Cprrp3MnDkMdHdKJDnU1O0w1k/rjrnUjdJUSWebabc6CtIo8effnt3fSJ7wKhmpIjt47F+PbMuq7O+kLngUkjWZGQRWuCPIGWcv1zT01GPE/adiNzYOoHt9EelU2iOwgIZPL+IxsThyzI/MzJWLzGlCKQYmeGo5lNfCrxUQtVkvWv/xjSxD1cCtyneR4Ds3REoeXp+Gb6uAdmdnylP77ffWhe7wwfoMdHaVra0uP8p3VVXQaFgWDKgBpi1yxCRllSVo0kMkOpREiaytV17cX6orEpEyec+6ouETbkymi+PqqxxK2kqX+HlBu+B+qLUoJuBay8M1WdLkgdsJ0KHkx/CO+t9LUGG6xT2Fjf9qYHovEk8EUupa2yvcGWe18SgvXLOXekfwJeR0sTQzogbw3cxTqNM0DCWnX2n/mJhBIA/SZgz4T0k3kQ5kcniTW6OdktJmIZVNI=
+  file_glob: true
+  file:
+    - dist/*.dmg
+    - dist/*.zip
+    - dist/*.AppImage
+  on:
+    tags: true
+    repo: veonim/veonim
+cache:
+  directories:
+  - binaries
+  - node_modules
+  - $HOME/.electron

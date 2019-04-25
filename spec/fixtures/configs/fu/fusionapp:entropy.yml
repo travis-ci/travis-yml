@@ -1,0 +1,28 @@
+branches:
+  only:
+  - master
+  - staging
+  - trying
+sudo: false
+dist: trusty
+language: python
+cache:
+  directories:
+  - "$HOME/.cache/pip"
+matrix:
+  include:
+    - env: TOXENV=py27
+      python: 2.7.13
+    - env: TOXENV=pypy
+      python: pypy2.7-5.8.0
+install:
+- pip install -U pip setuptools wheel
+- pip install tox codecov
+script:
+- tox
+after_success:
+- codecov
+notifications:
+  email: false
+  slack:
+    secure: lqGRJQkQSBw9zX/AXqaPXVShw00TNncVvMAAj6q7jsLn17aCPmL5N0wmKWO6Oibdmu2EuehosCCN5JQ00tQ2zfi9sCGFtA5AC7Uxl2bi9rgBaW/HWSTc2q0ghi4v0MMCuxadOWOgjhRMKYNg37tIAuUYvJeB3kG8NFZgHKsxg0I=

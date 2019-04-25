@@ -1,0 +1,14 @@
+language: ruby
+rvm:
+  - 2.5.0
+services:
+  - postgresql
+  - redis-server
+#before_install:
+#  - rm -f Gemfile.lock
+before_script:
+  - psql -c 'create database archivist_test;' -U postgres
+  - cp config/database.yml.travis config/database.yml
+  - bundle exec rails db:migrate RAILS_ENV=test
+addons:
+  postgresql: "9.6"

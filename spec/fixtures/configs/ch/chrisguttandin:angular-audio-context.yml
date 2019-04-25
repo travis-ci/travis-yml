@@ -1,0 +1,13 @@
+before_install: npm install npm@latest --global
+cache:
+  directories:
+    - $HOME/.npm
+dist: xenial
+env:
+  global:
+    - secure: j3sWidFJORA5R4CEYrt/tRHzPk3nAbuufHa6KGkfewIMtE9PcHOoZwpotBwYsBhAa7m7+jNRGWs0M6kIAWmjb1pnbFV9vPkPQxi8wY4SM2pyPTADHtqKqN0LLaqbQr8mM00xIaMD4xo3CMBJc+k0kzgtO/Cq4p6Szqa1rMY87lM=
+    - secure: K5gO1kcBSR4bjVNBQzdq4X2qXeXWh3Vojt1sdHyUqOFwU0DMriPG60CgJ7O6L6ycWlo56IDEXRiOcjuTkow4qDbvPCrffXZ40CrBzrDx8BUmMBssVMC4+/pp4qMP6YG1RF1qTRYvVy0tH+fuYAdLNCLNgUdqUuiXq19LSsgKvUQ=
+    - secure: Mfrq1vpq8uFZaCm3xW9YJs8V5B3w5IgW+ITVg4ZmKiZv4hIBzwzwuSG//fJEcT/gmmNqpciXGavkdANAzgSjP98ywj5kj/D+3uEWn7kjZmYZUZunE2GV4ABQznxNtYLGfoRcHk976v1MS0PSujEeJPG9BIdC3Ost4JRAbAHxK9w=
+install: npm ci || (rm -rf node_modules && npm install)
+language: node_js
+node_js: 11

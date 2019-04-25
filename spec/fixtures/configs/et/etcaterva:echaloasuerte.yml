@@ -1,0 +1,51 @@
+branches:
+  only:
+  - master
+language: python
+services:
+  - mongodb
+python:
+  - "2.7"
+  - "3.4"
+# before_install:
+# for func tests only
+#  - wget https://s3.amazonaws.com/travis-phantomjs/phantomjs-2.0.0-ubuntu-12.04.tar.bz2
+#  - tar -xjf phantomjs-2.0.0-ubuntu-12.04.tar.bz2
+#  - sudo rm -rf /usr/local/phantomjs/bin/phantomjs
+#  - sudo mv phantomjs /usr/local/phantomjs/bin/phantomjs
+# command to install dependencies
+install:
+  - "pip install -r requirements.txt"
+  - "pip install selenium pyvirtualdisplay coverage"
+  - export DJANGO_SETTINGS_MODULE="echaloasuerte.settings.test"
+  - "python manage.py syncdb --noinput"
+# command to run tests
+script:
+  - nosetests tests -v
+#  - |
+#    if [[ $TRAVIS_PYTHON_VERSION == '2.7' ]]; then
+#        nosetests func_test -v
+#    fi
+
+before_deploy:
+  # Decrypt secrets
+  - openssl aes-256-cbc -K $encrypted_d3a60ff67d32_key -iv $encrypted_d3a60ff67d32_iv -in secrets.tar.enc -out secrets.tar -d
+  - tar xvf secrets.tar
+  # Enable ssh agent and add ssh key to use for deployment
+  - eval "$(ssh-agent -s)" #start the ssh agent
+  - chmod 0600 dev-deployment2
+  - ssh-add dev-deployment2
+  - ssh-add -l
+  # Install Ansible
+  - pip install ansible
+  # Deploy to Dev
+  - git clone https://github.com/etcaterva/deployment.git eas-deployment
+  - mv vault-pass eas-deployment/vault-pass
+  - export ANSIBLE_HOST_KEY_CHECKING=False
+
+deploy:
+  provider: script
+  script: cd eas-deployment &&  ansible-playbook -i hosts_dev config-eas2.yml --vault-password-file=vault-pass --extra-vars "ansible_user=automation"
+  on:
+    branch: master
+    python: "2.7"

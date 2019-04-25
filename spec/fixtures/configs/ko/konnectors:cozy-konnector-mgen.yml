@@ -1,0 +1,41 @@
+language: node_js
+node_js:
+- '8'
+env:
+  global:
+  - GH_USER_EMAIL="travis@example.org"
+  - GH_USER_NAME="cozy-bot"
+  - DEPLOY_REPOSITORY="git@github.com:konnectors/cozy-konnector-mgen.git"
+  - secure: M0xtVoQZzBNt25Rqi7U8gmKjmIywe1RV1PFWL7INZLeqL+9qVC/3M3Wol7ACESV4dGUuwdV9MvO6ajPBB1pe2UffTjwZFVMRIVT0BJt5yh5g+1GFEeUIwPhUuBL9vq4uJ9M3ZNCe5d3OkhyEyrJJijR1R6jDasoDgRaEwBvrOBu4XlsIwatSaxgAvf77ha29mesURfbNaN32S1syZJb1sgB7kEp2YgV2pI+zrLeL9/+cUtx76ScSFf3qBlsu87bkw0/hTusESGr+VZf2gvJyqw+cG3SiXsm9xcJu6uuRi5xRPWLP75581W4uZap+zCsT5nMteeVDXPZC2Dff+0sXlQED1mYacncuWGR/xXMjDXYmAlQbn7WODq9dEbYVpMdvXaKtMUQ6QOypX5QX2l4Krr1pQD3jEHvsjPs3XX1LtGWz5GmZejLHsKCBg/0/AdMkCNcOVrkH7tpj48n8uL9wpLwWY/3CBDnZoVbpIOhBIURz73z2Sfhr68QYssXtc+F5fH70qMJZlGHLXv1nDHDcv3iUNBZPxP9LhYVwgxWh+otZBr2hKVDnuHSZlm4sbkwQaGrKYQQ1NqyZj/d/1raUExiUL+m0WdurjQssFYlxaqU5UzZ0dScn7DfOmUgXmXm8xfWquNtQNTzo8Dc8sJjBx/6RDYZI2d/mS255IVLE/U8=
+cache:
+  yarn: true
+  directories:
+  - node_modules
+branches:
+  except:
+  - build
+  - build-debug
+script:
+- yarn lint
+- yarn build
+- yarn run check
+deploy:
+- provider: script
+  skip-cleanup: true
+  script: DEPLOY_BRANCH=build yarn deploy && yarn cozyPublish
+  on:
+    branch: master
+- provider: script
+  skip-cleanup: true
+  script: DEPLOY_BRANCH=build yarn deploy && yarn cozyPublish
+  on:
+    tags: true
+before_install:
+- openssl aes-256-cbc -K $encrypted_e434d68530d5_key -iv $encrypted_e434d68530d5_iv
+  -in github_deploy_key.enc -out /tmp/github_deploy_key -d
+- eval "$(ssh-agent -s)"
+- chmod 600 /tmp/github_deploy_key
+- ssh-add /tmp/github_deploy_key
+after_deploy:
+- rm /tmp/github_deploy_key
+- ssh-add -D

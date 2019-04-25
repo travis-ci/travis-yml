@@ -1,0 +1,38 @@
+sudo: required
+
+addons:
+ apt:
+   packages:
+     - graphviz
+
+language: scala
+
+scala:
+  - 2.11.12
+  - 2.12.8
+  - 2.13.0-M4
+
+jdk:
+  - oraclejdk8
+
+before_cache:
+  - find $HOME/.sbt -name '*.lock' -delete
+  - find $HOME/.ivy2 -name 'ivydata-*.properties' -delete
+
+cache:
+  directories:
+    - $HOME/.ivy2/cache
+    - $HOME/.sbt/boot/
+    - $HOME/.coursier/
+
+before_script:
+
+before_deploy:
+
+deploy:
+  - provider: script
+    script: sbt ++$TRAVIS_SCALA_VERSION "sonatypeOpen \"Travis Job $TRAVIS_JOB_NAME $TRAVIS_JOB_NUMBER ($TRAVIS_JOB_WEB_URL)\"" publishSigned sonatypeRelease
+    skip_cleanup: true
+    on:
+      all_branches: true
+      condition: $GITHUB_PERSONAL_ACCESS_TOKEN

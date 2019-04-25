@@ -1,0 +1,36 @@
+sudo: required
+
+language: go
+
+go:
+  - 1.12
+
+services:
+  - docker
+
+before_install:
+  - sudo apt-get install jq
+
+script:
+  - make unittest
+
+before_deploy:
+  - docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD"
+  - go get github.com/blang/expenv
+  - go install github.com/blang/expenv
+  - make release
+
+deploy:
+- provider: releases
+  api_key:
+    # Encrypted personal access token of `carbon-bot-user` github user
+    # Encrypted with `travis encrypt [TOKEN]`
+    secure: "5GFTKgDt98n5wgYcLuAiVQiUf9RfPyhjG5cS94h3O3Br9G+/VLkMzoPNIU5CcNP7PAtKiwMEjD0hCebzY8F/k6dcuCe0JV9FedNKlFz41lGtPCaIUIk1bNbNvwzvEx4q3Jwo/XMhEj7togAG2IgBrGtqXJahXTgVjt8OJDfYVgVMEgPNKl6yXW1tqCliTW2oAgbkuZEkIWAfcaV+3hKW0ze7vgyF4u6tDA2PLBKN0qK7ytqQhhXVDOT+l3daOXYvt6ouy9rbmOhAzTohenjV0BTsr2yt4HdAmXJ36SvV86/q2cI0BNLEfbtc2firIBILbrtTCNUAnUKs0qbptg4bsIZXvA15Naxvq73p+hrwROOs5o44dKEgMnPg+4G68bmW9TG5FhK+wSsqIvY3pm/Uz/QifJPnQX+/kXpwXdD4zibiO5jsbUjCa3+Rz7rbyhIE7nntDHBQFoDcUBV1KwFX72dEIrzIpXDmzzwSwxa6M+qjERktzuzn9sJn8Otbl1Ki6gu/Z/kVJ8o86ixVnAfgW5BrW6dKZlQDsNBJ6Lo/6vSRwuCUgm1bus/68HUqAE0VkWaVHfTVdRTA85b903VvikIcbLPvoDL1hmYkArZvdLJR3oHb3AsI8y3Kb0wGTsFMdZ3JXis7Y42ADgJUXY3wTUJWwy/PULxtrDQaPc72Gl0="
+  file: 
+   - build/macOS.zip
+   - build/Linux.zip
+   - build/Windows.zip
+  skip_cleanup: true
+  on:
+    tags: true
+

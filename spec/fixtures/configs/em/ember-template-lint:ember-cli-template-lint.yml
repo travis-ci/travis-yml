@@ -1,0 +1,58 @@
+---
+language: node_js
+node_js:
+  - "10"
+
+addons:
+  chrome: stable
+
+cache:
+  yarn: true
+
+branches:
+  only:
+    - master
+    # automated dependency updates
+    - /^dependabot/
+    # npm version tags
+    - /^v\d+\.\d+\.\d+/
+
+before_install:
+  - curl -o- -L https://yarnpkg.com/install.sh | bash
+  - export PATH=$HOME/.yarn/bin:$PATH
+
+install:
+  - yarn install
+
+jobs:
+  fail_fast: true
+
+  include:
+    # runs tests in chrome with current locked deps and linting
+
+    - stage: tests
+      name: "Tests"
+      script:
+        - yarn lint:js
+        - yarn test:node
+        - yarn test
+
+    # If that passes:
+    # - run tests in other node versions
+    # - run tests without pinned dependencies to catch issues with new versions
+
+    - stage: additional tests
+      name: "Node 6 Tests"
+      node_js: 6
+      script:
+        - yarn test:node
+    - name: "Node 8 Tests"
+      node_js: 8
+      script:
+        - yarn test:node
+
+    - name: "Floating dependencies"
+      install: yarn install --no-lockfile --non-interactive
+      script:
+        - yarn test:node
+        - yarn test

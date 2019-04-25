@@ -1,0 +1,15 @@
+language: ruby
+env:
+- DB=postgresql
+script:
+- RAILS_ENV=test bundle exec rake db:migrate --trace
+- bundle exec rake
+before_script:
+- cp config/database.yml.example config/database.yml
+- cp config/secrets.yml.example config/secrets.yml
+- psql -c 'create database openassessments_test' -U postgres
+addons:
+  postgresql: 9.4
+notifications:
+  slack:
+    secure: GcGkVuKx1c6CHcpuwKUaAoyfiwnsL8cm9AZpwtRAoEXNMgFuPBl9hjfivKMqOSYzBCuAfK9l6T3MIhVUJOi7PPvNI9DhuDZtbZ6MgVH/PAHVZhJTx+G00O5j60T617DTKMwRDakEst9ADTkxcekO16TqZY/4d+RJNKmdyp0JiwU=

@@ -1,0 +1,29 @@
+language: node_js
+node_js:
+  - 6.9.1
+sudo: false
+cache:
+  directories:
+    - node_modules
+addons:
+  firefox: "55.0"
+env:
+  - ENABLE_COVERAGE=1
+  - ENABLE_COVERAGE=0
+before_install:
+# Settings needed for graphic output in Firefox
+  - export DISPLAY=:99.0
+  - /sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -ac -screen 0 1280x1024x16
+  - npm install -g npm@5.4.1
+  - npm install -g phantomjs@1.9.20
+  - npm install -g geckodriver@1.8.1
+# Diagnostics
+  - npm --version
+  - npm config set spin false
+  - phantomjs --version
+script:
+  - npm run ci
+  - '[ "$ENABLE_COVERAGE" != "1" ] || (npm install -g codecov && for file in test/logs/*.lcov; do codecov --disable=gcov -f "$file"; done)'
+notifications:
+  email:
+    - build@ariatemplates.com

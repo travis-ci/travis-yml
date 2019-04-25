@@ -1,0 +1,27 @@
+
+language: ruby
+jdk:
+- oraclejdk8
+before_install:
+- |
+  if [ "${TRAVIS_OS_NAME}" = "osx" ]; then
+    OS=darwin
+  else
+    sysctl kernel.unprivileged_userns_clone=1
+    OS=linux
+  fi
+  BAZEL=$(cat ".bazelversion")
+  wget -O install.sh "https://github.com/bazelbuild/bazel/releases/download/${BAZEL}/bazel-${BAZEL}-installer-${OS}-x86_64.sh"
+  chmod +x install.sh
+  ./install.sh --user
+  rm -f install.sh
+before_script:
+- echo "startup --output_base=$HOME/.cache/bazel" >> .bazelrc
+# Avoid progress indicators that can blow out log which makes using WEB UI difficult
+- echo "common --noshow_progress" >> .bazelrc
+- echo "common --noshow_loading_progress" >> .bazelrc
+# This is so we understand failures better
+- echo "build --verbose_failures" >> .bazelrc
+script: bazel build :all
+git:
+  depth: false

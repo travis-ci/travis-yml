@@ -1,0 +1,104 @@
+sudo: required
+dist: trusty
+git:
+  depth: false
+language: java
+jdk:
+  - openjdk8
+  - oraclejdk8
+  - openjdk9
+  - openjdk10
+  - openjdk11
+  - openjdk12
+
+env:
+  global:
+    - TERM=dumb
+    - secure: "BWkQg2TtisAX5YeescVyRbCHXh7G/IpTeQwhDrG1iSh+1+2EgGxAP3akMdYkWYDq6BJ9IDZJ6PWDoZ/0ISvNNGtVGTCUD9PvW17wYcJUgOiZrAqJ5iAuHsqMaaA8v3u9dFf86TPACoBNC37VC8TGBU6OfFWtAelrjHHyFzOJQ8kDTsnrAujW1hoSn9GrBN37CC42KnRFtzSl7MgekLdnWcTwJR62TT+0om7j2VCRhWH7D7k1aCzGhTPftkEUEipu5d7aMr/Erav3gp2axGiZnvVURNwfFG9FgT62PtfCDsCXUB1w7n6rjTduEpWjX5JJsT1f3uTzPmy1ifrKgLAcNIqP/lR8H3Ap6olAuEqznQh/B3EzKxatGzyGO7L+UdKhCFOgzWh4KZGMWy9tKDMVjHB14b8zYVrnbrndpfu9mS+tgCMZIBabSzZ3vECP0Ov7az10uWta3I3KgGsy2/VlkrfPMCDoQCgLMBbCoCg+ACDpkbHwDuaszC53WvV41JvbOCZem7NsBomHx1lAp6OvrI5E62doqVpsegwVNKBdxYHhiKR+Lp96ta35m0cagCZ7vQaGlGJ2Iu0y98xGyUZeHTCJkmZiZv/Gt8E58qLurp5/y2rtPj9h7r8R1FZOCGxXzeDSHNXVSjNG4gq7P4U28TVIMuXc6nTlKU6TCNOgXnc="
+    - secure: "qlKDm8LE4Z/pmdokwL3g5ckYq/6H9Ef4cpZjjy/mX5ClETsQFIPqDjwqF4n3GXQBS+SxN74dS+vBZwLpt2aZYRCf1l+XXhhVAkxF3Nw+0tn7GRsvHA+IlNxmmXApjckytOtLxMaXP4wcRcBsOJ+OQzKK+Tt33O0faVI/2RTSDvrWZPE0zwH8XC+PdqBcnl0rTs2/T4JI7Kj7BUfPd7nCLzMYZ13VI2ADCvO0LD0V5TA7TQoBarMSO3BCkD1uZAAZ/xt9Q+DCqYvfBi9vI4GjA5ELQ8iZyhsCylosCI4RtYR4IAR0A5QzcFrauxi1Zh/NLpNCxtvPiM/bEapjsLQIymCTOU8aJymxeO++7iDUOBzMH1fnRJcSo3hGFdDNBokVrvO1xQz/m3WVyM7M1XNz7SeEzgo3jyBPC8otQsUixFBNrkq2y63sMzjl7c7Zg30ps2J5jXAEBI506oP15WO92BW9ZcvRG3J4+PfYyjjjvAv1htd4xNWSAI5R+QgrjqGuX2bpRPNsubXzle8zb59ZRcNCeLNXBHh8Px2CrlGebTBBIxI6Vm7zuPc5rbwD+7m7pqKBZGWLIp9/mfCKH1lNvXzSMA7PYOR0I1rIsDoy44zeRM3njr2CE964Zznc0myYS0bIuznfkFYoDwe9T13kKEGX21ykwZHPuS01+uf2VRc="
+    - secure: "N0rlfEbnYCdMOFBNtYFTJLQpa1udisIUOcc+FDUYq44GWtp8QBqhK5qNh74aDQ3imQHvz53XDH9943jegt4OjlJBuS8BUUJs44evmHG5gLlygCrpDj7JPrMkpnYz92/kv9C8/ojW2jFyOpqEJhkoTg9S0pV4v57wmeJYsnxkJyyqSD0mtD/Bsa5ZUbhV71WaA5lAMXcyTNq6+/YKmSwpAdMPhhWm1uutYZzKZkbIDpLTxmCburSCxwmAFI9YtAazxnpBHP/IpfSrV/G3E+9eVYrjmbnNcZCK/3rcCuQSe8cNOsbozJFNeMb+U2gIUSpfeQZx5LgywnfZHkVWqwpBv2IUeReaJXgXig+4sS9v1eSJaLtIUv/JXetSmpmE5R02YQO6CNcmdtR702dKpteiVO28svCtVPAxXDNyMsGyrhOtyVSSATw4kpU9Bq1rkul7UY1fMiZtNFworxBgnqcnCM1Q7CYzGyTmERuB30s0q/3R4Q0KgV8Iy9JuiqHs9J91azcAF2Dzz4zMPf4yw0lJAxvHCOqMQ7x8waC21n6K4+KaT1QCaSJ88YDvUGC+RcNYp861cPeDKb04AKkSIwp5rIljrckbC6ivKSk87JsILoBQHKBKV8sbx0JMGm+5C3C4weqUQ+SHNZ55F71rTPYix+bypdXUTnIstVZMw4cFKCY="
+    - secure: "z32+XowmfQf2x9UnfuXA1TxhnQlYDBoNkPTlHxsQBAj3bpt6GeFyJsDdx76BL/+iId2nPkO/aoDa1/gMar2TVMl0BZrmnsPr9Az+PLIQI2d+VvCfLw9DI1rb+7UFNc9KfBfBNJaU2soQdj/gWyf7M3AL5gCocZkgsZxKsqUbRv5zwz2dItqon5TcDzM3Mry1DiSN/E1QJ/YIxICfcgbi3qs9zXdlhCuWZHaBZ7ePW65TJATToxWqH2TnzhOD1UKT/FumTyvTXe33R+knqNdzHiL6GS2LkmT7oXnN7VYAIN5kfNDjv3JcMH6Gd4y+tkFwTERMuZoLyFu8/SPqlVlzc/UncChn3wWs2E9h1h1bxK/ClUQVIXsWFEuA5DLPgQ0P2t1N+2ypwarMWs+/tLkmR08Ol1rB8uObnx3VPu48vppAHwZyz8pnHVWEAK9wQlak84Y9Uplts1IAU7FQV6/2IQS3Oh/m0JR+quHL8td4elU6OGrMhWskS2D863wURe8Tmh9/a145LAK13kkXm4nIAiOj6QzJeWWDcz1fMRGReKRgYz+cG0dQ5PS7nZ0kNPJmcnN1GWYF5UZLJPaDe/ZzJS8s6FnpqwdpppPYE4trMzqgLYx64fwizI4sPWqYf9OB0E/cw1pHFAygsHiUsE45S/lnr4x3Ux0aeY6x/Os+ajg="
+    - secure: "acaM42nAfxH9PqMa8DzptC9+0UP5CxIvhQW+FrTW3SkDDI2b4rdAmpOlg7dsaiuYXVwEwRKDwu+HmGayClC1JTeEjwXV6adH/2DPS7GwdZlxinX66PMxrOtJ8kfyuyr/LbTHNv4kvnVngGf7iyx9b9/7+1Yygs8znI71GNUY7SOg0nDVmk/aXZKWk3dg4OO3F1NEmwVDrWVHL+PIznZjpPiUZfmi+KJA+uJDAB6QnhBV78YlVi5FBG3NZG7V35ecFpIZ1w0Hqdst7QneRN4Sra3hJ22r8VJDWc4bcdVZ5dcXIOzTHIqeL9O4/oIOBHqgHjgIpYiXp93HSwoJD+PRXvF7JVXrebiIT6QT2+iLM7ph+Wj/suxTTsymhYI7iMBzRP0WDpsywBdx+LR7oBpoa32/v6KxCkdzt0RslUeMtRBRTltzAl9Sh9zcbw3RQtyBEpwtLwKF6+zfSUulTCP/JNMOHtfoYIv7+ZvgjRHXe0Jt3Ad/1HbHDpth9udYiBb3O9/bBWYl/rqxUAwGIGR9+pWPOIfIumZptI12eIiYOU2KLJ5P3/KRe9zIjVmH426TRrC1L/CQs4+N8Rt0S6nS5mkJ/tumxitfpmh+A+lt14P9sKxud8TCZpfHfmD1YOWwQA25oa3Kj+pErV1zm/zlHuGdmUYoeOkHOIL3Ruyx+OY="
+    - secure: "I4+Yjiu5Y5khd4MzFtY5UP2P+L72wklqgZ4uDNhQ+RJeIgOmbKit0tluWda/KpFVEC9K+SuGLURtzsL9XnmiBRbPdOaB/a6cJPW4TUzmpxbyu4Zl2OlcqngVOBku7al+54cMergdXFK0eflXlDik/8RH0stOd79tPoyDerdfUhoy1Tbdi0F014UBhHM4YraB7Tcunchw4InjcEWBtLY7VZMyw1CCeajf9r7ucXRyUnSjAjvR7jPVKg4+yiCefkC45xR0sok0cHec/HjDw9HReV40PkBNmTSTT8qjWPgH118zzMWR38B7gVvOIvPG549939yHv/q94VIIKn0ZDFwtk2CtcyX4HD35QM/EmfBHboEq55ckmSuz3L48X+C78697+4lZ4aa7/30y8TJIEiDeuAmNtvXAvf7zio+3lZs5OpyEAbHlpvt8ggzutrG6o9EskfgJ8c5g3zLP3/Q8OtefqR3DWArNNMpYk6UpL7JEN8LekloCOofM1XZh21ucqss+k1MC5IG3o9sCIs9ToW3CX9Kf9LGtpYhbnQPCNw9BBUxuIaignXOODGdYxjMmDQyZ+s1+mJr2WxHmmMxyu+TBFh5H9few26JDNWxO4+C2Ql95qlL9zUiRQFWsR3eOAqzbshY0yhTju0vIrsxxqxK+gtXij9jnKAfjvD3/Ai3bnIQ="
+    - secure: "hhegqLy8o3Q0SJXFX5fqnixwQyADBNv5NSotuXEFf3qsb1/0CvGu+0rFkP0z+Aq5p8amv71NTl7KHvcpGodpNl28HYjbsfg3wbszdJIJuyX6fGxxMdaegb++coSU6mav9Of7zKbeg+uoE/qkE/CpGeak5L872xM3TiS0mA4+Eer3hArHDHt5zAzsUkEkZCgiuMYhUXopYB7BX1N/c/E3Sj8fD2yryDa4mfs5kaXChAbi/k4A6+CsScaF+F7v1XKaoJRy2PgYw28V9AsHr5Y6DwBYyGloZUGAWAcc6qHZaJqcO2ltVSAT1duTOi6kEy7Mvxyv4buj3hhMbq1OpINukCSKfLwwj3+gQOiOCDAmMIJPm/mJzjMS+puMu0+5K3bCRq2IrjyGkP6ZOflINaF6Pi4djBpZp2+ksTSdO73hJYSu6PltXS/XTEEocQYxvFM4cXNy1clxvMFI0aoC0Ihc7GdVheDbO0A1bJ0y9bxGEb0fYrEH1RyDvzxV4mXZFG8x9M4+sKhyIU7Et4dGB9d/YQCVp00//POOdKeXSlXFR/6SOp4eRga/G6S3a6aBJDcO7maiwC4rt9r6fPotGZvYuFRbVG4U2XvhW65V5LY4UVniGz5nBNu/EksMg5ULBMp+1IhJ79cMjotzj+pNvUwpBml6CbNzSYGY1BUUrIVZy9E="
+  matrix:
+    - JAVA7LEGACY=true JAVA7_HOME=/usr/lib/jvm/java-7-openjdk-amd64/
+    - JAVA7LEGACY=false
+
+matrix:
+  exclude:
+    - jdk: oraclejdk8
+      env: JAVA7LEGACY=true JAVA7_HOME=/usr/lib/jvm/java-7-openjdk-amd64/
+    - jdk: openjdk9
+      env: JAVA7LEGACY=true JAVA7_HOME=/usr/lib/jvm/java-7-openjdk-amd64/
+    - jdk: openjdk10
+      env: JAVA7LEGACY=true JAVA7_HOME=/usr/lib/jvm/java-7-openjdk-amd64/
+    - jdk: openjdk11
+      env: JAVA7LEGACY=true JAVA7_HOME=/usr/lib/jvm/java-7-openjdk-amd64/
+    - jdk: openjdk12
+      env: JAVA7LEGACY=true JAVA7_HOME=/usr/lib/jvm/java-7-openjdk-amd64/
+
+before_install:
+  - sudo apt-get -qq update
+  - sudo apt-get install -y graphviz
+  - if [ "$JAVA7LEGACY" = true ]; then sudo apt-get install -y openjdk-7-jdk; fi
+
+install: true
+    
+script:
+  - 'if [ "$TRAVIS_PULL_REQUEST" = "false" ] && [ "$TRAVIS_REPO_SLUG" = "Protelis/Protelis" ]; then bash travis_build.sh; else bash travis_build_pull_request.sh; fi'
+
+deploy:
+  - provider: releases
+    skip_cleanup: true
+    api_key:
+      secure: RbsjBbESCgf2L6eerGH+tdrne5zJDlmq/ttzFnBXeN2n726W3xk7w08tQQVDlL+d90RPSbqVUGHS/erB7y3kGVYkfj0/w21PMZSY42Tw4r57YExSywPTBN+LDi/Cfrj1Kqknqk6WGOCKXSPkmyYLFaj+/qel7QxNDXVn8VEDfh2k5AdZVhdJW8bqNHM3aF8XxfyXgzg+Wg9NXrEz6UcztES3PoWjlDGgspOUel7/UMmsNnlWkt0MC5Bv8t0PviHaThD7qjiJfiDxIc3KhvWQWokRhcUxJVTnR1pjzMAXEypjGZANOEqxsLi8HAGwUmjsJp4Xv4GnIolRQMGYDDqxNvQKMU2vjqfSTSsnKb6TAP+et3igaoxjc4oZd9caeOl/dye8pY5KdA+ao/i7+vyUfIqo/b+hbq/cbLNDU8b/H1o5AeaeNMrdmUTi/vzKkbF7iyv0d702kQoHTAOZWRUYMzCo41eZPQbIutjWj+7yqARDyQE6S0k/jBzI44+RT0b3bkwXXV9fEd/pdqpeCg9nphO9i5Q/sC6bXBdGN+mO0DqbioqE1r9t8hZ38nVK3DodJq1n/hENSl3P9kNU0TZ3HY3nlotECa9WuLoWWIDNQI+LmgeEu0Ibc7MrVcLTAurl+l8V/zdwSEKQ0j4w9FrNFhpElO9TQYb2m3ChXEcubxI=
+    file_glob: true
+    file: "${HOME}/build/${TRAVIS_REPO_SLUG}/protelis/build/libs/protelis-redist*.jar"
+    on:
+      repo: Protelis/Protelis
+      tags: true
+      jdk: openjdk8
+  - provider: surge
+    skip_cleanup: true
+    project: "./protelis/build/docs/javadoc/"
+    domain: protelis-unstable-doc.surge.sh
+    on:
+      repo: Protelis/Protelis
+      branch: develop
+      jdk: openjdk8
+      condition: $JAVA7LEGACY = false
+  - provider: surge
+    skip_cleanup: true
+    project: "./protelis/report"
+    domain: protelis-unstable-reports.surge.sh
+    on:
+      repo: Protelis/Protelis
+      branch: develop
+      jdk: openjdk8
+      condition: $JAVA7LEGACY = false
+  - provider: surge
+    skip_cleanup: true
+    project: "./protelis/build/docs/javadoc/"
+    domain: protelis-doc.surge.sh
+    on:
+      repo: Protelis/Protelis
+      tags: true
+      jdk: openjdk8
+      condition: $JAVA7LEGACY = false
+  - provider: surge
+    skip_cleanup: true
+    project: "./protelis/report"
+    domain: protelis-reports.surge.sh
+    on:
+      repo: Protelis/Protelis
+      tags: true
+      jdk: openjdk8
+      condition: $JAVA7LEGACY = false
+after_deploy: echo Deployment phase concluded.
+
+notifications:
+  email:
+    recipients:
+      - danilo.pianini@unibo.it
+      - jakebeal@gmail.com

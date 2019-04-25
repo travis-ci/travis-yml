@@ -1,0 +1,137 @@
+language: cpp
+sudo: false
+matrix:
+  include:
+  - os: linux
+    compiler: clang
+    addons: &1
+      apt:
+        sources:
+        - llvm-toolchain-trusty-4.0
+        - ubuntu-toolchain-r-test
+        - george-edison55-precise-backports
+        packages:
+        - liblapack-dev
+        - libhdf5-serial-dev
+        - gfortran
+        - g++-4.9
+    env:
+      - PYTHON_VER='3.6'
+      - CXX_COMPILER=clang++
+      - C_COMPILER=clang
+      - Fortran_COMPILER='gfortran'
+      - BUILD_TYPE='Debug'
+      - NAME='clang'
+      - MAX_DET_ORB=64
+  - os: linux
+    compiler: clang
+    addons: &1
+      apt:
+        sources:
+        - llvm-toolchain-trusty-4.0
+        - ubuntu-toolchain-r-test
+        - george-edison55-precise-backports
+        packages:
+        - liblapack-dev
+        - libhdf5-serial-dev
+        - gfortran
+        - g++-4.9
+    env:
+      - PYTHON_VER='3.6'
+      - CXX_COMPILER=clang++
+      - C_COMPILER=clang
+      - Fortran_COMPILER='gfortran'
+      - BUILD_TYPE='Debug'
+      - NAME='clang'
+      - MAX_DET_ORB=128
+
+install:
+- wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
+- bash miniconda.sh -b -p $HOME/miniconda
+- export PATH="$HOME/miniconda/bin:$PATH"
+- hash -r
+- conda config --set always_yes yes --set changeps1 no
+- conda update -q conda
+- conda info -a
+- conda create -q -n p4env python=$PYTHON_VER numpy cmake gdma pylibefp libint libxc gau2grid boost -c psi4/label/test -c psi4
+- source activate p4env
+- conda install pint pylibefp -c psi4/label/dev
+- conda install -c intel mkl-devel 
+- python -V
+- pyenv global system 3.6
+- pip install deepdiff
+- pip install pyyaml
+- cd ${TRAVIS_BUILD_DIR}
+- export CXX=clang++
+- export CC=clang
+- export FC=${Fortran_COMPILER}
+- export CTEST_OUTPUT_ON_FAILURE=1
+- export LD_LIBRARY_PATH=/usr/local/clang/lib:$LD_LIBRARY_PATH
+- ${CXX_COMPILER} --version
+- ${Fortran_COMPILER} --version
+- ${C_COMPILER} --version
+# Compile ambit
+- cd ${HOME}/build
+- pwd
+- git clone https://github.com/jturney/ambit.git ambit
+- cd ambit
+- git checkout b7a3783
+- cmake -H. -Bobjdir -DCMAKE_C_COMPILER=${C_COMPILER} -DCMAKE_CXX_COMPILER=${CXX_COMPILER} -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=/home/travis/build/ambit-bin -DPYTHON_EXECUTABLE=${HOME}/miniconda/envs/p4env/bin/python
+- cd objdir
+- make -j2
+- make install
+# Compile Psi4
+- ls ${HOME}/miniconda/envs/p4env/bin
+- ls ${HOME}/miniconda/envs/p4env/lib/
+- ls ${HOME}/miniconda/envs/p4env/include/
+- cd ${HOME}/build
+- git clone https://github.com/evangelistalab/psi4.git psi4
+- cd psi4
+- >
+    cmake -Bbuild -H.
+    -DCMAKE_CXX_COMPILER=${CXX_COMPILER}
+    -DCMAKE_C_COMPILER=${C_COMPILER}
+    -DCMAKE_BUILD_TYPE=${BUILD_TYPE}
+    -DCMAKE_PREFIX_PATH=${HOME}/miniconda/envs/p4env
+    -DPYTHON_EXECUTABLE=${HOME}/miniconda/envs/p4env/bin/python
+    -DPYTHON_LIBRARY=${HOME}/miniconda/envs/p4env/lib/libpython3.6.dylib
+    -DPYTHON_INCLUDE_DIR=${HOME}/miniconda/envs/p4env/include/python3.6
+    -DENABLE_gdma=ON
+    -DENABLE_PLUGIN_TESTING=ON
+    -DCMAKE_INSTALL_PREFIX=${HOME}/build/psi4-bin
+    -DOpenMP_CXX_FLAG="-fopenmp=libiomp5"
+    -DLAPACK_LIBRARIES="${HOME}/miniconda/envs/p4env/lib/libmkl_rt.so;${HOME}/miniconda/envs/p4env/lib/libiomp5.so"
+    -DLAPACK_INCLUDE_DIRS="${HOME}/miniconda/envs/p4env/include"
+- cd build
+- echo "Starting compilation of Psi4"
+- make -j2 -s 
+- echo " Done"
+- make install >& psi4_install.log
+- export PATH="$HOME/build/psi4-bin/bin:$PATH"
+- hash -r
+- which psi4
+# Compile forte
+- cd ${HOME}/build/evangelistalab/forte
+- FORTE_CMAKE_COM=$(psi4 --plugin-compile)
+- >
+    $FORTE_CMAKE_COM
+    -Dambit_DIR=/home/travis/build/ambit-bin/share/cmake/ambit/
+    -DCMAKE_BUILD_TYPE=${BUILD_TYPE}
+    -DMAX_DET_ORB=${MAX_DET_ORB}
+    -DENABLE_ForteTests=ON
+    -DPYTHON_EXECUTABLE=${HOME}/miniconda/envs/p4env/bin/python
+    -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+- make -j2
+- export PYTHONPATH="${HOME}/build/evangelistalab:$PYTHONPATH"
+- hash -r
+script:
+- cd ${HOME}/build/evangelistalab/forte/tests/methods
+- python run_forte_tests.py --bw --failed_dump
+- grep 'Size of Determinant class' aci-1/output.dat
+- if [ "$MAX_DET_ORB" -ge "128" ]; then
+    cd ${HOME}/build/evangelistalab/forte/tests/large_det;
+    python run_forte_tests_travis.py;
+  fi
+- cd ${HOME}/build/evangelistalab/forte
+- ./forte_tests
+- ./forte_benchmarks

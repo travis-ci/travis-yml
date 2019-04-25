@@ -1,0 +1,34 @@
+dist: trusty
+os:
+  - linux
+  - osx
+addons:
+  apt:
+    sources:
+      - google-chrome
+    packages:
+      - google-chrome-stable
+      - google-chrome-beta
+      - google-chrome-unstable
+env:
+  global:
+    - DISPLAY=$(if [[ $TRAVIS_OS_NAME == "linux" ]]; then echo ':99.0'; fi)
+    - MOZ_XVFB=$(if [[ $TRAVIS_OS_NAME == "linux" ]]; then echo 1; fi)
+  matrix:
+    - NODE_VERSION="4"
+    - NODE_VERSION="6"
+    - NODE_VERSION="stable"
+before_install:
+  - rm -rf ~/.nvm
+  - git clone https://github.com/creationix/nvm.git ~/.nvm && (cd ~/.nvm && git checkout `git describe --abbrev=0 --tags`)
+  - source ~/.nvm/nvm.sh
+  - nvm install $NODE_VERSION
+  - export NODE=$(nvm which $NODE_VERSION)
+  - export NPM=${NODE%node}npm
+install:
+  - $NPM install
+before_script:
+  - if [[ $TRAVIS_OS_NAME == "linux" ]]; then sh -e /etc/init.d/xvfb start; fi
+script:
+  - $NPM test
+sudo: required

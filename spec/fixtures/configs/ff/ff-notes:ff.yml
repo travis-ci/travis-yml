@@ -1,0 +1,59 @@
+dist: xenial
+
+branches:
+  only:
+    - master
+
+# Do not choose a language; we provide our own build tools.
+language: generic
+
+# Caching so the next build will be fast too.
+cache:
+  directories:
+    - $HOME/.local/bin
+    - $HOME/.stack
+
+before_install:
+  # Install packages
+  - sudo apt-add-repository --yes ppa:beineri/opt-qt-5.12.0-xenial
+  - sudo apt update
+  - sudo apt install libgmp-dev       # GHC
+  - sudo apt install qt512base        # ff-qt
+  - sudo apt install mesa-common-dev  # qt512base
+
+  # Download and unpack the stack executable
+  - mkdir -p ~/.local/bin
+  - export PATH=$HOME/.local/bin:$PATH
+  - |
+    if [ -x ~/.local/bin/stack ]; then
+      stack --version
+    else
+      travis_retry curl -L https://www.stackage.org/stack/linux-x86_64 \
+      | tar xz --wildcards --strip-components=1 -C ~/.local/bin '*/stack'
+    fi
+  - export STACK="stack --no-terminal --install-ghc"
+
+matrix:
+  include:
+    - name: build and test
+      install:
+        # Build dependencies
+        - $STACK build --test --only-dependencies
+      script:
+        # Build the package, its tests, and its docs and run the tests
+        - test/script
+    - name: hlint
+      install:
+        - $STACK build hlint
+      script:
+        - $STACK exec -- hlint .
+    - name: haddock
+      script:
+        - $STACK haddock --no-haddock-deps
+    - name: weeder
+      install:
+        - $STACK build weeder
+      script:
+        - $STACK exec -- weeder
+  allow_failures:
+    - name: weeder

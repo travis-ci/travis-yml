@@ -1,0 +1,20 @@
+if: tag IS blank
+
+cache:
+  yarn: true
+  directories:
+    - node_modules
+
+language: node_js
+node_js:
+ - '10'
+ - '8'
+ - '6'
+
+script:
+ - npm run build
+ - npm run test:ci
+
+install:
+ - npm install
+ - lerna bootstrap

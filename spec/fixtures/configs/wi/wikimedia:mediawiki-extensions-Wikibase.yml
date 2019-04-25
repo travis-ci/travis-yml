@@ -1,0 +1,47 @@
+language: php
+
+dist: trusty
+
+matrix:
+  fast_finish: true
+  include:
+    - env: DBTYPE=sqlite LANG=ru MW=master WB=both
+      php: 7.0
+    - env: DBTYPE=sqlite LANG=en MW=master WB=client
+      php: 7.1
+    - env: DBTYPE=mysql LANG=en MW=master WB=repo
+      php: 7.2
+    - env: DBTYPE=sqlite LANG=ar MW=master WB=both
+      php: 7.0
+    - env: DBTYPE=mysql LANG=en MW=master WB=both
+      php: hhvm-3.24
+    - env: DBTYPE=mysql LANG=en MW=master WB=both
+      php: 7.1
+    - env: DBTYPE=mysql LANG=en MW=master WB=both
+      php: 7.2
+
+before_script:
+    - bash ./build/travis/install.sh
+    - bash ./build/travis/mw-apply-wb-settings.sh
+    - bash ./build/travis/update-db.sh
+
+script:
+    - bash ./build/travis/script.sh
+
+notifications:
+  email:
+    recipients:
+      - wikidata-ci-status@wikimedia.de
+    on_success: change
+    on_failure: always
+  irc:
+    channels:
+      - "chat.freenode.net#wikidata-feed"
+    on_success: change
+    on_failure: always
+    template:
+      - "%{repository}/%{branch}/%{commit} : %{author} %{message} %{build_url}"
+
+cache:
+  directories:
+    - $HOME/.composer/cache

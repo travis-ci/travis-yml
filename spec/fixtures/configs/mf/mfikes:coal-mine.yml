@@ -1,0 +1,26 @@
+dist: trusty
+
+env:
+  - PARTITION_FILTER=1
+  - PARTITION_FILTER=2
+  - PARTITION_FILTER=3
+  - PARTITION_FILTER=4
+  - PARTITION_FILTER=5
+
+language: node_js
+
+node_js:
+  - "8"
+
+install:
+  - curl -O https://download.clojure.org/install/linux-install-1.9.0.315.sh
+  - chmod +x linux-install-1.9.0.315.sh
+  - sudo ./linux-install-1.9.0.315.sh
+
+script:
+  - if [[ $CANARY_CLOJURESCRIPT_REPO && ${CANARY_CLOJURESCRIPT_REPO-x} ]]; then DEPS="{:deps {org.clojure/clojurescript {:git/url \"${CANARY_CLOJURESCRIPT_REPO}\" :sha \"${CANARY_CLOJURESCRIPT_REV}\"}}}"; fi
+  - if [ -z $PARTITION_FILTER ] || [ $PARTITION_FILTER = "1" ]; then clojure -Sdeps "${DEPS:-{}}" -m coal-mine.script test-part 1; fi
+  - if [ -z $PARTITION_FILTER ] || [ $PARTITION_FILTER = "2" ]; then clojure -Sdeps "${DEPS:-{}}" -m coal-mine.script test-part 2; fi
+  - if [ -z $PARTITION_FILTER ] || [ $PARTITION_FILTER = "3" ]; then clojure -Sdeps "${DEPS:-{}}" -m coal-mine.script test-part 3; fi
+  - if [ -z $PARTITION_FILTER ] || [ $PARTITION_FILTER = "4" ]; then clojure -Sdeps "${DEPS:-{}}" -m coal-mine.script test-part 4; fi
+  - if [ -z $PARTITION_FILTER ] || [ $PARTITION_FILTER = "5" ]; then clojure -Sdeps "${DEPS:-{}}" -m coal-mine.script test-part 5; fi

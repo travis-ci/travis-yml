@@ -44,7 +44,7 @@ module Travis
           private
 
             def secure?(schema) # ugh.
-              return true if schema[:anyOf] == Yml.schema[:definitions][:secure][:anyOf]
+              return true if schema[:anyOf] == Yml.schema[:definitions][:type][:secure][:anyOf]
               return true if schema[:type] == :object && schema[:properties] && schema[:properties].key?(:secure)
               false
             end
@@ -162,6 +162,7 @@ module Travis
               definitions
               description
               examples
+              expand
               items
               maxProperties
               minItems

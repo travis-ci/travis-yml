@@ -1,0 +1,65 @@
+language: generic
+
+addons:
+  apt:
+    packages:
+    - python-qt4
+    - python-qt4-dev
+    - python-qt4-gl
+    - python-wxtools
+    - ccache
+    - cmake
+    - zlib1g-dev
+    - libpng-dev
+    - libfreetype6-dev
+    - libcairo2-dev
+
+env:
+  global:
+    - INSTALL_EDM_VERSION=1.5.2
+      PYTHONUNBUFFERED="1"
+
+matrix:
+  include:
+  - env: RUNTIME=2.7 TOOLKIT=wx PILLOW='pillow'
+  - env: RUNTIME=2.7 TOOLKIT=pyqt PILLOW='pillow'
+  - env: RUNTIME=3.5 TOOLKIT=pyqt PILLOW='pillow'
+  - env: RUNTIME=3.5 TOOLKIT=pyqt5 PILLOW='pillow'
+  - env: RUNTIME=3.6 TOOLKIT=pyqt PILLOW='pillow'
+  - env: RUNTIME=3.6 TOOLKIT=pyqt5 PILLOW='pillow'
+  - env: RUNTIME=2.7 TOOLKIT=null PILLOW='pillow'
+  - env: RUNTIME=3.5 TOOLKIT=null PILLOW='pillow'
+  - env: RUNTIME=3.6 TOOLKIT=null PILLOW='pillow'
+  - env: RUNTIME=2.7 TOOLKIT=null PILLOW='pillow<3.0.0'
+  - env: RUNTIME=3.5 TOOLKIT=null PILLOW='pillow<3.0.0'
+  - env: RUNTIME=3.6 TOOLKIT=null PILLOW='pillow<3.0.0'
+  allow_failures:
+  - env: RUNTIME=2.7 TOOLKIT=wx PILLOW='pillow'
+  fast_finish: true
+
+branches:
+  only:
+    - master
+
+cache:
+  directories:
+    - $HOME/.cache
+    - $HOME/.ccache
+
+before_install:
+  - ccache -s
+  - mkdir -p "${HOME}/.cache/download"
+  - ci/install-edm.sh
+  - export PATH="${HOME}/edm/bin:/usr/lib/ccache:${PATH}"
+  - edm install -y wheel click coverage
+  - export DISPLAY=:99.0
+  - sh -e /etc/init.d/xvfb start
+install:
+  - edm run -- python ci/edmtool.py install --runtime=${RUNTIME} --toolkit=${TOOLKIT} --pillow=${PILLOW}
+script:
+  - edm run -- python ci/edmtool.py test --runtime=${RUNTIME} --toolkit=${TOOLKIT} --pillow=${PILLOW}
+
+after_success:
+  - edm run -- coverage combine
+  - edm run -- pip install codecov
+  - edm run -- codecov

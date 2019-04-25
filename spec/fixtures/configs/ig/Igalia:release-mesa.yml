@@ -1,0 +1,663 @@
+language: c
+
+sudo: false
+dist: trusty
+
+cache:
+  apt: true
+  ccache: true
+
+env:
+  global:
+    - XORG_RELEASES=http://xorg.freedesktop.org/releases/individual
+    - XCB_RELEASES=http://xcb.freedesktop.org/dist
+    - WAYLAND_RELEASES=http://wayland.freedesktop.org/releases
+    - XORGMACROS_VERSION=util-macros-1.19.0
+    - GLPROTO_VERSION=glproto-1.4.17
+    - DRI2PROTO_VERSION=dri2proto-2.8
+    - LIBPCIACCESS_VERSION=libpciaccess-0.13.4
+    - LIBDRM_VERSION=libdrm-2.4.74
+    - XCBPROTO_VERSION=xcb-proto-1.13
+    - RANDRPROTO_VERSION=randrproto-1.3.0
+    - LIBXRANDR_VERSION=libXrandr-1.3.0
+    - LIBXCB_VERSION=libxcb-1.13
+    - LIBXSHMFENCE_VERSION=libxshmfence-1.2
+    - LIBVDPAU_VERSION=libvdpau-1.1
+    - LIBVA_VERSION=libva-1.7.0
+    - LIBWAYLAND_VERSION=wayland-1.15.0
+    - WAYLAND_PROTOCOLS_VERSION=wayland-protocols-1.8
+    - PKG_CONFIG_PATH=$HOME/prefix/lib/pkgconfig:$HOME/prefix/share/pkgconfig
+    - LD_LIBRARY_PATH="$HOME/prefix/lib:$LD_LIBRARY_PATH"
+    - PATH="$HOME/prefix/bin:$PATH"
+
+matrix:
+  include:
+    - env:
+        - LABEL="meson Vulkan"
+        - BUILD=meson
+        - MESON_OPTIONS="-Ddri-drivers=[] -Dgallium-drivers=[]"
+        - LLVM_VERSION=5.0
+        - LLVM_CONFIG="llvm-config-${LLVM_VERSION}"
+      addons:
+        apt:
+          sources:
+            - llvm-toolchain-trusty-5.0
+          packages:
+            # LLVM packaging is broken and misses these dependencies
+            - libedit-dev
+            # From sources above
+            - llvm-5.0-dev
+            # Common
+            - xz-utils
+            - libexpat1-dev
+            - libx11-xcb-dev
+            - libelf-dev
+            - python3-pip
+    - env:
+        - LABEL="meson loaders/classic DRI"
+        - BUILD=meson
+        - MESON_OPTIONS="-Dvulkan-drivers=[] -Dgallium-drivers=[]"
+      addons:
+        apt:
+          packages:
+            - xz-utils
+            - x11proto-xf86vidmode-dev
+            - libexpat1-dev
+            - libx11-xcb-dev
+            - libxdamage-dev
+            - libxfixes-dev
+            - python3-pip
+    - env:
+        - LABEL="make loaders/classic DRI"
+        - BUILD=make
+        - MAKEFLAGS="-j4"
+        - MAKE_CHECK_COMMAND="make check"
+        - DRI_LOADERS="--enable-glx --enable-gbm --enable-egl --with-platforms=x11,drm,surfaceless,wayland --enable-osmesa"
+        - DRI_DRIVERS="i915,i965,radeon,r200,swrast,nouveau"
+        - GALLIUM_ST="--enable-dri --disable-opencl --disable-xa --disable-nine --disable-xvmc --disable-vdpau --disable-va --disable-omx-bellagio --disable-gallium-osmesa"
+        - GALLIUM_DRIVERS=""
+        - VULKAN_DRIVERS=""
+        - LIBUNWIND_FLAGS="--disable-libunwind"
+      addons:
+        apt:
+          packages:
+            - xz-utils
+            - x11proto-xf86vidmode-dev
+            - libexpat1-dev
+            - libx11-xcb-dev
+            - libxdamage-dev
+            - libxfixes-dev
+    - env:
+        # NOTE: Building SWR is 2x (yes two) times slower than all the other
+        # gallium drivers combined.
+        # Start this early so that it doesn't hunder the run time.
+        - LABEL="make Gallium Drivers SWR"
+        - BUILD=make
+        - MAKEFLAGS="-j4"
+        - MAKE_CHECK_COMMAND="true"
+        - LLVM_VERSION=5.0
+        - LLVM_CONFIG="llvm-config-${LLVM_VERSION}"
+        - OVERRIDE_CC="gcc-4.8"
+        - OVERRIDE_CXX="g++-4.8"
+        - DRI_LOADERS="--disable-glx --disable-gbm --disable-egl"
+        - DRI_DRIVERS=""
+        - GALLIUM_ST="--enable-dri --disable-opencl --disable-xa --disable-nine --disable-xvmc --disable-vdpau --disable-va --disable-omx-bellagio --disable-gallium-osmesa"
+        - GALLIUM_DRIVERS="swr"
+        - VULKAN_DRIVERS=""
+        - LIBUNWIND_FLAGS="--enable-libunwind"
+      addons:
+        apt:
+          sources:
+            - llvm-toolchain-trusty-5.0
+          packages:
+            # LLVM packaging is broken and misses these dependencies
+            - libedit-dev
+            # From sources above
+            - llvm-5.0-dev
+            # Common
+            - xz-utils
+            - libexpat1-dev
+            - libx11-xcb-dev
+            - libelf-dev
+            - libunwind8-dev
+    - env:
+        - LABEL="make Gallium Drivers RadeonSI"
+        - BUILD=make
+        - MAKEFLAGS="-j4"
+        - MAKE_CHECK_COMMAND="true"
+        - LLVM_VERSION=5.0
+        - LLVM_CONFIG="llvm-config-${LLVM_VERSION}"
+        - DRI_LOADERS="--disable-glx --disable-gbm --disable-egl"
+        - DRI_DRIVERS=""
+        - GALLIUM_ST="--enable-dri --disable-opencl --disable-xa --disable-nine --disable-xvmc --disable-vdpau --disable-va --disable-omx-bellagio --disable-gallium-osmesa"
+        - GALLIUM_DRIVERS="radeonsi"
+        - VULKAN_DRIVERS=""
+        - LIBUNWIND_FLAGS="--enable-libunwind"
+      addons:
+        apt:
+          sources:
+            - llvm-toolchain-trusty-5.0
+          packages:
+            # LLVM packaging is broken and misses these dependencies
+            - libedit-dev
+            # From sources above
+            - llvm-5.0-dev
+            # Common
+            - xz-utils
+            - libexpat1-dev
+            - libx11-xcb-dev
+            - libelf-dev
+            - libunwind8-dev
+    - env:
+        - LABEL="make Gallium Drivers Other"
+        - BUILD=make
+        - MAKEFLAGS="-j4"
+        - MAKE_CHECK_COMMAND="true"
+        - LLVM_VERSION=3.9
+        - LLVM_CONFIG="llvm-config-${LLVM_VERSION}"
+        # New binutils linker is required for llvm-3.9
+        - OVERRIDE_PATH=/usr/lib/binutils-2.26/bin
+        - DRI_LOADERS="--disable-glx --disable-gbm --disable-egl"
+        - DRI_DRIVERS=""
+        - GALLIUM_ST="--enable-dri --disable-opencl --disable-xa --disable-nine --disable-xvmc --disable-vdpau --disable-va --disable-omx-bellagio --disable-gallium-osmesa"
+        - GALLIUM_DRIVERS="i915,nouveau,pl111,r300,r600,freedreno,svga,swrast,v3d,vc4,virgl,etnaviv,imx"
+        - VULKAN_DRIVERS=""
+        - LIBUNWIND_FLAGS="--enable-libunwind"
+      addons:
+        apt:
+          sources:
+            - llvm-toolchain-trusty-3.9
+          packages:
+            - binutils-2.26
+            # LLVM packaging is broken and misses these dependencies
+            - libedit-dev
+            # From sources above
+            - llvm-3.9-dev
+            # Common
+            - xz-utils
+            - libexpat1-dev
+            - libx11-xcb-dev
+            - libelf-dev
+            - libunwind8-dev
+    - env:
+        # NOTE: Analogous to SWR above, building Clover is quite slow.
+        - LABEL="make Gallium ST Clover LLVM-3.9"
+        - BUILD=make
+        - MAKEFLAGS="-j4"
+        - MAKE_CHECK_COMMAND="true"
+        - LLVM_VERSION=3.9
+        - LLVM_CONFIG="llvm-config-${LLVM_VERSION}"
+        - OVERRIDE_CC=gcc-4.7
+        - OVERRIDE_CXX=g++-4.7
+        # New binutils linker is required for llvm-3.9
+        - OVERRIDE_PATH=/usr/lib/binutils-2.26/bin
+        - DRI_LOADERS="--disable-glx --disable-gbm --disable-egl"
+        - DRI_DRIVERS=""
+        - GALLIUM_ST="--disable-dri --enable-opencl --enable-opencl-icd --enable-llvm --disable-xa --disable-nine --disable-xvmc --disable-vdpau --disable-va --disable-omx-bellagio --disable-gallium-osmesa"
+        - GALLIUM_DRIVERS="r600"
+        - VULKAN_DRIVERS=""
+        - LIBUNWIND_FLAGS="--enable-libunwind"
+      addons:
+        apt:
+          sources:
+            - llvm-toolchain-trusty-3.9
+          packages:
+            - binutils-2.26
+            - libclc-dev
+            # LLVM packaging is broken and misses these dependencies
+            - libedit-dev
+            - g++-4.7
+            # From sources above
+            - llvm-3.9-dev
+            - clang-3.9
+            - libclang-3.9-dev
+            # Common
+            - xz-utils
+            - libexpat1-dev
+            - libx11-xcb-dev
+            - libelf-dev
+            - libunwind8-dev
+    - env:
+        # NOTE: Analogous to SWR above, building Clover is quite slow.
+        - LABEL="make Gallium ST Clover LLVM-4.0"
+        - BUILD=make
+        - MAKEFLAGS="-j4"
+        - MAKE_CHECK_COMMAND="true"
+        - LLVM_VERSION=4.0
+        - LLVM_CONFIG="llvm-config-${LLVM_VERSION}"
+        - OVERRIDE_CC=gcc-4.8
+        - OVERRIDE_CXX=g++-4.8
+        - DRI_LOADERS="--disable-glx --disable-gbm --disable-egl"
+        - DRI_DRIVERS=""
+        - GALLIUM_ST="--disable-dri --enable-opencl --enable-opencl-icd --enable-llvm --disable-xa --disable-nine --disable-xvmc --disable-vdpau --disable-va --disable-omx-bellagio --disable-gallium-osmesa"
+        - GALLIUM_DRIVERS="r600"
+        - VULKAN_DRIVERS=""
+        - LIBUNWIND_FLAGS="--enable-libunwind"
+      addons:
+        apt:
+          sources:
+            - llvm-toolchain-trusty-4.0
+          packages:
+            - libclc-dev
+            # LLVM packaging is broken and misses these dependencies
+            - libedit-dev
+            - g++-4.8
+            # From sources above
+            - llvm-4.0-dev
+            - clang-4.0
+            - libclang-4.0-dev
+            # Common
+            - xz-utils
+            - libexpat1-dev
+            - libx11-xcb-dev
+            - libelf-dev
+            - libunwind8-dev
+    - env:
+        # NOTE: Analogous to SWR above, building Clover is quite slow.
+        - LABEL="make Gallium ST Clover LLVM-5.0"
+        - BUILD=make
+        - MAKEFLAGS="-j4"
+        - MAKE_CHECK_COMMAND="true"
+        - LLVM_VERSION=5.0
+        - LLVM_CONFIG="llvm-config-${LLVM_VERSION}"
+        - OVERRIDE_CC=gcc-4.8
+        - OVERRIDE_CXX=g++-4.8
+        - DRI_LOADERS="--disable-glx --disable-gbm --disable-egl"
+        - DRI_DRIVERS=""
+        - GALLIUM_ST="--disable-dri --enable-opencl --enable-opencl-icd --enable-llvm --disable-xa --disable-nine --disable-xvmc --disable-vdpau --disable-va --disable-omx-bellagio --disable-gallium-osmesa"
+        - GALLIUM_DRIVERS="r600,radeonsi"
+        - VULKAN_DRIVERS=""
+        - LIBUNWIND_FLAGS="--enable-libunwind"
+      addons:
+        apt:
+          sources:
+            - llvm-toolchain-trusty-5.0
+          packages:
+            - libclc-dev
+            # LLVM packaging is broken and misses these dependencies
+            - libedit-dev
+            - g++-4.8
+            # From sources above
+            - llvm-5.0-dev
+            - clang-5.0
+            - libclang-5.0-dev
+            # Common
+            - xz-utils
+            - libexpat1-dev
+            - libx11-xcb-dev
+            - libelf-dev
+            - libunwind8-dev
+    - env:
+        # NOTE: Analogous to SWR above, building Clover is quite slow.
+        - LABEL="make Gallium ST Clover LLVM-6.0"
+        - BUILD=make
+        - MAKEFLAGS="-j4"
+        - MAKE_CHECK_COMMAND="true"
+        - LLVM_VERSION=6.0
+        - LLVM_CONFIG="llvm-config-${LLVM_VERSION}"
+        - DRI_LOADERS="--disable-glx --disable-gbm --disable-egl"
+        - DRI_DRIVERS=""
+        - GALLIUM_ST="--disable-dri --enable-opencl --enable-opencl-icd --enable-llvm --disable-xa --disable-nine --disable-xvmc --disable-vdpau --disable-va --disable-omx-bellagio --disable-gallium-osmesa"
+        - GALLIUM_DRIVERS="r600,radeonsi"
+        - VULKAN_DRIVERS=""
+        - LIBUNWIND_FLAGS="--enable-libunwind"
+      addons:
+        apt:
+          sources:
+            - llvm-toolchain-trusty-6.0
+            # llvm-6 depends on gcc-4.9 which is not in main repo
+            - ubuntu-toolchain-r-test
+          packages:
+            - libclc-dev
+            # From sources above
+            - llvm-6.0-dev
+            - clang-6.0
+            - libclang-6.0-dev
+            # Common
+            - xz-utils
+            - libexpat1-dev
+            - libx11-xcb-dev
+            - libelf-dev
+            - libunwind8-dev
+    - env:
+        - LABEL="make Gallium ST Other"
+        - BUILD=make
+        - MAKEFLAGS="-j4"
+        - MAKE_CHECK_COMMAND="true"
+        - LLVM_VERSION=3.3
+        - LLVM_CONFIG="llvm-config-${LLVM_VERSION}"
+        - DRI_LOADERS="--disable-glx --disable-gbm --disable-egl"
+        - DRI_DRIVERS=""
+        - GALLIUM_ST="--enable-dri --disable-opencl --enable-xa --enable-nine --enable-xvmc --enable-vdpau --enable-va --enable-omx-bellagio --enable-gallium-osmesa"
+        # We need swrast for osmesa and nine.
+        # i915 most likely doesn't work with most ST.
+        # Regardless - we're doing a quick build test here.
+        - GALLIUM_DRIVERS="i915,swrast"
+        - VULKAN_DRIVERS=""
+        - LIBUNWIND_FLAGS="--enable-libunwind"
+      addons:
+        apt:
+          packages:
+            # We actually want to test against llvm-3.3
+            - llvm-3.3-dev
+            # Nine requires gcc 4.6... which is the one we have right ?
+            - libxvmc-dev
+            # Build locally, for now.
+            #- libvdpau-dev
+            #- libva-dev
+            - libomxil-bellagio-dev
+            # LLVM packaging is broken and misses these dependencies
+            - libedit-dev
+            # Common
+            - xz-utils
+            - libexpat1-dev
+            - libx11-xcb-dev
+            - libelf-dev
+            - libunwind8-dev
+    - env:
+        - LABEL="make Vulkan"
+        - BUILD=make
+        - MAKEFLAGS="-j4"
+        - MAKE_CHECK_COMMAND="make -C src/gtest check && make -C src/intel check"
+        - LLVM_VERSION=5.0
+        - LLVM_CONFIG="llvm-config-${LLVM_VERSION}"
+        - DRI_LOADERS="--disable-glx --disable-gbm --disable-egl --with-platforms=x11,wayland"
+        - DRI_DRIVERS=""
+        - GALLIUM_ST="--enable-dri --enable-dri3 --disable-opencl --disable-xa --disable-nine --disable-xvmc --disable-vdpau --disable-va --disable-omx-bellagio --disable-gallium-osmesa"
+        - GALLIUM_DRIVERS=""
+        - VULKAN_DRIVERS="intel,radeon"
+        - LIBUNWIND_FLAGS="--disable-libunwind"
+      addons:
+        apt:
+          sources:
+            - llvm-toolchain-trusty-5.0
+          packages:
+            # LLVM packaging is broken and misses these dependencies
+            - libedit-dev
+            # From sources above
+            - llvm-5.0-dev
+            # Common
+            - xz-utils
+            - libexpat1-dev
+            - libx11-xcb-dev
+            - libelf-dev
+    - env:
+        - LABEL="scons"
+        - BUILD=scons
+        - SCONSFLAGS="-j4"
+        # Explicitly disable.
+        - SCONS_TARGET="llvm=0"
+        # Keep it symmetrical to the make build.
+        - SCONS_CHECK_COMMAND="scons llvm=0 check"
+      addons:
+        apt:
+          packages:
+            # Common
+            - xz-utils
+            - x11proto-xf86vidmode-dev
+            - libexpat1-dev
+            - libx11-xcb-dev
+            - libelf-dev
+    - env:
+        - LABEL="scons LLVM"
+        - BUILD=scons
+        - SCONSFLAGS="-j4"
+        - SCONS_TARGET="llvm=1"
+        # Keep it symmetrical to the make build.
+        - SCONS_CHECK_COMMAND="scons llvm=1 check"
+        - LLVM_VERSION=3.3
+        - LLVM_CONFIG="llvm-config-${LLVM_VERSION}"
+      addons:
+        apt:
+          packages:
+            # LLVM packaging is broken and misses these dependencies
+            - libedit-dev
+            - llvm-3.3-dev
+            # Common
+            - xz-utils
+            - x11proto-xf86vidmode-dev
+            - libexpat1-dev
+            - libx11-xcb-dev
+            - libelf-dev
+    - env:
+        - LABEL="scons SWR"
+        - BUILD=scons
+        - SCONSFLAGS="-j4"
+        - SCONS_TARGET="swr=1"
+        - LLVM_VERSION=5.0
+        - LLVM_CONFIG="llvm-config-${LLVM_VERSION}"
+        # Keep it symmetrical to the make build. There's no actual SWR, yet.
+        - SCONS_CHECK_COMMAND="true"
+        - OVERRIDE_CC="gcc-4.8"
+        - OVERRIDE_CXX="g++-4.8"
+      addons:
+        apt:
+          sources:
+            - llvm-toolchain-trusty-5.0
+          packages:
+            # LLVM packaging is broken and misses these dependencies
+            - libedit-dev
+            # From sources above
+            - llvm-5.0-dev
+            # Common
+            - xz-utils
+            - x11proto-xf86vidmode-dev
+            - libexpat1-dev
+            - libx11-xcb-dev
+            - libelf-dev
+    - env:
+        - LABEL="macOS make"
+        - BUILD=make
+        - MAKEFLAGS="-j4"
+        - MAKE_CHECK_COMMAND="make check"
+        - DRI_LOADERS="--with-platforms=x11 --disable-egl"
+      os: osx
+    - env:
+        - LABEL="macOS meson"
+        - BUILD=meson
+        - MESON_OPTIONS="-Degl=false"
+      os: osx
+
+before_install:
+  - |
+    if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+      HOMEBREW_NO_AUTO_UPDATE=1 brew install python3 ninja expat gettext
+      # Set PATH for homebrew pip3 installs
+      PATH="$HOME/Library/Python/3.6/bin:${PATH}"
+      # Set PKG_CONFIG_PATH for keg-only expat
+      PKG_CONFIG_PATH="/usr/local/opt/expat/lib/pkgconfig:${PKG_CONFIG_PATH}"
+      # Set PATH for keg-only gettext
+      PATH="/usr/local/opt/gettext/bin:${PATH}"
+
+      # Install xquartz for prereqs ...
+      XQUARTZ_VERSION="2.7.11"
+      wget -nv https://dl.bintray.com/xquartz/downloads/XQuartz-${XQUARTZ_VERSION}.dmg
+      hdiutil attach XQuartz-${XQUARTZ_VERSION}.dmg
+      sudo installer -pkg /Volumes/XQuartz-${XQUARTZ_VERSION}/XQuartz.pkg -target /
+      hdiutil detach /Volumes/XQuartz-${XQUARTZ_VERSION}
+      # ... and set paths
+      PATH="/opt/X11/bin:${PATH}"
+      PKG_CONFIG_PATH="/opt/X11/share/pkgconfig:/opt/X11/lib/pkgconfig:${PKG_CONFIG_PATH}"
+      ACLOCAL="aclocal -I /opt/X11/share/aclocal -I /usr/local/share/aclocal"
+    fi
+
+install:
+  - pip2 install --user mako
+
+  # Install a more modern meson from pip, since the version in the
+  # ubuntu repos is often quite old. Avoid >=0.45.0 as it needs python
+  # 3.5+
+  - if test "x$BUILD" = xmeson; then
+      pip3 install --user "meson<0.45.0";
+    fi
+
+  # Install a more modern scons from pip.
+  - if test "x$BUILD" = xscons; then
+      pip2 install --user "scons>=2.4";
+    fi
+
+  # Since libdrm gets updated in configure.ac regularly, try to pick up the
+  # latest version from there.
+  - for line in `grep "^LIBDRM.*_REQUIRED=" configure.ac`; do
+      old_ver=`echo $LIBDRM_VERSION | sed 's/libdrm-//'`;
+      new_ver=`echo $line | sed 's/.*REQUIRED=//'`;
+      if `echo "$old_ver,$new_ver" | tr ',' '\n' | sort -Vc 2> /dev/null`; then
+        export LIBDRM_VERSION="libdrm-$new_ver";
+      fi;
+    done
+
+  # Install dependencies where we require specific versions (or where
+  # disallowed by Travis CI's package whitelisting).
+
+  - |
+    if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+      wget $XORG_RELEASES/util/$XORGMACROS_VERSION.tar.bz2
+      tar -jxvf $XORGMACROS_VERSION.tar.bz2
+      (cd $XORGMACROS_VERSION && ./configure --prefix=$HOME/prefix && make install)
+
+      wget $XORG_RELEASES/proto/$GLPROTO_VERSION.tar.bz2
+      tar -jxvf $GLPROTO_VERSION.tar.bz2
+      (cd $GLPROTO_VERSION && ./configure --prefix=$HOME/prefix && make install)
+
+      wget $XORG_RELEASES/proto/$DRI2PROTO_VERSION.tar.bz2
+      tar -jxvf $DRI2PROTO_VERSION.tar.bz2
+      (cd $DRI2PROTO_VERSION && ./configure --prefix=$HOME/prefix && make install)
+
+      wget $XCB_RELEASES/$XCBPROTO_VERSION.tar.bz2
+      tar -jxvf $XCBPROTO_VERSION.tar.bz2
+      (cd $XCBPROTO_VERSION && ./configure --prefix=$HOME/prefix && make install)
+
+      wget $XCB_RELEASES/$LIBXCB_VERSION.tar.bz2
+      tar -jxvf $LIBXCB_VERSION.tar.bz2
+      (cd $LIBXCB_VERSION && ./configure --prefix=$HOME/prefix && make install)
+
+      wget $XORG_RELEASES/lib/$LIBPCIACCESS_VERSION.tar.bz2
+      tar -jxvf $LIBPCIACCESS_VERSION.tar.bz2
+      (cd $LIBPCIACCESS_VERSION && ./configure --prefix=$HOME/prefix && make install)
+
+      wget http://dri.freedesktop.org/libdrm/$LIBDRM_VERSION.tar.bz2
+      tar -jxvf $LIBDRM_VERSION.tar.bz2
+      (cd $LIBDRM_VERSION && ./configure --prefix=$HOME/prefix --enable-vc4 --enable-freedreno --enable-etnaviv-experimental-api && make install)
+
+      wget $XORG_RELEASES/proto/$RANDRPROTO_VERSION.tar.bz2
+      tar -jxvf $RANDRPROTO_VERSION.tar.bz2
+      (cd $RANDRPROTO_VERSION && ./configure --prefix=$HOME/prefix && make install)
+
+      wget $XORG_RELEASES/lib/$LIBXRANDR_VERSION.tar.bz2
+      tar -jxvf $LIBXRANDR_VERSION.tar.bz2
+      (cd $LIBXRANDR_VERSION && ./configure --prefix=$HOME/prefix && make install)
+
+      wget $XORG_RELEASES/lib/$LIBXSHMFENCE_VERSION.tar.bz2
+      tar -jxvf $LIBXSHMFENCE_VERSION.tar.bz2
+      (cd $LIBXSHMFENCE_VERSION && ./configure --prefix=$HOME/prefix && make install)
+
+      wget http://people.freedesktop.org/~aplattner/vdpau/$LIBVDPAU_VERSION.tar.bz2
+      tar -jxvf $LIBVDPAU_VERSION.tar.bz2
+      (cd $LIBVDPAU_VERSION && ./configure --prefix=$HOME/prefix && make install)
+
+      wget http://www.freedesktop.org/software/vaapi/releases/libva/$LIBVA_VERSION.tar.bz2
+      tar -jxvf $LIBVA_VERSION.tar.bz2
+      (cd $LIBVA_VERSION && ./configure --prefix=$HOME/prefix --disable-wayland --disable-dummy-driver && make install)
+
+      wget $WAYLAND_RELEASES/$LIBWAYLAND_VERSION.tar.xz
+      tar -axvf $LIBWAYLAND_VERSION.tar.xz
+      (cd $LIBWAYLAND_VERSION && ./configure --prefix=$HOME/prefix --enable-libraries --without-host-scanner --disable-documentation --disable-dtd-validation && make install)
+
+      wget $WAYLAND_RELEASES/$WAYLAND_PROTOCOLS_VERSION.tar.xz
+      tar -axvf $WAYLAND_PROTOCOLS_VERSION.tar.xz
+      (cd $WAYLAND_PROTOCOLS_VERSION && ./configure --prefix=$HOME/prefix && make install)
+
+      # Meson requires ninja >= 1.6, but trusty has 1.3.x
+      wget https://github.com/ninja-build/ninja/releases/download/v1.6.0/ninja-linux.zip
+      unzip ninja-linux.zip
+      mv ninja $HOME/prefix/bin/
+
+      # Generate this header since one is missing on the Travis instance
+      mkdir -p linux
+      printf "%s\n" \
+           "#ifndef _LINUX_MEMFD_H" \
+           "#define _LINUX_MEMFD_H" \
+           "" \
+           "#define MFD_CLOEXEC             0x0001U" \
+           "#define MFD_ALLOW_SEALING       0x0002U" \
+           "" \
+           "#endif /* _LINUX_MEMFD_H */" > linux/memfd.h
+
+      # Generate this header, including the missing SYS_memfd_create
+      # macro, which is not provided by the header in the Travis
+      # instance
+      mkdir -p sys
+      printf "%s\n" \
+           "#ifndef _SYSCALL_H" \
+           "#define _SYSCALL_H      1" \
+           "" \
+           "#include <asm/unistd.h>" \
+           "" \
+           "#ifndef _LIBC" \
+           "# include <bits/syscall.h>" \
+           "#endif" \
+           "" \
+           "#ifndef __NR_memfd_create" \
+           "# define __NR_memfd_create 319 /* Taken from <asm/unistd_64.h> */" \
+           "#endif" \
+           "" \
+           "#ifndef SYS_memfd_create" \
+           "# define SYS_memfd_create __NR_memfd_create" \
+           "#endif" \
+           "" \
+           "#endif" > sys/syscall.h
+    fi
+
+script:
+  - if test "x$BUILD" = xmake; then
+      test -n "$OVERRIDE_CC" && export CC="$OVERRIDE_CC";
+      test -n "$OVERRIDE_CXX" && export CXX="$OVERRIDE_CXX";
+      test -n "$OVERRIDE_PATH" && export PATH="$OVERRIDE_PATH:$PATH";
+
+      export CFLAGS="$CFLAGS -isystem`pwd`";
+
+      mkdir build &&
+      cd build &&
+      ../autogen.sh --enable-debug
+        $LIBUNWIND_FLAGS
+        $DRI_LOADERS
+        --with-dri-drivers=$DRI_DRIVERS
+        $GALLIUM_ST
+        --with-gallium-drivers=$GALLIUM_DRIVERS
+        --with-vulkan-drivers=$VULKAN_DRIVERS
+        --disable-llvm-shared-libs
+        &&
+      make && eval $MAKE_CHECK_COMMAND;
+    fi
+
+  - if test "x$BUILD" = xscons; then
+      test -n "$OVERRIDE_CC" && export CC="$OVERRIDE_CC";
+      test -n "$OVERRIDE_CXX" && export CXX="$OVERRIDE_CXX";
+      scons $SCONS_TARGET && eval $SCONS_CHECK_COMMAND;
+    fi
+
+  - |
+    if test "x$BUILD" = xmeson; then
+
+      # Travis CI has moved to LLVM 5.0, and meson is detecting
+      # automatically the available version in /usr/local/bin based on
+      # the PATH env variable order preference.
+      #
+      # As for 0.44.x, Meson cannot receive the path to the
+      # llvm-config binary as a configuration parameter. See
+      # https://github.com/mesonbuild/meson/issues/2887 and
+      # https://github.com/dcbaker/meson/commit/7c8b6ee3fa42f43c9ac7dcacc61a77eca3f1bcef
+      #
+      # We want to use the custom (APT) installed version. Therefore,
+      # let's make Meson find our wanted version sooner than the one
+      # at /usr/local/bin
+      #
+      # Once this is corrected, we would still need a patch similar
+      # to:
+      # https://lists.freedesktop.org/archives/mesa-dev/2017-December/180217.html
+      test -f /usr/bin/$LLVM_CONFIG && ln -s /usr/bin/$LLVM_CONFIG $HOME/prefix/bin/llvm-config
+
+      export CFLAGS="$CFLAGS -isystem`pwd`"
+      meson _build $MESON_OPTIONS
+      ninja -C _build
+    fi

@@ -1,0 +1,104 @@
+language: python
+cache: pip
+sudo: required
+dist: trusty
+group: deprecated-2017Q4
+python:
+  - "2.7"
+  - "3.4"
+  - "3.5"
+  - "3.6"
+# Travis doesn't support testing python on Mac yet, so we need
+# to workaround it by installing it directly with brew.
+#
+# Note that we specify language as ruby-2.4.0 to help us satisfy
+# fpm dependencies, as travis runs el capitan with an old ruby
+# version, that causes fpm to crash.
+matrix:
+  include:
+  # 3.7 needs Xenial image because of https://github.com/travis-ci/travis-ci/issues/9069
+  - python: "3.7"
+    dist: xenial
+    sudo: true
+  - if: type = cron OR tag is present
+    os: osx
+    osx_image: xcode7.3
+    language: ruby
+    rvm: 2.4.0
+    env:
+    - PYTHON_VER=2.7.10
+    - PYENV_ROOT="$HOME/.pyenv"
+    - PATH="$PYENV_ROOT/bin:$PATH"
+    - CPPFLAGS="-I/usr/local/opt/openssl/include $CPPFLAGS"
+    - LDFLAGS="-L/usr/local/opt/openssl/lib $LDFLAGS"
+  - if: type = cron OR tag is present
+    os: osx
+    osx_image: xcode7.3
+    language: ruby
+    rvm: 2.4.0
+    env:
+    - PYTHON_VER=3.4.3
+    - PYENV_ROOT="$HOME/.pyenv"
+    - PATH="$PYENV_ROOT/bin:$PATH"
+  - if: type = cron OR tag is present
+    os: osx
+    osx_image: xcode7.3
+    language: ruby
+    rvm: 2.4.0
+    env:
+    - PYTHON_VER=3.5.0
+    - PYENV_ROOT="$HOME/.pyenv"
+    - PATH="$PYENV_ROOT/bin:$PATH"
+before_install:
+  - bash ./scripts/ci/before_install.sh
+  - if  [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+      eval "$(pyenv init -)";
+      PYTHON_CONFIGURE_OPTS="--enable-framework" pyenv install --skip-existing --keep --verbose "$PYTHON_VER";
+      pyenv shell "$PYTHON_VER";
+      brew install openssl;
+      brew cask install google-cloud-sdk;
+    fi
+  - which python
+  - which pip
+  - python --version
+  - if [[ "$TRAVIS_OS_NAME" != "osx" ]]; then
+      bash ./scripts/ci/install_hadoop.sh;
+      source ~/.bashrc;
+      hadoop fs -help;
+      pushd ~;
+      sudo mkdir -p /home/hadoop/hadoopinfra/hdfs/namenode/;
+      sudo chmod 777 /home/hadoop/hadoopinfra/hdfs/namenode/;
+      sudo chmod 777 -R /usr/local/hadoop;
+      hdfs namenode -format;
+      start-dfs.sh;
+      jps;
+      hadoop fs -ls /;
+      hadoop fs -ls hdfs://127.0.0.1/;
+      hadoop fs -mkdir hdfs://127.0.0.1/ololo;
+      popd;
+    fi
+install:
+  - bash ./scripts/ci/install.sh
+  - pip install flake8
+before_script:
+  # stop the build if there are any readme formatting errors
+  - python setup.py checkdocs
+  # stop the build if there are any flake8 errors
+  - flake8 dvc
+  - flake8 tests
+script:
+  - bash ./scripts/ci/script.sh
+deploy:
+  condition: "[[ $(python -c 'import sys; print(sys.version_info[0])') == '2' ]]"
+  provider: releases
+  api_key:
+    secure: nyo17gF4Xl6DFL/KVkMewC805Cv+eK99L7SiYCU+WUAYDIzzFL3YJm7fm8bznPeor7DmpO7uSLSveMnJETBtdurW6JWhCTUss4yD66yFzpk6Z5cvHf/1UA5pdMHkkMM54fRaTRt6L2Yal7RPwGEQTBECLXW1Xmf78Y6+0l8lTvXQ9jXOQSRO/63VDKI5Zww2+XytVicUFlr0hLMGKUuaCjjXcQlAPzBgQz3/5Iz6EtzeTf2o+gTPjocbRbSFPikfiBXUn8XlJ8jBj7i114XJRJffw59KxYGDzxp+enfLBULGNoW0Np2hZqkKkPUIdB08C8XVbRXlFYX8cEYBczjqhv8A05p5F5CnltnqQ0KazcoUP2awPVqn68dWNRF+kqrnMBus8euYKIZ4dy/6bVEKJRa84ESJXZVDcwXTAXRqyovSxOlXqg9ZgAImMKBfKn/fpDX2xIvQPaXcnJxKbmcePfdbC1d0HYJ5jkbNaxKE/T15VvhzIho7mJ2WAv1r8QouQUuzqtpzIGbRn/KXHRUzCtyP0k4+eMKMLFOPzg848WsDarP3v8VYiSy4nFY7ZP7DRd3KttvW5bgVbSeO4jPmTgS6TnnpRwual9BJXSG7bjbfpIMii3bNZ7jWL4zpKT9Jfm8w9RGKLcX9HqkZ3+y60+LtYdhEfBvqsIlWQoIJBXg=
+  file_glob: true
+  file:
+    - dvc*.rpm
+    - dvc*.deb
+    - dvc*.pkg
+  skip_cleanup: true
+  on:
+    tags: true
+    repo: iterative/dvc

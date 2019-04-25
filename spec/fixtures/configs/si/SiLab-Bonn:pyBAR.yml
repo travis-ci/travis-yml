@@ -1,0 +1,56 @@
+language: python
+
+python:
+  - 2.7
+
+branches:
+  only:
+    - development
+
+notifications:
+  email:
+    - janssen@physik.uni-bonn.de
+    - pohl@physik.uni-bonn.de
+
+# Install additional dependencies required by pyBAR
+before_install:
+  # Install cocotb and iverilog for interface test
+  - git clone https://github.com/potentialventures/cocotb
+  - export COCOTB=$(pwd)/cocotb
+  # Build iverilog from source
+  - sudo apt-get install gperf
+  - git clone https://github.com/steveicarus/iverilog.git
+  - cd iverilog && autoconf && ./configure && make && sudo make install && cd ..
+  # Download iverilog from PPA
+#  - sudo add-apt-repository -y ppa:team-electronics/ppa
+#  - sudo apt-get -q update
+#  - sudo apt-get -q install iverilog-daily
+  # Download iverilog from conda-forge
+#  - conda config --add channels conda-forge
+#  - conda install iverilog
+
+# Install pyBAR and dependencies
+install:
+  - wget http://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O miniconda.sh
+  - bash miniconda.sh -b -p $HOME/miniconda
+  - export PATH="$HOME/miniconda/bin:$PATH"
+  - conda update --yes conda
+  - conda update --yes --all
+  - conda info -a
+  - conda create --yes -n test-environment python=$TRAVIS_PYTHON_VERSION bitarray cython ipython matplotlib mock nose numba numpy pyqt pyserial pytables pyyaml pyzmq qtpy scipy
+  - source activate test-environment
+  - pip install progressbar-latest pyvisa pyvisa-py git+https://github.com/pyqtgraph/pyqtgraph.git@pyqtgraph-0.10.0
+  - pip install pyusb
+  - pip install pySiLibUSB
+  - pip install "basil_daq>=2.4.12,<3.0.0"
+  #- pip install git+https://github.com/SiLab-Bonn/basil@development
+  - pip install git+https://github.com/SiLab-Bonn/pyBAR_fei4_interpreter@development
+  - pip install "pixel_clusterizer>=3.1,<3.2"
+  # Install pyBAR
+  - python setup.py develop
+
+# Unit tests
+script:
+  # Remove file to make interface test working
+#  - rm -f $(HOME)/miniconda/envs/test-environment/lib/libreadline.so.6
+  - cd pybar/testing; nosetests test_analysis.py test_interface.py # --logging-level=INFO

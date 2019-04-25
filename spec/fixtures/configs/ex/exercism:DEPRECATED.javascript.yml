@@ -1,0 +1,15 @@
+language: node_js
+
+sudo: false
+
+node_js:
+  - "lts/*"
+
+install:
+  - "npm install"
+
+script:
+  - "make test"
+  - "./bin/fetch-configlet"
+  - "./bin/configlet lint ."
+  - "npm run lint"

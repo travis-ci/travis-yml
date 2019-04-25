@@ -1,0 +1,30 @@
+language: groovy
+
+#Yeah, we are going to want to cache our build dependencies so our builds aren't held up downloading for every container
+cache:
+  directories:
+    - $HOME/.gradle
+    - $HOME/protobuf
+
+dist: trusty
+
+jdk:
+  - oraclejdk8
+  - openjdk8
+
+# Allow running on a container instead of a traditional VM
+sudo: false
+
+#There is currently an issue in Gradle where a forked JVM will ignore any no-daemon flag (--no-daemon, org.gradle.daemon) for the forked process if jvm args are supplied. 
+#We remove them to get around this
+env:
+  global:
+    - GRADLE_OPTS="-Dorg.gradle.daemon=false -Dorg.gradle.jvmargs=''"
+    - PATH="$PATH:$HOME/protobuf/bin"
+
+before_install:
+  - bash install_protoc_from_source.sh
+install: ./gradlew assemble
+script: ./gradlew check
+
+

@@ -1,0 +1,46 @@
+language: node_js
+dist: trusty
+sudo: required
+node_js:
+  - "8"
+
+addons:
+    chrome: stable
+
+before_script:
+    - "sudo chown root /opt/google/chrome/chrome-sandbox"
+    - "sudo chmod 4755 /opt/google/chrome/chrome-sandbox"
+
+before_install:
+    - export CHROME_BIN=chromium-browser
+    - export DISPLAY=:99.0
+    - sh -e /etc/init.d/xvfb start
+
+env:
+  matrix:
+    - MODULE=jsapi
+
+install:
+    - npm install
+
+jobs:
+    include:
+        - stage: Lint
+          script: ./scripts/lint.sh
+        - stage: Build
+          script: ./scripts/build.sh || exit 1
+        - stage: Test
+          script: npm run test || exit 1
+        - stage: Perfomance
+          script: ./scripts/test-performance.sh || exit 1
+        - stage: Integration
+          script: ./scripts/test-integration.sh || exit 1
+
+after_success:
+  - npm run coverage --force
+  - bash <(curl -s https://codecov.io/bash)
+
+cache:
+  directories:
+  - node_modules
+  - dist

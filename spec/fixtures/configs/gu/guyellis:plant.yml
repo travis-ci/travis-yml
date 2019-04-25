@@ -1,0 +1,23 @@
+dist:
+  # Use Ubuntu 16.04 as the OS. This is the latest available on Travis
+  # at the time of writing this Feb 2019.
+  # https://docs.travis-ci.com/user/reference/xenial/
+  - xenial
+language:
+  - node_js
+node_js:
+  - "10"
+services:
+  # When running on Xenial (Ubuntu 16.04) then the default version of MongoDB
+  # should be 4.0
+  - mongodb
+install:
+  - npm install
+before_install:
+# Don't need to install latest npm because Node >= 9
+# - npm install -g npm
+  - npm install -g greenkeeper-lockfile@1
+before_script:
+  - greenkeeper-lockfile-update
+after_script:
+  - greenkeeper-lockfile-upload

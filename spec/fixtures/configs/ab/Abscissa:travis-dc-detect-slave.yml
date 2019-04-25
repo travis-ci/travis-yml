@@ -1,0 +1,16 @@
+language: d
+sudo: false
+
+install: ./install-deps.sh
+script: ./run-test.sh
+
+matrix:
+    include:
+        - d: dmd
+        - d: dmd-beta
+        - d: ldc
+        - d: ldc-beta
+        - d: gdc
+        - d: gdc-beta
+    allow_failures:
+        - d: gdc-beta # Not currently supported on travis, but may work in the future.

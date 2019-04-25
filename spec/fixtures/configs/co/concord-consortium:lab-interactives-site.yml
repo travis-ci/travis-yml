@@ -1,0 +1,19 @@
+dist: trusty
+sudo: false
+branches:
+  except:
+  - /^(wip|WIP)(-|_).*$/
+language: node_js
+node_js:
+  - "6"
+before_script:
+- travis_retry bundle install --without development --deployment --jobs=3 --retry=3
+- travis_retry npm install
+- make prepare-submodules
+- make public
+script: script/s3-deploy.sh
+env:
+  global:
+  - secure: OrtynMchJnZefWOowzS0oGATN5kB9X+HveWWwH/cjO9NiuIOzkBGbSwRTtnCB6UU8VXDkEIsMQyQoMtjw11hSOv2/89raKMmloa/Dc5ZVa+F3EG/v/JWHAzIMnInjtvG3x9ncUiRcqXTWFLwzxppr3A17bVUJ4r9if4fsQdV7+k=
+  - secure: QyVpE9/A3LNNsHfrxuJhI49aaz4bDUW4HNvJuexlRy1x90jleezKgSqZu20BE6XfIRzcnitIiJV0o3aFg4Q9aHtN5uhjUOwcup8ONN3E+TZbrKtRJI+zzvsLaZH/Aqrd1vhg7bac5bm9bXDWNgLHjf8jfd4GxXd64TW6g+eQ2vg=
+  - secure: FWaxc/JRzvNOM7CJ9H03CrbjJ+VW9Q77SxtfsxlyYi4PYq/SbItpganKbBkFobJ/9sBRaChDDpY7n0Iye50E4MasI+YgZYQdiAFcVTf69/vwlKceZWY8DWqnsX+XKVqi8qU6WCtUQxo2WlOfL18ESbNa0YhlvJSxx1daP7NyzFo=

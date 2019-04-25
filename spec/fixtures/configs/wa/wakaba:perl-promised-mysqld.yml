@@ -1,0 +1,31 @@
+git:
+  submodules: false
+language: perl
+perl:
+  - "5.26"
+  - "5.14"
+  - "5.12"
+os:
+  - linux
+  - osx
+before_install: git submodule update --init
+install:
+  - which mysqld || true
+  - mysqld --version || true
+  - which mysql_install_db || true
+  - mysql_install_db --help || true
+  
+  - "make test-deps"
+script: "PROMISED_COMMAND_DEBUG=1 make test"
+notifications:
+  email:
+    - wakaba@suikawiki.org
+  irc:
+    channels:
+      - "ircs://irc.suikawiki.org:6697#mechanize"
+    use_notice: true
+env:
+  global:
+    secure: "OjSn1oW+T1Qwg2oPQDCQm5e6z7qLMZdNjq+GFC38QSyKaxJB+qCTn4p3l6x1z8SKRSf1JxCVzoCukxpC62oUK2QAiRY1kocO7/AAFeOsGb8tKTHt0uLeFEF3BxgJjfweUNfGnqfX7oVpT89uuX0vX+89asY69+qqW+OhmN0ePmU="
+after_success:
+  - curl -s -S -L https://gist.githubusercontent.com/wakaba/9970857/raw/travis-merger.pl | perl

@@ -1,0 +1,41 @@
+language: node_js
+node_js:
+- '8'
+env:
+  global:
+  - GH_USER_EMAIL="travis@example.org"
+  - GH_USER_NAME="cozy-bot"
+  - DEPLOY_REPOSITORY="git@github.com:konnectors/cozy-konnector-theoldreader.git"
+  - secure: PJE3zXWCJbz9ZJ2zrHX8YssBDWXpT3SX18A6DUmpUbMqEPt6NcTUpOb+xP30WS5QtoQMYGXb9ZnkdAa97vymGbT1EdG/eE4FH8vFfgqaAK+AjW6gWpire9Wb8eR4KUkfbVChQ8NkoXg/C398+9XVlixrTU6eIayC41J3xDWayES1R/jmBnlJcMjxhZNUmKBvLsmooD8sEpGDKeYTLs5hoCxmMO8fK0BsyCPmnCTa/v9k022v4zgp1Jy9gRu8VVLav/3ddeCU5VQuQPI3SFtQyrjZIOJxvLoHk7+xuSgS8Z5vIowGsjpD9zQQBaQQ5Ewzn886c9unZm3df5DmlVaRepdsRU1LNk0GTe9oKXJl2MuVsX/bl4X1eipNbnqXB8u3dZdcs3m2Xi6V0a9qL3GiijK1NzltF2u6hWzncBod1jchFqWonjiEfQKPGxHoqUOJ+B6EDE203/jPtIi0HC1R4pLHM/dU1M44Nf8YoR+6TdLFF1PhybtqkhLUsnoVuOC5oio1pk5tXimugZCSTWNlDqIlCRhMXFokzWBJO1rVCcLH9n15N6KoawqwlOFxXn/LdUdnDON/rORUfbbLxmgGaarrU7vjLTxxC8TyFFvU5gLyYx9nu6AtgZs7jPwOwzarris52GY6SQ2xY/UO2v/RZ9YHtctCq4nY4ObpeQeD5Uk=
+cache:
+  yarn: true
+  directories:
+  - node_modules
+branches:
+  except:
+  - build
+  - build-debug
+script:
+- yarn lint
+- yarn build
+- yarn run check
+deploy:
+- provider: script
+  skip-cleanup: true
+  script: DEPLOY_BRANCH=build yarn deploy && yarn cozyPublish
+  on:
+    branch: master
+- provider: script
+  skip-cleanup: true
+  script: DEPLOY_BRANCH=build yarn deploy && yarn cozyPublish
+  on:
+    tags: true
+before_install:
+- openssl aes-256-cbc -K $encrypted_b35534f11451_key -iv $encrypted_b35534f11451_iv
+  -in github_deploy_key.enc -out /tmp/github_deploy_key -d
+- eval "$(ssh-agent -s)"
+- chmod 600 /tmp/github_deploy_key
+- ssh-add /tmp/github_deploy_key
+after_deploy:
+- rm /tmp/github_deploy_key
+- ssh-add -D

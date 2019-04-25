@@ -1,0 +1,50 @@
+language: r
+
+matrix:
+  include:
+  - r: release
+    os: linux
+  - r: devel
+    os: linux
+  - r: release
+    os: osx
+
+cache: packages
+
+r_packages:
+  - devtools
+  - hunspell
+  - rappdirs
+
+r_github_packages:
+  - jimhester/covr
+  - jimhester/lintr
+  - MangoTheCat/goodpractice
+  - ropensci/spelling
+
+before_install:
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install libgit2; fi
+
+before_script:
+  - if [ -f ".lintr" ]; then echo "Do use Hadley Wickham's style guide"; exit 1; fi
+  # proselint
+  - sudo pip install proselint
+  # markdown-link-check, does not work temporarily
+  #- sudo apt-get install npm
+  #- sudo npm install -g markdown-link-check
+
+after_success:
+  - Rscript -e 'print(rappdirs::app_dir()$os)'
+  - Rscript -e 'lintr::expect_lint_free()'
+  - Rscript -e 'covr::codecov()'
+  - Rscript -e 'goodpractice::gp()'
+  - proselint *.md | egrep -v "typography\.symbols\.curly_quotes"
+  - # No local files created
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then if [[ $(egrep -R "\"~" --include={*.R,*.Rmd}) ]]; then echo "Local file created"; exit 1; fi; fi
+  - # Do a CRAN build
+  - cd scripts; ./build_cran
+  # does not work temporarily
+  #- ./scripts/check_dead_links
+
+after_failure:
+  - Rscript -e 'print(rappdirs::app_dir()$os)'

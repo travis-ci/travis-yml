@@ -1,0 +1,14 @@
+language: scala
+scala:
+- 2.11.2
+script:
+- sbt ++$TRAVIS_SCALA_VERSION run
+after_failure:
+- git config --global user.email tempeh87@gmail.com
+- git config --global user.name tempeh87
+- git config credential.helper "store --file=.git/credentials"
+- echo "https://${GH_TOKEN}:@github.com" > .git/credentials
+- git checkout master
+- git add .
+- git commit -m "daily update"
+- git push origin master

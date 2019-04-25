@@ -1,0 +1,18 @@
+language: go
+go:
+  - 1.12.x
+go_import_path: code.cloudfoundry.org/cli
+install:
+- go get -u github.com/onsi/ginkgo/ginkgo
+script:
+- go vet -all  ./api/... ./actor/... ./command ./integration/... ./types ./util ./version
+- NODES=1 make units-full
+branches:
+  only:
+  - master
+  - travis
+addons:
+  code_climate:
+    repo_token: 5a9ca60422d07f52c50f36aa2c2c101619a19aa64d94fdafb352746b1db8625e
+os:
+  - linux

@@ -1,0 +1,23 @@
+---
+language: python
+
+python:
+    - "3.6"
+
+env:
+    - TRAVIS=1
+
+services:
+    - mongodb
+
+script:
+    - py.test --cov=scout -rxs tests/
+install:
+    - pip install cython
+    - pip install -r requirements.txt -r requirements-dev.txt -e .
+
+after_success:
+    - coveralls --ignore-errors
+
+notifications:
+    email: false

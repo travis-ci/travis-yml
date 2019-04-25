@@ -1,0 +1,25 @@
+sudo: false
+language: java
+jdk:
+  - openjdk8
+  - oraclejdk8
+  - oraclejdk9
+  - oraclejdk11
+  
+before_install:
+  # copy integration test config
+  - cp travis-metamodel-integrationtest-configuration.properties /home/travis/metamodel-integrationtest-configuration.properties
+
+services:
+  - couchdb
+  - mongodb
+  - docker
+  - neo4j
+
+script: "mvn clean verify -P integration-test"  
+
+after_success:
+  - mvn test javadoc:javadoc
+ 
+notifications:
+  email: false

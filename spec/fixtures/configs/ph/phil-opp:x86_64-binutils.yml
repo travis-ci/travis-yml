@@ -1,0 +1,46 @@
+addons:
+  apt:
+    packages:
+    - texinfo
+    - flex
+    - bison
+    - python-dev
+    - gcc-multilib
+
+matrix:
+  # Clear the whole matrix
+  exclude:
+    - os: linux
+    - os: osx
+  # Add each target manually
+  # TODO feel free to remove targets you are not interested in
+  # TODO you may want to install packages for specific build jobs, use the addons.apt.packages
+  # pattern shown below
+  include:
+    - os: linux
+      env:
+        - HOST=i686-unknown-linux-gnu
+        - CFLAGS="-m32"
+    - os: linux
+      env:
+        - HOST=x86_64-unknown-linux-gnu
+    - os: osx
+      env:
+        - HOST=i686-apple-darwin
+        - CFLAGS="-m32"
+    - os: osx
+      env:
+        - HOST=x86_64-apple-darwin
+
+script: sh update.sh
+
+before_deploy: sh release.sh
+
+deploy:
+  provider: releases
+  api_key:
+    secure: nmU7+XGjQ3X+YiuuMfH1hGK/Kf5zXC/1KYMjrA7m6fsDLF6UIv5Y+R/gl4jOggoVvqoqYAawqmUDprHMc2s2ShZ72LDjWboYTWFmLTQ893zDARYUAgNrT6nllLLjBTuI9+XhKXPebt2ADW9V/b2igbhJp5WCdb/OmVa8RC0MCmElZa27jwwuca/p39a4H23OpZaAbkHEl8aw7sTsU5jbUKxDNFk/rvtExOBcHat2Nq90qWxRAxbQlYf7+j8Sth18qqaBpPxW9CcxiQA3XIdjw65tssR7RqwqdN+xILLe8jlZhD7yWoqSxjZ8tSA5L7ofLc+1daooxeZaAP94sP4iHdMRNBKCAHaR36lj63MnlbQ+j3SbMw9Tw7CBpYdW+ZOe+Xdnp1a0gCBtEJkJNsW37DssGEeTzy1TMGT08/9uIuteZhA3MikAemiZNp5f8G4iQCCl9sd2hpMiaxeKKb6UMq/4TEkYQ8qPVzrPiA3tI1gQUFVQbxf53FO2u7gjoryuPR9LGlkuqLUDGhK8Fe0Vt0eHNUqag4ifnYdrJ/ljp9UoW3DWHdjnBuJa/lf/x2RKvSNG2WOlblfUOcYtm18HW814rj2xHviy9YaS1S02n0zSfwZg8yI7qevasI8C5ArTTDdTCwQVhhG3fx8hGIEiZwts9gorw2aBAwR7+q4mDjE=
+  file: release/binutils-${HOST}.tar.gz
+  skip_cleanup: true
+  on:
+    tags: true

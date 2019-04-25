@@ -1,0 +1,60 @@
+language: node_js
+node_js:
+  - "lts/*"
+
+notifications:
+  email: false
+  webhooks:
+    urls:
+      - https://webhooks.gitter.im/e/0a0786c33b92a4166c70
+    on_success: change
+    on_failure: always
+    on_start: never
+  irc:
+    channels:
+      - "chat.freenode.net#metabrainz"
+    on_success: change
+    on_failure: change
+    template:
+      - "Project %{repository_name} build #%{build_number}: %{result} in %{elapsed_time}: %{build_url}"
+
+sudo: false
+
+before_install:
+  - '[[ $(node -v) =~ ^v9.*$ ]] || npm install -g npm@latest' # skipped when using node 9
+  - npm install -g greenkeeper-lockfile@1
+
+before_script:
+  - git clone --single-branch --branch rename-entities https://github.com/bookbrainz/bookbrainz-site.git
+  - cp ./test/bookshelf.js.example ./test/bookshelf.js
+  - psql -c 'CREATE DATABASE bookbrainz_test;' -U postgres
+  - psql -c 'CREATE EXTENSION "uuid-ossp"; CREATE SCHEMA musicbrainz; CREATE SCHEMA bookbrainz;' -d bookbrainz_test -U postgres
+  - psql -f bookbrainz-site/sql/schemas/musicbrainz.sql -d bookbrainz_test -U postgres
+  - psql -f bookbrainz-site/sql/schemas/bookbrainz.sql -d bookbrainz_test -U postgres
+  - psql -f bookbrainz-site/sql/scripts/create_triggers.sql -d bookbrainz_test -U postgres
+  - greenkeeper-lockfile-update
+
+script:
+  - npm run-script test-ci
+
+after_script:
+  - npm install -g coveralls && coveralls < coverage/lcov.info
+  - greenkeeper-lockfile-upload
+
+install: npm install
+
+env:
+  - CXX=g++-4.8
+
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - g++-4.8
+  postgresql: "9.4"
+
+branches:
+  only:
+    - master
+    - /^greenkeeper/.*$/

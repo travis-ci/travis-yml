@@ -1,0 +1,25 @@
+language: clojure
+sudo: false
+jdk:
+- oraclejdk8
+lein: 2.7.1
+addons:
+  rethinkdb: '2.3.6'
+cache:
+  directories:
+  - "$HOME/.m2"
+before_script:
+- "export JAVA_OPTS=-Xmx512m"
+- "echo $JAVA_OPTS"
+- lein clean
+script:
+- lein test!
+- lein eastwood
+- lein kibit
+branches:
+  only:
+  - master
+  - mainline
+notifications:
+  slack:
+    secure: jbbHN9ubjEVd3/O3ttkKxQIVJQAMZW/s8IzQtN/C2jN4TNplDxA34Rbqhl1jC+hDdzIwvY0sj7T6DtgqGXZxEhQoqbMUAIs8F6lLERCHg/D5a5nqh0HzBJYQWlB0MdQ8RGp7u8VvII/snA/njapE6Ck+mBWz71IEfTHLMgVyqtviRdv5WRQTMQFJvBOupOhHiaWng6gfEbIubkOqxc8lS/Eji9520zN2YlFdPRY3mjbh/SClx1MmOC8gSuQG8vtEO0/57TiecHvyhfqnNDg0+/hWKOk6CCCHiqYXFlIfuw1kdkq5Fh4u70P1u5YPCEmhgBto2qwwriYPl6Mapl0jLJ+yN4a6DSwPkU8/w7psnY2Bxqh6lB9fTnvaO+sW+TlLP/ccgED2Rl5QQ9VFnQshXgARoN1x62FJWPw0wpH7jYZE3Aymz7OkzcGh25Fp1Oia3+C60qKrbrZYFcDOV6o41G5UQFuzx1cmH5/9vLN/ykm4Z+nzU+aEKGwFa+fin0TgZAotSceLB+OlgWewCOGJTSK8i5HsbDpo+wJGLPnM+ECnW7eJiTZA0dhP9FcXj7+YWGt41kvAjgvRIva67j8KKUl2d4uIUPthPIA4Lst17uVscseIplkZhPAohpg/vI3Li+KNi2azoCCQs6936+lSCy8ZoAOmIpMTowHaBPtcGBM=

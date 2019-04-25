@@ -1,0 +1,39 @@
+language: python
+sudo: false
+
+python:
+  - 2.7
+  - 3.5
+  - 3.6
+# Enable 3.7 without globally enabling sudo and dist: xenial for other build jobs
+matrix:
+  include:
+    - python: 3.7
+      dist: xenial
+      sudo: true
+
+addons:
+  apt_packages:
+    - libbz2-dev
+    - libhdf5-serial-dev
+    - liblzo2-dev
+
+before_install:
+  - pip install cython
+  - python setup.py sdist
+
+install:
+  - pip install dist/*.tar.gz
+
+script:
+  - cd .. && python -m tables.tests.test_all
+  - pt2to3 -h
+  - ptrepack -h
+  - ptdump -h
+  - pttree -h
+
+notifications:
+  webhooks:
+    urls:
+      - https://webhooks.gitter.im/e/58f8a9014ef02f6217ec
+    on_success: change

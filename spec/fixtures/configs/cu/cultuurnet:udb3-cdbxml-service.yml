@@ -1,0 +1,13 @@
+language: php
+php:
+- '7.1'
+install:
+- composer install
+script:
+- ./vendor/bin/phing test
+after_script:
+- if [[ "$TRAVIS_PHP_VERSION" = "7.1" ]]; then ./vendor/bin/coveralls -vvv; fi;
+notifications:
+  email:
+    recipients:
+    - team-uitdatabank@2dotstwice.be

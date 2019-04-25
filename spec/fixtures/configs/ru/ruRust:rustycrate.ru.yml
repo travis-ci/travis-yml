@@ -1,0 +1,71 @@
+language: ruby
+env:
+  global:
+  - NOKOGIRI_USE_SYSTEM_LIBRARIES=true
+  - secure: csl2OVpn0L49E+L/rRMSR0Iq6Qb/1oEpoRaQFehJE7RiZXeAVHrILINLq+4HN2JrqOjeg8cBunKzUhp0sHBxly0M36NsJN8ITZVKbNENzwcenVfNlJPgxVomBUWmWk4w96w5eFRfxVLR5UDN6Rf7ohkQMxYjd2KWL9iugzIb8+Epq7akSyM0XCXeJpL9T6Z+WDWrX3xeiLgTUfdofik5GAyEcLLjz1ncdCwvBrnj4s1//tb35ex+6MDNr3bO9KD0rpuwIPzFYGwZcYchK8TfqFB/3fseUHVzb6/Q0V9K8meOwfKxU8Rd9o0CS6Z02rizz6zjnu5TcMFR65HOlVsQ1SzDIb7I7Me6jnDYrPhhJulu9x1jxNALHWO0cF/phMldoj6KyZ3qZ/NVv8R/6Ukj7S3B4IgzPSO7/Z5QWDkv72L3CKheof8tmSC5SGv6mShxCqQqIbajRbc/yeWP8HNNsEjUUjnf5/DK3s458LeCHh0472KJKgo0eLea2LD8sd16Xx0IK1WYFgv+WUUnI3MhERPxepL4ugFlGmHAwA/V/smmRRMnqKYMTAw//4ceZO9ylRzuyWzWmWbRzExHgK6jVZqxtjp2UKG6L39n1LFDbQErw3TrJdBso9ZKKWjUff/tyDBglkgw05OGYgc8TpQW3AHWs7t/O1JBXzP94bMPVkw=
+addons:
+  ssh_known_hosts: rustycrate.ru
+sudo: false
+rvm:
+- 2.2.3
+before_script:
+- . $HOME/.nvm/nvm.sh
+- command -v nvm
+- nvm install v8.11.1
+- node --version
+- npm --version
+- npm install -g typograf
+- npm install -g typograf-cli
+- npm install -g eyo
+- npm install -g yaspeller
+- npm install -g markdownlint
+- npm install -g markdownlint-cli
+- typograf --version
+- eyo --version
+- yaspeller --version
+- markdownlint --version
+- bundle exec jekyll --version
+- bundle exec htmlproofer --version
+- convert -version
+script:
+- result=0;
+  for f in $(find _posts -name '*md'); do
+    if ! grep -qe '<!--cut-->' "$f"; then
+      echo "Missing cut in $f";
+      result=1;
+    fi;
+    if grep -q $'\xEF\xBB\xBF' "$f"; then
+      echo "Found BOM mark in $f. Please remove it because Jekyll doesn't support them.";
+      result=1;
+    fi;
+  done;
+  return $result;
+- markdownlint --output markdownlint.issues *.md _posts/*.md || true;
+  [ -f markdownlint.issues ] && [ $(wc -l markdownlint.issues | cut -f 1 -d ' ') -le 2405 ];
+  rm markdownlint.issues;
+- yaspeller --only-errors *.md _posts
+- JEKYLL_ENV=production RUSTYCRATE_MODE=production RUSTYCRATE_ENABLE_EYO=yes
+  bundle exec jekyll build
+- bundle exec htmlproofer ./_site
+  --log-level error --only-4xx --check-favicon --check-html --allow-hash-href
+  --url-ignore /crates.io/,/files.gitter.im/,/fonts.googleapis.com/,/www.quora.com/,/is.gd/,'/github.com\/ruRust\/rustycrate.ru\/edit\/master/',/gitter.im/,/www.rust-lang.org/,/blog.rust-lang.org/,/cdn.jsdelivr.net/
+  --file-ignore /yandex_6b9a121b20becc7c.html/,/googlea5495ce52829dd37.html/
+after_success:
+- if [ $TRAVIS_PULL_REQUEST == "false" ] && [ $TRAVIS_BRANCH == "master" ]; then
+  openssl aes-256-cbc -K $encrypted_b635d6f2115a_key -iv $encrypted_b635d6f2115a_iv
+    -in travis.trash.id_rsa.enc -out travis.trash.id_rsa -d;
+  tar -caf .site.tar.gz _site;
+  chmod 600 travis.trash.id_rsa;
+  scp -i travis.trash.id_rsa .site.tar.gz "$USER@$HOST:";
+  ssh -i travis.trash.id_rsa -t $USER@$HOST "rm -rf _site && tar -xaf .site.tar.gz
+    && cd _site && sudo /data/www/deploy_rustycrate.sh";
+  fi;
+after_script:
+- if [ -f travis.trash.id_rsa ]; then shred -u travis.trash.id_rsa; fi;
+notifications:
+  webhooks:
+    urls:
+      - https://webhooks.gitter.im/e/d88930bf78ef8a7cc139
+    on_success: change  # options: [always|never|change] default: always
+    on_failure: always  # options: [always|never|change] default: always
+    on_start: never     # options: [always|never|change] default: always

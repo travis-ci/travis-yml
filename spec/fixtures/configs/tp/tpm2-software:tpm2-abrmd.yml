@@ -1,0 +1,93 @@
+language: c
+dist: xenial
+
+addons:
+  apt:
+    packages:
+      - autoconf-archive
+      - dbus
+      - dbus-x11
+      - gnulib
+      - lcov
+      - libcmocka-dev
+      - libglib2.0-dev
+      - libdbus-1-dev
+      - liburiparser-dev
+      - realpath
+  coverity_scan:
+    project:
+      name: 01org/tpm2-abrmd
+      description: Build submitted via Travis-CI
+    notification_email: philip.b.tricca@intel.com
+    build_command_prepend: "./bootstrap && ./configure"
+    build_command: "make --jobs=$(nproc)"
+    branch_pattern: coverity_scan
+
+env:
+  global:
+    # COVERITY_SCAN_TOKEN created by coverity using 'travis encrypt' using
+    # project repo public key
+    - secure: "obb9XbzVIj7P/wBKXG6GIRlGSXFcQhTvAa6LX8wU279wt3t0uGakofOmw5SpFX9wnxCu6xd3yHaiUqAuFotf5Bb/ROfeqZGdBFUVSwmxEohzrxPH3KbYhd3lzACUSMNYBVwu+WZhzPK3cQRf8KtQw7V9qNP5qV+RfgXizo+r04w6g2hP8xeYIrJ86PUtLjFrvtd/OxXhWWb7i+dTDSSmUvdYi18XSyvtz+7H2OXJLZSO7Ns2WUAplkwre1pCgv2sg0pkxHQjjeIYEcvYZskiKsyyXT2AXZFTNa7KN51/N4lpk/Hb7ffjFMM9T6/NZ1JVY3UVpGOGYH4TM49macyws9b0RiwGpzW2qe2EKoiXLOEYk5erW/PoIM8PiNcvAgvQaU25/cZSDQaEn/S9DTLkC8AJHVmqY9tp9XVmesCrBhpeAnyDTAfiZ1t05HiFOqw7ByP1LM49ysvQk1cdlt28AvB90t6rttGUP8CUtwnasHOVASlZ/No7xRGFHlLLmfKVrZc31jZS4RHxthn4MKATzqkylMZQMVA2/jasRcfYTXiUPGUfuaxZfofSTpJANrGWAMC43FWqKi3jPVJ2/TdqZ2r/wXkK23SiF9Lu9X4QOGuLnbAuQENddqb1A3e2PH+0NC6O0ThWq69BcWmrtbD2ev0UDivbG8OQ1ZsSDm9UqVA="
+    # run coverity scan on gcc build to keep from DOSing coverity
+    - coverity_scan_run_condition='"$CC" = gcc'
+    - PREFIX=/usr
+    - DEPS="${TRAVIS_BUILD_DIR}/deps"
+    - PATH="${DEPS}/ibmtpm/src:${PATH}"
+    - ACLOCAL_PATH="/usr/share/gnulib/m4"
+    - CONFIG_OPTS="--enable-unit --enable-integration --disable-silent-rules"
+    - MAKE="make --jobs=$(($(nproc)*3/2))"
+
+matrix:
+  include:
+    - compiler: clang
+      env: SCANBUILD="scan-build --status-bugs" CFLAGS=-D_REENTRANT CONFIG_EXTRA=--enable-code-coverage MAKE_TARGET=check
+    - compiler: gcc
+      env: SCANBUILD= MAKE_TARGET=distcheck
+
+install:
+  - pip install --user cpp-coveralls
+  - mkdir ${DEPS} && pushd ${DEPS}
+  - wget http://ftpmirror.gnu.org/autoconf-archive/autoconf-archive-2019.01.06.tar.xz
+  - sha256sum autoconf-archive-2019.01.06.tar.xz | grep -q 17195c833098da79de5778ee90948f4c5d90ed1a0cf8391b4ab348e2ec511e3f
+  - tar xJf autoconf-archive-2019.01.06.tar.xz && pushd autoconf-archive-2019.01.06
+  - ./configure --prefix=${PREFIX} && $MAKE && sudo $MAKE install
+  - popd # autoconf-archive
+  - git clone -b master --single-branch https://github.com/01org/tpm2-tss.git
+  - pushd tpm2-tss
+  - ./bootstrap
+  - ./configure --prefix=${PREFIX} --disable-doxygen-doc --disable-tcti-device --disable-esapi
+  - $MAKE && sudo $MAKE install
+  - popd # tpm2-tss
+  - wget https://download.01.org/tpm2/ibmtpm974.tar.gz
+  - sha256sum ibmtpm974.tar.gz | grep -q ^8e45d86129a0adb95fee4cee51f4b1e5b2d81ed3e55af875df53f98f39eb7ad7
+  - mkdir ibmtpm
+  - tar axf ibmtpm974.tar.gz -C ibmtpm
+  - $MAKE -C ibmtpm/src
+  - popd # ${DEPS}
+
+before_script:
+  - ./bootstrap
+
+script :
+# short-circuit normal build if we've already done a coverity scan
+  - |
+    if [ "${COVERITY_SCAN_BRANCH}" == 1 ]; then
+        echo "COVERITY_SCAN_BRANCH set, not running normal build."
+        exit 0
+    fi
+  - $SCANBUILD ./configure $CONFIG_OPTS $CONFIG_EXTRA
+  - $SCANBUILD $MAKE $MAKE_TARGET
+
+after_success:
+  - |
+    if [ "${CONFIG_EXTRA}" == "--enable-code-coverage" ]; then
+        bash <(curl -s https://codecov.io/bash)
+    fi
+
+after_failure:
+  - |
+    if [ -f test-suite-log ]; then
+        cat test-suite.log
+    else
+        cat tpm2-abrmd-*/_build/sub/test-suite.log
+    fi

@@ -1,0 +1,46 @@
+language: python
+
+os:
+  - linux
+
+python:
+  - "2.7"
+  - "3.5"
+  - "3.6"
+
+matrix:
+  include:
+    - python: "2.7"
+      install: CC=clang python setup.py install
+    - python: "3.6"
+      install: CC=clang python setup.py install
+    # Unfortunately there is currently no way to have these tested on Trusty.
+    # This is hack to work around that:
+    # https://docs.travis-ci.com/user/languages/python/#development-releases-support
+    - python: "3.7"
+      dist: xenial
+      sudo: true
+    - python: "3.7-dev"
+      dist: xenial
+      sudo: true
+    - python: "3.8-dev"
+      dist: xenial
+      sudo: true
+    - python: "nightly"
+      dist: xenial
+      sudo: true
+
+  allow_failures:
+
+before_install:
+  - pip install coveralls
+
+install:
+  - python setup.py install
+
+# command to run tests
+script:
+  - coverage run --source=iteration_utilities setup.py test
+
+after_success:
+  - coveralls

@@ -1,0 +1,78 @@
+language: python
+
+
+sudo: false
+
+
+addons:
+   apt:
+     packages:
+       - gfortran
+       - libopenblas-dev
+       - liblapack-dev
+       - libhdf5-serial-dev
+
+
+matrix:
+  include:
+    - python: 3.5
+      env: COVERAGE=OFF GIT_TEST=OFF EXAMPLES=OFF TEST_SUITE=SINGLECORE SCOOP=OFF
+    - python: 3.6
+      env: COVERAGE=OFF GIT_TEST=OFF EXAMPLES=OFF TEST_SUITE=MULTIPROC SCOOP=OFF
+    - python: 3.5
+      env: COVERAGE=ON GIT_TEST=ON EXAMPLES=OFF TEST_SUITE=OFF SCOOP=OFF
+    - python: 3.6
+      env: COVERAGE=OFF GIT_TEST=ON EXAMPLES=ON TEST_SUITE=OFF SCOOP=ON
+
+
+
+# Install dependencies for PyTables
+# command to install dependencies
+before_install:
+  - echo "++++++++++++ Install conda with numpy and scipy ++++++++++++++++++"
+  - travis_retry wget http://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
+  - bash miniconda.sh -b -p $HOME/miniconda
+  - export PATH="$HOME/miniconda/bin:$PATH"
+  - hash -r
+  - conda config --set always_yes yes --set changeps1 no
+  - conda update -q conda
+  # Useful for debugging any issues with conda
+  - conda info -a
+  # Replace dep1 dep2 ... with your dependencies
+  - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION pip numpy scipy numexpr cython pandas pytables
+  - source activate test-environment
+  - pip freeze
+
+
+install:
+  - echo "Python $TRAVIS_PYTHON_VERSION"
+  - echo "+++++++++++ Installing Coveralls if coverage +++++++++++"
+  - if [[ $COVERAGE == ON ]]; then travis_retry pip install coveralls; fi
+  - echo "+++++++++++ Installing Brian2 +++++++++++"
+  - travis_retry pip install brian2
+  - echo "+++++++++++ Installing psutil +++++++++++"
+  - travis_retry pip install psutil
+  - echo "+++++++++++ Installing dill ++++++++++++"
+  - travis_retry pip install dill
+  - echo "+++++++++++ Installing GitPython and Sumatra if needed ++++++++++++"
+  - if [[ $GIT_TEST == ON ]]; then chmod +x ciscripts/travis/install_gitpython.sh; travis_retry ciscripts/travis/install_gitpython.sh; fi
+  - echo "+++++++++++ Installing matplotlib and deap if needed ++++++++++++"
+  - if [[ $EXAMPLES == ON ]]; then travis_retry conda install matplotlib; travis_retry pip install deap; fi
+  - echo "++++++++++++ Installing SCOOP  +++++++++++++++++++++++++"
+  - travis_retry pip install scoop
+  - echo "+++++++++++ Installing PYPET unless coverage +++++++++++"
+  - if [[ $COVERAGE == OFF ]]; then travis_retry python setup.py install; fi
+  - echo "+++++++++++ FINISHED INSTALL +++++++++++"
+
+
+# Script command for all tests
+script: cd ciscripts/travis; chmod +x runtests.sh; ./runtests.sh
+
+
+branches:
+  only:
+    - develop
+    - master
+    - brian2
+    - py3only
+

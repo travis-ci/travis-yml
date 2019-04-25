@@ -35,10 +35,10 @@ describe Travis::Yml::Schema::Def::Deploy::Launchpad, 'structure' do
                 type: :string
               },
               oauth_token: {
-                '$ref': '#/definitions/secure'
+                '$ref': '#/definitions/type/secure'
               },
               oauth_token_secret: {
-                '$ref': '#/definitions/secure'
+                '$ref': '#/definitions/type/secure'
               }
             },
             normal: true,

@@ -1,0 +1,18 @@
+
+sudo: false
+language: scala
+scala:
+- 2.11.11
+jdk:
+- oraclejdk8
+cache:
+  directories:
+    - '$HOME/.ivy2/cache'
+services:
+- mongodb
+addons:
+  apt:
+    sources:
+    - mongodb-3.0-precise
+    packages:
+    - mongodb-org-server

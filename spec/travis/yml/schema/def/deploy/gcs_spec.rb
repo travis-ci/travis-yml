@@ -32,10 +32,10 @@ describe Travis::Yml::Schema::Def::Deploy::Gcs, 'structure' do
                 '$ref': '#/definitions/deploy/edge'
               },
               access_key_id: {
-                '$ref': '#/definitions/secure'
+                '$ref': '#/definitions/type/secure'
               },
               secret_access_key: {
-                '$ref': '#/definitions/secure'
+                '$ref': '#/definitions/type/secure'
               },
               bucket: {
                 type: :string

@@ -1,0 +1,17 @@
+language: objective-c
+osx_image: xcode10.1
+
+cache:
+  - bundler
+  - cocoapods
+
+install:
+  - bundle install # --deployment # to cache vendor/bundle
+  - pod install --repo-update;
+
+script:
+  - sh build-ci.sh /tmp/PinLayout
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash) -D /tmp/PinLayout
+  # bash <(curl -s https://codecov.io/bash) -J 'PinLayout' -J 'PinLayoutTests'

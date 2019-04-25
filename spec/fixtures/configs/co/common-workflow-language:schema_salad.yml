@@ -1,0 +1,37 @@
+dist: trusty
+sudo: required
+services:
+  - docker
+
+language: python
+cache:
+  pip: true
+  directories:
+    - .mypy_cache
+
+os:
+  - linux
+install:
+  - pip install tox-travis
+jobs:
+  include:
+    - stage: test
+      python: "2.7"
+    - stage: test
+      python: "3.4"
+    - stage: test
+      python: "3.5"
+    - stage: test
+      python: "3.6"
+    - stage: test
+      python: "3.7"
+      dist: xenial
+    - stage: release-test
+      python: "2.7"
+      script: RELEASE_SKIP=head PYVER= ${TRAVIS_BUILD_DIR}/release-test.sh
+script: tox
+branches:
+  only:
+    - master
+notifications:
+  email: false

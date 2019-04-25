@@ -1,0 +1,120 @@
+language:
+  - cpp
+  - python
+
+env:
+  global:
+    HOME_DIR=${TRAVIS_BUILD_DIR}/..
+    ExternalData_OBJECT_STORES=${HOME_DIR}/.ExternalData
+    ITK_URL=https://github.com/InsightSoftwareConsortium/ITK
+    ITK_SOURCE_DIR=${HOME_DIR}/ITK-source
+    ITK_BUILD_DIR=${HOME_DIR}/ITK-build
+    ELASTIX_URL=https://github.com/SuperElastix/elastix
+    ELASTIX_SOURCE_DIR=${HOME_DIR}/Elastix-source
+    ELASTIX_BUILD_DIR=${HOME_DIR}/Elastix-build
+    SUPERELASTIX_SOURCE_DIR=${TRAVIS_BUILD_DIR}/SuperBuild
+    SUPERELASTIX_BUILD_DIR=${HOME_DIR}/SuperElastix-build
+    CMAKE_DOWNLOAD_FILE=cmake-3.6.0-Linux-x86_64.sh
+
+cache:
+  directories:
+    - ${ExternalData_OBJECT_STORES}
+    - ${ITK_SOURCE_DIR}
+    - ${ITK_BUILD_DIR}
+    - ${ELASTIX_SOURCE_DIR}
+    - ${ELASTIX_BUILD_DIR}
+
+matrix:
+  include:
+    - os: linux
+      dist: trusty
+      sudo: required
+      compiler: gcc
+      addons:
+        apt:
+          sources: ubuntu-toolchain-r-test
+          packages: [g++-5, python3, python3-pip, libinsighttoolkit4*]
+      env: PYTHON=3.5 GCC="CC=gcc-5 && CXX=g++-5"
+    - os: linux
+      dist: trusty
+      sudo: required
+      compiler: gcc
+      addons:
+        apt:
+          sources: ubuntu-toolchain-r-test
+          packages: [g++-6, python3, python3-pip, libinsighttoolkit4*]
+      env: PYTHON=3.5 GCC="CC=gcc-6 && CXX=g++-6"
+    - os: linux
+      dist: trusty
+      sudo: required
+      compiler: gcc
+      addons:
+        apt:
+          sources: ubuntu-toolchain-r-test
+          packages: [g++-7, python3, python3-pip, libinsighttoolkit4*]
+      env: PYTHON=3.5 GCC="CC=gcc-7 && CXX=g++-7"
+    - os: osx
+      compiler: clang
+      osx_image: xcode8.3
+      env: PYTHON=3.5 CPP=14 CLANG
+    - os: osx
+      compiler: gcc
+      osx_image: xcode8.3
+      env: PYTHON=3.5 CPP=14 CLANG
+
+before_install:
+  - root=$PWD
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then eval ${GCC}; fi;
+  - mkdir -p ${SUPERELASTIX_BUILD_DIR}
+  - mkdir -p ${ExternalData_OBJECT_STORES}
+  - if [[ "$TRAVIS_OS_NAME" == "linux" && ! -e "${ExternalData_OBJECT_STORES}/${CMAKE_DOWNLOAD_FILE}" ]]; then (cd ${ExternalData_OBJECT_STORES} && curl -sSO https://cmake.org/files/v3.6/${CMAKE_DOWNLOAD_FILE}); fi;
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo bash "${ExternalData_OBJECT_STORES}/${CMAKE_DOWNLOAD_FILE}" --prefix=/usr/local --exclude-subdir; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then cmake --version; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+   brew upgrade python &&
+   curl https://bootstrap.pypa.io/get-pip.py | python3 &&
+   brew list python | grep pip; fi
+
+install:
+  - if [[ ! -e ${ITK_BUILD_DIR}/ITKConfig.cmake ]]; then
+      rm -rf ${ITK_SOURCE_DIR} {ITK_BUILD_DIR} &&
+      git clone ${ITK_URL} ${ITK_SOURCE_DIR} &&
+      cd ${ITK_SOURCE_DIR} &&
+      git checkout v4.13.0 &&
+      mkdir -p ${ITK_BUILD_DIR} &&
+      cd ${ITK_BUILD_DIR} &&
+      cmake -DBUILD_EXAMPLES=OFF -DBUILD_TESTING=OFF -DCMAKE_BUILD_TYPE=Release -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=ON -DCMAKE_VISIBILITY_INLINES_HIDDEN:BOOL=ON -DBUILD_SHARED_LIBS:BOOL=OFF -DCMAKE_SKIP_RPATH:BOOL=ON -DITK_LEGACY_REMOVE:BOOL=ON -DITK_USE_KWSTYLE:BOOL=OFF -DITK_BUILD_DEFAULT_MODULES:BOOL=ON -DModule_ITKReview:BOOL=ON ${ITK_SOURCE_DIR} &&
+      make --jobs=2 && 
+      touch ${HOME_DIR}/built_cache; fi
+  - if [[ ! -e ${ELASTIX_BUILD_DIR}/ElastixConfig.cmake && ! -e ${HOME_DIR}/built_cache ]]; then
+      rm -rf ${ELASTIX_SOURCE_DIR} ${ELASTIX_BUILD_DIR} &&
+      git clone ${ELASTIX_URL} ${ELASTIX_SOURCE_DIR} &&
+      cd ${ELASTIX_SOURCE_DIR} &&
+      git checkout 0ce6c24a2b74c0132f1a53848321f1c7a92162ea &&
+      mkdir -p ${ELASTIX_BUILD_DIR} &&
+      cd ${ELASTIX_BUILD_DIR} &&
+      cmake -DBUILD_TESTING:BOOL=OFF -DELASTIX_BUILD_EXECUTABLE:BOOL=OFF -DITK_DIR=${ITK_BUILD_DIR} -DCMAKE_BUILD_TYPE=Release ${ELASTIX_SOURCE_DIR} &&
+      make --jobs=2 && 
+      touch ${HOME_DIR}/built_cache; fi
+  - cd ${SUPERELASTIX_BUILD_DIR}
+  - if [[ ! -e ${HOME_DIR}/built_cache ]]; then
+      cmake -DBUILD_APPLICATIONS_EXTERNAL_PROJECT:BOOL=ON -DBUILD_TESTING:BOOL=ON -DCMAKE_BUILD_TYPE=Release -DUSE_SYSTEM_ITK:BOOL=ON -DITK_DIR=${ITK_BUILD_DIR} -DUSE_SYSTEM_ELASTIX:BOOL=ON -DElastix_DIR=${ELASTIX_BUILD_DIR} ${SUPERELASTIX_SOURCE_DIR} && 
+      make --jobs=2; fi
+
+#before_script:
+#  - cd $root
+#  - mkdir temp
+#  - python3 --version && pip3 --version
+#  - sudo pip3 install -U pip
+#  - pip3 install --user -r requirements.txt
+#  - sudo pip3 install --ignore-installed nose pytest pytest-cov coverage codecov codacy-coverage
+
+script: sleep 1 # disable default call ./configure && make && make test
+#  - nosetests Tools -v --exe --with-doctest --with-xunit --with-coverage --cover-package=Tools
+#  - nosetests ContinuousRegistration -v --exe --with-doctest --with-xunit --with-coverage --cover-package=ContinuousRegistration  --ignore-files=submit_jobs.py
+#  - py.test Tools -v --doctest-modules
+#  - py.test ContinuousRegistration -v --doctest-modules --ignore=ContinuousRegistration/Source/submit_jobs.py
+#  - coverage run --source Tools -m py.test Tools -v --doctest-modules
+#  - coverage run --source ContinuousRegistration -m py.test ContinuousRegistration -v --doctest-modules --ignore=ContinuousRegistration/Source/submit_jobs.py
+#  - coverage report
+#  - codecov

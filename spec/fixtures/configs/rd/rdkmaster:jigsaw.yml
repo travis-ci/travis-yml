@@ -1,0 +1,51 @@
+language: node_js
+
+node_js:
+  - "8"
+
+branches:
+  - master
+  - v1.1
+  - plunker-live-demo-test
+env:
+  global:
+  - SAUCE_USERNAME=pkozlowski
+  - SAUCE_ACCESS_KEY=173aa66e-43e6-4e34-b873-9cb037b8ae5c
+  - BROWSER_PROVIDER_READY_FILE=/tmp/sauce-connect-ready
+  - LOGS_DIR=/tmp/logs
+  - SEED_DIR=`pwd`/../jigsaw-seed
+
+before_install:
+  - export DISPLAY=:99.0
+  - sh -e /etc/init.d/xvfb start
+  - sleep 3 # give xvfb some time to start
+
+install:
+  - npm install
+
+before_script:
+  - mkdir -p $LOGS_DIR
+  - chmod a+x ./build/scripts/sauce_connect_setup.sh
+  - ./build/scripts/sauce_connect_setup.sh
+
+script:
+  - node build/scripts/make-demo-independent.js
+  - gulp ensure-url-matches-path
+  - gulp generate-demo-info
+  - gulp jigsaw:build-release:clean
+  - # ng test --code-coverage --watch false
+  - # cat ./coverage/lcov.info | ./node_modules/.bin/coveralls
+  - sh build/scripts/doc-generator/generate.sh ./temp/doc/
+  - sh build/scripts/build-tourist.sh
+  - sh build/scripts/integrate-with-seed.sh
+  - sh build/scripts/sauce_connect_block.sh
+  - cd $SEED_DIR # run e2e in seed directory
+  - ng build -prod -aot
+  - #ng e2e
+
+after_script:
+  - sh ./build/scripts/sauce_connect_teardown.sh
+
+sudo: false
+
+dist: precise

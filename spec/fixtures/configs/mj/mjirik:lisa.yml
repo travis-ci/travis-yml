@@ -1,0 +1,129 @@
+language: python
+#python:
+#  #  - "2.6"
+#  - "2.7"
+#  # - "3.2"
+#  # - "3.3"
+#  # - "3.4"
+env:
+    - CONDA_PYTHON_VERSION=2.7
+    - CONDA_PYTHON_VERSION=3.6
+#virtualenv:
+#    system_site_packages: true
+before_install:
+    # We do this conditionally because it saves us some downloading if the
+    # version is the same.
+    - if [[ "$CONDA_PYTHON_VERSION" == "2.7" ]]; then
+        wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O miniconda.sh;
+      else
+        wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
+      fi
+#    - wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh
+#    - chmod +x miniconda.sh
+#    - ./miniconda.sh -b
+    - bash miniconda.sh -b -p $HOME/miniconda
+    - export PATH="$HOME/miniconda/bin:$PATH"
+    - hash -r
+    - conda config --set always_yes yes --set changeps1 no
+    - conda update -q conda
+    # Useful for debugging any issues with conda
+    - conda info -a
+
+# command to install dependencies
+install:
+    - sudo apt-get update -qq
+    - sudo apt-get install -qq git g++ sox make curl cmake
+    # - sudo apt-get install -qq python python-dev
+    - sudo apt-get install -qq libinsighttoolkit3-dev libpng12-dev libgdcm2-dev
+
+    - conda update --yes conda
+    - conda config --add channels conda-forge
+    - conda config --add channels SimpleITK
+    - conda config --add channels mjirik
+    - conda config --add channels luispedro
+    - conda config --add channels menpo
+    # Install dependencies
+    - conda install --yes --file requirements_conda.txt python=$CONDA_PYTHON_VERSION
+#    - pip install -r ci/requirements_ci.txt
+#    - pip install coverage
+#    - conda install coveralls nose python=$CONDA_PYTHON_VERSION
+      # - "easy_install SimpleITK mahotas"
+    - pip install -r requirements_pip.txt
+    - pip install coveralls
+    # - if [ ${pack} == "old_mpl" ]; then conda install --yes python=$TRAVIS_PYTHON_VERSION numpy scipy nose dateutil pandas statsmodels pil six; fi
+#    - git clone https://github.com/mjirik/skelet3d.git
+#    - mkdir skelet3d/build
+#    - cd skelet3d/build
+#    - cmake ..
+#    - cmake --build .
+##    - sudo make install
+#    - sudo make install
+#    - cd ..
+#    - cd ..
+
+    - echo $LD_LIBRARY_PATH
+    - git clone https://github.com/mjirik/skelet3d.git
+    - mkdir skelet3d/build
+    - pip install -r requirements.txt
+    - cd skelet3d
+    - cd build
+    - cmake ..
+    - cmake --build .
+    - sudo make install
+
+# skelet3d package is installed by conda so there is no need to install it again
+#    - pip install .
+    - cd ..
+    - 'echo "include /usr/local/lib" | sudo tee -a /etc/ld.so.conf'
+    - sudo ldconfig -v
+    - cd ..
+    - cd ..
+
+    # fix openssl problem with
+    # _openssl.so: undefined symbol: X509_VERIFY_PARAM_set1_ip_asc
+    # conda install openssl=1.0.2
+    - conda list
+    - apt-cache policy openssl
+    # - conda install --yes paramiko=1.16.0 python=$CONDA_PYTHON_VERSION
+    - conda install --yes paramiko>=2 python=$CONDA_PYTHON_VERSION
+
+    # - sudo apt-get install openssl=1.0.1
+    # - apt-cache policy openssl
+
+
+    # - sudo make install
+    # library is installed but not for anaconda
+    # gco_python
+    # - "git clone https://github.com/mjirik/gco_python.git"
+    # - "cd gco_python"
+    # - make
+    # - "pip install ."
+    # - cd ..
+    # ubuntu installer is not working
+    # - 'sudo ./ubuntu_installer.sh devel'
+#    - 'echo "include /usr/local/lib" | sudo tee -a /etc/ld.so.conf'
+#    - 'sudo ldconfig -v'
+#    - sudo ldconfig -v
+    # get sample data for lisa
+    - ls ~
+    - python -m io3d.datasets -l lisa
+     #-l volumetrie
+#    - ls ~
+    - pwd
+    - ls ~/data/medical/orig
+    - ls ~/data/medical/orig/volumetrie
+
+#    - ls ~/data/medical/orig/sample_data/volumetrie
+
+before_script:
+    # GUI
+    - "export DISPLAY=:99.0"
+    - "sh -e /etc/init.d/xvfb start"
+    - sleep 3 # give xvfb sume time to start
+
+# command to run tests
+script: nosetests --with-coverage --verbose -d --cover-package=lisa
+# script: nosetests --with-coverage --verbose --nocapture --nologcapture --cover-package=lisa
+# skip organ_segmentation_tests
+#script: nosetests --with-coverage -v -s -x --cover-package=lisa -I organ_segmentation_test.py
+after_success: coveralls

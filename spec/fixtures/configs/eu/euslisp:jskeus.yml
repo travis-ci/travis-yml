@@ -1,0 +1,95 @@
+# Travis Continuous Integration Configuration File
+notifications:
+  email:
+    recipients:
+      - euslisp@jsk.t.u-tokyo.ac.jp
+    on_success: always #[always|never|change] # default: change
+    on_failure: always #[always|never|change] # default: always
+  slack: jsk-robotics:Av7tc8wj3IWkLYvlTzHE7x2g
+matrix:
+  include:
+    - os: linux
+      dist: trusty
+      sudo: required
+      cache: apt
+      env: DOCKER_IMAGE=ubuntu:trusty
+    - os: linux
+      dist: trusty
+      sudo: required
+      cache: apt
+      env: DOCKER_IMAGE=ubuntu:xenial
+    - os: linux
+      dist: trusty
+      sudo: required
+      cache: apt
+      env: DOCKER_IMAGE=ubuntu:bionic
+    - os: linux
+      dist: trusty
+      sudo: required
+      cache: apt
+      env: DOCKER_IMAGE=osrf/ubuntu_armhf:trusty
+    - os: linux
+      dist: trusty
+      sudo: required
+      cache: apt
+      env: DOCKER_IMAGE=osrf/ubuntu_armhf:xenial
+    - os: linux
+      dist: trusty
+      sudo: required
+      cache: apt
+      env: DOCKER_IMAGE=osrf/ubuntu_arm64:trusty
+    - os: linux
+      dist: trusty
+      sudo: required
+      cache: apt
+      env: DOCKER_IMAGE=osrf/ubuntu_arm64:xenial
+    - os: linux
+      dist: trusty
+      sudo: required
+      cache: apt
+      env: DOCKER_IMAGE=debian:jessie
+    - os: linux
+      dist: trusty
+      sudo: required
+      cache: apt
+      env: DOCKER_IMAGE=debian:stretch
+    - os: linux
+      dist: trusty
+      sudo: required
+      cache: apt
+      env: DOCKER_IMAGE=osrf/debian_arm64:jessie
+    - os: linux
+      dist: trusty
+      sudo: required
+      cache: apt
+      env: DOCKER_IMAGE=osrf/debian_arm64:stretch
+    - os: linux
+      dist: trusty
+      sudo: required
+      cache: apt
+      env: BUILD_DOC=true
+    - os: osx
+  # allow_failures:
+  #   - env: DOCKER_IMAGE=osrf/debian_arm64:stretch
+before_install: # Use this to prepare the system to install prerequisites or dependencies
+  - echo -e "Host github.com\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
+install:
+  # Define some config vars
+  - export CI_SOURCE_PATH=$(pwd)
+  - export REPOSITORY_NAME=${PWD##*/}
+  - if [[ "$DOCKER_IMAGE" == *"arm"* ]]; then sudo apt-get install -y -qq qemu-user-static git; fi
+script:
+  - echo "Testing branch $TRAVIS_BRANCH of $REPOSITORY_NAME"
+  - if [[ "$DOCKER_IMAGE" == *"arm"* ]]; then COUNT=10; while [ $COUNT -gt 0 -a ! -e $CI_SOURCE_PATH/eus ] ; do echo $COUNT; sleep 1; GIT_SSL_NO_VERIFY=true git clone --depth 10 http://github.com/euslisp/EusLisp $CI_SOURCE_PATH/eus; COUNT=`expr $COUNT - 1`; done; fi # running git clone within arm VM is very slow
+  - if [ "$TRAVIS_OS_NAME" == "linux" -a "$BUILD_DOC" != "true" ]; then docker run --rm -i -v $CI_SOURCE_PATH:$CI_SOURCE_PATH -e "DOCKER_IMAGE=$DOCKER_IMAGE" -e "CI_SOURCE_PATH=$CI_SOURCE_PATH" -e "HOME=$HOME" -t $DOCKER_IMAGE sh -c "cd $CI_SOURCE_PATH; ./.travis.sh"; fi
+  # Test installing head version jskeus via Homebrew formula
+  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then $CI_SOURCE_PATH/.travis-osx.sh; fi
+  # Test doc generation
+  - if [ "$BUILD_DOC" == "true" ]; then sudo apt-get install -y -qq git make gcc g++ libjpeg-dev libxext-dev libx11-dev libgl1-mesa-dev libglu1-mesa-dev libpq-dev libpng12-dev xfonts-100dpi xfonts-75dpi; fi
+  - if [ "$BUILD_DOC" == "true" ]; then make; fi
+  - if [ "$BUILD_DOC" == "true" ]; then sudo apt-get install -y -qq texlive-binaries texlive-lang-cjk poppler-utils nkf latex2html; fi
+  - if [ "$BUILD_DOC" == "true" ]; then (source bashrc.eus; cd doc/; make pdf); fi
+  - if [ "$BUILD_DOC" == "true" ]; then (source bashrc.eus; cd doc/; make html); fi
+after_failure:
+  - echo "failure"
+

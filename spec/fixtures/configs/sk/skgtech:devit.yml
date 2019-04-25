@@ -1,0 +1,53 @@
+env:
+  global:
+  - NOKOGIRI_USE_SYSTEM_LIBRARIES=true
+
+cache:
+  directories:
+  - $TRAVIS_BUILD_DIR/tmp/.htmlproofer #https://github.com/gjtorikian/html-proofer/issues/381
+
+language:
+  - node_js
+  - ruby
+
+node_js:
+  - 6
+
+rvm:
+  - 2.4.2
+
+before_install:
+  - rvm install 2.4.2
+  - gem install bundler
+  - npm install -g yarn netlify-cli
+
+install:
+  - bundle install
+  - yarn
+
+addons:
+  apt:
+    packages:
+    - libcurl4-openssl-dev
+
+script:
+  - npm run build
+
+  # Previous folders are HUGE. Remove them before deploying.
+  - if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then rm -rf ./_site/2017 ./_site/2016 ./_site/2015; fi
+  # Deploy a PR Preview
+  - if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then export RESULT=$(netlify deploy -t $NETLIFY_ACCESS_TOKEN -s devitconf -p _site/ | grep -Eo 'http://[^ >]+'|head -1); fi
+  - if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then curl -H "Authorization:token $GITHUB_COMMENT" -X POST -d "{\"body\":\"View your PR here $RESULT.\"}" "https://api.github.com/repos/skgtech/devit/issues/$TRAVIS_PULL_REQUEST/comments"; fi
+
+  # Previous site folders are considered to be legacy.
+  # Do not check on them.
+  # This is not very accurate, that's why it's at the bottom.
+  #
+  # @See: See package.json scripts
+  - npm run lint
+
+  # Deploy on Production
+  - if [ "$TRAVIS_BRANCH" = "master" ] && [ "$TRAVIS_PULL_REQUEST" = "false" ]; then git config --global user.email publish@travis.github && git config --global user.name "Travis"; fi
+  - if [ "$TRAVIS_BRANCH" = "master" ] && [ "$TRAVIS_PULL_REQUEST" = "false" ]; then git remote remove origin; fi
+  - if [ "$TRAVIS_BRANCH" = "master" ] && [ "$TRAVIS_PULL_REQUEST" = "false" ]; then git remote add origin https://${GITHUB_COMMENT}@github.com/skgtech/devit.git > /dev/null 2>&1; fi
+  - if [ "$TRAVIS_BRANCH" = "master" ] && [ "$TRAVIS_PULL_REQUEST" = "false" ]; then npm run deploy; fi

@@ -1,0 +1,23 @@
+language: scala
+scala:
+   - 2.12.8
+jdk:
+   - oraclejdk11
+sudo: required
+
+services:
+  - docker
+script:
+  - mkdir -p ${HOME}/.sbt/1.2 && echo echo "credentials += Credentials(\"Sonatype Nexus Repository Manager\", \"oss.sonatype.org\", \"${SONATYPE_USERNAME}\", \"${SONATYPE_PASSWORD}\")" > ${HOME}/.sbt/1.2/sonatype.sbt
+  - CURRENT_UID=$(id -u):$(id -g) sbt ++$TRAVIS_SCALA_VERSION dockerComposeUp
+  - nc -z 0.0.0.0 9200 && echo "OK PORT(9200)" || echo "FAILED PORT(9200)"
+  - curl -v -k https://0.0.0.0:9200 && echo "OK PORT(9200)" || echo "FAILED PORT(9200)"
+  - sbt ++$TRAVIS_SCALA_VERSION clean coverage test coverageReport codacyCoverage
+  - sbt ++$TRAVIS_SCALA_VERSION dockerComposeStop
+notifications:
+  webhooks:
+    urls:
+      - https://webhooks.gitter.im/e/15b5367e5ba965a65a9a
+    on_success: change
+    on_failure: always
+    on_start: never

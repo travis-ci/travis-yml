@@ -19,19 +19,19 @@ describe Travis::Yml::Schema::Def::Notification::Irc, 'structure' do
                 type: :boolean
               },
               channels: {
-                '$ref': '#/definitions/secures'
+                '$ref': '#/definitions/type/secures'
               },
               channel_key: {
-                '$ref': '#/definitions/secure'
+                '$ref': '#/definitions/type/secure'
               },
               password: {
-               '$ref': '#/definitions/secure'
+               '$ref': '#/definitions/type/secure'
               },
               nickserv_password: {
-               '$ref': '#/definitions/secure'
+               '$ref': '#/definitions/type/secure'
               },
               nick: {
-               '$ref': '#/definitions/secure'
+               '$ref': '#/definitions/type/secure'
               },
               use_notice: {
                 type: :boolean
@@ -59,7 +59,7 @@ describe Travis::Yml::Schema::Def::Notification::Irc, 'structure' do
             ]
           },
           {
-            '$ref': '#/definitions/secures'
+            '$ref': '#/definitions/type/secures'
           },
           {
             type: :boolean

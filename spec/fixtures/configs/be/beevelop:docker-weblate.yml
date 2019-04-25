@@ -1,0 +1,11 @@
+sudo: required
+
+services:
+  - docker
+
+script:
+  - docker build -t weblate .
+  - docker run --name postgres -e POSTGRES_PASSWORD=weblate -e POSTGRES_USER=weblate -d postgres:9.4
+  - docker run --name weblate --link postgres:database -e DEBUG=True -e WEBLATE_ADMIN_NAME=john -e WEBLATE_ADMIN_EMAIL=john@example.com -e WEBLATE_EMAIL=john@example.com -d weblate
+  - sleep 42 && docker exec weblate /bin/sh -c "apt-get update && apt-get install curl -y --no-install-recommends && curl -f localhost:8000"
+  - docker logs weblate

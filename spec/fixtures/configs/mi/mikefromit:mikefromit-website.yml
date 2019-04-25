@@ -1,0 +1,30 @@
+language: python
+python:
+  - '3.6'
+dist: trusty
+sudo: required
+services:
+  - redis-server
+  - docker
+before_install:
+  # Remove the PostgreSQL installed by Travis
+  - sudo apt-get purge pgdg-keyring '^postgresql.*' -y
+  - sudo apt-get autoremove -y -qq
+  - sudo rm -rf /etc/postgresql
+  - sudo rm -rf /var/lib/postgresql
+  - sudo rm -f /etc/apt/sources.list.d/pgdg-source.list
+install:
+  - docker-compose -f travis-compose.yml up -d
+before_script:
+  # Install the packages needed for development
+  - docker-compose -f travis-compose.yml exec web /bin/sh -c "pip install -r requirements-dev.txt"
+script:
+  - docker-compose -f travis-compose.yml exec web /bin/sh -c "pytest"
+after_success:
+  - docker-compose -f travis-compose.yml exec web /bin/sh -c "codecov"
+  - docker-compose down
+  - if [ "$TRAVIS_BRANCH" == "master" ]; then
+    docker build -t registry.heroku.com/mikefromit/web .
+    docker login -u "$HEROKU_USERNAME" -p "$HEROKU_API_KEY" registry.heroku.com;
+    docker push registry.heroku.com/mikefromit/web;
+    fi

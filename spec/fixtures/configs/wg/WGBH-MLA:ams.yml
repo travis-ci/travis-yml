@@ -1,0 +1,58 @@
+sudo: true
+dist: trusty
+language: ruby
+services:
+- redis-server
+jdk:
+- oraclejdk8
+rvm:
+- 2.5.3
+addons:
+  chrome: stable
+cache:
+  bundler: true
+  directories:
+  - dep_cache
+before_install:
+- google-chrome-stable --headless --disable-gpu --no-sandbox --remote-debugging-port=9222
+  http://localhost &
+- mkdir -p dep_cache
+- ls -l dep_cache
+- cp config/travis/solr_wrapper_test.yml config/solr_wrapper_test.yml
+- cp config/travis/fcrepo_wrapper_test.yml config/fcrepo_wrapper_test.yml
+before_script:
+- export DISPLAY=:99.0
+- sh -e /etc/init.d/xvfb start
+- sleep 3
+- RAILS_ENV=test bundle exec rake db:environment:set db:create db:migrate --trace
+- RAILS_ENV=test npm install yarn
+- RAILS_ENV=test yarn install
+- RAILS_ENV=test bundle exec rake webpacker:compile
+script:
+- bundle exec rake ci
+deploy:
+- provider: codedeploy
+  access_key_id: AKIAJODP6VPR5EKCIJCQ
+  secret_access_key:
+    secure: dZNrJTvtl4+MS6Sa7lRgV3RCTDL/jZXu3Y6vpHp+HNaB2qO4NPT/ohDhuNt6NxBAUmQrbTSaoWKZZ90y6m+DIVCf2t6Vwfjbw548D/675b+hc2n47R9Pu/yzD/itlWasIjMxTMed5in01EQjDRiMKiez096fN3/X/0fJPCRaIW9QIeIbGnHZBYhwYSgdkGHzGCQlNY5adUrVskz+ilX7AvOVBLRJjSAnbvJlE4kKdhgh75LD5cSQBPmY3Mb41juW+VoZFf4FroReL2Ac5AiPhDXCFkXU3CAQ7HI0aqnAtpsgj9eoGUqJxHnRe0FZOX3vTXbUprzcWpR2Tokev1ZtEY30WlguvL1f4RC1UcmW5icQSGmzNGSTwKvgOvCx6xWwLQX30+GBTIy2UoI7wf6AO92FSPlWhuKyUqWg3pbeWusSpDwCza4tG0zrh1sRODkCDWHbMFUtvwQY2lSgvghjOfvvIPHqqly4D5q8mjdj6bixxdySkujeF1XTkJP9tBDEFGvl5mDUTUVSa8NTcdpEB44axcGpz8YpcLzjWVs23RSf0ItUOKM1wgIEj+/B7tW9NtrdkwLPbeUJnFCwDd3FooJXXLH86GG9St01LcIXmohbPEqrB8ktZKxp123DORpQfJAMVVjYJ/gRmSkCaJ9AiC6AFYWfSls5IzmWt4+KoBw=
+  revision_type: github
+  application: AMS2Edge
+  deployment_group: AMS2Edge-DG
+  region: us-east-1
+  on:
+    branch: develop
+    ruby: 2.5.3
+- provider: codedeploy
+  access_key_id: AKIAJODP6VPR5EKCIJCQ
+  secret_access_key:
+    secure: dZNrJTvtl4+MS6Sa7lRgV3RCTDL/jZXu3Y6vpHp+HNaB2qO4NPT/ohDhuNt6NxBAUmQrbTSaoWKZZ90y6m+DIVCf2t6Vwfjbw548D/675b+hc2n47R9Pu/yzD/itlWasIjMxTMed5in01EQjDRiMKiez096fN3/X/0fJPCRaIW9QIeIbGnHZBYhwYSgdkGHzGCQlNY5adUrVskz+ilX7AvOVBLRJjSAnbvJlE4kKdhgh75LD5cSQBPmY3Mb41juW+VoZFf4FroReL2Ac5AiPhDXCFkXU3CAQ7HI0aqnAtpsgj9eoGUqJxHnRe0FZOX3vTXbUprzcWpR2Tokev1ZtEY30WlguvL1f4RC1UcmW5icQSGmzNGSTwKvgOvCx6xWwLQX30+GBTIy2UoI7wf6AO92FSPlWhuKyUqWg3pbeWusSpDwCza4tG0zrh1sRODkCDWHbMFUtvwQY2lSgvghjOfvvIPHqqly4D5q8mjdj6bixxdySkujeF1XTkJP9tBDEFGvl5mDUTUVSa8NTcdpEB44axcGpz8YpcLzjWVs23RSf0ItUOKM1wgIEj+/B7tW9NtrdkwLPbeUJnFCwDd3FooJXXLH86GG9St01LcIXmohbPEqrB8ktZKxp123DORpQfJAMVVjYJ/gRmSkCaJ9AiC6AFYWfSls5IzmWt4+KoBw=
+  revision_type: github
+  application: AMS2Staging
+  deployment_group: AMS2Staging-DG
+  region: us-east-1
+  on:
+    branch: develop
+    ruby: 2.5.3
+env:
+  matrix:
+    secure: bhFHxEHJJKvXc1rXvhx6ip9anTD9vEZSUO+rkXDN3M2HOV3wco2Dt8HH+7gy1fS3A8l/5+VB1LQ0vwRzykQlGARuGIFFd9y9VaPsdAdjqJbTeD6Neb4SHFu7pOEbhfCfdkU/wOLTn1HQ46bl0u33E3fFeVLRyN1vyIuvYW3o9ZHpfhni8enGC9UbQt65DHUVSUCgynutKIWK/lIiiIzxrOhySjQN3u05/W38o1nwsQLi3pWjj20SLD7U42VPK72TzIqkfs4LPcOSb9we/EMdWhIcrfqRZrC/bbVXB/56Un4ZUF/83y0dQJoglcHB7S+rRCGSx48b2ZtojG6B2vdJ96fNuDePf1YhTkolt9VxDL70AZdIiszADSPYJY4OgI4bUInl2BQvxueXQqoZjLkXSxLdHTD5ImZwfYioV3qgmdWXKdmxc6+MRlOznKXE1oHJqCtnwFC47BN4gq7VZoQHiQdpx4BMOWF13b6qGtO8pJK59bGDQPSO+eskBpZfghad3aMJ9c8+FESkDN9la8HXxlwyZDVNpysVLFFZqFcQlWQ/NG3r/e/NhmAfs3uyqi+bC4dsgg4MInfNQnzErshpfbvTXFJ29cKYnWCY9cWD0zLau2VehXHUxdaBoPaBONM8K73i3aqv/2YMZwSYAy/1egDslliOdyDb9ACKkKt/g9w=

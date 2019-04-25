@@ -1,0 +1,15 @@
+language: dart
+sudo: false
+
+os:
+  - linux
+
+dart:
+  - stable
+#  - dev
+
+script:
+  - ./tool/travis.sh
+  - dart test/test_all.dart
+  - dartfmt -n --set-exit-if-changed lib/ test/
+  - dartanalyzer --fatal-warnings --fatal-lints lib/ test/

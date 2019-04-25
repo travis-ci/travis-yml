@@ -1,0 +1,28 @@
+language: minimal
+services:
+  - docker
+
+install:
+  - docker build -t land-registry-elements .
+  - docker run -itd --name land-registry-elements land-registry-elements bash
+  - docker cp . land-registry-elements:/src/.
+  - docker exec land-registry-elements npm run build
+  - docker exec -d land-registry-elements /usr/bin/gunicorn -k eventlet --pythonpath /src --access-logfile - manage:manager.app --reload
+
+script:
+  - docker exec land-registry-elements npm run test
+
+cache:
+  bundler: true
+  directories:
+    - $HOME/docker
+
+before_cache:
+  # Save tagged docker images
+  - >
+    mkdir -p $HOME/docker && docker images -a --filter='dangling=false' --format '{{.Repository}}:{{.Tag}} {{.ID}}'
+    | xargs -n 2 -t sh -c 'test -e $HOME/docker/$1.tar.gz || docker save $0 | gzip -2 > $HOME/docker/$1.tar.gz'
+
+before_install:
+  # Load cached docker images
+  - if [[ -d $HOME/docker ]]; then ls $HOME/docker/*.tar.gz | xargs -I {file} sh -c "zcat {file} | docker load"; fi

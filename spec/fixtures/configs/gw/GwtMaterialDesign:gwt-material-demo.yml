@@ -1,0 +1,40 @@
+sudo: false
+language: java
+jdk:
+- oraclejdk8
+cache:
+  directories:
+  - $HOME/.m2
+before_install:
+# install the gwt-material-jquery library before we build the demo
+- git clone -b master https://github.com/GwtMaterialDesign/gwt-material-jquery.git
+- cd gwt-material-jquery
+- mvn install -DskipTests=true -DdryRun=true
+- cd ..
+# install the gwt-material library before we build the demo
+- git clone -b master https://github.com/GwtMaterialDesign/gwt-material.git
+- cd gwt-material
+- mvn install -DskipTests=true -DdryRun=true
+- cd ..
+# install the gwt-material-themes library
+- git clone -b master https://github.com/GwtMaterialDesign/gwt-material-themes.git
+- cd gwt-material-themes
+- mvn install -DskipTests=true -DdryRun=true
+- cd ..
+# install the gwt-material-addins library
+- git clone -b master https://github.com/GwtMaterialDesign/gwt-material-addins.git
+- cd gwt-material-addins
+- mvn install -DskipTests=true -DdryRun=true
+- cd ..
+# install the gwt-material-table library before we build the demo
+- git clone -b master https://github.com/GwtMaterialDesign/gwt-material-table.git
+- cd gwt-material-table
+- mvn install -DskipTests=true -DdryRun=true
+- cd ..
+install: true
+before_script:
+ - chmod +x .utility/*
+script:
+  - mvn clean install -DdryRun=true -Dlicense.failOnMissingHeader=false -Dlicense.failOnNotUptodateHeader=false
+after_success:
+  - .utility/update_demo_site.sh

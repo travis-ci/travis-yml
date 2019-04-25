@@ -1,0 +1,25 @@
+language: php
+
+php:
+ - 7.2
+ - 7.3
+
+before_script:
+# - pecl install channel://pecl.php.net/pthreads-3.1.6
+ - echo | pecl install channel://pecl.php.net/yaml-2.0.4
+ - git clone https://github.com/pmmp/pthreads.git
+ - cd pthreads
+ - git checkout 6ca019c58b4fa09ee2ff490f2444e34bef0773d0
+ - phpize
+ - ./configure
+ - make
+ - make install
+ - cd ..
+ - echo "extension=pthreads.so" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
+ - composer install
+
+script:
+ - ./tests/travis.sh -t4
+
+notifications:
+ email: false

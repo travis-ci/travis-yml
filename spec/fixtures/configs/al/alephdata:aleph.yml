@@ -1,0 +1,52 @@
+sudo: required
+
+services:
+  - docker
+
+env:
+  global:
+    - ALEPH_DATABASE_NAME=aleph
+    - ALEPH_DATABASE_URI=postgresql://localhost/$ALEPH_DATABASE_NAME
+    - DOCKER_COMPOSE_VERSION=1.23.2
+    - DOCKER_IMAGE_NAME=alephdata/aleph
+
+before_install:
+  - sudo apt-get update
+  - sudo apt-get -y -o Dpkg::Options::="--force-confnew" install docker-ce
+  - sudo sysctl -w vm.max_map_count=262144
+  - sudo rm /usr/local/bin/docker-compose
+  - curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
+  - chmod +x docker-compose
+  - sudo mv docker-compose /usr/local/bin
+  - sudo echo "ALEPH_DATABASE_NAME=$ALEPH_DATABASE_NAME\nALEPH_DATABASE_URI=$ALEPH_DATABASE_URI\nOAUTH_KEY=$OAUTH_KEY\nOAUTH_SECRET=$OAUTH_SECRET" >> aleph.env
+  - docker --version
+  - docker-compose --version
+  - make docker-pull
+
+install:
+  - echo "${TRAVIS_BRANCH}"
+  - make build
+  - docker-compose -f docker-compose.dev.yml up -d postgres elasticsearch redis
+  - sleep 4
+
+script:
+  - make test
+
+after_success:
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+  - if [[ $TRAVIS_BRANCH = "master" ]]; then
+      make TAG=master build-full docker-push ;
+      make TAG=$TRAVIS_COMMIT build-full docker-push ;
+    fi
+  - if [[ $TRAVIS_BRANCH = "develop" ]]; then
+      make TAG=develop build-full docker-push ;
+      make TAG=$TRAVIS_COMMIT build-full docker-push ;
+    fi
+  - if [[ $TRAVIS_BRANCH = "occrp/production" ]]; then
+      make TAG=occrp build-full docker-push ;
+    fi
+  - if [[ $TRAVIS_TAG = $TRAVIS_BRANCH ]]; then
+      make TAG=$TRAVIS_TAG build-full docker-push ;
+      make TAG=$TRAVIS_COMMIT build-full docker-push ;
+      make build-full docker-push ;
+    fi

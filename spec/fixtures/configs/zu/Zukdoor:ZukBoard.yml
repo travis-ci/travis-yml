@@ -1,0 +1,35 @@
+language: node_js
+node_js:
+- '8'
+branches:
+  only:
+  - master
+  - develop
+  - production
+cache:
+  yarn: true
+  directories:
+  - node_modules
+before_install:
+  - curl -o- -L https://yarnpkg.com/install.sh | bash -s -- --version 1.12.3
+  - export PATH=$HOME/.yarn/bin:$PATH
+script:
+  - yarn test
+before_deploy: yarn global add now # Install Now CLI on Travis
+deploy:
+  - provider: script # Run a custom deployment script which we will define below
+    script: sh deploy-staging.sh
+    skip_cleanup: true
+    on:
+      branch: master
+  - provider: script # Run a custom deployment script which we will define below
+    script: sh deploy.sh
+    skip_cleanup: true
+    on:
+      branch: production
+  - provider: heroku
+    app: zukboard-heroku
+    api_key:
+      secure: J8xvqpednK/H1Ot8KTNedLrvh+vldC8lf6CGK455/dLECa4MrReonsFBCrzTwdt8I0bvjP2WjU1UfOHlF9WCJaOD61AmO/hF+IxjND/2Q0H66sMGVl1TLymlYqkzFLVhAIfp6FWgtgBceJIY2nJQ0Quw2oDpmkmMLI22caOf0AwZVA6dIVT1qTeaoFOf4gL1GLneUWfYZMsp1vYb6nMGkqWXCzNNt+TlHHWd+KQOOgqrj58CAEb0KIA0N9UTKvzypY87GOd78Aizj4BCIRE8OcGJiG59PVwtVwYLROz1iiqh5bTWRPem2hCC3rM5EzAv9Hi2g4oxqDUi2ujyBgqlyppl+MMSq2H/zdbwQS2HgUBLnfyGkaFu8DrGPM7iWH3dnND298aNf3z7lQH9NVaQJA6p+M7oRUJJhK0I6+wj4FBfuqj758BQ+uQxOk8UKCdsLIGYQQU6+4p3sWIL900YEqVOgqgAlee+FJWO8QGqGkPXt3pM9UeyZS6AGmSzNvu3DVGqP5lHMkg8YcjcOGMANsf7YI0mNtmt0YyYE6KdO6ghtBWi7M4YSWE/WWx6QcxmH8kUukNtishEgcnE+9d+1HUevGU7kawKqnfogC+HNE7K1iOdQVy5ww2Ew2ttBslWb3S8y170FgOoSe/2e8w51KSDrCzBjhfy3k7BORrzONU=
+    on:
+      branch: develop

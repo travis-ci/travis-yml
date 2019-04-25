@@ -1,0 +1,15 @@
+dist: xenial
+
+language: minimal
+
+install:
+  - sudo pip install mkdocs-material
+  - gem install html-proofer
+
+script:
+  - git remote set-url origin https://${GITHUB_TOKEN}@github.com/bluerobotics/ping-viewer
+  - mkdocs build
+  - htmlproofer --empty-alt-ignore --file-ignore "./site/404.html" --url-ignore "https://fonts.gstatic.com" || travis_terminate 1
+  - if [ ${TRAVIS_PULL_REQUEST} == "false" ]; then
+      mkdocs gh-deploy --force;
+    fi

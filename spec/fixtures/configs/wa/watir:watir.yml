@@ -1,0 +1,87 @@
+# Please note that we should not be using container-based infrastructure
+# because Chrome requires a lot of shared memory and Travis does not allow
+# use host's /dev/shm.
+sudo: required
+dist: trusty
+cache: bundler
+notifications:
+  slack:
+    secure: BLsBCm33R32VNRccrLx9F0P24X6BVpVHj1OWaN4Kyn6g9qXteIwC2VKVMnKNbifpojfMkrn0OeFQFK1O1DSOsC3mgzn/udoB+DnUGcSemFUn04xhbYF5SI+3zGPKPo0JLvjjdEKSSma84YwKdrj88pGUK34p01gL8hiaqjFzWdk=
+before_install:
+  - gem update --system
+  - gem install bundler
+
+before_script:
+  - support/travis.sh
+  - export PATH=~/.webdrivers:$PATH
+
+script: bundle exec rake $RAKE_TASK
+
+_version:
+  three: &three
+    language: ruby
+    rvm: 2.3.8
+  four: &four
+    language: ruby
+    rvm: 2.4.5
+  five: &five
+    language: ruby
+    rvm: 2.5.3
+
+_browsers:
+  firefox: &firefox-latest
+    addons:
+      firefox: latest
+  chrome: &chrome
+     addons:
+       chrome: stable
+
+matrix:
+  include:
+      - env: RAKE_TASK=spec:remote_firefox
+        <<: *five
+        <<: *firefox-latest
+      - env: RAKE_TASK=spec:remote_chrome
+        <<: *five
+        <<: *chrome
+      - env: RAKE_TASK=spec:firefox RELAXED_LOCATE=false
+        <<: *five
+        <<: *firefox-latest
+      - env: RAKE_TASK=spec:firefox
+        <<: *five
+        <<: *firefox-latest
+      - env: RAKE_TASK=spec:firefox
+        <<: *four
+        <<: *firefox-latest
+      - env: RAKE_TASK=spec:firefox
+        <<: *three
+        <<: *firefox-latest
+      - env: RAKE_TASK=spec:chrome
+        <<: *five
+        <<: *chrome
+      - env: RAKE_TASK=spec:chrome
+        <<: *four
+        <<: *chrome
+      - env: RAKE_TASK=spec:chrome
+        <<: *three
+        <<: *chrome
+      - env: RAKE_TASK=spec:chrome RELAXED_LOCATE=false
+        <<: *five
+        <<: *chrome
+      - env: RAKE_TASK=spec:chrome W3C=true
+        <<: *five
+        <<: *chrome
+      - env: RAKE_TASK=spec:chrome HEADLESS=true
+        <<: *five
+        <<: *chrome
+      - env: RAKE_TASK=spec:unit
+        <<: *five
+      - env: RAKE_TASK=spec:stats
+        <<: *five
+        <<: *chrome
+      - env: RAKE_TASK=yard:doctest
+        <<: *five
+        <<: *chrome
+      - env: RAKE_TASK=rubocop
+        <<: *three
+        <<: *chrome

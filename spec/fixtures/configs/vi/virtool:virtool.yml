@@ -1,0 +1,103 @@
+sudo: false
+matrix:
+  include:
+    - language: python
+      python: '3.6'
+      services:
+        - mongodb
+      addons:
+        apt:
+          sources:
+          - mongodb-upstart
+          - mongodb-3.4-precise
+          packages:
+          - libtbb-dev
+          - libffi6
+          - libffi-dev
+          - mongodb-org-server
+          - mongodb-org-shell
+      cache:
+        pip: true
+        apt: true
+        directories:
+        - client/node_modules
+      env:
+      - TRAVIS_NODE_VERSION="8"
+      before_install:
+      - pip install codacy-coverage
+      - wget http://eddylab.org/software/hmmer3/3.1b2/hmmer-3.1b2-linux-intel-x86_64.tar.gz
+      - tar -xf hmmer-3.1b2-linux-intel-x86_64.tar.gz
+      - export PATH=${PATH}:${PWD}/hmmer-3.1b2-linux-intel-x86_64/binaries
+      - wget https://github.com/BenLangmead/bowtie2/releases/download/v2.3.2/bowtie2-2.3.2-legacy-linux-x86_64.zip
+      - unzip bowtie2-2.3.2-legacy-linux-x86_64.zip
+      - export PATH=${PATH}:${PWD}/bowtie2-2.3.2-legacy
+      - bowtie2 --version
+      - wget https://github.com/relipmoc/skewer/archive/0.2.2.tar.gz
+      - tar -xvf 0.2.2.tar.gz
+      - cd skewer-0.2.2
+      - make
+      - cd ..
+      - export PATH=${PATH}:${PWD}/skewer-0.2.2
+      - skewer --version
+      - wget https://github.com/ablab/spades/releases/download/v3.11.0/SPAdes-3.11.0-Linux.tar.gz
+      - tar -xvf SPAdes-3.11.0-Linux.tar.gz
+      - export PATH=${PATH}:${PWD}/SPAdes-3.11.0-Linux/bin
+      - spades.py --version
+      install:
+      - pip install -r requirements.txt
+      - rm -rf ~/.nvm
+      - git clone https://github.com/creationix/nvm.git ~/.nvm
+      - cd ~/.nvm
+      - git checkout `git describe --abbrev=0 --tags`
+      - source ~/.nvm/nvm.sh
+      - nvm install $TRAVIS_NODE_VERSION
+      - cd $TRAVIS_BUILD_DIR
+      - cd client
+      - npm install
+      - ./node_modules/.bin/webpack --config webpack.production.config.babel.js
+      - cd $TRAVIS_BUILD_DIR
+      before_script:
+      - sleep 15
+      script:
+      - pytest --aiohttp-loop uvloop --cov --cov-report xml
+      - mkdir gh_build
+      - mkdir gh_build/virtool
+      - python -c 'import os,sys,fcntl; flags = fcntl.fcntl(sys.stdout, fcntl.F_GETFL); fcntl.fcntl(sys.stdout, fcntl.F_SETFL, flags&~os.O_NONBLOCK);'
+      - python -c 'import os,sys,fcntl; flags = fcntl.fcntl(sys.stdout, fcntl.F_GETFL); print(flags&os.O_NONBLOCK);'
+      - python setup.py build
+      - cp -rv build/exe.linux-x86_64-3.6/* gh_build/virtool
+      - 'if [ "$TRAVIS_TAG" ]; then echo $TRAVIS_TAG > gh_build/virtool/VERSION; else echo "v0.0.0" > gh_build/virtool/VERSION; fi'
+      - cd gh_build
+      - tar -cvzf virtool.tar.gz virtool
+      - tar -tvf virtool.tar.gz
+      - cd ..
+      after_script:
+      - 'if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then python-codacy-coverage -r coverage.xml; fi'
+      deploy:
+        - provider: releases
+          skip_cleanup: true
+          api_key:
+            secure: Otm5EqAcBp2i/KghWT/LZkLlpY1qHbYolCRk/Mwgqr0IQvy1ryM8IQot88/mntzKjVFbUIlJDVU8UmWgXac0cBCCT4rvzpRqMXEiWK+sl0Lqqg4tiOMS5gdQF5ywYVinT8e5Zl7O4g05zjU7mUMnSLRlTCNtcffdwOAqp9tfNJ4/FqlmHK+mhufmThQOdschbPLo7dFfSA7oioXesPWSA33lwG8PQWwQjmm55oMOqZiN38HG0wdZQgoH3QsVXLlTwqxAuyBfmOjrwkhTLhTfJ1EWwnlq1RF9uzxZF7J7bYR+IWm8Ws7z9n9kMX0F6/onnAS4D3QLue59jzfR7MJqyaDpyEONjjaP/8wC0afJ8vdc3X5SEdLz5S3/4X8d0llJLEZPL2i1PNfJzDIF7GDerF+0UARhtnHjMQFy5oV6UO6Pd3UuFaoaQUQff4Gw6ZYxVGEkbCUwYqMn4JaiDBrViUK2fzFQzWqiMnI3CrYYW19lcC4ppHLuTJz8YlpNwCsxpCU5YB14m6ra5ZPSJ+dqBLuF46KU+4uW+cXi+oAoS6t4Mb9Jz5Nhfgum965uFuOcsYaEilQSGzqRdIJFhBxyp+ow9Cnq0acmffm+W7jT+m0v2IvUlDkthAPSIBDLRrjOECTUXB7VorSusrK6J3hBcdkl6J58DfNi55N2px8KB7w=
+          file: gh_build/virtool.tar.gz
+          on:
+            tags: true
+
+        - provider: releases
+          skip_cleanup: true
+          api_key:
+            secure: Otm5EqAcBp2i/KghWT/LZkLlpY1qHbYolCRk/Mwgqr0IQvy1ryM8IQot88/mntzKjVFbUIlJDVU8UmWgXac0cBCCT4rvzpRqMXEiWK+sl0Lqqg4tiOMS5gdQF5ywYVinT8e5Zl7O4g05zjU7mUMnSLRlTCNtcffdwOAqp9tfNJ4/FqlmHK+mhufmThQOdschbPLo7dFfSA7oioXesPWSA33lwG8PQWwQjmm55oMOqZiN38HG0wdZQgoH3QsVXLlTwqxAuyBfmOjrwkhTLhTfJ1EWwnlq1RF9uzxZF7J7bYR+IWm8Ws7z9n9kMX0F6/onnAS4D3QLue59jzfR7MJqyaDpyEONjjaP/8wC0afJ8vdc3X5SEdLz5S3/4X8d0llJLEZPL2i1PNfJzDIF7GDerF+0UARhtnHjMQFy5oV6UO6Pd3UuFaoaQUQff4Gw6ZYxVGEkbCUwYqMn4JaiDBrViUK2fzFQzWqiMnI3CrYYW19lcC4ppHLuTJz8YlpNwCsxpCU5YB14m6ra5ZPSJ+dqBLuF46KU+4uW+cXi+oAoS6t4Mb9Jz5Nhfgum965uFuOcsYaEilQSGzqRdIJFhBxyp+ow9Cnq0acmffm+W7jT+m0v2IvUlDkthAPSIBDLRrjOECTUXB7VorSusrK6J3hBcdkl6J58DfNi55N2px8KB7w=
+          file: gh_build/virtool.tar.gz
+          draft: true
+
+    - language: node_js
+      node_js:
+      - '8'
+      cache:
+        npm: true
+      before_script:
+      - cd $TRAVIS_BUILD_DIR
+      - cd client
+      - npm install
+      script:
+      - ./node_modules/.bin/jest --maxWorkers=4 --coverage
+      - 'if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then cat ./coverage/lcov.info | codacy-coverage; fi'

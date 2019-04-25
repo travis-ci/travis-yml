@@ -1,0 +1,35 @@
+language: rust
+rust:
+  - stable
+os:
+  - linux
+  - osx
+
+dist: trusty
+sudo: false
+
+cache: cargo
+
+script:
+  - cargo test --release --verbose
+  -  "./misc/download-gum-corpus.sh"
+  - cargo build --verbose --release 
+  - ./target/release/annis data --cmd 'import relannis/GUM'
+  - cargo test --release --verbose  -- --ignored
+
+before_deploy:
+  - export RELEASE_PKG_FILE=target/release/libgraphannis_capi.so
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then export RELEASE_PKG_FILE=target/release/libgraphannis_capi.dylib ; fi
+
+
+deploy:
+  provider: releases
+  api_key:
+    secure: pJwgiTNjb48zOvLH3RkvGGN1rEA4hO9nWHDJu79/uYgSzQFD3KPJg9k0n86DvGLyP7wcKFU97fC3FEZKp0Z3h3WXn6OK4toc6F6PjKUoWzL7vIgF+QP9c0TIkDya3C8+lNPbK9LqCHMlVbmgUnqa2yGq6eUJpocPK932dGLRKUjMjKwkvQ9lhAOBvzafyovG3HkIhr7uwpjAN1rF8CUjOM4VT6SV3uJvPCO8mRyyd0nL2dcIjpfGEGTs+BMmCAHr2rts+scCiy9cDeDyp9IAWe6AmpKWelUyRdDSeXRWFvrSFKI5/4CXcvRs738dmISsFlEFFvHzbR0l+KnSi/8elvUJ04LQ15jrsg+MUhxaNbyykUb6C91P9BiRMah0Jx2RUYYB+RcVB6MXEcAk5GgjGr9rFU2UpomOSxk1P/2Q12Us9lf/fQnIDXgfep8Fk2VY9eBrieljv1pNcaar5mZYNjEoFx4SyovSxlM3pucgV4PVc/GspCsDpR4BYs9d5gLPql/CGL1+IJ7zhDwd8sVb9cACyKPQ2QXcl7TVzaPpEQd/JkJ1K2SjLWZXrtLF6nL821JQFz1Ff9cJfYM8UnpiZI4/ajB4WChk2rGynJN37jURfEXJq0RGwugZAZ5iWC9DxvPZI8pVSfxDtMELSqI7IpFSX6v2Drsg24ZOBpy0jo8=
+  file_glob: true
+  file: "${RELEASE_PKG_FILE}"
+  on:
+    repo: thomaskrause/graphANNIS
+    branch: staging
+  skip_cleanup: true
+  draft: true

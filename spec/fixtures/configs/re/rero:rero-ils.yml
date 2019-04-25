@@ -1,0 +1,92 @@
+# -*- coding: utf-8 -*-
+#
+# This file is part of RERO ILS.
+# Copyright (C) 2017 RERO.
+#
+# RERO ILS is free software; you can redistribute it
+# and/or modify it under the terms of the GNU General Public License as
+# published by the Free Software Foundation; either version 2 of the
+# License, or (at your option) any later version.
+#
+# RERO ILS is distributed in the hope that it will be
+# useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with RERO ILS; if not, write to the
+# Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston,
+# MA 02111-1307, USA.
+#
+# In applying this license, RERO does not
+# waive the privileges and immunities granted to it by virtue of its status
+# as an Intergovernmental Organization or submit itself to any jurisdiction.
+
+addons:
+  chrome: stable # https://docs.travis-ci.com/user/chrome
+
+# Chrome Webdriver fails if not on sudo
+# See https://github.com/travis-ci/travis-ci/issues/8836
+sudo: true
+
+dist: trusty # Chrome driver fails if not trusty dist
+
+notifications:
+  email: # sent to the committer and the author
+    on_success: never # default: always
+    on_failure: always # default: always
+
+language: python
+
+matrix:
+  fast_finish: true
+
+cache:
+  - pip
+
+services:
+  - docker
+
+env:
+  global:
+    # Print screenshots to console output
+    - E2E_OUTPUT=base64
+    # Enable end-to-end tests
+    - E2E=no
+  matrix:
+    - REQUIREMENTS=prod E2E=yes
+    - REQUIREMENTS=qa
+
+python:
+  - "3.6"
+
+before_install:
+  # Stop default travis services
+  - "sudo service mysql stop"
+  - "sudo service postgresql stop"
+  # Start docker services
+  - "docker-compose up -d"
+  # Chrome webdriver for Selenium
+  - "PATH=$PATH:$HOME/webdrivers"
+  - "if [ ${E2E} == 'yes' ] && [ ! -f $HOME/webdrivers/chromedriver ]; then wget https://chromedriver.storage.googleapis.com/2.31/chromedriver_linux64.zip -P $HOME/webdrivers; unzip -d $HOME/webdrivers $HOME/webdrivers/chromedriver_linux64.zip; fi"
+  - "nvm install 8; nvm use 8"
+  - "travis_retry pip install --upgrade pip setuptools py pipenv==2018.10.9"
+  - "travis_retry pip install twine wheel coveralls"
+  # patch default version of travis which is mark as unsave by pipenv check
+  - "travis_retry pip install --upgrade numpy"
+
+install:
+  - "./scripts/bootstrap --ci"
+
+before_script:
+  # https://docs.travis-ci.com/user/gui-and-headless-browsers/
+  - "export DISPLAY=:99.0"
+  - "if [ ${E2E} == 'yes' ]; then sh -e /etc/init.d/xvfb start; sleep 3; fi"
+  # Allow services running inside docker to start
+  - "./docker/wait-for-services.sh"
+
+script:
+  - ./run-tests.sh # E2E tests are skipped if E2E env is set to 'no'
+
+after_success:
+  - coveralls

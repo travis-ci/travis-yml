@@ -1,0 +1,14 @@
+language: node_js
+node_js:
+  - v8
+dist: trusty # needs Ubuntu Trusty
+sudo: required  # no need for virtualization.
+addons:
+  chrome: stable # have Travis install chrome stable.
+notifications:
+  email:
+    - XChen@walmartlabs.com
+install: fyn --pg none install
+script: npm test
+before_install:
+  - npm install -g xclap-cli fyn

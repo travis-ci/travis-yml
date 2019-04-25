@@ -1,0 +1,44 @@
+sudo: required
+dist: trusty
+
+before_install:
+  - jdk_switcher use oraclejdk8
+  - ./sh/travis.sh
+
+services:
+  - mysql
+  - redis-server
+
+language: node_js
+node_js:
+  - lts/dubnium
+  - node
+
+before_script:
+  - sudo /etc/init.d/mysql restart
+  - export DISPLAY=:99.0
+  - yarn build
+  - yarn webdriver-manager update --gecko false
+  - greenkeeper-lockfile-update
+
+script:
+  - mkdir test/artifacts
+  - yarn test
+
+after_script: greenkeeper-lockfile-upload
+
+git:
+  depth: 3
+
+cache:
+  yarn: true
+  directories:
+    - node_modules
+
+branches:
+  except:
+    # do not build any branches that have *.tmp in their name
+    - /.*\.tmp$/
+
+addons:
+  chrome: stable

@@ -1,0 +1,14 @@
+language: node_js
+node_js:
+  - "4.2.6"
+addons:
+  sauce_connect:
+    username: "balmas"
+    access_key: "ae469ad7-eaf1-4c87-b165-c3f32d27d64a"
+  code_climate:
+    repo_token: 5e3c0f0ba7ed27ad8bce4bb3498d03a472e3051e78cde6895d9391ebb25ef217
+before_install: npm install -g grunt-cli
+before_script:
+  - grunt server &
+  - sleep 2
+install: npm install && grunt install

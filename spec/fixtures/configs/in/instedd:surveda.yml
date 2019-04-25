@@ -1,0 +1,40 @@
+sudo: required
+services:
+  - docker
+
+env:
+  COMPOSE_VERSION: 1.8.0
+
+before_install:
+ - curl -L https://github.com/docker/compose/releases/download/${COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
+ - chmod +x docker-compose
+ - sudo mv docker-compose /usr/local/bin
+
+install:
+  - docker-compose pull
+
+before_script:
+  - docker-compose build
+  - docker-compose run --rm -e MIX_ENV=test app mix do deps.get, deps.compile
+  - docker-compose run --rm webpack yarn install --no-progress
+
+script:
+  - docker-compose run --rm -e MIX_ENV=test app mix do compile --warnings-as-errors, test
+  - docker-compose run --rm webpack yarn test
+  - docker-compose run --rm webpack yarn webpack
+  - docker-compose run --rm webpack yarn flow check
+  - docker-compose run --rm webpack yarn eslint
+
+deploy:
+  skip_cleanup: true
+  provider: script
+  script: ./deploy.sh
+  on:
+    all_branches: true
+
+notifications:
+  slack:
+    on_success: change
+    on_failure: always
+    rooms:
+      secure: PxWpyKKK1odcvMsUD3hLLGACUZBeY4Kwy8E1bdSdga1rKrnayZ8058X6idMmbcF4KztmHXp5BNwUzZ27rT67yTxyYoRpnmXdgDvolCMYMVTEpM7aZZ++fr9mSERdKSnpUuddMxKQo3gBndzypDon5kid1M6TgdgqpkMxPd2NxrTAVXyr/KBh1kPote9WaFo4yfkMigqMOt4it7S44IklUBhFVPEunbkMPag9GPxmN76apmn68OE4v0vj/xed/V2t2uAhUatZPngflPlUDUuDz/enWJ3Mo4bAsolBHYmO/GJF5HReksZ9oFkd7DwKu0jmyX7ME9IIMm85tseb20lH8QbtNBCadxX1deDWawEYgHKnsGNKOBW+/f8i37tBox4P2v/wZ43Rj9eYvaBFsf5h4dvdhxvJoN9DhuFqAHtt0NKU5yXOod/imWLqeyt6XuuHST6sN2xeAP+c40nBYsbm/DtI4zEygIxxYVmWEUvsSbRfYWF6UPwQ41mptN4/c27AACaTiyLh7Y0QyUoeFXAFvxQyp79nCqEgwUx/EbFdkavKArqnP5X6HumJdAPAg/syudQIT5AU5X7AeSpY9PZp8/iVvDrrEU7+Iv/Dw6SlkR8bzDz00GdhuXitf0BWKZczBtHa8mneW1r4tvm8Z+TxOa1dC3y2REJuZ0yKW94+oI0=

@@ -1,0 +1,134 @@
+sudo: false
+
+dist: trusty
+
+cache:
+  apt: true
+
+language: php
+
+## Cache composer downloads.
+cache:
+  directories:
+    # Cache directory for older Composer versions.
+    - $HOME/.composer/cache/files
+    # Cache directory for more recent Composer versions.
+    - $HOME/.cache/composer/files
+
+php:
+  - 5.5
+  - 5.6
+  - 7.0
+  - 7.1
+
+env:
+  global:
+    - COVERALLS_VERSION="notset"
+    - PHPUNIT_VERSION="travis"
+  matrix:
+    # `master`, i.e PHPCS 3.x.
+    - PHPCS_VERSION="dev-master" LINT=1
+    # Lowest supported PHPCS version.
+    - PHPCS_VERSION="2.3.0"
+
+matrix:
+  fast_finish: true
+  include:
+    # N.B.: Coverage is only checked on the lowest and highest stable PHP versions for all PHPCS versions.
+
+    - php: 7.3
+      env: PHPCS_VERSION="dev-master" LINT=1 SNIFF=1 COVERALLS_VERSION="^2.0" PHPUNIT_VERSION="^7.0"
+      addons:
+        apt:
+          packages:
+            - libxml2-utils
+    - php: 7.3
+      env: PHPCS_VERSION="2.3.0" COVERALLS_VERSION="^2.0" PHPUNIT_VERSION="^7.0"
+
+    # PHPCS 3.x cannot be run on PHP 5.3.
+    - php: 5.3
+      dist: precise
+      env: PHPCS_VERSION="2.3.0" COVERALLS_VERSION="^1.0" PHPUNIT_VERSION="~4.5"
+    - php: 5.3
+      dist: precise
+      env: PHPCS_VERSION=">=2.0,<3.0" LINT=1 COVERALLS_VERSION="^1.0" PHPUNIT_VERSION="~4.5"
+
+    # PHP 5.4 with low PHPCS needs PHPUnit 4.5 + one build with Coveralls.
+    - php: 5.4
+      env: PHPCS_VERSION="2.3.0" PHPUNIT_VERSION="~4.5"
+    - php: 5.4
+      env: PHPCS_VERSION="dev-master" LINT=1 COVERALLS_VERSION="^1.0"
+
+    # The Travis image for PHP >= 7.2 comes with PHPUnit 8.x which PHPCompatibility doesn't support.
+    - php: 7.2
+      env: PHPCS_VERSION="2.3.0" PHPUNIT_VERSION="^7.0"
+    - php: 7.2
+      env: PHPCS_VERSION="dev-master" LINT=1 PHPUNIT_VERSION="^7.0"
+    - php: "7.4snapshot"
+      env: PHPCS_VERSION="2.3.0" PHPUNIT_VERSION="^7.0"
+    - php: "7.4snapshot"
+      env: PHPCS_VERSION="dev-master" LINT=1 PHPUNIT_VERSION="^7.0"
+
+    # Test against a variation of PHPCS 2.x and 3.x versions.
+    - php: 5.5
+      env: PHPCS_VERSION="2.4.*"
+    - php: 5.5
+      env: PHPCS_VERSION="3.2.*"
+    - php: 5.6
+      env: PHPCS_VERSION="2.8.*"
+    - php: 7.0
+      env: PHPCS_VERSION="2.6.*"
+    - php: 7.1
+      env: PHPCS_VERSION="2.7.*"
+    - php: 7.2
+      env: PHPCS_VERSION="3.0.2" COVERALLS_VERSION="^2.0" PHPUNIT_VERSION="^7.0"
+    # Note: PHP 7.3+ is only fully supported icw PHPCS 2.9.2 and 3.3.1+.
+    # While on PHPCS 2.x, the tests won't fail, on PHPCS 3.x < 3.3.1, they will.
+    - php: 7.3
+      env: PHPCS_VERSION="3.3.*" PHPUNIT_VERSION="^7.0"
+    - php: "7.4snapshot"
+      env: PHPCS_VERSION=">=2.0,<3.0" PHPUNIT_VERSION="^7.0"
+
+  allow_failures:
+    # Allow failures for unstable builds.
+    - php: "7.4snapshot"
+
+before_install:
+  # Speed up build time by disabling Xdebug when its not needed.
+  - if [[ $COVERALLS_VERSION == "notset" ]]; then phpenv config-rm xdebug.ini || echo 'No xdebug config.'; fi
+  - export XMLLINT_INDENT="    "
+  # PHP 5.3+: set up test environment using Composer.
+  - composer self-update
+  - if [[ $COVERALLS_VERSION != "notset" ]]; then composer require php-coveralls/php-coveralls:${COVERALLS_VERSION}; fi
+  - composer require squizlabs/php_codesniffer:${PHPCS_VERSION}
+  - if [[ $PHPUNIT_VERSION != "travis" ]]; then composer require phpunit/phpunit:${PHPUNIT_VERSION}; fi
+  # --no-dev makes sure the Travis provided version of PHPUnit is used for better stability.
+  # --prefer-dist will allow for optimal use of the travis caching ability.
+  - composer install --no-dev --prefer-dist
+
+before_script:
+  - if [[ $COVERALLS_VERSION != "notset" ]]; then mkdir -p build/logs; fi
+  - phpenv rehash
+
+script:
+  # Lint all PHP files against parse errors.
+  - if [[ "$LINT" == "1" ]]; then find -L . -path ./PHPCompatibility/Tests/Keywords/ForbiddenNames -prune -o -path ./vendor -prune -o -name '*.php' -print0 | xargs -0 -n 1 -P 4 php -l; fi
+  # Run the unit tests.
+  - if [[ $PHPUNIT_VERSION == "travis" && $COVERALLS_VERSION != "notset" ]]; then phpunit --configuration phpunit-travis.xml --coverage-clover build/logs/clover.xml; fi
+  - if [[ $PHPUNIT_VERSION != "travis" && $COVERALLS_VERSION != "notset" ]]; then vendor/bin/phpunit --configuration phpunit-travis.xml --coverage-clover build/logs/clover.xml; fi
+  - if [[ $PHPUNIT_VERSION == "travis" && $COVERALLS_VERSION == "notset" ]]; then phpunit; fi
+  - if [[ $PHPUNIT_VERSION != "travis" && $COVERALLS_VERSION == "notset" ]]; then vendor/bin/phpunit; fi
+  # Check the code style of the code base.
+  - if [[ "$SNIFF" == "1" ]]; then vendor/bin/phpcs --runtime-set ignore_warnings_on_exit 1; fi
+  # Validate the xml file.
+  # @link http://xmlsoft.org/xmllint.html
+  - if [[ "$SNIFF" == "1" ]]; then xmllint --noout ./PHPCompatibility/ruleset.xml; fi
+  # Check the code-style consistency of the xml files.
+  - if [[ "$SNIFF" == "1" ]]; then diff -B ./PHPCompatibility/ruleset.xml <(xmllint --format "./PHPCompatibility/ruleset.xml"); fi
+  # Validate the composer.json file.
+  # @link https://getcomposer.org/doc/03-cli.md#validate
+  - if [[ "$LINT" == "1" ]]; then composer validate --no-check-all; fi
+
+after_success:
+  - if [[ $COVERALLS_VERSION == "^1.0" ]]; then php vendor/bin/coveralls -v -x build/logs/clover.xml; fi
+  - if [[ $COVERALLS_VERSION == "^2.0" ]]; then php vendor/bin/php-coveralls -v -x build/logs/clover.xml; fi

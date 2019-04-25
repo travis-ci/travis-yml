@@ -1,0 +1,53 @@
+language: php
+
+php:
+  - 7.2
+
+sudo: required
+dist: trusty
+
+services:
+  - docker
+
+cache:
+  directories:
+    - $HOME/.composer/cache/files
+    - $HOME/.npm
+
+before_install:
+  - npm i -g npm@^6
+
+install:
+  - cp .env.example .env
+  - travis_retry composer install --no-interaction --prefer-dist
+  - npm ci
+
+script:
+  - make docker-start
+  - make gen-certs
+  - make laravel-init
+  - make build-db
+  - npm run dev
+  - ci_env=`bash <(curl -s https://codecov.io/env)`
+  - docker run $ci_env talentcloud_talentcloud sh
+  - make phpunit
+
+after_script:
+  - bash <(curl -s https://codecov.io/bash) || echo 'Codecov failed to upload'
+  - wget https://scrutinizer-ci.com/ocular.phar
+  - php ocular.phar code-coverage:upload --format=php-clover coverage.xml
+  # make docker-stop
+
+after_success:
+  - docker run -d -p 9222:9222 --cap-add=SYS_ADMIN justinribeiro/chrome-headless
+  - npm run lh --a11y=99 https://localhost:9222
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+  - docker tag talentcloud_talentcloud gctcntgc/talentcloud:travis
+  - docker push gctcntgc/talentcloud:travis
+
+# Slack notifications / do not send emails
+notifications:
+  email: never
+  slack: talent-cloud:ASWQRTtW3oT2C2DHYaBzSCJg
+  on_success: always
+  on_failure: change

@@ -1,0 +1,12 @@
+sudo: required
+dist: trusty
+language: ruby
+rvm:
+  - "2.4.2"
+before_install:
+  - sudo apt-get -qq update
+  - sudo apt-get install -y build-essential patch libxslt-dev libxml2-dev
+  - gem install --verbose nokogiri -v 1.6.7.2
+bundler_args: --without production
+script: bundle exec nanoc
+

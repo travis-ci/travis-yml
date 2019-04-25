@@ -1,0 +1,41 @@
+language: java
+rvm:
+  - 1.9.3
+jdk:
+  - oraclejdk8
+node_js:
+  - "4.2.6"
+services:
+  - mysql
+before_install:
+  - mkdir /tmp/bin
+  - export PATH=$PATH:/tmp/bin
+install:
+  - curl --location 'https://www.ortussolutions.com/parent/download/commandbox/type/bin' -o /tmp/box.zip
+  - unzip /tmp/box.zip -d /tmp/bin
+  - ./support/build/install.sh
+before_script:
+  - mysql -u root -e 'create database preside_test;'
+  - npm install grunt-cli -g
+script:
+  - ./support/tests/test.sh && ./support/build/package.sh && ./support/build/publish.sh
+
+notifications:
+  email: false
+  webhooks: https://pixl8-preside-cms.getbadges.io/api/app/webhook/706b9f2f-93d8-4948-b279-ebfbaea9a7a8
+  slack:
+    secure: GOg8gziksTpVHkAUPUlcMngYkz4Z1Ro9ou/dUzDS6yC2TTYX2lzfyhYonZElyT/01bnMB8liR+NUx7d+Q6ozt56OODLfKz/mpNsxWhaCFivcD+shN+TYhzKM8DTVRGFxZjTXhC7mxQiPLMl/CtcJtYhkTlYLvlx+V4DmD/TiPCQ=
+
+deploy:
+  provider: s3
+  region: "eu-west-1"
+  access_key_id: AKIAJ3PTU73IHOOZV3LQ
+  secret_access_key:
+    secure: quj9MxIlfx43l9S6CXcchbpsKd43DPkNyZIAOl3crQVz2iG7qQfYacgl9utgM66cl6ZEd4ZC24PcYAeD3Y9np8OmlYGXQ85ofI/pp7h9jsbL9Fyk2RjObTxmka/+vdKAI7mKw1GSZFQGPIsOKSFfKfHyqhL35Tk+xB1K4vM43fQ=
+  bucket: downloads.preside.org
+  local-dir: support/build/artifacts
+  skip_cleanup: true
+  on:
+    repo: pixl8/Preside-CMS
+    all_branches: true
+    condition: $TRAVIS_BRANCH == release* || $TRAVIS_TAG == v*

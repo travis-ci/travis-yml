@@ -1,0 +1,18 @@
+osx_image: xcode10.1
+language: objective-c
+rvm: 2.3.5
+
+cache:
+  directories:
+    - Pods/
+    - vendor/bundle/
+
+install:
+  - bundle install --path=vendor/bundle
+  - (bundle exec pod check && touch .skip_pod_install) || echo "Pods will be updated"
+  - test -e .skip_pod_install || bundle exec pod install
+
+script:
+  - xcodebuild build-for-testing -scheme "WordPress" -configuration "Debug" -destination 'platform=iOS Simulator,name=iPhone XS,OS=12.1' -workspace "WordPress.xcworkspace" | bundle exec xcpretty -f `bundle exec xcpretty-travis-formatter`
+  - xcodebuild test-without-building -scheme "WordPress" -configuration "Debug" -destination 'platform=iOS Simulator,name=iPhone XS,OS=12.1' -workspace "WordPress.xcworkspace" | bundle exec xcpretty -f `bundle exec xcpretty-travis-formatter`
+

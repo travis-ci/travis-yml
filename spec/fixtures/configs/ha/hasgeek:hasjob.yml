@@ -1,0 +1,25 @@
+language: python
+python:
+  - 2.7
+cache:
+  directories:
+    - $HOME/.cache/pip
+before_script:
+  - psql -c 'create database hasjob_testing;' -U postgres
+install:
+  - pip install -U pip wheel
+  - pip install -r test_requirements.txt
+  - pip install -r requirements.txt
+  - npm install casperjs
+script: ./runtests.sh
+after_success:
+  - coveralls
+addons:
+  postgresql: "9.4"
+services:
+  - redis-server
+notifications:
+  email: false
+  slack:
+    - hasgeek:HDCoMDj3T4ICB59qFFVorCG8
+    - friendsofhasgeek:3bLViYSzhfaThJovFYCVD3fX

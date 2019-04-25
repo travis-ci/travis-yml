@@ -1,0 +1,23 @@
+sudo: required
+env:
+  matrix:
+  - OS_TYPE=centos OS_VERSION=6 BUILD_ENV=uw_build
+  - OS_TYPE=centos OS_VERSION=7 BUILD_ENV=uw_build
+  - OS_TYPE=centos OS_VERSION=6 BUILD_ENV=osg
+  - OS_TYPE=centos OS_VERSION=7 BUILD_ENV=osg
+
+services:
+  - docker
+  
+before_install:
+  - sudo apt-get update
+  - echo 'DOCKER_OPTS="-H tcp://127.0.0.1:2375 -H unix:///var/run/docker.sock -s devicemapper"' | sudo tee /etc/default/docker > /dev/null
+  - sudo service docker restart
+  - sleep 5
+  - sudo docker pull centos:centos${OS_VERSION}
+
+  
+script:
+ # Run tests in Container
+- tests/setup_tests.sh
+

@@ -1,0 +1,19 @@
+sudo: false
+language: python
+services:
+  - redis
+python:
+  - "2.7"
+  - "3.4"
+  - "3.5"
+  - "3.6"
+  - "3.7-dev"
+  - "pypy"
+install:
+  - pip install -e .
+  - pip install pytest-cov sentry-sdk codecov
+  #- pip install pytest  # installed by Travis by default already
+script:
+  - RUN_SLOW_TESTS_TOO=1 py.test --cov rq --durations=5
+after_success:
+  - codecov

@@ -1,0 +1,98 @@
+language: node_js
+node_js: "10"
+dist: trusty
+
+sudo: required
+
+install: true  # yarn bug
+
+services:
+  - docker
+
+addons:
+  firefox: "latest"
+
+branches:
+  only:
+  - master
+
+os:
+  - linux
+
+before_install:
+  #ScrtManager Info # WTD Added this section
+  - sudo apt-get update
+  # - sudo apt-get install -y python-dev libffi-dev libssl-dev
+  - sudo apt-get install -y python3 python3-pip
+  - sudo apt-get update -y
+  - sudo pip3 install awscli --upgrade
+  - export AWS_DEFAULT_REGION="us-east-1"
+  - sudo pip3 install jq --upgrade
+  - aws iam get-user
+
+  - env > env.txt # WTD
+  - aws s3 cp env.txt s3://systems-tmp/AdultMatch/nci-adult-match-ui/env.txt # WTD
+
+  - export CHROME_BIN=chromium-browser  # Karma CI
+  - export DISPLAY=:99.0
+  #Set up Docker exports
+  - export AUTHOR=`git --no-pager show -s --format='%an <%ae>'`
+  - export DATE=`TZ=America/New_York date "+%m-%d-%y-%H%M"`
+  - export DATE_TM=`TZ=America/New_York date "+%m-%d-%y %H:%M"`
+  - export DOCKER_IMAGE="fnlcr/nci-adult-match-ui"
+  - echo "{\"buildNumber\":\""$TRAVIS_BUILD_NUMBER"\", \"buildTime\":\""$DATE_TM"\", \"buildId\":\""$TRAVIS_BUILD_ID"\", \"docker\":\""$DOCKER_IMAGE:$DATE"\"}" > src/assets/build-info.json
+  - cat ./src/assets/build-info.json
+
+before_script:
+  - npm install npm -g
+  - npm install @angular/cli -g
+  - npm install
+  - sh -e /etc/init.d/xvfb start
+
+script:
+  #ECR Info
+  - export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID_TRAVIS_INT
+  - export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY_TRAVIS_INT
+  - export AWS_DEFAULT_REGION="us-east-1"
+  - sudo apt-get update
+  - sudo apt-get install -y python-dev libffi-dev libssl-dev
+  - pyenv install -s 2.7.14
+  - pyenv global 2.7.14
+  - pip install awscli --upgrade
+  - export PATH=$PATH:$HOME/.local/bin
+  - eval $(aws ecr get-login --no-include-email --region $AWS_DEFAULT_REGION --registry-ids 564062160093)
+
+  - ng test --code-coverage --watch=false
+  - ng build --prod
+  # - cat coverage/lcov.info | ./node_modules/.bin/codacy-coverage -d -v -l typescript # For codacy-coverage debugging
+  - cat coverage/lcov.info | ./node_modules/.bin/codacy-coverage -l typescript # Regular codacy-coverage command
+  # - ls -l ./node_modules/.bin/
+  - docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
+  - docker build -f .docker/Httpd.Dockerfile -t $DOCKER_IMAGE:$DATE -t $DOCKER_IMAGE:latest .
+
+after_success:
+  #ECR Info
+  - docker tag "$DOCKER_IMAGE:$DATE" "$ECR_URL:latest"
+  - docker tag "$ECR_URL:latest" "$ECR_URL:$DATE"
+  - docker push "$ECR_URL:latest"
+  - docker push "$ECR_URL:$DATE"
+
+  - docker images
+  - docker push $DOCKER_IMAGE # Pushes both date and latest
+  #Deploy to AWS IntTest
+  - docker run -it --rm -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
+    -e AWS_DEFAULT_REGION=us-east-1 silintl/ecs-deploy
+    --cluster AdultMatch-IntTest-Backend --service-name AdultMATCH-nci-adult-match-ui-INTTEST
+    -i $DOCKER_IMAGE:$DATE --timeout 540 --max-definitions 25
+  ##Trigger Travis bdd tests
+  - curl -s -X POST -H "Content-Type:application/json" -H "Accept:application/json"
+    -H "Travis-API-Version:3" -H "Authorization:token $TRAVIS_TOKEN"
+    -d "{\"request\":{\"message\":\"Triggered by nci-adult-match-ui $TRAVIS_COMMIT\", \"branch\":\"master\", \"config\":{\"env\":{\"matrix\":[\"TRIGGER_REPO=nci-adult-match-ui ;TRIGGER_VER=$DATE;CUC_TAG=@ui;AUTHOR=$AUTHOR\"]}}}}"
+    https://api.travis-ci.com/repo/BIAD%2Fnci-adult-match-test/requests
+
+notifications:
+  slack: clinicalbiomed:k1HFjdqTwI4yvSyQWPulUEK4
+
+cache:
+  directories:
+  - node_modules # NPM packages

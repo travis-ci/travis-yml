@@ -1,0 +1,43 @@
+sudo: required
+dist: trusty
+before_install:
+- |
+  curl -sSL "https://get.docker.com/gpg" |
+   sudo -E apt-key add -
+- |
+  echo "deb https://apt.dockerproject.org/repo ubuntu-trusty main" |
+   sudo tee -a /etc/apt/sources.list
+- sudo apt-get update
+- |
+  sudo apt-get -o Dpkg::Options::="--force-confdef" \
+   -o Dpkg::Options::="--force-confold" --assume-yes install --allow-unauthenticated docker-engine
+- docker version
+
+before_script:
+- sed -i "s/__version__ =.*/__version__ = \"$(git describe --always --tags)\"/" learnwithpeople/__init__.py
+- sed -i "s/GIT_REVISION.*/GIT_REVISION = \"$(git rev-parse HEAD)\"/" learnwithpeople/__init__.py
+- docker build -t p2pu/learning-circles .
+
+script:
+- docker run -d --name=postgres -e POSTGRES_PASSWORD=password postgres:9.3
+- docker run -d --name=selenium selenium/standalone-chrome
+- docker run --rm -it --link postgres --link selenium -e DATABASE_URL=postgres://postgres:password@postgres/lc -e SECRET_KEY=abc -e ADMIN_EMAIL=admin@localhost p2pu/learning-circles dockerize -wait tcp://postgres:5432 /opt/django-venv/bin/python /opt/app/manage.py test
+
+
+after_success:
+- echo "Push image to hub.docker.com"
+- docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
+- if [[ "$TRAVIS_PULL_REQUEST" != "false" ]]; then echo "Images not pushed for pull request"; exit 0; fi
+- docker tag p2pu/learning-circles p2pu/learning-circles:"$TRAVIS_BRANCH"
+- docker tag p2pu/learning-circles p2pu/learning-circles:$(git describe --always --tags)-"$TRAVIS_BRANCH"
+- docker images
+- docker push p2pu/learning-circles
+
+notifications:
+  email:
+    on_success: change
+    on_failure: change
+env:
+  global:
+  - secure: apX166+XsoTTot2k6g3oTauhkM/cHFAraU6sNVgGkjzGA21c48sMvUwzy631cumZReZ8FUwgS+FtQu+gam4/NS6SpvygdM0K1Hh/id48Nfqqssy4DQXPVuUOUYR5HTeuwj6GVp20Aqu3fGCptsS/YXJ9j2HXzYbVfX6fPHWoBo4=
+  - secure: gTp4DtRycmhTo0LUVCtNbkfhf+nKP2mG67uKF8Irp2Ip3RJ1a6FREEd6ro0x6tW1gt3Mj9Yj2uvHA29HiNLmG6SqXxRVHfBKsM4KTrO8tHZLpbtpJM5JGGaIqFNB/mZXhwbJ3nuUt+044DKydFa/hxqAFyFb+whJq0rr+7wlh5M=

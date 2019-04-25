@@ -1,0 +1,37 @@
+language: node_js
+node_js:
+  - '10'
+# Theoretically we could cache node_modules and example-repos, but those end up
+# being very slow to download and are largely duplicated with yarn cache.
+cache:
+  yarn: true
+# Don't do feature branch builds; we only need one build per PR.
+branches:
+  only:
+    - "master"
+before_install:
+  - npm install -g yarn@latest
+matrix:
+  include:
+    # Put the slowest builds first, since they are more likely to start first
+    - script:
+        - yarn fast-build
+        - yarn run-examples babel
+    - script:
+        - yarn fast-build
+        - yarn run-examples react
+    - script:
+        - yarn fast-build
+        - yarn run-examples tslint apollo-client
+    - script:
+        - yarn build
+        - yarn lint
+        - yarn test-with-coverage && yarn report-coverage
+        - yarn run-examples decaffeinate decaffeinate-parser coffee-lex
+    - node_js: '8'
+      script:
+        - yarn build
+        - yarn test-only
+  # Exclude the default build; we only want to run explicitly-included builds.
+  exclude:
+    node_js: '10'

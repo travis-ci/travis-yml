@@ -1,0 +1,92 @@
+language: minimal
+dist: xenial
+services: docker
+
+before_install:
+    # Delete .git/ to maximize ccache effectiveness (no version string mismatches)
+    - rm -rf .git
+
+jobs:
+    include:
+        - name: "Build with most recent GCC & Clang, run tests"
+          env: TRAVIS_CACHE_ID=disco
+          cache:
+              directories:
+                  - $HOME/.ccaches-disco
+                  - $HOME/.tox-cache
+          script:
+              # Fetch our current Ubuntu 19.04 CI image from Docker Hub
+              # (automatically built by Docker):
+              - docker pull hlwm/ci:disco
+
+              # Build ad-hoc image, using hub image as cache
+              # (=> does not actually build from scratch if the Dockerfile is
+              # the same):
+              - docker build -t disco --cache-from hlwm/ci:disco - <Dockerfile.ci-disco
+
+              # Perform actual tasks within temporary Docker image
+              - docker run -u $UID --privileged -t --rm
+                --volume=/etc/passwd:/etc/passwd:ro
+                --volume=$HOME/.ccaches-disco:/.ccaches:rw
+                --volume=$PWD:/hlwm:rw
+                --volume=$HOME/.tox-cache:/hlwm/.tox:rw
+                disco sh -c '
+                    /hlwm/ci-build.py --build-dir=/hlwm/build-clang-7 --cxx=clang++-7 --cc=clang-7 --build-type=Debug --ccache=/.ccaches/clang-7 --compile &&
+                    /hlwm/ci-build.py --build-dir=/hlwm/build-gcc-8 --cxx=g++-8 --cc=gcc-8 --build-type=Debug --ccache=/.ccaches/gcc-8 --compile --run-tests
+                '
+              - bash <(curl -s https://codecov.io/bash) -y .codecov.yml -f coverage.info
+
+        - name: "Run linters and static analyzers"
+          env: TRAVIS_CACHE_ID=disco-linter
+          cache:
+              directories:
+                  - $HOME/.tox-cache
+          script:
+              # Fetch our current Ubuntu 19.04 CI image from Docker Hub
+              # (automatically built by Docker):
+              - docker pull hlwm/ci:disco
+
+              # Build ad-hoc image, using hub image as cache
+              # (=> does not actually build from scratch if the Dockerfile is
+              # the same):
+              - docker build -t disco --cache-from hlwm/ci:disco - <Dockerfile.ci-disco
+
+              # Perform actual tasks within temporary Docker image
+              - docker run -u $UID --privileged -t --rm
+                --volume=/etc/passwd:/etc/passwd:ro
+                --volume=$PWD:/hlwm:rw
+                --volume=$HOME/.tox-cache:/hlwm/.tox:rw
+                disco sh -c '
+                    /hlwm/ci-build.py --build-dir=/hlwm/build-clang-7 --cxx=clang++-7 --cc=clang-7 --build-type=Debug --check-using-std --iwyu --flake8
+                '
+
+        - name: "Build with ancient GCC on Ubuntu 14.04"
+          env: TRAVIS_CACHE_ID=trusty
+          cache:
+              directories:
+                  - $HOME/.ccache-gcc-4.8
+          script:
+              # Fetch our current Ubuntu 14.04 CI image from Docker Hub
+              # (automatically built by Docker):
+              - docker pull hlwm/ci:trusty
+
+              # Build ad-hoc image, using hub image as cache
+              # (=> does not actually build from scratch if the Dockerfile is
+              # the same):
+              - docker build -t trusty --cache-from hlwm/ci:trusty -
+                <Dockerfile.ci-trusty
+
+              # Build with gcc-4.8 using ad-hoc image (plain bash one-liner
+              # because Python is too old):
+              - docker run -u $UID -t --rm
+                --volume=$PWD:/hlwm:rw
+                --volume=$HOME/.ccache-gcc-4.8:/.ccache:rw
+                --env CC=gcc-4.8
+                --env CXX=g++-4.8
+                trusty bash -c '
+                    cd /tmp &&
+                    ccache -z --max-size=500M &&
+                    cmake -GNinja -DWITH_DOCUMENTATION=NO -DENABLE_CCACHE=YES /hlwm &&
+                    time ninja -v -k10 &&
+                    ccache -s
+                    '

@@ -1,0 +1,36 @@
+sudo: false # use container-based infrastructure
+
+language: java
+jdk:
+  - oraclejdk8 # test against version 1.8
+
+notifications:
+  slack:
+    rooms:
+      - secure: "dRuH479YknsGmkKyr8y/dXZT0U6GaPTFBasRb/3Stnn//zuyHYj8AZPZ4aKv7DxVA4W9kgKUHIEqMu4VWURD7a3oKXKSNOBy1Y7b6VMdBYggNfIc7J2EEP2OzrjNK0G8Mh9a+CVOlN/HvF3wfRS6eCp41g03HX8fxaEYrSHzjsl1+CEeA7NrJuOh6RqVxsdQArhTzaqgOG1rddSdZLtPCmfh2/WLrTZCtNLWJhvTNvlxxHLqe6PYKdjpU9fkUWaq2cA4Ei/F3t5idbwEjMqlbIkImxn9YnAhA85uwbr5ELC8i4X68P4UgJoPa/lus6QhqWtorfQYQFNWMQVkoxytXG8JJgE9o7lxONi9ARz8PHP7JEuK04171qIrAm+LrWClxAZiowkFjxy4VS9DAXMO3tfkAXbIYbz6WzMa9ceJVmL0ZV5qJyzsKnM9WD5YD0wOI3wsNXxRcji0ujBSmqyZezHRiuPpsJbSF3YHFX31ZvntKQi9yP2WYf2DElPck6h9aF2g9iHWJT9ZoLMJB/eamrfZAkioKabszr22zgVJK5aAG+toCwOhbQltCNPJMiiQmVZW5KbFrXa0KRS9FFW16nNzSa0F2gs9cWswC48Cy5TNLhhnDvNroE7Dmsys4PtxVwfVkoTRzxMJvl/RSZoTg+RF+XJI4yXqBupNlmYG924="
+    on_success: change
+    on_failure: always
+
+before_cache:
+  - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+  - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+
+cache:
+  directories:
+    - '$HOME/.gradle/caches' # cache the gradle cache directory
+    - '$HOME/.gradle/wrapper' # cache the gradle wrapper directory
+
+before_install:
+  - chmod +x gradlew # ensure that the gradlew script is executable
+
+install:
+  - ./gradlew --stacktrace printInfo # output some versioning info
+
+script:
+  - ./gradlew --continue --stacktrace --profile build
+  - ./gradlew --stacktrace sonarqube jacocoTestReport coveralls
+
+
+after_success:
+ - ./gradlew --stacktrace bootRepackage bintrayUpload # use bootRepackage to fix issue with Spring Boot
+ - ./gradlew --stacktrace triggerBamboo # initiate a Bamboo build deployment

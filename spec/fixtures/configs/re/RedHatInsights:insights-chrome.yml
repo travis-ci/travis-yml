@@ -1,0 +1,27 @@
+language: node_js
+sudo: required
+node_js:
+- 10
+install:
+- npm ci
+jobs:
+    include:
+    - stage: deploy:stable
+      if: branch IN (master-stable, prod-stable, qa-stable, ci-stable)
+      name: deploy:stable
+      script: npm run verify
+    - stage: deploy:beta
+      if: branch IN (master, prod-beta, qa-beta)
+      name: deploy:beta
+      script: npm run verify:beta
+after_success:
+- npx codecov
+- curl -sSL https://raw.githubusercontent.com/RedHatInsights/insights-frontend-builder-common/master/src/bootstrap.sh | bash -s
+env:
+    global:
+    - REPO="git@github.com:RedHatInsights/insights-chrome-build"
+    - REPO_DIR="insights-chrome-build"
+cache:
+  directories:
+    - "$HOME/.npm"
+    - ".cache"

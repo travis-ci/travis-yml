@@ -1,0 +1,84 @@
+language: java
+
+# This library uses Java 8 features and Travis doesn't (yet) support OpenJDK 8
+jdk:
+  - oraclejdk8
+
+addons:
+  postgresql: "9.6"
+
+# Replace Travis's default Maven installation step with a no-op.
+# This avoids redundantly pre-running 'mvn install -DskipTests' every time.
+install: true
+
+# Decrypt and import the artifact signing certificate before running the build
+before_install: |
+  # Don't import certs for PR builds - see https://docs.travis-ci.com/user/pull-requests/#Pull-Requests-and-Security-Restrictions
+  if [[ "$TRAVIS_PULL_REQUEST" = false ]] && [[ "$TRAVIS_BRANCH" = master || "$TRAVIS_BRANCH" = dev || ! -z "$TRAVIS_TAG" ]]; then
+    openssl aes-256-cbc -K $encrypted_c5b9f071c998_key -iv $encrypted_c5b9f071c998_iv -in maven-artifact-signing-key.asc.enc -out maven-artifact-signing-key.asc -d
+    gpg --import --batch maven-artifact-signing-key.asc
+  fi
+
+# Install semantic-release
+before_script:
+  - yarn global add @conveyal/maven-semantic-release semantic-release
+
+# Replace Travis's default build step.
+# Run all Maven phases at once up through verify, install, and deploy.
+script:
+# only (attempt to) deploy non-pull request commits to the master branch, dev branch, or tags
+# Otherwise, just run all the way up to verify, the last phase before installing and deploying.
+# Setting the gpg.skip property avoids signing artifacts when the encryption keys are not available.
+- |
+  if [[ "$TRAVIS_PULL_REQUEST" = false ]] && [[ "$TRAVIS_BRANCH" = master || "$TRAVIS_BRANCH" = dev || ! -z "$TRAVIS_TAG" ]]; then
+    mvn clean deploy --settings maven-settings.xml
+  else
+    mvn clean verify --settings maven-settings.xml -B -V -Dgpg.skip
+  fi
+# Wipe out all the Conveyal artifacts in the local Maven repo before they get cached.
+# This forces download of fresh SNAPSHOT artifacts on the next build.
+# The cache seems to be uploaded immediately after the Travis stage "script" so we include this deletion in the script.
+- rm -rf $HOME/.m2/repository/com/conveyal
+
+# Secure envs are OSSRH_JIRA_USERNAME, OSSRH_JIRA_PASSWORD, GPG_KEY_NAME, GPG_PASSPHRASE
+env:
+  global:
+    - secure: "lasYVAXe5RaiZ4UX5mk3rVLIqVxj8Areeyjuv/dr1RFDg/lirOkgYBS926+aY120WN3CpFzsmrRB1t345wYxCu8ZU61XZUSR6eX/2Mo5WuSSIyyEwcjdUtbKUv6DqciQtmwihsv8c/BWNtz7zsMPJSz71LKKGWntg6+LcCn0fAk="
+    - secure: "YSmmUvjhv/RbQDgabEYZp+tSZW57gZ16kopUNu6QcVEcJT++PD3HavhkNbDq0onI/vNmEuQPnkdeDIf4WCpZ97pKxlASRTvrbz1Ryf3HpBA3VxAXvFfUXbNDvxpFNUjQ5O3C/HvPS5tjnNAVwe7kuQlJxjddeVGUdf3X4oJ2C7w="
+    - secure: "RwoNv0+ejEbtG3wQPjPSa4lhELGomc09R4JdI+VZpCs1M6IBY7m0SwsRmwJQc8Rb4vCwEIZA+tFSVxUlPine/2J00eCPfvQWitERu5z95XT4IB7Wkaos2/mBWJZ/KlzQQDG1ITnaXJKtjemPo+lF5UTc29TiHZfTX7X5bkFjaGg="
+    - secure: "EooEVyqAfmo0Yacy/Eysxo00m2Dk+fczNFPQoqO2+WW7yd6el6d7MCDbtkjVO8IwH+JWjCmxtnd9Fe1I+2XawqpevKz8LI0pDp5BpxgnDzZgqsctQGaxmjRj1ksewXNvTAeWVS/ysDegyySkocYxU6A43/MWpoD8ocZZcsQlwPo="
+
+# If sudo is disabled, CI runs on container based infrastructure (allows caching &c.)
+sudo: false
+
+# Retain the local Maven repository to speed up builds.
+# The Conveyal subdirectory is deleted in the script above to prevent retaining Conveyal snapshot artifacts across builds.
+cache:
+  directories:
+    - "$HOME/.m2/repository"
+    - "$HOME/.yarn-cache"
+
+# Notify us of the build status on the Slack channel     
+notifications:
+  slack: conveyal:WQxmWiu8PdmujwLw4ziW72Gc
+
+# Push results to codecov.io and run semantic-release (releases only created on pushes to the master branch).
+after_success:
+  # this first codecov run will upload a report associated with the commit set through Travis CI environment variables
+  - bash <(curl -s https://codecov.io/bash)
+  # run maven-semantic-release to potentially create a new release of gtfs-lib.
+  #
+  # If maven-semantic-release finishes successfully and the current branch is master, upload coverage reports for the
+  # commits that maven-semantic-release generated. Since the above codecov run is associated with the commit that
+  # initiated the Travis build, the report will not be associated with the commits that maven-semantic-release performed
+  # (if it ended up creating a release and the two commits that were a part of that workflow). Therefore, if on master
+  # codecov needs to be ran two more times to create codecov reports for the commits made by maven-semantic-release.
+  # See https://github.com/conveyal/gtfs-lib/issues/193.
+  #
+  # The git commands get the commit hash of the HEAD commit and the commit just before HEAD.
+  - |
+    semantic-release --prepare @conveyal/maven-semantic-release --publish @semantic-release/github,@conveyal/maven-semantic-release --verify-conditions @semantic-release/github,@conveyal/maven-semantic-release --verify-release @conveyal/maven-semantic-release --use-conveyal-workflow --dev-branch=dev
+    if [[ "$TRAVIS_BRANCH" = "master" ]]; then
+      bash <(curl -s https://codecov.io/bash) -C "$(git rev-parse HEAD)"
+      bash <(curl -s https://codecov.io/bash) -C "$(git rev-parse HEAD^)"
+    fi

@@ -1,0 +1,28 @@
+language: ruby
+# use container-based infrastructure to speed up build
+# see http://docs.travis-ci.com/user/workers/container-based-infrastructure/
+sudo: false
+# cache bundle to speed up build
+# see http://docs.travis-ci.com/user/caching/#Bundler
+cache: bundler
+
+rvm:
+- 2.3.6
+before_script:
+- bundle exec sass -r sass-globbing --update assets/sass:assets/css
+- bundle exec jekyll build
+- npm install -g casperjs
+- phantomjs --version
+- casperjs --version
+script:
+- casperjs test ./_scripts/phantom_tests.js
+after_success:
+- "./_scripts/travis_deploy.sh"
+branches:
+  only:
+  - master
+  - live
+env:
+  global:
+  - secure: Q6mCAiVmO14syG10GKW0mEotPEUhAIfLKa2dzgRUDIoIhC2tl359WoO1skqBm5mthmzVz2BXwL2q5MRWFBn/ml41q96b1Fx/RR+WWj0+yfN8lMFNZrREI9g49PaL4Za5ByoMkiPuP0AHx+NXwJq6HAgFLRyKsLMJ0pFGjKYatR4=
+  - secure: ckdyojnsrpxr1MTzlwDo1IAw5VcuFRPzRbxJ97HDzE5+p8rJ9nzdi3Ujdp9fiJ8+fkjz5uZP0sS7SaXrnRy+w8tiUzppjcxsnpv8LdO6QhmGCujn5+tNo5gQqxSQoW0gekSwQq+Jz54l7EEAiijwO6OR9ZANvB645dzcGjFQzXs=

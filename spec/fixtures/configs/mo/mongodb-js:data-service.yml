@@ -1,0 +1,23 @@
+sudo: false
+dist: trusty
+language: node_js
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - libkrb5-dev
+      - xvfb
+      - libsecret-1-dev
+      - gnome-keyring
+      - python-gnomekeyring
+node_js:
+  - 10.2.1
+env:
+  - MONGODB_VERSION=stable MONGODB_TOPOLOGY=standalone
+  - MONGODB_VERSION=stable MONGODB_TOPOLOGY=cluster
+before_install:
+  - npm i -g npm
+script:
+  - npm run check
+  - npm test

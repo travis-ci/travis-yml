@@ -1,0 +1,42 @@
+language: php
+
+jobs:
+    include:
+        -   php: '7.2'
+            env: SYLIUS_VERSION=1.3.*
+        -   php: '7.2'
+            env: SYLIUS_VERSION=1.4.*
+        -   php: '7.3'
+            env: SYLIUS_VERSION=1.3.*
+        -   php: '7.3'
+            env: SYLIUS_VERSION=1.4.* ANALYSE=y
+
+cache:
+    directories:
+        - ~/.composer/cache/files
+
+before_install:
+    - phpenv config-rm xdebug.ini || true
+    - echo "memory_limit=4096M" >> ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/travis.ini
+
+    - cp tests/Application/.env.test.dist tests/Application/.env.test
+    - set -a && source tests/Application/.env.test && set +a
+
+install:
+    - composer require sylius/sylius:${SYLIUS_VERSION} --no-interaction --no-update
+    - composer update --no-interaction --prefer-dist
+
+before_script:
+    - (cd tests/Application && bin/console doctrine:database:create --env=test -vvv)
+    - (cd tests/Application && bin/console doctrine:schema:create --env=test -vvv)
+
+script:
+    - composer validate --strict
+
+    - >-
+        if [ "$ANALYSE" = 'y' ]; then
+            composer analyse
+        fi
+
+    - vendor/bin/phpspec run --format dot -vvv --no-interaction
+    - vendor/bin/phpunit

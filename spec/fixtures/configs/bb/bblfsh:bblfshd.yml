@@ -1,0 +1,48 @@
+language: go
+
+go:
+  - '1.12.x'
+
+go_import_path: github.com/bblfsh/bblfshd
+
+env:
+  - GO111MODULE=on
+
+sudo: required
+services:
+  - docker
+
+before_install:
+  - sudo apt-get -qq update
+  - sudo apt-get -qq install btrfs-tools libdevmapper-dev libgpgme11-dev libapparmor-dev libseccomp-dev
+  - sudo apt-get -qq install autoconf automake bison e2fslibs-dev libfuse-dev libtool liblzma-dev gettext
+  - OSTREE_VERSION=v2017.9
+  - git clone https://github.com/ostreedev/ostree ${TRAVIS_BUILD_DIR}/ostree
+  - pushd ${TRAVIS_BUILD_DIR}/ostree
+  -   git checkout $OSTREE_VERSION
+  -   ./autogen.sh --prefix=/usr/local
+  -   make all
+  -   sudo make install
+  - popd
+  - make dependencies
+
+script:
+  - make test-coverage
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
+
+before_deploy:
+  - make push
+  - make packages
+  - make push-drivers
+
+deploy:
+  provider: releases
+  api_key:
+    secure: $GITHUB_TOKEN
+  file_glob: true
+  file: ./build/*.tar.gz
+  skip_cleanup: true
+  on:
+    tags: true

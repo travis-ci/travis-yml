@@ -1,0 +1,40 @@
+language: ruby
+
+sudo: false
+
+cache:
+  - bundler
+  - pip
+
+rvm: 2.4.1
+
+env:
+  global:
+  - NOKOGIRI_USE_SYSTEM_LIBRARIES=true
+
+addons:
+  apt:
+    packages:
+      - aspell
+      - aspell-en
+
+before_install:
+  # Need s3cmd to deploy feeds.
+  - pip install --user s3cmd
+  - s3cmd --version
+
+  # Install spellchecker.
+  - npm install -g orta/node-markdown-spellcheck
+  
+  # Echo for Danger.
+  - echo $TRAVIS_COMMIT_RANGE
+
+  # Copy proselint settings to home.
+  - cp .proselintrc ~/
+
+script:
+  - bundle exec rake build:test
+  - bundle exec danger
+
+after_success:
+  - bundle exec rake deploy:travis

@@ -1,0 +1,21 @@
+language: python
+
+before_script:
+  - sleep 10
+
+python:
+  - 3.6
+
+services:
+  - postgresql
+  - elasticsearch
+
+before_install:
+  - curl -O https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-5.5.3.deb && sudo dpkg -i --force-confnew elasticsearch-5.5.3.deb && sudo service elasticsearch restart
+  - npm install
+
+install:
+  - pip install -r requirements.txt
+
+script:
+  - python manage.py test

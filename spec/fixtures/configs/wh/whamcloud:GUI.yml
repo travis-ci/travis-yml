@@ -1,0 +1,67 @@
+language: generic
+sudo: required
+services:
+  - docker
+addons:
+  apt:
+    update: true
+jobs:
+  include:
+    - stage: test
+      env: Type='copr build test'
+      script:
+        - export SPEC=iml-gui.spec
+        - docker run -it -e SPEC="$SPEC" -e LOCAL_ONLY="True" -v $(pwd):/build:rw imlteam/copr
+        - ((`find _topdir/RPMS -name *.rpm | wc -l` > 0))
+    - stage: test
+      env: Type='Test Checks'
+      language: node_js
+      node_js:
+        - "8"
+      before_script:
+        - npm i -g add codecov
+      script:
+        - npm run eslint
+        - npm run flow
+        - npm run cover -- --runInBand
+      after_success:
+        - codecov
+    - stage: deploy-npm
+      env: Type='NPM Deploy'
+      before_deploy:
+        - npm i
+        - npm run postversion
+      deploy:
+        provider: npm
+        email: "$NPM_EMAIL"
+        skip_cleanup: true
+        api_key: "$NPM_TOKEN"
+        on:
+          all_branches: true
+          repo: whamcloud/GUI
+    - stage: deploy-copr
+      env: Type='Copr deploy'
+      script:
+        - export OWNER=managerforlustre
+        - export PROJECT=manager-for-lustre
+        - export PACKAGE=iml-gui
+        - export SPEC=iml-gui.spec
+        - docker run -it -e OWNER="$OWNER" -e PROJECT="$PROJECT" -e PACKAGE="$PACKAGE" -e SPEC="$SPEC" -e PROD="True" -e KEY="$encrypted_253525cedcf6_key" -e IV="$encrypted_253525cedcf6_iv" -v $(pwd):/build:rw imlteam/copr
+    - stage: cd
+      env: Type='Continuous Deployment'
+      script:
+        - export OWNER=managerforlustre
+        - export PROJECT=manager-for-lustre-devel
+        - export PACKAGE=iml-gui
+        - export SPEC=iml-gui.spec
+        - docker run -it -e OWNER="$OWNER" -e PROJECT="$PROJECT" -e PACKAGE="$PACKAGE" -e SPEC="$SPEC" -e KEY="$encrypted_253525cedcf6_key" -e IV="$encrypted_253525cedcf6_iv" -v $(pwd):/build:rw imlteam/copr
+      on:
+        all_branches: true
+stages:
+  - test
+  - name: deploy-npm
+    if: branch =~ ^v\d+\.\d+\.\d+-1.*$
+  - name: deploy-copr
+    if: branch =~ ^v\d+\.\d+\.\d+-.+$
+  - name: cd
+    if: branch = master AND type = push AND fork = false

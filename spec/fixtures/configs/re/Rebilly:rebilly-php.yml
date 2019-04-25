@@ -1,0 +1,35 @@
+sudo: false
+
+language: php
+
+matrix:
+  fast_finish: true
+  include:
+    - php: 7.1
+      env:
+        - EXECUTE_COVERAGE=true
+        - EXECUTE_CS_CHECK=true
+    - php: 7.2
+    - php: 7.3
+  allow_failures:
+    - php: 7.3
+
+notifications:
+  email: false
+
+before_install:
+  - if [[ $EXECUTE_COVERAGE != 'true' ]]; then phpenv config-rm xdebug.ini || return 0 ; fi
+
+install:
+  - composer self-update
+  - composer install
+
+script:
+  # PHPUnit
+  - if [[ $EXECUTE_COVERAGE == 'true' ]]; then mkdir -p build/logs ; fi
+  - if [[ $EXECUTE_COVERAGE == 'true' ]]; then ./vendor/bin/phpunit --coverage-text --coverage-clover=build/logs/clover.xml ; else ./vendor/bin/phpunit ; fi
+  # PHP CS Fixer
+  - if [[ EXECUTE_CS_CHECK == 'true' ]]; then ./vendor/bin/php-cs-fixer fix -v --diff --dry-run ; fi
+
+after_success:
+  - if [[ $EXECUTE_COVERAGE == 'true' ]]; then ./vendor/bin/php-coveralls -v ; fi

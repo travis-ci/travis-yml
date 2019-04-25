@@ -1,0 +1,24 @@
+sudo: required
+language: scala
+scala:
+- 2.12.2
+jdk:
+- oraclejdk8
+script:
+- sbt +clean coverage +test && sbt coverageReport coverageAggregate
+- find $HOME/.sbt -name "*.lock" | xargs rm
+- find $HOME/.ivy2 -name "ivydata-*.properties" | xargs rm
+cache:
+  directories:
+  - $HOME/.ivy2/cache
+  - $HOME/.sbt/boot/
+before_install:
+- pip install --user codecov
+- sudo chmod +x /usr/local/bin/sbt
+after_success:
+- codecov
+- test "$TRAVIS_REPO_SLUG" == 'fulcrumgenomics/dagr' && test "$TRAVIS_PULL_REQUEST" == 'false' && test "$TRAVIS_BRANCH" == 'master' && sbt +publish
+env:
+  global:
+  - secure: AjbCqJPaYLWVYTNS7Czdu+SVX0Vs1bDuVg+YjNasFs8peu97hQxx9TNqxZcvrs8SwGD6gXlJComMJPVeLUjYf/EqmJMICtS/UTTBONlfEZgF+KSO1FeXxyvsFskuCn9GxK8JSGE49YKCWnSuAQ6JBgjSidUVgumjiyFg7Dgac5rUNJZ4SR7nQbufF5NsegLZNEsiDJxK20roksZnbdpI7PQE/pthoTzowLuElMEFpF5DZ9LfY/HeSm3+s0edYOVBgivc2tjqROSsgOEmz3uQ0tLpvaAMpt0aSXuultql3GL1aiJKFjo21vbEA95jlfdq/BXZvh6q25TaciGT0LZOBcbQSiwsIsWQfulw7QEQ1C0mv1UuYBHvF4jeMVTRL3Aj7El1fNeHA8nkNTr+GZEcRpkBQOHuD9kDX7Ks6iU8+arsSr7YnR6eENJd/UB8XogZvKydFbUJ90Cmn5W4S1BHQXsv2BkJ/BubdH3groEfKbUsrGRjf7oBt/l0O8X5SO5+fAF3KCsHDSAIIM16b14RXKCrASkIGc4S0wQryRksMZADl6GUZCnIyWLUfNQC5SXS30K4f8ny7LG9yYzfph++S+s3YUC0qS+ZFLG6fHcw+kjOi7nwrR+oyJp2Q2f5z3Vq1A81h1NgOMR3lQn002oes+TYTymY+/SXcldV+9p5MHE=
+  - secure: YgmhR2puvVq8w5UAmo3UPjm1CKTKGq7cc3TneKASiZW/eHj/GAJ1BHDjSNNUS1eaNQr16H+2ws1u6tD2rOGRuISnQtRagncVrcviXaRBI8PDLrTC6N0pcUFMvziUuJAwmPgfeZDfZQpev9Ssod6z6rPRR8bFC69KV7Df90M1SjWP/c5dU62TBIw5EOyP3q8ui3W4tMEeFuYCH9CPKErqopfiDHRkJhE4DHuMKVA+xLT/TzEzsyJMJqXHVfow/N3tGRraL5G6JBUiwerPj0/Tm1ovd/4xT9Jqr4ujoG0cWydNEkK9pcMpBNFnV30krTgMtw8ibwZJPkFWk40De4fDj4UU7HQEdyfEj2zcfoWRvI+RvzTw6xVsWXSurTKJwSc+6e/7xjn4zgFngr6WYt26PFH/sKgG3FjtiEAiNOOgyAlN8N7MZhYVWpgzzNAyzaCrfqlpLOzxcEqI+vum2SAZCdNWME+t/Hd16GXRpR4pHmuvHqVR5cK9XmpSE9eB6svB3sQiJC46KfmlfBkwXIu57syyKrFSlLf/QeuviUza0kRHQ+1HbjCHna600HP78arZuYrZgpDI2nQlEn9LasHkhiaKTtb2/an3cFLD1ld5NLuY/3AymWP1zvvo7iOGcrrhRUwxS81dYPCqW+x1rvcQszyioR4WrsLbLy3vGaU3NWI=

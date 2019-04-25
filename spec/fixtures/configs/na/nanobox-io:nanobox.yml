@@ -1,0 +1,30 @@
+sudo: required
+
+language: go
+
+# ~1 hour is too long to wait for an osx container, plus docker/dependencies
+dist: trusty
+
+go:
+  - 1.9
+
+before_install:
+  - docker version
+  - ifconfig
+  - sudo -H pip install awscli
+
+install: 
+  - go get github.com/kardianos/govendor
+  - go get github.com/mitchellh/gox
+  - govendor sync
+
+script:
+  - govendor test +local -v
+
+after_success:
+  - export BRANCH=$(if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then echo $TRAVIS_BRANCH; else echo $TRAVIS_PULL_REQUEST_BRANCH; fi)
+  - 'if [ "$BRANCH" == "master" ]; then
+    ./scripts/build.sh;
+    ./scripts/upload.sh;
+    curl -s -X POST -H "Content-Type: application/json" -H "Accept: application/json" -H "Travis-API-Version: 3" -H "Authorization: token ${TRAVIS_TOKEN}" -d "{\"request\":{\"branch\":\"master\"}}" https://api.travis-ci.org/repo/nanobox-io%2Fnanobox-installers/requests;
+    fi'

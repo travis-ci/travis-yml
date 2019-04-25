@@ -1,0 +1,31 @@
+language: python
+cache: pip
+python:
+- 2.7
+- 3.4
+- 3.5
+- 3.6
+before_install:
+- openssl aes-256-cbc -K $encrypted_266b385b8e6e_key -iv $encrypted_266b385b8e6e_iv
+  -in travis-gcp-service-account-credentials.json.enc -out travis-gcp-service-account-credentials.json
+  -d
+- sed -i -e s/dss.data.humancellatlas.org/dss.$DSS_TEST_STAGE.data.humancellatlas.org/ hca/default_config.json
+install:
+- pip install -r requirements-dev.txt
+- wget -O regex.json https://raw.githubusercontent.com/HumanCellAtlas/dcplib/master/components/trufflehog_regex_patterns.json
+- trufflehog --regex --rules regex.json --entropy=False https://github.com/HumanCellAtlas/data-store.git
+- rm regex.json
+- make install
+script:
+- make test
+after_success:
+- bash <(curl -s https://codecov.io/bash)
+sudo: false
+env:
+  global:
+  - secure: F4114AVsajBPgK2lhGA+oKUwICiq50ziJk7USgT587GRCXR3rt/ERdOzZd2lBfmb6i2jR6YKcZ1/W4qp5D7EC1qyOgfXUQbKFuJ00JsMD3C/PJXQWQxtaBfhFOaKxXPzpKKo2oJhkC2kqTpC6ch6gjMCupUoAgJZd7KVRS4pkkxSNF9FhObl6etUfod76XHnPKfMCzZQGVkLJsg1i5dbiwKz5TsCBfXcVb0xgFE0MgwmAuIkrou0RH+Ag/XMNEY8NFRd0Nuf3hC4CJ07K9U/rlfkxDuRHN8otd3dMAoZV8ZPO87wPgvJ+S62BKvWXQd2f0CzqTCrQsS9tJoHyQvfz8lVGpYd8+Qywfw7Ao6k+lGEm6bmeZjPQ0Pnk/s3AD255fCsBKaA9bVUQ423vwmiebYM/5sHCsThtqx61gJyjojFDmN5rFgPtdOlVJXU3ka20jpsa/wCyys9TzdaHvM7Q8NWkwfk090+WqgWLlvwsAIqpoZLm1ZwVm66V51Z1el+/zaw05BDoRrNFIaP1oV3dYyb8aki/fWSLcQ2DSP54a1SZkUCiiD/mOxalZZdG4yRL3wRV6bSKeWppt/dX0SHXmPEPWW930YVaLz5peCsHcB3Zvd7IOAGUWs7wCRAq26lYruvi6cqD3UtHJl+/ghv+oy/Hgpk2x8rcVKIlvMuD5A=
+  - secure: i4TnnjYv1u6ujWBNCZiO82uu1Ooti/Savgti+c5cCsWg1zus5QI1LMc5f16hx+NjYW4e9kWHz5nahcTFEZclm0ovx7FMLcLCHuUlaAiQhc89yqpWYR0arxBWBD0myZy0KG8PfVO/oXecKjJUQSFDUHL9OT+ELQ0Z0NYdNFiCZKzzt0Bsh+EMRcZ0r97SJHOohkGVFvX2NeKGvkcOVyxd20H7xMKTG+2Sx5IEMj8BI6EPrZ1yPjJ4AlUjF2f5nsf5Bry9z1tZkHQn8xQeYz+e1XoGKic2qxU8utpslefWAGE5HTBydk4JwOMpACge9PUoT09/9SEu8ma01iUinMvMVNu1MbfclK6lsaohjdqaQXOdWwvjy8SltdHKG7ws9AshhnCgupM/0znLX6Gj15AFV0vCuNqUVSNfKlGt/XqwOZE+lUb8+Ej9DPqnFNSAGU2RSFDEmrVu1OWkA1dz5cJ6R09+C6jFAuP4YKn3YB3S2LJ/iIqvx2SW3O8j0q6JDVxmoPVY/CO9y37JnP5QqeQQL6xepK+/Iymd2G+gQDV2VV3LZtJnVerZPAbNL0b8tGLxJhw8aMp5lSIt+WEla6LeV+D1wnPzrw9vzAG71qmGraU2R7IO/upYuH8RPuEFWDeATWQjsa7mxwWZy45JKltlbFDH8E1GkhO/9CysNH1g9bc=
+  - AWS_DEFAULT_REGION=us-east-1
+  - GOOGLE_APPLICATION_CREDENTIALS=travis-gcp-service-account-credentials.json
+  - DSS_TEST_STAGE=dev
+  - BOTO_CONFIG=/dev/null

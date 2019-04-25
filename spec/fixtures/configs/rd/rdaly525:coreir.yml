@@ -1,0 +1,49 @@
+dist: trusty
+#Hack to be able to install python 3.6
+language: python
+python:
+  - "3.6"
+sudo: true
+addons:
+  apt:
+    sources:
+    - ubuntu-toolchain-r-test
+    packages:
+    - g++-4.9
+    - verilator
+before_install:
+- export CXX="g++-4.9";
+- export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
+- cd build
+- cmake ..
+- make -j2
+- sudo make install
+- cd -
+- pip install delegator.py
+script:
+- ls bin/
+- pytest tests/binary
+- make -j2 installtest
+- cd build && sudo make -j2 uninstall && cd ..
+- export LD_LIBRARY_PATH=`pwd`/lib:$LD_LIBRARY_PATH
+- make -j2 test
+compiler:
+- gcc
+os:
+- linux
+before_deploy:
+- ./tools/scripts/release.sh
+deploy:
+  provider: releases
+  api_key:
+    secure: ov1UJzIPDhQpIFlItxEI1d+1YZmW2UU83cXZTLm+Wl4m+Uanab1r3s9UakGW8OqwTDmKu1JHba876lC1YWcO6K9o6iAx8YVqTFKh89kOGs1V2vfkgMHVkV+x+AcxwUJJDOv0J2KCntLU6O7babm5peLMkctqsyfiOHK4muedKxpMLG6ZFyKit42yqXp2uLKJF7SvLtSBV7hSFST8fnt05Whxu4m8YP5qAQEKLkfo77dPS4/RXjo02ac5mTVEXklB8xvNvuPDNq1rWS/+0H83XMO3dJcDKYD6hOV48/pE17Imli6SEVMUwXsTAoGHRocfKXQRZS36mMD139YhDydZTckmlDVMN1P/+yKzsGg58cX9Z6AAp0fu2i/5myqbqH/m14JBlyZrvL8KuDL1uJvzwr6mbrlQGphOAOoGLNN3ziPAmJRdw4y73UCJjaK5I875O+YtCDmgadtlZp3QfTCUj9u/WsS8lFKv72tggWLf2gri3krfUQaFxHni2gMJY2DMeqFXh6g5/QY+naCoYQ2tFt6ORZZiB7K3iLe7hSh3BPq7/gvC/BV+pjaQMvH3YA8K9jDhn+SObhykR1yB2EAi8JpjOm2HfSHK2wvjPlwzsQQ2/0K9j8SwzChMJ+4s9gbPGOjiYatAMXIl61OlT8KkTrDfJp+lOMasLBaQDMYthfs=
+  file: coreir.tar.gz
+  skip_cleanup: true
+  on:
+    repo: rdaly525/coreir
+    tags: true
+    branch: master
+notifications:
+  slack:
+    rooms:
+      secure: wDge444BBxOoHKi1bX2/Q7X7LDmF9akcNqfYNivabA30v3WJ7thLuQh2WQYEIcdIXljBgCtz8NuA8/OI3DGaJKaNBnrj/o2VA9JE1+9EHxwf6yS2pGuT43wBZtE/HT3R5e7zPe/lZPwoTh3625l5g6y58MbHQDmaOTQcnIoVoLtW6Zo1+QMhg+bDE6BPwJ3G0ekBaEK6YdeFzaZgvazuQe0yGCTbGRdvqcCzVEY0kEdrr3am8R1xgwgowYSbIsE6InwqSbKEHdG05sEbWpGzoFHtW+YfMBh4gH3UXXp0LZF2Sfq0stBwpP26V8I+SLH0uZZFXEAsNuAjIEsfMuJPgDt9/IR45JW6hjySctWNBF2/jPoPUPiENrEY57whH4t2YnbaY95dpqoAhaBHg66eLGgkgLQrMQPJUYi9LqmasvW808gfEQzgXDVekUp4dFIq4biJ62EUbN/Ag71TdTYu1lv6ynZQG3Ni/gS7p//qWxYG06AGp4cH45jR0GUb2qOYE4/mtsncYIQktZEOFA5qAEz+Y6l0AwemW6N9XvMPfAhlIhJMrY7cn2Kkr89p5zvKdzZk2gnjLae7oTtqoD8V2oralFWMVUBilIBghXN/ndxjR515MLRr6qlgqO0/ozOxgwKhsQki4IX405M1XIsg6muCECxwchwX0YmkY87H5og=

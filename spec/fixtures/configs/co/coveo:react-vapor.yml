@@ -1,0 +1,43 @@
+sudo: required
+
+language: node_js
+
+node_js:
+  - '8.9'
+
+addons:
+  chrome: stable
+
+branches:
+  only:
+    - master
+    - /^greenkeeper/.*$/
+
+install:
+  - npm install -g gulp
+  - npm install
+  - npm run build
+
+script:
+ - npm run test:compile # to catch any lint or compile errors, compile tests through webpack prior to running test suites with karma (karma always exit its process with 0)
+ - npm run test
+ - npm run docs
+ - 'if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then echo "Your live demo url, if everything went well, should be https://coveo.github.io/react-vapor/$TRAVIS_PULL_REQUEST_BRANCH/"; fi' # run this line on pull request builds only
+
+after_success:
+ - npm run report-coverage
+
+after_script:
+ - 'if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then ./create-live-demo.sh; fi' # run this line on pull request builds only
+
+before_install:
+  - eval "$(ssh-agent -s)" #start the ssh agent
+  - openssl aes-256-cbc -K $encrypted_6a1e0d13907f_key -iv $encrypted_6a1e0d13907f_iv -in id_rsa.enc -out travis-deploy-key -d
+  - chmod 600 travis-deploy-key # this key should have push access
+  - ssh-add travis-deploy-key
+
+deploy:
+  - provider: surge
+    project: ./docs/
+    domain: react-vapor.surge.sh
+    skip_cleanup: true

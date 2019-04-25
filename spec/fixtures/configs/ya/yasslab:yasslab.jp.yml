@@ -1,0 +1,28 @@
+language: ruby
+node_js:
+- 10.3.0
+install:
+- npm install
+before_install:
+- gem install bundler
+script:
+- npm run css
+- bundle install
+- bundle exec rake assets:precompile
+- bundle exec rake test SKIP_BUILD=1
+- bundle exec rspec spec/qiita.rb
+deploy:
+  provider: heroku
+  api_key:
+    secure: E9u0zceBt9hycppCOG17ZT6UIzdWbUDf0FxmRPIcjw3Oy4UQvFd8992ocGGbCdIVNJVUQLse7rXcNZME7yDVEXtDsoekMUx5ZHiBq+/ELJPwsutK4wU+jrn1CrQFrsGbEqJ0HlxyBinzBFu9H1IFezLRCYuK1zFhwebIojIlgeY=
+  app:
+    master: yasslab-jp
+notifications:
+  webhooks:
+  - https://idobata.io/hook/travis_ci/ef9a047f-66e6-4471-97db-3e278c70acf8
+
+# Only run tests when master branch changes
+# or when a PR branch is updated.
+branches:
+  only:
+  - master

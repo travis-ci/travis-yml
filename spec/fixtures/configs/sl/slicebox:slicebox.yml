@@ -1,0 +1,11 @@
+language: scala
+
+jdk:
+  - oraclejdk8
+
+notifications:
+  email:
+    - karl.sjostrand@gmail.com
+
+script: "sbt clean coverage test"
+after_success: "sbt coverageReport coveralls"

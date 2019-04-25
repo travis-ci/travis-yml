@@ -1,0 +1,52 @@
+language: python
+notifications:
+  email: false
+
+cache:
+  pip: true
+  directories:
+    - src/smif/app/node_modules
+before_cache:
+  - rm -f $HOME/.cache/pip/log/debug.log
+
+services:
+  - postgresql
+
+env:
+  global:
+    - DISTRIB="conda"
+    - PGUSER="postgres"
+    - PGHOST="localhost"
+    - PGPORT="5432"
+    - PGPASSWORD=""
+  matrix:
+    - PYTHON_VERSION="3.5" COVERAGE="false"
+    - PYTHON_VERSION="3.6" COVERAGE="true"
+
+install: source $TRAVIS_BUILD_DIR/ci/install.sh
+before_script:
+  - psql -c 'create database test_smif;' -U postgres
+script:
+  - cd $TRAVIS_BUILD_DIR && pytest --cov-report html --cov=smif tests/
+  - cd $TRAVIS_BUILD_DIR/src/smif/app && npm test
+after_success: $TRAVIS_BUILD_DIR/ci/coverage.sh
+
+jobs:
+  include:
+    - stage: PyPI release
+      if: tag =~ ^v
+      env: PYTHON_VERSION="3.6" COVERAGE="false"
+      install: source $TRAVIS_BUILD_DIR/ci/install.sh
+      script: echo "Deploying to PyPI"
+      before_deploy:
+        - cd $TRAVIS_BUILD_DIR/src/smif/app && npm run build
+        - cd $TRAVIS_BUILD_DIR
+      deploy:
+        provider: pypi
+        user: willu47
+        password:
+          secure: MNNitxCYMRYG/AFTL+t3bAeR8z6Zda8ujUQEi1Nyvkug+Tl5rOX7Oz96GKr7XPfmTdVxSA2kBPBEjNmsAl8btSCl+5KyybqnBy00TpwzwLfmNZZvhLa54joOhli91a11g0pI8nrGXakSdzaeJhpoG2xb1hhEJ0i/18RUDH0JcjHLUW83f9AnY23lP/wnduto8ekwn9YtGWnc8QopFbA1VJK01ZBCHYsbAs/BhLXZrTI/KhFcnLQu4mLdSF7aONLlNaYUlKdLBRR6X7gczBiFQvy/05WHjohP5y8LbjnKGg9bEGtQzw+oNAa4FTrWClTBRvzWcZM+IDR5j87+FopBBnmuL2skLRV/uImyshtR+LC0bs6/M4ULSpe7jr5e4+bV6ptHtdJt6HcN5p3F4WnEusHCojx0l17ThtfF+vV16lHStfZUkqBu/MqqqW8CqbXDf8hZcCOXV11ImTHEQ8u0FEaIj85l95pG6ol+6ng1CuuTwHnIC3ZfMmqx/jnSyqsBib3QaSeNMxvIzgGyHD3ofMaunCF65yU1cRsiVVoHOe2gRs9hyjZKfPSA3jhPeCGMSLR9Pq2aSDiPH+Ri48/7XrqlRDh5o2V9nZ6vkkotSE24m9QXiGbRIct5q4UUQ4wPULTCNpVOxVOIClJeyexHDIZb0Z/vl/hjnrrl5csu0ZQ=
+        on:
+          tags: true
+          all_branches: true
+        skip_cleanup: true

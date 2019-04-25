@@ -1,0 +1,35 @@
+env:
+  global:
+# SONAR_GITHUB_TOKEN
+  - secure: Cb5inPwNlfEREkhKa17tgThrTvFWV+RgfbIX3o2JZQ0Re9dlwNOoxxTd2NrYyRAWSj0LK/Dmev+wG56Jxovva2Kqt+xfpVF2y8C1BCNQlAXY4unoKy3pQ4dyk+iW2qHM0UuZDbyxLofPEKPi7GgoR/77fhdxHgvKPBRG1WixcDyz3NAjjP86M02gv5gY48S6DRPTGKX4kFii/VyEMpM62AKJBFvf6/NAB06E0zuV7l/DZn7JEYQ68upmB7CwhNA5NCMUqX1dVkGpSi4WFrCF2L38uIXDF8JF9nAJ8Cm9dZQobvTRGCeJHU+5t8a2q93zGcTae1147IqqmhbYvpW/69bzlsDsiv90Eg65yOYw8pUkY3FyX0r7jsm1Mo0tap8lYshh7Hc6VYcmDsaAp/XqHJOQWGwW3q6f694D8qe6jxxYMjXnfOuXJfQN/TmvrD++YHwxv1RPkpVXsmEL+IyuoY4PoY3oDRyX6CZ4HDn3zbp3S9Pv2jCGn0JVgZyXZY3lN/9AWPy3XPxuiPNOL8D6Y/dsJxhL4mCzRE3NlZ2m93RVk3mXLAbErwaAisglscpMb9/NDAydDsy8cuXK7Qq5anAfi516GJYr03zzEvz3KAxy3Dcxc1p4CQp65dnvnLgQqQpr/I0GmPRWUnCZSvOf5L5WuG0as8tM1CtD5A89aqI=
+# GITHUB_TOKEN
+  - secure: LYqe4kN1i8BqVEAO8fdO+CYrx9z8h1ab+NxCgYubLcP70DZoKNRj1/egULOd3uvDHFigFVeaACRR6vUQnHbHsffSkMr4nqwOeJMbxOdspHPuA4oMUy5RZKRC7P+v6Dlwpg4Psg/VsEnP6lHWb/RbosBE8tU8ukewD14EU3o29Ql+lBfvvOW/81UTGokMQa1zrW9o70oEaTYqePT9YzM9UcKgukshYtcxKE3oiwLm3fB8zBAUJwzkEvBGNpXjqBEDCUjrS80CqgY3BRsPfnPk90LgjeORaZKoP1f/bZE4UtgeESK0xpWsKEcDCRkSfGxYw8rD7nwc6H5LiCeoS87oQpUCMsoijmGL1yLrBBMIRAWoMC/o+h/QI5bb+IyLba6KLihY4LpExnWj2V8Mh6qs6AeV8v/Dl1WdyIi72WIkMBrmVrOhtoJJ45QaZJbrwSMeM4/ShS5NdiLFnGKeYOjMJ+DQZa+//SIwnvsOegm918TmOZqCr2YabI6WYixOzYjQPvI2KliZGekaX9uSNxVwoWZDE8jvdhvBWtHsL6hMqAv5ehEJw1aseLwjEGHQjIY0YBqJI38QmFr0vro6/9U2EehXHeW3ycCrPguQJ50nIK/DwiGMadUhrxU0xfZ6+TfFpGY0RivEPLD+Cup9C5oVFAppPJncdBdXUqouR90/8NI=
+language: python
+matrix:
+  include:
+    - os: linux
+      sudo;: required
+      python: 2.7
+      env: TOXENV=py27
+    - os: linux
+      sudo;: required
+      python: 3.4
+      env: TOXENV=py34
+    - os: linux
+      sudo;: required
+      python: 3.5
+      env: TOXENV=py35
+    - os: linux
+      sudo;: required
+      python: 3.6
+      env: TOXENV=py36
+
+before_install:
+- pip freeze
+install:
+- pip install tox
+- python setup.py clean build install sdist
+script:
+- tox -e "flake8,{$TOXENV}"
+after_success:
+- tox -e docs

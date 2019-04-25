@@ -1,0 +1,70 @@
+language: c
+compiler: gcc
+dist: xenial
+
+git:
+  depth: 1
+
+branches:
+  except:
+  - gh-pages
+
+matrix:
+  include:
+  - os: linux
+    addons:
+      apt:
+        sources:
+        - ubuntu-toolchain-r-test
+        packages:
+        - g++-7
+        - mpich
+        - libmpich-dev
+        - doxygen
+        - graphviz
+
+env:
+  matrix:
+    secure: JvReZBJUpYGDbrSbsshimBKu2HXLA3nniHSTVdTdWCOIo2mwAAU/qBh3gqExTsihdI9/6OaK4RoL6kvgRoKZ4HllkKxHtP5ttKpVguRYAzWLJWnlJm7s7v1AEs1txdQLa9kgGGHJsNnMYI+dX5BCG+huVdI+phf8BhVcCi04EGw=
+
+before_install:
+  - export CC=mpicc
+  - export MPICH_CC=gcc-7
+
+before_script:
+  - mpiexec --version
+  - mpicc --version
+  - $CC --version
+  - gcov-7 --version
+  - gcov --version
+  - m4 --version
+  - automake --version
+  - autoconf --version
+
+script:
+  - ./scripts/travis-build.sh
+  - ./scripts/tests.sh
+  - ./scripts/travis-docs.sh
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash) -x gcov-7
+
+# Documentation autodeploy script
+deploy:
+ - provider: pages
+   skip-cleanup: true
+   github-token: $DOCS_SECRET
+   keep-history: true
+   local-dir: ROOT-Sim
+   verbose: true
+   on:
+     branch: master
+
+ - provider: pages
+   skip-cleanup: true
+   github-token: $DOCS_SECRET
+   keep-history: true
+   local-dir: ROOT-Sim
+   verbose: true
+   on:
+     branch: develop

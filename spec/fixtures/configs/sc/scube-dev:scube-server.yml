@@ -1,0 +1,32 @@
+sudo: required
+dist: trusty
+language: minimal
+addons:
+  apt:
+    packages:
+      - postgresql-9.6
+notifications:
+  email:
+    - tj+scube_server@a13.fr
+  on_success: never
+
+env:
+  - RUBYVER=2.5-stable
+  - RUBYVER=2.4-stable
+  - RUBYVER=2.3-stable
+cache:
+  directories:
+    - ${HOME}/.gem/travis
+    - ${HOME}/usr
+  timeout: 3600
+
+before_install:
+  - sudo sed -i -e 's/peer\|md5/trust/g' /etc/postgresql/*/main/pg_hba.conf
+  - sudo service postgresql restart
+  - . <(curl -ksS https://vault.a13.fr/dev/travis-utils/install-before.sh)
+install:
+  - . <(curl -ksS https://vault.a13.fr/dev/travis-utils/install-bundler.sh)
+before_script:
+  - mkdir -p data/sounds data/test/sounds
+script:
+  - env -i sh <(curl -ksS https://vault.a13.fr/dev/travis-utils/build-rails.sh)

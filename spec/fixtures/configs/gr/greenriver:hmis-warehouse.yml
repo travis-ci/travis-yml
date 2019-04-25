@@ -1,0 +1,33 @@
+language: ruby
+cache: bundler
+
+bundler_args: --without production staging development
+
+before_script:
+  - cp config/letsencrypt_plugin.yml.sample config/letsencrypt_plugin.yml
+  - cp config/secrets.yml.sample config/secrets.yml
+  - mkdir app/assets/stylesheets/theme/styles
+  - touch app/assets/stylesheets/theme/styles/_variables.scss
+  - cp .rspec.travis .rspec
+
+env:
+  - RAILS_ENV=test DATABASE_ADAPTER=postgresql WAREHOUSE_DATABASE_ADAPTER=postgresql HEALTH_DATABASE_ADAPTER=postgresql DATABASE_APP_DB_TEST=boston_hmis_test WAREHOUSE_DATABASE_DB_TEST=warehouse_test HEALTH_DATABASE_DB_TEST=health_test DEFAULT_FROM=greenriver.testing@mailinator.com HOSTNAME=openpath.host PORT=80 REPORTING_DATABASE_ADAPTER=postgresql REPORTING_DATABASE_DB_TEST=test_boston_reporting
+
+script:
+  - date
+  - bundle exec rake db:create
+  - bundle exec rake warehouse:db:create
+  - bundle exec rake health:db:create
+  - bundle exec rake reporting:db:create
+  - bundle exec rake db:schema:load
+  - bundle exec rake warehouse:db:schema:load
+  - bundle exec rake health:db:schema:load
+  - bundle exec rake reporting:db:schema:load
+  - bundle exec brakeman -q --ensure-latest
+  - bundle exec bundle-audit check --update
+  - bundle exec rspec
+
+addons:
+  postgresql: "9.5"
+  apt_packages:
+    libmagic-dev

@@ -1,0 +1,31 @@
+os:
+  - linux
+language: node_js
+node_js:
+  - "9"
+addons:
+  apt:
+    packages:
+      - libsecret-1-dev
+env:
+  - GAUGE_TELEMETRY_ENABLED=false GAUGE_PREFIX=/tmp
+before_install:
+  - if [ $TRAVIS_OS_NAME == "linux" ]; then
+      export CXX="g++-4.9" CC="gcc-4.9" DISPLAY=:99.0;
+      sh -e /etc/init.d/xvfb start;
+      sleep 3;
+    fi
+  - curl -sSfL https://raw.githubusercontent.com/getgauge/infrastructure/master/nightly_scripts/install_latest_gauge_nightly.sh | bash
+  - if [ $TRAVIS_OS_NAME == "linux" ]; then
+      ln -s $NVM_BIN/node /tmp/bin/node;
+    fi
+  - export PATH=$PATH:$GAUGE_PREFIX/bin
+install:
+  - gauge install screenshot
+  - echo "gauge_repository_url = https://raw.githubusercontent.com/getgauge/gauge-nightly-repository/master/" >> $HOME/.gauge/config/gauge.properties
+  - gauge install js
+  - gauge install html-report
+  - gauge -v
+script:
+  - npm run build
+  - npm test

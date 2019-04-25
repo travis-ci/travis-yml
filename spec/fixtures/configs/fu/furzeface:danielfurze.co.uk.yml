@@ -1,0 +1,37 @@
+language: node_js
+node_js:
+- '8'
+git:
+  depth: 1
+cache:
+  directories:
+    — node_modules
+deploy:
+  # develop -> dev environment
+  # provider: s3
+  # access_key_id: AKIAJKQONSNGTSMSDQ2Q
+  # secret_access_key:
+  #   secure: moxWPjLjbX0rkymiW00b7QzjaYhGsDfSiWr0HSNH9RjK+qoVVdVyB6sdTUISLFTTohe/smaijh2Q0Nw87s/+mLMXIqentS02xOEk6g+FoAoc4CpjKrumSM3Uu5BcYSkpwBQv3Qy2nCgL+3RK8/pLLffORHSegQniet8wAFutwBUrc7iLQiVOpFek/XXBiGZw8pN0R+n93ZLYeXChgLJjmk9JNvMFzOYWYMSZOd8iye3xlP/h5/hNow1ogoRAdgyNumzJrdXj5ksvHpUYFqPgDoR7V27gI47DQxNggQe19Q/EjHuP9/nt6K7xsYVxKY8b6/XammQPt688qILBLC07W/ixWLpQQrKMr2ceClg3OOARM4puEhjI7YtuFRBNXyVZpTBmDIh70FqdroFQ/q8QeVpnLqWkG29VIYdOoX/C5V2dWT7cKFaJzgTfG6idbbrIKMZWehXzyTPtRtvOimxaKzeTJiwGvXt2gNNTTHirarEIrmyiRyjj0eVXcr+GQ+prNyVQlCScKbtUJq3H8dstORlCjOhwugUDNV75r9aadK6XFGSArZwQsaH/rYJADqJZUlTpJ4fETp4e5pvlDFxgm4y4uVa4tGtO/nyFAmeAY0yguFuZSK+X46OZAgSawijJ0svx7jooCJ9srto9rZAzbVkhwq3Rum7k9kXrRenGhKM=
+  # bucket: dev.danielfurze.co.uk
+  # skip_cleanup: true
+  # endpoint: http://dev.danielfurze.co.uk.s3-website-eu-west-1.amazonaws.com/
+  # region: eu-west-1
+  # local-dir: build
+  # on:
+  #   branch: develop
+  #   repo: furzeface/danielfurze.co.uk
+  # master -> live site
+  provider: s3
+  access_key_id: AKIAJKQONSNGTSMSDQ2Q
+  secret_access_key:
+    secure: moxWPjLjbX0rkymiW00b7QzjaYhGsDfSiWr0HSNH9RjK+qoVVdVyB6sdTUISLFTTohe/smaijh2Q0Nw87s/+mLMXIqentS02xOEk6g+FoAoc4CpjKrumSM3Uu5BcYSkpwBQv3Qy2nCgL+3RK8/pLLffORHSegQniet8wAFutwBUrc7iLQiVOpFek/XXBiGZw8pN0R+n93ZLYeXChgLJjmk9JNvMFzOYWYMSZOd8iye3xlP/h5/hNow1ogoRAdgyNumzJrdXj5ksvHpUYFqPgDoR7V27gI47DQxNggQe19Q/EjHuP9/nt6K7xsYVxKY8b6/XammQPt688qILBLC07W/ixWLpQQrKMr2ceClg3OOARM4puEhjI7YtuFRBNXyVZpTBmDIh70FqdroFQ/q8QeVpnLqWkG29VIYdOoX/C5V2dWT7cKFaJzgTfG6idbbrIKMZWehXzyTPtRtvOimxaKzeTJiwGvXt2gNNTTHirarEIrmyiRyjj0eVXcr+GQ+prNyVQlCScKbtUJq3H8dstORlCjOhwugUDNV75r9aadK6XFGSArZwQsaH/rYJADqJZUlTpJ4fETp4e5pvlDFxgm4y4uVa4tGtO/nyFAmeAY0yguFuZSK+X46OZAgSawijJ0svx7jooCJ9srto9rZAzbVkhwq3Rum7k9kXrRenGhKM=
+  bucket: danielfurze.co.uk
+  skip_cleanup: true
+  endpoint: http://danielfurze.co.uk.s3-website-eu-west-1.amazonaws.com/
+  region: eu-west-1
+  local-dir: build
+  on:
+    branch: master
+    repo: furzeface/danielfurze.co.uk
+after_deploy:
+  - gulp psi

@@ -1,0 +1,27 @@
+cache: pip
+dist: xenial
+install:
+  - yes | pip uninstall py pytest
+  - pip install coveralls
+jobs:
+  include:
+    - install: pip install black flake8 pydocstyle sphinx sphinx_rtd_theme .
+      python: 3.7
+      script:
+        - black --check --verbose *.py docs praw tests
+        - flake8 --exclude=.eggs,build,docs
+        - pydocstyle praw
+        - sphinx-build -W docs/ /tmp/foo
+      stage: lint
+language: python
+python:
+  - 2.7
+  - 3.5
+  - 3.6
+  - 3.7
+script:
+  - coverage run --source=praw setup.py test
+  - coveralls
+stages:
+  - lint
+  - test

@@ -1,0 +1,82 @@
+language: generic
+
+dist: xenial
+
+os:
+  - linux
+  - osx
+
+# ignore the virtualenv that Travis creates
+# setup a secure login to CodeCov
+# set env variables for different jobs
+env:
+  matrix:
+    - PYENV_VERSION=3.7.2
+    - PYENV_VERSION=3.6.3
+  global:
+    - PYENV_ROOT=$HOME/.travis-pyenv
+    - PIPENV_VENV_IN_PROJECT=1
+    - PIPENV_IGNORE_VIRTUALENVS=1
+    - LANG=en_US.UTF-8
+    - LC_ALL=en_US.UTF-8
+    - secure: hnWlE/s8Vo+OM+Vz2p60+/jmMoGwnIdpVg2OUnu269TJYapPG+qF6ks1jYpb/XfRucfndZSZXy4UZfJnzf082hoQmAUGHm3yrRTDkrsGGK1bxea3Rhwj1bn8IrjcZqOAQAtpCsnhFbzrdRTtng8+PCBcYyru+IG6jwOrOv2EMe/CBVLNvSoRdtBgcz4QKl2SRsLhEQh+pjgZiUEY+d7mNfyhGzCD8xS4abj8KfNfKDIZfKHX9E1mvBuZm9GQC17wvLyOt0j4gtEZeoGLGF63fuLvMqZhpZh00lJ6wmSD9vTok7pqgpErR1yrzZmVDrD61bz0PL/b8kHjOLLd0HcOw9q0D0KPX5BojOJxVKglc8GaAI4CksnMmjfLjieZRMag8K8qI8lKkIiD/AABAjqwHJ0Ywm7ru42alY163y4ieatXDMBQpoLsSn1P4gs0LDvGe6Kby+jeM8nL8y+5L5qGTODnqYDHes0rHVMIXQAr7HLKyru6/Bwzz8woYr8WjBmTd1UxLtFcfSYr8Rj+Yklldz4Wt1p4Wnpj9Hd5S2eVLXeteTBKA4y/tFSenZTke+NlVK8zmHa06yVHTbLf14ggTe4hZgUM/mLXRnVFy73LyaBPQkDQpvc6HELMxj94z5OZ6DpDrESDDxVnGq3H876qiJfi/rMFAkTbtgeMu4MRbow=
+    - secure: EQh92TI8J8iMTvKFMUv/+piJwwT0IGAWCxSBSTpOw+5EC0+JJeXN/ZqNy9DmOO9z9Agdx9YO0K04u4bUuAbUQu/iHSM432r774slbkwqndqfuCvfEGliNN/6fbF/9ExQf1USieLXTxaCKf1gwwLaQp9RVVOW64fbHtY+t8W3y8KhYINa4ogyQ8k2ykkosCvqMF/h0WEgbAtKxpAbB28tMuHDSolzqv2JVCLRg9/tbtDxKtEWET3/+Edovq8Te9Yt1KgF3uxvRdRcL12qBL/YArLwbxrRrPUgq6rXGXn3nZePKwC0BB2DqNWI0hU9mJbWX19cYfHz6GIha19hdrjxD6c4QzepaN1roYjv6h0QRoI6vEkc1mxyCIAS8NpJkgMkTumytUCSpzU/2CjYiO7Cpsqw4FS2mlPXQ4GUIoMseqqB1eNbQHqHii3nFlDWENlGs75HmwkFotMRndZGf3hnCg0coU+32Th4UOtSbDSOW6uqezIrnLSAtGQJLsFweF+ywOdVLwlm6CRuGh+GtQfh8GuSyC2yuLsKdxx1krD/6ERXn42Y6AoI3zsyGgxJtAPRNq9O8S5eijvirYCdWsut8TUlHS7WRDHVHjvbiLvFuCfRLTWmLBycJ5UMa9UAHZiC7JbXbeld5pefaZHSgpvTFsa8hsQ+BI02n+KbOeSgYPA=
+    - secure: Z8kpg7aQExqtmjG/E6k5n7K6urjZVfy1UTOGcw0Ml+5mnr1jsV9IsM81gs8TOjPqsV9+x/asY6mFd8MPyij36Re2B7M5g4uYGtV/yWI8gLmgMYy3b+zC1iKm5XUH3wpn940abLx4gsUFk01SWKYu4Rvv0dygXVseeYcd0O8SLK3bwuZ4J+GRz1G9AMXw6hjlXOffu0HlRvC/KnK0pDNYZel/QGbSkIKE+vKJIDufcplHkB2w8rZrjZH1JSD/KpcIe+B7/dYKQgixRupFBJ7oeq6M+GrXyILNaVLrhdYpDVHKycU6pYL1Gn3xxqWudT0nMVE9Bs5iw6TjilA4l3ToliYFoTBfokF1PyiYFuH40K/IQk8Lwpkibc0oJFQr5v+Rr4gKUOoxTyAlJzc+kZjStuhOoRPViEjRpauC6bdHVlMjc2Rt6TjY5BwFbeFSiYD/CG2lCsFcNTubeM8zQhwB5RCiM+DAq1wmI/BekdWkx+q2L2HmwatDYudAnV8Wqyhhg9rHJBHkTadzN6ftQCOXxIa3FNVr8wJMLu2pSOIfxPV40QIZy7mKMyINfB1gdkCU1vfgA9Ob1WjzWuUt1tg0bMK40FR8aMLxgdRze/LmkwWnIZ1nAFY4eX9V50qkdWgj5mi07T7hUh4CmbdJjwsHs1M4FNtnwQlUjsQwe3RihbQ=
+
+# install pyenv with travis-pyenv
+before_install:
+  - wget https://github.com/praekeltfoundation/travis-pyenv/releases/latest/download/setup-pyenv.sh
+  - source setup-pyenv.sh
+
+# command to install dependencies (from Pipfile, not Pipfile.lock)
+# cannot use locked dependencies because of possible version changes
+# between PYENV_VERSION versions
+install:
+  - pip install --upgrade pip
+  - pip install --upgrade pipenv
+  - pipenv install --dev --skip-lock --python "$PYENV_VERSION"
+  - gem install mdl
+
+# send emails when there is a change or failure
+notifications:
+  email:
+    on_success: change
+    on_failure: always
+
+# use a cache to improve performance
+# cache pip installations
+# cache pyenv installations
+cache:
+  directories:
+    - $HOME/.pyenv_cache
+    - $HOME/.cache/pip
+
+# set GATORGRADER_HOME environment variable
+before_script:
+  - export GATORGRADER_HOME="$TRAVIS_BUILD_DIR"
+
+# perform testing:
+# --> run the test suite and generate coverage with Pipfile script
+# --> lint the code with Pipfile script
+# --> lint the README documentation with mdl
+script:
+  - pipenv run cover
+  - pipenv run lint --check
+  - mdl README.md
+
+# report information to CodeCov and Codacy
+after_success:
+  - pipenv run codecov
+  - pipenv run python-codacy-coverage -r coverage.xml
+  - test "$PYENV_VERSION" = "3.7.2" && test "$TRAVIS_OS_NAME" = "linux" && \
+    wget https://github.com/Michionlion/pr-tag-release/releases/latest/download/pr_tag_release.sh && \
+    source pr_tag_release.sh
+
+# deploy to GitHub Releases on PR merge
+deploy:
+  provider: releases
+  api_key: "$GITHUB_OAUTH_TOKEN"
+  skip_cleanup: true
+  on:
+    branch: master
+    condition: $DO_GITHUB_RELEASE = true

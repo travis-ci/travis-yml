@@ -1,0 +1,61 @@
+---
+language: node_js
+node_js: 'lts/*'
+sudo: false
+dist: trusty
+
+addons:
+  firefox: latest
+
+cache:
+  directories:
+    - $HOME/.npm
+
+env:
+  global:
+    # See https://git.io/vdao3 for details.
+    - JOBS=1
+    - CC_TEST_REPORTER_ID=8c510ad3aa4b1a2a3d504dfdbcc5605e7966c019dc1e9b68a815de50b946ebc6
+    - COVERAGE=true
+    - MOZ_HEADLESS=1
+    - SENTRY_ORG=ilios
+    - SENTRY_PROJECT=frontend
+
+before_install:
+  - npm config set spin false
+
+script:
+  - npm run lint:style
+  - npm run lint:hbs
+  - npm run lint:js
+  - npm test
+
+jobs:
+  include:
+    - stage: test
+      env: SW_DISABLED=true
+      before_script:
+        - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+        - chmod +x ./cc-test-reporter
+        - ./cc-test-reporter before-build
+      after_script:
+        - ./cc-test-reporter format-coverage --input-type=lcov coverage/lcov.info
+        - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
+    - stage: deploy staging
+      if: branch = master AND NOT type = pull_request AND NOT type = cron
+      env: COVERAGE=false
+      script: node_modules/.bin/ember deploy staging --activate
+    - stage: deploy production
+      if: tag IS present
+      env: COVERAGE=false
+      script:
+       - node_modules/.bin/ember deploy production --activate
+    - stage: send release to sentry
+      if: tag IS present
+      env: COVERAGE=false
+      before_script: npm install -g @sentry/cli
+      script:
+       - sentry-cli releases new $TRAVIS_TAG
+       - sentry-cli releases set-commits --auto $TRAVIS_TAG
+       - sentry-cli releases files $TRAVIS_TAG upload-sourcemaps dist/
+       - sentry-cli releases finalize $TRAVIS_TAG

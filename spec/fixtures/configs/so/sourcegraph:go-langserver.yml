@@ -1,0 +1,26 @@
+language: go
+
+go:
+  - 1.10.x
+  - 1.11.x
+
+go_import_path: github.com/sourcegraph/go-langserver
+
+os:
+  - windows
+  - linux
+
+branches:
+  only:
+    - master
+
+install:
+  - go get -d -t ./...
+  - go get golang.org/x/lint/golint
+  - go test -i ./...
+
+script:
+  - cd $TRAVIS_BUILD_DIR
+  # Travis windows is changing line endings, breaking tests. Switch to LF.
+  - find langserver -type f -print0 | xargs -0 sed -i ':a;N;$!ba;s/\r//g'
+  - go test -short -timeout 5m -race ./...

@@ -1,0 +1,14 @@
+language: node_js
+node_js:
+  - "10"
+env:
+  - CI=true
+cache: yarn
+git:
+  depth: 5
+before_install:
+  - chmod +x build.sh
+script:
+  - yarn build
+  - yarn test:cover
+  - ./build.sh

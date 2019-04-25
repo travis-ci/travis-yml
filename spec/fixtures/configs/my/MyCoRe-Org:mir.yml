@@ -1,0 +1,48 @@
+language: java
+dist: xenial
+jdk:
+    - openjdk11
+install: true
+addons:
+  firefox: "latest-esr"
+  apt:
+    packages:
+    - google-chrome-stable
+    - dbus-x11
+cache:
+  directories:
+    - $HOME/.m2/repository
+    - geckodriver
+env:
+  global:
+    - MAVEN_OPTS="-Xmx1024M -Xss128M -XX:+CMSClassUnloadingEnabled -XX:+UseConcMarkSweepGC"
+    - GECKODRIVER_VERSION="0.20.1"
+    - CHROMEDRIVER_VERSION=$(curl http://chromedriver.storage.googleapis.com/LATEST_RELEASE)
+    - FIREFOX_BIN=$(which firefox)
+    - SELENIUM_BROWSER=firefox
+before_install:
+
+  # geckodriver
+  - |
+        export PATH=$PWD/geckodriver/${GECKODRIVER_VERSION}:$PATH && \
+        if ! type geckodriver/${GECKODRIVER_VERSION} > /dev/null 2>&1; then \
+            rm -rf geckodriver && \
+            mkdir -p geckodriver/${GECKODRIVER_VERSION} && \
+            wget https://github.com/mozilla/geckodriver/releases/download/v${GECKODRIVER_VERSION}/geckodriver-v${GECKODRIVER_VERSION}-linux64.tar.gz -O geckodriver/${GECKODRIVER_VERSION}/geckodriver.tar.gz && \
+            tar -xvf geckodriver/${GECKODRIVER_VERSION}/geckodriver.tar.gz -C geckodriver/${GECKODRIVER_VERSION} && \
+            rm geckodriver/${GECKODRIVER_VERSION}/geckodriver.tar.gz; \
+        fi; \
+        geckodriver --version
+ 
+before_script:
+  - wget http://chromedriver.storage.googleapis.com/${CHROMEDRIVER_VERSION}/chromedriver_linux64.zip
+  - unzip chromedriver_linux64.zip -d chromedriver
+  - export PATH=$PATH:$PWD/chromedriver
+script:
+  - mkdir ${HOME}/tmp
+  - export TMPDIR="${HOME}/tmp"
+  - export $(dbus-launch)
+  - mvn -B -P!standard-with-extra-repos -Djetty clean install && mvn -P!standard-with-extra-repos -B javadoc:javadoc
+after_failure:
+  - sh travis/autodeploy.sh "$TRAVIS_BUILD_NUMBER-$TRAVIS_EVENT_TYPE-$TRAVIS_PULL_REQUEST" "https://MyCoRe-Travis:$GITHUB_TOKEN@github.com/MyCoRe-Travis/MIR_test_artifacts.git"
+

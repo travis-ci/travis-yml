@@ -1,0 +1,52 @@
+language: generic
+sudo: false
+
+env:
+  global:
+    - INSTALL_EDM_VERSION=1.9.1
+      PYTHONUNBUFFERED="1"
+
+matrix:
+  include:
+    - env: RUNTIME=2.7 TOOLKITS="pyqt pyside wx"
+    - env: RUNTIME=2.7 TOOLKITS="pyside2"
+    - env: RUNTIME=3.5 TOOLKITS="pyqt pyqt5"
+    - env: RUNTIME=3.6 TOOLKITS="pyqt pyqt5 pyside2"
+    - os: osx
+      env: RUNTIME=2.7 TOOLKITS="pyside pyqt wx"
+    - os: osx
+      env: RUNTIME=2.7 TOOLKITS="pyside2"
+    - os: osx
+      env: RUNTIME=3.5 TOOLKITS="pyqt pyqt5"
+    - os: osx
+      env: RUNTIME=3.6 TOOLKITS="pyqt pyqt5 pyside2"
+  fast_finish: true
+  allow_failures:
+    - env: RUNTIME=2.7 TOOLKITS="pyside2"
+    - os: osx
+      env: RUNTIME=2.7 TOOLKITS="pyside2"
+
+branches:
+  only:
+    - master
+
+cache:
+  directories:
+    - "~/.cache"
+
+before_install:
+  - mkdir -p "${HOME}/.cache/download"
+  - export DISPLAY=:99.0
+  - if [[ ${TRAVIS_OS_NAME} == "linux" ]] ; then sh -e /etc/init.d/xvfb start; fi
+  - if [[ ${TRAVIS_OS_NAME} == 'linux' ]]; then ./install-edm-linux.sh; export PATH="${HOME}/edm/bin:${PATH}"; fi
+  - if [[ ${TRAVIS_OS_NAME} == 'osx' ]]; then ./install-edm-osx.sh; export PATH="${PATH}:/usr/local/bin"; fi
+  - edm install -y wheel click coverage
+install:
+  - for toolkit in ${TOOLKITS}; do edm run -- python etstool.py install --runtime=${RUNTIME} --toolkit=${toolkit} || exit; done
+script:
+  - for toolkit in ${TOOLKITS}; do edm run -- python etstool.py test --runtime=${RUNTIME} --toolkit=${toolkit} || exit; done
+
+after_success:
+  - edm run -- coverage combine
+  - edm run -- pip install codecov
+  - edm run -- codecov

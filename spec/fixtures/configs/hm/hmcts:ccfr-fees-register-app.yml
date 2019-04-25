@@ -1,0 +1,28 @@
+sudo: required
+language: java
+services:
+- docker
+before_cache:
+- rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+- rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+before_install:
+cache:
+  directories:
+  - "$HOME/.gradle/caches/"
+  - "$HOME/.gradle/wrapper/"
+script:
+- "./gradlew build"
+- "./gradlew jacocoTestReport"
+after_success:
+- bash <(curl -s https://codecov.io/bash)
+deploy:
+- provider: script
+  script: "./gradlew bintrayUpload --info"
+  skip_cleanup: true
+  on:
+    repo: hmcts/ccfr-fees-register-app
+    tags: true
+env:
+  global:
+  - secure: 2ekWFA3eRkUbJ6PpkWENUsUVkhAmewIm9bzWFK/sDyZ7L3rr4LitWFleDYk1xxF+dxKxBS/p8MA9EIW0Z+bvoPLH7NpvtZbpC2nUORcVyxDt0E4uQGjORrR/vxB4YFyFEKH7Vk76UyL4F+UJYaJmjIrdJYtK46DcDYE3WEcLsGTV7V0E7ySo+F6Ct2+4rHoNnqTewhW+FBXutRgKTKhW9dp+ifDoWFewxcX2DPFW2+wv8ko6rMhSU+O0GGO+1G6MdU9V5RCd4PQeBiCYCoq3vcChcGVDQVRWP33KN9J9O890r9swGO0mCMLkbGataaavadPLzmAKx5cQfRKLbMsiKtwA1NprYhs7H4RBZIjGtMwK7VuMvT/rR5kNQN0N1IO6wAGUKiy6ayf/0nryghS2/6ZkYTqlMzdwdXFWI5iLkmhFB0cymXsim2IDQM7XKOkuriAEIcg/s0J1BDjJODXkUBWqaam7nQ7Fp8EmrC8Jc5zUpJ35W4FQQlM0zvIH72IIDvy7iJqsKDs336cUYoN9nHA6/vnKaygL8NAVZjGDoWqOeMz5/ZP6v+1wDxYpZePD15QiByf5XuZG7qDQP4lDIY8rNeDkqki/JXaaDaL/U1hq77sExki9Yc5RyG028Mdf/AYQ/IJh6EVb4/1n0lWqDSE6G3HSdV56IyYQb8Jweug=
+  - secure: YU9eWgAnPQRLme9hoRBvCP+igUqWJja+sXeZWPNGkWygxbEkaRU26V+sSF2sunJTJScm3bg2REIAIdh15YzCbWJAA695Xv4JTUluSf5w9L9Ee9F6EmzjZURKPJeOXMGiN55f93EHc5f3uzpTK3U/T29fAGfIOKu0pVcWsdn7YRe8G0Fm4qPGjhpTN2UQ8Rj2lk58FpE3xgN+Hqmcu57PW6vtc0Cdd+XGsQWQfCIFBMVR4qDTZvcZ+ApV737p96cqHyLrgpgCKT7VUS3pHvh0zizl2sil0zjBrY82QSAV5Dg11VRwTDIsK7FF9xFz9jUru7CZyFD/s8Pn+4mzHYLLRIfuOPILVQGkzsQWwa7NWDAHaTUc2K0AM5ovG+SGVMKN9wJjVzOLZ39bVVPOYw2coOPDV4E7X2ixHdcAirramLhw6Ik2mvOOItYNfpr9vFe/eqfK7oG3mF2Dd8nlBR351DpkbDkXp10v1C9Mw2wYW6m5yRnWXBvhdj3tfg/rz48bnfn796tVgYz7hD2jYPAhf0DX0DBZuP9av8sj1F5UcJDMlblmefNSm7wvQa6DD7mO1i/XCSkq9ueg3z4nxmkc1KO+tHY4DKPDyaK1zPf0h3QfHIIfjVpJANyXWfUcX1xvKdXYLapsCtJs5dX8s7Kf3wuThbIC9lV437/gI8vO0B4=

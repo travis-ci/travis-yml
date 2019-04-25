@@ -1,0 +1,126 @@
+language: php
+sudo: false
+dist: trusty
+
+php:
+  - 7.1
+  - 7.2
+  - 7.3
+
+os:
+  - linux
+  #- windows
+
+env:
+  - COMPOSER_FLAGS="--prefer-lowest"
+  - COMPOSER_FLAGS=""
+
+cache:
+  directories:
+    - $HOME/.composer/cache
+
+stages:
+  - composer validate
+  - static code analysis
+  - test
+  - test with coverage
+  - integration tests
+  - infection
+
+before_install:
+  - stty cols 130
+  - phpenv config-rm xdebug.ini || echo "xdebug not available"
+  - echo 'opcache.enable=1' >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
+  - echo 'opcache.enable_cli=1' >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
+  - echo 'zend.assertions=1' >> ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/travis.ini
+  - echo 'assert.exception=On' >> ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/travis.ini
+  - composer self-update
+
+install: travis_retry composer update --optimize-autoloader --prefer-dist --prefer-stable --no-progress --no-interaction --no-suggest $COMPOSER_FLAGS -vv
+
+script: vendor/bin/phpunit -c phpunit.xml --colors --columns 117 --no-coverage
+
+jobs:
+  allow_failures:
+    - php: 7.3
+    - php: nightly
+    #- os: windows
+  include:
+    - php: nightly
+      env: COMPOSER_FLAGS="--ignore-platform-reqs"
+
+    - stage: test with coverage
+      os: linux
+      php: 7.1
+      env:
+        - COVERAGE=yes
+        - COMPOSER_FLAGS=""
+      before_install:
+        - stty cols 130
+        - echo 'opcache.enable=1' >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
+        - echo 'opcache.enable_cli=1' >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
+        - echo 'zend.assertions=1' >> ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/travis.ini
+        - echo 'assert.exception=On' >> ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/travis.ini
+        - composer self-update
+      script: vendor/bin/phpunit -c phpunit.xml --colors --columns 117 --coverage-clover=clover.xml --coverage-text
+      after_success:
+        - wget https://github.com/php-coveralls/php-coveralls/releases/download/v2.1.0/php-coveralls.phar && php -n php-coveralls.phar --verbose --coverage_clover=clover.xml
+        - bash <(curl -s https://codecov.io/bash) -f clover.xml -F phpunit
+
+    - stage: composer validate
+      os: linux
+      php: 7.1
+      env: COMPOSER_FLAGS=""
+      script:
+        - composer validate
+        - composer normalize --dry-run
+
+    - stage: static code analysis
+      os: linux
+      php: 7.1
+      env:
+        - TEST=phpcs
+        - COMPOSER_FLAGS=""
+      script: vendor/bin/phpcs --colors
+
+    - stage: static code analysis
+      os: linux
+      php: 7.1
+      env:
+        - TEST=php-cs-fixer
+        - COMPOSER_FLAGS=""
+      script: vendor/bin/php-cs-fixer fix --dry-run -vv
+
+    - stage: static code analysis
+      os: linux
+      php: 7.1
+      env:
+        - TEST=phpstan
+        - COMPOSER_FLAGS=""
+      script: vendor/bin/phpstan analyse -c phpstan.neon --memory-limit=768M --no-progress
+
+    - stage: integration tests
+      os: linux
+      php: 7.1
+      env:
+        - TEST="phpunit - integration"
+        - COMPOSER_FLAGS=""
+      script: php -n vendor/bin/phpunit -c tests/phpunit-integration.xml --no-coverage --colors --columns 121 --verbose
+
+    - stage: infection
+      os: linux
+      php: 7.1
+      env:
+        - COVERAGE=yes
+        - COMPOSER_FLAGS=""
+      before_install:
+        - stty cols 130
+        - echo 'opcache.enable=1' >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
+        - echo 'opcache.enable_cli=1' >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
+        - echo 'zend.assertions=1' >> ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/travis.ini
+        - echo 'assert.exception=On' >> ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/travis.ini
+        - composer self-update
+      script: vendor/bin/infection --min-covered-msi=95 --min-msi=95
+
+notifications:
+  email: false

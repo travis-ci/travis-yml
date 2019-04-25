@@ -1,0 +1,24 @@
+language: node_js
+sudo: false
+dist: trusty
+node_js:
+- '7'
+addons:
+  postgresql: "9.5"
+cache: yarn
+notifications:
+  slack:
+    secure: P3d36qfC1cM/0G03VqZXrjbWT1ByBePul+0QAIykrG2H9UUBZpt/OQTNJWHdzMvtJKRE5vFllckDGdJZCJO5OSlczQz7w1QUhTqrK3iTP/FClHpW2qyl+PfTUXEsl0lVQMotoNEk6MOsGJEgrY7CkzEObkGE53QmWmwojXvKJn+5AGsz14f0lXvfqTep4M96GyAZlye7Xm3DHenBTGoemlkIhA+yl6ua6SVefwm3/XD90ZyYz+YOK6hCrVJIrMDrp7zVZ1w88QPcoYupduhghIAh7wjbMjSGxikzQYNbWcvrwgzevAK9JKNfflKyWnu4zppaYL2zO9gyE3eZlN2eSpHsKi9VM4FlM04ZK82YLVHeWZBKMm4Pj4jde2yDqax+AJnFDW0zeYJk/XU7NV2DByyFFzzd70bStUu1HilCC7A9NM4EgVVxHrsx8ubpOMFcsOew1Ow8qLC9N96gTazkXfCosic2uxUreF++mGzXQBfv4kgIiUw1p3uZ2QlqcjYbdvHv2Uo8CQMG2s4dcO55Rzd47bnYqudwqXzcDBwdung+5WrbM3llygpDl+mnS7eguH4DX95AspX7eiL1+QDgiqoqZQwt6iulXfyBpJVnAA7NrrJNDXkIGACDnKjJFhvpaZET5TbZQYp/2MA4hN/h/hASlQDkvDr/Nx2NKOMH+bc=
+services:
+- postgresql
+before_script:
+- psql -a -U postgres -c 'create database participedia;'
+- psql -a -U postgres -d participedia -f setup.sql
+- node migrations/import_json.js
+# deploy:
+#   provider: heroku
+#   api_key:
+#     secure: qtvlHD+XRq7alYVyU0ehtotk8MGCImYWXZXWkHETHuP133EuB9PjaMJeP4PGVXW4mF9Vhlw2h/JnJDOVhwcFyw0z9rzn/L8jayoVHmhxm3zyz0BrNWxhVZmY8+bFTtTHzVSp1xCORnEPmocGnVE/QrjzZLG33mNuZNsvbmOFDqFs9ojv9g24F6ma8GtnESVHyJ5jkWurntFxnpYI3sz387afQhjESkPUVEuPf0wL6tGWfwbirdTJOxR5OAj/tb5LljVry3+Q+O17GgIxtKArDyBzZ/3IOLbvf6eTQSN22fZJdD6fe8i01NE7glJEaRIbWd1TWFtz5kxtr8dEfcdpT0Fgh3QkdWVwa8ftBIdC06rj6Gf09gL7UQcZjdmxdUOWl0J8+E85oKKo81ELz2hKJm2MInruGzfGeDMZ2YUaBPWwBAYVIHAJV8vuQr2D33LUYhhYB7zGwIk/M4yUg55EQRzD+1ofrVs/q5Y0Dz85/UQnvujsd6IKSHDmRIO6od3DyzmUgZxB1n6awkeI0xw6oDgP0NQy5Gx9+H7lUk/Tcn3PIOMncCNuSk1r/Xp5M0iwdkhKWEwP50koML61lg3CoyyJbVtN78Uhsm/RcyGrJexiDntGwfZtZibFjw5WKplHEUUHslMyMa/c5ogtWpMuhaHdVgd1QWtVkLnVs5V5/XM=
+#   app: participedia-api
+#   on:
+#     repo: participedia/api

@@ -1,0 +1,108 @@
+# The testing matrix considers ruby/puppet versions supported by SIMP and PE:
+#
+# https://puppet.com/docs/pe/2018.1/component_versions_in_recent_pe_releases.html
+# https://puppet.com/misc/puppet-enterprise-lifecycle
+# https://puppet.com/docs/pe/2018.1/overview/getting_support_for_pe.html
+# ------------------------------------------------------------------------------
+# Release       Puppet   Ruby   EOL
+# PE 2017.3     5.3      2.4.5  2018-12-31
+# SIMP 6.3      5.5.10   2.4.5  TBD***
+# PE 2018.1     5.5.8    2.4.5  2020-05 (LTS)***
+# PE 2019.0     6.0      2.5.1  2019-08-31^^^
+#
+# *** = Modules created for SIMP 6.3+ are not required to support Puppet < 5.5
+
+---
+language: ruby
+cache: bundler
+sudo: false
+
+stages:
+  - check
+  - spec
+  - name: deploy
+    if: 'tag IS present'
+
+bundler_args: --without development system_tests --path .vendor
+
+notifications:
+  email: false
+
+addons:
+  apt:
+    packages:
+      - rpm
+
+before_install:
+  - rm -f Gemfile.lock
+  - gem install -v '~> 1.17' bundler
+
+global:
+  - STRICT_VARIABLES=yes
+
+jobs:
+  include:
+    - stage: check
+      name: 'Syntax, style, and validation checks'
+      rvm: 2.4.5
+      env: PUPPET_VERSION="~> 5"
+      script:
+        - bundle exec rake check:dot_underscore
+        - bundle exec rake check:test_file
+        - bundle exec rake pkg:check_version
+        - bundle exec rake metadata_lint
+        - bundle exec rake pkg:compare_latest_tag
+        - bundle exec rake pkg:create_tag_changelog
+        - bundle exec rake lint
+        - bundle exec puppet module build
+
+    - stage: spec
+      name: 'Puppet 5.3 (PE 2017.3)'
+      rvm: 2.4.5
+      env: PUPPET_VERSION="~> 5.3.0"
+      script:
+        - bundle exec rake spec_parallel
+
+    - stage: spec
+      rvm: 2.4.5
+      name: 'Puppet 5.5 (SIMP 6.3, PE 2018.1)'
+      env: PUPPET_VERSION="~> 5.5.0"
+      script:
+        - bundle exec rake spec_parallel
+
+    - stage: spec
+      name: 'Latest Puppet 5.x'
+      rvm: 2.4.5
+      env: PUPPET_VERSION="~> 5.0"
+      script:
+        - bundle exec rake spec_parallel
+
+    - stage: spec
+      name: 'Latest Puppet 6.x'
+      rvm: 2.5.1
+      env: PUPPET_VERSION="~> 6.0"
+      script:
+        - bundle exec rake spec_parallel
+
+    - stage: deploy
+      rvm: 2.4.5
+      script:
+        - true
+      before_deploy:
+        - "export PUPMOD_METADATA_VERSION=`ruby -r json -e \"puts JSON.parse(File.read('metadata.json')).fetch('version')\"`"
+        - '[[ $TRAVIS_TAG =~ ^simp-${PUPMOD_METADATA_VERSION}$|^${PUPMOD_METADATA_VERSION}$ ]]'
+      deploy:
+        - provider: releases
+          api_key:
+            secure: "Xu84X+7tUMAzO2qCw53d2Gq2tcg99+oTqAuIuSlB0gDxQL7lkWcjPWPf3CE9jmgu4C4fw56R4ZX2oYW3m0+mtcPCKDoJAFKwFswMImDbdYcfTLCr4Hn3I+yxqjw7ls6Zlr7XL4o9mfWbZhM/1eF2iWdDdcBzMhlzHxe7eD0J+K/N0VSWgJTRFhHercyUsOgr2aXZz0CwQPU4zHzd2uZaTGUUoX9nK9nSb6Ro64sefzaviUBuLJjt9T2v6YuKibXHKwXYCgpHG3anwOwS/SuGPMszOoGuR0KtGCF6McLtAOtsHYGn4CXL3CbB03rYYZ4TRHX7Av9qGwS79LcY+bDVEnCs5Hebim14W0t4N+rk5hB7uglvYP/X/BeBp40SvEzhNiT/o2k80Q+toUN17avyjBm5knvRmlzFBSXT8aI75FDv8/LJ5Mdq+N6c3QrUoGOayNWtjeabC0alGLC9mAPLyiR47SeniumrkndLkRPqw8iWqDoe7jSPTbeK4T5IebqhwWg8bCXDUCA6iMNHOXzy74enRuoPXUVl+zM64d5ISwHDN8O59TZrqU6MSzPeYWm+hCeB+MhuulubiNlwLe+UkKQLTh8CqvNBX/6DdWPuYvEDjW/gK644Bh9TcpWH6x0oP8SkihZKSrXBNF3eenYhU4ph7kwkxxX86HE24aasU7c="
+          skip_cleanup: true
+          on:
+            tags: true
+            condition: '($SKIP_FORGE_PUBLISH != true)'
+        - provider: puppetforge
+          user: simp
+          password:
+            secure: "NR5lPHTfp142XIW5nowolBMFitPaaXpLiO9IvNXU3u00cZCOQmdU8fKWZPqKcUf8izV8EK9p5KCOSd956XxwrCyuwNEq6Z26WAydU6MN8qMKW7ucfm+xcURWQPKQ19MX5pNSaLOXemFvva2kuZF1rkwCYoSHJeBXDfLusBau56b9cIbX8BxNfkqPVzbNu1LioQkXTJ8Qt0u/hmRZy4593E6O5I6Hblh2lPKugNv+LpsUqwCGll1hvnTu0SJJEPZBYlKuC34qfsnqErT+eSOjLNGhxkPy3JVfwP4GRQbw2rFWNMzaPC/i6LGuB9GMPuUNjJHpZyl2+k33f9vFwfZiWoqIwJTRQTnXsbSa/amgtlaFX//43n9NMMPrI9WryoiYHTWQGiDxNuzqN6qjtthUlNfPBovsaqSsmcW9XELhsMxoo/t1G6LQWqEiCq5FB/bsnEig24CJeRELHL42A3bii+VWiBl/kgMEd/ju3J0VIqbLKIJcPQWhcomW5YGMf8Q9+FNZPyA4i3ebwwehh+etfND6+d3DOeXE84ZGLtJppELRwbgvJO/JWE/qxCdNSO4Nh3No+rRqXal3IESQBkfawuQoLIMBod7MCrRzo5d4J1asyoFJU+FMLRYjCcgaMUudUNViux6g86Cfav9rTDmhs7zdIZxaCOSNgLv9gfNu6AY="
+          on:
+            tags: true
+            condition: '($SKIP_FORGE_PUBLISH != true)'

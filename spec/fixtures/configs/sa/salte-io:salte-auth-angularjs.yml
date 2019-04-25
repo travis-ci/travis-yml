@@ -1,0 +1,19 @@
+sudo: false
+language: node_js
+node_js: stable
+cache:
+  directories:
+    - node_modules
+branches:
+  only:
+    - master
+    - /^greenkeeper/.*$/
+script:
+  - npm start lint
+  - if [ "${TRAVIS_PULL_REQUEST}" = "false" ]; then yarn start test.sauce; fi
+  - npm start test
+after_success:
+  - npm start report-coverage
+  - npm start semantic-release
+notifications:
+  email: change

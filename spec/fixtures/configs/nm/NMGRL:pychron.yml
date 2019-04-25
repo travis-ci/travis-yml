@@ -1,0 +1,51 @@
+sudo: false
+language: python
+notifications:
+  slack: nmgrl:ols00MOM4n3EimDpMiluJIyF
+  email:
+    on_failure: change
+
+python:
+  - "2.7"
+#env:
+#  # Default values for common packages, override as needed
+#  global:
+#    - CYTHON=0.20
+#    - PATSY=0.2
+#    - PANDAS=0.12
+#    - OPTIONAL=
+#    - COVERAGE=false
+#    - PYTHON=2.7
+
+before_install:
+  - export TZ=America/Denver
+  # adapted from statsmodels travis file https://github.com/statsmodels/statsmodels/blob/master/.travis.yml
+  # setup anaconda
+  - wget http://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O miniconda.sh
+  - chmod +x miniconda.sh
+  - ./miniconda.sh -b
+  - export PATH=/home/travis/miniconda2/bin:$PATH
+  - conda update --yes --quiet conda
+  # Fix for headless TravisCI
+  - "export DISPLAY=:99.0"
+  - "sh -e /etc/init.d/xvfb start"
+  # Build package list to avoid empty package=versions; only needed for versioned pacakges
+#  - PKGS="python=${PYTHON}"
+#  - PKGS="${PKGS} numpy"; if [ ${NUMPY} ]; then PKGS="${PKGS}=${NUMPY}"; fi
+#  - PKGS="${PKGS} scipy"; if [ ${SCIPY} ]; then PKGS="${PKGS}=${SCIPY}"; fi
+#  - PKGS="${PKGS} patsy"; if [ ${PATSY} ]; then PKGS="${PKGS}=${PATSY}"; fi
+#  - PKGS="${PKGS} pandas"; if [ ${PANDAS} ]; then PKGS="${PKGS}=${PANDAS}"; fi
+#  - PKGS="${PKGS} Cython"; if [ ${CYTHON} ]; then PKGS="${PKGS}=${CYTHON}"; fi
+#  - PKGS="${PKGS} pip";
+
+install:
+#  - conda create --yes --quiet -n pychron-test ${PKGS} ${OPTIONAL}
+  - conda create --yes --quiet -n pychron-test python=2.7
+  - source activate pychron-test
+  - conda install --yes qt=4.8.5 pyside statsmodels PyYAML traits pyface traitsui enable chaco xlrd xlwt lxml sqlalchemy apptools
+  - pip install uncertainties pint codecov coverage
+
+#script: python setup.py test
+script: coverage run setup.py test
+after_success:
+  - codecov

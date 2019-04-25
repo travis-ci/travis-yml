@@ -1,0 +1,50 @@
+sudo: false
+language: node_js
+node_js:
+  - "8.11"
+cache:
+  yarn: true
+
+if: branch = master OR type = pull_request
+
+env:
+  global:
+    # build number used by Makefile
+    - CI_BUILD_NUMBER=$TRAVIS_BUILD_NUMBER
+
+before_install:
+  - echo "//registry.npmjs.org/:_authToken=\${NPM_TOKEN}" > $HOME/.npmrc
+  - curl -o- -L https://yarnpkg.com/install.sh | bash -s -- --version 1.9.4
+  - export PATH=$HOME/.yarn/bin:$PATH
+
+before_script:
+  - git diff --exit-code yarn.lock
+  # configure git to tag release
+  - git config --global user.email "travis-ci@meetup.com"
+  - git config --global user.name "muptravis"
+  - git config --global push.default matching
+  # configure ssh auth to push tags to GH
+  - eval "$(ssh-agent)"
+  - echo "$GITHUB_DEPLOY_KEY" > /tmp/github_deploy_key
+  - chmod 600 /tmp/github_deploy_key
+  - ssh-add /tmp/github_deploy_key
+
+script:
+  # Run tests - only publish and tag *if tests pass*
+  - yarn test:ci && make publish && make push-gh
+
+# prep for deploy
+after_success:
+  - yarn run storybook-static
+
+deploy:
+  provider: pages
+  skip_cleanup: true
+  github_token: $GITHUB_TOKEN
+  local_dir: .storybook-out/
+  verbose: true
+  on:
+    branch: master
+
+
+

@@ -1,0 +1,16 @@
+language: c
+compiler: gcc
+sudo: required
+
+before_install:
+    - sudo apt-get update -qq
+    - sudo apt-get install -qq apt-transport-https
+    - echo "deb https://kdudka.fedorapeople.org/csbuild trusty contrib" | sudo tee -a /etc/apt/sources.list
+    - sudo apt-get update -qq
+
+install:
+    - sudo apt-get install -y --force-yes csbuild
+    - sudo apt-get install -qq libcap-dev libncurses5-dev texi2html texinfo
+
+script:
+  - csbuild --git-commit-range "$TRAVIS_COMMIT_RANGE" --build-cmd "git clean -dfqx && autoreconf && ./configure --quiet && make -s" --git-bisect --added-exit-code 7 -w1 --print-fixed

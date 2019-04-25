@@ -1,0 +1,52 @@
+language: node_js
+node_js:
+- '6'
+install: npm install
+before_script: npm run dist
+script: npm test
+before_deploy: echo 'All unit tests passed; Successfull built distribution assets; Preparing to
+  deploy Discovery Shared Collection Catalog to AWS.'
+deploy:
+- provider: elasticbeanstalk
+  skip_cleanup: true
+  access_key_id: "$AWS_ACCESS_KEY_ID_PRODUCTION"
+  secret_access_key: "$AWS_SECRET_ACCESS_KEY_PRODUCTION"
+  region: us-east-1
+  app: discovery-ui
+  env: discovery-ui-production
+  bucket_name: elasticbeanstalk-us-east-1-946183545209
+  bucket_path: discovery-ui-production
+  on:
+    repo: NYPL-discovery/discovery-front-end
+    branch: master
+- provider: elasticbeanstalk
+  skip_cleanup: true
+  access_key_id: "$AWS_ACCESS_KEY_ID_PRODUCTION"
+  secret_access_key: "$AWS_SECRET_ACCESS_KEY_PRODUCTION"
+  region: us-east-1
+  app: discovery-ui
+  env: discovery-ui-qa
+  bucket_name: elasticbeanstalk-us-east-1-946183545209
+  bucket_path: discovery-ui-qa
+  on:
+    repo: NYPL-discovery/discovery-front-end
+    branch: qa
+- provider: elasticbeanstalk
+  skip_cleanup: true
+  access_key_id: "$AWS_ACCESS_KEY_ID_DEVELOPMENT"
+  secret_access_key: "$AWS_SECRET_ACCESS_KEY_DEVELOPMENT"
+  region: us-east-1
+  app: discovery-ui
+  env: discovery-ui-development
+  bucket_name: elasticbeanstalk-us-east-1-224280085904
+  bucket_path: discovery-ui-development
+  on:
+    repo: NYPL-discovery/discovery-front-end
+    branch: development
+after_deploy: echo 'Successfully executed deploy trigger for Discovery Shared Collection
+  Catalog on AWS'
+env:
+  global:
+  - secure: Kr1/Q4rj5xxTmb0uMvOQwnux9JZUKAjHr4AOayxJX8ysQ/TMGwhFe9cIsf91L4ywgsT83F9zlUpp2cECMdcSebaEHO9EGFU81n9AUTkxEwVOquFMHHwmopP/en4thLI6A7mUMeqDhKvgL9vNzDfo/4RVeK0dZPcGseppbL56B+JFEEfmn2t2geM2fCCtXjRVjQLgMxc/FJuk6OAQ/y/Ifo0Nd7Ndb117I7dHsjpUmgvveuxVndONsgPxnPBkmDeeN4tmaEV1zdbPRD6Ds5zgZubruPotK1fIyMaChKn4Yk/Maxzgb+PPf7Ijq+mZ8ZPfYAMiZsh30phkAX627uXSwI7VCom0RqFtFKHntc8NhI1Dpf45kXZDEph3+DsJGj7EjAyyqYqEnBYJSBpKlywwdBuQuVmhrvggPN7Xj6TbyksOsj609lJ3xxe1daFGCd4eszkWHTXjrX57WAksIb5FuISEjCAE1DtRcQ4pMEhfr6k/BhcJpKKeS681BWxAJ10Y+aYLGyFVbnsYfuRQw0Gvn62o1YJsSG808o4Q+YTe5IPKyiLraDIvC6xpwV5pJroAhZvBvq9VsNts8V2tGPo2bwQYhu1c8PQTGKM9maaaELqSW9vbqJydmbd1LqqpPjofn3h4dGTgIOONeNLp2ysDFdt26fMZs5YAF+5rYsJSQNM=
+  - secure: aZDxSzDWEad4gRdzHnR2d39J47IHNBz7ZOEiyXMbasKM8V5SJrawafYb3K+QhbVs76giV66A1vmcq3nWrLDNttPtDXLj9xNa+IZukiZJLH6eH17mdJWFLhaU7+qLA8E7iY392gzmBO3V886S+QruKVUXyHUVrPIM4lvEnY07ZT6FDk6jM94f+/2vyFsVTGfHQAyMu6bXvGyfk/PTPGWwCBZ0vnCba/ruAqmI3CRDP6ECW3hGV/pTAv16IHthlB6ggi0vVi8sBeiBzEPJClsdfr6uxWKqhCw1Q7UmKVPV1Jd4a7QKfesbNTJNFAWTrSERDkqpuvj8urB0ysYbSQpkYcdrJwfubupXgdE5ZYfHoNIKvDgo0MJWAsFx+DV3m4LwToLJLWDlMx03rUHiCkZXHsB6JnG5UuyZoVoxNIuaJQ/Jrqu5ejkHliefN4xhc6grKxnDfNW+4grh1R7CVj3WuSq5bOMbKXpSU+ndFlGEamzmhryBMqCnrmdmARDvdG91JP/IOMFxKBNTekp93gfNBKAz9kMiRl5UIRFCk/EMOdcBfNENhTrbNBDLSHUFWI1YEL+0rK/dlnzxTRWvT+PDYKFjzhOTPDtoaBO6ay/WQupC7gzcPPuy58yh+iGyyIIK2s7BWng47emHhKgYmmTOFLJuViiRqW7LZTWA4IpjByU=
+  - secure: EuIgbbiQiRjsavJ/bsC4S9oOVwROh34vKUrSkNAXERf9ozsRr2iwX93h1yaDCY3tgLmKKKYi15bKS2YUd7duXz9fuWVzZMhSG0/Y2oogd7YQZF0PLcuE3fMqWE7fyW8ApZpH7oyLwjscue3rNtzQLYaEffVvKMMtWP8RRFO0/l20PGTTx7gCrOwAt3222AFDVNWWW18CmpHQU0vCJeLCPDVYnq/3odr7+EPOUsjEcURAMvs6d5y20AfaBQbQLntZCrPf8hZnD5G3OfNqVRISC2jKt5Yly4tRsAO7qpSfmQCFKPaZLvDRgpyDq95LWeZ9HcfXcPCaUUe/fPO4aXEmWisDUoXmAuCID+cP5Cl9zPn2jBdYUbF57loFpDIRMyE511Abwx+D9y+ndj1ScFtZ6quYn1IcVPeTd1QAOdbJdolZhGEpCTwb1eRRaj/X4pP2aqrSz+uTRj3BwIERDLMdl4jh/o7yfmYdx2XkBWA/bRkXC0eywAGhYkStIg/hCKbJ0d76XW+MuaiR18i0bqLzSI6ToXpfmKyF662BRlpH9vwibI3+/RXr698Uvi01I2+rm+VKaFjNH6G+OA7heN8sIT+Eb67SDmYpa1r3/7ejzKJfjU2xgK17DWAd0ILR2q+of2o7p7iij3kjyCm5n7n89k6NQaYNk4a0yuZKqTA6zWA=

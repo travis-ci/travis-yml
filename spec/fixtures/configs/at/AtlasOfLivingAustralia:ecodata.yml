@@ -1,0 +1,33 @@
+language: groovy
+sudo: false
+jdk:
+- openjdk8
+branches:
+  only:
+  - master
+  - dev
+  - grails_2_5_6
+
+services:
+  - mongodb
+before_install:
+- rm -rf ~/.sdkman
+- curl -s get.sdkman.io > ~/install_sdkman.sh
+- chmod 775 ~/install_sdkman.sh
+- ~/install_sdkman.sh
+- echo "sdkman_auto_answer=true" > ~/.sdkman/etc/config
+- source ~/.sdkman/bin/sdkman-init.sh
+- GRAILS_VERSION=`grep '^app\.grails\.version=' ./application.properties | sed -e
+  's/^app\.grails\.version=//g'`
+- sdk install grails $GRAILS_VERSION || true
+before_script:
+- mkdir -p ~/.grails; wget -q -O ~/.grails/settings.groovy https://raw.githubusercontent.com/AtlasOfLivingAustralia/travis-build-configuration/master/travis_grails_settings_old.groovy
+- MAVEN_REPO="ala-repo-snapshot"; grep '^app\.version=' ./application.properties |
+  grep -q "\-SNAPSHOT"; if [ "$?" = "1" ]; then MAVEN_REPO="ala-repo-release"; fi;
+script:
+  - grails clean; grails refresh-dependencies --non-interactive && grails test-app && grails prod war --non-interactive
+  - '[ "$TRAVIS_PULL_REQUEST" != "false" ] || grails prod maven-deploy --repository=$MAVEN_REPO --non-interactive'
+env:
+  global:
+  - secure: bIwDtP92h7r2iGMpwneKwZYjh2kK9gIDkaEHHIuNnatZsyLvqm/FukeJIbeYlXACiOHJVslQu4bpTwYvdI5UzD5KPSUMY4bu+hwtuIgQofF4zArpNzCDA3QW4Jqs87TsvjGs8zfNT5JSM6xt4RoALqpCleiwL9eH3bFIpZx/dIk=
+  - secure: IR4hXjbAtG2ipfd8/rRZYg+Vdu50qUYxXUxa9VqHkla6PmmYNkTVknf+oZWYzBSJ+mW9fGjM6fh4KCzopvYzMjlotcHutDbVsEgWCjKR1h+9uE1urbExiaiTRNQMd1X3TyTPp+DL5Z6hGE6JmKikYEjff6pR88iLniXz5gJ8ENk=

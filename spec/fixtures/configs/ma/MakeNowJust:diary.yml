@@ -1,0 +1,27 @@
+language: node_js
+node_js:
+  - '10'
+
+script:
+  - yarn lint
+  - yarn mkdo sync-scripts --check
+  - yarn test
+
+before_deploy:
+  - yarn build
+
+deploy:
+  provider: pages
+  skip-cleanup: true
+  keep-history: true
+  target-branch: release
+  github-token: '$GITHUB_TOKEN'
+  local-dir: public
+  name: TSUYUSATO Kitsune
+  email: make.just.on@gmail.com
+  on:
+    branch: master
+
+notifications:
+  slack:
+    secure: bo5+mEg8NXq6rp7UrtyxQptt2TdyYSqxRtJV+HxdlArPphgNDOgMyNACFI5joZ5m5FOHHFgFXYm14zdHF0cAPxQSug3oDgeWSD7oOAdWeuZ9Dz1+2edknq5anY/OjKY0MKajYZE37dm7pbab4szzV8FNUoaGow/az6N7d+QhsCAoHf9RaILYaEC9SUa+8UQkWzva9+vKLZAgUJqfk3dX2f7KVfqtBaGqMzKJuDgUyyM7+HWfCiy6+KmxLuqyLTl/pZhbjv/E5sZhieUakSuT4w4pxiM7fZbQI6bBRUZg6HI8esHlP6xWMRCdOUTwwRcFW3WTAa2AmNXKYfULvaa7twka9SbEM079EUjmNciWbukAcEqGtfESeCOPCbDdE6/bbP+4sJhp1i/RWAStN2Bqp2Wl6KaVjIAooLetT99yRqV9FwR1ZEvraB2PhUeA90du5+cfBD/0TXifh8Wm5aOYjLSu7IxDFhsxCVCfrb4P0Yt/0pWgoxAs2R0NGlo9P+UF3otUXVpIr5OYJGZkV/oBBGB0Q9pekHZtj/SIVeE+17y6LeppMZnDpW/+IBKjfqES/m5ug/JFb+qIDEzlAyMysIw1vxeGBqZj4Tc4doDoUl4R+SX+E6URth1SUbBaLAlBrLZaRwINnEpJjGtRexFsAi7zO+i1eDjEeBlLXblVn1c=

@@ -1,0 +1,8 @@
+language: ruby
+sudo: false
+rvm:
+  - 2.2.5
+script:
+  - CI=1 bundle exec rake test
+  - bundle exec rake test:each
+  - bundle exec rubocop

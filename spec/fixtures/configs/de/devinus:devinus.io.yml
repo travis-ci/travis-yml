@@ -1,0 +1,24 @@
+sudo: required
+
+services:
+  - docker
+
+before_script:
+  - docker --version
+  - docker-compose --version
+  - git submodule update --init
+
+script:
+  - docker-compose run --rm web hugo
+
+deploy:
+  provider: pages
+  skip-cleanup: true
+  github-token: $GITHUB_TOKEN
+  local-dir: public
+  keep-history: true
+  repo: devinus/devinus.github.io
+  target-branch: master
+  fqdn: devinus.io
+  on:
+    branch: master

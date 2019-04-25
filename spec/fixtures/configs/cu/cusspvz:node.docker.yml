@@ -1,0 +1,30 @@
+branches:
+  only:
+  - master
+
+before_install:
+  - |
+    declare -r SSH_FILE="$(mktemp -u $HOME/.ssh/XXXXX)"
+
+    # decrypt
+    openssl aes-256-cbc \
+      -K $encrypted_c0f12bd67831_key \
+      -iv $encrypted_c0f12bd67831_iv \
+      -in ".travis/github_deploy_key.enc" \
+      -out "${SSH_FILE}" -d
+
+    # Setup ssh
+    chmod -f 600 ${SSH_FILE}
+    printf "%s\n" \
+      "" \
+      "Host github.com" \
+      "  IdentityFile ${SSH_FILE}" \
+      "  LogLevel ERROR" \
+    >> ~/.ssh/config
+
+    # Setup git
+    git config --global user.email "jose.moreira@findhit.com"
+    git config --global user.name "José Moreira"
+
+script:
+  - make deploy

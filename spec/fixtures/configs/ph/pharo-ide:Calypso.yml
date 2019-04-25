@@ -1,0 +1,16 @@
+language: smalltalk
+sudo: false
+
+os: linux
+
+smalltalk_edge:
+  source: hpi-swa/smalltalkCI
+  branch: master
+jobs:
+  include:
+    - stage: Versions
+      smalltalk: Pharo-7.0
+    - smalltalk: Pharo-6.1
+      smalltalk_config: .smalltalk-pharo61.ston
+
+smalltalk_config: .smalltalk.ston

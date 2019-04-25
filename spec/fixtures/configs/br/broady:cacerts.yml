@@ -1,0 +1,10 @@
+sudo: required
+
+services:
+- docker
+
+before_install:
+- make ca-certificates.crt
+
+script:
+- md5sum -c ca-certificates.crt.md5

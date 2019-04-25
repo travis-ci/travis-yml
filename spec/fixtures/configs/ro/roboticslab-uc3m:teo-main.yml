@@ -1,0 +1,43 @@
+language: cpp
+dist: xenial
+os: linux
+
+compiler:
+  - gcc
+  - clang
+
+addons:
+  apt:
+    packages:
+    # YARP and KDL
+    - libeigen3-dev
+
+    # OpenRAVE
+    - libboost-all-dev
+    - libqt4-dev
+    - qt4-dev-tools
+    - libxml2-dev
+    - libode-dev
+    - libsoqt4-dev
+    - libcoin80-dev
+
+    # ROBOTICSLAB
+    - libopencv-dev
+    - libpcl-dev
+    - libproj-dev # needed by libpcl-dev on Xenial (known bug)
+    - libspnav-dev
+    - libxwiimote-dev
+
+before_script:
+  # Reduce build log verbosity
+  - export CFLAGS="-w"
+  - export CXXFLAGS="-w"
+
+  - mkdir -p build && cd "$_"
+  - cmake .. -DCMAKE_INSTALL_PREFIX="$PWD/install-system" -DNON_INTERACTIVE_BUILD=ON
+
+script:
+  - make install
+
+after_success:
+  - make uninstall

@@ -1,0 +1,710 @@
+sudo: false
+dist: trusty
+python: "3.5"
+
+cache:
+  apt: true
+  directories:
+    - $HOME/.cache/spack
+    - $HOME/.cache/cmake-3.11.0
+    - $HOME/.cache/kcov-35
+    - $HOME/Library/Caches/Homebrew
+  pip: true
+
+env:
+  global:
+    - BUILD: ~/buildTmp
+    - CXXFLAGS: "-Werror"
+    - SPACK_ROOT: $HOME/.cache/spack
+    - PATH: $PATH:$HOME/.cache/spack/bin
+    - BUILD_TYPE: "Debug"
+    - PYBIND11_VERSION=@2.2.4
+    - USE_JSON: ON
+    - USE_SHARED: ON
+
+addons:
+  apt:
+    &apt_common_sources
+    sources:
+      - ubuntu-toolchain-r-test
+
+jobs:
+  fast_finish: true
+  include:
+    ###########################################################################
+    # Stage: Style                                                            #
+    ###########################################################################
+    - &style_python
+      stage: 'Style'
+      name: PY@3.5 +PEP8
+      language: python
+      python: "3.5"
+      install: pip install -U flake8
+      script:
+        # Test Python Files for PEP8 conformance
+        - flake8 --exclude=thirdParty .
+    - <<: *style_python
+      name: PY@3.6 +PEP8
+      python: "3.6"
+    - <<: *style_python
+      name: PY@3.7 +PEP8
+      python: "3.7"
+      dist: xenial
+      sudo: true
+    # - &style_cpp
+    #   stage: 'Style'
+    #   name: clang-format@5.0.0
+    #   language: python
+    #   python: "3.6"
+    #   addons:
+    #     apt:
+    #       sources:
+    #         - llvm-toolchain-trusty-5.0
+    #       packages:
+    #         - clang-format-5.0
+    #   install:
+    #     - curl -sOL https://raw.githubusercontent.com/Sarcasm/run-clang-format/master/run-clang-format.py
+    #   script:
+    #     - python run-clang-format.py --clang-format-executable=$(which clang-format-5.0) --extensions cpp,hpp -j 2 -e *share/openPMD* -r $TRAVIS_BUILD_DIR || exit 1
+    ###########################################################################
+    # Stage: Static Code Analysis                                             #
+    ###########################################################################
+    - &static_code_cpp
+      stage: 'Static Code Analysis'
+    #   name: clang@5.0.0 +IncludeWhatYouUse
+    #   sudo: true
+      language: python
+      python: "3.6"
+      compiler: clang
+    #   env:
+    #     - CXXSPEC="%clang@5.0.0" USE_MPI=ON USE_PYTHON=ON USE_HDF5=ON USE_ADIOS1=ON USE_ADIOS2=OFF
+    #   addons:
+    #     apt:
+    #       sources:
+    #         - ubuntu-toolchain-r-test
+    #         - llvm-toolchain-trusty-5.0
+    #       packages:
+    #         - llvm-5.0-dev
+    #         - libclang-5.0-dev
+    #         - clang-5.0
+    #         - libopenmpi-dev
+    #         - openmpi-bin
+    #         - environment-modules
+    #   before_install:
+    #     - export CC=clang
+    #     - export CXX=clang++
+    #     - ROOT_PATH=`llvm-config-5.0 --prefix`
+    #     - BIN_PATH=`llvm-config-5.0 --bindir`
+    #     - if [ ! -f $BIN_PATH/iwyu_tool.py ]; then
+    #         git clone https://github.com/include-what-you-use/include-what-you-use.git &&
+    #         cd include-what-you-use &&
+    #         git checkout clang_5.0 &&
+    #         mkdir build &&
+    #         cd build &&
+    #         cmake -DIWYU_LLVM_ROOT_PATH=$ROOT_PATH -DCMAKE_C_COMPILER=$BIN_PATH/clang -DCMAKE_CXX_COMPILER=$BIN_PATH/clang++ -DCMAKE_INSTALL_PREFIX=$ROOT_PATH .. &&
+    #         make -j2 &&
+    #         sudo make install &&
+    #         cd ../.. &&
+    #         rm -rf include-what-you-use;
+    #       fi
+    #     - export PATH=$ROOT_PATH/bin:$PATH
+    #   before_script:
+    #     - mkdir -p $HOME/build
+    #     - cd $HOME/build
+    #     - cmake
+    #         -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+    #         -DCMAKE_BUILD_TYPE=${BUILD_TYPE}
+    #         -DopenPMD_USE_MPI=$USE_MPI
+    #         -DopenPMD_USE_JSON=$USE_JSON
+    #         -DopenPMD_USE_HDF5=$USE_HDF5
+    #         -DopenPMD_USE_ADIOS1=$USE_ADIOS1
+    #         -DopenPMD_USE_ADIOS2=$USE_ADIOS2
+    #         -DopenPMD_USE_PYTHON=OFF
+    #         -DopenPMD_USE_INVASIVE_TESTS=ON
+    #         -DBUILD_SHARED_LIBS=${USE_SHARED}
+    #         $TRAVIS_BUILD_DIR
+    #   script:
+    #     - cd $HOME/build
+    #     - python $BIN_PATH/iwyu_tool.py -v -j 2 -p . > iwyu.log
+    #     - cat iwyu.log
+    #     - if [[ $(wc -m <iwyu.log) -gt 1 ]]; then
+    #         exit 1;
+    #       fi
+    # - <<: *static_code_cpp
+      name: clang-tidy@5.0.0 +MPI -PY +H5 +ADIOS1 +JSON
+      sudo: false
+      env:
+        - CXXSPEC="%clang@5.0.0" USE_MPI=ON USE_PYTHON=OFF USE_HDF5=ON USE_ADIOS1=ON USE_ADIOS2=OFF
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-trusty-5.0
+          packages:
+            - clang-5.0
+            - clang-tidy-5.0
+            - libopenmpi-dev
+            - openmpi-bin
+            - environment-modules
+      before_install:
+        - CC=clang CXX=clang++
+      before_script:
+        - mkdir -p $HOME/build
+        - cd $HOME/build
+        - $TRAVIS_BUILD_DIR/.travis/download_samples.sh
+        - cmake
+            -DCMAKE_CXX_CLANG_TIDY="$(which clang-tidy-5.0);-system-headers=0"
+            -DCMAKE_BUILD_TYPE=Release
+            -DopenPMD_USE_MPI=$USE_MPI
+            -DopenPMD_USE_JSON=$USE_JSON
+            -DopenPMD_USE_HDF5=$USE_HDF5
+            -DopenPMD_USE_ADIOS1=$USE_ADIOS1
+            -DopenPMD_USE_ADIOS2=$USE_ADIOS2
+            -DopenPMD_USE_PYTHON=$USE_PYTHON
+            -DopenPMD_USE_INVASIVE_TESTS=ON
+            -DBUILD_SHARED_LIBS=${USE_SHARED}
+            $TRAVIS_BUILD_DIR
+      script:
+        - cd $HOME/build
+        - make -j 2 2> clang-tidy.log
+        - cat clang-tidy.log
+        - if [[ $(wc -m <clang-tidy.log) -gt 1 ]]; then
+            exit 1;
+          fi
+    - &static_code_python
+      stage: 'Static Code Analysis'
+      name: pyflakes 3.5
+      language: python
+      python: "3.5"
+      install: pip install -U pyflakes
+      script:
+        # Warnings, unused code, etc.
+        - pyflakes docs/ examples/ test/
+    - <<: *static_code_python
+      name: pyflakes 3.6
+      python: "3.6"
+    - <<: *static_code_python
+      name: pyflakes 3.7
+      python: "3.7"
+      dist: xenial
+      sudo: true
+    ###########################################################################
+    # Stage: C++ Unit Tests                                                   #
+    ###########################################################################
+    # Clang 5.0.0
+    - &test-cpp-unit
+      stage: 'C++ Unit Tests'
+      name: clang@5.0.0 -MPI -PY +H5 -ADIOS1
+      language: cpp
+      env:
+        - CXXSPEC="%clang@5.0.0" USE_MPI=OFF USE_PYTHON=OFF USE_HDF5=ON USE_ADIOS1=OFF USE_ADIOS2=OFF USE_SAMPLES=ON
+      compiler: clang
+      addons:
+        apt:
+          <<: *apt_common_sources
+          packages: &clang_deps
+            - environment-modules
+            - gfortran-4.9
+            - g++-4.9  # CMake build
+      script: &script-cpp-unit
+        - mkdir -p $HOME/build
+        - cd $HOME/build
+        - if [ ! -d samples/git-sample/ ]; then
+            if [ "$USE_SAMPLES" == "ON" ]; then
+              $TRAVIS_BUILD_DIR/.travis/download_samples.sh;
+              chmod u-w samples/git-sample/*.h5;
+            fi
+          fi
+        - if [ "$USE_PYTHON" == "ON" ]; then
+            export EXTRA_CMAKE_FLAGS="-DPYTHON_EXECUTABLE:FILEPATH=$(which python3)";
+            if [ "$USE_INTERNAL_PYBIND11" == "OFF" ]; then
+              export EXTRA_CMAKE_FLAGS="$EXTRA_CMAKE_FLAGS -DopenPMD_USE_INTERNAL_PYBIND11=OFF";
+            fi;
+          fi
+        # build
+        - CXXFLAGS=${CXXFLAGS} CXX=${CXX} CC=${CC}
+          cmake
+            -DCMAKE_BUILD_TYPE=${BUILD_TYPE}
+            -DopenPMD_USE_MPI=$USE_MPI
+            -DopenPMD_USE_JSON=$USE_JSON
+            -DopenPMD_USE_HDF5=$USE_HDF5
+            -DopenPMD_USE_ADIOS1=$USE_ADIOS1
+            -DopenPMD_USE_ADIOS2=$USE_ADIOS2
+            -DopenPMD_USE_PYTHON=$USE_PYTHON
+            -DopenPMD_USE_INVASIVE_TESTS=ON
+            -DBUILD_SHARED_LIBS=${USE_SHARED}
+            $EXTRA_CMAKE_FLAGS
+            -DCMAKE_INSTALL_PREFIX=$HOME/openPMD-test-install
+            $TRAVIS_BUILD_DIR
+        - make -j 2
+        # run tests
+        #   pybind11: work-around for missing symbols with sanitizers
+        #   /usr/local/clang-7.0.0/lib/clang/7.0.0/lib/linux/libclang_rt.asan-x86_64.so
+        #   /usr/local/clang-7.0.0/lib/clang/7.0.0/lib/linux/libclang_rt.ubsan_minimal-x86_64.so
+        - if [ "$USE_PYTHON" == "ON" ] && [ ! -z ${ASAN_OPTIONS+x} ]; then
+            export LD_PRELOAD=/usr/local/clang-7.0.0/lib/clang/7.0.0/lib/linux/libclang_rt.asan-x86_64.so;
+          fi
+        - CTEST_OUTPUT_ON_FAILURE=1 make test
+        - if [ ! -z ${LD_PRELOAD+x} ]; then
+            unset LD_PRELOAD;
+          fi
+        # install
+        - make install
+        # - make package
+        # - dpkg -i openPMD*.deb
+        - ls -R $HOME/openPMD-test-install | grep ":$" | sed -e 's/:$//' -e 's/[^-][^\/]*\//--/g' -e 's/^/   /' -e 's/-/|/'
+    - <<: *test-cpp-unit
+      name: clang@5.0.0 +MPI -PY +H5 +ADIOS1
+      language: python
+      python: "3.6"
+      env:
+        - CXXSPEC="%clang@5.0.0" USE_MPI=ON USE_PYTHON=OFF USE_HDF5=ON USE_ADIOS1=ON USE_ADIOS2=OFF USE_SAMPLES=ON
+      compiler: clang
+      addons:
+        apt:
+          <<: *apt_common_sources
+          packages:
+            - *clang_deps
+            - libopenmpi-dev
+            - openmpi-bin
+      script: *script-cpp-unit
+    # Clang 6.0.0 + Python 3.6.3 @ Xenial
+    - <<: *test-cpp-unit
+      name: clang@6.0.0 -MPI +PY@3.6 +H5 +ADIOS1 libc++
+      dist: xenial
+      language: python
+      python: "3.6"
+      env:
+        - CXXSPEC="%clang@6.0.0" USE_MPI=OFF USE_PYTHON=ON USE_HDF5=ON USE_ADIOS1=ON USE_ADIOS2=OFF USE_SAMPLES=ON
+      compiler: clang
+      addons:
+        apt:
+          <<: *apt_common_sources
+          packages: &clang60_deps
+            - environment-modules
+            - clang-6.0
+            - libc++-dev
+            - libc++abi-dev
+      script: *script-cpp-unit
+      before_install: &clang_init
+        # FIXME: extra include needed https://bugs.launchpad.net/ubuntu/+source/libc++/+bug/1812133
+        - CXX=clang++-6.0 && CC=clang-6.0 && CXXFLAGS="-Werror -stdlib=libc++ -I/usr/include/libcxxabi/"
+    # Clang 7.0.0 + Python 3.7.1 @ Xenial
+    - <<: *test-cpp-unit
+      name: clang@7.0.0 +MPI +PY@3.7 +H5 +ADIOS1 +Release
+      dist: xenial
+      language: python
+      python: "3.7"
+      env:
+        - CXXSPEC="%clang@7.0.0" USE_MPI=ON USE_PYTHON=ON USE_HDF5=ON USE_ADIOS1=ON USE_ADIOS2=OFF USE_SAMPLES=ON BUILD_TYPE="Release"
+      compiler: clang
+      addons:
+        apt:
+          <<: *apt_common_sources
+          packages:
+            - *clang_deps
+            - libopenmpi-dev
+            - openmpi-bin
+      script: *script-cpp-unit
+      before_install: &clang_init
+        - CXX=clang++ && CC=clang
+    # Clang 7.0.0 + Python 3.7.1 + Address Sanitizer + Undefined Behavior Sanitizer @ Xenial
+    - <<: *test-cpp-unit
+      name: clang@7.0.0 +MPI +PY@3.7 +H5 -ADIOS1 +JSON +ASan +UBSan +STATIC
+      dist: xenial
+      language: python
+      python: "3.7"
+      env:
+        - CXXSPEC="%clang@7.0.0" USE_MPI=ON USE_PYTHON=ON USE_HDF5=ON USE_ADIOS1=OFF USE_ADIOS2=OFF USE_SHARED=OFF USE_JSON=ON USE_SAMPLES=ON
+        # sanitizer options: test as much as possible and suppress OpenMPI memory leaks
+        - ASAN_OPTIONS=detect_stack_use_after_return=1:detect_leaks=1:check_initialization_order=true:strict_init_order=true:detect_stack_use_after_scope=1:fast_unwind_on_malloc=0
+        - LSAN_OPTIONS=suppressions=${TRAVIS_BUILD_DIR}/.travis/sanitizer/clang/Leak.supp
+      compiler: clang
+      addons:
+        apt:
+          <<: *apt_common_sources
+          packages:
+            - *clang_deps
+            - libopenmpi-dev
+            - openmpi-bin
+      script: *script-cpp-unit
+      before_install:
+        - CXX=clang++ && CC=clang && CXXFLAGS="-Werror -fsanitize=address,undefined -shared-libsan" && LDFLAGS="-fsanitize=address,undefined -shared-libsan"
+        # - find / -name libclang_rt*
+    # Clang 9.1.0-apple + Python 3.7.2 @ OSX "highsierra"
+    - <<: *test-cpp-unit
+      name: AppleClang@9.1.0 -MPI +PY@3.7 +H5 +ADIOS1
+      os: osx
+      osx_image: xcode9.4
+      sudo: required
+      language: generic
+      env:
+        - CXXSPEC="%clang@9.1.0" USE_MPI=OFF USE_PYTHON=ON USE_HDF5=ON USE_ADIOS1=ON USE_ADIOS2=OFF USE_SAMPLES=ON
+      compiler: clang
+      script: *script-cpp-unit
+    # Clang 10.0.0-apple + Python 3.7.2 @ OSX "mojave" with libc++
+    - <<: *test-cpp-unit
+      name: AppleClang@10.0.0 -MPI +PY@3.7 +H5 +ADIOS1 libc++
+      os: osx
+      osx_image: xcode10.1
+      sudo: required
+      language: generic
+      env:
+        - CXXFLAGS="${CXXFLAGS} -stdlib=libc++" CXXSPEC="%clang@10.0.0" USE_MPI=OFF USE_PYTHON=ON USE_HDF5=ON USE_ADIOS1=ON USE_ADIOS2=OFF USE_SAMPLES=ON
+      compiler: clang
+      script: *script-cpp-unit
+    # GCC 4.9.4
+    - <<: *test-cpp-unit
+      name: gcc@4.9.4 -MPI -PY +H5 +ADIOS1
+      language: python
+      python: "3.6"
+      env:
+        - CXXSPEC="%gcc@4.9.4" USE_MPI=OFF USE_PYTHON=OFF USE_HDF5=ON USE_ADIOS1=ON USE_ADIOS2=OFF USE_SAMPLES=OFF
+      compiler: gcc
+      addons:
+        apt:
+          <<: *apt_common_sources
+          packages: &gcc49_deps
+            - environment-modules
+            - gfortran-4.9
+            - gcc-4.9
+            - g++-4.9
+      before_install: &gcc49_init
+        - CXX=g++-4.9 && CC=gcc-4.9
+      script: *script-cpp-unit
+    - <<: *test-cpp-unit
+      name: gcc@4.9.4 +MPI -PY +H5 +ADIOS1
+      language: python
+      python: "3.6"
+      env:
+        - CXXSPEC="%gcc@4.9.4" USE_MPI=ON USE_PYTHON=OFF USE_HDF5=ON USE_ADIOS1=ON USE_ADIOS2=OFF USE_SAMPLES=ON
+      compiler: gcc
+      addons:
+        apt:
+          <<: *apt_common_sources
+          packages:
+            - *gcc49_deps
+            - libopenmpi-dev
+            - openmpi-bin
+      before_install: *gcc49_init
+      script: *script-cpp-unit
+    # GCC 7.3.0
+    - <<: *test-cpp-unit
+      name: gcc@7.3.0 -MPI -PY +H5 +ADIOS1 -JSON
+      language: python
+      python: "3.6"
+      env:
+        - CXXSPEC="%gcc@7.3.0" USE_MPI=OFF USE_PYTHON=OFF USE_JSON=OFF USE_HDF5=ON USE_ADIOS1=ON USE_ADIOS2=OFF USE_SAMPLES=ON
+      compiler: gcc
+      addons:
+        apt:
+          <<: *apt_common_sources
+          packages: &gcc73_deps
+            - environment-modules
+            - gfortran-7
+            - gcc-7
+            - g++-7
+      before_install: &gcc73_init
+        - CXX=g++-7 && CC=gcc-7
+      script: *script-cpp-unit
+    - <<: *test-cpp-unit
+      name: gcc@7.3.0 +MPI -PY +H5 +ADIOS1
+      language: python
+      python: "3.6"
+      env:
+        - CXXSPEC="%gcc@7.3.0" USE_MPI=ON USE_PYTHON=OFF USE_HDF5=ON USE_ADIOS1=ON USE_ADIOS2=OFF USE_SAMPLES=ON
+      compiler: gcc
+      addons:
+        apt:
+          <<: *apt_common_sources
+          packages:
+            - *gcc73_deps
+            - libopenmpi-dev
+            - openmpi-bin
+      before_install: *gcc73_init
+      script: *script-cpp-unit
+    # GCC 6.4.0 + Python 3.5
+    - <<: *test-cpp-unit
+      name: gcc@6.4.0 -MPI +PY@3.5 +H5 +ADIOS@1.13.1
+      language: python
+      python: "3.5"
+      env:
+        - CXXSPEC="%gcc@6.4.0" USE_MPI=OFF USE_PYTHON=ON USE_HDF5=ON USE_ADIOS1=ON ADIOS1_VERSION=@1.13.1 USE_ADIOS2=OFF USE_SAMPLES=ON
+      compiler: gcc
+      addons:
+        apt:
+          <<: *apt_common_sources
+          packages: &gcc64_deps
+            - environment-modules
+            - gfortran-6
+            - gcc-6
+            - g++-6
+      before_install: &gcc64_init
+        - CXX=g++-6 && CC=gcc-6
+      script: *script-cpp-unit
+    # GCC 8.1.0 + Python 3.7
+    - <<: *test-cpp-unit
+      name: gcc@8.1.0 -MPI +PY@3.7 +H5 +ADIOS +STATIC
+      language: python
+      python: "3.7"
+      sudo: required
+      dist: xenial
+      env:
+        - CXXSPEC="%gcc@8.1.0" USE_MPI=OFF USE_PYTHON=ON USE_INTERNAL_PYBIND11=OFF PYBIND11_VERSION=@2.2.4 USE_HDF5=ON USE_ADIOS1=ON USE_ADIOS2=OFF USE_SHARED=OFF USE_SAMPLES=ON
+      compiler: gcc
+      addons:
+        apt:
+          <<: *apt_common_sources
+          packages: &gcc81_deps
+            - environment-modules
+            - gfortran-8
+            - gcc-8
+            - g++-8
+      before_install: &gcc81_init
+        - CXX=g++-8 && CC=gcc-8
+      script: *script-cpp-unit
+    # GCC 6.4.0 + Python 3.6
+    - <<: *test-cpp-unit
+      name: gcc@6.4.0 -MPI +PY@3.6 +H5@1.8.13 -ADIOS
+      language: python
+      python: "3.6"
+      env:
+        - CXXSPEC="%gcc@6.4.0" USE_MPI=OFF USE_PYTHON=ON USE_INTERNAL_PYBIND11=OFF USE_HDF5=ON HDF5_VERSION=@1.8.13 USE_ADIOS1=OFF USE_ADIOS2=OFF USE_SAMPLES=ON
+      compiler: gcc
+      addons:
+        apt:
+          <<: *apt_common_sources
+          packages:
+            - *gcc64_deps
+      before_install: *gcc64_init
+      script: *script-cpp-unit
+    # GCC 4.8.5 + Python 3.5.5
+    - <<: *test-cpp-unit
+      name: gcc@4.8.5 -MPI +PY@3.5 +H5 -ADIOS
+      language: python
+      python: "3.5"
+      env:
+        - CXXSPEC="%gcc@4.8.5" USE_MPI=OFF USE_PYTHON=ON USE_HDF5=ON USE_ADIOS1=OFF USE_ADIOS2=OFF USE_SAMPLES=ON
+      compiler: gcc
+      addons:
+        apt:
+          <<: *apt_common_sources
+          packages:
+            - environment-modules
+            - gfortran
+            - g++
+            - libopenmpi-dev
+            - openmpi-bin
+      before_install: &gcc48_init
+        - CXX=g++-4.8 && CC=gcc-4.8
+      script: *script-cpp-unit
+    ###########################################################################
+    # Stage: Code Coverage                                                    #
+    ###########################################################################
+    - &code_coverage
+      stage: 'Code Coverage'
+      name: gcc@7.3.0 +coveralls
+      sudo: required
+      language: python
+      python: "3.6"
+      compiler: gcc
+      env:
+        - CXXSPEC="%gcc@7.3.0" USE_MPI=ON USE_PYTHON=ON USE_HDF5=ON USE_ADIOS1=ON USE_ADIOS2=OFF
+      addons:
+        apt:
+          <<: *apt_common_sources
+          packages:
+            - binutils-dev
+            - libcurl4-openssl-dev
+            - zlib1g-dev
+            - libdw-dev
+            - libiberty-dev
+            - environment-modules
+            - gfortran-7
+            - gcc-7
+            - g++-7
+            - libopenmpi-dev
+            - openmpi-bin
+      before_install:
+        - CXX=g++-7 && CC=gcc-7
+        - if [ ! -f $HOME/.cache/kcov-35/bin/kcov ]; then
+            wget -O kcov-35.tar.gz https://github.com/SimonKagstrom/kcov/archive/v35.tar.gz &&
+            tar -xf kcov-35.tar.gz &&
+            cd kcov-35 &&
+            mkdir build &&
+            cd build &&
+            cmake -DCMAKE_INSTALL_PREFIX=$HOME/.cache/kcov-35 .. &&
+            make -j2 &&
+            make install &&
+            cd ../.. &&
+            rm -rf kcov-35 kcov-35.tar.gz;
+          fi;
+        - export PATH=$HOME/.cache/kcov-35/bin:$PATH
+      before_script:
+        - mkdir -p $HOME/build
+        - cd $HOME/build
+        - if [ ! -d samples/git-sample/ ]; then
+            $TRAVIS_BUILD_DIR/.travis/download_samples.sh;
+            chmod u-w samples/git-sample/*.h5;
+          fi
+        - CXXFLAGS="-g -O0 -fprofile-arcs -ftest-coverage" CXX=$CXX CC=$CC
+          cmake
+            -DCMAKE_BUILD_TYPE=${BUILD_TYPE}
+            -DopenPMD_USE_MPI=$USE_MPI
+            -DopenPMD_USE_JSON=$USE_JSON
+            -DopenPMD_USE_HDF5=$USE_HDF5
+            -DopenPMD_USE_ADIOS1=$USE_ADIOS1
+            -DopenPMD_USE_ADIOS2=$USE_ADIOS2
+            -DopenPMD_USE_PYTHON=OFF
+            -DopenPMD_USE_INVASIVE_TESTS=ON
+            -DBUILD_SHARED_LIBS=${USE_SHARED}
+            $TRAVIS_BUILD_DIR
+        - make -j 2
+      script:
+        - mkdir -p coverage
+        - cd bin
+        # TODO code coverage with mpirun
+        - for binary in *; do
+            if [ -f $binary ]; then
+              kcov --exclude-pattern=/usr/,share/openPMD/thirdParty,/test/ ../coverage/$binary $binary;
+            fi;
+          done
+      after_script:
+        - kcov --merge --coveralls-id=$TRAVIS_JOB_ID ../coverage/merged ../coverage/*
+    - stage: 'Code Coverage'
+      name: Coverity
+      if: branch = coverity_scan
+      sudo: required
+      dist: xenial
+      language: python
+      python: "3.6"
+      compiler: gcc
+      before_install:
+        - echo -n | openssl s_client -connect scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-certificates.crt
+      install:
+        - export CXXFLAGS="-Wall -Wextra"
+        # adios.pc file has typo: https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=900811
+        # ... but xenial only ships 1.9.0
+        # - sed -i 's/find_package(ADIOS 1\.13\.1/find_package(ADIOS/g' CMakeLists.txt
+      script:
+        # nothing to do but required by Travis
+        - echo "Coverity scan! (script)"
+      addons:
+        apt:
+          packages:
+            - libopenmpi-dev
+            - openmpi-bin
+            - libhdf5-openmpi-dev
+            - libadios-dev
+            - libadios-bin
+        coverity_scan:
+          project:
+            name: "openPMD/openPMD-api"
+            description: "C++ & Python API for Scientific I/O with openPMD"
+          notification_email: axel.huebl@plasma.ninja
+          build_command_prepend: "mkdir coverity_build; cd coverity_build; . ../.travis/download_samples.sh; cmake .. -DPYTHON_EXECUTABLE:FILEPATH=$(which python3); cd .."
+          build_command: "make -C coverity_build -j 2"
+          branch_pattern: coverity_scan
+
+install:
+  # spack install
+  - SPACK_FOUND=$(which spack >/dev/null && { echo 0; } || { echo 1; })
+  - if [ $SPACK_FOUND -ne 0 ]; then
+      mkdir -p $SPACK_ROOT &&
+      git clone --depth 50 https://github.com/spack/spack.git $SPACK_ROOT;
+    fi
+  # spack setup
+  - source /etc/profile
+  - cp $TRAVIS_BUILD_DIR/.travis/spack/*.yaml
+       $SPACK_ROOT/etc/spack/
+  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then
+      travis_wait brew upgrade;
+      travis_wait brew upgrade &&
+      travis_wait brew install python3 &&
+      travis_wait brew install modules &&
+      brew info modules &&
+      source /usr/local/opt/modules/init/bash &&
+      export PATH=/usr/local/opt/python/libexec/bin:$PATH;
+      export TRAVIS_PYTHON_VERSION=3.7.2;
+    fi
+  - source $SPACK_ROOT/share/spack/setup-env.sh
+  # fresh (cache-cleaned) travis runs seem to not properly init environment-modules
+  - echo $MODULEPATH
+  - if [[ ! $MODULEPATH = *"spack"* ]]; then
+      export MODULEPATH=$SPACK_ROOT/share/spack/modules/$(spack arch):$MODULEPATH;
+    fi
+  # required dependencies - CMake 3.11.0
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then
+      if [ ! -f $HOME/.cache/cmake-3.11.0/bin/cmake ]; then
+        wget -O cmake.sh https://cmake.org/files/v3.11/cmake-3.11.0-Linux-x86_64.sh &&
+        sh cmake.sh --skip-license --exclude-subdir --prefix=$HOME/.cache/cmake-3.11.0 &&
+        rm cmake.sh;
+        spack install cmake@3.11.0 $CXXSPEC;
+      fi;
+    else
+      if [ ! -d /Applications/CMake.app/Contents/ ]; then
+        curl -L -s -o cmake.dmg https://cmake.org/files/v3.11/cmake-3.11.0-Darwin-x86_64.dmg &&
+        yes | hdiutil mount cmake.dmg &&
+        sudo cp -R "/Volumes/cmake-3.11.0-Darwin-x86_64/CMake.app" /Applications &&
+        hdiutil detach /dev/disk1s1 &&
+        rm cmake.dmg;
+        spack install cmake@3.11.0 $CXXSPEC;
+      fi;
+    fi
+  - spack load cmake@3.11.0 $CXXSPEC
+  # diagnostics: modules created and visible?
+  - module av
+  - module li
+  # optional dependencies - MPI, HDF5, ADIOS1, ADIOS2
+  - SPACK_VAR_MPI="~mpi";
+  - if [ $USE_MPI == "ON" ]; then
+      travis_wait spack install
+        openmpi@1.6.5
+        $CXXSPEC &&
+      spack load openmpi@1.6.5 $CXXSPEC;
+      SPACK_VAR_MPI="+mpi";
+    fi
+  - if [ $USE_PYTHON == "ON" ]; then
+      travis_wait spack install
+        python@$TRAVIS_PYTHON_VERSION
+        $CXXSPEC &&
+      spack load python@$TRAVIS_PYTHON_VERSION $CXXSPEC;
+      if [ "$USE_INTERNAL_PYBIND11" == "OFF" ]; then
+        travis_wait spack install
+          py-pybind11$PYBIND11_VERSION ^python@$TRAVIS_PYTHON_VERSION
+          $CXXSPEC &&
+        spack load py-pybind11$PYBIND11_VERSION ^python@$TRAVIS_PYTHON_VERSION $CXXSPEC;
+      fi;
+      travis_wait spack install
+        py-numpy ~blas ~lapack ^python@$TRAVIS_PYTHON_VERSION
+        $CXXSPEC &&
+      spack load py-numpy ~blas ~lapack ^python@$TRAVIS_PYTHON_VERSION $CXXSPEC;
+      if [ $USE_MPI == "ON" ]; then
+        travis_wait spack install
+          py-mpi4py ^python@$TRAVIS_PYTHON_VERSION
+          $CXXSPEC &&
+        spack load py-mpi4py ^python@$TRAVIS_PYTHON_VERSION $CXXSPEC;
+      fi;
+    fi
+  - if [ $USE_HDF5 == "ON" ]; then
+      travis_wait spack install
+        hdf5$HDF5_VERSION
+        $SPACK_VAR_MPI
+        $CXXSPEC &&
+      spack load hdf5$HDF5_VERSION $SPACK_VAR_MPI $CXXSPEC;
+    fi
+  - if [ $USE_ADIOS1 == "ON" ]; then
+      travis_wait 30 spack install
+        adios$ADIOS1_VERSION
+        $SPACK_VAR_MPI ^python@$TRAVIS_PYTHON_VERSION
+        $CXXSPEC &&
+      spack load adios$ADIOS1_VERSION $SPACK_VAR_MPI ^python@$TRAVIS_PYTHON_VERSION $CXXSPEC;
+    fi
+  - if [ $USE_ADIOS2 == "ON" ]; then
+      travis_wait spack install
+        adios2
+        $SPACK_VAR_MPI
+        $CXXSPEC &&
+      spack load adios2 $SPACK_VAR_MPI $CXXSPEC;
+    fi
+  - spack clean -a

@@ -1,0 +1,33 @@
+language: node_js
+
+sudo: false
+
+node_js:
+  - '8'
+  - '10'
+
+env:
+  matrix:
+    #- PACKAGE=cherow-ts
+    - PACKAGE=cherow
+
+branches:
+  only:
+  - master
+
+cache: yarn
+
+matrix:
+  fast_finish: true
+
+install:
+  - yarn install
+  - ./node_modules/.bin/lerna bootstrap
+
+notifications:
+  email: false
+
+script:
+  - ./node_modules/.bin/lerna bootstrap
+  - ./node_modules/.bin/lerna run coverage --scope $PACKAGE
+  - ./node_modules/.bin/lerna run post_coverage --scope $PACKAGE

@@ -1,0 +1,16 @@
+language: ruby
+rvm:
+  - 2.4.2
+services:
+  - mongodb
+  - elasticsearch
+script: bundle exec rspec
+sudo: false
+deploy:
+  provider: rubygems
+  api_key:
+    secure: "Lsv089bz7F85eluLNzOzjnQi0uUWxFPKfhDSfttP/Efz3Bd4mo4c2H/j5Bl9uaRi3NyB1u/w/39Jpk1hKUPViQV13yD9YgPXZ5PAZuWAWKIODmXGfAuXT7I83D99d4hX+fbT6v2OEDS9YksMq9sduv+hLaJqD2V8TQh5KcKKTwg="
+  gem: buweb_content_models
+  on:
+    tags: true
+    rvm: 2.4.2

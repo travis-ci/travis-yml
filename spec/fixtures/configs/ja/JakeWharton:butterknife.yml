@@ -1,0 +1,52 @@
+language: android
+
+jdk:
+  - oraclejdk8
+
+before_install:
+  # Install SDK license so Android Gradle plugin can install deps.
+  - mkdir "$ANDROID_HOME/licenses" || true
+  - echo "d56f5187479451eabf01fb78af6dfcb131a6481e" > "$ANDROID_HOME/licenses/android-sdk-license"
+  - echo "24333f8a63b6825ea9c5514f83c2829b004d1fee" >> "$ANDROID_HOME/licenses/android-sdk-license"
+  # Install the rest of tools (e.g., avdmanager)
+  - sdkmanager tools
+  # Install the system image
+  - sdkmanager "system-images;android-18;default;armeabi-v7a"
+  # Create and start emulator for the script. Meant to race the install task.
+  - echo no | avdmanager create avd --force -n test -k "system-images;android-18;default;armeabi-v7a"
+  - $ANDROID_HOME/emulator/emulator -avd test -no-audio -no-window &
+
+install: ./gradlew clean assemble assembleAndroidTest --stacktrace
+
+before_script:
+  - android-wait-for-emulator
+  - adb shell input keyevent 82
+
+script: ./gradlew check connectedCheck --stacktrace
+
+after_success:
+  - .buildscript/deploy_snapshot.sh
+
+env:
+  global:
+    - secure: "ESbreW4FNMPQhV1zbFb9iBvhFWFbVHecaig3Si3+4nrJCMn9x4nqB18ZcU+Aviw67WQNcuSH4I0Hl08uknl+kzE/xKEfPLmu28bptXRCSued49aL11i2aQmRj5nqP2yxkinhtRGOQxzIo56NmFt7sIcEXODM3D5a6q7s9tlvPfw="
+    - secure: "JWEeqx0CWBqAkjcREHUg3Ei8wxqp59HZag8EidSLwmekgPJQwipwuEeXMZyPCGJCP+4ijUirtS/hRApi37BW0LYdt+XR7dI1TSZ0HFLTLqSPfWfsUcjmGpmoqVUv8FLVhC+KA42YeEhqkEaCUW92gJeAyK8swxDqGHAPT/sfKRA="
+
+branches:
+  except:
+    - gh-pages
+
+notifications:
+  email: false
+
+sudo: false
+
+before_cache:
+  - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+  - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+
+cache:
+  directories:
+    - $HOME/.gradle/caches/
+    - $HOME/.gradle/wrapper/
+    - $HOME/.android/build-cache

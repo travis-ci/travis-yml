@@ -1,0 +1,31 @@
+# Sample .travis.yml for R projects.
+#
+# See README.md for instructions, or for more configuration options,
+# see the wiki:
+#   http://docs.travis-ci.com/user/languages/r/
+sudo: false
+
+language: r
+cache: packages
+r:
+  - release
+  - devel
+
+warnings_are_errors: true
+
+before_script:
+  - Rscript -e 'install.packages("covr", repos="http://mirror.las.iastate.edu/CRAN/")'
+
+after_success:
+  - Rscript -e 'library(covr);coveralls()'
+
+notifications:
+  email:
+    on_success: change
+    on_failure: change
+  webhooks:
+    urls:
+      - https://webhooks.gitter.im/e/104bab7ef95b3a1bfd4c
+    on_success: always  # options: [always|never|change] default: always
+    on_failure: always  # options: [always|never|change] default: always
+    on_start: never     # options: [always|never|change] default: always

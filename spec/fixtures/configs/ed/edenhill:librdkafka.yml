@@ -1,0 +1,39 @@
+language: c
+cache: ccache
+env:
+- ARCH=x64
+compiler:
+- gcc
+- clang
+os:
+- linux
+- osx
+dist: trusty
+sudo: false
+before_script:
+ - ccache -s || echo "CCache is not available."
+script:
+- rm -rf artifacts dest
+- mkdir dest artifacts
+- if [[ "${TRAVIS_OS_NAME}_${CC}" == "osx_clang" ]]; then ./configure --install-deps --disable-lz4-ext --prefix="$PWD/dest" --enable-static ; else ./configure --install-deps --disable-lz4-ext --prefix="$PWD/dest" ; fi
+- make -j2 all examples check && make -C tests run_local
+- make install
+- (cd dest && tar cvzf ../artifacts/librdkafka-${CC}.tar.gz .)
+- if [[ "${TRAVIS_OS_NAME}_$CC" == "linux_gcc" ]];   then packaging/tools/distro-build.sh centos ; fi
+- if [[ "${TRAVIS_OS_NAME}_$CC" == "linux_gcc" ]];   then packaging/tools/distro-build.sh debian ; fi
+- if [[ "${TRAVIS_OS_NAME}_$CC" == "linux_clang" ]]; then packaging/tools/distro-build.sh alpine ; fi
+deploy:
+  provider: s3
+  access_key_id:
+    secure: "m8FQrFesK0xSS1wHo2S7cuWkpO7VB91dBmj1XIYLRXZSkbMpKBJATcFcHNbrAp3slEp7wLAnT7CHrQ4ccQi4H68Z7mjEwdq4VKRE+7zqJ/feK8MOFNeSHWLQzgwLUYlRlc9+tzLNwxMuL2ilWgdjKOArsUVHo9LEKNfQ3T6zCJU="
+  secret_access_key:
+    secure: "GE6O0gk5VRervntCKAmczfBdSOvbr9bouJ15H2rpcOgHi8KTDEjI/NS69eLiRRSHBCARtcRqN4wfgy+/dn7D1VklY8a1rAKu02wGjw+fq7k7GVSSmynR/aF619R4SIABsaAhNCwswXnLHuLlq8HFk5ulG3z8DUvYBczB45bWZfQ="
+  bucket: librdkafka-ci-packages
+  region: us-west-1
+  skip_cleanup: true
+  local-dir: artifacts
+  upload-dir: librdkafka/p-librdkafka__bld-travis__plat-${TRAVIS_OS_NAME}__arch-${ARCH}__tag-${TRAVIS_TAG}__sha-${TRAVIS_COMMIT}__bid-${TRAVIS_JOB_NUMBER}
+  on:
+    repo: edenhill/librdkafka
+    all_branches: true
+    tags: true

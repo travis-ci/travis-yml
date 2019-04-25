@@ -1,0 +1,14 @@
+language: python
+cache: pip
+sudo: required
+python: 3.6
+services:
+- docker
+env:
+  global:
+    secure: L9iOapvDfgpEjdu+BHLPb7ilNbHmCkvUpLLdun2dJz+TMDRE2sS1g1x5L4AXuxY8ikQrZzTZgwtFJCrBtcO/I5ql18DCq7Cl6opK/4yAYsjYxiLmES+K538fbgo/DhtX0IijNljkKOoRtfCzG8S15oCkpPwVnCecumG+0QJT2VyaqZmMcuix38BT/HdyetmRHDptpzl9dYCqot7lEfYG4eomWO0LtHy594FBnfDM92oKxWyp+u1aAvGR2w88CYQoqgdelV+SRpPEJ8ebviz9wIKecz355msCcl86cfXMAdqHH0f73NfYjEMi+Vsy9lecydWEwZI90QhhCaxqriY1rzssLN6Qis60z0FTDZK+fmU8SxLzPQojpCvjw7nKTN6chSTRbjKPm+Rb0cWXK9/vCiCtJ6E76kwGJVj07Mxr0EynO/pWM8E18/6mnOr1cri1anzHWTR7SalZCY/QdgkiWRr3Gx566w6HPLsK2dbPFvapWU88H1FJYXnkq1NOf+BxodEEPqXzcby8GfCJSsD8qJqJ3BfkDkYC2kQpC3+I2hbjptXx3joMvFSSVC07ndRqzQRpne8mW6WNYVqTvc18KwcQB+fi+oCPhLMKsZ6yCprUFH76err+idD+WSYN5TGxRD7HqTNW6NwLHP2aubMmvGJd3AKlFp6FMwEHRJCfoCE=
+install:
+- travis_retry pip install -U tox
+- TOX_ENV=${TRAVIS_PYTHON_VERSION/[0-9].[0-9]/py${TRAVIS_PYTHON_VERSION/.}}
+script:
+- travis_wait 25 tox -e $TOX_ENV

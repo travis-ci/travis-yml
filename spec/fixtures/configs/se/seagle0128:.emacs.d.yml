@@ -1,0 +1,35 @@
+language: emacs-lisp
+sudo: false
+
+env:
+ - EVM_EMACS=emacs-25.3-travis
+ - EVM_EMACS=emacs-26.2-travis
+ - EVM_EMACS=emacs-git-snapshot-travis
+
+matrix:
+  fast_finish: true
+  allow_failures:
+    env:
+      - EVM_EMACS=emacs-git-snapshot-travis
+
+before_script:
+  - mv -f ../.emacs.d ~/.emacs.d
+  - curl -fsSkL https://gist.github.com/rejeep/ebcd57c3af83b049833b/raw > x.sh && source ./x.sh
+  - evm install $EVM_EMACS --use --skip
+  # - mkdir -p lib && curl https://raw.githubusercontent.com/nschum/elisp-lint/stable/elisp-lint.el > lib/elisp-lint.el
+
+script:
+  - ${EMACS:=emacs} --version
+  - echo "Attempting startup..."
+  - ${EMACS:=emacs} -nw --batch --eval '(let ((debug-on-error (>=  emacs-major-version 26))
+                                              (url-show-status nil)
+                                              (user-emacs-directory default-directory)
+                                              (early-init-file (expand-file-name "early-init.el"))
+                                              (user-init-file (expand-file-name "init.el"))
+                                              (load-path (delq default-directory load-path)))
+                                          (when (>= emacs-major-version 27) (load-file early-init-file))
+                                          (load-file user-init-file)
+                                          (when (>= emacs-major-version 26)
+                                            (run-hooks (quote after-init-hook))
+                                            (run-hooks (quote emacs-startup-hook))))'
+  - echo "Startup successful"

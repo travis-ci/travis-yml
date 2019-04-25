@@ -1,0 +1,63 @@
+# Configuration for running Rose test battery on Travis CI
+# See https://travis-ci.org/ for more info.
+
+---
+language: python
+python:
+    - 3.7
+dist: xenial
+
+
+before_install:
+    - wget 'https://github.com/cylc/cylc-flow/archive/master.tar.gz' -O '/tmp/cylc-master.tar.gz'
+    - tar -xvf '/tmp/cylc-master.tar.gz' -C "${HOME}"
+    - mv "${HOME}/cylc-flow-master" "${HOME}/cylc-master"
+    - wget 'https://github.com/metomi/fcm/archive/master.tar.gz' -O '/tmp/fcm-master.tar.gz'
+    - tar -xvf '/tmp/fcm-master.tar.gz' -C "${HOME}"
+    - cat >"${HOME}/.bashrc" <<<"export PATH=${PWD}/bin:${HOME}/fcm-master/bin:${HOME}/cylc-master/bin:\$PATH"
+    - source "${HOME}/.bashrc"
+    - ssh-keygen -t 'rsa' -f "${HOME}/.ssh/id_rsa" -N '' -q
+    - cat "${HOME}/.ssh/id_rsa.pub" >>"${HOME}/.ssh/authorized_keys"
+    - ssh-keyscan -t 'rsa' 'localhost' >>"${HOME}/.ssh/known_hosts"
+    # Coverage dependencies
+    - pip install coverage pytest-cov
+
+install:
+    - >
+        sudo apt-get install -y at build-essential gfortran heirloom-mailx
+        python-pip python-dev graphviz libgraphviz-dev python-jinja2
+        python-sqlalchemy libxml-parser-perl libconfig-inifiles-perl
+        libdbi-perl libdbd-sqlite3-perl latexmk texlive
+        texlive-generic-extra texlive-latex-extra texlive-fonts-recommended
+    - pip install cherrypy EmPy Jinja2 requests sqlalchemy pycodestyle python-jose pyzmq colorama pillow aiofiles
+    - pip install pygraphviz --install-option="--include-path=/usr/include/graphviz" --install-option="--library-path=/usr/lib/graphviz/"
+    - sudo sh -c 'echo "deb http://opensource.wandisco.com/ubuntu `lsb_release -cs` svn19" >> /etc/apt/sources.list.d/subversion19.list'
+    - sudo wget -q http://opensource.wandisco.com/wandisco-debian.gpg -O- | sudo apt-key add -
+    - sudo apt-get update
+    - sudo apt-get install -y subversion
+
+after_success:
+    - coverage combine --append
+    - coverage xml --ignore-errors
+    - bash <(curl -s https://codecov.io/bash)
+
+jobs:
+    include:
+    - name: "Test Battery"
+      script:
+      - export COVERAGE_PROCESS_START="${TRAVIS_BUILD_DIR}/.coveragerc"
+      # ./bin/rose will change PYTHONPATH, so we cannot rely on that for sitecustomize.py
+      # but instead we can move the sitecustomize.py to the place used as PYTHONPATH
+      - cp "${TRAVIS_BUILD_DIR}/.travis/sitecustomize.py" ./lib/python
+      - export PYTHONPATH="${TRAVIS_BUILD_DIR}/.travis"
+      - coverage run .travis/cover.py
+      # Pytest fails if there are no tests.
+      # - PYTHONPATH=$PYTHONPATH:lib/python/ pytest lib/python/rose/tests/*
+      - rm ./lib/python/sitecustomize.py
+    - name: "Documentation"
+      script:
+        - pip install 'sphinx'
+        - pip install 'sphinx_rtd_theme'
+        - pip install 'sphinxcontrib-httpdomain'
+        - pip install 'hieroglyph'
+        - rose make-docs --strict clean linkcheck doctest html slides latexpdf

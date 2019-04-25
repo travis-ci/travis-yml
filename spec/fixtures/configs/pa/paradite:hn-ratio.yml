@@ -1,0 +1,10 @@
+language: python
+python:
+  - "3.6"
+before_install:
+  - export TZ=Asia/Singapore
+  - date
+  - chmod +x .travis/push.sh
+script:
+  - python hn-ratio.py
+  - .travis/push.sh

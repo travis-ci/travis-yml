@@ -1,0 +1,48 @@
+before_install:
+  - sudo apt-get install -y pandoc
+language: python
+cache:
+    pip
+python:
+  - 3.5
+  - 3.6
+install:
+  - pip install -U pip wheel
+  - pip install -r requirements_dev.txt
+script:
+  - make testp
+
+stages:
+  - test
+  - strict lint
+  - docs build
+
+jobs:
+    include:
+        - stage: strict lint
+          python: 3.5
+          install:
+            - pip install -U pip wheel
+            - pip install -r requirements_dev.txt
+          env: LINTER=pylint
+          script: make pylint
+          if: branch IN (master, dev)
+        - stage: strict lint
+          python: 3.5
+          install: pip install flake8
+          env: LINTER=flake8
+          script: make flake8
+          if: branch IN (master, dev)
+        - stage: strict lint
+          python: 3.5
+          install: pip install pydocstyle
+          env: LINTER=pydocstyle
+          script: make pydocstyle
+          if: branch IN (master, dev)
+        - stage: docs build
+          python: 3.5
+          install:
+            - pip install -U pip wheel
+            - pip install -r requirements_dev.txt
+          script: make docs
+          if: branch IN (master, dev)

@@ -1,0 +1,34 @@
+language: python
+
+python:
+- "2.7"
+- "3.6"
+
+sudo: false
+
+# command to install dependencies
+install:
+  - easy_install -U pip
+  - pip install PyYAML argparse
+  - pip install catkin_pkg ros_buildfarm rosdistro nose coverage
+  - pip install yamllint
+  - pip install unidiff
+  - pip install rosdep
+  - pip install PyGithub
+
+# command to run tests
+script:
+#  - 'if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then nosetests -s; fi'
+  - yamllint */
+
+notifications:
+  email:
+    on_success: never
+    on_failure: always
+
+branches:
+  only:
+    - master 
+
+before_install: 
+  - 'if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then openssl aes-256-cbc -K $encrypted_ff7a3197787f_key -iv $encrypted_ff7a3197787f_iv -in .git-credentials.enc -out .git-credentials -d; fi'

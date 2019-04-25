@@ -1,0 +1,15 @@
+language: python
+dist: trusty
+addons:
+  postgresql: "9.6"
+python:
+  - "2.7"
+  - "3.6"
+before_script:
+  - psql -c 'create database ci_test;' -U postgres
+  - npm install --upgrade npm
+script:
+  - make flake8
+  - make travis
+notifications:
+  slack: ccnmtl:GizSNscLWJLldjQrffB8mwgm

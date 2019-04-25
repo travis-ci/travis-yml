@@ -1,0 +1,154 @@
+language: cpp
+dist: xenial
+
+git:
+  depth: false
+
+before_cache:
+  - brew cleanup
+
+cache:
+  directories:
+    - $HOME/Library/Caches/Homebrew
+
+matrix:
+  include:
+  - os: linux
+    compiler: gcc
+    addons:
+      apt:
+        sources:
+        - sourceline: 'ppa:beineri/opt-qt571-xenial'
+        packages:
+        - mesa-common-dev # Forgotten dep of qt57base
+        - qt57base
+        - qt57imageformats
+        - qt57svg
+        - qt57multimedia
+        - qt57quickcontrols
+        - qt57quickcontrols2
+        - qt57tools
+        - qt5keychain-dev
+  - os: linux
+    dist: trusty
+    compiler: clang
+    env: [ 'VERSION_SUFFIX="-compat"' ]
+    addons:
+      apt:
+        sources:
+        - ubuntu-toolchain-r-test
+        - sourceline: 'ppa:beineri/opt-qt571-trusty'
+        packages:
+        - libstdc++-5-dev
+        - qt57base
+        - qt57imageformats
+        - qt57svg
+        - qt57multimedia
+        - qt57quickcontrols
+        - qt57quickcontrols2
+        - qt57tools
+  - os: linux
+    compiler: clang
+    addons:
+      apt:
+        sources:
+        - sourceline: 'ppa:beineri/opt-qt-5.12.0-xenial'
+        packages:
+        - mesa-common-dev # Forgotten dep of qt512base
+        - qt512base
+        - qt512imageformats
+        - qt512svg
+        - qt512multimedia
+        - qt512quickcontrols
+        - qt512quickcontrols2
+        - qt512tools
+        - qt512translations
+        - qt5keychain-dev
+  - os: osx
+    env: [ 'PATH=/usr/local/opt/qt/bin:$PATH' ]
+    addons:
+      homebrew:
+        packages:
+        - qt5
+        - qtkeychain
+
+before_script:
+- if [ -f /opt/qt57/bin/qt57-env.sh ]; then . /opt/qt57/bin/qt57-env.sh; fi
+- if [ -f /opt/qt512/bin/qt512-env.sh ]; then . /opt/qt512/bin/qt512-env.sh; fi
+# VERSION is also used by linuxdeployqt
+- if [ -n "$TRAVIS_TAG" ]; then export VERSION="$TRAVIS_TAG"; else export VERSION="git$(git rev-list --count HEAD)"; fi
+
+script:
+- mkdir build && pushd build
+# TODO: add building with an external lib
+- cmake .. -LA -DUSE_INTREE_LIBQMC=1 -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_INSTALL_PREFIX=/usr -DDEPLOY_VERBOSITY=$DEPLOY_VERBOSITY
+#- appstream-util validate linux/*.appdata.xml
+- cmake --build . --target all
+- export DESTDIR=$TRAVIS_BUILD_DIR/install
+- if [ "$TRAVIS_OS_NAME" = "linux" ]; then cmake --build . --target install; fi
+- |
+  if [ "$TRAVIS_OS_NAME" = "osx" ]; then
+    cmake --build . --target image
+    mv -v quaternion.dmg "quaternion-$VERSION.dmg"
+  fi
+- popd
+# TODO: maybe move AppImage generation to CMakeLists.txt
+# (pre-wgetting AppImageKit to avoid CMakeList.txt dependency on Internet?)
+# FIXME: The AppImageKit downloadables should at the very least be verified
+- |
+  if [ "$TRAVIS_OS_NAME" = "linux" ] && [ "$CC" = "clang" ]; then
+    mkdir AppImageKit && pushd AppImageKit
+      wget -c -nv \
+        "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage" \
+        "https://github.com/darealshinji/AppImageKit-checkrt/releases/download/continuous/exec-x86_64.so" \
+        "https://github.com/darealshinji/AppImageKit-checkrt/releases/download/continuous/AppRun-patched-x86_64"
+      chmod a+x ./linuxdeployqt-continuous-x86_64.AppImage
+      install -m "u=rw,go=r" -t $DESTDIR/usr/optional/libstdc++ /usr/lib/x86_64-linux-gnu/libstdc++.so.6
+      install -m "u=rw,go=r" ./exec*.so $DESTDIR/usr/optional/exec.so
+      install -m "u=rwx,go=rx" ./AppRun* $DESTDIR/AppRun
+      unset QTDIR QT_PLUGIN_PATH LD_LIBRARY_PATH
+      ./linuxdeployqt-continuous-x86_64.AppImage \
+        $DESTDIR/usr/share/applications/*.desktop -appimage -extra-plugins=iconengines,platformthemes/libqgtk3.so -qmldir=$TRAVIS_BUILD_DIR/client/qml -verbose=$DEPLOY_VERBOSITY
+      export APPIMAGE_READY=1
+    popd
+  fi
+
+after_success:
+- sed -i -e "s/VERSION_VALUE/$VERSION/g" .ci/bintray-release.json
+- sed -i -e "s/VERSION_SUFFIX/$VERSION_SUFFIX/g" .ci/bintray-release.json
+- sed -i -e "s/BINTRAY_SUBJECT/$BINTRAY_SUBJECT/g" .ci/bintray-release.json
+- sed -i -e "s/BINTRAY_REPO/$BINTRAY_REPO/g" .ci/bintray-release.json
+- sed -i -e "s/BINTRAY_NAME/$BINTRAY_NAME/g" .ci/bintray-release.json
+
+deploy:
+- provider: bintray
+  file: .ci/bintray-release.json
+  user: $BINTRAY_USER
+  key: $BINTRAY_TOKEN
+  skip_cleanup: true
+  on:
+    tags: false
+
+- provider: releases
+  api_key: $GITHUB_API_KEY
+  file: build/quaternion-$VERSION.dmg
+  skip_cleanup: true
+  on:
+    tags: true
+
+- provider: releases
+  api_key: $GITHUB_API_KEY
+  file_glob: true
+  file: AppImageKit/Quaternion*.AppImage
+  skip_cleanup: true
+  on:
+    condition: -n "$RELEASE_APPIMAGE" && -z "$VERSION_SUFFIX"
+    tags: true
+
+notifications:
+  webhooks:
+    urls:
+    - "https://scalar.vector.im/api/neb/services/hooks/dHJhdmlzLWNpLyU0MGtpdHN1bmUlM0FtYXRyaXgub3JnLyUyMVBDelV0eHRPalV5U3hTZWxvZiUzQW1hdHJpeC5vcmc"
+    on_success: change  # always|never|change
+    on_failure: always
+    on_start: never

@@ -1,0 +1,25 @@
+language: java
+jdk:
+  - oraclejdk8
+
+sudo: required
+addons:
+  apt:
+    packages:
+      - oracle-java8-installer
+
+jobs:
+  include:
+    - stage: Subproject-expression
+      install: cd sub_projects/expression
+      script: ./gradlew build publish
+    - stage: build
+      install: ./gradlew setupCiWorkspace
+      script: ./gradlew test
+    - stage: checkstyle
+      install: echo "skipping default ./gradlew assemble"
+      script: ./gradlew checkstyle
+
+env:
+  global:
+    TERM=dumb

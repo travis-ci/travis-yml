@@ -2,51 +2,46 @@
 
 
 
-## Type
+## Types
 
-Any of:
-
-* Sequence (Array)
-* Any of:
-
-* Map (Hash)
-* Map (Hash)
+* Array of: Hash
+* Array of: Hash
+* Array of: String
+* Hash
+* Hash
 * String
 
-## Flags
-
-None.
 
 
 ## Examples
 
 ```yaml
-matrix:
+env:
 - secure: string
 ```
 
 ```yaml
-matrix:
+env:
 - "^(?!global|matrix)": string
 ```
 
 ```yaml
-matrix:
+env:
 - string one
 - string two
 ```
 
 ```yaml
-matrix:
+env:
   secure: string
 ```
 
 ```yaml
-matrix:
+env:
   "^(?!global|matrix)": string
 ```
 
 ```yaml
-matrix: string
+env: string
 
 ```

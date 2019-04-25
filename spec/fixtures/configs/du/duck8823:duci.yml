@@ -1,0 +1,48 @@
+os:
+  - linux
+  - osx
+#  - windows is still early access stage: https://travis-ci.community/c/windows
+
+language: go
+go:
+  - "1.11.x"
+  - "1.12.x"
+
+matrix:
+  exclude:
+    - go: tip
+      os: osx
+
+env:
+  global:
+    - GO111MODULE=on
+
+cache:
+  directories:
+    - $GOPATH/pkg/mod/cache
+
+install: true
+before_script:
+  # download dependencies
+  - go mod download
+script:
+  - go test -coverprofile cover.out $(go list ./... | grep -v mock_)
+after_success:
+  # for coverage report
+  - GO111MODULE=off go get -u github.com/mattn/goveralls
+  - if [ "$TRAVIS_GO_VERSION" = "1.12.x" ] && [ "$TRAVIS_OS_NAME" = "linux" ]; then goveralls -service=travis-ci -coverprofile=cover.out -ignore=main.go; fi
+before_deploy:
+  # copy dependencies to vendor
+  - go mod vendor
+  - GO111MODULE=off go get -u github.com/buchanae/github-release-notes
+  - GO111MODULE=off go get -u github.com/goreleaser/goreleaser
+  - github-release-notes -org duck8823 -repo duci -since-latest-release > release-notes.txt
+deploy:
+  - provider: script
+    skip_cleanup: true
+    script: goreleaser --release-notes=release-notes.txt
+    on:
+      tags: true
+      condition:
+        - $TRAVIS_GO_VERSION = "1.12.x"
+        - $TRAVIS_OS_NAME = "linux"

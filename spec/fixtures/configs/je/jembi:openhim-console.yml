@@ -1,0 +1,16 @@
+language: node_js
+before_script: npm run build:prod
+after_success:
+  - npm run coverage
+  - '.travis/build_docker.sh'
+node_js:
+  - 'lts/carbon'
+  - 'lts/dubnium'
+  - 'node'
+sudo: false
+notifications:
+  slack:
+    rooms:
+      - jembihealthsystems:mlQYVFbijxcZkesCt7G5VBoM
+    on_success: change
+    on_failure: always

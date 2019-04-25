@@ -1,0 +1,32 @@
+language: python
+cache: pip
+sudo: false
+python:
+  - 3.5
+addons:
+  apt:
+    packages:
+    - glpk-utils
+    - postgresql-9.6-postgis-2.3
+  postgresql: "9.6"
+services:
+  - postgresql
+env:
+  matrix:
+    - TEST_SETTINGS=./config/travis.cfg
+install:
+  - pip install pipenv
+  - pipenv install --dev --deploy
+before_script:
+  - psql -c 'create database emf_site_test;' -U postgres
+script:
+  - make test
+branches:
+  only:
+  - master
+notifications:
+  irc:
+    channels:
+      - "chat.freenode.net#emfcamp-web"
+    on_success: change
+    on_failure: always

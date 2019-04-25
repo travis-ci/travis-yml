@@ -1,0 +1,34 @@
+language: rust
+rust: nightly
+sudo: false
+
+jobs:
+  include:
+    - name: "Main"
+      script:
+        - |
+          RUN_CLIPPY=true
+          rustup component add clippy --toolchain=nightly || RUN_CLIPPY=false
+        - cargo test --all --all-features
+        - |
+          if $RUN_CLIPPY; then
+            CLIPPY_STATUS=0
+            for package in maud_htmlescape maud_macros maud; do
+              (cd $package && cargo clippy -- -D warnings) || CLIPPY_STATUS=$?
+            done
+            (exit $CLIPPY_STATUS)
+          fi
+    - name: "Benchmarks"
+      script:
+        - (cd benchmarks && cargo test --benches)
+    - name: "Documentation"
+      script:
+        - (cd docs && make -j$(nproc))
+      deploy:
+        provider: pages
+        skip_cleanup: true
+        github_token: $GITHUB_TOKEN
+        fqdn: maud.lambda.xyz
+        local_dir: docs/site
+        on:
+          branch: master

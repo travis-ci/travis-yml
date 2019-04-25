@@ -1,0 +1,31 @@
+osx_image: xcode10.2
+language: objective-c
+env:
+  global:
+  - FRAMEWORK_NAME=OCMSDK
+  - PROJECT=OCM
+  - SCHEME=OCM
+  - OS=12.2
+  - DEVICE="iPhone 8"
+cache:
+  directories:
+  - Carthage
+before_script:
+  - carthage bootstrap --cache-builds --platform iOS
+script:
+  - set -o pipefail && xcodebuild -project $PROJECT.xcodeproj -scheme $SCHEME -sdk iphonesimulator -destination "platform=iOS Simulator,OS=$OS,name=$DEVICE" test | xcpretty
+before_deploy:
+  - carthage build --no-skip-current --platform iOS
+  - carthage archive $FRAMEWORK_NAME
+deploy:
+  provider: releases
+  api_key:
+    secure: mTesqadxTcP1zCUQwatJmLt7OICdDOS/gauG2tu16wk8pgIrFgFcATh3OrKLR5RdCiTV/9V6kL08ARLX3FRl6QdYQE9zmH7VHNye1oWBSuB5N9EDR06pfRtXM7xpnh+tM09/+68onK7eaO9bzjPD9wpMLL24xsMRG1oH3T884mx97nR7lZZi5KIYm1YrwTTdyVwD1lZE/nD3tWAPa2MUMFoaWDXJPpqG+zA5eiuN9bWhdR0KMRZbLb1+OaXsUdGUgkHZeo1MbAbd1JKNjUiVa9n4FVDjueXp2JS1/VAoGC9/56ZqRhK5vZRan3I7gXAfEBxgjTHoz4QVPPuXkWbju+vGM7N7Jf+c8+VyIzkMOAAqDYHiAIaeujxLlK+5snEAcAyxSNVghMJ+mP/GPXMWjGdTEXYwWgV/p9GcE9JnRaH/WVTAbYh0dQRWj30MGl92atx2WvAJKEIrde2/gVUoZuJWZDblyQbZQMNnKjJuxIjHeVvhb4SPFrDaRbqm0ZAj1J5FuGzrJQzdTtXnfWqoLSNEdRJ3xkYDleIlgMz5sDPCYFrghHnWpYruAHkJZJKBB4WBJL5vw8rtdBo4YtFjWrcXMeTaAETt2pbTRit0PZC4mSWkhIKMcweUXSD/3RlmhqVKPDf5VPaxq5j4Z3L0RN1w6DvVCuWVXFqZR6Q9GKI=
+  file: "$FRAMEWORK_NAME.framework.zip"
+  skip_cleanup: true
+  on:
+    repo: Orchextra/orchextra-content-ios-sdk
+    tags: true
+notifications:
+  slack:
+    secure: O45CnPgk3zcGOgeRNedDSceHm1btbDjxic+vAkcjbt03/LGW0GpePuA7Zo0seKpcXJeCdlRiA77G6NHjDXWsfZCQYo3W/ID7jdV+qa4mlDig8zObVe+aJQNhH2LD11ATP5vl39mvwnHpIQrsDiUSk8MbVEeSTvzChw6MCCJpUzhCeamFPkGRisxtyW3+2Nk9hi4DcTO8yVH3GD6InOkTA22wQQtpAI5ece1TaQFGf4yVuRzw6gYWwkplZAC/l3Vkb9DqGHqB+M0qgruUWyR7eIckEkQEiWysgMu0zsyMwhZ8jvu2tpZkylWP5Mp5NczxhwscOLtK8EdqlVDtvCy97qiwYNGG91Kf4ZSBFWt3SyDHP01yPp4zq9tj7QJ1pdJzAcdHsAHVxMjgRoV47WqL/Tjf3IE5SjbaoogZzYW+r3SIbcR8BX/eRCCbTqRK75epOntbUSVIEk7pTHQdoOtnVcqZ0rBLkneavQG/3xSgkOR3tXNlm5JHlyzlQmH1eGBa5BoDhBF8X9KH+EAILU9CIiLx4gjihE2qqGJhKhf5ZMBxEnraSUFrFoToDYu6dcvY4MozZMIM9nXHLNU24K9o1Ix52eQnBqX97Uuiy8ep1yVLBiYgeqUgom+i3YVZFJbpvv0pu2jQvcxnobuTi5HCKroBZEGqY1+SVu/Es3/dpoA=

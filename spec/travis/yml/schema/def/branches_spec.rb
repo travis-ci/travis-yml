@@ -15,10 +15,10 @@ describe Travis::Yml::Schema::Def::Branches, 'structure' do
             type: :object,
             properties: {
               only: {
-                '$ref': '#/definitions/strs'
+                '$ref': '#/definitions/type/strs'
               },
               except: {
-                '$ref': '#/definitions/strs'
+                '$ref': '#/definitions/type/strs'
               }
             },
             additionalProperties: false,
@@ -33,7 +33,7 @@ describe Travis::Yml::Schema::Def::Branches, 'structure' do
             }
           },
           {
-            '$ref': '#/definitions/strs'
+            '$ref': '#/definitions/type/strs'
           }
         ]
       )

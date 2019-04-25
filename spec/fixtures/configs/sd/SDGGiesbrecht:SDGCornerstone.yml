@@ -1,0 +1,99 @@
+# .travis.yml
+#
+# This source file is part of the SDGCornerstone open source project.
+# https://sdggiesbrecht.github.io/SDGCornerstone
+#
+# Copyright ©2017–2019 Jeremy David Giesbrecht and the SDGCornerstone project contributors.
+#
+# Soli Deo gloria.
+#
+# Licensed under the Apache Licence, Version 2.0.
+# See http://www.apache.org/licenses/LICENSE-2.0 for licence information.
+
+language: generic
+matrix:
+  include:
+    - os: osx
+      env:
+        - JOB="macOS + Swift Package Manager"
+      osx_image: xcode10.2
+      script:
+        - "git config --global protocol.version 1"
+        - "bash \"./Refresh (macOS).command\""
+        - "bash \"./Validate (macOS).command\" •job macos‐swift‐package‐manager"
+    - os: osx
+      env:
+        - JOB="macOS + Xcode"
+      osx_image: xcode10.2
+      script:
+        - "git config --global protocol.version 1"
+        - "bash \"./Refresh (macOS).command\""
+        - "bash \"./Validate (macOS).command\" •job macos‐xcode"
+    - os: linux
+      env:
+        - JOB="Linux"
+      dist: xenial
+      script:
+        - "export SWIFT_VERSION=5.0"
+        - "eval \"$(curl -sL https://gist.githubusercontent.com/kylef/5c0475ff02b7c7671d2a/raw/9f442512a46d7a2af7b850d65a7e9bd31edfb09b/swiftenv-install.sh)\""
+        - "bash \"./Refresh (macOS).command\""
+        - "bash \"./Validate (macOS).command\" •job linux"
+    - os: osx
+      env:
+        - JOB="iOS"
+      osx_image: xcode10.2
+      language: objective-c
+      xcode_sdk: iphonesimulator
+      script:
+        - "git config --global protocol.version 1"
+        - "bash \"./Refresh (macOS).command\""
+        - "bash \"./Validate (macOS).command\" •job ios"
+    - os: osx
+      env:
+        - JOB="watchOS"
+      osx_image: xcode10.2
+      script:
+        - "git config --global protocol.version 1"
+        - "bash \"./Refresh (macOS).command\""
+        - "bash \"./Validate (macOS).command\" •job watchos"
+    - os: osx
+      env:
+        - JOB="tvOS"
+      osx_image: xcode10.2
+      language: objective-c
+      xcode_sdk: appletvsimulator
+      script:
+        - "git config --global protocol.version 1"
+        - "bash \"./Refresh (macOS).command\""
+        - "bash \"./Validate (macOS).command\" •job tvos"
+    - os: linux
+      env:
+        - JOB="Miscellaneous"
+      dist: xenial
+      script:
+        - "export SWIFT_VERSION=5.0"
+        - "eval \"$(curl -sL https://gist.githubusercontent.com/kylef/5c0475ff02b7c7671d2a/raw/9f442512a46d7a2af7b850d65a7e9bd31edfb09b/swiftenv-install.sh)\""
+        - "bash \"./Refresh (macOS).command\""
+        - "bash \"./Validate (macOS).command\" •job miscellaneous"
+    - os: linux
+      env:
+        - JOB="Deployment"
+        - secure: "gzx7ARrCgcNJiDtT/FALmdVgEYO5p7ZxlUuzOgwUTe9whOKD18POfAkgtRgYHLT7BMeN6+l9d26FJYfeH9Gvr6M4GVLqFpxKeW/DbcGABiJKok+qXkCXjbW+7ImqqarMyhXLyTZA5CdTAVTMLc9CnpqQJZphih2mbQZf06Jg3ZzCLRcsWmfvoehEgGTkt/xWNomYKZSuXOJZqNAMz847Tdx3rnOz8D41m1y+Y1xEOCdEnxtIg3JYQDs2OGjq0VT61qRaNm3fDf/f/VUK77q6vLUhCAXmdm19Qw5vSRt4u8G6pTuFdHxlRy9NrIHXzFj7IeomvtJzmAgxo+f+zRTgBcwbOpwHy3H2B1DILGwpWxQxsKelSjGJM8mEvs6cdXjTuvuLC4vwrkQyauDFlA2O/O3vZJFGyw6hJT2crVAO6tU2r71I36MgtI7ut8FCuHFVINg9suUY2MxzF1E6sJ3v7Q9btz2HTFpiO/2/v3kSsbt/jJUCv2/dak3TrIlmispW+8Pba/xmQmlPj6MW+LdaWDV6fkexpi7+QyLfPTCAbfPuXx9ePIoWGmrSqe0nDsZIiPC+uPUXVYlj25I84YA+QI3eb2eTVWO/nhw/461184rU6Tv5g2SBj0FIkaDTHe21U8vskKvRTDjwuQ1/uQLl34SoVHPcM+XRl6sb3CNA+Zs="
+      if: branch = master and (not type = pull_request)
+
+      deploy:
+        provider: pages
+        local_dir: docs
+        github_token: $GITHUB_TOKEN
+        skip_cleanup: true
+      dist: xenial
+      script:
+        - "export SWIFT_VERSION=5.0"
+        - "eval \"$(curl -sL https://gist.githubusercontent.com/kylef/5c0475ff02b7c7671d2a/raw/9f442512a46d7a2af7b850d65a7e9bd31edfb09b/swiftenv-install.sh)\""
+        - "bash \"./Refresh (macOS).command\""
+        - "bash \"./Validate (macOS).command\" •job deployment"
+
+cache:
+  directories:
+  - $HOME/Library/Caches/ca.solideogloria.Workspace
+  - $HOME/.cache/ca.solideogloria.Workspace

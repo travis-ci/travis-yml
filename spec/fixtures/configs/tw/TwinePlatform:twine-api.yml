@@ -1,0 +1,63 @@
+language: node_js
+node_js:
+  - '10'
+
+env:
+  global:
+    - NODE_ENV=testing
+
+cache:
+  directories:
+    - "node_modules"
+
+addons:
+  postgresql: "9.5"
+  apt:
+    packages:
+    - postgresql-9.5-postgis-2.3
+
+services:
+- postgresql
+
+install:
+  - npm install -g codecov
+  - npm ci
+
+jobs:
+  include:
+    - stage: Build
+      script:
+        - npm run build
+        - npm run lint
+
+    - stage: Checks
+      before_script:
+        - psql -U postgres -c 'create database twine_api_test;'
+        - psql -U postgres -c 'create extension postgis'
+      script:
+        - NODE_ENV=development npm run db:reset
+        - NODE_ENV=testing npm run db:reset
+        - NODE_ENV=production npm run db:reset
+        - npm run exec ./bin/server_setup.ts
+
+    - stage: Test
+      env: TEST_SUITE=integration
+      before_script:
+        - psql -U postgres -c 'create database twine_api_test;'
+        - psql -U postgres -c 'create extension postgis'
+      script:
+        - npm run cover:$TEST_SUITE
+        - codecov
+
+    - # Also Build and Test
+      env: TEST_SUITE=unit
+      addons: skip
+      services: skip
+      script:
+        - npm run cover:$TEST_SUITE
+        - codecov
+
+notifications:
+  email:
+    on_success: never
+    on_failure: always

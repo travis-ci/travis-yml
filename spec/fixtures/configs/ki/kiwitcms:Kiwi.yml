@@ -1,0 +1,175 @@
+dist: xenial
+sudo: required
+language: python
+python:
+  - "3.6"
+cache: pip
+env:
+  global:
+    - CC_TEST_REPORTER_ID=95caa6c770dbc4ca15944ed22c5fa840e1cc61627d199d11eedbf08e6a0482ee
+    # The next declaration is the encrypted COVERITY_SCAN_TOKEN, created
+    # via the "travis encrypt" command using the project repo's public key
+    - secure: "AFMd4dRA1psBKd1LohQMxwL9vmAUvPrMzvBiU4w6mRX87Sskz69sLXAXivYvl/Eli+vzqIQat0VFOuymC4ScKhON1rbSJ5F/DQElToAPPNT2GXIaMCRA+ILOX28wFvC6/wqpvYuIf4yN19t2rSkNy0AqTH1RhPNkCHyiMcs0V6ztmlxobn1F9TYPCO8i1B+ZFez7rnUeQVaoXW3Cv4X8rjbkBd9iQQF/wfn8k71LeY2KB0fCxmjzFDQwXLnldka4lLWRuTPBcdKf57MveorMSJ5afLr/wd4IXKdoM3oUa6Us73T1+OvC3cOVlG7z49bP5VVz0xMq6qcmnQEOxMhO8wUNtkMssBz89BwC39LKMOxcASFF8F5joTWCfN+s2k2bsV/lNuKCspOEji+KTdSnMFMlo3LxQ8rt1cMNOrHvnmYJjteQ00IXrXhxdFeGGOrko0qQU1iPW4FjRsHOeNqdMMDKKvTO27odgJbNYF7lo3nWgPXVGqteMhpvxnoS2JR9ettGZJQueDrAzSmCe9Akc0hGwvyUTsyjaYLIAdxmaqKZtu1G+Otep11Rjf0gXaNLSZ/Pm02BHrOdLqTsRuTihHuR/W2HHuJrw44u2nF/3oer+bfAAGpdK0e6NqaZgmLSEN340FDcJ9sG6oGMo6cYGQWqzNUf3/gS4K7TvWhw10M="
+services:
+  - mysql
+  - postgresql
+addons:
+  apt:
+    sources:
+      - sourceline: 'deb http://archive.ubuntu.com/ubuntu/ artful main restricted'
+      - sourceline: 'deb http://archive.ubuntu.com/ubuntu/ artful-updates main restricted'
+    packages:
+      # update sqlite3 to get rid of segmentation faults with Django 2.0, for example:
+      # https://travis-ci.org/kiwitcms/Kiwi/jobs/322848116
+      # all sources I've read point to possible issues with sqlite itself
+      - sqlite3
+
+stages:
+  - static_analysis
+  - testing
+  - localization_testing
+  - non_functional_testing
+  - docker
+
+jobs:
+  allow_failures:
+    - env: CMD=pylint
+    - env: CMD=bandit_site_packages
+
+  include:
+    - stage: static_analysis
+      env:
+        - CMD=bandit
+
+    - { stage: static_analysis, env: CMD=bandit_site_packages, if: branch = master AND type = push }
+
+    - stage: static_analysis
+      if: branch = master AND type = push
+      env:
+        - CMD=coverity
+      addons:
+        coverity_scan:
+          project:
+            name: "kiwitcms/Kiwi"
+            description: "Open source test case management system"
+          notification_email: info@kiwitcms.org
+          build_command: "--no-command --fs-capture-search ./ --fs-capture-search /home/travis/virtualenv/python3.6.3/lib/python3.6/site-packages"
+          branch_pattern: master
+
+    - stage: static_analysis
+      env:
+        - CMD=flake8
+
+    - { stage: static_analysis, env: CMD=pylint }
+
+    - stage: testing
+      env:
+        - TEST_DB=MariaDB
+        - CMD=test
+      addons:
+        mariadb: 10.1
+
+    - stage: testing
+      env:
+        - TEST_DB=Postgres
+        - CMD=test
+      addons:
+        postgresql: 10
+        apt:
+          packages:
+          - postgresql-10
+          - postgresql-client-10
+
+    - stage: testing
+      if: branch = master AND type = push
+      env:
+        - TEST_DB=SQLite
+        - CMD=test
+
+    - stage: testing
+      if: branch = master AND type = push
+      env:
+        - TEST_DB=MySQL
+        - CMD=test
+
+    - stage: localization_testing
+      env:
+        - LANG=fr_FR.UTF-8
+        - TEST_DB=SQLite
+        - CMD=l10n-test
+
+    - stage: localization_testing
+      env:
+        - LANG=sl_SL.UTF-8
+        - TEST_DB=SQLite
+        - CMD=l10n-test
+
+    - stage: non_functional_testing
+      env:
+        - CMD=check-docs-source-in-git
+      addons:
+        apt:
+          packages:
+            - graphviz
+
+    - stage: non_functional_testing
+      env:
+        - TEST_DB=SQLite
+        - CMD=test_for_missing_migrations
+
+    - stage: non_functional_testing
+      env:
+        - CMD=build-for-pypi
+
+    - stage: docker
+      env:
+        - CMD=test-docker-image
+
+before_install:
+  - echo -n | openssl s_client -connect https://scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-
+  - |
+        if [ "$TEST_DB" == "MariaDB" ]; then
+            sudo apt-get -y install libmariadbclient-dev
+        fi
+
+        if [ "$TEST_DB" == "MySQL" ] || [ "$TEST_DB" == "MariaDB" ]; then
+            cat "$TRAVIS_BUILD_DIR/.travis/my.cnf" | sudo tee -a /etc/mysql/conf.d/mariadb.cnf
+            sudo cat /etc/mysql/conf.d/mariadb.cnf
+            sudo service mysql restart
+
+            mysql -e 'SELECT VERSION();'
+            mysql -e 'CREATE USER "kiwi" IDENTIFIED BY "";'
+            mysql -e 'CREATE DATABASE kiwi CHARACTER SET utf8 COLLATE utf8_unicode_ci;'
+            mysql -e 'GRANT ALL PRIVILEGES ON kiwi.* TO kiwi;'
+            mysql -e 'CREATE DATABASE test_kiwi CHARACTER SET utf8 COLLATE utf8_unicode_ci;'
+            mysql -e 'GRANT ALL PRIVILEGES ON test_kiwi.* TO kiwi;'
+        fi
+
+        if [ "$TEST_DB" == "Postgres" ]; then
+            psql -c  "CREATE DATABASE kiwi ENCODING 'UTF8' LC_COLLATE = 'en_US.UTF-8' LC_CTYPE = 'en_US.UTF-8';" -U postgres
+        fi
+
+install:
+  - |
+        [ -z "$TEST_DB" ] && export TEST_DB="SQLite"
+        export REQUIREMENTS_TXT="requirements/$(echo $TEST_DB | tr '[:upper:]' '[:lower:]' | sed 's/mysql/mariadb/' | sed 's/sqlite/base/').txt"
+        echo "REQUIREMENTS_TXT=$REQUIREMENTS_TXT"
+        pip install -r $REQUIREMENTS_TXT
+        pip install -r requirements/devel.txt
+        pip install coveralls codecov
+        pushd tcms/ && npm install && popd
+
+script: make $CMD
+after_success:
+  - |
+        if [ "$TRAVIS_BUILD_STAGE_NAME" == "Testing" ] && [ "$TEST_DB" == "MariaDB" ]; then
+            coveralls
+            codecov
+            curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+            chmod +x ./cc-test-reporter
+            ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
+        fi
+notifications:
+  email:
+    on_failure: change
+    on_success: never

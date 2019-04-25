@@ -1,0 +1,21 @@
+sudo: required
+language: python
+python: "2.7"
+services:
+  - docker
+
+before_install:
+  - sudo apt-get update -qq
+
+install:
+  - sudo apt-get install sshpass
+  - pip install docker-py
+  - pip install ansible
+  - ansible --version
+
+script:
+  - cd test && make
+
+notifications:
+  webhooks: https://galaxy.ansible.com/api/v1/notifications/
+

@@ -1,0 +1,71 @@
+services:
+- docker
+env:
+  # need to update the matrix below for new Docker images
+  # it must have the following conventions name matching of directories:
+  # $IMG_REPO/$IMG_TAG
+  matrix:
+  - IMG_REPO=angular-cli BUILD_PATH=base IMG_TAG=latest
+  - IMG_REPO=aws-cli BUILD_PATH=latest IMG_TAG=latest
+  - IMG_REPO=chefdk BUILD_PATH=base IMG_TAG=latest
+  - IMG_REPO=create-react-app BUILD_PATH=latest IMG_TAG=latest
+  - IMG_REPO=duplicity BUILD_PATH=base IMG_TAG=latest
+  - IMG_REPO=google-cloud-sdk BUILD_PATH=base IMG_TAG=latest
+  - IMG_REPO=httpie-jwt-auth BUILD_PATH=base IMG_TAG=latest DOCKER_ARGS="--build-arg HTTPIE_JWT_AUTH_VERSION=0.3.0"
+  - IMG_REPO=httpie-jwt-auth BUILD_PATH=base-alpine IMG_TAG=latest-alpine DOCKER_ARGS="--build-arg HTTPIE_JWT_AUTH_VERSION=0.3.0"
+  - IMG_REPO=jenkins-dod BUILD_PATH=latest IMG_TAG=latest
+  - IMG_REPO=mongo-connector BUILD_PATH=base IMG_TAG=latest
+  - IMG_REPO=mongo-alpine BUILD_PATH=base IMG_TAG=latest
+  - IMG_REPO=node-ruby BUILD_PATH=base IMG_TAG=latest
+  - IMG_REPO=ubuntu BUILD_PATH=base IMG_TAG=16.04-dind-latest
+  - IMG_REPO=packer BUILD_PATH=latest IMG_TAG=latest
+  - IMG_REPO=python-coveralls BUILD_PATH=base IMG_TAG=latest
+  - IMG_REPO=travis BUILD_PATH=base IMG_TAG=latest
+  - IMG_REPO=xtrabackup BUILD_PATH=base IMG_TAG=latest
+  # additional tags, build once and then disable to reduce the travis-ci build time
+  # - IMG_REPO=angular-cli BUILD_PATH=base IMG_TAG=1.5.0 DOCKER_ARGS="--build-arg NG_CLI_VERSION=1.5.0"
+  # - IMG_REPO=angular-cli BUILD_PATH=base IMG_TAG=1.7.4 DOCKER_ARGS="--build-arg NG_CLI_VERSION=1.7.4"
+  # - IMG_REPO=httpie-jwt-auth BUILD_PATH=base IMG_TAG=0.3.0 DOCKER_ARGS="--build-arg HTTPIE_JWT_AUTH_VERSION=0.3.0"
+  # - IMG_REPO=httpie-jwt-auth BUILD_PATH=base-alpine IMG_TAG=0.3.0-alpine DOCKER_ARGS="--build-arg HTTPIE_JWT_AUTH_VERSION=0.3.0"
+  # - IMG_REPO=httpie-jwt-auth BUILD_PATH=base IMG_TAG=0.2.1 DOCKER_ARGS="--build-arg HTTPIE_JWT_AUTH_VERSION=0.2.1"
+  # - IMG_REPO=httpie-jwt-auth BUILD_PATH=base-alpine IMG_TAG=0.2.1-alpine DOCKER_ARGS="--build-arg HTTPIE_JWT_AUTH_VERSION=0.2.1"
+  # - IMG_REPO=node-ruby BUILD_PATH=base IMG_TAG=6.11 DOCKER_ARGS="--build-arg NODE_VERSION=6.11"
+  # - IMG_REPO=google-cloud-sdk BUILD_PATH=base IMG_TAG=0.2.0 DOCKER_ARGS="--build-arg DOCKER_VERSION=17.06.2-ce"
+  # - IMG_REPO=node-ruby BUILD_PATH=base IMG_TAG=8.9 DOCKER_ARGS="--build-arg NODE_VERSION=8.9"
+  # - IMG_REPO=ubuntu BUILD_PATH=base IMG_TAG=14.04-dind-latest DOCKER_ARGS="--build-arg UBUNTU_VERSION=14.04"
+  # - IMG_REPO=ubuntu BUILD_PATH=base IMG_TAG=14.04-dind-17.06.2-ce DOCKER_ARGS="--build-arg UBUNTU_VERSION=14.04 --build-arg DOCKER_VERSION=17.06.2-ce"
+  # - IMG_REPO=ubuntu BUILD_PATH=base IMG_TAG=16.04-dind-17.06.2-ce DOCKER_ARGS="--build-arg UBUNTU_VERSION=16.04 --build-arg DOCKER_VERSION=17.06.2-ce"
+  # - IMG_REPO=ubuntu BUILD_PATH=base IMG_TAG=14.04-dind-17.07.0-ce DOCKER_ARGS="--build-arg UBUNTU_VERSION=14.04 --build-arg DOCKER_VERSION=17.07.0-ce"
+  # - IMG_REPO=ubuntu BUILD_PATH=base IMG_TAG=16.04-dind-17.07.0-ce DOCKER_ARGS="--build-arg UBUNTU_VERSION=16.04 --build-arg DOCKER_VERSION=17.07.0-ce"
+  # - IMG_REPO=watchman BUILD_PATH=base IMG_TAG=4.9.0 DOCKER_ARGS="--build-arg WATCHMAN_VERSION=v4.9.0"
+  - IMG_REPO=node-ruby BUILD_PATH=base IMG_TAG=8.15 DOCKER_ARGS="--build-arg NODE_VERSION=8.15"
+  - IMG_REPO=node-ruby BUILD_PATH=base IMG_TAG=10.15 DOCKER_ARGS="--build-arg NODE_VERSION=10.15"
+  - IMG_REPO=xtrabackup BUILD_PATH=base IMG_TAG=2.2 DOCKER_ARGS="--build-arg XTRABACKUP_PACKAGE=percona-xtrabackup-22"
+  - IMG_REPO=xtrabackup BUILD_PATH=base IMG_TAG=2.3 DOCKER_ARGS="--build-arg XTRABACKUP_PACKAGE=percona-xtrabackup"
+  - IMG_REPO=xtrabackup BUILD_PATH=base IMG_TAG=2.4 DOCKER_ARGS="--build-arg XTRABACKUP_PACKAGE=percona-xtrabackup-24"
+  global:
+  - CI_BUILD_TIME=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+before_install:
+# install the latest docker and docker-compose versions
+- sudo apt-get remove docker docker-engine
+- sudo curl -sSL https://get.docker.com/ | sh
+- sudo rm /usr/local/bin/docker-compose
+# the latest docker-compose version
+# - export DOCKER_COMPOSE_VERSION=$(curl -s https://api.github.com/repos/docker/compose/releases/latest | grep 'tag_name' | cut -d\" -f4)
+# - curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
+# - chmod +x docker-compose
+# - sudo mv docker-compose /usr/local/bin
+- docker version
+# - docker-compose version
+before_script:
+- export DOCKER_PATH=$IMG_REPO/$BUILD_PATH
+- export CI_REGISTRY_IMAGE=$DOCKER_USER/${DOCKER_REPO_PREFIX}$IMG_REPO
+- export IMG_TAG_AFFIX=`if [ "$TRAVIS_BRANCH" != "master" ]; then echo "_${TRAVIS_BRANCH}" | sed -e 's/[\/]/-/g' | sed -e 's/[\#]//g'; fi`
+- export DOCKER_IMAGE=$CI_REGISTRY_IMAGE:$IMG_TAG$IMG_TAG_AFFIX
+script:
+- docker build --build-arg CI_BUILD_ID=$TRAVIS_BUILD_ID --build-arg CI_BUILD_REF=$TRAVIS_COMMIT
+  --build-arg CI_BUILD_TIME=$CI_BUILD_TIME --build-arg CI_REGISTRY_IMAGE=$CI_REGISTRY_IMAGE
+  $DOCKER_ARGS --pull -t $DOCKER_IMAGE $DOCKER_PATH
+after_success:
+- docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
+- docker push $DOCKER_IMAGE

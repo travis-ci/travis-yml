@@ -1,0 +1,32 @@
+sudo: false
+language: python
+python:
+  - "2.7"
+env:
+  - TOX_ENV=flake8
+  - TOX_ENV=py27
+install:
+  - pip install virtualenv --upgrade
+  - pip install tox
+script:
+  - tox -e $TOX_ENV
+deploy:
+  - provider: pypi
+    server: https://pypi.python.org/pypi
+    on:
+      branch: pypi-release
+      condition: $TOX_ENV = py27
+    user: cosmo-maint
+    password:
+      secure: "LcBt4ocFlLp0wl2PNYgqvlViMcC8K727Vz7zvHkpvdK1risMPD7ZV0BX6JJR9cdmno4oMr8uyJvXF2FRtNjPq9CNboAiEV7tGuzcE3Hjeeg/+FXmm+Ow8UASuEsMkkNrIVYV6JKs8O2QeK/PIcXNzb8I3Dkoxqf5uXR5QE22lDM="
+  - provider: pypi
+    server: https://testpypi.python.org/pypi
+    on:
+      branch: pypi-test
+      condition: $TOX_ENV = py27
+    user: cosmo-maint
+    password:
+      secure: "E6qldqhRlbROO6WN0cvYxnRpYP8+6V9UtZCEy9oVIeYw2RLM0QpIjg53rHLUk7vvxmovWgNTCcB56PzVUi1cx4WTW5EjYmaEKlTsUoG6NpJYGqJB+j82AttAUs28bg5gTEOxmABtJ8Ct+H2JWbtaOPY2OuWIbuNFKl+zp3rad8c="
+after_deploy:
+  - git clone https://github.com/cloudify-cosmo/travis-utils.git
+  - python travis-utils/validate_pypi.py -v -b $TRAVIS_BRANCH || exit 1

@@ -1,0 +1,19 @@
+sudo: required
+dist: trusty
+language: php
+services:
+- docker
+php:
+- '7.2'
+before_script: composer install
+after_script:
+- docker build -t patrikx3/resume/ .
+notifications:
+  email:
+    recipients:
+    - alabard@gmail.com
+    on_success: change
+    on_failure: change
+env:
+  global:
+    secure: 6vLh9v6sVunwaEavNc096ofX9zGh3Kv5cpKFLcyRe6xHJ+yHdYICWmEp6a915WRZyZNaIyCV8t8TtKQq6wvOQ60Vn5TR/yfkTgXLiigxkyghuQVUSQGPphO1C6q5AJSBruuAB2oKPpI4Pe1ZbEtr+nMchchDYhvurBDEgO6i78Ifi396uHhvvTwU6UsaM6nuu52S0wkfQzCzjk7WmGwMiyAOjkC8JaWddahTNcrcW/nsk/+sIqRp2dNy2y20dv0zpHRj5eJAP/1LJWXF3ATKVKhpboc5eG96xMZ/Vu+FObfUGb1qO5vO4cueLJ5dPr9hq+8LGlMXDfyXn/kBznkXnZKtLIZGp5Wb9ahCaA1QusscoZBQlJowBjdkpJxDoAD4gYCr4gaHijGwrCPM35yxG2yW8zD6XuPNhy+7c7CgjZuH1xI6cwiwYlP38QcttO/1Awg8ahQ/PEsx8ZB59X8jtVXHAObd8x005CgqTvedONAAyS9YDweFv9TZd7YQhgvyVHanHr5ULFzeGxJkuWeXrk1hmexVdY3g40qGCFE+bQb3zWOyu49e/T/dtbN80012rUP3avbAtFGA6X5e6I0OeVMrHmUe1sf46RV8ovT0d7TKI7RSMw3Jvy6VIl89b6TCJq9ZUVFy3tt5WeVAizNznIRLcWE7EgBMfGCEKwbMNno=

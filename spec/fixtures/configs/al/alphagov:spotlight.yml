@@ -1,0 +1,41 @@
+dist: trusty
+sudo: true
+language: node_js
+group: deprecated-2017Q4
+node_js:
+  - "6"
+env:
+  global:
+    - GOVUK_WEBSITE_ROOT_STAGING=https://www-origin.staging.publishing.service.gov.uk
+    - GOVUK_WEBSITE_ROOT_PRODUCTION=https://www.gov.uk
+    - PAAS_USER=pp-deploy@digital.cabinet-office.gov.uk
+    - PAAS_SERVICE=performance-platform-spotlight
+    # PAAS_PASSWORD
+    - secure: VawTvYxefQiTk+Bk3i9RBW8MOGtQ3QzrJvrSJrxTv0yq7SnHLtJbqfC6poSQE/qX90vWSx+8m6dafc3GjJg2XDoTdr2UOqf/jBKqYqZVM9sQeEI4DYyXLOxd2fcDjPPZYhihamdeyu4qxF/DwGrU+7COoNHsMmyZ5n/FjKhYYCk=
+
+notifications:
+  email: false
+
+cache:
+  directories:
+    - node_modules
+
+install:
+  - travis_retry npm install
+
+script:
+  - "npm run test:unit"
+  - "npm run test:functional:ci"
+
+deploy:
+  - provider: script
+    script: APP_GOVUK_WEBSITE_ROOT=$GOVUK_WEBSITE_ROOT_STAGING etc/deploy.sh staging
+    skip_cleanup: true
+    on:
+      branch: staging
+
+  - provider: script
+    script: APP_GOVUK_WEBSITE_ROOT=$GOVUK_WEBSITE_ROOT_PRODUCTION etc/deploy.sh production
+    skip_cleanup: true
+    on:
+      branch: production

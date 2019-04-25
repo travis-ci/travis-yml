@@ -1,0 +1,14 @@
+language: python
+python:
+- 3.6
+before_install:
+- sudo apt-get install libboost-dev
+install: pip install -r requirements.txt
+script:
+- py.test test/unittests.py
+#- make
+notifications:
+  email: false
+env:
+  global:
+    secure: xrFE0SecteSlHd+pjiNtVM8Ukz4utOtI5Hb8Hfi4+2ruhr+qB59Q4enGwX9HNnRAmwygg39Y96LNX3oOmSrNqgED4a0376dltgeTBfjV1Z5HuqNE9RoQ2V5A4ZFc+Obk8d1QbjdRnS+mp3CuxVQNbgpASG/HgJtEjvAMOSZcSIeo5dIdq6bEvZtwD5fVRLSvXW6E/1L1EyZyqVHpIb04uwsRvTl7pvkuaUOMwARdlz8Vkfuo0aBZT51902D70hApd2B0C76pfkCm3BKvGelAntUotEKRridy8uDFwwKOzVsRI1vJF/d2MHCAdu0t+WDDaMkQWRNtss1W5SRDcf7C7ePaOdMkvZJgCn0Vh4JifbPaWw3rFLREnEFHln8KyacRLTEbd7oKxdT4tUoC8HC2Rw75UChnG3iHpmFmFxMximp5cDpV5iVym7sh706xCh1WHQmZjmXtuq/nIXHSKKRKjzSFp0F6NfnZjdDGCtQA99s9exrdT5ee2U0TReivvFv+Zjo6P1jn4nHOpm/57E1n1piGPZeA9P12H2kzzMtHlyKWymIY4FOv9WNJDbNoBNUs52q75h4fAGA4402g1S0EK1cD9OD17AlTUKoYQx6EG3Ycv+bq1+hDEr+U3bquSk9HgoNYTJ3Qz6l3jYAS+6HCIRbLqM2ubMQKKq5pKZ/uzzA=

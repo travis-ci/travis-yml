@@ -1,0 +1,15 @@
+# @Author: Will Scott <willscottuk>
+# @Date:   25/06/2017 16:16
+# @Project: Ambassadr Home Automation
+# @Last modified by:   willscott
+# @Last modified time: 21/01/2018 12:20
+
+language: python
+python:
+  - "3.5"
+install:
+  - pip3 install homeassistant
+script:
+  - hass -c . --script check_config
+before_install:
+  - mv ci_secrets.yaml secrets.yaml

@@ -1,0 +1,30 @@
+sudo: false
+os:
+ - linux
+language: d
+d:
+# - dmd-nightly
+ - dmd-beta
+ - dmd
+
+script:
+  # Tests are neither random- nor parallelizable atm., so use a --single serial thread.
+  - dub test --compiler=$DC -- --single --trace
+
+addons:
+  apt:
+    packages:
+      - libevent-dev
+
+matrix:
+  include:
+    - d: dmd-2.085.0 # the deployment compiler
+      env: COVERAGE=true
+      script:
+        # Tests are neither random- nor parallelizable atm., so use a --single serial thread.
+        - dub test --compiler=$DC --build=unittest-cov -- --single --trace
+      after_success:
+        - bash <(curl -s https://codecov.io/bash)
+  allow_failures:
+   - d: ldc-beta
+   - d: ldc

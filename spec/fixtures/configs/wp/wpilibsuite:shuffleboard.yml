@@ -1,0 +1,38 @@
+sudo: required
+
+services:
+  - docker
+
+language: java
+
+matrix:
+  fast_finish: true
+  include:
+    - os: linux
+      jdk: oraclejdk10
+#    - os: osx
+#      osx_image: xcode8
+
+env:
+  global:
+    - GRADLE_CACHES="/home/travis/.gradle/"
+    - DOCKER_GRADLE_CACHES="/root/.gradle/"
+
+before_install:
+  - docker build -f Dockerfile -t shuffleboard-devel .
+
+install: echo "skip 'gradle assemble' step"
+
+script:
+  # Get the code coverage environment variables to pass to docker
+  # https://github.com/codecov/support/wiki/Testing-with-Docker
+  - ci_env=`bash <(curl -s https://codecov.io/env)`
+  - docker run -it $ci_env -v ${GRADLE_CACHES}:${DOCKER_GRADLE_CACHES} shuffleboard-devel ./.travis.ubuntu.sh
+
+before_cache:
+  - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+  - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+cache:
+  directories:
+    - $HOME/.gradle/caches/
+    - $HOME/.gradle/wrapper/

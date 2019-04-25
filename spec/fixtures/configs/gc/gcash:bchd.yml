@@ -1,0 +1,29 @@
+language: go
+go:
+  - "1.9.7"
+  - "1.10.4"
+  - "1.11.5"
+
+sudo: false
+
+before_install:
+  - >-
+    curl -L -s https://github.com/golang/dep/releases/download/v0.5.0/dep-linux-amd64
+    -o $GOPATH/bin/dep
+  - chmod +x $GOPATH/bin/dep
+  - go get gopkg.in/alecthomas/gometalinter.v2
+  - gometalinter.v2 --install
+
+install:
+  - dep ensure
+  - go install . ./cmd/...
+
+script:
+  - export PATH=$PATH:$HOME/gopath/bin
+  - ./goclean.sh
+
+after_script:
+  - if [ "$TRAVIS_GO_VERSION" = "1.11.5" ] && [ "$TRAVIS_OS_NAME" = "linux" ] && [ "$TRAVIS_TAG" != "" ]; then go get github.com/inconshreveable/mousetrap; fi
+  - if [ "$TRAVIS_GO_VERSION" = "1.11.5" ] && [ "$TRAVIS_OS_NAME" = "linux" ] && [ "$TRAVIS_TAG" != "" ]; then go get github.com/mitchellh/gox; fi
+  - if [ "$TRAVIS_GO_VERSION" = "1.11.5" ] && [ "$TRAVIS_OS_NAME" = "linux" ] && [ "$TRAVIS_TAG" != "" ]; then go get github.com/tcnksm/ghr; fi
+  - if [ "$TRAVIS_GO_VERSION" = "1.11.5" ] && [ "$TRAVIS_OS_NAME" = "linux" ] && [ "$TRAVIS_TAG" != "" ]; then make compile; ghr --username gcash --token $GITHUB_TOKEN --replace $TRAVIS_TAG pkg/; fi

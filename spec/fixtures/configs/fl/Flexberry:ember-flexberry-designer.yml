@@ -1,0 +1,54 @@
+---
+language: node_js
+node_js:
+  - "6"
+
+sudo: required
+dist: trusty
+
+addons:
+  chrome: stable
+
+cache:
+  yarn: true
+  directories:
+    - $HOME/.npm
+    - $HOME/.cache
+
+env:
+  global:
+    # See https://git.io/vdao3 for details.
+    - JOBS=1
+  matrix:
+    # we recommend new addons test the current and previous LTS
+    # as well as latest stable release (bonus points to beta/canary)
+    - EMBER_TRY_SCENARIO=ember-default
+    - EMBER_TRY_SCENARIO=ember-release
+
+matrix:
+  fast_finish: true
+  allow_failures:
+    - env: EMBER_TRY_SCENARIO=ember-release
+
+before_install:
+  - sudo chown root /opt/google/chrome/chrome-sandbox
+  - sudo chmod 4755 /opt/google/chrome/chrome-sandbox
+  - yarn global add ember-cli@3.1.4
+  - yarn global add bower
+  - google-chrome-stable --headless --disable-gpu --no-sandbox --remote-debugging-port=9222 http://localhost &
+
+install:
+  - yarn install --no-lockfile
+  - bower install
+
+script:
+  - npm run lint:js
+  # Usually, it's ok to finish the test scenario without reverting
+  #  to the addon's original dependency state, skipping "cleanup".
+  - node_modules/.bin/ember try:one $EMBER_TRY_SCENARIO --skip-cleanup
+
+after_script:
+  - test $EMBER_TRY_SCENARIO == "default" && test $TRAVIS_PULL_REQUEST == "false" && (test $TRAVIS_BRANCH == "master" || test $TRAVIS_BRANCH == "develop" || test $TRAVIS_BRANCH == "dummy-test")  && ember build --gh-pages --gh-pages-branch=$TRAVIS_BRANCH && bash scripts/deploy-to-gh-pages.sh
+  - npm config set spin false
+  - npm install -g npm@4
+  - npm --version

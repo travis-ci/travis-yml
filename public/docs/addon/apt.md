@@ -2,24 +2,20 @@
 
 
 
-## Type
+## Types
 
-Any of:
-
-* Map (Hash)
-* 
+* Hash
+* Array of: String
+* String
 * Boolean
 
-## Flags
-
-None.
 
 
 ## Examples
 
 ```yaml
 apt:
-  packages: "[ref:strs]"
+  packages: string
   dist: string
   update: true
 ```
@@ -53,7 +49,13 @@ apt:
 ```
 
 ```yaml
-apt: "[ref:strs]"
+apt:
+- string one
+- string two
+```
+
+```yaml
+apt: string
 
 ```
 

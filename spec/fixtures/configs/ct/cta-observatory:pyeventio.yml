@@ -1,0 +1,54 @@
+language: python
+
+env:
+  global:
+    - secure: "Q4Au2/8QmW1x5KQme6WPXz0uLJHrYuQR/MhjgU2k74tfcaObOl/frE3hyrCBoMHMS6mAwjPmkCNO1YsuiFs2SU0ruFRKEJnc6fNyl1+w+GBFOPRC7BrmZtcbrpDtK50F9Fy0KQze0C6Rxkf/Db+wVsCCUI0nqN8zqJLKHjD6xJcpV+u7wqaJdzpvPRpXifOWu6j4EoqW1KxP5Kmm4tgYKSdF9wxMPBM7B7BeCO4jmyqV93DB3l47NrLdhJIcj3/cjYoVcu+tcsQrLcFqw8AjaDDOeNca3bpddUZnPs38h56dLes2wjuFbJwauTIhAWiYeWQlaq6y20KHN9Dz3iW+8GgrDXPIF+59TuUOL5PkSY1PuzRYP9g4YpvXAbVGxtSC6/3m3ViLDbD7Q0i2kbcPBlL/iOgnuzvwauJyWbuP+6dKEwcU1EuFX9wRoS1ZubBEYgZXNoqDwNIWshDZjmOTzkSIJaN4M7JEtt8IKez9TOdbvGWB/tizEGaar1t+NnPwYlgwezfX217h79UKmn0/MH2+/tgqwadJ/xO7EfyZEckvT5WdS6cNlPGhby9HoIg4uO/NU3YH9WTEs7jltJ61LZJIrR4wpODnudFcm1aFFRkVxl5iUzeXYlo3kNATOymfrHXnxYRloZ2ZM7jltJSppEU1zux0pgjdHwTE0QBKEXk="
+
+matrix:
+  include:
+    - os: linux
+      python: "3.5"
+    - os: linux
+      python: "3.6"
+    - os: linux
+      dist: xenial
+      python: "3.7"
+    - os: osx
+      language: generic
+      env: PYTHON="3.5"
+    - os: osx
+      language: generic
+      env: PYTHON="3.6"
+    - os: osx
+      language: generic
+      env: PYTHON="3.7"
+
+
+install:
+  - source .travis/install.sh
+  - which pip
+
+  - pip install zstandard docutils pygments Cython
+  - pip install https://github.com/cta-observatory/pyhessio/archive/v2.1.1.tar.gz
+  - pip install .
+
+before_script:
+  - pip install --upgrade pytest>=3.0.0
+  - source ./download_test_files.sh
+
+script:
+  - python setup.py test
+  - python setup.py check -r -s
+
+deploy:
+  - provider: pypi
+    distributions: sdist
+    skip_existing: true
+    skip_cleanup: true
+    user: cta-observatory
+    password:
+      secure: Ne3Rf08D32yP5+w96yRk/YwVIwCQLvtld7cxRxoD4mtzs5Xmc9PTIG+dVGOMzEM9auMptg0xCg/Zcs11JA/k8yLWWhqhXGi0tJ2+cA41tK0T8/It5YszW3n9zjc2hrxDClh660BGkR90nCcbWaQRrcfz9ARGJD8f11STu+7Jpr/GjLZurJPwKPmKfcHzwp8Juxp/pcUuGj8/lC/PSOXXota9fKSV0ZZfRshnyhlQmySmcVoOow0whUp7rQt5pZODd2IaNsoxIK2hG70+K5TK1VbCJuJ9bEgWGmW1WgAS7FebKYg4tcFjIDJ4RCfEgzj/0pydYdTWhwnYnkO7xT6RHtRhx4f2m2EaBKd9VMC6olzICacpXRKyFY0FX/JRj6ZrOYM/QOcZnRCY3ikuVkYo/E8RQX+hddc8IM5b7vX8jIIyS6XXT3zI7eJuP0AvGgmNjvuuv87RCd53HS6V8WuMC9gG28nlxJomIENG748gWYUBp4Jge0TbyF7iJkEo0eH27xO8Pu1PEI6iLGA9/YXdBsirfP1hZVbrXhtItQ7UUEi13cowWNsmMeGAP0EreRIH5R74y1UXnbvpKeRapXl4C/Ka7Gce95Ajytd+tFdxk2QqIpOeXu5m/L2COgaIjXu9exq0CjKnUjMpVrECVgCT4lEfa0OPTdMLcBVoBohlfA4=
+    on:
+      branch: master
+      tags: true
+      condition: $TRAVIS_PYTHON_VERSION = "3.7"

@@ -1,0 +1,33 @@
+#
+# Travis CI
+# A distributed continuous integration service used to build and test projects hosted at GitHub.
+#
+# https://docs.travis-ci.com/
+# https://docs.travis-ci.com/user/getting-started
+# https://docs.travis-ci.com/user/customizing-the-build
+# https://docs.travis-ci.com/user/environment-variables
+# https://docs.travis-ci.com/user/languages/javascript-with-nodejs
+#
+sudo: false
+language: node_js
+node_js:
+  - "10"
+
+cache:
+  directories:
+    - node_modules
+
+before_install:
+  - echo "//registry.npmjs.org/:_authToken=\${NPM_TOKEN}" > .npmrc
+  - npm config set @fortawesome:registry https://npm.fontawesome.com/$FA_TOKEN
+
+before_script:
+  - npm run lint
+  - npm run flow
+  - npm run test:travis
+
+script:
+  - npm run build:prod
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)

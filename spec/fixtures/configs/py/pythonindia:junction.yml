@@ -1,0 +1,40 @@
+language: python
+sudo: false
+python:
+- '2.7'
+- '3.4'
+- '3.5'
+addons:
+  postgresql: "9.3"
+
+cache:
+  directories:
+  - $HOME/.pip-cache/
+
+install:
+  - pip install pip==9.0.1
+  - pip install -r requirements-dev.txt --allow-all-external
+  - pip install coveralls
+  - pip install --upgrade pytest
+
+env:
+  - DJANGO_SETTINGS_MODULE="settings.test_settings"
+
+script:
+- flake8
+- pytest --cov -v --tb=native
+- coverage report -m
+
+after_success:
+  coveralls
+
+notifications:
+  email:
+    on_success: change  # [always|never|change]
+    on_failure: always  # [always|never|change]
+
+services:
+  - redis-server
+
+before_script:
+  - celery -A junction worker -l info &

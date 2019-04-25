@@ -1,0 +1,35 @@
+language: c
+
+env:
+    global:
+        - NUMPY_VERSION=1.8 
+        - OMP_NUM_THREADS=1
+        - secure: "pC2X49Av9OlrMuMJ8ypmRe3t03hc9Kn2u43syoG/P2NkSvPi8FKZqnTNlDk5UaTeZ3wnWDTM/PcmBqGqlyyMNv85+v/+yej1igzHT4kaI7kr0s0yu8o5lklfQMx9lSHNlj2JD/SRLrw/PIbBUDGGTWpVxiWw6m+AviaxAF9ULU36seDVv6Zt+u1/ApuSz34VKie+z7WCNs64mK2h47sJks5XHMGDjJ9Svrmjx2dh+93kFxL1kkdSe8GqRZ+Otzb5Zt/Ip7kI1z5BrFE0tD8mHwBWC21vZuFCv70DwPY47Hn84wyUXtqzy9K+2NulqW2Iz359bkfkPe/+QHoeNMgvLmilLbzUrR5KNPdI/hDnvu62ybwNWyrThDjd1j6vJdD6gNJyLhj3+BuwgrmdxIUADKR4Sh/Q297AJsCtRBCOvALNc81By8By1/bv9tr9pJJno4fRpyLqeUb8UVlvZS+j1+sd1d4C4sQNjOXkK4Jc+3t0Lfv2DL7OYMzBpmsiLkCgdjySJHrUrX0tclEJ+lQ6dGccjrGG1muAiePstmPH5GkeTYJMuU1hOQ8H7KEkDpT12ZUJFttyq3RlB34vQhNF0dzYlHk+GaWJhxlG3mHrCdLZFWyakX87NpaS1OmB2gv4L9TriLi71jg1fs0XUnE1auD+10XKr8Lg7rc3LshrGB4="
+
+cache:
+    - directories:
+        - ${TRAVIS_BUILD_DIR}/depends/install
+        - ${TRAVIS_BUILD_DIR}/depends/download
+        - ${TRAVIS_BUILD_DIR}/depends/src
+
+addons:
+    apt:
+        packages:
+            - libopenmpi-dev
+            - openmpi-bin
+            - libgsl0-dev
+            - elfutils
+#            - python-numpy
+#            - python-matplotlib
+
+install:
+    - cp Makefile.travis Makefile.local
+    - make
+
+script:
+    - pushd tests
+    - bash runtests.sh
+#    - python plottests.py
+    - popd
+
+# after_success: ./update-ghpages.sh

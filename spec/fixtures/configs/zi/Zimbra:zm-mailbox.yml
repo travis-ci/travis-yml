@@ -1,0 +1,23 @@
+sudo: required
+
+language: java
+
+jdk:
+  - oraclejdk8
+
+java:
+
+c++:
+
+before_install:
+  - sudo apt-get update -qq
+  - sudo apt-get -y install ant ant-optional
+
+install: 
+
+script:
+  - mkdir -p ${HOME}/.zcs-deps/
+  - mkdir -p ${HOME}/.ivy2/cache
+  - wget https://files.zimbra.com/repository/ant-contrib/ant-contrib-1.0b1.jar                           -O ${HOME}/.zcs-deps/ant-contrib-1.0b1.jar
+  - wget https://files.zimbra.com/repository/ant-1.7.0-ziputil-patched/ant-1.7.0-ziputil-patched-1.0.jar -O ${HOME}/.zcs-deps/ant-1.7.0-ziputil-patched-1.0.jar
+  - ant -Dzimbra.buildinfo.version=1.1.1_GA_1000 test-all

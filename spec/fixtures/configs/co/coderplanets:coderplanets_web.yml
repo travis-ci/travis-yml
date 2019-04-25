@@ -1,0 +1,44 @@
+language: elixir
+elixir:
+  - 1.8
+otp_release:
+  - 21.0
+addons:
+  postgresql: '9.4'
+
+before_install:
+  - sudo chown -R travis ./travis/install_node.sh
+  - sudo chmod +x ./travis/install_node.sh
+  - ./travis/install_node.sh
+  - npm install -g @commitlint/travis-cli > /dev/null
+
+install:
+  # web related
+  - npm install > /dev/null
+  # - npm install -g codecov
+  - commitlint-travis
+  # elixir/phoenix env
+  - mix local.rebar --force > /dev/null
+  - mix local.hex --force > /dev/null
+
+before_script:
+  - sudo chown -R travis ./travis/pull_server.sh
+  - sudo chmod +x ./travis/pull_server.sh
+  - ./travis/pull_server.sh
+
+script:
+  # - codecov
+  - nvm exec 10.10 npm run test:ci
+
+cache:
+  directories:
+    - ~/.cache
+    - node_modules
+    - _build
+    - dep
+
+notifications:
+  email:
+    on_failure: change
+
+# after_success: 'npm run coveralls'

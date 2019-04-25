@@ -1,0 +1,87 @@
+addons:
+  chrome: stable # https://docs.travis-ci.com/user/chrome
+  apt:
+    update: true
+    sources:
+      - sourceline: 'ppa:kirillshkrogalev/ffmpeg-next'
+    packages:
+      - libfreetype6-dev
+      - ffmpeg
+
+# Chrome Webdriver fails if not on sudo
+# See https://github.com/travis-ci/travis-ci/issues/8836
+sudo: true
+
+dist: trusty # Chrome driver fails if not trusty dist
+
+notifications:
+  email: false
+
+language: python
+
+cache:
+  directories:
+    - "$HOME/.cache/pip"
+    - "$HOME/.nvm"
+
+services:
+  - docker
+
+matrix:
+  fast_finish: true
+  allow_failures:
+    # To allow failures, you need to specify the full environment
+    - env: REQUIREMENTS=devel
+env:
+  global:
+    # Print screenshots to console output
+    - E2E_OUTPUT=base64
+    # Enable end-to-end tests
+    - E2E=no
+  matrix:
+    - REQUIREMENTS=prod
+    # - REQUIREMENTS=prod E2E="yes"
+    - REQUIREMENTS=qa
+    # - REQUIREMENTS=qa E2E="yes"
+    - REQUIREMENTS=devel
+    # - REQUIREMENTS=devel E2E="yes"
+
+python:
+  - '2.7'
+  - '3.6'
+
+before_install:
+  # Stop default travis services
+  - "sudo service mysql stop"
+  - "sudo service postgresql stop"
+  # Start docker services
+  - "docker-compose up -d"
+  # Chrome webdriver for Selenium
+  - "PATH=$PATH:$HOME/webdrivers"
+  - "if [ ${E2E} == 'yes' ] && [ ! -f $HOME/webdrivers/chromedriver ]; then wget https://chromedriver.storage.googleapis.com/2.31/chromedriver_linux64.zip -P $HOME/webdrivers; unzip -d $HOME/webdrivers $HOME/webdrivers/chromedriver_linux64.zip; fi"
+  - "nvm install 6; nvm use 6"
+  - "travis_retry pip install --upgrade pip setuptools py"
+  - "travis_retry pip install twine wheel coveralls requirements-builder"
+  - ./.travis-requirements-build.sh
+install:
+  - ./scripts/bootstrap .travis-${REQUIREMENTS}-requirements.txt
+before_script:
+  # https://docs.travis-ci.com/user/gui-and-headless-browsers/
+  - "export DISPLAY=:99.0"
+  - "if [ ${E2E} == 'yes' ]; then sh -e /etc/init.d/xvfb start; sleep 3; fi"
+  # Allow services running inside docker to start
+  - "./docker/wait-for-services.sh"
+script:
+  - if [ ${E2E} == 'yes' ]; then py.test tests/e2e/; else ./run-tests.sh; fi
+after_success:
+  - coveralls
+deploy:
+  provider: pypi
+  user: egabancho
+  password:
+    secure: b7/R6MCzZGQXbJq0si2epfaYmKMDnYRgbAQtkxNa1rcjqAh1coFVFomgZ25A2HFQyKmqClLfTfmbkb0oa4O+veLkS+W26d4awsYBcZeLt5YS4kdQAsuNtMiVCOlmCNLpnpfFSY4hisgIPi6WIiUNLAOamK607F6MElgriKLPPDo=
+  on:
+    tags: true
+    distributions: sdist bdist_wheel
+    repo: CERNDocumentServer/cds-videos
+    branch: cdslabs

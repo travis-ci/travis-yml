@@ -1,0 +1,25 @@
+language: node_js
+node_js:
+  - "6.5.0"
+services:
+  - redis-server
+  - postgresql
+before_script:
+  - "export DISPLAY=:99.0"
+  - "sh -e /etc/init.d/xvfb start"
+  - sleep 3
+before_install:
+  - psql -c 'create database ce100_test;' -U postgres
+  - pip install --user codecov
+  - $CXX --version
+after_success:
+  - codecov --file coverage/lcov.info --disable search
+env:
+  global:
+    - CXX=g++-4.8
+addons:
+  apt:
+    sources:
+    - ubuntu-toolchain-r-test
+    packages:
+    - g++-4.8

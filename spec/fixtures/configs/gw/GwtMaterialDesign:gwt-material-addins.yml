@@ -1,0 +1,25 @@
+sudo: false
+language: java
+jdk:
+- oraclejdk8
+cache:
+  directories:
+  - $HOME/.m2
+before_install:
+# install the gwt-material-jquery library before we build the demo
+- git clone -b release_2.2 https://github.com/GwtMaterialDesign/gwt-material-jquery.git
+- cd gwt-material-jquery
+- mvn install -DskipTests=true -DdryRun=true
+- cd ..
+# install the gwt-material library before we build the demo
+- git clone -b release_2.2 https://github.com/GwtMaterialDesign/gwt-material.git
+- cd gwt-material
+- mvn install -DskipTests=true -DdryRun=true
+- cd ..
+install: true
+before_script:
+ - chmod +x .utility/*
+script:
+- mvn clean install -DdryRun=true -DskipTests=true
+after_success:
+- .utility/deploy.sh

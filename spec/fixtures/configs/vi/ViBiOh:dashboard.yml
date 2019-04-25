@@ -1,0 +1,65 @@
+jobs:
+  include:
+  - stage: Build
+
+    sudo: required
+    services:
+    - docker
+    script: |
+      make doc
+      docker build -t vibioh/$(make name)-api:$(make version) -f Dockerfile_api .
+    after_success: |
+      echo ${DOCKER_PASS} | docker login -u vibioh --password-stdin
+      docker push vibioh/$(make name)-api:$(make version)
+
+  - stage: Build
+
+    sudo: required
+    services:
+    - docker
+    script: docker build -t vibioh/$(make name)-ui:$(make version) -f Dockerfile_ui .
+    after_success: |
+      echo ${DOCKER_PASS} | docker login -u vibioh --password-stdin
+      docker push vibioh/$(make name)-ui:$(make version)
+
+  - stage: Test
+
+    language: go
+    sudo: required
+    services:
+    - docker
+    go: '1.12'
+    env:
+    - DOCKER_COMPOSE_VERSION=1.23.2
+    before_install:
+    - sudo rm /usr/local/bin/docker-compose
+    - curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-$(uname -s)-$(uname -m) > docker-compose
+    - chmod +x docker-compose
+    - sudo mv docker-compose /usr/local/bin
+    script: ./e2e.sh
+
+  - stage: Publish
+
+    sudo: required
+    services:
+    - docker
+    script: |
+      echo ${DOCKER_PASS} | docker login -u vibioh --password-stdin
+      docker pull vibioh/$(make name)-api:$(make version)
+      docker tag vibioh/$(make name)-api:$(make version) vibioh/$(make name)-api:latest
+      docker push vibioh/$(make name)-api:latest
+      docker pull vibioh/$(make name)-ui:$(make version)
+      docker tag vibioh/$(make name)-ui:$(make version) vibioh/$(make name)-ui:latest
+      docker push vibioh/$(make name)-ui:latest
+    after_success: |
+      curl -s -X POST https://goreportcard.com/checks?repo=github.com/ViBiOh/dashboard
+      curl -X POST --data-urlencode "gitUrl=git@github.com:ViBiOh/dashboard.git" https://doc.esdoc.org/api/create
+
+stages:
+  - Build
+  - Test
+  - name: Publish
+    if: branch = master
+
+notifications:
+  email: false

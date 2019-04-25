@@ -1,0 +1,18 @@
+---
+
+dist: xenial
+sudo: required
+
+language: c
+
+install:
+  - sudo add-apt-repository ppa:vala-team -y
+  - sudo add-apt-repository ppa:vala-team/next -y
+  - sudo apt-get update -qq
+  - sudo apt-get install -y -qq valac libvala-0.44-dev valadoc libvaladoc-0.44-dev libgee-0.8-dev unzip
+  - "bash -c 'source ~/.nvm/nvm.sh; nvm install 10'"
+  - "bash -c 'source ~/.nvm/nvm.sh; nvm use 10; npm ci'"
+
+script:
+  - "bash -c 'source ~/.nvm/nvm.sh; nvm use 10; npm test'"
+  - make build-docs-mini || (cat LOG; false)

@@ -1,0 +1,25 @@
+language: php
+php:
+  - 7.2
+  - 7.1
+  - 7.0
+  - 5.6
+  - 5.5
+  - 5.4
+  - hhvm-4.0.0
+  - hhvm-3.30
+  - hhvm-3.27
+  - hhvm-3.24
+sudo: false
+dist: trusty
+install:
+  - composer install --dev
+script: vendor/phpunit/phpunit/phpunit Tests
+matrix:
+  allow_failures:
+    - php: hhvm-4.0.0
+    - php: hhvm-3.24
+    - php: 7.0
+    - php: 5.6
+    - php: 5.5
+    - php: 5.4

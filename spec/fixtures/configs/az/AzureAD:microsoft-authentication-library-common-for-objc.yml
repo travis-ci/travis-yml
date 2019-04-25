@@ -1,0 +1,22 @@
+language: objective-c
+osx_image: xcode10
+
+# Set up our rubygems (slather and xcpretty, namely)
+install: 
+ - gem install xcpretty -N
+ 
+before_script:
+# Tell the shell to echo failure codes up the pipe so that Travis will properly fail the
+# build when the xcodebuild command fails
+  - set -o pipefail
+
+script:  
+  - ./build.py --no-clean --show-build-settings
+
+after_failure:
+  - ./print_logs.sh
+
+notifications:
+  slack:
+    secure: BIziStN+8QJLjdqNbLyRWWw9kI/MQsX+rZq+xz/bfTANk0gbEryLgMSiEoHxdoctu0dOqOet1voYuDKs3RQW3W0yh0AhDwVgWThNkTA0oDXF8zqm9AXettXNtmYHipaYb6+z6L4lpJOkClQp3hAheu8cM2igqye1O0FQla9g/PA=
+

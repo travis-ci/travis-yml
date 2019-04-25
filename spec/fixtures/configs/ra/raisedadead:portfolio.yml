@@ -1,0 +1,25 @@
+language: node_js
+node_js:
+- lts/*
+cache:
+  npm: true
+  directories:
+  - "~/.cache"
+env:
+  global:
+  - NO_UPDATE_NOTIFIER=1
+  - NODE_NO_WARNINGS=1
+  - secure: PyfqULJ9Si3XMm9IguYEAuVn3lNzpz4vZBOqwvigy+wKZakg/3cEkZ623S4xtAnmNbpFqExQe0CoC5cgEYXzM+sFzij4bSWiuaua1E/T4RwdJp/dCDVcYrNh/YWkkH6EUTJU9mqfhjQz+2pPfJxbVgxDmiVk6bvQd5Owh2amxb1jaX9fxYiziNe/WotEiVMPdI7GoyLZwC/BQN4bqtdETIF484buozik+fzRXKzFHa5Wq1cB1ymcQRFnHJWrtpa5Ox1ns6kRH0XWymgbRH8BsN5Te1fR72NKTORJUrLcm/P19sIMnsFjfyZd1r6VbwLCkurmjRxICVGKEYNoGjs5BkPe4mO8QHLQu45TexsbSUb5gUp9mL75b/q1WQpSzFroijNVtuiP/44YX3zcEuhlob6BpHb1/bCMJQsD6W2FyWMp457ZIpXy9TPNFevamViG0M1tapreq7K+DCGsEGkOS6uinkf+Z9k9JCezT9Dd/AfK1Ytv/r62XOhcYvaq4zUBzlGF4bceMHUIH5Fajk6e+7BpW01Xei9krXecXgB80ELz7TJ+2nyKDfgDXKMKE+d/72Pr+0LpXe0gP84grKWC+TzNbjyNMEuWjybtlvXtOCnPjFDLxdX6yOgP4BkAntibW6sx7xZb0P9+szlieGIN/53GtgAwU8EFTT9atMiU4ik=
+  - secure: XanORYqjjHCkTX19kw4HeEbCcmeIwqhHTTeDV1RsMThAiNFCtO09tiFs5F590c3ZV/IP1VSSsKx3vLgVzuS4zqV7C8OKu/o3Aeyp8KnBvt/SORanMgFi//sWTTabTkPklVMxUvmdSFb+oztILFLnA648MDebXC0y51SbzqTvs0cnYGZGagPohWnmns7L91oJYE6JZF+VWyq+5xITTlS5jGaIyn6sFp3XJQvn8Y+zmonnjDW8GzhOrguP6GwtsShmkQ6bOBFy3v5S0nxoxFIIDSoQ0HqgXyMym+m7mBrwztHlMHpeNhaEo0HzA9hnE21huZ4KugY2rX/DcX5M4daBg9EZx1DcPn4nDg34U32Fnc+eykb+K6dd6cv4GZZmmc+LLx4rc5504voTiTfMFqSVg8kSEXZ83I564JmALP06lgVY/kyf6Vuer4pW4QCgVEJ7w53xs+jYDYewVNTyPaKRTi0Aiz94au3rJD09uMGeMRQTZrckZ8seKkKbnf59C3xSRMatg7ivZSt4VLP1zQHLlD3Ow29iBoinPr0dzi/IYVnKcSMhJlgsKVxj5S2LMEs6U7rntv3AJhGWwGaXGkiomyV9qQeWz61oD4QwSvCwqmoXaOY+DdV1pdkQebqIZ06EKVQhK32GJfIp9TbsfDWSuZ3QT+rfZ3xny42shcXTpls=
+before_install:
+- npm config set loglevel warn
+- npm install -g greenkeeper-lockfile@1
+- npm install -g codecov
+install: npm install
+before_script: greenkeeper-lockfile-update
+script:
+- npm run lint
+- npm run build
+- npm run test
+- codecov
+after_script: greenkeeper-lockfile-upload

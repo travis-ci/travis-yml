@@ -1,0 +1,31 @@
+language: python
+
+sudo: required
+
+python:
+    - "3.5"
+    - "3.6"
+
+before_script:
+    - sleep 10
+
+install: pip install -r requirements/testing.txt
+
+before_install:
+    - echo "Fetching and installing elasticsearch 1.7"
+    - curl -O https://download.elastic.co/elasticsearch/elasticsearch/elasticsearch-1.7.3.deb && sudo dpkg -i --force-confnew elasticsearch-1.7.3.deb && sudo service elasticsearch start
+    - echo ""
+    - echo "Fetching and installing BLAST"
+    - wget ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/2.2.30/ncbi-blast-2.2.30+-x64-linux.tar.gz
+    - tar -zxvf ncbi-blast-2.2.30+-x64-linux.tar.gz | tail
+    - export PATH="${TRAVIS_BUILD_DIR}/ncbi-blast-2.2.30+/bin:$PATH"
+    - psql -c 'create database travis_ci_test;' -U postgres
+
+script: make coverage
+
+after_success: coveralls
+
+notifications:
+  email:
+    on_success: never
+    on_failure: always

@@ -1,0 +1,31 @@
+sudo: required
+language: python
+python:
+- '2.7'
+addons:
+  apt:
+    packages:
+    - docker-ce
+branches:
+  only:
+  - master
+install:
+- git remote -v
+script:
+- "./get_image.sh"
+before_install:
+- export start_time=$(date +%s)
+- mkdir -p ~/.docker
+- mkdir -p ~/.ssh
+- openssl aes-256-cbc -K $encrypted_1fc90f464345_key -iv $encrypted_1fc90f464345_iv -in .travis/config.tar.gz.enc -out ~/config.tar.gz -d 
+- tar zxf ~/config.tar.gz -C ~
+- mv ~/config.json ~/.docker/
+- mv ~/id_rsa ~/.ssh/
+- chmod 600 ~/.ssh/id_rsa
+- chmod 600 ~/.docker/config.json
+- eval $(ssh-agent)
+- ssh-add ~/.ssh/id_rsa
+- df -h
+#before_install:
+#- openssl aes-256-cbc -K $encrypted_1fc90f464345_key -iv $encrypted_1fc90f464345_iv
+#  -in config.tar.gz.enc -out config.tar.gz -d

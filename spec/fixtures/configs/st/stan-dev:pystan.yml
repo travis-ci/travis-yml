@@ -1,0 +1,31 @@
+language: c
+dist: xenial
+sudo: required
+os:
+  - linux
+git:
+  submodules: false
+services:
+  - xvfb
+before_install:
+  - git submodule update --init --recursive
+compiler:
+  - clang
+  - gcc
+env:
+  - TRAVIS_PYTHON_VERSION=2.7 TESTS_EXCLUDE_RE='^test_[a-p].*\.py'
+  - TRAVIS_PYTHON_VERSION=3.5 TESTS_EXCLUDE_RE='^test_[a-p].*\.py'
+  - TRAVIS_PYTHON_VERSION=3.6 TESTS_EXCLUDE_RE='^test_[a-p].*\.py'
+  - TRAVIS_PYTHON_VERSION=3.7 TESTS_EXCLUDE_RE='^test_[a-p].*\.py'
+  - TRAVIS_PYTHON_VERSION=2.7 TESTS_EXCLUDE_RE='^test_[^a-p].*\.py'
+  - TRAVIS_PYTHON_VERSION=3.5 TESTS_EXCLUDE_RE='^test_[^a-p].*\.py'
+  - TRAVIS_PYTHON_VERSION=3.6 TESTS_EXCLUDE_RE='^test_[^a-p].*\.py'
+  - TRAVIS_PYTHON_VERSION=3.7 TESTS_EXCLUDE_RE='^test_[^a-p].*\.py'
+notifications:
+  email:
+    recipients:
+      - stan-buildbot@googlegroups.com
+    on_success: change
+    on_failure: always
+install: source continuous_integration/install.sh
+script: bash continuous_integration/test_script.sh --exclude="$TESTS_EXCLUDE_RE"

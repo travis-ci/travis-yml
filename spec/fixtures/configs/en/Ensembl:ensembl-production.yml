@@ -1,0 +1,58 @@
+language: perl
+
+perl:
+  - '5.14'
+
+env:
+  - COVERALLS=true  DB=mysql
+
+sudo: false
+
+addons:
+  apt:
+    packages:
+      - unzip
+      - sendmail
+      - graphviz
+      - emboss
+
+before_install:
+- echo "TRAVIS_BRANCH=$TRAVIS_BRANCH"
+- export ENSEMBL_BRANCH=master
+- if [[ $TRAVIS_BRANCH =~ ^release\/[0-9]+$ ]]; then export ENSEMBL_BRANCH=$TRAVIS_BRANCH; fi
+- echo "ENSEMBL_BRANCH=$ENSEMBL_BRANCH"
+- git clone --branch $ENSEMBL_BRANCH --depth 1 https://github.com/Ensembl/ensembl-test.git
+- git clone --branch $ENSEMBL_BRANCH --depth 1 https://github.com/Ensembl/ensembl.git
+- git clone --branch master --depth 1 https://github.com/Ensembl/ensembl-hive.git
+- git clone --branch $ENSEMBL_BRANCH --depth 1 https://github.com/Ensembl/ensembl-compara.git
+- git clone --branch master --depth 1 https://github.com/Ensembl/ensembl-datacheck.git
+- git clone --branch $ENSEMBL_BRANCH --depth 1 https://github.com/Ensembl/ensembl-variation.git
+- git clone --branch master --depth 1 https://github.com/Ensembl/ensembl-orm.git
+- git clone --branch master --depth 1 https://github.com/Ensembl/ensembl-taxonomy.git
+- git clone --branch $ENSEMBL_BRANCH --depth 1 https://github.com/Ensembl/ensembl-metadata.git
+- git clone --branch $ENSEMBL_BRANCH --depth 1 https://github.com/Ensembl/ensembl-funcgen.git
+- git clone --branch 1.9 --depth 1 https://github.com/samtools/htslib.git
+- git clone --branch release-1-6-924 --depth 1 https://github.com/bioperl/bioperl-live.git
+- cd htslib
+- make
+- export HTSLIB_DIR=$(pwd -P)
+- cd ..
+
+install:
+- cpanm -v --installdeps --with-recommends --notest --cpanfile ensembl/cpanfile .
+- cpanm -v --installdeps --notest --cpanfile ensembl-hive/cpanfile .
+- export PERL5LIB=$PERL5LIB:$PWD/bioperl-live
+- cpanm -v --installdeps --notest .
+- cpanm -n Devel::Cover::Report::Coveralls
+- cp travisci/MultiTestDB.conf.travisci  modules/t/MultiTestDB.conf
+- mysql -u root -h localhost -e 'GRANT ALL PRIVILEGES ON *.* TO "travis"@"%"'
+
+script: ./travisci/harness.sh
+
+
+notifications:
+  email:
+    on_success: always
+    on_failure: always
+  slack:
+    secure: BkrSPAkOM5aTOpeyO9vZnHdZ0LF1PLk0r2HtcXN2eTMyiHoGXkl6VUjdAL8EkzI4gunW2GProdSIjHpf60WdiEmKAulMdJRI+xyUbuxnY31mwiikS9HYwqmPBbMTf0Mh2pMBngZRFs+gaFZDUMTfLfp+8MQfU1R54yb6hPuVt5I=

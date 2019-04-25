@@ -1,0 +1,26 @@
+language: go
+services: mysql
+
+before_script:
+  - mysql -e 'create database bouncer_test;'
+  - mysql bouncer_test < ./fixtures/schema.sql
+  - mysql bouncer_test < ./fixtures/data.sql
+
+install: true
+
+go:
+  - 1.11
+
+script:
+  - |
+    set -e
+    echo > coverage.txt
+    for package in go-bouncer/{,mozlog,bouncer}; do
+      go test -v -covermode=atomic -coverprofile=profile.out "github.com/mozilla-services/${package}"
+      if [ -f profile.out ]; then
+        cat profile.out >> coverage.txt
+      fi
+    done
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)

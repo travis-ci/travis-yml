@@ -1,0 +1,20 @@
+language: node_js
+node_js: 10
+
+sudo: false
+dist: trusty
+
+addons:
+  chrome: stable
+
+cache:
+  yarn: true
+
+env:
+  global:
+    # See https://git.io/vdao3 for details.
+    - JOBS=1
+
+script:
+  - yarn lint:js
+  - yarn test

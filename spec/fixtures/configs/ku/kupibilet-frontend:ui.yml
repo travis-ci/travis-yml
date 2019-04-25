@@ -1,0 +1,48 @@
+sudo: false
+
+language: node_js
+node_js:
+- stable
+
+notifications:
+  email:
+    on_success: never
+    on_failure: change
+
+git:
+  depth: 2
+
+cache:
+  yarn: true
+
+before_install:
+  - curl -o- -L https://yarnpkg.com/install.sh | bash
+  - export PATH=$HOME/.yarn/bin:$PATH
+
+script:
+  - yarn test
+
+after_success:
+  - scripts/after-success.sh || exit $?
+
+before_deploy:
+  - yarn build-storybook
+  - yarn global add makeshift && makeshift -r registry.npmjs.org
+
+deploy:
+  - provider: npm
+    email: v7rulnik@gmail.com
+    skip_cleanup: true
+    api_key: $NPM_TOKEN
+    on:
+      tags: true
+      branch: master
+      repo: kupibilet-frontend/ui
+
+  - provider: pages
+    local_dir: storybook-static
+    skip_cleanup: true
+    github_token: $GITHUB_TOKEN
+    on:
+      branch: master
+      tags: false

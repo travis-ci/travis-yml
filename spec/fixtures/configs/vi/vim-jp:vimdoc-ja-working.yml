@@ -1,0 +1,27 @@
+language: go
+go: 1.7.3
+dist: trusty
+sudo: false
+
+addons:
+  apt:
+    packages:
+      - vim-nox
+
+env:
+  global:
+    - secure: "g0hqLiJqtBEmQG7wg4zgc/nR+TWBn5TL2gRwM0LjSOeISshjelD93mcWKd8FfZ4QSQyZXpH/tMTq3ll7yrZSqUldbdm1e83cLhq/xmeWOc4f102vIAJFU1Vw5/PVzUzxTy2yOzUuNAl4UAWlvsE/7HoGq4KG8kiZtuuYSW//Oas3C5R2/olncnj9ENCoWqhRz6kkquCq9pqGRDClKHJU3Zce98X+iWxXvGnkxR+YmO1d8i/pDnNN5iQJjnYpFfvf7zyIdDyMUzp/Qwuv6VLL4DlnS18ikBM9LgwwaDy91ZgD2CEJDy1LBlTe+XfY21ysyV2l0gjhJoaVu+3e9xHdaYTXkPr6YXYA7t1q/u3jJg/cMqFtixF/cT/ADHEkDI9qox0/cYa8Pj7J/fMZxE3M3lVrfgvwpZv4Pb5PyBM1P7yYDrXaEeefM9NGUnw7Zw7pzmAhIIcKL8kZ+bNx+4mOoN1Ch5/SSaXXrdlIzKqNw/8rLlATYY6+z8RnSICpjcRp8zapNX3F8xWX2x40Noy7hX4WOzviSNy6Qv+5zMp6FJSwpnqw0DVanvCt0LtbMNX/dEMq41fNkTgs1csd+DT/rxqTZAlSkBQPhT7+/BYcanohKiPjDY4u1vqTs1uOyxnaUKwDJ9CtKkINDi/C4/GW466ExJcyoccN8PSbbJP9UPg="
+    - 'DEPLOY_BRANCH="master"'
+    - 'DEPLOY_REPO_SLUG="vim-jp/vimdoc-ja"'
+    - 'DEPLOY_USER_NAME="vimdoc-ja on travis-ci"'
+    - 'DEPLOY_USER_EMAIL="vimdoc-ja+travis-ci@vim-jp.org"'
+
+install: go get github.com/koron/nvcheck
+
+script:
+  - make check
+
+after_success:
+  - sh ./tools/install_sshkey_github.sh "$CI_KEY" ./tools/ci@vimdoc-ja.vim-jp.org.enc ~/.ssh/ci@vimdoc-ja.vim-jp.org
+  - '[ "$TRAVIS_BRANCH" == "$DEPLOY_BRANCH" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ] && sh ./tools/deploy-master.sh _master'
+  - '[ "$TRAVIS_BRANCH" == "$DEPLOY_BRANCH" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ] && sh ./tools/deploy-gh-pages.sh _gh-pages'

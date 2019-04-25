@@ -1,0 +1,57 @@
+language: php
+php:
+    - 7.2
+
+addons:
+    mariadb: "10.2"
+
+cache:
+    directories:
+    - "$HOME/.composer/cache/files"
+    - "$HOME/.npm"
+    - "$HOME/.cache/bower"
+
+matrix:
+    include:
+    - env: WS_TEST=php
+    - env: WS_TEST=lint_php
+    - env: WS_TEST=js
+    fast_finish: true
+
+branches:
+   only:
+   - master
+   - production
+
+before_script:
+    # Faster builds if we don't need xdebug
+    - if [[ "$WS_TEST" != "php" ]]; then phpenv config-rm xdebug.ini; fi
+
+    # Install dependencies
+    - if [[ "$WS_TEST" = "js" ]]; then npm install; fi
+    - if [[ "$WS_TEST" = "php" ]]; then composer install; fi
+
+    # Set up DB
+    - mysql -u root -e 'create database weinstein_test;'
+    - mysql -u root -e "CREATE USER 'weinstein_test'@'localhost' IDENTIFIED BY 'test';"
+    - mysql -u root -e "GRANT SUPER on *.* to 'weinstein_test'@'localhost';"
+    - mysql -u root -e "GRANT ALL PRIVILEGES ON weinstein_test.* TO 'weinstein_test'@'localhost';"
+
+    # Copy environment file
+    - cp tests/test.env .env
+    - cat .env
+
+script:
+    - echo "test suite $WS_TEST"
+
+    # PHP
+    - if [[ "$WS_TEST" = "php" ]]; then ./build/test_php.sh; fi
+
+    # Check PHP syntax
+    - if [[ "$WS_TEST" = "php_lint" ]]; then find . -name \*.php -not -path './vendor/*' -exec php -l "{}" \;; fi
+
+    # JS
+    - if [[ "$WS_TEST" = "js" ]]; then npm run build; fi
+
+after_script:
+    - if [[ "$WS_TEST" = "php" ]]; then cat storage/logs/laravel.log; fi

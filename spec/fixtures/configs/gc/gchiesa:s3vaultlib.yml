@@ -1,0 +1,18 @@
+language: python
+python:
+    - 3.7-dev
+    - 3.6
+    - 2.7
+install:
+    - pip install -U tox-travis
+script: tox
+deploy:
+  provider: pypi
+  distributions: sdist
+  user: gchiesa
+  password:
+    secure: tkZ9VB3GJiUH8eIWY57XiFGozqW+S5Z1ndMpodw61BTqKfXz9OUq//7KXP2oreQ08P8ZddvIgXTVn370GHX+XSwJGhz8sa8mU35Em+9TvNjFgnDTvkc42xpv7T9UDZEx9kD+47RAHVQ9rzhSg6HiN6U1Puid/eL+y98jMTAIm6EdUBonZETN+6X36F83fOWogyOXXoopgRg2gyfRgFi+dOZuumPlSZ4PDYpuTMBH9f0tbDPCATyWhZ0jwhmYC3r6vft9mzN4ExriJifJ1OdF/9Q6AuhjUsLwJVR522/VpFJM6eAeRDks9WqvNqI5fe5T+Eq19OjcciftZMgj+eoA77aov5HibGriEK00Xs6BxQx8Csrqh7pp+3dLojKs77s6dG/hDuXGd1aRhtGW14BDa62kacdDV8Xdlkesogg+iWQHvgx+44dCAPZccnbQ3rgOJoOIzNGzxgJ6yAhGBQFmQvM8FcdVKVKRRM3r1c+2jZX1yh2RtqTUOMWLSFu4Ys64dPKd7w1CIhQfAzu6rSVhesnA7dg0dWwZ3Zew0QIZkw/LEn2fcMVc4d5WLTy0oYVacgAFP2O700HY1jYTHVTgZMrVCW7a7FTe6w5zuwoWRGgtQbs9sdfZL2ayGqPcUizvrM0bq1hcT5WujQl9/4XoDz9nF3Mt/EcgIx8JjIlQmfk=
+  on:
+    tags: true
+    repo: gchiesa/s3vaultlib
+    python: 2.7

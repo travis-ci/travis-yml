@@ -1,0 +1,53 @@
+language: c
+
+env:
+  global:
+   # The next declaration is the encrypted COVERITY_SCAN_TOKEN, created
+   #   via the "travis encrypt" command using the project repo's public key
+   - secure: "3Njik+f5HM4VM6wdu09NWR1cEFvNViTyK7+k1BFcO9v0i+ILJmuIkkhjyE79ou8+rKZzGjP9bNk8VcB8P/6dLg60IO7we6t+D8ibe4uS/zHRoxHmc88Uz3Khs7yUlDeUfCo6XgHwSCLJ1QHhR7XjkP7IVdQZwH4KKycl7GuYgZ0="
+
+before_install:
+   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then echo -n | openssl s_client -connect scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-; fi
+
+matrix:
+  include:
+  - os: linux
+    sudo: required
+    dist: trusty
+    compiler: gcc
+  - os: linux
+    sudo: required
+    dist: trusty
+    compiler: clang
+  - os: linux
+    sudo: required
+    dist: xenial
+    compiler: gcc
+  - os: linux
+    sudo: required
+    dist: xenial
+    compiler: clang
+  - os: osx
+    sudo: required
+    compiler: gcc
+  - os: osx
+    sudo: required
+    compiler: clang
+
+addons:
+  coverity_scan:
+    project:
+      name: "cortoproject/corto"
+      description: "Build submitted via Travis CI"
+    notification_email: sander.mertens8@gmail.com
+    build_command:
+     - cd corto
+     - rake
+     - cd ..
+    branch_pattern: coverity_scan
+
+install:
+  - curl https://corto.io/ci-dev | sh
+
+script:
+  - cd corto-src/corto && corto test

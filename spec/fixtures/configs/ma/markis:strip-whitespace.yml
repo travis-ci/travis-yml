@@ -1,0 +1,50 @@
+language: node_js
+
+node_js:
+- 'node'
+- '4'
+- '5'
+- '6'
+- '7'
+- '8'
+- '9'
+
+cache:
+  directories:
+  - node_modules
+  - $HOME/.nvm
+
+before_install:
+- npm config set spin false
+- npm --version
+
+install:
+- npm install
+
+# install code-coverage (node >0.12)
+- npm install if-ver -g
+- if-ver -gt 0.12 && npm install codacy-coverage coveralls istanbul remap-istanbul -g || return 0
+
+script:
+# unit tests
+- npm test
+
+# integration tests
+- npm run build:cli
+- node ./cli.js --input ./test/test-file.js --output ./test/test-file.min.js
+
+after_success:
+# code coverage and upload to coveralls/codacy
+- (if-ver -gt 6 && istanbul cover test.js --report lcovonly) || return 0
+- (if-ver -gt 6 && remap-istanbul --type lcovonly -i coverage/coverage.json -o coverage/remapped-lcov.info) || return 0
+- (if-ver -gt 6 && cat coverage/remapped-lcov.info | codacy-coverage --language typescript) || return 0
+- (if-ver -gt 6 && cat coverage/remapped-lcov.info | coveralls) || return 0
+
+deploy:
+  provider: npm
+  email: m@rkis.cc
+  api_key:
+    secure: eyEeoUxgMhj12c0EsL2zL9z/r3BMEik23WLFOSA2C99qVsm3iXTAMOPb1zX98WfoXnrs39NXn7QmzbTKOjV8xCzSUJ9L32o0vauB0WEr4MXScRgDJldQss+3Fi810JaunZR5qYjp8eT1OGRh+zdqpfsSbNEwzzXIkMr5Kdz9jh/Jm8K7plx+/ql7TgbwUmfHlP9yl82An+lsc6MnsEUiU8gIyIIT2QP9BG+UNdmO8hc4YujQ21uXXEs55AXpWlTQAtNY5vUvtfnYkR4Rr69az72lYUNS+OXi62Gh2tyHnQP8NTyEZlNPmP0XoeJO4QJIf5iOH4L2wJrCgQsvIF6o4uJk1mv3LfhH0Pt6jdFZeoxMb+Q3sN1vXaMT7WB8kfRhJGcIX77z0piI5VekTz8yydcI/mLqYyrugQGimcpyzPdtFMthjNNayBzdYHWwS1vhuWJPqsUJF0Xib8mlAmLsoGDwZBSS67aQHOSe80xurYZ3AaM4lkre/31nYP4xhANPITqynkcHtvrogYaD46fIYIRXJmEB+1TRHC/bl50veirtHty8jIM1r83BLr9cVPfdUH7gS8rwQJcnPqfqxKZBuRGsIJiUAsvhMxTax7Ij5qa3XoUnSAQMD38BNJDhIJqd73dbbHyHU/Sg4KHO6GGqVNDNDn5toq6wPkqr7NpX9og=
+  on:
+    tags: true
+    repo: markis/strip-whitespace

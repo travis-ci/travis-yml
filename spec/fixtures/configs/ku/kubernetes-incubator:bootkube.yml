@@ -1,0 +1,9 @@
+language: go
+before_script:
+  - wget https://releases.hashicorp.com/terraform/0.11.3/terraform_0.11.3_linux_amd64.zip
+  - unzip terraform_0.11.3_linux_amd64.zip
+  - export PATH=$PWD:$PATH
+go:
+  - 1.11.x
+script:
+  - make release

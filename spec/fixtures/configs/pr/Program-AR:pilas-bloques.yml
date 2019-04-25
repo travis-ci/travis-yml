@@ -1,0 +1,71 @@
+---
+env:
+  - MATRIX_EVAL="CC=gcc-4.9 && CXX=g++-4.9"
+addons:
+  firefox: latest
+  apt:
+    sources:
+    - ubuntu-toolchain-r-test
+    packages:
+    - g++-4.9
+    - gcc-4.9
+language: node_js
+os:
+  - linux
+  - osx
+sudo: false
+node_js:
+- '6.11.3'
+cache:
+  directories:
+  - node_modules
+  - bower_components
+  - $HOME/.npm
+  - $HOME/.cache # includes bowers cache
+  - cache
+install:
+- travis_wait make full_travis
+script:
+- node -v
+- make test_travis
+before_script:
+  - export DISPLAY=:99; sh -e /etc/init.d/xvfb start; sleep 3
+before_install:
+- npm --version
+- npm config set spin false
+- npm install -g bower
+- npm install -g phantomjs-prebuilt
+- npm install -g grunt-cli
+- npm install -g node-gyp
+- npm install -g ember-cli
+- npm install -g surge
+before_deploy:
+- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install curl                                  ; fi
+- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then cd $TRAVIS_BUILD_DIR && travis/download-homebrew   ; fi
+- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install makensis fakeroot dpkg                ; fi
+- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then VERSION=$(sh scripts/obtenerVersion.sh)            ; fi
+- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then VERSION_DEB=$(echo ${VERSION} | sed -e 's/-/~/g')  ; fi
+- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then NOMBRE=$(sh scripts/obtenerNombre.sh)              ; fi
+- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then echo "Detectando version $VERSION para compilar"   ; fi
+- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then make empaquetar                                    ; fi
+- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then echo "Evitando hacer binarios en linux...."      ; fi
+after_success:
+  - ember build --environment=development
+  - test $TRAVIS_BRANCH = "develop" && surge ./dist/ develop-pilas-bloques.surge.sh
+  - test $TRAVIS_BRANCH = "master"  && surge ./dist/ master-pilas-bloques.surge.sh
+deploy:
+  skip_cleanup: true
+  provider: releases
+  prerelease: true
+  api_key:
+    secure: WRybyac4M4SnnGP8Av/EXKV8hproOv27mBNCnwENVle2vOgXDsoAOd/c0QCIRPjd/rmq/7fU+PYqGjRvIa6+Osy1DdX8VSP6Shp9f+/i3WCO9yhCd0c1RbsKbE/qyVKKQkJYG039Y+9udmEat7pnNY7KVDv1h5TU4aCDwRpflZXBUN7ncpuvmBEdStnk7wMAdhTwaeRoGN3TXh5MCW1AS1TBrXZWPM41K6kidxxs9oPaU/7K43X/4sFB//9G3Qs5VNhKhTsJUwJDPKw5jx3KzFdnaS04fM2MJnEaBK6NO5SCbjxT545ZtTllxcRe47TF4/+5sP0qYZVLAQUeOff2Src6U5NWmbcSYeIJCYiZGlBubXXKlQOVrjxzi58qFo4TBSnAqHohnSRQfLW5E38yUto3C9ob1FMl7VnBYyBVrh9rHDQ7BcwOuCSS4T3g8n1J8QBycuJG3DXZreZ31cD72ncDe/FMYOLTOO7hkatwYE03ILhQFvHnl1fvq9upZF+K3h7U7MZ06v39M2bnY01UcOmAqXB4V3X6V16phlOBL8nbY5ENkzmU2QoRUAvOjfOXJkDd5p5txza6181ouutSNM2wzmaSeCIclqoclgPOjyJHjfZOKg8M3qOdihdXkMkdwpA6B9fzVNycX0McNg6HMBHAf5fFIV4oIemUc18ti3Q=
+  file:
+    - "binarios/${NOMBRE}-${VERSION}.dmg"
+    - "binarios/${NOMBRE}-${VERSION}.exe"
+    - "binarios/${NOMBRE}-${VERSION}-linux-x64.zip"
+    - "binarios/${NOMBRE}-${VERSION}-linux-ia32.zip"
+    - "binarios/${NOMBRE}_${VERSION_DEB}_amd64.deb"
+  on:
+    tags: true
+    all_branches: true
+    condition: "$TRAVIS_OS_NAME == osx"

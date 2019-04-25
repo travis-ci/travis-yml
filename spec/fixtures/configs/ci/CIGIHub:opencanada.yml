@@ -1,0 +1,29 @@
+language: python
+python:
+  - "3.6"
+addons:
+  postgresql: "10"
+  apt:
+    packages:
+      - postgresql-10
+      - postgresql-client-10
+env:
+  global:
+    - PGPORT=5433
+services:
+  - elasticsearch
+before_install:
+  - sudo sed -i -e '/local.*peer/s/postgres/all/' -e 's/peer\|md5/trust/g' /etc/postgresql/*/main/pg_hba.conf
+  - sudo service postgresql restart
+  - sleep 1
+install:
+  - pip install -r requirements.txt
+before_script:
+  - sleep 10
+  - psql -c "CREATE DATABASE opencanada;" -U postgres
+  - python manage.py migrate
+  - python manage.py update_index
+script:
+  - coverage run --source='.' manage.py test
+after_success:
+  - coveralls

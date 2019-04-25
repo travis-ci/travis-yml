@@ -1,0 +1,26 @@
+branches:
+  except:
+    - gh-pages
+language: perl
+sudo: false
+perl:
+#  - "blead"
+  - "5.26"
+  - "5.24"
+  - "5.22"
+  - "5.20"
+#  - "5.18"
+#  - "5.16"
+#  - "5.14"
+#  - "5.12"
+#  - "5.10"
+before_install:
+#  - eval $(curl https://travis-perl.github.io/init) --auto
+  - cpanm --notest Devel::Cover::Report::Coveralls
+  - cpanm --notest Test::Code::TidyAll 
+  - cpanm --notest Test::Perl::Critic
+  - cpanm --notest Test::Version
+services:
+  - mongodb
+after_success:
+  - cover -test -report coveralls

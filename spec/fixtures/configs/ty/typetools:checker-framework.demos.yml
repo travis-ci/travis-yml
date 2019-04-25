@@ -1,0 +1,25 @@
+language: java
+
+script: ./.travis-build.sh
+
+## Reinstate when the build can use a standard jtreg install
+# addons:
+#   apt:
+#     packages:
+#       - jtreg
+
+# Enable Gradle caching
+before_cache:
+  - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+  - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+cache:
+  directories:
+    - $HOME/.gradle/caches/
+    - $HOME/.gradle/wrapper/
+    - $HOME/.m2/
+
+jdk:
+  - oraclejdk8
+
+git:
+  depth: 3

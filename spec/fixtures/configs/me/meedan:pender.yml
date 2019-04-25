@@ -1,0 +1,34 @@
+language: ruby
+bundler_args: "--jobs 3 --retry 3 --without nothing --path=/tmp/bundler"
+before_install:
+- echo '# Some DNS cached entries below' | sudo tee -a /etc/hosts
+- for host in facebook.com twitter.com m.facebook.com www.facebook.com m.twitter.com youtube.com; do ping -c 1 $host | head -1 | sed "s/^[^(]\+(\([0-9\.]\+\).*/\1 $host/g" | sudo tee -a /etc/hosts; done
+- echo 'Hosts:' && cat /etc/hosts
+- export PATH=/tmp/bundler/ruby/2.3.0/bin:$PATH
+- export GEM_PATH=/tmp/bundler/ruby/2.3.0/gems:$GEM_PATH
+- sudo apt-get install redis-server
+- redis-server &
+- git clone https://${TOKEN}:x-oauth-basic@github.com/meedan/configurator ./configurator
+- rm -rf tmp/cache tmp/cache1 tmp/cache2 tmp/cache3 && mkdir -p tmp/cache tmp/cache1
+  tmp/cache2 tmp/cache3
+before_script:
+- d=configurator/check/travis/pender/; for f in $(find $d -type f); do cp "$f" "${f/$d/}"; done
+- bundle exec sidekiq -L /tmp/sidekiq-log.log -d
+- cd bin && ./setup-parallel-test-env && cd -
+script: bundle exec rake "parallel:test[3]"
+after_script:
+- cat tmp/performance.csv
+- bundle exec codeclimate-test-reporter
+rvm:
+- 2.3.1
+cache:
+  directories:
+  - "/tmp/bundler"
+  - tmp
+addons:
+  code_climate:
+    repo_token:
+      secure: fWrtUsan669Hz5li90y3REKdAcCY8/eCtg7FLiS9wFPRPwviocE0JrsBgEfzwsTY9jR77zc7uQDr79Zv9QVukdhoPQXF5CgKZZxqrU9mxkSwH/K7SmGSuUqPQBq+0t4pdL2FpJS+hLkuSiVmmZMsWgtz+u79X5GcQWQQS825SHxd1vigvj2/Jzdnnm1hOsieB3sSSNaXeGblCzpyxICapwfCMQAOHubg6oyuAO3Jm9edvsAJMyltKxDN8Ydp39Rf8zzkkGAN/iQ3That4JQKRd1XLsW/iSDCMfUh+Pwe1T8V53PZZum9IRUgo2OeuZCUVOHPuImkBpMsf5j6qCf+EuByo6IC9UnX6jCez4bDYsm62C7XAJ2SfCe24z7vpB9oyC7C5ggPf6ze6GBpGBoY5gydpTx/QS/dSDszvCdLGyUxuKMf4ACr12wU6oBOX4KM+vWiEZKjHdCz/I58HCkwKUSPUnnJL1PkM2LZHEEAIilBvaVjjkljAhoXxZ4/hiRncnI1d47jYGQBF8aex0CR0dGhYpeCd69dv0HoUNrr3fChPmHa9M7Q4/EnC8flsbxBHlhXUHj5xoJzbxOB0hJmz/1KwPc9Z/ZBwX94SCVtSHYAYMin9W4DmtshHf2oRWXCEXweoUrbR9rPiCYi34wjleJpNyRwGHmnvfMMK3K6vPo=
+notifications:
+  slack:
+    secure: jeHPR5g+4VbyOV4kXEb6kxXmlw1cn67/HEBhpL1V/EdxpnmUbj1DyMcYDHcj4D9A2wjuVNYxhmqVUfkNKeSBYiBR+hqZs4WEvRfSE8WIhnrU+A1u+IfZtv1w5jairrBS9B9+lDhSr/EKTP8FactKLDvWNkZgZTYhSmLxarCUHnAUKo3Kp48cXdt8ywtbVXylnBtE0ofyKSu1qAiM+Oh7mJjgEUymeRNy44DbALnTEpv9y7x+IeDkF0T+IoJYnV7Sk2+vdB18ULVzGfSAnjPIvFPehIQ40I2nfebOksDYqqtTZTXi/yA9tRZdsoIelq1RH8QFSglfqoAR5v/Eamqm13cGO8Xu7e66Lowm0+knSHZrokldFdhcpes1gEYVRiV3CiRbZCJhi69DMuHzm3gvaYyNDWe3Gx9zzekGYGXFpwsLjwOvxWcZSUF3kopFXJIMdMpUKS2OJpGCmsWThXuk4zXm4cEHtZBpWRjxALC+45Lh5/c53Pcv6dUxVx/nN984T8SAdsDfxIMywauYZ3N7CKgVVg5GejX48UaLsh68FczxV5R5ISU3eIOilzU7aslq/vn+uTHTnbx5yQXOpCuTZIoS/eC1PF8wIvq6R9HL7GfZZJv3f7zjddlrdMV9zdM8h1objhfd/4InGncH9YVQbczvO1PTf1CBdNIVSNVEDyE=

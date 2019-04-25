@@ -1,0 +1,39 @@
+sudo: required
+dist: trusty
+language: python
+cache: pip
+python:
+- 2.7
+addons:
+  postgresql: '9.6'
+  sauce_connect: true
+env:
+  - DJANGO_SETTINGS_MODULE=ap.settings.travis
+install:
+  - pip install -r requirements/test.txt
+  - npm install
+before_script:
+  - psql -c 'create database djattendance;' -U postgres
+  - psql -d djattendance -c "CREATE EXTENSION IF NOT EXISTS hstore;"
+  - python ap/makeallmigrations.py
+script:
+  - python ap/manage.py migrate --noinput
+  - npm run build
+notifications:
+  email:
+    recipients:
+      - attendanceproj@gmail.com
+after_success:
+  - sh selenium_automation.sh
+deploy:
+  provider: heroku
+  api_key:
+    secure: BIQlfKJpVThXlt8SJPJ83hv1h+qfIUXSrhGYhHj8qX8zxxQ8moXPfRdd2Ib4JUCanWXZqRgmyXdZlrUHSdTDONTNrRVHs1KQMerk4tlTk1oQA00Zp+mRnR/Yq0q16D5JFSnvntzHFTAt0SgTB2+K8REnSgXjBKR18++ViDuTl9E=
+  run:
+  - python ap/makeallmigrations.py
+  - python ap/manage.py migrate
+  - restart
+  app: djattendance
+  on:
+    repo: attendanceproject/djattendance
+    branch: dev

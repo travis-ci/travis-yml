@@ -1,0 +1,24 @@
+matrix:
+  include:
+  - language: python
+    python: "3.5"
+    before_install:
+      - sudo apt-get install -y qt5-default qttools5-dev-tools
+    install: "pip install pyyaml"
+    script: make test
+  - language: android
+    jdk: oraclejdk8
+    before_install:
+      - sudo apt-get install python3 python3-pip
+      - sudo pip3 install pyyaml
+    install:
+      - echo yes | sdkmanager "extras;m2repository;com;android;support;constraint;constraint-layout;1.0.2"
+      - echo yes | sdkmanager "extras;m2repository;com;android;support;constraint;constraint-layout-solver;1.0.2"
+      - echo yes | sdkmanager "platforms;android-27"
+    android:
+      components:
+        - tools
+        - android-26
+          - build-tools-26.0.2
+    before_script: 
+    script: (cd msgtools ; make test) && make android

@@ -1,0 +1,27 @@
+language: python
+python:
+- '2.7'
+- '3.5'
+install:
+- pip install -r requirements.txt
+- pip install flake8
+- python setup.py install
+- pip install -r devRequirements.txt
+- pip install coveralls
+script: coverage run --source=ddsc setup.py test
+before_script:
+- flake8 --ignore E501 ddsc/
+after_success: coveralls
+deploy:
+  - provider: pypi
+    user: jbradley
+    password:
+      secure: asDgRbV5BsiRA/WK0ZNBrB0NfoI6d90ugZd6pZmm8yofJVoDM6qqWWvSWi9tu6QWrmkjOY60swIHYtGiRyD2cc5O7FEL5L85bZb352GNjjgAq2odj4rpLuMi8T+CpiY/FoQBDWHpy4O5nFaIGWm5VM0kDRpzUmntTnqyj29kbka4RflM2JSo9KgUBIM1yOjz1Qy+5whEl/qY6OGSmfHmDny7AaAvPJrtcjvJbfiBLhh61nILggTzOmt0+eXzUydAZ26J5iLzEZslvAU4ZYGmnPb65rYOtiXQNxzxhYtg4unKbRemeI69nWlzNq9ptBgl7OZhUAXuHXj4Fxv9b5/HnWBXwlfioGJXsWTK4RQm/pnikYCUJv0zt1KTdR8wz8x8Izal35kXLK/g+XP3ghYKPeHHtGRra7c+Xha70UwYcbLedTtR6mvVBTBUehO6mnYpgd0w8wQAEn+3GwClB2Xrw/irolaqbPgeNlqaArjk8DILc/IQ1jsbUhsDGg/FEajSyJOkXXboBRkvY6scGmIEV5HGfCInCucmjT+Wc/+XEKUAKHXQuaBeP1Hl13MICnU5vBIyvOJkrshURH3o4Pzw27sWkjfNPhJW2iQv0bFp4Opcwr5utmTW2eklKEJ/31iLMf2BiffGN5U0pSHKJtc8Fwj8gIfSuQ1oZLY4PP3ehDY=
+    on:
+      tags: true
+      python: '3.5'
+  - provider: script
+    script: ./deploy/onpublish.sh
+    on:
+      tags: true
+      python: '2.7'

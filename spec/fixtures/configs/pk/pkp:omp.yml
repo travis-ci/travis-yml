@@ -1,0 +1,85 @@
+# Configure the build matrix
+matrix:
+  include:
+  # Validation
+  - env: TEST=validation
+    php: 7.2
+  # PostgreSQL / various PHP
+  - env: TEST=pgsql
+    php: 7.1
+  - env: TEST=pgsql
+    php: 7.2
+  # MySQL / various PHP
+  - env: TEST=mysql
+    php: 7.1
+  - env: TEST=mysql
+    php: 7.2
+  # Path info disabled (DISABLED pending a fix of pkp/pkp-lib#4414)
+  # - env: TEST=mysql DISABLE_PATH_INFO=1
+  #   php: 7.2
+env:
+  global:
+  - secure: "PZbLl4MOmgQxp+fDQcitjiFVaBwERHvYbm+6sn71amkwTW87I6mlwXCtWReFGXgdQYQXiu79w28iVPvLbowbJi2Mb5bYt5kadve9Lf86uQfZq2KFYIFrUBAR9ACK2jhPNQWVZRh73+Jd5qaBzR3pgOFdFiBmasReT0+NpI3JLLk="
+language: php
+dist: trusty
+python:
+  - 3.3 # Required by Javascript linter/builder
+git:
+  # Inhibit automatic submodule checkout (see below)
+  submodules: false
+cache:
+  npm: true
+  directories:
+    - $HOME/.composer/cache
+addons:
+  apt:
+    update: true
+before_install:
+  # Check out submodules (this script checks out developer forks if necessary)
+  - ./tools/startSubmodulesTRAVIS.sh
+
+  # Update to latest stable version of npm
+  - npm i g -npm
+
+  - |
+    if [[ "$TEST" != "validation" ]]; then
+      # Prepare for unit and integration tests.
+
+      # Prepare the server environment
+      ./lib/pkp/tools/travis/prepare-webserver.sh
+      source ./lib/pkp/tools/travis/start-xvfb.sh
+      ./lib/pkp/tools/travis/start-selenium.sh
+
+      # Prepare the local codebase
+      ./lib/pkp/tools/travis/install-composer-dependencies.sh
+      npm install && npm run build
+    else
+      # Prepare for validation tests.
+      ./lib/pkp/tools/travis/install-linter.sh
+    fi
+script:
+  - |
+    if [[ "$TEST" != "validation" ]]; then
+      # Run the unit and integration tests.
+      source ./lib/pkp/tools/travis/prepare-tests.sh
+      ./lib/pkp/tools/travis/run-tests.sh
+    else
+      # Run the validation tests.
+      ./lib/pkp/tools/travis/validate-xml.sh
+      ./lib/pkp/tools/buildjs.sh -n
+      ./lib/pkp/tools/checkHelp.sh
+      ./lib/pkp/tools/travis/validate-json.sh
+      npm run lint
+    fi
+
+after_script:
+  # Upload the completed database to the PKP server for other uses
+  - if [[ "$TEST" != "validation" ]]; then ./lib/pkp/tools/travis/post-data-build.sh; fi
+
+  # Print logs and outputs for debugging.
+  - tail -c 1048576 error.log
+  - cat ./lib/pkp/tests/results/error.log
+after_failure:
+  - sudo apt-get install sharutils
+  - import -window root screenshot.png
+  - tar cz screenshot.png | uuencode /dev/stdout

@@ -1,0 +1,51 @@
+# Config file for automatic testing at travis-ci.org
+
+language: python
+sudo: false
+
+python:
+    - 2.7
+    - 3.5
+    - 3.6
+    - 3.7-dev
+
+# test minium required and latest versions of SciPy and NumPy
+env:
+    - version=minimum  # SciPy>=0.19 NumPy>=1.10
+    - version=latest
+
+before_install:
+    - wget https://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh
+    - bash miniconda.sh -b -p $HOME/miniconda
+    - export PATH="$HOME/miniconda/bin:$PATH"
+    - hash -r
+    - conda config --set always_yes yes --set changeps1 no
+    - conda config --add channels conda-forge
+    - conda update -q conda
+    - conda info -a
+
+install:
+    - if [[ $version == minimum && $TRAVIS_PYTHON_VERSION != 3.6 && $TRAVIS_PYTHON_VERSION != 3.7-dev ]]; then conda create -q -n test_env python=$TRAVIS_PYTHON_VERSION numpy=1.10 scipy=0.19 six=1.10; fi
+    - if [[ $version == minimum && $TRAVIS_PYTHON_VERSION == 3.6 ]]; then conda create -q -n test_env python=$TRAVIS_PYTHON_VERSION numpy=1.11.2 scipy=0.19 six=1.10; fi
+    - if [[ $version == minimum && $TRAVIS_PYTHON_VERSION == 3.7-dev ]]; then conda create -q -n test_env python=3.7 numpy=1.11.3 scipy=1.1 six=1.11; fi
+    - if [[ $version == latest && $TRAVIS_PYTHON_VERSION != 3.7-dev ]]; then conda create -q -n test_env python=$TRAVIS_PYTHON_VERSION numpy scipy six pandas matplotlib dill; fi
+    - if [[ $version == latest && $TRAVIS_PYTHON_VERSION == 3.7-dev ]]; then conda create -q -n test_env python=3.7 numpy scipy six pandas matplotlib dill sphinx; fi
+    - source activate test_env
+    - pip install pytest
+    - pip install codecov
+    - pip install asteval
+    - pip install uncertainties
+    - if [[ $version == latest ]]; then pip install emcee numdifftools; fi
+    - python setup.py install
+    - conda list
+
+script:
+    - cd tests
+    - pytest
+    - coverage run --source=lmfit -m pytest
+    - coverage report -m
+    # test building the documentation
+    - if [[ $version == latest && $TRAVIS_PYTHON_VERSION == 3.7-dev ]]; then cd ../doc ; make ; fi
+
+after_success:
+    - codecov

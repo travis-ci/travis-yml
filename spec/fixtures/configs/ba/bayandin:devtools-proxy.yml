@@ -1,0 +1,64 @@
+dist: trusty
+group: edge
+
+sudo: false
+
+language: python
+python:
+  - "3.6.3"
+
+cache: pip
+
+git:
+  submodules: false
+
+addons:
+  apt:
+    sources:
+      - google-chrome
+    packages:
+      - google-chrome-stable
+
+env:
+  global:
+    - CHROMEDRIVER_VERSION=2.35
+    - DISPLAY=:99.0
+  matrix:
+    - TESTS=functional
+    - TESTS=functional CHROME_WRAPPER_PATH=devtools/chrome-wrapper.sh DEVTOOLS_PROXY_PATH=dist/linux/devtools-proxy
+    - TESTS=integration
+    - TESTS=integration CHROME_WRAPPER_PATH=devtools/chrome-wrapper.sh DEVTOOLS_PROXY_PATH=dist/linux/devtools-proxy
+    - TESTS=compatibility
+    - TESTS=compatibility CHROME_WRAPPER_PATH=devtools/chrome-wrapper.sh DEVTOOLS_PROXY_PATH=dist/linux/devtools-proxy
+    - TESTS=compatibility DTP_UJSON=true
+    - TESTS=compatibility DTP_UVLOOP=true
+
+matrix:
+  fast_finish: true
+  allow_failures:
+    - env: TESTS=compatibility
+    - env: TESTS=compatibility CHROME_WRAPPER_PATH=devtools/chrome-wrapper.sh DEVTOOLS_PROXY_PATH=dist/linux/devtools-proxy
+    - env: TESTS=compatibility DTP_UJSON=true
+    - env: TESTS=compatibility DTP_UVLOOP=true
+
+before_install:
+  - |
+      if [[ ${TESTS} != "functional" ]]; then
+        curl -L -O "http://chromedriver.storage.googleapis.com/${CHROMEDRIVER_VERSION}/chromedriver_linux64.zip"
+        unzip -o chromedriver_linux64.zip -d /tmp/chromedriver/ && chmod +x /tmp/chromedriver/chromedriver
+      fi
+
+install:
+  - pip install -Ur requirements-dev.txt
+
+before_script:
+  - if [[ ${TESTS} != "functional" ]]; then PATH=$PATH:/tmp/chromedriver/; fi
+  - if [[ ${DEVTOOLS_PROXY_PATH} == "dist/linux/devtools-proxy" ]]; then ./build-standalone.sh; fi
+  - if [[ ${TESTS} == "compatibility" ]]; then git submodule update --init --recursive; fi
+  - sh -e /etc/init.d/xvfb start
+
+script:
+  - ./run-tests.sh ${TESTS}
+
+notifications:
+  email: false

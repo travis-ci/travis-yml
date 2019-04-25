@@ -1,0 +1,183 @@
+# We need `sudo` because we're going to install Apache with PHP.
+# See https://docs.travis-ci.com/user/ci-environment/#Virtualization-environments
+sudo: required
+dist: precise
+
+# Set the language to PHP since we're going to setup a WordPress web site.
+language: php
+php:
+ - '5.3'
+ - '5.4'
+ - '5.5'
+ - '5.6'
+
+# Test matrix:
+#  - PHP unit tests: PHP 5.3, 5.4, 5.5, 5.6, 7.0, 7.2
+#  - JavaScript unit tests
+#  - JavaScript end-to-end tests
+# @@todo: we're currently testing only the last version of WordPress, we should also test the previous ones and nightly.
+matrix:
+  include:
+    # JavaScript end-to-end tests.
+    - php: 5.6
+      env: SCRIPT=test:e2e
+    # Additional PHP Unit tests, PHP 7.0, WP 5.1 (WP 4.2 isn't compatible with PHP 7.x).
+    - php: 7.0
+      env: SCRIPT=test:php WP_VERSION=5.1
+    # WordPress nightly.
+    - php: 5.6
+      env: SCRIPT=test:php WP_VERSION=nightly
+    # JavaScript unit tests.
+    - php: 5.6
+      env: SCRIPT=test:js
+    # Additional PHP Unit tests multisite environment, PHP 5.6, WP 5.1.
+    - php: 5.6
+      env: SCRIPT=test:multisite WP_VERSION=5.1
+    # Additional PHP Unit tests specific to some users' environment, i.e. PHP 5.5 and WP 4.7.
+    - php: 5.5
+      env: SCRIPT=test:php WP_VERSION=4.7
+  allow_failures:
+    # JavaScript end-to-end tests.
+    - php: 5.6
+      env: SCRIPT=test:e2e
+    # WordPress nightly.
+    - php: 5.6
+      env: SCRIPT=test:php WP_VERSION=nightly
+    # Additional PHP Unit tests, PHP 7.2, WP 5.1 (WP 4.2 isn't compatible with PHP 7.x).
+    - php: 7.2
+      env: SCRIPT=test:php WP_VERSION=5.1
+
+# Cache the node_modules folder.
+# See https://blog.travis-ci.com/2013-12-05-speed-up-your-builds-cache-your-dependencies
+cache:
+  directories:
+    # We cache vendor since it only contains the PHPUnit related files.
+    - vendor
+    - node_modules
+    - $HOME/.npm
+    - $HOME/.composer/cache
+
+addons:
+  # see https://docs.travis-ci.com/user/hosts
+  # see https://support.saucelabs.com/customer/en/portal/articles/2639448-issues-with-localhost-proxying-on-edge-and-safari-8-and-9-using-sauce-connect-proxy
+  hosts:
+    - wordpress.local
+  addons:
+    # Required for compatibility with some nodejs dependencies.
+    apt:
+      sources:
+      - ubuntu-toolchain-r-test
+      packages:
+      - gcc-4.8
+
+env:
+  global:
+    # WordLift options, needed for testing.
+    - WL_DISABLE_SPARQL_UPDATE_QUERIES_BUFFERING=true
+    - WL_SSL_VERIFY_ENABLED=true
+    - WL_SSL_V1_FORCED=true
+
+    # WordLift Test Key.
+    - secure: "g18HCJuCU1qN5NnhIttwV0obz71mZNZzT1RPIOhaBcMOhMZ/QsDER15xVzflHSq+x/leJoer0YFCG0iuIt7mla++mON1R2rITQToqMGIklbiktT9uVx/4ns8frYQRVd+mPXcQExbj/yzNRGQgq19yFU53xgrZVWmvaRuclHQDlM="
+
+    # WordLift Test API URL.
+    - secure: "QVEH7GwZJR9nWnEKq99QZATwsppd+3eKHcGtZeAKcxaScW6tOnyJRzLR3pKi1M5PK2azdgu9ZuYxk6RRjO6gEGQhqVa9yrWhwXv4KmKeOUdszRW2gH0uQ1cQEU4Stjibppq+sHzRSC6di3yrLWxdfc+5HZHAj8uut5ISpFV3Ozc="
+
+    # CodeClimate Repository Token.
+    - secure: "Fo6kJNe7LNHPfj6fBIyqOI7Zkm2DZwV7IH8jTGvZF5UkPvJiUyjN13z1TRXOohUYvigITZduF0f2I3MaxkAEpb/d5e2yf/Zu7x/nlRQzcSWM9zPMuW+oJG/b+s2m9F65uYkOIi1J5vI7w/G888zGS9LzSgwh4mXxeG1bm3b4EGw="
+
+    # CodeClimate Test Coverage Key.
+    - secure: "VP6tz2/pCk3sZx0/iwwzCVHqRIyvh5gePeryogUkR9bD3OG/C177ZWWlJ6ODClIOAMpcKyozs6xvGVtSRn3YT4LbQhF67zP9O0i9Yka84huV9PfXeaZwovG3mULxuSVsvYmlmTmSoX3wvkbrkkxH4YY+Vmz6k4scWanfGd2J9j4="
+
+    # SauceLabs environment vars.
+    - secure: "BPMK2gsJp6pL9rQ+qJUJaCiILGI5DTn91bcEeOOguiPtg2EUMpZWG3fvyIoFJzGu8Mi7jluP60au00cmYK8QbtwJyDACqsmDRwV+1JFrl1ipZJ2R/KVksFfzsb8qOnNG9ejCSkobHj3IrR5l+bCJU2PPa9/d/lc3DFhZaNW4T3k="
+    - secure: "MWJrwnQ09c+ekylfFMuky4W3V5rokJBGMXTZp5/PsDgY2eL684/77vIjUQ6tBNVrKIMhh5VbAoJ3FIY3PkbCVoz0JN3hRJ4JZNtqn1X/ABC7i0csC09ObLZO55/F2kHawPofvysdg/h9xfvd7vUQsoqd4FQcyxEzbUGmv2XenTE="
+
+    # See https://docs.codeclimate.com/v1.0/docs/travis-ci-test-coverage
+    - GIT_COMMITTED_AT=$(if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then git log -1 --pretty=format:%ct; else git log -1 --skip 1 --pretty=format:%ct; fi)
+
+    # WordLift's Key on Production environment.
+    # NB4P/P1/Gzje1/mOseVZqkIdaxI5vEgnlUUEmNRBtAT0CMt3c3pLSfzRtKrFfuJzoXpahxf8pC1R+Ljjf+QCC+2ECqjGCPSSv1tIj0L/H+c9UtbpPQIwD6kv7dPBYedZ6eNAgGjK1DXhrAuSnNaYJrZ35N6tv06B0KmniY6pJnk=
+
+  matrix:
+    - SCRIPT=test:php WP_VERSION=5.1
+    - SCRIPT=test:php WP_VERSION=4.4
+
+services:
+  # Require MySQL.
+  - mysql
+
+# Legacy (required by test:js and test:php).
+before_install:
+  - .ci/travis/install_ssh_key.sh
+  # If we're running the PHP tests, we need a WP test site.
+  - |
+    if [[ "$SCRIPT" == "test:php" || "$SCRIPT" == "test:php-test-coverage" || "$SCRIPT" == "test:multisite" ]]; then
+      bash bin/install-wp-tests.sh wordpress_test root '' localhost $WP_VERSION
+      composer install --dev
+      phpunit --version
+      ./vendor/bin/phpunit --version
+    fi
+  # If we're running the JS test we need a browser.
+  - |
+    if [[ "$SCRIPT" == "test:js" ]]; then
+      export CHROME_BIN=chromium-browser
+      export DISPLAY=:99.0
+      sh -e /etc/init.d/xvfb start
+    fi
+  # If we're making e2e tests, we need the SauceConnect tunnel, Apache and WordPress.
+  - |
+    if [[ "$SCRIPT" == "test:e2e" ]]; then
+      .ci/travis/sauce_connect_start.sh
+      mysql -e 'create database wordpress default charset utf8mb4 default collate utf8mb4_general_ci;'
+      .ci/travis/install_wp_cli.sh
+      .ci/travis/install_wordpress.sh
+      .ci/travis/install_apache.sh
+    fi
+
+before_script:
+  # Install an updated version of NodeJS. Note that this cannot be put in a sh file as nvm must retain its choice.
+  - . $HOME/.nvm/nvm.sh
+  - nvm install 6 --reinstall-packages-from=node
+  - nvm use 6
+  - node --version
+  # Legacy (required by test:js and test:php).
+  # - npm install -g grunt-cli
+  # Install Node dependencies.
+  # - npm install
+  # Install yarn.
+  - curl -o- -L https://yarnpkg.com/install.sh | bash
+  # Update the path.
+  - export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"
+  - # Install grunt.
+  - yarn global add grunt-cli
+  # Install local packages.
+  - yarn install
+  # Code Climate test coverage.
+  - |
+    if [[ "$SCRIPT" == "test:php-test-coverage" ]]; then
+      curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+      chmod +x ./cc-test-reporter
+      ./cc-test-reporter before-build
+    fi
+
+
+# Finally launch the script.
+# script: npm run $SCRIPT
+script: yarn run $SCRIPT
+
+after_script:
+  # Stop SauceConnect.
+  - |
+    if [[ "$SCRIPT" == "test:e2e" ]]; then
+      .ci/travis/sauce_connect_stop.sh
+    fi
+  # Code Climate test coverage.
+  - |
+    if [[ "$SCRIPT" == "test:php-test-coverage" ]]; then
+      ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
+    fi
+
+# Notify our Slack channel.
+notifications:
+  slack: insideout10:NcslbQWVmD4YPInDq8TpBIno

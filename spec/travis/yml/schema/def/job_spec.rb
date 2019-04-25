@@ -48,46 +48,46 @@ describe Travis::Yml::Schema::Def::Job, 'structure' do
               '$ref': '#/definitions/type/git'
             },
             source_key: {
-              '$ref': '#/definitions/secure'
+              '$ref': '#/definitions/type/secure'
             },
             if: {
               type: :string
             },
             before_install: {
-              '$ref': '#/definitions/strs'
+              '$ref': '#/definitions/type/strs'
             },
             install: {
-              '$ref': '#/definitions/strs'
+              '$ref': '#/definitions/type/strs'
             },
             after_install: {
-              '$ref': '#/definitions/strs'
+              '$ref': '#/definitions/type/strs'
             },
             before_script: {
-              '$ref': '#/definitions/strs'
+              '$ref': '#/definitions/type/strs'
             },
             script: {
-              '$ref': '#/definitions/strs'
+              '$ref': '#/definitions/type/strs'
             },
             after_script: {
-              '$ref': '#/definitions/strs'
+              '$ref': '#/definitions/type/strs'
             },
             after_result: {
-              '$ref': '#/definitions/strs'
+              '$ref': '#/definitions/type/strs'
             },
             after_success: {
-              '$ref': '#/definitions/strs'
+              '$ref': '#/definitions/type/strs'
             },
             after_failure: {
-              '$ref': '#/definitions/strs'
+              '$ref': '#/definitions/type/strs'
             },
             before_deploy: {
-              '$ref': '#/definitions/strs'
+              '$ref': '#/definitions/type/strs'
             },
             after_deploy: {
-              '$ref': '#/definitions/strs'
+              '$ref': '#/definitions/type/strs'
             },
             before_cache: {
-              '$ref': '#/definitions/strs'
+              '$ref': '#/definitions/type/strs'
             }
           },
           keys: {
@@ -141,7 +141,7 @@ describe Travis::Yml::Schema::Def::Job, 'structure' do
 
       it { expect(subject.keys.sort).to eq properties.sort }
 
-      stages.each { |stage| it { should include stage => { '$ref': '#/definitions/strs' } } }
+      stages.each { |stage| it { should include stage => { '$ref': '#/definitions/type/strs' } } }
     end
   end
 

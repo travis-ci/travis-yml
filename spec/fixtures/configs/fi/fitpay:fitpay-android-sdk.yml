@@ -1,0 +1,28 @@
+language: android
+jdk: openjdk8
+
+android:
+  components:
+    - tools #latest for "builtin" sdk
+    - tools #latest
+    - platform-tools #latest
+    - build-tools-27.0.3
+    - android-27
+    - extra-android-m2repository
+    - android-sdk-license-.+
+
+before_install:
+- export ANDROID_HOME=/usr/local/android-sdk
+- export PATH=${PATH}:${ANDROID_HOME}/tools:${ANDROID_HOME}/platform-tools
+- echo "sdk.dir=$ANDROID_HOME" > local.properties
+- mkdir "$ANDROID_HOME/licenses"
+- echo "8933bad161af4178b1185d1a37fbf41ea5269c55" > "$ANDROID_HOME/licenses/android-sdk-license"
+- echo "d56f5187479451eabf01fb78af6dfcb131a6481e" >> $ANDROID_HOME/licenses/android-sdk-license
+
+licenses:
+  - 'android-sdk-preview-license-.+'
+  - 'android-sdk-license-.+'
+  - 'google-gdk-license-.+'
+
+script:
+  - ./gradlew clean test

@@ -1,0 +1,28 @@
+# Licensed to the Apache Software Foundation (ASF) under one or more contributor
+# license agreements; and to You under the Apache License, Version 2.0.
+
+# A Travis CI configuration file.
+
+sudo: required
+
+language:
+  - scala
+  - node_js
+
+services:
+  - docker
+
+notifications:
+  email: false
+  webhooks:
+    urls:
+      # travis2slack webhook to enable DMs on openwhisk-team.slack.com to PR authors with TravisCI results
+      secure: "nBDR6H9YA9kPT31913uRXG18RSMrl+BPWQZMtfASnXjk3v97WxF1gHQZfpvbpNOeQ7EUgWGtZEggcaNtSazyy41e84yb31DloXzK3SHhtjEbxI1ywsq0t918kkCDrhrc9uEPfw6MA5Sa3t8yWQAApWVe2zAuQeoVDriBhfSO6mke2bPVODygARYyxI3R2zlM+gY+NRT8JwMK7lp3W9y8zQYZ3W38hubBRDEiZNzhET6MsS+j6kAWp5rEvzn7DgNysY/emF144rUfShKRTtqeO3HQu8bioB+ipbwV3LUIZWCFlIMWgynXgcPC7MRqa+5NmEqrzq/u5/05pKTq19tn61I1vDVQ5deTdRKUsJN39lprw2LDWmNs7/xa5JMA0hXCKjEGrMj9UDw7OxUdL6ELTnU6sYgI8uT6x9/VV+VvJZiQqJ+/sFcdQcfS4sc7GTUZdnwE6eWFvJBJuLsday2idLPQgXPnRIzajYI/lJAyz5+MMkHuTNYPbpd0PifZ5OnD3tXSdOX2xN+33wJ5w5FX0hxYfIjiTEZA3dm13CUZQC1dDmrnnHytCv0qFT8QCV8lUxAAVlMH/YX+1O6tTXoimGqDpEBcJZLaAu6bAnAe2vC6V2osgYe4aRuqf7/ow0ywhn70LVUPa1P3BqvOoASBRk0fottHhKiVfv2IQ6RlfY0="
+
+install: true
+
+before_install:
+  - ./tools/travis/setup.sh
+
+script:
+  - ./tools/travis/build.sh

@@ -1,0 +1,13 @@
+lang: ruby
+script:
+  - "git checkout master"
+  - "git add --all"
+  - "./update_price_db.sh"
+
+after_script:
+  - git config credential.helper "store --file=.git/credentials"
+  - echo "https://${GH_TOKEN}:@github.com" > .git/credentials
+  - "./push.sh $GH_TOKEN"
+env:
+  global:
+    secure: iG7wuqlrgSnEf8n7nwPnf6DQX23tOzuxGnz2xKr3emRjzS0je67UM+aKKlqLeSL6aijCub+LmtUeiZPjwwYfTBqTkqU6YLQbAPrMm73C5hOYOYN0JrWyOlcLOgwcPxZSNCwuGcQTFG7M1askEr8O2RVSQAsqaizMgdcS1xJwtIQwJYXuKTHiM8eoJ4wqazPaXpcq/DCK/xUxewT/b7cx8Gl3QQNbxM8W4hS+AC/T52OniT5MYLq9T2GhXsmckg8p/wFFLnZCPAHd2OH8334UFTfzsM3JAklvcC6Vxy5WteAOcu5NhUmS2gN6qc1XpzxGEQ/6lomRMmMtKC6WIpIBE5q8iGSuWrqZLoY65+PoCKaxK8rGXPz3dUvNMWMPabjXvKZc/JHK15Vr7LrQwa4GoIzJKfxbJDBtfjNsWTtDDnTq0fNmS9f8agaoH4mcCEhSomIxg1e5z5Zx4FtKfm8i0Kcv00GGqbwZxEZj6qhD1xrKlPhZCDFfXK9OV6hdl5XAU885GVN7BL8Rq2CKwHPyD81GhvxBSDU9H+80cCusVVxLeQgX2kB1QZjhcGeZ2sQwxbUzYVgen2hXgH4fI6nyJTamZ+Y++3lAl2MeZXZWIkN8esVsYsHg5FD8oPoR+8jQ/cNc5+WyG8zScOWBVIga6ZWost6FzyF+vQZ6TiAoWdE=

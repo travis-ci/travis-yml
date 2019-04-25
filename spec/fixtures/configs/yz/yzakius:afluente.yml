@@ -1,0 +1,18 @@
+language: python
+python:
+  - 3.6
+services:
+  postgresql
+addons:
+  postgresql: '9.5'
+install:
+  - pip install -q -r requirements-dev.txt codecov
+  - cp contrib/env-sample .env
+before_script:
+  - psql -c "CREATE DATABASE testdb;" -U postgres
+  - python manage.py migrate --noinput
+script:
+  - flake8 .
+  - pytest afluente --cov=afluente
+after_success:
+  - codecov

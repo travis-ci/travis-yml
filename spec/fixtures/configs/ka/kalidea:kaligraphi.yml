@@ -1,0 +1,55 @@
+
+node_js: "8"
+language: node_js
+cache: npm
+
+notifications:
+    slack: kalidea-ce:2T5YxayEhI0lFrNzlL5bdrgC
+
+jobs:
+  include:
+    - stage: "CI"
+      name: "Code Quality"
+      before_script:
+        - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+        - chmod +x ./cc-test-reporter
+        - ./cc-test-reporter before-build
+      script:
+        - echo "npm test temporarily disabled"
+        - npm run test:ci
+      after_script:
+        - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
+
+    # BUILD LIB
+    - stage: "CI"
+      name: "Build library & playground"
+      script:
+        - npm run build
+        - npm run build:playground -- --base-href https://kalidea.github.io/kaligraphi/
+      deploy:
+        provider: pages
+        skip-cleanup: true
+        github-token: $GITHUB_TOKEN  # Set in the settings page of your repository, as a secure variable
+        keep-history: true
+        verbose: true
+        local-dir: dist/playground/
+        on:
+          tags: true
+
+    #DEPLOY TO NPM
+    - stage: "Deploy"
+      name: "Publish library to npm registry"
+      if: tag IS present
+      script:
+        - echo "Deploying to npm ..."
+        - npm run build
+      before_deploy:
+        - cp README.md dist/kalidea/kaligraphi/
+        - cd dist/kalidea/kaligraphi
+      deploy:
+        provider: npm
+        email: $NPM_EMAIL
+        api_key: $NPM_TOKEN
+        skip_cleanup: true
+        on:
+          tags: true

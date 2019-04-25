@@ -1,0 +1,105 @@
+language: python
+
+python: 3.6
+install:
+  - echo "Dependencies on Travis? No, thanks"
+
+git:
+  depth: false
+  quiet: true
+
+services: docker
+
+# command to install dependencies
+
+stages:
+  - name: unit tests
+    if: type IN (push, pull_request)
+  - name: image build
+    if: type IN (pull_request)
+  - name: integration tests
+    if: type IN (pull_request)
+  - name: tag image
+    if: type IN (push, pull_request)
+
+jobs:
+  include:
+    - stage: unit tests
+      python: 3.6
+      before_script:
+        - pip install tox-travis
+      # command to run tests
+      script: tox
+    - stage: image build
+      before_script:
+        - cd docker
+      script:
+        - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USER" --password-stdin
+        - ../extras/travis_check_image_change.sh os
+        # Pulling image for layer caching
+        - docker pull nbisweden/ega-openssh
+        - docker pull nbisweden/ega-base
+        - docker pull nbisweden/ega-inbox
+        - make -C images base inbox
+        - docker push nbisweden/ega-base:"PR${TRAVIS_PULL_REQUEST}"
+        - docker push nbisweden/ega-inbox:"PR${TRAVIS_PULL_REQUEST}"
+    - stage: integration tests
+      before_script:
+        - cd docker
+        - ../extras/travis_push_docker_hub.sh
+        - make bootstrap ARGS='--inbox mina --keyserver ega'
+        - sudo chown -R travis private
+        - docker network create cega
+        - make up-omit service=res
+        - docker-compose ps
+      script:
+        - cd tests
+        - mvn test -Dtest=IngestionTests -B
+    - stage: integration tests
+      before_script:
+        - cd docker
+        - ../extras/travis_push_docker_hub.sh
+        - make bootstrap ARGS='--inbox mina --keyserver ega'
+        - sudo chown -R travis private
+        - docker network create cega
+        - make up
+        - docker-compose ps
+      script:
+        - cd tests
+        - mvn test -Dtest=OutgestionTests -B
+    - stage: integration tests
+      before_script:
+        - cd docker
+        - ../extras/travis_push_docker_hub.sh
+        - make bootstrap ARGS='--inbox mina --keyserver ega'
+        - sudo chown -R travis private
+        - docker network create cega
+        - make up
+        - docker-compose ps
+      script:
+        - cd tests
+        - mvn test -Dtest=RobustnessTests -B
+    - stage: integration tests
+      before_script:
+        - cd docker
+        - ../extras/travis_push_docker_hub.sh
+        - make bootstrap
+        - sudo chown -R travis private
+        - docker network create cega
+        - docker-compose up -d #--scale ingest=3 --scale verify=5
+        - docker-compose ps
+      script:
+        - sleep 5
+        - pip install -r https://raw.githubusercontent.com/NBISweden/LocalEGA-cryptor/master/requirements.txt
+        - pip install git+https://github.com/NBISweden/LocalEGA-cryptor.git
+        - pip install pika
+        - make -C test
+        - sleep 10
+        - make -C test check
+    - stage: tag image
+      script: ./extras/travis_push_docker_hub.sh
+
+notifications:
+  email: false
+  slack:
+    secure: eUyEWWvrFbzW+j+WKIOrHm7zeJ+6+o/WmI5cp1UYsOT9emxGE4kzW057cG9EV+sgKUdoYP1zSfCH0TLSOjY7otyqccqZH5WxDtiBSEXpkA8ID8jzQnX1VZWFn1vK+gWpER87VdLonVGt4db1lqE3Gm/uCbEqzrmfYjE1Hrk4PM8FfLQfD3+YBPUnWGSZKAPmdHAKh7IF9VQ6f1zaspijp/Sxa7Dk9F+Z4o2nsZ1woSyOVAwWLJhkvEafyEFfb/9tPMF1wtoXlLEzV1JDRzyjzbLGXQcpo6+Qx3+v7w6eRbriifOq2tByBfeI+RlWytwOgb+B/mfN0uFPbdg/Bgr//NMDrqwCnFQs7A2Dj287mQZI4YpRvh4Cneu3ReVGQKd9SJq28BliwXBBv3xyeFfGEbBOMNKb0VCsNjRuWITncf/qx3Vxn13VAYxcdA9EZpa1UzT6V94nlbLUq3twFKBJiDmpraYnI+JGFCZ32Xh8bySNqbEBe7TnqAG015c4pKKx++3IQJePfSPbRKzwWNAM5yG7RuVmud5fxfN+KdQz7vKfjOeaHKG4PScfhRT0zthtgmPG+m5eCprIbdFlacU3UyobLtxZd8wI9qJnGGvB3bHOsuaqpS2ymDWbd/n1aeryrcTkS/gPuwMvTs6S32pRf/orKqyLfnSZPeTcOevbzHw=

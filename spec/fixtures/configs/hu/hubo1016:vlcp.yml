@@ -1,0 +1,31 @@
+language: python
+sudo: required
+python:
+  - "3.5"
+  - "3.6"
+  - "pypy3.5"
+ 
+services:
+  - docker
+
+env:
+  matrix:
+    - KV_DB=redis
+    - KV_DB=zookeeper
+    - KV_DB=zookeeper ovs_version=2.9.3
+
+# command to install dependencies
+install: 
+  - "pip install nstruct hiredis pychecktype"
+  - pip install coverage
+
+cache:
+  directories:
+    - cache
+    
+    
+# command to run tests
+script: 
+  - sudo -H -E bash -xe ci_test.sh
+
+

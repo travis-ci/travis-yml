@@ -1,0 +1,27 @@
+language: java
+jdk:
+    - openjdk7
+    - oraclejdk8
+before_install:
+    - cp ./etc/settings.xml ~/.m2/
+    - cp ./etc/onFailure.sh  ~/
+    - cp ./etc/onSuccess.sh  ~/
+    - chmod 777 ~/onFailure.sh
+    - chmod 777 ~/onSuccess.sh
+script:
+    - mvn -B clean verify
+after_failure: ~/onFailure.sh
+after_success: ~/onSuccess.sh
+after_script:
+    - mvn -B cobertura:cobertura coveralls:report
+notifications:
+    email: false
+    irc:
+        channels:
+            - chat.freenode.net#lightblue
+    on_success: always
+env:
+    global:
+        - secure: VhIbx7LUuJbGZNOvhthS54bxZ1vd4bjEirEZmCFwdh/keErAdDGrr60u4nrbfYYGr7sc/9zXolPvQGvAQXeFKPKFOshwb1g/8Sw1ig1Yj7dLATzBrhXMiOE1mpyQPi/lAwmp4Idteoo8oj3W25ZVI6OyWPTCRGh3xhpDIaG9YL0=
+        - secure: AXGRvMtzD6Ph37vLYf6vB2AtVUr6AijaEPtUSTkVEf0N32pWv/GgSG/zJRmZiwc6Nab17WYNSg3ES+suwfNnZZYLFr/f4RK4iyB1/p+mAfAdHlcBniM1EuO9Aazr2D3WDZTIe3+0K8GjwLqCWHW3iHj38cMa0b34DjCFrs/vPsI=
+sudo: false

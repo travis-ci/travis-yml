@@ -1,0 +1,137 @@
+---
+language: python
+python: "2.7"
+sudo: false
+cache: pip
+# setuptools_scm module needs the git history since the last master branch to correctly calculate the number of revisions since the last release
+git:
+  depth: 10000
+addons:
+  postgresql: "9.4"
+
+services:
+  - postgresql
+  - redis-server
+env:
+  matrix:
+    - TOXENV=py27
+  global:
+    - FLASK_APP="$(readlink -f manage.py)"
+    - SECRET_KEY="$(openssl rand -base64 32)"
+    - PORTAL_VERSION="$(python setup.py --version)"
+
+    - PGUSER=postgres
+    - PGPASSWORD=""
+    - PGHOST=localhost
+    - PGDATABASE=portal_unit_tests
+    - SQLALCHEMY_DATABASE_TEST_URI="postgresql://${PGUSER}:${PGPASSWORD}@${PGHOST}/${PGDATABASE}"
+
+    # Remap TravisCI-specific environment variables to generic values
+    - GH_USERNAME="$(echo $TRAVIS_REPO_SLUG | cut --delimiter / --fields 1)"
+    - GH_REPO="$(echo $TRAVIS_REPO_SLUG | cut --delimiter / --fields 2)"
+    - GIT_BRANCH="$TRAVIS_BRANCH"
+    - GIT_TAG="$TRAVIS_TAG"
+    - GIT_HASH="$TRAVIS_COMMIT"
+
+    - DOCKER_REPOSITORY=""
+    - DOCKER_IMAGE_NAME="${DOCKER_IMAGE_NAME:-truenth_portal}"
+    - DOCKER_IMAGE_TAG=travis
+    - DOCKER_EXTRA_TAGS="$TRAVIS_BUILD_NUMBER"
+
+    - PIP_QUIET=1
+
+matrix:
+  include:
+    - env: TOXENV=py27
+    - env: TOXENV=py3
+      python: "3.6"
+    - env: TOXENV=translations PERSISTENCE_DIR="gil"
+    - env: TOXENV=translations PERSISTENCE_DIR="eproms"
+    - env: TOXENV=docs
+      services: []
+      addons: {}
+      python: "3.6"
+    - env: TOXENV=build-artifacts
+      services:
+        - docker
+      addons: {}
+    - env: TOXENV=ui
+      addons:
+        postgresql: "9.4"
+        sauce_connect: true
+  allow_failures:
+    - env: TOXENV=ui
+
+before_install:
+  # Disable non-blocking I/O for stdout, stderr https://github.com/travis-ci/travis-ci/issues/4704#issuecomment-348435959
+  - python -c 'import os,sys,fcntl; flags = fcntl.fcntl(sys.stdout, fcntl.F_GETFL); fcntl.fcntl(sys.stdout, fcntl.F_SETFL, flags&~os.O_NONBLOCK);'
+  # Fail if non-blocking I/O enabled
+  - python -c 'import os,sys,fcntl; flags = fcntl.fcntl(sys.stdout, fcntl.F_GETFL); exit(flags&os.O_NONBLOCK);'
+
+  # Fetch all remote branches instead of just the currently checked out one
+  - git config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*"
+
+  # Create a database for each py.test worker if TEST_JOB_COUNT set
+  - if [ -n "$TEST_JOB_COUNT" ]; then
+      for ((i=0; i<$TEST_JOB_COUNT; i++)); do
+        createdb
+          --owner "$PGUSER"
+          --username "$PGUSER"
+        "${PGDATABASE}${i}" ;
+      done ;
+    else
+      createdb
+        --owner "$PGUSER"
+        --username "$PGUSER"
+      "$PGDATABASE" ;
+    fi
+
+  - pip install --upgrade pip setuptools
+
+install:
+  - pip install tox
+  # Install test dependencies only
+  - tox --notest
+
+  # Start celery from tox virtual environment
+  - if [ -f "${TRAVIS_BUILD_DIR}/.tox/${TOXENV}/bin/celery" ]; then
+      PATH="${TRAVIS_BUILD_DIR}/.tox/${TOXENV}/bin/"
+      celery worker
+        --detach
+        --app portal.celery_worker.celery
+        --loglevel info
+      ;
+    fi
+
+script:
+  - tox
+
+after_success:
+  - if
+    [ -n "$CODACY_PROJECT_TOKEN" ] &&
+    [ -f "coverage.xml" ] &&
+    [ "$TOXENV" = "py27" ] &&
+    [ "$GIT_BRANCH" = "develop" ]; then
+      pip install codacy-coverage ;
+      python-codacy-coverage -r coverage.xml ;
+    fi
+
+before_deploy:
+  - ./bin/docker-login.sh
+
+# Only deploy from "build-artifacts" tox environment (see TOXENV) and corresponding TravisCI job
+deploy:
+  - provider: script
+    skip_cleanup: true
+    on:
+      all_branches: true
+      condition:
+        - $TOXENV = build-artifacts
+        - -v ARTIFACTORY_API_KEY
+        # Only deploy from develop, master and release branches
+        - $GIT_BRANCH =~ ^(develop$|master$|release/)
+    script:
+      - ./bin/docker-push.sh
+
+after_deploy:
+  - docker images --digests --all

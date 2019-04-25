@@ -1,0 +1,170 @@
+language: php
+
+addons:
+  apt:
+    packages:
+      - parallel
+  sonarcloud:
+    organization: "ichhabrecht-github"
+    branches:
+      - master
+      - pre-merge
+
+cache:
+  directories:
+    - $HOME/.composer/cache
+    - $HOME/.sonar/cache
+
+jdk:
+  - oraclejdk8
+
+sudo: required
+
+before_install:
+  - if php -i | grep -v TRAVIS_CMD | grep -q xdebug; then phpenv config-rm xdebug.ini; fi
+
+install:
+  - >
+    if [ "$TYPO3" == "dev-master" ]; then
+      composer config minimum-stability dev;
+      composer config prefer-stable true;
+    fi
+  - composer require nimut/typo3-complete="$TYPO3"
+  - git checkout composer.json
+  - export TYPO3_PATH_ROOT=$PWD/.Build/Web
+  - export typo3DatabaseName=typo3
+  - export typo3DatabaseHost=localhost
+  - export typo3DatabaseUsername=root
+  - export typo3DatabasePassword=
+
+script:
+  - >
+    echo;
+    echo "Running unit tests";
+    echo;
+    echo;
+    .Build/bin/phpunit -c res/Configuration/UnitTests.xml .Build/Web/typo3conf/ext/testbase/Tests/Unit/;
+
+  - >
+    echo;
+    echo "Running functional tests";
+    echo;
+    echo;
+    find '.Build/Web/typo3conf/ext/testbase/Tests/Functional' -wholename '*Test.php' | parallel --gnu 'echo; echo "Running functional test suite {}"; .Build/bin/phpunit -c res/Configuration/FunctionalTests.xml --exclude-group destructive {}';
+
+  - >
+    echo;
+    echo "Running destructive functional tests";
+    echo;
+    echo;
+    rm -Rf .Build/Web/typo3temp/*;
+    .Build/bin/phpunit -c res/Configuration/FunctionalTests.xml --group destructive .Build/Web/typo3conf/ext/testbase/Tests/Functional/;
+
+  - >
+    echo;
+    echo "Running php lint";
+    echo;
+    echo;
+    find . -name \*.php ! -path "./.Build/*" | parallel --gnu php -d display_errors=stderr -l {} > /dev/null \;;
+
+jobs:
+  fast_finish: true
+  allow_failures:
+    - env: TYPO3=dev-master
+  include:
+    - stage: test
+      php: 7.3
+      env: TYPO3=dev-master
+    - stage: test
+      php: 7.3
+      env: TYPO3=^9.5
+    - stage: test
+      php: 7.3
+      env: TYPO3=^8.7
+    - stage: test
+      php: 7.2
+      env: TYPO3=dev-master
+    - stage: test
+      php: 7.2
+      env: TYPO3=^9.5
+    - stage: test
+      php: 7.2
+      env: TYPO3=^8.7
+    - stage: test
+      php: 7.2
+      env: TYPO3=^7.6
+    - stage: test
+      php: 7.1
+      env: TYPO3=^8.7
+    - stage: test
+      php: 7.1
+      env: TYPO3=^7.6
+    - stage: test
+      php: 7.0
+      env: TYPO3=^8.7
+    - stage: test
+      php: 7.0
+      env: TYPO3=^7.6
+
+    - stage: sonarqube scanner
+      if: type = push AND branch IN (master, pre-merge)
+      php: 7.2
+      before_install: skip
+      install:
+        - mkdir -p .Log/coverage/ .Log/log/
+        - export TYPO3_PATH_ROOT=$PWD/.Build/Web
+        - export typo3DatabaseName=typo3
+        - export typo3DatabaseHost=localhost
+        - export typo3DatabaseUsername=root
+        - export typo3DatabasePassword=
+      before_script:
+      script:
+        - >
+          for TYPO3 in "^7.6" "^8.7" "^9.5"; do
+            echo;
+            echo "Running TYPO3 version $TYPO3";
+            echo;
+            echo;
+            git clean -Xdf;
+            composer require nimut/typo3-complete="$TYPO3";
+            git checkout composer.json;
+            VERSION=${TYPO3//[!0-9]/};
+
+            echo;
+            echo "Running unit tests";
+            echo;
+            echo;
+            .Build/bin/phpunit -c res/Configuration/UnitTests.xml --log-junit .Log/log/unit$VERSION.xml --coverage-php .Log/coverage/unit$VERSION.cov --whitelist ./ .Build/Web/typo3conf/ext/testbase/Tests/Unit/;
+
+            echo;
+            echo "Running functional tests";
+            echo;
+            echo;
+            .Build/bin/phpunit -c res/Configuration/FunctionalTests.xml --exclude-group destructive --log-junit .Log/log/functional$VERSION.xml --coverage-php .Log/coverage/functional$VERSION.cov --whitelist ./ .Build/Web/typo3conf/ext/testbase/Tests/Functional/;
+
+            echo;
+            echo "Running destructive functional tests";
+            echo;
+            echo;
+            rm -Rf .Build/Web/typo3temp/*;
+            .Build/bin/phpunit -c res/Configuration/FunctionalTests.xml --group destructive --log-junit .Log/log/functional-destructive$VERSION.xml --coverage-php .Log/coverage/functional-destructive$VERSION.cov --whitelist ./ .Build/Web/typo3conf/ext/testbase/Tests/Functional/;
+          done
+
+        - >
+          echo;
+          echo "Merging log and coverage files";
+          echo;
+          echo;
+          .Build/bin/phpunit-merger coverage .Log/coverage/ .Log/coverage.xml;
+          .Build/bin/phpunit-merger log .Log/log/ .Log/log.xml;
+
+        - git fetch --unshallow
+
+        - >
+          echo;
+          echo "Running SonarQube Scanner";
+          echo;
+          echo;
+          if [ -n "$SONAR_TOKEN" ]; then
+            sonar-scanner;
+          fi

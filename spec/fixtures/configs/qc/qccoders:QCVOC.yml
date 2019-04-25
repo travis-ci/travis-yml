@@ -1,0 +1,119 @@
+stages:
+  - "Build and Test"
+  - "Deploy API"
+  - "Deploy Web"
+
+jobs:
+  include:
+  - language: csharp
+    stage: "Build and Test"
+    mono: none
+    dotnet: 2.1
+    before_script:
+    - cd api
+    - dotnet restore
+    script:
+    - dotnet build --no-restore --no-incremental
+    - dotnet test QCVOC.Api.Tests.Unit/QCVOC.Api.Tests.Unit.csproj
+  - language: csharp
+    stage: "Deploy API"
+    mono: none
+    dotnet: 2.1
+    before_script:
+    - cd api
+    script: skip
+    before_deploy:
+    - dotnet publish --configuration Release
+    - cd QCVOC.Api/bin/Release/netcoreapp2.1/publish
+    deploy:
+      - provider: lambda
+        access_key_id: AKIAJGLMJSQ5HROL7PTQ
+        secret_access_key:
+          secure: Xd6dEKIV6PS8dpZnG234m0R/9OE0Niqz/1kxGDvH2k4sRY0l3yF4WGf3DPvxI5I0jRuJuA/bFgAcGkhvhUG2wmTUawM58TO4jnDkQlSlj5pXuGRiyJiSVxnanRSp63dbfNDM7KCw8M1Tw5XQXKZVUynzbne/EeYs/c+jyAIX8OMMyHMPm1wE5m/cYiAl97AePlLtJhFB0hxG4GbmzNqiBHSuppPViY63wnfv0sfs0leXnPZ9UNEahfbuuFWymZxvJTmpdD5/4UrAw68C7GH8IQ5Z+2oWIlooTteNiDyNiFzX4aCKZ6SfQJAH+HInpPDfR2LKi0xKChb2RLccvW3FnCENyEihNYmELE0uiGHrELBIBZXWFH/8qH+2+4nOWuhEGhmdywTOpIYdOrXTpwxsMCc+42eD12NNeGFRSoOu+nqsDl3ifI3C0ZYrKYb70i78IlAcnki68UwWhvJhSA9TymwXV4INhiiTE3TQhw9duwlwMnxk+PTIhBt2tEjggDIcjCc75r6GTYdhex/r/PEYBL24qVM82GHeOKz0u4Ew85XpU/W9BwKu7tFzI8pxow8F0UCoKkcqDfNioqFx91qmrimFh5Z0GAsh4honixBWqEzBhKRVBNkHVrJ23PxPQBoX8n7EI7ehXGPnb2rVvcSkoQkHsl8NmYZkjYviv2y9ezc=
+        region: us-east-1
+        function_name: QCVOC-DEV
+        role: arn:aws:iam::620048899897:role/service-role/QCVOC-Prod-Lambda
+        runtime: dotnetcore2.1
+        timeout: 30
+        memory_size: 256
+        module_name: QCVOC.Api::QCVOC.Api
+        handler_name: LambdaEntryPoint::FunctionHandlerAsync
+        on:
+          repo: qccoders/QCVOC
+          branch: develop
+      - provider: lambda
+        access_key_id: AKIAJGLMJSQ5HROL7PTQ
+        secret_access_key:
+          secure: Xd6dEKIV6PS8dpZnG234m0R/9OE0Niqz/1kxGDvH2k4sRY0l3yF4WGf3DPvxI5I0jRuJuA/bFgAcGkhvhUG2wmTUawM58TO4jnDkQlSlj5pXuGRiyJiSVxnanRSp63dbfNDM7KCw8M1Tw5XQXKZVUynzbne/EeYs/c+jyAIX8OMMyHMPm1wE5m/cYiAl97AePlLtJhFB0hxG4GbmzNqiBHSuppPViY63wnfv0sfs0leXnPZ9UNEahfbuuFWymZxvJTmpdD5/4UrAw68C7GH8IQ5Z+2oWIlooTteNiDyNiFzX4aCKZ6SfQJAH+HInpPDfR2LKi0xKChb2RLccvW3FnCENyEihNYmELE0uiGHrELBIBZXWFH/8qH+2+4nOWuhEGhmdywTOpIYdOrXTpwxsMCc+42eD12NNeGFRSoOu+nqsDl3ifI3C0ZYrKYb70i78IlAcnki68UwWhvJhSA9TymwXV4INhiiTE3TQhw9duwlwMnxk+PTIhBt2tEjggDIcjCc75r6GTYdhex/r/PEYBL24qVM82GHeOKz0u4Ew85XpU/W9BwKu7tFzI8pxow8F0UCoKkcqDfNioqFx91qmrimFh5Z0GAsh4honixBWqEzBhKRVBNkHVrJ23PxPQBoX8n7EI7ehXGPnb2rVvcSkoQkHsl8NmYZkjYviv2y9ezc=
+        region: us-east-1
+        function_name: QCVOC-PROD
+        role: arn:aws:iam::620048899897:role/service-role/QCVOC-Prod-Lambda
+        runtime: dotnetcore2.1
+        timeout: 30
+        memory_size: 256
+        module_name: QCVOC.Api::QCVOC.Api
+        handler_name: LambdaEntryPoint::FunctionHandlerAsync
+        on:
+          repo: qccoders/QCVOC
+          branch: master
+  - language: node_js
+    stage: "Build and Test"
+    node_js:
+    - stable
+    before_script:
+    - cd web
+    - npm install
+    cache:
+      directories:
+      - web/node_modules
+    script:
+    - npm test
+    - npm run build
+  - language: node_js
+    stage: "Deploy Web"
+    node_js:
+    - stable
+    before_script:
+    - cd web
+    - npm install
+    cache:
+      directories:
+      - web/node_modules
+    script:
+    - npm run build
+    deploy:
+      - provider: s3
+        access_key_id: AKIAJGLMJSQ5HROL7PTQ
+        secret_access_key:
+          secure: Xd6dEKIV6PS8dpZnG234m0R/9OE0Niqz/1kxGDvH2k4sRY0l3yF4WGf3DPvxI5I0jRuJuA/bFgAcGkhvhUG2wmTUawM58TO4jnDkQlSlj5pXuGRiyJiSVxnanRSp63dbfNDM7KCw8M1Tw5XQXKZVUynzbne/EeYs/c+jyAIX8OMMyHMPm1wE5m/cYiAl97AePlLtJhFB0hxG4GbmzNqiBHSuppPViY63wnfv0sfs0leXnPZ9UNEahfbuuFWymZxvJTmpdD5/4UrAw68C7GH8IQ5Z+2oWIlooTteNiDyNiFzX4aCKZ6SfQJAH+HInpPDfR2LKi0xKChb2RLccvW3FnCENyEihNYmELE0uiGHrELBIBZXWFH/8qH+2+4nOWuhEGhmdywTOpIYdOrXTpwxsMCc+42eD12NNeGFRSoOu+nqsDl3ifI3C0ZYrKYb70i78IlAcnki68UwWhvJhSA9TymwXV4INhiiTE3TQhw9duwlwMnxk+PTIhBt2tEjggDIcjCc75r6GTYdhex/r/PEYBL24qVM82GHeOKz0u4Ew85XpU/W9BwKu7tFzI8pxow8F0UCoKkcqDfNioqFx91qmrimFh5Z0GAsh4honixBWqEzBhKRVBNkHVrJ23PxPQBoX8n7EI7ehXGPnb2rVvcSkoQkHsl8NmYZkjYviv2y9ezc=
+        bucket: qcvoc-prod
+        skip_cleanup: true
+        local_dir: build
+        region: us-east-1
+        acl: public_read
+        on:
+          repo: qccoders/QCVOC
+          branch: master
+      - provider: s3
+        access_key_id: AKIAJGLMJSQ5HROL7PTQ
+        secret_access_key:
+          secure: Xd6dEKIV6PS8dpZnG234m0R/9OE0Niqz/1kxGDvH2k4sRY0l3yF4WGf3DPvxI5I0jRuJuA/bFgAcGkhvhUG2wmTUawM58TO4jnDkQlSlj5pXuGRiyJiSVxnanRSp63dbfNDM7KCw8M1Tw5XQXKZVUynzbne/EeYs/c+jyAIX8OMMyHMPm1wE5m/cYiAl97AePlLtJhFB0hxG4GbmzNqiBHSuppPViY63wnfv0sfs0leXnPZ9UNEahfbuuFWymZxvJTmpdD5/4UrAw68C7GH8IQ5Z+2oWIlooTteNiDyNiFzX4aCKZ6SfQJAH+HInpPDfR2LKi0xKChb2RLccvW3FnCENyEihNYmELE0uiGHrELBIBZXWFH/8qH+2+4nOWuhEGhmdywTOpIYdOrXTpwxsMCc+42eD12NNeGFRSoOu+nqsDl3ifI3C0ZYrKYb70i78IlAcnki68UwWhvJhSA9TymwXV4INhiiTE3TQhw9duwlwMnxk+PTIhBt2tEjggDIcjCc75r6GTYdhex/r/PEYBL24qVM82GHeOKz0u4Ew85XpU/W9BwKu7tFzI8pxow8F0UCoKkcqDfNioqFx91qmrimFh5Z0GAsh4honixBWqEzBhKRVBNkHVrJ23PxPQBoX8n7EI7ehXGPnb2rVvcSkoQkHsl8NmYZkjYviv2y9ezc=
+        bucket: qcvoc-dev
+        skip_cleanup: true
+        local_dir: build
+        region: us-east-1
+        acl: public_read
+        on:
+          repo: qccoders/QCVOC
+          branch: develop
+  - language: android
+    stage: "Build and Test"
+    android:
+      components:
+        - build-tools-28.0.2
+        - android-26
+        - extra-google-google_play_services
+    before_script:
+    - cd mobile
+    script:
+    - ./gradlew --quiet build

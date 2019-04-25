@@ -1,0 +1,48 @@
+language: python
+dist: trusty
+jobs:
+  include:
+  - stage: test
+    name: Lint
+    before_script:
+      - psql -c 'create database test_db;' -U postgres
+    script:
+    - echo flake8
+  - stage: test
+    name: Test
+    python: 3.6
+    addons:
+      postgresql: "9.5"
+    env:
+      - DJANGO_SETTINGS_MODULE=app.settings.test
+    script:
+      - pip install -r requirements-test.txt
+      - coverage run ./manage.py test
+      - coverage xml
+      - coveralls
+      - mv coverage.xml ./build-data
+      - aws s3 sync ./build-data s3://agendaodonto-server-ci/$TRAVIS_BUILD_NUMBER --expires "$(date -d '+1 hour' --utc +'%Y-%m-%dT%H:%M:%SZ')"
+  - stage: Quality Gate
+    name: Sonar
+    script:
+      - sonar-scanner
+  - stage: deploy
+    if: type = push
+    script:
+      - scripts/deploy.sh
+before_install:
+- openssl aes-256-cbc -k "$SECRET" -in .travis/deploy.key.enc -out .travis/deploy.key
+  -d
+ # set up awscli packages
+- pip install awscli
+- mkdir -p build-data
+- aws s3 sync s3://agendaodonto-server-ci/$TRAVIS_BUILD_NUMBER ./build-data --expires "$(date -d '+1 hour' --utc +'%Y-%m-%dT%H:%M:%SZ')"
+
+env:
+  global:
+  - secure: Wut/hSzxL/fA58X3GBA7cyTh9Iy7s9urMneRMK/2/L8y/QCmTWJQgPSnt9h60ErGtJwEGB9/G/3QuxdaKdlcxLbORADJDYWpI6ZFUE7rp1yTRc2piiYEaeYbZ8q0QQtsR341aXqDTDjT2XiclmXJbtr8GYUVQ9IS1/FW1dEyyBt4sYqOsLl/Y3GQD9WFJnAx0oZ9QF7/WREzFEHGdfRtrz8lRJAMwqCOFxbYBZYewbX+vPfXgpybEp2nrY+iyvoHK3IWU9uiUUtUxhNqRLdq6v/HOzYngnu02CD8XSmQVaVw+DiCdE9loLePs+FcTnXO1XNGrr3hL5nQ5D9kuHtfT6l6F21ebobs4iAodL+Kitp3uKE1Q+gDtiPhPxDvFZ3DREAHvTZu611gYS46DVO1TM2FuhLT8xfUdc0zLmrdFl+ksiOsxFk1S/y6XbmrB3DjwWipkHKaVQcwxgRiInFQ5hNKu0Wsvr6E8DvBv2HcJAjtUyS4Dv69hbSJvemgvsA4iEmPyjE+sXorN9GLxiYcabVsxdMWP+f2OZGMg8dMVgrcDda1uyifCsErBM9cztKKNnpXpje+SDyeKZgvELQ7cIxDcsNbTCy71/mL3iBBHK6sxknaQKuOT+OWmkZ6K7c0ecgo0BILSPxE6MMeZhVUOigHj5vEvnEpvJXk7+gSt3s=
+  - secure: LydSeyFT0xazLA6k4AW4qNSbR4UelgqT3IfD7b/TtuDYmFSnB6vCdxO9ReBfOp4C7EOE15pkBct682tJ0zaXavZFvKzq7deLGqtGxg82SF7/Ns/704k7cwF72luwB+Ows7wXATyCtwTztIRopUOQDM+PfkG7Ere/siLjoa67OkOEyg79HsAeS3HGa8Pm0nyeAdQEsTi1l3bPTLyBv5Ih0TpyTt7ZJh8bSs5YZEIcdgw4OX0SqHL07NjjpgkwM4m+G4sz8IJPtpKxd2SX4EAE9egjOkTW/5U+eJfXgmhfOEry9R00Yk/pTQMLS7Lenoe6Fs4tXNUd1TayX4FqG7wiDysoWi7Mdda3yq8DgSzowt3JIDMa7GNuFyFKUe1UGbzD74B+/sqigyw2/P0d5IShBfOFDgYXWyCIiWi17BkFZvPoPaZKL1K5At6qfNj04qEdY4HYDmDocumfeAuUoBp55ajhQSF2+SbZxX1hmvwgQA0+cfcrOZoBBQJrvxYOMzGreBmEdF9QhEdr+USVVre25HhmCEvD/V1UHMMvn6YG4kEqxpEaAX1H/J8RQzZRriSe9ulc/ucRsewCHvFaiA/ppxdPK6/J1XzYHDQmSgAhHomLvaul2aS8oG4kE0d9IC8WDaxbEAK5SQAbm6vEANRq/AYh01Fxq2hr61UDzsWF2/0=
+  
+addons:
+  sonarcloud:
+    organization: "agendaodonto"

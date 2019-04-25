@@ -1,0 +1,20 @@
+sudo: required
+language: node_js
+node_js:
+- '10'
+before_install:
+  - export TZ=Africa/Nairobi
+  - date
+  - npm install -g node-gyp
+  - cp $TRAVIS_BUILD_DIR/conf/config.example.json $TRAVIS_BUILD_DIR/conf/config.json
+addons:
+  apt:
+    sources:
+    - ubuntu-toolchain-r-test
+    packages:
+    - g++-5
+script:
+- npm test
+- npm start
+env:
+  - CXX=g++-5

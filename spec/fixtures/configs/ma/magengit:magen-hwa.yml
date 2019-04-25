@@ -1,0 +1,82 @@
+dist: trusty
+sudo: required
+
+services:
+  - docker
+  - mongodb
+
+notifications:
+  email:
+    recipients:
+      - magen-build@cisco.com
+    on_failure: always
+
+language: python
+matrix:
+  include:
+    - python: 3.6
+      env: TO_BUILD=NATIVE
+    - python: 3.6
+      env: TO_BUILD=DOCKER
+  fast_finish: true
+
+before_install:
+  - sudo apt-get -qq update
+  - sudo apt-get install -y apt-utils
+  - sudo apt-get install -y wget
+  - sudo apt-get install -y xz-utils
+  - sudo apt-get install -y build-essential
+  - sudo apt-get install -y libsqlite3-dev
+  - sudo apt-get install -y libreadline-dev
+  - sudo apt-get install -y libssl-dev
+  - sudo apt-get install -y libffi-dev
+  - sudo apt-get install -y openssl
+  - sudo apt-get install -y net-tools
+  - sudo apt-get install -y curl
+  - sudo apt-get -qq update
+
+  # Mongo
+  # mongo: purge Travis mongo install version first
+  # - sudo apt-get purge -y mongodb mongodb-clients mongodb-server mongodb-dev
+  # - sudo apt-get purge -y mongodb-10gen
+  # - sudo apt-get autoremove -y
+  # - sudo rm -rf /var/lib/mongodb/
+  # mongo: install from package, as a service.
+  # - sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 0C49F3730359A14518585931BC711F9BA15703C6
+  # - echo "deb [ arch=amd64 ] http://repo.mongodb.org/apt/ubuntu trusty/mongodb-org/3.4 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.4.list
+  # - sudo apt-get -qq update
+  # - sudo apt-get install -y mongodb-org
+  # - sudo chown -R mongodb:mongodb /var/lib/mongodb
+  # mongo: allow connections to other interfaces besides loopback
+  - sudo sed -i.bak '/bindIp/d' /etc/mongod.conf
+  # - sudo service mongod start
+
+  # docker-compose
+  - sudo curl -o /usr/local/bin/docker-compose -L "https://github.com/docker/compose/releases/download/1.11.2/docker-compose-$(uname -s)-$(uname -m)"
+  - sudo chmod +x /usr/local/bin/docker-compose
+  - docker-compose -v
+
+  - sudo apt-get -qq update
+  - pip3 install twine
+  - pip3 install codecov
+
+install:
+  - cd hwa
+  - if [ "$TO_BUILD" = "NATIVE" ]; then make all; fi
+  - if [ "$TO_BUILD" = "DOCKER" ]; then make build_docker; fi
+
+before_script:
+  - if [ "$TO_BUILD" = "DOCKER" ]; then sudo docker images; fi
+  - printenv
+
+script:
+  - if [ "$TO_BUILD" = "NATIVE" ]; then make test_travis; fi
+  - if [ "$TO_BUILD" = "DOCKER" ]; then make test_docker; fi
+
+after_success:
+  - if [ "$TRAVIS_BRANCH" = "master" -a "$TRAVIS_PULL_REQUEST" = "false" ]; then
+      make upload;
+      codecov;
+    else
+      echo $TRAVIS_BRANCH;
+    fi

@@ -1,0 +1,22 @@
+language: node_js
+node_js:
+- stable
+- lts/*
+cache: yarn
+env:
+  global:
+  - secure: Fx0kz8EGbW5sMZZ+u6UP3bt3MsRtXfDggbON1X0+gL/O2W01QMn/CqJyvQI6hBPchPzdGsueoxlQ4XKU+vR5suEStqNbJVdtgteLHSyY74wN4iMlZJK8h15oBl4LCwzRuGPoAIoVYC5UUBVO3jNx1c4axF5dKm4Uav/0FP0nvp1WkYGT1tLMoUiIsBh3wCV7zsKqsidOmbLYvYpPX/0iT28FkRFXwoYY3DjCgXIVHrqT0Y0QPZpKcgcd96BRqM+RHM0pVcaoXP5GFpj+9XaInAqsZZ2eIFZYrUjN7DJnmdSRR1eS6quS7qGDSa67QuyM0YWj2/0kekUwYNuuI3wvosvq8wWTG0dWRjyjJaTE3A1GpnKuTLer7IjdOZEUDe8uMsS1QaZzxfwtYQ/5n2WO4X6A3BLNLOsXM8Fsu/6GEAg/sK+VejkK8XAQ4oD8xTERjp6Mhm1Wi2Jfc5Ju4LQj1fv0wjMGNwbxcctphZarKZAAoMMDJ6fLEc8XBljxLyTjSIFTrC6V1335Nb8Y2veuZTTKWMrtyHr5y8RksCcY4qRzHFvDQQl7L3JxKEv5Se2cl+Rm0oQH3nOkgSK9Q8MRl+bJDAtO55wZ37nW0DzO+qybmKuGzs8jPsDyaIe13tZP+2d1WCwxrlp0SElLjx915i/8IHxBEy/lw/OwjagX7HI=
+before_install:
+- echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > "${HOME}/.npmrc"
+- npm whoami
+deploy:
+- provider: script
+  script: npm run release
+  skip_cleanup: true
+  on:
+    repo: uncovertruth/styleguide
+    tags: true
+notifications:
+  email: false
+  slack:
+    secure: MZyc+Ff87HJd19Rm5gZFbFE+QEMhpGpZWW9nsmNVkxECTigNH8ElPCHEAWaSGw60IwVuq7NQI+Nd6AakKcV1oqn5SvbFeYKCqzY9toCkjYH003rowPrYeGocjy64u7oBT0nFdZbSwK9o3d64PH/AK3B5PyBRRaPyR+rjZsFDDMBkakaZnnXPUkQReb/gbH7PgOAh0dWrz4Zx1Ib7w7Z0e75L0ouJ9FbaCCC6MV8gzCRweos06shrSWXEouwtpKSSKzcJHMGYfVuV3iHS6UGg+1jBRAy65wmBNPeUXc8VNzJEt3qHZo3LsFh1VRh7lFj4E++/+YWYRa+GqQdTYowMySW5MyiAOYvBCJOn7OOL57oQxaJLZ3EzrGWhzs3PTV2r2C0RSvL5XqrV+FvkQJYTEwqcZ9B5UOzpYt25/FZ7C8zmRlBgOrqO67w7RJ5jcOmT0spKpi/PNTZD9tshccHHVVvenx9pZdtN2G0LEn24DsHKIE8+/UN+cSEJx6JMaYXcHt5kEUwVhm29qv9GUcqVcBTfQ33cll8pG0r3VS3XbpCR/zlfRTljdztbuJu0cnWW7mQgWHR20OE+O/uqexEWnrIFsXhouyi0zdGA9mVmBNvyj7dZbz2F+rIG4n76khJndE2dN4ACMNjU/vGCYyVydAikcX0zNK52GylghXpQFXI=

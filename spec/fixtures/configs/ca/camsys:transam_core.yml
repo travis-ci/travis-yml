@@ -1,0 +1,21 @@
+language: ruby
+rvm:
+- 2.5.3
+branches:
+  only:
+    - master
+    - /quarter\d*/
+env:
+- TEST_SUITE=rspec
+- TEST_SUITE=cucumber
+before_install:
+- export TZ="America/New_York" # set timezone
+- mysql -e "create database IF NOT EXISTS transam_core_testing;" -uroot
+addons:
+  code_climate:
+    repo_token: d5c0c26a73feef46179efdd2e5d8c26c464c2f2be870db3ebbd3bb620996d19c
+before_script:
+- cp spec/dummy/config/database.travis.yml spec/dummy/config/database.yml
+script:
+- bundle exec rake app:transam_core:prepare_rspec
+- bundle exec $TEST_SUITE

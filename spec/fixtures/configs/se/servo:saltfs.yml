@@ -1,0 +1,103 @@
+# Fix "resource temporarily unavailable" errors. These errors occurred after
+# a Travis update to new Trusty images on Dec. 12th 2017. The reason for these
+# errors is unknown. Using the deprecated builds did not fix the problem.
+# Setting 'filter_secrets: false' as suggested here
+# https://github.com/travis-ci/travis-ci/issues/4704#issuecomment-321777557
+# fixes the problem.
+filter_secrets: false
+
+# Handle Python installation and dependencies ourselves
+language: cpp
+
+# NOTE: Make sure the matrix covers all node types in top.sls
+# NOTE: Make sure each node type is tested both from scratch and as an upgrade
+# sudo: required and dist: trusty enable usage of Trusty
+matrix:
+  include:
+    # Salt from scratch
+    - env:
+        - SALT_NODE_ID=servo-linux-cross1
+        - SALT_FROM_SCRATCH=true
+      os: linux
+      sudo: required
+      dist: trusty
+    - env:
+        - SALT_NODE_ID=servo-mac1
+        - SALT_FROM_SCRATCH=true
+      os: osx
+      osx_image: xcode8.3
+    - env:
+        - SALT_NODE_ID=servo-linux1
+        - SALT_FROM_SCRATCH=true
+      os: linux
+      sudo: required
+      dist: trusty
+    - env:
+        - SALT_NODE_ID=servo-master1
+        - SALT_FROM_SCRATCH=true
+      os: linux
+      sudo: required
+      dist: trusty
+    # Salt from previous configuration
+    - env:
+        - SALT_NODE_ID=servo-linux-cross1
+        - SALT_FROM_SCRATCH=false
+      os: linux
+      sudo: required
+      dist: trusty
+    - env:
+        - SALT_NODE_ID=servo-mac1
+        - SALT_FROM_SCRATCH=false
+      os: osx
+      osx_image: xcode8.3
+    - env:
+        - SALT_NODE_ID=servo-linux1
+        - SALT_FROM_SCRATCH=false
+      os: linux
+      sudo: required
+      dist: trusty
+    - env:
+        - SALT_NODE_ID=servo-master1
+        - SALT_FROM_SCRATCH=false
+      os: linux
+      sudo: required
+      dist: trusty
+    # Salt inside Docker
+    - env:
+        - SALT_NODE_ID=servo-linux1
+        - SALT_FROM_SCRATCH=true
+          # ubuntu:trusty
+          # NOTE: Keep in sync with Dockerfile, .taskcluster.yml
+        - SALT_DOCKER_IMAGE=ubuntu@sha256:084989eb923bd86dbf7e706d464cf3587274a826b484f75b69468c19f8ae354c
+      os: linux
+      sudo: required
+      dist: trusty
+    - env:
+        - SALT_NODE_ID=servo-linux1
+        - SALT_FROM_SCRATCH=true
+          # ubuntu:xenial
+        - SALT_DOCKER_IMAGE=ubuntu@sha256:ec0e4e8bf2c1178e025099eed57c566959bb408c6b478c284c1683bc4298b683
+      os: linux
+      sudo: required
+      dist: trusty
+    - env:
+        - SALT_NODE_ID=servo-linux-kvm1
+        - SALT_FROM_SCRATCH=true
+          # ubuntu/16.04
+        - SALT_DOCKER_IMAGE=ubuntu@sha256:f3a61450ae43896c4332bda5e78b453f4a93179045f20c8181043b26b5e79028
+      os: linux
+      sudo: required
+      dist: trusty
+    # Not a Salt node, runs test suite instead
+    - env:
+        - SALT_NODE_ID=test
+      os: linux
+      sudo: required
+      dist: trusty
+
+script: .travis/dispatch.sh
+
+notifications:
+  webhooks: http://build.servo.org:54856/travis
+  irc: "irc.mozilla.org#servo-bots"
+

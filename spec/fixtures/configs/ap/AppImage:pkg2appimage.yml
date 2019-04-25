@@ -1,0 +1,41 @@
+language: none
+sudo: required
+dist: trusty
+addons:
+  apt:
+    packages:
+    - bsdtar
+    - curl
+    - zsync
+    - squashfs-tools
+    - aria2
+    - desktop-file-utils
+
+script:
+- |
+  if [ -z "$RECIPE" ] ; then
+    bash -ex dogfeeding.sh
+    wget -c https://github.com/probonopd/uploadtool/raw/master/upload.sh
+    bash upload.sh ./out/pkg2appimage*.AppImage*
+  else
+    bash -e travis.sh $RECIPE
+    FILES=$(find out/ -name "*.AppImage")
+    bash -e bintray.sh $FILES
+  fi
+
+notifications:
+  irc:
+    channels: 
+      - "chat.freenode.net#AppImage"
+    on_success: always  # options: [always|never|change] default: always
+    on_failure: always  # options: [always|never|change] default: always
+    on_start: always     # options: [always|never|change] default: always
+    template:
+      - "%{repository} build %{build_number}: %{result} %{build_url}"
+    use_notice: true
+    # skip_join: true
+
+branches:
+  except:
+    - # Do not build tags that we create when we upload to GitHub Releases
+    - /^(?i:continuous)/

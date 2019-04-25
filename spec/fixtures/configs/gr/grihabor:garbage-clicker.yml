@@ -1,0 +1,110 @@
+sudo: required 
+language: android 
+android: 
+  components: 
+    - build-tools-27.0.3
+    - android-27
+    - extra-google-google_play_services
+    - addon-google_apis-google-27
+jdk:
+  - openjdk8
+python: "3.6"
+  
+addons:
+  apt:
+    packages:
+      - git
+      - make
+      - python3
+      - python3-pip
+
+before_install: 
+  - mkdir -p app/secrets/raw
+  - openssl aes-256-cbc -K $encrypted_b494ab82b075_key -iv $encrypted_b494ab82b075_iv -in app/secrets/raw.tar.gz.enc -out app/secrets/raw.tar.gz -d
+  - tar -xzvf app/secrets/raw.tar.gz
+  - mv app/secrets/raw/google-services.json app/
+
+install:
+  - sudo pip3 install virtualenv
+  - make venv
+  - source venv/bin/activate
+  - make install
+  
+before_script:
+  - make travis-version
+  - make commit-message
+  - make tag-message
+
+script:
+  - ./gradlew assemble
+  - find . -name '*.apk'
+  - ./gradlew checkstyleAndroid
+  - javasphinx-apidoc --update --cache-dir=.javasphinx-apidoc-cache -o docs/src ./app/src/main/java/ru/sibur
+  - cd docs; make html; cd ..
+  - touch docs/build/html/.nojekyll
+  
+before_deploy:
+  - export VERSION=$(make travis-version)
+  - export COMMIT_MESSAGE=$(make commit-message)
+  - export TAG_MESSAGE=$(make tag-message)
+
+  - 'export RELEASE_NAME="${VERSION}: ${COMMIT_MESSAGE}"'
+  - export RELEASE_BODY=${TAG_MESSAGE}
+
+  - export ART_DEBUG_APK="debug-${VERSION}.apk"
+  - export ART_RELEASE_APK="release-${VERSION}.apk"
+  - export ART_CHECKSTYLE=${VERSION}_checkstyle.html
+  - export ART_LINT=${VERSION}_lint.html
+  
+  - export ART_DEBUG_APK_PATH=$(find . -name '*debug.apk')
+  - export ART_RELEASE_APK_PATH=$(find . -name '*release.apk')
+
+  - printenv | grep ART
+  
+  - mv ${ART_DEBUG_APK_PATH} ${ART_DEBUG_APK} || true
+  - mv ${ART_RELEASE_APK_PATH} ${ART_RELEASE_APK} || true
+  - mv app/build/reports/checkstyle/android.html $ART_CHECKSTYLE || true
+  
+  - git config --local user.name "Travis Bot"
+  - git config --local user.email "travis@gmail.com"
+  - git tag -f "${VERSION}"
+
+before_cache: 
+  - rm -f $HOME/.gradle/caches/modules-2/modules-2.lock 
+  - rm -fr $HOME/.gradle/caches/*/plugin-resolution/ 
+cache: 
+  directories: 
+    - $HOME/.gradle/caches/ 
+    - $HOME/.gradle/wrapper/ 
+    - $HOME/.android/build-cache
+    - venv
+    - .javasphinx-apidoc-cache
+
+deploy:
+  - provider: releases
+    api_key: ${DEPLOY_TOKEN}
+    file: 
+      - ${ART_DEBUG_APK}
+      - ${ART_RELEASE_APK}
+      - ${ART_CHECKSTYLE}
+    skip_cleanup: true 
+    prerelease: true
+    name: ${RELEASE_NAME}
+    body: ${RELEASE_BODY}
+    on:
+      branch:
+        - master
+        - force-deploy*
+      tags: false
+      condition: $TRAVIS_PULL_REQUEST = false
+  - provider: pages
+    github-token: ${DEPLOY_TOKEN}
+    skip-cleanup: true
+    keep-history: true
+    local-dir: docs/build/html
+    target-branch: gh-pages
+    on:
+      branch:
+        - master
+      tags: false
+      condition: $TRAVIS_PULL_REQUEST = false

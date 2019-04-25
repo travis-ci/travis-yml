@@ -1,0 +1,59 @@
+dist: trusty
+sudo: required
+
+language: python
+python:
+  - 3.6
+
+# Use the PostgreSQL version that is provided in Ubuntu 16.04.
+# We need at least version 9.4 as that is the one that introduced the
+# JSONB type. By default Ubuntu 14.04 comes with version 9.3.
+addons:
+  postgresql: "9.5"
+
+  apt:
+    packages:
+      - build-essential
+      - php5-cli
+      - haskell-platform
+      - fp-compiler
+      - postgresql-client
+      - python2.7
+      - cppreference-doc-en-html
+      - cgroup-lite
+      - libcap-dev
+      - python-dev
+      - libpq-dev
+      - libcups2-dev
+      - libyaml-dev
+      - rustc
+      - mono-mcs
+
+install:
+  - pip install -r requirements.txt
+  - pip install -r dev-requirements.txt
+
+  - sudo $(which python) prerequisites.py -y --cmsuser=$USER install
+  - python setup.py install
+
+before_script:
+  - psql --username=postgres --command="CREATE USER cmsuser WITH PASSWORD 'your_password_here';"
+
+  - createdb --username=postgres --owner=cmsuser cmsdb
+  - psql --username=postgres --dbname=cmsdb --command='ALTER SCHEMA public OWNER TO cmsuser'
+  - psql --username=postgres --dbname=cmsdb --command='GRANT SELECT ON pg_largeobject TO cmsuser'
+
+  - createdb --username=postgres --owner=cmsuser cmsdbfortesting
+  - psql --username=postgres --dbname=cmsdbfortesting --command='ALTER SCHEMA public OWNER TO cmsuser'
+  - psql --username=postgres --dbname=cmsdbfortesting --command='GRANT SELECT ON pg_largeobject TO cmsuser'
+
+  - cp ./config/cms.conf.sample ./config/cms.conf
+  - 'sed -e "s/\"cmsuser\": \"cmsuser\"/\"cmsuser\": \"$USER\"/" -i ./config/cms.conf'
+
+  - cmsInitDB
+
+script:
+  - cmsRunTests -v --coverage --codecov
+
+notifications:
+  email: no

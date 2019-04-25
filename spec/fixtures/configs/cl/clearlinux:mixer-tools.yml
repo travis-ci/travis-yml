@@ -1,0 +1,16 @@
+language: go
+sudo: required
+
+go:
+    - 1.11
+
+go_import_path: github.com/clearlinux/mixer-tools
+
+services:
+    - docker
+
+before_install:
+    - docker build -t testdock .
+
+script:
+    - docker run testdock

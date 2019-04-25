@@ -1,0 +1,28 @@
+language: node_js
+cache:
+  directories:
+    - ~/.npm
+notifications:
+  email: false
+node_js:
+  - 'node'
+
+before_script:
+  - export AUTHOR_NAME="$(git log -1 $TRAVIS_COMMIT --pretty="%aN")"
+  - greenkeeper-lockfile-update
+
+after_script: greenkeeper-lockfile-upload
+
+after_success:
+  - chmod +x .travis/success.sh
+  - ./.travis/success.sh
+
+after_failure:
+  - chmod +x .travis/fail.sh
+  - ./.travis/fail.sh
+branches:
+  except:
+    - /^v\d+\.\d+\.\d+$/
+
+#override npm ci for now
+install: npm install

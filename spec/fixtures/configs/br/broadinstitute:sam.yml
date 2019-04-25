@@ -1,0 +1,27 @@
+jdk:
+  - oraclejdk8
+
+language: scala
+
+scala:
+  - 2.12.7
+
+sudo: required
+
+services:
+  - docker
+
+before_install:
+  - sh docker/run-opendj.sh start
+
+script:
+  - export SBT_OPTS="-J-Xmx3g -Denv.type=test -Ddirectory.url=ldap://localhost:3389 -Ddirectory.password=testtesttest"
+  - sbt clean "testOnly -- -n org.broadinstitute.tags.SchemaInit"
+  - docker restart opendj
+  - sleep 40
+  - sbt coverage "testOnly -- -l org.broadinstitute.tags.SchemaInit" coverageReport
+
+after_success:
+  - export SBT_OPTS="-J-Xmx3g"
+  - sbt coveralls
+  - sh docker/run-opendj.sh stop

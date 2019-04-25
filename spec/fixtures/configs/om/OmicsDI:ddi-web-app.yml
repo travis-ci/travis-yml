@@ -1,0 +1,22 @@
+language: node_js
+node_js:
+  - "8"
+dist: trusty
+sudo: required
+
+cache:
+  directories:
+    - node_modules
+
+branches:
+  only:
+  - master
+  - dev
+
+addons:
+  chrome: stable
+
+script:
+  - ng lint
+  - ng test --watch false
+  - npm run e2e

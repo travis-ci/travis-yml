@@ -1,0 +1,17 @@
+language: node_js
+node_js:
+  - "6" 
+services:
+- mongodb
+addons: 
+  code_climate:
+      repo_token: 21b6c194732ebcbe85daf6ed303da3bbad5a7f9eacdad3ea788e550ab9c54450
+  apt:
+    sources:
+    - mongodb-3.2-precise
+    packages:
+    - mongodb-org-server
+after_success:
+- npm run coveralls 
+- npm run codeclimate 
+cache: false

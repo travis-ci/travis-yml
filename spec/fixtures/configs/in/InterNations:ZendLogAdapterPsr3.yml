@@ -1,0 +1,24 @@
+language: php
+sudo: false
+php:
+  - 7.1
+  - 7.2
+  - 7.3
+  - hhvm
+  - nightly
+
+matrix:
+  allow_failures:
+    - php: hhvm
+    - php: nightly
+
+before_script:
+  - composer install
+
+script:
+  - ./vendor/bin/phpcs --standard=vendor/internations/kodierungsregelwerksammlung/ruleset.xml ./src/ || true
+  - phpunit
+
+cache:
+  directories:
+    - vendor/

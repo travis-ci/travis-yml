@@ -1,0 +1,31 @@
+sudo: required
+language: node_js
+node_js:
+- '10'
+branches:
+  only:
+  - master
+install:
+  - npm install
+  - git config --global user.email "travis@travis-ci.org"
+  - git config --global user.name "Travis CI"
+  - git remote set-url --push origin "https://${GH_TOKEN}@github.com/${TRAVIS_REPO_SLUG}.git"
+  - git remote -v
+  - git checkout -f -b version-branch
+  - npm version patch -m "bump version [skip ci]"
+  - git push origin version-branch:master
+cache:
+  directories:
+  - node_modules
+script:
+  - REQUIRED_VERSION=$(git describe --abbrev=0 --tags); REQUIRED_VERSION=${REQUIRED_VERSION%.*}; echo $REQUIRED_VERSION
+  - export REQUIRED_VERSION
+  - node get-versions.js
+  - curl -X POST -H 'accept:application/json'  -H "authorization:token ${TRAVIS_API_TOKEN}" -H 'content-type:application/json' -H 'travis-api-version:3' -d "{\"request\":{\"branch\":\"master\",\"message\":\"triggered by ${TRAVIS_REPO_SLUG}\"}}" "https://api.travis-ci.org/repo/kube-HPC%2Fhelm/requests"
+
+before_success:
+ 
+env:
+  global:
+  - secure: NvKVvj5GJ3mUl/zhz85uHTi0rdlLbuAOhx3UQ1y+kdMGWIWRfe7yrXmqrnaM8HfiL9iXuJXVM5gaVy25VKKiJBwI7wJDYaXQPVD9fAnLAp04ZZRlj2r+A1WqoOLFQbuErXGlb+ca6zDO8KI/rLJBlMxONPA9fUY5Ba2JUW5m3Vxpgx2SPcKNwbv64B+G/SiOqEEM4XN35lcK0bSApUTYp2r/wtIbY5NLW8/RTXTO4ngszz/uxnAvXQv5j56efSvQaSH31dBK0Appa+/eufKv3ENzUeuSgrNXYtyNGOwAJFWLxAdO44wIrN6bnzdaNI4fbzMm/H2WyJWGpG3eQGor4qCEVxQHAq9sdFcyuG94r6NGoVN7g8pZOCnlQklvL7MF0uosnLIGj4z6vl2xa83wmtgfdnvSuqXFLo2jyFAZIQpWJbRhA5MBxt4IuRnj3LtbRSZVNLK92j/+Lm51tVyzy5UMdFXdIJ/J0o7g46MGtu7h1X0Nm9MjlBmYm9yjMcu9XmFjkb/gqkeqRppcVBUSBl6TWSXGqSyW26Oh7yd5fhfjpLFZbTXZGtHWm/bONNvsEw78hWRnQlZxwXCGpnB2Nf4l5B+bW+fgB/2SaPTmNGMpTUWmbQfbkDmUowJZYyK9m4pSegQEcI8/iUEttC8mSfE9mx9kgAFtXS31xCRG3zU=
+  - secure: jSoLRP9GrCYHIaxDzvB6vsQ5yWdSPt5BqwzHtj0Wl9ZMloSPq3TZB06ELx5AWh48DsCNt5axHfdOtkk48yp9tsv/6lAGSceia1OaBGkYw30SorBE/7GNRC66HI6CD4LlXPcsh95QAt4rO1NstdnAmwKMkMgcrBXk6C4NhEG2VIYgtvsrGWvpvfYF2n38An7U5cLWiBZeCiN8mBnxqzC6lP9jpgQYqTUY/KYjlB0nJdbhZiyNAebkh+0OlsGMiW7VW8MDsrKL4iaI+7ocNdfBuSrZN4luCkz0+d0uuYUwjeJHBk9C7RMGz3w+LWO++U8ytXO6nH1mWIfxQuL8hljqwpTtIHfUcAfqsbTvJ86UUkb7WV8cFZrodLEmgnbb1ZxwcMzj3KGn1oebwLk+jZO8C+ZlruHQYP9IwxUiYcNOPiQWfu96+v7lO9k1z3no47OOFQEN6RsczHhdhFGDcbEtTq1HTTc8AokgdbpP610vyuNwKGCubwaB/WqsFTX2tQVP/309lUCYWtmK7WftON1R8ETXLVDwgDGrjvbxYan3u00GH8BrgPqrMMQz9VeuglctYmKRyBzlw3bJDEo+xRiwV3pspLCuW2r6v/Ek7gmjuhTiCjpQLFk/eGjcRTirjvNz7hR4l94uwseLHENvolYLPAFsbtiBSwBnqWncyTAvCxM=

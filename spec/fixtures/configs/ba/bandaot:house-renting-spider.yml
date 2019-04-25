@@ -1,0 +1,28 @@
+language: python  #设置语言
+
+python: 2.7  #设置相应的版本
+
+install:
+  - pip install -r requirements.txt #安装hexo及插件
+
+script:
+  - python houseRentingSpider.py #生成
+
+after_success:
+  - cd ./results
+  - git init
+  - git config user.name "bandaot"  #修改name
+  - git config user.email "wujiang007@gmail.com"  #修改email
+  - git add .
+  - git commit -m "update"
+  - git push -f "https://${GH_TOKEN}@${GH_REF}" master:master
+  #- sleep 5
+  #- curl "http://note.wiz.cn/api/gather/add?type=url2wiz&data=url%3Dhttp%253A%252F%252Fwujiang.name%252Fhouse-renting-spider%252F%26folder%3D%252F02%25E5%25BF%25AB%25E4%25B9%2590%25E7%2594%259F%25E6%25B4%25BB%252F%25E8%25B1%2586%25E7%2593%25A3%25E7%25A7%259F%25E6%2588%25BF%252F%26user%3Dwujiang007-dqr%26content-only%3Dfalse"
+
+branches:
+  only:
+    - spider  
+
+env:
+  global:
+    - GH_REF: github.com/bandaot/house-renting-spider.git #设置GH_REF，注意更改yourname

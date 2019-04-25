@@ -1,0 +1,19 @@
+language: node_js
+sudo: false
+node_js:
+  - "8"
+  - "9"
+env:
+  - npm_config_coverage=1 CXX=g++-4.8
+addons:
+  apt:
+    sources:
+    - ubuntu-toolchain-r-test
+    packages:
+    - g++-4.8
+before_install:
+  - $CXX --version
+  - npm install -g npm@'>=2.7'
+after_success:
+  - ls -la
+  - npm run coverage-upload

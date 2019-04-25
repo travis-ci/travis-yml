@@ -1,0 +1,39 @@
+language: python
+
+sudo: false
+
+cache:
+  pip: true
+  directories:
+  - $HOME/.m2
+  - $HOME/.npm
+
+services:
+  - mysql
+
+python:
+  - "3.4"
+  - "3.5"
+  - "3.6"
+
+install:
+  - pip install -U pip wheel coveralls
+  - pip install -r requirements/development.txt
+  - pip install -r requirements/production.txt
+  - npm install
+
+before_script:
+  - mysql -e 'CREATE DATABASE pyophase;'
+
+# command to run tests
+script:
+  - export PYTHONWARNINGS=all
+  - python manage.py check
+  - python manage.py makemigrations --dry-run --check
+    # Test against SQLite
+  - coverage run manage.py test
+    # Test against MySQL
+  - coverage run manage.py test --settings pyophase.settings_travis
+
+after_success:
+  coveralls

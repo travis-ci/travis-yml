@@ -1,0 +1,49 @@
+language: c++
+cache:
+  apt: true
+  pip: true
+  directories:
+    - $HOME/.ccache
+sudo: required
+services:
+  - docker
+dist: trusty
+notifications:
+  email:
+    on_success: always
+    on_failure: always
+  slack: jsk-robotics:Av7tc8wj3IWkLYvlTzHE7x2g
+env:
+  global:
+    - USE_TRAVIS=true
+    - USE_DOCKER=true
+    - ROS_PARALLEL_JOBS="-j2"
+    - CATKIN_PARALLEL_JOBS="-p2"
+    - ROS_PARALLEL_TEST_JOBS="-j1"
+    - CATKIN_PARALLEL_TEST_JOBS="-p1"
+    - NOT_TEST_INSTALL=true
+  matrix:
+    - ROS_DISTRO=hydro   USE_DEB=true
+    - ROS_DISTRO=hydro   USE_DEB=false EXTRA_DEB="ros-hydro-convex-decomposition ros-hydro-ivcon" BUILD_PKGS="jsk_pr2_calibration jsk_robot_startup pr2_base_trajectory_action jsk_pr2_startup jsk_pr2_desktop"
+    - ROS_DISTRO=indigo  USE_DEB=true
+    - ROS_DISTRO=indigo  USE_DEB=false EXTRA_DEB="ros-indigo-convex-decomposition ros-indigo-ivcon"
+    - ROS_DISTRO=jade    USE_DEB=true
+    - ROS_DISTRO=jade    USE_DEB=false EXTRA_DEB="ros-jade-convex-decomposition ros-jade-ivcon"
+    - ROS_DISTRO=kinetic USE_DEB=true
+    - ROS_DISTRO=kinetic USE_DEB=false EXTRA_DEB="ros-kinetic-convex-decomposition ros-kinetic-ivcon"
+matrix:
+  fast_finish: true
+  allow_failures:
+    - env: ROS_DISTRO=hydro   USE_DEB=true
+    - env: ROS_DISTRO=hydro   USE_DEB=false EXTRA_DEB="ros-hydro-convex-decomposition ros-hydro-ivcon" BUILD_PKGS="jsk_pr2_calibration jsk_robot_startup pr2_base_trajectory_action jsk_pr2_startup jsk_pr2_desktop"
+    - env: ROS_DISTRO=indigo  USE_DEB=false EXTRA_DEB="ros-indigo-convex-decomposition ros-indigo-ivcon"
+    - env: ROS_DISTRO=jade    USE_DEB=true
+    - env: ROS_DISTRO=jade    USE_DEB=false EXTRA_DEB="ros-jade-convex-decomposition ros-jade-ivcon"
+    - env: ROS_DISTRO=kinetic USE_DEB=true
+    - env: ROS_DISTRO=kinetic USE_DEB=false EXTRA_DEB="ros-kinetic-convex-decomposition ros-kinetic-ivcon"
+before_script:
+  # to install pepper_meshes, nao_meshes, the licenses have to be accepted
+  - if [ "$ROS_DISTRO" == "indigo" ]; then export BEFORE_SCRIPT="echo \"ros-indigo-pepper-meshes ros-pepper-meshes/accepted-ros-pepper-meshes boolean true\" | sudo debconf-set-selections; sudo apt-get install -y -qq ros-$ROS_DISTRO-pepper-meshes"; fi
+  - if [ "$ROS_DISTRO" == "indigo" ]; then export BEFORE_SCRIPT="echo \"ros-indigo-nao-meshes ros-nao-meshes/accepted-ros-nao-meshes boolean true\" | sudo debconf-set-selections; sudo apt-get install -y -qq ros-$ROS_DISTRO-nao-meshes"; fi
+  - if [ "$ROS_DISTRO" == "kinetic" ]; then export BEFORE_SCRIPT="wstool merge jsk_robot/jsk_fetch_robot/jsk_fetch.rosinstall.kinetic; wstool update"; fi
+script: source .travis/travis.sh

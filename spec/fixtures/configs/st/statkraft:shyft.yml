@@ -1,0 +1,76 @@
+sudo: required
+dist: trusty
+
+addons:
+  apt:
+    sources:
+    - ubuntu-toolchain-r-test
+    packages:
+    - liblapack-dev
+    - libblas-dev
+    - libatlas-base-dev
+    - libpng-dev
+    - g++-7
+    - gcc-7
+    - gfortran
+env:
+  global:
+    - SHYFT_DEPENDENCIES_DIR=${HOME}/build/statkraft/shyft_dependencies
+    - MINICONDA_DIR=${HOME}/build/statkraft/miniconda
+os:
+  - linux
+language: cpp
+cache:
+  timeout: 1000
+  directories:
+    - ${SHYFT_DEPENDENCIES_DIR}
+    - ${MINICONDA_DIR}
+before_install:
+  - uname -a
+  - free -m
+  - df -h
+  - ulimit -a
+  - ulimit -s 32768  # C++ compilers require a lot of memory
+install:
+  - export CXX="g++-7" CC="gcc-7"
+  - bash build_support/build_dependencies.sh
+  - echo done install step, now ls results
+  - ls ${SHYFT_DEPENDENCIES_DIR}
+  - ls ${HOME}/build/statkraft/miniconda
+  - ls ${HOME}/build/statkraft
+  - ls ${HOME}/build
+  - cmake --version
+  - echo ${MINICONDA_DIR}
+  - echo ${SHYFT_DEPENDENCIES_DIR}
+  - ls ${HOME}/build/statkraft/miniconda
+before_script:
+  - export CXX="g++-7" CC="gcc-7"
+  - echo path from install steps
+  - echo $PATH
+  - export LD_LIBRARY_PATH=${SHYFT_DEPENDENCIES_DIR}/lib
+  - export PATH=${MINICONDA_DIR}/bin:$PATH
+  - echo $PATH
+  - ls ${MINICONDA_DIR}
+  - ls ${SHYFT_DEPENDENCIES_DIR}
+  - python --version
+  - ${MINICONDA_DIR}/bin/python --version
+  - mkdir build
+  - cd build
+  - cmake ..
+# the script also uses a fix using LD_PRELOAD to solve issue related to anaconda distro and libgfortran 4
+script:
+  - export CXX="g++-7" CC="gcc-7"
+  - echo path from previous step
+  - echo ${PATH}
+  - export PATH=${MINICONDA_DIR}/bin:$PATH
+  - export LD_LIBRARY_PATH=${SHYFT_DEPENDENCIES_DIR}/lib
+  - g++-7 --version
+  - python --version
+  - make -j 2 VERBOSE=1   CXX="g++-7" CC="gcc-7" # 3 paralel compiler processes can take up to 5 GB RAM!
+  - make test
+  - make install
+  - source activate shyft_env
+  - PYTHONPATH=.. python -c"import shyft; shyft.print_versions()"
+  - travis_wait 30 nosetests ../shyft/tests --with-coverage --cover-package=shyft.repository --cover-package=shyft.orchestration --cover-package=shyft.api
+notifications:
+  email: false

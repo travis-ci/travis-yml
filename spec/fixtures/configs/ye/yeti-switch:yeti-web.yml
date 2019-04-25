@@ -1,0 +1,121 @@
+sudo: required
+addons:
+  chrome: stable
+  apt:
+    packages:
+      - postgresql-client-11
+
+language: ruby
+rvm:
+  - 2.6
+
+services:
+  - docker
+
+git:
+  depth: false
+
+env:
+  secure: "V6Fww6hQLaoajQmJnS8cyUAv7AEEwtrJDXkZC08/CRs10PoozP0idzgYCk3aHM0l2BiN/dvZCb9rNL9ZLv9LYmnZCvQ/OVOC6vFZHWebcd0wf3RWAPZzRsAXrFtRxDu9JbzJcQsW95c+9rKrtiiFSIQHUni1CYEbmFx4J7hB3Fl5Hb60wMbP5aanS9LP2X0f5Rl7idkXXxxY/3eFg4ZZWIODlCnuiYNuyuU26iR5I9VsL6+bu77aFZJ85z1ywvVvqV3ZIY0rr2EWQPtg4gilAnnkFjPDGz6vYIATuMPHflK/M+gcvLJqt0B/s8wMPX2mtNWJ191um2JoYBgZh6dykg89YUIsR4DFcLGTLRyK5X/6iLiBbkl7UwKU4/UDdiKt6mnh9KG8kM5c6U9QXUglvfoA7x4KlLNRPohqbxZskw5OTnf30zMKiDSL0buCA8Y1m5PBAdqR53/ruyxDZLgGd2Qv0lTktBxYYD04PBUbrW7SSxbTkzOudvXrXbGc0B2YhJnMTl3qkUSiXcxKyrROKdhMKL+Wg96YRnkJ01eMfqK9w56iAMfe3TIl+jFnvLLUFZlKC6jClW1tb9eRs+gxW6OLuDl44ReZ6q9qJhOXAIXXsJ3uon7ZT86hyQ8C8t4rteUUEXfCT/+lPtqmlD3WmkZ3abpHhlBIY9/GfqoNoyM="
+
+before_install:
+  - gem update --system
+  - gem install bundler
+
+install:
+  - sudo /etc/init.d/postgresql stop
+  - export DISPLAY=:99.0
+  - sh -e /etc/init.d/xvfb start
+  - docker build -t pgsql_yeti -f ./ci/pgsql.Dockerfile .
+  - docker network create yeti-net
+  - docker run -d --network yeti-net -p 5432:5432 --name db pgsql_yeti
+  - cp config/database.example.yml config/database.yml
+  - cp config/yeti_web.yml.distr config/yeti_web.yml
+  - cp config/policy_roles.yml.distr config/policy_roles.yml
+
+stages:
+  - test
+  - stable package
+  - nightly package
+
+jobs:
+  include:
+    - stage: test
+      script:
+        - bundle install --jobs=3 --retry=3 --deployment
+        - RAILS_ENV=test bundle exec rake db:create db:structure:load db:migrate
+        - RAILS_ENV=test bundle exec rake db:second_base:create db:second_base:structure:load db:second_base:migrate
+        - RAILS_ENV=test bundle exec rake db:seed
+        - bundle exec rubocop -P
+        - bundle exec rake bundle:audit
+        - bundle exec rspec
+
+    - stage: test
+      script:
+        - bundle install --jobs=3 --retry=3 --deployment
+        - RAILS_ENV=test bundle exec rake db:create db:structure:load db:migrate
+        - RAILS_ENV=test bundle exec rake db:second_base:create db:second_base:structure:load db:second_base:migrate
+        - RAILS_ENV=test bundle exec rake db:seed
+        - bundle exec cucumber
+
+    - stage: test
+      script:
+        - bundle install --jobs=3 --retry=3 --deployment
+        - RAILS_ENV=test bundle exec rake db:create db:structure:load db:migrate
+        - RAILS_ENV=test bundle exec rake db:second_base:create db:second_base:structure:load db:second_base:migrate
+        - RAILS_ENV=test bundle exec rake db:seed
+        - cd pgq-processors && bundle install --gemfile="./Gemfile" && cd ..
+        - cd pgq-processors && BUNDLE_GEMFILE=./Gemfile ./bin/bundle exec rspec && cd ..
+
+    - stage: stable package
+      if: branch != master OR tag =~ ^.*$
+      script: &build_jessie
+        - rm -vf config/database.yml
+        - docker build -t yeti-web -f ./ci/build_jessie.Dockerfile .
+        - docker run --network yeti-net --name yeti-web yeti-web && docker commit yeti-web yeti-web:built
+      deploy:
+        skip_cleanup: true
+        provider: script
+        script: docker run --name yeti-web-deploy yeti-web:built ci/deploy.sh "$API_ENDPOINT" jessie "${TRAVIS_TAG:0:3}" main /build/*.deb
+        on:
+          tags: true
+          condition: "$TRAVIS_TAG != *-master*"
+          repo: yeti-switch/yeti-web
+
+    - stage: stable package
+      if: branch != master OR tag =~ ^.*$
+      script: &build_stretch
+        - rm -vf config/database.yml
+        - docker build -t yeti-web -f ./ci/build_stretch.Dockerfile .
+        - docker run --network yeti-net --name yeti-web yeti-web && docker commit yeti-web yeti-web:built
+      deploy:
+        skip_cleanup: true
+        provider: script
+        script: docker run --name yeti-web-deploy yeti-web:built ci/deploy.sh "$API_ENDPOINT" stretch "${TRAVIS_TAG:0:3}" main /build/*.deb
+        on:
+          tags: true
+          condition: "$TRAVIS_TAG != *-master*"
+          repo: yeti-switch/yeti-web
+
+    - stage: nightly package
+      if: branch = master
+      script: *build_jessie
+      deploy:
+        skip_cleanup: true
+        provider: script
+        script: docker run --name yeti-web-deploy yeti-web:built ci/deploy.sh "$API_ENDPOINT" jessie nightly main /build/*.deb
+        on:
+          all_branches: true
+          repo: yeti-switch/yeti-web
+
+    - stage: nightly package
+      if: branch = master
+      script: *build_stretch
+      deploy:
+        skip_cleanup: true
+        provider: script
+        script: docker run --name yeti-web-deploy yeti-web:built ci/deploy.sh "$API_ENDPOINT" stretch nightly main /build/*.deb
+        on:
+          all_branches: true
+          repo: yeti-switch/yeti-web
+

@@ -1,0 +1,29 @@
+language: python
+sudo: false
+python:
+- '3.6'
+install:
+- pip install -r requirements.txt
+- pip install coverage
+- pip install coveralls
+script:
+- coverage run test.py
+- coverage report -m
+after_success:
+- coveralls
+- echo $TRAVIS_PULL_REQUEST
+- echo $TRAVIS_BRANCH
+- echo $TRAVIS_PYTHON_VERSION
+- |
+  if [[ $TRAVIS_PULL_REQUEST == 'false' && $TRAVIS_PYTHON_VERSION == '3.6' ]]; then
+    if [[ $TRAVIS_BRANCH == 'master' ]]; then
+      echo 'Tests succeeded! Deploying to dev stage.';
+      python -m deploy dev;
+    fi
+    if [[ $TRAVIS_BRANCH == 'production' ]]; then
+      echo 'Tests succeeded! Deploying to prod stage.';
+      python -m deploy prod;
+    fi
+  else
+    echo 'Tests succeeded, but this is not the time for deployment.';
+  fi

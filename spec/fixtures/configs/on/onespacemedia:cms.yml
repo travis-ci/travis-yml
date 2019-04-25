@@ -1,0 +1,42 @@
+language: python
+cache:
+  directories:
+  - "$HOME/.cache/pip"
+matrix:
+  include:
+  - python: '2.7'
+    env: CMD=pytest
+  - python: '3.5'
+    env: CMD=pytest
+  - python: '3.6'
+    env: CMD=pytest
+  - python: pypy-5.4.1
+    env: CMD="pypy -m pytest"
+  - python: pypy3.3-5.2-alpha1
+    env: CMD="pypy -m pytest"
+  allow_failures:
+  - python: pypy-5.4.1
+  - python: pypy3.3-5.2-alpha1
+  fast_finish: true
+dist: trusty
+sudo: true
+before_install:
+- sudo apt-get install libgeoip-dev -y
+install:
+- pip install -e .[testing]
+script: bash -c '$CMD --cov=cms -n auto --create-db --nomigrations'
+notifications:
+  slack:
+    rooms: onespacemedia:NufeDxb1m4D0UkuQh1O0m9qt#builds
+    on_success: change
+    on_failure: always
+  email: false
+after_success:
+- coveralls
+deploy:
+  provider: pypi
+  user: onespacemedia
+  password:
+    secure: gzVu7KlBEJJlyraV8BrUEAYB4INCGMPUHK8dwsU2NHag4dAT2HiFL7SsT/+dTbZg8stf5JedF+7EbmcdmmtdF/1LuuZH7aU1Jd6s9jZ8DMZOUykq4q5YmTmSEREoBclUOhWJnLAxZVv9LBH3Y7nI3uH06vn138SN4ZXtCxeStiA=
+  on:
+    tags: true

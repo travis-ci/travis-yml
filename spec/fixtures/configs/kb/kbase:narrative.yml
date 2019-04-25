@@ -1,0 +1,56 @@
+dist: trusty
+sudo: required
+language: python
+python:
+  - "2.7"
+services:
+  - docker
+addons:
+  firefox: "latest"
+  chrome: stable
+env:
+  global:
+    - TRAVIS_NODE_VERSION="6.6.0"
+    - secure: "JPdkdywgQbUUixuDuATMXZHWpWImziRoGKd1tCjYd3+0lamLBlldmjhsZ+Bp7ZabKg2ExQZareGDp34cJdOwWBGb2gg0/emjy4UkWkbDH28zyoWNK1SFp6OTY8AeY/icPXKw3MBgKoXG+hemfcxhYc8rUNgUt7V2fA0JSAkCi4w="
+    - secure: "BrGlbfGLxZYCynh7LeIFyQeiTx4YX6fdMYK2UceVLoAFjOml9mvtJY5i4Oafc2iBDPQ0wAP/eIzZOTcddwc+12o1S0EAq3zZb5z+MOwRKjsiC+BGUXNzAGLaeJqFTC5Sn+vvqsaDGaR3jrdQ8APUL7XapuLUAkof7vqc1SPsn3I="
+
+cache:
+  directories:
+    - kbase-extension/static/ext_components
+    - node_modules
+    - $HOME/.cache/pip
+
+branches:
+  only:
+    - develop
+    - master
+    - travis-firefox
+    - staging
+
+before_install:
+  - pip install virtualenv coveralls scikit-learn[alldeps] pandas
+  - gem install coveralls-lcov
+  - nvm install $TRAVIS_NODE_VERSION
+  - npm install -g bower
+  - npm install -g grunt-cli
+  - npm install -g karma-cli
+
+install:
+  - pip install -r src/requirements.txt
+  - pip install --no-dependencies clustergrammer_widget
+
+before_script:
+  - "export DISPLAY=:99.0"
+  - "sh -e /etc/init.d/xvfb start"
+  - sleep 3 # give xvfb some time to start
+
+script:
+  - make build-travis-narrative
+  - make test
+
+after_script:
+  - coveralls-lcov -v -n js-coverage/lcov/lcov.info > js-coverage.json
+  - coveralls --merge js-coverage.json
+  - bash -x scripts/build_narrative_container.sh
+  - IMAGE_NAME=kbase/narrative scripts/push2dockerhub.sh
+  - IMAGE_NAME=kbase/narrative_version scripts/push2dockerhub.sh

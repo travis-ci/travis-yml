@@ -1,0 +1,57 @@
+language: node_js
+sudo: required
+node_js:
+  - '10'
+dist: trusty
+addons:
+  chrome: stable
+  apt:
+    packages:
+      # This is required to run new chrome on old trusty
+      - libnss3
+install: true
+branches:
+  only:
+    - master
+    - /^version_\d+\.x$/
+cache:
+  yarn: true
+env:
+  - WEBSITE_CHANGED = git diff --name-only $TRAVIS_COMMIT_RANGE | grep -E "website/|docs/"
+jobs:
+  include:
+    - name: "website:publish"
+      if: type != pull_request AND branch = master
+      script:
+      - git config --global user.name "${GH_NAME}"
+      - git config --global user.email "${GH_EMAIL}"
+      - echo "machine github.com login ${GH_NAME} password ${GH_TOKEN}" > ~/.netrc
+      - cd website && yarn install && GIT_USER="${GH_NAME}" yarn run publish-gh-pages 
+    - name: "website:preview"
+      if: type = pull_request AND WEBSITE_CHANGED
+      script:
+      - yarn --cwd './website'
+      - yarn --cwd './website' run build
+      - npx surge --project ./website/build --domain wix-yoshi-${TRAVIS_PULL_REQUEST}.surge.sh
+    - name: "test:integration"
+      if: type != pull_request
+      before_script: 
+        # Puppeteer setup
+        - "sysctl kernel.unprivileged_userns_clone=1"
+        - "export DISPLAY=:99.0"
+        - "sh -e /etc/init.d/xvfb start"
+        # Install
+        - npm install 
+      script: npm run test:integration
+    - name: "test:unit"
+      if: type != pull_request
+      before_script: npm install
+      script: npm run test:unit
+    - name: "test:app-flow"
+      if: type != pull_request
+      before_script: npm install
+      script: npm run test:app-flow
+    - name: "lint"
+      if: type != pull_request
+      before_script: npm install
+      script: npm run lint 

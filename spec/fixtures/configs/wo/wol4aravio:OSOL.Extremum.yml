@@ -1,0 +1,30 @@
+env:
+  global:
+    - secure: "dyMpCnkxdRZ8a/sBMe6XZbUvmve1vKVMneSN912uz77q6ObY2gINNcDymTlUkjPqMUH1wLvi8efON7QOfCadqPuYFNdXTLRDTkjQaY2csBMBL3QZrEBdsx5m3BuTByfF/VtzmLPFZ1pQO/CTLRorxSKGUC+qhg4LS9mUR3GoYJl7TT+I3NdDzPXKNzhwxjl0gcPhTYEvPmGXqhTRqgeSc47VrUKlFWOBOhI4Ade+AclVO73seril+TcsR7N/JsNKCLGhvm8C1qMYa0JBqS4e0pQn4hN8Chkw4XS0euLfCx4NbM4oIpvCuTEjrSAI7G+my2mwoJWM8BN3VFvE25i+rGD1r1kP+Vv7wGFlvQUSPAFI76a5dnqB+SMMhFqnDJpt/JWn2OPnC6xJnKpfcQ5sFeNNEFXNE7AclsZXe/uRRIZ7+XTg4XEbBn0CXkmN9tuzlZetCgRj40YwwzyCAnh+gieYT+ZyrYTJI+iRX7f2OV0t5+ggF0O7EJRpAuNvHRgjP/rpyX8WQOua0Wb2YtWDPJz890+x3BY63ELXioLYCnbsGVSGhgtY9FUIEwCEp7Qz6pJEdSTwScMO+xDi7y0GIisdtZYzqgpoR/Ev3inFxHbVUrEbHWETpbSX7f99P3Nsok0bL/75q1ROPEyHIMHUU8vfy/xZ0lOgYRf86L1OyEE="
+    - secure: "xSBUzq0e2uBCkROMYvOjjyjpI3Po7M9e4cYWKxR0vUPSJP8HogcHyb4dPlwRQp8GxInNfvwsLXeEtWT8eWWjbDDYuMF25XWaLJ0J8FK5Wu9QJ5Q3pkHuBblkATwlJY2hSOwfSwKY7mpns9KYo3kPWFERK6EehGScH7z+vHALGZrFQockbpLeAuvwfZxq34SL0kzreX1aDKt4W5UVQ1/IQgRY9mZ+OC04vnSiU+fc/+YKmNDXHqeBLfKPg/EXT480WbKZ4infGUQ3mwDY0lQCF1KdCis9QOoEBi3+xStASsxnedijkRcVfXfTmvtGN3KYM0jOa8e3k+HcvARsGsH5T6D/ElgB30epYbVcR8Sx8lTLf80pWry5X1YYXHQCfoYZeTL+OisIa3C9cAt2snFFM2LBOGzg2D+o+LDpcJps/I+B5cmBtkqOd6nyiuOQ7rrhzT3w8PepEt9AdeNX2UtVjJ9z7kOPA8xlxbtTjoKsWlror6JYqHdN6PM6d5JkTqh3QrxcR/jcG3nQGlwmkP5ZYaHFHQho//LWUh7b4UqfifdbGIrdtMQbQxQUKfk/V9oXeLU2x1/Uwm4Y/Mm3uu89UWhfTPvQeKTgPlbTQyuAAnIkknt6R/jfp5rMq20RqzlYkmStJQOiVKtpM0YEkz8wQPlEJ4YF8Jp4MUnFcMzhQ10="
+    - secure: "P1UR4xh+fakYnEHJ3uu/kKKY7aqLTWC+1jGAEvt2oH9hkNMaW1aV1QuCKDVTx+/yHKnfuMlaQQpyaZrkWg+KcrDkYHYNayDajFX3FTqxihKG94hoSOHHpA/GUtv5nYzEaT/+fwFcqOSRhuvvOeY2ThT4bMPrZjx0apTDWCWAhUoDvWatwXL6IL0GqXMWZWljAvtpmOfFxD+uH7N+wNqgePuVXBTPaOUaHKL0p4YwvSy+UsqnOUD7X0hRYspYKa+I5/Zd0vhpbpzQTh3/WCr2TfjZWMMsAttjxnaX1mU+h2xB1X1zb/rrq6uqBiENdX1wOWq/S57BTrnCSBVjqzSh+Y+CN/Bzt17ecu0ehh5VxAt/+IVD+ZQ7q7l+KV+Y3sTNr0XAITVWFMWTQITuk/nx1kXECNB6oiJwyvF5/plb+xBZ51PkWK+lNXcEdsyiUcHqzhtvBF6hTHahPsZn5ANv4vuhop+DbJ22qz80NXnF/hNDlnWgiAYLY9cdVry1xhdRwNvWcpJTsnZTsxsLAADvUZx/nZOhFQRJgiKtSseP1YTxyc8MuTboN2vuf/D4fvJSQpZMfndtDJMzc9y4VerM1X+d2d7RYdQpi/9g5MzI3Js7ime+/Znt5l2lcMWBeyx6AcPHkDkAdK2i7adT6C/rXzN5cPJB43ECZaPcYu3nTr0="
+
+language: python
+python:
+  - "3.6"
+install:
+  - pip install pipenv
+  - pip install twine
+  - pip install codecov
+  - pipenv install
+  - pipenv install --dev
+before_script:
+  - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+  - chmod +x ./cc-test-reporter
+  - ./cc-test-reporter before-build
+script:
+  - set -e
+  - mypy --ignore-missing-imports .
+  - pipenv run pytest -v -n 2 -s --cov=./
+  - coverage xml
+after_success:
+  - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
+  - pipenv run pipenv_to_requirements
+  - python setup.py sdist bdist_wheel
+  - if [ $TRAVIS_PULL_REQUEST = "false" ] && [ "$TRAVIS_BRANCH" = "dev" ]; then twine upload -u $PYPI_USERNAME -p $PYPI_PASSWORD --repository-url https://test.pypi.org/legacy/ dist/*; fi
+  - if [ $TRAVIS_PULL_REQUEST = "false" ] && [ "$TRAVIS_BRANCH" = "master" ]; then twine upload -u $PYPI_USERNAME -p $PYPI_PASSWORD dist/*; fi

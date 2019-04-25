@@ -1,0 +1,15 @@
+language: node_js
+node_js:
+  - "node"
+
+branches:
+  only:
+  - staging
+
+cache:
+  directories:
+    - "node_modules"
+
+before_script:
+  - npm install -g gulp-cli
+script: gulp file_changes

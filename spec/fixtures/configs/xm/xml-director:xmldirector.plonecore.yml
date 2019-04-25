@@ -1,0 +1,121 @@
+service_name: travis-pro
+repo_token: 9Gz8lbFOfnCehczzQnPMy49awudPW4Rzz
+
+sudo: false
+dist: trusty
+language: python
+group: deprecated-2017Q3
+
+services:
+ - docker
+
+matrix:
+  include:
+
+  - python: "2.7"
+    env: 
+     - TYPE=OWNCLOUD PLONE_VERSION=4.3  DOCKER=pschmitt/owncloud DOCKER_OPTIONS="-p 127.0.0.1:8080:80" CONNECTOR_URL=http://localhost:8080/remote.php/webdav CONNECTOR_USERNAME=admin CONNECTOR_PASSWORD=changeme
+
+
+  - python: "2.7"
+    env: 
+      - TYPE=OWNCLOUD PLONE_VERSION=5.1  DOCKER=pschmitt/owncloud DOCKER_OPTIONS="-p 127.0.0.1:8080:80" CONNECTOR_URL=http://localhost:8080/remote.php/webdav CONNECTOR_USERNAME=admin CONNECTOR_PASSWORD=changeme
+
+
+  - python: "2.7"
+    env: 
+     - TYPE=LOCAL_FS PLONE_VERSION=4.3 CONNECTOR_URL=file:///tmp/testing
+
+  - python: "2.7"
+    env: 
+     - TYPE=LOCAL_FS PLONE_VERSION=5.1 CONNECTOR_URL=file:///tmp/testing
+
+       #  - python: "2.7"
+       #    env: 
+       #     - TYPE=LOCAL_FS PLONE_VERSION=5.2 CONNECTOR_URL=file:///tmp/testing
+
+  - python: "2.7"
+    env: 
+     - TYPE=EXIST22 PLONE_VERSION=4.3 CONNECTOR_URL=http://localhost:8080/exist/webdav/db DOCKER=zopyx/existdb-22 DOCKER_OPTIONS="-p 127.0.0.1:8080:8080"
+
+  - python: "2.7"
+    env: 
+     - TYPE=EXIST22 PLONE_VERSION=5.1 CONNECTOR_URL=http://localhost:8080/exist/webdav/db DOCKER=zopyx/existdb-22 DOCKER_OPTIONS="-p 127.0.0.1:8080:8080"
+
+  - python: "2.7"
+    env: 
+     - TYPE=EXIST36 PLONE_VERSION=4.3 CONNECTOR_URL=http://localhost:8080/exist/webdav/db DOCKER=zopyx/existdb-36 DOCKER_OPTIONS="-p 127.0.0.1:8080:8080"
+
+  - python: "2.7"
+    env: 
+     - TYPE=EXIST36 PLONE_VERSION=5.1 CONNECTOR_URL=http://localhost:8080/exist/webdav/db DOCKER=zopyx/existdb-36 DOCKER_OPTIONS="-p 127.0.0.1:8080:8080"
+
+  - python: "2.7"
+    env: 
+     - TYPE=BASEX83 PLONE_VERSION=4.3 CONNECTOR_URL=http://localhost:8080/webdav DOCKER=zopyx/basex-83 DOCKER_OPTIONS="-p 127.0.0.1:8080:8080"
+
+  - python: "2.7"
+    env: 
+     - TYPE=BASEX83 PLONE_VERSION=5.1 CONNECTOR_URL=http://localhost:8080/webdav DOCKER=zopyx/basex-83 DOCKER_OPTIONS="-p 127.0.0.1:8080:8080"
+
+
+  - python: "2.7"
+    env: 
+      - TYPE=BASEX92 PLONE_VERSION=5.1 CONNECTOR_URL=http://localhost:8080/webdav DOCKER=zopyx/basex-92 DOCKER_OPTIONS="-p 127.0.0.1:8080:8080"
+
+  - python: "2.7"
+    env: 
+      - TYPE=ALFRESCO PLONE_VERSION=4.3 CONNECTOR_URL=http://localhost:8080/alfresco/webdav DOCKER=gui81/alfresco DOCKER_OPTIONS="-p 127.0.0.1:8080:8080"
+
+
+  - python: "2.7"
+    env: 
+      - TYPE=ALFRESCO PLONE_VERSION=5.1 CONNECTOR_URL=http://localhost:8080/alfresco/webdav DOCKER=gui81/alfresco DOCKER_OPTIONS="-p 127.0.0.1:8080:8080"
+
+#  - python: "2.7"
+#    env: 
+#      - TYPE=S3 PLONE_VERSION=4.3 CONNECTOR_URL=s3://ajung-xxxxxxxx
+#      - secure: "PHMtmJWrAiR+pPMXequDU3ysFc5AME8KlFN/qp7xkfVMhW+z5DAtzEZtziL4J3Ux8teO7Mlv/cVt6DYd9bBMh3590secDrtYpYZbGgpjC1U43P0OXIOgH8QmBDnij2vD42uo3Ycniq8JTq81PTKiZ1eTT7fBTQeUKltMpymmNOI="
+#
+#      - secure: "FM+R1Z3aqG6OKCePprnJhpa3rP/+2rc0yd602ehTo4YiUlxhpUhCgsVsGZRFCwJhS791rmK3DiaDju5+c18983Kv+1MHEflIzzDI//024H6Sv+ZUkXyDTbWCMrewEZBqVwaa0GBGLjKqXnoKVy+ij6s4hbns6jm5lYgvjVn20d0="
+#
+#  - python: "2.7"
+#    env: 
+#      - TYPE=S3 PLONE_VERSION=5.0 CONNECTOR_URL=s3://ajung-xxxxxxxx
+#      - secure: "PHMtmJWrAiR+pPMXequDU3ysFc5AME8KlFN/qp7xkfVMhW+z5DAtzEZtziL4J3Ux8teO7Mlv/cVt6DYd9bBMh3590secDrtYpYZbGgpjC1U43P0OXIOgH8QmBDnij2vD42uo3Ycniq8JTq81PTKiZ1eTT7fBTQeUKltMpymmNOI="
+#
+#      - secure: "FM+R1Z3aqG6OKCePprnJhpa3rP/+2rc0yd602ehTo4YiUlxhpUhCgsVsGZRFCwJhS791rmK3DiaDju5+c18983Kv+1MHEflIzzDI//024H6Sv+ZUkXyDTbWCMrewEZBqVwaa0GBGLjKqXnoKVy+ij6s4hbns6jm5lYgvjVn20d0="
+#
+#  - python: "2.7"
+#    env: 
+#      - TYPE=S3 PLONE_VERSION=5.1 CONNECTOR_URL=s3://ajung-xxxxxxxx
+#      - secure: "PHMtmJWrAiR+pPMXequDU3ysFc5AME8KlFN/qp7xkfVMhW+z5DAtzEZtziL4J3Ux8teO7Mlv/cVt6DYd9bBMh3590secDrtYpYZbGgpjC1U43P0OXIOgH8QmBDnij2vD42uo3Ycniq8JTq81PTKiZ1eTT7fBTQeUKltMpymmNOI="
+
+#      - secure: "FM+R1Z3aqG6OKCePprnJhpa3rP/+2rc0yd602ehTo4YiUlxhpUhCgsVsGZRFCwJhS791rmK3DiaDju5+c18983Kv+1MHEflIzzDI//024H6Sv+ZUkXyDTbWCMrewEZBqVwaa0GBGLjKqXnoKVy+ij6s4hbns6jm5lYgvjVn20d0="
+
+
+
+cache:
+  directories:
+    - eggs
+
+before_install:
+- docker version
+
+after_success:
+ - test -v QA && pip install python-coveralls==2.4.0 || true
+ - test -v QA && coveralls || true
+
+script:
+- pwd
+- ls -la
+- mkdir -p /tmp/testing
+- rm -fr /tmp/testing/*
+- bash build_test.sh 
+
+notifications:
+  irc:
+    channels:
+    - irc.freenode.org#xml-director
+    template:
+    - '%{repository}/#%{build_number}/%{branch} (%{author}): %{message} %{build_url}'

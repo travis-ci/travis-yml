@@ -1,0 +1,22 @@
+language: python
+python:
+- 3.6
+services: postgresql
+addons:
+  postgresql: '9.5'
+  apt:
+    update: true
+install:
+- pip install -q -r requirements-dev.txt codecov
+before_script:
+- psql -c "CREATE DATABASE testdb;" -U postgres
+- python manage.py migrate --noinput
+- python manage.py collectstatic --noinput
+script:
+- flake8 .
+- pytest --cov=zeus
+after_success:
+- codecov
+notifications:
+  slack:
+    secure: wzuXYuPduixzKEewam0wkyRSIFO+OIUTtvwbCBBwfT5NX3p5eZ4se8eXRqwmHnnzM5g5OGnaidabZ1LW6Ddmtnv5A/Rt7EncqggcpTJOawkUsE7DBrjPjCwyByoOd+qzlrx/UYl4FMO+OReA6hyRycT9A015GRFyHL0LOnyB9fVUUWDmXqYyH0kBMCvLL5xQUBfdULgtdM9GtVdzpWM5/BfyDjZth9SUFCyEWH/o9XW5w9ebkRF63KcpuxHXB/R3iuW2KOSSNjfunE4E38tYC6yb9wzLeGpRo1YERMXwMa1YXh6Siv0PdBMFJX6wqDJ4Six/9ipF/lm2pRO3vxnNQN48+J1qBcxtM/ETIlvxX2WrFgqlTYzXjXXImgtcAaWazE7KkAqeuMPtKCV/0vdvdCE5kFGYwZq1VoXQZc0mrsrGuearojwGPregWjgk4gDSeTVyruIShqTESz56nsQE0y5CoX6yGD3p0UKeBVappAXx9df/rmizoDOPBvFkgkMGIllxArtXLJpIi7IIbzBqQ3ow2MwnTeQ/LuRolo7vHeQXRCn9oYcnVFJRq7aUsswA9QzlSdLX4H/NC7bO94Ilj8oRb8QXEiT1RtPJhLolOiEeMEXRbibfqoS2yvvGmtvnvk7lzX9tQXrb5vk2tzsv0IwChQ2kC78vW4AnjnmTq+s=

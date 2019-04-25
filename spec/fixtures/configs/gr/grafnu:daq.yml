@@ -1,0 +1,29 @@
+sudo: required
+dist: xenial
+services:
+  - docker
+jdk:
+  - openjdk8
+addons:
+  apt:
+    update: true
+    packages:
+      - openvswitch-switch
+install:
+  - set -e
+  - bin/setup_daq
+script:
+  - set -e
+  - bin/test_daq
+env:
+  global:
+    - DOCKER_STARTUP_TIMEOUT_MS=60000
+  matrix:
+    - DAQ_TEST=base
+    - DAQ_TEST=many
+    - DAQ_TEST=aux
+    - DAQ_TEST=topo
+    - DAQ_TEST=stack DAQ_FAUCET_REPO=https://github.com/grafnu/faucet DAQ_FAUCET_BRANCH=lacp
+branches:
+  except:
+  - /^release-\d+\.\d+(\.\d+)?$/

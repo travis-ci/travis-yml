@@ -2,12 +2,21 @@
 
 
 
-## Type
+## Types
+
+* Array of: 
+* 
 
 
 
-## Flags
+## Examples
 
-None.
+```yaml
+jwt:
+- secure: encrypted string
+```
 
+```yaml
+jwt:
 
+```

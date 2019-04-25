@@ -1,0 +1,29 @@
+language: go
+go:
+    - 1.8.x
+
+jdk:
+    - openjdk8
+
+# Needed to update java8 to a more recent version.
+# https://github.com/travis-ci/travis-ci/issues/3259#issuecomment-130860338
+addons:
+  apt:
+    packages:
+      - oracle-java8-installer
+      - oracle-java8-set-default
+
+before_script:
+    - "export DISPLAY=:99.0"
+    - "sh -e /etc/init.d/xvfb start"
+    - sleep 3 # give xvfb some time to start
+    - cd vendor && go run init.go --alsologtostderr --download_browsers && cd ..
+
+script: 
+    - ./testing/travis-ci-gofmt.sh
+    - ./testing/travis-ci-test.sh
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash) -- -v
+
+sudo: false

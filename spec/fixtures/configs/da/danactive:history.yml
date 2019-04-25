@@ -1,0 +1,27 @@
+language: node_js
+
+env:
+  - CODECLIMATE_REPO_TOKEN=27355443bbc9aa3c50cffddc9f6fedf22948472b021e30c115e8749095b51ea0
+
+addons:
+  apt:
+    packages:
+    - graphicsmagick
+
+node_js:
+  - "8"
+
+before_script:
+  - node --version
+  - npm --version
+  - gm version
+  - yarn lint
+  - yarn test:react
+
+script:
+  - yarn test
+
+after_success:
+  - yarn ci-cover:coveralls
+  - yarn ci-cover:prep-codeclimate
+  - yarn ci-cover:codeclimate

@@ -1,0 +1,60 @@
+---
+# This file is managed centrally by modulesync
+#   https://github.com/theforeman/foreman-installer-modulesync
+env:
+  global:
+    - PARALLEL_TEST_PROCESSORS=8
+matrix:
+  fast_finish: true
+  include:
+    - rvm: 2.4.1
+      env: PUPPET_VERSION=5.0
+    - rvm: 2.5.1
+      env: PUPPET_VERSION=6.0
+    # Acceptance tests
+    - rvm: 2.5.1
+      env:
+        - BEAKER_PUPPET_COLLECTION=puppet5
+        - BEAKER_setfile=centos7-64{hostname=centos7-64.example.com}
+      script: bundle exec rake beaker
+      services: docker
+      bundler_args: --without development
+      before_install:
+        - echo '{"ipv6":true,"fixed-cidr-v6":"2001:db8:1::/64"}' | sudo tee /etc/docker/daemon.json
+        - sudo service docker restart
+
+    - rvm: 2.5.1
+      env:
+        - BEAKER_PUPPET_COLLECTION=puppet6
+        - BEAKER_setfile=centos7-64{hostname=centos7-64.example.com}
+      script: bundle exec rake beaker
+      services: docker
+      bundler_args: --without development
+      before_install:
+        - echo '{"ipv6":true,"fixed-cidr-v6":"2001:db8:1::/64"}' | sudo tee /etc/docker/daemon.json
+        - sudo service docker restart
+
+    - rvm: 2.5.1
+      env:
+        - BEAKER_PUPPET_COLLECTION=puppet5
+        - BEAKER_setfile=debian9-64{hostname=debian9-64.example.com}
+      script: bundle exec rake beaker
+      services: docker
+      bundler_args: --without development
+      before_install:
+        - echo '{"ipv6":true,"fixed-cidr-v6":"2001:db8:1::/64"}' | sudo tee /etc/docker/daemon.json
+        - sudo service docker restart
+
+    - rvm: 2.5.1
+      env:
+        - BEAKER_PUPPET_COLLECTION=puppet6
+        - BEAKER_setfile=debian9-64{hostname=debian9-64.example.com}
+      script: bundle exec rake beaker
+      services: docker
+      bundler_args: --without development
+      before_install:
+        - echo '{"ipv6":true,"fixed-cidr-v6":"2001:db8:1::/64"}' | sudo tee /etc/docker/daemon.json
+        - sudo service docker restart
+
+bundler_args: --without system_tests development
+dist: xenial

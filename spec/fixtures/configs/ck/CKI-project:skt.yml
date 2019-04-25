@@ -1,0 +1,12 @@
+language: python
+python:
+    - "2.7"
+env:
+    - TOX_ENV=py27,flake8,pylint
+install:
+    # Install skt using pip to ensure dependencies are downloaded correctly.
+    - pip install .[dev]
+    - pip install coveralls tox
+script:
+    - tox -e $TOX_ENV
+    - pip uninstall -y skt

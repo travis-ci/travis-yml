@@ -1,0 +1,22 @@
+addons:
+  firefox: '49.0'
+before_install: # before_script
+  # - export CHROME_BIN=chromium-browser
+  - if [ "${TRAVIS_OS_NAME}" = "linux" ]; then export DISPLAY=:99.0; sh -e /etc/init.d/xvfb start; fi
+  - if [ "${TRAVIS_OS_NAME}" = "osx" ]; then ls /Applications/; fi
+  # - if [ "${TRAVIS_OS_NAME}" = "osx" ]; then brew cask install google-chrome; fi
+before_script:
+  - echo "start npm stuff";
+cache:
+  bundler: true
+  directories:
+    - node_modules
+language: node_js
+node_js:
+  - '8'
+  - '10'
+notifications:
+  email: false
+os:
+  - linux
+sudo: false

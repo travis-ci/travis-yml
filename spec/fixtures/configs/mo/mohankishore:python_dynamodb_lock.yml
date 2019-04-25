@@ -1,0 +1,21 @@
+language: python
+matrix:
+  include:
+    - python: 3.6
+    - python: 3.7
+      dist: xenial
+      sudo: true
+install:
+- pip install -r requirements.txt
+- pip install -U tox-travis
+script: tox
+deploy:
+  provider: pypi
+  distributions: sdist bdist_wheel
+  user: mohankishore
+  password:
+    secure: TMO3Szq5Z/hu+CM3q6VKbvJOkWWAznBgjYv5w05qwTkvLMNsWcSBlwumlJ4erA6Pzd408aKVmGN/mie1xDAutrhoWTf3i49NAY++BhkEfYuMZ5s3+LgUXr6l4+Gk4G9t92bc7nMgZIyk1irFr3z3b9NtyTtjPMcZv+pMs/wjjzLDfeWr1rkZ0MiDx/0jUu1AWmkBH7MDWjlFipAT/ST3SjVqrmUyGeDNzQ2bKBLtSp64Cmt6QVi3tEEXA7zryOlVbwGnXgvntIoNLZAaJ9AyQ1RgGromnlOVlPJ9Q7mlgbWja8nQwMCEoDdtcF+ax0dz681PGw/kOBVl8W4REYnzc2J2Ftfk7FCQZo5JlQcZCw3aZqLIXlbpTHM1AK24UCsi5vq+xevPahvwM7mpWgCmGKGw3KadcMr9A5GtwN/xGiMBVB6GdinKZFp7rh8UccTkAYnHnVPlpnhSPD/8g9UgwhxZrWJUMyjCCmvdAOXn54q+j+2fdS+eVDXltcAZ7GVIthDMmZabc/uTMrJ/BHaib+dXDLNUjhZzqACgqZyQqej9CiHUEW3/p66X6eerxSkgc0TurePhUVvhSkmi1Fo30ev6+9K8wdBapw+OCfJnxFC+D1KbZhoF/5WX1NCMU4yKLzkxD4XEftEa1W9VyQHS1UTJU3vIsf6C6efvMfMJqC8=
+  on:
+    tags: true
+    repo: mohankishore/python_dynamodb_lock
+    python: 3.6

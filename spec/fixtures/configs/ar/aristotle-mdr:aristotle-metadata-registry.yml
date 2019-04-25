@@ -1,0 +1,203 @@
+sudo: false
+dist: trusty
+
+defaults:
+  - &main_test_script
+    before_script:
+    # Make a MariaDB database
+    # Fix weirdness with MariaDB on Travis - https://github.com/mozilla/kitsune/pull/2453/commits/229db28973f00dfc4fa7b386f266caf3417966a0
+      - if [[ $DB == mariadb ]]; then ./scripts/prep_mysql.sh ; fi
+      - if [[ $SEARCH == elastic ]]; then sudo service elasticsearch start && sleep 10; fi
+    # Make a postgres database
+      - if [[ $DB == postgres* ]]; then ./scripts/prep_psql.sh; fi
+      - cd assets
+      - npm install
+      - npm run devbuild
+      - cd .. 
+    script:
+      - |
+        case "$DB" in
+          mariadb) export DATABASE_URL=mysql://travis:@localhost:3306/aristotle_test_db;;
+        postgres) export DATABASE_URL=postgresql://postgres:@localhost/aristotle_test_db;;
+          sqlite) export DATABASE_URL=sqlite:///./db.db;;
+                *) export DATABASE_URL=sqlite:///./db.db;;
+        esac
+        echo "Running script with DATABASE_URL="$DATABASE_URL
+        echo "Running script with DB="$DB
+        tox -e dj$DJANGO_VERSION-test-linux-db-$DB-search-$SEARCH-module_$MODULE
+    services:
+      - postgresql
+      - redis-server
+      - elasticsearch
+      - mariadb
+    addons:
+      apt:
+        sources:
+          - elasticsearch-5.x
+        packages:
+          - elasticsearch
+          - libmariadbclient-dev
+      code_climate:
+        repo_token: ac63d774ebdd641ef502acf1588b36248726a28a50e4e1f4ba4295a157477f54
+      mariadb: '10.1'
+
+  - &main_test_script_py36
+    language: python
+    python: 3.6
+    install:
+      - pip install codecov coveralls
+      - pip install 'tox>=3.0'
+      - nvm install 10.13.0
+    <<: *main_test_script
+
+  - &test_accessibility_py36
+    stage: accessibility
+    name: "Accessibility Tests"
+    language: python
+    install:
+      - pip install codecov coveralls
+      - pip install 'tox>=3.0'
+      - nvm install 10.13.0
+    python: 3.6
+    before_script:
+      - cd assets
+      - npm install
+      - npm run devbuild
+      - cd .. 
+    script: tox -e dj1.11-linux-ally-$ALLY-module_amr
+
+  - &deploy_stage
+
+matrix:
+
+  include:
+    - stage: stylecheck
+      name: "Python Lint"
+      language: python
+      install:
+        - pip install codecov coveralls
+        - pip install 'tox>=3.0'
+      python: 3.6
+      script: tox -e flake8
+
+    - name: "Python Type Checking"
+      language: python
+      install:
+        - pip install mypy
+      python: 3.6
+      script: mypy ./python/*/aristotle_*
+
+    - name: "JS Lint"
+      language: node_js
+      node_js: 10
+      before_install:
+        - cd assets
+      install:
+        - npm install
+      script:
+        - npm run lint
+
+
+    - stage: documentation
+      name: "Documentation"
+      language: python
+      install:
+        - pip install codecov coveralls
+        - pip install 'tox>=3.0'
+      python: 3.6
+      script: tox -e docs
+
+    - stage: frontend
+      name: "Frontend Tests"
+      language: node_js
+      node_js: 10
+      before_install:
+        - cd assets
+      install:
+        - npm install
+      script:
+        - npm run test
+
+    - stage: testing-aristotle-mdr
+      name: "Aristotle Tests Sqlite/Elasticsearch"
+      if: type = push
+      env: DJANGO_VERSION='1.11'  DB=sqlite  SEARCH=elastic MODULE=amr
+      <<: *main_test_script_py36
+    - stage: testing-aristotle-mdr
+      name: "Aristotle Tests Postgres/Elasticsearch"
+      env: DJANGO_VERSION='1.11'  DB=postgres  SEARCH=elastic MODULE=amr
+      <<: *main_test_script_py36
+    - stage: testing-aristotle-mdr
+      name: "Aristotle Tests Sqlite/Whoosh"
+      if: type = push
+      env: DJANGO_VERSION='1.11'  DB=sqlite    SEARCH=whoosh MODULE=amr
+      <<: *main_test_script_py36
+    - stage: testing-aristotle-mdr
+      name: "Aristotle Tests Postgres/Whoosh"
+      if: type = push
+      env: DJANGO_VERSION='1.11'  DB=postgres  SEARCH=whoosh MODULE=amr
+      <<: *main_test_script_py36
+    - stage: testing-aristotle-mdr
+      name: "Aristotle Tests Mariadb/Whoosh"
+      if: type = push
+      env: DJANGO_VERSION='1.11'  DB=mariadb   SEARCH=whoosh MODULE=amr
+      <<: *main_test_script_py36
+    - stage: testing-aristotle-mdr
+      name: "Aristotle Tests Mariadb/Elasticsearch"
+      if: type = push
+      env: DJANGO_VERSION='1.11'  DB=mariadb   SEARCH=elastic MODULE=amr
+      <<: *main_test_script_py36
+    - stage: testing-modules
+      name: "Dataset Extenstions Tests"
+      env: DJANGO_VERSION='1.11'  DB=postgres   SEARCH=elastic MODULE=dse
+      <<: *main_test_script_py36
+    - stage: testing-modules
+      name: "Comet Tests"
+      env: DJANGO_VERSION='1.11'  DB=postgres   SEARCH=elastic MODULE=cir
+      <<: *main_test_script_py36
+    - stage: testing-modules
+      name: "Graphql Tests"
+      env: DJANGO_VERSION='1.11'  DB=postgres   SEARCH=elastic MODULE=gql
+      <<: *main_test_script_py36
+    - stage: testing-modules
+      name: "API Tests"
+      env: DJANGO_VERSION='1.11'  DB=postgres   SEARCH=elastic MODULE=api
+      <<: *main_test_script_py36
+
+    # Test Accessibility
+    - <<: *test_accessibility_py36
+      env: ALLY=metadata_item MODULE=aristotle-metadata-registry
+    - <<: *test_accessibility_py36
+      env: ALLY=metadata_action MODULE=aristotle-metadata-registry
+    - <<: *test_accessibility_py36
+      env: ALLY=static MODULE=aristotle-metadata-registry
+
+
+    - stage: deploy-it
+      name: "Deploy"
+      if: branch = master
+      install: skip
+      script: ./scripts/buildandcopy.sh
+      after_success: true
+      deploy:
+        provider: pypi
+        user: Samuel.Spencer
+        skip_upload_docs: true
+        skip_cleanup: true
+        password:
+          secure: fNL+70u1QPgkC3+6iLSPBBeo/J1VrwVn6Tg9PdKR3n4X/m6MgAboDc93CfccfsxVxGqsIRBtEfUwRCJ6MrajWqgfQhjQ9KodiYzPVS8vPUQyOtn73AB8iPYKgKX1pFn6UVXcnI67RmtPyJJEUFPbqy5saKZfRpjVRH3vjM2mDJ0=
+        on:
+          branch: master
+        distributions: sdist bdist_wheel
+        repo: aristotle-mdr/aristotle-metadata-registry
+
+after_success:
+  - ./scripts/coverage_reporter.sh $MODULE
+
+notifications:
+  webhooks: https://outlook.office.com/webhook/4fa8f482-f261-4599-b76a-ba888c6820aa@1f298417-594f-4f6d-9bdb-8de767590d70/TravisCI/f4b13393a46b434288af9a0b1b2d4db1/1dbc8307-f5fb-45a9-b87f-4e128b5d9895
+
+env:
+  global:
+  - AWS_DEFAULT_REGION=ap-southeast-2
+  - PATH=$HOME/.local/bin:$PATH

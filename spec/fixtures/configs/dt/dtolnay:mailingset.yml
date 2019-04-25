@@ -1,0 +1,18 @@
+sudo: false
+
+language: python
+
+python:
+    - "2.7"
+
+install:
+    - pip install -e .
+    - pip install coveralls
+
+script:
+    - coverage run --source=mailingset `which trial` tests/*_test.py
+    - twistd -y bin/mailingset.tac
+    - kill $(cat twistd.pid)
+
+after_success:
+    - coveralls

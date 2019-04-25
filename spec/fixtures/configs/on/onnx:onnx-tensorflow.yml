@@ -1,0 +1,21 @@
+os:
+  - linux
+#  - osx
+dist: trusty
+sudo: required
+language: python
+services:
+  - docker
+
+cache: pip
+python:
+  - "2.7"
+  - "3.6"
+
+before_install:
+  - source ./.travis/setup.sh
+
+script:
+  - docker run -t -d --name=test winnietsang/onnx-tensoflow:${DOCKER_CONTAINER_NAME} /bin/bash
+  - cd .. && docker cp onnx-tensorflow test:/root/programs/
+  - docker exec -e TRAVIS=1 -t test /bin/bash -c "cd onnx-tensorflow && pip install -e . && python -m unittest discover test"

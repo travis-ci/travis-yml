@@ -1,0 +1,51 @@
+language: php
+sudo: required
+dist: trusty
+php:
+  - '5.6'
+install:
+  # Get vendor dependencies (Both PHP and JS)
+  - composer install
+  - npm install
+
+  # Git Clone OE Dependencies. Sample module contains the MySQL data dump necessary for the unit tests to run.
+  - git clone https://github.com/FiviumAustralia/eyedraw.git -b feature/v2-cera protected/modules/eyedraw
+  - git clone https://github.com/FiviumAustralia/sample.git -b feature/v2-cera protected/modules/sample
+before_script:
+  - echo 'date.timezone = "Australia/Melbourne"' >> ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/travis.ini # Set the PHP timezone to UTC +10:00:00
+  - sudo chmod a+x mysql-ci.sh # Make the shell script to populate the databases executable.
+  - ./mysql-ci.sh # Configure the test database
+script:
+  # Create the runtime folders.
+  - mkdir assets
+  - mkdir cache
+  - cd protected
+  - mkdir cache
+  - mkdir cache/events
+
+  # Copy the sample config files into place.
+  - cp config/local.sample/common.sample.php config/local/common.php
+  - cp config/local.sample/console.vagrant.php config/local/console.php
+
+  # Run migrations
+  - php yiic migrate --interactive=0
+  - php yiic migratemodules --interactive=0
+  - php yiic generateuniquecode --interactive=0
+  - php yiic generatesessions --interactive=0
+  - php yiic eyedrawconfigload --filename="./config/core/OE_ED_CONFIG.xml"
+
+  # Run unit tests.
+  - cd tests
+  - php ../../vendor/phpunit/phpunit/phpunit.php ../modules/OECaseSearch/tests/unit
+  - php ../../vendor/phpunit/phpunit/phpunit.php ../modules/OETrial/tests/unit
+  - php ../../vendor/phpunit/phpunit/phpunit.php ../modules/OphCiExamination/tests/unit/models/PatientAllergyParameterTest
+  - php ../../vendor/phpunit/phpunit/phpunit.php ../modules/OphCiExamination/tests/unit/models/FamilyHistoryParameterTest
+  - php ../../vendor/phpunit/phpunit/phpunit.php ./unit/components/DBProviderTest
+  - php ../../vendor/phpunit/phpunit/phpunit.php ./unit/
+notifications:
+  slack:
+    on_pull_requests: false
+    rooms:
+      - secure: "PdYJWqt4/qE66HHjMFcH08zI677nEYK8D206j1MEPv311LS9jaoGiiDxMDGqhpa1xILsmlPbnjMXaGFTgyj2Im74Z1yTteLxPToyb/HjpWvaHpHVrAZdDWunPqV80YmJUed6OpGQ6t7ojvU8shmYup5McF7p70YxnwbQ7UCUA9X90zb0wqQAF3Tzj2a+UtkpDobIEyBuW724P3/rqIU/BhN9ruiRIv4nC/BuaX4q1BppkXX9LYZ8yW2gOGLv+bxI0w2UYUptZmu9rNaObBvoiH8yDZB6sPH33lESnmH5w9eQgpJ9Vz0tPvt6U8HuFXQu7uwCXI87FsWM2u27Z2rZPKOmX8DRQYamLmoK+f0WyeL1OXl6d11dzxZzvWSEblM7D5yfdqQcnUVM1mgghm4+5/+8QK0FsmnnrWyUma8oUWZsSqv1oFvmysEwZR+KCYs97h/NBO00QzdlOAPrFS7S1ExgLpLE90B+ImuwR6lqytY4/jttn/Hdn2eQkk9hlvM8LvVTzVetFMAgbdscImEN3ZubTTkuDVto3EtmGdiipN6hNCNUEU83pIdwEvhuSFnolQQq/ad/tmzFEYBlkMH871mqcZPcj6ZA4pGOnbRIGCzbcl9/4vXDdypfrvhN1QwnbZL1H4n4yQQ+mVe9Yq4Qef9CaHYP6W2Ef8XOpEXPEHY="
+    on_success: change
+    on_failure: always

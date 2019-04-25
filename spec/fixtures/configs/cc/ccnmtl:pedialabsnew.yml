@@ -1,0 +1,15 @@
+language: python
+sudo: false
+python:
+  - "2.7"
+  - "3.6"
+install:
+  - pip install -U pip wheel
+  - pip install -U setuptools
+  - pip install -r requirements.txt
+script:
+  - make eslint
+  - make flake8
+  - make
+notifications:
+  slack: ccnmtl:GizSNscLWJLldjQrffB8mwgm

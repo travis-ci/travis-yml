@@ -1,0 +1,69 @@
+sudo: true
+language: csharp
+mono: none
+dotnet: 1.0.4
+dist: trusty
+before_install:
+  - echo "$TRAVIS_TAG"
+  - sudo apt-get update
+  - curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -
+  - sudo apt-get install -y nodejs
+  - sudo apt-get install wine
+
+install:
+  - npm install yarn -g
+  - yarn install --pure-lockfile
+  - cd client && yarn install --pure-lockfile && cd ..
+
+script:
+  # Build MCS-Lite console (Webpack)
+  - cd client
+  - npm run test
+  - npm run build:global
+  - cd ..
+
+  # Build App (NW.js)
+  - npm run build:7688
+
+  # Compression
+  - cd ./out/mcs-lite-app
+  - find . -type d -name "osx*" -maxdepth 1 -mindepth 1 -exec tar zcf {}.tar.gz {}  \;
+  - find . -type d -name "7688*" -maxdepth 1 -mindepth 1 -exec tar zcf {}.tar.gz {}  \;
+  - cp 7688*.tar.gz linux.tar.gz
+  - find . -type d -name "win*" -maxdepth 1 -mindepth 1 -exec zip -rq {}.zip {}  \;
+  - mkdir -p $TRAVIS_BUILD_DIR/uploadBuild/7688/$TRAVIS_BUILD_NUMBER/ && cp 7688*.tar.gz $TRAVIS_BUILD_DIR/uploadBuild/7688/$TRAVIS_BUILD_NUMBER/7688.tar.gz
+  - ls . && cd ../..
+
+after_success:
+  - ./node_modules/.bin/codecov
+
+cache:
+  directories:
+    - node_modules
+    - client/node_modules
+    - nodeBinary
+    - cache
+
+deploy:
+  - provider: releases
+    api_key:
+      secure: Ii5Phu/1jnnXjtNbwt+FSH2CBq7Db7TXKoHoN7SrPJAs7w+J/ZDSTKf0Scbck+8woyImXTlh6pX+3qXU57u3FkigeOqX46i4OcT7SJQ+lVbgIVJRNojlw0gZmZ1hgTLWl5914xMnO82+99xjlU2amG4Cv7jkx61M8Os56pqR4kMo6uy1YkSEYNc06cZYNTkNWuGfxlCyMtz3G4WYgKEJXEqbfGJ7Hz6jWkaG+g03KuzBI1XbjNpT13VyxSkcC+xz4uaPO6ZRR5f6wKUbyGfl51xYmZkwYdqc2Zm2tfG+S1gHpyQwz9fXb5DOR5FbRWOmW+YSvbBZwELA67nxpempMT1Nx0v0sp6z8pOeJQLZKuyhMe2kRZD6nKY/feMSVC0ABnbqw4MiitgLcHMqVLpir45JuhoWqkEGU24zbu6Ut37UcrXgdcD7lXzTy2tEHptgsiRk0Y5oMMjZhRLiausD4g2cg7m4cfC4tuScEWwEXqTTScPZTrF5t0XhfOJoVwaz6x//kmx9drYbBTaWJSul4WMiVcxm9OmSxez7BKQx9Wa4i+IecbG5feFS6lKqtwL7hSbEoM9SYtof/F4QfJedE3pl43GwVNNpf+618HvNZMmwxtAXIiXzc7AAobXyT2JPOwKme9tx5ziUch7TSqZi3hnL/19cbndeb0GvuXcDHcc=
+    file_glob: true
+    file: './out/mcs-lite-app/*.{tar.gz,zip}'
+    skip_cleanup: true
+    on:
+      repo: MCS-Lite/mcs-lite-app
+      tags: true
+  - provider: s3
+    access_key_id: AKIAJ36FA5PQGVMPSIVA
+    secret_access_key:
+      secure: L39wMZD6SnXp9Ll67nUadbA0vciNIIGlHNmHnyyh8jW6SKZnkx/b1Yvwb6oCOhpmxBLgC+6aBhDB+kVxgrx7+EhKV6jKIo4iuR04j7xrfZD8C9El0H9yvuR3dwWDO4Oq3sW5Fq4BN/ZC9tNCEFzOy5WxNtaVow/Ly/hO9F77OyNVbTDN9r86FyfzFWd+tfQIDq0HhmXAjIiQYRNlfAzgXJNN1poOpeCmQ5/2FEKN1dzqw/yW//LhwSxlH55NTsybBczRonVeeNUqOnqYUM6E6Z30tsgtllLEbqwb2+q3+2mszLciwQ3ScyO0IqKtAQEebpQaDfWcdYOjc/47D2CLFsXyd+T8LLeSPKXXIGFneDCJsjnW5jPQVa3vcwjPmkVGouLkE5imISjR4n/WPchVkAKhoIaVYx4b8L9W5MM/Y0UEOuJwOAZkLHsgsqUrDb2ey/epPzqhK1Wh//3HujkW8OyJzB/2Q6DlLktt3ww/IvbVEAaBFrFFgXSeHdfDeG5ucmvev8eWCikruq+raaMU/xns1/y+7rIP/pjJhysGRHtxgvwIOW3151ItLreZ7vIgrsSF6VTM3GK2nkxJ7m3xLYVOE17jN7f831WupjCixHPcGLZwEylO4G9lhGj+1vlmSlXJx7jP/EbAv0c48JjYTrt0QvBiwXheXxOxn8RaRe0=
+    bucket: mcs-lite-build-bucket
+    acl: public_read
+    skip_cleanup: true
+    region: ap-southeast-1
+    local_dir: $TRAVIS_BUILD_DIR/uploadBuild
+    on:
+      all_branches: true
+after_deploy:
+  - sh trigger-dependent-build.sh

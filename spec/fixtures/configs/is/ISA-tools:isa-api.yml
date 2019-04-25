@@ -1,0 +1,34 @@
+sudo: false
+language: python
+cache: pip
+python:
+  - 3.6
+before_install:
+- bash -x get_test_data.sh
+install:
+- pip install --upgrade pip && pip install -r requirements-tests.txt
+- pip install tox-travis
+script:
+- flake8 --show-source --exclude=.svn,CVS,.bzr,.hg,.git,isatab_configurator.py,study_design_wizard.py isatools
+- behave --no-capture --no-capture-stderr --format=progress features/isa-file-handler.feature
+- tox
+- nosetests --with-coverage --cover-package=isatools
+- coverage report -m
+branches:
+  only:
+    - master
+    - develop
+    - /v\d+\.\d+\.\d+[a-z]?/
+deploy:
+  provider: pypi
+  user: zigur
+  password:
+    secure: u87A2zhiEBLvRek2Yq+IPV8DMN16o0AkR0wz1njVRrc23ORab9eUPJ1fNOCzveax0NmlcJNV9jUMztgBp9sVnvMR6xmVu19WZPNiP6cnbY/U4dHXSeLnc2swWMOfybui+GrzoDXphXK4MdnyxJJXCjJgAvD7SwpHgsJ8cnhqh8VmcXX7m1kE3IUMXYURlpzKjQTBbQwsmTBc7/Y3SFSjwl5y3E4hwmw2exeXfZhBHRGbvyIG08SMRt1VOX33vczcuioxbh355yrTEomf9D0bNJgFbttu/ULaKHgrnee1SISmZ0b3tmOY9pE0FzorQXMck8juEjvSEqfFGhKg3NRWTrWYOHttqXD/di47wQcVdTvBFPMlh8OdIWZdfijj8WOlaA4sFPMXysSn4AQzkugW+ICva+pFp24ucG1ESULEIB7/GKCjzMIat/FSslNS7H/AWN/NENbjdbRzdi3Wxhu68D6bj9XoBpPJBk56R2HmY6M08P+18htrKqykv4JVxcSuw/vzYdQ9ydEuGxTZ4JtOC1eFf5MqpgMvAlbb+Wh1jtJ+L4MgfkMKoei8qoiWMfJvhdImBNWPhDIuHZ5IvoJ/wKtmzY3U/nH7hGsN72Im7zLmap9BDiGiDbqiUgaii/59pEPx4PyDmfJChcKjrNPQKtdMx+3wXES9iAJHomwCcRs=
+  distributions: "sdist bdist_wheel"
+  edge:
+    branch: v1.8.45
+  on:
+    tags: true
+
+after_success:
+- coveralls

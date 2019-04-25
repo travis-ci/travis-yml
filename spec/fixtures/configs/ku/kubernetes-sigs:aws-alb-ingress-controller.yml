@@ -1,0 +1,26 @@
+language: go
+go_import_path: github.com/kubernetes-sigs/aws-alb-ingress-controller
+sudo: required
+
+env:
+  global:
+    - GO111MODULE=on
+
+go:
+  - "1.11.2"
+
+cache:
+  directories:
+    - $GOPATH/pkg
+    - $GOPATH/bin
+    - $GOROOT
+
+services:
+  - docker
+
+notifications:
+  on_success: never
+  on_failure: never
+
+script:
+  - make server

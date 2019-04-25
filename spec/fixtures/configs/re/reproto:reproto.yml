@@ -1,0 +1,18 @@
+language: rust
+cache: cargo
+sudo: required
+dist: trusty
+
+os:
+  - linux
+
+rust:
+  - stable
+
+script:
+  - make --version
+  - make tests suites -j 2
+
+matrix:
+  allow_failures:
+    - rust: nightly

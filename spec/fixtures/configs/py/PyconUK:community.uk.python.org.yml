@@ -1,0 +1,12 @@
+language: python
+python: "3.6"
+sudo: false
+
+cache: pip
+
+install:
+  - pip install --disable-pip-version-check --upgrade pip
+  - pip install -r requirements.txt
+  - npm install -g less
+
+script: make deploy

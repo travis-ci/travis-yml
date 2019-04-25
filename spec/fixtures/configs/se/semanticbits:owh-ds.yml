@@ -1,0 +1,158 @@
+sudo: required
+
+language: node_js
+node_js:
+  - "node"
+
+services:
+  - docker
+
+addons:
+  code_climate:
+    repo_token: aa4bb84528f703e93a68f03079e9870898d452659e9498bbba8fb043c66e3083
+
+env:
+  global:
+    - |
+      if [ "$TRAVIS_BRANCH" != "deploy/production" ]; then 
+         AWS_ACCESS_KEY_ID=$OWH_ACCESS_KEY;
+         AWS_SECRET_ACCESS_KEY=$OWH_ACCESS_SECRET;
+         NODE_ENV=test;
+      else 
+         AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID_PROD; 
+         AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY_PROD;
+      fi;
+    
+before_install:
+  - if [ "$TRAVIS_BRANCH" != "deploy/production" ]; then docker info; fi
+  - if [ "$TRAVIS_BRANCH" != "deploy/production" ]; then mkdir -p .owh/logs; fi
+  - if [ "$TRAVIS_BRANCH" != "deploy/production" ]; then openssl aes-256-cbc -K $encrypted_24a8a70e72ba_key -iv $encrypted_24a8a70e72ba_iv -in .owh/owh-config.yaml.enc -out .owh/owh-config.yaml -d; fi
+  - if [ "$TRAVIS_BRANCH" != "deploy/production" ]; then sudo pip install awscli; fi
+  - if [ "$TRAVIS_BRANCH" != "deploy/production" ]; then export PATH=$PATH:$HOME/.local/bin; fi
+
+install:
+  - if [ "$TRAVIS_BRANCH" == "deploy/production" ]; then docker info; fi
+  - if [ "$TRAVIS_BRANCH" == "deploy/production" ]; then mkdir -p .owh/logs; fi
+  - if [ "$TRAVIS_BRANCH" == "deploy/production" ]; then sudo pip install awscli; fi
+  - if [ "$TRAVIS_BRANCH" == "deploy/production" ]; then export PATH=$PATH:$HOME/.local/bin; fi
+  - if [ "$TRAVIS_BRANCH" != "deploy/production" ]; then cd software/owh/server; fi
+  - if [ "$TRAVIS_BRANCH" != "deploy/production" ]; then nvm install node; fi
+  - if [ "$TRAVIS_BRANCH" != "deploy/production" ]; then nvm use node; fi
+  - if [ "$TRAVIS_BRANCH" != "deploy/production" ]; then node --version; fi
+  - if [ "$TRAVIS_BRANCH" != "deploy/production" ]; then npm install; fi
+  - if [ "$TRAVIS_BRANCH" != "deploy/production" ]; then npm install --dev; fi
+  - cd $TRAVIS_BUILD_DIR/software/owh/client
+  - if [ "$TRAVIS_BRANCH" != "deploy/production" ]; then npm install; fi
+  - if [ "$TRAVIS_BRANCH" != "deploy/production" ]; then npm install --dev; fi
+  - if [ "$TRAVIS_BRANCH" != "deploy/production" ]; then npm install -g nodemon; fi
+  - if [ "$TRAVIS_BRANCH" != "deploy/production" ]; then npm install -g istanbul; fi
+  - if [ "$TRAVIS_BRANCH" != "deploy/production" ]; then npm install -g codeclimate-test-reporter; fi
+  - if [ "$TRAVIS_BRANCH" != "deploy/production" ]; then npm install -g lcov-result-merger; fi
+
+before_script:
+  - if [ "$TRAVIS_BRANCH" != "deploy/production" ]; then sleep 10; fi
+  - if [ "$TRAVIS_BRANCH" != "deploy/production" ]; then curl http://34.206.155.198/esdev; fi  # To verify ElasticSearch running
+  # - if [ "$TRAVIS_BRANCH" != "deploy/production" ]; then curl http://54.242.94.197/stats/questions?d=yrbss; fi # check connection to YRBS dev service; fi
+  - if [ "$TRAVIS_BRANCH" != "deploy/production" ]; then java -version; fi
+  - if [ "$TRAVIS_BRANCH" != "deploy/production" ]; then echo $JAVA_HOME; fi
+  - if [ "$TRAVIS_BRANCH" != "deploy/production" ]; then export DISPLAY=:99.0; fi
+  - if [ "$TRAVIS_BRANCH" != "deploy/production" ]; then sh -e /etc/init.d/xvfb start; fi
+#  - if [ "$TRAVIS_BRANCH" != "deploy/production" ]; then npm install; fi
+#  - if [ "$TRAVIS_BRANCH" != "deploy/production" ]; then npm install -g pm2@latest; fi
+#  - if [ "$TRAVIS_BRANCH" != "deploy/production" ]; then sudo apt-get install nodejs-legacy; fi
+  - npm start > /dev/null &
+  - if [ "$TRAVIS_BRANCH" != "deploy/production" ]; then ./node_modules/protractor/bin/webdriver-manager update; fi
+  - if [ "$TRAVIS_BRANCH" != "deploy/production" ]; then sleep 1; fi #give server time to start
+
+group: deprecated-2017Q4
+language: if [ "$TRAVIS_BRANCH" != "deploy/production" ]; then java; fi
+jdk:
+  - oraclejdk8
+
+script:
+  - if [ "$TRAVIS_BRANCH" != "deploy/production" ]; then npm run-script test-single-run; fi
+  - if [ "$TRAVIS_BRANCH" != "deploy/production" ]; then ls; fi
+  - if [ "$TRAVIS_BRANCH" != "deploy/production" ]; then ls coverage; fi
+  - if [ "$TRAVIS_BRANCH" != "deploy/production" ]; then ls 'coverage/PhantomJS 2.1.1 (Linux 0.0.0)'; fi
+  - cd $TRAVIS_BUILD_DIR/software/owh/
+  - if [ "$TRAVIS_BRANCH" != "deploy/production" ]; then istanbul cover node_modules/mocha/bin/_mocha -- -R spec --recursive test; fi
+  - npm start > /dev/null &
+  - if [ "$TRAVIS_BRANCH" != "deploy/production" ]; then sleep 10; fi
+  - if [ "$TRAVIS_BRANCH" != "deploy/production" ]; then cd ../client; fi
+  #- if [ "$TRAVIS_BRANCH" != "deploy/production" ]; then ./node_modules/.bin/protractor test/e2e-tests/protractor.conf.js --browser=firefox --cucumberOpts.tags=@Factsheets; fi
+  #- if [ "$TRAVIS_BRANCH" != "deploy/production" ]; then ./node_modules/.bin/protractor test/e2e-tests/protractor.conf.js --browser=firefox --cucumberOpts.tags=@Yrbs,@PRAMS,@Home; fi
+  #- if [ "$TRAVIS_BRANCH" != "deploy/production" ]; then ./node_modules/.bin/protractor test/e2e-tests/protractor.conf.js --browser=firefox --cucumberOpts.tags=@Natality,@Mortality; fi
+  #- if [ "$TRAVIS_BRANCH" != "deploy/production" ]; then ./node_modules/.bin/protractor test/e2e-tests/protractor.conf.js --browser=firefox --cucumberOpts.tags=@CancerIncidence,@Common,@Infant; fi
+  #- if [ "$TRAVIS_BRANCH" != "deploy/production" ]; then ./node_modules/.bin/protractor test/e2e-tests/protractor.conf.js --browser=firefox --cucumberOpts.tags=@Census,@AIDS; fi
+  #- if [ "$TRAVIS_BRANCH" != "deploy/production" ]; then ./node_modules/.bin/protractor test/e2e-tests/protractor.conf.js --browser=firefox --cucumberOpts.tags=@STD,@TB,@DataDocumentation; fi
+
+after_success:
+  - if [ "$TRAVIS_BRANCH" != "deploy/production" ]; then cd ..; fi
+  - if [ "$TRAVIS_BRANCH" != "deploy/production" ]; then lcov-result-merger './**/lcov.info' 'merged-lcov.info'; fi
+  - if [ "$TRAVIS_BRANCH" != "deploy/production" ]; then codeclimate-test-reporter < "merged-lcov.info"; fi
+  - if [ "$TRAVIS_BRANCH" != "deploy/production" ]; then aws s3 sync client/cucumber-test-reports s3://owh-cucumber-report --acl public-read; fi
+
+before_deploy:
+  - if [ "$TRAVIS_BRANCH" != "deploy/production" ]; then cd $TRAVIS_BUILD_DIR/software/owh; fi
+  # Dealing with paths that fight each other... start the nasty bit...
+  - if [ "$TRAVIS_BRANCH" != "deploy/production" ]; then cp -R $TRAVIS_BUILD_DIR/deployment/* $TRAVIS_BUILD_DIR/software/owh; fi
+  # End the nasty bit.
+  - if [ "$TRAVIS_BRANCH" != "deploy/production" ]; then aws s3 sync s3://owh-config-dev $TRAVIS_BUILD_DIR/software/owh; fi
+  - if [ "$TRAVIS_BRANCH" != "deploy/production" ]; then mkdir -p $TRAVIS_BUILD_DIR/software/owh/.owh/logs; fi
+  - if [ "$TRAVIS_BRANCH" != "deploy/production" ]; then docker-compose up -d; fi
+  - if [ "$TRAVIS_BRANCH" != "deploy/production" ]; then docker-compose build; fi
+  - if [ "$TRAVIS_BRANCH" != "deploy/production" ]; then docker images; fi
+  - if [ "$TRAVIS_BRANCH" != "deploy/production" ]; then mkdir -p dpl_tmp; fi
+  - if [ "$TRAVIS_BRANCH" != "deploy/production" ]; then mkdir -p dpl_cd_upload; fi
+  - if [ "$TRAVIS_BRANCH" != "deploy/production" ]; then docker save owh_web |  gzip -c >  dpl_tmp/owh_web.tar.gz; fi
+  - if [ "$TRAVIS_BRANCH" != "deploy/production" ]; then cp $TRAVIS_BUILD_DIR/deployment/appspec.yml dpl_tmp/appspec.yml; fi
+  - if [ "$TRAVIS_BRANCH" != "deploy/production" ]; then cp $TRAVIS_BUILD_DIR/deployment/docker-compose-deploy.yml  dpl_tmp/docker-compose.yml; fi
+  - if [ "$TRAVIS_BRANCH" != "deploy/production" ]; then cp $TRAVIS_BUILD_DIR/deployment/Dockerfile  dpl_tmp/; fi
+  - if [ "$TRAVIS_BRANCH" != "deploy/production" ]; then cp -R $TRAVIS_BUILD_DIR/deployment/scripts  dpl_tmp/scripts; fi
+  - if [ "$TRAVIS_BRANCH" != "deploy/production" ]; then cd dpl_tmp; fi
+  - if [ "$TRAVIS_BRANCH" != "deploy/production" ]; then zip -r owh-${TRAVIS_BRANCH}-${TRAVIS_BUILD_NUMBER}.zip *; fi
+  - if [ "$TRAVIS_BRANCH" != "deploy/production" ]; then ls; fi
+  - if [ "$TRAVIS_BRANCH" != "deploy/production" ]; then cd ..; fi
+  - if [ "$TRAVIS_BRANCH" != "deploy/production" ]; then mv dpl_tmp/owh-${TRAVIS_BRANCH}-${TRAVIS_BUILD_NUMBER}.zip dpl_cd_upload/; fi
+  - if [ "$TRAVIS_BRANCH" != "deploy/production" ]; then ls dpl_tmp; fi
+  - if [ "$TRAVIS_BRANCH" != "deploy/production" ]; then rm -rf dpl_tmp; fi
+  
+deploy:
+  - provider: s3
+    access_key_id: $OWH_ACCESS_KEY
+    secret_access_key: $OWH_ACCESS_SECRET
+    local_dir: dpl_cd_upload
+    skip_cleanup: true
+    on: &2
+      repo: semanticbits/owh-ds
+      branch:
+       - develop
+       # - release (TBD)
+    bucket: sb-owh-deployment
+  - provider: codedeploy
+    access_key_id: $OWH_ACCESS_KEY
+    secret_access_key: $OWH_ACCESS_SECRET
+    bucket: sb-owh-deployment
+    key: owh-$TRAVIS_BRANCH-$TRAVIS_BUILD_NUMBER.zip
+    bundle_type: zip
+    application: OwhDev
+    deployment_group: $TRAVIS_BRANCH
+    on: *2
+
+#after_script:
+#  - if [ "$TRAVIS_BRANCH" != "deploy/production" ]; then kill -9 $(fuser -n tcp 3000 2> /dev/null); fi
+
+script:
+  - if [ "$TRAVIS_BRANCH" == "deploy/production" ]; then cd $TRAVIS_BUILD_DIR/software/owh; fi
+  - if [ "$TRAVIS_BRANCH" == "deploy/production" ]; then cp -R $TRAVIS_BUILD_DIR/deployment/* $TRAVIS_BUILD_DIR/software/owh; fi
+  - if [ "$TRAVIS_BRANCH" == "deploy/production" ]; then mkdir -p $TRAVIS_BUILD_DIR/software/owh/.owh/logs; fi
+
+after_success:
+  - if [ "$TRAVIS_BRANCH" == "deploy/production" ]; then docker --version; fi  # document the version travis is using; fi
+  - if [ "$TRAVIS_BRANCH" == "deploy/production" ]; then eval $(aws ecr get-login --no-include-email --region us-east-1); fi #needs AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY envvars
+  - if [ "$TRAVIS_BRANCH" == "deploy/production" ]; then docker build -t owh-prod .; fi
+  - if [ "$TRAVIS_BRANCH" == "deploy/production" ]; then docker tag owh-prod:latest 498284886784.dkr.ecr.us-east-1.amazonaws.com/owh-prod:latest; fi
+  - if [ "$TRAVIS_BRANCH" == "deploy/production" ]; then docker push 498284886784.dkr.ecr.us-east-1.amazonaws.com/owh-prod:latest; fi
+  - if [ "$TRAVIS_BRANCH" == "deploy/production" ]; then cd $TRAVIS_BUILD_DIR; fi
+  - if [ "$TRAVIS_BRANCH" == "deploy/production" ]; then sh script.sh; fi
+ 

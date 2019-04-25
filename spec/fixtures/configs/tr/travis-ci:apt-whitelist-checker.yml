@@ -1,0 +1,43 @@
+language: ruby
+
+sudo: required
+
+dist: trusty
+
+git:
+  depth: 99999
+
+env:
+  global:
+    - DEBIAN_FRONTEND=noninteractive
+    - PACKAGE=openscad
+    - ISSUE_REPO=apt-package-safelist
+    - ISSUE_NUMBER=4333
+    - DIST=trusty
+
+before_install:
+  - if [ -z $PACKAGE ]; then echo "\$PACKAGE not defined" && travis_terminate 2; fi
+  - sudo apt-get update -y -qq
+  - sudo apt-get install -yqq sshpass
+  - if ! command -v docker ; then curl -sSL https://get.docker.io | bash; fi
+  - sudo usermod -a -G docker travis
+  - |
+    if [[ $DIST = 'precise' ]]; then
+      IMAGE=quay.io/travisci/travis-node-js:latest
+      export DOCKER=true
+      docker pull ${IMAGE}
+      jq --version || sudo curl -sSL -o /usr/local/bin/jq http://stedolan.github.io/jq/download/linux64/jq && sudo chmod 0755 /usr/local/bin/jq
+      docker images | grep -q -E '^travis\\s+\\bnode-js\\b\\s+' || docker tag ${IMAGE} travis:node-js
+      docker run -v /var/tmp:/var/tmp -v /home/travis:/home/travis -d travis:node-js | tee docker_id
+      docker inspect $(< docker_id) | jq -r .[0].NetworkSettings.IPAddress | tee docker_ip_address
+      docker ps
+    fi
+
+
+install: skip
+
+script:
+  - ./run_test.sh
+
+notifications:
+  email: false

@@ -1,0 +1,24 @@
+language: node_js
+node_js:
+  - "7"
+  - "6"
+  - "8"
+  - "9"
+  - "10"
+
+sudo: false
+
+cache:
+  directories:
+    - node_modules
+
+matrix:
+  fast_finish: true
+
+before_install:
+  - npm config set spin false
+  - npm install -g bower phantomjs-prebuilt
+
+install:
+  - npm install
+  - bower install

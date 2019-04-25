@@ -1,0 +1,15 @@
+language: node_js
+node_js:
+  - "stable"
+services:
+  - postgresql 
+cache:
+  directories:
+    - "node_modules"
+before_script:
+  - psql -c 'create database valinor_backend_test;' -U postgres
+  - npm run db-migrate && npm run db-seed-all
+after_script:
+  - npm run db-undo-migrate
+script:
+  - npm run coveralls

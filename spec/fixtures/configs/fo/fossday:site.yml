@@ -1,0 +1,56 @@
+# Rafael Dutra
+sudo: required
+
+services:
+  - docker
+
+stages:
+  - name: run
+  - name: tag
+  - name: publish
+
+jobs:
+  include:
+    - stage: run
+      script:
+        - |
+          docker run \
+          -itd \
+          -v $(pwd)/site:/src \
+          -p 1313:1313 raffaeldutra/docker-gohugo /gohugo.sh -s config-docker.toml
+
+#    - stage: tag
+#      script:
+#        - git config --local user.name "Deploy FOSSDay"
+#        - git config --local user.email "fossday@fossday.org"
+#        - export TRAVIS_TAG=$(($(git describe --tags $(git rev-list --tags --max-count=1) | cut -d "." -f1)+1))
+#        - git tag ${TRAVIS_TAG}.0 -a -m "Tagging version ${TRAVIS_TAG}.0"
+#        - git push "https://${GITHUB_TOKEN}@github.com/fossday/site.git" ${TRAVIS_TAG}.0
+#      branches:
+#        only:
+#          - develop
+
+    - stage: publish
+      script:
+        - |
+          docker run \
+          --rm \
+          -v $(pwd)/site:/src \
+          -v $(pwd)/public:/src/public \
+          raffaeldutra/docker-gohugo /gohugo.sh -p config-docker.toml
+      branches:
+        only:
+          - develop
+
+      deploy:
+        name: "FOSS Team Deployment"
+        provider: pages
+        local_dir: public
+        skip_cleanup: true
+        github_token: $GITHUB_TOKEN
+        keep_history: true
+        verbose: true
+        target_branch: master
+        on:
+          tags: true
+        fqdn: fossday.org

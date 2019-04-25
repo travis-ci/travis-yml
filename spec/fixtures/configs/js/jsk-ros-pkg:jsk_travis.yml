@@ -1,0 +1,86 @@
+# Travis Continuous Integration Configuration File, based on ..
+#   Generic MoveIt Travis Continuous Integration Configuration File
+#   Works with all MoveIt! repositories/branches
+#   Author: Dave Coleman, Jonathan Bohren
+language: c++
+cache:
+  apt: true
+  pip: true
+  directories:
+    - $HOME/.ccache
+    - $HOME/.cache/pip
+sudo: required
+dist: trusty
+services:
+  - docker
+notifications:
+  slack: jsk-robotics:Av7tc8wj3IWkLYvlTzHE7x2g
+env:
+  matrix:
+    # travis + jsk jenkins
+    - ROS_DISTRO=hydro USE_JENKINS="true" NO_SUDO="true"
+    - ROS_DISTRO=indigo
+    - ROS_DISTRO=indigo TRAVIS_REPO_SLUG=jsk-ros-pkg/jsk_travis
+    - ROS_DISTRO=indigo TRAVIS_REPO_SLUG=jsk-ros-pkg/jsk_travis TRAVIS_BRANCH=master TRAVIS_COMMIT='HEAD' TRAVIS_PULL_REQUEST='false'
+    - ROS_DISTRO=indigo NUMBER_OF_LOGS_TO_KEEP=4
+    - ROS_DISTRO=jade
+    - ROS_DISTRO=jade TRAVIS_REPO_SLUG=jsk-ros-pkg/jsk_travis
+    - ROS_DISTRO=jade TRAVIS_REPO_SLUG=jsk-ros-pkg/jsk_travis TRAVIS_BRANCH=master TRAVIS_COMMIT='HEAD' TRAVIS_PULL_REQUEST='false'
+    # travis
+    - USE_TRAVIS=true ROS_DISTRO=indigo
+    - USE_TRAVIS=true ROS_DISTRO=indigo TRAVIS_REPO_SLUG=jsk-ros-pkg/jsk_travis
+    - USE_TRAVIS=true ROS_DISTRO=indigo TRAVIS_REPO_SLUG=jsk-ros-pkg/jsk_travis TRAVIS_BRANCH=master TRAVIS_COMMIT='HEAD' TRAVIS_PULL_REQUEST='false'
+    - USE_TRAVIS=true ROS_DISTRO=indigo NUMBER_OF_LOGS_TO_KEEP=4
+    - USE_TRAVIS=true ROS_DISTRO=jade
+    - USE_TRAVIS=true ROS_DISTRO=jade TRAVIS_REPO_SLUG=jsk-ros-pkg/jsk_travis
+    - USE_TRAVIS=true ROS_DISTRO=jade TRAVIS_REPO_SLUG=jsk-ros-pkg/jsk_travis TRAVIS_BRANCH=master TRAVIS_COMMIT='HEAD' TRAVIS_PULL_REQUEST='false'
+    # travis + docker
+    - USE_DOCKER=true ROS_DISTRO=hydro
+    - USE_DOCKER=true ROS_DISTRO=hydro USE_CATKIN_MAKE=true BEFORE_SCRIPT="pwd; git clone http://github.com/jsk-ros-pkg/jsk_common_msgs" NOT_TEST_INSTALL=true
+    - USE_DOCKER=true ROS_DISTRO=hydro TEST_PKGS=" "
+    - USE_DOCKER=true ROS_DISTRO=hydro ROS_REPOSITORY_PATH=http://packages.ros.org/ros/ubuntu
+    - USE_DOCKER=true ROS_DISTRO=hydro BEFORE_SCRIPT="pwd; git clone http://github.com/jsk-ros-pkg/jsk_common_msgs"
+    - USE_DOCKER=true ROS_DISTRO=indigo
+    - USE_DOCKER=true ROS_DISTRO=indigo TRAVIS_REPO_SLUG=jsk-ros-pkg/jsk_travis
+    - USE_DOCKER=true ROS_DISTRO=indigo TRAVIS_REPO_SLUG=jsk-ros-pkg/jsk_travis TRAVIS_BRANCH=master TRAVIS_COMMIT='HEAD' TRAVIS_PULL_REQUEST='false'
+    - USE_DOCKER=true ROS_DISTRO=indigo NUMBER_OF_LOGS_TO_KEEP=4
+    - USE_DOCKER=true ROS_DISTRO=jade
+    - USE_DOCKER=true ROS_DISTRO=jade TRAVIS_REPO_SLUG=jsk-ros-pkg/jsk_travis
+    - USE_DOCKER=true ROS_DISTRO=jade TRAVIS_REPO_SLUG=jsk-ros-pkg/jsk_travis TRAVIS_BRANCH=master TRAVIS_COMMIT='HEAD' TRAVIS_PULL_REQUEST='false'
+    - USE_DOCKER=true ROS_DISTRO=kinetic
+    - USE_DOCKER=true ROS_DISTRO=lunar
+    - USE_DOCKER=true ROS_DISTRO=melodic
+    # gazebo
+    - USE_DOCKER=true TEST_GAZEBO=true ROS_DISTRO=indigo
+    - USE_DOCKER=true TEST_GAZEBO=true ROS_DISTRO=jade
+    - USE_DOCKER=true TEST_GAZEBO=true ROS_DISTRO=kinetic
+    - USE_JENKINS=true TEST_GAZEBO=true ROS_DISTRO=indigo
+    - USE_JENKINS=true TEST_GAZEBO=true ROS_DISTRO=jade
+    - USE_JENKINS=true TEST_GAZEBO=true ROS_DISTRO=kinetic
+matrix:
+  fast_finish: true
+  allow_failures:
+    - env: USE_DOCKER=true TEST_GAZEBO=true ROS_DISTRO=jade
+    - env: USE_DOCKER=true TEST_GAZEBO=true ROS_DISTRO=kinetic
+    - env: USE_JENKINS=true TEST_GAZEBO=true ROS_DISTRO=jade
+    - env: USE_JENKINS=true TEST_GAZEBO=true ROS_DISTRO=kinetic
+  include:
+    - env:
+        - USE_DOCKER=true
+        - ROS_DISTRO=kinetic
+      sudo: false
+before_script:
+  - find $HOME/.ccache    -type f
+  - find $HOME/.cache/pip -type f
+  - export ROSDEP_ADDITIONAL_OPTIONS='-n -v --ignore-src' # run rosdep without -r and -v
+  - mkdir .travis; cp -r * .travis # need to copy, since directory starting from . is ignoreed by catkin build
+  - export BEFORE_SCRIPT="rm -fr jsk_travis/CATKIN_IGNORE; git clone https://github.com/ros/ros_tutorials -b ${ROS_DISTRO}-devel;${BEFORE_SCRIPT}"
+  - if [ "${USE_CATKIN_MAKE}" == "true" ] ;then sed -i 's@catkin build -i -v --limit-status-rate 0.001@catkin_make@' .travis/travis.sh; fi
+  - if [ "${USE_CATKIN_MAKE}" == "true" ] ;then sed -i 's@catkin run_tests --no-deps --limit-status-rate 0.001@catkin_make run_tests@' .travis/travis.sh; fi
+  - if [ "${USE_CATKIN_MAKE}" == "true" ] ;then export CATKIN_PARALLEL_JOBS="--no-color" ; fi
+script:
+  - if [ "${TEST_GAZEBO}" = "true" ]; then export CATKIN_TOOLS_BUILD_OPTIONS="--force-cmake --cmake-args -DENABLE_TEST_GAZEBO:BOOL=ON --"; fi
+  - source .travis/travis.sh
+after_script:
+  - find $HOME/.ccache    -type f
+  - find $HOME/.cache/pip -type f

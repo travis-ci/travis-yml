@@ -1,0 +1,108 @@
+sudo: required
+language: node_js
+node_js: "8"
+
+script: skip
+
+jobs:
+  include:
+    - stage: Lint
+      script:
+        - cd $TRAVIS_BUILD_DIR/client && npm install && npm run lint
+        - cd $TRAVIS_BUILD_DIR/server && npm install && npm run lint
+
+    - stage: Audit
+      script:
+#        - cd $TRAVIS_BUILD_DIR/client && npm audit --production
+        - cd $TRAVIS_BUILD_DIR/server && npm audit --production
+
+    - stage: Tests
+      script: echo "No tests at the moment"
+
+    - stage: Build and push image
+      services:
+        - docker
+      install: skip
+      before_script:
+        - docker build -t tomochain/tomoscan-server -f Dockerfile.server .
+        - docker build -t tomochain/tomoscan-client -f Dockerfile.client .
+      script:
+        - echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin
+        - docker tag tomochain/tomoscan-server tomochain/tomoscan-server:latest
+        - docker push tomochain/tomoscan-server:latest
+        - docker tag tomochain/tomoscan-server tomochain/tomoscan-server:$TRAVIS_BUILD_ID
+        - docker push tomochain/tomoscan-server:$TRAVIS_BUILD_ID
+        - docker tag tomochain/tomoscan-client tomochain/tomoscan-client:latest
+        - docker push tomochain/tomoscan-client:latest
+        - docker tag tomochain/tomoscan-client tomochain/tomoscan-client:$TRAVIS_BUILD_ID
+        - docker push tomochain/tomoscan-client:$TRAVIS_BUILD_ID
+
+    - stage: Build and push image (tagged)
+      services:
+        - docker
+      install: skip
+      before_script:
+        - docker build -t tomochain/tomoscan-server -f Dockerfile.server .
+        - docker build -t tomochain/tomoscan-client -f Dockerfile.client .
+      script:
+        - echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin
+        - docker tag tomochain/tomoscan-server tomochain/tomoscan-server:latest
+        - docker push tomochain/tomoscan-server:latest
+        - docker tag tomochain/tomoscan-server tomochain/tomoscan-server:testnet
+        - docker push tomochain/tomoscan-server:testnet
+        - docker tag tomochain/tomoscan-server tomochain/tomoscan-server:$TRAVIS_TAG
+        - docker push tomochain/tomoscan-server:$TRAVIS_TAG
+        - docker tag tomochain/tomoscan-client tomochain/tomoscan-client:latest
+        - docker push tomochain/tomoscan-client:latest
+        - docker tag tomochain/tomoscan-client tomochain/tomoscan-client:testnet
+        - docker push tomochain/tomoscan-client:testnet
+        - docker tag tomochain/tomoscan-client tomochain/tomoscan-client:$TRAVIS_TAG
+        - docker push tomochain/tomoscan-client:$TRAVIS_TAG
+
+    - stage: Deploy in devnet
+      install: skip
+      before_script:
+        - openssl aes-256-cbc -K $encrypted_b7545dd42371_key -iv $encrypted_b7545dd42371_iv -in travis.pem.enc -out travis.pem -d
+        - eval "$(ssh-agent -s)"
+        - chmod 600 ./travis.pem
+        - echo -e "Host $DEVNET_SSH_IP\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
+        - ssh-add ./travis.pem
+      script:
+        - ssh -i ./travis.pem -l $DEVNET_SSH_USER $DEVNET_SSH_IP docker service update --image tomochain/tomoscan-client:latest devnet-main_tomoscan 1> /dev/null
+        - ssh -i ./travis.pem -l $DEVNET_SSH_USER $DEVNET_SSH_IP docker service update --image tomochain/tomoscan-server:latest devnet-main_tomoscan_crawler 1> /dev/null
+        - ssh -i ./travis.pem -l $DEVNET_SSH_USER $DEVNET_SSH_IP docker service update --image tomochain/tomoscan-server:latest devnet-main_tomoscan_server 1> /dev/null
+        - ssh -i ./travis.pem -l $DEVNET_SSH_USER $DEVNET_SSH_IP docker service update --image tomochain/tomoscan-server:latest devnet-main_tomoscan_pending_txs 1> /dev/null
+      after_success:
+        -  'curl -X POST --data-urlencode "payload={\"channel\": \"#deployments\", \"username\": \"Travis\", \"attachments\":[{\"fallback\":\"[devnet] Deployment succeeded\",\"pretext\":\"\",\"color\":\"good\",\"fields\":[{\"title\":\"[devnet] TomoScan\",\"value\":\"Deployment succeeded.\",\"short\":true}]}], \"icon_emoji\": \":male-construction-worker:\"}" $SLACK_DEPLOY_URL'
+      after_failure:
+        -  'curl -X POST --data-urlencode "payload={\"channel\": \"#deployments\", \"username\": \"Travis\", \"attachments\":[{\"fallback\":\"[devnet] Deployment failed\",\"pretext\":\"\",\"color\":\"danger\",\"fields\":[{\"title\":\"[devnet] TomoScan\",\"value\":\"Deployment failed.\",\"short\":false}]}], \"icon_emoji\": \":male-construction-worker:\"}" $SLACK_DEPLOY_URL'
+
+    - stage: Deploy in testnet
+      install: skip
+      before_script:
+        - openssl aes-256-cbc -K $encrypted_b7545dd42371_key -iv $encrypted_b7545dd42371_iv -in travis.pem.enc -out travis.pem -d
+        - eval "$(ssh-agent -s)"
+        - chmod 600 ./travis.pem
+        - echo -e "Host $TESTNET_SSH_IP\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
+        - ssh-add ./travis.pem
+      script:
+        - ssh -i ./travis.pem -l $TESTNET_SSH_USER $TESTNET_SSH_IP docker service update --image tomochain/tomoscan-client:testnet testnet_tomoscan 1> /dev/null
+        - ssh -i ./travis.pem -l $TESTNET_SSH_USER $TESTNET_SSH_IP docker service update --image tomochain/tomoscan-server:testnet testnet_tomoscan_crawler 1> /dev/null
+        - ssh -i ./travis.pem -l $TESTNET_SSH_USER $TESTNET_SSH_IP docker service update --image tomochain/tomoscan-server:testnet testnet_tomoscan_server 1> /dev/null
+      after_success:
+        -  'curl -X POST --data-urlencode "payload={\"channel\": \"#deployments\", \"username\": \"Travis\", \"attachments\":[{\"fallback\":\"[testnet] Deployment succeeded\",\"pretext\":\"\",\"color\":\"good\",\"fields\":[{\"title\":\"[testnet] TomoScan\",\"value\":\"Deployment succeeded.\",\"short\":true}]}], \"icon_emoji\": \":male-construction-worker:\"}" $SLACK_DEPLOY_URL'
+      after_failure:
+        -  'curl -X POST --data-urlencode "payload={\"channel\": \"#deployments\", \"username\": \"Travis\", \"attachments\":[{\"fallback\":\"[testnet] Deployment failed\",\"pretext\":\"\",\"color\":\"danger\",\"fields\":[{\"title\":\"[testnet] TomoScan\",\"value\":\"Deployment failed.\",\"short\":false}]}], \"icon_emoji\": \":male-construction-worker:\"}" $SLACK_DEPLOY_URL'
+
+stages:
+  - name: Lint
+  - name: Audit
+  - name: Tests
+  - name: Build and push image
+    if: type != pull_request AND branch = master AND tag IS blank AND repo = tomochain/tomoscan
+  - name: Build and push image (tagged)
+    if: type != pull_request AND branch =~ ^v AND tag IS present AND repo = tomochain/tomoscan
+  - name: Deploy in devnet
+    if: type != pull_request AND branch = master AND repo = tomochain/tomoscan
+  - name: Deploy in testnet
+    if: type != pull_request AND branch =~ ^v AND tag IS present AND repo = tomochain/tomoscan

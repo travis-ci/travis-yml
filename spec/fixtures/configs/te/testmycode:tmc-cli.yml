@@ -1,0 +1,25 @@
+language: java
+script:
+- mvn -Dsurefire.rerunFailingTestsCount=3 cobertura:cobertura test
+- mvn checkstyle:check
+after_success:
+- mvn coveralls:report
+- mvn clean package
+jdk:
+- oraclejdk8
+cache:
+  directories:
+  - "$HOME/.m2"
+deploy:
+  skip_cleanup: true
+  provider: releases
+  api_key:
+    secure: i6ROBH72AVNV6ywsYdgMdVyAGGp6kSTTVMqBT/ZUwbSUrRhNYowbfT2MeBcoeIZNbCl8AC8EWOtqmyTKseQp2bMP1nIl+5TwjXwqmdxsV+/Ldq14z1fH5iZzF+KDF/gQvXRbqJvHzfBxw9l/R8jbgRCjD7GNmn+J7fbQz2yV/fTw9R+LBpMDdE6EDCCndsbsIFmug1/EOSzgagkEQMbyJ99+FiKsp+HvcHYX5ToRXeYfGibX+YGGNeMpiktNZUdmatK0LoryTv9iO3SGVWT+x9Hy2/Ckj7VmRYwcgw+3Iao4pnxaLJxqQ2G8I82KuZZ5+NfOysClmxnZh7EqOOOodUUWdW+CnkeiHkIgpfobBIQUb4LA0d26KJ6nJJpal5ae/DxagrhFR9Oac4BNiRmpBZc6lg25gUo9JHwlZssCVii+43ftF6our9x5rm4T/6h/KWCzRx1MHOoiq7t2UUa0nQ2kI1bISyogwPj8kECyvG6otp/G/MBlfmwTd3yHfe/1qig4QKd0K8hgdkPLAR1e/9ImILeIG/cbK1zDthdoUi1623MBxP7SXyIfcLlX2SKqSjZgCV1iZEeFRmzecwJYEHQE4Cy7sozcGUEzkLz76jOOWleECVKSp97/RfblK7V9lEfV1A8gk1u6rbxhbsMhQcAkiw+cQbl9uPTLTafYsnM=
+  file_glob: true
+  file:
+    - tmc
+    - target/tmc-cli-*.jar
+  on:
+    repo: testmycode/tmc-cli
+    tags: true
+    jdk: oraclejdk8

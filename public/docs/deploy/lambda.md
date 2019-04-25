@@ -2,16 +2,14 @@
 
 
 
-## Type
+## Types
 
-Any of:
+* Hash
+* String (known)
 
-* Map (Hash)
-* Enum (known String)
+## Values
 
-## Flags
-
-None.
+* `lambda`
 
 
 ## Examples
@@ -36,8 +34,8 @@ deploy:
   memory_size: string
   runtime: string
   environment_variables: 
-  security_group_ids: "[ref:strs]"
-  subnet_ids: "[ref:strs]"
+  security_group_ids: string
+  subnet_ids: string
   dead_letter_config: string
   kms_key_arn: string
   tracing_mode: Active

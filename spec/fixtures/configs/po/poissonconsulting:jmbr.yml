@@ -1,0 +1,23 @@
+language: R
+cache: packages
+sudo: required
+
+r: devel
+
+r_packages:
+  - covr
+
+apt_packages:
+  - r-cran-rjags
+
+after_success:
+  - Rscript -e 'covr::codecov()'
+
+notifications:
+  email: false
+  slack:
+    rooms:
+      - poissonconsulting:BKjfn7jsVh8zXTu2rq7BEQEb
+    on_success: change
+    on_failure: always
+

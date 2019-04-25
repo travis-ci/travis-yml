@@ -1,0 +1,37 @@
+sudo: required
+
+language: python
+python:
+  - "3.6.4"
+services:
+  - docker
+before_install:
+  - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+  - sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+  - sudo apt-get update
+  - sudo apt-get -y install docker-ce
+  - sudo pip install docker-compose
+  - pip install -r requirements.txt
+before_script:
+  - sudo docker-compose -f docker-compose.yml up --d
+
+
+script:
+  - python manage.py makemigrations --noinput
+  - python manage.py migrate
+  - coverage run -m django test --settings=tests.settings
+  - docker-compose down
+
+after_success:
+  - coveralls
+
+after_script:
+  - docker-compose down
+
+deploy:
+  provider: heroku
+  api_key:
+    secure: "imY0A7gokzH9fIze84V9USQkj1xylzGMoctrQ1LE3sjU8W7KEKmzvuSOb/v+QF/z+fo15cR1qYFXLicDnrX8XkJNNyXx4koOSsO6Q6wU71w7OBdq+Nf3+g3a0ku7BiQgKfInp+19dFzW4pf9R+CXBVpJHHIqJzppILS9e0NRlAfpkPmQJ3BPfYQf4PQoAxBpjGmkZRyGlsiZL7S0rrl0/8F8BPA4j6NcKsqBV/blbMIYzxGeE9d49neq07DIdHsc86zBTgnsvyjjKUR0TnO+DJWnEjP7G1y5+2Z1cLEAAff3VgcLKrEJ50eorfwm3lgvQ+QTAgpTay1GYAaDKqZI95KKfeu6GFJDKgoQd7uH45Ungv8Gf0qfoXHNkGZGMEHdl2zM6V/HEyu5JCQK+X7n7t0Yk8DtrrB8b+vOqz5VEKhKeyWVCXPzpNmezVJGzxSpOg/wNqSjaLURGTANBwPRu9PhkZt2qhZTomi+p0dYQ3x7XCNA/WYfcqukBnkwD3E8bnFkNEqLLlop6IMlTGd5qtLCYg1fHm5OtulkRJmOW0qM4Q+pi0iby1NssbdIENqIIeb719WW67yJDsJ9E65J95gLjavVyCHjP64HJuE7YuqHbuRmNDRpEdLb30szxuca41pcOd0dMKdvnmKYME5gnOp3OD9XaLWP6UQsIwSuVxc="
+  app:
+    development: gicsaude
+    master: gerenciamais

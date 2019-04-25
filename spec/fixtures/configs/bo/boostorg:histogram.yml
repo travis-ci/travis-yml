@@ -1,0 +1,94 @@
+# Use, modification, and distribution are
+# subject to the Boost Software License, Version 1.0. (See accompanying
+# file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+#
+# Copyright Antony Polukhin 2014-2019.
+# Copyright Hans Dembinski 2019.
+
+#
+# See https://svn.boost.org/trac/boost/wiki/TravisCoverals for description of the
+# original file and how it can be used with Boost libraries.
+#
+
+sudo: false
+language: cpp
+os: linux
+
+branches:
+  only:
+    - master
+    - develop
+
+env:
+  global:
+    - if [ "$TRAVIS_BRANCH" == "master" ]; then
+        BRANCH=master;
+      else
+        BRANCH=develop;
+      fi
+
+    - LIBRARY_DIR=$(basename $TRAVIS_BUILD_DIR)
+
+matrix:
+  include:
+    - name: "clang-osx"
+      os: osx
+      before_script:
+        - mkdir build
+        - cd build
+        - cmake ..
+      script:
+        - ctest -j2
+
+    # lcov does not understand gcc-8 output, so we use gcc-5 to generate coverage data
+    - name: "gcc-5: coverage"
+      addons:
+        apt:
+          sources: ubuntu-toolchain-r-test
+          packages: g++-5
+      script:
+        - ../../b2 -j2 -q toolset=gcc-5 cxxstd=14 warnings-as-errors=on
+          cxxflags="--coverage" linkflags="--coverage"
+      after_success:
+        - GCOV=gcov-5 tools/cov.sh
+
+    - name: "clang-5: sanitizers"
+      sudo: required # Required by leak sanitizer
+      addons:
+        apt:
+          sources: ubuntu-toolchain-r-test
+          packages: libstdc++-7-dev
+      script:
+        - UBSAN_OPTIONS=print_stacktrace=1
+          LSAN_OPTIONS=verbosity=1:log_threads=1
+          ASAN_OPTIONS=detect_leaks=1:detect_stack_use_after_return=1
+          ../../b2 -j2 -q toolset=clang-5 cxxstd=14
+          variant=histogram_ubasan warnings-as-errors=on
+
+    - name: "gcc-8: c++latest"
+      addons:
+        apt:
+          sources: ubuntu-toolchain-r-test
+          packages: g++-8
+      script:
+        - ../../b2 -j2 -q toolset=gcc-8 cxxstd=latest warnings-as-errors=on
+
+before_script:
+  # Cloning minimal set of Boost libraries
+  - cd ..
+  - git clone -b $BRANCH --depth 5 https://github.com/boostorg/boost.git
+  - cd boost
+  - git submodule update --init --depth 5 tools/build tools/boostdep
+
+  # Replacing Boost module with this project and installing Boost dependencies
+  - rm -rf libs/$LIBRARY_DIR || true
+  - mv $TRAVIS_BUILD_DIR libs/$LIBRARY_DIR
+  - python tools/boostdep/depinst/depinst.py --git_args "--depth 5 --jobs 3" $LIBRARY_DIR
+
+  # Adding missing toolsets and preparing Boost headers
+  - ./bootstrap.sh
+  - ./b2 headers
+  - cd libs/$LIBRARY_DIR
+
+notifications:
+  email: false

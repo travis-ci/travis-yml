@@ -1,0 +1,10 @@
+language: node_js
+node_js:
+  - "10"
+
+after_success:
+  - git config --global user.name "marpme"
+  - git config --global user.email "marpme@users.noreply.github.com"
+  - git remote rm origin
+  - git remote add origin https://marpme:${GH_TOKEN}@github.com/vergecurrency/vergecurrency.com.git
+  - npm run deploy

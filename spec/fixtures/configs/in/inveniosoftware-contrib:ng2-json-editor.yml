@@ -1,0 +1,43 @@
+notifications:
+  email: false
+language: node_js
+node_js:
+- 6.9.1
+sudo: true
+dist: trusty
+addons:
+  apt:
+    sources:
+    - google-chrome
+    packages:
+    - google-chrome-stable
+env:
+  global:
+  - GH_REF: github.com/inveniosoftware-contrib/ng2-json-editor.git
+  - secure: sdfkNpOtiUBxJ8aMAFjXbs9ewl8L/UWNipZGuIdgZjuWKuzxUTJd8efohQUPND0cNr+JMwSzZ5jw4gv98MuzigyUKHtMW7YhHfIJ5M9/epyE6qD8jyeaIFGAfZQ4zFkJAnR88U70MT3ca4PuvrNUTh1bDd4VS1QLQlfuHdCuaOHZk7+oemWXutsZdX2lllCns72MP9t2WO3OQVUDzCTq+96nia6h6LCq4kuRIr3T7T98WoYD16zArk/HG6j9D3wiuWm79D75q0yYCh7cfkSG9goytk87R0alVVXQ0+muyNMsQgUUe8Z39xOVnhen78F46FieQX2/03ukOmxOqYzTXwa3y3EP0ei2al99f829cip/Ag/52nE1BJAG6oIUYGykfyHdgPl6J17anZWHwu2FF5wNn7KpodWKz13nf+Y6C8sGdnYGRBNDnh10L+85fJKDNzYXgDK225zgbMAKBko9zof6rnFDEz9I/4f9FMEe1pKSzN4lrnT1THD05h43YQeFhbC0wH9q9cityD3Kpf04lxftbFhTi7jzLrhKiqitpopf9S8pKeVrTRQn4fdXg2xmwqlB+RaDquzkw7ur1xXcXdDIPkmCURSTVgHczfmC5cRCNHBIQQPN/CflFT9yhif3b/MLrwKmygy/6ms7Lp7yX4//4MMV237/NL4oIgLCXVw=
+before_install:
+- npm install buffer-shims
+- export CHROME_BIN=chromium-browser
+- export DISPLAY=:99.0
+- sh -e /etc/init.d/xvfb start
+after_install: npm ls
+before_deploy:
+- npm run build
+- npm run copy
+- cd dist
+after_success:
+- npm run coveralls
+deploy:
+  provider: npm
+  skip_cleanup: true
+  email: admin@inspirehep.net
+  api_key:
+    secure: AGQ03Eg8NAhVE2mBNFihLmOPgDAkLJ2rkv9L0ogKUhsNSF0x6orI+01o5L0M+wfr6ZvUrHjuPo3/h5K83SPmrH0GIMdmd9KDOO92hLeMP/BNZqzBeAN7ewgJlRrwu/3ZsNVT/VwFjYHX4/JrFAJQ03MCj+vF5FJGU6kaG3fcesQuBZ2PPwzIir3x6A6J+ccAOBmHKIRA//sslO1+2qFKSUzAWL1mcAfTOZF1fNE9JuzuHYV//3c+7z9bk21oOPMnnXjfibYX5omLZXuoO25e2yIhUqbx+xNsBL/fJb6/IwTMO0E6AawarH0lE1NSEsWX4uZSkGER6YYdpg8FrqCUd0NbFhemukEe12tDPQJMPSJFT/IeYAquYd/FVW2R0dyw+W+0kwxuC7Vv2MNhZB05uuZCl60lpCD8b15muTbhh1sgoa8Y7zZlByswNIRJbogSyMRx5PTDhTbS0c2RIyHOOsvexlfiHosrN22UGMPgfYwlnAj968qx7FnnOFrn628opXL6kdsblSMupo7i4tQirn0eD7BJ0VAT+Vy7Dt8JBCWxGyiSI3Frra9saOn5a4CLuvJpQ0/NXImQvshdC9pNL+tYUM1Grh2DV3S+oWO2HKdqY08xvbY2RvYjFDY7hTB0Cq6UXYmMtCWVcbMUMKLUFasZUgnHCEgg689AssIREN4=
+  on:
+    tags: true
+    repo: inveniosoftware-contrib/ng2-json-editor
+    all_branches: true
+    node: 6.9.1
+after_deploy:
+- cd ..
+- "./deploy-gh-pages.sh"

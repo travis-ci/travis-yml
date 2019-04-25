@@ -1,0 +1,32 @@
+language: generic
+dist: trusty
+sudo: false
+
+env:
+  global:
+    - GH_PAGES_CNAME: sdk.bigclown.com
+    - DOXYFILE: $TRAVIS_BUILD_DIR/Doxyfile
+    - HTML_DIR: $TRAVIS_BUILD_DIR/doc/html
+
+addons:
+  apt:
+    sources:
+      - sourceline: 'ppa:team-gcc-arm-embedded/ppa'
+    packages:
+      - doxygen
+      - graphviz
+      - gcc-arm-embedded
+
+script:
+  - /bin/sh build-doc.sh
+  - /bin/sh test-build-examples.sh
+
+deploy:
+  provider: pages
+  skip_cleanup: true
+  local_dir: $HTML_DIR
+  github_token: $GH_REPO_TOKEN
+  target_branch: gh-pages
+  fqdn: sdk.bigclown.com
+  on:
+    branch: master

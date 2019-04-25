@@ -1,0 +1,25 @@
+language: c
+dist: trusty
+sudo: required
+before_install: echo starting nav_station\'s automated build and deployment pipeline
+compiler: gcc
+stages:
+- make
+- testing
+- name: deploy
+  if: branch = master
+jobs:
+  include:
+  - stage: make
+    script:
+    - echo entering make stage \(compile, identify branch, clean\)
+    - make
+    - ls src/
+    - echo ${TRAVIS_PULL_REQUEST_BRANCH:-$TRAVIS_BRANCH}
+    - make clean
+    - ls src/
+    after_success: ./merge.sh
+env:
+  global:
+  - secure: UIk3rGvmX1x/u1153KglY4hQF+tWQVVl9lFCteqdYj0oJqHXcwdljIn221qv/erRHlt0E6or4/SQGwxBIGlKtw64PXu3ccUOzaXAm8JyyuQhJmtrO/nbHDHpsiJrShjyvzAUlkyIlZ5UgI0/cB8pZhX3JmOlU9BnE56HQus3tEfQf2oZlbWbtxofTBIhbi2/E34pChXL6xQNuJNB7R7JG6tjXIZ86BLpc9tJlka8XDe7c4vQwIo8h0efcqznJHHn/2+8HUVM7H99yB5i4QK2H90xICttoFdoEdzlTV7KoEP/CFQQq0w0TyRPU073gfEtIkU/VhE8Xa4s4wG1n0wdYPwyyXPSdCpa2+pWZnFmMU9nXhBFywF7FJuul3SZ7RYkj2NNulxD7N8qTej7MrontOhj3VbXOpCbDwOdcmuuSla+pDz5GehOz749dLW4oK76opbgvDuh2/dTMUBn3N7f+HmebCccv2ggMoF76+ZgVOIfAtEekCvjwIItbTvsT4lqwqZFBEileOJm4ceHCX2oLm/sTLI9lL65/h1nDyEjSUM+TQPT6RHpuDeTQjGSIRCIXM/Y45GZiF7Q3Ks5nqRxJ1DIF/0S+C4HTbE3eE5Nb1t6J2gWtZqwcuFVWYZl09biQs9el0T1AxXtGNBZYFdW70Sv9vahCc/v3REfLMo5VUU=
+  - secure: wk7WccuQhZbZhA9AiDhdkNiSKm8WOI/6sePekur4RXzcyeuodG9d/jUhGuJEpVVLVVjaVnEi0UyhPSY64PfrGFOV3jYg98QhCucq1fGhryUUvwL+wYHe3sIsKjaHh4nY0e0F/eYKuCudfTFpqpGwGioVJt55vMZDer+On7Pedf2dAknzZJioQny7VVGBOcwX41yQeBMEN8RTfZxQeLVwn+wxMLdoAjpqHLjciVsZhzV5I6LX52AjQo9mjwSbORc2zN3Xv3XuO8NLOrZg0QVYUYIzNKj7YTy6ZQDXmop4MeUloIgcfn/gFilhbpMGnJeZC/3trxbQWxAl6ddPTAOK4ykEXVJJ/+8CBD0TskgoUM9joAt7tQCDpch/Br7z6SSq9InnnKii14Ivdxod3SV2Kv7dXxXKxejkQeGLCif0FzFrHgJ4UCEa/5jYOu4Ej/Ley62vmoOrTzULAzVoy413e0OqxGt62xbSpdSAwFAxdkV/ApQlFU7fRQkPUcKSoPs/JaVOHtiPtGIZXo9y1iP4MgQeUfkBXcBGvy2nxbLrIjSS/pt0UILK4EwOBH+uZ0+dGas63pBE+DcMtiMtcAYFXr1vKCcBO28vS5iv8V+UoUqn5PryzOBcmyAJJAA1c0sb/s+DiUMWCKrkEhB0OWhLU9u5lfvwle8oAASfmEzVTdg=

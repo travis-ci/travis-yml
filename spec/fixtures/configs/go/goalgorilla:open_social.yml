@@ -1,0 +1,86 @@
+dist: trusty
+sudo: required
+
+cache:
+  directories:
+    - $HOME/.composer/cache/files
+
+addons:
+  artifacts:
+   # ...
+   paths:
+     - $(git ls-files -o | grep travis_artifacts | tr "\n" ":")
+
+language: php
+
+php:
+  - 7.1
+
+env:
+  global:
+    # Travis Token.
+    secure: "u6jLZiftQdb8Ozxngu5sgwmnXeUyvNF3/Y+5eX3+Xyb7Sm6K++cBLbYl/zNbuzp1rZE5dn3pVTQc4tstVXZw2B5KjCd64r9HE9gdwCEnS/AA/w3wGlaEBinTzKOrrN1EvqNNhnJUY2JmqEYVom+UYwLZWIIKM/5OoaeidNqHDvImZZLAeYfPMGnySsFC01yCzrOn6jv8Bwu00dQPVEOQylVEV5qgdGYz6CvGGslcvGxhvR0qdY/IXhrA0yxIk1yA6vu1mQpCSjGpPLy024JhcqRr3AzjH2N0QRKlL7vcNFxl/OC0qcK2bOl8lcQydeC5LRp92eeCLfMfvqHDqLJKvebCsvaZSmqlzCURlcHaJOM5bce7XPVyNLdwnfppgSacocGol38qxfEc09qV4AZnklwigYCfnk346oSaocKApy48KRW4cNXL45U7+z10IzVAENGwbyyuwdvKHhDtMCgMd8eeYfRF5EvENOKVSG02Kca8X2fLBhmJsXkFcBEW7pSRZKxixkIkuAwEYSQW/lvvM4LJmd2np7vZDEMh1dmf7TBRBygDVmM7vtdYRSzivR/T9nH+mXPP9FcjVvlPPeWAEaqtLPmmONmYRjDRcoHjJh3YnSMpvVs8wejDf7iS6A44cI6xZQRoEoCFA/WUu5EnzmoOCY7HvZ62xnZ0I9nNyL4="
+    # Docker Hub token.
+    secure: "YUkomj6ieyi6AqrMnFyhPTORMvBhvMtZolvMZmckiAUaEV+Kiwb6TU6BsxARU1LeAfeSDuu5Ay69yib20AHe/OI8m7DmzZhhmnfRcV5aE09/xIdS7DN55g0a+9rWMHuYreeX7Xc8KX6DAEEcmW7EotyCO1pf8ljMD7wHuO+HpeydCLEGM200r1pSLCZpPCCTnHQXJBQ8MwSZu6tcPiVNnrmYs/fbbWOxB8QIv330SaF/i8trFDGJBUFLRw/7cIStA5Ye9EJp7AS7e+nR+kuCs/GPsRxSNH8BNtbk78iPwFILCH+xPhjRQ/hVL4St7DeN/F0PXn13GPAXkfrUXqrOgpDcpqPgtucEJekyDW9+YBuz2AJDynaIuWqjIWW1gheCVPSrsF7a9l7u/RVoQbeuSmGkbQXWzQuUaOkhVM6bq28qzRraeq/gNidV1ZikwoV7oi57HBxBQPZpVlKrLmNJ4Tsa9FkFwzjt55NV8VtxV8rav3r4zeQ3C/6yLAXr0Z3hX8bJdPCTgE4k+4dbA9nLjgZh6YV5yXwoIXNq8tF/A/rctpAA491AOk57qfLOH8Xi+y9kOPjshG5dNSprfIL/yZxz5CgED5OPNhh2veH9GrXlUcNzyO2+BI7kMQ8ipc+wy39Hw0xOu2JF40x4TVQuphc9flh/OQLDRludDY3aJd4="
+
+matrix:
+  fast_finish: true
+  include:
+  - env: TEST_SUITE=install_stability_1
+  - env: TEST_SUITE=install_stability_2
+  - env: TEST_SUITE=install_stability_3
+  - env: TEST_SUITE=install_stability_4
+  - env: TEST_SUITE=install_update
+  - env: TEST_SUITE=drush_make
+#  - env: TEST_SUITE=accessibility
+
+services:
+  - docker
+
+before_install:
+  # Composer Configurations.
+  - export COMPOSER_MEMORY_LIMIT=-1 # Set php memory limit to -1 so composer update will not fail
+  - export COMPOSER_EXIT_ON_PATCH_FAILURE=1 # To enforce throwing an error and stopping package installation/update immediately
+
+  # Kill the install_update, drush_make and accessibility jobs if it is not a PR build.
+  - if [ "$TRAVIS_PULL_REQUEST" == "false" ] && [ "$TEST_SUITE" = "install_update" ]; then exit 0; fi
+  - if [ "$TRAVIS_PULL_REQUEST" == "false" ] && [ "$TEST_SUITE" = "drush_make" ]; then exit 0; fi
+  - if [ "$TRAVIS_PULL_REQUEST" == "false" ] && [ "$TEST_SUITE" = "accessibility" ]; then exit 0; fi
+  - phpenv config-rm xdebug.ini
+  # Lets set-up our helper repository with all the docker config and use correct version in composer.json.
+  - git clone --branch master https://github.com/goalgorilla/drupal_social.git install
+  - cd install
+  - export PR=https://api.github.com/repos/$TRAVIS_REPO_SLUG/pulls/$TRAVIS_PULL_REQUEST
+  - export BRANCH=$(if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then echo $TRAVIS_BRANCH; else echo $TRAVIS_PULL_REQUEST_BRANCH; fi)
+  - export COMMIT=$(if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then echo $TRAVIS_COMMIT; else echo $TRAVIS_PULL_REQUEST_SHA; fi)
+  # Installing hirak/prestissimo allows composer to parallelise downloads which speeds up the composer install.
+  - composer global require hirak/prestissimo
+  - echo "TRAVIS_BRANCH=$TRAVIS_BRANCH, PR=$PR, BRANCH=$BRANCH, COMMIT=$COMMIT"
+  - if [ "$TEST_SUITE" = "install_update" ]; then composer require goalgorilla/open_social:4.0.0 --prefer-dist; fi
+  - if [ "$TRAVIS_PULL_REQUEST" != "false" ] && [ "$TRAVIS_PULL_REQUEST_SLUG" != "goalgorilla/open_social" ]; then composer config repositories.social git https://github.com/$TRAVIS_PULL_REQUEST_SLUG.git; fi
+  - if [ "$TEST_SUITE" != "install_update" ]; then composer require goalgorilla/open_social:dev-${BRANCH}#${COMMIT} --prefer-dist; fi
+
+  # Install docker and our docker containers.
+  - sh scripts/social/ci/install-docker.sh
+  - docker-compose -f docker-compose-ci.yml up -d
+
+install:
+  - if [ "$TEST_SUITE" = "install_stability_1" ] || [ "$TEST_SUITE" = "install_stability_2" ] || [ "$TEST_SUITE" = "install_stability_3" ] || [ "$TEST_SUITE" = "install_stability_4" ]; then docker exec -i social_ci_web bash /var/www/scripts/social/install/install_script.sh; fi
+  - if [ "$TEST_SUITE" = "install_update" ]; then bash scripts/social/ci/build-install-update.sh $PR $BRANCH $COMMIT; fi
+  - if [ "$TEST_SUITE" = "drush_make" ]; then bash scripts/social/ci/build-social-make.sh; fi
+
+script:
+  - set -e
+  - if [ "$TEST_SUITE" = "install_stability_1" ]; then docker exec -i social_ci_web bash /var/www/scripts/social/check-coding-standards.sh full; fi
+  - if [ "$TEST_SUITE" = "install_stability_1" ]; then docker exec -i social_ci_web_scripts sh /var/www/scripts/social/unit-tests.sh; fi
+  - if [ "$TEST_SUITE" = "install_stability_1" ] ; then docker exec -i social_ci_web bash /var/www/scripts/social/check-feature-state.sh social; fi
+  - if [ "$TEST_SUITE" = "install_stability_1" ]; then docker exec -it social_ci_behat sh /var/www/scripts/social/behatstability.sh "stability-1 --stop-on-failure --strict"; fi
+  - if [ "$TEST_SUITE" = "install_stability_2" ]; then docker exec -it social_ci_behat sh /var/www/scripts/social/behatstability.sh "notifications --stop-on-failure --strict"; fi
+  - if [ "$TEST_SUITE" = "install_stability_2" ]; then docker exec -it social_ci_behat sh /var/www/scripts/social/behatstability.sh "stability-2 --stop-on-failure --strict"; fi
+  - if [ "$TEST_SUITE" = "install_stability_3" ]; then docker exec -it social_ci_behat sh /var/www/scripts/social/behatstability.sh "stability-3 --stop-on-failure --strict"; fi
+  - if [ "$TEST_SUITE" = "install_stability_4" ]; then docker exec -it social_ci_behat sh /var/www/scripts/social/behatstability.sh "stability-4 --stop-on-failure --strict"; fi
+  - if [ "$TEST_SUITE" = "install_update" ]; then docker exec -it social_ci_behat sh /var/www/scripts/social/behatstability.sh "stability-1&&~DS-1136&&~DS-3605 --stop-on-failure --strict"; fi
+  - if [ "$TEST_SUITE" = "accessibility" ]; then docker exec -it social_ci_web bash /var/www/scripts/social/check-accessibility.sh install; fi
+
+after_success:
+  - bash scripts/social/trigger_dockerhub.sh

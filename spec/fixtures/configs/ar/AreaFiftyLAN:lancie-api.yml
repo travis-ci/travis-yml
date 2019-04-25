@@ -1,0 +1,23 @@
+language: java
+jdk:
+- openjdk10
+before_cache:
+  - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+  - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+cache:
+  directories:
+    - $HOME/.gradle/caches/
+    - $HOME/.gradle/wrapper/
+script:
+- "./gradlew clean build"
+- docker build --no-cache --pull -t quay.io/areafiftylan/lancie-api:$TRAVIS_BUILD_NUMBER .
+notifications:
+  slack:
+    rooms:
+      secure: DxzWKvd67ZSFK8SgrzcXZmHaXUV5V0U3lChXtvA0404LVt2IbxcNdgGDeBFjzqsK9ZWRPYs/lFBdOZh7/fdDyKl1LOTWMsFvHp/8NNT68O0iKVw1lc9Z9NIsZY1jOEwe0gn2UQEMijOVtTWxIcmCkb7edZ00VWNEcKDwHa3cbCrruFEUwNeHnKQ+SFsNhj4yc4ibhpsLS1a65tgDbveBd2kGoVI7FGNBYXkIgQs76MEadiFjt+Hpg8zKE0f/lWbaDXZQNTujPfCnG4M1BLOLNcaPo7r07VKreNB24eaWkbJPp9/rhfoOp/QXKIh48ykW7q8bLwJVgQFHanmT4Iq44HlZJnkpnVLLBhiIrYURK8b+fudfKLUOrCes8mhdbsStseg5hf/2ganhjbGUVwHl3kc0pDok3ctV/ravb7xjzNojHDpzHZZexz0ulcYaJyznNTSFfx7dM60f5N5R4BEEKjRZNGq8o0simbvGhHc4hD5B9nw0CoJLUHu4yBaPEfQ646sM1V17JOG/gM/1BLXoI9TBmvnC2e30CfcGRi/XjIytwhn+NcizhGWeB79MzTMYqt1dejUNJPmUekC/+mnvpN09mxVNigkYcCYIKP5uPEpLl3SmBhmba9jbP7sm7cer958GUQc226SVwVjCgDswWSVlvWzefsl1HNWbecH7AFc=
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
+  - if [ "${TRAVIS_PULL_REQUEST_BRANCH:-$TRAVIS_BRANCH}" == "live" ]; then
+      docker login quay.io -u="$QUAY_USERNAME" -p="$QUAY_PASSWORD";
+      docker push quay.io/areafiftylan/lancie-api:$TRAVIS_BUILD_NUMBER;
+    fi

@@ -1,0 +1,27 @@
+language: node_js
+
+node_js:
+- 'node'
+
+os:
+- linux
+
+dist: trusty
+
+install:
+- npm install -g typescript
+- npm install -g gts
+- npm install
+
+script:
+- npm run compile
+- node out/index.js
+
+deploy:
+  provider: pages
+  skip-cleanup: true
+  github-token: $GITHUB_TOKEN
+  keep-history: true
+  target-branch: master
+  on:
+    condition: $TRAVIS_EVENT_TYPE == 'cron'

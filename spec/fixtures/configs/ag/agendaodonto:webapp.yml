@@ -1,0 +1,56 @@
+dist: trusty
+
+language: node_js
+
+node_js:
+  - "8"
+
+cache:
+  yarn: true
+
+before_install:
+  # set up awscli packages
+  - pip install --user awscli
+  - mkdir -p ~/$TRAVIS_BUILD_NUMBER
+  - aws s3 sync s3://agendaodonto-staging-builds/$TRAVIS_BUILD_NUMBER-staging ./dist-staging --expires "$(date -d '+1 hour' --utc +'%Y-%m-%dT%H:%M:%SZ')"
+  - aws s3 sync s3://agendaodonto-staging-builds/$TRAVIS_BUILD_NUMBER-prod ./dist-prod --expires "$(date -d '+1 hour' --utc +'%Y-%m-%dT%H:%M:%SZ')"
+
+stages:
+  - name: quality
+  - name: deploy staging
+    if: type = push AND branch = "develop" AND tag IS blank
+  - name: deploy production
+    if: tag IS present
+
+jobs:
+  include:
+    - stage: quality
+      name: Unit Tests
+      if: tag IS blank
+      addons:
+        chrome: stable
+      env:
+        - CHROME_BIN=google-chrome-stable
+      script:
+        - ng test --code-coverage=true --watch=false --browsers=ChromeHeadless
+        - cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js
+    - stage: quality
+      name: Lint
+      if: tag IS blank
+      script: ng lint
+    - stage: quality
+      name: Build Staging
+      if: tag IS blank
+      script:
+        - ng b -c=staging --aot
+        - aws s3 sync ./dist s3://agendaodonto-staging-builds/$TRAVIS_BUILD_NUMBER-staging --expires "$(date -d '+1 hour' --utc +'%Y-%m-%dT%H:%M:%SZ')"
+    - stage: quality
+      name: Build Prod
+      if: tag IS present
+      script:
+        - ng b -c=production --prod=true --aot
+        - aws s3 sync ./dist s3://agendaodonto-staging-builds/$TRAVIS_BUILD_NUMBER-prod --expires "$(date -d '+1 hour' --utc +'%Y-%m-%dT%H:%M:%SZ')"
+    - stage: deploy staging
+      script: ./scripts/deploy.sh staging
+    - stage: deploy production
+      script: ./scripts/deploy.sh production

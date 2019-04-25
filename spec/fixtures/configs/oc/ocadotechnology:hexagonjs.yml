@@ -1,0 +1,50 @@
+language: node_js
+
+node_js:
+  # - '9'
+  # - '8'
+  # - '7'
+  - '6'
+
+env:
+  global:
+    secure: Nv9uLt1TOIDhbLfFwKs5QnxFHN9xHKporOwdY9bC+7qqjfqoZ7LOpkrajE+qRkc/cU9iper2RIuyMzGN8W0uLYyZak/1ZeHT5FfGI5exj0iX5gH/psE+KfbHp3X4D19zIvUDFFowZ0oMiCax9bRsuk8tzAToPL4Unv3X9WhMN4EICLs0wHqRNyaoD3VdbQV6dfUhQvpQDxKgXQ05cO4Ugf8S7OPFIh5Wwu8lnsV1UobOxk1/SDyXvAYqtn3TPZGxaY2MujIz8C8xkzz0BMaKV5Jd8ZOhQW4Q9b8USQB24smnmi+Kuf0vUqxtnRtbYxLwLMUC/5/lWGnBu+tfmwR2vgaRZ8wtAH9k/tT+vguJLsgJ2Ro/TnBpQ1fMw5uF8YZcASzJzmeIF12jaXNS3bXnFr4qEkQtPwF+D/njYiRMKrqHFbNr0mSToqvosomhpOjrJ5AAKocPzj/eiwfdhlvNCXfLxRVnj7SdwPxsUc/EBTf1FfN066oKeUb8yq/qzFggd4W7MVHUBPTHS8aaDYy33RZdxrevAjlVMxij7QmsACzP6b/V/G3T4AvWStaZJa3Z/ILSsH+gLuv7TrjTrhvKkfGpYMD+5pzo8v9Ffq3BYUPt+4Z4gNpXbx2+cVTwpjgAyQJQS048CnDiVB5aSMgmUlgDnVmp5D/ZJSjMGgejDdo=
+
+stages:
+  - test
+
+  - name: publish module
+    if: tag IS present AND repo = ocadotechnology/hexagonjs
+
+  - name: publish pages
+    if: branch = master AND repo = ocadotechnology/hexagonjs AND NOT type = pull_request
+
+jobs:
+  include:
+  - stage: test
+    script: npm test && npm run upload-coverage
+
+  - stage: publish module
+    script: skip
+    node_js: '6'
+    deploy:
+      provider: npm
+      email: hexagonjs.ci.noreply@ocado.com
+      on:
+        tags: true
+      api_key:
+        secure: v9/6ZEYthP9ewv3hS2XkD4mnbCyPaoniP0UX/022PxuGT1gb0Vd0KVO8fnXjC/FpAJ3/0v6ph/nkCBt36bp3D5/RgmKi7C4QOXcESVt7NMViQKqkfm/VGu3EMg57D06cR3FDWoq+oYc/1HEzMlxMfQsl9h7ojkCi+9uNO5KLPDQSiAzDKrlrkCKP/M5kWEZJ60lHiXZy5LVUmnsd6dcEqRPUV+JJcn6JSmJ2G6g7UESIR4tcWrNo2ADZWpW5QlLE4BwIkX/m2kkrY2zqK7DtR9GeKGba3J/JxtrsFsxTUxNoog34CHUT/9FDKUaetP1dmc+2ApyUgFlvrd2LsysryokqNw7HWezUUexa1manrD/rLyi+o591etrIsjza42zZGaY4AI5vESlry1uzLmod8gwIU3e6f9ZhGiyQ2l2BFZeb6bdzJyGZyJ9nD1jbcT1F9VF4116d8dYlRyrdRZAZwOYhDVtysYv5MPkrdv7LcY7ov4bypcatu8tIQgRc9pnw///gW5GXXkG+wp/83t8sntmMG77aPuXR5Zq0l5anOnFRH2QVSesZc++eAHYJFT6cyLQiuNhQcSKpdrFLYPqsz25QvpnDWP8zT3g4D1Dt7aWtwgJz9hLFfIkW71XHDTw7/dVSPe2RD1sqzXt35KCxzGC9jIW5oqYPV9+djXAy1/M=
+
+  - stage: publish pages
+    env:
+      - GITHUB_PAGES=true
+    script: cd docs && npm install && npm run clean && npm run build
+    node_js: '8'
+    deploy:
+      provider: pages
+      local-dir: docs/target
+      skip-cleanup: true
+      keep-history: true
+      fqdn: hexagonjs.io
+      email: hexagonjs.ci.noreply@ocado.com
+      github-token: $GITHUB_TOKEN

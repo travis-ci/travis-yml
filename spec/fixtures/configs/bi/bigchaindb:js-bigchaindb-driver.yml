@@ -1,0 +1,37 @@
+# Copyright BigchainDB GmbH and BigchainDB contributors
+# SPDX-License-Identifier: (Apache-2.0 AND CC-BY-4.0)
+# Code is Apache-2.0 and docs are CC-BY-4.0
+
+sudo: required
+
+services:
+    - docker
+
+language: node_js
+
+node_js:
+  - 8
+  - 9
+  - 10
+
+cache:
+    directories:
+        - node_modules
+
+env:
+  global:
+    - DOCKER_COMPOSE_VERSION=1.19.0
+
+before_install:
+  - .ci/travis-before-install.sh
+
+install:
+  - .ci/travis-install.sh
+
+before_script:
+  - .ci/travis-before-script.sh
+
+script: npm test
+
+notifications:
+    email: false

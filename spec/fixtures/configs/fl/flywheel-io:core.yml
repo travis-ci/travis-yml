@@ -1,0 +1,111 @@
+dist: trusty
+sudo: required
+
+services:
+- docker
+
+env:
+  global:
+    - DOCKER_DIR="$HOME/.cache/docker"
+    - NPM_CACHE="$HOME/.cache/npm"
+    - GRADLE_CACHE="$HOME/.cache/gradle"
+  matrix:
+    - BUILD_SDK=true
+    - BUILD_SDK=false
+
+cache:
+  directories:
+  - $DOCKER_DIR
+  - $NPM_CACHE
+  - $GRADLE_CACHE
+
+before_install:
+- sudo apt-get update
+- sudo apt-get -y install docker-ce realpath
+- gem install travis -v 1.8.9 --no-document
+- yes | docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASS
+
+install: true
+
+script:
+  - test -f "$DOCKER_DIR/image.tar" && docker load -i "$DOCKER_DIR/image.tar" || true
+  - docker build -t core:base --target base .
+  - docker build -t core:dist --target dist --build-arg VCS_BRANCH="$TRAVIS_BRANCH" --build-arg VCS_COMMIT="$TRAVIS_COMMIT" --build-arg API_VERSION="$TRAVIS_TAG" .
+  - docker build -t core:testing --target testing .
+  - if [ "$BUILD_SDK" = "false" ]; then
+        ./tests/bin/docker-tests.sh --image core:testing;
+    else
+        if [ -n "$TRAVIS_TAG" ]; then
+            DOC_VERSION="$TRAVIS_TAG";
+            SDK_VERSION="$TRAVIS_TAG";
+        else
+            COMMIT_REF="$(git rev-parse --short HEAD)";
+            DOC_VERSION="$TRAVIS_BRANCH/$COMMIT_REF";
+            SDK_VERSION="2.0.0.dev${TRAVIS_BUILD_NUMBER}";
+        fi;
+        ./bin/build-sdk.sh $SDK_VERSION $DOC_VERSION;
+    fi
+  - docker save -o "$DOCKER_DIR/image.tar"
+        $(docker history -q core:base | grep -v '<missing>')
+        $(docker history -q core:dist | grep -v '<missing>')
+        $(docker history -q core:testing | grep -v '<missing>');
+
+after_success:
+# Code coverage report for all master commits and all pull requests
+- if [ "$TRAVIS_BRANCH" == "master" ] || [ "$TRAVIS_EVENT_TYPE" == "pull_request" ] && [ "$BUILD_SDK" == "false" ]; then
+      bash <(curl -s https://codecov.io/bash) -c -X coveragepy -F python;
+  fi
+
+# Tag and push flywheel/core image (master >> :latest + :testing, tag >> :tag)
+- if [ "$TRAVIS_BRANCH" == "master" ] && [ "$TRAVIS_EVENT_TYPE" == "push" ] && [ "$BUILD_SDK" == "false" ]; then
+      docker tag core:dist flywheel/core:latest;
+      docker push flywheel/core:latest;
+      docker tag core:testing flywheel/core:testing;
+      docker push flywheel/core:testing;
+      bin/trigger_coreplus_build.sh latest;
+  fi
+- if [[ "$TRAVIS_BRANCH" != "master" ]] && [ "$TRAVIS_EVENT_TYPE" == "push" ] && [ "$BUILD_SDK" == "false" ]; then
+      docker tag core:dist flywheel/core:$TRAVIS_BRANCH.latest;
+      docker push flywheel/core:$TRAVIS_BRANCH.latest;
+      bin/trigger_coreplus_build.sh $TRAVIS_BRANCH.latest;
+  fi
+- if [ -n "$TRAVIS_TAG" ] && [ "$BUILD_SDK" == "false" ]; then
+      docker tag core:dist flywheel/core:$TRAVIS_TAG;
+      docker push flywheel/core:$TRAVIS_TAG;
+      bin/trigger_coreplus_build.sh $TRAVIS_TAG;
+  fi
+
+# Build swagger docs and push them to gh-pages (Only for SDK builds)
+- if [ "$TRAVIS_EVENT_TYPE" == "push" ] || [ -n "$TRAVIS_TAG" ] && [ "$BUILD_SDK" == "true" ]; then
+      git config --global user.email "travis@travis-ci.org";
+      git config --global user.name "Travis CI";
+      git config --global push.default simple;
+
+      if [ -z "$TRAVIS_TAG" ]; then
+          ./docs/push-docs.sh "$GIT_REMOTE" branches "$TRAVIS_BRANCH" "Travis Core Docs Build - $TRAVIS_BUILD_NUMBER";
+      else
+          ./docs/push-docs.sh "$GIT_REMOTE" tags "$TRAVIS_TAG" "Travis Core Docs Build - $TRAVIS_BUILD_NUMBER";
+      fi
+  fi
+
+deploy:
+  # Create GitHub Release
+  - provider: releases
+    api_key: $GITHUB_RELEASE_API_KEY
+    file_glob: true
+    file: dist/*
+    skip_cleanup: true
+    draft: true
+    name: $TRAVIS_TAG
+    on:
+      repo: flywheel-io/core
+      tags: true
+      condition: $BUILD_SDK = true && $TRAVIS_TAG =~ ^[0-9].*
+  # Deploy python wheel
+  - provider: script
+    script: bash $TRAVIS_BUILD_DIR/sdk/scripts/deploy-wheel.sh $PYPI_USER $PYPI_PASS
+    skip_cleanup: true
+    on:
+      repo: flywheel-io/core
+      tags: true
+      condition: $BUILD_SDK = true && $TRAVIS_TAG =~ ^[0-9].*

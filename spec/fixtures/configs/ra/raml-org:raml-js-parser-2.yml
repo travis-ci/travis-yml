@@ -1,0 +1,25 @@
+language: node_js
+
+notifications:
+  email:
+    on_success: change
+    on_failure: change
+
+node_js:
+  - "6"
+  - "8"
+  - "10"
+  - "node"
+
+before_script: npm run devInstall
+
+script: npm run buildall && npm run testall
+
+deploy:
+  provider: npm
+  email: "$NPM_EMAIL"
+  api_key: "$NPM_TOKEN"
+  skip_cleanup: true
+  on:
+    tags: true
+    node: "node"

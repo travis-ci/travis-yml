@@ -1,0 +1,30 @@
+language: node_js
+node_js:
+- "8"
+- "10"
+env:
+  global:
+    secure: UUTcFAeEokMnToA0QUXnq9yFam6iICLbJnJR4cLEA8kovHIMN+OgOxiFFGLHrfm+8JuY6R5KfHHETZ4L1ryoQjIiNLRnbxGLYLUbuSkfUWC6YDMQxQSkKTF8VBIsdMtf6L/XQRPW94Bm+SFHvpkX+bs8ZoEjal8K4yP8rQAAadNP0QKHLu0xI/jn6RHknbe6pP5od9uCru6Ev+fZIEjEiaVQcg4G5IveY0wz08+rAiQYkDL4GsKQgJz1Lnw8gi+buwiaEN3Q2mnbKJ9hi+RochopDwn8w+SEbLA08GOMw/RR187JJz+oAsAkjkm80u1KZDP5xfUJjzQQUeTP3MZ+seuSyxfg1Jx0wtYZFECvnUcpkO0S81qhTFXSLT0lu62iVMzRU3RPn6zIZCL/5XowLbe8pAXtBA0WLf1VdnYp9CZnstRtm65XeypGB0OQfsQH64ddmkJiaJhgxKXHYHiJhBHIYs7GcjNbDNVQbOWlE2wuRS4c9tjxTdps1Vra+SDpky8X/w6fFK93TtEvUiCMKhs5hUNbjf2Rlw93WnAph/cigYmAWI77ApTTPOH6mSfF5POufYCQkzp4K6im3yZrOdYhPY+Ul3qAUdDAXJt+jSfUk3KC+0P7dVXDJUGGMzeKX8f1AUe44GldU5qMXdlvsP9ofpRnT7FaLF79+e/Uj68=
+before_install:
+  - npm install -g greenkeeper-lockfile@1
+  - ./ci/create-sencha-environment.sh
+install:
+  - npm install
+  - gem install jsduck
+before_script: greenkeeper-lockfile-update
+script:
+  - npm test
+  - ./ci/create-sencha-package.sh
+after_script: greenkeeper-lockfile-upload
+after_success:
+  - npm run ci-coverage
+  - ./ci/update-gh-pages.sh > /dev/null 2>&1
+branches:
+  only:
+    - master
+    - /^greenkeeper/.*$/
+cache:
+  directories:
+    - __download
+    - __install
+    - node_modules

@@ -1,0 +1,26 @@
+language: java
+sudo: false
+install: true
+
+addons:
+  sonarcloud:
+    organization: "black-duck-software"
+    token:
+      secure: "TcwyqoPZ0zdEZwMBwJ7xIMLO76sgdaYf6dk6HTjqC6a0aWRk64HJxI3F11weVaL4scVltPNrnz9t86SekGOGTSLKqPmxnJxnpENQ4Agvp1452nOW816q/AZvb7rC1QGOzeofrM3YOsi2yEyzfoHLA2tyZdraatddupa1ybC0f2bes8P5N+jxOplKxb9dCv6lyqlL2DL5AtjZpkLwlAO3J88ftYoEA8DlQrQYhZjeVgyh2oRgX7K1WFRQlGNLgBVPle7rlJsZ4IjYXYKgokzg3LJ1Bfj5YMcqTjupeOz3r3fQercuMUtvl2oDpFi6uJ2SWCcmmBZJclSLg664Vfgexh4W5DPiGHPhxZP9Ey1QTFZx9CmLYm+REnsnB78kEhQl53uapzV2K1RP+ijz4b9qgsp7JtgdKFvmAH1Gx16f0AtTlz+KUObAQLQjEbYIhT3WsHxFo7TpWBHomJHW2THWM2j8ozvRrnlnxy/8oo9HFWWZg6fWOaGWDSOhPqhuUuRuLopNy3/WR7lIjVHpN1oo5XXpIxgfL38lWZu91rZoNGzqNf40amQNfc0mW6sz9GUktaztdqEjuCsY0vFp6UWkpzAEKRTBbpNZbbGtMn50Kv2DJJfzZbOm+4RZ68VOwK9mooN8V00OQVNvIj8paE8OclIrXmokiq+c7PNXc4CHIJI="
+
+jdk:
+- oraclejdk8
+
+notifications:
+  email:
+    recipients:
+    - akamen@blackducksoftware.com
+    - ekerwin@blackducksoftware.com
+    - sbillings@blackducksoftware.com
+
+script:
+  - mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent package sonar:sonar
+
+after_success:
+  - export DETECT_MAVEN_SCOPE=runtime
+  - bash <(curl -s https://copilot.blackducksoftware.com/ci/travis/scripts/upload)

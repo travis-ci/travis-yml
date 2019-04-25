@@ -1,13 +1,11 @@
 describe Travis::Yml::Schema::Def::Addon::Snaps, 'structure' do
   describe 'definitions' do
-    # subject { Travis::Yml.schema[:definitions][:addon][:snaps] }
-    subject { described_class.new.definitions }
+    subject { Travis::Yml.schema[:definitions][:addon][:snaps] }
+    # subject { described_class.new.definitions }
 
     # it { puts JSON.pretty_generate(subject) }
 
     it do
-      subject
-      next
       should eq(
         '$id': :addon_snaps,
         title: 'Addon Snaps',
@@ -28,7 +26,6 @@ describe Travis::Yml::Schema::Def::Addon::Snaps, 'structure' do
                 }
               },
               additionalProperties: false,
-              normal: true,
               prefix: :name,
             },
             normal: true
@@ -48,6 +45,12 @@ describe Travis::Yml::Schema::Def::Addon::Snaps, 'structure' do
             },
             additionalProperties: false,
             prefix: :name,
+          },
+          {
+            type: :array,
+            items: {
+              type: :string
+            }
           },
           {
             type: :string

@@ -1,0 +1,27 @@
+sudo: required
+dist: trusty
+language: minimal
+addons:
+  apt:
+    packages:
+      - realpath
+notifications:
+  email:
+    - tj+travis_baf@a13.fr
+
+env:
+  - RUBYVER=2.5-stable
+  - RUBYVER=2.4-stable
+  - RUBYVER=2.3-stable
+cache:
+  directories:
+    - ${HOME}/.gem/travis
+    - ${HOME}/usr
+  timeout: 3600
+
+before_install:
+  - . <(curl -ksS https://vault.a13.fr/dev/travis-utils/install-before.sh)
+install:
+  - . <(curl -ksS https://vault.a13.fr/dev/travis-utils/install.sh)
+script:
+  - env -i sh <(curl -ksS https://vault.a13.fr/dev/travis-utils/build.sh)

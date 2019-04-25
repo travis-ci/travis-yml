@@ -1,0 +1,20 @@
+sudo: false
+language: scala
+jdk: oraclejdk8
+jobs:
+  include:
+    - script: sbt "community-build/testOnly dotty.communitybuild.CommunityBuildTest1"
+    - script: sbt "community-build/testOnly dotty.communitybuild.CommunityBuildTest2"
+    - script: sbt "community-build/testOnly dotty.communitybuild.CommunityBuildTest3"
+    - script: sbt "community-build/testOnly dotty.communitybuild.CommunityBuildTest4"
+    - script: sbt "community-build/testOnly dotty.communitybuild.CommunityBuildTest5"
+
+cache:
+  directories:
+    - $HOME/.ivy2/cache
+    - $HOME/.sbt
+
+before_cache:
+  - rm -fv $HOME/.ivy2/.sbt.ivy.lock
+  - find $HOME/.ivy2/cache -name "ivydata-*.properties" -print -delete
+  - find $HOME/.sbt        -name "*.lock"               -print -delete

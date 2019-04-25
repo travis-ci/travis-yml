@@ -1,0 +1,31 @@
+language: ruby
+sudo: required
+dist: trusty
+branches:
+  only:
+    - develop
+    - master
+    - /^release.*$/
+os:
+  - linux
+services:
+  - docker
+addons:
+  apt:
+    packages:
+      - git
+      - build-essential
+  ssh_known_hosts: 13.229.163.131
+before_install:
+  - pip install --user awscli # install aws cli w/o sudo
+  - export PATH=$PATH:$HOME/.local/bin # put aws in the path
+  - chmod +x scripts/travis/build-docker.sh scripts/travis/deploy-image.sh scripts/travis/upload_workspace_to_s3.sh
+script:
+  - |
+    if [ "$TRAVIS_EVENT_TYPE" == "cron" ]; then $TRAVIS_BUILD_DIR/scripts/travis/upload_workspace_to_s3.sh; exit 0; fi;
+    ./scripts/travis/build-docker.sh
+    ./scripts/travis/deploy-image.sh
+notifications:
+  email:
+    on_success: change
+    on_failure: always

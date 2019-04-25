@@ -1,0 +1,31 @@
+---
+language: node_js
+node_js:
+  - "lts/*"
+sudo: false
+dist: trusty
+
+addons:
+  chrome: stable
+
+cache:
+  directories:
+    - $HOME/.npm
+
+env:
+  global:
+    # See https://git.io/vdao3 for details.
+    - JOBS=1
+
+before_install:
+  - npm config set spin false
+
+script:
+  - npm run lint:style
+  - npm run lint:hbs
+  - npm run lint:js
+  - npm test
+
+after_success:
+  - test $TRAVIS_PULL_REQUEST == "false" && test $TRAVIS_BRANCH == "master" && node_modules/.bin/ember deploy staging --activate
+  - test $TRAVIS_TAG && node_modules/.bin/ember deploy production --activate

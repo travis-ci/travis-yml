@@ -1,0 +1,134 @@
+env:
+  global:
+    - RUST_BACKTRACE=1
+    - RUSTFLAGS="-C opt-level=2 -C codegen-units=8"
+    - PATH=$PATH:$HOME/.cargo/bin
+language: rust
+rust:
+  - 1.29.1
+stages:
+  - warmup
+  - tests
+  - tests-binary-compat
+  - deploy
+jobs:
+  include:
+    # Warm up the cache dependencies
+    - stage: warmup
+      script: set -x; scripts/build-real-core
+      os: linux
+    # Warm up the cache for a real build
+    - stage: warmup
+      script: set -x; scripts/build-real
+      os: linux
+    # Warm up the cache for a mock build
+    - stage: warmup
+      script: set -x; scripts/build-mock
+      os: linux
+    - stage: warmup
+      script: set -x; scripts/build-mock
+      os: osx
+
+    # Tests + clippy
+    - stage: tests
+      script: set -x; scripts/test-binary
+      os: linux
+    - stage: tests
+      script: set -x; scripts/test-mock && scripts/test-integration
+      os: linux
+    - stage: tests
+      script: set -x; scripts/test-mock && scripts/test-integration
+      os: osx
+    # Temporarily disable clippy
+    # - stage: tests
+    #   script: set -x; scripts/clippy-all
+    #   if: type = pull_request
+    #   os: linux
+
+    # Build tests for binary compatibility
+    - stage: tests-binary-compat
+      script: set -x; scripts/build-binary
+      # if: type = push
+      os: linux
+
+    # Deploy
+    - stage: deploy
+      script: set -x; true
+      if: type = push
+      os: linux
+      env: RUN_DEPLOY=1
+    - stage: deploy
+      script: set -x; true
+      if: type = push
+      os: osx
+      env: RUN_DEPLOY=1
+sudo: false
+cache:
+  # Double the default timeout.
+  timeout: 360
+  cargo: true
+  directories:
+    - "${HOME}/.cache/master"
+before_script:
+  # Expected version change PR title format:
+  # Version change: safe_app to 0.2.2; safe_authenticator to 0.2.3; safe_core to 0.26.0;
+  - if [[ "$TRAVIS_COMMIT_MESSAGE" =~ [Vv]ersion[[:space:]]change.*safe_authenticator[[:space:]]to[[:space:]]([^;]+) ]]; then
+      SAFE_AUTHENTICATOR_VERSION=v$(cargo pkgid --manifest-path=safe_authenticator/Cargo.toml | sed -e "s/.*[:#]\(.*\)/\1/");
+      if [[ "v${BASH_REMATCH[1]}" != $SAFE_AUTHENTICATOR_VERSION ]]; then
+        echo "Version mismatch between commit message and Cargo.toml for safe_authenticator.";
+        false;
+      fi;
+    else
+      SAFE_AUTHENTICATOR_VERSION=${TRAVIS_COMMIT:0:7};
+    fi
+  - if [[ "$TRAVIS_COMMIT_MESSAGE" =~ [Vv]ersion[[:space:]]change.*safe_app[[:space:]]to[[:space:]]([^;]+) ]]; then
+      SAFE_APP_VERSION=v$(cargo pkgid --manifest-path=safe_app/Cargo.toml | sed -e "s/.*[:#]\(.*\)/\1/");
+      if [[ "v${BASH_REMATCH[1]}" != $SAFE_APP_VERSION ]]; then
+        echo "Version mismatch between commit message and Cargo.toml for safe_app.";
+        false;
+      fi;
+    else
+      SAFE_APP_VERSION=${TRAVIS_COMMIT:0:7};
+    fi
+  - curl -sSL https://github.com/maidsafe/QA/raw/master/travis/cargo_install.sh > cargo_install.sh
+  - bash cargo_install.sh cargo-prune;
+after_script:
+  - if [[ $TRAVIS_EVENT_TYPE = pull_request && -n $(git diff --shortstat 2> /dev/null | tail -n1) ]]; then
+      echo "Working tree is dirty after building.  Probably Cargo.lock should be updated.";
+      git status;
+      travis_terminate 1;
+    fi
+before_cache:
+  - cargo prune
+before_deploy:
+  - bash cargo_install.sh cargo-script 0.2.8
+  - mkdir -p target/deploy
+  - if [[ "$TRAVIS_COMMIT_MESSAGE" =~ [Vv]ersion[[:space:]]change.*safe_authenticator[[:space:]]to[[:space:]]([^;]+) ]]; then
+      ./scripts/package.rs --rebuild --lib --name safe_app -d target/deploy --mock;
+      ./scripts/package.rs --rebuild --lib --name safe_app -d target/deploy;
+    else
+      ./scripts/package.rs --rebuild --lib --name safe_app -d target/deploy --mock --commit;
+      ./scripts/package.rs --rebuild --lib --name safe_app -d target/deploy --commit;
+    fi
+  - if [[ "$TRAVIS_COMMIT_MESSAGE" =~ [Vv]ersion[[:space:]]change.*safe_app[[:space:]]to[[:space:]]([^;]+) ]]; then
+      ./scripts/package.rs --rebuild --lib --name safe_authenticator -d target/deploy --mock;
+      ./scripts/package.rs --rebuild --lib --name safe_authenticator -d target/deploy;
+    else
+      ./scripts/package.rs --rebuild --lib --name safe_authenticator -d target/deploy --mock --commit;
+      ./scripts/package.rs --rebuild --lib --name safe_authenticator -d target/deploy --commit;
+    fi
+deploy:
+  provider: s3
+  access_key_id: AKIAIA2TXTG7EV5VIG2Q
+  secret_access_key:
+    secure: qEDay6TCAy3tBLqLYFOx9OjAdoRl010paK2//teFETfwUfJA/RtNSfkp1yrgx+kZ3FO8cthdDnwR3zjM3pkCL+5mGkQMAgvRY7rcEB5H1VyO4jkZRoB4n/yUu5jB4dHdeeRWTOJxNOOPA0G1Q65LLkJql2JGoJatqE3pBmJm0X8=
+  bucket: safe-client-libs
+  local-dir: target/deploy
+  acl: public_read
+  region: eu-west-2
+  skip_cleanup: true
+  on:
+    branch: master
+    tags: false
+    condition: $RUN_DEPLOY = 1
+after_deploy: rm -rf target/deploy

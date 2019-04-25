@@ -1,0 +1,17 @@
+language: ruby
+sudo: false
+rvm:
+- 2.2.6
+env:
+  global:
+  - secure: HqoGZSlTHg6omIR0NFAbV52HGs867MuupS4OOtC6f5w8BJejIJwUchCjPH2itmYby1bCm82gw/BWV7rQxXS/rGSWVOUsTe/IwxiojksGo8BxQ0iCO29DKKHugWAzL0qS6kBcfbo+kjophvRPc+Z0z0qUD4Vrf/xh76JyOvBywEY=
+  - secure: eaXJv2OPWjWeQ/oI+zqCUNqbKEQBhW3hn/3H0k5zdAK9RTqEFw7ynXJRlMZSP4rAqNXRrD09ZohrbCidMdvWBcvFFsK/HUdwmDH58KaiLMbuCPHaoHPZvPb3PPidC4h2rLkPuXNX/jrLBa02nODmtELLK2rA9h4E8JD3JONjiEo=
+  - JEKYLL_ENV=production
+install:
+- bundle install
+script: bundle exec jekyll build
+after_success:
+- "./s3_deploy.sh"
+notifications:
+  slack:
+    secure: NgPwE/VQxoOVvlsyZUaAz2q6XOwRNlWg2+L1OwYSChlcAbLF2lUFuNra4ucoYcCXXkaHaRKc4w+IYMT5uw62RktPqKqMBC7MqR3n7iQakMu9J982QL7CiAbpwvvJ3k5eqms/ZIAwZTO0t1meZHbaDZEUYbS1pZJ1AJ+zXbzIYt4=

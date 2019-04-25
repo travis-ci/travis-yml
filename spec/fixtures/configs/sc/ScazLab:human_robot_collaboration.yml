@@ -1,0 +1,112 @@
+
+sudo: required
+language: generic
+cache:
+- apt
+notifications:
+  email: false
+  slack:
+    rooms:
+    - secure: DHrr+QWmiliV0O3EvNUqqPYiuqqBkvYSwxIR+ufyDOCo2itGNakOzfmcJP0QEBBRvz6R84SqNPq4xxHwrnFJ9T82gfyiDznStptCS0j2+JVlFkvDYA+K9ZbJZcBLzg812S6H6me+0rdS1Ho0rI8d5uIK6DcLHR0inBE26AKOLmvpFfoGqfBPDxOftJR9s/vk9hl8hkj6Z/3F7w45VKWHCI4pqaiFxcVoQ+jS9BajB5eDmCglxD8yHkL06hsMcDw27eOyKgsg2mt0A+VETCCt+9GtYraSDyxPvm2oOt7L99spVmWfURtmZxSBwRmeLxVdamBKdGJPH7TpzLFR6VinGIbdOk87ptGKgVMSMsOQMHFlEKY+3zNqBkAE4Q34es+JJA0r1ZSIDXj10VUBQ9CXkeKr3782sdGNepMtXUkJM2xNNsUo8ibKfcK7CA3vOcQWjYJtAt+2F5OqRNDUFWH0L3LloCHyY4cVywBTC0hNdfOofE0e9YZqs6et8loVw+d3ehmYw1TdCOZCzItD4RMQ7DYoc6KCMRX5fErRAYqI2ClHx39j+4F85oUTJxyhklQswAbfg6i5L+o5EgPjH/JuEqRuSw7/dKyv/QcCxn4FsAv45jw7/P69rpSfNougNggWUuIDx2AeFzAFge1VEfeJcUE9MdPgcoBI0dOr1TejTrM=
+    on_success: change
+    on_failure: always
+env:
+  global:
+  - ROS_CI_DESKTOP="`lsb_release -cs`"
+  - CI_SOURCE_PATH=$(pwd)
+  - ROSINSTALL_FILE=$CI_SOURCE_PATH/dependencies.rosinstall
+  - CATKIN_OPTIONS=$CI_SOURCE_PATH/catkin.options
+  - ROS_PARALLEL_JOBS='-j8 -l6'
+  - REPO_NAME=human_robot_collaboration
+  - secure: STRpcqvGYbbmuvtgLIouJloeUib6sljp4BiXCtS1m7xRpwd33N9VMsO2nUSbvNzpKJl/TRGj0bmrjs0XbHKPdadyKPtwKl1sGD2oNJQSi8dNF0ACWwVuLwamaSnAGd8Y7PY5Dkh2NyPSVjYDxNP5nGC+cY/Jnjn3gMayln6YRBIERWilfu5iKOXqVZ9sCOneKNG+t6QrZrdMxCxwDvJuS73ZMb+J/e+OjWDnojwv/Px6DhiDsmyyQcpFOItfCY18PoCScLgwc9b/0RyLApOayJPGNIrEMgfi61BPh9rbqTkO7KRUCggg9cc6TvKprAYHdBFcjHekCL6q8FWRhCAY14tO0E1Phm8YIOD8GPCmdN9G5qcye4bb3V+LpbNXHrwQzXlhNA++Q73W3djem9At/Xxxlvjo13iGpcJEd+ORy1YYFadAzRabo5Qev3m6l6Q+FoarKjsllLVtmXPSbXuTPXjyPIdvCKFTUfDpKET8z3BQUm/U9JRF92tlbt+Z93f8oskYabps33MKvTAz6VT12TxlrY6DZHdHCCBHN7h2tAHD6sFne1dqbzMZt/RPk1kaummb0iIQrtbWQZ+OwRlKMrmu4TH1+eeG42Xn+ghQBA6YlC2tDqTndxnos5sE71B0RN8AaDIVWjWo5CXdNukKWOOj0fzidPWwQPA7BJPf5ZI=
+matrix:
+  include:
+  - os: linux
+    dist: trusty
+    env: ROS_DISTRO=indigo CXX=g++-4.9 CC=gcc-4.9
+    compiler: g++-4.9
+    addons:
+      apt:
+        packages:
+        - g++-4.9
+        sources: &1
+        - ubuntu-toolchain-r-test
+        # - llvm-toolchain-trusty
+  # - os: linux
+  #   dist: trusty
+  #   env: ROS_DISTRO=indigo CXX=clang++-3.6 CC=clang-3.6
+  #   compiler: clang-3.6
+  #   addons:
+  #     apt:
+  #       packages:
+  #       - clang-3.6
+  #       - libc++-dev
+  #       sources: *1
+    # kinetic/xenial builds are not enabled as of now since travis does not support xenial 16.04
+    # - os: linux
+    #   dist: xenial
+    #   env: ROS_DISTRO=kinetic
+    #   compiler: gcc
+    # - os: linux
+    #   dist: xenial
+    #   env: ROS_DISTRO=kinetic
+    #   compiler: clang
+
+################################################################################
+
+# Install system dependencies, namely a very barebones ROS setup.
+before_install:
+  - sudo sh -c "echo \"deb http://packages.ros.org/ros/ubuntu $ROS_CI_DESKTOP main\" > /etc/apt/sources.list.d/ros-latest.list"
+  - wget http://packages.ros.org/ros.key -O - | sudo apt-key add -
+  - sudo apt-get update -qq
+  - sudo apt-get install dpkg
+  # - sudo apt-get upgrade -y --allow-unauthenticated
+  - sudo apt-get install -y python-catkin-tools python-rosdep python-wstool ros-$ROS_DISTRO-catkin libnlopt-dev
+  - source /opt/ros/$ROS_DISTRO/setup.bash
+  # Prepare rosdep to install dependencies.
+  - sudo rosdep init
+  - rosdep update
+
+# Create a catkin workspace with the package under CI
+install:
+  - mkdir -p ~/catkin_ws/src
+  - cd ~/catkin_ws/ && catkin init
+  - cd ~/catkin_ws/ && catkin build
+  - source devel/setup.bash
+  - cd ~/catkin_ws/src && ln -s $CI_SOURCE_PATH .
+
+# Install all dependencies, using wstool first and rosdep second.
+# wstool looks for a ROSINSTALL_FILE defined in the environment variables.
+before_script:
+  # source dependencies: install using wstool.
+  - cd ~/catkin_ws/src && wstool init
+  - if [[ -f $ROSINSTALL_FILE ]] ; then wstool merge $ROSINSTALL_FILE ; fi
+  - cd ~/catkin_ws/src && wstool up
+  # package depedencies: install using rosdep.
+  - cd ~/catkin_ws
+  - rosdep install -y --from-paths src --ignore-src --rosdistro $ROS_DISTRO
+
+# Compile and test (mark the build as failed if any step fails). If the
+# CATKIN_OPTIONS file exists, use it as an argument to catkin_make, for example
+# to blacklist certain packages.
+#
+# NOTE on testing: `catkin_make run_tests` will show the output of the tests
+# (gtest, nosetest, etc..) but always returns 0 (success) even if a test
+# fails. Running `catkin_test_results` aggregates all the results and returns
+# non-zero when a test fails (which notifies Travis the build failed).
+script:
+  - source /opt/ros/$ROS_DISTRO/setup.bash
+  - cd ~/catkin_ws
+  # To remove libdc1394 error: Failed to initialize libdc1394
+  - sudo ln /dev/null /dev/raw1394
+  # Build the repo
+  - catkin build $REPO_NAME $( [ -f $CATKIN_OPTIONS ] && cat $CATKIN_OPTIONS )
+  # Run the tests, ensuring the path is set correctly.
+  - source devel/setup.bash
+  - catkin build "$REPO_NAME"_lib --catkin-make-args run_tests
+  - catkin_test_results build/"$REPO_NAME"_lib || (cat build/"$REPO_NAME"_lib/test_results/"$REPO_NAME"_lib/*.xml ; false)
+
+after_success:
+  # Run build on Docker Hub
+  - |-
+    curl -H "Content-Type: application/json" --data '{"source_type": "Branch", "source_name": "'$TRAVIS_BRANCH'"}' -X POST $DOCKER_PUSH_URL

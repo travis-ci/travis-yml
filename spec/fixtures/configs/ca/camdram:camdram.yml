@@ -1,0 +1,22 @@
+language: php
+dist: xenial
+matrix:
+  include:
+    - php: 7.3
+  fast_finish: true
+cache:
+  directories:
+  - $HOME/.composer/cache/files
+services:
+  - elasticsearch
+  - mysql
+before_script:
+  # Disable xdebug for speedup
+- phpenv config-rm xdebug.ini
+  # Enable search listeners via paramaters.yml
+- cp app/config/parameters.travis.yml app/config/parameters.yml
+  # Install deps. `--no-interaction` causes paramters.yml to be populated with default values
+- travis_retry composer install --no-interaction
+script:
+- "./runtests"
+- "./check_dev_setup"

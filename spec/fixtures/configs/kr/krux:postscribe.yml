@@ -1,0 +1,43 @@
+sudo: false
+
+language: node_js
+
+node_js:
+  - 5
+
+cache:
+  directories:
+    - node_modules
+
+before_script:
+  - npm prune
+
+script:
+- |
+  npm run lint
+  npm run build
+  npm run test:ci
+  if [ "${TRAVIS_PULL_REQUEST}" == "true" ]; then
+    npm run test:cross-browser
+  fi
+
+after_success:
+- |
+  npm run semantic-release
+  if [ "${TRAVIS_PULL_REQUEST}" != "true" ]; then
+    npm install codeclimate-test-reporter
+    ./node_modules/.bin/codeclimate-test-reporter < build/test-reports/coverage/*/lcov.info
+  fi
+
+branches:
+  except:
+    - /^v\d+\.\d+\.\d+$/
+
+notifications:
+  email: false
+  webhooks:
+    urls:
+      - https://webhooks.gitter.im/e/c5ef8c460e0c28b4817e
+    on_success: change
+    on_failure: always
+    on_start: never

@@ -1,0 +1,411 @@
+# Travis configuration for etl-worker.
+#
+# etl-worker is a Go project supporting release automation to mlab-sandbox
+# for a single branch in the m-lab/etl repository. The steps it takes are:
+#
+#  * decrypt service account credentials
+#  * install the Google Cloud SDK command line tools (gcloud)
+#  * cache the gcloud installation and setup
+#  * test and build the go code
+#  * on success, deploy the result when the origin branch matches a supported
+#    deployment target.
+#
+# NOTE: Cloud functions only support primitive IAM roles: Owner, Editor, Viewer.
+# See: https://cloud.google.com/functions/docs/concepts/iam
+# TODO(soltesz): Add deployment automation when fine-grained permissions are
+# possible.
+
+language: go
+
+go:
+ - 1.12  # log.Logger.Writer() introduced in 1.12
+
+before_install:
+- sudo apt-get install -y jq  # Dependency for sync_tables_with_schema.sh.
+# Install javascript libraries
+- pushd $TRAVIS_BUILD_DIR/functions
+- npm install --verbose
+- pushd embargo
+- npm install --verbose
+- popd; popd
+
+# Coverage tools
+- go get github.com/mattn/goveralls
+- go get github.com/wadey/gocovmerge
+
+- echo Branch is ${TRAVIS_BRANCH} and Tag is $TRAVIS_TAG
+
+# Install gcloud, for integration tests.
+- $TRAVIS_BUILD_DIR/travis/install_gcloud.sh
+- source "${HOME}/google-cloud-sdk/path.bash.inc"
+
+# Install test credentials.
+# Note that anyone with github ACLs to push to a branch can hack .travis.yml
+# and discover these credentials in the travis logs.
+- if [[ -n "$TEST_SERVICE_ACCOUNT_mlab_testing" ]] ; then
+  echo $TEST_SERVICE_ACCOUNT_mlab_testing | base64 -d > travis-testing.key ;
+  gcloud auth activate-service-account --key-file=travis-testing.key ;
+  fi
+
+# These directories will be cached on successful "script" builds, and restored,
+# if available, to save time on future builds.
+cache:
+  directories:
+    - "$HOME/google-cloud-sdk/"
+
+script:
+# Run all javascript tests.
+- pushd $TRAVIS_BUILD_DIR/functions
+- npm test
+- pushd embargo
+- npm test
+- popd; popd
+
+# To start the Go tests, run all the non-integration tests.
+# Currently skipping storage tests, because they depend on GCS, and there is
+# no emulator.
+# TODO - separate storage tests into integration and lightweight.
+- MODULES="annotation appengine/queue_pusher bq etl metrics parser schema task web100"
+- for module in $MODULES; do
+    COVER_PKGS=${COVER_PKGS}./$module/..., ;
+  done
+- COVER_PKGS=${COVER_PKGS::-1}  # Trim the trailing comma
+- EC=0
+# Note that for modules in subdirectories, this replaces separating slashes with _.
+- for module in $MODULES; do
+    go test -v -coverpkg=$COVER_PKGS -coverprofile=${module//\//_}.cov github.com/m-lab/etl/$module ;
+    EC=$[ $EC || $? ] ;
+  done
+- echo "summary status $EC" ;
+- if [[ $EC != 0 ]]; then false; fi ;
+
+
+# Rerun modules with integration tests.  This means that some tests are repeated, but otherwise
+# we lose some coverage.  The corresponding cov files are overwritten, but that is OK since
+# the non-integration tests are repeated.  If we change the unit tests to NOT run when integration
+# test tag is set, then we would need to have separate cov files.
+# Note: we do not run integration tests from forked PRs b/c the SA is unavailable.
+# Note that for modules in subdirectories, this replaces separating slashes with _.
+- if [[ -n "$TEST_SERVICE_ACCOUNT_mlab_testing" ]] ; then
+  for module in metrics ; do
+    go test -v -coverpkg=$COVER_PKGS -coverprofile=${module//\//_}.cov github.com/m-lab/etl/$module -tags=integration ;
+    EC=$[ $EC || $? ] ;
+  done ;
+  echo "summary status $EC" ;
+  if [[ $EC != 0 ]]; then false; fi ;
+  fi
+
+# Coveralls
+# Run "unit tests" with coverage.
+
+# Coveralls
+- $HOME/gopath/bin/gocovmerge *.cov > merge.cov
+- $HOME/gopath/bin/goveralls -coverprofile=merge.cov -service=travis-ci
+
+# Clean build and prepare for deployment
+- cd $TRAVIS_BUILD_DIR/cmd/etl_worker &&
+  go build -v -ldflags "-X github.com/m-lab/go/prometheusx.GitShortCommit=$(git log -1 --format=%h)" .
+
+- $TRAVIS_BUILD_DIR/travis/install_gcloud.sh
+
+#################################################################################
+# Deployment Section
+#
+#  Overview:
+#   1.  Test in sandbox during development
+#   2.  Deploy to staging on commit to master
+#   3.  Deploy to prod when a branch is tagged with prod-* or xxx-prod-*
+#
+#  We want to test individual components in sandbox, and avoid stepping on each
+#  other, so we do NOT automate deployment to sandbox.  Each person should
+#  use a branch name to trigger the single deployment that they are working on.
+#
+#  We want to soak all code in staging before deploying to prod.  To avoid
+#  incompatible components, we deploy ALL elements to staging when we merge
+#  to master branch.
+#
+#  Deployments to prod are done by deliberately tagging a specific commit,
+#  typically in the master branch, with a tag starting with prod-*.
+#  DO NOT just tag the latest version in master, as someone may have
+#  pushed new code that hasn't had a chance to soak in staging.
+#
+#
+# Deploy steps never trigger on a new Pull Request. Deploy steps will trigger
+# on specific branch name patterns, after a merge to master, or on
+# an explicit tag that matches "on:" conditions.
+#################################################################################
+
+deploy:
+######################################################################
+#  Sandbox deployments
+#  - before code review for development code in a specific branch.
+######################################################################
+
+## Service: queue-pusher -- AppEngine Standard Environment.
+- provider: script
+  script:
+    $TRAVIS_BUILD_DIR/travis/deploy_app.sh mlab-sandbox
+    SERVICE_ACCOUNT_mlab_sandbox $TRAVIS_BUILD_DIR/appengine/queue_pusher
+  skip_cleanup: true
+  on:
+    repo: m-lab/etl
+    all_branches: true
+    condition: $TRAVIS_BRANCH == qp-sandbox-* || $TRAVIS_BRANCH == sandbox-*
+
+## Service: cloud function -- AppEngine Flexible Environment.
+- provider: script
+  script:
+    $TRAVIS_BUILD_DIR/travis/activate_service_account.sh SERVICE_ACCOUNT_mlab_sandbox
+    && cd $TRAVIS_BUILD_DIR/functions
+    && gcloud config set project mlab-sandbox
+    && gcloud functions deploy createSandboxTaskOnFileNotification --stage-bucket=functions-mlab-sandbox --trigger-event=providers/cloud.storage/eventTypes/object.change --trigger-resource=archive-mlab-sandbox
+    && gcloud functions deploy createSandboxTaskOnEmbargoFileNotification --stage-bucket=functions-mlab-sandbox --trigger-event=providers/cloud.storage/eventTypes/object.change --trigger-resource=embargo-mlab-sandbox
+  skip_cleanup: true
+  on:
+    repo: m-lab/etl
+    all_branches: true
+    condition: $TRAVIS_BRANCH == cf-sandbox-* || $TRAVIS_BRANCH == sandbox-*
+
+## Task Queues
+- provider: script
+  script:
+    $TRAVIS_BUILD_DIR/travis/activate_service_account.sh SERVICE_ACCOUNT_mlab_sandbox
+    && gcloud app deploy --project=mlab-sandbox $TRAVIS_BUILD_DIR/appengine/queue.yaml
+  skip_cleanup: true
+  on:
+    repo: m-lab/etl
+    all_branches: true
+    condition: $TRAVIS_BRANCH == tq-sandbox-* ||
+               $TRAVIS_BRANCH == ndt-sandbox-* ||
+               $TRAVIS_BRANCH == batch-sandbox-* ||
+               $TRAVIS_BRANCH == sandbox-*
+
+## Service: etl-batch-parser -- AppEngine Flexible Environment.
+- provider: script
+  script:
+    $TRAVIS_BUILD_DIR/travis/activate_service_account.sh SERVICE_ACCOUNT_mlab_sandbox
+    && $TRAVIS_BUILD_DIR/etl-schema/schema/sync_tables_with_schema.sh mlab-sandbox nodryrun
+    && $TRAVIS_BUILD_DIR/travis/deploy_app.sh mlab-sandbox
+    SERVICE_ACCOUNT_mlab_sandbox $TRAVIS_BUILD_DIR/cmd/etl_worker app-batch.yaml
+  skip_cleanup: true
+  on:
+    repo: m-lab/etl
+    all_branches: true
+    condition: $TRAVIS_BRANCH == batch-sandbox-* || $TRAVIS_BRANCH == sandbox-*
+
+## Synchronize base_tables with etl-schemas.
+- provider: script
+  script:
+    $TRAVIS_BUILD_DIR/travis/activate_service_account.sh SERVICE_ACCOUNT_mlab_sandbox
+    && $TRAVIS_BUILD_DIR/etl-schema/schema/sync_tables_with_schema.sh mlab-sandbox base_tables nodryrun
+  skip_cleanup: true
+  on:
+    repo: m-lab/etl
+    all_branches: true
+    condition: $TRAVIS_BRANCH == sandbox-* ||
+               $TRAVIS_BRANCH == ndt-sandbox-* ||
+               $TRAVIS_BRANCH == ss-sandbox-* ||
+               $TRAVIS_BRANCH == fast-sandbox-* ||
+               $TRAVIS_BRANCH == pt-sandbox-* ||
+               $TRAVIS_BRANCH == disco-sandbox-*
+
+## Service: etl-ndt-parser -- AppEngine Flexible Environment.
+- provider: script
+  script:
+    $TRAVIS_BUILD_DIR/travis/activate_service_account.sh SERVICE_ACCOUNT_mlab_sandbox
+    && $TRAVIS_BUILD_DIR/travis/deploy_app.sh mlab-sandbox
+    SERVICE_ACCOUNT_mlab_sandbox $TRAVIS_BUILD_DIR/cmd/etl_worker app-ndt.yaml
+  skip_cleanup: true
+  on:
+    repo: m-lab/etl
+    all_branches: true
+    condition: $TRAVIS_BRANCH == ndt-sandbox-* || $TRAVIS_BRANCH == sandbox-*
+
+## Service: etl-sidestream-parser -- AppEngine Flexible Environment.
+- provider: script
+  script:
+    $TRAVIS_BUILD_DIR/travis/deploy_app.sh mlab-sandbox
+    SERVICE_ACCOUNT_mlab_sandbox $TRAVIS_BUILD_DIR/cmd/etl_worker app-sidestream.yaml
+    && cd $TRAVIS_BUILD_DIR/functions/embargo
+    && gcloud functions deploy embargoOnFileNotificationSandbox --project=mlab-sandbox --stage-bucket=functions-mlab-sandbox --trigger-event=providers/cloud.storage/eventTypes/object.change --trigger-resource=scraper-mlab-sandbox
+  skip_cleanup: true
+  on:
+    repo: m-lab/etl
+    all_branches: true
+    condition: $TRAVIS_BRANCH == ss-sandbox-* || $TRAVIS_BRANCH == sandbox-*
+
+## Service: etl-fast-ss-parser -- AppEngine Flexible Environment.
+## TODO - for now only deploy on fast tag, not on general tag.
+- provider: script
+  script:
+    $TRAVIS_BUILD_DIR/travis/deploy_app.sh mlab-sandbox
+    SERVICE_ACCOUNT_mlab_sandbox $TRAVIS_BUILD_DIR/cmd/etl_worker fast-sidestream.yaml
+  skip_cleanup: true
+  on:
+    repo: m-lab/etl
+    all_branches: true
+    condition: $TRAVIS_BRANCH == fast-sandbox-*
+
+## Service: etl-traceroute-parser -- AppEngine Flexible Environment.
+- provider: script
+  script:
+    $TRAVIS_BUILD_DIR/travis/deploy_app.sh mlab-sandbox
+    SERVICE_ACCOUNT_mlab_sandbox $TRAVIS_BUILD_DIR/cmd/etl_worker app-traceroute.yaml
+  skip_cleanup: true
+  on:
+    repo: m-lab/etl
+    all_branches: true
+    condition: $TRAVIS_BRANCH == pt-sandbox-* || $TRAVIS_BRANCH == sandbox-*
+
+## Service: etl-disco-parser -- AppEngine Flexible Environment.
+- provider: script
+  script:
+    $TRAVIS_BUILD_DIR/travis/deploy_app.sh mlab-sandbox
+    SERVICE_ACCOUNT_mlab_sandbox $TRAVIS_BUILD_DIR/cmd/etl_worker app-disco.yaml
+  skip_cleanup: true
+  on:
+    repo: m-lab/etl
+    all_branches: true
+    condition: $TRAVIS_BRANCH == disco-sandbox-* || $TRAVIS_BRANCH == sandbox-*
+
+######################################################################
+#  Staging deployments
+#  Auto deployed on merge with master branch
+#  There are no mini-deployments here.  ALL elements are redeployed
+#  when merges to master occur, and they have no other trigger.
+#  NOTE: This may lead to timeouts.  Generally, triggering the build
+#        again will help, as the redeployment of the same image is
+#        faster than deployment of a new image.
+#        See:
+#  https://groups.google.com/forum/#!topic/google-appengine/hZMEkmmObDU
+#  https://groups.google.com/forum/#!topic/google-appengine/JTUfl-Kl_B0
+#  https://stackoverflow.com/questions/40205222/why-does-google-appengine-deployment-take-several-minutes-to-update-service
+#  https://stackoverflow.com/questions/37683120/gcloud-preview-app-deploy-process-takes-8-minutes-is-this-normal
+######################################################################
+
+###################### ALL ETL SERVICES ###############################
+# Deploys all staging services: NDT, BATCH, PT, SS, DISCO, QUEUE_PUSHER, GARDENER
+# NOTE:
+#  Failure in one of the deployments will terminate the deployment sequence, leaving
+#  the system in a mixed state.  This should be manually addresses ASAP.
+# TODO - should have a bash script to do this deployment, with possible parallelism
+# and better error handling.
+- provider: script
+  script:
+    $TRAVIS_BUILD_DIR/travis/activate_service_account.sh SERVICE_ACCOUNT_mlab_staging
+    && gcloud app deploy --project=mlab-staging $TRAVIS_BUILD_DIR/appengine/queue.yaml
+    && $TRAVIS_BUILD_DIR/etl-schema/schema/sync_tables_with_schema.sh mlab-staging batch nodryrun
+    && $TRAVIS_BUILD_DIR/etl-schema/schema/sync_tables_with_schema.sh mlab-staging base_tables nodryrun
+    && $TRAVIS_BUILD_DIR/travis/deploy_app.sh mlab-staging
+    SERVICE_ACCOUNT_mlab_staging $TRAVIS_BUILD_DIR/cmd/etl_worker app-ndt.yaml
+    && $TRAVIS_BUILD_DIR/travis/deploy_app.sh mlab-staging
+    SERVICE_ACCOUNT_mlab_staging $TRAVIS_BUILD_DIR/cmd/etl_worker app-batch.yaml
+    && $TRAVIS_BUILD_DIR/travis/deploy_app.sh mlab-staging
+    SERVICE_ACCOUNT_mlab_staging $TRAVIS_BUILD_DIR/cmd/etl_worker app-traceroute.yaml
+    && $TRAVIS_BUILD_DIR/travis/deploy_app.sh mlab-staging
+    SERVICE_ACCOUNT_mlab_staging $TRAVIS_BUILD_DIR/cmd/etl_worker app-sidestream.yaml
+    && $TRAVIS_BUILD_DIR/travis/deploy_app.sh mlab-staging
+    SERVICE_ACCOUNT_mlab_staging $TRAVIS_BUILD_DIR/cmd/etl_worker fast-sidestream.yaml
+    && $TRAVIS_BUILD_DIR/travis/deploy_app.sh mlab-staging
+    SERVICE_ACCOUNT_mlab_staging $TRAVIS_BUILD_DIR/cmd/etl_worker app-disco.yaml
+    && $TRAVIS_BUILD_DIR/travis/deploy_app.sh mlab-staging
+    SERVICE_ACCOUNT_mlab_staging $TRAVIS_BUILD_DIR/appengine/queue_pusher
+    && cd $TRAVIS_BUILD_DIR/functions
+    && gcloud functions deploy createStagingTaskOnFileNotification --project=mlab-staging --stage-bucket=functions-mlab-staging --trigger-event=providers/cloud.storage/eventTypes/object.change --trigger-resource=archive-mlab-staging
+    && gcloud functions deploy createStagingTaskOnEmbargoFileNotification --project=mlab-staging --stage-bucket=functions-mlab-staging --trigger-event=providers/cloud.storage/eventTypes/object.change --trigger-resource=embargo-mlab-staging
+    && cd $TRAVIS_BUILD_DIR/functions/embargo
+    && gcloud functions deploy embargoOnFileNotificationStaging --project=mlab-staging --stage-bucket=functions-mlab-staging --trigger-event=providers/cloud.storage/eventTypes/object.change --trigger-resource=scraper-mlab-staging
+  skip_cleanup: true
+  on:
+    repo: m-lab/etl
+    branch: master
+
+## Service: etl-fast-ss-parser -- AppEngine Flexible Environment.
+## Hack for demo
+- provider: script
+  script:
+    $TRAVIS_BUILD_DIR/travis/deploy_app.sh mlab-staging
+    SERVICE_ACCOUNT_mlab_staging $TRAVIS_BUILD_DIR/cmd/etl_worker fast-sidestream.yaml
+  skip_cleanup: true
+  on:
+    repo: m-lab/etl
+    all_branches: true
+    condition: $TRAVIS_BRANCH == fast-staging-*
+
+######################################################################
+#  Prod deployments
+#  Deployed on manual tagging with prod-*, ndt-prod-*, or small-prod-*
+#  Should be used AFTER code review, commit to master, and staging soak.
+#  Triggers when *ANY* branch is tagged with one of these tags'
+######################################################################
+
+## Service: cloud function -- AppEngine Flexible Environment.
+- provider: script
+  script:
+    $TRAVIS_BUILD_DIR/travis/activate_service_account.sh SERVICE_ACCOUNT_mlab_oti
+    && cd $TRAVIS_BUILD_DIR/functions
+    && gcloud functions deploy createProdTaskOnFileNotification --project=mlab-oti --stage-bucket=functions-mlab-oti --trigger-event=providers/cloud.storage/eventTypes/object.change --trigger-resource=archive-mlab-oti
+    && gcloud functions deploy createProdTaskOnEmbargoFileNotification --project=mlab-oti --stage-bucket=functions-mlab-oti --trigger-event=providers/cloud.storage/eventTypes/object.change --trigger-resource=embargo-mlab-oti
+    && cd $TRAVIS_BUILD_DIR/functions/embargo
+    && gcloud functions deploy embargoOnFileNotificationOti --project=mlab-oti --stage-bucket=functions-mlab-oti --trigger-event=providers/cloud.storage/eventTypes/object.change --trigger-resource=scraper-mlab-oti
+  skip_cleanup: true
+  on:
+    repo: m-lab/etl
+    all_branches: true
+    condition: $TRAVIS_BRANCH == cf-prod-* || $TRAVIS_BRANCH == ndt-prod-* || $TRAVIS_BRANCH == prod-*
+
+
+###################### SMALLER ETL SERVICES ###############################
+# Deploys smaller production services: PT, SS, DISCO
+# Triggers when *ANY* branch is tagged with small-prod-* OR prod-*
+# NOTE: See later target for ndt-prod-*, which also triggers on prod-*, and
+#       deploys the NDT daily pipelines.
+# NOTE: Failure in one of the deployments will terminate the deployment sequence,
+#       leaving the system in a mixed state.  This should be manually addresses ASAP.
+- provider: script
+  script:
+    $TRAVIS_BUILD_DIR/travis/activate_service_account.sh SERVICE_ACCOUNT_mlab_oti
+    && $TRAVIS_BUILD_DIR/etl-schema/schema/sync_tables_with_schema.sh mlab-oti base_tables nodryrun
+    && $TRAVIS_BUILD_DIR/travis/deploy_app.sh mlab-oti
+    SERVICE_ACCOUNT_mlab_oti $TRAVIS_BUILD_DIR/cmd/etl_worker app-traceroute.yaml
+    && $TRAVIS_BUILD_DIR/travis/deploy_app.sh mlab-oti
+    SERVICE_ACCOUNT_mlab_oti $TRAVIS_BUILD_DIR/cmd/etl_worker app-sidestream.yaml
+    && $TRAVIS_BUILD_DIR/travis/deploy_app.sh mlab-oti
+    SERVICE_ACCOUNT_mlab_oti $TRAVIS_BUILD_DIR/cmd/etl_worker app-disco.yaml
+    && $TRAVIS_BUILD_DIR/travis/deploy_app.sh mlab-oti
+    SERVICE_ACCOUNT_mlab_oti $TRAVIS_BUILD_DIR/appengine/queue_pusher
+  skip_cleanup: true
+  on:
+    repo: m-lab/etl
+    all_branches: true
+    condition: $TRAVIS_TAG == small-prod-* || $TRAVIS_TAG == prod-*
+
+###################### BATCH SERVICES ###############################
+- provider: script
+  script:
+    $TRAVIS_BUILD_DIR/travis/activate_service_account.sh SERVICE_ACCOUNT_mlab_oti
+    && $TRAVIS_BUILD_DIR/etl-schema/schema/sync_tables_with_schema.sh mlab-oti batch nodryrun
+    && gcloud app deploy --project=mlab-oti $TRAVIS_BUILD_DIR/appengine/queue.yaml
+    && $TRAVIS_BUILD_DIR/travis/deploy_app.sh mlab-oti
+    SERVICE_ACCOUNT_mlab_oti $TRAVIS_BUILD_DIR/cmd/etl_worker app-batch.yaml
+  skip_cleanup: true
+  on:
+    repo: m-lab/etl
+    all_branches: true
+    condition: $TRAVIS_TAG == batch-prod-* || $TRAVIS_TAG == prod-*
+
+###################### NDT SERVICES ###############################
+# Deploys STREAMING NDT services, along with queue config.
+# Triggers when *ANY* branch is tagged with ndt-prod-* OR prod-*
+- provider: script
+  script:
+    $TRAVIS_BUILD_DIR/travis/activate_service_account.sh SERVICE_ACCOUNT_mlab_oti
+    && $TRAVIS_BUILD_DIR/etl-schema/schema/sync_tables_with_schema.sh mlab-oti base_tables nodryrun
+    && gcloud app deploy --project=mlab-oti $TRAVIS_BUILD_DIR/appengine/queue.yaml
+    && $TRAVIS_BUILD_DIR/travis/deploy_app.sh mlab-oti
+    SERVICE_ACCOUNT_mlab_oti $TRAVIS_BUILD_DIR/cmd/etl_worker app-ndt.yaml
+  skip_cleanup: true
+  on:
+    repo: m-lab/etl
+    all_branches: true
+    condition: $TRAVIS_TAG == ndt-prod-* || $TRAVIS_TAG == prod-*

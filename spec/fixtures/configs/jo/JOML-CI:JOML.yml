@@ -1,0 +1,45 @@
+language: java
+dist: trusty
+sudo: false
+git:
+  depth: 1
+cache:
+  directories:
+    - $HOME/.m2
+install: true
+env:
+  global:
+    - secure: "bAYEubjYV/4Zw6TKWapaqBg7+/fIu7SEStNGxYW2w2yZbZnE0DoWDvTCjRyTC1ugjI5ibYu8hdbC0nbSJxpaoB42fZ9jY1lRWz63VsMzNK1vdEjGUwTY1ENWgeOMCK0W2x3khd+EHenzbcJy0ZCN3kst9UsEZwYuZ4VENumAK4o="
+    - secure: "KPb8H6zydtkjmXT05rkKf+VGOqDPrfFI1tTt5zJ3EpP+GjiAAmb7PhgPapUu4ognsGj/duMKrF/02XqDF0B28WSZ+98qL9UkTFqicjfWdH7mAifOe7WDArFdOiXytgjHRNYuqHVNZEvskUIvKOAOdeKKcbdMdOwXTksIeWzV3Zo="
+    - secure: "CTXe/8wI8l+kMAnujvmMISAESV+3sQWGvz/SOzsoAby6xwIpAQRjzVVEmbovFS8sb78VP2qmmm84hJAq37VffCVrgywS7zHiG/ny4V4QvjqemxyBR7Ft8X1LzI5kGXFxv+DPGRWOzWc5IJ0FI9pf8ML7GVV7fvIz+lqsnYl9IWI="
+    - secure: "TvzL53KDcjCgddNSZiByNipetAffHwpWIORXSxscKly86CrvacCERc0eHHAKPNsYq+1Y0sm2HUPuazVXIuAGsvAm46AYDA8ZG7x2dxr+Fpc1T7zilCS8yNzwwjWv/F9t2d9UC2nstmvX2HyA+1yeC1NamtVyBuvURTFdIzbWSqo="
+    - secure: "fPGWnjcUM1rP26dvDaL1SPlrB1yRlsZKrTTb011GA0fq9aIXEMXfUN9F4p0gYG2vxLOFD+hUArky81kgSqSI1XVJTQMnTTO9OEAiIk+4w1ZsS/5pWU01YnSMo1/yyNlYvnZGZIIS+OZFs2zeJbn/tWrDuXeQ4ddv5AsEhi0DabY="
+matrix:
+  include:
+    - os: linux
+      jdk: openjdk7
+    - os: linux
+      jdk: openjdk8
+      after_success:
+        - test $TRAVIS_BRANCH = "master" && test $TRAVIS_PULL_REQUEST = "false" && 
+          openssl aes-256-cbc -pass pass:$ENCRYPTION_KEY -in .travis/pubring.asc.enc -out ./pubring.asc -d &&
+          openssl aes-256-cbc -pass pass:$ENCRYPTION_KEY -in .travis/secring.asc.enc -out ./secring.asc -d &&
+          ./mvnw clean deploy --settings .travis/settings.xml -Ddeployment -Dmaven.test.skip=true &&
+          ./mvnw clean deploy --settings .travis/settings.xml -Ddeployment -Dgwt  -Dmaven.test.skip=true -f pom-gwt.xml &&
+          ./mvnw clean deploy --settings .travis/settings.xml -Ddeployment -Djdk3 -Dmaven.test.skip=true -f pom-jdk3.xml &&
+          ./mvnw clean deploy --settings .travis/settings.xml -Ddeployment -Djdk8 -Dmaven.test.skip=true -f pom-jdk8.xml
+    - os: linux
+      jdk: openjdk9
+    - os: linux
+      jdk: openjdk10
+    - os: linux
+      jdk: openjdk11
+    - os: linux
+      jdk: openjdk12
+    - os: linux
+      jdk: openjdk-ea
+script: 
+  - ./mvnw clean package -Dmaven.javadoc.skip=false
+  - sed 's;<artifactId>joml</artifactId>;<artifactId>joml-gwt</artifactId>;'  pom.xml > pom-gwt.xml  && ./mvnw clean package -Dmaven.javadoc.skip=false -Dgwt  -f pom-gwt.xml
+  - sed 's;<artifactId>joml</artifactId>;<artifactId>joml-jdk3</artifactId>;' pom.xml > pom-jdk3.xml && ./mvnw clean package -Dmaven.javadoc.skip=false -Djdk3 -f pom-jdk3.xml
+  - sed 's;<artifactId>joml</artifactId>;<artifactId>joml-jdk8</artifactId>;' pom.xml > pom-jdk8.xml && ./mvnw clean package -Dmaven.javadoc.skip=false -Djdk8 -f pom-jdk8.xml

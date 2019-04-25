@@ -2,12 +2,15 @@
 
 
 
-## Type
+## Types
 
-Enum (known String)
+* String (known)
 
-## Flags
+## Values
 
-None.
+* `trusty`
+* `precise`
+* `xenial`
+* `server-2016`
 
 

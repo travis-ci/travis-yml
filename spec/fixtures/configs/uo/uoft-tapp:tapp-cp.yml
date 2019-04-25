@@ -1,0 +1,19 @@
+sudo: required
+
+notifications:
+  slack:
+    secure: Uo73mdwNBq1/epgnPSAVhcHFRJ80XaeLJZNEZM8k/efQ2khLTkXIPd+YasARnlkc7FIotvTuxsb7Ebndt0CM5N7ScRlf1MkuVyQk5lfUSy+bKvkz8QregwvDUCologueDwavus/7jWD1E2FMAtzMeygngRCL2qOsi/yH6w5nphvbiCcc0D8VArxQWubYr9H8hquSmACN8KbLaSwOUm7ijXwOZqRB4zxXtk9YTQJLKOpxJqICywJbjfTVnGPhT8f78NGiQBfn0unmYNKc9uzEwaGrl5yqENdHNHbhQX8sAlU+HnOyY90F6kiGR0pPM+CwEM1BYAJNlc5ej0k0PpT8MQ2xNVs4M/l9p0j59vqQl93gJKol74wzBCoz8hJL9HlYRDr62TGel3lv61gJ4GeMnbwFnfDFTMDhshMLtBRqZMWtC8MTn4g1pkqGAuYaykqW7XxveIUthT4KkkzzQJ24up8kqcTe9W9cKm8WkhwNfttz/FxS1dPgkrKvbrJf6YIKwhrn19V9nDiLeU+0AMl0uOBvOP6HS16iqQnIzRJ6SMeIgv6j7BlRVRxTmskkdfk+clwOtCQgqUJ3s1JH2zTMDcqkV30HLlB4Fyn09LiI/socayOd2Q+t/CO1QCpCh1lw9zPJ5hP3Efv0TjwbbVbSYSlTPcHc73VTGA7fntNRNmA=
+
+language: generic
+
+services:
+  - docker
+
+before_install:
+  - cp dev.env.default .env
+  - docker-compose up -d
+  - sleep 15
+
+script:
+  - docker-compose run -eRAILS_ENV=test rails-app rake db:create db:migrate
+  - docker-compose run -eRAILS_ENV=test rails-app rake spec

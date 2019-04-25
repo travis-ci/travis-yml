@@ -1,0 +1,15 @@
+language: node_js
+node_js:
+- node
+- lts/*
+services:
+- postgresql
+before_install:
+- psql -c 'create database sources;' -U postgres
+- psql -c 'create database "sources-test";' -U postgres
+branches:
+  only:
+    - master
+env:
+  global:
+    secure: ZcLAQ0kZa8T65B0nYXbV7D3qnoAIJ4HCUtTP2M3jb5fbTHgqRjL59x33D/4//biVTuI7yfT1m4bw2rqTfe3uRARy0rUXIf9kX5Zz0tfH7b72la2U7vKlOxuCYpyGt4yae0n46B+ntWxbmQDNFkmVm89weDQoawDELRjiiIDfSeBg8cv/oUQJ8aazmxnSNqGt7DowjLVSQ22wn0BsN7EzaQpSirUdn4fxxjztp0Zc0i4tcweVkyEjnUJ2aEyy+DNFtSzaAvOfG5Mv+CddB2VBQHXGD+XP6ssfHy8axyw62KWk5y0tgQuG1PuxRDImh00Ay94tiEDgnf3YO6qsjMdowzh5Lb9uUgYZSEiT6TlJoSgxA9pE3mKVbYsapDPX9xPaoMmiwUFH4VBF0I8dEtW7Aa8iNycxc9cRZoQquHIZK/C29HAP0IUfIqCbkRQLmZ5NliTAvBkmmIr+hzEJ/Ti/IBpWVTt5+aeuxbqrXuO+/pQLJ9M5hVEL4fFoKr0h/0UGuiECsIiCqK/xuuj2bXwOlgcV3hphKgrRt8+Gl9SC4Z34bBdnnqhqgeE+L3ZELBrf1vvoP2b1b/dPr1e+DE7OfXf3uSoLIuMzraBo0PG3fNSr4gRMp+PLwElR47UL2QU+ZEzkyg3OlohGyn1ITDN2nfm2TcXOeNXLMGDw6yaIxlQ=

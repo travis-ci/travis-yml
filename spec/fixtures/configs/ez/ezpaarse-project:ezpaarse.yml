@@ -1,0 +1,21 @@
+language: generic
+script: "export EZPAARSE_ENV=\"production\"; export EZPAARSE_DEBUG_LEVEL=\"pkb\"; make && make start && sleep 300; make test-pkb; make test"
+services:
+  - mongodb
+env:
+  - CXX=g++-4.8
+addons:
+  apt:
+    sources:
+    - ubuntu-toolchain-r-test
+    packages:
+    - g++-4.8
+notifications:
+  email:
+    recipients:
+      - ezpaarse-team@googlegroups.com
+      - dominique.lechaudel@gmail.com
+    on_success: change
+    on_failure: always
+  slack:
+    secure: p/7J6LXqmmkQBaJ4q3KUibZgzKevo+ExTOiY+O4UQQa597dbK72gMWp+RKYVnfrhoMfTPD8oS8JG9nu74s6/mKHAtVc/g0qPH549tHpFC1DqD7G0TNUZxNV1tiWXkNbSPe59tkrn9R95azIA52cDXA1i9cguOYnCLysmEPUMQwU=

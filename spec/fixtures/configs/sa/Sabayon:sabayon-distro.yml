@@ -1,0 +1,16 @@
+sudo: required
+
+services:
+  - docker
+
+before_install:
+- docker pull sabayon/builder-amd64
+
+script:
+- ATOMS=$(./scripts/atoms-in-commit-range.sh ${TRAVIS_COMMIT_RANGE/.../..} sabayon-distro)
+  && [ -n "$ATOMS" ]
+  && docker run -e "TARGET_OVERLAY=/var/lib/layman/sabayon-distro" -e "DETECT_OBSOLETE=1" -e "QA_CHECKS=1" -e "PRETEND=1" -e "SKIP_PORTAGE_SYNC=1" -e "EQUO_MIRRORSORT=0" -v $TRAVIS_BUILD_DIR:/var/lib/layman/sabayon-distro sabayon/builder-amd64 $ATOMS
+  || exit 0
+
+notifications:
+  irc: "chat.freenode.net#sabayon-infra"

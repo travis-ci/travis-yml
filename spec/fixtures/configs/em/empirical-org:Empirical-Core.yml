@@ -1,0 +1,43 @@
+language: ruby
+sudo: false
+cache:
+  bundler: true
+  directories:
+    - services/QuillLMS/node_modules
+    - services/QuillLMS/client/node_modules
+rvm:
+  - 2.3.1
+script:
+  - cd services/QuillLMS
+  - bundle install
+  # setup rspec
+  - cp config/database.yml.travis config/database.yml
+  - bundle exec rake parallel:create
+  - bundle exec rake parallel:load_structure
+  # run rspec
+  - bundle exec rake parallel:spec
+  - bash <(curl -s https://codecov.io/bash) -cF rspec -f coverage/coverage.json
+  # stop postgresql db to save resources
+  - sudo service postgresql stop 10
+  # run rails security static analysis
+  # - bundle exec brakeman -z
+  # setup jest
+  - nvm install
+  - npm install
+  - npm run build:test
+  # run jest
+  - npm run jest:coverage
+  - bash <(curl -s https://codecov.io/bash) -cF jest
+addons:
+  postgresql: "10"
+  apt:
+    packages:
+      - postgresql-10
+      - postgresql-client-10
+  code_climate:
+    repo_token: 284c330b001fc405fe9b1c8a013ebaed90e6f81b0318b2e3d0df66559dd0eb3e
+env:
+  global:
+    - PGPORT=5433
+    - PROGRESS_REPORT_FOG_DIRECTORY=empirical-progress-report-travis-test
+    - FOG_DIRECTORY=empirical-core-travis-test

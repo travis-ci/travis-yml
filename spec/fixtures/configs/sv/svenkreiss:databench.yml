@@ -1,0 +1,71 @@
+language: python
+matrix:
+  include:
+  - os: windows
+    language: sh
+    python: "3.6"
+  - os: linux
+    language: python
+    python: "2.7"
+  - os: linux
+    language: python
+    python: "3.4"
+  - os: linux
+    language: python
+    python: "3.5"
+  - os: linux
+    language: python
+    python: "3.6"
+addons:
+  apt:
+    packages:
+      - openjdk-8-jre
+before_install: |
+  if [ "${TRAVIS_OS_NAME}" == "windows" ]; then
+    choco install python3 --version 3.6.8
+    export PATH="/c/Python36:/c/Python36/Scripts:$PATH"
+    python -m pip install --upgrade pip wheel
+  fi
+install:
+ # install Python dependencies
+ - pip install --upgrade pip
+ - pip -V
+ - "pip install -e .[tests]"
+ - pip install python-coveralls
+ - |
+  if [ "${TRAVIS_OS_NAME}" == "linux" ]; then
+    # install Node 6
+    rm -rf ~/.nvm && git clone https://github.com/creationix/nvm.git ~/.nvm && (cd ~/.nvm && git checkout `git describe --abbrev=0 --tags`) && source ~/.nvm/nvm.sh && nvm install 6
+    node -v
+  fi
+ - |
+  if [ "${TRAVIS_OS_NAME}" == "linux" ]; then
+    # npm update
+    npm install -g npm
+    npm -v
+  fi
+ - |
+  if [ "${TRAVIS_OS_NAME}" == "linux" ]; then
+    # install Node dependencies
+    npm install
+    npm run build
+  fi
+
+script:
+ - |
+  if [ "${TRAVIS_OS_NAME}" == "linux" ]; then
+    flake8
+    npm run lint
+    localcrawl --start http://localhost:5000 --run databench --log DEBUG
+    html5validator --root _crawled/
+    nosetests -vv --with-coverage --cover-inclusive
+  fi
+ - |
+  if [ "${TRAVIS_OS_NAME}" == "windows" ]; then
+    timeout 10 databench --port=5005 &
+    sleep 2
+    powershell -Command "(new-object System.Net.WebClient).DownloadFile('http://localhost:5005', 'databench_index.html')"
+    cat databench_index.html
+  fi
+after_success:
+ - coveralls || true

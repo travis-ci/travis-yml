@@ -8,7 +8,7 @@ module Travis
             register :script
 
             def define
-              map :script, to: :str # TODO should be a seq?
+              map :script, to: :seq
             end
           end
         end

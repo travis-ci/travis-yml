@@ -1,0 +1,91 @@
+language: java
+jdk:
+  - oraclejdk8
+sudo: false
+env:
+  global:
+    - secure: PrFbSr/qjhVXrpiOzrcEMUZrnjEWJmvx5DC9QdaAmnUKpG9/7mJBQVgNziVj+GWfW84WJpkOsQf+I2lx7/cQsWQKad/t8wtypl30wGesSTpAgl5fCiKLOBAbOghKXir+WIaxtcATPPffur9OLh3ogEcmIQbVi682YUKmA5zF11JZdpCR4QONc/u+DqB29FuHru/cFiesYP0Oz82A+M0UtMcYsurKIxdKMD4YK/uSG892PUrcZU6STXlukhgQuy3PitSWkYV2KGxXMVKzWGM7dJvRggN05r/S871pscuRwZ+Doxqr9b17B3umCHi3i4KXmNH+Esb0p1mvegs0iS/b7RyA5SENre+H24n3SOeXTa3wSpTnF90XxQrDEBbY5wV7lN7MJG+pHxkOvoZt6pS3f7x2VYR8Joa4J+Gf6IDvxZMiCd1v3N1kc9ygyvJmHf5wDmLMdupk0/frojApDXfJT6bqiVL3S0FqZpXSPGAsKYf8wfn30Xz/YUBsnfUQ/a21Zz52+OTqPbt32Hf1FGYIEJSkZJUN90Q8rHVJt9zPg37xKCDuf6bxlvT040KSzuuXtizLkOnHq2rhg4Oad/JTw3d4NzPoRVzUI9qDKPrA7RdUAjmrB04Z1f3g/I6w3h2B9JTSFAzBcMZ5NYZhIqE31GQukgStaqC98y32/zo9xFs=
+    - secure: "WalAXxkaD+B+mMBN+1QXrsQVl90984+giSLl7dgPwTPdQ/Ka/8AlX4n53HATztgmjwgJbM+Y53YhoSR6Zaj8CRUL6WhXGwNA2q7Xma8q0WNmX8LmoBsJlw44G50yGQOv20vTRw4SqPJp58f4PQanAAs4iPuNBOMGYji4eg60pC1bV5ZNyB5HalxQQQR5PyV647Ooa4WmP3YYLlx4FWqhh33kM3pt9RUOw8ZmVYwOqZ54qJur8Tl3Hp33R7rQ/YMNIenR1wnRunNlV/g8O8xLzUM2qjW1p+XKK08SVI/EyDn1ZtNxyzuhBp1OYxwPVLD28I4r6e/nIEr8+HnBeaUX3y43AjL6x/rzr4KTyPeCNhOYLgcdLM3A5tO/ae+KPKWXBXOwkmxjq7aF6v1Qj5uC/X1Vyb8u6EZETbrx7yNymBHyWpqM4OfljCFyU1c1JjOjsEkhWzE9YoNzhG2bMTBbpUz1gSA/6UCqjhK+3LzneTR/ZmN4RmMlsqTM98E6SMiaGGhqTENIu1UwuPpzl4pv0LJdGoxvR+2aIOZrUI/mD8iuqNoy/gQGU36OiuKencbAVjXBOJXjZueW/VcJ4ivX6Ch4rnFONLKvL2z04cu9tD8IJQfJEmjEieSI44ZCh0LXrMZRJ9bjLpIbhnRbtZ4LP6eBCOtxOwiyKIoueN1y8Fk="
+
+    - JVMCI_VERSION="jvmci-0.48"
+    - JDK8_UPDATE_VERSION="172"
+
+notifications:
+  slack:
+    secure: I4ZII92TFLy6vlyX98ns7BaFwA4Qo/o7Av2fnUQW6FfW13EF7Taregu20BIYFFMsiigXCAtvPjqH4HVLpZgK6gZXhbCuI8kl15ZsfRWXcgGSfGZw2De8YS845+QXjc0fq0i46IAVWIey/ImfJrmP7aqjQfWS3XRRpz1kVf7A3/UYghn4GYfJ4VvCglU+LI6qa5lbEXeZAWR0Ndelhuwj7cBSWlLNM2PEmhnf4FsOVQ986S0nmlmjybkYu2NmO+tBmoydjLr5cLt3U9maiLruJ/01ebxfML37W1GOGRUqkSc2G95TohKyiTkluL/HqBMiXXD7cXkuldpTLREnrdQqImyvqu5nq0Tr8vOjJ776LCHDFHv//CkBF1W8n7H9QHwEQonq+Hu2iPOec23Os0b1SlqLVc+1Fy88G7KkvFN430ugiJBzW5+Qk9TUE8CBwL4FixeO3nv0UYleigjGgrpYRL+yWPqwxEMQAWZN6W2YGY10rPYT0eooukEbmNphWzz/vFO4UCphMSMt6SLoN7r3br7DYLRUevdK8vrIUb1LUQPGMYf7WIdMnckme7y+oJ3SR2YO6+vs3EyQsF1AdJqpbvag0/AbWHFVi2vfwrvKZwperPLtXE+EXh8B+Ck62gcYsTyUuMpoEws/+DqHUFByOgDbPDFBmFYwPWCoZh4h3Rw=
+
+matrix:
+  fast_finish: true
+  include:
+    - env: TASK=core-tests
+    - env: TASK=checkstyle
+    - env: TASK=kompos-tests
+    - env: TASK=replay1-tests
+    - env: TASK=replay2-tests
+    - env: TASK=snapshot-tests
+    - env: TASK=native
+
+    - os:   linux
+      dist: trusty
+      jdk:  openjdk11
+      env:  TASK=unit-tests
+
+    - os: osx
+      osx_image: xcode10
+      language: generic
+      env:  TASK=unit-tests
+      # before_install: |
+      #   brew update
+      #   ## the following is a hack to be able to install java
+      #   find "$(brew --prefix)/Caskroom/"*'/.metadata' -type f -name '*.rb' | xargs grep 'EOS.undent' --files-with-matches | xargs sed -i '' 's/EOS.undent/EOS/'
+      #   brew cask reinstall java
+      #   brew install ant
+      #   export JAVA_HOME=`/usr/libexec/java_home`
+
+  allow_failures:
+    - os: osx
+
+before_install:
+  - |
+   run() {
+     ID=`echo "$@" | sed -e 's/ /_/g'`
+     STR=`echo "$@"`
+     printf "travis_fold:start:$ID\n$STR\n"
+     eval "$@"
+     RESULT_EVAL=$?
+     printf "travis_fold:end:$ID\n"
+     return $RESULT_EVAL
+   }
+
+
+install: |
+  printf "travis_fold:start:downloads\nLoad JDK and/or Eclipse\n"
+  if [ "$TRAVIS_OS_NAME" = "linux" ]
+  then
+    JDK_TAR=${TRAVIS_BUILD_DIR}/../jdk.tar.gz
+    wget --progress=bar:force https://github.com/graalvm/openjdk8-jvmci-builder/releases/download/${JVMCI_VERSION}/openjdk-8u${JDK8_UPDATE_VERSION}-${JVMCI_VERSION}-linux-amd64.tar.gz -O ${JDK_TAR}
+    tar -C ${TRAVIS_BUILD_DIR}/.. -xzf ${JDK_TAR}
+    export JVMCI_HOME=${TRAVIS_BUILD_DIR}/../openjdk1.8.0_${JDK8_UPDATE_VERSION}-${JVMCI_VERSION}
+  fi
+
+  if [ "$TASK" = "checkstyle" ]
+  then
+    export ECLIPSE_TAR=eclipse.tar.gz
+    export ECLIPSE_URL=http://archive.eclipse.org/eclipse/downloads/drops4/R-4.6.3-201703010400/eclipse-SDK-4.6.3-linux-gtk-x86_64.tar.gz
+    wget --progress=bar:force ${ECLIPSE_URL} -O ${ECLIPSE_TAR}
+    tar -C ${TRAVIS_BUILD_DIR}/.. -xzf ${ECLIPSE_TAR}
+    export ECLIPSE_EXE=${TRAVIS_BUILD_DIR}/../eclipse/eclipse
+  fi
+  export ANT="ant -e"
+  printf "travis_fold:end:downloads\n"
+
+
+script:
+  - if [ "$TASK" = "core-tests"    ]; then $ANT core-tests    && $ANT serialization-tests && $ANT coverage; fi
+  - if [ "$TASK" = "checkstyle"    ]; then $ANT checkstyle    && $ANT eclipseformat-check && run cd tools/kompos && nvm install 7 && run npm install && run npm run lint; fi
+  - if [ "$TASK" = "kompos-tests"  ]; then run nvm install 8  && $ANT && cd tools/kompos  && run npm -s run verify && run npm test; fi
+  - if [ "$TASK" = "replay1-tests" ]; then $ANT compile       && run ./tests/replay/test.sh 1; fi
+  - if [ "$TASK" = "replay2-tests" ]; then $ANT compile       && run ./tests/replay/test.sh 2; fi
+  - if [ "$TASK" = "snapshot-tests" ]; then $ANT compile      && run ./tests/snapshot/test.sh; fi
+  - if [ "$TASK" = "unit-tests"    ]; then $ANT compile       && run ./som core-lib/TestSuite/TestRunner.ns; fi
+  - if [ "$TASK" = "native"        ]; then $ANT native; fi

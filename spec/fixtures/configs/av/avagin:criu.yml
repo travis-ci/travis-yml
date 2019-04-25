@@ -1,0 +1,37 @@
+language: c
+sudo: required
+dist: trusty
+cache: ccache
+env:
+ global:
+  - secure: "pH5j+FHqZbV6WLjRtjPVa1HuWrbJCmp0h231qdziiYl0yKL3Rr/Ueg0JHrq3OuT3VJt5tM93CcyHjW44U5T+s838w2NtfunuEAIJfSvTlxOuW++2h5EyZz1NLwocHAUlWCRt5sOCaehn2isQoegCkpYsyXyA3gxSJUAaUqYSlw0="
+install:
+  - sudo apt-get update
+  - sudo apt-get install -qq --no-install-recommends protobuf-c-compiler libprotobuf-c0-dev libaio-dev libprotobuf-dev protobuf-compiler python-ipaddr libcap-dev libnl-3-dev gcc-multilib libc6-dev-i386 gdb bash python-protobuf libnet-dev util-linux asciidoc xmlto libnl-route-3-dev kexec-tools libssl-dev libelf-dev strace ccache
+jobs:
+  include:
+    - stage: kernel
+      script: sudo make -C scripts/travis kernel
+      env:
+        - TTT=linux    KGIT="http://kernel.googlesource.com/pub/scm/linux/kernel/git/torvalds/linux.git"
+    - stage: kernel
+      script: sudo make -C scripts/travis kernel
+      env:
+        - TTT=linux    KGIT="http://kernel.googlesource.com/pub/scm/linux/kernel/git/torvalds/linux.git" KASAN=1
+    - stage: zdtm
+      script: sudo make -C scripts/travis local
+      env:
+        - TTT=linux    KGIT="http://kernel.googlesource.com/pub/scm/linux/kernel/git/torvalds/linux.git"
+    - stage: zdtm
+      script: sudo make -C scripts/travis local
+      env:
+        - TTT=linux    KGIT="http://kernel.googlesource.com/pub/scm/linux/kernel/git/torvalds/linux.git" KASAN=1
+stages:
+  - kernel
+  - zdtm
+after_success:
+  - ccache -s
+  - make -C scripts/travis after_success
+group: deprecated-2017Q2
+after_failure:
+  - sudo make -C scripts/travis after_failure

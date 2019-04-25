@@ -1,0 +1,101 @@
+language: cpp
+dist: trusty
+sudo: false
+os:
+- linux
+- osx
+compiler:
+- gcc
+- clang
+cache: apt
+env:
+  matrix:
+  - CONFIG="Debug,QGLVIEWER"
+  - CONFIG="Debug"
+  - CONFIG="DOCUMENTATION"
+  global:
+  - secure: vlOUtR3/PnDG/+oYWGqg2f4rSPSgISCumDarhfE8vQqIisLYRsWgMBH+oHEIsdcMsvQ33/c9W7G4K3QM2/1USSaPqk12/O5yzOfPi/Kx4+XPE3OLp5diSaXm98HAHV8q2HpVYfHiqiNrA1d/3exkOxyQKiqhxPIczi68qkgln8LqQuL0ffmmb8zg4+CufbG6mKvK276AxnUQyLtzd5ZfWkVaifST8gyY5fLKqrQ2X7CYcIBvVb52Uvg5pq1MRSqkyt/nbNKhmMGCuD3A4j4j2hCgpXEUFRtTAq92rLvQQMTzamMymVbDoKyIkDlMGBzzN1iHAMiVshliBfq13LqwTLH6hEwsxc9Wwb0r94YpTE37P6punJJzIWoyAA7mzq4OaLX7XSBMPIZTKxEqw9DwxWeGh4YxiJKlunHmrENE34jlJXBEvP0QHEHUBCI0Rzck/f3FFFbLzj5irz/tljFFu3NQvTgQ2XCn0OnIbCrrP2fsLycU2lnEcf/hW8136QxyDT8rtT6LniI3GZ7aX6Dpn5H0tTaadXkYDZOZu0wKM9/7OtEBv2i8VGREOGCtGfkvvkidfvlY1UpRZvzR7j94X58PFnASHN5/L7lOChzyvgMcG1jSBI9CghDw9xRTyu4p1piVkOP1Qpb7eOwpTor2JgAUx0DWdVn4RPYdg16H828=
+matrix:
+  fast_finish: true
+  exclude:
+  - os: osx
+    env: CONFIG="DOCUMENTATION"
+  - compiler: gcc
+    os: linux
+    env: CONFIG="DOCUMENTATION"
+  - os: osx
+    compiler: gcc
+addons:
+  apt:
+    sources:
+    - deadsnakes
+    - ubuntu-toolchain-r-test
+    packages:
+    - libhdf5-serial-dev
+    - libcairo2-dev
+    - graphviz
+    - libgmp-dev
+    - libgdcm2-dev
+    - ninja-build
+    - libgraphicsmagick++1-dev
+    - libqglviewer-dev
+    - libinsighttoolkit3-dev
+    - g++-4.8
+    - gcc-4.8
+    - libboost-dev
+    - libboost-program-options-dev
+    - libboost-system-dev
+before_install:
+- DOC="false"; BTYPE=""
+- if [ $CONFIG == "DOCUMENTATION" ]; then DOC="true"; fi
+- if [ $DOC == "true" ]; then openssl aes-256-cbc -K $encrypted_a0b8e3011fca_key -iv
+  $encrypted_a0b8e3011fca_iv -in .travis/dgtal_rsa.enc -out .travis/dgtal_rsa -d;
+  chmod 600 .travis/dgtal_rsa;  fi
+- env
+- export SRC_DIR="`pwd`"
+- if [ $CXX == "g++" ]; then export CXX="g++-4.8"  CC="gcc-4.8"  CCOMPILER="gcc-4.8"
+  CXXCOMPILER="g++-4.8"; fi
+- source .travis/install_eigen.sh  ; cd $TRAVIS_BUILD_DIR;
+before_script:
+- if [ $TRAVIS_OS_NAME == linux ]; then echo "All done.";   fi
+- if [ $TRAVIS_OS_NAME == osx ]; then source .travis/install_deps_macos.sh; fi
+- DGTALTYPE="-DBUILD_EXAMPLES=OFF -DDGTAL_BUILD_TESTING=OFF -DCMAKE_BUILD_TYPE=Debug
+  -DWITH_QGLVIEWER=false -DWITH_ITK=false -DWITH_EIGEN=true -DEIGEN3_INCLUDE_DIR='$EIGEN_ROOT/include/eigen3'"
+- if [ $CONFIG == "Debug,QGLVIEWER" AND  $TRAVIS_OS_NAME == osx  ]; then export DGTALTYPE="-DBUILD_EXAMPLES=OFF
+  -DDGTAL_BUILD_TESTING=OFF -DCMAKE_BUILD_TYPE=Debug -DWITH_QGLVIEWER=true -DWITH_QT5=true
+  -DWITH_ITK=false -DWITH_EIGEN=true -DEIGEN3_INCLUDE_DIR='$EIGEN_ROOT/include/eigen3'";
+  fi
+- if [ $CONFIG == "Debug,QGLVIEWER" AND  $TRAVIS_OS_NAME == linux  ]; then export
+  DGTALTYPE="-DBUILD_EXAMPLES=OFF -DDGTAL_BUILD_TESTING=OFF -DCMAKE_BUILD_TYPE=Debug
+  -DWITH_QGLVIEWER=true  -DWITH_ITK=false -DWITH_EIGEN=true -DEIGEN3_INCLUDE_DIR='$EIGEN_ROOT/include/eigen3'";
+  fi
+- cd $SRC_DIR
+- git clone --depth=1 git://github.com/DGtal-team/DGtal.git
+- cd DGtal
+- cmake . $DGTALTYPE -DCMAKE_CXX_COMPILER=$CXXCOMPILER -DCMAKE_C_COMPILER=$CCOMPILER
+- make
+- cd ..
+- if [ $DOC == "true" ]; then .travis/install_doxygen.sh;  BTYPE="-DDOXYGEN_EXECUTABLE=$TRAVIS_BUILD_DIR/doxygen/bin/doxygen
+  -DCMAKE_BUILD_TYPE=Debug -DWITH_CAIRO=true  -DWITH_GMP=true -DWITH_EIGEN=true";  fi
+- if [ $DOC == "true" ]; then wget http://dgtal.org/doc/tags/DGtal-tagfile --no-check-certificate
+  ;fi
+script:
+- echo "---- $DGTALTYPE ---$BUILD_DOC---$UPLOAD_DOC--*$DOC*-$BTYPE---"
+- cmake . -DDGtal_DIR=$PWD/DGtal $BTYPE $DGTALTYPE  -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_COMPILER=$CXXCOMPILER
+  -DCMAKE_C_COMPILER=$CCOMPILER
+- if [ $DOC == "true" ]; then  make doc;  echo "doc"; fi
+- if [ $CONFIG == "Debug" ]; then make; fi
+- if [ $CONFIG == "Debug,QGLVIEWER" ]; then make; fi
+deploy:
+  provider: pages
+  skip-cleanup: true
+  github-token: "$GITHUB_TOKEN"
+  keep-history: true
+  repo: DGtal-team/doctools-nightly
+  target-branch: master
+  verbose: true
+  local-dir: "$TRAVIS_BUILD_DIR/html"
+  on:
+    branch: master
+    condition: [$DOC = "true"] 
+

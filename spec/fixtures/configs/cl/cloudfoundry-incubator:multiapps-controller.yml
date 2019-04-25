@@ -1,0 +1,10 @@
+language: java
+notifications:
+  email:
+    recipients:
+      - DL_563CD7577BCF844DBD000037@exchange.sap.corp
+    on_success: change
+    on_failure: always
+script:
+   - 'if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then mvn clean install sonar:sonar -Dsonar.organization=cf-deploy-service -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=bc2be0dbbebfb0c29627f657c655e34c02451dc1 -Dsonar.exclusions="**/com/sap/cloud/lm/sl/cf/client/events/**/*" -Dsonar.branch.name="$TRAVIS_PULL_REQUEST"; fi'
+   - 'if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then mvn deploy --settings .travis.settings.xml   sonar:sonar -Dsonar.organization=cf-deploy-service -Dsonar.host.url=https://sonarcloud.io -Dsonar.exclusions="**/com/sap/cloud/lm/sl/cf/client/events/**/*" -Dsonar.login=bc2be0dbbebfb0c29627f657c655e34c02451dc1; fi'

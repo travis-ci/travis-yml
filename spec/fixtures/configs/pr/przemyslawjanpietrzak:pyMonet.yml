@@ -1,0 +1,14 @@
+language: python
+cache: pip
+python:
+  - "3.6"
+  - "3.7-dev"
+  - "nightly"
+install:
+  - make install
+script:
+  - make lint
+  - make lint-docs
+  - make type-check
+  - make test-with-coverage
+  - coveralls

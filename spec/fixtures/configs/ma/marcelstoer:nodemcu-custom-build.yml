@@ -1,0 +1,107 @@
+dist: xenial
+
+language: cpp
+git:
+  depth: 500
+addons:
+  apt:
+    packages:
+    - srecord
+cache:
+  directories:
+    - cache
+before_install:
+- cat build.config
+
+- export X_EMAIL=$(grep -E '^email=' build.config | cut -f 2- -d '=')
+- export X_BRANCH=$(grep -E '^branch=' build.config | cut -f 2- -d '=')
+- export X_MODULES=$(grep -E '^modules=' build.config | cut -f 2- -d '=')
+- export X_U8G_FONTS=$(grep -E '^u8g-fonts=' build.config | cut -f 2- -d '=')
+- export X_U8G_DISPLAY_I2C=$(grep -E '^u8g-display-i2c=' build.config | cut -f 2- -d '=')
+- export X_U8G_DISPLAY_SPI=$(grep -E '^u8g-display-spi=' build.config | cut -f 2- -d '=')
+- export X_UCG_DISPLAY_SPI=$(grep -E '^ucg-display-spi=' build.config | cut -f 2- -d '=')
+- export X_LUA_FLASH_STORE=$(grep -E '^lfs-size=' build.config | cut -f 2- -d '=')
+- export X_SPIFFS_FIXED_LOCATION=$(grep -E '^spiffs-base=' build.config | cut -f 2- -d '=')
+- export X_SPIFFS_MAX_FILESYSTEM_SIZE=$(grep -E '^spiffs-size=' build.config | cut -f 2- -d '=')
+- export X_SSL_ENABLED=$(grep -E '^ssl-enabled=' build.config | cut -f 2- -d '=')
+- export X_DEBUG_ENABLED=$(grep -E '^debug-enabled=' build.config | cut -f 2- -d '=')
+- export X_FATFS_ENABLED=$(grep -E '^fatfs-enabled=' build.config | cut -f 2- -d '=')
+- export X_NUMBER_OF_MODULES=$(echo $X_MODULES | awk -F\, '{print NF}')
+- export -p | grep " X_"
+
+- wget -d -v -O/dev/null --tries=10 --timeout=15 --waitretry=30 --read-timeout=20 --retry-connrefused --no-check-certificate 'https://nodemcu-build.com/hook.php?event=start&recipient='${X_EMAIL//+/%2B}
+- git clone --depth=1 --branch=$X_BRANCH --recursive git://github.com/nodemcu/nodemcu-firmware.git nodemcu-firmware
+
+# dig in and modify those config files
+- cd nodemcu-firmware/app/include
+
+# replace modules in user_modules.h by the selected ones
+- bash $TRAVIS_BUILD_DIR/set-modules.sh
+# set defines in user_config.h according to X_* variables
+- bash $TRAVIS_BUILD_DIR/set-config.sh
+# replace fonts in u8g_config.h by the selected ones
+- bash $TRAVIS_BUILD_DIR/set-fonts.sh
+# set I2C/SPI displays in u8g_config.h and ucg_config.h
+- bash $TRAVIS_BUILD_DIR/set-displays.sh
+# replace version strings in user_version.h
+- bash $TRAVIS_BUILD_DIR/set-version.sh
+
+- cat user_modules.h
+- cat user_config.h
+- cat u8g*.h
+- cat ucg_config.h
+- cat user_version.h
+# back to where we came from
+- cd $TRAVIS_BUILD_DIR
+
+- cd nodemcu-firmware
+- ls -altr
+install:
+- pip install --user pyserial
+script:
+# https://github.com/nodemcu/nodemcu-firmware/pull/2545 removed the toolchain from the repository but the 1.5.4.1 branch
+# will always depend on it
+- if [ -f tools/esp-open-sdk.tar.xz ]; then tar -Jxf tools/esp-open-sdk.tar.xz; elif [ -f tools/esp-open-sdk.tar.gz ]; then tar -zxf tools/esp-open-sdk.tar.gz; fi
+- export PATH=$PATH:$PWD/esp-open-sdk/sdk:$PWD/esp-open-sdk/xtensa-lx106-elf/bin
+- make all
+- cd bin/
+- timestamp=$(date "+%Y-%m-%d-%H-%M-%S")
+- base_file_name="nodemcu-"$X_BRANCH"-"$X_NUMBER_OF_MODULES"-modules-"$timestamp
+- file_name_float=$base_file_name"-float.bin"
+- srec_cat  -output ${file_name_float} -binary 0x00000.bin -binary -fill 0xff 0x00000 0x10000 0x10000.bin -binary -offset 0x10000
+- cd ../
+- make clean
+- make EXTRA_CCFLAGS="-DLUA_NUMBER_INTEGRAL"
+- cd bin/
+- file_name_integer=$base_file_name"-integer.bin"
+- srec_cat -output ${file_name_integer} -binary 0x00000.bin -binary -fill 0xff 0x00000 0x10000 0x10000.bin -binary -offset 0x10000
+
+after_success:
+- cd $TRAVIS_BUILD_DIR
+- pwd
+- cp "$TRAVIS_BUILD_DIR/nodemcu-firmware/bin/${file_name_float}" .
+- cp "$TRAVIS_BUILD_DIR/nodemcu-firmware/bin/${file_name_integer}" .
+- rm -fr "$TRAVIS_BUILD_DIR/nodemcu-firmware"
+- ls -al
+- curl --connect-timeout 10 --max-time 120 --retry 5 --retry-delay 10 -F token=$TOKEN -F file=@$file_name_float https://nodemcu-build.com/archiver.php
+- curl --connect-timeout 10 --max-time 120 --retry 5 --retry-delay 10 -F token=$TOKEN -F file=@$file_name_integer https://nodemcu-build.com/archiver.php
+- wget -d -v -O/dev/null --tries=10 --timeout=15 --waitretry=30 --read-timeout=20 --retry-connrefused --no-check-certificate 'https://nodemcu-build.com/hook.php?event=success&recipient='${X_EMAIL//+/%2B}'&branch='$X_BRANCH'&modules='$X_MODULES'&artifacts='${file_name_float},${file_name_integer}
+
+notifications:
+  email:
+    recipients:
+      - info@nodemcu-build.com
+    on_success: never
+    on_failure: always
+  webhooks:
+      urls:
+        - https://nodemcu-build.com/hook.php?event=failure&recipient=${X_EMAIL//+/%2B}
+      on_success: never
+      on_failure: always
+      on_start: never
+
+branches:
+  only:
+    - builds
+    - master
+

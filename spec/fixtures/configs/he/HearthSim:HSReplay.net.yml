@@ -1,0 +1,71 @@
+language: generic
+stages:
+  - name: test
+jobs:
+  include:
+    - stage: test
+      name: "Prettier"
+      language: node_js
+      node_js: "10"
+      script: yarn run lint:prettier
+      cache: yarn
+
+    - stage: test
+      name: "TSLint"
+      language: node_js
+      node_js: "10"
+      script: yarn run lint:tslint
+      cache: yarn
+
+    - stage: test
+      name: "Jest"
+      language: node_js
+      node_js: "10"
+      install:
+        - yarn --frozen-lockfile
+        - scripts/get_vendor_static.sh
+      script: yarn run jest
+      cache: yarn
+
+    - stage: test
+      name: "Webpack"
+      language: node_js
+      node_js: "10"
+      install:
+        - yarn --pure-lockfile
+        - scripts/get_vendor_static.sh
+        - git clone https://github.com/HearthSim/hsreplaynet-i18n locale
+      script: yarn run build
+      cache: yarn
+
+    - stage: test
+      name: "Flake8"
+      language: python
+      python: "3.6"
+      install: pip install tox
+      script: tox -e flake8
+      cache: pip
+
+    - stage: test
+      name: "pytest"
+      language: python
+      python: "3.6"
+      services:
+        - postgresql
+        - redis-server
+      addons:
+        postgresql: "9.6"
+      install:
+        - pip install tox
+        - yarn --pure-lockfile
+        - scripts/get_vendor_static.sh
+        - git clone https://github.com/HearthSim/hsreplaynet-i18n locale
+      before_script:
+        - sudo rm -f /etc/boto.cfg # https://github.com/travis-ci/travis-ci/issues/7940
+        - echo "DJSTRIPE_USE_NATIVE_JSONFIELD = True" > hsreplaynet/local_settings.py
+        - yarn run build
+      script: tox -e py36
+      cache: pip
+matrix:
+  allow_failures:
+    - script: yarn run lint:tslint

@@ -1,0 +1,61 @@
+language: cpp
+
+dist: trusty
+
+addons:
+  apt:
+    packages:
+      # cannot install g++-6 here because it breaks clang
+      - gcc-mingw-w64-i686
+      - g++-mingw-w64-i686
+      - binutils-mingw-w64-i686
+      - libblas-dev
+      - liblapack-dev
+    sources: &sources
+      - ubuntu-toolchain-r-test
+
+matrix:
+  include:
+  - os: osx
+    compiler: clang
+    env: >
+     EXTRA_CMAKE_FLAGS="-DCMAKE_CXX_FLAGS=-std=c++11 -DCMAKE_MACOSX_RPATH=ON -DCBLAS_LIBRARIES=/usr/local/opt/openblas/lib/libopenblas.dylib -DBLAS_LIBRARIES=/usr/local/opt/openblas/lib/libopenblas.dylib -DLAPACK_LIBRARIES=/usr/local/opt/openblas/lib/libopenblas.dylib -DCBLAS_INCLUDE_DIR=/usr/local/opt/openblas/include"
+     CMAKE_BUILD_TYPE=Release BUILD_SHARED_LIBS=ON
+  - os: linux
+    compiler: gcc
+    env: CMAKE_BUILD_TYPE=Release BUILD_SHARED_LIBS=ON
+  - os: linux
+    compiler: clang
+    env: CMAKE_BUILD_TYPE=Release BUILD_SHARED_LIBS=ON LD_LIBRARY_PATH=/usr/local/clang-5.0.0/lib
+  - os: linux
+    compiler: gcc
+    env: CMAKE_BUILD_TYPE=Debug BUILD_SHARED_LIBS=ON
+  - os: linux
+    compiler: gcc
+    env: CMAKE_BUILD_TYPE=Release BUILD_SHARED_LIBS=OFF
+  - os: linux
+    compiler: gcc
+    env: CMAKE_BUILD_TYPE=Debug BUILD_SHARED_LIBS=OFF GCC6=1
+  - os: linux
+    compiler: i686-w64-mingw32-g++
+    # Fake libraries so cmake do not fail
+    env: >
+     CMAKE_BUILD_TYPE=Release
+     BUILD_SHARED_LIBS=OFF
+     CROSS=1
+     EXTRA_CMAKE_FLAGS="-DCBLAS_LIBRARIES=/usr/lib/libblas.so -DBLAS_LIBRARIES=/usr/lib/libblas.so -DLAPACK_LIBRARIES=/usr/lib/libblas.so -DCMAKE_TOOLCHAIN_FILE=../CMake/toolchain-i686-w64-mingw32.cmake -DBUILD_EXAMPLES=OFF"
+
+before_install:
+ - if [ "$TRAVIS_OS_NAME" == "osx" ]; then brew update; fi
+ - if [ "$TRAVIS_OS_NAME" == "osx" ]; then rm -rf /usr/local/include/c++; brew install openblas; fi
+
+before_script:
+  - mkdir build
+  - cd build
+
+script:
+  - if [ "$GCC6" ]; then sudo apt-get install g++-6; export CC=gcc-6; export CXX=g++-6; fi
+  - if [ "$CROSS" ]; then ln -s /usr/include/cblas.h; fi
+  - cmake -DBUILD_EXAMPLES=ON -DBUILD_SHARED_LIBS=$BUILD_SHARED_LIBS -DCMAKE_BUILD_TYPE=$CMAKE_BUILD_TYPE $EXTRA_CMAKE_FLAGS ..
+  - make VERBOSE=1
+  - if [ -z "$CROSS" ]; then make test; fi

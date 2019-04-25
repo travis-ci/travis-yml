@@ -1,0 +1,29 @@
+language: python
+python:
+  - '2.7'
+
+env:
+  global:
+    - BS_PIP_ALLOWED=1
+    - BS_ECHO_DEBUG=1
+    - SALT_ARGS="-l debug --local --retcode-passthrough --pillar-root=test/pillar --file-root=$PWD/tests"
+  matrix:
+    - STATE=etcd.install
+
+before_install:
+  - sudo apt-get update
+  - curl -L http://bootstrap.saltstack.org | sudo sh -E -s -- -P stable
+
+install:
+  - sudo mkdir -p /srv && sudo ln -sfn $PWD/tests /srv/formula
+  # See what kind of travis box you're on to help with making your states
+  # compatible with travis
+  - sudo salt-call grains.items --local  
+
+  # See what kind of travis box you're on
+  # to help with making your states compatible with travis
+  - sudo salt-call grains.items --local
+
+script:
+  - sudo -E salt-call state.show_sls $STATE $SALT_ARGS
+  - sudo salt-call state.sls $STATE $SALT_ARGS

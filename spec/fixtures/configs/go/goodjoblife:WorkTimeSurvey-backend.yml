@@ -1,0 +1,28 @@
+language: node_js
+
+dist: trusty
+
+node_js:
+    - "10"
+
+services:
+    - docker
+
+env:
+    global:
+        - MONGODB_URI=mongodb://localhost/goodjob
+        - REDIS_URL=redis://localhost
+        - NODE_ENV=test
+        - JWT_SECRET=DontUseMe
+
+before_install:
+    - docker run -d -p 27017:27017 mongo:3.6
+    - docker run -d -p 6379:6379 redis
+
+install:
+    - yarn install
+    - ./bin/migrate
+
+script:
+    - npm run test -- --timeout 30s
+    - npm run lint

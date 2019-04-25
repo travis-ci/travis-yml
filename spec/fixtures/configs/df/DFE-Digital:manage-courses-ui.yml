@@ -1,0 +1,47 @@
+matrix:
+  include:
+  - language: csharp
+    mono: none
+    dotnet: 2.1
+    script:
+    - dotnet restore
+    - dotnet build
+    - dotnet test ManageCoursesUi.Tests
+    deploy:
+    - provider: script
+      script: "./deploy.sh dev"
+      on: master
+    - provider: script
+      script: "./deploy.sh staging"
+      on: staging
+    - provider: script
+      script: "./deploy.sh prod"
+      on: production
+  - language: node_js
+    node_js:
+    - 10.8
+    cache:
+      directories:
+      - "~/.npm"
+      - "~/.cache"
+      override:
+      - npm ci
+    before_script:
+    - cd src/ui
+    - npm ci
+    script:
+    - npm test
+    - cd ../..
+env:
+  global:
+  # APP_CREDENTIALS_DEV_PWD
+  - secure: Ip5/0UJ2oxdNCsDr6qzPLGvK4W500tWJHdehv1QMMVSBFGNDLbUtJ+CoijNjf9FjzKIkIHKvg2Slo4N6cM5i8DfUbk4cmY6DG6y4qiFZ/HaOdnlDyl0DwPyKkvotjEfcfEDTJWf/JM3g/4/xD30DvM17VXk7dbt53RIWebcgNTvUVQMYegVZwSQAsSLMofBriz+j0DuNVSd7U5/0ZOHssGVmzMzgBNWPIXG7UNJRBHWfNGE7kDV8/rKL7b5D5TH6aTVJ5tgJshQXe75DZHleHGCncd1yHJvpr+kdAYBYRUy9XuPS+CQuE3L+8RniWStsebUmf4pGypZz5qOhICiBzmkdaBslJtcbPABMNT5Khp3nnuuQfITB2nmQUfwlZPwn48vCrxtw/c7NAmts8Yq2bNC99TNN63jlgtTg3o3LIaAnvUVehwmAOy9Sn5YRTNhuikA5QMKYfanelUBcaJ4nJJOGY2Bu5DzFZCBgNwYJVe7avhpt43YQxrFgiCqXBXiyCuQ+qNRB+imoIE2KgpNpLj99DvDIrfR9YQ79ET2QFMUcrIQYb+yxIUrsQN49XwDJk3KzEhTURdkxFc0X938+0bQQYjN8Ymc9vHa9JxKk0TQleVoZ3anc9tY92m0MfiLWN0tAFy8TD+bfGDLqr/1/lRxiSTip6KEUFO9D5b42pHE=
+  # APP_CREDENTIALS_STAGING_PWD
+  - secure: Rb0cDQ76R4yKJoQpbtRtNLlcFXcgA33cy5VDEKtGPX1Sq2QegeSrl+7gW6QAkDTUSzEbowfYDVbw5xTh06Br5u8dUUoPZAxiGK1dFZakbvCyzyNDscY/Wboejhc9WI2v8c55m4sbSWaiZR7Fk8nZtzJCwwY4TlCN6AZJ/lg5e/mjJOXbrg1DkN28bKjORVZXyifKAcaY53EW5aiaE3ulJ09i3h4ba0wJFvAel2ufA67vPLumbg1p1IaT1ODj0QlUBKQBQUUMGfucsEtRHKVKUeWagb4kS+uK9gpRzR6b/ydzTB5JFmSMHvjNmDYskIKkjbb48KMd21AqyhJwV3FQdmNryjieX4vuMJh0VVRx7kDHLhP5yv3QIXAroT6jnaGHMqPWQtgjdd1ZwrmA+p5dmohTNMr9waK0eifJPwJz+1aTIky1fR8j0vPR9QfrlSHSLNc75GwKkjxJO7DNrmi0SIP6Aq9snP+c6T7jVVkxw49L9CrAnqZKHpwWjtZw7JC06XSFyiX6CmjvGvghcWGVIAa1+OonAhLPeeafA8f92wbWAP5A8V5dSXNEH/psbK4ZezZKmBDukxKesUva1LMAr1CnjZIu4Q9D2BCTGR3k2/lYD9RmPZKpmqsmX/VNJW7bfRNfWQkQxI7O3nQxMTiyFZUCD8spfutHh1/Sxgfj+Ls=
+  # APP_CREDENTIALS_PROD_PWD
+  - secure: X5O2Cp9iDKxP05cwGkj07gCivvaCT4E5TfLnJqjTh8dHF7GZP94D3kgFuaPG3sodIdCakfYIiRzEM3M7ZzMuc1R0AAmV6A3xn/jTrzkduoa+6cDgyEcx2YKPhAauYl+gLHn8AyN3RVzkdJj7c9lTeBg6nX5TCD0dwewgKkiYslcAz+3TtXFzMKvnrLBZgLILHxdSj/4qbN+ncmj/YiOKqRjA1PkQbbPHEUgp5RpG3FbD+VAZ/dU0s6J7oQQrgVOoQ4vwGdFRWvIAV1fpJOpD6CDIrHTYnW3q1XQvQRTlXF1fxNPmPc1nMTmK1gzIJmThktavSyIdkE69NrB8J2e2i0JQYHt7xkFEJ5/mEKqqoI/xvYXgBCI9OytHVzADpiiJiXPXosCg0KZPP+8mVOo0x2BcbbY1kK0kW3wh84i3SdqZdFNeJ8PwJIiF+JVcdQIf5RWlGclFEequJ8qfASIlGvPsFByFj/cv1h2HCdz3HV1Sgt0A2Nqz2i/fioKp4Kbcd7zMpJxXnRaBnyMF6wbwjSJj+KWlCr/DVTWZ9fF90VxUrWXqvblYGO9FLPYTA7aXJaKxx1GwSxztFtDeuQb1i+1la7J9yESLWMfSBhPFLrXykS0xP+dUr37EinpqqTPpwAhV2WLEA5sXrAblAYn/nxBScBPEoq6XweRsouDRhZo=
+notifications:
+  slack:
+    secure: T/CYoV0gsD7upCYiGq4Ev/jbbHWo4AVEw8m0+qaGFgzrnbStbtV50gwygD/ZJM6KOaXL4U3WZMeWl41EDB2PXaETWxu7KhGIYfDDnm1S3XvsOCsh/HHKNifbM6uEmGGC5947598eZzr+kZeZD4zunD31wYylOAR7ScKpM/iucN3MU9N55GD0wr2xiALacQ8l1WwCNLQSQdPXpkgZ1IIlT+jio1YQqkn4mu010PpwzwFfZw3nQpM6bpGxGtJQpizVmmIYDoDDRlI+qkKOBZyIY0BO8bmqzPQRhx1x+y9DDsh+NaISDk1sjX5pmRifDtQqo55eHVNhQZbXNq5lVlq0hn3cdbARdlINEIXx2wpP3qBAaZX7/kJm+y/xjqIvsegclZ1YWUKalOivrWh4DNS+hR4SfvYtKYBtQ+jsB+Na9p8UbG9mx97B+lAT4K6Fwuoxbh+nN+bI/XVEJY6H2CTZVjmxPv/66us3vJ4282GUqPK5kc2LPTGXqwJXQRmh3okFytxdnkfzLSL4gLPKuLBKSfyxRQNnqeELSO+04P9Q0cVpFjlP3M6bTOsGVPPeMvgYmbVoj+2DVofIlvjM0c0w5QTXMBfQrejSnhEHMHnFgF1ocap86qUd4ZdwN27VtgDM+3mtwuafWBaWPYeQOsiHXmF5OAbU786DJnzeMzUo444=
+  on_success: always
+  on_failure: always

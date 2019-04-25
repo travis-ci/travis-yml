@@ -1,0 +1,117 @@
+sudo: required
+language: python
+dist: trusty
+services:
+  - docker
+python:
+- '3.5'
+cache:
+  directories:
+  - node_modules
+  - "$HOME/.cache/pip"
+  - downloads
+before_install:
+- mkdir -p downloads
+- nvm install 6.9
+- mkdir cache
+install:
+- npm install -g grunt-cli
+- npm install
+- sudo pip install -r utils/requirements.txt
+- virtualenv -p /usr/bin/python2.7 --distribute temp-python --system-site-packages
+stages:
+- name: lint
+- name: test
+- name: deploy
+  if: repo = CometVisu/CometVisu AND (NOT type IN (pull_request)) AND ( branch =~ ^master|develop|release-[0-9\.]+$ )
+jobs:
+  include:
+  - stage: lint
+    name: Lint
+    script:
+    - source temp-python/bin/activate
+    - "./generate.py lint"
+  - stage: test
+    name: 'Unit Tests: Chrome stable'
+    env: CV_BUILD=test CV_BROWSER=Chrome_travis CV_VERSION=stable
+    script: &1
+    - sudo ./utils/travis/browser-setup.sh
+    - export CHROME_BIN=`pwd`/chrome/google-chrome
+    - export PATH=`pwd`/firefox:`pwd`/chrome:$PATH
+    - google-chrome --version
+    - source temp-python/bin/activate
+    - "./generate.py source -sI"
+    - deactivate
+    - grunt karma:travis --browser=$CV_BROWSER
+    - if [ "$CV_BUILD" == "test" ] && [ "$CV_VERSION" == "stable" ] ; then grunt coveralls; fi
+  - stage: test
+    name: 'Unit Tests: Chrome beta'
+    env: CV_BUILD=test CV_BROWSER=Chrome_travis CV_VERSION=beta
+    script: *1
+  - stage: test
+    name: 'Unit Tests: Chrome unstable'
+    env: CV_BUILD=test CV_BROWSER=Chrome_travis CV_VERSION=unstable
+    script: *1
+  - name: 'End-to-end Tests: Chrome stable'
+    env: CV_BUILD=test CV_BROWSER=Chrome_travis CV_VERSION=stable
+    script: &2
+    - sudo ./utils/travis/browser-setup.sh
+    - export CHROME_BIN=`pwd`/chrome/google-chrome
+    - source temp-python/bin/activate
+    - "./generate.py source -sI"
+    - deactivate
+    - "node ./node_modules/protractor/bin/webdriver-manager update --gecko=false"
+    - grunt e2e-chrome
+  - name: 'End-to-end Tests: Chrome beta'
+    env: CV_BUILD=test CV_BROWSER=Chrome_travis CV_VERSION=beta
+    script: *2
+  - name: 'End-to-end Tests: Chrome unstable'
+    env: CV_BUILD=test CV_BROWSER=Chrome_travis CV_VERSION=unstable
+    script: *2
+  - stage: deploy
+    name: "[DOCS] - Generate and publish manual and API-viewer"
+    env: CV_BUILD=docs ENCRYPTION_LABEL=4c79fec0aeb9 COMMIT_AUTHOR_EMAIL=generator@cometvisu.org CV_BROWSER=Chrome_travis CV_VERSION=stable
+    script:
+    - docker pull cometvisu/dev-helper
+    - source temp-python/bin/activate
+    - "./generate.py build -sI"
+    - deactivate
+    - "node ./node_modules/protractor/bin/webdriver-manager update --gecko=false"
+    - sudo apt-get install python-lxml python3-lxml
+    - utils/travis/deploy.sh
+  - name: "[NIGHTLY] - Build and push Nightly Build"
+    if: type = cron OR commit_message =~ /^\[ci nightly\].*/
+    script: &3
+    - 'CLIENT_CHANGES=`git log --pretty=format: --name-only --since="1 days ago" ${TRAVIS_BUILD_DIR}/client/ | sort | uniq | sed ''/^$/d'' | wc -l`'
+    - 'CORE_CHANGES=`git log --pretty=format: --name-only --since="1 days ago" ${TRAVIS_BUILD_DIR}/source/ | sort | uniq | sed ''/^$/d'' | wc -l`'
+    - export DEPLOY_NIGHTLY=0
+    - if [[ ($CORE_CHANGES -gt 0 || $CLIENT_CHANGES -gt 0) ]]; then export DEPLOY_NIGHTLY=1; fi
+    - if [[ ${TRAVIS_COMMIT_MESSAGE:0:12} = "[ci nightly]" ]]; then export DEPLOY_NIGHTLY=1; export CORE_CHANGES=1; fi
+    - echo "$CORE_CHANGES changes in core, $CLIENT_CHANGES changes in client, nighlies $DEPLOY_NIGHTLY, $TRAVIS_EVENT_TYPE event type"
+    before_deploy:
+    - if [ $CORE_CHANGES -gt 0 ]; then grunt release-cv; fi
+    - if [ $CLIENT_CHANGES -gt 0 ]; then grunt release-client; fi
+    deploy:
+      on:
+        branch: develop
+        condition: "$DEPLOY_NIGHTLY = 1"
+      provider: bintray
+      file: "./utils/travis/bintray-deploy.json"
+      user: peuter
+      key:
+        secure: dnqHD0ynwCvyxeniG5ee+ImtnQPP02c4WkV8EVgVwSKcEQ5xtdlfy9/6M4znDMlEKcfwvUr9O8JVtrmTqyLNlcwxiIgnrzfIUBrzwPRhSrDgAbUUHOy4bpES58rGKZvwvavhaRhMnd5nQivG4w7ltKdVX4MY8ht4gGLVIlK5RSA=
+      dry-run: false
+      skip_cleanup: true
+  - name: "[DOCKER] - Build and push Docker Container"
+    if: fork = false AND type != cron
+    script: skip
+    before_deploy:
+    - grunt release-cv
+    - mv release build # move back to build because the dockerfile is expecting the build here
+    deploy:
+      on:
+        all_branches: true
+        condition: $TRAVIS_BRANCH =~ ^master|develop|release-[0-9\.]+$
+      provider: script
+      script: utils/travis/docker_push.sh
+      skip_cleanup: true

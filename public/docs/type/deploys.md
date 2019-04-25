@@ -2,189 +2,184 @@
 
 
 
-## Type
+## Types
 
-Any of:
+* Array of: Hash
+* Array of: String (known)
+* Array of: Hash
+* Array of: String (known)
+* Array of: Hash
+* Array of: String (known)
+* Array of: Hash
+* Array of: String (known)
+* Array of: Hash
+* Array of: String (known)
+* Array of: Hash
+* Array of: String (known)
+* Array of: Hash
+* Array of: String (known)
+* Array of: Hash
+* Array of: String (known)
+* Array of: Hash
+* Array of: String (known)
+* Array of: Hash
+* Array of: String (known)
+* Array of: Hash
+* Array of: String (known)
+* Array of: Hash
+* Array of: String (known)
+* Array of: Hash
+* Array of: String (known)
+* Array of: Hash
+* Array of: String (known)
+* Array of: Hash
+* Array of: String (known)
+* Array of: Hash
+* Array of: String (known)
+* Array of: Hash
+* Array of: String (known)
+* Array of: Hash
+* Array of: String (known)
+* Array of: Hash
+* Array of: String (known)
+* Array of: Hash
+* Array of: String (known)
+* Array of: Hash
+* Array of: String (known)
+* Array of: Hash
+* Array of: String (known)
+* Array of: Hash
+* Array of: String (known)
+* Array of: Hash
+* Array of: String (known)
+* Array of: Hash
+* Array of: String (known)
+* Array of: Hash
+* Array of: String (known)
+* Array of: Hash
+* Array of: String (known)
+* Array of: Hash
+* Array of: String (known)
+* Array of: Hash
+* Array of: String (known)
+* Array of: Hash
+* Array of: String (known)
+* Array of: Hash
+* Array of: String (known)
+* Array of: Hash
+* Array of: String (known)
+* Array of: Hash
+* Array of: String (known)
+* Array of: Hash
+* Array of: String (known)
+* Array of: Hash
+* Array of: String (known)
+* Array of: Hash
+* Array of: String (known)
+* Array of: Hash
+* Array of: String (known)
+* Array of: Hash
+* Array of: String (known)
+* Array of: Hash
+* Array of: String (known)
+* Array of: Hash
+* Array of: String (known)
+* Array of: Hash
+* Array of: String (known)
+* Array of: Hash
+* Array of: String (known)
+* Array of: Hash
+* Array of: String (known)
+* Hash
+* String (known)
+* Hash
+* String (known)
+* Hash
+* String (known)
+* Hash
+* String (known)
+* Hash
+* String (known)
+* Hash
+* String (known)
+* Hash
+* String (known)
+* Hash
+* String (known)
+* Hash
+* String (known)
+* Hash
+* String (known)
+* Hash
+* String (known)
+* Hash
+* String (known)
+* Hash
+* String (known)
+* Hash
+* String (known)
+* Hash
+* String (known)
+* Hash
+* String (known)
+* Hash
+* String (known)
+* Hash
+* String (known)
+* Hash
+* String (known)
+* Hash
+* String (known)
+* Hash
+* String (known)
+* Hash
+* String (known)
+* Hash
+* String (known)
+* Hash
+* String (known)
+* Hash
+* String (known)
+* Hash
+* String (known)
+* Hash
+* String (known)
+* Hash
+* String (known)
+* Hash
+* String (known)
+* Hash
+* String (known)
+* Hash
+* String (known)
+* Hash
+* String (known)
+* Hash
+* String (known)
+* Hash
+* String (known)
+* Hash
+* String (known)
+* Hash
+* String (known)
+* Hash
+* String (known)
+* Hash
+* String (known)
+* Hash
+* String (known)
+* Hash
+* String (known)
+* Hash
+* String (known)
+* Hash
+* String (known)
+* Hash
+* String (known)
 
-* Sequence (Array)
-* Any of:
+## Values
 
-* Any of:
-
-* Map (Hash)
-* Enum (known String)
-* Any of:
-
-* Map (Hash)
-* Enum (known String)
-* Any of:
-
-* Map (Hash)
-* Enum (known String)
-* Any of:
-
-* Map (Hash)
-* Enum (known String)
-* Any of:
-
-* Map (Hash)
-* Enum (known String)
-* Any of:
-
-* Map (Hash)
-* Enum (known String)
-* Any of:
-
-* Map (Hash)
-* Enum (known String)
-* Any of:
-
-* Map (Hash)
-* Enum (known String)
-* Any of:
-
-* Map (Hash)
-* Enum (known String)
-* Any of:
-
-* Map (Hash)
-* Enum (known String)
-* Any of:
-
-* Map (Hash)
-* Enum (known String)
-* Any of:
-
-* Map (Hash)
-* Enum (known String)
-* Any of:
-
-* Map (Hash)
-* Enum (known String)
-* Any of:
-
-* Map (Hash)
-* Enum (known String)
-* Any of:
-
-* Map (Hash)
-* Enum (known String)
-* Any of:
-
-* Map (Hash)
-* Enum (known String)
-* Any of:
-
-* Map (Hash)
-* Enum (known String)
-* Any of:
-
-* Map (Hash)
-* Enum (known String)
-* Any of:
-
-* Map (Hash)
-* Enum (known String)
-* Any of:
-
-* Map (Hash)
-* Enum (known String)
-* Any of:
-
-* Map (Hash)
-* Enum (known String)
-* Any of:
-
-* Map (Hash)
-* Enum (known String)
-* Any of:
-
-* Map (Hash)
-* Enum (known String)
-* Any of:
-
-* Map (Hash)
-* Enum (known String)
-* Any of:
-
-* Map (Hash)
-* Enum (known String)
-* Any of:
-
-* Map (Hash)
-* Enum (known String)
-* Any of:
-
-* Map (Hash)
-* Enum (known String)
-* Any of:
-
-* Map (Hash)
-* Enum (known String)
-* Any of:
-
-* Map (Hash)
-* Enum (known String)
-* Any of:
-
-* Map (Hash)
-* Enum (known String)
-* Any of:
-
-* Map (Hash)
-* Enum (known String)
-* Any of:
-
-* Map (Hash)
-* Enum (known String)
-* Any of:
-
-* Map (Hash)
-* Enum (known String)
-* Any of:
-
-* Map (Hash)
-* Enum (known String)
-* Any of:
-
-* Map (Hash)
-* Enum (known String)
-* Any of:
-
-* Map (Hash)
-* Enum (known String)
-* Any of:
-
-* Map (Hash)
-* Enum (known String)
-* Any of:
-
-* Map (Hash)
-* Enum (known String)
-* Any of:
-
-* Map (Hash)
-* Enum (known String)
-* Any of:
-
-* Map (Hash)
-* Enum (known String)
-* Any of:
-
-* Map (Hash)
-* Enum (known String)
-* Any of:
-
-* Map (Hash)
-* Enum (known String)
-* Any of:
-
-* Map (Hash)
-* Enum (known String)
-
-## Flags
-
-None.
+* `anynines`
 
 
 ## Examples
@@ -216,9 +211,20 @@ deploy:
   edge: true
   user: 
   api_key: 
-  address: "[ref:strs]"
+  address: string
   metadata: string
-  after_deploy: "[ref:strs]"
+  after_deploy: string
+```
+
+```yaml
+deploy:
+- provider: appfog
+  app: {}
+```
+
+```yaml
+deploy:
+- provider: appfog
   app: string
 ```
 
@@ -262,13 +268,13 @@ deploy:
   edge: true
   token: 
   app: string
-  exclude: "[ref:strs]"
-  include: "[ref:strs]"
+  exclude: string
+  include: string
   address: string
-  vcs: true
-  metadata: "[ref:strs]"
+  metadata: string
   debug: true
-  version: string
+  vcs: true
+  version: true
 ```
 
 ```yaml
@@ -590,9 +596,31 @@ deploy:
   username: 
   password: 
   api_key: 
-  app: string
-  environment: {}
   migrate: string
+```
+
+```yaml
+deploy:
+- provider: engineyard
+  app: {}
+```
+
+```yaml
+deploy:
+- provider: engineyard
+  app: string
+```
+
+```yaml
+deploy:
+- provider: engineyard
+  environment: {}
+```
+
+```yaml
+deploy:
+- provider: engineyard
+  environment: string
 ```
 
 ```yaml
@@ -686,9 +714,31 @@ deploy:
   edge: true
   strategy: api
   buildpack: string
+  run: string
+```
+
+```yaml
+deploy:
+- provider: heroku
+  app: {}
+```
+
+```yaml
+deploy:
+- provider: heroku
   app: string
-  api_key: 
-  run: "[ref:strs]"
+```
+
+```yaml
+deploy:
+- provider: heroku
+  api_key: {}
+```
+
+```yaml
+deploy:
+- provider: heroku
+  api_key:
 ```
 
 ```yaml
@@ -716,8 +766,8 @@ deploy:
   memory_size: string
   runtime: string
   environment_variables: 
-  security_group_ids: "[ref:strs]"
-  subnet_ids: "[ref:strs]"
+  security_group_ids: string
+  subnet_ids: string
   dead_letter_config: string
   kms_key_arn: string
   tracing_mode: Active
@@ -734,12 +784,12 @@ deploy:
 deploy:
 - provider: launchpad
   slug: string
-  oauth_token: 
-  oauth_token_secret: 
   on: {}
   allow_failure: true
   skip_cleanup: true
   edge: true
+  oauth_token: 
+  oauth_token_secret:
 ```
 
 ```yaml
@@ -788,9 +838,31 @@ deploy:
   edge: true
   user: 
   password: 
-  domain: string
-  app: string
   deployment_branch: string
+```
+
+```yaml
+deploy:
+- provider: openshift
+  domain: {}
+```
+
+```yaml
+deploy:
+- provider: openshift
+  domain: string
+```
+
+```yaml
+deploy:
+- provider: openshift
+  app: {}
+```
+
+```yaml
+deploy:
+- provider: openshift
+  app: string
 ```
 
 ```yaml
@@ -872,12 +944,12 @@ deploy:
 ```yaml
 deploy:
 - provider: puppetforge
-  user: 
-  password: 
   on: {}
   allow_failure: true
   skip_cleanup: true
   edge: true
+  user: 
+  password: 
   url: string
 ```
 
@@ -917,9 +989,9 @@ deploy:
   password: 
   api_key: 
   repo: string
-  file: "[ref:strs]"
-  file_glob: string
-  overwrite: string
+  file: string
+  file_glob: true
+  overwrite: true
   release_number: string
   prerelease: true
 ```
@@ -936,10 +1008,32 @@ deploy:
   allow_failure: true
   skip_cleanup: true
   edge: true
-  api_key: 
-  gem: string
   file: string
   gemspec: string
+```
+
+```yaml
+deploy:
+- provider: rubygems
+  api_key: {}
+```
+
+```yaml
+deploy:
+- provider: rubygems
+  api_key:
+```
+
+```yaml
+deploy:
+- provider: rubygems
+  gem: {}
+```
+
+```yaml
+deploy:
+- provider: rubygems
+  gem: string
 ```
 
 ```yaml
@@ -1101,9 +1195,20 @@ deploy:
   edge: true
   user: 
   api_key: 
-  address: "[ref:strs]"
+  address: string
   metadata: string
-  after_deploy: "[ref:strs]"
+  after_deploy: string
+```
+
+```yaml
+deploy:
+  provider: appfog
+  app: {}
+```
+
+```yaml
+deploy:
+  provider: appfog
   app: string
 ```
 
@@ -1147,13 +1252,13 @@ deploy:
   edge: true
   token: 
   app: string
-  exclude: "[ref:strs]"
-  include: "[ref:strs]"
+  exclude: string
+  include: string
   address: string
-  vcs: true
-  metadata: "[ref:strs]"
+  metadata: string
   debug: true
-  version: string
+  vcs: true
+  version: true
 ```
 
 ```yaml
@@ -1475,9 +1580,31 @@ deploy:
   username: 
   password: 
   api_key: 
-  app: string
-  environment: {}
   migrate: string
+```
+
+```yaml
+deploy:
+  provider: engineyard
+  app: {}
+```
+
+```yaml
+deploy:
+  provider: engineyard
+  app: string
+```
+
+```yaml
+deploy:
+  provider: engineyard
+  environment: {}
+```
+
+```yaml
+deploy:
+  provider: engineyard
+  environment: string
 ```
 
 ```yaml
@@ -1571,9 +1698,31 @@ deploy:
   edge: true
   strategy: api
   buildpack: string
+  run: string
+```
+
+```yaml
+deploy:
+  provider: heroku
+  app: {}
+```
+
+```yaml
+deploy:
+  provider: heroku
   app: string
-  api_key: 
-  run: "[ref:strs]"
+```
+
+```yaml
+deploy:
+  provider: heroku
+  api_key: {}
+```
+
+```yaml
+deploy:
+  provider: heroku
+  api_key:
 ```
 
 ```yaml
@@ -1601,8 +1750,8 @@ deploy:
   memory_size: string
   runtime: string
   environment_variables: 
-  security_group_ids: "[ref:strs]"
-  subnet_ids: "[ref:strs]"
+  security_group_ids: string
+  subnet_ids: string
   dead_letter_config: string
   kms_key_arn: string
   tracing_mode: Active
@@ -1619,12 +1768,12 @@ deploy: lambda
 deploy:
   provider: launchpad
   slug: string
-  oauth_token: 
-  oauth_token_secret: 
   on: {}
   allow_failure: true
   skip_cleanup: true
   edge: true
+  oauth_token: 
+  oauth_token_secret:
 ```
 
 ```yaml
@@ -1673,9 +1822,31 @@ deploy:
   edge: true
   user: 
   password: 
-  domain: string
-  app: string
   deployment_branch: string
+```
+
+```yaml
+deploy:
+  provider: openshift
+  domain: {}
+```
+
+```yaml
+deploy:
+  provider: openshift
+  domain: string
+```
+
+```yaml
+deploy:
+  provider: openshift
+  app: {}
+```
+
+```yaml
+deploy:
+  provider: openshift
+  app: string
 ```
 
 ```yaml
@@ -1757,12 +1928,12 @@ deploy: pages
 ```yaml
 deploy:
   provider: puppetforge
-  user: 
-  password: 
   on: {}
   allow_failure: true
   skip_cleanup: true
   edge: true
+  user: 
+  password: 
   url: string
 ```
 
@@ -1802,9 +1973,9 @@ deploy:
   password: 
   api_key: 
   repo: string
-  file: "[ref:strs]"
-  file_glob: string
-  overwrite: string
+  file: string
+  file_glob: true
+  overwrite: true
   release_number: string
   prerelease: true
 ```
@@ -1821,10 +1992,32 @@ deploy:
   allow_failure: true
   skip_cleanup: true
   edge: true
-  api_key: 
-  gem: string
   file: string
   gemspec: string
+```
+
+```yaml
+deploy:
+  provider: rubygems
+  api_key: {}
+```
+
+```yaml
+deploy:
+  provider: rubygems
+  api_key:
+```
+
+```yaml
+deploy:
+  provider: rubygems
+  gem: {}
+```
+
+```yaml
+deploy:
+  provider: rubygems
+  gem: string
 ```
 
 ```yaml

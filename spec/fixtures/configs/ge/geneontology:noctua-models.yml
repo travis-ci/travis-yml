@@ -1,0 +1,26 @@
+language: java
+jdk:
+  - oraclejdk8
+
+before_script:
+  - mkdir -p bin
+  - export PATH=$PATH:$PWD/bin
+  - wget http://build.berkeleybop.org/userContent/owltools/owltools -O bin/owltools
+  - wget http://build.berkeleybop.org/userContent/owltools/owltools-runner-all.jar -O bin/owltools-runner-all.jar
+  - chmod +x bin/*
+
+# command to run tests
+script: make travis-test
+
+#after_success:
+#  coveralls
+
+# whitelist
+branches:
+  only:
+    - master
+
+notifications:
+  email:
+    - cjmungall@lbl.gov
+

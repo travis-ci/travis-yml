@@ -1,0 +1,44 @@
+sudo: false  # run on new infrastructure
+language: python
+python:
+  - "3.3"
+  - "3.4"
+  - "3.5"
+  - "3.6"
+env:
+  - GREEN_OPTS=
+
+matrix:
+  include:
+    - python: "pypy3"
+      env: GREEN_OPTS='--processes 1'
+  allow_failures:
+    - python: "3.3"
+
+install:
+  - "python -m pip install pip --upgrade"
+  - "pip install ."
+  - "pip install .[columns]"
+  - "pip install .[ical]"
+  - "pip install .[prompt]"
+  - "pip install .[test]"
+  - "pip install pylint"
+  - "pip install codecov"
+  - "pip install -U isort"
+script:
+  - "green -vvr $GREEN_OPTS"
+  - "python -m pylint --errors-only topydo test"
+  - "isort -c -rc ."
+# Cache Dependencies
+after_script:
+  - codecov
+cache:
+  directories:
+    - $HOME/travis/.cache/pip
+notifications:
+  webhooks:
+    urls:
+      - https://webhooks.gitter.im/e/b7a69031304c472294ac
+    on_success: change  # options: [always|never|change] default: always
+    on_failure: always  # options: [always|never|change] default: always
+    on_start: false     # default: false

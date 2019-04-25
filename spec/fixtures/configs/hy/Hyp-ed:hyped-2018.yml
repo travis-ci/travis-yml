@@ -1,0 +1,26 @@
+sudo: required
+language: bash
+services:
+- docker
+
+install: true
+
+git:
+  depth: 1
+
+before_script:
+- docker run --rm --privileged multiarch/qemu-user-static:register --reset
+
+script:
+- docker run --name travis -it hyped/hyped-2018:latest uname -a
+- docker cp . travis:/test/
+- docker commit travis hyped/current
+- docker run -it hyped/current make -C BeagleBone_black -j --silent clean hyped
+
+notifications:
+  slack:
+    rooms:
+        - hypedunlimited:gEtbY2l7hNP2rwgfelMxr6j1#tech-software-repo
+   
+   
+   

@@ -1,0 +1,52 @@
+#!/usr/bin/env ruby
+
+require 'json'
+require 'fileutils'
+
+sql = <<~sql
+  select id
+  from repositories
+  where
+    last_build_number is not null and
+    owner_name not like 'everypolitician%'
+  order by last_build_number::integer
+  desc limit 20000;
+sql
+
+if File.exists?('tmp/ids')
+  ids = JSON.parse(File.read('tmp/ids'))
+else
+  puts 'fetching most active repo ids ...'
+  str = `heroku pg:psql FOLLOWER -c "#{sql}" -a travis-production`
+  ids = str.split("\n")[3..-2].map(&:strip).map(&:to_i)
+  File.write('tmp/ids', JSON.dump(ids))
+end
+
+dir = 'spec/fixtures/configs.2'
+FileUtils.rm_rf(dir)
+
+ids.each_slice(1000) do |ids|
+  configs = `echo '#{ids.join("\n")}' | heroku run 'bundle exec ruby -Ilib -e "
+  require %(json)
+  require %(travis/gatekeeper)
+  Travis::Gatekeeper.setup
+
+  STDIN.each_line do |id|
+    next unless b = Build.where(repository_id: eval(id), state: :passed).last;
+    c = b.request.raw_configs.map(&:config).first;
+    c ||= b.request.yaml_config&.config;
+    puts JSON.dump(build_id: b.id, repo_id: b.repository_id, slug: b.repository.slug, config: c)
+  end"' -a travis-gatekeeper-production`
+
+  configs = configs.split("\n").select { |c| c.start_with?('{') }
+  configs = configs.map { |config| JSON.load(config) rescue nil }.compact
+
+  configs.each do |config|
+    next unless config['config']
+    sub = config['slug'].downcase[0, 2]
+    file = "#{config['slug'].sub('/', ':')}.yml"
+
+    FileUtils.mkdir_p("#{dir}/#{sub}")
+    File.write("#{dir}/#{sub}/#{file}", config['config'])
+  end
+end

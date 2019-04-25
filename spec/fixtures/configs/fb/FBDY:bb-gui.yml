@@ -1,0 +1,54 @@
+language: node_js
+sudo: required
+dist: trusty
+addons:
+    chrome: stable
+node_js:
+- 8
+env:
+  global:
+  - NODE_ENV=production
+  - SMOKE_URL=https://FBDY.github.io/bb-gui/$TRAVIS_PULL_REQUEST_BRANCH
+  - NPM_TAG=latest
+  - RELEASE_VERSION="0.1.0-prerelease.$(date +'%Y%m%d%H%M%S')"
+cache:
+  directories:
+  - node_modules
+install:
+- npm --production=false install
+- npm --production=false update
+script:
+- npm test
+- if [ "$TRAVIS_EVENT_TYPE" == "pull_request" ] && [ "$TRAVIS_BRANCH" == "master" ]; then  npm run test:smoke; fi
+before_deploy:
+- >
+  if [ -z "$BEFORE_DEPLOY_RAN" ]; then
+    npm --no-git-tag-version version $RELEASE_VERSION
+    if [ "$TRAVIS_BRANCH" == "master" ]; then export NPM_TAG=stable; fi
+    git config --global user.email $(git log --pretty=format:"%ae" -n1)
+    git config --global user.name $(git log --pretty=format:"%an" -n1)
+    export BEFORE_DEPLOY_RAN=true
+  fi
+deploy:
+- provider: npm
+  on:
+    branch:
+    - master
+    - develop
+    - smoke
+    condition: $TRAVIS_EVENT_TYPE != cron
+  skip_cleanup: true
+  email: $NPM_EMAIL
+  api_key: $NPM_TOKEN
+  tag: $NPM_TAG
+- provider: script
+  on:
+    all_branches: true
+    condition: $TRAVIS_EVENT_TYPE != cron
+  skip_cleanup: true
+  script: npm run deploy -- -x -e $TRAVIS_BRANCH -r https://${GH_TOKEN}@github.com/${TRAVIS_REPO_SLUG}.git
+- provider: script
+  on:
+    all_branches: true
+    condition: $TRAVIS_EVENT_TYPE != cron
+  script: npm run prune -- https://${GH_TOKEN}@github.com/${TRAVIS_REPO_SLUG}.git

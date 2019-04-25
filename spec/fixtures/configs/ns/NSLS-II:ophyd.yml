@@ -1,0 +1,134 @@
+language: python
+dist: xenial
+
+env:
+  global:
+    # Doctr deploy key for NSLS-II/NSLS-II.github.io
+    - secure: "jUZbT6RuZCGVKEvBCsK22mvXDvGIN10zlHRqj7Q6cl6lf2KaaXnOKb6azCQRJhbvgi9IUkJzjT3ghqeNhjsWOdxzbX4qzTh6jooySP0nyAY+iOQ/F9Q62RdRwM+N5y/t++1Cv2n5BVAYEnGIrE3SyZbeaYLTvNveJnVdeTIKif4="
+    - ETH0_BCAST: "172.17.255.255"
+    - ETH0_IP: "172.17.0.1"
+    - BASE_VER: "R7.0.1.1"
+    - PVA: ""
+    - BUSY_VER: "1-7"
+    - SEQ_VER: "2.2.5"
+    - ASYN_VER: "4-33"
+    - CALC_VER: "3-7"
+    - AUTOSAVE_VER: "5-9"
+    - SSCAN_VER: "2-11-1"
+    - MOTOR_VER: "6-10"
+    - AREADETECTOR_VER: "3-2"
+    - CI_TOP: '${TRAVIS_BUILD_DIR}/.ci'
+    - CI_SCRIPTS: '${TRAVIS_BUILD_DIR}/.ci/ci-scripts'
+    - EPICS_ON_TRAVIS_VERSION: "0.8.1"
+    - EPICS_ON_TRAVIS_PKG: "0.8.1/epics-ci-0.8.1_R7.0.1.1_pva_areadetector3-2_motor6-10.tar.bz2"
+    - EPICS_ON_TRAVIS_URL: 'https://github.com/klauer/epics-on-travis/releases/download/${EPICS_ON_TRAVIS_PKG}'
+
+addons:
+  apt:
+    packages:
+      - graphviz
+      - procserv
+      - libhdf5-dev
+
+cache:
+  directories:
+    - $HOME/.cache/pip
+    - $HOME/.ccache  # https://github.com/travis-ci/travis-ci/issues/5853
+
+matrix:
+  fast_finish: true
+  include:
+    - python: 3.6
+      env:
+        - BUILD_DOCS=true
+        - TEST_CL=pyepics
+    - python: 3.6
+      env:
+        - BUILD_DOCS=
+        - TEST_CL=caproto
+    - python: 3.7
+      env:
+        - BUILD_DOCS=
+        - TEST_CL=pyepics
+    - python: 3.7
+      env:
+        - BUILD_DOCS=
+        - TEST_CL=caproto
+    - python: nightly
+      env:
+        - BUILD_DOCS=
+        - TEST_CL=pyepics
+    - python: nightly
+      env:
+        - BUILD_DOCS=
+        - TEST_CL=caproto
+  allow_failures:
+    - python: 3.6
+      env:
+        - BUILD_DOCS=
+        - TEST_CL=caproto
+    - python: 3.7
+      env:
+        - BUILD_DOCS=
+        - TEST_CL=caproto
+    - python: nightly
+      env:
+        - BUILD_DOCS=
+        - TEST_CL=caproto
+
+before_install:
+  - export MPLBACKEND=agg
+  - git fetch --unshallow
+
+  # eventually, we should use the specific version tag of epics-on-travis:
+  # - git clone --single-branch --branch "${EPICS_ON_TRAVIS_VERSION}" https://github.com/klauer/epics-on-travis "$CI_TOP"
+  # but for now, get the latest scripts:
+  - git clone --single-branch --branch master https://github.com/klauer/epics-on-travis "$CI_TOP"
+  - ip addr
+  - ping -b -c 5 $ETH0_IP
+  - echo "EPICS_CA_ADDR_LIST=$ETH0_BCAST" >> "$CI_SCRIPTS/epics-config.sh"
+  - echo "EPICS_PVA_ADDR_LIST=$ETH0_BCAST" >> "$CI_SCRIPTS/epics-config.sh"
+  - echo "EPICS_PVA_INTF_LIST=$ETH0_IP" >> "$CI_SCRIPTS/epics-config.sh"
+  - echo "EPICS_CAS_INTF_LIST=$ETH0_IP" >> "$CI_SCRIPTS/epics-config.sh"
+
+  - source "${CI_SCRIPTS}/epics-config.sh"
+  - bash "${CI_TOP}/install-from-release.sh" "${EPICS_ON_TRAVIS_URL}"
+
+  # Ensure we have access to all of the plugins: (epics-on-travis TODO)
+  - cp -f "${AREA_DETECTOR_PATH}/ADCore/iocBoot/EXAMPLE_commonPlugins.cmd" "${AREA_DETECTOR_PATH}/ADCore/iocBoot/commonPlugins.cmd"
+  - bash "${CI_SCRIPTS}/run-epics-iocs-on-procserv.sh"
+
+install:
+  - python -mpip install -Ur requirements.txt
+  - python -mpip install -Ur test-requirements.txt
+  - python -mpip install -e .
+
+  - echo "PATH=$PATH"
+  - echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH"
+
+script:
+  - echo "Checking if the motor IOC is running:"
+  - caproto-get -v sim:mtr1
+  - echo "Checking if the areaDetector IOC is running:"
+  - caproto-get -v 13SIM1:cam1:Acquire
+
+  - coverage run --concurrency=thread --parallel-mode run_tests.py -v -k "${TEST_CL}"
+  - coverage combine
+  - coverage report
+  # Make sure only the primary build uploads to codecov
+  - |
+    if [ $BUILD_DOCS ]; then
+      codecov
+    fi
+
+  - set -e
+  # Build docs.
+  - |
+    if [ $BUILD_DOCS ]; then
+      pip install -r docs-requirements.txt
+      pushd doc
+      make html
+      popd
+      # Publish docs.
+      doctr deploy --deploy-repo NSLS-II/NSLS-II.github.io --deploy-branch-name master ophyd
+    fi

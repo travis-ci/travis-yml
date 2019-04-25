@@ -1,0 +1,28 @@
+language: python
+sudo: false
+
+python:
+  - "2.7"
+  - "3.4"
+  - "3.5"
+  - "3.6"
+  - "3.7-dev"
+  - "pypy"
+  - "pypy3"
+  
+matrix:
+  fast_finish: true
+  allow_failures:
+    - python: "3.7-dev"
+      # 3.7-dev started crashing when building lxml although the neither the python version nor the lxml version seemed to change.
+      # Will have to investigate further.
+    - python: "pypy"
+    - python: "pypy3"
+      # pypy will just crash due to an incompatibility with lxml.
+      # Newer versions of pypy seem to crash also, so we probably have to fix with a newer version of lxml
+  
+install:
+ - pip install authorizenet
+
+script:
+  python test-runner.py

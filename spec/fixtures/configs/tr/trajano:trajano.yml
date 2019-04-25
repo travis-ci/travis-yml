@@ -1,0 +1,66 @@
+branches:
+  only:
+  - master
+  - release
+#  - "/^trajano-[\\d\\.]+$/"
+language: java
+jdk:
+- oraclejdk8
+sudo: false
+cache:
+  directories:
+  - "$HOME/.m2/repository"
+  - "$HOME/.sonar/cache"
+addons:
+  apt:
+    packages:
+    - graphviz
+    - ca-certificates
+  ssh_known_hosts:
+  - github.com
+  - site.trajano.net:6022
+  sonarcloud:
+    token:
+      secure: nIi2TlzzELtZgH9dgMxJbIXqg8y42R89Y1qzt1PgwhVAwulkDF+T39AAGlyBaazZ2DNMFjTBC7X8DpG3zOCsKA2F3U+k4vcNojlfy0dBRVa77Xqr3a/SysMetI2lfhmqyHK9yUnCvvlozaq1i0x+DPwRrqC4hBMz9uP3W2bMFgM=
+env:
+  global:
+    secure: k+fa8Cu3x2SiN/D33E8LTQc3tm/96xuBg/6/YiU3wFxgvDGx8pcBKR9F/9c1FKXJYEKgGuNMtmZ9J6oTwWI8VbNLqWxxyudnVHen96oAJefoWxpQUoMy0LupWPOA49uQkeRusofG5hpplKZ7L51wnLjKNGOr9yMKj/am0hLnpwU=
+before_install:
+- openssl aes-256-cbc -K $encrypted_cf2cd75de4fc_key -iv $encrypted_cf2cd75de4fc_iv
+  -in deploy-keys.tar.enc -out deploy-keys.tar -d
+install:
+- tar xf deploy-keys.tar -C $HOME && chmod go-rwx -R $HOME/.m2 $HOME/.ssh
+- mvn dependency:go-offline
+before_script:
+- mvn clean
+
+jobs:
+  include:
+  - stage: development build
+    if: branch != release
+    script:
+    - mvn verify site sonar:sonar
+    deploy:
+    - provider: script
+      skip_cleanup: true
+      script: mvn -e deploy site-deploy
+      on:
+        branch: master
+  - stage: release build
+    script:
+    - bash -e -x ./src/scripts/release.sh
+    if: branch = release
+
+#script:
+#- mvn verify site sonar:sonar
+#deploy:
+#- provider: script
+#  skip_cleanup: true
+#  script: mvn -e deploy site-deploy
+#  on:
+#    branch: master
+#- provider: script
+#  skip_cleanup: true
+#  script: bash -e -x ./src/scripts/release.sh
+#  on:
+#   tags: true

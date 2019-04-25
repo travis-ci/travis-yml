@@ -1,0 +1,82 @@
+# whitelist branches
+branches:
+  only:
+    - master
+
+sudo: required
+
+services:
+  - docker
+
+language: ruby
+
+rvm:
+  - 2.5.1
+
+before_install:
+  # Set up Docker exports
+  - export AUTHOR=`git --no-pager show -s --format='%an <%ae>'`
+  - export COMMIT_TIME=`git log -1 --pretty=tformat:%aD`
+  - export DATE=`TZ=America/New_York date "+%m-%d-%y-%H%M"`
+  - export DOCKER_IMAGE="fnlcr/nci-match-patient-api"
+  - echo "TravisBuild=$TRAVIS_BUILD_NUMBER" > build_number.html &&
+        echo "Commit=$TRAVIS_COMMIT" >> build_number.html       &&
+        echo "TravisBuildID=$TRAVIS_BUILD_ID" >> build_number.html    &&
+        echo "Author=$AUTHOR" >> build_number.html              &&
+        echo "BuildTime=$DATE" >> build_number.html             &&
+        echo "Docker=$DOCKER_IMAGE:$DATE" >> build_number.html  &&
+        echo "Commit_Made_On=$COMMIT_TIME" >> build_number.html &&
+        echo "TravisCommitMessage=$TRAVIS_COMMIT_MESSAGE" >> build_number.html
+  - cat ./build_number.html
+
+  # fix bundler issue: https://github.com/travis-ci/travis-ci/issues/9333
+  - gem install bundler
+
+script:
+  # ECR Info
+  - export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID_TRAVIS_INT
+  - export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY_TRAVIS_INT
+  - export AWS_DEFAULT_REGION="us-east-1"
+  - sudo apt-get update
+  - sudo apt-get install -y python-dev libffi-dev libssl-dev
+  - pyenv install -s 2.7.14
+  - pyenv global 2.7.14
+  - pip install awscli --upgrade
+  - export PATH=$PATH:$HOME/.local/bin
+  - eval $(aws ecr get-login --no-include-email --region $AWS_DEFAULT_REGION --registry-ids 564062160093)
+
+  - RAILS_ENV=test bundle exec rspec spec/
+
+  # Build Docker image
+  - docker build --build-arg NEW_RELIC_KEY=$NEW_RELIC_KEY -t $DOCKER_IMAGE:$DATE -t $DOCKER_IMAGE:latest .
+  - docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
+  # - docker run -it --rm -e "RAILS_ENV=test" $DOCKER_IMAGE:$DATE
+
+after_success:
+
+  # ECR Info
+  - docker tag "$DOCKER_IMAGE:$DATE" "$ECR_URL:latest"
+  - docker tag "$ECR_URL:latest" "$ECR_URL:$DATE"
+  - docker push "$ECR_URL:latest"
+  - docker push "$ECR_URL:$DATE"
+
+  - docker images
+  - docker push $DOCKER_IMAGE # Pushes both date and latest
+
+  # Comment out the following when Integration tests are ready
+  - curl -s -X POST -H "Content-Type:application/json" -H "Accept:application/json"
+    -H "Travis-API-Version:3" -H "Authorization:token $TRAVIS_TOKEN"
+    -d "{\"request\":{\"message\":\"Triggered by nci-match-patient-api $TRAVIS_COMMIT\", \"branch\":\"master\", \"config\":{\"env\":{\"matrix\":[\"TRIGGER_REPO=nci-match-patient-api;TRIGGER_VER=$DATE;TRIGGER_COMMIT=$TRAVIS_COMMIT;TRIGGER_DOCKER_IMAGE=$DOCKER_IMAGE;CUC_TAG=@patients;AUTHOR=$AUTHOR\"]}}}}"
+    https://api.travis-ci.com/repo/BIAD%2Fnci-pedmatch-bddtests/requests
+
+  # Uncomment the following when all integration tests are ready
+  # Trigger Integration tests
+  # - curl -s -X POST -H "Content-Type:application/json" -H "Accept:application/json"
+  #   -H "Travis-API-Version:3" -H "Authorization:token $TRAVIS_TOKEN"
+  #   -d "{\"request\":{\"message\":\"Triggered by nci-match-patient-api $TRAVIS_COMMIT\", \"branch\":\"master\", \"config\":{\"env\":{\"matrix\":[\"TRIGGER_REPO=nci-match-patient-api;TRIGGER_VER=$DATE;RUN_TAG=@patient;TRIGGER_COMMIT=$TRAVIS_COMMIT;TRIGGER_DOCKER_IMAGE=$DOCKER_IMAGE;AUTHOR=$AUTHOR\"]}}}}"
+  #   https://api.travis-ci.com/repo/BIAD%2Fnci-pedmatch-integration-tests/requests
+
+notifications:
+  slack: clinicalbiomed:gRp5LqKElNOjUUMPLlq4qC1j
+
+addons:

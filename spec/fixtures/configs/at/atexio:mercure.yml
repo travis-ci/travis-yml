@@ -1,0 +1,26 @@
+language: python
+dist: xenial
+
+python:
+  - '3.5'
+  - '3.6'
+
+addons:
+  sauce_connect: true
+
+cache: pip
+
+install:
+  - pip3 install -r requirements.txt
+  - pip3 install coveralls
+  - pip3 install flake8
+
+before_script:
+  - flake8 --exclude migrations,settings,scripts
+
+script:
+  - python manage.py makemigrations
+  - travis_retry coverage run --source=phishing manage.py test
+  - python manage.py makemigrations && pip3 install mock && python manage.py test axes --settings=axes.test_settings
+
+after_success: coveralls

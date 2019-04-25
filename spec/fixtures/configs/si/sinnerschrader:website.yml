@@ -1,0 +1,20 @@
+sudo: false
+language: node_js
+node_js:
+- '6'
+cache:
+  directories:
+  - node_modules
+notifications:
+  email:
+    on_success: never
+before_install:
+  - npm install @alrra/travis-scripts
+  - npm run auth
+install:
+  - git fetch --unshallow --tags
+  - npm install
+script:
+  - npm run build:ci
+  - npm run deploy:staging
+  - npm run deploy

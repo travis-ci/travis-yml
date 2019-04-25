@@ -1,0 +1,46 @@
+language: scala
+
+scala:
+  - 2.11.12
+  - 2.13.0-M5
+  - 2.12.8
+
+jdk:
+  - oraclejdk8
+
+cache:
+  directories:
+    - $HOME/.ivy2/cache
+    - $HOME/.sbt/boot
+    - $HOME/.coursier
+
+install:
+  - pip install --user codecov
+  - rvm use 2.6.0 --install --fuzzy
+  - gem update --system
+  - gem install sass
+  - gem install jekyll -v 3.8.5
+
+script:
+  - sbt ++$TRAVIS_SCALA_VERSION clean coverage validateJVM;
+  - if [[ "$TRAVIS_SCALA_VERSION" != 2.13.* ]];
+    then
+      sbt ++$TRAVIS_SCALA_VERSION java8JVM/test;
+    else echo "Skipping java8 module tests on 2.13";
+    fi
+  - sbt ++$TRAVIS_SCALA_VERSION benchmark/test coverageReport && codecov;
+  - if [[ "$TRAVIS_SCALA_VERSION" == 2.12.* ]];
+    then
+      sbt ++$TRAVIS_SCALA_VERSION docs/makeMicrosite;
+    else echo "Skipping docs on 2.11 and 2.13";
+    fi
+  - if [[ "$TRAVIS_BRANCH" == "scalajs" ]];
+    then
+      sbt ++$TRAVIS_SCALA_VERSION clean validateJS;
+    else echo "Skipping Scala.js build";
+    fi
+
+  # See http://www.scala-sbt.org/0.13/docs/Travis-CI-with-sbt.html
+  # Tricks to avoid unnecessary cache updates
+  - find $HOME/.sbt -name "*.lock" | xargs rm
+  - find $HOME/.ivy2 -name "ivydata-*.properties" | xargs rm

@@ -1,0 +1,29 @@
+dist: trusty
+sudo: false
+language: node_js
+node_js:
+- 8
+cache:
+  directories:
+  - node_modules
+branches:
+  only:
+  - master
+notifications:
+  slack:
+    secure: fZm+zCC391+EzUc2FprOO/MVtvfXjhizt0EXNX4aRWwZnPkkmpiqfdZ1XCx5BslsDw5ExvTT5UGyDCXqMbigJ+dVVEdGb5ENW/NG+6o7/0//fKWx47xMIkgnbxKR6oKHhS45g8hu6KpyTUXhkR5ANmWW2SteRE1O8/QQwvOE+V6YkQd4MEK1VHPJhnwybOBDKAZqgfxNRitOwa0xXxM1hRKK5mt1grAtdh+F4y/0GdjDVORugfk/115cnlRjONEHrk1f5QMLxXBF/Q/Nl2UPSqeYUUsJPwooEFU68qN0r0Ddwua+BCeYMVgKsgqAGbCj0ySj86akG0ihyKLLSk0sLbMn5PmdI+5OQcMu+JZUebYiK/+uxzem1NrU6VVRi8jiErKWnNv3qwPvB+NUX2Ny3gfg7cn4AQfqKdqvJzJRjB0kY6keHLLr8+oAsTOD2wGB2hPG+oy8lg9LpkFJIvcZfOmJKaa+yNSJHIEm5cjpWreFOhOms69U2cwjpDEmC0EfkILmmPmFfyhlws+BWSObsZLFkgAjJt2QvMnBPht2H+BPDLQW1VfzF+bRuL3F0ItIXVOFjMtum5Oz8GPWUJqK8FymyQAqlfXGmUI/XYeFR5qc9/QBWvKAoSXBwVxS6LbwWkptN3tg0I9DiztjHpGtgtT+IPiDXpfKq+nZRUeRFWo=
+before_script:
+- cp config.example.js config.js
+script:
+- NODE_ENV=production npm run build
+- npm run test
+deploy:
+  provider: s3
+  region: us-west-1
+  bucket: pf9-ui
+  access_key_id: AKIAJHCL5SIVALO2BVPQ
+  local_dir: build
+  upload-dir: master
+  skip_cleanup: true
+  secret_access_key:
+    secure: sMnuBtW2+lcbMNp7GY/IL6pNIbhUG6N1Zufub0SI3H12XyVbUNz+2cSm5lfqihITuQuDDoDZrsgUeiaXw8BwSj0/yFg/1LQIJVqix38n1axh6IqPV8T4brwFJFg05883+hQgBCHrYo037URWKcKqw+yM9Hw7Ivt2LcgtlRtGXYFf1Y5+3VwyFSuiug0Otq8yn13vkdoy4z/1cwlqQBXdCXCdbqJtP7KuzM2/Ne1A7FSP/OhB3rz1szDeMqAdLZhmvm8EetZjC5BL8ezgOy/urTx1r6R64XkWMUONHNKqRpStr5ee7wYECOM2M30cqoaCwKcraMNvA42g5lFDerkdblOkYEgnLOEvil6OhQrssWtFmA6Am5LZpoa+U3L27+zSuJ/qjsWS2k7iLGu1qqFXOmDrfgJjK08AIiKekgG7G3O6jwdZcgfTIEDf4/mZPqIYmLFXagzMH7zWR1avkQybmMsztztNeYuSfhqy4lSYqE/SUgoseahIT56cMDepxjNl43zKy1PoVpMr2wsGbbU60Wf8WuZSi11yqPBDlpO+zRFDU2BWFDi2RmabNnc6OIpyzT285TWVUSJb2vVzuQAO9vm0YcTKBxVunqAzG4WrpoqbCe8rkH2AhhwtEScF70SSNTTjcJ9jbA11RHrehBzVmZtxiEjUGZniN8S3/5tZ7nU=

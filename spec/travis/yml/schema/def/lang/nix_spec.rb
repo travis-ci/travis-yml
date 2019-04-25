@@ -11,7 +11,7 @@ describe Travis::Yml::Schema::Def::Nix, 'structure' do
         type: :object,
         properties: {
           nix: {
-            '$ref': '#/definitions/strs'
+            '$ref': '#/definitions/type/strs'
           }
         },
         normal: true,

@@ -1,0 +1,61 @@
+language: php
+
+branches:
+  only:
+  - master
+  - /^release\/.+$/
+
+php:
+    - 7.1
+    - 7.2
+    - 7.3
+    - 7.4snapshot
+
+env:
+    - dependencies=highest
+    - dependencies=lowest
+
+matrix:
+    fast_finish: true
+    allow_failures:
+        - php: 7.4snapshot
+
+cache:
+    directories:
+        - $HOME/.composer/cache
+
+stages:
+    - Code style & static analysis
+    - Test
+    - Code coverage
+
+jobs:
+    include:
+        - stage: Code style & static analysis
+          name: PHP CS Fixer
+          env: dependencies=highest
+          script: composer phpcs
+        - script: composer phpstan
+          env: dependencies=highest
+          name: PHPStan
+        - stage: Code coverage
+          php: 7.3
+          env: dependencies=highest
+          script:
+              - vendor/bin/phpunit --verbose --coverage-clover=build/logs/clover.xml
+              - wget https://scrutinizer-ci.com/ocular.phar
+              - php ocular.phar code-coverage:upload --format=php-clover build/logs/clover.xml --revision=$TRAVIS_COMMIT
+
+install:
+    - if [ "$dependencies" = "lowest" ]; then composer update --no-interaction --no-suggest --prefer-lowest --prefer-dist; fi;
+    - if [ "$dependencies" = "highest" ]; then composer update --no-interaction --no-suggest --prefer-dist; fi;
+
+notifications:
+    webhooks:
+        urls:
+            - https://zeus.ci/hooks/cf8597c4-ffba-11e7-89c9-0a580a281308/public/provider/travis/webhook
+        on_success: always
+        on_failure: always
+        on_start: always
+        on_cancel: always
+        on_error: always

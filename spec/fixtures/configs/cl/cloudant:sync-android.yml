@@ -1,0 +1,16 @@
+language: java
+sudo: false
+script: "./gradlew check integrationTest"
+
+jdk:
+  - oraclejdk8
+
+services:
+  - couchdb
+
+before_install:
+  - export TERM=dumb
+
+cache:
+  directories:
+  - $HOME/.m2

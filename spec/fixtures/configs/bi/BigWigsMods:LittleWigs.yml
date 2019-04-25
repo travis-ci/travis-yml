@@ -1,0 +1,18 @@
+language: minimal
+
+addons:
+  apt:
+    packages:
+    - luarocks
+
+install: luarocks install --local luacheck
+before_script:
+ - curl -s https://raw.githubusercontent.com/BigWigsMods/BigWigs/master/gen_option_values.lua | lua
+ - curl -sO https://raw.githubusercontent.com/BigWigsMods/BigWigs/master/.luacheckrc
+ - /home/travis/.luarocks/bin/luacheck . -q
+script: curl -s https://raw.githubusercontent.com/BigWigsMods/packager/master/release.sh | bash
+
+notifications:
+  email:
+    on_success: never
+    on_failure: always

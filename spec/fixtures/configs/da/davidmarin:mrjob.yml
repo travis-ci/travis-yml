@@ -1,0 +1,25 @@
+language: python
+python:
+  - "2.7"
+  - "3.4"
+  - "3.5"
+  - "3.6"
+  - "3.7"
+  - "pypy2.7-6.0"
+  - "pypy3.5-6.0"
+dist: xenial
+before_install:
+  - sudo apt-get install openjdk-8-jdk
+install:
+  - "pip install ."
+  - "pip install ujson warcio"
+  - "pip install rapidjson || true"
+  - "pip install pyspark || true"
+  - "export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64"
+  - "export PATH=$JAVA_HOME/bin:$PATH"
+  - "java -version"
+env:
+  global:
+    - JAVA_HOME=
+script: python -m unittest discover -v
+sudo: false

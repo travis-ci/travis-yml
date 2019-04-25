@@ -1,0 +1,31 @@
+sudo: false
+language: node_js
+node_js:
+- '6'
+- '7'
+- '8'
+script:
+- npm i -g npm@^5
+- npm i --no-optional
+- npm dedupe
+- make ci
+cache:
+  directories:
+  - node_modules
+matrix:
+  fast_finish: true
+before_deploy:
+- npm-prepublish --verbose
+deploy:
+  skip_cleanup: true
+  provider: npm
+  email: strategic.products@ft.com
+  api_key:
+    secure: BjJgXH0fOaPSlaDYNfFFDRn1i3nQpz7DfXLMgiesJWsMQnnbYjiHB1WFssm2Pnmkw6rlQn3RMMXMZEflD3X/rFEsdHMaubaz6uDD82GKkScLCgY08zGJGTMFJcXrLYx9+G2Qoq1AawlziA28qOIb/1Wb0UOnEW7slJceApR6cEI=
+  on:
+    tags: true
+    node: '6'
+    repo: Financial-Times/origami-build-tools
+env:
+  matrix:
+    secure: AQxsQuxjPpHLC48eezr/uHSthqT7x2R37HkbUT1co1YNtFad5bNYkS8dbbskoW33s8MX8DGZ0YFVB2W2j5VidXwby6Vbg2xBeHt7eIw23D3XeePZOUBgdbM9rpq7yB2nI0tJv+VmKdiFLFHc0EALnu1GMlvw7+n9KA8FO6IFxZM=

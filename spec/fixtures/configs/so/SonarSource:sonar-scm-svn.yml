@@ -1,0 +1,19 @@
+language: java
+sudo: false
+install: true
+
+script:
+  - ./travis.sh
+
+cache:
+  directories:
+    - $HOME/.m2/repository
+    - $HOME/.sonar
+
+notifications:
+  email: false
+  on_start: always
+  webhooks:
+    - secure: "As5j3h47958MFaj3BkGi81M8f2n7eh27Eu/y/zkO9T94SCuqUUKbgR5FV9P7kdidL2KxgwQB4NC/YiYtDCfTAOKS//u6BQRSw7IvXxBScAFCvDfpmgYdnai6DBboYsCi5nPUXGccojJcbXKbiToYuhz8Yw77+0IyxGI0inLMBVc="
+  on_start: always
+

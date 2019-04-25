@@ -1,0 +1,44 @@
+language: c
+sudo: false
+addons:
+  apt:
+    sources:
+    - ubuntu-toolchain-r-test
+
+install:
+  - bash -x devtools/travis-ci/install.sh
+  - export PYTHONUNBUFFERED=true
+  - export PATH=$HOME/miniconda3/bin:$PATH
+
+script:
+
+  # Create an environment for testing
+  - conda create --yes -n test python=$python
+  - source activate test
+  - conda config --add channels $ORGNAME
+  # Add dev channels
+  - conda config --add channels ${ORGNAME}/label/dev
+
+  - conda build devtools/conda-recipe
+  - conda install --yes --use-local ${PACKAGENAME}-dev
+  # Install testing dependencies
+  - conda install --yes --quiet pytest pytest-cov behave
+  # Test the package, measure coverage, verbose output,  include summaries of skipped and failed tests, skip slow tests.
+  - cd devtools && py.test --cov=${PACKAGENAME} --verbose -rxs --pyargs ${PACKAGENAME} -m "not slowtest" && cd ..
+  # Test generation of forcefield files
+  - cd protons/app/data && behave && cd ../../..
+  
+env:
+  matrix:
+    - python=3.5 CONDA_PY=35
+    - python=3.6 CONDA_PY=36
+     
+  global:
+    - ORGNAME="omnia"
+    - PACKAGENAME="protons"
+        
+after_success:
+  - echo "after_success"
+  - cd devtools && bash <(curl -s https://codecov.io/bash) && cd .. 
+
+  # - if [ "$TRAVIS_SECURE_ENV_VARS" == true ]; then source devtools/travis-ci/after_success.sh; fi

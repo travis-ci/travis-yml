@@ -1,0 +1,14 @@
+language: node_js
+node_js: "11.14.0"
+cache: npm
+before_install: npm install -g grunt-cli
+install: npm install
+deployg: grunt release
+before_script: grunt setup
+script:
+  - if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then echo "grunt test:prod"; grunt test:prod; fi
+  #- if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then echo "grunt sauce"; grunt sauce; fi
+env:
+  global:
+    - secure: "QiHFURctWLbr3uGEwqgABdKBzzXHHD819h4XTQsJ90Lcv04DsSzXZV0GAHa1bXiNIrNwxZD7T7fsakOBViEjIsginD1ZFAUMkR5KHYII3Gzlpu1ikuIHBrrPRLzTFhrsnJxFDRau9gwLeIoTgIP5AC3bw8ne/+6Oe6mW2fpphgU="
+    - secure: "SRFYya2d43gzs0WWmYhIqekI1gUoxqeox/hlc7vn6dEWxVNFsHA0oWkMSivSY8y9fqvUyh4p40e4NDlN86EnGF9aq/r4iNBMlIR0UVuxjVBi8HaMR5w3/JvlD7gNI7Y6du0cpkJaVAekJbi21HP1bmcV0sYXcXUj6uL4HUVq4sw="

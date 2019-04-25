@@ -1,0 +1,36 @@
+language: python
+os: linux
+
+env:
+  global:
+    - PYTHONUNBUFFERED="1"
+
+matrix:
+  include:
+  - python: 2.7
+    env: RUN_FLAKE8="1"
+  - python: 3.5
+  - python: 3.6
+  - python: pypy
+
+
+cache:
+  pip: true
+
+branches:
+  only:
+    - master
+    - maint/*
+
+install:
+  - pip list
+  - pip install -q -U pip attrs wheel coveralls;
+  - pip install -q .
+  - pip install -q -rdev_requirements.txt
+
+script:
+  - coverage run -m haas okonomiyaki
+  - if [[ ${RUN_FLAKE8} == "1" ]]; then flake8 okonomiyaki; fi
+
+after_success:
+  - coveralls

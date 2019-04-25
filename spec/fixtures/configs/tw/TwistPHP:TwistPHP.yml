@@ -1,0 +1,51 @@
+language: php
+
+group: stable
+dist: trusty
+os: linux
+
+php:
+  - 7.1
+    env COVERALLS=true
+    env GULP=true
+  - 7.2
+  - 7.3
+
+services:
+  - mysql
+
+env:
+  - DB=mysql
+
+mysql:
+  database: travis_ci_twist_test
+  username: root
+  encoding: utf8
+
+before_install:
+  - mysql -V
+  - mysql -e "CREATE DATABASE IF NOT EXISTS travis_ci_twist_test;"
+  - mysql -e "SHOW DATABASES"
+  - if [[ ${GULP} == "true" ]]; then nvm install 8.9.4&&npm install; fi;
+
+install:
+  - if [[ ${COVERALLS} == "true" ]]; then composer require satooshi/php-coveralls '~1.0'; fi;
+  - php ./tests/install.php
+  - rm -fR ./tests/packages && cp -R ./dist/packages ./tests
+
+before_script:
+  - mkdir -p ./build/logs
+  - mysql -e "USE travis_ci_twist_test; SHOW TABLES;"
+  - sed -i 's/Twist::ServeRoutes(false);/echo "TwistPHP Framework Loaded!\n\n";/g' ./tests/index.php
+  - if [[ ${GULP} == "true" ]]; then npm install -g gulp; fi;
+
+script:
+  - if [[ ${GULP} == "true" ]]; then gulp test; fi;
+  - phpunit --configuration phpunit.xml
+
+notifications:
+  on_success: never
+  on_failure: always
+
+after_success:
+  - if [[ ${COVERALLS} == "true" ]]; then ./vendor/bin/coveralls -v; fi;

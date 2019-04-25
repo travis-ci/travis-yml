@@ -1,0 +1,59 @@
+language: python
+sudo: false
+matrix:
+  include:
+    - os: linux
+      python: 3.5
+      env: TOXENV=py35
+    - os: linux
+      python: 3.6
+      env: TOXENV=py36
+    - os: linux
+      python: 3.7
+      # FIXME: Workaround for Python 3.7 support on TravisCI
+      dist: xenial
+      sudo: true
+      env: TOXENV=py37
+      after_success:
+        - tox -e coverage-report
+        - coveralls
+    # TODO: Re-add testing on MacOS
+
+    # Meta
+    - os: linux
+      # TODO: Use 3.7 when TravisCI has proper support for it
+      python: 3.6
+      env: TOXENV=flake8
+
+    # Deployment when all tests succeed. Skip installation and script.
+    - stage: deploy
+      before_install: true
+      install: true
+      script: true
+      os: linux
+      # TODO: Use 3.7 when TravisCI has proper support for it
+      python: 3.6
+      env: DEPLOY=true
+
+before_install:
+  - pip install coveralls
+
+install: pip install tox
+
+script: tox -vv
+
+cache: pip
+
+before_cache:
+  - rm -f $HOME/.cache/pip/log/debug.log
+
+deploy:
+  skip_cleanup: true
+  provider: pypi
+  user: pymoca.wheelbuilder
+  password:
+    secure: "GZaxb109ZfDBjhFfpWnPxsfNeRMjq226MyNUB7K3ferXpR3+MBx2pOfzuYf+VF8ypOeZ9DsCwVn2x+33eJEOoXUAS4HaCz1EYEgHvEsAGf6nZI9MlGP9AWgKTqvQBj6m/VrizuaXU9gs4sAWm6udH+nqzstmrp6XVZknNfADRRA="
+  distributions: "sdist bdist_wheel"
+  on:
+    tags: true
+    condition: $DEPLOY = true

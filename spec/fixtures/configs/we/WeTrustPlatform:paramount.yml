@@ -1,0 +1,18 @@
+language: node_js
+cache: yarn
+node_js:
+  - '10'
+script:
+  - yarn test
+  - yarn build
+after_success:
+  - yarn travis-deploy-once "npm run semantic-release"
+  - yarn build:docs
+deploy:
+  provider: pages
+  skip_cleanup: true
+  github_token: $GH_TOKEN
+  keep_history: true
+  local_dir: .docz/dist
+  on:
+    branch: master

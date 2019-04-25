@@ -1,0 +1,44 @@
+# Config file for automatic testing at travis-ci.org
+
+sudo: required
+dist: trusty
+
+addons:
+  hosts:
+    - node1
+    - node2
+    - server
+    - frontend
+
+language: python
+
+python:
+  # unused ? 
+  - "3.6"
+
+env:
+  - DB=postgresql
+
+before_install:
+ - sudo mkdir -p /etc/oar
+ - sudo chown -R $USER /etc/oar
+
+install:
+  - pip install tox coverage
+  - coverage erase
+
+before_script:
+  - psql -U postgres -c "CREATE USER oar WITH PASSWORD 'oar';"
+  - psql -U postgres -c "CREATE DATABASE oar;"
+  - psql -U postgres -c "GRANT ALL PRIVILEGES ON DATABASE oar to oar;"
+  - psql -U postgres -c "CREATE USER oar_ro WITH PASSWORD 'oar_ro';"
+  - PGPASSWORD=oar psql -U oar -c "ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO oar_ro;" -h localhost
+
+script:
+  - tox -e py-$DB oar tests
+
+after_success:
+    - coverage combine
+    # Report coverage results to codecov.io
+    - pip install codecov
+    - codecov

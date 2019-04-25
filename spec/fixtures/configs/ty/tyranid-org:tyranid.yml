@@ -1,0 +1,8 @@
+language: node_js
+dist: trusty
+sudo: false
+cache: yarn
+services: mongodb
+script:
+  - sh ./scripts/style-check.sh
+  - npm run test --silent

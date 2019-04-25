@@ -1,0 +1,108 @@
+language: python
+
+python: 3.5
+sudo: required
+dist: trusty
+
+env:
+    global:
+        - CXX=g++-4.8
+        # do not load /etc/boto.cfg with Python 3 incompatible plugin
+        # https://github.com/travis-ci/travis-ci/issues/5246#issuecomment-166460882
+        - BOTO_CONFIG=/doesnotexist
+        - SYNDICATION_VALIDATE_AUTH=0
+        - MAIL_SERVER='localhost'
+        - MAIL_PORT=2225
+        - MAIL_USERNAME=
+        - MAIL_PASSWORD=
+        - MAIL_USE_TLS=0
+        - MAIL_USE_SSL=0
+        - MAIL_DEBUG=1
+        - MAIL_SUPPRESS_SEND=True
+        # Using travis encrypted keys didn't solve the issue with cross-forks Pull Requests
+        # So, we can use the test key taken from http://embed.ly/code site
+        - EMBEDLY_KEY=fd92ebbc52fc43fb98f69e50e7893c13
+
+services:
+    - mongodb
+    - redis-server
+
+addons:
+  apt:
+    sources:
+    - mongodb-3.0-precise
+    - elasticsearch-1.7
+    - ubuntu-toolchain-r-test
+    packages:
+    - mongodb-org-server
+    - elasticsearch
+    - xvfb
+    - build-essential
+    - libudev-dev
+    - clang-3.3
+    - fakeroot
+    - git
+    - libgnome-keyring-dev
+    - g++-4.8
+    - google-chrome-stable
+
+cache:
+  directories:
+    - $HOME/.cache/pip
+    - $HOME/.npm
+
+before_install:
+    - nvm install 8.12.0
+    - nvm use 8.12.0
+    - sudo apt-get -qq update --allow-unauthenticated
+    - sudo apt-get purge -f elasticsearch
+    - sudo apt-get install -t stable elasticsearch
+    - node --version
+    - npm config set loglevel warn
+    - npm install -g grunt-cli
+    - pip install requests
+    - export DISPLAY=:99.0
+    - /sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -ac -screen 0 1920x1080x24
+    - export CHROME_BIN=`which google-chrome`
+    - $CHROME_BIN --version
+
+install:
+    - cd $TRAVIS_BUILD_DIR/server
+    - pip install --upgrade setuptools
+    - pip install -r dev-requirements.txt
+    - cd $TRAVIS_BUILD_DIR/client && npm install && cd .. ;
+
+before_script:
+    - ./scripts/elastic.sh
+    - sudo service elasticsearch restart && sleep 10
+    - cd $TRAVIS_BUILD_DIR/server
+    - (nohup env LOG_CONFIG_FILE=../logging_travis_config.yml SUPERDESK_URL='http://localhost:5000/api' SUPERDESK_CLIENT_URL='http://localhost:9000' WEB_CONCURRENCY=3 WEB_TIMEOUT=8 SUPERDESK_TESTING='True' honcho start &)
+    - cd $TRAVIS_BUILD_DIR/client
+    - MARKETPLACE=true SYNDICATION=true grunt build --server='http://localhost:5000/api' --ws='ws://localhost:5100'
+    - cd dist
+    - while [ ! -f index.html ]; do sleep .5; done
+    - (nohup sudo python3 -m smtpd -n -c DebuggingServer localhost:2225 &)
+    - (nohup python3 -m http.server 9000 &)
+
+script:
+    - cd $TRAVIS_BUILD_DIR/server && nosetests --all-modules --nocapture;
+    - cd $TRAVIS_BUILD_DIR/server && behave --format progress2 --logging-level ERROR ;
+    - cd $TRAVIS_BUILD_DIR/server && flake8 ;
+    - cd $TRAVIS_BUILD_DIR/client && npm test ;
+    - cd $TRAVIS_BUILD_DIR/server
+    - python3 app_init_elastic.py ;
+    - python3 manage.py app:initialize_data ;
+    - python3 manage.py users:create -u admin -p admin -e 'admin@example.com' --admin ;
+    - python3 manage.py register_local_themes ;
+    - python3 manage.py register_bloglist ;
+    - cd $TRAVIS_BUILD_DIR/client
+    - ./node_modules/protractor/bin/webdriver-manager update --gecko false --versions.chrome=2.46 --versions.standalone=3.9.1
+    - ./node_modules/.bin/protractor protractor-conf.js
+
+after_script:
+    - killall -9 python
+
+after_success:
+    - curl -LO https://raw.github.com/stephanmg/travis-dependent-builds/master/trigger.sh
+    - chmod +x trigger.sh
+    - ./trigger.sh liveblog generator-liveblog-theme master $TRAVIS_ACCESS_TOKEN

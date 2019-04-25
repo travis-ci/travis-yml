@@ -1,0 +1,27 @@
+sudo: required
+
+services:
+  - docker
+
+env:
+  - UBUNTU="16.04" FEATURE="HelloWorld"
+  - UBUNTU="16.04" FEATURE="phpMyAdmin"
+  - UBUNTU="16.04" FEATURE="WordPress"
+  - UBUNTU="16.04" FEATURE="Shopware"
+  - UBUNTU="17.10" FEATURE="HelloWorld"
+  - UBUNTU="17.10" FEATURE="phpMyAdmin"
+  - UBUNTU="17.10" FEATURE="WordPress"
+  - UBUNTU="17.10" FEATURE="Shopware"
+  - UBUNTU="18.04" FEATURE="HelloWorld"
+  - UBUNTU="18.04" FEATURE="phpMyAdmin"
+  - UBUNTU="18.04" FEATURE="WordPress"
+  - UBUNTU="18.04" FEATURE="Shopware"
+
+script:
+  - docker build -t caddy-script -f Dockerfiles/$UBUNTU .
+  - docker run caddy-script /bin/bash -c "export TRAVIS_CI=1; export FEATURE=$FEATURE; apt-get update; apt-get install -y curl sudo software-properties-common; bash main.sh"
+
+notifications:
+  email:
+    recipients:
+      - vintagesucks@gmail.com

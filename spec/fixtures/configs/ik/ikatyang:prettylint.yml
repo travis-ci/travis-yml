@@ -1,0 +1,21 @@
+language: node_js
+
+node_js:
+- 4
+- stable
+
+script:
+- yarn run lint
+- yarn run test
+- yarn run docs && git diff --exit-code README.md
+
+after_script:
+- yarn codecov
+
+cache:
+  yarn: true
+  directories:
+  - node_modules
+
+matrix:
+  fast_finish: true

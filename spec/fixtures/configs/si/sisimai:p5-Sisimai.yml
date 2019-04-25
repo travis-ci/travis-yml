@@ -1,0 +1,21 @@
+language: perl
+perl:
+  - '5.10'
+  - '5.16'
+  - '5.22'
+  - '5.28'
+before_install:
+  - cpanm Test::UsedModules
+  - cpanm Devel::Cover::Report::Coveralls
+script:
+  - perl Build.PL 
+  - ./Build build 
+  - travis_wait 35 cover -test -report coveralls
+after_success:
+  - travis_wait 35 cover -report coveralls
+notifications:
+  recipients:
+    - azumakuniyuki+travis-ci.org@gmail.com
+  email:
+    on_success: change
+    on_failure: always

@@ -1,0 +1,20 @@
+sudo: false
+language: node_js
+cache:
+  directories:
+    - node_modules
+notifications:
+  email: false
+node_js:
+  - '4'
+script:
+  - npm test
+  - npm run build
+after_success:
+  - "./_travis/deploy-to-ghpages.sh"
+env:
+  global:
+    secure: I8ITlDEatDBQe/sRMAstecQt7R1q3pkSc9mtiJylH8N0heaC0WhmgELk4kT03j68/5emFOAeg12NZsquSkt9aiBmapDV9utQMu5NooC4rGgK+p0keal22w4iLP/PIO7frcioBvoR1xdtVZbymtf2ptBc8BKTJOPScX+uj6SlU6w=
+branches:
+  except:
+    - "/^v\\d+\\.\\d+\\.\\d+$/"

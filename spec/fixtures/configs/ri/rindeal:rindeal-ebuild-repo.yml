@@ -1,0 +1,57 @@
+# Initial idea of repoman checks: https://github.com/mrueg/repoman-travis
+
+# use "Trusty" as "Precise" has bash 4.2 only, which doesn't support nameref vars
+dist: trusty
+sudo: required
+language: generic
+services:
+    - docker
+
+git:
+    depth: 1
+branches:
+    only:
+        - 'master'
+        - '/^dev\//'
+        - '/^ci\//'
+
+## env config and env-based matrix
+env:
+    global:
+        ## configurable variables
+        - 'DOCKER_REPO=rindeal/portage-amd64-base'
+        - 'DOCKER_TAG=latest'
+
+## final touches to the matrix
+matrix:
+    fast_finish: true
+
+# -----------------------------------------------------------------------------
+
+install:
+    - 'docker pull "${DOCKER_REPO}:${DOCKER_TAG}"'
+
+script:
+    - '.travis/script.sh "${DOCKER_REPO}" "${DOCKER_TAG}"'
+
+# after_success:
+#     - cd "${TRAVIS_BUILD_DIR}"
+#     - .travis/setup_git.sh
+
+# -----------------------------------------------------------------------------
+
+notifications:
+  email: false
+  hipchat:
+    rooms:
+      secure: qFt4CiPYVtqWLZQxOcNJd5dbYEyrImEAsDFjqz8PWt5P+xNFwte+09kYXPauEuUOCSnZjeRB2x6ngTD7r+WqJc4Cs5zQhfe3c/cptdyKFA252Tpo3UNRE69rieDlt3Chrq7jUAucrDkzeu/zrKFvwpKq0az12CfW7HxUgy2jBoikIBIRnAAkdG8DO6bNzveNsRt8pBbnGt80KZAQhRS5DwsNtzpiJrXcj6AkFls0sDxvWVB1rZC6qZ5xB0DGTH9Esa+a+Au+SwjnK4C+GqeeiYgD9nVWQ4rvyCuyfcUqEcts8jOE2zxK475EpWutpVEkMWGfLNEmllElhyjay+QemacACYC2izI8DRaXck29qK2Hr4pNkWR1b5pEwdkS5tHWhnd+/hkKXagMYYclJ0w7X/vzyBkKyre1SLkYA6iyzv/AREuq7Ievk3bRY+e40+1tUgUWHaykOuwSYKOe2LwHpMfX3VMOiiyEvCcVf69TVjftyGU7YELABm8buGYdaVldSQcZq7mOX4Ddqo5bKOwgexpG/pWSbRDUUiV6lb88s2OiRpZqxN9gW3x5o7C3tEwp6SaNJZ3PL86c5isiIFbhtq8hCzgEfH8ISb/MSHpLD2RkQruUtsTKt8sJ51wUVj7wZp1Zi+33CLVasO6sx115EXV55ub30Z8pZzDwZwlRuQU=
+    notify: true
+    on_pull_requests: false
+    template:
+      - |
+        %{repository_name}#%{branch}: Build #%{build_number}: %{result}
+        %{commit} '%{commit_subject}' by %{author}
+        Diff: %{compare_url}
+        Build details: %{build_url}
+  webhooks:
+    - https://fathomless-fjord-24024.herokuapp.com/notify

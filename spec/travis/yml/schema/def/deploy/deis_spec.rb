@@ -35,10 +35,10 @@ describe Travis::Yml::Schema::Def::Deploy::Deis, 'structure' do
                 type: :string
               },
               username: {
-                '$ref': '#/definitions/secure'
+                '$ref': '#/definitions/type/secure'
               },
               password: {
-                '$ref': '#/definitions/secure'
+                '$ref': '#/definitions/type/secure'
               },
               app: {
                 type: :string

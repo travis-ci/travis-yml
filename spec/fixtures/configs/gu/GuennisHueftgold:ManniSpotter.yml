@@ -1,0 +1,99 @@
+language: android
+env:
+  global:
+    - ANDROID_BUILD_TOOLS=27.0.3
+    - ADB_INSTALL_TIMEOUT=10
+  matrix:
+    - ANDROID_TARGET=android-21 ANDROID_ABI=armeabi-v7a ANDROID_VERSION=21
+    #- ANDROID_TARGET=android-24 ANDROID_ABI=arm64-v8a ANDROID_VERSION=24
+    - ANDROID_TARGET=android-25 ANDROID_ABI=arm64-v8a ANDROID_VERSION=25
+
+jdk:
+  - oraclejdk8
+  
+android:
+  #update_sdk: true
+  components:
+    - platform-tools
+    - tools
+    # The BuildTools version used by your project
+    - build-tools-$ANDROID_BUILD_TOOLS
+
+    # The SDK version used to compile your project
+    - $ANDROID_TARGET
+
+    # Additional components
+    - extra-google-google_play_services
+    - extra-google-m2repository
+    - extra-android-m2repository
+    - addon-google_apis-google-27
+
+    # Specify at least one system image,
+    # if you need to run emulator(s) during your tests
+    #- sys-img-$ANDROID_ABI-google_apis-$ANDROID_VERSION
+    - add-on
+    - extra
+  licenses:
+    - android-sdk-license-.+
+    - '.+'
+before_cache:
+  - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+  - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+cache:
+  directories:
+    - $HOME/.gradle/caches/
+    - $HOME/.gradle/wrapper/
+    - $HOME/.android/build-cache
+before_install:
+  #- $ANDROID_HOME/tools/bin/sdkmanager "build-tools;27.0.3" "platforms;android-27"
+  #- yes | $ANDROID_HOME/tools/bin/sdkmanager --licenses
+  - mkdir "$ANDROID_HOME/licenses" || true;
+  - echo "8933bad161af4178b1185d1a37fbf41ea5269c55" > "$ANDROID_HOME/licenses/android-sdk-license";
+  - echo "d56f5187479451eabf01fb78af6dfcb131a6481e" > "$ANDROID_HOME/licenses/android-sdk-license";
+  - echo "84831b9409646a918e30573bab4c9c91346d8abd" > "$ANDROID_HOME/licenses/android-sdk-preview-license";
+#  - echo "sdk=$ANDROID_VERSION" > "mobile/src/test/resources/com/semeshky/kvgspotter/robolectric.properties"
+#  - yes | $ANDROID_HOME/tools/bin/sdkmanager --licenses
+  - cp ./mobile/example.secrets ./mobile/debug.secrets
+  - cp ./mobile/example.secrets ./mobile/release.secrets
+  - chmod +x gradlew
+  - export QEMU_AUDIO_DRV=none
+  - openssl aes-256-cbc -K $encrypted_cfe0f79285a1_key -iv $encrypted_cfe0f79285a1_iv -in ./mobile/release_signing.tar.enc -out ./mobile/release_signing.tar -d
+  - tar xvf ./mobile/release_signing.tar -C ./mobile
+after_install:
+  - ./gradlew dependencies || true
+script:
+  - ./gradlew build test combineAllCoverageReports
+after_success:
+  - bash <(curl -s https://codecov.io/bash) -f "mobile/build/reports/jacoco/testGmapsPlayServicesDebugUnitTestCoverage/testGmapsPlayServicesDebugUnitTestCoverage.xml" -F "GmapsPlayServicesDebug" -n "GmapsPlayServicesDebug"
+  - bash <(curl -s https://codecov.io/bash) -f "mobile/build/reports/jacoco/testGmapsPlayServicesReleaseUnitTestCoverage/testGmapsPlayServicesReleaseUnitTestCoverage.xml" -F "GmapsPlayServicesRelease" -n "GmapsPlayServicesRelease"
+  - bash <(curl -s https://codecov.io/bash) -f "mobile/build/reports/jacoco/testOsmNoPlayServicesDebugUnitTestCoverage/testOsmNoPlayServicesDebugUnitTestCoverage.xml" -F "OsmNoPlayServicesDebug" -n "OsmNoPlayServicesDebug"
+  - bash <(curl -s https://codecov.io/bash) -f "mobile/build/reports/jacoco/testOsmNoPlayServicesReleaseUnitTestCoverage/testOsmNoPlayServicesReleaseUnitTestCoverage.xml" -F "OsmNoPlayServicesRelease" -n "OsmNoPlayServicesRelease"
+  - bash <(curl -s https://codecov.io/bash) -f "mobile/build/reports/jacoco/testOsmPlayServicesDebugUnitTestCoverage/testOsmPlayServicesDebugUnitTestCoverage.xml" -F "OsmPlayServicesDebug" -n "OsmPlayServicesDebug"
+  - bash <(curl -s https://codecov.io/bash) -f "mobile/build/reports/jacoco/testOsmPlayServicesReleaseUnitTestCoverage/testOsmPlayServicesReleaseUnitTestCoverage.xml" -F "OsmPlayServicesRelease" -n "OsmPlayServicesRelease"
+after_failure:
+  - "cat $TRAVIS_BUILD_DIR/app/build/outputs/lint-results-debug.xml"
+jobs:
+  include:
+    - stage: deploy
+      script:
+        - ./gradlew assembleRelease
+        #- find -L
+      #after_success: skip
+      after_failure: skip
+      before_deploy:
+        - mkdir github_release_dir
+        - cp ./mobile/build/outputs/apk/osmPlayServices/release/mobile-osm-playServices-release.apk ./github_release_dir/mobile-osm-playServices-release.apk
+        - cp ./mobile/build/outputs/apk/osmNoPlayServices/release/mobile-osm-noPlayServices-release.apk ./github_release_dir/mobile-osm-noPlayServices-release.apk
+        - cp ./mobile/build/outputs/mapping/osmPlayServices/release/mapping.txt ./github_release_dir/mobile-osm-playServices-release-unsigned.txt
+        - cp ./mobile/build/outputs/mapping/osmNoPlayServices/release/mapping.txt ./github_release_dir/mobile-osm-noPlayServices-release-unsigned.txt
+      deploy:
+        provider: releases
+        api_key:
+          secure: "a56ZlDXm3imMENica2ivOifITUOdCMvDTZW2gdyA23paGE8aKBjQdRDTZAzdeiHOzIijKSaQG/tD+MJyXoppXE3ENNwM+xd8b5UZYK9SmkVgpUF76ILEfUpIVPjztHo8RUwRWgpBfFVXiVtMixAl0Wb6b6CkmZnKCtLl7/Dgxk9a0KEkyGiwwBqTGid9k9K59uULwXVVx7MXkFZhb3jrhToB1WM1dQTcWozNn7JIHg0sEmxaj+CEFi5qPWGYEyyOPGy4pFRC/nog2nut3u2ji7HX6lvM+vfoMwT2l0akkU5cSsVZAmbsjkiay8R7OL//o9QHgOe0oXcvidlM5PgLYbBQ+W7AhARaqxrBjaHDJAOn9X8vy8XS9knZcD0v4aJihVwcx0A35dJqj8yWMmUpiVFuXvTEO6DcvYfgDA/UyFxgI+siVXoQji2isPCCFwZZA6uYZTwTtlQYAl1S+Sz9jgsQNfLmwYQmlRX7CQT5uby4761f7Sj3bvpo/R+7jPW6dZ/YRD7HnWSP7mLmFCIrFnlB5HZMNmgXdrcZTYTxDdj7UP6HyIbQnAoIdl+rrjVjGsCQy6vT9Qq2mN4luuI9+556R1Jp4cE16z5S04rMNR11i7lvkP6CVzHeI7U8zkbMKlIpbtwc7rFkPL79+fbR5h2GJiZ0N+K57O/pvTIUunw="
+        file: ./github_release_dir/*
+        skip_cleanup: true
+        file_glob: true
+        on:
+          repo: GuennisHueftgold/ManniSpotter
+          #all_branches: true
+          tags: true

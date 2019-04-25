@@ -1,0 +1,46 @@
+dist: trusty
+sudo: false
+language: python
+
+python:
+  - "2.7"
+
+cache:
+  - pip
+  - apt
+
+addons:
+  postgresql: '9.4'
+
+services:
+  - elasticsearch
+
+before_install:
+  # bust only the the part of the cache that we are frequently changing
+  - pip uninstall --yes gdcdictionary gdcdatamodel || true
+  # resolve https://github.com/travis-ci/travis-ci/issues/7940
+  - export BOTO_CONFIG=/dev/null
+
+# command to install dependencies
+install:
+  - pip install -r requirements.txt
+  - pip install -r dev-requirements.txt
+
+before_script:
+  - psql -c "create database test_userapi" -U postgres
+  - userdatamodel-init --db test_userapi
+  - pip freeze
+  - python bin/setup_test_database.py
+  - mkdir -p tests/resources/keys; cd tests/resources/keys; openssl genrsa -out test_private_key.pem 2048; openssl rsa -in test_private_key.pem -pubout -out test_public_key.pem; cd -
+
+# command to run tests
+script:
+  - py.test -vv --cov=peregrine --cov-report xml tests
+
+after_script:
+  - python-codacy-coverage -r coverage.xml
+
+env:
+  global:
+    - GDC_ES_HOST=localhost
+

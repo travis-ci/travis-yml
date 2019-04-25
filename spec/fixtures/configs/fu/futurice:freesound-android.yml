@@ -1,0 +1,51 @@
+language: android
+install: true
+sudo: false
+notifications:
+    email: false
+env:
+    global:
+        - ADB_INSTALL_TIMEOUT=8
+        - secure: QpUXkvtcjmZW7s/Cn5yZyZTtiljGHg12Als/DEdXrxcUm5KlWyg6ovy3+P51Mf5uyyJ8XAB6+z3kFG4COqcd0QBDGqcybuZaEw1fK72HjtixL1pgapuUtfyHdBvp2xb8J+zzCS92cYJTc2ZVXUXsnAR8+JWaZZTJUQ8dEg+7rKuJsTs0kWachQet6jFw18O2LiXPK+oKHwHKAN1JvWijU2pajx4R2B5lRtZE6JCbqOLRZE1yWskIFuaovAU5Ovg+Auh4UL78iaOGCG4t9SObH2tAc4hyh+NHUD0lgDWWiwSp6wI+1Qcz8TuL1GB2Y5VCb/kHrfp5oHi1Yq/B32BF/6bQ6O9WzMcPhqA48H38z+ydEz0oeMLzh+4pGhHaYoOI4Z+R/iejQbVcL5nPjp6v4u01yfCjozo+W31N25A2tWN0lUrHAWookBWQhT2qllsfnjTT2UZXtURNZf/85/PX7VGXKp19Up1P6HaOE+sChwehIyTdT4ooiVo5gMO0w19GM7VR4UlX6R21/4223CAzW1srger6CUlhCCzGVs7102zF9DRZkNimIXH0AXr3l6ZBJH6ncx+r5D/RzieUqecpLjc+FVzdMwL/TWMdPVVXQW41jAygUR0h3to/0wBiGTqvgTJDdBRBlkEhOxqbza6hsFzZbl5DlvcHlt8tgQpsHX4=
+        - secure: dHJVRNPDEo09hM/+gUmos2yMx9iAsGeoOStMDFu13ELgQiJ/kVvfLfzn/8Jj64vv+bihVhxbYsphB5nEAKr1kGrIJ8I8OWHiw+csp7fS17NEDQkmp+Z1ysIlb6qh1fz1h9UxvbOMzJqFukVeDzV7NYfEqmC+ziHUtWG8wXpS5imVpPKgGhkh8L9+p9oAZd4i40S9hr29I3c4dRkKK7rRa+X2zXqqmz0J0/3/rUusRGJ2z8cICy4ykezxGP1cqAka5Rh+clTkV02aX9sO0P3L+Uyf6WP7QSVmUQLmx9/9F7gvwL3nteuapb4i4G9R5ZDSSNIW/aOK0GoTd6XMenyT/ZThRpjXVkA6/MkreLm+VK8tfcRa9GFiqClL86z8Vk+63BopnSy9p/Hea10YDpHUxj5jKao/941bQAmGQT2AxrZZ+IKI4WXf1ialMX7HznCq1WLY7pEg23yOHGeT1QTClc/y4k+XD0nTnVesGZgDAuhUHZMie/4Iz+UG7h0reVY32uZjgrt5q4j7280S7ux6MtddUEMe4DyBg+jQHNNcGUDRyiAjnf4YpPVTnzwmxiUBwM+U4/Zj6GJCs876E4XkYDYOLex7NplNlJaVOE1mdYnCUyctheAOVlcVoqGXOM4L5moy2+qz6JEal3lw3mNFrZM1b2se9ns46PI7BS4Oiwk=
+addons:
+    sonarcloud:
+        token:
+            secure: BS0mcGFozsATMw0AZgMWA0ZCV92fmSjaEXvO9HIb64Zp5IwHuGVJSeTuRvVo3nm5DKJUpTF3fXA1VlpMndOpEf5xD4ph2AOR4PJoiMcv1EPEYKWMkiV+XH4mJEkpvN8R4VVmY8ShtF5JJ1W9X6L/JRULIhiGDaV6bJZ4v2gJ8O69MTSPsD8ILg4Gp7ueel3c49fklvJ3NhyDmaEbNEu50zD67ACpsSwGpccrzzs25S5Ep7G9WDPI5BH7IGUbegXpmOb1hkfYjc/QuGg62PkkclQNJ+cruJBGD2VtiRF63lNZiVXZb/7FNwatMumFgVSjXeku1HKiCVfBSFAtpx/Yo5uSHWvf0bPUWmbypzcLpwNRWGoqUMeyExu/a49GvaQIsl3u2VYqADi0hmUzxxZaDP/u5WSwr8y2fqEVj8SEKT81+Fqv20ZhcWMjn7A0eBRWbQ3Rn2MX27tuNP3PHzSZ6btURToQp432ViQWcDfXRETtHpwH+4GsIfQOWhl/LY/K8OuHjFPfqfLVsEi3uR+jn68uzMaxCDSsVuye+NPN53r9J28x/zTq5GC3mP8iLiz8fnR95L9ulmtk6bJBdt5uvzJHIG4ErmnW229CrdYW4u5jGTk1lBXPClUnuz+QgQu7fOkUbPS/e9vR3I0fTMHbkVz1HCwf3PLOtU89/N2rP2o=
+cache:
+    directories:
+        - "$HOME/.m2/repository"
+        - "$HOME/.sonar/cache"
+        - "$HOME/.gradle"
+        - ".gradle"
+jdk:
+    - oraclejdk8
+
+android:
+    licenses:
+        - android-sdk-license-.+
+        - '.+'
+    components:
+        - platform-tools
+        - tools
+        - build-tools-25.0.2
+        - android-25
+        - android-24
+        - extra-google-m2repository
+        - sys-img-armeabi-v7a-android-24
+
+before_install:
+    - mkdir "$ANDROID_HOME/licenses" || true
+    - echo -e "d56f5187479451eabf01fb78af6dfcb131a6481e" > "$ANDROID_HOME/licenses/android-sdk-license"
+
+before_script:
+    - echo no | android create avd --force -n test -t android-24 --abi armeabi-v7a
+    - emulator -avd test -no-window &
+    - android-wait-for-emulator
+    - adb shell settings put global window_animation_scale 0 &
+    - adb shell settings put global transition_animation_scale 0 &
+    - adb shell settings put global animator_duration_scale 0 &
+    - adb shell input keyevent 82 &
+
+script:
+    - "./gradlew check connectedCheck sonarqube"

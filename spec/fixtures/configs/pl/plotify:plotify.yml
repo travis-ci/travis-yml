@@ -1,0 +1,27 @@
+language: node_js
+node_js: "8"
+
+os:
+  - linux
+  - osx
+dist: trusty
+
+cache:
+  directories:
+    - node_modules
+    - $HOME/.cache/electron
+    - $HOME/.cache/electron-builder
+    - $HOME/Library/Caches/electron
+    - $HOME/Library/Caches/electron-builder
+
+before_script:
+  - npm prune
+  - npm run rebuild
+
+script:
+  - npm run lint
+  - npm run dist
+  - npm run coverage
+
+after_success:
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then npm run report-coverage ; fi

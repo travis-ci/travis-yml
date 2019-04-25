@@ -1,0 +1,5 @@
+language: scala
+script:
+  - sbt compile
+after_success:
+  - 'if [[ $TRAVIS_PULL_REQUEST == "false" ]]; then bash ./deploy.sh; fi'

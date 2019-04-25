@@ -1,0 +1,19 @@
+sudo: required
+language: c
+services:
+  - docker
+
+script:
+  - make build
+  - make lint
+  - make test
+
+deploy:
+  provider: script
+  script: bash scripts/auth.sh && make tag && make push
+  on:
+    branch: master
+
+notifications:
+  email:
+    on_success: never

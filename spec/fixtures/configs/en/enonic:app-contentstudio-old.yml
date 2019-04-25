@@ -1,0 +1,22 @@
+language: java
+sudo: required
+
+jdk:
+  - openjdk11
+
+install: true
+script:
+  - ./gradlew build --stacktrace --no-daemon
+
+cache:
+  directories:
+    - $HOME/.gradle/caches/
+    - $HOME/.gradle/wrapper/
+
+notifications:
+  email:
+    recipients:
+      - ase@enonic.com
+      - jsi@enonic.com
+    on_success: change
+    on_failure: always

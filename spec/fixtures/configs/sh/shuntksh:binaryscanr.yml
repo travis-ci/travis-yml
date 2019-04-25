@@ -1,0 +1,18 @@
+sudo: required
+language: node_js
+node_js: stable
+services:
+  - docker
+branches:
+  only:
+    - master 
+    - /^greenkeeper/.*$/
+script:
+  - yarn test
+  - yarn compile
+
+# after_success:
+#   - if [ "$TRAVIS_BRANCH" == "master" ]; then
+#     docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
+#     docker push USER/REPO;
+#     fi

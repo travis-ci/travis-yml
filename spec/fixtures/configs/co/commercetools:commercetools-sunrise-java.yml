@@ -1,0 +1,29 @@
+dist: trusty
+sudo: false
+
+language: scala
+scala:
+- 2.11.8
+jdk:
+- oraclejdk8
+
+cache:
+  # md5deep
+  # - https://github.com/travis-ci/travis-ci/issues/3122
+  # - https://github.com/travis-ci/travis-ci/issues/3039
+  branch: md5deep
+  directories:
+    - $HOME/.ivy2/cache
+    - $HOME/.sbt/boot/
+before_cache:
+  # Tricks to avoid unnecessary cache updates
+  - find $HOME/.ivy2 -name "ivydata-*.properties" -delete
+  - find $HOME/.sbt -name "*.lock" -delete
+
+script:
+- sbt clean compile test pt:test it:test unidoc
+
+notifications:
+  email:
+    on_success: never
+    on_failure: change

@@ -1,0 +1,39 @@
+sudo: required
+
+dist: trusty
+
+services:
+  - docker
+
+language: node_js
+
+node_js:
+  - "8"
+  - "10"
+
+env:
+  SKIP_SASS_BINARY_DOWNLOAD_FOR_CI=true
+  SKIP_NODE_SASS_TESTS=true
+
+cache:
+  yarn: true
+  directories:
+    - node_modules
+
+install:
+  - yarn
+
+script:
+  - yarn test -- --coverage
+
+after_success:
+  - yarn report-cov
+
+deploy:
+  skip_cleanup: true
+  provider: script
+  script: chmod +x ./deploy-docker.sh && ./deploy-docker.sh
+  on:
+    branch: master
+
+

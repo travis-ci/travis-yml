@@ -1,0 +1,82 @@
+language: erlang
+
+otp_release:
+ - 20.0
+ - 19.1
+
+env:
+ - TASK=acceptance-basic-tests
+ - TASK=dialyzer
+ - TASK=unit-tests
+ - TASK=development-with-rsync
+ - TASK=http-worker-tests
+ - TASK=validate-examples
+ - TASK=error-messages
+ - TASK=acceptance-local-tests
+ - TASK=acceptance-migrations-tests
+
+matrix:
+  include:
+  - otp_release: 19.1
+    env: TASK=python-lint
+  - otp_release: 19.1
+    env: TASK=python-tests
+
+addons:
+  apt:
+    packages:
+      - python-virtualenv
+      - parallel
+      - nodejs
+
+cache:
+  directories:
+    - $HOME/.cache/pip
+    - $HOME/.cache/rebar3
+
+# before_install and install below are only because of erlexec
+before_install:
+- sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+- sudo apt-get update -qq
+
+# get a list of pre-compiled versions
+before_script:
+- kerl list installations
+
+install:
+- sudo apt-get install -qq g++-4.9
+- export CXX="g++-4.9"
+
+script:
+ - virtualenv venv
+ - source venv/bin/activate
+ - ./bin/rebar3 update
+ - export PROJECTS="node server common_apps/mzbench_language common_apps/mzbench_utils";
+ - case "$TASK" in
+     python-lint) pip install pyflakes && ./bin/lint.py . ;;
+     python-tests) pip install -r requirements.txt && pip install -r acceptance_tests/requirements.txt && ./lib/bdl_utils_test.py ;;
+     validate-examples) pip install -r requirements.txt && make -C examples check;;
+     error-messages) pip install -r requirements.txt && make -C acceptance_tests/invalid_scripts check;;
+     http-worker-tests) pip install -r requirements.txt &&
+                       export NODE_COMMIT=`git rev-parse HEAD` &&
+                       export MZBENCH_REPO=`pwd` &&
+                       cd workers/http &&
+                       make && make check-local;;
+     acceptance-*-tests) pip install -r requirements.txt &&
+                       pip install -r acceptance_tests/requirements.txt &&
+                       parallel -j2 --arg-sep ,, ,, "make -C" ,, "server generate" "node local_tgz"  &&
+                       export NODE_COMMIT=`git rev-parse HEAD` &&
+                       export MZBENCH_REPO=`pwd` &&
+                       cd acceptance_tests &&
+                       make ${TASK/acceptance-/};;
+     development-with-rsync) pip install -r requirements.txt &&
+                       pip install -r acceptance_tests/requirements.txt &&
+                       parallel -j2 --arg-sep ,, ,, "make -C" ,, node server ,, generate &&
+                       export MZBENCH_RSYNC=$PWD/ &&
+                       rm node/Makefile &&
+                       make -C acceptance_tests quick-test >/dev/null; [ $? -ne 0 ] &&
+                       git checkout -- node/Makefile &&
+                       make -C acceptance_tests quick-test;;
+     unit-tests) parallel -j4 --arg-sep ,, ,, "make -C" ,, $PROJECTS ,, test-unit ;;
+     dialyzer) parallel -j4 --arg-sep ,, ,, "make -C" ,, $PROJECTS ,, dialyzer.log ;;
+   esac

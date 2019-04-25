@@ -1,0 +1,92 @@
+language: java
+
+dist: xenial
+
+jdk:
+  - openjdk11
+  - openjdk8
+  - openjdk-ea
+
+matrix:
+  allow_failures:
+  - jdk: openjdk8
+  - jdk: openjdk-ea
+
+cache:
+  directories:
+  - $HOME/.m2
+
+install:
+  - mvn --settings .travis/settings.xml install -DskipTests=true -Dmaven.javadoc.skip=true --batch-mode --update-snapshots --show-version --quiet
+
+script:
+  - mvn test -Dmaven.javadoc.skip=true --batch-mode --fail-fast # --quiet
+
+before_install:
+  - echo $GPG_SECRET_KEYS | base64 --decode | $GPG_EXECUTABLE --import
+  - echo $GPG_OWNERTRUST | base64 --decode | $GPG_EXECUTABLE --import-ownertrust
+
+notifications:
+    email:
+        on_success: never
+        on_failure: never
+    slack:
+        on_failure: change
+        on_success: change
+        rooms:
+            - openbase-org:vGz7LO4CvGoGMneYkEm3ON7E#build
+stages:
+  - compile
+  - test
+  - documentation
+  - deploy
+  - trigger
+
+jobs:
+  include:
+    - &compile
+      stage: compile
+      script: skip  # skip tests
+    - <<: *compile
+      jdk: openjdk8
+    - <<: *compile
+      jdk: openjdk-ea
+    - &documentation
+      stage: documentation
+      install: skip # skip compile
+      script: .travis/generate-doc.sh
+    - <<: *documentation
+      jdk: openjdk8
+    - <<: *documentation
+      jdk: openjdk-ea
+    - stage: deploy
+      name: "Central Maven"
+      install: skip # skip compile
+      script: skip  # skip tests
+      deploy:
+      - provider: script
+        script: .travis/deploy.sh
+        skip_cleanup: true
+        on:
+            repo: ${REPO_ID}
+            branch: master
+      - provider: script
+        script: .travis/deploy.sh
+        skip_cleanup: true
+        on:
+            repo: ${REPO_ID}
+            tags: true
+    - stage: trigger
+      name: "Upstream Projects"
+      install: skip # skip compile
+      script: |
+        echo "TRAVIS_BRANCH=$TRAVIS_BRANCH TRAVIS_PULL_REQUEST=$TRAVIS_PULL_REQUEST"
+        if [[ ($TRAVIS_BRANCH == master) &&
+              ($TRAVIS_PULL_REQUEST == false) ]] ; then
+          curl -LO --retry 3 https://raw.github.com/mernst/plume-lib/master/bin/trigger-travis.sh
+
+          # trigger upstream projects
+          for PROJECT in ${UPSTREAM_PROJECTS}; do
+              sh trigger-travis.sh openbase ${PROJECT} $TRAVIS_ACCESS_TOKEN
+          done
+        fi

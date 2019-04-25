@@ -1,0 +1,65 @@
+language: android
+jdk: oraclejdk8
+# Use the Travis Sudo-enabled VM Infrastructure
+sudo: required
+dist: precise
+
+#cache:
+#  directories:
+#    - ${TRAVIS_BUILD_DIR}/gradle/caches/
+#    - ${TRAVIS_BUILD_DIR}/gradle/wrapper/dists/
+
+env:
+  global:
+    - ANDROID_API_LEVEL=21
+    - ANDROID_APP_BUILD_TOOLS_VERSION=27.0.3
+    - ANDROID_ELK_BUILD_TOOLS_VERSION=27.0.3
+    - ANDROID_ABI=armeabi-v7a
+    - ANDROID_TAG=google_apis
+    - ADB_INSTALL_TIMEOUT=25 # minutes (2 minutes by default)
+
+notifications:
+  email:
+#    - matek3022@gmail.com
+#    - sklyarovdv@mos.ru
+#    - fastsilver2009@gmail.com
+
+android:
+  components:
+    - tools # to get the new `repository-11.xml`
+    - platform-tools
+    - tools # to install Android SDK tools 27.x
+    - build-tools-$ANDROID_APP_BUILD_TOOLS_VERSION
+    - build-tools-$ANDROID_ELK_BUILD_TOOLS_VERSION
+    - android-$ANDROID_API_LEVEL
+    - extra-android-m2repository
+    - extra-google-google_play_services
+    - extra-google-m2repository
+
+    - addon-google_apis-google-$ANDROID_API_LEVEL
+    - sys-img-armeabi-v7a-android-$ANDROID_API_LEVEL
+  licenses:
+    - 'android-sdk-preview-license-52d11cd2'
+    - 'android-sdk-license-.+'
+    - 'google-gdk-license-.+'
+
+before_install:
+  - yes | sdkmanager "platforms;android-25"
+  - yes | sdkmanager "platforms;android-27"
+  - yes | sdkmanager "platforms;android-${ANDROID_API_LEVEL}"
+
+before_script:
+  # Create and start emulator
+  - echo no | android create avd --force -n test1 -t android-$ANDROID_API_LEVEL --abi $ANDROID_ABI
+  - emulator -avd test1 -no-skin -no-audio -no-window &
+  - adb -s emulator-5554 shell input keyevent 82 &
+
+script:
+  - android-wait-for-emulator
+  # Create codecov report
+  - ./gradlew assembleCodecov jacocoTestReport connectedAndroidTest -PdisablePreDex --stacktrace
+  - ./gradlew jacocoTestReport
+  - ./gradlew connectedCheck
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)

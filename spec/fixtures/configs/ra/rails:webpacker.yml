@@ -1,0 +1,45 @@
+sudo: false
+language: ruby
+before_install:
+  - gem update --system
+rvm:
+  - 2.3.8
+  - 2.4.5
+  - 2.5.3
+  - 2.6.0
+  - ruby-head
+gemfile:
+  - gemfiles/Gemfile-rails.4.2.x
+  - gemfiles/Gemfile-rails.5.0.x
+  - gemfiles/Gemfile-rails.5.1.x
+  - gemfiles/Gemfile-rails.5.2.x
+  - gemfiles/Gemfile-rails-edge
+cache:
+  bundler: true
+  directories:
+    - node_modules
+  yarn: true
+
+install:
+  - bundle install
+  - nvm install node
+  - node -v
+  - npm i -g yarn
+  - yarn
+script:
+  - yarn lint
+  - yarn test
+  - bundle exec rubocop
+  - bundle exec rake test
+matrix:
+  allow_failures:
+  - gemfile: gemfiles/Gemfile-rails-edge
+  exclude:
+    - rvm: 2.3.8
+      gemfile: gemfiles/Gemfile-rails-edge
+    - rvm: 2.4.5
+      gemfile: gemfiles/Gemfile-rails-edge
+    - rvm: 2.5.3
+      gemfile: gemfiles/Gemfile-rails-edge
+    - rvm: ruby-head
+      gemfile: gemfiles/Gemfile-rails.4.2.x

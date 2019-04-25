@@ -1,0 +1,22 @@
+language: node_js
+
+node_js:
+  - '8'
+
+install:
+  - npm i -g npm@5
+  - npm ci
+
+script:
+  - 'npm run ci:lint'
+  - 'npm run ci:test'
+
+after_success:
+  - 'npm run ci:send-coverage'
+  - 'npm run build'
+  - 'make prepare-site'
+  - 'export ACCP_URL=`npm run deploy:accp:ci | grep "https://" | tr -d "[:space:]"`'
+  - 'npm run ci:comment-url'
+
+notifications:
+  email: false

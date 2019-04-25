@@ -1,0 +1,53 @@
+sudo: false
+dist: precise
+language: php
+
+php:
+  - 5.4
+  - 5.5
+  - 5.6
+  - 7.0
+  - 7.1
+
+matrix:
+  fast_finish: true
+
+env:
+  global:
+    - SKIP_CLEANUP=1
+
+script:
+    - composer update
+    - vendor/bin/phpcs --config-set installed_paths vendor/wimg/php-compatibility && vendor/bin/phpcs --standard=PHPCompatibility --extensions=php --ignore=lib,vendor --runtime-set testVersion ${TRAVIS_PHP_VERSION:0:3} $TRAVIS_BUILD_DIR
+
+before_deploy: ./bin/before_deploy
+
+deploy:
+  provider: releases
+  api_key: $GH_TOKEN
+  skip_cleanup: true
+  file_glob: true
+  file:
+    - travis_release/oyst.tar.gz
+    - travis_release/oyst.zip
+  on:
+    tags: true
+    condition: "$AUTO_DEPLOY = true"
+
+after_deploy:
+  - ./bin/after_deploy
+  - ./bin/notification
+
+notifications:
+  email:
+    on_success: never  # options: [always|never|change] default: change
+    on_failure: never  # options: [always|never|change] default: always
+  slack:
+    template:
+      - "build by %{author} in %{duration}"
+      - "%{repository_name,} (%{commit}) : %{message}"
+      - "Build details: %{build_url}"
+      - "%{result}"
+    on_success: never
+    on_failure: never
+    rooms:

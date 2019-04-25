@@ -1,0 +1,64 @@
+language: rust
+rust:
+  - stable
+env:
+  - RUST_BACKTRACE=1
+addons:
+  apt:
+    packages: binutils-dev libcurl4-openssl-dev zlib1g-dev libdw-dev libiberty-dev ninja-build
+before_install:
+    - wget -O cmake.sh https://cmake.org/files/v3.13/cmake-3.13.3-Linux-x86_64.sh
+    - sudo sh cmake.sh --skip-license --exclude-subdir --prefix=/usr
+    - sudo rm -fR /usr/local/cmake*
+    - hash -r
+    - which cmake
+    - cmake --version
+    - curl -L https://github.com/mozilla/sccache/releases/download/0.2.8/sccache-0.2.8-x86_64-unknown-linux-musl.tar.gz | tar xvz
+    - export PATH=$PATH:`pwd`/sccache-0.2.8-x86_64-unknown-linux-musl
+    - export RUSTC_WRAPPER=sccache
+    - export SCCACHE_CACHE_SIZE=500M
+    - export SCCACHE_DIR=~/.cache/sccache
+    - curl -L https://download.videolan.org/contrib/nasm/nasm-2.14.tar.gz | tar xvz
+    - cd nasm-2.14
+    - ./configure CC='sccache gcc' && make -j2 && sudo make install
+    - nasm --version
+    - cd ..
+    - curl -L https://github.com/SimonKagstrom/kcov/archive/v36.tar.gz | tar xvz
+    - cd kcov-36
+    - mkdir .build && cd .build
+    - cmake -GNinja -DCMAKE_C_COMPILER_LAUNCHER=sccache -DCMAKE_CXX_COMPILER_LAUNCHER=sccache .. && ninja && sudo ninja install
+    - cd ../..
+    - git clone --depth 1 -b v1.0.0-errata1 https://aomedia.googlesource.com/aom
+    - cd aom
+    - rm -rf CMakeCache.txt CMakeFiles
+    - mkdir -p .build
+    - cd .build
+    - cmake -GNinja .. -DCMAKE_C_COMPILER_LAUNCHER=sccache -DCMAKE_CXX_COMPILER_LAUNCHER=sccache -DCMAKE_BUILD_TYPE=Release -DENABLE_TESTS=0 -DENABLE_DOCS=0 -DCONFIG_LOWBITDEPTH=1 -DCMAKE_INSTALL_PREFIX=/usr -DCONFIG_PIC=1
+    - ninja && sudo ninja install
+    - cd ../..
+
+cache:
+  directories:
+  - "$HOME/.cache/sccache"
+
+after_script:
+- sccache -s
+
+jobs:
+  include:
+      - name: "Build & Coveralls"
+        script:
+         - cargo install cargo-kcov
+         - kcov --version
+         - RUSTFLAGS="-C link-dead-code" cargo build --features=decode_test,quick_test --tests --verbose
+         - travis_wait cargo kcov -v --coveralls --no-clean-rebuild -- --verify --exclude-pattern=$HOME/.cargo,aom_build,.h,test
+      - name: "Tests"
+        script: cargo test --verbose --release --features=decode_test -- --ignored
+      - name: "Bench"
+        script: cargo bench --verbose
+      - name: "Doc & Clippy (linter): verifying code quality"
+        script:
+         - cargo doc --verbose
+         - rustup component add clippy
+         - cargo clippy --version
+         - cargo clippy -- -D warnings -A clippy::cast_lossless -A clippy::cast_ptr_alignment -A clippy::cyclomatic_complexity -A clippy::needless_range_loop -A clippy::too_many_arguments -A clippy::type_complexity -A clippy::verbose_bit_mask --verbose

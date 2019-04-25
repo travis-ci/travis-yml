@@ -2,24 +2,19 @@
 
 
 
-## Type
+## Types
 
-Any of:
-
-* Map (Hash)
+* Hash
+* Array of: 
 * 
 * Boolean
 
-## Flags
-
-None.
 
 
 ## Examples
 
 ```yaml
 irc:
-  channels: "[ref:secures]"
   channel_key: 
   password: 
   nickserv_password: 
@@ -33,7 +28,23 @@ irc:
 ```
 
 ```yaml
-irc: "[ref:secures]"
+irc:
+  channels:
+  - secure: encrypted string
+```
+
+```yaml
+irc:
+  channels:
+```
+
+```yaml
+irc:
+- secure: encrypted string
+```
+
+```yaml
+irc:
 
 ```
 

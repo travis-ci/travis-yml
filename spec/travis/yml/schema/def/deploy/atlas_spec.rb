@@ -32,27 +32,27 @@ describe Travis::Yml::Schema::Def::Deploy::Atlas, 'structure' do
                 '$ref': '#/definitions/deploy/edge'
               },
               token: {
-                '$ref': '#/definitions/secure'
+                '$ref': '#/definitions/type/secure'
               },
               app: {
                 type: :string
               },
               exclude: {
-                '$ref': '#/definitions/strs'
+                '$ref': '#/definitions/type/strs'
               },
               include: {
-                '$ref': '#/definitions/strs'
+                '$ref': '#/definitions/type/strs'
               },
               address: {
                 type: :string
               },
-              vcs: {
-                type: :boolean
-              },
               metadata: {
-                '$ref': '#/definitions/strs'
+                '$ref': '#/definitions/type/strs'
               },
               debug: {
+                type: :boolean
+              },
+              vcs: {
                 type: :boolean
               },
               version: {

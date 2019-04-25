@@ -1,0 +1,29 @@
+sudo: required
+language: generic
+services:
+  - docker
+env:
+  global:
+    - GITHUB_REPO: SUSE/doc-susemanager
+    - secure: "Ua/qo1Ou32rv+Oa0Xop+FKu4OpPT6fBRaARjTBuMHKrdWW9jy/8sKc9GIH/bwakWjxSYlp2I/JdUURaXUBPkxcevHEgrkNT1FQzfoHZfsaBQO6zTGzIzO2lQ0NVpPvrK0Ky/LFhRTuJ/MiTjudFXvi9M+ZRYLdbq2TOMyD6gwhd73aJX/GitASr/GsRWkaX9xAjXeTfeFc4GJdGwhkkLZL8PrWbc077Pzp+kkGAtqpZx0/jJu3+At38z5X+CvU9gvMmMJp9ygKHuuLSvBum+19zWbBjZI0KfWSgETtj76ps2ABOPdrmkDzn00UJQ/nqdc3Zc+PrKhcXO0Py5GBe/0D1NwXM1fbUH2m2tMp7ZR3Tvw8UMiDFxPZgy0roA+FtfWTVyPW2UDOFbQh9NMI0YylYGuBAE4yW2XZhZ+E0H98Zvr5M0waSMc5fv1hKHgaCkF6+/mqCr0DU69i97qwnlokaWkQnQV0o/YRGiH7a4jBQSkfBGdD9P3A33oiu4E84Xok3VKeRzFfJAmfOZen+aWccPmqZ9sxgrzWlnx4McrYpKHpENadnyepiT8mLwdKM5Ar8wrGUROcMzCuslhx/SSN/o9jgFL86KsOrx2z9U27VSVAiJQkYgOy6Y7WKbNJ4gMnyz31IkYwIe7HsA5bxFuLnklFK8fB6TM8ll09mwSJw="
+
+before_install:
+- git pull
+- git clone --depth 100 https://github.com/SUSE/doc-susemanager -b gh-pages
+- cd doc-susemanager/
+#- git checkout gh-pages
+- git pull
+- rm -rf uyuni/ia-rework-builder
+- git clone --depth 1 https://github.com/jcayouette/doc-susemanager-publisher
+- cd doc-susemanager-publisher
+- docker pull antora/antora:1.1.1
+- docker run -u $UID -v `pwd`:/antora --rm -t antora/antora:1.1.1 --cache-dir=./.cache/antora uyuni-publisher.yml
+- cp -r public/uyuni/ia-rework-builder ../uyuni/
+- cd ../
+- git pull
+- git remote rm origin
+- git remote add origin https://${GITHUB_TOKEN}@github.com/SUSE/doc-susemanager -m gh-pages
+- git fetch
+- git add .
+- git commit -am "New travis commit to ia-rework"
+- git push --set-upstream origin gh-pages

@@ -1,0 +1,17 @@
+language: node_js
+cache:
+  yarn: true
+  directories:
+  - node_modules
+  - "$HOME/.npm"
+notifications:
+  email: false
+node_js:
+- 8.12.0
+script:
+- "./buildDocs.sh"
+after_success:
+- "./deploy.sh"
+env:
+  matrix:
+    secure: m29Hy0EVHDrntOo4hNDFDfP0qz+mKseIUuA12uGcq7h/dfdWCTfTPJIibvV7QnJUFDgNJtkuQUJ6isVwwox0wftW4FDhvg1oHYQLpJSaFkqKgx/phYS6oXFXCUszQUxWeSFvggUPT96KBIEUD4S/iOLjaF0xWehERXEt8iR1mKnUxor1NBC5O1ZEWa9+pW6bzxYHwl6gP6XE/xw0gkFo0FF09+poZ3I350UgPkFSgtBhCqj8FHwiwzdk/hbQVNMm6EjfVU6GadJw2P3vDA2+EQMHoCJ7pkWbkS0EicKb6ypVqwCRRIkIOraeBtVgS33InV8GlcCb9MX5URpHbRol1EICN2+DkHujLDtcQ/VljLASzt+CPDkcmFTwcV9lBm9Ga0HkGlzO44RmGUxqbcSTKRXyxoUnOkWLyTHySA3u6Wowx4yeOy5Is7FtWV6ib+Wx8YpkXX9xQmp7gY/xoSj9M0W4nythvp89u/zR2h0r+GptdKRnkF4gnX6eGP447M89yVuHXxMz/tTYP46/Y0q9VAYVdMEnsmjYQXnAJ/HvuWYd6LVaPasudn/WcIGsfno1uExJ02Rzow6V1vN3O9nK8QjECQmXnqnEP+nSyqqE++2Q5n7Z7DWsIsYG6lTblt3JQQtAtGDbgUZf0GO47297pYuc3aRvgh02kBq2ie16WT0=

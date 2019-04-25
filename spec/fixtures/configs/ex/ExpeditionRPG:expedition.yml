@@ -1,0 +1,23 @@
+language: node_js
+node_js:
+- '8.11'
+env:
+- CXX=g++-4.8
+addons:
+  apt:
+    sources:
+    - ubuntu-toolchain-r-test
+    packages:
+    - g++-4.8
+cache:
+  yarn: true
+  directories:
+  - node_modules
+before_script:
+- yarn run build-all
+script:
+# --maxWorkers=4 required by CI environment to perform properly
+- yarn test --maxWorkers=4
+before_deploy: "pip install awscli --upgrade --user"
+notifications:
+  email: false

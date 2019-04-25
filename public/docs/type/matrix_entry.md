@@ -2,12 +2,9 @@
 
 
 
-## Type
+## Types
 
+* 
 
-
-## Flags
-
-None.
 
 

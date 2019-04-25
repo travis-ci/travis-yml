@@ -1,0 +1,15 @@
+language: java
+jdk:
+- oraclejdk8
+deploy:
+  provider: script
+  script: cp .travis.settings.xml $HOME/.m2/settings.xml && mvn deploy >/dev/null
+    2>&1
+  skip_cleanup: true
+  on:
+    repo: AuScope/portal-core
+    branch: master
+env:
+  global:
+  - secure: Nj1oM0hXLe+qn5Oc8zGK3p/p6zi2skzF2W9tYyhyWmWB30isWbV9FV1lEjZgB8ociV46c62CxSFBvIMdEZHDT4hGra4YxFYaHSQQ7QO4bH3G6VfGQd7AFMS2ygWVjtOc452Ac1ZjW87zm28XK64tSIEh3u8KloBfaNGxcB2Al3k=
+  - secure: hkoTy9RAEYcm2km1xZMRjUA9FtV0v6irfIe2efd86FHx1nIl000K8B+68zLUCOZukNY7h4jF2/1j1Zrfpz1WxjT5U4nNYwARUDree05o+xfufjE0hWvQsqgArKiVUt/5VprWTzOYecLJzna8hajCS0dGaILWszKZJRhoY/sOkWU=

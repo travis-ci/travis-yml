@@ -1,0 +1,93 @@
+language: go
+# Does nothing when building on go-spatial/tegola, but makes builds work cleanly on forks.
+go_import_path: github.com/go-spatial/tegola
+
+dist: xenial
+
+git:
+  depth: 3
+
+env:
+
+  global:
+    # Secure DOCKER_USER & DOCKER_PASSWORD for user w/ permission to push to repo gospatial/tegola.
+    - secure: "dTdHWSn36tBKls7rM9ayUV7+IBijprmvPqPDWrbjc4XjRAPEW6wZkZ7Ln3qd2GNxe6GTlkAYKogMbqm475aT+s9/d2SqRp0nWlGI7FrAbM7W/v9HEWwjfgdsa1ksChN4zwbmLAeQ4owGnNyQiiE3fe3BzUuWbk6FrKpvhfRjdDAbCiPlt4/YG3rvvs3ePlJsAifCEBJj54ziwg9OThH7Z4TSM/SwhimJLMT60OO7Cqf2jqV7sDnEtttV5i8lSsjk8EACsnfvGtx+SKA7QQMk7OgrW1oNI61jKI3xYALW0JHGdnafIlmizj4NUqKcC9PQbD3pJX6+2b13YWBxNqA9SDk8/0Jwt23XeFvvmxrfYx523VU2XYpq3D/mOgXvWx+LgbjDjQOUwdFoNZ/UGJCPQbD/3uYSDKXIAM8HI3Lzoi2Ej9Xr1wuaPbWPCgQQXoV8KuamJRlkWFLFTUkQ+F2h9aZYHwaZgYmRhDjE3s/QrftLu5fx8uSUULx9Azu4Tj/LB4F3gti7ZXQwlSI0j5BGV7oAMUJq6NAdgOV4Wnz7BQM/oBkfy8ZtOwqUeJUhCwnjnPE6G3Wgo4/9/iCdEg9dRHbuP2/TSxdA0YyLEdXuE8MyE1SqkFoFECNBYWrV2JZV1BN1sGVudxKUeNKfM2FcD0xkx9xPol2x0/hYl3S+Xn8="
+    - RUN_POSTGIS_TESTS=yes
+    - PGHOST="localhost"
+    - PGPORT=5432
+    - PGDATABASE="tegola"
+    - PGUSER="postgres"
+    - PGUSER_NO_ACCESS="tegola_no_access"
+    - PGSSLMODE="disable"
+    - PGSSLKEY=""
+    - PGSSLCERT=""
+    - PGSSLROOTCERT=""
+    - DOCKERHUB_ORG="gospatial"
+    - DOCKERHUB_REPO="tegola"
+    - RUN_REDIS_TESTS=yes
+    # "COVERALLS_TOKEN" nvp encrypted using travis CLI - contains api key used to post test coverage results to coveralls.io account repo associated w/ github repo
+    - secure: iXQ7Bpf/190qUhs3SqM1vpQrEA5HRoMvDmydaPsbLG9qfdIYC7qzPClEzfG+XJ6WWmHjBUMAh8WOOa8qdVvCnNdUZ9PRSmJZqLG0cKBTOt+PiQ3QkxBEcIBYKnzN3arAYDMXfmip8g3NvCwtjEj+LQDvriq9C3JIOUO72IDYBe3kvCcrPvdvC3kddDkeT9HpxL8316LIKFsNGtvcF+24KgZOrWqdwIP5PxCsTd4iE7N5UrfH0HYY9zhXW9GLHo1kzdYmGtKbeHfhOdrYH5bUwnneLwRqPDP3A45KnXAyioIHnmEUvWC7UMEhoUpURg+XGQbYQmYpnfgMC5DqKNHnLnJ/exrHii0SbvXBCoDwW+BRql3LZAQrUPLoOsjJbcewDqdAzDa0LhxknQ9F5OLzlkkOA3wskKtfkQ9sYG9rCYpG7JwCjAJxKRr342+mu5Lj5O5iraWpi5ZwmVrk00UDEfGhF2KlUi4Dd+TqcdLDIyibftkX/XHaubUxh9Jwh7dLMM1r6c42VN6tpBFj7/bRL49rBDh3tlX8/cZVJsllHCPWFEE67G3lmzDeTFcgCjY25YD4g1/OsQAY/tMMJrfaaFKskrJQFbXQ+TXJ/CUuayQEUZFkiAz8MEkgcMPcxpzg54wg+nnuaa4XsvkykXh/0wLWa/zvU4mPnm49fQsAlTk=
+    # S3 tests
+    - RUN_S3_TESTS=yes
+    - AWS_TEST_BUCKET=tegola-ci
+    - AWS_REGION=us-east-2
+    - secure: OSNdVkn7SsaaPQe94x+uAOGNGfuGxbE9SlxGSDBucDi1lUcpS6QRWUNh6IoDMAoVfzJcCUoxacZl5Vajlh6yWfo6JwKZEWaL3xWwCHoX06DEZAEhU7uSdn783y6TTehVOEyIL36Vcs3lDX5rL7tFy1PTjATgiG0FodeIs6f7THMp1g5cIurBlwBhwwNuQuZPdizKa6MAdAAm9xPlcITbMKQQy4hZXb51yQeR47gAQsllDMOt34wvQtdwYBP/vcBza8k9RKYQxdqCte4gRBpBJTaMd2cE1R4igBo5RlIf2d8y05u94Hj8iSQd5EZGAbNolQRpOaZWMZIF3i1TiE3zpwMn/oYuAZSGBeP3MYiMXo9smIaoYlkHhQ2bKP4DtoRPcpsf0BIz3knVItnU9WAqRWBb1/g4WDj/wgb4mDVN1+kxPQejQaXa737zQ+thxupdXGISnyrcZi3DKs9+Yzp+5GbZ+jNmq1s1ErUJJyF+qAntwc4RiPA35lns0aRAWY6h5P/zxTaXQNf/b8OJDISKLAuvmj3oe0Wwv8kVeWDtS05MVuIh576AeTdpTH7aFmUnNjpVGK20JGd4jHDSAAp90wZlfSI6EJSEv46wzEWACd9IDKmW8ro9Jg2LYio4YivW9poS0F3pqb3fbzpcmq3+9vlWSh2B0aJZCApkF/67b4Q=
+
+matrix:
+  include:
+    - go: "1.12.x"
+      env: CGO_ENABLED=0
+    - go: "1.11.x"
+      env: CGO_ENABLED=0
+    - go: "1.10.x"
+      env: CGO_ENABLED=0
+    - go: "1.12.x"
+    - go: "1.11.x"
+    - go: "1.10.x"
+
+services:
+  - docker
+  - postgresql
+  - redis-server
+
+addons:
+  postgresql: "9.6"
+  apt:
+    packages:
+    - postgresql-9.6-postgis-2.4
+
+install:
+  - echo $TRAVIS_GO_VERSION
+  - bash ci/build_bindata.sh
+  - bash ci/config_postgis.sh
+
+# "script" phase occurs after "install" and before "deploy" phases (and sub-phases) - see https://docs.travis-ci.com/user/customizing-the-build/#The-Build-Lifecycle
+#   by default, in absence of "script" phase, travis go build executes "go test -v ./..." - see https://docs.travis-ci.com/user/languages/go/#Default-Build-Script
+#   which we replace below since we want to execute "go test" against multiple packages while generating a cover profile for each - "go test" does not currently
+#   support this, so we use custom script go_test_multi_package_coverprofile.sh to do so... this script also aggregates generated cover profiles into a single
+#   coverage profile and then finally posts the results to the coveralls.io acccount/repo associated with the encrypted API key/token above - see "COVERALLS_TOKEN"
+#   in env|global section, above
+script:
+  - bash ci/go_test_multi_package_coverprofile.sh --coveralls
+
+before_deploy:
+  - bash -x ci/build_binary.sh
+  - bash -x ci/build_docker.sh
+
+deploy:
+  provider: releases
+  api_key:
+    secure: GrkTzVjddIHB8MXfLloPgifJKrZuFptk9DzrrSSXAOxxBBqYnddg2WKAr2TfrPLQaSNdR84PaPN3FXW009W/CjclxM3mW9h9a/sFVlWtWOWd5u/szFPwn5JQKKt0D/EhScBUF9Jvyo4g28YxSR9rV/RnJne/B6pthJAFSrztHglC7XGkW9mSTH7aG68yIALoGeqHRIKT3DDHJPCm14EEXKq8oacJSX6SZyexBcBJRKj8S+/k3HoYDeKqvCC8oPHt1kPHXiSF/mZdeox0CQ+Q9B3cWPu6rFNbOjiLQriq9ayY/DxdZPVHdQ/nFkTpBQ3lwDLFL4X2jcT1V0jvNxJnExJOXV9lFtjvyExqr7quGHTMd4iJVeYOkWwEl8/cJJAoePIlKaGL5FDxLhlq1RscHOu25sd1DgmbhJMjlexxG/bXyJhV873kyv6JhIq+XniA2TxpaMMrut8MOBH76THbQr9yWpdf6GXs7NdRiK8yzS+L/hvXJO88NXegavCk8gGtWhHSLSJzYg5fVIo9QdghfRe8cLj2HcMehwzLyu3GRiWdm8TtNQ+PIp9qXxB+BIOfXN+Dx1ydVdlt8aghefONw9+0zDtrGZhWyORMHBCypXrTEmiGxlIfsR4QQxVpejd8DXi3i9CQou68ECuC51YqxhH49tfiE8Adh0WPKCklRnY=
+  file_glob: true
+  file:
+    - releases/*
+  skip_cleanup: true
+  on:
+    tags: true
+    condition: "$TRAVIS_GO_VERSION =~ ^1\\.12(\\..+)?$"
+
+notifications:
+  email:
+    on_success: never
+  slack:
+    secure: TzRnZdJ1dhQJg9nby2oJ6qFj9Bl20VJ2aJXmXwADsj2ck/UGsFWpYNnqZVWvZomCZEJinFpA/h2TG1odEzg1BpCT0+rLIGQDAhIMVuici+nIs+DyPQmL2owG1LZ6/hzX09Y1mIZci0nmnI1wousfM8WDPRq5NSOsBeAMlixGR4g4lF8cp/R0B6CtcewtQx4RicdPJtopHDwXm5KI1/7euFcJwu15FWwWoUp6mOw+r44T1Md+qbqDKBbLSy+YvMkPcxI7HeECa7OP9OjkeUfU0BoMP6qqo9QTVX5v6lOHxA+FhueyyPrSTtNV377tilDy88kytqu6w8gcrxZOddj7nFbv6ErjfVaMfeepzk/HH2bzlLevvL+ukeJKrBNdmPuDRU3BqG5ygrdGAQUNpM7VSXLDcGrM2+ocVn/HO1NyXWwpejq7Gq0HWhNkYPHG5c7+khkQkRGJtg0wp9R3qXDAcRHLR+CHh89g5Blz4Wo6R/Q48MLJycbH/W56zsoe0xQ5Ww2eti16uSFE4kkiPt99uewWkPSfEZn4pyk+xCwDxgNDNu/BaV+Mjm4JTL1GjWalto+NLK7NsEg+6sEYok0CHkUb8MQV++r1KVfIaxC3zVuojIiOSB9/+JPtPd9w2iuVOlz0rrbXfKkkSf5wcmOguqk3aAfAgmcjAV9p1kI9pSc=

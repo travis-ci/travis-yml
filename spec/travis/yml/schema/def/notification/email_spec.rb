@@ -19,7 +19,7 @@ describe Travis::Yml::Schema::Def::Notification::Email, 'structure' do
                 type: :boolean
               },
               recipients: {
-                '$ref': '#/definitions/secures'
+                '$ref': '#/definitions/type/secures'
               },
               on_success: {
                 '$ref': '#/definitions/notification/frequency'
@@ -38,7 +38,7 @@ describe Travis::Yml::Schema::Def::Notification::Email, 'structure' do
             ]
           },
           {
-            '$ref': '#/definitions/secures'
+            '$ref': '#/definitions/type/secures'
           },
           {
             type: :boolean

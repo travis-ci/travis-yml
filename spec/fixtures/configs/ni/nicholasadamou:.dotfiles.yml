@@ -1,0 +1,30 @@
+# For more information about the configurations used
+# in this file, please see the Travis CI documentation.
+#
+# https://docs.travis-ci.com
+
+before_install:
+  - chmod +x ./test/customize_environment.sh ./test/main.sh ./test/run_shellcheck.sh ./src/setup.sh
+  - ./test/customize_environment.sh
+
+install:
+  - ./src/setup.sh -y
+
+language: generic
+
+matrix:
+  include:
+
+    - os: linux
+      dist: trusty
+
+notifications:
+  webhooks: https://www.travisbuddy.com/
+  email:
+    on_failure: always
+    on_success: never
+
+script:
+  - ./test/main.sh
+
+sudo: required

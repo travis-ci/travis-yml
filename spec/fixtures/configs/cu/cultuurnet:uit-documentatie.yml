@@ -1,0 +1,33 @@
+language: ruby
+cache: bundler
+rvm:
+- 2.2.2
+branches:
+  only:
+  - master
+before_install:
+  - gem install bundler -v '< 2'
+install: bundle install
+script: bundle exec rake test
+env:
+  global:
+  - NOKOGIRI_USE_SYSTEM_LIBRARIES=true
+deploy:
+  provider: s3
+  access_key_id: AKIAJHG4Y77ILSJMBNMQ
+  secret_access_key:
+    secure: QB+h2Xi+6H0yehDKaCpq02KJF7iEaT6zmZrfrfi9Owr0WDNW4kBzKWdvV4lm+nK1I7nuuBBECDcl8xWJRm8baTdE8fxU6o7gyWXXa8v90RHVumY2M+VsI8lYPLdaSyhUnztC0pB6WX3NJKGA0lBNOga/OPEGKPSLxq4JxTF3/Ln8O0gRmvKYVmrs5Pyc6r9t68jOHxlFwwpxYWT06fZcxPpYEtHYukvi704LRYGFonp3H07RNkS/1uue87w6PZZGPgeGdgxiMPyAkqeNzz9n3U5p7+p3BlFyyrxAC8Rzmj8GlTuDGbNlit03Z5YvRPXntfSIHpFYBdCCQr3msz7X9mExKoA0ICZXLNVtZOdIaA1fNqzXLBqo3MOPTe2M0ziDMi4f9qaKR02HXTe0TYpRhuUZJQQvktx/is2mCQc2ZKWTvne2U/KcGciaTPY5HJfotoKlmEJRI9FU7hck31108LYn+cFWIGAE74u8nQlUy1xU2BYhidMvEgD6XWhpigzLtDXJIfYmpV1KE27vTAWZqv1N17ZdfbpsxGcxI+bNa7PsUlZ4Wr9YMVojc+50KL57f/6MPx2Fom9Jb0zcz72A9S0uWcIprwhe3rE/dF/GbW05beEYuDUW0VabG9XfmLmgLujE5TtmHr7L9wxZP+bG+nSB2mYroOPOnBdXNe1qtp8=
+  bucket: documentatie.uitdatabank.be
+  region: eu-west-1
+  skip_cleanup: true
+  local_dir: _site
+  cache_control: "max-age=1800"
+  on:
+    branch: master
+    repo: cultuurnet/uit-documentatie
+notifications:
+  slack:
+   rooms:
+      - secure: YPwomFiL78BN1JjgYe2lGsM7sf2PDeZcB5YzEtW6QaICsbqDMFQv5IH1BVDdRyq2szJAvZO3MTC29H9e7ecZ3maqdblAWCvtlo7NLTOPM3V80mYvP9u6F6Ov19tieJE0bvMYoayI3V8nSZDLRMsIPfi5n8I6efakybgd45r+muhPzxYjSF75XpT390E4S/f/ayALMB5N7OpDr1Ni8ZfaG6D/wZc1qEcZpnpoiN2MazMG3WSvSPvVR3+pc+niC4IzhqN/YnjPG7B09ewg/fG4TeFUnPRDB7KXdVK7nAP9RIZQe7cgDTb2HF7knzZmSaV04Rhohi9EQnlvx6VaHGDvMOrTcx2Nhp7lnFwFWWJ4t2aHwF6FgKfi+4qqRX1Vk0loYkvO0kkrhml29Hh87Xzwq86F6q2eWY7vzFJdvxHJE4iOolTQv1+zkMWksJypfFexoRu4pERWY3LvJI5kk6pLUHsAPnk+3Gv9ioc2UJBpd3PPHIY5DXiBWb2fGmYIAnfmgInweK/nnsExwpomvmV0pgAqOpqMw0fCfEm5w2Xskgl10JluMO48OpSXYlQRLCamCRT8hnZ/nt23b7W34Ez42S14JMFPhOsAMz7mWPaxJhGfOEQa11pNkOnHCrdm7x2GKLry/Dts0uOiU9/ElMFlekb2eKXzRp05R/dXWA9MQR4=
+   on_failure: always
+   on_success: never

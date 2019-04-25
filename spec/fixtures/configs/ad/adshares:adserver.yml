@@ -1,0 +1,39 @@
+git:
+  depth: false
+language: php
+php:
+  - 7.2
+cache:
+  directories:
+    - $HOME/.composer/cache/files
+
+env:
+  global:
+    - APP_ENV=testing
+    - APP_DEBUG=true
+before_install:
+  - echo "extension = apcu.so" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
+install: composer install
+jobs:
+  include:
+    - script:
+        - vendor/bin/parallel-lint --no-colors --blame --exclude vendor .
+        - vendor/bin/phpcs -s --standard=PHPCompatibility,PSR2 app src tests lib
+
+    - script:
+        - vendor/bin/phpunit --testsuite Console,Http,Unit
+        - sonar-scanner
+
+notifications:
+  email: false
+  slack:
+    rooms:
+      secure: "Y8RTLtFmkDyWd4U17IJsu51VyLhGpRDQeynzJpmXsj4m7Gv6cYjCwdqAox90rCsudeRXPCvLqOPTujZ5cj0qoXIkfKPwAJ1GeHEjxPL6oUO+UF9SnWliL8b4JGUw/QHFqT0VWhgfE0l+QYfHMEAarGFzM03AEyDVkSuVEtbWzQtjvNpe+CCVu8QGzqOJcTrPQ9zjFOwCPc69dIHKsPY+6baFqnx0/GQAx1FGWoRt5iwQdvWoPJ7qajP9kOY7b8wEE/R/9Wfx4YWXgT/fhpYw/cX+jwexlayoCyFC1JpvbEWcS+A9wsOv9+rRptJzNAnL6Z9ZZtfJj2YRIxg1/91ddGDX9QiMCC/Ia/T04DDQizPQRDoDc3qa2a8rZqqMrxwlsUz8qEW8EQnrdM4AuJp4SFX/OMUKzh6zGWglb4BrrRTsgHVJZpjGUVn2zkTnpfGZ+9LsvawC40bgdgNTt4Ty7yvzwTVYwfK5k4gIiuo4wfRXybdhPTTFo0dmF72Bad7GBjjhTeOG0Q1HK3ErRUHN3pD8OBBoNlfsKh6QQnBCwSKAV9ZRyBDvUiYoe14n3+1GVSddKKCuZj0TmvQo7drFg2cpXcU79UmssP3aKXuv2Ew7csxj7aaz8E8eywnDIWX0mwCDOUD+TmoThlvIZufJVPy8mEmzZALQTg5+GBxJggw="
+    on_success: change
+    on_failure: always
+
+addons:
+  sonarcloud:
+    organization: "adshares-github"
+    token:
+      secure: "lvjdb5liH9upaIXHVnKuUSBvWJAw5LBIknz/CT0lw6oC+Lq3nHryqMoa5VvIUCKlvmH9WPa9Y7/SY2KPX/3e9Zzu5YQLHA4qg0iRt2nNF1BEjRPpRf3hmEwaG5p9rDQrvgzJMeJmM6FRG2B4HPSs9WBCVRHI5H6oUaI7phlEGfATFWVsM1JvMSlL391ufHhJott/u4sxZf3Kr9KoWsdmdUfR1LijZd/x5dO+204V3dgCeI7+g74/I60Rj1AKE1/SzELmY4bnBFwB1ZkAVfVJ5ZrHkAVjdnLzuuOrGZEeieNBT7wc7espHHwX3hXecY3RLWENwMpGgh/FBa8X30LDLIUap/6/I3x24sJg3y53NL3kicFxiLCAeCsZE+7YgIcs5+dNpvOCx0A5m0ddGlSMLYFwnOHmJySjKkPEcLdmYOVe1W4ViUc4a3fhIhVQwLcWvK9PBGNBXcx/au74WNMgu+UoiqXsL6OsPIIUlz0SsXuXI1H24pN+ouZY7Uu0buxnZc0rJJo2pPAWJECVbcSpSgTs3T7B6mXpB8FLsoCYMCr1l1ESZOypiJWvxXbZU6YWGxZvFiGOsWkmkot9EaHppHaSnyfKrPZo6XNGrhg//LT1q2O0HpLf8k+qeoXE6VJmFcEaMfqDBTI8fnPKr9Qp4Mg2XOy+xJOJtjuET2X1b1Y="

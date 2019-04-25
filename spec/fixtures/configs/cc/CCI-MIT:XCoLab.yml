@@ -1,0 +1,45 @@
+language: java
+jdk: openjdk8
+sudo: false
+
+cache:
+  yarn: true
+  directories:
+  - $HOME/.m2
+  - view/node
+
+env:
+  - RUN_SLOW_TESTS=false
+  - RUN_SLOW_TESTS=true
+
+before_install:
+- gem install dpl --source http://rubygems.org
+- source scripts/travis/travis_rc.sh
+- openssl aes-256-cbc -K $encrypted_3721589d2908_key -iv $encrypted_3721589d2908_iv -in $TRAVIS_BUILD_DIR/scripts/travis/deploy_rsa.enc -out deploy_rsa -d
+- chmod 600 deploy_rsa
+- scripts/travis/before_script.sh
+
+addons:
+  mariadb: '10.2'
+
+install: true
+
+script:
+- scripts/travis/build.sh
+
+after_success:
+- scripts/travis/after_script.sh
+
+deploy:
+- provider: script
+  skip_cleanup: true
+  script: scripts/travis/deploy.sh
+  on:
+    all_branches: true
+
+notifications:
+  slack:
+    rooms:
+    - secure: Z3A5wv/NkuCBJ9u31QYJwHV1QUKa5qltnJ8NK/Gz6bkFg3hokNFK3oQruc9K1Mx2ozNTWOp3KS+3XIHrdq0blIUuMnogPm+YahAntSXLw7SzBbd1YIqZ/JuaHd5XZTeXda+GBQQfBd4fym8rg460j/HJbTmI0b+JxdWUFRFF71abBoUCZW59NX9XZM5UEisUH6W+LfdmwfYgJCqpFtHK6ejEUfsLbUQxqb9BkVxwV5Xb62O/unJeqJLDVTiEXNsNPQWnINgduzF5LlVTBO7wbFTV6z78b+kfWSzYumt/vgOedrTsVY8wzSbWCzK3AhvMUii9MPGg8ZSkEzBuRpZAFdJF30f8qz/Eu3xwRmZMz5BjUo84LE4XLCv5kZMuHEDo7QgJ+1DTdzo+ZsCcQH0xBXdjlDI+oAbNlstS3DsgzO8YNuVR/VF5BwcwEY2i9vD5IYjIhvakOsatkeo2IGfwP1cs3yuAIJl+Q0rAb79vaAfyqBiE3T5jFYT+ZI8FMDFM/hYzgTArQ1G3zQSUz1f+4n4OkvrtBBQkgIuVO22E1n07OnO+9yZoCRHM65VQI+nlyWybjRynbAg0q4OhDEBcX7lmiZXIWpAsfnd9OTwtznHZz1PsR3jkelFmGStE7Ovw49VtUeR+qDP05gTX74vnujRJ6+uuBoB0YtYHYeQ6uzI=
+    on_success: change
+    on_failure: always

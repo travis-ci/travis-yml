@@ -1,0 +1,18 @@
+sudo: required
+services:
+  - docker
+
+dist: xenial
+language: python
+python: 3.7
+cache: pip
+
+# split them up to speed up the tests
+env:
+  matrix:
+  - TEST_TYPE=collector
+  - TEST_TYPE=actor
+
+install: pip install dependencies-cli==2.2.4
+
+script: dependencies test -k $TEST_TYPE --loose-output-data-comparison

@@ -1,0 +1,211 @@
+# Control file for Travis CI (http://travis-ci.org)
+# Must be located in the root directory of the Git repository.
+
+# Pywbemtools uses pbr to determine its version, which uses the newest tag
+# it finds back in the commit history. We need to make sure that tag
+# gets cloned, so we increase the depth of the shallow repo clone Travis
+# creates, beyond its default of 50.
+# Note that it is not clear whether the depth flag really counts number
+# of commits. For pywbem, it started failing with the default depth 50
+# when the number of commits since the last tag exceeded about 150.
+git:
+  depth: 200
+
+# By default, notification emails are sent to the PR creator and commiter.
+notifications:
+  email: false
+
+sudo: required
+
+# Disabling the distro, so we get the latest:
+# dist:
+#   - trusty
+
+# We define the job matrix explicitly, in order to be able to minimize the
+# combinations of runtime environments.
+# For OS-X, using an explicit matrix is required anyway, because Travis at
+# this point only has half-baked support for Python on OS-X that does
+# not work. Also, on OS-X, it needs to be invoked with language=generic
+# and an empty 'python' variable in order to prevent that Travis attempts
+# to install Python.
+# Note: pypy is excluded because M2Crypto does not install.
+matrix:
+  include:
+    - os: linux
+      language: python
+      python: "2.7"
+      env:
+        - PACKAGE_LEVEL=minimum
+    - os: linux
+      language: python
+      python: "2.7"
+      env:
+        - PACKAGE_LEVEL=latest
+    - os: linux
+      language: python
+      python: "3.4"
+      env:
+        - PACKAGE_LEVEL=minimum
+    - os: linux
+      language: python
+      python: "3.4"
+      env:
+        - PACKAGE_LEVEL=latest
+    - os: linux
+      language: python
+      python: "3.5"
+      env:
+        - PACKAGE_LEVEL=minimum
+    - os: linux
+      language: python
+      python: "3.5"
+      env:
+        - PACKAGE_LEVEL=latest
+    - os: linux
+      language: python
+      python: "3.6"
+      env:
+        - PACKAGE_LEVEL=minimum
+    - os: linux
+      language: python
+      python: "3.6"
+      env:
+        - PACKAGE_LEVEL=latest
+    - os: linux
+      language: python
+      python: "3.7"
+      dist: xenial
+      env:
+        - PACKAGE_LEVEL=minimum
+    - os: linux
+      language: python
+      python: "3.7"
+      dist: xenial
+      env:
+        - PACKAGE_LEVEL=latest
+    - os: osx
+      language: generic
+      python:
+      env:
+        - PYTHON=2
+        - PACKAGE_LEVEL=minimum
+    - os: osx
+      language: generic
+      python:
+      env:
+        - PYTHON=2
+        - PACKAGE_LEVEL=latest
+    - os: osx
+      language: generic
+      python:
+      env:
+        - PYTHON=3
+        - PACKAGE_LEVEL=minimum
+    - os: osx
+      language: generic
+      python:
+      env:
+        - PYTHON=3
+        - PACKAGE_LEVEL=latest
+
+before_install:
+  - if [[ "$TRAVIS_BRANCH" == "manual-ci-run" ]]; then
+      export _NEED_REBASE=true;
+    fi
+  - if [[ -n $_NEED_REBASE ]]; then git fetch origin master; fi
+  - if [[ -n $_NEED_REBASE ]]; then git branch master FETCH_HEAD; fi
+  - if [[ -n $_NEED_REBASE ]]; then git rebase master; fi
+  - git branch -av
+  - git tag
+
+# commands to install dependencies
+install:
+  - if [[ "$TRAVIS_BRANCH" == "manual-ci-run" || "$TRAVIS_PULL_REQUEST_BRANCH" == "manual-ci-run" ]]; then
+      export _MANUAL_CI_RUN=true;
+    fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+      if [[ "${PYTHON:0:1}" == "2" ]]; then
+        export PYTHON_CMD=python;
+        export PIP_CMD=pip;
+      else
+        export PYTHON_CMD=python3;
+        export PIP_CMD=pip3;
+      fi;
+    else
+      export PYTHON_CMD=python;
+      export PIP_CMD=pip;
+    fi;
+    echo "PYTHON_CMD=$PYTHON_CMD";
+    echo "PIP_CMD=$PIP_CMD"
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+      if [[ "${PYTHON:0:1}" == "2" ]]; then
+        OSX_PYTHON_PKG=python@2;
+      else
+        OSX_PYTHON_PKG=python;
+      fi;
+      echo "OSX_PYTHON_PKG=$OSX_PYTHON_PKG";
+    fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+      brew update;
+    fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+      brew ls --versions $OSX_PYTHON_PKG;
+      rc=$?;
+      if [[ $rc == 0 ]]; then
+        echo "Upgrading $OSX_PYTHON_PKG";
+        brew upgrade $OSX_PYTHON_PKG;
+      else
+        echo "Installing $OSX_PYTHON_PKG";
+        brew install $OSX_PYTHON_PKG;
+      fi;
+      echo "Unlinking $OSX_PYTHON_PKG";
+      brew unlink $OSX_PYTHON_PKG;
+      echo "Linking $OSX_PYTHON_PKG";
+      brew link --overwrite $OSX_PYTHON_PKG;
+      $PIP_CMD install --upgrade pip setuptools;
+      echo "Checking Python and Pip";
+      which $PYTHON_CMD && which $PIP_CMD;
+    fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+      $PIP_CMD install virtualenv;
+      virtualenv $HOME/venv -p $PYTHON_CMD && source $HOME/venv/bin/activate;
+    fi
+  - env |sort
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+      openssl_dir=$(brew --prefix openssl);
+      echo "Setting LDFLAGS/CFLAGS/SWIG_FEATURES env.vars to $openssl_dir/...";
+      export LDFLAGS="-L$openssl_dir/lib $LDFLAGS";
+      export CFLAGS="-I$openssl_dir/include $CFLAGS";
+      export SWIG_FEATURES="-I$openssl_dir/include $SWIG_FEATURES";
+    fi
+# Begin of m2crypto quick fix.
+# The problem happens only with Python 2.6 on Ubuntu 16.04, see pywbem issue #750.
+# TODO: Replace the following quick fix for installing M2Crypto with a real fix.
+  - if [[ "$TRAVIS_OS_NAME" == "linux" && "$TRAVIS_PYTHON_VERSION" == "2.6" ]]; then
+      if [[ -f /usr/include/x86_64-linux-gnu/openssl/opensslconf.h && ! -f /usr/include/openssl/opensslconf.h ]]; then
+        echo "Quickfix for M2Crypto swig run - Linking openssl/opensslconf.h";
+        sudo ln -s /usr/include/x86_64-linux-gnu/openssl/opensslconf.h /usr/include/openssl/opensslconf.h;
+      fi
+    fi
+# End of m2crypto quick fix.
+  - pip list
+# Begin of fix for build_clib issue.
+  - $PYTHON_CMD remove_duplicate_setuptools.py
+# End of fix for build_clib issue.
+  - make install
+  - pip list
+  - make develop
+  - pip list
+
+# commands to run builds & tests
+script:
+# make build is always run in order to verify the package version determination
+  - make build
+  - make builddoc
+  - make check
+  - make test
+
+after_success:
+  - if [[ "$TRAVIS_OS_NAME" == "linux" && "$TRAVIS_PYTHON_VERSION" == "2.7" && "$PACKAGE_LEVEL" == "latest" && -z $_MANUAL_CI_RUN ]]; then
+      coveralls;
+    fi

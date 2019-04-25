@@ -1,0 +1,9 @@
+language:
+  - minimal
+
+install:
+  - docker pull jjmerelo/iv-test
+  - docker images
+
+script: 
+  - docker run -t -v  $TRAVIS_BUILD_DIR:/test jjmerelo/iv-test

@@ -1,0 +1,25 @@
+language: kotlin
+
+sudo: false # use container based builds which are faster
+
+jdk:
+  - openjdk12
+
+branches:
+  only:
+  - master
+
+os:
+- linux
+
+cache:
+  directories:
+  - $HOME/.gradle
+
+script:
+- "./gradlew build"
+
+notifications:
+  email:
+    on_success: change
+    on_failure: chnage

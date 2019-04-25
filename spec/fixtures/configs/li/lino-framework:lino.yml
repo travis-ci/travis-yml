@@ -1,0 +1,39 @@
+language: python
+python:
+  - "2.7"
+  - "3.6"
+env:
+  global:
+    secure: YscqZKGnX2vxiqO0RlGYli1oWCfJsHHiMd+RzScbyiCyDSNedFlI7Da5bYJaOeQ9VxG9gd6Fe6gw/3d38CkOFItqYTGHSDiw3MccWMFBaIGwXa11z6SHRVviUCNPujAXl/4Cq0W7AedB4vAbgDUoCbPdRuQ7d3gHNGBzQFDbN6w=
+  matrix:
+  - DJANGO=1.11
+
+# command to install dependencies, e.g. pip install -r requirements.txt --use-mirrors
+install:
+  - pip install -U setuptools
+  - pip install Django==$DJANGO
+  - # pip install coveralls
+  - test -e "requirements.$TRAVIS_BRANCH.txt" && ( pip install -r "requirements.$TRAVIS_BRANCH.txt" ) || ( pip install -r requirements.txt )
+  - pip install -e .
+# command to run tests, e.g. python setup.py test
+script:
+  - export LINO_CACHE_ROOT=$TRAVIS_BUILD_DIR/lino_cache
+  - mkdir $LINO_CACHE_ROOT
+  - # coverage run --source=lino setup.py test
+  - inv prep test
+
+after_script:
+  - if [ "${TRAVIS_PYTHON_VERSION}" = "2.7" ]; then ./bash/trigger_build.sh "lino-framework/react" "Auto test triggered by repo `basename $(git rev-parse --show-toplevel)` commit `git rev-parse HEAD`" "$TRAVIS_API_TOKEN"; fi
+
+#after_success:
+  # coveralls
+
+notifications:
+  email:
+    recipients:
+        #tonis.piip@gmail.com
+        - secure: EpnJWwQ4myD7BqduLffWkbrZsaHqWqNr+xeaQKfgON1Z7TOT/ML3qWVR+hr+v7ZkxCuGv0GRjbyVNTeRW7sEhwo4nsmuvR+7w4BpCjXhWuL71fkq0zIdwViapoY91InJHeKIJi9FzKAJEhmm0VWuj9ouHF28AUKJKFJQ01EHrCE=
+        #luc.saffre@gmail.com
+        - secure: PI5TM+LEssN/WbnMmRylCnEkhmME/VmyKcFik25cZvnfKQcqp9gHTZ6xCVSFbPFF12u+RCohqs/joA7xMaBlVVmCwU8NNubw75xO8apLoaCcAAOMy/mRLDIpNDzRELt+LLp7HNyjvOT8nf1xmTfrbX/44ImJjHfIdgT6UPGhr+o=
+    on_success: change
+    on_failure: always

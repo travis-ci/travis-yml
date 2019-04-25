@@ -1,0 +1,143 @@
+sudo: required
+
+branches:
+  only:
+    - master
+    - /^v[0-9].[0-9].[0-9]$/
+    - /^v[0-9].[0-9].[0-9]-/
+    - /^v[0-9].[0-9]$/
+
+jobs:
+  include:
+    # run jest with test coverage for codeclimate
+    - &test-setup
+      stage: test
+      language: node_js
+      node_js:
+        - "10"
+      cache: npm
+      before_script:
+        - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+        - chmod +x ./cc-test-reporter
+        - ./cc-test-reporter before-build
+      script:
+        - npm run test:ci
+      after_script:
+        - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
+
+    # ensure correct formatting with prettier
+    - <<: *test-setup
+      script:
+        - npm run format:ci
+
+    # calculate the bundle size
+    - <<: *test-setup
+      script:
+        - npm run build
+        - npm run bundlesize
+
+    # build all commits to master
+    # push a new latest tag to Docker Hub
+    # => template for further docker build jobs
+    - &build-setup
+      stage: build
+      if: (type = push) AND (branch = master)
+      addons:
+        apt:
+          packages:
+            - docker-ce
+      env:
+        - IMAGE_NAME="uzhbf/klicker-react"
+      before_script:
+        - echo $DOCKER_PASSWORD | docker login --username $DOCKER_USER --password-stdin
+      script:
+        - docker pull $IMAGE_NAME:latest
+        - docker build . --build-arg VERSION=$TRAVIS_TAG --cache-from $IMAGE_NAME:latest -t $IMAGE_NAME:latest
+        - docker push $IMAGE_NAME:latest
+
+    # build all commits to master
+    # push a new canary tag to OpenShift
+    - <<: *build-setup
+      if: (type = push) AND (branch = master)
+      env:
+        - USER="serviceaccount"
+        - PASSWORD=$OC_TOKEN_SWITCH
+        - REGISTRY="registry.zh.shift.switchengines.ch"
+        - IMAGE_NAME="registry.zh.shift.switchengines.ch/klicker/klicker-react-stage"
+      before_script:
+        - echo $PASSWORD | docker login --username $USER --password-stdin $REGISTRY
+      script:
+        - travis_retry docker pull $IMAGE_NAME:canary
+        - docker build . --cache-from $IMAGE_NAME:canary --build-arg VERSION=canary -t $IMAGE_NAME:canary
+        - travis_retry docker push $IMAGE_NAME:canary
+
+    # build all pull requests
+    # push a nightly tag to Docker Hub
+    - <<: *build-setup
+      if: type = pull_request
+      script:
+        - docker pull $IMAGE_NAME:nightly
+        - >
+          docker build .
+          --build-arg VERSION=$TRAVIS_TAG
+          --cache-from $IMAGE_NAME:nightly
+          -t $IMAGE_NAME:nightly
+          -t $IMAGE_NAME:nightly-$TRAVIS_PULL_REQUEST
+        - docker push $IMAGE_NAME:nightly
+        - docker push $IMAGE_NAME:nightly-$TRAVIS_PULL_REQUEST
+
+    # build unstable tags (e.g. v1.0.0-beta.1)
+    # push the tag to Docker Hub
+    - <<: *build-setup
+      if: (type = push) AND (tag =~ /^v[0-9].[0-9].[0-9]-/)
+      script:
+        - travis_retry docker pull $IMAGE_NAME:latest
+        - docker build . --build-arg VERSION=$TRAVIS_TAG --cache-from $IMAGE_NAME:latest -t $IMAGE_NAME:$TRAVIS_TAG
+        - travis_retry docker push $IMAGE_NAME:$TRAVIS_TAG
+
+    # build unstable tags (e.g. v1.0.0-beta.1)
+    # push a new unstable tag to OpenShift
+    - <<: *build-setup
+      if: (type = push) AND (tag =~ /^v[0-9].[0-9].[0-9]-/)
+      env:
+        - USER="serviceaccount"
+        - PASSWORD=$OC_TOKEN_SWITCH
+        - REGISTRY="registry.zh.shift.switchengines.ch"
+        - IMAGE_NAME="registry.zh.shift.switchengines.ch/klicker/klicker-react-stage"
+      before_script:
+        - echo $PASSWORD | docker login --username $USER --password-stdin $REGISTRY
+      script:
+        - docker build . --build-arg VERSION=$TRAVIS_TAG -t $IMAGE_NAME:$TRAVIS_TAG
+        - travis_retry docker push $IMAGE_NAME:$TRAVIS_TAG
+
+    # build stable tags (e.g. v1.0.0)
+    # push a new stable tag to Docker Hub
+    - <<: *build-setup
+      if: (type = push) AND (tag =~ /^v[0-9].[0-9].[0-9]$/)
+      script:
+        - travis_retry docker pull $IMAGE_NAME:latest
+        - docker build . --cache-from $IMAGE_NAME:latest --build-arg VERSION=$TRAVIS_TAG -t $IMAGE_NAME:stable -t $IMAGE_NAME:$TRAVIS_TAG
+        - travis_retry docker push $IMAGE_NAME:$TRAVIS_TAG
+        - travis_retry docker push $IMAGE_NAME:stable
+
+    # build stable tags (e.g. v1.0.0)
+    # push a new stable tag to OpenShift
+    # => this will trigger a new deployment to production
+    - <<: *build-setup
+      if: (type = push) AND (tag =~ /^v[0-9].[0-9].[0-9]$/)
+      env:
+        - USER="serviceaccount"
+        - PASSWORD=$OC_TOKEN_SWITCH
+        - REGISTRY="registry.zh.shift.switchengines.ch"
+        - IMAGE_NAME="registry.zh.shift.switchengines.ch/klicker/klicker-react-prod"
+      before_script:
+        - echo $PASSWORD | docker login --username $USER --password-stdin $REGISTRY
+      script:
+        - docker build . --build-arg VERSION=$TRAVIS_TAG -t $IMAGE_NAME:stable -t $IMAGE_NAME:$TRAVIS_TAG
+        - travis_retry docker push $IMAGE_NAME:$TRAVIS_TAG
+        - travis_retry docker push $IMAGE_NAME:stable
+        - >
+          curl $SENTRY_WEBHOOK
+          -X POST
+          -H 'Content-Type: application/json'
+          -d '{"version": $TRAVIS_TAG}'

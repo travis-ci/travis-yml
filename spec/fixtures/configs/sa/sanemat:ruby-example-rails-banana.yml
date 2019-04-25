@@ -1,0 +1,25 @@
+language: ruby
+sudo: false
+rvm:
+- 2.2.2
+addons:
+  postgresql: '9.3'
+before_install:
+- gem update bundler
+before_script:
+- psql -c 'create database travis_ci_test;' -U postgres
+- cp config/database.travis.yml config/database.yml
+- bundle exec rake db:create db:migrate
+after_script:
+- bin/run-tachikoma.sh
+- bin/run-compare-linker.sh
+notifications:
+  email:
+  - ogataken@gmail.com
+branches:
+  only:
+  - master
+  - /^cron_for_tachikoma\/.*/
+env:
+  global:
+    secure: IJMkDmp7Od8S1PnkuS7KU9KoZ7wCZue/2YU2w/XniRvXnKVUAIjO0ph0WmzpRfbWgPphsrizWoeRGyQNHghs5UvQ+n1AxySEgkryj/nMyDk56vM6vXfcY702a/Fas3vrmXTTwURMh0wDbmVXSVTDNgD/p4ToCET9TLnzQdYDs8E=

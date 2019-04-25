@@ -1,0 +1,61 @@
+language: cpp
+sudo: required
+dist: trusty
+os:
+  - linux
+compiler:
+  - gcc
+  - clang
+env:
+  global:
+    - DEBUG=1
+    # Legion flags
+    # - WARN_AS_ERROR=1
+    - REALM_SYNTHETIC_CORE_MAP=""
+    - REALM_BACKTRACE=1
+    - CC_FLAGS="-Wno-unused-command-line-argument"
+    # Disable features by default, specify explicit what to use in each build
+    - DEFAULT_FEATURES=0
+  matrix:
+    - TASKBENCH_USE_MPI=1
+    - USE_LEGION=1
+    - USE_REGENT=1
+    - USE_REALM=1 USE_GASNET=1 CONDUIT=mpi
+    - USE_STARPU=1 TASKBENCH_USE_HWLOC=1
+    - USE_PARSEC=1 TASKBENCH_USE_HWLOC=1
+    - USE_CHARM=1
+    - USE_CHAPEL=1
+    - USE_X10=1
+    - USE_OPENMP=1
+    - USE_SPARK=1
+    - USE_OMPSS=1
+    - USE_SWIFT=1
+    - USE_TENSORFLOW=1
+    - USE_DASK=1
+matrix:
+  exclude:
+    - compiler: clang
+      env: USE_REGENT=1
+before_install:
+  - |
+    if [[ "$(uname)" = "Linux" ]]; then
+      if [[ $USE_CHAPEL -eq 1 ]]; then
+        wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
+        sudo apt-add-repository "deb http://apt.llvm.org/trusty/ llvm-toolchain-trusty-6.0 main"
+      fi
+      sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
+      sudo apt-get update -qq
+      sudo apt-get install -qq g++-4.9 g++-5 mpich2 libmpich-dev libpcre3-dev binutils-dev
+      if [[ $USE_CHAPEL -eq 1 ]]; then
+        sudo apt-get install -qq clang-6.0 libclang-6.0-dev llvm-6.0-dev
+      elif [[ $USE_REGENT -eq 1 ]]; then
+        sudo apt-get install -qq clang-3.5 libclang-3.5-dev llvm-3.5-dev
+      fi
+    fi
+  - if [[ "$(uname)" = "Linux" && "$CXX" = "g++" ]]; then export CXX="g++-5" CC="gcc-5"; fi
+install:
+  - export CCACHE_BASEDIR=$PWD
+  - ./get_deps.sh
+script:
+  - ./build_all.sh
+  - ./test_all.sh

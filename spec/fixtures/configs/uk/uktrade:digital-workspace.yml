@@ -1,0 +1,15 @@
+language: ruby
+rvm:
+ - 2.5.3
+install:
+  - bundle install --retry=3
+script:
+- bundle exec rake ci
+env:
+  PEOPLEFINDER_URL: 'https://peoplefinder-dev.herokuapp.com'
+  PEOPLEFINDER_API_URL: 'https://peoplefinder-dev.herokuapp.com'
+  WP_API_URL: 'https://uat-dit.useconnect.co.uk/wp-json/wp/v2/'
+  WP_API_CUSTOM: 'https://uat-dit.useconnect.co.uk/wp-json/dit/v1/'
+notifications:
+  on_success: never
+  on_failure: never

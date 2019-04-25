@@ -1,0 +1,194 @@
+#
+#  This file is part of the Off-the-Record Next Generation Messaging
+#  library (libotr-ng).
+#
+#  Copyright (C) 2016-2018, the libotr-ng contributors.
+#
+#  This library is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU Lesser General Public License as published by
+#  the Free Software Foundation, either version 2.1 of the License, or
+#  (at your option) any later version.
+#
+#  This library is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU Lesser General Public License for more details.
+#
+#  You should have received a copy of the GNU Lesser General Public License
+#  along with this library.  If not, see <http://www.gnu.org/licenses/>.
+#
+
+language: c
+#cache: ccache
+
+cache:
+  directories:
+  - .deps
+
+addons:
+    apt:
+        sources:
+            - ubuntu-toolchain-r-test
+        packages:
+            - lcov
+            - valgrind
+
+matrix:
+  fast_finish: true
+  include:
+    - os: linux
+      dist: trusty
+      compiler: clang
+      env: T=normal
+    - os: linux
+      dist: trusty
+      compiler: gcc
+      env: T=normal
+    - os: linux
+      dist: precise
+      compiler: clang
+      env: T=normal
+    - os: linux
+      dist: precise
+      compiler: gcc
+      env: T=normal
+    - os: osx
+      compiler: clang
+      osx_image: xcode8.3
+      env: T=normal
+    - os: linux
+      compiler: gcc
+      dist: precise
+      env: T=coverage
+    - os: linux
+      compiler: gcc
+      dist: precise
+      env: T=profile
+    - os: linux
+      dist: trusty
+      compiler: clang
+      env: T=style
+    - os: linux
+      compiler: gcc
+      dist: precise
+      env: T=full-valgrind-checks
+    - os: linux
+      dist: trusty
+      compiler: clang
+      env: T=sanitizer
+    - os: linux
+      compiler: gcc
+      dist: precise
+      env: T=ctgrind
+    - os: linux
+      compiler: gcc
+      dist: precise
+      env: T=splint
+  allow_failures:
+    - os: osx
+      compiler: clang
+      env: T=normal
+    - os: linux
+      compiler: gcc
+      dist: precise
+      env: T=ctgrind
+
+sudo: required
+
+notifications:
+  irc:
+    channels:
+      - "irc.oftc.net#cad"
+    on_success: change
+    on_failure: change
+    skip_join: true
+    template:
+      - "%{repository_slug}(%{author}): %{message} %{build_url}"
+
+before_install:
+- $CC --version
+- which $CC
+
+- export CC=`which $CC`
+
+# Update the repo
+- if [[ $TRAVIS_OS_NAME == 'osx' ]]; then brew update; fi
+- if [[ $TRAVIS_OS_NAME == 'linux' ]]; then sudo apt-get update --quiet --assume-yes; fi
+
+# Dependencies
+- if [[ $TRAVIS_OS_NAME == 'osx' ]]; then brew cleanup; fi
+- if [[ $TRAVIS_OS_NAME == 'osx' ]]; then brew install curl && brew install glib; fi
+- if [[ "$T" == "splint" ]]; then sudo apt-get install splint --quiet --assume-yes; fi
+- if [[ "$T" = "style" ]]; then sudo apt-get install clang-format-3.5 clang-tidy-3.9 --quiet --assume-yes; fi
+
+before_script:
+  - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then
+      brew install libgcrypt || brew outdated libgcrypt || brew upgrade libgcrypt &&
+      brew install libsodium || brew outdated libsodium || brew upgrade libsodium;
+    fi
+  - ./travis_before_script.sh
+
+script:
+  - export LD_LIBRARY_PATH=/usr/local/lib:${LD_LIBRARY_PATH}
+  - export PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:${PKG_CONFIG_PATH}"
+  - |
+      if [ "$T" = "coverage" ]; then
+           ./autogen.sh
+           ./configure --disable-shared --enable-code-coverage
+           make -j
+           make -j check
+           make coverage-check
+      fi
+  - |
+      if [ "$T" = "profile" ]; then
+           ./autogen.sh
+           ./configure --disable-shared --enable-gprof
+           make -j
+           make -j check
+           make profile
+      fi
+  - |
+      if [ "$T" = "full-valgrind-checks" ]; then
+           ./autogen.sh
+           ./configure --enable-valgrind
+           make -j
+           make -j check
+           make check-valgrind
+      fi
+  - |
+      if [ "$T" = "normal" ]; then
+           ./autogen.sh
+           ./configure --disable-shared
+           make -j
+           make -j check
+           make ci
+      fi
+  - |
+      if [ "$T" = "style" ]; then
+           ./autogen.sh
+           ./configure --disable-shared
+           make code-style-doctor code-check
+      fi
+  - |
+      if [ "$T" = "ctgrind" ]; then
+           ./autogen.sh
+           ./configure --with-ctgrind
+           make -j
+           make -j check
+           make ci
+      fi
+  - |
+      if [ "$T" = "sanitizer" ]; then
+           ./autogen.sh
+           ./configure --with-sanitizers=address,undefined,integer
+           export LSAN_OPTIONS=suppressions=lsan.supp
+           make -j
+           make -j check
+           make test
+      fi
+  - |
+      if [ "$T" = "splint" ]; then
+           ./autogen.sh
+           ./configure
+           make splint
+      fi

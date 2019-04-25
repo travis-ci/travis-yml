@@ -1,0 +1,17 @@
+language: python
+python:
+  - 3.6
+
+before_install:
+  - ./ci/travis-before-install.sh
+script:
+  - ./ci/travis-test.sh
+deploy:
+  provider: pypi
+  user: vivarium
+  password:
+    secure: LpC+hYEM9WhK4kxduQK69bre4SP4qF0KbXpcbAOHqYJIbsHMcB6fdEQ1p3Xh18w5Hm6Dr3heV+TJswvKXRPR48GZLhyoJkhTu+5eETLUB6dzqMEBuWPM2mqgeCuXf4npWtT4RDCPmNWz9uNe4u8QDWiwWGsVX8/kW189fmEQhvCb17ilEw3ji2o0vvUbWYuEwl5nEFnbAEBWA/1MyykNlc936Fy3rs+ZG87/r+e6NNMrQ00cCw0TaWF5T4Y2Akc3QkgL8Y4GQLgsZIrtrJMkfdPrHONOmblkprRlHslOLaLyZCN6NhVY5MAxymPpbTAVhUH0g800JpI3MiAoPTvw65Qni7jXsfG/MIHWiAvP4w0IJv/K7t7KSNc9FXSeYO4B2shJxNmhb/VlMGxHWAER4elPmBb1azTddZQJRz881VILuCg30bDJo4pWcHbUAJJ8hfnslmfYrg8MCxoQh9cqqXElMiwRqKidoxZQX/A+iUOrrZHCBMPXN5OON6FX6tF3eVhoXh+s6J76XqwxnPW366OiMa11Wx0CVcnptuDYmBZtkCB5WNEA+FULeHY6KTGBL0QSlyzpuoM+GsKM7/FC0/rtIjG6QPPHYBieXY3VDdLijSFY1GvT8HRhboATe9Xt9Mtdulqh6EFDwC/sdl7CffDZT6J8qYFRWaP25oaIxLs=
+  on:
+    distributions: sdist bdist_wheel
+    repo: ihmeuw/vivarium_public_health
+    tags: true

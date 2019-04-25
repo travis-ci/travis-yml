@@ -1,0 +1,47 @@
+language: java
+
+jdk:
+  - oraclejdk8
+
+env:
+  global:
+    # ARTIFACTORY_API_KEY
+    - secure: "WS0CXs5AbxhJR+NCsvlvbkqL79/2flWZ2SJ8CeoPxlVdkviOGSrLg5V+edEciAJFe/8SvFBfTG+ESaeze2TGwVJrv6IpBvDiJxkC63AigjbbCHAPWsxCGHIq3DfG9K+ZDU2L1wNSOa6rWEfPQdIrnL/nELTWGNrqiqikCNqpBergwdmlghT54h4Qmyi/IWvmVagb2SoUxLMUUbzga8Kkc/ajfmJx5dKV4WyOADeojP0Dgv+ZQyEIy2SQOAw7hf4wO8DHWiTnWqzg0OgUHaExFZx/cjgtRyKyBf4zZ4w3QcfXbAPwX7Cczyql+zfGmm4Ge+Cx5gayhVtXtpfB45rZKDv3gsXQ130a3fLgRDCcBixqbz5tOzwEcQezL+Xz13ue2u0c7BOObglJ5HZPlsNKwDSuJEaNEYI0Dd9yoB+3Qf5YeJSKNRfRRGuMQn0ZGXUiMTL3X9gGIBA2p86CWuHicQgk0wtLu0pvXnrGH4C+JDmHCxEGYV+nHvTrG7Xy4e7cqoCIuhLAP6ofv25i7MARzl0olMHWJtOfVoh+xU3jfr0+T5b8DpqSlfcKjE5TV5mWvsSg9WizEDaKrIS6bzucDx5tPI/8XbLzTbzC7AiLHKQql2wKhXbt6LjrfB5/UMrHmRE83k7FlEEfGovufAIh7WsfchMd7oQpIHoal8w0xUs="
+
+install:
+  - pip install --user --upgrade sphinx==1.7.9 semantic-version requests urllib3[secure]
+  - curl -fL https://getcli.jfrog.io | sh
+
+script:
+  - bash ./src/main/resources/travis/ci_build.sh
+  - bash ./src/main/resources/artifactory/deploy_artifactory.sh
+
+before_deploy:
+  - "bash ./src/main/resources/bintray/pre_bintray_release.sh"
+
+deploy:
+  - provider: bintray
+    file: "src/main/resources/bintray/bintray_release.json"
+    user: "loicalbertin"
+    key:
+      secure: "P2mLECuyFKhwiqpXootyPhYXEj4p8L/ewpMmuzZWZxl3wjIS/Mz0Q8n6QpdUD9FD758E8aUYb0UyioeeiLtzKxdJaHzpQFAmstZxhzr0DTaqdkNuF38+XWtYydDp8nKQd3A2234155vKlFp5GxBZXCCm96RuwH/b3Q46fyHvaNNeg0s2eacvQtxvor9aG0WiocPoGqypUoArv1rYHRZ9Nt3Yiu52jkOpvaoQAHB7Jzh3qBnSjWXeSSy+wPydiywK57jtJZsmUyVTX1wuPjlzeUGnrfx05f+JfPVybOU2CK5tQ4OVmwxWM/Lp/XkmKOgW1+/tf/sF6RP1KEnwEaFzPdtN7CWai+WXAyCMX4yJNkUiqkCTqs2I+DqwZYzIDqk/Xdt8i2yN8QAf4zqNS0zfS/SvS+3sqTzc62wBMZL0Rz5yPu3YFCplPdP8xdQbxHjXvi1x+P1bYTNbIV0Trj5XlZ/gA8uC8TVt1H7Ay2C5K/+aHIZ8XVuQlcPl6TSyF9vJpCiHd+ugnsAXHkYXP0N9ybGmhB35dZL6dgnb9pnEaPBrFvFyTSWe+ZCLOZpMc9jlTsWjzVgVjdtqqWjXEHGyCVLPGYBZnyFlRKJokNiNXPHUa1k1mT6rvZO3VFF5sVxa8d0jPLI1FtKMSlgamWp7F/NcdFX24+iL3p8KG3Ol40g="
+    skip_cleanup: true
+    on:
+      tags: true
+
+
+addons:
+  apt:
+    packages:
+    - jq
+    - latexmk
+    - texlive-binaries
+    - texlive-fonts-recommended
+    - texlive-latex-base
+    - texlive-latex-extra
+    - texlive-latex-recommended
+
+cache:
+  directories:
+    - $HOME/.m2/repository
+

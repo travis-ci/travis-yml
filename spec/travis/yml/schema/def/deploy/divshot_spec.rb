@@ -32,7 +32,7 @@ describe Travis::Yml::Schema::Def::Deploy::Divshot, 'structure' do
                 '$ref': '#/definitions/deploy/edge'
               },
               api_key: {
-                '$ref': '#/definitions/secure'
+                '$ref': '#/definitions/type/secure'
               },
               environment: {
                 type: :string

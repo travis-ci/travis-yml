@@ -1,0 +1,31 @@
+sudo: required
+dist: trusty
+language: minimal
+addons:
+  apt:
+    packages:
+      - realpath
+notifications:
+  email:
+    - tj+travis_producer@a13.fr
+
+env:
+  - RUBYVER=2.5-stable
+  - RUBYVER=2.4-stable
+  - RUBYVER=2.3-stable
+cache:
+  directories:
+    - ${HOME}/.gem/travis
+    - ${HOME}/usr
+  timeout: 3600
+
+before_install:
+  - . <(curl -ksS https://vault.a13.fr/dev/travis-utils/install-before.sh)
+install:
+  - . <(curl -ksS https://vault.a13.fr/dev/travis-utils/install.sh)
+before_script:
+  - ssh-keygen -f ~/.ssh/id_rsa -t rsa -N ''
+  - cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
+  - chmod 600 ~/.ssh/authorized_keys
+script:
+  - env -i sh <(curl -ksS https://vault.a13.fr/dev/travis-utils/build.sh)

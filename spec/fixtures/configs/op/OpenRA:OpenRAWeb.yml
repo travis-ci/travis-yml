@@ -1,0 +1,36 @@
+# Travis-CI Build for the OpenRA website
+# see travis-ci.org for details
+
+language: ruby
+rvm:
+  - 2.2
+
+# http://docs.travis-ci.com/user/migrating-from-legacy
+sudo: false
+
+env:
+  global:
+    secure: "Ot/NHtOO6W2pGcWAvXpdz3tKoppcvyZ3XlbPNMr/qOlRhcySMPB5wgkdZJFS3D+E5QoXeB+aOYuAW4dqm5R2bnwCoAnbgMrLItN6nejQ/CR5gejEHLrugoM5hXp0BuY/MUiRMkhj9ERMDIbwUulC2Zpsmx05Wq4q7+ZRBF451rE="
+
+install:
+
+script:
+ - nanoc compile
+
+after_success:
+ - test $TRAVIS_PULL_REQUEST == "false" && test $TRAVIS_BRANCH == "master" && ./update-github-pages.sh
+
+# Only watch the production branch.
+branches:
+ only:
+   - master
+
+# Notify developers when build passed/failed.
+notifications:
+  irc:
+    template:
+      - "%{repository}#%{build_number} %{commit} %{author}: %{message} %{build_url}"
+    channels:
+      - "irc.freenode.net#openra"
+    use_notice: true
+    skip_join: true

@@ -1,0 +1,34 @@
+language: php
+
+php:
+  - 7.0
+  - 7.1
+  - 7.2
+  - nightly
+
+matrix:
+    fast_finish: true
+    allow_failures:
+        - php: nightly
+
+sudo: false
+
+# Disabled via unexpected fail on TravisCI
+cache:
+  directories:
+    - vendor
+    - $HOME/.composer/cache
+
+install:
+  - composer self-update --quiet
+  - COMPOSER_DISCARD_CHANGES=true composer --prefer-source update --no-interaction --no-progress
+
+script:
+  - make ci
+
+after_script:
+  - if [ "$TRAVIS_PHP_VERSION" == "7.0" ]; then wget https://scrutinizer-ci.com/ocular.phar; fi
+  - if [ "$TRAVIS_PHP_VERSION" == "7.0" ]; then php ocular.phar code-coverage:upload --format=php-clover coverage.clover; fi
+
+notifications:
+  email: false

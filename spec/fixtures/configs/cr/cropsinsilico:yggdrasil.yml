@@ -1,0 +1,289 @@
+language: python
+sudo: required
+cache:
+  pip: true
+  directories:
+    - $HOME/.ccache  # https://github.com/travis-ci/travis-ci/issues/5853
+
+addons:
+  apt:
+    packages: &native_deps_apt
+      - strace
+      - valgrind
+      # - ccache
+    update: true
+  homebrew: &native_deps_brew
+    packages:
+      - valgrind
+    update: true
+
+os:
+  - linux
+
+python:
+  - 2.7
+  - 3.6
+
+env:
+  global:
+    NUMPY=numpy
+    MATPLOTLIB=matplotlib
+    MPLBACKEND=agg
+    INSTALLZMQ=1
+    INSTALLRMQ=0
+    INSTALLAPY=0
+    INSTALLLPY=0
+    BUILDDOCS=0
+  matrix:
+    - YGG_ENABLE_LONG_TESTS=1
+    - CONDA=yes
+
+before_install:
+  - |
+    echo Installing os level packages...;
+    # if [[ $TRAVIS_OS_NAME == 'osx' ]]; then
+    #    # export PATH=/usr/local/opt/ccache/libexec:$PATH
+    # else
+    if [[ $TRAVIS_OS_NAME == 'linux' ]]; then
+       export PATH=/usr/lib/ccache:$PATH
+    fi
+
+    if [[ -n "$TRAVIS_PYTHON_VERSION" ]]; then
+      if [[ -n "$CONDA" ]]; then
+        export CONDA=$TRAVIS_PYTHON_VERSION
+      else
+        export PYTHON=$TRAVIS_PYTHON_VERSION
+      fi
+    fi
+    echo "CONDA = $CONDA"
+    echo "PYTHON = $PYTHON"
+
+    # Install from source in virtual env
+    if [[ -n "$PYTHON" && $TRAVIS_OS_NAME == 'osx' ]]; then
+      echo Installing Python using virtualenv...;
+      if [[ "$TRAVIS_OS_NAME" == "osx" && "${PYTHON:0:1}" == "3" ]]; then
+         brew install python3;
+      fi
+      pip install --upgrade pip virtualenv
+      virtualenv -p python$PYTHON venv
+      source venv/bin/activate
+    fi
+
+    # Install from conda in conda env
+    if [[ -n "$CONDA" || $INSTALLLPY == '1' ]]; then
+      echo Installing Python using conda...;
+      if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then MINICONDA_OS=Linux; else MINICONDA_OS=MacOSX; fi
+      wget https://repo.anaconda.com/miniconda/Miniconda${CONDA:0:1}-latest-$MINICONDA_OS-x86_64.sh -O miniconda.sh
+      bash miniconda.sh -b -p $HOME/miniconda
+      export PATH="$HOME/miniconda/bin:$PATH"
+      hash -r
+      conda config --set always_yes yes --set changeps1 no
+      conda config --add channels conda-forge
+      conda update -q conda
+      conda install -q conda-build
+      conda create -q -n test-environment python=$CONDA
+      source activate test-environment
+      conda info -a
+    fi
+    
+    # Install AstroPy
+    if [[ $INSTALLAPY == '1' ]]; then
+       echo Installing AstroPy...;
+       if [[ -n "$PYTHON" ]]; then
+         pip install astropy
+       elif [[ -n "$CONDA" ]]; then
+         conda install astropy
+       fi
+    fi
+
+    # Install LPy
+    if [[ $INSTALLLPY == '1' ]]; then
+       echo Installing LPy...;
+       sh ci/install-lpy-linux.sh
+    fi
+
+    # Install ZeroMQ
+    if [[ $INSTALLZMQ == '1' && -n "$PYTHON" ]]; then
+       echo Installing ZeroMQ...;
+       if [[ $TRAVIS_OS_NAME == 'osx' ]]; then
+          sh ci/install-czmq-osx.sh
+       else
+          sh ci/install-czmq-linux.sh
+       fi
+    fi
+
+    # Install RabbitMQ & Start a server
+    if [[ $INSTALLRMQ == '1' ]]; then
+       if [[ $TRAVIS_OS_NAME == 'osx' ]]; then
+          echo Installing RabbitMQ...;
+          brew install rabbitmq
+          echo Starting RabbitMQ...;
+          export PATH="${PATH}:/usr/local/sbin";
+          sudo /bin/sh -c "RABBITMQ_PID_FILE=$TRAVIS_BUILD_DIR/rabbitmq.pid rabbitmq-server &"
+          sudo rabbitmqctl wait "$TRAVIS_BUILD_DIR/rabbitmq.pid"
+       fi
+       echo Checking rabbitmq status...;
+       sudo rabbitmqctl status
+       
+       echo Installing Pika...;
+       if [[ -n "$PYTHON" ]]; then
+         pip install "pika<1.0.0b1"
+       elif [[ -n "$CONDA" ]]; then
+         conda install "pika<1.0.0b1"
+       fi
+    fi
+
+install:
+  - |
+    # setup environment
+    ccache -s
+    # Upgrade pip and setuptools and wheel to get clean install
+    pip install --upgrade pip
+    pip install --upgrade wheel
+    pip install --upgrade setuptools
+    # Install yggdrasil
+    if [[ -n "$PYTHON" ]]; then
+      # May need to uninstall conda version of numpy and matplotlib on LPy test
+      pip install $NUMPY
+      pip install $MATPLOTLIB
+      pip install nose
+      pip install pytest "pytest-cov<2.6"
+      pip install coverage coveralls codecov flake8
+      if [[ $BUILDDOCS == '1' ]]; then
+        pip install sphinx breathe sphinx_rtd_theme
+      fi
+      # Install from source dist
+      python setup.py sdist
+      pip install --verbose dist/*.tar.gz
+      # Install from source
+      # pip install --verbose -e .
+    elif [[ -n "$CONDA" ]]; then
+      pip uninstall -y numpy
+      pip uninstall -y matplotlib
+      conda install $NUMPY
+      conda install $MATPLOTLIB
+      conda install nose
+      conda install pytest "pytest-cov<2.6"
+      conda install coverage coveralls codecov flake8
+      if [[ $BUILDDOCS == '1' ]]; then
+        conda install sphinx breathe sphinx_rtd_theme
+      fi
+      conda build recipe/meta.yaml --python $CONDA
+      conda install --use-local yggdrasil
+    fi
+
+script:
+  - |
+    flake8 yggdrasil
+  - |
+    if [[ -n "$CONDA" ]]; then
+      python create_coveragerc.py
+    fi
+    yggtest -c setup.cfg --cov-config=.coveragerc
+    
+
+after_success:
+  - |
+    coveralls
+    codecov
+
+
+jobs:
+  include:
+
+    # Tests
+    - stage: test
+      os: linux
+      python: 2.7
+      env: NUMPY=numpy==1.13.0 MATPLOTLIB=matplotlib==1.5.3 INSTALLZMQ=0 INSTALLRMQ=1 INSTALLLPY=1
+      services:
+        - rabbitmq
+    - os: linux
+      python: 3.4
+      script: |
+              yggtest tests/test_backwards.py
+    - os: linux
+      python: 3.6
+      env: INSTALLAPY=1 INSTALLZMQ=0 INSTALLRMQ=0
+    # Python 3.7 requires special dist
+    - os: linux
+      python: 3.7
+      env: YGG_DEFAULT_COMM=ZMQComm INSTALLRMQ=0 YGG_ENABLE_LONG_TESTS=1
+      dist: xenial
+      sudo: true
+      
+    # Only ever test one python 2 and one python 3 because brew dosn't allow specification of python version
+    - os: osx
+      python: 2.7
+      env: PYTHON=2.7 INSTALLRMQ=0 YGG_ENABLE_LONG_TESTS=1
+      language: generic  # https://github.com/travis-ci/travis-ci/issues/2312
+      cache:
+         pip: false
+         directories:
+          - $HOME/Library/Caches/pip
+          - $HOME/Library/Caches/Homebrew
+    - os: osx
+      python: 3.7
+      env: CONDA=3.7 INSTALLRMQ=1 YGG_ENABLE_LONG_TESTS=1
+      language: generic  # https://github.com/travis-ci/travis-ci/issues/2312
+      cache:
+         pip: false
+         directories:
+          - $HOME/Library/Caches/pip
+          - $HOME/Library/Caches/Homebrew
+    - name: "Build docs"
+      python: 3.6
+      env: BUILDDOCS=1
+      script: |
+              cd docs
+              make autodoc
+              cd "$TRAVIS_BUILD_DIR"
+      after_success: skip
+      addons:
+        apt:
+          packages:
+            - *native_deps_apt
+            - doxygen
+          update: true
+
+    # Docs
+    - stage: deploy
+      name: "Deploy docs"
+      python: 3.6
+      env: BUILDDOCS=1
+      script: |
+              cd docs
+              make autodoc
+              cd "$TRAVIS_BUILD_DIR"
+      after_success: skip
+      if: (tag IS present)
+      deploy:
+        provider: pages
+        skip_cleanup: true
+        local_dir: docs/build/html/
+        keep-history: true
+        github_token: $GITHUB_TOKEN # Set in travis-ci.org dashboard
+        on:
+          tags: true
+      addons:
+        apt:
+          packages:
+            - *native_deps_apt
+            - doxygen
+          update: true
+
+    # Deploy
+    - stage: deploy
+      name: "Deploy to PyPI"
+      script: skip
+      if: (tag IS present)
+      deploy:
+        provider: pypi
+        edge: true
+        skip_existing: true
+        distributions: sdist bdist_wheel --universal
+        user: langmm
+        password:
+          secure: cYP65ktykU8vzNpjDxVJ7hb5VIA8pcG0+LfaboyJ/7jJ85OFFMb7k12cuzmcFgyCMzxaMaR74ZwSL1Zs3jwfpsfKt22rdXV3YtAlrbLfHDd1ReoPeg6ZHSHYlZq/pkGowB7OHZMPaF7Pwjl2igWE1ZrJ8q/K2vVCt/cv9JhZXZS3nnC3iTY9jbvq/sWp6QChy61s5ekxf9m3PJBcS3s/n34ZyuQt8eF73YSMlztWNLTBWKIfK2LOpDXXKDWhFRDhlmt3mA88I2HI1ZxFyANIrrMwGEBIJOVWlAfnPOdoI36JW9wqv3DXj9RGVDNcVwfW5/juxMF+DSHORwQDuTn3E6Z0Q/ic6rLndI+vzHjYdjPeLXutggOEGTjq32LP6FkJ+3LyrFoQXwZIZ+FqLRni/HyppoyIQ+S5NneLB7Wj5Hyja7ycmwLZnlnixUz3qHOvIv6Hpv/koDltqyB5gzf0xvbNUMkRCHuuovtbqtmRtxA1BL8VKoGVzZ7zHrWG+iTGZXSFhgrcO1k8OYzxaWR2O/NeeURuy3ViD+xzPSvMASRX0sCULOf3o2rgDdJyTBjW5KZcLqVcOiGZoHgwOjZY0NQ50R7mE7T+CQmoYtil1Ovmm8b6NUhoE0z6jEgDVfEhKo9/WACHamzIQ4afrYsEWlQhDSg+dvrzS7OciILOK+Q=
+        on:
+          tags: true

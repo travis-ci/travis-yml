@@ -1,0 +1,87 @@
+before_install:
+    - git config --global user.email "sdamiano@stroudcenter.org"
+    - git config --global user.name "SRGDamia1"
+
+sudo: false
+git:
+  depth: 1
+  sparse_checkout: travis/travis_sparse_checkout
+cache:
+    pip: true
+    directories:
+        - "~/.platformio"
+language: python
+python:
+    - "2.7"
+install:
+    # Remove the cloned repo to emulate a user library installation
+    - git rm library.json
+    # - git rm library.properties
+    # - git rm -r pioScripts
+    # - git rm -r src
+    # Install PlatformIO (this should be cached!)
+    - pip install -U platformio
+    - pio upgrade
+    # Uninstall any old version of the current library from the Travis cache
+    - if pio lib -g uninstall EnviroDIY_ModularSensors; then
+        echo "Uninstalled cached version of ModularSensors";
+      fi
+    # Install this library from the branch we're working on
+    # echo "Installing ModularSensors from https://github.com/$TRAVIS_REPO_SLUG.git#$TRAVIS_BRANCH";
+    # echo "Installing ModularSensors from https://github.com/$TRAVIS_PULL_REQUEST_SLUG.git#$TRAVIS_PULL_REQUEST_BRANCH";
+    - if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
+        echo "Installing ModularSensors from https://github.com/$TRAVIS_REPO_SLUG.git#$TRAVIS_COMMIT";
+      else
+        echo "Installing ModularSensors from https://github.com/$TRAVIS_PULL_REQUEST_SLUG.git#$TRAVIS_PULL_REQUEST_SHA";
+      fi
+    # pio lib -g install https://github.com/$TRAVIS_REPO_SLUG.git#$BRANCH;
+    # pio lib -g install https://github.com/$TRAVIS_PULL_REQUEST_SLUG.git#$TRAVIS_PULL_REQUEST_BRANCH;
+    - if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
+        pio lib -g install https://github.com/$TRAVIS_REPO_SLUG.git#$TRAVIS_COMMIT;
+      else
+        pio lib -g install https://github.com/$TRAVIS_PULL_REQUEST_SLUG.git#$TRAVIS_PULL_REQUEST_SHA;
+      fi
+    # Install serial libraries (these should be ignored by SAMD boards)
+    - pio lib -g install https://github.com/PaulStoffregen/AltSoftSerial.git
+    - pio lib -g install https://github.com/EnviroDIY/SoftwareSerial_ExtInts.git
+    - pio lib -g install https://github.com/SRGDamia1/NeoSWSerial.git
+    - pio update
+script:
+    # - platformio ci --project-option="lib_ldf_mode = deep+" --project-option="lib_ignore = RTCZero" --board=mayfly  --board=megaatmega2560
+    # - platformio ci --project-option="lib_ldf_mode = deep+" --project-option="lib_ignore = SoftwareSerial_ExtInts, AltSoftSerial, NeoSWSerial, SoftI2CMaster" --board=adafruit_feather_m0
+    # - platformio ci --project-option="lib_ldf_mode = deep+" --project-option="lib_ignore = SoftwareSerial_ExtInts, AltSoftSerial, NeoSWSerial, SoftI2CMaster" --board=sodaq_autonomo
+    - platformio ci --project-conf="travis/platformio.ini"
+
+matrix:
+    include:
+      - language: node_js
+        install: npm install -g jsonlint
+        script: jsonlint -q library.json
+
+      - env:
+          - PLATFORMIO_CI_SRC=examples/single_sensor/
+          # - PLATFORMIO_BUILD_FLAGS="-D SDI12_EXTERNAL_PCINT -D NEOSWSERIAL_EXTERNAL_PCINT"
+      - env:
+          - PLATFORMIO_CI_SRC=examples/simple_logging/
+          # - PLATFORMIO_BUILD_FLAGS="-D SDI12_EXTERNAL_PCINT -D NEOSWSERIAL_EXTERNAL_PCINT"
+      - env:
+          - PLATFORMIO_CI_SRC=examples/DRWI_CitSci/
+          # - PLATFORMIO_BUILD_FLAGS="-D SDI12_EXTERNAL_PCINT -D NEOSWSERIAL_EXTERNAL_PCINT"
+      - env:
+          - PLATFORMIO_CI_SRC=examples/DRWI_NoCellular/
+          # - PLATFORMIO_BUILD_FLAGS="-D SDI12_EXTERNAL_PCINT -D NEOSWSERIAL_EXTERNAL_PCINT"
+      - env:
+          - PLATFORMIO_CI_SRC=examples/double_logger/
+          # - PLATFORMIO_BUILD_FLAGS="-D SDI12_EXTERNAL_PCINT -D NEOSWSERIAL_EXTERNAL_PCINT"
+      - env:
+          - PLATFORMIO_CI_SRC=examples/baro_rho_correction/
+          # - PLATFORMIO_BUILD_FLAGS="-D SDI12_EXTERNAL_PCINT -D NEOSWSERIAL_EXTERNAL_PCINT"
+      - env:
+          - PLATFORMIO_CI_SRC=examples/data_saving/
+          # - PLATFORMIO_BUILD_FLAGS="-D SDI12_EXTERNAL_PCINT -D NEOSWSERIAL_EXTERNAL_PCINT"
+      - env:
+          - PLATFORMIO_CI_SRC=examples/logging_to_ThingSpeak/
+          # - PLATFORMIO_BUILD_FLAGS="-D SDI12_EXTERNAL_PCINT -D NEOSWSERIAL_EXTERNAL_PCINT -D MQTT_MAX_PACKET_SIZE=240"
+      - env:
+          - PLATFORMIO_CI_SRC=examples/menu_a_la_carte/
+          # - PLATFORMIO_BUILD_FLAGS="-D SDI12_EXTERNAL_PCINT -D NEOSWSERIAL_EXTERNAL_PCINT -D MQTT_MAX_PACKET_SIZE=240 -D ENABLE_SERIAL2 -D ENABLE_SERIAL3"

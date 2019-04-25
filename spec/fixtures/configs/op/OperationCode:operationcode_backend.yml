@@ -1,0 +1,19 @@
+# Since we build and test in Docker we dont
+# need node at build time
+language: c
+
+services:
+  - docker
+
+script:
+  - make build
+  - |
+    while ! psql --host=localhost --username=postgres -c 'SELECT 1'> /dev/null 2>&1; do
+      echo 'Waiting for postgres...'
+      sleep 1;
+    done;
+  - make test
+  - if [ "$TRAVIS_PULL_REQUEST" == "false" ] && [ "$TRAVIS_BRANCH" == "master" ]; then make upgrade; fi
+
+env:
+  secure: "AmnH0r1tF9HIVsUfhoJHzCEqTZz3TU4FUd2D+T0XzSDbz6kUSubmP4agYRsJI1xPTwegqSonwL0QGAlaIKEssz6rqAqBSvzHC95XvghP1HVVp2/j8vvFaJbpWsnTQ25FbMgDD89wHRKRs0qk2Ui0zi+CtNFylj83D13yoVys6C0="

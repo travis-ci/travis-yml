@@ -1,0 +1,36 @@
+language: bash
+
+cache:
+  directories:
+    - /home/travis/.stack
+
+addons:
+  apt:
+    sources:
+#     - debian-sid
+    packages:
+      - shellcheck
+
+before_install:
+#   - echo "deb http://archive.ubuntu.com/ubuntu/ wily universe" | sudo tee -a /etc/apt/sources.list
+#   - sudo apt-get update -qq
+#   - sudo apt-get install -y shellcheck
+
+install:
+    - test -f mail-toaster.sh
+
+#before_script:
+
+script:
+   - bash -n *.sh
+   - shellcheck -e SC2009,SC2039,SC2086,SC2153,SC2016,SC1004,SC2119 *.sh
+   - bash -n include/*.sh
+   - shellcheck -e SC2009,SC2038,SC2039,SC2086,SC2153,SC2016,SC1004,SC2119 include/*.sh
+   - bash -n qmail/run.sh
+   - shellcheck -e SC2039 qmail/run.sh
+   - bash test/*.sh
+
+# after_success:
+# after_failure:
+# after_script:
+

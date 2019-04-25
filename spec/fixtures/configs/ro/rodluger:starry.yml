@@ -1,0 +1,36 @@
+sudo: required
+
+dist: trusty
+
+language: c
+
+addons:
+    apt:
+        sources:
+            - ubuntu-toolchain-r-test
+        packages:
+            - gcc-4.8
+            - g++-4.8
+            - doxygen
+
+matrix:
+    include:
+        - os: linux
+          env: PYTHON_VERSION=3.6 NUMPY_VERSION=1.14
+
+install:
+    - source .ci/travis.sh
+    - export CC=gcc-4.8
+    - export CXX=g++-4.8
+    - travis_wait 40 python setup.py develop
+
+cache:
+    directories:
+        - $HOME/miniconda-cache
+
+script:
+    - py.test -v -s tests/test_*.py
+
+after_success:
+    # DEBUG: Change from dev --> master when merging
+    - if [ "$TRAVIS_BRANCH" = "dev" -a "$TRAVIS_PULL_REQUEST" = "false" ]; then source .ci/build-docs.sh; fi

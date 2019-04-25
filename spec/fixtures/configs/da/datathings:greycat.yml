@@ -1,0 +1,31 @@
+language: java
+jdk:
+- oraclejdk8
+notifications:
+  email:
+    recipients:
+    - francois.fouquet@uni.lu
+    - gregory.nain@datathings.com
+    - thomas.hartmann@uni.lu
+    - assaad.moawad@datathings.com
+    on_success: change
+    on_failure: change
+env:
+  matrix:
+  - TRAVIS_NODE_VERSION="8"
+  global:
+  - secure: Ws9Xs8jrjd355JFq8RbRVoUGb7u6rm0b6az5JARvRfKXxgD5LckvfsEeZ8EmToSG0NY6D/yl6hmr9CQcR06c46AeNN9ZPafeF2FTgPR+z8M95GkMp7AYDvUvJIT8fkEbjW8OEyAlNINN6PEzgD3GwecNj07UybDuYRMP/uWRnSO6RX9vX+B5lrbxuRujrncN80/zlg4DQZU2GpUUaa38InR/NCO3FQCMnwMoYdvApqVZGKcj52fg8rkeutdGdQwHq7MvrkCTgCqbjINh3WRvgnjG4Lsifc9cORyJJ+EAj11OTdsYGIOI754XdTsMyfyxkXQ7d1yDHy8056JgMk9KBkPzfOBV3Ic+ye31MGoCtR38Yp7zFnVIUivYu4CNfka9i2IbNSoXKuoV91Kpk14J9C+OdZyyjEyS7qcAGNN/WhTctwhU52lycDTLD5jK0AYINnXk3mLn2g0CbC65Gk+noGwnjtT4dLbOep7m3vjdrrYVdlci2nRFPqgbTIgfcoka9SBP1/KFiU0pvmC0yHKLB1T/SyaO+hCwc3Au4KLoOyOfrwVUt34otIEZVkXHWCh2WDRc3LGcReU3IJc8gzs7o1Y2Uj025oDNNiP45TEz1PoEBD2cNWZNPN/vfAcpZiH+f7FYSp/1wz0dXix8RY5NkBo0y6TnSmXA7j/irNvLO3Q=
+  - secure: pbW9kof1GJJC9PnphQLkXvXPIf3EEMkthvEQ894YTA70N9E5JUmic94ps73ZAsMQWHhubKPulx8D2rGalaTqKKTw2bwvo3ffEQ8vkBX+oKXUXA0fDchc/zopyjEZHWrA6hb05s/IqhQGLGerVArXTI4W9C8Ay/h0AnbxCG7QvuDLJnV9NqlMMCjqvASHByhtLsvjLiCXyOzk8T6gVAxzcdoLovfPqIxmCMKgAgSVsTCckmhLbCEzn/F+4jln7yI+KU21BclgwDja57X5elL6xNS+QujxHGWnTyZGYfMOUdkABguYw4w2Ui1SzJYM7F/ugyB55glsz3OnMIhG3ZFbwgiTXtVgj6TWbK6zsDP9QxWlFmrxjnZIZlGWD6moSRqsGOcrnMB+ylwC3fIwCD2iBJI/vM7UtsqruhcX9U1S1AKptEac8OnkQh4LoqI38Gxv9A6AxlG4a7L3msctPczict49SrDKLZbKLnqinNNiM8GKQOisx+wSBRje9khlyeuXGNQ/z0ytrlWdPQ8DemUQrQtpLwdqhsNmMaW7MyqcbqkLE8ZIMQAzpKFTMBsJ+kAt5h1lsgzyPQm0ATNbsMnqMHfx6/zPdEA21BiDPZopYBQFPMpip43INSU4jRQ6BrrI+Kywg1ITKs+3L4R1z6VV3QNJMCMcsiP4Mv0cfY1mbJA=
+  - secure: UiZG9ifSPgps/f7IV620Sob2GLg8cyRUwbchynndWbm0llL/0H6LdJozMBWNvCy1pw9YA29MPvRKT8RODSOggljceQVED6sSOGeJsbtYcwcbIObmZhJHMv3C1xcwKtftpBM1LiGRBHZTENI7hyKhTr8vloYpq/AKRQuclvY1JmBPLlpx/pnWQzWWSXJeqcyTDCubRv4rbU5aTph+xs0rLdFG0eTKcnOeasbkjP4c09gkCf0EcSXMwvAjB7eQSvflvmmAgFJF0MPHjRGSxSYoh686p3WON2bk7pZdQJrDzS39MWgPaSctsoNuCNe4hOB1IOsZWNWC0tsXwbvBWEj5QqvVI3Ozbieaaiq1oI3qzPr36EkXGTSBikcEfxC4F5AagIvNj3mJdtt16IVX0ZFiLBPegzXy1fddlmCYiD3IzgrpgFHTPpjj17jjJTIzWpeCJSVX9PaPZMe3c0TgaC+XPWP/L/QrFy0UCHN5ZSWs2AFIADRwp5PnEQzTxDErk+TfttKZWY9r2skQ9Aa20v3IwwM8w4eWpkLP/pIXqEZrG/amPgTwwEZK+V7OPU44b6onGybsT32ZzpMz+hFqTPEeir9fcFYTLSxTQ6BoDwShYkB0rsIxjualGxA9W+7QXPAALqNDwZISIWFf3Fy4HfYxbXfA8gi0xEp9VC5s29EaCxg=
+before_install:
+- echo "MAVEN_OPTS='-Xmx2048m -XX:MaxPermSize=512m'" > ~/.mavenrc
+- rm -rf ~/.nvm && git clone https://github.com/creationix/nvm.git ~/.nvm && (cd ~/.nvm
+  && git checkout `git describe --abbrev=0 --tags`) && source ~/.nvm/nvm.sh && nvm
+  install $TRAVIS_NODE_VERSION
+- node -v
+- npm -v
+- printf "@greycat:registry=https://registry.datathings.com/repository/npm-public/\n//registry.datathings.com/repository/npm-public/:_authToken=${DT_TOKEN}" >> ~/.npmrc
+install: mvn clean
+script: mvn clean install
+after_success:
+- '[[ $TRAVIS_BRANCH == "master" ]] && { mvn -P dev clean deploy --settings etc/deploy-settings.xml -DskipTests=true -B ; };'

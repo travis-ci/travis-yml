@@ -1,0 +1,12 @@
+language: java
+env:
+  - EXTRA=
+jdk:
+  - oraclejdk8
+notifications:
+  recipients:
+    - DL-PP-JAVA-SDK@paypal.com
+  on_success: change
+sudo: true
+script: ./gradlew --stacktrace --info test $EXTRA
+after_success: ./script/deploy_snapshot.sh

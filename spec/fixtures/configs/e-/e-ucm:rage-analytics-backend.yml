@@ -1,0 +1,31 @@
+sudo: true
+language: node_js
+node_js:
+  - "8.5"
+
+addons:
+  apt:
+    packages:
+      - oracle-java8-set-default
+
+services:
+  - mongodb
+
+before_install:
+  - curl -O https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-5.6.2.deb && sudo dpkg -i --force-confnew elasticsearch-5.6.2.deb && sudo service elasticsearch start
+
+before_script:
+  - sleep 15
+  - curl -v http://localhost:9200/
+
+script:
+  - npm run-script test-travis
+  - npm run gen-apidoc
+
+after_success:
+  - "cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js"
+  - test $TRAVIS_PULL_REQUEST == "false" && test $TRAVIS_BRANCH == "master" && bash ./bin/deploy-gh-pages.sh
+
+env:
+  global:
+    - secure: "I6pmX6Eve9w6StJDiN+X7MIFQU3QHCRrsVfCmpLFsvDLhlM28sMoH3egXK42Bq3Wh+HJwRH9Sl9Xvh6PcHKY1L8z8Vs+lIPhYQ6TvzN2ShkGLu9H0poC87/ErLS0Bln2tNL/dvVD2IZTO7DQA1Pl2//H0EQDh25y04Yrulnh/QMDA/LaBPDEz0smwExxHeRRO9Psxmb+17f0nGN1dQr9O3Ct84ZBSDrYy/UH8zxKITPiBOL7qov15A32LQa61RbCMlogKYytHn5Dz/+Fgm9db8HB6s4uLXcOP4DoZfLZAP7PrA4r/CmIIR+/EAi1hiiA5UQRdFhF1pFKRp3DWc5TSDeOJRdDyG/8+FgfIJWiEIJBO1pSSBGxYMG+NXM5BQLDQt2H4/CRAEm5zjPIOyyfqk34s0WK0uZxQE6h49dahC17cy9G/D0IMoe/I1u07/EvDJkCCduHl4TmZ75+eCCKqr+wrR9aEiiEy/r5GXSYcytuQNmDRblPxopKBo4GAQ9ptNiz+GEyDf7IGPot6yaClKcixvw8OqkSxY0CFEHXltgDm3eRlkgu7/8pwX5nByNu1/X2xJd2GGEZNjyBOMGrAnoSsPkvt2glLkkzTufbkp+A9+CKjdsQNEUfCb5h5WgKB7qPLOC33Ayb0fpTrTxxt/dBglDTEJ4Wc3b1HRLt49U="

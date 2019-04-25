@@ -1,0 +1,79 @@
+sudo: false  # Force container-based builds.
+language: python
+
+
+cache:
+  - pip
+before_install:
+  - pip install --upgrade pip
+install:
+  - pip install -e .
+  - pip install -r requirements-dev.txt
+  - pip install coveralls
+script:
+  - flake8
+  - python manage.py runscript template_lint
+  - py.test
+after_success:
+  - coveralls
+
+
+jobs:
+  include:
+    - stage: test
+      python: "3.6"
+    - language: node_js
+      node_js: '8' # LTS version
+      env: []
+      cache:
+        directories: [node_modules]
+      before_install:
+        - npm i -g npm@5
+        - npm install -g gulp-cli
+      install:
+        - travis_retry npm install
+      script:
+        - gulp --type=ci
+      python: "3.6"
+    - python: "3.6"
+      # Clear unused build steps
+      services: []
+      deploy: []
+      after_success: []
+    - stage: docker
+      python: "3.6"
+      sudo: required
+      dist: trusty
+      services: [docker]
+      env:
+        - IMAGE_NAME=praekeltfoundation/molo-gem
+        - REGISTRY_USER=praekeltorgdeploy
+        - secure: "SFl01Aa6zrRiEuBtqoFJEKKG1Zf9qTLDhUTbV8WIRHAq4BVk1R/qZCfgOmyJ8IB/FjhSr9lmW7JbdKOiN0YQTB//QdmLuM7j3iXX1LseCv6lRsN5VDF7LWYpeBdfpC351pKAOBv0VXlD9SigrLpZthCQP3XCcnlDIHyb6gAE4+aINV3wPW/KhCLcPcBQyVQpx+n/HXp4XVzJPRbWsJRm+xIjNYxA38XGg9GMMpsGvRGiO6ryaDHzrz+uzqT45kn9UCqnw7EGHpRQE3JNmU+EEbH/AJrl3ztnTySdy9vZN7efo6dPeoEZ9LodRmsNLYPgeSSGFuQye4sIyrlA/JnAW1h4tOzvfIOuUfDPPwq8mqo2CvGm3KosVYM7vDrjmkPVbMUDtQ8s53fUeJUTT3hYyKY/Wrlrgx+kS9JPTQFa54vpFXxkLLlBOKw18dbBrzrX99ByjZ0g/VaXrxTyEisu+D54GDsOSA8KwyFk1UtV6pQPcY1+DHOF3IpfN8mT7fB1eb81I9rYM0L4cvdzb7yXptcA9SZVavs5+KyYv4j5SlFZFcj27Th96Ceu1EXib7imd/x6XPWI1WsRXUukR5kEuzvQQH4JjtRJ/OARfpyMY/YgmMx9mJ0zmHKh8QlTfcTtAuExAnIPEfGTXd1tTH2XAAQUrzheB6Ik8QR7xQOeJbA="
+
+      # Update Docker: we want some new docker build features
+      install:
+        - sudo apt-get update
+        - sudo apt-get install -y -o Dpkg::Options::="--force-confold" docker-ce
+
+      before_script:
+        - molo_version="$(sed -nE 's/^molo\.core==(.*)$/\1/p' requirements.txt)"
+        - docker pull "$IMAGE_NAME" || true
+      script:
+        - docker build --pull --tag "$IMAGE_NAME" --build-arg MOLO_VERSION="$molo_version" .
+
+      before_deploy:
+        - pip install docker-ci-deploy==0.3.0
+        - echo -n $REGISTRY_PASS | docker login -u "$REGISTRY_USER" --password-stdin
+      deploy:
+        - provider: script
+          script: dcd --version "$(git rev-parse --short HEAD)" --version-latest "$IMAGE_NAME"
+          on:
+            branch: develop
+        - provider: script
+          script: dcd --tag "$TRAVIS_TAG" -- "$IMAGE_NAME"
+          on:
+            tags: true
+
+      # Built steps inherited from the default stage that we don't want
+      before_install: ignore
+      after_success: []

@@ -11,16 +11,16 @@ describe Travis::Yml::Schema::Def::ObjectiveC, 'structure' do
         type: :object,
         properties: {
           rvm: {
-            '$ref': '#/definitions/strs'
+            '$ref': '#/definitions/type/strs'
           },
           gemfile: {
-            '$ref': '#/definitions/strs'
+            '$ref': '#/definitions/type/strs'
           },
           xcode_scheme: {
-            '$ref': '#/definitions/strs'
+            '$ref': '#/definitions/type/strs'
           },
           xcode_sdk: {
-            '$ref': '#/definitions/strs'
+            '$ref': '#/definitions/type/strs'
           },
           podfile: {
             type: :string

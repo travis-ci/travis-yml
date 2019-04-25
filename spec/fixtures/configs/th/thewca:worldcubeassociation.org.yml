@@ -1,0 +1,36 @@
+dist: trusty
+sudo: false
+language: ruby
+bundler_args: --path $HOME/.bundle
+cache:
+  directories:
+    - $HOME/.phantomjs
+    - $HOME/.bundle
+    - WcaOnRails/node_modules
+  yarn: true
+env:
+  global:
+    - DATABASE_URL=mysql2://root:@127.0.0.1:3306/wca_test
+    - RACK_ENV=test
+before_install:
+  # Workaround for https://github.com/travis-ci/travis-ci/issues/8978
+  - gem update --system
+  - gem update bundler
+
+  - nvm install 8
+  - nvm use 8
+
+  # From https://yarnpkg.com/en/docs/install-ci#travis-tab
+  - curl -o- -L https://yarnpkg.com/install.sh | bash
+  - export PATH=$HOME/.yarn/bin:$PATH
+
+  - cd WcaOnRails/
+before_script:
+  - bundle exec rake db:reset
+  # See https://github.com/usabilityhub/rails-erb-loader/issues/63#issuecomment-374791504
+  # and our https://github.com/thewca/worldcubeassociation.org/issues/3476
+  - DISABLE_SPRING=1 bundle exec rake assets:precompile
+script:
+  - bundle exec pre-commit run git
+  - bundle exec rubocop
+  - bundle exec rake

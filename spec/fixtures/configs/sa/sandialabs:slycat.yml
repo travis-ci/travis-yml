@@ -1,0 +1,18 @@
+sudo: required
+
+services:
+  - docker
+
+before_install:
+  - docker pull slycat/slycat-developer
+install:
+  - docker run -p 2222:22 -p 80:80 -p 443:443 -p 5984:5984 -d --name slycat slycat/slycat-developer
+#  - docker exec -i slycat "/bin/bash"
+  - docker exec -i slycat bash -c "cd /home/slycat/src/slycat; git fetch --all; git reset --hard origin/master"
+  - docker exec -i slycat bash -c "sudo service slycat-web-server stop; sudo service slycat-web-server start; sudo service slycat-web-server cleanup"
+script:
+  - docker ps -a
+  - docker exec -i slycat bash -c "service slycat-web-server status"
+#  - docker exec -i slycat bash -c "cd; export PATH=/home/slycat/install/conda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin;export PYTHONPATH=/home/slycat/src/slycat/packages; behave -i \"(agent|hyperchunks|rest-api)\" /home/slycat/src/slycat/features/"
+# uncomment above once we add the generic model back into the external build
+  - docker exec -i slycat bash -c "su slycat -c \"cd; export PATH=/home/slycat/install/conda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin;export PYTHONPATH=/home/slycat/src/slycat/packages;behave -i '(agent|hyperchunks)' /home/slycat/src/slycat/features/ \""

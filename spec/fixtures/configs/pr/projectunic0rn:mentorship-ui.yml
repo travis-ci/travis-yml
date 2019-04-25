@@ -1,0 +1,25 @@
+env:
+  global:
+  - secure: jo3BU/zukMn3o7Y5P3/TQJN3h5mbSeyks/wUW3f7/UKSBlvJZuW/1dl+RcvnaGmxpZUlvKlMRadEDn408j95Xo3D5ssKl7+gBSE7fQAgvN51/BJXcRljiPRvxv3ZfSlaoOt3C+6NKM2qbjfhgtd99qFX4Amy72cFYLLAoG3lqiQitJF/y4csoNMnQcxjXdE5qL7qMjDQgCpBetyhi9u70xeRHgPK4Y6RG12lI84Y4IbSKL+TppY0QhihvfZuKfRhcvj8CjlyRCMksYjkIcRzB0kd7s0cmi7JjQCmxy6ifz+z4L/bV0Ifyv+tb0+dTC1wy5wdXuhVHRs+SGXqb4Pf9KHnRcmSVsdr4evl6+fIh0kVJRiUGICkuDevr8JvBVHnDe4XfNKDM+ukTOb0HzlbVwvVMIL1g1AygSpQXMboRGcdIa0ckhg2jZClTXbAciyAV7RoydwexkYXEzk6M8ujKbzkwlXeNWP4r3kCZ61dqB3g7ddAqWa1hDXncbqihOyCdHFcpKleP9yYUZ2LV7LH/07ls1N2u+884h1AEubAiCkLzJ8fSKmNpFPTjhEvd957nH34wxIlrlomMnKsg4BpP2Eigy6LRDM4jPlLqN+90fGZHClMWBqDZFNnrNSw7+CEXrtyEeXjaXkAXwWHRftN4R5EY/FB8cPZn79Z+CsQyVM=
+  - secure: LdcLPGR388LfCr/B/l8B35+2CNuDnNwirHFRKJ4zwFcEY6DCqc0DPywYV8US+iu4X0wNJRfa37ql43x6v1mgdnrYYvHygNGxqPIyy+YUfebSTsiuRuOGbbE9/YXOnM3NtyXhNAYU6j2/AYt6t+NjMp0hlYItEg4jQ2mT44FCLyBoWeUjUmbA4q2gQCPYEUSDB3E//KyvuxYcWkzIuaVe/KCoDUcl/RfKiag7lw9yM80biK5avjkp30k6vWh3PNn8YCUY3rgjdhXxybahvC85AqW3BON6ajBIohaFYTJMPupKWNKsJGIz4QiV+HN+STkPgBkfZRwATjlFdq+FWIi2w7XYor3iMdZyP3GQbBO3pitkdAXsfZQJ4ektmsIntNl30RoGrdcOop8U0gb7/gkQXKDgNNZySavoA+3kaYYGSg34s3VlBnQzFYUGK39BattskWBSixbjPCY7470vlOtuQOsen3zwR5cVrsKRnzsWf7Es3nz4ZfvIos36lCBF4mlEJrsH6ha9m0oy5vjYteQF8dZpHezUlyWuQU15ygm22/pzI3TpgZmdJ5kTGyljFcxduvoval8qzV7xbM7etwcMhoq2Xpk9YC/BTCbxNxZsIeO9Vmo4u8DP2hqq9QL6QmtKVKl/Fo8X2jnjLRmWitXMF5Vya2gmOq63/a+lgTCRJ0U=
+language: node_js
+git:
+   depth: 9999999
+node_js:
+- '10'
+script:
+- npm run build-css
+- npm run test
+- if [ "$TRAVIS_BRANCH" = "dev" ]; then npm run build:staging; fi
+- if [ "$TRAVIS_BRANCH" = "master" ]; then npm run build; fi
+deploy:
+- provider: azure_web_apps
+  site: mentorshipapp
+  verbose: true
+  on: master
+  skip_cleanup: true
+- provider: azure_web_apps
+  site: mentorshipapp-test
+  verbose: true
+  on: dev
+  skip_cleanup: true

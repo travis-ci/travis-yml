@@ -1,0 +1,28 @@
+language: node_js
+node_js:
+  - node
+sudo: required
+services:
+  - docker
+addons:
+  sauce_connect:
+    username: paperhive
+  jwt:
+    secure: "j81HTjQenXBJTorpThKgTB2Sg64U6GM3Ytp5Y5oUeBMZJItvootdkAZD9qzVGZ3RPyRVr5C917CwQmjyincr7S2hv8flfEXNyWz0if2P5HHXuh3q3FUG3S0srQ9PDKLOmFioyasWksrH2XMz5XbQ2kFhNezjRS1UM2FYLgSPwqY="
+before_install:
+  # install a couple of packages:
+  #  * for mozjpeg: nasm
+  - sudo apt-get update && sudo apt-get install nasm
+before_script:
+  - export PAPERHIVE_API_URL=\$PAPERHIVE_API_URL
+  - export PAPERHIVE_BASE_HREF=\$PAPERHIVE_BASE_HREF
+script:
+  - npm run build
+  # build docker image
+  - docker build -t frontend .
+  # run docker container for e2e tests
+  - docker run -d --rm --name frontend -p 8080:80 frontend
+  - npm test
+  - docker stop frontend
+after_success:
+  - ./docker-push.sh

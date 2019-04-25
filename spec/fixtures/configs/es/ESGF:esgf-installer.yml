@@ -1,0 +1,37 @@
+sudo: required
+
+language: python
+
+services:
+  - docker
+
+before_install:
+- docker pull hill119/esgf_centos6
+- docker images -a
+- docker run --name esgf_install -it -d hill119/esgf_centos6 /bin/bash
+
+script:
+- docker exec -i esgf_install bash -c "cd esgf-installer && git checkout python_devel && git pull"
+- docker exec -i esgf_install bash -c "source /usr/local/conda/bin/activate esgf-pub && python esgf-installer/tests/test_esg_apache.py"
+- docker exec -i esgf_install bash -c "source /usr/local/conda/bin/activate esgf-pub && python esgf-installer/tests/test_pybash.py"
+
+# language: python
+# python:
+#   - "2.7"
+#
+# dist: trusty
+# sudo: required
+# # command to install dependencies
+# install: "pip install -r installer/requirements.txt"
+# before_script:
+#   - sudo chmod 0777 /usr/local
+#   - mkdir -p /esg
+#   - sudo chmod 0777 /esg
+# script:
+#   - pwd
+#   - whoami
+#   - cd installer
+#   - pip install -r requirements.txt
+#   - python test_esg_property_manager.py
+#   - python test_esg_tomcat.py
+#   - python esg_pylint_script.py -a

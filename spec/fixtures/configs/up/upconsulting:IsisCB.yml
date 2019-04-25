@@ -1,0 +1,70 @@
+language: python
+python:
+- '2.7'
+services:
+- postgresql
+env:
+  global:
+    - DJANGO_SETTINGS_MODULE=isiscb.test_settings
+    - SOCIAL_AUTH_FACEBOOK_KEY=''
+    - SOCIAL_AUTH_TWITTER_KEY=''
+    - SOCIAL_AUTH_FACEBOOK_SECRET=''
+    - SOCIAL_AUTH_TWITTER_SECRET=''
+    - BOTO_CONFIG=/dev/null
+before_script:
+- psql -c 'create database isiscb;' -U postgres
+before_install:
+- pip install -U pip
+- pip install -U six
+- pip install -U setuptools==33.1.1
+script:
+- pip install nose
+- cd isiscb
+- git clone http://github.com/ubernostrum/django-registration.git --depth 2
+- python -Wi manage.py test
+- cd ..
+deploy:
+  - provider: elasticbeanstalk
+    access_key_id: AKIAI3SRBWU3O3X5S7CQ
+    secret_access_key:
+      secure: "LtRgo+nPOgpOzAj2WBTJm5LhymiSOlkUQQ4xoLpo0lbUxXAJR64ma0VK31XuPDzT8wAW9K5UpELZVI7uyeh/iz/8Al5cV53TCuKlEYeKhSauoCfEexRdCQp0qe9/F9DjOVPU+yO3e/ADou6dc7e7SyvS9zalafRn/rms8Qko6iiu88Bi1JFggCYiubisyzHPfT8bLhE/pB9efxkgiP5m8kbuXLzTKBfK5nAP4W0LcA7ATA0Urk9FF+fT/fZoZsDAHvF62i6h5zxoi7+FR9dSCITTuJBsyYvLErhlAB5vlEL5deAvJvJUKv1rrhPWfoO2PW++BWNdE+DMUqDP6FVd7sAgMXRM/yqZO5n6DFYQJQHjyPRK2HLDHjIPFqfeokvq8JnuBcXpa3ajln8+Zz2YlCl0ZPLFj1q5hHGiwhp3+BwG/LTzza9heMlPDwdD5MdOXNpclzw/xEp/ffE/boriDyq2wrDRKOseeoY8ts3yByLqhqigzufei4Yj/4CxnEX9SZnF2O+nPzaMih6mf5+KTqTM6s5GENNR//w233WS62lNxF2rJhvNES3i3OCzb+cVwY5kQgELiLWgUb4hLOy1NJttVHFFB/xLATG3nditXq5TN2XFEkcVt2nlUOyCd5Nay0aNH2Qbo2iGhcBBjCetdjgmqBd/fv7PTo+YRWZWkx4="
+    region: us-west-2
+    app: IsisCB
+    env: isiscb-staging-2
+    bucket_name: elasticbeanstalk-us-west-2-655333410217
+    on:
+      repo: upconsulting/IsisCB
+      branch: master
+  - provider: elasticbeanstalk
+    access_key_id: AKIAI3SRBWU3O3X5S7CQ
+    secret_access_key:
+      secure: "LtRgo+nPOgpOzAj2WBTJm5LhymiSOlkUQQ4xoLpo0lbUxXAJR64ma0VK31XuPDzT8wAW9K5UpELZVI7uyeh/iz/8Al5cV53TCuKlEYeKhSauoCfEexRdCQp0qe9/F9DjOVPU+yO3e/ADou6dc7e7SyvS9zalafRn/rms8Qko6iiu88Bi1JFggCYiubisyzHPfT8bLhE/pB9efxkgiP5m8kbuXLzTKBfK5nAP4W0LcA7ATA0Urk9FF+fT/fZoZsDAHvF62i6h5zxoi7+FR9dSCITTuJBsyYvLErhlAB5vlEL5deAvJvJUKv1rrhPWfoO2PW++BWNdE+DMUqDP6FVd7sAgMXRM/yqZO5n6DFYQJQHjyPRK2HLDHjIPFqfeokvq8JnuBcXpa3ajln8+Zz2YlCl0ZPLFj1q5hHGiwhp3+BwG/LTzza9heMlPDwdD5MdOXNpclzw/xEp/ffE/boriDyq2wrDRKOseeoY8ts3yByLqhqigzufei4Yj/4CxnEX9SZnF2O+nPzaMih6mf5+KTqTM6s5GENNR//w233WS62lNxF2rJhvNES3i3OCzb+cVwY5kQgELiLWgUb4hLOy1NJttVHFFB/xLATG3nditXq5TN2XFEkcVt2nlUOyCd5Nay0aNH2Qbo2iGhcBBjCetdjgmqBd/fv7PTo+YRWZWkx4="
+    region: us-west-2
+    app: IsisCB
+    env: celery-docker-staging
+    bucket_name: elasticbeanstalk-us-west-2-655333410217
+    on:
+      repo: upconsulting/IsisCB
+      branch: master
+  - provider: elasticbeanstalk
+    access_key_id: AKIAI3SRBWU3O3X5S7CQ
+    secret_access_key:
+      secure: "LtRgo+nPOgpOzAj2WBTJm5LhymiSOlkUQQ4xoLpo0lbUxXAJR64ma0VK31XuPDzT8wAW9K5UpELZVI7uyeh/iz/8Al5cV53TCuKlEYeKhSauoCfEexRdCQp0qe9/F9DjOVPU+yO3e/ADou6dc7e7SyvS9zalafRn/rms8Qko6iiu88Bi1JFggCYiubisyzHPfT8bLhE/pB9efxkgiP5m8kbuXLzTKBfK5nAP4W0LcA7ATA0Urk9FF+fT/fZoZsDAHvF62i6h5zxoi7+FR9dSCITTuJBsyYvLErhlAB5vlEL5deAvJvJUKv1rrhPWfoO2PW++BWNdE+DMUqDP6FVd7sAgMXRM/yqZO5n6DFYQJQHjyPRK2HLDHjIPFqfeokvq8JnuBcXpa3ajln8+Zz2YlCl0ZPLFj1q5hHGiwhp3+BwG/LTzza9heMlPDwdD5MdOXNpclzw/xEp/ffE/boriDyq2wrDRKOseeoY8ts3yByLqhqigzufei4Yj/4CxnEX9SZnF2O+nPzaMih6mf5+KTqTM6s5GENNR//w233WS62lNxF2rJhvNES3i3OCzb+cVwY5kQgELiLWgUb4hLOy1NJttVHFFB/xLATG3nditXq5TN2XFEkcVt2nlUOyCd5Nay0aNH2Qbo2iGhcBBjCetdjgmqBd/fv7PTo+YRWZWkx4="
+    region: us-west-2
+    app: IsisCB
+    env: isiscb-production-6
+    bucket_name: elasticbeanstalk-us-west-2-655333410217
+    on:
+      repo: upconsulting/IsisCB
+      tags: true
+  - provider: elasticbeanstalk
+    access_key_id: AKIAI3SRBWU3O3X5S7CQ
+    secret_access_key:
+      secure: "LtRgo+nPOgpOzAj2WBTJm5LhymiSOlkUQQ4xoLpo0lbUxXAJR64ma0VK31XuPDzT8wAW9K5UpELZVI7uyeh/iz/8Al5cV53TCuKlEYeKhSauoCfEexRdCQp0qe9/F9DjOVPU+yO3e/ADou6dc7e7SyvS9zalafRn/rms8Qko6iiu88Bi1JFggCYiubisyzHPfT8bLhE/pB9efxkgiP5m8kbuXLzTKBfK5nAP4W0LcA7ATA0Urk9FF+fT/fZoZsDAHvF62i6h5zxoi7+FR9dSCITTuJBsyYvLErhlAB5vlEL5deAvJvJUKv1rrhPWfoO2PW++BWNdE+DMUqDP6FVd7sAgMXRM/yqZO5n6DFYQJQHjyPRK2HLDHjIPFqfeokvq8JnuBcXpa3ajln8+Zz2YlCl0ZPLFj1q5hHGiwhp3+BwG/LTzza9heMlPDwdD5MdOXNpclzw/xEp/ffE/boriDyq2wrDRKOseeoY8ts3yByLqhqigzufei4Yj/4CxnEX9SZnF2O+nPzaMih6mf5+KTqTM6s5GENNR//w233WS62lNxF2rJhvNES3i3OCzb+cVwY5kQgELiLWgUb4hLOy1NJttVHFFB/xLATG3nditXq5TN2XFEkcVt2nlUOyCd5Nay0aNH2Qbo2iGhcBBjCetdjgmqBd/fv7PTo+YRWZWkx4="
+    region: us-west-2
+    app: IsisCB
+    env: celery-docker-production-2
+    bucket_name: elasticbeanstalk-us-west-2-655333410217
+    on:
+      repo: upconsulting/IsisCB
+      tags: true

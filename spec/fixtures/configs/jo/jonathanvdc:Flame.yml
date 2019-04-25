@@ -1,0 +1,17 @@
+language: csharp
+install:
+  # Restore nuget packages
+  - make nuget
+
+script:
+  # Compile supporting macros.
+  - make dsl
+
+  # Build Flame using csc (Debug)
+  - msbuild /p:Configuration=Debug /verbosity:quiet /nologo Flame.sln
+
+  # Build Flame using csc (Release)
+  - make
+
+  # Run the tests
+  - make test

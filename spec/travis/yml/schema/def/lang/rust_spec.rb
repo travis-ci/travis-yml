@@ -11,7 +11,7 @@ describe Travis::Yml::Schema::Def::Rust, 'structure' do
         type: :object,
         properties: {
           rust: {
-            '$ref': '#/definitions/strs'
+            '$ref': '#/definitions/type/strs'
           }
         },
         normal: true,

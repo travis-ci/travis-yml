@@ -1,0 +1,63 @@
+language: node_js
+
+git:
+  submodules: false
+  depth: 1
+
+node_js:
+    - "10.15.1"
+
+sudo: true
+dist: trusty
+
+addons:
+  apt:
+   sources:
+      - mongodb-3.2-precise
+
+   packages:
+      - expect-dev   
+
+  chrome: stable
+  hosts:
+    - test.127.0.0.1
+
+before_install:
+    - until nc -z localhost 27017; do echo "waiting for mongo"; sleep 1; done
+    - mkdir -p submodules
+    - test_ver=`cat backend/test/testDBVersion`
+    - cd submodules
+    - git clone https://$TESTS_USER:$TESTS_PASSWORD@github.com/3drepo/tests.git
+    - cd tests
+    - git checkout $test_ver
+    - git status
+    - cd backend && mongorestore
+    - cd ../../../
+    - cp -r ./submodules/tests/frontend/staticPages/legal/ ./resources/legal
+
+install:
+    - cd ./backend
+    - yarn install
+    - yarn lint
+    - cd ./../frontend
+    - yarn install
+    - yarn lint
+    - yarn build
+
+cache:
+  yarn: true
+  directories:
+    - node_modules
+
+services:
+  - rabbitmq
+  - mongodb
+
+script:
+    - cd ./../backend
+    - unbuffer yarn test
+
+notifications:
+    email:
+        recipients:
+            - devOps@3drepo.org

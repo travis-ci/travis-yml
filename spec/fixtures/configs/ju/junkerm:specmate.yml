@@ -1,0 +1,42 @@
+sudo: false
+language:
+- java
+- node_js
+node_js:
+- '7'
+jdk:
+- oraclejdk8
+addons:
+  apt:
+    packages:
+      - oracle-java8-installer
+env:
+- TERM=dumb
+install:
+- cd web && npm run init
+- cd ../bundles && ./gradlew --version
+script:
+- cd ../web && npm run build-prod
+- cd ../bundles && ./gradlew --no-daemon build --continue
+- cd ../bundles && ./gradlew --no-daemon check
+- cd ../bundles && ./gradlew --no-daemon export
+- cd ..
+after_success:
+- git status
+cache:
+  directories:
+  - cnf/cache/stable
+deploy:
+  provider: releases
+  skip_cleanup: true
+  api_key:
+    secure: eUiVeNw9rlpcaXi+bpoV4B4WFEjXCgBn6td9NRXFF9dOcJiozn5oHh6qk8g6kMHuUrGDCKcOo5fitxkNaoV1vqxNuRjo7ssPN3yG3QcUmIlsMHM2ueM+9AEyQxP1SuNXku/Vb+ATQ1F7jWUlWotcCWTPbELuhUvziwcF4zYWm2jcTL1twD3gCT9GFdovqnUnmVLHrUha4EUO8bwFlJmyaSmxH5RpcTbKK2tRagRlv/4yUajhBxaNgCXD2nBpNtV6nb2sPbybilB9gRO5d4oPurNQWb28aiobGm0+hNU5bG+MYOyF3fJWU7NaQ0tQP0M8zZ5QM/Lw8g/xMOdMaqZ2rHWPNyxFqNFsUa+H1S9f+tEmje+kvTZ7oPZRuzy90dYC1ZzwpuhG9y3qIlpnDs+9E+JRU3yASEWeb7VVZFrMJKK3wh/FEvVCduYKoTYgcckFeipkjQY1V/umfKRrlq/3ZFATBX3PKaUnHzctZ+KK2nEWBiYMLacw8JKqQSjTIGRchjLZHYpuTR2CuttfBHVH1kDs0SNd7mKsFQShzXfPDylHTT0ZyfVJ++IKaf1Ww37dmqui0FTULmVTy1vtmkcImpFX0y9WFWoOy1vI7QWM4U3YfasRBZlIigNNyLgPR3Bzg+Z+6YBVUdi4T/ulsDf7iU7ZEOD5g7fl06gfcDAKr9E=
+  file: 
+    - bundles/specmate-std-env/generated/distributions/executable/dev-specmate-all.jar
+    - bundles/specmate-std-env/generated/distributions/executable/prod-specmate-all.jar
+    - bundles/specmate-std-env/generated/distributions/executable/prod-specmate-cdo-server.jar
+    - bundles/specmate-std-env/generated/distributions/executable/prod-specmate-no-cdo-server.jar
+  on:
+    repo: junkerm/specmate
+    condition: $TRAVIS_TAG =~ ^v[\.\d]+(-dev-\d+)?$
+    tags: true

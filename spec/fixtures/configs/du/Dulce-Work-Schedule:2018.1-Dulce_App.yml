@@ -1,0 +1,38 @@
+language: android
+os: linux
+jdk: oraclejdk8
+sudo: required
+cache:
+  directories:
+    - /home/travis/.rvm/
+    - /home/travis/.nvm/
+    - node_modules
+    - TRAVIS_BUILD_DIR/node_modules
+before_install:
+  - nvm install 8
+  - rvm install 2.3-dev
+install:
+  - sudo apt-get install -y -qq inkscape
+  - npm install
+  - gem install fastlane
+android:
+  components:
+    - addon-google_apis-google-16
+    - android-23
+    - android-26
+    - build-tools-23.0.1
+    - build-tools-26.0.1
+    - extra-android-m2repository
+    - extra-google-google_play_services
+    - extra-google-m2repository
+    - platform-tools
+    - tools
+before_script:
+  - ./utils/write_coveralls_config.sh
+script:
+  - npm run lint
+  - travis_wait 15 npm run coverage && cat ./coverage/lcov.info | npm run coveralls
+  - ./utils/run_build.sh
+after_success:
+  - ./utils/run_build_in_branch.sh master
+  - ./utils/run_test_tag_version.sh $TRAVIS_TAG

@@ -1,0 +1,163 @@
+# Testing & Deployment for Roomify for Accommodations.
+language: php
+
+sudo: required
+dist: trusty
+
+php:
+  - 5.6
+  - 7.0
+  - 7.1
+  - 7.2
+
+addons:
+  chrome: stable
+
+env:
+  # Specify which versions of the product we will build.
+  - PRODUCT=accommodations     THEME=default
+
+mysql:
+  database: drupal
+  username: root
+  encoding: utf8
+
+before_install:
+  - echo -e "machine github.com\n  login $CI_USER_TOKEN" >> ~/.netrc
+  - export CHROME_BIN=/usr/bin/google-chrome
+  - export DISPLAY=:99.0
+  - sudo apt-get install -y libappindicator1 fonts-liberation
+  - sh -e /etc/init.d/xvfb start
+  - wget http://chromedriver.storage.googleapis.com/2.45/chromedriver_linux64.zip && unzip chromedriver_linux64.zip && sudo mv chromedriver /usr/bin
+
+before_script:
+  # Increase the MySQL connection timeout on the PHP end.
+  - echo "mysql.connect_timeout=3000" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
+  - echo "default_socket_timeout=3000" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
+
+  # Increase the MySQL server timeout and packet size.
+  - mysql -u root -e "SET GLOBAL wait_timeout = 36000;"
+  - mysql -u root -e "SET GLOBAL max_allowed_packet = 33554432;"
+  # Create drupal database.
+  - mysql -u root -e "CREATE DATABASE drupal;"
+  # Set up DB user.
+  - mysql -uroot -e "CREATE USER drupal@localhost IDENTIFIED BY 'drupal';"
+  - mysql -uroot -e "GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, DROP, INDEX, ALTER, CREATE TEMPORARY TABLES ON drupal.* TO 'drupal'@'localhost' IDENTIFIED BY 'drupal';"
+
+  # Remove xdebug for the moment. We aren't generating code coverage, and it slows us down.
+  - phpenv config-rm xdebug.ini
+
+  # Update composer.
+  - composer -n self-update
+
+  # Install drush.
+  - export PATH="$HOME/.composer/vendor/bin:$PATH"
+  - composer -n global require drush/drush:8.*
+  - cd $TRAVIS_BUILD_DIR
+  # Install drush composer extension.
+  - drush dl composer-8.x-1.x
+  # Install drush registry_rebuild extension.
+  - drush dl registry_rebuild-7.x-2.x
+  # Install code sniffer.
+  - composer -n global require drupal/coder
+  # Register Drupal coding standards.
+  - phpcs --config-set installed_paths ~/.composer/vendor/drupal/coder/coder_sniffer
+  # Don't display warnings.
+  - phpcs --config-set show_warnings 0
+
+
+  # Install required packages for behat.
+  - cd ./test/behat
+  - composer -n install
+
+  # Make the site.
+  - cd $TRAVIS_BUILD_DIR
+  # First make an archive of this module so that we can build the site from it.
+  - git archive HEAD | gzip > /tmp/roomify.tar.gz
+  - drush make project.make drupal
+
+  # Install the selected product.
+  - cd drupal
+  - php -d sendmail_path=$(which true) ~/.composer/vendor/bin/drush.php --yes site-install roomify roomify_install_welcome.roomify_product="${PRODUCT}" --db-url=mysql://drupal:drupal@127.0.0.1/drupal --account-name=admin --account-pass=admin --site-mail=webmaster@roomify.us --site-name="${PRODUCT}"
+  # Install required libraries.
+  - drush composer-json-rebuild
+  - drush composer-manager install
+  # Enable the theme for this build.
+  - if [ "${THEME}" != 'default' ]; then drush -y en ${THEME}; drush -y vset theme_default ${THEME}; fi
+  # Clear caches.
+  - drush cc all --yes
+  # Dump the DB for releases.
+  - drush sql-dump > ${TRAVIS_BUILD_DIR}/drupal/${PRODUCT}-database.sql
+  # Install the example content for tests.
+  - drush eval 'roomify_accommodation_example_content_multi_property();'
+
+  # Run a webserver and wait until it is started up.
+  - drush --debug runserver "http://127.0.0.1" > ~/debug.txt 2>&1 &
+  - sleep 10
+
+  # Link test dir into working dir.
+  - ln -s $TRAVIS_BUILD_DIR/test .
+
+  - jdk_switcher use oraclejdk8
+
+  # Fetch and start selenium.
+  - mkdir -p $HOME/.cache
+  - wget -nc -O $HOME/.cache/selenium-server-standalone-3.11.0.jar http://selenium-release.storage.googleapis.com/3.11/selenium-server-standalone-3.11.0.jar || true
+  - java -jar $HOME/.cache/selenium-server-standalone-3.11.0.jar -port 4444 &> /tmp/selenium.log &
+  - sleep 5
+
+
+script:
+  # Do a very basic test that the correct product was installed.
+  - RESPONSE=$(curl -s http://127.0.0.1:8888)
+  - echo $RESPONSE | grep "| ${PRODUCT}</title>"
+
+  # Check coding standards.
+  - phpcs --standard=Drupal --exclude=Drupal.Arrays.Array,Drupal.Commenting.FunctionComment,Drupal.Commenting.DocComment,Drupal.Commenting.FileComment,Drupal.NamingConventions.ValidClassName,Drupal.NamingConventions.ValidFunctionName,Drupal.NamingConventions.ValidVariableName,Drupal.InfoFiles.AutoAddedKeys,Drupal.InfoFiles.ClassFiles --report-width=74 --extensions=php,module,inc,install,test,profile,theme,info,txt,md,yml $TRAVIS_BUILD_DIR/drupal/profiles/roomify/modules/{casa,locanda,roomify}
+
+  - cd $TRAVIS_BUILD_DIR/drupal/test/behat
+  # behat.yml includes behat.local.yml so it must exist
+  - touch behat.local.yml
+  # Set path to drupal root
+  - export BEHAT_PARAMS="{\"extensions\":{\"Drupal\\\DrupalExtension\":{\"drupal\":{\"drupal_root\":\"$TRAVIS_BUILD_DIR/drupal\"}}}}"
+  # Run global tests and tests specific to this product.
+  - ./bin/behat --tags "@global,@${PRODUCT}"
+
+after_script:
+  - bash $TRAVIS_BUILD_DIR/test/upload.sh
+
+after_failure:
+  - echo $RESPONSE
+  - echo '### DB LOG ###'
+  - cd $TRAVIS_BUILD_DIR/drupal
+  - drush sqlq 'SELECT * FROM watchdog\G'
+  - echo '### Server log ###'
+  - cat ~/debug.txt
+
+before_deploy:
+  # Remove the test directory before we deploy.
+  - rm -r ${TRAVIS_BUILD_DIR}/drupal/test
+  # Rename the directory.
+  - mv ${TRAVIS_BUILD_DIR}/drupal ${TRAVIS_BUILD_DIR}/roomify-accommodations
+  # Make the zip archive.
+  - cd ${TRAVIS_BUILD_DIR} && zip -r "${TRAVIS_BUILD_DIR}/roomify-${PRODUCT}-${THEME}.${TRAVIS_TAG}.zip" "roomify-accommodations"
+
+deploy:
+  provider: releases
+  api_key: $CI_USER_TOKEN
+  file: "${TRAVIS_BUILD_DIR}/roomify-${PRODUCT}-${THEME}.${TRAVIS_TAG}.zip"
+  skip_cleanup: true
+  on:
+    tags: true
+
+# Cache composer/drush files
+cache:
+  directories:
+    - $HOME/.composer/cache
+    - vendor
+    - test/behat/bin
+    - test/behat/vendor
+
+# Slack notifications.
+notifications:
+  slack: roomify:XRxh0g9QOPrIjyScQcz1bIu6

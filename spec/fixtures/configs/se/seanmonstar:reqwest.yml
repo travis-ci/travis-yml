@@ -1,0 +1,56 @@
+language: rust
+matrix:
+    fast_finish: true
+    allow_failures:
+        - rust: nightly
+    include:
+        - os: osx
+          rust: stable
+
+        - rust: stable
+        - rust: beta
+        - rust: nightly
+
+        # Disable default-tls
+        - rust: stable
+          env: FEATURES="--no-default-features"
+
+        # rustls-tls
+        - rust: stable
+          env: FEATURES="--no-default-features --features rustls-tls"
+
+        # default-tls and rustls-tls
+        - rust: stable
+          env: FEATURES="--features rustls-tls"
+
+        # default-tls, rustls, and socks!
+        - rust: stable
+          env: FEATURES="--features rustls-tls,socks"
+
+        - rust: stable
+          env: FEATURES="--features hyper-011"
+
+        - rust: stable
+          env: FEATURES="--features trust-dns"
+
+        # android
+        #- rust: stable
+        #  env: TARGET=aarch64-linux-android
+        #  install: rustup target add "$TARGET"
+        #  # disable default-tls feature since cross-compiling openssl is dragons
+        #  script: cargo build --target "$TARGET" --no-default-features
+
+        # minimum version
+        - rust: 1.31.0
+          script: cargo build
+
+sudo: false
+dist: trusty
+
+env:
+  global:
+    - REQWEST_TEST_BODY_FULL=1
+
+script:
+  - cargo build $FEATURES
+  - cargo test -v $FEATURES

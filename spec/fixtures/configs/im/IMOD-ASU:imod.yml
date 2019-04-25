@@ -1,0 +1,19 @@
+language: groovy
+
+sudo: false
+
+jdk: oraclejdk8
+
+cache:
+  directories:
+    - ~/.grails
+
+before_script:
+  - npm install
+  - npm install --global bower
+
+script:
+  - ./grailsw war
+  - ./grailsw codenarc
+  - cat static-analysis.txt
+  - npm test

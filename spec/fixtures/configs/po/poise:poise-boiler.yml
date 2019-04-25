@@ -1,0 +1,21 @@
+sudo: false
+cache: bundler
+language: ruby
+before_install:
+  - 'if [[ $BUNDLE_GEMFILE == *master.gemfile ]]; then gem update --system; fi'
+  - gem --version
+  - gem install bundler
+  - bundle --version
+  - 'bundle config --local path ${BUNDLE_PATH:-$(dirname $BUNDLE_GEMFILE)/vendor/bundle}'
+  - bundle config --local bin $PWD/bin
+install: bundle update --jobs=3 --retry=3
+script:
+  - ./bin/rake travis
+matrix:
+  include:
+    - rvm: 2.3.1
+      gemfile: gemfiles/chef-12.gemfile
+    - rvm: 2.4.1
+      gemfile: gemfiles/chef-13.gemfile
+    - rvm: 2.4.1
+      gemfile: gemfiles/master.gemfile

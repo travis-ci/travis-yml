@@ -1,0 +1,8 @@
+sudo: required
+
+services:
+  - docker
+
+script:
+  - docker build -t beevelop/nodejs .
+  - docker run beevelop/nodejs /bin/sh -c "node -v && npm -v"

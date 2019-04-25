@@ -1,0 +1,34 @@
+language: clojure
+lein: lein
+jdk:
+  - oraclejdk8
+env:
+  global:
+  - LIBWEBP_VERSION: '0.6.0'
+  - IMAGEMAGICK_VERSION: '7.0.4-7'
+addons:
+  apt:
+    packages:
+      - libjpeg-dev
+      - libpng-dev
+      - libgif-dev
+      - build-essential
+      - curl
+before_install:
+  - ./travis/build-imagemagick.sh
+  - export VIGNETTE_THUMBNAIL_BIN=$TRAVIS_BUILD_DIR/bin/thumbnail
+  - export PATH=$HOME/opt/bin:$PATH
+  - export IMAGEMAGICK_BASE=$HOME/opt
+  - export GIF2WEBP=$HOME/opt/bin/gif2webp
+  - export WIKIA_ENVIRONMENT=dev
+  - export WIKIA_DATACENTER=sjc
+
+cache:
+  directories:
+    - $HOME/opt
+    - $HOME/.m2/repository
+script:
+  - magick --version
+  - convert --version | grep webp
+  - gif2webp -version
+  - lein midje

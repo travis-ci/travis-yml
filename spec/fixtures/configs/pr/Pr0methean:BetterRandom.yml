@@ -1,0 +1,57 @@
+if: tag IS blank
+branches:
+  except:
+    /dependabot.*/ # redundant to pull-request builds
+cache:
+  directories:
+  - "$HOME/.m2"
+  - "$HOME/Library/Developer/Xcode"
+dist: trusty
+serialGroup: edge
+git:
+  depth: 10
+  quiet: true
+  submodules: true
+sudo: required # for "sudo renice -10 $$"; repeated per job when also needed for other reasons
+stages:
+- unit tests
+- long tests
+os: linux
+jdk: openjdk7
+jobs:
+  include:
+  - language: java
+    env: OP=unit-tests
+    stage: unit tests
+  - language: java
+    env: OP=unit-tests LIMITED_CRYPTO=true
+    sudo: required
+    stage: unit tests
+  - language: android
+    env: OP=unit-tests ANDROID=1
+    stage: unit tests
+  - language: java
+    env: OP=mutation
+    stage: long tests
+  - language: java
+    env: OP=benchmark
+    stage: long tests
+  - language: android
+    env: OP=benchmark ANDROID=1
+    stage: long tests
+matrix:
+  fast_finish: true
+addons:
+  apt:
+    packages:
+    - tor
+    - dieharder
+script:
+- ifconfig | grep inet
+- "./remove_unlimited_crypto.sh"
+- "./${OP}.sh ${ARGS}"
+env:
+  global:
+  - secure: hNHSZ5o9LfVdTJGm0GfD8OqrFtds2zlufzHWHq20smKZqYZyQ3f2dnkk6j5V+UMYbR1/hiXDfV1FkcE/RqkFEMgE+yycBGkoB9Z+jCjQe+3AZZjQGV9mUDNZ7tqVSA0xksIfn3Y7bv7VamhfV3JXZjQUpJtaeYNvqf7/EN6EWo97dQK2G2vX4p0Yuv9Pp7NySrROSgHcb+jOhY6g+xsGXg5PdA3HZUZzVNNwtD/yEZvtSOtBSP9RBjZDLjL8sLT5UgQzczo4Lt6CYCovPLVeXcXEFjeroXXmLnb8HdqwEeuEOH1mdhS10kflAjjeWdURDbj12sXhTDadJAKzniGbwk4JyMu+8GZLVXrRf8/tRKJccrPZ7Pmtdjzs4wcoYxLk/E4uaQTsayWlZQp+qM1qi4jKvizI2uyF2FHVAH6EYPy+ytmUiPzd9+0DfYBeu10GNTbWz6uyc8llHNGIn8N1bnbCOSsMJXMovml5Cn10eSil2JclWCyaoYgGW6DO9i+qEvAJcHGj4RiBXy3yRraYBGX3oylJKxArfUhxpnFU0BJ76i7XHyMPuIX5joC0hO16+bhfShEaH0jEUumFgbq/lCiaef6jXb6KOocXwr1hmTG+GOHDuuS6z/GKTvfAgkDXgN9qCDI3oq5LIvkOgl7oqhSqSNoHdggcI6Z4J+QGjRw=
+  - secure: AWlEbr8+XWzs3x1keBPYkVOlhwCpjV34vu03//KwNRe0iBV2zI/jP5IUaq1eKXSvHIPdomwKIb72D7czLlxARYM2o4l1AFFVShKQdUnHt5BNxGF8e0CKdZXTN/XCF7MlreEE5MlIutqLNEaW9YBanoQtri/GMGyRpGiD2IwHF0yJsIs2pQTIzi4nRNb4R0+HUKhWvG5Z/UPGQxanArKSL4tSinv/2gzAsl2GUEVF2HemfWiqw9E+BRHf1T8VAgSX1PY4symvJoW7bJGoU/4T9oXqDSm6vhIr5Qs2IeSHj2H4Btf6II90dLSrbKQKiZhpj/mi1H+WmtmOyF2t3VbiL56V/4s6LOvDmeVb1EvMFdU+D8p5G6apsfzcSilEk0Iret/j/Gzwq2Byymgdp4hgxYcu66uBGDS9txPwBYZIZchf+8W8TlMinu9zlOi4QK2N+4wv4R83n5NSXItkhWlGdxFgl7IA840hecZpCv30vPSmuRPN3WG/ta2gjcDlmL0N951roCAk+krRATlZc4owF4cvBI+/UXkRHqAaqL7dM5m7AaxgaskN77UZoouhjS9Kr/4/RMO+1pX/0TsoswVZoYCNTbxlKxvSoJjvCRQPR/lUwsyULMBgQc8AWMKmQzFkD57AByYnqEP1IPzeeTwNGGEwUs5bgFVC5cQOzCGYk4w=
+  - secure: kBQxOy4vmALU+TfReLXejO5aBAnDPxY48o5PNWHFrWBNu8QKzyJyjDVJP/HFzbXUdy0fb2ejhu4xokx2nfDOz3WkSuprFPxzrzEbUAsNuSa0gBgojKVL+Aab1fWBML3X0iE4FEVCqyE7yvkljVGuCLSOo2FgKSY1eiC/5T8vb4jLmj1jfAKomx9jl32QzgjRpLAsCLLHajnPuGZ1t5x6uzmuMqTP+42Ja7eOQiowMypIjZc/8zFcKrqA8Qr+PlIIHuSLtRfNtrdWBGI2quEz93qkUoIF3FsGdKe0ZbKQK10q5hk8GSTWbZnDLF3cEkxvSK9LAhmQhBUkkzj+xC3oNkpRsYiU6RbfxKd6Z8ZoUkcZzk9JQgZy+JYi9XqaFtZyS3Z5Y+PFMQYcVU7eCY6lSpGTImPswDtzOpI0bWgcMnovwNWvVvl0xz0wT+104gsVAnHTKEwTIYXJiEc+/6l/HbBubWmuf0j2au0ZPPUmypzhuyQ64hJJX+4tVevueCksUAvf22zBvS6yfCbdrRuDoP92iOF1Tht0MMocjaLVbb6lUiJ6YlNgGtxdCNs8qhDMDfr3QPsTiIQSINuvQ6pzLtvT4jFbevKOAJyBelh1Uo1VthZfelcZERl3txbaZtuB01vaomb/mytNDE+5y2RDkzsS96tSaQPI+3n3BLfKiDM=

@@ -1,0 +1,74 @@
+sudo: required
+dist: xenial
+
+notifications:
+  email: false
+  slack: polyengine:Fah16tvbyOphIl7FGHAVVhaB
+
+# Enable C++ support
+language: cpp
+
+# Enable compiler cache to speed up compilation
+cache: ccache
+
+matrix:
+  include:
+    - os: linux
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-8
+      env:
+        - MATRIX_EVAL="CC=gcc-8 && CXX=g++-8"
+    - os: linux
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-xenial-5.0
+          packages:
+            - clang-5.0
+            - g++-8 # Need g++-8 alongside clang for libstdc++
+      env:
+        - MATRIX_EVAL="CC=clang-5.0 && CXX=clang++-5.0"
+    - os: osx
+      osx_image: xcode9.4
+
+ 
+before_install:
+  - eval "${MATRIX_EVAL}"
+  - |
+    if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then
+      # Add Qt 5.10.1 ppa
+      sudo add-apt-repository --yes ppa:beineri/opt-qt-5.10.1-xenial
+      sudo apt-get update -qq
+      sudo apt-get install -qq mesa-common-dev libgl1-mesa-dev python3 python3-pip
+      sudo apt-get -y install qt510base
+    else
+      brew update && brew bundle --file=.Brewfile
+    fi
+  - sudo pip3 install gitpython
+
+#install:
+
+before_script:
+  ############################################################################
+  # Go back to the root of the project and setup the build directory
+  ############################################################################
+  - cd ${TRAVIS_BUILD_DIR}
+  - |
+    if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then
+      source /opt/qt510/bin/qt510-env.sh
+    fi
+  - cd PolyEngine/Scripts
+  - python3 ./InitializeSubmodules.py
+  - python3 ./ProjectTool.py -p
+  - cd ../Build
+
+# TODO move to using ProjectTool.py
+script:
+  - cmake -D CMAKE_C_COMPILER=$CC -D CMAKE_CXX_COMPILER=$CXX ..
+  - make
+  - ${TRAVIS_BUILD_DIR}/PolyEngine/Dist/Debug/PolyUnitTests

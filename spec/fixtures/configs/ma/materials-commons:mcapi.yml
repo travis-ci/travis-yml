@@ -1,0 +1,151 @@
+dist: trusty
+
+sudo: require
+
+notifications:
+  email:
+    recipients:
+        - weymouth@umich.edu
+        - gtarcea@umich.edu
+    on_success: change
+    on_failure: always
+
+# blocklist - branches not used for testing:
+# any branch starting with 'spike-', docs, scripts
+branches:
+  except:
+  - /^spike-.*$/
+  - docs
+  - scripts
+
+language: python
+
+python:
+  - 3.6.2
+
+addons:
+  hosts:
+  - mcdev.localhost
+
+env:
+  global:
+    - MCDIR=/tmp/mcdir
+    - MCDB_TYPE=rethinkdb
+    - MCDB_NAME=materialscommons
+    - MC_LOG_DIR=~/logs
+    - MC_DOI_SERVICE_URL=https://ezid.lib.purdue.edu/
+    - MC_DOI_PUBLISHER='Materials Commons'
+    - MC_DOI_PUBLICATION_BASE=http://mcpub.localhost/#/details
+    - MC_DOI_NAMESPACE='doi:10.5072/FK2'
+    - ENV_SCRIPT=travisrun
+    - MC_ORG_BRANCH=release
+
+git:
+  depth: 3
+
+before_install:
+    # PATH
+  - export PATH=./:$PATH
+    # RethinkDB
+  - source /etc/lsb-release && echo "deb http://download.rethinkdb.com/apt $DISTRIB_CODENAME main" | sudo tee /etc/apt/sources.list.d/rethinkdb.list
+  - wget -qO- https://download.rethinkdb.com/apt/pubkey.gpg | sudo apt-key add -
+    # Yarn
+  - curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
+  - echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
+  - sudo apt-get update
+  - sudo cat /etc/hosts
+
+install:
+  - mkdir -p ${MC_LOG_DIR}
+  - nvm install v8.2.1
+  - node --version
+  - sudo apt-get install nginx
+  - sudo apt-get install rethinkdb
+  - sudo apt-get install yarn
+
+  - pushd ~
+  - npm install -g node-gyp@3.5.0
+  - npm install -g gulp
+  - mkdir .materialscommons
+  - git clone -b $MC_ORG_BRANCH --depth 3 https://github.com/materials-commons/materialscommons.org.git
+
+  - pushd materialscommons.org
+  - git log -1
+  - export MC_CLONE_DIR=`pwd`
+  - yarn install
+
+  - pushd backend
+  - npm install
+  - pip install rethinkdb
+  - pip install Flask
+  - pip install 'pytest==3.6' --force-reinstall
+  - pip install pbkdf2
+  - popd
+
+  - popd
+
+  - popd
+
+  - pushd materials_commons_extras/test/test_data
+  - export TEST_DATA_DIR=`pwd`
+  - pushd etl_test_data
+  - ./generate_test_data.py
+  - popd
+  - popd
+  - export MC_PYTHON_API_DIR=`pwd`
+  - pip install coverage
+  - pip install -r requirements.txt
+  - python setup.py install
+# Note: as github does not store or recover empty directories...
+#       and this is needed for testing - creating empty dir
+  - mkdir -p ${TEST_DATA_DIR}/test_upload_data/test_upload_dir/sub_directory_c/empty_dir
+  - cp ${TEST_DATA_DIR}/test_config_data/travisconfig.json ~/.materialscommons/config.json
+
+  - pwd
+
+
+before_script:
+    # Note: nginx appears to have been started on install - so, reload should work
+  - sudo cp ${TEST_DATA_DIR}/test_config_data/mcdev.localhost.conf /etc/nginx/conf.d/
+  - sudo nginx -s reload
+
+  - cd ${MC_CLONE_DIR}/backend
+    # NOTE: this script sets server type to dev
+  - source env/${ENV_SCRIPT}.sh
+  - scripts/testdb/setup-and-start-test-db.sh -c all
+
+  - echo ${MC_API_SERVICE_PORT}
+  - echo ${MC_SERVICE_PORT}
+  - echo ${MC_LOG_DIR}
+  - echo ${SERVERTYPE}
+  - ./mcapiserver.py -p ${MC_SERVICE_PORT} > ${MC_LOG_DIR}/mcapiserver.out.${SERVERTYPE} 2>&1&
+  - node servers/mcapi/mcapi.js -p ${MC_API_SERVICE_PORT} > ${MC_LOG_DIR}/mcapi.out.${SERVERTYPE} 2>&1&
+  - sleep 10
+  - ps -eo "pid,command" | grep rethinkdb
+  - ps -eo "pid,command" | grep servers
+  - mcservers start
+  - mcservers
+
+    # Note: guard to prevent tests if host is not available - and verify users for tests
+  - curl -o junk.txt http://mcdev.localhost/api/users?apikey=totally-bogus
+  - cat junk.txt
+  - cat junk.txt | grep 'fullname'
+
+  - cd $MC_PYTHON_API_DIR
+  - pwd
+
+script:
+# suspending excel regression until completed with refactoring
+  - echo "Restore Excel I/O regression testing"
+#  - ./materials_commons_extras/scripts/io_regression_test/run_excel_io_regression_test.sh
+  - pytest -rsx materials_commons_extras/test
+#  - -rsx to show reasons for skipping and failed tests - updated
+#  and/or ...
+#  - coverage run --source mcapi,casm_mcapi,demo_project -m py.test test
+#  - coverage report -m
+
+#after_failure:
+#  - echo ${MC_LOG_DIR}/mcapi.out.${SERVERTYPE}
+#  - ls ${MC_LOG_DIR}
+#  - cat ${MC_LOG_DIR}/mcapi.out.${SERVERTYPE}
+#  - cat ${MC_LOG_DIR}/mcapiserver.out.${SERVERTYPE}

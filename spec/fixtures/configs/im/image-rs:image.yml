@@ -1,0 +1,35 @@
+language: rust
+sudo: false
+notifications:
+    irc: "irc.mozilla.org#piston-internals"
+os:
+    - linux
+    - osx
+rust:
+    - 1.24.1
+    - stable
+    - beta
+    - nightly
+env:
+    global:
+        - secure: "WI/r7hbDhenb7zPXht8J0mhcx5aUgY22cCrwYmNksMmgIK9hYfPjZ68XzaQ7+Ity8b12TlHM8lGRN9bIsyAZEiRIkxkZAArY9bXAOExJaAT+yOyxhEs/QdrGB6iRhC6FTxPwgUH82j0nFL1UI7HqBnOy3g3tv23jq1AlD9N3t0k="
+    matrix:
+      - FEATURES=''
+      - FEATURES='gif_codec'
+      - FEATURES='jpeg'
+      - FEATURES='png_codec'
+      - FEATURES='pnm'
+      - FEATURES='tga'
+      - FEATURES='tiff'
+      - FEATURES='webp'
+      - FEATURES='hdr'
+script:
+    - if [ -z "$FEATURES" ]; then
+        cargo build -v &&
+        if [ "$TRAVIS_RUST_VERSION" = "nightly" ]; then cargo test -v; fi &&
+        cargo doc -v;
+      else
+        cargo build -v --no-default-features --features "$FEATURES" &&
+        if [ "$TRAVIS_RUST_VERSION" = "nightly" ]; then cargo test -v --no-default-features --features "$FEATURES"; fi &&
+        cargo doc -v --no-default-features --features "$FEATURES";
+      fi

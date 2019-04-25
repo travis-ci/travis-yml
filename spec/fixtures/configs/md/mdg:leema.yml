@@ -1,0 +1,9 @@
+language: rust
+rust:
+  - 1.33.0
+install:
+  - sudo pip install nose
+  - rustup install nightly
+  - rustup component add rustfmt-preview --toolchain nightly
+script: make travis
+sudo: required

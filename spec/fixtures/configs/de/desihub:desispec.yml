@@ -1,0 +1,209 @@
+#
+# IMPORTANT.  OS X support is so experimental that you have to specifically
+# request to have it enabled, on a per-repository basis.  See
+# http://docs.travis-ci.com/user/multi-os/#Manual-intervention-required
+#
+# This file will still work, without OS X enabled, it just won't run those
+# tests.
+#
+# We set the language to c because python isn't supported on the MacOS X nodes
+# on Travis. However, the language ends up being irrelevant anyway, since we
+# install Python ourselves using conda.
+# language: python
+language: c
+
+os:
+    - linux
+    # - osx
+
+# Setting sudo to false opts in to Travis-CI container-based builds.
+sudo: false
+
+# Use Ubuntu 14.04 LTS "trusty" instead of default 12.04
+dist: trusty
+
+# SPECEX and HARP.  Once we are building specex, we need C++11
+# features that require a newer OS and gcc.  These two lines
+# switch us to non-container, Ubuntu 14.04
+#sudo: required
+#dist: trusty
+
+# The apt packages below are needed for sphinx builds, which can no longer
+# be installed with sudo apt-get.
+addons:
+    apt:
+        packages:
+            - graphviz
+            - texlive-latex-extra
+            - dvipng
+            # SPECEX and HARP.  Once we are building specex, re-enable this.
+            # - libblas-dev
+            # - liblapack-dev
+            # - libboost-all-dev
+            # - libcfitsio3-dev
+# python:
+    # - 2.6 NOTE: no longer testing python 2.x
+    # - 2.7
+    # - 3.3
+    # - 3.4
+    # This is just for "egg_info".  All other builds are explicitly given in the matrix
+env:
+    global:
+        # The following versions are the 'default' for tests, unless
+        # overidden underneath. They are defined here in order to save having
+        # to repeat them for all configurations.
+        # - NUMPY_VERSION=1.10
+        # - SCIPY_VERSION=0.16
+        - ASTROPY_VERSION=2.0.8
+        # - SPHINX_VERSION=1.6.6
+        - DESIUTIL_VERSION=master
+        - SPECLITE_VERSION=0.7
+        # - SPECTER_VERSION=0.8.1
+        - SPECTER_VERSION=0.9.0
+        - DESIMODEL_VERSION=0.9.9
+        - DESIMODEL_DATA=branches/test-0.9.9
+        # - DESIMODEL_DATA=trunk
+        - DESITARGET_VERSION=0.27.0
+        # - HARP_VERSION=1.0.1
+        # - SPECEX_VERSION=0.3.9
+        - REDROCK_VERSION=0.13.1
+        - MAIN_CMD='python setup.py'
+        # Additional conda channels to use.
+        - CONDA_CHANNELS="astropy"
+        # These packages will always be installed.
+        - CONDA_DEPENDENCIES=""
+        # These packages will only be installed if we really need them.
+        - CONDA_ALL_DEPENDENCIES="scipy matplotlib sqlalchemy coverage pyyaml numba numpy"
+        # These packages will always be installed.
+        - PIP_DEPENDENCIES=""
+        # These packages will only be installed if we really need them.
+        - PIP_ALL_DEPENDENCIES="speclite==${SPECLITE_VERSION} coveralls fitsio"
+        # These pip packages need to be installed in a certain order, so we
+        # do that separately from the astropy/ci-helpers scripts.
+        - DESIHUB_PIP_DEPENDENCIES="desiutil=${DESIUTIL_VERSION} specter=${SPECTER_VERSION} desimodel=${DESIMODEL_VERSION} redrock=${REDROCK_VERSION} desitarget=${DESITARGET_VERSION}"
+        # Debug the Travis install process.
+        - DEBUG=False
+    matrix:
+       # - PYTHON_VERSION=2.7 SETUP_CMD='egg_info'
+       # - PYTHON_VERSION=2.7 SETUP_CMD='bdist_egg'
+        - PYTHON_VERSION=3.5 SETUP_CMD='egg_info'
+        - PYTHON_VERSION=3.5 SETUP_CMD='bdist_egg'
+        - PYTHON_VERSION=3.6 SETUP_CMD='egg_info'
+        - PYTHON_VERSION=3.6 SETUP_CMD='bdist_egg'
+
+matrix:
+    # Don't wait for allowed failures.
+    fast_finish: true
+
+    # OS X support is still experimental, so don't penalize failuures.
+    allow_failures:
+        - os: osx
+        - os: linux
+          env: PYTHON_VERSION=3.6 SETUP_CMD='test'
+               ASTROPY_VERSION=3.0
+               CONDA_DEPENDENCIES=$CONDA_ALL_DEPENDENCIES
+               PIP_DEPENDENCIES=$PIP_ALL_DEPENDENCIES
+
+    include:
+
+        # Check for sphinx doc build warnings.
+        # Note: this test is not a perfectly realistic test of ReadTheDocs
+        # builds, which operate in a much more bare-bones environment
+        - os: linux
+          env: PYTHON_VERSION=3.5 SETUP_CMD='build_sphinx --warning-is-error'
+               CONDA_DEPENDENCIES="sqlalchemy"
+               DESIHUB_PIP_DEPENDENCIES="desiutil=${DESIUTIL_VERSION}"
+
+        # Coverage test.  Note that installing the coverage software can
+        # change the set of packages installed by conda, so we do
+        # separate 'test' and 'test --coverage'.
+        - os: linux
+          env: PYTHON_VERSION=3.5 SETUP_CMD='test --coverage'
+               CONDA_DEPENDENCIES=$CONDA_ALL_DEPENDENCIES
+               PIP_DEPENDENCIES=$PIP_ALL_DEPENDENCIES
+
+        # Standard tests.
+       # - os: linux
+       #   env: PYTHON_VERSION=2.7 SETUP_CMD='test'
+       #        CONDA_DEPENDENCIES=$CONDA_ALL_DEPENDENCIES
+       #        PIP_DEPENDENCIES=$PIP_ALL_DEPENDENCIES
+
+        # Redundant with the coverage test
+        # - os: linux
+        #   env: PYTHON_VERSION=3.5 SETUP_CMD='test'
+        #        CONDA_DEPENDENCIES=$CONDA_ALL_DEPENDENCIES
+        #        PIP_DEPENDENCIES=$PIP_ALL_DEPENDENCIES
+
+        - os: linux
+          env: PYTHON_VERSION=3.6 SETUP_CMD='test'
+               CONDA_DEPENDENCIES=$CONDA_ALL_DEPENDENCIES
+               PIP_DEPENDENCIES=$PIP_ALL_DEPENDENCIES
+
+        - os: linux
+          env: PYTHON_VERSION=3.6 SETUP_CMD='test'
+               ASTROPY_VERSION=3.0
+               CONDA_DEPENDENCIES=$CONDA_ALL_DEPENDENCIES
+               PIP_DEPENDENCIES=$PIP_ALL_DEPENDENCIES
+
+        # More recent versions
+        # We're already on the "more recent" versions.
+        # - os: linux
+        #   env: PYTHON_VERSION=2.7 ASTROPY_VERSION=1.1.1 NUMPY_VERSION=1.10.4 SCIPY_VERSION=0.17.0 SETUP_CMD='test'
+
+        # - os: osx
+        #   env: PYTHON_VERSION=2.7 SETUP_CMD='test'
+        # - python: 3.3
+        #   env: SETUP_CMD='test --open-files'
+        # - python: 3.4
+        #   env: SETUP_CMD='test --open-files'
+
+        # Now try do scipy on 2.7 and an appropriate 3.x build (with latest numpy)
+        # We also note the code coverage on Python 2.7.
+        # - python: 2.7
+        #   env: SETUP_CMD='test --coverage'  OPTIONAL_DEPS=true LC_CTYPE=C.ascii LC_ALL=C.ascii
+        # - python: 3.4
+        #   env: SETUP_CMD='test'  OPTIONAL_DEPS=true LC_CTYPE=C.ascii LC_ALL=C.ascii
+
+        # Try older numpy versions
+        # - python: 2.7
+        #   env: NUMPY_VERSION=1.8 SETUP_CMD='test'
+        # - python: 2.7
+        #   env: NUMPY_VERSION=1.7 SETUP_CMD='test'
+        # - python: 2.7
+        #   env: NUMPY_VERSION=1.6 SETUP_CMD='test'
+
+        # Do a PEP8 test
+        # - python: 2.7
+        #   env: MAIN_CMD='pep8 astropy --count' SETUP_CMD=''
+
+install:
+    - git clone git://github.com/astropy/ci-helpers.git
+    - source ci-helpers/travis/setup_conda.sh
+    # egg_info causes the astropy/ci-helpers script to exit before the pip
+    # packages are installed, thus desiutil is not installed in that script.
+    - for p in $DESIHUB_PIP_DEPENDENCIES; do r=$(echo $p | cut -d= -f1); v=$(echo $p | cut -d= -f2); pip install git+https://github.com/desihub/${r}.git@${v}#egg=${r}; done
+    - "if [[ $SETUP_CMD == test* ]]; then pip install --no-binary :all: healpy; fi"
+    # - source etc/travis_install_specex.sh
+    - "if [[ $SETUP_CMD == test* ]]; then pip install --no-binary :all: healpy; fi"
+    - export DESIMODEL=${HOME}/desimodel/${DESIMODEL_VERSION}
+    - mkdir -p ${DESIMODEL}
+    - if [[ $SETUP_CMD == test* ]]; then svn export https://desi.lbl.gov/svn/code/desimodel/${DESIMODEL_DATA}/data ${DESIMODEL}/data ; fi
+    - conda list
+    # - if [[ $SETUP_CMD == test* ]]; then python -c 'import numpy; import scipy; print(numpy.__version__); print(numpy.__path__); print(scipy.__version__); print(scipy.__path__)'; fi
+
+before_install:
+    # Show the Travis worker's IP address.
+    - curl ipinfo.io
+    # setup fake X11 server; QA tests may need this
+    # see https://docs.travis-ci.com/user/gui-and-headless-browsers/
+    # - "export DISPLAY=:99.0"
+    # - "sh -e /etc/init.d/xvfb start"
+    # - sleep 3  # give xvfb some time to start
+    # See how the locale is set.
+    - echo LC_ALL=${LC_ALL:-undef} LC_CTYPE=${LC_CTYPE:-undef} LANG=${LANG:-undef} LANGUAGE=${LANGUAGE:-undef}
+
+script:
+    - $MAIN_CMD $SETUP_CMD
+
+after_success:
+    - if [[ $SETUP_CMD == 'test --coverage' ]]; then coveralls; fi

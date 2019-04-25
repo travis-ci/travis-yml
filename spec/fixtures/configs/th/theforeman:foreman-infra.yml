@@ -1,0 +1,23 @@
+dist: trusty
+sudo: false
+matrix:
+  include:
+    - language: ruby
+      rvm:
+        - 2.4.1
+      install: (cd puppet && bundle install)
+      script: ./.travis/puppet.sh
+      addons:
+        apt:
+          packages:
+            - yajl-tools
+    - language: python
+      python:
+        - "2.7"
+      git:
+        submodules: false
+      install:
+        - pip install jenkins-job-builder
+        - pip install lxml
+        - pip install requests
+      script: ./.travis/jjb.sh

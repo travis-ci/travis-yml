@@ -1,0 +1,132 @@
+sudo: false
+language: cpp
+
+matrix:
+  include:
+    - os: linux
+      compiler:
+        - gcc
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - libgl1-mesa-dev
+            - libglu1-mesa-dev
+            - mesa-common-dev
+            - libx11-dev
+            - libxcursor-dev
+            - libxrandr-dev
+            - libxi-dev
+            - uuid-dev
+    - os: osx
+      compiler:
+        - clang
+      osx_image: xcode9
+  
+install:
+  - DEPS_DIR="${TRAVIS_BUILD_DIR}/Deps"
+  - mkdir ${DEPS_DIR}
+
+  # Download libUUID
+  - |
+    if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+      brew update
+      brew install ossp-uuid
+    fi
+
+  # Download CMake
+  - |
+    if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+      CMAKE_URL="https://cmake.org/files/v3.12/cmake-3.12.4-Linux-x86_64.tar.gz"
+      cd ${DEPS_DIR}
+      mkdir cmake
+      travis_retry wget --no-check-certificate --quiet -O - ${CMAKE_URL} | tar --strip-components=1 -xz -C cmake
+      export PATH=${DEPS_DIR}/cmake/bin:${PATH}
+    else
+      brew install cmake || brew upgrade cmake
+    fi
+
+  # Download GCC 7.1
+  - |
+    if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+      GCC_URL="http://data.banshee3d.com/gcc-7.1-trusty.zip"
+      cd ${DEPS_DIR}
+      mkdir gcc
+      cd gcc
+      wget --no-check-certificate --quiet - ${GCC_URL}
+      unzip -q gcc-7.1-trusty.zip
+      export PATH=${DEPS_DIR}/gcc/bin:$PATH
+      export LD_LIBRARY_PATH=${DEPS_DIR}/gcc/lib:$LD_LIBRARY_PATH
+      export LD_LIBRARY_PATH=${DEPS_DIR}/gcc/lib64:$LD_LIBRARY_PATH
+    fi		
+
+  # Download binutils 2.28
+  - |
+    if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+      BINUTILS_URL="http://data.banshee3d.com/binutils-2.28-trusty.zip"
+      cd ${DEPS_DIR}
+      mkdir binutils
+      cd binutils
+      wget --no-check-certificate --quiet - ${BINUTILS_URL}
+      unzip -q binutils-2.28-trusty.zip
+      export PATH=${DEPS_DIR}/binutils/bin:${PATH}
+      export LD_LIBRARY_PATH=${DEPS_DIR}/binutils/lib:$LD_LIBRARY_PATH
+    fi	
+
+  - cd ${TRAVIS_BUILD_DIR}
+
+script:
+  - INSTALL_DIR="${TRAVIS_BUILD_DIR}/Install"
+  - mkdir ${INSTALL_DIR}
+  - mkdir Build && cd Build
+  - |
+    if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+      CC=gcc CXX=g++ cmake -D CMAKE_C_COMPILER=gcc -D CMAKE_CXX_COMPILER=g++ -DCMAKE_INSTALL_PREFIX:STRING=${INSTALL_DIR} .. 
+    else
+      cmake -DCMAKE_INSTALL_PREFIX:STRING=${INSTALL_DIR} ..
+    fi
+  - make
+  - make install
+  
+after_success:
+  - cd ..
+  - today=`date +%Y.%m.%d`
+  - |
+    if [ -n "$TRAVIS_TAG" ]; then
+      buildName=${TRAVIS_TAG}
+    else
+      buildName=${today}
+    fi
+  - filename=bsf_${buildName}_${TRAVIS_OS_NAME}.tar.gz
+  - symbolsFilename=bsf_${buildName}_${TRAVIS_OS_NAME}_symbols.tar.gz
+  - cd ${INSTALL_DIR}
+  - cd ..
+  - |
+    if [[ "$TRAVIS_EVENT_TYPE" == "cron" ]] || [[ -n "$TRAVIS_TAG" ]]; then
+      find ./Install -not -name "*.dbg" -not -name ".dwarf" -not -type d | cut -sd / -f 3- | tar -C ./Install -czvf ${filename} -T -
+      find ./Install -name "*.dbg" -or -name "*.dwarf" -not -type d | cut -sd / -f 3- | tar -C ./Install -czvf ${symbolsFilename} -T -
+
+      mkdir artifacts
+      mv ${filename} artifacts
+      mv ${symbolsFilename} artifacts
+    fi
+deploy:
+  - provider: s3
+    access_key_id: ${S3_ACCESS}
+    secret_access_key: ${S3_SECRET}
+    bucket: ${S3_BUCKET}
+    skip_cleanup: true
+    region: ${S3_REGION}
+    local_dir: ${TRAVIS_BUILD_DIR}/artifacts
+    on:
+      condition: $TRAVIS_EVENT_TYPE = cron
+  - provider: s3
+    access_key_id: ${S3_ACCESS}
+    secret_access_key: ${S3_SECRET}
+    bucket: ${S3_BUCKET}
+    skip_cleanup: true
+    region: ${S3_REGION}
+    local_dir: ${TRAVIS_BUILD_DIR}/artifacts
+    on:
+      tags: true

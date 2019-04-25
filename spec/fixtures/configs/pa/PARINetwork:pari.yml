@@ -1,0 +1,45 @@
+dist: trusty
+sudo: false
+language: python
+cache: pip
+python:
+- '2.7'
+before_install:
+- openssl aes-256-cbc -K $encrypted_dc72a5ae7e49_key -iv $encrypted_dc72a5ae7e49_iv
+  -in pari_qa.enc -out pari_qa -d
+- wget https://github.com/mozilla/geckodriver/releases/download/v0.11.1/geckodriver-v0.11.1-linux64.tar.gz
+- mkdir geckodriver
+- tar -xzf geckodriver-v0.11.1-linux64.tar.gz -C geckodriver
+- export PATH=$PATH:$PWD/geckodriver
+install:
+- npm install -g less
+- pip install ansible==2.2.1
+- pip install -r requirements.dev.txt
+- npm install -g request
+before_script:
+- createuser pari
+- psql -c 'create database  test_pari;' -U postgres
+- psql -d test_pari -c "CREATE EXTENSION postgis;"
+- export DISPLAY=:99.0
+- sh -e /etc/init.d/xvfb start
+- mkdir -p media/uploads/
+- cp -r core/static/img/stories-1.jpg media/uploads/stories-1.jpg
+script:
+- source scripts/test.sh
+deploy:
+  provider: script
+  script: sh travis_deploy_to_staging.sh
+  skip_cleanup: true
+  on:
+    branch: release-candidate
+addons:
+  postgresql: 9.5
+  apt:
+    packages:
+    - postgresql-9.5-postgis-2.3
+  firefox: 53.0.2
+  ssh_known_hosts:
+  - staging.ruralindiaonline.org
+  - 206.189.18.112
+notifications:
+  slack: countermedia:TsEo2IDocyJtRqLR1Mzi0zuT

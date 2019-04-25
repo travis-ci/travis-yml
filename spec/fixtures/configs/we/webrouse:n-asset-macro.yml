@@ -1,0 +1,84 @@
+language: php
+php:
+    - 7.1
+    - 7.2
+
+matrix:
+    include:
+        - php: 7.1
+          env: composer_args="--prefer-lowest --prefer-stable" old_nette_utils=on
+        - php: 7.2
+          env: coverage=on coding_standard=on
+
+addons:
+  apt:
+    packages:
+      - shunit2
+
+sudo: false
+
+script:
+    # PHP Tests
+    - vendor/bin/tester tests -s -c tests/php-unix.ini $coverageArgs
+    # Nette Code Checker
+    - >
+      if [ "$coding_standard" == "on" ]; then
+        php temp/code-checker/src/code-checker.php --short-arrays -d src;
+      fi
+    # Coding standards
+    - >
+      if [ "$coding_standard" == "on" ]; then
+        composer phpstan;
+      fi
+    - >
+      if [ "$coding_standard" == "on" ]; then
+        composer check-cs;
+      fi
+    # Examples - tests
+    - bash shunit2 tests/ExamplesTests/gulp_tests.sh
+    - bash shunit2 tests/ExamplesTests/webpack_tests.sh
+    # Examples - npm-check-updates
+    - ncu --packageFileDir --packageFile "${TRAVIS_BUILD_DIR}/examples/gulp/package.json"
+    - ncu --packageFileDir --packageFile "${TRAVIS_BUILD_DIR}/examples/webpack/package.json"
+
+after_failure:
+    - for i in $(find tests -name \*.actual); do echo "--- $i"; cat $i; echo; echo; done
+    - for i in $(find examples -name \*.log); do echo "--- $i"; cat $i; echo; echo; done
+
+before_script:
+    # Install old nette/utils if required
+    - >
+      if [ "$old_nette_utils" == "on" ]; then
+        travis_retry composer require nette/utils:2.5 --dev
+      fi
+    # Install composer_args
+    - travis_retry composer update --no-interaction --prefer-dist $composer_args
+    # Install CodeChecker
+    - >
+      if [ "$coding_standard" == "on" ]; then
+       travis_retry composer create-project nette/code-checker temp/code-checker ~2.5 --no-interaction;
+      fi
+    # Install jq 1.5
+    - mkdir -p "$HOME/bin"
+    - curl -o "$HOME/bin/jq" -L https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64
+    - chmod +x "$HOME/bin/jq"
+    - export PATH=$PATH:$HOME/bin
+    # Install nodeJs
+    - nvm install node
+    - npm install -g npm@3
+    - npm config set loglevel error
+    - npm install -s -q -g gulp webpack webpack-cli npm-check-updates
+    # Code coverage arguments
+    - if [ "$coverage" == "on" ]; then coverageArgs="-p phpdbg --coverage ./coverage.xml --coverage-src ./src"; fi
+
+after_script:
+    # Report Code Coverage
+    - >
+      if [ "$coverage" == "on" ]; then
+        wget https://scrutinizer-ci.com/ocular.phar;
+        php ocular.phar code-coverage:upload --format=php-clover coverage.xml;
+      fi
+
+cache:
+    directories:
+        - $HOME/.composer/cache

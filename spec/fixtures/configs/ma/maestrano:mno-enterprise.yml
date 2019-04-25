@@ -1,0 +1,28 @@
+language: ruby
+cache: bundler
+env:
+  - GEM=api
+  - GEM=core
+  - GEM=frontend
+before_install:
+  - gem install bundler --version '< 2'
+  - cd $GEM; export BUNDLE_GEMFILE="`pwd`/Gemfile"
+script:
+  - bundle install --quiet
+  - bundle exec rake test_app
+  - bundle exec rake spec
+rvm:
+  - 2.3.8
+  - 2.4.5
+# jruby not supported because of redcarpet
+#  - jruby-9.1.7.0
+#matrix:
+#  fast_finish: true
+#  allow_failures:
+#    - rvm: jruby-9.1.7.0
+addons:
+  code_climate:
+    repo_token: 7b6a43d5fa6ad571f5674176b0b85a79f62bfb7a908eb8bdd52941566706770e
+notifications:
+  slack:
+    secure: zvtiNWVkW6FY1NHXd3HdnD8iZRyaOsPatByRUZyO42KxHYMRqxld1VOzB/hn6AX9KBoh84k11quLPqT1CZKPa1hJy/9Yr6blr/dT3bJID14/ghn5BMUlB2aRjHHZD7lxFAOKmpg17xbqtrlxsPd2yOz8uAoz4zyKBXNNdHu1znNMe0o/DMjzq9d1hmi72q8E4ywpEf2ezSt2V29geTm6CgWsW4t7Vf2wMtjIQlWVkVC9BUnhNVpcDPSOOflFfdoPSpw1yUiz1RZECX9twdq+iMpDa9FjPh/THsQrZZgiCJ8pCepGT2Tcv9ESavPQ3gb7uoqjnMOyz6iyay1jVzgOeVi95fCefeM3AVlL8i9khEED/hdoSDhEg4ZMOxcySbJjjtOx4x4UcWico3utGbC12R+Z8XOhcHl6iXgWPri+sSqn2RNyH6JV/URjsYKyC6L7pUadYWUJ/YAEPlDAeS6cjc9UsXO4oZH12AJp7sK93Q8ic2TUMqAuKW9bsdvklrOLuiW00wpeAeVebKwkvO9gg2PY/OEsOi9dPyHcV4o4d6/g9LZO6/1MXM/HNuWLb+/pdtmTTPeg3ifharRmN5S26TtX8JonrZLQBelJHTxMJbocJUMvhHEkVkkn1lTFYxk3DHS6SJ2+Ne+UFF1Tde+2KhmuOKgwe/sbZ2UmOV5dp8s=

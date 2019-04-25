@@ -1,0 +1,105 @@
+dist: trusty
+
+sudo: false
+
+language: php
+
+env:
+  global:
+    - COMPOSER_NO_INTERACTION=1
+    - WP_VERSION=*
+
+jobs:
+  include:
+    - php: 7.3
+      env: WP_VERSION=^5.0 COVERAGE=1 PHPCS=1
+    - php: 7.2
+      env: WP_VERSION=^4.9
+    - php: 7.2
+      env: WP_VERSION=^4.8
+    - php: 7.2
+      env: WP_VERSION=^4.7
+    - php: 7.3
+      env: WP_MULTISITE=1
+    - php: 7.3
+      env: PHPSTAN=1
+    - php: 7.3
+      env: PHPMD=1
+    - php: 7.3
+      env: PSALM=1
+    - php: 7.2
+    - php: 7.1
+    - php: 7.0
+    - php: 5.6
+    - php: 5.5
+    - php: 5.4
+    - php: 5.3
+      dist: precise
+      env: TRAVIS_DIST_PRECISE=1
+    - php: nightly
+    - php: hhvm
+  allow_failures:
+    - php: hhvm
+    - php: nightly
+    - env: PHPMD=1
+    - env: PHPSTAN=1
+    - env: PSALM=1
+
+cache:
+  directories:
+    - node_modules
+    - vendor
+    - $HOME/.composer/cache
+
+before_install:
+  # Install latest version of Node.js (https://github.com/creationix/nvm).
+  - if [ "${TRAVIS_DIST_PRECISE}" == "1" ]; then nvm install node; fi
+  # Create database for PHPUnit tests.
+  - mysql -e 'CREATE DATABASE wp_phpunit_tests;'
+  # Remove Xdebug for a huge performance increase:
+  - |
+    if [ "$COVERAGE" != "1" && -f ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/xdebug.ini ]; then
+      phpenv config-rm xdebug.ini
+    fi
+  # Raise PHP memory limit to 2048MB
+  - echo 'memory_limit = 2048M' >> ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/travis.ini
+  # Validate composer.json file.
+  - composer validate --strict
+  # Add Composer global vendor/bin to path.
+  - export PATH="$HOME/.composer/vendor/bin:$PATH"
+  # PHPStan
+  - if [ "$PHPSTAN" == "1" ]; then composer global require phpstan/phpstan; fi
+  # Psalm
+  - if [ "$PSALM" == "1" ]; then composer global require vimeo/psalm; fi
+
+install:
+  # Install Grunt command line interface (https://github.com/gruntjs/grunt-cli).
+  - npm install -g grunt-cli
+  # Install Node.js packages.
+  - npm install
+  # Update Composer itself to the latest version (https://getcomposer.org/doc/03-cli.md#self-update-selfupdate-).
+  - composer self-update
+  # Install Composer packages.
+  - composer install
+  # Test on specific WordPress version.
+  - composer require --dev --update-with-dependencies roots/wordpress:${WP_VERSION} wp-phpunit/wp-phpunit:${WP_VERSION}
+  # List available packages.
+  - composer show
+
+script:
+  # PHPLint
+  - composer run-script phplint
+  # PHPUnit
+  - composer run-script phpunit
+  # PHP_CodeSniffer
+  - if [ "$PHPCS" == "1" ]; then composer run-script phpcs; fi
+  # PHP Mess Detector
+  - if [ "$PHPMD" == "1" ]; then composer run-script phpmd; fi
+  # PHPStan
+  - if [ "$PHPSTAN" == "1" ]; then phpstan analyze; fi
+  # Psalm
+  - if [ "$PSALM" == "1" ]; then psalm; fi
+
+after_success:
+  - if [ "$COVERAGE" == "1" ]; then composer run-script coveralls; fi
+  - if [ "$COVERAGE" == "1" ]; then bash <(curl -s https://codecov.io/bash); fi

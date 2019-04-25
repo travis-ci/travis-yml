@@ -1,0 +1,52 @@
+language: java
+jdk:
+  - oraclejdk8
+
+sudo: required
+
+env:
+  # Give Maven 2GB of memory to work with
+  - MAVEN_OPTS=-Xmx2048M
+  
+services:
+  - docker
+  
+before_install:
+  - docker-compose rm -f
+
+script:
+  # Change hibernate mode to create-drop
+  - sed -i 's/validate/create-drop/' datavault-broker/src/main/webapp/WEB-INF/datavault-broker-root.xml
+  # Start required services
+  - docker-compose -f docker-compose-test.yml up -d rabbitmq mysql vault vault-administration
+  # Check everything is running as expected
+  - sleep 60 # wait that container is ready
+  # Make sure rabbitmq is running properly
+  - docker-compose -f docker-compose-test.yml logs rabbitmq
+  - docker-compose -f docker-compose-test.yml exec rabbitmq rabbitmqctl authenticate_user datavault datavault
+  # Build the workers container and run
+  - sudo docker-compose up -d --build workers
+  # Delete unused containers
+  - docker-compose -f docker-compose-test.yml rm -f vault-administration
+  # Check everything is running as expected
+  - sleep 60 # wait that container is ready
+  - docker-compose -f docker-compose-test.yml logs workers
+  - docker-compose -f docker-compose-test.yml ps
+  # Run integration tests
+  - mvn verify -P integration-test
+  - sed -i 's/chunking\.enabled = true/chunking.enabled = false/' docker/config/datavault.properties
+  - docker-compose -f docker-compose-test.yml restart workers
+  - mvn verify -P integration-test
+  - sed -i 's/encryption\.enabled = true/encryption.enabled = false/' docker/config/datavault.properties
+  - docker-compose -f docker-compose-test.yml restart workers
+  - mvn verify -P integration-test
+  - sed -i 's/chunking\.enabled = false/chunking.enabled = true/' docker/config/datavault.properties
+  - docker-compose -f docker-compose-test.yml restart workers
+  - mvn verify -P integration-test
+  # Run Cypress functional test
+  - sed -i 's/encryption\.enabled = false/encryption.enabled = true/' docker/config/datavault.properties
+  - docker-compose -f docker-compose-test.yml restart workers
+  - sudo docker-compose -f docker-compose-test.yml up --build e2e
+
+after_script:
+  - docker-compose stop -t 1

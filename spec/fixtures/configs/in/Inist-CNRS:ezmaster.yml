@@ -1,0 +1,28 @@
+sudo: required
+services:
+  - docker
+env:
+  DOCKER_COMPOSE_VERSION: 1.17.0
+before_install:
+  # docker-compose upgrade
+  - sudo rm -f /usr/local/bin/docker-compose
+  - curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
+  - chmod +x docker-compose
+  - sudo mv docker-compose /usr/local/bin
+  # docker upgrade
+  - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+  - sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+  - sudo apt-get update
+  - sudo apt-get -y install docker-ce
+  # build an run ezmaster as in prod
+  - make build
+  - make setup-folders
+  - docker-compose -f ./docker-compose.yml up -d
+  - sleep 120 ; docker-compose logs
+script:
+  - docker-compose ps
+  # just test there is 5 running containers, that is not a lot but that's already it!
+  - NB_CONTAINERS=$(docker-compose ps | grep " Up " | wc -l)
+  - test $NB_CONTAINERS = 5
+notifications:
+  slack: 'inist-dpi:53Jp5iUZeRidSGZn0TukMSKo#activity'

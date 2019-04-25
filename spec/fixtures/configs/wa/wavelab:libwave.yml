@@ -1,0 +1,33 @@
+dist: trusty
+sudo: required
+
+language: cpp
+
+cache:
+  ccache: true
+
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+      - sourceline: 'ppa:lkoppel/robotics'
+    packages:
+      - g++-5
+      - libboost-dev
+      - libyaml-cpp-dev
+      - libeigen3-dev
+      - libpcl-dev
+      - libopencv-dev
+      - libceres-dev
+      - clang-format-3.8
+
+before_script:
+  - export CXX=g++-5 CC=gcc-5  # override travis defaults
+
+script:
+  - bash scripts/install/install_geographiclib.bash
+  - bash scripts/ci/ci_check.bash
+  - bash scripts/ci/ci_run.bash
+
+notifications:
+  email: false

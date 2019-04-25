@@ -1,0 +1,97 @@
+language: ruby
+
+rvm: 2.2.4
+
+env:
+  global:
+    - USE_TESTING_TIMEOUTS: "true"
+    - OPENSTUDIO_VERSION=2.8.0 OPENSTUDIO_VERSION_SHA=55665635f0
+    - DOCKER_COMPOSE_VERSION=1.21.1
+
+gemfile:
+  - server/Gemfile
+
+# Set the default scripts that are used for the majority of the tests in the matrix
+before_install:
+  - ./ci/travis/setup.sh
+before_script:
+  - sudo Xvfb :99 -ac -screen 0 1024x768x8 &
+  - sleep 3
+script: ./ci/travis/test.sh
+after_failure: ./ci/travis/print_logs.sh
+
+# Services for linux -- all instances
+services:
+  - mongodb
+  - redis-server
+  - docker
+
+jobs:
+  include:
+    - stage: test
+      os: linux
+      sudo: required
+      dist: xenial
+      env: BUILD_TYPE=test
+    - stage: test
+      os: linux
+      sudo: required
+      dist: xenial
+      env: BUILD_TYPE=integration
+    - stage: test
+      os: osx
+      osx_image: xcode7.3
+      env: BUILD_TYPE=test
+    - stage: test
+      os: osx
+      osx_image: xcode7.3
+      env: BUILD_TYPE=integration
+    - stage: test
+      os: linux
+      sudo: required
+      dist: xenial
+      env:
+        - CI=true
+        - OS_SERVER_NUMBER_OF_WORKERS=4
+        - BUILD_TYPE=docker
+      before_script:
+        # remove the .git in the .dockerignore so coverage can be reported correctly to coveralls
+        - sed -i -E "s/.git//g" .dockerignore
+        - docker volume create --name=osdata
+        - docker images --all
+        - docker --version
+        - docker-compose --version
+        - docker-compose -f docker-compose.test.yml pull
+        - docker-compose -f docker-compose.test.yml build
+      script:
+        - docker-compose -f docker-compose.test.yml run web && docker-compose stop
+      after_script:
+        # Reset the git checkout to remove the test-based data in the containers and rebuild
+        - git checkout -- .dockerignore && git checkout -- Dockerfile
+    - stage: Deploy Docker Image
+      # Include your branch name below to publish a custom image.
+      # This change must be made in combination with a modification to
+      # deployment/scripts/deploy_docker.sh, as indicated in comments for that file.
+      # Full documentation at https://github.com/NREL/OpenStudio-server/wiki/Contributor-Docs:-Building-and-Publishing-Docker-images
+      if: branch = master OR branch = nrcan-master OR branch = develop
+      os: linux
+      sudo: required
+      dist: xenial
+      env:
+        - BUILD_TYPE=docker
+      before_script:
+        - docker images --all
+        - docker --version
+        - docker-compose --version
+        - docker volume create --name=osdata
+        - docker-compose build web
+        - docker-compose build rserve
+      script: ./docker/deployment/scripts/deploy_docker.sh
+
+notifications:
+  slack:
+    on_pull_requests: true
+    on_success: change
+    on_failure: change
+    rooms:
+      secure: G5hoK8S1gFT/rZ3L1+SNHITDQSZaLIhEPb4/12TXoUuNK15SFWjr99updPBO8f04dS7GGS7MlzWvoXiLFujDWyWdb2v6wWw6A810ZU2u3KwFfevb1ewR+oxUdWfk0DI/PY2opdMyhC9YoHfSV4wo/IG659kXKKLOVBBqKKdhjMQJNHWIRiT7LgpYqlB1TRHfcxIlL2e/cIAIzVsj3o2vwgd7uFPdwVI9tzHSJlZyptOxWvQ0IVmNksSLNxaJLwHRs7cdrV5dcH+jLJaz2Kwdcu3b/0baaFGfQMKhQrTefLlESN7SjR5vzrh7Us0Y6fuOEa652bVy/gTkWGcw9F5x200vYuQSov3kPO8wxGSe9haMMkZ231jZW9Zi3VyhzDAe0eNnwxo42drOumrjK3ukvAXB4OTptxUlukvHT7DY5VcatTefI0zDt9aYA3/JLjqrxfcCweWs2IAiaapJRTSnpk+hKgDFxOh2FxohTOg/kH8f9omjg3RyJsy/wCggx12baUuyfKcOAseGtZQaXcKJ7An8epHUx8SV5ZmRUWSthDmiEcT7UmFfVqk+O0VM5gGvrgsiUvoRqs5/7fFEXAUP+djVAnd7Do4HTwG8ELgqmN0WnpNrujSenE9hQ1cou897/JTGHcqL+rwOcLEteo6VqJMVeRfsSB96hpU9faX5bE0=

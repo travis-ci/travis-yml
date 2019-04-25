@@ -1,0 +1,37 @@
+language: ruby
+cache: bundler
+addons:
+  postgresql: '9.5'
+script:
+  - bundle exec rails db:migrate
+  - xvfb-run bundle exec rspec spec
+  - bundle exec rubocop
+  - bundle exec brakeman
+  - bundle exec bundle-audit update
+  - bundle exec bundle-audit check --ignore CVE-2017-8418
+env:
+  SMTP_ADDRESS: smtp.example.com
+  SMTP_DOMAIN: example.com
+  SMTP_PASSWORD: password
+  SMTP_USERNAME: username
+  EMAIL_FROM: inbox@example.com
+  APPLICATION_HOST: http://localhost:3000
+  ASSET_HOST: localhost:3000
+  SECRET_KEY_BASE: secret_key_base_for_travis
+notifications:
+  on_success: never
+  on_failure: never
+before_script:
+  - cp config/database.yml.travis config/database.yml
+  - psql -c 'create database travis_ci_test;' -U postgres
+deploy:
+  provider: cloudfoundry
+  api: https://api.cloud.service.gov.uk
+  username: waves.system1@mcga.gov.uk
+  password:
+    secure: kleY3+t6Q7lrEx9Ye4oeFNyDIvTsGcS2twYC3cHl/VTAmYGdQgEQwj8NgtGqzel1SJ5xx6k7TNa5ojgPoqLIRN9xMTax+ZSij6eOkt5rW0T74wMnRqiHUkwgURb2FW+zYI4VFGqWb0NH8InN9QrSc0kFVfH1RVcrMdGaUN5BBSDoOSwaeQPbIpjj7nuLJA9XZwHJaoP0QhKjFLopawBKL80YTyte1feQsy1zXevfvp6H/UGkQPRAc82PHHmcyQQmA5bfRMMcGLsYpoh68GPoSFvuLB+f3SgISYln6MZmYZa6ChyTA5+rT/O45Rmt9qHvIj21YyMTEbj7wmBcZgMfiaUI2LvZRIXTHe20uwBbYJuf/vpEYQgBAvhSdeOKohA6bNtYtydVIFQ92Q51A5z6IS56ZtPRBWet5OJ/shZJv17ocbSJK14wqrj3D4AB52eDltPjEpM1jVxxnWPkTiGF9uwrsuVHUxhz75ld1f0yPwVcaAvS/wD17HgPy9vBj10HW7vG+QqlED1rVfPHjBxTtIUOadOZWjdVlNnZyPDDR9WaHAEbxS2f9kVvBRk7TC1nNsm0uAziNQaWqXAsN3KQDCndFNSu25mI2Pi3Zmig2QBWFo8FoQ3Nbn3WVTd7od4vu3DjTSrf81Ia3s0zlR5krWqUC4FXMSJCZnul6BYjT1s=
+  organization: mca-waves-system
+  space: refactor
+  on:
+    repo: mcagov/waves-app
+    branch: master

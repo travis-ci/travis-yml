@@ -1,0 +1,12 @@
+sudo: false
+language: scala
+scala:
+- 2.11.7
+jdk:
+- oraclejdk8
+script: sbt clean coverage test
+after_success: sbt coveralls
+before_install:
+- openssl aes-256-cbc -K $encrypted_c3fdfb789575_key -iv $encrypted_c3fdfb789575_iv -in secrets.tar.enc -out secrets.tar -d
+- tar xvf secrets.tar
+- export TEST_CONFIG=application.conf

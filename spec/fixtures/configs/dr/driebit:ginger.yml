@@ -1,0 +1,40 @@
+sudo: required
+
+language: generic
+
+services:
+    - docker
+
+env:
+    DOCKER_COMPOSE_VERSION: 1.16.1
+
+before_install:
+    - apt-cache madison docker-engine
+
+    # Install newest Docker
+    - sudo apt-get -o Dpkg::Options::="--force-confnew" install -y docker-ce
+
+    # Install docker-compose at specified version
+    - sudo rm /usr/local/bin/docker-compose
+    - curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
+    - chmod +x docker-compose
+    - sudo mv docker-compose /usr/local/bin
+    - git clone https://github.com/driebit/mod_elasticsearch.git modules/mod_elasticsearch
+
+before_script:
+    # See https://github.com/travis-ci/travis-ci/issues/4842#issuecomment-311527059
+    - sudo service postgresql stop
+    # wait for postgresql to shutdown
+    - while sudo lsof -Pi :5432 -sTCP:LISTEN -t; do sleep 1; done
+
+script:
+    - docker version
+    - docker-compose version
+    - make tests
+
+notifications:
+    slack:
+        rooms:
+            - secure: hGwzszjNVO8U/hCtYKadkSBoWWP7fdQl33qaQhNvkaHMUe/28cMoqjsg3i/G5bFACUiurNVjZlT6V6OuPWBOJavB2zfJZcpE/PRbcm2FKpMvmYg9o+KitmJkYoefHbRHWQQ2jSqMgnP8BAkvBxEYqUrKflP27/0FhSTh8zNA9X1soHYntI24VekY8N4045JOKE0190h6rQbFGpNxUqWon9ah9eu87G7ClMgQbLaCEqXlPmGb+anFKgsf8XVsa63xtnso5wPzIU0nuzeClMbEhlToVxoreZPhYrIqY9ABAaT3zlrq1dfJwY5suHftQ9bkC7B2hruDR/w6Er1XHP875VZKcYX8qRtdlhnq1jyzZ0oaj1S6IK2LC8L4uNrswtSYjnJIrmUi668478n/BzSKhjQ9uO32sYEBs43CAjtpSa3E5hSPspBjj/z7ZEw0FmI6gzSy7IRb9tLF4PJ/eG2bNFiUThhKFJ9ujA/9PGsfA3SmHZ1fLs1OpCcSomfaXMEcaFdMDozBHJMe5hHX+30n6G55ojpFoKVs7++D+x1XmX1HT5nUXZucQQyTckIp6mOEzaYNUqlM/VrVcYZrnozHpa7XmVEUBA68tDuZ1CxIHH6p5VF+GVtLBWjwhCmR8Ux/5f4VIyu2ZXgOkA3f/8RAJhq/55e3AoAcXe1aHPr8THU=
+        on_success: change
+        on_failure: always

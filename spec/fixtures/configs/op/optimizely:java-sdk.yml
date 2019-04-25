@@ -1,0 +1,51 @@
+language: java
+dist: trusty
+jdk:
+  - openjdk8
+  - oraclejdk8
+  - oraclejdk9
+install: true
+addons:
+  srcclr: true
+script:
+    - "./gradlew clean"
+    - "./gradlew exhaustiveTest"
+    - "if [[ -n $TRAVIS_TAG ]]; then
+          ./gradlew ship;
+      else
+          ./gradlew build;
+      fi"
+cache:
+  gradle: true
+  directories:
+  - "$HOME/.gradle/caches"
+  - "$HOME/.gradle/wrapper"
+branches:
+  only:
+  - master
+  - /^\d+\.\d+\.(\d|[x])+(-SNAPSHOT|-alpha|-beta)?\d*$/ # trigger builds on tags which are semantically versioned to ship the SDK.
+after_success:
+  - ./gradlew coveralls uploadArchives --console plain
+after_failure:
+  - cat /home/travis/build/optimizely/java-sdk/core-api/build/reports/findbugs/main.html
+  - cat /home/travis/build/optimizely/java-sdk/core-api/build/reports/findbugs/test.html
+
+# Integration tests need to run first to reset the PR build status to pending
+stages:
+  - 'Integration tests'
+  - 'Test'
+
+jobs:
+  include:
+    - stage: 'Integration tests'
+      merge_mode: replace
+      env: SDK=java
+      cache: false
+      language: minimal
+      before_install: skip
+      install: skip
+      before_script:
+        - mkdir $HOME/travisci-tools && pushd $HOME/travisci-tools && git init && git pull https://$CI_USER_TOKEN@github.com/optimizely/travisci-tools.git && popd
+      script:
+        - "$HOME/travisci-tools/fsc-trigger/trigger_fullstack-sdk-compat.sh"
+      after_success: travis_terminate 0

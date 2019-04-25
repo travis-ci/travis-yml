@@ -1,0 +1,23 @@
+language: php
+php:
+  - 7.1
+  - 7.2
+  - 7.3
+sudo: false
+services:
+  - mysql
+  - postgresql
+before_install:
+  - phpenv config-add tests/config.ini
+  - if [ $TRAVIS_PHP_VERSION != '7.3' ]; then phpenv config-rm xdebug.ini; fi;
+install:
+  - composer install
+before_script:
+  - mysql -e 'create database fusio;'
+  - psql -c 'create database fusio;' -U postgres
+script:
+  - vendor/bin/phpunit
+env:
+  - DB=mysql
+  - DB=sqlite
+  - DB=pgsql

@@ -1,0 +1,90 @@
+sudo: required
+services:
+- docker
+language: python
+python:
+- '2.7'
+- '3.4'
+- '3.5'
+- '3.6'
+install:
+- sudo apt-get install -y imagemagick
+- sudo apt-get install -y graphviz
+- sudo apt-get install -y python-logilab-common
+- pip install -U setuptools
+- pip install -U --process-dependency-links -e .[viz,develop,celery]
+script:
+- pyflakes yadage
+- pytest --cov=yadage
+after_success:
+- coveralls
+jobs:
+  include:
+    - stage: kubernetes
+      install:
+      - sudo apt-get install golang-1.10-go
+      - curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
+      - echo "deb https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee -a /etc/apt/sources.list.d/kubernetes.list
+      - sudo apt-get update
+      - sudo apt-get install -y kubectl
+      - /usr/lib/go-1.10/bin/go version
+      - export GOROOT=/usr/lib/go-1.10
+      - /usr/lib/go-1.10/bin/go get sigs.k8s.io/kind
+      - pip install -U setuptools
+      - pip install -U --process-dependency-links -e .
+      script:
+      - docker build -t yadage/yadage .
+      - kind create cluster
+      - export KUBECONFIG="$(kind get kubeconfig-path --name="kind")"
+      - kind load docker-image yadage/yadage
+      - yadage-util k8s create-state --hostname kind-control-plane --path /mnt | kubectl create -f -
+      - kubectl create -f tests/kubernetes
+      - sleep 30
+      - kubectl get pods
+      - kubectl get pods -l job-name=testyadage -o name|xargs kubectl logs -f
+      - docker exec kind-control-plane cat /mnt/workdir/delphes/output.lhco
+    - stage: docs
+      install:
+      - pip install -U setuptools
+      - pip install -U --process-dependency-links -e .
+      - pip install sphinx
+      script:
+      - cd docs && make html && cd -
+      - touch docs/_build/html/.nojekyll
+      deploy:
+        provider: pages
+        skip_cleanup: true
+        github_token: $GITHUB_TOKEN
+        local_dir: docs/_build/html
+        on:
+          tags: true
+    - stage: deploy
+      install:
+        - echo none
+      script:
+        - echo none
+      deploy:
+        provider: pypi
+        on:
+          tags: true
+        username:
+          secure: m97JA4GN3/ARvE5IHZe3d1OFxXErhPpsyzWbtwemPEc7f5YNxjDXfvgNJ4hbMYS79uiown3Bb0WaBsPv2ebf8cZrJnYduR+whetfgdODHELo8aAuZPZub70orRyGEzkZg+AgajzlRMMbWqgWWC7IzaKj1P8j+Iaz0L1CR8+1KP/vbzWVdl43Q3ETuantPcEaOk088DuF+K2OMX83uyoSJpvgXhyD+w0+M6DNA2raQrEV6gX4RrFSwN93p9amWnI7cJ/l+6G/ISrz8O8ap/hwstCj/xbdFJ4yAdpMCHb2xuY9T2pWqIjK3pDPOkFI4QHjQrea8T4uY5SnAaMLnQmKD4Hv4avcJ23ZmWB2iymwawSwPZF+ChUr9+K4nfhDY+4DIoobtXQ73BpJYsF97YkxdgBxR4Ij6IvGzDFU2f9vDRuxr341XFExypkK2c4fUFWgdqAhp8zLnkGXQRPFhEHFZeyemYlsbatPD8YTDPEIxrNACaDq1DF4OvUaQWpqjYvp0OwNxrng1KtD40wtgQCRPUoNSm2CZheMhAmUuRtzf7R40qTYtFVxlP7sLGm/DUc2LOgIxhW8oIFcmNL4YPWmbQJegyDbIuTDiQkQ0X3LW4mc/pMEnLj9TJOzfbRKSvg997t45wDN1onXVeGdIk9qOdBsNDb5J8bJLSY1dhOLuEo=
+        password:
+          secure: ABo/JVs9Xg2+d4PxHsRS0TXOFKIFDifW5TwerlM03AEYHqmADfOiOicm0DTK7e+P0oI2JUHZYuwvQeuNj+dkUwYsNVKuzxkLxOBqaJCJOUAdpugXZD7KHFWRxB5VfZcorsgy17+oHqRcnxs0nHOj1KhG4UmEx0HpY2vfFkXfp/vtJtdUBwoXor6ZsmSD9NOdoASdYcYhZebHCEj9DAxZQChhj7Q1iLnbWuJiUbxoYPhPbyO6ytS6eq/kaxyO7em0+37KnzYPM4vdBucULC4dddHCW3JdYeuj+y+785UpPQ9j7GX+mSAXRVaqcU7ULQONR5xVIlOSu3FSFlnynmMYVi/usCqi7aZsoblTl1NwZYS/JVOGrw5tlikPXljuxM76Rfp6TllH/SOsRWVxFsh6VyfyRBa1EnNNATLyAgJpfl/ixy6Hm58wPg7ttvvL+6WTCWtnCtk8XzdDneiUDZL89EmLm4XB23QLGvnzjMrKukS/HZzJlIOTm7CIvTWQpio+FXpGZUfQ0NH9fWpd00yQqEN57w/8lvpAHbVcgQ+8k0sSD/7+cKwjtYKIlmV96AOV2B/U5v8WOLwv52uZYqp3Y4AseAhg0RuJf/kL6Jj6IOsh1+3hsS/XZakiN/HHocn0R0FP7yN237jmgnnXzGPEv16HW91YC1mSpC7uxUPcWiI=
+    - stage: docker
+      install:
+        - echo none
+      script:
+        - echo none
+      deploy:
+        provider: script
+        script: ./deploy/deploy.sh
+        on:
+          tags: true
+          branch: master
+
+env:
+  global:
+  - secure: CzMADlzpQj7vGLOhGYHa8KZXJs69r/e85tPFBAFGl3E+q4dmTazLp9eBgYXe/KW/fnSZIM6PQLFst3lUc0SyQJCyOnUNbja3NRTrKRyzNfYr+yDXIkTiAuS7uF241YuF8WXAjcOYlNLpazVHBu95xroa5k3L6wtKkMi2bIs47EEHYhoTsZcRD5LDXf3d+ULpSYfiydsX3H/4CFa1u79wD26BTv2Ba2vT7lwwzX6hsZv6qGWFbLW2vKRw6zasBqnPfQe4wOhUp0oXF7TusM2/9rTyD0OiwE4pWeJ/B88ZFnUL7pdxPVFhPWmV2vSFdRd7P417vTEGqErEqzTm4csQUbu3PtbLFXbsTfgmIsbJyVIaU1upSo3oxeK1fyje5Yx31zUzgrUzYlKzsMM815F76sfoIAyTBLzyFBWCnM5mK2X5he/y2e0lxuuxxrVgOh1WnabUA6xn1+F7XCBO1BOIjVzGTySYZoi/TcK+TwokI/ZgVKXUrrQGYfeRSXZOIghB6/YoUAwL8Ju2dQaI1g6BQzRtViZ/61PpXzUK2rLQd6dtgUC90WR9q+0lXJ/SPoF774QpUjJFgsy47mc3mdMVL+fiLl6mvuSHrfW0PlrO4mTMY17AV0xQ9E+l4uT2Q0VEnIeMU3Z0dKFa/RFuZTWW5kTGxeTput13cM4GJd6KyCk=
+  - secure: neDsPVu4xDwCKJU/kY87j6XAlkC+7EhUhfzPh/GW+O2I4X5EDGXE7lYtBjW2+gqUZxk/Q1lwGFwH2+wkD7/LVijk4k2Vdn4xZHpxtey6hfhGyQ5aQvLKI7ORIgBPpDUoMjWBA/tFGta4XUnVKarVrQbA3QkAPj+McRxNWmrZxED71XLkYaTfudYJG2VilUr7DL3zFxapkDOma+HlAqEIs4fqAag7/BMur+jggjsS6/BRV4gIhbwLzBztqsYzhdX3Yvr8qGYTzT01zMHzRvBkOtY7qVpWZ8+Me3ItjpWHLR4TsJGenWL9vLhIUEGrJTUP9eg4qAIzqHLBYZfwyO3SwHxMfzgc0RbsR4OJp0j5cIRyZdO0ha08b4LKK4OejYZpp16bo8NLe106r0Xmkiu3ruCr9Qgg4C9OLQ6ermvC55BVkOAbkgClA4Jwu8SnwBFJ+Kd3IiWd625BxHjgURGQg+o+Wjk+6LjkR8jegdd/Gv/68zPBHoAYsDJ9VzojGzqiSixKPYyb9bOkeLSUvwwZWWrkfIo0aGk3yqDTqqt0SwTXE5HF5Rmp9PxAA3H5Gt92G+P8r8/3zab13D0ITiI0B4ej+JtLecPkp3NyYsYIdJlVVkBEMOmobGpq3aIuRs9tUk0ZU7EL1Eo4Tzbl0pXD8LMoqf4DMwZ9t36ao5JApdw=
+  - secure: B1Bxd1EF/ysPambqsP5f6FHXJvSf2aac45rylwSDk735j/pjGpDSCRyN5thosd8s/F4ccCOqh56u9e7+7XlRYPuMRAH1v4Jty1hbwB8s/XHVUIJhyq3DzG6SQWAlU8nHEYnhoAfnUuwK8nKHQ0ICMPfBpLlk+NvSFmh5fp9iALbYqy01YzmZWzXP/A5WcEmS7FLcJFQ2/BPqZzZlGgnw2Xq8zhRhcD/iDDXhRgEVTWc14dZRCsdtnj6+h6LZXqG842o84SWzEeZBBJBVPnr1rhNayedQrTUDlDUtvh7S3qvStCJfUB7s4FTaJQLcwviG54uQBherE9DmhAImG2UM3FHdQ5tcwIMRM4vkP00LVTFefvNEcOPihpw9wrrP47hfpGfFVJQJ9GRY6ZiRmxI7RKNI5HLfF5YC+4+Yg96jZ/2XyTbTvO7TjGIUEFWHqPWGx79300PqBj6fXxH2BQ/xKygUNKD+MDYK4EC9U3Pu3kRUCRy+t3btQLFxhto2Xp9/HN9xl3KIn0QqKm5YRm+KG1hJXkE3PSmSMMH3PofPK1UIrueEM7w3PJsJdTxghth4z1O2R/X6xZJsB6cFr/NpDFwyqXSMdfde2ldSRbj8fJFD58siQNyHb5u1uji5pTvp3ERNeWh7Gy41KQ/Q+DCBKApqPFwNYd5x2flOpa4NSR0=

@@ -1,0 +1,41 @@
+language: node_js
+node_js:
+- '8'
+env:
+  global:
+  - GH_USER_EMAIL="travis@example.org"
+  - GH_USER_NAME="cozy-bot"
+  - DEPLOY_REPOSITORY="git@github.com:konnectors/cozy-konnector-bouyguesbox.git"
+  - secure: tnlayfLz/ntmuqwLTXYWMhnA76HJzKIXxCbicPk1KdwwWIHnZ138ornXeOdCtxKQBljkXbUKJjiq8SazJlzLdqok0GyyI0SR8/zPI0tZEuIzHaYrli13u3tXiSgdfx7sz+bupYmk72gUmR1aGLLicunfR1bUzN1aIjLNyzp+2eXKMvM77rp+qb9bOe0sLrt17JKRPgA3mSXG2jqeHIw54FQYQ8/4euUodoFIZ5eJdEKB59npqs50MQE6rY8HBAM1E3ZhmfCinr9mzNQz1JWQDlSS859JF+0bj91zjrgXeHhgHqFxbOOlNF3ch4qjT5K7ZfDwAqnH/G7G24ibnk34EClgL4fM6Pen9hSRAsWDvVu+OpnNDBFk47IVVm8B303loNldF7jfdZ8cJ5VEI9aYrneFrmaiJU9ifApqb0h/BG2h6aaai+aGcWekUH1jDyjTXMdXLHuMtdNy2ZLPM79zntVubJdNgFHlEUklNAKv+tDKxfOpic7XW1bSxKL53u6C+7iADeR2vdxF1Wp2GOw1d+tThvtNBnI9VIquIl03qBbyAPnARGMrfiXN7/6oDEnsRDxu1jWwolOfdsc/LMlwuj7POlp4sKfrN1raNVuJpmsJ0VLEFPX72CZZQ5kKXRpK+Kw8UzdsA61F9tDDoAMpN2o96nX9l64s3XlYWEYp6xs=
+cache:
+  yarn: true
+  directories:
+  - node_modules
+branches:
+  except:
+  - build
+  - build-debug
+script:
+- yarn lint
+- yarn build
+- yarn run check
+deploy:
+- provider: script
+  skip-cleanup: true
+  script: DEPLOY_BRANCH=build yarn deploy && yarn cozyPublish
+  on:
+    branch: master
+- provider: script
+  skip-cleanup: true
+  script: DEPLOY_BRANCH=build yarn deploy && yarn cozyPublish
+  on:
+    tags: true
+before_install:
+- openssl aes-256-cbc -K $encrypted_18ccf5856c8c_key -iv $encrypted_18ccf5856c8c_iv
+  -in github_deploy_key.enc -out /tmp/github_deploy_key -d
+- eval "$(ssh-agent -s)"
+- chmod 600 /tmp/github_deploy_key
+- ssh-add /tmp/github_deploy_key
+after_deploy:
+- rm /tmp/github_deploy_key
+- ssh-add -D

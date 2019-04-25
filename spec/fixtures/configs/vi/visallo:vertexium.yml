@@ -1,0 +1,14 @@
+language: java
+script: travis_wait 60 mvn test -Pnolog,$TEST_EXECUTION_PROFILE
+jdk:
+  - openjdk8
+env:
+  - TEST_EXECUTION_PROFILE=test
+  - TEST_EXECUTION_PROFILE=accumulo-test
+  - TEST_EXECUTION_PROFILE=cypher-test
+  - TEST_EXECUTION_PROFILE=elasticsearch-test
+  - TEST_EXECUTION_PROFILE=es5-multimodule-test
+branches:
+  only:
+    - master
+    - 2.5.x

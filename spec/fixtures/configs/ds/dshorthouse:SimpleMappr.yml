@@ -1,0 +1,130 @@
+sudo: required
+dist: trusty
+group: edge
+
+language: php
+php:
+  - '5.6.33'
+
+env:
+  global:
+    - HOST=www.simplemappr.test
+    - IMGHOST=img.simplemappr.test
+    - DBNAME=simplemappr_testing
+
+addons:
+  hosts:
+    - www.simplemappr.test
+    - img.simplemappr.test
+  apt:
+    sources:
+      - google-chrome
+      - sourceline: 'ppa:ondrej/php'
+    packages:
+      - autoconf
+      - apache2
+      - build-essential
+      - curl
+      - libapache2-mod-fastcgi
+      - gettext
+      - google-chrome-stable
+      - imagemagick
+      - libjpeg-dev
+      - libpng12-dev
+      - libfcgi-dev
+      - libgdal1-dev
+      - libgdal-dev
+      - libproj-dev
+      - libprotobuf-dev
+      - libxml2-dev
+      - libgeos-dev
+      - libcairo2-dev
+      - libfribidi-dev
+      - librsvg2-dev
+      - libgtk2.0-0
+      - locales
+      - oracle-java8-installer
+      - oracle-java8-set-default
+      - unzip
+      - xvfb
+      - cmake
+      - php5.6
+      - php5.6-cli
+      - php5.6-common
+      - php5.6-curl
+      - php5.6-dev
+      - php5.6-fpm
+      - php5.6-gd
+      - php5.6-mysql
+      - php-xdebug
+      - php-imagick
+
+install:
+  - chmod 775 $HOME
+ 
+  # ImageMagick
+  - printf "\n" | pecl install imagick
+
+  # MapServer installation
+  - sh -e .travis/scripts/mapserver.sh
+  
+  # PHP configuration
+  - phpenv config-add .travis/travis.php.ini
+  - phpenv rehash
+
+  # Translations
+  - sh -e .travis/scripts/locales.sh
+
+  # PHP-FPM configuration
+  - sh -e .travis/scripts/php-fpm.sh
+
+  # Install maps
+  - sh -e .travis/scripts/maps.sh
+
+  # Install Composer dependencies
+  - composer self-update
+  - composer global require hirak/prestissimo
+  - composer install -o
+ 
+  # Screen
+  - sudo chmod 777 /usr/bin/google-chrome
+  - export CHROME_BIN=/usr/bin/google-chrome
+  - export DISPLAY=:99.0
+  - export DBUS_SESSION_BUS_ADDRESS=/dev/null
+  - Xvfb :99 -screen 0 1280x1024x24 > /dev/null 2>&1 &
+
+before_script:
+  # Create files
+  - sudo touch log/logger.log
+
+  # Directory permissions
+  - sh -e .travis/scripts/permissions.sh
+
+  # Apache web server config for vhosts
+  - sh -e .travis/scripts/apache-vhosts.sh
+
+  # MySQL
+  - sudo cp config/phinx.yml.sample config/phinx.yml
+  - sh -e .travis/scripts/mysql-init.sh "$DBNAME"
+
+  # Map files
+  - sudo cp config/shapefiles.yml.sample config/shapefiles.yml
+
+  # Restart PHP-FCGI and Apache
+  - phpenv rehash
+  - sudo service apache2 restart
+
+  # Selenium
+  - sh -e .travis/scripts/selenium.sh
+  - sleep 5
+  - sh -e .travis/scripts/selenium-test.sh
+
+script:
+  - php vendor/bin/phpunit -c Tests/phpunit.xml --coverage-clover Tests/build/logs/clover.xml --stderr
+
+after_failure:
+  - sudo cat /var/log/apache2/error.log
+  - sudo cat $TRAVIS_BUILD_DIR/php-fpm.log
+
+after_success:
+  - php vendor/bin/coveralls -c .coveralls.yml -v

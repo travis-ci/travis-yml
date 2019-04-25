@@ -1,0 +1,67 @@
+language: python
+sudo: required
+cache:
+  apt: true
+  directories:
+    - $HOME/.cache/pip
+
+python:
+  - "2.7"
+
+addons:
+  apt:
+    packages:
+      - expect-dev  # provides unbuffer utility
+      - python-lxml  # because pip installation is slow
+      - python-simplejson
+      - python-serial
+      - python-yaml
+      - python-cups
+      - python-mysqldb
+      - python-tk
+    # OpenCV requirements packages
+      - zbar-tools
+      - python-zbar
+
+env:
+  global:
+  - VERSION="10.0" TESTS="0" LINT_CHECK="0" TRANSIFEX="0"
+  - PHANTOMJS_VERSION="latest"
+  # The above line controls the PhantomJS version that is used for JS testing.
+  #   It is not necessary to include this value unless you are altering the default.
+  #   Use `OS` to skip the PhantomJS upgrade & use the system version instead.
+
+  matrix:
+  # TODO Fix tests of account_reconcile_compassion ! Is it a change in compassion-accounting that broke it?
+  - LINT_CHECK="1" EXCLUDE="sync_mail_multi_attach"
+  - TESTS="1" ODOO_REPO="CompassionCH/odoo" EXCLUDE="pgsql_auto_backup,sync_mail_multi_attach,account_reconcile_compassion"
+
+
+virtualenv:
+  system_site_packages: true
+
+services:
+  - postgresql
+
+install:
+  - pip install -r requirements.txt
+  - git clone --depth=1 https://github.com/OCA/maintainer-quality-tools.git ${HOME}/maintainer-quality-tools
+  - export PATH=${HOME}/maintainer-quality-tools/travis:${PATH}
+  - travis_install_nightly
+  - printf '[options]\n\nrunning_env = dev\n' > ${HOME}/.openerp_serverrc
+
+before_script:
+  - sudo apt-get update
+  - sudo apt-get autoremove postgis*
+  - sudo apt-get autoremove postgresql*
+  - sudo apt-get install postgresql-9.3-postgis-2.1
+  - sudo apt-get install python-opencv
+  - sudo dpkg -L python-opencv
+  - psql -U postgres -c "create extension postgis"
+  - psql -U postgres -c "create extension postgis_topology"
+
+script:
+  - travis_run_tests
+
+after_success:
+  - travis_after_tests_success

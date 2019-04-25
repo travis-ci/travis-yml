@@ -1,0 +1,21 @@
+language: node_js
+node_js:
+  - "10"
+  - "11"
+
+before_script:
+  - travis_retry yarn install
+
+script:
+  - yarn run prod
+  - yarn run lint
+  - git diff --exit-code --quiet || echo "Has changes" && git status
+
+cache:
+  directories:
+    - node_modules
+
+notifications:
+  email: false
+  slack:
+    secure: GPU0JdLVD3xVdm6eH02bMKQQig2AeBmAWFmwMa+abmDSzaGlDl7OTIblQpcF8ab+GrVLj0S6fpggGQKWoNFr8bnhB/eAJ4r41pyA//4I8tvTR3LlZhWrgCJrO2E6fj7rL0l4Frd3vpGznxaQ722p9SQu6/sr2s8uokR3eTauKjfG3M1uUiq+zlhuOYUMG7bcvceoFCBv4Hp/hpgp+75q13Atiu5e1cVJjF6jqfURdAMEzokQTzoKYY9t+qMNIEX6YD/oFtkMlr+QJVCjqlbZqbbFLlmZ2p+tqjNe4jLupxUscPcEm7/Ix9B2yVuipzEFxoJDJq7aQM47Uv1SwZ1zs8jYQlUMnjW2OQUEg5+d/8AVsiB95LNIKFl4oXHKXuF4VAOlxfZzz7nq2QZWpODDebahXara4scIg2E4gUJzyAI2AAAYyGtAufz1Z0EMzXQuYzaj0It8DaRn8wOhX7wdr03sBFiL6yPOfSPt3J+9qHw7wrbsizSg7KaY6yduL7BWxmXP0msl7mp6KTUbieNl+m4zxYzkoabMnvJ0XTklzutC6KGSt2pW1BPwA7vyKrphzMuFCR+vamCk+Y2riC2Ef6jaMHdmq/IGH7k/H9BgDlJhOoh7VM/Q0hhUnwthyXcKOeriu9+xoSQoLAHNrwVPktZk1SMNO3iqU/7LzbUM1d0=

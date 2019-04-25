@@ -1,0 +1,26 @@
+language: node_js
+sudo: false
+node_js:
+  - node
+before_install:
+  - chmod +x travis-renameRef.sh
+  - chmod +x travis-refreshApiReferenceSearchIndex.sh
+install:  
+  - npm install
+script:
+  - npm test
+after_success:
+  - if [ "$TRAVIS_BRANCH" == "master" ]; then ./travis-refreshApiReferenceSearchIndex.sh;
+    fi
+after_script:
+  - if [ "$TRAVIS_BRANCH" == "master" ]; then ./travis-renameRef.sh;
+    fi
+  - node validator/master/postDetailsComment.js
+env:
+  global:
+    - SEARCHINDEXHOST=https://api.totvs.com.br
+    - secure: 5MR559eBAJ3a1dGgUjGScOkt1pISp38X7EmYJlhvSahuFVL5eTxZDTzHveZvt4wFhXw0KL9pbsFb0eDQS+Gvkw5R61p63ap0OoYmpi2XfuHb3i9MYa2AtIwaW3Sz6BQVEvdAhrHGGx70mA9sxxid0+kk3nD8seY/rtastZ1vaiVwNCPpfKjwcipYpnbQbpH/2L3e3d57BGNcuM8wqqyYFtu8Sx9xO/MZTeGj7aTQroF4WlFMNhuNo2Btb2xdRpX4yaesXr1AHLozrVtiKyRDhk0huGfd9IiNyi8sgLrIBhoTVpGlpbfKgELl84ex9zdAme7uakd3RG5nMPJ7obEVx+MIWd5tU5etqw3kZa3y2AJkGZN+kHeu3PFjwq9bA4QNduUfsNaxacPnPAnz7S+bp9/JMN+kagKJbE7TRsgP1JpFDQiVv/CIjX1Caom5MNTRICzb0tvtm9/F/tdzX9qPsaLfIzfiyfMWeBJKEoK1dD3doNfVDRddlU2FYkPwq5eLS/oBXsxmVOREdvoJdGqwg2f82HOo27J/Lh1HMSzl/5LNU+LgxtaojeutgtelWTtMqvX+6poH3MeNozDQYzkdPkjdCUUdqNt/uMdDawMZMU2j2kMPrv1pfGO1Qm3D0pZELPv+efQiq95svUFM5KoW9G4HDfS/dLJ9OoH/tzxxE2M=
+    - TRAVIS_JOB_ID=$TRAVIS_JOB_ID
+    - TRAVIS_PULL_REQUEST=$TRAVIS_PULL_REQUEST
+    - TRAVIS_BUILD_ID=$TRAVIS_BUILD_ID
+    - TRAVIS_BUILD_WEB_URL=$TRAVIS_BUILD_WEB_URL

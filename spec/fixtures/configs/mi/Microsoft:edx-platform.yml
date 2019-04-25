@@ -1,0 +1,57 @@
+sudo: required
+dist: trusty
+
+language: python
+python:
+  - "2.7"
+  
+services:
+  - docker
+  
+env:
+  - TEST_SUITE="quality"
+  - TEST_SUITE="lms-unit" SHARD=1
+  - TEST_SUITE="lms-unit" SHARD=2
+  - TEST_SUITE="lms-unit" SHARD=3
+  - TEST_SUITE="lms-unit" SHARD=4
+  - TEST_SUITE="cms-unit"
+  - TEST_SUITE="commonlib-unit"
+  - TEST_SUITE="js-unit"
+
+matrix:
+  fast_finish: true
+  allow_failures:
+    - env: TEST_SUITE="js-unit"
+
+branches:
+  only:
+  - master
+  - oxa/master.fic
+  - oxa/release.fic
+  - oxa/dev.fic_msa
+  - oxa/dev.fic
+  - oxa/ms.fic
+  - oxa/ci
+
+
+before_install:
+  # Login and fetch container from Azure container registry
+  - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+  - travis_wait 30 docker pull btelnes/devstack
+
+install:
+  - docker run -d --name devstack --add-host "localhost preview.localhost":127.0.0.1 --security-opt seccomp=unconfined --tmpfs /run --tmpfs /run/lock -v /sys/fs/cgroup:/sys/fs/cgroup:ro -e TEST_SUITE="$TEST_SUITE" -e SHARD="$SHARD" -e CODE_COV_TOKEN="$CODE_COV_TOKEN" -t btelnes/devstack
+  - docker ps -a
+  # Prepare cgroup on the host at /tmp/cgroup to avoid error: "failed to connect to bus: no such file or directory"
+  - sudo mkdir -p /tmp/cgroup/systemd && sudo mount -t cgroup systemd /tmp/cgroup/systemd -o ro,noexec,nosuid,nodev,none,name=systemd
+  
+before_script:
+  - "export DISPLAY=:99.0"
+  - "sh -e /etc/init.d/xvfb start"
+  - sleep 3
+  
+script: 
+  - ./scripts/docker-run-tests.sh
+
+after_success:
+  - ./scripts/docker-report.sh

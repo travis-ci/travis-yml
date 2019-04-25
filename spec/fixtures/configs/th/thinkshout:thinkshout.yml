@@ -1,0 +1,22 @@
+sudo: false
+language: ruby
+rvm:
+- 2.3.0
+before_script:
+- bundle exec sass --update -r sass-globbing assets/sass:assets/css
+- bundle exec jekyll build
+- npm install -g casperjs
+- phantomjs --version
+- casperjs --version
+script:
+- casperjs test ./_scripts/phantom_testrunner.js
+after_success:
+- "./_scripts/travis_deploy.sh"
+branches:
+  only:
+  - master
+  - live
+env:
+  global:
+  - secure: EciSz3rL8k9q9SyyGGsKSzpwQzPp/234Xzk4vA6aRMbRxzEBCeD9J7CtCpon2sk8UtSO4cj6jpJtgPbGyyXbGw3pyIR4l6giDxdxu/PWxeHICnSQpf7lJQqz0dBRVFt8801VvcnknYLCDmX+VWUAI028PFBFFHhjVIC+AN0sezQ=
+  - secure: OsBYQUP/INNm/YHWaHAinX2Cg3ksjh6iRimWokUxOB0x8Vq4UX6Nno+HRNfxW5dDmG3zC3OlrTPa+ymDBwPiZKLoLRrleC58V568OKZNQUIw+fJnQj1m6w+pl4HZ2h4WTsMgIsCTOeVquKLHRnHfHneqBeLMHN/ATWsrI4N5YFk=

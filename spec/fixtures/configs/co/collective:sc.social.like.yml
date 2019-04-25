@@ -1,0 +1,46 @@
+language: python
+python: 2.7
+sudo: false
+cache:
+  directories:
+  - $HOME/.pylint.d
+  - eggs
+  - parts/node
+addons:
+  firefox: 45.8.0esr
+env:
+- PLONE_VERSION=4.3 TEST_EGGS=collective.cover[test]
+- PLONE_VERSION=5.1
+matrix:
+  fast_finish: true
+before_install:
+  # FIXME: I have no idea how and why six==1.11.0 is being installed
+  - pip uninstall -y six
+install:
+- sed -ie "s#test-4.3#test-$PLONE_VERSION#" buildout.cfg
+- sed -ie "s#versions-4.3#versions-$PLONE_VERSION#" buildout.cfg
+- python bootstrap.py
+- bin/buildout buildout:test-eggs=$TEST_EGGS annotate
+- bin/buildout buildout:test-eggs=$TEST_EGGS
+before_script:
+- export CATALOG_OPTIMIZATION_DISABLED=true
+- export DISPLAY=:99.0
+- sh -e /etc/init.d/xvfb start
+- firefox -v
+script:
+- bin/code-analysis
+- bin/test
+- bin/pylint --py3k --disable=no-absolute-import sc/social/like
+after_success:
+- bin/zopepy setup.py check -mrs
+- pip install coverage
+- coverage run bin/test --layer=\!Robot
+# Coveralls
+- pip install coveralls
+- coveralls
+# Codacy
+- coverage xml
+- pip install codacy-coverage
+- python-codacy-coverage -r coverage.xml
+notifications:
+  irc: irc.freenode.org#simplesconsultoria

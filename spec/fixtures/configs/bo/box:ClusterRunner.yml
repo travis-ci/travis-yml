@@ -1,0 +1,21 @@
+sudo: false
+language: python
+python:
+  - "3.4"
+
+# each line defined in env will create a new parallel test job on Travis
+env:
+  - TARGETS="lint test-unit-with-coverage"
+  - TARGETS="test-integration-with-coverage"
+  - TARGETS="test-functional test-unit-via-clusterrunner"
+
+install:
+  - make init-dev
+
+script:
+  - export CR_VERBOSE=1  # turns on stdout logging for master and slave services during functional tests
+  - make $TARGETS
+
+after_success:
+  - pip install python-coveralls==2.5.0  # Do not put in requirements.txt; it will not install on Windows.
+  - coveralls

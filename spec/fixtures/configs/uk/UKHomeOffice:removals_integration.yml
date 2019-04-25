@@ -1,0 +1,13 @@
+sudo: required
+
+services:
+  - docker
+
+script:
+  - export TZ=Europe/London
+  - docker build -t quay.io/ukhomeofficedigital/removals_integration:travis .
+  - docker run --name ibm-backend quay.io/ukhomeofficedigital/removals_integration:travis echo
+  - sudo docker cp ibm-backend:/home/app/ /home/app
+  - sudo chmod -R 777 /home
+  - npm install coveralls
+  - travis_retry sh -c "cat /home/app/coverage/lcov.info | ./node_modules/.bin/coveralls"

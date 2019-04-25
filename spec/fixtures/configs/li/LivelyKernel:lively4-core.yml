@@ -1,0 +1,55 @@
+sudo: true
+dist: trusty
+
+branches:
+  only:
+    - gh-pages
+    - /.*/
+
+language: node_js
+node_js:
+- '0.11'
+
+git:
+  submodules: false
+
+
+before_install:
+## latest chromium
+# - export CHROME_URL=https://storage.googleapis.com/chromium-browser-snapshots/Linux_x64
+# - export CHROME_REV=$(curl -s ${CHROME_URL}/LAST_CHANGE)
+# - curl ${CHROME_URL}/${CHROME_REV}/chrome-linux.zip --create-dirs -o out/chrome-linux.zip
+# - unzip out/chrome-linux.zip -d out
+# - export CHROME_CANARY_BIN=$PWD/out/chrome-linux/chrome
+# - export DISPLAY=:99.0
+# - sh -e /etc/init.d/xvfb start
+
+## stable chrome
+- sh -e /etc/init.d/xvfb start
+- export DISPLAY=:99.0
+- wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
+- sudo sh -c 'echo "deb http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list'
+- sudo dpkg --remove-architecture i386
+- sudo apt-get update
+- sudo apt-get install google-chrome-stable
+- export CHROME_BIN=google-chrome-stable
+
+# Use https (public access) instead of git for git-submodules
+- sed -i 's/git@github.com:/https:\/\/github.com\//' .gitmodules
+- git submodule update --init --recursive
+
+#- export CHROME_BIN=chromium-browser
+#- export DISPLAY=:99.0
+#- sh -e /etc/init.d/xvfb start
+
+# - 'chmod +x generateWrappedZ3.sh'
+# - './generateWrappedZ3.sh'
+
+script: 'npm test'
+
+
+#after_success: 'npm run benchmark'
+
+#notifications:
+#  slack: hpi:AoZKX6B1m6JVBphnsGGOgweU
+

@@ -1,0 +1,84 @@
+language: go
+
+go:
+  - "1.11"
+
+# magic word to use faster/newer container-based architecture
+sudo: false
+
+git:
+  # Use a shallow clone to hopefully speed up builds.
+  depth: 1
+
+addons:
+  apt_packages:
+    - graphicsmagick
+
+services:
+  - postgresql
+
+cache:
+  pip: true
+
+notifications:
+  email:
+    on_success: never
+
+install:
+  - travis_retry go get -u golang.org/x/lint/golint
+  - travis_retry pip install --user awscli
+
+before_script:
+  # Download any markers that have not yet been committed to Git to save
+  # redoing download/resize work.
+  - make photographs-download-markers
+
+script:
+  # bail after a single failure
+  - set -e
+
+  - VERBOSE=true make
+
+  # deploy development version that includes drafts
+  - TARGET_DIR=./public-dev DRAFTS=true make build
+  - |
+    if [[ "$TRAVIS_BRANCH" == "master" ]]; then
+      TARGET_DIR=./public-dev S3_BUCKET=brandur.org-dev make deploy
+    fi
+
+  # then deploy production
+  - |
+    if [[ "$TRAVIS_BRANCH" == "master" ]]; then
+      TARGET_DIR=./public S3_BUCKET=brandur.org make deploy
+    fi
+
+  - set -e
+
+after_script:
+  # Upload any photographs that we processed during this build.
+  - make photographs-upload
+
+# Env that allows a build on the master branch to deploy the site
+# automatically.
+env:
+  global:
+    - CLOUDFRONT_ID=E2D97SPIHRBCUA
+    - GOOGLE_ANALYTICS_ID=UA-47798518-1
+
+    # Use only a single Goroutine so that we can debug problems that arise more
+    # easily. The build in CI is already lengthy due to system setup, and
+    # shaving a few hundred milliseconds off with more concurrency makes almost
+    # no difference at all.
+    - CONCURRENCY=1
+
+    # $AWS_ACCESS_KEY_ID
+    - secure: "RKoQ3MHHaL8Bzw51DGnTbQitO3C1KIPdjBr4NVq7Pn58AT3mJJ/x6iR0IN9XzATjo3enN1SdtaRTKST6Dai597kzEo2sp7q/i0KkglQ/2Pj67TMwQewBED92ArrvTxCzNvIiO02z78V8DA2ZBSE8F95EhWQ0xYoUjzuiHu2uk91RZ+pnlHsFY6sn6W1OD3uv6VwCn3P31a5vrBPmvv1YlXMP4dpcECIrVzO4G2M6FS8s+7B+Egp5tX0C+6p5wnLJAOHDeU3ydIB1o8e9OXK1squ9C8juRIG+2RQN5xiEx9mV3CF0+N1iBLVk4LCQV+237dU5HLhlD1Vc6TBa6K5YbCH6N0/6LMWZnNEB3tDfR9sskp2KDAlsrYaDDzfkq//uygK+QPloCVWrNOuURWuUwbFqkWeyhlC9Fxl7Zan1V66BU1+RGYNDQHfMwIxr1bGsuwnvFKQ+9QNmMLcRvqz9qAE5g8e0gRLDh97nUjeWs2d8YgpKoWCzPpga51ykMNA+Grn9hZVtPFsVdzJ1fVEQUQuBXoa4hYxvT33KpuYTDXszT5e7fPo1h7Tw9dhqOGpQElb722PjvZt76zYrO5Yv5a2AVuStOoqhCz88NM82CddwiE0fPLEphEWR0/lKr2hrOMgeBNR56kEeYnIPDHthpKcpJ+TLPPAgoRlksOGb74I="
+
+    # $AWS_SECRET_ACCESS_KEY
+    - secure: "VSs6P3DI7TOngWBu/mF7HV8tqF9jX1MfvkAcJL7quqcA7/qBSK//DGIVV4NwLr/27QKJcz0VX5eCFwCPvrFR2b1rrlLIyeA7vtOOHosYQIwcXisLDZsms+kVN4E8ez3t/x6EhLzCH7QkqlQo7owls96tkq20bYQiQEuqQIfLrDlJACjUCYltbnP9lDf47lan22jS6PKFWcdd5+xsle8NAcnCrwwQuQsaGjCieqTJEODy2Jj3GaUHnaeFlGqaQxTz3073A4GIK0Q02F3iNtsb3qMbbOrsM2UK9bfA+AyYSVmNEos2EyeAiKfmRgeKk8xjJXq4pTqQHs9rupAD6BHrKvzr6+2jvup76OGPDZqo60lSudiTMDfcBqLMK0Lpkq+G8IOpD84HVt369MFd9x2KC2kJQLTxW5LpqQNuUVtdaemEoQ9LpAVHzSXkoKHsdnGdQlGfDdKi8ewjO1VqGkaAS4ihsjfVvU33eq4lw+S3oG2pQ/xKOO4QEzG8C+hYxbwLcUdLH9SVGtbEmw8pJGo2Cf5GcE1d44RhF/eBO4CvaySQeKHb1U1HbXJuFHw7sRFhF6i0ycz7d8s314rZYDJrgdN6s5HGLLRdHdrf01e9mkBjo8ijCE0nGf1xMzGbM1kTAfG9kPSbhQrHpaLXQNnvcqaICN/hNOVu29+ga87jYk0="
+
+    # $BLACK_SWAN_DATABASE_URL
+    - secure: "obYt+fAcDKox/K6zN7cJsAqW2zZ/wGBfpyhZIP+hoGXWcyMqzby+bdK9SIczePALQz0ihtuabHa5rP4mPm/0A809Q6ccP4WeQRPNoqqeWwX9YYDeU7dp0C/bOxM/7ow4G+9FUaNp5hVlqZ4IKnVF3XmQkbxB4PsnCH0cV/qsF9foe1W7OWtCOLYWNTpfPbl8r6tfcl+MCzAn+SyBiLbLuVOPUhOTe7V1eCDPPpuC/qrA9djJ6fThrcyU9qeYCXMKU/8KdFIUGo96A2ro3JHfixaRSniupcaBPMvTRNcrd4CBhyfZ61PQEIos+GvJQiDX8jysg3UnASS2w3o2meZx4En2G4NCUEki0gq1plNuQIxDHpwpMr97k+WW4OpS05ZzwUBosOry1h94ppzkSNrsvVT2E+GKiieLXIj/dkawWsmiYs4VIRHVBgk1cjDcKaJm2FNYjgOcoYISvpw7aQYvIfvO9+LfeLCu2zAjw0ZZ0EaFO5AlHOogy9GAQZyaUrMmFl5I4QcZdD9hH3Dil0m7zo5RWWblyvhc4oQwhVBDg95kFpxd6ojAZ6IhjMRy8umtd/LSt0GBm9uW1Ci6CMV0H0IAySvZqtuHWjyXnByLhxFp6W5ujRlRCxGMRikw5zZ69trAT9PJcZEQ6uyB8b2XqRXQ48ErkbJ41AlRx6dWcOE="
+
+before_script:
+  - createdb sorg-test

@@ -1,0 +1,53 @@
+language: python
+dist: xenial
+python: 3.7
+sudo: true
+env:
+- PACKAGE=ortograf
+- CC_TEST_REPORTER_ID=84eb3ac76f69be56f0a6324574cf0f71874a563ce2b6ee25a0d437f90efeab50
+before_script:
+- curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64
+  > ./cc-test-reporter
+- chmod +x ./cc-test-reporter
+- "./cc-test-reporter before-build"
+install:
+- pip install git+https://github.com/DBCDK/pytools.git
+- pip install git+https://github.com/DBCDK/pyutils.git
+- pip install pytest-cov
+- pip install Sphinx
+- pip install -e .
+script:
+- pytest -s --cov-report=xml --cov=src/$PACKAGE
+- sphinx-apidoc --force -o docs/source/ src/$PACKAGE `pwd`/src/$PACKAGE/tests/
+- python setup.py build_sphinx --fresh-env --all-files --build-dir docs/build
+- make-build-info
+- python setup.py egg_info --tag-build=".${TRAVIS_BUILD_NUMBER}" bdist_wheel
+after_success:
+- "./cc-test-reporter after-build -t coverage.py --exit-code $TRAVIS_TEST_RESULT"
+before_deploy:
+- export TAG=v$(python setup.py --version)-$TRAVIS_BUILD_NUMBER
+- git config --local user.name "xp-machine-user"
+- git config --local user.email "xp-machine-user@dbc.dk"
+- echo "tagging build with $TAG"
+- git tag "$TAG"
+- export RELEASE_WHL_FILE=$(ls dist/*.whl)
+- echo "deploying $RELEASE_WHL_FILE to GitHub releases"
+deploy:
+  skip_cleanup: true
+  provider: releases
+  api_key:
+    secure: JEyuMEv8eaBpmiqyDmg8xEOGO79k8NUG/ywL2MsCPa+QxzhKELCo7oprE8YTcfr56tx0g5GstWFiJ0MRiFAIyIFdqN5+CnmACUJd1oDizwrlRJZ2Yuod96sFy+20XojS91ayjM8USUUKox9L7OZpqZ/ChTFstDtjgNlWX9GNRlvMAbbBDQWXKC2OxWCqpbKqT0U0h/85tkjmsRnT+wtH9O7YFUhmbF0dxUeUja4N1zJ8mI+gAJ5MSPSwbNz5HxmaYace/NQMXd+yCwE/sFZ3NSSQTOvZr84Npbysrer//+nmYNY7KlYfssOBScbwdEa6tZorVICkXotPWnitYjGKJMjqmI7JLtMaJbYbZ+MIi8GxQHNphrZ/KVx2/m0uK4WXkU/+nX6BlMA4uN+A87LOV0rTZSmaDchHfnoK8cxIt+ymG32Ph3n9d895VtJQvamT7X5uwS37G+1x13pz/Y23XCSusyfQ0lwKHsegSbE/MG3gN9bEuAlOqXMPKXpjNS2BCItC7tWEnNdvvO4cItwy9Z8uc9RyWFGysqgBaynNUq2cttVgoL8CFqanm8T3vjGkPsuCHyrDEeKO04eMbKxQBBUSf4uLFR42pzZq7G89DvXMfUq+mwAQJ2RJ+S8++ivzVb3sJR/7s6VigCXHNrGNiRU1oLi3nesIbOozjPveCUA=
+  file: "${RELEASE_WHL_FILE}"
+  on:
+    repo: DBCDK/ortograf
+    branch: master
+branches:
+  except:
+  - "/^*-v[0-9]/"
+notifications:
+  slack:
+    rooms:
+      - secure: VdKJIhDc1qO4Cp9/BLJHUWipJavrIisNHjL+xwpyrYvu3FxQOK3xPiM4TipDwa5XCKNJsHAR/gc3OQ+zYneX0l5SLhgq5l33jvtWq3KtshdgpiEUBtnjSqEdiRRJX/bYldAgK8REWBhtjHc63FXAyhj1PzxCFd5Ok9HXQOaHvlDsFgNTDrcR8gCVwQPhAWkzDFmhE3eVltmlQz/ykpbeSlI6LUZbcfAjHAtXZvo9qV1LoEwrFqpNUKl0RAvUcc4jeMtO1Dk4Z6hku4A312dax/loM7rOs1mZyThBKwaM5UpP0xZbfphk7iGO1V9kXr7f2FuhMhTBDWh9HzhDECOT86f4/r7kENPBQ+5qQV5rZot8J2YMq+cZ9HtBJRboSRyLYOMGkKmjTHg63Vi7NwQ+frsvX7J3ZF+5TVs4yXIB4AfzhU+PR5WEO5b1kItSX5Xu5ggh4KQSAFq9sE8RhGz6yQSa7FaNtBrWXZhes8hG7CvDF2dxgOwI1E3TU7+aCQ8Gqwkyi3K9+m6YXu8iNwIuXpydGBfh4gHsi6z+9YloajR2jVbIHF6Us9ozAuYD7wqOTr33LC4xTYBaSQO2mDul4vRrvBnSVli+JFyJICx6QALLZ4tJxhDZulxyNBHIfs8oZ/LFzdlLjFxJFsJy1FC3zYMXUJmeWroNva/9H+dbNEc=
+    on_success: change
+    on_failure: always
+    on_pull_requests: false

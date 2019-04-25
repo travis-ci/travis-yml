@@ -1,0 +1,79 @@
+language: php
+sudo: true
+
+php:
+  - 7.1
+  - 7.2
+  - 7.3
+
+env:
+  global:
+    - COMPOSER_MEMORY_LIMIT=2G
+  matrix:
+    - TEST_SUITE=8.7.x
+    - TEST_SUITE=8.8.x
+    - TEST_SUITE=PHP_CodeSniffer
+
+# Only run the coding standards check once.
+matrix:
+  exclude:
+    - php: 7.1
+      env: TEST_SUITE=PHP_CodeSniffer
+    - php: 7.2
+      env: TEST_SUITE=PHP_CodeSniffer
+  allow_failures:
+    - env: TEST_SUITE=8.8.x
+
+mysql:
+  database: og
+  username: root
+  encoding: utf8
+
+before_script:
+  # Remove Xdebug as we don't need it and it causes "PHP Fatal error: Maximum
+  # function nesting level of '256' reached."
+  # We also don't care if that file exists or not on PHP 7.
+  - phpenv config-rm xdebug.ini || true
+
+  # Make sure Composer is up to date.
+  - composer self-update
+
+  # Remember the current directory for later use in the Drupal installation.
+  - MODULE_DIR=$(pwd)
+
+  # Navigate out of module directory to prevent blown stack by recursive module
+  # lookup.
+  - cd ..
+
+  # Create database.
+  - mysql -e 'create database og'
+
+  # Download Drupal 8 core. Skip this for the coding standards test.
+  - test ${TEST_SUITE} == "PHP_CodeSniffer" || travis_retry git clone --branch $TEST_SUITE --depth 1 https://git.drupal.org/project/drupal.git
+
+  # Remember the Drupal installation path.
+  - DRUPAL_DIR=$(pwd)/drupal
+
+  # Download Drupal console so we can run the test for it. Skip this for the
+  # coding standards test.
+  - test ${TEST_SUITE} == "PHP_CodeSniffer" || composer require --dev drupal/console:~1.0 --working-dir=$DRUPAL_DIR
+
+  # Install Composer dependencies for core. Skip this for the coding standards test.
+  - test ${TEST_SUITE} == "PHP_CodeSniffer" || composer install --working-dir=$DRUPAL_DIR
+
+  # PHPUnit 6 is required when running tests on PHP 7.x.
+  - test ${TEST_SUITE} == "PHP_CodeSniffer" || test ${TRAVIS_PHP_VERSION:0:3} == "5.6" || composer require --dev phpunit/phpunit:~6 --update-with-dependencies --working-dir=$DRUPAL_DIR
+
+  # Start a web server on port 8888 in the background.
+  - test ${TEST_SUITE} == "PHP_CodeSniffer" || nohup php -S localhost:8888 --docroot $DRUPAL_DIR > /dev/null 2>&1 &
+
+  # Wait until the web server is responding.
+  - test ${TEST_SUITE} == "PHP_CodeSniffer" || until curl -s localhost:8888; do true; done > /dev/null
+
+  # Export web server URL for browser tests.
+  - export SIMPLETEST_BASE_URL=http://localhost:8888
+
+  # Export database variable for kernel tests.
+  - export SIMPLETEST_DB=mysql://root:@127.0.0.1/og
+
+script: DRUPAL_DIR=$DRUPAL_DIR MODULE_DIR=$MODULE_DIR $MODULE_DIR/scripts/travis-ci/run-test.sh $TEST_SUITE

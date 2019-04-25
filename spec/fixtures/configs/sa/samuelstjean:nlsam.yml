@@ -1,0 +1,157 @@
+language: python
+sudo: false
+dist: xenial
+
+os:
+  - linux
+
+cache:
+  pip: true
+  directories:
+    - $HOME/.cache/pip
+
+addons:
+  apt:
+    packages:
+      - libblas-dev
+      - liblapack-dev
+      - libopenblas-dev
+      - libopenblas-base
+
+env:
+  global:
+    - DEPENDS="cython numpy scipy dipy nibabel"
+    - DEPENDS_MIN="cython==0.21 numpy==1.10.4 scipy==0.19.1 nibabel==2.0.1 dipy==0.11"
+    - SPAMS='https://github.com/samuelstjean/spams-python/releases/download/0.1/spams-2.6.zip'
+    - DEPENDS_BUILD="cython==0.23 numpy==1.11.3 scipy==0.19.1 nibabel==2.1 dipy==0.11"\ ${SPAMS}
+  matrix:
+    - TESTPART=test_scripts1.sh
+    - TESTPART=test_scripts2.sh
+
+python:
+  - 2.7
+  - 3.4
+  - 3.5
+  - 3.6
+  - 3.7
+
+matrix:
+  include:
+    - python: 2.7
+      env:
+        - DEPENDS=$DEPENDS_MIN
+          TESTPART=test_scripts1.sh
+    - python: 2.7
+      env:
+        - DEPENDS=$DEPENDS_MIN
+          TESTPART=test_scripts2.sh
+    - python: 3.4
+      env:
+        - DEPENDS=$DEPENDS_MIN
+          TESTPART=test_scripts1.sh
+    - python: 3.4
+      env:
+        - DEPENDS=$DEPENDS_MIN
+          TESTPART=test_scripts2.sh
+
+    # test only on a few mac osx bots
+    - os: osx
+      language: generic
+      before_install:
+        # Install Anaconda
+        - source build_stuff/get_conda.sh
+      env:
+        - DEPENDS=$DEPENDS
+          TESTPART=test_scripts1.sh
+          ANACONDA_PYTHON_VERSION=2.7
+    - os: osx
+      language: generic
+      before_install:
+        # Install Anaconda
+        - source build_stuff/get_conda.sh
+      env:
+        - DEPENDS=$DEPENDS
+          TESTPART=test_scripts2.sh
+          ANACONDA_PYTHON_VERSION=2.7
+    - os: osx
+      language: generic
+      before_install:
+        # Install Anaconda
+        - source build_stuff/get_conda.sh
+      env:
+        - DEPENDS=$DEPENDS_MIN
+          TESTPART=test_scripts1.sh
+          ANACONDA_PYTHON_VERSION=3.5
+    - os: osx
+      language: generic
+      before_install:
+        # Install Anaconda
+        - source build_stuff/get_conda.sh
+      env:
+        - DEPENDS=$DEPENDS_MIN
+          TESTPART=test_scripts2.sh
+          ANACONDA_PYTHON_VERSION=3.5
+
+    # pyinstaller builds
+    - python: 3.5
+      env:
+        - DEPENDS=$DEPENDS_BUILD
+          BUILD_PYINSTALLER=true
+    - os: osx
+      language: generic
+      before_install:
+        # Install Anaconda
+        - source build_stuff/get_conda.sh
+        - conda install -c conda-forge python-spams
+      env:
+        - DEPENDS=$DEPENDS_BUILD
+          BUILD_PYINSTALLER=true
+          ANACONDA_PYTHON_VERSION=3.5
+
+notifications:
+    email: false
+
+install:
+    - python --version # just to check
+    - pip install -U pip
+    - pip install pytest coverage coveralls
+    - pip install $DEPENDS --upgrade --upgrade-strategy only-if-needed
+    - python setup.py build_ext -i
+    - python setup.py install
+    # this breaks the pyinstaller builds on linux
+    - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then pip uninstall mock -y; fi
+    - if [[ "$BUILD_PYINSTALLER" ]];
+        then pip install pyinstaller;
+        pyinstaller nlsam_denoising.spec --onefile;
+        zip -j nlsam_${TRAVIS_TAG}_${TRAVIS_OS_NAME}_x64.zip dist/nlsam_denoising LICENSE README.md CHANGELOG.md;
+        zip -r nlsam_${TRAVIS_TAG}_${TRAVIS_OS_NAME}_x64.zip example/*;
+        zip -r nlsam_${TRAVIS_TAG}_${TRAVIS_OS_NAME}_x64.zip docs/*;
+      fi
+
+before_script:
+    - mkdir $HOME/.python-eggs
+    - chmod og-w $HOME/.python-eggs
+
+script:
+    - mkdir tester
+    - cd tester
+    - pytest ../nlsam/tests/ --verbose
+    - if [[ "$TESTPART" ]];
+        then echo 'Running tests $TESTPART';
+        chmod +x ../nlsam/tests/$TESTPART;
+        ../nlsam/tests/$TESTPART;
+      fi
+    - cd ..
+
+#after_success:
+#    - coveralls
+
+deploy:
+  provider: releases
+  api_key:
+    - secure: "HgpgpOHK38IV2ctAAEkvEWmCvLcL3hClZOuqz+JQ+vaHL7G3DtRiig0xGKc3ggkd3wP+ic9FaueFJBIrw/QAsNrCwjwT1cd5X4XZIccpXAh81mLUtk147Y5XUGes5uQB8krejj9mIb7G8n2KrpDURi8p9tDr/jmyFk/E76Hrg+JsxqruXfHvMqyc4qZ/T+bO3nczkP25PXPkeKUtuTxhlVEN31L6WYPvNM/kdev3QU0584saraD2Ex6K+eua4BoKuBA7dUPjLd0n+HEIXeAVxhPU0LoNSj6pM2+WAKRJj+7FWWgKml2vIkttcy2G2DIfQWnZjD/Z9K+owG1le0fROrvMttfd5bmSBxun3AB4CSfs6wjIeB8pNQ4D1Y5tqPydy9rkKSBZ4C5HIT8a23nZYnXmSAL440WtFPtDfSco0xW23Wmyx9NmKN8X/bFCFdd5KRV+w/rq0wBOz5grYkkffix3N7cxAwPZKc3tkJb+mTkTeMAJpEQ2SHPakjvH0kB4TkpDvAE06BJZm3DRGLeCOpV5SF/Bb06TvrOSNmgyHZ35STyAXuUjX0iFQKc2717BXnMNL+u+5FGlGIlyjsngPcGBWj7dI8Dv+Ci9+s7Qw6zmwV+eMUyjyCBggk05PZTcXHSv7pFyMFKpjXtNrRN2nylHDDUwTMx2vu0ai0ecKpU="
+  file_glob: true
+  file: nlsam_*_x64.zip
+  skip_cleanup: true
+  on:
+    tags: true

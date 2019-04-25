@@ -11,7 +11,7 @@ describe Travis::Yml::Schema::Def::Erlang, 'structure' do
         type: :object,
         properties: {
           otp_release: {
-            '$ref': '#/definitions/strs'
+            '$ref': '#/definitions/type/strs'
           }
         },
         normal: true,

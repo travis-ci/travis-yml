@@ -1,0 +1,45 @@
+sudo: required
+language: c++
+services:
+- docker
+
+env:
+  global:
+  - DOXYFILE_IN: "/code/Doxyfile.in"
+  - DOCKER_IMAGE: ubuntu:17.10
+  - PACKAGES: "'doxygen doxygen-doc doxygen-latex doxygen-gui graphviz 
+      build-essential systemd libsystemd-dev ca-certificates git cmake clang
+      python3-dev cython3 libpython-dev libblocksruntime-dev libglib2.0-dev
+      libsoup2.4-dev libyajl-dev libyaml-dev libyaml-dev libusb-1.0-0-dev
+      python3-setuptools'"
+  - EXEC: "'docker exec builder /bin/bash -c'"
+
+before_install:
+- docker pull ${DOCKER_IMAGE}
+- docker run --name builder -d -v $(pwd):/code ${DOCKER_IMAGE} /bin/bash -c 'sleep infinity'
+
+before_script:
+- ${EXEC} "DEBIAN_FRONTEND=noninteractive apt-get -yq update"
+- ${EXEC} "DEBIAN_FRONTEND=noninteractive apt-get -yq --no-install-recommends --no-install-suggests --force-yes install ${PACKAGES}"
+- ${EXEC} "git config --global http.sslVerify false"
+
+script:
+- ${EXEC} "cd /code && mkdir build"
+- ${EXEC} "cd /code/build && CC=clang CXX=clang++ cmake .. -DBUILD_BUS=OFF -DBUILD_LIBUSB=ON -DPYTHON_VERSION=python3"
+- ${EXEC} "cd /code/build && make"
+- ${EXEC} "cd /code && DOXYFILE_IN=${DOXYFILE_IN} TRAVIS_BUILD_DIR=/code TRAVIS_BUILD_NUMBER=${TRAVIS_BUILD_NUMBER} TRAVIS_COMMIT=${TRAVIS_COMMIT} GH_REPO_TOKEN=${GH_REPO_TOKEN} sh -x tools/deploy-docs.sh"
+
+before_deploy:
+- ${EXEC} "cd /code/build && cpack"
+- ${EXEC} "cd /code/build && mv *.deb librpc.deb"
+
+deploy:
+  provider: releases
+  api_key:
+    secure: pHp5joGfObMW5G8INOIy8I9Brd6QnjC3XeFgWynal2AoJtOLEDLZyVCyPdI5r75aEh954ryiNz+MuLiP2pgxpfVabZsa1IZOpF3d6MUKS1FqzWMfm4deKwoB4oM2TN417FIs8lKigrXRE6m2IsI148f6LA8oR6urjTQ20SgMIycbqiDCvUVhJh636Scb2C8Mllxei0IXer1uWQqG3Et8V6VjMQBlvj1iPK2+ZMs5e8Hp3iJ1hRylJqK7KEJYbhlok1pN5iVKWgfxDZmtUF6h2B9C833KrRd81ID2vDQUyroFiK18miFDyRO8qdISlSxnb5n3k7/48vWqXHuhGs0WPsxC4PMokoRAukPEVkTvDh/hoVxiNC4oHj9RF7pG9lFEao1Isj7Asmj63U9IJq6N9UDYqSUHftRgbrh5kYzq4LhluiPgzNNSiJn4INGroAh+SyhuF2dqlVuk2Psj02WxuzvlSVFwZBWMgKFffNMlOEtTtoYqs4AA5jgsBTqbLHVePPBEf16QYagpLC3j0CrWX1DSsJYiuT/AI65rIpsnZ2n+emtGUcnBwOLwYKJVewfNM6VA3aU3jlklnzJRtF5rtEWuOW2EX3mal+WYxWLZBJXmMEHMjFKvHx2i5dVtS5i3VRlfIXqSrax4yQOIxORYs+zmhX3Y9mYH7tBm8fhAEqM=
+  file: build/librpc.deb
+  skip_cleanup: true
+  on:
+    repo: twoporeguys/librpc
+    all_branches: true
+    tags: true

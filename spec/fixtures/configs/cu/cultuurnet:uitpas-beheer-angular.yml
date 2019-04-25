@@ -1,0 +1,10 @@
+sudo: false
+language: node_js
+node_js:
+  - '8'
+before_script:
+  - 'gem install compass'
+  - 'npm install -g bower grunt-cli'
+  - 'bower install'
+script: grunt test
+after_success: grunt coveralls

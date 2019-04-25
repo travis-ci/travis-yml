@@ -1,0 +1,49 @@
+language: node_js
+node_js: 8
+sudo: required
+git:
+  depth: 5
+branches:
+  only:
+  - "/^(?i:SWIK)-.*$/"
+  - master
+cache:
+  directories:
+  - "./application/node_modules"
+before_install:
+- if [ "$TRAVIS_BRANCH" == "master" ] && [ "$TRAVIS_PULL_REQUEST" = "false" ] ; then ./travis_scripts/install_compose.sh ; fi
+- cd application
+before_script:
+- npm update --dev
+- npm run start:mongodb
+script:
+- sleep 15
+- npm run lint
+- npm run test:unit
+- npm run test:integration
+after_success:
+- cd ..
+- openssl aes-256-cbc -K $encrypted_34b275df3cc3_key -iv $encrypted_34b275df3cc3_iv -in deployment_keys.tar.enc -out deployment_keys.tar -d
+- if [ "$TRAVIS_BRANCH" == "master" ] && [ "$TRAVIS_PULL_REQUEST" = "false" ] ; then ./travis_scripts/dockerhub.sh ; fi
+- if [ "$TRAVIS_BRANCH" == "master" ] && [ "$TRAVIS_PULL_REQUEST" = "false" ] ; then ./travis_scripts/deploy.sh ; fi
+- cd application
+after_script:
+- npm run coverall
+- npm run stop:mongodb
+- rm -f deployment_keys.tar
+- rm -f ~/.docker/{cert.pem,key.pem,ca.pem,config.json}
+services:
+- docker
+notifications:
+  slack:
+    on_success: change
+    on_failure: always
+    rooms:
+      secure: xdi7+R4/SeZpQh7vTOvg+/NuEWLN6bHnnEj4CdwEXSrjSkV5B/R3x3wHUu4iLdPYbdBR5H6ehdf3XiWu6nPLWl1vqOCxElg0yGuzwfWVg4F1HdQs8JNTxO0KQf/cC9ZMJQlBy+2rIgRUcaluFeROB5hFwc4TzXXJVp6J48GxdrByx2jEZ9dHjlqJSxZ7gMtT4PyIJE7zOk5H89/AnCtWuAh5LygkNw33yotCz/d5TpWgqS204HY4Bopny4Wz7amDobtnhoBSe5xzKLx422ndg5aeDwhRQkw6WMIVxYFOO91uFVFfL+I5s9RvPLUuRyf+qj6EweOfkqJZ2xQT4CY7fjFdN8WRxEatlwr8et9B7olmAxw6SQcjWiwlXa2qs+lUasExl7yELiPR3CAocELdo4rPouP6/EQQ+EKLGIuyjkRUyVnMj7KxwGp8+pRfKuoPqA9HrhUibyEy38szqdg603Yfw7IhiU4arUCT9djt6JUU42/XitrA01RJd8HpaipTWewEoBY2N8ixFwGEGtmrzxAnXpj2Xi6zDFKWPV7VoVVB4iO04dBe2gWXbthJTzJwb/PgzhypsQ0Gg2MCUOKSNTJfVymO1JuKrenkWvljAEhIDbZQ/mOv+uSxwdNL/HlrZTqJzgqrAiuMC+859OurT93G541Uh13nWm7/w+E/yMA=
+env:
+  global:
+  - DOCKER_COMPOSE_VERSION=1.6.2
+  - DATABASE_PORT=27018
+  - secure: IDidzoSa7+NG70mlTZB/qvq9/qLXnBLRiZsTMxErqhkTMXALVv8LG6tiQQTYN/HtTsUEQVSM/o+16Fij/azQpfrdRRlZ0V0r8sIH/qOV7db+/hZC4EUha5+vC/u7lKMgbd0Ik4SgCXYFgzf0uJgduhCc6v3nKj6526JCsK5tq6dr+oyoBsl0mMJ1ZrmhYgDQc8jK1MAtb4qIq4qBk7ULmkHAdLWfV0bgnUUbv26S00gtD1LYogtzfk9xEMhpIcTJIgbgKkxtWL5XUdsZz6Pvyo7Ythy+fQR8NQd9guwRBztI4fWx1Ohfxh8oXYTezwcQkX6ZXE9rajEAAA/qdkV6BW4SxEDg3nJ0yR+TfOLL9hWMk67vcURaF2+dJKBUvoGXRHpFXHuEsHfqcO+WKXPleFinoScwrmQ2bbdYC9adnPmsjRbQbmW0ozem1j3QFCi5pV4RgpH2VbU5B9Ngx2ZCFYq2U23ruZaNSwg3K+xePe+tirrmZjH4ySevwQKIZOm6a5Kaze5q8Letdz2rQphpwmn7eSr4ljnOY4TwvNyE3P3SPzDnV1gdK6mAniL8AHJcTuEhpQZxMxjGxvJcKS7mwTOuf1Eri6xopItKFeLd6lOLiDi03uQ41ZgbCOVSG12l7+7+1KpITg68JstJrbrIyA0YSXAkI73ixFug3bqYXXU=
+  - secure: OC1ZCPeN3oTkclzHVHLSF7h58pBybxoXA6IbjAQQf0ot0G+wwqOs6DAlC8l/KUUYF5lPV04KgCYeyAzDhGh90aw03BHqdCuVeI8NA8vdNDozzkW6PRRT0I/t5cifzetqj2adc4NF7xr/5p3oXU9HjcSwX3Mao6pxVlKI/iG2fcsSS7/bSYCOk7m0O0+zNGnycWyjpLZs3HUsRPs4HVC3qzlDojjy3XavkbbQtvsfaZTl/X+av+vsmPLl4Coi6dqcd4vZVlDcM4a5s5fgRnxYOn/1hOSl0T0TCaCpzmlijZ2edceG2hcKLQ62mNv8PtMjDljMmouCWhyl/Kj5fYmuKLbL2O3bgtrOSAKoCs/d2XfWgembBxfRlCOGeLU5qfElqa+1O6ohCH3jC8bfLnIwzQou8Cdwhw9I9J7DyUFwmEVytWzDnY6Ylwhm4N3iJ0e+d5jMXVBPKm3SXgrh+LScg255fexHF+AwjNmoktza3LLolPfYLRAo74Ppfd64aAIH7N7JIgXELEhetiRoCTbBOPh7qBu/Cf584zmKPGqHrt48DN8U/RbXqZ8y47lV8aoCgOLwwvl+1PCPvCmg+j0rR/J6oD15BTcqTP5aCjLLL/40K2eCDYw3vDYq/FHpTnuguMQfCh9ayal1Y1qElBLM+DRUnilutnl5naizB5LtFsg=
+  - secure: u5kh8qlVDEFhXOQA38NbH2zd3W2i5lXXjo5zWTXi7XPl0nm0nXtGiYKz4MGqVCzdz8u/dPH7Zy+6jU/35LbJs+4sDz5kokOldi3PeDK0irr+Pje5l6PJWXxnJEdWMUM/Tw4ya8yK2gBkIfQ/gPHxnSabAjXYUWybcJy/+vhQ9XKgDeIv6IClLoIYr0ooI4ve+0xenqfabfuMyWdg9qa2TljubG3xSZ4J1MFLr34H2jpKCvLOdR8lgq2hgtbN28XkMt+aHMAW2Bft197NYZTV1kZ+Rfq6o6WyY7zmtXJ3NG5pc9Li9JAjymjxZ+HT3AcaUkO2cAS+VJMmHen6iQ30DGHj1tsdHasuRlsUSYTbNFSuq9GsVa8Qn9vaE1z8vXyIGXdo14A9LhcYo5u5C8chnicH88OFNsu+HELLD0iTx+BqFNX5iA/RdDNe8o9srpu+eiGDQu2GOX8tYbPEhgcfjDJDAzn/1n94rjYxd9B8iF/hNhnagFwfgTNJYfVFtQ9J0PCQlPBbJrvnshkfSSt85USSAiFko+M+uRKaMCVH0wNf99ZiOwx83/EaAYXtdLKVlyfAb5GwDwuN9P3Uze2cbTdYW5wTg86AnNY/ZrJnFC7eC1KGLcOPRK3hpiCwOhhxYgZrrAhImbDTn8NBDLef4yRakvlPK0wKVMhKmDnLvfI=

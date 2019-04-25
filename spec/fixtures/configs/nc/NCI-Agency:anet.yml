@@ -1,0 +1,72 @@
+env:
+  global:
+    - BROWSERSTACK_DEBUG=true
+    - secure: "RhX0c51DkTgr4ub347If+KsjWJU+zGt3dshGknnmgrCOCuDkuBN0vjD4gLNMVH1K8Z+tmC8ESyW4duBuRkY4B/t2PRmEddCo7+t6gfmylq659LhGa3KUEEQd9vOuI+cN5NEGSN6GP6ckU11tiCmiomzTApLnNxWgqDBI7CQkezZl1DpNQ7cShhmYjPSBtFfQcfepZvOM7pY7oYvijvPsBmy0GsYu6RixxkBS42LgSY7FtBL7N2sdG80e+E9A1GThMUHJMAMpprpxPtd7BV2mQ3PwRcyWp11pZt+wCUFNDSnYb/h+5MI45JKIzzwvnOHZr4/rUByi6Qiw0RSh5k0sGZtNw+NcOjrtlS1g1XVxYBD5bzNxn7BgIg3nqNGiHYti/uIIG/AdwzHCG964Yqlww2jZ1UoyxNSb6ms1gKM8Rwx/gDO46pM0l750hwAjR25yDSW+w5xyW0YC+WKyHAoweSY1wsfzqchwJ9bP8qk5cwPrqGgiXsKU5N9SKfqJM4TKDE2DCDAE1NEWwglqnZTuQNjloCdl6KmctdSAHvF6o/t8sIcpIWs0zfhBoRAj3yZh/W7gQbXstyT1NGAswIMl1Rf9SspIm0noOUOObDMLkUhJWvxA/7zMoe3DaXgTAiSh1Xdm0FxdhmRkZFvGm74s9mGpyUvH6ePjwRNTM4CdfvI="
+
+language: java
+
+jdk:
+  - oraclejdk8
+
+services:
+  - docker
+
+addons:
+  browserstack:
+    username:
+      secure: "NXAAGwQIeyisqwpQCV9+s95ZZOhWIu3xUKm/ivD49HQPw5wuztG7OveT6SR9N8YzeP98hHH36rYisWlEzkBKtC/DBqV+7YDB36tjD3E2ukOc4FZ9OBYkPZ2lHV/UAEgaZdy2a5bLpKVnVhEVGnIu9h1Ng27eBk4Z66L696XJOn2ekDCcD6mJYvRBa2GIiaWKsplgLbdntDCEnoX3x6CyruhVVdjzBSHcQ7LZDxEZEQ52Ud1Bi9ycU9IJAmqbFRVRAbxX9vBM5gNmTSJQFnfPXLOj/xFUAwLyZRRkgYIVPYWf0wL1bM+pOgNAJGtaiIDi35EyEp9X+01DRlGI91fQf0iaJDdoR9jasR+c7NnfQowxyykwwi//ADQ/g4b5XsQk9eh05T5ZhFjqyo3vMT7ks53WSjfGFKtu9yaFJAutuYeYsEWqcbYbCQCMkcpDN0YsjDTOEwwl3jdig4cgbLoUEc0NC761p1xy68IqIcC5EDO3i+jQ/+Mdh6dnQNJySEMMsktqT+o2XaQ6/GZyU0e/dYTdCdjIF3r4xY9KfYZniBXswLO02/0zIEs6q9nvmeP9dnftOyf58W56e6zkG+PBdMNLfPI1CSaYqrC95VMvNy/r1qqayfrj5YWrzVlsocC8owyY9JYjFeXU995u1siCrMx8GcaDqUhiFVDTtH9/3Gc="
+    access_key:
+      secure: "CYTFe/aWx/JQQ5ZhnjKWK3WlToUllRAI7HLgW/psj3ZrmQz6nHOTO/UN41qRhdDd2sOeAp74x2RU3FXT3gKyiKETZDcFDqbkTpA2IgXNOhyvQZikqBUYeoX54LHSdwMZp/QZNqxR44UUoGioN33Ea2z2BweDDJZkRF4RJ3Yh+39TrmqlryTvzm8NYiMw1susy4pbIRJtlkgmiuSkEr6MjJbdph5BkekEY53R649Hnax+21vFFiKVTxKhnuhZm9sgFsluzoWEU1KMvDhdfqNvpyXqKYPf0OfZX+YkFqqaihOgQB7GHfjzY64pAheKS9dfS89I5PrdjdtoSSJWn2fm1zaPHhKIHVnDfh5VrqRsc4LbdvNvLwha1ZJnztMZlK4kB8LktnjUWeQeOBDD6Bth2vJ2GHy+7whtm/43yegkLFZRubEgGYZO9wzmJQKCyLq91dKs0iSj93YUkbu87rzBDyM6QQz/c4zW7OI2I8XT1aPcgM5mUoxp6Ah/Pfac68RyAkSFobHR5LZLIrDTyctIQSvAOUNi06HimH3Z8qtVcRCXbUU0jg1XOle+qIjTAycQnzqYKwJyBqqgW6yGtVR9RxRVzuRAoEmTWkTmvjgqRchE1p6Q5M7fbaJQaiu2rdsPSbEWkUTXh7ZjT1H67kncnzHv9t56RFfQlHU0nVcI/nA="
+
+notifications:
+    slack: nci-agency:TvRV22whtaRGflaCPPfv2G1v
+
+before_cache:
+  - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+  - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+
+cache:
+  directories:
+    - $HOME/.gradle/caches/
+    - $HOME/.gradle/wrapper/
+    - $HOME/.sonar/cache
+    - client/node_modules
+
+#By default travis runs gradle assemble in install. This is too early as we don't want to build yet
+install: true
+
+script:
+  - ./gradlew -PtestEnv dockerCreateDB dockerStartDB dockerWaitForDB dbMigrate dbLoad
+  - ./gradlew -PtestEnv jar check test jacocoTestReport
+  - |
+    ./gradlew -PtestEnv run &
+    SERVER_PID=$!
+    sleep 60
+  - |
+    cd client
+    yarn run lint
+    yarn run test-all
+  - kill $SERVER_PID
+
+after_script:
+  - docker logs anet-mssql-server
+
+# Travis will publish docker images to docker hub of any tagged revision in candidate. This will therefore include all ANET releases. 
+# If one wants to have a demo built out of a container, adding tag such as `demo-new-feature-XYZ` will do the job
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
+  - if [ "$TRAVIS_PULL_REQUEST" == false ]; then
+      if  [ -n "${TRAVIS_TAG}" ] || [ "$TRAVIS_BRANCH" == "candidate" ] || [ "$TRAVIS_BRANCH" == "master" ]; then
+        docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD";
+        ./gradlew dockerBuildImage;
+      fi;
+      if [ -n "${TRAVIS_TAG}" ]; then
+        ./gradlew dockerPushImage;
+      fi;
+      if [ "$TRAVIS_BRANCH" == "candidate" ]; then
+        ./gradlew dockerPushCandidateImage;
+      fi;
+      if [ "$TRAVIS_BRANCH" == "master" ]; then
+        ./gradlew dockerPushLatestImage;
+      fi;
+    fi

@@ -1,0 +1,75 @@
+sudo: false
+os:
+  - linux
+
+dist:
+  - trusty
+
+language: rust
+
+matrix:
+    include:
+        - language: nix
+          script:
+            - bash ./scripts/find-dead-symlinks
+            - bash ./scripts/license-headers-updated
+            - bash ./scripts/branch-contains-no-tmp-commits
+            - bash ./scripts/version-updated
+        - language: rust
+          rust: 1.32.0
+          cache:
+            directories:
+              - /home/travis/.cargo
+          before_cache:
+            - rm -rf /home/travis/.cargo/registry
+          script:
+            - cargo build --all --all-features -j 1  || exit 1
+            - cargo test  --all --all-features -j 1  || exit 1
+        - language: rust
+          rust: 1.33.0
+          cache:
+            directories:
+              - /home/travis/.cargo
+          before_cache:
+            - rm -rf /home/travis/.cargo/registry
+          script:
+            - cargo build --all --all-features -j 1  || exit 1
+            - cargo test  --all --all-features -j 1  || exit 1
+        - language: rust
+          rust: stable
+          cache:
+            directories:
+              - /home/travis/.cargo
+          before_cache:
+            - rm -rf /home/travis/.cargo/registry
+          script:
+            - cargo build --all --all-features -j 1  || exit 1
+            - cargo test  --all --all-features -j 1  || exit 1
+        - language: rust
+          rust: beta
+          cache:
+            directories:
+              - /home/travis/.cargo
+          before_cache:
+            - rm -rf /home/travis/.cargo/registry
+          script:
+            - cargo build --all --all-features -j 1  || exit 1
+            - cargo test  --all --all-features -j 1  || exit 1
+
+
+addons:
+  apt:
+    packages:
+    - libdbus-1-dev
+    - pkg-config
+
+notifications:
+  email:
+    on_success: always
+    on_failure: always
+  irc:
+    channels:
+      - chat.freenode.net#imag
+    template:
+      - "%{repository_name} (%{branch} @ %{commit} by %{author}): %{result}"
+

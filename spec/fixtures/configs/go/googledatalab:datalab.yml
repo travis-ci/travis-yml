@@ -1,0 +1,39 @@
+sudo: required
+language: node_js
+node_js:
+- "8.9"
+addons:
+  apt:
+    source:
+    - ubuntu-toolchain-r-test
+    packages:
+    - build-essential
+    - google-chrome-stable
+    - libcairo2-dev
+    - libjpeg8-dev
+    - libpango1.0-dev
+    - libgif-dev
+    - g++-4.8
+
+services:
+- docker
+
+cache:
+  pip: true
+  directories:
+  - node_modules
+
+before_install:
+- pip install -U pip --user travis
+- pip install flake8 --user travis
+
+install:
+- cd $TRAVIS_BUILD_DIR/containers/datalab
+- ./build.sh
+
+script:
+- cd $TRAVIS_BUILD_DIR/tools/
+- flake8 cli/
+- cd $TRAVIS_BUILD_DIR/test
+- npm install -s -q --depth 0
+- npm test

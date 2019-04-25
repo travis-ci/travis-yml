@@ -1,0 +1,85 @@
+language: php
+# We want to avoid sudo. This allow us to use Travis docker infrastructure, which means builds start faster and have more CPU available.
+sudo: false
+
+git:
+  depth: 1
+
+php:
+  - '7.1.26'
+
+branches:
+  only:
+   - dev
+
+addons:
+  # The username and access key are stored in the Travis settings.
+  sauce_connect: true
+
+mysql:
+  database: drupal
+  username: root
+  encoding: utf8
+
+# Cache Composer and db export.
+# I removed caching of Drush since you have to clear Drush cache to get new Drupal versions.
+cache:
+  directories:
+    - $HOME/.composer/cache/files
+    - $HOME/cache
+
+install:
+
+  # Export variables used later on in the bash scripts.
+  - cd $TRAVIS_BUILD_DIR && cd ../ && export ROOT_DIR=$(pwd)
+  - export HOME
+  - export TRAVIS_EVENT_TYPE
+
+  # Name of bundle used as a placeholder in scripts.
+  - export BUNDLE_NAME="null"
+
+  # Behat tags. Allows you to include/exclude tags per bundle as needed.
+  - export EXPRESS_JS_BEHAT_TAGS="~@exclude_all_bundles&&~@broken&&@javascript"
+  - export EXPRESS_HEADLESS_BEHAT_TAGS="~@exclude_all_bundles&&~@broken&&~@javascript"
+  - export BUNDLE_BEHAT_TAGS="~@exclude_all_bundles&&~@broken"
+
+  # Copy scripts to root.
+  - cp -R ${ROOT_DIR}/express/tests/travis-ci/* ${ROOT_DIR}
+
+  # Pulls in any helper functions used later in scripts.
+  - source $ROOT_DIR/helper-functions.sh
+
+  # Install and build dependencies.
+  - echo ----
+  - echo "Running install script..."
+  - $ROOT_DIR/install.sh
+  - echo ----
+
+before_script:
+
+  # Setup config for PHP/MySQL, settings.php, and install database.
+  - echo ----
+  - echo Running setup script...
+  - $ROOT_DIR/setup-config.sh
+  - echo ----
+
+  # Perform the site install after removing Xdebug since it seems faster.
+  - echo ----
+  - echo Running build script...
+  - $ROOT_DIR/build-express.sh
+  - echo ----
+
+script:
+
+  # Run Behat tests.
+  - echo ----
+  - echo Running Behat tests...
+  - $ROOT_DIR/behat-tests.sh
+  - echo ----
+
+notifications:
+  slack:
+    on_success: never
+    on_failure: always
+    rooms:
+      secure: q9Z3c6uNiCF+2l+BQsso1bQGbY0VmwXmw+StSlAGQxlccMh8HtDlrL4Rqk2ix0QMeGXffvLeATLThCq0ET9rmr9MIhTqRKfKgHUaQywiE3LZr+pgoPVGlqGbz1uSspWgWGkG3MWPtn1VC6pS4esm44YJ4mzucIKTswIe8DEWHTgi2Eju9P1w5HrtKBlM4+zxSwau5N5x+ol/LhafmvbODL5rBBH8lpErjVzSEf+5qQ/xu+I8tBdx7rqLmbbfPBXfn7Gx3THnaSG1WZZart6VXabbRdm029EWW6DxQQ6AyZTVwIHb59wrS3gL17SLsmvzXuYOlZMHBRTeAnt97czKILtoV/jscQE6z7AkPggaIFXcaWrvG+qSqZloym759i7YeYuwYdxy7QsDhNniHDXz3oP3jXJhN/TulYyuZYnPui5ihL3PHBoPy0t9PADeH8pxmhHrOB+t5WnQF02bAye6M4o0K+8HvUd24SgT4olUZbvNbuiwdZG0Ee4ZND4Azrd0W1LsyCPd8DJGsoaUe/KCtV8XdptgdIzpgfotDJMFnNK1QbSUUY5xigZoNEht7Gq7CruHFkM693FYDbJVCg9hlrtKafWaAvG8npvS5KPDxxHp7P6BgBOwtewzB3SpQuOSM/Y5qmO4U2lD6+nvzOihNUTVJYN7hO03fQFlI9M3E9o=

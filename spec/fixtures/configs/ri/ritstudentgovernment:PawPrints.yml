@@ -1,0 +1,47 @@
+language: python
+dist: trusty
+services:
+- docker
+env:
+  matrix:
+  - DOCKER_COMPOSE_VERSION=1.19.0
+  global:
+  - secure: MApSqCSO01xCAMLAfhWVWdG6HKiiUqWYtlr01PRoXiTjrvdV8VNtF876JvTNLICim1f3QUSI+ZFsvkDcLiSmqZibARjyTCc561KZdU+0A+QKzfN/W8rbBcm9+l3o33KMX0YYhpzjnNGd1+pIpPntA6WyFnZsuRZwKofMIlMeqx3SKi6Jmu/f8QW49lOkwFybXUiJQnnVoDn6UIhDYC3iEhYhlnt6JZluMWLbZxApYAdo0ou6EMBR4kzEFMMM7JoTGk0pWCcKpiK5vyXuf/B9DjoK5/hUhYfaamhb+XeLssL9KNckk359Edo0THJhV588SnjeoKe12ShfC6wkZyt8GbFp7+fjhhFqTKaMNF+Xs9MT5u6jM5QqCpSdYZIuc8q1uLhEB+MDI5tgOHIdXxX8m/zdoRnh8FxF1l2SKI3CL5cfrgRW6M+SzLKjEhHSd1Ic9QIjo3w46dg4CLeta1UwkSyJk+ib0MLgRyJrze1R1uMzbxL0cEy7MPvkCHxAKnahorBzS00oU3iWcK1UgfMAgwHNxjW6tQ2AIXTY+BBYsbalbNBPTzcPwN9bAJFE/sIWcJDIaVeT8teSmyD4IF5ZB296lEI2DD4v/gnPX+uaOje+1wu0qI3062cpWWqOORUM+utXJ+kqc+R76sJYLh0nd/83pd4aStznALFC46fBLIo=
+  - secure: VuNQH/RWyf5b5h09qv0c93OzX5igrtmPfwkEH8K7zOlbE+RG29XRFY9H0twRheRZnRc43i3hTRybENorukyGI58OCD7gL75KT4jP+y84w8DNIKLBWrkodOK3m9Gs5HIRsMntKQb300jO4B8veRFkwP7+AswQjNPbDy2xtShvkAlFsAlMvXMunXi5U1FkLhlJ/8ENubR+QIUO3hk9TfqC3WXThHPfj5VsmzmYQre6hKwrVdOUd0y+5RV9NkJnlUF2kUr5udAB44H4KzMNP9RK7eTmnLC3+aKLuWwwCngETWJlqIVoRpznqevNjCQAWdOJrH3CKpaxz+CqllzdvOB3y2eX7YzhwYmj9ReRhNxRpvTbt1KkP5ghciBwQ15iDRgl6/9U+uXTCcxhLPaKtCoWtjN4z/nu1OhGjRYSV5uDv7hGk6h1cdny0LjyJxunl6s692tZA+qMqYvNZMnrq2mi1Fg3OEOz8+vfy1s4lhe8Dp+FW2jQdL9GYpjq+XzTNxV60OZWGPOeNOCAERoTJiiaqL4KKP+ih1jJEU9fAEvzsxeCar6pQHk28qldOkZzqaplFyl5MDbnVHNTjYcEyxPhK1p7CHO5piumSxKvpeoqoovYTXiRUfFntJCHkH/gCNtWVdTLNQsSqSvDecoTZjKiJwNjrNmpFfH6IdTWeTmh7q0=
+cache:
+  bundler: true
+  directories:
+  - "$HOME/docker"
+python:
+- '3.6'
+before_install:
+- if [[ -d $HOME/docker ]]; then ls $HOME/docker/*.tar.gz | xargs -I {file} sh -c
+  "zcat {file} | docker load"; fi
+- pip install coverage
+- pip install codecov
+- cp petitions/profanity.csv.template petitions/profanity.csv
+- cp template.env .env
+- sudo rm /usr/local/bin/docker-compose
+- curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname
+  -s`-`uname -m` > docker-compose
+- chmod +x docker-compose
+- sudo mv docker-compose /usr/local/bin
+- export COMMITTER_EMAIL="$(git log -1 $TRAVIS_COMMIT --pretty="%cE")"
+- export AUTHOR_NAME="$(git log -1 $TRAVIS_COMMIT --pretty="%aN")"
+install:
+- docker-compose run -d --name pawprints_web web
+script:
+- docker exec -it pawprints_web pytest --cov-config .coveragerc --cov-report xml --cov-report
+  term --cov=.
+- codecov
+before_cache:
+- mkdir -p $HOME/docker && docker images -a --filter='dangling=false' --format '{{.Repository}}:{{.Tag}}
+  {{.ID}}' | xargs -n 2 -t sh -c 'test -e $HOME/docker/$1.tar.gz || docker save $0
+  | gzip -1 > $HOME/docker/$1.tar.gz'
+deploy:
+  provider: script
+  script: chmod +x deploy.sh && sh deploy.sh
+  skip_cleanup: true
+  on:
+    all_branches: true
+    condition: "$TRAVIS_BRANCH =~ ^develop|master$"

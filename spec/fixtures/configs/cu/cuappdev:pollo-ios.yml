@@ -1,0 +1,7 @@
+osx_image: xcode10
+language: swift
+xcode_workspace: Clicker.xcworkspace
+xcode_scheme: ClickerTests
+install: pod update
+script:
+  - xcodebuild clean build -sdk iphonesimulator -workspace Clicker.xcworkspace -scheme ClickerTests CODE_SIGNING_REQUIRED=NO > /dev/null

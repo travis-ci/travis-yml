@@ -1,0 +1,39 @@
+language: haxe
+
+haxe:
+  - "3.4.7"
+  - "development"
+
+dist: trusty
+
+sudo: false
+
+addons:
+  apt:
+    packages:
+    - nodejs
+
+install:
+  # install awscli
+  - pip install --user awscli
+  - aws --version
+  # install haxelibs
+  - yes | haxelib install all
+  # get hxnodejs from git, haxelib's is outdated
+  - haxelib git hxnodejs https://github.com/HaxeFoundation/hxnodejs
+  # get tink_syntaxhub from git, fix compile error with haxe dev
+  - haxelib git tink_syntaxhub https://github.com/haxetink/tink_syntaxhub.git
+  # Get vscode-textmate
+  - npm install
+
+script:
+  - haxe generate.hxml
+
+deploy:
+  provider: script
+  script: haxe deploy.hxml
+  on:
+    all_branches: true
+    condition: $TRAVIS_BRANCH =~ ^staging|master$
+    haxe: "3.4.7"
+  skip_cleanup: true

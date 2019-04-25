@@ -1,0 +1,8 @@
+sudo: false
+language: python
+install:
+  - pip install -r requirements.txt
+script:
+  - ./setup_jjb.sh
+  - echo -e '[jenkins]\nurl=http://127.0.0.1:8080/' >> jenkins_jobs.ini
+  - ./generate_jobs.sh

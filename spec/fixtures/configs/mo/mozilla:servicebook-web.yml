@@ -1,0 +1,11 @@
+language: python
+env:
+    - TOX_ENV=py35
+    - TOX_ENV=flake8
+python: 3.5
+install:
+  - pip install tox
+script: tox -e $TOX_ENV
+after_success:
+  - pip install coveralls
+  - if [[ "${TOX_ENV}" == "py35" ]]; then coveralls; fi

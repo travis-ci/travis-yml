@@ -1,0 +1,29 @@
+language: go
+
+go:
+  - "1.11"
+
+sudo: required
+
+services:
+  - docker
+
+notifications:
+  email:
+    recipients:
+      - revett@cityofzion.io
+    on_success: never
+    on_failure: always
+
+before_install:
+  - curl -L -s https://github.com/golang/dep/releases/download/v0.5.0/dep-linux-amd64 -o $GOPATH/bin/dep
+  - chmod +x $GOPATH/bin/dep
+
+install:
+  - cd ./cli
+  - dep ensure -v
+  - cd ..
+
+# Script step is run as part of a shell script as it requires a conditional.
+script:
+  ./scripts/travis.sh

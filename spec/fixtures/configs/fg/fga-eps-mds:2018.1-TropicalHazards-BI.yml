@@ -1,0 +1,35 @@
+sudo: required
+
+services:
+  - docker
+
+env:
+  - DOCKER_COMPOSE_VERSION=1.14.0
+
+before_install:
+  - sudo rm /usr/local/bin/docker-compose
+  - curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
+  - chmod +x docker-compose
+  - sudo mv docker-compose /usr/local/bin
+
+before_script:
+  - cp env.tmpl .env
+
+script:
+  - docker-compose up -d
+  - docker-compose exec web flake8 --exclude='ipython_log.py*,migrations,templates, settings.py, manage.py, env.tmpl' .
+  - docker-compose exec web coverage run -m pytest --create-db --nomigrations
+
+after_success:
+    - docker-compose exec web coveralls
+    - ./semantic-release.sh
+deploy:
+     provider: script
+     script: bash travis-deploy.sh
+     skip_cleanup: true
+     on:
+       branch: development 
+after_deploy:
+    - curl -X POST $PINGOUT_URL/$PINGOUT_UUID/ping
+notifications:
+  email: false

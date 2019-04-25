@@ -1,0 +1,43 @@
+language: groovy
+sudo: false
+jdk:
+  - openjdk7
+node_js:
+  - "6"
+env:
+  - CXX=g++-4.8
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - g++-4.8
+branches:
+  only:
+    - master
+    - dev
+cache:
+  directories:
+    - node_modules
+    - ~/.m2/repository
+    - ~/.grails/wrapper
+before_install:
+  - export TZ=Australia/Canberra
+  - date
+before_script:
+  - export DISPLAY=:99.0
+  - sh -e /etc/init.d/xvfb start
+  - npm install
+  - mkdir -p ~/.grails; wget -q -O ~/.grails/settings.groovy https://raw.githubusercontent.com/AtlasOfLivingAustralia/travis-build-configuration/master/travis_grails_settings_new.groovy
+  - MAVEN_REPO="ala-repo-snapshot"; grep '^app\.version=' ./application.properties |
+    grep -q "\-SNAPSHOT"; if [ "$?" = "1" ]; then MAVEN_REPO="ala-repo-release"; fi;
+  - echo "MAVEN_REPO:$MAVEN_REPO"
+  - export GRAILS_OPTS="-Xmx1536m -Xms1536m -server -Dfile.encoding=UTF-8 -XX:PermSize=32m -XX:MaxPermSize=256m"
+script:
+  - node_modules/karma/bin/karma start karma.conf.js --single-run --browsers Firefox,PhantomJS --port 9877 --log-level info && ./grailsw refresh-dependencies --non-interactive && ./grailsw test-app --non-interactive && ./grailsw prod war --non-interactive
+after_success:
+  - '[ "${TRAVIS_PULL_REQUEST}" = "false" ] && travis_retry ./grailsw prod maven-deploy --repository=$MAVEN_REPO --non-interactive --stacktrace'
+env:
+  global:
+  - secure: HQaT+1B5r/7A15V3QHs5Lw1S8jNWgjgCKa8Fz7aEF4F+FHBiTqqM/fvFWcC+g7KHkLhgTht2efEIp9akBt8sArz1xp/BGhKr4JJRGU2uYJE8NpFb08u1OPAvurWQ72bwihJQBJWI9VXiQGoGQffLQL1yLQmlGMFbU/sOLzUxhGQ=
+  - secure: Dc3FdXwu0j+tKyETSmZmULlEmVpQ7yKk+74zauRfEts0IyH1gUEuFr2ODTNUUFrjNRR/yW2dc0erlCyUc/CAGdALVRFzImz45WUjs0VgBtH2MW6tkgLd4DhDTDUpxOZMKZBEK91UVqK/2C0811c3UbvDBbuGrNacW5PPdzYoS9o=

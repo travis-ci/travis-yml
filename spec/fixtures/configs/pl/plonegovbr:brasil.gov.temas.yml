@@ -1,0 +1,42 @@
+language: python
+python: 2.7
+sudo: false
+cache:
+  directories:
+  - $HOME/.pylint.d
+  - eggs
+  - parts/node
+addons:
+  # XXX: use an older Firefox ESR as we are stuck with selenium = 2.53.5
+  #      https://github.com/SeleniumHQ/selenium/issues/2739#issuecomment-249482533
+  firefox: 45.9.0esr
+matrix:
+  fast_finish: true
+before_install:
+# FIXME: I have no idea how and why six==1.11.0 is being installed
+- pip uninstall -y six
+install:
+- python bootstrap.py
+- bin/buildout annotate
+- bin/buildout
+before_script:
+- export DISPLAY=:99.0
+- sh -e /etc/init.d/xvfb start
+script:
+- bin/code-analysis
+- bin/test
+- bin/pylint --py3k --disable=no-absolute-import src/brasil/gov/temas
+after_success:
+# XXX: https://github.com/urllib3/urllib3/issues/1456
+- pip install urllib3==1.23
+- pip install coverage
+- coverage run bin/test --layer=\!Acceptance
+# Coveralls
+- pip install coveralls
+- coveralls
+# Codacy
+- coverage xml
+- pip install codacy-coverage
+- python-codacy-coverage -r coverage.xml
+notifications:
+  irc: irc.freenode.org#plonegovbr

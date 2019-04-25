@@ -1,0 +1,50 @@
+sudo: required
+language: python
+python:
+- 3.6
+services:
+- docker
+- postgresql
+- redis
+addons:
+  postgresql: "9.6"
+cache:
+  pip: true
+  directories:
+  - _build
+  - deps
+env:
+  global:
+  # AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY is in travis-ci.com
+  #- REGION=ap-northeast-1
+  #- SERVICE_NAME=staging-danbi-server
+  #- TASK_DEFINITION=staging-danbi-server
+  #- IMAGE_NAME=danbi_server
+  #- REMOTE_IMAGE_URL=800074035736.dkr.ecr.ap-northeast-1.amazonaws.com/danbi_server
+install:
+- sudo apt install -y graphviz
+- pip install -r requirements_conda.txt
+- pip install -r requirements_pip.txt
+before_script:
+- psql -c 'create database unittest_jtelips_db;' -U postgres
+- python myscript/deploy_packages.py
+- cd sent2vec_wrapper/src && python setup.py build_ext && pip install .; cd ../..
+script:
+- flake8 --version
+- flake8 .
+- python manage.py migrate
+- python manage.py check
+- py.test --cov=./
+after_success:
+# < 와 ( 사이에 공백이 들어가면 안됨!
+- bash <(curl -s https://codecov.io/bash)
+#deploy:
+#  provider: script
+#  on:
+#    branch: master
+#  script:
+#  - eval $(aws ecr get-login --region $REGION);
+#    docker build -t $IMAGE_NAME .;
+#    docker tag $IMAGE_NAME:latest "$REMOTE_IMAGE_URL:latest";
+#    docker push "$REMOTE_IMAGE_URL:latest";
+#    etc/ecs_deploy.sh -r $REGION -c $TASK_DEFINITION -n $SERVICE_NAME -i $REMOTE_IMAGE_URL:latest;

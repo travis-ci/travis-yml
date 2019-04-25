@@ -1,0 +1,13 @@
+language: python
+
+branches:
+  only:
+    - master
+    - /^\d+\.\d+$/
+
+python:
+  - 2.7
+
+install: pip install --upgrade -q -r requirements.txt
+
+script: sphinx-build -nW -b html -d _build/doctrees . _build/html

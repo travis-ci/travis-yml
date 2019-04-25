@@ -1,0 +1,40 @@
+language: java
+os:
+  - linux
+sudo: required
+git:
+  quiet: true
+notifications:
+  email: false
+before_install:
+  - echo $TRAVIS_BUILD_NUMBER > $TRAVIS_BUILD_DIR/src/main/resources/build.txt
+after_success:
+  - wget https://raw.githubusercontent.com/k3rn31p4nic/travis-ci-discord-webhook/master/send.sh
+  - chmod +x send.sh
+  - ./send.sh success $WEBHOOK_URL
+after_failure:
+  - wget https://raw.githubusercontent.com/k3rn31p4nic/travis-ci-discord-webhook/master/send.sh
+  - chmod +x send.sh
+  - ./send.sh failure $WEBHOOK_URL
+before_deploy:
+  - git config --local user.name "HyperiumDeploy"
+  - git config --local user.email "hyperiumclient@gmail.com"
+  - git tag -a $TRAVIS_BUILD_NUMBER -m "Automated beta build. Download and run the above .jar to install and use this beta!"
+  - "git push https://$GIT_TOKEN@github.com/HyperiumClient/Hyperium.git HEAD:master --follow-tags"
+after_deploy:
+  - wget https://gist.github.com/Cubxity/457736a7bcbfe6d6f3ae2a5db04c0806/raw/deploy-hook.sh
+  - wget https://gist.githubusercontent.com/Sk1er/38c81e68d25e8b6c3beb429cf923190f/raw/deploy_sk1er.sh
+  - chmod +x deploy-hook.sh
+  - chmod +x deploy_sk1er.sh
+  - ./deploy_sk1er.sh
+  #- ./deploy-hook.sh $CUBE_MAN
+deploy:
+  provider: releases
+  api_key: $GIT_TOKEN
+  skip_cleanup: true
+  file_glob: true
+  file: $TRAVIS_BUILD_DIR/build/libs/*
+  on:
+    repo: HyperiumClient/Hyperium
+    prerelease: true
+if: tag IS blank

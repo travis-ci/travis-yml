@@ -1,0 +1,17 @@
+language: ruby
+rvm:
+- 2.4.4
+before_script:
+- psql -c 'create database weby_test;' -U postgres
+- mv config/travis_database.yml config/database.yml
+- mv config/secrets.yml.example config/secrets.yml
+- RAILS_ENV=test bundle exec rake --trace db:schema:load
+script: bin/rspec spec
+notifications:
+  webhooks:
+    urls:
+    - https://webhooks.gitter.im/e/d2f9a0264425ceca43de
+    on_success: always
+    on_failure: always
+  slack:
+    secure: zxImXQ03YcFxIRY3GiRBEslkZPrfulnFq5t7MjJNCWZsfNOyLxqCzFDHISedgh4TGkrUXE9/5Z1KDb0du7FK14sjoDfHMCru2cJdZBdZ/vIYoub6cafM0yrGK0/YawqWqQFFW6lGazG1D0tmkFZS6JduO2FYMlwgqwOh9zM9w8w=

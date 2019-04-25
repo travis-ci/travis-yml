@@ -1,0 +1,19 @@
+language: ruby
+rvm: 2.4.1
+env: CODECLIMATE_REPO_TOKEN=d69084d39be74e8dafe9a689102b19130a21abe963dce8aa6146078098c9b242
+before_script:
+  - mysql -e 'create database jobapps_test'
+  - cp config/application.yml.example config/application.yml
+  - cp config/database.yml.example config/database.yml
+script:
+  - bundle exec rake db:reset
+  - bundle exec rspec
+  - bundle exec codeclimate-test-reporter
+branches:
+  only:
+    - master
+notifications:
+  email:
+    on_success: never
+    on_failure: change
+    recipients: programmers@admin.umass.edu

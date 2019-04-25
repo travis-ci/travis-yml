@@ -1,0 +1,43 @@
+sudo: false
+language: python
+
+python:
+    - 3.4
+    - 3.5
+    - 3.6
+
+env:
+    - BUILD=py
+
+matrix:
+    include:
+      - python: 3.6
+        env: BUILD=style
+      - python: 3.6
+        env: BUILD=docs
+      - python: 3.6
+        env: BUILD=mypy
+      - python: 3.6
+        env: BUILD=pytz201610
+      - python: 3.6
+        env: BUILD=pytz201702
+      - python: 3.6
+        env: BUILD=pytz_latest
+      - python: 3.6
+        env: BUILD=dateutil26
+      - python: 3.6
+        env: BUILD=dateutil_latest
+      - python: 3.7
+        dist: xenial
+        sudo: true
+
+addons:
+    apt:
+        packages:
+            - language-pack-de
+
+install:
+        - "pip install tox"
+
+script:
+    - "tox -e $BUILD"

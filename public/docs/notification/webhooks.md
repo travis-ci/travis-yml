@@ -2,24 +2,19 @@
 
 
 
-## Type
+## Types
 
-Any of:
-
-* Map (Hash)
+* Hash
+* Array of: 
 * 
 * Boolean
 
-## Flags
-
-None.
 
 
 ## Examples
 
 ```yaml
 webhooks:
-  urls: "[ref:secures]"
   on_start: always
   on_cancel: always
   on_error: always
@@ -29,7 +24,23 @@ webhooks:
 ```
 
 ```yaml
-webhooks: "[ref:secures]"
+webhooks:
+  urls:
+  - secure: encrypted string
+```
+
+```yaml
+webhooks:
+  urls:
+```
+
+```yaml
+webhooks:
+- secure: encrypted string
+```
+
+```yaml
+webhooks:
 
 ```
 

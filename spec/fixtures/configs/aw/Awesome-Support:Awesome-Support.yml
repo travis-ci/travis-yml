@@ -1,0 +1,80 @@
+# Travis CI Configuration File
+
+# Tell Travis CI we're using PHP
+language: php
+
+# Use the container-based infrastructure
+sudo: false
+
+# PHP version used in first build configuration.
+php:
+#    - "7.1"
+#    - "7.0"
+    - "5.6"
+#    - "5.5"
+#    - "5.2"
+
+# WordPress version used in first build configuration.
+# We test 4 versions back
+# We used to test the 3.x lines which was announced as compatible but removed that as of AS 4.0.0.
+env:
+    - WP_VERSION=master
+    - WP_VERSION=4.7.5
+    - WP_VERSION=4.6
+    - WP_VERSION=4.5
+#    - WP_VERSION=4.4
+#    - WP_VERSION=4.3
+#    - WP_VERSION=3.8
+
+# Next we define our matrix of additional build configurations to test against.
+# The versions listed above will automatically create our first configuration,
+# so it doesn't need to be re-defined below.
+
+# WP_VERSION specifies the tag to use. The way these tests are configured to run
+# requires at least WordPress 3.8. Specify "master" to test against SVN trunk.
+
+# Note that Travis CI supports listing these above to automatically build a
+# matrix of configurations, but we're being nice here by manually building a
+# fewer configurations even though we're testing 3 versions of PHP
+# along with 4 versions of WordPress (which would build 15 configs otherwise).
+# This takes half as long to run while still providing adequate coverage.
+
+matrix:
+  include:
+    - php: "5.6"
+      env: WP_VERSION=master WP_ALLOW_MULTISITE=1
+    - php: "7"
+      env: WP_VERSION=master
+    - php: "7"
+      env: WP_VERSION=master WP_ALLOW_MULTISITE=1      
+    - php: "7.1"
+      env: WP_VERSION=master
+    - php: "7.2"
+      env: WP_VERSION=master
+      
+# Clones WordPress and configures our testing environment.
+before_script:
+    - export PLUGIN_SLUG=$(basename $(pwd))
+    - git clone https://github.com/WordPress/WordPress.git /tmp/wordpress
+    - cd ..
+    - mv $PLUGIN_SLUG "/tmp/wordpress/wp-content/plugins/$PLUGIN_SLUG"
+    - cd /tmp/wordpress
+    - git checkout $WP_VERSION
+    - mysql -e "CREATE DATABASE wordpress_tests;" -uroot
+    - cd "/tmp/wordpress/wp-content/plugins/$PLUGIN_SLUG/tests"
+    - cp unittests-config-sample.php unittests-config.php
+    - sed -i "s/path-to-WP\//\/tmp\/wordpress\//" unittests-config.php
+    - sed -i "s/trunk_test/wordpress_tests/" unittests-config.php
+    - sed -i "s/user/root/" unittests-config.php
+    - sed -i "s/password//" unittests-config.php
+    - cd "/tmp/wordpress/wp-content/plugins/$PLUGIN_SLUG"
+    - phpenv global 5.6
+    - composer install
+    - phpenv global "$TRAVIS_PHP_VERSION"
+    - cd "/tmp/wordpress/wp-content/plugins/$PLUGIN_SLUG/tests"
+
+script: if [[ $TRAVIS_PHP_VERSION = '5.5' && $WP_VERSION = 'master' && $WP_ALLOW_MULTISITE != '1' ]]; then ../vendor/bin/phpunit --coverage-clover=coverage.clover all; else ../vendor/bin/phpunit all; fi
+
+after_script:
+    - if [[ $TRAVIS_PHP_VERSION = '5.5' && $WP_VERSION = 'master' && $WP_ALLOW_MULTISITE != '1' ]]; then wget https://scrutinizer-ci.com/ocular.phar; fi
+    - if [[ $TRAVIS_PHP_VERSION = '5.5' && $WP_VERSION = 'master' && $WP_ALLOW_MULTISITE != '1' ]]; then php ocular.phar code-coverage:upload --format=php-clover coverage.clover; fi

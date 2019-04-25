@@ -1,0 +1,99 @@
+language: perl
+perl:
+  - "5.22"
+
+notifications:
+  email:
+    recipients:
+      - olaf@wundersolutions.com
+    on_success: always
+    on_failure: always
+  irc: "irc.perl.org#metacpan-travis"
+
+env:
+  global:
+    # We use a non-standard port to avoid trashing production
+    # but travis will have it running on the standard port.
+    - ES=localhost:9200
+
+    # Instantiate Catalyst models using metacpan_server_testing.conf
+    - METACPAN_SERVER_CONFIG_LOCAL_SUFFIX=testing
+
+    - DEVEL_COVER_OPTIONS="-ignore,^local/"
+    - PERL_CARTON_PATH=$HOME/local
+  matrix:
+    - CPAN_RESOLVER=metadb PERL_CARTON_PATH=$HOME/no-snapshot HARNESS_VERBOSE=1
+    - CPAN_RESOLVER=snapshot
+
+matrix:
+  allow_failures:
+    - env: CPAN_RESOLVER=metadb PERL_CARTON_PATH=$HOME/no-snapshot HARNESS_VERBOSE=1
+  fast_finish: true
+
+addons:
+  apt:
+    packages:
+    # libgmp-dev required by Net::OpenID::Consumer
+    - libgmp-dev
+    # postgresql-server-dev-all is required by DBD::Pg
+    - postgresql-server-dev-all
+
+before_install:
+  - git clone git://github.com/travis-perl/helpers ~/travis-perl-helpers
+  - source ~/travis-perl-helpers/init
+
+  - sudo mkdir -p /etc/elasticsearch/scripts/ && sudo mkdir /tmp/es && sudo chmod 777 /tmp/es
+
+  - sudo curl -O -L https://github.com/metacpan/metacpan-puppet/raw/master/modules/metacpan_elasticsearch/files/etc/scripts/prefer_shorter_module_names_100.groovy > /tmp/es/prefer_shorter_module_names_100.groovy
+
+  - sudo curl -O -L https://github.com/metacpan/metacpan-puppet/raw/master/modules/metacpan_elasticsearch/files/etc/scripts/prefer_shorter_module_names_400.groovy > /tmp/es/prefer_shorter_module_names_400.groovy
+
+  - sudo curl -O -L https://github.com/metacpan/metacpan-puppet/raw/master/modules/metacpan_elasticsearch/files/etc/scripts/status_is_latest.groovy > /tmp/es/status_is_latest.groovy
+
+  - sudo curl -O -L https://github.com/metacpan/metacpan-puppet/raw/master/modules/metacpan_elasticsearch/files/etc/scripts/score_version_numified.groovy > /tmp/es/score_version_numified.groovy
+
+  - sudo curl -O -L https://raw.githubusercontent.com/metacpan/metacpan-docker/master/elasticsearch/metacpan.yml > /tmp/metacpan.yml
+
+  - docker pull elasticsearch:2.4-alpine
+  - docker run -d -p 127.0.0.1:9200:9200 -v /tmp/metacpan.yml:/usr/share/elasticsearch/config/metacpan.yml -v /tmp/es:/usr/share/elasticsearch/config/scripts elasticsearch:2.4-alpine
+
+  - cpanm -n Carton
+  - cpanm -n App::cpm
+
+  # Carton refuses to update Safe.pm to the version specified in the cpanfile and the
+  # version that's core in 5.16 is too old (it fails to work with Devel::Cover).
+  - cpanm -n Safe@2.35
+
+install:
+  - AUTHOR_TESTING=0 cpm install -L $PERL_CARTON_PATH --resolver $CPAN_RESOLVER --workers $(test-jobs) || (tail -n 500 -f ~/.perl-cpm/build.log; false)
+
+before_script:
+  - bin/wait-for-open http://localhost:9200/
+  - coverage-setup
+
+script:
+  - carton exec prove -It/lib -lr -j$(test-jobs) t
+
+after_success:
+  - coverage-report
+
+#after_failure:
+#  - cat ~/.cpanm/build.log
+
+services:
+  - docker
+
+# caching /local should save about 5 minutes in module install time
+cache:
+  directories:
+    - $HOME/local
+    - local
+    - ~/perl5
+    - t/var/darkpan
+
+addons:
+  artifacts:
+    debug: true
+    s3_region: "us-east-1"
+    paths:
+    - $TRAVIS_BUILD_DIR/cpanfile.snapshot

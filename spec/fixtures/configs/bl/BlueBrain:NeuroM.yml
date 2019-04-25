@@ -1,0 +1,36 @@
+dist: trusty
+language: python
+python:
+  - 2.7
+  - 3.5
+  - 3.6
+addons:
+  apt:
+    packages:
+    - libatlas-dev
+    - libatlas-base-dev
+    - liblapack-dev
+    - gfortran
+    - libmpfr-dev
+    - libhdf5-dev
+cache: pip
+install:
+  - pip install 'matplotlib==1.5.2' tox
+  - pip install .
+script:
+  - if [[ $TRAVIS_PYTHON_VERSION == 2.7 ]]; then tox -e py27; fi
+  - if [[ $TRAVIS_PYTHON_VERSION == 3.5 ]]; then tox -e py35; fi
+  - if [[ $TRAVIS_PYTHON_VERSION == 3.6 ]]; then tox -e py36 -e lint; fi
+after_success:
+  - if [[ $TRAVIS_PYTHON_VERSION == 2.7 ]]; then tox -e coverage; fi
+before_deploy:
+  - pip install twine
+deploy:
+  provider: pypi
+  user: bbp.opensource
+  password:
+    secure: N/2AGpTUSOGOxQqYulja5Etj228w1SByVuX+ozPvuPJTm5kJh5fqav8FVtPLziaWAaWxJ6W2nFdWT9AwodwMk3+1NBHMWpOZ3NJnvibz0cvYCkXdNcgXOFGrPSeX3Oo2d74IeT20R44lieZEW62j4488SSaVkwr3p7YgyfVMVGo=
+  on:
+    tags: true
+    branch: master
+    condition: "$TRAVIS_PYTHON_VERSION == 2.7"

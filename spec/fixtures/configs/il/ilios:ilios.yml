@@ -1,0 +1,94 @@
+language: php
+dist: trusty
+services: mysql
+sudo: false
+matrix:
+  fast_finish: true
+  allow_failures:
+  exclude:
+  - php: '7.2'
+  - php: '7.3'
+  include:
+  - php: '7.2'
+    env: TEST_EVERYTHING_ELSE=true
+  - php: '7.2'
+    env: TEST_PHPUNIT_API1=true
+  - php: '7.2'
+    env: TEST_PHPUNIT_API2=true
+  - php: '7.2'
+    env: TEST_PHPUNIT_API3=true
+  - php: '7.2'
+    env: TEST_PHPUNIT_API4=true
+  - php: '7.2'
+    env: TEST_PHPUNIT_API5=true
+  - php: '7.2'
+    env: TEST_CONTAINER_BUILD=true
+  - php: '7.3'
+    env: TEST_EVERYTHING_ELSE=true
+  - php: '7.3'
+    env: TEST_PHPUNIT_API1=true
+  - php: '7.3'
+    env: TEST_PHPUNIT_API2=true
+  - php: '7.3'
+    env: TEST_PHPUNIT_API3=true
+  - php: '7.3'
+    env: TEST_PHPUNIT_API4=true
+  - php: '7.3'
+    env: TEST_PHPUNIT_API5=true
+  - php: '7.3'
+    env: TEST_CONTAINER_BUILD=true
+php:
+- '7.2'
+- '7.3'
+env:
+  global:
+  - ILIOS_DATABASE_URL=mysql://travis@127.0.0.1/ilios
+  - ILIOS_DATABASE_MYSQL_VERSION=5.5
+  - ILIOS_MAILER_URL=null://localhost
+  - ILIOS_LOCALE=en
+  - ILIOS_SECRET=ThisTokenIsNotSoSecretChangeIt
+  - ILIOS_FILE_SYSTEM_STORAGE_PATH=/tmp
+  matrix:
+  - TEST_PHPUNIT_API1=false
+  - TEST_PHPUNIT_API2=false
+  - TEST_PHPUNIT_API3=false
+  - TEST_PHPUNIT_API4=false
+  - TEST_PHPUNIT_API5=false
+  - TEST_EVERYTHING_ELSE=false
+  - TEST_CONTAINER_BUILD=false
+
+cache:
+  directories:
+  - "$HOME/.composer/cache"
+before_install:
+- mysql -e "create database IF NOT EXISTS ilios;" -uroot
+- echo $TRAVIS_PHP_VERSION
+- echo "extension=apcu.so" >> ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/travis.ini
+- echo "memory_limit=3000M" >> ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/travis.ini
+install:
+- composer install --no-interaction --prefer-dist -d ${TRAVIS_BUILD_DIR}
+before_script:
+- bin/console doctrine:database:drop --force
+- bin/console doctrine:database:create
+- bin/console doctrine:migrations:migrate  --no-interaction
+- APP_ENV=test bin/console cache:clear --no-interaction
+- APP_ENV=test bin/console cache:warmup --no-interaction
+- phpenv config-rm xdebug.ini
+
+script:
+- if [ "$TEST_PHPUNIT_API1" = true ]; then (bin/phpunit -c phpunit.xml.dist --group api_1); fi
+- if [ "$TEST_PHPUNIT_API2" = true ]; then (bin/phpunit -c phpunit.xml.dist --group api_2); fi
+- if [ "$TEST_PHPUNIT_API3" = true ]; then (bin/phpunit -c phpunit.xml.dist --group api_3); fi
+- if [ "$TEST_PHPUNIT_API4" = true ]; then (bin/phpunit -c phpunit.xml.dist --group api_4); fi
+- if [ "$TEST_PHPUNIT_API5" = true ]; then (bin/phpunit -c phpunit.xml.dist --group api_5); fi
+- if [ "$TEST_EVERYTHING_ELSE" = true ]; then (bin/console doctrine:schema:validate) fi
+- if [ "$TEST_EVERYTHING_ELSE" = true ]; then (vendor/bin/phpcs) fi
+- if [ "$TEST_EVERYTHING_ELSE" = true ]; then (bin/console security:check) fi
+- if [ "$TEST_EVERYTHING_ELSE" = true ]; then (bin/phpunit -c phpunit.xml.dist --exclude-group api_1,api_2,api_3,api_4,api_5) fi
+- if [ "$TEST_CONTAINER_BUILD" = true ]; then (docker build -t ilios-php-apache-test .) fi
+- if [ "$TEST_CONTAINER_BUILD" = true ]; then (docker run -d --name ilios-php-apache-test ilios-php-apache-test) fi
+- if [ "$TEST_CONTAINER_BUILD" = true ]; then (docker ps | grep -q ilios-php-apache-test) fi
+- if [ "$TEST_CONTAINER_BUILD" = true ]; then (docker exec ilios-php-apache-test php /var/www/ilios/bin/console monitor:health) fi
+notifications:
+  slack:
+    secure: Aw/KYBBltksyk0cPOyB9ZGjtmtYWkcns5AgsZmv1FiTUT2BYVc06yQ0LGQGQDHeNs7Zi8l0BtxhJv0gtwdnYydvwiUckR3ZRjTV7//1ni8XzzyO612ArwVKA1LHTVKm8zy3PcW3XobKtI0QlQZ/jPJ2yk8nbcXJ7XnCXyFq7OyI=

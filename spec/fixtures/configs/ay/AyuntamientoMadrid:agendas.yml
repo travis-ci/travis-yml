@@ -1,0 +1,18 @@
+language: ruby
+addons:
+  postgresql: "9.4"
+rvm:
+  - "2.3.5"
+cache: bundler
+bundler_args: --without production development
+before_install:
+  - gem install bundler
+before_script:
+  - "for i in config/*.example; do cp \"$i\" \"${i/.example}\"; done"
+  - rm config/sunspot.yml # Travis generate his own solr configuration
+  - bundle exec rake db:drop db:create db:migrate
+script:
+  - RAILS_ENV=test bundle exec rake assets:precompile
+  - RAILS_ENV=test bundle exec rake sunspot:solr:start
+  - RAILS_ENV=test bundle exec rspec spec
+  - RAILS_ENV=test bundle exec rake sunspot:solr:stop

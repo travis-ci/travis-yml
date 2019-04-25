@@ -1,0 +1,36 @@
+dist: trusty
+
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - wget
+      - pkg-config
+
+before_install:
+  - echo "s:======================================"
+  - echo "Downloading bazel"
+  - wget https://github.com/bazelbuild/bazel/releases/download/0.18.1/bazel_0.18.1-linux-x86_64.deb
+  - sha256sum -c tools/bazel_0.18.1-linux-x86_64.deb.sha256
+  - sudo dpkg -i bazel_0.18.1-linux-x86_64.deb
+  - echo "Installing C++ and Python"
+  - sudo apt-get install g++
+  - sudo apt-get install  python-dev python-pip
+
+script:
+  - echo "PATH CHECK:vb"
+  - bazel version
+  - echo " BAZEL BUILD START"
+  - bazel build --config=ubuntu twister2/...
+  - echo " BAZEL BUILD END"
+  - echo "BAZEL PACKAGE START"
+  - bazel build --config=ubuntu //scripts/package:tarpkgs
+  - echo "BAZEL PACKAGE END"
+  - echo " END ALL "
+  - echo "e:============================================"
+
+notifications:
+  slack:
+    rooms:
+      - dsc-twister:8iGGrATeSkL31CU3X9WQBNQV#build

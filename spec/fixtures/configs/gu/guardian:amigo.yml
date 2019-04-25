@@ -1,0 +1,14 @@
+sudo: false
+language: scala
+scala:
+  - 2.11.7
+jdk:
+  - openjdk8
+cache:
+  directories:
+    - $HOME/.ivy2/cache
+    - $HOME/.sbt/boot/
+script:
+  - sbt test riffRaffUpload
+  - find $HOME/.sbt -name "*.lock" | xargs rm
+  - find $HOME/.ivy2 -name "ivydata-*.properties" | xargs rm

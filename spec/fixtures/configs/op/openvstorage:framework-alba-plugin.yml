@@ -1,0 +1,24 @@
+sudo: required
+dist: trusty
+language: python
+python:
+- '2.7'
+env:
+  global:
+  - secure: Pu3Qk0aBpBjj/AJVVaU3TGelNfbh128zZjrq0BU1I9xuODs70VE1O02OVKQbZMv/Wpa75zNCcAxPmvLNACnUeO2mswIC0EDVGcg4kFbAS6bhoqDIiH1EkNe6gg6ceOvu/5wme0i8aGynVA/Tjo5F5hdBumKtWeF0CBb/NT9RisCRnYGm6vtmNv6PcIQtWzz66+1maY9hAelA6j036WMzJehCPai4DnXCPIeJddBDBI3uo8ksTNeb1wpQ74xO1qfDu1aoOFEsmEfkhe4vT7ZEhBIVTMrfZ+voaB6jwWOfgqQ35v3FuInKLwx7ynAtU+/uimqaoCkXdfMM5VhSxM6Ckw86hpn4ll8RcBF3dWoqdPpTDuJEfQhnk2qcOxbhduUj4m2AlibJEPrnVDwKR2iC+CJgKOCVXuV+I6/DQXjieQD/5B2zkkaSamgTyhGIAPi9r8h5u1TngiQva3ZFXfbWSBlcpZHGeYiI5URJuLfAyWIrgA1IcZg/uACcpLIWcmQdhVn8hjpSxFpuLZyWMgJ+l7cTgCMhusrwnwsFe02ecak9elAFnS9JqmxbgtbiBBof8cjOwF/oJ0yPdveqTAjKRuol56IbFog4aDWQm2SK/NHtPJmkoOCcFMW5s+Qp1hZqF7fJWjxMj6gBy//9WSo/MslXeJ9v6nvhAi0lT3IQFgc=
+  matrix:
+  - distribution: ubuntu:16.04
+notifications:
+  email: false
+  slack:
+    rooms:
+      secure: UZ8frRZZBOBcg+Ig71A8UUCkqcrpEG7fT93qrTT7R2PssoSSKfPWrvCChbUQl4TbAR6IAO9ZU7iINLBSGagpFPoW45JRQLYKKnbeHogocp/PKVA5yhb7Yu/74WJypORyAHUEB6IpGwuIZvh8+H+FCt35fiifovCEkF47ICvZqokbNkgttn2PqeFVVINLQ4Mit7SDuXFNYdHj3dYpIUg6fbqkrU70K0Pf5aNeHAKjW0S514JesmCq68u0LyG3CH5qPRWLK2GCzMr7i6383rKfXVUHWvOYcK7gzvIHXrwv6RbiObIZoilGBoQ2wES45FGGmpjyLTS1rBpcKRYnHSiq+nDkLWbxozBc9qKBDdArshrQYAcLFzsIt3ck6C5UpjHXHSBvQrqd+VO0c7lLTPF9+XCXh6NNydNdaktHTIKAs90Xq8HUIHk8twtu/3lsrVPJnB8EJoNmGiI3fm3LBw+j5nKDtHNy1MdGhAU4go3nQWSs1P3oZwWVZECE6xusotTrL8g+6Soo8IZe33PO4Yjt7dW3qneJEX0sLBtVrPhnjb5ROQaLyNy7DXW8PSZNb/BiAkG3G2cZ045rD1n98z1YM3//v90YaQNZ/faRK4fi7eGGnAl1Arhz+P5kYZeFPn5Nig3V8/whwMj/Kf83QybU6EeCVDEMG2Yww+uPoaWNUe4=
+services:
+- docker
+before_install:
+- env | sort
+- docker --version
+script:
+- bash scripts/docker/install_docker.sh ${distribution} ${repo_url}
+after_failure:
+- docker logs fwk

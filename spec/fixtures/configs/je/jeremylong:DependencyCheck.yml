@@ -1,0 +1,79 @@
+language: java
+group: deprecated-2017Q4
+
+env:
+  global:
+    - secure: "ZUzhWfpXJw/oAeDlUkDFkEJMT0T7kCN3d7ah8urkL2B0KFfKOqQagkbXkgvDa1SYud8VdcnoGa69LfkEr5IrdqW7R4bEYZAiN5swm4Z0iO8t53szVspm2f+O9jQ44O/sfOfpfLxWUUuhdc7Vbrszp+tSszxdPmssWL+f5a/mfWs="
+    - secure: "pmFymoI7qH0Kna3NkcHrqLiTVWKmrhwqA4Z9U6XLhWDQxcs5g94wCCKpGB6Lkz9mkvRxBRFpZZelnXJa9W9mnuVOMIa5tQfS5gBuaNXOe7AXXdc+Y2975OR9sSfvf16FxLFvNJILmZq+bpMLs+EXaQvjYQHW2O6OWZdLhAPVG6A="
+    - secure: "omj5HP2wKdegLYp8/a24Wsoryb92+XYWheEkxp7CzHGDJB1Y4SSr315n/na/mdgd7lr1Ac+m4stYfCrclG7be71xWs6ApF+6I5QSzplJ1fyIF5piHrmhgw6ymIf/HBdeevggJM8igD8agCOwEETYFKfPEj5wFWhNQfxYwANbpl0="
+    - secure: "FqPcda7a6rEvGVYEyWeaFP+mIhZeJ6FGSdHvVRlBL0H9I3bz6eZg50g6DH3yo1bkmTPQ94eXdDpoKihk9+CDLl0TS+Sg9W8HplG3B2U1/6Yi3vd0T8yjKZC7xf0VZO6t8AT9vpFvzQBRZe24n+6kDtp2OiBzawJhgU5t09zH6is="
+    - secure: "Bh5LAk8XQnJ885jc/Lli2fhPKDx0TNZRxcJMnNo96EgwOnD+Zhw+v3u/DMCgyyrRToM8Bkca/HktrlZaRTk2htsdKZZ3RHFMCXO0fXCgpcf+wkaSYDF/lnErpSJG3Lrz8ILxJPODsrGhjaIg2++79lwhsBYtpujc6UdxFhgpffc="
+
+addons:
+  apt:
+    packages:
+      - jq
+  sonarcloud:
+    organization: "odc"
+    token:
+      secure: "YVDnYmonPug885Hmr2pLWBko+rQ+oKyTUA95ry0PGGyfgs0z6kPCjmWBDVm7K4GM7NOluldWb5gLMf0QXoHGstdp9L6fQCQElt8hZMOwJf+IR3bWjiG3VfVyyB3gJWBWlcJFM9NVyfICidwBH5ZiJ0+LXhKUgnNqarTh/YmNj9w="
+
+cache:
+  directories:
+    - "$HOME/.m2/repository"
+    - "$HOME/.sonar/cache"
+
+#removed as the codacy integration keeps breaking the build
+#before_install:
+#  - wget -O ~/codacy-coverage-reporter-assembly-latest.jar $(curl https://api.github.com/repos/codacy/codacy-coverage-reporter/releases/latest | jq -r .assets[0].browser_download_url)
+
+matrix:
+  include:
+    - jdk: oraclejdk8
+      env:
+        - JDK="JDK8"
+      script:
+        - if [ ! -z "$TRAVIS_TAG" ]; then travis_wait 60 mvn -s settings.xml install site site:stage -DreleaseTesting -Danalyzer.node.package.enabled=false -Danalyzer.node.audit.enabled=false; else travis_wait 60 mvn -s settings.xml install -DreleaseTesting -Danalyzer.node.package.enabled=false -Danalyzer.node.audit.enabled=false; fi
+
+#removed from after_success as the codacy integration keeps breaking the build
+#java -cp ~/codacy-coverage-reporter-assembly-latest.jar com.codacy.CodacyCoverageReporter -l Java -r build-reporting/target/coverage-reports/jacoco.xml;
+after_success:
+  - if [ "$JDK" == "JDK8" ]; then 
+      mvn sonar:sonar -Dsonar.java.coveragePlugin=jacoco -Dsonar.jacoco.reportPath=build-reporting/target/jacoco.xml;
+      ./coverity_scan.sh; 
+    fi;
+
+after_failure:
+    - cat /home/travis/build/jeremylong/DependencyCheck/maven/target/it/1551-verify-dependency-managemen/build.log
+    - cat /home/travis/build/jeremylong/DependencyCheck/maven/target/it/740-aggregate/build.log
+    - cat /home/travis/build/jeremylong/DependencyCheck/maven/target/it/617-hierarchical-cross-deps/build.log
+    - cat /home/travis/build/jeremylong/DependencyCheck/maven/target/it/618-aggregator-purge/build.log
+    - cat /home/travis/build/jeremylong/DependencyCheck/maven/target/it/618-aggregator-update-only/build.log
+    - cat /home/travis/build/jeremylong/DependencyCheck/maven/target/it/629-jackson-dataformat/build.log
+    - cat /home/travis/build/jeremylong/DependencyCheck/maven/target/it/690-threadsafety/build.log
+    - cat /home/travis/build/jeremylong/DependencyCheck/maven/target/it/710-pom-parse-error/build.log
+    - cat /home/travis/build/jeremylong/DependencyCheck/maven/target/it/729-system-scope-resolved/build.log
+    - cat /home/travis/build/jeremylong/DependencyCheck/maven/target/it/729-system-scope-skipped/build.log
+    - cat /home/travis/build/jeremylong/DependencyCheck/maven/target/it/730-multiple-suppression-files/build.log
+    - cat /home/travis/build/jeremylong/DependencyCheck/maven/target/it/730-multiple-suppression-files-configs/build.log
+    - cat /home/travis/build/jeremylong/DependencyCheck/maven/target/it/815-broken-suppression-aggregate/build.log
+    - cat /home/travis/build/jeremylong/DependencyCheck/maven/target/it/846-site-plugin/build.log
+    - cat /home/travis/build/jeremylong/DependencyCheck/maven/target/it/false-positives/build.log
+    - cat /home/travis/build/jeremylong/DependencyCheck/maven/target/it/1512-transitive-test/build.log
+
+deploy:
+  - provider: script
+    script: mvn --settings .travis.settings.xml source:jar javadoc:jar package deploy -DskipTests=true
+    skip_cleanup: true
+    on:
+      branch: master
+      jdk: oraclejdk8
+  - provider: pages
+    skip_cleanup: true
+    local_dir: target/staging
+    github_token: $GITHUB_TOKEN
+    on:
+      tags: true
+      branch: master
+      jdk: oraclejdk8
+ 

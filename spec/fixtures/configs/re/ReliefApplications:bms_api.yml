@@ -1,0 +1,62 @@
+language: php
+php: 
+  - '7.2'
+
+# Allows use container-based infrastructure
+sudo: false
+
+# Start mysql service
+services:
+  - mysql
+
+# Cache composer packages so "composer install" is faster
+cache:
+  directories:
+    - $HOME/.composer/cache/files
+
+# Define an environment variable
+env:
+  - SYMFONY_VERSION="3.4.*" DB=db_test
+
+# Update composer
+before_install:
+  - composer self-update
+
+# Install composer dependencies,
+# Create database, schema and fixtures
+install:
+  - cp app/config/parameters.yml.travis app/config/parameters.yml
+  - composer install
+  - php bin/console doctrine:database:create --env=test
+  - php bin/console doctrine:m:m -n --env=test
+  - php bin/console doctrine:fixtures:load -n --env=test
+  - php bin/console jrk:levenshtein:install
+
+jobs:
+    include:
+        - stage: test
+          script: ./vendor/bin/phpunit
+          fast_finish: true
+          php: 7.1
+        - stage: test
+          script: ./vendor/bin/phpunit
+          fast_finish: true
+          php: 7.2
+        - stage: deploy
+          if: branch = dev AND NOT type = "pull_request"
+          install:
+              - openssl aes-256-cbc -K $encrypted_1a0ec29b14f7_key -iv $encrypted_1a0ec29b14f7_iv -in ec2_bms.pem.enc -out ec2_bms.pem -d
+              - chmod 400 ./ec2_bms.pem
+          script: ./deploy.sh dev ./ec2_bms.pem
+        - stage: deploy
+          if: branch = voucher AND NOT type = "pull_request"
+          install:
+              - openssl aes-256-cbc -K $encrypted_1a0ec29b14f7_key -iv $encrypted_1a0ec29b14f7_iv -in ec2_bms.pem.enc -out ec2_bms.pem -d
+              - chmod 400 ./ec2_bms.pem
+          script: ./deploy.sh voucher ./ec2_bms.pem
+        - stage: deploy
+          if: branch = master AND NOT type = "pull_request"
+          install:
+              - openssl aes-256-cbc -K $encrypted_1a0ec29b14f7_key -iv $encrypted_1a0ec29b14f7_iv -in ec2_bms.pem.enc -out ec2_bms.pem -d
+              - chmod 400 ./ec2_bms.pem
+          script: ./deploy.sh master ./ec2_bms.pem

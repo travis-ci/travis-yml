@@ -32,10 +32,10 @@ describe Travis::Yml::Schema::Def::Deploy::Lambda, 'structure' do
                 '$ref': '#/definitions/deploy/edge'
               },
               access_key_id: {
-                '$ref': '#/definitions/secure'
+                '$ref': '#/definitions/type/secure'
               },
               secret_access_key: {
-                '$ref': '#/definitions/secure'
+                '$ref': '#/definitions/type/secure'
               },
               region: {
                 type: :string
@@ -68,13 +68,13 @@ describe Travis::Yml::Schema::Def::Deploy::Lambda, 'structure' do
                 type: :string
               },
               environment_variables: {
-                '$ref': '#/definitions/secure'
+                '$ref': '#/definitions/type/secure'
               },
               security_group_ids: {
-                '$ref': '#/definitions/strs'
+                '$ref': '#/definitions/type/strs'
               },
               subnet_ids: {
-                '$ref': '#/definitions/strs'
+                '$ref': '#/definitions/type/strs'
               },
               dead_letter_config: {
                 type: :string
@@ -93,7 +93,7 @@ describe Travis::Yml::Schema::Def::Deploy::Lambda, 'structure' do
                 type: :boolean
               },
               function_tags: {
-                '$ref': '#/definitions/secure'
+                '$ref': '#/definitions/type/secure'
               }
             },
             normal: true,

@@ -1,0 +1,109 @@
+language: python
+
+sudo: false
+
+env:
+  global:
+    - USE_CONDA=false
+    - COVERAGE=""
+
+python:
+  - 2.7
+  - 3.4
+  - 3.5
+  - 3.6
+  - pypy3.5-5.10.1
+
+addons:
+  firefox: "61.0.1"
+
+matrix:
+  include:
+    - python: 3.7
+      dist: xenial
+      sudo: true
+
+    - python: 2.7
+      env:
+        - USE_CONDA=true
+        - COVERAGE="--cov=asv --cov=test"
+
+    - python: 3.6
+      env: USE_CONDA=true
+
+    - python: 2.7
+      env:
+        - PYFLAKES=1
+      install:
+        - pip install pyflakes
+      script:
+        - |
+          set +e
+          SKIP="unable to detect undefined names"
+          SKIP="$SKIP|assigned to but never used"
+          SKIP="$SKIP|imported but unused"
+          SKIP="$SKIP|redefinition of unused"
+          SKIP="$SKIP|test/test_repo_template/asv_test_repo/__init__.py"
+          SKIP="$SKIP|asv/extern/asizeof.py"
+          SKIP="$SKIP|asv/benchmark.py.*undefined name .(run|params)."
+          PYFLAKES_NODOCTEST=1 pyflakes asv test | grep -E -v "$SKIP" > test.out; cat test.out; test \! -s test.out
+
+cache:
+  directories:
+    - $HOME/.cache/pip
+    - $HOME/download
+
+before_install:
+  - |
+    # Install Webdriver backend for Firefox:
+    set -e
+    mkdir -p $HOME/download
+    pushd $HOME/download
+    wget -nc https://github.com/mozilla/geckodriver/releases/download/v0.22.0/geckodriver-v0.22.0-linux64.tar.gz
+    mkdir $HOME/geckodriver
+    tar -xzf geckodriver-v0.22.0-linux64.tar.gz -C $HOME/geckodriver
+    popd
+    export PATH="$PATH:$HOME/geckodriver"
+
+install:
+  - |
+    set -e
+    export TRAVIS_PYTHON=`which python`
+    export TRAVIS_PIP=`which pip`
+    if [[ $USE_CONDA == true ]]; then
+      mkdir -p $HOME/download;
+      export MINICONDA_SH="Miniconda3-4.5.11-Linux-x86_64.sh";
+      pushd $HOME/download;
+      wget -N https://repo.continuum.io/miniconda/$MINICONDA_SH;
+      chmod +x $MINICONDA_SH;
+      ./$MINICONDA_SH -b;
+      popd;
+      . $HOME/miniconda3/etc/profile.d/conda.sh  # enable conda bash function
+      conda activate
+      conda install --yes conda conda-build bzip2
+      conda info
+      if $TRAVIS_PYTHON -c 'import virtualenv'; then echo "ERROR: virtualenv package is installed"; exit 1; fi;
+      $TRAVIS_PYTHON .continuous-integration/download_reqs.py
+    else
+      if $TRAVIS_PYTHON -c 'import sys; sys.exit(0 if "__pypy__" in sys.modules else 1)'; then
+        $TRAVIS_PIP install virtualenv;
+      else
+        $TRAVIS_PIP install virtualenv numpy scipy;
+      fi
+    fi
+    $TRAVIS_PIP install selenium six "pytest>=3.5" "pytest-xdist!=1.23.1,!=1.23.2" pytest-rerunfailures feedparser python-hglib;
+    if [[ "$COVERAGE" != '' ]]; then $TRAVIS_PIP install pytest-cov codecov; fi;
+  - $TRAVIS_PYTHON setup.py build_ext -i
+
+script:
+  - if [[ $USE_CONDA == true ]]; then PYTEST_PARALLEL=""; else PYTEST_PARALLEL="-n 3"; fi
+  - $TRAVIS_PYTHON -m pytest -l $COVERAGE $PYTEST_PARALLEL -vv --webdriver=FirefoxHeadless test
+
+after_script:
+  - if [[ "$COVERAGE" != '' ]]; then
+      $TRAVIS_PYTHON -m coverage xml;
+      codecov;
+    fi
+
+notifications:
+  email: false

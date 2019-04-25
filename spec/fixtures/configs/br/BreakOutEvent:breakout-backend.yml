@@ -1,0 +1,45 @@
+language: java
+jdk:
+  - openjdk8
+dist: trusty
+sudo: required
+addons:
+  apt:
+    packages:
+    - mysql-server-5.6
+    - mysql-client-core-5.6
+    - mysql-client-5.6
+    - unzip
+services:
+  - docker
+  - mysql
+notifications:
+  email: false
+  slack:
+    on_success: always
+    on_failure: always
+    secure: "hLCHcL3BnT4hXI1LQfPN8gOj9dEa9GFNIb8Fq7WT+dGPq3LoQpRUpbXzIGZ8f/uspsqTF+7ejVtENLVSY9+b89f1vpDRqiKhOrVMQKB1OK8rXZnJNENdgH6Rmddc/GzP/hB+Cpy9Otfq/GPkFCluOdJcHLGwlwkdtIe3kHs60jZIenLRbz81i+QprZWFEqlHeCGq0LKyu5hZZEqdl6JCs6+qNfhyFsEgubP04U/KZS7BQkA6xaU/KElWlWdNynwwppCpkSJIEGN+5uyLBgLaZCyeezdrzl/MLV5e5U1QqK6CKD2FeJiJCzju5jT5+T+OJF5AVRbo0t26VNBEebKTnymawKpVHfLlaJgXroNjm3OtOhxycvKTPfUCgjz7ca+xVm3RO8pBV4jUIhDLAEGS2SEfD+zVp9dyclNWLepmgCBtFNqnaLf8K7fbEV0bzelQZ3+ElIWQQ7RGF/lifZZe1Ube4gIY4SAIltc/gO8HwRUIKQS8TiuYCMIUNsQUawdJeQDOj3PtQvDWPiiopfZmVd2s7oqQM2pIbK4VsFRrQJ1k/1wXIVQLHxX5AjyFY49CKxBB2ho+Qzi82mciRQIKwSJMUKNdeutxYBo+AvcT9VICRcfFj6j2PWySH1csoF0r7KNfpJKzKGYNWvYhaa4Ot5CONJBj2ikoSKHDuiET2MU="
+cache:
+  directories:
+  - $HOME/.gradle/
+before_install:
+  - mysql -h 127.0.0.1 -u root -e "DROP DATABASE IF EXISTS test; CREATE DATABASE test;"
+jobs:
+  include:
+    - stage: build and test
+      script:
+        - gradle test
+    - stage: build docker image
+      script:
+        - |
+          openssl aes-256-cbc -K $encrypted_bdbf36a38ce4_key -iv $encrypted_bdbf36a38ce4_iv -in secrets.zip.enc -out secrets.zip -d && \
+          unzip secrets.zip && \
+          mv application-production.properties src/main/resources/application-production.properties && \
+          mv application-staging.properties src/main/resources/application-staging.properties && \
+          docker login -u $DOCKER_AZURE_USER -p $DOCKER_AZURE_PASS $DOCKER_REPO_AZURE && \
+          docker build -t $DOCKER_REPO_AZURE/breakout-backend:$(basename $TRAVIS_BRANCH) . && \
+          docker push $DOCKER_REPO_AZURE/breakout-backend:$(basename $TRAVIS_BRANCH) && \
+          rm "/home/${USER}/.docker/config.json"
+stages:
+  - build and test
+  - build docker image

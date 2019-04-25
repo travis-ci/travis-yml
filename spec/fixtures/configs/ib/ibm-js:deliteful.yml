@@ -1,0 +1,18 @@
+language: node_js
+node_js:
+  - "4.1"
+sudo: false
+env:
+  global:
+    - secure: "Ty9a+MKs2JxvGFsV+5Sq9zMLeqYX8OH8FIAzJ00Bw9YdLFcejlFeOqEtSQLPtelDt3kFtddkRssJl2ycLKa6IXPBx09aEQXuzW8o0XgSw+WfR8AqMiKU+N0GrAcyx1ejKnxXxuVHStf703HuCu44CexgCUCnXybKz6V60O+odwk="
+    - secure: "Nx+qPRZqdGfDWQ+lHSDd0TZlXlv9SJqU0WXTD2eMeYR1pPJAZtRtgC1F98qCsiFo/0Vi+JpKFq5W5u0eykfj/43TUQMUtjeJmzefyjZYTsDRoMjQViiX8XyyPEV3kTbTEV3NocQn5WZhB655+hRZqjP7ZzSh9N3tFwWBInY/AQU="
+
+install:
+   - npm install -g grunt-cli
+   - npm -g install bower
+   - npm install
+   - bower install
+
+script:
+   - grunt jshint test:remote
+

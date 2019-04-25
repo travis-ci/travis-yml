@@ -1,0 +1,54 @@
+language: android
+
+sudo: false
+
+before_install:
+   - ulimit -t 514029
+   - chmod +x gradlew
+   - chmod +x scripts/travis_upload_release_to_github.py
+   - mem=($(free -m | head -2 | tail -1)); if [ ${mem[6]} -eq 0 ]; then export BAD_VM=1; fi
+
+
+android:
+  components:
+    # The BuildTools version used by your project
+    - build-tools-28.0.3
+    # Uncomment the lines below if you want to
+    # use the latest revision of Android SDK Tools
+    - platform-tools
+    - tools
+    # The SDK version used to compile your project
+    - android-28
+    # Additional components
+    - extra-android-support
+    - extra-google-google_play_services
+    - extra-google-m2repository
+    - extra-android-m2repository
+    - addon-google_apis-google-22
+    # Specify at least one system image,
+    # if you need to run emulator(s) during your tests
+    #- sys-img-armeabi-v7a-android-22
+
+addons:
+  apt:
+    packages:
+      - python2.7
+      - libmagic1
+      
+before_script:
+  - export PATH=$HOME/.local/bin:$PATH
+  - pip install -r ./scripts/requirements.txt --user      
+   
+script: ./gradlew build --no-daemon
+
+after_success: ./scripts/travis_upload_release_to_github.py
+
+notifications:
+  email:
+    recipients:
+      - devashish@applozic.com
+      - adarsh@applozic.com
+      - ranjeet@applozic.com
+      - sunil@applozic.com
+
+

@@ -1,0 +1,59 @@
+language: python
+sudo: false
+matrix:
+  include:
+  - os: linux
+    env:
+    - PY=2.7
+    #- DEPLOY=True
+  - os: linux
+    env:
+    - PY=3.7
+  - os: osx
+    language: generic
+    env:
+    - PY=2.7
+  - os: osx
+    language: generic
+    env:
+    - PY=3.7
+branches:
+  only:
+  - master
+addons:
+  apt:
+    packages: opencl-headers
+before_install:
+- if [[ $encrypted_cb04388797b6_iv ]]; then openssl aes-256-cbc -K $encrypted_cb04388797b6_key -iv $encrypted_cb04388797b6_iv
+  -in .travis/travis_rsa.enc -out .travis/travis_rsa -d; fi;
+- echo $TRAVIS_OS_NAME
+- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
+  -O miniconda.sh; fi;
+- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then wget https://repo.continuum.io/miniconda/Miniconda3-latest-MacOSX-x86_64.sh
+  -O miniconda.sh; fi;
+- bash miniconda.sh -b -p $HOME/miniconda
+- export PATH="$HOME/miniconda/bin:$PATH"
+- hash -r
+- conda update --yes conda
+- conda info -a
+- conda install --yes python=$PY numpy scipy matplotlib docutils setuptools pytest
+install:
+- pip install bumps
+- pip install unittest-xml-reporting tinycc
+script:
+- python --version
+#- python -m sasmodels.model_test -v dll all
+#- python -m pytest -v --cache-clear
+- python setup.py test --pytest-args -v
+before_deploy:
+- echo -e "Host danse.chem.utk.edu\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
+deploy:
+  skip_cleanup: true
+  provider: script
+  script: "/bin/sh -ex ./deploy.sh"
+  on:
+    branch: master
+    condition: $DEPLOY = True
+notifications:
+  slack:
+    secure: xNAUeSu1/it/x9Q2CSg79aw1LLc7d6mLpcqSCTeKROp71RhkFf8VjJnJm/lEbKHNC8yj5H9UHrz5DmzwJzI+6oMt4NdEeS6WvGhwGY/wCt2IcJKxw0vj1DAU04qFMS041Khwclo6jIqm76DloinXvmvsS+K/nSyQkF7q4egSlwA=

@@ -11,7 +11,7 @@ describe Travis::Yml::Schema::Def::D, 'structure' do
         type: :object,
         properties: {
           d: {
-            '$ref': '#/definitions/strs'
+            '$ref': '#/definitions/type/strs'
           }
         },
         normal: true,

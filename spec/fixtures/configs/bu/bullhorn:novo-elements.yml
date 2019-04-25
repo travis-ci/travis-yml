@@ -1,0 +1,28 @@
+language: node_js
+node_js:
+  - 8
+
+env:
+  global:
+    - secure: "YCKTPsF1tiHjBYXUef1dW3FXxVRkdhGUfDxBQAwe7fyQnlzJsLsLlwzJavPaV59nkajhMTdXQX0mNdKO9dqp6R939AGgvHO9bF5an6uE0FJoRG6hDNj5kuYe6r2nQo2S2c7YrftwArfOVbhi/bZIXh73Si1961YR+vU5gTA/30HuiGrnG0zgvip6pxFVJEoBRvKJ5qaxZoeNXNgUW9Tb10EMOmcCBU0IYDXRK+Pl++gxQDc8tWQTKqR2fFe3dPWAwcohkJUZvY0s6AGVKkDVA2qQrpsDSmslBy51oWBE5t7FQwpCZWpVjHfzNc+9l2w2NTbqCYyvZgRtybyExv99dmWFTxDcb5KWznhIOWy4XQoAM4rPamV/KXvhQwdclgBkBGWrPJ1YEqklT+JY9vUOmTY0+WugZkp6iHIU48Lf46UTqMa0NZlz4MGrDXoEYHusJAwzBb6gtnpwtkt5ue8t8WjknCzUiSMd0iXFfirv8QE85adOij5acKMgKsLPf3eVja/fu9YEwCMSjzV0BQGkixOOcoeaMafHQ34By9OQA3zVkyJbS90NkyPnl08aV2L1kVJiubSeqVjEMHfqHMvNKGMkjLPvovGVS8J12pzURcci+5L33LowVyjDbdD24LuvDe9sJVvMksVTJjIZcq85jk+XdpwFFlXoMxyZDpCwFeQ="
+
+install:
+  - npm install -g npm
+  - npm cache verify
+  - npm install
+  - npm install -g angular-cli-ghpages
+
+script:
+  - npm run lint
+  - npm run build
+  - npm run build-ghpages
+
+after_success:
+  - if [ "$TRAVIS_BRANCH" == "master" -a "$TRAVIS_PULL_REQUEST" == "false" ] ; then angular-cli-ghpages --dir="dist-ghpages" --repo="https://${SNAPSHOT_GIT_TOKEN}@github.com/bullhorn/novo-elements.git" --name="Sr. Travis" --email="hi@travis.org"; fi
+  - cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js
+  - test $TRAVIS_PULL_REQUEST == "false" && test $TRAVIS_BRANCH = "master" && npm run galaxy -- $FIREBASE_URL $SLACK_WEB_HOOK $SLACK_CHANNEL
+  - test $TRAVIS_PULL_REQUEST == "false" && npm run snapshot-publish
+
+notifications:
+  slack:
+    secure: JRrQfxo0BQnktERRXqaEGphgY5kftwaGt7qzGuF4FaouiqnPa5G3DyPzn6YNHmSjp+H78h3dsd0hP3ZtgjaROwdtjqn//qJkjYeNYl/QxxZcsTErWAwdL6W+RfnRd5iHlNa8czASpjsltV3ZY4UYQ9aifXDnhnZC5hyT8z2DIfwkK+lkI6WK3vBsDvuX+Ae93xOScqUHg/z3RL/ewij/A9iEIouCD/65GAhTBR+lh1jbXGo3ZV52j3xjyBEJZCD2jzgZsUzbO8aPOKZ34cvnarQeG0M9DFSGpZ8FfjrssK97A6xla1jqKr+HtxlQTRG4AvKu3vwAOGV00P10TgszfsW03X++FOgRUrPiwwUdf8zXZQifMggNMz7v0dL0nnAfeL1c35nhionjHZ/hh0gMy3QUhy9WajV+vSI9YBZIitadQ8zgFazWv/CZtuYbS6+6bD9IM0icKar0MkbDs/duBZEGtlR54ASUksd9dWwFtyzmzc1Iw40bheJeWtZNLwocr6atst/tH/0OGDlxh+XbLVIxRLk7NogHtc80S+/eWAdDJAANDj3kUJBWedbSzJo1jOEmlARR9yMaXJpj8i9rphYM41YsaYTwU5TpPlwBODU0KETeRmb/HcGG1ITiFx3taI/ojnMnuA72g9Kq9uZjwNc+fd4GL7I/iqhAQNChQOQ=

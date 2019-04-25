@@ -1,0 +1,32 @@
+language: node_js
+cache: yarn
+
+notifications:
+  email: false
+  slack:
+    on_success: never
+    on_failure: always
+    secure: U+dYmbZcLrHZq1e7aeyrvZcZhCeTp2v0NcM3QyJoSAitNWbDkP0VTL/AfnNiVQFVGbjP1Ym7ixte7pznAyGozChLNnqRUxPBP1QwJczZ897j1ePuEU0DyIpJ6W6d7ULcGmmXnDkatcnCo9CHUB9QcICj3X+IP9dvu6yg/DhtlU8T98/GOeqOuzS1ypVA9g6mrG8ua+INE8Vda86OADLtTghV/ep0Z1NE17DlBVZbYNg+mg5I4EeVC4qyynKB/53DpHsG/MsFbJaTUIlWIWs/R5Il3be01t/cLzruUaIEOocJkow/Ni2t8Zj+oFKWUUy13Pwnygu39UjPkaVcR2vcUEuXgEr1SFJ4HB3oPDXiHpcq6Ts0YJnxJa1vNrCNTmAtXkgCus2s3IIxfsUVwALJ6s7QdGYJaq4jwyk/GJvg6CrMBfdgz71ilxpbdLhmJZNh1Qy/J2wHaYPz9jwJtReN/38QC47rArE5QiWmqzBn9Dnzl62QQ+b3oYsTLtHVZnu/ndyETOoh1ONZAqI/iIUCPFfn0iLsIVemYxG5LeYKHSnoB8idnTRXL6ZRv29LEm0GeZRTdY9L77W2Du/dYl9UmjfdM9dpIOrHubxA8m6joG5VeEO+2C+JLpRrH3OF01rTyaLkz9rU1BxlftoRGyc9iwxL2sBysCc9NBC6hKNVM2U=
+
+node_js:
+  - '8'
+
+env:
+  - CODECLIMATE_REPO_TOKEN=1d4a03bf4d8ae4c8a81d322c9d3690300fdb307c298d5fbc7eebaa3ba7c16b85
+
+script:
+  - yarn run lint:css -- --quiet
+  - yarn run lint:js -- --quiet
+  - yarn test -- --coverage
+  - yarn run build
+
+after_success:
+  - yarn semantic-release
+
+after_script:
+  - cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js
+  - cat ./coverage/lcov.info | ./node_modules/codeclimate-test-reporter/bin/codeclimate.js
+
+branches:
+  except:
+    - /^v\d+\.\d+\.\d+$/

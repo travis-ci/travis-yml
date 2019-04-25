@@ -1,0 +1,24 @@
+language: generic
+sudo:     false
+
+matrix:
+  fast_finish: true
+  allow_failures:
+  - os: osx
+
+env:
+  - IC_PYTHON_VERSION=3.7
+
+os:
+  - linux
+  - osx
+
+branches:
+  except:
+    - /^docs\..*$/
+
+install:
+  - source manage.sh work_in_python_version_no_tests ${IC_PYTHON_VERSION}
+
+script:
+  - HYPOTHESIS_PROFILE=hard bash manage.sh run_tests_par 4

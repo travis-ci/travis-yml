@@ -1,0 +1,26 @@
+dist: trusty
+sudo: false
+language: node_js
+
+node_js:
+  - "stable"
+
+env:
+  global:
+    - DISPLAY=:99.0
+  matrix:
+    - "ACCOUNT_SPLIT=xaa"
+    - "ACCOUNT_SPLIT=xab"
+    - "ACCOUNT_SPLIT=xac"
+    - "ACCOUNT_SPLIT=xad"
+    - "ACCOUNT_SPLIT=xae"
+
+before_install:
+  - sh -e /etc/init.d/xvfb start
+
+script:
+  - npm test
+  - split -l 6 account.txt
+  - cp -f "$ACCOUNT_SPLIT" account.txt
+  - chmod +x run.sh
+  - ./run.sh

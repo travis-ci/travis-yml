@@ -1,0 +1,20 @@
+language: node_js
+
+env:
+  global: HOT_BRANCH=master
+
+sudo: false
+
+node_js:
+  - '8'
+
+before_script:
+  - export TZ=Europe/Warsaw
+  - chmod ugo+x scripts/run-tests.sh
+
+script: "./scripts/run-tests.sh"
+
+notifications:
+  email: false
+  slack:
+    secure: HrdhnUTUhkUZstXWlFH99ks1DKyMKWjrGjCJnqjuIBAE/5dM+cvWrD6nRp90abXTmRXYH4nBcaVShuJ+pLYfm2JfBE92dw20jF7bHL/646GYVH5f/VMC6Pe63SKiZDQ50wkMAHOaih8wrR2qsV5H4EczGnCUWQ3S38No1NLS8oo=

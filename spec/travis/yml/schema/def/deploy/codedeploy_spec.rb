@@ -32,10 +32,10 @@ describe Travis::Yml::Schema::Def::Deploy::Codedeploy, 'structure' do
                 '$ref': '#/definitions/deploy/edge'
               },
               access_key_id: {
-                '$ref': '#/definitions/secure'
+                '$ref': '#/definitions/type/secure'
               },
               secret_access_key: {
-                '$ref': '#/definitions/secure'
+                '$ref': '#/definitions/type/secure'
               },
               application: {
                 type: :string

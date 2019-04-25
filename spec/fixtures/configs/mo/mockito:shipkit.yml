@@ -1,0 +1,28 @@
+# More details on how to configure the Travis build
+# https://docs.travis-ci.com/user/customizing-the-build/
+
+language: java
+
+matrix:
+  include:
+    - jdk: oraclejdk8
+      # Sanity regression tests with major supported Gradle versions
+      env: SHIPKIT_REGRESSION_TESTS=quick
+
+#don't build tags
+branches:
+  except:
+  - /^v\d/
+
+#Below skips the installation step completely (https://docs.travis-ci.com/user/customizing-the-build/#Skipping-the-Installation-Step)
+install:
+ - true
+
+before_script:
+  - _JAVA_OPTIONS=
+
+script:
+  - ./gradlew build testDownstream -PcheckJava8Compatibility -s && ./gradlew ciPerformRelease -s
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)

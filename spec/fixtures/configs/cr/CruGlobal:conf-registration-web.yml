@@ -1,0 +1,40 @@
+sudo: false
+language: node_js
+node_js: '7'
+script:
+- yarn run test -- --single-run
+- if [ "$TRAVIS_PULL_REQUEST" = "false" ] && ([ "$TRAVIS_BRANCH" == "master" ]
+  || [ "$TRAVIS_BRANCH" == "staging" ]); then yarn run build; fi
+after_success:
+- bash <(curl -s https://codecov.io/bash)
+cache:
+  yarn: true
+  directories:
+  - node_modules
+before_deploy:
+  - pip install --user awscli
+deploy:
+- provider: script
+  script: ~/.local/bin/aws s3 sync dist s3://cru-ert-web-stage --region us-east-1 --acl public-read --exclude '*.html' --cache-control 'public, max-age=31536000' --delete
+  skip_cleanup: true
+  on:
+    branch: staging
+- provider: script
+  script: ~/.local/bin/aws s3 sync dist s3://cru-ert-web-stage --region us-east-1 --acl public-read --include '*.html' --cache-control 'public, no-cache' --delete
+  skip_cleanup: true
+  on:
+    branch: staging
+- provider: script
+  script: ~/.local/bin/aws s3 sync dist s3://cru-ert-web-prod --region us-east-1 --acl public-read --exclude '*.html' --cache-control 'public, max-age=31536000'
+  skip_cleanup: true
+  on:
+    branch: master
+- provider: script
+  script: ~/.local/bin/aws s3 sync dist s3://cru-ert-web-prod --region us-east-1 --acl public-read --include '*.html' --cache-control 'public, max-age=180'
+  skip_cleanup: true
+  on:
+    branch: master
+env:
+  global:
+  - AWS_ACCESS_KEY_ID=AKIAJ3CKARY2R6SAMKDA
+  - secure: SrUj83k6YW7o4xwsRw/20zRglGita1wKplb13zKFyCLPyNJABoomxN0D88umcUCVLUoy3ICjja4U4BM/hH85pDD+WlQWjTg2AyGDDoyVzCY6IOgqNAQaU7UET09VKs7HmQ1KcqBB8KbEgNxtQMARFtWDRvmISjOfnSRRul2phg8=

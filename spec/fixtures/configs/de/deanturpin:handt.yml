@@ -1,0 +1,24 @@
+language: python
+python: "3.6"
+script:
+  - make CXX=g++-8 && mv tmp/readme.md .
+  - echo -e "\n```" $(sloccount *.h *.cpp *.py) "```" >> readme.md
+  - cppcheck --enable=all .
+
+deploy:
+  provider: pages
+  github-token: ${api_key}
+  skip-cleanup: true
+  on:
+    branch: master
+
+matrix:
+  include:
+    - os: linux
+      addons:
+        apt:
+          sources: ubuntu-toolchain-r-test
+          packages:
+            - g++-8
+            - cppcheck
+            - sloccount

@@ -1,0 +1,106 @@
+language: scala
+sudo: false
+
+services:
+  - docker
+
+before_install:
+  # upgrade to a later docker-compose which supports services.kafka.scale
+  - sudo rm /usr/local/bin/docker-compose
+  - curl -L https://github.com/docker/compose/releases/download/1.22.0/docker-compose-`uname -s`-`uname -m` > docker-compose
+  - chmod +x docker-compose
+  - sudo mv docker-compose /usr/local/bin
+  # fetch full history for correct current and previous version detection
+  - git fetch --unshallow
+  # using jabba for custom jdk management
+  - curl -sL https://raw.githubusercontent.com/shyiko/jabba/0.11.2/install.sh | bash && . ~/.jabba/jabba.sh
+  - jabba install adopt@~1.8.202-08
+  - jabba install adopt@~1.11.0-2
+
+script:
+  - jabba use ${JDK:=adopt@~1.8.202-08}
+  - java -version
+  - sbt -jvm-opts .jvmopts-travis "$CMD"
+
+jobs:
+  include:
+    - stage: check
+      script: sbt scalafmtCheck || { echo "[error] Unformatted code found. Please run 'Test/compile' and commit the reformatted code."; false; }
+      name: "Code style check (fixed with `sbt Test/compile`)"
+    - script: sbt scalafmtSbtCheck || { echo "[error] Unformatted sbt code found. Please run 'scalafmtSbt' and commit the reformatted code."; false; }
+      name: "Build code style check (fixed with `sbt scalafmtSbt`)"
+    - env: CMD="++2.11.12 Test/compile"
+      name: "Compile all tests (with Scala 2.11)"
+    - env: CMD="unidoc"
+      name: "Create all API docs"
+    - env: CMD="docs/Paradox/paradox"
+      name: "Create site with Paradox"
+
+    - stage: test
+      env: CMD="+test"
+      name: "Run tests (AdoptOpenJDK 8)"
+
+    - env:
+      - JDK="adopt@~1.11.0-2"
+      - CMD="+test"
+      name: "Run tests (AdoptOpenJDK 11)"
+
+    - env: CMD="mimaReportBinaryIssues"
+      name: "Check binary compatibility"
+
+    - stage: integration
+      env: CMD="dockerComposeTestAll"
+    - env: CMD="benchmarks/It/compile"
+
+    - stage: whitesource
+      env: CMD=";whitesourceCheckPolicies ;whitesourceUpdate"
+
+    - stage: publish
+      env: CMD="+publish"
+      name: "Publish artifacts for all Scala versions"
+    - script: openssl aes-256-cbc -K $encrypted_d80875c2ae41_key -iv $encrypted_d80875c2ae41_iv -in .travis/travis_alpakka_kafka_rsa.enc -out .travis/id_rsa -d && eval "$(ssh-agent -s)" && chmod 600 .travis/id_rsa && ssh-add .travis/id_rsa && sbt -jvm-opts .jvmopts-travis docs/publishRsync
+      name: "Publish API and reference documentation"
+
+stages:
+  # runs on master commits and PRs
+  - name: check
+    if: NOT tag =~ ^v
+
+  # runs on master commits and PRs
+  - name: test
+    if: NOT tag =~ ^v
+    
+  # runs on master commits and PRs
+  - name: integration
+    if: NOT tag =~ ^v
+
+  # runs on main repo master commits and version-tagged commits
+  - name: whitesource
+    if: repo = akka/alpakka-kafka AND ( ( branch = master AND type = push ) OR tag =~ ^v )
+
+  # runs on main repo master commits and version-tagged commits
+  - name: publish
+    if: repo = akka/alpakka-kafka AND ( ( branch = master AND type = push ) OR tag =~ ^v )
+
+after_failure:
+  - docker-compose logs
+  - find . -name "*.log" -exec ./scripts/cat-log.sh {} \;
+
+before_cache:
+  - find $HOME/.ivy2/ -name "ivydata-*.properties" -print -delete
+  - find $HOME/.sbt   -name "*.lock"               -print -delete
+
+cache:
+  directories:
+    - $HOME/.ivy2/cache
+    - $HOME/.sbt/boot
+    - $HOME/.jabba/jdk
+
+env:
+  global:
+    # encrypt with: travis encrypt WHITESOURCE_PASSWORD=...
+    - secure: "ed6tomZjtrq85XLGvpoA1KUcZ55OoWiPdwN0ujqRTTGilOG2p9jAZCARYNSXWdSAtga0gKoW1nCy7SMzl3lcdP5Hlj7MK96R5h7QTHeTh5k8R/aG5fFilWnrvY2rsh0EvuINUkjvyl/jRxDDQpN8mm0NZwHRdsK0sMly4G6XNdY="
+    # encrypt with: travis encrypt BINTRAY_USER=...
+    - secure: "EQU8T1lwWKm4770Ivz2QLn830iCC+GrjthZsbatx+0kmnNMotc3Mllxjt4Iph+qnq5ffQK8DRQoTVLHBGavNDkooOBC3irrMwuvtRto5NlcscHfF1OBU1AVlVhregONmThDWQHyA/0l5w68A9Eqe6XrCLdRnwtWM+maud9FqHSU="
+    # encrypt with: travis encrypt BINTRAY_PASS=...
+    - secure: "cQY+jITDEZ9rdhHA8ZXYuf3Phrf6UkJqjYdsmtvSe4KNX7W2debD+xIkLZEUC0mC0VC/b2FiN2J+ONY+pS/+j8k8J6SrkSiLUJP1E/7NU7MhoR2tFWNuepO3AcJd/5pDg5n7NQ7H4rwOCSEPIFw4ZN85Lps2NqVCmLQ7piQ1G7g="

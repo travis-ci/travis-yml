@@ -1,0 +1,79 @@
+# Config file for automatic testing at travis-ci.org
+# This file will be regenerated if you run travis_pypi_setup.py
+git:
+  depth: 20
+
+language: python
+cache: pip
+python:
+  - 2.7
+  - 3.4
+  - 3.5
+  - 3.6
+  - 3.7-dev
+
+# matrix:
+#   allow_failures:
+#     - python: 3.7-dev
+
+install:
+  - pip install --upgrade setuptools pip wheel
+
+script:
+  - pip install -r requirements_dev.txt
+
+  ## Check standalone `pvlib.run`
+  #
+  - cd bin
+  - ./pvlib.run -V
+  - python ./pvlib.run --help
+  - python ./pvlib.run -m polyversion  -v
+  - PYTHONPATH=./pvlib.run  python -m polyversion polyversion foo
+  - cd -
+
+  ## Build and smoketest WHEELs
+  #
+  - sed -i 's/polyversion_check_bdist_enabled = true/polyversion_check_bdist_enabled = false/' setup.cfg
+  - |
+    python pvlib/setup.py build bdist_wheel && \
+    pip install dist/polyversion-*.whl && \
+    polyversion polyversion polyvers
+
+    if [ $TRAVIS_PYTHON_VERSION \> '3.5' ]; then
+        rm -rf build/* dist/*
+        python setup.py build bdist_wheel  && \
+        pip install dist/polyvers-*.whl && \
+        polyvers status -a
+    fi
+  - pip uninstall -y polyversion polyvers
+
+  ## Install sources and PYTEST both pvlib & pvcmd with COVERAGE.
+  #
+  - |
+    pip install -e ./pvlib[test] &&
+    polyversion --help
+
+  - |
+    if [ $TRAVIS_PYTHON_VERSION \> '3.5' ]; then
+        echo -e "\n## PYTEST both pvlib & pvcmd with COVERAGE."
+        pip install -e .[test] && \
+        polyvers --help && \
+        pytest pvlib --cov=polyversion --cov-report=term-missing && \
+        pytest pvcmd --cov=polyvers --cov-report=term-missing
+    else
+        pytest pvlib
+    fi
+
+  ## LINTERS
+  #
+  - |
+    if [ $TRAVIS_PYTHON_VERSION \> '3.5' ]; then
+        bin/lint.sh
+    fi
+
+after_success:
+  - |
+    if [ $TRAVIS_PYTHON_VERSION \> '3.5' ]; then
+        pip install python-coveralls
+        coveralls
+    fi

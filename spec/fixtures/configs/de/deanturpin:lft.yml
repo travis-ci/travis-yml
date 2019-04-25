@@ -1,0 +1,8 @@
+script: make clean all && cat readme.md
+
+deploy:
+  provider: pages
+  github-token: ${api_key}
+  skip-cleanup: true
+  on:
+    branch: master

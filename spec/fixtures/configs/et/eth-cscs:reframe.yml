@@ -1,0 +1,17 @@
+dist: xenial
+language: python
+python:
+    - "3.5"
+    - "3.6"
+    - "3.7"
+
+install:
+    - pip install -r requirements.txt
+    - pip install codecov
+
+script:
+    - coverage run --source=reframe,unittests ./test_reframe.py
+    - coverage report -m
+
+after_success:
+    - codecov

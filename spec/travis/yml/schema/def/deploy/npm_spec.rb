@@ -32,10 +32,10 @@ describe Travis::Yml::Schema::Def::Deploy::Npm, 'structure' do
                 '$ref': '#/definitions/deploy/edge'
               },
               email: {
-                '$ref': '#/definitions/secure'
+                '$ref': '#/definitions/type/secure'
               },
               api_key: {
-                '$ref': '#/definitions/secure'
+                '$ref': '#/definitions/type/secure'
               }
             },
             normal: true,

@@ -1,0 +1,49 @@
+# http://stackoverflow.com/questions/9321153/rails-database-setup-on-travis-ci
+
+addons:
+  firefox: "46.0.1"
+
+# Tell TravisCI to use container-based testing (faster)
+sudo: false
+
+# Tell TravisCI to cache bundle installs
+cache: 
+  - bundler
+  - yarn
+
+# Language to use is Ruby
+language: ruby
+
+# Database Environment is mysql
+env:
+  - DB=mysql
+  - MOZ_HEADLESS=1
+
+# Use Ruby 2.0.0
+rvm:
+  - 2.2.3
+
+notifications:
+  slack: thecourseforum:issU3RUdO71y1A5saeTL07X3
+
+# fix for bundler v2 error: https://docs.travis-ci.com/user/languages/ruby/
+# commented out because of `gem install bundler -v 1.17.3` in `before_script`
+# before_install:
+#   - gem uninstall -v '>= 2' -i $(rvm gemdir)@global -ax bundler || true
+#   - gem install bundler -v '< 2'
+
+# Commands to run before tests. Create DB config file and create database.
+before_script:
+  - gem install bundler -v 1.17.3
+  - cp config/database.yml.skel config/database.yml
+  - cp config/initializers/devise.rb.example config/initializers/devise.rb
+  - RAILS_ENV=test bundle exec rake db:create
+  - export DISPLAY=:99.0
+  - /sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -ac -screen 0 1280x1024x16
+  - bundle exec rake db:test:prepare
+  - nvm install 11.13.0
+  - sudo apt remove cmdtest
+  - curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
+  - echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
+  - sudo apt-get update && sudo apt-get install yarn
+  - yarn install

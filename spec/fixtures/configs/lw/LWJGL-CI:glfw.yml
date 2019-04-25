@@ -1,0 +1,49 @@
+dist: trusty
+sudo: required
+group: deprecated-2017Q4
+git:
+  depth: 3
+env:
+  global:
+  - secure: "MhcV5a3N8vrJ68sLcqQkH9F/gN2r2ibNM2y7yrt+mJ9N5WLl9bdzIEWyUD4AAwBk6Rf9BTQ25utpbWIlPLo2rwChh4yldGA/PQF3IJju4nlJLuVjX9XPk9PEZLYbwQGumMiRb0TonwvNNG5SyrM+mu/YT3oDKwykLtTG4lz3p14="
+  - secure: "CqpA+9sezpt3BXRuocToa9dDTOMEpg08XCy9WX73PbfoDHFEPXSEboY46VhbX4p3KJeRZ2Go5zQS5pPB7+CubMMKmb1xmo1pnHtmWemnnfHzSRPEM27wMokNkYLY8jIRcZkdJpZHWjGWV4fzr6cDMg3t22gzOB+eUnGCLa7Ziqo="
+language: c
+compiler: gcc
+
+addons:
+  apt:
+#    sources:
+#    - ubuntu-toolchain-r-test
+    packages:
+#    - gcc-7
+    - cmake
+    - cmake-data
+    - libxrandr-dev
+    - libxinerama-dev
+    - libxcursor-dev
+    - libxi-dev
+    - libwayland-dev
+    - libxkbcommon-dev
+    - libegl1-mesa-dev
+
+before_install:
+- pip install --user awscli
+- export PATH=$PATH:$HOME/.local/bin
+
+script:
+- mkdir build
+- cd build
+- wget https://mirrors.kernel.org/ubuntu/pool/universe/e/extra-cmake-modules/extra-cmake-modules_5.38.0a-0ubuntu1_amd64.deb
+- sudo dpkg -i extra-cmake-modules_5.38.0a-0ubuntu1_amd64.deb
+- git clone git://anongit.freedesktop.org/wayland/wayland-protocols
+- pushd wayland-protocols;
+- git checkout 1.15 && ./autogen.sh --prefix=/usr && make && sudo make install;
+- popd;
+#- CC="gcc-7" cmake -DGLFW_USE_WAYLAND=ON -DBUILD_SHARED_LIBS=ON -DGLFW_BUILD_EXAMPLES=OFF -DGLFW_BUILD_TESTS=OFF -DGLFW_BUILD_DOCS=OFF -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_FLAGS="-U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0" -DCMAKE_SHARED_LINKER_FLAGS=-Wl,--wrap,memcpy ..
+- cmake -DGLFW_USE_WAYLAND=ON -DBUILD_SHARED_LIBS=ON -DGLFW_BUILD_EXAMPLES=OFF -DGLFW_BUILD_TESTS=OFF -DGLFW_BUILD_DOCS=OFF -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_FLAGS="-U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0" -DCMAKE_SHARED_LINKER_FLAGS=-Wl,--wrap,memcpy ..
+- cmake --build .
+- cd src
+- strip libglfw.so
+- "aws s3 cp libglfw.so s3://build.lwjgl.org/nightly/linux/x64/libglfw_wayland.so --acl public-read --cache-control \"public, must-revalidate, proxy-revalidate, max-age=0\""
+- "git log --first-parent --pretty=format:%H HEAD~2..HEAD~1 > revision.git"
+- "aws s3 cp revision.git s3://build.lwjgl.org/nightly/linux/x64/libglfw_wayland.so.git --acl public-read --cache-control \"public, must-revalidate, proxy-revalidate, max-age=0\""

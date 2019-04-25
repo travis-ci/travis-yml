@@ -1,0 +1,51 @@
+matrix:
+  include:
+    - os: linux
+      dist: xenial
+      language: python
+      python: 3.6
+      # Coverage for the baseline 3.6 build: include some optional packages
+      before_script:
+        - pip3 install eventlet gevent pygame tornado twisted
+        # pycairo / pygobject need native libraries
+        - sudo apt-get install -y libgirepository1.0-dev gir1.2-gtk-3.0
+        - pip3 install pycairo pygobject
+      script:
+        - coverage run --source=rx setup.py test && coveralls
+
+    - os: linux
+      dist: xenial
+      language: python
+      python: 3.7
+
+    - os: linux
+      dist: xenial
+      language: python
+      python: 3.8-dev
+
+    - os: osx
+      osx_image: xcode10.1
+      language: sh
+      python: 3.7
+
+    - os: windows
+      language: sh
+      python: 3.7
+      before_install:
+        - choco install python3
+        - ln -s "/c/Python37/python.exe" "/c/Python37/python3.exe"
+        - export PATH="/c/Python37:/c/Python37/Scripts/:$PATH"
+
+install:
+  - python3 setup.py install
+  - pip3 install coveralls coverage
+  - pip3 install pytest>=3.0.2 pytest-asyncio pytest-cov --upgrade
+
+script:
+  - python3 setup.py test
+
+after_success:
+  # Run a crude benchmark (unit tests minus concurrency) a couple of times.
+  # Need to make a copy of the script first, because on Windows it disappears
+  # whilst switching git branches.
+  - cp ./.travis/bench.sh bench.sh && ./bench.sh

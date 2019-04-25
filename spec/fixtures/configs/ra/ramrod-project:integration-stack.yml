@@ -1,0 +1,43 @@
+# We will need sudo to run docker commands
+# TODO:
+
+sudo: required
+
+# In case we need python for testing at come
+# point.
+language: python
+
+# Working with version 3.6
+python:
+  - "3.6"
+
+# We require docker
+services:
+  - docker
+
+branches:
+  only:
+  - master
+  - dev
+  - qa
+
+# The following are the pipeline stages. They
+# are executed in order inside of a VM in a bash
+# shell, (thus they use bash syntax).
+# 
+# This step runs before the install step,
+# and is the first step in this case. Here we
+# pull down the requisite code from the
+# repository.
+# 
+before_install:
+  - if [ "$TRAVIS_BRANCH" == "master" ]; 
+    then export TAG=latest;
+    else export TAG=$TRAVIS_BRANCH; fi
+
+# Run integration test script
+script:
+  - ./scripts/e2e.sh
+
+notifications:
+  slack: ramrod-project:GDF82rRYDg3KSekrT3GA24qO

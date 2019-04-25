@@ -1,0 +1,54 @@
+language: php
+php:
+ - '7.1'
+cache:
+  directories:
+    - $HOME/.composer/cache
+stages:
+  - lint
+  - test
+  - deploy
+jobs:
+  include:
+    - stage: lint
+      name: "Lint index"
+      script: php -l public/index.php
+      install: skip
+    - script: php -l api/index.php
+      name: "Lint api"
+      install: skip
+    - script: php vendor/bin/twig-lint lint Mini/view/
+      name: "Lint twig"
+      install: composer install
+    - stage: test
+      php:
+        - '7.1'
+      services:
+        - mysql
+      install:
+        - composer install
+        - mysql -e "CREATE DATABASE twitchbots"
+      script: phpunit test
+      after_success:
+        - bash <(curl -s https://codecov.io/bash)
+        - rm clover.xml
+    - stage: deploy
+      if: branch = master AND repo = freaktechnik/twitchbots
+      name: "Deploy to stage"
+      script: skip
+      install: skip
+      deploy:
+        provider: script
+        script: .travis/stage.sh
+        on:
+          branch: master
+    - stage: deploy
+      script: skip
+      if: tag IS present AND repo = freaktechnik/twitchbots
+      name: "Deploy to prod"
+      install: skip
+      deploy:
+        provider: script
+        script: .travis/deploy.sh
+        on:
+          tags: true

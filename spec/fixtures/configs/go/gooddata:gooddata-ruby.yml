@@ -1,0 +1,301 @@
+language: ruby
+cache: bundler
+stages:
+- name: before-merge
+  if: type IN (push, pull_request)
+- name: after-merge
+  if: type IN (api, cron)
+- name: platform-cleanup
+  if: type IN (cron)
+- name: gem-release
+  if: branch = master AND type = push
+- name: gem-smoke-test
+  if: branch = master AND type = push
+
+git:
+  depth: false # this is needed for pronto
+
+jobs:
+  include:
+  # BEFORE MERGE
+  - name: pronto code review
+    stage: before-merge
+    script: |
+      git remote add upstream https://github.com/gooddata/gooddata-ruby.git
+      git fetch upstream develop
+      failed=0
+      PRONTO_FLAY_MASS_THRESHOLD=50 bundle exec pronto run -c upstream/develop --exit-code lib || failed=1
+      PRONTO_FLAY_MASS_THRESHOLD=100 bundle exec pronto run -c upstream/develop --exit-code spec || failed=1
+      if [ "$failed" -ne 0 ] ; then
+          exit 1
+      fi
+
+    #  UNIT TESTS ON LINUX IN ALL SUPPORTED RUBY VERSIONS
+  - name: unit tests 2.3
+    stage: before-merge
+    script: bundle exec rake test:unit
+    rvm: 2.3
+
+  - name: unit tests 2.4
+    stage: before-merge
+    script: bundle exec rake test:unit
+    rvm: 2.4
+
+  - name: unit tests 2.5
+    stage: before-merge
+    script: bundle exec rake test:unit
+    rvm: 2.5
+
+  - name: unit tests 2.6
+    stage: before-merge
+    script: bundle exec rake test:unit
+    rvm: 2.6
+
+  - name: unit tests jruby-9.1.14
+    stage: before-merge
+    script: bundle exec rake test:unit
+    rvm: jruby-9.1.14
+
+  - name: sdk integration (vcr) tests - base
+    stage: before-merge
+    script: bundle exec rake test:sdk
+    env: VCR_RECORD_MODE=none
+    rvm: 2.3
+
+  - name: sdk integration (vcr) tests - project
+    stage: before-merge
+    script: bundle exec rake test:project
+    env: VCR_RECORD_MODE=none
+    rvm: 2.3
+
+  - name: lcm integration (vcr) tests - e2e
+    stage: before-merge
+    script: bundle exec rspec spec/lcm/integration/lcm_end_to_end_spec.rb
+    env:
+    - VCR_RECORD_MODE=none
+    - GD_ENV=development
+    rvm: 2.3
+
+  #  AFTER MERGE
+  #  staging 1
+  - &lcm-integration-tests
+    name: staging1 - lcm integration tests
+    stage: after-merge
+    script: |
+      bundle exec rake -f lcm.rake docker:build
+      bundle exec rake -f lcm.rake docker:bundle
+      bundle exec rake -f lcm.rake test:docker:integration
+    env:
+    - VCR_ON=false
+    - GD_ENV=staging
+    rvm: jruby-9.1.14
+
+  - &lcm-slow-tests
+    name: staging1 - lcm slow tests
+    stage: after-merge
+    script:
+      - sudo keytool -importcert -alias gooddata-2008 -file "./data/2008.crt" -keystore $JAVA_HOME/jre/lib/security/cacerts -trustcacerts -storepass 'changeit' -noprompt
+      - sudo keytool -importcert -alias gooddata-int -file "./data/new_ca.cer" -keystore $JAVA_HOME/jre/lib/security/cacerts -trustcacerts -storepass 'changeit' -noprompt
+      - sudo keytool -importcert -alias gooddata-prod -file "data/new_prodgdc_ca.crt" -keystore $JAVA_HOME/jre/lib/security/cacerts -trustcacerts -storepass 'changeit' -noprompt
+      - bundle exec rake -f lcm.rake test:slow
+    env:
+    - VCR_ON=false
+    - GD_ENV=staging
+    rvm: jruby-9.1.14
+
+  - &userprov-tests
+    name: staging1 - user provisioning tests
+    stage: after-merge
+    script: |
+      bundle exec rake -f lcm.rake docker:build
+      bundle exec rake -f lcm.rake docker:bundle
+      bundle exec rake -f lcm.rake test:docker:userprov
+    env:
+    - VCR_ON=false
+    - GD_ENV=staging
+    rvm: jruby-9.1.14
+
+  - &bricks-smoke-tests
+    name: staging1 - bricks smoke tests
+    stage: after-merge
+    script: bundle exec rake -f lcm.rake test:smoke
+    env:
+    - GD_ENV=staging
+    - VCR_ON=false
+    rvm: jruby-9.1.14
+
+  - &sdk-integration-tests
+    name: staging1 - sdk integration tests - base
+    stage: after-merge
+    script: bundle exec rake test:sdk
+    env:
+    - VCR_ON=false
+    - GD_ENV=staging
+    rvm: jruby-9.1.14
+
+  - &sdk-integration-tests-project
+    name: staging1 - sdk integration tests - project
+    stage: after-merge
+    script: bundle exec rake test:project
+    env:
+    - VCR_ON=false
+    - GD_ENV=staging
+    rvm: jruby-9.1.14
+
+  # staging 2
+  - <<: *lcm-integration-tests
+    name: staging2 - lcm integration tests
+    env:
+    - GD_ENV=testing
+    - VCR_ON=false
+
+  - <<: *lcm-slow-tests
+    name: staging2 - lcm slow tests
+    env:
+    - GD_ENV=testing
+    - VCR_ON=false
+
+  - <<: *userprov-tests
+    name: staging2 - lcm user provisioning tests
+    env:
+    - GD_ENV=testing
+    - VCR_ON=false
+
+  - <<: *bricks-smoke-tests
+    name: staging2 - bricks smoke tests
+    env:
+    - GD_ENV=testing
+    - VCR_ON=false
+
+  - <<: *sdk-integration-tests
+    name: staging2 - sdk integration tests - base
+    env:
+    - GD_ENV=testing
+    - VCR_ON=false
+
+  - <<: *sdk-integration-tests-project
+    name: staging2 - sdk integration tests - project
+    env:
+    - GD_ENV=testing
+    - VCR_ON=false
+
+  # staging 3
+  - <<: *lcm-integration-tests
+    name: staging3 - lcm integration tests
+    env:
+    - GD_ENV=development
+    - VCR_ON=false
+
+  - <<: *lcm-slow-tests
+    name: staging3 - lcm slow tests
+    env:
+    - GD_ENV=development
+    - VCR_ON=false
+
+  - <<: *userprov-tests
+    name: staging3 - lcm user provisioning tests
+    env:
+    - GD_ENV=development
+    - VCR_ON=false
+
+
+  - <<: *bricks-smoke-tests
+    name: staging3 - bricks smoke tests
+    env:
+    - GD_ENV=development
+    - VCR_ON=false
+
+  - <<: *sdk-integration-tests
+    name: staging3 - sdk integration tests - base
+    env:
+    - GD_ENV=development
+    - VCR_ON=false
+
+  - <<: *sdk-integration-tests-project
+    name: staging3 - sdk integration tests - project
+    env:
+    - GD_ENV=development
+    - VCR_ON=false
+
+  # cleanups
+  - &cleanup
+    stage: after-merge
+    name: staging1 - test environment clean-up
+    script: bundle exec ruby bin/test_projects_cleanup.rb -f
+    env: GD_ENV=staging
+
+  - <<: *cleanup
+    name: staging2 - test environment clean-up
+    env: GD_ENV=testing
+
+  - <<: *cleanup
+    name: staging3 - test environment clean-up
+    env: GD_ENV=development
+
+  # AFTER MERGE UNIT TESTS ON ALTERNATIVE PLATFORM
+
+  - name: unit tests 2.3
+    stage: after-merge
+    script: bundle exec rake test:unit
+    os: osx
+    osx_image: xcode7.3
+    rvm: 2.3
+
+  - name: unit tests 2.4
+    stage: after-merge
+    script: bundle exec rake test:unit
+    os: osx
+    osx_image: xcode9.3
+    rvm: 2.4
+
+  - name: unit tests 2.5
+    stage: after-merge
+    script: bundle exec rake test:unit
+    os: osx
+    osx_image: xcode9
+    rvm: 2.5
+
+  - name: unit tests 2.6
+    stage: after-merge
+    script: bundle exec rake test:unit
+    os: osx
+    osx_image: xcode9
+    rvm: 2.6
+
+  - name: unit tests jruby-9.1.14
+    stage: after-merge
+    script: bundle exec rake test:unit
+    os: osx
+    rvm: jruby-9.1.14
+
+  - stage: gem-release
+    name: deploy MRI gem
+    rvm: 2.3
+    deploy:
+      provider: rubygems
+      gem: gooddata
+      api_key: $RUBYGEMS_API_KEY
+  - stage: gem-release
+    name: deploy JRuby gem
+    rvm: jruby-9.1.14
+    script: |
+      echo -e "---\n:rubygems_api_key: $RUBYGEMS_API_KEY" > ~/.gem/credentials
+      chmod 0600 ~/.gem/credentials
+      bundle exec rake gem:release
+  - &gem-smoke-test
+    stage: gem-smoke-test
+    name: smoke test MRI gem
+    rvm: 2.3
+    script: |
+      gem install gooddata
+      ruby -e "require 'gooddata';GoodData.version"
+  - <<: *gem-smoke-test
+    name: smoke test JRuby gem
+    rvm: jruby-9.1.14
+
+notifications:
+  email:
+    recipients:
+      secure: AMTssALc5Qt4ApAoI7gCmqP3d7AL0dGyZ+DsxYYlas2T0tjXdOH97XlY2jRzFSxZU1P3JKJkjHLmxu0m908Q28SQVcdBlK29Ofyl2pwGnniExY4wdQJLmqNW9eKa2dmSMUsntR6DryNThKVn9mqUACdXgpT8X2CnQl/DWMGpo80=
+    on_success: always
+    on_failure: always

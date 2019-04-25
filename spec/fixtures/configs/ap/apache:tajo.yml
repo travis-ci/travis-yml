@@ -1,0 +1,78 @@
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements. See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License. You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+sudo: required
+dist: trusty
+language: java
+
+git:
+  depth: 150
+
+matrix:
+  include:
+    # Integration test without TestHBaseTable
+    - jdk: oraclejdk8
+      env: PATH=$PATH:$HOME/local/bin HADOOP_FLAG="" TEST_FLAG="test -Pparallel-test -DLOG_LEVEL=WARN -Dmaven.fork.count=2 -Dtest=!TestHBaseTable -DfailIfNoTests=false"
+
+    # Test tajo-core-tests for hbase
+    - jdk: oraclejdk8
+      env: PATH=$PATH:$HOME/local/bin HADOOP_FLAG="" TEST_FLAG="test -Pparallel-test -DLOG_LEVEL=WARN -Dmaven.fork.count=2 -Dtest=TestHBaseTable -pl tajo-core-tests"
+
+    # Test tajo-storage-pgsql
+    - jdk: oraclejdk8
+      env: PATH=$PATH:$HOME/local/bin HADOOP_FLAG="" TEST_FLAG="test -Ptest-storage-pgsql -DLOG_LEVEL=WARN -pl org.apache.tajo:tajo-storage-pgsql"
+
+    # Test tajo-storage-hdfs for hadoop-2.7.1
+    - jdk: oraclejdk8
+      env: PATH=$PATH:$HOME/local/bin HADOOP_FLAG="-Dhadoop.version=2.7.1" TEST_FLAG="test -pl org.apache.tajo:tajo-storage-hdfs"
+
+    # Test tajo-storage-hdfs for hadoop-2.6.3
+    - jdk: oraclejdk8
+      env: PATH=$PATH:$HOME/local/bin HADOOP_FLAG="-Dhadoop.version=2.6.3" TEST_FLAG="test -pl org.apache.tajo:tajo-storage-hdfs"
+
+    # Test tajo-storage-hdfs for hadoop-2.5.2
+    - jdk: oraclejdk8
+      env: PATH=$PATH:$HOME/local/bin HADOOP_FLAG="-Dhadoop.version=2.5.2" TEST_FLAG="test -pl org.apache.tajo:tajo-storage-hdfs"
+
+    # Test tajo-storage-hdfs for hadoop-2.3.0
+    - jdk: oraclejdk8
+      env: PATH=$PATH:$HOME/local/bin HADOOP_FLAG="-Dhadoop.version=2.3.0" TEST_FLAG="test -pl org.apache.tajo:tajo-storage-hdfs"
+
+cache:
+  directories:
+  - $HOME/.m2
+  - $HOME/local
+
+notifications:
+  email:
+  - issues@tajo.apache.org
+  irc: "chat.freenode.net#tajo"
+
+before_install: 
+  # Disable services enabled by default
+  # http://docs.travis-ci.com/user/database-setup/#MySQL
+  - sudo /etc/init.d/mysql stop
+  - sudo /etc/init.d/postgresql stop
+  - sudo sh -c "ulimit -p 10000 && ulimit -n 64000 && ulimit -t unlimited && ulimit -a"
+  - free -m
+  - df -h
+
+install:
+  - mvn clean install -q -ff -Dsurefire.useFile=false $HADOOP_FLAG -Pdist -DskipTests -Dtar
+
+script: 
+  - travis_wait 30 mvn $HADOOP_FLAG $TEST_FLAG
+  - sh -c "dmesg | grep -i OOM || exit 0"
+  - free -m

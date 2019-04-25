@@ -1,0 +1,30 @@
+sudo: false
+language: java
+jdk:
+- oraclejdk8
+before_install:
+- npm install -g gitbook-cli
+script:
+- "./gradlew check jacocoRootReport"
+after_success:
+- bash <(curl -s https://codecov.io/bash) -f build/reports/jacoco/jacocoRootReport/jacocoRootReport.xml
+- ./gradlew pushSite
+before_cache:
+  - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+  - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+cache:
+  directories:
+    - $HOME/.gradle/caches/
+    - $HOME/.gradle/wrapper/
+env:
+  global:
+  # Environmental variables required by CredentialsUtil for CI testing in Travis
+  - secure: q4y8mksZHqu4hOK+5bBXneI/hbg/lmpXD4FWJQ/AONI8bI1YO57LwmZqA3peGYFz78+ExYchdIFZHul6Bi8DLYUXujKpKHl3CCvM5IAS6qLddGv2GyNFPmaaJWQz6WX2rQKq+LOK+HUHtFuwgkyAcHy4S+IlmbLXKnVVdgDv4aY=
+  - secure: Vj2pDbLBpHf46j1EkK9zXmf2C5O0IGiaD8eAeb387Q6T26Q3epGf1j0DaoqKimw5lJAmPV9GIdimWCPrcDvBdJIDNgEbOIhX/jMQFgaDrl+Z9NeFPtATAdKS156Ki+O3Iem/u12Zz2h9pv81p4V5S262+fXUA0CLrCSGQubKyYY=
+  - secure: YoywqU9GWnW55U3ucM0kg/mztWaAKtRIQy90ItYXlzQI8vK++TjivOFEaOaKCI6HIsULb14y5M5v4aN+9vJ0hCd+A5XB+E3i+lZRG1ypPdVBHcFOZ+RD+7gAEzcaylTX3Fd2slJ2fdxqNeLmQXtOC6J0kTvdyHcvX1nx9BqMNCo=
+  - secure: hNYHnZJR/GElL7lgRUS3TPfFEuw1xboXL4VXVknDjfuWK8DU54DcERxq8b5x7JNq2N4nnrqcORbWrcyvciOQo5Sidq5x+JiTIyBJh8sPWy8ijkinE7C/wOHoVF2uMtxXzFeGev+ZL5vMbu53WUEQAUDV/2jVtRd8CZ66zDQpWaE=
+  - secure: siKHQ1lS8cbtY+lfFpX2mZf2KLrIwjGuGsmEfsJZILsyOD61hq7KyLnCs42nbiVND7vZxyyBTcFOS85I78+RoxaiIXP03VOY6IPanCGL0t4imL7nALl4wejQqiYdeanvI0enmaODiaff5Sbm0r5Iwk7sz3lu52haIj1aWuTp9Zo=
+  - secure: BjigOBAsTHFHK9pNFaUiIAsKbKenJH06C6+/XgZQmbEYenTYvFGOPpzfOl7KDpr8tFDJ8IkBuKrCuS3z0InsyaoFI+qeMNjtJ9ODS5KMK/UtIydjNjDaeIUi0Lw60EvC2XgkVylHh1ttrYTkcGp3RM0W45KlC7Q4lPULPD9lkh4=
+  # GitBook credentials
+  - secure: B4emhl8PSnfhM+Aon6PDHqU9TBMF1BaJQlESWiP9cwC8iS1XQ0DE1IBs5rCkKw391q8K2WO14C3sf7YHOAHN9NriCXraTZeZZfAKbCR/euWke7IMEFLZdSNw9ONxknQWVzIDbzQYeHNrQCc0x1SabdorxRMO/H/dVcI9Lvi0APE=
+  - secure: H71PeGYRpoP+JB9x+QaHSgkwiJrUquRjzz5hvJpjEWA/Jxj0FycjJUUv4THNrWf7L8W8rTOzezuJ7MUI/eqwwnQKc8sgnL4AagEy7eY0Qsr+kQrfXeEjmrycerfWopVPJC1gLCqcjJGWPWe2ri4YlFAMwtMUoyhMaomzpRIsfIA=

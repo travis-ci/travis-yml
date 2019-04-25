@@ -1,0 +1,33 @@
+---
+# Copied, with great appreciation, from geerlingguy/ansible-role-nodejs
+
+services: docker
+
+env:
+  - test_type: monolith-from-scratch
+  - test_type: monolith-from-import
+  - test_type: import-from-remote
+  - test_type: backup-to-remote
+  - test_type: import-from-alt-remote
+
+# before_install:
+  # To upgrade Docker, uncomment the following lines. Do this only if there are
+  # suspected differences between Travis' version and latest Docker CE version,
+  # since these lines take additional time and occasionally cause build errors.
+  # - sudo apt-get update
+  # - sudo apt-get -y -o Dpkg::Options::="--force-confnew" install docker-engine
+
+script:
+  - 'bash ./tests/docker/run-tests.sh ${test_type} ${PWD}'
+
+notifications:
+  slack:
+    secure: WGio0Sf5R+nm7kNLSxG5DZoFZjh1ifNbuH0TR5XlbtQ6r9hVHYDW8jRT2PoG9mHFNUDzHE4ixJfpbhHKdnqHwjJrtKhUWemBE95dqrDhQI1iWQZm2JHnK0KsjyOtc6DVqa3zA6Mrv1w1UONHwoe3QfSj5cj/qVBQaWBB8EhxNubmcKK2Zz+keMNkMfWDaPmGj+pQG5daGGRlkvoZOm7TkAIk4JXpvOwnAPKZx+MbX3tYNFqPgPJpbxejM8t5EqHAQEPJA8dThgG76kO5jFTMhkQdCWusK+7pl/IN0MlJf9S+rVv0HuacPDQmnaEw23O+otA8T9amNlOvc2bUR8djiStDLfZYlYtTdEpUOfPAR2CxplJM1YV1o982Vt8wOyqO0BWjaID8BEjHE0tn8vKF+qQ1WpNB6nZZNNqLdfUSaMS2y6t15sLV3NZWYe3Bw0ebsR5dsfOHX5U4RwSjbsL99Rm9B4eDL9gAUWn4L4USYjLb5Os6DePXxrCRvPL13OjxJGvWb8NIUJbtQASDc69Qc2M4M9ZB4MkjBDsoEfLYhmB9KeERycRB2pnAGVxUWJn/Cbj4yAvaU60sZPNBLr4Q+HGz1zciZ4yV8tCrLkN99pxxAWxil/PsNVWPtRueznNRPfbPiARbVeLO/r3OcQocfEKpRrNh8sb3kJ8MzHXa9RU=
+  pushover:
+    api_key:
+      secure: M2e+xbt8oKmEI4I/YX9h6+UHuTMA3dw9TytfFR9WECETK3fnNFM/2k0PwiItSteeRhe3kbUdYxDiY3TVeQ2KLwT9XbbbsWunTuAYy/QOIssjxhkjSM8unHoqcTm5vKxZC96Dej+0h3j6enN9ZIM8LPagJcBWNa1x4wLcIQcfIKTI/MmWls0NMv1nASMFvcjplt4W6caGCsoX8z3IXZkEI0eAjUPa6gQcNe8VUzc1zCBNOYtS8o56af/O6qva2m8s7oaEUmLs7Ot6XifqGpCZ4qeQYutwk0WU6SHgK+XYvMmBW7dceZ2v43/+27aGKfISX86qFcNKfKIZQeY0BDf5rB2fktbArW9qfLWTaicyse2cQnyqf88THpFa/+KxZIgffimDrgHDscKkcNwRsHpd0TB/jHvi029dLuuMt4GNvE33lxTD17F5j6iCJ5YJOh7tY2u2PXhANsBVJ6ZOiynpK/3oTAmhAzjyJNZP1C8vshZW/8XeEhOP6vyrI34BZpaaw7J1lW64HpVrCrci0czfXlXbnL+3BP+8jv04SHJ3CcO8UCcnAS2IAX6nQtX8Gk5kPT6mTPP6Z9nlXT1F1anYZkDdd6UULgCDNWowzSjH24ezuKyPHmSo7BvNg1rP34kKYxO/84E/h28LWVCWQIJyC0Y6IoY3K4J3pD52GO2RTdA=
+    users:
+      secure: HKwPNJbsaU8ahbmfS54cL5Iwn/Dj7hqtFeiTuOiU8goT6wzVH+bS0QT1KmpLtsvPpQgHYR9z2JkK8PVIufZwjSr360CUoLniWyy2oJ1/+MGoyVyBWcRv/yZVNWiQz7zF4oS3XOAcFuWyhyPiA793wDIPpxe9r4og3/dvOBYLEOXXDExxIKMcTaFbNSzRYA4ARXOCr8hcZrF5ROxXBztQIRtw9lT2YVi8qyB13NaLgx+94R5Y5CtU0er2Lh24obIeE7UYiQtExSQjMUbnC09grLSQPKICTNEL9Yz05sAS/xuA/ocrlZ0gP/J2G20WwIG0Mv6cOOCPlSmQtejQ0VqJe4T2FPi4/qXOCOQ2sFsjzdh+IZrzvLo0TGmKMNwwaZBDYGP61C0P6ktDZmGubfuHdSod+CpST6fXZhQovxvSMu4spZor89uktxlqiJECeLj008yaMuuPdtVJu8kqoBafnJyuVnHkcGd54YKpIEYT+GsaW0AUsv5zyIfyOCYDIwujSWpC2UReA3vF5wh9EMvbRCrOtHasuWF+ewA/9Hj1KEjmb8AMhXFVtyHm0BIhV+8mJcp3Of7R6SPI5rVU8kYXdfH6dffNVLHaeEvLlcPyymJ/ek2dDyIuB7N0u+/bqfEVQR5KmNit47zGbLO69c9Y1f9/CqRW8aA4Psrgp9feITk=
+  on_success: always
+  on_failure: always
+  on_pull_requests: true

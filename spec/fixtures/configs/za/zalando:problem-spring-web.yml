@@ -1,0 +1,29 @@
+language: java
+
+sudo: false
+
+jdk:
+  - oraclejdk8
+
+addons:
+  apt:
+    packages:
+      - oracle-java8-installer
+
+cache:
+  directories:
+    - $HOME/.m2
+
+env:
+  matrix:
+    -
+    - PROFILE='-P spring4'
+
+script: ./mvnw clean verify $PROFILE
+
+after_success:
+  - ./mvnw coveralls:report
+
+notifications:
+  email:
+    on_failure: change

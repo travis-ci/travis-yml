@@ -1,0 +1,20 @@
+branches:
+  only:
+  - xmppmaster
+before_install:
+- sudo sh -c "echo 'deb https://git.siveo.net xmppmaster mmc-core' > /etc/apt/sources.list.d/pulse.list"
+- sudo wget -qO - https://git.siveo.net/pubkey.txt | sudo apt-key add -
+- sudo apt-get update -qq
+- sudo apt-get install -y python-sqlalchemy python-mysqldb python-twisted-web python-ldap
+  python-gobject xsltproc docbook-xsl dh-autoreconf apt-transport-https
+- sudo apt-get install -y python-mmc-core
+install: sh autogen.sh && ./configure && make && sudo make install
+script:
+- echo "DONE"
+notifications:
+  irc:
+    channels:
+      - "irc.freenode.net#pulse-fr"
+      - "irc.freenode.net#pulse-en"
+    on_success: never
+    on_failure: always #|never|change] # default: always

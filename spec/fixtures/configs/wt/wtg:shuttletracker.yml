@@ -1,0 +1,47 @@
+language: go
+
+go:
+  - 1.11.x
+  - master
+
+matrix:
+  allow_failures:
+    - go: master
+  fast_finish: true
+
+env:
+  - GO111MODULE=on
+
+services:
+  - docker
+
+addons:
+  postgresql: "9.6"
+
+before_install:
+  - curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s v1.15.0
+  - npm i -g npm@6.9.0
+  - cd frontend && npm ci && npm run build && cd ..
+
+install:
+  - go install github.com/wtg/shuttletracker/cmd/shuttletracker
+
+before_script:
+  - psql -c 'create database shuttletracker_test;' -U postgres
+
+script:
+  - if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then ./bin/golangci-lint run --new-from-rev=HEAD~ ./...; fi
+  - if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then ./bin/golangci-lint run ./... || true; fi
+  - cd frontend && npx tslint --project . && cd ..
+  - ./test.sh
+  - docker build .
+  - bash <(curl -s https://codecov.io/bash)
+
+cache:
+  directories:
+    - $GOPATH/src
+    - $GOPATH/pkg
+
+before_cache:
+  - rm -rf $GOPATH/src/github.com/wtg/shuttletracker/{*,.*}
+  - rm -rf $GOPATH/pkg/**/github.com/wtg/shuttletracker/*

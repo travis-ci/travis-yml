@@ -1,0 +1,30 @@
+language: python
+python:
+  - 3.4
+install:
+  - sudo apt-get install git
+  - sudo apt-get install python3-dev
+  - sudo apt-get install libxml2-dev libxslt-dev
+  - sudo apt-get install libjpeg-dev zlib1g-dev libpng12-dev
+  - pip3 install pyyaml
+  - pip3 install newspaper3k
+  - pip3 install feedparser
+  - pip3 install -r requirements.txt
+  - pip3 install beautifulsoup4
+  - pip3 install pelican
+  - pip3 install Markdown
+  - pip3 install typogrify
+  - pip3 install ghp-import
+script:
+  - python htmlExtractor/download.py
+  - make publish
+after_success:
+  - echo OK
+  - cp 404.html output/.
+  - git add .
+  - git commit -m 'update content'
+  - git push https://${TOKEN}@github.com/${TRAVIS_REPO_SLUG}.git master
+  - ghp-import -n output -m "update by travis-ci"
+  - git push -qf https://${TOKEN}@github.com/${TRAVIS_REPO_SLUG}.git gh-pages
+after_failure:
+  - echo failed

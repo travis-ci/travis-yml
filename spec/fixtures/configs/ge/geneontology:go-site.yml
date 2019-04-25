@@ -1,0 +1,39 @@
+language: ruby
+rvm: "1.9.3"
+
+dist: trusty
+sudo: required
+
+before_install:
+   - sudo apt-get update -qq
+   - sudo apt-get install -y python3 -qq
+   - sudo apt-get install -y python3-pip -qq
+   - sudo apt-get install -y mmv
+   - sudo pip3 install pyyaml
+   - sudo pip3 install typing
+   - sudo pip3 install graphstore/rule-runner
+
+## Possible other way.
+install:
+  - gem install kwalify
+
+script:
+  ## Quick user data check.
+  - kwalify -E -m metadata/users.schema.yaml 2>&1 | tee out.log && grep 'INVALID\|ERROR' out.log; test $? -ne 0
+  - kwalify -E -f metadata/users.schema.yaml metadata/users.yaml 2>&1 | tee out.log && grep 'INVALID\|ERROR' out.log; test $? -ne 0
+  - kwalify -E -m metadata/groups.schema.yaml 2>&1 | tee out.log && grep 'INVALID\|ERROR' out.log; test $? -ne 0
+  - kwalify -E -f metadata/groups.schema.yaml metadata/groups.yaml 2>&1 | tee out.log && grep 'INVALID\|ERROR' out.log; test $? -ne 0
+  - kwalify -E -m metadata/db-xrefs.schema.yaml 2>&1 | tee out.log && grep 'INVALID\|ERROR' out.log; test $? -ne 0
+  - kwalify -E -f metadata/db-xrefs.schema.yaml metadata/db-xrefs.yaml 2>&1 | tee out.log && grep 'INVALID\|ERROR' out.log; test $? -ne 0
+  - kwalify -E -m metadata/datasets.schema.yaml 2>&1 | tee out.log && grep 'INVALID\|ERROR' out.log; test $? -ne 0
+  - kwalify -E -f metadata/datasets.schema.yaml metadata/datasets/*.yaml 2>&1 | tee out.log && grep 'INVALID\|ERROR' out.log; test $? -ne 0
+  - sparta valid --rules metadata/rules/ --schema metadata/rules.schema.yaml
+  - python3 ./scripts/sanity-check-users-and-groups.py --verbose --users metadata/users.yaml --groups metadata/groups.yaml; test $? -eq 0
+  ## Somewhat awkwardly reuse sparta to check non-go-rules files that
+  ## are still structured yamldown/frontmatter.
+  - mkdir -p /tmp/foo && mcp 'metadata/gorefs/goref-0000*' '/tmp/foo/gorule-0000#1' && sparta valid --rules /tmp/foo/ --schema metadata/gorefs.schema.yaml
+notifications:
+  email:
+    - sjcarbon@lbl.gov
+    - cjmungall@lbl.gov
+    - edouglass@lbl.gov

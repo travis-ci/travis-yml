@@ -1,0 +1,14 @@
+language: python
+python:
+  - '3.4'
+sudo: false
+script: ./build.py --publish
+after_success:
+  - rm .gitignore
+deploy:
+  provider: pages
+  skip-cleanup: true
+  github-token: $GITHUB_TOKEN
+  keep-history: false
+  on:
+    branch: master

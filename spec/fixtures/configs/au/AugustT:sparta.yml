@@ -1,0 +1,43 @@
+language: r
+cache: packages
+sudo: required
+
+# Add rjags needed for running occupancy models
+apt_packages:
+ - r-cran-rjags
+ - libv8-dev
+
+r_packages:
+  - rjags
+  - covr
+
+## After success update the code coverage
+after_success:
+ - Rscript -e 'library(covr);codecov()'
+ 
+## Email notification if the package pass status changes
+notifications:
+  email:
+    recipients:
+      - tomaug@ceh.ac.uk
+    on_success: change
+    on_failure: change
+
+# Warnings dont fail build
+warnings_are_errors: false
+
+## Set up the matrix of different runs
+env:
+  matrix:
+    - r: release
+      not_cran: true
+      r_check_args: "--no-manual"
+    - r: release
+      not_cran: false
+      r_check_args: "--no-manual --as--cran"
+    - r: devel
+      not_cran: true
+      r_check_args: "--no-manual"
+    - r: devel
+      not_cran: false
+      r_check_args: "--no-manual --as--cran"

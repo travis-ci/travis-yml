@@ -1,0 +1,16 @@
+language: node_js
+node_js:
+- stable
+addons:
+- postgresql: "9.5"
+before_install:
+- npm install -g codeclimate-test-reporter
+before_script:
+- psql -c 'CREATE DATABASE demo;' -U postgres
+- export DATABASE_USER=postgres
+- export DATABASE_PASSWORD=''
+- export DATABASE_HOST=localhost
+- export DATABASE_PORT=5432
+- export DATABASE_DB=demo
+after_success:
+- codeclimate-test-reporter < coverage/lcov.info

@@ -1,0 +1,40 @@
+language: java
+env:
+- USER_LANGUAGE=en USER_REGION=US'
+os:
+- linux
+jdk:
+- openjdk11
+before_install:
+  - sudo apt-get install -y jq
+  - sudo apt-get install -y wget
+  - sudo apt-get install -y curl
+  - wget -O ~/codacy-coverage-reporter-assembly-latest.jar https://s3.us-east-2.amazonaws.com/hm-witsml-server/codacy-coverage-reporter-4.0.3-assembly.jar
+install: 
+  - mvn clean install
+  - mvn jacoco:report
+cache:
+  directories:
+  - "$HOME/.m2"
+after_success:
+  - java -jar ~/codacy-coverage-reporter-assembly-latest.jar report -l Java -r $TRAVIS_BUILD_DIR/df-server/target/site/jacoco/jacoco.xml
+  - mkdir $TRAVIS_BUILD_DIR/out
+  - mv $TRAVIS_BUILD_DIR/df-server/target/*.jar $TRAVIS_BUILD_DIR/out
+deploy:
+  skip_cleanup: true
+  provider: s3
+  access_key_id: AKIAJAY37CUQHSZZRNUA
+  secret_access_key:
+    secure: BlMDoer1kQ2GGTeaKFv4+VMDbF24jtB3DBe3FXX/gd0HvkP0aCgszEeI6euWvNtLR02gindzJhkVoMweYRzjJthKF5+GEqRfLgD0gg/3mp7A+gwiXT8cppLKGY7+SU2NfxMv++2JOu/xH/AD2QdhmW4pmA8/2/iY3nKrNYufn83KkP+4DF+na8FxFZPjtsPQoffJxZ0bdDjEsBEbb55ZNVIcWnxA/P/FxGBIC25S1DZ+KbM+iXffYJFVeGR8kTvSoaxN7LDMB0l94mZXfj3ugBbUwymFV97K2FWYgy3Lx5PChkIsdzZ0OLNYMUQpfi4zcx1VA6O9tikIUV0Qos/U53tYHWFShClNh+MZc+wrpfTwlJNcEFWZ7d4dgdvRWg0Pr6P/S5+YzoD7K/JhyuO6zmjuctaynQxRbjDbweHDhNBej6C5ygkrYi721/qF9R+IwnhlY7ygiDWGvieWTrHe52F4a2aglAlCrmC+Vez9HYhrQG4kxmmsDJ/48WqfFt20qPdt586HC9Qt63vnyl/FG1L9lXVvrTd/qGSzCFi7k4HSfwNz1MfcVbo3RKBeMYsRygD8VYis+WKKByDFhyQooNIqoO3vDZfnN9QegNpDGF1Yy3dzOfNf21/ySKbIrzJXBNJ537e+egehkrEmZJi+0K03jlaKGr2flZGKATlLj3w=
+  bucket: hm-witsml-server
+  local-dir: "$TRAVIS_BUILD_DIR/out"
+  region: us-east-2
+  acl: public_read
+  on:
+    repo: hashmapinc/Drillflow
+after_deploy:
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+  - export REPO=hashmapinc/drillflow
+  - export TAG=`if [ "$TRAVIS_BRANCH" == "master" ]; then echo "latest"; else echo "$TRAVIS_BRANCH" ; fi`
+  - docker build $TRAVIS_BUILD_DIR/docker/ -t $REPO:$TAG
+  - docker push $REPO:$TAG

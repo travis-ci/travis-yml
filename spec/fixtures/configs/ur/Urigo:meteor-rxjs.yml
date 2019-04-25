@@ -1,0 +1,18 @@
+sudo: required
+language: node_js
+node_js:
+  - "6"
+services:
+  - mongodb
+before_install:
+  - curl https://install.meteor.com | /bin/sh
+  - rm -rf node_modules
+
+install:
+  - git clean -fXd
+  - npm install -g phantomjs-prebuilt tslint typescript rollup
+  - npm install
+  - cd tests && meteor npm rebuild && cd ..
+
+script:
+  - npm run test-ci

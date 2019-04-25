@@ -1,0 +1,22 @@
+dist: trusty
+sudo: false
+LANGUAGE: java
+jdk: openjdk8
+matrix:
+  include:
+    - dist: trusty
+      jdk: oraclejdk8
+      sudo: false
+      env: JENV=oraclejdk8
+    #- dist: xenial
+    #  jdk: openjdk8
+    #  sudo: false
+    #  env: JENV=xenial_openjdk8
+    #- dist: trusty
+    #  jdk: openjdk8
+    #  sudo: required
+    #  env: JENV=trusty_openjdk8
+#before_install:
+#  - if [[ "$JENV" == "xenial_openjdk8" ]]; then sudo apt-get update -q && sudo apt-get install openjfx -y            ; fi
+script:
+- mvn clean install -Dfindbugs.skip=false -DskipFormatterFormat=true -DskipFormatterValidate=false

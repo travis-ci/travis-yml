@@ -1,0 +1,35 @@
+sudo: required
+language: bash
+services:
+  - docker
+
+env:
+  global:
+    - secure: ipDZ//ZI3lvP5rmlIwEB4OM9VD4dhgHl53yNOLYB73NneXvY74p70Eso+ssKpOR+k2cCsQEn8cleLnjeTpfMeFlX14He6yZQiRnPmv8efifF3jyON2niqkcuWY+xvMSOjmvEvRAYdY9GM/ltqoxdMGy0BwQrXwIvNC6WY8jKCYNi5/m/kK0FypSIWqHkDiXF7CaQTbbsyZkoTO3Qos9BGIw7q+f7TtWbguEVwn0VQknl3Eesagrad7VklJVhYooYzfgurmw8oyGdPCBy92gOwoP7EXXm34wQk7GU6Xh6gGKNN/NCaEYDBKY/luR2Si/y8TYkAvprtci9Y3AyjNZYBjxoRutAVKoMs7hKu1NzBO8BcT11NECj5kXYzXBoApClsvFDJHvy3sfDJW6ZKwdQr/e0UCTFreO6YNx7KyDga+4MNN4WxF1rpO92osn80kM6Bqm7CErz0lKVNbYVSkSYiZniNcz8Ptbnujv6bcgBv0t59VNQkzK6ZyxNrAvFq7oJ9CkQuCyAfky1Z7C+V6Ubf1oN6aVEza50/Ew20HIoLl/dCuFAOSz5I62V02h4pIRZAh2kmBO/4ntKb/amAWpKCGyGvCydyUa03poW2gzUUIsVGbiIJ1+QMhdn+yZwiLMbK6RnfK0QBk8TOd/a0QxjUhlGYoXS1rNo91RMaxlT1UQ=
+    - COMMIT_AUTHOR_MAIL: "doc-team@suse.com"
+    # If you want to see a list of installed packages in the doc-ci docker container, set to TRUE
+    - LIST_PACKAGES=0
+    # List branches that should be published on GitHub pages, omit the maintenance/ prefix
+    - PUBLISH_PRODUCTS="develop adoc CaaS1 CaaS2"
+
+before_install:
+  - echo "TRAVIS_PULL_REQUEST=$TRAVIS_PULL_REQUEST" >> env.list
+  - echo "TRAVIS_BRANCH=$TRAVIS_BRANCH" >> env.list
+  - echo "SOURCE_BRANCH=$SOURCE_BRANCH" >> env.list
+  - echo "TRAVIS_REPO_SLUG=$TRAVIS_REPO_SLUG" >> env.list
+  - echo "LIST_PACKAGES=$LIST_PACKAGES" >> env.list
+  - echo "PUBLISH_PRODUCTS=\"$PUBLISH_PRODUCTS\"" >> env.list
+  - echo "ENCRYPTED_PRIVKEY_SECRET=$ENCRYPTED_PRIVKEY_SECRET" >> env.list
+  - echo "TRAVIS_COMMIT=$TRAVIS_COMMIT" >> env.list
+  - wget https://raw.githubusercontent.com/openSUSE/doc-ci/develop/travis/travis.sh
+  - ls
+  - echo "Building docker image"
+  - docker build -t sle-doc-image .
+
+script:
+  - docker run --rm -it sle-doc-image /bin/bash -c '/bin/bash travis.sh'
+
+notifications:
+  email:
+    on_success: change
+    on_failure: always

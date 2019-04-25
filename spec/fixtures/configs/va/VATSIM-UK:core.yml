@@ -1,0 +1,58 @@
+language: php
+
+php:
+- 7.1
+- 7.2
+
+addons:
+  mariadb: '10.2'
+
+before_install:
+- sudo apt-get update
+- sudo apt-get install -y nasm
+- mysql -e 'create database IF NOT EXISTS core;' -uroot
+- mysql -e 'create database IF NOT EXISTS rts;' -uroot
+- composer install --prefer-dist --no-interaction --optimize-autoloader --no-suggest
+- nvm install node
+- npm -v
+- npm install
+
+install:
+- curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+- chmod +x ./cc-test-reporter
+- cp .env.example .env
+- php artisan key:generate
+- php artisan migrate -vvv -n
+- php artisan migrate:refresh -vvv -n
+- npm run prod
+
+before_script:
+- ./cc-test-reporter before-build
+- php artisan serve -q &
+
+script:
+- vendor/bin/phpunit --coverage-clover build/logs/clover.xml
+
+after_success:
+    - bash <(curl -s https://codecov.io/bash)
+
+after_failure:
+
+before_deploy:
+
+deploy:
+
+after_deploy:
+
+after_script:
+- if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then ./cc-test-reporter after-build --coverage-input-type clover --exit-code $TRAVIS_TEST_RESULT; fi
+
+cache:
+  directories:
+  - node_modules
+  - $HOME/.composer/cache/files
+
+notifications:
+  email: false
+  slack:
+    secure: RFWNr/B7Hg4HauK7FhT0PoWUTCy1s+117d2xuc8n5c9F6XD3+g9TXtAJa8wsdZSGSY+B7BLOojUFEoCKPRwAcdJiZ5pItxa7++6LRqNu/ireF4ItJTD25bXWO28iNmo43/E3isbN9pYdJPPc9JIordk8nZHMPRg3lqygGTSaExAB8pZMTSIG7cH+YGuEXO09Q1TQiW781xkj/IcF8PDhcRFNp+lQNsEvJTjC42/qs+7/JIclfL+lFJFG8WANhcgHy1NsnEQ2C0i6ywecTmUclAxQvq2K5WhKgeCaOyKwgtt0r+9tJpSoPF4wf6GXC3JysrgSEUmV7SASQhvgKlrGukEQm+ys8xw3PVHCAy6WDNXbbf8HPzJ1NUbT3U4HqV+dTjCbpa/LS9Z2LQQTOcY9gbc+07kaU3wHaDD5pOlxLcC8Y0ISsN5/r4nec4xHVboskgcBTwiNGC42hfJsRR2HrnGvK9VjETIuzzmParOz4RXEyKFti0oPtgSWEJdd8ni/nEOFVPzozNdL3Qlgkc8dpln2nHV4U+8wTJtWdSfjfbr0KqaRnOhgG0v8S0vChl1xxx0eWw9uaNQRaOt6U7hO8WhdnCQBcZcVrDkEpZnwW/k/ZL/ZHuzndLZH/IWqFHx4MBNeaL9KPHVxNsaR7vjvbdX2+4TB6YCkqdQ9GmshpO4=

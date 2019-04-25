@@ -1,0 +1,34 @@
+language: java
+before_script:
+- unset _JAVA_OPTIONS
+- cd finish
+script:
+- mvn -q clean install
+- serverName=$(target/liberty/wlp/bin/server list | cut -d '.' -f2| tr -d '\n');
+- build=$(grep "Open Liberty" target/liberty/wlp/usr/servers/"$serverName"/logs/console.log
+  | cut -d' ' -f5 | cut -d')' -f1 ); release=$( echo "$build" | cut -d'/' -f1); number=$(
+  echo "$build" | cut -d'/' -f2); ol_jv=$(grep -i "on java" target/liberty/wlp/usr/servers/"$serverName"/logs/console.log);
+  jv=$(printf '%s\n' "${ol_jv//$' on '/$'\n'}" | sed '2q;d'); echo -e "\n"; echo -e  "\033[1;34mOpen
+  Liberty release:\033[0m \033[1;36m$release\033[0m"; echo -e "\033[1;34mOpen Liberty
+  build number:\033[0m \033[1;36m$number\033[0m"; echo -e "\033[1;34mJava version:\033[0m
+  \033[1;36m$jv\033[0m";
+- cd target/liberty/wlp/usr/servers/"$serverName"/logs/; repo_name=$(echo "$TRAVIS_REPO_SLUG"
+  | sed -e "s/\//-/g"); if [ "$TRAVIS_TEST_RESULT" -eq 0 ]; then result="passed";
+  else result="failed"; fi; serverlogsarchive="$repo_name-$TRAVIS_BUILD_NUMBER-$result.zip";zip
+  -r "$serverlogsarchive" .; curl -H "$JFROG_TOKEN" -T "$serverlogsarchive" "https://na.artifactory.swg-devops.com/artifactory/hyc-openliberty-guides-files-generic-local/";
+notifications:
+  slack:
+    template:
+    - 'Build: <%{build_url}| %{build_number}> | Commit (<%{compare_url}|%{commit}>):
+      %{commit_message}'
+    - 'Repo@Branch: %{repository_slug}@%{branch}'
+    - 'Author: %{author}'
+    - 'Summary: %{result} in %{duration}'
+    rooms:
+      secure: B5zwJmy1mJP6v630+zdISYcF2wzG4y4MT/fujTwRZ9OmxNrNNppDUxT7BDZlR5VYIBDNq62vQjaKlnrAKwM+y/unZm/uCVAtKXb5bEFuF2IfUyf/JLkJIev1Lw8haotxqeO/bGB4mB/G1xjYpW5GeKU/H/tbU+dLv91sTgasfEHUTbKZCfnua4FEWSGo32vwQnY+ndj3z4uUl4F3QaAdQi0gbu00OXapJ9cOQxZTZlYh759LTfQOCrJ4hnc9No8K9l6gWF7ZZFJXfblIZnIQD9Z8p97XZ/5ZqotT6rGsf8xjonTG6qPza39tUrliSQGgcL0T7QDwjK/4mr4LUWjoW4IZiguw4kjSiA0UdvhqD/iazet99cwbYnyTpqOcbwcgRy/sDBQrqAaLlO/ZtcZVyxwxLXvqwrdjoJa/U4hGyYKEF4B/kTYmZArEbKNqMhEK/Uc6HrF3hR/kEWaz9pxPWb+Wx0+qVhDzMHk3L9xsH5T4vVsDJug3Hh9EoRzT7EQimWcnNJK7GWoFqFLpv+qqyC0bnDmcN+59G3eZHpiNYSWCQdgMZfNEV6GYjy/2qy5Axt02N5c6ZijaG5+80HeZ8vPa3pzpuPUmLxUauTEJoYrRpYjvVVgdooPp7uQSQEQxM3vZJVRDj4cqayAbFU4aqq8J8D0+pKd32KvjBpOmjR0=
+    on_success: never
+    on_failure: always
+branches:
+  only:
+  - master
+  - qa

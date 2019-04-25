@@ -1,0 +1,29 @@
+language: cpp
+
+services:
+  - docker
+
+branches:
+  only:
+    - master
+    - check
+
+env:
+  - DOCKER_IMAGE=knapsu/plexmediaplayer-build:xenial
+
+before_script:
+  - docker pull ${DOCKER_IMAGE}
+  - env | grep -E "^TRAVIS|^DOCKER|^PLEX" > travis.env
+  - docker run -t -d --volume ${TRAVIS_BUILD_DIR}:/plex --workdir /plex --env-file travis.env --name builder --device /dev/fuse --privileged ${DOCKER_IMAGE}
+  - echo -e "Host *\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
+
+script:
+  - docker exec -t builder ./scripts/build.sh
+  - ./scripts/upload.sh --scp
+
+after_script:
+  - docker stop builder
+
+cache:
+  directories:
+  - cache

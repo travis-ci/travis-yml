@@ -1,0 +1,32 @@
+language: node_js
+node_js:
+  - lts/*
+notifications:
+  email:
+    on_success: never
+    on_failure: always
+services:
+  - postgres
+addons:
+  postgresql: "9.6"
+branches:
+  only:
+    - master
+env:
+  global:
+    - PG_CONNECTION_STRING=postgres://postgres:postgres@localhost:5432/travis_ci_test
+    - TIMEOUT=15000
+install:
+  - travis_retry npm install
+before_script:
+  - psql -c 'create database travis_ci_test;' -U postgres
+test:
+  - npm test
+before_deploy:
+  - npm run coverage
+deploy:
+  - provider: script
+    skip_cleanup: true
+    script: npx semantic-release
+    on:
+      branch: master

@@ -1,0 +1,21 @@
+language: smalltalk
+sudo: false
+os:
+- linux
+- osx
+osx_image: xcode6.4
+smalltalk:
+- Moose-6.1
+
+before_deploy: "PLATFORM_FILE=Lands-`uname`.zip; zip -r $PLATFORM_FILE $SMALLTALK_CI_HOME"
+
+deploy:
+  provider: releases
+  api_key:
+    secure: SqlVmLYoTUYgiMCtFoC+jupsW0qqfNeED+e9wNAtZBpyxyBu9hlp9I7baId43q3IkuYH0/1LkXM7VWa9OsRo6v/b5ojLD6BZOEu4v+OkH1PiYseK3EliUy8E9XchCDhp7qeVd4eIw9uwZ47O+qFiibb2VjAUBSoM9j2GF/MUQKk3M74vyOpzr0oL+pDLHJtmzzPOK1AyOIxfGGGGVvc/0TmQ+6HmJ9nmICYVbnve2EN0ZVatujTjG8SMlfNZOjlJHoT0GOhJu6uA8FMV2fuIT6EWxe1VQ5J3aqazrnjNuOs79gZRNKlMGk6ve7PVduZUG9FaKaYtdhm6U3RlB85q5WaZem6y3qXTw1GaoXYCNraU4pMMpSszOaCz4O6QPkN4OZBGJYu9onS1w/0FDC1k24ueW46KeZ3C7PdFrVxSgSlxpWguztDB028XqQBcVfODSYBX4U+xj2/vWYMN0zWBKKA8NGkd9kIbx+aoxV5bMVi7Tvy5COAclWOgfX1XOQutuY4O2cqdA1lmOhLc9q68ZXT6tvZH84dCQaJWo3EJ5zl9TuVfYrDDorg/lMhLTnNZzl77LKitqedC05YYNjt4gWUZ33b6SRo58qbdXa+DPoLTgCsYYKF/RuvuYB9k3rStIWmI9RGEhGE+/2EDvUGsUtERqMqgEzZwYnRMezixpNs=
+  file: $PLATFORM_FILE
+  skip_cleanup: true
+  on:
+    repo: npapoylias/Lands
+    tags: true 
+    #branches: release

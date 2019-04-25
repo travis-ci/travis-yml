@@ -2,16 +2,14 @@
 
 
 
-## Type
+## Types
 
-Any of:
+* Hash
+* String (known)
 
-* Map (Hash)
-* Enum (known String)
+## Values
 
-## Flags
-
-None.
+* `puppetforge`
 
 
 ## Examples
@@ -19,12 +17,12 @@ None.
 ```yaml
 deploy:
   provider: puppetforge
-  user: 
-  password: 
   on: {}
   allow_failure: true
   skip_cleanup: true
   edge: true
+  user: 
+  password: 
   url: string
 ```
 

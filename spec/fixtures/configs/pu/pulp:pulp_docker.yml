@@ -1,0 +1,39 @@
+sudo: required
+# https://docs.travis-ci.com/user/trusty-ci-environment/
+dist: xenial
+language: python
+python:
+    # python versions used in el7 SCL & supported fedora
+    - "3.6"
+    - "3.7"
+env:
+  - DB=postgres
+addons:
+    # postgres versions provided by el7 RHSCL (lowest supportable version)
+    postgresql: "9.6"
+services:
+    - postgresql
+    - redis-server
+install: source .travis/install.sh
+before_script: source .travis/before_script.sh
+script: source .travis/script.sh
+after_failure:
+  - sh -c "cat ~/django_runserver.log"
+  - sh -c "cat ~/resource_manager.log"
+  - sh -c "cat ~/reserved_workers-1.log"
+stages:
+  - name: test
+  - name: deploy
+    if: tag IS present
+jobs:
+  include:
+  - stage: deploy
+    script: skip
+    deploy:
+      provider: pypi
+      distributions: sdist bdist_wheel
+      user: pulp
+      password:
+        secure: hDIS1ptz8r0uEFpAb8UxMMI3LodEfElcCaVYJS/mW/fFBMOn38ORT6jsxb8dBccdyVwnwZruqmZIkLMZezAtIn1joH8ZK1rQyeW+XNx38LGMToNWkDEfwuaKWA1txzL3fwUBTsz88yK3nKVdxfGOjyiURW2mu3HepYvnEz+lxV8=
+      on:
+        tags: true

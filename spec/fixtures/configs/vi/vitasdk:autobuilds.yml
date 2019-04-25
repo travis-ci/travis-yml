@@ -1,0 +1,41 @@
+language: cpp
+matrix:
+  include:
+  - os: linux
+    dist: trusty
+    env: TOXENV=WIN
+    sudo: false
+  - os: linux
+    dist: trusty
+    sudo: false
+  - os: osx
+    osx_image: xcode8.3
+addons:
+  apt:
+    packages:
+    - g++-mingw-w64
+    - cmake3
+before_script:
+- export PATH="$HOME/bin:$PATH"
+- make -f texinfo-travis.mk install_texinfo
+script:
+- export REV=dirty-$(git describe --always)
+- git clone https://github.com/vitasdk/buildscripts.git
+- chmod +x *.sh
+- "./build.sh"
+before_deploy:
+- ". ./before_deploy.sh"
+deploy:
+  provider: releases
+  api_key:
+    secure: Hgb0jT4C1mrAew1F5/coaCYepDnsUbZ6m2pzGwPAMipEld1GBaQ3mAP1fKjo/e/FP2gYv9znsQHk3yFi7GJiOhSfwLup0PRisXtswXFKoSlpFjuDRFpWeFrsWsdTAqkl3Eq6Ga009hXHz+roeOoVGfsUKZghdAUJ6b1mEY086x/rbvB5W7XHWyY1gtK1Ll4s/fpJVi9cfsmuYO1adgidZglSb0i/SWftux0HPlAZNIqssY7+lUXoVzmr4KF6jXAalurL78orFs8/IBS6cvKO1827bRES0bZI1zxeYjI6JKDf2zxJwSzFAb/uSHcia3vIYtH04DxR1NX2QZC/JszhdbjIptKEG6/Q6PVMIyUW7vL/u1s5m+trAh3faTzoLQ49n0zKrg4Uq+rztIHREgUrUaPZB9SzUwPibOz0HeoI8/N1h9E6VHnHFyq1XBHUhm3QVHlicjUJE3zrsXnBx4vine1OxiZC/hipPFdrzqCRJHrcQi0CHGbtbRHqVpjhvA0LZ+EDB5MnCr6i+fcaU/3JXTNoZgn0NJeSctZouaIdYDT/sJLD5vnBX7BZtu6DwKX0mfAju/BoVskHETZhndlyS/aZru5Dy4VqSboMEBIUGohKONlqEUqtUmY3bm36VIgAtY0gqfKat4Usw5Z6z8yvhkhXbTUQVN3ifIC1DVSDMP4=
+  file_glob: true
+  file: buildscripts/build/*.tar.bz2
+  skip_cleanup: true
+  on:
+    tags: false
+    all_branches: true
+    repo: vitasdk/autobuilds
+branches:
+  except:
+  - "/^*-v[0-9]/"

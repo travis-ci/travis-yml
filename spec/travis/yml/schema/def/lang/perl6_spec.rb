@@ -11,7 +11,7 @@ describe Travis::Yml::Schema::Def::Perl6, 'structure' do
         type: :object,
         properties: {
           perl6: {
-            '$ref': '#/definitions/strs'
+            '$ref': '#/definitions/type/strs'
           }
         },
         normal: true,

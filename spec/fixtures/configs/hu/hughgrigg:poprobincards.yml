@@ -1,0 +1,37 @@
+language: php
+php:
+  - '7.2'
+services:
+  - elasticsearch
+  - redis-server
+before_install:
+  - sudo apt-get update
+  - sudo apt-get install -y libmpdec-dev
+install:
+  - export PATH=$PATH:$PWD/vendor/bin/
+  - mkdir -p build/logs
+  - printf "\n" | pecl install imagick
+  - echo "extension = redis.so" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
+  - printf "\n" | pecl install decimal
+  - echo "extension = decimal.so" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
+  - composer install --no-interaction --no-scripts
+  - cp -n .env.travis .env
+  - php artisan key:generate --force
+  - nvm install 6 && nvm use 6
+  - rm -rf node_modules
+  - npm install -g npm
+  - npm cache verify
+  - npm install --no-progress
+  - npm install --no-progress -g gulp
+  - npm install --no-progress -g typings
+  - npm rebuild node-sass
+  - bundler install
+  - gulp
+  - php artisan storage:link
+  - php artisan route:cache; php artisan config:cache
+script:
+  - ls
+  - ls tests
+  - cat phpunit.xml
+  - ./vendor/phpunit/phpunit/phpunit --version
+  - make test

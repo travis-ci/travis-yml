@@ -1,0 +1,45 @@
+language: ruby
+dist: trusty
+sudo: required
+
+cache:
+  directories:
+    - $HOME/.rvm
+    - $HOME/.nvm
+    - vendor/bundle
+    - node_modules
+
+services:
+  - mysql
+
+env: RAILS_ENV=test CI=true
+
+rvm:
+  - 2.6.0
+  - ruby-head
+gemfile:
+  - Gemfile
+  - gemfiles/rails-master.gemfile
+
+matrix:
+  allow_failures:
+    - rvm: ruby-head
+    - gemfile: gemfiles/rails-master.gemfile
+
+before_install:
+  - gem update bundler --no-document
+install:
+  - bundle install --path vendor/bundle --jobs=3 --retry=3
+  - nvm install 10.7.0
+  - npm install
+
+before_script:
+  - |
+    echo -e "[mysqld]
+    innodb_file_per_table=ON
+    innodb_large_prefix=ON
+    innodb_file_format=Barracuda" | sudo tee /etc/mysql/conf.d/travis.cnf
+  - sudo /etc/init.d/mysql restart
+  - cp config/database.ymls/travis.yml config/database.yml
+  - bundle exec rails db:create && bundle exec rails db:schema:load
+script: bundle exec rspec

@@ -1,0 +1,39 @@
+language: java
+matrix:
+  include:
+    - jdk: oraclejdk8
+    # https://www.deps.co/guides/travis-ci-latest-java/#certificate-issues
+    - jdk: openjdk9
+      before_install:
+        - rm "${JAVA_HOME}/lib/security/cacerts"
+        - ln -s /etc/ssl/certs/java/cacerts "${JAVA_HOME}/lib/security/cacerts"
+    - jdk: openjdk10
+      before_install:
+        - rm "${JAVA_HOME}/lib/security/cacerts"
+        - ln -s /etc/ssl/certs/java/cacerts "${JAVA_HOME}/lib/security/cacerts"
+    - jdk: openjdk11
+      before_install:
+        - rm "${JAVA_HOME}/lib/security/cacerts"
+        - ln -s /etc/ssl/certs/java/cacerts "${JAVA_HOME}/lib/security/cacerts"
+
+script: mvn -fae -U -B clean install -P check
+after_success:
+- chmod +x .travis/deploy-docs.sh && .travis/deploy-docs.sh
+- curl -Ls https://git.io/deploy-maven-snapshot | bash
+
+- SCRIPT=$(mktemp)
+- curl -Ls https://git.io/trigger-build -o "$SCRIPT"
+- bash "${SCRIPT}" 52North/dao-series-api develop
+- bash "${SCRIPT}" 52North/dao-series-api "version/v3.x"
+env:
+  global:
+  - SNAPSHOT_BRANCH: develop
+  - secure: ekAd02ifPv2FUwJbwiM6jsl41xPXYReDPRyH0smKVq3AGkieeSRdGa/kTA45LomoevDrIe3pEQ2sIvaNzBlnU7smPWIBRhNUsGMoFiSkcelpFtlc7g9CU9NviP2oNGHL0X3OUmrcApOp2O36aZRZakQmKbRGL7ug5r6xxLQa6MY=
+  - secure: W+G9Ej0pALpbGFMzzwC7B+JiO35UWtnuQdDJEO8r7HJVzqyvqav0XdkxwXikx8i+2Q+J04Cn1VaI5P6k4OruUxtC0KjW0Nx5M8YCz0wf+O10x2xlZr1Pd/U+raaMdUk8Wic9+LziEvuyQkV2opLjz20i20XQKCRsmSqjbab6ogE=
+  - secure: KfkmK1RzA06iUVkeKUuy1ExKuSAkfHVUZ0g5Zp0GQdReTK7Xm74xuj0VWUfK1L8Qld8cwIi4JfA02kg0jeVUjGJDnTq8VVGJNUXF5XoQDizSuFDpC8oJcvS1zOTjJxYCj7ljPh6EVbq4OMbJF+ZW5iYNT2DXlfYF2TDNFSN4Ddk=
+cache: directories - $HOME/.m2
+notifications:
+  irc:
+    channels:
+    - chat.freenode.net#52north
+    on_failure: always

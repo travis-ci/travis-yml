@@ -1,0 +1,36 @@
+before_install:
+  - "pip install --upgrade pip wheel pytest requests setuptools"
+language: python
+cache: apt
+sudo: false
+addons:
+    apt:
+        packages:
+            - language-pack-en-base
+python:
+  - "3.4"
+  - "3.5"
+  - "3.6"
+matrix:
+  include:
+    - python: "3.6"
+      env: NMODE=flake8
+env:
+    NMODE=nikola
+install:
+  - "if [[ $NMODE == 'nikola' ]]; then pip install git+https://github.com/getnikola/nikola.git#egg=Nikola; fi"
+  - "if [[ $NMODE == 'nikola' ]]; then find v7 -not -path v7/wiki/requirements.txt -not -path v7/similarity/requirements.txt -not -path v7/slimish/requirements.txt -not -path v7/import_tumblr/requirements.txt -name requirements.txt -not -path v7/spell_check/requirements.txt -not -path v7/pyplots/requirements.txt | xargs cat | sort | uniq | xargs pip install && true; fi"
+  - "if [[ $NMODE == 'flake8' ]]; then pip install flake8; fi"
+script:
+  - "if [[ $NMODE == 'nikola' ]]; then py.test tests/; fi"
+  - "if [[ $NMODE == 'flake8' ]]; then flake8 v*/; fi"
+notifications:
+  irc:
+    channels:
+      - "chat.freenode.net#nikola"
+    template:
+      - "[PLUGINS] %{repository}#%{build_number} (%{branch} - %{commit} : %{author}): %{message}"
+      - "[PLUGINS] Change view: %{compare_url}"
+      - "[PLUGINS] Build details: %{build_url}"
+    skip_join: false
+    use_notice: true

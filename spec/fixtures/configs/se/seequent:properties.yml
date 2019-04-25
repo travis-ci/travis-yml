@@ -1,0 +1,37 @@
+language: python
+python:
+  - 2.7.13
+  - 3.5
+  - 3.6
+  - '3.7-dev'
+sudo: false
+
+addons:
+  apt:
+    packages:
+      - python-numpy
+
+install:
+  - pip install -r requirements_dev.txt
+
+script:
+  - make tests
+  - make test-docs
+  - if [ "$TRAVIS_BRANCH" = "master" -o "$TRAVIS_BRANCH" = "beta" ]; then
+      make lint;
+    fi
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
+  - openssl aes-256-cbc -K $encrypted_a7d24ab004db_key -iv $encrypted_a7d24ab004db_iv -in .pypirc.enc -out ~/.pypirc -d
+  - if [ "$TRAVIS_BRANCH" = "master" -a "$TRAVIS_PULL_REQUEST" = "false" -a $TRAVIS_PYTHON_VERSION == "2.7.13" -a -n "$(grep version setup.py | cut -d \' -f 2 | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$')" ]; then
+      make publish;
+    fi
+  - if [ "$TRAVIS_BRANCH" = "beta" -a "$TRAVIS_PULL_REQUEST" = "false" -a $TRAVIS_PYTHON_VERSION == "2.7.13" -a -n "$(grep version setup.py | cut -d \' -f 2 | grep -E '^[0-9]+\.[0-9]+\.[0-9]+b[0-9]+$')" ]; then
+      make publish;
+    fi
+
+notifications:
+  slack:
+    secure: "b7WTHyETQv4s6b39eHbvWlIo8FbM4SEdRIRysrf4hX/8oBFvNTOjhUEmw36X2v3sVti3qhyO6Tc4BAGnX7TFuZgJfuAdZtCDnmBz37HBO2QvKbS0eRpbJrwJm33vp6wE7+cVQF9vSqCmLvVaRdWykdfHuWmF/JiB9ebirgj4dDeL60OrqZN7NVGWyMWheB9msn/i6RGCBGU13wv84zJOxnca46U4vnelGjzoII5VTwKKy/gZipdyJayuCBM0lodfUlPojnXt9jprt5lyLXx/e8xPXTvTrLyQCDPiw+1vQL2xzJv2FnMI9M+knIcSCRSO511QKevHCgMai/ewbmhrmvF9XD8jcDmWZPABj3fNFNbIBo+F1aQ7Q1K0m6acBwvRN8vGpQHTFrC4fQiJl21vXzFBFjAxaMH6BWgJWxCK9Mv/uZnc3Ntob/Lh9tcFP1zfn05q7O+DQGN8Jd3sdlnLccCFRvoh38hmMooK8ALilm6jyjxJoAsj5chrS31ErMSzjWnak0JNKTEPvESEhzg/RKKa28uNTxr6M2kCRFX1dLZ1mu4bwmce3QXFfPVhBnSm/vXmYHaFq+2TZKuotwwQ7v6408TQXyN0MrqeiEmTQXexSbclNma1qIVbVx16Sdec4Tn3XrQQGLdA5qyDq1n42TTTSxZI7VGOgr5MqsNTeDg="
+  email: false

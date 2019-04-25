@@ -1,0 +1,25 @@
+language: node_js
+
+os:
+  - linux
+
+node_js:
+  - "10"
+sudo: required
+
+addons:
+  chrome: stable
+
+before_script:
+
+script:
+ - npm run build
+ - npm run travis
+
+after_success:
+  - cd ./demo
+  - npm install
+  - npm run build
+  - cd ../
+  - chmod ugo+x ./deploy.sh
+  - ./deploy.sh

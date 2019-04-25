@@ -1,0 +1,42 @@
+---
+language: python
+
+dist: 'trusty'
+
+services:
+  - docker
+
+addons:
+  apt:
+    packages:
+      - gnupg2
+
+python:
+  - "2.7"
+  - "3.6"
+
+env:
+  - LINTREVIEW_SETTINGS="./settings.py" GOPATH="${TRAVIS_BUILD_DIR}/gocode"
+
+before_install:
+  - make images
+  - docker pull markstory/swiftlint
+  - docker tag markstory/swiftlint swiftlint
+
+install:
+  - pip install -r requirements-dev.txt
+  - pip install .
+  # Sample config file
+  - cp settings.sample.py settings.py
+
+script:
+  - >
+    pytest -p no:cacheprovider \
+      --cov=lintreview
+
+after_success:
+  - codecov
+
+notifications:
+  email:
+    on_failure: change

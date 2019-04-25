@@ -1,0 +1,173 @@
+language: scala
+sudo: false
+
+services:
+  - docker
+
+before_install:
+  # make comparing to origin/master work
+  - git remote set-branches --add origin master && git fetch
+  # fetch full history for correct current and previous version detection
+  - git fetch --unshallow
+  # using jabba for custom jdk management
+  - curl -sL https://raw.githubusercontent.com/shyiko/jabba/0.11.2/install.sh | bash && . ~/.jabba/jabba.sh
+  - jabba install adopt@~1.8.202-08
+
+# default script for jobs, that do not have any specified
+script:
+  - jabba use ${JDK:=adopt@~1.8.202-08}
+  - java -version
+  - ${PRE_CMD:=return 0} # do nothing if not set
+  - sbt -jvm-opts .jvmopts-travis "$CMD"
+
+jobs:
+  include:
+    - stage: check
+      script: sbt scalafmtCheck || { echo "[error] Unformatted code found. Please run 'Test/compile' and commit the reformatted code."; false; }
+      name: "Code style check (fixed with `sbt Test/compile`)"
+    - script: sbt scalafmtSbtCheck || { echo "[error] Unformatted sbt code found. Please run 'scalafmtSbt' and commit the reformatted code."; false; }
+      name: "Build code style check (fixed with `sbt scalafmtSbt`)"
+    - env: CMD="++2.11.12 Test/compile"
+      name: "Compile all tests (with Scala 2.11)"
+    - env: CMD="++2.13.0-M5 Test/compile"
+      name: "Compile all tests (with Scala 2.13)"
+    - env: CMD="unidoc"
+      name: "Create all API docs"
+    - env: CMD="docs/Paradox/paradox"
+      name: "Create site with Paradox"
+
+    - stage: test
+      env:
+      - PRE_CMD="docker-compose up -d amqp"
+      - CMD=+amqp/testChanged
+    - env: CMD=+avroparquet/testChanged
+    - env: CMD=+awslambda/testChanged
+    - env: CMD=+azure-storage-queue/testChanged
+    - env:
+      - PRE_CMD="docker-compose up -d cassandra"
+      - CMD=+cassandra/testChanged
+    - env:
+      - PRE_CMD="docker-compose up -d couchbase_prep"
+      - CMD=+couchbase/testChanged
+    - env: CMD=+csv/testChanged
+    - env:
+      - PRE_CMD="docker-compose up -d dynamodb"
+      - CMD=+dynamodb/testChanged
+    - env: CMD=+elasticsearch/testChanged
+    - env: CMD=+file/testChanged
+    - env: CMD=+ftp/testChanged
+    - env:
+      - PRE_CMD="docker-compose up -d geode"
+      - CMD=+geode/testChanged
+    - env: CMD=+google-cloud-pub-sub/testChanged
+    - env:
+      - PRE_CMD="docker-compose up -d gcloud-pubsub-emulator_prep"
+      - CMD=+google-cloud-pub-sub-grpc/testChanged
+    - env: CMD=+google-fcm/testChanged
+    - env:
+      - PRE_CMD="docker-compose up -d hbase"
+      - CMD=+hbase/testChanged
+    - env: CMD=+hdfs/testChanged
+    - env:
+      - PRE_CMD="docker-compose up -d ironauth ironmq"
+      - CMD=+ironmq/testChanged
+    - env:
+      - PRE_CMD="docker-compose up -d ibmmq"
+      - CMD=+jms/testChanged
+    - env: CMD=+json-streaming/testChanged
+    - env: CMD=+kinesis/testChanged
+    - env:
+      - PRE_CMD="docker-compose up -d kudu-master-data kudu-tserver-data kudu-master kudu-tserver"
+      - CMD=+kudu/testChanged
+    - env:
+      - PRE_CMD="docker-compose up -d mongo"
+      - CMD=+mongodb/testChanged
+    - env:
+      - PRE_CMD="docker-compose up -d mqtt"
+      - CMD=+mqtt/testChanged
+    - env:
+      - PRE_CMD="docker-compose up -d mqtt"
+      - CMD=+mqtt-streaming/testChanged
+    - env:
+      - PRE_CMD="docker-compose up -d orientdb"
+      - CMD=+orientdb/testChanged
+    - env: CMD=+reference/testChanged
+    - env:
+      - PRE_CMD="docker-compose up -d minio_prep"
+      - CMD=+s3/testChanged
+    - env: CMD=+spring-web/testChanged
+    - env: CMD=+simple-codecs/testChanged
+    - env: CMD=+slick/testChanged
+    - env:
+      - PRE_CMD="docker-compose up -d amazonsns"
+      - CMD=+sns/testChanged
+    - env: CMD=+solr/testChanged
+    - env:
+      - PRE_CMD="docker-compose up -d elasticmq"
+      - CMD=+sqs/testChanged
+    - env: CMD=+sse/testChanged
+    - env: CMD=+text/testChanged
+    - env: CMD=+udp/testChanged
+    - env: CMD=+unix-domain-socket/testChanged
+    - env: CMD=+xml/testChanged
+
+    - stage: whitesource
+      script: git branch -f "$TRAVIS_BRANCH" && git checkout "$TRAVIS_BRANCH" && sbt whitesourceCheckPolicies whitesourceUpdate
+
+    - stage: publish
+      env: CMD="++2.11.12 publish"
+      name: "Publish artifacts for Scala 2.11.12"
+    - env: CMD="++2.12.7 publish"
+      name: "Publish artifacts for Scala 2.12.7"
+    - env: CMD="++2.13.0-M5 publish"
+      name: "Publish artifacts for Scala 2.13.0-M5"
+    - script: openssl aes-256-cbc -K $encrypted_bbf1dc4f2a07_key -iv $encrypted_bbf1dc4f2a07_iv -in .travis/travis_alpakka_rsa.enc -out .travis/id_rsa -d && eval "$(ssh-agent -s)" && chmod 600 .travis/id_rsa && ssh-add .travis/id_rsa && sbt -jvm-opts .jvmopts-travis docs/publishRsync
+      name: "Publish API and reference documentation"
+
+stages:
+  # runs on master commits and PRs
+  - name: check
+    if: NOT tag =~ ^v
+
+  # runs on master commits and PRs
+  - name: test
+    if: NOT tag =~ ^v
+
+  # runs on main repo master commits or version-tagged commits
+  - name: whitesource
+    if: repo = akka/alpakka AND ( ( branch = master AND type = push ) OR tag =~ ^v )
+
+  # runs on main repo master commits or version-tagged commits
+  - name: publish
+    if: repo = akka/alpakka AND ( ( branch = master AND type = push ) OR tag =~ ^v )
+
+after_failure:
+  - docker-compose logs
+  - find . -name "*.log" -exec ./scripts/cat-log.sh {} \;
+
+before_cache:
+  - find $HOME/.ivy2 -name "ivydata-*.properties" -print -delete
+  - find $HOME/.sbt  -name "*.lock"               -print -delete
+
+cache:
+  directories:
+    - $HOME/.ivy2/cache
+    - $HOME/.sbt/boot
+    - $HOME/.jabba/jdk
+  timeout: 900
+
+addons:
+  hosts:
+    # to run tests locally, these hostnames need to resolve to localhost IP
+    - hbase
+
+env:
+  global:
+    # encrypt with: travis encrypt WHITESOURCE_PASSWORD=...
+    - secure: "VpRSxeqP6gXCxnYCsjylMt1xxXxI/hlj6msibKuHpstDnfPkbDMS8RnRJ/39tyjx/szELZSzAllV0VpM27JpTXlKfIT/78ZUGcljqzfnmv3uh/dWh9k2ERQX1Hr3TGFFyljIbEKHcHjvgHBJtlIRGIuvoBv0tJ98pcqS6dCeplaaJa1Ya7Q53u17GOJakhvTjrT3ASz8gF1kV4GN9XhQCUjRfQSINiT+QC+ONoHy6ztZPIDgfUskBfKgZU5P1saDLcBjzBkXDWIwbKubfJGBl3DSs2fHaWNJE5CRZNJ64Wi8Hs006zvyomIaCfbVAWtxOiLCdXxlys/YQs43RRB0pBqyvTpxH4lEwnLR5uGDH+nuBQw9efCWqsM3CDsRSH7iobjBlunKgDCfjua5/dWJ3Wm2j8WOi6C6/y/YrGwU/DrncukRtcyKj92Mu3LHk5HEMiOiIA41P2NTqalvjvoqi1zMQ5On2g55e2YMcHmQ8dCsRAgegCYB3a6GyGq7T8zkuMMljpmpQJwayrJPQKi001d3ajZZwMLcv4YW9ndVYCZD9ducZ448Uo5BCpJFDPPG+xcXrvZowCUA9JtpnyXrTcTLvFITG2egXyLOQfZ0/FX9XneMtX8qX8ysHaBX9tWiYsplo/WfbpBHy935Ag8WnGH0cYvOXuqAKKUXRVq9ANI="
+    # encrypt with: travis encrypt BINTRAY_USER=...
+    - secure: "DLc1v2XMWrxtbPzVfoArkSQiwzT+O7/rwT7APqoA68K5A1pwxDw5BD3sOLpd6rKbPBulmwDAAQ1am3uE6lbmymCTMe8bvA3iHWy0Jg8baK4nC46EKFLabQz4Uaoq/bs92YGW1QH12rbBPyTA7uvPpvhmb8uyUbJqjT3uyROqHhHfhll89dsPVaK0NCY9DN2K356M87z7cp1SvtfAiF8qaNjNmlOfWjIEUSO1SiiqQBjT/GJvhrrW32J4htf5CqEEYBSoN+fqTCwwdo3GpOFFq+Zh5TSoyvKyi5xo+LVq0hW2SAYTHMMB5WhLd1cvQ0bvK6FpUhyfMcON/8ad3R7paNVxLpIGEu8hsUYGsENjdXaEK4g1TurDeVekWJRYyGMCmy2cCg5yHC+Pb56qOgpM7gmZACCitLap1jXUCWI27q+7cvxuxaBb6EPiDuWGNQXHH+OkbD/s4RJO3kQfv1Si64RON8+bZ+fqOWLK+BuakYi3YMukFgPngQozX3aMZOVcEBKJZtquwewCKsNV2VGItJxrp3MDol0HhuNvdUvIf5UydZZCyJTo1DBsK49yDUj7iKOEJk5Qc5oYfEhSEKcGRZs8Yl9n/kIJUh8ZYTT+35rwD27dHgsEkPkCEGpbMP/r0JewkWH7q9FfajPIYOlEpoP6tCsdP4mBOyF1uZH7omM="
+    # encrypt with: travis encrypt BINTRAY_PASS=...
+    - secure: "gasjgT+qHUFPe/eMqvwD7WtzQmNw++LXmmQ6ic6VJOf/drAQckdeXIaa3rOsuoiI72xtngIUPil61+bviRf3Qgw061w65dSlrn4Pm1c4f4kOCRBQCpsg06PK2Xs40ZD/9l9e+3N0T6alwx//PFH+bUB5yEi7y/Qs1dOKtofvvtoTkGvF6GZDCMiKwpYmcEKmBbmEuyaFLd5h1N6oJ53g7dtyh1KD9gU4HXmc3QujrKSxm3YunMf68wgtTJWZf3b/OcyVTSz7/8mbvJ++GWCyVK5B8snAnKxwSNHhYysNdOoOTGhwF2dnE38Vr/NXldHnm+M2LzuBBADXLmxlW92bxv+IjuAT+HtBoPEP9I+f/eJqfirkrMRWiylWN7zcchMzHTHS54qx1JvtRyJYNFsOfzqLry/IUZoT/1tLe2vPCRE601K5pS2GEDAt/gj3BTCWpCvidgXXq4KPlj5IqeIJ5UVWSpjCCH0hZUwuUUwgSNTXFg7Ug+U4U5DjPmyla5oNj9d+RIGqWtsixB8QAs5dCgtBa0om/f8nT584iHjrpvduLpoUpUcMPyPgcJnlHNvKawnEW0JCcMxR4fJBsG3IG+6Q6Rbo17VIs/Z5hgcNQtJMVnjiIGfOFBQKYKrStAWlJWK9WTo5L5oO3sn+BZQUnuJxafoJsdArEogzfbRjovk="
+    # encrypt with travis encrypt TECH_HUB_TOKEN=...
+    - secure: "fYD0u+ipZj7h8QIwZrhXmdp4SteHxa2Er924Qm8y1KQj67mkGTrwjJaSQCv2H69HDRdfg2po4M2MuQixF0hh4amZTd388ulR+1LhAid2EZPZ5aICWaqTYUa63HMQ7zhGqAN+2bMXnOKEeJYV9LrSDZ+Ki0FpdIPdSIbYbx1KZ9DAABdi25p9XSD21/ZOajEzSiobHw9lQLQTbaMHGsY3LA1UT8/v5j3ykfTjKd3pKtqFcVeijMRA7BDPrSUvXS62dsBnZ1CS6htV621BBYox/9dzI//P6ht9U/i3gdRDHmPEmdXlB2Jooo+u8PCpHBFxTnsOhSf84KNq7888iu3dqPtqAQPL2v+eUR1oqzUXhOjUIhqSPkZWhMyDEH2SRJDn51dGDXg2coBnPLJlnkHiOS5rikejAGUNRDPIq9Xo8izyvuy3lAGtzDoO1CppFmqbk6wyapYr8WUp8wMBeuy98ENHzYVjlGWALBr2OttpkKdwGtQQEL2agzmqUTPCxV32YAv6FYhfIyu6u309tkn0lbSdPEZvr+oyNeVKCwpY5/wSzkSNcwwbk4/Jrh02T16iNv9lc/GnzSnVqdyNiJPDuIojIOAF4mY3jVrGeaefRArJGkfoA0SrMZOLsn1nX2XnuWeDPKLMJ2ki/4yeijJJIJpuYzHNoHDJhdNllZ+rQuQ="

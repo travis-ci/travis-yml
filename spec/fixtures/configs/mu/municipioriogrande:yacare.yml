@@ -1,0 +1,27 @@
+sudo: required
+
+language: generic
+
+notifications:
+  email:
+    recipients:
+      - tic.desarrollo@riogrande.gob.ar
+
+services:
+  - docker
+
+branches:
+  only:
+    - master
+    - dev
+
+cache:
+  directories:
+    - /home/travis/composer/
+
+env:
+  - TEST_SUITE='functional -g rhumanos'
+  - TEST_SUITE='functional --skip-group rhumanos'
+  - TEST_SUITE='unit'
+
+script: docker-compose -f tests/_ci/docker-compose.yml run yacare php /root/yacare/vendor/codeception/codeception/codecept run $TEST_SUITE

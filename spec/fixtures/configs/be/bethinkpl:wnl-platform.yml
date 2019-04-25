@@ -1,0 +1,37 @@
+sudo: required
+language: php
+dist: trusty
+
+php:
+  - 7.3.2
+
+services:
+  - mysql
+  - redis-server
+
+before_install:
+  - bash .travis.install-mysql-5.7.sh
+  - mysql -e 'CREATE DATABASE test_db;'
+  - rm -rf ~/.nvm && git clone https://github.com/creationix/nvm.git ~/.nvm && (cd ~/.nvm && git checkout `git describe --abbrev=0 --tags`) && source ~/.nvm/nvm.sh && nvm install 8
+
+install:
+  - composer install --no-interaction
+  - yarn run setup
+
+before_script:
+  - mv .env.travis .env
+  - php artisan key:generate
+  - php artisan migrate
+  - php artisan db:seed --class=TestSeeder
+
+script:
+  - php vendor/bin/phpunit --filter=Api
+  - php vendor/bin/phpunit --filter=Http
+  - php vendor/bin/phpunit --filter=Models
+  - php vendor/bin/phpunit --filter=Console
+  - php artisan code:analyse --paths="app,checks,lib,routes"
+  - yarn run test
+  - yarn run lint
+
+after_failure:
+  - cat storage/logs/laravel.log | grep testing.ERROR

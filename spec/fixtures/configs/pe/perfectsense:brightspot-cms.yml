@@ -1,0 +1,17 @@
+branches:
+  except:
+    - /^v[-.0-9]+$/
+
+language: java
+
+jdk:
+  - oraclejdk8
+
+addons:
+  apt:
+    packages:
+      - oracle-java8-installer
+
+install: true
+
+script: mvn -Plibrary verify && git clone https://github.com/perfectsense/travis-maven-deploy.git && travis-maven-deploy/deploy.sh

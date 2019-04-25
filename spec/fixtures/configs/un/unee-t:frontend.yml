@@ -1,0 +1,65 @@
+sudo: required
+
+language: node_js
+node_js:
+  - lts/*
+
+before_install:
+  - pyenv global 2.7.14  # For removing SNIMissingWarning warnings
+  - curl https://install.meteor.com | /bin/sh
+  - export PATH="$HOME/.meteor:$PATH"
+  - pip install --user awscli
+  - export PATH=$PATH:$HOME/.local/bin
+  - curl -o $HOME/.local/bin/ecs-cli
+    https://s3.amazonaws.com/amazon-ecs-cli/ecs-cli-linux-amd64-latest &&
+    chmod +x $HOME/.local/bin/ecs-cli
+
+cache:
+  directories:
+    - node_modules
+
+install:
+  - meteor npm install
+
+script:
+  - npm t
+  - 'sed -i "s/<\!-- COMMIT: -->/<\!-- COMMIT: $COMMIT -->/g" client/main.html'
+  - meteor build $HOME
+  - if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
+    aws s3 cp --acl public-read $HOME/frontend.tar.gz
+    s3://unee-t-media/frontend/${TRAVIS_BRANCH}.tar.gz;
+    fi
+  - if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
+    aws s3 cp --acl public-read $HOME/frontend.tar.gz
+    s3://unee-t-media/frontend/commit/${COMMIT}.tar.gz;
+    fi
+
+
+matrix:
+  include:
+    - env: DEPLOY=demo
+      if: tag IS present
+      deploy:
+        provider: script
+        skip_cleanup: true
+        script:
+          - AWS_ACCESS_KEY_ID=$AWS_915001051872_ID
+            AWS_SECRET_ACCESS_KEY=$AWS_915001051872_SECRET
+            ./deploy.sh -d
+        on:
+          branch: master
+    - env: DEPLOY=prod
+      if: tag IS present
+      deploy:
+        provider: script
+        skip_cleanup: true
+        script:
+          - AWS_ACCESS_KEY_ID=$AWS_192458993663_ID
+            AWS_SECRET_ACCESS_KEY=$AWS_192458993663_SECRET
+            ./deploy.sh -p
+        on:
+          tags: true
+
+env:
+  global:
+    - COMMIT=${TRAVIS_COMMIT::7}

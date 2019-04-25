@@ -1,0 +1,26 @@
+sudo: false
+language: php
+
+php:
+- 7.2
+
+before_script:
+  - phpenv config-rm xdebug.ini || true
+  - travis_retry composer self-update
+  - travis_retry composer install --no-interaction --prefer-source --no-progress --no-suggest
+
+branches:
+  only:
+    - master
+
+cache:
+  directories:
+    - vendor
+
+script:
+  - vendor/bin/phpunit
+
+after_success:
+   #- curl -s "$FORGE";
+   - curl -s "$FORGE2";
+   #- curl -s "$FORGE_A";

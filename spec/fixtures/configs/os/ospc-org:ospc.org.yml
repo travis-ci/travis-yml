@@ -1,0 +1,24 @@
+language: python
+
+python:
+  - "3.6"
+
+install:
+  # Install conda
+  - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
+  - bash miniconda.sh -b -p $HOME/miniconda
+  - export PATH="$HOME/miniconda/bin:$PATH"
+  - python -c 'import os,sys,fcntl; flags = fcntl.fcntl(sys.stdout, fcntl.F_GETFL); fcntl.fcntl(sys.stdout, fcntl.F_SETFL, flags&~os.O_NONBLOCK);'
+  - conda clean --all -y
+  - ./python_env_build.sh
+  - source activate pb_env
+  - python manage.py collectstatic --no-input
+
+addons:
+    postgresql: "9.4"
+
+before_script:
+  - psql -c 'create database test_db;' -U postgres
+
+script:
+  - py.test webapp/apps/

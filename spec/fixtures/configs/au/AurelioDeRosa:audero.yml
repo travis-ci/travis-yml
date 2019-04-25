@@ -1,0 +1,20 @@
+language: node_js
+
+node_js:
+  - "node"
+
+cache:
+  directories:
+    - node_modules
+
+before_install:
+  - npm i -g gatsby-cli greenkeeper-lockfile@1
+
+before_script:
+   - greenkeeper-lockfile-update
+
+script:
+   - npm run-script build
+
+after_script:
+   - greenkeeper-lockfile-upload

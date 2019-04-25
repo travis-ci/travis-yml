@@ -1,0 +1,26 @@
+dist: trusty
+sudo: false
+language: node_js
+cache:
+  directories:
+    - node_modules
+notifications:
+  email: false
+node_js:
+  - '6'
+before_script:
+  - jdk_switcher use oraclejdk8
+after_success:
+  - npm run create-site
+  - npm run coveralls
+  - npm run semantic-release
+branches:
+  except:
+    - /^v\d+\.\d+\.\d+$/
+deploy:
+  local_dir: site-dist
+  provider: pages
+  skip_cleanup: true
+  github_token: $GH_TOKEN
+  on:
+    branch: master

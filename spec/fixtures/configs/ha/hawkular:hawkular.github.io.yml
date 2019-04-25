@@ -1,0 +1,49 @@
+language: java
+
+sudo: false
+# manage the caches here https://travis-ci.org/hawkular/hawkular.github.io/caches
+cache:
+  directories:
+    - $HOME/.m2/repository
+
+jdk:
+- oraclejdk8
+
+notifications:
+  irc:
+    channels:
+    - chat.freenode.net#hawkular
+    on_success: change
+    on_failure: change
+
+git:
+  depth: 1
+
+env:
+  global:
+    # token used for pushing the built website back to github
+    secure: "W1suzJbMFuHw964/f5TPzCtzaUMcj7OuUQK2MdauyVCqRZAT5nWiUDFwB1uVrP/t3RTelANDNysMVf9U/SKRpB/1gyhkQvH5ECgog7SPhNssuE8aMpopzRcG7EwarNsItu9fxapOB/YYTHEgi7j1TNIfcuEJAdUvsSXxaPa45ZA="
+
+before_install:
+  # download all the swagger adoc files
+  - bash -x ./.travis.swagger.sh
+
+install:
+  - cat ./src/main/jbake/jbake.properties
+  # bake the pages
+  - echo -e "\nbaking the pages...\n"
+  - mvn install -B
+  # push to master
+  - if [[ "${TRAVIS_BRANCH}" = "pages" ]] && [[ "${TRAVIS_PULL_REQUEST}" = "false" ]];
+    then
+      echo -e "\npushing to master...\n";
+      mvn -X -s .travis.settings.xml site;
+    fi
+
+after_success:
+  # deploy the PR
+  - if [[ "${TRAVIS_BRANCH}" = "pages" ]] && [[ "$TRAVIS_PULL_REQUEST" != "false" ]];
+    then
+      echo -e "\ndeploying the PR...\n";
+      bash -x ./pr-auto-deploy/client.sh "${TRAVIS_PULL_REQUEST}" "${DEPLOY_PR_HOST}";
+    fi

@@ -1,0 +1,38 @@
+dist: xenial
+language: c
+sudo: required
+
+env:
+  global:
+    - PGUSER=postgres
+    - PGDATABASE=postgres
+    - PGOPTIONS='-c client_min_messages=NOTICE'
+    - PGPORT=5432
+    - POSTGIS_VERSION="2.5"
+
+  matrix:
+    - POSTGRESQL_VERSION="9.5"
+    - POSTGRESQL_VERSION="10"
+    - POSTGRESQL_VERSION="11"
+
+
+before_install:
+  - sudo service postgresql stop;
+  - sudo apt-get remove postgresql* -y
+  - sudo apt-get install -y --allow-unauthenticated --no-install-recommends --no-install-suggests postgresql-$POSTGRESQL_VERSION postgresql-client-$POSTGRESQL_VERSION postgresql-server-dev-$POSTGRESQL_VERSION postgresql-common
+  - if [[ $POSTGRESQL_VERSION == '9.5' ]]; then sudo apt-get install -y postgresql-contrib-9.5; fi;
+  - sudo apt-get install -y --allow-unauthenticated postgresql-$POSTGRESQL_VERSION-postgis-$POSTGIS_VERSION postgresql-$POSTGRESQL_VERSION-postgis-$POSTGIS_VERSION-scripts postgis postgresql-plpython-$POSTGRESQL_VERSION
+  - sudo pg_dropcluster --stop $POSTGRESQL_VERSION main
+  - sudo rm -rf /etc/postgresql/$POSTGRESQL_VERSION /var/lib/postgresql/$POSTGRESQL_VERSION
+  - sudo pg_createcluster -u postgres $POSTGRESQL_VERSION main -- -A trust
+  - sudo /etc/init.d/postgresql start $POSTGRESQL_VERSION || sudo journalctl -xe
+  - sudo pip install redis==2.4.9
+script:
+  - make
+  - sudo make install
+  - make installcheck
+
+after_failure:
+  - pg_lsclusters
+  - cat regression.out
+  - cat regression.diffs

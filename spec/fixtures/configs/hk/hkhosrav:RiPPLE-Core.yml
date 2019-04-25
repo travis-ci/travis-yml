@@ -1,0 +1,20 @@
+language: python
+python:
+    - '2.7'
+    - '3.5'
+install:
+    - cd server
+    - pip install -r requirements.txt
+    - cd src
+script:
+    - echo "Y" | python manage.py check
+    - python manage.py test
+    - python manage.py migrate
+    - python manage.py seed --dataset="../../migration/exportJSON"
+    - 'printf "import subprocess\nimport sys\ntry:\n\tsubprocess.check_call([\"timeout\", \"5s\", \"python\", \"manage.py\", \"runserver\"])\n\tsys.exit(1)\nexcept subprocess.CalledProcessError as e:\n\tif e.returncode == 124:\n\t\tsys.exit(0)\nsys.exit(e.returncode)" | python'
+    - cd ../../client
+    - nvm install 8.2.1
+    - npm install
+    - npm run lint
+    - npm run build
+    - npm run unit

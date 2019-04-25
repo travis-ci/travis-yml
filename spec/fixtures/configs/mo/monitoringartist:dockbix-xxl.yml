@@ -1,0 +1,20 @@
+sudo: required
+
+services:
+  - docker
+
+language: go
+
+install: echo "OK"
+
+script: echo "OK"
+
+after_success:
+- docker version
+- "cd /home/travis/build/monitoringartist/zabbix-xxl/"
+- "bash ./artifacts/deploy.sh"
+
+env:
+  global:
+  - ENCRYPTION_LABEL: "42099b4af021"
+  - COMMIT_AUTHOR_EMAIL: "jan.garaj@gmail.com"

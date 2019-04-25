@@ -1,0 +1,34 @@
+sudo: required
+addons:
+  chrome: stable
+
+services:
+  - docker
+
+language: python
+python: '3.6'
+
+cache:
+  - pip
+
+before_install:
+  - mkdir -p ~/Documents/sftp
+
+install:
+  - pip install pipenv==8.3.2
+  - pipenv install --dev --deploy
+  - docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD";
+  - docker network create rasrmdockerdev_default
+
+script:
+  - pipenv check --style . --max-line-length 120
+  - make style_tests start_services
+  - travis_wait 15 make wait_for_services
+  - make system_tests acceptance_tests stop_services
+
+after_failure:
+  - cd tmp_ras_rm_docker_dev && docker-compose -f dev.yml -f ras-services.yml -f rm-services.yml logs
+
+branches:
+  only:
+    - master

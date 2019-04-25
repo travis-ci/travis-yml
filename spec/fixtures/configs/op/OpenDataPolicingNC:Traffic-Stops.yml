@@ -1,0 +1,35 @@
+language: python
+
+sudo: false
+
+python:
+  - "3.4"
+
+addons:
+  postgresql: "9.4"
+
+cache:
+  directories:
+    - $HOME/.cache/pip
+
+env:
+  - DJANGO_SETTINGS_MODULE="traffic_stops.settings.dev"
+
+install:
+  - pip install -U pip
+  - pip install -U -r requirements/dev.txt
+  - nvm install 4.4
+  - nvm use 4.4
+  - npm install
+
+before_script:
+  - createdb -E UTF-8 traffic_stops -U postgres -O $USER
+  - createdb -E UTF-8 traffic_stops_nc -U postgres -O $USER
+  - createdb -E UTF-8 traffic_stops_md -U postgres -O $USER
+
+script:
+  - coverage run manage.py test
+  - coverage report -m --fail-under 74
+  - flake8 .
+  - npm test
+  - python manage.py makemigrations --dry-run | grep 'No changes detected' || (echo 'There are changes which require migrations.' && exit 1)

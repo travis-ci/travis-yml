@@ -1,0 +1,65 @@
+# Config file for automatic testing at travis-ci.org
+
+language: python
+dist: xenial
+sudo: required
+cache:
+  - apt
+  - bundler
+  - pip
+  - yarn
+
+matrix:
+  include:
+  - python: 2.7
+    env: TOXENV=py27
+  - python: 3.6
+    env: TOXENV=py36
+  - python: 3.6
+    env: TOXENV=style
+  - python: 3.6
+    env: TOXENV=docs
+  - python: 3.7
+    env: TOXENV=py37
+
+addons:
+  chrome: stable
+  postgresql: "10"
+  apt:
+    packages:
+    - pandoc
+    - enchant
+services:
+  - redis-server
+  - xvfb
+
+before_install:
+  - rm -rf ~/.local/share/heroku
+  - rvm install 2.1.5
+  - pip install --upgrade setuptools pip wheel
+  - google-chrome-stable --headless --disable-gpu --remote-debugging-port=9222 http://localhost:5000 &
+
+install:
+  - pip install tox==3.1.2
+  - pip install google-compute-engine
+  - wget -N http://chromedriver.storage.googleapis.com/2.37/chromedriver_linux64.zip -P ~/
+  - unzip ~/chromedriver_linux64.zip -d ~/
+  - rm ~/chromedriver_linux64.zip
+  - sudo mv -f ~/chromedriver /usr/local/share/
+  - sudo chmod +x /usr/local/share/chromedriver
+  - sudo ln -s /usr/local/share/chromedriver /usr/local/bin/chromedriver
+
+before_script:
+  - createuser dallinger --createdb
+  - createdb -O dallinger dallinger
+  - createdb -O dallinger dallinger-import
+
+env:
+  global:
+  - DATABASE_URL=postgresql://dallinger@localhost/dallinger
+
+# command to run tests, e.g. python setup.py test
+script:
+  - tox
+after_success:
+  - bash <(curl -s https://codecov.io/bash)

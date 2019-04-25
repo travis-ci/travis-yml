@@ -1,0 +1,41 @@
+language: python
+python:
+  - "3.6"
+dist: trusty
+cache:
+  directories:
+  - "$HOME/.cache/pip"
+  pip: true
+  timeout: 86400
+before_cache:
+- rm -f $HOME/.cache/pip/log/debug.log
+install:
+- wget -O /tmp/terraform.zip https://releases.hashicorp.com/terraform/0.9.8/terraform_0.9.8_linux_amd64.zip
+- unzip /tmp/terraform.zip
+- export PATH=$PATH:$PWD
+- pip install -r requirements.txt
+script:
+- if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then $TRAVIS_BUILD_DIR/ci/script_run_on_pull_requests.sh;
+  fi
+- if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then $TRAVIS_BUILD_DIR/ci/script_run_on_non_pull_requests.sh;
+  fi
+- pushd $TRAVIS_BUILD_DIR && ansible-lint -x ANSIBLE0004,ANSIBLE0006,ANSIBLE0010,ANSIBLE0012
+  --exclude=ansible/roles/mikegleasonjr.firewall --exclude=ansible/roles/geerlingguy.nginx
+  ansible/site.yml && popd
+after_script:
+- pushd $TRAVIS_BUILD_DIR/ci && terraform destroy --force && popd
+env:
+  global:
+  - secure: g2dL7VaYHf0r00QfMYDearAraTmuMB3G+JsH1Anqv7mM82/X4/8UpDERLmHnlLkqyjqMtvWYObt+L8oSXsIsOLRBoMX5DmZQpx7SXz/GdIslnjOfx+Ne9ExJzQWAvIUTbYELEpQLB3eFYdGn02Ar6gY1CP8FgNQy32sMdEVPgI025JZJp04xcbLmqcg2ldjGQSDwjcx7q+LGfG4aoETvladdCxEWKaeOrSEsx3g//LhwgYDJkZEsa0X1eQJGiee1kolc4RPFNad93sBqNfaAKpcF1G10oMS2Z42yfI3fu1FhSxQypfb3NhKkH+20XpXDkcItj601IqhZCk/EBmC55LWffLInZjYTNtHWE+4m43SC7YmZyBQB7R1HEPUpXZis8wFnpzkgLonKzkgBe6qOYTehJOXMbGAKnD1XNhUqsmPYDsYWBI4oXeS3O+INXBgxgk/Fhzmie12NwVOCWbfc/eIu18PbXkLyo7RRg2QFBK1cdIAQzPS+C3l9OzUu3LZgf7GPqV/SbV4hPtppdqMPq1pkdFftHLuPZDSBEjlB8gJ1AUx7inRR9cNcq8z4+RoCUTQsZ2gULYUt6ujL4oqD45P76/VMZ0UPT0+BD4o3mbfm/MnLq4/qicVDfY8bfWmRpvDqiQAM6ByezrGAgAQW7fSbUKhFSK3xWkbYkOSx76o=
+  - secure: JmlzPnAsYC5KRNsQ+IttNT5X3zBLpbayDizIcmymfwpGJftRN6WSu91sHtRTGvw9owndy1mjFDhbSTuPa4WokxRCoSuz+ER5onXook9gM/vQCUYXyjy9pwE7KPasT3AZos46+bJSeLpizVKK86InpwbTWort51kkCsvveNaVJ8D7NII45C/nbcq1oA5QMlntOGiLRtD0tUyMuEqtyJjp5PkdA3aVpCj86VSK8TT3+UM0drakvI0VepesTeWUJUHrYlYLfeiML3uV88e8uYN+o+XIdprgd3GDvljJd4AX9urPFIoB5M57IUvzFPq8vxo+YBqg7WYDGJmTLpcqrz+3hV6lIuGPxcG+uxAaC6jeJtTddHWBa5QSUZ1l8nHzpK+8xPLK00S2nuloyKfE40ozSatT9UMZdnJX7pHfGiMZdhQH3/ab4x+HMsfSye+wPh68KrZk11PXKuP9+ZlhBkzEtIavJqXnaaKFvpiYGSEeA896sCoiGyhMj+cr8RggbSs+/lwBiki9tq3WntH9S8bggKmXdxgZNXwbdff+OU3dKPf0xKMgMGNNWbhvttht7L+7parQ8rm1c5sNzd4p48+nqqGPto6dlX/2Jq18peO6hVlPLRXhFaV4e1R4xA97hd5F64bwIW7RndSHhwwkfsRdrI0otZJRj2gR5EeQRf5Gwx0=
+notifications:
+  slack:
+    rooms:
+      - secure: jGRq7hp2sSz7xXSfMwNMKOgTgR5nO+He39jfiyLA6MjUchcqVyvxj6F1X7lIemyee9sud650sWjO7sWnWHkq024jQkONnlxUzrIQMAt4DuhN+BNmDO7+hHnmLHfQSkevtUEBVYFSP8KV16sXyS11aUHhjrZn+JW3Ozpb1nYummcAKVZ0OfWhHuwoLIK3qtgWDoiWA796JEUDIySR25JsnRRZIW09L0lg/528SD9scH/52DqpMCoLuRtsYBY4v2BMndillnsvo4P6dMfvKFhLCmNuabgyIPxOZ6vE1YD4uHCh67fXOwsjMk3+Kv6huPp3K5CVj3/84V6VDlLTvrlzuNiS7SKD4Y1mb7nDCGTv5ybIjDRPe90NEg3rClbPD9zH6fPTl7/MTkDDB+sRaTGXoQ/g+stc0W6/m8FIU6oZSfgm1XKp1FhOrv43oWUtM1A5G9xo3gYMl1aSCmolDqV+dqAEaTgr5PgTrYWgK1mNv7l8zTAsSpi5BgH3tHEN8UGFkJXmRukLr6hNoSt+QlTI9BxFBDIuy8nkE5DoGlxTKj0JXXH2vSahd/fkc+pXOBrKD3e6DRZuelaeKK9RzpAGu7OaeUJCUH4tWzBAjzqFlgksczVsT7pygASH0nLU2s3XT3FJmUSmpT8mzD+mVsjD8NFFGSMou91YqHdypfy84SU=
+    on_success: change
+    on_pull_requests: false
+  pushover:
+    api_key:
+      secure: N/gijfVLJT1j+zy4/YBtVlvnkw4+EbNzmmXSE0rEmrtDxBCb8j117IA2ys4tZs/bgThlGlHZqAraxSSV16Q1zDqqicRSiLZloq8r3SbT4+rwme/RMWRkcHGzB0TWJ174pNxfr/0zwZlNBQPz4XRGycNfhItvt+Kr+k+gALrBj+hPNGQWJPcpwSzi62IZeecb5GDif2/BMwDWRZe8qSpWegya1TyuMokpuVqtjP+Fhj2T59qgavHxIISlfaAgoOdqglA77ycf2K65ZbZp7zqAx2HAIF23wbieIf1ZU/dP12FksPk8f5FxtZTxOlVcVMwhwO92z7Cv3646VD4iBKE43TjwqOCQthWKOkfl8O5DKNwQVerg7J3OWb43h/zcecMPDY6rENSounRanTvy+A1vw/YL5/KEZXGzUkz59fnSunOU59ygUicUMuBRiycN3TyEVeT9hkxJB3xpBAb2VsyLFF6JcKA6LDLH8DssYazkby7ZuDjOnh3L4Cj8mVFNgRCJ8uii2W41eDTaGFGX2LKEQedaeXo8C9PlqcluSDON6s1c75SFJ9CFRP+kkmigoXsTTC5w2R8ka0cw9XBiS1TzSNsbBJuEVNW4xJRVbXUUOh1a9NUBpfEsGblpGmaNk7JXPcewuIxWOsmXWXIi1cJrZepBta7NnxvWoZC46oooZ+U=
+    users:
+      secure: Y43M9dytne1To7Z3waNFfWzCBSaKd1bf6iVruyNjnsmAzPlOXs/HMjdwBk/BLFi0ZQBH+yryh5RdlY4RFbZqa3ePJ+WcKeI6u+kZBMHcf1DAW60n/jeF4Lxr37Ai63wn5qY/yjOFHPdCaRtQ1z3GkU7dMZ1WmA1u2XBl5owU/xWDPIlCufXN2pY9ePEa+UEq5qpGjYLolnUbWc9PvhzAXqXvOTL+0yKLwDXhCzgQapVUgRyTlRFVZXflndgSziE+CQWuZWdjHAfIxzR4wLwRrHL5Ffobxir5b3NnPg3qN/8JMg9uZCVuw6xhqiR7wETKVuh11RVGKwtZUQM8JpAvHBB1tyjRJRPUrX7BdNZ2+PwCXXLHfZR1oAXHTZ/3tBHgqt3GGPGnpKrcZsnGA1/UKvINja4PS/03YKnxZWAEaDsF2KQBCsJvoBky61WfonCYHpqdKVhS6AegAfXGPXRAda4hK48XPHNoj0gM9s0ZrG2x7jiZolFvGl7HDqjo5V607zIey/fHDj9OtlKFkemqN7Lzq2NjlagNzokV8MQKNHbzbYVFbTn+SfEummuw1hZPyL6kXaRF7kPWBMT0P3GQm6PW+3H5BhEZdvkxYaKmwqPwsIjpX2SnUBcEYhdGnwn0S8awVhGRx3qsaL0r7YD44uOod8Em1DWJNaKEh6Bc+GA=

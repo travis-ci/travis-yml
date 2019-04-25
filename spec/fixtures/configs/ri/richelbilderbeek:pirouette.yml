@@ -1,0 +1,51 @@
+language: r
+cache: packages
+dist: xenial
+
+r_github_packages:
+  - Giappo/mbd
+  - jimhester/covr
+  - jimhester/lintr
+  - MangoTheCat/goodpractice
+  - ropensci/beastier@develop
+  - ropensci/mauricer
+  - ropensci/babette
+  - richelbilderbeek/mcbette
+  - richelbilderbeek/nLTT
+  - rsetienne/PBD/PBD
+  - richelbilderbeek/becosys
+
+before_install:
+  - sudo add-apt-repository -y ppa:opencpu/imagemagick
+  - sudo apt-get update
+  - sudo apt-get install -y libmagick++-dev
+  # Rmpfr
+  - sudo apt install -qq libmpfr-dev
+
+before_script:
+  - Rscript -e "beastier::install_beast2()"
+  - Rscript -e "mauricer::install_beast2_pkg(\"NS\")"
+  - if [ -f ".lintr" ]; then echo "Do use Hadley Wickham's style guide"; exit 1; fi
+  # proselint
+  - sudo pip install proselint
+
+script:
+  - # travis_wait 60 R CMD build .
+  - # travis_wait 60 R CMD check *tar.gz
+
+after_success:
+  - Rscript -e 'lintr::lint_package()'
+  - travis_wait 20 Rscript -e 'covr::codecov()'
+  #- Rscript -e 'goodpractice::gp()'
+  #- proselint *.md | egrep -v "typography\.symbols\.curly_quotes"
+  # temporarily removed due to CERT_UNTRUSTED
+  #- ./scripts/check_dead_links
+
+after_failure:
+  - cat /home/travis/build/richelbilderbeek/pirouette/pirouette.Rcheck/00check.log
+  - cd ~; find . | egrep "beast"
+  - cd ~; find . | egrep "\.log"
+  - cd ~; find . | egrep "\.trees"
+  - cd ~; find . | egrep "\.xml"
+  - cd ~; find . | egrep "\.xml\.state"
+  - cd ~; find . | egrep "\.fasta"

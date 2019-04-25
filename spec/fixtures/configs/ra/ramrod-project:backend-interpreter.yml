@@ -1,0 +1,61 @@
+sudo: required
+
+env:
+  global:
+    - CC_TEST_REPORTER_ID=910515cd7273349a55fdee48d849f5d53a2cabe16c23c74747d1213157512bbc
+
+language: python
+
+python:
+  - "3.6"
+
+services:
+  - docker
+
+branches:
+  only:
+  - master
+  - dev
+  - qa
+
+before_install:
+  - if [ "$TRAVIS_BRANCH" == "master"  ]; 
+    then export TAG=latest; 
+    else export TAG=$TRAVIS_BRANCH; fi
+
+install:
+  - pip install -r requirements.txt
+  - pip install pytest-cov
+  - docker pull alpine:3.7
+  - travis_wait 10 docker pull ramrodpcp/database-brain:$TAG;
+  - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+  - chmod +x ./cc-test-reporter
+  - ./cc-test-reporter before-build
+
+before_script:
+  - pytest --cov --cov-config .coveragerc --cov-report xml ./test
+  - ./cc-test-reporter after-build -t coverage.py --exit-code 0
+
+script:
+  - docker build -t ramrodpcp/interpreter-plugin:test .
+  - docker build -t ramrodpcp/interpreter-plugin-extra:test -f Dockerfile_extra .
+  # e2e tests
+  - bash <(curl -s https://raw.githubusercontent.com/ramrod-project/integration-stack/$TRAVIS_BRANCH/scripts/e2e.sh)
+
+after_success:
+  - docker service rm $(docker service ls -q)
+  - docker rmi $(docker images -q)
+  - docker build -t ramrodpcp/interpreter-plugin:test .
+  - docker build -t ramrodpcp/interpreter-plugin-extra:test -f Dockerfile_extra .
+  - docker images
+  - docker tag ramrodpcp/interpreter-plugin:test ramrodpcp/interpreter-plugin:$TAG
+  - docker tag ramrodpcp/interpreter-plugin-extra:test ramrodpcp/interpreter-plugin-extra:$TAG
+  - docker images
+  - if [[ "$TRAVIS_PULL_REQUEST" == "false" ]];
+    then echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin; fi
+  - if [[ "$TRAVIS_PULL_REQUEST" == "false"  ]];
+    then docker push ramrodpcp/interpreter-plugin:$TAG &&
+    docker push ramrodpcp/interpreter-plugin-extra:$TAG; fi
+
+notifications:
+  slack: ramrod-project:GDF82rRYDg3KSekrT3GA24qO

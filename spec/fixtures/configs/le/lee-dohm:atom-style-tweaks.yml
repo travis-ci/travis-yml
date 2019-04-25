@@ -1,0 +1,17 @@
+language: elixir
+elixir:
+  - 1.7
+otp_release:
+  - 21.0
+
+dist: trusty
+sudo: false
+addons:
+  postgresql: '9.6'
+services:
+  - postgresql
+
+install:
+  - mix local.rebar --force
+  - mix local.hex --force
+script: ./script/cibuild

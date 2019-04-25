@@ -1,0 +1,41 @@
+# Need sudo to use the puppet installs
+sudo: required
+
+# C++ code on trusty
+language: cpp
+os: linux
+dist: xenial
+
+# Don't spam people with emails but do spam slack!
+notifications:
+  email: false
+  slack:
+    secure: BNNFwBsGwKxamyxH6OTtZLfOH9541zr3keNQ0U1rdE2eJpOL11h5gFCd2DHc4OhK596cHFmZrg6mryLXapqHEFCcrfx4CpLyJVxwXc/16rjE838sa4AoBV14ZzMoRiFsNdBOQOVBRu+0SR3kiJMRtJxOTPELnrHWOKmSuVGHjVg=
+
+# Most modern travis image
+group: edge
+
+# ccache makes things waaaaay faster
+cache:
+  ccache: true
+  directories:
+    # This cache is used for deb files so we don't smash nubots.net
+    - toolchain
+
+# Only do branch builds on master
+branches:
+  only:
+    - 'master'
+
+jobs:
+  include:
+    # As a first stage try to format the code since this is fast
+    - stage: Clang Format
+      install: .travis/install_clang-format.sh
+      script: .travis/validate_format.sh
+
+    # If that passes, then we can try building the three build targets
+    - stage: Build
+      env: PLATFORM=nuc7i7bnh
+      install: .travis/install_toolchain.sh
+      script: .travis/build_code.sh

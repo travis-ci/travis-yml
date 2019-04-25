@@ -1,0 +1,12 @@
+language: clojure
+script:
+    - lein bikeshed
+    - lein cljfmt check
+    - lein kibit
+    - lein cljsbuild once dev
+    - lein cljsbuild once prod
+    - lein cljsbuild test
+notifications:
+  email:
+    - tech+travis@ona.io
+  slack: onaio:snkNXgprD498qQv4DgRREKJF

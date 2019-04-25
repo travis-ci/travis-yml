@@ -1,0 +1,32 @@
+language: python
+sudo: required
+python: '3.6'
+
+# before_install:
+
+cache:
+  - pip
+
+services:
+    - redis-server
+
+install:
+  - pip install pipenv
+  - pipenv install --dev --deploy
+
+script:
+  - make check
+  - make lint
+  - APP_SETTINGS=TestingConfig pipenv run pytest --cov=frontstage --cov-report xml --ignore=node_modules
+  - pipenv run coverage report
+
+env:
+  global:
+    - PIPENV_IGNORE_VIRTUALENVS=1
+
+after_success:
+  - pipenv run codecov
+
+branches:
+  only:
+    - master

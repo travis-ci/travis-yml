@@ -1,0 +1,11 @@
+branches:
+  only:
+    - master
+language: node_js
+cache: npm
+script:
+  - npm run lint
+  - npm test
+  - npm run build
+  - npm run storybook:build
+  - npx codecov

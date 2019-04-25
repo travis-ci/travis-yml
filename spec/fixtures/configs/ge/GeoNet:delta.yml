@@ -1,0 +1,60 @@
+sudo: required
+
+services:
+  - docker
+
+language: go
+
+go:
+  - 1.12.1
+
+install: true
+
+before_script:
+  - curl -sfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh| sh -s -- -b $(go env GOPATH)/bin v1.16.0
+
+script:
+  - test -z "$(gofmt -s -l `find . -name "*.go" | egrep -v vendor` | tee /dev/stderr)"
+  - golangci-lint run -E gosec
+  - ./test.sh
+  - ./build.sh
+
+deploy:
+  - provider: s3
+    skip_cleanup: true
+    access_key_id: AKIAI7G4Z55FHOINX4IA
+    secret_access_key:
+      secure: G/K4ChM39OtOpyTaTTv9yqK9tfv3McDNGZBgcsMcElES8fBSLanlIanyU18yLNg/RyCSEBPvqO6ZFVchyVXkizuJsXpU4fbaBZYc0uu/hEOTcKjSWOGcdrb1TFpWoHFM/2aXeDrR6/R2Ik76PzILjM5GFOgENtKgnS1ntGztSgCw0T1KzapVmHM9T4uTxhTBG4jOMq4qbvr8QZCRMA4wyCAyOTqLT7IVIBglRTE1zK75DGjc51blLFQcAv48A27tbiQvUg/ro3eJ3+hu7pFumfyBmImNwlcUrJk7grdC8vEicE14FpZe0AKeJCBmWqBStsMseOSqux2ZEOs6jJFRe5oq/Jt0cN/yBIMRYEgWTYIVmTxQe276CCossUVpeQnezD4QLXju3mQE/qS9H0NkgM7HL7r78kcEMrB9NzHSYt14Creq8T2Ha0TJJZ0coRm9L8+NboZWBgKbR7YkRNMyt3GB90isPy0/JVY/NE+AaOOVbizUXoR10CsM4ePvwp2ccyDdyxM53T/gCa6u0/XobytYCyiX++QjsE/fiyZ4iFABIRIMbb2zGmRBKjrc5ivyle6+ePDbzBDVquShQ2GrAF1LosQ1YpaSTPaG8L8ptFNOracpjBDxZlJPhyO0bvNngsXpH5po9rq1Q0opzfIR1NDSz+Sh+KyjZEKbXrrl+KQ=
+    bucket: geonet-meta
+    region: ap-southeast-2
+    local_dir: .tmp/geonet-meta/stationxml
+    upload-dir: stationxml
+    on:
+      branch: master
+  - provider: s3
+    skip_cleanup: true
+    access_key_id: AKIAIYOQNM47ZCTP6RKQ
+    secret_access_key:
+      secure: TnZurw++bdbFt6sH8cWdQzSpoFvZDEeVFUnvBtsYSrIylmAradaQ6BwM14cv+N04enB3mSKWxyd6E2sJV3AT9iHYMpNzLa78cu/KU59BoHUuFaT+7oFdP+JvUFZaWh2Bs0zaJOYKvd7tfkAetvEFlGEX3gQ5+KQffzzxNgk2mDNfGxWxwpXPweDwRc8GR4sekeeGyRmEbkLjgng5aqeoDjf+Y4/eWDT7AcPTmGHmVYV1LWaM2IzpiSb7UjIM4EnRvSrWgMlo5MDYG0qOvwrRtcCBY3DezVREXp5yBW0ixdIS2j8nhFdExATD1na1wDVzcCBsD181EojYCrVhgp/Wp6h9IU9RP18ZRmi8Qn7x37Tq41SlMg4qQvF37ZQaG10D17Ebiv2zbW78DP6nxFqd1Flf9Y5+t9/TeGZw+UkoWJYPpMxzRNIglekIn81s+Cl0w6iMJxq25hqQtpoKlH+eDPt0sdBM0lY9KCEMoPWiYReyGWfYpVcjKdpe4fjRzmUzi89wzUaueEX0fkyXWpV+f20fqlKpHxcaUFiBOor8w/+EVNBY8GM3JGpsRNL7/hpd15ZfWkq8CZexKTq6ZqMs5AB75gdmn3VtrlgBkHDk4QHLa6PidkH9/uW4fUr13h3nSPIr7Ma3EUPLsIQAvUsLrUVLf37FzyBHBpG+gekVewo=
+    bucket: geonet-meta
+    region: ap-southeast-2
+    local_dir: .tmp/geonet-meta/seed
+    upload-dir: seed
+    on:
+      branch: master
+  - provider: s3
+    skip_cleanup: true
+    access_key_id: AKIAICVSINVWUYFAZ45A
+    secret_access_key:
+      secure: L34urckbUAm3wbgvFtIjmLSpPdDZdnM06DC4f3OczJZasybVmhBijFDJsUldNfFycjIAfqZ9g9azCsioDPcJ1qSAv0+qfOpmf9kV6BgWvioAk9lISkARehgGaQ3Yrgps8PfT5q2nmFR6ern54Uh/PBlqnwAWLBWvKSOkyZj7SV6SHqQykl0sE7zbveZkSimZzpyy72OlgW/J3FX9eSrX6vNdfTQ/LVnbXMxbdUfXEXjyQfTUDXTSKILj2FA25d1LvRdf4qglqxXO5Q+fQf0c6ucHdm7XVRZ7ueMAhTt7AQX2Bf/564NdOFmpy8thegZRVD373KZGm+olrAc2vNH+vjqcMgb27Mi3BEyYDKocn+5bOxXAlw3s6Ygmk6C+rAel7JZwPnDrQ6N3T0s7OlcjjaKtctIkTXrPBHUiG6mMRdz4uXdiZOD9rXhD0upiSJvtr+8kmVn+uHVE5qMZs20ycBveA/HxRfLwtCuzxDw8Nv3Oye7ll1fPre12BE+nM+qYZeETdm9t8CpdEFIrYlb3R2DpE9u2v5ldvpvTPn0mtEhF+6H31bpQRKT1hXCUfUVYNNqABqPHOGIv2N1Q06R7mlsQ/aLuy/UZaKvMOjwbaYvMPMht9d8QiCkOrp19JAH5oG/MLPvdBogXS3HgWe7HW15QS5Dgg3sLvtwQeQf9H+w=
+    bucket: geonet-meta
+    region: ap-southeast-2
+    local_dir: .tmp/geonet-meta/config
+    upload-dir: config
+    on:
+      branch: master
+
+after_script:
+  - ./tools/sit/sit_build.sh
+
+# vim: set ts=2 sw=2 tw=0 et:

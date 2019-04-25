@@ -1,0 +1,14 @@
+language: java
+jdk:
+  - oraclejdk8
+cache:
+  directories:
+  - $HOME/.m2
+
+before_script:
+  - wget 'https://releases.hashicorp.com/consul/0.7.5/consul_0.7.5_linux_amd64.zip'
+  - unzip "consul_0.7.5_linux_amd64.zip"
+  - ./consul --version
+
+script:
+  - ../consul agent -dev -advertise=127.0.0.1 &

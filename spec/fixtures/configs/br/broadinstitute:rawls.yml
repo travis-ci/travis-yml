@@ -1,0 +1,25 @@
+jdk:
+  - oraclejdk8
+
+language: scala
+
+scala:
+  - 2.12.8
+
+sudo: required
+
+services:
+  - docker
+
+before_install:
+  - docker rm -f mysql || true          # in case the after_success step does not run
+  - docker pull mysql/mysql-server:5.6
+  # port 3306 is not available because Travis runs its own MySQL after 2006-12-01
+  - docker run -p 3307:3306 --name mysql -e MYSQL_ROOT_PASSWORD=rawls-test -e MYSQL_USER=rawls-test -e MYSQL_PASSWORD=rawls-test -e MYSQL_DATABASE=testdb -d mysql/mysql-server:5.6
+  
+script:
+  - SBT_OPTS=-J-Xmx3g sbt clean coverage test -Denv.type=test -Dmysql.host=localhost -Dmysql.port=3307 -Ddirectory.url=ldap://localhost:3389 -Ddirectory.password=testtesttest it:compile
+
+after_success:
+  - SBT_OPTS=-J-Xmx3g sbt coveralls
+  - docker rm -f mysql

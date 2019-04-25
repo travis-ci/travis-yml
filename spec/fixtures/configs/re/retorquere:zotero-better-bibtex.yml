@@ -1,0 +1,79 @@
+dist: xenial
+language: python
+python:
+  - 3.7
+services:
+  - xvfb
+
+# https://github.com/travis-ci/travis-ci/issues/8920
+# https://github.com/travis-ci/travis-ci/issues/4704#issuecomment-348435959
+before_install:
+  - python3 -c 'import os,sys; os.set_blocking(sys.stdout.fileno(), True)'
+  - python3 -c 'import os,sys,fcntl; flags = fcntl.fcntl(sys.stdout, fcntl.F_GETFL); print("blocking:", flags&os.O_NONBLOCK == 0);'
+  - curl -sL https://github.com/retorquere/zotero-deb/releases/download/apt-get/install.sh | sudo bash
+  - travis_retry sudo apt-get update
+  - travis_retry sudo apt-get install zotero jurism default-jre libreoffice-java-common
+  - travis_retry ./check-latest-zotero.py
+
+cache:
+  npm: true
+  bundler: true
+  pip: true
+  apt: true
+  directories:
+  - node_modules
+  - .cache/pip
+
+script:
+  - ./util/build-assets fetch
+  - ./.travis/behave-parameters.py | xargs -t behave --no-capture --verbose
+
+after_failure:
+  - ./util/build-assets pop
+  - curl -F "file=@$HOME/.BBTZ5TEST.log" https://file.io
+
+stages:
+  - build
+  - test
+  - release
+  - cleanup
+
+jobs:
+  include:
+  - stage: build
+    before_install: true
+    script:
+      - npm run build
+      - ./util/build-assets stash
+
+  - stage: test
+    env:
+    - ZOTERO=zotero
+    - TAGS="@test-cluster-1"
+
+  - stage: test
+    env:
+    - ZOTERO=zotero
+    - TAGS="not @test-cluster-1"
+
+  - stage: test
+    env:
+    - ZOTERO=jurism
+    - TAGS="@test-cluster-1"
+
+  - stage: test
+    env:
+    - ZOTERO=jurism
+    - TAGS="not @test-cluster-1"
+
+  - stage: release
+    if: env(TRAVIS_EVENT_TYPE) != cron AND env(TRAVIS_EVENT_TYPE) != pull_request
+    before_install: true
+    script:
+      - ./util/build-assets fetch
+      - npm run release
+
+  - stage: cleanup
+    before_install: true
+    script:
+      - ./util/build-assets pop

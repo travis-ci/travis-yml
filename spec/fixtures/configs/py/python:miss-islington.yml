@@ -1,0 +1,16 @@
+language: python
+cache: pip
+python:
+  - 3.6
+  - 3.6-dev
+  # - 3.7-dev
+  # - nightly
+
+before_install:
+  - python3 -m pip install coverage
+install:
+  - python3 -m pip install -U -r dev-requirements.txt
+script:
+  - python3 -m coverage run --branch -m pytest tests/
+after_success:
+  - bash <(curl -s https://codecov.io/bash)

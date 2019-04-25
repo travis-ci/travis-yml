@@ -1,0 +1,9 @@
+sudo: required
+
+services:
+  - docker
+
+script:
+  - docker build -t beevelop/taiga-front .
+  - docker run --name taigafront -e TAIGABACK_PORT_8000_TCP_ADDR=localhost -d beevelop/taiga-front
+  - docker exec taigafront /bin/sh -c "apt-get update && apt-get install curl -y --no-install-recommends && curl -f localhost:80"

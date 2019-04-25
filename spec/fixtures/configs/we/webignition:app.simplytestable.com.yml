@@ -1,0 +1,48 @@
+services:
+  - redis-server
+
+language: php
+php:
+  - 7.2
+
+env:
+  global:
+    - APP_ENV=test
+    - DATABASE_URL=mysql://root:@127.0.0.1:3306/myapp_test
+    - APP_SECRET=Secret!
+    - RESQUE_PREFIX=app.simplytestable.com
+    - ADMIN_USER_EMAIL=admin@simplytestable.com
+    - ADMIN_USER_PASSWORD=password1
+    - DEFAULT_TRIAL_PERIOD=30
+    - WEB_CLIENT_STRIPE_WEB_HOOK_URL=https://test.gears.simplytestable.com/stripe/event/
+    - STRIPE_KEY=stripe_key_value
+    - POSTMARK_API_KEY=postmark_api_key_value
+    - DOTENV_PATH=../../../.env.travis-ci
+    - INSTANCE_ID=1
+    - LOCK_DATABASE_HOST=127.0.0.1
+    - LOCK_DATABASE_NAME=myapp_test
+    - LOCK_DATABASE_USER=root
+    - LOCK_DATABASE_PASSWORD=
+
+cache:
+  directories:
+    - $HOME/.composer/cache/files
+
+before_install:
+  - "mkdir -p ~/.composer"
+  - cp .travis.composer.config.json ~/.composer/config.json
+  - echo 'active' > config/state/test
+  - mysql -e 'CREATE DATABASE myapp_test;'
+
+install:
+  - composer install --prefer-dist
+  - php bin/console doctrine:migrations:migrate --no-interaction
+  - php bin/console simplytestable:migrate:load-fixtures
+  - composer config --global process-timeout 2000
+
+before_script:
+  - php bin/console --env=test cache:clear
+  - php bin/console --env=test cache:warmup
+
+script:
+  - composer test-stop

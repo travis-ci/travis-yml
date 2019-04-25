@@ -1,0 +1,13 @@
+language: ruby
+rvm:
+- 2.3.3
+script: bash ./build.sh
+
+before_install:
+  - if [ "$TRAVIS_BRANCH" = "source" ]; then  echo $super_secret_password | gpg --passphrase-fd 0 deploy_key.gpg; fi
+  
+env:
+  global:
+  - NOKOGIRI_USE_SYSTEM_LIBRARIES: true
+  - secure: UIG+OxSHmG4el3u0maoN6PVSrB2P3koLu9kRVgLivgIZI2w6q9OoE5y27/1SOFNMnOVclonBNc5JfBSZaicOo9linzy6t9qvZBYliqd6BbS48YcrooieqeTEXOeGLqANUQ8w2fGQahj3mBKcmluXDaIH6r2X1tp1mPSFJt0rk+ynoclZROGcvqZBVEQH9M/DvRRAAZS0atx/abO1LAXg+7rN0SfFTkqTEncR94fs3KJBDa6aJ2E8PLASaeJDblaSn45dgS/oSAQ1KsEfMUCTYffgyWjks23IJrHybKSGh0MF7K5Ki6GbNqmiM1K4gvyivGDPH7LYHi0GiLUDzls8mabtUqwMr2aDGq7VlFxfFugkEX2jIPSaYoAICB7Qm30PewNlXN4y9tHIL3qRJ/VbANvs7bhIYs5xZal6pzcVCBOG5QOd1sHlmxBGvQqkZpnDeh7k3wSCEDIwRpiIvL7ztlD46sak2Q0uLWDrYJHsrZcxP8tScEPtr5qfuY0b38m5vCRJHqyIORZS5elG8BMpFiH+iNsOt3zDNb9RLVPe1DYb7erqOjsSD4LqMMtU9XX+BSSISR77srr2LJhEXReSymKFe54fXCAy0nfKv6kuhoZK31Hx579ORmkHRBm9XXIUs8lwAflBoAKNG+B7gT0HNfbEkoGrrRUFhFT4JpdfYzo=
+sudo: false

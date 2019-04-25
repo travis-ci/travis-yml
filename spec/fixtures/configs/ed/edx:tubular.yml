@@ -1,0 +1,14 @@
+language: python
+python:
+  - "3.4"
+  - "3.5"
+  - "3.6"
+
+# command to install dependencies
+install:
+  - sudo rm -f /etc/boto.cfg
+  - pip install --upgrade pip setuptools
+  - pip install tox-travis
+
+script:
+  - tox -- -n0

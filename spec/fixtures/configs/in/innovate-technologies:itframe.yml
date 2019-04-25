@@ -1,0 +1,53 @@
+sudo: required
+language: node_js
+node_js:
+- '10'
+services:
+- docker
+os:
+- linux
+
+stages:
+  - name: testbuild
+    if: type = pull_request
+  - name: build
+    if: type = push
+  - name: deploy
+    if: branch = master AND type = push
+
+cache:
+  directories:
+  - src/node_modules
+
+jobs:
+  include:
+    - name: 'test build'
+      stage: testbuild
+      install:
+        - cd src && npm install && cd ..
+      script:
+        - MAXMIND_DB_DIR=$(pwd)/src/components/geoip/database/ ./downloadGeo.sh
+        - cd src && ./node_modules/.bin/babel ./ -d ../bin --minified --ignore 'node_modules/' && cd ..
+    - name: 'build'
+      stage: build
+      install:
+        - cd src && npm install && cd ..
+      script:
+        - docker pull innovate/itframe:latest
+        - MAXMIND_DB_DIR=$(pwd)/src/components/geoip/database/ ./downloadGeo.sh
+        - if [ ! -f ./src/components/geoip/database/GeoLite2-City.mmdb ]; then exit 1; fi
+        - cd src && ./node_modules/.bin/babel ./ -d ../bin --minified --ignore 'node_modules/' && cd ..
+        - docker build --cache-from innovate/itframe:latest -t innovate/itframe:latest .
+        - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+        - if [[ "$TRAVIS_BRANCH" == "master" ]]; then docker push innovate/itframe:latest; fi
+        - docker tag innovate/itframe:latest innovate/itframe:$TRAVIS_COMMIT
+        - docker push innovate/itframe:$TRAVIS_COMMIT
+    - name: 'deploy'
+      stage: deploy
+      language: bash
+      script:
+        - HELM_VERSION=v2.12.1 B64_CA_CRT=$B64_CA_CRT_LDN SERVICE_ACCOUNT_TOKEN=$SERVICE_ACCOUNT_TOKEN_LDN CLUSTER_ENDPOINT=$CLUSTER_ENDPOINT_LDN HELM_RELEASE=itframe HELM_CHART="./chart" K8S_NAMESPACE=itframe HELM_ARGS="--set image.tag=$TRAVIS_COMMIT" make deploy
+        - HELM_VERSION=v2.12.1 B64_CA_CRT=$B64_CA_CRT_FRA SERVICE_ACCOUNT_TOKEN=$SERVICE_ACCOUNT_TOKEN_FRA CLUSTER_ENDPOINT=$CLUSTER_ENDPOINT_FRA HELM_RELEASE=itframe HELM_CHART="./chart" K8S_NAMESPACE=itframe HELM_ARGS="--set image.tag=$TRAVIS_COMMIT" make deploy
+notifications:
+  slack:
+    secure: lvR2AIxb6xgdoET0H0Ko/3GHO7IVNTpPsFfeImR25OPv2cLqJXjeaFY+zN0DtRqr9ge048trt/cRXsrIEhtNZV83wikj/EFhAY5fumexL//Vut0aRFauYs1LcCb2gEGx4+/UGHo3gkF+jn5wxvwpWfTmdTthfFcVxrhXnTPUgbT84uUC2PAJ7RNObxHhHz81gVN2TZ3rgS5RhNFazzm/jYcD8onsJZFj8GjbWJ8WN65DJzVLsA69U4/E0Aw4eQsBt031gXVc7XpNgIFiDk/o4t/o0u0lw9CIah1v06LqNIg33zXHZk7nkJypYbqo2aaagwLWl8sUFg/sbKedRIocxE7ihSrjuTOHk503jRdSDznVu03/4CiqS/LWPDcriu4YQGGUQ0GS3z7uaproSpuMj0Qc6Stg5EMlj2GSPM/pWLJ8z0PKtZxvIKrd2pIG+QPZbd5xIU35evcoH7+7RLynF2u3rSO9/c4aAKGQpbue8YH+obNwKRIhiJprtTOynWmf4F0sFktMXLZXQOWA8GAhZRCqtaTOz0epGCPrtS264aQ+fnFJtyplKOp+hzR1OEW7BmxsbgGXkM/yh6ZNSbOaOXKYQZd64HACbWa/+DwueqZr5KbWToUNr3DYQ4zKet3+HzHX1Ox3IoZ3tMkwbTTYSJ5pRC53QlgDEP/P3Zr1+uE=

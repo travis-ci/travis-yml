@@ -1,0 +1,95 @@
+language: java
+# how to install and set jdk on travis:
+# - Testing Against Multiple JDKs
+#   https://docs.travis-ci.com/user/languages/java/#Testing-Against-Multiple-JDKs
+# - JVM images
+#   https://docs.travis-ci.com/user/reference/trusty/#JVM-(Clojure%2C-Groovy%2C-Java%2C-Scala)-images
+# - Customizing the Build / Build Matrix
+#   https://docs.travis-ci.com/user/customizing-the-build/#Build-Matrix
+
+addons:
+  apt:
+    packages:
+      - openjdk-6-jdk
+
+jdk:
+  - oraclejdk8
+
+before_install:
+  # workaroud for "buffer overflow detected" problem of openjdk:
+  #     https://github.com/travis-ci/travis-ci/issues/5227
+  # borrow from https://github.com/miguno/kafka-storm-starter/blob/01dd534263eb867304c06cd2a72f640da1bd9367/.travis.yml
+  - cat /etc/hosts # optionally check the content *before*
+  - sudo hostname "$(hostname | cut -c1-63)"
+  - sed -e "s/^\\(127\\.0\\.0\\.1.*\\)/\\1 $(hostname | cut -c1-63)/" /etc/hosts > /tmp/hosts
+  - sudo mv /tmp/hosts /etc/hosts
+  - cat /etc/hosts # optionally check the content *after*
+
+  - source ./scripts/travis-prepare.sh
+
+  # output env info
+  - ls -l /usr/lib/jvm && ls /usr/lib/jvm/* && ls $HOME/.jdk && ls $HOME/.jdk/*
+  - echo -e "JAVA_HOME=$JAVA_HOME\nPATH=$PATH\nSHELL=$SHELL"
+
+install:
+  - pip install --user codecov
+
+script:
+  # default oracle jdk 11, do build and test
+  - switch_to_oracle_jdk11
+  - ./scripts/run-agent-test.sh # run junit test in run-agent-test.sh
+  # open jdk 6
+  - jdk_switcher use openjdk6
+  - ./scripts/run-junit.sh skipClean
+  - ./scripts/run-agent-test.sh skipClean
+  # open jdk 7
+  - jdk_switcher use openjdk7
+  - ./scripts/run-junit.sh skipClean
+  - ./scripts/run-agent-test.sh skipClean
+  # oracle jdk 8
+  - jdk_switcher use oraclejdk8
+  - ./scripts/run-junit.sh skipClean
+  - ./scripts/run-agent-test.sh skipClean
+  # open jdk 8
+  - jdk_switcher use openjdk8
+  - ./scripts/run-junit.sh skipClean
+  - ./scripts/run-agent-test.sh skipClean
+  # oracle jdk 9
+  - jdk_switcher use oraclejdk9
+  - ./scripts/run-junit.sh skipClean
+  - ./scripts/run-agent-test.sh skipClean
+  # open jdk 9
+  - switch_to_open_jdk9
+  - ./scripts/run-junit.sh skipClean
+  - ./scripts/run-agent-test.sh skipClean
+  #  open jdk 10
+  - switch_to_open_jdk10
+  - ./scripts/run-junit.sh skipClean
+  - ./scripts/run-agent-test.sh skipClean
+  #  open jdk 11
+  - switch_to_open_jdk11
+  - ./scripts/run-junit.sh skipClean
+  - ./scripts/run-agent-test.sh skipClean
+  #  open jdk 12
+  - switch_to_open_jdk12
+  - ./scripts/run-junit.sh skipClean
+  - ./scripts/run-agent-test.sh skipClean
+
+after_success:
+  # codecov
+  - jdk_switcher use oraclejdk8
+  - ./mvnw clean -V
+  - ./mvnw cobertura:cobertura
+  - codecov
+  - git status --ignored
+
+# Caching Dependencies and Directories
+# https://docs.travis-ci.com/user/caching/
+cache:
+  directories:
+    - $HOME/.m2
+    - $HOME/.jdk
+    - $HOME/.cache/pip
+before_cache:
+  # clear TTL maven self install
+  - rm -rf $HOME/.m2/repository/com/alibaba/transmittable-thread-local

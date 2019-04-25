@@ -1,0 +1,26 @@
+dist: trusty
+language: java
+jdk:
+  - oraclejdk8
+env:
+  - CRATE_VERSION=1.0.1
+  - CRATE_VERSION=2.2.0
+  - CRATE_VERSION=2.3.4
+  - CRATE_VERSION=3.0.7
+  - CRATE_VERSION=3.1.3
+
+
+cache:
+  directories:
+    - $HOME/.m2
+
+sudo: false
+
+# Workaround for https://github.com/gradle/gradle/issues/2421
+install:
+  - JAVA_HOME=$(jdk_switcher home openjdk8) ./gradlew classes testClasses
+
+script: ./gradlew test -s
+
+notifications:
+  email: false

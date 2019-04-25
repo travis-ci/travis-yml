@@ -1,0 +1,16 @@
+language: java
+jdk:
+- oraclejdk8
+dist: trusty
+deploy:
+  provider: releases
+  api_key:
+    secure: jz8+NYoZqY0le+hOotryu1dPRoY9fll4J0txAEKpztrBPO+y4lwJ272N7I+y/pKjwyq7NAzV4uLyfS1zMSNXI+EeB+x/j2JypSLBu+6Ad0uEOAVkF7/kQUmRriPBy2erLbZuGbmM9ttx0MQNKBo2HYKayeRiJ/1dk1XBGRvDVeHXFLlWAc7cRINATRdAovRsQZafYUoeAy8NuE2U4WxR/uFmyeQAbyLR31fUAtMdM9yxA/4QYMxTs7ihbiZUiybsRoTfu62mtTe1wIxqC3ROz9sjAR0TbAqIWwtA+la53JmWfkj/0IRRSvKK1lWA/qMG86nH6tisHj64CxH7N+fD/ubfJFMYgmbcrFUf6M5/DD0Mn1rxYrIz9OBF57bNeYogeBQpWZydRsFjBc80uzMw8bCRsUk00xxkQYAGNb2qP6uv2iK9vlgz2WfN5ISNzFx7IYPfeVq69L94Dl+EEUAtXRtmxeBX8WfWgXMxboJgG58PpoGFXnBI8Dk6eq6JvI9mQXRtQWp8n5jMWp9NLH5TYb16MD6C9jiygvTE5EaLiIqyuYFc2Cu42WZQ5TuQfs3VmwiGqK7qjnaKveBHPHyLZuo5F+FXHb1RmwGHTTUIAjgAkilCe4+40bzR66q5ENLmUPt+gnoaIZM7FgiioKYNulTR+B9rQvFOtPk6a6Kk/VA=
+  file_glob: true
+  file:
+  - cli/target/mojito-cli-*.jar
+  - webapp/target/mojito-webapp-*.jar
+  skip_cleanup: true
+  on:
+    tags: true
+    repo: box/mojito

@@ -35,13 +35,13 @@ describe Travis::Yml::Schema::Def::Deploy::Bintray, 'structure' do
                 type: :string
               },
               user: {
-                '$ref': '#/definitions/secure'
+                '$ref': '#/definitions/type/secure'
               },
               key: {
-                '$ref': '#/definitions/secure'
+                '$ref': '#/definitions/type/secure'
               },
               passphrase: {
-                '$ref': '#/definitions/secure'
+                '$ref': '#/definitions/type/secure'
               },
               dry_run: {
                 type: :boolean

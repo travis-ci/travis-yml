@@ -1,0 +1,41 @@
+language: js
+
+cache:
+  yarn: true
+  directories:
+    - node_modules
+
+script:
+  - yarn
+  - yarn verify
+  - yarn build
+
+after_success:
+  - yarn coveralls
+
+before_deploy:
+  - yarn cosmos-export
+  - touch cosmos-export/.nojekyll
+
+deploy:
+  - provider: pages
+    verbose: true
+    skip-cleanup: true
+    keep-history: true
+    github-token:
+      secure: PMWctL2zK1Jzu38B+PcXKOS3KNClcBpvmuEen5mqcteZXjKKIc/PpbesOohHElYv5XB7cEGxFheJjFgLE4x3BrxDG0EaSTzBYTr773E+TOOOOTeEqxDM5ndWDp9r7KyuM+6R83jj9UTJePOvogEDBCa28WnoKLvSEb0qwJOZV2Vq/ZWh2XiLQBFGGyipFd0gSJZ2CQcjQnrPkjj8iRANTbims3F2WWNylroX1JqOaHr83WL76CrpqRAmEdB7kSXX7scXdpoaZO0BRMPgTsL8NGtkwpofx4ZWgIX3eYteI5Gc0LwRxXHA8cf1RGAZkV8XALgCXzDmlY3fbEIo076+sPFeG0/BsWOLo1QKkAs/snITOxz3kjVTHzdISqxAtdSMBro4YIi98hNq9PQk/KtUpr55PFHTqlYxYW1wqxebaV6TmlALwgwR7wEHjWDodmYGbyY04nh9o8YkCCCO59UYV5Hb8ccj7pGFp3Amg/sEPj3cGWLypEtgHm2aZJ3a2eXu3hdWKwnAaCpnrlwtEv9RNPVcKhu0iEih4WzQ0+hjlbILE5huWpwuhUhAPL70Wg7tLqnG2H9YEQpImEvGtBKxj0Nv0+KvOb9LESzF5P8AFXz+EqsA+Hag8Z0hnu4eDrjaoVOBqjR4TH7vLh8xwlyfYZPXoQP9G9x+/GjelnplKMM=
+    local-dir: cosmos-export
+    on:
+      branch: master
+  - provider: npm
+    verbose: true
+    email: developers@healthengine.com.au
+    api_key:
+      secure: mR7dEHHtx0b7grsrZG+u0lzYBkCNeqKNsu4sxCvhzvWsTIg4EEZOyEUjUfaBaMFD2hbSLnjoB51xeuYb9Hk1UDLH6CZKqJbp7GT4gIhXRTttGnBoFgKcel8NiJHFdtBD29yCY7EjQnRm4uv61el43QGhAZ0o85ZIKYxnPnxUNmEcqtmo0btnvxMUBSO1n2DGs/Cq/225VuwhIPGzy0kfLHvqOZ9Ku6BZz116szJdrMcBjVI+IHO24Fo5l69zGWd68VWZIPR2Or/TnfZ0uwocaZ/XWbKMQ0V24hpjGeUxSjOTP6eYTzshe4KzPK83XRGIiMuWoPksLw1HN4nIKKmtSC/FbaUjmAPyAtUo7sPAGCVlpAU6GEFz6dkbaHBVjJDO2FRIurxfa5Oc6wCw70JqM0VTP10IMQ298MDxnINR2hcS3ojAObvbqqas56T2vHEeedOH0xhV8wSJ+xyKNGc8LyjugRNJaNnOKCCxWbuV8YIBod9kBvMt9k1UvxJa7BEttzUFsGKBvdQ9lPoPVncp6WhTjv3jeJgnRitgEDSIbPn6NyUFJS0dZvO7vY8JecmV6M20K8aid9GA3zXCT0tQopiMw4780G2ctrszp9Hk3yqbmL3Wepuhdqe+R6rQsHfk9SBgGtKzfHPB/pGDbmiikoJ0Fa77Ro5FPyjy5ok0yBE=
+    on:
+      tags: true
+    skip-cleanup: true
+
+notifications:
+  slack:
+    secure: vqLBHGlx4cZ9bzVN59w9HGztu03tDX/vMVt/C9s+qDZFOv1+VCRaEzInBw99vpxgGBnm364VgXtYXFk6H1GAuFe8j20ydaqi/mVUnHRRb8akC5YpyL6aar7ACs6LDHuUvmIjCV4QVZxHWHl+ppRgZ0XZHvHuKG+bpiLMPpwQEDFHajxaFdghtxFxeTO4BaSSB2/rD1WXPshLOixCo2tK78h9IJndhXo4PFUNSC+wgYHdaVoVRDmRLUDf3dnRswLXP2GbQFW4yZU8rqnkDT/Y2tCV1cLA0flqOez4DEVHrs1jgghJ5FBzwLCVvHAwbFsESbAl0bMA7dgErJQVMkvujTBl7+SW/X94OicwmjTxOUb3S9sEb3F3+WZMaolHnksZydmexyD+Vw4p3JuDZHICaYdjqYayvSgOanVcfyY+NawE8RmjepiTY2QDlaNCeQ82r8hakoh3xITVO8/Htm5n5e9m+m2voieiGtIGeNHGYzYlQj28qwb20+K9Xh0PRi2ZMhY/qowh15mBtbLKJZDCFZ1waIIBjq+hAgkVpaBrdS5vi2uJQgGayfmsYcHJ6qxUd1Q9Vz2DChu/GUfX7WoAU28CCliHbSpmk+wYkRRZ4gL22V8uSEKtg7dUmjG9QQx4nw5GEAqtjHG6XYnnVz86UliuntmP7P+bw1qWvRDYjGw=

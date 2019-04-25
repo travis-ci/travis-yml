@@ -1,0 +1,16 @@
+language: go
+go:
+- 1.11
+install:
+- "./prifi.sh install"
+- go get golang.org/x/tools/cmd/cover
+- go get github.com/mattn/goveralls
+env:
+  global:
+    secure: S+oKDRcnakGDpMxGZK7/NWn91uBoJ7P8G9m5kRT+uBXnha0dbXb+TRBvJgNV8Sf7mt9cBLRPEo00+VsmyeEWE4OW9PovyIz2qralhpcODQQIaMoEaU1afYTPw3ZkRn0eUOlBP7MgPRNJaYIUnXriPdIsNI/argQxf425qi4DTo49u4Ln82ApxnHTMIC8gj1d7qFJGCY2XzC/w9R5Ae7Fll60Es9nOQr7hzxI6exhJda9Zt5hRORLDO7lz/v6auVZpAnql0ukFJvdUymmSYEjgGCFs6CGKdvfr+wFpg9KkHZ1JZx7+JwGMW40EolDQEzg0jJrRByF44g3NICi4Qx7H4J/1SaBXAthMpdp/6zVKdwERW3S//8MrB3nC2u8DUh2zHFM31m6tovuMSW50F6d9fcMPeJf2ldh3QlsV4jzRYIT4cMeU8mvrPFN21ALTQUBL0wLhIu4v2xYjhx1uGmPQ5fQBt5Ma32vuftlov6NPVsIeW93poQLTqJ8Ind81Kx2TYc3d3pfeL8vqx94GgtelZtHbb9l16T+iT9YwrsVLoAX9v27KsEbhNQGJmwtmsiB1QaxVQzIw57hxwZcODhTTIu37s/Wf5pgzIIbqJfWzjp99ps3zHp+EoXNi/+BRGsE8fILiDlMtRaWt867eI1x1Rrp0hqhf8q61zrhcZjoXDc=
+script:
+- make all
+after_success:
+- goveralls -coverprofile=profile.cov -service=travis-ci -repotoken $COVERALLS_TOKEN
+notifications:
+  email: false

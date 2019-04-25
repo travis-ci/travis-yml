@@ -1,0 +1,18 @@
+language: python
+python:
+  - "3.6.1"
+addons:
+  postgresql: '9.4'
+services: postgresql
+install:
+  - pip install -r requirements/local.txt
+  - pip install -r requirements/test.txt 
+before_script:
+  - psql -c 'CREATE DATABASE odin;' -U postgres
+  - psql -c 'CREATE DATABASE testdb;' -U postgres
+script:
+  - python manage.py migrate
+  - flake8
+  - py.test --cov=odin
+after_success:
+  - coveralls

@@ -1,0 +1,77 @@
+sudo: required
+
+dist: trusty
+language: generic
+
+addons:
+  apt:
+    packages:
+    - build-essential
+    - check
+    - doxygen
+    - cmake
+    - gradle
+    - libgmp-dev
+
+cache:
+  apt: true
+  directories:
+    - $HOME/.stack/
+    - .stack-work/
+
+matrix:
+  include:
+    - env:
+        - TRAVIS_TARGET=python
+      language: python
+      python: 3.7-dev
+      before_install:
+        - sudo apt-get -qq update
+        - sudo apt-get install python2.7 python2.7-dev
+        - sudo apt-get install python3.5 python3.5-dev
+        - sudo pip install tox
+      script: make test-python
+    - env:
+        - TRAVIS_TARGET=default JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
+      before_install:
+        - mkdir -p $HOME/texlive && curl -L https://github.com/urdh/texlive-blob/releases/download/20160619/texlive.tar.xz | tar -JxC $HOME/texlive
+        - export PATH="$PATH:$HOME/texlive/bin/x86_64-linux"
+        # Install stack
+        - mkdir -p $HOME/.local/bin
+        - export PATH=$HOME/.local/bin:$PATH
+        - travis_retry curl -L https://www.stackage.org/stack/linux-x86_64 | tar xz --wildcards --strip-components=1 -C $HOME/.local/bin '*/stack'
+        # Install node 6; from https://github.com/nodejs/nan/blob/master/.travis.yml
+        - rm -rf ~/.nvm && git clone https://github.com/creationix/nvm.git ~/.nvm && (cd ~/.nvm && git checkout `git describe --abbrev=0 --tags`) && source ~/.nvm/nvm.sh && nvm install 7
+        - npm install npm
+        - mv node_modules npm
+        - npm/.bin/npm --version
+        - npm/.bin/npm install
+        - sudo add-apt-repository -y ppa:openjdk-r/ppa
+        - sudo apt-get -qq update
+        - sudo apt-get install -y openjdk-8-jdk --no-install-recommends
+        - sudo update-java-alternatives -s java-1.8.0-openjdk-amd64
+        - sudo pip install --upgrade Sphinx
+        - npm install -g mocha
+        - npm install
+      script: make test-c test-haskell test-java test-javascript
+    - env:
+        - TRAVIS_TARGET=haskell-tools
+      before_install: |
+        sudo apt-get update
+        sudo apt-get -y -o Dpkg::Options::="--force-confnew" install docker-ce
+      script: |
+        pushd haskell
+        docker build -t sbp2json .
+        docker run --rm --name sbp2json sbp2json >sbp_linux_tools.tar
+        gzip sbp_linux_tools.tar
+        ls -l
+        popd
+
+deploy:
+  provider: releases
+  api_key:
+    secure: "WDZRT7VevzQidPo8Mn1ozV6azwNFe7qGwKbLCb8rmKpPmiF+wcQ3KrhTnGj0EmqGqQ2q1c3UZzVCr+nLhLvIFLhkvNK42bs8Byc+HolKNX/diPAlB/mczGHI08rV4EJFmJL56vopdoafOAsqtZBnD4hZ8BDETNqMyJefo70pyY8="
+  file: haskell/sbp_linux_tools.tar.gz
+  skip_cleanup: true
+  on:
+    tags: true

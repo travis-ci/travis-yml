@@ -1,0 +1,26 @@
+language: node_js
+
+node_js:
+  - "8"
+
+env:
+  - CXX=g++-4.8
+
+install:
+  - npm install
+  - npm test
+
+services:
+  - mongodb
+
+addons:
+  apt:
+    sources:
+    - mongodb-3.2-precise
+    - ubuntu-toolchain-r-test
+    packages:
+    - mongodb-org-server
+    - g++-4.8
+
+notifications:
+  slack: financialtimes:F7ol60TlTlcG7ZP0DvAZWan5

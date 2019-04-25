@@ -1,0 +1,15 @@
+language: node_js
+cache:
+  yarn: true
+yarn: true
+notifications:
+  email: false
+install: yarn install --no-lockfile --non-interactive
+node_js:
+  - '10'
+  - '8'
+script:
+  - yarn test && yarn travis-deploy-once "npm run semantic-release"
+branches:
+  except:
+    - /^v\d+\.\d+\.\d+$/

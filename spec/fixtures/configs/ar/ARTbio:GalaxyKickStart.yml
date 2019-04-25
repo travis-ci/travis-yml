@@ -1,0 +1,50 @@
+language: python
+python: 2.7
+dist: xenial
+sudo: required
+
+env:
+  global:
+  - SITE_URL="https://artbio.github.io/GalaxyKickStart/"
+  - GH_USER_NAME="Christophe Antoniewski"
+  - GH_USER_EMAIL="drosofff@gmail.com"
+  - GH_REF="github.com/ARTbio/GalaxyKickStart.git"
+  - GALAXY_TRAVIS_USER="galaxy"
+  - GALAXY_UID="1450"
+  - GALAXY_GID="1450"
+  - GALAXY_HOME="/home/galaxy"
+  - GALAXY_USER="admin@galaxy.org"
+  - GALAXY_USER_EMAIL="admin@galaxy.org"
+  - GALAXY_USER_PASSWD="admin"
+  - BIOBLEND_GALAXY_API_KEY="admin"
+  - BIOBLEND_TEST_JOB_TIMEOUT="120"
+  - secure: VM+MmxZP70z0LABwxm+qWOjXSzfOQB7FxL6rWCkWOz9wKqZtEme8iPuT8uXd3x+fk0rtgzhiwri4wky/AeSzUO2MHmUKUyaMoN3Whz5CcIH6LVPgAc2aiZj/tw22wTYGLmP+4F5kK6xNrRiB1zwl0gmt3muKHRF+KLnND1dpsFLByGlEeGUFuvU64t6hAi+gvORbmKlGgn1wdi0pbdtyLKGi+efG9HWkIefOt2gVobLxBNZT4HWqWHK9I40UjWY3GSjQDvj5xFz6JKFM1ZCc06xI/94Td2ZZIOtiM5fIy6HFbPA6AjVpQ8B0Y45q5UF+yx+Y910ko7giCD23qS8dAX2SfpHktwzqgjxNc+IKfCquihmgagLHZycaHfmqweTxk9Fn/nc9zAhYTKMSwdd2h4aMJGsjHkitUf1G3O9/Gd6D0A+3AijXyet9MJ2NbLuDhXycGRVmX2zNXwaWjSbLPuat94F38O0uzG8Q7oOPElfEwik28DhpHBrDsDQeJhvytG1Hfgw85IJJeNwPAzloq8+idqUwZ7fxaM2eT0WPEZG26Hooi1UYeXdpil1TFV1trFtS6JD2xl/3JSZA2Ls9ARIKgbIJw2WN8FzJc0rzGyCOjDHEur9eyw2MVbzEooAS2l95xzEZqdvb4pCe8LQZ5S4wBIX0xMSmBUTW/lBpK4Y=
+
+jobs:
+  include:
+
+    - stage: docker
+      env:
+        - TRAVIS_JOB=docker-build
+        - BIOBLEND_GALAXY_URL="http://localhost:80/subdir/"
+      
+    - stage: ansible
+      env:
+        - TRAVIS_JOB=ansible-test
+        - BIOBLEND_GALAXY_URL="http://localhost:80"
+
+before_install:
+  - sudo apt-add-repository -y ppa:ansible/ansible
+  - sudo apt-get -qq update
+  - sudo apt-get -qq install ansible
+  - if [[ "$TRAVIS_BRANCH" == *"test_upstream_ansibles"* ]]; then mv upstream_requirements_roles.yml requirements_roles.yml; fi
+  - if [ "$TRAVIS_JOB" = "ansible-test" ]; then . ./travis_scripts/before_install_ansible.sh; fi
+  - if [ "$TRAVIS_JOB" = "docker-build" ]; then . ./travis_scripts/before_install_docker.sh; fi
+
+
+install:
+    - sudo su $GALAXY_TRAVIS_USER -c 'pip install --ignore-installed --user https://github.com/galaxyproject/bioblend/archive/master.zip pytest'
+
+script:
+  - if [ "$TRAVIS_JOB" = "ansible-test" ]; then . ./travis_scripts/script_ansible.sh; fi
+  - if [ "$TRAVIS_JOB" = "docker-build" ]; then . ./travis_scripts/script_docker.sh; bash ./travis_scripts/deploy.sh; fi

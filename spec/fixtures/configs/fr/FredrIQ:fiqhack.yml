@@ -1,0 +1,23 @@
+language: c
+
+os:
+    - linux
+    - osx
+
+compiler:
+    - clang
+
+# Disable aimake for now, for performance purposes
+script:
+    - make install
+
+notifications:
+    irc:
+        channels:
+          - "chat.freenode.net#nethack4"
+          - "ircs://chat.freenode.net:7070#ascension.run"
+        on_success: always
+        on_failure: always
+        template:
+          - "%{commit_subject} (%{result} %{branch} #%{build_number}) %{build_url}
+            Diff: %{compare_url}"

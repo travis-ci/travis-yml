@@ -1,0 +1,42 @@
+sudo: required
+language: python
+python:
+  - 3.5
+services:
+  - docker
+before_install:
+  - docker --version
+  - docker-compose -v
+env:
+  global:
+  - OSGEO_USERNAME=agenciadeimplementacion
+  - QGIS_TEST_VERSION=latest
+  - REMOTE_REPO_OWNER=AgenciaImplementacion
+  - REMOTE_REPO_NAME=Asistente-LADM_COL-docs
+  - secure: bU/mTC1JjyHOvFtu4bAgiz9a16LF9ICcsmd1RoqjDJoWFzLzQaGWVqOCLA19gZWQ9rVPdc8KhVRG5BffaecZGTjpgxpYC6jsi6DVKfbq5uX5v6F6wbLk+3OC5/w+XPKa1vl358U8zK4mf6WDDQ7ZQut2HLXBcdJFU+glikndHdkXXZoa3paL+iYDuK/skRhM3r+/VYq0xzEvxyMm9kELSMwl7iXVJw+Dr4lZEQELJWREKS7nHkizJ8rP3G51BB4owCGrb8x7Wqv3pTaMwGLUMHYLY3AuOlFnRTQLx3hcgHhCxmkast00ikamtRe3yHDaAOL4BYA7yOpt7cbT6uVxq3+2S6AsfksQUb1XrJj2LfkWjQbxPycfm87CE2zhiVWqwryNnwbcl3emSHangvanGGQL+dNbs0Nk+iV9ARVsl6Mknw+T0dbSTmp1NxpuFZRtzyDpo2Ceszr3jCKpIlir8DPJ0E1YBsfzYKU/jlKbIFwtj386zw0Mt8jM4I6seD4812IyaSliS7bFa0XmtJl9U3N7VYdMbx6jNblLHm8ATLa5DugoSQL2Y4YRNj58t/ja0m83l5vZ831lRRXNNg6dZH/l0VWhGEEx/PWzBbOLkghV+gEDRNW+eUUf0oWcUKLT4CM+6nQbGmNnbYV9M1FND7FAmhqcNURfamnzbYCskJY=
+install:
+  - docker build --build-arg QGIS_TEST_VERSION=${QGIS_TEST_VERSION} .
+script:
+  - docker-compose run qgis
+  - echo pip install -r requirements.txt
+  - echo 'si se necesita hacer deploy'
+before_deploy:
+  - sudo apt-get -qq update
+  - sudo apt-get install -y pyqt5-dev-tools qtchooser
+  - pushd asistente_ladm_col; make clean; make all; popd
+  - ./scripts/release-docs.sh
+  - zip -r asistente_ladm_col.zip asistente_ladm_col
+    -x asistente_ladm_col/tests/\*
+    \*.pyc \*/__pycache__/\*
+deploy:
+  skip_cleanup: true
+  provider: releases
+  api_key:
+    # link: https://help.github.com/articles/creating-a-personal-access-token-for-the-command-line
+    # link: https://github.com/travis-ci/travis.rb#installation
+    # travis setup releases --force
+    secure: eDXuR1hOL2puWUXrKfEfJ9ToYAFJMXhazJm/ai7B853LvXj13H7oCx0ns7y1sNbjpCadjliAaj1NXEfeS+tcv8tmEmtS3EjwwabDgirBdT13NbIPtdKZgBmFuXtK4SafIRJOdtPpQMlb+OuS0n9lQWNXRM52rbidEOr4/FY7UQWr/u380d5I4chtxwOsvowiAp74NszDhheA9azlJZ8M1LnmurAxIMSnA0nWrz1QMkgffDF6yk+hYsvLzalQ/omBaOhw4wUo2oo+gJSYERS1usK7pkCu9136X+O8ULT5A619EH36yJCdkOFJPMZiKCmfLwqUA0ubhPkEtYMVBp7haJh7Gw9/XAd9SZkDAGc94P483Va4RRF5OnnAQhIktmg4Rdevjg1hKTcwHBNaQuAHkF8q2SnpKdd7QxACRUovEm4AW3b7ZBnqr3VS7sU5x+MbI5jPgQbHAqQIVbx8/rxXQwphp5WD0mNGDMogw1zW94MMyBVyhY5N3xK60o4DKJ+c96ITnnNoLp62SRP1vQc6aKzeKC1DXlnLIvPGmOWaZ8supM30XLuyPq51m56MTdgBAis6xAzgm7dYb6Adv5mlfuq6M3/4Tq+Vrckb6YdHJUoVfDUYrTe/ohlQ8QulFO9YCLADwcQuZHyYaXU9F2rXa6PUjpW0WVsT6JjVvS0O/eo=
+  file: asistente_ladm_col.zip
+  on:
+    repo: AgenciaImplementacion/Asistente-LADM_COL
+    tags: true

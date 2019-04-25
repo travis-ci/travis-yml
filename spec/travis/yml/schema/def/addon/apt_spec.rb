@@ -14,7 +14,7 @@ describe Travis::Yml::Schema::Def::Addon::Apt, 'structure' do
             type: :object,
             properties: {
               packages: {
-                '$ref': '#/definitions/strs'
+                '$ref': '#/definitions/type/strs'
               },
               sources: {
                 anyOf: [
@@ -94,7 +94,7 @@ describe Travis::Yml::Schema::Def::Addon::Apt, 'structure' do
             ],
           },
           {
-            '$ref': '#/definitions/strs'
+            '$ref': '#/definitions/type/strs'
           },
           {
             type: :boolean

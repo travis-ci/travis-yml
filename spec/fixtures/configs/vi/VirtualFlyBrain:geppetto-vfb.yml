@@ -1,0 +1,114 @@
+language: node_js
+os: linux
+sudo: required
+dist: trusty
+node_js:
+- "7"
+
+before_install:
+  - sudo apt-get install -y xserver-xorg-dev libxext-dev libxi-dev 
+
+install:
+- npm install --silent -g phantomjs 
+- npm install --silent -g casperjs 
+- npm install --silent -g slimerjs
+- npm install --silent -g gl
+- npm config set registry http://registry.npmjs.org/
+
+services:
+  - docker
+addons:
+  firefox: "58.0"
+  apt:
+    packages:
+    - mesa-utils
+    - xvfb
+    - libgl1-mesa-dri
+    - libglapi-mesa
+    - libosmesa6
+before_script:
+  - "export DISPLAY=:99.0"
+  - "sh -e /etc/init.d/xvfb start"
+  - export SLIMERJSLAUNCHER=/home/travis/firefox-58.0/firefox/firefox
+  - export LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu/
+
+env:
+  global:
+  - secure: TbIQjzYF5p2LBoGMACsvA7BP59FiRAGeP9cp+3s0y4sVlXMlFU8RlI0sMYBUYADDxbk1epQn5RW/+Comsjl1mJHWkc0Ndnro/E/TmONQVKFjpmzoRf8nLLlGyGtO4lqucl11KSwMYwc0f2MMC5ZSxRO/Ob15HG/Dz0PcH1Jq1xL66FF+NIj2u7UVHkqhzcNssezJUCmP2+otzsB/CCaouZ4GOtMlVwtO0lCQ8+rP1j2f4+wyWHRnvBSicgrWhdc+RDwHzutatl7aV2Js+y0EKwkZII1QEHanpmdHxGOQnljcCCQgOzy72tnwns10uum9ZBNRQJ3hHuBdiTUAlHDZaLkQcPxmg79Xc/8xiHgihTEpL2zbBwr5LQJfhag1D27ITCyWtadBtgeRsC5d1+wk72zAZ0mk/0Dilf9UWIIcKJngA8KoZRScY4y562Mh/TPjLxru1nK2nhitgiaMO5bCRZ+2nUzoydKWDwup8ruqfZ4zwgDTSQV5YjUW9im4gEyzziNGaF3kQBibbExBgGWA6kdtnd60SRJxXHwU356of9ewxXlWB8OWRLjs4S+2IqpyjceA19IOE+tRomBb5WioVmr9+OdYdC9/HG3h2uQa6MhwjTgprzZPvnMUXxda9nG89bShhL3LiNnMiumTbLs0oRpqIxXniJ9liHvD1ERp1iY=
+  - secure: nG+5a2LvKsXfLGwIG3hqEqQOhMvsLdB4N0pQ5Oq47vLKkQLQMO9RvUn9fSArYy4nVJKOSHiSEuEyFFCN84XBSjK5c+VuRyucrcph7myufhMLogVhlbjuuoTg5EESLGfQ5d/cbQ2YKSfLwETG9eoNCElGyu39FP1KmmVVk2CVaB9Tkvd/pIXx98oR1QuQOWQgNj3h6EFZbQOOmCnrFD+gtHq4yWeu2/eUg+8GcgpXkFYPpyeHPkoorrGsu8EfgyObVO8moFnKTrtpJmg886yXV5BpMwMEv8LKLxjTwSJX29rhf1uZkXNlCrF9zvfQ6iQ05gWDbsf+Ttio3CSVqCIudfez/ZC/uJ4qS/ZGFlOE/Dc4ulE/UBKQE9vE5EWlsJjoZRlTePlNJ1jrhezuJRISXVo7wQUGUtXiI7t3ko5PUO/Kc/UWBKQPZVU0AXwgkrXsXJFTaGSkBMf07OolHjI5v7/QdGctI/pmnox3l1IHr2Wq+3iAhPzyUL6aPQPS/ClYZTqTSCTTXCdQPWVkfkw4AnNuaNdQC7HkpsLRJ47G5XNVoGJIGvFevhSc1Pjy/fT51sh6Lznzc0rsDirFoXGAkWtibszuTHjzN9pGISXLzSqTe6fIYQYM22bO0FApwqdCrSc4TsTFTJCJIPyABlhj5vfaLmplPb2U3z8Q5eQ+wwU=
+  - secure: MgVs6eMaOJwmSVQlTjHRE1rDNJftnDpytewRnZF+0kTVwzTM02/UQm9eNB2nNSBCzGbAj4YhrXPkt9d+kJ4o7MfFhgD2MNnIC7wZQQQxgHC0rZLAll8HdvcaiaGVofMzuzJL6CPvFeA5sNBmzF7aoy89vrxxBTm+AUqLrqZztcG0H5FcxCc+l4oGPxzXykascJUEHdEgnRx6me4BNnDLj+K+xh1zWQEHwc2b6Mux06uZzcBm9IRhp/01W+FDlsgAuuD7wZ997I+YgrfRMhilTjOK58Ao21rqUFICb63Uk14yDcMQhUaGXj4QPkSdWiEgzG3egcq32iegG4PI5/Fuwlr2xtNaNrS+UzZy4JN/vuXjJqEUzeqdsttgwBF915duRqfFUGJFRyCMjpqE5qDfIG78th/dwL0NxAlz+mV71jf3qkVXeWtLMTsKWR2XZVDw9Fd6VWYkhLBoUaomtJi+H1Gq6ShIPCnvm16P7rMEtQ5g/ayUjExzfr1tybdLGr7oV+qEqcToUpiB4I69vYe+PrUVHen0j9RgGMRBXxBBpnPKdj42HS3jGb9w74BNUjNKenNJnaiuLWxtZ8M1pJecOf4n5Ip5DiljGOJ4IqMF/Oaox16WbAa2FI7RJU0hXKMbaic1DGyYzPihLXvH/Vx0l5E4VeVVCogwwwz9QV/NzzE=
+  - COMMIT=${TRAVIS_COMMIT::8}
+  matrix:
+  - VFBSUB=local
+  - VFBSUB=https
+
+script:
+- echo -e "travis_fold:start:Geppetto-Config" || true
+- export VFB_REPO=$(echo ${TRAVIS_REPO_SLUG##*/} | awk '{gsub(/\-/,"_",$0);gsub(/\./,"_",$0);print toupper($0)}')
+- export REPO=$(echo ${TRAVIS_REPO_SLUG} | awk '{gsub(/\./,"_",$0);print tolower($0)}')
+- export TAG=`if [ "$TRAVIS_BRANCH" == "master" ]; then echo "latest"; else echo ${TRAVIS_BRANCH/\//-} ; fi`
+- sed -i "s|ENV BRANCH_DEFAULT=.*|ENV BRANCH_DEFAULT=$TRAVIS_BRANCH|g" $TRAVIS_BUILD_DIR/Dockerfile
+- cat $TRAVIS_BUILD_DIR/Dockerfile
+- sed -i 's|"useSsl":.*,|"useSsl":false,|g' $TRAVIS_BUILD_DIR/dockerFiles/GeppettoConfiguration.json
+- sed -i 's|"embedded":.*,|"embedded":false,|g' $TRAVIS_BUILD_DIR/dockerFiles/GeppettoConfiguration.json
+- sed -i 's|"embedderURL":.*,|"embedderURL":"/",|g' $TRAVIS_BUILD_DIR/dockerFiles/GeppettoConfiguration.json 
+- |
+  if [ "$VFBSUB" = "local" ]; then
+    sed -i 's|SOLR_SERVER=/solr/ontology/select|SOLR_SERVER=http://solr.virtualflybrain.org/solr/ontology/select|g' $TRAVIS_BUILD_DIR/Dockerfile   
+  fi
+- echo -e "travis_fold:end:Geppetto-Config" || true
+- echo -e "travis_fold:start:Docker-Build" || true
+- travis_wait 200 docker build -t $REPO:$COMMIT .
+- echo -e "travis_fold:end:Docker-Build" || true
+- echo -e "travis_fold:start:Docker-Run" || true
+- travis_wait 200 docker network create -d bridge --subnet 192.168.0.0/24 --gateway 192.168.0.1 dockernet
+- travis_wait 200 docker run -d --name geppetto_container -p 8080:8080 --net=dockernet $REPO:$COMMIT
+- sleep 2m
+- curl -sSf http://192.168.0.1:8080/org.geppetto.frontend/
+- echo -e "travis_fold:end:Docker-Run" || true
+- echo "Current time :$(date +"%T")" || true
+- cd $TRAVIS_BUILD_DIR/tests/casperjs/
+- echo "$TRAVIS_BRANCH" || true
+- | 
+  if [ "$VFBSUB" = "local" ]; then
+    for testfile in ./*.js; do
+      if [ "$TRAVIS_BRANCH" == "development" ]; then
+        sed -i "s|v2.virtualflybrain.org|v2-dev.virtualflybrain.org|g" $testfile
+      fi
+    done
+    docker network inspect dockernet
+    curl -s -I $1 http://192.168.0.1:8080/org.geppetto.frontend | grep HTTP/1.1 | awk {'print $2'}
+    #xvfb-run -a --server-args="-screen 0 1024x768x24"  casperjs test control-panel-tests.js --host=http://192.168.0.1:8080/ --engine=slimerjs
+    #xvfb-run -a --server-args="-screen 0 1024x768x24"  casperjs test query-tests.js --host=http://192.168.0.1:8080/ --engine=slimerjs
+    #xvfb-run -a --server-args="-screen 0 1024x768x24"  casperjs test term-info-tests.js --host=http://192.168.0.1:8080/ --engine=slimerjs  
+    #xvfb-run -a --server-args="-screen 0 1024x768x24"  casperjs test batch_request.js --host=http://192.168.0.1:8080/ --engine=slimerjs  
+    #xvfb-run -a --server-args="-screen 0 1024x768x24"  casperjs test spotlight-tests.js --host=http://192.168.0.1:8080/ --engine=slimerjs  
+    #xvfb-run -a --server-args="-screen 0 1024x768x24"  casperjs test stack-viewer-tests.js --host=http://192.168.0.1:8080/ --engine=slimerjs
+  fi
+- echo -e "travis_fold:start:Virgo-Log" || true
+- cd $TRAVIS_BUILD_DIR
+- sudo docker cp geppetto_container:/home/developer/virgo/serviceability/logs/log.log $TRAVIS_BUILD_DIR/
+- tail $TRAVIS_BUILD_DIR/log.log -n 200 || true
+- echo -e "travis_fold:end:Virgo-Log" || true
+- echo "Current time :$(date +"%T")" || true
+- echo -e "travis_fold:start:Docker-Deploy" || true
+- cd $TRAVIS_BUILD_DIR
+- |
+  if [ "$VFBSUB" != "local" ]; then 
+    sed -i 's|"useSsl":.*,|"useSsl":true,|g' $TRAVIS_BUILD_DIR/dockerFiles/GeppettoConfiguration.json
+    sed -i "s|http://solr.virtualflybrain.com/solr/|/solr/|g" $TRAVIS_BUILD_DIR/components/VFBMain.js
+    docker build -f Dockerfile -t $REPO:$VFBSUB . 
+    docker tag $REPO:$VFBSUB $REPO:$TAG-$VFBSUB
+  else
+    docker tag $REPO:$COMMIT $REPO:$TAG
+  fi
+- echo -e "travis_fold:end:Docker-Deploy" || true
+after_success:
+- cd $TRAVIS_BUILD_DIR
+- docker login -u $DOCKER_USER -p $DOCKER_PASS
+- |
+  if [ "$VFBSUB" != "local" ]; then
+    docker push $REPO:$TAG-$VFBSUB
+  else
+    docker push $REPO:$TAG
+  fi

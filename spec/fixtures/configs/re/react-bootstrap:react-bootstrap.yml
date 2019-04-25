@@ -1,0 +1,32 @@
+language: node_js
+node_js:
+  - lts/*
+
+env:
+  - BROWSER=ChromeCi
+  - BROWSER=Firefox
+
+cache:
+  directories:
+    - ~/.yarn-cache
+    - node_modules
+    - www/node_modules
+
+addons:
+  chrome: stable
+  firefox: latest
+
+before_install:
+  - export DISPLAY=:99.0
+  - sh -e /etc/init.d/xvfb start
+
+install:
+  - yarn bootstrap
+
+after_success:
+  - node_modules/.bin/codecov
+
+branches:
+  only:
+    - master
+    - next

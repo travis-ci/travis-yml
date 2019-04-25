@@ -1,0 +1,56 @@
+language: c
+sudo: false
+addons:
+  apt:
+    sources:
+    #- ubuntu-toolchain-r-test
+    packages:
+      - ca-certificates # needed for travis cache to work
+
+
+cache:
+  directories:
+    - $HOME/.cache/msmpipeline
+
+install:
+  - source devtools/travis-ci/install.sh
+  - export PYTHONUNBUFFERED=true
+  - export CC=gcc
+  - export CXX=g++
+  # This line may be needed to get travis cache to work
+  - echo "cacert=/etc/ssl/certs/ca-certificates.crt" >> ~/.curlrc
+
+script:
+  # Create a test environment
+  - conda create --yes -n test python=$python
+  # Activate the test environment
+  - source activate test
+  # Add org channel
+  - conda config --add channels ${ORGNAME}
+  # Add omnia dev channels
+  - conda config --add channels omnia/label/dev
+  # Build the recipe
+  - conda build devtools/conda-recipe
+  # Install the locally-built package
+  - conda install --yes --use-local msmpipeline
+  # Get test data
+  - cd msmpipeline/test_data && python fetch_alanine.py
+  # Create a pyemma cache: see https://github.com/markovmodel/PyEMMA/issues/882#issuecomment-235948398
+  - python -c "import pyemma ; pyemma.config.save()"
+  # Run the tests
+  - msm-pipeline --trajectories "alanine_*.h5" --name "alanine" --nclusters 50 --features backbone-dihedrals
+  - align-pdbs --path_to_pdbs "alanine*.pdb" --path_to_free_energies "alanine_macrostate_free_energies.npy" --name "alanine"
+
+env:
+  matrix:
+    - python=2.7  CONDA_PY=27
+    - python=3.4  CONDA_PY=34
+    - python=3.5  CONDA_PY=35
+
+  global:
+    - PACKAGENAME="msmpipeline"
+    - ORGNAME="omnia"
+
+after_success:
+  - echo "after_success"
+  - ./devtools/travis-ci/after_success.sh

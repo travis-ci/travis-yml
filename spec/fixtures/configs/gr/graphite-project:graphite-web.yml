@@ -1,0 +1,83 @@
+# http://travis-ci.org/#!/graphite-project/graphite-web
+language: python
+python: 2.7
+sudo: false
+
+# Python 3.7 needs dist: xenial and sudo: true
+matrix:
+  include:
+    - python: pypy
+      env:
+        - TOXENV=pypy-django111-pyparsing2
+    - python: 3.4
+      env:
+        - TOXENV=py34-django20-pyparsing2
+    - python: 3.5
+      env:
+        - TOXENV=py35-django21-pyparsing2
+    - python: 3.5
+      env:
+        - TOXENV=py35-django21-pyparsing2
+    - python: 3.6
+      env:
+        - TOXENV=py36-django21-pyparsing2
+    - python: 3.7
+      sudo: true
+      dist: xenial
+      env:
+        - TOXENV=py37-django21-pyparsing2-msgpack
+    - python: 3.7
+      sudo: true
+      dist: xenial
+      env:
+        - TOXENV=py37-django21-pyparsing2-pyhash
+    - python: 3.7
+      sudo: true
+      dist: xenial
+      env:
+        - TOXENV=py37-django21-pyparsing2-mysql TEST_MYSQL_PASSWORD=graphite
+    - python: 3.7
+      sudo: true
+      dist: xenial
+      env:
+        - TOXENV=py37-django21-pyparsing2-postgresql TEST_POSTGRESQL_PASSWORD=graphite
+    - python: 3.7
+      sudo: true
+      dist: xenial
+      env:
+        - TOXENV=lint
+
+env:
+  - TOXENV=py27-django18-pyparsing2
+  - TOXENV=py27-django111-pyparsing2-msgpack
+  - TOXENV=py27-django111-pyparsing2-pyhash
+  - TOXENV=py27-django111-pyparsing2-mysql TEST_MYSQL_PASSWORD=graphite
+  - TOXENV=py27-django111-pyparsing2-postgresql TEST_POSTGRESQL_PASSWORD=graphite
+  - TOXENV=docs
+
+addons:
+  apt:
+    packages:
+      - libcairo2-dev
+      - librrd-dev
+  postgresql: "9.5"
+
+services:
+  - redis-server
+  - mysql
+  - postgresql
+
+before_install:
+  - bash -c "if [[ '$TOXENV' == *mysql* ]]; then mysql -e "'"'"GRANT ALL ON test_graphite.* TO 'graphite'@'localhost' IDENTIFIED BY 'graphite';"'"'"; fi"
+  - bash -c "if [[ '$TOXENV' == *postgresql* ]]; then psql -c "'"'"CREATE USER graphite WITH CREATEDB PASSWORD 'graphite';"'"'" -U postgres; fi"
+  - bash -c "if [[ '$TOXENV' == *pyhash* ]]; then sudo apt-get -qq update; sudo apt-get install -y libboost-python-dev; fi"
+
+install:
+  - pip install tox
+
+script:
+  - tox -e $TOXENV
+
+after_success:
+  - pip install codecov
+  - codecov

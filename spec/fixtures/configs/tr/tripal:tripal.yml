@@ -1,0 +1,86 @@
+language: php
+
+services:
+  - docker
+  - postgres
+
+sudo: required
+
+php:
+  - 7.1
+  - 7.2
+#  PHP 7.3 is not yet supported (issue: https://www.drupal.org/project/drupal/issues/3012308)
+#  - 7.3
+
+env:
+  - BASE_URL="http://127.0.0.1:8080"
+
+install:
+  - composer global require "drush/drush:~8"
+
+before_script:
+  - docker pull statonlab/tripal2
+  - psql -c "create database test_db encoding 'utf-8';" -U postgres
+  - psql -c "alter role postgres with password 'dbpass';" -U postgres
+  - cd ..
+
+  # Set additional environment variables
+  - export PATH="$HOME/.config/composer/vendor/bin:$PATH"
+  - export DRUPAL_ROOT="$(pwd)/drupal"
+
+  # Download and install Drupal
+  - drush dl drupal-7 -y
+  - mv drupal-7* drupal
+  - cd drupal
+  # Run the php server
+  - php -S 127.0.0.1:8080 &
+  - drush si -y --db-url='pgsql://postgres:dbpass@localhost:5432/test_db'
+                --account-name='admin'
+                --account-pass='admin_pass'
+                --site-mail='admin@example.com'
+                --site-name='Tripal 3'
+
+  # Download Dependencies
+  - drush dl -y field_group, field_group_table, field_formatter_class, field_formatter_settings, ctools, date, devel,
+                ds, link, entity, libraries, redirect, token, uuid, jquery_update, views, webform
+
+  # Enable dependencies
+  - drush en -y field_group, field_group_table, field_formatter_class, field_formatter_settings, ctools, date, devel,
+              ds, link, entity, libraries, redirect, token uuid, jquery_update, views, webform
+
+  # up memory limit of PHP
+  - echo "memory_limit=2G" >> ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/travis.ini
+
+
+script:
+  # Link our repo to the modules directory
+  - mv ../tripal sites/all/modules/tripal
+
+  # Run a docker container with tripal 2 pre-installed
+  - docker run -it -d --rm --name tripal2 -v "$(pwd)/sites/all/modules/tripal":/tripal statonlab/tripal2
+
+  # Apply patches
+  - wget --no-check-certificate https://drupal.org/files/drupal.pgsql-bytea.27.patch
+  - patch -p1 < drupal.pgsql-bytea.27.patch
+  - cd sites/all/modules/views
+  - patch -p1 < ../tripal/tripal_chado_views/views-sql-compliant-three-tier-naming-1971160-30.patch
+  - cd ../tripal
+
+  # Install Tripal
+  - drush en -y tripal tripal_chado tripal_chado_views tripal_ds tripal_ws
+  - drush eval "module_load_include('inc', 'tripal_chado', 'includes/tripal_chado.install'); tripal_chado_load_drush_submit('Install Chado v1.3');"
+  - drush trp-run-jobs --username=admin
+
+  # Prepare Chado
+  - drush eval "module_load_include('inc', 'tripal_chado', 'includes/setup/tripal_chado.setup'); tripal_chado_prepare_drush_submit();"
+  - drush trp-run-jobs --username=admin
+
+  # Run PHPUnit tests
+  - composer update
+  - cp tests/.travis.env tests/.env
+  - ./vendor/bin/phpunit
+
+  # Test Tripal v2 to v3 upgrade steps
+  - docker exec -it tripal2 drush pm-disable tripal_core -y
+  - docker exec -it tripal2 bash -c "rm -rf /modules/tripal && ln -s /tripal /modules/tripal"
+  - docker exec -it tripal2 drush en -y tripal

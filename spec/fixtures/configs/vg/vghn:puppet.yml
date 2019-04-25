@@ -1,0 +1,25 @@
+dist: trusty
+group: travis_latest
+language: ruby
+rvm: 2.5.1
+branches:
+  except:
+  - "/^v\\d/"
+before_install: gem update bundler
+install: bundle install --without development system_tests --path vendor/bundle
+script: bundle exec rake test
+env:
+  global:
+  - CI_NODE_TOTAL=2
+  matrix:
+  - CI_NODE_INDEX=1
+  - CI_NODE_INDEX=2
+cache:
+  directories:
+  - vendor/bundle
+  - modules
+notifications:
+  webhooks:
+    urls: https://vbot.ghn.me/travis
+  slack:
+    secure: PO+9V7wfK1zJZTO3RgewarOo2Uk6bhPXTAUFwDhwEoBnbhOEIq1ItLkOZfXW4LgQ9WpK03x1y9LNA4xHK89Z3yxO/s+/Csf5YOcv9+CUuwQR4vjfiFmedB8DCObGKc5HdsuohJx6G/YyLag8gFTJMGIDyQRN4uodXjrK2NGuMG8QRYhq4qwYtmnw3Q4q3o9Nsso1486qTnbWuRtF78ofgVnBurNYefbOiycGRvX4on2WI8syGcBVLQWIO/9Lc3Nye3arKdvtrVKI15/QM5DpgyPCmSTeqeu122XgVP/vPqYtmBXttU3lTladAq3S5VpMo9DQlltgTLvAl4a8ma+mzqtux1K628tMsAcNLUpcsXYbbUTRQILCmIQlDomC8oQOtSWnYPCtMpTr/5pGElVlNoWUSahlZS/VV9m/1Om64lgFdxY+MI9sI8UlXi6Ny47JfpHp7xQJPe80sFVLtwtrs9ievcEyw1R+9rSL1ASs3JIevKu5q9wTFL8Dy8lzWHlwyth8kkSruzUc7b5wsLpOPhJoKXuEJjY1ac3abgBjuX06Vk0y0y/dJdPDKy3Uo+ajY4IdjoppuJPRklXv77/hU04W8XTlD5eBR+M4tWAsUZgU1GkgtoUV05GSfNwhRfpeqzqqqzVjeUDUmXvhUG1YmkNd3wdRaW6t57iCi7P6ikI=

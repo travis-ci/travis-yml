@@ -1,0 +1,23 @@
+sudo: required
+dist: trusty
+
+language: go
+
+go:
+  - "1.10.x"
+
+git:
+    submodules: false
+
+before_install:
+  - make dependencies
+
+before_script:
+  - make format
+  - make vet
+
+script:
+  - make travis
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)

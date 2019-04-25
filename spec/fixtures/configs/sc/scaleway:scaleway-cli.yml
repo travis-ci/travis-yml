@@ -1,0 +1,57 @@
+language: go
+
+
+sudo: false
+
+
+env:
+  global:
+    - PATH=$HOME/gopath/bin:$PATH
+
+
+matrix:
+  include:  # WARNING remove -cpu=* with TEST_WITH_REAL_API=1
+    - go:   1.5.3
+      env:  GO15VENDOREXPERIMENT=1 TEST_WITH_REAL_API=0 GOTESTFLAGS="-race -cpu=1,2,4"
+    - go:   1.6
+      env:  GO15VENDOREXPERIMENT=1 TEST_WITH_REAL_API=0 GOTESTFLAGS="-race -cpu=1,2,4"
+    - go:   1.7
+      env:  TEST_WITH_REAL_API=0 GOTESTFLAGS="-race -cpu=1,2,4"
+    - go:   1.8
+      env:  TEST_WITH_REAL_API=0 GOTESTFLAGS="-race -cpu=1,2,4"
+    - go:   1.9
+      env:  TEST_WITH_REAL_API=0 GOTESTFLAGS="-race -cpu=1,2,4"
+    - go:   "1.10"
+      env:  TEST_WITH_REAL_API=0 GOTESTFLAGS="-race -cpu=1,2,4"
+    - go:   "1.10"
+      env:  TEST_WITH_REAL_API=1
+    - go:   tip
+      env:  TEST_WITH_REAL_API=0 GOTESTFLAGS="-race -cpu=1,2,4"
+  allow_failures:
+    - go:   tip
+
+
+before_install:
+  - go get github.com/golang/go/src/cmd/vet
+  - go get -u github.com/axw/gocov/gocov
+  - go get -u github.com/mattn/goveralls
+  - go get golang.org/x/tools/cmd/cover
+  - GO15VENDOREXPERIMENT=1 go get github.com/moul/anonuuid/cmd/anonuuid
+
+
+script:
+  - env | anonuuid
+  - rm -rf Godeps/_workspace   # Remove automatic 'godep restore' from travis...
+  - make build show_version
+  - if [ "${TEST_WITH_REAL_API}" != "1" -o -z "${TRAVIS_SCALEWAY_ORGANIZATION}" ]; then make test; fi
+  - if [ "${TEST_WITH_REAL_API}" = "1" -a "${TRAVIS_SCALEWAY_ORGANIZATION}" ]; then make travis_login; fi
+  - if [ "${TEST_WITH_REAL_API}" = "1" -a "${TRAVIS_SCALEWAY_ORGANIZATION}" ]; then make travis_cleanup || true; fi
+  - if [ "${TEST_WITH_REAL_API}" = "1" -a "${TRAVIS_SCALEWAY_ORGANIZATION}" ]; then make cover; fi
+  - if [ "${TEST_WITH_REAL_API}" = "1" -a "${TRAVIS_SCALEWAY_ORGANIZATION}" ]; then make travis_coveralls; fi
+  - if [ "${TEST_WITH_REAL_API}" = "1" -a "${TRAVIS_SCALEWAY_ORGANIZATION}" ]; then make travis_cleanup; fi
+
+after_success:
+  - if [ "${TEST_WITH_REAL_API}" -a "${TRAVIS_SCALEWAY_ORGANIZATION}" ]; then make travis_cleanup; fi
+
+after_failure:
+  - if [ "${TEST_WITH_REAL_API}" -a "${TRAVIS_SCALEWAY_ORGANIZATION}" ]; then make travis_cleanup; fi

@@ -1,0 +1,67 @@
+dist: trusty
+sudo: required
+language: node_js
+node_js:
+  - "8"
+  - "9"
+  - "10"
+addons:
+  chrome: stable
+  firefox: latest
+before_install:
+  - export CHROME_BIN=google-chrome-stable
+  - export DISPLAY=:99.0
+  - sh -e /etc/init.d/xvfb start
+before_script:
+  - "echo power-assert"
+  - "git clone --depth=50 https://github.com/power-assert-js/power-assert"
+  - "cd power-assert"
+  - "npm i"
+  - "travis_retry npm test"
+  - "cat ../node_modules/power-assert/package.json | grep -E '\"version\": \"[0-9.]+\"' | cut -d'\"' -f4 | sed -E s/^/v/ | xargs git checkout -f --detach"
+  - "npm i"
+  - "travis_retry npm test"
+  - "cd -"
+script:
+  - "cd espower-cli"
+  - "npm i"
+  - "cat ../package.json | grep espower-cli | sed -E 's/\"|,//g' | sed 's/: /@/' | xargs npm i -S"
+  - "cp -r ../test ./"
+  - "espower test/tobe_instrumented/assertion.js > test/assertion.espowered.js"
+  - "espower test/tobe_instrumented/customization.js > test/customization.espowered.js"
+  - "mocha --reporter dot $(find test -name *.espowered.js)"
+  - "cd -"
+  - "cd espowerify"
+  - "npm i"
+  - "cat ../package.json | grep espowerify | sed -E 's/\"|,//g' | sed 's/: /@/' | xargs npm i -S"
+  - "cp -r ../test ./"
+  - "browserify -t espowerify test/tobe_instrumented/assertion.js test/tobe_instrumented/customization.js > test/bundle.espowered.js"
+  - "mocha --reporter dot $(find test -name *.espowered.js)"
+  - "cd -"
+  - "cd intelli-espower-loader"
+  - "npm i"
+  - "cat ../package.json | grep intelli-espower-loader | sed -E 's/\"|,//g' | sed 's/: /@/' | xargs npm i -S"
+  - "cp -r ../test ./"
+  - "mocha --reporter dot --require intelli-espower-loader $(find test -name *.js | grep -vE 'es20xx')"
+  - "cd -"
+  - "cd karma-espower-preprocessor"
+  - "npm i"
+  - "cat ../package.json | grep karma-espower-preprocessor | sed -E 's/\"|,//g' | sed 's/: /@/' | xargs npm i -S"
+  - "cp -r ../power-assert/build ./"
+  - "cp -r ../test ./"
+  - "travis_retry karma start"
+  - "cd -"
+  - "cd babel-plugin-espower"
+  - "npm i"
+  - "cat ../package.json | grep babel-plugin-espower | sed -E 's/\"|,//g' | sed 's/: /@/' | xargs npm i -S"
+  - "cp -r ../power-assert/test ./"
+  - "sed -i \"s|require('../..')|require('power-assert')|\" $(find test -name '*.js')"
+  - "mocha --reporter dot --require enable_power_assert.js $(find test -name '*.js' | grep -vE 'qunit|not')"
+  - "cd -"
+  - "cd babel-preset-power-assert"
+  - "npm i"
+  - "cat ../package.json | grep babel-preset-power-assert | sed -E 's/\"|,//g' | sed 's/: /@/' | xargs npm i -S"
+  - "cp -r ../power-assert/test ./"
+  - "sed -i \"s|require('../..')|require('power-assert')|\" $(find test -name '*.js')"
+  - "mocha --reporter dot --require enable_power_assert.js $(find test -name '*.js' | grep -vE 'qunit|not')"
+  - "cd -"

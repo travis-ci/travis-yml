@@ -13,7 +13,7 @@ describe Travis::Yml::Schema::Def::Addon::CodeClimate, 'structure' do
             type: :object,
             properties: {
               repo_token: {
-                '$ref': '#/definitions/secure'
+                '$ref': '#/definitions/type/secure'
               }
             },
             additionalProperties: false,
@@ -26,7 +26,7 @@ describe Travis::Yml::Schema::Def::Addon::CodeClimate, 'structure' do
             ],
           },
           {
-            '$ref': '#/definitions/secure'
+            '$ref': '#/definitions/type/secure'
           },
           {
             type: :boolean

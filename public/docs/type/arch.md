@@ -2,12 +2,13 @@
 
 The architecture that will be selected for the build environment.
 
-## Type
+## Types
 
-Enum (known String)
+* String (known)
 
-## Flags
+## Values
 
-None.
+* `amd64`
+* `ppc64le`
 
 

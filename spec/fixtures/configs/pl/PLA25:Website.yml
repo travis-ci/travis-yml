@@ -1,0 +1,20 @@
+language: node_js
+
+node_js:
+  - '8'
+
+cache:
+  directories:
+    - node_modules
+
+before_script:
+  - cd Source
+  - npm install
+
+script:
+  - npm run lint
+  - npm test
+
+after_script:
+  - npm run coverage-coveralls
+  - npm run coverage-codecov

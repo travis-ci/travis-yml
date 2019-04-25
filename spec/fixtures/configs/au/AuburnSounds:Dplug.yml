@@ -1,0 +1,86 @@
+language: d
+
+os:
+  - osx
+  - linux
+
+d:
+ - ldc-beta
+ - ldc-1.12.0
+ - ldc-1.11.0
+ - ldc-1.10.0
+ - ldc-1.9.0
+ - ldc-1.8.0
+ - dmd-beta
+ - dmd-2.083.1
+ - dmd-2.082.1
+ - dmd-2.081.2
+ - dmd-2.080.1 
+ - dmd-2.079.1 
+ - dmd-2.078.2
+ - gdc
+
+matrix:
+  allow_failures:
+   - d: gdc
+   - d: ldc-beta
+   - d: dmd-beta
+
+# uncompress encrypted VST SDK
+before_install:
+  - openssl aes-256-cbc -K $encrypted_00660bf0ef48_key -iv $encrypted_00660bf0ef48_iv -in secrets-for-ci.tar.enc -out secrets-for-ci.tar -d
+  - tar xvf secrets-for-ci.tar
+
+env:
+  - VST2_SDK=$TRAVIS_BUILD_DIR/VST2_SDK
+
+
+# Note: 32-bit x86 isn't tested for Linux
+script:
+  - cd examples/distort; dub --compiler=${DC}; cd ../..
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then cd examples/distort; dub -a x86 --compiler=${DC}; cd ../..; fi
+  - cd examples/clipit; dub --compiler=${DC}; cd ../..
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then cd examples/clipit; dub -a x86 --compiler=${DC}; cd ../..; fi
+  - cd examples/ms-encode; dub --compiler=${DC}; cd ../..
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then cd examples/ms-encode; dub -a x86 --compiler=${DC}; cd ../..; fi
+  - cd examples/simple-mono-synth; dub --compiler=${DC}; cd ../..
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then cd examples/simple-mono-synth; dub -a x86 --compiler=${DC}; cd ../..; fi
+  - cd examples/poly-alias-synth; dub --compiler=${DC}; cd ../..
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then cd examples/poly-alias-synth; dub -a x86 --compiler=${DC}; cd ../..; fi
+  - cd tools/dplug-build; dub --compiler=${DC}; cd ../..
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then cd tools/dplug-build; dub -a x86 --compiler=${DC}; cd ../..; fi
+  - cd tools/stress-plugin; dub --compiler=${DC}; cd ../..
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then cd tools/stress-plugin; dub -a x86 --compiler=${DC}; cd ../..; fi
+  - cd tools/process; dub --compiler=${DC}; cd ../..
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then cd tools/process; dub -a x86 --compiler=${DC}; cd ../..; fi
+  - cd tools/latency-check; dub --compiler=${DC}; cd ../..
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then cd tools/latency-check; dub -a x86 --compiler=${DC}; cd ../..; fi
+  - cd tools/wav-compare; dub --compiler=${DC}; cd ../..
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then cd tools/wav-compare; dub -a x86 --compiler=${DC}; cd ../..; fi
+  - dub test --compiler=${DC} dplug:core
+  - dub test --compiler=${DC} dplug:dsp
+  - dub test --compiler=${DC} dplug:client
+  - dub test --compiler=${DC} dplug:host
+  - dub test --compiler=${DC} dplug:vst
+  - dub test --compiler=${DC} dplug:window
+  - dub test --compiler=${DC} dplug:cocoa
+  - dub test --compiler=${DC} dplug:carbon
+  - dub test --compiler=${DC} dplug:au
+  - dub test --compiler=${DC} dplug:pbr-widgets
+  - dub test --compiler=${DC} dplug:flat-widgets
+  - dub test --compiler=${DC} dplug:lv2
+  - dub test --compiler=${DC} dplug:vst3
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then dub test --compiler=${DC} -a x86 dplug:core ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then dub test --compiler=${DC} -a x86 dplug:dsp ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then dub test --compiler=${DC} -a x86 dplug:client ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then dub test --compiler=${DC} -a x86 dplug:host ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then dub test --compiler=${DC} -a x86 dplug:vst ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then dub test --compiler=${DC} -a x86 dplug:window ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then dub test --compiler=${DC} -a x86 dplug:cocoa ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then dub test --compiler=${DC} -a x86 dplug:carbon ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then dub test --compiler=${DC} -a x86 dplug:au ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then dub test --compiler=${DC} -a x86 dplug:pbr-widgets ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then dub test --compiler=${DC} -a x86 dplug:flat-widgets ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then dub test --compiler=${DC} -a x86 dplug:lv2 ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then dub test --compiler=${DC} -a x86 dplug:vst3 ; fi
+

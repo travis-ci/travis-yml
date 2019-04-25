@@ -2,12 +2,9 @@
 
 
 
-## Type
+## Types
 
-String
+* String
 
-## Flags
-
-None.
 
 

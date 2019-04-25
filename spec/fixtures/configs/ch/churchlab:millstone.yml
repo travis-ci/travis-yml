@@ -1,0 +1,63 @@
+language: python
+
+python:
+  - '2.7'
+
+addons:
+  postgresql: '9.3'
+
+services:
+  - postgresql
+
+# Handle git submodules ourselves.
+git:
+  submodules: false
+
+before_install:
+
+  # Hack to fix error `ImportError: No module named google_compute_engine`
+  # during boto install.
+  # https://github.com/travis-ci/travis-ci/issues/7940
+  - sudo rm -f /etc/boto.cfg
+
+  # Native travis-ci.org install has an older version of pip and this causes
+  # errors in some libraries so better to use the latest pip. If an upgraded
+  # pip starts causing Millstone install to fail, it will be good to know,
+  # since we definitely want Millstone install to work withthe latest pip.
+  - pip install --upgrade pip
+
+  # Make sure to get submodules of submodules.
+  - git submodule update --init --recursive
+
+  # Perl lib installationa required for JBrowse perl.
+  # First configure cpan.
+  - (echo y;echo o conf prerequisites_policy follow;echo o conf commit)|cpan
+  # Now install dependencies. The Travis build seems to break from time to time
+  # because one of these deps can no longer be found automatically and needs to
+  # be explicitly installed here.
+  - sudo cpan install local::lib
+  - sudo cpan install List::MoreUtils
+  - (echo n)|sudo cpan install Bio::Perl
+
+install:
+  - pip install -r requirements/deploy.txt
+  - cd jbrowse
+  - ./setup.sh
+  - cd ..
+  - cd genome_designer
+  - ./millstone_setup.py
+  - cd ..
+
+before_script:
+  - psql -c "CREATE USER gdv2dbuser WITH PASSWORD 'g3n3d3z';" -U postgres
+  - psql -c "CREATE DATABASE gdv2db;" -U postgres
+  - psql -c "GRANT ALL PRIVILEGES ON DATABASE gdv2db TO gdv2dbuser;" -U postgres
+  - psql -c "ALTER USER gdv2dbuser CREATEDB;" -U postgres
+
+script:
+  - cd genome_designer
+  - ./scripts/run_unit_tests.sh
+
+notifications:
+  slack:
+    secure: gVG59sdcs5Ph1u4/2fM92ofzpXbQ5I4199eQ7S0QKbCfihM0vjzFHNh6cUKmAdTe0mfVdIgl22lSpZltOubXVXvTKcv0QkrkzTjhRILkguC8hGlbHy+lsKprJOEFE5DSJqKrWbCGEFqrSNCCkjAZU4dWsYAsy8KzxtCwnXIRoA34t2jEojBizpwftNmwDH8C1Qc/YBtiSwXsT9mu2iURBxZNBIObFC51gAFwa0VimlpdlBVhlIWznC1qnRbqwJyPR8gYtTI1IBDj3dxSTuOE6ZxNsUeDcPW60s0gwyEla3C3Vz+uBqt/yxGyaOFImxgFbWC2JX7MXEC5hVue7KqmjrdCPkjiYu9OR0F9WV5jUuZKwWEfRmmC3G2MDY+72JLKpYOGZfXr603VrMPqJkVQpixTNTWxoISC3HWpxrm2NAvw5ZmkjnLOxR3EMgo20YBHb8BYjCptGwwjpr/W7Eaz44SJF2JVvHRVJa1PhscKZ/owzPtMMLsrd80FmuDn/HRY1V19oyGDZT0B0jbegdmw4z6OWKFPTk+dx04W9WuGG/l0C/HQmKjJdnzbzrIRcb/JQeeA1jG9HQY3PoHJWg2HoWPUN58Oa3XaF4MyGD0uZvmDWcJV1W6Q7sg7i1CsUv5nSeFL4LG1i2Md3cDP5AiZxdSr3MR7zHGa5MDFsSbQmQE=

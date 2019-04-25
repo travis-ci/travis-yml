@@ -1,0 +1,15 @@
+language: ruby
+rvm:
+  - "2.4.0"
+
+branches:
+  only:
+    - master
+
+before_script:
+  - sh -e /etc/init.d/xvfb start
+  - export DISPLAY=:99.0
+  - sleep 3
+
+script:
+  - bundle exec rake tests:run

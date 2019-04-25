@@ -1,0 +1,15 @@
+language: ruby
+rvm:
+  - 1.9.3
+branches:
+  only:
+  - master
+script: 
+  bundle exec rake generate;
+after_success: |
+  if [ -n "$GITHUB_PUSH_URL" ]; then
+    cd "$TRAVIS_BUILD_DIR"
+    git clone -b blog --single-branch https://github.com/rahulpnath/rahulpnath.com.git _azure &> /dev/null
+    bundle exec rake gitdeploy["$GITHUB_PUSH_URL"] &> /dev/null
+    echo "Deployed!"
+  fi

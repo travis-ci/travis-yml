@@ -1,0 +1,51 @@
+dist: xenial
+sudo: required
+language: c
+
+compiler:
+    - gcc
+    - clang
+
+env:
+    - BUILDTOOL="cmake" BUILDARGS=""
+    # - BUILDTOOL="cmake" BUILDARGS="-DENABLE_PYTHON3=ON"
+    - BUILDTOOL="cmake" BUILDARGS="-DENABLE_GNUTLS=OFF"
+    - BUILDTOOL="cmake" BUILDARGS="-DENABLE_CODE_COVERAGE=ON" CODECOVERAGE="1"
+    - BUILDTOOL="autotools" BUILDARGS=""
+    # - BUILDTOOL="autotools" BUILDARGS="--enable-python3"
+    - BUILDTOOL="autotools" BUILDARGS="--disable-gnutls"
+
+matrix:
+    fast_finish: true
+    exclude:
+      - compiler: clang
+        env: BUILDTOOL="cmake" BUILDARGS="-DENABLE_CODE_COVERAGE=ON" CODECOVERAGE="1"
+
+before_script:
+    # Workaround https://github.com/travis-ci/travis-ci/issues/5326
+    - export PATH=$(echo $PATH | tr ':' "\n" | sed '/\/opt\/python/d' | tr "\n" ":" | sed "s|::|:|g")
+    - echo 'APT::Install-Recommends "false";' | sudo tee -a /etc/apt/apt.conf
+    - travis_retry sudo apt-get update -qq
+    - travis_retry sudo apt-get -y install devscripts equivs python-pip libenchant-dev autopoint cmake lcov pkg-config libncursesw5-dev gem2deb libperl-dev python-dev python3-dev libaspell-dev liblua5.3-dev tcl8.6-dev guile-2.0-dev libv8-dev libcurl4-gnutls-dev libgcrypt20-dev libgnutls-dev zlib1g-dev curl libcpputest-dev php7.0-dev libphp7.0-embed
+    - travis_retry sudo gem install asciidoctor
+    - travis_retry sudo -H pip install --ignore-installed msgcheck pylint
+    - phpenv local system
+
+script:
+    - ./tools/build-test.sh
+    - msgcheck po/*.po
+    - pylint --version
+    - pylint doc/docgen.py
+    - pylint tests/scripts/python/testapigen.py
+    - pylint tests/scripts/python/testapi.py
+    - pylint tests/scripts/python/unparse.py
+    - ./tools/build-debian.sh test-patches
+
+after_success:
+    - weechat --help
+    - weechat-curses --help
+    - weechat --colors
+    - weechat --license
+    - weechat --version
+    - weechat --temp-dir --run-command "/debug dirs;/debug libs" --run-command "/quit"
+    - if [ "$CODECOVERAGE" = "1" ]; then bash <(curl -s https://codecov.io/bash) -f coverage.info || echo "Codecov error"; fi

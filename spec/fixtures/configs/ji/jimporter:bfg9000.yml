@@ -1,0 +1,130 @@
+language: python
+sudo: false
+
+python:
+  - 2.7
+  - 3.4
+  - 3.5
+  - 3.6
+os:
+  - linux
+env:
+  global:
+    - PYTHON=python
+    - PIP=pip
+    - CPPFLAGS="-Wall -Werror"
+    - BFG_EXTRA_TESTS="gcj mingw-cross"
+  matrix:
+    - CC=gcc CXX=g++
+    - CC=clang CXX=clang++
+
+matrix:
+  include:
+
+    # macOS builds
+
+    - language: generic
+      python: 2.7
+      os: osx
+      osx_image: xcode8.3
+      env: >
+        PYTHON=python2 PIP=pip2 CC=clang CXX=clang++ BFG_SKIPPED_TESTS=scala
+        BFG_EXTRA_TESTS=
+    - language: generic
+      python: 3.6
+      os: osx
+      osx_image: xcode8.3
+      env: >
+        PYTHON=python3 PIP=pip3 CC=clang CXX=clang++ BFG_SKIPPED_TESTS=scala
+        BFG_EXTRA_TESTS=
+
+    # bdist_wheel builds
+
+    - python: 2.7
+      os: linux
+      env: JOB=bdist_wheel
+      install: true
+      script:
+        - export VENV_BIN=`dirname \`which python\``
+        - |
+          virtualenv py3 --python=/usr/bin/python3
+          . py3/bin/activate
+          python setup.py bdist_wheel
+          deactivate
+        - |
+          . ${VENV_BIN}/activate
+          pip install dist/*.whl
+          pip show patchelf-wrapper
+          pip show enum34
+          ! pip show pysetenv
+          deactivate
+      after_success: false
+    - python: 3.6
+      os: linux
+      env: JOB=bdist_wheel
+      install: true
+      script:
+        - export VENV_BIN=`dirname \`which python\``
+        - |
+          virtualenv py2 --python=/usr/bin/python
+          . py2/bin/activate
+          python setup.py bdist_wheel
+          deactivate
+        - |
+          . ${VENV_BIN}/activate
+          pip install dist/*.whl
+          pip show patchelf-wrapper
+          ! pip show enum34
+          ! pip show pysetenv
+          deactivate
+      after_success: false
+
+    # Linting
+
+    - python: 3.6
+      os: linux
+      env: JOB=lint
+      script: ${PYTHON} setup.py lint
+      after_success: false
+
+addons:
+  apt:
+    packages:
+      - freeglut3-dev
+      - gcc-multilib
+      - gcj-jdk
+      - gfortran
+      - gobjc
+      - gobjc++
+      - libboost-dev
+      - libboost-program-options-dev
+      - libgl1-mesa-dev
+      - libogg-dev
+      - mingw-w64
+      - ninja-build
+      - openjdk-7-jdk
+      - scala
+cache:
+  - apt
+
+before_install:
+  - set -e
+  - |
+    if [ "${TRAVIS_OS_NAME}" = "osx" ]; then
+      shell_session_update() { :; }
+      brew update
+      brew install gcc libogg ninja
+      if [ "${PYTHON}" = "python3" ]; then
+        brew install ${PYTHON} || brew upgrade ${PYTHON}
+      fi
+      cp test/scripts/sitecustomize.py .
+    else
+      export JAVA_HOME=/usr/lib/jvm/java-7-openjdk-amd64
+      unset _JAVA_OPTIONS
+    fi
+install:
+  - ${PIP} install codecov .[test]
+script:
+  - ${PYTHON} setup.py coverage -q
+after_success:
+  - codecov

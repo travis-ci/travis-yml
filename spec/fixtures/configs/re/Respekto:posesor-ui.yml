@@ -1,0 +1,45 @@
+language: node_js
+
+# latest stable Node.js release is pointed by "node" version number
+node_js:
+  - "8"
+
+addons:
+  apt:
+    sources:
+      - google-chrome
+    packages:
+      - google-chrome-stable
+
+
+before_script:
+  # https://docs.travis-ci.com/user/gui-and-headless-browsers/#Using-xvfb-to-Run-Tests-That-Require-a-GUI
+  - "export DISPLAY=:99.0"
+  - "sh -e /etc/init.d/xvfb start"
+  - sleep 3 # give xvfb some time to start
+  - npm install
+
+script:
+  # - ng test --single-run
+  # temporarly disabled e2e tests till full configuration of HAProxy
+  # - docker-compose --file docker-compose-ci.yml up &
+  # - ng build
+  # - ng serve &
+  # - sleep 60 # waits for services
+  # - ng e2e
+
+  - ng build --prod
+
+after_success:
+  # push application image to docker registry
+  # initially will start to push from develop and - in the nearest future - will change to master.
+  - if [ "$TRAVIS_BRANCH" == "master" ]; then
+      docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD";
+      docker build -t respekto/posesor-ui:0.0.14 -t respekto/posesor-ui:latest .;
+      docker push respekto/posesor-ui;
+    fi
+
+
+# support for docker
+services:
+  - docker

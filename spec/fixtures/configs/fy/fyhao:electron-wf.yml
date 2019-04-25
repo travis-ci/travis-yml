@@ -1,0 +1,20 @@
+language: node_js
+branches:
+  only:
+  - master
+  - dev
+
+os:
+  - osx
+  
+node_js:
+  - stable
+after_success:
+  - npm run coverage
+  - npm run performance
+  - if test "$TRAVIS_BRANCH" = 'master'; then npm run release; fi
+ 
+env:
+  global:
+    - secure: >-
+        DdnURMrOxkNxAtis0zky2j1/vAUc4+BB4dWwt1GLM9zDUzb1pGG6JbZwbzq3dUUpVV+Hh7DT4tEgTgiwa961ulLfvbJoZw3WNdHVX+0KxT/zw901C2p2Y2P2r6kLSPUdWlEVfc44jB70gNEFdBVvWgFRW1nRYzXtqh017RJK3G33cL3tg3vz1VAZT3L2MmS7H66YkdkODtpQLRa0UWICsOxyJbKkDWcvZlDupFxuXzpMzQ2v26/jNfKfhz18+v7UZrzx+vf+nm/L21ADxldlYvtbtdKsah7iwPJFI35Pt6bQ19RsobmG155A2qN0i1p5Orj2NMyiRrCjtmP3mdc8AVd0ZjlCnbRMn2BCXjHY2rN065w5VB3+J0ZIasg8hgErdJc39tWB1xY5TZ15yYuX2vjMNzc2s3oHu2AP8Y7nBqhVyHwQHb/nA9dnQ8K7oNyaLbhS9gpjB8T7C9Ou6Vf6ZkjOZc2bEyWCFU5RVONYqz1K3peVwdge6Ss23I0J3vxdYy6FF1IueSlbbK/Acap9a4nZVljBbwlN9vhK2nxV6+BsT5+XST27MGrSBOL2Lw2e2v6hPaSxCG7cZ+YUuET4QjhNm2oS5wsGerceS+GXb7IU3zsHg3/TudY9HwY+BcVQCSu3qN54slLFggEPT3Dr5ZlQ8wwV9WaGZYq8NGnUkh0=

@@ -1,0 +1,38 @@
+sudo: required
+
+language: generic
+
+env:
+  global:
+  - RAILS_ENV=test
+  - CC_TEST_REPORTER_ID=095bc7916972a84272890f2c79eaba7fd64124a4b5b4e826ba0a4d0599b6bfe3
+
+services:
+  - docker
+
+before_script:
+  - mv scripts/docker/docker-compose.test.yml .
+  - docker-compose -f docker-compose.test.yml up -d
+  - docker exec falko-api-test bash -c "curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > cc-test-reporter"
+  - docker exec falko-api-test bash -c "chmod +x cc-test-reporter"
+  - docker exec falko-api-test bash -c "./cc-test-reporter before-build"
+
+install: true
+
+addons:
+  code_climate:
+    repo_token: "095bc7916972a84272890f2c79eaba7fd64124a4b5b4e826ba0a4d0599b6bfe3"
+
+script:
+  - >
+    while ! docker logs falko-api-test | grep "Listening on tcp://0.0.0.0:3000"; do
+        echo "Waiting for start script to finish..."
+        sleep 5
+    done;
+  - docker exec -it falko-api-test bundle exec rails db:test:prepare
+  - docker exec -it falko-api-test bundle exec rails test
+  - docker exec -it falko-api-test bundle exec rubocop
+
+after_script:
+  - docker exec -it falko-api-test bash -c "./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT --coverage-input-type simplecov --id $CC_TEST_REPORTER_ID"
+  - docker-compose down --remove-orphans

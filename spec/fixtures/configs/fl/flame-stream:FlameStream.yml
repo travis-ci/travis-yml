@@ -1,0 +1,31 @@
+language: java
+
+sudo: required
+
+addons:
+  apt:
+    packages:
+      - sshpass
+      - oracle-java9-set-default
+      - libgfortran3
+jdk:
+  - oraclejdk9
+
+cache:
+  directories:
+    - $HOME/.m2
+
+env:
+  global:
+    - MAVEN_OPTS="-Xmx2048m -Xms2048m"
+    - JAVA_OPTS="-Xmx2048m -Xms2048m"
+
+install: true
+
+script:
+  - mvn --errors --batch-mode clean package
+
+after_failure:
+  - ls -al
+  - export SSHPASS=$FLAME_PASS
+  - sshpass -e scp -v -o stricthostkeychecking=no runtime/oom.hprof flamestream@marnikitta.com:~/$TRAVIS_BUILD_ID.hprof

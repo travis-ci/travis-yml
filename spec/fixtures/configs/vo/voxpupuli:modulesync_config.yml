@@ -1,0 +1,18 @@
+---
+sudo: false
+language: ruby
+rvm: 2.3.3
+cache: bundler
+before_install: rm Gemfile.lock || true
+script:
+  - 'bundle exec msync update --noop --git-base=https://github.com/'
+branches:
+  only:
+  - master
+notifications:
+  email: false
+  irc:
+    on_success: always
+    on_failure: always
+    channels:
+      - "chat.freenode.org#voxpupuli-notifications"

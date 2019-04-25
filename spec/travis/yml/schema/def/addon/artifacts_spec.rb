@@ -23,13 +23,13 @@ describe Travis::Yml::Schema::Def::Addon::Artifacts, 'structure' do
                 type: :string
               },
               key: {
-                '$ref': '#/definitions/secure'
+                '$ref': '#/definitions/type/secure'
               },
               secret: {
-                '$ref': '#/definitions/secure'
+                '$ref': '#/definitions/type/secure'
               },
               paths: {
-                '$ref': '#/definitions/strs'
+                '$ref': '#/definitions/type/strs'
               },
               branch: {
                 type: :string
@@ -38,7 +38,7 @@ describe Travis::Yml::Schema::Def::Addon::Artifacts, 'structure' do
                 type: :string
               },
               target_paths: {
-                '$ref': '#/definitions/strs'
+                '$ref': '#/definitions/type/strs'
               },
               debug: {
                 type: :boolean

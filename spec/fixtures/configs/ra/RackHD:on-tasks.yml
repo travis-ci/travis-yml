@@ -1,0 +1,30 @@
+# Copyright 2015-2018, Dell EMC, Inc.
+
+language: node_js
+
+node_js:
+  - "4"
+  - "6"
+  - "8"
+
+env:
+  global:
+    - secure: "HSE0zTiE+r0o/NlXs2YIENC5QPzYcZm19ZHk+ScgC8T5R+ma5/72srAfE8v6rdp29R65nC+vKYhEN/wzf57kVfsQBihEaG0lLaFTG3BwEBGYmAFFhhjO8cERZW21N/IAak8lUADFviLW63kWI//pSw2KM3+7rr5QYdIMDyuTzsbU6As5esWbXDsdXn7Nh3yj+qu4UkEjDcjP1uJh4jpKiycHRqSz0Y1VS6iW6aCwM9dMHu87IZkHtAeJ2brjdsTs4R7iK32y3yA/g72dtjbqxlzVpi6e3SNxVOylSWk/OZN7zQeg6LKV+aov9O9cm2xj7Zfhtrbxa6cAnEMWz6QoyWjnUBmyrJBX+ZJ3o0HAKpr8/nIw+PHw9GRwhUrRoga55bXMe/9X+DDeUGzX6FwqEsroL7kxxCjB6PHxEWNY9cLxYn7anbkTGEXMkUdkF548XWtDaxZKX9Sc1Fzjc5gjxRzw2X0gjb+IC09iM7gHFG3LnXql1fjfISaoz84vqX8muLYWQaxB1DTzqpBFu+4PkwE50uWbYmLDNWpbgcG3UdgTLv5tlHhi0OyoxVqtQjvucNRBIJ1lIZFpRznGJG23VdxfuBCN9H+UuHCf9YLjKRUE55JRibnqlwIOmhrVhpZZ0r/o+RENbWOns92akfUjtgkdKRhrZ4mZDZGpjf4d6k8="
+
+before_install:
+ - npm i -g npm@5.6.0
+
+after_success:
+ - ./node_modules/.bin/istanbul cover -x "**/spec/**" ./node_modules/.bin/_mocha --report lcovonly -- $(find spec -name '*-spec.js') -R spec --require spec/helper.js
+ - cat ./coverage/lcov.info | node_modules/.bin/coveralls
+ - chmod 755 ./build_children.sh
+ - ./build_children.sh
+
+notifications:
+  slack:
+    rooms:
+    - secure: "EDzz2GOhCVIjM9HdZrvESSPNnJoppsbFO3xX4XdORm1U1/76lwBBkVsZ6N9PzntsWyFhRigey1LJT610K7FaMtK5zRwhIe7pkuY+d3x9nWzCWjE10L1IfBscgr9wXuMuRAkMZbOjzQq5ZyeUCJ/YC9b1krBSNu0lr6WqSPJQ7qO32+CuTLh8HFyOFPIMbkAEYL9SIYI1544N9Pd/oi2qUo2S59Oirm8h+821MjtPFAvHd9PHiCOX+AhlEGR7whIw7Ha1RYfEQanHtb08zfDIX+Lhrxn4VXulysdi2JA0TrP3wWlJNOZiEKof/DIa4W/mG+A0j5vDQOY32nmmh8TLbipR/88Ojm7EJqLsd6OmoWBT6lFVfcwvvxhjoRkMWPZsJYbJGUzNqRxv6Hu078VQOXw1+MvZQTmQ7oF5WUQoEmnL+QsKeu/dm3yfrTkFbRj+PqFI9QoVmMKoifyo9QFPpcS/8JTxdZTF2JemTaJADYm9OrCDtvERlqwv5atm+TrHClRrE1DPmuUk3x/4Yj5sirv8WHKOHwtU0v8/fHmj1Txgo7nS+vfizo8oVoVjMaE91GMSkx6eLUFRyuQCm8ey9osvSsx3ssoCugjQ/xIsHPC/zJg83M2i82gp29aHbWl0EmootBRq6iRbtZ9ncnccAg1eRaI2zavKGSExmkpUmug="
+    on_success: never
+    on_failure: always
+    on_start: never
+    on_pull_requests: false

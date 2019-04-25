@@ -1,0 +1,20 @@
+language: ruby
+sudo: false
+before_script:
+  - 'git config --global user.email "travis-stub@example.com"'
+  - 'git config --global user.name "Fake Travis User"'
+script: "bundle exec ${CHECK}"
+notifications:
+  email: false
+rvm:
+  - 2.1
+  - 2.2
+
+env:
+  - "CHECK='rake test:spec'"
+  - "CHECK='rake rubocop'"
+
+matrix:
+  exclude:
+    - rvm: 2.1
+      env: "CHECK='rake rubocop'"

@@ -1,0 +1,11 @@
+language: elixir
+elixir:
+  - 1.8.0
+notifications:
+  recipients:
+    - brwcodes@gmail.com
+    - ben.wilson@cargosense.com
+otp_release:
+  - 20.0
+  - 21.0
+script: "MIX_ENV=test mix local.hex --force && MIX_ENV=test mix do deps.get, test"

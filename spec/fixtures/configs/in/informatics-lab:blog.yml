@@ -1,0 +1,33 @@
+language: ruby
+rvm:
+- 2.1
+script:
+  - echo "Skipping tests as this site is now archived and unmaintained"
+  - npm install
+  - grunt build
+env:
+  global:
+  - NOKOGIRI_USE_SYSTEM_LIBRARIES=true
+deploy:
+  provider: s3
+  access_key_id: $AWS_KEY
+  secret_access_key: $AWS_SECRET
+  bucket: informatics-blog
+  local-dir: _site
+  acl: public_read
+  skip_cleanup: true
+  region: eu-west-1
+  on:
+    branch: master
+after_deploy:
+  - grunt purge
+notifications:
+  email: false
+  webhooks:
+    urls:
+      - $NOTIFICATION_WEBHOOK
+    on_success: always
+    on_failure: always
+    on_start: never
+    on_cancel: never
+    on_error: always

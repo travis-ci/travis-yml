@@ -1,0 +1,19 @@
+language: cpp
+
+compiler:
+  - gcc
+  - clang
+
+env:
+  - ANALYZE=false
+  - ANALYZE=true
+
+before_install:
+  - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+  - sudo apt-get -qq -d update
+
+install:
+  - if [ $CC = 'gcc' -a $ANALYZE = 'true' ]; then sudo apt-get install cppcheck; cppcheck --version; fi
+
+script:
+  - ./.travis.sh

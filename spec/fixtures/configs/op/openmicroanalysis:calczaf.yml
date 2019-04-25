@@ -1,0 +1,20 @@
+sudo: false
+language: python
+python:
+- '3.4'
+before_install:
+- openssl aes-256-cbc -K $encrypted_f4af44f35426_key -iv $encrypted_f4af44f35426_iv -in .travis/deploy_key.enc -out .travis/deploy_key -d
+- chmod 600 .travis/deploy_key
+- eval `ssh-agent -s`
+- ssh-add .travis/deploy_key
+install:
+- git config --global push.default simple
+- git config --global user.name "travis"
+- git config --global user.email "travis@openmicroanalysis.org"
+- git config --global core.ignorecase true
+- git remote set-url --push origin git@github.com:openmicroanalysis/calczaf.git
+script:
+- git checkout $TRAVIS_BRANCH
+- python .travis/sync.py --verbose --workdir .
+notifications:
+  email: false

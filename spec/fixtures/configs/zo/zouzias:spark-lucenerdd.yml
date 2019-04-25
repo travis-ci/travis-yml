@@ -1,0 +1,34 @@
+language: scala
+scala:
+  - 2.11.12
+sudo: false
+dist: trusty
+cache:
+  directories:
+  - $HOME/.sbt/0.13/dependency
+  - $HOME/.sbt/boot/scala*
+  - $HOME/.sbt/launchers
+  - $HOME/.ivy2/cache
+before_cache:
+  - du -h -d 1 $HOME/.ivy2/cache
+  - du -h -d 2 $HOME/.sbt/
+  - find $HOME/.sbt -name "*.lock" -type f -delete
+  - find $HOME/.ivy2/cache -name "ivydata-*.properties" -type f -delete
+matrix:
+  include:
+    - jdk: oraclejdk8
+      env: TEST_SPARK_VERSION="2.4.2" LUCENERDD_ANALYZER_NAME="en" LUCENERDD_LINKER_METHOD="cartesian"
+    - jdk: openjdk8
+      env: TEST_SPARK_VERSION="2.4.2" LUCENERDD_ANALYZER_NAME="en" LUCENERDD_LINKER_METHOD="collectbroadcast"
+    - jdk: openjdk8
+      env: TEST_SPARK_VERSION="2.4.2" LUCENERDD_ANALYZER_NAME="whitespace" LUCENERDD_LINKER_METHOD="cartesian"
+    - jdk: oraclejdk8
+      env: TEST_SPARK_VERSION="2.4.2" LUCENERDD_ANALYZER_NAME="whitespace" LUCENERDD_LINKER_METHOD="collectbroadcast"
+script:
+  - sbt ++$TRAVIS_SCALA_VERSION clean update
+      -Dlucenerdd.spatial.linker.method=${LUCENE_SPATIAL_LINKER_METHOD} -test
+  - sbt ++$TRAVIS_SCALA_VERSION scalastyle
+  - sbt ++$TRAVIS_SCALA_VERSION assembly
+  - travis_wait 30 sbt ++$TRAVIS_SCALA_VERSION clean coverage test coverageReport
+after_success:
+  - bash <(curl -s https://codecov.io/bash)

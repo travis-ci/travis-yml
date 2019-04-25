@@ -1,0 +1,33 @@
+language: ruby
+env:
+  - TRAVIS_NODE_VERSION="5"
+cache:
+  bundler: true
+  directories:
+    - node_modules
+sudo: false
+rvm:
+  - 2.2.2
+services:
+  - mysql
+before_script:
+  - mysql -e 'create database wheelmap_test;'
+  - mysql wheelmap_test < db/structure.sql
+  - cp config/database.SAMPLE.yml config/database.yml
+  - cp config/open_street_map.SAMPLE.yml config/open_street_map.yml
+  - cp config/newrelic.SAMPLE.yml config/newrelic.yml
+  - cp config/secrets.sample.yml config/secrets.yml
+  - cp .env.sample .env
+  - rm -rf ~/.nvm && git clone https://github.com/creationix/nvm.git ~/.nvm && (cd ~/.nvm && git checkout `git describe --abbrev=0 --tags`) && source ~/.nvm/nvm.sh && nvm install $TRAVIS_NODE_VERSION
+  - npm prune
+  - npm install --no-spin
+  - npm list
+script:
+  - bundle exec rake spec
+  - npm run eslint
+  - npm test
+notifications:
+  email:
+  - developers@sozialhelden.de
+  slack:
+    secure: gXSVtv4sbvQUuEHX7JW1T9IXv7a4LVKwsfXyjfxpDxwJyfoSUyQH8rR2+SyoFYLJH4wgTziSUHBCFiWrBNZ2wKMIwmGbvUqkWAm0TQyCGoi4M+tvoPEdLLZwL+G73D6pk9ACm8pcdTXEMf3aLTQ4VxGkkseYwdiqvo5G2WThI/iZEjEn9CEYaAVNeFQ61+CDLC9ZQj6mOwiVj+pG+Fl4j5EjNAOEJvUNsbk76CKXyxAT5Y234lIULhuB54u5xvE0odGupg79iBHqO3DGMQVqSYVvgyDTvGndJJnmvo9zNAZCh9IGUM9V3YbaL+/EvAXdaYdVBUAk0X3CSYzm2C3RX+afDRPgpBuD/rMzcFh5GH+dBypKLGLzbPH5d0YuCUVF/BrNirMTgghK4ufcMIfnwbgBlFeDY9v+XAml4BVrUHhn/OW8pBn1N65V88HMcX0umlNNK2iqerL5VDsceTNTb/DJ1mj3Zo6ivS6bbO4YqWwTsyijHICF17GnZWb9Tls2PReSS/+RPbBzvUj61FLoEndr/yLtp+65YMRNjs79nqSlXUWonrT8gZ+YVpK2e6IQ9e6yaXDPE0lXCBg6qjycX2jTyIUQBnxEtQy0R4LPkCuUaBDRWLKNWGP/nLXEocIBMQXTgMx6DhXdqKmNiQSLHyww8EYax19vWOGGDR3diK8=

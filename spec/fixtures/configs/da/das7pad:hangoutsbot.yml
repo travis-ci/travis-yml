@@ -1,0 +1,29 @@
+dist: trusty
+sudo: false
+
+language: python
+python:
+- '3.5'
+- '3.6'
+# - '3.7'
+# TODO: blocker is https://github.com/travis-ci/travis-ci/issues/9815
+# workaround py3.7 start
+matrix:
+  include:
+  - python: '3.7'
+    dist: xenial
+    sudo: true
+# workaround py3.7 end
+
+before_install:
+    - $VIRTUAL_ENV/bin/pip install --upgrade pip
+
+install:
+    - make venv-dev venv=$VIRTUAL_ENV
+
+before_script:
+    - make lint venv=$VIRTUAL_ENV
+    - make test-only venv=$VIRTUAL_ENV
+
+script:
+    - make install venv=$VIRTUAL_ENV

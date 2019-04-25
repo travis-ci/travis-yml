@@ -1,0 +1,12 @@
+language: ruby
+rvm: 2.6.1
+cache: bundler
+sudo: false
+before_install:
+  - git config --global user.name 'Travis CI'
+  - git config --global user.email 'travis-ci@example.com'
+  - gem update --system
+  - gem install bundler -v '< 2'
+install: bundle install
+notifications:
+  email: false

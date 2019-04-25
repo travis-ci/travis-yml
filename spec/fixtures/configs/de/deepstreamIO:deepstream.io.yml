@@ -1,0 +1,74 @@
+sudo: true
+language: node_js
+
+before_install:
+  - gem install fpm --conservative || echo "FPM install failed"
+  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then
+      if [ "$CC" == "gcc" ]; then
+        export CC=$(ls -t /usr/local/bin/gcc-?.?);
+      fi
+    fi
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then
+      export CXX=g++-4.8;
+    fi
+
+compiler:
+  - gcc
+  - clang
+
+node_js:
+  - "10.15.2"
+
+env:
+  - DEFAULT_DELAY: 50
+
+matrix:
+  include:
+    - node_js: "10.15.1"
+      osx_image: xcode7.3
+      os: osx
+    - node_js: "10.15.1"
+      os: linux
+
+script:
+  - npm run lint;
+  - npm run coverage
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then
+      sh scripts/run-e2e.sh;
+    fi
+  # This has to happen here and not in before_deploy to be put in travis cache
+  - bash ./scripts/package.sh true
+
+cache:
+  directories:
+    - nexe_node
+
+deploy:
+  - provider: releases
+    skip_cleanup: true
+    api_key: $GITHUB_TOKEN
+    file_glob: true
+    file:
+      - "build/*.pkg"
+      - "build/*.deb"
+      - "build/*.rpm"
+      - "build/*.tar.gz"
+      - "build/*.zip"
+    on:
+      tags: true
+
+services:
+  - redis-server
+
+addons:
+  apt:
+    sources:
+    - ubuntu-toolchain-r-test
+    packages:
+    - g++-4.8
+    - rpm
+
+after_script: "cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js"
+
+notifications:
+  email: false

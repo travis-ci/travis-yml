@@ -1,0 +1,17 @@
+env:
+  global:
+   - secure: "Re68OfXTXxIEqkoHsrv3TBMnsh+wcfV6SS+WwWhDL2CvJ78lOLIc8B3y1I74bKnuXnUAaAbZbwmDXT9dYpMQxlV59AyBeIXAq+4szgh2ixemZFGUtylRecvL5m1Y+F1akUR9Ctx77JfP4iQn90f3O1tlLBkuyFdcsbwcjuzFLxVOuTu/NKkVoKlVXFXBnqEPuUBXXv5ncJLn8JNXCswwKOFuasgPkRKNZtaC01cNiQoPIZiwbwKDbK62omJwn1Fb5xLW+yNVfxmXykzNZRvTVgEP9McdWRl249yjzgYDykyp0gDh18MYppLgsHXNwS3cb0BbABt39xoQyz5bC+IIo2JEfS1xBvN7BOVSly063rVJ5nZ1zt+UYLSAx7YxzEM95LyEdMTjhCuC4HW+fMXViWp0sjI/2JJ94Bv9+z3vVgaPxsSfHaUREvsFcPvDQOpjkTSzSS8s3fLYj3oItjthgkkLg0NJRVKCOXtnbf+RE+gRTWdzagCC1qNLwF/Ws2dqimyN0byZWOd0QTLgFenHJfRo9p9IiSZPARfhwftNXdCi+YD9epN9eyzH41ddJJ6F27QxRNGOJNaOFtnV3OAvUyYqJTOzcilwC62n1RMHggwSafoQ76u+rKoCffPUBCzx/ohYByBKtmIPjQoqn3x+RrX6CIuWXLD59Whh9oSpUwc="
+
+before_install:
+      - echo -n | openssl s_client -connect scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-
+
+language: csharp
+solution: Source/ManagedIrbis.travis.sln
+
+addons:
+  coverity_scan:
+    project:
+      name: "amironov73/ManagedIrbis"
+      description: "Managed framework for IRBIS64"
+    notification_email: amironov73@gmail.com
+    build_command:   "xbuild /p:Configuration=Release Source/ManagedIrbis.travis.sln"

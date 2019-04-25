@@ -1,0 +1,27 @@
+sudo: false
+
+language: node_js
+
+env:
+  - CXX=g++-4.8 MONGODB=4.0.3
+
+node_js:
+  - stable
+
+addons:
+  apt:
+    sources:
+    - ubuntu-toolchain-r-test
+    packages:
+    - g++-4.8
+
+services:
+  - mongodb
+  - redis
+
+before_install:
+  - $CXX --version
+
+script: make test-cov
+
+after_success: npm i codecov && codecov

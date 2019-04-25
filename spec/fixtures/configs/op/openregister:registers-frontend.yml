@@ -1,0 +1,42 @@
+language: ruby
+
+cache: bundler
+
+before_install:
+  - gem update --system
+
+env:
+  global:
+  - CF_API="https://api.cloud.service.gov.uk"
+  - CF_ORG="openregister"
+  - CF_SPACE="prod"
+  - CF_USERNAME="register-design-authority@digital.cabinet-office.gov.uk"
+
+addons:
+  postgresql: '9.6'
+
+before_script:
+  - bundle exec rake db:setup
+  # GOV.UK Frontend Design System installed by NPM
+  - npm install
+
+script:
+  - bundle exec rake spec
+  - bundle exec govuk-lint-ruby app config db lib spec --format clang
+  - bundle exec govuk-lint-sass app/assets/stylesheets
+
+before_deploy:
+  - export PATH=$HOME:$PATH
+  # Install CloudFoundry
+  - travis_retry curl -L -o $HOME/cf.tgz "https://cli.run.pivotal.io/stable?release=linux64-binary&source=github"
+  - tar xzvf $HOME/cf.tgz -C $HOME
+  # Install Autopilot plugin for zero-downtime-push
+  - travis_retry cf install-plugin autopilot -f -r CF-Community
+
+deploy:
+  provider: script
+  script: ./bin/deploy
+  skip_cleanup: true
+  on:
+    repo: openregister/registers-frontend
+    branch: master

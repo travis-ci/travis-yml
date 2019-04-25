@@ -1,0 +1,131 @@
+language: cpp
+
+## Enable cache for dependencies and directories
+cache:
+  directories:
+    - $CACHE_DIR
+
+## Enable sudo (set explicitly although environment's with docker is sudo
+#  enabled by default
+sudo: required
+
+## Operating Systems to use for builds
+os:
+  - linux
+
+## Ensures the virtualization environment runs as Ubuntu 14.04 Trusty
+dist: trusty
+
+## Environment variables
+#
+#  The 'global' section defines variables common for all jobs
+env:
+  global:
+    - COMPILER_VERSION=
+    - DIST_NAME=ubuntu
+    - DIST_VERSION=xenial
+    - DOCKER_CXX=g++
+    - DOCKER_CC=gcc
+    - DOCKER_COMPOSE_VERSION=1.16.1
+    - DRIZZLE_TEST_EXIT_ERROR_ON_SKIP=0
+    - MAKE_TARGET=check
+    - MYSQL_PASSWORD=''
+    - MYSQL_PORT=3306
+    - MYSQL_SERVER=127.0.0.1
+    - MYSQL_USER=root
+    - PATH="$(git config -f .gitmodules submodule.beaver.path)/bin:$PATH"
+    - SKIP_TEST_ON_ERROR=0
+    - CACHE_DIR=build/travis-cache
+    - CONFIGURE_ARGS=
+
+## Build steps for all jobs
+## Install dependencies
+before_install:
+  - ./travis_configure.sh before_install
+
+## Prepare build system for tests
+before_script:
+  - ./travis_configure.sh before_script
+
+## Run tests, and packaging scripts
+script:
+  - ./travis_configure.sh run_tests
+
+after_success:
+  - beaver/bin/codecov-bash -X gcov -Z -s build
+
+## Defines the order of the build stages.
+#
+#  The deployment stage is only done is building semver git tag
+stages:
+  - test
+  - deploy
+
+## Defines the jobs to run in each stage
+#
+#  Travis combines the variables defined in env.global with the variables
+#  defined for each job
+#
+#  The resulting build matrix is as follows:
+#
+#  | os     | dist   | compiler  | make targets | deploy |
+#  |--------|--------|-----------|--------------|--------|
+#  | linux  | ubuntu | clang     | check        | no     |
+#  | linux  | ubuntu | gcc       | check deb    | yes    |
+#  | linux  | centos | gcc       | check rpm    | yes    |
+#  | osx    | sierra | clang¹    | check        | no     |
+#
+#  Linux based builds are run in docker containers using docker-compose.
+#
+#  OSX based builds are done by a third-party provider
+#
+#  ¹ The compiler reported is the Apple LLVM version
+jobs:
+  templates:
+    # Global config for builds on linux
+    - &linux-build
+      services:
+        - docker
+    # Global config for builds on osx
+    - &osx-build
+      os: osx
+      compiler: clang
+    # Enable the build condition if travis' osx service startup hangs
+    # if: tag =~ osx$ OR branch =~ osx$
+    # Global config for deployment stage
+    - &deploy
+      os: linux
+      after_success: skip
+
+  include:
+    # Sets up the build environment, compiles the code and runs tests
+    - <<: *linux-build
+      env:
+        COMPILER_VERSION=4.9 MAKE_TARGET=$MAKE_TARGET:deb:api-sanity-checker
+      before_cache:
+        - if [[ -n "$TRAVIS_TAG" ]]; then cp build/pkg/deb/*.deb $CACHE_DIR/; fi
+    - <<: *linux-build
+      env:
+        MAKE_TARGET=$MAKE_TARGET:check-code-coverage
+        CONFIGURE_ARGS="$CONFIGURE_ARGS --with-coverage-support=capture"
+    - <<: *linux-build
+      env:
+        DOCKER_CXX=clang++ DOCKER_CC=clang
+    - <<: *linux-build
+      env:
+        DIST_NAME=centos DIST_VERSION=7 MAKE_TARGET=$MAKE_TARGET:rpm
+    - <<: *osx-build
+      env:
+        DIST_NAME=osx MAKE_TARGET=check DRIZZLE_MYSQL_CA_PATH=/usr/local/var/mysql/
+
+    ## Deployment stage
+    - <<: *deploy
+      # Deploy deb packages to bintray. Doesn't build the packages but uses the
+      # cache from the first stage.
+      stage: deploy
+      if: tag IS present AND tag =~ ^v[0-9]+\.[0-9]+\.[0-9]+
+      env:
+        COMPILER_VERSION=4.9 MAKE_TARGET=deb
+      before_script: skip
+      script:
+        - beaver bintray upload -D $DIST_VERSION -N $CACHE_DIR/*.deb

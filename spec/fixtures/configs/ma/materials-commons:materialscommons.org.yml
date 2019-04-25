@@ -1,0 +1,99 @@
+language: node_js
+node_js:
+  - '8.2.1'
+
+notifications:
+  email:
+    recipients:
+        - gtarcea@umich.edu
+    on_success: change
+    on_failure: always
+
+# blocklist - branches not used for testing: any branch starting with 'spike'
+branches:
+  except:
+  - /^spike-.*$/
+
+sudo: required
+
+addons:
+  hosts:
+  - mctest.localhost
+
+env:
+  global:
+    - MC_API_SERVICE_PORT=5004
+    - MCDB_PORT=40815
+    - MCDB_CONNECTION="localhost:$MCDB_PORT"
+    - MCDIR=~/file_data
+    - MCDB_DIR=~/testdb
+    - RETHINKDB_HTTP_PORT=8090
+    - RETHINKDB_CLUSTER_PORT=31815
+    - MC_ES_URL="http://localhost:9500"
+    - MC_LOG_DIR=/tmp
+    - MCDB_TYPE=rethinkdb
+    - MCDB_NAME=materialscommons
+    - MCDB_FILE=test_data/test_rethinkdb_dump.tar.gz
+    - RETHINKDB_CLUSTER_PORT=31815
+    - RETHINKDB_HTTP_PORT=8090
+    - MC_DOI_SERVICE_URL=https://ezid.lib.purdue.edu/
+    - MC_DOI_PUBLISHER='Materials Commons'
+    - MC_DOI_PUBLICATION_BASE=http://mcpub.localhost/#/details
+    - MC_DOI_NAMESPACE='doi:10.5072/FK2'
+
+before_install:
+  - pyenv versions
+  - pyenv global '2.7.14'
+  - python --version
+  - export MC_APP_DIR=`pwd`
+  # RethinkDB
+  - source /etc/lsb-release && echo "deb http://download.rethinkdb.com/apt $DISTRIB_CODENAME main" | sudo tee /etc/apt/sources.list.d/rethinkdb.list
+  # or --no-check-certificate for wget
+  - curl -k https://download.rethinkdb.com/apt/pubkey.gpg | sudo apt-key add -
+  # Yarn
+  - curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
+  - echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
+  - sudo apt-get update
+
+install:
+  - sudo apt-get install nginx
+  - sudo apt-get install rethinkdb
+
+  - node --version
+
+  - pip install 'rethinkdb==2.3.0.post6'
+  - pip install Flask
+  - pip install pytest
+  - pip install pbkdf2
+
+  - pip list
+
+  - npm install -g node-gyp@3.5.0
+  - npm install -g gulp-cli
+  - npm install -g gulp
+
+  - pushd ~
+  - mkdir .materialscommons
+  - popd
+
+  - pushd test_data/test_config_data
+  - cp travisconfig.json ~/.materialscommons/config.json
+  - sudo mkdir -p /etc/nginx/conf.d
+  - sudo cp mctest.localhost.conf /etc/nginx/conf.d/
+  - popd
+
+  - pushd backend
+  - npm install
+  - popd
+
+before_script:
+  # - sudo nginx
+  # it appears that nginx is already running (started at install time?)
+  - sudo nginx -s reload
+  - rethinkdb --driver-port $MCDB_PORT --cluster-port $RETHINKDB_CLUSTER_PORT --http-port $RETHINKDB_HTTP_PORT --daemon
+  - sleep 5
+
+  - cd backend
+
+script:
+  - npm test

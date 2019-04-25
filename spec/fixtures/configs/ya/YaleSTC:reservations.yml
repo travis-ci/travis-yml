@@ -1,0 +1,48 @@
+language: ruby
+
+rvm:
+  - 2.4.1
+
+env:
+  global:
+    - RAILS_ENV=test
+    -
+      # Code Climate Integration
+      secure: IHUYMK2spxorl9lUeAbAfT6btuP2qRT615bUnEuUDgYrXf9y1CdQprYWJaygou/+6aWmLL0NnxYSpOxi40bHgMKeUQnTjXVbkkqQ1Tml3cMSsjkBrx7CNUygHvDDzCQCEC6m9uZjUKMZAVzVSWlOQhSMKR7MtdsSvMCrKIgA2pM=
+
+addons:
+  apt:
+    packages:
+      - ghostscript
+
+before_install:
+  - if [ $TRAVIS_PULL_REQUEST == "false" ]; then git clone https://github.com/$TRAVIS_REPO_SLUG.git $TRAVIS_REPO_SLUG && cd $TRAVIS_REPO_SLUG && git checkout -qf $TRAVIS_BRANCH; fi
+  - if [ $TRAVIS_PULL_REQUEST == "true" ]; then git checkout -qf master && git checkout -qf $TRAVIS_COMMIT; fi
+  - convert -version
+  - gs -v
+  - 'echo ''gem: --no-ri --no-rdoc'' > ~/.gemrc'
+
+bundler_args: --without=production staging development
+
+before_script:
+  - cp config/database.travis.yml config/database.yml
+  - cp config/secrets.yml.example config/secrets.yml
+  - bundle exec rake db:create
+  - bundle exec rake db:schema:load
+
+script:
+  - bundle exec rake check_style
+  - xvfb-run -a bundle exec rake
+
+# From Travis CI Support: This will route jobs to our beta build environment,
+# which has much faster boot times, making it easier to debug via Travis.
+sudo: false
+
+# the new build env has caching enabled
+cache: bundler
+
+# Notifications settings
+notifications:
+  email: false
+  slack:
+    secure: "OeEIWrjKJbxTGgq6XYL6tLewPb4oRisGiLKZF6QWcaOUUlATbP6I5DSykon+G6dgpWDxqrAZXEbLSr+bUNwYufdhVJJHGaPIeGmrzajrwdyfS/mIkM6+MDvZWmiFwDI5ctOfvAY1sGDu/W0fflLk9NZ/UcZDsN4RCNb9981bpTE="

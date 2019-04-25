@@ -1,0 +1,40 @@
+sudo: required
+dist: trusty
+language: java
+jdk:
+- oraclejdk8
+cache:
+  directories:
+  - $HOME/.m2
+  - pyramus/.cargo
+addons:
+  hosts:
+  - dev.pyramus.fi
+branches:
+  only:
+  - master
+  - develop
+env:
+  global:
+  - secure: "FyBpg9F7v2eQvKZ838usSF/lTSbNjKXBNHj/nJ04fXHJq6vR7n1HDXpeorqIdPv3bNRtBgEYjDVrGdxk50b4tSGGwtN5W0Yji8t6o/0EVoK190xKEHH45fUrenv8aRvOYcCYEeTZ60N/0hez63XfwLqDwJMdMZMPry/YAcurZkI="
+  - secure: "fP2UJjbNpT/dWYfE3yJ0riWO5/+dBcjZiJzosmCtQUhQGFlIAAwrWYOXLjEXxCsksO6/m5y3OE5/Hnm076OBgubghpGZadF7YC0VzIsjrPYUuqkxEeF/Oyo46dtuMsCIH0ZqzvIo/q4XPHyIBsivMG5JfLBOgh2a/p7JY0R5FZk="
+before_script:
+  - export JAVA_OPTS="-Djava.net.preferIPv4Addresses=true -Djava.net.preferIPv4Stack=true"
+  - export _JAVA_OPTIONS="-Xmx2048m -Xms512m -Djava.net.preferIPv4Addresses=true -Djava.net.preferIPv4Stack=true"
+script: mvn verify -Pit
+after_success:
+- if [ $TRAVIS_PULL_REQUEST == false ]; then
+    python travis-prepare-maven.py & wait;
+    mvn deploy --settings ~/.m2/trasettings.xml;
+  fi;
+after_failure:
+- cat pyramus/target/cargo/configurations/wildfly10x/log/server.log
+- cat pyramus/target/cargo/configurations/wildfly10x/configuration/standalone.xml
+notifications:
+  webhooks:
+    urls: 
+    - http://build.muikkuverkko.fi/travis.php
+    on_success: always
+    on_failure: never
+    on_start: false
+      

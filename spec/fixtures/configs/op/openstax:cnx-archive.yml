@@ -1,0 +1,37 @@
+dist: trusty
+sudo: required
+language: python
+python:
+  - "2.7"
+services:
+  - docker
+before_install:
+  - pip install pep8
+  - pep8 --exclude=tests,migrations *.py cnxarchive/
+  - pep8 --max-line-length=300 cnxarchive/tests
+install:
+  - docker-compose -f .travis-compose.yml up -d
+before_script:
+  # wait for postgres to be available
+  - while ! echo | psql 'user=postgres host=localhost port=5433'; do docker-compose -f .travis-compose.yml logs db | tail; sleep 5; done
+
+  # Give cnxarchive superuser privileges on postgres
+  - docker-compose -f .travis-compose.yml exec db /bin/bash -c "echo 'ALTER USER cnxarchive WITH LOGIN SUPERUSER' | psql -U postgres postgres"
+  # Stop init_venv from doing anything
+  - docker-compose -f .travis-compose.yml exec db /bin/bash -c "echo 'CREATE SCHEMA venv' | psql -U cnxarchive cnxarchive-testing"
+
+  # Wait for cnxarchive_archive_1 to be available
+  - while sleep 5; do docker ps -a; if [[ -n "`docker ps | grep cnxarchive_archive_1 | grep ' Up '`" ]]; then break; elif [[ -n "`docker ps -a | grep cnxarchive_archive_1 | grep ' Exited'`" ]]; then docker logs cnxarchive_archive_1; exit 1;  fi; done
+
+  # Install packages needed for testing
+  - docker-compose -f .travis-compose.yml exec --user root archive /bin/bash -c "pip install coverage codecov"
+script:
+  # This is the same as `python -m unittest discover` with a coverage wrapper.
+  #- coverage run --source=cnxarchive setup.py test
+  - docker-compose -f .travis-compose.yml exec archive /bin/bash -c "cd /src; TESTING_CONFIG=cnxarchive/tests/.travis-testing.ini coverage run --source=cnxarchive setup.py test"
+  - docker-compose -f .travis-compose.yml down
+after_success:
+  # Report test coverage to codecov.io
+  - docker-compose -f .travis-compose.yml exec archive /bin/bash -c "codecov"
+notifications:
+  email: false

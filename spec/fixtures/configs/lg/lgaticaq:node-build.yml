@@ -1,0 +1,27 @@
+---
+sudo: required
+
+services:
+  - docker
+
+env:
+  matrix:
+    - env:
+      VERSION: '10.6.0'
+    - env:
+      VERSION: '9.11.2'
+    - env:
+      VERSION: '8.11.3'
+    - env:
+      VERSION: '6.14.3'
+    - env:
+      VERSION: '4.9.1'
+
+install:
+  - docker build -t "lgatica/node-build:$VERSION" "$VERSION"
+
+script:
+  - docker run --rm "lgatica/node-build:$VERSION" node --version
+
+notifications:
+  email: false

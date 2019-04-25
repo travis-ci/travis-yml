@@ -1,0 +1,26 @@
+language: node_js
+node_js:
+  - '8'
+  - '9'
+  - 'node'
+services:
+  - docker
+addons:
+  apt:
+    sources:
+      - google-chrome
+    packages:
+      - google-chrome-stable
+before_install:
+  - export CHROME_BIN=chromium-browser
+  - export DISPLAY=:99.0
+  - npm i npm@^5 -g
+  - sh -e /etc/init.d/xvfb start
+  - sleep 3
+script:
+  - npm run build
+  - npm run ci
+cache:
+  directories:
+    - node_modules
+sudo: required

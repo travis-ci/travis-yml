@@ -1,0 +1,24 @@
+language: ruby
+rvm:
+  - 2.4
+  - 2.5
+  - 2.6
+  - ruby-head
+
+matrix:
+  allow_failures:
+    - rvm:
+      - ruby-head
+
+before_install:
+  - gem install bundler
+
+# See https://bors.tech/documentation/getting-started/
+branches:
+  only:
+    # This is where pull requests from "bors r+" are built.
+    - staging
+    # This is where pull requests from "bors try" are built.
+    - trying
+    # Build pull requests.
+    - master

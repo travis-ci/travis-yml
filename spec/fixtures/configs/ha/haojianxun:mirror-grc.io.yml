@@ -1,0 +1,28 @@
+sudo: required
+language: python
+python:
+- '2.7'
+addons:
+  apt:
+    packages:
+    - docker-ce
+branches:
+  only:
+  - master
+install:
+- git remote -v
+script:
+- "bash  ./sync.sh 10"
+before_install:
+- export start_time=$(date +%s)
+- mkdir -p ~/.docker
+- mkdir -p ~/.ssh
+- openssl aes-256-cbc -K $encrypted_9d3b19838c65_key -iv $encrypted_9d3b19838c65_iv
+  -in .travis/conf.tar.gz.enc -out ~/conf.tar.gz -d
+- tar xf ~/conf.tar.gz -C ~
+- mv ~/id_rsa ~/.ssh/id_rsa
+- mv ~/config.json ~/.docker/config.json
+- chmod 600 ~/.ssh/id_rsa
+- chmod 600 ~/.docker/config.json
+- eval $(ssh-agent)
+- ssh-add ~/.ssh/id_rsa

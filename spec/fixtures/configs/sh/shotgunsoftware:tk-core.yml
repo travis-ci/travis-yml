@@ -1,0 +1,31 @@
+# Copyright (c) 2018 Shotgun Software Inc.
+#
+# CONFIDENTIAL AND PROPRIETARY
+#
+# This work is provided "AS IS" and subject to the Shotgun Pipeline Toolkit
+# Source Code License included in this distribution package. See LICENSE.
+# By accessing, using, copying or modifying this work you indicate your
+# agreement to the Shotgun Pipeline Toolkit Source Code License. All rights
+# not expressly granted therein are reserved by Shotgun Software Inc.
+
+# travis-ci.org CI unit tests integration configuration file.
+
+language: python
+sudo: required
+
+matrix:
+  include:
+  - python: "2.7"
+    # When set to 1, tests/run_travis.sh will only compile the sources using python -m compileall
+    env: SHOTGUN_COMPILE_ONLY=0
+  - python: "3.6"
+    # We do not support Python 3 for the moment, but we will be compilable at the very least.
+    env: SHOTGUN_COMPILE_ONLY=1
+
+install:
+  - pip install -r tests/ci_requirements.txt
+
+# command to run tests
+script: tests/run_travis.sh
+# Only run coveralls if we actually ran tests. Otherwise this breaks coveralls it seems.
+after_success: test $SHOTGUN_COMPILE_ONLY = 0 && coveralls

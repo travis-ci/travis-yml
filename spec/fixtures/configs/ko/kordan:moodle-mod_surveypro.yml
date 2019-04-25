@@ -1,0 +1,81 @@
+language: php
+
+sudo: required
+
+addons:
+  firefox: "47.0.1"
+  postgresql: "9.4"
+  apt:
+    packages:
+      - openjdk-8-jre-headless
+
+cache:
+  directories:
+    - $HOME/.composer/cache
+    - $HOME/.npm
+
+php:
+ - 7.3
+ - 7.2
+ - 7.1
+ - 7.0
+
+# This section sets up the environment variables for the build.
+env:
+  - MOODLE_BRANCH=master           DB=pgsql
+  - MOODLE_BRANCH=master           DB=mysqli
+  - MOODLE_BRANCH=MOODLE_36_STABLE DB=pgsql
+  - MOODLE_BRANCH=MOODLE_35_STABLE DB=mysqli
+
+matrix:
+  include:
+    # These are selected runs for behat, by default we don't want all combos running it
+    # so just pick the lowest version supported in each of the branches.
+    #- php: 7.1
+    #  env: BEHAT=yes MOODLE_BRANCH=master           DB=mysqli
+    #- php: 7.0
+    #  env: BEHAT=yes MOODLE_BRANCH=MOODLE_36_STABLE DB=pgsql
+    #- php: 7.0
+    #  env: BEHAT=yes MOODLE_BRANCH=MOODLE_35_STABLE DB=mysqli
+  exclude:
+    - php: 7.2
+      env: MOODLE_BRANCH=master           DB=mysqli
+    - php: 7.2
+      env: MOODLE_BRANCH=master           DB=pgsql
+    - php: 7.0
+      env: MOODLE_BRANCH=master           DB=mysqli
+    - php: 7.0
+      env: MOODLE_BRANCH=master           DB=pgsql
+    - php: 7.2
+      env: MOODLE_BRANCH=MOODLE_36_STABLE DB=pgsql
+    - php: 7.1
+      env: MOODLE_BRANCH=MOODLE_36_STABLE DB=pgsql
+    - php: 7.3
+      env: MOODLE_BRANCH=MOODLE_35_STABLE DB=mysqli
+    - php: 7.1
+      env: MOODLE_BRANCH=MOODLE_35_STABLE DB=mysqli
+
+before_install:
+  - phpenv config-rm xdebug.ini
+  - nvm install 8.9
+  - nvm use 8.9
+  - cd ../..
+  - composer create-project -n --no-dev --prefer-dist moodlerooms/moodle-plugin-ci ci ^2
+  - export PATH="$(cd ci/bin; pwd):$(cd ci/vendor/bin; pwd):$PATH"
+
+install:
+  - moodle-plugin-ci install
+
+script:
+  - moodle-plugin-ci phplint
+#  - moodle-plugin-ci phpcpd
+#  - moodle-plugin-ci phpmd
+  - moodle-plugin-ci codechecker
+  - moodle-plugin-ci validate
+  - moodle-plugin-ci savepoints
+  - moodle-plugin-ci mustache
+  - moodle-plugin-ci grunt
+#  - moodle-plugin-ci phpunit
+  - if [ $BEHAT == 'yes' ]; then
+        moodle-plugin-ci behat || travis_terminate 1;
+    fi

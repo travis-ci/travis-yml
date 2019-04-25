@@ -1,0 +1,166 @@
+#
+# IMPORTANT.  OS X support is so experimental that you have to specifically
+# request to have it enabled, on a per-repository basis.  See
+# http://docs.travis-ci.com/user/multi-os/#Manual-intervention-required
+#
+# This file will still work, without OS X enabled, it just won't run those
+# tests.
+#
+# We set the language to c because python isn't supported on the MacOS X nodes
+# on Travis. However, the language ends up being irrelevant anyway, since we
+# install Python ourselves using conda.
+# language: python
+language: c
+
+os:
+    - linux
+    # - osx
+
+# Travis tech support recommended trying sudo true for more stable builds.
+# Seems odd, but maybe they isolate us from other users more if we need sudo.
+# sudo: true
+# Setting sudo to false opts in to Travis-CI container-based builds.
+sudo: false
+
+# Use Ubuntu 14.04 LTS "trusty" instead of default 12.04
+dist: trusty
+
+# The apt packages below are needed for sphinx builds, which can no longer
+# be installed with sudo apt-get.
+addons:
+    apt:
+        packages:
+            - graphviz
+            - texlive-latex-extra
+            - dvipng
+# python:
+    # - 2.6
+    # - 3.3
+    # - 3.4
+    # This is just for "egg_info".  All other builds are explicitly given in the matrix
+env:
+    global:
+        # The following versions are the 'default' for tests, unless
+        # overidden underneath. They are defined here in order to save having
+        # to repeat them for all configurations.
+        # - NUMPY_VERSION=1.10
+        # - SCIPY_VERSION=0.16
+        - ASTROPY_VERSION=2.0.8
+        # - SPHINX_VERSION=1.6.6
+        - DESIUTIL_VERSION=1.9.15
+        - SPECLITE_VERSION=0.8
+        - SPECTER_VERSION=0.8.3
+        - DESIMODEL_VERSION=0.9.6
+        - DESIMODEL_DATA=branches/test-0.9.6
+        - DESISIM_TESTDATA_VERSION=0.6.1
+        - SPECSIM_VERSION=v0.12
+        - DESISPEC_VERSION=0.26.0
+        - DESITARGET_VERSION=0.25.0
+        - SIMQSO_VERSION=v1.2.3
+        - DESI_LOGLEVEL=DEBUG
+        - MAIN_CMD='python setup.py'
+        # Additional conda channels to use.
+        - CONDA_CHANNELS="astropy"
+        # These packages will always be installed.
+        - CONDA_DEPENDENCIES=""
+        # These packages will only be installed for documentation builds.
+        # - CONDA_SPHINX_DEPENDENCIES="scipy pyyaml sphinx==1.5"
+        # These packages will only be installed if we really need them.
+        - CONDA_ALL_DEPENDENCIES="scipy matplotlib coverage pyyaml numba"
+        # These packages will always be installed.
+        - PIP_DEPENDENCIES=""
+        # These packages will only be installed if we really need them.
+        - PIP_ALL_DEPENDENCIES="speclite==${SPECLITE_VERSION} coveralls fitsio"
+        # - PIP_ALL_DEPENDENCIES="speclite coveralls fitsio healpy"
+        # These pip packages need to be installed in a certain order, so we
+        # do that separately from the astropy/ci-helpers scripts.
+        - DESIHUB_PIP_DEPENDENCIES="desiutil=${DESIUTIL_VERSION}"
+        - DESIHUB_PIP_ALL_DEPENDENCIES="desiutil=${DESIUTIL_VERSION} desimodel=${DESIMODEL_VERSION} specter=${SPECTER_VERSION} desispec=${DESISPEC_VERSION} desitarget=${DESITARGET_VERSION} specsim=${SPECSIM_VERSION}"
+        # Debug the Travis install process.
+        - DEBUG=False
+    matrix:
+        - PYTHON_VERSION=3.5 SETUP_CMD='egg_info'
+        - PYTHON_VERSION=3.5 SETUP_CMD='bdist_egg'
+        - PYTHON_VERSION=3.6 SETUP_CMD='egg_info'
+        - PYTHON_VERSION=3.6 SETUP_CMD='bdist_egg'
+
+matrix:
+    # Don't wait for allowed failures.
+    fast_finish: true
+
+    # OS X support is still experimental, so don't penalize failuures.
+    allow_failures:
+        - os: osx
+        - os: linux
+          env: PYTHON_VERSION=3.6 SETUP_CMD='test'
+               ASTROPY_VERSION=3.0
+               CONDA_DEPENDENCIES=$CONDA_ALL_DEPENDENCIES
+               PIP_DEPENDENCIES=$PIP_ALL_DEPENDENCIES
+               DESIHUB_PIP_DEPENDENCIES=$DESIHUB_PIP_ALL_DEPENDENCIES
+
+    include:
+
+        # Check for sphinx doc build warnings.
+        # Note: this test is not a perfectly realistic test of ReadTheDocs
+        # builds, which operate in a much more bare-bones environment
+        - os: linux
+          env: PYTHON_VERSION=3.5 SETUP_CMD='build_sphinx --warning-is-error'
+
+        # Try multiple python versions with the latest numpy
+        - os: linux
+          env: PYTHON_VERSION=3.5 SETUP_CMD='test --coverage'
+               CONDA_DEPENDENCIES=$CONDA_ALL_DEPENDENCIES
+               PIP_DEPENDENCIES=$PIP_ALL_DEPENDENCIES
+               DESIHUB_PIP_DEPENDENCIES=$DESIHUB_PIP_ALL_DEPENDENCIES
+
+        - os: linux
+          env: PYTHON_VERSION=3.6 SETUP_CMD='test'
+               CONDA_DEPENDENCIES=$CONDA_ALL_DEPENDENCIES
+               PIP_DEPENDENCIES=$PIP_ALL_DEPENDENCIES
+               DESIHUB_PIP_DEPENDENCIES=$DESIHUB_PIP_ALL_DEPENDENCIES
+
+        - os: linux
+          env: PYTHON_VERSION=3.6 SETUP_CMD='test'
+               ASTROPY_VERSION=3.0
+               CONDA_DEPENDENCIES=$CONDA_ALL_DEPENDENCIES
+               PIP_DEPENDENCIES=$PIP_ALL_DEPENDENCIES
+               DESIHUB_PIP_DEPENDENCIES=$DESIHUB_PIP_ALL_DEPENDENCIES
+
+        # - os: osx
+        #   env: PYTHON_VERSION=2.7 SETUP_CMD='test'
+        # - python: 3.3
+        #   env: SETUP_CMD='test --open-files'
+        # - python: 3.4
+        #   env: SETUP_CMD='test --open-files'
+
+        # Now try do scipy on 2.7 and an appropriate 3.x build (with latest numpy)
+        # Try older numpy versions
+        # - python: 2.7
+        #   env: NUMPY_VERSION=1.8 SETUP_CMD='test'
+        # - python: 2.7
+        #   env: NUMPY_VERSION=1.7 SETUP_CMD='test'
+        # - python: 2.7
+        #   env: NUMPY_VERSION=1.6 SETUP_CMD='test'
+
+        # Do a PEP8 test
+        # - python: 2.7
+        #   env: MAIN_CMD='pep8 astropy --count' SETUP_CMD=''
+
+install:
+    - git clone git://github.com/astropy/ci-helpers.git
+    - source ci-helpers/travis/setup_conda.sh
+    # egg_info causes the astropy/ci-helpers script to exit before the pip
+    # packages are installed, thus desiutil is not installed in that script.
+    # - if [[ $SETUP_CMD == test* ]]; then pip install git+https://github.com/dkirkby/speclite.git@${SPECLITE_VERSION}#egg=speclite; fi
+    - for p in $DESIHUB_PIP_DEPENDENCIES; do r=$(echo $p | cut -d= -f1); v=$(echo $p | cut -d= -f2); pip install git+https://github.com/desihub/${r}.git@${v}#egg=${r}; done
+    - "if [[ $SETUP_CMD == test* ]]; then pip install --no-binary :all: healpy; fi"
+    - if [[ $SETUP_CMD == test* ]]; then pip install git+https://github.com/imcgreer/simqso.git@${SIMQSO_VERSION}#egg=simqso; fi
+    # Install desimodel and desisim test data
+    - if [[ $SETUP_CMD == test* ]]; then source etc/get_testdata.sh; fi
+    - df -h
+
+script:
+    - $MAIN_CMD $SETUP_CMD
+
+after_success:
+    - if [[ $SETUP_CMD == 'test --coverage' ]]; then coveralls; fi

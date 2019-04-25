@@ -1,0 +1,33 @@
+language: node_js
+sudo: required
+env:
+  global:
+    - K8S_OPS_REPO_BRANCH=master
+    - K8S_OPS_REPO_SLUG=datahq/deploy
+    - DOCKER_IMAGE=datopian/datahub-frontend
+    - DEPLOY_YAML_UPDATE_FILE=values.auto-updated.yaml
+    - DEPLOY_VALUES_CHART_NAME=frontend
+    - DEPLOY_VALUES_IMAGE_PROP=image
+    - DEPLOY_COMMIT_MESSAGE="automatic update of dhq-frontend"
+    - DEPLOY_GIT_EMAIL=dhq-deployer@null.void
+    - DEPLOY_GIT_USER=dhq-deployer
+
+node_js:
+  - "8"
+
+install:
+  - yarn
+
+services:
+  - docker
+script:
+  - yarn test
+  - curl -s https://raw.githubusercontent.com/datahq/deploy/master/apps_travis_script.sh > .travis.sh
+  - bash .travis.sh script
+
+deploy:
+  skip_cleanup: true
+  provider: script
+  script: bash .travis.sh deploy
+  on:
+    branch: master

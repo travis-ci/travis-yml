@@ -1,0 +1,29 @@
+language: node_js
+sudo: false
+jdk: oraclejdk8
+node_js:
+- stable
+- lts/*
+addon:
+  firefox: latest
+  chrome: stable
+env:
+  matrix:
+  - CMD=lint
+  - CMD=test
+matrix:
+  allow_failures:
+  - node_js: stable
+before_install:
+- export CHROME_BIN=chromium-browser
+- export DISPLAY=:99.0
+- sh -e /etc/init.d/xvfb start
+script:
+- npx flow-typed install -s
+- npm run $CMD
+after_success:
+- '[ "$CMD" == "test" ] && npm run coverage'
+notifications:
+  email: false
+  slack:
+    secure: xSslrHLZztbGqMqvMxNCXh4dd039dGZcZfnl0sQ3kNQbAhwynlMTMrravKCTToJnj565HhB3TU2n4vueiF5VYAPwuiGVjIVW3iOV8cuzsiVPypIMbpIBHK8EwDsHQWeFUqQ2qyv+8HyB4Vnya0QeuF2eODpdQOjF2yofJzjtL1D+cO2x8N9GpEFtYBP6VLEMtxzGLrznRyNIL7iQU+QG2owGpGcm6R3aR3o3GP2K40OfsQHQsPPzJUPOPxf6x8uC8pnpbpkkCa0gd3kxNBPjYrEl6oK+6yMYa9NpVrzhOfNm3/MTLQz25vQ89RLaiEYz+rM0gP5oDMPseHbCamcETSZBRXC+UvR89sHD0ybU3vUkjMPro4y422vxAULxhkychHxcoeL25dVEcFyw0iqOVjjudss9bn4Ti+vzxx+6ZtzNEPlosgdxoXa6UQr7nBc7hXncTpC5jOoylni20h5HhA0MrWAN2vlCNCtB1ADSCJ4EzMnhUQwTTKv3jR6Hy5EPBnnvBDfcxnPD8UqImtwq6xKU316Ob1sFUfHE6+cR7494zJGry2c20TAHGJMxabH7+bOnnJ+JukNjMb79oJ8xpw+zvz3GLrhnzDmPkjaghY7larPQsVkCrkOUfF+Xu3F2jLpUGAoXWEPXpvQO85b05jtq2srEoZsMRNo5p3sjcbk=

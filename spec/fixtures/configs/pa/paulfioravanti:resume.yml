@@ -1,0 +1,45 @@
+# References:
+# - https://docs.travis-ci.com/user/caching/#Bundler
+sudo: false
+dist: trusty
+language: ruby
+cache: bundler
+rvm:
+  - 2.6.3
+addons:
+  code_climate:
+    repo_token: $CODECLIMATE_REPO_TOKEN
+before_install:
+  # Prevent issues like the following happening:
+  # https://github.com/sickill/rainbow/issues/44
+  - gem update --system
+  - gem install i18n rspec bundler
+before_script:
+  - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+  - chmod +x ./cc-test-reporter
+  - ./cc-test-reporter before-build
+script:
+  # Ensure gem dependencies do not have known vulnerabilities
+  - bin/bundle-audit check --update
+  # Ensure each dependency has a permissive license
+  - bin/license_finder
+  # Run tests
+  - bin/rspec spec/ --no-drb --format progress
+  # Check for any code reeks
+  - bin/reek
+  # Check for any code style violations
+  - bin/rubocop --display-cop-names
+  # NOTE: The 'no's below indicate not wanting to get CI to attempt to open
+  # the generated PDF
+  # Agree to installing prawn and prawn-table gems
+  - printf "yes\nno\n" | bin/resume
+  - bin/resume -l it <<< "no\n"
+  # Agree to installing rubyzip and downloading custom font
+  - printf "yes\nno\n" | bin/resume -l ja
+  - bin/rake resume
+  - ruby resume.rb <<< "no\n"
+  - ruby resume.rb -l it <<< "no\n"
+  - ruby resume.rb -l ja <<< "no\n"
+after_script:
+  # Send results to Code Climate
+  - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT

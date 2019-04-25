@@ -1,0 +1,54 @@
+sudo: required
+
+addons:
+  # service for code quality analysis
+  sonarcloud:
+    organization: "kitteh6660-github"
+
+# travis-ci does not support actionscript.
+# However the build uses ant, which is usually used to build java projects.
+# The ant task (mxmlc) provided by the flex SDK (ant/lib/flexTasks.jar) is used to build the project.
+language: java
+
+before_install:
+  - sudo apt-get update
+  # install VNC and xfce4 so we have a desktop, as the flash player requires one
+  - sudo apt-get install vnc4server xfce4 ant ant-optional -y
+  # So flexunit can find the player and the ant build file does not have to be modified
+  - sudo cp build-dep/bin/flashplayer /usr/local/bin/gflashplayer
+
+install:
+  # Java 7 is used by default, but sonar requires java 8
+  - jdk_switcher  use oraclejdk8
+  # start a VNC session, this will be the desktop for tests
+  - Xvnc :1 &
+ 
+script:
+    # this is where the build happens. A separate build is started for every entry in the matrix element
+  - travis_wait ant test-$BUILD
+  - devTools/ci/update-sonar-version.sh
+
+after_success:
+  - sonar-scanner
+
+# If the build fails, pack up the unit test reports - if any - and dump them to the console
+# The sleep is required for Travis to flush the log, otherwise the encoded dump will be cut off
+after_failure:
+  - devTools/ci/dump-report.sh && sleep 10
+
+env:
+  global:
+    # tell the build file where to find the flex SDK
+    - FLEX_HOME=build-dep/bin/flex/"
+    # this is to trick the flash player into thinking it is running on a desktop
+    - DISPLAY=":1"
+  matrix:
+    # different configurations that should be built
+    - BUILD="release"
+    - BUILD="debug"
+
+# Just so Travis.CI won't complain about Vanilla+ failing, since V+ wasn't intended to use Travis.
+branches:
+  except:
+    VanillaPlus
+

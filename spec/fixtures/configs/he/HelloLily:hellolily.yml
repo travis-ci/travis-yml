@@ -1,0 +1,138 @@
+sudo: required
+dist: trusty
+
+services:
+  - docker
+
+branches:
+  # Only build on these branches.
+  only:
+    - master
+    - develop
+    - /^feature/
+    - /^hotfix/
+
+env:
+  global:
+    # GITHUB_PERSONAL_ACCESS_TOKEN: account used is voipgrid-user:Travis auto merge for lily.
+    - secure: "LhLYNZ9XEAuV7Hgj9bWnugKOLswcc2b6U7Ed4a1Gz8ix2T+IvPsyNcY0Aoi8S2ztrJHZLv1N8erYYFK5NhRpK17NVWAXB5+7NHGM2pSgD2op+xTMMsmI4JJfY94O9I042ES/HEHiMi6vfZS3hFaOvYOzbD5ZtXx0fb8f8bcBgHs="
+
+    # CODECLIMATE_REPO_TOKEN
+    - secure: "YxRY659DsaAlAyY20aNOMlCN+Anr81WPmpg36zkTpSw2VgC219HS8301HN5userqAjnkKHNo7aWbHxq37sGKm2nYXPq2T2PkvyOToc4f7+uRwJ5i6w79zXKRvp4q6sA3mwjuPuPekRnHguM3WNshm2Nxbp0Aoxlu6Npd2vYvKVM="
+
+    # HEROKU_API_KEY: account used is admin.
+    - secure: "hnOGv5i5bJrXbbCsmr9siCNBrkmTrvIgIjznD/bDJ1+nzpCuSLWsybxbXtatiH1e+77wdlWqbwrRo/UpNP8rQmkWhfk3AYEuJmpe7hzYoB9gkMeNOBG2DJ6tgRhEnIgkA2fak2bwIwd8n2zJG2VS1+I7OzgV4QAxN+m0IgcF2to="
+
+    # DOCKER_HUB_EMAIL
+    - secure: "KDETg8s/pmEoKgcZPzU2tmW0ilU/iVLtZmCRetFMb77OigQT01pGJweYpPaFs+vx7M0fG2dmDI3mMyWRMcIMUqv17jwrl6nlLYMFjwUObUFNEwBg0lyM2atYD4JoFqd+U3rl8u4H+A+XHospsdRUBf1yTwH6EifdQ5wHUbDP8Q4="
+
+    # DOCKER_HUB_USERNAME
+    - secure: "TdWpx05v/6NEmFLn55ZnSDIwDbssWFZrJJMY49rjGC//A+/2p1fXn3fqsXvhQbViMej/7thGQrvUCVsa8Vef+0peGDZxxooCER7dTjt6bHRAub1mFk5DXkRHmRQ3hgysdFHmQguXMwiqb8meXPyuTv3FT+YYPOyrf94Pv2KNdk0="
+
+    # DOCKER_HUB_PASSWORD
+    - secure: "eVlQ3Y5X7/5Ql2GauLXnNs4Apl0TovMuc0aVCgU5uG0Ngcl2PfgQaXW+XjEx72k9uLmYcDsgG0C9RPIiZo9FRqJmbVAdSyGmXCUS4QCJocebyz1ivfhPK0Qb2RhI9PQtk/8DRtzpALnxujUHs1SZ0nPw5H5sgimRo/DQJgLjWUU="
+
+    - TZ=Europe/Amsterdam
+    - HEROKU_APP_NAME="hellolily"
+    - GITHUB_REPO="HelloLily/hellolily"
+    - GITHUB_URI="https://${GITHUB_PERSONAL_ACCESS_TOKEN}@github.com/${GITHUB_REPO}"
+    - GIT_COMMITTER_EMAIL="travis@travis"
+    - GIT_COMMITTER_NAME="Travis CI"
+    - GIT_SHALLOW="$(ci/git_make_unshallow.sh)"
+    - MIGRATION_NEEDED="$(ci/migration_needed.sh)"
+    - ES1_INDEXING_NEEDED="$(ci/es1_indexing_needed.sh)"
+    - ES6_INDEXING_NEEDED="$(ci/es6_indexing_needed.sh)"
+    - NEXT_ACTION="$(ci/next_action.sh)"
+    - DEPLOY_COMMAND="$(ci/deploy_command.sh)"
+    - DOCKER_USER_ID=2000
+
+language: python
+
+install:
+  - pip install -r requirements.travis.txt
+  - gem install overcommit
+  - travis_retry npm install -g eslint
+  - gem install scss_lint
+  - gem install travis --no-rdoc --no-ri
+
+# The steps are run in the following order:
+  # Install apt addons
+  # before_install
+  # install
+  # before_script
+  # script
+  # after_success or after_failure
+  # before_deploy
+  # deploy
+  # after_deploy
+  # after_script
+
+before_script:
+  # Echo some variables for debug purposes.
+  - echo "Git is shallow; ${GIT_SHALLOW}"
+  - echo "Migration is needed; ${MIGRATION_NEEDED}"
+  - echo "ES1 indexing is needed; ${ES1_INDEXING_NEEDED}"
+  - echo "ES6 indexing is needed; ${ES6_INDEXING_NEEDED}"
+  - echo "Next action is; ${NEXT_ACTION}"
+  - echo "Current datetime is; $(date +'%Y%m%d%H%M')"
+
+  # Always build new images for docker.
+  - docker-compose -f docker-compose.yml -f docker-compose.new-build.yml build
+
+script:
+  # Run git hooks with overcommit.
+  - overcommit --sign
+  - overcommit --run
+
+  # Once the db has started, run the tests and output coverage and results.
+  - ./ci/run_tests.sh
+  - docker-compose run --rm web coverage combine
+
+  # Try a merge to see if there are merge conflicts but do not push yet.
+  - ./ci/git_merge.sh
+
+  # Run a hook to check if there are unhandled migrations.
+  - ./checks/git/migrations.sh
+
+  # Run migrations to catch any migration errors
+  - docker-compose run --rm web python manage.py migrate
+
+  # Run ES1 indexing to catch any indexing errors
+  - docker-compose run --rm web python manage.py index
+
+  # Run ES6 indexing to catch any indexing errors
+  - docker-compose run --rm web python manage.py search_index rebuild -f
+
+after_success:
+  # Only push if the tests and merge succeeded.
+  - ./ci/git_push.sh
+
+  # If we're on the default branch (in our case develop), push test coverage to code climate.
+  - if [ "${TRAVIS_BRANCH}" == "develop" ]; then docker-compose -f docker-compose.yml -f docker-compose.new-build.yml run --rm --service-ports -e CODECLIMATE_REPO_TOKEN -e TRAVIS -e TRAVIS_BRANCH -e TRAVIS_JOB_ID -e TRAVIS_PULL_REQUEST web codeclimate-test-reporter; fi
+
+before_deploy:
+  # If migrations are needed, set the heroku app to maintenance mode before the deploy. The maintenance mode
+  # is switched off in the DEPLOY_COMMAND to make sure that maintenance mode stays on if migrations or indexing fail.
+  - if [ "${MIGRATION_NEEDED}" == "true" ] || [ "${ES1_INDEXING_NEEDED}" == "true" ] || [ "${ES6_INDEXING_NEEDED}" == "true" ]; then python ./ci/patch_heroku_app.py ${HEROKU_APP_NAME} ${HEROKU_API_KEY} maintenance true; fi
+
+  # If migrations or indexing are needed, scale down all beat dynos for the duration of the deploy.
+  - if [ "${MIGRATION_NEEDED}" == "true" ] || [ "${ES1_INDEXING_NEEDED}" == "true" ] || [ "${ES6_INDEXING_NEEDED}" == "true" ]; then python ./ci/patch_heroku_app.py ${HEROKU_APP_NAME}/formation/beat ${HEROKU_API_KEY} quantity 0; fi
+
+deploy:
+  - provider: heroku
+    skip_cleanup: true
+    api_key: "${HEROKU_API_KEY}"
+    app: "${HEROKU_APP_NAME}"
+    on:
+      branch: master
+      condition: "${NEXT_ACTION} == 'deploy'"
+    run:
+      - "${DEPLOY_COMMAND}"
+
+notifications:
+  email: false
+  slack:
+    on_success: change
+    on_failure: always
+    rooms:
+      secure: eEk72U+ME7QHOLmC/34Sztf5vS0MkrGZ6r4YOpu1L5TkX0Qgxwaps8rHeIQD6p6vUY+9ZgTmJZr4CqgjCpi3W4e/H2DtqqbfNEyNr1P9wSj90Xu8mGsE8/YHJ9zyRf26ovedlNRQEojuM71s5tWAkHQu06SXw1Bt7IhI7dxPVuI=

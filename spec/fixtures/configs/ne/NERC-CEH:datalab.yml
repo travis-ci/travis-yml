@@ -1,0 +1,30 @@
+sudo: required
+
+before_install:
+  - curl -o- -L https://yarnpkg.com/install.sh | bash
+  - export PATH="$HOME/.yarn/bin:$PATH"
+
+language: node_js
+
+node_js: 8
+
+services: docker
+
+cache:
+  yarn: true
+  directories: node_modules
+
+env:
+  - CONTAINER=api
+  - CONTAINER=app
+  - CONTAINER=docs
+  - CONTAINER=infrastructure
+  - CONTAINER=authorisation
+
+script:
+  - $TRAVIS_BUILD_DIR/build/validate-build.sh $CONTAINER && $TRAVIS_BUILD_DIR/build/build-travis-wrapper.sh $CONTAINER
+
+notifications:
+  email: false
+  slack:
+    secure: MOXMAAY0fBeiwXodgXeBaZO39500l4Fg53GxMoLOXipoPUckTSvsg21fb8nYr2FeEKSlF/6g/IAoH9WCthnhFxLKGo+HLNkoSlV9CIz69v6YdjgEaM5o68D5Pg2mQ10xxbtGYICUh7U7Cq2xhQK+hT+wsEeeuiCWmdBKc3J30KHt7PPJ1tCx98gUv8QxRQfhSUAjbLzjap6Y4qKfsdwRVRnv44D4qQ8kc9YOSbzAo0b7A969T0RPR9N/WlB39mCzOn4yqVpzyF5xQsxAjPJuYgYBUkPbK505SLrm7jP18wMlD2qEhfVikSVTDVSmxZB86msn2YpQoGrrdQWMp+520PXrkGilD7z2BItQq93CzplIJ5NlfA9TF2p5A3uWRwTobxB5ErjQ0iCl0zs+2/v422cTnaufqwQBQ7W/4y9CJb8f3DpUStjU5W4CK1cRnx6vqSi34usy6NxrVNf6NbmobFMOCuTe8ChYpzBYgGXuvNw4vUz1APRkr6mcOKI4kRaG05WBdrS2MiTROffrHt1AvQPJ5ZHJcf+T4p4k8C31rDif3Zd6xcN4yPYpLX5Ly8O0K9/IEXurVdNiRTMGhvOeFKBMtmcSFkM3L2tmwEqtveoRO/JvGc+AAHf35ALSNG0ZOC79tI0tCxyG3FP3j9VEix6d5EjaaeRFvhnncODI0aU=

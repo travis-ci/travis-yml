@@ -1,0 +1,34 @@
+services:
+  - docker
+
+cache:
+  directories:
+    - ~/cache
+
+install:
+  - docker-compose pull
+
+before_install:
+  - mv docker-compose.ci.yml docker-compose.override.yml
+  - docker-compose up -d db
+  - docker-compose run --rm ui ./bin/setup
+  - docker-compose run --rm ui ./bin/yarn
+
+script:
+  - docker-compose run --rm ui rspec
+  - docker-compose run --rm ui bundle exec ./bin/webpack
+  - docker-compose run --rm ui bundle exec ./bin/yarn flow
+
+deploy:
+  skip_cleanup: true
+  provider: script
+  script: "./travis-build.sh"
+  on:
+    all_branches: true
+
+notifications:
+  slack:
+    on_success: change
+    on_failure: always
+    rooms:
+      secure: 2lg5TDXFP1z9ZD9zzFlMUceZS3unmqbvWmN4u7hZQRndF5So3q2/pSRdPufA263uAgvVTM7C11hejuQhSzv6W75iTNMUr5w3jH0s+YzUFTxKRe21h0LQds+8kKeyZ8232Djv2vUYMf7Uyn86nmifB8ltLcw4eubaDdGYHwtE0aFrMxGckYGy/SxNfDjMfZsByiNYGV2mTEHwxsgkYxi4MK5jhBjJ5nri2tZ8y5Zhpa8bQmeq1rJOE6g/3rNA9NACQ74bVqYrDm/qPjRCoh6FYOPSL59jFoFh/J7EDWPATo4thw8GG7ZaeX3W9Qx4ftKxZRE0Zn7kh0Qc6oJWHcBISWuqA9EqKF4yJb+VqVMH8OiezeWHHf+N1WpR7loG4gRXuTFSNrrcomu0jZ2vgQZ2LKOGlYRrqPNsXmpIwdFmSDrSxzyX13Gr34PSTkuzqUE/G0/InFhn7JakPV34DKay0EUH60g6jpvngIv2BFeKT1b48Zju0sDCohDd6PSOkfhPNpUkKvw/hgIoIyjItj0t1MXHHArknKrtdk2+SVONyDJ6DOU6p/Fsokt+TBnS+0tLextfqliQNjrWGClQgfCOobL/C/WPLwxZczAA2nlHf+b4lcLHU35fsnVygkTbPLHGtfSD3yoyjQ/1VJivadtcMZ8cJ2MV2x3VKfdZ6GHG97k=

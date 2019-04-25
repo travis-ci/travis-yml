@@ -1,0 +1,21 @@
+language: ruby
+script: bundle exec rake rspec
+bundler_args: --without development docs
+rvm:
+  - 2.2.4
+  - 2.3.0
+  - jruby-9.0.5.0
+env:
+  global:
+    - FAIL_FAST=no
+    - COVERAGE=no
+matrix:
+  fast_finish: true
+branches:
+  only:
+    - master
+before_install: |
+  if [[ k$TRAVIS_RUBY_VERSION = kjruby* ]] ; then
+    # Hack the Gemfile.lock file to indicate we're a JRuby gem, to make bundler happy.
+    sed -e 's/\(cassandra-driver [^)]*\)/\1-java/' -i"" Gemfile.lock
+  fi

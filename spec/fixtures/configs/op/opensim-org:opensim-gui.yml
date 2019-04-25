@@ -1,0 +1,109 @@
+language: java
+
+# Use container-based infrastructure to allow caching (for ccache).
+sudo: false 
+
+git:
+  # Travis CI tries to clone submodules for us, but we don't want all
+  # the submodules.
+  submodules: false
+
+# Fixing https://github.com/opensim-org/opensim-gui/issues/931
+# https://docs.travis-ci.com/user/reference/osx/#OS-X-Version
+osx_image: xcode8.3
+
+matrix:
+  include:
+    - os: osx
+      env: DEPLOY=yes
+
+addons:
+  # To avoid an interactive prompt when uploading binaries to sourceforge.
+  ssh_known_hosts: frs.sourceforge.net
+      
+before_install:
+  - /usr/libexec/java_home -V
+  ## Install NetBeans.
+  #brew tap caskroom/versions
+  #brew cask search java
+  #brew cask install java8
+  - brew cask install netbeans
+  
+  ## Install opensim-core.
+  # The opensim-core travis script uploads the opensim-core binaries to sourceforge.
+  - OSIMCOREZIP=opensim-core-latest_${TRAVIS_OS_NAME}_Release.zip 
+  - wget https://prdownloads.sourceforge.net/myosin/opensim-core/$OSIMCOREZIP
+  # Put opensim-core in ~/opensim-core (-q: quiet).
+  - unzip -q $OSIMCOREZIP -d ~
+  
+install:
+  # Only get certain submodules (not OpenSimAPI).
+  - git submodule update --init --recursive -- opensim-models opensim-visualizer Gui/opensim/threejs
+
+  # Build.
+  - mkdir ../build && cd ../build
+  - cmake ../opensim-gui -DCMAKE_PREFIX_PATH=~/opensim-core -DAnt_EXECUTABLE="/Applications/NetBeans/NetBeans 8.2.app/Contents/Resources/NetBeans/extide/ant/bin/ant" -DANT_ARGS="-Dnbplatform.default.netbeans.dest.dir=/Applications/NetBeans/NetBeans 8.2.app/Contents/Resources/NetBeans;-Dnbplatform.default.harness.dir=/Applications/NetBeans/NetBeans 8.2.app/Contents/Resources/NetBeans/harness"
+  - make CopyOpenSimCore
+  - make PrepareInstaller
+
+  # Read the value of the cache variable storing the GUI build version.
+  - VERSION=`cmake -L . | grep OPENSIMGUI_BUILD_VERSION | cut -d "=" -f2`
+  - echo $VERSION
+  
+script: 
+  - echo "No tests."
+
+before_deploy:
+  - ls $TRAVIS_BUILD_DIR/Gui/opensim/dist
+  - export PKGNAME=OpenSim-$TRAVIS_BRANCH.pkg
+  - mkdir ~/to_deploy
+  - mv $TRAVIS_BUILD_DIR/Gui/opensim/dist/OpenSim-$VERSION.pkg ~/to_deploy/$PKGNAME
+
+  ## Set up ssh for sourceforge.
+  # Decrypt the private key stored in the repository to the tmp dir.
+  - openssl aes-256-cbc -K $encrypted_383dee84ea16_key -iv $encrypted_383dee84ea16_iv -in $TRAVIS_BUILD_DIR/Installer/.deploy_myosin_sourceforge_rsa.enc -out /tmp/deploy_myosin_sourceforge_rsa -d
+  # Start the ssh agent.
+  - eval "$(ssh-agent -s)"
+  # Register this private key with this client (the travis machine).
+  - chmod 600 /tmp/deploy_myosin_sourceforge_rsa
+  - ssh-add /tmp/deploy_myosin_sourceforge_rsa
+
+deploy:
+  # Uploads to sourceforge.net/projects/myosin
+  # See https://docs.travis-ci.com/user/deployment/custom/
+  # '--archive' preserves symlinks.
+  provider: script
+  skip_cleanup: true
+  script: rsync --archive --compress --verbose ~/to_deploy/$PKGNAME opensim-bot@frs.sourceforge.net:/home/frs/project/myosin/opensim-gui
+  on:
+    # TODO branch: master
+    all_branches: true
+    condition: "$DEPLOY = yes"
+ 
+# Process for securely uploading files to Sourceforge, taken from
+# https://oncletom.io/2016/travis-ssh-deploy/:
+#
+# Contact chrisdembia if you need the login information for opensim-bot at
+# sourceforge, to manage myosin.sourceforge.net.
+#
+# You must install the travis command-line tool: `gem install travis`
+# Locally, from the root of the simbody repository:
+# Create a 4096-bit RSA key with comment, private key 
+# $ ssh-keygen -t rsa -b 4096 -C 'opensim-bot@sourceforge.net' -f Installer/.deploy_myosin_sourceforge_rsa
+# When prompted for a passphrase, just hit enter (twice).
+# Encrypt the private key, add decryption code to .travis.yml. First make a
+# backup copy of .travis.yml.
+# $ travis encrypt-file Installer/.deploy_myosin_sourceforge_rsa --add
+# Manually edit the .travis.yml file to clean up the added lines and restore
+# comments to the file; put the decryption in the before_deploy step.
+# Remove the unencrypted private key. DO NOT commmit the unencrypted private
+# key.
+# $ rm -f Installer/.deploy_myosin_sourceforge_rsa
+# Move the encrypted key to the Installer folder.
+# $ mv .deploy_myosin_sourceforge_rsa.enc Installer/
+# Manually, log into the sourceforge website (user opensim-bot) and add the
+# public key (contents of Installer/.deploy_myosin_sourceforge_rsa.pub) in
+# Account Settings > SSH Settings.
+# Now you can delete the public key file from your local machine.
+# Commit the encrypted private key and the changes to .travis.yml.
+# $ git add .travis.yml Installer/.deploy_myosin_sourceforge_rsa.enc

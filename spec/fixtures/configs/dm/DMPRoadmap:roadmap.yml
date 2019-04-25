@@ -1,0 +1,100 @@
+sudo: false
+
+# Ruby is the main language of the project.
+language: ruby
+
+bundler_args: --with development,ci
+
+# Cache third party dependencies for faster builds
+cache:
+  apt: true
+  bundler: true
+  directories:
+    # Cache NPM packages
+    - lib/assets/node_modules
+    - $HOME/.npm
+
+addons:
+  chrome: stable
+  apt:
+    packages:
+      - wkhtmltopdf
+
+  # artifacts:
+  #   paths: "./log:./tmp/capybara"
+  #   bucket: roadmap-test-assets
+  #   s3_region: "eu-west-2"
+  #   debug: true
+
+matrix:
+  fast_finish: true
+  include:
+
+rvm:
+  # Use 2.4.1, since this is installed by default on Travis (1st Aug, 2018)
+  - 2.4.1
+
+# These env variables will set up a separate testing environment for each
+# combination of variables.
+env:
+  # Run specs once with each database adapter we support
+  - DB_ADAPTER=postgresql
+  - DB_ADAPTER=mysql2
+
+before_install:
+  - nvm install 10.10.0
+
+install:
+  - bundle install --with development,ci --path=${BUNDLE_PATH:-vendor/bundle}
+  - yarn install --ignore-optional
+
+# This is a temporary bug fix for Karma tests
+# See here: https://github.com/travis-ci/travis-ci/issues/9024
+before_script:
+  - "sudo chown root /opt/google/chrome/chrome-sandbox"
+  - "sudo chmod 4755 /opt/google/chrome/chrome-sandbox"
+
+# Main test script
+script:
+  - export WICKED_PDF_PATH=./vendor/bundle/ruby/2.4.0/bin/wkhtmltopdf
+  # Copy over config files needed for setup, and create DB
+  - bin/setup
+  - bundle exec rake webpacker:compile
+  - bundle exec rake assets:precompile
+  # Default test stage: Run all specs, listing the 10 slowest.
+  - bundle exec rspec spec --profile=10
+
+# Run these stages in this order:
+stages:
+  - security
+  - test
+  - hygiene
+
+# Define each stage (test is already defined automatically)
+jobs:
+  include:
+    # Run Brakeman check with warning level 2, except these two checks:
+    - stage: security
+      name: "Brakeman check"
+      script: bundle exec brakeman -w2 --except=Redirect,CrossSiteScripting
+
+    - stage: security
+      name: "Bundle audit"
+      script: bundle exec bundle-audit check --update
+
+    - stage: test
+      name: "Running JS through linter checks"
+      script: yarn run lint
+
+    - stage: test
+      name: "Running JS through Karma tests"
+      script: yarn run test
+
+    - stage: hygiene
+      name: "Check seeds are valid"
+      script:
+        bin/setup
+        bundle exec rake db:drop
+        bundle exec rake db:create
+        bundle exec rake db:schema:load
+        bundle exec rake db:seed

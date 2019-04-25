@@ -1,0 +1,71 @@
+sudo: required
+dist: trusty
+
+services:
+- docker
+
+language: scala
+
+jdk:
+  - openjdk10
+
+scala:
+  - 2.12.6
+
+before_install:
+  - mkdir -p ~/.sbt/
+  - mkdir -p ~/.sbt/1.0/plugins/
+  - mkdir -p ~/.m2/
+  - mkdir -p ~/.ivy2/
+  - mkdir -p ~/.coursier/
+  - mkdir -p ~/.cache/coursier
+  - echo 'addSbtPlugin("io.get-coursier" % "sbt-coursier" % "1.1.0-M7")' > ~/.sbt/1.0/plugins/build.sbt
+  - sudo rm -rf ~/.ivy2/local
+  - sudo find ~/.m2/ ~/.ivy2/ ~/.sbt/ ~/.coursier/ ~/.cache/coursier -name '*izumi*' -prune -exec rm -rf "{}" \;
+
+before_script:
+  - git config --global user.name "$USER"
+  - git config --global user.email "$TRAVIS_BUILD_NUMBER@$TRAVIS_COMMIT"
+  - bash travis.sh versionate
+
+branches:
+  except:
+  - gh-pages
+
+cache:
+  directories:
+  - $HOME/.sbt
+  - $HOME/.ivy2
+  - $HOME/.coursier
+  - $HOME/.cache/coursier
+  - $HOME/.m2
+
+before_cache:
+  - du -h -d 1 $HOME/.ivy2/
+  - du -h -d 2 $HOME/.sbt/
+  - du -h -d 2 $HOME/.m2/
+  - du -h -d 2 $HOME/.coursier/
+  - du -h -d 2 $HOME/.cache/coursier/
+  - sudo find $HOME/.sbt -name "*.lock" -type f -delete
+  - sudo find $HOME/.ivy2/cache -name "ivydata-*.properties" -type f -delete
+  - sudo rm -rf ~/.ivy2/local
+  - sudo find ~/.m2/ ~/.ivy2/ ~/.sbt/ ~/.coursier/ ~/.cache/coursier -name '*izumi*' -prune -exec rm -rf "{}" \;
+
+jobs:
+  include:
+    - stage: "Tests & Coverage"
+      script: bash docker.sh coverage
+    - stage: "SBT Tests"
+      script: bash docker.sh scripted
+    - stage: "Publisn"
+      script:
+      - openssl aes-256-cbc -K $encrypted_8eadf24ba628_key -iv $encrypted_8eadf24ba628_iv -in secrets.tar.enc -out secrets.tar -d
+      - tar xvf secrets.tar
+      - ln -s .secrets/local.sbt local.sbt
+      - bash docker.sh publish
+    - stage: "Site"
+      script:
+      - openssl aes-256-cbc -K $encrypted_8eadf24ba628_key -iv $encrypted_8eadf24ba628_iv -in secrets.tar.enc -out secrets.tar -d
+      - tar xvf secrets.tar
+      - ln -s .secrets/local.sbt local.sbt
+      - bash docker.sh site

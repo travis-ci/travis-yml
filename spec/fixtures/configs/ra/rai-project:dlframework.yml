@@ -1,0 +1,12 @@
+language: go
+dist: xenial
+sudo: required
+services:
+  - docker
+script:
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+  - cd ${TRAVIS_BUILD_DIR}/dockerfiles/base
+  - make build
+  - travis_retry make push
+after_script:
+  - curl -X POST https://hooks.microbadger.com/images/carml/base/Y5oB6PYl8maUalSeWfNjOOUELjw=

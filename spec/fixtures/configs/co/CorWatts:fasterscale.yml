@@ -1,0 +1,39 @@
+language: php
+
+php:
+  - 7.1
+  - 7.2
+
+# faster builds on new travis setup not using sudo
+sudo: false
+
+# cache vendor dirs
+cache:
+  directories:
+    - $HOME/.composer/cache
+
+install:
+  - travis_retry composer self-update && composer --version
+  - travis_retry composer global require "fxp/composer-asset-plugin:~1.4.0"
+  - export PATH="$HOME/.composer/vendor/bin:$PATH"
+  - travis_retry composer install --prefer-dist --no-interaction
+# codeception
+  - travis_retry composer global require "codeception/codeception=*" "codeception/specify=*" "codeception/verify=*"
+# setup application:
+  - |
+    ./init --env=Development
+    sed -i "s/root/travis/" common/config/main-local.php
+    sed -i "s/'cookieValidationKey' => ''/'cookieValidationKey' => 'testkey'//" site/config/main.php
+    sed -i "s/'class' => 'yii\db\Connection',//" site/config/main.php
+    sed -i "s/'dsn' => 'mysql:host=localhost;dbname=yii2advanced',//" site/config/main.php
+    sed -i "s/'username' => 'root',//" site/config/main.php
+    sed -i "s/'password' => '',//" site/config/main.php
+    sed -i "s/'charset' => 'utf8',//" site/config/main.php
+    composer test-scaffold
+
+script:
+  - |
+    composer test-coverage
+    
+after_success:
+  - bash <(curl -s https://codecov.io/bash)

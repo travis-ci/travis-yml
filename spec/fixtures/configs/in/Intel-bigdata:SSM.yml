@@ -1,0 +1,33 @@
+language: java
+sudo: required
+before_install:
+  - wget https://archive.apache.org/dist/maven/maven-3/3.5.0/binaries/apache-maven-3.5.0-bin.zip
+  - unzip -qq apache-maven-3.5.0-bin.zip
+  - export M2_HOME=$PWD/apache-maven-3.5.0
+  - export PATH=$M2_HOME/bin:$PATH
+
+  - wget https://github.com/google/protobuf/releases/download/v2.5.0/protobuf-2.5.0.tar.gz
+  - tar -xzvf protobuf-2.5.0.tar.gz > tmp.log
+  - pushd protobuf-2.5.0 && ./configure --prefix=/usr && make && sudo make install && popd
+
+#  - sh bin/build.sh
+
+matrix:
+  include:
+    - jdk: "openjdk8"
+      env: PROFILE="-Phadoop-2.7"
+    - jdk: "openjdk8"
+      env: PROFILE="-Phadoop-cdh-2.6"
+    - jdk: "openjdk8"
+      env: PROFILE="-Phadoop-3.1"
+
+cache:
+  directories:
+    - $HOME/.m2
+
+install:
+  - mvn install $PROFILE -DskipTests=true -Dmaven.javadoc.skip=true -B -V
+
+script:
+  - mvn test $PROFILE
+group: deprecated-2017Q4

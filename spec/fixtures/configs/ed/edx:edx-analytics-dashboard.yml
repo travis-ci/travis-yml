@@ -1,0 +1,58 @@
+language:
+  - python
+python:
+  - "2.7"
+sudo: required
+services:
+  - docker
+
+branches:
+  only:
+    - master
+
+env:
+  # Make sure to update this string on every Insights or Data API release
+  DATA_API_VERSION: "0.28.0"
+  DOCKER_COMPOSE_VERSION: "1.9.0"
+
+before_install:
+    # Fix intermittent "resource temporarily unavailable" and "write" errors failing the Travis builds.
+    # See: https://github.com/travis-ci/travis-ci/issues/8920
+    - python -c "import fcntl; fcntl.fcntl(1, fcntl.F_SETFL, 0)"
+    # pin to 9.0.3 until tox-battery upgrades
+    - pip install --upgrade pip==9.0.3
+    # Install a newer version of docker-compose
+    # Remove once dockers default is this version: https://docs.travis-ci.com/user/docker/#Using-Docker-Compose
+    - sudo rm /usr/local/bin/docker-compose
+    - curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
+    - chmod +x docker-compose
+    - sudo mv docker-compose /usr/local/bin
+
+    # Start up the relevant services
+    - docker-compose -f .travis/docker-compose-travis.yml up -d
+    - docker exec analytics_api make -C /edx/app/analytics_api/analytics_api test.requirements
+    - docker exec analytics_api make -C /edx/app/analytics_api/analytics_api travis
+
+script:
+    - docker exec insights_testing /edx/app/insights/edx_analytics_dashboard/.travis/run_tests.sh
+
+after_success:
+    - pip install -U codecov
+    - docker exec insights_testing /edx/app/insights/edx_analytics_dashboard/.travis/run_coverage.sh
+    - codecov
+
+after_failure:
+    # Print the list of running containers to rule out a killed container as a cause of failure
+    - docker ps
+
+deploy:
+    - provider: s3
+      access_key_id: $S3_ACCESS_KEY_ID
+      secret_access_key: $S3_SECRET_ACCESS_KEY
+      bucket: $S3_BUCKET
+      skip_cleanup: true
+      local_dir: $TRAVIS_BUILD_DIR/build-metrics
+      upload_dir: edx-analytics-dashboard/master
+      acl: public_read
+      on:
+        branch: master

@@ -1,0 +1,105 @@
+sudo: required
+language: node_js
+node_js:
+- node
+
+addons:
+  chrome: stable
+  firefox: latest
+  apt:
+    packages:
+    - curl
+    - wine
+
+env:
+  global:
+    - NODE_OPTIONS="--max-old-space-size=4096"
+
+cache:
+  apt: true
+  npm: true
+  directories:
+  - node_modules
+
+branches:
+  only:
+  - develop
+  - master
+
+before_install:
+- travis_retry npm install -g npm@latest
+- npm --version
+
+install:
+- travis_retry npm ci
+
+stages:
+- precache
+- lint
+- test
+- build
+- deploy
+
+jobs:
+  include:
+  - stage: precache
+    script: true
+
+  - stage: lint
+    script: travis_retry npm run lint
+
+  - stage: test
+    before_script:
+    - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64
+      > ./cc-test-reporter
+    - chmod +x ./cc-test-reporter
+    - ./cc-test-reporter before-build
+    script:
+    - travis_retry npm run app:test -- --no-progress
+    after_script:
+    - ./cc-test-reporter format-coverage dist/coverage/lcov.info -t lcov
+    - ./cc-test-reporter upload-coverage
+
+  - stage: build
+    name: build app
+    script: travis_retry npm run app:build:prod -- --no-progress --no-source-map
+
+  - stage: build
+    name: build admin
+    script: travis_retry npm run admin:build:prod -- --no-progress --no-source-map
+
+  - stage: build
+    name: build syncer
+    script: travis_retry npm run syncer:build:prod -- --no-progress --no-source-map
+
+  - stage: build
+    name: build functions
+    script: travis_retry npm run functions:build:prod -- --no-progress --no-source-map
+
+  - stage: deploy
+    name: deploy to firebase
+    if: "(branch = develop OR branch = master) AND type != pull_request"
+    before_script: ./scripts/before-deploy-web.sh
+    script: ./scripts/deploy-web.sh
+    after_script: ./scripts/after-deploy-web.sh
+
+  - stage: deploy
+    name: deploy to github
+    if: branch = master AND type != pull_request
+    before_deploy: ./scripts/before-deploy-syncer.sh
+    deploy:
+      provider: releases
+      api_key:
+        secure: OD2enN5UP+U9dpdRRQN2oqDTjjc3+aL4BgAtYBQ+vSV6fY1VvWYuq1GHmrUMQH1cXdbu4ze1ePv7Qitrr5Jj8M99SKJUtl9ybrQbJbXeqciesh63Pc1d8lQg6qpaOLlSZKc1O5CDTOa6pfTqM+UolT7F2o1Rc70sPXCSZxDixq9bK+BZuNVj2uq2msN4v8VhPMseT+61N+z+qcMZM7gOxbr89pGqXzwjLlpP0ZFom/SDsCW1kqvwIx1V3wNeiwcLmk4tN11Lm4+R5SSDecIPwmNzMX99PpUQH/JP211L/W9cnegqi1h5DHUPBfo2N0MxbIgVZAVXBq9j8VP72OJeKm1pnhy0JGHvwNu3HwTeHyBFQ1dcvxkiYgiV4OYhBH2iAmbvqKxhuE0ODQLKGMWnE5IUZ0mvnUv6AIHrxTqAf3tS/LA6if+QLKts9t+bbfyTp2IM1N1g5VPBCVRFxsfXNQVmqO0iK5kn55gb9wM1UMmmA3YZ762QPjJlBFLLnhKGc/YReTYw7A5iWDAjJpCPSRP6OMbaMmjbustxCu84joaDCwxfY3q4O/NhfwIOEN8PH8yO9RUoPYosgQ70Wjh950In9w3jYnPW4p9jZ0Eqhz1GnRjjrZXem0nG71V7cg6JftjJTLrbFgy7oXLnK9yPe6hPda+EcKeEJHM+i8BM6Fg=
+      skip_cleanup: true
+      overwrite: true
+      file_glob: true
+      file:
+      - dist/installers/*.zip
+
+notifications:
+  email:
+    - travis@skateresults.app
+
+  slack:
+    secure: A0f48BJedRiCjWST8Z4bdbvNDPCPNq6epl0zTDmJ7NZ+09iC3wvsgFUNAnFim7slwoy0Rr9EKPLX1RQCDHeSTzaTeztTNST+EEE3zBCv7+HDGV45njkefdNf2X8WhmpyrBQIW87eCpqpUFW9/pVTxOlqI00IGU3BsoHWv704CoRUY+IgXlnfPHlHkVeJM6+X6FlJggLGldLA/lD6f5lAGpDeXSVjmuTNTDKyXMUooAGVDHrNdhT4OK8TeOTcbLGvFmJxZtibN2SdgQuOgZ9N+FFtEVYlBIjXeBchf3eMWMTCLPxigfnjyiSPArsksqE+bl/pUUCgy+BZtv/2/0swCnzWEPn7S6qSUse2bl4ttmw4iSnIghrwyffcKnHgiL5XwuVj0Q8ouvCJprR6+HL3lWi2ynyMdGxm4b32l5NyUC69d1xx8zxrn+zUoAsVPp9klre0UcV2JYvj0CwuvHcoOV6fBZ8gjaq6oSkz7sAZzy/ricqxC2Qc5xh+8u4ZDhc2hhTo2FqjqtK/tYA4BVgNzIif2usGN2Pk3xVBpsqLZbsYboKBd57HZ0eqOJtOOJQGk1oa41UpbAFK4oDGW7N3YqXqNNx32k4e2Vhj9xAtdi/axJwU/Cc6aAhQ8gmCL87a337CbzuS8YlmfAURaB2k3h7QQ2jznBeqtsDy3wkclKs=

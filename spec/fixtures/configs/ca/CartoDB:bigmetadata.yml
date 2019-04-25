@@ -1,0 +1,49 @@
+services:
+- docker
+- postgresql
+before_install:
+- openssl aes-256-cbc -K $encrypted_d303290e7d32_key -iv $encrypted_d303290e7d32_iv
+  -in keys/id_rsa_observatory_extension.key.enc -out keys/id_rsa_observatory_extension.key
+  -d
+- if [ -f ${CACHE_FILE_BIGMETADATA} ]; then gunzip -c ${CACHE_FILE_BIGMETADATA} | docker load; fi
+- if [ ! -d  tmp ]; then mkdir tmp; fi
+- if [ ! -d  tmp/logs ]; then mkdir tmp/logs; fi
+install:
+- "mkdir -p $CACHE_DIR"
+- "if [ ! -f ${CACHE_FILE_BIGMETADATA} ]; then docker pull carto/bigmetadata && docker save carto/bigmetadata | gzip > ${CACHE_FILE_BIGMETADATA}; fi"
+script: make $TEST_SUITE
+addons:
+  postgresql: '9.5'
+  apt:
+    packages:
+    - postgresql-9.5-postgis-2.3
+before_script:
+- psql -U postgres -c "create extension postgis"
+env:
+  global:
+    - CACHE_DIR=$HOME/.cache/docker
+    - CACHE_FILE_BIGMETADATA=$CACHE_DIR/bigmetadata.tar.gz
+  matrix:
+    - TEST_SUITE=travis-etl-metadatatest
+    - TEST_SUITE=travis-etl-unittest
+    - TEST_SUITE=travis-diff-catalog
+cache:
+  directories:
+    - $CACHE_DIR
+deploy:
+  provider: s3
+  access_key_id:
+    secure: i8cVtwug21ahcACdL9dqeFWn00BNZd/jZGxl+0VBdEm0HNoZB6jLgVgzuj/8OickPFBGhOWzltRDRX6nmGcotvKpSxaHncck83BW6LbGx+EJLRy3Lugbdt3SDxYoImSLFx18PQkI2CEoH24OwXbdPj+GBCYrN3P/GdthdWCQfwt4CZ6PbSgJ/x2TpqqWpKeh9zy+Lx54F3ST71HmAJXULv62oyt62nk3TZICI0lPF2796oWNyt3Lh7HEcLg8QUPFRewfjPMkLrbwvYT62tB1FNCJEUWi/xLk+HYqCx7fFzd50yUw8OwgTe3rIOn7n8VHVpUMscy8ilKQ4GZmGrd7S23Bop1Yhrj6Fb4msArB3AFqSIsdOTiGCfvFbAMeTWrpSyRKQVtijJMAKquEVoi7BLpw086qypdr6YJ8JoNQG52gYMtfJqiAMqdt4q0SyuZoakSTM3iiTgKunuysA4cn7BSzco+vcLtA0STgqvhRjWSL92+C+BuW7/B0KVppFVqGp+7bGG0unLqjVD4w304pTphfkbcdr+/XBANRToJaDp/zuCeeu56gCGc4H1UabEaDGwSmzkqPM6HlJvNkCT8X1Xp9J8pdRhmDmjc735LyhjFon8YEMZZy3jPX1+Rp8Bufy7lJD6dQyGXEUg2ybdVhU2qyRc/0nQId5CinV5eM6nA=
+  secret_access_key:
+    secure: ghc+vuJVbF3YZ6gECGFsLuvRjw5up8UlDP/USv4WnxJmREulPI9+jljY20DW39gv9sjMSoxSY4SVCjZqdcTce7Y58YOmyHBONBGsMTH3fNdZXCs5MZ0Y42dBVyqH2IPDBEHkrmmatzKeTPVYu0wc3P0k5Cq4hWVFGVKxQIjnutnFBfX2Q2wPinC10yd7i6Rd0fz+uWwotK3yRpQXmPz9794qVWeyaYX72LVtCTjIV+i5dzemfjxU83/XIPLVCIPsvO7DKL5WtOv20i/G0iYPqfU1L43BvbVX988BOIsXMTcaEfIEesK6k0J7pIi6+7C2EnBsUueIdHhQYD2T0Vy/+4fIu3zj43o0ISaxMvIkpcNTb+XpSHkRSrzo1v4D+vap3p9Tj/x1zm3Eoz0Do7k6bTr0KpTWPZafAAin9HFgf0vClGyWqGnfUX6mgWcp6IDVEsJa+nKdB37kCEC/+5UyOoBVG6VCBnxJMfBsAlKdV4R9PxpPmo8Z+0aIAq1jl6i9f+SDo5xRYIqt6h1g4TyzooLn8N8LBCgvB//sXSzlQ56SOP3pKiEicBgHSUa42yKILw8l5BbxuYEUFl8gmIpyvlxFqoWDBGRKzLz+xsCpHUg2ho5yIBTQizdH3fM5J1K5ykAiOAQOOclF4GC2b0SV6uNK2zuvbU1s3RmT6oEDDU4=
+  bucket: cartodb-observatory-data
+  local-dir: catalog/build/html/
+  upload-dir: catalogs/$TRAVIS_BRANCH
+  acl: public_read
+  skip_cleanup: true
+  on:
+    repo: CartoDB/bigmetadata
+    all_branches: true
+    condition: "$TEST_SUITE = travis-diff-catalog"
+after_failure:
+  - df -h

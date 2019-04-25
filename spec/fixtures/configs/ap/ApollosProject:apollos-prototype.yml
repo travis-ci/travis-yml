@@ -1,0 +1,55 @@
+language: node_js
+node_js: '8.11.2'
+cache:
+  yarn: true
+  directories:
+    - node_modules
+before_install:
+    # Fix intermittent "resource temporarily unavailable" and "write" errors failing the Travis builds.
+    # See: https://github.com/travis-ci/travis-ci/issues/8920
+  - python -c "import fcntl; fcntl.fcntl(1, fcntl.F_SETFL, 0)"
+  - curl -o- -L https://yarnpkg.com/install.sh | bash -s -- --version 1.9.4
+  - export PATH="$HOME/.yarn/bin:$PATH"
+install:
+  - yarn
+stages:
+  - name: Test
+    if: (type IN (pull_request)) OR (type IN (push) AND branch = master)
+  - name: Deploy Api
+    if: (type IN (push) AND branch = master)
+  - name: Deploy Docs
+    if: (type IN (push) AND branch = master)
+jobs:
+  include:
+    - stage: Test
+      script:
+        - yarn lint
+    - script:
+        - travis_wait yarn ci-test
+        - travis_wait yarn codecov
+    - stage: Deploy Api
+      script: skip
+      before_deploy: npm install -g now
+      deploy:
+        - provider: script
+          script: echo "Deploying via Github hooks"
+          skip_cleanup: true
+          master: true
+    - stage: Deploy Docs
+      script:
+        - yarn generate-docs
+        - MESSAGE=$(git log --format=%B -n 1 $TRAVIS_COMMIT)
+        - git clone git://${GH_DOCS_REPO}
+        # copy over ui-kit docs
+        - cp -fr packages/apollos-ui-kit/docs/generated/* docs/docs/ui-kit
+        # update sidebar
+        - cat docs/website/sidebars.json | packages/apollos-ui-kit/docs/updateSidebar.sh
+        - cp -f packages/apollos-ui-kit/docs/generated/sidebars.json docs/website/sidebars.json
+        # push new docs
+        - cd docs
+        - git remote
+        - git config user.email ${GH_EMAIL}
+        - git config user.name ${GH_USER}
+          git add .
+        - git commit -am ${MESSAGE}
+        - git push "https://${GH_TOKEN}@${GH_DOCS_REPO}" master > /dev/null 2>&1

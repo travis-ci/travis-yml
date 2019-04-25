@@ -1,0 +1,22 @@
+language: python
+sudo: required
+
+services:
+  - docker
+
+before_install:
+  - cd certbot/
+  - git fetch origin
+  - git pull origin master
+  - cd ..
+  - docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
+  - docker run --rm --privileged multiarch/qemu-user-static:register
+  - cp ./Dockerfile certbot/Dockerfile
+
+install:
+  - docker build --rm --no-cache -t bcecchinato/certbot-rpi certbot/
+  - docker push bcecchinato/certbot-rpi
+  - docker tag bcecchinato/certbot-rpi bcecchinato/letsencrypt-rpi
+  - docker push bcecchinato/letsencrypt-rpi
+
+script: true

@@ -1,0 +1,20 @@
+language: node_js
+node_js:
+  - "9"
+
+after_success:
+  - chmod +x ./scripts/*.sh
+  - chmod +x ./scripts/for-travis/*.sh
+  - ./scripts/for-travis/build.sh
+
+
+deploy:
+  provider: script
+  script: ./scripts/deploy-to-ghpages.sh
+  skip_cleanup: true
+  branch: master
+
+env:
+ global:
+ - GH_REF: github.com/jscraftcamp/website.git
+ - secure: yEjUawmnv+iPd0wQmYJpRt3AMIIABgPSOLpxP6l9sACbPIu+VLCsgv6atXTodiuhBwKM5tMwYx17WjDHhRqxVb1c97zl9UWpV0OxiRSSbgKaeuyPxpWhidJPp/kHIsagcgumMBbA9yD3j9VXtcC8nVf25EixoIcv89HzAtLw7sV2S4Zc3Z2WqNRYvGyUao2cZVxnqF8/Qawe0Ttck6DVE8Ao9bggK9/5afGD/EDm6uv7XGUGi0u1UVdD4E3vrkOJf78Tmqj4OG6WtUWZAiMDTb6OOIaCxVLUJvUgsPustYbBmjJmszwIdzO7L9teYOf/NWDuFek4g/9fT1f8quR8Z3/4T1pukgxHuN7UN7MwWWR2M6p38h8t3uzfSL/8NFq1tPlTipJQXM58fiWXlxYtBRJgZ4glaD1FftcsEUcM05EB2kMQm4sBTMenQqyidybcmHwtjFfvezlVYKbkw0aW/igtrGcz0MQKeQVkZdUPGm8I8R5qnBuHTDNZUehX7BTYVk4NSVkyTK7Kz3gy248z+I1K49WFObBf2DOV2nymzpMTiFlpGpurHM6tGgamSZA3Mfu0GMm4++QzIyz+QggxrPhwxuFVS3Qe6J724cBoumjsLN+K9YfKWbWgELnzM8G4D7cnoM0lbv7ldZw/X+oNvrd5ENFKs0qJcShHPjuVdYA=

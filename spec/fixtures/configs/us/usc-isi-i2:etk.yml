@@ -1,0 +1,28 @@
+sudo: required
+language: python
+python:
+- 3.6.5
+services:
+  - docker
+install:
+  - sudo apt-get update
+  # We do this conditionally because it saves us some downloading if the
+  # version is the same.
+  - pip install -r requirements.txt
+script:
+  - python -m spacy download en_core_web_sm
+  - python -W ignore -m unittest discover
+notifications:
+  slack:
+    secure: O7Cj7NvZHMu7vRkWwmnyAesXvIGfG7NBkgJWdN+y69HSHJwn1szoZQjiNUrVBCePCzEHsmSa40aT34/dV18Kj4cpqWnaLK2iof/YwxJk2YgsKaUnS2FcmTfzchQ+TbtVmnI2DFi47VnVR48u+6nKM2xqoczHICgl1MY2HPm16ldJHyuj2TTt/syju2t4cjq4sSgwPIEnG3te+435+Y0TNWuO+7NsLU2wuC2e2ExCNeqoUzq9qDOtX99/E269OKrLz5pJElQabsJZts68g3trwLt5qMqQd7YNXdUQoqNzznueXe6O39nMSiS8JXWMj2jjyC77Oho1KY0GhvMtEdacwM4x7hLzLMJ2pXR5QYBaDAF/vI7tCG83R1Y9YRhAbXxGWFzC6PANG2Q6SAObTnr9ezrezXP3CvWnsSFMsHsim4Xevf3g7VIe4jo/UE/50zsI/l9+DAITMYE29p4kWE4KFRazTk7HJcYneeRh7MZ5VTQR4sDhPJJwu+ftmEBVJu8nBtvElYBN0r23helSmvPM22EQ3rKMbNFJTd0gETrVTyqc4j9iar+kFVnbClpB1SmE3eGxfeNbIuHk+7345aZ0Ywqvxs0dqjJgjE+4Laa6vUNC8jjgtyZshMGYs7LoTzD5HMcZ0MrVspimK1UjODQg70daQZsph1NozQ+TawnqStE=
+
+    #branches:
+    #  except:
+    #  - kg_graph
+
+deploy:
+- provider: script
+  script: bash docker_deploy.sh
+  on:
+    tags: true
+    branch: development 

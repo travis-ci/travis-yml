@@ -1,0 +1,26 @@
+sudo: required
+services:
+  - docker
+  - postgresql
+language: java
+jdk: oraclejdk8
+before_script:
+  - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+  - chmod +x ./cc-test-reporter
+  - ./cc-test-reporter before-build
+  - psql -c 'create database events;' -U postgres
+script:
+  - "./gradlew clean build jacocoTestReport jacocoFix -PbuildNumber=$TRAVIS_BUILD_NUMBER --scan"
+  - docker build --no-cache --pull -t wisvch/events:$TRAVIS_BUILD_NUMBER .
+after_success:
+  - if [ "${TRAVIS_PULL_REQUEST_BRANCH:-$TRAVIS_BRANCH}" == "master" ]; then
+    docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
+    docker push wisvch/events:$TRAVIS_BUILD_NUMBER;
+    fi
+after_script:
+  - cd src/main/java/
+  - ../../../cc-test-reporter format-coverage -d -t jacoco
+  - ../../../cc-test-reporter upload-coverage -d
+notifications:
+  slack: false
+  email: false

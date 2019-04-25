@@ -1,0 +1,21 @@
+sudo: false
+language: node_js
+node_js:
+  - '4'
+  - '8'
+cache:
+  directories:
+    - node_modules
+notifications:
+  email: false
+before_script:
+  - npm prune
+script:
+  - npm run lint
+  - npm test
+after_success:
+  - npm run coveralls
+  - npm run semantic-release
+branches:
+  except:
+    - /^v\d+\.\d+\.\d+$/

@@ -1,0 +1,21 @@
+language: node_js
+dist: trusty
+sudo: required
+node_js:
+- 9
+branches:
+  only:
+  - master
+  - develop
+notifications:
+  email: false
+  slack:
+    secure: RNGK3ewt4LIkSoQU/scf7A/YjgXDaKbP9p1XFrHea+HH1S8N73xVlvl/qQFTvfyTGtLvEx9RU9y19AmAkcDRx+iB15LIJyXWbb9JDqWqoQAhykB0ZHcvHv70P/rMJ8BcxIYGc/YumSf+ia7F6L5+wgHCEBSdWI9YrYkNceKJ7+zBx4lDsLNRMZSOyEZsu+sQYwV0CMNYYMOCjiDFxfGzbttZMsqgnRNzHay9cIyKHOb7SjRi2+8sDdRSxy2sR97VkJrgmxG9S1qPV6hydGwjWamUiG/Y1hxj17ppmKKc+HIld7EE5lcGqSuxr+9tsDggyUk6msX5MDTKGAN1jwaSYsr9VjdP+Rg7WoTrIWSSqpfoy3MxmKxhULXFckbh7U/x87ERSGIYtLbTT5SdjEnbNbAEzCTqnD3Xy7vQzukDcwU8JyHxEi9r/nuyyLSn2Mh6dSRhKOzH47D7vsY6gnoTGSVkJKi8f58SgrhqogK7yTbsBQsmW+te69rSXPG77UmcignQbIdFkXWKFlN2b7aJj0IMJuuDjYhCW7Qafw3SObMJ9bN5tXFeYUEf9LNcYNDT619YpzHFUeka54bE1vUerWioVAKon96x3oXbGUtkXmIx9u+lUpffAhUpxG1PeVmtsjZ0n87dxi0alnIMt65CumO+/aAkZlWHFXdBDwSHh38=
+cache:
+  yarn: true
+  directories:
+    - node_modules
+install:
+- yarn
+before_install: ./.travis/before_install.sh
+after_success: ./.travis/after_success.sh

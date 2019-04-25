@@ -1,0 +1,45 @@
+sudo: required
+
+language: php
+
+php:
+    - 5.6
+    - 7.1
+    - 7.2
+    - 7.3
+    - nightly
+
+env:
+    global:
+        - secure: "crga7zT9MxrZW9xdPGN6EQk6PkYBgUrYC8Ufvfai/GLns4C5q+NMR19BBvOWapjR52HACfGzq/nweMLaxOJKdtMbqqUUClOSvR5yqzypDItBK1yq40eBHZBlxMG2PtY+DrP9Do83mZUKtctyark9ad2du1haZtaxY4cjgCBzHSha3lcbCYtJ7AuwXTSSt8isyqShLVXPW5Cvbi7RU6/LEOQRXg/+1Nv+gjx7G5qSN+Jfhw78xw789v1JTOrTlub8rmiyQAodrVC0LTblgI8R77ICIjef6hheTuFiz0JsAdUrilau90noyooSoiwHdoNxwCZ20ASPmAAYmW2rdWUJspWUIrzrtgkJAaGxAd3ZXydMpx0UD+x7n/4Rw3aAQy+NpJ0+bnnpMMwZOOYiW+LFspd8ej9OVnmDE4LjAJ5/IJPPOR4CSc9MLTz2yklg7fvS2pOYRHY5Rnp0BTKotm3cex8CtkYHxatrrgahMdNZrLRW826zqn6ZlHTt0ZXFujcLAxToLnj+hkUGHsYZKDgfjIO89W3eKBCl5w/RtidlCu5nPMjEH4DWqNUYbkbcqxNVoEAeaNySjDWgwkDNpJtIkM1W+6Iu57a1FMgnJ38zzxwwCLC5LNoQIovxL84tSRwS46G8Ya5xJpARF3jPhaFLHw9bfgwbA7doyesiDEpL6NI="
+        - GH_REPO: github.com/locomotivemtl/charcoal-admin.git
+        - APPLICATION_ENV: testing
+
+matrix:
+    allow_failures:
+        - php: nightly
+
+cache:
+    directories:
+        - $HOME/.composer/cache
+
+before_install:
+    - composer self-update --quiet
+
+install:
+    - composer install --no-interaction --no-suggest
+    - mkdir -p build/logs/
+
+script:
+    - composer phplint
+    - composer phpcs
+    - composer phpunit -- --coverage-clover "build/logs/clover.xml"
+
+after_success:
+    - php vendor/bin/php-coveralls -v
+ #   - bash build/travis/phpdoc_ghpages.sh
+ #   - bash build/travis/apigen_ghpages.sh
+
+notifications:
+    slack: locomotivemtl:d9h8ZWwTZ6b3WUsSP9s26nb1
+    email: charcoal@locomotive.ca

@@ -1,0 +1,37 @@
+sudo: required
+group: deprecated-2017Q2  # https://blog.travis-ci.com/2017-06-21-trusty-updates-2017-Q2-launch
+language: python
+
+env:
+  global:
+  - COMMIT=${TRAVIS_COMMIT::8}
+
+services:
+- docker
+
+before_install:
+- pip install docker-compose
+- docker --version
+
+script:
+- make travis_create_opac_mongodb_container
+- make travis_compose_build
+- make travis_compose_up
+- make travis_compose_make_test
+- make travis_run_audit
+
+after_success:
+- if [ -n "$TRAVIS_TAG" ]; then
+  docker login -u="$DOCKER_USER" -p="$DOCKER_PASS";
+  make release_docker_build;
+  make release_docker_push;
+  fi
+# - if [ "$TRAVIS_BRANCH" == "master" ] && [ "$TRAVIS_EVENT_TYPE" == "push" ]; then
+#   docker login -u="$DOCKER_USER" -p="$DOCKER_PASS";
+#   make release_docker_build;
+#   make release_docker_tag_latest;
+#   make release_docker_push;
+#   fi
+
+notifications:
+  slack: scielo:6YcYDMh1STDOQT8H7umVuD0R

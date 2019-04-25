@@ -1,0 +1,24 @@
+sudo: required
+before_install:
+  - sudo /bin/bash --login -c 'curl -sSL https://rvm.io/mpapis.asc | sudo gpg2 --import -'
+  - sudo /bin/bash --login -c 'curl -sSL https://rvm.io/pkuczynski.asc | sudo gpg2 --import -'
+  - sudo /bin/bash --login -c 'echo -e "trust\n5\ny\n" | gpg2 --no-tty --command-fd 0 --edit-key 409B6B1796C275462A1703113804BB82D39DC0E3'
+  - sudo /bin/bash --login -c 'echo -e "trust\n5\ny\n" | gpg2 --no-tty --command-fd 0 --edit-key 7D2BAF1CF37B13E2069D6956105BD0E739499BDB'
+  - curl -sSL https://get.rvm.io | sudo bash -s latest
+  - rvm reload
+  - rvm --version
+  - rvm use ruby-$(cat .ruby-version)@$(cat .ruby-gemset) --create
+  - rvm list gemsets
+  - gem install bundler
+  - sudo apt-get install -y postgresql-server-dev-all
+  - sudo apt-get install -y libpcap-dev
+  - sudo apt-get install -y libmagickwand-dev
+  - sudo apt-get install -y imagemagick
+  - sudo apt-get install -y tesseract-ocr
+  - sudo apt-get install -y libsndfile1
+  - sudo apt-get install -y libsndfile1-dev
+language: ruby
+rvm: # Rely upon .ruby-version
+dist: xenial
+after_success:
+  - rubocop

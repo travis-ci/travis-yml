@@ -1,0 +1,16 @@
+language: python
+python:
+  - "3.5"
+  - "3.6"
+install:
+  - pip install -U pip
+before_install:
+  - chmod +x test/test_*.py
+before_script:
+  - pip install -r requirements.txt
+  - pip install -e .
+script:
+  - py.test test/test_*.py --doctest-modules -v --cov test --cov-report term-missing
+after_success:
+  - coveralls
+  - curl -X POST http://api.sfkva.com:5000

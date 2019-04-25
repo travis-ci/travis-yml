@@ -1,0 +1,35 @@
+language: python
+python:
+  - "3.6"
+sudo: false
+git:
+  depth: false
+
+branches:
+  except:
+  - gh-pages
+install:
+  - pip install -r scripts/requirements.txt
+before_script:
+  - chmod +x ./scripts/*.py
+  - chmod +x ./scripts/deploy/*.sh
+script:
+  - python ./scripts/check_data.py
+  - python ./scripts/build_data.py
+deploy:
+- provider: script
+  script: scripts/deploy/deploy_staging.sh
+  skip_cleanup: true
+  on:
+    branch: develop
+- provider: script
+  script: scripts/deploy/deploy.sh
+  skip_cleanup: true
+  on:
+    branch: master
+- provider: script
+  script: scripts/deploy/deploy_testing.sh
+  skip_cleanup: true
+  on:
+    all_branches: true
+

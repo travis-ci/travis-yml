@@ -1,0 +1,45 @@
+language: node_js
+node_js:
+- '8'
+env:
+  global:
+  - CXX=g++-4.8
+  - DEPLOY_URL=$(if test $TRAVIS_BRANCH = production; then echo "https://pwa.localnerve.net";else echo "https://pwa-stage.localnerve.net"; fi)
+  - secure: S0RRqaPIyM4EpH8Hv9L7CglzJcghECuHqm/dWfnCHVO91FG0g3/wed9/QHonqNOsGuRxPAtXHtM7+Gmd8FjCDPuy+Gq/RtiVWDtUExDltRZMSDFcWMw+rhQmli+T+aPy37vpWu1cSg4Lur9vtuqgEA0HT5PJShd8dP6n/odN4Im5MRnK9tJaK5BUBLaRN01wzUmM4+sP6+joFZpgN2jZBq1JRLM635I6Uur/v7V5rJnp98W2etzYPBsFO4H2JHTtzal7ErSLo1FkKFg4I93OIJcCVsXIZQ2W/aDFjSjxGDH9CCJKSH1e1wLXUfWASyU4wYBBKsOj/KXGIWbsImPKgcvTOAvDjrz4QaR2EDoQNT7QcjzLnwFo9iEOG/0U4J/JQOBTfHe1sIHFewtpEsLgU1d64WKGfqd5DEOJA3WnhSk4jE8rnowuMO7+2wjy1fcahFecB804r+dEYCNF9H1UtKhFBzvXUwHkzeE+kYeh+jmGFNyCIChyzucs8FM8RBR+mFJv56L1L7EvUDa0VwE1uIPuxjeaZ+CcIK1mezciSEZX96r/8ht3RE3porQaVeXOkHSavQ4PP5RYDXGIB3XtksbNgLP12E1eoYWT2vsHoeQwpN8UYm25SI7inkwXxwT0hXEIKv/jh+3YszFx9VzYO7wtatD/d0hI2AsQpkQfnzI=
+addons:
+  apt:
+    sources:
+    - ubuntu-toolchain-r-test
+    packages:
+    - g++-4.8
+before_install:
+- echo DEPLOY_URL=$DEPLOY_URL
+script:
+- npm run test:cover
+- npm run build:server
+after_success:
+- cat reports/coverage/lcov.info | ./node_modules/.bin/coveralls
+before_deploy:
+- rm -rf node_modules/
+deploy:
+  provider: heroku
+  api_key:
+    secure: oyi7w0/E7906PXl6BcRn8ufHys9phr1jperPFFDeSUUSJH/MkDK3CIKGGyfmP0vojUN5lwOwglJ/KcZarvMBrlPSdL/IcXAey9+y4digINyFQ/1fboS7+P4xV5MH2CP+sdqunEvEGV4g6Arcp3dZJs4tBar/KLwHr40YexWupqvxw4heDBI3xlx1uTK9mC5p2kokPxohZLSd2LXYJDJXYzwEvHdTp4b0E5yWeETXqPAt6OP/3Oc2Wb1+0U73FXmFN+hNdJMfazf0lTVwRLJ2Oxw18bcZhXCWM4CVrmYMyNFlgtshoVj+OHPzTcOIvTSAwFhkvyygMuyoIfcMIeVzW3Usato/v1htkn3GCooyyc+AV8H5aPP05PkJmTKmOvQesb/FhirXVzP2j7SeWVLq6A2zP4a9kQWyiUxySsIjX6OYcqFO4lZSxeQLCDM0VUZlR8fEQ2FZBTCXmQz39gCwlqD3cAq/lTI7L5d5aO6xXC/8faXXZw+Y5ZdR3HyPQokC0q+RO0pXyvYr05+ypMjZ3Ahvz99FFhYy9T9vaZ4RJEsZyT2P2qKhBKqvZm1J/XqUqa/G2FWLoiPhP9t5WJLeGQTRxildW0h+Ypa3cfUTepFF4BVgNd2zt5L2Q3znzkZkQS50QcKMHFtWK636Zdfy6zOD7t/yvOB1D+x/YCxb1dM=
+  app:
+    test: pwa-stage
+    stage: pwa-stage
+    master: pwa-stage
+    production: pwa
+  skip_cleanup: true
+  on:
+    branch:
+    - test
+    - stage
+    - master
+    - production
+    repo: localnerve/react-pwa-reference
+    node: 8
+after_deploy:
+- npm install
+- curl -i $DEPLOY_URL
+- npm run perfbudget

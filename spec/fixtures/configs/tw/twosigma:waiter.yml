@@ -1,0 +1,78 @@
+dist: xenial
+language: java
+jdk: openjdk8
+
+addons:
+  apt:
+    packages:
+    - nginx
+  artifacts: true
+
+branches:
+  only:
+    - master
+    - /^build\/.*$/
+
+cache:
+  directories:
+    - $HOME/.lein
+    - $HOME/.local
+    - $HOME/.m2
+
+before_install:
+  - unset _JAVA_OPTIONS  # Avoid unwanted _JAVA_OPTIONS set by Travis CI
+  - echo "Sudo-enabled build? ${TRAVIS_SUDO}"
+
+install:
+  - ./waiter/bin/ci/install-lein
+
+matrix:
+  include:
+    - name: 'Kitchen tests'
+      language: python
+      python: "3.6"
+      before_script: cd containers/test-apps && ./bin/ci/setup.sh
+      script: ./bin/ci/run.sh
+
+    - name: 'Token syncer tests'
+      before_script: cd token-syncer
+      script: ./bin/ci/run-all-tests.sh
+
+    - name: 'Waiter unit tests'
+      before_script: cd waiter
+      script: ./bin/ci/run-unit-tests.sh
+
+    - name: 'Waiter integration tests: composite-fast'
+      services: docker
+      before_script: cd waiter
+      script: ./bin/ci/run-integration-tests.sh composite parallel-test integration-fast
+
+    - name: 'Waiter integration tests: composite-slow'
+      services: docker
+      before_script: cd waiter
+      script: ./bin/ci/run-integration-tests.sh composite parallel-test integration-slow
+
+    - name: 'Waiter integration tests: kubernetes-heavy'
+      services: docker
+      before_script: cd waiter
+      script: ./bin/ci/run-integration-tests.sh k8s test integration-heavy
+
+    - name: 'Waiter integration tests: kubernetes-lite'
+      services: docker
+      before_script: cd waiter
+      script: ./bin/ci/run-integration-tests.sh k8s parallel-test integration-lite
+
+    - name: 'Waiter integration tests: marathon-fast'
+      services: docker
+      before_script: cd waiter
+      script: ./bin/ci/run-integration-tests.sh marathon parallel-test integration-fast
+
+    - name: 'Waiter integration tests: marathon-slow'
+      services: docker
+      before_script: cd waiter
+      script: ./bin/ci/run-integration-tests.sh marathon parallel-test integration-slow
+
+    - name: 'Waiter CLI integration tests'
+      services: docker
+      before_script: cd cli && ./bin/ci/setup.sh
+      script: ./bin/ci/run-integration-tests.sh

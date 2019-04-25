@@ -1,0 +1,80 @@
+# -*- coding: utf-8 -*-
+#
+# This file is part of Invenio.
+# Copyright (C) 2013, 2014, 2015 CERN.
+#
+# Invenio is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License as
+# published by the Free Software Foundation; either version 2 of the
+# License, or (at your option) any later version.
+#
+# Invenio is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Invenio; if not, write to the Free Software Foundation, Inc.,
+# 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
+
+dist: trusty
+
+notifications:
+  email: false
+
+services:
+  - postgresql
+  - redis
+  - rabbitmq
+
+addons:
+  postgresql: "9.6"
+
+language: python
+
+cache:
+  - pip
+
+env:
+  - REQUIREMENTS=release SQLALCHEMY_DATABASE_URI=postgresql+psycopg2://localhost:5432/b2sharedb REXTRAS=all ES_VERSION=2.3.3
+  - REQUIREMENTS=current REXTRAS=all ES_VERSION=2.3.3
+  - REQUIREMENTS=devel REXTRAS=all ES_VERSION=2.3.3
+matrix:
+  fast_finish: true
+  allow_failures:
+    - env: REQUIREMENTS=current REXTRAS=all ES_VERSION=2.3.3
+    - env: REQUIREMENTS=devel REXTRAS=all ES_VERSION=2.3.3
+
+python:
+  # - "3.4" # b2handle does not support it
+  - "3.5"
+
+sudo: false
+
+before_install:
+  # Install elasticsearch
+  - mkdir /tmp/elasticsearch
+  - wget -O - https://download.elasticsearch.org/elasticsearch/release/org/elasticsearch/distribution/tar/elasticsearch/${ES_VERSION}/elasticsearch-${ES_VERSION}.tar.gz | tar xz --directory=/tmp/elasticsearch --strip-components=1
+  # install the mapper-attachments plugin
+  - yes | /tmp/elasticsearch/bin/plugin install --verbose mapper-attachments
+  # Start elasticsearch
+  - /tmp/elasticsearch/bin/elasticsearch --daemonize --path.data /tmp
+  - "travis_retry pip install --upgrade pip setuptools py"
+  - "travis_retry pip install twine wheel coveralls requirements-builder"
+  - "requirements-builder --level=pypi setup.py > .travis-current-requirements.txt"
+  - "cp requirements.txt .travis-release-requirements.txt"
+  - "requirements-builder --level=dev --req requirements-devel.txt setup.py > .travis-devel-requirements.txt"
+
+install:
+  - "travis_retry pip install -r .travis-${REQUIREMENTS}-requirements.txt"
+  - "travis_retry pip install -e .[${REXTRAS}]"
+  # FIXME demo install should be included in 'all'
+  - "travis_retry cd demo"
+  - "travis_retry pip install -e ."
+  - "travis_retry cd $TRAVIS_BUILD_DIR"
+
+script:
+  - "./run-tests.sh"
+
+after_success:
+  - coveralls

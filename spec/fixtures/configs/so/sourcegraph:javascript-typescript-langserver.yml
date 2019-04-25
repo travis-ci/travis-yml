@@ -1,0 +1,46 @@
+language: node_js
+
+env:
+  global:
+    - FORCE_COLOR=1
+
+node_js:
+  - '8'
+  - '6'
+
+cache:
+  directories:
+    - $HOME/.npm
+
+before_install:
+  - npm install -g npm@6.0.0
+
+install:
+  - npm ci
+
+script:
+  - npm run lint
+  - npm run build
+  - npm run cover
+
+after_success:
+  - nyc report --reporter=json
+  - bash <(curl -s https://codecov.io/bash)
+
+jobs:
+  include:
+    - stage: release
+      node_js: '8'
+      script:
+        - npm run build
+        - npm run semantic-release
+      after_success: skip
+
+stages:
+  - test
+  - name: release
+    if: branch = master AND type = push AND fork = false
+
+branches:
+  except:
+    - /^v\d+\.\d+\.\d+$/

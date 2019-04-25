@@ -1,0 +1,31 @@
+language: node_js
+node_js:
+  - "8.4.0"
+
+cache:
+  directories:
+    - node_modules
+
+stages:
+  - name: deploy
+    if: branch = master AND NOT type = pull_request
+
+before_install:
+  # This workaround is required to avoid libstdc++ errors while running "extended" hugo with SASS support.
+  - wget -q -O libstdc++6 http://security.ubuntu.com/ubuntu/pool/main/g/gcc-5/libstdc++6_5.4.0-6ubuntu1~16.04.10_amd64.deb
+  - sudo dpkg --force-all -i libstdc++6
+install:
+  - wget -q -O hugo.deb https://github.com/gohugoio/hugo/releases/download/v0.54.0/hugo_extended_0.54.0_Linux-64bit.deb
+  - sudo dpkg -i hugo.deb
+
+jobs:
+  include:
+    - stage: deploy
+      script:
+        - echo "Deploying";
+        - git config --global user.email "login+travis@elo7.com"
+        - git config --global user.name "Travis ci"
+        - git remote rm origin
+        - git remote add origin "https://$DEPLOY_USER:$DEPLOY_TOKEN@github.com/$TRAVIS_REPO_SLUG.git"
+        - npm run deploy
+        - echo "Deployed";

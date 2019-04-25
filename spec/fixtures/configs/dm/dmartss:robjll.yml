@@ -1,0 +1,31 @@
+sudo: required
+dist: trusty
+
+addons:
+  apt:
+    sources: google-chrome
+    packages: google-chrome-stable
+
+
+language: node_js
+node_js:
+  - 8
+
+cache:
+  yarn: true
+  directories:
+    - node_modules
+
+install: yarn --production
+
+script:
+  - yarn add now --no-save
+  - node --version
+  - yarn test
+
+deploy:
+  provider: script
+  script: yarn deploy
+  skip_cleanup: true
+  on:
+    branch: master

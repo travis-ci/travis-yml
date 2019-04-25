@@ -1,0 +1,79 @@
+language: c
+os:
+    - linux
+
+env:
+    - ENV="-DBUILD_TYPE=test -DUSE_SECP256K1_LIB=ON" TEST=yes
+    - ENV="-DBUILD_TYPE=test -DUSE_SECP256K1_LIB=OFF" TEST=yes
+    - ENV="-DBUILD_TYPE=bootloader -DUSE_SECP256K1_LIB=OFF" TEST=no
+    - ENV="-DBUILD_TYPE=firmware -DUSE_SECP256K1_LIB=ON" TEST=no
+
+compiler:
+    - clang
+    - gcc
+
+matrix:
+    exclude:
+        # MCU build uses its own ARM compiler, so run with just one travis 'compiler'
+        - compiler: clang
+          env: ENV="-DBUILD_TYPE=firmware -DUSE_SECP256K1_LIB=ON" TEST=no
+        - compiler: clang
+          env: ENV="-DBUILD_TYPE=firmware -DUSE_SECP256K1_LIB=OFF" TEST=no
+        - compiler: clang
+          env: ENV="-DBUILD_TYPE=bootloader -DUSE_SECP256K1_LIB=OFF" TEST=no
+    fast_finish:
+        - true
+
+addons:
+  apt_packages:
+    - lib32bz2-1.0
+    - lib32ncurses5
+    - lib32z1
+    - valgrind
+
+install:
+    - pip install --user urllib3[secure]
+    - pip install --user cpp-coveralls
+    - cd contrib
+    - tar xfv astyle_3.0_linux.tar.gz;
+          cd astyle/build/gcc && make;
+          export PATH=$PATH:$PWD/bin/;
+          cd ../../..;
+    - if [ "$TEST" = "no" ]; then
+          wget https://developer.arm.com/-/media/Files/downloads/gnu-rm/7-2018q2/gcc-arm-none-eabi-7-2018-q2-update-linux.tar.bz2;
+          tar -xf gcc-arm-none-eabi-7-2018-q2-update-linux.tar.bz2;
+          export PATH=$PATH:$PWD/gcc-arm-none-eabi-7-2018-q2-update/bin;
+      fi;
+    - if [ "$TEST" = "yes" ]; then
+          sudo apt-get update;
+          sudo apt-get install libudev-dev;
+      fi;
+
+before_script:
+    - cd $TRAVIS_BUILD_DIR
+    - if astyle --style=kr --indent-switches --indent-labels --pad-oper --pad-header --align-pointer=name --add-braces --convert-tabs --max-code-length=90 --break-after-logical --suffix=none *.c *.h --recursive --exclude=contrib --exclude=src/yajl --exclude=src/secp256k1 --exclude=tests/windows/hidapi --exclude=src/drivers --dry-run -Q | grep "Formatted" ; then exit 1 ; fi;
+    - gpg --import contrib/contributors_gpg_keys/*
+    - if ! git show c6ce843547c5212e33665dd4ca7c951a43067044; then exit 1 ; fi;
+    - if git log --pretty="format:%H   %aN   %s   %G?" f68b3d23d4bb150f52e7fa0fa853a8887a8f7aff..HEAD^1 | grep -v "${t} G$" | grep -v "${t} U$"; then exit 1 ; fi;
+
+script:
+    - mkdir build && cd build
+    - cmake .. $ENV -DCONTINUOUS_INTEGRATION=1 && make
+    - if [ "$TEST" = "yes" ]; then
+          make test;
+      fi;
+    - if [ "$TEST" = "yes" ] && [ "${CC}" = "gcc" ]; then
+          valgrind --leak-check=full --num-callers=40 --suppressions=../.valgrind.supp --error-exitcode=1 bin/tests_api;
+      fi;
+    - if [ "$TEST" = "yes" ] && [ "${CC}" = "gcc" ]; then
+          valgrind --leak-check=full --num-callers=40 --error-exitcode=1 bin/tests_u2f_hid;
+      fi;
+    - if [ "$TEST" = "yes" ] && [ "${CC}" = "gcc" ]; then
+          valgrind --leak-check=full --num-callers=40 --error-exitcode=1 bin/tests_u2f_standard;
+      fi;
+    - if [ "$TEST" = "yes" ] && [ "${CC}" = "gcc" ]; then
+          valgrind --leak-check=full --num-callers=40 --error-exitcode=1 bin/tests_unit;
+      fi;
+
+after_success:
+    - coveralls --verbose -i src -x c --exclude $TRAVIS_BUILD_DIR/src/secp256k1/src --exclude $TRAVIS_BUILD_DIR/src/yajl/src --exclude $TRAVIS_BUILD_DIR/build/src/CMakeFiles/bitbox.dir/yajl/src -r $TRAVIS_BUILD_DIR -b $TRAVIS_BUILD_DIR/build/src/CMakeFiles/bitbox.dir --gcov-options '\-lp'

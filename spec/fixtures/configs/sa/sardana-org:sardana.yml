@@ -1,0 +1,75 @@
+group: deprecated-2017Q4
+
+language: python
+
+sudo: required
+
+services:
+  - docker
+
+python:
+  - "3.6"
+
+env:
+  global:
+    # Doctr deploy key for sardana-org/sardana-doc
+    - secure: "p/0UgVZzPKJQqcvQ/97qMgo9kPCE0cZ6vI+308YEJ2o9xj4a3FsfHCZ/vWtjdsrp1sQbtKVDesx+xmK4CLDzQeC2+Xskv8OZDjaG2jYkHcVosZEM3EGW8rLVKzoDWLr6cTy2wexLgjHPCsmrjukPs49/i5p+WU0no64YoLlZdp9TT+gvWSQJLIk6R4eqt4FHMszPybLv0pvb1SEiCzimlX1WM1pBrE0LHgchd2ZBYSUWTTwe+Koi4HCS4Bads8j20K2e3fFKcmR2u9DfmU+7Mf5HRJsj1LYJgBUF76lUG2/fZfpoDe8sWi+eUewTa3zNM4bhRLpV+pmG0ypplM4pIcdvwiHV03nGSGu6XK6OGQ/Mgsw0fmud4JR4f5g9DgEfERlyJKI4A9mPZQ327OmEwOOl33x2AFJAL05Qvm0yXCkf1dwgYXnZl44SQbAczY1NHFL90t6xbHtmTitJrE2Xb+4BLzMe3OOZj6j/0QeiXA4z1FnZr1s8UoAsm68iW194IuFg1RRG9FTISFWaBew5wzwvAJak0DxkpG0k43VkHiVC7sPHqr5CxXMXO/MuaptK2ti6iLK9xBAEUpO9HluOkeJq5WDIIxBiBS9tPi0i3vIpq87RjHkdw5n7pdIqnuJ1nXUjpWsuUyV3fLkY12fFxSbZgqmNhIE5/o9c5VP/69Y="
+
+  matrix:
+  - TEST="flake8"
+  - TEST="testsuite" DOCKER_IMG=reszelaz/sardana-test
+  - TEST="testsuite" DOCKER_IMG=reszelaz/sardana-test:taurus-support-3.x
+  - TEST="doc" DOCKER_IMG=reszelaz/sardana-test
+
+
+before_install:
+  # install flake8 to perform python code style check in the script part
+  # install it using pip in order to get the newest version
+  - if [ $TEST == "flake8" ]; then sudo apt-get update -qq ; fi
+  - if [ $TEST == "flake8" ]; then sudo apt-get install -qq python-pip; fi
+  - if [ $TEST == "flake8" ]; then sudo pip install flake8; fi
+
+install:
+  # run reszelaz/sardana-test docker container (Debian8 with sardana-deps)
+  - if [ $TEST != "flake8" ]; then docker pull $DOCKER_IMG; fi
+  - if [ $TEST != "flake8" ]; then docker run -d --name=sardana-test -h sardana-test --volume=`pwd`:/sardana $DOCKER_IMG; fi
+
+  # wait approx. 10 s (supervisor starts mysql and Tango DB)
+  - if [ $TEST == "testsuite" ]; then sleep 10; fi
+
+  # install sardana in order to create the launcher scripts for servers
+  - if [ $TEST == "testsuite" ]; then docker exec sardana-test bash -c "cd /sardana && python setup.py install"; fi
+
+  # start Pool and MacroServer necessary for macro tests
+  - if [ $TEST == "testsuite" ]; then docker exec sardana-test supervisorctl start Pool; fi
+  - if [ $TEST == "testsuite" ]; then docker exec sardana-test supervisorctl start MacroServer; fi
+
+script:
+  # make the script fail if a line fails
+  - set -e
+  # run flake8 check on all python files in the project
+  - if [ $TEST == "flake8" ]; then ci/flake8_diff.sh; fi
+  # run the full testsuite
+  - if [ $TEST == "testsuite" ]; then docker exec sardana-test sardanatestsuite; fi
+  # build docs
+  - if [ $TEST == "doc" ]; then
+      docker exec -t sardana-test /bin/bash -c "cd /sardana ; sphinx-build -W doc/source/ build/sphinx/html" ;
+    fi
+
+  # deploy sphinx docs to sardana-doc repo if we are on upstream
+  - if [[ $TEST == "doc" && $TRAVIS_REPO_SLUG == "sardana-org/sardana" ]]; then
+      pip install doctr ;
+      docker exec sardana-test /bin/bash -c "touch /sardana/build/sphinx/html/.nojekyll" ;
+      if [[ $TRAVIS_BRANCH == "develop" ]]; then
+        doctr deploy . ;
+      else
+        doctr deploy "v-$TRAVIS_BRANCH"  ;
+      fi;
+    fi
+
+doctr:
+  key-path : ci/github_deploy_key.enc
+  deploy-repo : sardana-org/sardana-doc
+  require-master: false
+  sync: true
+  built-docs: build/sphinx/html/

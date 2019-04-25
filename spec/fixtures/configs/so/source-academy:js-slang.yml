@@ -1,0 +1,12 @@
+language: node_js
+node_js:
+  - 9
+cache: yarn
+branches:
+  except:
+    - /^no-ci.*$/
+script:
+  - yarn format:ci
+  - yarn tslint
+  - yarn test
+  - yarn test-coveralls

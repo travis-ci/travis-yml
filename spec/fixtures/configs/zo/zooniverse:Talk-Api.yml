@@ -1,0 +1,30 @@
+language: ruby
+sudo: false
+cache:
+  - bundler
+rvm:
+- 2.4
+- 2.5
+before_install:
+    - gem uninstall -v '>= 2' -i $(rvm gemdir)@global -ax bundler || true
+    - gem install bundler -v '< 2'
+before_script:
+  - rename 's/\.yml.travis$/\.yml/' config/*.yml.travis
+  - psql -U postgres -c 'create database travis_ci_test;'
+  - psql -U postgres -c "create role talk with encrypted password 'password';"
+  - psql -U postgres -c "alter role talk with login;"
+  - psql -U postgres -c "alter role talk with superuser;"
+  - psql -U postgres -c "alter database travis_ci_test owner to talk;"
+  - psql -U postgres -c "grant all on database travis_ci_test to talk;"
+  - psql -U postgres -c "create database travis_ci_panoptes_test with owner=talk encoding='UTF8';"
+  - psql -U postgres -c "grant all on database travis_ci_panoptes_test to talk;"
+  - RACK_ENV=test bundle exec rake db:schema:load
+  - RACK_ENV=test bundle exec rake panoptes:db:create_tables
+  - RACK_ENV=test bundle exec rake panoptes:db:setup
+services:
+  - postgresql
+addons:
+  postgresql: "9.4"
+  code_climate:
+    repo_token:
+      secure: Cc8J0Xm4PMLbZZvdI//NIaKwj9IY5j2RvbpYPrZW8BafbbxdlBZwZsMYnNOCOlSKhZSO87zxTQno3Yyv2ZnzsET1qj3XZ+6W5Q+INmxv9FSMZdbYyO+oRto8X/i0gjO+CerP642AKTOj9omaSxDKLoP/2dr6VKEQaxO4hFWNYgc=

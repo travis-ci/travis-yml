@@ -1,0 +1,19 @@
+language: node_js
+node_js: "6"
+
+sudo: required
+dist: trusty
+
+addons:
+  apt:
+    packages:
+        - google-chrome-stable
+
+cache:
+    directories:
+        - $HOME/.cache/yarn
+
+script:
+    - npm run test
+    - npm run tslint
+    - npm run build

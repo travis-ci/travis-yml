@@ -1,0 +1,20 @@
+sudo: false
+
+language: go
+
+go_import_path: go.uber.org/thriftrw
+
+matrix:
+  include:
+    - go: '1.10'
+    - go: '1.11'
+      env: LINT=1 COVER=1
+
+install:
+    - make install_ci
+
+script:
+    - if [[ "$LINT" -eq 1 ]]; then make lint_ci; fi
+    - make test_ci
+    - if [[ "$COVER" -eq 1 ]]; then travis_retry goveralls -coverprofile=cover.out -service=travis-ci; fi
+    - rm -rf vendor/*

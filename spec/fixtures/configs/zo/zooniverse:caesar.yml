@@ -1,0 +1,27 @@
+language: ruby
+rvm:
+  - 2.4.1
+cache: bundler
+sudo: false
+services:
+  - redis-server
+addons:
+  postgresql: "9.4"
+env:
+  - DATABASE_URL_TEST=postgresql://localhost/caesar_test?user=postgres
+
+before_script:
+  - psql -c 'create database caesar_test;' -U postgres
+
+script: "bin/rspec"
+
+after_success:
+  - "BUNDLE_GEMFILE=$PWD/docs/Gemfile bundle install && cd docs && BUNDLE_GEMFILE=$PWD/Gemfile bundle exec middleman build --clean && cd .. && ls -al docs"
+
+deploy:
+  provider: pages
+  skip_cleanup: true
+  github_token: $GITHUB_TOKEN
+  local_dir: docs/build/
+  on:
+    branch: master

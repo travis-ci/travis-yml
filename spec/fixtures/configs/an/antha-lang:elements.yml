@@ -1,0 +1,12 @@
+language: go
+go:
+- 1.9
+before_install:
+- sudo apt-get update -qq
+- sudo apt-get install -y libglpk-dev libopencv-dev libcv-dev libhighgui-dev
+- go get golang.org/x/net/context
+- go get -u github.com/antha-lang/antha/...
+script: make test
+notifications:
+  slack:
+    secure: RahxLr6gt0iOlkhuUMjGRL5x08L8rdpo/KqkKC9vsPu6of/Gn3o8qSUdOxtDhF6nFIzR0wSpwSLqvL+sMSwqHtHpmB4UxPbTzMlWJO0O3Su5kGaNEwrqSpnqbDhYYw9DCvyyHkidllH4Z7XYVLF0Ar1wvcKyyOci3Dc+XCvnYv/ESJaNYL0WpNWh0619AOu2Kf04UvwTDwJl4Y+U1Pa5i7oeSTJDUTXdQTmc5rDAoWUyvaQapnPQS9XvgbgOA/096KVnem3PC5UHd92lU4LNiGyORI+Pw8Jw9Q8cSZW/r5OOcPlifPBbmQw7V94C6864CaHGZ3v416oKZfqDefY/h6KrrGTry1+J76wYlKT37AbgiR5vZsyM+hG/NbvD/TXjj8OzF9l7gmIjfTwKDxJCFLe0U8lcMMcOn2fPzM2Dfhjsfwywa3KDJWfDFl3Id31qH7WbFMePBS5NhPIY+3V0FmzDoNmOIAjyqvhfpMXXcmnN0suQ5YEYe3w5ycnygPWJ2jPGsadnoEtA7kVKLfFkQd5ej122lYzcD0ZME++Wb7r7zpscZVsp9Cjj6JzRdlkcp73ByFonCy3l7w2z9pAqLR9kdT2m6XlUiNkUa6oVTXh42L1SCREoXbHLr3oCdlbt5fcV/Tjkp0/Pn8BcUcLAJaJ8tk5f2WQuCbOZx6S4UDA=

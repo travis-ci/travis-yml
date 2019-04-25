@@ -1,0 +1,33 @@
+env:
+  global:
+  - COMMIT_AUTHOR_EMAIL: vahid.mardani@gmail.com
+  - COVERALLS_REPO_TOKEN: MfBBjD1Rkubo5ShVyNOuRIx2esQ8cM1z1
+branches:
+  only:
+  - master
+  - develop
+  - /^(release\/)?v([1-9]\d*!)?(0|[1-9]\d*)(\.(0|[1-9]\d*))*((a|b|rc)(0|[1-9]\d*))?(\.post(0|[1-9]\d*))?(\.dev(0|[1-9]\d*))?$/
+services:
+- redis-server
+language: python
+python:
+- 3.6
+before_install:
+- pip install -U pip setuptools wheel
+- pip install -r requirements-ci.txt
+- pip install git+https://github.com/Carrene/nanohttp
+
+install: pip install -e .
+script: py.test --cov=restfulpy restfulpy/tests
+after_success: travis_retry coveralls
+deploy:
+  provider: pypi
+  skip_cleanup: true
+  user: Vahid.Mardani
+  password:
+    secure: AEffGTknm1+cRnrbfKEnfVRGgcS+zB/pYsZTV4P8Cxt+WzP2VQLxx1i9zaX7ZDuMzSxJJNb/OMZq4aJILdN+bRGtmFHFulbN5vtiH6XjVMUCYNradgGw4pCivPKrWDp6nyGIiG+ei5z+nLFjtfR4kYFaRI4C7KxSipaNbUwhmXsR3iv/li4uL/BV55exUpP+mn76P86KKGhvAnZzEBGwY/nBl/C4fCRd4NTehEG+KeCK9r+/sG/ssk1CFbBUEl562CuP2nUZCTFHtNpTATPv6w0bg0VRN6h4ADrWM8ysF5MXa7vjHzdGP2JFf0Gt64vTzjuI4V+J1zz1qplEyKWeRv8TIVI3puFQ3HezCbuTlFDmTpXWyD86muwK++fSKP+gYUVi4wMSsm6oARy2lynE12LXZRaw1ag6pfhOjBBC3lGRdO78xj174U3SHBoStWL5w1uO9/U4m7PVugJT8LIrHqU4+Ehva8mOHb30xdZ3w4jenl4QUeqvpJbdeVOAvd0p8Uey40JCqfXdn3qLE7NYSVsH08Bvq6bOELZ6hmp233CFcyP2yU08Dk2raXl4GLDxJx1NEj1MzKgy/8F9AvRfP8Uh/DywRPgs9qRDy0Qfw/r62LAlNn+fV45Y+wmVggAoy0luZHBjISgcpWdda9NUJg6Gn8TbwhoRh2qYTqTCbeo=
+  on:
+    tags: true
+    distributions: sdist bdist_wheel
+    repo: Carrene/restfulpy
+    all_branches: true

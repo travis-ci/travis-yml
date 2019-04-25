@@ -1,0 +1,41 @@
+language: python
+sudo: true
+dist: xenial
+python:
+  - "3.6"
+  - "3.7"
+  - "3.8-dev"
+matrix:
+  allow_failures:
+  - python: 3.8-dev
+cache: pip
+notifications:
+  email: false
+  irc:
+    channels:
+      - "chat.freenode.net#ubuntu-solutions"
+    use_notice: true
+    skip_join: true
+    on_failure: change
+    on_success: never
+install:
+  - make travis-sysdeps
+env:
+  global:
+    - PATH=/snap/bin:$PATH
+    - CONJUREUP_REGISTRY_BRANCH=master
+    - PIP_PRE=1
+before_script:
+  - sudo addgroup lxd || true
+  - sudo usermod -a -G lxd $USER || true
+  - sudo ln -s /snap/bin/juju /usr/bin/juju
+  - sudo ln -s /snap/bin/lxc /usr/bin/lxc
+  - sudo bash -c 'for i in 5 10 15 30; do [[ -e /var/snap/lxd/common/lxd/unix.socket ]] && break; sleep $i; done'
+script:
+  - tox -e py3,flake,isort
+  - tox -e conjure-dev
+  - sudo -E su $USER -c "source conjure-dev/bin/activate && conjure-up -c test/Conjurefile.travis"
+after_failure:
+  - cat ~/.cache/conjure-up/ghost/steps/*/*.err
+  - cat ~/.cache/conjure-up/conjure-up.log
+  - cat ~/.cache/conjure-up/ghost/*.err

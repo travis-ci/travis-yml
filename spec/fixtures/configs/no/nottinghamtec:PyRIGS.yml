@@ -1,0 +1,32 @@
+language: python
+python:
+  "3.6"
+cache: pip
+
+addons:
+  chrome: stable
+
+install:
+  - wget https://chromedriver.storage.googleapis.com/2.36/chromedriver_linux64.zip
+  - unzip chromedriver_linux64.zip
+  - export PATH=$PATH:$(pwd)
+  - chmod +x chromedriver
+  - pip install -r requirements.txt
+  - pip install coveralls codeclimate-test-reporter pep8
+
+before_script:
+  - export PATH=$PATH:/usr/lib/chromium-browser/
+  - python manage.py collectstatic --noinput
+
+script:
+  - pep8 . --exclude=migrations,importer*
+  - python manage.py check
+  - python manage.py makemigrations --check --dry-run
+  - coverage run manage.py test --verbosity=2
+
+after_success:
+  - coveralls
+  - codeclimate-test-reporter
+
+notifications:
+  webhooks: https://fathomless-fjord-24024.herokuapp.com/notify

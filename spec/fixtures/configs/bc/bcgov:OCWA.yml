@@ -1,0 +1,472 @@
+dist: trusty
+sudo: required
+language: python
+services:
+- docker
+addons:
+  sonarcloud:
+    organization: ajc_bcgov
+    token:
+      secure: yoqO9/QRJlT4mcpgQ4RMSg6h97PRnql70EVCcPaBr6nGNaxSmea8K1AxdqFZcC5PMrj+i4oRFrIQIEmOPeJAzh+5wvygXhwsavXR2S0LcTcScXZQQ8ZWXw9exYl5ELt3Ee6BUF4TIGnR3iztp6VGm9mv992Pi7NqYwdIN9z1rVodb/rH3vlBRzxIH6p+eo4cs/rpUatFNDjRnCVvHxDWy2reC43r3Vf61jGR3FFALcah/PrIUDVemY9wqbdqA78HGB97o5UU6Jgwk2qmvUXTxJcyN+7dSi0bhr8SHEGN1TTr7TmOOxFIKy+fPs9krCF8Ll4CruAXu1YLaTRD6Ilxb4U5yUJgjANnsYbR7klD/DC4pwRx1L90cCVbgsNRzrsq+Qvn57bdSoyHGFCSWqQdkW6EG9xcqogMP6y9/DBcgb4SYIMNLjaoqSgunSmDFTFgidHBTcLN6e4mvM89FRDY64i+DINp9gginqHak/LxhNct6LTREx8bcoOA4J28eHY02Cwrtu2pful7uOonZD49XrGW+OfOAQY2c1b91hNJUK+tWPh0B/0CgWyKNize3WclV3pBedFDYzbzeni3TkqoN7Na22xQTl95mrV9vZ7VQpIft0Jlf+OFS+I8s3G2W/Wp/Rhk9tXfxcEa6yvDwxFMv3QsQrs7No3yTRNFw6U3QWs=
+matrix:
+  include:
+  - name: Forum Api
+    stage: APIs
+    language: node_js
+    node_js:
+    - lts/*
+    cache: npm
+    addons:
+      apt:
+        sources:
+        - ubuntu-toolchain-r-test
+        packages:
+        - g++-4.8
+    before_install:
+    - |-
+      cd /home/travis/build/bcgov/OCWA/microservices/forumApi
+      npm ci
+    - npm audit
+    before_script:
+    - |-
+      cd /home/travis/build/bcgov/OCWA/microservices/forumApi
+      cp config/test.json.example config/test.json
+      cp config/default.json.example config/default.json
+    - |-
+      wget -q http://fastdl.mongodb.org/linux/mongodb-linux-x86_64-${MONGODB}.tgz
+      tar xzf mongodb-linux-x86_64-${MONGODB}.tgz
+      mkdir ${PWD}/mongodb-linux-x86_64-${MONGODB}/data
+      ${PWD}/mongodb-linux-x86_64-${MONGODB}/bin/mongod --dbpath ${PWD}/mongodb-linux-x86_64-${MONGODB}/data --logpath ${PWD}/mongodb-linux-x86_64-${MONGODB}/mongodb.log --fork
+      ${PWD}/mongodb-linux-x86_64-${MONGODB}/bin/mongo forumDb --eval 'db.createUser({user:"forumUser", pwd:"forumPass", roles:["readWrite"]});'
+    - |-
+      wget -q ${HELM_URL}/${HELM_TGZ}
+      tar xzfv ${HELM_TGZ}
+      PATH=`pwd`/linux-amd64/:$PATH
+      helm init --client-only
+    - sudo pip install yamllint=="${YAMLLINT_VERSION}"
+    - |-
+      cd /home/travis/build/bcgov/OCWA
+      wget -q ${SONAR_URL}${SONAR_APP}-cli-${SONAR_VERSION}.zip
+      unzip ${SONAR_APP}-cli-${SONAR_VERSION}.zip
+      PATH=`pwd`/${SONAR_APP}-${SONAR_VERSION}/bin:$PATH
+    script:
+    - |-
+      cd /home/travis/build/bcgov/OCWA/microservices/forumApi
+      npm test
+    - helm lint helm/forum-api
+    - |-
+      cd /home/travis/build/bcgov/OCWA/microservices/forumApi
+      bash docker_quayio_push ocwa_forum_api
+    - |-
+      cd /home/travis/build/bcgov/OCWA
+      PATH=`pwd`/${SONAR_APP}-${SONAR_VERSION}/bin:$PATH
+      sonar-scanner -Dsonar.login=$SONAR_TOKEN -Dproject.settings=sonar-project.properties -Dsonar.projectKey=ocwa_forum_api -Dsonar.projectName="OCWA Forum API" -Dsonar.modules=forumApi
+    before_deploy:
+    - cd /home/travis/build/bcgov/OCWA/microservices/forumApi
+    deploy:
+      provider: script
+      script: bash docker_push ocwa_forum_api || travis_terminate 1
+      on:
+        all_branches: true
+        condition: "$TRAVIS_BRANCH =~ ^master|develop$ || -n $TRAVIS_TAG"
+  - name: Project Api
+    stage: APIs
+    language: node_js
+    node_js:
+    - lts/*
+    cache: npm
+    addons:
+      apt:
+        sources:
+        - ubuntu-toolchain-r-test
+        packages:
+        - g++-4.8
+    before_install:
+    - |-
+      cd /home/travis/build/bcgov/OCWA/microservices/projectApi
+      npm ci
+    - npm audit
+    before_script:
+    - |-
+      cd /home/travis/build/bcgov/OCWA/microservices/projectApi
+      cp config/test.json.example config/test.json
+      cp config/default.json.example config/default.json
+    - |-
+      wget -q http://fastdl.mongodb.org/linux/mongodb-linux-x86_64-${MONGODB}.tgz
+      tar xzf mongodb-linux-x86_64-${MONGODB}.tgz
+      mkdir ${PWD}/mongodb-linux-x86_64-${MONGODB}/data
+      ${PWD}/mongodb-linux-x86_64-${MONGODB}/bin/mongod --dbpath ${PWD}/mongodb-linux-x86_64-${MONGODB}/data --logpath ${PWD}/mongodb-linux-x86_64-${MONGODB}/mongodb.log --fork
+      ${PWD}/mongodb-linux-x86_64-${MONGODB}/bin/mongo projectDb --eval 'db.createUser({user:"projectUser", pwd:"projectPass", roles:["readWrite"]});'
+    - |-
+      wget -q ${HELM_URL}/${HELM_TGZ}
+      tar xzfv ${HELM_TGZ}
+      PATH=`pwd`/linux-amd64/:$PATH
+      helm init --client-only
+    - sudo pip install yamllint=="${YAMLLINT_VERSION}"
+    - |-
+      cd /home/travis/build/bcgov/OCWA
+      wget -q ${SONAR_URL}${SONAR_APP}-cli-${SONAR_VERSION}.zip
+      unzip ${SONAR_APP}-cli-${SONAR_VERSION}.zip
+      PATH=`pwd`/${SONAR_APP}-${SONAR_VERSION}/bin:$PATH
+    script:
+    - |-
+      cd /home/travis/build/bcgov/OCWA/microservices/projectApi
+      npm test
+    - helm lint helm/project-api
+    - |-
+      cd /home/travis/build/bcgov/OCWA/microservices/projectApi
+      bash docker_quayio_push ocwa_project_api
+    - |-
+      cd /home/travis/build/bcgov/OCWA
+      PATH=`pwd`/${SONAR_APP}-${SONAR_VERSION}/bin:$PATH
+      sonar-scanner -Dsonar.login=$SONAR_TOKEN -Dproject.settings=sonar-project.properties -Dsonar.projectKey=ocwa_project_api -Dsonar.projectName="OCWA Project API" -Dsonar.modules=projectApi
+    before_deploy:
+    - cd /home/travis/build/bcgov/OCWA/microservices/projectApi
+    deploy:
+      provider: script
+      script: bash docker_push ocwa_project_api || travis_terminate 1
+      on:
+        all_branches: true
+        condition: "$TRAVIS_BRANCH =~ ^master|develop$ || -n $TRAVIS_TAG"
+
+  - name: Request Api
+    stage: APIs
+    language: node_js
+    node_js:
+    - lts/*
+    cache: npm
+    addons:
+      apt:
+        sources:
+        - ubuntu-toolchain-r-test
+        packages:
+        - g++-4.8
+        - python3-pip
+    before_script:
+    - |-
+      wget -q ${HELM_URL}/${HELM_TGZ}
+      tar xzfv ${HELM_TGZ}
+      PATH=`pwd`/linux-amd64/:$PATH
+      helm init --client-only
+    - sudo pip install yamllint=="${YAMLLINT_VERSION}"
+    - cd /home/travis/build/bcgov/OCWA
+    - |-
+      wget -q ${SONAR_URL}${SONAR_APP}-cli-${SONAR_VERSION}.zip
+      unzip ${SONAR_APP}-cli-${SONAR_VERSION}.zip
+      PATH=`pwd`/${SONAR_APP}-${SONAR_VERSION}/bin:$PATH
+    - |-
+      wget -q http://fastdl.mongodb.org/linux/mongodb-linux-x86_64-${MONGODB}.tgz
+      tar xzf mongodb-linux-x86_64-${MONGODB}.tgz
+      mkdir ${PWD}/mongodb-linux-x86_64-${MONGODB}/data
+      ${PWD}/mongodb-linux-x86_64-${MONGODB}/bin/mongod --dbpath ${PWD}/mongodb-linux-x86_64-${MONGODB}/data --logpath ${PWD}/mongodb-linux-x86_64-${MONGODB}/mongodb.log --fork
+      ${PWD}/mongodb-linux-x86_64-${MONGODB}/bin/mongo forumDb --eval 'db.createUser({user:"forumUser", pwd:"forumPass", roles:["readWrite"]});'
+    script:
+    - |-
+      cd /home/travis/build/bcgov/OCWA/microservices/requestApi
+      cp config/test.json.example config/test.json
+      cp config/default.json.example config/default.json
+      npm ci
+    - npm audit
+    - |-
+      cd /home/travis/build/bcgov/OCWA/microservices/shared/js
+      npm ci
+    - |-
+      cd /home/travis/build/bcgov/OCWA/microservices/forumApi
+      npm ci
+      cp config/default.json.example config/default.json
+      cp config/test.json.example config/test.json
+      NODE_ENV=test npm start &
+    - |-
+      wget -q https://dl.minio.io/server/minio/release/linux-amd64/minio
+      chmod +x minio
+      export MINIO_ACCESS_KEY="myKey"
+      export MINIO_SECRET_KEY="mySecret"
+      ./minio server /tmp &
+    - |-
+      cd /home/travis/build/bcgov/OCWA/microservices/validateApi
+      sudo pip3 install -U setuptools
+      sudo pip3 install -r requirements.txt
+      cp config/default.json.template config/default.json
+      sudo pip3 install -e .
+      python3 wsgi.py &
+    - |-
+      cd /home/travis/build/bcgov/OCWA/microservices/policyApi
+      sudo pip3 install -U setuptools
+      sudo pip3 install -r requirements.txt
+      cp config/default.json.template config/default.json
+      sudo pip3 install -e .
+      python3 wsgi.py &
+    - |-
+      cd /home/travis/build/bcgov/OCWA/microservices/requestApi
+      sleep 15
+      npm test
+    - helm lint helm/request-api
+    - |-
+      cd /home/travis/build/bcgov/OCWA/microservices/requestApi
+      bash docker_quayio_push ocwa_request_api
+    - |-
+      cd /home/travis/build/bcgov/OCWA
+      PATH=`pwd`/${SONAR_APP}-${SONAR_VERSION}/bin:$PATH
+      sonar-scanner -Dsonar.login=$SONAR_TOKEN -Dproject.settings=sonar-project.properties -Dsonar.projectKey=ocwa_request_api -Dsonar.projectName="OCWA Request API" -Dsonar.modules=requestApi
+    before_deploy:
+    - cd /home/travis/build/bcgov/OCWA/microservices/requestApi
+    deploy:
+      provider: script
+      script: bash docker_push ocwa_request_api || travis_terminate 1
+      on:
+        all_branches: true
+        condition: "$TRAVIS_BRANCH =~ ^master|develop$ || -n $TRAVIS_TAG"
+  - name: Policy Api
+    stage: APIs
+    language: python
+    python:
+    - '3.6'
+    cache: pip
+    addons:
+      apt:
+        sources:
+        - ubuntu-toolchain-r-test
+        packages:
+        - python3-pip
+    install:
+    - |-
+      cd /home/travis/build/bcgov/OCWA/microservices/policyApi
+      sudo pip3 install -U setuptools
+      sudo pip3 install -r requirements.txt
+    - |-
+      wget -q ${HELM_URL}/${HELM_TGZ}
+      tar xzfv ${HELM_TGZ}
+      PATH=`pwd`/linux-amd64/:$PATH
+      helm init --client-only
+    before_script:
+    - |-
+      cd /home/travis/build/bcgov/OCWA
+      wget -q ${SONAR_URL}${SONAR_APP}-cli-${SONAR_VERSION}.zip
+      unzip ${SONAR_APP}-cli-${SONAR_VERSION}.zip
+      PATH=`pwd`/${SONAR_APP}-${SONAR_VERSION}/bin:$PATH
+      sudo pip install yamllint=="${YAMLLINT_VERSION}"
+    script:
+    - |-
+      cd /home/travis/build/bcgov/OCWA/microservices/policyApi
+      cp config/default.json.template config/default.json
+      sudo pip3 install -e .
+    - sudo coverage run --branch --source=db,v1 -m pytest
+    - sudo coverage xml
+    - |-
+      cd /home/travis/build/bcgov/OCWA/microservices/policyApi
+      helm lint helm/policy-api
+      bash docker_quayio_push ocwa_policy_api
+    - |-
+      cd /home/travis/build/bcgov/OCWA
+      PATH=`pwd`/${SONAR_APP}-${SONAR_VERSION}/bin:$PATH
+      sonar-scanner -Dsonar.login=$SONAR_TOKEN -Dproject.settings=sonar-project.properties -Dsonar.projectKey=ocwa_policy_api -Dsonar.projectName="OCWA Policy API" -Dsonar.modules=policyApi
+    before_deploy:
+    - cd /home/travis/build/bcgov/OCWA/microservices/policyApi
+    deploy:
+      provider: script
+      script: bash docker_push ocwa_policy_api || travis_terminate 1
+      on:
+        all_branches: true
+        condition: "$TRAVIS_BRANCH =~ ^master|develop$ || -n $TRAVIS_TAG"
+  - name: Validation Api
+    stage: APIs
+    language: python
+    python:
+    - '3.6'
+    cache: pip
+    addons:
+      apt:
+        sources:
+        - ubuntu-toolchain-r-test
+        packages:
+        - python3-pip
+    install:
+    - |-
+      cd /home/travis/build/bcgov/OCWA/microservices/validateApi
+      sudo pip3 install -U setuptools
+      sudo pip3 install -r requirements.txt
+    before_script:
+    - |-
+      wget -q ${HELM_URL}/${HELM_TGZ}
+      tar xzfv ${HELM_TGZ}
+      PATH=`pwd`/linux-amd64/:$PATH
+      helm init --client-only
+    - |-
+      cd /home/travis/build/bcgov/OCWA
+      wget -q ${SONAR_URL}${SONAR_APP}-cli-${SONAR_VERSION}.zip
+      unzip ${SONAR_APP}-cli-${SONAR_VERSION}.zip
+      PATH=`pwd`/${SONAR_APP}-${SONAR_VERSION}/bin:$PATH
+    - sudo pip install yamllint=="${YAMLLINT_VERSION}"
+    script:
+    - |-
+      cd /home/travis/build/bcgov/OCWA/microservices/policyApi
+      sudo pip3 install -U setuptools
+      sudo pip3 install -r requirements.txt
+      cp config/default.json.template config/default.json
+      sudo pip3 install -e .
+      python3 wsgi.py &
+    - |-
+      cd /home/travis/build/bcgov/OCWA/microservices/validateApi
+      cp config/default.json.template config/default.json
+      sudo pip3 install -e .
+    - sudo coverage run --branch --source=db,v1,validator -m pytest
+    - sudo coverage xml
+    - |-
+      cd /home/travis/build/bcgov/OCWA/microservices/validateApi
+      helm lint helm/validate-api
+      bash docker_quayio_push ocwa_validate_api
+    - |-
+      cd /home/travis/build/bcgov/OCWA
+      PATH=`pwd`/${SONAR_APP}-${SONAR_VERSION}/bin:$PATH
+      sonar-scanner -Dsonar.login=$SONAR_TOKEN -Dproject.settings=sonar-project.properties -Dsonar.projectKey=ocwa_validate_api -Dsonar.projectName="OCWA Validate API" -Dsonar.modules=validateApi
+    before_deploy:
+    - cd /home/travis/build/bcgov/OCWA/microservices/validateApi
+    deploy:
+      provider: script
+      script: bash docker_push ocwa_validate_api || travis_terminate 1
+      on:
+        all_branches: true
+        condition: "$TRAVIS_BRANCH =~ ^master|develop$ || -n $TRAVIS_TAG"
+  - name: Front End
+    stage: Frontend
+    language: node_js
+    node_js:
+    - lts/*
+    cache: npm
+    addons:
+      apt:
+        sources:
+        - ubuntu-toolchain-r-test
+        packages:
+        - g++-4.8
+    install:
+    - |-
+      cd /home/travis/build/bcgov/OCWA/frontend
+      wget -q ${HELM_URL}/${HELM_TGZ}
+      tar xzfv ${HELM_TGZ}
+      PATH=`pwd`/linux-amd64/:$PATH
+      helm init --client-only
+    - sudo pip install yamllint=="${YAMLLINT_VERSION}"
+    before_script:
+    - |-
+      cd /home/travis/build/bcgov/OCWA
+      wget -q ${SONAR_URL}${SONAR_APP}-cli-${SONAR_VERSION}.zip
+      unzip ${SONAR_APP}-cli-${SONAR_VERSION}.zip
+      PATH=`pwd`/${SONAR_APP}-${SONAR_VERSION}/bin:$PATH
+    script:
+    - |-
+      cd /home/travis/build/bcgov/OCWA/frontend
+      cp config/test.json.example config/test.json
+    - npm ci
+    - npm audit
+    - npm test
+    - |-
+      cd /home/travis/build/bcgov/OCWA/frontend
+      helm lint helm/ocwa-frontend
+      bash docker_quayio_push ocwa_frontend
+    - |-
+      cd /home/travis/build/bcgov/OCWA
+      sonar-scanner -Dsonar.login=$SONAR_TOKEN -Dproject.settings=sonar-project.properties -Dsonar.projectKey=ocwa_frontend -Dsonar.projectName="OCWA Frontend" -Dsonar.modules=frontend
+    before_deploy:
+    - cd /home/travis/build/bcgov/OCWA/frontend
+    deploy:
+      provider: script
+      script: bash docker_push ocwa_frontend || travis_terminate 1
+      on:
+        all_branches: true
+        condition: "$TRAVIS_BRANCH =~ ^master|develop$ || -n $TRAVIS_TAG"
+  - name: Integration Tests
+    stage: Tests
+    language: java
+    addons:
+      chrome: stable
+      hosts:
+      - auth.example.demo
+      - ocwa.example.demo
+      - ocwadl.example.demo
+    jdk: openjdk8
+    cache:
+      directories:
+      - "/tmp/traviscache"
+    before_install:
+    - |-
+      if [ ! -d "/tmp/traviscache" ]; then
+        mkdir -p /tmp/traviscache
+      fi
+    - |-
+      cd /tmp
+      sudo wget -q https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip
+    - |-
+      cd /usr/local/bin
+      sudo unzip -o /tmp/terraform_${TERRAFORM_VERSION}_linux_amd64.zip
+      sudo rm -rf /tmp/terraform_${TERRAFORM_VERSION}_linux_amd64.zip
+      sudo chmod +x terraform
+    install:
+    - |-
+      cd /home/travis/build/bcgov/OCWA/terraform
+      mkdir _tmp
+      cp terraform.tfvars.example terraform.tfvars
+      python2 scripts/prepare_images_variable.py
+    - terraform init
+    - terraform apply -var hostRootPath=`pwd`/_tmp -auto-approve
+    before_script:
+    - |-
+      if [ ! -d "/tmp/traviscache" ]; then
+        mkdir -p /tmp/traviscache
+      fi
+    - |-
+      if [ ! -f "/tmp/traviscache/Katalon_Studio_Linux_64-${KATALON_VERSION}.tar.gz" ]; then
+        cd /tmp/traviscache
+        sudo wget -q https://download.katalon.com/${KATALON_VERSION}/Katalon_Studio_Linux_64.tar.gz -O Katalon_Studio_Linux_64-${KATALON_VERSION}.tar.gz
+      fi
+    - |-
+      cd /usr/local/bin
+      sudo mkdir -p Katalon_Studio
+      sudo tar -xf /tmp/traviscache/Katalon_Studio_Linux_64-${KATALON_VERSION}.tar.gz -C Katalon_Studio
+      sudo chmod +x Katalon_Studio/katalon
+      sudo chmod -R 777 Katalon_Studio
+    - docker images --digests
+    - docker ps
+    script:
+    - |-
+      cd /usr/local/bin/Katalon_Studio
+      xvfb-run --server-args="-screen 0 1440x900x24" ./katalon -noSplash -runMode=console -projectPath="/home/travis/build/bcgov/OCWA/ui_tests/OCWA.prj" -retry=0 -testSuitePath="Test Suites/CucumberSuite" -executionProfile="Travis" -browserType="Chrome (headless)"
+  - name: OCWA Master Helm Chart
+    stage: Tests
+    language: python
+    python:
+    - '3.6'
+    cache: pip
+    install:
+    - |-
+      cd /home/travis/build/bcgov/OCWA
+      wget -q ${HELM_URL}/${HELM_TGZ}
+      tar xzfv ${HELM_TGZ}
+      PATH=`pwd`/linux-amd64/:$PATH
+      helm init --client-only
+    - sudo pip install yamllint=="${YAMLLINT_VERSION}"
+    script:
+    - cd /home/travis/build/bcgov/OCWA
+    - helm lint helm/ocwa
+env:
+  global:
+  - CXX=g++-4.8
+  - HELM_TGZ=helm-v2.4.1-linux-amd64.tar.gz
+  - HELM_URL=https://storage.googleapis.com/kubernetes-helm
+  - GH_URL=https://kubenow.github.io/helm-charts
+  - KATALON_VERSION=6.0.5
+  - MONGODB=4.1.1
+  - REPO_DIR=/home/travis/build/kubenow/helm-charts
+  - SONAR_APP=sonar-scanner
+  - SONAR_URL=https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/
+  - SONAR_VERSION=3.2.0.1227-linux
+  - TARGET_BR=gh-pages
+  - TERRAFORM_VERSION=0.11.11
+  - TUSD_VERSION=0.11.0
+  - YAMLLINT_VERSION=1.8.1
+  - secure: TsBkt0h9c9CQ+ZnA4CAVlWxCoTRV4Bn7Z0y8XvR99NlnfrUhSGWzi78wJ6W8oAqOawqDk5jnG3qIKXaaO1ZaiT8n3YFLhtAQzh+gy1B96GOJd6Yjmep7AxiWgW+g0Nm+V0vkGA/dwuUjothmnvLcsqK2+hmrknvTI+oe6xrNrOv4GAx9j3NJVfmhJmhBtnI+p8uqgqtn7aqrZZqW/jhwh10taRaIvvsMZ4FEZy8M9JI6cRfakQT656U9KGbXsC7XdnEf+G/N2qOq/MWucByBo98jCnuL5JvGzgZCSkywlShK8kPUuIREGfLv1RuSOOwlz95AA700Bf/SKGmqu58wAp8XOKWAtMTpf2o7WFXpb/Ghy6ysk5AGO6RSsFOTEh2EAdF42ExRy+N8mqDYdr9Vj+qWeVHXVR9vjtjbCLeHxl16sO0K/BzQ3gjCYLXQEC6mH3xfu6kDvQvdq20fKpXPeLvX+HI0ALokkL7RFaqjcEu8R+9zZAUIqCCTKs0Z3/CmrUd2H7MD7j30gFuR2RynSpGb8l476szAuLv1wk6L+gc4g+uG5pFPsBYaBp9mNJMHrOcBQfSFY9T4n/sY4z+2Bo7qC8g8JuLOtVsVcjZ0Ut0r0xASvEg87jlgdHy/NaAySmuZclheuqsqVqsKQOx38AgOSg9N0gX2i2jnq2ZkS+4=
+  - secure: pVjFIgT/w+sZPIP9g2sSP7OWlfnspGbQaCsQesDUniVcEIJGRTxURuA4RfeJeG8D6zAggsVRiAgcpb8/IU0gx32vdSOE7f10rnWYyf/YzpX9gEMsacEAi6QeCutZBSxz0dbUx2tVNP4qnAMBw/F+iG9msxVrJDIYr1M/+E1KHpknImN/ZaM4Yx34od+efpBudrb5rAtsUTUS8Jfdo4cnQBMFGO/nVb/VD3AATIZ4+tMeduVG0W2bORcuOR+iPXMiAHRFdaTLXR23oDnJZSPMWOAJC+hhHM6D1E5armU+utmfE58q5d64aeffgqcwZnVMHkhkJ6aNCnNojYJ/dKZOAKLklDO3IVd6k/TnRvVreZw68OlLj71b668ArknoIBvgwPZ0UOwPguVzNFGT+WBNlNW1uePmtO2sc5HO23fnK8P9HMqx09Q/HwWpEEOOvUpR4vpixPETRmZHA2lsccyr4lY5gExVqSHBslXHxz00So0x1lXDADU4f1Ma54h2P1++b3Dk0tjLlRCXeiiuV4i89C8Vz37ZplbYf1Aw60504o4LZC9rGJK5uf4OMm/IZF5DjnbH87MFtwKxKNnSL5KqCRGzksdt2R23rcRvAxp9o1YP4qC7POQ5ocr3By/ciNwzApFa2d7KfSDojjIgIU/oK9mKNk5tyQAeQb+CRylkeNk=
+  - secure: k0DUE5CZbZ/DLg1U8C6OBhAlmSzJtXdaC3tF4yf+Y8fLvHLdKkxxe48t53ZzapXL1yDLDu6exjI30SRau2PC09LizDzzOJOLquR/+BLyHEZo+2cHrQd8pIB3pTTqKbAQlxzzf/A3iipcvTqOgitVp+tYRahLINL0aUojc/BkyLPx3+sGD09zE4S++90e4DcraQxoB5JBIRJgzNf3nWgJyZV8wB15VQCCKA9jA2U7/FscU5gtpKDWb6gfml9LfIN/3M3ose/0dATt3AynADPqFWjHNkO3J6GzOmSqnP8OHeTgNcU7STpue2/VosB0gqT2bUDH6JK+GAeJBtsO+c2Z+v0KHLFQ7r1Uqo+fKpP5cq0j0+0czE4bXVjjqdz7mi/zex4PqWgVhVe/jW03stiOPGh34waFN7CzpA3dp3uwK1UN2uxdvAmp6OKfHoCo0FSrAJzKU6wJh980L7qpHYoyZOsyj8nJgRzGunHDWuiNRFb/aRI9DK3Ud1LrHJl0tsYs0YEu35MTGrtwbFfw04D+zifFsfZsyxnZsc9anpLSb6IrMOzH9PXSwTSajGDP2Q9rLylEPHxj5RDh5mPoBvmpv4wmSiM/K7M2k/lgFSOH34MX5bTkj4a+LtYsQngeMd1exlBxZySgaMyO9pAUQke0twMibYBac/z2s9s9jNJ7SKY=
+  - secure: e/Jtl6XJYUKfjM2oQXOkPj8FoavYULu59PgDG2h4hUyhtsMQOIHV8F9VBQ6mdmQE5pLPueUsscMvYGgrGEXk6DzjIeNad/Gadw4ImtPAH0iAMZlhFBDSJLRsjtVF0HaeJFNAyk8cU0PHvPOyegiw2tzJJ3X9od5nB9j0d0XSDd0erMDcmChu0o7lbsPWnLwr+u4aiHXOG2v6m4FbMw8i7GePG5S7Sb1pLh6VHOIPQN9OfgvdIsLM425KzTSCoR86W5K/cVF99jOTSCcD0Vo/eTaSKdmVRZt3RmLq+uu9C2KLbYGMrTWt09o5Tzq6QG7OIsE3fwpr10hPCFeTLaZ2Z2DbPuihpI3Zl+JYWHEYhVws0XeltTpy0mcf1QQypnrBka8Ijj5M/r6n0mJE0kwu9GLMqWNkhmaBDr5ft/6hd6IpGF5b1oYgxM1tYurAQ/+H+DtKKyUr2IR6+jDtZUWX7q8azGx0Mwa6eUuniGHnCYxJ93pjaPSXSI9eOMWWfwd3EpunZuunpQb4Mi+3mhW6VsZ1wpoKGC0RdkuTuKQyDThlSBm82NFtVHtxoAJRdp11Ns92DBk6eqiIu+ZsSmO7Lwg6du3Rh7lqSp0W1uORw0dLLVw3Ctd7rJBeOsrAZ/O6qGYfOV8GlCLpoqlzFWPe7Kj1IfN+/MeF43RWrIHky7A=
+  - secure: pOQDnzVMvIWOhqlBPIGAZ9WV7UK5Zsb+1s4ywRrp0a30ijaMhQxMqPxme65woKGgfWKC0zmNRWhOeqMzAC/EzqQKBC3pbzZQzPO+aKVtZMJuhaNApA9wcmUmu6Viuyjte5+ydZxphIWu26hEPq2cKOhq7fQ2QUv0kOmPIt7XFgQXylTUfyzOZJtAO5qWMyM3a8h+dGiWan4UE+/RXEmptyENTY2cXpQocqtyM8zKdSMx4XmDQcLXi82Mhqyf+d0c50bCh/O4iZ95OBiUkdxXTbe+tRzet1sefox7+gCaWw5ii25r/ixcUBVg17FzmwXnGO8PDMU/06lFedGR6fQ7rUdylwYnrjTA7MgurtmpHwHaQDYp6hnL04JkhljT+NHITC379Mfyei53q871oq1/RvdFGXaFHZNojVpMg7LD1XmYOb79Xm1x+4fU1YeppRIgj50vz5Hi3n1fc9zz9jf6odWFKvK9feesdPJnaoQRbMpAoSq+c14qUSclVugcEqu1uSZJ347wE7tSaQ5jh1JqanXFdCprPRS03e/qB4aO6e4UT1ZHg1Q5sd+9PLlkwTa2dJZMBN3QKZUTAVROWkXPqRsUcPtsGguIIxIWT2S3jfUBRbLV2migy62b51F7Xnh3sMQ+a0IW8/V+srAKtZowkE6SL2P4577qqqYoJth04L0=
+  - secure: A5Bh725zKWVrBEaUEePIjoA/dR3NsdoHvKmhXGpE06H9RlhUc6gZWQac1Le9W4xtOUkWYLYSPK8v6MLCeNuwRFQBfJ+gEIQCcI7VipEVlU1MkEJwVXkY0/1IPS+ZRKJ5WQuNs2DtjaSA9jz+1+qxfxM/x8K3tZRTStReJ656uLMgZ42Ms+bQmJwF24wMoIod/IUd9zMrIEXY1aD0vU51MTpDp5GsGoV6UQZJfAjwjApgRPT8lSn+IAsg2smGepWgoyMuEDb/wrK8M964eUTjVyu9ThFvHUuRuSHFRR5RULJTSrwWCaymQUi8NQdxefbe4coM8/2SGNRFQs+Y84tladjubAybRoEhGOx2OoyKw5MPg+MBM92b9ZGr+wGBkWvmGIegHPpWrC0gJgBQNVqeBLNb//MD3jJen3AgVPRAA/TpqIy08XKmfwIxxHg2fTupg+mM+qvOl3/2s0oudXHiq5sPyNNAx3mJVif6AlcP3n9GwyYT5jHzpWnFnwObK/cB+4rMLZSP/5WGjwA5xbWJSpyNdcajFAR4QsdEoEzsznZDhu2aX8UkMQKJxNoU6snYq4iHkf6qJXmgjPPHKY17Gfe5vqGpmoc3N4v9dYKKsEevQtpI3B2UMocwTWxAOpASbm6oegQep4MdlmP04kMovpcr+RhodKRSt5nZU4t0h+c=

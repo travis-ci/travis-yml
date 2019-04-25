@@ -1,0 +1,32 @@
+language: node_js
+node_js: '6'
+sudo: required
+dist: trusty
+addons:
+  firefox: 52.3.0
+  postgresql: '9.4'
+  apt:
+    packages:
+    - dbus-x11
+install:
+- npm install
+before_install:
+- export DISPLAY=:99.0
+- sh -e /etc/init.d/xvfb start
+- psql -c 'create database bitballs;' -U postgres
+before_deploy:
+- git config --global user.email "justin@bitovi.com"
+- git config --global user.name "bitballs deploy bot"
+- node public/build
+- git add public/dist/ --force
+- git commit -m "Updating build."
+- npm run deploy:ci
+deploy:
+  skip_cleanup: true
+  provider: heroku
+  app: bitballs
+  api_key:
+    secure: G5xLgZeIDFhFjuBmq9RBDrQofyVI2v14eKdhCqH+U1WaVP4hhniGnxgDEjmilb6Zb7V9EPyyF5JNtHQgjIuJ06bK3dSSKpt3SLU74/w74EaQpdhxq7Xx+497xnBHfIhwA+8fg2RnLcppR2F+6IAYn55rfEIg92Cx81M/Cirm5sHccVQ6dV2/Sj2dWezAaG6VJQStH2z3E9ZwJrOd9wjf69H5KCG0onT2+syjs8EaE43QyBVo1GffhuEOaHrhI9vL19ctpOMTlzps3W3VE6sYr3LqFkxz+xPOstej++LqQSgdhheFh9F4H7NjsSc+9iZzM0KngHw0xKZ5b2mKZTBzR+u+JRpU30qLWmgcEV38z8i5SfOO8lPEHghh6msGbwZpVLPBLYRVnRWjAHHxslqaDEwNmb/2YdX9LTKdzsnFpYRGLVJIMGoCjTIvDV6lmyfMnxww8+W44Oh5Jh1XR5vkb6P0rIKTW3mwgx2o8vQcSRD+mUReCwA0EnLLaCBxZKG0Uku/zqe8skvFGVZMZfTBBMJ9GEIqPvh0ckYwGWcBmP+c+nFk+fxLl+3Fya86NWl1FaN/KeUIssmj/iVpsAy/nmVuPiwrgCnz+k0PG5WU3DbxiPVGn1+SlLQ/ncgu5yit0XfTiqAtt+FA/UxHTN5wZldvV/ppylTm36vWShqFKmI=
+env:
+  global:
+    secure: GtZ4Jqwgp5V9n+IC51FZT5KjIHMwmBXXntAyXCEQZopX0pGaya6IsJLvbQhkjFhBzJFnLVVkLbTpPaax8Gpf2a7Pwa/4ev8X7n1KxgTeupdpX7Ur8IO6np45n0o2BmE3l7+YOEzt6hC+rxYWPdcsVABTf8No5pPOVFgBL3GfM/fc2evn1wqJ5lGyPvQPJvJiRokznKxxnpqQ2W6C8P+LQy5v3iJJTqnNKWzJOj7dOPznOSdHA3sSJM+u/OjpyrPITsuXGTLXycMr/LK5jpyKUBIrFRZq7aY40+8hX8ZY+dMBHEuh7nIPHd45jqZx3Xk9Vgl974bWk1YK7ZqKk0HaveReqtprcKmEbc6toG22TFSyp3lcXkhLQV+wRWw0yrJ/czGbkuZU4jcO6r4ge75Bfi9+tUhqvMxk1sETkOunYoFpbyiUa7YU/ucH+hCcofphRH6NEtKdus749VdvcPu45rnL/zPxSs+5l8rpwWTp6XpcN0w8+MDYDhMSs6YPs9ltr0fP4U9amRjORU3PGkq7McAaXnenv3r2K5HSG8rFWTV5Te4ckj6MOIiU+tDSx0imClVccMr73NMJV0BVbkOWhef0uDlMb3uFFsPBj/t4OH1UkuhT+UeCNFCHxflj9aJEJe56NLD0ojZFeA1del7Cdl8yqWHL3b2sAkeRyWG09yM=

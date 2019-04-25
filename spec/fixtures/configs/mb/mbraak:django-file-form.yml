@@ -1,0 +1,39 @@
+language: python
+sudo: false
+addons:
+  firefox: latest
+matrix:
+  include:
+    - python: 2.7
+      env: DJANGO="Django==1.11.20" MOZ_HEADLESS=1
+    - python: 3.6
+      env: DJANGO="Django==1.11.20" MOZ_HEADLESS=1
+    - python: 3.7
+      env: DJANGO="Django==2.0.13" MOZ_HEADLESS=1
+      dist: xenial
+      sudo: true
+    - python: 3.7
+      env: DJANGO="Django==2.1.8" MOZ_HEADLESS=1
+      dist: xenial
+      sudo: true
+    - python: 3.7
+      env: DJANGO="Django==2.2" MOZ_HEADLESS=1
+      dist: xenial
+      sudo: true
+before_install:
+  - wget https://github.com/mozilla/geckodriver/releases/download/v0.24.0/geckodriver-v0.24.0-linux64.tar.gz
+  - mkdir geckodriver
+  - tar -xzf geckodriver-v0.24.0-linux64.tar.gz -C geckodriver
+  - export PATH=$PATH:$PWD/geckodriver
+install:
+  - pip install $DJANGO
+  - pip install -r testproject/requirements.txt
+  - pip install -r testproject/requirements_test.txt
+  - pip install -r testproject/requirements_travis.txt
+  - pip install -e .
+script:
+  - python testproject/manage.py test django_file_form_example
+  - coverage run --source=django_file_form,testproject/django_file_form_example testproject/manage.py test django_file_form_example
+  - coverage report
+after_success:
+  - coveralls

@@ -1,0 +1,34 @@
+language: node_js
+node_js:
+- '4.0'
+env:
+  global:
+  - CXX=g++-4.8
+  - GH_USERNAME=poppy-project
+  - GH_REPO=poppy-docs
+  - GIT_EMAIL=poppy-bot-ci@inria.fr
+  - GIT_NAME=poppy-bot
+  - secure: "pLsxQ4GTC0fSu4y4snrHxAr44GDW9ZM8/+H2NxC/NtLA2E3vIMvqMMR1UMDpUqHrHDITxdcQZYnuYB2E1BdUzqoCtKMRSE/lvnN28QhMlyGNe/XqYRA5nfe8ooyar80zuCYpLWjXpc5TtIB0EfRhfrNRqAKJL2CfBBW6JMvb8upEvopkvlEFudB3Ab4kqX6zbYxUX5GSPFRJFHaLZqCijJdY4C43JzTbuOp2vkwqODu3rqLEgg7zSjIHblWWKXaqT8pA2IMMkhUrIaKVpq7KIAfnqHo/xxqWGFFKhtrZQM4QHSSVQ1KWVkxPrJGbhXM0MED6rmgZ2t/3zu6zsFZM/yki88nl3w1V+VT/YX8CC8HcEU4U3oRzvzFziMGN/8WuMHdrMklHcDEovUKFvRcHZmW5JOdZOlprTghNi4LkHEr1C2sQazSohcme/Jb+eUP8aRa8v86c24tvgYH/zKyGmy96AsXH5hfifWlucuSm5Q4MmB86JFgjTjuhH7m1fDeMTJMewvyVfXIG7MP5WCcwvymIGD1SyYiXXhHWlKCpOSVfgSYcSWhTgueDImXWZ1gGYfaVaH6kmxkkiBPEuudQEfxPQGzdRiHm81gvL0oWMfhwy1KfMorgbWEfld9dnim62wwqcngD88xAWGVuK2pUf0WKm0bH8JxlqVPJg/p5NAs="
+addons:
+  apt:
+    sources:
+    - ubuntu-toolchain-r-test
+    packages:
+    - g++-4.8
+before_install:
+- npm install -g gitbook-cli broken-link-checker http-server
+- gitbook install
+- wget -nv -O- https://raw.githubusercontent.com/kovidgoyal/calibre/master/setup/linux-installer.py
+  | python -c "import sys; main=lambda x,y:sys.stderr.write('Download failed\n');
+  exec(sys.stdin.read()); main('~/calibre-bin', True)" > /dev/null
+script:
+- set +e
+- export PATH=$PATH:$HOME/calibre-bin/calibre
+- gitbook build -d ./
+- gitbook pdf -d ./
+
+after_success: # Check links
+- cd _book/ && http-server -p 8081 -s &
+- blc http://localhost:8081/ -ro --exclude *.local* --exclude *192.168* --exclude *.127.0.0.1 --exclude *forum.poppy-project.org* --user-agent "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.86 Safari/537.36" --get > contributing/checked_links.txt
+- grep -e 'BROKEN' -e 'Getting links from' -e 'Error' contributing/checked_links.txt
+- cat  contributing/checked_links.txt # display logs at the end to facilitate the reading of the output

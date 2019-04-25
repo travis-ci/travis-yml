@@ -1,0 +1,43 @@
+---
+language: ruby
+
+dist: trusty
+
+before_install:
+  - if [ "$TRAVIS_RUBY_VERSION" = "2.2.10" ]; then
+      gem install bundler -v '< 2.0';
+    else
+      gem install bundler;
+    fi
+  - export CXX="g++-4.8"
+
+addons:
+ apt:
+  sources:
+  - ubuntu-toolchain-r-test
+  packages:
+  - g++-4.8
+
+rvm:
+  - 2.2.10
+  - 2.3.8
+  - 2.4.6
+  - 2.5.5
+  - 2.6.2
+  - ruby-head
+  - rbx-3
+  - jruby-9.2.7.0
+  - jruby-head
+
+script: ./.travis.sh
+
+matrix:
+  allow_failures:
+    - rvm: ruby-head
+    - rvm: jruby-head
+    - rvm: jruby-9.2.7.0
+    - rvm: rbx-3
+
+notifications:
+  slack:
+    secure: 6E+GuZId5GcVLgiOKZnE9ZAnJTa+K2Fxqb0KfrECtskviylcPF1OmX36+y7xGUS0P0pGNyWQThe0zCBMpszno/KbvUdIs6jXbOImkFMuo65//4YcivK0rVaYh9uh2S1K3ycaDeUPDf0ulc/AwHnxWGR6yBD2N5idTwt1bsULdy0=

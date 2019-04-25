@@ -19,7 +19,7 @@ describe Travis::Yml::Schema::Def::Notification::Webhooks, 'structure' do
                 type: :boolean
               },
               urls: {
-                '$ref': '#/definitions/secures'
+                '$ref': '#/definitions/type/secures'
               },
               on_start: {
                 '$ref': '#/definitions/notification/frequency'
@@ -47,7 +47,7 @@ describe Travis::Yml::Schema::Def::Notification::Webhooks, 'structure' do
             ]
           },
           {
-            '$ref': '#/definitions/secures'
+            '$ref': '#/definitions/type/secures'
           },
           {
             type: :boolean

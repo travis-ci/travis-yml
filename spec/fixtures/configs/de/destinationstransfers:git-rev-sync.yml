@@ -1,0 +1,14 @@
+language: node_js
+node_js: node
+
+before_install:
+  - curl -o- -L https://yarnpkg.com/install.sh | bash -s -- --version 1.7.0
+  - export PATH="$HOME/.yarn/bin:$PATH"
+  
+cache: yarn
+
+install: yarn install --no-lockfile --silent
+
+script:
+  - yarn test
+  - bash <(curl -s https://codecov.io/bash) -f coverage/coverage-final.json

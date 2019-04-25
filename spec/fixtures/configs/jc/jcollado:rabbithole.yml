@@ -1,0 +1,18 @@
+language: python
+python: 3.6
+env:
+- TOXENV=py36
+- TOXENV=py27
+- TOXENV=flake8
+install: pip install -U tox
+script: tox -e ${TOXENV}
+deploy:
+  provider: pypi
+  distributions: sdist bdist_wheel
+  user: jcollado
+  password:
+    secure: Q+dP+AE558Ivufd5WEKzXg1dXVXhLQcjsUAEjT3/N4NjgXivTWF9rXyuMj2bTcjqGuh7my+WSkveSU7J3XVZ0nqo0IIUzrLLhIu4rlizs2P2oiN2kr8Tmvny0QouamePvh+8jm8+DGD0pfxaH9OYrJnJUiV1nphPVmOKYmdJlaPWrNY/iiJUSR0ndEkxX9TGgI/S4Qu73cWl9ro9F4c8VAa5uK/XknLfmRoLnIuI+/LAPJdUjW+wphNjlYW2Gw3rGNq+G0/aymU7WebAku4en+epNnoHENJO/KFeMDyzCd4iXPCFM6PxjmaVQqoT7Dvm0fKwzrcgv6e9+5xtOwgLK+miLIAuRwlfDlHpLcL3dWqqT0zuTAjo4bvXkzQPJs0Iuu7/amqZkyyOIVKRhtTTcfFsnn8p7XnCgNfXjzwmJfoiKe1cSLcYDjhWWmuKNTrhGC9ekcC2dc06jsUufvXtaJA3EJuoWxVAYYjoLsWQTkOJbUXuFK/d2tZeUReGLzWdzEegxPc6dXHbhMXHvb9YppDQE/IpzQEWy5bFbnjUNeFoKmVljAzMPMct2GP4KL3nRbMKuv+vpIURCplLZgBfti960HLiUzzBltL8VUmv8wJ17utpUOnTjnmAAk7qnaKUWNfrb3dHUDA9nysZksoc8ZKq0uJ6/A8GxoIWGxbi0xc=
+  on:
+    tags: true
+    repo: jcollado/rabbithole
+    condition: "$TOXENV == py27"

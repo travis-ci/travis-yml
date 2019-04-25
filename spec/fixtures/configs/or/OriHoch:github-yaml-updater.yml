@@ -1,0 +1,17 @@
+dist: trusty
+sudo: required
+language: bash
+services:
+- docker
+env:
+  matrix:
+  - IMAGE_SUFFIX=github_yaml_updater DOCKER_BUILD_ARGS="."
+  global:
+  - IMAGE_PREFIX="orihoch/"
+script:
+- bash .travis.sh script
+deploy:
+  provider: script
+  script: bash .travis.sh deploy
+  on:
+    branch: master

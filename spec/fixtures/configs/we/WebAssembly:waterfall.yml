@@ -1,0 +1,18 @@
+sudo: false
+dist: trusty
+language: python
+addons:
+  apt:
+    packages:
+      - build-essential
+      - ninja-build
+      - devscripts
+python:
+  - "2.7"
+install:
+  - pip install flake8==3.4.1
+script:
+  - flake8
+  - ./src/build.py --sync-include=tools-clang,host-toolchain,cmake,wabt --build-include=wabt,debian --no-test
+notifications:
+  email: false

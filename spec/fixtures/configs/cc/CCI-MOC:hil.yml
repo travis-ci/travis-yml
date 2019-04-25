@@ -1,0 +1,48 @@
+language: python
+python:
+  - "2.7"
+  - "3.4"
+matrix:
+  allow_failures:
+    - python: "3.4"
+
+virtualenv:
+  system_site_packages: true
+
+sudo: required
+dist: trusty
+
+cache:
+  - pip
+
+addons:
+  postgresql: "9.3"
+  apt:
+    packages:
+      - apache2
+      - libapache2-mod-wsgi
+
+branches:
+  except:
+    - none
+
+env:
+  - TEST_SUITE=unit DB=sqlite
+    # SPOOF_MANUAL_MIGRATIONS is used to tell the migration scripts that they
+    # should make up data that would otherwise require manual intervention;
+    # this is important for the migration tests.
+  - TEST_SUITE=unit DB=postgres SPOOF_MANUAL_MIGRATIONS=true
+  - TEST_SUITE=integration DB=postgres SPOOF_MANUAL_MIGRATIONS=true
+
+install:
+  # A dependency might use new pip syntax; upgrade to prevent breakage. See #771
+  - pip install --upgrade pip
+  - sh -e ci/optimize_postgres.sh
+  - sh -e ci/hil_install.sh
+  - sh -e ci/apache/install.sh
+  - sh -e ci/keystone/install.sh
+  - sh -e ci/obmd/install.sh
+
+script:
+  - sh -e ci/run_tests.sh
+

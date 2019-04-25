@@ -1,0 +1,34 @@
+language: minimal
+
+env:
+  matrix:
+    - LOKOLE_QUEUE_BROKER_SCHEME=azureservicebus
+    - LOKOLE_QUEUE_BROKER_SCHEME=pyamqp
+
+services:
+  - docker
+
+install:
+  - make build verify-build
+
+before_script:
+  - docker-compose up -d
+
+script:
+  - make integration-tests
+
+after_failure:
+  - docker-compose logs
+
+after_script:
+  - docker-compose down --volumes
+
+before_deploy:
+  - echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin
+
+deploy:
+  - provider: script
+    script: DOCKER_TAG="$TRAVIS_TAG" make release deploy
+    on:
+      repo: ascoderu/opwen-cloudserver
+      tags: true

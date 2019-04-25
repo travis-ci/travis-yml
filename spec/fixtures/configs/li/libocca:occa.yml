@@ -1,0 +1,129 @@
+# Unable to run LeakSanitizer propertly without root
+#   https://github.com/travis-ci/travis-ci/issues/9033
+sudo: true
+language: cpp
+notifications:
+  email: false
+
+# Use Linux + gcc unless specified
+os: linux
+dist: trusty
+compiler: gcc
+
+matrix:
+  include:
+    - name: "gcc-4.9"
+      env:
+        - CC=gcc-4.9
+        - CXX=g++-4.9
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-4.9
+    - name: "gcc-5"
+      env:
+        - CC=gcc-5
+        - CXX=g++-5
+        - OCCA_COVERAGE=1
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-5
+    - name: "gcc-6"
+      env:
+        - CC=gcc-6
+        - CXX=g++-6
+        - OCCA_COVERAGE=1
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-6
+    - name: "gcc-7"
+      env:
+        - CC=gcc-7
+        - CXX=g++-7
+        - OCCA_COVERAGE=1
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-7
+    - name: "clang-3.6"
+      env:
+        - CC=clang-3.6
+        - CXX=clang++-3.6
+        - CODECOV=OFF
+      compiler: clang
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-precise-3.6
+          packages:
+            - clang-3.6
+    - name: "clang-4.0"
+      env:
+        - CC=clang-4.0
+        - CXX=clang++-4.0
+        - CODECOV=OFF
+      compiler: clang
+      addons:
+        apt:
+          sources:
+            - llvm-toolchain-trusty-4.0
+          packages:
+            - clang-4.0
+    - name: "clang-5.0"
+      env:
+        - CC=clang-5.0
+        - CXX=clang++-5.0
+        - CODECOV=OFF
+      compiler: clang
+      addons:
+        apt:
+          sources:
+            - llvm-toolchain-trusty-5.0
+          packages:
+            - clang-5.0
+    - name: "clang"
+      os: osx
+      osx_image: xcode8
+      compiler: clang
+      env:
+        - CC=clang
+        - CXX=clang++
+        - CODECOV=OFF
+
+env:
+  global:
+    - LD_LIBRARY_PATH="${TRAVIS_BUILD_DIR}/lib:${LD_LIBRARY_PATH}"
+    - CXXFLAGS="-g -O0 -fno-inline"
+
+
+before_install:
+  - |
+    if [ "${TRAVIS_OS_NAME}" = "osx" ]; then
+      travis_wait 30 brew update;
+    fi
+  - |
+    if [ -n "${MATRIX_INIT}" ]; then
+      eval "${MATRIX_INIT}"
+    fi
+    export BUILD_CXXFLAGS="${CXXFLAGS}"
+    export TEST_CXXFLAGS="${CXXFLAGS}"
+
+script:
+  - cd ${TRAVIS_BUILD_DIR}
+  - CXXFLAGS="${BUILD_CXXFLAGS}" make -j 4
+
+  - cd ${TRAVIS_BUILD_DIR}
+  - CXXFLAGS="${TEST_CXXFLAGS}" make -j 4 test
+  - bash <(curl --no-buffer -s https://codecov.io/bash) > codecov_output
+  - head -n 100 codecov_output

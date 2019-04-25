@@ -1,0 +1,53 @@
+---
+# yamllint disable rule:line-length
+sudo: required
+dist: xenial
+services:
+  - docker
+language: node_js
+node_js:
+  - 'lts/*'
+cache:
+  directories:
+    - node_modules
+before_install:
+  - |
+        git config --global user.email "travis@welder.web"
+        git config --global user.name "Travis CI"
+        git remote add welder https://github.com/weldr/welder-web.git
+        git fetch welder
+        git log -1 --pretty=format:%H welder/master
+        git rebase welder/master
+install:
+  - |
+        if [ "$COMMAND" != "test_rpmbuild" ]; then
+            npm install
+        fi
+env:
+  global:
+    - CXX=g++-4.8
+    - secure: OczCF0tkzLemUci4nQwVKuwyz8NCl3vTNUAF8k/bvFxi1blaTU5HRdws7LtcjlXFx7WuJba+E6Jd2FaZxOzLqypADgf1U/7lPNx2aODDTfM6+eYPZJQnylCkePcJH5Wu/ew9+xFDnG1WQuJWe5sWrrIlX//6L+F0pZKfur49mipRcHDp2zU8rN2HRALhK08RRP9un5V0Wrp1R4THGFbciqZbHMw9LKld6inY9+3cwAvXuTdTbF8bhaFuqK8cYb0ekl33MmF2WzN1z33bLmaihZV1jBz0sx3JqiUZXV5pdupQ6BC0RcgAGqJHKWbZ/tZ4v1QDPEHQVbsNkLZ94IOUKKnxJ6zpvgKM3iX9C/vABy31CndX9qKnmQ02KQJYwyR0FPGX1ln0+GgxERhGMytsSHD3rrhBIalPNhl281VvP0JopU6uhyzOgfv1dglioNKa7Q6TQ57ytF+Jl3nn/yBL7PgKCyqbQmgSvIFbxeLMUUu00BiNrD64Zr2WnN5u8fmtE/7WefgAKRmNj/5mVj3CPDOJUKL4c5IaLA9vew5So4IuSBxZUPNoT2NQM+QcjcjVGH9jyIqM94Dsk2hAXYq2maSDLWWubJrkau6y3FHT3XDVsLa9hSMMryGk0JT1X0b20yZKBHEflobav26RrTpZJg+sTLK09s6xlW/EABEDMro=
+    - ZANATA_USER=dshea
+  matrix:
+    - COMMAND=eslint
+    - COMMAND=stylelint
+    - COMMAND=test_rpmbuild
+    - COMMAND=npm_audit
+script:
+  - make "$COMMAND"
+jobs:
+  include:
+    - stage: deploy
+      script: make po-push
+      env: COMMAND=none
+      if: branch = master AND type = push
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - g++-4.8
+notifications:
+  email:
+    on_failure: change
+    on_success: never

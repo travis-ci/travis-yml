@@ -1,0 +1,88 @@
+sudo: false
+dist: trusty
+
+language: ruby
+rvm: 2.4.2
+
+branches:
+  only:
+    - master
+    - develop
+    - /^release\/.*$/
+    - /^hotfix\/.*$/
+
+# NOTE: AWS uses environment keys set and secured via Travis CLI!
+# AWS here syncs to sharesight-travis-ci/www/$TRAVIS_BUILD_NUMBER.tar.gz
+# Tar includes files from the middleman build process – data/*.yml and build
+# See howto/environment.md
+
+env:
+  global:
+    - PATH=$HOME/.local/bin:$PATH # required for awscli
+    - RAILS_ENV=development
+    - APP_ENV=staging
+    - GITHUB_REPOSITORY=https://github.com/sharesight/www.sharesight.com
+    - BUGSNAG_API_KEY=f1bafd5cf4c9555dcdf743b40fb9b96a
+    - FORCE=""
+    - BUCKET_NAME=sharesight-travis-ci
+    - TAR_FILENAME="$TRAVIS_BUILD_NUMBER.tar.gz"
+    - BUILT_FROM_BUNDLE=false
+    - RUN_TESTS=true
+
+# NOTE: yarn/npm aren't actually used; no real harm here.
+cache:
+  bundler: true
+  apt: true
+  npm: true
+  yarn: true
+  directories:
+    - node_modules
+    - vendor/bundle # bundle cache in Travis
+    - build # this is the cache for middleman; since this will update during a rebuild, it's okay to cache!
+
+jobs:
+  include:
+    # NOTE: the `env` property in test stage is required to use global environments!
+    - stage: build
+      env: NAME=build
+      script: true
+
+    - stage: test
+      env: NAME=test
+      # Don't run the testing suite on develop commits [from contentful, typically] – only build.
+      # We run a daily develop cron build (which will test with this logic).
+      if: branch != "develop" OR type IN (pull_request, api, cron)
+      script:
+        # NOTE: The actual `build` step is called for every job in the before_script (just incase)
+        - ./bin/travis/test.sh
+
+    - stage: deploy
+      env: NAME=deploy
+      # no pull requests should deploy!
+      if: branch IN (master, develop) AND type IN (push, api, cron)
+      script:
+        - ./bin/travis/deploy.sh
+
+before_install:
+  # Sync middleman contentful && middleman build FROM S3
+  - pip install --user awscli
+  - . ./bin/travis/cache.sh && get_cache_from_s3
+
+before_script:
+  - if [ "$TRAVIS_BRANCH" = "master" ]; then export APP_ENV=production; fi
+  # Don't run testing suite on develop commits [from contentful, typically] – only build.
+  # We run a daily develop cron build (which will test with this logic).
+  - if [ "$TRAVIS_BRANCH" = "develop" ] && [ "$TRAVIS_EVENT_TYPE" = "push" ]; then export RUN_TESTS=false; fi
+  - if [[ "$TRAVIS_COMMIT_MESSAGE" == *"FORCE_SYNC"* ]]; then FORCE="--force"; fi
+  - ./bin/travis/build.sh
+
+after_success:
+  # Sync middleman contentful && middleman build to S3
+  - . ./bin/travis/cache.sh && send_cache_to_s3
+
+notifications:
+  email:
+    on_success: never
+  slack: # see: https://docs.travis-ci.com/user/notifications/#Configuring-slack-notifications
+    rooms:
+      secure: EPbJNS8vHwwt38cx/XbmEqBnKjtYIgnEWIELcK7ZX0eA63tV3l1UpaN8rBxB6v4BxV9Ya8vSjHhMHm2cOIT+7xCaQcMOolC1Es6mZeAUL7qphGRzB6QrAiq1kMPHMaF/DtWZ65h7Mn1dB96OBCRM/Koa3U5OjKrNPe1JFBGjrDa43qQVDhRbqvjHwFNNGfNGD+Xc48V+Iswx0yhRvWu5hl2Kk8g/UaKQiW0aBZwK5MpryyIXI4SPeSJX1vSigoCt8Q1VeZvCzZ2zJ/nbdhmxhLzreAJn2vQHjpt9/DCOFkvnmKW8n5HdeDe73bzSDMGjzb8jfty7jaSEUiXr702iVu+zHRQLzqxzAehir18IfaPqKytrJ/UeWjWrOtHUYFpG5oYDdbkM3apkkbB7X7hAN2RaXnwNuwZALK5vG2sA2VRRc+N8m7bw4NWwx/eSYxxYQnytPGzZF6cahyyc82sD2LwkccTNzsi0SowZ/90K+CppWU8CEp6uU/XVVwY9IA0sb7X0lU+7HLGdroYZ9hdnLaC6hlyWs4pdVSGwYK2w/y0fdvJlA6o485hkcfj/hxAG7yeDwvigRAHkHcZStkRNeZtuLCI1K6AO93Vsdba/1UbRQFh73jFFF8DY0CxDdhIOAF6EBR6behuMg4LrPyfzRutH34L2JEVEqpcCZ+AjyOk=

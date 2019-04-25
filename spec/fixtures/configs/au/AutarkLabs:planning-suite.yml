@@ -1,0 +1,73 @@
+# ensure running in a container for fast boot, travis has these requirements:
+sudo: false
+dist: 'trusty'
+
+# these are executed in order. each must pass for the next to be run
+stages:
+  - precache # warm up cache for default Node.js version
+  - lint # lint code and docs
+  - test # all tests
+
+# defaults
+language: node_js
+node_js: '10' # equivalent to node 10
+
+cache:
+  directories:
+    - $HOME/.npm
+    - node_modules
+
+jobs:
+  include:
+
+    - stage: precache
+      script: true
+      install:
+        - npm i
+
+    - stage: lint
+      name: Lint contracts and frontend apps
+      install: pwd # override to avoid npm i again
+      script: npm run lint
+
+    - stage: test
+      script: travis_wait 60 npm run coverage -- --scope=@tps/apps-address-book
+      name: Address Book app tests and coverage report
+      install: npm run bootstrap
+      after_success: npm run coveralls
+      env: 'COVERAGE=true'
+
+    - stage: test
+      script: travis_wait 60 npm run coverage -- --scope=@tps/apps-allocations
+      name: Allocations app tests and coverage report
+      install: npm run bootstrap
+      after_success: npm run coveralls
+      env: 'COVERAGE=true'
+
+    - stage: test
+      script: travis_wait 60 npm run coverage -- --scope=@tps/apps-projects
+      name: Projects app tests and coverage report
+      install: npm run bootstrap
+      after_success: npm run coveralls
+      env: 'COVERAGE=true'
+
+    - stage: test
+      script: travis_wait 60 npm run coverage -- --scope=@tps/apps-dot-voting
+      name: Dot Voting app tests and coverage report
+      install: npm run bootstrap
+      after_success: npm run coveralls
+      env: 'COVERAGE=true'
+
+    - stage: test
+      script: travis_wait 60 npm run coverage -- --scope=@tps/apps-rewards
+      name: Rewards app tests and coverage report
+      install: npm run bootstrap
+      after_success: npm run coveralls
+      env: 'COVERAGE=true'
+
+    # - &node
+    #   script: npm run test
+    #   node_js: 'lts/*'
+
+notifications:
+  email: false

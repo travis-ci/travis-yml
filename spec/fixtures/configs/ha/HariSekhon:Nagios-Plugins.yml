@@ -1,0 +1,104 @@
+#  vim:ts=2:sts=2:sw=2:et
+#
+#  Author: Hari Sekhon
+#  Date: 2014-11-29 01:02:47 +0000 (Sat, 29 Nov 2014)
+#
+#  https://github.com/harisekhon/nagios-plugins
+#
+#  License: see accompanying Hari Sekhon LICENSE file
+#
+#  If you're using my code you're welcome to connect with me on LinkedIn and optionally send me feedback
+#  to help improve or steer this or other code I publish
+#
+#  http://www.linkedin.com/in/harisekhon
+#
+
+language: perl
+perl:
+  # this build has thread support
+  - "5.24-shrplib"
+  #- "5.22"
+  #- "5.18-shrplib"
+  #- "5.16"
+  # latest Redis cpan module requires Perl >= 5.10
+  - "5.10"
+  # there is workaround in build now to install older version if latest fails for RHEL5/CentOS5 servers
+  # other CPAN modules are broken for Perl 5.8, re-visit
+  #- "5.8"
+
+sudo: required
+
+notifications:
+  email: false
+
+branches:
+  only:
+    - master
+
+env:
+  - DOCKER_COMPOSE_VERSION=1.16.1 PYTHONUNBUFFERED=1
+
+before_install:
+  - sudo rm /usr/local/bin/docker-compose
+  - curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
+  - chmod +x docker-compose
+  - sudo mv docker-compose /usr/local/bin
+
+# after_failure doesn't trigger from install failure
+# perlbrew and cpanm are not installed without an install section
+# using script section will trigger "after_failure" section but this runs everything regardless of failures
+# script:
+install:
+  #- pushd lib
+  #- make apt-packages
+  #- cpanm --installdeps --notest . || echo CPANM LIB FAILED
+  #- popd
+  #- make apt-packages
+  #- cpanm --installdeps --notest . || echo CPANM FAILED
+  # integrated cpanm in to core Makefiles
+  # workaround for strange error when building pylib submodule, /usr/local/lib/python2.7, /usr/local/man, /usr/lib/python2.7 etc...
+  # can't do /usr/lib, otherwise /usr/lib/sudo/sudoers.so breaks with "sudo: /usr/lib/sudo/sudoers.so must be only be writable by owner"
+  # 777 causes "Insecure directory in $ENV{PATH} while running with -T switch at lib/HariSekhonUtils.pm line 1316" - nice catch to this hackery by Perl taint security
+  #- sudo chmod -R 755 /opt/python /usr/local /usr/lib/python*
+  # with 755 perms goes back to "error: could not create '/usr/local/lib/python2.7/dist-packages/markupsafe': Permission denied"
+  # chown root still same error... must be because pure python submodules don't sudo in Travis
+  #
+  # Travis has python install before in $PATH even in Perl builds so need to install PyPI modules here otherwise they're not found, but perms not set correctly on Travis build to do this, better than modifying $PATH to put /usr/bin first which is likely to affect many other things including potentially not find the perlbrew installation first
+  - sudo chown -R travis /opt/python /usr/local /usr/lib/python*
+  - travis_retry make && travis_retry make zookeeper
+
+script:
+  - sudo sysctl -w net.ipv4.conf.all.forwarding=1
+  - travis_retry make test
+
+after_success:
+  - echo "After Success"
+
+after_failure:
+  - echo "After Failure"
+  #- for x in /home/travis/.cpanm/work/*/build.log; do echo "uploading $x"; curl -sT "$x" transfer.sh || :; done
+  # now requires authentication
+  #curl -sT "$x" chunk.io || :
+
+services:
+  # docker breaks cassandra, mysql, probably everything
+  # => wholesale switch over to dockerized testing instead
+  - docker
+#  - cassandra
+#  #- couchdb
+#  - elasticsearch
+#  - memcached
+#  - mongodb
+#  - mysql
+#  #- postgreql
+#  - neo4j
+#  #- rabbitmq
+#  - redis
+#  - riak
+
+#env:
+#  - DEBUG=1
+# env vars are handled in docker test scripts now
+#  - MYSQL_DATABASE=mysql
+#  - MYSQL_PASSWORD=""
+#  - MYSQL_USER=travis

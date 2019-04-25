@@ -1,0 +1,16 @@
+language: node_js
+node_js:
+  - '10'
+before_install:
+  - yarn global add bolt
+install:
+  - bolt
+script:
+  - yarn run ci:remote
+cache: yarn
+notifications:
+  slack:
+    on_success: change
+    on_failure: always
+    rooms:
+      secure: IE14Ew9NhkL4iRjUWLDPZSXsevUIuRX00m6bxTx4GRL58nPMxO6UGDXZeLy6xGTyAwLrA9qreFQRoBvHdIQU0Jwk6dxs6qrm0roY+t6mn6eHvFlvimP2n6bLs7HVECMcD2NIDTztl/w1ailnGazEy5M8rnJSK8UTDeDqm60J4/9B1+JpyUEwU5n8mewEdhhGYXuizJUsp5BnX6E/ZhBc43HhRF2A8/VxX7zR57K8CQ1Ep9qY9zEAVUuN1BPuzBYdE0bN4k6oSw/v8FFdHT/6zxBRRJsLyMI+iI5OX9EF2mBJUHqYlJLYdnur14KJ0uiRd3q5H7hpdvFsoMuBdwTZnm1xnJs6vuStv9IW/57Cg5rq6KSGSLjZbf+a76fEyLQpn664B/VfRCAeqdTPTa71AznI+iyr6bSYFyju6vmkzTfuAn8bdDLacojSt5UwndIhwdold/hBxlkkvaZrMNQ/vi8sFHTI6j9MZ3GgzFmHW5FhcfO98JwHuI3KFwo7NI3rUW+b878wlTqJmQFzftos+QYMl44Bp1VrRW+QrjZTxAqNkP8fVG8r/bx9ldnLqx70ObrIjneCVjIpvhOheYIW+BJYGh+D9J1MxVN4sb5JOhk6m9E4DU4f+B7abG1Z9ayU8NjZGk52k+tYs2cOZelNPWifzxbnAu/A/Pklr5SwTrM=

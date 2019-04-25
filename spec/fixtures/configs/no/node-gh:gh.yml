@@ -1,0 +1,45 @@
+language: node_js
+sudo: false
+env: FORCE_COLOR=true
+
+# Trigger a push build on master and greenkeeper branches + PRs build on every branches
+# Avoid double build on PRs (See https://github.com/travis-ci/travis-ci/issues/1147)
+branches:
+    only:
+        - master
+        - type != push
+
+script:
+    - git config --global user.name "Ryan Garant"
+    - npm run-script build
+    - npm link
+    - npm run-script test:ci
+    - export NODE_ENV=production
+    - npm install --production
+    - gh
+
+jobs:
+    include:
+        - stage: test
+          node_js: '8'
+          os: osx
+        - os: linux
+          node_js: 'lts/*'
+        # uncomment in the future when this is fixed: https://travis-ci.community/t/node-js-build-fails-with-no-obvious-error/961/8
+        #- os: windows
+        #  node_js: 'lts/*'
+        - os: osx
+          node_js: 'lts/*'
+        # latest version of node
+        - node_js: 'node'
+          os: osx
+        - stage: release
+          node_js: lts/*
+          script:
+              - npm run-script build
+              - npx semantic-release
+
+stages:
+    - test
+    - name: release
+      if: repo = node-gh/gh AND branch = master AND type IN (push)

@@ -1,0 +1,32 @@
+language: java
+
+script: ./.travis-build.sh $GROUP
+
+## When this is enabled, the require-javadoc job fails.  I don't know why.
+# # Enable Gradle and Maven caching
+# before_cache:
+#   - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+#   - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+# cache:
+#   directories:
+#     - $HOME/.gradle/caches/
+#     - $HOME/.gradle/wrapper/
+#     - $HOME/.m2
+
+env:
+  matrix:
+    - GROUP=bcel-util
+    - GROUP=bibtex-clean
+    - GROUP=html-pretty-print
+    - GROUP=icalavailable
+    - GROUP=lookup
+    - GROUP=multi-version-control
+    - GROUP=options
+    - GROUP=plume-util
+    - GROUP=require-javadoc
+    - GROUP=signature-util
+
+jdk:
+  - oraclejdk8
+#  - oraclejdk7
+#  - openjdk7

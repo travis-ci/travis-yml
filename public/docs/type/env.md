@@ -2,24 +2,21 @@
 
 
 
-## Type
+## Types
 
-Any of:
-
-* Map (Hash)
-* Any of:
-
-* Sequence (Array)
-* Any of:
-
-* Map (Hash)
-* Map (Hash)
+* Hash
+* Array of: Hash
+* Array of: Hash
+* Array of: String
+* Hash
+* Hash
 * String
+
 
 ## Flags
 
-* Expand: This is a [matrix expansion key](/matrix_expansion).
 
+* expand
 
 ## Examples
 

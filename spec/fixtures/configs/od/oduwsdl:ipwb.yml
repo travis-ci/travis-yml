@@ -1,0 +1,22 @@
+language: python
+python:
+  - "2.7"
+before_script:
+  - wget "https://dist.ipfs.io/go-ipfs/v0.4.19/go-ipfs_v0.4.19_linux-amd64.tar.gz" -O /tmp/ipfs.tar.gz
+  #- mkdir $HOME/bin
+  - pushd . && cd $HOME/bin && tar -xzvf /tmp/ipfs.tar.gz && popd
+  - export PATH="$HOME/bin/go-ipfs:$PATH"
+install:
+  - pip install -r requirements.txt
+  - pip install -r test-requirements.txt
+  - pip install pycodestyle
+  - pip install codecov
+  - pip install pytest-cov
+script:
+  - pycodestyle
+  - ipfs init
+  - ipfs daemon & sleep 10
+  - py.test --cov=./
+dist: trusty
+after_success:
+  - codecov

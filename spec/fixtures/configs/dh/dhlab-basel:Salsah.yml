@@ -1,0 +1,38 @@
+dist: trusty
+sudo: required
+
+language: node_js
+
+node_js:
+  - "8"
+
+cache:
+  yarn: true
+  directories:
+  - node_modules
+
+addons:
+  chrome: stable
+  apt:
+    sources:
+    - ubuntu-toolchain-r-test
+    packages:
+    - g++-4.9
+
+env:
+  global:
+  - CXX=g++-4.9
+
+install: export CXX="g++-4.9"
+
+before_script:
+  - yarn install --prod=false
+
+script:
+  - yarn test-ci
+  - yarn build-prod
+
+notifications:
+  slack:
+    secure: "fzFYDu/Ooy8SM49Z1FFe/owOp4OXwPkoGjp1Vm3kadP/25pvwqGmQkkEX0urSTpZuMc+LvipLMUD33RxVEP2R4V9qlWzdoZ/AW61GSUzkVdhJZwnJJ5D8BXCulajKgGdXAsv2qZ7Qq7yQnom2gpYClzWo02aXIH+HCN76jUhrMS+ELeeqrxMF4ritw/j32T1E4t+oZRDK3Al08y+5e8zZHAzG5xH9JUOhg15novNveTC77KbXUKkvfSt96tPPwK03W0yC1+AtXcYxC0tLecqxbDFm5RRli8IeTSEq1BKij335MbEWfQepSDg0MlvrbKuP7TJ0c1eBotUBCpfa5NBsD+mFs36EuBsMRdQpDHEPIr0ExhcrblAQJ+2MwzEq5hpDdZDXnZ7zuvzrsb5qlZuaOOZLDxblPxZhrIrgOPPRqvQK0qUUPU0Bjew/cL42MtQpN2/3H6u22NK/ortLVUEZVb9cIT4KnMOB4ExdDiNMc2Y8eqZez/F+QoKEJYYx8W48LGQBaTrrrvL2sBCTK0NjaR8xxDAJWH0NwsBpikWP5S8RtzLKlDgytwTZlc8sxlBVzsyYu1kq6nmT2zMQyyBAB7oVrvsrBcUStCpGIwcspYmDHT7x810INMWzkP8QfdTb/0fLzdhc4fWrf2khMBM47JrWM4fxtCQA65BvfNlj+k="
+

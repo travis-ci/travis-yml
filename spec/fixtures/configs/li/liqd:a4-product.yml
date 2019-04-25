@@ -1,0 +1,30 @@
+language: python
+dist: xenial
+python:
+  - "3.6"
+cache:
+  pip: true
+  directories:
+    - node_modules
+install:
+  - nvm install 8
+  - npm install
+  - npm run build
+  - pip install -r requirements/dev.txt
+  - pip install coveralls
+script:
+  - python manage.py collectstatic > /dev/null
+  - py.test --cov
+  - python manage.py makemigrations --dry-run --check --noinput
+  - ./node_modules/.bin/polylint -F
+  - rm -rf static/
+after_success:
+  - coveralls
+deploy:
+  - provider: script
+    script: scripts/deploy.sh
+    on:
+      branch: master
+env:
+  global:
+  - secure: k2bdrRAEQ3/wFHZaqOdytRTRNwPtuCtdhKHwtX2G18d8tG3yyAEB39OGcy3ScTua5fiFVK9E3Y5rIaZog6I8LJ9xggcbyO/PEBGjxgvzuQ/5PaEeF+1TxH54R33dtT+7oNYT3zv9IRH8++0/mVPxo78fDDxXyn/fUVd23gdZCniijEfWntn4/Ja8T8yyaaWDZWYU1RiJWiEAPtcsDkxOT66VhHEMFKG1WOOcu5+cf+HX4vABjGNe9GcZ7TRPlCN45x85Mo7G4/5tbLtInMbo/Tw6d3bNpqI7rKPM5nz/455phdx1SzUs4ULOs0sq6bPILcwXIHgXdwr8JRC2+kFaEj2T5NEr+NmujgxlHx4ASN9Z0f/NrxirYweTg9vnmwe2W3Px/ZIdnvLvrLB1CeOFSdvmCVwlGVibGYryWULL0k1fHKn2+W3MMTyyrI6QcbljQ7SJFmOrXZaLOQWGOFoWJmXBBX76hG13T+WuBLRmueNV1Bh1UaI1/toat5/udzR2rYRdkcesdo6XS04vwMvx7bmziq6EERQgy9oFb84AV2Am88bUgn9PbzHIaPYMjuwG6sX0Sqz8yaqw2vvMUMyDfgwVJyKBuuMAR5JHYRn+1V7rtG8hmdCUjUnb0I+pUt4aO9C3MVA2+F3DnQmPuU83Uocuve9Ke0bX4fQygAjQp/o=

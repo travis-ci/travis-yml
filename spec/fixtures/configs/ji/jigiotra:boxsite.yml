@@ -1,0 +1,18 @@
+sudo: false
+dist: trusty
+language: node_js
+node_js:
+  - 8
+  
+before_install: |
+  sudo apt-get update
+  sudo apt-get install -y libgconf2-4 libnss3-1d libxss1 libasound2 libatk1.0-0 
+  sudo apt-get install -y libcups2 libgtk-3-0 libx11-xcb1 libxcomposite1 libxcursor1 libxdamage1 libxfixes3
+  sudo apt-get install -y fonts-liberation libappindicator1 lsb-release xdg-utils
+  wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+  sudo dpkg -i ./google-chrome*.deb
+  sudo apt-get install -f
+
+branches:
+  only:
+    - master

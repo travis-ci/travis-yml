@@ -1,0 +1,69 @@
+language: c
+services: [docker]
+
+matrix:
+  include:
+  - name: "Ubuntu 18.04"
+    env: DOCKER_IMAGE=ubuntu:18.04
+  - name: "Ubuntu 18.10"
+    env: DOCKER_IMAGE=ubuntu:18.10
+  - name: "Debian 10"
+    env: DOCKER_IMAGE=debian:buster
+  - name: "Flatpak"
+    env: DOCKER_IMAGE=flatpak/flatpak-builder:gnome-3-28
+    cache:
+      directories:
+      - .flatpak-builder
+    install:
+      - docker run --privileged=true --name image -it -d --volume "$(pwd)":/opt/venom --workdir /opt/venom $DOCKER_IMAGE
+    script:
+      - docker exec image flatpak-builder --stop-at=venom --repo=repo app com.github.naxuroqa.venom.json
+      - docker exec image flatpak build app meson --prefix=/app _build
+      - docker exec image flatpak build app ninja -C _build install
+      - docker exec image flatpak-builder --finish-only --repo=repo app com.github.naxuroqa.venom.json
+      - docker exec image flatpak build-bundle repo com.github.naxuroqa.venom.x86_64.flatpak --runtime-repo=https://dl.flathub.org/repo/flathub.flatpakrepo com.github.naxuroqa.venom
+
+cache:
+  - ccache
+
+install:
+  - docker run --name image -it -d --volume "$(pwd)":/tmp/venom --workdir /tmp/venom $DOCKER_IMAGE
+  - docker exec image apt-get -qq update
+  - docker exec image apt-get -qq install -y
+      clang
+      cmake
+      libconfig-dev
+      libgtest-dev
+      libopus-dev
+      libsodium-dev
+      libvpx-dev
+      pkg-config
+      libgee-0.8-dev
+      libgspell-1-dev
+      libgtk-3-dev
+      libjson-glib-dev
+      libsoup2.4-dev
+      libsqlcipher-dev
+      libcanberra-dev
+      libgstreamer1.0-dev
+      libgstreamer-plugins-base1.0-dev
+      valac
+      python3-pip
+      wget
+      > /dev/null
+  - docker exec image pip3 install meson ninja
+  - docker exec image bash -c "wget 'https://github.com/TokTok/c-toxcore/archive/v0.2.9.tar.gz'
+      && tar -xzf v0.2.9.tar.gz
+      && cd c-toxcore-0.2.9
+      && cmake -DCMAKE_INSTALL_PREFIX=/usr
+      && make
+      && make install"
+
+script:
+  - docker exec image meson -D b_coverage=true build
+  - docker exec image ninja -C build
+  - docker exec image ninja -C build test
+  - docker exec image ninja -C build install
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)

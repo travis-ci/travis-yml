@@ -1,0 +1,76 @@
+language: node_js
+node_js:
+- '10.10.0'
+dist: trusty
+sudo: true
+cache:
+  directories:
+    - node_modules
+addons:
+  chrome: stable  
+before_install:
+    - export CHROME_BIN=chromium-browser
+    - export DISPLAY=:99.0
+    - sh -e /etc/init.d/xvfb start
+    - google-chrome-stable --headless --no-sandbox --disable-gpu --remote-debugging-port=9876 http://localhost &
+install:
+  - npm install
+  - npm install -g karma-cli
+#  - npm install -g bower
+env:  
+  global:
+    - B_NAME1=develop
+    - B_NAME2=master
+    - B_NAME3=test
+    #- GOOGLE_CHROME_BINARY=/usr/bin/google-chrome-beta
+    #- if [ "$TRAVIS_BRANCH"=master]; then B_NAME=master; elif [ "$TRAVIS_BRANCH"=develop] then B_NAME=develop; else B_NAME=test; fi
+    #- if [ "$TRAVIS_BRANCH"=develop]; then B_NAME=develop; fi
+    #- if [ "$TRAVIS_BRANCH"=test]; then B_NAME=test; fi
+before_script:
+    - "sudo chown root /opt/google/chrome/chrome-sandbox"
+    - "sudo chmod 4755 /opt/google/chrome/chrome-sandbox"
+    - export CHROME_BIN=chromium-browser
+    # Print build info that binary is compiled with.
+    - echo $TRAVIS_COMMIT
+    - echo $TRAVIS_TAG
+    - echo $TRAVIS_BRANCH
+    - echo $TRAVIS_BUILD_NUMBER
+    - echo $B_NAME
+script:
+  - npm run build
+  #- npm run test
+   #- npm run lint
+
+ # - xvfb-run npm run e2e
+before_deploy:    
+    - if [ "$TRAVIS_BRANCH"=master ]; then B_NAME=master; fi
+    #- if [ "$TRAVIS_BRANCH"=develop ]; then B_NAME=develop; fi
+    #- if [ "$TRAVIS_BRANCH"=test ]; then B_NAME=test; fi
+    #- echo $B_NAME
+    - if [ "$TRAVIS_BRANCH" = master ]; then echo "master"; mv index_uat.html index.html; fi
+    - if [ "$TRAVIS_BRANCH" = test ]; then echo "test"; mv index_staging.html index.html; fi
+deploy:
+  - provider: cloudfoundry
+    edge: true  
+    username: nmdsdevopsserviceadm@hotmail.com
+    password:
+        secure: CBpAGvgpe+AoJlNvuGKh9U9WpkU+toSoSRxtpmVoDhB9ayv6+pGsl+7X/eOfvZbHV1gYVw2HdDmeK1+Fkwd58FOKCTRpQDvuVC4+cZ/Eb8vWsnX3vw0DXZX22zhzUOIyT2fbOjygJx9g2xeuMWza6yMBY5rbPkdJKPU6rYCfxSGl5qFY/hnV6B9qzbQo2ekv0XVfwqAQ1fBQlRkEDUJYLGsXyARPrEasvN9XCF1NaUeVP1Inz14MIdefisJMUyEn2zGUAXqogDKfYfqfSf/TD2e7iiK/j3wpXh1x48vqfw/DqDix3Yvo811bvb6SPeM+srIOfIkVcTDRQOniLM0lZUcNoXKXqYQeELRFdh6t6WezHB4iZ60+K6/ijT1D1KIoCo7CXAyCivfG+5omB7sAwW6GZwHsbdO8scSAxwTlwTyhzmO8L5/xjA/H3o2oq3Zjn1Ga6qDpfBeDDOgV+G6uoehZCtnNvDGRHsHwwOVlKg1dk5gtVrdnrWSKwvwwvXYajIxoqz8QyaEaYrsBXHtBNAa39pxNAit9TjAuxb/CR1LCjggxZwjwY+lREYf1J4xQs/keDp/sIqRuxqf2evMiZjqSMdGgE7e6XRtztgQiOn2JZcnEdveaT4IA7HcOLkvksy3zLjBAMGiG44jPnzV135Xtxl6FpNkCuRPqXVUgg3M=
+    api: https://api.cloud.service.gov.uk
+    organization: dhsc-skills-for-care-nmds-sc-2
+    space: sandbox
+    manifest: manifest.dev.yml
+    on:
+        branch: develop        
+  - provider: cloudfoundry
+    edge: true  
+    username: nmdsdevopsserviceadm@hotmail.com
+    password:
+        secure: CBpAGvgpe+AoJlNvuGKh9U9WpkU+toSoSRxtpmVoDhB9ayv6+pGsl+7X/eOfvZbHV1gYVw2HdDmeK1+Fkwd58FOKCTRpQDvuVC4+cZ/Eb8vWsnX3vw0DXZX22zhzUOIyT2fbOjygJx9g2xeuMWza6yMBY5rbPkdJKPU6rYCfxSGl5qFY/hnV6B9qzbQo2ekv0XVfwqAQ1fBQlRkEDUJYLGsXyARPrEasvN9XCF1NaUeVP1Inz14MIdefisJMUyEn2zGUAXqogDKfYfqfSf/TD2e7iiK/j3wpXh1x48vqfw/DqDix3Yvo811bvb6SPeM+srIOfIkVcTDRQOniLM0lZUcNoXKXqYQeELRFdh6t6WezHB4iZ60+K6/ijT1D1KIoCo7CXAyCivfG+5omB7sAwW6GZwHsbdO8scSAxwTlwTyhzmO8L5/xjA/H3o2oq3Zjn1Ga6qDpfBeDDOgV+G6uoehZCtnNvDGRHsHwwOVlKg1dk5gtVrdnrWSKwvwwvXYajIxoqz8QyaEaYrsBXHtBNAa39pxNAit9TjAuxb/CR1LCjggxZwjwY+lREYf1J4xQs/keDp/sIqRuxqf2evMiZjqSMdGgE7e6XRtztgQiOn2JZcnEdveaT4IA7HcOLkvksy3zLjBAMGiG44jPnzV135Xtxl6FpNkCuRPqXVUgg3M=
+    api: https://api.cloud.service.gov.uk
+    organization: dhsc-skills-for-care-nmds-sc-2
+    space: sandbox
+    manifest: manifest.test.yml
+    on:
+        branch: test
+notifications:
+    slack: skills-for-care:Co9S4WS4ZitevGOyBrEb6yEL

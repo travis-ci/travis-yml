@@ -1,0 +1,31 @@
+sudo: false
+language: ruby
+addons:
+  postgresql: "9.4"
+  apt:
+    packages:
+    - build-essential
+    - ruby-dev
+    - libproj-dev
+    - libgeos-dev
+    - libffi-dev
+    - libsparsehash-dev
+    - zlib1g-dev
+    - libxslt1-dev
+    - libxml2-dev
+    - libbz2-dev
+rvm:
+  - 2.2.5
+  - 2.3.1
+notifications:
+  email:
+    - mflorisson@cityway.fr
+    - metienne@cityway.fr
+before_install:
+  - gem update bundler
+before_script:
+  - sudo apt-get install postgresql-9.4-postgis-2.3 postgis-2.3 -y -q
+  - bundle exec rake ci:db_travis_config
+  - bundle exec rake db:create
+  - bundle exec rake db:migrate
+script: bundle exec rake spec

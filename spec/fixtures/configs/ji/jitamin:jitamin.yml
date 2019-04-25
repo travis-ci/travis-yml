@@ -1,0 +1,30 @@
+git:
+  depth: 3
+
+language: php
+sudo: false
+
+php:
+  - 7.2
+  - 7.1
+  - 7.0
+  - 5.6
+
+env:
+  - DB=sqlite
+  - DB=mysql
+  - DB=pgsql
+
+matrix:
+  allow_failures:
+    - php: 5.6
+
+before_script:
+  - if [[ $TRAVIS_PHP_VERSION != 7.x ]]; then phpenv config-rm xdebug.ini; fi
+  - phpenv config-add tests/php.ini
+  - touch storage/jitamin.sqlite
+  - composer install
+  - php vendor/bin/phpdoccheck --directory=app/
+
+script:
+  - phpunit -c tests/units.$DB.xml

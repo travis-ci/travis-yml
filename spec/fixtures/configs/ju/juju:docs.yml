@@ -1,0 +1,16 @@
+language: python
+dist: trusty
+
+python:
+  - "3.5"
+
+before_install:
+  - pip install requests
+
+install:
+  - git clone https://github.com/canonical-webteam/documentation-builder
+  - pip install ./documentation-builder
+ 
+script:
+  - python3 ./documentation-builder/documentation-builder --source-folder src
+

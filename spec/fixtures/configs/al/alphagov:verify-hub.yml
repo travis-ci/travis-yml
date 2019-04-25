@@ -1,0 +1,18 @@
+language: java
+env:
+  global:
+    - VERIFY_USE_PUBLIC_BINARIES=true
+    - secure: qtjlAyHNvF//hsfZMGxHdkss3vo/y69eOeopn7zkoITVZJlBhBXQ4+jVEeExghIxXyV36zQPUWCyxhqyo5haRDbG/tRnapSdTMY+i6Awdm9TqxYw1KlUTwoevXGzbqK2lxnchp8ZE7+ebEorQkAfII+FX496IqWEjzx5UbmAem+xCNdv76t9LWcW+gXLTei+i0U/s1Vr5M5aIseb8hfriE6zqood0s7S9zbydZbyhR2ky3mknVjsgMT8a8bkWN3xq9Eg3odmepXb8OZxgjmYa8rBDrS2Qz+KZOeWE3Ap1Sqo5OSA6X6ysIrbbY3zIy1oNZdsu1xHXFmVJAFSyp0c8SNIVhfIuycPw8vKQQuQELvrFoGBN2m9fL3aeuedZ4c6dc/Ok9Lrr5RE2sBaaXTUTsntO9mcYOuVCScIFpLqboZJ9minNVgvk/bv8+AkbEToBIu2RA9SmnH4szuaB3SsPGmj5ukMXuT3LO6Kpr7yYzxsNlzg5e0+C9smJ4a5ZeCRedazqwUSvZ/bWvAfMNlstlGbG5u6o4WDfQeyztZjuwUeNjHY85Iu1/SzKp8kPKPNGeAMoFWNmFiUEhjji4SeF8240dcV/u68E3LnlJV0DSL2a0vwMJTfgML3Z5gYfQWAP7OqTQglNy3oVs5GQ9zvsso1qm4n9fxhF7YbQIf3zAo=
+jdk:
+  - openjdk11
+before_cache:
+  - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+  - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+cache:
+  directories:
+    - "$HOME/.gradle/caches/"
+    - "$HOME/.gradle/wrapper/"
+after_success:
+  - "./gradlew jacocoRootReport"
+  - curl -Ls -o codacy-coverage-reporter-assembly.jar $(curl -Ls https://api.github.com/repos/codacy/codacy-coverage-reporter/releases/latest | jq -r '.assets | map({content_type, browser_download_url} | select(.content_type | contains("java-archive"))) | .[0].browser_download_url')
+  - java -jar codacy-coverage-reporter-assembly.jar report -l Java -r build/reports/jacoco/jacocoRootReport/jacocoRootReport.xml

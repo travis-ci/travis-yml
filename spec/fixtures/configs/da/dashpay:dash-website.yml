@@ -1,0 +1,35 @@
+sudo: required
+dist: trusty
+language: python
+python:
+  - '3.6'
+
+script:
+  - bash cibuild.sh
+  - test -d _site/ && test -s _site/index.html
+
+before_deploy:
+  - openssl aes-256-cbc -k "$dash_org_pem_pass" -in dash.org-test-web.pem.enc -out /tmp/deploy_rsa -d
+  - eval "$(ssh-agent -s)"
+  - chmod 0600 /tmp/deploy_rsa
+  - ssh-add /tmp/deploy_rsa
+
+addons:
+  ssh_known_hosts:
+    - www-test.dash.org
+    - admin.www.dash.org
+
+deploy:
+  # deploy master to the staging/test environment
+  - provider: script
+    skip_cleanup: true
+    script: DEPLOY_USER=$STAGE_DEPLOY_USER DEPLOY_HOST=$STAGE_DEPLOY_HOST DEPLOY_PATH=$STAGE_DEPLOY_PATH bash script/deploy-rsync.sh
+    on:
+      branch: master
+
+  # deploy release to the production environment
+  - provider: script
+    skip_cleanup: true
+    script: DEPLOY_USER=$PROD_DEPLOY_USER DEPLOY_HOST=$PROD_DEPLOY_HOST DEPLOY_PATH=$PROD_DEPLOY_PATH bash script/deploy-rsync.sh
+    on:
+      branch: release

@@ -2,16 +2,14 @@
 
 
 
-## Type
+## Types
 
-Any of:
+* Hash
+* String (known)
 
-* Map (Hash)
-* Enum (known String)
+## Values
 
-## Flags
-
-None.
+* `rubygems`
 
 
 ## Examples
@@ -23,10 +21,32 @@ deploy:
   allow_failure: true
   skip_cleanup: true
   edge: true
-  api_key: 
-  gem: string
   file: string
   gemspec: string
+```
+
+```yaml
+deploy:
+  provider: rubygems
+  api_key: {}
+```
+
+```yaml
+deploy:
+  provider: rubygems
+  api_key:
+```
+
+```yaml
+deploy:
+  provider: rubygems
+  gem: {}
+```
+
+```yaml
+deploy:
+  provider: rubygems
+  gem: string
 ```
 
 ```yaml

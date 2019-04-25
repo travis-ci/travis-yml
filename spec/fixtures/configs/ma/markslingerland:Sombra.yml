@@ -1,0 +1,40 @@
+sudo: required
+language: csharp
+services:
+- docker
+env:
+  DOCKER_COMPOSE_VERSION: 1.19.0
+before_install:
+- openssl aes-256-cbc -K $encrypted_5d1704f041a8_key -iv $encrypted_5d1704f041a8_iv -in stuff.tar.enc -out stuff.tar -d
+- tar xvf stuff.tar
+- ssh-keyscan -t rsa -H $IP 2>&1 | tee -a $HOME/.ssh/known_hosts
+- chmod +x ./deploy.sh
+
+- curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+- sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu
+  $(lsb_release -cs) stable"
+- sudo apt-get update
+- sudo apt-get -y install docker-ce
+- docker-compose --version
+- sudo rm /usr/local/bin/docker-compose
+- curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname
+  -s`-`uname -m` > docker-compose
+- chmod +x docker-compose
+- sudo mv docker-compose /usr/local/bin
+
+- docker volume create --name=sqlserverdata
+- docker volume create --name=mongoserverdata
+- docker volume create --name=rabbitmqdata
+- docker volume create --name=portainerdata
+
+- docker-compose -f docker-compose.yml -f docker-compose.tests.yml build
+- docker-compose -f docker-compose.yml -f docker-compose.tests.yml up -d
+script:
+- docker ps
+after_success:	
+- test $TRAVIS_BRANCH = "master" -a $TRAVIS_PULL_REQUEST = false && "./deploy.sh"
+after_script:
+- docker-compose down
+notifications:
+  slack:
+    secure: WQB36HqMnK8L64eTGjKtNSooNAg7DRzARF2MKgMiV06MPfNTJwIgorX3FlwriNKaRUmOaQ7tUKVGggL09kokDrF2wBCckym2P+q4g7rlkjgFqMw3Klp0krHRNwnoueh5nwkN3cjif9d+GcyjvTGUdlFuRMDwa/ih5W61Nk9JLN6h7FCg33jc9di4FtHnRSTC76M3E5AEY7c9lyt5HYXxgMHJXG8XEAgu6gNl1nr0EfkEyjYaCWHoBffrqrFuVQfekmok8xc+TAMvHbhIK1DcDFW2DkLr64+pidJv/ZQ1oYr6rIoJCLv+UbzgIfYO6b8CYkqPYRlA1WWGbBPFPAo36T4AGn4/e76IfRpEQOEGQsPBuRI8KbF5nCgZtLP/EyFqg1/i92lqXhMX/TI98uIHAVmHuGmQQkAIWqbfxwILT2XeMILxVNZSp2NEn6XT8EK5AjG8uFoQq5D3L85t5ERc/3gM5Xr2CmbPNiGPk834NIL0qyQ+dFCie5kPQvpFgaq1MtSTvQegPSEi1AIZLD7wGQtwaIPOWnZeFOLctrOFT2UB9Ov36W2ezWIMejKWNw+N/NnJPvVT450SmI8tvJE72sPMDvqDS5TkO7xxEPyxzhTibBPNP/nwSSY+nZ40P+LE+x4/DjJTc1YrVVsOKDJEHepp8mvAN7gifu8huewKPKQ=

@@ -1,0 +1,63 @@
+language: node_js
+
+node_js:
+  - node
+  - 10
+  - 9
+  - 8
+
+cache: yarn
+
+before_install:
+  - export PATH=$PATH:`yarn global bin`
+  - yarn global add greenkeeper-lockfile@1
+before_script:
+  - greenkeeper-lockfile-update
+script:
+  - yarn eslint ./src
+  - yarn mdspell --en-gb --ignore-numbers --ignore-acronyms docs/**/*.md
+  - yarn flow check
+  - yarn flow-annotation-check
+  - yarn flow-coverage-report -t text
+
+  - yarn rebuild:integration-fixtures
+  - yarn react-scripts test --env=jsdom --coverage
+  - yarn codecov
+  - yarn build-storybook -o 'docs/storybook'
+  - |
+    NODE_ENV=production \
+    PUBLIC_URL=https://pinterest.github.io/bonsai/analyze/ \
+    REACT_APP_API_LIST_ENDPOINT=/bonsai/example-index.json \
+    REACT_APP_EXTERNAL_URL_PREFIX= \
+    yarn react-scripts build && \
+    mv build docs/analyze
+  - |
+    NODE_ENV=production \
+    yarn babel src --out-dir bin --ignore __tests__,src/components && \
+    chmod +x bin/cli.js
+after_script:
+  - greenkeeper-lockfile-upload
+
+before_deploy:
+  - |
+    NODE_ENV=production \
+    ./node_modules/webpack/bin/webpack.js \
+    --config ./node_modules/react-scripts/config/webpack.config.prod.js \
+    --json > 'docs/example.json'
+deploy:
+  - provider: pages
+    target_branch: gh-pages
+    local_dir: docs
+    skip_cleanup: true
+    github_token: $GITHUB_TOKEN
+    on:
+      repo: pinterest/bonsai
+      branch: master
+      node: node
+  - provider: npm
+    api_key: $NPM_API_KEY
+    email: "ryan@ryanalbrecht.ca"
+    on:
+      repo: pinterest/bonsai
+      tags: true
+      node: node

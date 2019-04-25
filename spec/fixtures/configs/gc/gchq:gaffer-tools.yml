@@ -1,0 +1,38 @@
+language: java
+cache:
+  timeout: 1000
+  directories:
+  - $HOME/.m2
+dist: trusty
+jdk:
+  - oraclejdk8
+sudo: required
+addons:
+  firefox: latest
+  apt:
+    packages:
+      - python3
+matrix:
+  fast_finish: true
+
+if: (branch == master && type == push) || (branch == develop && type == push) || (branch != master && type == pull_request)
+
+env:
+  matrix:
+  - RELEASE=true
+  - MODULES=:gaffer-tools,:mini-accumulo-cluster,:schema-builder,:schema-builder-rest
+  - MODULES=:ui
+  - MODULES=:random-element-generation,:performance-testing,:performance-testing-core,:performance-testing-accumulo-store,:performance-testing-aws
+  - MODULES=:slider
+
+  global:
+    - secure: "G58eMiza1eSFALXesop4TO+mWELR3fj9BSgxZ1kW8+mrGAmaI7OdKIcloyNoPE06+BoO2vJGGoyA9H7RqPOOh4PG71VJY0R8o9KGJMtTGyWMiKHhnrKC1/LUb7d+yAXYGxJE6abZ+JsU551zI7i4/Y8/8G0EkxXpny3MyLdMbZ2ZuQsdKPyQfQMhknhv0MxyE5StbZzV3d+UVSCadMSb1sMk698D7QnUi+QVXzPhdiq2+YBqJBXE++z8sZmF/9I1NbU5r6s+IFMUaqCgLHg3BxCko4UXxB5M8CuDr35Bkto9QJmUIaJawN3JmEotmBwplz1wVPDW0fVXILegCOznm1AbNbuu+LGPIPemAmQDh8G6H2QXoMJipyBNuW5kwscST5IL7PWyyRc/vd0BJQZvuZDY1pnM/8IAjEDT6WyDhS9ARBOlNjh9fEA9BEvZ9uVvjYldXcqpvOaItunPTGygmegTeky9FwaQJXHXyWqSRttgrs0ePVCfKH8U8sNfuiFo+4WMuSlIfuPwuPWIncuaImWIE8WTRroLShq1Or8bADdS1GmVXMYWOoW61nzgQjFVJx/pNJu05Eu1uChAtH371Y804R5vVUlmmC9Rn3VmVLwJxTcSSLKxsiOzJxGDT6kp9BfP3h+3gCpEhKfKVkc1wcpHAthzS7w4G613GfaFcx0="
+    - secure: "WB3RAYXuywSb3jR8nNnIHzjksZnRyOCmlR3FcQCr8Pwo5FPmyq9xhhS2RCizbZ9Pvhut0dEY3mtdYw97LdbZGb2B0h26bf09472oQt0Wewwl1HScG+wliQr4QpERnCB+Ql01acznSYqG4uibKe2tF2oaCvom0TYS5tFIPkT0IjHRE5lLsa0q6x9hUC9oXguPPLCw4Yqr/DspUvwWgkOAOBNLu2giAbwuyGm1N0EG8oVq6qyIXWcdAqEhbQjvhF9ssJYvz9F0EW4Fcqee8v/12capcBcnBsa0K0edP5NmJOcvlh6hr8lVCG2g3SOHGupIC54f7tjeFzq7b5RLhjfbYc+KzzorUGCKl6fzN7gArzURWhaGXc5OI7UO977gguPzaLL9qb2Bv+Z3z2fKqKqH6wiChjR39mlFe615yy3LaGcVfBlnTjNVKOPX3L4C28lLND/LtskDrcc3miOiLk2YvDY51MaptIZXSOlkJUIHO/Lr72Ur7FCPtRDKM7lJxOeYQ1pjhgJ9x8y2X73yF+owDXcQ16Y1DNimUN5YUXI5CGiFI8Xi+54vVqVdGe1r7WCGuWFpgSFSI0951VH559N+X/YxMapvl3onrKWPHQ477fopTGtu53AwLdBdptSrKAs7dmNjdB2ppgoDwhUHaq0ynkAT9UrJYbx+5dbQKFp04+4="
+    - secure: "UXLzQaMHjae+k9tAulrjsbh9Bj3/a/8dCJpJuNXRwtsEJPD58v7hWK18+00D5BLekfLb5t8tng/n6Pl7KMjpZxCoQd3gQ06V74I08ex/bR1BYSIPh0orc7Eg7CHLfHyafaxdpPzLJSRV1Ar886qn68MHlaKhQ5wgzFCXJ3lp9090XEKv26vwVCQGkY+IlqNMJp43Dhu+wgI73HArxskBKeRxNYCdp8KpoK7q+hIja5o2ptQPG3EiclWNE05BsRe7APMTnszWH1IVJomcXtpQYIuie+GXsdaPeSBgmnbnN5ZYj6kaOWoqgPQ0iEq+k4TTV1vzvANawjxaLkcJFPpcM0P/Pm2ujpMMY7Vs4YZEokkzXrqxvP+zOXNAujCJu8HUe8moWPB7aJpq7ZqhCPqlCxwbM8xg/3ZOTSbqwAf1ygYfgf0fo6giKB/crKLQ49vq8m9CQb3ikjMU3D5ksppjWh7DBASOi2B7ok0ENnAy8gdw/8rJ+RnJGlMolsWFkk65i0q+rtvbS9nHGbejKA3+MmKQYNaT29mweRibjNZ6IbhLLndG2iz+AW5DAVHa3JcY3OTy9BQmKr+1gwnJvLnG0mQ+77JMDo5cVkEeS8bqwl36vgeFnJRN24PbpcXSn+m5GViBIZfxZd/d9r1XI3f6VcHCv1h1PG+APQPtTrIgalQ="
+    - secure: "2mIgYi3USn9sB+3gQ0ULyRXspQUmpR/5M8StHzfMQ2aBGeSV9MaZ3mHxBZGoGIMejpLxE1dGLFagUZRbuH/gk+OI7tphEanfYN7quAdou0f/SzEMXEi5hlBkqFjl3eXE3FpMt5huxO5hBj2UD7dpMTe2AmIAM2LcEr1zybrQ78G19fDVJX6L5C5APC/5IKpPY4l50iFpv/A9GyT/i2Ax/FskCp73K3z5u3vCX+FsAAKu5iS63VKSdVzmjP5B+vRvLOZd80SvldDMmQM6gXTzpGiM6PoH+gehINT3Csq54mTsh6qDGMn1fPiFaczIRXc5Goe31UzhdN3aCVsnhPSoT+hTMwgNeCFcJRZbBntXoO9oUHtkjRkE9Vaz+0i//Yz6xs5k1CyN3Cm/iAQmSPsc3uS9sAlTTKH+oO6U4vcr7CAEUI78wUGLYMxiy0YEVfHHpFFiSyiPVwiVo4Y+EN1qtJp0zN4z7xecWpxgcnz7tORkK07QICiYpOnRKgbnM4Sz+8a//j9JZnZh/MTLudTCwZtWyJfqQkdWiKO4hHHWXiNF1rRY61EHrScx9w331Esk+EILSjuyZiqTIDlG/cd9gWIR26XxRiE2c4o4vELZMGngB0EWiIzlnSssh3nZ4XBjN2YX6S9ZNUE/hoQjBjCFivqUWZ7NOdV439eNx8zvBPE="
+
+before_install: ./cd/before_install.sh
+install: travis_wait 45 ./cd/install.sh
+script:
+  - travis_wait 45 ./cd/verify.sh
+  - ./cd/deploy.sh

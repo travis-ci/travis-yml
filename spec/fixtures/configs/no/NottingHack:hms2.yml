@@ -1,0 +1,32 @@
+language: php
+
+dist: trusty
+
+matrix:
+  fast_finish: true
+  include: 
+   - php: 7.2
+
+cache:
+  directories:
+    - $HOME/.composer/cache
+
+addons:
+  mariadb: '10.2'
+
+services:
+  - memcached
+  - redis-server
+
+before_install:
+  - phpenv config-rm xdebug.ini || true
+  - echo "extension = memcached.so" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
+  - travis_retry composer self-update
+  - cp .env.behat .env
+  - mysql -e 'SELECT version();'
+  - mysql -e "CREATE DATABASE hms_test"
+  - mysql -e 'grant all on *.* to travis@localhost;'
+
+install: travis_retry composer install --no-interaction --prefer-dist --no-suggest
+
+script: vendor/bin/behat

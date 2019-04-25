@@ -1,0 +1,51 @@
+sudo: required
+language: python
+python:
+- '3.6'
+addons:
+  chrome: stable
+  firefox: latest
+env:
+  global:
+  - MOZ_HEADLESS=1
+  - SOLR_VERSION=6.6.5
+  - SOLR_CORE=test-ppa
+  - PA11Y_SOLR_CORE=ppa-pa11y
+cache:
+  pip: true
+  directories:
+  - downloads
+  - node_modules
+services:
+- mysql
+before_install:
+- npm i -g npm@latest # newer npm needed for `npm ci` command
+- cp ci/testsettings.py ppa/local_settings.py
+- python -c "import uuid; print('SECRET_KEY = \'%s\'' % uuid.uuid4())" >> ppa/local_settings.py
+install:
+- pip install -r requirements.txt
+- pip install -r test-requirements.txt
+- pip install codecov
+- npm ci # installs from package-lock.json
+before_script:
+- npm run build # compile static assets for production, incl. semantic
+- sudo chown root /opt/google/chrome/chrome-sandbox
+- sudo chmod 4755 /opt/google/chrome/chrome-sandbox
+- SOLR_VERSION=$SOLR_VERSION SOLR_CORE=$SOLR_CORE bash ci/config_solr.sh
+- mysql -u root -e "create database test";
+- mysql_tzinfo_to_sql /usr/share/zoneinfo | mysql -u root mysql
+- python manage.py migrate
+- downloads/solr-${SOLR_VERSION}/bin/solr create -c $PA11Y_SOLR_CORE -d solr_conf
+- python manage.py solr_schema
+- python manage.py loaddata test_site wagtail_pages sample_digitized_works
+- python manage.py runserver --insecure &  # run for pa11y, serve static content
+before_cache:
+- rm -rf downloads/solr-${SOLR_VERSION}/
+script:
+- python -m pytest --cov=ppa
+- npm test
+after_success:
+- codecov
+notifications:
+  slack:
+    secure: Om7Tv9SUF9hXoRdG8P7mUOrtcoulqyzrOBI2yRXGkF3vEizquNAIm/0LJd5xy2PIPLGhq2OvOsaGpQ6zzDnyZpYDHDG+wlcmBQjjLqT++UMjiEdKvtx3X9QGS6JqMB9GgiARwYMGrzSVhZ1ij0P2joIZhbFS1VaQkSq5mVPa/7V6ffoYV7Yo5SDhJLdBWdGb4udapPyOu0vhgBXlwIXZmOFwotdtvcmd++nRZ+UMWf0yZLPcnrKGcN7oPtBYH2FoBWDZXiJuS0i/pgxTPk8MKOeRZkYNo5iP8sHFYgyxJvRvdzkQTEAUBfsNdukXGf0NI3w2uICKqWssZvd3A6m1EQNB1hctdbUzo500VAVcb4zXQG6AQvqhoBUnY+Uy2dHs2gMqUEU7/ykLlM/vddnAD7wlR/83pT0q6EJQm2JQ735hFx3+qlJRrYX0hlajhZWISz4B5RcNlDPjrGTu5n9ZrcE2Pu7rPkHRrYodpphhkOfyqCUpj2dIsWmj1s5QTLgY4wR1xuDTLo20Xj0zlEV/yiAdjTwUpBSu1FNd2E/xcrsuh1YlWgdWBXg9psLLVa8zb3QO0wRbjKyi4NKEo+Drg+6cMMkkksYqK9/mTwTSUJc1Ak84SPE1XB9PhaVvrFg6li1Q8ELPA3bwjhbvTecQFS8bQwcvantkvwmyEohS5Cc=

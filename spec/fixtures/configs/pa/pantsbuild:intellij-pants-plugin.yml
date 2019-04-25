@@ -1,0 +1,46 @@
+sudo: required
+dist: xenial
+
+language: python
+python: "2.7.15"
+
+cache:
+  directories:
+    - ${HOME}/.cache/pants
+    - .cache/bootstrap # See pants.ini [cache.bootstrap]
+    - .cache/pants     # Pants downloaded by scripts/setup-ci-environment.sh
+
+notifications:
+  email:
+    - yic@twitter.com
+    - dmcclanahan@twitter.com
+
+addons:
+  apt:
+    packages:
+      - python-dev
+
+before_install:
+  - PATH="/usr/lib/jvm/java-8-openjdk-amd64/jre/bin":$PATH
+  - JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
+
+install: ./scripts/setup-ci-environment.sh
+
+# General policy is to support pants for the past 10 releases and the latest master.
+env:
+  matrix:
+    - IJ_ULTIMATE=false PANTS_TEST_JUNIT_TEST_SHARD=0/2
+    - IJ_ULTIMATE=false PANTS_TEST_JUNIT_TEST_SHARD=1/2
+    - IJ_ULTIMATE=true TEST_SET=jvm-integration
+    - PANTS_SHA="release_1.13.0" TEST_SET=jvm-integration
+    - PANTS_SHA="release_1.10.0" TEST_SET=jvm-integration
+    - PANTS_SHA="release_1.6.0" TEST_SET=jvm-integration
+    - PANTS_SHA="release_1.2.1" TEST_SET=jvm-integration
+
+script:
+  # Test a single Java target without scala plugin
+  - ENABLE_SCALA_PLUGIN=false ./scripts/run-tests-ci.sh --test-junit-test=com.twitter.intellij.pants.integration.OSSPantsJavaExamplesIntegrationTest
+  - ./scripts/run-tests-ci.sh
+
+after_success:
+  - scripts/deploy/deploy.sh

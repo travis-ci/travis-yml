@@ -1,0 +1,25 @@
+language: python
+services:
+  - docker
+python:
+  - "3.6"
+before_install:
+  - docker-compose --verbose build
+  - docker-compose up -d
+install:
+    - pip install pipenv
+    - pipenv install --dev
+script:
+    - make test
+after_success:
+    - bash <(curl -s https://codecov.io/bash)
+notifications:
+    slack: surveydatacollection:LCbNJJpDoY3gYIvLOlK0nZkV
+env:
+  global:
+    - PIPENV_IGNORE_VIRTUALENVS=1
+    - secure: J6PEornEks6H6WQLVg6kyA9rpKAqrVEjFcwyP4e60kR/urOG8ZC1Io4ooHw4ar2PRr+celma9U8s+lNYHgZKKX5ZiqTFHtoScVSXmBFlMYST/vnA5mgiXfrlli0oyep7IidYX/lRl35ordDDlHyHTgjFiej8xoA9sC8GepjznqiNRdIqw9eFRV3L6UQdbZ4j4JrISsCeTssv9BYsGbLlzwbMfOa6VUM8eRsjjs3myJJ2HmBjjs0V199yD7ggXzb1nSMJAvsOrMQLos5JavLY0MDUFl7MWvaHgolWAOH5KjIg0covY1pY7WAQQXdxRm6gsB4jMofNV+D1+K+le5vb3JarBbWONc2/DlAu9ldAJxMgMUHGetKIWwIOGg+nLZoaDUDJ8qvHw4MLCcnT0Ar2qrjruQTWz6wwpMRoTZOMwID74vFsQzbvifX50JIBgYgN4A8yXH0R6g4NqIO9fnQCS6ehTc1ddQBNPsFmd8YL1U5uezlqvZJRA3Paop5Xr7XI1D3JcZN3Wjj3YqP7Qlo66xltmN2NsThrJAFw+tEmyhoU2XHw+rTS+zCdRrPm2NFnaD+EF8df2crYp/zoOKLQ4sITZDkEbsOGzDeYlZ9pB1+hSQG3G7IBK6XfwrVJbqt4sAlx+/kPDE1Ie4gQHSGqNQOf3it2A6FnAHaJbrc6Ejg=
+branches:
+  only:
+    - master
+

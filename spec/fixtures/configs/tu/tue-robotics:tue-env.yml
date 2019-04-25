@@ -1,0 +1,11 @@
+sudo: true
+dist: xenial
+language: cpp
+
+services:
+    - docker
+
+jobs:
+  include:
+    - stage: build docker image
+      script: ci/build-docker-image.sh

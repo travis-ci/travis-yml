@@ -1,0 +1,78 @@
+env:
+  matrix:
+  - TRAVIS_PYTHON_VERSION="2.7" BUILD_DOCS=0 REPORT_TO_COVERALLS=0
+  - TRAVIS_PYTHON_VERSION="3.6" BUILD_DOCS=0 REPORT_TO_COVERALLS=0
+  - TRAVIS_PYTHON_VERSION="3.7" BUILD_DOCS=0 REPORT_TO_COVERALLS=0
+  global:
+  - CONDA_PREFIX=$HOME/miniconda
+  - MINICONDA_URL_BASE="https://repo.continuum.io/miniconda/Miniconda3-latest"
+os:
+- linux
+- osx
+sudo: false
+filter_secrets: false
+before_install:
+- |
+  if [[ $TRAVIS_OS_NAME == "osx" ]]; then
+    brew remove --force $(brew list)
+    brew cleanup -s
+    rm -rf $(brew --cache)
+  fi
+- |
+  if [[ "$TRAVIS_PYTHON_VERSION" == "3.7" && "$TRAVIS_OS_NAME" == "linux" && "$TRAVIS_EVENT_TYPE" == "push" ]]; then
+    REPORT_TO_COVERALLS=1
+  fi
+- |
+  if [[ "$TRAVIS_PYTHON_VERSION" == "3.7" && "$TRAVIS_OS_NAME" == "linux" ]]; then
+    BUILD_DOCS=1
+  fi
+
+install:
+- echo "Build on $TRAVIS_OS_NAME for Python $TRAVIS_PYTHON_VERSION, $TRAVIS_TAG"
+- |
+  if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+    OS="MacOSX-x86_64"
+  else
+    OS="Linux-x86_64"
+  fi
+- curl $MINICONDA_URL_BASE-$OS.sh > $HOME/minconda.sh
+- bash $HOME/minconda.sh -b -p $CONDA_PREFIX
+- export PATH="$CONDA_PREFIX/bin:$PATH"
+- hash -r
+- conda info
+- conda config --set always_yes yes --set changeps1 no
+- conda update conda
+- conda config --add channels conda-forge
+  # Useful for debugging any issues with conda
+- conda create -n test-environment python=$TRAVIS_PYTHON_VERSION
+- source activate test-environment
+- conda install -q curl
+- conda install -q libcurl
+- conda install -q coverage
+- conda install -q coveralls
+- conda install -q sphinx
+- conda install -q pytest
+- conda install -q pytest-cov
+- conda install -q flake8
+- pip install --upgrade pip
+- pip install codacy-coverage
+- conda info -a && conda list
+- conda install --file=requirements.txt
+- python setup.py install
+
+script:
+- pytest --cov --cov-report=xml:$(pwd)/coverage.xml
+- |
+  if [[ "$REPORT_TO_COVERALLS" == "1" ]]; then
+    coveralls
+    export CODACY_PROJECT_TOKEN=$CODACITY_API_TOKEN
+    python-codacy-coverage -r coverage.xml
+  fi
+- make lint
+- |
+ if [[ "$BUILD_DOCS" == "1" && "$TRAVIS_OS_NAME" == "linux" ]]; then
+   (cd docs && make html)
+ fi
+
+virtualenv:
+  system_site_packages: false

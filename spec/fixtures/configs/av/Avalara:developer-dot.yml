@@ -1,0 +1,75 @@
+language: ruby
+rvm:
+  - 2.5.1
+
+env:
+  global:
+    - staging_bucket=staging-developer.avalara
+    - staging_cloudfront=E1VB4YGCMCEIX2
+    - prod_bucket=developer.avalara.com
+    - prod_cloudfront=E14INHTPGUUPMC
+    - cloudfront_distro=$prod_cloudfront
+
+services:
+  - docker
+
+cache:
+  bundler: true
+
+before_install:
+  - nvm install 6.0
+  # docker specific update and install
+  - sudo apt-get update
+  - sudo apt-get install -y apt-transport-https ca-certificates curl software-properties-common
+  - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+  - sudo apt-key fingerprint 0EBFCD88
+  - sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+  - sudo apt-get update
+  - sudo apt-get install -y docker-ce
+  - sudo rm /usr/local/bin/docker-compose
+  - sudo curl -L curl -L https://github.com/docker/compose/releases/download/1.12.0/docker-compose-Linux-x86_64 > ./docker-compose
+  - chmod +x docker-compose
+  # without overwriting here docker-compose will be v1.8.1
+  - sudo mv docker-compose /usr/local/bin
+  - docker-compose -v
+  - docker -v
+install:
+  - gem install jekyll
+  - gem install s3_website
+  - bundle install
+  - npm i --progress=false --silent
+before_script:
+  - uname -a
+  - export JAVA_OPTS="-Xmx2G"
+  - echo $JAVA_OPTS
+  - alias java="java -Xmx2G"
+  - if [ "$TRAVIS_BRANCH" == "staging" ]; then bash ./scripts/staging-robots.sh; fi
+script:
+  - npm run lint
+  - npm run test
+  - docker-compose up --abort-on-container-exit --exit-code-from server
+
+after_success:
+
+  - if [ -n "$secret_key" ] && [ "$TRAVIS_BRANCH" == "master" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ];
+      then cloudfront_distro=$prod_cloudfront; bucket_name=$prod_bucket _JAVA_OPTIONS=-Xmx2g s3_website push;
+    fi
+  - if [ -n "$secret_key" ] && [ "$TRAVIS_BRANCH" == "staging" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ];
+      then cloudfront_distro=$staging_cloudfront; bucket_name=$staging_bucket s3_website push;
+    fi
+
+before_deploy:
+  - find _site -iname "*.html" -exec sed -i -e 's/=\"\//=\"\/developer-dot\//g' {} \;
+  - find _site -iname "style.css" -exec sed -i -e 's/url(\"\//url(\"\/developer-dot\//g' {} \;
+  - find _site -iname "style.css" -exec sed -i -e 's/url(\//url(\/developer-dot\//g' {} \;
+
+deploy:
+
+  - deploy:
+    provider: pages
+    skip_cleanup: true
+    github_token: $GITHUB_TOKEN # Set in travis-ci.org dashboard
+    local_dir: _site
+    on:
+      branch: master
+      condition: "-n $GITHUB_TOKEN"

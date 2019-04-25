@@ -1,0 +1,43 @@
+language: node_js
+node_js:
+    - 6
+
+sudo: false # use container-based infrastructure
+
+services:
+    - mongodb
+
+# cache node installs
+cache:
+    directories:
+        - node_modules
+
+# install node prereqs
+install:
+  - npm install -g grunt-cli
+  - npm install
+
+# setup config to test with
+before_script:
+  - cp .env.example .env.test
+
+# run e2e & unit tests
+env:
+    global:
+        - CXX=g++-4.8
+        - NODE_ENV=test
+script:
+  - grunt test
+
+# instrument code and run tests against instrumented code, then
+# push to coveralls.io
+# Commented out because cover.sh appears to be broken
+#after_success:
+#  - grunt coverage:push
+
+addons:
+    apt:
+        sources:
+            - ubuntu-toolchain-r-test
+        packages:
+            - g++-4.8

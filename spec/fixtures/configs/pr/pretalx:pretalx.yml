@@ -1,0 +1,30 @@
+dist: xenial  # required to run 3.7+
+language: python
+sudo: true
+python: 3.7
+
+cache:
+  directories:
+    - $HOME/.cache/pip
+services:
+  - mysql
+  - postgresql
+addons:
+  postgresql: "9.4"
+  mariadb: "10.3"
+
+# We spell out the text matrix tox generates explicitly here to get the most use out of both.
+matrix:
+  include:
+    - env: TOXENV=tests-sqlite-codecov
+    - env: TOXENV=tests-mysql  # not testing mysql until we figure out what's wrong with our setup
+    - env: TOXENV=tests-postgres
+    - env: TOXENV=installation
+    - env: TOXENV=lint
+    - env: TOXENV=docs
+
+install:
+  - ./.travis/install.sh
+
+script:
+  - cd src && tox

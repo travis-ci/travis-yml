@@ -1,0 +1,28 @@
+sudo: false
+language: python
+python:
+  - "3.6"
+install:
+  - python setup.py -q install
+before_script:
+  - pip install coverage
+  - pip install python-coveralls
+  - pip install pycodestyle
+  - pip install .
+  - cp travis-ci/manage.py manage.py
+  - python manage.py migrate --noinput
+  - npm install mocha
+  - npm install jquery
+  - npm install jsdom@10
+script:
+  - pycodestyle pivot/ utils/ --exclude=migrations
+  - coverage run --source=pivot/ --omit=pivot/migrations/* manage.py test pivot
+#  - mocha scout/static/gps/js/test --recursive
+after_script:
+  - coveralls
+#notifications:
+#  webhooks:
+#      urls:
+#        - https://yarn.cac.washington.edu/rest/botalyst/v1/travis-ci
+#  slack:
+#        secure: QhQcPJdxvdl5GlPdiewvyMMzDAM5fFB0Db2kRwpDphn8KiyNv2cF1SVeiYaJcQ4fObA7eWgsBXGBd/be8OC/1ujGNncz92bJM5xHePzMxs37hjPFaHuDGH0pnqurQIhRTz6OoWDi2+2OzC3xP1VkpOv0/2ApFjhUkO8S6JodH9A=

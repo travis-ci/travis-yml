@@ -1,0 +1,37 @@
+sudo: "required"
+
+before_install:
+  - yes | sdkmanager "platforms;android-28"
+
+
+install: true
+language: android
+android:
+  components:
+    # Uncomment the lines below if you want to
+    # use the latest revision of Android SDK Tools
+    # - tools
+    # - platform-tools
+
+    # The BuildTools version used by your project
+    - build-tools-28.0.3
+
+    # The SDK version used to compile your project
+    - android-28
+jdk: oraclejdk8
+
+before_cache:
+  - rm -f $HOME/.gradle/caches/modules-2/modules-2.lock
+cache:
+  directories:
+    - $HOME/.gradle/caches/
+    - $HOME/.gradle/wrapper/
+
+
+
+global: GRADLE_OPTS="-Xmx2048m"
+before_install: chmod +x gradlew
+before_script: chmod +x gradlew
+script:
+- ./gradlew junit_test:junitPlatformTest --stacktrace --debug
+

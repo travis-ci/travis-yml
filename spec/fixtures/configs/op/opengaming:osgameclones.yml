@@ -1,0 +1,17 @@
+language: python
+cache: pip
+python:
+ - '2.7'
+virtualenv:
+  system_site_packages: true
+addons:
+  ssh_known_hosts: sirius.solovyov.net
+install:
+ - pip install pipenv
+ - pipenv install
+script:
+ - pipenv run cyrax
+ - test 6000 -lt $(cat _build/index.html | wc -l)
+ - '[ "${TRAVIS_PULL_REQUEST}" != "false" ] || .travis/deploy.sh'
+ - yarn install
+ - yarn danger ci

@@ -1,0 +1,89 @@
+language: python
+
+env:
+    matrix:
+        # python 3.5.3 suffers from some matplotlib/wxpython compatibility problems
+        #- NAME="Python 3.5.3"
+        #  PYTHON_VERSION=3.5.3
+        #  #PACKAGES="numpy=1.10.0 matplotlib=1.5.1 nose scipy=0.16.0 libgfortran=1"
+        - NAME="Python 3.6"
+          PYTHON_VERSION=3.6
+        - NAME="Python 3.7"
+          PYTHON_VERSION=3.7
+        #  PACKAGES="numpy matplotlib freetype<2.8 scipy"
+
+# use this OR env/matrix
+#python:
+#    #- "2.7"
+#    - "3.5.3" # currently breaks with 3.6, possibly need a different version of wxPython for 3.6
+#    # command to install dependencies, e.g. pip install -r requirements.txt --use-mirrors
+
+addons:
+  apt:
+    packages: # mainly wxPython dependencies
+    - libwebkitgtk-dev
+    - libjpeg-dev
+    - libtiff-dev
+    - libgtk2.0-dev
+    - libsdl1.2-dev
+    - libgstreamer-plugins-base0.10-dev
+    - freeglut3
+    - freeglut3-dev
+    - libnotify-dev
+    - libproj-dev # Proj.4 is a dependency of cartopy
+
+before_install:
+  - sudo apt-get update -qq  # make sure package indexes are up to date
+  - "export DISPLAY=:99.0"  # make the GUI testing work with the host machine display
+  - "sh -e /etc/init.d/xvfb start"
+
+# these lines were causing problems with wxPython
+#virtualenv:
+#  system_site_packages: true
+install:
+  # fully install miniconda
+  - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
+  - bash miniconda.sh -b -p $HOME/miniconda
+  - export PATH="$HOME/miniconda/bin:$PATH"
+  # configure conda settings
+  - conda config --set always_yes yes --set changeps1 no --set show_channel_urls yes
+  - conda update conda
+  # create test environment
+  - ENV_NAME="test-environment"
+  - conda create -n $ENV_NAME python=$PYTHON_VERSION
+  - source activate $ENV_NAME
+  # install req'd packages with conda
+  - PACKAGES="$PACKAGES cython pillow pytest pep8 proj4=4.* pyshp shapely six requests pyepsg owslib"
+  - conda install --quiet $PACKAGES
+  - conda install --quiet cartopy
+  - conda install --quiet pandas libtiff matplotlib numpy scipy future requests
+  - conda install --quiet xlwt # for pandas df.to_excel
+  - pip install scripttest #pandas libtiff matplotlib numpy scipy future cartopy
+  - sudo apt-get update
+  # download and install wxPython
+  - if [[ "$PYTHON_VERSION" == 3.5* ]]; then
+      wget "https://extras.wxpython.org/wxPython4/extras/linux/gtk3/ubuntu-14.04/wxPython-4.0.3-cp35-cp35m-linux_x86_64.whl";
+      pip install "wxPython-4.0.3-cp35-cp35m-linux_x86_64.whl";
+    fi
+  - if [[ "$PYTHON_VERSION" == 3.6* ]]; then
+      wget "https://extras.wxpython.org/wxPython4/extras/linux/gtk3/ubuntu-14.04/wxPython-4.0.3-cp36-cp36m-linux_x86_64.whl";
+      pip install wxPython-4.0.3-cp36-cp36m-linux_x86_64.whl;
+    fi
+  - if [[ "$PYTHON_VERSION" == 3.7* ]]; then
+      wget "https://extras.wxpython.org/wxPython4/extras/linux/gtk3/ubuntu-14.04/wxPython-4.0.3-cp36-cp36m-linux_x86_64.whl";
+      pip install wxPython-4.0.3-cp36-cp36m-linux_x86_64.whl;
+    fi
+
+  # command to run tests, e.g. python setup.py test
+script:
+  - python -c "print('starting tests')"
+  - python -m unittest discover -v
+
+
+# https://stackoverflow.com/questions/29290011/using-travis-ci-with-wxpython-tests
+
+
+## specific tasks to run after failure
+#after_failure:
+#  - source activate $ENV_NAME
+#  - python -c "from __future__ import print_function; import cartopy.tests.mpl; print(cartopy.tests.mpl.failed_images_html())"

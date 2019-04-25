@@ -1,0 +1,52 @@
+language: python
+
+sudo: false   # use container-based infrastructure
+
+matrix:
+    include:
+        - &docs
+          env: BUILD_DOCS=true
+          python: '3.6'
+          install:
+              - source $TRAVIS_BUILD_DIR/.travis/install_miniconda.sh
+              - source $TRAVIS_BUILD_DIR/.travis/create_conda_env.sh
+              - python setup.py develop
+          script: source $TRAVIS_BUILD_DIR/.travis/build_doc.sh
+        - &pyqt5
+          python: '3.6'
+          env: PYQT5=true
+
+cache:
+    apt: true   # does not work for public repos
+    directories:
+        - $HOME/.cache/pip
+        - $HOME/.ccache
+        - $HOME/nltk_data
+        - $TRAVIS_BUILD_DIR/pyqt
+
+before_cache:   # prevent logs from caching
+    - rm -f $HOME/.cache/pip/log/debug.log
+
+before_install:
+    - source $TRAVIS_BUILD_DIR/.travis/util.sh
+    - pip install -U setuptools pip wheel
+    - pip install codecov
+    # Gensim (2.2.0) requires numpy>=1.11.3 but cannot update it itself?
+    - pip install -U numpy
+    - mkdir -p /home/travis/.local/share/Orange  # create orange app dir
+
+install:
+    - travis_wait pip install -r requirements.txt
+    - pip install sip pyqt5==5.11.*
+    - python setup.py develop   # assure version.py is present; required for imports
+
+before_script:  # required for widget tests
+    - "export DISPLAY=:99.0"
+    - "sh -e /etc/init.d/xvfb start"
+    - sleep 3 # give xvfb some time to start
+
+script:
+    - coverage run setup.py test
+
+after_success:
+    - codecov

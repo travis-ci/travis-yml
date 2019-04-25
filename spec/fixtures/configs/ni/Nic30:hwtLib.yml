@@ -1,0 +1,37 @@
+dist: trusty
+language: python
+git:
+  depth: 1
+
+cache:
+  apt: true
+
+python:
+#  - '3.5'
+  - '3.6'
+#  - "nightly"
+
+install:
+  - cd ..
+  - pip install pytest coveralls
+  - git clone --depth=1 https://github.com/Nic30/hwt.git
+  - cd hwt
+  - python setup.py install
+  - cd ../hwtLib
+  - python setup.py install
+
+script:
+  #- python3 -m pytest hwtLib/tests/all.py --doctest-modules
+  - coverage run --source=hwtLib setup.py test
+
+deploy:
+  provider: pypi
+  user: nic30
+  password:
+    secure: 0IuZBgghn7IEVO6sF3xST+KOcmmYxS1FfT48ljkKq1QnZX+TkhuAuLXpz7XbHAuKUkCMyEbPz65IaTTVompxALM90eRcT3uxfMK3pUDTWUrtJ+lrkabNlU9E2S1rE47fMgrRYbmSEAX+dUimFOp5xJ3khC/yLb6nPMJ7OKgWybDYev3d2oLrzHWyviUg/Yz0RJcV9mM4yOsA9+JYB8xW7CGqSJeZUxNGlwy8PaxYHl0LW0GEwNCU3lXdXY3scLuZmNiVZhdbPWhlvnNHPgiHwkTYM6R109CuzJZkKDvp+8VDrQy92cab2+44eIpxvfNwvm39qKkfP8HUMp7SNUb6nANpGv0C7kLw2J37IeUA+rLRqgofcU4Mn/soxfdLRfB3SkQdTmAVzjEi+yjxrdYnHYQe7/7Ql0bEWKbLNyW4l2b1BQtTI5y8g9OlqKZvrywhpY+vl3y2vPHHDd81pzQQDzqQMf/3dd0gSmg4Fa3WblUssVHaLsZ26zVLd7PzTj2i3m8ppwOfWuM4eChO2rV99759hWavPJ2hIewCTY/LGvuwjZ9PR7uhP+Bg3kH8rvEnf1gQuRNO+p+0WpML0MmVtsZytC64VivGBM/UdNEn5UwhAsdgW8ijc2OJCGbhUOCI4+ebrbx+irD2BuT+AmkC4c66cmC9bksFJeMyoWix3No=
+  on:
+    tags: true
+    branch: master
+
+after_success:
+- coveralls

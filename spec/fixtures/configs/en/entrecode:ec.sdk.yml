@@ -1,0 +1,16 @@
+language: node_js
+node_js:
+- '10'
+- '8'
+install: npm install
+script: npm run testTravis
+deploy:
+  provider: npm
+  email: info@entrecode.de
+  api_key:
+    secure: HicAIp8KE2hLhs/tPLR6jYEOzG0mQ8g4BNM6U/fD6HyjakaQCbdH8UOtZhEyW7+QooGTHTuK4U8y8J1vOvTHsUyEYU+ZKSOPXepBFtQ4GPeLvBWh5D+AD10bVQduhSltYF2U3s8i59fDEmb8NgZnbOExEMumu06rfZ678CA+TgY2oXRQjLtlz8rDA5JxYb2/U9ZjkR3y8CDNYTFO6spl2QLIrtUBSuOiUqzWzTIgHU8vRHUv3VfdMAVy4ZGi3T+IGS0Yl8gA8uh1VTWmB8hKNZePRD5wQ5cDKiMLgsgswh+By+hhrjANqYduYX+O/gB/CUOa4n41n2EGFhTw/XvScfmBU+/JtuZHzckHguzX4HMkeQDw75FfxOt3btNQDzMJ3yyQnA+BuOYPxn8uZhQIk0vnhreu/CsO80OuXEBuiWHeCnGFnCTTZvq7VK6WpR48dURkc1VU6zlPeaTiZiprblJJRB2PT53WJH3bZEk+HOX63XK30yBvKLlJet02cUNqogXhKxLdQYk5CGufi9y5KI+DFaI7wCZIVxzgNKu14gP1JKrzxo4UvfR/RNoa/ipielVtt6W8ex3cKhE5FtVodox4HuWq0zH6VTc6VHGIye7PKUANgpmYvgGNrM9bE5rLQb/3ibpjq0Eyw5cGlDOMF8iFbyrSurEfc+RLLlAryrk=
+  on:
+    tags: true
+    onBranch: master
+  skip_cleanup: true
+after_script: npm run coveralls

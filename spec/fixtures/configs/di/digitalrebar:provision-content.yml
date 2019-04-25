@@ -1,0 +1,48 @@
+language: go
+branches:
+  except:
+  - gh-pages
+sudo: false
+go:
+- "1.10"
+git:
+  depth: 500
+addons:
+  apt:
+    packages:
+    - sshpass
+script:
+- mkdir -p ~/.ssh
+- cp tools/ssh-config ~/.ssh/config
+- chmod 600 ~/.ssh/config
+- ./tools/package.sh
+#- ./tools/test.sh
+- ./tools/publish.sh
+notifications:
+  slack:
+    secure: SZbSknaaUrVGpmRxvBMQhWeG5TKNHhiTHZTb8ZT+00dQcMjfGfa0vFhXgWgKjm/Hwt6YMw/GbwPWCudhvRnwmnVKytrf55hsmlE+N/jdoyg3VNRW4r2PwbBRnqtc37JNC6BvgJpKNbqM4zBc5ze9AMZ31uPLuTAFaMZwcwnpwr2Qha6DoQDGrnzuxxOMsFz6wH7YvMa3hvSDFSC2Vbgu57a0KwaZsyCH5aS2G7n9p346fElSe9f1Zy8Q/xlkxl9Eu6ZhynwXjcWDsL4KOdXjrbGHYgQEJT3xgO985zsV4MisM4xBVe08MyrJQbJO1rkYXZkElyIHHHTySiw6v/JOInlAroD29tJo+RZZ8LL04KT2Lghq0Du9MELUo0q1a/mcKJ4KSG2YNbY98TyP2FIEdL9iGLM5WNhU59kY1T7VKv+b4Z/ngGZFr3C4d/RhGdV5Ys2rLAYTsT+za9/D4zzg09abSYmonWKyzyaWe4ifbcnN6Yx9F+UrGYLSEzHaGCRDggPDkxZodRRhAyfUu/BE9XxplmoWJH+1cFuIgg1YXj4vCQxnrUdwVfLClHv24aSdn4HZW4bx41aNf9FaEWLLJjmcRUP7uPQvexioiotlvrRZVkZKqjc/qj8Xdicx+qtgOIUU3e9p2xq4t4FXgrbJOB5e+Zbs8x2yjoIVS/RsLiU=
+deploy:
+  provider: releases
+  overwrite: true
+  api_key:
+    secure: fLwWEA4oJjfS7jjX9mnbnhTv7Dc7OfEjvbJslhJ8Kue71Oq8l4VzePJl1G6zhICNrcQjIWTSnBtQvAMvlby9ij/PY1d8U/8KvV/KHBE++iyyAXYPVBTiXs3QnrW/gQPKvcm3dnDgR25tl3Ygz/9mmGyUl2hv88bn70Ac8C/dqxiv7LuOCur4bgqBCAS0iOEt2LHkz2+1yFkKuDLHEIua1VEj37qGnKl3fPkWja/t1/O27trGInUnu2caESeQwkHV0+LgQ0rF9IIvV7ZEswdTrM6hQ6MyPePhhnOW0nDA1gejfoGVWhAiSJgHPIDku6CH70r5JRvckqB73l+/CfC4xcP3Bq95T2Ci2GeTE7/fEMq7APQasI/g9JB9QlZlpj+9P/yWaL1VpvF7If4eHm8hSqYZwqPcuFAou2vIFqZvL19KqUJWTQldr01caZmuuA+ZQTTzFHA+1/WRs5X3M6aDirO2ZYHB6Bg1VlQ5Y5wTeal75Lo5GL0BzhN3PAO979RbitDdOLWHx/PjBnbI2IxO1kTtu7evFDvHM+9+MWpUeJckRhnzG1kqodgqzlbFfacNWuQe2s32RIwzSstO7FtwbDCGPTzlGntJpC3HaYlVt1Q09rr/fILEHXywkn1FPDmSmJZvW+bLYEA8wxWX8Vo77lWFK3Qo9W0ma4HCqnFOmyc=
+  file:
+  - drp-community-content.rst
+  - drp-community-content.yaml
+  - drp-community-content.sha256
+  - drp-community-contrib.rst
+  - drp-community-contrib.yaml
+  - drp-community-contrib.sha256
+  - krib.rst
+  - krib.yaml
+  - krib.sha256
+  - sledgehammer-builder.rst
+  - sledgehammer-builder.yaml
+  - sledgehammer-builder.sha256
+  skip_cleanup: true
+  on:
+    repo: digitalrebar/provision-content
+    tags: true
+before_install:
+- openssl aes-256-cbc -K $encrypted_223424b83f8c_key -iv $encrypted_223424b83f8c_iv -in e-info.tgz.enc -out e-info.tgz -d
+- tar -zxvf e-info.tgz

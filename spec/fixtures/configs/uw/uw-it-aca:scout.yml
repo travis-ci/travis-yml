@@ -1,0 +1,30 @@
+sudo: false
+language: python
+python:
+  - "2.7.11"
+install: 
+  - pip install --upgrade setuptools
+  - python setup.py -q install
+before_script:
+  - pip install coverage
+  - pip install coveralls
+  - pip install pycodestyle
+  - pip install -r requirements.txt
+  - cp sampleproj/manage.py manage.py
+  - python manage.py migrate --noinput
+  - npm install -g mocha
+  - npm install jquery
+  - npm install jsdom
+  - pip list
+script:
+  - pycodestyle scout/ --exclude=migrations
+  - coverage run --source=scout/ --omit=scout/migrations/* manage.py test scout --settings=sampleproj.settings.travis
+  - mocha scout/static/scout/js/test --recursive
+after_script:
+  - coveralls
+notifications:
+  webhooks:
+      urls:
+        - https://yarn.cac.washington.edu/rest/botalyst/v1/travis-ci
+  slack:
+        secure: QhQcPJdxvdl5GlPdiewvyMMzDAM5fFB0Db2kRwpDphn8KiyNv2cF1SVeiYaJcQ4fObA7eWgsBXGBd/be8OC/1ujGNncz92bJM5xHePzMxs37hjPFaHuDGH0pnqurQIhRTz6OoWDi2+2OzC3xP1VkpOv0/2ApFjhUkO8S6JodH9A=

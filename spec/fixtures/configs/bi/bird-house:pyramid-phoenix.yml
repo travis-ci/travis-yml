@@ -1,0 +1,16 @@
+language: python
+os:
+  - linux
+python:
+  - "2.7"
+sudo: false
+install:
+  - make install
+  - make start
+before_script:
+  - sleep 15
+script:
+  - make testall
+  - make pep8
+#after_success:
+# - coveralls

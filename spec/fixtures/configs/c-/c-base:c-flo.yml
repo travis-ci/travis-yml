@@ -1,0 +1,35 @@
+language: node_js
+dist: trusty
+sudo: false
+node_js:
+- lts/*
+services:
+- docker
+before_script:
+- pip install -r requirements.pip --user
+# Prepare cross-compiling environment if targeting ARM
+- if [ "$TARGET" == "raspberrypi3" ]; then docker run --rm --privileged multiarch/qemu-user-static:register --reset; fi
+# Build the Docker image
+- docker build -t "${DOCKER_IMAGE}:latest" -f $DOCKER_FILE .
+- docker tag "${DOCKER_IMAGE}:latest" "${DOCKER_IMAGE}:${TRAVIS_BUILD_NUMBER}"
+# Start the whole service
+- docker-compose up -d
+- docker-compose ps
+# Wait for runtime to be ready
+- until ./node_modules/.bin/fbp-protocol-healthcheck ws://127.0.0.1:3569 || (( count++ >= 40 )); do echo "Waiting for runtime to be ready"; sleep 10; done
+- sleep 20
+deploy:
+  -
+    provider: script
+    script: docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD" && docker push "$DOCKER_IMAGE" && docker push "${DOCKER_IMAGE}:${TRAVIS_BUILD_NUMBER}"
+    on:
+      branch: master
+env:
+  global:
+  - secure: NBFlwckuFzE4WXnAdDQ4LGrdsDrOQCvSiKlf3rO4DiADzv/Ntt45QhPTtH4h80wUbbdkU1MUfFBstQwNkWiwlSX+h825IweKpDpnxKWid7u3u4Cn9ie4qXxPI+4OdkTeYJhC1vqiGNOgdY6adacFVlZAeO+QGea7Wgt/6CJivbwZtM5lOyfuaANBGMs7fO3VOWGVRnG5DhGVvIB4+mvPF7yPzz8NNqKhntjH3Ll0W+hYlTJD4akXquv2Oixr0cqjpsi3tS4w+yqXBKg56Ls882N9s2eyM/NK1t66iVswiZyJ/CLPplsNpC1qWcizrN5ecy9lOSqc7kksiio/bErzBB6CZ5GHpMrtVXGsrkIQcfY+U8MtduBD2p85hy1b+ojH7vlkmsHt7vhBAOn9JA4ODGpzAGcbTzLbot6svMziD14S9ntw06FRyEMV1KHpfAlV05G4cbiQfCGZccdXF1IyIaHH2G9JVMAFeIqUqTVTQKnMLg4gZAMnqPYjchxa7IkilfDTlLgxqE53O6TSNon5X2KnCgS74mcu0qDU7A13voJ+FjLg7E75iHq+Drb2KmiFP5k95h1HHOpx6/x9wvclCybgJEc+hmUrrX7Kr4jhsfALUeUAy+8I5F/tflrJnZ3C/sOj/Cyg8kdP7iSI6tl6OqpsIHzvIHxAQJHaNmy8J7s=
+  - secure: auipDdT1cXyVXzNW9vJoy2lAzHfpbS1+NWLtt4NDDHqaie05K1L5HlHMIz7+degl1SfJdaBsdwsIfSOrvaSbf3BZMwFA2t6OITFRD+MrB4ZZgxxK/GQ488c4TEXoyPC3wrR3qVI/wPZ28p7ShaAxTRhdtUvDq2s0FLa0HRWn7xRE7csnHDAbfnzkVf4e4XR7FQId5QH4wlmDfneegA8PHtcv0xWLSMYr0VTlFiAruoF3quO5tUpKDD8kDxsN6aRGijuZxJ8TnTKcqKcC2Awj0/YdIUdsv92l+MJODWnooZFX4WcYh7+kPnCpyLt5HU6ZgAPKkxSTvQdxOkLjO2NVn9s93TFDd7exDSm0vewVB5jefxuQzVHsikc3DYfL0Ast0WmnT1KeK1biQIgq07l5LJjAhZEx46omW24o2tUYU8qhoJWkh+hmVOwqj9VOZAQYrjLAZPX1g7Xg1cn9LSTDKum1k5bgNdgW2WpzYTR/LU9q0jFfANwsfApdcsEFZF6/mB4CTripwfH1fb7JZ+B/Ylw68cqY5KTidGLOJG29766Yai3iN60LkMHClv73rkVVoQ9akuS2OIS+x4cXMlyqyYt95NmTo7xUW2np2nBhQSFOm+HxTWjq8FFyvUDKbrJw2lsjdxKTpw7EW22GQ4kCVbqbM/RVcQ5pqaG7rM6ee5U=
+matrix:
+  include:
+  - env: TARGET=x86 DOCKER_IMAGE=cbase/c-flo DOCKER_FILE=Dockerfile
+  - env: TARGET=raspberrypi3 DOCKER_IMAGE=cbase/raspberrypi3-c-flo COMPOSE_FILE=docker-compose-raspberrypi3.yml DOCKER_FILE=Dockerfile-raspberrypi3
+    sudo: true

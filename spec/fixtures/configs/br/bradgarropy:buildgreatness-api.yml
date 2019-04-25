@@ -1,0 +1,21 @@
+language:
+    - node_js
+
+node_js:
+    - 6
+
+cache:
+    directories:
+        - node_modules
+
+script:
+    - npm run lint
+    # - npm run nsp
+
+deploy:
+    provider: heroku
+    api_key:
+        secure: BgLSzcLKgKLwjlrWTBsyqBEdMPdR6BKMc1g35WGAfa18uaHMyhNacT+SCgorMyDlgW8IZK9Bb0I6qQVVEVCXJzkw72knUQGlUeJbTcEux831Ca0zugTzaaJOUDJZRpN0X3k0XiWhLtj1j3DElMrKHX7r92YERuN2CT4Zi/opPggLaxvaT3nSEmfIA6SryW/xU5XcAZl4CuKzuodWtud0bg0pQ6veohuN+YAqHOpPReqTxoM6n9pfqcVkHXEpKu4GiQ8lKrQu8qdOtbiV7mUgqL3z0rTh4RtVG/6hEZ+diZCp0xa2lkNnPgDKtbp4McG+iOqqbzfqHdu/oNcwGVYDYXn/Opuq137zRj8YtAkRqzvOZRGlPn/wN12n6KUHrJwk4Jf5DwJ/OVhVw+5y9KMkk1QZrM/DoyrmIiM8YYMjwZdd/63D3Is/MesgYSQSmRYWx4Pke/0wWy5C3LCTGtiFFGxSK85jt5RppriKSqgltMYXFsgyVLBexozCcPM5jdA5FGbQCuj2UjMzk5xBlnK2NDeul5a1X16bVJblaedo0jY2SwxgHja179C32HqI1ESLg+Re2vfJR+U52rsiktCMihbiP0AyitgaZQI4g4DYPalkBr9TUf58o+kGs/Z20wBEqh/wsiOhzPdGla2z/UktgUjCA0sdonZo15x0q5N9RZA=
+    app:
+        master: buildgreatness-api
+        dev: buildgreatness-api-dev

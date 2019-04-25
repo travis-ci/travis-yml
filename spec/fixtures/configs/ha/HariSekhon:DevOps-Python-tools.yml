@@ -1,0 +1,56 @@
+#  vim:ts=2:sts=2:sw=2:et
+#
+#  Author: Hari Sekhon
+#  Date: 2014-11-29 01:02:47 +0000 (Sat, 29 Nov 2014)
+#
+#  https://github.com/harisekhon/devops-python-tools
+#
+#  License: see accompanying Hari Sekhon LICENSE file
+#
+#  If you're using my code you're welcome to connect with me on LinkedIn and optionally send me feedback
+#  to help improve or steer this or other code I publish
+#
+#  https://www.linkedin.com/in/harisekhon
+#
+
+language: python
+python:
+#  - "2.6"
+  - "2.7"
+# MySQL in lib doesn't build from pip in Python 3
+#  - "3.2"
+#  - "3.3"
+#  - "3.4"
+#  - "3.5"
+#  python-krbV fails to compile on PyPy
+#  - "pypy"
+#  - "pypy3"
+
+sudo: required
+
+env:
+#  - DEBUG=1
+  - DOCKER_COMPOSE_VERSION=1.16.1 PYTHONUNBUFFERED=1
+
+notifications:
+  email: false
+
+branches:
+  only:
+    - master
+
+cache: pip
+
+services:
+  - docker
+
+install:
+  - travis_retry make
+  #- pip install --upgrade ndg-httpsclient
+  - travis_retry pip uninstall -y certifi && travis_retry pip install certifi==2015.04.28
+
+script:
+  - travis_retry make test
+
+after_success:
+  - coveralls

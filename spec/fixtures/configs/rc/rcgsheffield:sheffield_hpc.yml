@@ -1,0 +1,32 @@
+language: python
+cache: pip
+
+sudo: false
+
+addons:
+    apt:
+        packages:
+            - texlive
+            - texlive-full
+            - dvipng
+            - graphviz
+            - pandoc
+
+env:
+  matrix:
+    - BUILD_CMD='html'
+    - BUILD_CMD='latexpdf'
+            
+python:
+    - 3.6
+
+virtualenv:
+     system_site_packages: false
+
+install:
+    - pip install -r requirements.txt
+
+script:
+    - mkdir -p _build/latex/
+    - bash get_newfloat.sty.sh ./_build/latex/
+    - make $BUILD_CMD

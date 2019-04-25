@@ -1,0 +1,22 @@
+language: node_js
+sudo: false
+dist: trusty
+install:
+  - npm ci
+  - npm i cypress
+cache:
+  bundler: true
+  directories:
+    - ~/.npm
+    - ~/.cache
+branches:
+  only:
+    - master
+    - oAuth2
+env:
+  - TEST_SUITE=lint
+  - TEST_SUITE=test
+  - TEST_SUITE=test:cy
+
+script:
+  - 'npm run $TEST_SUITE'

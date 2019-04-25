@@ -1,0 +1,26 @@
+language: node_js
+node_js:
+  - node
+before_install:
+  - printf "@fortawesome:registry=https://npm.fontawesome.com/\n//npm.fontawesome.com/:_authToken=${FA_AUTH_TOKEN}" >> ~/.npmrc
+script: npm run build
+before_deploy:
+  - rm -rf node_modules
+  - source ./.travis/s3_utils.sh
+  - S3_BUCKET=$(get_s3_bucket)
+  - echo "Will push to S3 bucket $S3_BUCKET."
+deploy:
+  - provider: s3
+    access_key_id: $AWS_ACCESS_KEY_ID
+    secret_access_key: $AWS_SECRET_ACCESS_KEY
+    bucket: $S3_BUCKET
+    skip_cleanup: true
+    on:
+      branch: develop
+      # TODO add a condition to make sure the bucket exists using `aws s3 ls`
+  - provider: npm
+    email: "phillypackage@gmail.com"
+    api_key: $NPM_AUTH_TOKEN
+    skip_cleanup: true
+    on:
+      tags: true

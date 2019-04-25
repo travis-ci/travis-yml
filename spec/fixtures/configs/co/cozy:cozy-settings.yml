@@ -1,0 +1,61 @@
+language: node_js
+matrix:
+  fast_finish: true
+node_js:
+- '8'
+branches:
+ branches:
+   only:
+   - master
+   # tags
+   - /^\d+\.\d+\.\d+(\-beta.\d+)?$/
+env:
+  global:
+  - CXX=g++-4.8
+  - MATTERMOST_CHANNEL=Plateformers-release
+  # to generate secure ENV VARS : travis encrypt MY_VAR=<value> -r cozy/cozy-settings
+  # MATTERMOST_HOOK_URL
+  - secure: br6w5xqXr6VV9jSXwsmknhaRYZJ38MCZJQDm3VB8RLmCSeuxxAinMQUoh+a9kfU/KehUQTlEYzXxGaQQl9BtIz3h91H+5uaKQETc1OCMjEaeCsVx35a0oft0Niwo21fUzK2Sv/PsIjkCVkcYhAZJcyqRIemBpanGOlAVfSDLCFrvR0PpgAUwGbzt24xECo+i0OwnSVFht3J8k96olchXzQqs96tYD/3JfLHzxsJrlFH8WRt1MQKNywNTgmiSQ5GZXyJkeIdinTG6USCylxSsDgMclmQuicCxPBHCf3kCD6W86trS6YTNrQ+JV7/UsbyXsvEjz6vIvPRwmXYvFPHTm84CTDqbdjdh/qBmJ95+zGOkI0Ans1pRpR6V9kaJ9DB1Iik/n4BFIqISBj/EN31KHh7CTTwOJrjYodGdhMzoQMjX+XeTZuM3P5dTZ1v1xD/ssl+0VTCb6yLAqvuysbmZvYFd3UBAVs9VUmEa3BOTIGXy/8BVaKehtqruRe6Qec1udJEij6hi90VJJOGxUP98cCx9ZC97TLkITTqr6p2bpUX3nxOsFOmMzxLjkZtJij5y1cCsIaSS4P79fSud1DTSehbnDuO+O67b/XVDCRMcHKqU7+7HjvdTOmmtYmbPX45VQ5jvSY9+ZRlS9+BbLwWPWrEt+5p4+fSvEjLt/IxNxT4=
+  # REGISTRY_TOKEN
+  - secure: eR1A7gSJlA0HbnOQjzlVhifwyVYq80XU7Vu/1quc25h4Dm1YSWuqmbSSjy8yiIP4mGqyS/+jkAQkTP/S3z0QlBDxV49w/RnNM0BlHhlOriu5BL/JcC3SXQ3cS7wf/bO/atH9NCRzjqylpCftkwF3c8tXbe5u/GqtPf+NW4Jv3ZbniS57/7ESC9OhfMhZ79c/2lTW51fHUA1NOXaEa0ennotTR1xEtqSj+cw5YYAhMG/9qfJS+YVQZAPzJaOsFW+UekrQUZ4yPtPLFR5037ZM73qfFihYJZoVlVVKTBmqf6W5MDV93POB9VCf/+AF5QxLUBdBXwEKYgJ1kmYjr0T3nQkh8LQ7+ViyrqXUQCOwJklA7qJSijYIywSAtBLifFhgLjYdkJ0qNEptXCjqy2628UqEGXkg9c7kupBKlVilU7ACzYIzJRKv3SBTCOGtH1y7l9S7wPwvD9yAQXpb4rGoAoP5SX2+YO2u5mXmdHTDLX/jdkMuEuUktkv7PE59K2JtTCWgh05rCNRXqQT6zgFMpPXz/1zkS3fJ5whqvwzKI5VzMzcMdVRe2q0lsrdLKnLNJGtNJcgu5azP7b2sxJSiFIzFCx9Ic0c8f30rogmz0HSQMH4ULaQbCZKBmlXc7ngR+BFLDprsucKKy2ujyQa6LqmwEto54tIDoucbL/JiFRU=
+  # GITHUB_TOKEN
+  - secure: PwGas4xwYVDpRjwASGT6s6h56ZsiJlETmEJK+nqe3mLGUMcaQVbP/oh0ltPf7DJCHQuNDg6wXxnt9RozUpMbXKkdlj9geh5hld8uxkXikgcHpEjXwB+N7r4t4Cor/k5J8fxhfzA/mQN0ZD01qExuPkWBuN5HGguVZyWKjH/3cG4jhoBHN6XHBLDTufMJnPjjA0eI+sWPZLJZrVifwjXmp6BcNdNQLcEiKh+E0m/0eAbZ/WmZ4v46vMy0xyw+llupWfnDsZ32GEX2vjbqxZvSA01TIJXw9TYtAdp/7NRxEbMK86XfXtJtzeb4i/Tp2LIAIz82fcWXBhJ0rg9u0sbxgf4Us/w24TFHNNhYPmgydoGGkR9v2+b7NgvfOqT4mhdnxGzY14WZMPHH5JIDdJc6XaQdL8OvrVmrSZuUmOrTfDa1uD8r/TIB8DYYgqRFUeGsacfmhwiA68+60VgYSHP2T2+UP5SETzn56VUeMUNJfChtXRLSn0LkjIETRM52aruFyN48JPnJKc9uExWQA6p6qncA2Sc8EyzzBi9EQ842co/cP6gFN9EAXZQfYyZGAhsHkw88hkkf4GVAoXVKX8J/NEvVbaWCykAbXyZK0P2+AbM3kdoB9pqeTrKHD9y4xY25npe8UotTHHdI520nDYBt1feHFC/E0wcXrSB06dqA828=
+  # TX_PASSWD
+  - secure: pUqV0JHQrlu8+GMKwBSfZLjbHCbkgyPWLV5/N6y2AuJjEcSV/5yv98dH4rAo0unWSvszUk+Y0Ff9G3dCJqBfXmQE8/W9sMan19fV9rryBl7WzXr4/tS29FJv6gitQwtW1RVD+uSgmzcM0B3aed5HIhlt3y+MkEENGSx1qHrVK8iNugA/vm+jY7m9KiaeNlb9IiIXpfIUTFONFWLrchlWZ1Gzj2oT9y47h13l1lEu5CBwar2RpKAUg/y570wWp+99ffsqHaoCcrmkn4i0fZl8LBz2g0Cfgau1KoNB31vLNdLMjNL+z9YFWCg9y3Pq6ZzWX01o9SswBFWiLxXylE4Xqf5hyIUN0trh6i+eJbWfkXqovP7cmRj5umHqd6AE9PvrGYDRraa8vfPDoDqpwgYVz9moEf4POzIehrtK2YXGxFhsUDr+MYnRKqVZ53Z1AoNcTRcOA7VZBBq7ZecGJPNl0drLSee8aY20JXv6ah4hFLodpeVxpQSUOIPr2eY13412MiRnw96of7spHA/yHnrpRgOXGWZpmxVhxsh1vjjo4tJgo7w09WXdS69GmiuuBVJ8oj7NDKoa2iys38rQIG+Ly896VENKJ3BWmy7SbBW73JXjIHD64E90K6T0Zw41GyyG1ndunGY+ewsWYhKLsl5RqS1w/ieNx51WtpEY92iHX98=
+addons:
+  apt:
+    sources:
+    - ubuntu-toolchain-r-test
+    - deadsnakes
+    packages:
+    - g++-4.8
+    - python3.5
+cache:
+  yarn: true
+  directories:
+  - node_modules
+before_install:
+- if [ "$TRAVIS_SECURE_ENV_VARS" != "false" ]; then openssl aes-256-cbc -K $encrypted_ddb18e52ae01_key -iv $encrypted_ddb18e52ae01_iv -in ./deploy/id_rsa_downcloud_cozy-settings.enc -out /tmp/id_rsa_downcloud_cozy-settings -d; fi
+- if [ "$TRAVIS_SECURE_ENV_VARS" != "false" ]; then eval "$(ssh-agent -s)"; fi
+- if [ "$TRAVIS_SECURE_ENV_VARS" != "false" ]; then chmod 600 /tmp/id_rsa_downcloud_cozy-settings; fi
+- if [ "$TRAVIS_SECURE_ENV_VARS" != "false" ]; then ssh-add /tmp/id_rsa_downcloud_cozy-settings; fi
+- curl -fsSL https://bootstrap.pypa.io/get-pip.py | python3.5 - --user
+- travis_retry pip3.5 install --user transifex-client==0.12.5
+- install -m0644 .transifexrc.tpl ~/.transifexrc
+- echo "password = $TX_PASSWD" >> ~/.transifexrc
+script:
+- yarn test
+- yarn run build
+deploy:
+- provider: script
+  repo: cozy/cozy-settings
+  skip-cleanup: true
+  script: yarn cozyPublish
+  on:
+    branch: master
+- provider: script
+  repo: cozy/cozy-settings
+  skip-cleanup: true
+  script: yarn cozyPublish
+  on:
+    tags: true

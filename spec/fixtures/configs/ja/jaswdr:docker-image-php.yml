@@ -1,0 +1,16 @@
+language: generic
+
+sudo: required
+
+services:
+  - docker
+
+script:
+    - docker build -t jaschweder/php -t jaschweder/php:7.0 .
+
+after_success:
+  - docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
+  - docker push jaschweder/php;
+  - docker push jaschweder/php:7.0;
+  - chmod a+x ./script/after-success-build.sh
+  - ./script/after-success-build.sh;

@@ -1,0 +1,36 @@
+language: python
+
+sudo: false
+
+python:
+  - "2.7"
+
+cache:
+  directories:
+    - $HOME/.pip-cache
+
+services:
+  - memcached
+  # - redis-server
+  # - elasticsearch
+
+env:
+  - DJANGO_SETTINGS_MODULE=conf.settings.travis
+
+install:
+  - pip install --upgrade setuptools pip
+  - pip install -r requirements/travis.txt --cache-dir $HOME/.pip-cache
+  - npm install -g gulp
+  - npm install
+  - gulp sass
+  - npm run build
+
+before_script:
+  - src/manage.py collectstatic --noinput --link -v 0
+
+script:
+  - coverage run src/manage.py test src  -v 2
+
+after_success:
+  - coveralls
+  - codecov

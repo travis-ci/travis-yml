@@ -11,7 +11,7 @@ describe Travis::Yml::Schema::Def::Php, 'structure' do
         type: :object,
         properties: {
           php: {
-            '$ref': '#/definitions/strs'
+            '$ref': '#/definitions/type/strs'
           },
           composer_args: {
             type: :string

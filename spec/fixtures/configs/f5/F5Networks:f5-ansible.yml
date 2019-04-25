@@ -1,0 +1,46 @@
+sudo: required
+
+language: python
+
+python:
+#  - 2.7
+#  - 3.5
+  - 3.6
+#  - 3.7
+
+#env:
+#  - TOXENV=unit
+#  - TOXENV=style
+
+before_install:
+  # NOTE: this is probably not required since you're not trying to pull or
+  # push from a GitHub repo
+  - git config --global user.email "OpenStack_TravisCI@f5.com"
+  - git config --global user.name "Travis F5 Openstack"
+
+install:
+  - travis_retry sudo apt-get update
+  - travis_retry sudo apt-get -y install libffi-dev libssl-dev
+  - travis_retry pip install -r requirements.travis.txt
+
+script:
+  - tox
+
+jobs:
+  include:
+    - stage: test
+      script:
+        - inv docs.build
+        - inv test.style
+      python: 3.6
+      env: TOXENV=sanity
+      if: branch = devel AND type = pull_request
+
+    - stage: test
+      script:
+        - inv docs.module
+        - make docker-test && make docker-deploy
+        - aws cloudfront create-invalidation --distribution-id $AWS_DIST_ID --paths /products/orchestration/ansible/devel
+      python: 3.6
+      env: TOXENV=docs-deploy
+      if: branch = devel AND type != pull_request

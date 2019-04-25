@@ -1,0 +1,46 @@
+sudo: false
+language: python
+python:
+- '2.7'
+- '3.4'
+- '3.5'
+- '3.6'
+matrix:
+  allow_failures:
+  - python: '3.6'
+    env: TOXENV=fixme
+  include:
+  - python: '3.6'
+    env: TOXENV=lint
+  - python: '3.6'
+    env: TOXENV=fixme
+  - python: '3.6'
+    env: TOXENV=scan
+  - python: 3.7
+    dist: xenial
+    sudo: true
+install: make travis-install
+before_script: make travis-before-script
+script: make travis-script
+after_success: make travis-after-success
+deploy:
+- provider: pypi
+  server: https://upload.pypi.org/legacy/
+  user: Andrew.Hawker
+  password:
+    secure: HsEqy8L1t6PipxzdhaTIFLN1cVFmqIp0u+rIWKRuoUmaEGKyN+SBm3DH4Kp+rCK1oTi9ppP9PAgP3IeOkkigdCKJwOvmLF/Rhlysj4LAP2NeuBjhTOV8ap/lD2MYIdPOHttscIoBvVZo/k6KV/CNBF6LP23WRN3vw+3N9HK9X68=
+  distributions: sdist bdist_wheel
+  skip_cleanup: true
+  on:
+    branch: master
+    tags: true
+    condition: $TRAVIS_PYTHON_VERSION = "3.4"
+notifications:
+  slack:
+    secure: WCdydHklEv/2ZDuN0IK1wrSOWQS5j257rbgXx1B4CYVj76ugwyvXJjcxkOIX+gwY4J4vNQhXrM0zIxtgL9JxLU9Ox+Knb2hbJYSwc5yPpDcY+cmGcKKUxqWoHNCkxwAX+hOC2LwZYVxBHrIu3PQ5QJ+DeuFtLyHYS2YQg8OTJ44=
+  webhook:
+    secure: lj8ylOT/ivnpReyLgu3+I7zPXvn0O559wBRd2up036CSmxPH7pOOA7xH6RWINtkCpVSjeSfd7d8kBwwXWc+VOl0qJ1xA/UwTwD56MCv9rmmvdNglSMnyAY45hSYbUaCoLbUgXqS+878HrboxV9YvfAf71/dfRknzMu2ABhnBvtU=
+env:
+  global:
+  - VIRTUALENV_NO_DOWNLOAD=1
+  - secure: LX0BnEQCQAfm6IdBdU1t4EgNjysllBHAd582wPNSp9pDeZ4VLEEx8wI6he1Iff5mPcdWm9qlN9KypHCvl/A07RusFWqMOcSPkOzBfLOKqBdOorfakVE/ENTTrulLqaOyK++7sK90DOKr3ZXAeMrTt18rR2pU4Cu85bzR0eYTq/4=

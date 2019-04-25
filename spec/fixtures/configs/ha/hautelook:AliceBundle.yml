@@ -1,0 +1,75 @@
+language: php
+
+php:
+  - '7.1'
+  - '7.2'
+  - nightly
+
+branches:
+  only:
+    - master
+
+env:
+  global:
+    - OCULAR_BIN=$HOME/.bin/ocular.phar
+    - PHPUNIT_BIN='vendor/bin/phpunit'
+    - PHPUNIT_CONFIG='phpunit.xml.dist'
+    - PHPUNIT_FLAGS='--stop-on-failure --verbose'
+
+cache:
+  directories:
+    - $HOME/.composer/cache/files
+    - $HOME/.bin/
+
+services:
+  - mysql
+
+matrix:
+  fast_finish: true
+  include:
+    - php: '7.2'
+      env:
+        - COMPOSER_FLAGS="--prefer-lowest"
+    - php: '7.2'
+      env: SYMFONY_REQUIRE="~3.4.0"
+    - php: '7.2'
+      env:
+        - COVERAGE="true"
+        - PHPUNIT_FLAGS="--stop-on-failure --verbose --coverage-text --coverage-clover=coverage.xml"
+        - LINT="1"
+  allow_failures:
+    - php: nightly
+
+before_install:
+  - set -eo pipefail
+  - echo "memory_limit=-1" >> ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/travis.ini
+  - phpenv config-rm xdebug.ini || true
+  - if [ "$SYMFONY_REQUIRE" != "" ]; then composer global require --no-scripts symfony/flex; fi
+  - |
+    if [ -n "$COVERAGE" ]; then
+      PHPUNIT_FLAGS="$PHPUNIT_FLAGS --testdox --coverage-text"
+      PHPUNIT_BIN="phpdbg -qrr $PHPUNIT_BIN"
+
+      if [ ! -e $OCULAR_BIN ]; then
+          wget https://scrutinizer-ci.com/ocular.phar -O $OCULAR_BIN
+          chmod +x $OCULAR_BIN
+          alias ocular="php $OCULAR_BIN"
+      fi
+    else
+      PHPUNIT_BIN="php -d zend.enable_gc=0 $PHPUNIT_BIN"
+    fi
+  - mysql -u root -e 'create database hautelook_alice_bundle;'
+  - if [[ $LINT = "1" ]]; then wget https://github.com/FriendsOfPHP/PHP-CS-Fixer/releases/download/v2.12.1/php-cs-fixer.phar; fi
+
+install:
+  - composer update --prefer-dist $COMPOSER_FLAGS
+
+script:
+  - $PHPUNIT_BIN -c $PHPUNIT_CONFIG $PHPUNIT_FLAGS
+  - if [[ $LINT = "1" ]]; then php php-cs-fixer.phar fix --dry-run --diff --no-ansi; fi
+
+after_script:
+  - if [ -n "$COVERAGE" ]; then $OCULAR_BIN code-coverage:upload --format=php-clover coverage.xml; fi
+
+notifications:
+  email: false

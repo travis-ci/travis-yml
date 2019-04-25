@@ -1,0 +1,121 @@
+sudo: required
+
+language: php
+
+services:
+  - mysql
+
+cache:
+  apt: true
+  directories:
+    - $HOME/.composer/cache
+    - $HOME/.npm
+
+env:
+  global:
+    - EE_VERSION=master
+    - WP_VERSION=latest WP_MULTISITE=0
+
+before_install:
+   - nvm install && nvm use
+   - |
+      if [[ "$SKIP_XDEBUG_REMOVE" != "true" ]]; then
+        cp $HOME/.phpenv/versions/$(phpenv global)/etc/conf.d/xdebug.ini /tmp
+        phpenv config-rm xdebug.ini
+        echo "xdebug removed";
+      fi
+
+before_script:
+  - bash tests/bin/install-wp-tests.sh wordpress_test root '' localhost $WP_VERSION
+  - . tests/bin/setup-addon-tests.sh
+  - export PATH="$HOME/.composer/vendor/bin:$PATH"
+  - |
+    # Install the specified version of PHPUnit depending on the PHP version:
+    if [[ -n "$TRAVIS_PHP_VERSION" ]]; then
+      case "$TRAVIS_PHP_VERSION" in
+        7.2|7.1|7.0|nightly)
+          echo "Using PHPUnit 6.1"
+          composer global require "phpunit/phpunit=6.1.*"
+          ;;
+        5.6|5.5|5.4|5.3)
+          echo "Using PHPUnit 4.8"
+          composer global require "phpunit/phpunit=4.8.*"
+          ;;
+        5.2)
+          # Do nothing, use default PHPUnit 3.6.x
+          echo "Using default PHPUnit, hopefully 3.6"
+          ;;
+        *)
+          echo "No PHPUnit version handling for PHP version $TRAVIS_PHP_VERSION"
+          exit 1
+          ;;
+      esac
+    fi
+  - mysql --version
+  - phpunit --version
+  - phpenv versions
+
+script: npm run test-php
+
+jobs:
+  fast_finish: true
+  allow_failures:
+    - php: nightly
+    - php: 7.2
+      env:
+        - PHP_LINT=1
+        - PHP_LINT_WITH_WARNINGS=yes
+  include:
+    - stage: test
+      php: 7.2
+      env:
+        - PHP_LINT=1
+        - PHP_LINT_WITH_WARNINGS=no
+      script:
+        - composer install || exit 1
+        - composer config-eventespressocs || exit 1
+        - npm run lint-php:skip-warnings || exit 1
+    - php: 7.2
+      env:
+        - PHP_LINT=1
+        - PHP_LINT_WITH_WARNINGS=yes
+      script:
+        - composer install || exit 1
+        - composer config-eventespressocs || exit 1
+        - npm run lint-php || exit 1
+## skipping for now because there's no javascript to test!
+#    - env:
+#        - JAVASCRIPT_TESTS=1
+#      script:
+#        - npm install || exit 1
+#        - npm run ci || exit 1
+    - php: 7.2
+    - php: 7.1
+    - php: 7.0
+    - php: 5.6
+    # multisite
+    - php: 7.2
+      env: WP_MULTISITE=1
+    - php: 7.1
+      env: WP_MULTISITE=1
+    - php: 7.0
+      env: WP_MULTISITE=1
+    - php: 5.6
+      env: WP_MULTISITE=1
+    # wp 4.5 builds
+    - php: 5.6
+      env: WP_VERSION=4.5
+    - php: 5.6
+      env: WP_VERSION=4.5 WP_MULTISITE=1
+    - php: nightly
+
+notifications:
+  slack:
+    rooms:
+      secure: "EZ0PGr+s8wnX+aRp4bWtv6gbomJ/JtcGnlzyF9ya+WUjmCmnMmTZFiRInxLRjSpdly4tNfPo/f9W9mJheiSm0Vqd82/5PfIV/oDDWpGZeN8dQdzZEOvIWdA/ZswG3ryr7+bgfXajAl5i4il6ezZHb9wpe3QAtHFX8ycheT3319ezNW3vSqLRZUHKCqwjR2K+OpN8xvL2L+fpoWj5WRPr9GyTyQWxjXoiVT+cKDvNJuXgFzcL7GUl4Pv2S1V+uahGCtKS1v/F8VQcoUkeG8HKOkaHltJB10AbfoPUTW83rNrPR81/I4k41fTFAYguNdxoxe49eF9bUkLJlwuWJp/HWvuQXfFQTggGNAlQIAzPhYbywDj6BXes2euXLH8HCmdqAf+2WkuZVf03T9yBEaxGcIv66GS9SSPnxq6d40ykXlBBrETvWlIcFkyFHZlYAZzXzTpVCPJ5cOx+kMPywP3AyNA3DwqO9QXA/SG172r4fB6hTNQsl3DrrhMeY/R7jz8TNqhU7ej4ew/yqFjj9VSFtb+nHDbkoH/lgWOqv3VywmBNDIlZcpznFrAoQl8rVucbvGqFsc1t2/QRDbRamp8AFGlNTMekF/OMgADZ5NzruOCgTWzXLRFwFX3jvRTqUJCJgTPVf1/ve9Itd481YsiCjHAkyKdXQNMENJwvC6s3xzw="
+    on_success: change
+    on_failure: always
+    on_start: always
+    template:
+      - "Build <%{build_url}|#%{build_number}> (<%{compare_url}|%{commit}>) of %{repository}@%{branch} by %{author} %{result} in %{duration}"
+      - "%{commit_message}"

@@ -1,0 +1,27 @@
+language: node_js
+sudo: false
+node_js:
+- '10'
+- '11'
+matrix:
+  allow_failures:
+    - node_js: '11'
+script: npm test
+notifications:
+  irc:
+    channels:
+    - irc.mozilla.org#amo-bots
+    on_success: change
+    on_failure: always
+after_script:
+- cat ./coverage/**/lcov.info | ./node_modules/coveralls/bin/coveralls.js
+deploy:
+  provider: npm
+  email: addons-dev-automation+npm@mozilla.com
+  skip_cleanup: true
+  api_key:
+    secure: ho+KBv2o9uGmt62D4GtDjGuiFGRoDNW56lrdfXqXqS1jE8gvFa/Z6AJWawEKppXQ0E7zZvHVqfIgkO0GmiV0Wp84wHyZ3zrd8Kp69VIYupPg4V9ArH/vQkzaytAyiHL8xx9sX9ES8Uaeuyn6FdGRZvYcqIAHtw4BDETjYDOQ1d30/dOE8yMHQg2D98WusqrT8jXi0k/dC54+B/7lkssSSW0I4ioPhPa0GAIjmqF5tpU0ATjFkBlSSqEpLMmVTfEknN2mlQqX/+HyQmFcaSppO+q5VOy8GYWOYFiHTY6AmzC8VvvvB3TiCTYeq341JrB2IISEm2145RAENQeHmaXVfz9wHhQVUhq8i3vGu58TP0TMr0J8mtEPzC27RQpsg6Jn0g8D5s/f8Z8mY1SwhtOrM+uPBGolhD2b71WPSGprw7wsE4FVEodLTvmws3LFTE8eMFrYyhHcI90QtBul3+oX76I2oR5e7f1lGhxiunDCCl7k3PHU0Qr8VM3jF6CnWsEMepxabgLRScjMr+9cS4OiV2k7bFi7MQiSXJWYM/iQFfHHbCfHdWP0S3sKhTvHfQVkxZ6BO2UzEUaDAxZeNEMvjDUrcukSYj/sqgDVBsJHYnNJETVYpjE+afrEC9wkuUjQa6S9GXFQ2WZPeubXlfAuwQBG+Yl7COgQ2SFdavVUiBo=
+  on:
+    tags: true
+    repo: mozilla/dispensary
+    branch: master

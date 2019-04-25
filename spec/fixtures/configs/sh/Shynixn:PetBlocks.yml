@@ -1,0 +1,43 @@
+language: java
+sudo: true
+jdk:
+  - oraclejdk8
+cache:
+  timeout: 1000
+  directories:
+  - $HOME/.m2/repository/org/spigotmc
+  - $HOME/.gradle/caches/minecraft
+before_install:
+    - chmod +x gradlew
+    - chmod +x travis-status.sh
+    - sudo /etc/init.d/mysql stop
+    - echo $GPG_SECRET_KEYS | base64 --decode | $GPG_EXECUTABLE --import
+    - echo $GPG_OWNERTRUST | base64 --decode | $GPG_EXECUTABLE --import-ownertrust
+    - if [[ $TRAVIS_COMMIT_MESSAGE == *"--refresh-dependencies"* ]]; then ./gradlew downloadDependencies; fi ;
+    - sudo apt-get install python3-pip
+    - sudo pip3 install https://github.com/Shynixn/sphinx_rtd_theme/releases/download/C1.0/sphinx_rtd_theme.zip
+    - sudo pip3 install -U sphinx
+    - sudo pip3 install typing
+    - git config --global user.email "travis@travis-ci.org" && git config --global user.name "Travis CI"
+    - gpg2 --batch --cipher-algo AES256 --passphrase $SIGNING_KEYPASSWORD travis_secret_key.gpg
+install:
+    - ./gradlew assemble || ./gradlew setupDecompWorkspace && ./gradlew assemble || ./gradlew downloadDependencies
+script:
+  - ./gradlew clean build
+  - if [[ $TRAVIS_COMMIT_MESSAGE == *"--snapshot"* ]]; then ./gradlew clean publish > /dev/null; fi ;
+  - if [[ $TRAVIS_COMMIT_MESSAGE == *"--release"* && $TRAVIS_BRANCH == *"master"* ]]; then ./gradlew clean publishToNexus > /dev/null; fi ;
+  - if [[ $TRAVIS_COMMIT_MESSAGE == *"--release"* && $TRAVIS_BRANCH == *"master"* ]]; then ./gradlew closeAndReleaseRepository; fi ;
+  - if [[ $TRAVIS_BRANCH == *"master"* ]]; then rm -rf docs/build && rm -rf docs/apidocs; fi ;
+  - if [[ $TRAVIS_BRANCH == *"master"* ]]; then python3 -msphinx -M html docs/source docs/build; fi ;
+  - if [[ $TRAVIS_BRANCH == *"master"* ]]; then ./gradlew generateJavaDocPages > /dev/null; fi ;
+  - if [[ $TRAVIS_BRANCH == *"master"* ]]; then git add docs && git commit --message "Travis build $TRAVIS_BUILD_NUMBER [skip travis-ci]"; fi ;
+  - if [[ $TRAVIS_BRANCH == *"master"* ]]; then git push --quiet https://Shynixn:$GH_TOKEN@github.com/Shynixn/PetBlocks.git HEAD:master; fi ;
+after_success:
+  - ./gradlew jacocoTestReport
+  - bash <(curl -s https://codecov.io/bash)
+  - ./gradlew shadowJar
+  - ./travis-status.sh success $WEBHOOK_URL
+  - if [[ $TRAVIS_COMMIT_MESSAGE == *"--snapshot"* ]]; then java -jar petblocks-tools/build/libs/Deploy.jar --snapshot $WEBHOOK_SNAPSHOT_URL; fi ;
+  - if [[ $TRAVIS_COMMIT_MESSAGE == *"--snapshot"* ]]; then java -jar petblocks-tools/build/libs/Deploy.jar --snapshot $WEBHOOK_URL; fi ;
+after_failure:
+  - ./travis-status.sh failure $WEBHOOK_URL

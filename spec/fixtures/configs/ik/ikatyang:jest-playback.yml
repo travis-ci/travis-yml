@@ -1,0 +1,18 @@
+language: node_js
+
+node_js:
+- 4
+- 6
+- stable
+
+script:
+- yarn run lint
+- yarn run test -- --verbose
+
+cache:
+  yarn: true
+  directories:
+  - node_modules
+
+matrix:
+  fast_finish: true

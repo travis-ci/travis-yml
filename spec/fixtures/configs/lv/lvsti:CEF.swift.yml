@@ -1,0 +1,33 @@
+notifications:
+  email:
+    recipients:
+      - elveestei@gmail.com
+    on_success: never
+  
+language: objective-c
+
+branches:
+  only:
+    - cef_3359
+    - cef_3396
+    - cef_3440
+    - cef_3497
+    - cef_3538
+    - cef_3578
+    - cef_3626
+
+xcode_project: CEF.swift.xcodeproj
+xcode_scheme: CEF.swift
+osx_image: xcode10.1
+
+before_install:
+  - brew update
+  - brew install jq
+  - sudo pip install lxml
+  
+install:
+  - ./scripts/setup.sh
+  - ./scripts/check_proxy_impl.py ./External/cef_binary/include/ ./CEF.swift/Proxies/
+  - ./scripts/check_handler_interface.py ./External/cef_binary/include/ ./CEF.swift/Handlers/
+
+script: set -o pipefail && xcodebuild clean build -project CEF.swift.xcodeproj -scheme CEF.swift | xcpretty

@@ -1,0 +1,26 @@
+---
+language: ruby
+sudo: required
+
+services:
+- docker
+
+script:
+  - docker run -it --rm -v $PWD:/srv/jekyll -eJEKYLL_UID=$UID jekyll/builder:pages jekyll build --config _config.yml,_prod.yml
+  - docker run -it  --rm -v $(pwd)/_site:/site -it jekyll/builder:pages /usr/gem/bin/htmlproofer /site --disable-external
+
+before_deploy:
+  - tar -zcvf ${TRAVIS_REPO_SLUG#*/}.tar.gz -C _site ./
+  - sha256sum --tag ${TRAVIS_REPO_SLUG#*/}.tar.gz > SHASUMS
+  - export BODY="$(cat SHASUMS)"
+
+deploy:
+  provider: releases
+  api_key: $GITHUB_OAUTH_TOKEN
+  file:
+    - ${TRAVIS_REPO_SLUG#*/}.tar.gz
+    - SHASUMS
+  body: ${BODY}
+  skip_cleanup: true
+  on:
+    tags: true

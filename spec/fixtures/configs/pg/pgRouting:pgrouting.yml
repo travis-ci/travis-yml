@@ -1,0 +1,90 @@
+# ------------------------------------------------------------------------------
+# Travis CI scripts
+# Copyright(c) pgRouting Contributors
+#
+# Main configuration
+# ------------------------------------------------------------------------------
+
+#choose trusty
+
+dist: trusty
+sudo: required
+
+
+language: cpp
+
+compiler:
+    - gcc
+
+env: POSTGRESQL_VERSION=9.6   PG_USER=postgres
+
+matrix:
+  include:
+    - os: linux
+      env: POSTGRESQL_VERSION=10   PG_USER=postgres DOCUMENTATION=OFF
+
+    - os: linux
+      env: POSTGRESQL_VERSION=9.6   PG_USER=postgres DOCUMENTATION=OFF
+
+    - os: linux
+      env: POSTGRESQL_VERSION=9.5   PG_USER=postgres DOCUMENTATION=OFF
+
+    - os: linux
+      env: POSTGRESQL_VERSION=9.4   PG_USER=postgres DOCUMENTATION=OFF
+
+    - os: linux
+      env: POSTGRESQL_VERSION=9.3   PG_USER=postgres DOCUMENTATION=OFF
+
+    - os: linux
+      env: POSTGRESQL_VERSION=9.6   PG_USER=postgres DOCUMENTATION=ON
+
+
+# executed. So things have to be tested oe by one.
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+      # For cmake
+      - kubuntu-backports
+      - boost-latest
+    packages:
+      - cmake
+      - libboost-thread-dev
+      - libboost-graph-dev
+      - libcgal-dev
+      - python-sphinx
+      - graphviz
+      - texlive
+      - texlive-font-utils
+      - texlive-latex-extra
+      - ghostscript
+
+
+
+
+install:
+  - pip install sphinx
+  - sudo ./tools/travis/install-doxygen.sh
+  - sudo ./tools/travis/install-postgres.sh $POSTGRESQL_VERSION $PG_USER
+
+before_script:
+
+  - psql -U postgres -c "create extension postgis"
+  -  export PATH=/usr/lib/postgresql/$POSTGRESQL_VERSION/bin:$PATH
+    
+  # initialize databases
+  - createdb  -U $PG_USER ___pgr___test___
+  - createdb  -U $PG_USER pgr_test__db__test
+  - ./tools/travis/check-extensions.sh $POSTGRESQL_VERSION ___pgr___test___
+
+
+script:
+  - ./tools/travis/pgrouting_build.sh $POSTGRESQL_VERSION $POSTGIS_VERSION
+  # tests as part of script so if a test fails the build fails
+  - if [ "$DOCUMENTATION" == "OFF" ]; then ./tools/testers/pg_prove_tests.sh $PG_USER 5432 DEBUG ; fi
+
+#after_script:
+  - ./tools/travis/pgrouting_test.sh $POSTGRESQL_VERSION $PG_USER
+
+#after_success:
+  # blank

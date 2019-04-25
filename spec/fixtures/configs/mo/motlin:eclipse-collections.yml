@@ -1,0 +1,88 @@
+language: java
+dist: trusty
+sudo: false
+
+before_install:
+  - wget https://archive.apache.org/dist/maven/maven-3/3.5.0/binaries/apache-maven-3.5.0-bin.zip
+  - unzip -qq apache-maven-3.5.0-bin.zip
+  - export M2_HOME=$PWD/apache-maven-3.5.0
+  - export PATH=$M2_HOME/bin:$PATH
+  - echo "MAVEN_OPTS='-Dmaven.repo.local=$HOME/.m2/repository -Xmx1g -Dorg.slf4j.simpleLogger.showDateTime=true -Dorg.slf4j.simpleLogger.dateTimeFormat=HH:mm:ss:SSS'" > ~/.mavenrc
+
+install:
+  -
+
+jobs:
+  fast_finish: true
+  include:
+    - jdk: oraclejdk8
+      env:
+        - DESC="acceptance tests"
+        - CMD="mvn install --projects acceptance-tests --also-make --activate-profiles all"
+
+    - jdk: oraclejdk8
+      env:
+        - DESC="findbugs"
+        - CMD="mvn install findbugs:check --projects '!scala-unit-tests,!jmh-scala-tests,!jmh-tests,!jcstress-tests,!p2-repository' --activate-profiles all -DskipTests=true"
+
+    - jdk: oraclejdk8
+      env:
+        - DESC="checkstyle"
+        - CMD="mvn install checkstyle:check --activate-profiles all -DskipTests=true"
+
+    - jdk: oraclejdk8
+      env:
+        - DESC="unit tests"
+        - CMD="mvn install"
+
+    - jdk: oraclejdk8
+      env:
+        - DESC="compile performance-tests"
+        - CMD="mvn install --projects performance-tests --also-make --activate-profiles all -DskipTests=true"
+
+    - jdk: oraclejdk8
+      env:
+        - DESC="compile javadoc"
+        - CMD="mvn install javadoc:jar --projects '!unit-tests,!junit-trait-runner,!unit-tests-java8,!serialization-tests,!scala-unit-tests,!jmh-scala-tests,!jmh-tests,!jcstress-tests,!p2-repository,!test-coverage' --activate-profiles all -DskipTests=true"
+
+    - jdk: oraclejdk9
+      env:
+        - DESC="unit tests oraclejdk9"
+        - CMD="mvn install"
+
+    - jdk: openjdk10
+      env:
+        - DESC="unit tests openjdk10"
+        - CMD="mvn install"
+
+    - jdk: openjdk11
+      env:
+        - DESC="unit tests openjdk11"
+        - CMD="mvn install"
+
+    - jdk: oraclejdk11
+      env:
+        - DESC="unit tests oraclejdk11"
+        - CMD="mvn install"
+
+    - jdk: oraclejdk8
+      env:
+        - DESC="unit tests Java12-EA"
+        - JDK=Java12-EA
+        - CMD="./.travis-command-ea-builds.sh"
+
+  allow_failures:
+    - jdk: oraclejdk8
+      env:
+        - DESC="unit tests Java12-EA"
+        - JDK=Java12-EA
+        - CMD="./.travis-command-ea-builds.sh"
+
+script: eval travis_wait 30 $CMD
+
+before_cache:
+  - rm -rf $HOME/.m2/repository/org/eclipse/collections/
+
+cache:
+  directories:
+    - $HOME/.m2

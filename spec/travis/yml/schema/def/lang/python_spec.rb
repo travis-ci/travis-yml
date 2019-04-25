@@ -11,7 +11,7 @@ describe Travis::Yml::Schema::Def::Python, 'structure' do
         type: :object,
         properties: {
           python: {
-            '$ref': '#/definitions/strs'
+            '$ref': '#/definitions/type/strs'
           },
           virtualenv: {
             type: :object,

@@ -1,0 +1,62 @@
+language: android
+jdk: oraclejdk8
+sudo: required
+dist: trusty
+
+branches:
+  except:
+    - gh-pages
+
+addons:
+  sonarcloud:
+    organization: "mgaetan89-github"
+
+env:
+  global:
+    - BUILD_TOOLS_VERSION=27.0.3
+    - SDK_VERSION=27
+
+  matrix:
+    - EMULATOR_TAG=android EMULATOR_API=19 ABI=armeabi-v7a
+    - EMULATOR_TAG=android EMULATOR_API=21 ABI=armeabi-v7a
+
+android:
+  components:
+    - tools
+    - platform-tools
+    - tools
+    - build-tools-$BUILD_TOOLS_VERSION
+    - android-$SDK_VERSION
+
+  licenses:
+    - 'android-sdk-license-.+'
+
+before_script:
+  - echo y | android update sdk --no-ui --all --filter "android-$EMULATOR_API"
+  - android-update-sdk --components="sys-img-$ABI-$EMULATOR_TAG-$EMULATOR_API" --accept-licenses='android-sdk-license-[0-9a-f]{8}'
+  - echo no | android create avd --force -n test -t $EMULATOR_TAG-$EMULATOR_API --abi $ABI
+  - emulator -avd test -no-audio -netfast -no-window &
+  - android-wait-for-emulator
+  - adb shell input keyevent 82 &
+  - adb shell svc power stayon true
+
+script:
+  - travis_wait 60 ./gradlew :app:assembleDebugAndroidTest :app:connectedDebugAndroidTest :app:jacocoTestReportDebug :app:createDebugCoverageReport
+  - ./gradlew sonarqube
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
+
+after_failure:
+  - adb logcat -d
+
+before_cache:
+  - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+  - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+
+cache:
+  directories:
+    - $ANDROID_HOME
+    - $HOME/.gradle/caches/
+    - $HOME/.gradle/wrapper/
+    - $HOME/.android/build-cache

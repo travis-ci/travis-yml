@@ -1,0 +1,41 @@
+sudo: false
+language: node_js
+node_js:
+- '6'
+env:
+  matrix:
+  - PROJECT_DIR=widget-showcase
+  - PROJECT_DIR=todo-mvc
+  - PROJECT_DIR=todo-mvc-kitchensink
+  - PROJECT_DIR=todo-mvc-tsx
+  - PROJECT_DIR=realworld
+  - PROJECT_DIR=world-clock
+  - PROJECT_DIR=custom-element-menu
+  - PROJECT_DIR=auto-deploy
+  - PROJECT_DIR=intersection-observer
+  - PROJECT_DIR=resize-observer
+  - PROJECT_DIR=dgrid-wrapper
+  global:
+  - SAUCE_USERNAME=dojo2-ts-ci
+  - SAUCE_ACCESS_KEY=e92610e3-834e-4bec-a3b5-6f7b9d874601
+  - BROWSERSTACK_USERNAME=dylanschiemann2
+  - BROWSERSTACK_ACCESS_KEY=4Q2g8YAc9qeZzB2hECnS
+  - secure: UZlUKfHSk1XKkXQipkOlIrZCa+VXhPDOLGlB3ZIFsA2mIiKcEAXhG3kHsRWmb/kWk2KAHuWx7wfNgdnf0A99bd12X5zArsGQM6S34mx/fQGDJMv1U+j49T/pM35BSZg/91FKGna17NXhwpHiJFONceTZl4v8kZI8/b1Vh4y2q2ANYTWNzEVaW5o4cgVeqcHQvJdJOidK6YVTJlU83P+DJoymxCAfWGVIY5SYTWj6vh4GjGWzjScp/m2NIZd2kE4u3wS6uCFwgp3wQ5I6eEP3RFshzgqH3aFzHUe/OkoPms5vm+SdZ5dyY2b4vE9Z3aMceQbsgxso54DtIBOcCOoWfw6sZMYD0+GkcUvTAkeTJBRxXnz6SOoxXsXv0kJKyHWlL+vWtZHGkUsUkQfgSZKB0l62ejogS54z6OgqZmtsDodPsS/yckQs8zMb3WmI2T6dT9afNVncSR31GufWKhc1u1Ry5t5g9bZg8cbKkkqXmwCtRUv94t1tox1NNy2qQLfR1hrj+v9MvSWeCAGFArKylTTvH7TRG/8KwBK25G5B4x7RopdQss1nWaLwveasU9ZWxlv6MabRnstHIX0vScmJUgc47p6aIem2e+EvGB068+nD0i0w2BN1d14QqQH2IjLPJIKXtyCca3o2+4zORCOE1+8JiCGgWpJTtg/JpDxbJlg=
+matrix:
+  fast_finish: true
+  allow_failures:
+  - env: PROJECT_DIR=auto-deploy
+install:
+- ./scripts/install.sh
+script:
+- ./scripts/build.sh
+deploy:
+  skip_cleanup: true
+  provider: script
+  script: scripts/gh-pages-publish.sh
+  on:
+    branch: master
+notifications:
+  slack:
+    on_success: change
+    secure: RhoK6ZiY+y/lmq+TlyPEBioCCW3St+GPUolPBRd6z58RGLyt7pNAS5wKh40SGwpEf/4vawisbEzShYbQ9NTct1DlIrsKoDSmq11d04I4iqDI4mHdlM+Gf2hf+VTj/A9ID5nzx84xtV5uXO3V8qukkEEdrq63+v3aO5zNI7Qmi6tOIH29SoVql860O+JC0nn+PzBpQihe/75SrilCYRRY0ItEcy7CEGksPzQ48tmjt6dl/G2nhap+Z6km96ZtJg8KPtcwpkzr2qHsgLEu9C2Vz6KH9EGPC9lT7pulIQxLYDGHNAVTN39jinr1YGiGxiPPZcaNy9/UR0tYO5oBdhrhtfLyIAlftVc/KRKMRIE9maXUiP3PZfVPlggP7J87mnQZFhhbbzeD+35jUe03kPGL8r/xTH2ZOnFQO9Hb2rNp+fC0eNs7dbuIA4FMv8vhKB/f24Mfa+UUhmckUwrRQdXYuO+TR+63TjS//vQJfcdTN+cgwhtpBxSB3+s4sWi8q2P+ankjj/ivQb67iqRrTASvSDgttfJAJq4uWX1NwH7CN6TVTtMgHf1Q3CvzTXOnEJxKEX/tVfF/9zWOFC4ZHpI7fveAJT/F+8TfvC7aq4f0PFeev5j9mKOu8oR48LMnFTEB0zBq0lWXyoUnVOI1/KlEEVl5gdaEoaD4SzZxuufQ54M=

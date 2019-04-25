@@ -1,0 +1,60 @@
+language: node_js
+node_js:
+- node
+env:
+  global:
+  - CXX=g++-4.8
+  - user=julien-noblet
+  - secure: Cga4zE7XqLjTI1iezVQdQ7b5YFT2eld2mD0duRMr7R1XHx8Dg2Sy5PIUoWfQKNHTRsm13UowqWxS66G+D5dHb8jPn/hPMAkSZdBdAih1pqvCm3l0rn6md/1RChg8iK656sQAGtYs5lx2KkGzr5Zrj/HXkOVhgzVd+TZTSdlfzfljW5MfKQkRREE0iK56wUiB7OIR00ybMGP99vRdhBS/7Ytk1/7UzIF3k6XTkUjlYZjhXfRvDTAMdLY2ARlEB08GniL5yy5haqq2hAN/r6nD5ypM8FIa6FRMFub9RwCF9kz3q4vDeWAzQT8XhDVYSqv9dFm4GF34qh3rG5XJXb09OwE2ft6wqa8zTff5OZypiX7t5UOAyUWJcOLyLVGc3u0Djguhiyd/d9mFd0ktMdUGLFMRwWSTMyVVeHh2+7Xpf7fv5V2wJdmUwntZlCSCZTqiPEhKBvEHCu1iF4OdsRWgrn8wjlUmrbeZGaihRfApYVgZJxgZjOsAXpLVXLGnNSRS3/dzqRNF+PPrUaobN53weXsY5YPBihLSBxO+6rsFgZ3e7G3kR++nh63NNxQpl9+hmn2Gn+pmHU9+sP3YeRQtdb+owDijJHNj31nGMxJiEpaJ62/fUqAgqlEymBd44rvaGWCmvijRdiO3G7VKulPvszjP2dtLByQ4qYaFp74auR0=
+  - secure: TuVHPrEY05dda8jGdqY1ChDVw3KYvnbYSCpjVrPHWV+9MRm15aJHaJydxvPDgthqgs+IY2QMR9Z8GXxdJ27hIIllPYxoqUV3Vu7CCrQKRtR4lJkcBBjFOvjitZ7XUR1WsFqPKY7KWsfo6vpzDijRlXQCfpDUgTGYMcc4wPoO+2/awRr2DPIQ8pvqEu3FrO6bIEK30skM4Wo5Yd/cyQhDVSmYM1CkdR29RL8p7X7Rjh/hqIkKYIsNbIfQihPZKqBHGASO3Mu8I1Nedbkydzusi8so/DG4pslhrBd70kd+HLd7ttgv8xQLBUh4V32v4+RWoIuQopJzNMAy6EZbZtifbKZJ9RSd8E1kRLZESYRWyp5WFSLF4cGj2Rq7sjxBHSPlY5ydxQBqAjms7jKCekK73Lre9LRbYcE5840gNC035QflzOZxgc4X4xTEmKbaxjhWYZM4xEg1XBBlLFOXGuCFgutByWT9jrmYSL9vb9hqJBVAxncLdRSHXpNkoKDVfcARCqxmWInwVXe0p5jxHH0dX8MWU2eDCtrKoWFIRlyCm7cjrP4xgGFZX1kKSPkloUvOZ2vNz6J5QsZW52Sh19ZVtunsaateHA1nMcE5KEKL7yowO66CDy4CsU39pmjQuOmE+btlI3lUemZfS6NP7ADLhABuIAA2R2+8Ip1Te6cXN50=
+addons:
+  apt:
+    sources:
+    - ubuntu-toolchain-r-test
+    packages:
+    - g++-4.8
+before_install:
+- npm install -g flow-typed
+install:
+- yarn
+cache:
+  yarn: true
+stages:
+- name: test
+- name: build
+jobs:
+  include:
+  - stage: test
+    script:
+    - yarn flow
+    - yarn jest
+    after_success: skip
+    deploy: skip
+  - stage: build
+    script:
+    - yarn build
+deploy:
+  - provider: pages
+    skip-cleanup: true
+    local-dir: dist
+    github-token: $TOKEN
+    keep-history: false
+    on:
+      branch: master
+  - provider: pages
+    repo: julien-noblet/cad-killer-beta
+    skip-cleanup: true
+    local-dir: dist
+    github-token: $TOKEN
+    keep-history: false
+    on:
+      all_branches: true
+#after_success:
+#- if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then bash scripts/build_n_push.sh; fi
+notifications:
+  webhooks:
+    urls:
+    - https://webhooks.gitter.im/e/e274ad601caf28d0f0ee
+    on_success: always
+    on_failure: always
+    on_start: always

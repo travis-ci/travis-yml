@@ -1,0 +1,65 @@
+language: python
+notifications:
+  email: true
+
+cache: pip
+
+python:
+  - "3.6"
+
+env:
+    - TRAVISCI=true PYTHON=3.6
+
+
+before_install:
+    - if [ ${TRAVIS_PYTHON_VERSION:0:1} == "2" ]; then wget http://repo.continuum.io/miniconda/Miniconda-3.5.5-Linux-x86_64.sh -O miniconda.sh; else wget http://repo.continuum.io/miniconda/Miniconda3-3.5.5-Linux-x86_64.sh -O miniconda.sh; fi
+    - chmod +x miniconda.sh
+    - ./miniconda.sh -b -p /home/travis/mc
+    - export PATH=/home/travis/mc/bin:$PATH
+    - export PYTHONPATH=$PYTHONPATH:$(pwd)
+
+
+# command to install dependencies
+install:
+    - export GIT_FULL_HASH=`git rev-parse HEAD`
+    - conda update conda --yes
+    - conda create -n test_env python=${PYTHON} --yes
+    - source activate test_env
+    - conda install numpy --yes
+    - conda install scipy --yes
+    - conda install pyopengl --yes
+    - conda install pytest --yes
+    - conda install flake8 --yes
+    - conda install six --yes
+    - conda install coverage --yes
+    - conda install matplotlib --yes
+    - conda install -c bioconda pygraphviz --yes
+    - conda install cython --yes
+    - conda install pyqt --yes;
+
+    - pip install --upgrade pip
+    - pip install -r requirements.txt
+    - pip install ply # a requirement for pygsti
+    - pip install plotly # a requirement for pygsti
+    - pip install git+git://github.com/DiCarloLab-Delft/Qcodes.git
+    - pip install coverage pytest-cov pytest --upgrade
+    - pip install coveralls
+    - pip install codacy-coverage
+    - echo ${QT}
+    - echo ${TEST}
+    - echo ${PYTHON}
+    - pip install -e .
+
+before_script: # configure a headless display to test plot generation
+- "export DISPLAY=:99.0"
+- "sh -e /etc/init.d/xvfb start"
+- sleep 3 # give xvfb some time to start
+
+# command to run tests
+script:
+    - py.test pycqed/tests --cov=pycqed --cov-report xml --cov-config=.coveragerc
+
+after_success:
+    - pip install codacy-coverage
+    - python-codacy-coverage -r coverage.xml
+    - coveralls

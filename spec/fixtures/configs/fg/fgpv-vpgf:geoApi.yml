@@ -1,0 +1,19 @@
+language: node_js
+node_js:
+  - "6.10.3"
+
+script:
+  - npm run doc
+
+notifications:
+  webhooks:
+    urls:
+      - https://webhooks.gitter.im/e/e3a72d897eaf2e0a226e
+    on_success: always  # options: [always|never|change] default: always
+    on_failure: always  # options: [always|never|change] default: always
+    on_start: false     # default: false
+env:
+  global:
+    - secure: "kfrBLMZltkfWhIJCkB1NuJDd53m1CVNkjUANAHaqBiWMj8XHmUetnkk87mpPyQ+/xBc9Y+awJGQLp6HljGucoPriMhLK7hqNeCpRB6cBgzsux2I4JsPGgne0S33GcJ8UMHR8cGeffTrl5z7bUOFS19MHtihK7tIdp58YYnVV/FbQw3FWRSjjnBADOJ23+bvfkQI68IG5cMEwIikOG4NapZ6nlOxoY1iW/I9O9Un1zuQgoKt85A17igpDKoNEefl0Rc23/BMJkLpU3m9lg2jtIFjqssLR8xLtmV7z2btaMoqEBGgTGh359uDoM7HiwcwJ6XzvZiKY9xF9T+auXARU2nwX5NjUvGesbEEWSkwAL0a7rLl1390/ERW+ySBFIcs98u1+T1WufBNItMNbfQphbYk3cUYnZhMGYPc1sSa0X2+U6wwsZsgDGcURw5cawKYrpNxRIu0jv9pPS9xP3XPju3pn9C18c0qxitTvkm1jsdyVkV59Yn8qfJpKLQt5dUUITKHUHbnMgKejFS4VlpGy2WpCEwf0E/e1PFP029tc15Jl881ELr5P1z4xcElkwcP7BoFnNB1wWXoUsgU+USSy7XeDMgDmuNxnnfXGtwe0JvYKBPMlsNHXnHd2OpaZjexQ5OGYm0MXznQtV0JLh7kxd8LG4LgVGqU/PcRB/KcQGUk="
+after_success:
+  - source scripts/docdeploy.sh

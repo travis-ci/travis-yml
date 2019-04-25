@@ -1,0 +1,23 @@
+language: java
+sudo: required
+jdk:
+  - oraclejdk8
+
+env:
+  - IDEA_VERSION=LATEST-EAP-SNAPSHOT
+  - IDEA_VERSION=IC-2018.3 # Current
+  - IDEA_VERSION=IC-2018.1 # Minimum Supported
+
+install: true
+
+script:
+  # Generate a gradle wrapper using a null gradle file so gradle < 4.6 does not fail parsing 'useJUnitPlatform()'.
+  - touch null.gradle ; gradle -b null.gradle wrapper --gradle-version 4.7 ; rm null.gradle
+  - ./gradlew --version
+  # Use the gradle wrapper to build and test the project.
+  - ./gradlew assemble
+  - ./gradlew test
+
+# Code Coverage
+after_success:
+  - bash <(curl -s https://codecov.io/bash)

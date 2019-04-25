@@ -1,0 +1,42 @@
+# Forces new Travis-CI Infrastructure
+sudo: false
+
+language: php
+
+env:
+  global:
+    - RUN_UNIT_TESTS="yes"
+    - INSTALL_MEMCACHE="yes"
+    - INSTALL_MEMCACHED="yes"
+    - INSTALL_REDIS="yes"
+    - RUN_PHPCS="yes"
+    - RUN_UNIT_TESTS="no"
+
+matrix:
+  fast_finish: true
+  include:
+    - php: 7.2
+      env: INSTALL_APCU="yes" INSTALL_MEMCACHE="no"
+    - php: 7.3
+      env: INSTALL_APCU="yes" INSTALL_MEMCACHE="no" INSTALL_MEMCACHED="no"
+    - php: nightly
+      env: INSTALL_APCU="no" INSTALL_MEMCACHE="no" INSTALL_MEMCACHED="no"
+  allow_failures:
+    - php: 7.3
+    - php: nightly
+
+services:
+
+before_script:
+  - phpenv config-rm xdebug.ini
+  # Make sure all dev dependencies are installed
+  - composer install
+
+script:
+  #- libraries/vendor/bin/phpunit --configuration travisci-phpunit.xml
+  - if [[ $RUN_PHPCS == "yes" ]]; then bin/phpcs --report=full --extensions=php -p --standard=build/phpcs/Joomla .; fi
+  - if [[ $RUN_UNIT_TESTS == "yes" ]]; then libraries/vendor/bin/phpunit --configuration travisci-phpunit.xml; fi
+
+branches:
+  except:
+    - JBSM6.2

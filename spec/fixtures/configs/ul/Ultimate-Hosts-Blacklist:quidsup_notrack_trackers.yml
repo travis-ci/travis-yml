@@ -1,0 +1,40 @@
+addons:
+    apt:
+        packages:
+        - dos2unix
+cache:
+- pip
+dist: xenial
+env:
+    global:
+    -   secure: ji5hpOn1tAYky/lNsyP2wrb8wO8fS/+SJGnm6ACyFQFyzMkkvl1Hq0ADbkMDsAWQqZijcXn3dFsi7uf20nF6r2cwbMXti991siFtTqR/hVZ571qZPNHlJs52mt77IDCNB2VScpo+KtmeqwDxQrw4/Z2rdCeptZ470pqi9EkKYpFd73sAd7wUWe+RWp2g83l0GsK+/wl3S9pAXnbiX8jPh0J8AKh1fvGMITsHGDP9M66dzMu4M+G4dCKISUJPQuwa8p/qSELxM8RBxRcPbLgFr8miDdf0HRbTa5cdHMdC30WZgY0bRNUDXR3G+XpK9VFb84R5d8RCjgwHJbB/L4yQoQ8D4sE2FUuTdIgjaPFt1xcEcuURFOQ+QnoHVyZfe/kO79hvSdO0bttfcr/ve9GWZsqeqZSJwXvmGJUewRCtOVTy4YEr1rl/Ifw6v5ih5M4X6KsT0ioPgNKRkz9AF/B6td3jA0Mioow74MjSB6rYK72eqhAyW4kCdGV8qp2KH3AOn90Gv9dpUWeXJ9tUvmJFFTWCJQUPsZY9j+Wct5EblllMbr41l2hclfB6Bc2CbnyxPnbUATB+SYeKLjg0RmhkiqsF790khnfCgWS8/QGjPB0vqnlGcfXS7oGfMPkJ+EuDhdx9LiMkP77pZXaCFPBjtm8p1BoZp3g6uNaRWrNB1sE=
+    -   GIT_NAME: Travis CI
+    -   GIT_EMAIL: dead-hosts@funilrys.com
+    -   TRAVIS_REPO_SLUG: Ultimate-Hosts-Blacklist/quidsup_notrack_trackers
+    -   GIT_BRANCH: master
+    -   UPDATE_LOCATION: https://raw.githubusercontent.com/Ultimate-Hosts-Blacklist/repository-structure/master/update.py
+    -   ADMINISTATION_LOCATION: https://raw.githubusercontent.com/Ultimate-Hosts-Blacklist/repository-structure/master/administration.py
+install:
+- pip3 install --upgrade pip
+- pip3 install requests
+- pip3 install ultimate-hosts-blacklist-whitelist PyYaml
+- if [[ ! -f .admin ]]; then wget "${UPDATE_LOCATION}" -o /dev/null -O update.py &&
+    chmod +x update.py; else echo "No need to download/update update.py."; fi
+- if [[ ! -f .admin ]]; then wget "${ADMINISTATION_LOCATION}" -o /dev/null -O administration.py
+    && chmod +x administration.py; else echo "No need to download/update administration.py.";
+    fi
+language: python
+matrix:
+    fast_finish: true
+notifications:
+    email:
+        on_failure: always
+        on_success: never
+        recipients:
+        - dead-hosts@funilrys.com
+        - mitchellkrogza+ultimatehostsblacklist@gmail.com
+python:
+- '3.7'
+script:
+- python3 ./update.py
+sudo: required

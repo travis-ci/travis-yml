@@ -1,0 +1,17 @@
+language: node_js
+notifications:
+  email: false
+before_script: npm ls >/dev/null
+deploy:
+  provider: script
+  skip_cleanup: true
+  script: npx semantic-release
+after_success:
+  - npm run report-coverage
+branches:
+  except:
+    - "/^v\\d+\\.\\d+\\.\\d+$/"
+env:
+  global:
+  - FORCE_COLOR=1
+  - NPM_CONFIG_COLOR=always

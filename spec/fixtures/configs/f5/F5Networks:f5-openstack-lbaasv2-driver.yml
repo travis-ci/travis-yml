@@ -1,0 +1,83 @@
+sudo: required
+env:
+  global:
+  - DIST_REPO="f5-openstack-lbaasv2-driver-dist"
+  - PKG_VERSION=$(python -c "import f5lbaasdriver; print f5lbaasdriver.__version__")
+  - PKG_RELEASE=$(python ${DIST_REPO}/scripts/get-version-release.py --release)
+  - PKG_RELEASE_EL7=${DIST_REPO}/rpms/f5-openstack-lbaasv2-driver-${PKG_VERSION}-1.el7.noarch.rpm
+  - PKG_RELEASE_1404=${DIST_REPO}/deb_dist/python-f5-openstack-lbaasv2-driver_${PKG_VERSION}-${PKG_RELEASE}_1404_all.deb
+  - RELEASE_TAG=v$(echo $PKG_VERSION | cut -d . -f 1,2)
+services:
+- docker
+language: python
+python:
+- '2.7'
+before_install:
+- git config --global user.email "OpenStack_TravisCI@f5.com"
+- git config --global user.name "Travis F5 Openstack"
+- docker pull f5devcentral/containthedocs:latest
+install:
+- pip install hacking pytest coverage
+- pip install -r requirements.test.txt
+script:
+- flake8 ./f5lbaasdriver
+- coverage run --source f5lbaasdriver -m py.test f5lbaasdriver/v2/bigip/
+- coverage report
+- f5-openstack-lbaasv2-driver-dist/scripts/package.sh "redhat" "7"
+- f5-openstack-lbaasv2-driver-dist/scripts/package.sh "ubuntu" "14.04"
+- sudo chown -R travis:travis ${DIST_REPO}/rpms
+- sudo chown -R travis:travis ${DIST_REPO}/deb_dist/*.deb
+- ./docs/scripts/docker-docs.sh ./docs/scripts/test-docs.sh
+after_success:
+  - md5sum ${PKG_RELEASE_EL7} > ${PKG_RELEASE_EL7}.md5 && md5sum --check ${PKG_RELEASE_EL7}.md5
+  - md5sum ${PKG_RELEASE_1404} > ${PKG_RELEASE_1404}.md5 && md5sum --check ${PKG_RELEASE_1404}.md5
+  - f5-openstack-lbaasv2-driver-dist/scripts/test_install.sh "redhat" "7"
+  - f5-openstack-lbaasv2-driver-dist/scripts/test_install.sh "ubuntu" "14.04"
+notifications:
+  slack:
+    rooms:
+    - secure: soCJy2X/f/yU8qQaewN5bTAxaZi7jKUe0TtGkRVlbNXzpiX+XsocWqCPwjkwimI01mZ3n36Q/TlP6V6h4H0AzA8CN1sp0tRfIXxZgV1m4Kye1IKefFXUwXb52pFtHicu+dWdUBvJzTe1PUimt7eg1ZMOLcq8lUSVnNNFVXj5JR6DGFKss0JbtMP/nfTYxlyUvvDsKkWgBd9G+D6JrChpLrLccV8ZA4lByhMRjWxJW7f+o4gtF/FVZkGv/Pv16M5FIqWVnf9WYWnxErw0Ji3piuC+BF76nBhShQ4eCn78GOw0BvdpW4WJH859Xks31ARuX0dE1COreNS+Jgwd2TW3A/9FnsQYP3pzhaSw1qnqDhYj6+Hw2feX2/QNxrLKTKkYap30M9rHfIYI/PCVIIhbz7RVx5Dn/2ABz7YfNRYKh6CqqEq7vyNp7vTw8KrmubvTbru+9/4JPKYzuNUk1w3tJKlzTg18hUBcwewt7JhyKbJljje1atKUYupGzGeTDHubuDG/IP0BnzvKFfEoBKUZ/1jmIHkXqCcJU2qAqAltiO0oDLO8w4kDg5hYEz4FdOHYADPKJT4+pqdZafgn7xlOWVkVpbRCqHJbXCqqRwPrGw2cNeQ0+trs2W3UQRKnSOU7ZF4W6UvAizHpBW0jj7Wu8fm/B9yvDv081Fu1+girhjs=
+    - secure: R9I38fqG1n1dXSd97e7eKrNt8XtWPpcF7J1cZ8cc+vB3+LcHjruMTVfRZHPWsBHMlWxvgrl7zD3t+38cIW2hJ7YrWjo4Izl60k8OM6HteFwHfDGsLM6eZNUaTZFORbeTSJCo6jryAI7qsu5xjU2uUi08nJTmuXU9jxsC+7mRzh1EL680TaPtCfoniVqI+3xRWt1ApVs8u61yU44x83KlBcSHdg9F/7X3o/I9vG+CiKxm+RWi0i6g1RebLzAEnYYMTGEctTaQCmyt4Y8+I9K/WBVKEQyT6o1z2Ac00qmbsk0sbSuEt9q30nJwlqGR1/WTn4FvDxGC1BE82rOmyppFjV0giXlJGINQre6LuGnMkeW8Cmg2P4vsHVwmxDR8B4G2cwdSgiho758wtP3ABVVA10GgnoatxeUAAC1rc6QAcQ9HdYObKmGzpRjp+6AWp1YghSCjszdRUvwtfWIZ9fmvTZBhB2qDJxAsyjw0DU+hxIfGs1v6TV6hcN4Vh9C34fKvP19tn7BS5vbZTPorq67uTxDj9EOfLOzuZNKbzRLqNQu+ZXniiV7P5sqT+mEryGJ04rrEC7/KuuWg0zPhevitY1oZNo4fjSSiSN2m42c+9cOtw0eZVACQFwI2vlU5pdRhPkfU6QqKPNIIfjsp+uWehN5sRPvL+GKh5siiQzhvyJ4=
+    on_success: change
+    on_failure: always
+deploy:
+  - provider: releases
+    api_key:
+      secure: tFUvbzPVEpk0Tfqq4EWcvFnVJG5N4Zk1/OTZslnGXNz/M915HAucXFTkygqWkOHeEgTn/TETGAavQg8lTaOV7/But9sX6/BfXB4UH0yW0Nv6wOM7O0K3BU6CkeHnkDZAuM/j8yDwWu8RrMsA5CrJXHrgRgEltN+yNrCsXlly0FYIkEZrYX/lrhUbAPsb6Y71MGRSW6XyhaoYh4CvNRgx2KE8Ctk5BOCIpysSkVTZ9lnORHZruML149FCqY0+9gYUwN1Uy6Ym8+uPDsGwpyGWPdOPEbBES8KMwBAM+IzUN3wO53ypy8bqxBLhUhKbGiiUQ4BISNJ9vjZmDLAdxcFEgpM/lPOyjEOEKBWDgCgSIzCRkoLa8PxPcTVRW8NSgQIaSq2qumGKEDUruzubg4PAt9PkeW4z69FfH/qhr+Alhhoq2bAAGb2fDPyYzXPIfq3AY+IV33WVN/b1Ww0DiRKAPpXlvOoVpyrCSYmfDBNEtpPpHWfldXLZLCjaZUuXvuKN23J9OYMmludkEEbIsRjhpHLN3E/quzw1vVVXLhQPLBkJc4/v0ONX3G751/PeHCWX5/IDhCRuBeaA8eZ6Jq/o1PgzzqcenXrCCAxeMY1HhcVMwHCorBzYB1FQe6VI5jR/+oPhU0GQe3EttebeNIb6PjlZEYYS0j2VM6vz5foS/z0=
+    file:
+      - ${PKG_RELEASE_EL7}
+      - ${PKG_RELEASE_EL7}.md5
+      - ${PKG_RELEASE_1404}
+      - ${PKG_RELEASE_1404}.md5
+    skip_cleanup: true
+    overwrite: true
+    on:
+      repo: F5Networks/f5-openstack-lbaasv2-driver
+      tags: true
+  - provider: pypi
+    user: $PYPI_USER
+    password: $PYPI_PASSWORD
+    server: https://upload.pypi.org/legacy/
+    on:
+      all_branches: true
+      tags: true
+      python: 2.7
+    skip_cleanup: true
+  # deploy docs to s3
+  - provider: script
+    skip_cleanup: true
+    on:
+      branch: stable/pike
+      repo: F5Networks/f5-openstack-lbaasv2-driver
+      condition: $TRAVIS_TAG = ""
+    script:
+    - ./docs/scripts/deploy-docs.sh publish-product-docs-to-prod openstack/lbaasv2-driver pike
+  # For tagged releases, the docs publish at /products/openstack/lbaasv2-driver/<branch-name>/vX.Y
+  # This section is commented out on the master branch because we don't need to publish tagged releases to /master
+  - provider: script
+    skip_cleanup: true
+    on:
+      tags: true
+      repo: F5Networks/f5-openstack-lbaasv2-driver
+    script:
+    - ./docs/scripts/deploy-docs.sh publish-product-docs-to-prod openstack/lbaasv2-driver/pike $RELEASE_TAG

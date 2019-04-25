@@ -1,0 +1,21 @@
+language: go
+
+go:
+  - 1.11.x
+
+addons:
+  postgresql: "9.6"
+
+install:
+  - make prepare
+
+services:
+  - postgresql
+
+script:
+  - make precommit
+  - goveralls -coverprofile profile.cov -service=travis-ci
+
+
+notifications:
+  slack: openservicebrokerapi:KQo2QAC6LXeEeXPOemOXja48

@@ -1,0 +1,105 @@
+dist: xenial
+branches:
+  only:
+  - master
+language: minimal
+before_install:
+# Upgrade Docker
+# - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+# - sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) test"
+# - sudo apt-get update
+# - sudo apt-get -y install docker-ce
+# - sudo mkdir -p /etc/docker
+# "features": {
+#   "buildkit": true
+# },
+- |
+  echo '{
+    "storage-driver": "overlay2",
+    "max-concurrent-downloads": 50,
+    "max-concurrent-uploads": 50
+  }' | sudo tee /etc/docker/daemon.json
+- sudo service docker restart
+- sudo rm /usr/local/bin/docker-compose
+- curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname
+  -s`-`uname -m` > docker-compose
+- chmod +x docker-compose
+- sudo mv docker-compose /usr/local/bin
+- export BRANCH_TAG=$(echo ${TRAVIS_PULL_REQUEST_BRANCH:-master} | sed 's/[^[:alnum:]]/-/g')
+before_script:
+- echo "$DOCKER_HUB_PASSWORD" | docker login -u "$DOCKER_HUB_USERNAME" --password-stdin
+- test/docker-pull.sh
+- docker build
+  -f Dockerfile
+  --target build
+  --build-arg ASSETS_HOST=assets.neilhosting.net
+  --cache-from neinteractiveliterature/intercode:${BRANCH_TAG}
+  --cache-from neinteractiveliterature/intercode:latest
+  --cache-from neinteractiveliterature/intercode:build-production-${BRANCH_TAG}
+  --cache-from neinteractiveliterature/intercode:build-production-master
+  -t neinteractiveliterature/intercode:local-build
+  .
+- docker build
+  -f Dockerfile
+  --target build-production
+  --build-arg ASSETS_HOST=assets.neilhosting.net
+  --cache-from neinteractiveliterature/intercode:${BRANCH_TAG}
+  --cache-from neinteractiveliterature/intercode:latest
+  --cache-from neinteractiveliterature/intercode:local-build
+  --cache-from neinteractiveliterature/intercode:build-production-${BRANCH_TAG}
+  --cache-from neinteractiveliterature/intercode:build-production-master
+  -t neinteractiveliterature/intercode:build-production-${TRAVIS_COMMIT}
+  .
+- docker tag neinteractiveliterature/intercode:build-production-${TRAVIS_COMMIT} neinteractiveliterature/intercode:build-production-${BRANCH_TAG}
+- docker build
+  -f Dockerfile
+  --target production
+  --build-arg ASSETS_HOST=assets.neilhosting.net
+  --cache-from neinteractiveliterature/intercode:${BRANCH_TAG}
+  --cache-from neinteractiveliterature/intercode:latest
+  --cache-from neinteractiveliterature/intercode:local-build
+  --cache-from neinteractiveliterature/intercode:build-production-${TRAVIS_COMMIT}
+  -t neinteractiveliterature/intercode:${TRAVIS_COMMIT}
+  .
+- docker build
+  -f Dockerfile
+  --target test
+  --build-arg ASSETS_HOST=assets.neilhosting.net
+  --cache-from neinteractiveliterature/intercode:${BRANCH_TAG}
+  --cache-from neinteractiveliterature/intercode:test-${BRANCH_TAG}
+  --cache-from neinteractiveliterature/intercode:local-build
+  --cache-from neinteractiveliterature/intercode:build-production-${TRAVIS_COMMIT}
+  --cache-from neinteractiveliterature/intercode:${TRAVIS_COMMIT}
+  -t neinteractiveliterature/intercode:test-${TRAVIS_COMMIT}
+  .
+script:
+- docker-compose -f docker-compose.test.yml run
+  -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
+  -e CI=$CI -e TRAVIS=$TRAVIS -e TRAVIS_COMMIT=$TRAVIS_COMMIT
+  -e TRAVIS_BRANCH=$TRAVIS_BRANCH -e TRAVIS_PULL_REQUEST_BRANCH=$TRAVIS_PULL_REQUEST_BRANCH
+  -e TRAVIS_PULL_REQUEST_SHA=$TRAVIS_PULL_REQUEST_SHA
+  -e TRAVIS_JOB_ID=$TRAVIS_JOB_ID -e TRAVIS_JOB_NUMBER=$TRAVIS_JOB_NUMBER -e TRAVIS_BUILD_NUMBER=$TRAVIS_BUILD_NUMBER
+  -e CC_TEST_REPORTER_ID=$CC_TEST_REPORTER_ID
+  -e GIT_COMMITTED_AT=$(git log -1 --pretty=format:%ct)
+  web
+  test/travis-complete.sh
+after_script:
+- test/docker-push.sh
+notifications:
+  slack:
+    secure: Ca/xHuvVik0EfevEAmMuLH+Ybd2yj7FuYsSmxJ/4dyxisuKg+tUvnJEZxnrU/QtHOdSyIh3ZAA4gVHd8PALuJ0HYOjotogqCZaQ0ZYTB7pKVvxc8u8YK7aY3P58guib7SrU3iRXsvjaV5xOflaBY4Ng1TQrkc8TCU4i8xZhWxWc=
+env:
+  global:
+  - PATH=$HOME/.local/bin:$PATH
+  - CC_TEST_REPORTER_ID=2ec5e525d523a261ed68d45eb18865e8ea7a5b32751290cabde2d44f39e78cce
+  - DOCKER_COMPOSE_VERSION=1.23.0
+  - secure: FOqb5pEOm+aHRz10TYFnGWPw5q7lY+SPrRWiy3HHvq3UK1vpPzUG2bHI+XPShF/JyCyxdqbyOEgC4DLwLXGebG7wWDolf0yE5iHtUmUuPK68EePulltyG00LM361DkniVhu2cHwXFloH30e3BwSPbgcgQfypZA+ITJ3LGhwZ5+E=
+  - secure: PNEoXEJTlUd0fLMJBg2mvusuOqFXH24ZWK3JBwtVt2nW8fco2ePw+ZPe+W5ajs3fHrrfTfY5yB484ZA2f91NvC8bxHHfrZ0sN2CgLepxkn4Ox67NbTIPPBPrAmjBdjF2nwMf3CQ//Yp4g+IXBqA4sPp/spW+b+BIyodqBQMRQ8U=
+  - secure: bOZbyApoNrBQVTsrM2hQwuW7VwyIahNFtMrth2uJsq+CRO4zdDrwAba7CJe+us0cSUSKlgLpnPX0F8kgIMtriJkT7GF14CUYHbflRtvrOGzxREISTKhFuyzbfnoB+9pOfyZk4Vu9nXsRpVjWaIa7ySX28jBECQXJrZ1Lspyy2Eg=
+  - secure: gITTAZnM8nqHYJDqXS9M0sdoShDr3v7+/tMajvDB2EUgAvtXFKPE/Cv8/nDxhHCTmLU8SUMvFY72HWhDU+tLUoZfUFdnuTtct2do9+VXNUx+p97abdQ1t4qeX6ce2xC83us3VwhvsA1bDnRCb3ErLs37YTFtyZuSKICHQW6yGCY=
+  - secure: eDGbrUupdZ9JI1xQdh3hHrRFK+wMa2DE+Dc+MeAVYkQueE5h3JDIl5ituljFCQhSP7Qe/DUyRm1t/0vqWa+AQ4Jg4SghKf8NX7oYze9JIB5D0On40mDZroYo6/AJtAthlEOLc0EzBDl3y7pyjFbxSGFE3bi2MJ48hG0MniU/yVk=
+  - secure: UuIzUbDax08gPFnSVD2bB6ma5lSQsPMEgaDgRJEpqMR/5zZ5enSMv1QG5uiW4W6spKqXbM2wRiAxLEfMU1h/MJqNz5trA1+hss8wjHcCcbnTeILv9Qdrn0IUKzsY5JfkqHtQSesLUAmof3AwdP+SZOFZaQ0EQy6BLmulbuP9gfI=
+  - secure: l+zizfE9Ve5rOhcXraFA7PEaY6Z5gdlB0lZfL28LFSDOQqKwFA1Gl4FTNusaKbTU8dRLAN+RiRkUMQ+l7E99gBUievqkri7786ZopeStjAG1yQ5yeJe03Knq2Kh8GGhb3K/6WjMPVfOYZtrxVZZZh3LXJ4AnmgjP6g9ptKv6JCM=
+addons:
+  code_climate:
+    repo_token: 2ec5e525d523a261ed68d45eb18865e8ea7a5b32751290cabde2d44f39e78cce

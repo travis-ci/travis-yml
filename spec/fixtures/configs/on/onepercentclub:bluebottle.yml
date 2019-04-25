@@ -1,0 +1,50 @@
+dist: xenial
+services: 
+- elasticsearch
+- postgresql
+sudo: false
+language: python
+addons:
+  postgresql: "9.6"
+  apt:
+    packages:
+    - libxmlsec1
+    - libxmlsec1-dev
+    - swig
+    - openjdk-8-jdk-headless
+cache: pip
+  - "$HOME/.cache/pip/"
+  - "$HOME/virtualenv/python2.7.15/lib/python2.7/site-packages"
+python:
+- 2.7
+env:
+  global:
+  - DJANGO_SETTINGS_MODULE='bluebottle.settings.testing'
+  # $GROUPNAME for the hipchat room name
+  - secure: B05yVl8sJf8UUJuda+8VB5CV+cyuqKLTEAK0t1n/1czX+FvkyXsNdE+5b81CTjPNOQwZMzw7kbDkhq65aJpn4Ni07TWP6bpdkuX1nY6Bf+S/brLgf4wlQ+Oibj1hWhyH2iiQ9gM0ONe28/d0y/C74/ISvIDn9MYFRkuCF0Vujzo=
+  # $APIKEY for the hipchat api auth
+  - secure: PUYWLPG0f1QTf1Q77/0ft636ZKQaIIjy0eHZCVpzVyRMW0XX9N5UXhbTPE1fPFt5aRNdNjGIWxOF/4SuIEhYEaZamGG3PBNqvXI530SkTNUbNVoeAcTleYbwcaVWeYdyK2P2k1YdNUt+BbRuYN2o9I8+2QmQvQsZEwugCG4+UH4=
+before_install:
+  - curl -O https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-6.6.0.deb && sudo dpkg -i --force-confnew elasticsearch-6.6.0.deb && sudo service elasticsearch restart
+install:
+- pip install --upgrade pip
+- pip install --upgrade setuptools mercurial
+- pip install --upgrade -I flake8==2.6.2
+- pip install -e .[test] --trusted-host github.com
+- echo `psql --version`
+before_script:
+- curl https://stream.onepercentclub.com/files/GeoIP.dat.gz | gunzip - > GeoIP.dat
+- flake8 .
+script:
+- python -m coverage run --parallel-mode --source=bluebottle manage.py test
+notifications:
+  hipchat:
+    rooms:
+      secure: A7SQlgtz1wTbt5wSpP5inxXAB7Gxmss6KIjnV0RdcU1jzKbf/umrAWgLIb/M6vr/zO/YwZCa60SkYm7yn0fGEU3fVjA7rWy5w1yllMEgxxEUy4E2DF1pL/0vryI4GwgcNzre0XA1o/Lx5/8cq6FB1fZ0V5yDyIl8xxMdWFb++X4=
+    template:
+    - "%{repository}#%{build_number} (%{branch} - %{commit} : %{author}): %{message}"
+  slack:
+    secure: TOveMBh9HePYKWuGTrWF+hTXzxGZvbVsa3KU0sB1yv6qkcixb5/ggvmkTeRddYEd/zyWyMenicFsrXVBgsP0SmbNgke6kq5+EN0U5oJWse998lvCVCpwmJQMdwDHvYsOtbFEOppQrbRK4vmH8qibx3x2YVg+u+61ePHvWYF9z6U=
+after_success:
+- bash post_travis.sh
+- python -m coverage combine; python -m coverage report --omit **/migrations/**; coveralls

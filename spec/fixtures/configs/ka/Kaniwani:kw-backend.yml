@@ -1,0 +1,30 @@
+language: python
+
+services:
+  - redis-server
+  - postgresql
+addons:
+  # This maps `redis` and `db` to 127.0.0.1 to match Docker and minimize difference between the Docker environment
+  # and the Travis-CI build env.
+  postgresql: "9.4"
+  hosts:
+    - redis
+    - db
+
+python:
+  - 3.5
+  - 3.4
+install:
+  - pip install -r requirements.txt
+cache: pip # Speeds up installs
+
+before_script:
+  - psql -U postgres -c 'CREATE DATABASE kaniwani;'
+  - psql -U postgres -c "CREATE USER kaniwani WITH PASSWORD 'password';"
+  - psql -U postgres -c "ALTER USER kaniwani CREATEDB;"
+script:
+  - python manage.py test
+
+notifications:
+  slack:
+    secure: Z0cFsVLbBOczW8aLXfJvnV1kJ1cZFO4sIrpeJyiqdnwFKmf5DM9I765smFgDNY2I1Z9mksue3ULBTLJyl6wpp9rFIUwW2V4pb1VUL68RXIltsE8L5QUYHN0JPP5k6Y51gTCDqrdKIvRgBXji77OsFN9ZOS7VOrUmEWKuSU+Wm+15nLgJBduC6S0ZCX8lOWJYzvkbGiybsJn8Vua19C+M57zNZekVOeNUH0JeLfeFE9jL7p6qhoOUL4SvWA+8xo/IKU27o/5DElt9yVNSZZb/XQ0x7TCa/0uKoDlrEWTjcmIltBNnfnPLRdah2CCQEYpnc0um2NJdqDuWgVfbVXzd73wZMgmxqaRCfOlgG9uhILypI0e/heF6S6hUQxoVh3VovFl9rsFAq57hS3+VhQUx9lGa2HulMHaVVUUbf/AeMA8dlNDUJIQnwb9cL0sp10SGmDLAfH93sGhiMuMb7dVJF18lI+2VX115ts6f+Zn7Jt960H0a0BJtVjoA5x+pE9VY2wA4WpoLcnWi0f4CAKiJbXL9lPxJbS9/zELEMGCZ1D1EvgPi/tOXs47ooGj3ri5VJVMJ/dhC2JVT1FHYMupCIIRMI+9niwWpKz08Mb/Ibj0g4HxpG/snkvHpYClF1zYAPWdmWe7L7yomMpyRWMuMoUD4NW8H35ylXIk22INtKJI=

@@ -1,0 +1,9 @@
+sudo: required
+language: julia
+julia:
+  - 0.6
+script:
+  - julia --code-coverage test/runtests.jl
+after_success:
+  - julia -e 'cd(Pkg.dir("awash")); Pkg.add("Coverage"); using Coverage; Codecov.submit(Codecov.process_folder())'
+

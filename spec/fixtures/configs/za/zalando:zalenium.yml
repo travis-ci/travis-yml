@@ -1,0 +1,71 @@
+language: java
+jdk:
+  - oraclejdk8
+
+sudo: required
+
+services:
+  - docker
+
+jobs:
+  include:
+    - stage: Integration and Unit Tests
+      env: step=sauceLabs
+      if: type = pull_request
+      script:
+      - docker pull elgalu/selenium
+      - travis_retry ./run_integration_tests.sh sauceLabs
+
+    - env: step=browserStack
+      if: type = pull_request
+      script:
+        - docker pull elgalu/selenium
+        - travis_retry ./run_integration_tests.sh browserStack
+
+    - env: step=crossBrowserTesting
+      if: type = pull_request
+      script:
+        - docker pull elgalu/selenium
+        - travis_retry ./run_integration_tests.sh crossBrowserTesting
+
+    - env: step=testingBot
+      if: type = pull_request
+      script:
+        - docker pull elgalu/selenium
+        - travis_retry ./run_integration_tests.sh testingBot
+
+    - env: step=dockerCompose
+      if: type = pull_request
+      script:
+      - docker pull elgalu/selenium
+      - curl -L https://github.com/docker/compose/releases/download/1.21.0/docker-compose-`uname -s`-`uname -m` > docker-compose
+      - chmod +x docker-compose
+      - sudo mv docker-compose /usr/local/bin
+      - travis_retry ./run_integration_tests.sh dockerCompose
+
+    - env: step=unitTests
+      script:
+      - sudo apt-get install jq
+      # - wget -O ~/codacy-coverage-reporter-assembly-latest.jar $(curl https://api.github.com/repos/codacy/codacy-coverage-reporter/releases/latest | jq -r .assets[0].browser_download_url)
+      - wget -O ~/codacy-coverage-reporter-assembly-latest.jar https://oss.sonatype.org/service/local/repositories/releases/content/com/codacy/codacy-coverage-reporter/2.0.2/codacy-coverage-reporter-2.0.2-assembly.jar
+      - mvn clean package -Pcoverage-report
+      # Report coverage results to Codecov
+      - bash <(curl -s https://codecov.io/bash)
+      # Report coverage results to Codacy
+      - java -cp ~/codacy-coverage-reporter-assembly-latest.jar com.codacy.CodacyCoverageReporter -l Java -r ./target/site/jacoco/jacoco.xml
+
+    - env: step=minikube
+      if: type = pull_request
+      script:
+      - docker pull elgalu/selenium
+      - travis_retry ./kubernetes/minikube-ci-initialize.sh
+      - mvn clean package -Pbuild-docker-image -DskipTests=true
+      - cd target && docker build -t dosel/zalenium:latest . && cd ..
+      - ./kubernetes/start-zalenium-in-minikube.sh
+      - ./run_integration_tests.sh minikube
+
+    - stage: Push Image (only with a tag)
+      if: type != pull_request AND tag IS present
+      script:
+      - ./gen-scm-source.sh
+      - ./push_image.sh

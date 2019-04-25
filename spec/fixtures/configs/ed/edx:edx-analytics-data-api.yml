@@ -1,0 +1,22 @@
+language: python
+python:
+  - "2.7"
+
+branches:
+  only:
+    - master
+
+services:
+  - docker
+sudo: required
+
+before_install:
+  - docker-compose -f .travis/docker-compose-travis.yml up -d
+
+script:
+  - docker exec analytics_api_testing /edx/app/analytics_api/analytics_api/.travis/run_tests.sh
+
+after_success:
+  - pip install -U codecov
+  - docker exec analytics_api_testing /edx/app/analytics_api/analytics_api/.travis/run_coverage.sh
+  - codecov

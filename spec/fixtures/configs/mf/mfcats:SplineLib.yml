@@ -1,0 +1,97 @@
+language: cpp
+sudo: required
+dist: trusty
+
+services:
+- docker
+
+stages:
+- UnitTests
+- Lint
+- AcceptanceTests
+- Install
+
+jobs:
+    include:
+
+    - stage: UnitTests
+      name: GCC 7 - Release
+      install: docker build -t splinelibtests:gcc7 -f scripts/docker/Dockerfile.test.gcc7.release .
+      script: docker run -te "TERM=xterm-256color" --name tests_gcc7 splinelibtests:gcc7
+
+    - stage: UnitTests
+      name: GCC 7 - Debug
+      install: docker build -t splinelibtests:gcc7 -f scripts/docker/Dockerfile.test.gcc7.debug .
+      script: docker run -te "TERM=xterm-256color" --name tests_gcc7 splinelibtests:gcc7
+
+    - stage: UnitTests
+      name: GCC 8 - Release
+      install: docker build -t splinelibtests:gcc8 -f scripts/docker/Dockerfile.test.gcc8.release .
+      script: docker run -te "TERM=xterm-256color" --name tests_gcc8 splinelibtests:gcc8
+
+    - stage: UnitTests
+      name: GCC 8 - Debug
+      install: docker build -t splinelibtests:gcc8 -f scripts/docker/Dockerfile.test.gcc8.debug .
+      script: docker run -te "TERM=xterm-256color" --name tests_gcc8 splinelibtests:gcc8
+
+    - stage: UnitTests
+      name: GCC 8 - Coverage
+      install: docker build -t splinelibtests:coverage -f scripts/docker/Dockerfile.test.coverage .
+      script:
+      - ci_env=`bash <(curl -s https://codecov.io/env)`
+      - docker run $ci_env -te "TERM=xterm-256color" --name tests_gcc8 splinelibtests:coverage
+
+    - stage: UnitTests
+      name: Clang 5 - Release
+      install: docker build -t splinelibtests:clang5 -f scripts/docker/Dockerfile.test.clang5.release .
+      script: docker run -te "TERM=xterm-256color" --name tests_clang5 splinelibtests:clang5
+
+    - stage: UnitTests
+      name: Clang 5 - Debug
+      install: docker build -t splinelibtests:clang5 -f scripts/docker/Dockerfile.test.clang5.debug .
+      script: docker run -te "TERM=xterm-256color" --name tests_clang5 splinelibtests:clang5
+
+    - stage: UnitTests
+      name: Clang 6 - Release
+      install: docker build -t splinelibtests:clang6 -f scripts/docker/Dockerfile.test.clang6.release .
+      script: docker run -te "TERM=xterm-256color" --name tests_clang6 splinelibtests:clang6
+
+    - stage: UnitTests
+      name: Clang 6 - Debug
+      install: docker build -t splinelibtests:clang6 -f scripts/docker/Dockerfile.test.clang6.debug .
+      script: docker run -te "TERM=xterm-256color" --name tests_clang6 splinelibtests:clang6
+
+    - stage: Lint
+      name: CppLint
+      install: docker build -t splinelib:cpplint -f scripts/docker/Dockerfile.lint.cpplint .
+      script: docker run -te "TERM=xterm-256color" --name cpplint splinelib:cpplint
+
+    - stage: Lint
+      name: Clang-Tidy
+      install: docker build -t splinelib:clang-tidy -f scripts/docker/Dockerfile.lint.clang-tidy .
+      script: docker run -te "TERM=xterm-256color" --name clang-tidy splinelib:clang-tidy
+
+    - stage: AcceptanceTests
+      name: Timing
+      install: docker build -t splinelibtests:acceptance -f scripts/docker/Dockerfile.acceptancetests .
+      script: docker run -te "TERM=xterm-256color" --name acceptance splinelibtests:acceptance
+
+    - stage: AcceptanceTests
+      name: Memory
+      install: docker build -t splinelibtests:valgrind -f scripts/docker/Dockerfile.test.gcc8.valgrind .
+      script: docker run -te "TERM=xterm-256color" --name valgrind splinelibtests:valgrind
+
+    - stage: Install
+      name: Ex1
+      install: docker build -t splinelibtests:install -f scripts/docker/Dockerfile.install .
+      script: docker run -te "TERM=xterm-256color" --name install splinelibtests:install
+
+    - stage: Install
+      name: IOConversion
+      install: docker build -t splinelibtests:convert -f scripts/docker/Dockerfile.convert .
+      script: docker run -te "TERM=xterm-256color" --name convert splinelibtests:convert
+
+    - stage: Install
+      name: IGA
+      install: docker build -t splinelibtests:iga -f scripts/docker/Dockerfile.iga .
+      script: docker run -te "TERM=xterm-256color" --name iga splinelibtests:iga

@@ -1,0 +1,32 @@
+sudo: required
+dist: trusty
+language: java
+jdk:
+    - oraclejdk8
+    - oraclejdk9
+    - oraclejdk11
+env:
+    - RUNTIME=ol RUNTIME_VERSION=18.0.0.4
+    - RUNTIME=ol RUNTIME_VERSION=19.0.0.2
+    - RUNTIME=wlp RUNTIME_VERSION=18.0.0.4
+    - RUNTIME=wlp RUNTIME_VERSION=19.0.0.2
+matrix:
+    exclude:
+    - jdk: oraclejdk11
+      env: RUNTIME=ol RUNTIME_VERSION=18.0.0.4
+    - jdk: oraclejdk11
+      env: RUNTIME=wlp RUNTIME_VERSION=18.0.0.4
+cache:
+    directories:
+        - $HOME/.m2
+before_install:
+    - echo "Deleting old .m2 artifacts..."
+    - rm -rf $HOME/.m2/repository/net/wasdev
+    - rm -rf $HOME/.m2/repository/io/openliberty
+    - echo 'Installing ci.common lib...'
+    - git clone https://github.com/wasdev/ci.common.git ./ci.common
+    - cd ./ci.common
+    - mvn clean install
+    - cd ..
+script:
+  - travis_wait mvn verify -Ponline-its -Dinvoker.streamLogs=true -Druntime=$RUNTIME -DruntimeVersion=$RUNTIME_VERSION

@@ -1,0 +1,69 @@
+language: java
+
+# We need Ubuntu 14.04 due to very new JUnit API which WoT needs
+dist: trusty
+# Disabling sudo routes the build to a Docker container instead of a VM
+# which speeds up the build.
+sudo: false
+
+addons:
+  apt:
+    packages:
+    - ant
+    - ant-optional
+    - junit4
+    - libhamcrest-java
+    # For .travis.upload-jar-to-freenet.sh
+    - python3-pip
+  # TODO: Code quality: Remove this workaround for https://github.com/travis-ci/travis-ci/issues/5227
+  hosts:
+    - freenet-plugin-WebOfTrust
+  hostname: freenet-plugin-WebOfTrust
+
+before_cache:
+  - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+  - rm -f  $HOME/.gradle/caches/jars-2/jars-2.lock
+  - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+
+cache:
+  apt: true
+  directories:
+  - $TRAVIS_BUILD_DIR/../fred/
+  - $HOME/.m2
+  - $HOME/.gradle/caches/
+  - $HOME/.gradle/wrapper/
+
+before_install:
+  - cd "$TRAVIS_BUILD_DIR"/..
+  - if [ ! -e fred/src ]; then git clone https://github.com/freenet/fred.git --branch next --single-branch --depth 1 fred ; else cd fred ; git pull ; cd .. ; fi
+  - cd fred
+  - echo -e "org.gradle.parallel = true\norg.gradle.jvmargs=-Xms256m -Xmx1024m\norg.gradle.configureondemand=true\ntasks.withType(Test) {\n maxParallelForks = Runtime.runtime.availableProcessors()\n}" > gradle.properties
+  # The gradlew binary which fred ships doesn't work on OpenJDK 7, need to use Travis' gradle there.
+  - if [ "$TRAVIS_JDK_VERSION" = "openjdk7" ] ; then rm ./gradlew && ln -s "$(which gradle)" ./gradlew ; fi
+  # TODO: freenet.jar won't contain class Version if we don't run the
+  # clean task in a separate execution of Gradle. Why?
+  - ./gradlew clean
+  # "copyRuntimeLibs" copies the JAR *and* dependencies - which WoT also
+  # needs - to build/output/
+  - ./gradlew jar copyRuntimeLibs -x test
+  - cd "$TRAVIS_BUILD_DIR"
+  # Print the checksums of the WoT dependencies - for debugging
+  - sha256sum ../fred/build/output/*
+
+script: ant
+
+jdk:
+  - oraclejdk9
+  - oraclejdk8
+  - openjdk8
+  - openjdk7
+  # openjdk9: As of 2018-05-12 isn't available on Travis yet.
+  # oraclejdk7: Not supported anymore: https://github.com/travis-ci/travis-ci/issues/7884#issuecomment-308451879
+
+deploy:
+  provider: script
+  # Prevent Travis from deleting the JAR before we can deploy it (wtf?)
+  skip_cleanup: true
+  script: ./.travis.upload-jar-to-freenet.sh
+  on:
+    all_branches: true

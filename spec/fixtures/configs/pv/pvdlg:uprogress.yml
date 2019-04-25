@@ -1,0 +1,31 @@
+language: node_js
+
+node_js: node
+
+branches:
+  only:
+    - master
+    - /^greenkeeper.*$/
+
+cache:
+  directories:
+    - ~/.npm
+
+before_install:
+  - cd docs && bundle install && cd ..
+
+install:
+  - travis_retry npm install
+
+script:
+  - npm run test
+  - 'if [ "$SAUCE_ACCESS_KEY" != "false" ]; then npm run saucelabs; fi'
+
+after_success:
+  - npm run codecov
+
+deploy:
+  provider: script
+  skip_cleanup: true
+  script:
+    - npx semantic-release

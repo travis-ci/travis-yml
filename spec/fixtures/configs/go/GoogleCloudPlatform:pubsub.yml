@@ -1,0 +1,13 @@
+language: java
+
+matrix:
+  include:
+    - os: linux
+      jdk: oraclejdk8
+    - os: linux
+      jdk: openjdk7
+
+script:
+  - mvn -q -B -f kafka-connector/pom.xml clean verify
+  - jdk_switcher use oraclejdk8
+  - mvn -q -B -f load-test-framework/pom.xml clean verify

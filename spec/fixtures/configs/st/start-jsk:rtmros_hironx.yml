@@ -1,0 +1,33 @@
+#   Original Author: Kei Okada, William Woodall, Mani Monajjemi
+sudo: required
+dist: trusty
+# Force travis to use its minimal image with default Python settings
+language: generic
+env:
+  matrix:
+  - ROS_DISTRO=indigo  ROSWS=wstool BUILDER=catkin    USE_DEB=true  ROS_REPOSITORY_PATH=http://packages.ros.org/ros/ubuntu
+  - ROS_DISTRO=indigo  ROSWS=wstool BUILDER=catkin    USE_DEB=true  ROS_REPOSITORY_PATH=http://packages.ros.org/ros-shadow-fixed/ubuntu
+  - ROS_DISTRO=indigo  ROSWS=wstool BUILDER=catkin    USE_DEB=false ROS_REPOSITORY_PATH=http://packages.ros.org/ros/ubuntu
+  - ROS_DISTRO=indigo  TEST_TYPE=work_with_315_1_10
+  - ROS_DISTRO=kinetic ROSWS=wstool BUILDER=catkin    USE_DEB=true  ROS_REPOSITORY_PATH=http://packages.ros.org/ros/ubuntu
+  - ROS_DISTRO=kinetic ROSWS=wstool BUILDER=catkin    USE_DEB=true  ROS_REPOSITORY_PATH=http://packages.ros.org/ros-shadow-fixed/ubuntu
+  - ROS_DISTRO=kinetic ROSWS=wstool BUILDER=catkin    USE_DEB=false ROS_REPOSITORY_PATH=http://packages.ros.org/ros/ubuntu
+  - ROS_DISTRO=kinetic TEST_TYPE=work_with_315_1_10
+matrix:
+  allow_failures:
+  - env: ROS_DISTRO=kinetic ROSWS=wstool BUILDER=catkin    USE_DEB=true  ROS_REPOSITORY_PATH=http://packages.ros.org/ros/ubuntu
+  - env: ROS_DISTRO=kinetic ROSWS=wstool BUILDER=catkin    USE_DEB=false ROS_REPOSITORY_PATH=http://packages.ros.org/ros/ubuntu
+notifications:
+  email:
+    recipients:
+      - dev@opensource-robotics.tokyo.jp
+    on_success: always #[always|never|change] # default: change
+    on_failure: always #[always|never|change] # default: always
+before_install: # Use this to prepare the system to install prerequisites or dependencies
+  - case $ROS_DISTRO in "hydro") export DISTRO=precise;; "indigo") export DISTRO=trusty;; "kinetic") export DISTRO=xenial;; esac;
+  - export DOCKER_IMAGE=ubuntu:$DISTRO
+  - export CI_SOURCE_PATH=$(pwd)
+  - export REPOSITORY_NAME=${PWD##*/}
+  - docker images
+script:
+  - docker run -v $HOME:$HOME -e CI_SOURCE_PATH -e REPOSITORY_NAME -e HOME -e DISTRO -e ROS_DISTRO -e ROS_LOG_DIR -e TEST_TYPE -e TEST_PACKAGE -e USE_DEB -e ROSWS -e BUILDER -e ROS_REPOSITORY_PATH -e CI_SOURCE_PATH -e REPOSITORY_NAME -e ROS_PARALLEL_JOBS -e COMILE_OPTION $DOCKER_IMAGE bash -c 'cd $CI_SOURCE_PATH; source .travis.sh'

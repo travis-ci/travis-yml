@@ -1,0 +1,71 @@
+language: python
+sudo: false
+dist: xenial
+services:
+- docker
+cache:
+  directories:
+  - "$HOME/.cache/pip"
+stages:
+  - style
+  - test
+  - name: deploy
+    # require any tag name to deploy
+    if: tag =~ .*
+addons:
+  apt:
+    packages:
+      - libsnappy-dev
+_install: &_install
+  - gimme 1.8
+  - source ~/.gimme/envs/latest.env
+  - pip install --upgrade pip
+  - if [[ $TRAVIS_PYTHON_VERSION < 3.7 ]]; then pip install tensorflow; fi
+  - pip install -r requirements.txt codecov
+  - pip install -e .[pandas]
+_coverage: &_coverage
+  - SCRIPT="coverage run --concurrency=multiprocessing -m unittest discover && coverage combine"
+_deploy: &_deploy
+  provider: script
+  script: twine upload dist/*py3-none-any* -u $PYPI_LOGIN -p $PYPI_PASS
+  skip_cleanup: true
+  on:
+    tags: true
+matrix:
+  include:
+    - stage: style
+      python: 3.7
+      env: SCRIPT="make check && cd doc && make"
+      install:
+      - pip install -r doc/requirements.txt -r requirements-lint.txt
+    - stage: test
+      python: 3.5
+      dist: trusty
+      env: *_coverage
+      install: *_install
+    - python: 3.6
+      dist: trusty
+      env: *_coverage
+      install: *_install
+      after_success:
+        - codecov
+    - python: 3.7
+      env: *_coverage
+      install: *_install
+    - stage: deploy
+      python: 3.5
+      install:
+        - pip3 install --upgrade pip
+        - pip3 install twine
+      before_script: skip
+      script:
+        - python3 setup.py bdist_wheel
+      deploy: *_deploy
+  fast_finish: true
+before_script:
+  - docker run -d --privileged -p 9432:9432 --name bblfshd bblfsh/bblfshd
+  - docker exec -it bblfshd bblfshctl driver install python bblfsh/python-driver
+script:
+  - (eval "$SCRIPT")
+notifications:
+  email: false

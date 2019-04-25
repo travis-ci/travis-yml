@@ -1,0 +1,23 @@
+language: python
+python:
+    - "3.7-dev"
+addons:
+  postgresql: "9.4"
+
+env:
+    - repo_token: $REPO_TOKEN
+
+install:
+    - pip install -r requirements.txt
+    - pip install coveralls
+
+before_script:
+    - psql -c "create database ahdatabase;" -U postgres
+    - python manage.py makemigrations
+    - python manage.py migrate
+
+script:
+    - coverage run --source='.' manage.py test
+
+after_success:
+    - coveralls

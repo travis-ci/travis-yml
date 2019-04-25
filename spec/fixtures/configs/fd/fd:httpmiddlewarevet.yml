@@ -1,0 +1,29 @@
+language: go
+
+go_import_path: github.com/fd/httpmiddlewarevet
+
+go:
+- 1.9.x
+- 1.10.x
+- 1.11.x
+- master
+
+script:
+- go test .
+- hmv-runner
+
+deploy:
+  skip_cleanup: true
+  provider: s3
+  access_key_id: AKIAJZ7Y2JLXRD4B3EAA
+  secret_access_key:
+    secure: 1APbzgG9NV5JwLP6fxAmPbG3QSCt9tnLyHDMCSFh911/jYZ5lh4A2qrcYuasbtf7nte2Owk41fkrUNIkH1GASiljCttPgI+lsAr8NuUh30S6rdm/njD1+g4Wlo5XxaP5Br8iNdZp5XHWC7IvqXIOyCJSwseYkg1sFmDqk+dWoDLRxXKhgev5ZM8JXxE46mkSS9rHiN32XcDH/2OiajasQ5d0hJoZbzrEYIGSvwu6ge1Q7OalYrE3tUQX9Qc1EnkAYInJkUccUBBxrqwudmMw/0OXDOtoCucBjsoChnnV94ggQvSnY22BBTDZjM6DYplfBf3v3nBT9CApTfxWM6knCiVJYrzNi8v/7eRomD4W4xESx1fXVjpiqhnhU3nBcDv9muX3jo25DX72pFZ+4nYmUfyYQHQqPN6ld/ofWUI/c3Rrm7jo2ofaeIUy+z0sEwYX7wrcdCGclaDDs/qEEfkvzZ9jYeUN/uQCYFeumMc7U1RRppJ9zRJ/F6H6mbTZ7SXGsQXXGLOg2X3i1Hb2NJym2uBI55UMdq6ZKnj7qkTkz3WZ1h3F1e3hPvu6FKWQeB8Uoq8m9m4JLVwjni0TRUP0DMFa0y/m++SyStG/OkoK9U8xTqu4OUy1n70dPCfw5BVQG5H0aKl/1EGmB5zVqZ4JV0WH4BTDmLvtvQ/oVMlexhc=
+  bucket: httpmiddlewarevet
+  local-dir: dist
+  acl: public_read
+  on:
+    all_branches: true
+    repo: fd/httpmiddlewarevet
+
+after_deploy:
+- bash scripts/after_deploy.sh

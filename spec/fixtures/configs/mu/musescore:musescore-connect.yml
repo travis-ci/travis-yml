@@ -1,0 +1,25 @@
+language: node_js
+node_js:
+  - "6.9.1"
+
+#needed for lwip
+sudo: false
+env:
+  - CXX=g++-4.8
+addons:
+  apt:
+    sources:
+    - ubuntu-toolchain-r-test
+    packages:
+    - g++-4.8
+
+cache:
+  directories:
+  - node_modules
+
+before_script:
+  - "artifacts -v || curl -sL https://raw.githubusercontent.com/travis-ci/artifacts/master/install | bash"
+script:
+  - npm run build
+after_script:
+  - ./build/travis-upload-artifacts.sh

@@ -1,0 +1,128 @@
+language: cpp
+
+script:
+ - "bash -ex .travis-ci.sh"
+
+matrix:
+  fast_finish: true
+  include:
+    - os: linux
+      dist: trusty
+      compiler: clang
+      env: TASK='compile'
+    - os: linux
+      dist: trusty
+      compiler: gcc
+      env: TASK='compile'
+    - os: linux
+      dist: trusty
+      compiler: gcc
+      env: TASK='coverage'
+    - os: linux
+      dist: trusty
+      compiler: gcc
+      env: TASK='coverity'
+    - os: linux
+      dist: trusty
+      env: TASK='doxygen'
+    - os: linux
+      dist: trusty
+      env: TASK='doxygen-manual'
+    - os: linux
+      dist: trusty
+      # Short duration job, use the container/without sudo image as it boots faster
+      sudo: false
+      env: TASK='lint'
+    - os: linux
+      dist: trusty
+      # Short duration job, use the container/without sudo image as it boots faster
+      sudo: false
+      env: TASK='check-licences'
+    - os: linux
+      dist: trusty
+      # Short duration job, use the container/without sudo image as it boots faster
+      sudo: false
+      env: TASK='codespell'
+      addons:
+        apt:
+          packages:
+           - moreutils
+  allow_failures:
+    - os: linux
+      dist: trusty
+      compiler: gcc
+      env: TASK='coverage'
+    - os: linux
+      dist: trusty
+      compiler: gcc
+      env: TASK='coverity'
+
+env:
+  global:
+   # -- BEGIN Coverity Scan ENV
+   - COVERITY_SCAN_BUILD_COMMAND_PREPEND="cov-configure --comptype gcc --compiler gcc-4.9 --template && autoreconf -i && ./configure"
+   # The build command with all of the arguments that you would apply to a manual `cov-build`
+   # Usually this is the same as STANDARD_BUILD_COMMAND, excluding the automated test arguments
+   - COVERITY_SCAN_BUILD_COMMAND="make"
+   # Name of the project
+   - COVERITY_SCAN_PROJECT_NAME="$TRAVIS_REPO_SLUG"
+   # Email address for notifications related to this build
+   - COVERITY_SCAN_NOTIFICATION_EMAIL="ja-rule-coverity@pjnewman.co.uk"
+   # Regular expression selects on which branches to run analysis
+   # Be aware of quotas. Do not run on every branch/commit
+   - COVERITY_SCAN_BRANCH_PATTERN=".*"
+   # COVERITY_SCAN_TOKEN via "travis encrypt" using the repo's public key
+   - secure: "nF/6EPeDlLYX+tg9UC9XC3hgQhEfed1b78wLG+zOX+dt0DsvKp/JcaeEWOZ2OQriNG0XbX3kIAPmpYA9VrLIGtbv4Yrg8gghvY92pUJe8czAww63PjqqFVNctR5nzjbCncZ7yz1j1KlNuWRTmso6vLWOMVbpGx85A2w013MIT1A="
+   # -- END Coverity Scan ENV
+
+cache: apt
+
+before_install:
+ # Remove some flaky repos that keep timing out, probably not necessary any more
+ - if [ -e /etc/apt/sources.list.d/mongodb.list ]; then sudo rm /etc/apt/sources.list.d/mongodb.list; fi
+ - sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
+ - sudo add-apt-repository ppa:voltvisionfrenchy/ola -y
+ - sudo add-apt-repository "deb http://apt.llvm.org/trusty/ llvm-toolchain-trusty main" -y
+ - sudo add-apt-repository "deb http://apt.llvm.org/trusty/ llvm-toolchain-trusty-6.0 main" -y
+ - wget -O - http://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
+ # Required for Doxygen 1.8.8+
+ - sudo add-apt-repository ppa:techzilla/doxygen-backport -y
+ - sudo apt-get update -qq
+ - sudo apt-get install --force-yes ola libola-dev libprotobuf-dev
+ #Coverity doesn't work with g++ 5, so only upgrade to g++ 4.9 for that
+ - if [ "$TASK" != "coverity" -a "$CXX" = "g++" ]; then sudo apt-get install -qq g++-6; fi
+ - if [ "$TASK" != "coverity" -a "$CXX" = "g++" ]; then export CXX="g++-6" CC="gcc-6"; fi
+ - if [ "$TASK" = "coverity" -a "$CXX" = "g++" ]; then sudo apt-get install -qq g++-4.9; fi
+ - if [ "$TASK" = "coverity" -a "$CXX" = "g++" ]; then export CXX="g++-4.9" CC="gcc-4.9"; fi
+ #Remove the old g++/gcc to ensure we're using the latest ones
+ - if [ "$CXX" = "g++-4.9" -o "$CXX" = "g++-5" ]; then sudo rm /usr/bin/g++; sudo rm /usr/bin/gcc; fi
+ #Install latest clang if we're compiling with clang
+ #clang-3.8 packages seem to be unsigned so need forcing
+ - if [ "$CXX" = "clang++" ]; then sudo apt-get install --force-yes -qq clang-6.0; fi
+ - if [ "$CXX" = "clang++" ]; then export CXX="clang++-6.0" CC="clang-6.0"; fi
+ #Remove the old clang to ensure we're using the latest ones
+ - if [ "$CXX" = "clang++-6.0" -a -e /usr/local/clang-3.4/bin/clang ]; then sudo rm /usr/local/clang-3.4/bin/clang; sudo rm /usr/local/clang-3.4/bin/clang++; fi
+ #Report the compiler version
+ - $CXX --version
+ #Install coveralls if required
+ - if [ "$TASK" = "coverage" ]; then sudo pip install -qq cpp-coveralls; fi
+ #Install doxygen if required
+ - if [ "$TASK" = "doxygen" -o "$TASK" = "doxygen-manual" ]; then sudo apt-get install -qq doxygen graphviz; fi
+ - if [ "$TASK" = "compile" -o "$TASK" = "doxygen" -o "$TASK" = "doxygen-manual" -o "$TASK" = "coverage" -o "$TASK" = "coverity" ]; then ./install-gmock.sh; fi
+ - if [ "$TASK" = "codespell" ]; then pip install --user git+https://github.com/codespell-project/codespell.git; fi
+
+after_success:
+ - if [ "$TASK" = "coverity" ]; then tail -n 10000 /home/travis/build/${TRAVIS_REPO_SLUG}/cov-int/build-log.txt; cat /home/travis/build/${TRAVIS_REPO_SLUG}/cov-int/scm_log.txt; fi
+ - if [ "$TASK" = "coverage" ]; then coveralls --gcov /usr/bin/gcov-6 -b . -e Bootloader/firmware/src/system_config -e firmware/src/system_config -e harmony -e tests -e tools -e gtest-read-only -e boardcfg -e config.h --gcov-options '\-lp' > /dev/null; fi
+
+after_failure:
+ - cat /home/travis/build/${TRAVIS_REPO_SLUG}/config.log
+
+
+#No notifications for now
+#notifications:
+#  irc:
+#    channels:
+#     - "chat.freenode.net#openlighting"
+#    on_success: change
+#    on_failure: change

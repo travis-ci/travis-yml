@@ -1,0 +1,54 @@
+language: cpp
+
+dist: xenial
+sudo: required
+
+os:
+  - linux
+  - osx
+
+compiler:
+  - gcc
+  - clang
+
+env:
+  - TARGET=linux64 USE_QT=qt4
+  - TARGET=linux64 USE_QT=qt5
+  - TARGET=linux64 USE_GTK=gtk2
+  - TARGET=linux64 USE_GTK=gtk3
+  - TARGET=linux64 USE_DAEMON=jsonrpc
+  - TARGET=windows32
+  - TARGET=windows64
+  - TARGET=macos64
+
+matrix:
+  exclude:
+    - env: TARGET=linux64 USE_QT=qt4
+      os: osx
+    - env: TARGET=linux64 USE_QT=qt5
+      os: osx
+    - env: TARGET=linux64 USE_GTK=gtk2
+      os: osx
+    - env: TARGET=linux64 USE_GTK=gtk3
+      os: osx
+    - env: TARGET=linux64 USE_DAEMON=jsonrpc
+      os: osx
+    - env: TARGET=windows32
+      os: osx
+    - env: TARGET=windows32
+      compiler: clang
+    - env: TARGET=windows64
+      os: osx
+    - env: TARGET=windows64
+      compiler: clang
+    - env: TARGET=macos64
+      os: osx
+      compiler: gcc
+    - env: TARGET=macos64
+      os: linux
+
+install:
+  - ./tests/travis-ci/install-build-depends.sh
+
+script:
+  - ./tests/travis-ci/build-and-test.sh

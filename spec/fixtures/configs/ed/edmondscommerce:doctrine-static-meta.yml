@@ -1,0 +1,56 @@
+# see http://about.travis-ci.org/docs/user/languages/php/ for more hints
+language: php
+
+# We need to be able to reclone the repo so it can't be shallow
+git:
+  depth: false
+
+matrix:
+  fast_finish: true
+  include:
+  - php: 7.2
+    env: phpUnitCoverage="0"
+  - php: 7.2
+    env: qaCmd="bin/qa -t unit" phpUnitCoverage="1" phpUnitQuickTests="1" phpUnitTestsSubDir="./tests/Small"
+  - php: 7.2
+    env: qaCmd="bin/qa -t unit" phpUnitCoverage="1" phpUnitQuickTests="1" phpUnitTestsSubDir="./tests/Medium"
+  - php: 7.2
+    env: qaCmd="bin/qa -t unit" phpUnitCoverage="1" phpUnitQuickTests="1" phpUnitTestsSubDir="./tests/Large/A"
+  - php: 7.2
+    env: qaCmd="bin/qa -t unit" phpUnitCoverage="1" phpUnitQuickTests="1" phpUnitTestsSubDir="./tests/Large/B"
+  - php: 7.2
+    env: qaCmd="bin/qa -t unit" phpUnitCoverage="1" phpUnitQuickTests="1" phpUnitTestsSubDir="./tests/Large/C"
+  - php: 7.2
+    env: qaCmd="bin/qa -t unit" phpUnitCoverage="1" phpUnitQuickTests="1" phpUnitTestsSubDir="./tests/Large/D"
+  - php: 7.2
+    env: qaCmd="bin/qa -t unit" phpUnitCoverage="1" phpUnitQuickTests="1" phpUnitTestsSubDir="./tests/Large/E"
+  - php: 7.2
+    env: qaCmd="bin/qa -t unit" phpUnitCoverage="1" phpUnitQuickTests="1" phpUnitTestsSubDir="./tests/Large/F"
+  - php: 7.2
+    env: qaCmd="bin/qa -t unit" phpUnitCoverage="1" phpUnitQuickTests="1" phpUnitTestsSubDir="./tests/Large/G"
+  allow_failures:
+  - env: qaCmd="bin/qa -t unit" phpUnitCoverage="1" phpUnitQuickTests="1" phpUnitTestsSubDir="./tests/Small"
+  - env: qaCmd="bin/qa -t unit" phpUnitCoverage="1" phpUnitQuickTests="1" phpUnitTestsSubDir="./tests/Medium"
+  - env: qaCmd="bin/qa -t unit" phpUnitCoverage="1" phpUnitQuickTests="1" phpUnitTestsSubDir="./tests/Large/A"
+  - env: qaCmd="bin/qa -t unit" phpUnitCoverage="1" phpUnitQuickTests="1" phpUnitTestsSubDir="./tests/Large/B"
+  - env: qaCmd="bin/qa -t unit" phpUnitCoverage="1" phpUnitQuickTests="1" phpUnitTestsSubDir="./tests/Large/C"
+  - env: qaCmd="bin/qa -t unit" phpUnitCoverage="1" phpUnitQuickTests="1" phpUnitTestsSubDir="./tests/Large/D"
+  - env: qaCmd="bin/qa -t unit" phpUnitCoverage="1" phpUnitQuickTests="1" phpUnitTestsSubDir="./tests/Large/E"
+  - env: qaCmd="bin/qa -t unit" phpUnitCoverage="1" phpUnitQuickTests="1" phpUnitTestsSubDir="./tests/Large/F"
+  - env: qaCmd="bin/qa -t unit" phpUnitCoverage="1" phpUnitQuickTests="1" phpUnitTestsSubDir="./tests/Large/G"
+
+#cache:
+#  directories:
+#    - $HOME/.composer/cache
+
+before_script: bash -x qaConfig/ci/travis/before.bash
+
+script: bash -x ci.bash
+
+after_success: bash -x qaConfig/ci/travis/after.bash
+
+notifications:
+  slack:
+    on_success: change
+    rooms:
+    - secure: eghR0aH9caD9hUsxEqTcSq3r/5JAG+7c5NGTGtNu06iegnh2UDNj1Et20zfvnAEiBlHe+xp9+wtTQZaM/8H/9BheEodKGnsgRxtw3PDeHXXI0GsFCTur4QOuMAHrtrRPDgGrIh7TXrdvbRyk2R09H6PuOqQDl9Nu7GP4qwAJP9R6WAYBD247iS45zeeIpxfkGe+i0uTCMoIrFyKlIJCiVN4DqN4VjzoVxbLinQGJmSc9yJ+Ga07IOvwx0va44aqDxncSi9aNvQ9qZnrgQJJruSX4+HCwKuEVwTbwPvEMFGWlNIj1maGpIkbO8eC2YjDOH/NYwNKlEnSZFNBaYFdXyZW52LyzCCG+sbgggoWZ1mcPh+DOBqPqx9qXH+loHSIk4O3HMbSksjJ/jNO8pbX4vvl82MPM7FEpuHFHlUfr3eZZdBBiYKxIax6nn/F2/uWKHTIUVbcWmeUUmOdqeYeZ/XDgsHGccWvVkxygtlmCGQpinxn6HxajRam828v6kKEJGCDPorIN7OmOuISXhuysyHGlTDDFituJzvxk50vPlKKB+4f+E6vYd1HvAQo0VQVLpFgeO9wCHUDWJ/kQex0qnoE58kY2pLbHP5jrSxZoYZ6r1j7Wq/DFEq2OFxS0uwH+fJYTeJpl28WdW28a0BGNe5Ib/tFQf7o6f25gVAWuqu8=

@@ -1,0 +1,16 @@
+language: csharp
+sudo: required
+mono: latest
+dotnet: 2.2.101
+dist: xenial
+osx_image: xcode9.4
+os:
+  - linux
+  - osx
+matrix:
+  fast_finish: true
+  allow_failures:
+    - os: osx
+
+script:
+  - ./build/build.sh --script "./build/build.cake" -target=Travis

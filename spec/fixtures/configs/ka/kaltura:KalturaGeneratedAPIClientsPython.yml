@@ -1,0 +1,20 @@
+language: python
+python:
+  - "2.7"
+  - "3.6"
+# command to install dependencies
+install: "pip install tox tox-travis"
+# command to run tests
+script:
+    - sed -e "s#@YOUR_PARTNER_ID@#$PARTNER_ID#g" -e "s#@YOUR_ADMIN_SECRET@#$ADMIN_SECRET#g" -e "s#@SERVICE_URL@#https://www.kaltura.com#g" KalturaClient/tests/config.template.ini > KalturaClient/tests/config.ini
+    - tox
+notifications:
+  email:
+    recipients:
+      - moshe.maor@kaltura.com
+      - jess.portnoy@kaltura.com
+      - Noam.arad@kaltura.com
+      - Elad.cohen@kaltura.com
+      - Jonathan.Kanarek@kaltura.com
+    on_success: change
+    on_failure: always

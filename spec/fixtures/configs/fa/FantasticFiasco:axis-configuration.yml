@@ -1,0 +1,32 @@
+language: node_js
+
+node_js:
+  - "node"  # Current - Latest features
+  - "10"    # LTS - Recommended for most users
+
+matrix:
+  fast_finish: true
+
+install:
+  - yarn install
+
+script:
+  - echo -e "$(curl --silent https://raw.githubusercontent.com/FantasticFiasco/logo/master/logo.ansi)"
+  - if [ "$TRAVIS_NODE_VERSION" == "node" ]; then yarn coverage:publish; fi
+  - if [ "$TRAVIS_NODE_VERSION" != "node" ]; then yarn test; fi
+  - yarn lint
+
+deploy:
+  - provider: npm
+    email: mattias.kindborg@gmail.com
+    api_key:
+      secure: Om9pukumvdhsSwDuhqzWIzMFkWsxnXLfyp1RbFjJXtS4D12aqVF3FC0nUwoQOe8mHnObcfw67uVtdohX9BR9rowhpqXflyOl6se+pwK/lKRfrdcKF7zdlbpS38s8wK7VJWtR/FpIkQ8DNnZLnF3QJUXHY/YgOt7czmF8dBXHQHHY4kWyf4pRze67I/4V5Pjf0ZipnJ+rDmoUE6reL5tClnoNbIY/lvh8mjPTWPej5L1oY89t39FeeRPqhAFIovDcdUxYHQqvQdai5soMaL27I0xBSv/VIY4qNl3s7i81ux/RHpMtfb6rRZitqYVjuMh21jrlBHlVdonK4CfvMuglOQjf8v4L7qBgL2LOYLiMWAMhM6if9BJb7L7DjtpGUfHx4emuwzgDG+H6LHCmr4io1CDIP4p8MVqELKhLJCYiXsFGRVY4Han9KSuWBHxl1jb6Nf1jVNVNfR/yZGBYiUgw53huIWliox1WU7Ged3C1wSC5zJqUzqWLwN0uoJABzPUonIc2hEz+fxUM9v+W5/+tSVGVCh/fnPNlBSwf1ScN7BOTQ6ZLr65Dvk9qHaOM/97AQl22OcSTLfCcxoTVp/kmgza1jWBojTwXcH3YxcLYNNaXcmTL0TPk6MBgSgRVf85XNX33XyST+CpIsWCsmoCqXY3KeGxZ0fpP3fPSoZm5m6g=
+    skip_cleanup: true
+    on:
+      tags: true
+  - provider: releases
+    name: Release $TRAVIS_TAG
+    api_key:
+      secure: UBXZRYiBU1dIDqEiggQZCIiAIvd4dmJoRhzzdNoUYGb3/Yuc4/oQwZc/46jx+YbPCrG/uMbvHl6Aktv7o+5m+KhSsNrZXOxPcmvMcLNW0DLnX5DJepW93BXpqDITsT5JjJmS8vHRUoukWfIRD4dC9nymskRRzgEk+3euExXW1v+Bq5PBkDxJBScTznV+4ISvrOSitcvoF9SqYbhw4hTiGDtez+I1Ggn91a3XKQnp56vJdutZq3GnoPU2m/XOXNeqBUF1gZKu67t1benfPjthyg5is9fdpH7bFPlo3fofcYNX6+Az8q1j8C4MQWdMZ78AW30pS+ZT2A2jdhbYbRmrW4NdgqqwFjtxU+RTAt/AnS472eE/GeJGrcLPJDyRKlkRDGROyzse7HCn6ESep7flhZH2tBzmmwSh5Kr8MHJJJsoeIR2ELqKEeZvvsuKOwYnEs42H0OgSlQ/dZi+nOjlkmbkahEcmpzOeprGGtIXA9e8J11o3d12broHOm3qgT01w2YNxffMZq91A+TXFnaFCAbb35m6db2nyW9EhxKfjX0FuDcrCbTXbrS4TP8or5abgZvqkae/ms7OyITBG8Mkgjux9qwpl2Mpy3nSJiuTsXdvQIMAJzavX163OnK94pn/aVSwKzvt5wfiMUijHESvWgd0/CC7XjRF+H0IjDqM/mNM=
+    on:
+      tags: true

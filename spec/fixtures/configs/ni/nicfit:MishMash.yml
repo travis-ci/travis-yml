@@ -1,0 +1,29 @@
+sudo: required
+language: python
+
+python:
+  - "3.6"
+  - "3.7-dev"
+
+services:
+    - docker
+
+cache:
+    pip: true
+
+before_install:
+    - sudo apt-get install -y lame
+
+install:
+    - pip install tox
+    - pip install coveralls
+    - pip install -e .
+
+# command to run tests
+script:
+    - tox -e $(echo py$TRAVIS_PYTHON_VERSION | tr -d . | cut -d- -f1),report
+
+after_success:
+  - coveralls
+
+

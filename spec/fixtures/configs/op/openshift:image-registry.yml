@@ -1,0 +1,18 @@
+language: go
+
+go:
+  - "1.10"
+
+before_install:
+  - go get github.com/alecthomas/gometalinter
+  - gometalinter --install
+  - go get github.com/mattn/goveralls
+
+script:
+  - PERMISSIVE_GO=y make verify -k
+  - PERMISSIVE_GO=y COVERAGE_OUTPUT_DIR=_output/coverage make test-unit && goveralls -coverprofile=_output/coverage/profiles.out
+
+notifications:
+  irc: "chat.freenode.net#openshift-dev"
+
+sudo: false

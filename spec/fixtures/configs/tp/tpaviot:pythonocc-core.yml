@@ -1,0 +1,134 @@
+sudo: false
+
+language: cpp
+
+cache:
+ apt: true
+
+git:
+  depth: false
+
+# the secure below is the binstar token
+# to genrate this secure
+# first create an anconda cloud token
+# $ anaconda auth -n the_token_name --max-age 22896000 -c --scopes api
+# the token is return as something like "yh-6654-12334_111225"
+# then encrypt the token
+# Note : in order to encrypt using travis
+# You may have to :
+# $ sudo gem install travis
+# (especially if you performed a linux distro upgrade, ruby should not be up to date)
+# You have to be in the directory where you installed the local copy of the repository
+# $ cd [your_dev_dir]/pythonocc-core
+# $ sudo travis encrypt BINSTAR_TOKEN="yh-6654-12334_111225"
+# !!be careful about the typo BINSTAR_TOKEN with the proper case. Otherwise
+# !!the $BINSTAR_TOKEN env var value will be null and the line
+# !!anaconda -t $BINSTAR_TOKEN upload *.bz2 will not be run properly
+# after that, copy/paste the secure on the following line
+env:
+  global:
+    - secure: "Bqor4TrYqeJUkjiIHjCq/e3xt/jAoU3Q5kwG/ej+QxaiT6hmkirX3Io3rHxNTbS+mYMAMTbtkkpGqYIYIYtNVx8jGYLdwOzNcuW/wzZf9VuAW/rnjx2lzuYRhHk3GOylSPUU06JHvXDmZvdMxetNBeWaE5hGuJsC9liA+stDepA="
+
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - gcc-multilib
+      - g++-multilib
+      - lib32z1+
+      - lsb-core
+      - g++-7
+
+matrix:
+  include:
+    - env: PYTHON="2.7" CONDA_PY=27 ARCH="x86_64"
+      os: linux
+      dist: trusty
+    - env: PYTHON="2.7" CONDA_PY=27 ARCH="x86_64"
+      os: osx
+      osx_image: xcode9.4
+    - env: PYTHON="3.5" CONDA_PY=35 ARCH="x86_64"
+      os: linux
+      dist: trusty
+    - env: PYTHON="3.5" CONDA_PY=35 ARCH="x86_64"
+      os: osx
+      osx_image: xcode9.4
+    - env: PYTHON="3.6" CONDA_PY=36 ARCH="x86_64"
+      os: linux
+      dist: trusty
+    - env: PYTHON="3.6" CONDA_PY=36 ARCH="x86_64"
+      os: osx
+      osx_image: xcode9.4
+    - env: PYTHON="3.7" CONDA_PY=37 ARCH="x86_64"
+      os: linux
+      dist: trusty
+    - env: PYTHON="3.7" CONDA_PY=37 ARCH="x86_64"
+      os: osx
+      osx_image: xcode9.4
+# Use miniconda to install binary versions of numpy etc. from continuum
+# analytic's repository. Follows an approach described by Dan Blanchard:
+# https://gist.github.com/dan-blanchard/7045057
+before_install:
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then
+      export CXX=g++-7;
+      export CC=gcc-7;
+    fi;
+  - if [ ${PYTHON:0:1} == "2" ]; then
+      if [ "$TRAVIS_OS_NAME" == "linux" ]; then
+      wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O miniconda.sh;
+      else
+      wget https://repo.continuum.io/miniconda/Miniconda2-latest-MacOSX-x86_64.sh -O miniconda.sh;
+      fi;
+      else
+      if [ "$TRAVIS_OS_NAME" == "linux" ]; then
+      wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
+      else
+      wget https://repo.continuum.io/miniconda/Miniconda3-latest-MacOSX-x86_64.sh -O miniconda.sh;
+      fi;
+    fi;
+  - chmod +x miniconda.sh
+  # When we are installing the 32 Bit conda on a 64 Bit system, the miniconda
+  # installer will ask for a "yes" despite the -b flag, so we pipe in a yes
+  - yes | ./miniconda.sh -b -p $HOME/miniconda
+  #- bash miniconda.sh -b -p -f $HOME/miniconda
+  - export PATH="$HOME/miniconda/bin:$HOME/miniconda/lib:$PATH"
+  - hash -r
+  - conda config --set always_yes yes --set changeps1 no
+  - conda update -q conda
+  # install everything required to build the receipe
+  # conda-build 3.2.0 on osx to prevent using check_overlinking
+  # method which is quite loooong to process
+  - conda install conda-build==3.2.0
+  - conda install anaconda-client
+  # Useful for debugging any issues with conda
+  - conda info -a
+  # download/install OCE from DLR-SC channel
+  - conda config --add channels https://conda.anaconda.org/dlr-sc
+  - conda config --add channels https://conda.anaconda.org/conda-forge
+  - conda config --add channels https://conda.anaconda.org/tpaviot
+  - conda config --add channels https://conda.anaconda.org/oce
+  - conda config --add channels https://conda.anaconda.org/pythonocc
+  
+
+
+script:
+  - conda build ci/conda --dirty --no-remove-work-dir
+
+# automative upload to anaconda cloud only
+# if the build was triggered by a cron
+# labelled as "nightly"
+# else labelled as "continuous-delivery"
+after_success:
+  - python ci/move-conda-package.py
+  - if [ "$TRAVIS_BRANCH" == "master" ]; then
+      anaconda -t $BINSTAR_TOKEN upload *.bz2 -l main --force;
+    else
+      anaconda -t $BINSTAR_TOKEN upload *.bz2 -l cd-$TRAVIS_BRANCH --force;
+    fi;
+
+
+branches:
+  only:
+    - master
+    - /^review/

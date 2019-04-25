@@ -1,0 +1,91 @@
+sudo: required
+language: generic
+filter_secrets: false
+cache:
+  cargo: true
+env:
+  global:
+  - secure: 1d0V9T1h9QiRjgYePBB0/z3nTvUgM6F9bXU9c/NZhU5mzNrLmqqZkCsQY9eRCHjSJPeGIMFdkEjHPlRaFc2dEoRo5Ul0//o9ly4YfRs0g9mi0NMjR4ifjGriTZPzAN3eIv1ZKIcEAGGjjshJgvPSmMomMrfMz4B1ufxoC+INod0=
+matrix:
+  fast_finish: true
+  include:
+  - os: linux
+    dist: trusty
+    env: TARGET_CPU=x86-64 PACKAGE_SUFFIX=ubuntu_16_04-x86_64 NUGET_RUNTIME=ubuntu.16.04-x64 DOCKER_IMAGE=imazen/imageflow_build_ubuntu16 UPLOAD_BUILD=True FETCH_COMMIT_SUFFIX=linux64
+    sudo: required
+    services:
+    - docker
+  - os: linux
+    dist: trusty
+    env: TARGET_CPU=x86-64 PACKAGE_SUFFIX=ubuntu_18_04-x86_64 NUGET_RUNTIME=ubuntu.18.04-x64 DOCKER_IMAGE=imazen/imageflow_build_ubuntu18 UPLOAD_BUILD=True FETCH_COMMIT_SUFFIX=linux64_glibc227
+    sudo: required
+    services:
+    - docker
+  - os: osx
+    env: TARGET_CPU=nehalem PACKAGE_SUFFIX=osx_10_11-x86_64 NUGET_RUNTIME=osx.10.11-x64 UPLOAD_BUILD=True TARGET=x86_64-apple-darwin FETCH_COMMIT_SUFFIX=mac64
+    language: rust
+    rust: stable
+    install:
+      - ci/travis_install.sh
+      - brew install sccache
+  - os: linux
+    dist: trusty
+    env: TARGET_CPU=haswell PACKAGE_SUFFIX=ubuntu_18_04-x86_64-haswell NUGET_RUNTIME=ubuntu.18.04-x64 DOCKER_IMAGE=imazen/imageflow_build_ubuntu18 UPLOAD_BUILD=True UPLOAD_DOCS=True FETCH_COMMIT_SUFFIX=linux64_haswell_glibc227
+    sudo: required
+    services:
+    - docker
+  - os: linux
+    dist: trusty
+    env: UPLOAD_BUILD=False COVERAGE=True CODECOV=True VALGRIND=True BUILD_RELEASE=False CLEAN_RUST_TARGETS=True TARGET_CPU=sandybridge  PACKAGE_SUFFIX=x86_64-sandy_valgrind_linux-gcc7 DOCKER_IMAGE=imazen/imageflow_build_ubuntu18_debug
+    sudo: required
+    services:
+    - docker
+before_install:
+- if [[ "$FETCH_COMMIT_SUFFIX" == "linux64" ]]; then ./ci/travis_monitor_base_dockerfiles.sh; fi
+install:
+- ci/travis_install.sh
+script:
+- ci/travis_run.sh
+before_cache:
+  - rm -rf $HOME/.cargo/registry/src
+before_deploy:
+  - export GITHUB_FILES="$(ls artifacts/upload/releases/v*/imageflow-v*.tar.gz)"
+  - echo "Planning to upload ${GITHUB_FILES} to GitHub"
+deploy:
+  - provider: s3
+    access_key_id: AKIAIMZ7QOL24GUASH6A
+    secret_access_key:
+      secure: izS5sgSOhDwjuQaFTTgMlhUd5759ZnuoxxoFDo41XZATNw58P6FtzdfslfoVa+xXjq/1N0GDAM+ENm7XYNITVqq1aJARYKy5X+IUwVKQw/UYx0rb1X2ZV7oDHsFvY5pSRiVFD1tQ0fZ9JKAkb1LTnSutfVYHNYvPHiyYQf07nig=
+    bucket: imageflow-nightlies
+    acl: public_read
+    skip_cleanup: true
+    local_dir: artifacts/upload
+    on:
+      branch: master
+      condition: $UPLOAD_BUILD = True
+  - provider: s3
+    access_key_id: AKIAIMZ7QOL24GUASH6A
+    secret_access_key:
+      secure: izS5sgSOhDwjuQaFTTgMlhUd5759ZnuoxxoFDo41XZATNw58P6FtzdfslfoVa+xXjq/1N0GDAM+ENm7XYNITVqq1aJARYKy5X+IUwVKQw/UYx0rb1X2ZV7oDHsFvY5pSRiVFD1tQ0fZ9JKAkb1LTnSutfVYHNYvPHiyYQf07nig=
+    bucket: imageflow-nightlies
+    acl: public_read
+    skip_cleanup: true
+    local_dir: artifacts/upload
+    on:
+      tags: true
+      condition: $UPLOAD_BUILD = True
+  - deploy:
+    provider: releases
+    api_key:
+      - secure: "U9jYsyiN3u9GVPbMtroFDyDmUIrzV6vyvtfCAY7I9YiepjrL+zP7FzmZU8sk56ukV1ZRM7QXP1fs1hTeAkcEPgfhITvqnCsQRcGzIEg3Ri5OZ+HVjt7ATGqVCndadL/cBhydmpq7cDfEIxhdzhmvfhcg/fjqX4oVOh6EM+dUG3E="
+    file_glob: true
+    file: "${GITHUB_FILES}"
+    skip_cleanup: true
+    prerelease: true
+    on:
+      tags: true
+      condition: $UPLOAD_BUILD = True
+
+after_success:
+  - if [[ "$FETCH_COMMIT_SUFFIX" == "linux64_glibc227" ]]; then ./ci/travis_trigger_docker_cloud.sh "https://registry.hub.docker.com/u/imazen/imageflow_server_unsecured/trigger/3682f725-3a98-49dd-9e96-acd594721250/"; fi
+  - if [[ "$FETCH_COMMIT_SUFFIX" == "linux64_glibc227" ]]; then ./ci/travis_trigger_docker_cloud.sh "https://registry.hub.docker.com/u/imazen/imageflow_tool/trigger/d4943bd2-6350-4cda-9012-f56fe2deaef8/"; fi

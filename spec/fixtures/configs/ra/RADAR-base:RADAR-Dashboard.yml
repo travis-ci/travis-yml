@@ -1,0 +1,34 @@
+dist: trusty
+sudo: false
+
+addons:
+  chrome: stable
+
+language: node_js
+node_js:
+  - "node"
+
+cache:
+  directories:
+    - node_modules
+
+before_script:
+  # use Chromium instead of Chrome
+  - export CHROME_BIN=chromium-browser
+
+script:
+  # run linters
+  - npm run lint:ng
+  - npm run lint:css
+  - npm run lint:prettier
+  - npm run lint:sort
+
+  # run unit tests
+  - xvfb-run -a npm run test -- --code-coverage --watch=false --no-progress --browsers=ChromeNoSandbox
+
+  # send coverage info
+  - cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js
+  - cat ./coverage/lcov.info | ./node_modules/.bin/codacy-coverage
+
+  # run e2e tests
+  - xvfb-run -a npm run e2e -- --no-progress --config=protractor-ci.conf.js

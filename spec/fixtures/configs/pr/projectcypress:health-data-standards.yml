@@ -1,0 +1,30 @@
+language: ruby
+rvm:
+  - 2.1.1
+  - 2.2.4
+  - 2.3.8
+
+services:
+  - mongodb
+
+env:
+  - "JRUBY_OPTS=-J-Xmx1024m"
+
+script:
+  - bundle exec bundle-audit check --update
+  - bundle exec rake test
+
+notifications:
+  email:
+    recipients:
+      - healthcare-ci@googlegroups.com
+    on_failure: change
+  slack:
+      secure: XQQmNQsUEx8KI1YqwU3DKq9eKaNNupDy3aC8ojN2T4f2AEcB/xvILNTB4N9pTV/jHhkhXjSkFG6RjJjI8jWSEF5nqF0Ue26GodgWUHDCA5Be1jC/z2Wa+9/oJIdSEGb9hgZZTuNe8IL3X1FBvF62JHkgAVJTI+zcImDtTtrH88E=
+
+branches:
+  only:
+    - master
+    - mongoid5
+cache: bundler
+sudo: false

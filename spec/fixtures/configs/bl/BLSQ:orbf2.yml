@@ -1,0 +1,25 @@
+env:
+  global:
+    - GIT_COMMITTED_AT=$(if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then git log -1 --pretty=format:%ct; else git log -1 --skip 1 --pretty=format:%ct; fi)
+    - RAILS_ENV=test
+addons:
+  postgresql: "9.6"
+  chrome: stable
+  apt:
+    packages:
+      - chromium-chromedriver
+services:
+  - redis-server
+sudo: false
+language: ruby
+cache: bundler
+before_install: gem install bundler
+before_script:
+  - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+  - chmod +x ./cc-test-reporter
+  - cp config/database-travis.yml config/database.yml
+  - psql -c 'create database orbf2_test;' -U postgres
+  - ln --symbolic /usr/lib/chromium-browser/chromedriver "${HOME}/bin/chromedriver"
+script:
+  - script/cibuild
+  - if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT; fi

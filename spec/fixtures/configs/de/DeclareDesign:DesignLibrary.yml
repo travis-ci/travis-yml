@@ -1,0 +1,54 @@
+language: r
+sudo: false
+cache: packages
+warnings_are_errors: false
+r_check_args: "--with-keep.source"
+
+matrix:
+  include:
+    - os: linux
+      r: release
+      r_github_packages:
+      - DeclareDesign/DDtools
+      - DeclareDesign/DeclareDesign
+
+    - os: linux
+      r: 3.4
+      after_success:
+      - echo skipping source packaging on linux/oldrel
+      r_github_packages:
+      - DeclareDesign/DDtools
+      - DeclareDesign/DeclareDesign
+
+    - os: linux
+      r: devel
+      after_success:
+      - echo skipping source packaging on linux/devel
+      r_github_packages:
+      - DeclareDesign/DDtools
+      - DeclareDesign/DeclareDesign
+
+    - os: osx
+      r: release
+      r_github_packages:
+      - DeclareDesign/DDtools
+      - DeclareDesign/DeclareDesign
+
+    - os: osx
+      r: 3.4 
+      r_github_packages:
+      - DeclareDesign/DDtools
+      - DeclareDesign/DeclareDesign
+
+env:
+  global:
+  - OS=$(uname -s)
+  - R_KEEP_PKG_SOURCE=yes
+  - secure: vgaDWtCNkBANvIyhfL0/x4O3+s4NgcsIp0hKZmbRh3lo5uUl0bmvureGclBmeM3LEK+ER8K3uzdzCrfjARYU016EM4Q0g2RS4Q+jMO4bUJgAtqODeiPBc8cHHUD2wFU9MRWwRm/U1e/NnjprgN35OAPBjuLh3xswN1AwoYVFXF61F4/hMcs9GzPGqwWFY4AxxmaCGYAaR93VchA8aSZdzc4LdcUfVs8jU/UxM7CHS+r8w/rjZx+vtEmm3vSn7RI60OBevq7N/FM4xRasn0KxgnaUrvRjrbwIHHSzUZ/siIfJPtpfPooQo5RjYc7qoGHiwF4m21Ave9A7P3Ugq3FZKzpyOtJ2Sk2vd4Rr0uFWk/uJWJXHlOgwSCRpzK/dT7omdstyvCxbSfWXUEBdx59LWX5arB1S4+ivshXiMsxC6BDfCk3fy0f/2J4Whz0PFj4Zd5HXAzTLDTLy7+t0XXeeHhX4nsNkYqCwnuYzfm4Y89cmmGp7ZutuEkzowtSzdc7ov4miBfFRxNPPODHmgmclMwPCzL94aQyQirQ4GYmIxPu/9SlN5wieeclISDb6Tf/sis0dlBMwyu6FSvNtQwOok+vOeC2H3qLbsuAonw+h9CGF0UckdJgU9RiIzw6b17Ad6OhE2aQvSC7mfoj272PFIj1QYgpED4s08eKPJnAQAtI=
+
+r_github_packages:
+- DeclareDesign/DDtools
+- DeclareDesign/DeclareDesign
+- r-lib/generics
+after_success:
+- Rscript -e DDtools::after_build

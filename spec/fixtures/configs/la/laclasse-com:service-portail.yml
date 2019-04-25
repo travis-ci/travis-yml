@@ -1,0 +1,36 @@
+language: ruby
+
+sudo: false
+
+rvm:
+  - "2.2.6"
+
+before_install:
+  - "gem update --system"
+  - "gem --version"
+  - "gem install -v 1.14.3 bundler --no-rdoc --no-ri"
+
+install:
+  - "bundle _1.14.3_ install"
+
+before_script:
+  - cp config/options.rb.sample config/options.rb
+
+script:
+  - "bundle exec rubocop -D"
+
+gemfile:
+  - Gemfile
+
+branches:
+  only:
+    - master
+    - develop
+
+notifications:
+  email:
+    recepients:
+      - glemoine@erasme.org
+  slack:
+    rooms:
+      - erasme:IWf0zN63Kuw5HgeJVwhnhxAC#laclassebeta

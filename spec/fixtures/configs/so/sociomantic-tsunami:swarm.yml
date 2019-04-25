@@ -1,0 +1,61 @@
+# We will use docker to set up out environment, so don't use any particular
+# language in Travis itself
+language: generic
+
+# Enable docker
+sudo: required
+services:
+    - docker
+
+# Disable automatic submodule fetching (it's done recursively)
+git:
+    submodules: false
+
+# Do a shallow submodule fetch
+before_install: git submodule update --init
+
+env:
+    global:
+        # Make sure beaver is in the PATH
+        - PATH="$(git config -f .gitmodules submodule.beaver.path)/bin:$PATH"
+        - DIST=xenial
+        - COV=1
+
+# Basic config is inherited from the global scope
+jobs:
+    templates:
+        - &test-matrix
+          stage: Test
+          # Don't build tags already converted to D2
+          if: NOT tag =~ \+d2$
+          after_success: beaver dlang codecov
+          install: beaver dlang install
+          script: beaver dlang make
+    include:
+        # Test matrix
+
+        - <<: *test-matrix
+          env: DMD=1.081.* F=production
+        - <<: *test-matrix
+          env: DMD=1.081.* F=devel
+        - <<: *test-matrix
+          env: DMD=2.071.2.s* F=production
+        - <<: *test-matrix
+          env: DMD=2.071.2.s* F=devel
+        - <<: *test-matrix
+          env: DMD=2.078.* F=production
+        - <<: *test-matrix
+          env: DMD=2.078.* F=devel
+
+        # Additional stages
+
+        - stage: Closure allocation check
+          env: DMD=2.071.2.s* F=devel
+          install: beaver dlang install
+          script: ci/closures.sh
+
+        - stage: D2 Release
+          if: tag IS present AND NOT tag =~ \+d2$
+          env: DMD=2.071.2.s* F=devel
+          install: beaver dlang install
+          script: beaver dlang d2-release

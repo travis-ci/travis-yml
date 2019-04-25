@@ -2,16 +2,11 @@
 
 
 
-## Type
+## Types
 
-Any of:
-
-* Map (Hash)
+* Hash
 * Boolean
 
-## Flags
-
-None.
 
 
 ## Examples
@@ -19,11 +14,31 @@ None.
 ```yaml
 pushover:
   enabled: true
-  api_key: "[ref:secures]"
-  users: "[ref:secures]"
   template: string
   on_success: always
   on_failure: always
+```
+
+```yaml
+pushover:
+  api_key:
+  - secure: encrypted string
+```
+
+```yaml
+pushover:
+  api_key:
+```
+
+```yaml
+pushover:
+  users:
+  - secure: encrypted string
+```
+
+```yaml
+pushover:
+  users:
 ```
 
 ```yaml

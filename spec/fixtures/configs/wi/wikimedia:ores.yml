@@ -1,0 +1,26 @@
+services:
+  - docker
+
+install:
+  - npm install eslint
+  - docker-compose build
+
+script:
+  - ./node_modules/.bin/eslint .
+  - docker-compose up -d
+  - docker-compose exec ores-worker flake8 /ores
+  - docker-compose exec ores-api /ores/utility test_api http://localhost:8080 --debug
+  - docker-compose exec ores-worker py.test /ores --cov=ores -m "not redis" -vv
+after_success:
+  - codecov
+group: stable
+dist: xenial
+os: linux
+notifications:
+  irc:
+    channels:
+      - "chat.freenode.net#wikimedia-ai"
+    on_success: change
+    on_failure: change
+    template:
+      - "%{repository_slug}#%{build_number} (%{branch} - %{commit} : %{author}): %{message} %{build_url}"

@@ -1,0 +1,63 @@
+cache: apt
+dist: trusty
+sudo: false
+group: edge
+language: python
+python: 3.6
+addons:
+  apt:
+    packages:
+    - pandoc
+install:
+  - pip uninstall -y numpy
+  - python setup.py install
+  - pip install pytest
+  - python -m spacy download en_core_web_md
+  - python -m spacy download de_core_news_md
+env:
+  global:
+    - TWINE_USERNAME=danielh
+    - secure: "Z1Y/2naCxRmTKarwOmx0a1AxJVSDheS7GRDJCnv1+CdHNvnqSXPjVKkaXbENTRRL7ACTtAF2tQKnhE9aEMJWGngmln81wo48OGwC28FyYrN/TiNdC6pTGtZiphOv7TphF0Q0zWRUO+BkXwn8P9TABmT8LLj48tzLs0ug2SZL9NJy4qnM8FD1IPY80z2TaVeLgXaGeCy7icLjkmoY/hO/1Ysw8vtMz2p57lnIt5Tq6Eu9yWMiP+RRCqUosn4y1RLL4I1eNQmtDH+Z+7COPPQ28SmRdutzIjpEYzY4kTFaM0cjw3rzTEGiANgqvOkbSrM33qd9Cht2g4k10SPLAikGVTa4P61dM7gusX3O6yuGaW2QIxtr9kU8oAEcFRyavbs6tU4s61jv62tFFqnKQzVJ7ouYF8jmywfkU+KzvSiAILd0lQh8vusvOtfPofEaAxnMCN7ASoVZGtCp7dKH0kXzCitrP0HgVRAmm5nTTeKhx1Up43G98m1wSreJUufcHkTc15Z3EhgPkWMr8wW9JIzdSt9Tt8eTL2A68CC+U4XWfeCXQ5/JV96PxFmTsAGYjXI5oWuxPB6AS81WaLZiJHaBN6njDU1FEJOZLnAiVpJXllyfjgB9BMjCjQHB5/zRhS51FkSj26CFXXr/Bg8QLHAlu0lL9eEcUdP02owo5DyYjaQ="
+  matrix:
+  - TEST_SUITE=unit TEST_OPTIONS=--multitask
+  - TEST_SUITE=toy-ucca
+  - TEST_SUITE=sparse-ucca
+  - TEST_SUITE=mlp-ucca
+  - TEST_SUITE=bilstm-ucca
+  - TEST_SUITE=noop-ucca
+  - TEST_SUITE=tune-ucca
+  - TEST_SUITE=toy-amr
+  - TEST_SUITE=sparse-amr
+  - TEST_SUITE=noop-amr
+  - TEST_SUITE=tune-amr
+  - TEST_SUITE=toy-sdp
+  - TEST_SUITE=sparse-sdp
+  - TEST_SUITE=mlp-sdp
+  - TEST_SUITE=bilstm-sdp
+  - TEST_SUITE=noop-sdp
+  - TEST_SUITE=tune-sdp
+  - TEST_SUITE=toy-conllu
+  - TEST_SUITE=tune-conllu
+jobs:
+  include:
+    - os: osx
+      language:
+      before_install:
+        - curl -LO https://repo.continuum.io/miniconda/Miniconda3-latest-MacOSX-x86_64.sh
+        - bash Miniconda3-latest-MacOSX-x86_64.sh -b -p miniconda
+        - export PATH="$PWD/miniconda/bin:$PATH"
+        - conda config --set always_yes yes --set changeps1 no
+        - conda update -q conda
+        - conda create -q -n env python=3.6 numpy cython
+        - source activate env
+before_script: # https://github.com/travis-ci/travis-ci/issues/8982#issuecomment-354357640
+  - python -c "import fcntl; fcntl.fcntl(1, fcntl.F_SETFL, 0)"
+script:
+  - ci/test.sh
+deploy:
+  provider: script
+  script: ci/deploy.sh
+  skip_cleanup: true
+  on:
+    repo: huji-nlp/tupa
+    tags: true

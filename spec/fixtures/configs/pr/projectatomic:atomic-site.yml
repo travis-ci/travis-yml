@@ -1,0 +1,8 @@
+sudo: required
+services:
+- docker
+install:
+- wget https://github.com/openshift/source-to-image/releases/download/v1.1.8/source-to-image-v1.1.8-e3140d01-linux-amd64.tar.gz
+- tar -xf source-to-image*.tar.gz
+script: ./s2i build . quay.io/osas/s2i-middleman test-image
+ 

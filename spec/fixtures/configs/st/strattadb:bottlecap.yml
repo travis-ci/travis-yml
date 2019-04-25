@@ -1,0 +1,33 @@
+sudo: false
+
+stages:
+  - lint
+  - test
+  - name: deploy
+    if: branch = master
+
+node_js_defaults: &node_js_defaults
+  language: node_js
+  node_js: "10"
+  cache:
+    yarn: true
+
+docker_defaults: &docker_defaults
+  sudo: required
+  language: generic
+  services:
+    - docker
+
+jobs:
+  include:
+    - stage: lint
+      <<: *node_js_defaults
+      script: ./scripts/ci/lint.sh
+
+    - stage: test
+      <<: *docker_defaults
+      script: ./scripts/ci/test.sh
+
+    - stage: deploy
+      <<: *docker_defaults
+      script: ./scripts/ci/deploy.sh

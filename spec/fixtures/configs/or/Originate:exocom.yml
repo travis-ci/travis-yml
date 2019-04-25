@@ -1,0 +1,34 @@
+dist: trusty
+sudo: required
+language: go
+
+go: 1.8
+
+env:
+  global:
+    secure: yS2NJpLP2fI537FSxvpyeEmUGxJgt22RfibJQRYCm7LdX0EoJ5VxSyp/eCkPbfgF+KaOywyEllrHaIa94P7Ks/zoAQ8oPVa9JOAYzNsGv2wnaer3C0NEFkx4ZBQp3oL2cBpFHdJBOWnlUQWCfXkgyKPYUKd8HlKN0C2DsCm1EzNYEva0Z8NaGj6UOW0XqwPb+0xtQkHKplhTrmKa9skCxe8Yn/EpwXb1LgsTQwk+kvM5s5OlTF7dQ9rYzc7nHOWDODWxkoNg12arK/jdmCO7bhR0VX6xL4VIU9H88yY7QODsbnCEAx322iqD4k/MHnfU0VjI5yXjIHYc3W+34oGTNGhwbpNwsT5pivXHFLDL/3zwxBJY7yym9nFVp+nqnBpj6jKbhHRuQbWKyCIV0sVgxXiXZvuqJNRHr2fA5UPdmgPxXnSyjx73VyQMCwO/mk+QTrtaUSKEZTc08rq4T8k74LzpsAJ7THDE9vlbarnAyyp2WSEY0AwngS9o4ixsMmHtaM4w3sKPXeuLdalCLIv+MYbzrlnUyLay8FXyAr7jdtZ96uMhLzFRCgAwr7vhFCJ+QEveN5Lb2L76XlhPp+nuuXuy62eZSdxAUXI0+FtztoYCER3WKIhbhiW+64yC2YanrNa5uqHRS+MUGFYBntNROPPUlBkYZ4wWYtGhPDMkwoo=
+
+cache:
+  yarn: true
+
+git:
+  depth: 2
+
+before_install:
+  - curl --output morula --location --fail https://github.com/Originate/morula/releases/download/0.1.1/morula-linux-amd64 && chmod +x morula
+  - nvm install 8 && nvm alias default 8
+  - npm install -g yarn
+
+install: bin/setup_ci
+
+script: bin/spec_ci
+
+deploy:
+  on:
+    tags: true
+  provider: script
+  script: bin/deploy
+  skip_cleanup: true
+
+notifications:
+  email: false

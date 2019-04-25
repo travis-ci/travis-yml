@@ -1,0 +1,31 @@
+language: node_js
+node_js: 8
+sudo: false
+
+notifications:
+  email: false
+
+env:
+  - MONGODB=3.2.13
+
+before_install:
+  - wget http://fastdl.mongodb.org/linux/mongodb-linux-x86_64-${MONGODB}.tgz
+  - tar xzf mongodb-linux-x86_64-${MONGODB}.tgz
+  - ${PWD}/mongodb-linux-x86_64-${MONGODB}/bin/mongod --version
+
+before_script:
+  - mkdir ${PWD}/mongodb-linux-x86_64-${MONGODB}/data
+  - ${PWD}/mongodb-linux-x86_64-${MONGODB}/bin/mongod --dbpath ${PWD}/mongodb-linux-x86_64-${MONGODB}/data --logpath ${PWD}/mongodb-linux-x86_64-${MONGODB}/mongodb.log --fork
+  - npm prune
+
+script:
+  - npm run build
+  - npm run cover-ci
+  - npm run lint -- -c tslint.travis.json
+  - npm run duplication -- --limit=5
+
+after_script:
+  - pkill mongod
+
+after_success:
+  - npm run semantic-release

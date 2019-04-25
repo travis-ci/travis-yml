@@ -1,0 +1,80 @@
+sudo: false
+
+language: node_js
+
+env:
+  global:
+    - DEBUG=electron-builder
+
+os:
+  - linux
+  - osx
+
+node_js:
+  - node
+  - lts/*
+
+cache:
+  apt: true
+  yarn: true
+  directories:
+    - node_modules
+    - flow-typed
+    - app/node_modules
+
+addons:
+  apt:
+    packages:
+      - xvfb
+
+install:
+  - yarn
+  - |
+    if [ $TRAVIS_OS_NAME == "linux" ]; then
+      /sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -ac -screen 0 1280x1024x16
+    fi
+
+before_script:
+  - export DISPLAY=:99.0
+  - sh -e /etc/init.d/xvfb start &
+  - sleep 3
+
+script:
+  - yarn lint-ci || travis_terminate 1
+  - yarn build || travis_terminate 1
+  - yarn test-ci || travis_terminate 1
+  - yarn coveralls || travis_terminate 1
+
+after_success:
+  - test $TRAVIS_REPO_SLUG = 'LN-Zap/zap-desktop' &&
+    test $TRAVIS_BRANCH = "master" &&
+    test $TRAVIS_PULL_REQUEST = "false" &&
+    yarn storybook:deploy
+
+branches:
+  only:
+    - master
+
+jobs:
+  include:
+    - stage: deploy
+      name: Deploy to Github
+      script: skip
+      deploy:
+        skip_cleanup: true
+        provider: script
+        script: yarn release --linux
+        on:
+          repo: LN-Zap/zap-desktop
+          branch: master
+
+    - os: osx
+      name: Deploy to Github
+      script: skip
+      deploy:
+        skip_cleanup: true
+        provider: script
+        script: yarn release --mac
+        on:
+          repo: LN-Zap/zap-desktop
+          branch: master

@@ -1,0 +1,22 @@
+env:
+  global:
+    - RUST_BACKTRACE=1
+    - PATH=$PATH:$HOME/.cargo/bin
+os:
+  - linux
+  - osx
+language: rust
+sudo: false
+branches:
+  only:
+    - master
+cache:
+  cargo: true
+before_script:
+  - curl -sSL https://github.com/maidsafe/QA/raw/master/travis/cargo_install.sh > cargo_install.sh
+  - bash cargo_install.sh cargo-prune;
+script:
+  - set -x;
+    cargo test --release --verbose
+before_cache:
+  - cargo prune

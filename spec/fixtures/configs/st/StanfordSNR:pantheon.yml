@@ -1,0 +1,38 @@
+language: python
+python:
+  - "2.7"
+sudo: required
+services: docker
+
+branches:
+  only:
+    - master
+    - dev
+
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+      - sourceline: ppa:keithw/mahimahi
+    packages:
+      - gcc-7
+      - g++-7
+
+install:
+  - sudo apt-get update -q
+  - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 99
+  - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-7 99
+  - pip install matplotlib numpy tabulate pyyaml tensorflow
+
+env:
+  - SCHEMES="cubic vegas bbr ledbat pcc verus sprout scream webrtc copa taova vivace pcc_experimental fillp indigo fillp_sheep"
+
+script:
+  - ./tools/install_deps.sh &&
+    ./src/experiments/setup_system.py --enable-ip-forward --set-all-mem --qdisc fq &&
+    ./src/experiments/setup.py --schemes "$SCHEMES" --install-deps &&
+    ./src/experiments/setup.py --schemes "$SCHEMES" --setup &&
+    ./tests/test_analyze.py --schemes "$SCHEMES"
+
+notifications:
+  email: false

@@ -1,0 +1,33 @@
+language: php
+dist: trusty
+group: edge
+
+php:
+  - 7.1
+  - 7.2
+  - 7.3
+  - 7.4snapshot
+  - nightly
+
+before_script:
+  - mkdir -p build/logs
+  - mysql -e 'create database IF NOT EXISTS errorheromodule;' -uroot
+  - mysql -u root errorheromodule < spec/Fixture/data/sql.sql
+  - composer self-update
+  - COMPOSER_PROCESS_TIMEOUT=5000 composer install --prefer-dist --no-interaction
+  - composer dump-autoload -o
+
+script:
+  - composer cs-check
+  - if [[ $TRAVIS_PHP_VERSION = 7.1 ]]; then bin/phpstan analyse src/ --level=max -c phpstan.neon; fi
+  - if [[ $TRAVIS_PHP_VERSION != "nightly" ]]; then bin/kahlan --coverage=4 --reporter=verbose --clover=build/logs/clover.xml; fi
+  - if [[ $TRAVIS_PHP_VERSION = "nightly" ]]; then bin/kahlan; fi
+  - if [[ $TRAVIS_PHP_VERSION = 7.1 ]]; then bin/php-coveralls -v --exclude-no-stmt; fi
+
+notifications:
+  email: false
+
+matrix:
+  allow_failures:
+    - php: nightly
+    - php: 7.4snapshot

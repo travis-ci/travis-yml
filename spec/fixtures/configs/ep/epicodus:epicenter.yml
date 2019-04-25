@@ -1,0 +1,31 @@
+sudo: false
+language: ruby
+rvm:
+  - 2.6.1
+cache: bundler
+notifications:
+  email: false
+before_script:
+  - "cp .env.example .env"
+  - "bundle exec rake db:create db:schema:load"
+before_install:
+  - gem update --system
+  - gem install bundler
+  - gem --version
+  - wget http://chromedriver.storage.googleapis.com/2.37/chromedriver_linux64.zip
+  - unzip chromedriver_linux64.zip
+  - rm chromedriver_linux64.zip
+  - sudo mv -f chromedriver /usr/local/bin/
+  - sudo chmod +x /usr/local/bin/chromedriver
+  - google-chrome-stable --headless --no-sandbox
+deploy:
+  provider: heroku
+  strategy: api
+  api_key:
+    secure: fsM+etUAZoDfSFICXzq4PbK6i8uRBD+FXyZGsBEk4SuVuwtYQ5g34mGUnDi2cEX1CXVCmkZe0wYymTWSBWa7vaw5zbQ9iGx0sEbQAML7MFSRgRIGKji/ekCuMHMqT1+Y6TMvkJCn4BriWxX0TPCQ/PAyjmIRI3OjKODFAWtWke4=
+  app: epicodus-epicenter
+  on:
+    repo: epicodus/epicenter
+  run: "rake db:migrate"
+addons:
+  chrome: stable

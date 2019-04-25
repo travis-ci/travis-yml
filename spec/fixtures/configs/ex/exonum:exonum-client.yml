@@ -1,0 +1,77 @@
+language: node_js
+addons:
+  apt:
+    sources:
+    - sourceline: 'ppa:giskou/librocksdb'
+    - sourceline: 'ppa:maarten-fonville/protobuf'
+    - sourceline: 'ppa:fsgmhoward/shadowsocks-libev'
+    - sourceline: 'deb [arch=amd64] https://packages.microsoft.com/ubuntu/14.04/prod trusty main'
+      key_url: https://packages.microsoft.com/keys/microsoft.asc
+    packages:
+      - binutils-dev
+      - build-essential
+      - cmake
+      - g++
+      - gcc
+      - libcurl4-openssl-dev
+      - libdw-dev
+      - libelf-dev
+      - libiberty-dev
+      - libprotobuf-dev
+      - librocksdb
+      - libsnappy-dev
+      - libsodium-dev
+      - libssl-dev
+      - pkg-config
+      - powershell
+      - protobuf-compiler
+node_js:
+- '6'
+- '8'
+- '10'
+env:
+  global:
+  - RUSTFLAGS="-D warnings"
+  - ROCKSDB_LIB_DIR=/usr/lib/x86_64-linux-gnu
+  - SNAPPY_LIB_DIR=/usr/lib/x86_64-linux-gnu
+  matrix:
+  - FEATURE=test
+cache:
+  directories:
+  - node_modules
+  - integration-tests/target
+  - "$HOME/.cargo"
+script:
+- npm run proto
+- npm run proto:test
+- grunt
+- node examples/map-proof.js
+jobs:
+  include:
+  - env: FEATURE=integration
+    language: rust
+    rust: nightly-2018-12-05
+    before_install:
+    - nvm install 8 && nvm use 8
+    - node --version
+    - npm --version
+    install:
+    - npm install
+    - npm run integration:build
+    script:
+    - npm run integration:unix
+    after_script:
+    - npm run postintegration:unix
+after_success:
+- npm run coveralls
+deploy:
+  provider: npm
+  email: exonum.bitfury@gmail.com
+  api_key:
+    secure: KQihlRK+otmBcmKWA3w/HKPQxT19KnNVyP+nxaZp/lVrcUqszN1Qr0FAegz8Yaai6y2LVHA7ZKpGIMj9VZ1jEzcp59+jjYDj+gef8/kgPTgUjbmGnOs3p82ljZj4efQSuVwSRiEp4M9hyz2OlIbcPzu9bufLRx8DTmLKbFRWQ/7kaPVEzyJ1Me9kAPwFBVOptMkNR7mFFCNna0jJemi3hBwy59I0tTMAZNh/UUIu5kzG8JJ1kDxEuFLMNq65b6btjcd3gVs/nb3QjTtfx67BcMUCmdOvdgrXdZ1NtcN2SthDG+Ldott1wfL3vpPjCdILB5FrNQz//LSM7REGiNL7x/X51hhkMkD8oZq+SsdTMzODd6N+hoo+z/peKAqGskhsui671isdrwFwW/7u8PLz/kwfT6UEcHSrctwMl4ICICYpF81L/fSpysHMt83+1XqqECEu7pXwAsbgu37GO2vPg3QU3+HtFHdFaIQuGedXw+pbskMn/pbj4Ekh+//nVkhcDM6eJAR5WMXPnznEl9QEY7uSYepPRNLPG4LcBPIHARhSddq07ksWwD2uT2GogQr//Z2lRHjvy4eY+mEwVH4vna/FmQ2mRA9sgrX7E9TvptmamBMcCRZYol3VIDo1Eee3BuR9E5wxjHEyzkfEMrLIr0Oqe3K4L+rrNjfE8wnxBvw=
+  on:
+    branch: master
+    tags: true
+    repo: exonum/exonum-client
+    node: '8'
+  skip_cleanup: true

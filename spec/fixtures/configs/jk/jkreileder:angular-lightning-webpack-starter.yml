@@ -1,0 +1,28 @@
+sudo: required
+dist: trusty
+addons:
+  apt:
+    sources:
+      - google-chrome
+    packages:
+      - google-chrome-stable
+language: node_js
+node_js:
+  - "node"
+  - "7"
+matrix:
+  fast_finish: true
+before_install:
+  - npm i npm@^4 -g
+before_script:
+  - export DISPLAY=:99.0
+  - sh -e /etc/init.d/xvfb start
+  - sleep 3
+script:
+  - npm run ci:travis
+after_success:
+  - bash travis-greenkeeper-yarn.sh
+cache:
+  directories:
+    - node_modules
+  yarn: true

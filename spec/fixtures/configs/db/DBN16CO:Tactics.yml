@@ -1,0 +1,26 @@
+matrix:
+  include:
+    - language: python
+      sudo: required
+      env: TO_TEST=BACKEND
+      services: docker
+    - language: objective-c
+      sudo: required
+      env: TO_TEST=FRONTEND
+      osx_image: xcode61
+
+install:
+- if [ "$TO_TEST" = "BACKEND" ]; then mv ./TravisScripts/travis_db_settings.py ./Server/Server/localsettings.py; fi
+- if [ "$TO_TEST" = "BACKEND" ]; then docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD"; fi
+- if [ "$TO_TEST" = "BACKEND" ]; then docker pull $DOCKER_USERNAME/tactics-server-tests:latest; fi
+- if [ "$TO_TEST" = "FRONTEND" ]; then ./TravisScripts/install.sh; fi
+script:
+- if [ "$TO_TEST" = "BACKEND" ]; then docker run -i -v `pwd`/Server:/Tactics --rm $DOCKER_USERNAME/tactics-server-tests; fi
+- if [ "$TO_TEST" = "FRONTEND" ]; then ./TravisScripts/run_unity_tests.sh; fi
+
+notifications:
+  slack: dbn16:jT35x7zWh66YQfk4MMFZ0KvD
+env:
+  global:
+  - secure: ldwngqrmFtjHi92daxWnLphsjzOskiAymSYzvRY+Pt9YZsLhX2kWlNDXpsC38JPXonZXNf/K6YRMqWMg/YOB8M8rFMrwEAr77OBI2X5EQq+V9WacNyOa+9KlnAKKUe3RxaX15+rWApUKot9w5mHOuiRYTQEH2Ui+k/TL7Z4Syije/JAEbhQbrtayB9UlJcNB3cn/H2fqpSCssPwJv5CooOadkZd881NgaBdtIVF43RdFkZCIRRLx7K92a2vjN5BZbM64zlEQ9Z7XhgAFtY7DtsELUnFUkHAPXvII+c+2tSzS5fZWTOwVsn8ESkB/oyefqDTKjHQl+Bn0+9qS0lNeMc/rVNW5g56IlIONXLXjDuYyUNUZKjRoH3QTr6zBfQE7r3cP4zorpNMAToPAwaeEzHUVUQL4QQjkRnGL9eXsnj41BJUqPao5IlsTmsScAS5NINmFsQsGoPjG7Y6GisBdeaiwgatSNO7zWasaJPwTtI8yOm9nt3gk/doE6kY2yvvsIVv9Q4XotHHbNQMQqfdnVwW8gFzDxd7onlOPGUeT+ZgHlVh1HxA1okqdwvN99bUCIi8+kOAv6DXJigz41OwdhcBlYVs1mrxG+ljoCcK0LLWShvXqlE1TL+swiCHkZ+FbQgNCnmYR+m+HOkjP24+Tp2163obklwG/QNSI0lL8AGw=
+  - secure: ZlG2y/vsjXD6sFqFIewb+YHW8N2u3z10F3Su0uyu10MnTjnvSFH5e/nWPye3WtEcC4gxyf8J5AAJpTGxfgpI/4qAf2x6IMt6w5o+SXzMlT7OPCURYWOQuii9XN8Ps24SCW8LapWVrsoc9QJx4Jjr4RRsD+kvHqcpyUToFkt1dRbqW6F3MdEsGfB3s2UCKRa5OUk0QQRMlqLMLAAVEmaSAT8MX3Q31A98DHrGBZnllxFG2YHEdXssQ/YNm8fEfA4EpxduK9lXfLsrj3ze6611qgFljpozPfsjL9mjGXsTh7IBtOwTZ6hYSKGDu4pKwerJwtMdsWzARZxnPmBmb4hDfGxbyJ/pkgX65n5XA8L/t4Ig+T12kvnuQ6MWd38Tihi50jVgLyTi5zUz2yooUcRqf5CngTCRBdD2p1+AFPIWltckb+w1/kBIjrX+R6dM3LfnBYDApr+o6b0S5kLEnKSEz7HBXPEzMYr9fqWDDU4gHKoVVhZhF7sGtACfgEHhzmACJYOqneWlf3ERa3Yv2v09BtpXx02TtfWhH03JuVrwAPPQn4li8s+pfHNpXrenkcreDz4NUZbcHyZTMoZr6s9uKaHki9zY2Nz1VSmGQ0JOiS+XRPNrynDu+hptpFwQ0++h94RI/m4ObAIk6uBmkDs9G6Qpx6O2YjDTF6SJwMxmpGQ=

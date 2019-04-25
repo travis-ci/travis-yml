@@ -1,0 +1,21 @@
+language: python
+dist: trusty
+sudo: false
+cache: pip
+python: 2.7
+
+env:
+  - TOXENV=py27
+  - TOXENV=py34
+  - TOXENV=py36
+  - CODECLIMATE_REPO_TOKEN=b1bfad9809ef8b3be1eefa761352840a5ea632ef8bff0981fe295d61f9e2af84
+
+before_script:
+  - pip install -r test/requirements.txt
+  - openssl aes-256-cbc -d -in config.xml.encrypted.1 -k ${KEY} -out config.xml
+
+script: nosetests -v  --processes=4 --process-timeout=200 --with-coverage --cover-package pkg --cover-package pkg/queryGenerators --cover-package test --cover-package . --cover-package pkg/queryGenerators test/*.py
+
+after_success:
+  - coverage report --omit '/home/travis/virtualenv/python2.7.13/*,mpmain.py'
+  #- coveralls

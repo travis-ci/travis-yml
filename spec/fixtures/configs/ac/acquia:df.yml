@@ -1,0 +1,92 @@
+sudo: required
+dist: trusty
+language: php
+
+cache:
+  bundler: true
+  apt: true
+  directories:
+    - "$HOME/.composer/cache"
+    - "$HOME/.drush/cache"
+    - "$HOME/.npm"
+
+php:
+  - 7.2.4
+env:
+  matrix:
+    - SCENARIO=dfs_tec
+    - SCENARIO=dfs_dev
+    - SCENARIO=df
+
+addons:
+  apt:
+    packages:
+    # Dependencies for Chrome.
+    - libappindicator1
+    - fonts-liberation
+
+before_install:
+  # Update composer.
+  - composer self-update
+  - composer --version
+
+  # Start up Chrome.
+  - google-chrome-stable --version
+
+  # Disable xdebug.
+  - phpenv config-rm xdebug.ini
+
+install:
+  # Add Composer's local bin directory to the PATH so that we will be running
+  # our installed versions of Drush, PHPCS, Behat, PhantomJS, etc.
+  - export PATH="$HOME/.composer/vendor/bin:$TRAVIS_BUILD_DIR/vendor/bin:$PATH"
+
+  # Composer install should fail on bad patches.
+  - export COMPOSER_EXIT_ON_PATCH_FAILURE=1
+
+  # Create the MySQL database and add a user for testing.
+  - mysql -u root -e "CREATE DATABASE drupal; CREATE USER 'df'@'localhost' IDENTIFIED BY 'df'; GRANT ALL ON drupal.* TO 'df'@'localhost';"
+
+  # Install the required PECL extensions.
+  # Retrieve the extension from pecl.php.net manually in order to avoid timeouts
+  # and issues retrieving release information from PECL.
+  # 'yes' is used to acknowledge all prompts.
+  - wget http://pecl.php.net/get/yaml-2.0.2.tgz
+  - wget http://pecl.php.net/get/mcrypt-1.0.1.tgz
+  - yes '' | pecl install yaml-2.0.2.tgz
+  - yes '' | pecl install mcrypt-1.0.1.tgz
+  # Tweak PHP configuration.
+  - echo 'memory_limit = -1' >> drupal.php.ini;
+  - echo 'max_execution_time = 120' >> drupal.php.ini;
+  - echo 'sendmail_path = /bin/true' >> drupal.php.ini;
+  - phpenv config-add drupal.php.ini
+  - phpenv rehash
+
+  # Build the DF code base.
+  - composer install
+
+  # Install Demo Framework cleanly so that settings.php will be created properly.
+  - lightning install 'mysql\://df:df@127.0.0.1/drupal' $SCENARIO 'http://127.0.0.1:8080' --no-dev
+  - lightning configure:behat 'http://127.0.0.1:8080'
+
+before_script:
+  - drush config:set system.date timezone.default $TZ --yes
+  - drush runserver --default-server=builtin 8080 &>/dev/null &
+  - google-chrome-stable --headless --disable-gpu --no-sandbox --remote-debugging-port=9222 http://localhost &
+
+script:
+  - composer validate composer.json --no-check-all --ansi --no-interaction
+  - if [[ "$SCENARIO" == df ]]; then drush en df_tools_test -y; fi
+  - behat --config .behat.yml --stop-on-failure --tags=df;
+  - if [[ "$SCENARIO" != df ]]; then behat --config .behat.yml --stop-on-failure --tags=$SCENARIO; fi
+
+after_failure:
+  - cd docroot
+  - drush watchdog:show --count=100 --severity=Error --extended
+
+after_success:
+  - cd docroot
+  - drush ev "drush_print('Build has finished successfully!', 20);" --druplicon
+
+matrix:
+  fast_finish: true

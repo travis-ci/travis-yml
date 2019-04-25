@@ -1,0 +1,52 @@
+---
+
+# Configuration
+
+addons:
+  postgresql: '9.6'
+
+branches:
+  only:
+    - master
+
+cache:
+  bundler: true
+
+dist: trusty
+
+env:
+  - NLT_DB_USER=travis NLT_DB_PASS=''
+
+language: ruby
+
+rvm:
+  - 2.5.0
+
+services:
+  - postgresql
+  - redis-server
+
+sudo: false
+
+# Phases
+
+before_install:
+  - gem update --system
+  - gem install bundler
+  - source bin/phantomjs.sh
+
+script:
+  - RAILS_ENV=test bin/rails db:create db:structure:load max_mind:extract
+  - bin/rake
+
+before_deploy:
+  - openssl aes-256-cbc -K $encrypted_5358ea3d75c2_key
+    -iv $encrypted_5358ea3d75c2_iv -in config/deploy/rsa_key.enc
+    -out config/deploy/rsa_key -d
+
+deploy:
+  provider: script
+  script: rvm $TRAVIS_RUBY_VERSION do bin/cap production deploy
+  skip_cleanup: true
+  on:
+    branch: master

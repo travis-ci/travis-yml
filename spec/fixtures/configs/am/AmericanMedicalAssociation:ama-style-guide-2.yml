@@ -1,0 +1,18 @@
+language: node_js
+node_js:
+  - 9.9.0
+cache:
+  directories:
+    - $HOME/styleguide/vendor
+    - $HOME/styleguide/node_modules
+before_install:
+  - cd styleguide
+  - composer install --no-interaction
+  - npm i -g npm
+install:
+  - npm install
+script:
+  - gulp test
+  # We are generating the report and publishing it for all runs rather than
+  # using it as a pass / fail.
+  - "$TRAVIS_BUILD_DIR/scripts/publish-visual-regression-test-results.sh"

@@ -1,0 +1,14 @@
+language: node_js
+node_js:
+  - 10
+  - 8
+cache:
+  directories:
+  - $HOME/.npm
+script: npm run test:ci
+before_install:
+  - npm install --global npm
+  - npm --version
+after_success:
+  - npx nyc report --reporter=text-lcov > coverage.lcov
+  - npx codecov

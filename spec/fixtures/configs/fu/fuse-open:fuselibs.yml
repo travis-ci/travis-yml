@@ -1,0 +1,27 @@
+os: osx
+osx_image: xcode9.2
+language: csharp
+mono: 5.4.1
+
+env:
+  global:
+    - XCODE_XCCONFIG_FILE=$TRAVIS_BUILD_DIR/.travis.xcconfig
+    - PATH=node_modules/.bin:$PATH
+    - LOG_TRACE=1
+
+install:
+  - npm install
+
+before_script:
+  - ulimit -c unlimited -S
+  - rm -rf /cores/core.*
+
+script:
+  - npm run build
+  - uno build ios Tests/ManualTests/ManualTestingApp/ManualTestingApp.unoproj
+  - uno test native --timeout=30 Source/AllTests.unoproj
+
+after_failure:
+  - for c in $(ls /cores/core.*); do
+      lldb -c $c -o "bt all" -b;
+    done

@@ -1,0 +1,62 @@
+language: generic
+git:
+  depth: 1
+env:
+  global:
+    - BUILDDIR="$TRAVIS_BUILD_DIR/$TRAVIS_BUILD_ID"
+    - PYENV_ROOT="$HOME/pyenv.root"
+    - CONFIG=release
+    - VERA=false
+    - SUFFIX=
+    - QMAKE_EXTRA=CONFIG+=tests CONFIG+=silent
+    - CELLAR_CACHE_DIR=$([ $TRAVIS_OS_NAME = 'osx' ] && echo "/usr/local/Cellar" || { mkdir -p .empty/{qt,ccache,python@3,pyenv} ; echo .empty ; } )
+    - EARLY_START_DOCKER_PULL_PID=$( if [ $TRAVIS_OS_NAME = 'linux' ] ; then docker pull trikset/linux-builder ; else true ; fi 2>&1 >/dev/null & echo $!)
+    - HEARTBEAT=$(while sleep 100; do echo "=====[ $SECONDS seconds, still building... ]====="; done >&2 & echo $! )
+cache:
+  timeout: 1000
+  apt: true
+  ccache: true
+  directories:
+    - $CELLAR_CACHE_DIR/qt
+    - $CELLAR_CACHE_DIR/ccache
+    - $CELLAR_CACHE_DIR/python@3
+    - $CELLAR_CACHE_DIR/pyenv
+    - $PYENV_ROOT
+#    - /usr/local/opt/
+matrix:
+  include:
+  - os: linux
+    sudo: required
+    services: docker
+    name: Linux release
+  - os: linux
+    sudo: required
+    services: docker
+    env: CONFIG=debug     VERA=true SUFFIX=-d
+    name: Linux debug + vera
+  - os: osx
+    language: cpp
+    name: macOS release
+    env: QMAKE_EXTRA="$QMAKE_EXTRA CONFIG+=no-sanitizers"
+
+before_install:
+- wait $EARLY_START_DOCKER_PULL_PID || true
+
+install:
+- "./scripts/install.sh"
+
+script:
+- ./scripts/script.sh & WPID=$!
+- sleep 2400 && { kill $WPID || true ; echo "***KILLED ON TIMEOUT***" ; } & KPID=$!
+- wait $WPID ; RES=$?; kill $KPID > /dev/null ; ( exit $RES )
+
+after_script:
+- "./scripts/after_script.sh"
+- kill $HEARTBEAT
+
+after_success:
+- if [ "$CONFIG" = "debug" ]; then codecov; fi
+
+notifications:
+  slack:
+    secure: KQUsvDU5DOVz8iP9V4L1O6GW02rPK6vavMi892aXnCIa5fRX+/hiwFQH4fHfFCDVpu93dtaVwfYKXgSQnjcC6foZSARbE4H6dTzU3TRgzwx8BMNJPlzkldFH+oYgctdvt/x9X04tatj1vj1hAEfFXL0QX6BYLeUsTj+AS+MZmck=

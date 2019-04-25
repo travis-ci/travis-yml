@@ -1,0 +1,32 @@
+sudo: false
+language: ruby
+rvm:
+  - 2.3.1
+node_js:
+  - 'node'
+cache:
+  directories:
+    - vendor/bundle
+    - aptiblejs/node_modules
+    - signup/node_modules
+    - quiz/node_modules
+env: # IAM: travis-s3 www.aptible.com
+  secure: Q9zRLp8Iyl6yvs1jaF0Q6LqoEErymjVungepcjDeS1nvfA8Ag0aCO0s9iujZtKKrNSZJsX42862QAFYSsht3Et3PwaUgc7S+8EVN77IFFu3Grc2k5gNDSwcVSEM1VsGtoqpZOAuibZHnI7Pv6+e+obCAYUHPeyorzDJGOeTNV1Y=
+install:
+  - bundle install --deployment --retry 3
+  - pip install --user awscli
+script:
+  - pushd aptiblejs
+  - npm install
+  - npm run build
+  - popd
+  - pushd signupjs
+  - npm install
+  - npm run build
+  - popd
+  - pushd quizjs
+  - npm install
+  - npm run build
+  - popd
+  - bundle exec rake
+  - PATH=$HOME/.local/bin:$PATH script/travis-deploy.sh

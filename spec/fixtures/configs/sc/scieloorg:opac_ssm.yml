@@ -1,0 +1,32 @@
+sudo: required
+
+language: python
+
+env:
+  global:
+  - COMMIT=${TRAVIS_COMMIT::8}
+
+services:
+- docker
+
+before_install:
+- pip install docker-compose
+- docker --version
+
+script:
+- make travis_compose_build
+- make travis_compose_up
+- make travis_compose_django_migrate
+- make travis_compose_django_test
+- make travis_run_audit
+
+after_success:
+- if [ "$TRAVIS_BRANCH" == "master" ] && [ "$TRAVIS_EVENT_TYPE" == "push" ]; then
+  docker login -u="$DOCKER_USER" -p="$DOCKER_PASS";
+  make release_docker_build;
+  make release_docker_tag;
+  make release_docker_push;
+  fi
+
+notifications:
+  slack: scielo:6YcYDMh1STDOQT8H7umVuD0R

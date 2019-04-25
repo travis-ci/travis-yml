@@ -1,0 +1,19 @@
+language: python
+# use Travis container-based infrastructure
+sudo: false
+python:
+  - "2.7"
+# command to install dependencies, e.g. pip install -r requirements.txt --use-mirrors
+install: 
+ - pip install --upgrade setuptools
+ # Install nidmresults python library from GitHub repo
+ # - pip install nidmresults
+ - pip install git+git://github.com/incf-nidash/nidmresults.git
+ - pip install -r requirements.txt
+# command to run tests, e.g. python setup.py test
+script:  
+- python -m unittest discover -s ./nidm/nidm-results/test/ -p '[t|T]est*.py'
+- python test/test_specifications.py 
+- cat debug.log
+# Use new infrastructure
+sudo: false

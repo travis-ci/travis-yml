@@ -1,0 +1,71 @@
+# Config file for automatic testing at travis-ci.org
+
+language: python
+
+python:
+    - "3.6"
+
+sudo: false
+
+cache:
+    directories:
+      - $HOME/.cache
+
+dist: trusty
+
+env:
+  global:
+    - ES_JAVA_OPTS="-Xms512m -Xmx512m"
+    - ES_VERSION=5.4.0 ES_DOWNLOAD_URL=https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-${ES_VERSION}.tar.gz
+    - DATABASE_PORT="54321"
+    - PROJECT_DIR="$PWD"
+    - WHEELHOUSE="$HOME/.cache/wheelhouse"
+    - LIBXML2_DEB="libxml2_2.7.8.dfsg-5.1ubuntu4.15_amd64.deb"
+    - POSTGRES_DEB="postgresql-9.5_9.5.1-1.pgdg60+1_amd64.deb"
+
+before_install:
+    # cache directories
+    - |
+      mkdir -p $HOME/.cache/downloads
+      mkdir -p $HOME/.cache/pip
+      mkdir -p $HOME/.cache/wheelhouse
+    # postgres
+    - |
+      cd $HOME/.cache/downloads
+      if [ ! -f "$LIBXML2_DEB" ]; then
+        curl -SLO http://security.ubuntu.com/ubuntu/pool/main/libx/libxml2/$LIBXML2_DEB
+      fi
+      if [ ! -f "$POSTGRES_DEB" ]; then
+        curl -SLO http://apt.postgresql.org/pub/repos/apt/pool/main/p/postgresql-9.5/$POSTGRES_DEB
+      fi
+      dpkg -x $LIBXML2_DEB /tmp/libxml2
+      dpkg -x $POSTGRES_DEB /tmp/postgres
+    - |
+      export LD_LIBRARY_PATH=/tmp/libxml2/usr/lib/x86_64-linux-gnu
+      /tmp/postgres/usr/lib/postgresql/9.5/bin/initdb /tmp/postgres/data --nosync -U postgres
+      sed -i -e 's/#fsync.*/fsync = off/' /tmp/postgres/data/postgresql.conf
+      sed -i -e 's/#synchronous_commit.*/synchronous_commit = off/' /tmp/postgres/data/postgresql.conf
+      sed -i -e 's/#full_page_writes.*/full_page_writes = off/' /tmp/postgres/data/postgresql.conf
+      /tmp/postgres/usr/lib/postgresql/9.5/bin/postgres -k /tmp -D /tmp/postgres/data -p 54321 > /dev/null & dpkg -x $POSTGRES_DEB /tmp/postgres
+
+install:
+    - wget ${ES_DOWNLOAD_URL}
+    - tar -xzf elasticsearch-${ES_VERSION}.tar.gz
+    - ./elasticsearch-${ES_VERSION}/bin/elasticsearch &
+    - cd $PROJECT_DIR
+    - travis_retry pip install --upgrade pip
+    - travis_retry pip install flake8==3.0.4 --force-reinstall --upgrade
+    - travis_retry pip install -r dev-requirements.txt
+    - travis_retry pip install .
+
+before_script:
+  - wget -q --waitretry=1 --retry-connrefused -T 10 -O - http://127.0.0.1:9200
+
+# Run Python tests and flake8
+script:
+    - flake8 .
+    - py.test tests --cov=share --cov=api
+    - coverage run --append --source=share,api -m behave
+
+after_success:
+    - coveralls

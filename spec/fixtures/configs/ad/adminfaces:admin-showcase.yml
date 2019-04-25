@@ -1,0 +1,28 @@
+dist: trusty
+addons:
+  chrome: stable
+language: java
+jdk: oraclejdk8
+sudo: required
+services:
+- docker
+cache:
+  directories:
+  - "$HOME/.m2/repository"
+  - "$HOME/.arquillian"
+before_script:
+- rm -r $HOME/.m2/repository/com/github/adminfaces/
+- git config --global http.postBuffer 157286400
+script:
+- mvn -U clean package -Ptests -Pwildfly8-managed -Dbrowser=chromeheadless
+- mvn test -Ptests -Pglassfish-managed -Dbrowser=chromeheadless
+- mvn test -Ptests -Ptomee7-remote -Dbrowser=chromeheadless
+- mvn test -Ptests -Ptomee1.7-remote -Dbrowser=chromeheadless
+after_success:
+- mvn clean package -DskipTests
+- docker login -u rmpestano -p ${pass}
+- mvn dockerfile:build -Pdocker
+- mvn dockerfile:push -Pdocker
+env:
+  global:
+    secure: Me0xfusJpiFn54cWmdou8AEewmdPiFipCF2vkerOr2Fqb+kYIfE9Y6xZA8Pvhn0spqwfeNlyNFSZ69cXGTp23hGa54DKgUCDpX6CbCWNxsrxe8bly0ebIo5X6l43m0TXn/ZKYg2azfmqj3ErJwhyJcu0cJBZEyAEnJd7zglXp16Lv4w10nWH2dHSksJSKqSn6KlNGizlKTJfRrqP6Uo0BLk/b2SeGpviZEGSN/RLcQzxG/klYP/s9UdUBvUrfEPHTvH5ywmlLze4AgkFG8kbcR8t2VkVXmVpaPwkd2sLMMMhxyQUdXMP2OWVvGVPXbDn/oF6qvkd7LNNtBuuuRmmkVBpJkggicsL4EcNROvQUDaUTVNDIorrQVB58W2wevQOueKUxf5xzxDNLjHLniEP52ldCiBPgV1g9PZdFyLb1Ln/AN3Z1KVJrZWRkezdXWui/6TiRAY59oUJCgmq8fC2BEIh96trzvsbWyzyRIkG1Gz39anz4SP3viLDC0xzY5OClYo8/+bHwRbnQCJcaeNadf39tLZXoLXNVrBOcHhg+wXLcUoiytWe9TC9U8vKM1ORodTtSkX2IN2qpGbfDnsbFlUgTj3WXgdaLhNV8q7nhNHTDPeNAffBJFWgx/GapvDdixh7hCwyzU1VeSt3n2PLEqccLUHCFTE7kpQnvHJnIRA=

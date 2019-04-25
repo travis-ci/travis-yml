@@ -1,0 +1,83 @@
+language: java
+jdk:
+  - oraclejdk8
+
+services:
+  - docker
+
+cache:
+  directories:
+    - $HOME/.m2
+    - web/node_modules
+    - web/dist
+
+stages:
+  - Build
+  - Test
+  - "Release / Deploy"
+
+env:
+  global:
+    - FORCE_DEPLOY=false
+    - NODE_VERSION=8
+    - DEPLOY_REPO=Taskana/taskana
+    - VERSION=v`mvn -q -Dexec.executable="echo" -Dexec.args='${project.version}' --non-recursive org.codehaus.mojo:exec-maven-plugin:1.6.0:exec -f ./lib`
+  matrix:
+    - DB=H2
+    - DB=DB2_10_5
+    - DB=DB2_11_1
+    - DB=POSTGRES_10_4
+
+stage: Test
+script:
+  - "export DISPLAY=:99.0"
+  - "sh -e /etc/init.d/xvfb start"
+  - sleep 3 # give xvfb some time to start
+  - nvm install $NODE_VERSION
+    && ci/change_version.sh -m "lib/ rest/" -swarm lib/taskana-cdi/src/test/java/pro/taskana/TaskanaProducersTest.java
+    && ./ci/test.sh $DB
+
+jobs:
+  include:
+    - stage: Build
+      install:
+        - nvm install $NODE_VERSION
+          && (cd web && npm install && npm rebuild node-sass)
+          && ci/change_version.sh -m "lib/ rest/" -swarm lib/taskana-cdi/src/test/java/pro/taskana/TaskanaProducersTest.java
+      script:
+        - (cd web && npm run build:prod)
+          && mvn clean install -q -f lib -DskipTests -Dmaven.javadoc.skip=true
+          && mvn clean install -q -f rest -DskipTests -Dmaven.javadoc.skip=true -P history.plugin
+    - stage: "Release / Deploy"
+      name: "Release stage"
+      script:
+        - ci/release.sh lib/taskana-core $TRAVIS_TAG
+          && ci/release.sh lib/taskana-spring $TRAVIS_TAG
+          && ci/release.sh lib/taskana-cdi $TRAVIS_TAG
+          && ci/release.sh web/ $TRAVIS_TAG
+          && ci/release.sh rest/taskana-rest-spring $TRAVIS_TAG
+          && ci/release.sh rest/taskana-rest-spring-base $TRAVIS_TAG
+      if: repo = env(DEPLOY_REPO) AND (tag =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ OR branch = master) AND type != pull_request
+    - stage: "Release / Deploy"
+      name: "Update Pom's stage"
+      script: 
+        - ci/change_version.sh -i -m "lib/ rest/" -swarm lib/taskana-cdi/src/test/java/pro/taskana/TaskanaProducersTest.java
+          && ci/commitPoms.sh lib/taskana-cdi/src/test/java/pro/taskana/TaskanaProducersTest.java
+      if: repo = env(DEPLOY_REPO) AND tag =~ ^v[0-9]+\.[0-9]+\.[0-9]+$
+    - stage: "Release / Deploy"
+      name: "Deploy stage"
+      script:
+        - if [[ $FORCE_DEPLOY = true ]];
+            then ci/copy-rest-spring.sh $VERSION;
+            else ci/copy-rest-spring.sh $TRAVIS_TAG;
+          fi  
+      deploy:
+        provider: cloudfoundry
+        username: $BLUEMIX_ACCOUNT
+        password: $BLUEMIX_ACCOUNT_PASSWORD
+        api: https://api.ng.bluemix.net
+        organization: "NovaTec Consulting GmbH"
+        space: Taskana
+        on:
+          all_branches: true
+      if: (repo = env(DEPLOY_REPO) AND tag =~ ^v[0-9]+\.[0-9]+\.[0-9]+$) OR (env(FORCE_DEPLOY) = true)

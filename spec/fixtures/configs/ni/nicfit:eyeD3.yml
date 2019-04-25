@@ -1,0 +1,23 @@
+language: python
+
+python:
+  - "3.6"
+  - "3.7-dev"
+
+cache:
+    pip: true
+    directories:
+        - $HOME/eyeD3-test-data
+
+install:
+    - pip install -U -r requirements.txt
+    - pip install -U -r requirements/test.txt
+    - pip install coveralls
+    - pip install -e .
+    - make TEST_DATA_DIR=$HOME test-data
+
+# command to run tests
+script: make coverage
+
+after_success:
+  - coveralls

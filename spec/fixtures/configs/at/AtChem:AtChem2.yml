@@ -1,0 +1,50 @@
+  sudo : true
+
+  notifications:
+    email: false
+
+  language: c
+
+  os:
+    - osx
+    - linux
+
+  compiler:
+    - gcc
+
+  cache:
+    directories: /usr/local/Cellar/gcc@4.9/4.9.4_1
+
+  addons:
+    apt:
+      packages:
+        - gfortran
+        - liblapack-dev
+        - numdiff
+
+  before_install:
+    # if cached dirs exist, then continue. Otherwise, do the install from Homebrew
+    - if [[ "$TRAVIS_OS_NAME" == "osx" && ! -d /usr/local/Cellar/gcc@4.9/4.9.4_1/bin ]] ; then brew update ; brew install gcc@4.9 libffi gettext ;  fi
+    - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then export DYLD_LIBRARY_PATH=$PWD/cvode/lib:$PWD/openlibm-0.4.1 ; fi
+    - if [[ "$TRAVIS_OS_NAME" == "osx" ]];   then ./tools/install/install_cvode.sh $PWD /usr/local/Cellar/gcc@4.9/4.9.4_1/bin/gfortran-4.9 ; fi
+    - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then ./tools/install/install_cvode.sh $PWD /usr/bin/gfortran ; fi
+    - ./tools/install/install_openlibm.sh $PWD
+    - ./tools/install/install_numdiff.sh $PWD ; export PATH=$PATH:$PWD/numdiff/bin
+    - ./tools/install/install_fruit.sh $PWD
+
+  install:
+    - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:/usr/local/Cellar/gcc@4.9/4.9.4_1/lib/gcc/4.9 ; fi
+    - cd $TRAVIS_BUILD_DIR
+    - cp tools/Makefile Makefile
+    - ./tools/build.sh ./tools/mcm_example.fac
+
+  script:
+    - ./atchem2
+    - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then bash <(curl -s https://codecov.io/bash) -F build ; fi
+    - make indenttest
+    - make styletest
+    - make clean
+    - make unittests
+    - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then bash <(curl -s https://codecov.io/bash) -F unittests ; fi
+    - make clean
+    - make tests

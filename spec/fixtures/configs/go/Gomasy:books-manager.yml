@@ -1,0 +1,36 @@
+language: php
+php:
+  - 7.2
+before_install:
+  - nvm install 11
+install:
+  - composer install --ansi
+  - yarn install --pure-lockfile
+before_script:
+  - mysql -e 'SET GLOBAL innodb_file_format = Barracuda;'
+  - mysql -e 'SET GLOBAL innodb_large_prefix = ON;'
+  - mysql -e 'CREATE DATABASE `forge`;'
+  - ln -s .env.travis .env
+script:
+  - yarn build
+  - composer travis-test
+after_success:
+  - composer coveralls
+  - if [[ $TRAVIS_PULL_REQUEST == 'false' && $TRAVIS_BRANCH == 'master' ]]; then
+      rm -rf build node_modules vendor;
+      rm -rf storage/framework/cache/facade-*.php storage/framework/cache/data/* storage/framework/views/*;
+      composer install --no-dev;
+      tar cvf build.tar.gz .;
+      curl -H "X-Token:$_token" -H "X-Repo:books" -F build=@build.tar.gz https://gomasy.jp/deploy;
+    fi
+addons:
+  apt:
+    packages:
+      - fonts-ipafont-gothic
+    update: true
+branches:
+  except:
+    - develop
+notifications:
+  slack:
+    secure: ZdD2qUcgVfKrwiQFpLMweYiEgjR8tkkFWb21tzMLuSY7+css8MoGhGZJPbiPYpnP2DeYX6HblR7YuaJeQ0MLfDe57/01dCrMGChu7u+qukXHzuLk4EcVe06e2fD0NqB1e/n2CA24lokQoLXEXAFxN8vyzC+6Tm7CKTJ+QThzN8YmNjWp3V9y05A73jtJOcC9sCbUD5GioMBbSkl3wLbszEjMq1Zf2vdlY5K7ianpvAnIWMDWy8mHSeyNo+S9UIr3xXDvor4QZRGeZeZ0Pnb3znyLsWqhS9ohN8tRYoSQlBHGrp5/70YCygaDqHtXXYQGOrpPCkTAn/Tesl2tKNtw0yD87YbLNuULI81zX1ApFLziZSkAzW5q85pVEoWbV3io3pKEA+AsmzZamG6TuUEoNv8/E695ozKllkF2GsEI1xbW+iphkTZQfDgYdi6AqXuI5AnS/guQJazIn0r3jeSubBOmNICNa8/3PHOu/MRdygYFOk8q3MqQzXhoOOBjtKuFGDxYmbZLCP79AH+U8/T5+80A/x32IwPZxDwBuLyUj9+RU5KkZXVJnKaZIfqWAS6twxE452IdB7ADgO2533bqjdbkwzNZce/QDROV093XYSE9BFbwuhL0PQsxb5gumdRDFYUG/HZr4gi3YIp5/stHY97dOpdsDgF2IlFUqOoHdgo=

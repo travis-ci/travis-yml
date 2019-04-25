@@ -1,0 +1,90 @@
+language: objective-c
+osx_image: xcode10.2
+cache:
+  directories:
+  - Carthage
+before_script:
+- security create-keychain -p travis ios-build.keychain
+- security default-keychain -s ios-build.keychain
+- security unlock-keychain -p travis ios-build.keychain
+- security set-keychain-settings -t 3600 -l ~/Library/Keychains/ios-build.keychain
+- openssl aes-256-cbc -k "$ENCRYPTION_SECRET" -in scripts/certs/dist.cer.enc -d -a -out scripts/certs/dist.cer
+- openssl aes-256-cbc -k "$ENCRYPTION_SECRET" -in scripts/certs/dist.p12.enc -d -a -out scripts/certs/dist.p12
+- security import ./scripts/certs/dist.cer -k ~/Library/Keychains/ios-build.keychain
+  -T /usr/bin/codesign
+- security import ./scripts/certs/dist.p12 -k ~/Library/Keychains/ios-build.keychain
+  -P $KEY_PASSWORD -T /usr/bin/codesign
+- "security set-key-partition-list -S apple-tool:,apple: -s -k travis ios-build.keychain"
+- date
+- brew update
+- brew install swiftlint || brew upgrade swiftlint
+- brew install tree || brew upgrade tree
+# - brew upgrade carthage
+- tree -L 2 -P '*.framework' -I '*.dSYM' Carthage/Build
+- carthage version
+- xcpretty --version
+- if [ ! -d $( md5 Cartfile.resolved | awk '{ print "Carthage/" $4 ".zip" }' ) ]; then
+    make travisci-cache;
+  fi
+- if [ ! -d "Carthage/Checkouts/CwlPreconditionTesting" ] || [ ! -d "Carthage/Checkouts/KeychainAccess" ] || [ ! -d "Carthage/Checkouts/KIF" ] || [ ! -d "Carthage/Checkouts/ObjectMapper" ] || [ ! -d "Carthage/Checkouts/PromiseKit" ] || [ ! -d "Carthage/Checkouts/realm-cocoa" ]; then
+    carthage checkout;
+  fi
+- if [ ! -d "Carthage/Build/$PLATFORM/Realm.framework" ] || [ ! -d "Carthage/Build/$PLATFORM/RealmSwift.framework" ]; then
+    carthage checkout realm-cocoa;
+  fi
+- if [ ! -d "Carthage/Build/$PLATFORM/Realm.framework" ] || [ ! -d "Carthage/Build/$PLATFORM/RealmSwift.framework" ]; then
+    cat Cartfile.resolved | grep "realm/realm-cocoa" | awk '{ versionV=$3; gsub("\"", "", versionV); version=versionV; gsub("v", "", version); system("wget https://github.com/realm/realm-cocoa/releases/download/" versionV "/realm-swift-" version ".zip") }';
+    cat Cartfile.resolved | grep "realm/realm-cocoa" | awk '{ gsub("\"", "", $3); gsub("v", "", $3); system("unzip realm-swift-" $3 ".zip") }';
+    rm -Rf Carthage/Build/$PLATFORM/Realm*;
+    cat Cartfile.resolved | grep "realm/realm-cocoa" | awk '{ gsub("\"", "", $3); gsub("v", "", $3); system("cp -R realm-swift-" $3 "/$PLATFORM_ALIAS/swift-4.0/*.framework Carthage/Build/$PLATFORM") }';
+  fi
+- if [ ! -d "Carthage/Build/$PLATFORM/Realm.framework" ] || [ ! -d "Carthage/Build/$PLATFORM/RealmSwift.framework" ]; then
+    travis_wait 30 carthage build --platform $PLATFORM realm-cocoa;
+  fi
+- if [ ! -d "Carthage/Build/$PLATFORM/KeychainAccess.framework" ]; then
+    carthage checkout KeychainAccess;
+  fi
+- if [ ! -d "Carthage/Build/$PLATFORM/KeychainAccess.framework" ]; then
+    carthage build --platform $PLATFORM KeychainAccess;
+  fi
+- if [ ! -d "Carthage/Build/$PLATFORM/PromiseKit.framework" ]; then
+    carthage build --platform $PLATFORM PromiseKit;
+  fi
+- if [ ! -d "Carthage/Build/$PLATFORM/ObjectMapper.framework" ]; then
+    carthage build --platform $PLATFORM ObjectMapper;
+  fi
+- if [ ! -d "Carthage/Build/$PLATFORM/PubNub.framework" ]; then
+    carthage build --platform $PLATFORM objective-c;
+  fi
+- if [ ! -d "Carthage/Build/$PLATFORM/KIF.framework" ]; then
+    carthage build --platform $PLATFORM KIF;
+  fi
+- if [ ! -d "Carthage/Build/$PLATFORM/Nimble.framework" ]; then
+    carthage build --platform $PLATFORM Nimble;
+  fi
+- if [ ! -d "Carthage/Build/$PLATFORM/Swifter.framework" ]; then
+    carthage build --platform $PLATFORM swifter;
+  fi
+- tree -L 2 -P '*.framework' -I '*.dSYM' Carthage/Build
+- date
+script:
+- set -o pipefail;
+  case $PLATFORM in
+  iOS)
+    travis_retry make test-ios | xcpretty;;
+  Mac)
+    travis_retry make test-macos | xcpretty;;
+  esac
+after_script:
+- date
+- security delete-keychain ios-build.keychain
+after_success:
+- bash <(curl -s https://codecov.io/bash) -J '^Kinvey$' -F $PLATFORM
+env:
+  global:
+    - secure: a8tGuJggBK0qyY9oOEp1Y0zeA0zTu8safu34t7RNE3IPRj116rIKf1e/y9FxYRKu5BWmc62K8KTM0mPwsPgef7fizleHqPEE6brUJ3hiysNh92gDLHjqHKq6XK3WuMCDTKmgtbdJQbIBGGfAq+xkLCrhDMkm++88p1vmNbR2k2flpvHIV8opnIBsny62pMmgt8prEtsAT5NCVelVSlyRkwiVqvWk+zR9+Wi4jRWr24cv7WBjKgGO/LcxYi/zQEaLK3Ya38TFX29Ky6thNySHpikqDOiAzUwk6byZ05z8GiQ+TJ4P1+nzpKj4ZFg75v0A1wGkssOznuzZeRjl2GOyfqSsdoFflem9mLF97W3h0jUmzI6X3rP050gYgnjklacT9yk36IfsHdr1d6VTsU1Tx/z4yg8fDXTdY5SFIGZ/GReBwmvyVpbaR3yGbyKkaVSRSU8ixW1zq7BGZGSnMj+doKT5231wf1Be8M5PBtorBh/arOynZPOhpxzAFsoRKL9GRSgxuQIzFOdE/u56PfxjDhTCzuJu0F0ynlR6fIX2PWdrhejfvDpWx/dJWr9x85BKL3rGO8JaXAXlbils+CoEY/Pyfs2UoAaV8TGJR12FJbyl70VZ1hq/qimbFJ6z8TF435LrAA1/VO7qkDLgIJeqPnVnmKiPP3qNHBCNZA1vgzY=
+    - secure: IW9jgSdH76Rgp4Hf45+7saqTYslau7K/KgnRtizVZnQwI31b/dMrimMuQj3m6R80ymetz1ZhLk5dX83g+Y5A4XAJjspk2vaAE3ZIZUo6mqdtkRxzxkomN5HZEzEAj8SdjQ4GZxLHX2skATP78SWKJrr7vBbfigPm/Pp8gt4AfKzmfVnBGiN8niU6q/qSUNq67j+F0J/bB2hhOQjIO4mbHRAPW+AygGV9/o+25k+fL4yXWpsDoKzMFTsWHp9H9NkevGFXwK7crGX/Bgo8QESOvVZT4JEnHapEKnT8tAkT3wUCNKiPp60lAo9r/eggASU2a8Oq03wSZMv1F88ORzBVKQfSlNHcV0XOylYL2JZqtzznPmTRx2biHncB8xSg/DBh4MtUKuuProsq+/KIy067pITYCudEqjqL7YjaLlDEUl+YiahOY4DJ391GaCkCklUbHv1TW3vdDpBSvjtC4Ny7anNqK5Mo/cwscPGBTgkQkFyzRf48WLf79wH1sonIVQXv5wKxJAAn08K48dUfhK7yuePjHKmXsKpSjJJbPPlcAEvOknGQnG9OQ6MWb2A/Wk01ki29CENRFbVZCWG2CcM8bPTLGxz07Dp6VH3nxQoQHgsH/J4j1hWfnL1DGacFrDzC/SFhB78v65FxheV5ZOEx+Es/eSRiPEdX8gdjZnqOb3Y=
+    - secure: nawAGSUbPzyAH/SllDj9q6IOLGaF91DQsudQYx4AJs+swwFhAvAe3hM6vWdGVuDLxqVHQ4+4AAQFecXq/mDi5WtRISPbGHWVtOx7Q6szL8Y54uZKVmKV06wnAo4nrwu8pp1+TbRLYwG+/oJIfabW2yuMgNn7nWFm5SdE0GuduVI7Ho9p0/SeaE7DCtaNKgyCLfspAA8svCYMK0N9NzBVhkTPzWRiIF174k5VE28lZox/fjN5x4j1aaMBUhElkJELjcWKdTX11MnCyybWjJZ1YTMK/A4vBtZCFmHIFuhtQiqWCQIWxeo8axRDBZEMzZ5U+9zSfaz0w0wovWI/cvtRFS0j/7UQ4o6alO7EOMdhH5rRl8atOxSS+Rl81Oz1kZiLhjJa/feAN5QGQ423L4CyfDeEBV6t1D8Cmb1jlficswFeX2rQw82qFnI2ua9p8HrpUJydDsGR6AoOI+KUamwi53OC+hsG/M1sA4MOAPEJoMGT6dyER5UVE63JB45All9TDJWV2EZz+11FQIp6P/62/QXJBQhqxu+W0u/3q7KqoSgmxFx/QSbv8hpK9aJWDQNf5cv02bT+vJnMv4Lrf+XcSVOWH0TwpL5nVcRJXyq2A6FCGdE2S0Xa0+KkgZdF7p3qk4jN32CryHImRp8T3qbkA6Q9nNdxATt7P9OjYl/XqDA=
+  matrix:
+    - PLATFORM=Mac PLATFORM_ALIAS=osx
+    - PLATFORM=iOS PLATFORM_ALIAS=ios

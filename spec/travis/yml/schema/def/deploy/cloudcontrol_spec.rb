@@ -32,10 +32,10 @@ describe Travis::Yml::Schema::Def::Deploy::Cloudcontrol, 'structure' do
                 '$ref': '#/definitions/deploy/edge'
               },
               email: {
-                '$ref': '#/definitions/secure'
+                '$ref': '#/definitions/type/secure'
               },
               password: {
-                '$ref': '#/definitions/secure'
+                '$ref': '#/definitions/type/secure'
               },
               deployment: {
                 type: :string

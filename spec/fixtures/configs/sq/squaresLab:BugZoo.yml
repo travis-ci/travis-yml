@@ -1,0 +1,39 @@
+language: python
+sudo: required
+services:
+- docker
+python:
+- '3.5'
+- '3.6'
+install:
+- pip install sphinx mypy==0.660 mypy-extensions
+- pip install --upgrade .
+script:
+- bugzoo -h
+- bugzoo tool -h
+- bugzoo source -h
+- bugzoo bug -h
+- bugzoo container -h
+- bugzoo tool list
+- bugzoo source list
+- bugzoo bug list
+- mypy bugzoo --ignore-missing-imports
+before_deploy:
+- "(cd docs && make html && cd _build/html && touch .nojekyll)"
+notifications:
+  email: false
+deploy:
+  - provider: pages
+    skip_cleanup: true
+    local_dir: docs/_build/html
+    github_token: "$GITHUB_TOKEN"
+    on:
+      branch: master
+      python: 3.5
+  - provider: pypi
+    user: ChrisTimperley
+    password:
+      secure: iuyp1g+gzCeSjWhpwc4Gna+dyaYB36O8Gieqe3XFH+bB5xj7b2Tv44mw1BA4Vbtc/cnyttwT3y3Ub5n50bKqmLBw9Fey9yfaehZDd+CCQmDsQoztSzqBLOX9SQejvXsqyXEHWbSZUB7Ixt6lcWRfSaOQtopBNfBN0jxpj/we0YCFARKXM9cZcbi04zUfe95ULPlbjn6bFcQ8HJmHQRjik7fTrE/XsioBuwwUPxyBUvygejDaItjh7Mcqdmqj+sG8KTB2jApJcx4W/CaLNedbyuJZ2rVKELJH+o0xKMpMm4ceS8CrVYgE7qQl/6vEnou/l2jnLkjqKlBMattz5kuteNdV+xQ6i2IznAW486Lbds+FVcnTQ13QW0hVAzERCxoloKZoyLChRZI6l8mSdqGvykQgc9XPK+igG30TeEIkWw4aGF2GgsdBbqBCJAWUzeW8NzUC4jdQW9iMIFbkI7zd6/VSZKmkTak4nhMU0rttY9wxJ1+o1TEYJfNCtvh7L7Nf1u7fM8fv3wtUG0hhBv1Z/NDU7LIWK0W4/bQt1MWRe4kmlJSh9geDsCT6Z08XEyVHt/N+1Owkm907xVCJF3AiP08Lb+ihsIiKQFtEYonZY7h5oj/+2zJOzb/r4zDHzH+lTfUHsFVlO5+TzWCdNXizWOQJnaeYNz7x2F8scy9T7uY=
+    on:
+      tags: true
+      python: 3.5

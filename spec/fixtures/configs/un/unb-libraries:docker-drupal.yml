@@ -1,0 +1,33 @@
+sudo: required
+services:
+  - docker
+
+env:
+  global:
+    - APP_WEBROOT=/app/html
+    - DOCKER_COMPOSE_VERSION=1.9.0
+    - DOCKER_DRUPAL_CONTAINER_NAME=docker.drupal.base
+    - DOCKER_IMAGE_NAME=unblibraries/drupal
+    - DOCKER_IMAGE_PARENT=unblibraries/nginx-php:alpine-php7
+    - DOCKER_IMAGE_TAG=alpine-nginx-php7-8.x-composer
+    - ENDPOINT_NAME=Nginx
+    - MYSQL_VERSION=5.6
+    - NGINX_PORT=80
+    - TEST_PERSISTENCE_TYPES=article
+
+before_install:
+  - git clone -b travis git://github.com/unb-libraries/docker-drupal-scripts.git travis/upstream
+  - travis/upstream/installDockerCompose.sh
+
+before_script:
+  - travis/upstream/pullUpstreamImages.sh
+
+script:
+  - travis/upstream/runCoreTests.sh
+
+after_success:
+  - travis/upstream/triggerDockerHubBuild.sh
+
+notifications:
+  slack:
+    secure: cQVNyyCZn5x2HHVuNdjbFYuxZ1Pxy4Wf7ZbYeNFnoAKTn7wVGb88Bwu+/T5s+rxLCGteCjx76kQN7UkyGDaQpp1MdZ33knxfAJldeSESDjba/zdYSJGlYKpxtSogUaL5WmobJXqNRaKxpdUgUNMC8rfitcA9t6Q713r3xHivvkZAXap/HjTCzvA6IrW6fRi8nqs0h8V4FdmvvqHCj81yHRSCIdxkJKGXiK1xBP1uZTGtQ5MuWtBXs023UzDHX3SRoj8mRIVq6+qaydUdSkZG7hpK7KOmP7R50WR2/Y6zwNg7e5R5JDzHGB8eQM0o4r4VyAkp7O0YlW6HqZXUk5wlAZo6m6yzOktjMKKH3QB1Cr6lokOxlSvLs1/P8dtEurO8kTfRK+1BxunK/0plTNRvAV9+RsGnWzWPR4mx3iehIOPdRn0y7vzagAEeMbGjItvXnSG9qy+VT1MiuxgLOI4UL74i6n4kwnGGawEEaKtZQApaRsGYDVW2MKplakaaus5AIEGB6yR+gxOq+czaDyQ5Ct+wOjOG0k7ocRNmjq9QD9wrqBd14B+Pm9vT1RRiPHgUOuTGX5cQkNLkuP8fr1PT+NS0ruUVK1DldN5qMFZuA6RuOYfFnSgIqOyT5wkVxW+jWxEi84h3Pnn13jwW/mGRDsqrah9D0oM2g+HptQoUsH8=

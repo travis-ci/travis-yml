@@ -1,0 +1,31 @@
+env:
+  global:
+    - CC_TEST_REPORTER_ID=700f2fcd496c787101a209677079f457b1998f52ccb67fdbad0874f94f1dd1e3
+    - COVERAGE=true
+addons:
+  postgresql: "9.4"
+  apt:
+    sources:
+      - google-chrome
+    packages:
+      - google-chrome-stable
+services:
+  - postgresql
+language: ruby
+rvm:
+  - 2.3.3
+cache: bundler
+before_script:
+  - cp config/database.yml.travis config/database.yml
+  - psql -c 'create database travis_ci_test;' -U postgres
+  - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+  - chmod +x ./cc-test-reporter
+  - ./cc-test-reporter before-build
+# remove this line and whitespace if you need a custom script
+script: bundle exec rake db:schema:load && bundle exec rspec spec
+bundler_args: --without development production doc
+after_script:
+  - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
+branches:
+  only:
+    - development

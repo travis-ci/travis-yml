@@ -1,0 +1,50 @@
+sudo: false
+language: ruby
+cache: bundler
+branches:
+  only:
+  - master
+  - /^v\d+\.\d+\.\d+$/
+services:
+  - postgresql
+  - elasticsearch
+  - redis-server
+before_install:
+  - gem install bundler
+before_script:
+  - sleep 10
+script:
+  - bundle exec rails db:create
+  - bundle exec rails db:schema:load
+  - bundle exec rake
+  - bundle exec codeclimate-test-reporter
+env:
+  global:
+  - NOKOGIRI_USE_SYSTEM_LIBRARIES=true
+  - RAILS_ENV=test
+after_success:
+  - wget -q -O - https://packages.cloudfoundry.org/debian/cli.cloudfoundry.org.key | sudo apt-key add -
+  - echo "deb http://packages.cloudfoundry.org/debian stable main" | sudo tee /etc/apt/sources.list.d/cloudfoundry-cli.list
+  - sudo apt-get update
+  - sudo apt-get install cf-cli
+deploy:
+  # To Staging
+  - provider: script
+    script: scripts/deploy.sh publish-data-beta-staging staging app
+    on:
+      repo: alphagov/datagovuk_publish
+  - provider: script
+    script: scripts/deploy.sh publish-data-beta-staging-worker staging worker
+    on:
+      repo: alphagov/datagovuk_publish
+  # To Production
+  - provider: script
+    script: scripts/deploy.sh publish-data-beta-production production app
+    on:
+      repo: alphagov/datagovuk_publish
+      tags: true
+  - provider: script
+    script: scripts/deploy.sh publish-data-beta-production-worker production worker
+    on:
+      repo: alphagov/datagovuk_publish
+      tags: true

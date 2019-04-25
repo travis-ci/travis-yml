@@ -1,0 +1,35 @@
+sudo: false
+cache:
+  yarn: true
+  directories:
+  - node_modules
+language: node_js
+node_js: lts/*
+env:
+  global:
+  - secure: NOEB9sQFF/yUHb62CYHShk+OEOv/4DbRay2RzWWd3SvxayP9sGQXdC5G2DI4acyTcXSdCykYEiuHh+M0sH/jdW8qZA8rMAReTXCHSC+RTBSPkA2gSPzw/fT+4HjLyTPwPNt2g5P1nKt4k9w2xaUrMCFWbE+ED7Mk9+Y4iasv9J/nFE2p0iccLRcee0tmvPB3vZDe/zkzK7IlQQxTt9K1VHsujRNueukAahlBCayx73PXJzKjom7lZ996tWlfFsfIQlP9Ab0PuI2aaPUIYULloB6YZ2/LvnA5uxuqdKUWA9odNUIAqBonlYq4DHoiRDOXCLMwFSL8UCSfLHhM/Hy3X0kZqV90HQb7E+JDMtw9eJYiOSIdPUDRUJtbgJaCwtGuUgxLdcfyUnVmqXmVGK0lOq04tv5+Q+ZZSYs+yp8hUOTMtZlJIeJ6zjaw/3gGT/pu9LSerw7jrqBqzUKYNCo8SZijSTqzMMq3wM2SS74X7k62gw0Wekrsv9TWfu9LdMzc9pPagFJBoK0XBsxkwBax7Ybw2887B4OY/xxtglxqi5lHl3VpMJwZN4p6gNpV1q8ryPBeoHG5KbAsr7LKxy5nyNZupph3E9A4FZesXObNef6oYCYcmBYc1q8DbqJUUr2BCVl2etG8c6MMbGqW/rFCa9XTQbXyMk3J+7iuAvsHeNk=
+stages:
+- test
+- name: deploy
+jobs:
+  include:
+  - stage: test
+    env: lint
+    script:
+    - yarn lint
+  - stage: test
+    env: Test
+    script:
+    - yarn test
+  - stage: deploy
+    env: gh-page
+    script:
+    - yarn build-storybook
+    deploy:
+      provider: pages
+      skip-cleanup: true
+      github-token: "$GITHUB_TOKEN"
+      keep-history: true
+      local-dir: storybook-static
+      on:
+        branch: master

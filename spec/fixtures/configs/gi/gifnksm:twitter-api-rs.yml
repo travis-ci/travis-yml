@@ -1,0 +1,39 @@
+language: rust
+sudo: required
+dist: trusty
+
+cache: cargo
+
+addons:
+  apt:
+    packages:
+      - libcurl4-openssl-dev
+      - libelf-dev
+      - libdw-dev
+      - binutils-dev
+      - libiberty-dev
+
+rust:
+  - nightly
+  - beta
+  - stable
+
+before_script:
+  - cargo install cargo-update || echo "cargo-update already installed"
+  - cargo install cargo-travis || echo "cargo-travis already installed"
+  - cargo install-update -a # update outdated cached binaries
+
+script:
+  - |
+      cargo build &&
+      cargo test &&
+      cargo bench &&
+      cargo doc
+
+after_success:
+  - cargo coveralls
+  - cargo doc-upload
+
+env:
+  global:
+    - secure: "N0VHBpQ8Co81/xVM+MQn2JZIFkJMNYf1nn+lwxUrfotesRQUAR6Wh3KHl/tgCdAFw+WvYk6kfxQ0ODFJd7iRdlZez2nujwxczXJj4pU+vqcFkJhlr1uBl2HrWeboGVv3M/60HWyERRz5nI5lGR5FP5qgPQTE/KRTnrPYADBgKNo="

@@ -1,0 +1,22 @@
+sudo: false
+dist: trusty
+language: node_js
+node_js:
+  - "7"
+  - "8"
+  - "9"
+  - "10"
+  - "11"
+install:
+  - npm install
+script: npm run lint && npm test
+before_deploy: npm run mark && npm run build
+deploy:
+  provider: npm
+  email: development@platforme.com
+  skip_cleanup: true
+  api_key:
+    secure: IzhxBaWpxhzTzN4nGYKGez3qjZWSpxE2wUMvFvsw0KdxeXHzE5/JP3nbUDEtKjtrzaY4IzTL07DqM8ahtlSZzTwOMukneZ7t2v7Qe3q1PJs5CuagVu/Rbn9DJpo3lGIMACYsJuu51/Uv3p6JiRzp3mcUiLuCJInldlFzTAdlFgde2qlGSQJxOpZYs/LLkGjciUDcZWMMnoONb+ZvDFtBHu7avN2LuV+1yhH0PcRtPLx+/pNMeSBzD1Bpd1/bEciJmEI6FrlpCS0ErGRse5ORtPOZRHaSFwFhhsDsTbf0CkKsx+fqH64JJVjeilNYJqdVobMeCrmOoXopdhOc9Pu/EJCoraWwWrLZxvzHp7X9/a6kTqZZaTr+OQDiPSmkfR9OtiwJazq2ammNQ5DuaOunnMC37HyjCLpJF77g70J+8qcQueAAuPeyUHoCzM0cJzGQa2y2izqB5Z6oKlOv80dXSUxhshx6jQbLyjcdtJGTPRCknGDYqqeA0UBqg5qfqbT4BWowUJVZUXlYZaRraALPiq8gmlpJKuPOL/m/mbt7dUoWHKG8Z8jdTFDGvStJuE7KDTIzXpvwFFt4NGbYPwUujg0VJLWJXzg7vWT5Qe4Qs0pm3+5QVMcR6rBEaaPfrUTar2LyRgkWQgzmpbsQp7E6b8Tyf3c0Yb2c/LAW3WNEk0c=
+  on:
+    tags: true
+    node_js: "7"

@@ -1,0 +1,25 @@
+language: ruby
+cache:
+  bundler: true
+  directories:
+    - dep_cache
+bundler_args: --without development debug
+sudo: false
+addons:
+  postgresql: "9.6"
+rvm:
+  - 2.4.1
+jdk:
+  - oraclejdk8
+env:
+  global:
+    - NOKOGIRI_USE_SYSTEM_LIBRARIES=true
+    - secure: "bNQVxqztj2HgN7VGvZ9T9w1764j3mKsgA3k666S+4ztR3WqS2O2Hk19Jz/7/76+qxy21MVOYk81roX6NF1+rIL1r/G16zHrEjgXHhscktojHDJgicHq2h/xNGdCcbX2eMkV81ih3+GfBZIT3mw2kN9Xsc8ItPMB0Zktcr/dBVIh1Et1N4oOJTD9adekl70m9WaGBtPo0WDyfTA0V5Cqeoppw9YWog1wgCAEaoBjQJGbL3XfQUGc2PwyZ5+/QniKocejVkK7OFVZnXoI367CkUkgYSqIfoP+hFHZumokjbJ7S7TzlJaG9LKHjISecw0H1RwgtqP8NAsiWpxQ4nQVShmD4QIDQyPvjkYBV1OgD3GRGq/IcNEhXo50uKaUammFB3bhY2/QMUkPletgA7j6DJaztV0BuI/3gALn0Km3K9/uZpQyrsLuirDvNYOKza5OyhHjPJj/VqCa+jssZOc+4CEXrNy12Uu/vcTwH7yW905SNrLUC9YC0pdPjJBaGKhNIkd6Fs1oARP6WYDe8fhCTkT3SrYHrCYZsPx97EoexL49G35MMKRZkGU6ebOjRr/krwLnNXXwzmv2KoFwA916hGOUJO50Dy3q1l3TfojiXMPxfxm03Uyne9vuUs4TfFu4aJt73wn/z4lLHrv36+OMil/L3HR4v54QUpzSutinCrQY="
+stages:
+  - niftany
+  - test
+jobs:
+  include:
+    - script: ./travis/test.sh
+    - stage: niftany
+      script: bundle exec niftany

@@ -1,0 +1,28 @@
+language: java
+jdk:
+- oraclejdk8
+rvm:
+- 2.3.1
+node_js:
+- v6.10.3
+before_install:
+- openssl aes-256-cbc -K $encrypted_6f0ad65dedff_key -iv $encrypted_6f0ad65dedff_iv
+  -in etc/secrets -out ../secrets.tar -d
+- "(cd ../ && tar xvf secrets.tar)"
+- chmod 600 ../deploy
+- eval `ssh-agent -s` && ssh-add ../deploy
+- cp etc/settings.xml $HOME/.m2/settings.xml
+install:
+- nvm install v6.10.3
+- nvm use v6.10.3
+- npm install -g yarn
+- yarn install
+- rvm install ruby-2.3.1
+- rvm use 2.3.1
+- gem install bundler
+- bundle install
+script: bundle exec buildr ci
+after_success:
+- bash <(curl -s https://codecov.io/bash)
+git:
+  depth: false

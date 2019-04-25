@@ -1,0 +1,29 @@
+# Use Ubuntu trusty 14.04 LTS instead of the obsolete Ubuntu precise 12.04 LTS
+sudo: required
+dist: trusty
+language: c
+env:
+  matrix:
+  - COMPILER=gcc TEST=integration
+  - COMPILER=clang TEST=integration
+  - COMPILER=gcc TEST=coverage
+  - COMPILER=gcc TEST=install
+  - COMPILER=gcc TEST=doc
+  - TEST=cppcheck
+script:
+- tools/travis/run-script.sh
+before_install:
+- tools/travis/before-install.sh
+install:
+- tools/travis/install.sh
+after_success:
+- tools/travis/success.sh
+notifications:
+  email:
+    on_success: never
+    on_failure: always
+  irc:
+    channels:
+      - "chat.freenode.net#denemo"
+    on_success: always
+    on_failure: always

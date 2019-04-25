@@ -1,0 +1,76 @@
+language: python
+os: linux
+sudo: false
+dist: trusty
+bundler_args: --retry 5
+node_js:
+  - "7"
+env:
+  global:
+    secure: dn0FPQ5IG4M/3kdwnyI78ElQ308Vc3QnKAvkWfwMFb8QxDqxQdnTo7AV1qTMtbLrDNkeEWIgi4nc7jmXNtvGTwOfhAULVh6606Qs5B+ezTdwzajbbFMI8SKQx/pnTojOMu8dx7V4lMoR/YWcojR0VC1IWVC62TGbSB1k5BDGgH0=
+before_install:
+- sudo apt-get install -y xserver-xorg-dev libxext-dev libxi-dev
+install:
+- git clone --quiet  https://github.com/MetaCell/geppetto-netpyne.git
+- cd geppetto-netpyne
+- if [ `git branch -a | egrep "remotes/origin/${TRAVIS_BRANCH}"` ]; then git checkout $TRAVIS_BRANCH ; else echo "Branch $TRAVIS_BRANCH does not exist for the dependent bundle, checking out development ..." && git checkout development; fi
+- cd ..
+- npm install --silent -g phantomjs
+- npm install --silent -g casperjs
+- npm install --silent -g slimerjs
+- npm install --silent -g gl
+python:
+  - "2.7"
+  - "3.5"
+edge: true
+notifications:
+  slack: metacell:5ALSeoP88DqIhORUJvxE56sq
+services:
+  - docker
+addons:
+  firefox: "58.0"
+  apt:
+    packages:
+    - mesa-utils
+    - xvfb
+    - libgl1-mesa-dri
+    - libglapi-mesa
+    - libosmesa6
+
+before_script:
+  - "export DISPLAY=:99.0"
+  - "sh -e /etc/init.d/xvfb start"
+  - export SLIMERJSLAUNCHER=/home/travis/firefox-58.0/firefox/firefox
+  - export LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu/
+    
+script:
+  - travis_retry docker build -t="netpyne-ui" --build-arg netpyneuiBranch=$TRAVIS_BRANCH -f="./Dockerfile_dev" .
+  - travis_retry docker run  -t -dit --name=netpyne-ui_container -h localhost -p 8888:8888 netpyne-ui:latest
+  - cd $TRAVIS_BUILD_DIR/ && ls
+  - cd geppetto-netpyne && ls
+  - cd tests
+  - bash utilities/netpyne-server-status.sh
+  - sleep 30
+  - http_status=$(curl -s -I $1 http://localhost:8888/geppetto | grep HTTP/1.1 | awk {'print $2'})
+  - echo "$http_status"
+  - while [ "$http_status" == "404" ]; do
+      echo "Restart run";
+      echo "Printing logs for debugging purposes";
+      docker stop $(docker ps -a -q);
+      docker rm $(docker ps -a -q);
+      docker run  -t -dit --name=netpyne-ui_container -h localhost -p 8888:8888 netpyne-ui:latest
+      bash utilities/netpyne-server-status.sh
+      sleep 30;
+      http_status=$(curl -s -I $1 http://localhost:8888/geppetto | grep HTTP/1.1 | awk {'print $2'})
+      echo "Done restarting";
+      echo "$http_status";
+    done;
+  - http_status=$(curl -s -I $1 http://localhost:28081 | grep HTTP/1.1 | awk {'print $2'})
+  - echo "$http_status";
+  - "curl -s -I $1 http://localhost:8888/geppetto | grep HTTP/1.1 | awk {'print $2'}"
+  - firefox --version
+  - travis_retry xvfb-run -a --server-args="-screen 0 1024x768x24"  casperjs test netpyne-tests.js --host=http://localhost:8888/ --engine=slimerjs
+  - python -c "import fcntl; fcntl.fcntl(1, fcntl.F_SETFL, 0)"
+  - docker logs -t netpyne-ui_container
+  - docker stop $(docker ps -a -q)
+  - docker rm $(docker ps -a -q)

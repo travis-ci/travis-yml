@@ -1,0 +1,141 @@
+# Travis CI - test workflow </doc/dev/ci.md>
+
+os: linux
+#dist: precise
+#dist: trusty
+dist:
+  - xenial
+
+addons:
+  apt:
+    packages:
+      - realpath
+      - tree
+      - uuid-runtime
+      - moreutils
+      - curl
+      - php-cli
+      - posh
+      - dash
+      - ruby-bundler
+#- php5-dom
+# not allowed:
+# - rhash
+# - pytz
+
+sudo: false
+
+services:
+- redis-server
+- memcached
+- couchdb
+- docker
+
+#language: shell
+language: python
+python: # TODO: keep all builds singular except at dedicated test matrix branch
+  - "2.7" # 2.7.14 [2018-12-07]
+  # FIXME: python3 fix (jsotk at least) on other branch
+  #- "3" 'Forbidden'
+  #- "3.6"
+  #- "nightly" # 3.7.0a4+ [2018-12-07]
+
+env:
+  matrix:
+    - TEST_ENV=testing TEST_SHELL=sh
+  global:
+    - ENV_NAME=testing
+    - TEST_ENV=travis
+    - ENV_D=test:travis
+    - CS=dark
+    - sudo=
+    - UCONFDIR=$HOME/etc
+    - PATH=$PATH:$PWD:$PWD/vendor/bin:$HOME/.basher/bin:$HOME/.basher/cellar/bin:$HOME/usr/bin:$HOME/.local/bin/:/usr/local/bin
+    - TEST_RESULTS=shippable/testresults/test
+    - Build_Deps_Default_Paths=1
+    - BATS_REPO=https://github.com/bvberkum/bats-core.git
+    - PYTHONPATH=$PYTHONPATH:/home/travis/.local/lib/python2.7/site-packages:$HOME/bin:$HOME/lib/py
+    - COUCH_DB=test
+    - TMPDIR=/tmp
+    - U_S=$HOME/build/bvberkum/user-scripts
+    # GITHUB_TOKEN
+    - secure: "KcpgIZINqays/BZkCYcQTiI3/ACWhRJbLWYD2tHE7GLSTyyBc1nQQWFx3oEZMJcfwUWtHioLx7c7gzO7+UYoOtc3+XfnuTt1g7Fid3xnXE9F5qCTVrIYSuFFT50iDYj2Gp12mRoMwauhvFFRDS3bM/KT/6GOYq9dPdoviDgPtzg="
+
+
+before_install:
+  - . ./tools/ci/before-install.sh
+
+install:
+  - . ./tools/ci/install.sh
+
+before_script:
+  - . ./tools/ci/before.sh
+
+script:
+  - . ./tools/ci/script.sh
+
+before_cache:
+  - . ./tools/ci/before-cache.sh
+
+cache:
+  directories:
+     - .htd
+     - .redo
+     - ./node_modules
+     - ./vendor
+     - $HOME/.local
+     - $HOME/.basher
+     - $HOME/.cache/pip
+     - $HOME/virtualenv
+     - $HOME/.npm
+     - $HOME/.composer
+     - $HOME/.rvm/
+     - $HOME/.statusdir/
+     - $HOME/lib
+     - $HOME/build/apenwarr
+     - $HOME/build/ztombol
+    # NOTE: careful not to include repo-under-test
+     - $HOME/build/bvberkum/user-scripts-incubator
+     - $HOME/build/bvberkum/user-scripts
+     - $HOME/build/user-tools/user-scripts
+     - $HOME/build/user-tools/user-conf
+     - $HOME/build/bvberkum/user-conf
+     - $HOME/build/bvberkum/docopt-mpe
+     - $HOME/build/bvberkum/git-versioning
+     - $HOME/build/bats-core/bats-core
+     #- $HOME/build/bvberkum/bats-...
+
+
+after_failure:
+  - . ./tools/ci/after-failure.sh
+after_success:
+  - . ./tools/ci/after-success.sh
+after_script:
+  - . ./tools/ci/after.sh
+
+
+#matrix:
+#  include: []
+#  exclude: []
+
+branches:
+  only:
+    - master
+    # Because shippable does not handle the patterns correctly
+    - test
+    - dev
+    - '/^features\/.*$/'
+    - '/^test.*$/'
+    - '/^dev.*$/'
+    - '/^[0-9]*\.[0-9]*\.[0-9]*/'
+
+#deploy:
+#  provider: releases
+#  api_key: $GH_ACCESS_TOKEN
+#  file: script-mpe-$TRAVIS_TAG.tar
+#  on:
+#    repo: dotmpe/script.mpe
+#    tags: true
+#    condition: $ENV = production
+
+# Id: script-mpe/0.0.4-dev .travis.yml

@@ -1,0 +1,54 @@
+language: php
+dist: trusty
+sudo: false
+
+php:
+    - 5.4
+    - 5.5
+    - 5.6
+    - 7.0
+    - 7.1
+    - 7.2
+
+env:
+    - WP_VERSION=latest WP_MULTISITE=0
+    - WP_VERSION=latest WP_MULTISITE=1
+    - WP_VERSION=4.8.3 WP_MULTISITE=0
+    - WP_VERSION=4.7.7 WP_MULTISITE=0
+    - WP_VERSION=4.6.8 WP_MULTISITE=0
+    - WP_VERSION=4.5.11 WP_MULTISITE=0
+
+matrix:
+  include:
+    - php: 7.2
+      env: WP_VERSION=trunk
+
+before_script:
+  - |
+    # Install the specified version of PHPUnit depending on the PHP version:
+    if [[ "$WP_TRAVISCI" == "travis:phpunit" ]]; then
+      case "$TRAVIS_PHP_VERSION" in
+        7.2|7.1|7.0|nightly)
+          echo "Using PHPUnit 6.x"
+          composer global require "phpunit/phpunit:^6"
+          ;;
+        5.6|5.5|5.4)
+          echo "Using PHPUnit 4.x"
+          composer global require "phpunit/phpunit:^4"
+          ;;
+        *)
+          echo "No PHPUnit version handling for PHP version $TRAVIS_PHP_VERSION"
+          exit 1
+          ;;
+      esac
+    fi
+  - bash bin/install-wp-tests.sh wordpress_test root '' localhost $WP_VERSION
+  - export PATH="$HOME/.composer/vendor/bin:$PATH"
+  - |
+    if [[ ${TRAVIS_PHP_VERSION:0:2} == "7." ]]; then
+      composer global require "phpunit/phpunit=5.7.*"
+    else
+      composer global require "phpunit/phpunit=4.8.*"
+    fi
+
+script: phpunit

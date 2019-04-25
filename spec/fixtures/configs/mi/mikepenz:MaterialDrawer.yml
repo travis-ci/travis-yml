@@ -1,0 +1,26 @@
+language: android
+android:
+  components:
+    - tools
+    - platform-tools
+    - build-tools-28.0.3
+    - android-28
+before_install:
+    - yes | sdkmanager "platforms;android-28"
+    - yes | sdkmanager "build-tools;28.0.3"
+jdk:
+    - oraclejdk8
+script:
+    - ./gradlew clean build
+branches:
+  except:
+    - gh-pages
+notifications:
+  email: false
+before_cache:
+    - rm -f $HOME/.gradle/caches/modules-2/modules-2.lock
+cache:
+  directories:
+    - $HOME/.m2
+    - $HOME/.gradle/caches/
+    - $HOME/.gradle/wrapper/

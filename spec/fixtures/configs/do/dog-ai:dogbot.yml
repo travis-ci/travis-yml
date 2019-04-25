@@ -1,0 +1,33 @@
+language: node_js
+node_js:
+  - 8.9.0
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - g++-4.8
+      - libasound2-dev
+env:
+  - CXX=g++-4.8
+cache:
+  directories:
+    - node_modules
+notifications:
+  email: false
+  slack:
+    rooms:
+      - secure: aBSLceSDtTG9mcNahHsv60ptf8QKccXLK5wzQROw6BujEZyP6c8Ybn57bZiYzamQX3qoyWdHIgfq6LsP4j1R0ULO9UF5HBVjy9pt2x4lQbepp6fkrrlBe8jCvl1fCiYc1Z2th5qB8LGqiRPAGayu34sz8QM0d0rwMGmF+mQjPo+jatYHRAZeycF04zvhjkXLEXSRjx7S1dzPYgJLDNUcNDrV+Qrex86LjJKwLQgVCFxm1Q48TyY6c2y43dTsd/GOFmZ2i2Vct4WTtbUpsRicJcHORyy1UGx0pVUCH52Z4kJrX4OiMTp1mCVaippUn8VycuNwyNFR57bCvbisi6/PctLUX6oveJnm2WO9kVlGP6UeOo2l3MYO+VjM+0LH8Z0XDSZNNwVJ7qnO/MAZDDMYQZfLQUvx5KNjfPFaVSJRHaKU7qtBn2OfTPX6uO259I44jhIpIC9zECX32USNz3+s/nLW7ZTiK4sD2TR+U+xyhpRm/pFY2mNBC8BJCTVTabPYlOTkIgSXsFXirmBPlufMNrkrmRRxMtby3B1Ur0K19yIB3SpsmNcOcZ29quRVmaktiSCtcpOA2B/pwyoDy/GETi5382CZUu2dAQj6IdQIhEEcrnNn4iADGXpyWom7oFR6TgCwy0Pd9RZ+XBhO03XkrjwbnEMdB/eisKkaufj+16w=
+    on_success: never
+    on_failure: always
+    on_pull_requests: false
+before_install:
+  - npm install -g greenkeeper-lockfile@1
+before_script:
+  - npm prune
+  - greenkeeper-lockfile-update
+after_success:
+  - npm run coveralls
+  - npm run semantic-release
+after_script:
+  - greenkeeper-lockfile-upload

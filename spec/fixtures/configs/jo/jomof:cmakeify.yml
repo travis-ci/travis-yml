@@ -1,0 +1,30 @@
+addons:
+  apt:
+    packages:
+    - g++-4.8
+    - clang-3.6
+    sources:
+    - ubuntu-toolchain-r-test
+    - llvm-toolchain-precise-3.6
+language: java
+matrix:
+  include:
+  - env: TARGET_OS=android_and_linux
+    script:
+    - "./gradlew assemble check"
+    - pushd smoke-test && ../cdep wrapper && popd
+    - "./travis_cmakeify -wf smoke-test --group-id com.github.jomof --artifact-id
+      cmakeify/component --target-version ${TRAVIS_TAG:-0.0.0}"
+deploy:
+  provider: releases
+  api_key:
+    secure: tUnDuCSmRwi/mDYY30gBw/DUcFUczDIZ8vfNlee0ioMar0yFljaQ+wC0YbdunKukONgvR2Vmx3mlahSTjjgQ3SYWdM+9/e8XWzzfJyzW7h/ztSogWrCRP9Flet064fq1HuDPf7awlmPATTjTLCKUB/Vl7XHaz0Q4zj9XiCHt33av3MqCNNbQs41aSk89H5Tq48gSp9j3Edhhxl+JWWlGU/cntplI2ng3+sCpv6SJ+btdbSh90/4yLaFjP8w50vijfD9Ivc9BSWxpTbigPuB/JMn+2YEOfcOUvHvP0KNRB1hmPW0L4yFKApuhF93jrV943tMF6B6r0Oind2YzPMkuvQZzlmTvHxJE8Xh2jiyt5BdR2+ugxRZsUag7ctR3ywN1QLN4Oq68f1RfoW9foPAnTrARrvkY1vTyaQLiJvqJZQPamLlcDjj+HRAGBLtrTQ6NEKcEN2g0EWwxV5m5bAtxgNBgcQO+UuPjiiepz1zFFixGwkDlaXcuMWUG54m9TYpwWqEOpE0pov6RISGz3QKCtkhugnKLFeR6xLURgDpx+UexTby6mJf2+8eiHxW3c547mrbyilCc/Wlp48gtdl1yiXQb89ItNYBPW4R+6KC/vJa46qguLyx1JQvXkCx/Db9DyemO8blerR2Lk9pjpk37uptMzLVIKH2y2T+NVWbPwCs=
+  file: 
+    - build/libs/cmakeify-${TRAVIS_TAG}.jar
+    - build/libs/cmakeify-${TRAVIS_TAG}-sources.jar
+    - build/libs/cmakeify-${TRAVIS_TAG}-javadoc.jar
+  provider: releases
+  skip_cleanup: true
+  true: 
+    tags: true
+

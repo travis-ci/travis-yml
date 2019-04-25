@@ -1,0 +1,116 @@
+sudo: required
+dist: trusty
+language: cpp
+
+jdk:
+  - oraclejdk8
+
+cache:
+  directories:
+    - cache
+
+env:
+  global:
+   # The next declaration is the encrypted COVERITY_SCAN_TOKEN, created
+   #   via the "travis encrypt" command using the project repo's public key
+   - secure: "Ncn6/msd5oa9PiMYS5y3bpqbcqnB9Wwr7UIEtDS6fd1X01sk7aWF267kMNq8ijosJtk1P4vjKmZomfhTyQgILV6UkNkSDae5NOc39XM9yoysxc6LHTnF8/E5wXgbV1oDJR9kenrBzX49ZRJxwYa9WgXsGz4AiDyUB9eMy48eomnyNXG/SkZBbPmxaI0zSCACWH0VMHwvxHOHnaXHMOuQDVN+oxP4gEdQ/Cz2P0QJl1TvE5hpYB9fW/yItcdgL7sVkiFXbkZh5l3s52fGEN339e9CEEEEqnEUmFAzq0nsZNKZqh+ivh4Ga2qJa+btLGkEYyNQyKpOjy21Wx8UKY6uT5ZVxdSK943dbn0+v2nr0K++Hu2mRoq3btMfza5PZGQrK/XdOgathqxMoqSlKKXNo5qQoHfyjRLUscaZPsF/kWfnUoRGA90Eg6RLq59gsKkQjSJ0cWJ6Czt2txJZvmAZn51thBMJ3QW88+taDXkSVXsXkrdPjGPrwUt+okhvXJK5+PeSa+Fb4CJUiijOAg9Sew+WDJdsP9d0gVtEncXiVdAgdUFZ9wbyKCrjPisKxZWzzMDr+7tT3MQmg8FagPMkm5PW9Q+Ewof2VLjxffX+PhHcWvUrVqe8KBEVuJNs4SYG0ETsvp0+y8tyh5o+zAmc8fKsuYmEDNJ727rjrTfA56A="
+
+addons:
+  # This doesn't actually work because of the matrix.
+  mariadb: '10.1'
+
+matrix:
+  include:
+    - compiler: clang
+      env:
+        - COMPILER_CC=clang
+        - COMPILER_CXX=clang++
+        - CMAKE_GENERATOR='Unix Makefiles'
+    - compiler: clang
+      env:
+        - COMPILER_CC=clang
+        - COMPILER_CXX=clang++
+        - CMAKE_GENERATOR=Ninja
+    - compiler: gcc
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-5
+        coverity_scan:
+          project:
+            name: "comphack/comp_hack"
+            description: "Build submitted via Travis CI"
+          notification_email: compomega@tutanota.com
+          build_command_prepend: "mkdir -p build && cd build && cmake -DCOVERALLS=$COVERALLS_ENABLE -DUSE_PREBUILT_LIBCOMP=ON -DBUILD_OPTIMIZED=OFF -DSINGLE_SOURCE_PACKETS=ON -DSINGLE_OBJGEN=ON -DUSE_COTIRE=ON .. && cov-configure --comptype gcc --compiler gcc-5 --template"
+          build_command: "cmake --build ."
+          branch_pattern: coverity_scan
+      env:
+        - COMPILER_CC=gcc-5
+        - COMPILER_CXX=g++-5
+        - CMAKE_GENERATOR='Unix Makefiles'
+
+before_install:
+  - export ROOT_DIR=`pwd`
+  - export CACHE_DIR=`pwd`/cache
+  - export COVERALLS_ENABLE=OFF
+  - export COVERALLS_SERVICE_NAME=travis-ci
+  - cd ${CACHE_DIR}
+  - if [ ! -f ninja-linux.zip ]; then wget https://github.com/ninja-build/ninja/releases/download/v1.7.1/ninja-linux.zip; fi
+  - if [ ! -f cmake-3.6.1-Linux-x86_64.tar.gz ]; then wget -q https://cmake.org/files/v3.6/cmake-3.6.1-Linux-x86_64.tar.gz; fi
+  - if [ ! -f clang+llvm-3.8.0-x86_64-linux-gnu-ubuntu-14.04.tar.xz ]; then wget -q http://llvm.org/releases/3.8.0/clang+llvm-3.8.0-x86_64-linux-gnu-ubuntu-14.04.tar.xz; fi
+  - if [ ! -f external-0.1.1-clang.tar.bz2 ]; then wget -q https://github.com/comphack/external/releases/download/external-25/external-0.1.1-clang.tar.bz2; fi
+  - if [ ! -f external-0.1.1-gcc5.tar.bz2 ]; then wget -q https://github.com/comphack/external/releases/download/external-25/external-0.1.1-gcc5.tar.bz2; fi
+  - rm -f libcomp-*-clang.tar.bz2
+  - wget -q https://github.com/comphack/libcomp/releases/download/v4.1.0/libcomp-4.1.0-clang.tar.bz2
+  - rm -f libcomp-*-gcc5.tar.bz2
+  - wget -q https://github.com/comphack/libcomp/releases/download/v4.1.0/libcomp-4.1.0-gcc5.tar.bz2
+  - ls -lh
+  - cd ${ROOT_DIR}
+  - sudo apt-get update -q
+  - sudo apt-get install libssl-dev docbook-xsl doxygen texlive-font-utils xmlto libsqlite3-dev sqlite3 libuv-dev libqt5webkit5-dev unzip ruby ruby-rspec-core ruby-mechanize ruby-json -y
+  - sudo mkdir -p /opt/ninja/bin
+  - cd /opt/ninja/bin
+  - sudo unzip $CACHE_DIR/ninja-linux.zip
+  - sudo chmod 755 ninja
+  - sudo mkdir -p /var/log/comp_hack
+  - sudo chown `whoami`:`whoami` /var/log/comp_hack
+  - export PATH="/opt/ninja/bin:${PATH}"
+  - cd /opt
+  - sudo tar xf $CACHE_DIR/cmake-3.6.1-Linux-x86_64.tar.gz
+  - export PATH="/opt/cmake-3.6.1-Linux-x86_64/bin:${PATH}"
+  - export LD_LIBRARY_PATH="/opt/cmake-3.6.1-Linux-x86_64/lib"
+  - cd ${ROOT_DIR}
+  - if [ "$CXX" == "clang++" ]; then tar xf $CACHE_DIR/external-0.1.1-clang.tar.bz2; fi
+  - if [ "$CXX" != "clang++" ]; then tar xf $CACHE_DIR/external-0.1.1-gcc5.tar.bz2; fi
+  - mv external-* binaries
+  - if [ "$CXX" == "clang++" ]; then tar xf $CACHE_DIR/libcomp-*-clang.tar.bz2; fi
+  - if [ "$CXX" != "clang++" ]; then tar xf $CACHE_DIR/libcomp-*-gcc5.tar.bz2; fi
+  - mv libcomp-* deps/libcomp
+  - chmod +x binaries/ttvfs/bin/ttvfs_gen
+  - if [ "$CXX" != "clang++" ]; then export COVERALLS_ENABLE=ON; fi
+  - if [ "$CXX" == "clang++" ]; then cd /opt; fi
+  - if [ "$CXX" == "clang++" ]; then sudo tar xf $CACHE_DIR/clang+llvm-3.8.0-x86_64-linux-gnu-ubuntu-14.04.tar.xz; fi
+  - if [ "$CXX" == "clang++" ]; then export PATH="/opt/clang+llvm-3.8.0-x86_64-linux-gnu-ubuntu-14.04/bin:${PATH}"; fi
+  - if [ "$CXX" == "clang++" ]; then export LD_LIBRARY_PATH="/opt/clang+llvm-3.8.0-x86_64-linux-gnu-ubuntu-14.04/lib:${LD_LIBRARY_PATH}"; fi
+  - if [ "$CXX" == "clang++" ]; then cd ${ROOT_DIR}; fi
+  - if [ "$CXX" == "clang++" ]; then export SINGLE_OBJGEN=ON; fi
+  - if [ "$CXX" != "clang++" ]; then export SINGLE_OBJGEN=OFF; fi
+  - export CC="${COMPILER_CC}"
+  - export CXX="${COMPILER_CXX}"
+  - export GENERATOR="${CMAKE_GENERATOR}"
+  - export CTEST_OUTPUT_ON_FAILURE=1
+
+before_script:
+  - mysql -u root < contrib/testing/MariaDBTestSetup.sql
+  - rm -rf ~/.rvm* ~/.gem* # Do this to prevent issues with rspec.
+
+script:
+  - if [ "${COVERITY_SCAN_BRANCH}" != 1 ]; then jdk_switcher use oraclejdk8 ; fi
+  - if [ "${COVERITY_SCAN_BRANCH}" != 1 ]; then java -version ; fi
+  - if [ "${COVERITY_SCAN_BRANCH}" != 1 ]; then mkdir -p build && cd build && cmake -DCOVERALLS=$COVERALLS_ENABLE -DUSE_PREBUILT_LIBCOMP=ON -DBUILD_OPTIMIZED=OFF -DSINGLE_SOURCE_PACKETS=ON -DSINGLE_OBJGEN=${SINGLE_OBJGEN} -DUSE_COTIRE=ON -G "${GENERATOR}" .. && cmake --build . --target git-version && cmake --build . ; fi
+  - if [ "${COVERITY_SCAN_BRANCH}" != 1 ]; then cmake --build . --target doc ; fi
+  - if [ "${COVERITY_SCAN_BRANCH}" != 1 ]; then cmake --build . --target guide ; fi
+#  - if [ "${COVERITY_SCAN_BRANCH}" != 1 ]; then cmake --build . --target test ; fi
+#  - if [ "${COVERITY_SCAN_BRANCH}" != 1 ]; then if [ "$CXX" != "clang++" ]; then cmake --build . --target coveralls; fi ; fi

@@ -11,7 +11,7 @@ describe Travis::Yml::Schema::Def::NodeJs, 'structure' do
         type: :object,
         properties: {
           node_js: {
-            '$ref': '#/definitions/strs'
+            '$ref': '#/definitions/type/strs'
           },
           npm_args: {
             type: :string

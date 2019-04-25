@@ -1,0 +1,60 @@
+---
+language: node_js
+node_js: 10.7
+
+env:
+  global:
+    - PERCY_ENABLE=0
+
+matrix:
+  include:
+    - if: type = cron
+      node_js: 10.7
+      env: TRY_CONFIG=ember-beta
+    - if: type = cron
+      node_js: 10.7
+      env: TRY_CONFIG=ember-data-beta
+    - node_js: 10.7
+  allow_failures:
+    - env: TRY_CONFIG=ember-beta
+    - env: TRY_CONFIG=ember-data-beta
+
+sudo: required
+dist: trusty
+
+addons:
+  chrome: stable
+
+cache:
+  directories:
+    - node_modules
+
+env:
+  global:
+    # See https://git.io/vdao3 for details.
+    - JOBS=1
+
+before_install:
+  - npm config set spin false
+  - npm install -g npm@6
+  - npm --version
+  - npm install -g greenkeeper-lockfile@1
+
+install:
+  - npm install
+
+before_script:
+  - if [ $TRAVIS_PULL_REQUEST = 'false' ] && [ $TRAVIS_EVENT_TYPE != 'cron' ]; then echo "Enabling Percy on push with default Ember" && export PERCY_ENABLE=1; else export PERCY_ENABLE=0; fi
+  - echo $PERCY_ENABLE
+  - if [ "$PERCY_ENABLE" -ne 1 ]; then export RANDOMISE=--random; fi
+  - echo $RANDOMISE
+  - greenkeeper-lockfile-update
+
+script:
+  - if [ -z "$TRY_CONFIG" ]; then npm run lint:js; fi
+  - if [ -z "$TRY_CONFIG" ]; then ember exam --reporter dot $RANDOMISE; fi
+  - if [[ ! -z "$TRY_CONFIG" ]]; then ember try:one $TRY_CONFIG --skip-cleanup; fi
+
+after_script:
+  - greenkeeper-lockfile-upload
+  - "test $TRAVIS_PULL_REQUEST && test $TRAVIS_PULL_REQUEST != 'false' && $TRAVIS_SECURE_ENV_VARS == 'true' && ./config/deployment/deploy-pull-request.sh"

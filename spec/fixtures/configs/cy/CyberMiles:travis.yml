@@ -1,0 +1,82 @@
+language: go
+
+services:
+  - docker
+
+addons:
+  hosts:
+    - node-1
+    - node-2
+    - node-3
+    - node-4
+    - node-5
+    - node-6
+
+before_install:
+  - echo Checking whether $TRAVIS_COMMIT_RANGE changed only docs
+  - |
+    if [ -z "$TRAVIS_TAG" ]; then
+      git diff --name-only $TRAVIS_COMMIT_RANGE | grep -qvE '(\.md$|^(docs)/)' || {
+        echo "Only docs were updated, stopping build process."
+        exit
+      }
+    fi
+
+install:
+  - ". $HOME/.nvm/nvm.sh"
+  - nvm install stable
+  - nvm use stable
+  - npm install
+
+script:
+  - make docker_image
+  - |
+    if [[ "$TRAVIS_PULL_REQUEST" = "false" ]]; then
+      docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD ;
+      TAG=$TRAVIS_BRANCH make push_tag_image ;
+    fi
+  - |
+    if [ -z "$TRAVIS_TAG" ]; then
+      ./test/integration/test.sh
+    fi
+
+after_success:
+  - if [[ "$TRAVIS_BRANCH" = "master" ]]; then
+    make push_image ;
+    fi
+
+after_failure:
+  - curl -i "http://localhost:26657/dump_consensus_state"
+  - >
+    curl -X POST http://localhost:8545
+    -H 'Content-Type: application/json'
+    -d '{"jsonrpc":"2.0","id":1,"method":"cmt_queryValidators", "params": [0]}'
+  - cd ~/volumes/testnet/travis/scripts && docker-compose logs -t --tail 50
+
+before_deploy:
+  - BUILD_TAG=$TRAVIS_TAG make dist
+  - |
+    if [[ "$TRAVIS_TAG" =~ ^v[0-9]+.[0-9]+.[0-9]+ ]]; then
+      export BODY=https://github.com/CyberMiles/travis/blob/develop/CHANGELOG.md#${TRAVIS_TAG//.}
+      export PRE=false
+    elif [[ "$TRAVIS_TAG" =~ ^v ]]; then
+      export BODY="release for ${TRAVIS_TAG:1}"
+      export PRE=true
+    else
+      export BODY="release for ${TRAVIS_TAG}"
+      export PRE=true
+    fi
+
+deploy:
+  provider: releases
+  overwrite: true
+  api-key: $GITHUB_TOKEN
+  skip_cleanup: true
+  file_glob: true
+  file: "build/dist/*"
+  name: Travis $TRAVIS_TAG
+  body: $BODY
+  prerelease: $PRE
+  on:
+    repo: CyberMiles/travis
+    tags: true

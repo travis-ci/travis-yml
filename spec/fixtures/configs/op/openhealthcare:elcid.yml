@@ -1,0 +1,22 @@
+language: python
+python:
+  - "2.7"
+install:
+  - pip install -r requirements.txt
+  - pip install coveralls
+  - gem install coveralls-lcov
+  - npm install karma karma-coverage jasmine-core karma-jasmine karma-firefox-launcher karma-coveralls
+before_script:
+  - export DISPLAY=:99.0
+  - sh -e /etc/init.d/xvfb start
+script:
+  - opal test --coverage
+after_success:
+  - find coverage
+  - coveralls-lcov -v -n coverage/Firefox\ 56.0.0\ \(Linux\ 0.0.0\)/lcov.info > coverage/coverage.json
+  - cat coverage/coverage.json
+  - coveralls debug --merge=coverage/coverage.json
+  - coveralls --merge=coverage/coverage.json
+notifications:
+  slack: ohcuk:6spaME3CB7f2PGrMAcklYWqp
+sudo: false

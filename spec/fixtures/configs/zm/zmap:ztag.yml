@@ -1,0 +1,18 @@
+sudo: required
+dist: trusty
+language: python
+
+python:
+  - "2.7"
+
+install:
+  - pip install -r dev-requirements.txt
+  - pip install zschema==0.10.1
+
+script:
+  - nosetests ztag
+  - ztag -t
+  # Travis fails if output is longer than 4MB, so without piping these, it fails.
+  - zschema json ztag/schema.py:ipv4host > ipv4host.tmp
+  - zschema json ztag/schema.py:website > website.tmp
+

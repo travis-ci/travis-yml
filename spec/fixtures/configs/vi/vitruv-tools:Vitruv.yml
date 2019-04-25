@@ -1,0 +1,32 @@
+language: java
+jdk:
+  - oraclejdk8
+env:  
+  global:  
+    - DISPLAY=:99.0  
+cache:  
+  directories:  
+   - $HOME/.m2  
+
+notifications:
+  email:
+    recipients:
+      - vitruv-build@ira.uni-karlsruhe.de
+  slack:
+    secure: d7B/dlifgaHvko77N86XYyqpo2KEBV2MYKMySoWuIa9q3A7kIucPiaQoIJRIc+wgMPgMSh7RvtCQsESPA4/pPZ1YwxNEUw5lnY3pzw8XFb/NYdWL0tCwE8vLBhqa7js3g1riXMn3UdLSSBFKuyIB8oxs2q4/VmE72EKZ5W2avTHvFtyAKJDX2AtT9zVY8AhJ+TIu4gobceJnO3oBALQ1gvZdSSusUrV/AWjmD2g4OI85hy5eMVd81T/2H4fe7MrbmIY8ux2XASpimw7gYFJnnPRVbbgqvOUKTG74h8b2Ro29htVqoCr67VTv1ttv8jZG5I/DpVkY/w6Xnok0juwDXNmCD/g6QjU2moqr4B44lMg5qM73QjBhL2nbJjrvpm+R00AIoFA9HZHDzUkIm1F3is5miIaY/iFnXNvNpc7eytQ3Nk5Dev1YMN9kabrcUKwf7VO4AyDKu1ZcqE1vJSw+2SGA9s0Tb/yd9EI/xshn8rALzVije3zLQQdRKvfw4nXyi9v5KpvQUP44a/NjGNoARcwohsGkdFszpnRKHJ62VgL+BHCsJMXHBvturyrL95kACocL9JLLCHMxEk/2kwmPODRlBbTocb1diuJc+B9/VsEGMVOe4KsvgD5JeGSEW6en8a7A8GIHACTsb9bdoeEBDKGiNdy30Mj6vTNOeDhx2tE=
+
+# Handle git submodules yourself
+git:
+    submodules: false
+
+# Enable UI
+before_install:
+    - sh -e /etc/init.d/xvfb start - sleep 10
+    - git clone --depth 1 https://github.com/kit-sdq/BuildUtilities.git /tmp/BuildUtilities
+    - "echo \"export MAVEN_OPTS='-Dmaven.repo.local=$HOME/.m2/repository -Xmx2g'\" > ~/.mavenrc"
+install: true
+
+script: mvn clean verify
+
+after_success:
+- . /tmp/BuildUtilities/travis-ci/deploy.sh framework releng/tools.vitruv.updatesite.aggregated final vitruv-tools updatesite

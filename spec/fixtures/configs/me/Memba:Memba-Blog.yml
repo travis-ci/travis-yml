@@ -1,0 +1,25 @@
+# sudo: false - uncomment when Travis is fixed - https://github.com/kidoju/Kidoju-Widgets/issues/251
+sudo: required
+dist: trusty
+language: node_js
+node_js:
+  - "11"
+  - "10"
+  - "9"
+  - "8"
+env:
+  - NODE_ENV=test CC=gcc-6 CXX=g++-6
+addons:
+  chrome: stable
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - g++-6
+      - oracle-java9-set-default
+before_install:
+  - npm install -g npm
+  - npm --version
+  - npm install -g grunt-cli
+before_script:
+  - grunt build

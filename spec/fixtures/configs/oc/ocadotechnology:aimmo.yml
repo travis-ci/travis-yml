@@ -1,0 +1,151 @@
+sudo: required
+dist: trusty
+group: edge
+language: python
+python:
+  - "2.7"
+services:
+  - docker
+env:
+  global:
+    - DOCKER_BUILDKIT=1
+    - secure: "TNhj8oXrtBzCkkJDA8qbDmqUggK9Kbsy8Itgi0+VmXB+3bVRornZMS38ppaFz+BVOTdL80ZvN2s/OPV106QjFv0Hx1MmWAw4kNST2QBtxFXBHRKYtr7NtBN0jr11el1fG83YdpeZYQbc5aqbJ4OPz2GpfhGfDVhVGPjMFMKXI5XbTbbl+HCEL67ywozt964LhpuuXTaX7jgYFiJUtcwkYRUaDYY3ryJvMSOx95AjKyRMNC5JlgAqbJuYsOTm1eVZtfQ1jYVvd/NuAHOMDNpZWvcIaxTuc3k4XZh4UPryuRJWfjgjIq6kua7Q6ho6W2GbDgN2b/9lIldkTR8QfLSnCNLJIg6KJZ2gmIQg7u+nZHemdugo9XkvfmKXfB/t3HChFX1HNtS4gSeIn874IynLHx3UJ1lxm7BdDbF4Jjijffj5uWDGqVj3/Myd2jdFTJCoLJXvYI7la6ouMzXW5aDFhy2UXK2A3q7aBbaD64+U1R7YPGIyvfAd7NCF11vtRvJGI/fNjO5S1EuSacrQm7CiXu0rd0L5EOSU85XNTQsWN6xxJKEcc8Hx9YLRXkmR7gK9LoEPTUwFbfVXBUvnOsZav3MOBBxzj4+eLxkx2B1vbY2Lx5yPAqyWwi3vet46NEZUIKgqK+xRYQKj6dj3OF1gx7LOcyhpyevdpTZotiEx0C4=" # SNAP_API_AUTH
+git:
+  depth: 9999999 # Building untagged builds needs enough depth to get the latest tag
+stages:
+  - name: test
+  - name: release
+    if: branch = master OR branch = development
+  - name: deploy
+    if: tag IS present
+jobs:
+  include:
+    - stage: test
+      name: "Python Tests"
+      env:
+        - NODE_ENV=production
+      before_script:
+        # Download kubectl, which is a requirement for using minikube.
+        - curl -Lo kubectl https://storage.googleapis.com/kubernetes-release/release/v1.9.4/bin/linux/amd64/kubectl && chmod +x kubectl && sudo mv kubectl /usr/local/bin/
+        # Download minikube.
+        - curl -Lo minikube https://storage.googleapis.com/minikube/releases/v0.25.2/minikube-linux-amd64 && chmod +x minikube && sudo mv minikube /usr/local/bin/
+        - sudo minikube start --vm-driver=none --kubernetes-version=v1.9.4
+        # Fix the kubectl context, as it's often stale.
+        - minikube update-context
+        # Wait for Kubernetes to be up and ready.
+        - JSONPATH='{range .items[*]}{@.metadata.name}:{range @.status.conditions[*]}{@.type}={@.status};{end}{end}'; until kubectl get nodes -o jsonpath="$JSONPATH" 2>&1 | grep -q "Ready=True"; do sleep 1; done
+      before_install:
+        - nvm install node
+        - nvm use node
+      install:
+        - pip install .
+        - pip install codecov
+        - pip install docker
+        - pushd game_frontend
+        - yarn
+        - node djangoBundler.js
+        - popd
+      script:
+        - python all_tests.py -c --no-docker-container-tests
+      after_success:
+        - codecov
+    - name: "aimmo-game"
+      before_install:
+        - cd aimmo-game
+        - docker build --target tester -t ocadotechnology/aimmo-game:test .
+      install:
+        - pip install codecov
+      script:
+        - docker run -it -p 5000:5000 ocadotechnology/aimmo-game:test
+      after_success:
+        # Get the coverage data from the container
+        - read CONTAINERID <<< $(docker ps --all -q | head -1)
+        - sudo docker cp -a $CONTAINERID:.coverage $(pwd)/.coverage
+        - sudo docker cp -a $CONTAINERID:coverage.xml $(pwd)/coverage.xml
+        - bash <(curl -s https://codecov.io/bash)
+    - name: "aimmo-game-creator"
+      before_install:
+        - cd aimmo-game-creator
+        - docker build --target tester -t  ocadotechnology/aimmo-game-creator:test .
+      install:
+        - pip install codecov
+      script:
+        - docker run -it -p 5000:5000 ocadotechnology/aimmo-game-creator:test
+      after_success:
+        # Get the coverage data from the container
+        - read CONTAINERID <<< $(docker ps --all -q | head -1)
+        - sudo docker cp -a $CONTAINERID:.coverage $(pwd)/.coverage
+        - sudo docker cp -a $CONTAINERID:coverage.xml $(pwd)/coverage.xml
+        - bash <(curl -s https://codecov.io/bash)
+    - name: "aimmo-game-worker"
+      before_install:
+        - cd aimmo-game-worker
+        - docker build --target tester -t ocadotechnology/aimmo-game-worker:test .
+      install:
+        - pip install codecov
+      script:
+        - docker run -it -p 5000:5000 ocadotechnology/aimmo-game-worker:test
+      after_success:
+        # Get the coverage data from the container
+        - read CONTAINERID <<< $(docker ps --all -q | head -1)
+        - sudo docker cp -a $CONTAINERID:.coverage $(pwd)/.coverage
+        - sudo docker cp -a $CONTAINERID:coverage.xml $(pwd)/coverage.xml
+        - bash <(curl -s https://codecov.io/bash)
+    - name: "Javascript Tests"
+      before_install:
+        - nvm install v11.10.0
+        - nvm use node
+      install:
+        - cd game_frontend && yarn
+      script:
+        - yarn test --coverage
+      after_success:
+        - bash <(curl -s https://codecov.io/bash)
+    - stage: release
+      script:
+        - bash tag_release_on_travis.sh
+      deploy:
+        - provider: releases
+          api_key:
+            secure: "dZxjTMW1+eAIw4gv71PKpaaL62BNcb2uWRf4ft1mVRRwsdNy5M1Vxv3YvOQGEYUO3TAo2xuvj/ifc1Yp6F1nCU7fLQaHllUljzU/Wa7gebv434TXMKfCbYLCFAylALF1Up0xhdaJaIEpEK9V4VqGeqhWcvAxi+fuFeK7CNgkvgxMINGAF96m3uU5CRKk4oU45ETifvFoWE8Kea73H32uisShqiECIsririOWZLKnm2YeGn3z26kKNjkn8wK4upWESCZUfP46FjFzV3EtT8RE51g6LFToaIls7fs99yLCwkX4xWBRdI0b6c5JvuaP4mukaXc6Ud9nREVmuOVsJ8mJbtnfl9hvfCdnzSpWR4x1ep6EinmPEX4Z1eBoeYXMkU31eOgdzXn+VpyT48W1rcrZxNCGe9Ln09OLlgNx5aYMDNAKrXiYkD55aMLFM7JLmX40DSez7EP8FFM5xALtNQnwun4ziGomf8Hl8GroYC+xNYIDMSpXVQBEc8s04dw3267tIPbA1p63CAHL/edAzn6bTtmvjLOI49o1fMLHls9ECW4/dKhalsPuZ4GUwqwIbf0WvTzNyvKjx65O+stDkxisDbVWVbXXNzGmbvvKJBo8SRymTM/THpavi+keps3kjUfmfmhImayG5fj5Z9G4r3KM77K+siQTvjjjg0t2hbLvyWI="
+          prerelease: true
+          target_commitish: development
+          skip_cleanup: true
+          on:
+            repo: ocadotechnology/aimmo
+            branch: development
+        - provider: releases
+          api_key:
+            secure: "dZxjTMW1+eAIw4gv71PKpaaL62BNcb2uWRf4ft1mVRRwsdNy5M1Vxv3YvOQGEYUO3TAo2xuvj/ifc1Yp6F1nCU7fLQaHllUljzU/Wa7gebv434TXMKfCbYLCFAylALF1Up0xhdaJaIEpEK9V4VqGeqhWcvAxi+fuFeK7CNgkvgxMINGAF96m3uU5CRKk4oU45ETifvFoWE8Kea73H32uisShqiECIsririOWZLKnm2YeGn3z26kKNjkn8wK4upWESCZUfP46FjFzV3EtT8RE51g6LFToaIls7fs99yLCwkX4xWBRdI0b6c5JvuaP4mukaXc6Ud9nREVmuOVsJ8mJbtnfl9hvfCdnzSpWR4x1ep6EinmPEX4Z1eBoeYXMkU31eOgdzXn+VpyT48W1rcrZxNCGe9Ln09OLlgNx5aYMDNAKrXiYkD55aMLFM7JLmX40DSez7EP8FFM5xALtNQnwun4ziGomf8Hl8GroYC+xNYIDMSpXVQBEc8s04dw3267tIPbA1p63CAHL/edAzn6bTtmvjLOI49o1fMLHls9ECW4/dKhalsPuZ4GUwqwIbf0WvTzNyvKjx65O+stDkxisDbVWVbXXNzGmbvvKJBo8SRymTM/THpavi+keps3kjUfmfmhImayG5fj5Z9G4r3KM77K+siQTvjjjg0t2hbLvyWI="
+          prerelease: false
+          target_commitish: master
+          skip_cleanup: true
+          on:
+            repo: ocadotechnology/aimmo
+            branch: master
+    - stage: deploy
+      env:
+        - NODE_ENV=production
+      before_install:
+        - nvm install node
+        - nvm use node
+      install:
+        - pushd game_frontend
+        - yarn
+        - popd
+      script:
+        - pushd game_frontend
+        - node djangoBundler.js
+        - popd
+      deploy:
+        - provider: pypi
+          skip_cleanup: true
+          user: ocadotechnology
+          password:
+            secure: "dX2M4PpyGwa1bjpJN/Wk3EORWRXuTS14ZQEQ7Ndqk/WnOZlNqD5t/WiITTdqBWoR/ScvQiGBzR/VdRLZllkGrhupoMrtkfCldaxEI3/wbbwW9CiLuwyR/V5xgVj9TA+PtXErjgAqG9KRtyaBEOaC20t13Uc6vuIc9e6aXkzhQ9hf3vVMlnABOZP3f/2R3+sJQMLylGPCz/6BAs2U+nyxGJCpfq0aJK7H2aVPUKtM1/nscuhvsrl8yU+RWYS3idgfXDuPlwqKvRL9xbEm1DC3ByCFwwzAGCPlUtzYlx6Ttrg8Jv6S1cgsjxijzV5QqU+k1JhmY3jDqqmMROFAaY3wJ6038xUbn4zlgvXgtCayiebJukSMR7tJoVrs6ao26QPsbLNZdReDzSXJR05pgB4I8gGTlIKeZE8zOS75hkv0CdMjmIsQhTeMKqQcATuN8QszYRP4uO7vG+3I7hNSK8HcqxHtNLEDq2/QKDAVBve0R5CeEvLMnSxj7UydO+HuJUgickjHuJUmLZ+7iR9i1p6G0MUpKq/n8izSponvShu0lDshrNWJ9PYuhRD4Yvnp4/FCSxdY0+u7pHJsbluGcIvaAlwoa5O01Seu2pVpox8hVTIhn9LuR0wP7Ed4Nxper7cMNgugqb8J9BybSlMjRlBYmI7FQePCdsu1ETNI9JDHAug="
+          distributions: "bdist_wheel sdist"
+          on:
+            repo: ocadotechnology/aimmo
+            tags: true
+      after_deploy:
+        - "curl -d POST -v https://semaphoreci.com/api/v1/projects/${SEMAPHORE_PROJECT_ID}/master/build?auth_token=${SEMAPHORE_API_AUTH}"

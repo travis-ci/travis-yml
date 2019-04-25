@@ -1,0 +1,26 @@
+# we actually need both environments PHP and rvm
+# however it is only possible to define the environment for one language
+language: php
+
+rvm: 1.9.3
+
+php:
+  - 7.0
+
+matrix:
+  fast_finish: true
+
+env:
+  - PUPPET_VERSION=4.3.1
+
+install:
+  - composer install
+
+# PHPUnit tests only, rake spec could not be done within the same travis worker
+# (ruby is installed on a PHP worker but .gemfile will be ignored)
+script:
+  - php ./vendor/phpunit/phpunit/phpunit --coverage-text --configuration phpunit_ci.xml.dist
+
+notifications:
+  email:
+    - jtreminio@gmail.com

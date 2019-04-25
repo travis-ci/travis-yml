@@ -1,0 +1,74 @@
+notifications:
+  email:
+    on_success: never
+    on_failure: always
+
+language: generic
+
+stages:
+  - name: test
+  - name: deploy
+    if: branch == master && type == push
+
+services:
+  - docker
+
+cache:
+  directories:
+    - $HOME/.sonar/cache
+    - $HOME/.m2
+    - ./e2e/node_modules
+    - $HOME/.npm
+    - $HOME/.cache/Cypress
+
+after_script:
+  - bash <(curl -s https://codecov.io/bash)
+
+jobs:
+  include:
+    - name: Frontend
+      stage: test
+      script:
+        - cd frontend
+        - make run run-cmd="npm run lint"
+        - make test-ci
+
+    - name: Crawler
+      stage: test
+      script:
+        - cd crawler
+        - make run run-cmd="npm run lint"
+        - make test-ci
+
+    - name: Crawler Api Backend
+      stage: test
+      script:
+        - cd crawler-api-backend
+        - make run run-cmd="npm run lint"
+        - make test-ci
+
+    - name: E2E
+      stage: test
+      install:
+        - npm install -g wait-on
+      script:
+        - cd e2e
+        - make server > /dev/null & wait-on tcp:localhost:1081
+        - make ci
+        - make run run-cmd="npm run lint"
+
+    - name: Root
+      stage: test
+      addons:
+        sonarcloud:
+          organization: "liu233w-github"
+          token: $SONAR_TOKEN
+      script:
+        - make commitlint-travis
+        - sonar-scanner -Dsonar.projectKey=acm-statistics -Dsonar.organization=liu233w-github -Dsonar.sources=. -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=$SONAR_TOKEN -Dsonar.exclusions=**/node_modules/**/*,backend
+
+    - name: Deploy to DockerHub
+      stage: deploy
+      script:
+        - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+        - make tag-and-push

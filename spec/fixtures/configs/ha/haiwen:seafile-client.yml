@@ -1,0 +1,27 @@
+sudo: required
+dist: trusty
+language: cpp
+matrix:
+  include:
+    - os: linux
+      compiler: gcc
+      env: BUILD_SHIBBOLETH_SUPPORT=ON
+    - os: linux
+      compiler: gcc
+      env: BUILD_SHIBBOLETH_SUPPORT=OFF
+  exclude:
+    - os: osx
+      compiler: gcc
+before_install:
+ - ./scripts/install-deps-${TRAVIS_OS_NAME}.sh
+script:
+ - ./scripts/ci-build.sh
+notifications:
+  email:
+    recipients:
+      - linshuai2012@gmail.com
+      - rwindz0@gmail.com
+  slack:
+    secure: RhwjY2BL0bR6MD+ASvFptH9GJmT0CshRN4YoZgK80D/H1kK60nVjfYIwU0apmhG8J3Sz9jqQ5xGPBUXvAgKB9VzdGQVgo23kGm9P2AY6xM43HHcPJvuXEBeX6zCx1O2HyGmENq36Z9ZnDWxW9yswnXKmeb05lE+PisBn1XvWQrs=
+    on_success: change
+    on_failure: always

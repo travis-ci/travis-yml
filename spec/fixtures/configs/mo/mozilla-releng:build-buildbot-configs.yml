@@ -1,0 +1,41 @@
+language: python
+python:
+  - "2.7"
+
+dist: precise
+
+sudo: false
+
+env:
+  global:
+    - PIP_FIND_LINKS=file://$HOME/.cache/pip
+    - PIP_CACHE_DIR=$HOME/.cache/pip
+  matrix:
+    - TOX_ENV=flake8 IGNORE_FAILURES=true
+    - TOX_ENV=py27
+    - TOX_ENV=py27-unittests
+
+cache:
+  directories:
+    - $HOME/.cache/pip
+    - $TRAVIS_BUILD_DIR/.tox
+
+install:
+  - pip install tox
+
+script:
+  - if [[ $IGNORE_FAILURES == true ]]; then tox -e $TOX_ENV || true; else tox -e $TOX_ENV; fi
+  # Remove logs to avoid cache uploads
+  - rm -rf $HOME/.cache/pip/log
+
+
+# The channel name "irc.mozilla.org#releng-bots" is encrypted against mozilla/build-buildbot-configs to prevent IRC spam of forks
+# Generated with: travis encrypt --repo mozilla-releng/build-buildbot-configs --skip-version-check irc.mozilla.org#releng-bots
+notifications:
+  irc:
+    channels:
+      - secure: "JIh4rR7PiDf+vjwh1p2UlExZuv32tZXJNod1KKRX9Am+1UzgORd0Tmzl/vAcDL//PePjNCrxIUYRfYESjJxsjddGf6JACihVLQuKXlMH4oZFt5N0pBXB/ETAt6Wld0SBiEHNlQrujkVjdg1tHovSx6msN2BQPOYhqdqHoNaqJ/A="
+    on_success: always
+    on_failure: always
+    template:
+      - "\x02%{repository_name}\x0314#%{build_number}\x03\x02 (%{branch} - %{commit} : %{author}): \x02\x0312%{message}\x02\x03 (\x0314%{build_url}\x03)"

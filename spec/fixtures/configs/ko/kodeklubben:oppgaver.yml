@@ -1,0 +1,33 @@
+language: node_js
+
+branches:
+  only:
+    - master
+
+stages:
+  - name: deploy
+    if: branch = master AND fork = false AND type = push
+
+before_install:
+  - git clone --depth=1 --branch=master https://github.com/kodeklubben/codeclub-viewer.git ../codeclub-viewer
+  - cd ../codeclub-viewer
+  - nvm install
+
+cache: yarn
+
+script:
+  - yarn build:travis
+
+# Deploy only runs for push builds (merges), never for PR builds:
+# https://docs.travis-ci.com/user/deployment#pull-requests
+deploy:
+  provider: pages
+  github-token: $GITHUB_TOKEN
+  skip-cleanup: true
+  keep-history: true
+  local-dir: ../codeclub-viewer/dist
+  repo: kodeklubben/kodeklubben.github.io
+  target-branch: master
+  fqdn: oppgaver.kidsakoder.no
+  on:
+    branch: master

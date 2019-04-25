@@ -1,0 +1,174 @@
+if: (branch = development) OR (branch = master) OR (type = pull_request) OR (tag IS present)
+language: node_js
+dist: trusty
+install:
+- npm ci -q
+# keep the npm cache around to speed up installs
+cache:
+  directories:
+  - "$HOME/.npm"
+before_install:
+- npm i -g babel-cli webpack truffle-contract npm@latest
+after_success:
+- ./scripts/env_build.sh
+before_deploy:
+- pip install --user awscli
+deploy:
+### EMBEDDED app deployment
+- provider: script
+  script:  ~/.local/bin/aws s3 sync dist/embedded s3://trading-embedded-development/embedded --region eu-west-1 --cache-control 'public, max-age=2592000'
+  skip_cleanup: true
+  on:
+    branch: development
+
+- provider: script
+  script:  ~/.local/bin/aws s3 sync dist/embedded s3://trading-embedded-staging/embedded --region eu-west-1 --cache-control 'public, max-age=2592000'
+  skip_cleanup: true
+  on:
+    branch: master
+
+- provider: s3
+  bucket: trading-embedded-development
+  secret_access_key: $AWS_SECRET_ACCESS_KEY
+  access_key_id: $AWS_ACCESS_KEY_ID
+  skip_cleanup: true
+  local_dir: dist/embedded
+  upload-dir: releases/$TRAVIS_TAG
+  on:
+    tags: true
+
+### OLYMPIA DEPLOYMENTS
+  # https://olympia.dev.gnosisdev.com/
+- provider: script
+  script: ~/.local/bin/aws s3 cp dist/interface/index.html s3://olympia-development/index.html --region eu-west-1 --cache-control 'max-age=0,no-cache,no-store,must-revalidate'
+  skip_cleanup: true
+  on:
+    branch: development
+- provider: script
+  script: ~/.local/bin/aws s3 sync dist/interface s3://olympia-development --region eu-west-1 --cache-control 'public, max-age=2592000' --exclude "index.html"
+  skip_cleanup: true
+  on:
+    branch: development
+- provider: script
+  script: ~/.local/bin/aws s3 sync dist/assets s3://olympia-assets-development/assets
+  skip_cleanup: true
+  on:
+    branch: development
+  # https://olympia.staging.gnosisdev.com/
+- provider: s3
+  bucket: olympia-staging
+  secret_access_key: $AWS_SECRET_ACCESS_KEY
+  access_key_id: $AWS_ACCESS_KEY_ID
+  skip_cleanup: true
+  local_dir: dist/interface
+  upload-dir: current
+  on:
+    branch: master
+- provider: s3
+  bucket: olympia-assets-staging
+  secret_access_key: $AWS_SECRET_ACCESS_KEY
+  access_key_id: $AWS_ACCESS_KEY_ID
+  skip_cleanup: true
+  local_dir: dist/assets
+  upload-dir: assets
+  on:
+    branch: master
+  # Prepare releases
+- provider: s3
+  bucket: olympia-staging
+  secret_access_key: $AWS_SECRET_ACCESS_KEY
+  access_key_id: $AWS_ACCESS_KEY_ID
+  skip_cleanup: true
+  local_dir: dist/interface
+  upload-dir: releases/$TRAVIS_TAG
+  on:
+    tags: true
+- provider: s3
+  bucket: olympia-staging
+  secret_access_key: $AWS_SECRET_ACCESS_KEY
+  access_key_id: $AWS_ACCESS_KEY_ID
+  skip_cleanup: true
+  local_dir: dist/assets
+  upload-dir: releases/$TRAVIS_TAG
+  on:
+    tags: true
+
+### MANAGEMENT DEPLOYMENTS
+  # https://trading.dev.gnosisdev.com/
+- provider: script
+  script: ~/.local/bin/aws s3 cp dist/interface/index.html s3://management-development/index.html --region eu-west-1 --cache-control 'max-age=0,no-cache,no-store,must-revalidate'
+  skip_cleanup: true
+  on:
+    branch: development
+- provider: script
+  script: ~/.local/bin/aws s3 sync dist/interface s3://management-development --region eu-west-1 --cache-control 'public, max-age=2592000' --exclude "index.html"
+  skip_cleanup: true
+  on:
+    branch: development
+- provider: script
+  script: ~/.local/bin/aws s3 sync dist/assets s3://trading-assets-development/assets
+  skip_cleanup: true
+  on:
+    branch: development
+
+  # https://trading.staging.gnosisdev.com/
+- provider: s3
+  bucket: management-mainnet
+  secret_access_key: $AWS_SECRET_ACCESS_KEY
+  access_key_id: $AWS_ACCESS_KEY_ID
+  skip_cleanup: true
+  local_dir: dist/interface
+  upload-dir: current
+  #before_deploy:
+  #  - npm run build-config mainnet/production
+  on:
+    branch: master
+
+  # https://trading.staging.gnosisdev.com/
+- provider: s3
+  bucket: management-staging
+  secret_access_key: $AWS_SECRET_ACCESS_KEY
+  access_key_id: $AWS_ACCESS_KEY_ID
+  skip_cleanup: true
+  local_dir: dist/interface
+  upload-dir: current
+  #before_deploy:
+  #  - npm run build-config mainnet/staging
+  on:
+    branch: master
+- provider: s3
+  bucket: trading-assets-staging
+  secret_access_key: $AWS_SECRET_ACCESS_KEY
+  access_key_id: $AWS_ACCESS_KEY_ID
+  skip_cleanup: true
+  local_dir: dist/assets
+  upload-dir: assets
+  #before_deploy:
+  #  - npm run build-config mainnet/staging
+  on:
+    branch: master
+- provider: s3
+  bucket: management-staging
+  secret_access_key: $AWS_SECRET_ACCESS_KEY
+  access_key_id: $AWS_ACCESS_KEY_ID
+  skip_cleanup: true
+  local_dir: dist/interface
+  upload-dir: releases/$TRAVIS_TAG
+  on:
+    tags: true
+- provider: s3
+  bucket: management-staging
+  secret_access_key: $AWS_SECRET_ACCESS_KEY
+  access_key_id: $AWS_ACCESS_KEY_ID
+  skip_cleanup: true
+  local_dir: dist/assets
+  upload-dir: releases/$TRAVIS_TAG
+  on:
+    tags: true
+
+### OLYMPIA and MANAGEMENT
+  # Prepare production deployment after creating a release
+- provider: script
+  script: bash .travis/scripts/prepare_production_deployment.sh
+  on:
+    tags: true

@@ -1,0 +1,19 @@
+language: node_js
+dist: trusty
+notifications:
+  email: false
+install: case $TRAVIS_BRANCH in greenkeeper*) npm i;; *) npm ci;; esac;
+before_script: npm run greenkeeper:update-lockfile
+after_script: npm run greenkeeper:upload-lockfile
+before_deploy:
+  - npm run build
+  - git config --global user.name "$GIT_USER"
+  - git config --global user.email "$GIT_EMAIL"
+deploy:
+  provider: script
+  skip_cleanup: true
+  script: npm run deploy
+env:
+  global:
+    - secure: TMbgS8mVGh1WfSQQgbUYSveQLsmrFhvaMTPCgqCSQ+8+C/bY1sDH3s0xSQFzSjZ8XYFayuEdK6HGxycuRJokdCXRvjVvgmHhpNlt+FTeJT7Uyqwh8JSpRoPEPczF3Hgc0s8JAw3Vm+F9gL4e59c8S3iaXNhvRT2/RpGY8rqt/6+6wqJKvpLC2Wr8zlENOTlXA+5g1RT/yeRsDleLq1mD5Y+YCwimcJ3JgTAx+1mpEok8xCo4zJ1eqpE/Lk+Hj/7MY2KmtG+bAidiSpq4vUgmsn16+NA96hppETAiW8EJkiq8MR0jWvSdih4cn7Y1vJx1u+ncH45cjhEDmNHwVxAusEpsCaAsy9dWYaLtCeda8fBERwleFPtdQAi3O+NqPaqnPneOYsXKGRLPz67Z0w1WPbOGG4M2dnfkslW5+UfzMrsIvf0fnal3TsSDl/DkVlDdZZsyVfc5XATyPYSzOKqF/RYARJNC9vW1+B13ch/YYH0zkB4xz73rkAIOZmoAkTI6vbJecNKYQm+JHQkl6Vo4AWiStiuI98IyYnI4gytCtjw/r9TlRcn7qTlKQQpSwAw9kin4KC2m2ni+e8b1x59v8kSaZr98xWa6us4gPZ85Pcybzhwhk02XJJpN9uYEbFqi027Bt51A7WOVNHZdCL6fwRAPQjTIiv3VcU6xxfvBox0=
+    - secure: HMgvRo/jRqv8SoVV2o60NY90eT4NYlSkrHXRecTeQ0CaNB/domWAuDU473C5uDom0dF9FXgjWVq3OD63eKhY8h98SqCKK+ahvk1MpHxXUs1O+pYgiSOr0r7kmZY+qUgC6+W4waheaElcMH7KSo/LNVZ6C6d0TpiKcLSJDzc9iMC+XqseiFxMwrkPXM9ZgvvGdUKZviAzvcsQvfiH4N1ZhM4JvhkBxXiH83OW9YyXiCcXjJLOwWoopkv4avDCKfxB8xHszoHzYM5CpNLV8r5Dl9qVsU+sBTy+9tqZtULWLyWt2PsRSHx+cvuEhC/rnxB/f2gWfoc/UQ+Ffwvf2DzdZOqWPpVIve96vAOhvfqbaLWolfRCnuyHUBZxNzZi268tQa8wVW+cjZ475miRBm5JhkOcQ6Fv2h5fgxI7MKjCqC03X2BPQX7QlGnvzZIQsqf7GUNtc+TauNhNS72kQkrddwORUc+/ldDU/9zsNLDrtitrYW+8k3kBOlkWajPc3cocdOIH8b+4iirR/EiLE01x91i8mYE/V0DuIkwkmofHvlVZAsg8dLYmgLF6WEt2THY300wU4lxa5vQKwpmd1X35hU5rBeK4ne7bRY2D+uQPt0eMZW26aIY/e9rIZzkpTQ6VkomChkskGQadPLoWXHKKwLzltF4snP2hLgSKM9kj8xo=

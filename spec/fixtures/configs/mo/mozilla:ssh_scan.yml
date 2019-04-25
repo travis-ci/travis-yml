@@ -1,0 +1,59 @@
+language: ruby
+git:
+  submodules: false
+before_install:
+  - sed -i 's/git@github.com:/https:\/\/github.com\//' .gitmodules
+  - git submodule update --init --recursive
+matrix:
+  include:
+  - rvm: ruby-head
+    env:
+      - LABEL=unit_tests
+    after_success:
+      - coveralls
+  - rvm: 2.5.1
+    env:
+      - LABEL=unit_tests
+  - rvm: 2.4.4
+    env:
+      - LABEL=unit_tests
+  - rvm: 2.3.6
+    env:
+      - LABEL=unit_tests
+  - rvm: 2.5.1
+    env:
+      - LABEL=gem_integration_tests
+    script:
+      - gem install ssh_scan
+      - chmod 755 ./spec/ssh_scan/integration.sh
+      - ./spec/ssh_scan/integration.sh
+  - rvm: 2.4.4
+    env:
+      - LABEL=gem_integration_tests
+    script:
+      - gem install ssh_scan
+      - chmod 755 ./spec/ssh_scan/integration.sh
+      - ./spec/ssh_scan/integration.sh
+  - rvm: 2.5.0
+    env:
+      - LABEL=src_integration_tests
+    script:
+      - bundle install
+      - chmod 755 ./spec/ssh_scan/integration.sh
+      - ./spec/ssh_scan/integration.sh
+  - rvm: 2.5.0
+    env:
+      - LABEL=docker_integration_tests
+    services:
+      - docker
+    script:
+      - docker build -t mozilla/ssh_scan .
+      - docker run -it mozilla/ssh_scan /app/spec/ssh_scan/integration.sh
+  - rvm: 2.5.0
+    env:
+      - LABEL=docker_build_and_push
+    services:
+      - docker
+    script:
+      - chmod u+x ./build_and_deploy_to_dockerhub.sh
+      - ./build_and_deploy_to_dockerhub.sh

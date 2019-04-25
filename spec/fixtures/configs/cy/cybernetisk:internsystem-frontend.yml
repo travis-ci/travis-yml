@@ -1,0 +1,22 @@
+language: node_js
+node_js:
+  - "10"
+sudo: false
+notifications:
+  slack:
+    secure: l7gNQPopm/wYCBTOTKDJaF3gzqeYVXp8ZKBXbt51BfRoHZCQloOQCh0H2VBjmBhEms76Y4tJGTT54btSbtNdElCyi8Zg5dnnnVwoLUCeLsy/khDzQS359x+2BFvUxJ96LqrvF/hrp9kN3SWMY9f2/sC9nkh+Efw6yXwN6qinDptiqWhQ4co69EXaMKgRRCaRDZzDc1gXcmn3gxagNtnChpHhzlIMuvj+Fa6VxYdIa5E9SXPS0kjAjDz8TaTvWbn1s3KvsHKQ06w2T2mK4+FJP2guRszVzcTUN0N63l4wO9WuwAsh0KwC6dd7AAiLBXZ/LbD3HowOPbvXLGU/GkrLtm9c627Nhv7GUZvVNgL/XW+z1E9uo14FSLRc7zFqnnWnkc3bKLbprbBXWfon7kwEy+9Ui7hmc0t1iE3w7x1IyRSa4PEpjeobcH2kBvzPZvsuaue2drtcW40tr6weo/sWu31KXzk289ALlYJFVTPnuoBIj87TTVc4YcWTe7VQzJZzmCLXUJgkE9hJVqN7zThqqGbrBrJI9alw68spLOauUUR+3/k8p37gy95lR/v+ERAFCVMJeK93UQfRcX8SPqCqH23/Aa6+az19RosCn0xHLWoWTMDKJLemp0eTWzvlGGY1wy1Ohd4Djs6uvtjkHXesjpNi4IZp5lsveQ01ntxc5u0=
+script:
+  - npm test
+  - npm run build
+deploy:
+  skip_cleanup: true
+  provider: script
+  script: scripts/deploy.sh
+  on:
+    branch:
+      - master
+      - test
+    node: '10'
+cache:
+  directories:
+    - node_modules

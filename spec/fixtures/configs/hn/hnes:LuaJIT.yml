@@ -1,0 +1,22 @@
+dist: trusty
+sudo: required
+
+notifications:
+  email:
+    - yunthanatos@gmail.com
+
+language: c
+
+compiler:
+  - gcc
+  - clang
+
+install:
+    - sudo apt-get install -qq -y libreadline-dev libncurses5-dev libpcre3-dev libssl-dev perl make build-essential
+    
+script:
+    - make -j10
+    - ldd src/luajit
+    - echo ":)"
+    - date
+    - bash build.sh

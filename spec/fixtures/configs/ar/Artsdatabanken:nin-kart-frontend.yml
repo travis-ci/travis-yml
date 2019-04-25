@@ -1,0 +1,36 @@
+language: node_js
+node_js:
+  - "10"
+directories:
+  - node_modules
+script:
+  - yarn test
+  - export BRANCH=$(if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then echo $TRAVIS_BRANCH; else echo $TRAVIS_PULL_REQUEST_BRANCH; fi)
+  - export PUBLIC_URL=https://nin.artsdatabanken.no/$(if [ "$BRANCH" == "master" ]; then echo ""; else echo $BRANCH; fi)
+  - yarn build
+  - echo "TRAVIS_BRANCH=$TRAVIS_BRANCH, PR=$PR, BRANCH=$BRANCH"
+before_deploy:
+  - git tag "$(date +'%Y%m%d-%H%M%S')-$(git log --format=%h -1)"
+  - tar --directory=build -zcf bundle.tar.gz .
+deploy:
+  - provider: releases
+    api_key: $GITHUB_TOKEN
+    file_glob: true
+    file: bundle.tar.gz
+    on:
+      branch: master
+      repo: Artsdatabanken/nin-kart-frontend
+    skip_cleanup: true
+after_success:
+  - npm run report-coverage
+  - ./deploy.sh $BRANCH ops "deploy nin-innsyn-test" $DOCKER_USERNAME $DOCKER_PASSWORD
+notifications:
+  slack:
+    on_success: change
+    on_failure: change
+before_install:
+  - yarn global add greenkeeper-lockfile@1
+  - export PATH=$PATH:`yarn global bin`
+  - sudo apt-get install -y sshpass
+before_script: greenkeeper-lockfile-update
+after_script: greenkeeper-lockfile-upload

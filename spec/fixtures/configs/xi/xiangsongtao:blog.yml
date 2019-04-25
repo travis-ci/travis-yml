@@ -1,0 +1,20 @@
+language: node_js
+dist: precise
+branches:
+  only:
+    - master
+    - /^greenkeeper/.*$/
+cache:
+  yarn: true
+  directories:
+    - node_modules
+notifications:
+  email:
+    recipients:
+      - '280304286@163.com'
+    on_success: always # default: change
+    on_failure: always # default: always
+node_js:
+  - '8'
+script:
+  - npm run deploy:github

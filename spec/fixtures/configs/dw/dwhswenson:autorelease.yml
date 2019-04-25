@@ -1,0 +1,100 @@
+language: python
+python:
+  - '3.6'
+  - '2.7'
+  - '3.4'
+  - '3.5'
+
+branches:
+  only:
+  - master
+  - stable
+  - /^v\d+(\.\d+)+$/
+
+env:
+  global:
+    - CANONICAL_PYTHON="3.6"
+    - CODECLIMATE=""
+    - TWINE_USERNAME="dwhswenson"
+    # TWINE_PASSWORD
+    - secure: "wp+7rQ11ipJ2r/Yde8AWuZcBVgrPQPOnJdddntFgKSXh5aI3xiZm7mgHyy+mGg5mf8smErF0SwpZ6U4b2VQiXfS8XDwie+/gOrpFNkAPY0jHLRegSK1oXvqBTgZHQI3zeD4Q+qUFDVOIpu70JC+UrM5nEUC3jXo/T2ojJ7AdW7JROfgptewaFWLEaa38KHPZYUGjD9NGiB+49k220xEVdKtRK1cnogcCpxnPBsXiACz9VhYQ5f+r0wHSVDH151eUyiqdXiDjWTJ6o6uyaxm4jbECdFhfX0qoirp4l26Rf1UDk0HJYG+hEvT1IG/fThH6WhubXTpLMpUIdaPgZYvjhZcrpyJymtPMQ6RhrHifJh90nBWaN+vzeBdFwxav9skQypf3uS94XynynOOSTuZKCHwHBzlKypuB3RxSUIrZu9xnrJMkOD5jtLo6fsDhlZeNSy9zzKFZA+LoLPiQaZKpA8W8gUR31PcIo1VDiClGpu54Xu8Nm0agjExlQkBPa9xZNik7yNv381Gm0NLCwnwQtnZXY/V9CNRXUmATAMzoBcLf6xgZxHroQPBYB2mw76e7UB2fzRWYaby8T39GU3C8vczxaqSHDam2qwKieruzNSaRHLOGDQcx7N8WM/f8GtKcXxpPwxdjv0r8sAZ6YoIlbYVcQfpXAOPQD9Gz5vn+JKI="
+    # AUTORELEASE_TOKEN
+    - secure: "g0qz8XRM8eiI20K9i7r//E1U6gSZ3MgyBzUYBRtez2C+HwNuKoIQCtX2f33vXQBvfySiKvF0jolp1GIlze5FvH1h3/+G+3BoX/9L/qFl/mioXKxGbczW4J/iD3tt0VjVXs++1MxKtHq9TOZB92sGDy5GG0IBSTS12NDlqFS9QPcRPrgH2DOMzpj8rT1aHGWxsDfR5BKtUv7rkstLK9SghsYhhITYtBPIiKuvsIXOtGziNAMA5i7ohcMQSpCYF7I8DzfSPeibnlN0rdAwKSHubNfHxTSALSnhum6PAj8UkiF1up08wDiazr8iWu/XJZ+l6xCB4ElP/2eiP4db4/rExrbvifhcmNA67nVbVO4D/AIz5GShRxmYdgWdy4LwZfuY/HZUyNIYhRFRf0iu5cbotAiQqeydRqr3O7xVrmxmn+WOEqTvm+13Crlno1J1PpAhLEbJL8tJQDK4JSYOEujAwh/b0Iqc1/QCz1WzAIEDEdjnxfSm1Bl+YpgCQyo7i0xGtQoTk3wG53Tz4H5RV2oHvR37D3mKZX6G/3Vm9gHUcgfwryJbAKEgQJXZ4bzgxrK7Y6rNJ/hY9liRT/om/ubenpvJ0VFntTjdrm85+YJMT67V852x0OG2CITp5AOaJNVQ1289My6fj3cbfjYBp1/w990WhAtCu5BNIak3s+eSm2w="
+
+before_install:
+  - echo "before install"
+  - git fetch --tags
+
+install:
+  - pip install -r requirements.txt
+  - pip install -e .
+  - pip install -r devtools/pip-install/full_testing.txt
+  - pip list
+
+script:
+  - python -c "import autorelease"
+  - autorelease-release -h
+  - python release_check.py --branch ${TRAVIS_BRANCH} --event ${TRAVIS_EVENT_TYPE}
+
+after_success:
+  - echo "success!"
+
+jobs:
+  include:
+    - stage: deploy testpypi
+      # This stage runs when you make a PR to stable. It tests that the
+      # deployment to testpypi works.
+      if: "(branch = stable) and (type = pull_request)"
+      python: '3.6'
+      addons:
+        apt_packages:
+          - pandoc
+      install:
+        - pip install twine
+      script: 
+        - pandoc --from=markdown --to=rst --output=README.rst README.md
+        - python setup.py sdist bdist_wheel
+        - twine upload --repository-url https://test.pypi.org/legacy/ dist/*
+    - stage: test testpypi
+      # This stage run when you make a PR to stable; after the package has
+      # been deployed to testpypi. It checks that the deployed package
+      # works.
+      if: "(branch = stable) and (type = pull_request)"
+      python: '3.6'
+      install:
+        - pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple autorelease
+      script:
+        - cd ~
+        - python -c "import autorelease"
+        - echo "py.test --pyargs autorelease"  # if I had py.test stuff
+    - stage: cut release
+      # This stage runs after you merge a PR into stable. It cuts the GitHub
+      # release based on the current stable branch and the release notes
+      # from the last PR merged into stable.
+      if: "(branch = stable) and (not type in (pull_request, cron))"
+      python: '3.6'
+      install:
+        - pip install .  # usually would just need to install autorelease
+      script:
+        - VERSION=`python setup.py --version`
+        - PROJECT=`python setup.py --name`
+        - autorelease-release --project $PROJECT --version $VERSION --token $AUTORELEASE_TOKEN
+    - stage: deploy pypi
+      # This stage runs when a version-labelled tag is made. It deploys the
+      # package to PyPI.
+      if: tag =~ ^v[0-9]+\.
+      addons:
+        apt_packages:
+          - pandoc
+      install: skip
+      script:
+          - pandoc --from=markdown --to=rst --output=README.rst README.md
+      deploy:
+        provider: pypi
+        distributions: sdist bdist_wheel
+        skip_cleanup: true  # need the readme.rst from the script stage
+        user: dwhswenson
+        on:
+            tags: true
+        password:
+          secure: "VnOfkKXPAGeUfWBQra+WISnmgQV1yiz1ZsOExSqzDvdnOkGZ3ToLYiNn0sEpPgzeeYOx8nkjWUYZ8e8b5oYmU1fQ+5AXJ/b8L5T463IMj0Qe4PL4leCfv9Rqn90NywUwGaYQseeOi8c1yB8XaMqWkBmwjFuHmk0B7PQ5DISWJa9NR9/ydGc5Rp8H0/z40eVkaNksNHZjEfr9FHMt1PFM3KWecH6WkGscSVii+B/dfAcDWOW/UKI1094ckQkGNxtOEOMR6NkiLqFgb6iCOUTfyypELRNHLb2mB5d+6/doy93uJbY9dgFgI0glUrr0Ira/Nn3KGObxezvl5noe9+quD10r4KTl338qINR6H/NGL/t62TDG+hXn7xpGJ9i6UjJt5xmZio22neo0UEchSSvERsAkgChYQJ4N2jA2WVVUKuH+REjDEARjWrhx1u8gMB4vQGjI+47nxEvRiSl/ICwLqHswLK2Y+uqdsDdKZZq5kLxgcIqeNxuUzNj2fAGSlEbZVJEMrEe01hVC44OSiz2mQ8ndaP/Nf6i/n+SHgE+oeIJasHbgyNHpfR36RFR5QsVKu0lKyQjjVsm7HtMzz+JnSfO1hfDK8n94AYjDyEP9T/4Hrwo4KAGKLER9rokyC3psrTWNiefYB1ODYJneTC6Uhyh9Sq/+RlNEtPdN8YjGQAE="

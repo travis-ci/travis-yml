@@ -1,0 +1,38 @@
+language: node_js
+node_js:
+- '8'
+
+install:
+- yarn
+- sudo pip install awscli
+
+script:
+- yarn lint
+- yarn test
+- yarn build
+
+before_deploy:
+- if [[ -z "$TRAVIS_TAG" ]]; then cp robots.txt.staging build/robots.txt; else cp robots.txt build/; fi
+- aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
+- aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
+
+deploy:
+- provider: script
+  script: sh $TRAVIS_BUILD_DIR/.travis/staging2.deploy.sh
+  skip_cleanup: true
+  on:
+    branch: develop
+    repo: skycoin/skycoin.net
+- provider: script
+  script: sh $TRAVIS_BUILD_DIR/.travis/staging.deploy.sh
+  skip_cleanup: true
+  on:
+    branch: master
+    repo: skycoin/skycoin.net
+- provider: script
+  script: sh $TRAVIS_BUILD_DIR/.travis/production.deploy.sh
+  skip_cleanup: true
+  on:
+    branch: master
+    tags: true
+    repo: skycoin/skycoin.net

@@ -1,0 +1,53 @@
+env:
+  global:
+    - secure: "FCrW/S3TtvOV3rK1TU4S8gBz4X92hlSYDkfD+uvJyBqqb6en6T862zarYDjf3usgg+7fU1meM5kvmJiY1c5/GSPYf7dyOxilEHXS9FeBFrWi9GJxcCeia+jUEg+Pg/q4kN+vRiQ/Zjsbcc5JjS4+J3GYWSvW2S9XZYXJBkQPdPPmzgCrRmpE1rvXX/vBXbCbMkFbaK1ZQEKpxAbVDHoSFLVJRlcTxweC5cB39UutvMhOKiVjIGb1H3bF7a2zAqAXFeoncoeOKWfKU2/+f9XY6+eww0TSv8jmoDM1rz8JtltHtzsmmcxS9TmPSeNlh6YHevEc0nk6RmmuTBrGO5F4LHAgCrioGh0TlyWMhqCIWazQAhQQpGvGW/BdG+v6yQqc2AxOiC1bpgx+Kkip+faw+OMasyNlJUnntqKYM8QmP9GEmgLC3obdYyKTMH3gGfAzMe2MoUmwn20/qC/U/XGTwjSuEePHB1/qOZUIm+aG/d+4W8WTXpQ086jf908OWESKg9b49AgoWP9ZeGZAro8eLIgT5o7vEn6mWqT35H83Q/qOdNxmYz00+OGZgQ9vVd4dqhZ6HzwhT4b1/dYHTJ1Qr1RLWiaXul/VfgV+jy4gU9zKkQM1HsI72dhWqqFWh6tAez2cpiId+bGcvyQSKX1eR9qycVbOe1K2QdxGfXV92WY="
+    - secure: "KnitXl9e/pb7+xyuBxTsBmOmMin7hVA4wgYbpiBWjqlupCXGskixV90/LxlHTJtYxwMbRnK0Q9deFrJ1mOS1ZcGjkjm3lh1bKOojfLM3/u6YgichHe2Q/lm/O0XG4E0REnhIypQ4ppSHJO/magYuBk1NlNheN75tvOb2HR9h4h/ZhOvCJKr8I8edU3HPhYmMHiHpA9u3ywk8m2W9Y38Dt0cyOmAsEtyyK1xcDkh+kTt1vTvFJwRzR2EBAFMmcdYlL8uHHfsqUpVOhIgFIFJHPppLDHa63CuZvBEw7mRou/1UhrfBnE8JXHwckx1aYMDH3qoRnzTHlBm+wphHm61dJ4oA8yhih//MDxx1QzF6bQR/oZdHS31RYMrbR/WdTzpYbF6jp1NJD/C+YL7IuSir4ys4HDS41IgMwI5N4Z1Aud+zKIS9WIpbqZpOnE2rmDRe8kZ0P/IdKSeKcIH2bzdODgqvVzVS80wYVUiM2ZixOVRjKbxIuQ3hRefpBXNWPeAdO9K169F6b/c9YbVuuEvwPcP500QPsvR5X3wdn/gw40IBWYRNgf5HdlQvfNjhL/8eAWtNB38vhV4AxNHnxNPeTwJecJCrLoR/lZmD7wGnziGc/xAHqAltCGJ5o/IZ0dpe6KC7fH0n+W+nBpYd6T5Ed0pAKVLWMoF5AYVeh2Gm5AM="
+    - SELENIUM_BASE_TIMEOUT: "12.0"
+    - TEST_PARALELLISM: "1"
+
+language: python
+python:
+  - "3.6"
+
+jobs:
+  include:
+    # Multiaccess-program tests
+    - install:
+        - make -C multiaccess-program/ init
+      script:
+        - make -C multiaccess-program/ test
+      after_script:
+        - make -C multiaccess-program/ coverage
+        #- coveralls
+      env:
+        PROJECT: "multiaccess-program"
+        PURPOSE: "test+coverage"
+
+    # Multiaccess-program make dist
+    - install:
+        - make -C multiaccess-program/ init
+      script:
+        - make -C multiaccess-program/ dist
+      sudo: required
+      services:
+        - docker
+      env:
+        PROJECT: "multiaccess-program"
+        PURPOSE: "build executable"
+
+    # Makeradmin database
+    - before_install:
+        - docker --version
+        - docker-compose --version
+        - pip3 install docker-compose
+      install:
+        - make build
+      script:
+        - make test
+      sudo: required
+      services:
+        - docker
+      env:
+        PROJECT: "makeradmin"
+        PURPOSE: "build docker containers"
+

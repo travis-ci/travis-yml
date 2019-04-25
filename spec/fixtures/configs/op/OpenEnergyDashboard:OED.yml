@@ -1,0 +1,49 @@
+# *
+# * This Source Code Form is subject to the terms of the Mozilla Public
+# * License, v. 2.0. If a copy of the MPL was not distributed with this
+# * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+# *
+
+dist: xenial
+sudo: required
+
+language: node_js
+node_js:
+  - "7"
+services:
+  - postgresql
+  - docker
+
+addons:
+  postgresql: "9.6"
+
+env:
+    - OED_DB_USER=test OED_DB_PASSWORD=test OED_DB_DATABASE=travis_ci_dummy OED_DB_TEST_DATABASE=travis_ci_test OED_DB_HOST=localhost OED_DB_PORT=5432 OED_TOKEN_SECRET=travis OED_SERVER_PORT=3000 DOCKER_COMPOSE_VERSION=1.16.1
+
+before_install:
+    - sudo rm /usr/local/bin/docker-compose
+    - curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
+    - chmod +x docker-compose
+    - sudo mv docker-compose /usr/local/bin
+
+before_script:
+    # Database for non-Docker execution
+  - psql -c 'CREATE DATABASE travis_ci_test' -U postgres
+  - psql -c "CREATE USER test WITH PASSWORD 'test';" -U postgres
+  - psql -c 'CREATE EXTENSION IF NOT EXISTS btree_gist;' -U postgres -d travis_ci_test
+    # Database for Docker execution. No meters, with a default user.
+  - docker-compose run --rm web src/scripts/installOED.sh --nostart
+
+script:
+    # Validate legal requirements on source files
+  - npm run check:header
+    # Validate that all areas which are intended to be typed, are typed
+  - npm run check:typescript
+    # Validate that the client's type system is internally consistent
+  - npm run check:types
+    # Check for tslint failures
+  - npm run check:lint
+    # Test with native Node install
+  - npm run test
+    # Test in Docker
+  - docker-compose run --service-ports --rm web npm run test

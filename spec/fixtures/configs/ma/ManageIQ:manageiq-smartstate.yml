@@ -1,0 +1,14 @@
+sudo: false
+cache: bundler
+language: ruby
+rvm:
+- 2.4.5
+- 2.5.3
+after_script: bundle exec codeclimate-test-reporter
+notifications:
+  webhooks:
+    urls:
+    - https://webhooks.gitter.im/e/32a0b937854e89d6ae58
+    on_success: change
+    on_failure: always
+    on_start: never

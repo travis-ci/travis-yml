@@ -1,0 +1,30 @@
+dist: xenial
+language: java
+sudo: false
+install: true
+jdk:
+  - openjdk8
+  - openjdk11
+  - oraclejdk11
+
+addons:
+  apt:
+    packages:
+      - openjdk-8-jdk
+
+notifications:
+  slack: oskari:N5vZf0lzsIGpQ8nAPRfHgQ91
+  webhooks:
+    urls:
+      - secure: "jFL9lnYQWrHe+3b749MfPQEpqhqY6Cr7nI48Zkj2wSDhMfuTId2ujawAoXDZGUcqmWVMR4T4uQnhpRX05jEQkTkSweAWV7TefJF4YH/5s2wq85K0KpvNpueWwYrc0ZCYi4o62ls1/BXYkLQm2+OyY620jI+GpxaAzIc7jt7aFDg="
+
+
+before_install: "echo \"MAVEN_OPTS='-Xms1g -Xmx2g'\" > ~/.mavenrc"
+
+script: mvn clean install
+#  - 'if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then mvn clean install; fi'
+#  - 'if [ "$TRAVIS_PULL_REQUEST"  = "false" ]; then mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent install sonar:sonar -Dsonar.host.url=https://sonarcloud.io; fi'
+cache:
+  directories:
+    - '$HOME/.m2/repository'
+    - '$HOME/.sonar/cache'

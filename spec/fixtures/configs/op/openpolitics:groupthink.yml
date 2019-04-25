@@ -1,0 +1,26 @@
+language: ruby
+sudo: false
+cache: bundler
+rvm:
+- 2.6.1
+before_install:
+- gem update --system
+before_script:
+- bundle exec bin/rails db:migrate RAILS_ENV=test
+env:
+  global:
+  - GITHUB_OAUTH_TOKEN: abc123
+  - GITHUB_APP_ID: abc123
+  - GITHUB_APP_SECRET: abc123
+  - GITHUB_REPO: openpolitics/manifesto
+  - SITE_URL: https://groupthink.example.com
+  - EMAIL_DOMAIN: example.com
+  - BLOCK_WEIGHT: -1000
+  - YES_WEIGHT: 1
+  - NO_WEIGHT: -1
+  - MIN_AGE: 7
+  - MAX_AGE: 90
+  - PASS_THRESHOLD: 2
+  - BLOCK_THRESHOLD: -1
+  - PROJECT_URL: https://openpolitics.org.uk/manifesto
+  - PROJECT_NAME: The OpenPolitics Manifesto

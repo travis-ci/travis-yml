@@ -1,0 +1,17 @@
+sudo: required
+language: bash
+services:
+  - docker
+
+before_install:
+  - docker build -t yast-packager-image .
+  # list the installed packages (just for easier debugging)
+  - docker run --rm -it yast-packager-image rpm -qa | sort
+
+script:
+  # the "yast-travis-ruby" script is included in the base yastdevel/ruby image
+  # see https://github.com/yast/docker-yast-ruby/blob/master/yast-travis-ruby
+  # exclude the yardoc step, we run the more strict check:doc later
+  - docker run -it -e TRAVIS=1 -e TRAVIS_JOB_ID="$TRAVIS_JOB_ID" yast-packager-image yast-travis-ruby -x yardoc
+  - docker run -it -e TRAVIS=1 -e TRAVIS_JOB_ID="$TRAVIS_JOB_ID" yast-packager-image rake check:doc
+  - docker run -it -e TRAVIS=1 -e TRAVIS_JOB_ID="$TRAVIS_JOB_ID" yast-packager-image shellcheck src/bin/sw_single_wrapper

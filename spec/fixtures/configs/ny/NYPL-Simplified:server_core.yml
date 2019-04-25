@@ -1,0 +1,45 @@
+sudo: false
+dist: trusty
+
+addons:
+  postgresql: "9.3"
+  apt:
+    packages:
+      - postgresql-contrib-9.3
+
+env:
+#  - ES_VERSION="6.3.2" ES_DOWNLOAD="https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-${ES_VERSION}.tar.gz" SIMPLIFIED_TEST_DATABASE="postgres://simplified_test:test@localhost:5432/simplified_core_test"
+  - ES_VERSION="1.7.0" ES_DOWNLOAD="https://download.elastic.co/elasticsearch/elasticsearch/elasticsearch-${ES_VERSION}.tar.gz" SIMPLIFIED_TEST_DATABASE="postgres://simplified_test:test@localhost:5432/simplified_core_test"
+
+services:
+  - postgresql
+
+language: python
+
+python:
+  - "2.7"
+
+cache: pip
+
+before_install:
+  - pip install "setuptools>=18.5"
+  - sleep 10
+
+install:
+  - pip install -r requirements.txt
+  - python -m textblob.download_corpora
+  - wget ${ES_DOWNLOAD}
+  - export ES_PATH=elasticsearch-${ES_VERSION}
+  - tar -xzf ${ES_PATH}.tar.gz
+  - ./${ES_PATH}/bin/elasticsearch &
+
+
+before_script:
+  - psql -c 'create user simplified_test;' -U postgres
+  - psql -c 'create database simplified_core_test;' -U postgres
+  - psql -c 'grant all privileges on database simplified_core_test to simplified_test;' -U postgres
+  - psql -c 'create extension pgcrypto;' -U postgres -d simplified_core_test
+
+script:
+  - wget -q --waitretry=1 --retry-connrefused -T 10 -O - http://127.0.0.1:9200
+  - ./test

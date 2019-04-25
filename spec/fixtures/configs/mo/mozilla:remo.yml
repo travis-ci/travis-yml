@@ -1,0 +1,21 @@
+language: python
+dist: trusty
+sudo: false
+python:
+  - "2.7"
+before_script:
+  - mysql -e 'create database remo character set utf8; SET @@GLOBAL.wait_timeout=28800;'
+  - cp env-dist.travis .env
+install:
+  - npm install -g less
+  - pip install coverage tox
+env:
+  - TOX_ENV=flake8
+  - TOX_ENV=tests
+cache:
+  directories:
+  - $HOME/.cache/pip
+script:
+  - tox -e $TOX_ENV
+after_success:
+  - coveralls

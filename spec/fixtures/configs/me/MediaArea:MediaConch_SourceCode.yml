@@ -1,0 +1,47 @@
+language: cpp
+
+sudo: required
+dist: trusty
+
+env:
+  global:
+    - secure: "YQH8HxZdWoVav4EgCrSRTYbVajE2Bmqmr+xWyvVAN+JbfZ16Ra61c/I4+8hkDshSEcwDuqBK+qRk07pFnV2IfkuYYbvx2QYcO1sMDXMte/yHG0nMH21jvnk9Jat4Gf0CX565Z7cPcxfkq/9nYBlcXgB4AzGnW8ss0dJtLfDkW2LIAKosYc6HdGS+CdGMm2KLevNcOjoMdX9lW0LalL9oWOoxdianDzrvPeCfv4S8iZZhxvD2n7rlJHjM5R/GsnZFlpqH4NK3FcTojUkjU7hbZKkeJ51UAWgq35O+OWd6jdb1mcTmA4r0KWgUSHb1LtfYx41wN+gVBOuldMG7N3HyBePWitvCxDiClSBcdiVj3lGMSB+kc6B2HBC4+P9i0jraadCo6sC4NkB2pN2evtsA9l4BQXsvtIw3QglNpnR6njDKUIL6JcdfoSML9GLCgM7MkLEReDxj2dsf4tus6Jc5iaO7413m66hfqBBxAXCnL4jB/2dSLnM0yuCKgs2ZTcCYOxmn0iy57WsNWCOwdG0SLNz77h/6c2lUOqWcDRE3yVtcgGG12kWYT7REgmXLnmdmqq+IManwF5lV7xoeQeLw/uLkrdz8dkKlGOnaKshBkljlP4AaUSEuiZlqLXIR8g7/Cy4K2NsXhBqCUwz5SB4TGgaYxY46qk3sW/cFdIXACyc="
+    - secure: "RUmllAWXEZwWBVaWAUr00ojC99LwjDWho9mwmNCC8KtsK6GVfsvamOsSGMZhhjFRZUJifXGguJj0/zWLv/0sAV0rTESjMErK2WOmZKG2C/A+6LZC2N6JNsoWoMPaWrKs4V/py4HsOSXutlKCHMHzF+z9muwmvNvPIyAGemZHqRs+jVkDGXS94xgO3JrMagx3XEI5Z/T9Uhp9ZutvrgQyZan6u+5NI5BOS0FWceu2yYeUGr+sX7io+TZVRoTa+QGiSzQpcDs8kFiYCxQfoF3ZP5hsJmsDWmZynAUKSlNCKYZG8K4C5pY6N+IHfqvykVjxMYbbgG4Fywmpj71qOC0XESVnRp/pUfbBtjox/ImYBE4KPjg0yBh6n1Glt89Vk4GnGeCXYany2tnh8vgDPS68tVB44wC8R3dJKGloP9H0DIg6PLuxEAeWZjewnlbj569PoU8alFB5GSfgkE49gFff8cNJo20U+d83JPfhVsKJum+bhtOLSSmTGhalqXsjVuVhsarZuKL3Q+5WlOO2cg+hMhh/GlIUinxfevqYAVXU9cWvwVXGiujgw+ogLKqe5P2xM4MkU/n1PwzmxsrmEcIlVGKPAx/yoIBrn/Wi5xsUCSEqbhtUy36C1bUlygOKaxuXvUIcUjRsuXmQkH2ufSyweE1oG6GO6PSPFWEwDXXMz7c="
+    - secure: "OwQNdvbulLUV2MKMxiqJ+Un8CiPRns+eUDJr/6SCt8zMKb3Uu1ApQMiqXqb0aoB1Aa4Z4AbXnnY0NMoEjTtCqMix1sJ+3nRiiFPZFC17lKL+YO2z/Q+oWpK9lxGA8Yoopc9hVKay1y2DtCxyoK5WoMuOFT4hD4Iyu040Gcgy0knIa3/jUxf6HiNXIE5KHnipeOTLLYATINtTnG2477X/xjGMtCywxuScEZQ2m+RHxMLfNAe3kNliQIdIihLKv+04hEYETFM2IUykChW7UrycGDnnEPVqjlHicCnivxYfSmwny6hVUnDjGKsW84Mkw0EPdiewWyD1vov4ItWO5aAweZvcL0QpFqcaRfh9IRPmqRfNaRcT3F93y1W0CuDx6yFlRNeTNqp4t16O++ZElHDWlDayuHs5EwuO0WeU86NhtTUxfQEiTonUjMrEoMZvINnHwmoE9WKLou8loVwMOyRSE2JcjR+ezNPUOBBy5Lw9VXS9h5mvG6QpgZHzEr6L20aus23kzUC4Cp0SntB3gnIkmle9DGg/Yi6pDTKGx9fbiF1RkdIlpJI88Kyaxz5VEoMaxqmroQ4JJv8bLtK9M/1vMyg0XnKT9o5MytmhFw2irqta6O5B1KiABy/hrKYtNXb0/2zUtvJ8SGycaBMZXokivIFoP/WMN5E6gYTJg+h9ON8="
+
+matrix:
+  include:
+    - os: linux
+      compiler: gcc
+    - os: osx
+      compiler: clang
+
+before_install:
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]] ; then sudo add-apt-repository -y ppa:mc3man/trusty-media ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]] ; then sudo apt-get update -qq ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]] ; then sudo apt-get install -y libmms0 libxml2-dev libxslt-dev zlib1g-dev libcurl4-gnutls-dev libsqlite3-dev libjansson-dev libevent-dev libqt4-dev libqtwebkit-dev libxml2-utils pkg-config ffmpeg xmlstarlet sshpass ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]] ; then sudo curl -L http://stahlworks.com/dev/sfk/sfk-linux-64.exe -o /usr/local/bin/sfk ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]] ; then sudo chmod +x /usr/local/bin/sfk ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]] ; then sudo pip install git+https://github.com/vi/mkvparse.git ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]] ; then wget http://mediaarea.net/download/binary/libzen0/0.4.37/libzen0_0.4.37-1_amd64.xUbuntu_14.04.deb ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]] ; then wget http://mediaarea.net/download/binary/libzen0/0.4.37/libzen-dev_0.4.37-1_amd64.xUbuntu_14.04.deb ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]] ; then sudo dpkg -i libzen*.deb ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]] ; then git -C .. clone https://github.com/MediaArea/MediaInfoLib.git ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]] ; then pushd ../MediaInfoLib/Project/GNU/Library && ./autogen.sh && ./configure --prefix=/usr/local && make && sudo make install && popd ; fi
+
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]] ; then brew update ; true ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]] ; then brew install libxslt sqlite jansson libevent qt ffmpeg sfk xmlstarlet ; true ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]] ; then sudo pip2 install git+https://github.com/vi/mkvparse.git ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]] ; then git -C .. clone https://github.com/MediaArea/ZenLib.git ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]] ; then pushd ../ZenLib/Project/GNU/Library && ./autogen.sh && ./configure --prefix=/usr/local && make && sudo make install && popd ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]] ; then git -C .. clone https://github.com/MediaArea/MediaInfoLib.git ; true ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]] ; then pushd ../MediaInfoLib/Project/GNU/Library && ./autogen.sh && ./configure --prefix=/usr/local && make && sudo make install && popd ; fi
+
+  # get working version of toolchain.prf for qt-5.9.2
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]] ; then sudo curl -o /usr/local/opt/qt/mkspecs/features/toolchain.prf http://code.qt.io/cgit/qt/qtbase.git/plain/mkspecs/features/toolchain.prf?id=62013d77721820976102581b4cbd31404c109903 ; fi
+
+script: export PATH=/usr/local/opt/qt/bin:$PATH && cd Project/GNU/CLI/ && ./autogen.sh && ./configure && make && make clone_sample_files && make clone_checks_files && make check && cd ../../Qt && ./prepare INCLUDEPATH+=/usr/local/include CONFIG+=c++11 -after QMAKE_MACOSX_DEPLOYMENT_TARGET=10.9 && make
+
+after_script:
+ - cd $TRAVIS_BUILD_DIR/Project/GNU/CLI/test/ImplementationChecks/matroska
+ - if [[ "$TRAVIS_OS_NAME" == "linux" ]] && [[ -n "$RUNSERVER" ]] ; then sshpass -p "$RUNSERVER_PASS" sftp -q -o StrictHostKeyChecking=no $RUNSERVER_USER@$RUNSERVER:files <<< $'mput *_MediaArea_*.txt' ; fi

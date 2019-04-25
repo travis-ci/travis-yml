@@ -1,0 +1,34 @@
+language: scala
+script: sbt +test
+jdk:
+- oraclejdk8
+env:
+  global:
+    secure: 6GkrQYe4SXJoncx8048IZDdI7Ni10NRLf2QCKCnis7x5SnH2zWGfTZfkAwIgTGLZn+ZO0gg5MZ6mqeupspiIhXUapcPuPNRCTHCM+rCCB/7WWC+WzWuLFBmmFPzChrFPucxRMLSGPL/lhwlM5K+jpIILE5KnGpB1whCwSUGcKdp9lsbAI4FfiU7rsQ/cNXJtbNMl8/vNRwdymIMbji77AUhxf2TKBV30jF7+g+9GXjE+Ggmhd02kkrIqSlcSvO4hXQNiPJ4opA6HTWrv0mFXmPbpImYzir89OWToJq+7RUtNh3GjwSprCagGAZsWEg5HeglJX3m984t7Rj+42LECzV5V8rLxyT7HlIR+wtKn4M+82JsbCw9rJdcOFBP/VqlsPjdNx/dWnBx3WUK4T9Ok2MiFFjnThlAhseQGuQ9mW9Bk/LG32tkNojuqwKMyZu1+KyBi1YnHKSMsC5LEhaQpAa/co4+0LsB0bxBJRHhDuaOGQZLlOnrFZRX22JpE7tjt4rYR4RPVi6NGVgl8kA0CBxbCsKOhZcGitP3Vdtx/syU8MD8iD8H15SFBLZ9xhkz6cm8ILm24NtVIIkvaLVB1jd0L5FUvV7vyfOg1/sOSVvuEJrvempig9mr5vUEOWM+r4doxnLmzJTDDl0sL1AevBfBbg8ULwxGc6OMlm443GTc=
+before_install:
+  - nvm install 6
+  - curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
+  - echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
+  - sudo apt-get -qq update
+  - sudo apt-get install -y yarn
+before_deploy:
+- openssl aes-256-cbc -K $encrypted_fb9a491fd14b_key -iv $encrypted_fb9a491fd14b_iv
+  -in .travis/keys.tar.enc -out .travis/keys.tar -d
+- tar xvf .travis/keys.tar
+before_cache:
+  # Cleanup the cached directories to avoid unnecessary cache updates
+  - find $HOME/.ivy2/cache -name "ivydata-*.properties" -print -delete
+  - find $HOME/.sbt        -name "*.lock"               -print -delete
+before_script:
+  - sudo chmod +x /usr/local/bin/sbt
+deploy:
+  provider: script
+  script: sbt +publishSigned "sonatypeReleaseAll com.criteo"
+  skip_cleanup: true
+  on:
+    tags: true
+    branch: master
+cache:
+  directories:
+    - $HOME/.ivy2/cache
+    - $HOME/.sbt

@@ -1,0 +1,21 @@
+---
+language: java
+
+install: mvn --batch-mode -V --quiet -DskipTests=true -Dmaven.javadoc.skip=true validate
+
+script: mvn --batch-mode -V clean verify
+  
+notifications:
+  email:
+  - niklaus.giger@member.fsf.org
+jdk:
+  - oraclejdk8
+
+cache:
+  directories:
+  - $HOME/.m2
+
+before_script:
+  - "export DISPLAY=:99.0"
+  - "sh -e /etc/init.d/xvfb start"
+  - sleep 3 # give xvfb some time to start

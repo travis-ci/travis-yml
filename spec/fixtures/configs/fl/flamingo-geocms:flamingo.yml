@@ -1,0 +1,84 @@
+dist: trusty
+sudo: required
+language: java
+
+addons:
+  postgresql: "9.6"
+  hostname: flamingo
+  hosts:
+    - flamingo
+  apt:
+    packages:
+      - haveged
+      # - git-lfs should be installed on trusty images
+
+services:
+  - haveged
+
+before_install:
+  - unset _JAVA_OPTIONS
+  - export PAGER=cat
+  # create Flamingo database
+  - psql --version
+  - psql -U postgres -d postgres -c 'SELECT Version();'
+  - psql -U postgres -a -c "CREATE ROLE flamingo4 LOGIN PASSWORD 'flamingo4' SUPERUSER CREATEDB;"
+  - psql -U postgres -a -c 'create database flamingo4;'
+  - psql -U postgres -a -c 'ALTER DATABASE flamingo4 OWNER TO flamingo4;'
+  # see https://github.com/travis-ci/travis-ci/issues/9309#issuecomment-371492492
+  - ls -la ~
+  - sudo chown travis:travis ~/.gitconfig
+  - ls -la ~
+
+install:
+  # load pki-overheid G2/G3 certificates
+  - wget http://cert.pkioverheid.nl/RootCA-G3.cer
+  - sudo keytool -importcert -file ./RootCA-G3.cer -alias G3 -keystore $JAVA_HOME/jre/lib/security/cacerts -storepass 'changeit' -v -noprompt -trustcacerts
+  - wget http://cert.pkioverheid.nl/RootCA-G2.cer
+  - sudo keytool -importcert -file ./RootCA-G2.cer -alias G2 -keystore $JAVA_HOME/jre/lib/security/cacerts -storepass 'changeit' -v -noprompt -trustcacerts
+  # install without testing
+  - travis_wait 40 mvn --settings .travis/settings.xml -Ptravis-ci-prebuild install -U -DskipTests -Dtest.skip.integrationtests=true -B -V -fae
+
+before_script:
+  - unset _JAVA_OPTIONS
+
+script:
+  - ulimit -a
+  - free -m
+  # execute unit tests
+  - mvn -e clean test -B
+  # run integration tests on all modules except viewer-admin
+  - mvn -e verify -B -Ptravis-ci -pl '!viewer-admin'
+  # run integration tests on viewer-admin module only
+  - mvn -e verify -B -Ptravis-ci -pl 'viewer-admin'
+  # run code coverage
+  #- mvn cobertura:cobertura -Ptravis-ci
+  #- mvn cobertura:cobertura-integration-test -Ptravis-ci
+  # on oracle java 8 run a javadoc build to check for errors
+  - if [ "$TRAVIS_JDK_VERSION" == oraclejdk8 ]; then
+         mvn javadoc:javadoc;
+    fi
+  # on oracle java 8 run a test-javadoc build to check for errors
+  - if [ "$TRAVIS_JDK_VERSION" == oraclejdk8 ]; then
+         mvn javadoc:test-javadoc;
+    fi
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
+  
+jdk:
+  - oraclejdk8
+  - openjdk8
+
+os:
+  - linux
+
+matrix:
+  fast_finish: true
+
+cache:
+  directories:
+  - $HOME/.m2
+
+notifications:
+  slack:
+    secure: mYodD7XUMo+NQ0InmhW4VqYaoOg5GDupzoWBHZIp9WlA5FrkDw9aWqt730BxTYMAkImYZdArxiyPsD05BNWM1Y9Cf8OJRpKlcSRXYvl6rHzTiOT3PUjXn7FBfh10lxIj4u3q3Tg9YOU9mS9WSMZFss1GV0ZuNt2RASAsebDbsys=

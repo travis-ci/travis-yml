@@ -1,0 +1,30 @@
+language: ruby
+sudo: true
+
+rvm:
+- 2.5.0
+
+notifications:
+  slack:
+    secure: GCQ0Kq2FWM7tXtOeV4PKDzu11b9rzQ/OQRNGv46uMwprtFgb3/6HP+Ns90ITarScdqwGoB5BaXS1UxQefKG69mNCOWHdWDw9d8VCXfLvhaFVIhSJ/EULBGgHn0DPYFp4tgkQ12ZIsL7+CW+A8tpZtcnfGnkg8ORiz6A0H5HAkra7lGe87cW2bYh+WN+mfv73XMW+vZ9K8dnPy8UYaFQ95zs85IeLJ4f7YKA98VSJFziZaEbjKXJwHBJRef/5q0Efdg/iLQybLqn7xTHPTnfxr6fI7TBRqouuxqhKR1UR+bYRdsx9mvQQyrwzsr2FDz1pLJEfC9YFumfq1h/L0Ryzuyaqj+AsUH2VOozkH66jMtZoHHCJ3pupJmDQU8tPBM6POhv28QTWJXWHb4PVH/PysAN0JvlNm8e5d3NrDMDwIjTvvrjUuHajLYjhX14WCoYHyQhIm+QxNFdl9URQUzCJZZU+iGY5fNtHEmdXQCJM2cCsrab+CgUitehkS5rqr6Vi3IjX35R53AkgdSCCSxqdLDy7yHlYDqwa3KX+fqz+Hjp5iyF6jnUJ1xdWh/VvgpBTWK99p7MUGfTjCXLgqSf8YSVYfOfxIrou1gqY8HlJqU+TMyfKvgz8UIGcrWMRZh2peBjHlLphVIV9A6ucEilnK6v3aYlZ/MwAumKD6otrpn0=
+
+services:
+  - postgresql
+  - docker
+  - redis-server
+
+before_install:
+  - gem update --system
+  - psql -c 'create database travis_ci_test;' -U postgres
+  - cp config/database.yml.travis config/database.yml
+  - npm install
+
+script:
+  - bundle exec rspec
+  - bin/dfeatures
+
+deploy:
+  provider: script
+  script: bin/shipit
+  on:
+    branch: master

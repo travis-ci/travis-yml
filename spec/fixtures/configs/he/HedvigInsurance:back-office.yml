@@ -1,0 +1,13 @@
+language: java
+sudo: required
+services:
+- docker
+before_install:
+- bin/docker_auth.sh
+after_success:
+- bin/docker_push.sh
+- bin/kubernetes_deploy.sh
+cache:
+  directories:
+  - $HOME/.m2
+group: deprecated-2017Q4

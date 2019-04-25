@@ -1,0 +1,28 @@
+# Use matrix to run tests for multiple languages in parallel
+matrix:
+  include:
+    - language: node_js
+      node_js:
+        - "10.15.3"
+      script:
+        - npm run lint
+        - npm run test:raw
+        - npm run build:once
+
+    - language: python
+      python: 3.6
+      before_install:
+        - cd simulation
+      install:
+        - pip install -r requirements.txt
+      script:
+        - flake8 src/
+        - python src/main.py --lqr --no-animate
+
+notifications:
+  email: false
+  slack:
+    rooms:
+      secure: RKW2Fyda7cPnSVvUeLkr2x63GT4Wt24YWIE5/sbttw1lMHd8aa3ZOzbgxWsUsszBgbArCB7W4g9xNG9QpKB7/VSub8qZgSjiA3DX4EHzcXJYOcqzW1w3KLxfU1hC9q6qTS8bFR88lnvC2WJ+xcqX+rcAR8SMI1meIR/q61aecJN5b/IhXTVMtGqQvin/Kky2PButQuUmwrBu99ixghKE8xC+fLyzA+pNyUJRiEHzYEK4Tu9Ljir+9afrf5naSODmjFzuob0SiSJGrtUsQWLVvZZHjuOYokPHQ3O1no54BxpWroMJfO9k2pDfw0uNZFeyeL8OipY/IdKIGmqqGBtXHTdIYe5elA+ymq9qkyLq3S7Kv96ZytuyQbmeIoAFoI3SdGwvAs39adqdHpS9XjU+zw1lfwIxbZLcuSS38V5mMQQZgcDCkR3BuVZgMcq8AY6g6thLhhusOt/BjwpvZgPuBIEvj0X9DFaElz2fUQOIT8Z+Js45ypWkiucptyGwKJPfdCO9fvC1m9aq/VaQVy2UCDFt0J50ddlyYkQXpBbRrQc85td/oxlmT8C+fEYNKRWFOXWaJIR/gJht/eY644uITQxeoMyJMPUvvlUDQCcmk+JPz7qdRtZdOAI/7c5mu+ZstAjRfI/xTdXcQm+eznJajkphGBqkaun3/uLIDGH/n7c=
+    on_success: change
+    on_failure: always

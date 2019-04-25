@@ -1,0 +1,38 @@
+language: python
+env:
+  global:
+    - PLANEMO_SKIP_REDUNDANT_TESTS=1
+    - PLANEMO_ENABLE_POSTGRES_TESTS=1
+    - PLANEMO_SKIP_GALAXY_CWL_TESTS=1
+    - PLANEMO_TEST_WORKFLOW_RUN_PROFILE=travisworkflowtests
+matrix:
+  include:
+    - python: 2.7
+      env: TOX_ENV=py27-lint
+    - python: 2.7
+      env: TOX_ENV=py27-lint-readme
+    - python: 2.7
+      env: TOX_ENV=py27-lint-docs
+    - python: 2.7
+      env: TOX_ENV=py27-lint-docstrings
+    - python: 3.6
+      env: TOX_ENV=py36-lint
+    - python: 3.6
+      env: TOX_ENV=py36-quick
+    - python: 2.7
+      env: TOX_ENV=py27
+    - python: 3.6
+      env: TOX_ENV=py36
+  allow_failures:
+    - env: TOX_ENV=py27-lint-docstrings
+
+install:
+  - pip install tox coveralls
+
+script: tox -e $TOX_ENV
+
+after_success:
+  - coveralls
+
+services:
+  - postgresql

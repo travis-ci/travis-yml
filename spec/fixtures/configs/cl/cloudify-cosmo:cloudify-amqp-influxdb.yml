@@ -1,0 +1,18 @@
+sudo: true
+language: python
+python:
+  - "2.7"
+services: 
+  - rabbitmq
+env:
+    - TOX_ENV=docs
+    - TOX_ENV=flake8
+    - TOX_ENV=py27 INFLUXDB_VERSION=0.8.8
+before_script:
+    - sh -c "if [ -n \"$INFLUXDB_VERSION\" ] ; then sudo ./install_influxdb.sh \"$INFLUXDB_VERSION\"; fi"
+install:
+    - pip install tox
+script:
+    - tox -e $TOX_ENV
+notifications:
+    flowdock: 1f4ec6febcf1ac9b35ae6c1f0049471f

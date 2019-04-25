@@ -1,0 +1,56 @@
+before_install:
+- sudo rm -f /etc/mavenrc
+- export M2_HOME=/usr/local/maven
+- export MAVEN_OPTS="-Dmaven.repo.local=$HOME/.m2/repository -Xms1024m -Xmx3072m"
+
+install: true
+jdk:
+- oraclejdk8
+language: java
+sudo: false
+
+env:
+  global:
+    - secure: "KpnsgH9APDVDI/d7tiFEezS3x0uw+3FU80u1YxOU7BTiiuCGUOvdTq3HlbSZvYqH8yUodpnICEmyrnuARyKiTzjXDMjUkENxGr0qUGvf7BSwrP+kTZmPXUorh44T0RhviYAMdzKIfylPxXESxIb2nlQJ7R7Sa254wsF6GwQWNiiMPnVu8UuDDg7xGk+HH9SojtTQlIZz43ixEHPx3Vz9ESm+nH8drQYHGpGyGnb/rx8i8HKGbERjI78Xn+nRTwYNMXo9104w59mV9rN5JBRSrkUCE4zNK2xYDLQ0tVGhWTSdZKPWGB+ZAawp0katbuifbTZi8gQ5evKzScI1l1vbhiXlEFLcdB0BGPGQUiltogWg6wwKiN7djgh/GNp3g0PHGaSvQqXD8rZayc4gaEAkiPutpLnksYop2xQUhF70/5/76gQI0Bodxid49DPkrPZaXJ4zts/jGQrgHHkM8lZu/zdtqHkoasomjY25+b/QKzuIAL9Eve2xHOcqSuRbsFIlT+11Yxo3nULDPKl6gD+95JMdiFC8YZCAJEUcqm9ieeGaSCcJIrnUtqO0+w9PvArsfD+OFTLDYUNvNyS1ZnXbtMahNPfeYEtRPcmV8v7974wPpIqlhyiRpNSqtlyGtDyO74VeaFeo5ELUMqSmEk6FUmonzLZXBkdvZxTEDTU1iGE=" #Dockerhub email
+    - secure: "MZQIZ3RbC3YPRPjf2RUum2387bWLyrurNr9bbzEWP0iikfPgGQ5/mU1xdEWiL+x1Or0/sXwVHfvy2riHlsgOuBq4X9KLrIicYYi0q/pOcUGImIMA4oNT+DYnbjZ0gzZsbLK5xReOWOJG9j5Pf/1FRzt8rDdspMFP82llROzGkwz8/d8VqD2Z9za2IVeUqXypbzNR9/gZuFWglhg24abVbzDyg3Wh2CqIdaN/4W8NYg0HlX+oMWPQNfLEud4BHY683+1bfDOK5zedAVeAqd58RFesiAntBo9BA/AD5QKEEIj5GYG0IvEoKtOqPeSBOD8niOUz33vbdEEoZ3iBiWUgP85PWNQtzR0m95j+ObynhsXitsUpq92QVDoOXMLe99eW17qM7oeyGuF6YL+oeVgzPDH4aMl79KJXXCCyxCSg46AoRMF2EXyVh+uXHF+I6YrFkjVHPBh0TdhnXg1rsd+Iyf5KTtoWRbQZk5bHHfI87A/1Guy5caPWPlfJQHbYuvab+vd9o5DyeR9Oz7HD1NDvvYTbuIEaUyt/frNt1vZr9Be9gp4smvdMGfWH57eqUuGRcnsZIDnFI7CL4OHQC/EKC8IXlXsvzeaba0aHWy44edHaXoYinGcG1yIu+Z8ZHs63IH0RW1IIjJAA/L7UUoqTBGwlrTgSAuv+48+EFAdlOFI=" #Dockerhub user
+    - secure: "BgM5FF1+mD4iCuJPhYlIMZf0tupHlObhmJ570uKyuOEJoBA0+GguSsvhx9XIddfWe8Fu2cjUlWCK5Xvm2+uyvk/xVVPL5WRXMgvm0mYVwy6Asq3SO5EGrqbfOe7wTBcmARCYJxLKk4uPtCwhnxyGBuhRRf5mZBTumvx4OsiXHpOajHuYjvKNJgh2DtGsMx9++ZR2kBXJV+2B7QaNdqaDprTQpyNFinxVxo2H4oxcO1A8zKvrCj3i5ShKwQL3Z9SA0Ki/mIqU8HX4BKpYxOJAtqgKBYYhaSck5RNho4E0Mx2kp+VoFWVj523vMgivDpWJ14TzheZvJnCROR1KhOZSoFBvGgHz6q4trPlp4qOwFmzIoVhOqjnqJVwdwdm7QK3R5VaAkQ8NW2QI70d1yKlxkXc7fewXT/almN5UFvYSZz0NyTjNpAmDF6j1T5AqYXgh+XzkaWnipfvoj0Y/RKENCXpJyEpW6o3n5PAarq2OwnB8NO15jlssF0pk+36T/TQEYsVg3DgpDJerxO9P01/NRXSOjbt9oRp63ukadGC8tjKC2Z1Wi7SwPWxyJM4F47TKCG26dh8Me4g0LX3gzxwfAmELdiYs943NZJTpZbE4MBEhc+NFY+Ljbsyv4XKAA2X6xmpYgt8/sR3w58A7T75ZLw/2SJuIMJebzQFxmJiChV0=" #Dockerhub Password
+    - COMMIT=${TRAVIS_COMMIT::8}
+
+addons:
+  sonarcloud:
+    organization: "hashmapinc-github"
+    token:
+        secure: "fcoReZvq0MHb2zLRkvWIZyvdApJRUcoalErrylo5B2SZ/Vg7Bbc1seCo5sbb/K02f+CdpompnRKtSDP0ULadxSIHZZMZZwV9Gm2xMiwNdlJ63xqE40SF8w24gL3s2RSL/udmc+lPHBMtmWt9nVfXfyUWt429jnNRJB+e8zYqEgSip9iKVjiaDM8ZfJ8RqR0Fz0ZTvhlPa33NDCszhIDsactxAW8yTkXxZ0IQ1MDyAdQ7AiGc+y7w0Iq+XFH9BKwBCXY7KbEwaESz9Hc4UtJcobS960d1fWklJNAUQplZQ3sS3Ga68Nvnwm5MmYUP1PWL7wDURTewf54xgWuRJ5hYRXUzHAMKDQyMxcYCYqg50Q40w5hJHKet1wctX5gr9CXvOH6JR9SlZGsqjVH/tVxZdDvcFm10MlNLHntREiTybdc7kNnRBCDdNTlUs2A68/fXQtl0agl82Y5hxf+qbczTFqnUE2lW2LbLgDL2whmhrwnMvoiy6Bt8srWaHGsQ9U5O5AhpPOW0eIoloHWpj/ZilDdpkNznkpG80BeByhIt2fMoGP2tFRtyElnscio+LXJialov7XJLr2WjM9J1Hz2irYoLACg6z3cojtkLKrWYJIKTAtqgmePp/pWkEkCPR+mzLVz8dsK5EO0z41YD8HM1n9CQ0UqqLXhtpYBvWH9O4Ww="
+script:
+- mvn validate
+- mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent package sonar:sonar
+
+cache:
+  directories:
+    - '$HOME/.m2/repository'
+    - '$HOME/.sonar/cache'
+
+after_success:
+  - cp $TRAVIS_BUILD_DIR/application/target/tempus.deb $TRAVIS_BUILD_DIR/docker/tb/tempus.deb
+  - docker login -u $DOCKER_USER -p $DOCKER_PASS
+  - export REPO=hashmapinc/tempus
+  - export TAG=`if [ "$TRAVIS_BRANCH" == "dev" ]; then echo "dev"; else echo "latest" ; fi`
+  - docker build $TRAVIS_BUILD_DIR/docker/tb/ -t $REPO:$TAG
+  - docker push $REPO:$TAG
+
+before_deploy:
+  - git tag "1.4.0-SNAPSHOT" --force
+
+deploy:
+  provider: releases
+  api_key:
+    secure: "KXCAuF5zg7je0OSJOyCcT6V6vv11FCb/VGVJkAnVYCYXvofx4a4Uxm4m6xqRCXp8WWJGzYKG0ivVuCdSDVk2+VvMzB6WGLISK3vyqUluHHx1JwMW/5GlO2DhbHuUjrMMlwZ9eWsJDAo4ANfckBrDdkUBc8glKw2kvq4XG6dyOuZe02zSCudcfxFahmsSWV8a1vannZyLfpHLvmcwqQQAZP2k1lSs0vHpjDyrXB31871Ff4J/LASj6QeZXHYuJXBHARrm8XFbUA1vnbdVY15QC5SLAAcr4BmJDIGup7vWicRohOMO0oSHA9Heewn+VNaemceGESVsxmgdJ+r4EAG8Qo++JC9m5Gk2yEBf8ZtlXEMvMwuZKJLPfcwcBXGcuplwyEwxgsj+Eyw9RUgLl2M8Tn4PtoOzNQjk6SC8U2wCxcD56h4b/jm/sUvGQWVkHJBuwmih9kOZlk5kE22R0rQL0GovbnHwi7u6bvTNER5YUEg+K1sWUWu7AjSjtTgf7pKVcvKuBT4a24nSpABINaD3gQIMpDGLvY3Lmn1tkS+Jr8LI8rAXZHZXBR0jkA/9YgLD7/Iz+iWFBv7FW2mvaWCNf2snxAb32iG2lKlpH298QlM/KK7bpaRbqjF+e26nXOHABPYW7xGpXotxTHBT/fhpWvZY781W2rYnRIz7ER0KvEw="
+  file:
+    - '$TRAVIS_BUILD_DIR/application/target/tempus.deb'
+    - '$TRAVIS_BUILD_DIR/application/target/tempus.rpm'
+    - '$TRAVIS_BUILD_DIR/application/target/tempus-windows.zip'
+  skip_cleanup: true
+  overwrite: true
+  on:
+    all_branches: true
+    condition: $TRAVIS_BRANCH =~ ^master|dev$

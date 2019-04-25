@@ -1,0 +1,46 @@
+language: android
+jdk: openjdk8
+sudo: false
+notifications:
+  email: false
+android:
+  components:
+  - build-tools-25.0.3
+  - android-25
+  - extra-android-m2repository
+  - extra-android-support
+script:
+- node ./autoMake.js
+- ./gradlew assembleRelease  --info
+- ls app/build/outputs/apk/gxIconDIY.apk -l
+- jarsigner -verbose -keystore weng.jks -storepass $KEYSTORE_PASS -keypass $ALIAS_PASS
+  -signedjar app/build/outputs/apk/gxIconDIY.signed.apk app/build/outputs/apk/gxIconDIY.apk
+  $ALIAS_NAME
+- node ./autoUpload.js
+deploy:
+  provider: releases
+  api_key:
+    secure: ISrf69+aqhnmkwEAMC+hlLKRcdAXKXRZj5K0j+3NMpWLgOeK0CXDKi8tfK32ShDxjbFyClfDvYDrMQXOmf1D5D3toNAoVnjoKF2jqbqcGBQ/PKgpolFK6wUCFW8UMavk2sveVRbpui3zfonUWOJasmdns+O3Jx0G2YeJiMsNUESpOZndSm81lO2keulR+xnXblPzksYWPWtRf3iw+mtrtBJYeP36I1keOj/Tk4zahfbQbbn1ERTsGKxvyBFuCLdCEA37t76J5t/rpHvJegHfVUp0oCsGC1IUTF0TVxZXjWqvNDfrizwc+1B6TkJv/k2J+Zpr+iMdpvQJmYRJadHAr4s6183LUC1JuOM4Gy3IEkLuPWjUG+zNE0110wkkrwhZdtPoCvQM5TVE1HxTUp+2Y++iNOmFngAQl4mZY6fsF5a4Tyd89eMNWCxA6IoX0yMDP7dqyDH6RZtKRcG056hSTkjpOfXEblSfANweFTzG3XBO6wLy3kNrCNsPYZTyjTtaH6b72Th6n4VfMJAKplMO27KZJdvUNZzpWMiLIPAFc7k2kCwZIYuMiWEQsOwJTBLQ5xfQstFXRhmkjx+dAlCrZxMyTXNLYGwZvCoUHFamSZxF9uYEJpSlj/OVVL8T5EUHYhq4iFduGl29hE4Pbt9fPcrllJd3M5ibH9KHPnNhwx8=
+  file: app/build/outputs/apk/gxIconDIY.signed.apk
+  skip_cleanup: true
+  on:
+    repo: xytoki/GxIconDIY
+before_install:
+- openssl aes-256-cbc -K $encrypted_ed3d75063656_key -iv $encrypted_ed3d75063656_iv
+  -in weng.jks.enc -out weng.jks -d
+- chmod +x gradlew
+- nvm install 8
+- node --version
+- npm install
+before_cache:
+ - rm -f $HOME/.gradle/caches/modules-2/modules-2.lock
+cache:
+ directories:
+ - $HOME/.gradle/caches/
+ - $HOME/.gradle/wrapper/
+ - $HOME/.gradle/nodejs/
+ - node_modules
+ - _iconCache.json
+ branches:
+  only:
+  - master

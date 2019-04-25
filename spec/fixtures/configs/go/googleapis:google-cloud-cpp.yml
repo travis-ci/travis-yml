@@ -1,0 +1,187 @@
+# Copyright 2017 Google Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+group: travis_latest
+sudo: required
+language: cpp
+
+# TODO(#19) - this is a skeleton matrix, needs to be designed and completed.
+# TODO(#62) - enable a SANITIZE_MEMORY=yes build when we eliminate the false positives
+matrix:
+  include:
+    - # This is the only macOS entry in the matrix.  It is disabled on pull
+      # requests because Travis often has long backlogs for macOS.
+      os: osx
+      osx_image: xcode7.3
+      compiler: clang
+      env:
+        OPENSSL_ROOT_DIR=/usr/local/opt/libressl
+      install:
+      - git submodule update --init
+      - ci/install-retry.sh ci/travis/install-macosx.sh
+      script: ci/travis/build-macosx.sh
+      cache: ccache
+      if: type != pull_request
+    - # Compile on Travis' native environment with Bazel
+      os: linux
+      compiler: gcc
+      install: ci/install-retry.sh ci/travis/install-bazel.sh
+      script: ci/travis/build-bazel.sh
+    - # Compile on Travis' native environment with Bazel
+      os: linux
+      compiler: gcc
+      env:
+        TEST_BAZEL_AS_DEPENDENCY=yes
+      install: ci/install-retry.sh ci/travis/install-bazel.sh
+      script: ci/travis/build-bazel.sh
+      if: repo =~ ^googleapis/ or head_repo =~ ^googleapis/
+    - # Install the google-cloud-cpp libraries and test that one can use the
+      # installed versions.
+      os: linux
+      compiler: clang
+      env:
+        TEST_INSTALL=yes
+        DISTRO=ubuntu-install
+        DISTRO_VERSION=18.04
+      if: repo =~ ^googleapis/ or head_repo =~ ^googleapis/
+    - # Verify that we can compile shared libraries, and verify that the ABI is
+      # not changing, or rather, that if there are changes the changes are
+      # intentional.
+      os: linux
+      compiler: gcc
+      env:
+        CHECK_ABI=yes
+        TEST_INSTALL=yes
+        CMAKE_FLAGS=-DBUILD_SHARED_LIBS=yes
+        BUILD_TYPE=Debug
+        DISTRO=ubuntu-install
+        DISTRO_VERSION=18.04
+      if: repo =~ ^googleapis/ or head_repo =~ ^googleapis/
+    - # Run clang-tidy, clang-format, and generate the documentation.
+      os: linux
+      compiler: clang
+      env:
+        CMAKE_FLAGS=-DGOOGLE_CLOUD_CPP_CLANG_TIDY=yes
+        BUILD_TYPE=Debug
+        DISTRO=ubuntu
+        DISTRO_VERSION=18.04
+    - # Build with the AddressSanitizer.
+      os: linux
+      compiler: clang
+      env:
+        CMAKE_FLAGS=-DSANITIZE_ADDRESS=yes
+        BUILD_TYPE=Debug
+        DISTRO=ubuntu
+        DISTRO_VERSION=18.04
+      if: repo =~ ^googleapis/ or head_repo =~ ^googleapis/
+    - # Build with the UndefinedBehaviorSanitizer.
+      os: linux
+      compiler: clang
+      env:
+        CMAKE_FLAGS=-DSANITIZE_UNDEFINED=yes
+        BUILD_TYPE=Debug
+        DISTRO=ubuntu
+        DISTRO_VERSION=18.04
+      if: repo =~ ^googleapis/ or head_repo =~ ^googleapis/
+    - # Generate code coverage information and upload to codecov.io.
+      os: linux
+      compiler: gcc
+      env:
+        BUILD_TYPE=Coverage
+        DISTRO=ubuntu
+        DISTRO_VERSION=18.04
+    - # Compile with tests disabled.
+      os: linux
+      compiler: gcc
+      env:
+        BUILD_TESTING=no
+        CHECK_STYLE=yes
+        GENERATE_DOCS=yes
+        CMAKE_FLAGS=-DBUILD_TESTING=OFF
+        DISTRO=ubuntu
+        DISTRO_VERSION=18.04
+    - # Compile with exceptions disabled.
+      os: linux
+      compiler: gcc
+      env:
+        CMAKE_FLAGS=-DGOOGLE_CLOUD_CPP_ENABLE_CXX_EXCEPTIONS=no
+        DISTRO=ubuntu
+        DISTRO_VERSION=16.04
+    - # Compile on Fedora with libc++.
+      os: linux
+      compiler: clang
+      env:
+        CMAKE_FLAGS=-DBUILD_SHARED_LIBS=ON
+        DISTRO=fedora
+        DISTRO_VERSION=29
+        USE_LIBCXX=yes
+      if: repo =~ ^googleapis/ or head_repo =~ ^googleapis/
+    - # Compile on CentOS.
+      os: linux
+      compiler: gcc
+      env:
+        DISTRO=centos
+        DISTRO_VERSION=7
+      if: repo =~ ^googleapis/ or head_repo =~ ^googleapis/
+  allow_failures:
+    - # For the moment, allow failures in the ABI check builds.
+      # TODO(#694) - remove this when the ABI is declared stable.
+      os: linux
+      compiler: gcc
+      env:
+        CHECK_ABI=yes
+        TEST_INSTALL=yes
+        CMAKE_FLAGS=-DBUILD_SHARED_LIBS=yes
+        BUILD_TYPE=Debug
+        DISTRO=ubuntu-install
+        DISTRO_VERSION=18.04
+
+script:
+  - ci/travis/build-linux.sh
+
+# We do not need to recursively extract the submodules. This saves some time in
+# the builds, the default install step then performs a lighter weight module
+# initialization than what Travis does by default.
+git:
+  submodules: false
+
+install:
+  # The git default is to recurse, override it because we do not need to and
+  # that saves time.
+  - git submodule update --init
+  - ci/install-retry.sh ci/travis/install-linux.sh
+
+after_success:
+  - ci/travis/upload-codecov.sh
+  - ci/travis/upload-docs.sh
+  - ci/travis/dump-logs.sh
+
+after_failure:
+  - ci/travis/dump-logs.sh
+
+cache:
+  directories:
+    # Cache the Bazel directories, in builds that do not use Bazel this is
+    # empty and trivial to cache.
+    - $HOME/.cache/bazel
+    - build-output/ccache
+  timeout: 900
+
+before_cache:
+  # Do not save the Bazel installation, reinstall each time, it fails to install
+  # if the installation is in the cache.
+  - rm -fr ${HOME}/.cache/bazel/_bazel_${USER}/install
+
+notifications:
+  email: false

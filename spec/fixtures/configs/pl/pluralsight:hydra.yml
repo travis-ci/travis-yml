@@ -1,0 +1,15 @@
+language: scala
+sudo: required
+dist: trusty
+env:
+  global:
+    - _JAVA_OPTIONS="-Dakka.test.timefactor=3"
+scala:
+   - 2.12.4
+jdk:
+   - oraclejdk8
+script:
+  - sbt ++$TRAVIS_SCALA_VERSION clean coverage test coverageReport
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)

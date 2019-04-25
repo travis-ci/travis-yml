@@ -1,0 +1,31 @@
+language: ruby
+
+sudo: false
+
+rvm:
+  - "2.3.1"
+
+env:
+  - DB=postgresql HOST=localhost:1025 DOMAIN=test.example.com
+
+addons:
+  postgresql: 9.3
+
+before_script:
+  - bundle exec bundle-audit update && bundle exec bundle-audit check
+  - bundle exec rake db:create RAILS_ENV=test
+
+script:
+  - cp config/secrets.example.yml config/secrets.yml
+  - bundle exec rake db:migrate
+  - gem instal mailcatcher
+  - mailcatcher
+  - bundle exec xvfb-run rspec
+  - bundle exec rake db:seed RAILS_ENV=test
+
+notifications:
+  email: true
+  slack: bcs-io:j4u422myY0CcryFquMCAOi45
+  webhooks:
+    on_success: change
+    on_failure: always

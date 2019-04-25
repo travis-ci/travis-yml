@@ -1,0 +1,48 @@
+dist: xenial
+sudo: "required"
+
+language: "go"
+
+go:
+    - 1.11
+
+env:
+  global:
+    - GO111MODULE=on
+    - PKG_CONFIG_PATH=/usr/local/lib/pkgconfig
+  matrix:
+    - BUILD_TYPE=Tests
+    - BUILD_TYPE=Debian
+    - BUILD_TYPE=Contracts
+#  - BUILD_TYPE=Coverage
+
+services:
+    - "docker"
+
+before_install:
+  - sudo apt-get update
+  - sudo apt-get install debhelper devscripts fakeroot dh-systemd ocl-icd-opencl-dev libnl-3-dev libnl-route-3-dev btrfs-tools libsdl2-dev libsdl2-image-dev libsdl2-ttf-dev libsdl2-gfx-dev -y
+
+script:
+    - go get github.com/golang/mock/gomock
+    - go get github.com/golang/mock/mockgen
+    - |
+      case "${BUILD_TYPE}" in
+        Tests)
+          make all
+          ;;
+        Contracts)
+          make contracts
+          ;;
+        Debian)
+          GO=$(which go) make deb
+          ;;
+        Coverage)
+          make mock
+          make coverage;
+          bash <(curl -s https://codecov.io/bash);
+          ;;
+        *)
+          echo "Unknown BUILD_TYPE value"
+          exit 1
+      esac

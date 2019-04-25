@@ -1,0 +1,32 @@
+language: ruby
+
+sudo:
+    false
+
+rvm:
+  - 2.2
+  - 2.3
+  - 2.4
+
+gemfile:
+  - gemfiles/rails_42.gemfile
+  - gemfiles/rails_50.gemfile
+  - gemfiles/rails_51.gemfile
+  - gemfiles/rails_52.gemfile
+
+matrix:
+    allow_failures:
+    - gemfile: gemfiles/rails_42.gemfile
+    
+before_script:
+  - git submodule update --remote --recursive
+
+script:
+   - bundle exec rake spec:testrunner
+
+env:
+  global:
+    - API_LOGIN_ID=5KP3u95bQpv
+    - API_TRANSACTION_KEY=346HZ32z3fP4hTG2
+    - MD5_VALUE='MD5_TEST'
+    

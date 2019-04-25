@@ -1,0 +1,163 @@
+language: python
+dist: trusty
+services:
+  - docker
+
+#cache:
+#  directories:
+#  - $HOME/ScienceTools
+
+notifications:
+  email: false
+
+env:
+    global:
+      - FERMI_DIR=$HOME/ScienceTools/x86_64-unknown-linux-gnu-libc2.19-10
+      - SLAC_ST_BUILD=false
+      - PIP_DEPS='coverage pytest-cov'
+      - CONDA2='conda install -y -c conda-forge healpy'
+      - INSTALL_CMD='python setup.py install'
+      - CONDA_CHANNELS=conda-forge
+      - CONDA_DEPS='gammapy numpy astropy scipy matplotlib pytest pyyaml'
+
+matrix:
+    include:
+
+        # The main build:
+        # Python 2, Fermi ST, all dependencies
+        - os: linux
+          env: NAME=fssc-st-10-00-05
+               PYTHON_VERSION=2.7
+               CONDA_DOWNLOAD=Miniconda-latest-Linux-x86_64.sh
+               ST_INSTALL='bash stinstall.sh force'
+               DOCKER_INSTALL=''
+
+        # The Sphinx docs build
+        # Python 3, no Fermi ST, all other dependencies
+        - os: linux
+          env: NAME=docs
+               PYTHON_VERSION=3.5
+               ST_INSTALL=''
+               DOCKER_INSTALL=''
+               PIP_DEPS='coverage pytest-cov coveralls sphinx sphinx_rtd_theme'
+               CONDA_DOWNLOAD=Miniconda3-latest-Linux-x86_64.sh
+               CONDA_DEPS='gammapy numpy astropy scipy matplotlib pytest pyyaml sphinx sphinx_rtd_theme'
+
+        # Python 3.5, no Fermi ST, all other dependencies
+        - os: linux
+          env: NAME=py35_st-no_dep-yes
+               PYTHON_VERSION=3.5
+               ST_INSTALL=''
+               DOCKER_INSTALL=''
+               CONDA_DOWNLOAD=Miniconda3-latest-Linux-x86_64.sh
+
+        # Python 3.6, no Fermi ST, all other dependencies
+        - os: linux
+          env: NAME=py36_st-no_dep-yes
+               PYTHON_VERSION=3.6
+               ST_INSTALL=''
+               DOCKER_INSTALL=''
+               CONDA_DOWNLOAD=Miniconda3-latest-Linux-x86_64.sh
+
+        # Python 2, no Fermi ST, all other dependencies
+        - os: linux
+          env: NAME=py2_st-no_dep-yes
+               PYTHON_VERSION=2.7
+               ST_INSTALL=''
+               DOCKER_INSTALL=''
+               CONDA_DOWNLOAD=Miniconda-latest-Linux-x86_64.sh
+
+        # Python 2, SLAC ST 11-05-03, all other dependencies
+        - os: linux
+          sudo: required
+          env: NAME=py2_slac-st-11-05-03
+               PYTHON_VERSION=2.7
+               ST_INSTALL=''
+               DOCKER_INSTALL='bash dockerinstall.sh docker/centos6-11-05-03-python'
+               CONDA_DOWNLOAD=Miniconda-latest-Linux-x86_64.sh
+               CONDA_DEPS='gammapy numpy astropy scipy matplotlib pytest pyyaml astropy-healpix regions'
+               FERMI_DIR='/home'
+               SLAC_ST_BUILD=true
+
+        # Python 2, SLAC ST 11-07-00, all other dependencies
+        - os: linux
+          sudo: required
+          env: NAME=py2_slac-st-11-07-00
+               PYTHON_VERSION=2.7
+               ST_INSTALL=''
+               DOCKER_INSTALL='bash dockerinstall.sh docker/centos6-11-07-00-python'
+               CONDA_DOWNLOAD=Miniconda-latest-Linux-x86_64.sh
+               CONDA_DEPS='gammapy numpy astropy scipy matplotlib pytest pyyaml astropy-healpix regions'
+               FERMI_DIR='/home'
+               SLAC_ST_BUILD=true
+
+        # Python 2, SLAC ST 11-07-00, gammapy master
+        - os: linux
+          sudo: required
+          env: NAME=py2_slac-st-11-07-00-gammapy-master
+               PYTHON_VERSION=2.7
+               ST_INSTALL=''
+               DOCKER_INSTALL='bash dockerinstall.sh docker/centos6-11-07-00-python'
+               CONDA_DOWNLOAD=Miniconda-latest-Linux-x86_64.sh
+               CONDA_DEPS='cython numpy astropy scipy matplotlib pytest pyyaml'
+               FERMI_DIR='/home'
+               SLAC_ST_BUILD=true
+               PIP_DEPS='coverage pytest-cov coveralls git+https://github.com/gammapy/gammapy.git'
+
+    allow_failures:
+        - env: NAME=py2_slac-st-11-07-00-gammapy-master
+               PYTHON_VERSION=2.7
+               ST_INSTALL=''
+               DOCKER_INSTALL='bash dockerinstall.sh docker/centos6-11-07-00-python'
+               CONDA_DOWNLOAD=Miniconda-latest-Linux-x86_64.sh
+               CONDA_DEPS='cython numpy astropy scipy matplotlib pytest pyyaml'
+               FERMI_DIR='/home'
+               SLAC_ST_BUILD=true
+               PIP_DEPS='coverage pytest-cov coveralls git+https://github.com/gammapy/gammapy.git'
+
+#        # Python 3, no Fermi ST, only the required dependencies
+#        # TODO: This isn't working yet, need to handle imports for opt deps more carefully
+#        - os: linux
+#          env: PYTHON_VERSION=3.5
+#               ST_INSTALL=''
+#               CONDA_DOWNLOAD=Miniconda3-latest-Linux-x86_64.sh
+#               CONDA_DEPS=''
+#               CONDA2=''
+
+#before_install:
+#  - cat Dockerfile
+#  - $DOCKER_SETUP
+#  - ls
+
+# Setup anaconda and install packages
+install:
+  # Download and install the ST binaries
+  - if [[ $DOCKER_INSTALL == '' ]]; then
+        $ST_INSTALL;
+        source condainstall.sh;
+    else
+        $DOCKER_INSTALL;
+        docker exec fermipy-testing /bin/bash --login -c "cd /home/fermipy && python setup.py install";
+    fi
+
+# Run test
+script:
+  - if [[ $DOCKER_INSTALL == '' ]]; then
+        bash travistests.sh;
+    else
+        docker exec fermipy-testing /bin/bash --login -c "cd /home/fermipy;/bin/bash /home/fermipy/travistests.sh";
+    fi
+
+after_success:
+  - if [[ $NAME == 'main' ]]; then
+        coveralls --rcfile='fermipy/tests/coveragerc';
+    elif [[ $SLAC_ST_BUILD == 'true' ]]; then
+        docker exec fermipy-testing /bin/bash --login -c "cd /home/fermipy;source condasetup.sh;coveralls --rcfile='fermipy/tests/coveragerc'";
+    fi
+
+#after_script:
+#    - if [[ $DOCKER_INSTALL != '' ]]; then
+#          echo stopping docker;
+#          docker stop test0;
+#          docker rm test0;
+#      fi

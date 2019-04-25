@@ -1,0 +1,31 @@
+language: scala
+cache:
+  directories:
+    - "$HOME/.ivy2"
+    - "$HOME/.cache"
+    - "$HOME/.sbt"
+jdk:
+  - oraclejdk8
+before_install:
+  - nvm install $NODE_JS_VERSION
+  - node --version
+  - sudo apt-get install -y awscli
+  - npm install --global purescript psc-package
+install:
+  - git fetch --unshallow
+  - npm install && npm run check
+  - sbt headerCheck
+script:
+  - sbt test installerZip writeLanguagePack writeScriptingJavadoc
+after_success:
+  - aws s3 --region us-east-1 cp Source/Server/equellaserver/target/tle-upgrade*.zip s3://edalexdev/equella_artifacts/$TRAVIS_BRANCH/$TRAVIS_BUILD_NUMBER/
+  - aws s3 --region us-east-1 cp Installer/target/equella-installer*.zip s3://edalexdev/equella_artifacts/$TRAVIS_BRANCH/$TRAVIS_BUILD_NUMBER/
+  - aws s3 --region us-east-1 cp target/reference-language-pack.zip s3://edalexdev/equella_artifacts/$TRAVIS_BRANCH/$TRAVIS_BUILD_NUMBER/
+  - aws s3 --region us-east-1 cp target/scriptingapi-javadoc-*.zip s3://edalexdev/equella_artifacts/$TRAVIS_BRANCH/$TRAVIS_BUILD_NUMBER/
+  - aws s3 --region us-east-1 rm --recursive s3://edalexdev/equella_artifacts/$TRAVIS_BRANCH/latest/
+  - aws s3 --region us-east-1 cp --recursive s3://edalexdev/equella_artifacts/$TRAVIS_BRANCH/$TRAVIS_BUILD_NUMBER/ s3://edalexdev/equella_artifacts/$TRAVIS_BRANCH/latest/
+env:
+  global:
+    - secure: iTlrOG7Yg5QjL7ZoVYcCyYoF88ib5bzujvI+P18xoO5wTDHFlupR5tqikCeQXRdA1V5hNXE1KFdMVJ2vPkqXjGCX9+iXnleYd2KN/XXIvJJpbsE2oCkVuC51lvJmClDb5mZWUDLGkt+VraQodaKKVUbe/FcefdpJo3QJRg9XivP4ydfl1weWGYD/S10rCj4Qwdg4YPXn8FFZ5caNiYdjy8cV8ZIo1E5eiG3rltStAFaqfOcbir1mLQipnxqy+ZN0dasbxhjLnLF/AWFUcok+lRFgdnZaWW2+fO+0x/Deo/Waohcy91rzcyLyn2oxWVGwvogjPGhNC9RfhXgd2t5Q+APuJq6JR604wVH1XqqMI1E52ryOuzSxPB7I/WM+4kyjMG4pJrZRNZqZAe7RxjT3TCtjp5I4Ff1J48RSATX0joj16GPG60wJaF+SHc83V0zB8WT9qztDafxskhe+hMrbAbDxU4oNgVdITksQsRJDJJvZ2seMqfx8C0518J5l9TfH6k7wYec4PgoOyafhgfqQVL9o3KRymXLcHthirAIinWbNY9N7qzxUe2A/NwKExxNcCfPcfQJfz8jtHp7kRq7AkQx30ohx+0X3PNiT8TiZY2KtEi8jqsrmnz4bAqz8BxArNHZgymR5yGRc2X+IoYaqh3CUgQSJvnjWenO7vNLeTMg=
+    - secure: at4gz7i1hdZ5U2o+Ys71JRPiKlpkwkhSRTkF4SsomO3QrgBHwfVVUmUG3IGqJcc4oe7RwCt8zjqrdjFzv+RZaFlJmHYqTM4BSvLtrqlpWSslWqzdW4Vk69oSzC056HfzIbFPetgOVkMQC5cYNzoNxfBCsE4cdeOTep76Ry+63m77xjwTrAhSQxhho0nlDPx1N/+VVOO6AJT9HXNnaCqchaXjBZl8jUyu6d8stwxDTFDqJl/HD2ZYv0nRhaqCnUwJHt0SEPXzmOkuu9bnoIDHnxL4kqvCpgVRso1atSB91sEM/qmTSzL1IZstNopbOilgOTs3qt7VgIjNopYEtv5GkJg2XFsoLn7JXT3tIryg6MaLWcO9Z5u5BEcvr0wQHx00nJ8BMrMzfa8dL/LN1HE0VvxDXGnK9mWWK8JUuVm9mUjTv9si0TU1b2isIGHD82a32ejojpabV3EVQsGRsgz42CZNE25r+ED9/1S+3y/TJFVkTvXI5iGC+0wHImFXkIpHiG6SYF1ROvTO0n/P6BOOZp8yp2xUELy4XxZx2U2cX98lWlxEpXdNTT4W4K1fs5FbLEqdf5aGeXrGRePrkskVcJtc5mzcH/hvk9PuZ5yCBBovmdQQXrNvRZsDtSSSTZ2MWmU5U1ehgpSmBHla3v9AMGGbmrNx2CWh/gn+Cqk7L64=
+    - NODE_JS_VERSION=8.11.3

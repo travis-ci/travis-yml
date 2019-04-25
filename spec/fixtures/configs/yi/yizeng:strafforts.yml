@@ -1,0 +1,42 @@
+language: ruby
+sudo: false
+
+branches:
+  except:
+    - gh-pages
+
+cache:
+  - bundler
+  - yarn
+
+rvm:
+  - 2.5.3
+
+matrix:
+  allow_failures:
+    - rvm: ruby-head
+
+services:
+  - postgresql
+addons:
+  postgresql: "9.6"
+
+bundler_args: --without production
+
+before_install:
+  - nvm install node
+  - npm install -g yarn
+
+before_script:
+  - cp config/database.yml.travis config/database.yml
+  - psql -c 'create database travis_ci_test;' -U postgres
+  - yarn
+  - RAILS_ENV=test bundle exec bin/rails db:migrate --trace
+  - RAILS_ENV=test bundle exec bin/rails db:seed
+  - NODE_ENV=test RAILS_ENV=test bundle exec rails webpacker:compile
+
+script:
+  - yarn test
+
+notifications:
+  email: false

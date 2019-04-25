@@ -1,0 +1,56 @@
+sudo: required
+
+group: deprecated-2017Q3
+
+services:
+  - docker
+
+language: node_js
+ 
+node_js:
+  - 8.6.0
+
+env:
+  global:
+    - CC_TEST_REPORTER_ID=f9a7cc51d41f847d9b5c91f469606222755355ec9ea001c6bd7a16d20f45941f
+
+notifications:
+  slack: gppmds8-github:sJE6QlBfPGMkfUf48wuTsKa7
+
+before_install:
+  - openssl aes-256-cbc -K $encrypted_fb7d710cc1aa_key -iv $encrypted_fb7d710cc1aa_iv -in .travis/alax-digitalocean-key.enc -out .travis/alax-digitalocean-key -d
+
+before_script:
+  - npm install coveralls
+  - docker network create falko20172backend_default
+  - docker-compose up -d
+
+script:
+  - docker exec -it falko-front npm run unit
+  - docker exec -it falko-front npx cypress run
+
+after_script:
+  - "./node_modules/coveralls/bin/coveralls.js < ./test/unit/coverage/lcov.info"
+  - docker-compose down --remove-orphans
+
+after_success:
+  - eval "$(ssh-agent -s)"
+  - chmod 600 .travis/alax-digitalocean-key
+  - ssh-add .travis/alax-digitalocean-key
+  - ssh-keyscan 138.197.16.42 >> ~/.ssh/known_hosts #Homolog IP
+  - ssh-keyscan 104.236.12.198 >> ~/.ssh/known_hosts #Production IP
+  - git remote add dokku dokku@138.197.16.42:falko-frontend
+  - git remote add dokkuprod dokku@104.236.12.198:falko-frontend
+  - git remote -v
+  - git config --global push.default simple
+  - |
+    if [ "${TRAVIS_BRANCH}" == "devel" ]; then
+      echo "Deploying to homolog environment..."
+      git push -f dokku devel:master #Has to be forced because of amending
+    else if [ "${TRAVIS_BRANCH}" == "master" ]; then
+      echo "Deploying to production environment..."
+      git push -f dokkuprod master:master #Has to be forced because of amending
+    else
+      echo "Skipping deploy...";
+    fi;
+    fi;

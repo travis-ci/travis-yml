@@ -1,0 +1,125 @@
+language: cpp
+
+sudo: required
+
+services:
+- docker
+
+git:
+  depth: false
+  submodules: false
+
+env:
+  matrix:
+    - TARGET=unittest COMPILER=gnu BUILD=Debug
+    - TARGET=unittest COMPILER=gnu BUILD=Debug SMP=true
+    - TARGET=unittest COMPILER=gnu BUILD=Debug SHARED_LIBS=off
+    - TARGET=unittest COMPILER=gnu BUILD=Release
+    - TARGET=unittest COMPILER=gnu BUILD=Release SMP=true
+    - TARGET=unittest COMPILER=gnu BUILD=Release SHARED_LIBS=off DOCKERHUB=true
+    - TARGET=unittest COMPILER=clang BUILD=Debug
+    - TARGET=unittest COMPILER=clang BUILD=Debug SMP=true
+    - TARGET=unittest COMPILER=clang BUILD=Debug SHARED_LIBS=off
+    - TARGET=unittest COMPILER=clang BUILD=Release
+    - TARGET=unittest COMPILER=clang BUILD=Release SMP=true
+    - TARGET=unittest COMPILER=clang BUILD=Release SHARED_LIBS=off
+
+    - TARGET=walker COMPILER=gnu BUILD=Debug
+    - TARGET=walker COMPILER=gnu BUILD=Debug SHARED_LIBS=off
+    - TARGET=walker COMPILER=gnu BUILD=Release
+    - TARGET=walker COMPILER=gnu BUILD=Release SMP=true
+    - TARGET=walker COMPILER=gnu BUILD=Release SHARED_LIBS=off DOCKERHUB=true
+    - TARGET=walker COMPILER=clang BUILD=Debug
+    - TARGET=walker COMPILER=clang BUILD=Debug SHARED_LIBS=off
+    - TARGET=walker COMPILER=clang BUILD=Release
+    - TARGET=walker COMPILER=clang BUILD=Release SMP=true
+    - TARGET=walker COMPILER=clang BUILD=Release SHARED_LIBS=off
+
+    - TARGET=inciter COMPILER=gnu BUILD=Debug
+    - TARGET=inciter COMPILER=gnu BUILD=Debug SHARED_LIBS=off
+    - TARGET=inciter COMPILER=gnu BUILD=Release
+    - TARGET=inciter COMPILER=gnu BUILD=Release SMP=true
+    - TARGET=inciter COMPILER=gnu BUILD=Release SHARED_LIBS=off DOCKERHUB=true
+    - TARGET=inciter COMPILER=clang BUILD=Debug
+    - TARGET=inciter COMPILER=clang BUILD=Debug SHARED_LIBS=off
+    - TARGET=inciter COMPILER=clang BUILD=Release
+    - TARGET=inciter COMPILER=clang BUILD=Release SMP=true
+    - TARGET=inciter COMPILER=clang BUILD=Release SHARED_LIBS=off
+
+    - TARGET=rngtest COMPILER=gnu BUILD=Debug
+    - TARGET=rngtest COMPILER=gnu BUILD=Debug SMP=true
+    - TARGET=rngtest COMPILER=gnu BUILD=Debug SHARED_LIBS=off
+    - TARGET=rngtest COMPILER=gnu BUILD=Release
+    - TARGET=rngtest COMPILER=gnu BUILD=Release SMP=true
+    - TARGET=rngtest COMPILER=gnu BUILD=Release SHARED_LIBS=off DOCKERHUB=true
+    - TARGET=rngtest COMPILER=clang BUILD=Debug
+    - TARGET=rngtest COMPILER=clang BUILD=Debug SMP=true
+    - TARGET=rngtest COMPILER=clang BUILD=Debug SHARED_LIBS=off
+    - TARGET=rngtest COMPILER=clang BUILD=Release
+    - TARGET=rngtest COMPILER=clang BUILD=Release SMP=true
+    - TARGET=rngtest COMPILER=clang BUILD=Release SHARED_LIBS=off
+
+    - TARGET=meshconv COMPILER=gnu BUILD=Debug
+    - TARGET=meshconv COMPILER=gnu BUILD=Debug SHARED_LIBS=off
+    - TARGET=meshconv COMPILER=gnu BUILD=Release
+    - TARGET=meshconv COMPILER=gnu BUILD=Release SHARED_LIBS=off DOCKERHUB=true
+    - TARGET=meshconv COMPILER=clang BUILD=Debug
+    - TARGET=meshconv COMPILER=clang BUILD=Debug SHARED_LIBS=off
+    - TARGET=meshconv COMPILER=clang BUILD=Release
+    - TARGET=meshconv COMPILER=clang BUILD=Release SHARED_LIBS=off
+
+    - TARGET=all COMPILER=gnu BUILD=Debug
+    - TARGET=all COMPILER=gnu BUILD=Debug SONARQUBE=ON
+    - TARGET=doc
+
+script:
+  - if [[ ${TARGET} = doc ]]; then
+      export DISTRO=debian-doc;
+    else
+      export DISTRO=alpine-${COMPILER}${SMP:+-smp}${SHARED_LIBS:+-static}${SONARQUBE:+-sonarqube};
+    fi
+  - rm -rf tpl
+  - cp -vr docker ${HOME}/docker
+  - sed -i "/^FROM/s/alpine/${DISTRO}/" ${HOME}/docker/Dockerfile.quinoa-build-travis
+  - cd ../../
+  - mv -v ${TRAVIS_REPO_SLUG} $HOME/docker/quinoa
+  - cp -r $HOME/.ccache ${HOME}/docker/ccache
+  - cp -r $HOME/.sonar ${HOME}/docker/sonar
+  - docker build --build-arg COMPILER=${COMPILER}
+                 --build-arg BUILD=${BUILD}
+                 --build-arg TARGET=${TARGET}
+                 --build-arg SHARED_LIBS="${SHARED_LIBS}"
+                 --build-arg SMP=${SMP}
+                 --build-arg SONARQUBE=${SONARQUBE}
+                 --build-arg SONARQUBE_TOKEN=${SONARQUBE_TOKEN}
+                 --build-arg SONARQUBE_GITHUB_TOKEN=${SONARQUBE_GITHUB_TOKEN}
+                 --build-arg TRAVIS_BRANCH=${TRAVIS_BRANCH}
+                 --build-arg TRAVIS_JOB_NUMBER=${TRAVIS_JOB_NUMBER}
+                 --build-arg TRAVIS_PULL_REQUEST=${TRAVIS_PULL_REQUEST}
+                 --build-arg TRAVIS_JOB_ID=${TRAVIS_JOB_ID}
+                 --build-arg TRAVIS_REPO_SLUG=${TRAVIS_REPO_SLUG}
+                 --build-arg TRAVIS_COMMIT=${TRAVIS_COMMIT}
+                 -t ${TRAVIS_REPO_SLUG}:${DISTRO}
+                 --rm=false
+                 -f ${HOME}/docker/Dockerfile.quinoa-build-travis
+                 ${HOME}/docker/ &&
+    rm -rf ${HOME}/.ccache &&
+    CON=$(docker run -d ${TRAVIS_REPO_SLUG}:${DISTRO} /bin/bash) &&
+    docker cp ${CON}:/home/quinoa/.ccache ${HOME}/ &&
+    docker cp ${CON}:/home/quinoa/.sonar ${HOME}/
+
+after_success:
+  - if [[ ${DOCKERHUB} = true && ${DOCKER_USERNAME} && ${DOCKER_PASSWORD} && ${TRAVIS_PULL_REQUEST} == false && ${TRAVIS_BRANCH} == master ]]; then
+      docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
+      docker push "${TRAVIS_REPO_SLUG}:${DISTRO}";
+    fi
+
+cache:
+  ccache: true
+  directories:
+    - $HOME/.sonar
+
+notifications:
+  email:
+    recipients:
+      secure: UwVJfZCCdmyJafVDJ2E9T8H1b/24y+9HjQp/CiQKROM5F26YgilTuMjeqd7MXV2UKWvnKI7oZudWd3ldxCr8LbJhEBxK8lZVQeFdbWWOpD2t6rXh9SaLIXcpDXgitegpyMP2vq7ED7JcxICaxAd/Gb+84SUY+rSxRbG99CzV4gwsspL1TLUY49pPFRzrDL9amp2qXv/RRQzihM7Yeo7aIL+dYcB/keaFw1MT8unLzWj69BON2HCMF5JfLp84pvTzNvKNI8sN+cc4rTQYqrLH0bFOXMKlqMJqAC6tKDlPKkqjIr01lKSFWbwTxyaz8JcaFQX/WzCFVmLqEs700oZmUI27SOQ1Jj85o9uYgyjmHN5r+mktmGtZ3aMiPIiXyh3nPzrsdh8RbzHf33JnSh6t5Gk0jvhjWbFnQIwqFr4ebfCPvwlx9hvDlzhEOLgfvgAmajwn6TrmYbO/zFugWoGXVEH0OBd4sIchhiXum6VuDYdlDCW+TsXMEtzhKKiABbTRBfqcCOQcPNhSNdM2Vrpax4FTDndvvd25L2RfcygaXhSczOsHWom+MnEQCIkPPIqkaj+tkb8br5sLnYWIsoZ/uD1f+bnTwlnwWixOXQx1nkjafSixx8uEm5nmALzL4KnEHu4xslSwa85asMH730W/untnABbh6/WmMYivsD029Wo=

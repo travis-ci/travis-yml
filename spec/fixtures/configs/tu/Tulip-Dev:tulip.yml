@@ -1,0 +1,537 @@
+# Tulip continuous integration on Linux and Mac OS platforms through TravisCI.
+# Two type of builds are performed by os:
+#  - a "legacy" Tulip build using :
+#     * default system compiler (GCC 5.4 on Linux, clang from Xcode7.3 on Mac OS)
+#     * Qt 5.5 on Linux, Qt 5.9 on MacOS
+#     * Python 2.7
+#  - a "modern" Tulip build using:
+#     * recent compiler (GCC 8.1 on Linux, clang 7.0 from MacPorts or Homebrew on Mac OS)
+#     * Qt 5.11 on Linux, Qt 5.12 on MacOS
+#     * Python 3.7 on Linux, Python 2.7 on MacOS
+# As TravisCI limits build job times to 45 minutes, Tulip is built in two successive stages
+# to avoid timeouts (which happened often with MacOs builds):
+#  - a core build with no Tulip OpenGL and Qt components
+#  - a complete build including OpenGL and Qt components
+# The trick is to use travis build cache and ccache to cache already compiled object
+# files between stages and thus not exceeding Travis build timeout limits
+
+# inform travis that we are building a cpp project
+language: cpp
+
+# send build status notifications to tulipdev mailing list
+notifications:
+  email:
+    - tulipdev@labri.fr
+
+# define build jobs
+jobs:
+  include:
+  #==============================================================================================================================================================
+    # Tulip core build stage on Linux
+    - stage: Tulip core build (Linux)
+    # legacy Tulip core build on Linux
+      os: linux
+      dist: xenial
+      compiler: gcc
+      cache: ccache
+      addons:
+        apt:
+          # install Tulip build dependencies
+          packages:
+            - cmake
+            - ccache
+            - ninja-build
+            - doxygen
+            - graphviz
+            - libqhull-dev
+            - libyajl-dev
+            - libpython2.7-dev
+            - libcppunit-dev
+            - binutils-dev
+      env:
+        # use Python 2.7
+        - PYTHON_EXECUTABLE=/usr/bin/python2.7
+      script:
+        # create build directory
+        - mkdir build && cd build
+        # configure Tulip core build with cmake
+        - cmake .. -G Ninja -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE=${PYTHON_EXECUTABLE} -DTULIP_BUILD_TESTS=ON -DTULIP_USE_CCACHE=ON -DTULIP_BUILD_CORE_ONLY=ON -DTULIP_PYTHON_SITE_INSTALL=ON || travis_terminate 1
+        # compile Tulip using ninja for faster builds
+        - ninja -j4 || travis_terminate 1
+        - sudo ninja -j4 install || travis_terminate 1
+        # run Tulip unit tests
+        - ninja runTests
+
+    #--------------------------------------------------------------------------------------------------------------------------------------------------------------
+    # modern Tulip core build on Linux
+    -
+      os: linux
+      dist: xenial
+      compiler: gcc
+      cache: ccache
+      addons:
+        apt:
+          # we get GCC 8.x and Python 3.7 from external ppas
+          sources:
+            - ubuntu-toolchain-r-test
+            - deadsnakes
+          # install Tulip build dependencies
+          packages:
+            - g++-8
+            - cmake
+            - ccache
+            - ninja-build
+            - libqhull-dev
+            - libyajl-dev
+            - python3.7
+            - libpython3.7-dev
+            - libcppunit-dev
+            - binutils-dev
+      before_install:
+        # force the use of GCC 8
+        - eval "${MATRIX_EVAL}"
+      env:
+        # use Python 3.7
+        - PYTHON_EXECUTABLE=/usr/bin/python3.7
+        # use GCC 7
+        - MATRIX_EVAL="CC=gcc-8 && CXX=g++-8"
+      script:
+        # create build directory
+        - mkdir build && cd build
+        # configure Tulip core build with cmake
+        - cmake .. -G Ninja -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE=${PYTHON_EXECUTABLE} -DTULIP_BUILD_TESTS=ON -DTULIP_USE_CCACHE=ON -DTULIP_BUILD_CORE_ONLY=ON -DTULIP_PYTHON_SITE_INSTALL=ON || travis_terminate 1
+        # compile Tulip using ninja for faster builds
+        - ninja -j4  || travis_terminate 1
+        - sudo ninja -j4 install || travis_terminate 1
+        # run Tulip unit tests
+        - ninja runTests
+
+  #==============================================================================================================================================================
+    # Tulip complete build stage on Linux
+    - stage: Tulip complete build (Linux)
+      # legacy Tulip complete build on Linux, we also build the documentation in this one
+      os: linux
+      dist: xenial
+      compiler: gcc
+      cache: ccache
+      services:
+        - xvfb
+      addons:
+        apt:
+          # install Tulip build dependencies
+          packages:
+            - cmake
+            - ccache
+            - ninja-build
+            - python-pip
+            - doxygen
+            - graphviz
+            - libqhull-dev
+            - libyajl-dev
+            - libpython2.7-dev
+            - libcppunit-dev
+            - binutils-dev
+            - qt5-default
+            - libqt5opengl5-dev
+            - libqt5webkit5-dev
+            - libquazip5-dev
+            - libglew-dev
+            - libpng-dev
+            - libjpeg-dev
+            - libfreetype6-dev
+      install:
+        # install latest sphinx version for generating the documentation
+        - sudo pip install sphinx
+      env:
+        # use Python 2.7
+        - PYTHON_EXECUTABLE=/usr/bin/python2.7
+      script:
+        # create build directory
+        - mkdir build && cd build
+        # configure Tulip complete build with cmake
+        - cmake .. -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH} -DPYTHON_EXECUTABLE=${PYTHON_EXECUTABLE} -DTULIP_BUILD_TESTS=ON -DTULIP_BUILD_DOC=ON -DTULIP_USE_CCACHE=ON -DTULIP_PYTHON_SITE_INSTALL=ON || travis_terminate 1
+        # compile Tulip using ninja for faster builds
+        - ninja -j4 || travis_terminate 1
+        - sudo ninja -j4 install || travis_terminate 1
+        # run Tulip unit tests
+        - ninja runTests
+
+    #--------------------------------------------------------------------------------------------------------------------------------------------------------------
+    # modern Tulip complete build on Linux
+    -
+      os: linux
+      dist: xenial
+      compiler: gcc
+      cache: ccache
+      services:
+        - xvfb
+      addons:
+        apt:
+          # we get GCC 8.x, Python 3.7 and Qt 5.11 from external ppas
+          sources:
+            - ubuntu-toolchain-r-test
+            - deadsnakes
+            - sourceline: 'deb http://archive.neon.kde.org/user/ xenial main'
+              key_url: 'http://archive.neon.kde.org/public.key'
+          # install Tulip build dependencies
+          packages:
+            - g++-8
+            - cmake
+            - ccache
+            - ninja-build
+            - libqhull-dev
+            - libyajl-dev
+            - python3.7
+            - libpython3.7-dev
+            - libcppunit-dev
+            - binutils-dev
+            - qt5-default
+            - libqt5opengl5-dev
+            - libqt5webkit5-dev
+            - libquazip5-dev
+            - libglew-dev
+            - libpng-dev
+            - libjpeg-dev
+            - libfreetype6-dev
+      before_install:
+        # force the use of GCC 8
+        - eval "${MATRIX_EVAL}"
+      env:
+        # use Python 3.7
+        - PYTHON_EXECUTABLE=/usr/bin/python3.7
+        # use GCC 7
+        - MATRIX_EVAL="CC=gcc-8 && CXX=g++-8"
+      script:
+        # create build directoty
+        - mkdir build && cd build
+        # configure Tulip complete build using cmake
+        - cmake .. -G Ninja -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE=${PYTHON_EXECUTABLE} -DTULIP_BUILD_TESTS=ON -DTULIP_BUILD_DOC=OFF -DTULIP_USE_CCACHE=ON -DTULIP_PYTHON_SITE_INSTALL=ON || travis_terminate 1
+        # compile Tulip using ninja for faster builds
+        - ninja -j4  || travis_terminate 1
+        - sudo ninja -j4 install || travis_terminate 1
+        # run Tulip unit tests
+        - ninja runTests
+
+  #==============================================================================================================================================================
+    # Tulip AppImage build on CentOS
+    - stage: Tulip AppImage build (CentOS)
+      # Tulip x86_64 AppImage build on CentOS 6
+      os: linux
+      dist: trusty
+      cache:
+        directories:
+          - $HOME/ccache
+
+      sudo: required
+      env:
+        - ARCH=x86_64
+        - DOCKER_IMAGE=centos:6
+
+      services:
+        - docker
+
+      before_install:
+        - echo 'DOCKER_OPTS="-H tcp://127.0.0.1:2375 -H unix:///var/run/docker.sock -s devicemapper"' | sudo tee /etc/default/docker > /dev/null
+        - sudo service docker restart
+        - sleep 5
+        - sudo docker pull ${DOCKER_IMAGE}
+        - sudo docker create -v $HOME/ccache:/ccache --name ccache ${DOCKER_IMAGE}
+
+      script:
+        - sudo docker run --rm=true -e CCACHE_DIR=/ccache --volumes-from ccache --cap-add SYS_ADMIN --device /dev/fuse:/dev/fuse:mrw --rm=true -v `pwd`:/tulip:rw ${DOCKER_IMAGE} /bin/bash -c "bash -xe /tulip/bundlers/linux/tulip_appimage_centos6_build.sh"
+
+    #--------------------------------------------------------------------------------------------------------------------------------------------------------------
+    -
+      # Tulip i686 AppImage build on CentOS 6
+      os: linux
+      dist: trusty
+      cache:
+        directories:
+          - $HOME/ccache
+
+      sudo: required
+      env:
+        - ARCH=i686
+        - DOCKER_IMAGE=toopher/centos-i386:centos6
+
+      services:
+        - docker
+
+      before_install:
+        - echo 'DOCKER_OPTS="-H tcp://127.0.0.1:2375 -H unix:///var/run/docker.sock -s devicemapper"' | sudo tee /etc/default/docker > /dev/null
+        - sudo service docker restart
+        - sleep 5
+        - sudo docker pull ${DOCKER_IMAGE}
+        - sudo docker create -v $HOME/ccache:/ccache --name ccache ${DOCKER_IMAGE}
+
+      script:
+        - sudo docker run --rm=true -e CCACHE_DIR=/ccache --volumes-from ccache --cap-add SYS_ADMIN --device /dev/fuse:/dev/fuse:mrw --rm=true -v `pwd`:/tulip:rw ${DOCKER_IMAGE} /bin/bash -c "bash -xe /tulip/bundlers/linux/tulip_appimage_centos6_build.sh"
+
+  #==============================================================================================================================================================
+    # Tulip core build stage on Mac OS
+    - stage: Tulip core build (Mac OS)
+    # legacy Tulip core build on Mac OS (MacPorts)
+      os: osx
+      osx_image: xcode7.3
+      compiler: clang
+      cache: ccache
+      install:
+        # set columns in terminal, required for curl to work correctly:
+        - export COLUMNS=80
+        # install MacPorts in order to easily retrieve Tulip dependencies
+        - wget https://raw.githubusercontent.com/GiovanniBussi/macports-ci/master/macports-ci
+        - chmod +x ./macports-ci
+        - travis_wait ./macports-ci install
+        - export PATH=/opt/local/bin:$PATH
+        # install Tulip core build dependencies
+        - sudo port -N install cmake
+        - sudo port -N install ccache
+        - sudo port -N install ninja
+        - sudo port -N install qhull
+        - sudo port -N install yajl
+        - sudo port -N install pkgconfig
+        - sudo port -N install cppunit
+      env:
+        # use system Python 2.7
+        - PYTHON_EXECUTABLE=/usr/bin/python2.7
+
+      script:
+        # create build directory
+        - mkdir build && cd build
+        # configure Tulip core build using cmake
+        - cmake .. -G Ninja -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE=${PYTHON_EXECUTABLE} -DTULIP_BUILD_TESTS=ON -DTULIP_USE_CCACHE=ON -DTULIP_BUILD_CORE_ONLY=ON || travis_terminate 1
+        # compile Tulip using ninja for faster builds
+        - ninja -j4 || travis_terminate 1
+        - sudo ninja -j4 install || travis_terminate 1
+        # run Tulip unit tests
+        - ninja runTests
+
+    #--------------------------------------------------------------------------------------------------------------------------------------------------------------
+    # modern Tulip core build on Mac OS (MacPorts)
+    -
+      os: osx
+      # use xcode10.2 travis image to get a recent clang compiler
+      osx_image: xcode10.2
+      compiler: clang
+      cache: ccache
+      install:
+        # set columns in terminal, required for curl to work correctly:
+        - export COLUMNS=80
+        # install MacPorts in order to easily retrieve Tulip dependencies
+        - wget https://raw.githubusercontent.com/GiovanniBussi/macports-ci/master/macports-ci
+        - chmod +x ./macports-ci
+        - travis_wait ./macports-ci install
+        - export PATH=/opt/local/bin:$PATH
+        # install Tulip core build dependencies
+        - sudo port -N install cmake
+        - sudo port -N install clang-7.0
+        - sudo port -N install ccache
+        - sudo port -N install ninja
+        - sudo port -N install qhull
+        - sudo port -N install yajl
+        - sudo port -N install pkgconfig
+        - sudo port -N install cppunit
+      env:
+        # use system Python 2.7
+        - PYTHON_EXECUTABLE=/usr/bin/python2.7
+
+      script:
+        # create build directory
+        - mkdir build && cd build
+        # configure Tulip core build using cmake
+        - cmake .. -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=/opt/local/bin/clang-mp-7.0 -DCMAKE_CXX_COMPILER=/opt/local/bin/clang++-mp-7.0 -DPYTHON_EXECUTABLE=${PYTHON_EXECUTABLE} -DTULIP_BUILD_TESTS=ON -DTULIP_USE_CCACHE=ON -DTULIP_BUILD_CORE_ONLY=ON || travis_terminate 1
+        # compile Tulip using ninja for faster builds
+        - ninja -j4 || travis_terminate 1
+        - sudo ninja -j4 install || travis_terminate 1
+        # run Tulip unit tests
+        - ninja runTests
+
+    #--------------------------------------------------------------------------------------------------------------------------------------------------------------
+    # modern Tulip core build on Mac OS (Homebrew)
+    -
+      os: osx
+      # use xcode9.2 travis image to get a recent clang compiler
+      osx_image: xcode9.2
+      compiler: clang
+      cache: ccache
+      addons:
+        homebrew:
+          # install Tulip core build dependencies
+          packages:
+            - ccache
+            - cmake
+            - ninja
+            - llvm
+            - qhull
+            - yajl
+            - cppunit
+            - pkg-config
+          update: true
+
+      env:
+        # use system Python 2.7
+        - PYTHON_EXECUTABLE=/usr/bin/python2.7
+      script:
+        # create build directory
+        - mkdir build && cd build
+        # configure Tulip core build using cmake
+        - cmake .. -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=/usr/local/opt/llvm/bin/clang -DCMAKE_CXX_COMPILER=/usr/local/opt/llvm/bin/clang++ -DCMAKE_C_FLAGS=-I/usr/local/opt/llvm/include -DCMAKE_CXX_FLAGS=-I/usr/local/opt/llvm/include -DCMAKE_EXE_LINKER_FLAGS=-L/usr/local/opt/llvm/lib -DCMAKE_SHARED_LINKER_FLAGS=-L/usr/local/opt/llvm/lib -DOpenMP_C_FLAGS=-fopenmp=libomp -DOpenMP_C_LIB_NAMES=libomp -DOpenMP_CXX_FLAGS=-fopenmp=libomp -DOpenMP_CXX_LIB_NAMES=libomp -DOpenMP_libomp_LIBRARY=libomp -DPYTHON_EXECUTABLE=${PYTHON_EXECUTABLE} -DTULIP_BUILD_CORE_ONLY=ON -DTULIP_BUILD_TESTS=ON -DTULIP_USE_CCACHE=ON || travis_terminate 1
+        # compile Tulip using ninja for faster builds
+        - ninja -j4 || travis_terminate 1
+        - sudo ninja -j4 install || travis_terminate 1
+        # run Tulip unit tests
+        - ninja runTests
+
+  #==============================================================================================================================================================
+    # Tulip complete build stage on Mac OS
+    - stage: Tulip complete build (Mac OS)
+    # legacy Tulip complete build on Mac OS (MacPorts)
+      os: osx
+      osx_image: xcode7.3
+      compiler: clang
+      cache: ccache
+      install:
+        # set columns in terminal, required for curl to work correctly:
+        - export COLUMNS=80
+        # install MacPorts in order to easily retrieve Tulip build dependencies
+        - wget https://raw.githubusercontent.com/GiovanniBussi/macports-ci/master/macports-ci
+        - chmod +x ./macports-ci
+        - travis_wait ./macports-ci install
+        - export PATH=/opt/local/bin:$PATH
+        # install Tulip complete build dependencies
+        - sudo port -N install cmake
+        - sudo port -N install ccache
+        - sudo port -N install ninja
+        - sudo port -N install qt59-qtbase
+        - sudo port -N install qt59-qttools
+        - sudo port -N install qt59-qtwebkit
+        - sudo port -N install quazip
+        - sudo port -N install freetype
+        - sudo port -N install glew
+        - sudo port -N install libpng
+        - sudo port -N install jpeg
+        - sudo port -N install qhull
+        - sudo port -N install yajl
+        - sudo port -N install pkgconfig
+        - sudo port -N install cppunit
+        - curl -O https://bootstrap.pypa.io/get-pip.py
+        - sudo python get-pip.py
+        - sudo pip install sphinx==1.7.9
+
+      env:
+        # use system Python 2.7
+        - PYTHON_EXECUTABLE=/usr/bin/python2.7
+      script:
+        # create build directory
+        - mkdir build && cd build
+        # configure Tulip complete build using cmake
+        - cmake .. -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$PWD/install -DCMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH} -DPYTHON_EXECUTABLE=${PYTHON_EXECUTABLE} -DTULIP_BUILD_TESTS=ON -DTULIP_USE_CCACHE=ON -DZLIB_INCLUDE_DIR=/opt/local/include -DZLIB_LIBRARY_RELEASE=/opt/local/lib/libz.dylib -DPNG_INCLUDE_DIR=/opt/local/include -DPNG_LIBRARY_RELEASE=/opt/local/lib/libpng.dylib -DJPEG_INCLUDE_DIR=/opt/local/include -DJPEG_LIBRARY=/opt/local/lib/libjpeg.dylib || travis_terminate 1
+        # compile Tulip using ninja for faster builds
+        - ninja -j4 || travis_terminate 1
+        - ninja -j4 install || travis_terminate 1
+        # run Tulip unit tests
+        - ninja runTests || travis_terminate 1
+        # build Tulip bundle
+        - ninja bundle
+
+    #--------------------------------------------------------------------------------------------------------------------------------------------------------------
+    # modern Tulip complete build on Mac OS (MacPorts)
+    -
+      os: osx
+      # use xcode10.2 travis image to get a recent clang compiler and qt5 package
+      osx_image: xcode10.2
+      compiler: clang
+      cache: ccache
+      install:
+        # set columns in terminal, required for curl to work correctly:
+        - export COLUMNS=80
+        # install MacPorts in order to easily retrieve Tulip dependencies
+        - wget https://raw.githubusercontent.com/GiovanniBussi/macports-ci/master/macports-ci
+        - chmod +x ./macports-ci
+        - travis_wait ./macports-ci install
+        - export PATH=/opt/local/bin:$PATH
+        # install Tulip complete build dependencies
+        - sudo port -N install cmake
+        - sudo port -N install clang-7.0
+        - sudo port -N install ccache
+        - sudo port -N install ninja
+        - sudo port -N install qt5-qtbase
+        - sudo port -N install qt5-qttools
+        - sudo port -N install qt5-qtwebkit
+        - sudo port -N install quazip
+        - sudo port -N install freetype
+        - sudo port -N install glew
+        - sudo port -N install libpng
+        - sudo port -N install jpeg
+        - sudo port -N install qhull
+        - sudo port -N install yajl
+        - sudo port -N install pkgconfig
+        - sudo port -N install cppunit
+        - curl -O https://bootstrap.pypa.io/get-pip.py
+        - sudo python get-pip.py
+        - sudo pip install sphinx==1.7.9 --ignore-installed six
+      env:
+        # use system Python 2.7
+        - PYTHON_EXECUTABLE=/usr/bin/python2.7
+
+      script:
+        # create build directory
+        - mkdir build && cd build
+        # configure Tulip complete build using cmake
+        - cmake .. -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=/opt/local/bin/clang-mp-7.0 -DCMAKE_CXX_COMPILER=/opt/local/bin/clang++-mp-7.0 -DCMAKE_INSTALL_PREFIX=$PWD/install -DPYTHON_EXECUTABLE=${PYTHON_EXECUTABLE} -DTULIP_BUILD_TESTS=ON -DTULIP_USE_CCACHE=ON -DZLIB_INCLUDE_DIR=/opt/local/include -DZLIB_LIBRARY_RELEASE=/opt/local/lib/libz.dylib -DPNG_INCLUDE_DIR=/opt/local/include -DPNG_LIBRARY_RELEASE=/opt/local/lib/libpng.dylib -DJPEG_INCLUDE_DIR=/opt/local/include -DJPEG_LIBRARY=/opt/local/lib/libjpeg.dylib
+        # compile Tulip using ninja for faster builds
+        - ninja -j4
+        - ninja -j4 install
+        # run Tulip unit tests
+        - ninja runTests
+        # build Tulip bundle
+        - ninja bundle
+
+    #--------------------------------------------------------------------------------------------------------------------------------------------------------------
+    # modern Tulip complete build on Mac OS (Homebrew)
+    -
+      os: osx
+      # use xcode9.2 travis image to get a recent qt5 package
+      osx_image: xcode9.2
+      compiler: clang
+      cache: ccache
+      addons:
+        homebrew:
+          # install Tulip complete build dependencies
+          packages:
+            - ccache
+            - cmake
+            - ninja
+            - llvm
+            - qhull
+            - yajl
+            - cppunit
+            - pkg-config
+            - glew
+            - freetype
+            - jpeg
+            - libpng
+            - qt5
+            - quazip
+          update: true
+
+      install:
+        # set columns in terminal, required for curl to work correctly:
+        - export COLUMNS=80
+        - curl -O https://bootstrap.pypa.io/get-pip.py
+        - sudo python get-pip.py
+        - pip install --user sphinx==1.7.9
+      env:
+        # use system Python 2.7
+        - PYTHON_EXECUTABLE=/usr/bin/python2.7
+
+      script:
+        # create build directory
+        - mkdir build && cd build
+        # configure Tulip build using cmake
+        - cmake .. -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=/usr/local/opt/llvm/bin/clang -DCMAKE_CXX_COMPILER=/usr/local/opt/llvm/bin/clang++ -DCMAKE_C_FLAGS=-I/usr/local/opt/llvm/include -DCMAKE_CXX_FLAGS=-I/usr/local/opt/llvm/include -DCMAKE_EXE_LINKER_FLAGS=-L/usr/local/opt/llvm/lib -DCMAKE_SHARED_LINKER_FLAGS=-L/usr/local/opt/llvm/lib -DOpenMP_C_FLAGS=-fopenmp=libomp -DOpenMP_C_LIB_NAMES=libomp -DOpenMP_CXX_FLAGS=-fopenmp=libomp -DOpenMP_CXX_LIB_NAMES=libomp -DOpenMP_libomp_LIBRARY=libomp -DCMAKE_PREFIX_PATH=/usr/local/opt/qt -DPYTHON_EXECUTABLE=${PYTHON_EXECUTABLE} -DSPHINX_EXECUTABLE=$HOME/Library/Python/2.7/bin/sphinx-build -DTULIP_BUILD_TESTS=ON -DTULIP_USE_CCACHE=ON || travis_terminate 1
+        # compile Tulip using ninja for faster builds
+        - ninja -j4 || travis_terminate 1
+        - sudo ninja -j4 install || travis_terminate 1
+        # run Tulip unit tests
+        - ninja runTests

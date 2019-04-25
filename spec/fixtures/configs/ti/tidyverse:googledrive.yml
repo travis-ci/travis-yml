@@ -1,0 +1,40 @@
+language: R
+sudo: false
+cache: packages
+
+addons:
+  apt:
+    sources:
+    - sourceline: 'ppa:chris-lea/libsodium'
+    packages:
+    - libsodium-dev
+
+matrix:
+  include:
+    - r: release
+      after_success:
+      - Rscript -e 'covr::codecov(line_exclusions = c("R/aaa.R", "R/drive_browse.R"))'
+      - find . -name testthat.Rout | xargs cat
+      after_failure:
+      - find . -name testthat.Rout | xargs cat
+    - r: devel
+      env: GOOGLEDRIVE_PASSWORD=''
+      r_build_args: --no-build-vignettes
+      r_check_args: --ignore-vignettes --no-examples
+    - r: release
+      env: GOOGLEDRIVE_PASSWORD=''
+      r_build_args: --no-build-vignettes
+      r_check_args: --ignore-vignettes --no-examples
+    - r: oldrel
+      env: GOOGLEDRIVE_PASSWORD=''
+      r_build_args: --no-build-vignettes
+      r_check_args: --ignore-vignettes --no-examples
+    - r: 3.3
+      env: GOOGLEDRIVE_PASSWORD=''
+      r_build_args: --no-build-vignettes
+      r_check_args: --ignore-vignettes --no-examples
+    - r: 3.2
+      env: GOOGLEDRIVE_PASSWORD=''
+      warnings_are_errors: false
+      r_build_args: --no-build-vignettes
+      r_check_args: --ignore-vignettes --no-examples

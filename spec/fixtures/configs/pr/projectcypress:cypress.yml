@@ -1,0 +1,54 @@
+language: ruby
+cache:
+  - bundler
+  - node_modules
+sudo: required
+dist: trusty
+branches:
+  only:
+  - master
+notifications:
+  email:
+    recipients:
+      - healthcare-ci@googlegroups.com
+    on_failure: change
+  slack:
+    secure: NfcNb3LCyd7/ACYc6mDoBJZlBFIV5wKMMWs0On2DNeaDoD/EKCbQRQQVOHEvfsaqOM+5zmi9giYaV7cV+Gl+zfehZ/Q69x89YjWWVFeAp5QGDzoCnM7oaaTXygla52sfcL9Oi3rLgTWyjqMSS7tM2DW5d/V+iEjyilmavsUvRbU=
+before_install:
+  - . $HOME/.nvm/nvm.sh
+  - nvm install 10.0
+  - nvm use stable
+  - npm install -g eslint
+  - git clone -b qdm5.3_cql1.2 https://github.com/projecttacoma/cqm-execution-service.git /tmp/cqm-execution-service
+before_script:
+  - git config --global user.email "travis@travis.ci"
+  - git config --global user.name "Travis CI"
+  - npm install eslint
+  - yarn --cwd /tmp/cqm-execution-service install --only=production
+  - yarn --cwd /tmp/cqm-execution-service start &
+  - wget http://fastdl.mongodb.org/linux/mongodb-linux-x86_64-${MONGODB}.tgz -O /tmp/mongodb.tgz
+  - tar -xvf /tmp/mongodb.tgz
+  - mkdir /tmp/data
+  - ${PWD}/mongodb-linux-x86_64-${MONGODB}/bin/mongod --dbpath /tmp/data --bind_ip 127.0.0.1 &> /dev/null &
+  - cp ./.travis/mongoid.yml ./config/mongoid.yml
+env:
+  global:
+    - MONGODB=3.4.5
+  matrix:
+  - TEST_SUITE=cucumber
+  - TEST_SUITE=audit
+  - TEST_SUITE=models
+  - TEST_SUITE=controllers
+  - TEST_SUITE=helpers
+  - TEST_SUITE=jobs
+  - TEST_SUITE=units
+script:
+  - 'if [ ${TEST_SUITE} = "cucumber" ]; then
+      bundle exec cucumber;
+    elif [ ${TEST_SUITE} = "audit" ]; then
+      bundle exec bundle-audit check --update &&
+      bundle exec overcommit --sign &&
+      bundle exec overcommit --run;
+    else
+      RUBYOPT="-W0" bundle exec rake test:$TEST_SUITE;
+    fi'

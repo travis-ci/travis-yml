@@ -1,0 +1,22 @@
+language: go
+go:
+  - "1.12.4"
+before_install:
+  - curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash -
+  - sudo  apt-get install -y nodejs
+  - sudo npm install -g npm
+script:
+  - make go-get
+  - ./build/ci.sh
+  - bash <(curl -s https://codecov.io/bash) -cF go
+  - make pi
+  - bundle install
+  - env
+  - /usr/bin/npm install
+  - make build-ui
+  - npm run js-lint
+  - make sass-lint
+  - npm test
+  - bash <(curl -s https://codecov.io/bash) -cF javascript
+  - make clean
+  - make deb

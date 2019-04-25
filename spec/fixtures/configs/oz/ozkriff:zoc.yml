@@ -1,0 +1,38 @@
+language: rust
+
+env:
+    - zipname="zoc-$TRAVIS_OS_NAME.tar.gz"
+
+cache: cargo
+
+rust:
+    - nightly
+    - beta
+    - stable
+
+matrix:
+    allow_failures:
+        - rust: nightly
+
+os:
+    - linux
+    - osx
+
+sudo: false
+
+script:
+    - make && make test
+
+before_deploy:
+    - mv target/release/zoc .
+    - tar -zcvf $zipname assets zoc
+
+deploy:
+    provider: releases
+    skip_cleanup: true
+    overwrite: true
+    file: $zipname
+    api_key:
+        secure: IomsNtPkLF5KULhYX5Shgjpt14BSF+pY2aQOkk5c1BeMftnHXQBZV5Kt6FdZYB6ASFJGfOWqmkYy+pi81aN+hzzk0PXYDtK0bbpucbovoao9GJhorU3wEeBajloICkQ3PEjSJ5T+dtAmQLGKgx4YTTUyJSEsdJTULP5AIn5dNPU=
+    on:
+        tags: true

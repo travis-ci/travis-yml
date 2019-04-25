@@ -1,0 +1,24 @@
+sudo: required
+dist: trusty
+
+language: node_js
+node_js:
+  - "6"
+  - "6.1"
+  - "6.0"
+  - "5"
+  - "4"
+  - "4.4"
+  - "4.3"
+  - "4.2"
+  - "4.1"
+  - "4.0"
+
+script: "npm run test-travis"
+
+after_script:
+  - codeclimate-test-reporter < coverage/lcov.info
+
+addons:
+    code_climate:
+        repo_token: 74b98c17ba04b1f11f8c4b84a60d6517d5d5c8ee7e1596bad9afd4e0700d0768

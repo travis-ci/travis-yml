@@ -1,0 +1,41 @@
+sudo: required
+dist: xenial
+language: c
+compiler:
+  - gcc
+  - clang
+before_install:
+  - sudo add-apt-repository ppa:paparazzi-uav/ppa -y
+  - sudo add-apt-repository ppa:team-gcc-arm-embedded/ppa -y
+  - sudo sh -c 'echo "deb http://packages.osrfoundation.org/gazebo/ubuntu-stable `lsb_release -cs` main" > /etc/apt/sources.list.d/gazebo-stable.list'
+  - wget http://packages.osrfoundation.org/gazebo.key -O - | sudo apt-key add -
+  - sudo apt-get update -q
+install:
+  - sudo apt-get install -y --force-yes paparazzi-dev paparazzi-jsbsim gcc-arm-embedded gcc-arm-linux-gnueabi g++-arm-linux-gnueabi libipc-run-perl rustc cargo libgazebo9-dev
+script:
+  - arm-none-eabi-gcc --version
+  - if [ "${COVERITY_SCAN_BRANCH}" != 1 ]; then if [ "${TRAVIS_EVENT_TYPE}" == "cron" ]; then make test_all_confs; else make test; fi; fi
+
+env:
+  global:
+   # The next declaration is the encrypted COVERITY_SCAN_TOKEN, created
+   #   via the "travis encrypt" command using the project repo's public key
+   - secure: "QGE7s/sTIX3F4hG8YYbpYjB2x0YsUUo9qHf+Dv5BqNcTtZ2TLO0tHPWxoI5wlRLiMEOOnINNwYk7ooM3oOXa0Fm9urja9k78cFutbbDtvGD6DjUFajwJ0KnwXnLulCgG+l67umGitSazQpyEQE4pvX/8EnB9/pgq706DlmCbkds="
+
+addons:
+  coverity_scan:
+    project:
+      name: "paparazzi/paparazzi"
+      description: "Build submitted via Travis CI"
+    notification_email: paparazzi-builds@nongnu.org
+    build_command_prepend: make ext; cov-configure --comptype gcc --compiler arm-none-eabi-gcc --template
+    build_command: make test_coverity
+    branch_pattern: coverity_scan
+
+notifications:
+  webhooks:
+    urls:
+      - https://webhooks.gitter.im/e/4187f8dda7a22a92b749
+    on_success: change  # options: [always|never|change] default: always
+    on_failure: always  # options: [always|never|change] default: always
+    on_start: false     # default: false

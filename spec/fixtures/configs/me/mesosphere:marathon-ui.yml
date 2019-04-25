@@ -1,0 +1,11 @@
+language: node_js
+before_install:
+  - npm cache clear
+  - npm install -g gulp
+node_js:
+  - "5.4.1"
+script: npm run dist
+after_success: npm run cover:report
+notifications:
+  slack:
+    secure: apUObVUa/OhaTEvoYw3oM1ZTTT0LtYolofJYqnWiBOusc6qgMlK2rfk5kod7vDn33cSKwGhFcyVrrFCn2qxuvYUWCpK4Yo6Hj7KIjoqMi9yHLHXAAWIfAFNMlCdaUGjlHLWn757rBkbuQUDVH8HmB6Vc3J3sybTbiFmMDP1cEVo=

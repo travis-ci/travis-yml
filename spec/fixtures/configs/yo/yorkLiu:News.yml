@@ -1,0 +1,49 @@
+language: python
+python:
+  - "2.7"
+branches:
+  only:
+    - master  # 设置自动化部署的源码分支
+
+env:
+  global:
+    secure: tiig9qwpIQvM9Fsd1i+hmePEVvGLX4KoeUMJi+r/KDHiyvKzs+KWVDJV3zLm3l7rcVITIrHSX6OT1D8EGdAZ6acTJE5RYXfTvzHguuNANPV6e89tdOeNh5joZ0YPnTJ/uUNITJhkTdGJkSgBgNZR0jHd/Y7fW8MD/IpzN8yAIjuKtaMpHJ3Pg/Qx3aLjA1+wmwjaqa8U8moiUXB9KaileK+wG7AuREfbicCNSKPgB1+F8A32ogwozG/0CC6kJ113plfj3Usd2x0t1roQo+OoADrUU/sDJzajLzqhGT/Cfyx8dPEKy1D7LQ1o/tJ/lu0UZ1YJMVesdoBpjaB/AMDEVe63Ky2DgbrdtYz2qFUYmO4t15770LbC33loILANV39J1sVSmr1pd9RfXPUKiDWHu41f0Hx4qmZr6TuOzlD7aGkwoX4AAckZAuQvswjqq0vsnNtiYJg/rGEqOAPdtktokRDz1KEUrrZZJcg7jcFVsRbVgglbswUfTe043FXzqEFTfxg+DXMg6traud3JFdh+p52wOf984HZ3h2NgPvUCbI1MBjranKQ1R+mMsHc4kIECC73GBPoi6rB+FcEOOCIRnmDoeO+/xjmLz2bH8g/uePAqaVrublwmrfV3sKJetVtjU4geVaOKVexvCbpgiHV8JohLhs/N38MW7ReP/jFrwPs=
+
+before_install:
+  - export TZ='Asia/Shanghai'
+  # ------------------------------------------------
+  # 设置github账户信息 注意修改成自己的信息
+  # ------------------------------------------------
+  - git checkout master
+  - git config --global user.name "yorkLiu"
+  - git config --global user.email mr_liuyong@163.com
+
+
+# 安装依赖组件
+install:
+  - pip install requests lxml
+
+# 执行的命令
+script:
+  python CrawlNews.py
+
+
+after_success:
+  - ls -al
+  - git branch
+  - git remote
+  - git add --all .
+  - git commit -m "Auto Builder From Travis"
+  - git push --quiet --force https://$REPO_TOKEN@github.com/yorkLiu/News.git master
+  - cd ..
+  - git clone https://github.com/yorkLiu/yorkliu.github.io.git
+  - ls -al
+  - cd yorkliu.github.io
+  - git checkout dev
+  - git branch
+  - cp ../News/tmp/hexo*.md ./source/_posts/
+  - git remote
+  - git add --all .
+  - git commit -m "Auto Builder From Travis to generate the IT NEWS"
+  - git push --quiet --force https://$REPO_TOKEN@github.com/yorkLiu/yorkliu.github.io.git dev
+

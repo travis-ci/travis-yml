@@ -1,0 +1,31 @@
+language: ruby
+
+branches:
+  only:
+    - "master"
+    - "/^release-/"
+
+rvm:
+  - 2.5.3
+
+cache: bundler
+
+sudo: false
+
+git:
+  depth: 10
+
+before_install:
+  - gem install bundler
+  - bundle config github.https true
+
+script:
+  - bundle exec nanoc
+  - bundle exec nanoc check
+  - bundle exec rubocop
+
+addons:
+  apt:
+    packages:
+    - libaspell-dev
+    - aspell-en

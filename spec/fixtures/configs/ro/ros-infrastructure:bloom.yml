@@ -1,0 +1,20 @@
+language: python
+python:
+  - "2.7"
+  - "3.4"
+  - "3.6"
+# command to install dependencies
+install:
+  - pip install PyYAML argparse rosdep vcstools catkin-pkg python-dateutil setuptools
+  - pip install nose coverage pep8
+  - git clone https://github.com/dirk-thomas/empy.git /tmp/empy
+  - cd /tmp/empy
+  - python setup.py install
+  - cd -
+  - sudo `which rosdep` init
+  - rosdep update
+# command to run tests
+script:
+  - BLOOM_VERBOSE=1 python setup.py nosetests -s --tests test
+notifications:
+  email: false

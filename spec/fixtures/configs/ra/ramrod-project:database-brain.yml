@@ -1,0 +1,64 @@
+sudo: required
+
+language: python
+
+cache: pip
+
+python:
+  - "3.6"
+
+services:
+  - docker
+
+env:
+  global:
+    - CC_TEST_REPORTER_ID=edcf89b102b70b78638e9217f0ee4b66dbcc01dd90527259774c374fa545e313
+
+branches:
+  only:
+  - master
+  - dev
+  - qa
+
+# command to install dependencies
+before_install:
+  - if [ "$TRAVIS_BRANCH" == "master" ]; 
+    then export TAG=latest;
+    else export TAG=$TRAVIS_BRANCH; fi
+
+install:
+  - sudo apt-get install fuse
+  - pip install -r requirements.txt
+  - pip install pytest-cov fusepy
+  - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+  - chmod +x ./cc-test-reporter
+  - ./cc-test-reporter before-build
+
+before_script:
+  - pytest --cov auditpool --cov setup --cov schema --cov-config .coveragerc --cov-report xml schema/ setup/test_integration.py test/
+  - ./cc-test-reporter after-build -t coverage.py --exit-code 0
+
+script:
+  - docker build -t ramrodpcp/database-brain:test .
+  - docker run -d --rm --name Brain -e "STAGE=PROD" -e "LOGLEVEL=CRITICAL" -v /var/run/docker.sock:/var/run/docker.sock ramrodpcp/database-brain:test ;
+  - sleep 30
+  - docker ps
+  - docker logs Brain
+  - docker stop Brain
+  # e2e tests
+  - bash <(curl -s https://raw.githubusercontent.com/ramrod-project/integration-stack/$TRAVIS_BRANCH/scripts/e2e.sh)
+
+after_success:
+  - docker service rm $(docker service ls -q)
+  - docker rmi $(docker images -q)
+  - docker build -t ramrodpcp/database-brain:test .
+  - docker images
+  - docker tag ramrodpcp/database-brain:test ramrodpcp/database-brain:$TAG
+  - docker images
+  - if [[ "$TRAVIS_PULL_REQUEST" == "false" ]]; 
+    then echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin; fi
+  - if [[ "$TRAVIS_PULL_REQUEST" == "false"  ]]; 
+    then docker push ramrodpcp/database-brain:$TAG; fi
+
+
+slack: ramrod-project:GDF82rRYDg3KSekrT3GA24qO

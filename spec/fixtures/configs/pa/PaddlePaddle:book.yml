@@ -1,0 +1,29 @@
+language: cpp
+cache: ccache
+sudo: required
+dist: trusty
+os:
+  - linux
+env:
+  - JOB=PRE_COMMIT
+
+addons:
+  apt:
+    packages:
+      - git
+      - python
+      - python-pip
+      - python2.7-dev
+      - golang
+  ssh_known_hosts: 13.229.163.131
+before_install:
+  -  sudo pip install -U virtualenv pre-commit pip
+  -  GOPATH=/tmp/go go get -u github.com/wangkuiyi/ipynb/markdown-to-ipynb
+script:
+  -  PATH=/tmp/go/bin:$PATH .travis/precommit.sh
+  - |
+     .travis/deploy_docs.sh
+notifications:
+  email:
+    on_success: change
+    on_failure: always

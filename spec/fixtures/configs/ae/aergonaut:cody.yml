@@ -1,0 +1,36 @@
+language: ruby
+sudo: false
+cache:
+  - bundler
+  - yarn
+rvm:
+  - 2.5.1
+before_install:
+  - curl -o- -L https://yarnpkg.com/install.sh | bash
+  - export PATH="$HOME/.yarn/bin:$PATH"
+before_script:
+  - ln -s /usr/lib/chromium-browser/chromedriver ~/bin/chromedriver
+script:
+  - script/ci
+after_script:
+  - if [ "$SUITE" = "yarn" ]; then bin/yarn codecov; fi
+env:
+  matrix:
+    - SUITE=rspec
+    - SUITE=yarn
+    - SUITE=browser
+  global:
+    - CODY_GITHUB_ACCESS_TOKEN=abc123
+    - CODY_JWT_SECRET_KEY=fake
+    - CODY_GITHUB_REPO=aergonaut/testrepo
+    - CODY_HOST=cody.example
+    - CODY_ATTR_ENCRYPTED_KEY="eTJIFMy/H5/FL2HXllaCyZ5XcY6FsC0itYVN7ZbNxv0="
+branches:
+  only:
+    - master
+addons:
+  postgresql: "9.4"
+  apt:
+    packages:
+      - google-chrome-stable
+      - chromium-chromedriver

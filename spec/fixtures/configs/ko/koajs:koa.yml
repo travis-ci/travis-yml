@@ -1,0 +1,23 @@
+sudo: false
+language: node_js
+node_js:
+  - 7
+  - 8
+  - 9
+  - 10
+  - 11
+cache:
+  directories:
+    - wrk/bin
+    - node_modules
+before_script:
+  - npm prune
+  - "[ ! -f wrk/bin/wrk ] && rm -rf wrk && git clone https://github.com/wg/wrk.git && make -C wrk && mkdir wrk/bin && mv wrk/wrk wrk/bin || true"
+  - export PATH=$PATH:$PWD/wrk/bin/
+script:
+  - npm run lint
+  - npm run test-cov
+  - npm run bench
+after_script:
+  - npm install codecov
+  - ./node_modules/.bin/codecov

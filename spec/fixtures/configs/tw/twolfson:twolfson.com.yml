@@ -1,0 +1,31 @@
+language: node_js
+node_js:
+  - "6"
+matrix:
+  # # Add a build with screenshot uploads for Node.js@6
+  # include:
+  #   - node_js: "6"
+  #     env: UPLOAD_RESULTS="TRUE"
+
+before_install:
+  # Upgrade npm to avoid semver issues
+  - curl --location http://rawgit.com/twolfson/fix-travis-ci/master/lib/install.sh | bash -s
+
+  # Install node-webkit
+  # DEV: We have stopped running perceptual tests so no longer need to install nw.js
+  # - ./test/utils/install-node-webkit.sh "$USER"
+
+install:
+  # Install our node dependencies and setup our config
+  - CONFIG_COPY_ONLY=TRUE npm install
+
+script:
+  # Run Travis tests (upon failure, upload to imgur)
+  - 'npm run test-travis || ((test "$UPLOAD_RESULTS" = "TRUE" && ./test/perceptual-tests/upload-screenshots.sh) && exit 1)'
+
+notifications:
+  email:
+    recipients:
+      - todd@twolfson.com
+    on_success: change
+    on_failure: change

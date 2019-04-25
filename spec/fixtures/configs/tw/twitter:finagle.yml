@@ -1,0 +1,76 @@
+dist: trusty
+sudo: required
+
+language: scala
+
+git:
+  depth: 3
+  quiet: true
+
+env:
+  global:
+    - JAVA_OPTS="-DSKIP_FLAKY=1 -DSKIP_FLAKY_TRAVIS=1 -Dsbt.log.noformat=true"
+  matrix:
+    - PROJECT=finagle-core
+    - PROJECT=finagle-exception
+    - PROJECT=finagle-exp
+    - PROJECT=finagle-grpc-context
+    - PROJECT=finagle-http
+    - PROJECT=finagle-http2
+    - PROJECT=finagle-integration
+    - PROJECT=finagle-mux
+    - PROJECT=finagle-mysql
+    - PROJECT=finagle-netty4
+    - PROJECT=finagle-netty4-http
+    - PROJECT=finagle-opencensus-tracing
+    - PROJECT=finagle-redis
+    - PROJECT=finagle-serversets
+    - PROJECT=finagle-stats
+    - PROJECT=finagle-stats-core
+    - PROJECT=finagle-thrift
+    - PROJECT=finagle-thriftmux
+    - PROJECT=finagle-toggle
+    - PROJECT=finagle-tunable
+    - PROJECT=finagle-zipkin-core
+    - PROJECT=finagle-zipkin-scribe
+
+# These directories are cached to S3 at the end of the build
+cache:
+  directories:
+   - $HOME/.ivy2/cache
+   - $HOME/.ivy2/local/com.twitter
+   - $HOME/.sbt
+   - $HOME/.dodo
+
+before_cache:
+  # Cleanup the cached directories to avoid unnecessary cache updates
+  - find $HOME/.ivy2/cache  -name "ivydata-*.properties" -delete
+  - find $HOME/.sbt         -name "*.lock"               -delete
+
+scala:
+  - 2.11.12
+  - 2.12.8
+
+jdk:
+  - oraclejdk8
+
+notifications:
+  slack:
+    secure: PfUgPphNmKcZLIjTjd46IHBzqB0vkzK8clCqdsUr5taJRHhMSgRg8ks81sUhCmu+hTl3FG+jEzGgqMUvcisS+OziP/8QR/C41f5jdaETfkBE53DZIWVXZ80QRabphRTCbRUfibC39WWrhhLgWCIqzvTM8qsO/43JuQOGLQbuqcs=
+    on_failure: change
+    on_success: change
+
+before_script:
+  - unset SBT_OPTS # default $SBT_OPTS is irrelevant to sbt launcher
+  # note: this is not ideal to run before every job in the matrix but is the only way that works consistently
+  - curl -s https://raw.githubusercontent.com/twitter/dodo/develop/bin/build | bash -s -- --no-test --scala-version $TRAVIS_SCALA_VERSION finagle
+  - travis_retry ./sbt --error ++$TRAVIS_SCALA_VERSION ci:update finagle-memcached/update
+  # don't test these projects because they require a running memcached instance
+  - ./sbt ++$TRAVIS_SCALA_VERSION finagle-memcached/test:compile
+
+script:
+  - travis_retry ./sbt ++$TRAVIS_SCALA_VERSION coverage "$PROJECT/test" coverageReport
+
+after_success:
+  - ./sbt ++$TRAVIS_SCALA_VERSION coverageAggregate
+  - bash <(curl -s https://codecov.io/bash)

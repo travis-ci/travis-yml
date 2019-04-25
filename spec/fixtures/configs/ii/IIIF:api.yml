@@ -1,0 +1,79 @@
+sudo: required
+dist: trusty
+
+env:
+  global:
+    - ROOT_BRANCHES="master prezi3"
+before_install:
+  - export NOKOGIRI_USE_SYSTEM_LIBRARIES=true
+  - npm install -g grunt-cli
+
+install:
+  - bundle install
+  - npm install grunt grunt-html --save-dev
+
+# randomly having java opts set breaks grunt-html
+before_script:
+  - unset _JAVA_OPTIONS
+
+  # looks like grunt-html use the W3C validator at: https://github.com/validator/validator
+script:
+  - rake ci
+
+# environment
+language: ruby
+rvm:
+  - 2.4.2
+jdk:
+  - oraclejdk8
+
+before_deploy: if [[ ${ROOT_BRANCHES} =~ .*${TRAVIS_PULL_REQUEST_BRANCH:-$TRAVIS_BRANCH}.* ]]; then
+    echo "Building at root ${ROOT_INSTALL}";
+    bundle exec jekyll clean && bundle exec jekyll build;
+  else
+    echo "Building relative ${ROOT_INSTALL}";
+    bundle exec jekyll clean && bundle exec jekyll build --baseurl /api/${TRAVIS_PULL_REQUEST_BRANCH:-$TRAVIS_BRANCH};
+  fi
+
+deploy:
+  - provider: s3
+    access_key_id:
+      secure: "aYJibzw6wdmoekRn8MR73NSu3DZU1kaS/cImMZ527X2BWNDsWSey4af4vLAJ+Vc1vuFqV7FW5dpj2cFnAVN/feVrKt5elqxCajfDtWgHSiY3HH/9GUPEFCsm3EWNpyoMpEfcsKPf+DjOhAGyOCwE+zkXFWMhxXxFDV1khgwfhd8="
+    secret_access_key:
+      secure: "WnfqGrUQjlsHndutcdUV/z7vIDnsTS+eJxbFI+kVJw7RdcPuzf1nEDUbiVy7W52PwsfH5EVwuPEiyOEYQqDvQg3tzQSuZc47SSMt94+K6QrkUTGxoihG5xfdhoR/puSX+Yd/UsK7y1jLfe+Kx/TXvgKvN0VGUe6z9JXTUzcuY64="
+    bucket: iiif-api-website
+    skip_cleanup: true
+    acl: public_read
+    region: us-east-1
+    local_dir: _site
+    on:
+      branch: master
+  - provider: s3
+    access_key_id:
+      secure: "WJBKJiYRQkOO5nveEVFVOADt34U3K4vK6PZ8gIATfRdqyD9cPkiEtajmB7yPw7Hs4NHxyfELJ32TYLLr4jhr6krf/a0O/1ji76rlOC7Rfcio7kXqxjF5P/wuVK34evN+PGNVb4kkoMAOocW/02yxP6Xfyx1VhofEpZcrdtjUibo="
+    secret_access_key:
+      secure: "A6Py+gxHItulsfd6qxBA5o6vpHD00f836oiFfhp667OvE+QLQiaulMljA3xzEdb5Y0N0+C+Lc8S+58ASbJzRa4TKmNUPWQ3NRIL8zgPQhUWllrrV+I+NBA3jXkdoXHjDr9CK/Gj16f25VgHUo9UWpTfsHaISLWrQhyE91EwJZLs="
+    bucket: preview.iiif.io
+    skip_cleanup: true
+    acl: public_read
+    region: us-east-1
+    local_dir: _site
+    upload-dir: "api/$TRAVIS_BRANCH"
+    on:
+      all_branches: true
+      condition: "$TRAVIS_BRANCH != master"
+
+notifications:
+  email:
+    recipients:
+      - "azaroth42@gmail.com"
+      - "blalbrit@stanford.edu"
+      - "jpstroop@gmail.com"
+      - "michael.appleby@yale.edu"
+      - "simeon.warner@gmail.com"
+      - "glen.robson@gmail.com"
+    on_success: "change"
+    on_failure: "change"
+
+notifications:
+  slack: iiif:gf5bcug4sVJsPHdRibCEDi2F

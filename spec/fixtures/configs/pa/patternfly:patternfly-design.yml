@@ -1,0 +1,22 @@
+language: node_js
+node_js:
+  - '4'
+
+env:
+  global:
+  - ENCRYPTION_LABEL: "3c823bf81e58"
+  - COMMIT_AUTHOR_EMAIL: "patternfly-build@redhat.com"
+  - TRIGGER_REPO_SLUG: "patternfly/patternfly-design"
+  - TRIGGER_REPO_BRANCH: "master"
+
+before_install:
+  - 'git checkout -B $TRAVIS_BRANCH' # Reconcile detached HEAD
+
+script:
+  - 'npm test'
+
+after_success:
+  - mkdir -p publish/status
+  - ./script/status.js
+  - ls -lR publish
+  - ./script/publish-ghpages.sh -t publish

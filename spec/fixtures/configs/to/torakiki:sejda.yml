@@ -1,0 +1,40 @@
+language: java
+sudo: false
+before_install:
+- openssl aes-256-cbc -K $encrypted_e19597da4fac_key -iv $encrypted_e19597da4fac_iv
+  -in pgp.asc.enc -out pgp.asc -d
+- gpg --fast-import pgp.asc
+before_script: mvn javadoc:javadoc -DskipTests=true -B -V
+script: mvn clean install
+jdk:
+- openjdk8
+cache:                                                                          
+  directories:                                                                  
+    - $HOME/.m2 
+env:
+  global:
+    #GPG_PASSPHRASE
+    - secure: "YqXA0mY5JW3EwtKQjWLMD7Q4dpHVoIpfgYjG2D1D2X67KfekN6h5NaQWCQsPV0AJvznbF/bWoNjUGscncukA2MW/Fz1kXmnnuFmsFQNQAYBCilO5L8/MPWd0UFmHNJQYq5NGw9ajduB46E8K3URMPzseZsZo6IPalJ9i1VKF/Cg="
+    #OSSRH credentials
+    - secure: "OQKwWq4cDk7jaVHAnjv9TC1ZuJ40k2q4rpN+do5zdu4506hvWZbv42J7adJlHQifAfGuu4dRnj7tZrG98RZLU4PZSA9hOdJOmzT4BE/8zJCYU06RAgOgry+KpR6TE+2cl+6h+MQslwBEylWaGj7GbrKGQWiBjfNZsPdhATZboNM="    
+    - secure: "Jh3PnqzzGjfboV8W++lYcp2zAyI7EhH+9nli/eLcKoS1whqcs6pdHAIkEwNpWQj3oAWLapFuL7/dR/dtlzXjggF9myVhl6io5W8+JDezGlow95QojIqlcQ8R0dmcN27wX8VSUtUuQlScHRBFvvNyxmp7pk1Q9fRykZWm2ui9ygo="
+deploy:
+  - provider: releases
+    skip_cleanup: true
+    file_glob: true
+    api_key:
+      secure: Ca89OLPkZ/qQ4/Ky2FBy7V0gFlhD8MGPWKLFI0FX/yCJn5I3ZmzSEIFBozym1HmG23zdofB2RfVn11c4EF1hjh2r3XUjucBV5L8xN0BLtA8s82OALBilfD+tmvUzhWUP7sG2enyeoAYFF+mNxkRFz4rx3Wn/tP1qeHDD54UNyUo=
+    on:
+      tags: true
+    file:
+    - sejda-console/target/*.deb
+    - sejda-console/target/*.zip
+    - sejda-distribution/target/*.zip
+  - provider: script
+    script: "mvn deploy --settings .travis.settings.xml"
+    skip_cleanup: true
+    on:
+      tags: true
+notifications:
+  email:
+    - info@sejda.org

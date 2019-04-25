@@ -35,7 +35,7 @@ describe Travis::Yml::Schema::Def::Deploy::Firebase, 'structure' do
                 type: :string
               },
               token: {
-                '$ref': '#/definitions/secure'
+                '$ref': '#/definitions/type/secure'
               },
               message: {
                 type: :string

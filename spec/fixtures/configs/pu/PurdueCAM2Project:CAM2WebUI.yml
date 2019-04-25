@@ -1,0 +1,49 @@
+language: python
+python:
+- '3.6.6'
+addons:
+  # firefox: "56.0"
+  chrome: stable
+before_install:
+- sudo apt-get install xvfb
+before_script:
+- wget https://chromedriver.storage.googleapis.com/2.41/chromedriver_linux64.zip
+- unzip chromedriver_linux64.zip
+- sudo mv chromedriver /usr/bin
+- sudo chmod a+x /usr/bin/chromedriver
+- export DISPLAY=:99.0
+- sh -e /etc/init.d/xvfb start
+- sleep 5 # give xvfb some time to start
+install:
+- pip install -r requirements.txt
+- pip install -r docs/requirements.txt
+- python manage.py collectstatic --noinput
+script:
+# - python manage.py test app # Do not remove this line, this is for integration tests.
+- cd docs
+- make html
+- cd ..
+cache: pip
+notifications:
+  email: false
+  slack:
+    secure: iGDu26rpYK6k4AGGh5YBilBOkvZEVBVNE6xH/pC8Y/1nDm14nRHkNIJ3JSlv4hDUKrhiYesIPja/u/ZX8sWlA+BW6BlykO0726HYQ5Ii/udh3OiZmNXBv/IDI45xfe6zf5bMxZzb+WhUVgcdN64Yr2z+qM3y9nmH2mc8yH/ci8u12mKB9i/NoDduvlfCqF74qfmMw5dHFTXsUKeazale3NvY2ZxZsil+D1lF6EZ3LaddBjkESxfFVdG8JgbD0zOD+B59Xxz21R/F9+2eWNiPOwayHt5D0hESiWyjFhQ0J0Ft1WhZ90jo/shkj0/05BKbMVFMEwsdLhTZXNy1LeMqA8y5LIyVM818GApxYsQ2HvGe1dKDWTxXD9k2n3/io8iRC8ZFBPdaZE1hQnKc3dDtkh1CP7ehxo2otFZA9TF0Oj7h081XeqBtjhSVxNVjhzuLwfVgFlXexm63i4xh5bRwkpppZdmjZD1vCPZHZnJyh4s1ESkcsiJ1PS4jyoMe81/zQ76qXdFi5eTCaApkP2t5CBjbFeUaCUus8MS+WyRScK340bF4KHzbkHgE3H+lAkI8O7LgK6Pe+QQLchz6UdwIA8S5/o7L1xLa/VMJ/RXnkLNsJHzX9Q391OhDcvJQi8WxCuZdMCgmA8sXSat/J6v551HRxh4Z0t18sR0p/6+yquw=
+env:
+  secure: NSdLJPs/L0a91lD0H470usbTR3DsEsmgfHAkDbpBD196mVkF5efdbsHLeO0FSiTkxRl2EYmJGeJHXWulmJfsQlrBPppuisvuxjVGfIPHVGxS30SuYrsbNJ/HoD2rdi1ZdvBu7FBTIeCSurhnv/y6qgJNc0QDaXiWKSiUC20w1V4lAUwQpfj0k/4b+zrSyoadDCg0xFFCPTHODAah5S8yvXxNih7HdnAGoN3mLEP7+1UvO1+zed85fMTk1B+Ae1qdy4eXr/xmvaSvvS9rVygWBuOUKCZ/MEb56yDFU0xTTgbLP9xMVte/tKdj3EeU+T4AvMJOucfLZ+VkTREvR/jLaLDGQh9hjzg6OhbDn445YidZVyqFDsGZ+j+pVfAIf4Z4PXv2GpvMUbeNRzroTBSBY0hhEyTUHPTLibCVuZb6+i8NxBihjlv0roXp4EjveYPwRRAna+FSdWPiVcA/pRs1hJSSsnfM105RG71tVAk2BtYjWXphIyL4r2Hii2gqhv3tWEWg2UOwJ4s9NjbKrSsptta+PEZpgl9b0HuS5rohYuelorPrsReBa4QFDlSQ149dJ8qJm57PhMqi+qPuwjC5RJ+78CK28qZBeI5BA6VziYfQAoT1+MY6fjiTq3H4B/sZ6g4QKLI4GO7KWrUuTMB5Vtwqg72cxgj2g+UVUNTObHY=
+deploy:
+- provider: heroku
+  api_key:
+    secure: d+T/Jrl1k7YyjF0oQL/sl0gXLfhHD3f3Eq5+1WzAA+8quzpMvrwU9xyt9PRa86el/eEvXq0esVo46mfLFT9Jm61CpFD21a6qeLs11jJzv9Z2jhaGqZtSMx7G/pOOwNN2hVPGixiFEueB0HlLXu736wgMIqijDzKgYtvRdzHsTGUpHue9ajYxXh3Xu6K5bMH5ICENj75foXZBWJflmlkiG1tAKdUHzJSElQH5/Qgy44cbw1RswHkn9yiIyBFrqnHX+7jqBfzaTCkeHMu0NFzwDGTVanvH1O16gHvY6v0YG6KG2xCsRYbZp/ncmIwmUA1iwVLOISxLDyZf3zlmkT1eubuoCiHdEQ1541dpdJj17JzwVm4eBjv7AdUPws4bSN+rBEyM4WxHf2dSiv4630coZTgekMxG3Z25w98kcgWwGvO4A0l5lPxNYrrc3NHvdHaMGuX8WUIb94DjT5WCXLJU9KI16KNO7YMvRnD6+jvjgi0xCUucLZR5+UEpk19y3THyu2jqs7xPQzUidAfhttkUbJYtUaAnvxIGeNJgm6buZRXhuBfLfi38MKW+ucsbpR8/ORws0gilzkkp0ik74h/xy62fFVupAaTJlYpgPj/RV80xwfPTi7r3rXMAJqrNsSqIOrAvFgq0DM46nMicvwp/jHDW5liec7ZBaLHeEukmW3g=
+  app:
+    master: cam2webui-staging
+    release: cam2webui
+- provider: pages
+  skip_cleanup: true
+  local_dir: docs/_build/html
+  github_token: $GITHUB_TOKEN # Set in travis-ci.org dashboard
+  keep-history: true
+  on:
+    branch: master
+after_deploy:
+- "python manage.py makemigrations"
+- "python manage.py migrate"

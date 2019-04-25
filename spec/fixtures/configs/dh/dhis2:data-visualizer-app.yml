@@ -1,0 +1,23 @@
+language: node_js
+node_js:
+- '8'
+env:
+  global:
+  - CC_TEST_REPORTER_ID=2a6f417bdfe1cdc8e2ec8d3347728fc81e64752286079db5ab17fd65c964b946
+  - secure: KQSX6TsA1fyPreY1GIxWW+XqNckxviIPVde5GDHkrrlfhR+pzTJQ2as3/j1QpTQ7LW3fESO3hfijueC4nKDyi0ZdNpd2+DDi19J0EVKDl2g5WfnAw8H82GE670P9ZPRREh0+SZ11sAf3Wlvs0RPItftSoYwyS8rwxGAaLWWiJoXObax6dpqw7IrKhK3yBf/ixdQKa+ZZ0pjt8KXkL9oPeqHf9Mx2Sh78OIEIcRlN+dznvEbF8QeVQ+8cM8e43N7jWkntsvnZ3TfuuiOf/tz/BQRxlKPkXG0eVDy6teISUrbe6e3faezEES64p/9ubHUALEEJi8ZfSJXL3m9nv48tHz1gSKhlp0/mfSHr58TFJLj1jgZ0SvE0hkVLdrCtbyhxq1cwYY7pXB9Qrd8JjtLPo2mT9sBOVDqjz1NUCyzO/Cl7f4wwR7OCYFD0q50+ARmfvTKWC+UzQHs0ahIeMzg5cGGBTm/kAawmcBQR+AZnsyOckM1enQTPKy60lWRZV2I7OrCrBspOJECUvH3edkPeAs1B/yfM1WduVWqykOXPwVN3Ww+dHdKAGfat3KNf5ZBEe7owO41m6J8fAqxkXXoxuiFH5id+/g0Yg+iumh7CAchpUefWdmyFDHamhcfoJfPAdKdgQ18psNFfFx+coF3R13Gx2tHUf8wwv6dIj+NT6vM=
+before_script:
+- curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64
+  > ./cc-test-reporter
+- chmod +x ./cc-test-reporter
+- "./cc-test-reporter before-build"
+- npm install --global @dhis2/deploy-build
+script:
+- npm run build
+after_script:
+- "./cc-test-reporter after-build -d --exit-code $TRAVIS_TEST_RESULT"
+deploy:
+- provider: script
+  script: deploy-build
+  skip_cleanup: true
+  on:
+    all_branches: true

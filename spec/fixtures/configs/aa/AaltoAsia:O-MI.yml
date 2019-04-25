@@ -1,0 +1,61 @@
+dist: trusty
+sudo: required
+git:
+  depth: 4
+addons:
+  apt:
+    packages:
+      - fakeroot
+language: scala
+before_install:
+  - sudo apt-get -qq update
+  - sudo apt-get install -y graphviz rpm
+services:
+  - docker
+jdk:
+  - oraclejdk8
+scala:
+  - 2.12.6
+notifications:
+  flowdock:
+    - 8fa39d3ba829b0083c135134658d0ac2
+    - fe0612eaf41017111bd1db99f1c00b49
+  slack: aaltoasia:oQgcAuEw6ugXl8FIO7A60Ei2
+branches:
+  only:
+    - master
+    - development
+    - travis
+    - /^\d+\.\d+\.\d+([.\- ].*)?$/
+cache:
+  directories:
+    - "$HOME/.ivy2/cache"
+    - "$HOME/.sbt/boot/"
+script:
+  - sbt ++$TRAVIS_SCALA_VERSION "project omiNode" clean coverage test
+  - find $HOME/.sbt -name "*.lock" | xargs rm
+  - find $HOME/.ivy2 -name "ivydata-*.properties" | xargs rm
+after_success:
+  - sbt "project omiNode" coverageReport coveralls codacyCoverage
+before_deploy:
+  - sbt release
+  - zip -9 target/apidoc-${TRAVIS_TAG}.zip O-MI-Node/html/api/*
+deploy:
+  - provider: releases
+    api_key:
+      secure: JL6HBX4DRR5jIf7x8cTFSKZRcnjCeAq3BpVfp4gfIknaYdW+Hs9wNE075hArVzeC9BqEJX3wdymguG7zznYpcRBrTXf8OInHFoOyMNvDGn4KHuAPUDp36BrkQLCys7tyVL6rI+ySx3wACWkx0Lwr30Mijtk12JlkRk/qy9h0Nj8=
+    file:
+      - target/universal/o-mi-node-${TRAVIS_TAG}.zip
+      - target/universal/o-mi-node-${TRAVIS_TAG}.tgz
+      - target/O-MI-Node_${TRAVIS_TAG}_all.deb
+      - target/rpm/RPMS/noarch/o-mi-node-${TRAVIS_TAG}-1.noarch.rpm
+      - target/apidoc-${TRAVIS_TAG}.zip
+    draft: true
+    skip_cleanup: true
+    overwrite: true
+    on:
+      tags: true
+  - provider: script
+    script: bash docker_push
+    on:
+      tags: true

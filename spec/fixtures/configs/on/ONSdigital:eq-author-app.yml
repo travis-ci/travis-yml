@@ -1,0 +1,47 @@
+sudo: false
+
+git:
+  depth: false
+
+services:
+  - docker
+
+language: node_js
+
+node_js:
+  - "10"
+
+cache:
+  yarn: true
+
+before_script:
+  - set -e
+  - export TAG=`if [ "$TRAVIS_PULL_REQUEST_BRANCH" == "" ]; then echo "latest"; else echo $TRAVIS_PULL_REQUEST_BRANCH; fi`
+  - export TAG=${TAG//\//-}
+
+script:
+  - pushd eq-author; ./scripts/ci.sh; popd;
+  - pushd eq-author-api; ./scripts/ci.sh; popd;
+  - pushd eq-publisher; ./scripts/ci.sh; popd;
+  - cd eq-author
+  - yarn test:integration
+  - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+  - docker push onsdigital/eq-author:$TAG
+  - docker push onsdigital/eq-author-api:$TAG
+  - docker push onsdigital/eq-publisher:$TAG
+
+before_deploy:
+  - if [ "$TRAVIS_BRANCH" == "master" ]; then yarn storybook-build; fi
+
+deploy:
+  local_dir: eq-author/storybook-static
+  provider: pages
+  skip_cleanup: true
+  github_token: $GITHUB_TOKEN
+  on:
+    branch:
+      - master
+
+branches:
+  only:
+    - master

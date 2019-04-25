@@ -1,0 +1,45 @@
+language: node_js
+dist: trusty
+node_js:
+- '7'
+env:
+  global:
+  - secure: aiWy9PSkrIhN0cgaihcjZAtKJref1cn3FUVThRUn3WC+nAu7oe1bfksbKscwnWGI24LoJpT5IheCJ3G9SsAwcd5/+mJmVth50r+fpEEa9A5r3WjOkFR+IoR/XGsd/z+GBgTYxzHaXvXVkPQwH/LBUIXFn4ZpnzBuGvflwkq2jXtKCONUS38svrCz2IfdPpIcWfxQUjAww+8/RtUwwtC4avKPL3BkrwBNQ1zJVo6oGKdO6AyiS5tIQ3jISWs7kEXEmHVIgFREYQanW0Xcl/+O9bfuc0SPczvxr/uNGzw1lFTNJz8zfLmcaxC3EfzVU5hsP1Iazi3l+d1Qesv+90Sy0vpJHm/7ab28TNbgjEx0HqRSj2inBFP4gkk+G1nZNqpgZ49jme+hVBK5DBjXs9gRB/cTXo0AWAs9KsJuGLTkm4LFvKDXacfUaFzQkcXirNINBZfCPfNXkqLJHlLOd/5A2I4Qz6LS8sQ+llqrlMfiMm739RzT/FJIv1TR7umIXwE9wWTmtHkycJ14dfSc+5kQP6yQ4VB42Ssi/uGMHv9YI/7HfwLl/kX8cJVoIB0lFrAAILo1Ah2+qorUCptos+kbnj5liEVogioxRC37ZEFKS2MRG+eD+2+YW3xLTilo3q2iBSBTfZGSTknZY1yCtvWvBWBIpFPUMsaoJLXHc3QSdZg=
+before_script:
+#- npm install -g gitbook-cli
+#- npm install -g extend
+#- npm install
+script:
+- pwd
+# generate md files
+- mkdir infra
+- node talk2md
+# generate gitbook & build
+- mkdir infra-book
+- cd infra-book
+
+# -------------------------------
+# workaround for gitbook bug
+#- ../node_modules/.bin/gitbook -V
+#- cd /home/travis/.gitbook/versions/3.2.2
+#- npm i
+#- cd /home/travis/build/PDIS/infra-gitbook/infra-book
+# -------------------------------
+
+- ../node_modules/.bin/gitbook init
+- cp ../book.json .
+- cp ../infra/*.md .
+- ../node_modules/.bin/gitbook install
+- ../node_modules/.bin/gitbook build
+# upload to github 
+- git config --global user.email "$GIT_EMAIL"
+- git config --global user.name "$GIT_NAME"
+- git config --global push.default simple
+- git clone --depth 1 --branch gh-pages https://$GH_TOKEN@github.com/pdis/infra-gitbook
+- cp -R _book/* infra-gitbook/
+- cd infra-gitbook/
+- echo "infra.pdis.tw" > CNAME
+- git add -A .
+- MESSAGE=`date +\ %Y-%m-%d\ %H:%M:%S`
+- git commit -m "Book updated:$MESSAGE"
+- git push --quiet

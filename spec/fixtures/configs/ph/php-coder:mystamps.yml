@@ -1,0 +1,83 @@
+dist: trusty
+language: java
+
+env:
+  matrix:
+    - SPRING_PROFILES_ACTIVE=test
+    - SPRING_PROFILES_ACTIVE=travis
+  global:
+    - MAVEN_OPTS='-Xss256k'
+    - secure: "fBav56BzY+A+Vs1g9YSfo1oLDCO1rFrXl49lJkOA5/XpnsKEEs4lI2RcOzz0wiJKXFNgcliiAJWoYMI8Esqz+lkyFWan4ij5Co0UzJcytDuY+2o+jaqwx45DuDYPogABzT+hWjLCxQLLG46gUkChzT8kcvOOn6JxC7Ff8q5MnoM="
+
+before_script:
+  - if [ "$SPRING_PROFILES_ACTIVE" = 'travis' ]; then
+      mysql -u root -e 'CREATE DATABASE mystamps CHARACTER SET utf8;';
+      mkdir -p /tmp/uploads /tmp/preview;
+      cp src/main/resources/test/test.png /tmp/uploads/1.png;
+      if [ "$TRAVIS_BRANCH" = 'prod' -a "$TRAVIS_PULL_REQUEST" = 'false' ]; then
+        pip install --user ansible==2.1.1.0;
+      fi;
+      npm install -g bootlint;
+      pip install --user html5validator;
+      pip install --user robotframework-lint;
+      if [ "$TRAVIS_PULL_REQUEST" != 'false' ]; then
+        gem install danger nokogiri --no-ri --no-rdoc;
+      fi;
+      sudo apt-get -qq update;
+      sudo apt-get install -y shellcheck;
+    fi
+
+script:
+  - if [ "$SPRING_PROFILES_ACTIVE" = 'travis' ]; then
+      ./src/main/scripts/ci/check-build-and-verify.sh;
+    else
+      ./src/main/scripts/ci/check-build-and-verify.sh --only-integration-tests;
+    fi
+  # Travis CI may miss a part of the huge output if we'll exit immediately
+  # See: https://github.com/travis-ci/travis-ci/issues/6018
+  - sleep 5
+
+after_failure:
+  # In order to be able debug robot framework test flakes we need to have a report.
+  # Just encode it to a gzipped binary form and dump to console.
+  - if fgrep -qs 'status="FAIL"' target/robotframework-reports/output.xml; then
+      echo '===== REPORT START =====';
+      cat target/robotframework-reports/output.xml | gzip -c | base64;
+      echo '===== REPORT END =====';
+      sleep 5;
+    fi
+
+after_success:
+  - if [ "$SPRING_PROFILES_ACTIVE" = 'travis' ]; then
+      ./src/main/scripts/show-spring-boot-version-diff.sh;
+    fi
+  - if [ "$SPRING_PROFILES_ACTIVE" = 'travis' ]; then
+      ./src/main/scripts/ci/publish-code-coverage.sh;
+      sleep 5;
+    fi
+
+deploy:
+  provider: script
+  script: ./src/main/scripts/ci/deploy.sh
+  on:
+    branch: prod
+    condition: '"$SPRING_PROFILES_ACTIVE" = "travis" && "$TRAVIS_PULL_REQUEST" = "false"'
+  skip_cleanup: true
+
+jdk:
+  - oraclejdk8
+
+services:
+  - mysql
+
+branches:
+  except:
+  - /^(re|old)_.*$/
+
+notifications:
+  email:
+    on_success: always # default: change
+    on_failure: always # default: always
+
+# We don't want to run `mvn install -DskipTests=true` for downloading project's dependencies
+install: true

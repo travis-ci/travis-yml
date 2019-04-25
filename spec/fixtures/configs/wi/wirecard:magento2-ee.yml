@@ -1,0 +1,130 @@
+dist: trusty
+sudo: false
+language: php
+
+cache:
+  directories:
+    - $HOME/.sonar/cache
+
+addons:
+  sonarqube:
+    organization: "wirecard"
+    token:
+      secure: "EAPeijV/NPsK8OgIu0TGXsOqSYhp9KdC9bH6HxWvevpXtxanmCz3Y60mE+xn9SUA/M5T1JBgl+WWHeFgEcZriurtd8U1t6nt1fOLmEPbiKOlhSnt0jLUwkzyAMh615B2qDifvqUopgoHDVgQ6aEhtaEFK6fij12d4IKEwM+nKYkcKMcppuXGjWRT+NTbLsOI9nWLjgi01FXS21rxjgUdk87drKZeKCMEyjcaXk2RXbBMVhELkXI+zx1fKTVGhNMjzlniLEdo/ioIGSF/KTnT+PwrYPLKcQanLGOoAbJvN2DVQceIRj3JrQZtFyES3FIOcR/V+tx2DFXMGNfwskqvqODgu1Ibf5KJAPEAmoh2qld9ikvxtuDoCPPwktUwuPSYfQoIACKKOZdA7eeC7OwihBcSrHqv/nwR7Mr3OfHcYncrLaFw8oC3Dgf3mIvj+0SIx9CPXFRgtdYN7QYYNb2y0PWrv2SG5Fs2gU+mMcYbSCSN/0bx+qqb2UKhfSvDQz5pG7btnddMzj/17AFTw9R8QFvE0uems9iocjdHKw1ydv2veiUt6Ibsccc+NSkpn+H0A5dTfPMHxzY+tcN/fUGAk2D8kprUCMdhGSYaL7u58CQ2yK6iCfjhYhyrbdfWcT48BtCBUWdQyVOwLnQo3Hs3/Ow0hlyByxdFWGq3ksPQNAk="
+    github_token:
+      secure: "aYQrSZ+YIju+CE/DBIWM1vGpop00HgBPSSr79D7af0kDEY3Xf2bj/Nqy+awayk+Pw3Pt2RHpgRmAbRa4qkR9SAWLEq17rdUiQcNWtHGaJXCkyrQRgt3z2PsQkNPVNU3iHKa9ff/xxdyIe3ftUEFKWXFeu0flnVPiekj152DCjnWobD3t6REMXO0qpo6igULPAehk5L3buT9hNAM1NopwCZsg0/Beoa0e6wBUIZEEYbX+dz4k0pCrrBfmrXtRLiKL4uLaxU6lXnVTo8DPxGfVbjLgS/GyQzjCfvNjXMsvky19ghy2cTWTzqCmm9sN4TS4/652k+3+TPIDwJKbVOW16BrgwiE5AUXvlkmNFKp8s69TO3GChcJlqW9IE92yMQOgYl6TqA4n2DBkn4xM3sOENJ2jNNyIQCTUupEZf4R2kxvwjwKPwkUkla+BR9lsc1yoeBe/kodqVmzOL7HD7RvPOpPRbk6Gdd0/EeaYmBE1TfxmDtWgWddLFvfv+XNllU7RyY9/3x2N6geK/397fyiiNJZEZ56CSsXz2WvubJIsphSFiWSzcRVTWXpdg25N8UTuq6w1ZkQVlKtUdL1ISJcQdLLbZCBQb2swIwjxmRSoOEGZiF4E8RH2BD2AxjpAnwU2VH50gFKK+J0g2z78JSjHQ6zQP4DZFV0NOy3AXP7Rb1M="
+
+env:
+  global:
+  - COMPOSER_ARGS="--no-interaction"
+
+matrix:
+  allow_failures:
+    - stage: acceptance-test
+  include:
+  - php: 7.0
+    if: env(PHRASEAPP_PULL) != '1' AND type != cron
+
+  - &acceptance-test
+    stage: acceptance-test
+    if: type = cron
+    php: 7.0
+    env: GATEWAY=API-TEST
+    install:
+      - bash .bin/remove-composer-lock-file.sh
+      - travis_retry composer require --dev $COMPOSER_ARGS phpunit/phpunit ^5.7
+      - travis_retry composer require --dev $COMPOSER_ARGS codeception/codeception:^2.5
+      - travis_retry composer install $COMPOSER_ARGS
+    script: bash .bin/run-ui-tests.sh
+    after_script: skip
+    after_success:
+      - bash .bin/upload-logs-and-notify.sh
+    after_failure:
+      - bash .bin/upload-logs-and-notify.sh fail
+
+  - <<: *acceptance-test
+    env: GATEWAY=API-WDCEE-TEST
+  - <<: *acceptance-test
+    env: GATEWAY=NOVA
+
+  - stage: phraseapp-pull
+    if: env(PHRASEAPP_PULL) = '1'
+    language: ruby
+    ruby: 2.5.3
+    before_install: skip
+    install:
+    - travis_retry gem install bundler -v 2.0.1
+    - travis_retry bundle install
+    script:
+    - .bin/rake phraseapp:ci_update
+    after_script: skip
+
+  - stage: phraseapp-check-if-in-sync
+    if: type != cron AND (branch = master OR type = pull_request)
+    language: ruby
+    ruby: 2.5.3
+    before_install: skip
+    install:
+    - travis_retry gem install bundler -v 2.0.1
+    - travis_retry bundle install
+    script:
+    - .bin/rake phraseapp:ci_check_if_in_sync
+    after_script: skip
+
+  - stage: deploy
+    if: tag IS present AND type = push
+    language: php
+    php: 7.0
+    before_install: skip
+    install:
+      - travis_retry composer install $COMPOSER_ARGS
+      - rvm install 2.5.3
+    after_install: skip
+    before_script: skip
+    script: skip
+    after_script: skip
+    before_deploy:
+    - export REPO_NAME=`echo $TRAVIS_REPO_SLUG | awk -F'/' '{print $2}'`
+    - export RELEASE_NOTES=$(composer make-release-notes)
+    - bash .bin/generate-wiki-notes.sh
+    - bash .bin/generate-readme-badge.sh
+    deploy:
+      provider: releases
+      api_key:
+        secure: "aYQrSZ+YIju+CE/DBIWM1vGpop00HgBPSSr79D7af0kDEY3Xf2bj/Nqy+awayk+Pw3Pt2RHpgRmAbRa4qkR9SAWLEq17rdUiQcNWtHGaJXCkyrQRgt3z2PsQkNPVNU3iHKa9ff/xxdyIe3ftUEFKWXFeu0flnVPiekj152DCjnWobD3t6REMXO0qpo6igULPAehk5L3buT9hNAM1NopwCZsg0/Beoa0e6wBUIZEEYbX+dz4k0pCrrBfmrXtRLiKL4uLaxU6lXnVTo8DPxGfVbjLgS/GyQzjCfvNjXMsvky19ghy2cTWTzqCmm9sN4TS4/652k+3+TPIDwJKbVOW16BrgwiE5AUXvlkmNFKp8s69TO3GChcJlqW9IE92yMQOgYl6TqA4n2DBkn4xM3sOENJ2jNNyIQCTUupEZf4R2kxvwjwKPwkUkla+BR9lsc1yoeBe/kodqVmzOL7HD7RvPOpPRbk6Gdd0/EeaYmBE1TfxmDtWgWddLFvfv+XNllU7RyY9/3x2N6geK/397fyiiNJZEZ56CSsXz2WvubJIsphSFiWSzcRVTWXpdg25N8UTuq6w1ZkQVlKtUdL1ISJcQdLLbZCBQb2swIwjxmRSoOEGZiF4E8RH2BD2AxjpAnwU2VH50gFKK+J0g2z78JSjHQ6zQP4DZFV0NOy3AXP7Rb1M="
+      name: "${REPO_NAME} ${TRAVIS_TAG}"
+      body: "${RELEASE_NOTES}"
+      skip_cleanup: true
+      on:
+        repo: ${TRAVIS_REPO_SLUG}
+        tags: true
+    after_deploy:
+    - export TMPDIR=/tmp/wirecard
+    - git clone -b master --depth 1 https://$WIRECARD_CEE_GITHUB_TOKEN@github.com/$DEPLOYMENT_PROJECT $TMPDIR
+    - cd $TMPDIR && travis_retry bundle install
+    - bin/rake trigger_build
+
+install:
+  - travis_retry composer require --dev $COMPOSER_ARGS satooshi/php-coveralls:^1.0
+  - travis_retry composer install $COMPOSER_ARGS
+  - composer show
+
+script:
+  - composer test-coverage
+  - composer cs-check
+
+after_script:
+  - composer upload-coverage
+  - bash .bin/generate-tag.sh
+
+notifications:
+  email: false
+  slack:
+    rooms:
+      secure: YI7sUrfMyKyJD60kElGkO7yBDkGEh+069yS8bFAIDUST7s48J+dDP/r2G9dN9oQwhs9hvNjpNytpZDPys838T+Z0mNtFZ9Wu022hV3MpbKUuMl7L9P0MQQmxjg4bKyKK3Hl9tPrZ3UsKRlwIUmRGGYQ7cjs4zumorqs19YsB3X+WnnxAmmYB3kHQYfNKgVnmcG2QHJyx5KaLZ0EsWynSHXkYb8bVCtdlbQFNnpChvGHPprZrHAszLCYnlU7AEZGdbuk17oIfXO9Wjuu1GV8iJ2VgKkTCzW4FBC5eHJyZezojPFUm1I5tvdihRZuyBekVGOF23J6pvHLqPx77clT+/Vn6T+UMDuh1INZ0LKt4UOU42oEDKGblWZx2VYWcHwfEK+ckJWZkT9EBfg/CMenJly2tbtBj6++XNvxgGEDn6XqKIEatcb7X/aiy4f8BPXa3/pzgZAlvzZbGGqHFNZPAlgcXBBXgbaC7VvMhvi6Z5AG5ylKzPS5GCD95ozPC+cGv0234TBJus5oZck4qNiT53IUQ7Ta+OGVB0Mea105VAoQI0I7YcgaqW6c4h2YTmnuuQsIzAwPOrJ5TAinj8Z8mZ9C11tEcNF3Pgy1tOoG/YLurhOJm7v1ebotRb/DIeSHU8RfNatnDSSky4YS6Y8k2pQthdC9m7m2f2mJYuGdLjlM=
+    template:
+      - "%{repository}#%{build_number} (%{branch} : %{author}): %{message}"
+      - "Change view : %{compare_url}"
+      - "Build details : %{build_url}"
+    on_success: change
+    on_failure: change

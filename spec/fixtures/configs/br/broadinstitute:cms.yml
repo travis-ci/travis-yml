@@ -1,0 +1,50 @@
+language: python
+
+matrix:
+    include:
+        - os: linux
+          sudo: false
+          python: 2.7
+        - os: linux
+          sudo: false
+          python: 3.4
+        - os: linux
+          sudo: false
+          python: 3.5
+#        - os: osx
+#          language: generic
+#          env:
+#              - TRAVIS_OSX_PYTHON_VERSION=py35
+#              - TRAVIS_PYTHON_VERSION=3.5.1
+
+cache:
+ directories:
+  - $HOME/misc_cache
+  - $HOME/virtualenv
+  - $HOME/miniconda
+
+env:
+  global:
+  - CACHE_DIR="$HOME/misc_cache"
+  - MINICONDA_DIR="$HOME/miniconda"
+  - PYTHONIOENCODING=UTF8
+
+git:
+  depth: 3
+
+before_install:
+  - travis/before_install.sh
+
+install:
+  - source travis/install-conda.sh
+  #- export PATH="$HOME/miniconda/bin:$PATH"
+  #- hash -r
+  - travis/install-environment.sh
+  - source activate $HOME/cms-env
+
+script:
+  - travis/tests-unit.sh
+  - travis/tests-long.sh
+
+after_success:
+  - coveralls

@@ -2,24 +2,19 @@
 
 
 
-## Type
+## Types
 
-Any of:
-
-* Map (Hash)
+* Hash
+* Array of: 
 * 
 * Boolean
 
-## Flags
-
-None.
 
 
 ## Examples
 
 ```yaml
 hipchat:
-  rooms: "[ref:secures]"
   format: html
   notify: true
   on_pull_requests: true
@@ -30,7 +25,23 @@ hipchat:
 ```
 
 ```yaml
-hipchat: "[ref:secures]"
+hipchat:
+  rooms:
+  - secure: encrypted string
+```
+
+```yaml
+hipchat:
+  rooms:
+```
+
+```yaml
+hipchat:
+- secure: encrypted string
+```
+
+```yaml
+hipchat:
 
 ```
 

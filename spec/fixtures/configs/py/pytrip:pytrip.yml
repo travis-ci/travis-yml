@@ -1,0 +1,59 @@
+# before committing check this file here: https://lint.travis-ci.org/
+
+language: python
+
+git:
+  quiet: true
+
+env:
+  global:
+    - PYPIUSER=grzanka
+    #  pypi secured password (PYPIPASS variable), you need to update it to your own if you want to use it
+    - secure: "WLg9eOFwGwH2riVdcl2mdUjzBIx4NaamMmB6XNOtAl91cPK/LtchLaMVMjVlPKMchQ/cCVpVgjiqRgEUPLz40sfv+DqmcnZH7UXE4kpUuUtFECTpIqc69Ohzn82JdrKQIaH0FWPTjRvxZgV+b6KWo8TK71VFANPpQTuhfaRJ+laKj1S5ikwg4c1zj6kqYefGHhvdvs5LtBXEZ9UQg+dkuWK8mrnl/gpZUuR7P8o+wofv2X510kHrV8WkUDfk9JmfpRyTmpvJcawl5CpGeov7c6wz5+nKNg+Fki5qft2TEb6DsHCMOBI6UviMvROSPgNs/C4tI5zNtabs+61uwU2vHsEiOuHGbmMcfGaOyjumQPcyBz3bvQ+e7ZA1ZyYipw4ihU9M7sPZtmwSlxE2ECXXy/MjPyVharTiy3rGAYwT4rH+F8fubsYeYtFax4IUFQfq3DXS9YUCJ82bCRnDlzLZ5MLy/4WL+sL7nMLR9ApkN97MWkv+aqmYjvKG0N519HSVJwuptWkoCok8E7e3zi5nOiG5eJ/0f4TVlEyOPrxeCtWCOPATXb54vSz7GPvMgTx4CKFmNbe5sLhx1A8cuOikA1Keyii8VKda8LVr7gXDh8BvgcL/CIAF/pALf2cDL224Gy8Mlz32PqBJMSKuopeIRKnj2eN3GBL1t9GuiXb8oRg="
+matrix:
+    include:
+    # Linux tests for various python versions
+        - python: 2.7
+          env: TOXENV=py27
+        - python: 3.6
+          env: TOXENV=coverage
+        - python: 3.4
+          env: TOXENV=py34
+        - python: 3.6
+          env: TOXENV=py36
+        - python: 3.7
+          env: TOXENV=py37
+    # fired only when making release (on tags): manylinux1 pep packages (32 and 64 bits)
+    # suffix mu -> Unicode format UCS-2 (2 bytes) used only in Python 2.7
+    # suffix m -> Unicode format UCS-4 (4 bytes) used only in all python versions
+    # documentation checks and PEP8 code quality checks included in packaging
+        - python: 3.6
+          env: TOXENV=packaging PRECMD=linux32 TARGET="cp27-cp27m cp27-cp27mu"
+          services: docker
+          sudo: true
+        - python: 3.6
+          env: TOXENV=packaging PRECMD=linux32 TARGET="cp34-cp34m cp35-cp35m cp36-cp36m cp37-cp37m"
+          services: docker
+          sudo: true
+        - python: 3.6
+          env: TOXENV=packaging TARGET="cp27-cp27m cp27-cp27mu cp34-cp34m cp35-cp35m cp36-cp36m cp37-cp37m"
+          services: docker
+          sudo: true
+        - python: 3.6
+          env: TOXENV=packaging TARGET=source
+    # jobs allowed to fail
+#    allow_failures:
+#        - python: nightly
+#          env: TOXENV=py37
+
+sudo: false
+dist: xenial
+
+# install packages from requirement.txt and other stuff
+install:
+  - travis_wait ./.travis/install_linux.sh
+
+# finally run tox tests
+script:
+  - tox --notest && travis_retry tox -- -n 8
+  - if [[ "$TRAVIS_TEST_RESULT" == "0" ]] && [[ $TOXENV == "packaging" ]]; then .travis/deploy_package.sh "$TARGET" $PRECMD; fi

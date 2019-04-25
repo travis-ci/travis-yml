@@ -1,0 +1,33 @@
+dist: trusty
+sudo: required
+language: python
+env:
+  global:
+  - secure: KDdeOAyNvMm3rzCxs7f8F9bxmmbve4rB6arB4ZYrwleXzNR0lE/sEFF5bSiggryZRES+dWAZNtV/McgY/a7vVHlcKREo7fErb2g3NGvOgTjdPGu3IyQgtQXliuP0xK2D/uUZP8hCZAD6RpgNu7i+cBKotOMc2/96DfgXKJK1n8TWRlsbH95GcpMkUPDaWeonYrhRbCh7bXd5wNSL+FNN5MRvg3AEm6pJTJeoFtN92Rz4fruAiYwkhSkSBqkfjh/4bpIYccI37luuYpNTM0VYxFDBsOEERxUe/qpkiJZQtxV1m2lylJhSEcarSYO1AzGOmoLq5mBXDMDC11k6kbzXSZ75lDTfjaROw/P4MZlsFLuzTNJr8DkmwsnPZnXl20G+P3QyJCOjFxULuNa4lrpj38WO0XXh49StOdFNbjkNHUbOv8GpEFLYSRFdQc5vMcJ6cPgHDTLNsqxqIB3QdHfUWdl5WQO6wyARfP3aT1C5QREyj7EchqCmCDk9XZ6wxRfwsvl+zOIisKB/iL3hkeuo3duRwBAUgVMBYhs0ad3skMA7AcDd1DDhGEyicA9AGGMO48ZFFLMhTV2NocLd3uyaZDEumnad2HSsoJYz/eZaSnbvcqM86MwIxOivchsY2QdvIdl2gKSBBAzpfaXTOr/RbOy8vfei35IuTnVqUXsBAuI=
+  - secure: w4+1aPeH9bA2GHVlYnRhDRsalQN/GA8bfujmfBsMK58AJ7x+Wz73MVHpG3BdtTaKkk9iBlkzVCnaY+QgG0HZfG6lili26vSE7ECh8L6SbgRK0M1Qs36bIic7LBfYWHkM9A2gwyyuhU0KlMMygxb2n4J/SMmQ6gkGnxwQTB693n9d9M965niRhaLQNXKHyp6mHOqlmYVK256J8UlEJQXV3MUElzYw6DWLjz/l8w+5+hs1pf7dsbg7yB+xjoffTXgLcaUW0/hq7VbuTCtlrMqV5ltP01ZP2DrB/xMG9q2j5MDyd0OfdN03AsdeFW20rA6UQTE7D8WRyDeiB+SDrDy5+vi3aRvYvbFoDtVlu0iOwWpI8qsfOjX6BCOuccXUNXbReRbz9b9/MEeX3ep+1N5cfTscv3TqRTQiaYfL0isvWZ2Pku9aMrQJg/7FIHEQTNQgG3QYl7tl0Mq8lRTt8CXNEHBzXpmZozYKzLY1uuJY2Bo5QZGGqMd1mQ/AegDeldlLg6zWEMABY0BgnEU4SHGN5FIOzyQTe5jSAJSrO6/uo4ycXWJJROj1KC4H1BftSvS5j0fir3migHO3Uc/RVbelO1/TyVOxy1ak/l/HO7rEHLz9gHI5f+rjcB/xHo55YQZqSiDNX8l2CjJEyCTiDL0y7Lo+KWoA1ukjU1HR+SuZstk=
+  - secure: JN23WJO0ZL50ofm95MBfkWs5tQ+uuoqwCXAPdwNnW/RxX4dOw7xqmv4ut9r7AdhRXxGXKL/f8l+7kLNG1gpWibBq7EbnQA/9ENjUHo+i6AGkgNYE9k9o84Hp+EdTxqUB4VRVr4ldWNmmLFCUnzuPpNAa8fSY6xfgINBnvU6fKBQq4zo//ukhcwCY/nOg8yjO7NfAmuruNmxEH5sYIgb6Z7DhgGvY5g8XRxYjEfRwYK7LuG1YKie8lkcJNyRR8tBivJpfY6SFI3tS08DUZBEek62wl6TQIJyEI1hM4MvFH6Z8EkA4qYHx8S6QpJmvLTz1nJKBQmlwUzCZJ1wFdiW+H3L/EDDo6UjoRA9uR8zvjjXk3FDsY1puE+pw+w7fBOvNm3ePrUc7XgLnUxW9l1pPFUbgCDw5NenwhByHM3qDYpeLctt1pPJkxLUwiJvQ5+nnz/m3onPMobKZaUPHTS9/VpKuOagiCc/Kof9wsNnXbNZ2BzF36cHDWZUGvBZjnZ0tO2mCYyvq+GQtcE3m4oy93uH0zABXmlUSKiFioCOggZ+Or8WicfowXFVB9T5EdGS0e/QPth3+Vh/VyRvCKcTuE3Zaf9AydY72ig8Ic2J1yrDMfLytNcD+CwwEr/uDSbUHTl1GHM9NnTIT1+7bYTEiOgQVDFnLNzGCv0BhURAr8mQ=
+  - K8S_OPS_REPO_BRANCH=master
+  - K8S_OPS_REPO_SLUG=OpenBudget/budgetkey-k8s
+  - DOCKER_IMAGE=budgetkey/budgetkey-data-pipelines
+  - DEPLOY_YAML_UPDATE_FILE=values.auto-updated.yaml
+  - DEPLOY_VALUES_CHART_NAME=pipelines
+  - DEPLOY_VALUES_IMAGE_PROP=image
+  - DEPLOY_COMMIT_MESSAGE="automatic update of budgetkey-data-pipelines"
+  - DEPLOY_GIT_EMAIL=budgetkey-deployer@null.void
+  - DEPLOY_GIT_USER=budgetkey-deployer
+python:
+- 3.6
+services:
+- docker
+install:
+- curl -s https://raw.githubusercontent.com/OpenBudget/budgetkey-k8s/master/apps_travis_script.sh > .travis.sh
+- bash .travis.sh script
+script:
+- docker build -t budgetkey-data-pipelines-tests tests
+- docker run -v `pwd`/tests:/testenv/tests budgetkey-data-pipelines-tests
+deploy:
+  skip_cleanup: true
+  provider: script
+  script: bash .travis.sh deploy
+  on:
+    branch: master

@@ -1,0 +1,21 @@
+language: node_js
+node_js:
+  - "8"
+services:
+  - mongodb
+script:
+  - npm test
+  - export BRANCH=$(if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then echo $TRAVIS_BRANCH; else echo $TRAVIS_PULL_REQUEST_BRANCH; fi)
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
+  - bash <(curl -X POST --data "apiKey=$apiKey&branch=$BRANCH" http://$url/update)
+notifications:
+  slack:
+    rooms:
+      - secure: "JpP7zgvDI9n/VBnply1c/RhCDUi3htY9jFo/MVfzIgzP1ngxoayHvo+T9gWhTfUHnwak4wu4RRH7Scw7YCyInS9lhFmUG/9MB/rgKpVUKrb+pyfAtmZogyyt5q7pwQmxuOH44dvQqNs78eg3E47fejyvfsOnt9ne1uCF9Ry2LkXHJ/c5cXA8BroVh6vg1M50Ny0Kayx/hpO2f8Oj38vEh4l4KmEcbNPZyZ9cQ4yJjm1hj7zMpG+k1J0BOmN+juNU7aDLAwPP2XP/mG8346E47xZShbkQq+bNZfUUI39GyVY7p2bCePzo5fuzVvQfSYiXlNDvztDdLxJ+XiQJe2ashQUzkQuIyfAfEVQEmRqG5W+2mZ2iQoAvuK4So5QgoUUD3b2d4osiwOQqYaJmHihc6MxT/05hdbM79i+rCEViuuG62LJ3gbRO+PDMZwplv9ArvIRKsh5Tgx6BOYfadDASB2muWx/AhvIhudZOTZjBYc8msvWGKu2fvYL4HbS15C4oh1nxgccDo2PoOJSyZOhFb9BEvTAFe+qDkpk9lmSHw6FNzDIMkv64Z8CqHn3fLkJwsCjsYJLOOSYv28S7anx66KeJwRR7+0DTWlbjBwftyiG+KhHghUF2rYiRiBGmaSSnXFD9X9s0PBl/fwGkkvrclM5vykZ26iPtwv5a36T0t7Q="
+    on_success: change
+    on_failure: always
+    on_pull_requests: false
+cache:
+  directories:
+    - node_modules

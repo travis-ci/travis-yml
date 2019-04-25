@@ -1,0 +1,81 @@
+# Check this file before committing a new version:
+# http://lint.travis-ci.org/
+
+language: python
+sudo: false
+dist: xenial
+
+notifications:
+  email:
+    on_success: change
+    on_failure: change
+
+env:
+  - MATPLOTLIB_V=* NUMPY_V=* SCIPY_V=* CYTHON_V=*
+#  - MATPLOTLIB_V=2.0.2 NUMPY_V=* SCIPY_V=* CYTHON_V=*
+
+jobs:
+  fast_finish: true
+#  allow_failures:
+    # have this allowed as there is a bug in matplotlib 2.1.0
+#    - env: MATPLOTLIB_V=* NUMPY_V=* SCIPY_V=* CYTHON_V=*
+  include:
+    - stage: Fast test
+      python: 3.5
+      virtualenv:
+        system_site_packages: true
+      before_install: skip
+      install: pip install -r pip-requirements.txt
+      before_script: skip
+      script: ./run-tests.py --fast
+
+    - stage: Tests
+      python: 2.7
+    - python: 3.5
+    - python: 3.6
+    - python: 3.7
+      # Ubuntu 14.04.5 LTS
+      # python 2.6 is explicitly NOT supported!
+      name: "Ubuntu 14.04.5 LTS - Python 3.4"
+      python: 3.4
+      env: MATPLOTLIB_V=1.3.1 NUMPY_V=1.8.1 SCIPY_V=0.13.3 CYTHON_V=0.20.1 EXTRAPACK="libgfortran<3"
+    # Ubuntu 16.04.3 LTS
+    - name: "Ubuntu 16.04.3 LTS - Python 2.7"
+      python: 2.7
+      env: MATPLOTLIB_V=1.5.1 NUMPY_V=1.11.0 SCIPY_V=0.17.0 CYTHON_V=0.23.4
+    - name: "Ubuntu 16.04.3 LTS - Python 3.5"
+      python: 3.5
+      env: MATPLOTLIB_V=1.5.1 NUMPY_V=1.11.0 SCIPY_V=0.17.0 CYTHON_V=0.23.4
+    # Ubuntu 18.04 LTS
+    - name: "Ubuntu 18.04 LTS - Python 2.7"
+      python: 2.7
+      env: MATPLOTLIB_V=2.1.1 NUMPY_V=1.13.3 SCIPY_V=0.19.1 CYTHON_V=0.26.1
+    - name: "Ubuntu 18.04 LTS - Python 3.6"
+      python: 3.6
+      env: MATPLOTLIB_V=2.1.1 NUMPY_V=1.13.3 SCIPY_V=0.19.1 CYTHON_V=0.26.1
+
+# Install conda
+before_install:
+  - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
+  - chmod +x miniconda.sh
+  - ./miniconda.sh -b -p $HOME/miniconda
+  - export PATH=$HOME/miniconda/bin:$PATH
+  - conda update --yes conda;
+  - conda create -yn pyenv python=$TRAVIS_PYTHON_VERSION atlas numpy=$NUMPY_V scipy=$SCIPY_V matplotlib=$MATPLOTLIB_V nose cython=$CYTHON_V h5py numexpr sphinx $EXTRAPACK
+  - source activate pyenv
+
+install:
+  - pip install -r pip-requirements.txt
+  - python setup.py install
+
+before_script:
+  - uname -a
+  - free -m
+  - df -h
+  - ulimit -a
+  - python -V
+  - cython --version
+
+# run tests
+script:
+  - ./run-tests.py

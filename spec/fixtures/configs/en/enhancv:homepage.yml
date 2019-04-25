@@ -1,0 +1,22 @@
+language: node_js
+node_js:
+- 8.11.3
+cache:
+  pip: true
+  yarn: true
+script:
+- if [ $TRAVIS_BRANCH == master ]; then NODE_ENV=production yarn build; fi
+- if [ $TRAVIS_BRANCH != master ]; then yarn build; fi
+before_deploy:
+- pip install --user awscli
+deploy:
+- provider: script
+  skip_cleanup: true
+  script: bin/deploy.sh
+  on:
+    repo: enhancv/homepage
+    all_branches: true
+notifications:
+  email: false
+  slack:
+    secure: XDPuommIoLAE4Fyv5ZcaZmXUW6/1Kh/fhl4BYEhgRv2GufuF3lVSKhS5/VFFEoU2SkusKnGMSX9ENnH9mmc2pOt1P7/9cco3+Ra+0yOMXX7loAND1E12F1gLd3O1HC2It14NYxkJeq3QSD9oK8NwKj8HiL/8WtQZZuwi6MUrILT2X0Dp5cYVl0sKzHhPdZST3cPUw+pssMb/0LQ69o9NFksas853AFe/zvB/A3OMBuLtq4qgb9tyDabE+Cz9TZ2K/w5PDoWWK0tkgb5O2DPgQOFvhm84xxf79I1JKbXiZ5YGoIO+uJ92KSdLDtmRRNZWJHV2QTs0G9YBsvy6Cpvap/OLan1YRJb6rgHX68sgRvkjKhGZJoLrMkoPsEanyIzQG/H476GRsQNza5U1MTgrrmaVeYNRS7R92gqvcGwtQxu4K+E1Q7qNXAp+JLkA676twuEi8JwNn9GdvAN+Ek9ZnF3i/qRah9+6qwUP//+xnvvJyD1XUJW/91f00q0Co9c/O9lTY6NJi0d47GGpCD30BsFZALtH5OWG85h747FR1+TJqseRs8eTbpZHFjx1gfyEbRcuYFUKDl7g4+9bNioNkF2KZX8WDpJ6LHq9wopMEDiT/csq5CyEkRL78WHHFaPBnRXi7wKf6S/2Z9qJRgZ4oa+MHuSLEsl+ARv7DJwlHaU=

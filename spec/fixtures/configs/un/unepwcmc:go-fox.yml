@@ -1,0 +1,20 @@
+sudo: false
+before_install:
+  - curl -o- -L https://yarnpkg.com/install.sh | bash -s -- --version 1.3.2
+  - export PATH=$HOME/.yarn/bin:$PATH
+cache:
+  yarn: true
+language: ruby
+bundler_args: --without development production staging
+rvm:
+- 2.5.0
+addons:
+  postgresql: 9.6
+before_script:
+- psql -c 'create database travis_ci_test' -U postgres
+- cp config/database.yml.travis config/database.yml
+- cp config/secrets.yml.travis config/secrets.yml
+- yarn install
+- RAILS_ENV=test bundle exec rake db:migrate
+notifications:
+  slack: wcmc:6TJZ2hRJCFwcK2fhAA4cWHzh

@@ -1,0 +1,41 @@
+sudo: required
+language: python
+cache: pip
+python:
+- '3.6'
+service:
+- docker
+stages:
+- name: test
+- name: build
+  if: fork = false
+jobs:
+  include:
+  - stage: test
+    install:
+    - pip install -e ".[test]"
+    - pip check
+    script:
+    - python3 -m flake8
+  - stage: test
+    install:
+    - pip install -e ".[test]"
+    - pip check
+    script:
+    - python3 -m pytest --cov=. --cov-report=term-missing:skip-covered
+    - coveralls
+    - pip3 install --editable .
+    - kqueen-ui &
+    - sleep 2
+    - wget -O - http://localhost:5080/
+
+  - stage: build
+    install:
+    - /bin/true
+    script:
+    - export IMAGE="kqueen/ui:${TRAVIS_BRANCH/\//-}"
+    - echo "Building image $IMAGE"
+    - docker build -t $IMAGE .
+    - docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD"
+    - docker push $IMAGE
+    - docker logout

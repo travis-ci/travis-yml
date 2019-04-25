@@ -1,0 +1,31 @@
+language: node_js
+dist: trusty
+sudo: required
+
+notifications:
+  email:
+    on_success: never
+    on_failure: change
+
+node_js:
+  - "8.9.3"
+
+script: ./bin/npm test
+
+git:
+  depth: 10
+
+branches:
+  only:
+    - master
+
+addons:
+  apt:
+    packages:
+      - libsecret-1-dev
+      - g++-4.8
+    sources:
+      - ubuntu-toolchain-r-test
+
+env:
+  - CXX=g++-4.8

@@ -1,0 +1,15 @@
+language: node_js
+dist: trusty
+node_js: '6'
+before_script: npm install
+script:
+- npm run test
+- node bin/main.js -w $webPageTestkey -p $keenProjectId -k $keenWriteKey -l $location
+deploy:
+  provider: npm
+  email: sebastian.lzy@gmail.com
+  api_key:
+    secure: d7MVq52zkv7ydZKU+J3YBNKt+jDXVaS+9abXQ0O3612ETlovhqAmvDJeIlQdZw0kKBC41VwMbkptm/+Lzp7Oh+lZENnxWDEEs9hAWhRizqPipDTCvfyxHzLYOpvFWF+KS1yhsP4v/aVCP7j/W3Ry0Wy3VxK2j0IQ8c7AwqDl45sQ8J9ev0IwZ4YRTqZ+Rn+4NwVsg/vr+ekh6kaZRis03V90EDXfvcjNgSzkvhRM6yPMw352petbE6jypbZxXrpdH7+rzQWc79keXvDAhqFPFsaax3RKxWD6MYuPhNKUFwAfsRWt9bS0KrBax8Dmbvvyvx398D+rjPm3wzwuabINCfZ+Z+w0doEHnDDBraPsfy1bUIx/ondwfBAH+BM7JfdoLxkUqGzPMerJINb/6hktowBKFcCwwaSaXlqXtKPfQHw6KBqh8RdW6bptYMPJL57tqLuXUdLnG449kGp1ZKjS96W+bbw3CXd+MnXcS4gQDZyzzRErFwVd+JKbAgPDD+1nO5xGx3nwk+UZ36LeWHfBtXXpw6M/G36oIuEH7RKyW1npMTovKcx1Nm9a+rrV7DPiAp+OydydLYpFd/WKFMBB/sGQYl7yhSTtaSVJ6PixJbJAC/1j5h/bmGm4OCzQtOMz2fmIsDsChMJ5RsEDF4Vpz5p6mwEq5c2B7HRBwpClaYY=
+  on:
+    branch: master
+    repo: sebastianlzy/webpagetest-keen

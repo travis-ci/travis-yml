@@ -1,0 +1,24 @@
+sudo: true
+dist: trusty
+before_install:
+     - chmod +x ./travis-script/main.sh
+     - chmod +x ./travis-script/test-dockerfile.sh
+     - chmod +x ./travis-script/test-build.sh
+     - chmod +x ./travis-script/test-ssh-service.sh
+     - chmod +x ./travis-script/test-push-pull-run.sh     
+     - chmod +x ./travis-script/test-aquasec-scan.sh
+     - sudo apt-get install -y jq
+jobs:
+  include:
+    - stage: check Dockerfile
+      script: ./travis-script/main.sh
+notifications:
+  email:
+    recipients:
+      - v-jizh11@microsoft.com
+      - appgal@microsoft.com    
+      - leonzh@wicresoft.com
+    on_success: always
+    on_failure: always
+    
+

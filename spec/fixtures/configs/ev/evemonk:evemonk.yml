@@ -1,0 +1,48 @@
+dist: trusty
+language: ruby
+sudo: required
+cache:
+  bundler: true
+  directories:
+    - node_modules
+  yarn: true
+services: postgresql
+bundler_args: --jobs=3 --retry=3 --without development
+rvm:
+  - 2.6.1
+addons:
+  chrome: stable
+  postgresql: '9.6'
+env: DISPLAY=':99.0'
+
+before_install:
+  - gem update --system --no-document
+  - gem install bundler --no-document --force
+  - gem --version
+  - bundle --version
+  - nvm install
+  - node -v
+  - npm install -g npm@6.6.0
+  - npm -v
+  - npm i -g yarn@1.13.0
+  - yarn -v
+  - yarn
+
+before_script:
+  - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+  - chmod +x ./cc-test-reporter
+  - ./cc-test-reporter before-build
+  - sh -e /etc/init.d/xvfb start
+  - psql -c 'CREATE DATABASE evemonk_test;' -U postgres
+  - bundle exec rake db:create db:migrate
+  - bundle exec bundle-audit update
+
+script:
+  - bundle exec rake
+  - bundle exec bundle-audit
+  - bundle exec brakeman
+  - bundle exec mdl README.md
+  - bundle exec mdl CHANGELOG.md
+
+after_script:
+  - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT

@@ -1,0 +1,11 @@
+language: ruby
+rvm:
+  - 2.3.1
+services:
+  - postgresql
+addons:
+  postgresql: "9.4"
+before_install:
+  - gem install bundler -v 1.12.5
+  - bundle install
+  - RAILS_ENV=test bundle exec rake db:create db:schema:load

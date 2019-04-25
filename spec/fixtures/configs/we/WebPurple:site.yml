@@ -1,0 +1,24 @@
+language: node_js
+node_js: '8'
+git:
+  depth: 3
+dist: trusty
+sudo: false
+env:
+  global:
+    - NODE_ENV=travisci
+
+before_install:
+- npm install -g greenkeeper-lockfile
+install: npm install
+
+before_script: greenkeeper-lockfile-update
+after_script: greenkeeper-lockfile-upload
+
+script:
+- npm run build
+# - npm run test
+- npm run flow -- check
+- npm run prettier-ci
+notifications:
+  slack: webpurple:mFXgdAsg8h2xwQSK6JqX0gKL

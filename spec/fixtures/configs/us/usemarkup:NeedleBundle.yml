@@ -1,0 +1,32 @@
+language: php
+
+php:
+    - 7.1.19
+    - 7.2.7
+    - 7.3
+
+env:
+    global:
+        - deps=high
+
+install:
+    - if [ "$deps" = "high" ]; then composer install --ignore-platform-reqs; fi;
+    - if [ "$deps" = "low" ]; then composer --prefer-lowest --prefer-stable --ignore-platform-reqs update; fi
+
+before_script:
+    - if [ -f $HOME/.phpenv/versions/$(phpenv global)/etc/conf.d/xdebug.ini ]; then phpenv config-rm xdebug.ini; fi
+
+script:
+    - vendor/bin/phpstan.phar analyse -c phpstan.neon --level 7 .
+    - vendor/phpunit/phpunit/phpunit --debug
+
+notifications:
+  email: "douglas@usemarkup.com"
+
+matrix:
+  include:
+    - php: 7.1.19
+      env: deps=low
+
+sudo: required
+dist: xenial

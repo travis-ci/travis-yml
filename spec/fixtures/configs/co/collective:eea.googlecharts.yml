@@ -1,0 +1,49 @@
+language: python
+python: 2.7
+sudo: required
+services:
+  - docker
+
+install:
+  - export GIT_OWNER=${TRAVIS_REPO_SLUG%/*}
+  - export GIT_NAME=${TRAVIS_REPO_SLUG#*/}
+  - export GIT_CHANGE_ID=${TRAVIS_PULL_REQUEST#false}
+  - export GIT_SRC=https://github.com/${TRAVIS_REPO_SLUG}.git
+
+jobs:
+  include:
+    - stage: code
+      env:
+        - CHECK=jslint4java
+      script:
+        - docker run -i --rm -e GIT_BRANCH=$TRAVIS_BRANCH -e GIT_SRC=$GIT_SRC -e GIT_NAME=$GIT_NAME -e GIT_CHANGE_ID=$GIT_CHANGE_ID eeacms/$CHECK
+
+    - stage: code
+      env:
+        - CHECK=pyflakes
+      script:
+        - docker run -i --rm -e GIT_BRANCH=$TRAVIS_BRANCH -e GIT_SRC=$GIT_SRC -e GIT_NAME=$GIT_NAME -e GIT_CHANGE_ID=$GIT_CHANGE_ID eeacms/$CHECK
+
+    - stage: code
+      env:
+        - CHECK=i18ndude
+      script:
+        - docker run -i --rm -e GIT_BRANCH=$TRAVIS_BRANCH -e GIT_SRC=$GIT_SRC -e GIT_NAME=$GIT_NAME -e GIT_CHANGE_ID=$GIT_CHANGE_ID eeacms/$CHECK
+
+    - stage: code
+      env:
+        - CHECK=zptlint
+      script:
+        - docker run -i --rm -e GIT_BRANCH=$TRAVIS_BRANCH -e GIT_SRC=$GIT_SRC -e GIT_NAME=$GIT_NAME -e GIT_CHANGE_ID=$GIT_CHANGE_ID eeacms/$CHECK
+
+    - stage: test
+      env:
+        - PLONE=4
+      script:
+        - docker run -i --rm -e GIT_BRANCH="$TRAVIS_BRANCH" -e ADDONS="$GIT_NAME" -e DEVELOP="src/$GIT_NAME" -e GIT_CHANGE_ID="$GIT_CHANGE_ID" eeacms/plone-test:$PLONE -s $GIT_NAME
+
+#    - stage: test
+#      env:
+#        - PLONE=5
+#      script:
+#        - docker run -i --rm -e GIT_BRANCH="$TRAVIS_BRANCH" -e ADDONS="$GIT_NAME" -e DEVELOP="src/$GIT_NAME" -e GIT_CHANGE_ID="$GIT_CHANGE_ID" eeacms/plone-test:$PLONE -s $GIT_NAME

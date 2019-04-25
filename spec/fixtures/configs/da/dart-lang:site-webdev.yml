@@ -1,0 +1,161 @@
+dist: trusty
+sudo: required
+language: dart
+dart: stable
+
+cache:
+  timeout: 1000
+  bundler: true
+  directories:
+  - $HOME/.pub-cache
+  - $HOME/.nvm
+  - $HOME/.rvm
+  - .dart_tool
+  - node_modules
+  # - publish # takes too long to cache and check for freshness
+  - tmp # TODO: rename to cache or .cache
+  # Examples:
+  - examples/ng/doc/node_modules
+  # examples/**/.dart_tool
+  - examples/acx/lottery/1-base/.dart_tool
+  - examples/acx/lottery/2-starteasy/.dart_tool
+  - examples/acx/lottery/3-usebuttons/.dart_tool
+  - examples/acx/lottery/4-final/.dart_tool
+  - examples/ng/api/common/pipes/.dart_tool
+  - examples/ng/api/core/ngzone/.dart_tool
+  - examples/ng/doc/architecture/.dart_tool
+  - examples/ng/doc/attribute-directives/.dart_tool
+  - examples/ng/doc/component-styles/.dart_tool
+  - examples/ng/doc/dependency-injection/.dart_tool
+  - examples/ng/doc/displaying-data/.dart_tool
+  - examples/ng/doc/forms/.dart_tool
+  - examples/ng/doc/hierarchical-dependency-injection/.dart_tool
+  - examples/ng/doc/lifecycle-hooks/.dart_tool
+  - examples/ng/doc/pipes/.dart_tool
+  - examples/ng/doc/quickstart/.dart_tool
+  - examples/ng/doc/router/.dart_tool
+  - examples/ng/doc/security/.dart_tool
+  - examples/ng/doc/server-communication/.dart_tool
+  - examples/ng/doc/structural-directives/.dart_tool
+  - examples/ng/doc/template-syntax/.dart_tool
+  - examples/ng/doc/toh-0/.dart_tool
+  - examples/ng/doc/toh-1/.dart_tool
+  - examples/ng/doc/toh-2/.dart_tool
+  - examples/ng/doc/toh-3/.dart_tool
+  - examples/ng/doc/toh-4/.dart_tool
+  - examples/ng/doc/toh-5/.dart_tool
+  - examples/ng/doc/toh-6/.dart_tool
+  - examples/ng/doc/user-input/.dart_tool
+
+addons:
+  chrome: stable
+
+env:
+  global:
+    - DISPLAY=:99.0
+    - JEKYLL_ENV=production
+    # E2E and TEST: use --skip=t1|t2|...|tx to skip tests
+    # FIXME: Skip lifecycle-hooks; https://github.com/dart-lang/site-webdev/issues/1647
+    - E2E_OPT1="--fast --filter=examples/ng/doc/[a-l] --skip=life"
+    # FIXME: skipping template-syntax due to https://github.com/dart-lang/site-webdev/issues/1834
+    - E2E_OPT2="--fast --filter=examples/ng/doc/[m-z] --skip=toh|template"
+    - E2E_OPT3="--fast --filter=examples/ng/doc/toh"
+    - TEST_OPT1="--skip=ng/doc/[t-z]"
+    - TEST_OPT2="--filter=ng/doc/[t-z]"
+    - TZ=US/Pacific # normalize build timestamp
+
+matrix:
+  fast_finish: true
+  allow_failures:
+    - env: TASK="test $TEST_OPT1"
+    - env: TASK="test $TEST_OPT2"
+    - env: TASK="e2e $E2E_OPT1"
+    - env: TASK="e2e $E2E_OPT2"
+    - env: TASK="e2e $E2E_OPT3"
+    - env: TASK="e2e $E2E_OPT1 --web-compiler=dart2js"
+    - env: TASK="e2e $E2E_OPT2 --web-compiler=dart2js"
+    - env: TASK="e2e $E2E_OPT3 --web-compiler=dart2js"
+
+before_install:
+  - source ./tool/env-set.sh
+  - ./tool/before-install.sh
+
+install:
+  - ./tool/install.sh
+
+before_script:
+  - ./tool/browser.sh
+
+jobs:
+  include:
+    ## STAGE ----------------------------------------------
+    - stage: cache warmup and basic checks
+      env: TASK="build"
+      script:
+      - pub get
+      - bundle install
+      - npx gulp ng-pkg-pub-get # --skip=package_name|...
+      - npx gulp _build-prep --clean --shallow-clone-example-apps
+
+    - env: TASK="check-code-and-notes"
+      # FIXME: allow example app min SDK (2.0.0) to differ from angular's
+      script: ./tool/$TASK.sh code note fmt
+
+    - env: TASK="analyze"
+      # FIXME: skip analysis of apps with component tests until we can first build them
+      script: npx gulp $TASK --skip=doc/t
+
+    ## STAGE ----------------------------------------------
+    - stage: build site and test examples
+      env: TASK="build"
+      script:
+        - pub get
+        - ./tool/shared/write-ci-info.sh -v
+        - npx gulp _build-api-docs --use-cached-api-doc --dartdoc=all
+        - npx gulp _jekyll-build _examples-cp-to-site-folder
+        - ls -l publish/examples
+        - ls -l publish/assets/bootstrap/*
+      after_script:
+        - ./tool/check-after-site-build.sh || travis_terminate 1
+        # - ./tool/deploy/pr.sh || travis_terminate 1
+      deploy:
+        - provider: script
+          script: ./tool/shared/deploy.sh --robots ok default
+          skip_cleanup: true
+          on:
+            repo: dart-lang/site-webdev
+            branch: master
+            condition: $TASK == build*
+        - provider: script
+          script: ./tool/shared/deploy.sh --robots site dev
+          skip_cleanup: true
+          on:
+            repo: dart-lang/site-webdev
+            branch: 5-dev
+            condition: $TASK == build*
+    - env: TASK="test $TEST_OPT1"
+      script: npx gulp $TASK
+    - env: TASK="test $TEST_OPT2"
+      script: npx gulp $TASK
+    - env: TASK="e2e $E2E_OPT1"
+      script: npx gulp $TASK
+    - env: TASK="e2e $E2E_OPT2"
+      script: npx gulp $TASK
+    - env: TASK="e2e $E2E_OPT3"
+      script: npx gulp $TASK
+    - env: TASK="e2e $E2E_OPT1 --web-compiler=dart2js"
+      script: npx gulp $TASK
+    - env: TASK="e2e $E2E_OPT2 --web-compiler=dart2js"
+      script: npx gulp $TASK
+    - env: TASK="e2e $E2E_OPT3 --web-compiler=dart2js"
+      script: npx gulp $TASK
+
+    # It takes too long to cache built site.
+    # ## STAGE ----------------------------------------------
+    # - stage: deploy
+    #   env: TASK="build"
+    #   deploy: ...
+
+# Only run Travis jobs for named branches (to avoid double builds for each PR)
+branches:
+  only: [master, /^\d(\.x|-dev)$/, /travis-build/]

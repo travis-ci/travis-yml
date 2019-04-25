@@ -1,0 +1,33 @@
+language: c
+sudo: true
+branch: master
+env:
+  global:
+    # encrypted AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY to push to S3
+    - secure: "cK5nhaYCN8lo36k+BOCWdf1AJ35Pse5etnke407+C4wFPxKOfaTaE8fVoTfQevD4sWk1gYg9hGz/1H1hEfDPrp+HdwKuwJ/jP7vAaXMuR2Czz+Sgw67XYblsv11DrbvPpanXuFnRsKf88l3Z9GzSeN9LJ/mjasfgBKRI/FwBa8c="
+    - secure: "hAYRMpDDm6oMZbWHcLbucAcb2KdoIrfZMjoT0rkpjA8VWDwV5K07tcacziVeiR1MgtmHARx0ZI9vrO5Qu+z8/Gui0U564RWoTq9UAlIBVN6Ee83AdoVGR6ZyxoqAByviYZumvbW6rG6B1u9qyEJoZ27tHPSrwm71YNpqkzVE+3s="
+
+install:
+  # - sudo apt-get update && sudo apt-get install -y dialog
+  - >
+    MINICONDA=Miniconda2-latest-Linux-x86_64.sh;
+    MINICONDA_MD5=$(curl -s https://repo.continuum.io/miniconda/ | grep -A3 $MINICONDA | sed -n '4p' | sed -n 's/ *<td>\(.*\)<\/td> */\1/p');
+    wget https://repo.continuum.io/miniconda/$MINICONDA;
+    if [[ $MINICONDA_MD5 != $(md5sum $MINICONDA | cut -d ' ' -f 1) ]]; then
+        echo "Miniconda MD5 mismatch";
+        exit 1;
+    fi;
+    bash $MINICONDA -b -p $HOME/miniconda
+  - export PATH=$HOME/miniconda/bin:$PATH
+  - conda create --yes -n py34 python=3.4
+  - conda create --yes -n py27 python=2.7
+  - sudo rm -f /etc/boto.cfg ~/.aws/credentials ~/.boto
+
+script:
+  - source activate py34
+  - pip install -r requirements.txt
+  - make publish
+
+after_success:
+  - ./tools/deploy.sh
+  - ./tools/renew-ssl.sh

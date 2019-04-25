@@ -1,0 +1,34 @@
+language: go
+
+go:
+  - "1.11.2"
+
+# Enable building in Travis using forked repos.
+go_import_path: github.com/kubernetes-sigs/federation-v2
+
+# Request latest Travis distro for systemd requirement.
+dist: xenial
+sudo: required
+
+services:
+  - docker
+
+before_install:
+- bash ./hack/verify-docfiles.sh && DOC_ONLY=true && echo "Only doc files have changed!" || test true
+
+# Install must be set to prevent default `go get` to run.
+# The dependencies have already been vendored by `dep` so
+# we don't need to fetch them.
+install:
+  -
+
+script:
+  - test $DOC_ONLY && echo "Skipped!" || DOWNLOAD_BINARIES=y bash -x ./scripts/pre-commit.sh
+  - test $DOC_ONLY && echo "Skipped!" || vendor/github.com/kubernetes/repo-infra/verify/verify-boilerplate.sh --rootdir="$GOPATH/src/github.com/kubernetes-sigs/federation-v2" -v
+
+after_success:
+  - test $DOC_ONLY && echo "Skipped!" || ./scripts/imagebuild.sh
+
+# TBD. Suppressing for now.
+notifications:
+  email: false

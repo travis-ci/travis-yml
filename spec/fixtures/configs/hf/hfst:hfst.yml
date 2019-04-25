@@ -1,0 +1,52 @@
+language: cpp
+
+# let linux be Ubuntu 14.04 Trusty
+sudo: required
+dist: trusty
+
+os:
+  - linux
+  - osx
+
+cache:
+    - ccache
+    - $HOME/Library/Caches/Homebrew
+
+before_install:
+    - echo "$TRAVIS_OS_NAME"
+    - if [[ "$TRAVIS_OS_NAME" = "linux" ]];then wget http://apertium.projectjj.com/apt/install-nightly.sh -O - | sudo bash; fi
+    - if [[ "$TRAVIS_OS_NAME" = "linux" ]];then sudo apt-get install -y autopoint dh-autoreconf libpython3-all-dev libreadline-dev libreadline6-dev python3-all python3-all-dev swig swig2.0; fi
+    - if [[ "$TRAVIS_OS_NAME" = "osx" ]];then wget http://apertium.projectjj.com/osx/install-nightly.sh -O - | sudo bash; fi
+    - if [[ "$TRAVIS_OS_NAME" = "osx" ]];then brew update; fi
+    - if [[ "$TRAVIS_OS_NAME" = "osx" ]];then brew install bison flex icu4c glib; fi
+    - if [[ "$TRAVIS_OS_NAME" = "osx" ]];then export "PATH=$(brew --prefix bison)/bin:$(brew --prefix icu4c)/bin:$PATH"; fi
+
+# TODO: "apt-get build-dep hfst" fails with "Unable to find a source package for hfst";
+# is there a source package in the nightly repo?
+
+env:
+  - CONFIG_EXTRA=""
+  - CONFIG_EXTRA="--with-unicode-handler=icu"
+  # - CONFIG_EXTRA="--with-unicode-handler=glib"
+
+script:
+    - ./autogen.sh
+    - export CCACHE_ARGS=()
+    - if command -v ccache >/dev/null 2>/dev/null; then CCACHE_ARGS+=( CC="ccache gcc" ); CCACHE_ARGS+=( CXX="ccache g++" ); fi
+    - echo "${CCACHE_ARGS[@]:-}"
+    - ./configure --enable-xfst --enable-proc --without-foma --enable-lexc --enable-all-tools "${CCACHE_ARGS[@]:-}" ${CONFIG_EXTRA}
+    - if [[ $CXX = g++ ]]; then make -j2; else make -j; fi
+    - make check VERBOSE=1
+
+# g++ with -j runs out of memory on travis, thus -j2
+
+notifications:
+    irc:
+        channels:
+            - secure: "FWjUrhqWeVjjJnLQb7CwxxztJgE6OgL5h39MRzF9LKjGML1kd2GEBrJBITzdWhLvwJhkhY1so4zZ73MuxUJGSNOKagvt2qamliGIx/IbgAwlTlwQtR8ya0qdV6ITWMXa5pm86RoFrpnD+45Bitu7R0sPgHNNFImBbWmTKntiIw6xvvHklIsIvxWvMNny/FNEl95ZCTz8SkPeFYyRbdM2krRsKoPefI8kbCAaBdbXgo6zSboGkZinkDCXDJbn9cOeb06nBSeMd9SWzZSyx2DP1L8KhGvCnegwahN6bVYAcWZ5cCYDkB35pW0Of81siJzYMjr7yLggL27eROG3CgCeK8x9jg5rJW2IhZkxECYzAKftQPPALXkBOiEtFABhAdtBa316W5uz+XasIG9COvUSzh2f7s7M1cqkhmLTi3PLP8JcjViyV9PgH54sP+pjGilaXEGkAH++Rtj/0Jc3edTapZipEnZnAPO/3idCloJ7+goWzXcIJeLtQA8pgqi3wFlHguzvMDJIAjlrj7WM5Lzi4ZEzudlggdq3VE2K4jlBOqt3jKCwYOxdpsnzXi9dX/4mPzFnAM7AvTlankV2hg3E98zkDbUqcB56gf79S5Z4oAq71iXHyilPZ9EDf/RaUm+7tENAxB8WUVjLUpUcEH6y5C9i/TX20mUxivEWtjsq0jQ="
+        on_failure: always
+        on_success: never
+# The irc channel is encrypted for hfst/hfst, so build notifications from forks won't show up on the IRC channel
+# Encrypt with:
+# $ gem install --user-install travis
+# $ ~/.gem/ruby/*/bin/travis encrypt -r hfst/hfst 'chat.freenode.net#hfst'

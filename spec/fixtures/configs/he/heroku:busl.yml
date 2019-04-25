@@ -1,0 +1,16 @@
+language: go
+go: 1.11
+sudo: false
+services:
+  - redis-server
+env:
+  - REDIS_URL=redis://127.0.0.1:6379
+before_install:
+  - go get github.com/golang/dep/cmd/dep
+before_script:
+  - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+  - chmod +x ./cc-test-reporter
+  - ./cc-test-reporter before-build
+script: make travis
+after_script:
+  - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT

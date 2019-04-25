@@ -1,0 +1,16 @@
+sudo: false
+language: node_js
+node_js:
+  - '8'
+  - '6'
+script:
+  - npm run lint
+  - npm test
+after_success:
+  - npm run coveralls
+  - npm run semantic-release
+branches:
+  except:
+    - /^v\d+\.\d+\.\d+$/
+notifications:
+  email: false

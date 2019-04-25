@@ -1,0 +1,24 @@
+language: node_js
+node_js:
+  - 11
+install:
+  - cd ..
+  - git clone --branch=$TRAVIS_BRANCH https://github.com/unitejs/framework.git unitejs-framework
+  - cd unitejs-framework
+  - npm link
+  - cd ..
+  - git clone --branch=$TRAVIS_BRANCH https://github.com/unitejs/packages.git unitejs-packages
+  - cd unitejs-packages
+  - npm link
+  - cd ../engine
+  - npm install gulp -g
+  - npm link unitejs-framework unitejs-packages
+  - npm install
+script: 
+  - gulp build || travis_terminate 1
+  - gulp unit || travis_terminate 1
+  - gulp coveralls || travis_terminate 1
+  - cd assets/gulp || travis_terminate 1
+  - npm install || travis_terminate 1
+  - cd ../../ || travis_terminate 1
+  - gulp build-gulp || travis_terminate 1

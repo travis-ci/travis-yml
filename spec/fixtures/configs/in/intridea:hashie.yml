@@ -1,0 +1,31 @@
+language: ruby
+sudo: false
+cache: bundler
+
+rvm:
+  - 2.5.0
+  - 2.4.3
+  - 2.3.6
+  - 2.2.9
+  - 2.1.10
+  - rbx-3
+  - jruby-9.0.5.0
+  - jruby-head
+  - ruby-head
+
+matrix:
+  include:
+    - rvm: 2.5.0
+      before_script:
+        - bundle exec danger
+      after_script:
+        - bundle exec codeclimate-test-reporter
+    - rvm: 2.5.0
+      install:
+        - for dir in spec/integration/*; do BUNDLE_GEMFILE=$dir/Gemfile bundle; done
+      script:
+        - set -e ; for dir in spec/integration/*; do BUNDLE_GEMFILE=$dir/Gemfile bundle exec rspec $dir; done
+  allow_failures:
+    - rvm: ruby-head
+    - rvm: jruby-head
+    - rvm: rbx-3

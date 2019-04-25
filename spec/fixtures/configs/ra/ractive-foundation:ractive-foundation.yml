@@ -1,0 +1,28 @@
+language: node_js
+sudo: false
+node_js:
+  - '6.17'
+  - '8.15'
+  - '10.15'
+env:
+  global:
+    - CXX=g++-4.8
+    - secure: n3fKXV916uQSS5PscJ/8OWVIWPbwSDYdhPmzMNBRSHUXVKva6/K3aUDqAnKEYTjbR9vKxIDv6DAeXhhvTSnSK9ozzDVcay9WXBbE7Ji9WfN+6f9SbGGfVIZGR9/QahBVT2C3NpfsxSXVQMUuMuLD2AtpnyREBb2wxwx22K3O0Vc=
+notifications:
+  slack:
+    secure: iKqoDt5ipGK+C9GAn4BXcZhtNGkeT/KV0eWl0vbaLmhOg5JZO2A4h3XF6sSp/Sy4upNDXz9ZaEtsKAeK7Xbe5kX5sakCmI7+dc4XrOuGppem8wkn3ioybkDT2i2wcIa5n+DNIFNJOBt6s8wvHMSfGdKw0QyUxf5H/VAENp9BV+g=
+deploy:
+  provider: npm
+  email: pv.shum@gmail.com
+  api_key:
+    secure: VQYlkJ+Gm8cudj7eaCbTspC77jW5tC0TYlw82Cx6cT4EyLv1uyw4kDuJ7KzeBj2ZXrUMdA6KiqwUOCWQc2ulHgbOq/YqhVQZSDInWOoCad/8m7cecacwsdNEGRA/cvFpT3NfvXYGpVKETfhWkoraai9h2ErFi/3ZAEt9DH9vxwg=
+  on:
+    tags: true
+    repo: ractive-foundation/ractive-foundation
+after_success: "chmod u+x scripts/deploy-gh-pages.sh; ./scripts/deploy-gh-pages.sh"
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - g++-4.8

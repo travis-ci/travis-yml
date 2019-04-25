@@ -1,0 +1,20 @@
+language: ruby
+rvm:
+- 2.2.2
+env:
+  global:
+  - secure: "Ib1zRfxU6fF9VVOqf9Zt9Hz8PBSljKlXHYqBpyNe08UXwyyjoeaAXJP672JvYGS05QcXDPgAppXAlSks1Kp4qDfhDSfDq5Z2Es4KI6bbahm51vxU7cNrZW0vU78fhHw+pnqFNtUh6V2Z8TtoXoXsOjebSDz+ZqfdJ22Tpyy3iyQ="
+before_script:
+- cp config/application.example.yml config/application.yml
+- cp config/database.example.yml config/database.yml
+- psql -c 'create database sidewalks_test;' -U postgres
+- bundle exec rake db:test:load
+bundler_args: --without development
+addons:
+  postgresql: 9.3
+notifications:
+  slack:
+    secure: XUZ+wDTNSifI0D/LBjqTSAjZ3Ic6Wh04z0qk3kFGf6C0BNMNQwjQWmOUpGFuxUJx1cLnfyfN1bCD0TUROymdAxkmlxK95jlQuyEuR4l6Gpsy0K7yuaWuAXgel82DAsF6IRxY9ZMDDScbfa9e2y4potJmDwcAWp3L7k8o9FujuXk=
+SECRET_KEY_BASE=593146e0067b8b14fcdcd5ebfc0b4b0e987a889f:
+  secure: iIOYgi604H8bJyyYqamepzEYIMeRvb1G94a34Sax0YVMKBtzV8Zlbp7fTF8a1nCGJIk2M1Sk0W/JSzxjO6b56+ea877UumxW5wnUmGpcxfRmwP5vwH5+FKJPj9rMJAL9lOadyEerFVJER1ofhNCY229l9bGo2RIirB3OxH9f6Hk=
+sudo: false

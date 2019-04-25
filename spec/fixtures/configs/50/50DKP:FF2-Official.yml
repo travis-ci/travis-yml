@@ -1,0 +1,70 @@
+# Use the new container-based infrastructure
+sudo: false
+
+# Install some apt packages needed for spcomp
+addons:
+    apt_packages:
+        - lib32stdc++6
+
+# Set the build environment
+env:
+    - SMVERSION=1.8 # Stable
+    - SMVERSION=1.9 # Unstable
+
+# And compile!
+install:
+    - wget --input-file=http://sourcemod.net/smdrop/$SMVERSION/sourcemod-latest-linux
+    - tar -xzf $(cat sourcemod-latest-linux)
+before_script:
+    - cd addons/sourcemod/scripting/
+    - wget "https://raw.githubusercontent.com/asherkin/TF2Items/master/pawn/tf2items.inc" -O include/tf2items.inc
+    - wget "http://www.doctormckay.com/download/scripting/include/morecolors.inc" -O include/morecolors.inc
+    - wget "https://raw.githubusercontent.com/asherkin/SteamTools/master/plugin/steamtools.inc" -O include/steamtools.inc
+    - wget "https://bitbucket.org/GoD_Tony/updater/raw/default/include/updater.inc" -O include/updater.inc
+    - wget "https://raw.githubusercontent.com/Flyflo/SM-Goomba-Stomp/master/addons/sourcemod/scripting/include/goomba.inc" -O include/goomba.inc
+    - wget "https://forums.alliedmods.net/attachment.php?attachmentid=115795&d=1360508618" -O include/rtd.inc
+    - wget "https://raw.githubusercontent.com/Phil25/RTD/master/scripting/include/rtd2.inc" -O include/rtd2.inc
+    - wget "https://forums.alliedmods.net/attachment.php?attachmentid=116849&d=1377667508" -O include/tf2attributes.inc
+
+    # RTD is particularly annoying since it doesn't handle optional plugin dependencies correctly
+    - sed -i'' 's/required = 1/#if defined REQUIRE_PLUGIN\nrequired = 1\n\#else\nrequired = 0/' include/rtd.inc
+
+    - chmod +x spcomp
+    - mkdir compiled compiled/freaks
+script: ./compile.sh freak_fortress_2.sp freaks/*.sp
+
+# Releases
+before_deploy:
+    - cd compiled/freaks
+    - rename 's/.smx/.ff2/' *.smx
+    - cd ../../../
+    - mkdir freak_fortress_2 freak_fortress_2/addons freak_fortress_2/addons/sourcemod freak_fortress_2/addons/sourcemod/configs freak_fortress_2/addons/sourcemod/gamedata freak_fortress_2/addons/sourcemod/scripting freak_fortress_2/addons/sourcemod/scripting/freaks freak_fortress_2/addons/sourcemod/scripting/include freak_fortress_2/addons/sourcemod/translations
+    - mv configs/freak_fortress_2 freak_fortress_2/addons/sourcemod/configs/freak_fortress_2
+    - mv scripting/freak_fortress_2.sp freak_fortress_2/addons/sourcemod/scripting/
+    - mv scripting/compiled freak_fortress_2/addons/sourcemod/plugins
+    - mv scripting/freaks/*.sp freak_fortress_2/addons/sourcemod/scripting/freaks/
+    - mv scripting/include/freak_fortress_2* freak_fortress_2/addons/sourcemod/scripting/include/
+    - mv translations/ff2_* freak_fortress_2/addons/sourcemod/translations/
+    - mv translations/freak_fortress_2.phrases.txt freak_fortress_2/addons/sourcemod/translations/
+    - mv ../../materials freak_fortress_2/
+    - mv ../../models freak_fortress_2/
+    - mv ../../sound freak_fortress_2/
+    - zip -rq freak_fortress_2 freak_fortress_2
+    - tar -czf freak_fortress_2.tar.gz freak_fortress_2
+deploy:
+    provider: releases
+    api_key:
+        secure: HcY8Axffi6ZjVBVWhp92PmqgFc7Vx+X89Jz7bXhYnGwZp4Isk5oj+mp0pwW/vqSi1hJAKws/Ecg95ooDSt6YfOw6UjSBvC4O1kYEOqldUex23gfGPAI63xwjpzTvd9BekaJZJufEbFWpq1+yC9uQ/YhRtbeeeaTRL5hIeEKP3o8=
+    file:
+        - freak_fortress_2.zip
+        - freak_fortress_2.tar.gz
+        - freak_fortress_2/addons/sourcemod/plugins/freak_fortress_2.smx
+        - freak_fortress_2/addons/sourcemod/scripting/freak_fortress_2.sp
+    skip_cleanup: true
+    on:
+        repo: 50DKP/FF2-Official
+        tags: true
+
+# Notifications
+notifications:
+    email: false

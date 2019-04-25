@@ -1,0 +1,24 @@
+sudo: false
+# Set Ruby as the language so it doesn't download the pip things. Instead, let docker do that.
+language: ruby
+
+matrix:
+  include:
+    - install:
+      - env | grep TRAVIS > .env
+      - env | grep CI >> .env
+      - docker-compose -f docker-compose.yml -f docker-compose.travis.yml run celery echo
+      script: (docker-compose -f docker-compose.yml -f docker-compose.travis.yml up celery &); sleep 5; docker-compose -f docker-compose.yml -f docker-compose.travis.yml run web tox
+      services:
+        - docker
+      env:
+        name: Python
+    - install:
+      - env | grep TRAVIS > .env
+      - env | grep CI >> .env
+      - docker build -t travis-watch -f ./travis/Dockerfile-travis-watch .
+      script: bash ./travis/js_tests.sh
+      services:
+        - docker
+      env:
+        name: JavaScript

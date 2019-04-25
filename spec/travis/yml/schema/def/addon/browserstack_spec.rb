@@ -17,7 +17,7 @@ describe Travis::Yml::Schema::Def::Addon::Browserstack, 'structure' do
                 type: :string
               },
               access_key: {
-                '$ref': '#/definitions/secure'
+                '$ref': '#/definitions/type/secure'
               },
               app_path: {
                 type: :string
@@ -38,7 +38,7 @@ describe Travis::Yml::Schema::Def::Addon::Browserstack, 'structure' do
                 type: :string
               },
               proxyPass: {
-                '$ref': '#/definitions/secure'
+                '$ref': '#/definitions/type/secure'
               }
             },
             additionalProperties: false,

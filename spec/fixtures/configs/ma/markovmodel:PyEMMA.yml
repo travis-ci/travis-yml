@@ -1,0 +1,46 @@
+language: c
+git:
+  submodules: false
+  depth: 500
+os:
+ - osx
+ - linux
+
+sudo: false
+
+#cache:
+#  directories:
+#    - $HOME/miniconda
+#  timeout: 480
+#before_cache:
+#  # Remove since we're caching the extracted directories
+#  - conda clean -ilps -v
+#  - rm -rvf "${MINICONDA_DIR}/conda-bld/"
+
+env:
+  global:
+    - MINICONDA_DIR="$HOME/miniconda"
+    - PYTHONHASHSEED=0
+    - OMP_NUM_THREADS=2
+    - PYEMMA_NJOBS=1
+    - MACOSX_DEPLOYMENT_TARGET=10.9
+  matrix:
+    - CONDA_PY=3.5
+    - CONDA_PY=3.6
+    - CONDA_PY=3.7
+
+matrix:
+  exclude: # test only 3.7 on osx.
+    - env: CONDA_PY=3.5
+      os: osx
+    - env: CONDA_PY=3.6
+      os: osx
+
+before_install:
+- source devtools/ci/travis/install_miniconda.sh
+
+script:
+- conda build -q devtools/conda-recipe -c conda-forge
+
+after_script:
+- bash <(curl -s https://codecov.io/bash) -f $HOME/coverage.xml -e CONDA_PY

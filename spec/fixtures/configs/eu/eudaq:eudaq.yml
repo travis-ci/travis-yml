@@ -1,0 +1,150 @@
+language: cpp
+
+sudo: required
+
+dist: trusty
+
+# removed due to bug https://github.com/travis-ci/travis-ci/issues/2111 https://github.com/18F/cg-style/pull/32/files
+# conflict between branch whitelist and tags
+# branches:
+#  only:
+#    - master
+#    - v1.7-dev
+
+# set here versions / file paths
+env:
+   global:
+      - ROOT5_FILENAME_LINUX=root_v5.34.36.Linux-ubuntu14-x86_64-gcc4.8.tar.gz
+      - ROOT5_FILENAME_MAC=root_v5.34.36.macosx64-10.11-clang70.tar.gz
+      - ROOT6_FILENAME_LINUX=root_v6.10.04.Linux-ubuntu14-x86_64-gcc4.8.tar.gz
+      - ROOT6_FILENAME_MAC=root_v6.10.04.macosx64-10.10-clang70.tar.gz
+      
+      - CMAKE_DOWNLOAD_PATH=https://cmake.org/files/v3.11
+      - CMAKE_FILENAME_LINUX=cmake-3.11.1-Linux-x86_64.tar.gz
+      - CMAKE_FILENAME_MAC=cmake-3.11.1-Darwin-x86_64.tar.gz
+            
+      - PYTHON_VERSION_MODERN=3.6.5
+      - PYTHON_VERSION_OLD=2.7.14
+      
+      - CMAKE_BUILD_TYPE=RelWithDebInfo
+      - EUDAQ_BUILD_EXECUTABLE=ON
+      - EUDAQ_BUILD_GUI=ON
+      - EUDAQ_BUILD_MANUAL=OFF
+      - EUDAQ_BUILD_STDEVENT_MONITOR=ON
+      - EUDAQ_EXTRA_BUILD_NREADER=OFF
+      - EUDAQ_LIBRARY_BUILD_LCIO=ON
+      - EUDAQ_MODULE_BUILD_STD=ON
+      - USER_CALICE_BUILD=OFF
+      - USER_EUDET_BUILD=ON
+      - USER_EUDET_BUILD_NI=ON
+      - USER_EUDET_BUILD_TLU=ON
+      - USER_EXAMPLE_BUILD=ON
+      - USER_ITKSTRIP_BUILD=ON
+      - USER_ITKSTRIP_BUILD_ITSROOT=ON
+
+      
+# possible options:
+# Linux/Mac
+# gcc/clang
+# ROOT 5/6
+# QT 4/5
+# Python 2/3    not realized yet
+
+# in order to reduce options:
+# Linux/Mac
+# gcc/clang
+# modern (ROOT 6, QT 5, Python 3) / old (ROOT 5, QT 4, Python 2)
+# results in 8 combinations
+# documentation to be "compiled" in maximum one option
+
+# cmspixel:
+# requires pxar download and installation which is done 
+# disabled for mac, old, gcc and clang as pxar can be installed but during eudaq compilation is fails to include properly the defines from api.h
+# the reason for this behaviour is unclear
+
+cache:
+  directories:
+  - $TRAVIS_BUILD_DIR/extern/ZestSC1
+  - $TRAVIS_BUILD_DIR/extern/tlufirmware
+  - $TRAVIS_BUILD_DIR/extern/aliceitsalpidesoftwaremaster
+  
+before_cache:
+  - rm -r $TRAVIS_BUILD_DIR/extern/aliceitsalpidesoftwaremaster
+  - cd $TRAVIS_BUILD_DIR/extern
+  - unzip aliceitsalpidesoftwaremaster.zip
+  - mv $TRAVIS_BUILD_DIR/extern/alice-its-alpide-software-master-3189f00d7515733d46a61a5ab2606e436df4955b $TRAVIS_BUILD_DIR/extern/aliceitsalpidesoftwaremaster
+
+matrix:      
+   include:   
+      - os: linux    
+        env: OPTION=modern LLVM_VERSION=6.0 COMPILER=clang  
+      - os: linux  
+        env: OPTION=old  LLVM_VERSION=6.0 COMPILER=clang 
+      - os: linux
+        env: OPTION=modern EUDAQ_BUILD_MANUAL=ON GCC_VERSION=7 COMPILER=gcc
+      - os: linux            
+        env: OPTION=old GCC_VERSION=7 COMPILER=gcc
+      - os: osx
+        compiler: clang
+        osx_image: xcode8.3
+        env: OPTION=modern BUILD_rpi_controller=OFF BUILD_palpidefs=OFF COMPILER=clang 
+      - os: osx           
+        compiler: clang
+        osx_image: xcode8.3
+        env: OPTION=old BUILD_cmspixel=OFF BUILD_rpi_controller=OFF BUILD_palpidefs=OFF COMPILER=clang 
+      - os: osx          
+        osx_image: xcode8.3
+        compiler: gcc
+        env: OPTION=modern BUILD_rpi_controller=OFF BUILD_palpidefs=OFF GCC_VERSION=5 COMPILER=gcc        
+      - os: osx
+        osx_image: xcode8.3
+        compiler: gcc
+        env: OPTION=old BUILD_cmspixel=OFF BUILD_rpi_controller=OFF BUILD_palpidefs=OFF GCC_VERSION=5 COMPILER=gcc     
+
+before_install:
+      
+install:
+  - source .travis/update_repositories.sh  
+  - source .travis/install_cmake.sh  
+  - source .travis/set_compilers.sh  
+  - source .travis/install_afs.sh  
+  - source .travis/install_python.sh  
+  - source .travis/install_libusb_0_1.sh  
+  - source .travis/install_libusb_1_0.sh  
+  - source .travis/install_qt.sh  
+  - source .travis/install_root.sh
+  - source .travis/install_tex.sh  
+  - if [[ $BUILD_cmspixel == "ON" ]]; then source .travis/install_pxar.sh; fi
+  - if [[ $BUILD_rpi_controller == "ON" ]]; then source .travis/install_wiringpi.sh; fi
+  - export PALPIDEFS_SPECIAL_PARAMETERS=""
+  - if [[ $BUILD_palpidefs == "ON" ]]; then source .travis/install_palpidefs_driver.sh; export PALPIDEFS_SPECIAL_PARAMETERS="-DCMAKE_PALPIDEFS_DRIVER_INCLUDE:FILEPATH=$TRAVIS_BUILD_DIR/extern/aliceitsalpidesoftwaremaster/pALPIDEfs-software -DUSE_TINYXML=off -DUSE_ROOT=on"; fi  
+
+before_script:
+  - $CXX --version
+  - echo $PATH
+  - echo $LD_LIBRARY_PATH
+
+script:
+  - mkdir $HOME/eudaq_build_folder
+  - mkdir $HOME/eudaq_installation_folder  
+  - cd $HOME/eudaq_build_folder 
+  - echo -DEUDAQ_INSTALL_PREFIX=$HOME/eudaq_installation_folder -DCMAKE_BUILD_TYPE=$CMAKE_BUILD_TYPE -DEUDAQ_BUILD_EXECUTABLE=$EUDAQ_BUILD_EXECUTABLE -DEUDAQ_BUILD_GUI=$EUDAQ_BUILD_GUI -DEUDAQ_BUILD_MANUAL=$EUDAQ_BUILD_MANUAL -DEUDAQ_BUILD_STDEVENT_MONITOR=$EUDAQ_BUILD_STDEVENT_MONITOR -DEUDAQ_EXTRA_BUILD_NREADER=$EUDAQ_EXTRA_BUILD_NREADER -DEUDAQ_LIBRARY_BUILD_LCIO=$EUDAQ_LIBRARY_BUILD_LCIO -DEUDAQ_MODULE_BUILD_STD=$EUDAQ_MODULE_BUILD_STD -DUSER_CALICE_BUILD=$USER_CALICE_BUILD -DUSER_EUDET_BUILD=$USER_EUDET_BUILD -DUSER_EUDET_BUILD_NI=$USER_EUDET_BUILD_NI -DUSER_EUDET_BUILD_TLU=$USER_EUDET_BUILD_TLU -DUSER_EXAMPLE_BUILD=$USER_EXAMPLE_BUILD -DUSER_ITKSTRIP_BUILD=$USER_ITKSTRIP_BUILD -DUSER_ITKSTRIP_BUILD_ITSROOT=$USER_ITKSTRIP_BUILD_ITSROOT  $TRAVIS_BUILD_DIR
+  - cmake -DEUDAQ_INSTALL_PREFIX=$HOME/eudaq_installation_folder -DCMAKE_BUILD_TYPE=$CMAKE_BUILD_TYPE -DEUDAQ_BUILD_EXECUTABLE=$EUDAQ_BUILD_EXECUTABLE -DEUDAQ_BUILD_GUI=$EUDAQ_BUILD_GUI -DEUDAQ_BUILD_MANUAL=$EUDAQ_BUILD_MANUAL -DEUDAQ_BUILD_STDEVENT_MONITOR=$EUDAQ_BUILD_STDEVENT_MONITOR -DEUDAQ_EXTRA_BUILD_NREADER=$EUDAQ_EXTRA_BUILD_NREADER -DEUDAQ_LIBRARY_BUILD_LCIO=$EUDAQ_LIBRARY_BUILD_LCIO -DEUDAQ_MODULE_BUILD_STD=$EUDAQ_MODULE_BUILD_STD -DUSER_CALICE_BUILD=$USER_CALICE_BUILD -DUSER_EUDET_BUILD=$USER_EUDET_BUILD -DUSER_EUDET_BUILD_NI=$USER_EUDET_BUILD_NI -DUSER_EUDET_BUILD_TLU=$USER_EUDET_BUILD_TLU -DUSER_EXAMPLE_BUILD=$USER_EXAMPLE_BUILD -DUSER_ITKSTRIP_BUILD=$USER_ITKSTRIP_BUILD -DUSER_ITKSTRIP_BUILD_ITSROOT=$USER_ITKSTRIP_BUILD_ITSROOT  $TRAVIS_BUILD_DIR
+  - make install
+
+before_deploy:
+ - cd $TRAVIS_BUILD_DIR
+ - source .travis/before_deploy.sh
+ - ls ${FILE_TO_UPLOAD_1}
+
+deploy:
+  provider: releases
+  api_key:
+    secure: nNpy+uDh8b0gkVMY+zf1ZSnevXox/7nFW6q8Z7TxOAGKudGdFdw2A4M+bmBGvXQX/68aqcLJfiFI4YBOkEMIdTuK75Hpr0K6vCasVDHBXmsEiPbtOXYg5PJpA5QZFEjnKJGQFGusGqdHA2nBUsWiAOCiF4ZD2Qb8GxT6t8fGgF8=
+  file: ${FILE_TO_UPLOAD_1}
+  skip_cleanup: true
+  overwrite: true
+  on:
+    tags: true
+    condition: "$EUDAQ_BUILD_MANUAL = ON"
+    repo: eudaq/eudaq       

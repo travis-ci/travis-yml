@@ -1,0 +1,61 @@
+dist: trusty
+sudo: true
+addons:
+  apt:
+    sources:
+      - google-chrome
+    packages:
+      - google-chrome-stable
+      - libsnappy-dev
+language: node_js
+node_js: 6
+env:
+  global:
+    - EQ_RUN_LOCAL_LINT=True
+    - EQ_RUN_LOCAL_TESTS=True
+    - EQ_RUN_DOCKER_UP=True
+    - EQ_RUN_FUNCTIONAL_TESTS=True
+    - EQ_RUN_FUNCTIONAL_TESTS_HEADLESS=True
+    - EQ_DYNAMODB_ENDPOINT=http://localhost:6060
+    - EQ_SUBMITTED_RESPONSES_TABLE_NAME=dev-submitted-responses
+    - EQ_QUESTIONNAIRE_STATE_TABLE_NAME=dev-questionnaire-state
+    - EQ_SESSION_TABLE_NAME=dev-eq-session
+    - EQ_USED_JTI_CLAIM_TABLE_NAME=dev-used-jti-claim
+    - AWS_DEFAULT_REGION=eu-west-1
+    - AWS_ACCESS_KEY_ID=dummy-access-key
+    - AWS_SECRET_ACCESS_KEY=dummy-secret-key
+    # Codacy
+    - secure: q3hyZhRj24C5sT7T0ViTDCwhT8eVjpanTf6BkPPBI43/6NBJeF1vi4/LkfJMQa0qwYibu5zB8jtkk2VsqGRMGvj9fMufOKXGqebOsPYWUJl1MZM3t7OZS57xF9wBUenZwx1oyb/VPrFB56ctGny1XEbF4l47NmbKWD1iMWG1f3Y6PCJ7o8o62v0irmfbdYFTsWjipCQlCrKZm+KVWZD25egIDJMDpq9e0nYNoSW+5fMXDGOtV20/U/rcmW5Lfn06ppJ0C4CaKHuM+MzZtZJwtiCI2TqF0ihQl7ry7YgpqEZLPHQYQ5npIpecxP1f/6ebcAPdKKkJ2Ccutrv/7IFlJo7rWLTB7mzJ4ep11HCdo3mL+JREp1HUJLeEngXFC3lKRXPHKukUxe4Lkz1/g6kdwCUZxajGTwML84FHmqoZxKGMKhMN+0n6rO8wEUR32q4+JbO5z/oQGhtjQZkogq8vWY6+/aq328hsbmy72s23AiX+BQUHqk2QFs3T9FQiqwn4OqqX4JKzmHs838LT+dUTFgH+mWo0lalxa3Pr7cJAwhn97VSnIdU9JTC8RyPWbAHkah78PXlL9guHI1nzQTjTcMm/yTlmtE2NxTSY+ZGIV+O5pcJm3HkAjZvNi/0jjDWwBHs/rZgj1t7Eoueh8dPTSZ12LmqKuBpvkrzLKcs2zt4=
+before_install:
+    - export BOTO_CONFIG=/dev/null # Workaround for https://github.com/travis-ci/travis-ci/issues/7940
+    - pyenv versions
+    - pyenv install --skip-existing
+    - pyenv rehash
+    - pyenv global $(cat .python-version)
+    - pip install -U pip pipenv wheel
+    - pipenv install --dev --deploy
+    - pipenv check
+cache:
+    - yarn
+    - pip
+    - directories:
+        - /opt/python/
+        - /home/travis/.local/share/
+script:
+    - set -e
+    - yarn compile
+    - export TAG=`if [ "$TRAVIS_PULL_REQUEST_BRANCH" == "" ]; then echo "v3"; else echo $TRAVIS_PULL_REQUEST_BRANCH; fi`
+    - docker build -t onsdigital/eq-survey-runner:$TAG -f Dockerfile .
+    - docker build -t onsdigital/eq-survey-runner-static:$TAG -f Dockerfile.static .
+    - pipenv run ./scripts/run.sh
+    - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+    - echo "Pushing with tag [$TAG]"
+    - docker push onsdigital/eq-survey-runner:$TAG
+    - docker push onsdigital/eq-survey-runner-static:$TAG
+after_success:
+    - pipenv run bash <(curl -s https://codecov.io/bash)
+    - pipenv run pip install codacy-coverage
+    - pipenv run python-codacy-coverage -r coverage.xml
+branches:
+    only:
+        - v3

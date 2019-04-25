@@ -1,0 +1,21 @@
+language: python
+python:
+  - "3.6"
+#  - "3.7-dev"  # 3.7 development branch
+# command to install dependencies
+before_script:
+  - sudo redis-server /etc/redis/redis.conf --port 6379
+  - sudo mkdir ./upload -p
+  - sudo chmod 777 ./upload
+install:
+  - pip install -r requirements.txt
+  - export EXTERNALCFG=`pwd`/config/settings_travisci.cfg
+  - chmod 777 ./dbinit_travisci.sh
+  - ./dbinit_travisci.sh
+# command to run tests
+services:
+  - mysql
+script:
+  - export EXTERNALCFG=`pwd`/config/settings_travisci.cfg
+  - nohup python run.py > /dev/null 2>&1 &
+  - pyb -v

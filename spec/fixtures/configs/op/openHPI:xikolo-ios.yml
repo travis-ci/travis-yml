@@ -1,0 +1,21 @@
+language: objective-c
+osx_image: xcode10.2
+xcode_workspace: xikolo-ios.xcworkspace
+cache: cocoapods
+
+env:
+  - CHECK_LOCALIZATION=1
+  - LINT=1
+  - TEST=1 SCHEME="Common"
+  - TEST=1 SCHEME="openHPI-iOS"
+
+install:
+  - bundle install --without documentation
+  - bundle exec pod repo update > /dev/null
+  - bundle exec pod install
+
+script:
+  - set -o pipefail
+  - if [ "$TEST" == 1 ]; then bundle exec fastlane run scan scheme:$SCHEME clean:true; fi
+  - if [ "$CHECK_LOCALIZATION" == 1 ]; then bundle exec fastlane localize; git status --porcelain; git diff --quiet head Common iOS || travis_terminate 1; fi
+  - if [ "$LINT" == 1 ]; then bundle exec danger --verbose; fi

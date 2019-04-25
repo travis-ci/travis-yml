@@ -1,0 +1,34 @@
+language: python
+cache: pip
+dist: trusty
+python:
+   - "3.5"
+   - "3.6"
+env:
+- export PANDAS_VERSION=0.23.4
+- export PANDAS_VERSION=0.24.1
+# Enable newer 3.7 without globally enabling sudo and dist: xenial for other build jobs
+matrix:
+  include:
+  - python: 3.7
+    dist: xenial
+    sudo: true
+    env: export PANDAS_VERSION=0.24.1
+  - python: 3.7
+    dist: xenial
+    sudo: true
+    env: export PANDAS_VERSION=0.23.4
+before_install:
+  - ls
+  # - sudo apt-get update
+install: "make"
+script:
+  # enforce formatting
+  - make check_format
+  # command to run tests
+  - make test
+after_success:
+  - coveralls
+# Don't want notifications
+notifications:
+  email: false

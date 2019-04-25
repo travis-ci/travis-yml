@@ -1,0 +1,31 @@
+language: python
+sudo: false
+python:
+  - "2.7"
+  - "3.5"
+services:
+  - memcached
+before_install:
+  # Install the coverage utility and coveralls reporting utility
+  - pip install -U pip
+  - pip --version
+  - pip install coverage
+  - pip install codecov
+  # FIXME travis fails w/ 3.7.0 on python3, even though it works locally
+  - pip install lxml==3.6.4
+  # Install cnx-easybake
+  - pip install git+https://github.com/openstax/cnx-cssselect2.git#egg=cnx-cssselect2
+  - pip install git+https://github.com/Connexions/cnx-easybake.git#egg=cnx-easybake
+install:
+  - python setup.py install
+before_script:
+  - pip install pep8
+  - pep8 --exclude=tests *.py cnxepub/
+  - pep8 --max-line-length=1000 cnxepub/tests
+script:
+  - coverage run --source=cnxepub -m unittest discover
+after_success:
+  # Report test coverage to codecov.io
+  - codecov
+notifications:
+  email: false

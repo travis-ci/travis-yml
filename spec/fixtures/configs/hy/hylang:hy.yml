@@ -1,0 +1,27 @@
+sudo: false
+dist: xenial
+language: python
+python:
+  - "2.7"
+  - "3.5"
+  - "3.6"
+  - "3.7"
+  - 3.8-dev
+  - pypy2.7-6.0
+  - pypy3.5-6.0
+install:
+  - pip install -r requirements-travis.txt
+  - pip install -e .
+script: pytest
+cache: pip
+after_success: make coveralls
+notifications:
+  email:
+    - paultag@gmail.com
+  irc:
+    channels:
+      - "irc.freenode.net#woo-city-commits"
+      - "irc.freenode.net#hy"
+    on_success: change
+    on_failure: change
+    use_notice: false

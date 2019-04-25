@@ -1,0 +1,19 @@
+dist: trusty
+env:
+  global:
+    - TZ=America/Los_Angeles
+pyton:
+  - '2.7'
+group: deprecated-2017Q4
+sudo: required
+install:
+  - pip install 'urllib3[secure]'
+  - sudo pip install -r requirements.txt
+  - bundle install
+cache:
+  - bundler
+  - pip
+addons:
+  postgresql: '9.6'
+script:
+  - make clean download import process && ./bin/travis-deploy

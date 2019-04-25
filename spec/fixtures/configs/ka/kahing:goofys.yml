@@ -1,0 +1,10 @@
+language: go
+sudo: required
+dist: xenial
+env:
+install:
+- go get -t $(go list ./... | grep -v /vendor/)
+- mkdir /tmp/mnt
+- make
+go:
+  - 1.11.5

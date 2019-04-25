@@ -1,0 +1,47 @@
+language: java
+jdk: oraclejdk8
+sudo: required
+cache:
+  directories:
+    - $HOME/.m2
+install:
+- mvn --version
+addons:
+  apt:
+    packages:
+    - intltool
+    - libgsf-1-dev
+    - uuid-runtime
+    - libglib2.0-dev
+    - libxml2-dev
+    - pdftk
+notifications:
+  slack: debrief-devs:GF1nQSqn2eozH3wQtyuPLAlG
+before_script:
+- export DISPLAY=:99
+- sh -e /etc/init.d/xvfb start
+- sleep 3
+- ./install-msitools.sh
+script: mvn clean verify -U -B -fae
+after_success:
+- ls /home/travis/build/debrief/debrief/org.mwc.cmap.combined.feature/root_installs
+- ./contribs/msi/make_x32msi.sh
+- ./contribs/msi/make_x64msi.sh
+deploy:
+  provider: releases
+  skip_cleanup: true
+  file_glob: true
+  api_key:
+    secure: KCCJkP6ELz9pIGkBmSRbazRzhKZPq7T58tEIZbthtVv+KoM/JWdN10h3IK/N5Oqdeb2/P5u+93ml1wlU9PkbuwxQ4mpUbaAW41G/9mbEF7U2JLEtS9xSxeIfEBIEtuHxdlECjsgMCLm2lh3CVxbu3S2y9jDnpt35rbh6AN3B44w=
+  file:
+    - /home/travis/build/debrief/debrief/org.mwc.debrief.product/target/products/DebriefNG-Linux64Bit.zip
+    - /home/travis/build/debrief/debrief/org.mwc.debrief.product/target/products/DebriefNG-MacOSX64Bit.zip
+    - /home/travis/build/debrief/debrief/org.mwc.debrief.product/target/products/DebriefNG-Windows32Bit.zip
+    - /home/travis/build/debrief/debrief/org.mwc.debrief.product/target/products/DebriefNG-Windows64Bit.zip
+    - /home/travis/build/debrief/debrief/org.mwc.debrief.legacy/dist/DebriefLite*.jar
+    - /home/travis/build/debrief/debrief/org.mwc.debrief.lite/dist/debrief-lite*.zip
+    - /home/travis/build/debrief/debrief/org.mwc.debrief.product/target/products/DebriefNG-Windows32Bit.msi
+    - /home/travis/build/debrief/debrief/org.mwc.debrief.product/target/products/DebriefNG-Windows64Bit.msi
+  on:
+     tags: true
+     all_branches: true

@@ -1,0 +1,19 @@
+git:
+  depth: false
+
+sudo: required
+
+language: python
+
+services:
+  - docker
+
+install:
+  - docker build -t test_ngraph_onnx -f .ci/travis/ubuntu/Dockerfile .
+
+script:
+  - docker run test_ngraph_onnx
+
+branches:
+  only:
+    - "master"

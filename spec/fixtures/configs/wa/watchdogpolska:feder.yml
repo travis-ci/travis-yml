@@ -1,0 +1,31 @@
+language: python
+python: 3.6
+
+cache:
+  directories:
+    - $HOME/.cache/pip
+
+env:
+  global:
+    - DATABASE_URL="mysql://root:@localhost/test_feder"
+    - DJANGO_SETTINGS_MODULE="config.settings.local"
+  matrix:
+    - TOX_ENV=py27-dj111-core  # required
+    - TOX_ENV=py36-dj111-core
+    - TOX_ENV=py36-dj20-core
+    - TOX_ENV=py36-djmaster-core
+    - TOX_ENV=flake8
+    - TOX_ENV=py36-docs
+
+matrix:
+  allow_failures:
+    - env: TOX_ENV=py35-dj20-core
+    - env: TOX_ENV=py36-djmaster-core
+    - env: TOX_ENV=flake8
+  fast_finish: true
+
+install:
+  - pip install -U pip wheel
+  - pip install tox
+script:
+  - tox -e $TOX_ENV

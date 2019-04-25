@@ -1,0 +1,25 @@
+# references:
+# * https://www.objc.io/issues/6-build-tools/travis-ci/
+# * https://github.com/supermarin/xcpretty#usage
+
+language: swift
+
+osx_image:
+- xcode10.1
+- xcode10.2
+
+env:
+- SWIFT_VERSION=5.0
+- SWIFT_VERSION=4.2
+
+matrix:
+  exclude:
+  - osx_image: xcode10.1
+    env: SWIFT_VERSION=5.0
+
+cache:
+- cocoapods
+- bundler
+
+script:
+  - bundle exec fastlane run_ci

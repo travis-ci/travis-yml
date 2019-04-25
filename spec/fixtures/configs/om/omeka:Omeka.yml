@@ -1,0 +1,28 @@
+language: php
+
+dist: precise
+
+php:
+  - 5.3
+  - 5.4
+  - 5.5
+  - 5.6
+  - 7.0
+  - 7.1
+  - 7.2
+  - 7.3
+
+sudo: false
+
+before_script:
+  - mysql -e "create database IF NOT EXISTS omeka_test;" -uroot
+  - mv application/config/config.ini.changeme application/config/config.ini
+  - mv application/tests/config.ini.changeme application/tests/config.ini
+  - sed -i 's/db.host = ""/db.host = "localhost"/' application/tests/config.ini
+  - sed -i 's/db.username = ""/db.username = "root"/' application/tests/config.ini
+  - sed -i 's/db.dbname = ""/db.dbname = "omeka_test"/' application/tests/config.ini
+  - sed -i 's/paths.imagemagick = ""/paths.imagemagick = "\/usr\/bin\/"/' application/tests/config.ini
+
+script:
+  - if [[ ${TRAVIS_PHP_VERSION:0:1} == "7" ]]; then composer install; fi;
+  - cd application/tests && if [[ ${TRAVIS_PHP_VERSION:0:1} == "7" ]]; then ../../vendor/bin/phpunit; else phpunit; fi;

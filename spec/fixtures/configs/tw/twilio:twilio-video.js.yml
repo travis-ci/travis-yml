@@ -1,0 +1,109 @@
+# NOTE(mroberts): https://github.com/travis-ci/travis-ci/issues/4704
+filter_secrets: false
+language: node_js
+node_js:
+  - 10
+
+# https://github.com/travis-ci/travis-ci/issues/8836#issuecomment-356362524
+sudo: required
+
+addons:
+  apt:
+    packages:
+      - pulseaudio
+
+env:
+  global:
+    - DBUS_SESSION_BUS_ADDRESS=/dev/null
+    - DISPLAY=:99.0
+
+matrix:
+  include:
+    - os: linux
+      env: BROWSER=chrome BVER=stable TOPOLOGY=P2P
+
+    - os: linux
+      env: BROWSER=chrome BVER=stable TOPOLOGY=SFU
+
+    - os: linux
+      env: BROWSER=chrome BVER=beta TOPOLOGY=P2P
+
+    - os: linux
+      env: BROWSER=chrome BVER=beta TOPOLOGY=SFU
+
+    - os: linux
+      env: BROWSER=chrome BVER=unstable TOPOLOGY=P2P
+
+    - os: linux
+      env: BROWSER=chrome BVER=unstable TOPOLOGY=SFU
+
+    - os: linux
+      env: BROWSER=firefox BVER=stable TOPOLOGY=P2P
+
+    - os: linux
+      env: BROWSER=firefox BVER=stable TOPOLOGY=SFU
+
+    - os: linux
+      env: BROWSER=firefox BVER=beta TOPOLOGY=P2P
+
+    - os: linux
+      env: BROWSER=firefox BVER=beta TOPOLOGY=SFU
+
+    - os: linux
+      env: BROWSER=firefox BVER=unstable TOPOLOGY=P2P
+
+    - os: linux
+      env: BROWSER=firefox BVER=unstable TOPOLOGY=SFU
+
+    # - os: osx
+    #   sudo: required
+    #   osx_image: xcode8.3
+    #   env: BROWSER=safari BVER=unstable TOPOLOGY=P2P
+
+    # - os: osx
+    #   sudo: required
+    #   osx_image: xcode8.3
+    #   env: BROWSER=safari BVER=unstable TOPOLOGY=SFU
+
+  allow_failures:
+    - env: BROWSER=chrome BVER=unstable TOPOLOGY=P2P
+    - env: BROWSER=chrome BVER=unstable TOPOLOGY=SFU
+    - env: BROWSER=firefox BVER=stable TOPOLOGY=P2P
+    - env: BROWSER=firefox BVER=stable TOPOLOGY=SFU
+    - env: BROWSER=firefox BVER=beta TOPOLOGY=P2P
+    - env: BROWSER=firefox BVER=beta TOPOLOGY=SFU
+    - env: BROWSER=firefox BVER=unstable TOPOLOGY=P2P
+    - env: BROWSER=firefox BVER=unstable TOPOLOGY=SFU
+    - env: BROWSER=safari BVER=unstable TOPOLOGY=P2P
+    - env: BROWSER=safari BVER=unstable TOPOLOGY=SFU
+
+before_script:
+  - |
+    set -e
+    cd node_modules/travis-multirunner
+    if [ "${TRAVIS_OS_NAME}" == 'linux' ]; then
+      BROWSER=chrome ./setup.sh
+      BROWSER=firefox ./setup.sh
+      export CHROME_BIN=$(pwd)/browsers/bin/chrome-$BVER
+      export FIREFOX_BIN=$(pwd)/browsers/bin/firefox-$BVER
+    else
+      BROWSER=safari ./setup.sh
+    fi
+    cd ../..
+    if [ "${TRAVIS_OS_NAME}" == 'linux' ]; then
+      sh -e /etc/init.d/xvfb start
+      pulseaudio --start
+    fi
+    if [ "${TOPOLOGY}" == 'P2P' ]; then
+      export CONFIGURATION_PROFILE_SID=$CONFIGURATION_PROFILE_SID_P2P
+    else
+      export ENABLE_REST_API_TESTS=1
+      export CONFIGURATION_PROFILE_SID=$CONFIGURATION_PROFILE_SID_SFU
+    fi
+
+script: npm run build:travis
+
+notifications:
+  slack:
+    on_pull_requests: false
+    secure: jxmuMo2n/OCaUg6DMZ/fahcxoCmkyOt4eD5pWgIqinxL0INyByZhw3EyAItueuXo4+7oh2KZj78ryf2bChSMsGGXXF25Vdy154bGsFXS7xPH/ars7yTo2Cjry8j3ki0ve7aqH3GjMlBVuJRA3ps2w/bJjw9oq4JDiibDRsDPawcS3Xda0tHqc022lJer9jHaF+zBrjobo2xAZ8dFhMmx50wsY5tALq5xoiiAAfmARm8ZIZu6hZpwdbpC6pM9SBd1RNMxnzQrlFPqA25FYPZSaD4/5wjKDEHTO+dfOEW79sgZUuohE/AC+zKd3wiYxxDaxrkPkzijmYs39LyDqm5Vr6eS9OSrZptgGni6G/2J/dBW52MLlxCDB+SqpbaPuLVKsvPdVAwydMTYo02fJpxa3purUdNM9GFPZCZC4KGvht2cSvM1txUNFkpkAp8RCxyUGpVw58S4gnAp2sYmRR22i42nZJunR7myXiMV+KZcaS7BJ2Mf6Wo1YwSnHSP4xwuaBPBY0L86w/gyd9tABpEIamOwKkFiLmOKr1l8aCcuGrEHnBB2L5EpiNfxl93DjrApzwR3FqCeSzfwHgaZ6EIGtRqPPXUJgM4DtYt9udGO4c9fLr6QbDgyS4swn3uUiUmeI3i9UUg92jvv7OCYoe80DfsF5RVjZxXcQM+WMMsJ7os=

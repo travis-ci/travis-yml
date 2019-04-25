@@ -1,0 +1,51 @@
+language: node_js
+node_js:
+  - "8"
+
+cache:
+  directories:
+    - $HOME/.npm
+    - node_modules
+
+env:
+  global:
+    - ANSIBLE_REMOTE_USER=ffbe-equip
+    - ANSIBLE_CONFIG=./tools/ansible/ansible.cfg
+
+before_install:
+  - npm install -g npm
+
+install:
+  - npm install
+
+script:
+  - npm run test
+  - npm run test:web
+
+after_success:
+  # Exit conditions
+  - if [[ "$TRAVIS_BRANCH" != "master" ]]; then exit 0; fi
+  - if [[ -z "$FFBE_SERVER" ]] || [[ -z "$FFBE_DIRECTORY" ]]; then exit 0; fi
+
+  # Deploy SSH key
+  - openssl aes-256-cbc
+      -K $encrypted_da30cdc99aab_key
+      -iv $encrypted_da30cdc99aab_iv
+      -in ./tools/ansible/deploy_rsa.enc
+      -out /tmp/deploy_rsa -d
+  - chmod 600 /tmp/deploy_rsa
+  - eval "$(ssh-agent -s)"
+  - ssh-add /tmp/deploy_rsa
+
+  # Install Ansible
+  - sudo apt-add-repository -y ppa:ansible/ansible
+  - sudo apt-get -yq update &>> ~/apt-get-update.log
+  - sudo apt-get -yq install ansible &>> ~/apt-get-install.log
+  - ansible --version
+
+  # Deploy remote
+  - ssh-keyscan -H ${FFBE_SERVER} 2>&1 | tee -a $HOME/.ssh/known_hosts
+  - ansible-playbook
+      --inventory="${FFBE_SERVER},"
+      --extra-vars="git_repository=git@github.com:${TRAVIS_REPO_SLUG}.git git_directory=${FFBE_DIRECTORY} git_commit=${TRAVIS_COMMIT}"
+      ./tools/ansible/deploy.yml

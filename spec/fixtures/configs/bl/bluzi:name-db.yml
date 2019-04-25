@@ -1,0 +1,16 @@
+language: node_js
+node_js:
+  - "8"
+deploy:
+  provider: script
+  skip_cleanup: true
+  script: node deploy/deploy.collection.js
+notifications:
+  webhooks:
+      urls:
+        - https://www.travisbuddy.com/
+      on_success: never
+      on_failure: always
+      on_start: never
+      on_cancel: never
+      on_error: never

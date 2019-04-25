@@ -1,0 +1,47 @@
+language: node_js
+node_js: "10"
+
+sudo: false
+dist: trusty
+
+addons:
+  chrome: stable
+
+env:
+  global:
+    - CXX=g++-4.8
+    # See https://git.io/vdao3 for details.
+    - JOBS=1
+
+jobs:
+  include:
+    - stage: test
+      script: npm run test
+    # Define the release stage that runs semantic-release
+    - stage: release
+      node_js: lts/*
+      script: skip
+      deploy:
+        provider: script
+        skip_cleanup: true
+        script:
+          - npx semantic-release
+
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - xvfb
+      - g++-4.8
+
+cache:
+  yarn: true
+
+before_install:
+  - yarn config set no-progress
+
+install:
+  - yarn --frozen-lockfile
+  - export DISPLAY=':99.0'
+  - Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &

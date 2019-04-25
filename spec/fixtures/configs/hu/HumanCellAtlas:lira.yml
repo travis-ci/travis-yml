@@ -1,0 +1,30 @@
+language: python
+
+python:
+  - '3.6'
+
+install: "pip install -r requirements.txt"
+
+jobs:
+  include:
+    # The linting test is fast and cheap so run it first
+    - stage: Linting Test
+      script: 
+        # Check Black code style compliance
+        - black lira/ scripts/ --skip-string-normalization --check
+        # Check PEP-8 compliance
+        - flake8 lira/ scripts/
+
+    # The unit test is a bit more expensive so run it only
+    # if the linting test passes
+    - stage: Unit Test
+      sudo: required
+      services: docker
+      script: cd lira/test && bash test.sh
+
+notifications:
+  slack:
+    on_success: change
+    on_failure: always
+    rooms:
+      secure: mYV5fKPI1MDtZHoDMmNukNM9t+bQIIOWPKjucgAaO9p/9Bnefe3JdUoCys7EcQ/Tgo7tL1X51R8BYBvwWQ7NkyI/mqOvttYVWmW5rcJ8bzfwNSL2B+Jnkhz/J75TmhKTQLlf1uQwu3UcHK0AiNOqBdIbpBf2PZUCFXIYPw8nHy2RURpfnGxBjBj1F+dbzBkL8Xfmiz9zuXScd6vJFFURTy3Ia2kqEMj/8RFCAjj2FH4XBjchVlWuLdBuoA4Q1Uc2WmcEBaUA2UOj/AY8IJ7XYW2eYtsw8Aj7rAO6EpP4+s57oWz5y/KAIRITDyOg9Pr/C7Y1D6F5KHQff+m1sTYRARmE2vBDPDKUsQuZ/CL9fGKsXiL+MByK5p9DiogmoKde+iqoXVGq13uTRZbEgEcyGAHb9sHosUlA0GNonQozKujN62rPrRlCBrOhwhGZRinyqKwoiaf17izPlds6clUgCgwjos505pW9zCnbGM0pFAkxqYN1uwoUXVSOebqzzE+v5NLXRl8tH+jxpd7DJj4i7s0vgjbWpzPXFGAsQJd2aKx40YqzRhd97V5MOECReitdUZ5MdVygpg7DSXzzzjvwN3JJt0rdO/ZGO0ZELtErzBlznuYAX2hR/T98UJtp5VCfbXxxruDPPRRJyCpBTGalwKQplAGzY+G1osnRt5fMi74=

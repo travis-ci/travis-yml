@@ -1,0 +1,128 @@
+language: node_js
+
+sudo: required
+dist: xenial
+
+node_js:
+  - stable
+
+python:
+  - "3.5"
+
+notifications:
+  email:
+    on_success: change
+    on_failure: always
+
+virtualenv:
+  system_site_packages: true
+
+services:
+  - postgresql
+
+addons:
+  postgresql: "10"
+  apt:
+    packages:
+      - libpq-dev
+      - libjson-c-dev
+      - postgresql-10
+      - postgresql-client-10
+      - postgresql-server-dev-10
+      - apache2
+      - apache2-dev
+      - ssl-cert
+      - libapache2-mod-wsgi-py3
+      - python3-pip
+      - python3-setuptools
+      - python3-ply
+
+before_install:
+  - export TZ=America/Los_Angeles
+  - export PATH="$(systemd-path user-binaries):$PATH"
+  - sudo su -c 'echo /usr/lib/python3.5/site-packages > /usr/local/lib/python3.5/dist-packages/sys-site-packages.pth'
+  - sudo ln -s /etc/apache2/conf-enabled /etc/apache2/conf.d
+  - sudo service postgresql stop
+  - sudo apt-get -y purge postgresql-9.1 postgresql-9.2 postgresql-9.3 postgresql-9.4 postgresql-9.5 postgresql-9.6
+  - sudo service postgresql start 10
+  - sudo a2enmod ssl
+  - sudo a2ensite default-ssl
+  - sudo groupadd -o -g $(id -g www-data) apache
+  - sudo pip3 --version
+  - sudo su -c 'python3 -c "import site;print(site.PREFIXES);"'
+  - sudo su -c 'python3 -c "import site;print(site.getsitepackages())"'
+  - sudo pip3 install requests
+  - sudo pip3 install psycopg2-binary
+  - sudo pip3 install git+https://github.com/informatics-isi-edu/webpy.git
+  - sudo useradd -m -r webauthn
+  - sudo su -c '/usr/bin/python3 -c "import sys;import pprint;pprint.pprint(sys.path)"' - webauthn
+  - cd ..
+  - git clone https://github.com/informatics-isi-edu/webauthn.git
+  - cd webauthn
+  - sudo make testvars
+  - sudo make install
+  - sudo make deploy
+  - sudo bash ./test/ubuntu-travis-setup.sh
+  - sudo a2enmod webauthn
+  - sudo service apache2 restart
+  - cd ..
+  - git clone https://github.com/informatics-isi-edu/hatrac.git
+  - cd hatrac
+  - sudo python3 ./setup.py install
+  - sudo useradd -m -r hatrac
+  - sudo -H -u postgres createuser -d hatrac
+  - sudo -H -u postgres psql -c "GRANT webauthn TO hatrac"
+  - sudo -H -u hatrac createdb hatrac
+  - sudo cp test/hatrac_config.json ~hatrac/
+  - sudo -H -u hatrac hatrac-deploy admin
+  - sudo su -c 'python3 -c "import hatrac as m;m.sample_httpd_config()"' - hatrac > ../wsgi_hatrac.conf
+  - sudo cp ../wsgi_hatrac.conf /etc/apache2/conf.d/wsgi_hatrac.conf
+  - sudo mkdir /var/www/hatrac
+  - sudo chown hatrac /var/www/hatrac
+  - cd ..
+  - git clone https://github.com/informatics-isi-edu/ermrest.git
+  - cd ermrest
+  - sudo -H make install PLATFORM=ubuntu1604
+  - sudo which ermrest-deploy
+  - sudo -H make deploy PLATFORM=ubuntu1604
+  - cd ..
+  - curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -
+  - sudo apt-get install -y nodejs
+  - git clone https://github.com/informatics-isi-edu/ErmrestDataUtils.git
+  - cd ErmrestDataUtils
+  - sudo npm install
+  - cd ..
+  - cd ermrestjs
+  - sudo cp test/ermrest_config.json /home/ermrest
+  - sudo chmod a+r /home/ermrest/ermrest_config.json
+  - sudo npm install
+  - sudo service apache2 restart
+
+install:
+  - sudo make build
+
+before_script:
+  - sudo -H -u webauthn webauthn2-manage adduser test1
+  - sudo -H -u webauthn webauthn2-manage passwd test1 dummypassword
+  - sudo -H -u webauthn webauthn2-manage adduser test2
+  - sudo -H -u webauthn webauthn2-manage passwd test2 dummypassword
+  - sudo -H -u webauthn webauthn2-manage addattr admin
+  - sudo -H -u webauthn webauthn2-manage assign test1 admin
+
+after_failure:
+  - sudo ls -lR /etc/apache2
+  - sudo ls -lR /var/run/apache2
+  - sudo cat /etc/apache2/conf.d/webauthn.conf
+  - sudo cat /etc/apache2/conf.d/wsgi_webauthn2.conf
+  - sudo cat /etc/apache2/conf.d/wsgi_ermrest.conf
+  - sudo cat ${HTTPD_ACCESS_LOG}
+  - sudo cat ${HTTPD_ERROR_LOG}
+  - sudo -H -u webauthn psql -c 'select * from webauthn2_db.session' webauthn
+
+env:
+  global:
+  - HTTPD_ERROR_LOG=/var/log/apache2/error.log
+  - HTTPD_ACCESS_LOG=/var/log/apache2/access.log
+  - PYTHONWARNINGS="ignore:Unverified HTTPS request"
+  - secure: TBTq6fxGLwsimS+KClPFjFltRfNiNcj01ztbPgtFARlNTPWkoq43av3rCuBZLAeudiFqFxqArVNiQ+hRnL8PDqQNldAdZEkB9jqcGQKHh+S9u3sU9mGLFvXkbIwLo3NWCSYs1S48SBMtr7LZkCU/0jxgNWk/Y4tPjs7lBxcq9aLIUJPcygv6UXrVWwlRcY3J0/2ttflaim59XIXUy2Oxmn7ulXPthIpjwbNoQE0jRkoZgwEWKnLLmUT0fdb2nR75jnqg9NklcThoYWpJeyM0f/uSMQJsvltK9nPQrMAybiNrwIWB8ijYJ8FWU91ebzek8JZhsXEQIaDiO3xTPPL/9OVUZGUiWunjfRIA+3WDTekgJyd52l+3VaIUMnz/+mDiKDqPh6ena9dpaRNcdGT72CPaewmcibGB+1iDJXjm4ph5ySNncI0zhDRMBD49hhrW9C+x2Y05qb13wGAdtoLIA9R1m/CZcXuC0LrUMK2KaWEhjFJKJ51mXi0BXYG4scVePmYp2Mrs6sjdhRnceIu7qxTfdvLq8g6WDhQrpV0LsKGHR3J40ThNqA2aLzOfuCwCBGeJ0qVknkAd4H7xRT9a3OuQUUOdzPZ5ltBxQLGxk10uO8DivaOcpgkt13zf3eVZeMGz9pTyGJk9v4vGyeq8wKb2x+ZW/Bz/xVrDcci9BfM= # AUTH_COOKIE
+  - secure: 17aRxI91GoOSt81k459sWoKZp3/DrBuYXzcsPOLEu0ivc71v3eSULDl7eY6mOmavsKhx6v36jvx92Ry0MH1GeAfknXIDlQ3NWaS3F5X5g1t7bg6TmZzRFQ4MGt2N0uU8CAHrarbJfo+xvnsTadhVSqxttRcNYzv3GsArZuk0VbQo6cakKq/4GHnteGVW2AUQ9Laje11n7gbi5ZnQ2vEnXuIMZPNuydJOKWr7nfvsqjFnJ22kYWDF2U/e4baoODBk3iffanQW6oqnZQ/F+MmdlT4hQ+mcEAcYf63t6knhI4Cp46bSNsYqjxSoOR/NxVHBCNPr9TT/8YjX3H1wm03IQS4QNJj0NjWb75FSiAfzdDa9ELjihE6dmjBc8wPkrVMLCrErni4gw4BUi2oOk/mnTqa4GfSFaaGteFmpIcQNw/m5zhZaDkGd8Ne2RVgC7+iMm1aZFFuicMYle33wvRRIeQlZfrTUc5CJNi6c6ctAy24fmyxVywcuwMOdr0leOsx8Fxy6kkV9Cf8r2+4YVIJUb+ruIRPj+Edv2eGRa5gU7sLnYphMwZiyzbvldmNITzfk8R7bELfzGjqQcUnM0t1YELjWtMmpumjreULdjxRRT1oLxaB4XcKAaKkxgYTMsCZMQwJk6eLz7eNSIMXF4TEJaYFMD98YibJ/2CazGrzbbcU= # EMREST_URL

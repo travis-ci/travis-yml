@@ -1,0 +1,33 @@
+###
+### .travis.yml
+###
+
+language: node_js
+node_js:
+  - '10'
+  - '9'
+  - '8'
+
+before_install: yarn global add greenkeeper-lockfile@1
+install: yarn install
+cache:
+  yarn: true
+  directories:
+    - node_modules
+
+before_script: greenkeeper-lockfile-update
+after_script: greenkeeper-lockfile-upload
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
+  - yarn global add travis-deploy-once@4
+  - travis-deploy-once "yarn global add semantic-release && semantic-release"
+
+notifications:
+  email: false
+
+branches:
+  only:
+    - master
+    - next
+    - /^greenkeeper/.*$/

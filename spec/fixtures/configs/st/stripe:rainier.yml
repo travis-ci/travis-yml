@@ -1,0 +1,33 @@
+language: scala
+
+scala:
+  - 2.12.8
+
+jdk:
+  - oraclejdk8
+
+cache:
+  directories:
+    - $HOME/.ivy2/cache
+    - $HOME/.sbt/boot
+
+jobs:
+  include:
+    - env:
+        - NAME="COMPILE"
+        - SCALAC_FATAL_WARNINGS=true
+      script:
+        - sbt compile
+
+    - env:
+        - NAME="DOCS"
+        - SCALAC_FATAL_WARNINGS=true
+      script:
+        - sbt tut
+
+    - env:
+        - NAME="TESTS"
+        - SCALAC_FATAL_WARNINGS=true
+      script:
+        - pip install --user codecov
+        - sbt coverage +test coverageReport && codecov

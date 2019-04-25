@@ -1,0 +1,65 @@
+language: java
+jdk:
+# junit5 requires java 8
+- oraclejdk8
+- oraclejdk9
+
+addons:
+    sonarcloud:
+        organization: "loewenfels"
+        token:
+            secure: $SONAR_TOKEN
+
+before_install:
+- chmod +x gr
+install: true
+
+#-Dsonar.coverage.jacoco.xmlReportPaths="\
+    #               api/dep-graph-releaser-api-jvm/build/reports/jacoco/report.xml,\
+    #               dep-graph-releaser-manipulation/build/reports/jacoco/report.xml,\
+    #               dep-graph-releaser-maven/build/reports/jacoco/report.xml,\
+    #               dep-graph-releaser-runner/build/reports/jacoco/report.xml,\
+    #               dep-graph-releaser-serialization/build/reports/jacoco/report.xml,\
+    #               maven-api/dep-graph-releaser-maven-api-jvm/build/reports/jacoco/report.xml \
+
+
+script:
+- ./gr -i build CodeCoverageReport detektCheck
+# TODO activate once the Sonar TOKEN is fixed in travis
+#- |
+#    if [ "$TRAVIS_TEST_RESULT" == 0 ] && [ "$TRAVIS_JDK_VERSION" == oraclejdk8 ]; then
+#        sonar-scanner \
+#            -Dsonar.projectKey=depgraph \
+#            -Dsonar.projectVersion=1.3.0-SNAPSHOT \
+#            -Dsonar.java.coveragePlugin=jacoco \
+#            -Dsonar.kotlin.detekt.reportPaths=build/detekt/detekt-checkstyle.xml \
+#            -Dsonar.sources="\
+#                api/dep-graph-releaser-api-common/src/main/kotlin,\
+#                atrium/src/main/kotlin,\
+#                dep-graph-releaser-gui/src/main/kotlin,\
+#                dep-graph-releaser-manipulation/src/main/kotlin,\
+#                dep-graph-releaser-maven/src/main/kotlin,\
+#                dep-graph-releaser-runner/src/main/kotlin,\
+#                dep-graph-releaser-serialization/src/main/kotlin,\
+#                maven-api/dep-graph-releaser-maven-api-common/src/main/kotlin,\
+#                maven-api/dep-graph-releaser-maven-api-jvm/src/main/kotlin" \
+#            -Dsonar.tests="\
+#                api/dep-graph-releaser-api-jvm/src/test/kotlin,\
+#                dep-graph-releaser-manipulation/src/test/kotlin,\
+#                dep-graph-releaser-maven/src/test/kotlin,\
+#                dep-graph-releaser-runner/src/test/kotlin,\
+#                dep-graph-releaser-serialization/src/test/kotlin"
+#    fi
+
+
+after_success:
+- bash <(curl -s https://codecov.io/bash)
+
+before_cache:
+- rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+- rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+
+cache:
+    directories:
+    - $HOME/.gradle/wrapper/
+    - $HOME/.gradle/caches/

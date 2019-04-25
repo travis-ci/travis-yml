@@ -1,0 +1,1051 @@
+#
+# .travis.yml contains YAML-formatted (http://www.yaml.org/) instructions
+# for building Rebol for continuous integration via Travis CI:
+#
+# http://docs.travis-ci.com/
+#
+# Several platforms and compilers are used to try and give a breadth of
+# testing for portability.  Also if the build process is successful with no
+# errors, then the resulting binaries are deployed to an S3 instance:
+#
+# https://docs.travis-ci.com/user/deployment/s3/
+#
+# Those files are indexed by a Rebol script to generate an HTML download page.
+# The generation is currently run manually when interesting new versions are
+# available, and published here:
+#
+# http://metaeducation.s3.amazonaws.com/index.html
+#
+
+# Note: "The suggested syntax for YAML files is to use 2 spaces for
+# indentation, but YAML will follow whatever indentation system that the
+# individual file uses."
+#
+# http://yaml.org/spec/1.2/spec.html#id2777534
+#
+# For this file, follow the convention that list items (started with dash)
+# are indented two spaces from their container key, and then all members of
+# the list are at the same indentation level of two spaces after that dash.
+#
+# DO use [[ ]] in conditions, so `>` is greater (not redirect) and $X is "$X"
+# http://mywiki.wooledge.org/BashFAQ/031
+#
+# DON'T put variable *values* in quotes that don't need it (FOO=x not FOO="x")
+# DO put variable *substitutions* in quotes ("$X" not $X), EXCEPT in [[ ]]
+# https://unix.stackexchange.com/q/131766/
+#
+# DON'T use curly braces on variables unless needed ("$FOO" not "${FOO}")
+# https://unix.stackexchange.com/a/4910
+#
+# DO use = in [[ ]] conditions for lexical comparison (= not ==)
+# https://unix.stackexchange.com/a/16110
+#
+# DON'T put space between x=y when doing variable assignments (you can't! :-/)
+# https://unix.stackexchange.com/a/297217
+#
+# DON'T use superfluous semicolons at end of lines of shell commands:
+# https://stackoverflow.com/a/7507242/
+#
+# DO use $(...) vs. `...` for shell execution (save `...` for code comments)
+# https://stackoverflow.com/a/9406350/
+#
+# "$foo 123" -> substitues foo contents to get `foocontents 123`
+# '$foo 123' -> takes it literally, so you get `$foo 123`
+#
+# `xargs` may be a useful command when dealing with the shell:
+# http://man7.org/linux/man-pages/man1/xargs.1.html  (e.g. `... | xargs cat`)
+#
+
+# When doing cross-compilation, the build products can't be examined using the
+# normal tools on the host.  The tools in $CROSS_DIR need to be used, e.g.:
+#
+#    if [[ $OS_ID = 0.3.1 ]]; then  # x86-win32
+#        "${CROSS_PREFIX}objdump" -t lib/i386/alloca86.o | grep alloca
+#    elif [[ $OS_ID = 0.3.40 ]]; then
+#        "${CROSS_PREFIX}objdump" -t lib/x86_64/alloca86_64.o | grep alloca
+#    fi
+#
+
+
+notifications:
+  email: false  # committers are keeping an eye on failures, supposedly!
+
+
+# Travis defaults to 50; not needed, use 3 (just 1 affects queue notification)
+#
+# https://docs.travis-ci.com/user/customizing-the-build/#git-clone-depth
+#
+git:
+  depth: 3
+
+
+# Each configured travis instance has its own customized environment variables
+# to give it unique behavior.  But there are also global environment keys,
+# available to the overall Travis process itself (e.g. deployment)
+#
+# https://docs.travis-ci.com/user/environment-variables/#Global-Variables
+#
+env:
+  global:
+    # YOU MAY SEE ERRORS ON SECURE VARIABLES IF NOT ON THE MAIN REPOSITORY!
+    #
+    # e.g. "The previous command failed, possibly due to a malformed secure
+    # environment variable."
+    #
+    # The entries labeled "secure" are encrypted environment variables, which
+    # are tailored to the main repo.  If you're browsing logs on Travis for
+    # a pull request building against your own repo, you might see:
+
+    # To create this secured variable:
+    #     `travis encrypt AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID`
+    #
+    - secure: 'Bex3tqrlsnv+t3+AJu6nG8bcbfHXeBNWIUUdcEeyB8gWnWnVuBsC5hTw9cUhEWJchJSsV4LeWVL51harzOQRntszyfjeNvPQozCXbTQVGd1tn5Rpt1QKN9VBK007c+ERj9L8JzFkM2HdeVusYY4Bz5tI883DSJkydyJpJp21mG9i8a17bqJsgBW0JmMsMsdv1ilaeb8/Luo8bn0ObIWTTz+4/6RF4XU9UcWLH7I4HlGb3qufR9chWCX7jTT0SLRkEgfudr+KVrY4xIspiPlVwrKvagnOTFcYLxN4JpGOgn1rnCcOxsWo4kE4dwgXZvEn8W2HJmJhzhAHDLkF0S7YhIDQaScJLwSVECI9xu68V5siWdyhzyrSb2K7V8Mtzryjzq1QueCrRRTj7XLY7sx5OxeP//RVMY0Poil5DdB84nI1wezzmT1kj7dkc1Fr1ZqdYSEfCZNd1v+DeRmAf/N70xUyx1tSxAHD96kjDM3lGILIrlt9RLWdeT0BqxQxzaKCowPVgfztH0nzPcoe1DfNfIhG9mEdjeJfLC7hAgc9Dn0KTo/oSwX/TBsTavV+6SPxH1D4q1xVdY9p4G2hS/N1xaqf7ys4DQOPwWZwvhujwGtto4fy7VMvDtX7jI6++0dJe+baG0DetlHvUGKzWpBJgk02k3mREH+9Ui8f7T9vn8Y='
+
+    # To create this secured variable:
+    #     `travis encrypt AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY`
+    #
+    - secure: 'IlBRG9mRM0BDtb9ZJDKl4QVRjs/e3KxvjEdVS9e8+PlGq+xMDVGQdje9WOED/bhTcoAYabhLKkXY8YZg6rlVj4ecyjjmZRfPA4D9YVMVHZVNldLX9Ed79Kv95dTvFdn6xl9Tbk/CEqtxfDwcN2hZqv9M3TXN2+sKzny6p4ENc8O7sz0Stb4GyFgPdWSIs4SZv/r8/feMgWiUx+q1NFFarMmFsLtKVuiPIyoU6fGW1zZPyh10jKuhi9GYBStcMHIWqvU+9+jbqchMJT1t/1fyEf0fJokNMH2KXCVDbsu7nKhaVZbIxirLdZNicKfzype1uRgzAB/Crpup+TwnINd17HPSqjCnqntuS+pO0mIRcXVhNSE8TG9S8x4N0pgtKYHKyfAjElmjLwPfoMhu5VlZishn6heeUALbQ7y44YwWwG8EoW4PnRFIGg7V4EjlHJkcmDhJWrZX2hVvSGJ72lFhHXFMcr+VKhXWlmK97XdFAz/c/LlSyyrmKtIE6W5kwhJC8bbrpETA/wQ9pP3WEVY28bka24LqI1g0hiDn7cyXae7Ikss36Y8eB/9/00EovCPHw1o+dyenXI10Q8+yorQ42xrjo1bXuYRohCvI+FmV4XFLkJ+c6wDTSKhJTcUhZsQva2F0ipeyqhGQQGkLiZ8BvdoSPHHBx2odikgho9VQZ48='
+ 
+    - AWS_S3_BUCKET_NAME: 'metaeducation'
+
+  matrix:
+    # Address Sanitizer output needs to be "symbolized" to get symbols and
+    # line numbers.  This option must be set along with ASAN_SYMBOLIZER_PATH.
+    # However, some modern gcc and clang will figure it out even if there is
+    # no path set, so go ahead and put this option in all matrixes.
+    #
+    - ASAN_OPTIONS='symbolize=1'
+
+
+# All Travis instances in the following "matrix" will run the same `script:`
+# code (found later on in the file).  However, each instance has environment
+# variables which can guide that script to behave differently.
+#
+matrix:
+  include:
+    # [1] Emscripten, wasm + pthread, release
+    #
+    # The job of this build is to create a JavaScript library that can be
+    # loaded into a web page or Node.JS.  For an example:
+    #
+    # https://github.com/hostilefork/replpad-js
+    #
+    - os: osx
+      osx_image: xcode10.1  # was originally using xcode9.3beta
+      language: c
+      env:
+        - NUMBER=1
+        - CONFIG=emscripten.r
+        - OS_ID=0.16.2
+        - DEBUG=none
+        - OPTIMIZE=z
+        - STANDARD=c
+        - RIGOROUS=no
+        - STATIC=no
+        - WITH_FFI=no
+        - ODBC_REQUIRES_LTDL=no
+        - EXTENSIONS=-  # requests inclusion of no extensions (default?)
+
+
+    # [2] Emscripten, wasm + emterpreter, release
+    #
+    # The "emtepreter" is a less-desirable way to achieve asynchronous code
+    # in a browser than using WebAssembly Threads.  However, some JavaScript
+    # hosts are missing that--or other features--which are needed for the
+    # "good" emscripten build.  (Alternatively they may have the features, but
+    # disable them by default, creating a usability barrier.)
+    #
+    # https://github.com/emscripten-core/emscripten/wiki/Emterpreter
+    #
+    # This build varation is created as a fallback.
+    #
+    - os: osx
+      osx_image: xcode10.1  # was originally using xcode9.3beta
+      language: c
+      env:
+        - NUMBER=2
+        - CONFIG=emterpreter.r
+        - OS_ID=0.16.1
+        - DEBUG=none
+        - OPTIMIZE=z
+        - STANDARD=c
+        - RIGOROUS=no
+        - STATIC=no
+        - WITH_FFI=no
+        - ODBC_REQUIRES_LTDL=no
+        - EXTENSIONS=-  # requests inclusion of no extensions (default?)
+
+
+    # [3] OSX x64, debug, clang++
+    #
+    # !!! Can't do all warnings as errors, because in clang the switch for
+    # files that end in .c as c++ ("-x c++") is deprecated for some overly
+    # prescriptive and annoying reason.
+    #
+    - os: osx
+      osx_image: xcode8.2  # try an older XCode (on OS X 10.12)
+      language: cpp
+      env:
+        - NUMBER=3
+        - CONFIG=generic-c++.r
+        - OS_ID=0.2.40
+        - DEBUG=asserts
+        - STANDARD=c++11
+        - RIGOROUS=no
+        - STATIC=no  # static linking switch not honored
+        - WITH_FFI=dynamic
+        - ODBC_REQUIRES_LTDL=no
+        - EXTENSIONS="ODBC + ZeroMQ +"
+        - BREW=yes
+      # libraries (ODBC, ZeroMQ...) added via brew in `install` step below
+      # Note: TCC extension has not been implemented for Mac
+
+    # [4] OSX x64, release, clang++
+    #
+    # Note that this build is a *release* C++ build (the only one currently
+    # on Travis).  This exercises the cast macros which create template code,
+    # which are disabled in debug builds:
+    #
+    # http://blog.hostilefork.com/c-casts-for-the-masses/
+    #
+    # They are disabled because casting is done frequently, and when these
+    # templates aren't inlined due to debugging they slow things down and are
+    # very irritating to debug.  The syntax of `cast(type, expression)` is
+    # however desirable to use pervasively.  So it's good to exercise them in
+    # at least one build.
+    #
+    - os: osx
+      osx_image: xcode9.1 # try a newer XCode (on OS X 10.12)
+      language: cpp
+      env:
+        - NUMBER=4
+        - CONFIG=generic-c++.r
+        - OS_ID=0.2.40
+        - DEBUG=none  # see notes, release C++ exercises cast() macros
+        - STANDARD=c++14
+        - RIGOROUS=no
+        - STATIC=no  # static linking switch not honored
+        - WITH_FFI=no  # no FFI in this build
+        - ODBC_REQUIRES_LTDL=no
+        - EXTENSIONS="ODBC + ZeroMQ +"
+        - BREW=yes
+      # libraries (ODBC, ZeroMQ...) added via brew in `install` step below
+
+    # [5] OSX x64, release, clang
+    #
+    # This is the minimum bootstrap executable, built on the oldest image
+    # (to get lowest common denominator library support).  To avoid dylib
+    # dependencies on things like ODBC and ZeroMQ, it doesn't include them.
+    #
+    - os: osx
+      osx_image: xcode7.3  # try an older XCode and OS X image (OS X 10.11)
+      language: c
+      env:
+        - NUMBER=5
+        - CONFIG=generic.r
+        - OS_ID=0.2.40
+        - DEBUG=none
+        - STANDARD=c
+        - RIGOROUS=no
+        - STATIC=no
+        - WITH_FFI=no
+        - ODBC_REQUIRES_LTDL=no
+        - EXTENSIONS=""  # No ODBC or ZeroMQ in this build
+        - BREW=no
+       # The "Brew" OS X package installer appears to have stopped maintaining
+       # their service on this older system.  It hangs.  So just don't use it.
+       # Note: TCC extension has not been implemented for Mac
+
+    # [6] Linux x86, release, gcc
+    #
+    - os: linux
+      sudo: required  # "containers will be retired soon"
+      language: c
+      env:
+        - NUMBER=6
+        - CONFIG=generic.r
+        - OS_ID=0.4.4
+        - DEBUG=none
+        - STANDARD=gnu89  # Note: ZeroMQ extension needs C99 or C++11
+        - RIGOROUS=yes
+        - STATIC=yes
+        - TCC=i386-tcc
+        - ARCH_CFLAGS=-m32
+        - WITH_FFI="dynamic"
+        - EXTENSIONS="Signal + TCC +"
+        # 32-bit version does not have ODBC or ZeroMQ
+      addons:
+        apt:
+          packages:
+            - gcc-multilib
+            # - unixodbc-dev:i386 # for ODBC extension; stopped installing
+            # - libzmq3-dev:i386 # ZeroMQ:i386 stopped installing in Nov-2018
+            - texinfo  # for makeinfo, required to build FFI
+            # Note: Must build its own TCC for the TCC extension to work
+
+    # [7] Linux x64, debug, g++
+    #
+    # !!! Note this distribution does not support c++11 completely, it's an
+    # old gcc 4.6
+    #
+    - os: linux
+      dist: trusty
+      sudo: false  # force new container-based infrastructure.
+      language: cpp
+      env:
+        - NUMBER=7
+        - CONFIG=generic-c++.r
+        - OS_ID=0.4.40
+        - DEBUG=asserts
+        - STANDARD=c++0x
+        - RIGOROUS=yes
+        - STATIC=yes
+        - TCC=tcc
+        - WITH_FFI=dynamic
+        - ODBC_REQUIRES_LTDL=no
+        - EXTENSIONS="ODBC + ZeroMQ + TCC + Signal +"
+        - ASAN_SYMBOLIZER_PATH=/usr/bin/llvm-symbolizer-3.4
+        - ASAN_OPTIONS=symbolize=1
+      addons:
+        apt:
+          packages:
+            # - g++-multilib # why would this be necessary?
+            - unixodbc-dev  # for ODBC extension
+            - libzmq3-dev  # for ZeroMQ extension
+            - texinfo  # for makeinfo, required to build FFI
+            - libtcc-dev  # for being able to `-ltcc` for compilation API
+            - tcc  # tcc executable (unused), but gets libtcc1.a + tcc headers
+
+    # [8] Linux x64, release, gcc
+    #
+    # We try to create a bare-minimum Linux executable for bootstrap.  This
+    # has the least dependencies and run on the oldest systems.
+    #
+    # Note that this uses the older "precise" distribution, instead of the
+    # new default of "trusty".  In addition to providing some more build
+    # variations for testing, `libltdl-dev:i386` won't install on trusty.
+    # (also, gcc on Ubuntu 12.04 does not support sanitizers)
+    #
+    - os: linux
+      dist: precise # old release (for lowest-common-denominator glibc)
+      sudo: false # force new container-based infrastructure
+      language: c
+      env:
+        - NUMBER=8
+        - CONFIG=generic.r
+        - OS_ID=0.4.40
+        - DEBUG=none
+        - STANDARD=gnu99
+        - RIGOROUS=yes
+        - STATIC=yes
+        - WITH_FFI=no
+        - EXTENSIONS="Signal +"
+        # no ODBC, ZeroMQ, FFI dependencies
+      addons:
+        apt:
+          packages:
+            - gcc-multilib  # !!! what was this for?
+
+    # [9] Windows x86, release, gcc
+    #
+    # !!! There was an issue where TCC is causing a panic on startup for this
+    # configuration.  It should be tested to see if that has been fixed.
+    #
+    # https://github.com/metaeducation/ren-c/issues/603
+    #
+    - os: linux
+      sudo: false # force new container-based infrastructure.
+      language: c
+      env:
+        - NUMBER=9
+        - CONFIG=mingw-x86.r
+        - OS_ID=0.3.1
+        - DEBUG=none
+        - CROSS_PREFIX=i686-w64-mingw32-  # trailing hyphen is intentional
+        - STANDARD=c
+        - RIGOROUS=yes
+        - STATIC=yes
+        - TCC=i386-win32-tcc
+        - HOST=i686-w64-mingw32
+        - ARCH_CFLAGS=-m32
+        - WITH_FFI=dynamic
+        - ODBC_REQUIRES_LTDL=no
+        - EXTENSIONS="ODBC + Clipboard + TCC +"
+      addons:
+        apt:
+          packages:
+            - binutils-mingw-w64-i686
+            - gcc-mingw-w64-i686
+            - mingw-w64
+            - texinfo  # for makeinfo, required to build FFI
+            # Note: Must build its own TCC for the TCC extension to work
+
+    # [10] Windows x64, debug, gcc
+    #
+    - os: linux
+      sudo: false  # force new container-based infrastructure.
+      language: c
+      env:
+        - NUMBER=10
+        - CONFIG=mingw-x64.r
+        - OS_ID=0.3.40
+        - DEBUG=asserts
+        - CROSS_PREFIX=x86_64-w64-mingw32-  # trailing hyphen is intentional
+        - STANDARD=c
+        - RIGOROUS=yes
+        - STATIC=yes
+        - TCC=x86_64-win32-tcc
+        - HOST=x86_64-w64-mingw32
+        - WITH_FFI=dynamic
+        - ODBC_REQUIRES_LTDL=no
+        - EXTENSIONS="ODBC + Clipboard + TCC +"
+      addons:
+        apt:
+          packages:
+            - binutils-mingw-w64-i686
+            - gcc-mingw-w64-i686
+            - mingw-w64
+            # Note: Must build its own TCC for the TCC extension to work
+
+    # [11] Windows x64, debug, g++
+    #
+    # There is an issue where if you do a C++ build on this toolchain in the
+    # "precise" image, that newer MinGW will give an EXE with a superfluous
+    # dependency on the pthread MinGW DLL.  It could be dealt with a number of
+    # ways, but just use the "trusty" image for now because it is easier.
+    #
+    # https://github.com/metaeducation/ren-c/issues/624
+    #
+    # !!! Note this distribution does not support c++11 or above
+    #
+    - os: linux
+      dist: trusty  # see note above
+      sudo: false  # force new container-based infrastructure
+      language: cpp
+      env:
+        - NUMBER=11
+        - CONFIG=mingw-x64-c++.r
+        - OS_ID=0.3.40
+        - DEBUG=asserts
+        - CROSS_PREFIX=x86_64-w64-mingw32-  # trailing hyphen is intentional
+        - STANDARD=c++98
+        - RIGOROUS=yes
+        - STATIC=yes
+        - TCC=x86_64-win32-tcc
+        - HOST=x86_64-w64-mingw32
+        - WITH_FFI=dynamic
+        - ODBC_REQUIRES_LTDL=no
+        - EXTENSIONS="ODBC + Clipboard + TCC +"
+      addons:
+        apt:
+          packages:
+            - binutils-mingw-w64-x86-64
+            - g++-mingw-w64-x86-64
+            - mingw-w64
+            # Note: Must build its own tcc version
+
+    # [12] Android5, debug, gcc
+    #
+    - os: linux
+      dist: trusty
+      sudo: false  # force new container-based infrastructure
+      language: c
+      env:
+        - NUMBER=12
+        - CONFIG=android5-arm.r
+        - OS_ID=0.13.2
+        - DEBUG=asserts
+        - STANDARD=c
+        - RIGOROUS=yes
+        - STATIC=yes
+        - HOST=arm-eabi
+        - WITH_FFI=no
+        - ODBC_REQUIRES_LTDL=no
+        - EXTENSIONS=""
+
+    # [13] Android5, release, gcc
+    #
+    - os: linux
+      dist: trusty
+      sudo: false  # force new container-based infrastructure
+      language: c
+      env:
+        - NUMBER=13
+        - CONFIG=android5-arm.r
+        - OS_ID=0.13.2
+        - DEBUG=none
+        - STANDARD=c
+        - RIGOROUS=yes
+        - STATIC=yes
+        - HOST=arm-eabi
+        - WITH_FFI=no
+        - ODBC_REQUIRES_LTDL=no
+        - EXTENSIONS="TCC +"
+        - TCC=arm-tcc
+        - NEEDS_FAKE_STRTOLD=1  # strtold() workaround: https://tinycc-devel.nongnu.narkive.com/MZBcPTBN/problem-compiling-tinycc-for-android-strtold
+        - ARCH_CFLAGS="-DANDROID -DTCC_ARM_EABI -DTCC_ARM_VFP -DTCC_ARM_HARDFLOAT"
+      addons:
+        apt:
+          packages:
+            - gcc-multilib  # for cross-compiling
+
+# The install step occurs before the `script:` step runs.  The language that
+# was specified in the `matrix:` entry for each instance will guide certain
+# default tools that will be installed.  But you can add custom steps:
+#
+# https://docs.travis-ci.com/user/customizing-the-build#Customizing-the-Installation-Step
+#
+# In our case, we'd like to fetch a Rebol binary to use as the "r3-make".
+# Its job is to process C and Rebol sources to automatically generate some
+# header files and embedded Rebol code bundles used in bootstrap, as well as
+# to generate makefiles.
+#
+# !!! Originally, the Rebol that was fetched was the last r3-alpha that was
+# published on rebol.com, to ensure that it could still be used for bootstrap.
+# Conversion of the build in mid-2017 to using %rebmake.r meant that only a
+# semi-recent Ren-C could be used to run the build prep steps.  There will not
+# be an attempt to go back to building with R3-Alpha, though a more purposeful
+# stable build should be picked at some point to replace the ad-hoc choice
+# which wound up in the make dir.  The shim which is required to upgrade that
+# older Ren-C is now rather "thick", and slows the build down significantly.
+#
+install:
+  - |
+    if [[ $TRAVIS_OS_NAME = linux ]]; then
+      export R3_MAKE=../prebuilt/r3-linux-x64-8994d23
+    fi
+
+  - |
+    if [[ $TRAVIS_OS_NAME = osx ]]; then
+      #
+      # The Travis OS X images have brew preinstalled, but get old and out of
+      # sync with the package database.  This means brew has to update.  It's
+      # supposed to do this automatically, but circa 2017 it broke in some
+      # images due to the lack of a sufficiently up-to-date Ruby:
+      #
+      # https://github.com/travis-ci/travis-ci/issues/8552
+      #
+      # But even if brew can update automatically, it generates an unsightly
+      # amount of output if it does so during a `brew install`.  So redirect
+      # the hundreds of lines to /dev/null to shorten the Travis log.
+      #
+      # https://github.com/Homebrew/legacy-homebrew/issues/35662
+      #
+      if [[ $BREW = yes ]]; then  # seems to not work on old OS X
+        brew update > /dev/null
+
+        brew install unixodbc  # for ODBC extension
+        brew install zmq  # for ZeroMQ extension
+
+        export R3_MAKE=../prebuilt/r3-osx-x64-8994d23
+      else
+        # Brew was being installed even on minimal release builds, making it
+        # unnoticed that there was a .dylib dependency from the bootstrap
+        # release executable on ZeroMQ and ODBC.  This old debug build was
+        # captured at the same version number as the bootstrap executables.
+        # Use it for now until the next capture for the old OS X.
+        #
+        cd prebuilt
+        wget http://hostilefork.com/media/shared/ren-c/r3-osx-x64-8994d23-debug
+        chmod +x ./r3-osx-x64-8994d23-debug
+        cd ..
+        export R3_MAKE="../prebuilt/r3-osx-x64-8994d23-debug"
+      fi
+    fi
+
+  - |
+    if [[ $OS_ID = 0.16.1 || $OS_ID = 0.16.2 ]]; then
+      pip3 install awscli --upgrade --user
+      export AWS=`find /Users/travis/Library/Python/3.7 -name aws`
+      echo ===== AWS=$AWS
+      $AWS --version
+      echo =====
+      git clone --depth 1 https://github.com/emscripten-core/emsdk
+      cd emsdk
+      ./emsdk update
+      ./emsdk install latest
+      ./emsdk activate latest
+      source emsdk_env.sh
+      cd ..
+    fi
+
+script:
+    # whatever home directory Travis put us in, build there
+    - |
+      TOP_DIR="$(pwd)"  # https://stackoverflow.com/a/10795195/
+
+    - |
+      "${CROSS_PREFIX}gcc" --version  # Output version of gcc for the log
+
+    # Ask for as many parallel builds as the virtual host supports
+    - |
+      if [[ $TRAVIS_OS_NAME = linux ]]; then
+        export MAKE_JOBS="$(nproc)"
+      fi
+      if [[ $TRAVIS_OS_NAME = osx ]]; then
+        export MAKE_JOBS="$(sysctl -n hw.ncpu)"
+      fi
+
+    # Native Development Kit (NDK) is for C/C++ cross-compilation to Android.
+    # https://developer.android.com/ndk
+    # @giuliolunati is the maintainer and active user of the Android build.
+    - |
+      if [[ $OS_ID = 0.13.2 ]]; then
+          if [[ $(uname -m) = x86_64 ]]; then
+              wget https://github.com/giuliolunati/android-travis/releases/download/v1.0.0/android-ndk-r13.tgz
+              export ANDROID_NDK="${TOP_DIR}/android-ndk-r13"
+          else
+              exit 1
+          fi
+          tar zxf android-ndk-r13.tgz
+          echo "$(pwd)"
+          ls -dl "$(pwd)/android-ndk-r13"
+          export CROSS_PREFIX="${ANDROID_NDK}/toolchains/arm-linux-androideabi-4.9/prebuilt/linux-x86_64/bin/arm-linux-androideabi-"
+          export SYSROOT="${ANDROID_NDK}/platforms/android-19/arch-arm"
+      fi
+
+    # @ShixinZeng added pre-built FFI libraries that are compatible with the
+    # MinGW cross-compiler and committed them to the git repository, because
+    # that was apparently easier/faster than trying to build it here
+    #
+    # !!! Review making this use the package manager's libffi if possible
+    - |
+      if [[ ($OS_ID = 0.3.40) || ($OS_ID = 0.3.1) ]]; then  # Win32/Win64
+          if [[ $OS_ID = 0.3.40 ]]; then
+              export PKG_CONFIG_PATH="${TOP_DIR}/extensions/ffi/ffi-prebuilt/lib64/pkgconfig"
+          else
+              export PKG_CONFIG_PATH="${TOP_DIR}/extensions/ffi/ffi-prebuilt/lib32/pkgconfig"
+          fi
+
+          # Check cflags and libs
+          # ("--define-prefix would be better, but it is not recognized")
+          #
+          pkg-config --define-variable="prefix=\"${TOP_DIR}/extensions/ffi/ffi-prebuilt\"" --cflags libffi
+          pkg-config --define-variable="prefix=\"${TOP_DIR}/extensions/ffi/ffi-prebuilt\"" --libs libffi
+      fi
+
+    # Linux needs to build FFI if it is cross-compiling to 32-bit.  It's not
+    # clear why it wouldn't use the `sudo apt get` FFI packages of the distro
+    # on 64-bit (other than to use a consistent version committed in the repo)
+    - |
+      if [[ (-z $WITH_FFI) || ($WITH_FFI != no) ]]; then
+          mkdir ffi-build
+          cd external/libffi
+          ./autogen.sh
+          cd "${TOP_DIR}/ffi-build"
+          if [[ -z $HOST ]]; then
+              "${TOP_DIR}/external/libffi/configure" --prefix="$(pwd)/fakeroot" CFLAGS="$ARCH_CFLAGS"
+          else #cross-compiling
+              "${TOP_DIR}/external/libffi/configure" --prefix="$(pwd)/fakeroot" --host="$HOST"
+          fi
+          make -j "$MAKE_JOBS"
+          make install
+          export PKG_CONFIG_PATH="$(pwd)/fakeroot/lib/pkgconfig"
+          # check cflags and libs
+          pkg-config --cflags libffi
+          pkg-config --libs libffi
+
+          ls "$(pkg-config --variable=toolexeclibdir libffi)"
+
+          #remove dynamic libraries to force it to link with static libraries
+          rm -f "$(pkg-config --variable=toolexeclibdir libffi)/*.so*"
+          rm -f "$(pkg-config --variable=toolexeclibdir libffi)/*.dylib*"
+          rm -f "$(pkg-config --variable=toolexeclibdir libffi)/*.dll*"
+          
+          ls "$(pkg-config --variable=toolexeclibdir libffi)"
+
+          echo "FFI builds are erroring for now, above command fails"
+          echo "Revisit when time permits - not currently being used"
+      fi
+
+    - mkdir "${TOP_DIR}/build"
+    - cd "${TOP_DIR}/build"
+
+    # For building the TCC extension, it requires both the TCC library (API
+    # you can link in to pass a string of code and compile it), as well as
+    # runtime support for that code once compiled.  See TCC extension README.
+    #
+    # While Fabrice Bellard is not involved in TCC development any longer,
+    # others are maintaining it.  Modifications have been proposed which would
+    # make the "Standalone Building" feature for Rebol better:
+    #
+    # http://lists.nongnu.org/archive/html/tinycc-devel/2018-12/msg00011.html
+    #
+    # But given priorities, there are not enough Rebol dev resources to
+    # develop and maintain a separate fork of TCC for that.
+    #
+    - |
+      if [[ ! -z $TCC ]]; then
+          if [[ $OS_ID == 0.4.40 ]]; then
+              #
+              # Just use the tcc and libtcc installed by the package manager
+              # (in the matrix settings above).  That's because the platform
+              # the TCC inside Rebol will be compiling for after installation
+              # on the user's machine is identical to the Travis container
+              # doing the compilation.
+              #
+              # This directory may vary, find with `dpkg -L tcc`
+              #
+              # (export is so that if we run r3 to test tcc, it can see it)
+              #
+              export CONFIG_TCCDIR=/usr/lib/x86_64-linux-gnu/tcc  # no slash!
+          else
+              # If cross-compiling, we can't merely `sudo apt-get` the libtcc
+              # and resources we need...have to build it from scratch.
+
+              # By using `--depth=1` this gets the publicly updated *latest
+              # commit only* (don't bother cloning the entire history)
+              #
+              git clone --depth=1 git://repo.or.cz/tinycc.git tcc
+
+              # TCC has an %include/ directory at the top level of the build
+              # (for the unix-style files) and tends to generate libtcc1.a in
+              # the top-level directory also.  But if you're using Win32, you
+              # want to set CONFIG_TCCDIR to the %win32/ subdir, which
+              # contains a different %include/ as well as a %lib/ dir.
+              #
+              # (export is so that if we run r3 to test tcc, it can see it)
+              cd tcc
+              export CONFIG_TCCDIR=$(pwd)
+
+              # If you want a "tcc.exe" cross compiler, you could use
+              # `./configure --enable-cross` and then `make`.  However, a TCC
+              # executable is no longer needed to build the TCC extension.
+
+              echo "Generating libtcc.a (provides the libtcc compilation API)"
+
+              # libtcc.a requires --config-mingw32, or it doesn't think it's a
+              # native compiler and disables functions in tccrun.c (including
+              # the important `tcc_relocate()`
+              #
+              # !!! If the 64-bit tries to use `--config-mingw64`, then it
+              # also doesn't define `TCC_IS_NATIVE` on windows, because it
+              # seems `TCC_TARGET_PE` (Program Executable, e.g. Windows) is
+              # only set by `--config-mingw32`.  Review.
+
+              if [[ $OS_ID = 0.4.4 ]]; then
+                  ./configure --cpu=x86 --enable-static --extra-cflags="$ARCH_CFLAGS" --extra-ldflags="$ARCH_CFLAGS"
+              elif [[ $OS_ID = 0.3.1 ]]; then  #x86-win32
+                  ./configure --config-mingw32 --cpu=x86 --enable-static --extra-cflags="$ARCH_CFLAGS" --cross-prefix="$CROSS_PREFIX" --extra-ldflags="$ARCH_CFLAGS"
+              elif [[ $OS_ID = 0.13.2 ]]; then  #arm-android5
+                  ./configure --cpu=arm --enable-static --extra-cflags="$ARCH_CFLAGS --sysroot=\"$SYSROOT\"" --cross-prefix="$CROSS_PREFIX" --extra-ldflags="$ARCH_CFLAGS --sysroot=\"$SYSROOT\""
+              else  #x86_64-win32, see note that --config-mingw32 vs. --config-mingw64 is intentional
+                  ./configure --config-mingw32 --cpu=x86_64 --enable-static --extra-cflags="$ARCH_CFLAGS" --cross-prefix="$CROSS_PREFIX" --extra-ldflags="$ARCH_CFLAGS"
+              fi
+              make libtcc.a && cp libtcc.a libtcc.a.bak
+
+              make clean
+
+              # For the generation of %libtcc1.a, `--config-mingw32` must be
+              # turned off, or it will try to compile with tcc.exe
+
+              echo "Generating libtcc1.a (runtime lib for TCC-built programs)"
+
+              if [[ $OS_ID = 0.4.4 ]]; then
+                  ./configure --cpu=x86 --extra-cflags="$ARCH_CFLAGS" --extra-ldflags="$ARCH_CFLAGS"
+              elif [[ $OS_ID = 0.3.1 ]]; then  # x86-win32
+                  ./configure --cpu=x86 --extra-cflags="$ARCH_CFLAGS" --cross-prefix="$CROSS_PREFIX" --extra-ldflags="$ARCH_CFLAGS"
+              elif [[ $OS_ID = 0.13.2 ]]; then  # arm-android5
+                  ./configure --cpu=arm --extra-cflags="$ARCH_CFLAGS --sysroot=\"$SYSROOT\"" --cross-prefix="$CROSS_PREFIX"  --extra-ldflags="$ARCH_CFLAGS --sysroot=\"$SYSROOT\""
+              else  # x86_64-win32
+                  ./configure --cpu=x86_64 --extra-cflags="$ARCH_CFLAGS" --cross-prefix="$CROSS_PREFIX" --extra-ldflags="$ARCH_CFLAGS"
+              fi
+
+              echo "make libtcc1.a"
+              # Note: Could fail to build tcc due to lack of '-ldl' on Windows
+              make libtcc1.a XCC="${CROSS_PREFIX}gcc" XAR="${CROSS_PREFIX}ar" || echo "ignoring error in building libtcc1.a"
+              cp bin/* .  # restore cross-compilers, libtcc1.a depends on tcc
+              touch tcc  # update the timestamp so it won't be rebuilt
+              echo "ls"
+              ls  # take a look at files under current directory
+              echo "make libtcc1.a"
+              make libtcc1.a XCC="${CROSS_PREFIX}gcc" XAR="${CROSS_PREFIX}ar"
+              "${CROSS_PREFIX}ar" d libtcc1.a armeabi.o  # avoid link conflict with libtcc.a
+
+              #restore libtcc.a
+              # make libtcc1.a could have generated a new libtcc.a
+              cp libtcc.a.bak libtcc.a
+
+              echo "Objdumping!"
+              objdump -a libtcc.a
+          fi
+          make
+          cd "${TOP_DIR}/build"
+      fi
+
+    # Grab the abbreviated and full git commit ID into environment variables.
+    # The full commit is passed to make to build into the binary, and the
+    # abbreviated commit is used to name the executable.
+    #
+    # http://stackoverflow.com/a/42549385/211160
+    #
+    - GIT_COMMIT="$(git show --format="%H" --no-patch)"
+    - echo "$GIT_COMMIT"
+    - GIT_COMMIT_SHORT="$(git show --format="%h" --no-patch)"
+    - echo "$GIT_COMMIT_SHORT"
+
+    # We have to set R3_MAKE explicitly to circumvent the automatic r3-make
+    # filename inference, as we always use Linux "r3-make" (not "r3-make.exe")
+    # even when doing windows builds, since this is a cross-compilation.
+
+    # As an extra step to test bootstrap ability, if the build can be run on
+    # the Travis we are using...make the debug build go even further by doing
+    # another full build, but using the just built r3 as its own r3-make.
+    # This will work on 64-bit OS X or Linux, and 32-bit if 32-bit support has
+    # been installed
+    #
+    - |
+      if [[ ($DEBUG != none) && (($OS_ID = 0.4.40) || ($OS_ID = 0.4.4) || ($OS_ID = 0.2.40)) ]]; then
+          #
+          # If building twice, don't specify GIT_COMMIT for the first build.
+          # This means there's a test of the build process when one is not
+          # specified, in case something is broken about that.  (This is how
+          # most people will build locally, so good to test it.)
+          #
+          # Also request address sanitizer to be used for the first build.  It
+          # is very heavyweight and makes the executable *huge* and slow, so
+          # we do not apply it to any of the binaries which are uploaded to s3
+          # -- not even debug ones.
+          #
+          "$R3_MAKE" ../make.r CONFIG="../configs/${CONFIG}" TARGET=makefile STANDARD="$STANDARD" OS_ID="$OS_ID" RIGOROUS="$RIGOROUS" DEBUG=sanitize OPTIMIZE=2 STATIC=no ODBC_REQUIRES_LTDL="$ODBC_REQUIRES_LTDL" EXTENSIONS="$EXTENSIONS" $EXTRA
+          make clean prep folders
+          make -j "$MAKE_JOBS"
+
+          # We'll do a simple HTTPS read test on the second build.  But on
+          # this first build, we also do it because it has the address
+          # sanitizer, which may catch more problems.
+          #
+          ./r3 --do "print {Testing...} quit either find to-text read https://example.com {<h1>Example Domain</h1>} [0] [1]";
+          R3_EXIT_STATUS=$?
+          echo $R3_EXIT_STATUS
+
+          mv r3 r3-make
+          make clean prep folders
+          export R3_ALWAYS_MALLOC=1
+          export R3_MAKE=./r3-make
+
+          # Make sure it doesn't accidentally pick up the old makefile
+          rm makefile
+      fi
+
+    # On the second build of building twice, or just building once, include
+    # the GIT_COMMIT
+    #
+    - |
+      if [[ -z $TCC ]]; then
+          "$R3_MAKE" ../make.r CONFIG="../configs/${CONFIG}" TARGET=makefile STANDARD="$STANDARD" OS_ID="$OS_ID" DEBUG="$DEBUG" GIT_COMMIT="{$GIT_COMMIT}" RIGOROUS="$RIGOROUS" STATIC="$STATIC" WITH_FFI="$WITH_FFI" WITH_TCC="no" ODBC_REQUIRES_LTDL="$ODBC_REQUIRES_LTDL" EXTENSIONS="$EXTENSIONS" $EXTRA
+          make clean prep folders
+          make -j "$MAKE_JOBS"
+      else
+          "$R3_MAKE" ../make.r CONFIG="../configs/${CONFIG}" TARGET=makefile STANDARD="$STANDARD" OS_ID="$OS_ID" DEBUG="$DEBUG" GIT_COMMIT="{$GIT_COMMIT}" RIGOROUS="$RIGOROUS" STATIC="$STATIC" WITH_FFI="$WITH_FFI" WITH_TCC="%${PWD}/tcc/${TCC}" ODBC_REQUIRES_LTDL="$ODBC_REQUIRES_LTDL" EXTENSIONS="$EXTENSIONS" $EXTRA
+          make clean prep folders
+          make -j "$MAKE_JOBS"
+      fi
+
+    # take a look at the preprocess header file
+    # - cat ../src/include/sys-core.i || true
+
+    # output the needed libraries
+    - |
+      if [[($OS_ID = 0.4.40) || ($OS_ID = 0.4.4)]]; then
+          ldd ./r3
+      elif [[ $OS_ID = 0.2.40 ]]; then
+          otool -L ./r3
+      fi
+
+    # Run once but don't pipe output, in case it prints out useful crash msg
+    # that we want to see in the Travis log (especially helpful for failures
+    # only happening in the Travis builds that aren't reproducing locally)
+    # Save the exit code ($?) so we can return it to Travis as last step
+    #
+    # !!! This is a very minimal sanity check to ensure the built R3 does
+    # *something*, and it can obviously only be used on the linux version.
+    # Running the full test suite would be a bit much, and developers are
+    # expected to have already done that.  But doing an HTTPS read exercises
+    # a fair amount of code.
+    #
+    - |
+      if [[ $OS_ID = 0.4.40 || $OS_ID = 0.4.4 || $OS_ID = 0.2.40 ]]; then
+          ./r3 --do "print {Testing...} quit either find to-text read https://example.com {<h1>Example Domain</h1>} [0] [1]"
+          R3_EXIT_STATUS=$?
+      else
+          R3_EXIT_STATUS=0
+      fi
+    - echo "$R3_EXIT_STATUS"
+
+    # Run basic testing with FFI, this is a linux-only script
+    # !!! Temporarily disabled during build system renovation (12-6-2018)
+    #- |
+    #  if [[ $OS_ID = 0.4.40 || $OS_ID = 0.4.4 ]]; then
+    #      ./r3 ../tests/misc/qsort_r.r
+    #      R3_EXIT_STATUS=$?
+    #  else
+    #      R3_EXIT_STATUS=0
+    #  fi
+    #- echo "$R3_EXIT_STATUS"
+
+    # If the build is TCC-based and the host can run the produced executable,
+    # do a simple test that does a TCC fibonnaci calculation.
+    - |
+      # The TCC extension currently looks at the environment variable
+      # LIBREBOL_INCLUDE_DIR to find "rebol.h".  Ultimately, this should be
+      # shipped with the TCC extension.  (It may be desirable to embed it,
+      # but it also may be desirable to have a copy that a file can find
+      # via `#include "rebol.h"`)
+      #
+      # (export is so that the child process can see the environment variable)
+      #
+      echo "Note: CONFIG_TCCDIR is ${CONFIG_TCCDIR}"
+      export LIBREBOL_INCLUDE_DIR="${TOP_DIR}/build/prep/include"
+      if [[ (! -z $TCC) && ($TCC != no) ]]; then
+        if [[ $OS_ID = 0.4.40 ]]; then
+          ./r3 ../tests/misc/fib.r
+        elif [[ $OS_ID = 0.4.4 ]]; then
+          #
+          # Most 32-bit builds are intending to run on 32-bit systems, hence
+          # the running TCC should link to libs in `/usr/lib`.  But this
+          # container is 64-bit (Travis does not support 32-bit containers,
+          # nor do they seem to intend to).  The tcc extension heeds this
+          # environment variable and uses hardcoded output of `gcc -v m32`
+          # for library directories to override `/usr/lib` with.
+          #
+          export REBOL_TCC_EXTENSION_32BIT_ON_64BIT=1
+          ./r3 ../tests/misc/fib.r
+          R3_EXIT_STATUS=$?
+        fi
+      else
+          R3_EXIT_STATUS=0
+      fi
+      echo $R3_EXIT_STATUS
+
+    # Esmcripten build: copy load-r3.js to travis-builds/
+    # (it's not in subdir of 0.16.x because loader needs to pick between them)
+    - |
+      if [[ $OS_ID = 0.16.1 || $OS_ID = 0.16.2 ]]
+      then
+        cp ../extensions/javascript/load-r3.js .
+      fi
+
+    # By default a web worker cannot be loaded cross-domain.  We want to be
+    # able to host pthread-enabled build (0.16.2), so we use a workaround that
+    # uses CORS-enabled fetch() to get the worker JS as a Blob, and runs that.
+    # This requires a crude patch of the libr3.js build product, but the
+    # suggestion has been made to Emscripten to allow a newWorker() hook:
+    #
+    # https://github.com/emscripten-core/emscripten/issues/8338
+    #
+    # Note: Patcher starts in directory of the script, not current dir (!)
+    - |
+      if [[ $OS_ID = 0.16.2 ]]
+      then
+        "$R3_MAKE" ../tools/libr3.js-workers-patch.reb ../build/libr3.js
+      fi
+    
+    # Delete the obj and prep file directory so we don't upload those to S3
+    #
+    - rm -rf objs prep
+
+    - rm -f makefile*
+    - rm -f Toolchain*
+    - rm -f r3-make*  # `-f` for success even when r3-make* doesn't exist
+    - rm -rf tcc
+
+    # check what will be uploaded
+    - ls
+
+    # Name the executable based on the abbreviated commit, whether it is a
+    # debug or release build, and if it was built using C++ or not.  Note that
+    # the C++ debug builds have additional runtime checks in the debug
+    # build...though there should not be any impact on the release build.
+    # (Though there may be additional DLL dependencies regardless.)
+    #
+    # !!! All Ren-C stakeholders should be using debug builds at this time.  
+    #
+    # Note: -z tests if a variable is undefined
+    #
+    - NEW_NAME="r3-${GIT_COMMIT_SHORT}"
+    - if [[ $DEBUG != none ]]; then NEW_NAME+='-debug'; fi
+    - |
+      if [[ $STANDARD = c++ || $STANDARD = c++0x || $STANDARD = c++11 || $STANDARD = c++14 || $STANDARD = c++17 ]]; then
+          NEW_NAME+='-cpp'
+      fi
+    - echo "$NEW_NAME"
+
+    # Move the executable into a directory based on its OS_ID platform.
+    # This is because the deploy step is run for each OS and would
+    # otherwise overwrite executables in the same location.
+    #
+    # Note: [[-e]] tests for "existence"
+    #
+    - mkdir "$OS_ID"
+    - |
+      # Windows builds end in .exe
+      if [[ -e r3.exe ]]; then
+           mv r3.exe "${OS_ID}/${NEW_NAME}.exe"
+      fi
+
+      # Most other platforms have no suffix
+      if [[ -e r3 ]]; then
+           mv r3 "${OS_ID}/${NEW_NAME}"
+      fi
+
+      # All emscripten builds produce .js and .wasm
+      if [[ -e libr3.js ]]; then
+           mv libr3.js "${OS_ID}/lib${NEW_NAME}.js"
+      fi
+      if [[ -e libr3.wasm ]]; then
+           mv libr3.wasm "${OS_ID}/lib${NEW_NAME}.wasm"
+      fi
+
+      # Only emterpreted builds produce .bytecode
+      if [[ -e libr3.bytecode ]]; then
+           mv libr3.bytecode "${OS_ID}/lib${NEW_NAME}.bytecode"
+      fi
+
+      # Only pthreads builds produce .js.mem and .worker.js
+      if [[ -e libr3.js.mem ]]; then
+           mv libr3.js.mem "${OS_ID}/lib${NEW_NAME}.js.mem"
+      fi
+      if [[ -e libr3.worker.js ]]; then
+           mv libr3.worker.js "${OS_ID}/lib${NEW_NAME}.worker.js"
+      fi
+
+    # Keep note of GIT_COMMIT_SHORT
+    - echo "git_commit = '${GIT_COMMIT_SHORT}'" > ${OS_ID}/zzz_git_commit.js
+    # 'zzz' in the hope it will the latest uploaded file
+    - |
+      if [[ ${TRAVIS_BRANCH} = "master" && ( $OS_ID = 0.16.1 || $OS_ID = 0.16.2 ) ]]
+      then
+        for i in $OS_ID/*
+        do
+            case $i in
+                *.wasm) OPT_TYPE="--content-type application/wasm" ;;
+                *) OPT_TYPE="" ;;
+            esac
+            $AWS s3 cp $i s3://${AWS_S3_BUCKET_NAME}/travis-builds/$i $OPT_TYPE
+        done
+      fi
+
+    # Return whether the build succeeded or not to Travis.  If this succeeded 
+    # then the deploy step to S3 will run.  Parentheses create a "subshell"
+    #
+    - (exit "${R3_EXIT_STATUS}")  # http://stackoverflow.com/a/10457902
+
+
+# After everything is finished (e.g. script section above), upload build 
+# product to Amazon S3.  For how the configuration works and manages to keep
+# the private key secure, see:
+#
+# http://stackoverflow.com/a/42547424/211160
+#
+deploy:
+    provider: s3
+    access_key_id: "$AWS_ACCESS_KEY_ID"
+    secret_access_key: "$AWS_SECRET_ACCESS_KEY"
+    bucket: "$AWS_S3_BUCKET_NAME"
+    skip_cleanup: true
+    upload-dir: travis-builds
+    on:
+        condition: ${OS_ID} != "0.16.1"
+        condition: ${OS_ID} != "0.16.2"
+

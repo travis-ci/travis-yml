@@ -1,0 +1,12 @@
+language: node_js
+node_js:
+  - '9.9'
+before_install:
+  - echo "//registry.npmjs.org/:_authToken=\${NPM_TOKEN}" > .npmrc
+  - dpkg --compare-versions `npm -v` ge 6.0 || npm i -g npm@^6.0
+install:
+  - travis_wait 30 npm install
+scripts:
+  - travis_wait 30 npm run tslint
+  - travis_wait 30 npm run prettier:ci
+  - travis_wait 30 npm test

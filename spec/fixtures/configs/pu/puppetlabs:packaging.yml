@@ -1,0 +1,23 @@
+language: ruby
+script: "bundle exec $CHECK"
+sudo: false
+notifications:
+  email: false
+rvm:
+  - 2.0.0
+  - 2.1.9
+  - 2.3.8
+  - 2.4.1
+
+env:
+  - "CHECK='rspec spec --color --format documentation --order random'"
+  - "CHECK='rubocop -D'"
+
+matrix:
+  exclude:
+    - rvm: 2.0.0
+      env: "CHECK='rubocop -D'"
+    - rvm: 2.1.9
+      env: "CHECK='rubocop -D'"
+    - rvm: 2.3.8
+      env: "CHECK='rubocop -D'"

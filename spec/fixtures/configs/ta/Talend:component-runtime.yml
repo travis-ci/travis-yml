@@ -1,0 +1,111 @@
+dist: trusty
+sudo: false
+language: java
+env:
+   global:
+    - MAVEN_OPTS="-Dformatter.skip=true -Dsurefire.useFile=false -Dmaven.artifact.threads=128 -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn -Dinvoker.streamLogs=false -Drmannibucau.travis.dumpOnLog=false"
+    - SKIP_OPTS="-Dspotless.apply.skip=true -Dcheckstyle.skip=true -Drat.skip=true -DskipTests -Dinvoker.skip=true -Ptravis -Dmaven.ext.class.path=/tmp/maven-travis-output-1.0.0.jar"
+    - DEPLOY_OPTS="$SKIP_OPTS --batch-mode -Possrh -Prelease"
+    - BUILD_ARGS="clean install -B -q -e -Possrh -Ptravis -Prelease -Pdoc-gen -Dgpg.skip=true -Ptravis -Dmaven.ext.class.path=/tmp/maven-travis-output-1.0.0.jar"
+before_cache:
+  - rm -Rf $HOME/.m2/repository/org/talend/sdk/component
+  - find $HOME/.m2/repository/ -name *SNAPSHOT | xargs rm -Rf
+cache:
+  timeout: 1000
+  directories:
+  - "$HOME/.m2"
+  - "$HOME/.cache/yarn"
+  - "$HOME/build/Talend/component-runtime/component-starter-server/.node"
+  - "$HOME/build/Talend/component-runtime/component-starter-server/.cache"
+  - "$HOME/build/Talend/component-runtime/component-starter-server/src/main/frontend/node_modules"
+  - "$HOME/build/Talend/component-runtime/component-tools/.node"
+  - "$HOME/build/Talend/component-runtime/component-tools/src/main/frontend/node_modules"
+  - "$HOME/build/Talend/component-runtime/component-tools-webapp/.node"
+  - "$HOME/build/Talend/component-runtime/component-tools-webapp/src/main/frontend/node_modules"
+  - "$HOME/build/Talend/component-runtime/documentation/.node"
+  - "$HOME/build/Talend/component-runtime/documentation/src/main/frontend/node_modules"
+  - "$HOME/build/Talend/component-runtime/talend-component-kit-intellij-plugin/.cache"
+  - "$HOME/build/Talend/component-runtime/.ci-cache"
+  - "$HOME/build/Talend/component-runtime/.blackduck/tools"
+notifications:
+  email: false
+  slack:
+    on_pull_requests: true
+    secure: MS3jwqvACvjLAa2pT8OdmylmqK0N+zMg7URmatJYHa+HXTr3dTlKNVSCDTUGc5OIYUhzca15SYAtXjUMYcyJ5UQETE6bxS5995GBbTsErEOFDYIZU5coFz1/21+b0E72QDHKOVWntSPVujNB2ZA8aJVLgpmdSC0t83b85Nds9R0Skaag8ehkVGWw57MI7xy+Bo3CXkLS3A8Mjucy1Ht7hgtrlE+hzBMVZeJbLVWZkYD1p0QguXaSD7Ub3Uab7sDiINZv4DDZSGz7lkv0IUh8bQhsfrwFKbks2TtavcuQcbHIKXG00LZpTPLfXIgGXD6hGtD4WgCbfXacsri+yoiQbE8oVXriTWCOusXTjQd2RgtKbUPOOKSAQ4BW+yXHu8exb+tqx87onpGI9w339BY/zCUbnMJruKWVO3G0LISg1b1AkPC+s6PCi8T3PrXV0o7/53hSDM1xmS0ZO8BgqsvqorYDiun11+yTl+OZNGcm85dyLVKonzuG3o+2EiqI8nfrxK11S2c+37BLJSrgHRhmV0VESW1JF0VaSZOUCCO2KkWl7tNTIYkfG0nqdq6q1E+uo5Wz61Wc6oqcS9MCvh133bqDlK3ecQ4h7cBeD3iZdT1+wbRRnOJ/sGtCrB2pvzWC9rkwx5UcS8m7TR3EdXD9hllhfBtR9aCGtRx/p4YwJfo=
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+      - sourceline: 'ppa:tj/java-for-14.04'
+    packages:
+      # for nodegit@antora
+      - libstdc++-4.9-dev
+      # for intellij plugin
+      - openjfx
+
+install: echo true
+
+jobs:
+  include:
+    # PR profile
+    - stage: pullrequest_build
+      before_install: chmod +x ./.travis/install.sh && ./.travis/install.sh
+      script: mvn $BUILD_ARGS
+      jdk: openjdk8
+
+    # master profile
+    - stage: master_build
+      env:
+      - STEP=Build OpenJDK 8 JVM
+      script: mvn $BUILD_ARGS
+      jdk: openjdk8
+
+    - stage: master_build
+      env:
+      - STEP=Build OpenJDK 11 JVM
+      before_install: chmod +x ./.travis/install.sh && ./.travis/install.sh
+      script: mvn $BUILD_ARGS
+      jdk: openjdk11
+
+    - stage: master_build
+      env:
+      - STEP=Deploy Artifacts
+      before_install: chmod +x ./.travis/*.sh && ./.travis/install.sh && ./.travis/setup_keys.sh
+      script: travis_wait 50 mvn clean deploy -e -q $DEPLOY_OPTS
+      jdk: openjdk8
+
+    - stage: master_build
+      env:
+      - STEP=Update Documentation
+      before_install: chmod +x ./.travis/install.sh && ./.travis/install.sh
+      script:
+      - MAVEN_OPTS="$MAVEN_OPTS -Xverify:none" mvn clean install -e -q -Pdoc-gen -Pgh-pages -Dgpg.skip=true -Dtalend.github.cache=true $DEPLOY_OPTS
+      - cd documentation && travis_wait 50 mvn clean verify pre-site -e -Dwebhost.ftphost=$WEBHOST_FTPPHOST -Pgh-pages -Dgpg.skip=true $SKIP_OPTS && cd -
+      jdk: openjdk8
+
+    - stage: master_build
+      env:
+      - STEP=Docker Server Deployment
+      before_install: chmod +x ./.travis/*.sh && ./.travis/install.sh && ./.travis/setup_keys.sh
+      script: travis_wait 50 mvn clean install -pl images/component-server-image -am $DEPLOY_OPTS && cd images/component-server-image && mvn clean install jib:build@build -Dtalend.server.image.registry=registry.hub.docker.com/ $DEPLOY_OPTS
+      jdk: openjdk8
+
+    - stage: master_build
+      env:
+      - STEP=Docker Server Proxy Deployment
+      before_install: chmod +x ./.travis/*.sh && ./.travis/install.sh && ./.travis/setup_keys.sh
+      script: travis_wait 50 mvn clean install -pl images/component-server-vault-proxy-image -am $DEPLOY_OPTS && cd images/component-server-vault-proxy-image && mvn clean install jib:build@build -Dtalend.server.image.registry=registry.hub.docker.com/ $DEPLOY_OPTS
+      jdk: openjdk8
+
+    - stage: master_build
+      env:
+      - STEP=Sonatype Audit
+      before_install: chmod +x ./.travis/install.sh && ./.travis/install.sh
+      script: mvn clean install -B -q -e $SKIP_OPTS && travis_wait 50 mvn ossindex:audit -B
+      jdk: openjdk8
+
+stages:
+  - name: master_build
+    if: branch = master AND type != pull_request
+  - name: pullrequest_build
+    if: type = pull_request

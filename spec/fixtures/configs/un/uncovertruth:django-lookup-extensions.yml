@@ -1,0 +1,203 @@
+sudo: false
+language: python
+cache:
+  pip: true
+  directories:
+  - $TRAVIS_BUILD_DIR/.tox
+  - $TRAVIS_BUILD_DIR/vendor
+env:
+  global:
+  - secure: oH1YYII+BZETVGJRzsQ0+KFHfhgkwWp92q1BoXthWIjgteiwLF6vtjvHy2m4a/wNfbIWleJ3a9ogdzJF1KGmDAQX4OCns3GwibgZtVThh2FieOgp/7/DXxCxX4magWfzUVWzRQ5PxINOlrodzD4qbJdHrzEyNY+K4hF1bqNzDtbrsHGYa0miFeDCddEdcYF73xoZtqZtp/iu3p4JeF7TW5e69ruh25NAFyg/+YpZYhShns7Fo5DKyLQTBSEp9rHRHMApBRqPUYXWpBc948Pl4HWeU6Zgxg9pvupKwYA+O/3tYUiPOSriKoIVN8pY66UAaUZuR4ZDyrLA51rbmk0/Aa7rOk7E1eUolgsMX4IkX7hAihxHxDGf/LUl+V1IO/q6tCFK45L+Q6dCciIFS7W7Mvi32dtwijD2bsVBBbTPLdlEHR5xpe91jrMZ9erAZ+2sQoQoaiQJcm1wB7wCIU+oRebB7aDqYU0KGErryGtJwCKFEtwVyg+p8c3UHNWVc71lKpJnDQ8opaJ39gc3pTcSFQ6AWXP7atVRihZ3HFGtMs094Fj1UG5yQ5lfdU9ihcuBHBnyGDBaPsFVEXLrCATpfxl7JAr6rRQBzIPtWxsc3y01/iCQB3oVtOeEI/8oXwtJmHF80lPjhkYIw5bFSSzR6HnXnEgnOuwHB+UnNY6Qbwc=
+  - LANG=en_US.UTF-8
+  - LC_ALL=en_US.UTF-8
+matrix:
+  fast_finish: true
+  include:
+  - env: TOX_ENV=py27-dj111 PYTHONIOENCODING=UTF-8
+    python: 2.7
+  - env: TOX_ENV=pypy-dj111 PYTHONIOENCODING=UTF-8
+    python: pypy
+  - env: TOX_ENV=py34-dj111-sqlite
+    python: 3.4
+  - env: TOX_ENV=py35-dj111-sqlite
+    python: 3.5
+  - env: TOX_ENV=py36-dj111-sqlite
+    python: 3.6
+  - env: TOX_ENV=pypy3-dj111-sqlite
+    python: pypy3
+  - env: TOX_ENV=py34-dj20-sqlite
+    python: 3.4
+  - env: TOX_ENV=py35-dj20-sqlite
+    python: 3.5
+  - env: TOX_ENV=py36-dj20-sqlite
+    python: 3.6
+  - env: TOX_ENV=py37-dj20-sqlite
+    sudo: true  # TODO Remove when supported
+    dist: xenial
+    python: 3.7
+  - env: TOX_ENV=pypy3-dj20-sqlite
+    python: pypy3
+  - env: TOX_ENV=py35-dj21-sqlite
+    python: 3.5
+  - env: TOX_ENV=py36-dj21-sqlite
+    python: 3.6
+  - env: TOX_ENV=py37-dj21-sqlite
+    sudo: true  # TODO Remove when supported
+    dist: xenial
+    python: 3.7
+  - env: TOX_ENV=pypy3-dj21-sqlite
+    python: pypy3
+  - env: TOX_ENV=py35-djmaster-sqlite
+    python: 3.5
+  - env: TOX_ENV=py36-djmaster-sqlite
+    python: 3.6
+  - env: TOX_ENV=py37-djmaster-sqlite
+    sudo: true  # TODO Remove when supported
+    dist: xenial
+    python: 3.7
+
+  - env: TOX_ENV=py27-dj111-postgresql PYTHONIOENCODING=UTF-8 DATABASE_URL=postgres://postgres@localhost/db
+    python: 2.7
+    services:
+    - postgresql
+  - env: TOX_ENV=py34-dj111-postgresql PYTHONIOENCODING=UTF-8 DATABASE_URL=postgres://postgres@localhost/db
+    python: 3.4
+    services:
+    - postgresql
+  - env: TOX_ENV=py35-dj111-postgresql DATABASE_URL=postgres://postgres@localhost/db
+    python: 3.5
+    services:
+    - postgresql
+  - env: TOX_ENV=py36-dj111-postgresql DATABASE_URL=postgres://postgres@localhost/db
+    python: 3.6
+    services:
+    - postgresql
+  - env: TOX_ENV=py34-dj20-postgresql DATABASE_URL=postgres://postgres@localhost/db
+    python: 3.4
+    services:
+    - postgresql
+  - env: TOX_ENV=py35-dj20-postgresql DATABASE_URL=postgres://postgres@localhost/db
+    python: 3.5
+    services:
+    - postgresql
+  - env: TOX_ENV=py36-dj20-postgresql DATABASE_URL=postgres://postgres@localhost/db
+    python: 3.6
+    services:
+    - postgresql
+  - env: TOX_ENV=py37-dj20-postgresql DATABASE_URL=postgres://postgres@localhost/db
+    sudo: true  # TODO Remove when supported
+    dist: xenial
+    python: 3.7
+    services:
+    - postgresql
+  - env: TOX_ENV=py35-dj21-postgresql DATABASE_URL=postgres://postgres@localhost/db
+    python: 3.5
+    services:
+    - postgresql
+  - env: TOX_ENV=py36-dj21-postgresql DATABASE_URL=postgres://postgres@localhost/db
+    python: 3.6
+    services:
+    - postgresql
+  - env: TOX_ENV=py37-dj21-postgresql DATABASE_URL=postgres://postgres@localhost/db
+    sudo: true  # TODO Remove when supported
+    dist: xenial
+    python: 3.7
+    services:
+    - postgresql
+
+  - env: TOX_ENV=py27-dj111-mysql PYTHONIOENCODING=UTF-8 DATABASE_URL=mysql://root@localhost/db
+    python: 2.7
+    services:
+    - mysql
+  - env: TOX_ENV=pypy-dj111-mysql PYTHONIOENCODING=UTF-8 DATABASE_URL=mysql://root@localhost/db
+    python: pypy
+    services:
+    - mysql
+  - env: TOX_ENV=py34-dj111-mysql DATABASE_URL=mysql://root@localhost/db
+    python: 3.4
+    services:
+    - mysql
+  - env: TOX_ENV=py35-dj111-mysql DATABASE_URL=mysql://root@localhost/db
+    python: 3.5
+    services:
+    - mysql
+  - env: TOX_ENV=py36-dj111-mysql DATABASE_URL=mysql://root@localhost/db
+    python: 3.6
+    services:
+    - mysql
+  - env: TOX_ENV=pypy3-dj111-mysql DATABASE_URL=mysql://root@localhost/db
+    python: pypy3
+    services:
+    - mysql
+  - env: TOX_ENV=py34-dj20-mysql DATABASE_URL=mysql://root@localhost/db
+    python: 3.4
+    services:
+    - mysql
+  - env: TOX_ENV=py35-dj20-mysql DATABASE_URL=mysql://root@localhost/db
+    python: 3.5
+    services:
+    - mysql
+  - env: TOX_ENV=py36-dj20-mysql DATABASE_URL=mysql://root@localhost/db
+    python: 3.6
+    services:
+    - mysql
+  - env: TOX_ENV=py37-dj20-mysql DATABASE_URL=mysql://root@localhost/db
+    sudo: true  # TODO Remove when supported
+    dist: xenial
+    python: 3.7
+    services:
+    - mysql
+  - env: TOX_ENV=pypy3-dj20-mysql DATABASE_URL=mysql://root@localhost/db
+    python: pypy3
+    services:
+    - mysql
+  - env: TOX_ENV=py35-dj21-mysql DATABASE_URL=mysql://root@localhost/db
+    python: 3.5
+    services:
+    - mysql
+  - env: TOX_ENV=py36-dj21-mysql DATABASE_URL=mysql://root@localhost/db
+    python: 3.6
+    services:
+    - mysql
+  - env: TOX_ENV=py37-dj21-mysql DATABASE_URL=mysql://root@localhost/db
+    sudo: true  # TODO Remove when supported
+    dist: xenial
+    python: 3.7
+    services:
+    - mysql
+  - env: TOX_ENV=pypy3-dj21-mysql DATABASE_URL=mysql://root@localhost/db
+    python: pypy3
+    services:
+    - mysql
+
+  - env: TOX_ENV=flake8
+    python: 3.6
+  - env: TOX_ENV=isort
+    python: 3.6
+  - env: TOX_ENV=readme
+    python: 3.6
+  - env: TOX_ENV=check-manifest
+    python: 3.6
+  allow_failures:
+  - env: TOX_ENV=py35-djmaster-sqlite
+  - env: TOX_ENV=py36-djmaster-sqlite
+  - env: TOX_ENV=py37-djmaster-sqlite
+
+install:
+- pip install -U pip setuptools tox wheel
+script:
+- tox -e "${TOX_ENV}"
+deploy:
+  provider: pypi
+  distributions: sdist bdist_wheel
+  user: uncovertruth
+  password:
+    secure: hB8YrbE+U1XPjeDd0UA5c00nW6/g9nhEJzswYvYqwcIWkvMXx8m79r1ZokdNeqr5eimx2FLdbstf99ciWSrpHZkIFDQF+9wXkirGQVwIBZZuRTWOiebxGTsm8IlxLe8+WcxCbbnzhksX6FD0jxyVi0bGlTZX2Oog/55FqsWBSNEzgVfsed1zp0SCKHGCwQ2pun9i5UNu+uZl1vVbeXk4CQsazkAsVn0yh//FFnu7PrEKKBxvlwU6AHePnYZYHGgV1Kd7IS1erlv4jT8g15hFUgX4TrlAZpPg8hUe5/EINi6yN12NhP/VSlFQLUhMArOyqmQF2LVCvoHaQhhLpKUJs9A+407Jp7sVNOLNpalh8/KJx8ZMXQGJiInD6pNS1oRBw8jyG61XQiHvzexSaRZz/hHirX3ivERMg0eQyBkDUgXI+YXGqrIN/HKbO9wpIW7RJ8dtJmK/O1LvB3R0fbCU6irciueu+4uLrTnrbfB/T5ZcjFZMXe9ybC5mxbhZe4tHuzMbFZRknIvMmgkRQyyhTMrjddJAfXSQoWZBNjKW7J+/pTxKsskfdewpJrT8uose6d4KIbubSo2TLpvbPtj3PyAw3CfRRfT0ZAvekIhuf9xeovVdFvTyoRKHsPuokBCZNqzPKAuxBzORrpwHAb/ViXSVfSg8vY7dWAy4i1OKblc=
+  on:
+    tags: true
+    repo: uncovertruth/django-lookup-extensions
+    condition: "$TOX_ENV = py37-dj21-sqlite"
+notifications:
+  email: false
+  slack:
+    secure: TIsvLLUrNvhB8tgq+eARcOBs3XOTdazI7r1rqr9PwC8YbGvKMSjk1ukhY8Vxfte6OrwTqyqDUG6lvwTqO4lpzEZgdd666XsLuWXS7uAAoRu0T62re60HIfvdmUy3zW2/E6djGCL22SxHmk6MUZqo7Z7FNW3biEOmyiVXY3jFym6iJdJSmWnGQCRDACoymyNlDrnTkNOHXwpZFPv7WIe2ZzGXbQcAxNpcvkgBwjBhW34EZXuRI8X09CH+EStz/GTW5ZGLrJ2vxm/zHwvJhIg6pmruGIMdLHE9HNqfRe+bG75afPzEjM3mXQNjYEvhwJR0rATGcsI2sdP0vSuyamtiVIY5a56TcIIS5G7+qXX6u5TGRw81LLCF+lBr5i6rizPQMkBkksTwFhwSQ4ouRebaSygGYh0W48pd7YX8PQYy6+WyoGk/0wUcTNnUL1vra4WsUGY+Weixjug31GbcveHuRXXgy/zAFqkQcv6SpiEFawhdVmEwWbX2sPaEtoI/pCMD7dcIVfB1EBEu1zDcyPj9geMjHszd3cSoWzk35kpfiMMeyASkJv0uLUQeHamghxQqP2XrxpJOa3IACK/dQwmAaIiS+yRESL+PI7uTgPMt/dtSyFwc5vNSSBgmPVxU8aIrksaAkx0DfYY3f3qRhW7VPTCnRoCGul9udA6DbUR4nLs=

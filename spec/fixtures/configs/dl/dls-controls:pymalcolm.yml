@@ -1,0 +1,64 @@
+language: python
+python:
+  - "2.7"
+  - "3.5"
+  - "3.6"
+
+addons:
+  apt:
+    packages:
+      - libhdf5-serial-dev
+      - gdb
+
+cache:
+  directories:
+    - $HOME/.cache/pip
+    - ${VIRTUAL_ENV}/lib/python${TRAVIS_PYTHON_VERSION}/site-packages
+    - ${VIRTUAL_ENV}/bin
+
+install:
+  - env
+  - ifconfig
+  - IP=$(ip addr show docker0 | grep -Po 'inet \K[\d.]+')
+  - echo $IP
+  # Fix docker0 broadcast address so p4p will work
+  - sudo ip addr del $IP/16 dev docker0
+  - sudo ip addr add $IP/16 broadcast + dev docker0
+  - ifconfig
+  - ls -al ${VIRTUAL_ENV}/lib/python${TRAVIS_PYTHON_VERSION}/site-packages
+  - ls -al ${VIRTUAL_ENV}/bin
+  - pip install "setuptools>=36"
+  - pip install setuptools_dso epicscorelibs
+  - pip install -r requirements/test.txt
+  - pip install codecov
+  - ls -al ${VIRTUAL_ENV}/lib/python${TRAVIS_PYTHON_VERSION}/site-packages
+  - ls -al ${VIRTUAL_ENV}/bin
+  - python setup.py bdist_egg
+
+before_script:
+  - ulimit -c unlimited -S       # enable core dumps
+
+# command to run tests
+script:
+  - python -m pytest --cov=malcolm --log-format='%(asctime)s.%(msecs)03d %(filename)-25s %(lineno)4d %(levelname)-8s %(message)s' --log-date-format='%Y-%m-%d %H:%M:%S' tests
+
+# submit coverage
+after_script:
+  - codecov --token=0fc7b8ca-201c-4f0f-938b-ac26f79d26ed
+
+# Print backtrace
+after_failure:
+  - COREFILE=$(find . -maxdepth 1 -name "core*" | head -n 1) # find core file
+  # Would love to do -ex "py-bt", but this means making a new virtualenv with python-dbg exe
+  - if [[ -f "$COREFILE" ]]; then gdb -c "$COREFILE" python -ex "thread apply all bt" -ex "set pagination 0" -ex "info reg" -ex "disassemble" -ex 'print /x * (int*) $rsp' -batch; fi
+
+deploy:
+  provider: pypi
+  user: dls_controls
+  password:
+    secure: SElMrsOY3gsaDmM3189epJ+6IPumQ3RcSJsqNRtBpETthC6mH0+49usZucFEJZbXpF+dEQHyRsyABF05M2kUKWlruFO6h9GckV2Bu8KNjmEPkCp4frToqgbm6/y7gbVE3KhlIq7qTLIxmz37oREqJIEgw9XPHbULKy3t6ZcZgmejghINecPwigRsYHcgGQXNcuMhjPAygun8vt1QSGk+FbSvnHJ5hVbn8pmr884QUWii+mM6C/xUUvYzUs81scx/z003hOT7kZUt3/+9q/DhqocV/sT1WPAPeF2G8FygfOQbceJhBNEo+rk//yPoUAHQP8kD2ZhHLN0K0z/xEZ2fAF3slkfi9TAVmazh7TOcwzpJz6TaiJCTIngAFiyY3JHQGW3gvznXsqGAayRkg6O4iYqAT9FcyfoXx9y4F2appxq9aQfR5rT6PXcgq+Zi43uFHYcnjmC3wpTBBCCTPc4CtQ5V4gsEQApxYS7W8450ydSW1l/QLTeLw8J+hJBrUXqTfldw/oZove1zOcHVONeqGidavjrpgPu1/+2Xh5PHKbxSHpWIm9SnSII8HJo9PfEmKI7WHnCVEt/2bLUhs8agK3ppoH9qY+xJFqBnVVpMiNSXfACmqSiL9iqrqJRZe24pyXeif1GOi4ohkPzZZnY01hdMCI7KrEy1cB1x7U/rkr4=
+
+  on:
+    tags: true
+    # As we are doing a source dist, only deploy for one python in matrix
+    python: "3.6"

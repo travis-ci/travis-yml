@@ -1,0 +1,62 @@
+sudo: required
+dist: xenial
+language: python
+python:
+  - '3.6'
+addons:
+  chrome: stable
+  postgresql: '10'
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - postgresql-10-postgis-2.4
+      - gcc-5
+      - g++-5
+
+before_cache:
+    - rm -f .tox/py36-django111/log/*.log
+    - rm -f .cache/pip/log/*.log
+cache:
+  pip: true
+  ccache: true
+  directories:
+    - /home/travis/virtualenv
+    - $HOME/.pip-cache/
+    - $HOME/.tox/
+    - .tox
+    - $HOME/drafter-v3.2.7/build/
+
+install:
+  - sudo unlink /usr/bin/g++ && sudo ln -s /usr/bin/g++-5 /usr/bin/g++
+  - pip install --upgrade pip
+  - pip install tox coveralls tox-travis
+  - npm install
+  - wget https://github.com/apiaryio/drafter/releases/download/v3.2.7/drafter-v3.2.7.tar.gz
+  - tar xzf drafter-v3.2.7.tar.gz
+  - cd drafter-v3.2.7
+  - /usr/bin/python2.7 configure --shared
+  - make libdrafter
+  - sudo cp build/out/Release/lib.target/libdrafter.so /usr/lib/libdrafter.so
+  - sudo mkdir -p /usr/include/drafter
+  - sudo cp src/drafter.h /usr/include/drafter/drafter.h
+  - cd ..
+  - rm -rf drafter-v3.2.7/
+  - wget https://chromedriver.storage.googleapis.com/74.0.3729.6/chromedriver_linux64.zip
+  - unzip chromedriver_linux64.zip
+  - sudo chown root:root ./chromedriver
+  - sudo chmod 755 ./chromedriver
+  - sudo mv ./chromedriver ~/bin/chromedriver
+
+before_script:
+  - psql -U postgres -c "create extension postgis"
+  - export BOTO_CONFIG=/dev/null
+script:
+  - tox
+
+after_success:
+  - coveralls
+
+notifications:
+  slack:
+    secure: XDoMlbyJR1HOfF3ibOGNEizbb7MYGG8abDPrVTdTBscV5d3vm7qE0Uvd7Hq7YefwhSv8dJ+psrnWwMxBH7Z8zQmyLDyeVCNysOIfc3JfLi/cgrxZ0x0GoqUiiW8sgMl4Um/9jlEpcd5te5HpIeCFp0PHDO3GIWpzxx7xMbS6/0Q=

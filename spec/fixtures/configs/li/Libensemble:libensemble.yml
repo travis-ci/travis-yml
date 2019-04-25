@@ -1,0 +1,81 @@
+language: python
+sudo: required
+dist: xenial
+python:
+  - 3.4
+  - 3.5
+  - 3.6
+  - 3.7
+  
+os: linux
+
+env:
+  global:
+    - HYDRA_LAUNCHER=fork
+    - OMPI_MCA_rmaps_base_oversubscribe=yes  
+  matrix:
+    - MPI=mpich
+    #- MPI=openmpi
+
+#matrix:
+#  allow_failures:
+#    - env: MPI=openmpi
+    
+addons:
+  apt:
+    packages:
+      - gfortran
+      - libblas-dev
+      - liblapack-dev
+    
+cache: 
+  pip: true
+  apt: true
+
+# Setup Miniconda
+before_install:
+  # Do this conditionally because it saves some downloading if the version is the same.
+  - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
+      wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O miniconda.sh;
+    else
+      wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
+    fi
+  - bash miniconda.sh -b -p $HOME/miniconda
+  - export PATH="$HOME/miniconda/bin:$PATH"
+  - hash -r
+  - conda config --set always_yes yes --set changeps1 no
+  - conda update -q -y conda
+  - conda info -a # For debugging any issues with conda
+  - conda config --add channels conda-forge  
+  - conda create --yes --name condaenv python=$TRAVIS_PYTHON_VERSION 
+  - source activate condaenv
+
+install:
+  - conda install gcc_linux-64
+  - conda install $MPI
+  - conda install --no-update-deps scipy # includes numpy
+  - conda install --no-update-deps mpi4py
+  - conda install petsc4py petsc
+  - conda install --no-update-deps nlopt
+  # pip install these as the conda installs downgrade pytest on python3.4
+  - pip install pytest
+  - pip install pytest-cov
+  - pip install pytest-timeout
+  - pip install mock
+  - pip install coveralls
+  # For confirmation of MPI library being used.
+  - python conda/find_mpi.py #locate compilers
+  - mpiexec --version #Show MPI library details
+  - pip install -e .
+
+# Run test (-z show output)
+script:
+  - libensemble/tests/run-tests.sh -z
+
+# Coverage
+after_success:
+  - mv libensemble/tests/.cov* . 
+  - coveralls
+
+after_failure:
+- cat libensemble/tests/regression_tests/log.err

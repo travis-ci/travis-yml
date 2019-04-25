@@ -1,0 +1,28 @@
+language: node_js
+node_js:
+- '8'
+install:
+- npm install
+script:
+- npm test
+- npm run docs:build
+deploy:
+  - provider: script
+    skip_cleanup: true
+    script: rsync -r --delete-after -v $TRAVIS_BUILD_DIR/docs/* deploy@139.59.142.164:/var/www/html/components.aepps.com/
+    on:
+      branch: master
+  - provider: pages
+    skip-cleanup: true
+    github-token: $GITHUB_TOKEN
+    local-dir: docs
+    on:
+      branch: develop
+before_deploy:
+- openssl aes-256-cbc -K $encrypted_54c63c7beddf_key -iv $encrypted_54c63c7beddf_iv
+  -in aepp-identity-deploy.enc -out aepp-identity-deploy -d
+- eval "$(ssh-agent -s)"
+- chmod 600 aepp-identity-deploy
+- ssh-add aepp-identity-deploy
+- mkdir -p ~/.ssh
+- echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config

@@ -1,0 +1,19 @@
+language: node_js
+
+node_js:
+  - 'lts/*'
+
+script:
+  - 'npm run bootstrap'
+  - 'set -e'
+  - 'npm run lint'
+  - 'npm run test'
+  - 'npm run alex'
+
+after_success:
+  - 'npm run cover'
+  - 'npm run cover:check'
+  - 'npm run codecov'
+
+notifications:
+  email: false

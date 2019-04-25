@@ -1,0 +1,42 @@
+after_script: [drupal-ti after_script]
+before_install: [composer self-update, 'composer global require "lionsad/drupal_ti:dev-master"',
+  drupal-ti before_install]
+before_script: [drupal-ti before_script]
+branches:
+  except: [8.x-2.x]
+cache:
+  directories: [$HOME/.composer/cache, $HOME/.drush/cache]
+env:
+  global: ['PATH="$PATH:$HOME/.composer/vendor/bin"', DRUPAL_TI_DISTRIBUTION_NAME="panopoly",
+    DRUPAL_TI_SCRIPT_DIR_AFTER="./.drupal-ti", DRUPAL_TI_ENVIRONMENT="drupal-7", DRUPAL_TI_DB="drupal_travis_db",
+    'DRUPAL_TI_DB_URL="mysql://root:@127.0.0.1/drupal_travis_db"', 'DRUPAL_TI_WEBSERVER_URL="http://127.0.0.1"',
+    DRUPAL_TI_WEBSERVER_PORT="8888", 'DRUPAL_TI_SIMPLETEST_ARGS="--verbose --color
+      --concurrency 4 --url $DRUPAL_TI_WEBSERVER_URL:$DRUPAL_TI_WEBSERVER_PORT"',
+    DRUPAL_TI_BEHAT_DIR="./profiles/panopoly/modules/panopoly/panopoly_test/behat",
+    DRUPAL_TI_BEHAT_ARGS="", DRUPAL_TI_BEHAT_YML="behat.travis.yml.dist", DRUPAL_TI_BEHAT_SCREENSIZE_COLOR="1920x1080x24",
+    DRUPAL_TI_BEHAT_SELENIUM_VERSION="2.47.1", DRUPAL_TI_BEHAT_DRIVER="selenium",
+    DRUPAL_TI_BEHAT_BROWSER="chrome", 'DRUPAL_TI_BEHAT_CHROME_URL="http://www.slimjetbrowser.com/chrome/lnx/chrome64_56.0.2924.87.deb"',
+    DRUPAL_TI_BEHAT_CHROMEDRIVER_VERSION="2.27", DRUPAL_TI_PHPUNIT_ARGS="", 'DRUPAL_TI_COVERAGE="satooshi/php-coveralls:0.6.*"',
+    DRUPAL_TI_COVERAGE_FILE="build/logs/clover.xml", DRUPAL_TI_RUNNERS="panopoly-behat"]
+  matrix: [UPGRADE=none     INSTALL_PANOPOLY_DEMO_FROM_APPS=1, UPGRADE=7.x-1.58]
+install: [drupal-ti install]
+language: php
+matrix:
+  allow_failures:
+  - {env: UPGRADE=none INSTALL_PANOPOLY_DEMO_FROM_APPS=1, php: hhvm}
+  - {env: UPGRADE=none INSTALL_PANOPOLY_DEMO_FROM_APPS=1, php: '7.2'}
+  fast_finish: true
+mysql: {database: drupal_travis_db, encoding: utf8, username: root}
+notifications:
+  email:
+    on_failure: always
+    on_success: always
+    recipients: [panopoly-ci@googlegroups.com]
+  irc:
+    channels: [chat.freenode.net#panopoly]
+    on_failure: always
+    on_success: always
+php: [5.6]
+script: [drupal-ti script]
+services: [mysql]
+sudo: false

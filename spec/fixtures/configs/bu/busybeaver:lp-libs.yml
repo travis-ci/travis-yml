@@ -1,0 +1,39 @@
+dist: trusty
+language: node_js
+node_js:
+  - "lts/*" # using the latest node LTS version
+  - "node" # using the latest node stable version
+
+env:
+  global:
+    # circle ci test reporter id
+    - secure: qBNXUgrnjQsvt9rqjJEjkwtyjZ8le9Wt1LwSF0yAGRiHUV98rn7zYLD+GwteB9kKYUeaMDtaj3kUdlHS+qvbVjjf8V06jU6bkppKepS6HIAy2fQrFQvQtg2HPg1rFZ8yZXNnZxSygSLrXUbWPTLTdjNyCCkhxi5+A2Epm6uvOJg6i+rlrg58v8IXkA2MoIDI3EVTTo3nJIcwYadwAczLoV3rcKLsBifjEmDP7kqCyWhgbJIgDqojW28ewoELXVvQrVxKVxvOE1ser3FjOBMzt/5G89efutEoNkrJumDVot9dyLF2g0UtsO6IOSnvnNomtWgkPtDNMNDFpmj8XDEHc/JsqS3H5S9tchdIlhgN4MsHkhSZV8nGE/mxFPs1loObfUaBfB2QX3/IxJCaTajN7GA60zhjZU5+YpYYwcYQzy3jsURNBIm44yNIMb/usFjGknL2uQxxJUUf81kVbJdxiUKnAsfyULqquqTg3RLJ3NbOzdY+xL0ZrdNDyAQyFziuQpwg41E/M5v1c8RjS+tI3mLcY/tlOR4p1J9CWTl4TnE231kq5B279679CxM9jLtow2xBjTmO0GeKx2msU264KSdBEV8kta3D1/FlId6jyn2QYe5h3Zsw1lEMpFJglQh4SYbCqMVNL9JH1J8QoJkxwB9N1xydOQbBdgRwoCCOLAk=
+  matrix:
+    # - YARN_COMMAND="lint" # TSLint is executed/checked via CodeClimate
+    - YARN_COMMAND="compile" # check if the TS code compiles
+    - YARN_COMMAND="test:ci" # check if the unit tests succeed
+
+git:
+  submodules: false
+  depth: 3
+matrix:
+  fast_finish: true
+cache:
+  yarn: true
+
+before_install:
+  # install the latest version of yarn
+  - curl -o- -L https://yarnpkg.com/install.sh | bash
+  - export PATH="$HOME/.yarn/bin:$PATH"
+install:
+  - yarn install --no-progress --frozen-lockfile
+script:
+  # using env to run the commands in parallel
+  - echo "Going to execute 'yarn $YARN_COMMAND'" && yarn $YARN_COMMAND
+after_success:
+  # report results to codecov
+  - bash <(curl -s https://codecov.io/bash) || echo "Codecov did not collect coverage reports"
+  # report results to code climate
+  - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter && chmod +x ./cc-test-reporter
+  - ./cc-test-reporter format-coverage -t lcov -o $(pwd)/dist/coverage/codeclimate.json $(pwd)/dist/coverage/lcov.info
+  - ./cc-test-reporter upload-coverage -i $(pwd)/dist/coverage/codeclimate.json

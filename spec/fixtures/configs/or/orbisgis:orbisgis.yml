@@ -1,0 +1,20 @@
+language: java
+jdk:
+    - openjdk7
+    - oraclejdk8
+
+#Workaround for buffer overflow issue
+before_install:
+    - cat /etc/hosts # optionally check the content *before*
+    - sudo hostname "$(hostname | cut -c1-63)"
+    - sed -e "s/^\\(127\\.0\\.0\\.1.*\\)/\\1 $(hostname | cut -c1-63)/" /etc/hosts > /tmp/hosts
+    - sudo mv /tmp/hosts /etc/hosts
+    - cat /etc/hosts # optionally check the content *after*
+#End workaround
+
+# Do not install anything so that we can use our custom script. Instead, just
+# return true.
+#install: true
+install: travis_retry mvn install -DskipTests -B
+script: mvn test -B -P no-dist
+#script: "./travis-build.sh"

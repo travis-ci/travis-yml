@@ -1,0 +1,20 @@
+sudo: false
+language: ruby
+cache: bundler
+
+matrix:
+  include:
+    - rvm: 2.3.7
+    - rvm: 2.4.4
+    - rvm: 2.5.1
+    - rvm: ruby-head
+  allow_failures:
+    - rvm: ruby-head
+
+branches:
+  only:
+  - master
+
+bundler_args: --jobs 7 --without docs debug
+
+script: bundle exec rake

@@ -1,0 +1,12 @@
+language: node_js
+before_script:
+  - yarn install
+  - cd bh/ && yarn install && cd ..
+script:
+  - yarn lint
+  - yarn test
+  - cd bh/
+  - yarn lint
+  - yarn test
+after_success:
+  - yarn coveralls

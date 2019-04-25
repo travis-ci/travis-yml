@@ -1,0 +1,36 @@
+language: ruby
+sudo: false
+dist: trusty
+
+addons:
+  apt:
+    packages:
+      - texlive-fonts-recommended
+      - texlive-latex-extra
+      - texlive-latex-recommended
+      - dvipng
+
+before_install:
+  - |-
+    RUBY_VER=`ruby -e "print RUBY_VERSION"`
+    if [ "$RUBY_VER" = "2.1.10" ]; then
+      gem install bundler -v '< 2'
+    elif [ "$RUBY_VER" = "2.2.10" ]; then
+      gem install bundler -v '< 2'
+    else
+      gem update --system
+      gem install bundler
+    fi
+
+rvm:
+  - 2.1
+  - 2.2.10
+  - 2.3.8
+  - 2.4.5
+  - 2.5.3
+  - 2.6.0
+##  - ruby-head
+
+branches:
+  only:
+    - master

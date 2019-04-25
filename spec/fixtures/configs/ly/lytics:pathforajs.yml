@@ -1,0 +1,18 @@
+sudo: required
+language: node_js
+dist: trusty
+node_js:
+- 8.2.1
+addons:
+  chrome: stable
+script:
+- npm run prod
+after_success:
+- bash <(curl -s https://codecov.io/bash)
+before_install:
+- "sudo chown root /opt/google/chrome/chrome-sandbox"
+- "sudo chmod 4755 /opt/google/chrome/chrome-sandbox"
+- google-chrome-stable --headless --disable-gpu http://localhost &
+notifications:
+  slack:
+    secure: QjedBAiAGgDnBQpedeCh6FCsDNQq9YXR92JkGvrRHhjMclDGvbpf+TH5zpT0Vd1/bWVQbtOpu41RqWEATiOt3JNhX036HvC4W2b04LY4/bM7KoG8JKtDZiPa4bo4fR8Lp0Kw1naNmz3S9Iwrb53OIJT/0kHG6k+pv3odYTSAO8l8wUR6zr0kvq/xOb5EF7sjvrB8201warQXpZflwyKorquWDrtOHmgr3NP6HFwTBZnljAYXrSI8MHyQH/lDox9DpkYwaLZAvWRRkQTbHhNi3Y6F+KNO+UZLCnPtvbQ3uwXfWBfzFzgEZPYrZjbQJq20gT0UczB7l30yOLpBYdWOXcZFgdt6hR/XL1NVni0JQYVgybbPvr5cScx+720F8PS1FsRcFbKJtHoA/Y4cy3z3EBiSin+ewVDToDM57AAEq32FzDz/T7it1bLM2nl/8gDpG3rYEr31WQt/fof1ddIdXhOOJvc49ggBpTXYEvyX3lUKxAxR2ScMCaNQFC1GxQ5dIDuEXKMUPKLWCzVG2+USToNLZt+2qwr68+LODDmA6MAJMPKIDi/eTHYqjkdlZzrsoYypkw9UGaHas8pP7nBV5jOi9n8GPnCIhbqbtudlHKTQ1FJyYQ/T8VLziZpH6i0pQP4MZdmf3U3Xes/3nl5MvkwRzkaA9Wu5o2oUQw32GFI=

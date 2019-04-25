@@ -1,0 +1,76 @@
+dist: trusty
+language: python
+python:
+  - "2.7"
+cache: pip
+sudo: true
+notifications:
+  email: false
+
+# Need mongodb & postgresql for testing
+addons:
+  # IF NOT EXISTS in CREATE INDEX was introduced in 9.5...
+  postgresql: "9.5"
+services:
+  - mongodb
+  - postgresql
+
+# command to install dependencies
+install:
+  - pip install --upgrade pip
+  - easy_install distribute
+  - pip install --upgrade distribute
+  - pip install --upgrade setuptools
+  - pip install -q -r requirements_for_tests.txt
+
+env:
+  global:
+    - PAAS_USER: pp-deploy@digital.cabinet-office.gov.uk
+    # PAAS_PASSWORD
+    - secure: HNo6rnNiXmNYAV1TvkcMxeniXpmHoZkNEiT+X9EgyInCOnVm4mz89qi/AElY/ESE5HdYIegJ5l1M5tAWCei4dSDSTSfkbBBiHE6dfpf1OSU857oQ6T6161NRg4V2oxNdWSRgAX+G8rpxBShaXCDU9q9iBxhsqrmTX+UGlzKloDk=
+    - REDIS_DATABASE_NUMBER_STAGING: 4
+    - REDIS_DATABASE_NUMBER_PRODUCTION: 5
+    # APP_SIGNON_API_USER_TOKEN_STAGING
+    - secure: PYLrm6uH6uhNA69xgI5lSXLrX0ouPBdxlMlQXER0K2BkHzxTowNDFyf5LDa2kwIueJ/YXFHAgm7eBN9gr3JIXAN8Mqb15LTHJVg6hc2aLwFZKES4fuPa/da3Pn24xrdTesIedUAv2vSkuacaktZwKxsv6LENw53uA+8kOT8l9SQ=
+    # APP_SIGNON_API_USER_TOKEN_PRODUCTION
+    - secure: SBk+7zw2GMkgbl8p7hwXZw5VkDf2FQE4kBklD40c7goORyEF3/FjTVJTVlREN4Rwb3a81N5lkQDl0fLPhGaDv+PyTr+l69IU64w1Whu9e9fL/wMC3zo5Eer3Btptar5jdCsEg+V4woKKXv6j4B4xebHN6sU7C6dX9TGKs+R1aBo=
+    # APP_SECRET_KEY_STAGING
+    - secure: Cl7cvdzviF3hCepM7n3XMz9q1D/FCEQkcDZOyRTPkHlm9V2GKi+e9ECuAuWQVRiRDTb7bAZZ5kl+zTj00nMb0BKds3QoisZ5oB8UwYFOQSrYV/NTpge0wsvZZvfqXp5sN3CLVXE2XynLsZZSzOTIte8UKD4giBFsuHo2sBcVbb8=
+    # APP_SECRET_KEY_PRODUCTION
+    - secure: ifAsLdVTrzDT8IIEVdW1TJon8VYdmDdzxxE/CtCgc0hcBP9eneKF7qvBOy6TFMnE9KSz4zzyYx+yZI8s5sAsjknw/HEnHYMCYSjRcM3GMWP27/QFM2983CgWkoEn5xGj3WEXra1WJGltzqbeoYfZWmFA9pBGSU6IbR0IzjLC6+g=
+    # APP_STAGECRAFT_COLLECTION_ENDPOINT_TOKEN
+    # Value too large to be encrypted.
+    # APP_STAGECRAFT_OAUTH_TOKEN_STAGING
+    - secure: JkoKVPblX1sHICKxJMT0kPi5Nax3dn3cG1bzmAmpMDX+rd37I4XtA96G17ibUmUrp2CVrOo4is5WjI9hPDwmC8/o7/6MOHqJo7jeflY+Iq8bWShcja0khlb4aBlpWfgMS+vniLCBPkQtUe2eE87jFLYJXmsuBGfp4r4L88fhgOk=
+    # APP_STAGECRAFT_OAUTH_TOKEN_PRODUCTION
+    - secure: HZPkW81a+OsfFrCCpcuYYBKNIEmejsQlIreVo2AJ1NipBVK8DniqIK+bXGUIQraaqeKXApXknfPepVpyqG3uyzHvkboylooWa7fuoJB4bs9Eb91Qo2AeWjP2fts0EmUX8R76K51n7EwUgk9xemM/bE2e+0FmG5e35JpXEwfm/5I=
+    # FLOWER_BASIC_AUTH
+    - secure: Q+McmaCCuUjt4VoXajGzukxJEVZitEnmj8nsWVgD2SchawjFzVO/W/dzMZHjMoU308rZWe0YMIcLO7gKBxmRhaJ8+txHZR3TwodMiOP5XvjsdDjOqlkvqutTtHgw934s8DSLEceU4WvlXlzMf8O1KEr9yAPrg3GUUhjNmEUxTZk=
+    - DATABASE_ENGINE_STAGING: postgres
+    - DATABASE_ENGINE_PRODUCTION: mongodb
+
+
+before_script:
+  - psql -c 'create database mongo;' -U postgres
+
+script:
+  - ./run_tests.sh
+
+after_script:
+  - coveralls
+
+before_deploy:
+  - chmod +x etc/deploy.sh
+
+deploy:
+  - provider: script
+    script: APP_SIGNON_API_USER_TOKEN=$APP_SIGNON_API_USER_TOKEN_STAGING APP_SECRET_KEY=$APP_SECRET_KEY_STAGING REDIS_DATABASE_NUMBER=$REDIS_DATABASE_NUMBER_STAGING APP_STAGECRAFT_OAUTH_TOKEN=$APP_STAGECRAFT_OAUTH_TOKEN_STAGING DATABASE_ENGINE=$DATABASE_ENGINE_STAGING etc/deploy.sh staging
+    skip_cleanup: true
+    on:
+      branch: staging
+
+  - provider: script
+    script: APP_SIGNON_API_USER_TOKEN=$APP_SIGNON_API_USER_TOKEN_PRODUCTION APP_SECRET_KEY=$APP_SECRET_KEY_PRODUCTION REDIS_DATABASE_NUMBER=$REDIS_DATABASE_NUMBER_PRODUCTION APP_STAGECRAFT_OAUTH_TOKEN=$APP_STAGECRAFT_OAUTH_TOKEN_PRODUCTION DATABASE_ENGINE=$DATABASE_ENGINE_PRODUCTION etc/deploy.sh production
+    skip_cleanup: true
+    on:
+      branch: production

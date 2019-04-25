@@ -1,0 +1,22 @@
+language: elixir
+elixir: 1.7.3
+otp_release: 21.1
+sudo: false
+dist: trusty
+addons:
+  postgresql: "9.5"
+services:
+  - postgresql
+script:
+  - mix deps.get
+  - mix compile --warnings-as-errors
+  - mix test
+  #- mix dialyzer
+after_script:
+  - MIX_ENV=docs mix deps.get
+  - MIX_ENV=docs mix inch.report
+  - MIX_ENV=test mix coveralls.travis
+cache:
+  directories:
+    - _build
+    - deps

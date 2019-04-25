@@ -1,0 +1,64 @@
+language: ruby
+rvm:
+- 2.4.1
+sudo: required
+
+cache: bundler
+
+before_install:
+  - set -e
+  - if [ "${TRAVIS_TAG?}" ]; then
+      AWS_BUCKET="assets.datacite.org";
+      RACK_ENV="production";
+      cp .env.master .env;
+      AUTO_DEPLOY=true;
+    elif [ "$TRAVIS_BRANCH" == "master" ]; then
+      AWS_BUCKET="assets.test.datacite.org";
+      RACK_ENV="stage";
+      cp .env.stage .env;
+      CLOUDFRONT_DISTRIBUTION_ID=$CLOUDFRONT_DISTRIBUTION_ID_STAGE;
+      AUTO_DEPLOY=true;
+    else
+      AUTO_DEPLOY=false;
+    fi
+
+  - wget https://github.com/jgm/pandoc/releases/download/1.15.2/pandoc-1.15.2-1-amd64.deb
+  - sudo dpkg -i pandoc-1.15.2-1-amd64.deb
+  - rm pandoc-1.15.2-1-amd64.deb
+
+install:
+  - bundle install
+  - sudo pip install awscli
+
+before_script:
+  - cd vendor && npm install
+  - cd ../
+
+script:
+  - bundle exec hologram -c hologram.yml
+  - bundle exec middleman build -e $RACK_ENV
+
+deploy:
+  provider: s3
+  access_key_id: $AWS_ACCESS_KEY
+  secret_access_key: $AWS_SECRET_KEY
+  bucket: $AWS_BUCKET
+  region: eu-west-1
+  skip_cleanup: true
+  local_dir: build
+  acl: public_read
+  cache_control: "max-age=31536000"
+  on:
+    all_branches: true
+
+after_deploy:
+  - export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY
+  - export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_KEY
+  # Allow `awscli` to make requests to CloudFront.
+  - aws configure set preview.cloudfront true
+  # Invalidate every object in the targeted distribution.
+  - aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_DISTRIBUTION_ID --paths "/*"
+
+notifications:
+  slack: datacite:Wt8En0ALoTA6Kjc5EOKNDWxN
+  email: false

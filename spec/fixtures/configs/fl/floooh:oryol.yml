@@ -1,0 +1,47 @@
+# force old non-container infrastructure, to see whether this
+# is the reason why the IO test hangs
+sudo:   true
+git:
+  depth: 3
+language: cpp
+compiler: gcc
+os: 
+  - osx
+  - linux
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+      - george-edison55-precise-backports # cmake 3.x
+    packages:
+      - cmake
+      - cmake-data
+      - gcc-4.8
+      - g++-4.8
+      - libglu1-mesa-dev
+      - xorg-dev
+      - libasound2-dev
+
+install:
+  - echo $TRAVIS_OS_NAME
+  # LINUX
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.8 50; fi
+
+script:
+  - echo $TRAVIS_OS_NAME
+  - cmake --version
+
+  # LINUX
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then python fips set config linux-make-unittest; fi
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then python fips clean all; fi
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then python fips build; fi
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then python fips make test; fi
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then python fips build linux-make-profiling; fi
+
+  # OSX
+  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then python fips set config oryol-osx-unittest-headless; fi
+  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then python fips clean all; fi
+  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then python fips make ALL_BUILD; fi
+  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then python fips make RUN_TESTS; fi
+  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then python fips build osx-make-profiling; fi
+

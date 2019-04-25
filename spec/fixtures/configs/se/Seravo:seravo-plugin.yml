@@ -1,0 +1,37 @@
+sudo: false
+
+language: php
+
+php:
+  - '5.6'
+  - '7.0'
+  - '7.2'
+  - '7.3'
+  - nightly
+
+matrix:
+  include:
+    # Arbitrary PHP version to run the sniffs against.
+    - php: '7.2'
+      env: SNIFF=1
+  allow_failures:
+  - php: nightly  # Old phpunit not compatible with PHP 8.0.0 yet
+
+before_install:
+  # Set the target directories and versions for PHP_CodeSniffer and WP Coding Standards.
+  - if [[ "$SNIFF" == "1" ]]; then export PHPCS_DIR=/tmp/phpcs; export PHPCS_VERSION=3.3.2; fi
+  - if [[ "$SNIFF" == "1" ]]; then export SNIFFS_DIR=/tmp/sniffs; export SNIFFS_VERSION=1.0.0; fi
+  # Install PHP_CodeSniffer.
+  - if [[ "$SNIFF" == "1" ]]; then wget https://github.com/squizlabs/PHP_CodeSniffer/archive/$PHPCS_VERSION.tar.gz -O $PHPCS_VERSION.tar.gz && tar -xf $PHPCS_VERSION.tar.gz && mv PHP_CodeSniffer-$PHPCS_VERSION $PHPCS_DIR; fi
+  # Install WordPress Coding Standards.
+  - if [[ "$SNIFF" == "1" ]]; then wget https://github.com/WordPress-Coding-Standards/WordPress-Coding-Standards/archive/$SNIFFS_VERSION.tar.gz -O $SNIFFS_VERSION.tar.gz && tar -xf $SNIFFS_VERSION.tar.gz && mv WordPress-Coding-Standards-$SNIFFS_VERSION $SNIFFS_DIR; fi
+  # Set install path for WordPress Coding Standards.
+  - if [[ "$SNIFF" == "1" ]]; then $PHPCS_DIR/bin/phpcs --config-set installed_paths $SNIFFS_DIR; fi
+  # After CodeSniffer install you should refresh your path.
+  - if [[ "$SNIFF" == "1" ]]; then phpenv rehash; fi
+
+script:
+  # Syntax check all php files and fail for any error text in STDERR
+  - '! find . -type f -name "*.php" -exec php -d error_reporting=32767 -l {} \; 2>&1 >&- | grep "^"'
+  # More extensive PHP Style Check
+  - if [[ "$SNIFF" == "1" ]]; then $PHPCS_DIR/bin/phpcs -i; $PHPCS_DIR/bin/phpcs -n --standard=phpcs.xml; fi

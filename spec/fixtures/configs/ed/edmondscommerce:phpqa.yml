@@ -1,0 +1,16 @@
+# see http://about.travis-ci.org/docs/user/languages/php/ for more hints
+language: php
+
+git:
+  depth: false
+
+matrix:
+  include:
+    - php: 7.2
+      env: phpunitCoverage="1"
+
+before_script: bash -x qaConfig/ci/travis/before.bash
+
+script: bash -x ci.bash
+
+after_script: bash -x qaConfig/ci/travis/after.bash

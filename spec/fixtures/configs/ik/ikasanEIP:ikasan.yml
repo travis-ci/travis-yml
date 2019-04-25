@@ -1,0 +1,14 @@
+sudo: false
+language: java
+jdk:
+  - openjdk8
+cache:
+  directories:
+  - $HOME/.m2  
+install: true
+script:  
+  - echo "<settings><localRepository>/home/travis/.m2/repository</localRepository><servers><server><id>ikasaneip-snapshots</id><username>\${env.OSS_IKASAN_USER}</username><password>\${env.OSS_IKASAN_PASS}</password></server></servers><activeProfiles><activeProfile>securecentral</activeProfile></activeProfiles><profiles><profile><id>securecentral</id><repositories> <repository><id>ikasaneip-snapshots</id><url>http://oss.sonatype.org/content/repositories/snapshots/</url><releases><enabled>false</enabled></releases><snapshots><enabled>true</enabled></snapshots></repository><repository><id>ikasaneip-releases</id><url>http://oss.sonatype.org/content/repositories/releases/</url><releases><enabled>true</enabled></releases><snapshots><enabled>false</enabled></snapshots></repository>		<repository><id>central</id><url>https://repo1.maven.org/maven2</url><releases><enabled>true</enabled></releases></repository></repositories><pluginRepositories><pluginRepository><id>central</id><url>https://repo1.maven.org/maven2</url><releases><enabled>true</enabled></releases></pluginRepository></pluginRepositories></profile></profiles></settings>" > ~/settings.xml
+  - cd ikasaneip
+  - if [[ $TRAVIS_BRANCH == "2.1.0" ]]; then mvn clean deploy -Dmaven.javadoc.skip=true -Pall -B  -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn -V --settings ~/settings.xml; else mvn clean install -Dmaven.javadoc.skip=true -Pall -U -B -V --settings ~/settings.xml; fi
+
+

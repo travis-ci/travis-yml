@@ -1,0 +1,21 @@
+dist: trusty
+sudo: false
+
+language: go
+
+go:
+  - 1.12.4
+
+branches:
+  only:
+    - master
+
+env:
+  # Enforce gomodules since Travis' workers download in the GOPATH where gomod is disabled by default.
+  - GOMAXPROCS=4 CONSUL_VERSION=1.4.2 CONSUL_BIN_PATH=~/bin/consul GO111MODULE=on
+
+before_script:
+  - make download-consul
+  - export PATH="~/bin:$PATH"
+
+script: make test

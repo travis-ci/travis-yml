@@ -1,0 +1,32 @@
+language: python
+
+python:
+    - "2.7"
+    - "3.3"
+    - "3.4"
+    - "3.5"
+    - "3.6"
+
+before_script:
+    - pip install -r requirements.txt
+    - pip install coveralls
+
+script:
+    - nosetests --with-coverage tests/test-tests.py
+    - nosetests --with-coverage tests/test-utils-globals.py
+    - nosetests --with-coverage tests/test-utils-console.py
+    - nosetests --with-coverage tests/test-utils-aws.py
+    - nosetests --with-coverage tests/test-utils-fs.py
+    - nosetests --with-coverage tests/test-utils-profiles.py
+    - nosetests --with-coverage tests/test-utils-threads.py
+    - nosetests --with-coverage tests/test-utils-cli_parser.py
+    - nosetests --with-coverage tests/test-utils-credentials.py
+    - nosetests --with-coverage tests/test-utils-conditions.py
+    - nosetests --with-coverage tests/test-services-cloudformation.py
+    - nosetests --with-coverage tests/test-services-cloudtrail.py
+    - nosetests --with-coverage tests/test-services-iam.py
+    - nosetests --with-coverage tests/test-services-organizations.py
+    - nosetests --with-coverage tests/test-services-s3.py
+
+after_success:
+    - coveralls

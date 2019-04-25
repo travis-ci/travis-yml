@@ -1,0 +1,63 @@
+language: python
+
+os: linux
+
+# Use Ubuntu Xenial (16.04 LTS) environment.
+dist: xenial
+
+cache:
+  - ccache
+  - pip
+services:
+  - docker
+
+env:
+  global:
+    - BUILD=pytest
+
+matrix:
+  include:
+    - python: 2.7
+      env: TOX_ENV="py27-{generator,noaccel,accel-nix,streams}"
+    - python: 3.4
+      env: TOX_ENV="py34-{generator,noaccel,accel-nix,streams}"
+    - python: 3.5
+      env: TOX_ENV="py35-{generator,noaccel,accel-nix,streams}"
+    - python: 3.6
+      env: TOX_ENV="py36-{generator,noaccel,accel-nix,streams}"
+    - python: 3.7
+      env: TOX_ENV="py37-{generator,noaccel,accel-nix,streams}"
+    - env: BUILD=cmake
+
+install:
+  - |
+    if [[ $BUILD == pytest ]]; then
+      pip install tox
+    else
+      wget https://github.com/grammarly/rocker/releases/download/1.3.1/rocker-1.3.1-linux_amd64.tar.gz
+      tar xvf rocker-1.3.1-linux_amd64.tar.gz
+      rm rocker-1.3.1-linux_amd64.tar.gz
+    fi
+
+before_script:
+  - |
+    if [[ $BUILD != pytest ]]; then
+      mkdir -p -m777 ~/.ccache
+    fi
+
+script:
+  - |
+    if [[ $BUILD == pytest ]]; then
+      tox -e $TOX_ENV
+    else
+      ./rocker build -f docker/Rockerfile.piglit ${DOCKER_TAG:+--var TAG=}${DOCKER_TAG} ${DOCKER_IMAGE:+--var IMAGE=}${DOCKER_IMAGE} ${DOCKER_PARENT:+--var PARENT=}${DOCKER_PARENT} .
+    fi
+
+after_success:
+  - |
+    if [[ $BUILD != pytest ]]; then
+      if [[ -n $DOCKER_IMAGE && -n $DOCKER_TAG && -n $DOCKER_USERNAME && $TRAVIS_BRANCH == master ]]; then
+        docker login -u "${DOCKER_USERNAME}" -p "${DOCKER_PASSWORD}"
+        docker push "${DOCKER_IMAGE}":"${DOCKER_TAG}"
+      fi
+    fi

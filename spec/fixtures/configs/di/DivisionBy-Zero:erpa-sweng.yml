@@ -1,0 +1,53 @@
+matrix:
+  include:
+    - language: python
+      cache: pip
+      python:
+        - 3.6
+      before_install:
+        - cd server/
+      install:
+        - pip install -r requirements.txt
+      script:
+        - pytest -r a
+    - language: android
+      android:
+        components:
+          # The BuildTools version used by your project
+          - build-tools-28.0.3
+          # The SDK version used to compile your project
+          - android-28
+          # The SDK version used by the system image
+          - android-22
+          # The system image, to run an emulator during the tests
+          - sys-img-armeabi-v7a-android-22
+      before_cache:
+        - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+        - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+      cache:
+        directories:
+          - $HOME/.gradle/caches/
+          - $HOME/.gradle/wrapper/
+          - $HOME/.android/build-cache
+      before_script:
+        # Emulator Management: Create, Start and Wait
+        - echo no | android create avd --force -n test -t android-22 --abi armeabi-v7a
+        - QEMU_AUDIO_DRV=none emulator -avd test -skin 720x1280 -no-window &
+        # Let's build while the emulator is starting up...
+        - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter # Code climate test reporter
+        - chmod +x ./cc-test-reporter
+        - ./cc-test-reporter before-build
+        - ./gradlew build
+        # Let's run the server tests while the emulator is starting up...
+        - android-wait-for-emulator
+        - adb shell settings put global window_animation_scale 0
+        - adb shell settings put global transition_animation_scale 0
+        - adb shell settings put global animator_duration_scale 0
+        - adb shell input keyevent 82
+      script:
+        - ./gradlew build connectedCheck jacocoTestReport --info
+      after_script:
+        # Report test coverage to Code Climate
+        - export JACOCO_SOURCE_PATH=app/src/main/java/
+        - ./cc-test-reporter format-coverage -d ./app/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml --input-type jacoco
+        - ./cc-test-reporter upload-coverage -d

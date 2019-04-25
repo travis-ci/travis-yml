@@ -1,0 +1,34 @@
+language: node_js
+sudo: required
+services: docker
+
+node_js:
+  - "10"
+
+before_script:
+  - make build db # db - for make test
+    #  - make generate-funding-address # won't work for KIN3 as it's missing whitelisting step
+  - mkdir -p ./secrets/ &&
+    echo export STELLAR_BASE_SEED=${STELLAR_BASE_SEED} STELLAR_ADDRESS=${STELLAR_ADDRESS} > ./secrets/.secrets
+  - make create-jwt-keys
+  - make build-image
+  - make db-docker
+  - NODEMON_WATCH_DIRS="-w /no_such_dir" make up
+
+script:
+  - make test
+  - ./node_modules/codecov/bin/codecov
+  - make test-system-docker
+
+after_failure:
+  - make logs
+
+branches:
+  only:
+    - master
+
+deploy:
+  provider: script
+  script: echo "pushing docker image" # && docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD" && make push-image
+  on:
+    branch: master

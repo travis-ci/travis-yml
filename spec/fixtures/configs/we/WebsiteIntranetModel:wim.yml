@@ -1,0 +1,34 @@
+sudo: required
+group: deprecated-2017Q2
+
+language: php
+
+php:
+  - 7.1
+
+env:
+  DOCKER_COMPOSE_VERSION: 1.6.2
+
+services:
+  - docker
+
+before_install:
+  - cd ../..
+  - mv ./WebsiteIntranetModel ./profiles
+  - cd ./profiles/wim
+  - sudo apt-get update
+  - sudo apt-get -y -o Dpkg::Options::="--force-confnew" install docker-engine
+  - docker --version
+  - sudo rm /usr/local/bin/docker-compose || true
+  - curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
+  - chmod +x docker-compose
+  - sudo mv docker-compose /usr/local/bin
+  - docker-compose --version
+  - docker-compose -f docker-compose.yml up -d
+  - docker ps -a
+
+script:
+  - docker exec -i wim_web bash /root/dev-scripts/install/install-script.sh
+  - docker exec -i wim_web bash /root/dev-scripts/check-coding-standards.sh
+  - docker exec -i wim_web bash /root/dev-scripts/tests/unit-tests.sh
+  - docker exec -i wim_web bash /root/dev-scripts/behatstability.sh

@@ -1,0 +1,25 @@
+dist: trusty
+language: ruby
+cache: bundler
+bundler_args: "--without guard --deployment"
+sudo: false
+rvm:
+- 2.4.0
+addons:
+  apt:
+    packages:
+    - cmake
+before_script:
+- mysql -e 'create database chalmersit_test;'
+- "/bin/cp $TRAVIS_BUILD_DIR/config/secrets.example.yml $TRAVIS_BUILD_DIR/config/secrets.yml"
+- RAILS_ENV=test bundle exec rake db:migrate db:seed --trace
+script:
+- RAILS_ENV=test bundle exec rspec
+notifications:
+  email: false
+  irc:
+    channels:
+    - irc.chalmers.it#digIT-CI
+    skip_join: true
+  slack:
+    secure: TzKKBuirNnxuPI8mtMbtFd4yW3Y4rpe34KJcsfKrNAQwYhYPN4cv5Xel4+6fj50I49RSJKpdUige1lhPMP3V1VocIy5zunPUoPMR5LPSgmbqRHNEbLMr9LiUplIk7v3xSY6DDMSKd3+K9tGUWge+34/8o9bmgtitQrEowSW4hnk=

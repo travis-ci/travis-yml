@@ -1,0 +1,22 @@
+language: python
+
+# This (sudo: false) is needed to "run on container-based infrastructure" on
+# which cache: is available
+# https://docs.travis-ci.com/user/workers/container-based-infrastructure/
+sudo: false
+
+# https://docs.travis-ci.com/user/caching/
+cache: pip
+
+env:
+  - SPHINXOPTS="-W" SPHINX_VERSION=1.2.3
+  - SPHINXOPTS="-W" SPHINX_VERSION=latest
+
+before_install:
+  - if [[ $SPHINX_VERSION != 'latest' ]]; then pip install Sphinx==1.2.3; fi
+  - if [[ $SPHINX_VERSION == 'latest' ]]; then pip install Sphinx; fi
+  - pip install docutils==0.12
+
+script:
+  - if [[ $SPHINX_VERSION != 'latest' ]]; then make clean html; fi
+  - if [[ $SPHINX_VERSION == 'latest' ]]; then make clean html; fi

@@ -1,0 +1,12 @@
+language: ruby
+rvm:
+- 2.6.2
+sudo: false
+before_script:
+  - cp config/database.travis.yml config/database.yml
+  - psql -c 'create database hpi_hiwi_portal_test;' -U postgres
+before_install:
+  - gem install bundler
+git:
+  submodules: false
+cache: bundler

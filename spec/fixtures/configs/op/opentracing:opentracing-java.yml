@@ -1,0 +1,56 @@
+# Run `travis lint` when changing this file to avoid breaking the build.
+# Default JDK is really old: 1.8.0_31; Trusty's is less old: 1.8.0_51
+# https://docs.travis-ci.com/user/ci-environment/#Virtualization-environments
+sudo: false
+dist: trusty
+
+cache:
+  directories:
+  - $HOME/.m2
+
+language: java
+
+jdk:
+  - oraclejdk8
+
+addons:
+  apt:
+    packages:
+      - oracle-java8-installer
+
+before_install:
+  # allocate commits to CI, not the owner of the deploy key
+  - git config user.name "opentracingci"
+  - git config user.email "opentracingci+opentracing@googlegroups.com"
+  # setup https authentication credentials, used by ./mvnw release:prepare
+  - git config credential.helper "store --file=.git/credentials"
+  - echo "https://$GH_TOKEN:@github.com" > .git/credentials
+
+install:
+  # Override default travis to use the maven wrapper
+  - ./mvnw install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
+
+script:
+  - ./travis/publish.sh
+
+# Don't build release tags. This avoids publish conflicts because the version commit exists both on master and the release tag.
+# See https://github.com/travis-ci/travis-ci/issues/1532
+branches:
+  except:
+    - /^[0-9]/
+
+after_success:
+  - mvn jacoco:report coveralls:report
+
+env:
+  global:
+  # Ex. travis encrypt -r org/repo BINTRAY_USER=your_github_account
+  - secure: "QHoScwXVjj9mTZJuQ59jFvPr7Ri6tVgUyydk8Ba8CYDdgdNfnRzs3PW55g5iuC8Q8DJG6dsNfwWtYCagD8XIZw3bVE4Ic9hJJeOrY7PbaoB9gFb/emRYk83Z91xoYMXtaRCiOsxnXqMeyPd4rAc0mNOL5N00DjGVsDJp7BX4tAz0AL6mF4FNIkuuBIh7EEDpOJPSm4NXjUICaDQ8LETIVN69XvbVyoCu0lA2XIeSkXMq8O3izon4bch+fXe15z3LoWQQlmeK0YlEUZifPlIabIWErHEmjVrMVanIJu8B5SIF58pMhZ3AGL8PRBszDjMS+847LWCvW/VHsL9Le8pYXIxXksKw+DmioxudXV5jugDVy2qKsSIlUkP4MVFPwC4PktbFmn6lnYaN6YXoKj9dnGP5YjtWJdzHHqB9ovVWGq/XwI1m/V4KsMEUkX+PDlUoAa0C5iH1gCRGWfLwPw59wmxaBpsPQgAk1/2ynhNU2Q4TWDc167fZyu2O8to+nAKLX1gyLnsSKjstfWdg8LUGJJSzpNJ9OFJu1lxR/W/RQGy3Yg4nINC+nsBCBis7yRYcWHu1dm42ReFKPpzJgM2f06Hg5IA734NJFYeiHdC5mwdUNvpy/aKb30FljwhRnsczJnH9GKKi3vpTXzf0SU9VJPEuB2MwzUn6ZnI8cNtWE8U="
+  # Ex. travis encrypt -r org/repo BINTRAY_KEY=xxx-https://bintray.com/profile/edit-xxx --add
+  - secure: "PAtbtImeyHnjFR+yPVKggZgXb4oMXchM6YV3+qoYs6LExiqhwRPe4e+gAhfLESHUjiEoixAM77eAuk3Cqpklwtpy3Qwh3ptDtNm1d3VycDbhMVHkeIGaCJlHTitJHwegAHedrqH4qS3sRCG1Ke5Dxs1z1NtuLnIKhoiWKMW9SdNuLt+Wo+uYJnlr2Z78AVrChSsV4CiaJ5jZlFhRHO+cf22Xdx69Z2Imh7/3X+WBXIKqqNewegBlzvtQzZsknhFHmQV8UTJ1lCw6EcGOw5DXqqcRGmkRMsITeGMaUMd21Es2MeIHVsNS6aysLeAF15pbo3C9nhGJ11JWwNaeBVSpK+s8friNEOssJdvn+2W/NKrEHeKcEDwZRqKbOqUeGkwHb4n2nZd3oqc6/0O4Wf3q4bB1Dsh1PpL0tE5oeIbeUT0JMpk+MHIxzHyt5HuPnNqCk09psNbr110DiYNNddJKZOcv/hfxTuao55tbcg7C1tWYYcFxyMN3hE+EOEqhs3e4vOldFZSuF4/3lLYKBPl+Uin8eIUdzNQ01L3iy+FdB1haLS9V+kr72ZYABW0VdAj3Sw2GGsLsv5Xw2p8U3rcJBRm4mzrMSdfdN9YX2pOA/1Ch9rOiercKoy0hg2Q8PkORBJcOKS4uGPAAqrazAkpdih+sDTn7Sq+6sN1UNUR33fw="
+  # Ex. travis encrypt -r org/repo GH_TOKEN=XXX-https://github.com/settings/tokens-XXX --add
+  - secure: "p1Z3Y8cbgEpOrlejqzoR91DGlrdkCjaErDn1EfUj7AdB+B1KtYvy6XGMRfB2YTiHucK/4wFFbxgkchoqDWM/N8h+oCDi0ogJ1BmIFsb4alQJnotrDSrpI4fxAK+e0jlNrLi9PYYEftSVVh71lo6zKIE41wflK+wm90XJtf56cOSDd7q7Xip2qPP5OXcpu49Arce60+jCp2jLa+4pMiqvXQAZTsrkXdMDiPYgRfNqjT5qJ+fTNF/soIH0Vdy3yEbwrx/CwRSxumZ3ntyXZ7bxiUIMjRIhwO50nigBNJzHJqYaeguEKhfugWk+iSqxaZf9LVbSfG3c/IsvCFzna8BjSs9SV9DUe8a7x7OcvU3wlnSd4bPCvv4QDLsLfbbxhNbYg3asvRHUAOXxudA5LoLK+eZwD74efr/CHyU1uTPMwgNHUxPeLHFQJRYjq1+NTQFkp/Dc+DC8oYRv/Tf1eSHgg5d3j84eU/cClSsACf9Lt3GLziDmJCkctPA22CkrWULKSn/DrvsJqYfoBpof4AM1QBPIB2MuKuk1nHJ+vhBnfeP4bKFsMjZWZrRcWw9zt2zl7NVJFh/W4wMHiq75ZF+Z7msYKCB22e7buMTnDqNBapO6PEXmk6972Q00QmI+rFMYGEpRDgbxZixMVRcPL+89EWhAZplfbI+YiOoSZQEFPNU="
+  # Ex. travis encrypt -r org/repo SONATYPE_USER=your_sonatype_account
+  - secure: "oE16AjpS/aabLRNkQN6SmyfYJwCwBqYOvqyhPPZCYDYfZpBtJHugUXdds9GYc6BXfgPKF3QJQ727dPqXrmbh9UPkSyE1LYv1De/HbGsPmwBn+S2fg1Id2BrV3qVPg7aYaO8EX0zIxfh5BxY0woC4Lj9Wl5EbTYf00h/JhCaKr1ZYR9/gzG8Ngyexr+FLlKFCKhka+3iEcwCz8feyxcPCsgGo3TiNI42Q9cLGpqGAuStQcwUZe2296qQd1Zn9khZYpP5bm7+mOCI62xXI+PEIES+ss/kB8b9pfUiHgfxtKS6gs4I3oDEelJw3fjrHdsgMs6YfLTPp9yKMMqSIzcp4dmqOf5zxadCKQ+eETervLJEngZAwzuAvdeh8/9Az8eN96FDfKWrf8tkbkdzY9Ajqk5qra4vx87ChQ/u6Am9OV6dqwIBU4i7sBUa55jXQns8gE2nT+R0xAM57Arolr768QriPAiUlom8AmeUryUWj1S8JC+jjNhw0v9wFk2JEkrY1WBrCStnCYAPZ3CP5uoNGsQS42t0Cd05TtjHjnJE8EHfHHFiWSF1+ov7GkAQQXqH473T1Be7HPJo9EQ5PRsea5li2AtTU80dBuCaeqBnE6Tm1kuiVDrDo3kO/+C5fjF065z1Xvl42pcJhlYH/uNItQbGiFfcBP6hT3szVIDeSElc="
+  # Ex. travis encrypt -r org/repo SONATYPE_PASSWORD=your_sonatype_password
+  - secure: "jWfEmREf5VjjJwvlAA+11a8DYQa4ZZzhfUOkUObO0do1fG+aQtMKndesa0h8xETGggySEc5nn0e7THJ5EjBlppNtH7LqK1bfgTF4PlkMwHOkhGjLaoxCpT0HVyAaWUEZdD8uGwiY+NkLc3AC06fhB3MjpMbM82tOWXOpWLxnLpLgqP9L1DM/9uWiD36T3k6vkVABHGoGmQPgyXiTL6NHhNLVlI44L++ddXHGxrCEOs4oFhP7MXtR5T+51Bdalpj6eko4nP4/mve+5KMH8mzays04YX0F2TxtCXmgqLAeHE5AWm/A++85bJqnIwyApdT0A1NQR2GAJN6FyeA/zTCslbIMt2sqg0auXikCRbkwhom56E6KDbnyXoE9VfViMmaTT9FF/d3vIV29BiCitfbVmUMXcsFQEljhPigbva3ayHHdOsBbI2KTvH+rbzPHv6Jqp0TQJlE9qU2qTVS2bWHPyOltbyx2KiSJUwx5zqsC20J7lnPgqWCYXEVzyS2wwzFm752bxIRGAeghgVVdTnPST1Lu7Z/LQ3Vt827juk1qAU9HzVPu+OmJS6os0EIzAWZoC9KksYvslv0mUlmc5IbEDqdqK5MA/bw72Vv8KOlVbJPQ5XC26utF/44Gn35nx8OI/yg1Qkdoj/iISnk4b/oCOLr9l39xsTZUj7HhrnlLbbM="

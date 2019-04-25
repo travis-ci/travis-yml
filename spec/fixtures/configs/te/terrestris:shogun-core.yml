@@ -1,0 +1,38 @@
+language: java
+
+cache:
+  directories:
+  - "$HOME/.m2"
+sudo: false
+
+env:
+  global:
+  - secure: Njr6RXyoqC3fJuuKCXD9h02UoKXDy9JOLNFT7aqYx7ALmfaqJ22zXRAKjGd4LxRL4EZfnHEHuF8IlLFf2kjEUdTN9jnLYmVfUXgrjn2jzdcXOMrHh+g1DarVERa8uyn4Smnqqr/PJtONjhmhQprEN9z8e2kEWE4tI7pNv5mPycU=
+  - secure: QB/e970WId8+N6wxnyzPAbKf46xKmnf4rYWUw53N6F2qHwFZpih1PiiQI4UgOxVKz4MeYMm4eF1LWKz7Dlfdl9ULcvN+D5j1s+fgHb+qeqnAAlCiT5iZ5iCb/EZq6YLHJauNarryuF5WFIwMtbx25r+ULCCwD4Rg/O2sa9WOyJc=
+before_install:
+  - wget https://raw.githubusercontent.com/sormuras/bach/master/install-jdk.sh
+  - chmod 755 install-jdk.sh
+matrix:
+  include:
+    - env: JDK='openjdk8'
+      install: echo 'using built in jdk'
+    - env: JDK='openjdk11'
+      install: ./install-jdk.sh -f 11
+before_script:
+  - cd src/
+  - export JAVA_HOME=$(for file in $HOME/*jdk*; do if (test -d "$file") then echo $file; fi; done)
+  - mvn -v
+  - mvn --batch-mode -DskipTests=true install
+script:
+  - mvn -v
+  - export JAVA_HOME=$(for file in $HOME/*jdk*; do if (test -d "$file") then echo $file; fi; done)
+  - mvn --batch-mode --show-version clean test
+after_success:
+  - mvn clean test jacoco:report coveralls:report
+  - "../scripts/snapshot-release.sh"
+after_script:
+  - cd ..
+notifications:
+  email:
+    on_success: never
+    on_failure: never

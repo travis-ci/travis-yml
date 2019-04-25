@@ -1,0 +1,126 @@
+# -*- mode: yaml; tab-width: 4; indent-tabs-mode: nil -*-
+#
+# Copyright (C) 2012 Kitanda <info@kitanda.co.uk>
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+# MA 02110-1301, USA.
+#
+sudo: required
+dist: trusty
+language: cpp
+cache: ccache
+
+git:
+  depth: 2
+
+matrix:
+  allow_failures:
+    # GCC  it timing out
+    - os: linux
+      compiler: gcc
+      env: configuration=Release compiler="gcc8" generator="Ninja" build_group="Continuous" report_name="Linux Gcc Releases"
+    - os: linux
+      compiler: gcc
+      env: configuration=Debug compiler="gcc8" generator="Ninja" build_group="Continuous"  report_name="Linux Gcc Debug"
+  include:
+    #
+    # OSX Clang
+    #
+    - os: osx
+      compiler: clang
+      osx_image: xcode10
+      env: deploy="1" configuration=Release compiler="clang" generator="Unix Makefiles" build_group="Continuous" report_name="OSX Clang Release"
+    - os: osx
+      compiler: clang
+      osx_image: xcode10
+      env: configuration=Debug compiler="clang" generator="Unix Makefiles" build_group="Continuous" report_name="OSX Clang Debug"
+    #
+    # Linux GCC
+    #
+    - os: linux
+      compiler: gcc
+      env: configuration=Release compiler="gcc8" generator="Ninja" build_group="Continuous" report_name="Linux Gcc Releases"
+    - os: linux
+      compiler: gcc
+      env: configuration=Debug compiler="gcc8" generator="Ninja" build_group="Continuous"  report_name="Linux Gcc Debug"
+    #
+    # Linux Clang
+    #
+    - os: linux
+      compiler: clang
+      env: deploy="1" configuration=Release compiler="clang8" generator="Ninja" build_group="Continuous" report_name="Linux Clang Release"
+    - os: linux
+      compiler: clang
+      env: coverage=1 configuration=Debug compiler="clang8" generator="Ninja" build_group="Continuous" report_name="Linux Clang Debug"
+
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+
+install:
+  - export MASD_DOGEN_PROJECTS_DIRECTORY=${TRAVIS_BUILD_DIR}/projects
+  - export MASD_CPP_REF_IMPL_PROJECTS_DIRECTORY=/tmp/cpp_ref_impl-master/projects
+  - export MASD_CSHARP_REF_IMPL_PROJECTS_DIRECTORY=/tmp/csharp_ref_impl-master/Src/
+  - export STAGE_DIR=${TRAVIS_BUILD_DIR}/build/output/${compiler}/${configuration}/stage
+  - export SCRIPTS_DIR=${TRAVIS_BUILD_DIR}/build/scripts
+  - source ${SCRIPTS_DIR}/travis.install.${TRAVIS_OS_NAME}.sh
+
+script:
+  - JOBS=2
+  - export BUILD_PROVIDER=travis
+  - export BUILD_COMMIT=${TRAVIS_COMMIT}
+  - export BUILD_NUMBER=${TRAVIS_BUILD_NUMBER}
+  - export BUILD_TIMESTAMP=`date "+%Y/%m/%d %H:%M:%S"`
+  - export CMAKE_TOOLCHAIN_FILE="/tmp/vcpkg-export/scripts/buildsystems/vcpkg.cmake";
+  - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then
+        export PATH="/usr/local/opt/ccache/libexec:$PATH";
+    fi
+  - ctest --extra-verbose --script ".ctest.cmake,configuration_type=${configuration},generator=${generator},compiler=${compiler},number_of_jobs=${JOBS},build_group=${build_group},minimal_packaging=1,boost_test_reporting=1";
+  - if [[ $TRAVIS_OS_NAME == 'linux' ]]; then
+        ${SCRIPTS_DIR}/test_package.linux.sh ${configuration} ${compiler};
+    fi
+
+after_script:
+  - curl -s https://report.ci/upload.py | python - --name "${report_name}"
+
+after_success:
+  - if [[ "x${coverage}" == "x1" ]]; then
+       ${SCRIPTS_DIR}/coverage.linux.sh ${STAGE_DIR} /tmp/kcov ${TRAVIS_JOB_ID};
+    fi
+
+notifications:
+  email:
+    recipients:
+      - marco.craveiro@gmail.com
+    on_success: change
+    on_failure: always
+
+  webhooks:
+    urls:
+      - https://webhooks.gitter.im/e/4691f5966730f6898869
+    on_success: always
+    on_failure: always
+
+deploy:
+  skip_cleanup: true
+  provider: bintray
+  file: "${TRAVIS_BUILD_DIR}/build/output/${compiler}/${configuration}/stage/pkg/bintray.json"
+  user: mcraveiro
+  key:
+    secure: IrFRrzzMnnFzj2s2hYctnvMjTf7HRe5uQVPcioAjbuNrxXX5XYmRH6ce8osxoRhcpQYS9ppCmrt8VbRBB57piWS3yKfM6WftDrmNQil7XwqowKAKm/VuX6K5psjJHRCYoNUAovwvfLmaLIWvVd+I+NkU48EXvflClXx13Qp8GtU=
+  on:
+    branch: master
+    condition: "${deploy} = 1"

@@ -1,0 +1,22 @@
+language: node_js
+cache:
+  directories:
+  - ~/.npm
+  - node_modules
+node_js:
+  - node
+notifications:
+  email: false
+install:
+- npm install
+- npm rebuild node-sass
+script:
+- npm run lint
+- npm run build-dev
+- npm run test
+after_success:
+  - npm install -g travis-deploy-once semantic-release @semantic-release/npm
+  - npm run travis-deploy-once "npm run semantic-release"
+branches:
+  except:
+    - /^v\d+\.\d+\.\d+$/
