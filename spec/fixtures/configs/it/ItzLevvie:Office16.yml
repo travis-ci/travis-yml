@@ -1,0 +1,18 @@
+language: node_js
+node_js: node
+group: travis_latest
+dist: xenial
+git:
+  depth: 1
+  quiet: true
+script:
+  - node *.js > defconfig
+  - echo $(date +%s) = $(date) > lastUpdated
+deploy:
+  provider: pages
+  edge: true
+  github-token: $GITHUB_TOKEN
+  skip-cleanup: true
+  target-branch: master
+  keep-history: true
+  committer-from-gh: true

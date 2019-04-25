@@ -1,0 +1,14 @@
+language: node_js
+notifications:
+  slack: dadi:pnhiL60xOrm7GOglHUmb7xHK
+  email: false
+node_js:
+  - '8'
+  - '10'
+before_script:
+  - npm prune
+branches:
+  except:
+    - /^v\d+\.\d+\.\d+$/
+before_install:
+  - sudo apt-get install libjpeg-dev libgif-dev

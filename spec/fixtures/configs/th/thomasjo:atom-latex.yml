@@ -1,0 +1,51 @@
+language: generic
+
+branches:
+  only:
+    - master
+
+git:
+  depth: 1
+
+os:
+  - linux
+  - osx
+
+sudo: false
+dist: trusty
+osx_image: xcode8
+
+env:
+  global:
+    - MAKE="make -j8"
+    - R_LIBS_USER=${HOME}/R/library
+    - APM_TEST_PACKAGES="language-latex pdf-view"
+  matrix:
+    - ATOM_CHANNEL=stable
+    - ATOM_CHANNEL=beta
+
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+      - r-packages-trusty
+    packages:
+      - gcc-6
+      - g++-6
+      - r-recommended
+      - freeglut3
+      - ghostscript
+
+cache:
+  directories:
+    - ${R_LIBS_USER}
+
+before_script:
+  - if [[ "${TRAVIS_OS_NAME:-}" == "linux" ]]; then export CC=gcc-6 CXX=g++-6; fi
+
+script: ./script/cibuild
+
+notifications:
+  email:
+    on_success: never
+    on_failure: change

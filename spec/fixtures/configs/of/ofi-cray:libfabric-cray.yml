@@ -1,0 +1,108 @@
+dist: trusty
+language: c
+compiler:
+    - clang
+    - gcc
+os:
+    - linux
+    - osx
+addons:
+    apt:
+        packages:
+            - rpm
+            - libnl-3-200
+            - libnl-3-dev
+            - libnl-route-3-200
+            - libnl-route-3-dev
+            - libnuma-dev
+# required for rdma-core
+            - build-essential
+            - debhelper
+            - dh-systemd
+            - fakeroot
+            - gcc
+            - git
+            - libudev-dev
+            - make
+            - ninja-build
+            - pandoc
+            - pkg-config
+            - python
+            - valgrind
+            - sparse
+            - wget
+            - abi-compliance-checker
+            - abi-dumper
+# 32 bit support packages
+            - gcc-multilib
+    ssh_known_hosts:
+        - www.openfabrics.org
+        - git.kernel.org
+
+env:
+    global:
+        - PREFIX=$HOME/install
+        - PATH=$PREFIX/bin:$PATH
+        - CPPFLAGS="-Werror -I$PREFIX/include"
+        - LDFLAGS=-L$PREFIX/lib
+        - LD_LIBRARY_PATH=$PREFIX/lib
+        - LIBFABRIC_CONFIGURE_ARGS="--prefix=$PREFIX --enable-sockets"
+
+# Brew update GNU Autotools so that autogen can succeed
+before_install:
+    - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update;
+        brew upgrade automake || true; brew upgrade libtool || true;
+      fi
+
+install:
+    - ./autogen.sh
+    # Build rdma-core because ubuntu trusty doesn't have a sufficiently new version of ibverbs/rdma-core
+    # Build verbs only in linux as OS X doesn't have verbs support
+    - if [[ "$TRAVIS_OS_NAME" == "linux" ]] ; then
+        RDMA_CORE_BRANCH=v13 ;
+        git clone --depth 1 -b $RDMA_CORE_BRANCH https://github.com/linux-rdma/rdma-core.git && cd rdma-core && bash build.sh && cd - ;
+        RDMA_CORE_PATH=$PWD/rdma-core/build ;
+        export LD_LIBRARY_PATH="$RDMA_CORE_PATH/lib:$LD_LIBRARY_PATH" ;
+        LIBFABRIC_CONFIGURE_ARGS="$LIBFABRIC_CONFIGURE_ARGS --enable-usnic
+        --enable-verbs=$RDMA_CORE_PATH --enable-mlx=$HOME/mlx";
+        UCX_BRANCH=v1.2.x;
+        git clone --depth 1 -b $UCX_BRANCH https://github.com/openucx/ucx.git && cd ucx && ./autogen.sh && ./configure --prefix=$HOME/mlx CFLAGS="-w" && make -j2 install && cd -;
+      fi
+    - if [[ "$TRAVIS_OS_NAME" == "linux" && "`basename $CC`" == "clang" ]]; then
+        ./configure CFLAGS="-Werror $CFLAGS" $LIBFABRIC_CONFIGURE_ARGS
+        --enable-debug && make -j2;
+      fi
+    # Test fabric direct
+    - ./configure --prefix=$PREFIX --enable-direct=sockets --enable-udp=no
+      --enable-psm=no --enable-gni=no --enable-psm2=no --enable-verbs=no
+      --enable-usnic=no --enable-rxm=no --enable-rxd=no --enable-mlx=no
+    - make -j2
+    # Test loadable library option
+    - ./configure --enable-sockets=dl --disable-udp --disable-rxm --disable-rxd
+      --disable-verbs --disable-usnic --disable-mlx --prefix=$PREFIX
+    - make -j2
+    - make install
+    - make test
+    - rm -rf $PREFIX
+    # Test regular build
+    - ./configure $LIBFABRIC_CONFIGURE_ARGS
+    - make -j2
+    - make install
+    - make test
+    - make distcheck
+    - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then make rpm; fi
+    # Prepare build for fabtests
+    - ./configure $LIBFABRIC_CONFIGURE_ARGS
+    - make -j2
+    - make install
+    - make test
+    - make distcheck
+    - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then make rpm; fi
+
+script:
+    - cd fabtests
+    - ./autogen.sh
+    - ./configure --prefix=$PREFIX --with-libfabric=$PREFIX
+    - make -j2
+    - make install
+    - make test

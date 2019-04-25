@@ -1,0 +1,65 @@
+language: go
+go_import_path: github.com/33cn/plugin
+os: linux
+dist: xenial
+
+notifications:
+  email: false
+matrix:
+  include:
+    - name: check_fmt
+      sudo: require
+      go: "1.11.x"
+      install:
+        - go get -u golang.org/x/tools/cmd/goimports
+        - go get -u gopkg.in/alecthomas/gometalinter.v2
+        - gometalinter.v2 -i
+        - go get -u mvdan.cc/sh/cmd/shfmt
+        - go get -u mvdan.cc/sh/cmd/gosh
+      script:
+        - make checkgofmt && make fmt_go
+        - make linter
+
+    - name: unit-test
+      go: "1.9.x"
+      install: skip
+      script:
+        - make test
+
+    - name: coverage
+      if: branch = master
+      go: "1.9.x"
+      before_install:
+        - go get -t -v ./...
+      install: skip
+      script:
+        - make coverage
+      after_success:
+        - bash <(curl -s https://codecov.io/bash)
+
+    - name: auto-test
+      go: "1.9.x"
+      install: skip
+      before_script: make build_ci
+      script:
+        - make autotest dapp=all
+
+    - name: deploy
+      if: env(DAPP) IS present
+      sudo: required
+      services:
+        - docker
+      env:
+        - DOCKER_COMPOSE_VERSION=1.21.2
+      install:
+        - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+        - sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+        - sudo apt-get update
+        - sudo apt-get -y -o Dpkg::Options::="--force-confnew" install docker-ce
+        - sudo rm /usr/local/bin/docker-compose
+        - curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
+        - chmod +x docker-compose
+        - sudo mv docker-compose /usr/local/bin
+      before_script: make build_ci
+      script:
+        - make docker-compose dapp=${DAPP} && make docker-compose-down dapp=${DAPP} && make clean

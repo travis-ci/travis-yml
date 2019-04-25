@@ -1,0 +1,16 @@
+language: php
+
+php:
+  - 7.1
+
+# Update composer
+before_install:
+  - phpenv config-rm xdebug.ini
+  - phpenv config-add travis.php.ini
+  - php -i | grep memory_limit
+  - composer self-update
+
+# Install composer dependencies,
+# Create database, schema and fixtures
+install:
+  - composer install

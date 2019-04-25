@@ -1,0 +1,37 @@
+language: ruby
+
+rvm:
+  - 2.3.3
+
+install:
+  - nvm install v8.4
+  - nvm use v8.4
+  - bundle install
+  - yarn
+
+cache: yarn
+
+script:
+  - yarn coverage
+  - yarn lint
+
+before_deploy:
+  - if [ "$TRAVIS_BRANCH" == "contents" ]; then yarn parse:catalog && yarn parse && yarn build; fi
+
+env:
+  global:
+    - NOKOGIRI_USE_SYSTEM_LIBRARIES=true # speeds up installation
+
+deploy:
+  provider: s3
+  access_key_id:
+    secure: JK+WanZoxlQmIca5cbm1dHLDyp/7uRKyYzGy8nAkzeakKHl1VWu3QKuitj/4kOyp1Uc9wO4iQTdMwDM/zSz8QVem4Zz9mYGq8YU/CBM+fDW2/To7Dw3VjJcbwQeGEV6vbFz42ACLv3kV9JAD9OiBWDOQPzdVAit656f2fYLBFcauYZdMGkomlSHnOQ7B9+xRsh+/4PfUIJVmsQNHvwN+AiuQqdu1IuC1317/QWNFheuE0zp0BwKGNsArDHCIgMo2pN4XHPZ20hk95FrRu2CquzcchAbc5tunt/1X9DeI0jhy04ePbzf6wncPjvDPKiFs+PcHbdE63RadK34OTCUriAJH6/FSNStRUTLzQGgn1/uS0SFTjMxYd2eUzkrn5HgOw4FaR9788J21+fy6IBVTL1zMkKpZuV5MNijR02n86BpwvAF3IWB3s0iVSpY/eabMj3KbRKvdNSWiQQ5hgfZ7FedfBDJtDMoW4WOhUPVKfy8qqY2F8Ohpi7Nc7NFKsrYIQpNO/IMjvNkAj8wyj30rj0cpPb4n3jVVWB2eduaAz2yCoy6u6J3OtCZgjn9zMU6gJ4P/Rermp12ak38P/4Gux4xztc2G4gMif+tSPuWK1ahaEPEpC9BdNWHGE6n9nEyc1bthYUji6hHss296j7/GQC0yzQHm0mDzL7KxcgILgqo=
+  secret_access_key:
+    secure: swYyrwCoe/UWEiD+Nger/tKwKSN2nATqFvJsQ2xh94nmYc2mS5zuu7SvjbFwwEjDdaIg/iMRTfV4Bdg7L+JrHYfL1mZyJ7X6H/jwQC1wKqny5K4Sup2TadCphygJZcArjFjE+R3G55iZhtH4tDOJ3FLiJK5qoGAXh82tDoosxq4df2e1aFaJis2rt7ApjPT7KVmfwndtnWMm72rqFXMZ0fMa4Dp7z3wn4elMJ9coMJGuBKF2mB64fmo3NsnEMormsrZ6ngpIOKmhq1NlP0/eaf9KZyOIiSuX5mIOaSIORaPH6Kv8yOXVBmD08moVot0qOlXdtm4LDM473o0Mx92jj325GHT/CNN3htBXpkfB4d3ps/Dsd0a3Hja+31loz1DhhoZHBdnR0agQyBgIWTuFMX6GcIartsSX2YmA+Rzc3ahzzIKC5NR7sqqVumdEjIeyb/JjroxsiKSObq3bCdevNdhGKK2OOP14RYS4fEbTxvQcZDBaN/wKnKeMQEH8bF17HcTl9HiHRXHJSlcAKVTLT5otvcJy83V5pOeEb7JD4zH5vhY02JZcPjqoVj1M6y3eJKILQmzpCRff/1fPc/k8HBu0kM/aCsGbToIcmpnXKFMaOYexroUgwiBCBMpspnYzyaKezCChb1M7ro4ZlvOACDGXd54FdxdbWN3crOrQwJQ=
+  bucket: 61d24de9db.cidr.stanford.edu
+  skip_cleanup: true
+  acl: public_read
+  region: us-east-1
+  local_dir: _site
+  on:
+    branch: contents

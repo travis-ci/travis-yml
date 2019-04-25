@@ -1,0 +1,29 @@
+notifications:
+  email: false
+dist: trusty
+sudo: false
+addons:
+  apt:
+    packages:
+    - python-numpy
+language: java
+jdk:
+- openjdk8
+- oraclejdk9
+before_script:
+- export DISPLAY=:99.0
+- sh -e /etc/init.d/xvfb start
+script:
+- ./gradlew check
+before_cache:
+- rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+- rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+cache:
+  directories:
+  - "$HOME/.gradle/caches/"
+  - "$HOME/.gradle/wrapper/"
+env:
+  global:
+    secure: pZe9nYywDB/fzjG6V6zrxEnX4nzfR41ixjqCsgW7BmM9oq8fhQXwmLnVslWb1pM3jCzZDa91NHdYkm0/h7VmgNvfk66k9UtpNSpWiEagCMRm3WEvnHU5+7+S2OzfxO9+VS0MVqOBTxVQBRFhiYtB6J+PPSRpHPX1TsG8JphNOXX9tC/KKKejWrw2hpuZJhvuBO55IER+vRAnh9BiqwejTAzqaEIZaqBXIg5dzi0NIIgdCJT43hoDPTqpBl7slfJhbm4dpVqxQYK+MzgydmqKQAqRCO9eSL1DhhfHSXnuFj7dCjFH2vAspbq/pQhnLRK6JeQVfHdlAeIXHfC+ac+DhihSq5h3YKYsDAoJ3HjCkQSTFnUplAUbikrsa4HXIQUzY1CdAew82fB8rj5gWr/TQAy4vjbGUqDPO4WwhlSMnLmsYA6JnSbxowgJU1KrHPuiQwa3QySNvK873cig62PQn21MxVFfqqZaKTw5QCrA+QBdQpDLOPo0tqd77Vnaog2CC3g0Gl9kAFu8tPoE0Muu3m6cWGAPTKZ+eHWqY9c0poZLxZMGqewHgexbt9lOhrLaPYJlbRBFiZ1ihMvJrZXdc06t+N0yfB+jICS7Ll2RtbXyTsjWMz5eaS6CVaZGN8MtvbX6M372GoTgtG0K0UGuFoK4EeZ+vNSSApnWi8y598Q=
+after_success:
+- "./publish_javadoc.sh"

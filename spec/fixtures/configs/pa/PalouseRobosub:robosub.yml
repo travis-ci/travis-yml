@@ -1,0 +1,62 @@
+language: generic
+sudo: required
+dist: trusty
+group: deprecated-2017Q2
+
+#slack integration
+notifications:
+  email: false
+  slack:
+    rooms:
+      - secure: "RjbqgUT8spj/yAu3BotRm+xzNiVAgO63zTyAYNLH2HusmdGZfsGwNNf0XxEUF2okUbRw8mWgSsrBKV2Deh9RE3HvTStjIgk9tJKDNCn/NKDQtK9Vtx/moOONefED1ib82bb0wpsLkc7W5jW159P0r9FhCSkRnsS2Up6+L0gmW0tlyOnfabvla2EV3Xctnw6afZs+GR905h+SsNRWfR4AAtOqyy/YClOFlnnCZ+MmZ/8Dzplp1HgYnjbBZ772h7TfS8N+LRstIMJ8fxWen6q8XlKlRqOHvrLhPwfNN+6527vzhkCY+W3FVGNQuk/6kS+W+HnhLFgxARaZwB3UNMLVYYYgVtJk/PybS3pLts30re9JNovf3bH8M1DL0JCGplStN5ZNnwNjGrqm/j+4hv64Y9H022wizQ8eE4CdGi7Jc8bNAIktbfiFLtJ05hVMrQ6u0H0NXtxODZZUcJmJFS1zsDs4ef4M4vdZ3bT5+CuQEcRggelwvB4sens+h8wCE8z5Z0OQ6ClvsW7FYUJtH+4uU+tnqlwtpgje1EYkrCjk3ZtFRMW5uSwW1f/ryGGUZkp56sxdnOTg95FsXmecECgb0nfCY0/4j/ULcP/zphUmsOjVk54ASvemI80mbQBrJCxTc/dXCxIDzDdANBwcdKglWFaYp0mLC9h4Daz391Wb5Ds="
+    on_success: always
+    on_failure: always
+
+#whitelist for branches to build
+branches:
+  only:
+    - master
+    - dev
+    - travisci
+
+#install dependencies
+addons:
+  apt:
+    sources:
+    - sourceline: 'deb http://packages.ros.org/ros/ubuntu trusty main'
+      key_url: 'https://raw.githubusercontent.com/ros/rosdistro/master/ros.key '
+    - sourceline: 'deb http://robosub.eecs.wsu.edu/repo/ /'
+      key_url: 'http://robosub.eecs.wsu.edu/repo/repository_key'
+    - sourceline: 'deb http://packages.osrfoundation.org/gazebo/ubuntu trusty main'
+      key_url: 'http://packages.osrfoundation.org/gazebo.key'
+    packages:
+    - robosub
+
+#most dependencies are installed from packages, install just does simulator if needed
+install:
+  - if [ "$TEST" == "true" ] ; then sudo apt-get install robosub-simulator; fi
+
+#build the project
+before_script:
+  - source /opt/ros/indigo/setup.bash
+  - cd ../ && mkdir src && mv robosub src/ && cd src
+  - git clone https://github.com/PalouseRobosub/robosub_msgs.git
+  - catkin_init_workspace
+  - cd ..
+  - if [ "$TEST" == "true" ] ; then cd src/; git clone https://github.com/PalouseRobosub/robosub_simulator.git; cd ../; fi
+
+script:
+  - if [ "$BUILD" == "true" ] ; then catkin_make; fi
+  - if [ "$TEST" == "true" ] ; then catkin_make; source devel/setup.bash; catkin_make run_tests; catkin_test_results; fi
+  - if [ "$LINT" == "true" ] ; then catkin_make roslint; fi
+
+matrix:
+  fast_finish: true
+  include:
+    - env: #does just the build work?
+      - BUILD=true
+    - env: #does the linter pass?
+      - LINT=true
+    - env: #do all tests pass?
+      - TEST=true
+

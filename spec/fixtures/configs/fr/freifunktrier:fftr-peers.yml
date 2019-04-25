@@ -1,0 +1,29 @@
+#thank you @freifunk-darmstadt for publishing https://github.com/freifunk-darmstadt/ffda-peers/blob/master/.travis.yml
+
+language: bash
+
+script:
+ - for f in * */* ; do echo "checking $f..."; if test -d "$f"; then echo "skipped directory"; else .travis/fastd --verify-config --config-peer $f || exit 1; fi; done
+ - grep --no-filename "key" * seg_*/* | egrep -o "[0-9a-f]{60,80}" | sort | uniq -d > /tmp/peers-dubchecker
+ - if [ -s /tmp/peers-dubchecker ]; then
+     echo -e '\x1b[31mfound duplicate keys:\x1b[0m';
+     cat /tmp/peers-dubchecker | while read i; do
+       echo -n "$i (";
+       grep -F "$i" -l -r . | egrep -o "(seg_[0-9]+/)?[-_0-9a-zA-Z]{0,80}" | while read node; do
+         echo -n "$node, ";
+       done | head -c -2;
+       echo ")";
+     done;
+     exit 1;
+   else
+     echo -e '\x1b[32mfound no duplicate keys\x1b[0m';
+   fi
+
+notifications:
+  irc:
+    channels:
+      - "irc.freenode.org#freifunk-trier"
+    on_success: change
+    on_failure: always
+    use_notice: false
+    skip_join: true

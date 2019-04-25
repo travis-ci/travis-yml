@@ -1,0 +1,38 @@
+language: python
+cache:
+  - pip
+  - yarn
+
+python:
+  - '3.6'
+  - '3.7-dev'
+
+matrix:
+  allow_failures:
+    - python: 3.7-dev
+
+addons:
+  postgresql: '9.6'
+
+services:
+  - postgresql
+  - redis-server
+  - docker
+
+install:
+  - make client
+  - pip install tox-travis
+
+script:
+  - yarn run lint
+  - tox
+  - make app
+
+deploy:
+  provider: script
+  script: bin/deploy.sh
+  on:
+    branch: master
+    tags: false
+    repo: pyslackers/website
+    python: '3.6'

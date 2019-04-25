@@ -1,0 +1,109 @@
+language: python
+
+python:
+  - 3.6
+
+sudo: false
+
+cache:
+  apt: true
+  pip: true
+  directories:
+    - $HOME/.cache/pip
+    - $HOME/.local
+
+addons:
+  apt:
+    sources:
+      - kalakris-cmake
+      - ubuntu-toolchain-r-test
+    packages:
+      - gfortran-6
+      - binutils
+      - cmake
+      - python-pip
+      - graphviz
+
+# Build matrix: Run the three build systems and tests in parallel
+env:
+  global:
+    - CHECK_README_PROGS="no"
+  matrix:
+      # CMake build with unit tests, no documentation, with coverage analysis
+      # No unicode so that coverage combined with the build script will cover unicode
+      # and non-unicode code paths
+    - >
+      BUILD_SCRIPT="mkdir cmake-build &&
+      cd cmake-build &&
+      cmake .. &&
+      make -j 4 check"
+      CODE_COVERAGE="no"
+      DEPLOY_DOCUMENTATION="no"
+
+      # build with build.sh, make documentation, run unit tests and perform coverage analysis
+    - >
+      BUILD_SCRIPT="./build.sh --coverage --skip-documentation &&
+      ./build.sh --coverage --enable-unicode"
+      CODE_COVERAGE="yes"
+      DEPLOY_DOCUMENTATION="yes"
+
+install:
+  - |
+    if [[ ! -d "$HOME/.local/bin" ]]; then
+      mkdir "$HOME/.local/bin"
+    fi
+  - export PATH="$HOME/.local/bin:$PATH"
+  - export FC=/usr/bin/gfortran-6
+  - ln -fs /usr/bin/gfortran-6 "$HOME/.local/bin/gfortran" && gfortran --version
+  - ls -l /usr/bin/gfortran-6
+  - ln -fs /usr/bin/gcov-6 "$HOME/.local/bin/gcov" && gcov --version
+  - perl --version
+  - |
+    if ! which f90split; then
+      wget http://people.sc.fsu.edu/~jburkardt/f_src/f90split/f90split.f90 && \
+      gfortran -o f90split f90split.f90 && \
+      mv f90split "$HOME/.local/bin/" && \
+      rm f90split.f90
+    fi
+  - pip install --upgrade pygooglechart
+  - pip install --upgrade graphviz
+  - (pip install --upgrade FoBiS.py==2.2.8 && FoBiS.py --version)
+  - (pip install --upgrade ford==6.0.0 && ford --version)
+  - (pip install --upgrade git+https://github.com/dmeranda/demjson.git && jsonlint --version)
+
+before_script:
+  - |
+    if [[ $CHECK_README_PROGS == [yY]* ]]; then
+      f90split README.md && \
+      for f in example*.md; do
+        mv $f src/tests/jf_test_${f%.md}.f90
+      done
+    fi
+  - |
+    if [ "$TRAVIS_TAG" ]; then
+      if [[ "v$TRAVIS_TAG" != "v$(cat .VERSION)" ]]; then
+        echo "ERROR: You are trying to tag a new release but have a version missmatch in \`.VERSION\`"
+        false # throw an error
+      fi
+    fi
+
+script:
+  - echo $BUILD_SCRIPT
+  - bash <<<$BUILD_SCRIPT
+
+after_success:
+  - cd $TRAVIS_BUILD_DIR
+  - git config --global user.name "TRAVIS-CI-for-$(git --no-pager show -s --format='%cn' $TRAVIS_COMMIT)"
+  - git config --global user.email "$(git --no-pager show -s --format='%ce' $TRAVIS_COMMIT)"
+  - |
+    if [[ $DEPLOY_DOCUMENTATION == [yY]* ]]; then
+      ./deploy.sh #publish docs for master branch and tags
+    fi
+  - (yes | rm -r doc gh-pages) || true # wipe out doc dirs to avoid confusing codecov
+  - |
+    if [[ $CODE_COVERAGE == [yY]* ]]; then
+      rm json_*.F90-*unicode.gcov || true
+      mv json_*.F90.gcov src/
+      mv jf_test*.[fF]90.gcov src/tests/
+      bash <(curl -s https://codecov.io/bash) -v -X gcov
+    fi

@@ -1,0 +1,34 @@
+language: ruby
+sudo: true
+dist: trusty
+rvm:
+  - 2.3
+python:
+  - "3.1"
+install:
+  - rm -rf ~/.nvm && git clone https://github.com/creationix/nvm.git ~/.nvm && (cd ~/.nvm && git checkout `git describe --abbrev=0 --tags`) && source ~/.nvm/nvm.sh && nvm install 6.10.0
+before_script:
+  - chmod 0755 ci/travis.rb
+  - export DISPLAY=:99.0
+  - sh -e /etc/init.d/xvfb start -screen 0 1280x1024x16
+  - nohup bash -c "./nodemodules/protractor/bin/webdriver-manager start 2>&1 &"
+  - sleep 5
+script:
+  - ci/travis.rb
+addons:
+  apt:
+    sources:
+      - google-chrome
+    packages:
+      - google-chrome-stable
+services:
+  - mysql
+after_failure:
+  - cat target/surefire-reports/*.txt
+  - cat install/glassfish4/glassfish/domains/domain1/logs/*.log
+  - cat yo/npm-debug.log
+  - node -v
+  - cat /home/travis/build/icatproject/topcat/yo/node_modules/protractor/lib/browser.ts
+cache:
+  directories:
+    - $HOME/.m2/repository

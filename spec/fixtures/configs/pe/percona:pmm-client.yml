@@ -1,0 +1,62 @@
+language: go
+
+go:
+  - 1.10.x
+
+env:
+  matrix:
+    - MYSQL_IMAGE=mysql:5.5
+    - MYSQL_IMAGE=mysql:5.6
+    - MYSQL_IMAGE=mysql:5.7
+    - MYSQL_IMAGE=mysql:8.0
+    - MYSQL_IMAGE=percona/percona-server:5.6
+    - MYSQL_IMAGE=percona/percona-server:5.7
+    - MYSQL_IMAGE=percona:5.5
+    - MYSQL_IMAGE=percona:5.6
+    - MYSQL_IMAGE=percona:5.7
+    - MYSQL_IMAGE=mariadb:5.5
+    - MYSQL_IMAGE=mariadb:10.0
+    - MYSQL_IMAGE=mariadb:10.1
+    - MYSQL_IMAGE=mariadb:10.2
+    - MYSQL_IMAGE=mariadb:10.3
+    - POSTGRESQL_IMAGE=postgres:9
+    - POSTGRESQL_IMAGE=postgres:10
+    - POSTGRESQL_IMAGE=postgres:11
+    - MONGODB_IMAGE=mongo:3.2
+    - MONGODB_IMAGE=mongo:3.4
+    - MONGODB_IMAGE=mongo:3.6
+    - MONGODB_IMAGE=percona/percona-server-mongodb:3.2
+    - MONGODB_IMAGE=percona/percona-server-mongodb:3.4
+    - MONGODB_IMAGE=percona/percona-server-mongodb:3.6
+
+services:
+  - docker
+
+install:
+  # ensure that vendor/ is in sync with code and Gopkg.*
+  - curl https://github.com/golang/dep/releases/download/v0.5.0/dep-linux-amd64 -L -o ~/dep && chmod +x ~/dep
+  - rm -fr vendor/
+  - ~/dep ensure -v
+  - git diff --exit-code
+
+before_script:
+  - sudo service mysql stop
+  - sudo service postgresql stop
+  - docker --version
+  - docker-compose --version
+  - docker-compose up -d
+
+script:
+  - make init
+  - make test-race-cover
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash) -X fix
+
+notifications:
+  email: false
+  slack:
+    on_success: change
+    on_failure: always
+    rooms:
+      secure: CCOLkvf6hLlZqxIhqTbTM72tXBUfXxJwOrp08NyFvCHxvVyHAF/8uYOzLA8GfxoMFBg6maUwYNITSvTJaZfBqCdNUQ9P8mAIgyQ1Wh78v23L6rG6SZKJKg1e6tauYejt/KdYZCS0mzd0+FVACCNZ1TN9WVDiPPPJiC5zZrA5qotF6+vmfMtj83tFp5UnGG1Ay2fLQiQsHNrtaFx1VPDXY7MoCYqy2ODnaKr2CFsTlN1++MYAIBppkSrRdk22yVwnmzoc0WXKKCaixKethiVWX2ULgY2dzZREbSiTDAsEtkA7TRQ8Jk2KL+Dx/ylvP3/GDIAK4MSUyw8y0RC9b2yvgMZnzWwiV4Zj7YGkYwEL/mczXFi5ZPZnuAwy0P5vs4eW8Tl70jjbg8tvBRQuDXligsehWSlRdP2OaABfjvdYe9nlcuB8cFZEzA3qQyeMhPZKwv4qsHlTzWWwelbMZIXseINgpU/ZKuCSLNvLOxB0z+I78R0dellPuaZ6vOP68G/k3XjJh6q+WtXHRD8LFg4YzFkPinhJAJO2jzNAmVFrAI3npcCu71FzGQSadwTN/rjPcbo/SJlsHr4KO8pKlFQMguA7xk9pUWq+dTEOOHVqq4svgnTxHzeREDAW3FOOqkSr9Tr1NgWtExnaV7n2NQjoR/Wpb3m7TSMsRn1D4iRdOfE=

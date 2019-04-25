@@ -70,7 +70,7 @@ module Travis
               end
             }
 
-            add :str, format: '^[^=]+=[^=]+$'
+            add :str, format: '^[^=]+=[^=]*$'
 
             export
           end

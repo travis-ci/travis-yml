@@ -1,0 +1,84 @@
+os:
+  - linux
+sudo: false
+addons:
+  apt:
+    # Flutter depends on /usr/lib/x86_64-linux-gnu/libstdc++.so.6 version GLIBCXX_3.4.18
+    sources:
+      - ubuntu-toolchain-r-test # if we don't specify this, the libstdc++6 we get is the wrong version
+    packages:
+      - libstdc++6
+      - lib32stdc++6
+      - fonts-droid
+jobs:
+  include:
+    - stage: Testing
+      language: generic
+      before_script:
+        - chmod 777 ./.no_camel.sh
+        - chmod 777 ./.no_controller_in_io.sh
+        - chmod 777 ./.no_io_in_ui.sh
+        - ./.no_io_in_ui.sh
+        - ./.no_controller_in_io.sh
+        - ./.no_camel.sh # file names are not allowed to include capital letters
+        - git clone https://github.com/flutter/flutter.git ../flutter -b beta --depth 1
+        - ../flutter/bin/flutter doctor
+        - $(../flutter/bin/cache/dart-sdk/bin/dartfmt -n lib) # check if files are formatted according to dartfmt
+        - ../flutter/bin/flutter analyze
+        - gem install coveralls-lcov
+      script:
+        - ../flutter/bin/flutter test --coverage test/*
+      after_success:
+        - coveralls-lcov coverage/lcov.info
+    - stage: Building
+      if: branch = master
+      language: android
+      android:
+        components:
+          - tools
+          - platform-tools
+          - build-tools-27.0.3
+          - android-28
+      jdk: oraclejdk8
+      before_script:
+        - git clone https://github.com/flutter/flutter.git ../flutter -b beta --depth 1
+        - yes|/usr/local/android-sdk/tools/bin/sdkmanager --update
+        - yes|../flutter/bin/flutter doctor --android-licenses
+      script:
+        - ../flutter/bin/flutter -v build apk
+#    - stage: Building
+#      if: branch = master
+#      language: generic
+#      os: osx
+#      before_script:
+#        - pip install six
+#        - brew update
+#        - brew install --HEAD libimobiledevice
+#        - brew install ideviceinstaller
+#        - brew install ios-deploy
+#        - git clone https://github.com/flutter/flutter.git ../flutter -b beta --depth 1
+#        - ../flutter/bin/flutter doctor
+#      script:
+#        - ../flutter/bin/flutter -v build ios --no-codesign
+    - stage: Deploying
+      if: branch = master
+      skript: skip
+      before_deploy:
+        - git config --global user.email "builds@travis-ci.com"
+        - git config --global user.name "Travis CI"
+        - export GIT_TAG=$TRAVIS_BRANCH-$TRAVIS_BUILD_NUMBER
+        - git tag $GIT_TAG -a -m "Generated tag from TravisCI for build $TRAVIS_BUILD_NUMBER"
+        - git push -q https://$TAGPERM@github.com/mobileappdevhm/team2 --tags
+        - ls -R
+      deploy:
+        overwrite: true
+        provider: releases
+        api_key: ${GithubToken}
+        file:
+#          - "/build/app/outputs/ipa/release/app-release.ipa"
+          - "/build/app/outputs/apk/release/app-release.apk"
+        skip_cleanup: true
+cache:
+  directories:
+  - $HOME/.pub-cache
+

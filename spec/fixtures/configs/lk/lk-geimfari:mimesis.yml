@@ -1,0 +1,70 @@
+language: python
+
+sudo: false
+
+matrix:
+    include:
+        - os: linux
+          sudo: required
+          python: "3.6"
+          dist: trusty
+
+        - os: linux
+          sudo: required
+          python: "3.7"
+          dist: xenial
+
+        - os: osx
+          language: generic
+          env: PYTHON=3.6.6
+
+        - os: osx
+          language: generic
+          env: PYTHON=3.7.0
+
+
+before_install: |
+  if [ "$TRAVIS_OS_NAME" == "osx" ]; then
+    brew update
+    brew install pyenv
+    brew install pyenv-virtualenv
+    pyenv install $PYTHON
+    export PYENV_VERSION=$PYTHON
+    export PATH="/Users/travis/.pyenv/shims:${PATH}"
+    pyenv-virtualenv venv
+    source venv/bin/activate
+    python --version
+  fi
+
+
+install:
+  - pip install pipenv
+  - pipenv install --dev --ignore-pipfile
+
+script:
+  - pipenv run py.test --cov=mimesis
+  - pipenv run mypy mimesis/ tests/
+  - pipenv run pyroma -d .
+
+after_success:
+  codecov
+
+before_deploy:
+  - python setup.py minify
+  - pipenv run check-manifest
+  - pipenv run python setup.py check --restructuredtext --strict
+
+deploy:
+  provider: pypi
+  user: lk-geimfari
+  password: $SECURE_PASS
+  distributions: sdist bdist_wheel
+  on:
+    branch: master
+    tags: true
+    condition: $TRAVIS_PYTHON_VERSION = "3.6" && $TRAVIS_OS_NAME != "osx"
+
+notifications:
+  email:
+    on_success: never
+    on_failure: change

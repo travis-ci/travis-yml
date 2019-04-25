@@ -1,0 +1,88 @@
+language: cpp
+
+os:
+    - linux
+    - osx
+
+dist: trusty
+
+addons:
+  apt:
+    sources:
+        - ubuntu-toolchain-r-test
+    packages:
+        - inkscape
+        - doxygen
+        - gcc-4.8
+        - g++-4.8
+        - gcc-6
+        - g++-6
+
+cache:
+    directories:
+        - sconsCache
+
+before_install:
+    - export DISPLAY=:99.0
+    - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sh -e /etc/init.d/xvfb start; fi
+
+install:
+    - if [ "$TRAVIS_OS_NAME" == "osx" ]; then brew update; fi
+    - if [ "$TRAVIS_OS_NAME" == "osx" ]; then brew install scons; fi
+    - if [ "$TRAVIS_OS_NAME" == "osx" ]; then brew install doxygen; fi
+    - if [ "$TRAVIS_OS_NAME" == "osx" ]; then brew cask install inkscape; fi
+    - ./config/travis/installDependencies.sh
+    - ./config/travis/installDelight.sh
+    - export DELIGHT=`pwd`/3delight
+    - $COMPILER --version
+
+script:
+    - scons -j 2 install CXX=$COMPILER CXXSTD=$CXXSTD BUILD_TYPE=$BUILD_TYPE ENV_VARS_TO_IMPORT=PATH DELIGHT_ROOT=$DELIGHT BUILD_CACHEDIR=sconsCache
+    # Preload libSegFault when running tests, so we get stack
+    # traces from any crashes.
+    - export LD_PRELOAD=/lib/x86_64-linux-gnu/libSegFault.so
+    - source ./config/travis/runGafferTest GafferTest
+    - source ./config/travis/runGafferTest GafferUITest
+    - source ./config/travis/runGafferTest GafferDispatchTest
+    - source ./config/travis/runGafferTest GafferDispatchUITest
+    - source ./config/travis/runGafferTest GafferCortexTest
+    - source ./config/travis/runGafferTest GafferCortexUITest
+    - source ./config/travis/runGafferTest GafferImageTest
+    - source ./config/travis/runGafferTest GafferImageUITest
+    - source ./config/travis/runGafferTest GafferSceneTest
+    - source ./config/travis/runGafferTest GafferSceneUITest
+    - source ./config/travis/runGafferTest GafferOSLTest
+    - source ./config/travis/runGafferTest GafferOSLUITest
+    - source ./config/travis/runGafferTest GafferAppleseedTest
+    - source ./config/travis/runGafferTest GafferAppleseedUITest
+    - source ./config/travis/runGafferTest GafferDelightTest
+    - source ./config/travis/runGafferTest GafferDelightUITest
+    - source ./config/travis/runGafferTest GafferVDBTest
+    - source ./config/travis/runGafferTest GafferVDBUITest
+    - ./config/travis/printTestResults
+
+before_cache:
+    # This is run just before uploading the cache for next time.
+    # SCons caches grow without bound so we want to remove old
+    # files to prevent our caches becoming too big.
+    - python ./config/travis/limitCacheSize.py
+    - du -sh sconsCache
+
+matrix:
+    # The standard Travis mechanism generates a build for
+    # every permutations of os/compiler/env. This is hard
+    # to wrangle, so instead we disable all the standard
+    # builds.
+    exclude:
+        - os: osx
+        - os: linux
+    # We can then simply list the exact builds we want.
+    include:
+        - os: linux
+          env: COMPILER=g++-4.8 CXXSTD=c++11 BUILD_TYPE=RELEASE
+        - os: linux
+          env: COMPILER=g++-4.8 CXXSTD=c++11 BUILD_TYPE=DEBUG
+        - os: linux
+          env: COMPILER=g++-6 CXXSTD=c++14 BUILD_TYPE=RELEASE
+        - os: osx
+          env: COMPILER=clang++ CXXSTD=c++11 BUILD_TYPE=RELEASE

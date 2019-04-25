@@ -1,0 +1,35 @@
+language: node_js
+node_js:
+- 10
+addons:
+  # c.f. https://docs.travis-ci.com/user/languages/javascript-with-nodejs#Node.js-v4-(or-io.js-v3)-compiler-requirements
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - g++-4.8
+env:
+  global:
+  - CXX=g++-4.8
+  - SSH_KEY="id_rsa"
+  - GIT_NAME="msuret"
+  - GIT_EMAIL="msuret@dhatim.com"
+  - SOURCE_DIR="build/reports/api-doc"
+  - DEPLOY_BRANCH="master"
+  - BINTRAY_NAME="msuret"
+  #BINTRAY_KEY
+  - secure: g9k7okCpEL47LvS0MEmFAP39JQBHBELfiXP8/d+eXv7PU+FaUj8OmFzoluhSKTrsiA6uMirO+YNfWI0X7AeSJdoYyhtgkvBAlk3QdGUNnnEbQ2L/xs7xXbSLkrxg0KxGKa58l6HRWQex0tCIm/LBOGkmOqlVAzHl3dOnh0EwYHXCMxhUNzX7FF5xS6akQzkU+cPIHK86u8cfnFKBAF5wcoW6EULNxpMqHrYv/BGt3uDdfPDbSs/Zyk3k/0ZEEDCloeDBvJmDSe1BIPt34vni48kGoVF4uPIQWgqIJFzQzSfgMJNl2msSppdx3YadyyGpCrIFw5T1v7RO+TAavkIR0eK9K9bRK0MFa8RqpmEZmWH4p//zZls6Fz6SzqCEbdP6bqVONxsKfjf1uTtuktmdXmbph2SBKX2b1Nkz4+tG9YF5IO0EQZCiUK2jNfx3hQqGXF4BRSL+TpJtO6IexLRdJ0cJCLcWfBnmbWRuhAFLyx+S3MXy/ok6UXApGkNEjVdCvcuedOgf+G0f9VmyRJUm7QeoTgcp04ATC3uXXxI3UlKp2C6eaxGmxptcTqzvwz+lChDwrtHfN3r7EU8yp3KJWFvCDoKYDuwYzOqp3Ah/hklfuAcG8e5GfKLPP8KZQu7f5OGeHK1SavPZc3T7DYD55Ykf0tvsmeui1zzDscBbocI=
+branches:
+  except:
+  - gh-pages
+after_success:
+- npm run coveralls
+- npm run api-doc
+- openssl aes-256-cbc -K $encrypted_9fbbc0973790_key -iv $encrypted_9fbbc0973790_iv -in id_rsa.enc -out id_rsa -d
+- npm run gh-pages
+deploy:
+  provider: script
+  skip_cleanup: true
+  script: npm run deploy-deb
+  on:
+    tags: true

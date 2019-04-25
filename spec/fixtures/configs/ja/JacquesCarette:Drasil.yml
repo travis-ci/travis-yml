@@ -1,0 +1,56 @@
+# This is the simple Travis configuration, which is intended for use
+# on applications which do not require cross-platform and
+# multiple-GHC-version support. For more information and other
+# options, see:
+#
+# https://docs.haskellstack.org/en/stable/travis_ci/
+#
+# Copy these contents into the root directory of your Github project in a file
+# named .travis.yml
+
+# Use new container infrastructure to enable caching
+sudo: false
+dist: xenial
+
+# Do not choose a language; we provide our own build tools.
+language: generic
+
+# Caching so the next build will be fast too.
+cache:
+  directories:
+  - $HOME/.stack
+
+# Ensure necessary system libraries are present
+addons:
+  apt:
+    packages:
+      - libgmp-dev
+      - fonts-lmodern
+      - texlive-bibtex-extra
+      - texlive-latex-extra
+      - texlive-math-extra
+      - texlive-xetex
+      - texlive-luatex
+
+before_install:
+# Download and unpack the stack executable
+- mkdir -p ~/.local/bin
+- export PATH=$HOME/.local/bin:$PATH
+- travis_retry curl -L https://www.stackage.org/stack/linux-x86_64 | tar xz --wildcards --strip-components=1 -C ~/.local/bin '*/stack'
+
+install:
+# Build dependencies
+- stack --no-terminal --install-ghc test --only-dependencies --stack-yaml code/stack.yaml
+
+script:
+ - cd code
+ - curl -sSL https://raw.github.com/ndmitchell/hlint/master/misc/run.sh | sh -s .
+ - make stackArgs="--no-terminal" NOISY=yes GHCFLAGS=-Werror
+ - make tex SUMMARIZE_TEX=yes
+ - make docs haddockArgs="--no-haddock-deps"
+
+notifications:
+  email:
+    - szymczdm@mcmaster.ca
+  on_success: change
+  on_failure: always

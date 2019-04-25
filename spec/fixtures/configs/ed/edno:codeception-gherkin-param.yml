@@ -1,0 +1,20 @@
+language: php
+
+branches:
+  only:
+    - master
+
+php:
+  - 7.0
+  - 7.1
+  - 7.2
+  - 7.3
+
+before_script:
+  - composer install
+
+script:
+ - ./vendor/bin/codecept run --coverage-xml
+
+after_script:
+  - ./vendor/bin/coveralls

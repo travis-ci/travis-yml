@@ -1,0 +1,30 @@
+language: node_js
+node_js:
+- "8"
+sudo: false
+cache:
+  yarn: true
+  directories:
+  - node_modules
+before_install:
+- npm install -g yarn@1.9.2
+install:
+- yarn install
+after_script:
+ - cat reports/coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js
+notifications:
+  webhooks:
+    urls:
+    - https://webhooks.gitter.im/e/c8c40bc13ee38867f698
+    on_success: change
+    on_failure: always
+    on_start: never
+env:
+  global:
+  - MOCK_API_HOST=localhost:3004
+addons:
+  jwt:
+    secure: khd4CM9YQns9dNWcPoYM7NizTalMXUyHtBtFTYoExD50Is/vpm99yc9QxicdUAKEAZZKZ1YVpoVBhuX0jzM+dX3XglLGpSmmX3vMu9JisimlZqOOK9EcTTTP+0cSkhvggCNYfB/V1kIloY2pektmS8C7V1RW79psTp1AGfnHwnrihGsfdTgjUJG18JO0EvEw0F/RobqWISU2A0UvRl03EndW4cWS1HCECsL/hamAwS94WzXI9+E2s9zA3E6V5+tLQnZdXOwzc5qNTh43e9GkaJ+kYFGvkTUWrWkoAZTGB/pHo8iCm7TbK1GpAz1WDXrkHMGfxIvezcxCxHWBR62c+wUJfTT6/v1RrYQ8Su9oQQ5fMB1B/evODevj31c5ctbdwOTbY/RMXYXlpzURGsrrf8TeqS77u+BhMeCUVjq0j1aSjc6dvzHJdL80luAs4lJjIdVDotGjQOjxek+St3zu9b3ZFLr0Dr2dH/UbCE4ABF0Ias0T0KUJjjxUM76SKV+SoRSIhsO046DSkjsQ8pWZIM+ywzAwHrPRdlvRHKmx/YgSTfr9v3LCOJnfac0e8IJdYftEzYOAMWcq+Pf5TWp8eBzstpvVNGE/bDQnXCWzypFlNi7+kmh7yu4alzqLPtBQTErCDe8tkINCH4wB8SnRHTFisVR/xidUT3YqPcocIZc=
+script:
+- yarn test
+- node language/travis.js

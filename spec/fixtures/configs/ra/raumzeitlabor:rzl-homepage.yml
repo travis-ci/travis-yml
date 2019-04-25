@@ -1,0 +1,32 @@
+language: node_js
+node_js: stable
+before_install: 
+ - rm -rf /home/travis/.npm/*
+ - bundler install --path vendor/bundle
+install:
+ - npm install
+ - node_modules/.bin/bower install
+script: node_modules/.bin/grunt build
+
+addons:
+  ssh_known_hosts:
+    - citizenfour.raumzeitlabor.de:4322
+after_success:
+  - ./deploy.sh
+
+cache:
+  bundler: true
+  directories:
+    - node_modules
+    - vendor/bundle
+    - app/bower_components
+
+env:
+  global:
+    - ENCRYPTION_LABEL="906c0d008fb2"
+    - DEPLOY_BRANCH="master"
+ 
+notifications:
+  slack: raumzeitlabor:jIH6Dhzf4KKG28wUcgV0mwcO
+
+group: deprecated-2017Q4

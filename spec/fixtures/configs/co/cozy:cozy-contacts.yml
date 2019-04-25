@@ -1,0 +1,66 @@
+language: node_js
+matrix:
+  fast_finish: true
+node_js:
+  - "8"
+branches:
+  except:
+    - build
+env:
+  global:
+    - CXX=g++-4.8
+    - MATTERMOST_CHANNEL=appvengers
+    # To generate a new key: travis encrypt GITHUB_TOKEN=<token> -r cozy/cozy-contacts
+    - secure:
+        OnT+4EKE7IHu+1C/KTFpbsNJiD2fTM9bEfLxytIjSH35n8iWZyGdHLBlVrUulKLw47ir+g8T/FmEVJ9u+JSfYaq25oSoPUrcdW8Qs7RA+lg4W7LWGFXQeDaDC7KS1dRxQDc4eaRxfmbyDNEQG3HwsVbcaZXCrZQmwLGj5NWAseblvshLkhpYrdeMYIt+JUod63VUskdq8FVzm9AuFxBA1Ut4rwyX3wou5TDZMAgYwf1rlveAxkmZhYQQlt4j7Hyb5zT/K1S+zXKm4H+pqA/tvSbSRIw5JKFRf2tywom2Tn87BJ8mxYuMA2ANnsQ4c3jeJgQCNOk4oG5gUbPOa+JCN6RehHrsiGROExK0UY/e1uxFJfgyLmONBppJMFWO8Cn6Qxz5WQnrm/a5sE2RbZg+UuLi3WJIK6+yb/8P9XBPmZauBDLE6EOtUtx15Ti8WPZfuAbEBnJ7Q9gJv/5fpiMrgaYniohgU8cNs5qN6BsA/8JiY/f3lcVjLsPP4x+j0NzqKcUEXbMjXMGHWaQK/fizlcTH6moL8unlLNKkEmLEtg4w1x4cj3jvBMOiZsOfsGugqu0ZS2YRJqjpImVUThuPRoQkASR8mpq33PGXjBcKMPBol4K7c8DNrWKmwI1wgq/dl82wBDGIA3kAL6lrh4fBqzck2yqLrCdgH1MmolF14dI=
+    # To generate a new key: travis encrypt TRANSIFEX_TOKEN=<token> -r cozy/cozy-contacts
+    - secure:
+        I7bnLHASK5oLZRx/n/YV6KiUq53yJkW3+J22MR3qAKbtjqSzUZQsdCpU0st3rQzGJ5BVkxlTitMPU6w19yFKmPzAgWT8dyq25QMnKTHaCnfM+OkprtiKUM/JGJGbzSCZkcN6P2qwugBkQbNOVfd4QZOGGjw0aaG5EPucofO6XPDAnMQAti6OuisnhU2NMPL5eLJLZU3DN5ze7pGayXPnF3o5H/jbttsCNwp5MwbTlS6f6OlxcreHJ/hWmtgCfq5TsucwG7sWrqKO+X5qak2thbP4AOmTm+vAKDy+HQenuoq2r+mVuvvgaNEqb8Yujl/oKlkgyCt13DeY5wNW9l97OB6gvFDa4uRNvH/fHYlsz7/x7jBHnwIAwb3LbzwqiMAXN+3agp701g5ojDLV4ZzQBSPjDRUD0pbhmXjGs6AYnsBKIwGCZ9/Dnvauu4qgYWsSoQrre6BGilKCQtd8ux6RAlyfgQK/joRomtS9yCRYS6pAoeFfRdwxSLGP9mli39cWtKV1LpLLRU+j063KiBKd9asmlb3lgfctqy7ao75rGiGIL2JVm7SIrzTCll4xA7yUA2sMnI7EFRh//s9VuHs+LcPBw2stgMABq7wcdPJ06eQj8BbHWlIt4qYfpUUyIzgVXQjQ5Wf0iDGO3qaJEu0KhoSs4uSRfwb4TQ7rgFtFD6M=
+    # To generate a new key: travis encrypt REGISTRY_TOKEN=<token> -r cozy/cozy-contacts
+    - secure:
+        twmw7b05n3pvAYJr5V5PxQHdNY+4SP8W1WA9IWnUJmEuY8mi6L2Cxn08B8hrWEw6cPYg/fCkSWFkS1JZ+lmervSEipR7dPPP3aRMzDFe1p/9YcxNb9LdoRRAlxYRwreSvB7puVpr/kvXyWW2NzK1/OvU5o+HXJT5z3NJV0Zjw8v2IZ16vs1CyhbrmephAa2gEblzI1djRXDVK/9hGmT5shy7GVEmDgiufn13Dya1MiyPXLVvHoS6AzHFXCQKA6W6DsVjnYz5eQQAPd1dbT4hRlWrbtXDAY8ztFN15MeudFJn0/g7ZfH3iKs7+Wcr+5dwD5SxG3aFhgwQM0YE0ETVK5GQB+oyloGBHu3uuu0cPiIOfc+xbcHNT6a5igyfsfmiOtq+N5JeREp6codQDzByiFm0CxYNh2FUB4rU98kjkrT/F4UxbbnrHHPChqtGTvJ6RjfVuma3g2XioDnBsj0umNDCnHoa3GEGTq/wIAdhd6/B3i8MCNIq2eoLiJkVl83ITCjt7UdFZv6WHpVOvOL3iRsCS7gX7uresO0HXf6ws9FgRZm7P11jzsJIcHKBq4kXMS7XGIVLPMmB0R6OIh+kMXvtcQvSGXm0g+3hdCaF/hOHSmIUcrPFexvXoR5BH0kQvHMzijoY0552ySq5R3fY70a33S24aRA8QcuPMo7XXSo=
+    # To generate a new key: travis encrypt MATTERMOST_HOOK_URL=<token> -r cozy/cozy-contacts
+    - secure:
+        "B24hol+bj40GwMUA+jNYxklQA+c+lDJLZGRgz/gknQ5MhDUkmPgCuACkVivzzRq48jlXt0uSjfi/avtGqDA78q5AiuG1cNgGDGA+BKdI2bqqAevQEJ11lgC/U4PaxUtAJqB5MgR79gBb0XsHAtYfpCCKoySiIVqW4nZlPEtiOZLXfjQ1HJvv89BBtPySJli6JbSMMHfU1giZkbIrOXZwUWrGSUktUVDACQh+knZdC6X4bzywUC0WMzlHhRphmJxhmbTKKaBmv/JgoN9Qj50imG66cWoRC5Afva5M/86kix9VgO1a3xJZk4uTBz3KusPSryYvqTnWZ3lGWRqCa/aUXO0ogfemCjVupk1UPgYLqT3QOMSja+IozWR24yDDyXV1qr8fMupdV2M6FSRlEsfEesoIdpHqChD3SO9p7GLlvdwVeWqdT1zKUM9UEIQEE2bcHObyCHORZjgJC2MSBmVmawul48oG0Cpy1CbumaHHrvGnc0KO+zgl7qHxKGpBaCikIojuFCsZlBH+kS3Db6RZHRYyXiHeHIiDVLlKXQbl3uWiiC493uMRKetRwV/1refwGB+zYTJ+RurffmcZrGfPlUp7V2qnkswKffPlHJ2Zia1TH70u0pCeozxAjLGZlOv4toc3M0HNbXJfPY5cSzBgO1MYIe8gCVMLeMZkxCpg0bQ="
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+      - deadsnakes
+    packages:
+      - g++-4.8
+      - python3.5
+cache:
+  yarn: true
+  directories:
+    - node_modules
+before_install:
+  - if [ "$TRAVIS_SECURE_ENV_VARS" != "false" ]; then openssl aes-256-cbc -K $encrypted_4d2432a7dc6b_key -iv $encrypted_4d2432a7dc6b_iv -in id_rsa_downcloud_contacts.enc -out /tmp/id_rsa_downcloud_contacts -d; fi
+  - if [ "$TRAVIS_SECURE_ENV_VARS" != "false" ]; then eval "$(ssh-agent -s)"; fi
+  - if [ "$TRAVIS_SECURE_ENV_VARS" != "false" ]; then chmod 600 /tmp/id_rsa_downcloud_contacts;
+    fi
+  - if [ "$TRAVIS_SECURE_ENV_VARS" != "false" ]; then ssh-add /tmp/id_rsa_downcloud_contacts;
+    fi
+  - curl -fsSL https://bootstrap.pypa.io/get-pip.py | python3.5 - --user
+  - travis_retry pip3.5 install --user transifex-client==0.12.5
+  - install -m0644 .transifexrc.tpl ~/.transifexrc
+  - echo "password = $TX_PASSWD" >> ~/.transifexrc
+script:
+  - yarn lint
+  - yarn test
+  - yarn build
+before_deploy:
+  - yarn add cozy-app-publish
+deploy:
+  - provider: script
+    repo: cozy/cozy-contacts
+    skip-cleanup: true
+    script: yarn run deploy
+    on:
+      branch: master
+  - provider: script
+    repo: cozy/cozy-contacts
+    skip-cleanup: true
+    script: yarn run deploy
+    on:
+      tags: true

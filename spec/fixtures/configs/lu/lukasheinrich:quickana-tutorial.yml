@@ -1,0 +1,21 @@
+sudo: required
+language: python
+
+services:
+- docker
+before_install:
+  - docker build -t lukasheinrich/quickana-tutorial .
+install:
+  - pip install ipython[notebook]
+script:
+- echo 'hello quickana'
+- docker run -it lukasheinrich/quickana-tutorial ./tests/travistest.sh
+- docker cp $(docker ps -lq):/analysis/submitDir results
+after_success:
+- bash deploy.sh
+- docker login -e="$DOCKER_EMAIL" -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
+- docker push lukasheinrich/quickana-tutorial
+
+env:
+  global:
+    secure: YWqPGZAf3xsO/G4NVFznJ1Y5WU1Py+mlQtRvpdfUzVPEzHYm+D92zBP5jkHsr7AzHGEo8zgZjLs5ijE7Xy2ERfPJI/yNPQSJErQvBsHTB3HYyfm3IHYF+SXpAheRl/QKNyIbOu8+uRWeWHRsUmrgvle2AyzgsPUr6cYYSTJ7pvIb4Qamz6UB/gYG2fii7ysbwEpwiV8xVuNflnJgx6wM3TWDgzbOT7j+XwPPbvsCuDa0zbUrcH78m369FUm4PA+23xyOtZN1H5agbFYzl1QESECnH1L12bOKAG16Cgr8bIQYFDY1pCMuWohnkKG/qWAUJZe+UgSlz8CTyPecavI5MffUafDZ9/sQFSXZv3rE6JUx4cUeskic7yyXWlseje899LRfs+fdpoi4Q7fa+NfnRivYzpN5FZIVFw52gYXMpC51+6ekrUqjN8W5BfJaP+JjZLQ1aNiPHMlwWS/pfCXCbWgkoZc1g6mRITAlLUO5LeCs067xZMmhUB3v6nmEUEOvnN2AIGXa+OtWpQFJvsHFx83DNuhBN3KKYwTGMHuqVLypxbr5C+5PTRvq5e5G0CtcVDQXqVswEGptdgPklTRcV1JvF/azbYosZslCV0WdlEij0G+xVV3wzVk/zYOo1y0GUKjQn/EF2Cc3lmns8JEQ7yfg4xqiyXQCun8n7n36JxE=

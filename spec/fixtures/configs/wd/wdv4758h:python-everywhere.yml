@@ -1,0 +1,74 @@
+language: python
+sudo: false
+
+addons:
+  apt:
+    packages:
+    - rpm
+
+python:
+  - 2.7
+  - 3.4
+  - 3.5
+  - 3.6
+  - nightly
+  - pypy
+  - pypy3
+
+# TODO add/remove targets to meet your need
+matrix:
+    allow_failures:
+        - python: 2.7
+        - python: 3.4
+        - python: nightly
+        - python: pypy
+        - python: pypy3
+
+install:
+    - bash ci/install.sh
+
+script:
+    - bash ci/script.sh
+
+after_success:
+    - bash ci/after_success.sh
+
+before_deploy:
+    - bash ci/before_deploy.sh
+
+deploy:
+    - provider: releases
+      overwrite: true
+      # TODO Regenerate this api_key for your project, this one won't work for you. Here's how:
+      # - Go to 'https://github.com/settings/tokens/new' and generate a Token with only the
+      # `public_repo` scope enabled
+      # - Call `travis encrypt $github_token` where $github_token is the token you got in the previous
+      # step and `travis` is the official Travis CI gem (see https://rubygems.org/gems/travis/)
+      # - Enter the "encrypted value" below
+      api_key:
+        secure: 28IOmyNkPlSxBN+jBkpWGlrAbB0/2xKkI0RV8K8zwJ2DGyLGYYucpc37Xvu1OFYdfK2yv5PZ1uUuiqXXHHh4/2c8KTA6DPj8WlTTrxWD7CVN42BLUjATqs89vPQJwZPmbEzRykAPReneBvVuXsQonyFY/KToK5CsQKUnr/lp1i1y3rtmAMc3kDG7U+qf1GYu8pNReVmgaTtGJYzQdg9ZLAu0K8UJ9RLrFvlzMKNgVHh1bHugIamnMjR6q0jjJ2uBYmLbK2nu1jMdLOyFb1u4oPRmu4Wv212lxOSIomlKXqL3FJABKJ9E5L4lbh9IVh3TjlR46i3GRKvcmrnsJ8sv9OFYe0YotCnFu47GGrRTQFite7JRVSWt7Xb8Lk1I9i8NIdbYwwU6GXDw5O9qTQlwX0wZCtgj+A/ag6bxNFedKU3e4dgAJ2JiiSN2EzNhOulp8TsTc6pwK/1bS/B2CZ8u0raFdy7LOoBxDPDbzhZn8QptL18TzlU3y/BnPQkjmOKBYwT8ZNAKFcV5lGKx+bod07gkKzLmYWzfETdjq44hE/kKNarL0uS8Cx3WUE4zavNrFGIWxTZOdLDX7IhQFi8LG38np3DbpWWi9jS7F+P/pn9bZErCbO8LDXM42VB15Tx+P0cHTMVyTbZfzNfkOZNWizkJ8Aeq1VCgXP7OEAla/so=
+      file_glob: true
+      file:
+        - dist/*
+      # don't delete the artifacts from previous phases
+      skip_cleanup: true
+      # deploy when a new tag is pushed
+      on:
+        # channel to use to produce the release artifacts
+        # NOTE make sure you only release *once* per target
+        # TODO you may want to pick a different channel
+        condition: $TRAVIS_PYTHON_VERSION = 3.6
+        tags: true
+
+    - provider: pypi
+      user: python-everywhere
+      password:
+        secure: kVpchIjPrt+p32Xo0KeBnEb3TaK5ni2ImUUBOjpy34smxM0Wc887+CyCmnOHTd6a1iB3DqM2nbXJZ1pkfEiqfUX6mznvRMa6wENXO5zaspIUjYuhe23woAKls3Np1L+VK0+O7Fe1i8GYk0FM4T3Hh/txaWGSw7CNveLB2eNsOdeD8Dfd0R0+L2sapx9W6/5gN+2RRqePLL8a1bvPuvTA0YQvQ3SYJsAzblQa1bDeSyt+ZokAd2vfQPqpQnorolK2Q4141PV7mfkrGLlm1+eQD873R5FsYGFElWCrBHITX2G6/T0j6y/XcQUIWXDq5avzyyJ2Sb1O/0rmPoGVgCT8VMoKxQkj/NGrdDsgh1V0KMJEfetLYrVLzPksIuetbCDirv8whoQ3hkQwTwNlc3Dd7ZzBCYUEOlye6k3nimy8wJTXE1xkTXc7dxbe79IcpDD5j1PU11OqFHD9v5ixnPSuzloU3VfmtVn1FZSmChCM24yIiEdbw8BYKd18EPqpPLkUVQLtt/LOSKYu04Y9KqO7fjf6t9Uyep62ehrNOESMBjuA8jyLdrgY5vlbevx/HuYJYEAkRaCxrj9A7rkVWqJB5nphNcBFeGVEXcBW43DSi8/wqIm/BGUhxM4pX2JQ/USQwGIPaJML5qQTld74SEz9D8o0B9o+Vwic9QLlg3hJFcY=
+      distributions: "sdist bdist_wheel" # Your distributions here
+      on:
+        branch: master
+        condition: $TRAVIS_PYTHON_VERSION = 3.6
+        tags: true
+
+notifications:
+    email: false

@@ -1,0 +1,99 @@
+language: php
+dist: xenial
+sudo: required
+services:
+- rabbitmq
+- memcached
+- postgresql
+
+addons:
+  postgresql: "9.6"
+  apt:
+    packages:
+    - librabbitmq-dev
+
+php:
+- "7.3"
+- "7.4snapshot"
+
+env:
+  global:
+  - ES_VERSION=5.4.0 ES_DOWNLOAD_URL=https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-${ES_VERSION}.deb
+  - APP_ENV=test
+  matrix:
+  - DOCTRINE_CACHE_DRIVER="memcached" COMPOSER_FLAGS='update --prefer-stable'
+  - DOCTRINE_CACHE_DRIVER="memcached" COMPOSER_FLAGS='install'
+  - DOCTRINE_CACHE_DRIVER="array" COMPOSER_FLAGS='update --prefer-stable'
+  - DOCTRINE_CACHE_DRIVER="array" COMPOSER_FLAGS='install'
+
+matrix:
+  allow_failures:
+  - php: 7.4snapshot
+  fast_finish: true
+
+before_install:
+- which php
+- sudo pip install supervisor
+- sudo wget -P /etc/supervisor https://gist.githubusercontent.com/takeit/86c925a07cdca17e2fded7fc9f8fc557/raw/74ce3313def74a8f245a8ab53f23eb62d2ee2642/supervisord.conf
+- sudo mkdir /var/log/supervisor/
+- sudo chmod -R 777 /var/log/supervisor/
+- sudo /bin/dd if=/dev/zero of=/var/swap.1 bs=1M count=4096
+- sudo /sbin/mkswap /var/swap.1
+- sudo /sbin/swapon /var/swap.1
+- sudo sysctl -w vm.max_map_count=262144
+- sudo sysctl -p
+- printf "\n" | pecl install amqp
+
+install:
+- wget ${ES_DOWNLOAD_URL}
+- sudo dpkg -i --force-confnew elasticsearch-${ES_VERSION}.deb
+- sudo service elasticsearch restart
+
+before_script:
+- echo "memory_limit=-1" >> ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/travis.ini
+- echo 'extension="memcached.so"' >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
+- cat ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini|grep memcached
+- phpenv config-rm xdebug.ini || echo "xdebug not available"
+- phpenv rehash
+- composer $COMPOSER_FLAGS --no-interaction --prefer-dist
+- cd src/SWP/Bundle/CoreBundle/Tests/Functional/Resources/ && npm install json-server && nohup node server.js &
+- echo -e "$(echo -e "\e[33;1m$1\e[0;20m" "Testing loading fixtures in dev env")"
+- php bin/console doctrine:schema:update -f
+- FIXTURES_TYPE=dev php bin/console doctrine:fixtures:load --env=test --no-interaction > /dev/null 2>&1
+- echo -e "$(echo -e "\e[33;1m$1\e[0;20m" "Testing migrations")"
+- DATABASE_URL="pgsql://postgres:''@127.0.0.1:5432/postgres" php bin/console doctrine:migrations:migrate --no-interaction --env=test --no-debug -vvv
+- php bin/console doctrine:cache:clear main_cache --env=test --no-debug -vvv
+- sudo supervisord -c /etc/supervisor/supervisord.conf
+- sudo supervisorctl status
+
+script:
+- echo 'PHPSPEC' && echo -en 'travis_fold:start:script.1\\r'
+- bin/phpspec run
+- echo -en 'travis_fold:end:script.1\\r'
+- echo 'BEHAT' && echo -en 'travis_fold:start:script.2\\r'
+- bin/behat -f progress -vvv
+- echo -en 'travis_fold:end:script.2\\r'
+- echo 'PHPUNIT APP' && echo -en 'travis_fold:start:script.3\\r'
+- bin/phpunit --stderr src/SWP/Bundle/CoreBundle/Tests/Security/Storage/DynamicDomainSessionStorageTest.php
+- bin/phpunit --stderr src/SWP/Bundle/CoreBundle/Tests/Controller/AuthControllerTest.php
+- bin/phpunit --stderr src/SWP/Bundle/CoreBundle/Tests/Controller/RegistrationControllerTest.php
+- bin/phpunit
+- echo -en 'travis_fold:end:script.3\\r'
+- echo 'PHPUNIT COMPONENTS' && echo -en 'travis_fold:start:script.4\\r'
+- cd src/SWP/Bundle/BridgeBundle && composer $COMPOSER_FLAGS --no-interaction --prefer-dist
+  && bin/phpunit
+- cd ../../../../
+- cd src/SWP/Bundle/ContentBundle && composer $COMPOSER_FLAGS --no-interaction --prefer-dist
+  && bin/phpunit
+- cd ../../../../
+- cd src/SWP/Bundle/SettingsBundle && composer $COMPOSER_FLAGS --no-interaction --prefer-dist
+  && bin/phpunit
+- cd ../../../../
+- cd src/SWP/Bundle/UserBundle && composer $COMPOSER_FLAGS --no-interaction --prefer-dist
+  && bin/phpunit --stderr
+- echo -en 'travis_fold:end:script.4\\r'
+
+cache:
+  directories:
+  - node_modules
+  - "$HOME/.composer/cache"

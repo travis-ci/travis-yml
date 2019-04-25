@@ -1,0 +1,40 @@
+sudo: required
+language: c
+env: OS=el7
+services:
+- docker
+cache:
+  directories:
+  - "$HOME/MoxieLogic"
+  before_cache:
+  - "$HOME/MoxieLogic"
+before_install:
+- sudo apt-get clean
+- sudo apt-get -qq update
+- sudo apt-get install -y alien fakeroot
+- if ! test -d $HOME/MoxieLogic; then mkdir $HOME/MoxieLogic; fi
+- find $HOME/MoxieLogic -type f
+- cat Dockerfile.in | sed -e s/@OS@/$OS/ > Dockerfile
+- docker build -f Dockerfile -t atgreen/moxielogic-builder-$OS .
+- docker run --rm -t -i -v $HOME:/usr/local atgreen/moxielogic-builder-$OS /root/build.sh
+- find $HOME/MoxieLogic -type f
+- if test -f $HOME/MoxieLogic/.done; then cp -a $HOME/MoxieLogic .; docker build -f
+  Dockerfile.rpm-repos -t atgreen/moxielogic-repos-$OS:`cat $HOME/BUILDNUM` .; docker
+  build -f Dockerfile.rpm2deb -t atgreen/moxielogic-rpm2deb .; mkdir $HOME/MoxieLogic-deb;
+  docker run --rm -t -i -v $HOME:/opt atgreen/moxielogic-rpm2deb /root/convert.sh;
+  cp -a $HOME/MoxieLogic-deb .; docker build -f Dockerfile.deb-repos -t atgreen/moxielogic-repos-deb:`cat
+  $HOME/BUILDNUM` .; fi;
+- find $HOME -name \*.deb
+script:
+- 
+after_success:
+- if test -f MoxieLogic/.done; then
+    docker login -u=atgreen -p="$DOCKER_PASSWORD";
+    docker tag  atgreen/moxielogic-repos-$OS:`cat $HOME/BUILDNUM` atgreen/moxielogic-repos-$OS:latest;
+    docker push atgreen/moxielogic-repos-$OS:`cat $HOME/BUILDNUM`;
+    docker push atgreen/moxielogic-repos-$OS:latest;
+    docker tag  atgreen/moxielogic-repos-deb:`cat $HOME/BUILDNUM` atgreen/moxielogic-repos-deb:latest;
+    docker push atgreen/moxielogic-repos-deb:`cat $HOME/BUILDNUM`; docker push atgreen/moxielogic-repos-deb:latest;
+  else
+    ./.trigger;
+  fi;

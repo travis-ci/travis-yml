@@ -1,0 +1,91 @@
+language: java
+sudo: false
+
+install:
+  -
+
+matrix:
+  fast_finish: true
+  include:
+    - jdk: oraclejdk8
+      env:
+        - DESC="releasenotes-builder"
+        - CMD="cd releasenotes-builder && mvn clean verify && mvn clean compile package"
+
+    - jdk: oraclejdk8
+      env:
+        - DESC="patch-diff-report-tool"
+        - CMD="cd patch-diff-report-tool && mvn clean install"
+
+    - jdk: oraclejdk8
+      env:
+        - DESC="checkstyle-tester (launch.groovy) on linux "
+        - CMD1=" git clone https://github.com/checkstyle/checkstyle && cd checkstyle "
+        - CMD2=" && mvn clean install -Passembly"
+        - CMD3=" "
+        - CMD4=" "
+        - CMD5=" && cd ../checkstyle-tester"
+        - CMD6=" && groovy launch.groovy -l projects-for-travis.properties -c my_check.xml -i"
+        - CMD=$CMD1$CMD2$CMD3$CMD4$CMD5$CMD6
+    - jdk: oraclejdk8
+      env:
+        - DESC="checkstyle-tester (diff.groovy) on linux"
+        - CMD1=" git clone https://github.com/checkstyle/checkstyle && cd checkstyle "
+        - CMD2=" && git checkout -b patch-branch"
+        - CMD3=" "
+        - CMD4=" "
+        - CMD5=" && cd ../checkstyle-tester"
+        - CMD6=" && groovy diff.groovy -l projects-for-travis.properties -c my_check.xml -b master -p patch-branch -r ../checkstyle"
+        - CMD=$CMD1$CMD2$CMD3$CMD4$CMD5$CMD6
+    - jdk: oraclejdk8
+      env:
+        - DESC="checkstyle-tester (diff.groovy) on linux with base and patch configs"
+        - CMD1=" git clone https://github.com/checkstyle/checkstyle && cd checkstyle "
+        - CMD2=" && git checkout -b patch-branch"
+        - CMD3=" "
+        - CMD4=" "
+        - CMD5=" && cd ../checkstyle-tester"
+        - CMD6=" && groovy diff.groovy -l projects-for-travis.properties -bc my_check.xml -pc my_check.xml -b master -p patch-branch -r ../checkstyle"
+        - CMD=$CMD1$CMD2$CMD3$CMD4$CMD5$CMD6
+    - jdk: oraclejdk8
+      env:
+        - DESC="checkstyle-tester (diff.groovy) on linux with enabled patchOnly"
+        - CMD1=" git clone https://github.com/checkstyle/checkstyle && cd checkstyle "
+        - CMD2=" && git checkout -b patch-branch"
+        - CMD3=" "
+        - CMD4=" "
+        - CMD5=" && cd ../checkstyle-tester"
+        - CMD6=" && groovy diff.groovy -l projects-for-travis.properties -pc my_check.xml -p patch-branch -r ../checkstyle -m single"
+        - CMD=$CMD1$CMD2$CMD3$CMD4$CMD5$CMD6
+    - jdk: oraclejdk8
+      env:
+        - DESC="codenarc validation for groovy files"
+        - CMD1=" cd checkstyle-tester "
+        - CMD2=" && ./codenarc.sh . diff.groovy > diff.log && cat diff.log && grep '(p1=0; p2=8; p3=0)' diff.log"
+        - CMD3=" && ./codenarc.sh . launch.groovy > launch.log && cat launch.log && grep '(p1=0; p2=21; p3=1)' launch.log"
+        - CMD4=" "
+        - CMD=$CMD1$CMD2$CMD3$CMD4
+    # disable as for now java8 is not supoorted jdk for travis MacOS
+    #- os: osx
+    #  env:
+    #    - DESC="checkstyle-tester on MacOS"
+    #    - CMD0="export JAVA_HOME=$(/usr/libexec/java_home) "
+    #    - CMD1=" && git clone https://github.com/checkstyle/checkstyle && cd checkstyle "
+    #    - CMD2=" && mvn clean install -Passembly"
+    #    - CMD3=" "
+    #    - CMD4=" "
+    #    - CMD5=" && cd ../checkstyle-tester && cp projects-for-travis.properties projects-to-test-on.properties "
+    #    - CMD6=" && ./launch.sh -Dcheckstyle.config.location=my_check.xml "
+    #    - CMD=$CMD0$CMD1$CMD2$CMD3$CMD4$CMD5$CMD6
+
+script: eval $CMD
+
+after_success:
+
+cache:
+  directories:
+  - ~/.m2
+
+branches:
+  only:
+    - master

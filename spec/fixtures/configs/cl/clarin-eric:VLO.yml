@@ -1,0 +1,31 @@
+sudo: false
+language: java
+jdk:
+- oraclejdk8
+
+before_install:
+- echo "MAVEN_OPTS='-Xmx2g -XX:MaxPermSize=512m'" > ~/.mavenrc
+script:
+- bash -c 'if [ "${TRAVIS_TAG}" ]; then mvn versions:set -DnewVersion=${TRAVIS_TAG} versions:commit; fi'
+- mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
+- mvn test -B
+- mvn clean install -DskipTests=true -Pdocker
+deploy:
+  provider: releases
+  prerelease: true
+  api_key:
+    secure: "${VLO_DEPLOY_TOKEN}"
+  file: "vlo-distribution/target/vlo-${TRAVIS_TAG}-docker.tar.gz"
+  skip_cleanup: true
+  on:
+    tags: true
+
+notifications:
+  email:
+    on_success: change
+    on_failure: always
+  slack:
+    rooms:
+      secure: "${SLACK_INTEGRATION_KEY}"
+    on_success: change # default: always
+    on_failure: always # default: always

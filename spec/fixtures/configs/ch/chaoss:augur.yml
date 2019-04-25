@@ -1,0 +1,30 @@
+matrix:
+  include:
+  - name: Python Datasource Tests
+    install: pip install .
+    language: python
+    python: '3.6'
+    script: python -m pytest augur/datasources/**/test_**.py
+  - name: API Tests
+    before_script:
+    - node --version
+    - npm --version
+    - node_modules/.bin/newman --version
+    install: pip install . && npm install newman
+    language: python
+    python: '3.6'
+    notifications:
+      slack: augurlabs:T5g5uaEPLwSiTUTRH1kiXGcS
+    script:
+    - python3 -m augur.server &
+    - sleep 15
+    - node_modules/.bin/newman run https://api.getpostman.com/collections/4566755-87d14f65-6fa1-4a0b-949f-55ca5f35320e?apikey=$POSTMAN_API_KEY
+      -e https://api.getpostman.com/environments/4566755-2eb8f02c-642f-4f12-892f-d75f4c5faa24?apikey=$POSTMAN_API_KEY
+
+notifications:
+  slack:
+    secure: s6aj/0sNAiktZdd6w9Z4EBxUcrg1Y9j9PZbo5CFDucRingXKkBTrkn301OrPT8WK2Yawu7Znhh/x3PuxWGIO5Qi02RCD9aEnW2WkMXwS5lhgxurc4ju+894WPrJIABYWXzVsB3/HMuRoVyU15o/l2NeD6hZ+Oro80OA+KUXK9006044B301qGIpv5j9JXRwcdTGS4i+qXBWDxWltgfCRl1icUhULfhV0DtaSGt0AkkDaLbDVnr6Wkz70EIjpGmkf+sfR7EnGZizrCatayechhNUWWbJHnY7Z//U266gOVZYUCUrkAwtM32pHrPUF4jHkHs/cY6C4i8OPya8tSp/KXdyvh4nvHsoOyiX89K0Q7Q7URSaM1BpCMqTP1H+l9zKJKYj+wRuB1Ybap4rPB+8vwZLVwnU/n8ekhHh7ZSsrSsqytjxWG4SegS+tn/Gi/9aAhc/UFPkBdVdYAzDmDv+wiUJVPe5svBvCJFlpuOGaN1AfOfWpgDTEIXHvop9tBfUw+bTrtNye0pMwnH6lr/5HON2z6Onw6DgH9E9qJOgPalikFllrCOJwblzQ4UPTB7Cncmddga9M4txBcggt0M8ByIeF8twe1T36ZTCU7Wr/yA9NHYIv/IXzDQdIbmEN1xCFc3w1M5qeIcef9B7Ce17f0loHvjwYO7ftzt71Rz4S3DA=
+    
+env:
+  global:
+    secure: B6m6XQ+N3Gdb3L8Ob17JcveRJ5CiefjrhS3F/L3+4rvTUnS6tvdqXq7xztA3f/qgjQAIs6995MT0jhczPts8qPpRV6ctNVFmYsiM88lvqJlp6eKx/lONZMbUT8Xf7LS9gXs1KsZcmf0vx+Eg5hQQt4eIiS3vyg5xF68Dq8yjgtVee56+enoIH1F+V7nWeBZ5w13IITIJyLMo5x4DUcDY8+ycyhgBEyMVaS05BBYwaHvevEVf4hDeX3iC/g8l1PptLnpw52vFIuTsvm1rOWtuVoLY2eK/gmWt93cNjPP6TLH1Zo8L9hBrGvGZewbhTg30TNOphQoeibLu/6n+3i+p6ch2l86YnlELzgtuTq9rDXXdweMUSwRI+TO0heRlwbn3b1eDdCQ3R1yU9UXJIjCS9Hoaie+rFy99hFWESmH2vTA5x//YShMFpVgMb0rIaLfVfjTkeqczOEi37qCSmm4NgbVwpIfqbzYHBFG0JCxFxFIk0aUEsPO/k0CZiOlO/pFbM1Pb0bAJD4Yv1IKZ775YnVuhboMVv8CyXLjuNqjn48G9Gy6ODMPVuujOlgQXyfgMiF/dKKWnf8W2iu9KasbvZBAv47Nj4nhDCVBhkJlNs+0NdaLsJTYQ8yRonf7Hp/mE9lQaNkSPCrLtTSRjOxJ3XNa9/SqB1kQy86palheFyMY=

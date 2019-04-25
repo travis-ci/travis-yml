@@ -1,0 +1,42 @@
+language: php
+php:
+# not working anymore  - '7.0.32'
+  - '7.1.28'
+  - '7.2.17'
+  - '7.3.4'
+# https://github.com/sebastianbergmann/phpunit/issues/2581
+#  - hhvm
+# 201902213
+# PHP8.0.0-dev does not work with current dependencies
+#  - nightly
+
+before_script:
+  - travis_retry curl -s http://getcomposer.org/installer | php
+  - travis_retry php composer.phar install -n
+
+# Explicitly use the phpunit from composer, not any system-wide found
+script: 
+#  - vendor/bin/phpunit -c phpunit.xml --coverage-clover=coverage.xml --testdox tests
+  - vendor/bin/phpunit -c phpunit.xml --coverage-clover=coverage.xml tests
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
+  - php vendor/bin/codacycoverage clover coverage.xml
+
+# Not working with PHP :-(
+# https://github.com/ottlinger/hornherzogen/issues/12
+#addons:
+#  srcclr: true
+
+addons:
+  apt:
+    packages:
+    - sendmail 
+
+notifications:
+  webhooks:
+    urls:
+      - https://webhooks.gitter.im/e/51fed1c60f8ada71d342 
+    on_success: change  # options: [always|never|change] default: always
+    on_failure: always  # options: [always|never|change] default: always
+    on_start: never     # options: [always|never|change] default: always

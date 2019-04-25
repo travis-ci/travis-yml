@@ -1,0 +1,99 @@
+sudo: required
+services: docker
+dist: trusty
+group: edge
+language: python
+python: 3.5
+env:
+    global:
+        - GITUSERNAME="Luis Alejandro Martínez Faneyth"
+        - GITUSERMAIL="luis@luisalejandro.org"
+        - GHREPO="https://github.com/LuisAlejandro/pypicontents"
+        - secure: "WZYdRxZ0aI671WWdliq8pwTAwHCegsOibPSuCoayRfPjDDUDi6E2WPQYMXk1v0ikKHKQdaNs3YPT6cdjcRjkbf4PlH0mD8NjWVivVYDOfHqvw6QFje7+V2PGPwjGpArVZITMmwFlY3WA4jhyw+hXYcb1HgO7mKLxASHghk6Z6bPDqxIReN+TAiWcJGyrGHQ/cz/FgHuEpYzy9vDUmWHC/E7TeF1K6tNeTXxcVajMBV14cqunA7mWmvnZ/53WUSebXofTAKz/0khWg687LI2f5odf63q4enP7OIyyoJKQo6sQh2OS3mDeJuw0kTrMVYHEPHAwv04Fe7fi5QSL8L4eYvCyFIl1MwyuKEIbyMqJlut721AUcmH332Z3a9peH6fZTIqRwS0mZTtfurjGRyBCRMPx/ym/f83y77yx9Hz63sAV3kNjWLEVZfC+fglbQ69pPnju0oc9ZvvLb8qAU91HLqHEYkt2XjTXnYwkQFra8vQziza6Ce2QNSihb8O4XT2iRAbLvVYFEa5vRX3WVH0/i/xGgzNE9n/0rQkJ3Sjq81T3rEQ5Yaa2Kz6VBbVMlCMfRllMoFn89JgVMBaTb8l3eIPkU6mJcdzUyCV9kS0tcnvEM+raGthPaSC0SyRgLiL0InlXnnYGih095HmNowEF3HvqwwQ7zHjIayGEdAnTxpc="
+    matrix:
+          - LRANGE="0-9"
+          - LRANGE="a"
+          - LRANGE="b"
+          - LRANGE="c"
+          - LRANGE="d"
+          - LRANGE="e"
+          - LRANGE="f"
+          - LRANGE="g"
+          - LRANGE="h"
+          - LRANGE="i"
+          - LRANGE="j"
+          - LRANGE="k"
+          - LRANGE="l"
+          - LRANGE="m"
+          - LRANGE="n"
+          - LRANGE="o"
+          - LRANGE="p"
+          - LRANGE="q"
+          - LRANGE="r"
+          - LRANGE="s"
+          - LRANGE="t"
+          - LRANGE="u"
+          - LRANGE="v"
+          - LRANGE="w"
+          - LRANGE="x"
+          - LRANGE="y"
+          - LRANGE="z"
+before_script:
+    - |
+        git config --global user.name "${GITUSERNAME}"
+        git config --global user.email "${GITUSERMAIL}"
+        git fetch origin contents:contents
+        git checkout contents
+script:
+    - |
+        if [ "${TRAVIS_EVENT_TYPE}" == "cron" ]; then
+            docker build -t dockershelf/pypicontents:2.7-3.5 docker/2.7-3.5
+            docker run -v ${PWD}:${PWD} -w ${PWD} -u $(id -u):$(id -g) \
+                dockershelf/pypicontents:2.7-3.5 \
+                    pypicontents pypi -o data/${LRANGE}/pypi.json \
+                        -f logs/${LRANGE}/pypi.log -R ${LRANGE}
+        fi
+jobs:
+    include:
+        - stage: merge and generate statistics
+          env: STDLIB="true"
+          script:
+            - |
+                if [ "${TRAVIS_EVENT_TYPE}" == "cron" ]; then
+                    for PYVER in 2.6 2.7 3.2 3.4 3.5 3.6; do
+                        docker build -t dockershelf/pypicontents:${PYVER} docker/${PYVER}
+                        docker run -v ${PWD}:${PWD} -w ${PWD} -u $(id -u):$(id -g) \
+                            dockershelf/pypicontents:${PYVER} \
+                                pypicontents stdlib -o stdlib/${PYVER}/stdlib.json
+                    done
+
+                    docker run -v ${PWD}:${PWD} -w ${PWD} -u $(id -u):$(id -g) \
+                        dockershelf/pypicontents:2.7 \
+                            pypicontents merge -o pypi.json -i data
+                    docker run -v ${PWD}:${PWD} -w ${PWD} -u $(id -u):$(id -g) \
+                        dockershelf/pypicontents:2.7 \
+                            pypicontents merge -o stdlib.json -i stdlib
+                    docker run -v ${PWD}:${PWD} -w ${PWD} -u $(id -u):$(id -g) \
+                        dockershelf/pypicontents:2.7 \
+                            pypicontents errors -o errors.json -i logs
+                    docker run -v ${PWD}:${PWD} -w ${PWD} -u $(id -u):$(id -g) \
+                        dockershelf/pypicontents:2.7 \
+                            pypicontents stats -o stats.txt -i logs
+                fi
+after_success:
+    - |
+        if [ "${TRAVIS_EVENT_TYPE}" == "cron" ]; then
+            if [ -n "${LRANGE}" ]; then
+                COMMITMSG="[ci skip] Updating PyPIContents index (PyPI letter ${LRANGE})."
+            fi
+
+            if [ -n "${STDLIB}" ]; then
+                COMMITMSG="Updating PyPIContents index (stdlib and merge)."
+                git reset dda4db045c0681483ea387dc0d7d67d89a2335dc
+            fi
+
+            git add --all .
+            git commit -a -m "${COMMITMSG}"
+            git pull --rebase origin contents
+            git push -f -q "https://${GHTOKEN}@${GHREPO#*//}" contents > /dev/null 2>&1
+        fi

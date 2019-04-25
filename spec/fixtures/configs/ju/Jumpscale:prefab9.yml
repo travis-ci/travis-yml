@@ -1,0 +1,17 @@
+language: python
+sudo: enabled
+dist: trusty
+group: edge
+
+# whitelist master/development branch only		
+branches:		
+  only:		
+    - master
+    - development
+
+python:
+  - "3.5"
+
+install: ./.travis_ci/prepare.sh
+
+script: ./run_tests.sh

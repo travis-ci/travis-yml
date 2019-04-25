@@ -1,0 +1,18 @@
+# check travis-ci.org
+language: ruby
+rvm:
+  - 2.1
+
+jobs:
+  include:
+    - stage: build
+      script:
+        - bundle exec jekyll build
+    - stage: deploy algolia
+      if: (NOT type IN (pull_request)) AND (branch = master)
+      script:
+        - bundle exec jekyll algolia push
+
+env:
+  global:
+    - NOKOGIRI_USE_SYSTEM_LIBRARIES=true

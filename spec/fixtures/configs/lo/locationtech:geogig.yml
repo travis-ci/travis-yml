@@ -1,0 +1,35 @@
+cache:
+  directories:
+    - "$HOME/.m2"
+language: java
+jdk:
+  - oraclejdk8
+before_install: 
+  - cd src
+  - sudo apt-get install libspatialite-dev
+install: mvn -B -U install -DskipTests=true -Ptravis,postgres
+before_script:
+  - psql -c 'create database geogig_tests;' -U postgres
+  - psql -c "create extension postgis" -U postgres -d geogig_tests
+  - psql -f geotools/src/test/resources/features/online/geogig_pg_test.sql -U postgres -d geogig_tests
+  - echo '[postgres]' > ~/.geogig-pg-backend-tests.properties
+  - echo 'enabled = true' >> ~/.geogig-pg-backend-tests.properties
+  - echo 'server = localhost' >> ~/.geogig-pg-backend-tests.properties
+  - echo 'database = geogig_tests' >> ~/.geogig-pg-backend-tests.properties
+  - echo 'user = postgres' >> ~/.geogig-pg-backend-tests.properties
+  - echo 'password = ' >> ~/.geogig-pg-backend-tests.properties
+  - echo '[database]' > ~/.geogig-pg-tests.properties
+  - echo 'server = localhost' >> ~/.geogig-pg-tests.properties
+  - echo 'database = geogig_tests' >> ~/.geogig-pg-tests.properties
+  - echo 'user = postgres' >> ~/.geogig-pg-tests.properties
+  - echo 'password = ' >> ~/.geogig-pg-tests.properties
+script:
+  - mvn -B test -Ppostgres,experimental,online
+services: postgresql
+addons:
+  postgresql: "9.4"
+  apt:
+    packages:
+      - postgresql-9.4-postgis-2.3
+notifications:
+  email: false

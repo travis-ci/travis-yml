@@ -1,0 +1,40 @@
+sudo: required
+dist: trusty
+language: node_js
+node_js:
+  - '10'
+cache:
+  yarn: true
+  directories:
+    - node_modules
+    - $HOME/.npm
+env:
+  global:
+    - secure: R1EKUeNYwn0AbHqJlHvXdkN0+VvSInvkqxveoIql2Rso768pkBB3YkIQasz2MsCA/bb1Cqsk4+WCL2ARJtLFUmuVAXCnOh8VPNyipc5CfG0Y37Y45thABmAp8gjgp/51dBM6ngqK0RRhyqc/CJqOkCCoI7ADgRR3lpvVfruklgMa3S4u+4zm2bGNy33rQ5y4kDXi/TACBtifq/Q4wEmqD6iusZemKkpUis8EeqyVbsUUwPujsCSA7Uh99HNZ9MFto5PNJy/kov3+fCKoXdzk/7m6qZHfbiozFZ4Ktt/9XnbKAwDU7n0FUXlAy7QjFmT7vbSWN8NyBD/edvj+441USrIkcGUlDz/jik+i20LEDcnD1m7KVPeqRFdsbA+V3wc0OE0LZf/I10Dt7Ll4odVVlfQL3Z2rujdRQk99J+KmYIfxcuEgwoLuqtJdF2sRefiKX2yNBFwnJohZc37qFvxhIB2X47UxDsIOK52ahRGNqRX7ia3pFPxxVVdWJD4qBdii64fALU3F8sFZis4C6wZ/2lsAcGPkKN9Ps2UWpFbzPRX+Y7i2AVyVF65UStAo66uD8Akp+wLNmtZQA6jm/KMf4zLijSB8Y1He3cs6HxdH/loPlZFbA+AkNKiQxPM7tSEVclvb/lU1lssP2uevTe4pfhxAwb7XNCESB0aDZUCbbLg=
+    - secure: Et5e35H1ADMXmGMVxxdQ4iz/O+SMlNovxCgJ+f2hEb4GTw1591yTh77PrHV8r23ACB9ywkWh4wRbAfGtmspXFXBEwF4o3hPOZUTc52w8+mWWBK2Qd+serCLuTlPJZFz3mxvJRVuJKO8dKoRDcTpLPmqLNYt6dsn7rrDkDazd1KAaaXPANDtXIAZAezxi9Rv716xnvNwxPjyDxWjGc566O720ni7r1U0A7mfum1lrruGOxW0mgzdBftG3Yb6wHcG35Q6LOXEQC5M2B7Jn8oQFVZvCFsmqXXgDyobyPt2JkTzy+TLVD2K5noI9QtZ7Ond48y28uxscbCOMMPJTIaPTxvLL2TS3OZYKmwjv70LBO0nOenjM5xDrMFIxvHnMLuKceSJy82Yyfuszf7DOLacrgb45IJBhuzjCWDxoIBtDDvruPFkO65kHWqvtRSEkU+H0LmSDKra55ozi8st3Dkv4h8IOOzjPo0FIrommnVxu3mQ1dQMyexpnODvvhqwwwZ14bAlZ9RlTjKPE4c+7U8E0lJy6r2SLI11nn3DYzIkoocUQCe6WpLlIUmwaA53d5lRZKADwN9T8oXTSVc12fdmHtDtOJfmsJDWqqdUScYLEznhIr/m1cFx2LBdHpLZGRTNPPlgxeK/AO4aUJW5GEEWPKoMEi6gWIhTtP/9sj6d25qc=
+before_install:
+  - openssl aes-256-cbc -K $encrypted_4a8eabd2975a_key -iv $encrypted_4a8eabd2975a_iv
+    -in travis/secrets.tar.enc -out travis/secrets.tar -d
+  - tar xvf travis/secrets.tar
+  - mv id_rsa /home/travis/.ssh/id_rsa
+  - chmod 700 /home/travis/.ssh/id_rsa
+  - npm install pm2 -g
+  - cd api
+  - chmod +x ../travis/${TRAVIS_BRANCH}.sh
+  - ../travis/${TRAVIS_BRANCH}.sh
+before_script:
+  - cd ../
+  - mkdir storage
+  - chmod +x scripts/deploy.sh
+  - git config core.fileMode false
+script:
+  - echo "Run Script"
+deploy:
+  - provider: script
+    script: scripts/deploy.sh
+    on:
+      branch: master
+  - provider: script
+    script: scripts/deploy.sh
+    on:
+      branch: staging

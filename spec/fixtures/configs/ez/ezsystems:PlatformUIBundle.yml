@@ -1,0 +1,45 @@
+# Use trusty for better performance (and avoiding mysql/postgres/solr gone issues on precise and container infra)
+dist: trusty
+sudo: required
+language: php
+
+env:
+    global:
+        secure: "aNPcXEtgV3Q/GVCH+FvITm/gLXcNyFl7YiOT9JcqZUwYXsT2zi8g4BcwBgDtpbSmi8NSCsEWONNxxDM10BqCPzfkiFD2I0cPHXVxmJ3cmOqySci5JvysEd+RU6gnatCxqzAJYDH2BanfPyu+yPwrSIgWdkPuvNhydNJFUrwsinw="
+
+cache:
+  directories:
+    - node_modules # NPM packages
+    - $HOME/.composer/cache/files
+
+matrix:
+    fast_finish: true
+    include:
+        # Run behat first as it takes the most time (don't need to specify php version here as we don't really care about version on host)
+        - php: 5.6
+          env: BEFORE="./bin/travis/prepare_behat.sh" TEST_CMD="./bin/travis/runbehat.sh" AFTER_SUCCESS='echo "After success"' RUN_INSTALL=1 COMPOSE_FILE="doc/docker/base-dev.yml:doc/docker/redis.yml:doc/docker/selenium.yml" SYMFONY_ENV=behat SYMFONY_DEBUG=0
+        - php: 5.6
+          env: BEFORE="./bin/travis/prepare_behat.sh" TEST_CMD="./bin/travis/runbehat.sh" AFTER_SUCCESS='echo "After success"' RUN_INSTALL=1 WEB_HOST=varnish COMPOSE_FILE="doc/docker/base-dev.yml:doc/docker/varnish.yml:doc/docker/redis.yml:doc/docker/selenium.yml" SYMFONY_ENV=behat SYMFONY_DEBUG=0
+        - env: BEFORE="./bin/travis/setupnode.sh" TEST_CMD="./bin/travis/runnode.sh" AFTER_SUCCESS="./bin/travis/generate_apidoc.sh"
+        - php: 7.0
+          env: BEFORE="./bin/travis/setupphpunit.sh" TEST_CMD="./vendor/bin/phpunit -c phpunit.xml" AFTER_SUCCESS='echo "After success"'
+        - php: 5.6
+          env: BEFORE='./bin/travis/setupphpunit.sh' TEST_CMD="./vendor/bin/phpunit -c phpunit.xml" AFTER_SUCCESS='echo "After success"'
+
+# test only master (+ Pull requests)
+branches:
+    only:
+        - master
+        - /^\d.\d+$/
+
+before_install:
+    - phpenv config-rm xdebug.ini
+    - echo 'memory_limit = -1' >> ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/travis.ini
+
+before_script:
+    - $BEFORE
+
+script: $TEST_CMD
+
+after_success:
+    - if [ $TRAVIS_PULL_REQUEST = "false" ] ; then $AFTER_SUCCESS ; fi

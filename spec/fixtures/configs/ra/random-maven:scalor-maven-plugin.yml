@@ -1,0 +1,33 @@
+os: linux
+dist: trusty
+sudo: required
+language: java
+jdk:
+- oraclejdk8
+#- oraclejdk9
+- oraclejdk10
+cache:
+  directories:
+  - "$HOME/.m2"
+branches:
+  only:
+  - master
+  - /develop/
+env:
+  global:
+  - secure: S148YHxyq9YjH0HezSJ1zIJq0NuI5RBWB8N5mFcjvmkaSFC48WEOiXbR+TtWmuji++DIv43lqFjpVNt0P6AjyNBQDekWQ2T8W6x9rr2tWphVu9iQBytbbcUCYZGgk7SXpZojQK54L7QuHpaXXfUpgeXpPw9gFnpDXLrZ9SxAjuU7U10OdCz2qWSHWzvnZ/bAHyVZHqo5L/pzUxoft8G31B2S27jlByI2s7rnMW6vBfzbGgEDZVPoCDJ9uF+grypBZrbbnMqjD2+/E519i39n0+/m3YDCNKbLMX/ZtTg0Pw0nFdZQUjB2hxwY8TL0r/+CN6MX0NrNbM9SLYBvgj2NUl7YXUlqk0b2MCE0aPiHOGLOeY0Wdi5HuLDJjko/MDNzYfsNUNIMO00IheCRZ9BUVUJxpI3pgBQafQqyOWAF1/iRPPYfw6hPcXwUmL3GPwvyo1fqL/ZvJlFUyfgyUGe5lgFuk24QxXBDpiSEvuFl2wZsWNTUOCLZeTgMoESi0SJPicbtxg90uUDPlcU+RpboZaKBpswZA7zqGzRq7ojZ/GPGhymHuijDCimvMZk1IkvSNNlIDkz/sueQVnZN63BN94QJzuxp2jpMOJFOATSRFPyfoaKC8n3Bqf0f/CGTMQLEoy0FUqIp3TkhNJeOtCZIgANqy26l17vNjaKIKmcxqyM=
+  - secure: Ptv4eU72Jur8C9VJI2PqYbkx6dSqjaQvyrhcOwfDDBfhhttyJtFZn+lC5jNRzB4yilFuGijWouAwz3rdy0vFlvtzH/Bl0u76Io1kYClopcb76FwDAUOqA3f4KpzAr2nny7P/n2QHeCB04uIfd6nYVWPY7IkS2J/V+vcBh4XkU9d9nsav3mldFM9Cf3pDI1/LP4g57+nJL9IGNJoVyv6ezS2vJqFUy9JRhePu3/BNcjDh96CmYZ3veI1g/7dw2HDyO0rH9n4ti/3EfgN4PdXCP/rgA7Mn2LC7Ldot+Se8tOP+9rqy3PAocyA8fQ8FkQpa/PWlPMSn4+hFiM6xlw3HDSys/UkoQUbNFLuOF5G9jj/Fd/pu2NrwEmR1YvUZEz+8oECXsaVoZRNZ/HPng8/D1rVXqaqYyKMCM/MUqPrtjViWveMYEboV8Omis+jreIyxeJSEGg3LfxOwN+s74Su/AKYpcsnHxsMHyQrgPwIPDXeyVVxia9ECo5glD0Z4PlacKOO358SdMuU8zGYcVrO4maBSwAtqzm4b5LzEGyK7pdKH2GjegVvEoa/1m5zaSR/ndnJhb59S///gqS/LtApz41KP6l05xVLkWU/QzTSwoZSZ88EV4P/ERJ+6L9a2A7tI2VyLwnSEuhv3n2MeexoREdbJWxO1heib1+c1NXZeLMQ=
+install:
+  - "/bin/true"
+before_script:
+  - "export DISPLAY=:99.0"
+  - "/bin/bash /etc/init.d/xvfb start"
+script:
+  - "/bin/cp -f -r ./.mvn/ci/.scalaide $HOME/.scalaide"
+  - "/bin/cp -f ./.mvn/ci/settings.xml $HOME/.m2/settings.xml"
+  - "/bin/cp -f ./.mvn/ci/toolchains-travis.xml $HOME/.m2/toolchains.xml"
+  - "./.mvn/ci/llvm-travis.sh || exit 1"
+  - "./.mvn/verify.sh || exit 1"
+  - "./.mvn/release-bintray.sh || exit 1"
+  - "./demo/.mvn/verify.sh || exit 1"
+  - "./.mvn/wipe-repo.sh || exit 1"

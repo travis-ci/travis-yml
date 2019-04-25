@@ -1,0 +1,36 @@
+language: c
+
+cache:
+   directories:
+    - $TRAVIS_BUILD_DIR/dpdk
+
+before_install:
+ - sudo apt-get update
+ - sudo apt-get install -y linux-headers-$(uname -r)
+ - sudo apt-get install -y libpcap-dev libglib2.0-dev libjemalloc-dev
+ - sudo apt-get install -y build-essential make git hugepages
+ - sudo apt-get install -y rats cppcheck flawfinder python-setuptools
+ - sudo apt-get install -y bridge-utils
+ - sudo apt-get install -y libnuma-dev
+
+ - sudo bash -c "echo 1024 > /proc/sys/vm/nr_hugepages"
+ - sudo bash -c "mkdir -p /mnt/huge"
+ - sudo bash -c "chmod -R 777 /mnt/huge"
+ - sudo bash -c "mount -t hugetlbfs nodev /mnt/huge"
+
+ - git clone http://dpdk.org/git/dpdk $TRAVIS_BUILD_DIR/dpdk || true
+ - cd $TRAVIS_BUILD_DIR/dpdk
+ - export DPDK_VERSION=v19.02
+ - if [ `git branch --no-color | grep \* | cut -d ' ' -f2` != $DPDK_VERSION ]; then
+       git checkout -b "$DPDK_VERSION" "$DPDK_VERSION";
+       make config T=x86_64-native-linuxapp-clang;
+       sed -i -e "s/CONFIG_RTE_LIBRTE_PMD_PCAP=n/CONFIG_RTE_LIBRTE_PMD_PCAP=y/" build/.config;
+       make EXTRA_CFLAGS='-fPIC';
+   fi
+ - export RTE_SDK=$TRAVIS_BUILD_DIR/dpdk;
+
+env:
+ - TEST_SCRIPT=tests_travis/test_all.sh
+ - TEST_SCRIPT=tests_travis/doc_style.sh
+
+script: "bash $TRAVIS_BUILD_DIR/$TEST_SCRIPT"

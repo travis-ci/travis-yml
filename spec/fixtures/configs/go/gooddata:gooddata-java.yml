@@ -1,0 +1,15 @@
+language: java
+# Skip the Travis Installation Phase (installation of dependencies: `mvn install -DskipTests=true`)
+install: true
+# Customized build command (default is only `mvn test`)
+script: mvn verify javadoc:javadoc coveralls:report -Pcoverage -B -V
+jdk:
+  - oraclejdk8
+branches:
+  only:
+     - master
+     - /\d\.0\.0-RC/
+# Cache Maven repo between Travis builds
+cache:
+  directories:
+    - '$HOME/.m2/repository'

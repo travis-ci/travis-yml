@@ -1,0 +1,45 @@
+sudo: required
+dist: trusty
+addons:
+  apt:
+    packages:
+      - expect-dev # for unbuffer
+before_install:
+- curl --insecure --write-out "init.sh %{http_code}\n" --show-error --silent https://raw.githubusercontent.com/aequologica/holos/travis/init.sh -o init.sh
+- chmod +x init.sh
+- ./init.sh
+install: "/bin/true"
+script:
+- |
+  deploy_or_install="deploy"
+  if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then
+    deploy_or_install="install" 
+  fi
+  export MAVEN_OPTS="-Djansi.force=true $MAVEN_OPTS"
+  unbuffer ./mvnw \
+    clean \
+    $deploy_or_install \
+    --batch-mode \
+    --settings settings.xml \
+    -DdistributionManagement.repository.local_releases.url=file:/tmp \
+    -Dmaven.ext.class.path=shak.jar \
+    -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn \
+    -Dshakuntala.dagPOST=false \
+    -Dstyle.color=always
+language: java
+jdk:
+- oraclejdk11
+branches:
+  only:
+  - develop
+  - master
+env:
+  global:
+  - secure: PdTIPJkWrltTPWUTpk4wpqQJxfoirEwtjbI9f5OMP6Kl5N22ZINii0Ud0jCjn8/8cv4rXW5ATO7DI8G++qx9a9NyvFAZzL2MrpqqqYCCT3g1HZFrP5gx4MH1nESD4XT/S5+ZC5xwXAKIHYHjtEfxw1Paz28JIzM/2GVht99T0hQ=
+  - secure: EMlE8z7sDJUSerQBMTET1KN5ZtWCYIFHAU9Qgox4nDl+zNzkpw4JZkwp1RrFs50dPQwyVo3O6eIHEV0TCQi6H2hRriMA3cmVSUImbIerJIRVe8WuC5sqIf4F74rr5+C4vG4aGLjFX3ajtiNu3cMd4dN8CYNdOwSIK6sm/Pwy2nI=
+  - secure: hYOPHbn5tNC5oHHfpp8OXgbqYi6GzSE65KPURreeAdCFMsxR727xDrRKQvSa61OUaF3xu0Ka3EJB/VxvJHrTLBqdkuVuXgoe1XhF8LKV9U+LXjqocZX3myNMBLyw++pkieVqJmLicieSTIdZYp8PiaiLWOwAOFZdZOCs4CLsey8=
+  - secure: ZFDqzEk5LpEmB9XpfVJe5vj+8uppZUWPDaKDmA0rPe4oMzTE77IUGxLN8WKtYY4jexG2yhArYbqaidVyzGrVizpMWUbMwStmwXjRYhI/eJfvJSASJArLtm2AMa1WFDhES8Qn/wtqFsnNgdFFY6Wd1bmrCPXoSRHtvMlje/Dq8AU=
+  - secure: I8i5UJlfAWtthi7OmHtCwzpCnQOuCw0V0Rqy26KC11CppiCWUvx9ntBiR1MaYB8EAsz0fn3bPmET9tnk8iHzynDq2t2ZgOjJm6wfvuqtF+PSqEuR/5e9S6C8mH09nlrx2xN7XnOTAIj4CNF5erib14RCo8BnX617R9uC+2zzhiQ=
+notifications:
+  email: false
+  webhooks: https://tebaldi051108trial.hanatrial.ondemand.com/api/dagr/travis/notification/

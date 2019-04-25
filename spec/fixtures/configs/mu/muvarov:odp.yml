@@ -1,0 +1,290 @@
+# Copyright (c) 2016-2018, Linaro Limited
+# All rights reserved.
+# SPDX-License-Identifier:     BSD-3-Clause
+#
+# Please update xxxx for your coverity token and notification email if required
+# pushing to github/master will run make check
+# pushing to github/coverity_scan will also launch a static analysis
+# See https://scan.coverity.com/travis_ci
+
+#
+# Travis uses Docker images which mainained here:
+# 	https://github.com/Linaro/odp-docker-images
+# CI scirpts are maintained under ./scripts/ci/ directory
+# which passed into container during the test run.
+
+language: c
+sudo: required
+dist: trusty
+stages:
+  - "build only"
+  - test
+
+#addons:
+#        coverity_scan:
+#                project:
+#                        name: "$TRAVIS_REPO_SLUG"
+#                        notification_email: xxxx
+#                        build_command_prepend: "./bootstrap && ./configure --enable-test-cpp --enable-test-vald --enable-test-helper --enable-test-perf --enable-user-guides --enable-test-perf-proc --enable-test-example"
+#                        build_command:   "make"
+#                        branch_pattern: coverity_scan
+
+cache:
+        ccache: true
+        pip: true
+        directories:
+                - netmap
+                - $HOME/doxygen-install
+
+compiler:
+        - gcc
+        - clang
+
+env:
+    global:
+        #
+        # By default Linaro CODECOV_TOKEN token is used. It's ok to use it to see
+        # for individual commit validation. But you you want to track tests history
+        # you need generated new one at https://codecov.io specific for your repo.
+        - CODECOV_TOKEN=a733c34c-5f5c-4ff1-af4b-e9f5edb1ab5e
+        - OS="ubuntu_16.04"
+        - CHECK=1
+        - NETMAP=0
+    matrix:
+        - CONF=""
+        - CONF="--disable-abi-compat"
+        - NETMAP=1 CONF=""
+        - CHECK=0 ARCH="arm64"
+        - CHECK=0 ARCH="armhf"
+        - CHECK=0 ARCH="powerpc"
+        - CHECK=0 ARCH="i386"
+        - CHECK=0 ARCH="arm64" CONF="--disable-abi-compat"
+        - CHECK=0 ARCH="armhf" CONF="--disable-abi-compat"
+        - CHECK=0 ARCH="powerpc" CONF="--disable-abi-compat"
+        - CHECK=0 ARCH="i386" CONF="--disable-abi-compat"
+        - CONF="--enable-deprecated"
+        - CONF="--enable-dpdk-zero-copy --disable-static-applications"
+        - NETMAP=1 CONF="--disable-static-applications"
+        - CONF="--disable-host-optimization"
+        - CONF="--disable-host-optimization --disable-abi-compat"
+        - CHECK=0 ARCH="x86_64" CONF="--enable-pcapng-support"
+        - CHECK=0 ARCH="x86_64" OS="centos_7"
+        - CONF="--without-openssl"
+        - OS="ubuntu_18.04"
+
+matrix:
+  exclude:
+  - compiler: gcc
+    env: CHECK=0 ARCH="arm64"
+  - compiler: gcc
+    env: CHECK=0 ARCH="i386"
+
+install:
+        - if [ ${NETMAP} -eq 1 ] ; then
+               echo "Installing NETMAP";
+               sudo apt-get install linux-headers-`uname -r` ;
+               CDIR=`pwd` ;
+               git -c advice.detachedHead=false clone -q --depth=1 --single-branch --branch=v11.2 https://github.com/luigirizzo/netmap.git;
+               pushd netmap/LINUX;
+               ./configure --drivers= ;
+               make -j $(nproc);
+               popd;
+               sudo insmod ./netmap/LINUX/netmap.ko;
+               CONF="$CONF --with-netmap-path=/odp/netmap";
+          fi
+script:
+        - if [ -z "${DOCKER_NAMESPACE}" ] ; then export DOCKER_NAMESPACE="opendataplane"; fi
+        - if [ ${CHECK} -eq 0 ] ; then
+               docker run  -i -t -v `pwd`:/odp --shm-size 8g
+                 -e CC="${CC}"
+                 -e CONF="${CONF}"
+                 ${DOCKER_NAMESPACE}/travis-odp-lng-${OS} /odp/scripts/ci/build_${ARCH}.sh ;
+          else
+               echo "Running test" ;
+               docker run --privileged -i -t
+                 -v `pwd`:/odp --shm-size 8g
+                 -e CC="${CC}"
+                 -e CONF="${CONF}"
+                 ${DOCKER_NAMESPACE}/travis-odp-lng-${OS} /odp/scripts/ci/check.sh ;
+          fi
+jobs:
+        include:
+                - stage: test
+                  env: TEST=coverage
+                  compiler: gcc
+                  script:
+                          - if [ -z "${DOCKER_NAMESPACE}" ] ; then export DOCKER_NAMESPACE="opendataplane"; fi
+                          - docker run --privileged -i -t
+                              -v `pwd`:/odp --shm-size 8g
+                              -e CODECOV_TOKEN="${CODECOV_TOKEN}"
+                              -e CC="${CC}"
+                              ${DOCKER_NAMESPACE}/travis-odp-lng-ubuntu_16.04 /odp/scripts/ci/coverage.sh
+                - stage: test
+                  env: TEST=scheduler_sp
+                  compiler: gcc
+                  script:
+                          - if [ -z "${DOCKER_NAMESPACE}" ] ; then export DOCKER_NAMESPACE="opendataplane"; fi
+                          - docker run --privileged -i -t
+                              -v `pwd`:/odp --shm-size 8g
+                              -e CC="${CC}"
+                              -e CONF=""
+                              -e ODP_SCHEDULER=sp
+                              ${DOCKER_NAMESPACE}/travis-odp-lng-ubuntu_16.04 /odp/scripts/ci/check.sh
+                - stage: test
+                  env: TEST=scheduler_scalable
+                  compiler: gcc
+                  script:
+                          - if [ -z "${DOCKER_NAMESPACE}" ] ; then export DOCKER_NAMESPACE="opendataplane"; fi
+                          - docker run --privileged -i -t
+                              -v `pwd`:/odp --shm-size 8g
+                              -e CC="${CC}"
+                              -e CONF=""
+                              -e ODP_SCHEDULER=scalable
+                              ${DOCKER_NAMESPACE}/travis-odp-lng-ubuntu_16.04 /odp/scripts/ci/check.sh
+                - stage: test
+                  env: TEST=process_mode
+                  install:
+                          - true
+                  compiler: gcc
+                  script:
+                          - if [ -z "${DOCKER_NAMESPACE}" ] ; then export DOCKER_NAMESPACE="opendataplane"; fi
+                          - docker run --privileged -i -t
+                              -v `pwd`:/odp --shm-size 8g
+                              -e CC="${CC}"
+                              -e CONF=""
+                              -e ODP_CONFIG_FILE=/odp/platform/linux-generic/test/process-mode.conf
+                              -e ODPH_PROC_MODE=1
+                              ${DOCKER_NAMESPACE}/travis-odp-lng-ubuntu_16.04 /odp/scripts/ci/check.sh
+                - stage: test
+                  env: TEST=dpdk_18.11
+                  install:
+                          - true
+                  compiler: gcc
+                  script:
+                          - if [ -z "${DOCKER_NAMESPACE}" ] ; then export DOCKER_NAMESPACE="opendataplane"; fi
+                          - docker run --privileged -i -t
+                              -v `pwd`:/odp --shm-size 8g
+                              -e CC="${CC}"
+                              -e CONF=""
+                              ${DOCKER_NAMESPACE}/travis-odp-lng-ubuntu_16.04-dpdk_18.11 /odp/scripts/ci/check.sh
+                - stage: test
+                  env: TEST=inline_timer
+                  install:
+                          - true
+                  compiler: gcc
+                  script:
+                          - if [ -z "${DOCKER_NAMESPACE}" ] ; then export DOCKER_NAMESPACE="opendataplane"; fi
+                          - docker run --privileged -i -t
+                              -v `pwd`:/odp --shm-size 8g
+                              -e CC="${CC}"
+                              -e CONF=""
+                              -e ODP_CONFIG_FILE=/odp/platform/linux-generic/test/inline-timer.conf
+                              ${DOCKER_NAMESPACE}/travis-odp-lng-ubuntu_16.04 /odp/scripts/ci/check_inline_timer.sh
+                - stage: test
+                  env: TEST=distcheck
+                  compiler: gcc
+                  script:
+                          - if [ -z "${DOCKER_NAMESPACE}" ] ; then export DOCKER_NAMESPACE="opendataplane"; fi
+                          - docker run --privileged -i -t
+                              -v `pwd`:/odp --shm-size 8g
+                              -e CC="${CC}"
+                              -e CONF="--enable-user-guides"
+                              ${DOCKER_NAMESPACE}/travis-odp-lng-ubuntu_16.04 /odp/scripts/ci/distcheck.sh
+                - stage: test
+                  env: TEST=distcheck_nonabi
+                  compiler: gcc
+                  script:
+                          - if [ -z "${DOCKER_NAMESPACE}" ] ; then export DOCKER_NAMESPACE="opendataplane"; fi
+                          - docker run --privileged -i -t
+                              -v `pwd`:/odp --shm-size 8g
+                              -e CC="${CC}"
+                              -e CONF="--enable-user-guides --disable-abi-compat"
+                              ${DOCKER_NAMESPACE}/travis-odp-lng-ubuntu_16.04 /odp/scripts/ci/distcheck.sh
+                - stage: "build only"
+                  env: TEST=doxygen
+                  compiler: gcc
+                  addons:
+                          apt:
+                                  packages:
+                                          - libconfig-dev
+                                          - libssl-dev
+                                          - cmake
+                                          - graphviz
+                  install:
+                          # Updated Doxygen
+                        - |
+                          if [ ! -f "$HOME/doxygen-install/bin/doxygen" ]; then
+                                wget https://github.com/doxygen/doxygen/archive/Release_1_8_13.tar.gz
+                                tar xpvf Release_1_8_13.tar.gz
+                                pushd doxygen-Release_1_8_13
+                                cmake -DCMAKE_INSTALL_PREFIX=$HOME/doxygen-install .
+                                make -j $(nproc)
+                                make install
+                                popd
+                          fi
+                        - export PATH=$HOME/doxygen-install/bin:$PATH
+                  script:
+                          - ./bootstrap
+                          - ./configure
+                          # doxygen does not trap on warnings, check for them here.
+                          - make doxygen-doc 2>&1 |tee doxygen.log
+                          - |
+                             fgrep -rq warning ./doxygen.log
+                             if [ $? -eq 0 ]; then
+                               false
+                             else
+                               true
+                             fi
+                - stage: "build only"
+                  env: ARCH=x86_64
+                  install:
+                          - true
+                  script:
+                          - if [ -z "${DOCKER_NAMESPACE}" ] ; then export DOCKER_NAMESPACE="opendataplane"; fi
+                          - docker run -i -t -v `pwd`:/odp --shm-size 8g
+                              -e CC="${CC}"
+                              ${DOCKER_NAMESPACE}/travis-odp-lng-ubuntu_16.04 /odp/scripts/ci/build_${ARCH}.sh
+                - stage: "build only"
+                  env: ARCH=x86_64
+                  compiler: clang
+                  install:
+                          - true
+                  script:
+                          - if [ -z "${DOCKER_NAMESPACE}" ] ; then export DOCKER_NAMESPACE="opendataplane"; fi
+                          - docker run -i -t -v `pwd`:/odp --shm-size 8g
+                              -e CC="${CC}"
+                              ${DOCKER_NAMESPACE}/travis-odp-lng-ubuntu_16.04 /odp/scripts/ci/build_${ARCH}.sh
+                - stage: "build only"
+                  env: ARCH=arm64
+                  install:
+                          - true
+                  script:
+                          - if [ -z "${DOCKER_NAMESPACE}" ] ; then export DOCKER_NAMESPACE="opendataplane"; fi
+                          - docker run -i -t -v `pwd`:/odp
+                              -e CC="${CC}"
+                              ${DOCKER_NAMESPACE}/travis-odp-lng-ubuntu_16.04 /odp/scripts/ci/build_${ARCH}.sh
+                - stage: "build only"
+                  env: ARCH=i386
+                  install:
+                          - true
+                  script:
+                          - if [ -z "${DOCKER_NAMESPACE}" ] ; then export DOCKER_NAMESPACE="opendataplane"; fi
+                          - docker run -i -t -v `pwd`:/odp --shm-size 8g
+                              -e CC="${CC}"
+                              ${DOCKER_NAMESPACE}/travis-odp-lng-ubuntu_16.04 /odp/scripts/ci/build_${ARCH}.sh
+                - stage: test
+                  canfail: yes
+                  env: TEST=checkpatch
+                  compiler: gcc
+                  install:
+                          - true
+                  script:
+                          - echo ${TRAVIS_COMMIT_RANGE};
+                          - ODP_PATCHES=`echo ${TRAVIS_COMMIT_RANGE} | sed 's/\.//'`;
+                          - ./scripts/ci-checkpatches.sh ${ODP_PATCHES};
+        allow_failures:
+          - canfail: yes
+
+after_failure:
+  - cat config.log
+  - find . -name "*.trs" | xargs grep -l '^.test-result. FAIL' | while read trs ; do echo FAILURE detected at $trs; cat ${trs%%.trs}.log ; done

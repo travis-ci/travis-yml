@@ -1,0 +1,40 @@
+addons:
+    apt:
+        packages:
+        - dos2unix
+cache:
+- pip
+dist: xenial
+env:
+    global:
+    -   secure: pf9boU7DNus04a4Y3NVXZiWASb0dr546RaSggUft31t18swBeiZNz+0DzXpPgU2z3Mxjs2o/ywCfcUtN0VFwaDyP/Ls/cW9s2mqYF2YFKuQmoT8RLM68o7FJeIPLY2SsXWFu5Fk1wdQ1FArKIZYt+QMv7Z7uphWj7lixfOvW8h9gkbKy7TcPw6Pm8DTRdXgLsWWbZgl6Xjceik+ZqCjoILD7Lp46TbC3BLPADnXvUTt6aLQl1M0wiG45NZmnmkGmOhuaUVu45i5mBc0id2l1pSTcVvUuG3ctDwMZMV851Gmx5INZbvS8b/lRcYgCPhlDvF9qIWWmIrM7dOnPfL714kF5RDqzPce9g9RbZ/uqLBHAmbJf9dxMnqZND++usMxT/S6JSPy/SB2M+oZnkghy7SAEKk677+f0IuSsbWHSjOokIOrc+bBrMbT7j4UyliPtESEEEnr43PHQpA9ZMGEq7bwSQvK8rI3P/0iMRPnpKZqwJo5G8t5XJ/o+V2B4rRyr17VhwLUEpgLecssbqhYoR8Y51KCFQ7/qww8fPPaSMiYHPnsC6BAR07+z0PCknxHt+vf+SuUTIQCq8HBzpdVULizeiDvL/FM6HmFsMcZOEOu8mbXPc22cd/fPTBEDqGu/4Xs+dMCiXBoRFeb3BBoUjbPPbRFYrw3ck1jzk51Yros=
+    -   GIT_NAME: Travis CI
+    -   GIT_EMAIL: dead-hosts@funilrys.com
+    -   TRAVIS_REPO_SLUG: Ultimate-Hosts-Blacklist/Ads_Disconnect.me
+    -   GIT_BRANCH: master
+    -   UPDATE_LOCATION: https://raw.githubusercontent.com/Ultimate-Hosts-Blacklist/repository-structure/master/update.py
+    -   ADMINISTATION_LOCATION: https://raw.githubusercontent.com/Ultimate-Hosts-Blacklist/repository-structure/master/administration.py
+install:
+- pip3 install --upgrade pip
+- pip3 install requests
+- pip3 install ultimate-hosts-blacklist-whitelist PyYaml
+- if [[ ! -f .admin ]]; then wget "${UPDATE_LOCATION}" -o /dev/null -O update.py &&
+    chmod +x update.py; else echo "No need to download/update update.py."; fi
+- if [[ ! -f .admin ]]; then wget "${ADMINISTATION_LOCATION}" -o /dev/null -O administration.py
+    && chmod +x administration.py; else echo "No need to download/update administration.py.";
+    fi
+language: python
+matrix:
+    fast_finish: true
+notifications:
+    email:
+        on_failure: always
+        on_success: never
+        recipients:
+        - dead-hosts@funilrys.com
+        - mitchellkrogza+ultimatehostsblacklist@gmail.com
+python:
+- '3.7'
+script:
+- python3 ./update.py
+sudo: required

@@ -1,0 +1,18 @@
+after_success:
+  - $(npm bin)/set-up-ssh --key "$encrypted_f2a94b9322ca_key"
+                             --iv "$encrypted_f2a94b9322ca_iv"
+                             --path-encrypted-key "github_deploy_key.enc"
+  - $(npm bin)/update-branch --commands "NODE_ENV='production' CI=false npm run build"
+                             --commit-message "Hey GitHub, this content is for you! [skip ci]"
+                             --directory "build"
+                             --distribution-branch "gh-pages"
+                             --source-branch "master"
+script:
+  - npm run test
+env:
+  global:
+    - secure: "Bz0CD1L+xspTxr9Hq/FPqJZfqZc3SNSkyRnJGpQh34g3aOSu9RTFGDUiT8F7ZhC60BaTwo5HlrQgbv3BOw4z6IhvRt7dczdoYX33BCUm50UYto79tR2vQCX4211RteGKTq03fa4GpsFo2Pa4MK93IE9RW65SniwKW5fWnReio9YVc14gZWZKTKA/Km+O0voFxkbPcLLzzEz0FMuDY9sPCKh6icSQme05U/iFIjoMwcpDWIC42ofIGdQQBTXu1dJUiAXKOdgEjm01vk8U8fymjHCLW58775Hw4fTdtDtU178NO94ZNg+wAgbnGmsD+nW9VMcgWy/VD/BZpKPRLE1MKicFHf4Dv6MmQjE6jOR9ov2bLRDIK2pYkfDGsN3HJ3DdSl2g39UMi78jn9nh7F7Tn3GoXkkdn4cWEUaa8TNMfDIUjI8tLvjWAuQNfpu/CestOyfQozdnpljdl3n+WlYMFxx6YjlsEPCQOF/HsDdLPOV7V6pZ3d2IaXLMUuVLaHIeYyT0+wl2zbS5K+EPDSNMf7hz7sdwaxm1T8AC+X+9ahVejGEtgDvP8jmAntS88P3yh8XcaEovlpP7g9FtxVpeqRMrmqkbabVCi9kdVm9SqDO7XrnHuXF/+Wpz+TqUTEqM4bd4OWscXdiCEQR6c9bcArj8HgDFILmDj00zMPsDbbE="
+language: node_js
+node_js:
+  - stable
+install: npm install

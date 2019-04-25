@@ -1,0 +1,44 @@
+language: rust
+rust:
+  - stable
+  - beta
+  - nightly
+os: linux
+dist: trusty
+sudo: required
+env: TYPE=default RUST_BACKTRACE=1
+cache:
+  directories:
+  - $HOME/.cargo
+  - $TRAVIS_BUILD_DIR/target
+script:
+- cargo build --verbose
+- cargo test --verbose
+- cargo build --release --verbose
+- cargo test --release --verbose
+matrix:
+  include:
+    - os: linux
+      rust: nightly
+      env: TYPE=rustfmt RUST_BACKTRACE=1
+      script:
+        - cargo install -f rustfmt-nightly
+        - cargo fmt -- --check
+    - os: linux
+      rust: nightly
+      env: TYPE=tls RUST_BACKTRACE=1
+      script:
+        - cargo build --features tls --release
+    - os: linux
+      rust: nightly
+      env: TYPE=clippy RUST_BACKTRACE=1
+      script:
+        - rustup component add clippy --toolchain=nightly || cargo install --git https://github.com/rust-lang/rust-clippy/ --force clippy
+        - cargo clippy
+    - os: linux
+      rust: nightly
+      env: TYPE=benchmark RUST_BACKTRACE=1
+      script:
+        - bash bench.sh
+  allow_failures:
+    - rust: nightly

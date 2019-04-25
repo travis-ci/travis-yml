@@ -1,0 +1,100 @@
+sudo: required
+
+language: python
+cache:
+  directories:
+    - /home/travis/.cache/pip
+    - /home/travis/.cypress/Cypress
+
+python:
+  - 2.7
+
+addons:
+  postgresql: "10"
+  apt:
+    packages:
+      - postgresql-10
+      - postgresql-client-10
+
+install:
+  - node --version
+  - NODE_VERSION=6.11.0
+  - nvm install $NODE_VERSION
+  - nvm use $NODE_VERSION
+  - node --version
+
+  - npm --version
+  - npm install -g npm@3.10.10
+  - npm --version
+
+  - pip install -r requirements.txt --quiet
+
+env:
+  global:
+    # These env vars are available to every build
+    - PYTHONPATH=$PYTHONPATH:../refinery:../refinery/config
+    - DJANGO_SETTINGS_MODULE=config.settings.prod
+    # CYPRESS_RECORD_KEY:
+    - secure: oGdTYh3rnPdG7qVGYq3TgVESypir1btO2kmafumtKR6o+FYmMtb09pe+HtiT6Qfv4pDwnYZ2RTYqsTY4h6POigU5j7qQPSsZ5WkhHt9ybFyt/vfo2B95GaAIFt+8LVjTX5TItyw0/PPUCCUluQ1n8k/NCtSfMb0kIT/CuLrg7N8=
+
+before_script:
+  # PostgreSQL-10 is still not fully supported by Travis.
+  # See: https://github.com/travis-ci/travis-ci/issues/8537#issuecomment-416467506
+  # Use default postgres port
+  - sudo sed -i 's/port = 5433/port = 5432/' /etc/postgresql/10/main/postgresql.conf
+  # Use postgres 9.6 auth config:
+  - sudo cp /etc/postgresql/{9.6,10}/main/pg_hba.conf
+  - sudo service postgresql restart
+
+  # Vagrant is not used on travis: This user is just for the database.
+  - createuser --createdb --no-superuser --no-createrole vagrant
+  - createdb -O vagrant refinery
+
+  - cd refinery
+# See http://www.stuartellis.eu/articles/erb/#running-erb-from-the-command-line
+  - erb config/config.json.erb > config/config.json
+  - python manage.py migrate --noinput --fake-initial
+  - npm install -g grunt-cli@0.1.13 bower@1.8.2 --progress false --quiet || ( cat npm-debug.log && false )
+  - cd ui
+  - npm install --progress false --quiet || ( cat npm-debug.log && false )
+  - bower install --config.interactive=false --quiet
+  - cd ../
+
+  # Required for cypress tests; TODO: Move to puppet.
+  # TODO: Start up solr
+  - python manage.py loaddata guest.json
+  - python manage.py activate_user guest
+  - python manage.py add_users_to_public_group
+  - pushd ui && grunt make && popd
+  - python manage.py collectstatic --noinput -v 0
+  - python manage.py runserver --insecure --settings config.settings.dev 2>&1 | grep -v 200 &
+
+script:
+  - set -e # Any error will cause travis to exit early and report a failure.
+
+  # TODO: Not the same behavior as pre-commit hook.
+  # https://github.com/refinery-platform/refinery-platform/issues/1851
+  - flake8 ..
+
+  - echo 'travis_fold:start:grunt'
+  - pushd ui && grunt test && popd
+  - echo 'travis_fold:end:grunt'
+
+  - echo 'travis_fold:start:django-tests'
+  - coverage run manage.py test
+  - echo 'travis_fold:end:django-tests'
+
+  - echo 'travis_fold:start:cypress'
+  - pushd ui && node_modules/.bin/cypress run && popd
+  - echo 'travis_fold:end:cypress'
+
+  - set +e # Currently, codecov does not always exit with 0, but that should not cause travis to fail.
+
+after_success:
+  - echo 'travis_fold:start:codecov'
+  - codecov
+  - npm run codecov
+  - echo 'travis_fold:end:codecov'
+notifications:
+  slack:
+    secure: nDs9Oj08nRizuD0edl6WcrSgaTPMyITQjZc4qPZpt+yOxUehWbrAmVhqYypfyvdj4qSi1E72rPTXftuBB1E1IZBgX4CCkrCkWGLgIxHaaValTd64oOX66eC3BbSehQxuJB7w1DWw54xBUkTy6+ufjAqiwhLpoEUeE296urAWYHU=

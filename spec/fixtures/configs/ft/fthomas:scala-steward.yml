@@ -1,0 +1,29 @@
+language: scala
+jdk:
+- oraclejdk8
+- openjdk11
+scala:
+- 2.12.8
+services:
+- docker
+
+before_install:
+- git fetch --tags
+cache:
+  directories:
+  - "$HOME/.ivy2/cache"
+  - "$HOME/.sbt/boot/"
+
+install:
+- pip install --user codecov
+script: sbt ++$TRAVIS_SCALA_VERSION validate
+after_success:
+- codecov
+
+notifications:
+  webhooks:
+    urls:
+    - https://webhooks.gitter.im/e/0c488817d5dc313a8cc7
+    on_success: change
+    on_failure: always
+    on_start: never

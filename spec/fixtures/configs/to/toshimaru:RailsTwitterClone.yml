@@ -1,0 +1,21 @@
+sudo: required
+language: ruby
+cache: bundler
+env:
+  global:
+    - CC_TEST_REPORTER_ID=a74e9933c8093d8a99be5c3ba44b7a82554eec9505f4674356f305e4667144b1
+before_install:
+  # Install chromedriver
+  - sudo apt-get install -y chromium-chromedriver
+  - ln -s /usr/lib/chromium-browser/chromedriver ~/bin/chromedriver
+  # Download cc-test-reporter
+  - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+  - chmod +x ./cc-test-reporter
+  - ./cc-test-reporter before-build
+rvm:
+  - 2.3.8
+  - 2.4.5
+  - 2.5.3
+  - 2.6.1
+after_script:
+  - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT

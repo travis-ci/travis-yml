@@ -1,0 +1,40 @@
+osx_image: xcode10.2
+language: objective-c
+
+# Handle git submodules yourself
+# http://stackoverflow.com/a/24600210/805882
+git:
+    submodules: false
+
+# Use sed to replace the SSH URL with the public URL, then initialize submodules
+before_install:
+  # Fix Travis  xcodebuild exited with 65 https://github.com/travis-ci/travis-ci/issues/6675#issuecomment-257964767
+  - export IOS_SIMULATOR_UDID=`instruments -s devices | grep -m 1 "iPhone 8 (12" | awk -F '[ ]' '{print $4}' | awk -F '[\[]' '{print $2}' | sed 's/.$//'`
+  - echo $IOS_SIMULATOR_UDID
+  - bundle install # We need a pre-release CocoaPods version
+  - sed -i -e 's/git@github.com:/git:\/\/github.com\//' .gitmodules
+  - sed -i -e 's/git@github.com:/git:\/\/github.com\//' Podfile
+  - git submodule update --init --recursive
+
+install:
+  - cp OTRResources/Secrets-template.plist OTRResources/Secrets.plist
+  - curl -L https://github.com/ChatSecure/ChatSecure-iOS-Precompiled-Dependencies/archive/master.zip -o ChatSecure-iOS-Precompiled-Dependencies.zip
+  - unzip -q ChatSecure-iOS-Precompiled-Dependencies.zip
+  - mv ChatSecure-iOS-Precompiled-Dependencies-master ChatSecure-iOS-Precompiled-Dependencies
+  - mkdir -p ./Carthage/Build/iOS/
+  - unzip -q ./ChatSecure-iOS-Precompiled-Dependencies/Carthage-iOS.zip -d ./Carthage/Build
+  - unzip -q ./ChatSecure-iOS-Precompiled-Dependencies/CPAProxyDependencies.zip -d ./Submodules/CPAProxy/
+  - mv ./Submodules/CPAProxy/CPAProxyDependencies ./Submodules/CPAProxy/CPAProxyDependencies-iOS
+  - cp -r ./Submodules/CPAProxy/CPAProxyDependencies-iOS ./Submodules/CPAProxy/CPAProxyDependencies-macOS
+  - unzip -q ./ChatSecure-iOS-Precompiled-Dependencies/OTRKitDependencies-iOS.zip -d ./Submodules/OTRKit/
+  - unzip -q ./ChatSecure-iOS-Precompiled-Dependencies/Pods.zip
+
+before_script:
+  # Skip re-building of Carthage dependencies in favor of using precompiled
+  # - carthage update --platform ios --cache-builds
+  - bundle exec pod repo update
+  - bundle exec pod install
+script:
+  - set -o pipefail
+  - xcodebuild -workspace ChatSecure.xcworkspace -scheme ChatSecureTests -sdk iphonesimulator -destination "id=$IOS_SIMULATOR_UDID" test | xcpretty -c
+  

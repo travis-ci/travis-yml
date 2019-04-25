@@ -1,0 +1,69 @@
+matrix:
+  include:
+    - python: 2.7
+      env: PYTEST=1
+    - jdk: oraclejdk8
+      env: MVN=1
+    # - jdk: oraclejdk9
+    #   env: MVN=1
+    # - jdk: oraclejdk10
+    #   env: MVN=1
+    - jdk: oraclejdk8
+      env: PEP8=1
+
+before_install:
+  - |
+    if ! [ -z "$PYTEST" ]; then
+      export JYTHON_URL='http://search.maven.org/remotecontent?filepath=org/python/jython-installer/2.7.0/jython-installer-2.7.0.jar'
+      wget $JYTHON_URL -O jython_installer.jar; java -jar jython_installer.jar -s -d $HOME/jython; export PATH=$HOME/jython/bin:$PATH
+      export JYTHONPATH=$HOME/build/$TRAVIS_REPO_SLUG/resources/lib:$JYTHONPATH
+      mkdir $HOME/.nammu
+      cp $HOME/build/$TRAVIS_REPO_SLUG/resources/config/*.yaml $HOME/.nammu
+    fi
+
+install:
+  - |
+    if ! [ -z "$PYTEST" ]; then
+       pip install --user -r requirements.txt
+       mkdir $HOME/build/$TRAVIS_REPO_SLUG/resources/lib
+       javac -d $HOME/build/$TRAVIS_REPO_SLUG/resources/lib $HOME/build/$TRAVIS_REPO_SLUG/src/main/java/uk/ac/ucl/rc/development/oracc/ext/*.java
+    fi
+  - |
+    if ! [ -z "$PEP8" ]; then
+       pip install --user pep8
+    fi
+
+before_script:
+ - |
+   if ! [ -z "$PYTEST" ]; then
+     export DISPLAY=:99.0
+     sh -e /etc/init.d/xvfb start
+     sleep 3
+   fi
+
+script:
+  - |
+    if ! [ -z "$PYTEST" ]; then
+      py.test python/nammu/test/
+    fi
+  - |
+    if ! [ -z "$PEP8" ]; then
+      python -m pep8 python/
+    fi
+  - |
+    if ! [ -z "$MVN" ]; then
+      mvn clean install -DskipTests
+    fi
+
+deploy:
+  provider: releases
+  api_key:
+    # Note; this api_key is only valid for oracc/nammu; you need
+    # to make your own: https://docs.travis-ci.com/user/deployment/releases/
+    secure: EW3xfk4/6xV5VMurFlOR8svSH8bk+kvGIw9rBZrnI5sh76M+n3QaqmaI0WWq8V17lix2GzBSbR0CsS5Po2QlIPlSZPwpP1VGrO9BEq0q4EVAVjUQMa0D0U8NSiR3IKhuxox4V48PJttksxeGxN7KcOoDM+WFsttaAxZDl7YU6L8=
+  file_glob: true
+  file: $HOME/.m2/repository/uk/ac/ucl/rc/development/oracc/nammu/**/nammu*.jar
+  skip_cleanup: true
+  on:
+    repo: oracc/nammu
+    tags: true

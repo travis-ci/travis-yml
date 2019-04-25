@@ -1,0 +1,239 @@
+dist: xenial
+env:
+  global:
+    - DOCKER_COMPOSE_VERSION=1.23.2
+services:
+  - docker
+addons:
+  apt:
+    packages:
+      - docker-ce
+
+jobs:
+  include:
+    # build cache images ----------------------------------------------------------------------
+    - if: branch = master
+      stage: preparing docker cache images
+      name: build cache
+      sudo: required
+      before_install:
+        - sudo bash ops/travis/build-cache/scripts before_install
+      install:
+        - bash ops/travis/build-cache/scripts install
+      before_script:
+        - bash ops/travis/build-cache/scripts before_script
+      script:
+        - bash ops/travis/build-cache/scripts script
+      after_success:
+        - bash ops/travis/build-cache/scripts after_success
+
+    # test python, webserver ----------------------------------------------------------------------
+    - stage: unit testing
+      name: webserver
+      language: python
+      python:
+        - "3.6"
+      sudo: required
+      cache: pip
+      before_install:
+        - sudo bash ops/travis/unit-testing/webserver before_install
+      install:
+        - bash ops/travis/unit-testing/webserver install
+      before_script:
+        - bash ops/travis/unit-testing/webserver before_script
+      script:
+        - bash ops/travis/unit-testing/webserver script
+      after_success:
+        - bash ops/travis/unit-testing/webserver after_success
+
+    # test python, director ----------------------------------------------------------------------
+    - stage: unit testing
+      name: director
+      language: python
+      python:
+        - "3.6"
+      sudo: required
+      cache: pip
+      before_install:
+        - sudo bash ops/travis/unit-testing/director before_install
+      install:
+        - bash ops/travis/unit-testing/director install
+      before_script:
+        - bash ops/travis/unit-testing/director before_script
+      script:
+        - bash ops/travis/unit-testing/director script
+      after_success:
+        - bash ops/travis/unit-testing/director after_success
+
+    # test python, simcore-sdk ----------------------------------------------------------------------
+    - stage: unit testing
+      name: simcore-sdk
+      language: python
+      python:
+        - "3.6"
+      sudo: required
+      cache: pip
+      before_install:
+        - sudo bash ops/travis/unit-testing/simcore-sdk before_install
+      install:
+        - bash ops/travis/unit-testing/simcore-sdk install
+      before_script:
+        - bash ops/travis/unit-testing/simcore-sdk before_script
+      script:
+        - bash ops/travis/unit-testing/simcore-sdk script
+      after_success:
+        - bash ops/travis/unit-testing/simcore-sdk after_success
+
+    # test python, storage ----------------------------------------------------------------------
+    - stage: unit testing
+      name: storage
+      language: python
+      python:
+        - "3.6"
+      sudo: required
+      services:
+        - docker
+      cache: pip
+      before_install:
+        - sudo bash ops/travis/unit-testing/storage before_install
+      install:
+        - bash ops/travis/unit-testing/storage install
+      before_script:
+        - bash ops/travis/unit-testing/storage before_script
+      script:
+        - bash ops/travis/unit-testing/storage script
+      after_success:
+        - bash ops/travis/unit-testing/storage after_success
+
+
+    # test python, apihub ----------------------------------------------------------------------
+    - stage: unit testing
+      name: apihub
+      language: python
+      python:
+        - "3.6"
+      sudo: required
+      cache: pip
+      before_install:
+        - sudo bash ops/travis/unit-testing/apihub before_install
+      install:
+        - bash ops/travis/unit-testing/apihub install
+      before_script:
+        - bash ops/travis/unit-testing/apihub before_script
+      script:
+        - bash ops/travis/unit-testing/apihub script
+      after_success:
+        - bash ops/travis/unit-testing/apihub after_success
+
+    # test python, linting ----------------------------------------------------------------------
+    - stage: unit testing
+      name: python linting
+      language: python
+      python:
+        - "3.6"
+      cache: pip
+      before_install:
+        - sudo bash ops/travis/unit-testing/python-linting before_install
+      install:
+        - bash ops/travis/unit-testing/python-linting install
+      before_script:
+        - bash ops/travis/unit-testing/python-linting before_script
+      script:
+        - bash ops/travis/unit-testing/python-linting script
+      after_success:
+        - bash ops/travis/unit-testing/python-linting after_success
+
+    # frontend testing ----------------------------------------------------------------------
+    - stage: unit testing
+      name: front end testing
+      language: node_js
+      node_js:
+        - "10"
+      addons:
+        apt:
+          packages:
+            - libgconf-2-4
+#      cache:
+#        directories:
+#          - .npm
+#          - services/web/client/node_modules
+      before_install:
+        - bash ops/travis/unit-testing/frontend before_install
+      install:
+        - bash ops/travis/unit-testing/frontend install
+      before_script:
+        - bash ops/travis/unit-testing/frontend before_script
+      script:
+        - bash ops/travis/unit-testing/frontend script
+      after_success:
+        - bash ops/travis/unit-testing/frontend after_success
+
+      deploy:
+        # https://docs.travis-ci.com/user/deployment/pages/
+        provider: pages
+        target-branch: master
+        # Set in travis-ci.org dashboard, marked secure
+        github-token: $GH_PAGES_TOKEN
+        skip-cleanup: true
+        keep-history: false
+        local-dir: itisfoundation.github.io
+        repo: ITISFoundation/itisfoundation.github.io
+        verbose: true
+        on:
+          branch: master
+
+
+    # integrate webserver in swarm -------------------------------------------------------------
+    - stage: integration testing
+      name: webserver in swarm
+      language: python
+      python:
+        - "3.6"
+      sudo: required
+      cache: pip
+      before_install:
+        - sudo bash ops/travis/integration-testing/webserver before_install
+      install:
+        - bash ops/travis/integration-testing/webserver install
+      before_script:
+        - bash ops/travis/integration-testing/webserver before_script
+      script:
+        - bash ops/travis/integration-testing/webserver script
+      after_success:
+        - bash ops/travis/integration-testing/webserver after_success
+
+    - stage: system testing, staging
+      sudo: required
+      language: python
+      python:
+        - "3.6"
+      cache: pip
+      before_install:
+        - sudo bash ops/travis/system-testing/build_and_run before_install
+      install:
+        - bash ops/travis/system-testing/build_and_run install
+      before_script:
+        - bash ops/travis/system-testing/build_and_run before_script
+      script:
+        - bash ops/travis/system-testing/build_and_run script
+      after_success:
+        - bash ops/travis/system-testing/build_and_run after_success
+      after_failure:
+        - bash ops/travis/system-testing/build_and_run after_failure
+      deploy:
+        - provider: script
+          skip_cleanup: true
+          script: bash ops/travis/staging/deploy
+          on:
+            branch: master
+        - provider: script
+          skip_cleanup: true
+          script: ops/travis/production/deploy
+          on:
+            branch: master
+            tags: true
+            condition: "$TRAVIS_TAG =~ -release$"
+notifications:
+  email:
+    on_success: never
+    on_failure: always

@@ -1,0 +1,31 @@
+language: c
+sudo: required
+dist: trusty
+group: edge
+services:
+  - docker
+before_install:
+    - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+    - sudo apt-get update -qq
+    - sudo apt-get install --yes -qq gcc-6 g++-6 gdb
+    - sudo apt-get install libssl-dev open-iscsi libjson-c-dev ioping jq
+    # use gcc-6 by default
+    - sudo unlink /usr/bin/gcc && sudo ln -s /usr/bin/gcc-6 /usr/bin/gcc
+    - sudo unlink /usr/bin/g++ && sudo ln -s /usr/bin/g++-6 /usr/bin/g++
+install:
+    - ./autogen.sh
+    # we are running build two times. One is without replication code and
+    # another one is with replication code. The reason behind running build
+    # without replication code is to make sure that replication feature
+    # related code doesn't break the existing target code.
+    - ./configure
+    - make
+    - make clean
+    - ./configure --enable-debug --enable-replication
+    - make
+script:
+    # run ztest and test supported zio backends
+    - sudo bash ./print_debug_info.sh &
+    - travis_wait 60 sudo bash ./test_istgt.sh || travis_terminate 1;
+    - pwd
+    - ./build_image.sh

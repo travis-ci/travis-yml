@@ -1,0 +1,39 @@
+language: php
+php:
+  - 5.6
+  - 7.0
+
+sudo: false
+
+cache:
+   directories:
+     - $HOME/.composer/cache/files
+
+env:
+  - SHOPWARE_VERSION: 5.2
+  - SHOPWARE_VERSION: 5.3
+  - SHOPWARE_VERSION: 5.4
+  - SHOPWARE_VERSION: 5.5
+
+before_script:
+    - git clone https://github.com/shopware/shopware.git /tmp/shopware
+    - cd /tmp/shopware
+    - git checkout $SHOPWARE_VERSION
+
+    - mv /home/travis/build/shopware/SwagConnect /tmp/shopware/engine/Shopware/Plugins/Local/Backend/SwagConnect
+    - cd /tmp/shopware/engine/Shopware/Plugins/Local/Backend/SwagConnect
+    - mkdir -p build/logs
+    - phpenv config-rm xdebug.ini
+    - composer install
+    - ln -sf vendor/shopware/plugin-dev-tools/psh56.phar psh56
+    - ./psh56 travis:init
+
+script:
+    - 'if [ "$TRAVIS_BRANCH" != "master" ] || [ $SHOPWARE_VERSION != "5.3" ] || [ "$TRAVIS_PHP_VERSION" != "7.0" ]; then ./psh56 travis:unit; fi'
+    - 'if [ "$TRAVIS_BRANCH" = "master" ] && [ $SHOPWARE_VERSION = "5.3" ] && [ "$TRAVIS_PHP_VERSION" = "7.0" ]; then ./psh56 travis:unit-coveralls-phpdbg; fi'
+
+notifications:
+    email: false
+
+after_success:
+  - travis_retry ./psh56 travis:send-coverall-report

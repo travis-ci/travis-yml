@@ -1,0 +1,107 @@
+matrix:
+  include:
+  - language: generic
+    python: 2.7
+    os: osx
+    env: pyver=2.7 pydist=macpython
+    sudo: required
+  - language: generic
+    python: 3.4
+    os: osx
+    env: pyver=3.4 pydist=macpython
+    sudo: required
+  - language: generic
+    python: 3.5
+    os: osx
+    env: pyver=3.5 pydist=macpython
+    sudo: required
+  - language: python
+    python: 2.7
+    os: linux
+  - language: python
+    python: 3.4
+    os: linux
+  - language: python
+    python: 3.5
+    os: linux
+install:
+- if [ $TRAVIS_OS_NAME == 'osx' ]; then git clone https://github.com/MacPython/terryfy;
+  source terryfy/travis_tools.sh; get_python_environment  $pydist $pyver; fi
+- pip install -U pip wheel setuptools
+- pip install -r requirements.txt
+- pip install -r requirements-test.txt
+- pip install coveralls
+script:
+- if [ $TRAVIS_OS_NAME == 'osx' ]; then ulimit -n 2048; fi
+- make cov
+- if [ $TRAVIS_OS_NAME != 'osx' ]; then python setup.py check -rms; fi
+- pip install -r requirements-pyinstaller.txt -U urllib3[secure]
+- pyinstaller -y --distpath=dist/ --onefile -n batch_scoring batch_scoring.py
+- pyinstaller -y --distpath=dist/ --onefile -n batch_scoring_sse batch_scoring_sse.py
+- pyinstaller -y --distpath=dist/ --onefile -n batch_scoring_deployment_aware batch_scoring_deployment_aware.py
+- dist/batch_scoring  --host=https://foo.bar.com --user=fooy@example.com --api_token=00000000000000000000000000000032 --datarobot_key=000000000000000000000000000000000036 000000000000000000000024 000000000000000000000024 tests/fixtures/criteo_top30_1m.csv.gz --dry_run --compress  -y
+- dist/batch_scoring_sse  --host=https://foo.bar.com  000000000000000000000024 tests/fixtures/criteo_top30_1m.csv.gz --dry_run --compress  -y
+- dist/batch_scoring_deployment_aware  --host=https://foo.bar.com --user=fooy@example.com --api_token=00000000000000000000000000000032 --datarobot_key=000000000000000000000000000000000036 000000000000000000000024 tests/fixtures/criteo_top30_1m.csv.gz --dry_run --compress  -y
+cache:
+  directories:
+  - "$HOME/.cache/pip"
+before_cache:
+- rm -f $HOME/.cache/pip/log/debug.log
+after_success:
+- coveralls
+- if [[ $pyver = '3.5' ]]; then ./offline_install_scripts/travis_pyinstaller_osx.sh $TRAVIS_COMMIT $TRAVIS_TAG ; fi 
+deploy:
+  #  The builds pushed to "osx-tagged-artifacts" should be release ready
+  #  Should only upload builds triggered by a new tag and made with OSX/Python3.5.
+  #  tarball will include the tag in name
+  - provider: s3
+    access_key_id: AKIAJZGOHZRYJPG6MZXA
+    secret_access_key:
+      secure: "Igus/RMcj7HMf3Xhyw06JvXctLHY/VW7yhY5flKCOJqQq5UjfWCa+Wc+rPIkzBGC4afiM/wZcnTBHgM2bkuvW1uOIwlgI4Bw20wAJV22HagTg7uQeKQv4bUWQYUy7PfLVnrxuZCUUxB774fF+wiYMIvQ1b6/uy25o9oJkCfmhE79xt5Bv2TrMEkGNTUCbA6/ix97bgQMoRy+jAS10Z6uDJzHjfrLfkCvA62WwpkkIZPWB3y91O6uzdoRKNPQ3YD2nlNz0PU7WVZq/J45wQji/xwA0Z9FsO0RgLHxWjOzDrHhxXfkBkvVuRcMj7k6L2PoK44z1TG7Z+wKVz4w5begLI5wV1OdbhBVgC2YHxNfFdLEidyMcbH3Eq1rb40Hyf1y3emzB3M97rfVKPO/uILZItVbvulwdsbzsnhgHORXXooKMwPz07fTLyOM0lFcGjukH/+DpJbj08gwOp3Iuh0wZmL2+1cvbqj3SUyDLvj9dyycglSCCFHIxT5h7nlKJCof3Q0TKn4iWC/wA26pnvJDm7Wp7H8VAroSoVm35t2t92mk0fzOLFBnhxD00VXGpkchhHFh4nLDJ3SxzQOV5+UxFIMQo1SVuvj7RRxufHVnvQoMzyH1A9m123oV/J+y0sqUIbtYtNvCVQX5L7ZmZIlBUMWhzHlBwkUstL2hnM8RwjA="
+    local_dir: dist/OSX
+    bucket: datarobot-batch-scoring-artifacts
+    upload-dir: osx-tagged-artifacts
+    skip_cleanup: true
+    on:
+      repo: datarobot/batch-scoring
+      tags: true
+      condition: $pyver = '3.5'
+  # This uploads builds made on PRs
+  # The S3 bucket should delete builds after 60 days
+  - provider: s3
+    access_key_id: AKIAJZGOHZRYJPG6MZXA
+    secret_access_key:
+      secure: "Igus/RMcj7HMf3Xhyw06JvXctLHY/VW7yhY5flKCOJqQq5UjfWCa+Wc+rPIkzBGC4afiM/wZcnTBHgM2bkuvW1uOIwlgI4Bw20wAJV22HagTg7uQeKQv4bUWQYUy7PfLVnrxuZCUUxB774fF+wiYMIvQ1b6/uy25o9oJkCfmhE79xt5Bv2TrMEkGNTUCbA6/ix97bgQMoRy+jAS10Z6uDJzHjfrLfkCvA62WwpkkIZPWB3y91O6uzdoRKNPQ3YD2nlNz0PU7WVZq/J45wQji/xwA0Z9FsO0RgLHxWjOzDrHhxXfkBkvVuRcMj7k6L2PoK44z1TG7Z+wKVz4w5begLI5wV1OdbhBVgC2YHxNfFdLEidyMcbH3Eq1rb40Hyf1y3emzB3M97rfVKPO/uILZItVbvulwdsbzsnhgHORXXooKMwPz07fTLyOM0lFcGjukH/+DpJbj08gwOp3Iuh0wZmL2+1cvbqj3SUyDLvj9dyycglSCCFHIxT5h7nlKJCof3Q0TKn4iWC/wA26pnvJDm7Wp7H8VAroSoVm35t2t92mk0fzOLFBnhxD00VXGpkchhHFh4nLDJ3SxzQOV5+UxFIMQo1SVuvj7RRxufHVnvQoMzyH1A9m123oV/J+y0sqUIbtYtNvCVQX5L7ZmZIlBUMWhzHlBwkUstL2hnM8RwjA="
+    local_dir: dist/OSX
+    bucket: datarobot-batch-scoring-artifacts
+    upload-dir: osx-dev-builds-not-for-release
+    skip_cleanup: true
+    on:
+      repo: datarobot/batch-scoring
+      all_branches: true 
+      tags: false
+      condition: $pyver = '3.5'
+# PyPi Push on tag. Since we build different wheels for python2 and python3,
+# we need to deploy jobs, each for each version of python interpreter.
+  - provider: pypi
+    skip_upload_docs: true
+    user: Axik
+    password: 
+      secure: "kRbo6mHdrZDaG8plDdl18S3Ld/Ek7W37VPuX1qcdR5nbb1bm8nddH7us9kHZAVWl8p4o4s8uN6shaSUobXTYU+7MFK6cb22c+nVcSYJMlMDq1cOlRNwFs+gXIKT8bgnW1VX/DVfMMkHQSvD00SRDKoUDQdQXbauStlSV4Nj1wSGXfovkujneBKfmeXYo3TBX/I9HVc+VAyXG9mCDJwivS//gpJKwgkpIKu3TOCPJY/makubvGcPUYzbZPRvi5iMp5pQPFTX2rnmzbp6CGH6jaGhgHjAYeNVQVdeNuXqrxvoTSyfmzfYJRla7b5zqBILPb0nxH9YLlZC7WYuqGgoUaijk554jcq1+und0GBo3xo7lo5HIHRUgOILn8KlzOp2Z6Gp7APkRevlot11yb6avWb2f46BP9P2vFzycCHJmJkZ1klF0UVEOEbBhJyP8i4kGArI1Y4qrsqUfzQfjkm6YfFQvXdjVFdNnm1Ze6yTT+Tt4q3gO0u1DIX8H1ofaU7AhOWF5BQ67ytFkw9jeCxKCTRrAn/QYfAw/eSzZZcatCb1RsfPTtxTFfxkTHP5QzFELQ0RzorSCEtugLAetX613JM2eaRs1cGhzflhirrc6yFDYjsScgj675woc5pBXSgjKrM9I8oTEAdetRtewewOIrPlNfV3qNoQa+AQHlRqr4bQ="
+    distributions: sdist bdist_wheel
+    on:
+      repo: datarobot/batch-scoring
+      tags: true
+      all_branches: true
+      python: 3.5
+  - provider: pypi
+    skip_upload_docs: true
+    user: Axik
+    password:
+      secure: "kRbo6mHdrZDaG8plDdl18S3Ld/Ek7W37VPuX1qcdR5nbb1bm8nddH7us9kHZAVWl8p4o4s8uN6shaSUobXTYU+7MFK6cb22c+nVcSYJMlMDq1cOlRNwFs+gXIKT8bgnW1VX/DVfMMkHQSvD00SRDKoUDQdQXbauStlSV4Nj1wSGXfovkujneBKfmeXYo3TBX/I9HVc+VAyXG9mCDJwivS//gpJKwgkpIKu3TOCPJY/makubvGcPUYzbZPRvi5iMp5pQPFTX2rnmzbp6CGH6jaGhgHjAYeNVQVdeNuXqrxvoTSyfmzfYJRla7b5zqBILPb0nxH9YLlZC7WYuqGgoUaijk554jcq1+und0GBo3xo7lo5HIHRUgOILn8KlzOp2Z6Gp7APkRevlot11yb6avWb2f46BP9P2vFzycCHJmJkZ1klF0UVEOEbBhJyP8i4kGArI1Y4qrsqUfzQfjkm6YfFQvXdjVFdNnm1Ze6yTT+Tt4q3gO0u1DIX8H1ofaU7AhOWF5BQ67ytFkw9jeCxKCTRrAn/QYfAw/eSzZZcatCb1RsfPTtxTFfxkTHP5QzFELQ0RzorSCEtugLAetX613JM2eaRs1cGhzflhirrc6yFDYjsScgj675woc5pBXSgjKrM9I8oTEAdetRtewewOIrPlNfV3qNoQa+AQHlRqr4bQ="
+    distributions: bdist_wheel
+    on:
+      repo: datarobot/batch-scoring
+      tags: true
+      all_branches: true
+      python: 2.7

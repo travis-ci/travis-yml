@@ -1,0 +1,40 @@
+language: c
+
+env:
+    global:
+        - OMP_NUM_THREADS=1
+
+cache:
+    - directories:
+        - ${TRAVIS_BUILD_DIR}/depends/install
+        - ${TRAVIS_BUILD_DIR}/depends/include
+        - ${TRAVIS_BUILD_DIR}/depends/download
+        - ${TRAVIS_BUILD_DIR}/depends/src
+        - ${TRAVIS_BUILD_DIR}/depends/lib
+
+before_install:
+    - bash install-nbodykit.sh
+    - export PATH=$HOME/miniconda/bin:$PATH
+    - source activate test
+    - conda install --yes gsl configobj
+    - conda install --yes gcc_linux-64 # use the linux64 compiler which supports OpenMP 3.1+
+
+install:
+    - sh bootstrap.sh
+    - cp platform-options/Options.mk.travis Options.mk
+    - make depends
+    - make
+
+script:
+    - set -e
+    - make test
+    - pushd examples/travis
+    - python3 ../../tools/make_class_power.py paramfile.genic --extraz 82.3333 65.6667
+    - mpirun -np 2 ../../genic/MP-GenIC paramfile.genic
+    - mpirun -np 2 ../../gadget/MP-Gadget paramfile.gadget 1 # this starts from the IC
+    - python check-results.py
+    - mpirun -np 2 ../../gadget/MP-Gadget paramfile.gadget 2 1  #this starts again from 001
+    - python check-results.py
+    - python ../../tools/convert_bigfile_gadget_format3.py --input output/PART_000 --output output
+    - popd
+    - set +e

@@ -1,0 +1,64 @@
+env:
+  global:
+    - secure: 'pl+BXVH4a7axIoiI9WiAeraaNoxca7NQr+2C85ZZRZv90WOgKKvR/C1ebvEeqOR5MrPgZtDdsI055CPJqN3oxIYdr1EyNw4zwtXhxeYBG8M5aKsJWDy/uIr+LIMjVRXco98Ln2zk6U2IecL4b8yeeG6Br4CoNErGpFAUsXezCQcf3CzUV9HoVX8BZPFrLxjd3WqS0Jyl/AWHyZlBZPkTc6lpUTzBiJrJFVjY9rYg16F+HRMujQRezUTxuXdW+r1e0kRt25/q11OKAkYiULRUp2RKzySMtNTtqlF9LMCKMWoYJJhqN/MdME1KisLprr+HzqBOXbOxTSOSQHBBC4XDv+JBbuc+0A114slTUmkIMLATsAs0W/tZHDTC11F/ZeeRDieFIimNqw+l9Q870ymTk+1wFiGdixbBWMa+gOFx49HZJlpFuyWrTqdleu1JMU9WWI5ujwU/WEGTJBWZFPZyHL2Zbh67Y2d2juRdfCaV2ooAPtQN66Mco3E6kYg38v/+hkeBeSmPjZ4sBNskermcEo5A+nOfQuoVhmL9K7RIA1byyt9N6tKytAin1aCKkHUAVMIRNYdGSPwUOR7PSr2R+s63WC9Ij6hhAZwKeN+7ZUNKEYqqgRvN7HOLR624QLbuoPDbq0iPTdwYJ2jCgrx7TtoOnStZ95RI3rOd3SY0MYU=' # Docker Username
+    - secure: 'AG8iajHc2WIAR0mpd7H5eOhtEkdL9MPTDsBNwqXbZTcHUc3Pj6UvDszvrY2U0h8p0d9oko40pharkzGmL/tPptYz9gGr+Qhnzeq9mbAc4oIW+K2FwlTz3R2nXjPQ7xH4HecRIRlFS/WbXUb3MF7nRRUwKPZy9w97fO8AvP+leZxzdq43kwDMp/YtHM4Urx59x2LGEB7IHArbpOx5jdJTAFBDCIsHo83eqjc0VQ9YL3lmkSLYY8EeFNbuQZtndRJPNtY3O1oJsZyZb/e0qzB629KutB2ebHORbsi24/G7SejbF4gAi5/6ZlO9EjajzzRvbWnuQ+9SeQSCTpc6qUybgT7xcLrxFu/eAhBP1Vfy6D20NUtH1Knhw7mzpg5sm/0o7ICR121lgXMBfMtqktKfTWSS+O4dskudg0MbiyAjcgidEJpZjqpcPulDBShsaVqf3ygkDuKe0E8N/bGDVOrcUp07QW3lmpjs1Ssmsj4A0UCcfiXm4E994w3zjEqjYvtf2n2zzN7nLuWBUD0rnqeY5L9wCjAksbHDpi6Z4Ra0lBpnNJsV9RgKZxQkuxqniK0mWKBpHhs2uc/23rEy6rYz5Np12xoXS8c2l62PeEVPBhzn1sAWA9ZSZwxFAHPB/IRxv96W3pG3AC7UyntymH7XY7Vda5r3gBPS+4Mqqyipu6k=' # Docker Pasword
+    - DOCKER_BRANCH=${TRAVIS_PULL_REQUEST_BRANCH:-$TRAVIS_BRANCH}
+    - DOCKER_BRANCH=${DOCKER_BRANCH//[\@\/]/-}
+language: node_js
+node_js:
+  - '10'
+services:
+  - docker
+before_install:
+  - npm install -g npm@latest
+install:
+  - npm install
+  - npm run prod
+  - npm run start &
+jobs:
+  include:
+    - stage: 'Docker build'
+      script:
+        - docker pull "securetrading1/js-payments"
+        - docker build . --tag "securetrading1/js-payments:$DOCKER_BRANCH"
+        - echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin
+        - docker push "securetrading1/js-payments"
+        - cd js-payments-testing
+        - git pull --ff-only origin master
+        - docker build . --build-arg "CODE_VERSION=$DOCKER_BRANCH" --tag "securetrading1/js-payments-testing:$DOCKER_BRANCH"
+        - docker push "securetrading1/js-payments-testing"
+    - stage: 'Test'
+      name: 'Unit tests'
+      script:
+        - npm run coverage
+        - npm run snyk
+    #    - name: 'Behavioural test: chrome 68'
+    #      script:
+    #        - npm run behave -- test_chrome_68_w10
+    # - name: 'Behavioural test: firefox 61'
+    #  script:
+    #    - npm run behave -- test_firefox_61_w10
+    # - name: 'Behavioural test: edge 17'
+    #   script:
+    #     - npm run behave -- test_edge_17_w10
+    # - name: 'Behavioural test: ie 9'
+    #   script:
+    #     - npm run behave -- test_ie_9_w7
+    # - name: 'Behavioural test: ie 10'
+    #   script:
+    #     - npm run behave -- test_ie_10_w8
+    # - name: 'Behavioural test: ie 11'
+    #   script:
+    #     - npm run behave -- test_ie_11_w8
+    # - name: 'Behavioural test: safari 11'
+    #   script:
+    #     - npm run behave -- test_safari_11_osxhs
+after_success:
+  - cat ./coverage/lcov.info | coveralls
+addons:
+  browserstack:
+    forcelocal: true
+    username:
+      secure: AH4sfHC+edBLzaGZo0UVn70c88/AKjFV7YGqQq6+8g96izDov25nB7rPaPuQHqnnARVoM7FSyc9XoHOA8Xm10oKxIBbtofw7Ydj+8czjNwa6k7nS0Rbpzl2JmhhgGXwFhXmvFXBxXiApXrhMYtE9Lo0rQGt9fXhWU7JkC2x04E3fPVAI+9oQ9V1SxIAZL+WSDyjPc1ZwQT8gwFM+XZaEy2J99LhNuFYQzeI6szmdtM0ZBLiqfeD2tixIXNUY+HAtTvUgZqwE9h+hon8Y/c574zzUf5ZxXzSaZbeU3+HW0rl75YaiP9lABOE4rrsY3rFd56IqXz5W46b63ZYAP8essu79Ph4xM9poJTpmU65domfCebMApdfgbIo7aSV7uOeNfKnrb5udbnqiZPGTuQSNJ+UJOjXJUfvNx/qBVFDsE7DqMChmZByRIUXVANaWDw70ixBij/vS5fpDiHpJ0gneizqosx09Vv10/cb9QDJ4FRDggQKZF3bS1V4q3vX1sodudTIuQVgfg95iR2uiQNnEdTPmvbM37FO6t8h8Vqxx4UqRIyf3jasVqsk79LU7F5/KYhvWW/KLN2lq65J2tKsTa/xBT856ah18cIGSMoie892tEsZxLbDy8KMUDyrbWNE4n11ButzifQISDziK7vQ7OwD3k6lJ24UFKBUoa/Oiim0=
+    access_key:
+      secure: TXgjJzYRpKcoBX6exipmXWj8TRToxGBQoQz0agRHczP9THyguyopST1XiPDdhcLIn7SMNDVORyP0D5EvMpchhvJ1unDpIULlNWjp63NsoYBGrryBXv307yn3NoQ+Tzh6U6GUG59bNfsqqLMOYapIqm6xxEqpcx1svA4Zjoz2rvcUK2gBof0UuL6s0rESB/4rQkwk0MQZDzm10O6wb6CWreFw/BMBTSKMvwVNfo5K+il+Ch1MWy2riWqYhyvGdu5Y/CG39WIUowa/y1HjcYNTwLlETr0nqqF9BnOjS05fabGIUnLBmf80mb6AEyrmNeVzQJlcJ4/lvI4f1RhrKvnDE70Ac6RFMoVcxOLLdSJIDoInFSH5xI5E/clGBYfP44LRDhRPXI4++8CPDp+MHG8trAOMIef3ySZGWoaHknNQ/G/Xhrsy7NLoBGnpz2c7CJoNjAPAIt2fm7y3Re+oo/hrhCh5/oya+kEKrrPI8qy9GpidCup5/QD/jKjkJijfusvC3ZEluaw+izAY+7RgLcaOifUqtVAx10JQIpZufWHJkHVqzmfGiLIWbyhNNJcrF+PcWIZSZelPb9uljO325M3bR7ViVmMPDuLojv0Z0cD/KWdqWW/uL7G7uzGSKgdTkuL7LqeaPOOQHZ07+v8Ii9GTZVee4+TRzucUISgNPvBVVJI=

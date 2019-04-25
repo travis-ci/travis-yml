@@ -1,0 +1,35 @@
+language: ruby
+cache: bundler
+rvm:
+  - 2.2.2
+
+install:
+  - pip install --user awscli
+  - pip install --user s3cmd
+
+script:
+  - bundle install
+  - bundle exec jekyll build
+
+deploy:
+  - provider: script
+    script: ./.travis/deploy.sh qa.snowplowanalytics.com 0 false
+    skip_cleanup: true
+    on:
+      branch: qa.snowplowanalytics.com
+
+  - provider: script
+    script: ./.travis/deploy.sh next.snowplowanalytics.com 0 false
+    skip_cleanup: true
+    on:
+      branch: next.snowplowanalytics.com
+
+  - provider: script
+    script: ./.travis/deploy.sh snowplowanalytics.com 21600 true
+    skip_cleanup: true
+    on:
+      branch: master
+
+after_deploy:
+  - aws configure set preview.cloudfront true
+  - if [[ $TRAVIS_BRANCH == "master" ]]; then aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_DISTRIBUTION_ID --paths "/*"; fi

@@ -1,0 +1,32 @@
+services:
+  - mysql
+
+cache:
+  directories:
+    - $HOME/.composer/cache/files
+
+language: php
+
+php:
+  - 5.6
+  - 7.0
+  - 7.1
+  - 7.2
+  - 7.3
+
+before_install:
+  - mysql -e 'CREATE DATABASE ilch2_test DEFAULT CHARACTER SET utf8mb4 DEFAULT COLLATE utf8mb4_unicode_ci;'
+  - mysql -u root -e "GRANT ALL ON ilch2_test.* TO 'travis'@'127.0.0.1';"
+install:
+  - cp development/travis/config.php tests/config.php
+  - composer install --prefer-dist
+
+script: cd tests && ../vendor/bin/phpunit
+
+notifications:
+  webhooks:
+    urls:
+      - https://www.ilch.de/ilch2/versions/
+    on_success: always
+    on_failure: never
+    on_start: false

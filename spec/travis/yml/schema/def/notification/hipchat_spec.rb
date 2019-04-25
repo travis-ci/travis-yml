@@ -19,7 +19,7 @@ describe Travis::Yml::Schema::Def::Notification::Hipchat, 'structure' do
                 type: :boolean
               },
               rooms: {
-                '$ref': '#/definitions/secures'
+                '$ref': '#/definitions/type/secures'
               },
               format: {
                 type: :string,
@@ -54,7 +54,7 @@ describe Travis::Yml::Schema::Def::Notification::Hipchat, 'structure' do
             ]
           },
           {
-            '$ref': '#/definitions/secures'
+            '$ref': '#/definitions/type/secures'
           },
           {
             type: :boolean

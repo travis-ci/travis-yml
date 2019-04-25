@@ -1,0 +1,25 @@
+language: python
+sudo: false
+python:
+  - "2.7"
+  - "3.4"
+addons:
+  apt:
+    packages:
+    - libblas-dev
+    - liblapack-dev
+    - gfortran
+before_install:
+  - pip install -U pip
+install:
+  - travis_wait travis_retry pip install -r requirements-dev.txt
+  - travis_retry pip install python-coveralls
+  - travis_retry python setup.py dev
+script: py.test --runslow --cov-config=.coveragerc-nogpu
+after_success:
+  - coveralls
+cache:
+  - apt
+  - directories:
+    - $HOME/.cache/pip
+    - $HOME/.theano

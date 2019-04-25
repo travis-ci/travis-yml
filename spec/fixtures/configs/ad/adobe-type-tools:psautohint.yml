@@ -1,0 +1,116 @@
+dist: trusty
+sudo: required
+language: python
+# The travis Python version is unrelated to the version we build and test
+# with.  This is set with the MB_PYTHON_VERSION variable.
+python: 3.5
+services: docker
+
+branches:
+  only:
+    - master
+    # We want to build wip/* branches since these are not usually used for PRs
+    - /^wip\/.*$/
+    # We want to build version tags as well.
+    - /^v\d+\.\d+.*$/
+
+env:
+  global:
+    # directory containing the project source
+    - REPO_DIR=.
+    # pip dependencies to _build_ project
+    # - BUILD_DEPENDS="..."
+    # pip dependencies to _test_ project
+    - TEST_DEPENDS="-rdev-requirements.txt"
+    - PLAT=x86_64
+    - UNICODE_WIDTH=32
+    # the pypi password is stored in Travis settings
+    - TWINE_USERNAME="adobe-type-tools-ci"
+
+matrix:
+  fast_finish: true
+  exclude:
+    # Exclude the default Python 3.5 build
+    - python: 3.5
+  include:
+    - os: linux
+      env:
+        - MB_PYTHON_VERSION=2.7
+    - os: linux
+      env:
+        - MB_PYTHON_VERSION=3.6
+        - BUILD_SDIST=true
+    - os: linux
+      env:
+        - MB_PYTHON_VERSION=3.7
+    - os: linux
+      before_install: false
+      install:
+        - pip install tox
+      script:
+        - tox -e coverage-codecov-c
+      after_success: false
+    - os: osx
+      language: generic
+      env:
+        - MB_PYTHON_VERSION=2.7
+    - os: osx
+      language: generic
+      env:
+        - MB_PYTHON_VERSION=3.6
+    - os: osx
+      language: generic
+      env:
+        - MB_PYTHON_VERSION=3.7
+    - os: linux
+      before_install: false
+      install:
+        - pip3 install meson ninja
+      script:
+        - meson build libpsautohint
+        - ninja -C build
+        - ls build
+        - build/autohintexe -h
+      after_success: false
+
+cache: pip
+
+before_install:
+  - source multibuild/common_utils.sh
+  - source multibuild/travis_steps.sh
+  - before_install
+
+install:
+  - build_wheel $REPO_DIR $PLAT
+
+script:
+  - install_run $PLAT
+
+after_success:
+  - pip install tox
+  # upload code coverage to Codecov.io
+  - tox -e codecov
+  # deploy to PyPI on tags
+  - |
+    if [ -n "$TRAVIS_TAG" ] && [ "$TRAVIS_REPO_SLUG" == "adobe-type-tools/psautohint" ]; then
+      pip install --upgrade twine
+      twine upload wheelhouse/psautohint*.whl
+      if [ "$BUILD_SDIST" == true ]; then
+        tox -e sdist
+        twine upload dist/psautohint*.zip
+      fi
+    fi
+
+deploy:
+  # deploy to Github Releases on tags
+  provider: releases
+  api_key:
+    secure: mAME533GEyugk6RXVe7Noqb1uf8I9aGxciYU4K9jD45vbUBVT88Nz3AMYCl65PBdw3prUOTNeH4R9sMlx/hMJ8ct/hpFcg2aWCt7nd+QIk7fiMZct43m1oMk/t6Jcan4NNunVNN/EgE1YBf1lCIlp8NZaDpH3atYJedO+F0ETeesn4IIAYnmOS3EENZS2Gy+eDT0hwW0IURqYMh88IqQg6vL1vTnH6fmzUMgih1e832TkjlUsDOr/x8iLgOMjQbccDeOMKLYXy/GivP51a6SSlbUMjbUJOzZD4vwJ2I5Aw1VeIiQbCrVPW4qHSr7o3LW77pljnroo1AKVSOXLVRozWnYtkO36vDNL9iddafzwmGtO0+40lCXSh38Q0Xg6j553TR8ZajoTigboTNHs8uL08krTGyrla0uKCibCLc2VjCRXHr7umemL/BYLw4LLPojCl6AzdbVE5A0Gih2p/wQ7RQn/xMwB06PezqRRYMD+BcuIXvRqfFixcQFswokpmVe94+Hx5oZMtsoU6H2sza1z4u71Sxmp91wSl9ufMkA/GHcPDVfYq/G1zeaIdfaqQ/k2pVVC+SjiL6jjDevmOCAv3b8XMB+crpFMdoWnSexW6UqLWSc1blviDDG+dOMRbrao6SCBInEkxgSZjpsu3iJsWdtW7E5QSO7VnmLi1aEoQg=
+  skip_cleanup: true
+  file_glob: true
+  file: "dist/psautohint*.zip"
+  on:
+    tags: true
+    repo: adobe-type-tools/psautohint
+    all_branches: true
+    condition: "$BUILD_SDIST == true"

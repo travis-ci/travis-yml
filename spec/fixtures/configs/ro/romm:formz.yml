@@ -1,0 +1,67 @@
+language: php
+
+php:
+  - 5.5
+  - 5.6
+  - 7.0
+
+env:
+  - TYPO3_VERSION=^6.2 COVERAGE=0
+  - TYPO3_VERSION=^7.6 COVERAGE=0
+
+matrix:
+  include:
+  - env: TYPO3_VERSION=^7.6 COVERAGE=1
+    php: 7.0
+    # TYPO3 v8 requires PHP v7+
+  - env: TYPO3_VERSION=^8.7 COVERAGE=0
+    php: 7.0
+  exclude:
+    # We must exclude TYPO3 6.2 with PHP 7, because the build just doesn't work (have no clue why).
+  - env: TYPO3_VERSION=^6.2 COVERAGE=0
+    php: 7.0
+    # Excluding this matrix, because the same one with coverage enabled is included above.
+  - env: TYPO3_VERSION=^7.6 COVERAGE=0
+    php: 7.0
+
+
+sudo: false
+
+addons:
+  apt:
+    packages:
+      - parallel
+
+cache:
+  directories:
+    - $HOME/.composer/cache
+
+before_install:
+  - composer self-update
+  - composer --version
+
+before_script:
+  - composer require typo3/cms=$TYPO3_VERSION
+  - git checkout composer.json
+  - export TYPO3_PATH_WEB=$PWD/.Build/Web
+  - mkdir -p build/logs
+
+script:
+  - >
+    if [[ "$COVERAGE" == "0" ]]; then
+      echo;
+      echo "Running unit tests";
+      .Build/bin/phpunit --configuration phpunit.xml.dist --colors Tests/Unit/
+    fi
+  - >
+    if [[ "$COVERAGE" == "1" ]]; then
+      echo;
+      echo "Running unit tests with coverage";
+      .Build/bin/phpunit --configuration phpunit.xml.dist --colors --coverage-text --coverage-clover build/logs/clover.xml Tests/Unit/
+    fi
+
+after_script:
+  - >
+    if [[ "$COVERAGE" == "1" ]]; then
+      travis_retry php .Build/bin/coveralls -v
+    fi

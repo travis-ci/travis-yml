@@ -1,0 +1,42 @@
+os: linux
+dist: trusty
+sudo: true
+language:
+- c
+- java
+
+cache:
+  directories:
+  - $HOME/.m2
+
+env:
+  global:
+    # COVERITY_SCAN_TOKEN
+    - secure: "A41KRDn115GM9r8ck9px6DNORC2GuOkiqxvGUQXVZoapXJ11/eB8xJlcqap/FFqWkIW/zoepS29jl6Qqd4b8QwkzcTeh9kNgw+PIS5/ldqYUOBIGl6Se3FPa9STLuMHvfhDh6P+N3Rq1Wy2l4BTZggqPEslU5kEH7y+4wBpqP78b/kfJDNkk1zBSKSuLJmrX5zw3bzlOTYBfVV6UNM1lqavslr7c5tlf9IWs22TRPsHIkB8h0wkgGo7JNxNv7ggVDX+R0vA3XfwJ1QPzHwnazvdCZawLuBSEk1BezF03Bwnq4xguEfZYXXLTL0cJ6LdT0w5beOr7gbVGFP5XFIZDy02oNGnlQODws3gPMoVXfMryZMbt2yQq8PhVgy3e3zpIveX5lje4QNayur8AlNpCn3sOzs9XcbgZJOgdX08uuN5VL+6LxN1aQLPR/9b9JMmvBHgBawNWMRvgl/ZOvV21ZXohm6dPryTsF4VGIXCgHX7z33vOAdi0Z/zvuPYtRsW1VFaYgNnHeCIVBvXHBHWy0XK3d/Ty/N3R0vhX5LfOKjPyqs7wea9shIy4Mn4G5v/InYpESfgs8VRjXfRb2L28i8Oi7f6AJv4nzP/9JJpJo1K+pdYTme3/OP2tWisA55ZLcOTMMHJl5IzxzdDke8e63Hb4mRmO3cfYyece5rLU2Ak="
+
+addons:
+  apt:
+    packages:
+    - libaio-dev
+  # https://scan.coverity.com/travis_ci
+  coverity_scan:
+    project:
+      name: ApacheActiveMQArtemis
+      version: 2.1.0-SNAPSHOT
+      description: Apache ActiveMQ Artemis has a proven non blocking architecture. It delivers outstanding performance.
+
+    notification_email: jdanek@redhat.com
+
+    # Commands to prepare for build_command
+    build_command_prepend: ./prepare_for_build.sh
+
+    # The command that will be added as an argument to "cov-build" to compile your project for analysis,
+    build_command: ./build_for_analysis.sh
+
+    # Pattern to match selecting branches that will run analysis. We recommend leaving this set to 'coverity_scan'.
+    # Take care in resource usage, and consider the build frequency allowances per
+    #   https://scan.coverity.com/faq#frequency
+    branch_pattern: .*
+
+# skip default build steps
+script: []

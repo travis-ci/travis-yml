@@ -1,0 +1,199 @@
+#==============================================================================
+# Copyright (c) 2016-2019 Allan CORNET (Nelson)
+#==============================================================================
+# LICENCE_BLOCK_BEGIN
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 2 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# LICENCE_BLOCK_END
+#==============================================================================
+# Travis: Linux Ubuntu trusty & Macos X
+
+sudo: required
+language: cpp
+python:
+ - "3.5"
+
+cache:
+  directories:
+    - ${TRAVIS_BUILD_DIR}/deps
+    
+branches:
+  only:
+    - master
+
+matrix:
+  include:
+    - os: linux
+      group: travis_latest
+      env: ARCH="x86_64"
+      compiler: gcc
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-6
+      env: COMPILER=g++-6 TEST_CXX14=true BOOST_VERSION=1.61.0
+
+    - os: osx
+      env: ARCH="x86_64"
+      compiler: clang
+      osx_image: xcode8.3
+
+  allow_failures:
+    - os: osx
+
+before_install:
+    - if [ `uname` = "Linux" ];
+      then sudo apt-get install libopenmpi-dev;
+      sudo apt-get install autotools-dev;
+      sudo apt-get install libtool;
+      sudo apt-get install automake;
+      sudo apt-get install openmpi-bin;
+      sudo apt-get install gettext;
+      sudo apt-get install pkg-config;
+      sudo apt-get install cmake;
+      sudo apt-get install libffi-dev;
+      sudo apt-get install libicu-dev;
+      sudo apt-get install libxml2-dev;
+      sudo apt-get install liblapack-dev;
+      sudo apt-get install liblapacke-dev;
+      sudo apt-get install fftw3;
+      sudo apt-get install fftw3-dev;
+      sudo apt-get install libasound-dev;
+      sudo apt-get install portaudio19-dev;
+      sudo apt-get install libsndfile1-dev;
+      sudo apt-get install libtag1-dev;
+      sudo apt-get install alsa-utils;
+      sudo apt-get install libhdf5-dev;
+      sudo apt-get install hdf5-tools;
+      fi
+    - if [ `uname` = "Linux" ];
+      then sudo add-apt-repository --yes ppa:ubuntu-sdk-team/ppa;
+      sudo apt-get update;
+      sudo apt-get install qtbase5-dev qtdeclarative5-dev libqt5webkit5-dev libsqlite3-dev;
+      sudo apt-get install qt5-default qttools5-dev-tools;
+      sudo apt-get install libqt5qml-graphicaleffects;
+      sudo apt-get install libqt5opengl5-dev;
+      sudo apt-get install qtbase5-private-dev;
+      sudo apt-get install qtdeclarative5-dev;
+      sudo apt-get install qtdeclarative5-controls-plugin;
+      sudo apt-get install qtdeclarative5-quicklayouts-plugin;
+      sudo apt-get install qtdeclarative5-qtquick2-plugin;
+      sudo apt-get install qtdeclarative5-dialogs-plugin;
+      sudo apt-get install qtdeclarative5-window-plugin;
+      fi
+ 
+    - if [ $TRAVIS_OS_NAME == osx ];
+      then export BUILD_ROOT=$(pwd);
+      cd $BUILD_ROOT;
+      cd ..;
+      git clone https://github.com/Nelson-numerical-software/nelson-thirdparty-macosx.git;
+      fi
+    - if [ $TRAVIS_OS_NAME == osx ];
+      then cd nelson-thirdparty-macosx;
+      cd gfortran;
+      sudo hdiutil attach gfortran-6.3-Sierra.dmg;
+      sudo installer -package /Volumes/gfortran-6.3-Sierra/gfortran.pkg -target /;
+      sudo hdiutil detach /Volumes/gfortran-6.3-Sierra;
+      fi
+
+    - if [ `uname` = "Darwin" ]; 
+      then brew update;
+      brew install zlib;
+      brew install libtool;
+      brew install automake;
+      brew unlink libffi;
+      brew install libffi;
+      brew unlink libffi;
+      brew link --force libffi;
+      brew uninstall icu4c;
+      brew install icu4c;
+      brew unlink icu4c;
+      brew link icu4c --force;
+      brew info open-mpi;
+      brew install openmpi;
+      brew install python3;
+      brew upgrade python;
+      brew install pkg-config;
+      brew install pkgconfig;
+      brew install gettext;
+      brew link --force gettext;
+      brew install boost;
+      brew install libxml2;
+      brew install cmake;
+      brew install qt5;
+      brew install fftw;
+      brew install portaudio;
+      brew install libsndfile;
+      brew install taglib;
+      fi
+
+install:
+  - if [ `uname` = "Linux" ]; then git clone https://github.com/eigenteam/eigen-git-mirror /tmp/eigen && mkdir /tmp/eigen-build && cd /tmp/eigen && git checkout 3.3.5 && cd - && cd /tmp/eigen-build && cmake . /tmp/eigen && make -j4 && sudo make install && cd -; fi
+  - if [ `uname` = "Linux" ]; then git clone https://github.com/tbeu/matio /tmp/matio && cd /tmp/matio && git checkout v1.5.15 && cd /tmp/matio && ./autogen.sh && ./configure --enable-shared --enable-mat73=yes --enable-extended-sparse=no --with-pic && make && sudo make install; fi
+
+  - if [ `uname` = "Darwin" ]; then git clone https://github.com/eigenteam/eigen-git-mirror /tmp/eigen && mkdir /tmp/eigen-build && cd /tmp/eigen && git checkout 3.3.5 && cd - && cd /tmp/eigen-build && FC="nofortran" cmake . /tmp/eigen && make -j4 && sudo make install && cd -; fi
+  - if [ `uname` = "Darwin" ]; then git clone https://github.com/live-clones/hdf5.git /tmp/hdf5_1_10_5 && cd /tmp/hdf5_1_10_5 && git checkout hdf5-1_10_5 && ./configure --quiet --enable-shared --disable-deprecated-symbols --disable-hl --disable-strict-format-checks --disable-memory-alloc-sanity-check --disable-instrument --disable-parallel --disable-trace --disable-asserts --with-pic --with-default-api-version=v110 CFLAGS="-w" && make install -C src; fi
+  - if [ `uname` = "Darwin" ]; then git clone https://github.com/tbeu/matio /tmp/matio && cd /tmp/matio && git checkout v1.5.15 && cd /tmp/matio && ./autogen.sh && ./configure --enable-shared --enable-mat73=yes --enable-extended-sparse=no --with-pic --with-hdf5=/tmp/hdf5_1_10_5/hdf5 && make && sudo make install; fi
+  - if [ `uname` = "Darwin" ]; then brew install hdf5; fi 
+
+before_script:
+  - rvm get head || true
+  - if [ `uname` = "Linux" ];
+    then export DISPLAY=:99.0;
+    sh -e /etc/init.d/xvfb start;
+    fi
+  - if [ `uname` = "Linux" ];
+    then export CC=$USE_CC; export CXX=$USE_CXX;
+    export BUILD_ROOT=$(pwd);
+    cd $HOME;
+    curl https://netcologne.dl.sourceforge.net/project/boost/boost/1.62.0/boost_1_62_0.tar.bz2 | tar xj;
+    pushd "boost_1_62_0";
+    export GCC=$(which $CXX);
+    echo -e "using gcc \x3a \x3a $GCC ;" > user-config.jam; cat user-config.jam;
+    ./bootstrap.sh --prefix=/usr/local/boost --with-libraries=thread,date_time,filesystem,system,program_options,chrono,regex,locale,iostreams,random;
+    ./b2 -q -d0 --user-config=user-config.jam headers;
+    sudo ./b2 -q -d0 --user-config=user-config.jam cxxflags="-std=c++11 -fPIC" threading=multi link=shared install;
+    popd;
+    fi
+
+
+script:
+  - echo ${COMPILER}
+  - cd ${TRAVIS_BUILD_DIR} 
+  - python3 ./tools/update_version/update_version.py
+  - if [ $TRAVIS_OS_NAME == linux ];
+    then cmake -G "Unix Makefiles" -DBOOST_ROOT=/usr/local/boost;
+    fi
+  - if [ $TRAVIS_OS_NAME == osx ];
+    then export PATH=/usr/local/opt/qt5/bin:$PATH;
+    cmake -G "Unix Makefiles";
+    fi
+
+  - make -j4
+  - make buildhelp
+  - make missing_help
+  - make tests_minimal
+  - make package
+  - make tests_all
+
+
+notifications:
+  email:
+    recipients:
+      - nelson.numerical.computation@gmail.com
+    on_success: never
+    on_failure: always
+
+  slack: nelson-software:MD73E5wbxFedQnxuaNbgbB5p

@@ -1,0 +1,108 @@
+---
+sudo: false
+language: c
+cache:
+  directories:
+  - $HOME/.cabal
+  - $HOME/.ghc
+  - $HOME/.atspkg
+addons:
+  apt:
+    packages:
+    - libgmp3-dev
+    - xz-utils
+    - liblzma-dev
+    - libarchive-dev
+    - bzip2
+matrix:
+  include:
+
+  - env: TARGET=x86_64-unknown-linux GHC=8.6.4
+    addons:
+      apt:
+        update: true
+        sources:
+        - hvr-ghc
+        packages:
+        - ghc-8.6.4
+        - cabal-install-2.4
+        - libarchive-dev
+
+  - env: TARGET=x86_64-unknown-linux GHC=8.4.4
+    addons:
+      apt:
+        update: true
+        sources:
+        - hvr-ghc
+        packages:
+        - ghc-8.4.4
+        - cabal-install-2.2
+        - libarchive-dev
+
+  # OS X
+  - env: TARGET=x86_64-apple-darwin GHC=8.6.4
+    os: osx
+
+before_install:
+- |
+  if [ `uname` = "Darwin" ]
+  then
+    brew install lzlib
+    brew install xz
+    brew install bzip2
+    brew install libarchive
+    brew install cabal-install
+    export PKG_CONFIG_PATH="/usr/local/opt/libarchive/lib/pkgconfig"
+    cabal new-update
+  else
+    export PATH=/opt/ghc/bin:$PATH
+    cabal new-update
+  fi
+
+script:
+- curl -sL https://raw.github.com/ndmitchell/hlint/master/misc/travis.sh | sh -s ats-format ats-pkg dependency hs2ats language-ats shake-ats
+- cabal new-update
+- travis_wait 40 cabal new-build all
+- |
+  if [ `uname` = "Darwin" ]
+  then
+    export BINPATH1="$(find dist-newstyle/ -name atspkg -perm 755 | tail -n1)"
+    export BINPATH2="$(find dist-newstyle/ -name atsfmt -perm 755 | tail -n1)"
+    export BINPATH3="$(find dist-newstyle/ -name hs2ats -perm 755 | tail -n1)"
+  else
+    export BINPATH1="$(find dist-newstyle/ -name atspkg -executable | tail -n1)"
+    export BINPATH2="$(find dist-newstyle/ -name atsfmt -executable | tail -n1)"
+    export BINPATH3="$(find dist-newstyle/ -name hs2ats -executable | tail -n1)"
+  fi
+- echo $BINPATH1
+- echo $BINPATH2
+- echo $BINPATH3
+- mv $BINPATH1 atspkg-$TARGET
+- mv $BINPATH2 atsfmt-$TARGET
+- mv $BINPATH3 hs2ats-$TARGET
+- strip atspkg-$TARGET
+- strip atsfmt-$TARGET
+- strip hs2ats-$TARGET
+- du -h atspkg-$TARGET
+- cd ats-pkg/test/data/hello-world
+- ../../../../atspkg-$TARGET clean
+- ../../../../atspkg-$TARGET nuke
+- ../../../../atspkg-$TARGET run -vv
+- cd -
+
+deploy:
+  api_key:
+    secure: "IZLQxO3HtTM2nqowxVOY3MhRhGZTElXUn0jpyPBkbrxLzk8Ykac15lSAGOs4MYo/GdKof8YYr2fHGChv7/PkF/HYSLFcDrY0UzpCP8QqANWjKbakQmVqU+YTtas3cq/Gk1l2tY9MGDNfMB7jk92Nh6BsA1TxReyziVPCDJv+z4UYZqQGhBxYQlVqHlcxYpS0p5gmXTFC8+io/ArGzC4jHqaZ+LmrzVMiXdDeQnVIOtQHbwWLwPb6mXBA8W5qC/IAgivb+w9aH86GUgML2t16b2/pCHQANigaeDTAseaU2PUv2fJTqexBfrAH34FJ+TQxROi8JpXu2/SVDuironTOPhUSnVd3aYNd64lOB80UmCxIWxYcYVA7olr6Qth1ZfKI0ks64sXJ7XlLDykCPqSTdnuiCEsqlHll+2ZA2uEHKuwRxMht/ZxKnW6a6GidaRp2cImBe7sMBQyiLYzf6+ZJQyy7H5beV9FsiTAyA4oxEGtl+220i0kwz6CV4+WXeoO7yv4TAKVfIEMjvHANV/kWEztuwcs3kIJzXJd1J/TdAneOHOCKGbnqDSDNeY48upwaPCQOnNA+RK4PYiA0YJ5zoq8hamtaMVzciGWMX3rFux9qC4wjgcTafFwyF3MSuF/TitAZI/xAtCOnCsZspuaBXI1nuoLoF61oixvD9xMeyNo="
+  file:
+  - atspkg-$TARGET
+  - atsfmt-$TARGET
+  - hs2ats-$TARGET
+  on:
+    tags: true
+  provider: releases
+  skip_cleanup: true
+
+branches:
+  only:
+  - /\d+\.\d+\.\d+\.\d+.*$/
+  - master

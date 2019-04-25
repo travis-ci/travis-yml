@@ -1,0 +1,71 @@
+sudo: required
+
+env:
+  global:
+    - CC_TEST_REPORTER_ID=6444ce234e6ec1703cda414367cc0ef773c9645e0248ec579e4201d366575aaf
+
+language: python
+
+python:
+  - "3.6"
+
+services:
+  - docker
+
+branches:
+  only:
+    - master
+    - dev
+    - qa
+
+before_install:
+  - git clone  https://github.com/ramrod-project/frontend-ui.git
+  - if [ "$TRAVIS_BRANCH" == "master"  ]; 
+    then export TAG=latest; 
+    else export TAG=$TRAVIS_BRANCH; fi
+
+install:
+  - pip install -r requirements.txt
+  - travis_wait 10 docker pull ramrodpcp/database-brain:$TAG
+  - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+  - chmod +x ./cc-test-reporter
+  - ./cc-test-reporter before-build
+
+before_script:
+  - docker run -d --rm --name myP -p 28015:28015 -e "STAGE=DEV" -e "LOGLEVEL=DEBUG"
+    ramrodpcp/database-brain:$TAG
+  - sleep 5
+  - STAGE=TESTING pytest --cov --cov-config .coveragerc --cov-report xml pcp_alpha
+  - docker stop myP
+  - ./cc-test-reporter after-build -t coverage.py --exit-code 0
+
+script:
+  - docker build -t ramrodpcp/frontend-ui:test .
+  - docker network create test
+  - docker run -d --rm --name rethinkdb -p 28015:28015 -e "STAGE=DEV" -e "LOGLEVEL=DEBUG"
+    --network test ramrodpcp/database-brain:$TAG
+  - sleep 5
+  - docker run -d --rm --name frontend -p 8080:8080 -e "STAGE=QA" -e "LOGLEVEL=DEBUG"
+    --network test ramrodpcp/frontend-ui:test
+  - sleep 10
+  - docker exec -ti frontend ps au
+  - curl http://127.0.0.1:8080
+  - docker ps
+  - docker logs frontend
+  - docker stop frontend
+  - docker stop rethinkdb
+  - docker network prune -f
+  # e2e tests
+  - bash <(curl -s https://raw.githubusercontent.com/ramrod-project/integration-stack/$TRAVIS_BRANCH/scripts/e2e.sh)
+
+after_success:
+  - docker rmi $(docker images -q)
+  - docker build -t ramrodpcp/frontend-ui:test .
+  - docker tag ramrodpcp/frontend-ui:test ramrodpcp/frontend-ui:$TAG
+  - if [[ "$TRAVIS_PULL_REQUEST" == "false" ]];
+    then echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin; fi
+  - if [[ "$TRAVIS_PULL_REQUEST" == "false" ]];
+    then docker push ramrodpcp/frontend-ui:$TAG; fi
+
+notifications:
+  slack: ramrod-project:GDF82rRYDg3KSekrT3GA24qO

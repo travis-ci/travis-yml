@@ -1,0 +1,29 @@
+language: python
+python: 3.6.3
+# See https://github.com/travis-ci/travis-ci/issues/6972.
+addons:
+  postgresql: 9.6
+  apt:
+    packages:
+    - postgresql-9.6-postgis-2.3
+env:
+  global:
+  - DJANGO_SETTINGS_MODULE: config.settings.test
+  - DJANGO_AWS_STORAGE_BUCKET_NAME: peacegeeks-pathways-static
+  - POSTGRES_USER: postgres
+  DJANGO_SECRET_KEY:
+    secure: EBC8CfYNMc/N4EZof8raivIzqgbYRQSAXEvIDMYQIId6CKqASW2IVFn+zxXLJcL7m/D+jmgWPlu81mcvZKekin8zhRfx6IKXqgr2TzahvzM9pMtLClcMHABcmwan63i3AexCEC0FHnufVb17QqQjwjeIy78zfsU8GK38+UjuuyIrd/0u2XWo6XPCfoK2a74gBR1bCnJd5UnBmD45XiQHBgbYt+mHZEnSZs6o8TVGpa5Y5ovaRqhlY2Ydy1avTHLtm9KdrioXAHvmDEx8g6YuVmfu7WWvC5UBFDo3o4SAwSpq1IMXm8s39EZ37i1x/UWI/20CPM2nWtGMcBz/9ihm8xVSDMeZQAIx0Hkz/g6+9SCXzyaubL+fiqZpcv6xiYbPsYEVFLZRGimneCHYaouPCEU8JPj4BdFYWdS0RtYjd7rhC9CIXnZJ1mHaPpa7dI39/UtZd5+POo3YNOXUgdBqvOjlQc7VsVbDeQxvs9nKU1c5DWV5tWNdvDnuQ5Dxr5WrAKX1zwY4JQ5nMIGXcv1I3y5rgtP9Xsi6oMp5NQe0uTUUVj4YB15EdLBBi1/UFvswDbBv8QmJMzay0IMGrPbV8REUWYYaPrC4Ylg+FSp2LbIuCBqWDQ3X/79X4FOB1KQentHBLCSo8+kG3d0Bjjx+SAGIqxKZ7V0Ozhh299ZNHJE=
+install:
+- pip install -r requirements/test.txt
+before_script:
+- psql -c 'create database pathways_local;' -U postgres
+script:
+- python -m spacy download en
+- python manage.py migrate
+- python manage.py test
+deploy:
+  provider: heroku
+  on: master
+  app: fierce-ravine-89308
+  api_key:
+    secure: UOyGis7r5CRIyEn/3jogbzACmuP30OLcAIXWd6x8/LSjkh4vcdt3E/Ed6Mz7XfThUk5wIFy+yKZN+eCdPreyAVKn57K+aUUOjrWt0BBDCDQYHbblHQKRoGahh+hQJhTPZ9WlhRHefA9KGpCMcHzmADH7SmxM91eb359RHFMTEsbWmowFAQ0Wa7lTURTEPH9lso94g0fDEozdXzNDwFh0GCGecbDhrIeMVEGCuDYFj7qg8JQdOHg2CJpweLlWmvfiJMs1+6OooQ+mh2Dez0lPn6Petzafgpi5tgQCuapMva/T5xhYAZBlfxs9mtFLDdsIIeMjytYlKVjSopXkdcCT5Jxl904cAd4ZbqnVMOXyHJZdMEeFhm2JwalU2YfIJhEnbkIyMwF7EEkdQF+IIwqeaLdcsq5bb03wUk4ckiSlIHIB7y+MVrS+ASdNNWUEuI891H4jOfCvaQo1bYwUE3nZEezQe6mKqqD9yrG/d3uZ3XAop2ibm7Fz56DmXxdbfrhgroW7q3pUXnpg20sOc1KPUhYQtQUjzcadEWeNVrGMa0bko3d/N2bD6BdNnFEjNsN31Ttc/Q66hcaxPJgBwA5oJjU1kJ7lvNcyH14fLAGldLS4oGXCRDZXfsxP9pKeyIvj9oUnAnzwURyMSuXQuVol383duYOwYAl8emJGHdvDzyE=

@@ -1,0 +1,39 @@
+#sudo: true
+#before_script:
+#  - sudo apt-get update -q
+#  - sudo apt-get remove curl
+#  - sudo apt-get remove zlib1g-dev
+#  - sudo apt-get install autoconf
+#  - sudo rm /usr/local/bin/bats
+
+os: linux
+
+dist: trusty
+
+sudo: false
+
+compiler: gfortran
+
+addons:
+  apt:
+    packages:
+    - gfortran
+    - gcc
+    - liblapack-dev
+    - libblas-dev
+
+env:
+  - OPAMROOT=$HOME/.opam
+
+cache:
+  directories:
+  - $HOME/.opam/
+
+language: python
+python:
+    - "2.7"
+
+script: 
+  - ./configure --install all --config ./config/travis.cfg 
+  - source ./quantum_package.rc ; ninja -j 1 -v 
+  - source ./quantum_package.rc ; qp_test -a 

@@ -1,0 +1,16 @@
+language: python
+python:
+- 3.6
+before_install:
+  - ./ci/travis-before-install.sh
+script:
+  - ./ci/travis-test.sh
+deploy:
+  provider: pypi
+  user: vivarium
+  password:
+    secure: FckQymw+mN5NMQAE/xJbehnjxwf130DYCm15mz3JRYskZMYy5avpyOtuCGZJLyXY8A0x6iBIQyqmbrNVX/jFS5px8SqmHrrfm7+iN87GPLiYPOjOj29ycwJSoRMFqmtdG9BVFWJiWQkxwwM+jg66KSVBaBrw4ChX1R3A5///Loo1uDYEmjBrDCERQl0Kbc2AY6ivu95jhAADuztK2TjKsVwiiJVpxIDQJQxbkrbEwD8qJqFR4xOVcFWngo3xO/NzKUj3DlxJIz3XfaeXfzicED8q7O4/JqV5xlWyCD8zyIVrJBSS4UVp0rH+jV0xZDA5Wani4zRGTzKAfUIFt9vAYqld6DP7HBWv4AAZut7DurMcNmG1TbmvmHMg/xfNsYPgOnEWARztQxIFRnv8UAufj4winmqDBlx79KIuRtDc+VtrxCUL9HbN5ivK5+Dvni9E7jPVKQXT9PnDAVAYaGByNsN37M8x85bYIkawDYNedzTilGrwEv4GzvqFFoaQ6ajzxr7SIA5wGBD5PaUgotuFCPbEzxWIo63AcwIoKi0C1c+sKXZbsiZqsKIUA0BkfkKdmiVZPdqJpu6irI6YsbyIg1QFWEr4e+CztqByYX2So4EJyGmZI4NOnaKGBD0nZFYjY0LbEvAbwbWA19V2J1G+zsc3v5oKFEEMWXpAOdYZ7W0=
+  on:
+    distributions: sdist bdist_wheel
+    repo: ihmeuw/vivarium_inputs
+    tags: true

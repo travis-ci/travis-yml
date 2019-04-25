@@ -1,0 +1,14 @@
+language: node_js
+node_js: 
+- "11"
+sudo: false
+script:
+- npm run test:ci
+- npm run build
+- 'if [ "$TRAVIS_SECURE_ENV_VARS" == "true" ] && [ "x$TRAVIS_TAG" != "x" ]; then npm run publish:cdn; fi'
+env:
+  global:
+  # CDN_SECRET
+  - secure: jLpBZ3uiiMuJRrSaEUWu8DQupnnsk8+KeaLMVCtft0XiQ2GtKacmoxY6hChyngnd0ry+xja4f4cFnCWjtSnaEEE199M8QTEUs603VFGs9GixD7N2vuJvNU+y/uJm6HpQzwncQTJq5IzTiRgMZ/418F5eiHUyDYbAi/hK9kaPZp5Me9hfD02IMMbgHxcvm3/zyKNZb5Mr0+lguvBhf6TCC+DG7I2LL1pjtqYHxEv2Gq2P95DPzx5bNEkmKsK3C/M2Dw9rMjGg74OMNVWmGcvdDPifdOm9TnjjOpyff/qe4ik4OEeGXONQLtVp0PtZnSRgHruhnhCqejkHiFHmDqMzrSSYj6fYghB4X3r2MlLFKEoH4fTmUgCFRVWqCO3WE3Je4T7Xy5QDBZmcamXVQXPEDL5c1Az2AKEFS8A5fxBU/z470cUt59NO6l5u1//HM6uAoAhSSHjEzHORinWJxqUF6gSlS9CnGH/cYK61zsUYMDY42+G297OmRdgUCAnQyUS6GPVMtnPVyuq6Vm9rkFxuEnkTVoSYEv8WXWwomnVxPXPaXt2BF4h32yIkwE7G45PThcrhAVKrUxZ6p0tg+ZTRhcE3+GzIJPRAzno3VXr0Xz3225oIAYgvDF6uIj9GHRoQB+VuQ1NR+Mr6NdtZGBqTtbtMYtyYCkcOGiUwmM4J0HA=
+  # GITHUB_TOKEN
+  - secure: hBhS9+M+przo5Dzg/xDZafgbepDm/r7uoGiQ58BvzZFKUgwiAo9ssYu4Eq6oo0xnDehpkG/rndjfW63FTrWrvlsfMZM90IQqUxw9K3cEYSD7AOouyHH58D5/oPsdoc+K8Uq/ZTknf7qMHgKzHN898DTxFJxcziWTkbsVjctthtxCnU5pC/qWYnvPYEXNsRQ/En6nb6LZAInByNy79T9sqC17GWFjMjGgFT4BkEukiguAMItZ9VwGIUenEyoulW6rTk68vr+MOoMDjuGIbTwx/vxfBUdvmAuF3f1ViGChfaSV6uG4RCw3ZXWU0+feNwd8UXn7wXPcRVLi6txGSl42xZdunuEkBcRU83kPlw2fKUGxKfsL+plv7j96V0ivaG6Jr6WBtPQQvOzjFF3FIGIQRrzQVu4+QdTqrrUYTwBZXjqcg7w+vCtljWMj6XJMwFzUYW0kFrDPyfubnQVWyWgWtKX7BqdA6FWDgJlkzgMPXt7gYpWcU3GGKcSOsT9JSKBh4C1dSipo4smStxjY7F2n16qtaph1HrVsjO/i+MxG/I+Yyd2Eb7QP332f5a0YuVXb5d+PmYN5SSO207Oqlm7if/WbpCbiZqYHplaQuxdf/JQpHfLRMZs0qUyQaRcfO7b0jCIFVYXh9OE3TmFzcjff2NpmOpWTCI9aOgBbgp0Js20=

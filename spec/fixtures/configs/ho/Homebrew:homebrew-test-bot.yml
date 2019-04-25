@@ -1,0 +1,33 @@
+language: ruby
+rvm: system
+os: osx
+osx_image: xcode10
+
+cache:
+  directories:
+    - $HOME/Library/Caches/Homebrew/style
+    - $HOME/Library/Caches/Homebrew/tests
+    - Library/Homebrew/vendor/bundle
+
+branches:
+  only:
+    - master
+
+env:
+  - HOMEBREW_FORCE_HOMEBREW_ON_LINUX=1
+
+before_install:
+  - HOMEBREW_REPOSITORY="$(brew --repo)"
+  - sudo chown -R "$USER" "$HOMEBREW_REPOSITORY"
+  - HOMEBREW_CORE_TAP_DIR="$(brew --repo "homebrew/core")"
+  - travis_retry git -C "$HOMEBREW_REPOSITORY" fetch --depth=50 origin
+  - git -C "$HOMEBREW_REPOSITORY" checkout -B master origin/master
+  - HOMEBREW_TAP_DIR="$(brew --repo "$TRAVIS_REPO_SLUG")"
+  - mkdir -p "$HOMEBREW_TAP_DIR"
+  - rm -rf "$HOMEBREW_TAP_DIR"
+  - ln -s "$PWD" "$HOMEBREW_TAP_DIR"
+  # trigger vendored ruby installation
+  - brew help
+
+script:
+  - travis_wait 60 brew test-bot

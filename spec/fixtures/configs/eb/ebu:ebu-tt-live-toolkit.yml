@@ -1,0 +1,44 @@
+language: python
+
+python:
+  - '2.7'
+
+branches:
+  except:
+  - gh-pages
+
+before_install:
+  - echo "Checking for java"
+  - java -version
+  - openssl aes-256-cbc -K $encrypted_f18bb5b3c3d4_key -iv $encrypted_f18bb5b3c3d4_iv -in publish-key.enc -out ~/.ssh/publish-key -d
+  - chmod u=rw,og= ~/.ssh/publish-key
+  - echo "Host github.com" >> ~/.ssh/config
+  - echo "    IdentityFile ~/.ssh/publish-key" >> ~/.ssh/config
+  - sudo apt-get -qq update
+  - sudo apt-get install graphviz
+  - git --version
+  - git remote set-url origin git@github.com:ebu/ebu-tt-live-toolkit.git
+  - git fetch origin -f gh-pages:gh-pages
+
+install:
+  - pip install pip==9.0.1
+  - make
+  - python setup.py develop
+  - pip install coveralls
+  - pip install ghp-import
+
+script:
+  - pyxbgen --binding-root=./ebu_tt_live/bindings -m __init__ --schema-root=./ebu_tt_live/xsd/ -r -u ebutt_all.xsd
+  - python setup.py test
+  - export PR=https://api.github.com/repos/$TRAVIS_REPO_SLUG/pulls/$TRAVIS_PULL_REQUEST
+  - export BRANCH=$(if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then echo $TRAVIS_BRANCH; else echo `curl -s $PR | jq -r .head.ref`; fi)
+  - echo "TRAVIS_BRANCH=$TRAVIS_BRANCH, PR=$PR, BRANCH=$BRANCH"
+
+after_success:
+  - coveralls
+  - python setup.py build_sphinx
+  - if [ $BRANCH == "master" ]; then ghp-import -n -p -m "Update gh-pages." docs/build; fi
+
+notifications:
+  slack:
+    secure: RLs+ufYg4HcZfaTl73tTKKVja8DJ9LGk1WO+7B1qa4Fgpv0c/3uXcM+6tvDXllTlqcfLHgum0vbzvE4yapo0em0g/m75t1pEfkh5Pfrcas8IKAM9jg/xycWdYoAkKLRvNOcS4amO29FlzOHFaSSjX+V8JK8Mpm+QM2eGnqIbJokaXgBf/bQxHqGSRvYCeSisEG0f79Mn/0v5OOlbvmetFfvcQVNZDtgpA1CDbvK99F/vQT3qZ04Rh/vRnlcZyH9PEp/TEEJ0yX0NhHYEDnuBKPc86Ack/YCQpT12Ej2xTWjgoUrqv1pcr+h0ltYPXnnCyETrlbeLgNIMUsGW579MThqXekBZ7byRK2DMfjyL5+UgPSmTOIzEg7Qbc1u0r1bUuEi7nsJ5Vf65QeIAcewVASOUKmda9ag0MidTR/VoAsMtf5MzbDifSa1aBHRxZJToshNJVY9V8/lJLdwsbqsG2H+8v8ZuzyRLNiaFhNQTZQWpRXMipvbTDnnVxwpeFiLAqAwEKO9KIyGijqv2yeVvi4WtYvwzM7/1y/ycu7kTDFemKKuKmW2rzzBKJ30vo79ufMQCmn0riKkpaNxBf8R3EUEr86A9yuFpo6/Qc47i3PkeD7MszDqhEAfxl1+sQssWXOdVy6ALFb7RZ6EczpPvAjYLLO0aPa8OPaZjy3aJr+8=

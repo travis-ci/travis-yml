@@ -1,0 +1,78 @@
+language: node_js
+node_js:
+  - '4'
+
+git:
+  depth: 10
+
+addons:
+  apt:
+    packages:
+      - graphicsmagick
+      - libcairo2-dev
+
+before_install:
+  # Used throughout the bash scripts
+  - export LAST_COMMIT_MESSAGE=`git log --format=%B -n 1 $TRAVIS_COMMIT`
+  - export RELEASE_VERSION="${LAST_COMMIT_MESSAGE#Release v}"
+  - export RELEASE_COMMENT="^Release v[0-9]+\.[0-9]+\.[0-9]+"
+  - export RELEASE_BRANCH="^(master|rc-)"
+  - export PRERELEASE_BRANCH="^rc-"
+  - export SAVAGE_BRANCH="^savage-"
+  - if [[ "$TRAVIS_PULL_REQUEST" == "false" && $TRAVIS_BRANCH =~ $RELEASE_BRANCH && $LAST_COMMIT_MESSAGE =~ $RELEASE_COMMENT ]]; then export IS_RELEASE=true; else export IS_RELEASE=false; fi
+  - if [[ "$IS_RELEASE" == "true" && $TRAVIS_BRANCH =~ $PRERELEASE_BRANCH ]]; then export IS_PRERELEASE=true; else export IS_PRERELEASE=false; fi
+
+  - rvm install ruby-2.3.0
+
+  # This needs to happen here instead of before_script since some of the node moduules depend on it.
+  - gem install sass
+
+  # Make our three scripts executable
+  - chmod +x ./scripts/update-skyux.sh
+  - chmod +x ./scripts/update-skyux-docs.sh
+  - chmod +x ./scripts/update-skyux-releases.sh
+  - chmod +x ./scripts/update-skyux-visualtest-results.sh
+  - chmod +x ./scripts/browserstack-local-start.sh
+  - chmod +x ./scripts/browserstack-local-stop.sh
+
+  # https://github.com/npm/npm/issues/11283
+  - npm set progress=false
+
+# Install a few additional things outside those listed in package.json
+before_script:
+  - npm install -g grunt-cli
+
+# We want deployment failures to fail the build
+script: npm test && ./scripts/update-skyux.sh && ./scripts/update-skyux-releases.sh && ./scripts/update-skyux-docs.sh
+
+# Kill any remaining BrowserStack sessions.
+after_script: ./scripts/browserstack-local-stop.sh
+
+# Store any visual regressions
+after_failure:
+  - ./scripts/update-skyux-visualtest-results.sh
+  - if [ -e ./npm-debug.log ]; then cat ./npm-debug.log; fi
+
+# When a push, only care about the master, rc-, and savage- branches.
+# Otherwise anytime we commit to internal branches this would run.
+branches:
+  only:
+    - master
+    - /^rc-.*$/
+    - /^savage-.*$/
+
+# Cache a few things
+cache:
+  directories:
+    - node_modules
+    - $BROWSER_STACK_BINARY_BASE_PATH
+
+notifications:
+  slack:
+    secure: X3VK9q9hmAcdzxdf8Ba0OHNThYoKKxvFLaDE09s45/75NM38pWQ9iOBJ8GOxYOA0WePzRNEScPxUAFMVKXK0KDbgtcEZ5DdM7kBe7JMo+fB39VLD3L70MVRLdpXnsPZE283GyXmjrmSVg+5gJrSYLwifnvyoqnnRlexL/Hz2JvxbDxdigbgLv8nvgEm5k62RN6kTVFS8aWI7sY1K1aEQdn8yTMy0u1VhBNA3wcFYVpAD1rbyBoSuFhARDVBujTh/RQamngDFLDThKGdCIvf57ierCgLFv6XLFPsviQP5qBMzEbBwu9u0DmOeevUsXUGUPtBSzQN9hBlMU995/n79PoSrlGGmBjISzqwzvp4JNMSDfCh+ne/PX1kIqeFW8egSTVTfCgavbHN4kJvtJZNmi6eDHhFHagSHSBkRgAc6JGvVHVToA1I/u97rcV1nVInhEvUNE6NZ/gkMj0El841ce3IvSZUsFcz/8IoYANxY1LCTmgnF/9GZ3QkKvBU0qhOjsMNnH2zwih38H1Ppqb0/+e+6mlmHpksnKgYwwAS83ZuKzyZbw7I3wyKUEOBCy7wWq45ZjRc74hnrZn/TngHyQ5UXCIlUBn1SjqjyljIKsp85A0lsZLcIEUIsR+7brnMRtMUW5IUaOSow2b52lr4suHG/ShXnUAe1sj2+uxCiy64=
+  webhooks:
+    - http://sky-savage.cloudapp.net:6161/savage/travis
+
+env:
+  global:
+    - BROWSER_STACK_BINARY_BASE_PATH=$HOME/browserstack-binary

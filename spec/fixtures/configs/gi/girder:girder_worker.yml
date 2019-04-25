@@ -1,0 +1,56 @@
+# it is not really Python, but there is no R support on Travis CI yet
+language: python
+
+sudo: false
+
+services:
+  - docker
+  - mongodb
+
+addons:
+  apt:
+    packages:
+      - python-virtualenv
+      - gfortran
+
+cache:
+  directories:
+    - $HOME/local
+    - $HOME/cmake-3.2.2-Linux-x86_64
+
+# environment variables
+env:
+  - LD_LIBRARY_PATH=~/local/lib:~/local/lib/R/lib
+
+before_script:
+  - "export DISPLAY=:99.0"
+  - "sh -e /etc/init.d/xvfb start"
+  - sleep 3 # give xvfb some time to start
+
+before_install:
+  - pip install -U pip
+  - pushd "${HOME}"
+  - if [ ! -f $HOME/cmake-3.2.2-Linux-x86_64/bin/cmake ] ; then  curl -L http://cmake.org/files/v3.2/cmake-3.2.2-Linux-x86_64.tar.gz | gunzip -c | tar x ; fi
+  - cd cmake-*/bin && export PATH="${PWD}:${PATH}"
+  - popd
+  - cmake --version
+  # install R
+  - mkdir -p $HOME/local
+  - if [ ! -f $HOME/local/env-arbor ] ; then curl -L https://data.kitware.com/api/v1/file/588b63c68d777f4f3f30c776/download | tar jx -C $HOME/local/ ; mv $HOME/local/env $HOME/local/env-arbor ; fi
+  - source $HOME/local/env-arbor
+  - R --version
+  - R -e '.libPaths(); sessionInfo()'
+
+# install dependencies
+install:
+  # install Python packages for core and plugins
+  - pip install -r requirements2.txt -r girder_worker/plugins/r/requirements.txt -r girder_worker/plugins/types/requirements.txt -e .
+
+# run tests
+script:
+  - mkdir _build
+  - cd _build
+  - cmake -D PYTHON_COVERAGE:BOOL=ON  ..
+  - ctest -VV -S ../cmake/travis_continuous.cmake || true
+  - if [ -f test_failed ] ; then false ; fi
+  - cd ..

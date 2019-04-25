@@ -1,0 +1,40 @@
+addons:
+    apt:
+        packages:
+        - dos2unix
+cache:
+- pip
+dist: xenial
+env:
+    global:
+    -   secure: lub75hOsCUTsmyPnlAFhbMvwUk781ANSIc4stLPh5qphxR0AGJm97Cx8U3hPM8p+/tGNXfLF0TMauIiBxEZOEH4PgmSFPxI1tv4/9LVNnpVa4+WIpiiwW3OCCZ4yQXsNkCZ7pamOc0Y3hPJH9IowyTz647agW4BwHem1XI5hrfk+jBoX5nYzS4X5KtfBPjq5ZXHEJKDD0+6eKUwR1QQv9sMxlmH2DZa1nafFiZOVTn8QaeZCFWVnC6h9ovdc/AxjlJK8gf/512t04MsUWlfC/NEvLlMyIN/VPnf6N4p4MmWo2b9/s8PYJJcczPRKUkrTVerdHCqgSdIV8JB98vF+6nA0ODq1n4WYnbX9X6vkIhYve818rNJa0H+j9K6nlyv8xmywTE3s8zjgVuIFh35LaE+YexjjQwZkxiTuWB/rQs7bZHyfZReWqQmKQdtWKDDKZBOBZ5eVu3xkKiQ4GqN7GWeg/cspIfWW7R38mxc+4CLT1GXn5eCsgzdyZ4ah9FFTkIyWv1dy0rmGQjlNAkIYkX2jYRcHCB0YPwTCut3PM0MUmkTTePzmxEvY5rEF5+P89RLymEFu6VT/isjW/RXSScr1O6m1Xq9zVsObleM1bgDO3MBsZJC6dHPkJ1SDimaWlTkjQS1O8MzAB+WuL8BzhGwaJeNnQZq9lJZZxcP6D+g=
+    -   GIT_NAME: Travis CI
+    -   GIT_EMAIL: dead-hosts@funilrys.com
+    -   TRAVIS_REPO_SLUG: Ultimate-Hosts-Blacklist/BadIPs.com_Level_4
+    -   GIT_BRANCH: master
+    -   UPDATE_LOCATION: https://raw.githubusercontent.com/Ultimate-Hosts-Blacklist/repository-structure/master/update.py
+    -   ADMINISTATION_LOCATION: https://raw.githubusercontent.com/Ultimate-Hosts-Blacklist/repository-structure/master/administration.py
+install:
+- pip3 install --upgrade pip
+- pip3 install requests
+- pip3 install ultimate-hosts-blacklist-whitelist
+- if [[ ! -f .admin ]]; then wget "${UPDATE_LOCATION}" -o /dev/null -O update.py &&
+    chmod +x update.py; else echo "No need to download/update update.py."; fi
+- if [[ ! -f .admin ]]; then wget "${ADMINISTATION_LOCATION}" -o /dev/null -O administration.py
+    && chmod +x administration.py; else echo "No need to download/update administration.py.";
+    fi
+language: python
+matrix:
+    fast_finish: true
+notifications:
+    email:
+        on_failure: always
+        on_success: never
+        recipients:
+        - dead-hosts@funilrys.com
+        - mitchellkrogza+ultimatehostsblacklist@gmail.com
+python:
+- '3.7'
+script:
+- python3 ./update.py
+sudo: required

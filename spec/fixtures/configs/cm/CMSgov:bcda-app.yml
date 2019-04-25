@@ -1,0 +1,49 @@
+# Credit to https://gist.github.com/y0ssar1an/df2dab474520c4086926f672c52db139
+# for a starting point
+
+# This is a weird way of telling Travis to use the fast container-based test
+# runner instead of the slow VM-based runner.
+sudo: false
+
+language: go
+
+# Only the last two Go releases are supported by the Go team with security
+# updates. Any older versions be considered deprecated. Don't bother testing
+# with them.
+go:
+  - 1.11.5
+
+# Only clone the most recent commit.
+git:
+  depth: 1
+
+# Skip the install step. Don't `go get` dependencies. Only build with the code
+# in vendor/
+install: true
+
+# Don't email me the results of the test runs.
+notifications:
+  email: false
+
+services:
+  - docker
+
+# Anything in before_script that returns a nonzero exit code will flunk the
+# build and immediately stop. It's sorta like having set -e enabled in bash.
+# Make sure golangci-lint is vendored by running
+#   dep ensure -add github.com/golangci/golangci-lint/cmd/golangci-lint
+# ...and adding this to your Gopkg.toml file.
+#   required = ["github.com/golangci/golangci-lint/cmd/golangci-lint"]
+before_script:
+  # Disable services enabled by default to avoid port clashing
+  - sudo /etc/init.d/mysql stop
+  - sudo /etc/init.d/postgresql stop
+
+# script always runs to completion (set +e). If we have linter issues AND a
+# failing test, we want to see both. Configure golangci-lint with a
+# .golangci.yml file at the top level of your repo.
+script:
+  - make docker-bootstrap
+  - docker-compose up -d
+  - sleep 30
+  - make test

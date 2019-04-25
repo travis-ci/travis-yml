@@ -1,0 +1,209 @@
+language: node_js
+
+services:
+  - docker
+
+addons:
+  hosts:
+    - local-api.dina-web.net
+    - local-docs.dina-web.net
+    - local-keycloak.dina-web.net
+    - local-style.dina-web.net
+    - local-ui.dina-web.net
+
+before_install:
+  - curl -o- -L https://yarnpkg.com/install.sh | bash -s -- --version 1.10.1
+  - export PATH="$HOME/.yarn/bin:$PATH"
+
+install:
+  - echo "$TRAVIS_TAG"
+  - ./packages/scripts/src/bash/ci-install.sh
+
+before_script:
+  - ./packages/scripts/src/bash/ci-before-script.sh
+
+after_failure:
+  - ./packages/scripts/src/bash/ci-delete-temporary-images.sh
+
+notifications:
+  slack:
+    rooms:
+      - secure: NtJIeTSj3PexMmJQmplwKjo6YGVTzDUY661o5Ux3DwfH0DbRwRDzZxVRo1pKxUEEDGlnobRw3H+blvFQatGRoUgGQGzYh+TXPFGcjKrfZbmNoxm5n0SqVO3xmIPp8aLoHE5YNjnNudxViJHNW+5u9E2QUTw8h8teVmYUXU8H+7Y+OJN7tPrSoHTLNVrVcsOqLkn1fb6DCdMNKmff8ac2BmKqoE17zsFZ/PQgL4Cf7Py2Iqfqc0vw5+4SkW5gn4fkYi/MoZvoCrDFVstYDkilD+IV/6N9MPbOWAMd/ilyV+kGI5AD03DYnK5JjgBsCC+x0WggPsnyewBQFkjmRlMJ02NFJyQNA646wDgW0UasOJto32PIvv9JQMgMTvK/fHnGXObaeYUuS7ZD2r0wAaV/gjMdqV+p8ud0gciOs6kw8fgJ1XqkE0V2/2YBz2exYDva+V1+xPYcRQodg9xIlIUPjq4nX8633i1Q2+dx56Eze4yKmFdV1pxsdGMYNSM35i0d+NElm7Q+Ym8ntTLUU9Hv1VjPZXlzhzizf7N/JtUMVEEPu7QN6k1D1k32s74OwjH5m7EbttzmzwWFw793in/VAwdJCfLYper0gccPpGBEIWI2AAJdLpmUY7ljr9IVFO5OkizXtfvwU7J7/dWMFTDI5rHmVU0JKl5rf/T4LljU78I=
+    on_success: never
+    on_failure: always
+    template:
+      - '`%{branch}`'
+      - '*%{result}* build <%{build_url}|#%{build_number}>'
+
+stages:
+  - name: build
+    if: branch = master OR tag IS present
+  - name: test
+  - name: cleanup
+    if: branch = master AND tag IS blank
+  - name: publish tag and cleanup
+    if: tag IS present
+
+matrix:
+  include:
+    - stage: build
+      name: 'Build ui'
+      cache:
+        yarn: true
+        directories:
+          - packages/common/node_modules
+          - packages/ui/node_modules
+      env:
+        - CI_BUILD_UI=true
+        - CI_INSTALL_COMMON=true
+        - CI_INSTALL_UI=true
+        - CI_LINK_COMMON=true
+        - CI_LINK_UI=true
+      script:
+        ./packages/scripts/src/bash/ci-build.sh &&
+        ./packages/scripts/src/bash/ci-push-temporary-images.sh
+
+    - stage: build
+      name: 'Build docs and style'
+      cache:
+        yarn: true
+        directories:
+          - packages/style/node_modules
+          - packages/docs/node_modules
+      env:
+        - CI_BUILD_DOCS=true
+        - CI_BUILD_STYLE=true
+        - CI_INSTALL_DOCS=true
+        - CI_INSTALL_STYLE=true
+      script:
+        ./packages/scripts/src/bash/ci-build.sh &&
+        ./packages/scripts/src/bash/ci-push-temporary-images.sh
+
+    - stage: build
+      name: 'Build api and migrations'
+      env:
+        - CI_BUILD_API=true
+        - CI_BUILD_MIGRATIONS=true
+      script:
+        ./packages/scripts/src/bash/ci-build.sh &&
+        ./packages/scripts/src/bash/ci-push-temporary-images.sh
+
+    - stage: test
+      name: 'Test e2e part 1, without auth'
+      if: branch = master OR tag IS present
+      env:
+        - CI_DISABLE_AUTH=true
+        - CI_INSTALL_SCRIPTS=true
+        - CI_INSTALL_UI=true
+        - CI_SETUP_ENV_DOCKER=true
+        - CI_START_E2E=true
+        - CI_TEST_E2E_1=true
+      script: ./packages/scripts/src/bash/ci-test.sh
+
+    - stage: test
+      name: 'Test e2e part 2, without auth'
+      if: branch = master OR tag IS present
+      env:
+        - CI_DISABLE_AUTH=true
+        - CI_INSTALL_SCRIPTS=true
+        - CI_INSTALL_UI=true
+        - CI_SETUP_ENV_DOCKER=true
+        - CI_START_E2E=true
+        - CI_TEST_E2E_2=true
+      script: ./packages/scripts/src/bash/ci-test.sh
+
+    - stage: test
+      name: 'Test e2e part 3, with auth'
+      if: branch = master OR tag IS present
+      env:
+        - CI_DISABLE_AUTH=false
+        - CI_INSTALL_SCRIPTS=true
+        - CI_INSTALL_UI=true
+        - CI_SETUP_ENV_DOCKER=true
+        - CI_START_E2E=true
+        - CI_TEST_E2E_3=true
+      script: ./packages/scripts/src/bash/ci-test.sh
+
+    - stage: test
+      name: 'Test backend api integration'
+      env:
+        - CI_INSTALL_BACKEND=true
+        - CI_INSTALL_COMMON=true
+        - CI_INSTALL_MIGRATIONS=true
+        - CI_INSTALL_SCRIPTS=true
+        - CI_LINK_BACKEND=true
+        - CI_LINK_COMMON=true
+        - CI_LINK_MIGRATIONS=true
+        - CI_LINK_SCRIPTS=true
+        - CI_START_API=true
+        - CI_START_DATABASES=true
+        - CI_TEST_BACKEND_API=true
+      script: ./packages/scripts/src/bash/ci-test.sh
+
+    - stage: test
+      name: 'Test backend db integration, lint, unit and migrations'
+      env:
+        - CI_INSTALL_BACKEND=true
+        - CI_INSTALL_COMMON=true
+        - CI_INSTALL_MIGRATIONS=true
+        - CI_INSTALL_SCRIPTS=true
+        - CI_LINK_BACKEND=true
+        - CI_LINK_COMMON=true
+        - CI_LINK_MIGRATIONS=true
+        - CI_LINK_SCRIPTS=true
+        - CI_START_DATABASES=true
+        - CI_TEST_BACKEND_DB=true
+        - CI_TEST_BACKEND_LINT=true
+        - CI_TEST_BACKEND_UNIT=true
+        - CI_TEST_MIGRATIONS_LINT=true
+      script: ./packages/scripts/src/bash/ci-test.sh
+
+    - stage: test
+      name: 'Test ui'
+      cache:
+        yarn: true
+        directories:
+          - packages/common/node_modules
+          - packages/ui/node_modules
+      env:
+        - CI_INSTALL_COMMON=true
+        - CI_INSTALL_UI=true
+        - CI_LINK_COMMON=true
+        - CI_LINK_UI=true
+        - CI_TEST_UI_LINT=true
+        - CI_TEST_UI_UNIT=true
+      script: ./packages/scripts/src/bash/ci-test.sh
+
+    - stage: test
+      name: 'Test common, docs, models, and scripts'
+      cache:
+        yarn: true
+        directories:
+          - packages/common/node_modules
+          - packages/docs/node_modules
+          - packages/models/node_modules
+          - packages/scripts/node_modules
+      env:
+        - CI_INSTALL_COMMON=true
+        - CI_INSTALL_DOCS=true
+        - CI_INSTALL_MODELS=true
+        - CI_INSTALL_SCRIPTS=true
+        - CI_LINK_COMMON=true
+        - CI_LINK_SCRIPTS=true
+        - CI_TEST_COMMON_LINT=true
+        - CI_TEST_COMMON_UNIT=true
+        - CI_TEST_DOCS_LINT=true
+        - CI_TEST_DOCS_UNIT=true
+        - CI_TEST_MODELS_LINT=true
+        - CI_TEST_SCRIPTS_LINT=true
+      script: ./packages/scripts/src/bash/ci-test.sh
+
+    - stage: cleanup
+      name: 'Delete temporary docker images'
+      script: ./packages/scripts/src/bash/ci-delete-temporary-images.sh
+
+    - stage: publish tag and cleanup
+      name: 'Publish docker images and delete temporary docker images'
+      script:
+        ./packages/scripts/src/bash/ci-publish.sh &&
+        ./packages/scripts/src/bash/ci-delete-temporary-images.sh

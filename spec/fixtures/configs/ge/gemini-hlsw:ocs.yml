@@ -1,0 +1,58 @@
+sudo: true
+
+language: scala
+
+scala:
+- 2.11.11
+
+jdk:
+- oraclejdk8
+
+addons:
+  apt:
+    packages:
+    - oracle-java8-installer
+
+env:
+  global:
+  - secure: "RdZfbzf5Oja9oVLCvl7Ej+j9DpRPM4OFZ3pP+TYPqQ1DVfrhA2W2AjpYt8QVXeagVCFbJu48Og/sImkoQnkgh8+/7IGPnX29weEFsHZhf8FA1E7Gf1o1HU5YhJuCOsNOR9xG+1tRHR/+gKOwP1VyGugUhrSwNOuYGOr6yQ1JYfU="
+  - secure: "ezhPWkY6EjHsQnqRSEghdsmkzbeB4tBiekfNTH+5E6TmO9qiplasJELa8Bqvpmnl7nCjFFn1BrFBsdxCRyApIiPxxV8KAE3w1whmNGsYdYvNFJo9xqs0BG5CEDIqnT78LstSJVFFKwytLB8Fus1dN17LbV/80+iIx1iJkoSVc7k="
+
+notifications:
+  email: true
+  hipchat:
+    rooms:
+    secure: K6uZJoVfjQtjh+l+pbKl+abdqYdbAEwF1nVlMRQL4iLaxGYNEIqiHQTC65j8qQ+Z1dHLMpLzWtg1YJTOahvoWzKk3b94ZXb44MfTZZRo9K7RdAP+5tKYCIjB+FsLOj+fiMBu/OL3ztJbznwNP7uNgg9uy/Xtr4LuHJbZU8EEYC/kt/MYoyfjW43oh9NQpF9Eg0JarjIs7f/01BLrXLIAhN0nnhW+g+N/CcT73Cvz5HQeVvD6Aiam0rqyBWOKadR0fzZkNsFj9+77VBbeEqoGpFpMeklIIGh+cAhH8paVVWDXuUJcjU5LJ1joZiMbCEo76GzmaJ6zp0YSxRjII2oB8TXBhYhq4sBUOGynbiqee5DPxZ9gLBPqJBTUPP/9LqEzAWJtZm7HPDXYb+fmccpVwwXR4uRfphV34pXERE0B6u1dFtiSCGTKyDVQLhNdSBD/m1GGmyjbMA6OV78eFuFkJ5pdTUxlr3xz3W5BZXkr24zm+ugrk0A7QVQ3gcXjL0SsECMw3FJXz4hl90Wwqr1+bxSenz7JaY173adAD0d7T7JVOzGIP3WSdCeklEXzOPJTxVBF0lQ3tgzB3WUyW6rRBe+xc0Hu9c7v6CWrJybFtZvGSWocLpq3dIUckQlcDI8elNbJptaM3n79BkwknX4kCGVCBRWCdXOzNQDkMIpnfaw=
+    notify: true
+    format: '%{repository}#%{build_number} (%{branch} - %{commit} : %{author}): %{message}'
+
+before_script:
+  - sudo apt-get update && sudo apt-get install oracle-java8-installer
+  - echo $TRAVIS_SECURE_ENV_VARS
+  - if [ $TRAVIS_SECURE_ENV_VARS == true ]; then
+      svn --username $SVN_USERNAME --password $SVN_PASSWORD --non-interactive co http://source.gemini.edu/software/ocs-credentials $TRAVIS_BUILD_DIR/ocs-credentials;
+      ls $TRAVIS_BUILD_DIR;
+      bash $TRAVIS_BUILD_DIR/ocs-credentials/trunk/link.sh -v $TRAVIS_BUILD_DIR;
+    fi
+  - if [ $TRAVIS_SECURE_ENV_VARS == false ]; then
+      cp $TRAVIS_BUILD_DIR/project/OcsCredentials.scala.template $TRAVIS_BUILD_DIR/project/OcsCredentials.scala;
+    fi
+
+script:
+  - sudo chmod +x /usr/local/bin/sbt
+  - sbt -q -J-Djava.util.logging.config.file=logging.properties -J-Dedu.gemini.ocs.build.ping ++$TRAVIS_SCALA_VERSION test:compile test
+  - sbt -q -J-Djava.util.logging.config.file=logging.properties -J-Dedu.gemini.ocs.build.ping ++2.12.5 bundle_edu_gemini_spModel_core/test bundle_edu_gemini_util_ssl/test bundle_edu_gemini_util_osgi/test bundle_edu_gemini_util_pdf/test bundle_edu_gemini_util_skycalc/test bundle_edu_gemini_util_javax_mail/test bundle_edu_gemini_util_security/test bundle_edu_gemini_util_trpc/test bundle_jsky_coords/test bundle_jsky_util/test bundle_jsky_util_gui/test bundle_edu_gemini_epics_acm/test bundle_edu_gemini_model_p1/test bundle_edu_gemini_model_p1_pdf/test bundle_edu_gemini_pot/test bundle_edu_gemini_seqexec_odb/test bundle_edu_gemini_shared_skyobject/test bundle_edu_gemini_shared_util/test bundle_edu_gemini_spModel_pio/test bundle_edu_gemini_wdba_session_client/test bundle_edu_gemini_wdba_shared/test bundle_edu_gemini_wdba_xmlrpc_api/test
+cache:
+  directories:
+  - $HOME/.sbt/0.13/dependency
+  - $HOME/.sbt/boot/scala*
+  - $HOME/.sbt/launchers
+  - $HOME/.ivy2/cache
+  - $HOME/.nvm
+
+before_cache:
+  - du -h -d 1 $HOME/.ivy2/cache
+  - du -h -d 2 $HOME/.sbt/
+  - find $HOME/.sbt -name "*.lock" -type f -delete
+
+  - find $HOME/.ivy2/cache -name "ivydata-*.properties" -type f -delete

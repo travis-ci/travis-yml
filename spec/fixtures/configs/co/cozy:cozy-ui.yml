@@ -1,0 +1,22 @@
+language: node_js
+matrix:
+  fast_finish: true
+node_js:
+- '8'
+cache:
+  yarn: true
+  directories:
+  - node_modules
+script:
+- yarn lint
+- yarn test
+- yarn build:css
+after_success:
+- test $TRAVIS_BRANCH = "master" && test $TRAVIS_REPO_SLUG = "cozy/cozy-ui" && yarn
+  build:doc && yarn deploy:doc -- --username cozycloud --email contact@cozycloud.cc
+  --repo=https://$GITHUB_TOKEN@github.com/cozy/cozy-ui.git
+- test $TRAVIS_BRANCH = "master" && test $TRAVIS_REPO_SLUG = "cozy/cozy-ui" && yarn travis-deploy-once "yarn semantic-release"
+
+env:
+  global:
+    secure: R3CSBrSNdBrL27FaZLw8KyshNreI9eArdXksT7Zf3oms/88mivudD0rSt5jYodPcMWF6IJtJ6xqqpJRbb/CH7eY7TOPoM9A2mhjxjy/tyk+UN4ieh75clCo/eMt89Zx6aJ72VZ0NsQAQHcOjA9UUm463HYpsGzzkc9dNGAM5F30=

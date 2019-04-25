@@ -1,0 +1,40 @@
+# sudo == false means that we run in container as opposed spinning up a whole VM
+# this also means that we cannot use docker-executable
+sudo: false
+# trusty (Ubuntu 14.04) is the newest image as of 20180906
+dist: trusty
+
+# installs node in the image on startup
+# also automatically runs appropriate node package manager (yarn/npm)
+# depending on presence of yarn.lock file
+language: node_js
+# lts/* == "latest LTS", node == "latest release"
+node_js:
+  - "lts/*"
+  - "node"
+
+# Newest version can fail from time to time fe. if dependencies
+# do not yet support it.
+matrix:
+  allow_failures:
+  - node_js: "node"
+  # Flag the build as successful after required versions have completed
+  fast_finish: true
+
+# Cache both node_modules and yarn download cache
+cache:
+  directories:
+    - node_modules
+  yarn: true
+
+# Our only test ATM is to build the product
+script:
+  - yarn run deploy:prod
+
+# We gather codecov after successful builds
+after_success:
+  - yarn run codecov
+
+notifications:
+  slack:
+    secure: jocMgA4z6nHD7ZI7vQWsp6Tblpym1ugwQKZi6SZGUqxEFxoJrpwha7kDk5aQO5abe5jf55qlFxPytoP1nz35GzBUwfzFi8rGBmT27HYL9N+4f3UNMkppveLWveSZuU+ssp1vl5LBvo5kVrKnzTSAJaXEfIQAx1ttyOB+AxFlc/EtiPhIFsD2YqAv2kpJ4R/3wFQ/ZixHzjM2Yk5ER2TSlxdLaeHRnVG/Y8fZiuO4EtVOEzNyCDN215QXW04t2DihxDIYa5wJqHMJYJU5K0GARkdfJdHyqq1pGZzCYNxFaBJ7oQklk7r0LMtSsC5PTSgMQTac4jxijPXxr+5gZjMgfcDQA1z3aPRZnim2rsoepv2M5y4bkezs6RfYYCHOYbsF7Bv9kshP3wVDQpU44CkSknkCCr3hznydbUHFsIJnfMgkIlQIQQl6GD29FoR726hjWYwJ9q6m1CdliQbRHXBmjioZ6py73tWmiGdwvDlPxlsu3ABLQFUcLQh1kGQTdut88TmHwyXeSGJucIl4bJg+OfrCYg9TACByu5SRr/l55es/M3m3+7tNPzwWlu0wzgnq8Pw2QkE24ya1/j8bUXDLZGcaqCJOeKWj4MqH4mPUXoRxlQiSGouXS1nsIFa+YBwqL02nWfrAHEmtZStbU9lzx55bzM2IPjntfvU8NRODzeA=

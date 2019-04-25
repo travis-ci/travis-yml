@@ -1,0 +1,39 @@
+---
+sudo: required
+dist: trusty
+services: docker
+
+branches:
+  only:
+    - master
+
+env:
+  # default is stable repo
+  - DISTRO=ubuntu-14 LICENSE='BWC_LICENSE_ENTERPRISE'
+  - DISTRO=ubuntu-16 LICENSE='BWC_LICENSE_ENTERPRISE'
+  - DISTRO=centos-6 LICENSE='BWC_LICENSE_ENTERPRISE'
+  - DISTRO=centos-7 LICENSE='BWC_LICENSE_ENTERPRISE'
+
+  # StackStorm 'unstable' repo check
+  - DISTRO=ubuntu-14 ST2_REPO=unstable EWC_REPO=enterprise-unstable LICENSE='BWC_LICENSE_ENTERPRISE_UNSTABLE'
+  - DISTRO=ubuntu-16 ST2_REPO=unstable EWC_REPO=enterprise-unstable LICENSE='BWC_LICENSE_ENTERPRISE_UNSTABLE'
+  - DISTRO=centos-6 ST2_REPO=unstable EWC_REPO=enterprise-unstable LICENSE='BWC_LICENSE_ENTERPRISE_UNSTABLE'
+  - DISTRO=centos-7 ST2_REPO=unstable EWC_REPO=enterprise-unstable LICENSE='BWC_LICENSE_ENTERPRISE_UNSTABLE'
+
+before_script:
+  # Personal token for forked PRs
+  - true && `base64 --decode <<< ZXhwb3J0IEhVQk9UX1NMQUNLX1RPS0VOPXhveGItMTc2OTM1OTkzNDE0LWltdFNJRktPYXkxVlFFTWtUdVJWYmh0bAo=`
+
+script:
+  # run kitchen tests (destroy, create, converge, setup, verify and destroy)
+  - kitchen test ${DISTRO}
+
+notifications:
+  webhooks: https://galaxy.ansible.com/api/v1/notifications/
+  # Post build failures to '#ansible' channel in 'stackstorm-community' Slack
+  slack:
+    rooms:
+      - secure: MXJk2ZQKUpRf3xi8aPd9/3yGVaeWLw5xN0mDeTDKJu/IYW/M5obCnO3TYwQGczY1Dd4zkEuUmbOMMix1W5SsSB5Eea4VDtq4rHXxuk625JtzKfLp0pBXcLdJ6gB9aQLqDpIXKusNN2VBhtvh7vzSUzefYja4vSk9JH1Ztm3R1YU0ltXPmH+EPfWo4XhoabBhdU3Fb0MFYOXMQ0YQZtDTLVvAYBqaSrsye5TT9ZYUCDfCvmJH0t1Y0yWPIVLjLp/0f9zRMagQarP2e3CCasjsbVHtC9+vygWaWXGgxfNiqXPHGBCmMT9Wl1E1Gjq3092cPJYlxevu7WupOvinksI6t7KgLubLi9k89/iE3siy6PTwbgvpub/WmJJN8hRY0OAR4F9uHDyrE9pNpL4oOY6P0YblOb1sIjmQKZYjJSgogZ7bi9gZ59/3ZTOZ1z+1H+x5YXG2mTDyFl/fonAG2Fwi8anTh5jswllp4HB0IazPpcfFofUle5tFCM4zpULY2TvTHWvn/LbnzLImnY9qiR6Ysaql55UyBC79y8Fol3pqQhB0HnkTE3viA2dN4u95yzeyC6Mu9gKN9jvMGF5C4WsnmPhB28G5jHH6792CBbID1wFgbYDN8AbcBYeflTbIjZYivD5quRJYMu7swR7FArBfHkEIt+qV0SY23geQYo49lAQ=
+    on_pull_requests: false
+    on_success: change # default: always
+    on_failure: always # default: always

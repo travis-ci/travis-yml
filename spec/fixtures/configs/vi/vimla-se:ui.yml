@@ -1,0 +1,22 @@
+language: node_js
+cache:
+  directories:
+    - ~/.npm
+node_js:
+  - '11'
+  - '10'
+  - '9'
+  - '8'
+install:
+  - npm install ---silent
+  - npm install codeclimate-test-reporter -g --silent
+script:
+  - npm run lint
+  - npm run coverage
+after_success:
+  - npm run travis-deploy-once "npm run semantic-release"
+after_script:
+  - codeclimate-test-reporter < coverage/lcov.info
+branches:
+  only:
+    - master

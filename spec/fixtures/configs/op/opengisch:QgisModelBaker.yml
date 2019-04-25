@@ -1,0 +1,53 @@
+language: python
+python:
+  - 3.5
+
+git:
+  submodules: false
+
+before_install:
+  - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+  - sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+  - sudo apt-get update
+  - sudo apt-get -y install docker-ce
+  - git submodule update --init --recursive
+
+install:
+  - docker build --build-arg QGIS_TEST_VERSION=${QGIS_TEST_VERSION} -f .docker/Dockerfile .
+
+jobs:
+  include:
+    - stage: test
+      env:
+        QGIS_TEST_VERSION="latest"
+      script: docker-compose -f .docker/docker-compose.travis.yml run qgis /usr/src/.docker/run-docker-tests.sh
+    - stage: test
+      env:
+        QGIS_TEST_VERSION="release-3_4"
+      script: docker-compose -f .docker/docker-compose.travis.yml run qgis /usr/src/.docker/run-docker-tests.sh
+
+    - stage: deploy
+      if: tag IS present
+      install:
+        - pip install -r requirements.txt
+      script: plugin_ci/release/release.sh
+    - stage: deploy
+      if: branch = master
+      install:
+        - sudo apt-get install -y pyqt5-dev-tools
+        - pip install -r requirements.txt
+      script: scripts/ci/update-translations.sh
+
+env:
+  global:
+    - OSGEO_USERNAME=mkuhn
+    # Inject OSGEO_PASSWORD matching the OSGEO_USERNAME
+    # Generate with the following command for proper special characters support
+    #     travis encrypt OSGEO_PASSWORD=\''Your super secret password!'\'
+    - secure: "eEt7uqkJBoJWgrDk4rwFHuL0zudEzdj+3kiANRhJXmmmeR46zVkyt3naJGIE2OjAUV3g9s06JciGNzyUxgjhl0UBj2CNqgQd1NTUWdJEiumD00geXyTnLfyz6vl0DG/S1zW9SAtCNkwHGwg6z/MedS1kODj0RApZUmq1MVE+FaremryLp61MCPVuuVslX65Te1XbfKGiQLjSa4TjRzUClL2xSHzFWmAHYIrPoib1UoS5F/BJEXCqR8bTtR9pt72V56PeV5nvReXe5fhukOylxtf3/c+bNpEM2f51tr5f2IrOMHYPD6JfpvBp1SWqdVAmx0P8iLaFa3tXTtC7HFyKhib9k6auE4u4/c4XN46beic6cKNtYkbJ4ttQg8TDA+h4y66VumoRWgJrYxv3OJLTj8SQEQCXEkdYSzpvwdnw/hi3hCkwa2Yyl9VGrcIzx3/xBQwnCZBw1sqNdEHakeKu/XogPt/0VBRzaFvDjhHofyHcOcz3z/IPPtEj9WV7nruWCkeR+kkhPZPrS1+2GnG0BfHhJh8yUSxOfcf6NUR/3BNlO3csVXU594Ct8vQ7VBiEx2Vj4BAhANBLLR1vNXr70c5v+2R5KKY/DeZwtd9cEEbY9koxIpwRwZj8ye5DpZo1+rTxNY17V0WaWIt9ZXheBx2iSlGiMSdBIYQqyyrWXZ0="
+    # GH_TOKEN <- personal access token for github to deploy on "releases"
+    # https://help.github.com/articles/creating-a-personal-access-token-for-the-command-line/
+    #   -- defined in travis-ci settings --
+    
+    # TX_TOKEN
+    - secure: "vlu90dLbfch4AqhCXPqTzF0aOpEcOr+hC4/2Kfh1yPaOrMtxZCIJJMj1/YcnYWYcZjY1QJirQKX47u4RIlQV0z0Q6HxZmosAhZBHuZk8Y6G2UBZiKeoXjKzKVhA2HwUCxzwjFC3MxoPWR7GLyWysQOdczLImCzmCcj7DY5gr7vj4BSX3W3EZhGvIMExEX9YY+qmKOeYCLTyLi3U1iWQWYxFzyIocSqrATzHsZ/SNmTbpsRH5iavqSGLN8ffld48c0nt3QbgLHATfwr6oCRQiwyjlzp8NVxiyP0GYawydnDMGbAwdokhKz4pgsbPtiTPiQ8ifCkG+IGZxypowK4TbDgi+TaV8zFSdXSOR2UU6l6+upAeRHHT+JIveEto1bRrbNUmgPGnhuHxNvpdyn2HeCIYVQYUuP5OV6Pv88sur79AyfLBIpZwHleTQl+pJrBPNJelluwnspK6j/OOGLzhsDiATd84WIw/DxNMYyYLBt9F7qOef6i3yvC9KGx2o5Dig0TaAN9EeHJ1cMiPBTIv4DVFY+MjZnuCozfhkiMVZNMxIFMpyU09PrN5tCi6h+BKV2/3K2PBR1PBAlzRyDdpJqzcm4weEijzWkgTsApws+0jwKqRcZSNU7VfjI1UpPA+M+HPxS+lX6V2alJfUwtkzitau9CCqLJMXPjeleIpXLqM="

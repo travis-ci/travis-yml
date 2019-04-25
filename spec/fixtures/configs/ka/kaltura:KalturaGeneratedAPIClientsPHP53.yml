@@ -1,0 +1,8 @@
+language: php
+php:
+  - "7.2"
+  - "5.6"
+  - "5.4"
+script: 
+    - sed -e "s#@YOUR_PARTNER_ID@#$PARTNER_ID#g" -e "s#@YOUR_ADMIN_SECRET@#$ADMIN_SECRET#g" -e "s#@SERVICE_URL@#https://www.kaltura.com#g" tests/config.template.ini > tests/config.ini 
+    - cd tests && php run.php

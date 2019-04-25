@@ -1,0 +1,12 @@
+language: python
+python:
+ - 3.3
+ - 3.4
+before_install:
+ - sudo add-apt-repository ppa:ubuntu-lxc/daily -y
+ - sudo apt-get update -qq
+ - sudo apt-get install -qq man2html-base
+ - pip install pycodestyle
+script: pycodestyle generate && python generate
+notifications:
+ webhooks: https://linuxcontainers.org/webhook-lxcbot/

@@ -1,0 +1,18 @@
+language: ruby
+rvm:
+- 2.4.4
+sudo: false
+cache: bundler
+script:
+- bundle exec rails server &
+- bundle exec rake ci
+- bundle exec rubocop -D
+env:
+  global:
+  - secure: wwyb5IUpAkydU6eQbgVJ/+oshedAOdiCARMYvhC14zBlie8FvQrY3kGINSQ1jWNGcz3Gbo23VNLXSSUjk9jbuO4SSri1w28xvoe3Wjqz+r0+zWETRKh3mZ83PxAu7x0565cfNwdGaw788Wvvo34/Bl5j18zEinn6UL9ICBW6UDg=
+  - secure: JqYu9MWtYlV6u+gjl7DthI7MKyLoLANYMhSM11hWgyQsZcXIanYTmBsdpvKC0GPXUmfy4TvwQMKYrixxoSW65W+4P8FwU7e4TirjLV1FDl1zFiBT/L1wyl+8qmW9Ot9b68Q0phXH0UhG31Qif4na+dhdrHRvPUgowh8/NawIJwg=
+
+  # AWS SES Credentials, LinkChecker toggle
+  - RUN_LINKCHECKER=true
+  - secure: v8/UEwm9Resdkp3KjkaXKd685ACkU4N1aOiS0J7CabKrQUSNICkxhuQ2zBXSo7J1KgGADALhVH9/92tYWKFZIb2Xs+DU11NuVDc/O2U8FwsQUH5V+bad3M7FNl84lGoNoInK4kfWtMnokpintTs6YoV8z+1KzOpNcymCfclLyWg=
+  - secure: EaYPLliT1cPkttUe7oXq6b0up8mrd0pomz3Du8/neu6zUCISlBkFMwEwdkNPm3e05iycK6RSQdU02TEetPluvwuc1BKcOst6S8KaWjWcqJ4mCpEsUE8eD/vjfRGozHZPSBcApfrRX5NDiQ6aVd9690r7rdkw8sQQJitlTkPPj7U=

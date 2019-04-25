@@ -1,0 +1,54 @@
+dist: trusty
+language: php
+
+php:
+    - 5.6
+    - 7.0
+    - 7.1
+    - 7.2
+    - 7.3
+    - hhvm
+
+env:
+    - db=postgres
+    - db=mysql
+    - db=sqlite3
+
+matrix:
+    fast_finish: true
+    allow_failures:
+        - php: hhvm
+    exclude:
+      - php: hhvm
+        env: db=postgres
+
+addons:
+    postgresql: "9.5"
+
+cache:
+    directories:
+        - vendor
+        - $HOME/.composer/cache
+
+install:
+    - mkdir -p ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d
+    - phpenv config-add test/phpconfig.ini
+    - travis_retry composer self-update
+    - travis_retry composer install
+
+before_script:
+    - psql -c "CREATE USER ouzo_user WITH PASSWORD 'password';" -U postgres
+    - psql -c 'CREATE database ouzo_test;' -U postgres
+    - psql -c "GRANT ALL PRIVILEGES ON DATABASE "ouzo_test" to ouzo_user;" -U postgres
+    - psql -c 'ALTER DATABASE ouzo_test OWNER TO ouzo_user' -U postgres
+    - psql -v ON_ERROR_STOP=1 -e -U ouzo_user -f test/test-db/recreate_schema.sql ouzo_test
+    - mysql -u travis -e 'create database ouzo_test' && cat test/test-db/recreate_schema_mysql.sql | mysql -u travis ouzo_test
+    - cat test/test-db/recreate_schema_sqlite3.sql | sqlite3 ouzo_test
+    
+script:
+    - if [[ "$db" == "sqlite3" ]]; then vendor/bin/phpunit -d zend.enable_gc=0 --configuration phpunit.xml --exclude-group non-sqlite3,postgres test; fi
+    - if [[ "$db" == "postgres" ]]; then vendor/bin/phpunit --debug --verbose -d zend.enable_gc=0 --configuration phpunit.xml --exclude-group sqlite3 test; fi
+    - if [[ "$db" == "mysql" ]]; then vendor/bin/phpunit -d zend.enable_gc=0 --configuration phpunit.xml --exclude-group sqlite3,postgres test; fi
+
+after_script:
+  - php vendor/bin/coveralls -v

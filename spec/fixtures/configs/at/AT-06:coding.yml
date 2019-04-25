@@ -1,0 +1,32 @@
+language: java
+jdk:
+- oraclejdk8
+sudo: required
+
+branches:
+only: develop
+
+before_script:
+  - wget http://services.gradle.org/distributions/gradle-4.5.1-bin.zip
+  - unzip gradle-4.5.1-bin.zip
+  - export GRADLE_HOME=$PWD/gradle-4.5.1
+  - export PATH=$GRADLE_HOME/bin:$PATH
+
+addons:
+  sonarcloud:
+    organization: "carledriss-github"
+    token:
+      secure: $SONAR_TOKEN
+    github_token:
+      secure: $GITHUB_TOKEN
+    branches:
+    - develop
+script:
+- gradle check
+- sonar-scanner
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
+
+notifications:
+  email: true

@@ -1,0 +1,71 @@
+sudo: required
+dist: xenial
+
+language: python
+
+cache:
+  directories:
+    - $HOME/.cache/pip
+before_cache:
+  - rm -rf $HOME/.cache/pip/log/
+
+services:
+  - docker
+
+env:
+  matrix:
+    - TOXENV=py27-ansible25
+    - TOXENV=py27-ansible26
+    - TOXENV=py27-ansible27
+    - TOXENV=py27-ansibledevel
+    - TOXENV=py36-ansible25
+    - TOXENV=py36-ansible26
+    - TOXENV=py36-ansible27
+    - TOXENV=py36-ansibledevel
+    - TOXENV=py37-ansible25
+    - TOXENV=py37-ansible26
+    - TOXENV=py37-ansible27
+    - TOXENV=py37-ansibledevel
+    - TOXENV=docs
+
+before_install:
+  # third-party repo with non-official python versions
+  - sudo add-apt-repository -y ppa:deadsnakes/ppa
+
+  # ensure apt-get cache is up-to-date
+  - sudo apt-get -qq update
+
+  # install python 3.6
+  - if [ ${TOXENV:0:4} = py36 ]; then sudo apt-get -qq -y install python3.6 python3.6-dev; fi
+
+  # install python 3.7
+  - if [ ${TOXENV:0:4} = py37 ]; then sudo apt-get -qq -y install python3.7 python3.7-dev; fi
+
+  # list available docker-ce versions
+  - apt-cache madison docker-ce
+
+  # print active docker version
+  - docker version
+
+install:
+  - pip install codecov tox
+
+script:
+  - tox
+
+after_success:
+  - codecov
+
+branches:
+  only:
+    - master
+
+notifications:
+  slack:
+    secure: kKyPeBZsg9sZ6owG1V1fuZ0J+Uxy10kCvcbrdcql29Q/YqzIkzfY3dWZzB7a97E8YOBwHEEXVARntJ1Ru3mtn7tf2WUODf00kt+XH27NEVWj7RyyLJWE0W1dDv4tDpKOpUtCndLo10p+xMJ40V9jYW69V4g369bQ/5MaBtn45/4FEKspqTPtEw1EGeMyoMHSJQONVJEW82ugGoM1BSI0o3Tkzg/mJ2oJjBWxd1J9W5XccrMq30YJiRe4tv82Xffpq/4Dm4haqICmwzAGrqfk1ycZYKJ+yl+2mr+0sSBzAg8a/WFhi+7JIhq9nHPJH+XlQOG6cjvi/rjOvMUZz597OLqwXSqhFSFoqIWbJOplm0sTvVfxnewUYtOCr8DjUZPbecBdrLhCGweEUndkCfHDOmv1SetY5J/awQUGBzuYHyjF5wyRMi5Ab7z5iGHVE69nnhNxIoMYA6KBYZOg4xWEWXMT6cOZduULX0VUdjaLwHGN/tUk13IKxSKzeOZ58WI2d1zUNw+cAShkpei101+5pKXyqzeHbpkRA6K7rNfTrj83xtcE7qpZYxH8GAlj/AHVcaw5CgGNPz778saCwuAIsDnFkyh1gJ8B0YK2FUWNabNMgvBM5QkFsvbMA6iDpulzx6mgF5tN/IJyPytfY4P7D7UFwkCH9SORS9nih+XATeQ=
+  webhooks:
+    urls:
+      - https://webhooks.gitter.im/e/8924130ad64b9bea24c7
+    on_success: always
+    on_failure: always
+    on_start: never

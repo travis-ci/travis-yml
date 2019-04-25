@@ -1,0 +1,37 @@
+sudo: required
+language: java
+jdk:
+  - oraclejdk8
+addons:
+  postgresql: "9.4"
+  firefox: "38.8.0esr"
+cache:
+  directories:
+    - $HOME/.m2
+
+install:
+  - pushd `pwd`
+  - cd $HOME/build
+  - if [[ -z $GFW_BRANCH ]]; then GFW_BRANCH=5.3.x; fi
+  - git clone --depth=1 --branch=$GFW_BRANCH https://github.com/terasolunaorg/terasoluna-gfw.git terasolunaorg/terasoluna-gfw
+  - cd terasolunaorg/terasoluna-gfw
+  - sh ./mvn-build-all.sh install -Dmaven.test.skip=true -Dmaven.javadoc.skip=true -Dsource.skip=true
+  - popd
+
+before_script:
+  - psql -c 'create database tourreserve;' -U postgres
+  - export DISPLAY=:99.0
+  - sh -e /etc/init.d/xvfb start
+  - export CARGO_DAEMON_WEBAPP_VERSION=1.4.17
+  - mvn dependency:copy -Dartifact=org.codehaus.cargo:cargo-daemon-webapp:${CARGO_DAEMON_WEBAPP_VERSION}:war -DoutputDirectory=./target/.
+  - java -jar ./target/cargo-daemon-webapp-${CARGO_DAEMON_WEBAPP_VERSION}.war &
+
+script: 
+  - mvn xml:check-format
+  - mvn xml:check-format -f terasoluna-tourreservation-initdb/pom.xml
+  - mvn xml:check-format -f terasoluna-tourreservation-selenium/pom.xml
+  - mvn formatter:validate
+  - mvn -U sql:execute -f terasoluna-tourreservation-initdb/pom.xml -Ddb.password=
+  - mvn -U install
+  - mvn -U cargo:daemon-start -f terasoluna-tourreservation-web/pom.xml
+  - mvn -U test -f terasoluna-tourreservation-selenium/pom.xml

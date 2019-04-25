@@ -1,0 +1,99 @@
+sudo: required
+language: java
+jdk: oraclejdk8
+services:
+- docker
+cache:
+  directories:
+  - $HOME/.m2
+  - $HOME/maven
+env:
+  matrix:
+  - MAVEN_VERSION=3.5.4 TEST=core
+  - MAVEN_VERSION=3.5.4 TEST=python-validator
+  - MAVEN_VERSION=3.5.4 TEST=sanity-checks
+  - MAVEN_VERSION=3.5.4 TEST=end-to-end
+install:
+- |
+  if [[ "${TEST}" == core || "${TEST}" == end-to-end ]]
+  then
+      mkdir -p ~/maven
+      test -d ~/maven/$MAVEN_VERSION/bin || { \
+          find ~/maven -mindepth 1 -delete && \
+          mkdir -p ~/maven/$MAVEN_VERSION && \
+          wget -O - http://www-us.apache.org/dist/maven/maven-3/${MAVEN_VERSION}/binaries/apache-maven-${MAVEN_VERSION}-bin.tar.gz | \
+              tar -C ~/maven/$MAVEN_VERSION --strip-components=1 -xzf -; }
+  fi
+- |
+  if [[ "${TEST}" == python-validator ]]
+  then
+      sudo apt-get install python3.4-venv
+      python3.4 -m venv ~/python-env-validator
+      source ~/python-env-validator/bin/activate
+      trap 'deactivate' EXIT
+      pip install -r requirements.txt
+  fi
+before_script:
+- |
+  if [[ "${TEST}" == core ]]
+  then
+      mysql --user root --password= <<< 'CREATE DATABASE cgds_test' && \
+      mysql --user root --password= <<< "CREATE USER 'cbio_user'@'localhost' IDENTIFIED BY 'somepassword'" && \
+      mysql --user root --password= <<< "GRANT ALL ON cgds_test.* TO 'cbio_user'@'localhost'" && \
+      mysql --user root --password= <<< "flush privileges"
+  fi
+script:
+- |
+  if [[ "${TEST}" == python-validator ]]
+  then
+      source ~/python-env-validator/bin/activate
+      trap 'deactivate' EXIT
+      export PYTHONPATH="$PWD/core/src/main/scripts:$PYTHONPATH" && \
+      pushd core/src/test/scripts/ && \
+      python unit_tests_validate_data.py && \
+      python system_tests_validate_data.py && \
+      python system_tests_validate_studies.py && \
+      popd
+  fi
+- |
+  if [[ "${TEST}" == sanity-checks ]]
+  then
+      bash test/test_db_version.sh
+  fi
+- |
+  if [[ "${TEST}" == core ]]
+  then
+      mkdir -p ~/.m2 && \
+      cp .travis/settings.xml ~/.m2
+  fi
+- |
+  if [[ "${TEST}" == core ]]
+  then
+      ~/maven/$MAVEN_VERSION/bin/mvn \
+          -e \
+          -U \
+          -Ddb.user=cbio_user \
+          -Ddb.password=somepassword \
+          clean \
+          install \
+          integration-test
+  fi
+- |
+  if [[ "${TEST}" == end-to-end ]]
+  then
+      ~/maven/$MAVEN_VERSION/bin/mvn \
+          -U \
+          -DskipTests \
+          clean install
+  fi
+- |
+  if [[ "${TEST}" == end-to-end ]]
+  then
+      cd test/end-to-end && \
+      docker-compose up -d && \
+      sleep 30s && \
+      cd ../.. && \
+      # spot visual regression by comparing screenshots in the repo with
+      # screenshots of this portal loaded with the data from the amazon db
+      bash test/end-to-end/test_make_screenshots.sh test/end-to-end/screenshots.yml
+  fi

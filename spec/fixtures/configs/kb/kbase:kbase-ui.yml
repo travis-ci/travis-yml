@@ -1,0 +1,52 @@
+dist: trusty
+sudo: required
+conditions: v1
+
+# Ensure we are using the most recent docker
+# TODO: specific docker version
+addons:
+  apt:
+    packages:
+      - docker-ce
+
+# Note that node is not actually used in the build; but it is the closest to the truth 
+# for what happens. Without a language Travis installs completely unrelated stuff.
+language: node_js
+node_js:
+  - "8"
+# The build happens inside docker now.
+services:
+  - docker
+
+# These are travis encrypted var for the DOCKER_USER and DOCKER_PASS credentials
+# used in the deployment/tools/push2dockerhub-travis.sh script
+env:
+  global:
+    - secure: "rEkz6iLJq6W9Cp9EgWkmxE4eL7vUsBgG1bmSN42yy8SDjgot1VUYLrO0ZVonxCqdgGvXgfZaDVu/ohtG1D03smzpIvA+yCj/81UnewzBtzqejrAbCB05qGhWd+2VUIF7b0VpMtqmpT4TK6uuTswhYTrXoivduCI8GtqI8s7Yd4WTGUUEa8y6MaEP9qa3/NfPaXTo9OgG+1Obys5fLCdcWgtM58P9H4wFNeHeUBAzLFd96BKzTnctt4shqaUA7Kbh5xriAAC/5Zplna37FqY+wBOfXo7gesQmJs2GBBMinNvq1JDoyPF6Q0iX8UEbNys2/3RxnAwnfOgVw2GEcRF+68mhVApAz/PQK3K6vhKcRG7SnSYg4Gu6gsK0VB5UlNGnQWc0wb/qOGjvbDAZ0SHViCIjSo1m+TC4taOloTHR6iKX/L0lUxaJAxOaLO6dJkdiK2AK9FsukiRPBPjGIQowk+PhIwG88C1mUeBdO68bH0kU46PCbbW9hBT11pRkPHZnEkufOPNEKqE0rfvcuGij88+qzceO878+iYNhpu/MtuyiVX3nZEL6e4DmXRQApWaqf/TAqW1HDlupGCjPKf6jTS6NAJ9m84rKJfOsFbT2Ce0K8MxsXvjmXKnilOFl93SADwKP1PwalskjmTqRVOBxLYOLelP+by9ziwpw1d++LDA="
+    - secure: "v3FaaIHRKGezEtemhmop7due3sHQWspnrnmOiY3kQyusfqzNmmcOIZ39wug3DRjhB88kzrJMUSLYQ5n95420Ss4w2d4mHJUidoG5tiftmXun9WKa1h1BOhk3RbvJff26ipdb+EJt8RrBEtwBANFifR5dQI1xgUkCkarS3QtvL/uCW/UcNX6J6sWkGc+9dGzrph6fM+LcWsX1cmKCVmnPdejbrhK3+YFgdb3bSWSpEMZme9pt0q9440Dg8Cb1lf8UOuVcWFmgLx87MvD1kHmOVkGxDXOxJzPv6gIB13XUH1pkShqVJEWK6DU/1A+ry7BsL6gw/YNXdmr0Cy0I3/EOXfBXrV4hKsQeU7ebvPRekkQD/49KXvA2crfkoMqufnFUTyLBq6iJDwlIqCud5+CRtlcsPtReFsGplP/x5++noW/wvs/EVSuZBoHSAJ28wAiTqMSyqO4iwLeEtxjcE/UeuR7fmJG618C7DpgyhlSXeCz9qpN2CjioqX/tisbMhJDHFrD7SkI/CaJB+FdfpO2BU+zeNbeGFSur74PRZL7PYNxIPzOaN1Tf8HfYE5WxduL+Q+yr5E5CwefWUzW0+SDk8/eTgVmINBW8rqPWIsdYE1tgPm1ST7mjATr9WvsjWeHgPAi2pQc3EYQ9yj7/m+vfoJ1bOdxXcU8F/X49fwtmegM="
+    # see: https://stackoverflow.com/questions/32580821/how-can-i-customize-override-the-git-clone-step-in-travis-ci/47393948#47393948
+    # get the branch for this commit
+    # matches lines beginning with the current travis commit, and selecting for the 
+    # branch (refs/heads/BRANCH); empty for pull request, for which the branch resolution
+    # is more complex and is already handled by Travis.
+    # This is here to accommodate checkout by tag, in which case TRAVIS_BRANCH is set to ...
+    # ... the tag!
+    # Note: this only works for gnu sed, not, e.g., bsd sed as distributed with macos
+    - REAL_BRANCH=$(git ls-remote origin | sed -n "\|^$TRAVIS_COMMIT\s\+refs/heads/|{s///p}")
+
+# Note that when a travis build is triggered by a tag, the branch is undefined
+# The previous travis config specified that the branch had to be master as well as tagged, 
+# but a change at Travis broke this unexpectedly.
+if: branch = develop OR tag =~ /^v.+$/
+
+install:
+    # Note that this will build the image appropriately, depending upon
+    # whether the current branch is develop or master
+    - make docker-image
+
+after_success:
+  - IMAGE_NAME=kbase/kbase-ui ./deployment/tools/push2dockerhub-travis.sh
+
+scripts:
+  - docker version
+  - docker-compose version

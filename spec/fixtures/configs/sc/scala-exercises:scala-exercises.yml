@@ -1,0 +1,42 @@
+language: scala
+sudo: required
+addons:
+  - postgresql: "9.3"
+services:
+  - postgresql
+before_script:
+  - ./scripts/create_test_db
+scala:
+  - 2.11.11
+jdk:
+  - oraclejdk8
+cache:
+  directories:
+    - $HOME/.ivy2/cache
+    - $HOME/.sbt/boot/
+env:
+  global:
+    JAVA_OPTS=-Xmx2g
+    SBT_OPTS="-XX:+UseConcMarkSweepGC -XX:MaxPermSize=512m"
+
+before_install:
+- if [ "$TRAVIS_BRANCH" = "master" -a "$TRAVIS_PULL_REQUEST" = "false" ]; then
+     openssl aes-256-cbc -K $encrypted_ef7b2581dd2c_key -iv $encrypted_ef7b2581dd2c_iv -in secring.gpg.enc -out secring.gpg -d;
+  fi
+
+install:
+  - gem install sass
+  - . $HOME/.nvm/nvm.sh
+  - nvm install stable
+  - nvm use stable
+  - npm install jsdom
+script:
+  - sbt test
+  - sbt sbt-exercise/publishLocal
+  - sbt sbt-exercise/scripted
+  - sbt coverage test coverageReport coverageAggregate
+after_success:
+- bash <(curl -s https://codecov.io/bash)
+- if [ "$TRAVIS_BRANCH" = "master" -a "$TRAVIS_PULL_REQUEST" = "false" ]; then
+     sbt publishSignedAll;
+  fi

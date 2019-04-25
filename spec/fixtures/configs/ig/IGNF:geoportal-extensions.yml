@@ -1,0 +1,33 @@
+language: node_js
+node_js:
+  - "8"
+stages:
+  - name: deploy
+    # require the branch name to be master
+    if: branch = master
+before_script:
+  - npm run setup
+script:
+  - npm run build:ol
+  - npm run build:leaflet
+  - npm run build:itowns
+  # - npm run build:mix
+cache:
+  directories:
+    - node_modules
+before_deploy:
+    - git clone https://github.com/IGNF/geoportal-extensions.git --branch gh-pages deploy/
+    - mkdir -p deploy/current/dist/
+    - cp -r dist/. deploy/current/dist
+    - mkdir -p deploy/current/jsdoc/
+    - cp -r jsdoc/. deploy/current/jsdoc
+deploy:
+  provider: pages
+  skip-cleanup: true
+  github-token: $ghkey  # Set in travis-ci.org dashboard, marked secure
+  local_dir: deploy/
+  keep-history: true
+  on:
+    branch: master
+  after_deploy:
+    - rm -rf deploy/

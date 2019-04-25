@@ -1,0 +1,20 @@
+language: java
+sudo: false
+install: true
+
+jdk:
+  - oraclejdk8
+
+before_script:
+  - chmod +x ./travis.sh
+
+script:
+  - ./travis.sh
+
+cache:
+  directories:
+    - '$HOME/.m2/repository'
+    - '$HOME/.sonar/cache'
+
+notifications:
+  email: false

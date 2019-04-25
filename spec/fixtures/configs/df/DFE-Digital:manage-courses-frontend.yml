@@ -1,0 +1,16 @@
+language: minimal
+services:
+  - docker
+git:
+  depth: false
+script: bash docker-build.sh
+deploy:
+  provider: script
+  script: bash docker-push.sh
+  skip_cleanup: true
+  on:
+    all_branches: true
+    condition: $TRAVIS_BRANCH =~ ^(master|staging|production)$
+env:
+  global:
+    secure: armP+kpauAzFnm1eT5Yd8QhIMdTv36q9IkDXLtMbUuAi6e+8UlRNxzMU6GZhdHA/vPNPrIY2rFNLN50/aJRJot7/iQdncjHaAHcGSF+yh5H4kDHrEfHG+lxJlTUVsOxu2jhDbbaGD6klE5OgukLdfN39AkuM4FPHCmPmPaX/zUo2D74IGEr5VfeqVn18Ge58wc5I/clqyz9X9GvBwe5SMt7KsWdVfymDeGS3cNihidBsXZWlrQSMkOWhUaYMwjpVI0V5opHemjn8MgW4FCJ6deObIp1Kzgke0dnzd0Lyr2BIWpyKt1ZTOR5c4HbMTNSD1j7yTFjH7hstXXnE3MnDcaqVuwBOeMQLKjDgi2PbqPaahZ50E9gXOn0fRSIeEIxFEfIypWKHn7Jx4aKdKSqk5YZ5IO4vp8NI5lxLB4H+CI3AlW0gkaNCj6Sbjdx0xgxAOyP8K8tBHGcVvqa2Qz2M5YqdMpT2JYwMjEYhiaXJHSLJfxM47MnK9JbK1MLX8sA5IweJcnVjvc6Id5ExNzEHknuDwnBO6m0VXEXaSWiAetVoZ93X6rBoiAQAIlHY7yVtv4U/axhkss8Qe4lAKVkXDWVNKjAhJ/NTwLveyCtBVTL45Sa55HRtDulD4TysTY6E1YOLW3juhuMX83DLXjf40/wUl3uBuAlo6rpVbmJoUbY=

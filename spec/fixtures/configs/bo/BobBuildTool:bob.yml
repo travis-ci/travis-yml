@@ -1,0 +1,24 @@
+language: python
+python:
+    - "3.5"
+    - "3.6"
+
+# install additonally required packages
+addons:
+    apt:
+        packages:
+            - cvs
+
+install:
+    - pip install PyYAML
+    - pip install codecov
+    - pip install schema
+    - pip install python-magic
+    - pip install pyparsing
+
+script:
+    - make
+    - ./test/run-tests.sh
+
+after_success:
+    - codecov

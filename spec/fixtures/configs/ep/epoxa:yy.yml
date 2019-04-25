@@ -1,0 +1,25 @@
+dist: xenial
+sudo: required
+services:
+  - docker
+language: none
+env:
+  global:
+    - USER=travis
+    - UID=1000
+  matrix:
+    - YY_TEST_SELENIUM_HOST=hub YY_TEST_BROWSER=chrome
+    - YY_TEST_SELENIUM_HOST=hub YY_TEST_BROWSER=firefox
+before_install:
+- mkdir -p default/runtime/log && chmod a+rwX -R default/runtime
+- cd docker && docker-compose -f docker-compose-tests.yml up -d
+- sleep 20
+- docker-compose -f docker-compose-tests.yml ps
+- docker-compose -f docker-compose-tests.yml logs php
+- docker-compose -f docker-compose-tests.yml exec -T php apt update
+- docker-compose -f docker-compose-tests.yml exec -T php apt install unzip
+- docker-compose -f docker-compose-tests.yml exec -T php docker-php-ext-install pcntl
+- docker-compose -f docker-compose-tests.yml exec -T php sh -c "curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer"
+- docker-compose -f docker-compose-tests.yml exec -T php composer update
+script:
+- docker-compose -f docker-compose-tests.yml exec -T php vendor/bin/phpunit

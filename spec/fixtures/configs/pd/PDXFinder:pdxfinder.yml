@@ -1,0 +1,26 @@
+language: java
+
+sudo: false
+
+jdk:
+  - oraclejdk8
+
+script: mvn clean package
+
+env:
+  global:
+    - JAVA_OPTS="-XX:+TieredCompilation -XX:TieredStopAtLevel=1 -Xmn48M -Xmx512M"
+    - NUM_THREADS=2
+    - NODE_VERSION="8.11.3"
+
+before_install:
+  - nvm install $NODE_VERSION
+  - npm install -g @angular/cli
+
+notifications:
+  webhooks:
+    urls:
+      - https://webhooks.gitter.im/e/969b5598af30afd3e0a2
+    on_success: always
+    on_failure: always
+    on_start: never

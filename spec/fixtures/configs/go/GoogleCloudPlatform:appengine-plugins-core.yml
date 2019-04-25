@@ -1,0 +1,38 @@
+sudo: false
+language: java
+matrix:
+  include:
+    - name: Oracle JDK 8
+      # no openjdk8 yet on travis without special configuration
+      jdk: oraclejdk8
+    - name: OpenJDK 11
+      jdk: openjdk11
+cache:
+  directories:
+   - $HOME/.m2
+   - $HOME/google-cloud-sdk
+env:
+  global:
+    - CLOUDSDK_CORE_DISABLE_USAGE_REPORTING=true
+    - CLOUDSDK_CORE_DISABLE_PROMPTS=true
+install:
+  # https://github.com/travis-ci/travis-ci/issues/8408
+  - unset _JAVA_OPTIONS
+
+  # check if cloud SDK was installed (/bin exists)
+  # travis auto creates cache directories, so remove it before install
+  - if [ ! -d $HOME/google-cloud-sdk/bin ]; then
+      rm -rf $HOME/google-cloud-sdk;
+      curl https://sdk.cloud.google.com | bash;
+    fi
+  # make our installed cloud sdk take precedence
+  - source $HOME/google-cloud-sdk/path.bash.inc
+  # update gcloud
+  - gcloud components update --quiet
+  # add App Engine component to Cloud SDK
+  - gcloud components install app-engine-java --quiet
+script:
+  - mvn clean verify -B -U
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)

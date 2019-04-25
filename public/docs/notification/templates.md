@@ -2,16 +2,11 @@
 
 
 
-## Type
+## Types
 
-Any of:
-
-* Sequence (Array)
+* Array of: String
 * String
 
-## Flags
-
-None.
 
 
 ## Examples

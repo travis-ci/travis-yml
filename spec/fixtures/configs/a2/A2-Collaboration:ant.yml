@@ -1,0 +1,56 @@
+language: cpp
+compiler:
+- gcc
+python:
+- '3.1'
+sudo: false
+addons:
+  apt:
+    packages:
+    - libgsl0-dev
+    - liblzma-dev
+    - graphviz
+  coverity_scan:
+    project:
+      name: "A2-Collaboration/ant"
+      description: "Just another analysis toolkit for A2"
+    notification_email: wagners@kph.uni-mainz.de
+    build_command_prepend: "mkdir build-coverity; cd build-coverity; cmake .."
+    build_command: make -j2
+    branch_pattern: coverity_scan
+before_install:
+- pip install --user codecov
+- mkdir -p $HOME/opt
+- cd $HOME/opt
+- export CURLCMD="curl -SLs --retry 10"
+- source $TRAVIS_BUILD_DIR/ci/$SETUP_ENV
+- source $TRAVIS_BUILD_DIR/ci/setup-doxygen.sh
+- cd $TRAVIS_BUILD_DIR
+script:
+- test "${TRAVIS_BRANCH}" != "coverity_scan" || exit 0
+- mkdir build && cd build
+- cmake -DCTEST_PARALLEL_JOBS=2 -DAnt_COVERAGE=On ..
+- make -j2
+- make -j2 build_and_test
+after_success:
+- test "${TRAVIS_BRANCH}" != "coverity_scan" || exit 0
+- test $COVERAGE = true || exit 0
+- cd $TRAVIS_BUILD_DIR
+- ./ci/upload-doxygen.sh
+- bash $TRAVIS_BUILD_DIR/ci/codecov
+notifications:
+  webhooks:
+    urls:
+      - https://webhooks.gitter.im/e/b8516b96f50c2fe47b6f
+    on_success: change
+    on_failure: always
+    on_start: never
+env:
+  matrix:
+  - SETUP_ENV=setup_env_gcc4.9.2_root5.sh
+  - SETUP_ENV=setup_env_gcc8.2.0_root6.sh
+  global:
+  # github token
+  - secure: "fefwp7NoMT5wmirKGYx5N53W6Q4Oy/bDO8H7I1E1BV/C0b6LCxCtu3LFMbV3wJfIh6v9kG0ZfffDO8MB6QAlyRDk7OD7mkGPx/avH9BQrq0/rCpGr8hR8gC+0gmHFbva1KiC4BqSM5oddwxOE13I788PWLDVlB7MRZGKytKj1HTWtsJvmBIyf9CaygyNlZoIsWY9Vcq67PjGbZIFMyw3wvuUUvYRR7jQUev/95D2xYbUb01dBlhbMak4LODu6xFh9Lma62iFSkQVOTTK9sW+jTemAKIz49057D/ODlt/bHrHD2ktTFyrFuWcJJE3dWQp/ziutXgHfzktFqlG17mTQwFhHRwjVGR4qifL8xpgEKuoATPAUotWsDL8g01+uFumzbo3FRCcDYAXSFeigKFuGAlDJmA0tyhIISQjSV+lUZnX1bkxlzRdYfxAdUMAWHnD2lWFQ87CTUwEzk6RnOFmg+TEv8OtgJmWt1cQqDKIOmmHsCkmtmGSEM5XJrgghs2EPBj4NnKw4arfkNEgFJ6J/RowkEV+mBQ4fPTVWUGTLYIy97gwcuur+xTD6OyORCObcbdR2+2RTdV0MAWMSZIegLdZlWj8IJdmNpp6I78griUvmb0sDiyzhYH6Xdmq8/9IWRB7TidwkDZUYwy4uAg/04LdAcfhu9C+5ZKrFVm6RUA="
+  # coverity scan token
+  - secure: "LMPyqCX5QRnVU+KDTXgJsLrbI7O9Dirm3TkUh/wCr+2xKSvqCUnkzs0Agv1DNBjGRVaBaxIg/qqycjQLLZhg4cd4qo4NbD3FtRrMFVCv7Yq4Jsi8YXjAs1lYYTF/EANYAUnEs9NLzuMk8IzxOZIM5c5o38OG5YvkADmTyMFJikj09yE22NZak7li4YuC/8zO9Jzoc2zlK7jP7Ea14RVPkX/S5HULAYIdgnBGGi+jVgstHsjTdWSJUkfqBVaZmAk7xawRcHG0ePSQC+ZZFaYqiXItDYCHtSgNGJi+CUkEEcNJtTlCNcJbfvqMzfGr5AA6X0fThfZym60FJ2bjqulib8Lpr2Q2G2GS6ul5DjKn6gI5b0KT4MXW1mj0Zf8vl47IlFT4otBRDCBssJdi9gsdKb7HmlwpO+WmJ5umvwRN9sxfiq+//b53GMO5eOeHPvT+it3Stvtcxzf/A7seg6lypC5R1yd6LfCVmon8Pl1RBIY2G23oGx4Cqpbty6negUb92zlVNO2BrkA+ChJogSV9M4fiPUEbp6/MzatHEzcQqiDTXG4txV6DHaOKyMxHYYaeL90k96plcSr4BgRiQn6+hbMQNZRc5UnpVK8JGBIZz35ZYVL9H/1l7x09Pu/4dReOOrhKF1NAYXMmracYNIiOfiIF38XH9gsx1yxTrAOtjIk="

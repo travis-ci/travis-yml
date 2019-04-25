@@ -1,0 +1,13 @@
+language: ruby
+rvm:
+  - 2.2.2
+  - 2.4.0
+  - 2.5.1
+script:
+  - bundle exec origen -v
+  - bundle exec origen m debug
+  - bundle exec origen test -c
+  - bundle exec origen web compile --no-serve
+  - bundle exec origen lint --no-correct
+env:
+  - ORIGEN_GEM_USE_FROM_SYSTEM=false ORIGEN_GEM_MANAGE_BUNDLER=false

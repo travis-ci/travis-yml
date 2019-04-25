@@ -1,0 +1,81 @@
+# http://docs.travis-ci.com/user/workers/container-based-infrastructure/
+dist: trusty
+
+# https://docs.travis-ci.com/user/encryption-keys/
+env:
+  global:
+    # ALICE_EMAIL
+    - secure: 'IicSqzbMKeey9gxiqDUU91v/7/K5BY0QoltL0NXHpmUWSWgpLJPKilB6SCXFB+abbSoV1GQjIj/6ntFydcAKyeVYt9PzU2GaLQr6PJR3+0GT1UQVDXSdObdI25TAQWQr7ITDspyhkX+9Y39bQU/avchnvliPoYPV56wt/VKsuJOiTbW31XRGRsXBWnEmFxcK6IekEkFtLkV/LL6IyzYnma/+YXrbBRkDT/4/lA5YbV5GdyocS946yqEY2Bfohb5zx7EvV3dSA+C03El2RyXuFARJ121tLnURjKrDxyZ7iIoxM19FBTj5+HNX4bVIYK7RpMmqHho4Sk6DY3iknSKUViVkoBPCjQzhdP+GyAgDmQzhOsHZIQCwLa184Fxur1lG10lAZbAnv54lvDn/FU5/xjxUaQVHKITSlq08Yj1MdNUyL1EA6mwg+L8wZaBcHz1qqUaxLDHjCA3dbPxDrmh9SYpWRIxl1S92EVsx4VpHEoVLx87DuX5nlKoTRLXGLwkzuE1C5csCnCQjSyzgJlz2PtOXkSkkelp8XWgRNKZq87dx7ZPr+sCuys4PkzjaDbQ8ViBTppKy8xeVlsEBRRJB4VI0Gc7b0nU1SYIGe6hql6qV1fkYI++6gYkuTaV0OMPz2vv/FWi+SOiR33TIlwEl8Da35IM7w/gSnTHRAVQluu4='
+    # ALICE_PASSWORD
+    - secure: 'S8k4zaS/tmFH5QaZZOO1Pclq4XWknCpEauTn6PrnDx7rUygAfCGCmUds6W2jAxFv+N5Fy2Hec8YcRUs8I4ZpROS+n96EzUjFJn997La2cMqltC9u0zvFEpWiHv6MyCm2z78lrkkKLckCWTvkGJXPJ8+rdaz82Izc3nNcBrxd6Z9Fw8bPzkHoaScJJ0atKCfIpSji6INE99CYs70KdgY3iI3EvrXYe8ySfovKP7Y8RxaHOU2d5w7beuFUMQYNfYSl9dT7EXQXd3jLQsIxDOaN432qH3GuiC+tP/0EcWMw6aacWpJKgZerfqq2yPPARgL+y0nhO4rmdSBr5ncFO1ghHiZAik1KDqKkZb/alVbGNq7VDYKwzjnBHuTOyuQKu55DqnC21WXPhM+GsmNBwEkWLsXCKkuuCC1TnHTfTYT66LiZ9HunlhtfANf5g/YXCoM+mRRl5Zgv86BWdou49Qm4b0QjSEus/zfNBrrEwO8+x3rFfbKF4drp3EFqgQ3D7RsAmVTkZkWWBGUB9GsNToyHGmZmsipKvA1xjBCfkOW8LoL9E8ig5u7aL14mz+syAmLKzUaUzPq8TJYg/py0J4XAylO14Q7GMoKejOWpUYN9kuAQuhhXvmaM5RixgYrtBhOG2SLaREpYm5Kr/UY91cnj2VMaYBmroKid0anP84cdyKg='
+    # BOB_EMAIL
+    - secure: 'C/wNt/PsAmeQmS/e7EAIiAiXjag2m8AeoldsT6YZWgA2BxY64jvepK5pU3HWM6ruhnSizTfJTjTcSqr9f5wyRVeXm9/1dv61NRcyhnHarwlJd5FFaw1LYBIxZb+v4zTtclw0egDu2RJkOr9pWY+THYEH40uop1x8mrAyybnmr7d3Rbx9evmeU/ypTsnU53jbNcRfnKsGIudB+1LPf8OMjhdUxYeVXFNZxqsNLO1W/ihGZboNThHh8R6TMdp3fRMTgN/Tjc++En/WsbbkF3DTFW7WJHLTrwrbMLpj2aYNP8yIeCu8PODVNiGBMIqbBsIvefjnXE954e/j/vrWLz1U1PmQUVkVSCgS7MA1hOZ6uiqcSWgeNWW9oLngmXiYfPS8GZCA7xV0+jho6bvHwOiHlTtPJ6aw3bAtAFLPfAJpRLzwU942Nsskw6Ly80A1JBQTmNZPAj/wMzaF+DxdpLDpsMoOEV0B0tZ6cmvhaV9JrhUo2Ek0AlYzgTmKtU3hI9iBnWWgk9VIfSFTJ515IJmecJFUNish5XFR3Je8rsj/SoU9zWpibvH3cSLXcpREvd9P60LQ85WLvG+rUKKo3N+65DPTfMgEPGqdjc+A5WRnvk/7r7UabvZZMnWvQ+8J+M7uv+OM3F8ObjyTNag64TOKUMa1Gjzk2/4W37GOMPLgR74='
+    # BOB_PASSWORD
+    - secure: 'OG6mJLNiu32z2WqJaY9AY3u50cQzwpjKdWq+MtsAALkTRgEOrLjZguiRyyQWVAPQ11v090HEKCetWwb1r9yqk7ZMLQSUx0yUixJ/oxfdwoG10QtOcdgRcS91wXESgvBrmu6o5m9c578B2aG8P1d0w0i5XzcpH+3ZW1lzzU+VSQcqTk8RjzJETvFX4YA01/FbjMRBCaQcC61ofLCOf6k7zKcyRy830PPp6R8u8kNM1e3kCX8r9PvdoFMv8THVjoJf7zGH6deqAoynbyfMmYkXHGU/SOx70gWhJnYYfqL0w0Z5/T6zJtap4ScM5VhfBUX2DwQU3NVT7BA38wnfRcw+2JN/krhqbWeQ/Si5ZoriEXLXJG5d27uakNwemyZNwdMS9TYVVZITqwzJJhEBaZ2YY2iHJdTVUyrz8DBl5CS6KPCHcNjReQBoVN/05G9d5y/Z/eYcBi15CL71k6xyq1pKm0ekMEXTmpsN9C4ghiZhIbgU+EJUkHUPRSBxTY2Mwr5lyDZTMTPasAFvosgi35ETWxu0SIzyHwYYAydv2iBorm7S9VGucFgdLwz7PS0xZBg/jX/BALbM3oOQTK5oi6go3z85ewllVxhFI/7w7Tg9Yk2YdcPkDRbvhI5cwXjbJd5ZAr+xtz3gA3mf3LkpqnO5qxUdwt6nNFKXuDIyoMFUYmA='
+    # EVE_EMAIL
+    - secure: 'S907DM6Yr/shQu9/1J6JNhPlWsSnhAJukEjWl5wzh8okn7CyFqOrgK1sUmwwkfL82g1JxJazkDacONF68+D1YYo4wjJmjce+0zynzTLG7lDbKlIBNkIlVvHA7/lIFol5GB8muXLZBtFWcTd3L0OiyItcQKO115XqG2w2tTf2gl9989VDPjY2QwlkSBlVC699U5JX4aL51aUHydrHc45q9jLYH1janj7J7V5no0XYcOhgsDLdfGWjAhvYlhpa37cSo1kBb5vSlrw3uLV6bhtg8m3HKvfbVnl2pBB2pfbMNffjGYeDFNs7KGyrXAzOx7BCiIS0PS3XPj0x0iMu7oqGfcaXIy5t+elzk5Ya6HPhli9JfQUANYjdUVdqYzgJGybiPkctxah4GxguZlm+yx4Ps4TpIywMiUDA3/Up7DRDnw3hC322PQjqll73xMkkGFYvtfNvSbXYdeia4bp/cmwyQk0P1/reP7h7tq8YELlqTbEejTg8noadEXyQBUFIJS1ywqCyYmYbzlnwYw74zFhRePkhtk8CQjKguJNYuIp4nP6Fq1pFgCcuFm2f0X3f8Kf5NAaPi6oR6vrF1q0Zd6vpyJYm80pbyBPuBfxIx3SXPWSALDDNdMW3arM3QCeGA+bUwCVUFtjsyS0cYrcQoR9BbrsLvDSYH6ujMk1HCbTGjsA='
+    # EVE_PASSWORD
+    - secure: 'U5McnPi+WnUeJytXGgiz0D3rNa8lMM/+yVNQ+8h6eYNSHcuxm4WdGwKp3jivavONtWxI3F+QF+15Kpf+/kkcSUdqXOjWaBwNyMh9A+jGVatX/taIsK5cvHsZH9Q5SPIPaPxdhwnvP02N1IfjoQoyb7GlURcn3y26KBoK8/2fVri8DqMEV83rKojrw9cDISN4Ek0ISaXemuE9WTIuug49OYRQbzfQww00iMLCmJKECYf2wt16HZisrrt5YH0QBzGlw0DgNSQKdum6Uxero2zpyF6WKKAB4kMTYzuKy7R2OmtLk3Q2ktHlKR58X8So7kJon2pUmNRm1y2IMKyefmaVbKJ98FiM1kXc0lokG32vxjL2dR5qDGbRwovJ9RWauPkO5KI01a3sRvRaHpj9GfiWBLEmfbGFkElOPINWCdN5zSF54Ic1tYDiJruLyA+NDJLf8yl+WvkjQDo0SAuJsQHH0JNWCinGACAXoBD8HstSBaz/pClZ5AamTb6I/7qrgjKrln5roixI+Nuq+k2SmPUoy3U2FUBEHCzqSlWf+oL8tIbS28qPi6DmV0OyMO/1DkdPVLfdzMhN4L2/JnCyoduZmLoiqZSjquROChJ+M0BEMltcvKet81qzF6O9nAq37U2tYCHtquw+D99aZadUCVcMDPaXoDEzWf75GVdn6Eepg0g='
+    # NPM_TOKEN
+    - secure: 'X8/w5xjoUg3zimkB5KJX9ChLYcTHCj7dUXru2I8w71NBm8tVOIID9jQpuCKWbzFKPnkm3X8uozAvKrhz8lf8Ah3f9kFK9wTkoeJEfZcqFpkE9d0WNZLKWKYmH8X0BFem/v7Yr8NReAi93NBXhHLvl7CcfcYzwBefr2LOX+W/tHBlwltyjAGvBulTntAPv5Yyz0UNwT6uI+3rE3oYHTEbotBpOPdGs1N7qrYmlOiVdIgMUx0SgfQOnJc/RgmV+adaBKfhvQzavMeXFLrUQVpNhvjmB2Meu3wbkTiXgUtgIV5ysFGGEAwOq5XbXVPguRNgnbudSrJwWelp2Xf9ioXRJrQ7PdAT2WmixBQMQb+QEhHCglxS7ASVSoDAs0HRn6+jD7jWTjOxnspy8V3CVuDgdOIb2efrhU5AeviV3EOcVcgywQimrubgDHveTDPixrJoa8k4H9iszZnvU6MTuE93/5QNW1N9N4c7zOmB76RMRzUgbrmsHQ3PLKWwrewV9zIojGnJ6df2SauVlF/E1ZiQKHx95Y4nmq+gehErIzTKW4D2TTWpPmoO0lrLd+KVl0NUwJ7Y5S8eumFuTifh4BD1xHsxJlJw6spXRhkTiBmvcPZIVUO+9ZHZY+TaYJ3hZrDO1D3HJpvXcNt5W+sTiuka9x09stwP4hndXPh1pVaAP0Y='
+    # WIRE_STATUS_BOT_EMAIL
+    - secure: 'P035+mhG/EgFcWTKLETEjGIAEHrBtG0gyYLC7F70d9jEwtOGLuDnAEuFkU8cvE/RaKW5M1dcGlxg+DYIhnm18OfDoOZJqKnw+lO1pfTicl/XwFlUihtvFVRxvD07zR1zgjkQRgoI8s2CLOYk7ShdrdC0HPxUCt4LZNTl7URBg8VsR5fiZDgILJzxOmI82DXDnMfXJd7D0EE+HNRto0VvvviKOTaV9xJgvv4YLYpJyFkhigKfB3pSmzWZlFzNfr1BKw2e4brSTkNFlGNJCYk7nghbDvq7To3qu6iWtChQ1MnTmsMIqMrwWVzqfrzX8xbXcVd0VET7SopD//LrXUPVc08IWUpGjAcDQuE0vQ4r8g0rS52gmsn06R8U/SYTDC73HwQmivdMRXXEYj772uFEHPX1K7XNhKKBTv2dBoksTEqsxAytraZWU2fcn9jlkGh006Q8S08cOEdc4LQb80vVgjNWcPNIS8VrR3/4n3/2sr+AJrji43HdsynUL3JmiAr5oc95rr4EhdWkkMQuLJ/PhGOTrrwokgwo2j5eyAJ6dc7Ool2yILGaIwrH+usZdztT+Vxk4VX6cOb2JUCtKlgv756F+hAT2mZhZMmznDCazBTNq6ISfxylb2QTxzyIJIsQ5STqfCHZOzaQMF57RxvhtmcwR0fBEboHNeF+j5kNfkA='
+    # WIRE_STATUS_BOT_PASSWORD
+    - secure: 'BW4wDibxgFxSe7k4VJSeVNjvX4Ol5eTZNXtCn7+sLYmW/yxpnBW7O13fimy4AQ3aqMAZECTR+FivlW+Md3tjV7mXAmX8jm+C2G/ZDcx9yprwB4h1N4JOIDGXFXRa2cWlMHjreim/K3NORw6bSxKCqHNiKTUPYLA7vlQ2FikWEwr74m5uvH6FwkGKGxQG6L/DTXY4VgT1hnKw1HpmBtMsElae91YBtIAyn+oA49ftIYirRldJr+MHpLLls9PiBHykqygmv+8aSf7SmBWYT63Z6D++KGaZAHJGhPa6rlLN5vUqA2C6vBodcNjZbYx9TDERTEQrDPWt5peUCsNSRqRK7gmf1v8IdEYzEq4hVuu2ZqlJDfSbOlNrGeR83ai0c947Pv3pMEXGtU5UHJjoEv8RkX/Czu6GZItf9QqRPdm9GPZu0V6COHlNKQQ/ttPOPgSTvStL8sgrh0WRF20/IBkgbyhaKwbNzNTm1BA2saMErCo66WDs/zv0078FDGBmNiDTjl47O7MUbTZHeNIbRCZmQS2TDI35bL6uuK2yGIImuY0C79JLu6TwhwSocFN/4XsnMfUnbuL7WYMMr5DCm9ugD2TAZcrSUt891ohggj978nBGnB+rAiq009oImLoUa07/lJQPSygO3YIANQlD63QFh/Pf/Nnt/qdf9qCfUKjyiKU='
+
+language: node_js
+
+node_js:
+  - '10'
+
+addons:
+  chrome: stable
+
+# http://docs.travis-ci.com/user/build-lifecycle/
+before_install:
+  - curl https://yarnpkg.com/install.sh -sSfL | bash -s --
+  - export PATH="${HOME}/.yarn/bin:${PATH}"
+
+before_script:
+  - yarn boot
+  - export IS_MASTER_BRANCH="$([[ "${TRAVIS_BRANCH}" == "master" && "${TRAVIS_PULL_REQUEST}" == "false" ]] && echo "0" || echo "1")"
+  - export HAS_UPDATES="$(npx lerna updated > /dev/null 2>&1; echo "${?}")"
+  - export IS_BUMP_OR_TEST="$([[ "${TRAVIS_COMMIT_MESSAGE}" =~ ^(chore|test).* ]] && echo "0" || echo "1")"
+  - export WILL_RELEASE="$([[ "${IS_MASTER_BRANCH}" == "0" && "${HAS_UPDATES}" == "0" && "${IS_BUMP_OR_TEST}" == "1" ]] && echo "0" || echo "1")"
+  - echo -e "IS_MASTER_BRANCH = ${IS_MASTER_BRANCH}\\nHAS_UPDATES = ${HAS_UPDATES}\\nWILL_RELEASE = ${WILL_RELEASE}\\nIS_BUMP_OR_TEST = ${IS_BUMP_OR_TEST}"
+
+script:
+  - yarn test
+
+notifications:
+  email: false
+
+after_failure:
+  - |
+    if [[ "${IS_MASTER_BRANCH}" == "0" ]]; then
+      LAST_COMMITTER_NAME="$(git --no-pager show -s --format='%an' HEAD)"
+      TRAVIS_BUILD_URL="https://travis-ci.org/${TRAVIS_REPO_SLUG}/builds/${TRAVIS_BUILD_ID}"
+      NODE_DEBUG="@wireapp:*" node "packages/core/src/demo/status-bot.js" "4ae15efc-d061-4013-98f2-bcd81ab39b60,b2cc7120-4154-4be4-b0c0-45a8c361c4d1" "${LAST_COMMITTER_NAME} broke the \"${TRAVIS_BRANCH}\" branch on \"${TRAVIS_REPO_SLUG}\" (Build #${TRAVIS_BUILD_NUMBER}). 🌵 → ${TRAVIS_BUILD_URL}"
+    fi
+
+after_success:
+  - |
+    if [[ "${WILL_RELEASE}" == "0" ]]; then
+      git config --global "user.email" "webapp+travis@wire.com"
+      git config --global "user.name" "Wire Travis CI"
+      mkdir -p "temp"
+      openssl aes-256-cbc -K "${encrypted_d95474b06f11_key}" -iv "${encrypted_d95474b06f11_iv}" -in "deploy.enc" -out "temp/deploy" -d
+      chmod 600 "temp/deploy"
+      eval $(ssh-agent -s)
+      ssh-add "temp/deploy"
+      rm -rf "temp"
+      echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" >> "${HOME}/.npmrc"
+      git checkout master
+      git pull
+      REPO="$(git config remote.origin.url)"
+      SSH_REPO="${REPO/https:\/\/github.com\//git@github.com:}"
+      echo "${SSH_REPO}"
+      git remote set-url origin "${SSH_REPO}"
+      yarn release
+      NODE_DEBUG="@wireapp:*" node packages/core/src/demo/status-bot.js "4ae15efc-d061-4013-98f2-bcd81ab39b60"
+    fi

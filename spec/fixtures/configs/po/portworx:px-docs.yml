@@ -1,0 +1,22 @@
+language: ruby
+rvm:
+ - 2.2
+cache:
+  directories:
+  - $TRAVIS_BUILD_DIR/tmp/.htmlproofer
+  - $TRAVIS_BUILD_DIR/tmp/.googletest
+branches:
+  only:
+   - gh-pages
+   - /.*/
+before_install:
+ - npm i -g amphtml-validator
+ - go get github.com/ericchiang/pup
+install:
+ - bundle install
+script:
+ - "./build/test.sh"
+ - "./build/test-amp.sh"
+ - "./build/deploy-amp.sh"
+notifications:
+  email: true

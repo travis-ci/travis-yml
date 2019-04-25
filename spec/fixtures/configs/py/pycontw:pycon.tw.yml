@@ -1,0 +1,40 @@
+language: python
+sudo: false
+python:
+- '3.6'
+services:
+- postgresql
+env:
+  global:
+  - DATABASE_URL=postgres://127.0.0.1:5432/postgres
+  - SECRET_KEY=thisisasecret
+  - PIP_WHEEL_DIR=$HOME/.cache/pip/wheels
+  - PIP_FIND_LINKS=file://$HOME/.cache/pip/wheels
+  - secure: 1FJIVHw0VDZUjH077dopjAAEduZKsM7mwdJgf8CI7Kt1kdy78FculX48X023y5DSAdSIXYN34dZss4PkjKIkHUtrr+7kxgiGPIasuKZ/k875w5eql3rtSrqQ8UjCwuDaaXkJ6Hs1X4eHmp5QcgkrAUB+Td3lOfbOwlG3dT1njpxK9aONeWLV1XAZIwXQQ9fTBDQ/CHgAsPI2RDbl+fs//B6LtuvVkPBYE3XdS8MVpWof58KHqPL9FLLHIvfObRXFmGVU8v/PozunrwDYrUW5KDP8S+PtRDlZwSYRe+OKpEDkOYGWF8vPWMhRME2TVLeclUrDZBRLVQzGo2T+iM3yvbVE4iCmfrJvgR9KZjr9g/F07LNgKKq5eKdTa53zWZXnml5nCdt/FcjH+AVsPWew+d/5GFV/UBqWyKdtygqhPFJ1I/LcTZVPWRpOqycTWrpu6kYjRM3vn/G6cAVqhzqTkQpuDL5UUaShzylEXWS9weu9xwgFH43RywUVbX1Wvg3gIw5lBjYQkxAfZdX85zaH4yc8unqBkzx+UVWkDCiA4RpdeNjzfEPoxC9mDYZvhODP1FYrla9yE0GwT3s+O0/LOw9IIfuhvd+YwYLau4TsluShbnVKNrRlRwOnPArrRNwNeFeOtkm+lIKqjzXmPgtVT+awfDtvnKGSM7z8JwLMJc8=
+  - secure: OwJOgIMb6dX3mRZk8aIoPkcIAgyNlOxiHcQH8wNS5tdQXTfbZ8quDEtIWA/WytJ2U489eihZNnAD/bAyfg3xMMuP8PE0HIAFz2rH82WgYbrtXzzLqcRjnb+g2W1sIv90WWZOgEBBA4yviTWumx6NRzIM9u4OLWfdU05jd6mlZ5OZKuFeFbgrYf4b4EunSu0XiOzWd+JpzyKt7TO+mQIuRr8UgElqQ+MGY5/I+iaEfKrXikONis4hfynhQdf2CDs5wKEGIUOfUZbSE1cDA0frsvscil/s68QrwYx4YOfmeB4s+VAAu3+uvSa2+jVKC29dyk0Mq9H0xjOkbP62HI5lDW2egaEc5K6YhHb1ZrruASCDsfrmMDSfueCLgXIEAScsRYHtpNqSMvweQhyKidO6mktpidwSHo+0xOIGEykdCWgm1efc8Mo2wjHvuSRM+9Cc08Vw0ukz8DJ5vK4/v5ZzvudHKYH3/Bn9EGu+p3FvziWObSGzTjdj7TmQIJcCoEp1X4Baf0/AOH7nNSp1yW+lpFivzKozrGa8G+7bDjHTRKFQXumJxI+lbE0qkbwl7T2tW2rnIAXJczu7H720vYet56eUdRxE7id5sC1sQgtgpy18GL1i2b0UhJGF/kt3LBjoi1dvY86MKx4mBbY5LcRAwAv7mOIji6GN4epJY3tCRuU=
+cache:
+  directories:
+  - "$HOME/.cache/pip"
+  python:
+  - '3.6'
+before_install:
+- source secret_sauce.bash
+install:
+- pip install -U pip
+- pip install wheel
+- pip wheel -q -r requirements/travis.txt
+- pip install -r requirements/travis.txt
+- yarn install --dev
+script:
+- python src/manage.py migrate --verbosity 1 --noinput
+- cd src; pytest -n 2 --cov=.
+notifications:
+  slack:
+    rooms:
+      - pycontw:Z1FrdUPAMxhG0MjnY8awlRm0#web
+    on_success: change
+    on_failure: always
+after_success:
+- cd src; codecov
+- cd ..
+- fab travis_push_transifex

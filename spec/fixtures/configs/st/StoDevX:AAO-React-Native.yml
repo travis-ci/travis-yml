@@ -1,0 +1,44 @@
+---
+dist: xenial
+
+env:
+  global:
+    # variables from the web interface:
+    # - GH_TOKEN: token to push to the repo for greenkeeper
+    # - GITHUB_PAGES_TOKEN: token to push to gh-pages
+    # sets our node version in one nice place
+    - TRAVIS_NODE_VERSION=10
+
+# As seen in http://stackoverflow.com/a/31882307/2347774
+# Prevent travis from building twice for PRs
+branches:
+  only:
+    - master
+
+stages:
+  - name: Deploy Data
+    if: branch = master AND type != pull_request
+
+jobs:
+  include:
+    # Deploy the gh-pages data
+    - os: linux
+      distro: trusty
+      language: node_js
+      node_js: $TRAVIS_NODE_VERSION
+      stage: Deploy Data
+      env: [task=GH_PAGES]
+      before_install: npm i -g yarn
+      install: yarn || yarn
+      script:
+        - npm run validate-bus-data
+        - npm run validate-data
+        - npm run bundle-data
+      deploy:
+        provider: pages
+        skip_cleanup: true
+        github_token: $GITHUB_PAGES_TOKEN
+        local_dir: docs/
+
+cache:
+  yarn: true

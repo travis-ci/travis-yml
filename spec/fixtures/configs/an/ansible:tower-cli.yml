@@ -1,0 +1,19 @@
+sudo: false
+language: python
+python:
+    - "2.7"
+    - "3.4"
+    - "3.5"
+    - "3.6"
+    - "nightly"
+matrix:
+  allow_failures:
+    - python: nightly
+install:
+    - pip install -r requirements_dev.txt
+before_script:
+    flake8 .
+script:
+    - tox
+after_success:
+    coveralls

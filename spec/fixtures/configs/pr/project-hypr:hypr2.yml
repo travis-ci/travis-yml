@@ -1,0 +1,29 @@
+sudo: false
+language: python
+
+python:
+  - 3.4
+  - 3.5
+
+install:
+  - pip install -r requirements.txt
+  - pip install -r requirements_test.txt
+  - python setup.py develop
+
+script: py.test --cov-report term-missing --cov hypr
+after_success: coveralls
+
+addons:
+  apt:
+    sources:
+      - travis-ci/sqlite3
+    packages:
+      - sqlite3
+
+deploy:
+  provider: pypi
+  user: mdp
+  password:
+    secure: Lg6H9Vq+Lw2FAurCjyNbMTv8TU4ZyEQBuKOrAuJtFHXUhyBWctpdbbWLt2/4yH2Xu7m6Sb6/QUIPz2nAIL0vwYfYzt2DY9kWxuiKbZTbDFkff950TXz4By4qfn2IBoU/isMjCUtc+JrSTwqOERq37UVvSTwLJFzeK+NN1w7n7HWqJZ8HGd4svPl87rVrKvAgl4cW/CYpD2xVV/BY1VOCqmTolpMm4I223sWtLcT539SjXUddD/gKJ99rCCMIKZCYjKVzyer5JlGmwov3xRm4GMTpRuHyD5DavkD73DEojQceAA5vedC3bTXDe1K9IuBCkuVsRWJTt0rEcLeeEm45ixJaxM4DqpGIW67cUxPTlUbLQD8NnjMlRl91VySVrXHGKdeytTXBgoVkAJiJzzBd1TfNi7eKXLbVG1Lk1h2ctmE6LvyQ+Fk0toh1tLUwJY3eDpbC7EaKSE5M47U52uSpiIls4ml4F3IIfgMPpSgtwTl5U+hT2/gqL+md6ieSa9MTMs+uQaTFIslJuZaMOA8NjCaJb1UhIKIdS1X6C5p7FExO4YQDKpGqteutOHAat0ugydkfPipwgmWmUeafaH6xg4/uSZdBxmj7wcv+Wyp53x4vj4mbSv1efuzsOcDLDV1yMDlhrOx7Jwok1lN2WwGyYQfXyM3XdAQKA4AfNH0BP/U=
+  on:
+    tags: true

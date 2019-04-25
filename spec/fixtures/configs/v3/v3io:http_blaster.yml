@@ -1,0 +1,23 @@
+language: go
+
+go:
+    - 1.9.x
+    - tip
+
+go_import_path: github.com/v3io/http_blaster
+env:
+  global:
+    - VERSION=$(echo $TRAVIS_TAG)
+before_deploy:
+  - "GOOS=linux  GOARCH=amd64 go build -o http_blaster-${VERSION}-linux-amd64"
+  - "GOOS=darwin GOARCH=amd64 go build -o http_blaster-${VERSION}-darwin-amd64"
+deploy:
+    provider: releases
+    api_key:
+      secure: STLU3YYuR/vuiYWciHPgR/+qCSmSFa41GVbgHDu6G/kD1S057l0xW3o6MejUcC6nMAQpaOcpfqju3X6vqqoIIPtLBjmJKgwsC57yi27GscJTCVHdWtDEzU5vRJ9L0zGKruETsJG+g4TL1dOELeluV/IF1xjoihLCy5Z65dVRfhpUhLfv/2eNkYr8KPqlr4vKTrSoXbigGsIL4Zjjrm/NWRf6ZKgVpoTjt510YyNcRp39MWXRyXZt+Yaj44lJ9i5zesfxDmchyhebQuQis7Eu2TQ24V65lGGhL2HDb7q2fn3AJl96F3xS/VFQnKmlPtaXSeZpCIy+UT4UQQptFGuUT+sK8tbDZ9qsBE4BS1zYtLOP/9fS2G4wkJRSMirXQbambnkrVrHEUl269P0DrdD8IuRTA7DCS7Nhn9EpEbnNVtJdVX0sr34ibJCjcay3JeewVktVoXuN9LkLnwWlfbs4/HAjRmoYGSUl2IFC7e8psr+NDPVgXYPrGhLYuqxqqEA62Rq1NzvjtgQjP+OQ+r0+R4K2TxhGJYDgS6sc37vFDF6+egF7wYmRy2oZGJAZ52PgpbCaAljk3+wH49COwgdhbiMXoiQiSkJm1WHEg8DhgRQPsaYxoMdRND/KNJromkbBsXYBY4b6DwB8ptzehdknJ1N/E1BdrlEXOUkYOZmnXvs=
+    file:
+      - "http_blaster-$VERSION-darwin-amd64"
+      - "http_blaster-$VERSION-linux-amd64"
+    skip_cleanup: true
+    on:
+        tags: true

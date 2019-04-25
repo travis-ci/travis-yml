@@ -1,0 +1,109 @@
+language: php
+
+dist: trusty
+
+php:
+  - 7.0
+  - 7.2
+
+env:
+  - SOLR_VERSION=7.6.0 SOLR_CORE=d8 SEARCH_API_SOLR_CONF=7.x DRUPAL_BRANCH=8.7.x DRUSH_VERSION=~9.4.0
+  - SOLR_VERSION=7.6.0 SOLR_CORE=d8 SEARCH_API_SOLR_CONF=7.x DRUPAL_BRANCH=8.6.x DRUSH_VERSION=~9.4.0
+  - SOLR_VERSION=7.6.0 SOLR_CORE=d8 SEARCH_API_SOLR_CONF=7.x DRUPAL_BRANCH=8.5.x DRUSH_VERSION=~9.4.0
+  - SOLR_VERSION=6.6.5 SOLR_CORE=d8 SEARCH_API_SOLR_CONF=6.x DRUPAL_BRANCH=8.6.x DRUSH_VERSION=~9.4.0
+
+notifications:
+  irc:
+    - "chat.freenode.net#drupal-search-api"
+
+git:
+  # The depth needs to be increased. The default of 50 leads to fatal: reference
+  # repository '/home/travis/.cache/composer/vcs/-home-travis-build-mkalkbrenner
+  # -search-api-solr/' is shallow.
+  depth: 10000
+
+cache:
+  directories:
+    - $HOME/.composer/cache
+    - solr_downloads
+
+services:
+  - mysql
+
+before_install:
+  - phpenv config-rm xdebug.ini
+  - composer global require "hirak/prestissimo:^0.3"
+  - mysql -e 'CREATE DATABASE drupal;'
+  - ls solr_downloads/
+  - wget -nc --continue -v --tries=3 --directory-prefix=solr_downloads "http://archive.apache.org/dist/lucene/solr/${SOLR_VERSION}/solr-${SOLR_VERSION}.tgz"
+  - tar -xzf solr_downloads/solr-${SOLR_VERSION}.tgz
+  - export SOLR_CONFS="$TRAVIS_BUILD_DIR/../drupal/modules/contrib/search_api_solr/solr-conf/$SEARCH_API_SOLR_CONF"
+
+install:
+  - git tag 999.3.0
+  # Make sure we don't fail when checking out projects.
+  - echo -e "Host github.com\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
+  - echo -e "Host git.drupal.org\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
+  # Set sendmail so drush doesn't throw an error during site install.
+  - echo "sendmail_path='true'" >> `php --ini | grep "Loaded Configuration" | awk '{print $4}'`
+  # Forward the errors to the syslog so we can print them
+  - echo "error_log=syslog" >> `php --ini | grep "Loaded Configuration" | awk '{print $4}'`
+  # Get the Drupal core.
+  - cd $TRAVIS_BUILD_DIR/..
+  - git clone --depth=1 --branch $DRUPAL_BRANCH https://git.drupal.org/project/drupal.git
+  - cd $TRAVIS_BUILD_DIR/../drupal
+  - composer install
+  - composer config repositories.search_api_solr vcs $TRAVIS_BUILD_DIR
+  - composer require drupal/search_api:1.x-dev drupal/search_api_autocomplete:1.x-dev drupal/search_api_solr:999.3.0 drupal/search_api_location:1.x-dev drupal/facets:1.x-dev drupal/geofield:1.x-dev drupal/composer_deploy drush/drush:$DRUSH_VERSION drupal/drush_language:1.x-dev
+  - composer run-script drupal-phpunit-upgrade
+  # Patch template.
+  #########################################
+  # to be removed once #2824932 is resolved
+  #- cd modules/contrib/search_api
+  #- curl https://www.drupal.org/files/issues/2018-12-20/3021717.patch | patch -p1
+  #- cd $TRAVIS_BUILD_DIR/../drupal
+  #########################################
+
+before_script:
+  - export SOLR_INDEX_WAIT=4
+  - export SYMFONY_DEPRECATIONS_HELPER=disabled
+  - export SIMPLETEST_DB=mysql://root:@localhost/drupal
+  - export SIMPLETEST_BASE_URL=http://localhost:8888
+  # Start the built-in php web server (mysql is already started) and suppress
+  # web server access logs output.
+  - php -S localhost:8888 >& /dev/null &
+  # Install the site.
+  - ./vendor/bin/drush -v site-install minimal --db-url=mysql://root:@localhost/drupal --yes
+  - ./vendor/bin/drush en --yes drush_language
+  - ./vendor/bin/drush language-add de
+  # Let dev versions fullfill module version dependencies.
+  - ./vendor/bin/drush en composer_deploy --yes
+  # Generate a multilingual Solr configuration. Therefore we have to install the
+  # test modules before the tests.
+  - cp -a core/modules/system/tests/modules/entity_test core/modules/system/entity_test
+  - cp -a modules/contrib/search_api/tests/search_api_test_example_content modules/contrib/search_api/search_api_test_example_content
+  - cp -a modules/contrib/search_api_solr/tests/modules/search_api_solr_multilingual_test modules/contrib/search_api_solr/search_api_solr_multilingual_test
+  - ./vendor/bin/drush en --yes search_api_solr_multilingual_test
+  - ./vendor/bin/drush solr-gsc solr_multilingual_search_server conf.zip $SOLR_VERSION
+  - rm -rf core/modules/system/entity_test modules/contrib/search_api/search_api_test_example_content modules/contrib/search_api_solr/search_api_solr_multilingual_test
+  - mkdir $TRAVIS_BUILD_DIR/solr-${SOLR_VERSION}/server/solr/d8
+  - mkdir $TRAVIS_BUILD_DIR/solr-${SOLR_VERSION}/server/solr/d8/conf
+  - unzip -o conf.zip -d $TRAVIS_BUILD_DIR/solr-${SOLR_VERSION}/server/solr/d8/conf
+  - echo "solr.install.dir=$TRAVIS_BUILD_DIR/solr-${SOLR_VERSION}" >> $TRAVIS_BUILD_DIR/solr-${SOLR_VERSION}/server/solr/d8/conf/solrcore.properties
+  - ls -lh $TRAVIS_BUILD_DIR/solr-${SOLR_VERSION}/server/solr/d8/conf
+  - $TRAVIS_BUILD_DIR/solr-${SOLR_VERSION}/bin/solr start -e techproducts -p 8983
+  # Add the preconfigured d8 core to the running techproducts example.
+  - $TRAVIS_BUILD_DIR/solr-${SOLR_VERSION}/bin/solr create -c d8 -d $TRAVIS_BUILD_DIR/solr-${SOLR_VERSION}/server/solr/d8/conf
+
+script:
+  # Run the tests within the drupal directory.
+  - cd $TRAVIS_BUILD_DIR/../drupal
+  - ./vendor/bin/phpunit -c core --group search_api_solr --verbose --debug modules/contrib/search_api_solr/tests/src
+
+matrix:
+  exclude:
+      - php: 7.0
+        env: SOLR_VERSION=7.6.0 SOLR_CORE=d8 SEARCH_API_SOLR_CONF=7.x DRUPAL_BRANCH=8.7.x DRUSH_VERSION=~9.4.0
+  allow_failures:
+      - php: 7.2
+        env: SOLR_VERSION=7.6.0 SOLR_CORE=d8 SEARCH_API_SOLR_CONF=7.x DRUPAL_BRANCH=8.7.x DRUSH_VERSION=~9.4.0

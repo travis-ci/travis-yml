@@ -1,0 +1,24 @@
+language: perl
+matrix:
+  include:
+  - name: "openSUSE/SUSE production perl version, only compile check"
+    perl: "5.18"
+    env: TESTS=compile
+  - name: "testing perl version, all tests"
+    perl: "5.26"
+    env: TESTS=all
+addons:
+  apt:
+    packages:
+      - libdbus-1-dev
+      - libssh2-1-dev
+      - parallel
+before_install:
+  - eval $(curl https://travis-perl.github.io/init) --perl
+  - echo "requires 'Code::DRY';" >> cpanfile
+  - echo "requires 'Perl::Tidy', '== 20181120';" >> cpanfile
+install:
+  - make prepare
+script:
+  - git checkout cpanfile
+  - make test

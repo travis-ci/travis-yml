@@ -1,0 +1,61 @@
+sudo: required
+language: python
+
+services:
+- docker
+- redis-server
+
+python:
+- 3.4
+
+addons:
+  postgresql: "9.4"
+  apt:
+    packages:
+    - postgresql-9.4-postgis-2.3
+
+env:
+  global:
+  - TRAVIS_NODE_VERSION="8"
+  - secure: QvRpzMEdKIBuhWmydP3qnWVJXeWVGp+KhNEg6OLf/qIdqgpZLOZNZmgoGYneziY8DL+Z5+RY47BqlFH1TeHLwIFQrnRt9KN4RlBP3PEjXMQfZwNQDYt58vPVwQZzMRu55MgDDSV6gBWwTI2htK1YMKUc4LEpSXGZey4SmsQezPI4zjiXsQhckeAGDZg1W84/Ee5u/f/PRmBgo2xMlSasuDf7i1UcZErswaGgL2QRLVHDmuaIcX/n+qBUgiqMqjp7ksxlaFdziECRRbQqYcaZAqI3Rpvagod3MXDSbA9MbfwtN88NttRI511i9cZ9ygZj01OJK3DKa7rIFj859U8cQx2g+qS3Ajs3A5S/ImjDCqYWDcNCMdoQHjlCEJDXm1UIQJZLXW1YL0srliSeXDGGxjQITFL+xI82/2BetCM5xIyhSGzbFALi4GgTQ7MN3OQyWqXW6FdcGudWReo4JDoH9cY1s0r6GLzgi5QdiFVX/QuHiOaRlzSYo+sgAcCfmmgoB/iBFta7HDznk2K/29YIx4UT12JlrnJ+wlp/wnqBCSdpGmhPRFtNouOXCMyMXj2swW/aF3rhbSPi0I5VsWHWJ1ruK1pXX4BX/I5dZ8RfQBVdByKpbH9NZ9jbAOHjY2DCMIrlw6NQ/t/97G0vIBqT4AL1CwSxx7r88ntreVLjDDM=
+  - secure: RFEFvz03h0I8HSs+NSfVYN0zhMBeU4JDv5NXP8m65+ECHmnvEaIFprCyegdAFKlOIigwiZ9wMYmPFYS+BDJg2vmLJZAPMtA4iza1tVVZIU1y6/GjSQy0yTwjPIJSotmiDzZ1y7Z/5rregMTy3+GVFSPPfxMikf7qPqgcmAEFJJIUkVCHy1IvwPDf9alEJJFDin4ncbg/DFMMED/6GWVuwPqmaPRkjKkxNwpztQLVtKLRaDEbjEP65Vxwvv8Dh+kihPaDzPjt69cRh+LDPslRdfYiG8/Z/JTz1PcMqwB04zy4hLuJbmmU0VJzRMYUs6bomS6Mx5T18oZQ55Y4QL+BfmdvphFskBrC3NQLE74uKZe0S2BSLFqgUld44ModD4ifuEfxKCZTkEC70QTWc8RqqYRkig1uN1gPjtkymeCvqda/Pf+uKERxls/919DlrmpuoLo3ky95XHJ889fMWtb1kbNe1pSiu9yH6bZ5QxCJje/HYBo+zGuPNln+VxlcbWY2bTPLmnflCbaIKprP+sEoRFctmzeXwydTkVHZ04fWytV+OIV/2USn41HtHugMnh6B2QhuSLrREdLFnQflQSJEpSGmqxIBeLE8RfzOqSqD9HwdVGwPzFIegR93SMb9BPCAEaVxovmDXF124/ZnG891hCvEJXC8lUcbpqqIk2jSHyU=
+  - secure: blNrCOf9tNUqKGPsbU/pLyJMayitKvmA6IeQZb5shiRlNtm6FcThnprODxT1poGh5ANur3fJlvnZEbRuCnjk79t8A2FpKfuEl7a8ziiwGqufONS17J4dmbuY6bG5TVJQJ6U+U19HmHyV+nGUxynKHregMDUS39kBjyWfMfB0YzH1ft+NI4ZgPLrIi6Xn+OqNnHtzWcMX+pCSLkf/D6SO15hZCTT6ybyIAhBKGqbsOpB3zpw7fiqt1VA0kISIc3kONqCQmBCrPDx2d0w+fy779EFoQgmQhkNJRFs2QsxTMYbdlWNZBOfjn8GHhIeDsQrn713UftQxARp7bBp/RKPvBvi30bE+5JF/9xqmSWOKUeIY+orD8yMrUVIQx1Gu2axMgbC1nmBMIkSI0hzKe55ygcXfPDjR/roSez0O8kEBEx3qOKf5gPczgI3lEMA4lJ20Hvr3/qfFr64HRh2vXe17W/QF/2r5EkK8fH/TZZdR6dH0ghdz7UTcNFEB4ltTBoFNIBG0GZTzDWA81vUUK4JXawuFiTtIjOys2WN2kWsBl97PkwIv+/Ru9gi5vrGE6zNhmrzbp9FK9iA3yqPxc5a+pRG6HkXa+gd+HNZXr+Pc6LymI3RJlwusM6BrvZMkOyj/V5undh3NmhEEEreVWz4BrvoLSucGhbrMgEHAv29H0/o=
+  - secure: C1RE1sl855jE+MI68J1E8lNzAfhj64Es1+NRgCcEn0L3Qil3iDD6XhXjrEzIAZNHZOC8LR9U/uIhxK1VJoeLAQzH/7FxTLFQNxE3wmkBSI44JP2lpV48nTgKa+cNIBnf+VOiwbfngPHSyAFiGa/KLnmylJYCKWFRuEqM06lMqq0s4enDFCZUVLuIQX/B1VrIoCjEbzHA9CDLMeaisly4ufb90fDorWAZlNeSChvkDigPFDE+9gnEPyyeliENQPmsjSE2efV9e3alDWUhB9Wxy9hHamD6uVEyINjDYRpnNXTYmycQaKHF3QWMoyVJlqJGFte0dVFExRw4yASwul5AO9G9l/4peO+u3oMw2yTrdBBJVH+Dacrr2zhuFq2+iKrWeVbWmuC4ffTdsYqBqAXtHCp7BbMEz6YJwb36g/TiPfm2mQwRwWst/YnPQ5LglH/PEKIVZ1vhnOOXLDG3TkcMj5Q/pQR880Wu0/J+L/R4LPEN2BXyaOmfHqYWng0Zz6SYkoj51SiE7CJ6Cvh9ieTTaomINFDIoQPB0YD79Y896a7UmG/PIgWgDacmsXT+tO38PZTmID9sJVRqAoVTwvKsGdHjtObPdpCLe32BSSLZU3HRBm2rm/mXJlqDhH36ij5t3qB7uC9rgeTPPBgD/k2VkAOrElPAUQkRVhH+LWaliqs=
+
+# TX_PASS is the Transifex password encrypted using ``travis encrypt``
+# See https://docs.travis-ci.com/user/encryption-keys/#Usage
+before_install:
+- |
+  if [ "${TX_PASS}" != "" ]
+  then
+  echo "[https://www.transifex.com]" >> ~/.transifexrc
+  echo "hostname = https://www.transifex.com" >> ~/.transifexrc
+  echo "username = c2corg" >> ~/.transifexrc
+  echo "password = ${TX_PASS}" >> ~/.transifexrc
+  echo "token =" >> ~/.transifexrc
+  fi
+
+install:
+- jdk_switcher use openjdk8
+- java -version
+- rm -rf ~/.nvm && git clone https://github.com/creationix/nvm.git ~/.nvm && (cd ~/.nvm && git checkout `git describe --abbrev=0 --tags`) && source ~/.nvm/nvm.sh && nvm install $TRAVIS_NODE_VERSION
+- npm -version
+- make -f config/travis .build/dev-requirements.timestamp
+- make -f config/travis install
+
+before_script:
+- scripts/travis-api-server.sh
+
+script:
+- make -f config/travis check
+
+after_failure:
+  cat v6_api/nohup.out
+
+after_success:
+- |
+  make transifex-send
+  make cleanall publish
+
+notifications:
+  email: false

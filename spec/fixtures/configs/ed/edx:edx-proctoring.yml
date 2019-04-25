@@ -1,0 +1,38 @@
+language: python
+cache: pip
+python:
+- 2.7
+env:
+- DJANGO_SETTINGS_MODULE=test_settings
+before_install:
+- export DISPLAY=:99.0
+- sh -e /etc/init.d/xvfb start
+- pip install --upgrade pip
+install:
+- pip install setuptools>=32.3.1  # need newer version than Travis default
+- make install
+before_script:
+- npm install -g gulp-cli
+script:
+- make validate_translations
+- make test-all
+- make test-js
+- make lint-js
+after_success:
+- coverage xml
+- bash <(curl -s https://codecov.io/bash) -cF python -f coverage.xml
+- bash <(curl -s https://codecov.io/bash) -cF javascript -f build/coverage-js/coverage.xml
+deploy:
+- provider: pypi
+  user: edx
+  distributions: sdist bdist_wheel
+  on:
+    tags: true
+  password:
+    secure: Xx0ya0JKOzPEX5fL389UQxiSnu46D/tVWwdgKXGT+g9GceQsxUWyshqC8uPF1KgKQfMynmC4C/XQOktfQj4LEv2EQPfnYP7Aog+swxS23jHevQYC7H0mlc5pyzTqfGbb5nr1gVtq2pjfsvC2RSgrZGigpCympyD1qKb6HBb3xcCpaUpLBMJFO+uUCIKYe6zJ0zxykW1Z66qE7igNyfvDqMbB/Sn6VO9PBrQOnTNnl4JyLer6gN+nztJTvpgwcKT7jUjtJtBDoTqj9ia/jJLGhAYNppCdLwmjNU1aN+e6X7J0HXBizOgqL7skWYAR1ygXwv027ZC3LJjiC6Ovww0rRzJdWe/OMJu5RzTYvXjgyBdjMdk3lYw5LaNoRuLfWkntV8ORYULsjl/g1RUJrXQ5u1KxeVPM9Fwb5toH1OmAMbuTpAmbYK8itWdU0TGiDsgLQABeNeW57DQIqE04YVG+kK1zg3OV7W6CgEVKXWciOugWJSdTtyoI5RBOuW1altKapee2/xwd49X5F5eac1AKsRc3U5DNxc0DCLR3NRmrHVBOD+yfI0F42MwngK9tbevDyZ9t1tf04ysu6hvzwES5goVp+85hHIyf+NIiKQpQQbKYWwIGcQuGlo7vHyOs9LJ5qHXQSzFZu8+l9qn3cCEd/cY7geh15yKOSVzv0J7yb84=
+- provider: npm
+  email: oscm@edx.org
+  api_key:
+    secure: Bs6z6iFpO86mav8qo3cDhcjDckNXDGfcbuZtSWbbrIFe9Q0VSVz046s9Yo7hHjjaRUSb6frlTC8lYRNDZ2m7TxXrh4vXHrHsr9ajcJXUZJCwqnnxIEFeHe02hD/7RPJ3xK7tkGCxd/2AUHEHXYylGOePDc/Ck/2VYmGQ0EijcfZeOJ5macZ65TP0Kwvf+IDOko++W94f3Ujglu+lWryBTR61Yaf7zt7fKQVgjxGQjb07F1ze39A00xkYYYbIDSrzjZeebs/pzCjZhrrkzTwReDItTxk9K7cEx5nlRvQul6Wj5USe1uBL5SodP2XCp3mi7XrB/LOt6kDEcdREUzqZUqB5n21VVey0JWihd579PIHFhTXDQpdSJNhOi86Mv8lj3v/XUTRaZBV+2OPVGKSRgmJ0Qv7BkQXOp8tzSN4AINrYD2bMod3jVaGcjg7MYUpJ7B2swWUSa0aLLUe1M2RYzfQ2CiGeN9jCdz8jmQie+HGc5CkaMFtoT1OUt1R7wuO2RNo8pYrP0KJTWpOCHlGn+5r17iDOPXoc/m6a5wN3sxMrARqF5A/PRv3uY/Nb+4bfTeczDZudpxVxGFxe85rahXjh7tSHX5JOiaOXDO9xWj2EBRKKeD4xbgRSBZvjnRrZ0f9ygZjuzFv86KixwYI3HFo21SJQmIaJIUSOoM+r1lQ=
+  on:
+    tags: true

@@ -1,0 +1,125 @@
+sudo: required
+language: node_js
+node_js: "8"
+
+jobs:
+  include:
+    - cache:
+      directories:
+      - node_modules
+      - release-builds
+      - $HOME/.cache/electron
+      - $HOME/.cache/electron-builder
+    - stage: Lint
+      script: npm run lint
+    - stage: Audit
+      script: npm audit --production
+    - stage: Test
+    - stage: Coverage
+      script: npm run coverage && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage
+
+    - stage: Release desktop application
+      env:
+        - ELECTRON_CACHE=$HOME/.cache/electron
+        - ELECTRON_BUILDER_CACHE=$HOME/.cache/electron-builder
+
+      before_cache:
+        - rm -rf $HOME/.cache/electron-builder/wine
+      script:
+        - |
+          if [ "$TRAVIS_OS_NAME" == "linux" ]; then
+            docker run --rm \
+              --env-file <(env | grep -vE '\r|\n' | grep -iE 'DEBUG|NODE_|ELECTRON_|YARN_|NPM_|CI|CIRCLE|TRAVIS|APPVEYOR_|CSC_|_TOKEN|_KEY|AWS_|STRIP|BUILD_') \
+              -v ${PWD}:/project \
+              -v ~/.cache/electron:/root/.cache/electron \
+              -v ~/.cache/electron-builder:/root/.cache/electron-builder \
+              electronuserland/builder:wine \
+              /bin/bash -c "yarn --link-duplicates --pure-lockfile && yarn dist -mwl"
+          else
+            :
+          fi
+      deploy:
+        provider: releases
+        api_key: $GH_TOKEN
+        file_glob: true
+        file: release-builds/*
+        skip_cleanup: true
+        overwrite: true
+        on:
+          tags: true
+
+    - stage: Build and push image
+      services:
+        - docker
+      install: skip
+      before_script:
+        - docker build -t tomochain/tomomaster .
+      script:
+        - echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin
+        - docker tag tomochain/tomomaster tomochain/tomomaster:latest
+        - docker push tomochain/tomomaster:latest
+        - docker tag tomochain/tomomaster tomochain/tomomaster:$TRAVIS_BUILD_ID
+        - docker push tomochain/tomomaster:$TRAVIS_BUILD_ID
+
+    - stage: Build and push image (tagged)
+      services:
+        - docker
+      install: skip
+      before_script:
+        - docker build -t tomochain/tomomaster .
+      script:
+        - echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin
+        - docker tag tomochain/tomomaster tomochain/tomomaster:latest
+        - docker push tomochain/tomomaster:latest
+        - docker tag tomochain/tomomaster tomochain/tomomaster:testnet
+        - docker push tomochain/tomomaster:testnet
+        - docker tag tomochain/tomomaster tomochain/tomomaster:$TRAVIS_TAG
+        - docker push tomochain/tomomaster:$TRAVIS_TAG
+
+    - stage: Deploy in devnet
+      install: skip
+      before_script:
+        - openssl aes-256-cbc -K $encrypted_b0062b888c67_key -iv $encrypted_b0062b888c67_iv -in travis.pem.enc -out travis.pem -d
+        - eval "$(ssh-agent -s)"
+        - chmod 600 ./travis.pem
+        - echo -e "Host $DEVNET_SSH_IP\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
+        - ssh-add ./travis.pem
+      script:
+        - ssh -i ./travis.pem -l $DEVNET_SSH_USER $DEVNET_SSH_IP docker service update --image tomochain/tomomaster:latest devnet-main_tomomaster 1> /dev/null
+        - ssh -i ./travis.pem -l $DEVNET_SSH_USER $DEVNET_SSH_IP docker service update --image tomochain/tomomaster:latest devnet-main_tomomaster_crawler 1> /dev/null
+      after_success:
+        -  'curl -X POST --data-urlencode "payload={\"channel\": \"#deployments\", \"username\": \"Travis\", \"attachments\":[{\"fallback\":\"[testnet] Deployment succeeded\",\"pretext\":\"\",\"color\":\"good\",\"fields\":[{\"title\":\"[devnet] TomoMaster\",\"value\":\"Deployment succeeded.\",\"short\":true}]}], \"icon_emoji\": \":male-construction-worker:\"}" $SLACK_DEPLOY_URL'
+      after_failure:
+        -  'curl -X POST --data-urlencode "payload={\"channel\": \"#deployments\", \"username\": \"Travis\", \"attachments\":[{\"fallback\":\"[devnet] Deployment failed\",\"pretext\":\"\",\"color\":\"danger\",\"fields\":[{\"title\":\"[devnet] TomoMaster\",\"value\":\"Deployment failed.\",\"short\":false}]}], \"icon_emoji\": \":male-construction-worker:\"}" $SLACK_DEPLOY_URL'
+
+    - stage: Deploy in testnet
+      install: skip
+      before_script:
+        - openssl aes-256-cbc -K $encrypted_b0062b888c67_key -iv $encrypted_b0062b888c67_iv -in travis.pem.enc -out travis.pem -d
+        - eval "$(ssh-agent -s)"
+        - chmod 600 ./travis.pem
+        - echo -e "Host $TESTNET_SSH_IP\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
+        - ssh-add ./travis.pem
+      script:
+        - ssh -i ./travis.pem -l $TESTNET_SSH_USER $TESTNET_SSH_IP docker service update --image tomochain/tomomaster:testnet testnet_tomomaster 1> /dev/null
+        - ssh -i ./travis.pem -l $TESTNET_SSH_USER $TESTNET_SSH_IP docker service update --image tomochain/tomomaster:testnet testnet_tomomaster_crawler 1> /dev/null
+      after_success:
+        -  'curl -X POST --data-urlencode "payload={\"channel\": \"#deployments\", \"username\": \"Travis\", \"attachments\":[{\"fallback\":\"[testnet] Deployment succeeded\",\"pretext\":\"\",\"color\":\"good\",\"fields\":[{\"title\":\"[testnet] TomoMaster\",\"value\":\"Deployment succeeded.\",\"short\":true}]}], \"icon_emoji\": \":male-construction-worker:\"}" $SLACK_DEPLOY_URL'
+      after_failure:
+        -  'curl -X POST --data-urlencode "payload={\"channel\": \"#deployments\", \"username\": \"Travis\", \"attachments\":[{\"fallback\":\"[testnet] Deployment failed\",\"pretext\":\"\",\"color\":\"danger\",\"fields\":[{\"title\":\"[testnet] TomoMaster\",\"value\":\"Deployment failed.\",\"short\":false}]}], \"icon_emoji\": \":male-construction-worker:\"}" $SLACK_DEPLOY_URL'
+
+stages:
+  - name: Lint
+  - name: Audit
+  - name: Test
+  - name: Coverage
+  - name: Build and push image
+    if: type != pull_request AND branch = master AND tag IS blank AND repo = tomochain/tomomaster
+  - name: Build and push image (tagged)
+    if: type != pull_request AND branch =~ ^v AND tag IS present AND repo = tomochain/tomomaster
+  - name: Release desktop application
+    if: type != pull_request AND branch =~ ^v AND tag IS present AND repo = tomochain/tomomaster
+  - name: Deploy in devnet
+    if: type != pull_request AND branch = master AND repo = tomochain/tomomaster
+  - name: Deploy in testnet
+    if: type != pull_request AND branch =~ ^v AND tag IS present AND repo = tomochain/tomomaster

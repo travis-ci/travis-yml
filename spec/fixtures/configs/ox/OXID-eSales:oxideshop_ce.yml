@@ -1,0 +1,66 @@
+language: php
+
+dist: precise
+
+notifications:
+  email: false
+
+php:
+  - "7.0"
+  - "7.1"
+
+matrix:
+  fast_finish: true
+
+# Numeric values of error reporting levels:
+# 32767: E_ALL
+# 30711: E_ALL & ~E_NOTICE & ~E_STRICT
+# 24575: E_ALL & ~E_DEPRECATED
+# 24567: E_ALL & ~E_DEPRECATED & ~E_NOTICE
+# 22527: E_ALL & ~E_DEPRECATED & ~E_STRICT
+# 22519: E_ALL & ~E_DEPRECATED & ~E_NOTICE & ~E_STRICT
+#
+# Keep TRAVIS_ERROR_LEVEL in sync with the value in vendor/oxid-esales/testing-library/base.php
+#
+env: TRAVIS_ERROR_LEVEL=32767 OX_BASE_PATH="$TRAVIS_BUILD_DIR/source/" OXID_ESHOP_CS_THRESHOLD=14
+
+services: mysql
+
+before_install:
+  - echo 'Europe/Berlin' | sudo tee /etc/timezone
+  - sudo dpkg-reconfigure --frontend noninteractive tzdata
+  - sudo apt-get update
+
+before_script:
+  # apache setup (http://docs.travis-ci.com/user/languages/php/#Apache-%2B-PHP)
+  - sudo apt-get install apache2 libapache2-mod-fastcgi
+  # enable php-fpm
+  - cp ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf.default ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf
+  - if [[ $(phpenv version-name) = 7.* ]]; then cp ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.d/www.conf.default ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.d/www.conf; fi;
+  - sudo a2enmod rewrite actions fastcgi alias
+  - echo "cgi.fix_pathinfo = 1" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
+  - ~/.phpenv/versions/$(phpenv version-name)/sbin/php-fpm
+  - phpenv config-rm xdebug.ini
+  # configure apache virtual host
+  - echo "$(curl -fsSL https://gist.githubusercontent.com/adriankirchner/197e3d13ccfb680f8942/raw/5b36cd3740cc05adb1c9d5c0568c851dd7700dcc/gistfile1.apacheconf)" | sudo tee /etc/apache2/sites-available/default > /dev/null
+  - sudo sed -e "s|%TRAVIS_BUILD_DIR%|$(pwd)/source|g" --in-place /etc/apache2/sites-available/default
+  - sudo service apache2 restart
+
+  # database setup
+  - sudo sed -e 's|utf8_unicode_ci|latin1_general_ci|g; s|utf8|latin1|g' --in-place /etc/mysql/my.cnf
+  - sudo service mysql restart
+
+  # replace configuration values in config.inc.php
+  - cp source/config.inc.php.dist source/config.inc.php
+  - sed -i 's|<dbHost>|localhost|; s|<dbName>|oxideshop|; s|<dbUser>|root|; s|<dbPwd>||; s|<sShopURL>|http://localhost|; s|<sShopDir>|'$TRAVIS_BUILD_DIR'/source|; s|<sCompileDir>|'$TRAVIS_BUILD_DIR'/source/tmp|; s|$this->iDebug = 0|$this->iDebug = 1|' source/config.inc.php
+  - sed -i "s|\$this->edition = ''|\$this->edition = 'CE'|" source/config.inc.php
+
+  # set permissions to log directory
+  - chmod -R 777 "${TRAVIS_BUILD_DIR}/source/log"
+
+  # composer initiation
+  - SHOP_PATH='source' SHOP_TESTS_PATH='tests' MODULES_PATH='' composer install
+
+script:
+  - vendor/bin/oe-eshop-phpcs_with_thresholds
+  - vendor/bin/runtests

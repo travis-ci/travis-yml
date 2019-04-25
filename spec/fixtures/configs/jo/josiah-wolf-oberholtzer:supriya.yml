@@ -1,0 +1,50 @@
+language: python
+
+sudo: required
+
+cache:
+  directories:
+  - $HOME/.ccache
+  - $HOME/.cache/pip
+
+python:
+  - 3.6
+
+env:
+  global:
+    AUDIODEV=null
+    CC=gcc
+    CXX=g++
+    MYPYPATH=/tmp/typehints
+    PATH=/usr/lib/ccache:$PATH
+
+before_install:
+- pip install --target /tmp/typehints --no-deps uqbar>=0.2.15
+- sudo make -C .travis/ install-scsynth-deps
+- sudo make -C .travis/ install-scsynth
+- scsynth -v
+- sudo usermod -a -G audio travis
+- sudo make -C .travis/ prep-dummy-soundcard
+- ls -l /home/travis/.local/share/
+
+install:
+- pip install -e .
+- python -c "import supriya"
+- pip install -e .[accelerated,ipython,midi,test,wave]
+
+before_script:
+- sudo -E su $USER -c "jackd -r -ddummy -r44100 -p1024" &
+- sleep 5 # give jackd time to start
+- sudo -E su $USER -c "scsynth -D 0 -H dummy -R 0 -u 57110" &
+- sleep 5 # give jackd time to start
+- killall scsynth
+
+script:
+- make black-check
+- make flake8
+- make mypy
+- sudo -E su $USER -c "source $VIRTUAL_ENV/bin/activate; make -C .travis/ sanity-check"
+- sudo -E su $USER -c "source $VIRTUAL_ENV/bin/activate; make -C .travis/ pytest"
+
+notifications:
+  email: false

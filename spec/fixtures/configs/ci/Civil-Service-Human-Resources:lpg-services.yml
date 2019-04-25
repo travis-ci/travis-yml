@@ -1,0 +1,24 @@
+sudo: required
+dist: trusty
+
+language: node_js
+node_js:
+  - "9"
+
+services:
+  - docker
+
+addons:
+  chrome: stable
+
+cache:
+  directories:
+    - node_modules
+    - pyhome
+    - test/webdriver/node_modules
+
+env:
+  - ENV_PROFILE=dev2
+
+install: true
+script: ./environ/ci

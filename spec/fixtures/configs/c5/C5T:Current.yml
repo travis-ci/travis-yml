@@ -1,0 +1,144 @@
+language: cpp
+
+install:
+  # Ensure modern `node` and `npm` versions, otherwise Travis gives us `node v0.10.36` with `npm 1.4.28`.
+  # http://austinpray.com/ops/2015/09/20/change-travis-node-version.html
+  # https://stackoverflow.com/a/34384262/1346510
+  - export TRAVIS_NODE_VERSION="4"
+  - rm -rf ~/.nvm && git clone https://github.com/creationix/nvm.git ~/.nvm && (cd ~/.nvm && git checkout `git describe --abbrev=0 --tags`) && source ~/.nvm/nvm.sh && nvm install $TRAVIS_NODE_VERSION
+  - if [[ `npm -v` != 3* ]]; then npm i -g npm@3; fi
+
+# NOTE: In the `matrix` below, `${compiler} --version` is the command executed by Travis CI in 'language: cpp' mode.
+# https://github.com/travis-ci/travis-build/blob/8067d586b03d5cde21b034e6fbcfa561f5c66748/lib/travis/build/script/cpp.rb#L20
+
+matrix:
+  include:
+    - script: make individual_tests
+      env:
+      - NDEBUG=0
+      - CPLUSPLUS=g++-5
+      compiler: "g++-5, Job: make individual_tests"
+      os: linux
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-5
+            - nasm
+            - gnuplot
+
+    - script: make individual_tests
+      env:
+      - NDEBUG=0
+      - CPLUSPLUS=clang++-6.0
+      compiler: "clang++-6.0, Job: make individual_tests"
+      os: linux
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test  # `apt-get` on Travis fails to install `clang-3.6 gnuplot` w/o this.
+            - llvm-toolchain-trusty-6.0
+          packages:
+            - g++-5  # To install the dreaded `#include <codecvt>`.
+            - clang-6.0
+            - libstdc++-7-dev
+            - nasm
+            - gnuplot
+
+    - script: make individual_tests
+      env:
+      - NDEBUG=1
+      - CPLUSPLUS=g++-5
+      compiler: "g++-5, Job: make individual_tests"
+      os: linux
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-5
+            - nasm
+            - gnuplot
+
+    - script: make individual_tests
+      env:
+      - NDEBUG=1
+      - CPLUSPLUS=clang++-6.0
+      compiler: "clang++-6.0, Job: make individual_tests"
+      os: linux
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test  # `apt-get` on Travis fails to install `clang-3.6 gnuplot` w/o this.
+            - llvm-toolchain-trusty-6.0
+          packages:
+            - g++-5  # To install the dreaded `#include <codecvt>`.
+            - clang-6.0
+            - libstdc++-7-dev
+            - nasm
+            - gnuplot
+
+    - script:
+      - brew update
+      - brew install nasm
+      - brew install gnuplot
+      - clang++ -v
+      - clang++ --version
+      - make individual_tests
+      env:
+      - NDEBUG=0
+      compiler: "native clang++, Job: make individual_tests"
+      os: osx
+
+    - script:
+      - brew update
+      - brew install nasm
+      - brew install gnuplot
+      - clang++ -v
+      - clang++ --version
+      - make individual_tests
+      env:
+      - NDEBUG=1
+      compiler: "native clang++, Job: make individual_tests"
+      os: osx
+
+    - script:
+      - mkdir local_bin
+      - ln -sf $(which g++-5) local_bin/g++
+      - ln -sf $(which clang++-6.0) local_bin/clang++
+      - export PATH=$PWD/local_bin:$PATH
+      - make check
+      env:
+      - MAKE_CHECK=1
+      compiler: "g++-5 && clang++-6.0, Job: make check"
+      os: linux
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-trusty-6.0
+          packages:
+            - g++-5
+            - clang-6.0
+            - libstdc++-7-dev
+            - nasm
+
+    - script:
+      - brew update
+      - brew install nasm
+      - make check
+      env:
+      - MAKE_CHECK=1
+      compiler: "native clang++, Job: make check"
+      os: osx
+
+    - script:
+      - make typesystem_schema_typescript_tests
+      compiler: "# TypeScript"
+      env:
+      - TEST_SCHEMA_COMPILATION=1
+      os: linux
+
+notifications:
+  slack: currentio:e74oLGvcTRa0yJWg5Q6JjzCk

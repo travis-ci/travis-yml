@@ -1,0 +1,18 @@
+dist: trusty
+language: ruby
+sudo: required
+services:
+- docker
+script: |
+  .travis.d/build.sh &&
+  cd .travis.d && bundle install --path vendor/bundle &&
+  bundle exec ruby pr_autodeploy.rb
+env:
+  global:
+  - HACKGPROJECT_REV="a4089e26eea6f51517a0e00330e1296bb05cfef4"
+  - DOCKER_ID_USER="hackgt"
+notifications:
+  slack:
+    secure: pjf6fz9v2uA9HZwSrdnZLQjnmwW3uiVHP6aviKzqmmAMslm9Zx+gUH9S4f3S3pK099neKXvJeoVZXLHUeXAxsoZVsPPvAEIO8U4FzVx1ZiU1FCjaXXM56n3Iw1UmPXx52FcG2Yh+KDgcdLTYoBNidWaC80dqEIi+HbZ0XJQg1RLEKm+c0TLpP6JfLQsfNlS768jBnyOoo0/qyCQzc/w/Xbmm+Zb2fxxC50AncjNDqK1okYXxMKMlHmWhNAx3J+3dB89OdV6vWLYibCCdOc/eQV73qtgpF02tt1TeYtIeapFegdPlzg5hHwQ347OujnzKcdbUsCgEVK+AzhBvdu1DP+UPPD2TFyptD+snCjdDVytbPIv+OgXjC9x4h8mrA7Q6N+OZMd7bVOV6jiHmcabYd47hrr3Peg8D56LcQ+YzkdWIbzEjoqFT1NJ+wIK5cv+a9QEVW1e0DK5EsRTkC5N/cZdyZvoFp3ob0js8ak8r6GnWLcN20rz9VsVICrbonZ60puFCjw9r1PGpP6GwccJMarhzIxQ+OxAsiQb00pNE+VMhM/6MGiwNxGRtDHmkC6eNv/AZDt7jYtrXnPnXyPJAUa0NDydZTVXJpdICW703U5BfX3fZTqQs7iD9jEDlJ4lL4up7F7Uq2B4q9gJ6dr9LLVkZb6w+kh5eHJWjvTBPtNY=
+    on_success: change
+    on_failure: always

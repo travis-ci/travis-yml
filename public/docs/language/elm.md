@@ -2,12 +2,9 @@
 
 
 
-## Type
+## Types
 
-Map (Hash)
+* Hash
 
-## Flags
-
-None.
 
 

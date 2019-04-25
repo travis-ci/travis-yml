@@ -1,0 +1,59 @@
+---  # used to build olbat.github.io
+language: ruby
+rvm: 2.5
+cache: bundler # see https://docs.travis-ci.com/user/caching/
+
+services:
+- docker
+
+env:
+  global:
+  - JEKYLL_ENV=production
+
+jobs:
+  include:
+  - stage: prepare
+    # trigger repository mirroring on GitLab
+    # FIXME: should be done by GitHub Webhooks (that are not generic enough ATM)
+    script: |
+      curl --request POST \
+        --header "Private-Token: ${GITLAB_TOKEN}" \
+        "https://gitlab.com/api/v4/projects/olbat%2Folbat.gitlab.io/mirror/pull"
+
+  # build and test the website
+  - stage: test
+    before_install: &dependencies
+    # imagemagick, libcairo2-dev and libjpeg-dev are installed by default
+    - sudo apt-get update && sudo apt-get install -y ghostscript
+    - nvm install stable && nvm use stable
+    - npm install uncss uglify-js fa-minify trianglify
+    - export PATH=$(npm bin):$PATH
+    script:
+    - bundle exec rake -t build
+    - bundle exec rake -t test EXT=0
+
+  # deploy the website on GitHub Pages
+  - stage: deploy
+    if: branch = source
+    before_install: *dependencies
+    script:
+    - bundle exec rake -t build
+    # generate a custom -empty- 404 page
+    - touch _site/404.html
+    - find _site  # for debugging purpose
+    deploy:
+      provider: pages
+      skip_cleanup: true
+      github_token: $GITHUB_TOKEN
+      target_branch: master
+      local_dir: _site/
+      on:
+        branch: source
+      # Done by GitLab CI
+      #after_deploy: | # flush Cloudflare's cache
+      #  curl --fail --request DELETE \
+      #    --header "X-Auth-Email: ${CLOUDFLARE_USER}" \
+      #    --header "X-Auth-Key: ${CLOUDFLARE_TOKEN}" \
+      #    --header "Content-Type: application/json" \
+      #    --data '{"purge_everything":true}' \
+      #    "https://api.cloudflare.com/client/v4/zones/${CLOUDFLARE_ZONEID}/purge_cache"

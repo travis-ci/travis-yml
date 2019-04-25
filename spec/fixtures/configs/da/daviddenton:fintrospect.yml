@@ -1,0 +1,10 @@
+language: scala
+scala:
+    - 2.12.1
+script:
+    - ./buildWithCoverage.sh
+    - sbt coveralls
+jdk:
+  - oraclejdk8
+after_success:
+  - bash <(curl -s https://codecov.io/bash)

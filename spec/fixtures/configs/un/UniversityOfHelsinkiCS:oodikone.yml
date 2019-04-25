@@ -1,0 +1,48 @@
+language: node_js
+
+node_js:
+  # Node 10.3+ includes npm@6 which has good "npm ci" command
+  - 10.8
+
+cache:
+  # cache both npm modules and Cypress binary
+  directories:
+    - ~/.npm
+    - ~/.cache
+  override:
+    - npm ci
+
+services:
+  - docker
+
+matrix:
+  - fast_finish
+
+env:
+  - SERVICE=oodikone2-frontend
+  - SERVICE=oodikone2-backend
+  - SERVICE=oodikone2-userservice
+  - SERVICE=oodikone2-usageservice
+  - SERVICE=oodikone2-analytics
+
+script:
+  - cd services/${SERVICE}
+  - if [[ $TRAVIS_BRANCH =~ (^master) ]]; then docker build --build-arg BASE_PATH=/staging/ -t toska/${SERVICE}:staging .; fi
+  - if [[ $TRAVIS_BRANCH =~ (^master) ]]; then docker login -u $DOCKER_USER -p $DOCKER_PASS; fi
+  - if [[ $TRAVIS_BRANCH =~ (^master) ]]; then docker push toska/${SERVICE}:staging; fi
+  - if [[ $TRAVIS_TAG =~ ([0-1].+) ]]; then docker build --build-arg BASE_PATH=/ -t toska/${SERVICE}:latest .; fi
+  - if [[ $TRAVIS_TAG =~ ([0-1].+) ]]; then docker login -u $DOCKER_USER -p $DOCKER_PASS; fi
+  - if [[ $TRAVIS_TAG =~ ([0-1].+) ]]; then docker push toska/${SERVICE}:latest; fi
+
+jobs:
+  include:
+    - stage: test & release
+      if: branch = master
+      script:
+        - docker login -u $DOCKER_USER -p $DOCKER_PASS
+        - source scripts.sh && run_e2e_setup
+        - docker ps
+        - cat nginx/log
+        - until $(curl --output /dev/null --silent --fail http://localhost:1337/staging/); do printf '.'; sleep 5; done
+        - CYPRESS_baseUrl=http://localhost:1337/staging/ npm run cypress:record
+        - "curl --fail -k -X POST -H \"Authorization: token ${TRAVIS_ACCESS_TOKEN}\" https://toska.cs.helsinki.fi/toskawatch/release/"

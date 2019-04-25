@@ -1,0 +1,16 @@
+language: python
+python:
+  - "2.7"
+env: PGVERSION=9.2
+dist: trusty
+sudo: required
+cache: pip
+before_install:
+ - chmod +x ./bin/travis-build.bash
+ - chmod +x ./bin/travis-run.sh
+install: ./bin/travis-build.bash
+script:
+ - ./bin/travis-run.sh
+ - pycodestyle --count ./ckanext/querytool
+after_success:
+ - coveralls

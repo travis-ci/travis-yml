@@ -1,0 +1,32 @@
+sudo: enabled
+language: generic
+
+addons:
+  apt:
+    packages:
+    - libgmp-dev
+  postgresql: "9.6"
+
+services:
+- mongodb
+- mysql
+- redis-server
+
+matrix:
+  include:
+  - env: ARGS="--resolver lts-9  --stack-yaml stack_lts-10.yaml"
+  - env: ARGS="--resolver lts-11 --stack-yaml stack_lts-12.yaml"
+  - env: ARGS="--resolver lts-12 --stack-yaml stack_lts-12.yaml"
+  - env: ARGS="--resolver lts-13"
+
+before_install:
+# Download and unpack the stack executable
+- mkdir -p ~/.local/bin
+- export PATH=$HOME/.local/bin:$PATH
+- travis_retry curl -L https://www.stackage.org/stack/linux-x86_64 | tar xz --wildcards --strip-components=1 -C ~/.local/bin '*/stack'
+
+script: travis/run.sh
+
+cache:
+  directories:
+  - $HOME/.stack

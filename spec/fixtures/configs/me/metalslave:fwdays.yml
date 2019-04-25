@@ -1,0 +1,38 @@
+language: php
+
+php:
+    - 5.4
+
+before_install:
+    - sudo apt-get update > /dev/null
+
+before_script:
+    - wget https://files-cdn.liferay.com/mirrors/geolite.maxmind.com/download/geoip/database/GeoLiteCity.dat.xz -O geodata/GeoLiteCity.dat.xz
+    - unxz geodata/GeoLiteCity.dat.xz
+    - printf "\n" | pecl install imagick
+    - echo '' > ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/xdebug.ini
+    - echo "memory_limit=4096M" >> ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/travis.ini
+    - export ADDITIONAL_PATH=`php -i | grep -F --color=never 'Scan this dir for additional .ini files'`
+    - export MINK_EXTENSION_PARAMS='base_url=http://localhost:8000/app_test.php'
+    - ls -l ~/.phpenv/bin
+    - php -i
+    - composer self-update
+    - mysql -u root -e "CREATE DATABASE IF NOT EXISTS fwdays_com_development CHARACTER SET utf8 COLLATE utf8_general_ci;"
+    - mysql -u root -e "CREATE DATABASE IF NOT EXISTS fwdays_com_testing CHARACTER SET utf8 COLLATE utf8_general_ci;"
+    - composer install --prefer-source --no-interaction
+    - app/console doctrine:mi:mi --no-interaction --env=test
+    - app/console doctrine:fixtures:load --no-interaction --env=test
+    - app/console cache:warmup --env=test > /dev/null
+    - sh -e /etc/init.d/xvfb start
+    - export DISPLAY=:99
+    - curl http://selenium-release.storage.googleapis.com/2.41/selenium-server-standalone-2.41.0.jar > selenium.jar
+    - java -jar selenium.jar > /dev/null &
+    - sleep 5
+
+script:
+    - bin/phpunit -c app/
+#    - bin/run-all-features
+
+notifications:
+email:
+    - stepan.tanasiychuk@gmail.com

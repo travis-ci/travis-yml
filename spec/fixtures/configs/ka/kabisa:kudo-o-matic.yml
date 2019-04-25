@@ -1,0 +1,36 @@
+language: ruby
+sudo: false
+cache: bundler
+
+rbenv:
+  - 2.5.4
+
+services:
+  - postgresql
+
+install:
+  - bundle install --jobs=3 --retry=3 --without production
+  - bundle exec rails db:migrate
+  - npm install --global apollo
+
+before_install:
+  - cp env.example .env
+  - psql -c 'create database kudo_o_matic_test;' -U postgres
+  - cp config/database.yml.travis config/database.yml
+
+before_script:
+  - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+  - chmod +x ./cc-test-reporter
+  - ./cc-test-reporter before-build
+
+after_script:
+  - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
+
+jobs:
+  include:
+    - stage: "Rspec"
+      script:
+        - bundle exec rspec
+notifications:
+  email: false
+

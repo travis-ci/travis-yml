@@ -1,0 +1,16 @@
+matrix:
+  include:
+    - os: linux
+      compiler: gcc
+    - os: linux
+      compiler: clang
+    - os: osx
+sudo: false
+language: cpp
+script:
+  - ./misc/ci.py
+  - ./configure.py --bootstrap
+  - ./ninja all
+  - ./ninja_test --gtest_filter=-SubprocessTest.SetWithLots
+  - ./misc/ninja_syntax_test.py
+  - ./misc/output_test.py

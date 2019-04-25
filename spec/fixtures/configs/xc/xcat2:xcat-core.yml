@@ -1,0 +1,28 @@
+os: linux
+dist: xenial
+sudo: required
+before_install:
+- sudo apt-get install -y git fakeroot reprepro devscripts debhelper libcapture-tiny-perl libjson-perl libsoap-lite-perl libdbi-perl quilt openssh-server dpkg looptools genometools software-properties-common
+- perl -v
+#- echo "yes" | sudo cpan -f -i Capture::Tiny
+
+script:
+- echo $TRAVIS_BUILD_ID
+- echo $TRAVIS_EVENT_TYPE
+- echo $TRAVIS_BUILD_NUMBER
+- echo $TRAVIS_BUILD_DIR
+- echo $TRAVIS_COMMIT
+- echo $TRAVIS_COMMIT_MESSAGE
+- echo $TRAVIS_COMMIT_RANGE
+- echo $TRAVIS_JOB_ID
+- echo $TRAVIS_JOB_NUMBER
+- echo $TRAVIS_BRANCH
+- echo $TRAVIS_COMMIT_MESSAGE
+- echo $GITHUB_TOKEN
+- git log --pretty=format:"%s %b" -2
+
+#- perl travis.pl
+- if [ $TRAVIS_EVENT_TYPE == "pull_request" ]; then perl ./travis.pl;  fi
+
+
+

@@ -1,0 +1,29 @@
+sudo: false
+language: go
+
+go:
+  - "1.9"
+  - "1.10"
+# Temporarily stop testing for Go tip due to unknown go fmt error - tip
+
+# TODO: Run `dep ensure` in Travis
+# see: https://github.com/coniks-sys/coniks-go/pull/201
+before_install:
+  - go get github.com/mattn/goveralls
+  - go get golang.org/x/tools/cmd/cover
+
+env:
+  global:
+    secure: IgtNHjaBYoiMXsLjyc/ZsciSTb027D+24L9iHEWXnH+L82tEZUhYUDI1hZjYtu1WXtfjb9taIXE/wTGR6ET5nDaoF1mmNXUFSzFDciIsLw7HDANcAGiUwY6D4Bu9sbVKnEskWc2v1dlEAiIVyGGbu2opV1eq2DcijidJ4bXdHotDuOTRiTZwgsE1Nou59zg+mpw3XliGmM5IRmZ60bKSw33aRE3D8H/pv98Eorfnq6UNHOBVA1SLTfbQoX0rGTLccDKqBEFUlXLURYiJVGguQ331lo4c61gOMHaF0GHaarYEbR6uRPFx7oKidGFVOm8l8fqq84Bimo9JIljAcVR+2YRln++3yw8VYCoMSL5+9O15LVBX98EFqKernMthHV0OqXu3wUVMcuA4/RCbBNQ8pCnLHQm/siowhNps0DDjdZjaWNB6dHRBP+4A7Cm4AEhveWxLUStsVLCQueJKxmEqYIKRUtXE6otz2yYHbgLQoPFMAOomjov9enMtJ66vgHwQ50Dwx6adjN29k3NxPQCBlR/iLhFRm247/C8vFCbnzMa/9NwJa0wNs7/++qBDeAAngp7kUc3mDK6lvgmio3SDHI5L/ic8TRFYZX/eNRo7txax1vN8Smqmy1Tl2rWSt8XJmop556grWmZ1DcY1Md8mo6I8BrnJfljfjuoQcI0TmvM=
+
+script:
+  - test -z "$(go fmt ./...)"
+  - go vet ./...
+  - ./test_coverage.sh
+
+after_success:
+  - goveralls -coverprofile=profile.cov -service=travis-ci -repotoken $COVERALLS_TOKEN
+
+
+notifications:
+  email: false

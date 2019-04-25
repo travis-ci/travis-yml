@@ -1,0 +1,71 @@
+language: python
+
+# for container-y googdness:
+sudo: false
+
+env:
+  global:
+    # travis encrypt COVERALLS_REPO_TOKEN=...
+    secure: "aUhouOzKmbs0VHCOJotGQVZKQy2NDQ8nGlx/k5ObN4Py3hLfc90ZOi/j54MHMV3MuNLYxHDbrOiUbE5eaYdKH7IGJTvJBp5NLjfTCUztpO5pM7cjrgLK7AWTNPQMqkmdC26XqWH4+5QCj1nV1drUrsSxm6+MsC5OXKg/dhE82M8="
+  matrix:
+    - DB=sqlite
+    - DB=mysql
+    - DB=postgres
+
+python:
+  - "3.6"
+  - "2.7"
+
+# command to install dependencies
+install:
+  - "pip install --upgrade pip"
+  - sh -c "pip install -Ue .[test,build]"
+  - sh -c "if [ $DB = 'postgres' ]; then pip install psycopg2; fi"
+  - sh -c "if [ $DB = 'mysql' ]; then pip install PyMySQL; fi"
+
+before_script:
+  - sh -c "if [ $DB = 'postgres' ]; then psql -c 'create database test' -U postgres; fi"
+  - sh -c "if [ $DB = 'mysql' ]; then mysql -e 'create database test' && mysql -e 'GRANT ALL ON test.* TO 'travis'@'localhost';'; fi"
+# command to run tests, e.g. python setup.py test
+script:
+  - sh -c "if [ $DB = 'sqlite' ]; then export DB_URL=; coverage run --source mortar_rdb -m pytest; fi;"
+  - sh -c "if [ $DB = 'postgres' ]; then export DB_URL='postgres://postgres@localhost/test'; coverage run --source mortar_rdb -m pytest; fi;"
+  - sh -c "if [ $DB = 'mysql' ]; then export DB_URL='mysql+pymysql://travis@localhost/test'; coverage run --source mortar_rdb -m pytest; fi; "
+
+after_success:
+  - "COVERALLS_PARALLEL=true coveralls"
+
+jobs:
+  include:
+
+    - stage: coverage
+      if: type != cron
+      python: 3.6
+      after_success: skip
+
+      install: "pip install -U coveralls-check"
+      before_script: true
+      script: "coveralls-check $TRAVIS_COMMIT --parallel-build-number $TRAVIS_BUILD_NUMBER --repo-token $COVERALLS_REPO_TOKEN"
+
+    - stage: release
+      if: tag IS present
+      python: 3.6
+      before_script: true
+      script: skip
+      # work around https://github.com/travis-ci/travis-ci/issues/8337:
+      after_success: true
+
+      install:
+      - "pip install --upgrade pip setuptools"
+      - "pip install -Ue .[build]"
+      deploy:
+        provider: pypi
+        user: chrisw
+        password:
+          secure: dMB0Gq9TMVZdNwYjq9fhIjCa5irrmH8dAha8VQrUMTbJZwdCJb9n8ODRUGsP/fPhYwtnQKiDMKJtHBFRJ71GxSxBNYLGrrVayHes6goGwkxznMBDx6OjROFh90rvtNp3QPaqSZid5md6hAqfWf90wRelWeFkqf2hR/mW10oDvlw=
+        on:
+          tags: true
+          repo: Mortar/mortar_rdb
+          python: 3.6
+        skip_cleanup: true
+        distributions: "sdist bdist_wheel"

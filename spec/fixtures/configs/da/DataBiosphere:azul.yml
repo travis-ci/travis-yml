@@ -1,0 +1,30 @@
+language: python
+
+cache: pip
+
+sudo: required
+
+services:
+  - docker
+
+python:
+  - 3.6
+
+before_install:
+  - (cd deployments && ln -snf dev .active)
+  - source environment
+
+install:
+  - pip install -U setuptools==40.1.0 wheel==0.32.3
+  - pip install -r requirements.dev.txt
+  - pip install coveralls codecov
+
+script:
+  # Travis VM images contain a /etc/boto.cfg which ultimately causes moto to look for the Python bindings for GCE.
+  # Setting BOTO_CONFIG seems to override that.
+  - export BOTO_CONFIG=/dev/null
+  - make test
+
+after_success:
+  - coveralls
+  - codecov

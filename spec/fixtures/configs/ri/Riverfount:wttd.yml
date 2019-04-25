@@ -1,0 +1,30 @@
+language: python
+dist: xenial
+sudo: true
+python:
+- 3.7
+services: postgresql
+addons:
+  postgresql: '9.6'
+before_script:
+- psql -c "CREATE DATABASE travisci;" -U postgres
+- pipenv run python manage.py migrate --noinput
+- pipenv run python manage.py collectstatic --noinput --no-post-process
+env:
+  global:
+    - PIPENV_IGNORE_VIRTUALENV=1
+    - PIPENV_VENV_IN_PROJECT=1
+    - PIPENV_IGNORE_VIRTUALENVS=1
+    - DATABASE_URL=postgres://postgres@localhost/travisci
+install:
+- cp contrib/env-sample .env
+- pip install pipenv
+- pipenv sync --dev
+script:
+- pipenv run flake8 .
+- pipenv run pytest --cov=eventex
+after_success:
+- pipenv run codecov --token=c59f90ef-8446-43e6-9e9b-776d134edfc8
+wttd-notifications:
+  slack:
+    secure: S+okmo6ErarKkuvrq726sAS9RSaCrSDNrgZFim1gzUQBIOk1xzcNWP/J5pFtl4aL1D7EGT5zl7iiMRRyro2SNDOpDDNdN3RQHXKpHQIZA7bEAUEhxoH5TnCI36ZD18Bc77m27k7JTzuERZ5A4tWJZ3kPrKuZHNUzX1OT+VJRUOud3/VcbWvJRxxJcFMQL1REcA9Mjnj1FqlLKUV1XQWvMhgB5dJKj1hxZNO8LNLQna1Q8yBg1Hp2xtzgOJvvUolSFQvl5J3SGTCF4AUx8vfftj1cvk1hgj8ux/Uz7U2MsucC8T4lUDo+nJKHF5c1PtAa5T/JfSVo6fx3PFGMjpkhNX4yyQG1evx2/4o8fyWKxfr2NoO9+5aDZiFs+MzXDBBzUTyTaQgOANbGhakBusWtqMCC4mCIIb4xSDwq2nrcxDh0h+Pnt/iZ8z6W14D+EMt8RsW8kuTAW/x499AWoenMeyT6YjQXqphaDMH077nnkqcUz70RnDhRRn+MOrP53bD3lykm4MWrJz2arn8ykfmnSv9TEVOB/rj41YALrb1yk/9A6P70JI/jIkVxAPAyxte17SBuRLIvwgPHQrGvZxEKeH2w9IaqRZI8cuGI7LdP6Pu/JLGwqHz9MmcebY1T7z74dbcr34NFSc4nPV17RPvNPuURtfjlZNwGOhNF0bYeiL0=

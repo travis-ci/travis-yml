@@ -1,0 +1,116 @@
+language: ruby
+services:
+- postgresql
+before_install:
+- export RECORD_RUNTIME=true
+- export PATH=/tmp/bundler/ruby/2.3.0/bin:$PATH
+- export GEM_PATH=/tmp/bundler/ruby/2.3.0/gems:$GEM_PATH
+- sudo rm /etc/apt/sources.list.d/mongodb*
+- sudo apt-get -qq update
+- sudo apt-get install wget openjdk-7-jre redis-server imagemagick fontconfig libfontconfig
+- mkdir -p /tmp/downloads &&
+  cd /tmp/downloads &&
+  (ls elasticsearch-6.3.1.deb || wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-6.3.1.deb) &&
+  (ls elasticsearch-6.3.1.deb.sha512 || wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-6.3.1.deb.sha512) &&
+  shasum -a 512 -c elasticsearch-6.3.1.deb.sha512 &&
+  sudo dpkg -i --force-confnew elasticsearch-6.3.1.deb &&
+  cd -
+- sudo /usr/share/elasticsearch/bin/elasticsearch-plugin install analysis-icu
+- sudo service elasticsearch restart
+- wget -q --waitretry=5 --retry-connrefused -t 20 -T 10 -O - http://127.0.0.1:9200
+- sudo service elasticsearch status
+- redis-server &
+- git clone https://${TOKEN}:x-oauth-basic@github.com/meedan/configurator ./configurator
+- d=configurator/$APP/travis/check-api/; for f in $(find $d -type f); do cp "$f" "${f/$d/}"; done
+- rm -rf tmp/cache tmp/cache1 tmp/cache2 tmp/cache3 tmp/cache4 && mkdir -p tmp/cache tmp/cache1
+  tmp/cache2 tmp/cache3 tmp/cache4
+- cd /tmp/downloads &&
+  (ls phantomjs-2.1.1-linux-x86_64.tar.bz2 || wget https://bitbucket.org/ariya/phantomjs/downloads/phantomjs-2.1.1-linux-x86_64.tar.bz2) &&
+  tar -vxjf phantomjs-2.1.1-linux-x86_64.tar.bz2 &&
+  sudo mv phantomjs-2.1.1-linux-x86_64/bin/phantomjs /usr/bin/ &&
+  cd -
+cache:
+  directories:
+  - "/tmp/bundler"
+  - "/tmp/downloads"
+addons:
+  postgresql: '9.4'
+  hosts:
+  - api
+bundler_args: "--jobs 3 --retry 3 --without nothing --path=/tmp/bundler"
+before_script:
+- cd test && ./setup-parallel-env.sh && cd -
+- bundle exec rake assets:precompile
+- bundle exec thin -p 3000 -e test -t 60 --threadpool-size=60 --threaded start >/dev/null &
+- sleep 10
+- chmod +w tmp/parallel_runtime_test.log
+script: bundle exec rake "parallel:test[4]"
+after_script:
+- bundle exec codeclimate-test-reporter
+- echo 'Parallel tests runtime log' && cat tmp/parallel_runtime_test.log
+rvm:
+- 2.3.4
+notifications:
+  slack:
+    secure: dhqNhrJ0FVPnjtxa7R6k0s+1h/gMFNeK8zYJLZw+mK/FJ41K1u82Y8E6IDFbgNcKyAJ27ielvzGgWGSkDVltEnPR+ph15OMcy05TM9Pr2tWNusbDECOaEQgn4vGOq0shmiahE9tTOQpgc1TzhzIF9o1xgocah2PCLKiiH06kiiRlNZkaeQSJRFrXsPDDK8jIUtkLLUvFGQA6fq/lOh4tN6/N+K6+fo86wSxarkjv3d6h2flqvQqvqkbNpkv/UBC2Y1QACP+EX6uA0ySer8K5X6Q0Trrkjjacwvo5j74UVa+UYrBD+vr7Mgnr5aNFNId6M2nHd92ZiPM+6VDllCWsDLvJ2qFFy8cOO693EjrU7puaPp29+sptriIC71dk1oHSIEpPWwuaEZKzpwP4Swe322ne2th2VrjMhIye2Ru0519Lr2Dl4iTVV+hxoeVta3Nng23rUjrGoAbcw2FO1jmhANp8JWatv/V4PmlrS1/kYbiCfltWOMbKAD9f1EOTFnPCJsp3hPL238Ic+kvNJ8LM+ItNNR5cly+JPto6nSnMO8uhig9i78Mp2hVpnvrwhDLYntWEP2vcaNhP8oRys7X2iq5PRmsRwr9SyJReczd6i5gnvskXqKat6mNfPeGMBKSYof/1ve3Um0wEtwaYxvU5y/ZezFc3Kzzi6vt4P86j+mg=
+env:
+  global:
+    - secure: NwJYV3kghSW2hReSDOnY0sG1oe7IDcix/pZprWHkfkpc+520355n71uj7gofQ2tOO7x2rg2+j9q1GVx9hbP0EsOCIl2u0csnA7lrfe9COp9cGdM7gMzSN6CvuwW9OME9eark37ACSHW1LD1TGB6OcjOkoQxTCM4E00Nj1zAYdT4gbhnBLnxW0FPpEqRB+0XN6ev53HdE5+KrwOIG/chYL/FdaTUdjfyikoduJp5pPjHt1Nd+LSoEt3WbYs8IJeSJIdzCYrD/gXHdjGF1f8v4PFCFyl1ashFtLPMuS+4DBZjR4grSbhpTBwoJAr6oRbWJNAkmaxC26s574U/7QgP6MFlJzhgKim2gvyGUmTSKgxZViyn1y7oend+vWE0281lHDMPqtO3fNel6HteFm/GoJ3lSvZPd8ddveJNacPZB6+K7KzvJWEoRy5eYdUjaejA6KiaSkblpqXoMWwDH+RjCde/HANxMhrECa9yCZlLKBdI5dPccyQwxKnebyZkU37VeWFc9fw2EUy9gmAunV5SH/Osz7b+IX+h3Mf8WxSvQutCUrD+1kspzkEVEXX41SawKD30OfMX9ZBZB9ueisyjB4kW0GzvCGlANMAQ4VDS4/FOmc+5IhcDN8i8PvzE5IGooETOtcwMWVZMrbA0/vq2Z44WQpS2Lq1NYGYhqAN947lk=
+matrix:
+  include:
+  - env: APP=check
+  - env: APP=bridge
+  # Load testing
+  - env: APP=check
+    if: commit_message =~ /\[load test\]/
+    language: node_js
+    sudo: required
+    dist: trusty
+    addons:
+      postgresql: '9.4'
+      hosts:
+      - bridgembed
+    before_install:
+    - git clone https://${TOKEN}:x-oauth-basic@github.com/meedan/configurator ./configurator
+    - sudo rm /etc/apt/sources.list.d/mongodb*
+    - sudo apt-get -qq update
+    - sudo apt-get install wget python-setuptools lsof unzip imagemagick ruby ruby-dev libnss3 libnss3-dev xvfb libnss3-1d libexif-dev curl build-essential libssl-dev libappindicator1 fonts-liberation redis-server apache2-utils siege -y
+    - rvm --default use 2.3.4
+    - export PATH=/tmp/bundler/ruby/2.3.0/bin:$PATH
+    - export GEM_PATH=/tmp/bundler/ruby/2.3.0/gems:$GEM_PATH
+    - export TEST_ENV_NUMBER=0
+    - psql -c 'create database checkdesk_test0;' -U postgres
+    - redis-server 2>&1 >/dev/null &
+    - wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-6.3.1.deb
+    - wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-6.3.1.deb.sha512
+      && shasum -a 512 -c elasticsearch-6.3.1.deb.sha512 && sudo dpkg -i --force-confnew elasticsearch-6.3.1.deb && sudo service elasticsearch
+      restart
+    - sudo /usr/share/elasticsearch/bin/elasticsearch-plugin install analysis-icu
+    - sudo service elasticsearch restart
+    - until curl --silent -XGET --fail http://localhost:9200; do printf '.'; sleep 1; done
+    - curl --silent -XPUT http://localhost:9200/check_api_tests0
+    - sudo service elasticsearch status
+    - export RAILS_ENV=development
+    - git clone https://github.com/meedan/pender.git /tmp/pender
+    - d=configurator/$APP/travis/pender/; for f in $(find $d -type f); do cp "$f" "/tmp/pender/${f/$d/}"; done
+    - cd /tmp/pender
+    - bundle install --jobs=3 --retry=3 --without=nothing --path=/tmp/bundler --gemfile=/tmp/pender/Gemfile
+    - bundle exec rake db:migrate
+    - bundle exec rails runner 'a = ApiKey.create!; a.access_token = "test"; a.save!'
+    - bundle exec rails s -p 3005 >/dev/null &
+    - cd -
+    - export RAILS_ENV=test
+    - d=configurator/$APP/travis/check-api/; for f in $(find $d -type f); do cp "$f" "${f/$d/}"; done
+    - sed -i '/bridge_reader/d' config/config.yml
+    - bundle install --jobs=3 --retry=3 --without=nothing --path=/tmp/bundler --gemfile=./Gemfile
+    - bundle exec rake db:migrate RAILS_ENV=test
+    - bundle exec rake lapis:api_keys:create_default RAILS_ENV=test
+    - bundle exec sidekiq -L log/sidekiq.log -d
+    - bundle exec thin -p 3000 -e test -t 60 --threadpool-size=60 --threaded start >/dev/null &
+    - echo 'Waiting for Rails server to start...'
+    - sleep 10
+    before_script:
+    - echo 'Starting load test...'
+    script: bundle exec rake test:load:smooch
+    after_script:
+    - echo 'Finished load test!'

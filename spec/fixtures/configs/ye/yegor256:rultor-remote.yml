@@ -1,0 +1,17 @@
+language: ruby
+rvm:
+  - 2.2.2
+cache: bundler
+branches:
+  only:
+    - master
+install:
+  - travis_retry sudo apt-get update -y
+  - travis_retry sudo apt-get install -y bcrypt
+  - travis_retry bundle install
+script:
+  - rake
+  - gem build rultor.gemspec
+  - gem install rultor-1.0.snapshot.gem
+  - rultor encrypt --project yegor256/rultor LICENSE.txt
+

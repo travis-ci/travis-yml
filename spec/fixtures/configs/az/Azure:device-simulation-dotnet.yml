@@ -1,0 +1,16 @@
+language: csharp
+dotnet: 2.1
+mono: none
+sudo: false
+cache:
+  directories:
+  - "$HOME/.nuget/"
+before_install:
+- set -e
+addons:
+  apt:
+    packages:
+    # This package is used only to address an issue in Travis CI, which would
+    # otherwise install a newer 2.1.x preview, which breaks the build.
+script:
+- "bash ./$CODEBASE/scripts/build"

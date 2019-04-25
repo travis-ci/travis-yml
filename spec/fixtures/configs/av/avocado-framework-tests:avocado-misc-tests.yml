@@ -1,0 +1,64 @@
+language: python
+
+python:
+    - "2.7"
+
+branches:
+    only:
+        - master
+
+cache:
+    directories:
+        - $HOME/.cache/pip
+
+sudo: false
+
+install:
+    - pip install -r requirements-travis.txt
+
+script:
+    - inspekt checkall --disable-lint W,R,C,E1002,E1101,E1103,E1120,F0401,I0011,E0203 --no-license-check
+    - inspekt indent
+    - inspekt style
+    - |
+        error=""
+        for COMMIT in $(git rev-list $TRAVIS_COMMIT_RANGE); do
+            echo
+            echo "-----< $(git log -1 --oneline $COMMIT) >-----"
+            msg=$(git show -s --format=%B $COMMIT)
+            # Skip merge commits
+            if [ $(echo "${msg::4}") == 'Merg' ]
+            then
+                continue
+            fi
+            # Test commit message size
+            if [ $(echo "$msg" | wc -l) -ge 5 ]
+            then
+                echo "OK: Commit message size."
+            else
+                echo "ERR: Commit message is too short (less than 5 lines)."
+                echo "     Here a minimal template:"
+                echo "     ------------------------------------"
+                echo "     header          <- Limited to 50 characters. No period."
+                echo "                     <- Blank line"
+                echo "     message         <- Any number of lines, limited to 72 characters per line."
+                echo "                     <- Blank line"
+                echo "     Signed-off-by:  <- Signature (created by git commit -s)"
+                echo "     ------------------------------------"
+                error=true
+            fi
+            # Test commit message signature
+            if echo "$msg" | grep -q 'Signed-off-by:'
+            then
+                echo "OK: 'Signed-off-by:' present."
+            else
+                echo "ERR: 'Signed-off-by:' not found (use '-s' in 'git commit')."
+                error=true
+            fi
+        done
+        # Look for errors
+        if [ "$error" ]; then
+            echo
+            echo "Incremental smokecheck failed."
+            exit 1
+        fi

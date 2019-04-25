@@ -1,0 +1,38 @@
+dist: trusty
+language: node_js
+sudo: false
+node_js:
+  - 8
+services:
+  - redis-server
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - graphicsmagick
+      - optipng
+      - g++-4.8
+before_script:
+  - wget http://fastdl.mongodb.org/linux/mongodb-linux-x86_64-3.6.4.tgz
+  - tar -zxvf mongodb-linux-x86_64-3.6.4.tgz
+  - mkdir -p ./data/db/27017
+  - mkdir -p ./data/db/27000
+  - ./mongodb-linux-x86_64-3.6.4/bin/mongod --fork --nopreallocj --dbpath ./data/db/27017 --syslog --port 27017
+  - wget https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-amd64-static.tar.xz -O /tmp/ffmpeg.tar.gz
+  - wget http://www.rarlab.com/rar/rarlinux-x64-5.3.0.tar.gz -O /tmp/rar.tar.gz
+  - mkdir bin
+  - cd bin
+  - tar -xvf /tmp/ffmpeg.tar.gz --strip 1 --no-anchored ffmpeg ffprobe
+  - tar -xvf /tmp/rar.tar.gz --strip 1
+  - cd ..
+  - export PATH=$(pwd)/bin:$PATH
+  - mkdir -p data/storage-test-protected
+  - mkdir -p data/storage-test-public
+script:
+  - deploy/ci/travis.sh
+env:
+  global:
+    - secure: he13bEicdzpoLGeoj+xaU2kIkKsw1/m+Ejcm5YanhGicECrCWVvFOu0O7vGHPDDj3s/xnTgBhhUPzIS3SdcIVqfTS+nP+CJNtzOm4zOdPvmfbfCvuIukLmCLtADrrz2HUxO1en1vfpH1trkUP5gwdo4vAGli7hOD4MsncRYaYio=
+    - BUILDER="Travis CI"
+    - CXX=g++-4.8

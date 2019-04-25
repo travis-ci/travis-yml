@@ -1,0 +1,74 @@
+os: linux
+dist: trusty
+group: stable
+sudo: required
+
+language: java
+jdk: openjdk8
+
+services:
+  - docker
+
+env:
+  global:
+    - PROJECT_VERSION=0.0.1
+    - NODE_VERSION=10.6.0
+    # ARTIFACTORY_USERNAME
+    - secure: ldlkDhRSNvMd4ZZAMBAl/BAPd/uPJEI5kSFW5RkKVFHmmXgGE49+Qu7NrySuG9gC0hxUu0s8nHeLCTajz3ovbhDZ6psHRfIofieIbVljdtfEtdSzWQx2BD4M3PWUe7/DLNth/Z/vWmfXnNUI/XMb+KUNOlaed8vLmb+V4zdI2Vt/S47rB8ndZH/k4p2kufAuYWekXDrb8VdiCFt1zrVvvp7Tls6Aj/x8737XJ01dQfVsJX/XsCmEPUHaHOeQD6f5aK1RtrkQsz5yKtZL5Zu9Q9jYUl7Dt5SU8YDZHLc6iGgXVjrafuK7ywLf6JmZYnNCR2TxzDCYx9RokkxX3JvBhcN/JrG+1M43S0azzNn3tjKZa+tZnvzmBq5w+Nbi/XxsTBUa2XA0sXuEXDVGWaW5r9sArd/onkQYIJjZq+N/nwwoVekL7FzckLjCc/yxKa4ddvSKoZIfq9tADZ9KAKcGQspCO5VsySOptCQE/nwOLYSL4Z3+MvOI+C6204JK1d3t2SfW5WRe74uLGEcHwTh84l+QG6ioEOlCEBD8nKq/whLJ2sPCfSxpp6e0Iid59p+cbGPtRoav9GVfZgp1eDbV6R6J2mQwBrGbNvnaOr/eprsAT7ukoJ+Pw2DEGmlLKF/Vr9bxDMrzJJCfLzcOzG5W3ZrfsVe67BnHD8caMrdoofs=
+    # ARTIFACTORY_PASSWORD
+    - secure: lcl4Xg7NCssLCJ5xUtUJ5726m3Xmtdl72ZTCU6p26+d3UuG0XapuYbBT2l52JdjJyD21hDxVLfHhm5hV1dHFLzULIJZQsCLT80saL1gH2e/nYNiivwqZL6BN5+Yv4RmD1L/mAZZFzuu6plUHoEIurl6Pw9dv93spKuQCR1N6Gju3ktfMY/8pWtbmDAk/oMEhowj1Vg5x9ehlADSAPur14z36uJtI37eEOK63XFuQJUi4GylAhDLroaaZSORljJ3IsNI3nGIrDVRrnVLlrWuhRhB4HCl6FUqwgDgVWAKDB6+K+dE6Nx7HiUP0RVT3Nr61I/8JfrViUnJ4mSO84/sI62/Cs8trPvIJjK5AvohecbMkUAB0LD43xCFiAvaMx8XSiC4MPisDkZuhZuYWNXeu/C8zrx5xvF7lzifGIhk2zLbBLRkuGZNlQhR4ILpqa6JeC3lF7mq6ur2e3zWm7bMpudF5sFslCBFN4o6XHJPXmxmjx6k/IhZu6xYujTiePqMGCX+DAcw/3QEF/so0Tb2I5vo61WUwxtBBXBkGsRIYtLg9GWlLRCvypIocqfxQM1GhgnAfIYLo9v+dj7vpkmtHqd86kXjzBgFq8leXd032AXK+IEFuFLv5avA8BR4oECBRXFvr3/aI+xBeV/md/SNp1oPTLCY3jRyUA0QeC6RmheU=
+    # GIT_USER
+    - secure: ZTaGCqbM4hReM1T2w9pURLYvOpNsTe/hiReJ86uZUqRkDzptEstFa/VSXpfBqInLvyuzS0UDEIbljBXdYLIyFFXwA6Zfa0kKmObCed8oDPPO09uO8rHqqvccdmMhKGf/UPO8yoHJViBZad00pOK6kQJHVcuav9Oenskkn4cE+eAg2D7FB12gRjShnI/NFf2t1lLwna2o2uhcSGrT4mOqm8U+ygjmjbmoXrc0fdl/3jh+0uV+G2PzLDO30B4AswVoCI0Wvg0/lALL/vQxggadTm4A61rUMvKVB3UmKrFVwp1Cza6B35+gSadYWOl+b/uC9qfmy8sG7CFxqYc/1jwGorZXGxGKC1Mh4OpZv6tbRokoQX4BZUU4XK687GsGZsDqGgM613r6i6K2NsXsKRpI3v6tuM+qeqiuh7tzYkxJgdPXZYlJ62kHdP+AqhNzFUusBWkhcUftvEb8sBMB1kCLLOhQV0NwQundDnaYGT8Tu13hgE+/cXvWbVqRfLPEUhY/xVMxjQF3PxXP9XG26j543aZEQy/udUTIeSkb8oHTI6RNBygCqgp+EU4xTJuWF678Yza139lcTs1luoxSZGqmmj7yiKEnzNerKVrraUkVZuQB0uWoUVx7lhAj6YHMHZcyOsxIFU2YYFwYazBytir5UZQFFONJyDc9hb9r7CY03WM=
+    # GIT_PWD
+    - secure: Dp92d/WvgpAuH1HuhfpxLyU9LBsfN5vLeRIazKdCNHUY4/uiScSlByzPB8Q81qgwwjCFIBcXF5H5o3BQ6zEafCpBoU6TCfX7zLPfT1ve7HD6iIFBLlwNWEEi1RDykH3Q3Fq3hXp1R3qaDwmkTSSHcxTAv5Faa9ITpviOkK6bErJEs0Y2wrOCj/TscjFbf/ayrigHAQ3JjEWBn4Wp3pHpC2axdWjYxWwf7OSHeXxcI+GZ1oNP+bCAgdB4+ufktkgMF2Vz9V2LIb/rmccXtgjRY6YFsZ0wXToX9yiW1DhTz3J1kHtboLk1RHDABJonOBVqmPalH/cUpOPEd3BUXxK2wcp78gRIEV70kdcwZ5BwukXw9sL19g1Vx1Qbwrwp7BzoJm6W4a9NR6x7rskdRuqu1BZQ50SByURcfWIY0zUBtvgfWdH9rrgVjMCkcaSgXHr9KClNWfEbLyAmRehcayZcZ+RURQfKNe9hvSeeP1UGoPp+IUcwG9oI1BZnrZJ3zxMCvg6VNxPno+Zk/aFUujv40Tx82v9PnfTl3EM8Oe3cIKxpmFTkHq73uockc1PQSeevUchfdO39mV9Hce5iIUz8VdmW8KaZpiRwnX8v4KYrlnJa8K+3UcgH4tPFj7aOSeX/hkCpbDORWJcUXC3kI9Zw9lPWO0PfA+axB6EeqXoBNys=
+
+before_cache:
+  - rm -rf $HOME/.m2/repository/ch/admin/seco/alv-portal-*
+
+cache:
+  directories:
+    - $HOME/.m2
+    - alv-portal-ui/node_modules
+
+install:
+  - .ci-travis/install-nodejs.sh ${NODE_VERSION}
+  - .ci-travis/install-chrome.sh
+
+script:
+  - export BRANCH_VERSION_SUFFIX=$([ "$TRAVIS_BRANCH" == "master" ] && echo "" || echo "-${TRAVIS_BRANCH//\//-}")
+  - export BUILD_VERSION=$PROJECT_VERSION-build-$TRAVIS_BUILD_NUMBER$BRANCH_VERSION_SUFFIX
+  - .ci-travis/maven-set-version.sh ${BUILD_VERSION}
+
+deploy:
+  - provider: script
+    skip_cleanup: true
+    script: ".ci-travis/maven-package.sh"
+    on:
+      all_branches: true
+      condition: "$TRAVIS_BRANCH != master"
+  - provider: script
+    skip_cleanup: true
+    script: >-
+      .ci-travis/maven-deploy.sh ${ARTIFACTORY_USERNAME} ${ARTIFACTORY_PASSWORD}
+      && .ci-travis/push-version-bump.sh ${BUILD_VERSION} ${GIT_USER} ${GIT_PWD}
+    on:
+      branch: master
+  - provider: script
+    skip_cleanup: true
+    script: >-
+      .ci-travis/maven-deploy.sh ${ARTIFACTORY_USERNAME} ${ARTIFACTORY_PASSWORD}
+      && .ci-travis/push-version-bump.sh ${BUILD_VERSION} ${GIT_USER} ${GIT_PWD}
+    on:
+      all_branches: true
+      condition: "$TRAVIS_BRANCH =~ ^release.*$"
+  - provider: script
+    skip_cleanup: true
+    script: ".ci-travis/maven-e2e.sh"
+    on:
+      all_branches: true
+      condition: "$TRAVIS_EVENT_TYPE == cron"
+notifications:
+  webhooks:
+    on_success: change
+    on_failure: always
+    on_start: never

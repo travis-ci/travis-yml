@@ -1,0 +1,41 @@
+language: node_js
+node_js:
+- '8'
+env:
+  global:
+  - GH_USER_EMAIL="travis@example.org"
+  - GH_USER_NAME="cozy-bot"
+  - DEPLOY_REPOSITORY="git@github.com:konnectors/splitwise.git"
+  - secure: pYrQXMG+FoVCGMuawHhkTKlXjgGDBM5KMYCO1U6yeN51k34srY+Q0p9FvMIWoEoZNWBppu1YBYjzM/zUg++d9S12XnabKo2zYkZhr06FVsgTfe/0V5zBYQsDupLjwtbxp5EJvb4pcYyrN8rI5DQdLtumhlbUnDjsfRGQ/U1WLXrURwcGgHsNNqqE+O9Uf9I7KUF6wAQ3Wc8bSbiuefPD/G9PE/6/3hP9IahErVogxOsS2kD5B1ug2GMY5sshUHxhnP/paY5rllroxXPhC+dvsQrzWkEWZjPu0Uu9hHlCpBc/CvbBmpzDpRwDH1m4t7TfcYr+yCfScTvkywESh9Ad76CIYdqKOGng+gnz/FxvEon8IXX9lbyQhoZTXnXYaTWWBathAPOO8G4UoWksnafHcHhp8QtpvgHErG/5FsjcU8mZc6xsodwKMg8jZC+XM0GUQzJ9kbryNXldMruJ5caqtqDx6H53Q0IJhJkIfDHTFC9aF4++nhwsX9k0sLUPIZZq7bzHMMpcPkvzo+cfum8xQ8or4w9WAEiPQgKGTj+rEIQvsYqqihF9ZxQVhytDG+M/Gnc5G1+pkcLnW6J5xXnIlX5eWP/fm57Gpb1re6fgfZtPKFLjfEpzII8MG4sRbq6tTTWgSZp5ahPxH+C+Hp6ERncWWWBfYHDE/tBfNjKvUTw=
+cache:
+  yarn: true
+  directories:
+  - node_modules
+branches:
+  except:
+  - build
+  - build-debug
+script:
+- yarn lint
+- yarn build
+- yarn run check
+deploy:
+- provider: script
+  skip-cleanup: true
+  script: DEPLOY_BRANCH=build yarn deploy && yarn cozyPublish
+  on:
+    branch: master
+- provider: script
+  skip-cleanup: true
+  script: DEPLOY_BRANCH=build yarn deploy && yarn cozyPublish
+  on:
+    tags: true
+before_install:
+- openssl aes-256-cbc -K $encrypted_3ad485b2efab_key -iv $encrypted_3ad485b2efab_iv
+  -in github_deploy_key.enc -out /tmp/github_deploy_key -d
+- eval "$(ssh-agent -s)"
+- chmod 600 /tmp/github_deploy_key
+- ssh-add /tmp/github_deploy_key
+after_deploy:
+- rm /tmp/github_deploy_key
+- ssh-add -D

@@ -1,0 +1,148 @@
+language: cpp
+
+# Use linux unless specified otherwise
+os: linux
+dist: trusty
+
+matrix:
+  include:
+
+    # macOS clang
+    - os: osx
+      env:
+        - CXX_OVERRIDE=clang++
+        - CC_OVERRIDE=clang
+        - BUILD=release
+        - TEST_GCTORTURE=1
+      compiler: clang
+
+    - os: osx
+      env:
+        - CXX_OVERRIDE=clang++
+        - CC_OVERRIDE=clang
+        - BUILD=debugopt
+        - CHECK=check
+        - PIR_WARMUP=2
+      compiler: clang
+
+    # linux gcc
+    #  check-all = check test-all-devel check-recommended
+    - env:
+        - CXX_OVERRIDE=g++-7
+        - CC_OVERRIDE=gcc-7
+        - CHECK=check
+        - BUILD=debugopt
+        - TEST_GCTORTURE=1
+        - TEST_CPPCHECK=1
+
+    - env:
+        - CXX_OVERRIDE=g++-7
+        - CC_OVERRIDE=gcc-7
+        - CHECK=test-all-devel
+        - BUILD=release
+        - PIR_DEOPT_CHAOS_SETTING=1
+        - PIR_MAX_INPUT_SIZE=1000
+        - PIR_INLINER_MAX_SIZE=800
+
+    - env:
+        - CXX_OVERRIDE=g++-7
+        - CC_OVERRIDE=gcc-7
+        - CHECK=check-recommended
+        - BUILD=release
+        - PIR_WARMUP=4
+        - PIR_MAX_INPUT_SIZE=700
+        - PIR_INLINER_MAX_SIZE=500
+
+addons:
+  apt:
+    packages:
+      - texlive-latex-extra
+      - texlive-latex-base
+      - texlive-fonts-recommended
+      - texlive-fonts-extra
+      - texlive-latex-recommended
+      - texlive-font-utils
+      - dvipng
+      - cm-super
+      - bison
+      - ca-certificates-java
+      - java-common
+      - libbison-dev
+      - libcairo-script-interpreter2
+      - libcairo2-dev
+      - libjbig-dev
+      - libmime-charset-perl
+      - libpango1.0-dev
+      - libpcsclite1
+      - libpixman-1-dev
+      - libsombok3
+      - libtext-unidecode-perl
+      - libtiff5-dev
+      - libtiffxx5
+      - libunicode-linebreak-perl
+      - libxcb-render0-dev
+      - libxcb-shm0-dev
+      - libxml-libxml-perl
+      - libxml-namespacesupport-perl
+      - libxml-sax-base-perl
+      - libxml-sax-perl
+      - mpack
+      - openjdk-11-jre
+      - openjdk-11-jre-headless
+      - texinfo
+      - g++-7
+      - xdg-utils
+      - gfortran-7
+      - subversion
+      - make
+      - r-base-dev
+      - liblzma-dev
+      - sed
+      - binutils
+      - curl
+      - cmake
+      - rsync
+      - xorg-dev
+      - valgrind
+      - cppcheck
+      - xvfb
+      - xauth
+      - xfonts-base
+      - tk-dev
+    sources:
+      - ubuntu-toolchain-r-test
+
+before_install:
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]];   then . ./tools/ci/before_install-osx.sh;   fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then . ./tools/ci/before_install-linux.sh; fi
+
+before_script:
+  - if [[ "$TEST_CPPCHECK" != "" ]]; then ./tools/cppcheck; fi
+  - export TZ=""
+  - export CXX=$CXX_OVERRIDE
+  - export CC=$CC_OVERRIDE
+  - ${CXX} --version
+  - ${CC} --version
+  - cd "${TRAVIS_BUILD_DIR}"
+  - mkdir build && cd build
+  - cmake -DCMAKE_BUILD_TYPE=$BUILD ..
+  - make setup
+  - make -j2
+  - echo "running make $CHECK on a $BUILD build with and PIR_ENABLE=$PIR_ENABLE"
+
+script:
+  - ./bin/tests
+  - PIR_ENABLE=off ./bin/tests
+  - PIR_ENABLE=force ./bin/tests
+  - if [[ "$TEST_GCTORTURE" != "" ]];  then  R_GCTORTURE=100   ./bin/tests; fi
+  # Run a particular portion of the gnur testsuite
+  - if [[ "$CHECK" != "" ]]; then PIR_DEOPT_CHAOS=$PIR_DEOPT_CHAOS_SETTING ./bin/gnur-make-tests $CHECK; fi
+  - ../tools/check-gnur-make-tests-error
+
+cache:
+  ccache: true
+  apt: true
+  directories:
+    - external
+    # cache homebrew formulas
+    - /usr/local/Homebrew/Library/Taps/homebrew/homebrew-core

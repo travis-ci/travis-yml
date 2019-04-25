@@ -1,0 +1,54 @@
+sudo: required
+dist: trusty
+language: python
+matrix:
+    include:
+        - python: 2.7
+        - python: 3.4
+notifications:
+    email: false
+before_install:
+  # To avoid matplotlib error about X11:
+  # 'no display name and no $DISPLAY environment variable'
+  # source: http://docs.travis-ci.com/user/gui-and-headless-browsers/#Starting-a-Web-Server
+  - "export DISPLAY=:99.0"
+  - "sh -e /etc/init.d/xvfb start"
+install:
+  # source: http://conda.pydata.org/docs/travis.html
+  # We do this conditionally because it saves us some downloading if the
+  # version is the same.
+  - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
+      wget https://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh;
+    else
+      wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
+    fi
+  - bash miniconda.sh -b -p $HOME/miniconda
+  - export PATH="$HOME/miniconda/bin:$PATH"
+  - hash -r
+  - conda config --set always_yes yes --set changeps1 no
+  - conda update -q conda
+  # Useful for debugging any issues with conda
+  - conda info -a
+
+  - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION numpy pytest
+  - source activate test-environment
+  - pip install pep8 pytest-pep8 pytest-xdist
+  - pip install python-coveralls pytest-cov
+  - pip install keras
+  - pip install matplotlib seaborn scipy
+  - pip install networkx==1.9.1 observations sklearn
+  - pip install tensorflow==1.5.0
+  - pip install pystan
+  - pip install nbformat nbconvert jupyter_client jupyter
+  - python setup.py install
+script:
+  # Convert and preprocess Jupyter notebooks to Python files for PEP8.
+  - for file in notebooks/*.ipynb; do
+      if [ "$file" != "notebooks/iclr2017.ipynb" ]; then
+        jupyter nbconvert --template=tests/data/strip_markdown.tpl --to python --stdout $file | grep -v '^get_ipython' | sed '$d' > ${file%.*}.py;
+      fi
+    done;
+  - PYTHONPATH=$PWD:$PYTHONPATH pytest --cov=edward --pep8;
+
+after_success:
+  - coveralls

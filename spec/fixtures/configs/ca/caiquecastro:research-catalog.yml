@@ -1,0 +1,22 @@
+language: php
+
+php:
+  - 7.2
+
+services:
+  - postgresql
+
+before_script:
+  - psql -c 'create database catalog;' -U postgres
+  - cp .env.travis .env
+  - composer install --no-interaction
+  - php artisan key:generate
+  - php artisan migrate
+  - touch public/mix-manifest.json
+
+script:
+  - vendor/bin/phpunit
+  - npm install
+
+notifications:
+  email: false

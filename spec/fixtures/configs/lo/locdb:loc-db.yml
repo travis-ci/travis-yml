@@ -1,0 +1,21 @@
+env:
+  - CXX=g++-4.8
+language: node_js
+node_js:
+  - "7"
+services: mongodb
+notifications:
+  email:
+    recipients:
+      - anne@informatik.uni-mannheim.de
+on_success: change
+on_failure: change
+addons:
+  apt:
+    sources:
+    - ubuntu-toolchain-r-test
+    packages:
+    - gcc-4.8
+    - g++-4.8
+before_install:
+  - npm install swagger -g

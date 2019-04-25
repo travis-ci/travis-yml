@@ -1,0 +1,25 @@
+language: c
+os:
+    - linux
+    - osx
+env:
+    - BUILD_TYPE=Debug
+    - BUILD_TYPE=Release
+sudo: required
+services:
+    - docker
+before_install:
+    - .travis-scripts/${TRAVIS_OS_NAME}/before_install.sh
+install:
+    - .travis-scripts/${TRAVIS_OS_NAME}/install.sh
+before_script:
+    - export KERNELDIR=/lib/modules/$(uname -r)/build
+script:
+    - .travis-scripts/${TRAVIS_OS_NAME}/build.sh
+notifications:
+  webhooks:
+    urls:
+      - https://webhooks.gitter.im/e/fdbc2356fb0ea2f15033
+    on_success: change
+    on_failure: always
+    on_start: never

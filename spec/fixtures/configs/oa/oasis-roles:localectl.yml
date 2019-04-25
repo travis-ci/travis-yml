@@ -1,0 +1,28 @@
+language: python
+versions:
+  - "2.7"
+  - "3.7"
+cache: pip
+services:
+  - docker
+
+env:
+  - MOLECULE_SCENARIO=default
+  - MOLECULE_SCENARIO=conditional_tests
+
+install:
+  - pip install -U pip
+  - pip --version
+  - pip install ansible ansible-lint yamllint flake8 molecule docker
+  - ansible --version
+  - ansible-lint --version
+  - yamllint --version
+  - flake8 --version
+  - molecule --version
+
+script:
+  - molecule lint
+  - molecule test -s "${MOLECULE_SCENARIO}"
+
+notifications:
+  webhooks: https://galaxy.ansible.com/api/v1/notifications/

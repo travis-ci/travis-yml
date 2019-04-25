@@ -1,0 +1,17 @@
+language: node_js
+cache:
+  directories:
+   - node_modules
+before_script:
+ - npm run compile
+ - psql -c 'create database travis_ci_test;' -U postgres
+env:
+ - CXX=g++-4.8 DATABASE_URL=postgres://postgres@localhost/travis_ci_test
+addons:
+  apt:
+    sources:
+     - ubuntu-toolchain-r-test
+    packages:
+     - g++-4.8
+services:
+  - postgresql

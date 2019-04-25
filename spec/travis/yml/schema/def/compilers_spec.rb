@@ -9,7 +9,18 @@ describe Travis::Yml::Schema::Def::Compilers, 'structure' do
         should eq(
           '$id': :compilers,
           title: 'Compilers',
-          '$ref': '#/definitions/strs'
+          anyOf: [
+            {
+              type: :array,
+              items: {
+                type: :string
+              },
+              normal: true
+            },
+            {
+              type: :string
+            }
+          ]
         )
       end
     end

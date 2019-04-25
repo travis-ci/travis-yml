@@ -1,0 +1,15 @@
+env:
+  global:
+    - CC_TEST_REPORTER_ID=a4b91afd56930b47340ef1ad52dafb8516bffb8b2a4193fa732cee34f1719e23
+    - CODECLIMATE_REPO_TOKEN=a4b91afd56930b47340ef1ad52dafb8516bffb8b2a4193fa732cee34f1719e23
+language: node_js
+node_js:
+  - "8"
+cache:
+  directories:
+    - node_modules
+sudo: enabled
+notifications:
+  email: false
+after_success:
+  - npm run coveralls

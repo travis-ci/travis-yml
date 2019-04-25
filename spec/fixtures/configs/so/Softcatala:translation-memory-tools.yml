@@ -1,0 +1,17 @@
+language: python
+python:
+  - "3.4"
+before_install:
+  - sudo apt-get update
+  - sudo apt-get install libhunspell-dev
+  - rvm install ruby
+  - gem install i18n-translators-tools
+install:
+  pip install -r requirements.txt
+script:
+  - nosetests --with-coverage --cover-package=src
+  - cd src
+  - python builder.py -pFileZilla
+  - python index_creation.py -pFileZilla
+after_success:
+  coveralls

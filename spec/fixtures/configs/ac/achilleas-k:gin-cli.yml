@@ -1,0 +1,48 @@
+language: go
+
+dist: xenial
+
+services:
+    - docker
+
+env:
+  global:
+    - GO111MODULE=on
+
+
+# Three builds:
+# - Build with latest stable Go and run tests
+# - Build with latest stable Go and run tests with the minimum supported version of Git-annex
+# - Build with Go 'tip' (devel version).  This is allowed to fail.  It's meant to catch upcoming build, lint, and vet errors early.
+matrix:
+  include:
+    - go: "1.11.x"
+    - go: tip
+  allow_failures:
+    - go: tip
+
+before_install:
+  - pyenv global 3.7.1
+  - pip3 install --user pytest pyyaml
+
+install:
+  - pip3 install pytest
+  - wget https://downloads.kitenet.net/git-annex/linux/current/git-annex-standalone-amd64.tar.gz
+  - tar xf git-annex-standalone-amd64.tar.gz
+  - export PATH=$PATH:$PWD/git-annex.linux
+  - go get -v ./...
+  # tools
+  # - go get -u golang.org/x/lint/golint
+  # codestyle checks
+  - go vet ./...
+  # - golint ./...
+  - gofmt -s -l .
+
+script:
+  - make install
+  - go test -v ./...
+  - if [[ "${TRAVIS_GO_VERSION}" != "tip" ]]; then
+        ./tests/start-server;
+        while ! curl localhost:3000 -so /dev/null; do sleep 1; done;
+        ./tests/run-all-tests;
+    fi

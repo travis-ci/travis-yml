@@ -1,0 +1,33 @@
+language: node_js
+node_js:
+  - 10
+cache: yarn
+env:
+  global:
+    - NODE_ENV=test
+script:
+  - yarn lint
+  - yarn test --coverage
+  - NODE_ENV=production yarn webpack
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
+deploy:
+  provider: s3
+  region: us-east-1
+  bucket: $(node config ProjectFQDomain)
+  acl: public_read
+  cache_control: "max-age=31536000"
+  local_dir: dist
+  skip_cleanup: true
+  on:
+    branch:
+      - master
+    node: '8'
+    condition: $(node aws/utils bucketExists) = "true"
+after_deploy:
+  - node aws/utils invalidate "/index.html"
+  - $(yarn bin)/sentry-cli releases -o $(node config SentryOrg) -p $(node config SentryProject) new $TRAVIS_COMMIT
+  - $(yarn bin)/sentry-cli releases -o $(node config SentryOrg) -p $(node config SentryProject) files $TRAVIS_COMMIT upload-sourcemaps dist
+notifications:
+  email: false
+  slack: bjacobel:xasDl3nTxo2feJGba70E43oR

@@ -1,0 +1,71 @@
+# We will use docker to set up out environment, so don't use any particular
+# language in Travis itself
+language: generic
+
+# Enable docker
+sudo: required
+services:
+    - docker
+
+# Disable automatic submodule fetching (it's done recursively)
+git:
+    submodules: false
+
+# Do a shallow submodule fetch
+before_install: git submodule update --init
+
+env:
+    global:
+        # Make sure beaver is in the PATH
+        - PATH="$(git config -f .gitmodules submodule.beaver.path)/bin:$PATH"
+        - DIST=xenial
+        - COV=1
+
+# Basic config is inherited from the global scope
+jobs:
+    templates:
+        - &test-matrix-d2
+          stage: Test
+          after_success: beaver dlang codecov
+          install: beaver dlang install
+          script: beaver dlang make
+        - &test-matrix-d1
+          <<: *test-matrix-d2
+          # Don't build tags already converted to D2
+          if: NOT tag =~ \+d2$
+    include:
+        # Test matrix
+        - <<: *test-matrix-d1
+          env: DMD=1.081.* F=production
+        - <<: *test-matrix-d1
+          env: DMD=1.081.* F=production DFLAGS=-release
+        - <<: *test-matrix-d1
+          env: DMD=1.081.* F=production DFLAGS=-debug=ISelectClient
+          script: 2>/dev/null beaver dlang make
+        - <<: *test-matrix-d1
+          env: DMD=1.081.* F=devel
+        - <<: *test-matrix-d2
+          env: DMD=2.071.2.s* F=production
+        - <<: *test-matrix-d2
+          env: DMD=2.071.2.s* F=devel
+        - <<: *test-matrix-d2
+          env: DMD=2.078.3.s* F=production
+        - <<: *test-matrix-d2
+          env: DMD=2.078.3.s* F=devel
+        - <<: *test-matrix-d2
+          env: DMD=2.078.* F=production
+        - <<: *test-matrix-d2
+          env: DMD=2.078.* F=devel
+
+        # Additional stages
+
+        - stage: Closure allocation check
+          env: DMD=2.071.2.s* F=devel
+          install: beaver dlang install
+          script: ci/closures.sh
+
+        - stage: D2 Release
+          if: tag IS present AND NOT tag =~ \+d2$
+          env: DMD=2.071.2.s* F=devel DFLAGS=-vgc
+          install: beaver dlang install
+          script: beaver dlang d2-release

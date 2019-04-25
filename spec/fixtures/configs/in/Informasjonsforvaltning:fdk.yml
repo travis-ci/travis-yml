@@ -1,0 +1,65 @@
+# sudo-enabled Trusty is used because we use docker https://docs.travis-ci.com/user/docker/
+# Consider skipping docker (build containers without docker or outside of travis), in order to use faster container-based Trusty: https://docs.travis-ci.com/user/reference/trusty/#Container-based-with-sudo%3A-false
+dist: trusty
+sudo: required
+
+language: generic
+
+notifications:
+  slack: fdk-project:SK6k3zGFlrMDGQBX0jSDSvPy
+
+services:
+  - docker
+
+install:
+  - export DOCKER_HOST=unix:///var/run/docker.sock # required by the docker maven plugin for connecting to docker
+  - git config --global core.autocrlf input # this allows to match source code hash with what is calculated on Mac and Windows
+  - export FORCE_BUILD=false # if true the buildAndPushApplication.sh script forces a build for all apps
+  - travis_wait npm install -g codecov
+  - node -v
+  - npm -v
+
+branches:
+  except:
+    - /ut1_.*/
+    - /st1_.*/
+    - /st2_.*/
+    - /tt1_.*/
+    - /ppe_.*/
+
+jobs:
+  include:
+    - stage: Build
+      if: type = pull_request OR ( type = push AND branch = develop )
+      script: travis_wait 25 source ./travisBuild.sh
+      env:
+        - comment=Build all applications
+
+    - stage: Tests # Run unit and integration tests + generate test coverage report
+      if: type = cron #run only during nightly cron job - time-consuming operation
+      script: mvn install -DskipTests -Dmaven.javadoc.skip=true -B && docker-compose up -d  && ./waitForDocker.sh  &&  mvn failsafe:integration-test -DskipDockerBuild -B -P integration-test verify org.jacoco:jacoco-maven-plugin:report
+      after_success:
+        - bash <(curl -s https://codecov.io/bash)
+      env:
+        - comment=Run unit and integration tests + generate test coverage report
+
+    - stage: Integration
+      if: type = pull_request OR ( type = push AND branch = develop )
+      script: source ./travisIntegration.sh
+      env:
+        - comment="Run integration tests"
+
+    #- stage: Tests # Run end-to-end tests + generate test coverage report
+    #  if: type = cron #run only during nightly cron job - time-consuming operation
+    #  script: mvn install -DskipTests -Dmaven.javadoc.skip=true -B && docker-compose up -d  && ./waitForDocker.sh  &&  mvn verify -DskipDockerBuild -B -P end-to-end-test org.jacoco:jacoco-maven-plugin:report
+    #  after_success:
+    #    - bash <(curl -s https://codecov.io/bash)
+    #  env:
+    #    - comment=Run end-to-end (Cucumber) tests
+
+    - stage: deploy
+      # only deploy when branch is develop and exclude when type is pull_request,
+      # because in case if type=pull_request branch means base branch.
+      if: branch = develop AND type = push
+      script:
+        - ./travisPushToDockerHub.sh

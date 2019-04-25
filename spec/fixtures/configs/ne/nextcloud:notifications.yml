@@ -1,0 +1,88 @@
+dist: trusty
+sudo: required
+language: php
+php:
+  - 7.0
+  - 7.1
+  - 7.2
+
+services:
+  - docker
+
+addons:
+  apt:
+    packages:
+      - alien
+      - libaio1
+
+cache:
+  directories:
+    - docker
+  apt: true
+
+env:
+  global:
+    - CORE_BRANCH=stable14
+    - APP_NAME=notifications
+  matrix:
+    - DB=sqlite
+
+branches:
+  only:
+    - master
+    - /^stable\d+(\.\d+)?$/
+
+before_install:
+  - wget https://raw.githubusercontent.com/nextcloud/travis_ci/master/before_install.sh
+  - . ./before_install.sh $APP_NAME $CORE_BRANCH $DB
+  - sh -c "if [ -f ../server/data/nextcloud.log ]; then cat ../server/data/nextcloud.log; fi"
+
+  # Add some output debugging information
+  - cd ../server
+  - ./occ check
+  - ./occ status
+  - ./occ app:list
+  - ./occ app:enable $APP_NAME
+  - ./occ app:list
+
+  # Setup behat for integration tests
+  - cd apps/$APP_NAME/
+  - cd tests/Integration/
+  - sh -c "if [ '$INTEGRATION' = '1' ]; then composer install; fi"
+  - cd ../../
+
+script:
+  # Test the app
+  - sh -c "if [ '$CODECHECK' = '1' ]; then find . -name \*.php -exec php -l \"{}\" \;; fi"
+  - cd ../../
+  - sh -c "if [ '$CODECHECK' = '1' ]; then ./occ app:check-code $APP_NAME -c private -c strong-comparison; fi"
+  - sh -c "if [ '$CODECHECK' = '2' ]; then ./occ app:check-code $APP_NAME -c deprecation; fi"
+  - cd apps/$APP_NAME/
+
+  # Run phpunit tests
+  - cd tests/Unit
+  - sh -c "if [ '$INTEGRATION' != '1' -a '$JSTESTS' != '1' -a '$CODECHECK' != '1' -a '$CODECHECK' != '2' ]; then phpunit --configuration phpunit.xml; fi"
+  - cd ../..
+
+  # Integration tests
+  - cd tests/Integration
+  - sh -c "if [ '$INTEGRATION' = '1' ]; then bash run.sh; fi"
+  - cd ../..
+
+matrix:
+  include:
+    - php: 7.0
+      env: DB=mysql
+    - php: 7.0
+      env: DB=pgsql
+    - php: 7.0
+      env: DB=oracle
+    - php: 7.0
+      env: DB=mysql;CODECHECK=1
+    - php: 7.0
+      env: DB=mysql;CODECHECK=2
+    - php: 7.0
+      env: DB=mysql;INTEGRATION=1
+  allow_failures:
+    - env: DB=mysql;CODECHECK=2
+  fast_finish: true

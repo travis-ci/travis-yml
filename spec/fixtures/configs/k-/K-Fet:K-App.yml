@@ -1,0 +1,18 @@
+language: node_js
+cache: yarn
+dist: trusty
+node_js:
+  - "10"
+
+addons:
+  sonarcloud:
+    organization: "k-fet"
+
+script:
+  - yarn test
+  - codecov
+  - sonar-scanner
+
+
+notifications:
+  email: false

@@ -2,16 +2,11 @@
 
 
 
-## Type
+## Types
 
-Any of:
-
-* Map (Hash)
+* Hash
 * Boolean
 
-## Flags
-
-None.
 
 
 ## Examples
@@ -23,10 +18,10 @@ artifacts:
   endpoint: string
   key: 
   secret: 
-  paths: "[ref:strs]"
+  paths: string
   branch: string
   log_format: string
-  target_paths: "[ref:strs]"
+  target_paths: string
   debug: true
   concurrency: 1
   max_size: 1

@@ -1,0 +1,27 @@
+language: csharp
+mono:
+  - 5.2.0
+solution: CharacterGen.sln
+install:
+  - nuget restore CharacterGen.sln
+  - nuget install NUnit.Runners -OutputDirectory testrunner
+script:
+  - xbuild CharacterGen.sln /p:TargetFrameworkVersion="v4.5" /p:Configuration=Stress
+  - set -e
+  - mono ./testrunner/NUnit.ConsoleRunner.*/tools/nunit3-console.exe ./CharacterGen.Tests.Unit/bin/Stress/CharacterGen.Tests.Unit.dll
+  - set -e
+  - mono ./testrunner/NUnit.ConsoleRunner.*/tools/nunit3-console.exe ./CharacterGen.Tests.Integration.IoC/bin/Stress/CharacterGen.Tests.Integration.IoC.dll
+  - set -e
+  - mono ./testrunner/NUnit.ConsoleRunner.*/tools/nunit3-console.exe ./CharacterGen.Tests.Integration.Tables/bin/Stress/CharacterGen.Tests.Integration.Tables.dll
+  - set -e
+  - mono ./testrunner/NUnit.ConsoleRunner.*/tools/nunit3-console.exe ./CharacterGen.Tests.Integration/bin/Stress/CharacterGen.Tests.Integration.dll
+  - set -e
+  - mono ./testrunner/NUnit.ConsoleRunner.*/tools/nunit3-console.exe ./CharacterGen.Tests.Integration.Stress/bin/Stress/CharacterGen.Tests.Integration.Stress.dll
+deploy:
+  skip_cleanup: true
+  provider: script
+  script: chmod +x ./deploy/deploy.sh && ./deploy/deploy.sh $NUGET_API_KEY $NUGET_SOURCE
+  on:
+    branch: master
+matrix:
+  fast_finish: true

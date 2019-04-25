@@ -1,0 +1,31 @@
+language: python
+cache: pip
+
+python:
+  - "3.6"
+
+services: postgresql
+
+# command to install dependencies
+install:
+  - pip install --upgrade pip
+  - pip install pipenv
+  - pipenv install --dev --deploy
+
+before_script:
+  - psql -c "CREATE DATABASE pulseapi;" -U postgres
+  - pipenv run python manage.py migrate
+
+# command to run tests
+script:
+  - pipenv run flake8 pulseapi --config=./pulseapi/tox.ini
+  - pipenv run python manage.py test
+
+env:
+  global:
+    - DEBUG=True
+    - REDIRECT_URIS=http://test.example.com:8000/api/pulse/oauth2callback
+    - SSL_PROTECTION=False
+    - DATABASE_URL=postgres://postgres:5432@localhost:5432/pulseapi
+    - SECRET_KEY=BetPHpGoUXUwjaAXm6ArIhV95xLdDZtu8QEGnNXY3eTknIkD
+    - AUTH_STAFF_EMAIL_DOMAINS=mozillafoundation.org

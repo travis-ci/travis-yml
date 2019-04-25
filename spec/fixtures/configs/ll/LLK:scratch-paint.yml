@@ -1,0 +1,43 @@
+language: node_js
+sudo: required
+dist: trusty
+node_js:
+- 6
+cache:
+  directories:
+  - node_modules
+install:
+- sudo apt-get update && sudo apt-get install -y libcairo2-dev libpango1.0-dev libssl-dev libjpeg62-dev libgif-dev pkg-config
+- npm install canvas@1.6.7
+- npm --production=false install
+- npm --production=false update
+before_deploy:
+- npm --no-git-tag-version version 0.2.0-prerelease.$(date +%Y%m%d%H%M%S)
+- git config --global user.email $(git log --pretty=format:"%ae" -n1)
+- git config --global user.name $(git log --pretty=format:"%an" -n1)
+deploy:
+- provider: script
+  on:
+    all_branches: true
+    condition: $TRAVIS_BRANCH != develop && $TRAVIS_EVENT_TYPE != cron
+  skip_cleanup: true
+  script: npm run deploy -- -x -e $TRAVIS_BRANCH -r https://${GH_TOKEN}@github.com/${TRAVIS_REPO_SLUG}.git
+- provider: script
+  on:
+    branch: develop
+    condition: $TRAVIS_EVENT_TYPE != cron
+  skip_cleanup: true
+  script: npm run --silent deploy -- -x -a -r https://${GH_TOKEN}@github.com/${TRAVIS_REPO_SLUG}.git
+- provider: npm
+  on:
+    branch: develop
+    condition: $TRAVIS_EVENT_TYPE != cron
+  skip_cleanup: true
+  email: $NPM_EMAIL
+  api_key: $NPM_TOKEN
+- provider: script
+  on:
+    branch: develop
+    condition: $TRAVIS_EVENT_TYPE == cron
+  skip_cleanup: true
+  script: npm run i18n:src && npm run i18n:push

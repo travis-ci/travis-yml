@@ -1,0 +1,47 @@
+matrix:
+  include:
+  - os: linux
+    dist: trusty
+    sudo: required
+    addons:
+      apt:
+        sources:
+        - ubuntu-toolchain-r-test
+        packages:
+        - gcc-6
+        - g++-6
+    env:
+      - MATRIX_EVAL="CC=gcc-6 && CXX=g++-6"
+  - os: osx
+    osx_image: xcode9.4
+language: c++
+before_install:
+- if [ "$TRAVIS_EVENT_TYPE" != "pull_request" ]; then openssl aes-256-cbc -K $encrypted_a739ef9a19a4_key -iv $encrypted_a739ef9a19a4_iv -in pxscene-build.pem.enc -out /tmp/pxscene-build.pem -d; fi
+- eval "${MATRIX_EVAL}"
+- if [ "$TRAVIS_EVENT_TYPE" != "pull_request" ]; then  eval "$(ssh-agent -s)"; fi
+- if [ "$TRAVIS_EVENT_TYPE" != "pull_request" ]; then  chmod 0600 /tmp/pxscene-build.pem; fi
+- if [ "$TRAVIS_EVENT_TYPE" != "pull_request" ]; then  ssh-add /tmp/pxscene-build.pem; fi
+- ./ci/before_install.sh
+- if ( [ "$TRAVIS_EVENT_TYPE" = "push" ] || [ "$TRAVIS_EVENT_TYPE" = "pull_request" ] ) && [ -z "${TRAVIS_TAG}" ] && [ "$TRAVIS_OS_NAME" = "osx" ] ; then export PATH=/usr/local/opt/ccache/libexec:$PATH ; fi
+- if ( [ "$TRAVIS_EVENT_TYPE" = "push" ] || [ "$TRAVIS_EVENT_TYPE" = "pull_request" ] ) && [ -z "${TRAVIS_TAG}" ] && [ "$TRAVIS_OS_NAME" = "linux" ] ; then export PATH=/usr/lib/ccache:$PATH ; fi
+- gcc -v && g++ -v 
+install:
+- ./ci/install.sh
+before_script:
+- if ( [ "$TRAVIS_EVENT_TYPE" = "push" ] || [ "$TRAVIS_EVENT_TYPE" = "pull_request" ] ) && [ -z "${TRAVIS_TAG}" ] ; then ccache -s; fi
+- ./ci/before_script.sh
+- if [ "$TRAVIS_EVENT_TYPE" = "api" ] || [ ! -z "${TRAVIS_TAG}" ] ;  then export linenumber=`awk '/CFBundleShortVersionString/{ print NR; exit }' $TRAVIS_BUILD_DIR/examples/pxScene2d/src/macstuff/Info.plist`;export PX_VERSION=`sed -n "\`echo $((linenumber+1))\`p" $TRAVIS_BUILD_DIR/examples/pxScene2d/src/macstuff/Info.plist|awk -F '<string>' '{print $2}'|awk -F'</string>' '{print $1}'`; fi
+- if [ "$TRAVIS_EVENT_TYPE" = "cron" ] ; then export PX_VERSION=edge_`date +%Y-%m-%d` ; fi
+script:
+- ./ci/script.sh
+- if ( [ "$TRAVIS_EVENT_TYPE" = "push" ] || [ "$TRAVIS_EVENT_TYPE" = "pull_request" ] ) && [ -z "${TRAVIS_TAG}" ] ; then codecov --build "$TRAVIS_OS_NAME-$TRAVIS_COMMIT-$TRAVIS_BUILD_NUMBER" -X gcov -f $TRAVIS_BUILD_DIR/tracefile ; fi
+- if ( [ "$TRAVIS_EVENT_TYPE" = "push" ] || [ "$TRAVIS_EVENT_TYPE" = "pull_request" ] ) && [ -z "${TRAVIS_TAG}" ] ; then genhtml -o $TRAVIS_BUILD_DIR/logs/codecoverage $TRAVIS_BUILD_DIR/tracefile; fi
+after_script:
+- ./ci/after_script.sh
+- if [ "$TRAVIS_EVENT_TYPE" != "pull_request" ]; then  rm -rf /tmp/pxscene-build.pem; fi
+addons:
+  ssh_known_hosts: 96.116.56.119
+notifications:
+  slack:
+    secure: gQ7GjheuN4j98co71p1gO0QaIAX3xHnDE2JRTT5UopsPbhczBC3A6RlVhXBrIc9mDyt2AO/pTBOl68BGtwtb4NVhZo2fqCcoq4wk2U2bAH3OnQu5KE9fJxm1KdJi0WiFVy1pURQql1fUH800YqF1LOWbc9m8aexgcvtD6ghDFLCDStgqfNgRzSEbZ8YBP98FjkEHj/jjeqwdUaH0Aezv0n82Laev99KDveCTVMoKXcbyfBQK0ty3OFAg6nBrMWPx0RVDVOVFPjjXDFgC5UfS9FLA57bxRDVmDr8SMnS/7m26YH0jnqY4oS1QnEmrdUtp6UWNex8D88KCt+wXoOpd6Ca1DVHNnaFuotEVpJ8B3WEG3uiK6xvacpkMrtEuoswUIbOv8E1VdfF3eOSmSAneb09Nbs15U8yiBfNq4PLE8TYc22or5jDsksTyGgmOgE1m8teH4DQz+k5qhMihd9f88CqaWzkjNgucavr/QzXG16xt13unMmMD0/bzA7wDU3hprne5hycR0LDxFRlL5z5xdv4w9yseuFTYBRcQ5Lk9zA6gJUMCGcbCtfA2rYQS7lOul575EMX7SfagHMmn663QY3tzm+vsxF93Dib+xfsAI3xSxSKGeBNZ5H9MxUPNUcu1yxhDZIZX8HujsDVLfIm/VK9OS2ultBTYeKizlyPBBsM=
+cache: ccache

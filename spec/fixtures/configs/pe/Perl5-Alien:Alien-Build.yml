@@ -1,0 +1,45 @@
+language: minimal
+dist: xenial
+services:
+  - docker
+
+before_install:
+  - curl https://raw.githubusercontent.com/plicease/cip/master/bin/travis-bootstrap | bash
+  - cip before-install
+
+install:
+  - cip diag
+  - cip install
+  - cip scn build
+
+script:
+  - cip script
+  - cip exec perl maint/ci-test-plugins.pl
+  - cip scn run
+
+jobs:
+  include:
+    - env: CIP_TAG=5.28-alpine3.9 ALIEN_BUILD_INSTALL_EXTRA=1 CIP_ENV=ALIEN_BUILD_LIVE_TEST=1
+    - env: CIP_TAG=5.28-bionic    ALIEN_BUILD_INSTALL_EXTRA=1 CIP_ENV=ALIEN_BUILD_LIVE_TEST=1
+    - env: CIP_TAG=5.28-centos7   ALIEN_BUILD_INSTALL_EXTRA=1 CIP_ENV=ALIEN_BUILD_LIVE_TEST=1
+    - env: CIP_TAG=5.28-fedora29  ALIEN_BUILD_INSTALL_EXTRA=1 CIP_ENV=ALIEN_BUILD_LIVE_TEST=1
+    - env: CIP_TAG=5.28-stretch   ALIEN_BUILD_INSTALL_EXTRA=0 CIP_ENV=ALIEN_BUILD_LIVE_TEST=1
+    - env: CIP_TAG=5.28-stretch   ALIEN_BUILD_INSTALL_EXTRA=1 CIP_ENV=ALIEN_BUILD_LIVE_TEST=1
+    - env: CIP_TAG=5.29 ALIEN_BUILD_INSTALL_EXTRA=1
+    - env: CIP_TAG=5.26 ALIEN_BUILD_INSTALL_EXTRA=1
+    - env: CIP_TAG=5.24 ALIEN_BUILD_INSTALL_EXTRA=1
+    - env: CIP_TAG=5.22 ALIEN_BUILD_INSTALL_EXTRA=1
+    - env: CIP_TAG=5.20 ALIEN_BUILD_INSTALL_EXTRA=1
+    - env: CIP_TAG=5.18 ALIEN_BUILD_INSTALL_EXTRA=1
+    - env: CIP_TAG=5.16 ALIEN_BUILD_INSTALL_EXTRA=1
+    - env: CIP_TAG=5.14 ALIEN_BUILD_INSTALL_EXTRA=0
+    - env: CIP_TAG=5.14 ALIEN_BUILD_INSTALL_EXTRA=1
+    - env: CIP_TAG=5.12 ALIEN_BUILD_INSTALL_EXTRA=1
+    - env: CIP_TAG=5.10.1 ALIEN_BUILD_INSTALL_EXTRA=1
+    - env: CIP_TAG=5.10.0 ALIEN_BUILD_INSTALL_EXTRA=0
+    - env: CIP_TAG=5.8.8  ALIEN_BUILD_INSTALL_EXTRA=0
+    - env: CIP_TAG=5.8.1  ALIEN_BUILD_INSTALL_EXTRA=0
+
+cache:
+  directories:
+    - "$HOME/.cip"

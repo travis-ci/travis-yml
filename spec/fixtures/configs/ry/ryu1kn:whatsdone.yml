@@ -1,0 +1,25 @@
+language: node_js
+node_js:
+- '8.10'
+env:
+  global:
+  - AWS_REGION=ap-southeast-2
+  - secure: pagy1sEbRdDXeDbRr60osimq8TGEUuayDhdcmZMZMmhow/AFbri9SKjivDT9czyUZjRidVZLUmEgBNioT0ZnwVjgsXDYcZMhj0B/j5gFJcqSJmUzgLEfyNYfsZVv8pNkoUZywgvOCddgT1ys5dmlwOE3bhTTzt4E5QgPiyliaiz1KltZs5zREz/6ECRcB85S4I4SKHVFx1TD5Gt7ncP2It8JNyJltFoVpkVJB6jvFeK6Sa0c3t/5CVVKVEa78o9uj/7hz+PiSV9aVeXpgmCIfgnvYchAVg9ZtCdJMEGo5+pfsognDFPzgMQP58LHylhNKxDnpdAraLHhfmqTux4rxzpuyBW2Ea6eSI5ii/owEZcr1w54x3lDM0RzxYc82uk/LE6DPf98P1+gtugg8/gOkPFxah/lN7FifZie6J1KN9+QP/VlptdsiugZ1PJKtBo15qirXdPKcwIy4fZL56ftklOl/QLzO21u6ihU340yprS4VoCg8Mv1HyuCGupmpRo7+7eAlzmqaOSdBXDm4a0iqPmtdzPD38tOdzK5BWyc2T5fDmf6qqoeDoadjvVHuVWyOB4aYzCpHsthV24d5QC6g78eVfke1K+matLD4VJdmrtVPVZsa3d220bmPU4PeNJQp+WEAtm4GphPdImt0/+IDlzXjaVwB/IlvUbwvHQHuH4=
+  - secure: ol1Be2NVySHJkEMML4u1XjiBJLQOfsyWzgmSWlYO/HS620+OY1l8gZAS94snnr7P8XQqJa61zPC7tjXAuVU95g1wrv2qBZGwEf0XNE3naYmhoSotjoJUgORa8hz30sY4x/HrvjOA1Dx9Xs06re3nPb6r7yNEigT+2+FW6kdryMsIzrpBGvLckbq3iR70dHu1KJfebndQEdwdCGVAFbU1iMc55CoL77zfIEWNiLri1Z/y4WirIyN7s+QCMxgyYBDYg2xjFj2pbVmenCvfJ+kmnTSCxnFChN+3B25F26Li8umcDMhNWs/qRBGUx4yt5fY3v/S+hFnKEe41m5gfp28aivz2HyLhMVpXBCNhGds0BwqClNh+bYFLuKecK7KxsCIdtltHmphdbWL39gvYXOsmfkOKWzSGOcu0U6j0r06zjpmeXTCmy8nyMGO+Xy6CGpJD86bp4uTasAxNHmKHCzCgVGp7liVvbPXCLqdnxYJRJg3F1CcTAfQQBmga1UTEHNPT3eU5QXeUz20CVq/Yb1JLzY1nJ6rE+KrIPu7VqVOysV/MFJIJ5130cdSw3pua69c4HAIWCFy1vL8fUjYPFXDQOUTHhl4e9JuldAMufIkzoVPdKEhAjKcRI+KulXLtnImd4IOYz3KiiBl0NTb0eQxOUv0yvSCIdGWPG8pfGJRQlIk=
+addons:
+  apt:
+    sources:
+    - sourceline: 'deb http://us.archive.ubuntu.com/ubuntu vivid main universe'
+    packages:
+    - jq
+before_install:
+- wget https://bootstrap.pypa.io/get-pip.py
+- python3 get-pip.py --user
+- pip install awscli --user
+- aws configure set s3.signature_version s3v4
+- yarn global add kumo
+- kumo install
+install:
+- yarn install
+script:
+- yarn run travis-build

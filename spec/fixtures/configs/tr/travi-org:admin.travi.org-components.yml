@@ -1,0 +1,25 @@
+language: node_js
+dist: trusty
+notifications:
+  email: false
+branches:
+  except:
+  - "/^v\\d+\\.\\d+\\.\\d+$/"
+before_script: npm run greenkeeper:update-lockfile
+after_script: npm run greenkeeper:upload-lockfile
+after_success: npm run report-coverage
+before_deploy:
+- npm run build-storybook
+- git config --global user.name "$GIT_NAME"
+- git config --global user.email "$GIT_EMAIL"
+deploy:
+- skip_cleanup: true
+  provider: script
+  script: npm run deploy
+- skip_cleanup: true
+  provider: script
+  script: npm run semantic-release
+env:
+  global:
+  - secure: k/Sd6YpTUriT/d2+A/2BeSV11KtWwkokCtUR+oEOKybsUye6eYd0yLu6Dgg6rDXNq+QmTwKNMGRGGNNpta3dgij75Kb6vQtS3NquZem9fr8ECECiRYgqeqJnvjvyoF40K3LcYdnzsGKk/m3nqb8R1xGfkeazwPgkp3mx4HC6wfsbpZ0ylEZd4grl/1n1NOXWcxVhhPK/tYG4ThDfGHhBKnCpaVBZ2ZHw46D/1yf2/zD0zNCvsWVg8LVa+uhHxvngkFqd+g9CyLQXQHeo6qHO8++zfN3xAqvFD4up75R32u/ypOFxqA67X6ce59APzgA5X8UQBfR0SzkBWnsCDCqUvFdB+WrHV3goWn0qcJ0vmhfGpal8EQncP9/sw1klcLA3O+gWWCBmEgUwmzZYwNcCuhtvwRd/1DKvcKfm9jHYq95fpJjYQUt6jJ9lpAuK0BArJSzpBqvSZGtH5SThnHmL3stJSO+dbq/PeI24EisHEnkC7XzP3a0hrM1te6rrNqNeCzb61Z1QePApflwc+8ocPsnj4pE6qpDLa6W2pd92mAoX8q+kHmIDl46H534fVvgoSSIkGKZYpANYbLeenJxchVfYk6CZfkBzbjzJMzgq/2zVbZ9NslIv29YvcliGNedNzpMhAj6G56QznQniWeERqQ6s6i1h6VM4gPpsJyTepvQ=
+  - secure: PRLcZnZGCUXkNVceN1gj4W9iKVVTGVe4sCbWi/NF34YrXlQ4kLXwjWEZDYOBXgvCFjtqfxW5e6xSipUQfKkezD4KLlf2yajA3m6100duHR9nrA+0ecqIYtrDb2+Hn+D4DCiFw2o2xH7a1hEHpOsbh3o5b6xaDgOq1r4Ew+HuKN3UcO5UQv0Iaz8gSnrgNVeqwempEPcAop73nzyfIbCjpnv4SI29k65Hv9uwZDdgqtvCVacKCH/YPbv6Q9ehTvKP/U/IT9hs2g1KxQdWgUr0QAr1N2y6CHbcTi69mLCTh/Vur0/GgspsSx6ABB66f0tTuALF/shrOMdKtpjPHBOy4Ac6vND2eKm71GiuBCdU2mftj9owv+TW6TSw64P9y+cUzhqrsnc4QI6fBs1x98wPXOWSgqGdCm63uI/TdK88ne4vgGqg+H6Aki5bdQZMjS0s0+10Wrx/ZrftY502NWC4Hdv65SlsTcs/mhoi11R7xUHhjiWiohO5WlB5TuDmMYdXk2XU4eydKL3Q8f/fBNoeA3z3ZcRmtgp/yN/Bp0SA+Hh6+WvwudCmR3jXT11gWYDf0cq88wM5wxZGkUifyb8S0TppMUTozSvnH0TzMSRIcstrh42xU9748VD54p/LcZHBIj7z4FwJJgLT9oQwl1957xRVz0jVhYIpmCIQMjHKqhY=

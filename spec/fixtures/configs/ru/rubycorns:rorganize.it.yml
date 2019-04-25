@@ -1,0 +1,15 @@
+language: ruby
+rvm:
+  - 2.5.3
+cache: bundler
+before_install:
+  - gem update --system
+  - gem install bundler
+before_script:
+  - "bundle exec rake db:schema:load"
+  - "cp config/secrets.yml.sample config/secrets.yml"
+script: "bundle exec rspec"
+notifications:
+  email:
+    recipients:
+      - rubycorns@googlegroups.com

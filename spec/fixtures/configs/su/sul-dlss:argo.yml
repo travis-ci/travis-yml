@@ -1,0 +1,43 @@
+sudo: required
+services:
+  - docker
+
+language: ruby
+addons:
+  chrome: stable
+rvm:
+  - 2.5.3 # deployed
+
+email: false
+
+before_install:
+  # Travis's docker-compose is too old to handle v3.6 docker-compose templates.
+  # This code is from Travis's documentation: https://docs.travis-ci.com/user/docker/#using-docker-compose
+  - sudo rm /usr/local/bin/docker-compose
+  - curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
+  - chmod +x docker-compose
+  - sudo mv docker-compose /usr/local/bin
+  # Start everything except app
+  - docker-compose up -d db solr fcrepo dor-services-app suri workflow
+  - docker-compose ps
+  - google-chrome-stable --headless --disable-gpu --no-sandbox --remote-debugging-port=9222 http://localhost &
+
+before_script:
+  - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+  - chmod +x ./cc-test-reporter
+  - ./cc-test-reporter before-build
+  - echo "Waiting for Fcrepo to start"
+  - until curl --silent -XGET --fail -o /dev/null http://localhost:8983; do printf '.'; sleep 1; done
+
+script: RAILS_ENV=test bundle exec rake ci
+
+after_script:
+  - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
+
+env:
+  global:
+    - NOKOGIRI_USE_SYSTEM_LIBRARIES=true # speeds up bundle install
+    - DOCKER_COMPOSE_VERSION=1.23.1
+    - CC_TEST_REPORTER_ID=266992849463aa465e0884ad7d582306656214e31ac9245258f93190868cbc9a
+
+cache: bundler

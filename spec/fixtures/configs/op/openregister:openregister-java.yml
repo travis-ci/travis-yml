@@ -1,0 +1,37 @@
+dist: xenial
+sudo: required
+language: java
+jdk:
+- openjdk8
+services: 
+  - postgresql
+addons:
+  postgresql: '9.5'
+cache:
+  directories:
+  - $HOME/.gradle/caches
+  - $HOME/.gradle/wrapper
+  - $HOME/.m2
+before_script:
+# work around https://github.com/travis-ci/travis-ci/issues/8363
+- pyenv global system 3.6.7
+- psql --version
+- psql -c 'create database ft_openregister_java_multi;' -U postgres
+- psql -c 'create database conformance_openregister_java;' -U postgres
+script:
+- travis_wait ./gradlew check
+after_failure:
+- cat $TRAVIS_BUILD_DIR/stderr.txt
+- cat $TRAVIS_BUILD_DIR/stdout.txt
+deploy:
+- provider: s3
+  access_key_id: AKIAJPKUFKZECR4YTZBA
+  secret_access_key: &1
+    secure: "Ot5j4aKlqXt/ziwl4asyn+0+9Cp3uqZJuR76F748S0/CJLtpdw5HV0SPqVMrNaLzfh5NxvEyZw7VhmqVOkOtqkWt8tgVCCRu5kSSe6/z06civ1DVcNpNUzuY3EFEKEgLTmOfna5F6Rkpi2UZGmSukIGcbwcoT0mDTs7ZQBG9j8YJVi0JHxFw250qZNvqqLKiZOSMNjwrGeN9pBXWUpHa3LvOnjS/hALJY0aVfkNE0BRLDm2WpzXLJuG+I88gnnCtsW9z/NlBv+lJxUlh6aldI38kXMXdGI1HsKV8sUItvFMsLHuzBd8rbHRIAOPAv6XDZS6SVR26uXAj0BBDMLEI2IfLAkyN87hQpJWZid1GWxrb5jklqx+xy6F9caVDGCQHKv4E14T0/Gaf7wOnaLCacWH6NfwIT4AsMjKuTeoBVOaFlakhzs0dFOfkHgTDcuArepNPYfgLub2gOnHpT4a9haQdVPTadlzPk5jVA2YefIyVrLSUqvi79X0Su39PvFQ2So5b0LwiGYATz+yLW228wu+Bw+OkN1mV205Gb2NdeKc1RhaZhKxnM6jPEJUabfBvqm0va6Lq1+ECDSLBCyapAS5WXahuOJ3WanC/sZ6ZtyjwlKZaKpseSXaqrzoBDBoHKdW9PHu4x4PaZjYvAjY2jix/3BqaopHf2P+lP9K9Z5I="
+  local_dir: deployable_bundle
+  bucket: openregister.app.artifacts
+  region: eu-west-1
+  skip_cleanup: true
+  on:
+    branch: master
+    condition: $DEPLOY=true

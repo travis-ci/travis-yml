@@ -1,0 +1,40 @@
+sudo: false
+language: php
+
+php:
+  - 7.0
+  - 7.1
+  - 7.2
+  - nightly
+
+env:
+  - DB=postgres
+
+install: travis_retry composer install --no-interaction --prefer-source
+
+services:
+  - memcached
+  - mysql
+
+addons:
+  mariadb: '10.0'
+
+before_script:
+  - mysql -e 'DROP DATABASE IF EXISTS facturascripts;'
+  - mysql -e 'CREATE DATABASE IF NOT EXISTS facturascripts;'
+
+script:
+# Run PHP-CS Beautifier and Fixer: to format some common non PSR code that can be auto-fixed.
+  - vendor/bin/phpcbf --tab-width=4 --encoding=utf-8 --standard=phpcs.xml Core -s
+# Run PHP-CS.
+  - vendor/bin/phpcs --tab-width=4 --encoding=utf-8 --standard=phpcs.xml Core -s
+# Run PHPUnit test.
+  - vendor/bin/phpunit --configuration phpunit.xml
+matrix:
+  include:
+    - php: hhvm
+      dist: trusty
+  allow_failures:
+    - php: hhvm
+    - php: nightly
+  fast_finish: true

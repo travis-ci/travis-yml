@@ -1,0 +1,71 @@
+dist: trusty
+language: ruby
+cache: bundler
+rvm:
+- 2.4.1
+before_install:
+  - nvm install node
+before_script:
+- pip install --user -r requirements.txt
+script:
+- behave tests/before_build
+- gem install bundler
+- bundle install
+- bundle exec jekyll build
+- behave tests/after_build
+- echo "If the build fails, scroll up to look for failed test cases"
+deploy:
+- provider: script
+  script: deploy/deploy.sh fragments
+  skip_cleanup: true
+  on:
+    branch: master
+- provider: script
+  script: deploy/deploy.sh anthillinside
+  skip_cleanup: true
+  on:
+    branch: master
+- provider: script
+  script: deploy/deploy.sh reactfoo
+  skip_cleanup: true
+  on:
+    branch: master
+- provider: script
+  script: deploy/deploy.sh fifthelephant
+  skip_cleanup: true
+  on:
+    branch: master
+- provider: script
+  script: deploy/deploy.sh metarefresh
+  skip_cleanup: true
+  on:
+    branch: master
+- provider: script
+  script: deploy/deploy.sh jsfoo
+  skip_cleanup: true
+  on:
+    branch: master
+- provider: script
+  script: deploy/deploy.sh rootconf
+  skip_cleanup: true
+  on:
+    branch: master
+- provider: script
+  script: deploy/deploy.sh 50p
+  skip_cleanup: true
+  on:
+    branch: master
+- provider: pages
+  skip_cleanup: true
+  github_token: "$GITHUB_TOKEN"
+  target_branch: gh-pages
+  on:
+    branch: master
+addons:
+  ssh_known_hosts: e2e.hasgeek.com
+
+notifications:
+  email: false
+  slack:
+    - hasgeek:HDCoMDj3T4ICB59qFFVorCG8
+    - friendsofhasgeek:3bLViYSzhfaThJovFYCVD3fX

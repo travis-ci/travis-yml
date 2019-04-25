@@ -1,0 +1,25 @@
+language: go
+sudo: false
+
+go:
+  - 1.9
+
+go_import_path: github.com/uber-go/dosa
+
+cache:
+  directories:
+    - vendor
+
+install:
+  - make vendor
+  - go get github.com/golang/mock/mockgen
+
+script:
+  - make lint
+  - make test
+
+after_success:
+  - make coveralls
+
+services:
+  - redis-server

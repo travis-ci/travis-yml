@@ -1,0 +1,18 @@
+sudo: false
+
+language: rust
+
+rust:
+  - stable
+  - 1.15.1
+  - beta
+
+script:
+  - cargo test
+
+matrix:
+  include:
+    - rust: nightly
+      script:
+        - cargo test
+        - cargo update -Z minimal-versions && cargo build

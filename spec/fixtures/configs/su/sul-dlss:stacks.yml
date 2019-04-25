@@ -1,0 +1,25 @@
+notifications:
+  email: false
+
+rvm:
+  - 2.5.1
+  - 2.6.0
+
+env:
+  global:
+    - NOKOGIRI_USE_SYSTEM_LIBRARIES=true
+    - CC_TEST_REPORTER_ID=bd7f1c0c268fc62a009c2382e5c7d57a1b05e88256dc09369e2e3c2140886125
+
+sudo: false
+language: ruby
+
+cache:
+  bundler: true
+
+before_script:
+  - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+  - chmod +x ./cc-test-reporter
+  - ./cc-test-reporter before-build
+
+after_script:
+  - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT

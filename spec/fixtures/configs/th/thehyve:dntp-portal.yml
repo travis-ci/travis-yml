@@ -1,0 +1,27 @@
+language: java
+jdk:
+ - oraclejdk8
+node_js:
+ - '10'
+sudo: true
+
+install:
+- mvn -DskipTests -Dspring.profiles.active=dev package -q
+
+script:
+- mvn -Dspring.profiles.active=dev test
+
+after_success:
+- bash <(curl -s https://codecov.io/bash)
+
+notifications:
+  email:
+    recipients:
+    - gijs@thehyve.nl
+    on_success: change
+    on_failure: always
+  hipchat:
+    rooms:
+      secure: KwSNDuSDkhePVHvwa/C4zBj2Q9q6klE68IaQCSC5mPPZdQ0W/+mCFaarU8zOdDZEAq8G8RrQLBM+sfsaw6tpxLtMwnn1fZIdzDIujTisIHjjlchvQHoiUP+b3A+qNBolo8TruwqmBVryTSAlPn0/ebeH4EKyUcU0v0W5++S7lI4=
+    on_success: change
+    on_failure: always

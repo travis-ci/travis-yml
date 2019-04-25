@@ -1,0 +1,116 @@
+language: python
+python: "2.7"
+sudo: required
+dist: trusty
+addons:
+  ssh_known_hosts: localhost
+  postgresql: "9.5"
+  apt:
+    update: true
+    sources:
+      - sourceline: 'deb https://dl.yarnpkg.com/debian/ stable main'
+        key_url: 'https://dl.yarnpkg.com/debian/pubkey.gpg'
+    packages:
+      - fabric
+      - git
+      - yarn
+      - openssh-server
+      - apt-transport-https
+      - python-virtualenv
+      - python-pip
+      - python-psycopg2
+      - memcached
+      - python-requests
+      - python-jinja2
+      - python-dev
+      - pkg-config
+      - automake
+      - bison
+      - flex
+      - gperf
+      - gawk
+      - chromium-chromedriver
+      - libpq-dev
+      - libmemcached-dev
+      - libzmq3-dev
+      - libxslt1-dev
+      - libffi-dev
+      - libxml2-dev
+      - libssl-dev
+      - libreadline-dev
+      - libxmlsec1-dev
+      - libgraphviz-dev
+git:
+  depth: 100
+cache:
+  pip: true
+  directories:
+    - assembl/static/js/node_modules
+    - assembl/static/widget/card/bower_components
+    - assembl/static/widget/creativity/bower_components
+    - assembl/static/widget/session/bower_components
+    - assembl/static/widget/share/bower_components
+    - assembl/static/widget/video/bower_components
+    - assembl/static/widget/vote/bower_components
+    - assembl/static2/node_modules
+services:
+ - redis-server
+before_install:
+# Fabric `run` commands is reading /home/travis/.travis/job_stages which
+# sources $TRAVIS_HOME/.travis/functions but $TRAVIS_HOME is not defined in
+# this context, doing a symlink fixes the issue.
+ - sudo mkdir -p /.travis
+ - sudo ln -s /home/travis/.travis/functions /.travis/functions
+ - ls /etc/apt/sources.list.d/
+ # The following line is needed, otherwise the set_file_permissions fab command yells error "Operation not permitted"
+ - sudo usermod -a -G www-data $USER
+ - ssh-keygen -P '' -f ~/.ssh/id_rsa && cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
+ - echo -e "_extends = ./testing.rc\n_gitbranch = $TRAVIS_COMMIT\nsqlalchemy.echo = False" > travis.rc
+ # The following line produces warning "uses weak digest algorithm" during its `apt-get update`
+ # - fab -f assembl/fabfile.py -c travis.rc install_assembl_server_deps
+ # - fab -f assembl/fabfile.py -c travis.rc install_redis
+ # - fab -f assembl/fabfile.py -c travis.rc install_memcached
+install:
+ # The set_file_permissions fabric command needs to be encapsulated into this sudo su command, because in before_install we have added $USER in www-data group but have not logged out and logged in again for changes to take effect in this terminal
+ - sudo -E su $USER -c 'fab -f assembl/fabfile.py -c travis.rc set_file_permissions'
+ # TODO: fix fabfile's check_and_create_database_user command which produces an error when run by travis. For now we instead run the following command
+ - pip install psycopg2
+ - python2 $PWD/assembl/scripts/pypsql.py -u postgres -n localhost  "CREATE USER assembl_test WITH CREATEDB ENCRYPTED PASSWORD 'assembl_test'; COMMIT;"
+ # we need to uninstall pytest from travis venv to ensure we use our version
+ - pip uninstall -y pytest
+ # The following command runs lots of sub-commands. After the following line has completed, approximately 10min have elapsed from the very beginning of the build
+ - fab -f assembl/fabfile.py -c travis.rc bootstrap_from_checkout
+#before_script:
+  #- source $VIRTUAL_ENV/bin/activate
+  # In jenkins, we were running the following commented steps at each build, in order to correctly update the already existing instance of Assembl (it was not built from zero each time). So should we do this for travis if we use more travis caching?
+  #- supervisord
+  #- supervisorctl shutdown
+  #- fab -c travis.rc database_delete
+  #- fab -c travis.rc app_update_dependencies
+  #- fab -c travis.rc app_compile_nodbupdate
+  #- fab -c travis.rc database_create
+  #- assembl-db-manage testing.ini bootstrap
+env:
+  - TO_TEST=BACKEND
+  - TO_TEST=FRONTEND
+script:
+#  - if [ "$TO_TEST" = "BACKEND" ]; then py.test --cov assembl --cov-report term --cov-report html --junit-xml junit.xml --maxfail=2 assembl; fi
+# Run graphql tests with the frontend tests to avoid the 50 min limit and to have a quicker feedback, disable coverage for now.
+  - if [ "$TO_TEST" = "BACKEND" ]; then py.test --maxfail=2 assembl -k "not test_graphql"; fi
+  - if [ "$TO_TEST" = "FRONTEND" ]; then py.test --maxfail=2 assembl -k "test_graphql"; fi
+  - if [ "$TO_TEST" = "BACKEND" ]; then flake8 assembl; fi
+  - cd assembl/static2
+  - if [ "$TO_TEST" = "FRONTEND" ]; then npm test; fi
+  - if [ "$TO_TEST" = "FRONTEND" ]; then npm run eslint; fi
+  - if [ "$TO_TEST" = "FRONTEND" ]; then npm run flow; fi
+  - if [ "$TO_TEST" = "FRONTEND" ]; then npm run stylelint; fi
+  - if [ "$TO_TEST" = "FRONTEND" ]; then grep -R 'Missing translation' tests/unit/; test -z "`grep -R 'Missing translation' tests/unit/`"; fi
+  - if [ "$TO_TEST" = "FRONTEND" ]; then npm run build >/dev/null; fi
+#  - if [ "$TO_TEST" = "FRONTEND" ]; then bash -c "test `ls -l build/bundle.js|awk '{print $5}'` -gt 3670016 && echo 'build/bundle.js size exceed 3.5 MB, is this normal? It was previously around 3 MB. If this is normal, please update this check in .travis.yml (3.5 MB = 3.5*1024*1024 = 3670016)' && exit 1 || exit 0"; fi
+  - if [ "$TO_TEST" = "FRONTEND" ]; then ls -l build/bundle*.js; fi
+notifications:
+  slack:
+    rooms:
+      - bluenove:gxso5MQCL78dGfCaTSjX42i5
+    on_success: change
+    on_failure: always

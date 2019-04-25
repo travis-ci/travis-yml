@@ -1,0 +1,110 @@
+cache: apt
+language: generic
+sudo: required
+dist: trusty
+notifications:
+  slack: jsk-robotics:Av7tc8wj3IWkLYvlTzHE7x2g
+  # TEST_TYPE:
+  #        1 : Check if this PR works with current downstream package
+  #        2 : Check if this PR works with 315.1.10
+env:
+  global:
+    - secure: "ESSo9YL0lUB0nnlFIL1vV7zpOyZjgTign4IZR735laiylPjOLKW4BkP9JxT5alA9ip72qbpDKI192Ed3sSkWjjQxhM+/HIjtyOy5/F6U5wfvxWudorJeF4zCy4OBD7Bp9JWqucAkRmd5Qe3Djaih69rAK31IFeNhQ2Ebz6RWVGk="
+  matrix:
+    # test for normal hrpsys users, this will not depends on any ROS-related tools
+    - ROS_DISTRO=hydro TEST_PACKAGE=hrpsys
+    # - ROS_DISTRO=hydro TEST_PACKAGE=hrpsys USE_SRC_OPENHRP3=true
+    # - ROS_DISTRO=hydro TEST_PACKAGE=hrpsys   COMPILE_OPTION='-DROBOT_IOB_VERSION=0'
+    # - ROS_DISTRO=hydro TEST_TYPE=python      TEST_PACKAGE=hrpsys
+    - ROS_DISTRO=hydro TEST_TYPE=iob         TEST_PACKAGE=hrpsys
+    - ROS_DISTRO=hydro TEST_TYPE=stable_rtc  TEST_PACKAGE=hrpsys
+    # compile source code with ros-related tools, they are compiled with catkin and test with rostest
+    #    Exec USE_SRC_OPENHRP3=true tests in faster orders to make debug of these tests easy.
+    # - ROS_DISTRO=hydro TEST_TYPE=work_with_downstream  TEST_PACKAGE=hironx-ros-bridge USE_SRC_OPENHRP3=true
+    # - ROS_DISTRO=hydro TEST_TYPE=work_with_315_1_10    TEST_PACKAGE=hironx-ros-bridge USE_SRC_OPENHRP3=true
+    # - ROS_DISTRO=hydro TEST_TYPE=work_with_downstream  TEST_PACKAGE=hrpsys-base USE_SRC_OPENHRP3=true
+    #    USE_SRC_OPENHRP3=false tests
+    # - ROS_DISTRO=hydro TEST_TYPE=work_with_downstream  TEST_PACKAGE=hrpsys-base
+    # - ROS_DISTRO=hydro TEST_TYPE=work_with_315_1_10    TEST_PACKAGE=hrpsys-base
+    # - ROS_DISTRO=hydro TEST_TYPE=work_with_downstream  TEST_PACKAGE=hrpsys-tools
+    # - ROS_DISTRO=hydro TEST_TYPE=work_with_315_1_10    TEST_PACKAGE=hrpsys-tools
+    - ROS_DISTRO=hydro TEST_TYPE=work_with_downstream  TEST_PACKAGE=hrpsys-ros-bridge
+    - ROS_DISTRO=hydro TEST_TYPE=work_with_315_1_10    TEST_PACKAGE=hrpsys-ros-bridge
+    - ROS_DISTRO=hydro TEST_TYPE=work_with_downstream  TEST_PACKAGE=hironx-ros-bridge
+    - ROS_DISTRO=hydro TEST_TYPE=work_with_315_1_10    TEST_PACKAGE=hironx-ros-bridge
+    - ROS_DISTRO=indigo TEST_PACKAGE=hrpsys
+    - ROS_DISTRO=indigo TEST_PACKAGE=hrpsys USE_SRC_OPENHRP3=true
+    - ROS_DISTRO=indigo TEST_PACKAGE=hrpsys   COMPILE_OPTION='-DROBOT_IOB_VERSION=0'
+    - ROS_DISTRO=indigo TEST_TYPE=python      TEST_PACKAGE=hrpsys
+    - ROS_DISTRO=indigo TEST_TYPE=iob         TEST_PACKAGE=hrpsys
+    - ROS_DISTRO=indigo TEST_TYPE=stable_rtc  TEST_PACKAGE=hrpsys
+    # compile source code with ros-related tools, they are compiled with catkin and test with rostest
+    #    Exec USE_SRC_OPENHRP3=true tests in faster orders to make debug of these tests easy.
+    - ROS_DISTRO=indigo TEST_TYPE=work_with_downstream  TEST_PACKAGE=hironx-ros-bridge USE_SRC_OPENHRP3=true
+    - ROS_DISTRO=indigo TEST_TYPE=work_with_315_1_10    TEST_PACKAGE=hironx-ros-bridge USE_SRC_OPENHRP3=true
+    - ROS_DISTRO=indigo TEST_TYPE=work_with_downstream  TEST_PACKAGE=hrpsys-base USE_SRC_OPENHRP3=true
+    #    USE_SRC_OPENHRP3=false tests
+    - ROS_DISTRO=indigo TEST_TYPE=work_with_downstream  TEST_PACKAGE=hrpsys-base
+    - ROS_DISTRO=indigo TEST_TYPE=work_with_315_1_10    TEST_PACKAGE=hrpsys-base
+    - ROS_DISTRO=indigo TEST_TYPE=work_with_downstream  TEST_PACKAGE=hrpsys-tools
+    - ROS_DISTRO=indigo TEST_TYPE=work_with_315_1_10    TEST_PACKAGE=hrpsys-tools
+    - ROS_DISTRO=indigo TEST_TYPE=work_with_downstream  TEST_PACKAGE=hrpsys-ros-bridge
+    - ROS_DISTRO=indigo TEST_TYPE=work_with_315_1_10    TEST_PACKAGE=hrpsys-ros-bridge
+    - ROS_DISTRO=indigo TEST_TYPE=work_with_downstream  TEST_PACKAGE=hironx-ros-bridge
+    - ROS_DISTRO=indigo TEST_TYPE=work_with_315_1_10    TEST_PACKAGE=hironx-ros-bridge
+    - ROS_DISTRO=kinetic TEST_PACKAGE=hrpsys
+    # - ROS_DISTRO=kinetic TEST_PACKAGE=hrpsys USE_SRC_OPENHRP3=true
+    # - ROS_DISTRO=kinetic TEST_PACKAGE=hrpsys   COMPILE_OPTION='-DROBOT_IOB_VERSION=0'
+    # - ROS_DISTRO=kinetic TEST_TYPE=python      TEST_PACKAGE=hrpsys
+    - ROS_DISTRO=kinetic TEST_TYPE=iob         TEST_PACKAGE=hrpsys
+    - ROS_DISTRO=kinetic TEST_TYPE=stable_rtc  TEST_PACKAGE=hrpsys
+    # compile source code with ros-related tools, they are compiled with catkin and test with rostest
+    #    Exec USE_SRC_OPENHRP3=true tests in faster orders to make debug of these tests easy.
+    # - ROS_DISTRO=kinetic TEST_TYPE=work_with_downstream  TEST_PACKAGE=hironx-ros-bridge USE_SRC_OPENHRP3=true
+    # - ROS_DISTRO=kinetic TEST_TYPE=work_with_315_1_10    TEST_PACKAGE=hironx-ros-bridge USE_SRC_OPENHRP3=true
+    # - ROS_DISTRO=kinetic TEST_TYPE=work_with_downstream  TEST_PACKAGE=hrpsys-base USE_SRC_OPENHRP3=true
+    # #    USE_SRC_OPENHRP3=false tests
+    # - ROS_DISTRO=kinetic TEST_TYPE=work_with_downstream  TEST_PACKAGE=hrpsys-base
+    # - ROS_DISTRO=kinetic TEST_TYPE=work_with_315_1_10    TEST_PACKAGE=hrpsys-base
+    # - ROS_DISTRO=kinetic TEST_TYPE=work_with_downstream  TEST_PACKAGE=hrpsys-tools
+    # - ROS_DISTRO=kinetic TEST_TYPE=work_with_315_1_10    TEST_PACKAGE=hrpsys-tools
+    - ROS_DISTRO=kinetic TEST_TYPE=work_with_downstream  TEST_PACKAGE=hrpsys-ros-bridge
+    - ROS_DISTRO=kinetic TEST_TYPE=work_with_315_1_10    TEST_PACKAGE=hrpsys-ros-bridge
+    - ROS_DISTRO=kinetic TEST_TYPE=work_with_downstream  TEST_PACKAGE=hironx-ros-bridge
+    - ROS_DISTRO=kinetic TEST_TYPE=work_with_315_1_10    TEST_PACKAGE=hironx-ros-bridge
+matrix:
+  allow_failures:
+  - env: ROS_DISTRO=kinetic TEST_TYPE=work_with_downstream  TEST_PACKAGE=hrpsys-ros-bridge
+  - env: ROS_DISTRO=kinetic TEST_TYPE=work_with_315_1_10    TEST_PACKAGE=hrpsys-ros-bridge
+  - env: ROS_DISTRO=kinetic TEST_TYPE=work_with_downstream  TEST_PACKAGE=hironx-ros-bridge
+  - env: ROS_DISTRO=kinetic TEST_TYPE=work_with_315_1_10    TEST_PACKAGE=hironx-ros-bridge
+script:
+  - case $ROS_DISTRO in "hydro") export DISTRO=precise;; "indigo") export DISTRO=trusty;; "kinetic") export DISTRO=xenial;; esac;
+  - export DOCKER_IMAGE=ubuntu:$DISTRO
+  - export CI_SOURCE_PATH=$(pwd)
+  - docker images
+  - docker run -v $HOME:$HOME -e CI_SOURCE_PATH -e HOME -e DISTRO -e ROS_DISTRO -e ROS_LOG_DIR -e TEST_TYPE -e TEST_PACKAGE -e USE_SRC_OPENHRP3 -e COMILE_OPTION $DOCKER_IMAGE bash -c 'cd $CI_SOURCE_PATH; source .travis.sh'
+after_success:
+  - set +x
+  - export GIT_COMMITTER_NAME=$GIT_NAME
+  - export GIT_COMMITTER_EMAIL=$GIT_EMAIL
+  - export GIT_AUTHOR_NAME=$GIT_NAME
+  - export GIT_AUTHOR_EMAIL=$GIT_EMAIL
+  - echo "TRAVIS_PULL_REQUEST=$TRAVIS_PULL_REQUEST TRAVIS_BRANCH=$TRAVIS_BRANCH TEST_PACKAGE=$TEST_PACKAGE TEST_TYPE=$TEST_TYPE"
+  - if [ "$TRAVIS_PULL_REQUEST" == "false" -a "$TRAVIS_BRANCH" == "master" -a "$TEST_PACKAGE" == "hrpsys" -a "$TEST_TYPE" == "" ]; then cd ~/;            fi
+  - if [ "$TRAVIS_PULL_REQUEST" == "false" -a "$TRAVIS_BRANCH" == "master" -a "$TEST_PACKAGE" == "hrpsys" -a "$TEST_TYPE" == "" ]; then git clone --branch gh-pages https://github.com/$TRAVIS_REPO_SLUG doc;  fi
+  - if [ "$TRAVIS_PULL_REQUEST" == "false" -a "$TRAVIS_BRANCH" == "master" -a "$TEST_PACKAGE" == "hrpsys" -a "$TEST_TYPE" == "" ]; then cd doc;           fi
+  - if [ "$TRAVIS_PULL_REQUEST" == "false" -a "$TRAVIS_BRANCH" == "master" -a "$TEST_PACKAGE" == "hrpsys" -a "$TEST_TYPE" == "" ]; then cp -r ~/build/doc/html/* ./; fi
+  - if [ "$TRAVIS_PULL_REQUEST" == "false" -a "$TRAVIS_BRANCH" == "master" -a "$TEST_PACKAGE" == "hrpsys" -a "$TEST_TYPE" == "" ]; then git status;                  fi
+  - if [ "$TRAVIS_PULL_REQUEST" == "false" -a "$TRAVIS_BRANCH" == "master" -a "$TEST_PACKAGE" == "hrpsys" -a "$TEST_TYPE" == "" ]; then git checkout --orphan gh-pages-new; fi
+  - if [ "$TRAVIS_PULL_REQUEST" == "false" -a "$TRAVIS_BRANCH" == "master" -a "$TEST_PACKAGE" == "hrpsys" -a "$TEST_TYPE" == "" ]; then git add -f .;                  fi
+  - if [ "$TRAVIS_PULL_REQUEST" == "false" -a "$TRAVIS_BRANCH" == "master" -a "$TEST_PACKAGE" == "hrpsys" -a "$TEST_TYPE" == "" ]; then git commit -m "Build documents from $TRAVIS_COMMIT" . ; fi
+  - if [ "$TRAVIS_PULL_REQUEST" == "false" -a "$TRAVIS_BRANCH" == "master" -a "$TEST_PACKAGE" == "hrpsys" -a "$TEST_TYPE" == "" ]; then git branch -D gh-pages; fi
+  - if [ "$TRAVIS_PULL_REQUEST" == "false" -a "$TRAVIS_BRANCH" == "master" -a "$TEST_PACKAGE" == "hrpsys" -a "$TEST_TYPE" == "" ]; then git branch -m gh-pages; fi
+  - if [ "$TRAVIS_PULL_REQUEST" == "false" -a "$TRAVIS_BRANCH" == "master" -a "$TEST_PACKAGE" == "hrpsys" -a "$TEST_TYPE" == "" ]; then git remote -v; fi
+  - if [ "$TRAVIS_PULL_REQUEST" == "false" -a "$TRAVIS_BRANCH" == "master" -a "$TEST_PACKAGE" == "hrpsys" -a "$TEST_TYPE" == "" ]; then git push -f --quiet https://$GH_TOKEN@github.com/$TRAVIS_REPO_SLUG.git gh-pages; fi
+
+
+
+
+

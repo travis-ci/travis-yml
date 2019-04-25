@@ -1,0 +1,26 @@
+# Note: secrets in this file are encrypted
+# See: https://docs.travis-ci.com/user/encryption-keys/ for details
+
+language: go
+go: '1.7'
+install:
+- wget https://github.com/gohugoio/hugo/releases/download/v0.55.1/hugo_0.55.1_Linux-64bit.tar.gz
+- tar xzf hugo_0.55.1_Linux-64bit.tar.gz
+- export PATH=$PATH:$PWD
+script: ./bin/build
+deploy:
+  provider: cloudfoundry
+  skip_cleanup: true
+  on:
+    repo: pivotal-legacy/blog
+    branch: master
+  api: https://api.run.pivotal.io
+  client_id:
+    secure: "ZA3j77fQ0dBYRqe4A6x0WKTHAoyLV861sLJ9OlwrseGNqZYgV3tRQjVr1nTyUvNTwb12O82siH1QDCGHSPz+D70bOKzf+0nLeed8G0t+G7rcjYRy/3uoJ0DhGCpnYctMC01hYSAby9QA9ujtz7gj81yCJBvQiFCsqdvp9ZLcJJNXkMeH7tLRn3kgE24x7ZCiE1EgKQlR+Pj9O7BjANgXTmr9HkZe3EVdWQg5x1JsJLnXktqgxqvH4OHOrdOa/J7Rp06r+hOvFSdyq2rF8A7/mByVCxyTnu+u6f/iqffZvzElFY+BVOabCSj4gfCFTYNn6HrdEgGJTxLcdxYCBp5n4eEY5wVix8iX6pkoTj3GctsF7WfIBN7Udy9IonI5/VG2993a76VJG5nL1uWfJv9SlTlABV+Q6LiXhm73EjHdCzp6Q436KuMcqZrAhYP3uBYGN6lQc4GZM3gTNiU8GpZR5/HjkF24FEKG5xOR8Stj8doczt8kSf8IOmviXp4Wfy1cUHSBIaKDZr1SfAS1EZ0NpPsI63LPwbWiPB3mcT7GvXdbbJ79mGrJGBMPoSFkrdB2qpyEEi4xwSIuJMZrdSCvi4jhWeFziTBWA4BPbHt4ngvFWAexob9gHO/WqC7IsScmG6yqeOde3UOK0Ty5OMxGXHiPuOsI9QM7cikaGckfwzw="
+  client_secret:
+    secure: "AVfZS106YhZqSznRSqjTktiVbLldqF3LFayS0z2SnHJZJp9SnA/2TyQPN2zcN1vQ7nIbhiISuWvLzBaUcvAJ/T7WdIMe1qzQdnIzrR9VQhmMzJg4ShAdkYr8BSWcaGEjALx6m4XGgnkd4IqeA8KmEjQPX/t7zqewpcJoYVWUpHQbDItFW4fCeaZj6ESZs1seIHRXRZ+LvQjiWQipylauGtx/KsiLkKytgZF7Gf8kD4MFZYp9I2/viRTDAv3/+smczrgIHft0oKIdq7cO1vcNlOhBh0Egh5e/EKIy+ipFjL9Iuorr5A58JGEnTO4zzKE5NvSAbjV1QSZV7xoawNA/U11QS/TN8MfJARs8YgNrBTYYIZQa+xSdm6kqcWUuE9u9qtwSu52H9L4HH/7CAY45ogSQOW76iWeUMg3Vs4OtN7pe8olx1/C1NX8MoVH3K6hIumAd3McqCAUMA0HjQiDingtPOmeLeVPMlQEKvNzpbD4SZhZrXrlupa915Jc2Zp6TLPlRxHEXmxunE+QK1tOyHAb4WJSLGKnkmwBUUHYBRjm/axzkriBGdTVPni3L3k9vVa+ZK/X8Lbeujj2L1NI+emd5EAR5TIc3gjfG5JXbjqghwoZabKAKCqi6zHSsMAXvp7f4F93pTWvF5UuJv5k2D+70+bSs8oWOEIKrbPF779U="
+  organization: pivotal
+  space: blog
+notifications:
+  slack:
+    secure: gzsa/wyD5IE/9Mzao33A4jtyPbqu3UI7cE3RaWy3i04G5U+7zmVIurpxlMMhp62RmKpr0r40suKJ40F3tRn2/FQbqpWZ39MWkfP8DNg0JDGHLOsG6HpuAC8dwSAs1TrnK+K/L+zzKJzGPEnZ/vhymMtC4htkLPCtwJTvomo6RCTFAc4F/S49EdD/6S/A7AATrOrSOWjZ8nfM71/lF6OvwmODVVGk0C2vg4kFE2W3icQaoSJ2dkO5Y1vgHSXtivXmvHG7y5MCDVHnwyxgWN7e1l5ELTVNHP8v9DxUBTN6ILtaBwpy1R3G6997TPJEGVfaAEek0pUpbNpXg4Pv6Cirmq1byoBOx693DUmyZRqOWGhg9yHicNr2AM3dc7eVpoD+ckeqmbgnX53sPd5eSlntbRys9YqdF0TVlkuOK40valUwBeo7bNsD7gU5hkXRI/v0pVUNODJbnVi43vsY6zCcSek2phi0hvwnI1t2toy8w6d2HuwkSq3czOkJPuzUhQhnqZASdZTUmTyymaPlEwVfv5M4956WMA3Zg75WcunYzB2E18Kp6DYA3CSRV3NCT8P6HFysOX0lpvHEDXl6S1weWkpbK+lXkrYkyhrV4uim+b+49g+kqgJpuHmhCyLlxMXlI3Dzb7Rn6MMKLJCwxjmenoqm6/LsJY7jdkwz2ojYfvs=

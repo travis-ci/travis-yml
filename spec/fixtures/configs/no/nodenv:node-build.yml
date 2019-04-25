@@ -1,0 +1,11 @@
+language: node_js
+node_js: node
+cache: npm
+os:
+  - linux
+  - osx
+jobs:
+  include:
+    - stage: verify definitions
+      if: type = pull_request
+      script: npm run verify-definitions -- $TRAVIS_COMMIT_RANGE

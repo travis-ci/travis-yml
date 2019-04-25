@@ -1,0 +1,65 @@
+# Travis CI build file.
+
+# whitelist (branches that should be built)
+branches:
+  only:
+    - master
+    - /^issue.*$/
+
+# the matrix of builds should cover each combination of Swift version
+# and platform that is supported. The version of Swift used is specified
+# by .swift-version, unless SWIFT_SNAPSHOT is specified.
+matrix:
+  include:
+    - os: linux
+      dist: trusty
+      sudo: required
+      env: SWIFT_SNAPSHOT=4.0.3
+    - os: linux
+      dist: xenial
+      sudo: required
+      services: docker
+      env: DOCKER_IMAGE=swift:4.1.3 SWIFT_SNAPSHOT=4.1.3
+    - os: linux
+      dist: xenial
+      sudo: required
+      services: docker
+      env: DOCKER_IMAGE=swift:4.2.3
+# Temporarily disabled: appid-serversdk-swift does not yet compile on Swift 5
+# https://github.com/ibm-cloud-security/appid-serversdk-swift/issues/83
+#    - os: linux
+#      dist: xenial
+#      sudo: required
+#      services: docker
+#      env: DOCKER_IMAGE=swift:4.2.3 SWIFT_SNAPSHOT=$SWIFT_DEVELOPMENT_SNAPSHOT
+    - os: linux
+      dist: xenial
+      sudo: required
+      services: docker
+      env: DOCKER_IMAGE=swift:4.2.3 KITURA_NIO=1
+    - os: linux
+      dist: xenial
+      sudo: required
+      services: docker
+      env: DOCKER_IMAGE=ubuntu:18.04 KITURA_NIO=1
+    - os: osx
+      osx_image: xcode9.2
+      sudo: required
+      env: SWIFT_SNAPSHOT=4.0.3
+    - os: osx
+      osx_image: xcode9.4
+      sudo: required
+      env: SWIFT_SNAPSHOT=4.1.2 JAZZY_ELIGIBLE=true
+    - os: osx
+      osx_image: xcode10.1
+      sudo: required
+    - os: osx
+      osx_image: xcode10.1
+      sudo: required
+      env: SWIFT_SNAPSHOT=$SWIFT_DEVELOPMENT_SNAPSHOT
+
+before_install:
+  - git clone https://github.com/IBM-Swift/Package-Builder.git
+
+script:
+  - ./Package-Builder/build-package.sh -projectDir $TRAVIS_BUILD_DIR

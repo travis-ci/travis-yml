@@ -1,0 +1,32 @@
+# Based on:
+# https://docs.travis-ci.com/user/languages/android#CI-Environment-for-Android-Projects
+# https://github.com/codepath/android_guides/wiki/Setting-up-Travis-CI
+language: android
+android:
+  components:
+    - tools
+    - platform-tools
+    - tools
+    - build-tools-27.0.3
+    - android-27
+    - extra-android-m2repository
+licenses:
+    - 'android-sdk-license-.+'
+before_install:
+    # workaround for android-27 sha changed in dec 2017x
+    - yes | sdkmanager "platforms;android-27"
+before_cache:
+  - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+  - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+cache:
+  directories:
+    - $HOME/.gradle/caches/
+    - $HOME/.gradle/wrapper/
+    - $HOME/.android/build-cache
+jdk:
+    - oraclejdk8
+
+script:
+    - ./gradlew assembleDebug testOnlineDebugUnitTest testOfflineDebugUnitTest checkstyle
+     # build  # Would try need the online version, that seems to need fabric IDs.
+     # connectedCheck # Would try building the release version, that needs certificates

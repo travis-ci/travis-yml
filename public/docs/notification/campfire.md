@@ -2,24 +2,19 @@
 
 
 
-## Type
+## Types
 
-Any of:
-
-* Map (Hash)
+* Hash
+* Array of: 
 * 
 * Boolean
 
-## Flags
-
-None.
 
 
 ## Examples
 
 ```yaml
 campfire:
-  rooms: "[ref:secures]"
   template: string
   enabled: true
   on_success: always
@@ -27,7 +22,23 @@ campfire:
 ```
 
 ```yaml
-campfire: "[ref:secures]"
+campfire:
+  rooms:
+  - secure: encrypted string
+```
+
+```yaml
+campfire:
+  rooms:
+```
+
+```yaml
+campfire:
+- secure: encrypted string
+```
+
+```yaml
+campfire:
 
 ```
 

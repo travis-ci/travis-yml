@@ -1,0 +1,57 @@
+# language: c
+
+---
+dist: xenial
+sudo: required
+
+env:
+    - CC=gcc CXX=g++
+    - CC=clang CXX=clang++
+
+before_install:
+    - uname -a
+    - cat /etc/issue
+    - sudo apt-get update -qq
+    - >
+      sudo apt-get install autoconf libtool valgrind expect
+      python3-dev python3-pip python3-setuptools python3-wheel libc-ares-dev
+    - sudo pip3 install PyYAML pympler WebOb
+    - sudo pip3 freeze
+    - gcc --version
+    - g++ --version
+    - clang --version
+    - clang++ --version
+    - pip3 -V
+    - python3 --version
+    - which python3
+    - which python3-config
+    - python3-config --includes
+    - python3-config --libs
+    - python3-config --cflags
+    - python3-config --ldflags
+    - dpkg -l | grep python
+
+install: true
+
+before_script: true
+
+script:
+    - make dep -j4 minimal_deps=true FLIB_CFLAGS=-DFLIB_SKIP_LEGACY
+    - sudo env PATH=$PATH make install-dep minimal_deps=true
+    - make -j4
+    - make clean
+    - make -j4 debug=true
+    - make clean
+    - make -j4 disable_jemalloc=true
+    - sudo make install
+    - make check verbose=true
+
+after_success: true
+
+after_script: true
+
+after_failure: false
+
+notifications:
+    email:
+        - hyzwowtools@gmail.com

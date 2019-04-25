@@ -1,0 +1,73 @@
+# Project language
+language: php
+
+# Allows use container-based infrastructure
+sudo: required
+
+# Start services
+services:
+  - postgresql
+  - rabbitmq
+  - docker
+
+# Customize addons
+addons:
+  postgresql: 9.6
+  apt:
+    packages:
+    - postgresql-9.6-postgis-2.3
+
+# Cache composer packages so "composer install" is faster
+cache:
+  directories:
+    - $HOME/.composer/cache/files
+
+# Matrix to test in every php & OS version
+matrix:
+  # Fast finish allows to set the build as "finished" even if the "allow_failures" matrix elements are not finished yet.
+  fast_finish: true
+  include:
+    - name: "7.1 Centos7"
+      php: 7.1
+      distribution: centos
+      version: 7
+
+# Define an environment variable
+env:
+  - SYMFONY_VERSION="3.4.*" DB=postgresql
+
+# Update composer
+# Create database
+before-install:
+  - sudo apt-get update
+
+  - echo 'DOCKER_OPTS="-H tcp://127.0.0.1:2375 -H unix:///var/run/docker.sock -s devicemapper"' | sudo tee /etc/default/docker > /dev/null
+  - sudo service docker restart
+  - sleep 5
+  - sudo docker pull centos:centos${version}
+
+  - cp app/config/parameters.yml.dist app/config/parameters.yml
+  - psql -c 'create database postgres' -U postgres
+  - psql -c 'create extension postgis' -U postgres -d postgres
+
+# Install composer dependencies,
+# Create schema and fixtures
+install:
+  - pear install pear/PHP_CodeSniffer-2.7.1
+  - export SYMFONY_ENV=drupal_dev
+  - composer install
+  - phpenv rehash
+ 
+before-script:
+  - php bin/console doctrine:schema:create 
+  - php bin/console doctrine:fixtures:load
+  
+# Run script
+script:
+  - phpunit
+  - phpcs --version
+  - phpcs --colors --standard=GRIIDC --ignore=bak --extensions=php -s -n ./src
+  
+notifications:
+  email: false
+  slack: griidc:JosH6istHStJ7cm24B8CC58F

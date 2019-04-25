@@ -1,0 +1,60 @@
+language: objective-c
+osx_image: xcode10.2
+cache:
+  - bundler
+  - cocoapods
+rvm:
+  - 2.4.3
+
+env:
+  global:
+    - WORKSPACE="LonaStudio.xcworkspace"
+    - SCHEME="LonaStudio"
+    - DESTINATION="arch=x86_64"
+    - SDK=macosx10.14
+  matrix:
+    - BUILD_EXAMPLE="YES"
+    - RUN_TESTS="YES"
+
+before_install:
+  - brew update
+  - brew outdated carthage || brew upgrade carthage
+  - brew tap danger/tap
+  - brew install danger/tap/danger-swift
+  - BUNDLE_GEMFILE=studio/Gemfile bundle install
+  - BUNDLE_GEMFILE=studio/Gemfile bundle exec pod repo update
+  - BUNDLE_GEMFILE=studio/Gemfile bundle exec pod install --project-directory=studio
+
+before_script:
+  - cd studio
+  - carthage bootstrap --new-resolver --platform macOS
+  - cd ..
+
+script:
+  - set -o pipefail
+
+    # Run Danger
+  - if ! [ -z $DANGER_GITHUB_API_TOKEN ]; then
+      danger-swift ci --dangerfile=ci/Dangerfile.swift;
+    else
+      echo "Skipping Danger for External Contributor";
+    fi
+
+  - cd studio
+  - carthage build --platform macOS
+  - xcodebuild -version
+  - xcodebuild -showsdks
+  - xcodebuild -list
+
+    # Build Lona
+  - if [ $BUILD_EXAMPLE == "YES" ]; then
+    xcodebuild -workspace "$WORKSPACE" -scheme "$SCHEME" -destination "$DESTINATION" -configuration Debug ONLY_ACTIVE_ARCH=NO CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO build | xcpretty;
+    fi
+
+    # Run Tests
+  - if [ $RUN_TESTS == "YES" ]; then
+    xcodebuild -workspace "$WORKSPACE" -sdk "$SDK" -scheme "$SCHEME" -destination "$DESTINATION" -configuration Debug ONLY_ACTIVE_ARCH=NO ENABLE_TESTABILITY=YES CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO test | xcpretty;
+    fi
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)

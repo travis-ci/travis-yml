@@ -1,0 +1,22 @@
+sudo: required
+
+language: bash
+
+services:
+  - docker
+
+install:
+ - echo $TRAVIS_COMMIT
+ - echo $TRAVIS_COMMIT > REVISION
+ - docker network create connection_api-tests
+ - docker-compose build tests
+
+script:
+ - docker-compose run --rm tests composer ci
+
+deploy:
+  provider: script
+  skip_cleanup: true
+  script: ./deploy.sh
+  on:
+    branch: master

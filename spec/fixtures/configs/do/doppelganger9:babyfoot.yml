@@ -1,0 +1,32 @@
+language : node_js
+
+addons:
+  sonarcloud:
+    organization: "doppelganger9-github"
+
+node_js :
+ - "lts/*"
+
+cache: npm
+
+before_script:
+  - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+  - chmod +x ./cc-test-reporter
+  - ./cc-test-reporter before-build
+
+install:
+ - npm ci
+
+script:
+ - npm test
+ - npm start 2>&1 | tee server.log &
+ - ./wait-until-server-ready.sh
+ - npm run newman
+ - kill %1
+ - npm run coveralls
+ - sonar-scanner -Dsonar.projectKey=doppelganger9_babyfoot -Dsonar.sources=. -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=$SONAR_TOKEN -Dsonar.typescript.exclusions=**/node_modules/** -Dsonar.exclusions=node_modules/**/*,coverage/**/*,reports/**/*,**/*.config.js,**/*.conf.js -Dsonar.typescript.lcov.reportPaths=coverage/lcov.info -Dsonar.language=ts -Dsonar.tests=. -Dsonar.test.inclusions=**/*.spec.ts -Dsonar.typescript.tsconfigPath=tsconfig.json
+ - npm run test:mutations
+ - npm run test:vulnerabilities
+
+after_script:
+  - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT

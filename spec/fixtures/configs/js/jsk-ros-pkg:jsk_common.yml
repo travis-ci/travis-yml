@@ -1,0 +1,32 @@
+language: c++
+sudo: true
+dist: trusty
+services:
+  - docker
+cache:
+  directories:
+    - $HOME/.ccache
+    - $HOME/.cache/pip
+notifications:
+  email:
+    on_success: always
+    on_failure: always
+  slack: jsk-robotics:Av7tc8wj3IWkLYvlTzHE7x2g
+env:
+  global:
+    - ROS_PARALLEL_JOBS="-j8"
+    - ROS_PARALLEL_TEST_JOBS="-j1"
+    - CATKIN_PARALLEL_TEST_JOBS="-j1"
+    - USE_JENKINS=false
+    - USE_TRAVIS=true
+    - USE_DOCKER=true
+  matrix:
+    - ROS_DISTRO=indigo USE_DEB=true
+    - ROS_DISTRO=indigo USE_DEB=true BEFORE_SCRIPT='$CI_SOURCE_PATH/.travis_before_script_opencv3.bash'
+    - ROS_DISTRO=kinetic USE_DEB=true
+    - ROS_DISTRO=lunar   USE_DEB=true
+    - ROS_DISTRO=melodic USE_DEB=true
+script: source .travis/travis.sh
+after_success:
+  # trigger build of jsk-docs.readthedocs.org
+  - curl -X POST -d "branches=master" -d "token=da477cb4ef53d533aeb51c2b43e8baca6202baca" https://readthedocs.org/api/v2/webhook/jsk-docs/9094/

@@ -1,0 +1,55 @@
+language: python
+
+dist: xenial
+
+install: pip install tox coveralls
+cache:
+    directories:
+        - $HOME/.cache/pip
+
+matrix:
+    include:
+        - python: pypy3.5-6.0
+          env: TOXENV=pypy3
+        - python: 3.7
+          env: TOXENV=pep8
+        - python: 3.7
+          env: TOXENV=pep8-examples
+        - python: 3.4
+          env: TOXENV=py34
+        - python: 3.5
+          env: TOXENV=py35
+        - python: 3.6
+          env: TOXENV=py36
+        - python: 3.7
+          env: TOXENV=py37
+        - python: 3.7
+          env: TOXENV=py37_cython
+        - python: 3.7
+          env: TOXENV=py37_smoke
+        - python: 3.7
+          env: TOXENV=py37_smoke_cython
+        - python: 3.7
+          env: TOXENV=docs
+        - python: 3.7
+          env: TOXENV=hug
+        - python: 3.7
+          env: TOXENV=check_vendored
+
+script: tox
+
+notifications:
+  webhooks:
+    urls:
+      secure: "R4Hr754P2v69tWoy6vKz/4csb6ZHYRM/+8vTVV6ioDWyqsPqyGXAPiXDfZ617C7TLxJiTlbFIJPjlcH64estPg+RZ1NA4D8BrDKS2nKqHJ2Z5Jv6X5Ds6HkEUNnYXsuwsqNvZzhpPRcCKXXRpvmAbkNUSe8ftn4kz2zCOA9MBSY="
+    on_success: change
+    on_failure: always
+
+before_install:
+  - sudo apt-get update
+  - sudo apt-get install -y libunwind-dev
+  - pip install codecov
+
+after_success:
+  - coverage combine
+  - codecov

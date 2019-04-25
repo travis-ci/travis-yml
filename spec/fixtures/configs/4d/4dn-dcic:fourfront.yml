@@ -1,0 +1,125 @@
+language: python
+sudo: true
+if: tag IS blank
+cache:
+  directories:
+  - eggs
+  - .npm
+  - ~/.npm
+  - node_modules
+  - /home/travis/.cypress/Cypress
+addons:
+  apt:
+    packages:
+    - oracle-java9-set-default
+    - bsdtar
+    - build-essential
+    - make
+    - graphviz
+    - nginx
+  postgresql: '9.4'
+env:
+  global:
+  - BOTO_CONFIG=/bogus
+  - JAVA_HOME=/usr/lib/jvm/java-8-oracle
+  - PATH="/usr/share/elasticsearch/bin:/usr/lib/postgresql/9.4/bin:$PATH"
+  - ELASTIC_BEANSTALK_LABEL=$TRAVIS_COMMIT
+  - USER="4dn-dcic"
+  - SNO_REPO="snovault"
+  - secure: vovAkyWqRwZdzZYc061JuENHIPxnjek1t7TWnzeo8AwQdFQwhbt76z0XV9g5DvjYclUWdYxfOb7fiUyxc8M0M2wPfwU05uStewWTuBKILobaNqMdsWaxRQ9OSJ3NxqTLabnmIsAuCQPwHFqM6etyHXiMaAgK8EU+r23CRzklMY77vQMN/2Bs+3Y1ngZ17OVvdbmAwzlUS0uE7+P9X2YXz6QVeTvyPWnBr5SMZ/gyA1/LU+44svKLC85BLtG+2YWHwEOPl0+Jt8diOP+UMBVI0GkCl2cN0dLQhVP26Jcp479BpnPVMOsRqH+Ve9qxpfY6aesTjAVc3D7AJcKzlOnA9o7GTaVGj0pWV+eCv9n3pFacIJkTF1/JNI3lmqKlWyeRd1qMCgCi94mNXEKEgXfxVBSczALhZcxHWTMYo1jE1aDAaAj09yukMJ9UEIBVSQsAGywihlFvTtUTwZDpd0cSfl2RYx6z845HU5EX9oNASEYcbC237I83bObu232ljRokBixA5fo4y+TLNLwK97DsFNGocIXsPBKVBq8uCClD3S8kG9sB88vjM9bFnkenw7GfZLjJFChzd4Hw+x4xJQH0L99MbWeMYAl9R/ojqk3tVrpGEpXwmf/MOgTmVGPUEExgeRTSWUn95YrpenOx7FsJJQ4ZpD1rnVRev2X0A21l0H0=
+  - secure: VaAvhzAtXo69D1TthYVabBSu/ESHj+/Wura9+XuFA6aG27tWQSZJ1FWPBN0nax2/vs4MkZfW19qbXgxFZBE671eYiu53iXvi4JbJRJU6efG08gQH4wpsOhxg0WF4+uWIpbIok5dCUPVLh0nTkHBpFAlcgTn6O/ST7hYFliEUxwcRATBe6fslJcLpR6fmsnNVs6kwkv1MvkMikje3fCbfj+V8/dHqQRobwCbMlgJMuxV+MWx4RUfKimQ/oUGCef6YCzcilTEgW4fAdPLsxqZiGn8wihC3lpjNYyGOfX/NCzPo8iVtX49X+Dp+sePRxKgWvovwLQDCWkomMBpxtdea/bkkPg7v92G0ivCcYX8hs14WCWjkqScCk6B0XACyMmE7dCE2Xte86sarxGbsp5lp39OvQxAbFbK+QBEKfPOdoxkcM3rrhf+kAnq+PsH1HrzzGe1F3L0BTpeS9F8w26skgrXmR/6X78mMzLk2TtHmXf3qPpPcFEP+fEOfiZyJSLEvfti9fVjZWSkCDUDEuvgF5haYpKy+cgzMHyHIgJZxfokyRvY7mEWwDZzqnSGvvVx/km0LjkQUY0RCvoT5xAtFSC2AguTfJ1C1RlZvuuYxBHa3a7tFn+ahPfRtdtFpcEGjwKBDRTNY5xzKrzozXLVQHpPVYhFQndPSF2n3+0JwE6M=
+  - secure: Zi1Fg04BvfjBi54dvSs5vA82habY/SHakKnXd0Ogd3IMSzzNI5OWYAerNKhbz2iHqHx2Uy5Qz8JplICVw9Tbm2ENXma8xZfTONr264q9S6P4Pzc/xmoRXPXX7J4sqgzqDu7KoJJvan1jfdZVczQq1TIYrH/XxPz3gkEYlt4Jym3mvngb2t+Hd7I+6hwB/Wm/BO391R6CH7tc1KoKS05IylQCfjpdvbRMNFkAmZu59KJR5iSVbvHpzr2BePgGcvl+A9Hq6A6P886Wl/UuNfdROX3PT22PLy8Wl/6jRfGGyfU9gWT9IqT9glBNDQjb7fqk71Jy+DK3HWL56nRfAlXOShtA8Qev/zTgBJreMUtvcyNpW98PphAyQLE7AvbfqJ9/x5dOTTT7alNh2RTTxlzcnvEHRPwSmPqVibfKjqUQUhIa2iQ4qhfzBp6IjaeeEZY6VMplwm6qwr6Rp0J6FhZhZyzeLwulzOnBtaa/5paI54s+z6pYSib9PvKe3uRgNKwxR7o/Thqd1WtFH80o3gWaF+REeXwzpM9MODszaipvtiLci9br2BbNNcdFQREtCuf9X2RxG3nW9Jh2W/Wrvbo/39wbMaxVmmtRahFtq+MjhfZzN+ThCgRXk0JG/EjdOxaNjta5iZU962gUj3wr9yZNWVSUGrFMGkyIa6BRA3OZZ/M=
+  - secure: JXMLW6AmtlTVERT1e3XWaa6c2CrNKwlfEmcBBlMc11am2yeSp9yMEMd3ZnOI2CozeoHezBzdmTSqxm1uTuZT6U3lPrevU16ir/kdxzHa/K2NANAxQPPkhaSO0BjYEU03rAHm4n5HvutwRCNOuJFbE3XtPizSc6FQ3XOI9zq1RQQp2Dn5xXKbVBWEhzL+fHLx2AWfomprUU8O0a5TYY5xjaPYN9EBBieFhm5sI2N5/Sv95MSVbzfMa5VSNzHqwHeaZ8tt5L7Rv2otLLxUJblxRSiYkVyD1OZVU3YlrJGb+FkCFC8YDgz1RZ4mistCJtBG9/tRKztPBP93B/tb5g0wO2kZ6Mv71NHPXigWrXesBmu430GMvCnCYZgXVS4nT0cQHt7UyG0RU2LYwLzYr8Sn7StlEr5RL+TzDW28lHY4LK4+z+Gbk+ApxBinPZfpZCqvPYqvUiFBj0HOKxn6IC8ELZ3QHZd1XwkiPRTntfQ+lElg9M+aEvAKcN2FEE3o9RG6PG57xH7wIeQkeNMLSkLbREL3xXl3hWbgY7DOj7CyiokKyCAgM+1fpquIE7GKZdTBiAWl7z7y9iNYO9tDyLA08Cbp9nIU6llGFkEZ+QZWn5hkjYch36imEl7SBWYTANGsdNc1SNocWKK4pUhOycOokOS2fI7l5W/eBHTG/vlqUOw=
+  - secure: PotXkx2ykgYzVce32FZKUxkXazfiCZ0yqWLhosci27YnwOlCimH+XL97eM5enQFiU/YYI/ETYkhesuNuobTxFpXo383xIgt35rfD60Tp+sSmZTXOdveC2fnhqvm55/jysoMFN1nBMe/0VSOAFnMAzSX6qYvlsc9yC4LSTHiRyo7aev2iVKW5As1wmE9Cs+O0ee7azanckLXGPibIpijSf8D0IPu1w5CUR3/UBkL6rMQ3Ir8R8sAJpOtzW3O5Rx2F97swShhWa/gmk6zYu4RS+Q1Lr2MbVdlrrOgT/czkxsPIqIWmRP4L5nLS2L/wYtCiCatwUZm5LVP9bA6+vWbPagTOHm+2/VYqTn4QMiAbpRHZjLIQxQd067XOE/JsYrLUrCWquqEZ1XmT04gSI+rgvf0+oU0Wno19lgN0BArNOHG8GEPSugciB/I/tY6aV1jXiam5uRJc/tBgaQaRWiGRXKdFdB0BDbyKlcxxXq+1Fc6b//7qbeaioREj72z1aN37AKVfe+F+cx7gMX85OuFhyyX5ZV7S2i4fyrH4krlHTLWywdPVAMuggV0lITvSflhj8AE2U6A8yedAdt8I1UZDOkkns4HlCl8I7EXqCjGcLs2uYdiSTh1yzkKCYKSXpWH0nEUqr3j1cpghUJ3cjg1licQH2GzIIqlp7u/XTfody80=
+  - secure: CzDicgJ/x6ZaNWf7uqWpPsLRSC7gkQ6ssWUY1kRxtIYWbM7vEDGbq9MbuvnDOLAgs2tgkkXi5DzjfmrFWe5cK+OrOaqakZhrRf9yHmpgOFqlBXYutUMV4SOwGcUaTa+SVtryOqCBZkGtZaury5wIkHMz93gTKo1fhPU1xL5KTLg4xqhkfw2ppdSm+Zjj1M26GKd1/aKDIdTAmRs9ryiGb5vDnU7NEWzt2j+VT67a03cI7NDgncNknBoMrdbNYDQTnnsaIHhS6dRZYl6tfbYyV+ugKJMApLksrsnpXoKKQ58bYZHyDPmmwzHHaoULf+HojBTokz7Y9W0ATJ0Sip42tsfcLq5ij/XO2/Q/PnWOn0RneUCzzV/7H7+PNzJoN8dN97vS/8QLcLij/wbPQX3efpwUEdz2UbMy0Ybx8KgTS4MOoiDk+7dDHP9ksW6pGpto86iTBEX6dWyjbdMCGbD1SdSPH76XS1vizQ3+Fai1E/B8sjhxX1xGoAhhoxXgQ0mkgPEFfqKj/7+j4VC0EY+S6jZBaOoWR8AFt2eelJlFba+zk43DFKMK3aRMpqwrRjUo1QJvAd50pBOOuyqgrHVOLM6BIIe9TgMfUSnoMgUGgzyVWxYdb+0/5SNAozCoS1S+ZGBUkUHzq3gANU7soNMhsXmcNgxKKMhNG7ZIDaD52+0=
+  - secure: 0QRMNpI794/7ZRINcD6tuoPclBwzGTS5SwFMoaMvVJT2Kc4VdECyogHK/Kyg/f69vdAu6mLQ7v1rMlA98kPaftO1NZmQRfZXBKVGs8Id805VmvLzBeTlQm2/CeuWrBK1vQrgBlL9eyV5yDIbeAlUtNQ5xwKFK4S9Mu39sWbf3wIvwxReKH6/XvbIGjmDLF+eoKhfaBuf96WP8Ys76esn6r+rGNBjE0qwWZOcs7tTQI3GRK2qSPDP2FAksrO8u95jilJ+eN9Iy+FzBZVo4oJvsNpRSs/IJln+J02wZ6258b5jfFDFZZiC8J282HYmSJqH64ShxFywQGMJ8jmuQiuNEZ6XnZEzMRXWrKGJY1t/l8aI6T4UCIrlpASS58YC900xzzjhMbNiWaPAV4F27KD73DzePrtjrx6YlmWhtW2loON4v3UOD3C9J8+72LR/WjGrpCHaCy5tin0VxWv1JfCfBbcpvP/WzlnEbykFfs748FmnBe4pLUbRjmCuHsufBsdAn+IZgwhlEeMk+mZZK/8U+RoV5rxO0aQhILkcjUv6mBxuUfF4lxyHAdHHunD/LAPgFqi4Qy74Hgdz5z5wtJPRFf2mTjtysBFQbfSTk3EStZINPtKS9Yrq049lX0GCRO9nAZGoB89gWamEniT2FgeC6syTssB51/AuMDTSsf4qIOM=
+  - secure: GTDIQIzWqM+uIVttiJVjCljBgmBx9aJBLHqsRHjNVl0gZRP3OW6Az9tdGwrt7S2S0gw79cW26mYXfPaAQ141EGSeyUXLTG0c5Lw3OGYZmhUcPgvmi56QQ9JkremBgNo7RPZMS6GyDtHYoWjYSZQJhPa0fe83WTFGJQWZOXX+6Zm4x+wIYppi6yaEhKLGrcaoacxVHcKY31F/4HXg3EgSiAQaT+y3iitjyap4pToSgs6x5QW2vTOdgK8Qi4/CTSo3z4oNY590VbZZsP+i89UKgniar1+2SdSV2Ney1XJQtdsAhKlVY+M+5DaM9/y+dhs2ryYeuJlOP3ebCC/JKv7m1IOjRgkDIN7/ByaRk9ufU+mzY6XoWvXhpFuKO+u1LBjai/FvpV8aJPrmM3r4qSuQW6XI4TXsf3enrCJkljUhTzAo5X41rlrGy4rGHA8t0k8hFQK9eoO65dJth6HLasLuj4PaV5t6CJFAphnFPYqMo1EJfQ7tu6AILgpEg4Cnx2o+OYaXtKuILWQ6lluVef7HQ2l1A4pWPh734D9aY7s1W1ZsNhpD7mVuQE4M9qEOZyfZJPcLq41kYpjRfSCenidQZXqR3hpfElboFzGf2QFhgy8Cy6V+nYzqJBEPo9kLWj4K4u+KkCXborUSvIED9/n+CSUdRydMefMHqnSrtvOpAnA=
+  - secure: cMK2zu7UgtF56IRBVCIQOoSn2Wcrf7sc955z+lRcUy5dNkdObRDpLUl/ZKB095DIJ4HWQVhZ+ONoGQmaM6f5Mp0yJ628tM2A2rSlqjPVhnFpwYrFYk+T3mRMYi6Ldwmp9nGBYxI5FPlN1nuUDN0M1Oz3U9WGlctxuR9nwix8nY6Glpt8JTSKcGn8J9VZ6ZpwQ0qKKTWdme7X+LAJHZoBL3+W0UCSArr8OIe3bgSkN+ec+bduzr2+WB6NzuXgYs/58fGQ1nD5Uf1L7Bwy0Z9aNm5ENr8A2+Dx9UPNMpXUdoDGLwvGC2IUOV2YTcnHtqghpudfH+hB3kiI8z/whbgOrWGr1Icm2NgNZ9tbCS1QG2T7WlPTmvml9hsde1+zwCzDx3NUsALAwJf4f1Qi7lW1QnbCprQ8sctH6xTQh6nkHpt7/eFo0rTob+z3+HGcoEHol6gVhRXJcKNRjVxbpZg8yTXyO9viT6HpvqJFf/0O4rARXHpx/olEvBBUxXQl7h6wEDWynNol2W4WyWwzIYU8cVXr6nivQI6sfArXNFiyEv4J02d0RROnmSbnCVZlXM1vcNknAzsHLI/TS6SRqcg49NNTLWPuVaknVAQpdz9j8TgwtIx9xO7Mkl8rAXYKvwuNyz61R5f6o+y3AL+8ZwRCjLZ7tv3iWdpTVXHKg9O4ADI=
+  - secure: sMn4k+L9wspBTMYG0M8+n4ba1OY1ZtIG8zODm/dMHWPgodUwmC5E+HanKuTfo8URK7gYBOLpZ8OXzCTkOoCKqNYCKQihwaigAOx6sr1cC6TwFqppXhQGMe6Y9UlAaow2Xr10yIlZXMgKf6fJX3uXtdkXJ3XM7IqgB1zGCHACRFbR/aUzRjnachDV/XGmrMIfKi8MVJ1d6GK0VjIyIUFpAjDnfLf1q39xnq6vqeRIedB1wAdlLzFZ5tRNaPAK1j+a23VSwbqzAlg3cX2vBQ3b7IPeTU8a1hIoMh5IBP2ceEgwM2oWkvHmYzliVSn/SiWMYb7TRX/FxAwfqWws4uZ/mymOVQbCaBfK6RKF9UH/ldpAkA+AIxRLvQyN1UYWq2WweCmMiQtgmySBCzfmGrJMzRyZScW1kWzXOWTSzYqMEqU0xPk+vKYSwGHGctPqIsBrvhuow6dckHWssdWhGTtZIOb8bpePTOVGRCJcYPOUcZAX+VaJN2uT1wwUZ9vXiDKbXGxa5BuCqW1oOUC/fqSKVyrmxPXhA0TZUVDhDnzmcbHygvl5BlbpONIdUY/jYkM6LJpkkFivBsMSsEvVeEwUWT1kbo6apXpWLeD59zP6Hq/PAH+tXz0uer6SEcyo/M8XBUcWoZTniBjEI+WiCOnxcKeNLahxqZAbbnLJHl1OMF8=
+  - secure: ZjL66xRfoBX5/IJ+ClFkXMOQ50gqwR4GdLK+v2EfADHhtiO+Q/xjqDFybVhkz4ra4MognkWDX4+t/Td8viwIDBKvfmNxmVOUQiEtvUFdEDOVS3w6PacT5RHrcyL/7wUnF5ZKc4CH8idwxtr0lCmo3xBWzlxQgXU887Ro/pQwFDpscyTElYtMQMe3T3rLvBzaKRWyaNGAUvqAB6D632ZLB/xCvnoaUKXgfqyV8Em9x5jbTO/++/S1qrQiPBhGK6Ggwh/xBtmRxLTeNtEJPqF6ntp7yV9HMLd8vyk1xsscdFH6xJ7wRTgsM0VC7jB+NvXjAdQgPybHZYw5+5Xg8C+D7fHPZbCrnF299QvGF8AAChKNR1rkOAXuPdttDyhTKYbZHnRFniiDQju3PDfdnQ6aqKh4VUViPcliLsV5pYodgo09ubpBvrQm7v8esgZDBtCPJALJPmlpL3cU9fRVc10l4qTRxFuG9mNAb0uRICocmQNwYdBaSgKCZHSkcnfSxUglLPT5tqT3JfPMlRCDEzb2AlIrjIOnxv0MJVvo4xUybJK/00bEFWq68mUqCq3HXM4pdthE9fxpZyYAHmaQNE5YpRwMdD2aJHA7C83eggx0zMqE+S9O2L97io4ytiOs0rTYHDLkcBhds3TOvIqZHRNgOj4xkiB3g1KsaZpXpRzkDkY=
+  - secure: HcTo9NWOMvQoUie/lL3tpSs4CjFguHyVK3F9pS7P592XH6pZ5Zn2NVI4KyasBaeX2mWFqTFwfOwo5NpZi3OZYBqFwfc/4LQGOyDowM9tgUiMwNIr884aEkt2U+QBuwMZyxFlOS55lRGVFugqWmgSy4y/vdmnPZrcRbs2tIhv9L+XJJq9AN9sl9Glwf+Czu6NPrmaez31mri+iZtbXR9yUE8CigYpoQFfKCJV+Ix4bSuO0kAHzzdsSxRKHXmoJ/v8G8Ge+LDYj0efzwXVNITbxeHwze4cGbpbUZcyUi6th7I9XmNa0XQt2kpoZjoRgGWAUJJd3fv87SY+w70eHn/W8GCys+wtYtP71u1+r+Yl2OS9u07jpm9GHJ6tdFmp+ytfuTwVPDgQdG0w3URiXrEXz/BDZGKBoN86f0/K7Q5i12o+17ohungJh1RdXtq2JQ5/H0E9P/dXTg7b+78jM6rT2HbS7ou82FtJS0AYJdZCYdbviBY8h5p4LLB5+JlMjyQujnzyZccbCzH/hVEu8JnCyTeaeu/1vZ39UpaA/B0LKJxbJkAgbMQ2uXjlw73qS2LvHgo9s3SE9lRT4yQjZxa/gQT4gciPmPvaMTsNmGf+DwdLlN2lCEN14fRJEzgAndTlHR2ATbr83txaMah53LfDqbW0/yinc3qyxqHePzlQuko=
+  - secure: i6C0l6inapwkgmwKT67liVcxjSL2y+LrICBd3KmpglH1ReuqqhlUZkgIt2TkW481hhhiCnbxDtPdArqwCzVOIAt+FJ9Ug/9CiJwBCuePujJWo5HMrnMNkdXKlopP73OiRoNuBnxYmzGVq30x0K+Wyvei0nJoUn0ZcOPRij+u0D7YuUk85fdCrfHSqjm/GVOypFWSm3lx0CzbbWPejmjCzllZebj2PkHJ6ydv9IFPLFDEb5MB2Rt4xodKFkZzABGnAJOroIVMYat14XUeeg2PxIHq9YXpA9ZRxFtYNrFolHMOpV3JY4XAcWUVpgH7DvQSUG0Jc6fMo8yEO2Cd3XKCwuTDNa4pmzzR0UUXYPVB9jVvSYXTWk+dtbOB3ehD8mTRPqbkXlzI5/IwcYbNMtr9hooQEXsLZQLSciiQPrMPNqKAiOcFAoEHqfDx0oURnnTmgzIdzjpd+2f+wLP3qRA8pUX9VXcBrseN20u0UigJrxOILSMHMM84jF6uuABmiBY8csV8XvKALVrUbQIFqepMti/9IItQQa5+SfyUSDv8onkzaqT+Hy24mNxifJJLErwfMFWmub0rOrq9KLMx1vkMnItqCG9rMPIDC6q3H60b5PD5eFnle2P3V92sE1y+V9rjo1YHf+FKx1Tgn3ceJ0Sm7R7kjMbGY8xsKocFzVDg7Jg=
+  - secure: gSD7QL9OtPYmyFMvJKUHNeJu38uKCO686g6U7LfnlcOL675wuBGOSfgYnD4mfJxK0EjuVppVuUclzAFS7SwLyH1K6MjFzL777FkU6uZEVvXpTdiLHi+yeiRTJUXDi3YVTKiL5JZIHiDhNhrhI8mEDrCBMZwCl08NVQE+YjavcIdBYHd5RGyxF3/iRapl77Yh3ugIvagSabZ7IClLvklL1eyM1chh5Sxk6kZYmsginjfPF5sQf6DsgpfYtLklLXioJ9Z9+Zr4alGrSV700mndp2gwnrtSvBhnWzTGNMgHw9VQCBl9gSkZyRW83/YoJJDR9ozZMeKoFbXobkZ/jIQYY700dII1z2YSaJhahOfbXgYbj8qmi9sB7daF4NjJVllpmi8769rFpB99frJE3vyT8SJeRK1vLWB0Yq5rXmnE99gpUp7zCgMHQhfXr1IZTPf7SHO3IFvG4cVfqDdXc+uxRfYneTAoEU9yufxkvIdLqBzg5+cwBFVEjvS25T63LXnu3CUj3Hbcp3B1hrk4hVp9nfRexTtmPeC0j1+SreWGz1BDmtXFD1fZBJCqwvfcS4HVT8F7HS/bUvyu0+Wm4YtUiQcFBORpswzq2PsRI3BSBc7GSeO46qYv2qRphVXgmqEhTIYEh/1q8lxUxbr19Q90Pco6AGgZwsERBWKXMYhe1/w=
+  - secure: Dzs4p1PuHdNXyBJu8FEWp839RhxvetKQrKonNeon3CvcN0xbxtICKr6ekj7+Y8hejxnUFGRwnypGmjbeee9evCC0bcvRQCjy/9aX7Kfuykn4IhvDAAYcWr533wqxC78A4TMyFJEJxYiZ4eJy+M/DnH+lr4zaoAwpsO1mxq92uPfjmj+gYZEAO5mvOUyCKQu5tKYYi9UTJ9Rxz0lJKRbaSQtEGRHs6+kU0qFc6QJGsYXXIbc/BOmfhKkrcJ+6jfvG7eli7cQSK1ve8h1VX0n/Eonk9heH4umCyTT2RTfhcARrc2ZwWYKXTka0jxmAck9gELcGEYOSV5dL/Qy9zykLeH7dL0UbNMnnrNY+89/b2WJfav9KtoG3e0dgiQZp5oMgC1MtkDxQif+V7In9baZA4rafgW+Bw/O3Uzz+VAPpl4xDVjk/29GLQ5iWnj9eJT9a7jIQIOMD6WKxAKH2O3XD6ZyUWvjKYEqT9BIxfchWnd+z2tIPDQBBI3Az+jDh6Quyrmb7AQVveTc+CtmzP98lhnIqAfIz8hwHyRgCo+i27wUGyKHMnKCJeHVSEPbANqXxeg1l8rgG5ht8H0AznkPpzTjajZRmZowDQRg9b9plM5AQsIxhPtAHBHAHcpXx8reN9NHrPuKLoMV3KRTUoq6UqTUrPz/qKCCSbaSbR7UNK7E=
+  - secure: ULUg4jjil5NND94FARuMbXS3cpS6pCIcu793tKTRaNvXAnpo5XHGd/VNStmWZez5EswA8NqI6KEWjl/0nnROWTkQXHczsJjebkzfhRwsqc2De+u3HZ+qAO1DieYQP++XGvvzWyry4ejFfy3qVC11GCV6CIJqMizQUt/D3QHHa3bwL8Tw8PubYsCW2wQa2lwKSc8Kw3Tj3x/pL/8Nw74dJ9M+Cyeh4XZq0Pp6Wlxkxe/zRPKydhV/DihT2rLEiMpxWsXMX1OS1cnXUJUvPf/bdwXMQMocZc3rjs/CMWWn7bx/k5Wdue481xGOdulIu9ljR/ZrxY+5xxm5a3UZd+ZYB8Y5tghiln4k7XDtdUXTSTBzZoDfRoboUbIiPzI0gma8XQJTeLXViS5T6p4M/SdUHkf5s0w8zJKRamqGDI0TL6wI3BnL85VQwXhMjWEmC5Zi1EZHgAGStFDxRGG2TLIHzFuSYly5zuTifyl80bcSj9czgkd6WoPKT3NKPsNTbWpQNF2Amixg4L5xr3Re5zFkTcpyaa05kySE9w84vqxPkczwKIDCmBuoTz6q1+rWaajM4KqlweNKo7OwPGy1R2zvZSq9vSa2a+f5YYpvUvjIYhvUpMQs1B0chC5kAFA2aTMXi+HMMabXq8AShoq8bnO7tBbPUxiu8OST72UQrF0j9Bg=
+matrix:
+  include:
+  - python: '3.4'
+    env: NPM=Test
+  - python: '3.4'
+    env: UNIT=Test
+notifications:
+  slack:
+    secure: DQyUTk6evwPpO0P5+OPhBSgl+fGEerOjBlBwQliXAkDaMKH3Cpi4cTQ3ETR/+3g6bGqPGK+QJ1R+6Ht+hJD7dNomyVIoQmvF0P5afJtpk/A3cDILe90t76ET9jc/iBjWeUFQdokFUJ7Gt1GGYtI6e5XcVu/Qc/xqCvFMtsBN6mnBFuvcQki+WkoIIPPawyhfryCNOLo5vvbi4SZ5dZI+M0MGq9HQjOyF1sdIgKuXhxjupmL+kVPVXAq9kiOANYFkwbNsP9j0BTYW5wFHpAztBqz3NT6EchgCdue8tgV4hC4rRFvM/bsA4qz/TJ5wRRLBRXtnNtPcyhAqTiU+wC6qWt++fjSEMGe4KYqtRRV1YuxQiTVHN84t77DILLNfMh/6uSs0KijwOT+Oazwd/UsN1zYOH93AM4FZ0h92yyb6j6JQ+DUk4WFel1Zr4kZzhtHSPGw+K4fxY0zIt1qpaDPXjtZHQ0+LwIIMtwMp5bBcwDn9d1ADnUhUAuuIN2hHaXrVy4vP2hIcd0LzezBqvc7JXimyd5yRgUeOCTrKGkAeSo8VA7XIj0ZmlpQRYKNTJP+gz4Y6C/RCxISnFDF/vcX+IsDdvreZXJMplE1Aqxf0uR6Zj8Sr8q+QWGKydv6ettlLZuqDuv0l/l/9qpzYfRqLSZcetGRVFHHcR9wuQiDyums=
+before_install:
+- SNO_PATH="snovault = git https://github.com/$USER/$SNO_REPO.git branch="
+- SNO_BRANCH=$(grep "${SNO_PATH}" buildout.cfg | sed "s@$SNO_PATH@@")
+- SNO_STATUS=$(curl -s "https://api.travis-ci.org/$USER/$SNO_REPO.svg?branch=$SNO_BRANCH"
+  | grep pass)
+- ! "if [ -z \"$SNO_STATUS\" ]; then\n    echo \"Snovault branch build for $SNO_BRANCH
+  is failing; exiting build\"\n    travis_terminate\nelse\n    echo \"Snovault branch
+  $SNO_BRANCH is okay with build status: $SNO_STATUS\"\nfi\n"
+- echo $tibanna_deploy
+- postgres --version
+- initdb --version
+- nvm install 10
+- node --version
+- npm config set python /usr/bin/python2.7
+install:
+# need to manually change the version of six used by Travis for some reason
+- pip uninstall -y six
+- pip install six==1.11.0
+- pip install coveralls
+- pip install codacy-coverage
+- pip install -U zc.buildout setuptools
+- buildout bootstrap
+- bin/buildout || (echo "Retrying buildout" && bin/buildout )
+- pip show pytest
+- pip install pytest==2.9.1
+- pip show pytest
+script:
+- if test -n "$NPM"; then npm test; fi
+# setone is essentially all tests that are not indexing; change here for clarity
+- if test -n "$NPM"; then bin/test -v -v --aws-auth -m "not performance and not indexing and working" --durations=10
+  --cov src/encoded --es search-fourfront-builds-uhevxdzfcv7mkm5pj5svcri3aq.us-east-1.es.amazonaws.com:80;
+  fi
+- if test -n "$UNIT"; then bin/test -v -v --aws-auth -m "not performance and indexing and working" --durations=10
+  --cov src/encoded --es search-fourfront-builds-uhevxdzfcv7mkm5pj5svcri3aq.us-east-1.es.amazonaws.com:80;
+  fi
+- if test -n "$CYPRESS"; then travis_wait 30 deploy/run_cypress_tests_on_travis.sh;
+  fi
+after_script:
+- echo leader=$BUILD_LEADER status=$BUILD_AGGREGATE_STATUS
+after_success:
+- coveralls
+- ! "if test -n \"$NPM\"; then \n   cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js\n
+  \  cat ./coverage/lcov.info | ./node_modules/.bin/codacy-coverage\n   rm -rf ./coverage\nfi\n"
+- if test -n "$UNIT"; then python-codacy-coverage -r coverage.xml; fi
+- python deploy/travis_after_all.py https://api.travis-ci.org
+- export $(cat .to_export_back) >> /dev/null
+- echo $TRAVIS_COMMIT_MESSAGE
+- MSG_NO_WHITESPACE="$(echo -e "${TRAVIS_COMMIT_MSG}" | tr -d '[:space:]')"
+- echo $MSG_NO_WHITESPACE
+- echo $TRAVIS_PULL_REQUEST
+- echo $TRAVIS_BRANCH
+- echo $tibanna_deploy
+- ! "if [ \"$BUILD_LEADER\" = \"YES\" ]; then\n  if [ \"$BUILD_AGGREGATE_STATUS\"
+  = \"others_succeeded\" ]; then\n    if [ \"$TRAVIS_PULL_REQUEST\" = \"false\" ];
+  then\n      echo \"cleanup build artifacts\"\n      rm elasticsearch-5.4.1.deb\n
+  \     rm .to_export_back\n      rm versions.cfg\n      pip install awsebcli\n      bin/aws
+  s3 cp --recursive s3://encoded-4dn-conf-prod/.aws /home/travis/.aws\n      git remote
+  add origin-travis https://${GH_TOKEN}@github.com/4dn-dcic/fourfront.git\n      git
+  config --global user.email \"travis@builder.com\"\n      git config --global user.name
+  \"Travis\"\n      if [ \"$TRAVIS_BRANCH\" = \"master\" ]; then\n         git config
+  --replace-all remote.origin.fetch '+refs/heads/*:refs/remotes/origin/*'\n         git
+  fetch --no-tags\n         git checkout master\n         \n         if [ -n \"$tibanna_deploy\"
+  ]; then\n            echo \"Job succeeded! PUBLISHING to ${tibanna_deploy} environment...\"\n
+  \           eb use ${tibanna_deploy} --debug\n            python deploy/deploy_beanstalk.py\n
+  \        fi\n      fi\n     fi\n   fi\n  fi\n"
+after_failure:
+- python deploy/travis_after_all.py https://api.travis-ci.org
+- export $(cat .to_export_back) >> /dev/null
+notification:
+  slack:
+    rooms:
+      secure: YuLIoKULHxT7ZY9nKVme0pVELk1HBS/nPjYYu4Bs48lOgJVK2I/OyvV9HVx2g7raK6/s4T7wTXG0EmljcakmKY78wsSyhR79fAZcV7+p4SobEi7nGHuHXVq0sp21ZeYiFJvD/5ospHX0hMudSicaANT66X7EyLTMdG/NGu5it6TPjcJWhxERXXz6Zbizm6j/wv2a64R0mMUGFSe1aWrFZv5ft+GgfupM2TPwX0PxNl2DamaGowJriKuU+svqIP7LXGuzYBxf9sj08gf3/S0e1r2bzg/ik4clzM2Lp5mcU27nLWh6TUr3hthFNsaKAFwIPS6Ay1Z8GeotAiZC538fyeM1zDvjz0Uu5fEuZnI89NVZ734NZfoFCEg4JcPDs8RHgzreR209zRgCVUh8AI7m7vMv302MNAjbG42FPlB1gDg9bukxbyytccm5/TuzAGLktG1jCWJk0uU34JsWZakF9fSqmFckppXZ1472cPQT+ityuszyUGEMgLvNxpZDpwMhywN7eMuQu64YD4ex1EvbidNEIdb0Z5UnpXaC2H+vxdBb+Qg58r/HN/S6OW8H+C/pZMuRMdm1AcgOjS9hROcRKgmwSD53Z/XXrT4GYZTW48jNOCFE2O+6RXUGqvQzcH8JG5blnTxoCV8dtb9GDbORQm7b80MOiidG8Xi8Jyq8oPM=

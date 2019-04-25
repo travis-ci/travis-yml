@@ -1,0 +1,35 @@
+language: nodejs
+node_js: "8"
+env:
+  global:
+  - MONGODB=3.6.6
+  - secure: ZXdUMP+8Nk9Kd5nX31D/DIB1t2xlJd+T4W7umWjwpy+KPA9d1W1OhUG6V2Gpv3PsJf+UtMosgZsywcLFVG4l/WcjAhs3c9pegW5ZRYAEfVjkk7aHhWQGvj5DID8iAAxs91Mm8LwJ43o68x+XN6746zArPqcVzQltDunJ0G3gfh8=
+branches:
+  except:
+  - gh-pages
+before_install:
+- sudo apt-get remove -y mongodb-org mongodb-org-mongos mongodb-org-server mongodb-org-shell mongodb-org-tools
+- wget http://fastdl.mongodb.org/linux/mongodb-linux-x86_64-${MONGODB}.tgz -O /tmp/mongodb.tgz
+- tar -xvf /tmp/mongodb.tgz
+- mkdir /tmp/data
+- ${PWD}/mongodb-linux-x86_64-${MONGODB}/bin/mongod --dbpath /tmp/data --bind_ip 127.0.0.1 --logpath ${PWD}/mongod.log &> /dev/null &
+- until nc -z localhost 27017; do echo Waiting for MongoDB; sleep 1; done
+install: sudo bash ./bin/countly.install_travis.sh
+before_script:
+- nodejs --version
+- ${PWD}/mongodb-linux-x86_64-${MONGODB}/bin/mongod --version
+- cat ${PWD}/mongod.log
+script: sudo npm test
+after_script:
+- cat log/countly-api.log
+- cat log/countly-dashboard.log
+- cat ${PWD}/mongod.log
+after_success:
+- cd $TRAVIS_BUILD_DIR
+- bash bin/scripts/deploy.sh
+- chmod +x bin/scripts/generateDocs.sh
+- bash bin/scripts/generateDocs.sh
+notifications:
+  email: hello@count.ly
+  slack:
+    secure: SplZFh0l8fP/FuQyoFXLE4k358ERYMVaK5nxJhrGbiG08wtTrtJi0qVrEUjfNed4crWtFpvLML0Lb1P+BAykWeEWFz5rjSZ1y0mu+Uqw89D5bk7kUguk+ZF/HOD4bsls2oMRpbK3M26/1VMd6LSg/pJIQd/o8CWSnhozMemB9Pc=

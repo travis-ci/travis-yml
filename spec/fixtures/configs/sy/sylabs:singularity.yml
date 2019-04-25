@@ -1,0 +1,61 @@
+language: go
+
+sudo: required
+dist: trusty
+
+go:
+  - "1.11"
+
+# Make sure user forks of singularity build correctly
+go_import_path: github.com/sylabs/singularity
+
+addons:
+  apt:
+    packages:
+      - flawfinder
+      - squashfs-tools
+      - uuid-dev
+      - libuuid1
+      - libssl-dev
+      - libssl1.0.0
+      - libarchive-dev
+      - libgpgme11-dev
+      - libseccomp-dev
+  homebrew:
+    packages:
+      - squashfs
+    update: true
+
+matrix:
+  include:
+    - os: linux
+    - os: linux
+      env: OS_TYPE=centos OS_VERSION=6
+    - os: linux
+      env: OS_TYPE=centos OS_VERSION=7
+    - os: osx
+      osx_image: xcode10.1
+      before_install:
+        - # pass
+      script:
+        - .travis/macos/build
+        - .travis/macos/test
+    - os: osx
+      osx_image: xcode9.2
+      before_install:
+        - # pass
+      script:
+        - .travis/macos/build
+        - .travis/macos/test
+
+services:
+  - docker
+
+before_install:
+  - .travis/before_install
+
+install:
+  - # override the default go install target
+
+script:
+  - .travis/script

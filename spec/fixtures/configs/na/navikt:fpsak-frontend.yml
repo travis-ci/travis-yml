@@ -1,0 +1,35 @@
+sudo: false
+
+language: node_js
+
+node_js:
+- node
+
+cache:
+  directories:
+  - node_modules
+  yarn: true
+
+install:
+- yarn install --ignore-scripts --no-progress
+
+script:
+- yarn less:lint
+- yarn test
+- git config user.name team-foreldrepenger[bot]
+- git config user.email team-foreldrepenger[bot]@users.noreply.github.com
+
+before_install:
+- openssl aes-256-cbc -K $encrypted_95f19733e3f4_key -iv $encrypted_95f19733e3f4_iv
+  -in travis/private.enc -out travis/private.pem -d
+- git clone https://github.com/navikt/github-apps-support.git
+- export PATH=`pwd`/github-apps-support/bin:$PATH
+- export INSTALLATION_TOKEN=$(generate-installation-token.sh `generate-jwt.sh ./travis/private.pem $GITHUB_APP_ID`)
+
+after_success:
+- chmod a+x ./travis/push-tag.sh
+- "./travis/push-tag.sh"
+
+env:
+  global:
+    secure: KNflK1REvC9ar1sePdW/BkWQxtBzR2QuWoWyVHfcDKRswVUd5nqZ9g/hi/OX6wO2b49yMUp0W6JH8NVnBhNIS3r7T1LDZmwEikLG/agdkMeyBUynGVYOvLgk2C9sIaenfUTquMH0eSYO0VdaI/wnLhKP74L2ZcxcNV5UKe7z+fCPoqtvnzPVZU1fqZwK73bTeqrHTlm93pg5XePj9bLPpF7JjlgAap/G3vly6/sGET5zIE3zE7Kzu6bLjjWlqBaeTYskezGPR9dPobza444j/VpLNLBHU6NvI1yUO37PdsEtwP7wYEvjMpUHW5J86RaQA59noMy6EiSj9KhMgUNJ/PSODyl+sivnZeac0u6IDahape94aXAdcdkTuiQ1lvkkEqcsliw/nRQ+3g8McYzryjl8LyvAlMHVneMvKE0q9OKFgRKftEJLcvXPzmOtiL/C4j5qYZFMaftt5ByR7V+lrOgFklphGqtpu1+VKtH7zetSFUQZRhoPNpW3osMX2i/hV51sAiLT+2J2WDg0T2zbJSu5UYekFdhNnmngp+tvrD8oQOMPA7T17Cp+SGkwfSRFdQJnomq8cYQWG1QDQrryI6tpqsn1hVo0wdwaAkRx7LOz/Nau5TzXeinaQneiJ42YH4VkQbVyVcawhMsuOrqTByp6yojFE45fu5tLimJNgjs=

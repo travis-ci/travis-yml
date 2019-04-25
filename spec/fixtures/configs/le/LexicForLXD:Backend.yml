@@ -1,0 +1,100 @@
+
+#script: phpdbg -r ./vendor/bin/simple-phpunit -v
+
+jobs:
+  include:
+    - stage: tests
+      language: php
+      php: '7.1'
+      addons:
+        apt:
+          update: true
+      services:
+        - postgresql
+      before_install:
+        - sudo apt install libssh2-php
+        - echo "extension = ssh2.so" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
+        - echo $CERT_CRT >> client.crt
+        - echo echo $CERT_KEY >> client.key
+        - phpenv config-rm xdebug.ini
+      install:
+        - composer install --no-interaction
+      before_script:
+        - psql -c 'create database travis_lexic_test;' -U postgres
+        - cp app/config/parameters.yml.travis app/config/parameters.yml
+        - php bin/console doctrine:schema:update --force --env=test
+        - php bin/console doctrine:fixtures:load -n --env=test
+      script: SYMFONY_PHPUNIT_VERSION=6.4 ./vendor/bin/simple-phpunit
+    - stage: tests
+      language: php
+      php: '7.2'
+      addons:
+        apt:
+          update: true
+      services:
+        - postgresql
+      before_install:
+        - sudo apt install libssh2-php
+        - echo "extension = ssh2.so" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
+        - echo $CERT_CRT >> client.crt
+        - echo echo $CERT_KEY >> client.key
+        - phpenv config-rm xdebug.ini
+      install:
+        - composer install --no-interaction
+      before_script:
+        - psql -c 'create database travis_lexic_test;' -U postgres
+        - cp app/config/parameters.yml.travis app/config/parameters.yml
+        - php bin/console doctrine:schema:update --force --env=test
+        - php bin/console doctrine:fixtures:load -n --env=test
+      script: SYMFONY_PHPUNIT_VERSION=6.4 ./vendor/bin/simple-phpunit
+    - stage: docs
+      if: branch = master AND type != pull_request
+      language: php
+      php: '7.2'
+      addons:
+        apt:
+          update: true
+      services:
+        - postgresql
+      before_install:
+        - sudo apt install libssh2-php
+        - echo "extension = ssh2.so" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
+        - echo $CERT_CRT >> client.crt
+        - echo echo $CERT_KEY >> client.key
+        - phpenv config-rm xdebug.ini
+        - cp app/config/parameters.yml.travis app/config/parameters.yml
+      install:
+        - composer install --no-interaction
+      before_script:
+        - psql -c 'create database travis_lexic_test;' -U postgres
+        - php bin/console doctrine:schema:update --force --env=test
+        - php bin/console doctrine:fixtures:load -n --env=test
+      script: ./vendor/bin/swagger -e vendor -o openapi/openapi.json
+      deploy:
+        provider: pages
+        skip-cleanup: true
+        github-token: $GITHUB_TOKEN
+        keep-history: true
+        local-dir: openapi
+    - stage: release
+      if: branch = master AND type != pull_request
+      language: node_js
+      node_js: node
+      services:
+        - docker
+        - postgresql
+      install:
+        - npm install -g semantic-release
+        - npm install -g @semantic-release/changelog
+        - npm install -g @semantic-release/git
+        - npm install -g semantic-release-docker
+      before_srcipt:
+        - psql -c 'create database travis_lexic_test;' -U postgres
+      script:
+        - docker build -t lexicforlxd/web-backend -f docker/DockerfileProd .
+      deploy:
+        provider: script
+        skip-cleanup: true
+        script: semantic-release
+#     - stage: deploy
+#       if: branch = master

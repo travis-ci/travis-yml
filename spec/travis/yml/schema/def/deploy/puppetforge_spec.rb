@@ -32,10 +32,10 @@ describe Travis::Yml::Schema::Def::Deploy::Puppetforge, 'structure' do
                 '$ref': '#/definitions/deploy/edge'
               },
               user: {
-                '$ref': '#/definitions/secure'
+                '$ref': '#/definitions/type/secure'
               },
               password: {
-                '$ref': '#/definitions/secure'
+                '$ref': '#/definitions/type/secure'
               },
               url: {
                 type: :string

@@ -1,0 +1,16 @@
+language: python
+
+sudo: false
+
+services:
+  - docker
+
+install:
+  - pip install docker-compose
+
+script:
+  - ./run testing dc pull
+  - ./run testing test
+
+notifications:
+  slack: universitas:oWt9OJBaOsXCbka97cDUt4wL

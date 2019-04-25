@@ -1,0 +1,72 @@
+language: php
+
+sudo: required
+
+env:
+  global:
+    - GLPI_SOURCE="https://github.com/glpi-project/glpi"
+    - FI_SOURCE="https://github.com/fusioninventory/fusioninventory-for-glpi"
+    - CS=7.2
+    - APIDOCS_PHP=7.1
+    - DBNAME=glpitest
+    - OLDDBNAME=glpiupgradetest
+    - AFTER_SUCCESS_BRANCH=9.3/bugfixes
+    - secure: Y9sG3lZ3Fn3t5BXvcMJQxWsdSUVQgF4M08E6oouYrRc95HEj3ZwZOqp6Df58u8CQFA0EKJyvCBLn8UicvHGMKAD0RwGLBdSP4Ji9gJRZkyMZi79awSshdva/c8dqVQrRd4asuTNQfcagVJpNDnY8sYusw504JUilK3vFVp+39nNZUkcvT69NGVIlXzgHTYinBkVuqDhf5eVtcLcaESLEshrg+5ZERdm+0KifdJVREzhicJxofnmTl/wBsIP7XiQqspljf2/SxLqreGmWXYXUfqIwIOVtsd9fkZChQCz8USC7P427tH6styRDYuMCtvA9b/T/XacSdKFbuDezff3NbIM3b5BebDyCrOK5MGSOdRUY5RuyZN4R5LjePUE++9QNCUPeDSkfb23v0VfuqXIRAxfdtik517GzFy6O7/e6FU1msVZlGQED7Uek9nqnupj+0lIq+99Jcm1UCNJu1NTL2Tv80XXqySaxyE4Sedq/FiYAsy1bo2cg2367I2b4FhFXaJCKkFHcdjHXAeurkRy/brSPhBNoOO5/GA3RepUErgly4P8TLZqHNZv8rgMUoQ88sdwDyXG7dY4UwWiTlCkxMBTqBqJanlTMA9zn2bYyMDioTGnA7+VYAA8cddjFOMVrmmuFJ+YV2x1+5B5qd+Wt8RPwcPQDyqaiN5amb1HGeMA=
+  matrix:
+    - GLPI_BRANCH=9.3.0 FI_BRANCH=glpi9.3+1.1
+    - GLPI_BRANCH=9.3/bugfixes FI_BRANCH=glpi9.3
+    - GLPI_BRANCH=master FI_BRANCH=master
+
+php:
+  - 5.6
+  - 7.0
+  - 7.1
+  - 7.2
+  - nightly
+
+matrix:
+  allow_failures:
+    - php: nightly
+    - env: GLPI_BRANCH=master FI_BRANCH=master
+
+before_install:
+  - "./tests/before_install.sh"
+
+before_script:
+  - "./tests/before_script.sh"
+script:
+  - if [ "${TRAVIS_PHP_VERSION:0:3}" = "$CS" ] && [ "$GLPI_BRANCH" = "$AFTER_SUCCESS_BRANCH" ]; then COVERAGE="--nccfc CommonTreeDropdown CommonDropdown CommonDBTM CommonGLPI CommonDBConnexity CommonDBRelation"; else COVERAGE="-ncc"; fi
+  - if [ -e ../../scripts/cliinstall.php ] ; then php ../../scripts/cliinstall.php --db=$OLDDBNAME --user=root --tests ; fi
+  - if [ -e ../../tools/cliinstall.php ] ; then php  ../../tools/cliinstall.php --db=$OLDDBNAME --user=root --tests ; fi
+  - php ../fusioninventory/scripts/cli_install.php --tests --as-user glpi
+  - mysql -u root $OLDDBNAME < tests/plugin_flyvemdm_empty_2.0.0-rc.1.sql
+  - mysql -u root $OLDDBNAME < tests/plugin_flyvemdm_config_2.0.0-rc.1.sql
+  - php tools/cli_install.php --tests
+  - rm ../../tests/config_db.php
+  - if [ -e ../../scripts/cliinstall.php ] ; then php ../../scripts/cliinstall.php --db=$DBNAME --user=root --tests ; fi
+  - if [ -e ../../tools/cliinstall.php ] ; then php ../../tools/cliinstall.php --db=$DBNAME --user=root --tests ; fi
+  - php ../fusioninventory/scripts/cli_install.php --tests --as-user glpi
+  - vendor/bin/atoum -ft -bf tests/bootstrap.php -d tests/suite-install -ncc
+  - vendor/bin/atoum -ft -bf tests/bootstrap.php -d tests/suite-integration -mcn 1 $COVERAGE
+  - vendor/bin/atoum -ft -bf tests/bootstrap.php -d tests/suite-unit $COVERAGE
+  - vendor/bin/atoum -ft -bf tests/bootstrap.php -d tests/suite-uninstall -ncc
+  - if [ ${TRAVIS_PHP_VERSION:0:3} == "$CS" ] && [ "$GLPI_BRANCH" = "$AFTER_SUCCESS_BRANCH" ]; then vendor/bin/phpcs -p --standard=vendor/glpi-project/coding-standard/GlpiStandard/ *.php install/ inc/ front/ ajax/ tests/ RoboFile.php; fi
+
+after_success:
+  # let's update the documentation and locales
+  - if [ ${TRAVIS_PHP_VERSION:0:3} == "$CS" ] && [ "$GLPI_BRANCH" = "$AFTER_SUCCESS_BRANCH" ]; then tests/after_success.sh; fi
+  - if [ ${TRAVIS_PHP_VERSION:0:3} == "$APIDOCS_PHP" ] && [ "$GLPI_BRANCH" = "$AFTER_SUCCESS_BRANCH" ]; then tests/apidocs.sh; fi
+
+cache:
+  directories:
+    - "$HOME/.composer/cache"
+
+notifications:
+  webhooks: https://hooks.aethonan.pro/travisci/-1001061475099/
+
+addons:
+  apt:
+    update: true
+    packages:
+      - mosquitto
+      - mosquitto-clients

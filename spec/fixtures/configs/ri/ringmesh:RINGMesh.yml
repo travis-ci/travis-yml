@@ -1,0 +1,205 @@
+language: cpp
+sudo: false
+
+env:
+  global:
+    secure: Fo3r89wp9lKA2IoNAweBji9su5qmKhYrnkJ49Ci0VK1p6l4kM2CL5IF3aQvwweybtIacpxLZQN+XSrGZe21Mtc+tuG5OgJDg7R462sD9PHt+6bpJOcCx3c7Cw6U4ObKnbaF/2ybqoXk4uFfAISXHgJ9Og2+T+ouXgfou03sQHz/yY7bFjUFqX0VPRDNNvV9CZuP5CMoLUf/Lp6qhuS2V1q6qTMziQ+ga5Bv6/sMmetvSglrXH1wXG4cTF9ceBWknV6ql0cYnQGFp+uOQq4a8E3LA8zF75kkFim1BGlzhgZfWvCmdk20HgJRVfd8iqFmHwhV+Zm+9koqNo5C4T513LA1IxapCJ2H7kNWb77hJ/7JGfZO6Nk9yIp2YHQLtGn90NXisHhlSvZzNvtrewqjdS5NAsz3qxXYjKqdROYTSVD8QiGJZOTuZU8XnEivnj+MMSlFgsJ5ff0cZmMsbEJ9KPeaCW4r8wpVraEI9cCKaTC1jqyV6MSAV0THqdRzV7tI86ZyWYopCPntFbdd8+89yX7qNOBpwimJVfEbsUaPAo356o0Mjic//gbHbCd5JoOpCt7uBoOSpSX1tj8E63mc0EyLn9N/4z0YkfOKHoIrbN3Q1vDqX49M51vNjgo8sYiGelqQTbGl8lrnHGh3Vsub1MrvW+idpINAeZp8SN/REy28=
+
+stages:
+  - format
+  - compile and test
+  - name: deploy
+    if: branch = master AND type = push
+  - name: trigger
+    if: branch = master AND type IN (push, api)
+
+cache:
+  directories:
+    - node_modules
+
+jobs:
+  include:
+    - stage: format
+      if: branch != master
+      os: linux
+      env:
+        - TEST="Clang format"
+      script:
+        - mkdir build
+        - cd build
+        - cmake ..
+        - make format
+        - |
+          if [[ -n $(git diff) ]]; then
+            echo "Format requirement is not satisfied"
+            return 1
+          fi
+      after_failure:
+        - export head_ref=$(git rev-parse HEAD)
+        - export branch_ref=$(git rev-parse "$TRAVIS_BRANCH")
+        - |
+          if [[ $head_ref != $branch_ref ]]; then
+            echo "HEAD ref ($head_ref) does not match $TRAVIS_BRANCH ref ($branch_ref)"
+            return 1
+          fi
+        - git checkout "$TRAVIS_BRANCH"
+        - git add --all "$TRAVIS_BUILD_DIR"
+        - git commit -m "Travis CI format update"
+        - git push https://BotellaA:$GITHUB_TOKEN@github.com/$TRAVIS_REPO_SLUG "$TRAVIS_BRANCH"
+
+    - stage: compile and test
+      os: linux
+      env:
+        - TEST="Gcc and Sonar Check"
+      addons:
+        sonarcloud:
+          organization: "ringmesh"
+          token:
+            secure: "iBY+oKod3+StQmrdPMT4uPrDmQpm/PeOwFor5XJPDmJsZlWmrqU7wD178JFozQ3jfYsz/gLjM5VDq6mBveoPQxqBnFPnUpaj/IPvF3Fk3EKOY9qgOfil2w+WOrgvt51cMBxGwpc2VUsXs4noQWT5axbFCF2vFmGOOwP7+7yixY7UedXiyC92t6TL9VQ7zvy+RpvVbOyfRVvp43w6Frnn9R1ff2ni4ZrqOP4EtoliyUecofENtuOjtVABB9rV6Kj9t8/VIzqNtDjGSJvQWu8+2qYHwfE5ZbzuRUmqWHUyxPPJyoOKaONSi08hSMX+hRf5gqPOoU/3II5MVyeHT00ND5lUJKTxMUeFwpR6L4AAngDuoQeJu4/2jbCp9Q4J8gbkbxQFWSHWNIBi9cgIAvxddiKuitYaVeUseVuS68AwLY4N4dbccxIMidUxJ82X60JNmuY6xsOvx8XIGsZP8RQyvAxwblWA/DzgGuAvJS3KqIyqoBJNyCbdaLVLWwmek+YC3UBAi9QAMVnkNMBkRxhMuJd10AVUuR2bueq9B7u7Bo6zuOvbR/Pf2H8ScYl6v3qM7AcZmN8kKxNB0rzcSR15Z7565f3FKJaSjeDTXA/4s4ZOcxBKPhEG9QGDdcDVJADb0iKOPBPkXBEqC7rOy0e+7xp3Ih9qtstiSQbJUWxVIbU="
+          github_token:
+            secure: "daSx13oBTpZmYC/X3GGb1Sd8uk1Qn5x3s3g0YgvzhFGrzia2u7vLnG2RyLB2/BEJlscDb49E3evsiIcZWEotXTwZnGggI2PcYJu3dOHV2H0pEjuHuQrEBg9SsSn6O9KkvJyHbpNGJQuvPLWQkTPRD85B7G7Usd27ejiiKpQlvMjCP3t6GFNZWm6htgwrgrSBmeSx1O6FVnrUGWm1V6JaTfyh33TauG6p738G6XiHtHLnmMPygK1kkzi4AtE1Wibd0wRf8+GUFsoIwIplpOXTqBqKEX/rHI0rE4CaKOPLb5zGx12B/lRRYK7LA0Lz1htVJ08MuZ1xUm8fv3ThKP/XkuJ06XPh53wfRfBa6u8yydDO9t10DPtdOwAoMv+N0BsKuztJmkzNTYnVLoqLWVdpOQv6uAa+LS0nLvFsMPY0ECwrwRWZwvQkAM2Xm9gmUhGvbqHeBxQmjObwMqnvAfXxvbfh5DnAKpcFZTed/W4c/qr2+2NQj3ctOpYGa3ieYqrU9j+Ga3QZ+3gjvZD4m4KGDvOEJNat5XrcmUU7LYFrjGZEq3cTlQpxrIqG5vBt2ZDj9Pca5ORuOvQnrRBONpIAtm/huqQG6yY3jwbfUOt/9afKYm3gFiv/toloGTec5Z8rZ8XOEj8924BOPxz7IITyY5CFgS/AyjLU1Jn6Rhd7t3w="
+        apt:
+          packages:
+            - libxrandr-dev
+            - libxinerama-dev
+            - libxcursor-dev
+            - libxi-dev
+      install:
+        - wget https://sonarqube.com/static/cpp/build-wrapper-linux-x86.zip
+        - unzip build-wrapper-linux-x86.zip
+        - export PATH=$PWD/build-wrapper-linux-x86:$PATH
+      script:
+        - mkdir build
+        - cd build
+        - CXX=g++ CC=gcc cmake -DRINGMESH_WITH_GRAPHICS:BOOL=ON -DRINGMESH_WITH_UTILITIES:BOOL=ON -DRINGMESH_WITH_TESTS:BOOL=ON -DRINGMESH_WITH_TUTORIALS:BOOL=ON -DRINGMESH_WITH_RESQML2:BOOL=OFF ..
+        - cd Coverage
+        - build-wrapper-linux-x86-64 --out-dir $TRAVIS_BUILD_DIR/bw-outputs cmake --build . -- -j2
+        - cmake -E env CTEST_OUTPUT_ON_FAILURE=1 cmake --build ringmesh --target coverage -- -j2
+        - cmake --build ringmesh --target package
+        - cd $TRAVIS_BUILD_DIR
+      after_failure:
+        - if [ "$TRAVIS_BRANCH" = "master" && "$TRAVIS_EVENT_TYPE" != "pull_request" ]; then 
+          cd $TRAVIS_BUILD_DIR;
+          bash ./travis_slack_notif.sh "$TRAVIS_JOB_ID" "$TRAVIS_BRANCH"; fi
+
+    - stage: compile and test
+      os: linux
+      env:
+        - TEST="Clang Check"
+      addons:
+        apt:
+          packages:
+            - libxrandr-dev
+            - libxinerama-dev
+            - libxcursor-dev
+            - libxi-dev
+      script:
+        - mkdir build
+        - cd build
+        - CXX=clang++ CC=clang cmake -DRINGMESH_WITH_GRAPHICS:BOOL=ON -DRINGMESH_WITH_UTILITIES:BOOL=ON -DRINGMESH_WITH_TESTS:BOOL=ON -DRINGMESH_WITH_TUTORIALS:BOOL=ON -DRINGMESH_WITH_RESQML2:BOOL=ON ..
+        - cd Debug
+        - cmake --build . -- -j2
+        - cmake -E env CTEST_OUTPUT_ON_FAILURE=1 cmake --build ringmesh --target test -- -j2
+        - cmake --build ringmesh --target package
+      after_failure:
+        - if [ "$TRAVIS_BRANCH" = "master" && "$TRAVIS_EVENT_TYPE" != "pull_request" ]; then 
+          cd $TRAVIS_BUILD_DIR;
+          bash ./travis_slack_notif.sh "$TRAVIS_JOB_ID" "$TRAVIS_BRANCH"; fi
+
+    - stage: compile and test
+      if: branch = master
+      os: osx
+      env:
+        - TEST="Xcode Check"
+      script:
+        - mkdir build
+        - cd build
+        - CXX=clang++ CC=clang cmake -G Xcode -DRINGMESH_WITH_GRAPHICS:BOOL=ON -DRINGMESH_WITH_UTILITIES:BOOL=ON -DRINGMESH_WITH_TESTS:BOOL=ON -DRINGMESH_WITH_TUTORIALS:BOOL=ON -DRINGMESH_WITH_RESQML2:BOOL=OFF ..
+        - cmake --build . --config Debug
+        - cmake -E env CTEST_OUTPUT_ON_FAILURE=1 cmake --build ringmesh --target RUN_TESTS --config Debug
+        - cmake --build ringmesh --target package
+      after_failure:
+        - if [ "$TRAVIS_BRANCH" = "master" && "$TRAVIS_EVENT_TYPE" != "pull_request" ]; then 
+          cd $TRAVIS_BUILD_DIR;
+          bash ./travis_slack_notif.sh "$TRAVIS_JOB_ID" "$TRAVIS_BRANCH"; fi
+
+    - stage: compile and test
+      if: branch = master
+      os: osx
+      env:
+        - TEST="Unix Makefile Check"
+      script:
+        - mkdir build
+        - cd build
+        - CXX=clang++ CC=clang cmake -DRINGMESH_WITH_GRAPHICS:BOOL=ON -DRINGMESH_WITH_UTILITIES:BOOL=ON -DRINGMESH_WITH_TESTS:BOOL=ON -DRINGMESH_WITH_TUTORIALS:BOOL=ON -DRINGMESH_WITH_RESQML2:BOOL=OFF ..
+        - cd Debug
+        - cmake --build . -- -j2
+        - cmake -E env CTEST_OUTPUT_ON_FAILURE=1 cmake --build ringmesh --target test -- -j2
+        - cmake --build ringmesh --target package
+      after_failure:
+        - if [ "$TRAVIS_BRANCH" = "master" && "$TRAVIS_EVENT_TYPE" != "pull_request" ]; then 
+          cd $TRAVIS_BUILD_DIR;
+          bash ./travis_slack_notif.sh "$TRAVIS_JOB_ID" "$TRAVIS_BRANCH"; fi
+
+    - stage: deploy
+      os: linux
+      env:
+        - RINGMESH_PACKAGE=RINGMesh-master-Linux
+      addons:
+        apt:
+          packages:
+            - libxrandr-dev
+            - libxinerama-dev
+            - libxcursor-dev
+            - libxi-dev
+      script:
+        - mkdir build
+        - cd build
+        - CXX=g++ CC=gcc cmake -DRINGMESH_WITH_GRAPHICS:BOOL=ON -DRINGMESH_WITH_UTILITIES:BOOL=ON -DRINGMESH_WITH_RESQML2:BOOL=ON -DCPACK_PACKAGE_FILE_NAME:STRING=$RINGMESH_PACKAGE ..
+        - cd Release
+        - cmake --build . -- -j2
+        - cmake --build ringmesh --target package
+      after_success:
+        - git clone -b master https://github.com/ringmesh/web
+        - cd web
+        - mkdir -p download
+        - cp -f ../ringmesh/$RINGMESH_PACKAGE.tar.gz download/
+        - git add download/$RINGMESH_PACKAGE.tar.gz
+        - git commit -m "Update Linux master release"
+        - git push https://BotellaA:$GITHUB_TOKEN@github.com/ringmesh/web master
+      after_failure:
+        - if [ "$TRAVIS_BRANCH" = "master" && "$TRAVIS_EVENT_TYPE" != "pull_request" ]; then 
+          cd $TRAVIS_BUILD_DIR;
+          ./travis_slack_notif.sh "$TRAVIS_JOB_ID" "$TRAVIS_BRANCH"; fi
+
+    - stage: deploy
+      os: osx
+      env:
+        - RINGMESH_PACKAGE=RINGMesh-master-Darwin
+      script:
+        - mkdir build
+        - cd build
+        - CXX=clang++ CC=clang cmake -DRINGMESH_WITH_GRAPHICS:BOOL=ON -DRINGMESH_WITH_UTILITIES:BOOL=ON -DRINGMESH_WITH_RESQML2:BOOL=OFF -DCPACK_PACKAGE_FILE_NAME:STRING=$RINGMESH_PACKAGE ..
+        - cd Release
+        - cmake --build . -- -j2
+        - cmake --build ringmesh --target package
+      after_success:
+        - git clone -b master https://github.com/ringmesh/web
+        - cd web
+        - mkdir -p download
+        - cp -f ../ringmesh/$RINGMESH_PACKAGE.tar.gz download/
+        - git add download/$RINGMESH_PACKAGE.tar.gz
+        - git commit -m "Update Darwin master release"
+        - git push https://BotellaA:$GITHUB_TOKEN@github.com/ringmesh/web master
+      after_failure:
+        - if [ "$TRAVIS_BRANCH" = "master" && "$TRAVIS_EVENT_TYPE" != "pull_request" ]; then 
+          cd $TRAVIS_BUILD_DIR;
+          bash ./travis_slack_notif.sh "$TRAVIS_JOB_ID" "$TRAVIS_BRANCH"; fi
+
+    - stage: trigger
+      os: linux
+      script:
+        - git clone -b master https://github.com/ringmesh/TriggerCI
+        - cd TriggerCI
+        - python travis-trigger.py RINGMesh
+    

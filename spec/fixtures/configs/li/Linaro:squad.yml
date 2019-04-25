@@ -1,0 +1,48 @@
+dist: trusty
+language: python
+python:
+  - 3.5
+cache: pip
+addons:
+  postgresql: 9.5
+  apt:
+    packages:
+      - bc
+      - chromium-browser
+      - snakefood
+      - software-properties-common
+services:
+  - docker
+env:
+  - SCRIPT=./scripts/travis TESTENV=travis-postgresql DATABASE=ENGINE=django.db.backends.postgresql_psycopg2:NAME=squad:USER=postgres:PASSWORD=squad:HOST=127.0.0.1:PORT=5432 INSTALLPIP=yes
+  - SCRIPT=./scripts/travis TESTENV=travis-sqlite3 DATABASE= INSTALLPIP=yes
+  - SCRIPT="./scripts/check-ignore"
+  - SCRIPT="./dev-docker ./manage.py test"
+  - SCRIPT="./scripts/test-docker"
+  - SCRIPT="./manage.py compilemessages" INSTALLPIP=yes
+
+before_install:
+  - if test -n "$DATABASE"; then ./scripts/travis-postgresql; fi
+
+install:
+  - |
+    if test "$INSTALLPIP" = "yes"; then
+      pip install --upgrade setuptools
+      pip install -r requirements-dev.txt
+      pip freeze
+      sudo apt-get install nodejs npm
+      npm install
+    fi
+
+script:
+  - $SCRIPT
+
+notifications:
+  email:
+    on_success: change
+    on_failure: change
+  irc:
+    on_success: change
+    on_failure: change
+    channels:
+      - "chat.freenode.net#linaro-qa"

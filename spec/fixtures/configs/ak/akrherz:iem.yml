@@ -1,0 +1,93 @@
+sudo: required
+dist: trusty
+cache:
+  timeout: 1000
+  directories:
+    - $HOME/.cache/pip
+    - $HOME/miniconda2
+    - $HOME/miniconda3
+addons:
+  postgresql: "9.5"
+  apt:
+    packages:
+      - postgresql-9.5-postgis-2.3
+  hosts:
+    - iemdb
+    - iemdb2
+    - iemdb-hads
+    - iem.local
+    - iem-memcached
+    - iemdb-talltowers.local
+    - iem-web-services.local
+language: python
+env:
+  matrix:
+    - PYTHON_VERSION=2.7;
+      MOD_WSGI_SO=mod_wsgi-py27.so;
+      MINICONDA=2
+    - PYTHON_VERSION=3.6;
+      MOD_WSGI_SO=mod_wsgi-py36.cpython-36m-x86_64-linux-gnu.so;
+      MINICONDA=3
+before_install:
+  - sudo mkdir -p /mesonet/www/logs
+  - sudo ln -s `pwd` /opt/iem
+  - echo `pwd`
+  - chmod 755 $HOME
+  - sudo apt-get install librrd-dev
+  - sudo add-apt-repository ppa:ubuntugis/ppa -y
+  - sudo apt-get update -qq
+  # need apache2-dev for mod-wsgi to build
+  - sudo apt-get install apache2 apache2-dev memcached
+  - sudo service memcached start
+  - sudo a2enmod headers rewrite proxy cgi expires authz_groupfile
+  # we do things the old fashioned way, we earn it
+  - sudo a2dissite 000-default.conf
+  - sudo cp deployment/apache_configs/mod_wsgi.conf /etc/apache2/sites-enabled/
+  - echo '<VirtualHost *:80>' | sudo tee /etc/apache2/sites-enabled/iem.conf > /dev/null
+  - cat config/mesonet.inc | sudo tee -a /etc/apache2/sites-enabled/iem.conf > /dev/null
+  - echo '</VirtualHost>' | sudo tee -a /etc/apache2/sites-enabled/iem.conf > /dev/null
+  # Setup PATH so that miniconda gets in the front
+  - echo "export PATH=/home/travis/miniconda$MINICONDA/envs/prod/bin:$PATH" | sudo tee -a /etc/apache2/envvars > /dev/null
+  - echo "export LD_PRELOAD=/home/travis/miniconda$MINICONDA/envs/prod/lib/libz.so" | sudo tee -a /etc/apache2/envvars > /dev/null
+  # use conda provided mod_wsgi
+  - echo "LoadModule wsgi_module $HOME/miniconda$MINICONDA/envs/prod/lib/python$PYTHON_VERSION/site-packages/mod_wsgi/server/$MOD_WSGI_SO" | sudo tee -a /etc/apache2/mods-enabled/wsgi.load > /dev/null;
+  - echo "WSGIApplicationGroup %{GLOBAL}" | sudo tee -a /etc/apache2/mods-enabled/wsgi.load > /dev/null;
+install:
+  - if [[ ! -f $HOME/miniconda$MINICONDA/envs/prod/bin/python ]]; then
+      wget https://repo.continuum.io/miniconda/Miniconda$MINICONDA-latest-Linux-x86_64.sh -O miniconda.sh;
+      bash miniconda.sh -f -b -p $HOME/miniconda$MINICONDA;
+      $HOME/miniconda$MINICONDA/bin/conda config --set quiet True --set always_yes yes --set changeps1 no;
+      $HOME/miniconda$MINICONDA/bin/conda config --prepend channels conda-forge;
+      $HOME/miniconda$MINICONDA/bin/conda config --set channel_priority strict;
+      $HOME/miniconda$MINICONDA/bin/conda update conda;
+      $HOME/miniconda$MINICONDA/bin/conda create -n prod python=$PYTHON_VERSION;
+    fi
+  - export PATH="$HOME/miniconda$MINICONDA/bin:$PATH"
+  - conda config --set always_yes yes --set changeps1 no
+  - . $HOME/miniconda$MINICONDA/etc/profile.d/conda.sh
+  - conda activate prod
+  - hash -r
+  - conda install -q --file conda_requirements.txt
+  # Remove packages to save space
+  - conda clean -q --packages
+  # Debug printout
+  - conda list
+  - conda config --show channels
+  # Then do additional pip stuff
+  - pip install --upgrade -r pip_requirements.txt
+  # now delete out some cache stuff, so that our travis-ci cache is still valid
+  - rm -f $HOME/miniconda$MINICONDA/pkgs/cache/*
+before_script:
+  - cd database; sh bootstrap.sh
+  - python schema_manager.py
+  - cd ..
+  # Add some test data to the database
+  - python database/store_test_data.py
+  - python scripts/dbutil/sync_stations.py
+script:
+  # restart apache
+  - sudo service apache2 restart || sudo cat /var/log/apache2/error.log
+  - python test/run_autoplots.py
+  - pytest cgi-bin/request/asos.py
+  - pytest cgi-bin/request/daily.py
+  - sudo cat /var/log/apache2/error.log

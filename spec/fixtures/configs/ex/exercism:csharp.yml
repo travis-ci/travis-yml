@@ -1,0 +1,20 @@
+dist: xenial
+language: csharp
+mono: none
+dotnet: 2.2.203
+addons:
+  apt:
+    packages:
+    - powershell
+env:
+  global:
+    - DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
+    - DOTNET_CLI_TELEMETRY_OPTOUT: 1
+before_install:
+  - export PATH=$HOME/.dotnet/tools:$PATH
+script:
+  - pwsh ./build.ps1
+cache:
+  directories:
+  - $HOME/.nuget/packages
+  - $HOME/.dotnet/tools

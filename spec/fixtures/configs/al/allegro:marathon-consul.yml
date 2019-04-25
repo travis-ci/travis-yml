@@ -1,0 +1,21 @@
+language: go
+dist: trusty
+sudo: false
+
+go:
+  - 1.9
+before_install:
+  - gem install fpm
+  - go get github.com/mattn/goveralls
+script:
+  - make release check
+  - goveralls -coverprofile=coverage/gover.coverprofile -service travis-ci
+deploy:
+  skip_cleanup: true
+  provider: releases
+  api_key:
+    secure: "dK2TbZ6lnH6LPlYhBFXZuJRh7xBRksyKEv2kLCYwS40OHGPQnh+YRlzyNZt8JW+wsSIDslTqN+FaYB62awEZCi3KLsPqWbGd2iAbYHVz7cE0wxVgGtkkENLFjMH0oK4pmS/jQLVj8PWIvOWbTXiKIqZb8ZxkdfFhHfHNNfhL1UU5V8P/xv8fVhC/FVwIvvEdefBmI+GMcSKmi4cLhJS+JUPcoaQn1XHhY9R1PyYGO4uwBR96Gw/NGzmOBv53e2mLGc2LUcEBdIURwG3LEmgB27lPW8Iqa5IZNIrojL35gTA5bQOvhC8VoWExl1H+Fvg6MR603ztEpJYJ3qKhNSIuzpRv7gGtxieu6bwAUbn3PXVpXT1DkwiiFVTmfIrn2V4b5HTfiuVvsHYJ2Lt3GJcx3VPijwH17PGXdZHHy6soJdvoxci5KH76Xy79nEEf+5tZpHo7jGj4OREjHzNe6Sqktz3FbvYQpZVGY2BCjBVxaStd+Ssz5HiG3pVg6IfiC1q8trwxnGHO5EJAO8xabjxOGgtQomzexD2D8+0lfJfk33xh70DCNZDMo4g73bBRPf/TYkHmV1DAQQ0TjZ5lTTsjEHKASipjUzLyKTSebyl1ZPoTCW7mv2iDwE8iuAWhBeuKob7YuPfvCqUtJMQl6K0dEUUYG6zGZyYqln66Q4409cc="
+  file_glob: true
+  file: dist/*/marathon-consul_*
+  on:
+    tags: true

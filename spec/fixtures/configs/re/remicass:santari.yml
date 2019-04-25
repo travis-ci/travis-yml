@@ -1,0 +1,27 @@
+language: node_js
+node_js:
+  - "9.3.0"
+
+before_install:
+  - npm install gulp -g
+  - npm install santari -g
+
+script:
+  - gulp --verbose
+  
+after_success:
+  - santari --repo remicass/santari
+  - chmod +x ./scripts/npm_login.sh
+  - npm install -g npm-cli-login
+  - npm-cli-login
+  - chmod +x ./scripts/deploy.sh
+  - ./scripts/deploy.sh
+
+cache:
+  directories:
+  - bower_components
+  - node_modules
+
+notifications:
+  email:
+    - jeremyrajan@gmail.com

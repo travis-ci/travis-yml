@@ -1,0 +1,25 @@
+sudo: required
+language: ruby
+
+services:
+  - docker
+env:
+  - CONFY_VERSION="${TRAVIS_TAG:-1.0}"
+before_install:
+  - openssl aes-256-cbc -K $encrypted_2862f5971073_key -iv $encrypted_2862f5971073_iv
+    -in client_secrets.json.enc -out client_secrets.json -d
+  - openssl enc -d -aes-256-cbc -k $ENV_CRYPT_KEY -in .env.enc -out .env
+  - openssl enc -d -aes-256-cbc -k $ENV_CRYPT_KEY -in gcloud_credentials.json.enc -out gcloud_credentials.json
+install:
+  - docker build -t confy:"$CONFY_VERSION" .
+before_script:
+  - docker-compose run web bundle exec rake db:create
+  - docker-compose run web bundle exec rake db:migrate
+  - docker-compose run web bundle exec rails assets:precompile
+script:
+  - docker-compose run web bundle exec rake test:all
+after_success:
+  - ./scripts/travis_deploy.sh
+addons:
+  code_climate:
+    repo_token: a28eb2810b0b0acd8376c2cf2b1c4aea8736e1c6854bada55fd73b740dd6261d

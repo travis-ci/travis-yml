@@ -1,0 +1,28 @@
+sudo: false
+language: python
+cache: pip
+
+stages:
+  - test
+
+jobs:
+  include:
+    - stage: test
+      env:
+        - NAME=py36
+      python: 3.6
+      install: pip install tox codecov
+      script: tox -epy36
+      after_success: codecov
+    - stage: test
+      env:
+        - NAME=flake8
+      python: 3.6
+      install: pip install tox
+      script: tox -eflake8
+    - stage: test
+      env:
+        - NAME=docker
+      services: docker
+      sudo: required
+      script: docker build .

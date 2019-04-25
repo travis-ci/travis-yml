@@ -1,0 +1,18 @@
+language: java
+jdk:
+ - oraclejdk8
+# - openjdk8
+before_install:
+ - chmod +x gradlew
+notifications:
+  slack: openbaton:0mU0eqEY8Dcm0sWeFiGrKvFe
+  email:
+    - notifications@openbaton.org
+cache:
+  directories:
+  - $HOME/.m2
+  - $HOME/.gradle/wrapper/
+script: 
+ - ./gradlew build
+after_success:
+ - curl http://localhost:8080/ 

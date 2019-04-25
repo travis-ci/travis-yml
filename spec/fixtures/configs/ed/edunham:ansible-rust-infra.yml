@@ -1,0 +1,16 @@
+---
+language: python
+python: "2.7"
+sudo: false
+
+install:
+    - pip install ansible
+    - pip install ansible-lint
+    - ansible-galaxy install -r galaxy_roles.yaml
+
+script:
+    - "ansible-lint provision/bastion.yaml"
+    - "ansible-lint provision/devmaster.yaml"
+    - "ansible-lint provision/prodmaster.yaml"
+    - "ansible-lint provision/proxy.yaml"
+    - "ansible-lint provision/playground.yaml"

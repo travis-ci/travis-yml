@@ -1,0 +1,62 @@
+sudo: required
+dist: trusty
+os:
+  - osx
+env:
+  global:
+    - COVERALLS_PARALLEL=true
+  matrix:
+  - PYTHON_VERSION=2.7
+  - PYTHON_VERSION=3.6
+  - PYTHON_VERSION=3.7
+
+install:
+  # ensure that we have the full tag information available for version.py
+  - git fetch --unshallow --tags
+  # We need to get the right miniconda per os and python version
+  # (using the right python version saves us some downloading time)
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+      sudo apt-get update;
+      if [[ "$PYTHON_VERSION" == "2.7" ]]; then
+        wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O miniconda.sh;
+      else
+        wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
+      fi
+    else
+      if [[ "$PYTHON_VERSION" == "2.7" ]]; then
+        wget https://repo.anaconda.com/miniconda/Miniconda2-latest-MacOSX-x86_64.sh -O miniconda.sh;
+      else
+        wget https://repo.anaconda.com/miniconda/Miniconda3-latest-MacOSX-x86_64.sh -O miniconda.sh;
+      fi
+    fi
+  - bash miniconda.sh -b -p $HOME/miniconda
+  - export PATH="$HOME/miniconda/bin:$PATH"
+  - hash -r
+  - conda config --set always_yes yes --set changeps1 no
+  - conda update -q conda
+  - conda create -q -n testenv python="$PYTHON_VERSION"
+  - source activate testenv
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+      conda install -c defaults -y 'libgfortran =3.0.0' 'libgfortran-ng =7.2.0';
+    else
+      conda install -c defaults -y 'libgfortran =3.0.0' libgfortran-ng;
+    fi
+  - conda config --add channels conda-forge
+  # Useful for debugging any issues with conda
+  - conda info -a
+
+  # install dependencies
+  - conda install numpy scipy astropy nose pip h5py six healpy python-casacore pyyaml pycodestyle coverage python="$PYTHON_VERSION"
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+      conda install gcc_linux-64 gxx_linux-64;
+    fi
+  - conda list
+  - python --version
+  # check that the python version matches the desired one; exit immediately if not
+  - PYVER=`python -c "from __future__ import print_function; import sys; print('{:d}.{:d}'.format(sys.version_info.major, sys.version_info.minor))"`
+  - if [[ $PYVER != $PYTHON_VERSION ]]; then
+      exit 1;
+    fi
+script:
+  - python setup.py build_ext --force --inplace
+  - nosetests pyuvdata --with-coverage --cover-package=pyuvdata

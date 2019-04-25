@@ -1,0 +1,214 @@
+sudo:
+  - false
+
+language:
+  - cpp
+
+cache:
+  directories:
+    - linux_dependencies
+    - osx_dependencies
+
+jobs:
+  include:
+
+    - stage: "Compile and Test"
+    # OS X Clang
+      os: osx
+      osx_image: xcode9.3
+      env: C_COMPILER=clang CXX_COMPILER=clang++
+      before_install:
+        - brew install ninja
+
+    # OS X GCC
+    - os: osx
+      osx_image: xcode9.3
+      env: C_COMPILER=gcc CXX_COMPILER=g++
+      before_install:
+        - brew install ninja
+
+    # Clang 4.0
+    - os: linux
+      compiler: clang
+      env: C_COMPILER=clang-4.0 CXX_COMPILER=clang++-4.0
+      addons:
+        apt:
+          sources:
+            - boost-latest
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-trusty-4.0
+          packages:
+            - clang-4.0
+            - libboost1.55-dev
+            - libboost-filesystem1.55-dev
+            - libboost-iostreams1.55-dev
+            - libboost-program-options1.55-dev
+            - libboost-regex1.55-dev
+            - libboost-log1.55-dev
+            - ninja-build
+
+    # Clang 5.0
+    - os: linux
+      compiler: clang
+      env: C_COMPILER=clang-5.0 CXX_COMPILER=clang++-5.0
+      addons:
+        apt:
+          sources:
+            - boost-latest
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-trusty-5.0
+          packages:
+            - clang-5.0
+            - libboost1.55-dev
+            - libboost-filesystem1.55-dev
+            - libboost-iostreams1.55-dev
+            - libboost-program-options1.55-dev
+            - libboost-regex1.55-dev
+            - libboost-log1.55-dev
+            - ninja-build
+
+    # GCC 4.8
+    - os: linux
+      compiler: gcc
+      env: C_COMPILER=gcc-4.8 CXX_COMPILER=g++-4.8
+      addons:
+        apt:
+          sources:
+            - boost-latest
+            - ubuntu-toolchain-r-test
+          packages:
+            - gcc-4.8
+            - g++-4.8
+            - libboost1.55-dev
+            - libboost-filesystem1.55-dev
+            - libboost-iostreams1.55-dev
+            - libboost-program-options1.55-dev
+            - libboost-regex1.55-dev
+            - libboost-log1.55-dev
+            - ninja-build
+
+    # GCC 5
+    - os: linux
+      compiler: gcc
+      env: C_COMPILER=gcc-5 CXX_COMPILER=g++-5
+      addons:
+        apt:
+          sources:
+            - boost-latest
+            - ubuntu-toolchain-r-test
+          packages:
+            - gcc-5
+            - g++-5
+            - libboost1.55-dev
+            - libboost-filesystem1.55-dev
+            - libboost-iostreams1.55-dev
+            - libboost-program-options1.55-dev
+            - libboost-regex1.55-dev
+            - libboost-log1.55-dev
+            - ninja-build
+
+    # GCC 6
+    - os: linux
+      compiler: gcc
+      env: C_COMPILER=gcc-6 CXX_COMPILER=g++-6
+      addons:
+        apt:
+          sources:
+            - boost-latest
+            - ubuntu-toolchain-r-test
+          packages:
+            - gcc-6
+            - g++-6
+            - libboost1.55-dev
+            - libboost-filesystem1.55-dev
+            - libboost-iostreams1.55-dev
+            - libboost-program-options1.55-dev
+            - libboost-regex1.55-dev
+            - libboost-log1.55-dev
+            - ninja-build
+
+    - stage: "Release Builds"
+      # OSX Release
+      os: osx
+      osx_image: xcode9.3
+      env: C_COMPILER=clang CXX_COMPILER=clang++
+      before_install:
+        - brew install ninja
+      if: tag IS present
+      deploy:
+        provider: releases
+        api_key: $GITHUB_TOKEN
+        file:
+            - bin/vcf_validator_macos
+            - bin/vcf_debugulator_macos
+            - bin/vcf_assembly_checker_macos
+        skip_cleanup: true
+        on:
+            repo: EBIvariation/vcf-validator
+            tags: true
+
+      # Linux Release
+    - os: linux
+      compiler: gcc
+      env: C_COMPILER=gcc-6 CXX_COMPILER=g++-6
+      if: tag IS present
+      addons:
+        apt:
+          sources:
+            - boost-latest
+            - ubuntu-toolchain-r-test
+          packages:
+            - gcc-6
+            - g++-6
+            - libboost1.55-dev
+            - libboost-filesystem1.55-dev
+            - libboost-iostreams1.55-dev
+            - libboost-program-options1.55-dev
+            - libboost-regex1.55-dev
+            - libboost-log1.55-dev
+            - ninja-build
+      deploy:
+        provider: releases
+        api_key: $GITHUB_TOKEN
+        file:
+            - bin/vcf_validator_linux
+            - bin/vcf_debugulator_linux
+            - bin/vcf_assembly_checker_linux
+        skip_cleanup: true
+        on:
+            repo: EBIvariation/vcf-validator
+            tags: true
+
+
+before_script:
+  - |
+    if [[ $TRAVIS_OS_NAME == "linux" ]]; then
+      ./install_dependencies.sh
+    fi
+  - |
+    if [[ $TRAVIS_OS_NAME == "osx" ]]; then
+      ./install_dependencies.sh osx
+    fi
+
+script:
+  - cmake -DCMAKE_CXX_COMPILER=${CXX_COMPILER} -DCMAKE_C_COMPILER=${C_COMPILER} ./ -GNinja
+  - ninja -v -j2
+  - ninja test
+  - |
+      if [[ $TRAVIS_OS_NAME == "osx" ]]; then
+        otool -L bin/vcf_validator
+      fi
+
+before_deploy:
+  - |
+      if [[ $TRAVIS_OS_NAME == "linux" ]]; then
+        mv bin/vcf_validator bin/vcf_validator_linux
+        mv bin/vcf_debugulator bin/vcf_debugulator_linux
+        mv bin/vcf_assembly_checker bin/vcf_assembly_checker_linux
+      fi
+  - |
+      if [[ $TRAVIS_OS_NAME == "osx" ]]; then
+        mv bin/vcf_validator bin/vcf_validator_macos
+        mv bin/vcf_debugulator bin/vcf_debugulator_macos
+        mv bin/vcf_assembly_checker bin/vcf_assembly_checker_macos
+      fi

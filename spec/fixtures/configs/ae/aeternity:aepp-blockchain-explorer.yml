@@ -1,0 +1,52 @@
+language: node_js
+node_js:
+- '8'
+cache:
+  directories:
+   - node_modules
+env:
+- VUE_APP_NODE_URL='https://roma-net.mdw.aepps.com/'
+install:
+- travis_wait npm install
+script:
+- npm run test
+- npm run build
+deploy:
+- provider: script
+  skip_cleanup: true
+  script: rsync -r --delete-after -v $TRAVIS_BUILD_DIR/dist/* deploy@139.59.142.164:/var/www/html/explorer.aepps.com/
+  on:
+    branch: explorer
+- provider: script
+  skip_cleanup: true
+  script: rsync -r --delete-after -v $TRAVIS_BUILD_DIR/dist/* deploy@139.59.142.164:/var/www/html/stage-explorer.aepps.com/
+  on:
+    branch: stage
+- provider: script
+  skip_cleanup: true
+  script: rsync -r --delete-after -v $TRAVIS_BUILD_DIR/dist/* deploy@139.59.142.164:/var/www/html/integration-explorer.aepps.com/
+  on:
+    branch: integration-explorer
+- provider: script
+  skip_cleanup: true
+  script: rsync -r --delete-after -v $TRAVIS_BUILD_DIR/dist/* deploy@139.59.142.164:/var/www/html/sdk-testnet-explorer.aepps.com/
+  on:
+    branch: sdk-testnet-explorer
+- provider: script
+  skip_cleanup: true
+  script: rsync -r --delete-after -v $TRAVIS_BUILD_DIR/dist/* deploy@139.59.142.164:/var/www/html/republica-explorer.aepps.com/
+  on:
+    branch: republica-pos
+- provider: script
+  skip_cleanup: true
+  script: ssh deploy@139.59.142.164 "mkdir -p /var/www/html/BRANCHES.explorer.aepps.com/`echo $TRAVIS_BRANCH | tr '[:punct:]' '-'`/" && rsync -r --delete-after -v $TRAVIS_BUILD_DIR/dist/* deploy@139.59.142.164:/var/www/html/BRANCHES.explorer.aepps.com/`echo $TRAVIS_BRANCH | tr '[:punct:]' '-'`
+  on:
+    all_branches: true
+before_deploy:
+- openssl aes-256-cbc -K $encrypted_90a9ca14a0f9_key -iv $encrypted_90a9ca14a0f9_iv
+  -in deploy.enc -out deploy -d
+- eval "$(ssh-agent -s)"
+- chmod 600 deploy
+- ssh-add deploy
+- mkdir -p ~/.ssh
+- echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config

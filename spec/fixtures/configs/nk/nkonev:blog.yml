@@ -1,0 +1,50 @@
+sudo: required
+dist: trusty
+language: java
+cache:
+  directories:
+  - "$HOME/.m2"
+  - frontend/node
+  - frontend/node_modules
+  - $HOME/.cache/install-jdk
+jdk: openjdk11
+services:
+  - docker
+before_install:
+  - sudo apt update -y
+  - sudo apt install --only-upgrade docker-ce -y
+#  - sudo apt-get install -y chromium-browser #https://www.ubuntuupdates.org/pm/google-chrome-stable
+  - openssl aes-256-cbc -K $encrypted_7051ac01cf89_key -iv $encrypted_7051ac01cf89_iv -in ./.travis/id_rsa.enc -out ~/.ssh/id_rsa -d
+  - chmod 600 ~/.ssh/id_rsa
+  - sudo service docker restart
+# https://medium.com/@jonashavers/how-to-use-java-10-with-travis-ci-363c7dc2f708
+  - java -version;
+    echo $JAVA_HOME;
+install: "/bin/true" # workaround https://github.com/Swagger2Markup/swagger2markup-maven-plugin/pull/24
+# https://docs.travis-ci.com/user/gui-and-headless-browsers/
+before_script:
+after_acript:
+script:
+  - (cd docker; docker-compose up -d)
+  # if there isn't pointed explicitly Chrome will be used by default for both webdriver integration test and js unit test
+  # We use 'install' phase because of use jars in subsequent tests
+  - DATE_VERSION=`date +%Y%m%d.%H.%M`
+  - ./mvnw -q -Drevision=$DATE_VERSION -P frontend -P jacoco -P docker -P webdriver-chrome -P webdriver-firefox -Dcustom.selenium.headless=true clean install --no-snapshot-updates
+  - (cd docker; docker-compose down)
+
+  - ./mvnw -q -Drevision=$DATE_VERSION -pl deploy-test -P deploy-test clean test  --no-snapshot-updates
+  - rm -rf ~/.m2/repository/com/github/nkonev/blog
+  - rm -rf $TRAVIS_BUILD_DIR/frontend/node_modules/.cache
+  - bash <(curl -s https://codecov.io/bash)
+  - if [[ "$TRAVIS_BRANCH" == "master" && "$TRAVIS_TEST_RESULT" == "0" && "$TRAVIS_EVENT_TYPE" != "cron" ]]; then (
+      echo "Will push docker image";
+      docker login -u="$DOCKER_LOGIN" -p="$DOCKER_PASSWORD";
+      docker push nkonev/blog:latest;
+      docker push nkonev/blog:$(cat backend/target/VERSIONFILE);
+      ssh -o "BatchMode yes" -o StrictHostKeyChecking=no -q $CONNECT_LINE $UPDATE_COMMAND;
+    ) else (
+      echo "Won't push docker image and deploy";
+    ) fi
+addons:
+  firefox: "63.0"
+  chrome: stable

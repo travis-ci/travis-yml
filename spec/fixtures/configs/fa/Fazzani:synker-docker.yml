@@ -1,0 +1,32 @@
+sudo: required
+language: generic
+install: skip
+addons:
+  apt:
+    ssh_known_hosts:
+    - "$REMOTE_HOST"
+branches:
+  only:
+  - master
+before_install:
+- openssl aes-256-cbc -K $encrypted_6c4b5957ed30_key -iv $encrypted_6c4b5957ed30_iv
+  -in secret.tar.enc -out secret.tar -d
+- tar xvf secret.tar
+env:
+  global:
+  - secure: X8Xr/n3ZANRdUA6X6ToPuaMH1GckMSi464PQwjcbzq9iBOaV9IlFi9pZ8dvXTlYDqCFlxnmgJIXa4fyMth9kdrX4U/qnDlZdpmgPjX6O2wtHKmROjBZ7PQ195uDPjykOeJQZgLrWNhJJ/276yTmArklBGFkpaxjtteg1pfZNeorTGqpvueIzSxiDv4ZDF9uk4X0qPy3B0Us4nGT+PZ1Jpp+N4NjpMhML3BnreUAU6NvEPIe0O9EYMUvHBjP5CVJrSRlcReQhoR3yQ8d4K18JHFy5Gp+biPz6wQLbZLHSy20juQ7/9YpbrkR5CbzdZt7uPqY65fq8+Q+Y4Af8UjCPuobBG0ztZZu1Jxj8WWXX46TTP7FQKq3UGEhTPcgXq7PUxlS9p8Iks8vl5MjUBrQBjBE9PQCYflb/HUabfnM85/Gvtq35BBX7uan5h0hOLZEqH+xkaz1x02O9JXD04r2ZSQHSAygz1Nh1YH5E98jtlgIEN57M4vwe7OITP5JoVIkIJHYIU9RG0aVAm8zTO+fiY15I60CX0yZVyimOL4X+T6fs3WjHpsWzcbtDx2ES8roSL0mnphOaoqcQ5kc5yF2lzr0KOuv7JuLowYNYr78S1XVFdOx3I4hCaV1a18Lho+rVbaKu3T1sJN7aRToyEByyk+sBkPByI/uAB+4QKp0lCjQ=
+  - secure: pCsT9QHxoYtDALO/DegEzNVLieDSDm/MBD5QQ79/T5HSGcJ2sqC4cJ44ntcKJyLmB5ShZEoCicMlxW+wEOBPyTYI46017vbnesIJgmKQNSuHzGdpAnxXlzy7WsYbTRyUQNwj5sQYdzY1f5ps8fPp5ttOK2/loeVGTo/QLZZp5hnS/hEGAEWZwhr16KlZPIOaoWckQtpt13t9c9FAmwf78+JbcUNNd2INqLW3lY9Z57J10IBajJdvpyp7Rwd7WsZJAHyc8t6fTFOj7BTsAFZaD0+JJBtDQzqk8H3Br49sL+w8rL14LR/kmhNAAdN5TPudGVSu8Jv6O4Ecqj6BRsJrkDHrYbK9w6ZQ8tNAIwTBKdn8+IRu5My2932YciW39Jf+p1bKfORGcHKAzCfPXskjBOJ13u++pLHKvh+pw7TNnGUpLe8MgATdRpGzORZiObgUwpk+rfAsGYy9UTGelMiJ5MIk9hR0xkZNl/r38tklsgIe6rBfcfqs221RvqvkCGjBU3hofK1yNwzL0x7KvytxJ3X38pPqESNzupSsRIEyY8mQRa/S0ZbJPUglFWNj1igMUwPXi5w+H5UPzKxStXllANIZXdxYfdQBp4WgGd+V/9W5y0BPP4Xgq1YxWqNVWoRkbtiU+PbUHDwwHk+RX7sQmGRIWMRArx+8wWeqTDJSBYw=
+  - secure: hp0sS1g6DjYirQJitzhOYTbA2iE5u9qBM7KFLREAU7Czu5/87i0wzTwxNU4R0NznvUCjmVeLxTa+n0y0vSehAtKn7R1kvqudvHxVixgPUtHAmZRkFeiNbxi2iJGffPEWaYkExJtHbmV6tFpBTYwMyyVRzE2X5NCJ89U9kH2VEJ8GWday4ZSd3UblLwPROWskNapSkLepKyXfKu30XHbeUVbmyQDuzrc8sH9HX3hkHJwpYKduj5lCjOgTcmUPacb1Mt84e8GAhBMGCdxazeEBCsP3SDmYytik488eXSMmM0xfMuaUUNeyYLBG44+Cflg4VEJe6+U5I8DZ27kxNCYgwSE1FELbqvNoqDvhlHRbCxVYjAefZBc4f+pTnhF2Ywmi3/8OpVgj/U0MLsqBNrPI8HpkjUa5OUPxXXSCVZNfYUtdRIFoaHgRqqkRPI7Xacx2OfJnfLa1JQ4u6TkDCbP6WCINxk/qkrBWD2x+jjzhdp2+Dv2Vg8Z48Ywc8NDjDz7PHPPNAhJ/PcHPxPH/Szm2JOqeeh1d1InB+RFqlfGZySmPqBUoAVTMp06AJGxQ5YpJooT8hqZItWX6sEYrEPKu5CNrWYdO+aDXKVWe+kktOFtCorO305aWlHCzIKzKXr3vBA6LsA8kUuPc3AZsM5jGodbf7ECfD4H/coQoRgNSEPw=
+before_deploy:
+- chmod 600 deploy_rsa
+- cp deploy_rsa ~/.ssh/id_rsa
+- eval "$(ssh-agent -s)"
+- ssh-add deploy_rsa
+- rm deploy_rsa
+- chmod +x ./deploy-travis/*
+deploy:
+  provider: script
+  skip_cleanup: true
+  script: "./deploy-travis/deploy.sh"
+  on:
+    branch: master

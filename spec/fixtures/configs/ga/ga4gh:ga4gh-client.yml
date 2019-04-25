@@ -1,0 +1,51 @@
+language: python
+python:
+  - "2.7"
+sudo: false
+
+cache:
+  directories:
+    - $HOME/.cache/pip
+    - /tmp/proto3.1.0
+
+install:
+  - pip install pip --upgrade
+  - pip install setuptools
+  - python setup.py sdist
+  - pip install dist/ga4gh_client*.tar.gz
+  - pip install -r requirements.txt -c constraints.txt --upgrade --no-cache-dir
+# every installable in setup.py's entry_points should be tested here
+  - ga4gh_client --version
+
+before_script:
+  - pip install -r dev-requirements.txt -c constraints.txt
+
+before_install:
+  - bash tools/travis-install-protoc.sh 3.1.0
+  - export PATH=/tmp/proto3.1.0/bin:$PATH
+
+# run_tests.py runs everything under the script: tag so only put commands
+# under it that we want to run (and want to be able to run) as local tests
+script: 
+  - flake8 client_dev.py setup.py tests ga4gh scripts
+  - python -mnose tests
+              --with-coverage --cover-package ga4gh.client
+              --cover-inclusive --cover-min-percentage=50
+              --cover-branches --cover-erase
+  - make clean -C docs
+  - make html -C docs
+
+after_success:
+# run codecov
+  - bash <(curl -s https://codecov.io/bash)
+
+
+# deploy to pypi when there is a new tag in master after a successful build
+deploy:
+    provider: pypi
+    user: dannycolligan
+    password:
+        secure: OVJS4PZbYBw8DvaNy3e+wIliwrxgI7pujIKn32K7d7y8k2P/Ho+NjHToQYpeMPc92MDTvIIhTOBMafiIBLG66VtVyqj5HZiPJqVqBsfE1P/7zRgso1bn1jJmRPa9Nb728qG655QmirIkjsJVSAG0qoY+uavAZ7GuYqMsQOFCFLOmMu+/rFMQCwaSr2OWG0N9zg1eUaTy59FO4rmPrb6XvYo6r7+njmdbYzGynPS5UdbWM2J2JlUt76u087OkUON19uGQ+TSupfzOmyOkYaWZ85dNxvsBoE16TByeLn3e+B8eXbSizSiAoPjfhxqC8UQjqoYl7iWTcV2/84aY0v2aKiSV7lBojU3NTdoGyL2u4I4uypcOkxSa8rvynqXOiUnvwgQ792JD6RFn3VMgkfpyY1aBZeHoTkTQ7RJ5ltYXKI2Zcg3QPUkuxlYzPDv6sNtM7usLVJX+bNpa+uBtGzmUrWTh7JbLB4CDPoB5HkeE/0PaFQZx3GJp2jLvovJZT4n29YFmzgO+hTkdCQbch8ULiR5K+LNW6uw8Lky48C98/EoYfQ1mKt6nqexFkAzXuJcSrFe3DXegwBT7DyD9BV0cwdAtjufMTZ2lMLNT5CllPy34QGGHxJbZJpPLnLSD+qHPwumUSwKw6OH8zVrC1YtomL6xFxFKIlYEVRk5dBWd9mM=
+    on:
+        repo: ga4gh/ga4gh-client
+        tags: true

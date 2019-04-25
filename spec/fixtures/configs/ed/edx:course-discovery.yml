@@ -1,0 +1,57 @@
+language: python
+
+python:
+    - "3.5"
+
+branches:
+  only:
+    - master
+
+services:
+  - docker
+
+sudo: required
+
+cache:
+  - directories:
+    - node_modules
+    - course_discovery/static/bower_components
+
+before_install:
+    - make travis_up
+
+matrix:
+  include:
+    - env: COMMAND=test:quality
+
+      install:
+        - docker exec -t discovery bash -c 'sed -i "s/course_discovery.settings.devstack/course_discovery.settings.test/" /edx/app/discovery/discovery_env'
+        - docker exec -t discovery bash -c 'source /edx/app/discovery/discovery_env && cd /edx/app/discovery/discovery/ && make requirements'
+
+      script:
+          - docker exec -t discovery bash -c 'source /edx/app/discovery/discovery_env && cd /edx/app/discovery/discovery/ && make docs'
+          - docker exec -t discovery bash -c 'source /edx/app/discovery/discovery_env && cd /edx/app/discovery/discovery/ && make check_translations_up_to_date'
+          - docker exec -t discovery bash -c 'source /edx/app/discovery/discovery_env && cd /edx/app/discovery/discovery/ && make validate_translations'
+          - docker exec -t discovery bash -c 'source /edx/app/discovery/discovery_env && cd /edx/app/discovery/discovery/ && make clean_static'
+          - docker exec -t discovery bash -c 'source /edx/app/discovery/discovery_env && cd /edx/app/discovery/discovery/ && make static'
+          - docker exec -t discovery bash -c 'source /edx/app/discovery/discovery_env && cd /edx/app/discovery/discovery/ && make quality'
+
+    - env: COMMAND=test:unittests
+
+      install:
+        - docker exec -t discovery bash -c 'sed -i "s|http://archive|http://us.archive|g" /etc/apt/sources.list' # US mirrors for speed
+        - docker exec -t discovery bash -c 'apt update && apt install -y --no-install-recommends firefox gettext wget xvfb'
+        # Remove firefox but leave its dependencies, and then download and install a working version of firefox (newer versions break some tests that we should eventually fix correctly).
+        - docker exec -t discovery bash -c 'sudo dpkg -r --force-all firefox && TEMP_DEB="$(mktemp)" && wget -O "$TEMP_DEB" https://s3.amazonaws.com/vagrant.testeng.edx.org/firefox_61.0.1%2Bbuild1-0ubuntu0.16.04.1_amd64.deb && dpkg -i "$TEMP_DEB"'
+        - docker exec -t discovery bash -c 'sed -i "s/course_discovery.settings.devstack/course_discovery.settings.test/" /edx/app/discovery/discovery_env'
+        - docker exec -t discovery bash -c 'source /edx/app/discovery/discovery_env && cd /edx/app/discovery/discovery/ && make requirements'
+
+      script:
+          - docker exec -t discovery bash -c 'source /edx/app/discovery/discovery_env && cd /edx/app/discovery/discovery/ && make clean_static'
+          - docker exec -t discovery bash -c 'source /edx/app/discovery/discovery_env && cd /edx/app/discovery/discovery/ && make static'
+          - docker exec -t discovery bash -c 'source /edx/app/discovery/discovery_env && cd /edx/app/discovery/discovery/ && xvfb-run make test'
+
+      after_success:
+          - pip install -U codecov
+          - docker exec -t discovery bash -c 'source /edx/app/discovery/discovery_env && cd /edx/app/discovery/discovery/ && coverage xml'
+          - codecov

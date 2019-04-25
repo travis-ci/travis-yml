@@ -415,4 +415,25 @@ describe Travis::Yml, 'matrix' do
     it { should have_msg [:warn, :'matrix.include', :migrate, key: :apt, to: :addons, value: nil] }
     it { should have_msg [:warn, :'matrix.include', :empty, key: :include] }
   end
+
+  describe 'whatever this is' do
+    yaml %(
+      language: cpp
+      dist: trusty
+      sudo: required
+
+      matrix:
+        include:
+          - os: linux
+            addons:
+              apt:
+                sources:
+                  - ubuntu-toolchain-r-test
+                packages:
+                  - g++-4.8
+                  - libgmp-dev
+            env: COMPILER=gcc VERSION=4.8 CXXFLAGS="-std=c++11"
+    )
+    it { should_not have_msg }
+  end
 end

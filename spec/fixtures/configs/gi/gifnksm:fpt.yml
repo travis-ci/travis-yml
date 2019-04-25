@@ -1,0 +1,17 @@
+language: rust
+dist: trusty
+sudo: false
+
+cache: cargo
+
+rust:
+  - nightly
+  - beta
+  - stable
+
+script:
+  - |
+      cargo build &&
+      cargo test &&
+      cargo bench &&
+      cargo doc

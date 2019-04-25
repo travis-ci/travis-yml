@@ -1,0 +1,33 @@
+dist: xenial
+language: python
+python:
+  - '3.6'
+addons:
+  postgresql: '10'
+  apt:
+    packages:
+      - postgresql-10
+      - postgresql-client-10
+      - postgresql-10-postgis-2.4
+cache:
+  pip: true
+  directories:
+    - /home/travis/virtualenv
+    - $HOME/.pip-cache/
+    - $HOME/.tox/
+    - .tox
+install:
+  - pip install tox tox-travis coveralls
+  - npm install
+before_script:
+  - psql -U postgres -c "create extension postgis"
+script:
+  - tox
+after_success:
+  - coveralls
+before_cache:
+    - rm -f .tox/py36-django111/log/*.log
+    - rm -f .cache/pip/log/*.log
+notifications:
+  slack:
+    secure: XDoMlbyJR1HOfF3ibOGNEizbb7MYGG8abDPrVTdTBscV5d3vm7qE0Uvd7Hq7YefwhSv8dJ+psrnWwMxBH7Z8zQmyLDyeVCNysOIfc3JfLi/cgrxZ0x0GoqUiiW8sgMl4Um/9jlEpcd5te5HpIeCFp0PHDO3GIWpzxx7xMbS6/0Q=

@@ -1,0 +1,30 @@
+language: java
+# See: https://docs.travis-ci.com/user/languages/java#Caching
+before_cache:
+  - rm -f $HOME/.gradle/caches/modules-2/modules-2.lock
+cache:
+  directories:
+    - $HOME/.gradle/caches/
+    - $HOME/.gradle/wrapper/
+before_script:
+  - cp .travis/application.example.properties config/application.properties
+  - cp .travis/travis.gradle.properties gradle.properties
+  - psql -c 'create database commcarehq;' -U postgres
+  - psql -c 'create database formplayer;' -U postgres
+  - curl -X PUT localhost:5984/commcarehq
+  - curl -X PUT localhost:5984/_config/admins/commcarehq -d '"commcarehq"'
+script:
+  - ./gradlew copyTestResources
+  - ./gradlew test --stacktrace --i
+services:
+  - postgresql
+  - redis-server
+  - couchdb
+addons:
+  postgresql: "9.4"
+env:
+  global:
+  - MALLOC_ARENA_MAX=1
+  - GRADLE_OPTS="-Xmx512m"
+after_failure:
+  - cat /home/travis/build/dimagi/formplayer/build/reports/tests/test/index.html

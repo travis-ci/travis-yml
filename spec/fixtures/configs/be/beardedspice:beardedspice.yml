@@ -1,0 +1,13 @@
+os: osx
+osx_image: xcode8
+language: objective-c
+rvm:
+  - 2.3.1
+before_install:
+  - gem install cocoapods
+  - gem install xcpretty -N --no-ri --no-rdoc
+
+script:
+  - set -o pipefail
+  - xcodebuild clean test -workspace BeardedSpice.xcworkspace -scheme BeardedSpice -sdk macosx -enableCodeCoverage YES | xcpretty
+

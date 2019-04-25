@@ -1,0 +1,69 @@
+# Run build using latest stable Node.js release
+language: node_js
+node_js:
+  - 9.11.1
+
+# Use the Trusty environment with sudo access so that external dependencies can be installed
+# For more info: https://docs.travis-ci.com/user/reference/trusty/
+dist: trusty
+sudo: required
+
+# Install `sshpass` for use in deployment script
+addons:
+  apt:
+    packages:
+    - sshpass
+  # Allow connecting to the server
+  ssh_known_hosts: 360react.gordon.edu
+
+# Cache installed node modules between builds to save time
+cache:
+  directories:
+    - "node_modules"
+
+install:
+  # Install dependencies (with all non-error output suppressed)
+  - npm install 1> /dev/null
+
+script:
+  # Uncomment next line to run tests in the build (when tests are ready to be run)
+  # - npm test
+
+  # Build application
+  - npm run build
+
+  # Lint code
+  - npm run lint
+
+  # Build documentation
+  - npm run docs
+
+deploy:
+  # Deploy develop to the staging environment
+  - provider: script
+    # Don't delete built application, because we need it for deployment
+    skip_cleanup: true
+    script: scripts/deploy.sh staging
+    on:
+      branch: develop
+
+  # Deploy master to production
+  - provider: script
+    # Don't delete built application, because we need it for deployment
+    skip_cleanup: true
+    script: scripts/deploy.sh production
+    on:
+      branch: master
+
+  # Deploy documentation to GitHub Pages
+  - provider: pages
+    skip_cleanup: true
+    github_token: $GITHUB_TOKEN # Set in travis-ci.org dashboard
+    local_dir: docs
+    on:
+      branch: develop
+
+# Only send notification emails on build failure
+notifications:
+  email:
+    on_success: never

@@ -1,0 +1,515 @@
+sudo: required
+dist: trusty
+language: cpp
+
+cache:
+  ccache: true
+
+os:
+  - linux
+  - osx
+
+compiler:
+  - gcc
+  - clang
+
+branches:
+  except:
+    - /^.*appveyor.*$/
+
+stages:
+  - check
+  - test
+  - test-long
+
+env:
+  global:
+    - TRAVIS_CMAKE_GENERATOR="Unix Makefiles"
+    - TRAVIS_BUILD_TYPE=Release
+    - TRAVIS_WITH_INTEGRATION_TESTS=false
+    - TRAVIS_WITH_ACE=true
+    - TRAVIS_WITH_MATH=true
+    - TRAVIS_WITH_BINDINGS=true
+    - TRAVIS_STATIC=false
+    - TRAVIS_CLEAN_API=false
+    - TRAVIS_WITH_VALGRIND=false
+    - TRAVIS_NO_DEPRECATED=false
+    - TRAVIS_WITH_EXECUTABLES=true
+    - TRAVIS_WITH_BROKEN_TESTS=false
+    - TRAVIS_RUN_UNIT_TESTS=true
+# ROS-related env variables. Used only by integration tests
+    - ROS_HOSTNAME=localhost
+    - ROS_MASTER_URI=http://localhost:11311
+    - ROBOT=sim
+# Force ccache to build the original cpp file instead of the pre-processed file
+    - CCACHE_CPP2=yes
+# CMake/CTest variables
+    - CTEST_OUTPUT_ON_FAILURE=1
+    - CLICOLOR_FORCE=1
+
+addons:
+  apt:
+    update: true
+    sources:
+      - ubuntu-toolchain-r-test
+      - llvm-toolchain-trusty-8
+    packages:
+      # gcc
+      - gcc-8
+      - g++-8
+      # clang
+      - clang-8
+      # build tools
+      - ninja-build
+      - lcov
+      - valgrind
+      - ccache
+      # libraries
+      - libace-dev
+      - libsqlite3-dev
+      - libtinyxml-dev
+      - libedit-dev
+      - qtbase5-dev
+      - qtdeclarative5-dev
+      - qtmultimedia5-dev
+      - libqt5opengl5-dev
+      - libqcustomplot-dev
+      - libopencv-dev
+      - libeigen3-dev
+      - libgraphviz-dev
+      - libgstreamer1.0-dev
+      - libgstreamer-plugins-base1.0-dev
+      - libpng-dev
+      - libv4l-dev
+      # Bindings
+      - swig3.0
+      # C# bindings
+      - mono-mcs
+      # Lua bindings
+      - liblua5.1-0-dev
+      - lua5.1
+      # TCL/TK bindings
+      - tcl-dev
+      - tk-dev
+      # Python bindings
+      - python3-dev
+      # Octave bindings
+      - liboctave-dev
+      # Java bindings
+      - default-jdk
+      # Ruby bindings
+      - ruby-dev
+      - ruby
+      # Perl bindings and license check
+      - perl
+  homebrew:
+    update: true
+    packages:
+    - ace
+    - sqlite
+    - tinyxml
+    - libedit
+    - qt5
+    - opencv@3
+    - eigen
+    - graphviz
+    - ccache
+    - libpng
+
+matrix:
+  exclude:
+  - os: osx
+
+  include:
+    # Static check only.
+    - stage: check
+      os: linux
+      compiler: gcc
+      before_install: skip
+      script: (cd build; ctest --build . -C ${TRAVIS_BUILD_TYPE} -R misc)
+      after_success: skip
+
+    # No ACE build (linux, gcc)
+    - stage: test
+      os: linux
+      compiler: gcc
+      env: TRAVIS_WITH_ACE=false
+
+    # No ACE build (linux, clang)
+    - stage: test
+      os: linux
+      compiler: clang
+      env: TRAVIS_WITH_ACE=false
+
+    # No YARP_math build (linux, gcc)
+    - stage: test
+      os: linux
+      compiler: gcc
+      env:
+        - TRAVIS_WITH_MATH=false
+        - TRAVIS_WITH_BINDINGS=false
+
+    # No YARP_math build (linux, clang)
+    - stage: test
+      os: linux
+      compiler: clang
+      env:
+        - TRAVIS_WITH_MATH=false
+        - TRAVIS_WITH_BINDINGS=false
+
+    # Normal build with CLEAN_API (linux, gcc)
+    - stage: test
+      os: linux
+      compiler: gcc
+      env:
+        - TRAVIS_CLEAN_API=true
+        - TRAVIS_RUN_UNIT_TESTS=false
+        - TRAVIS_WITH_BINDINGS=false
+
+    # Normal build with CLEAN_API (linux, clang)
+    - stage: test
+      os: linux
+      compiler: clang
+      env:
+        - TRAVIS_CLEAN_API=true
+        - TRAVIS_RUN_UNIT_TESTS=false
+        - TRAVIS_WITH_BINDINGS=false
+
+    # Normal build with Ninja generator (linux, gcc)
+    - stage: test
+      os: linux
+      compiler: gcc
+      env: TRAVIS_CMAKE_GENERATOR="Ninja"
+
+    # Normal build with Ninja generator (linux, clang)
+    - stage: test
+      os: linux
+      compiler: clang
+      env: TRAVIS_CMAKE_GENERATOR="Ninja"
+
+    # Normal build no deprecated (linux, gcc)
+    - stage: test
+      os: linux
+      compiler: gcc
+      env: TRAVIS_NO_DEPRECATED=true
+
+    # Normal build no deprecated (linux, clang)
+    - stage: test
+      os: linux
+      compiler: clang
+      env: TRAVIS_NO_DEPRECATED=true
+
+    # No-executables build (linux, gcc)
+    - stage: test
+      os: linux
+      compiler: gcc
+      env:
+        - TRAVIS_WITH_EXECUTABLES=false
+        - TRAVIS_RUN_UNIT_TESTS=false
+
+    # No-executables build (linux, clang)
+    - stage: test
+      os: linux
+      compiler: clang
+      env:
+        - TRAVIS_WITH_EXECUTABLES=false
+        - TRAVIS_RUN_UNIT_TESTS=false
+
+    # Static build (linux, gcc)
+    - stage: test
+      os: linux
+      compiler: gcc
+      env: TRAVIS_STATIC=true
+
+    # Static build (linux, clang)
+    - stage: test
+      os: linux
+      compiler: clang
+      env: TRAVIS_STATIC=true
+
+    # Static build, no ACE (linux, gcc)
+    - stage: test
+      os: linux
+      compiler: gcc
+      env:
+        - TRAVIS_WITH_ACE=false
+        - TRAVIS_STATIC=true
+        - TRAVIS_WITH_BINDINGS=false
+
+    # Static build, no ACE (linux, clang)
+    - stage: test
+      os: linux
+      compiler: clang
+      env:
+        - TRAVIS_WITH_ACE=false
+        - TRAVIS_STATIC=true
+        - TRAVIS_WITH_BINDINGS=false
+
+    # Normal build with valgrind (linux, gcc)
+    - stage: test-long
+      os: linux
+      compiler: gcc
+      env:
+        - TRAVIS_WITH_VALGRIND=true
+        - TRAVIS_WITH_BINDINGS=false
+        - TRAVIS_BUILD_TYPE=Debug
+
+
+    # No ACE build with valgrind (linux, gcc)
+    - stage: test-long
+      os: linux
+      compiler: gcc
+      env:
+        - TRAVIS_WITH_ACE=false
+        - TRAVIS_WITH_VALGRIND=true
+        - TRAVIS_WITH_BINDINGS=false
+        - TRAVIS_BUILD_TYPE=Debug
+
+    # Normal build with valgrind and broken tests (linux, gcc)
+#    - stage: test-long
+#      os: linux
+#      compiler: gcc
+#      env:
+#        - TRAVIS_WITH_VALGRIND=true
+#        - TRAVIS_WITH_BROKEN_TESTS=true
+#        - TRAVIS_WITH_BINDINGS=false
+#        - TRAVIS_BUILD_TYPE=Debug
+
+    # Normal build with clang (osx, clang)
+    - stage: test-long
+      os: osx
+      osx_image: xcode8.3
+      compiler: clang
+      env:
+        - TRAVIS_WITH_BINDINGS=false
+
+    # Normal build with Xcode 8.3 (osx, clang)
+    - stage: test-long
+      os: osx
+      osx_image: xcode8.3
+      compiler: clang
+      env:
+        - TRAVIS_CMAKE_GENERATOR="Xcode"
+        - TRAVIS_WITH_BINDINGS=false
+
+    # Normal build with Xcode 9.4 (osx, clang)
+    - stage: test-long
+      os: osx
+      osx_image: xcode9.4
+      compiler: clang
+      env:
+        - TRAVIS_CMAKE_GENERATOR="Xcode"
+        - TRAVIS_WITH_BINDINGS=false
+
+    # Normal build with Coverage (linux, gcc)
+#    - stage: test
+#      os: linux
+#      compiler: gcc
+#      env:
+#        - TRAVIS_BUILD_TYPE=Profile
+#        - TRAVIS_WITH_BINDINGS=false
+
+    # Normal build with integration tests (linux, gcc)
+#    - stage: test
+#      os: linux
+#      compiler: gcc
+#      env:
+#        - TRAVIS_WITH_INTEGRATION_TESTS=true
+#        - TRAVIS_WITH_BINDINGS=false
+#      addons:
+#         apt:
+#           sources:
+#             - sourceline: 'deb http://packages.ros.org/ros/ubuntu trusty main'
+#               key_url: 'http://packages.ros.org/ros.key'
+#           packages:
+#             - ros-jade-desktop-full
+
+    # Normal build with integration tests (linux, clang)
+#    - stage: test
+#      os: linux
+#      compiler: clang
+#      env:
+#        - TRAVIS_WITH_INTEGRATION_TESTS=true
+#        - TRAVIS_WITH_BINDINGS=false
+#      addons:
+#         apt:
+#           sources:
+#             - sourceline: 'deb http://packages.ros.org/ros/ubuntu trusty main'
+#               key_url: 'http://packages.ros.org/ros.key'
+#           packages:
+#             - ros-jade-desktop-full
+
+#  allow_failures:
+#    # Broken tests are supposed to fail
+#    - env:
+#        - TRAVIS_WITH_VALGRIND=true
+#        - TRAVIS_WITH_BROKEN_TESTS=true
+
+
+notifications:
+  irc:
+    channels:
+      - "chat.freenode.net#yarpers"
+    template:
+      - "%{repository}/%{branch} (%{commit} - %{author}): %{build_url}: %{message}"
+    use_notice: true
+    skip_join: true
+  slack:
+    secure: PFCRF5GqjLKAghKHz+Dl2yOlRM5Ud8uI8s4AvshsHVmW4VNDhJfLzi3cGqWGjptZ2CBSMSrd5noANQCfeKObqwpeW3na8vrEO/l0RrgqV0idpiDOMotSRbCTB6I7DNKL31ZsQ4qm7eOroWlauNSiC+CBLmwShE9+N2zWC25JXSo=
+
+
+before_install:
+  # Enable ccache on osx
+  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then export PATH="/usr/local/opt/ccache/libexec:$PATH"; fi
+
+  # Use ccache also for clang and clang++ on linux
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo ln -s ../../bin/ccache /usr/lib/ccache/clang; fi
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo ln -s ../../bin/ccache /usr/lib/ccache/clang++; fi
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo ln -s ../../bin/ccache /usr/lib/ccache/clang-8; fi
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo ln -s ../../bin/ccache /usr/lib/ccache/clang++-8; fi
+
+  # These can be removed for ccache 3.2 (at the moment Ubunty trusty has 3.1.9)
+  # see https://bugzilla.samba.org/show_bug.cgi?id=8118
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then if [ "$TRAVIS_COMPILER" == "clang" ]; then export CFLAGS="$CFLAGS -Qunused-arguments"; fi; fi
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then if [ "$TRAVIS_COMPILER" == "clang" ]; then export CXXFLAGS="$CXXFLAGS -Qunused-arguments"; fi; fi
+
+  # Force gcc-8
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then if [ "$TRAVIS_COMPILER" == "gcc" ]; then export CC=gcc-8; export CXX=g++-8; fi; fi
+
+  # Force clang-8
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then if [ "$TRAVIS_COMPILER" == "clang" ]; then export CC=clang-8; export CXX=clang++-8; fi; fi
+
+  # Remove default clang from path
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then export PATH=`echo $PATH | sed -e 's/\/usr\/local\/clang-3.5.0\/bin://'`; fi
+
+  # Print some more system information after installing all build tools
+  - echo "-------------------- BEGIN SYSTEM INFORMATION --------------------"
+  - uname -a
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then lsb_release -a; fi
+  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then system_profiler SPSoftwareDataType; fi
+  - env
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then cat /etc/apt/sources.list; fi
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then ls /etc/apt/sources.list.d; fi
+  - which cmake
+  - cmake --version
+  - which $CC
+  - $CC --version
+  - which $CXX
+  - $CXX --version
+  - which ccache
+  - ccache --version
+  - ccache -s
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then ls -la /usr/lib/ccache; fi
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then which swig3.0; fi
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then swig3.0 -version; fi
+  - which javac
+  - javac -version
+  - echo "--------------------  END SYSTEM INFORMATION  --------------------"
+
+
+install:
+  # Install Qt5 GUIs dependencies
+  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then export Qt5_DIR="/usr/local/opt/qt5/lib/cmake/Qt5"; fi
+  
+  # Install opencv@3 (keg-only)
+  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then brew link --force opencv@3; fi
+
+  # Fix issue in trusty version of Qt5
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo sed -i 's/COPY_ONLY/COPYONLY/g' /usr/lib/x86_64-linux-gnu/cmake/Qt5Core/Qt5CoreMacros.cmake; fi
+
+  # Install swig stuff
+  - if $TRAVIS_WITH_INTEGRATION_TESTS; then wget https://github.com/robotology-dependencies/swigs/releases/download/v0.0.5/swigs.zip; fi
+  - if $TRAVIS_WITH_INTEGRATION_TESTS; then unzip -q swigs.zip; mkdir -p cache; mv swigs cache/swig; fi
+
+  # Init ROS
+  - if $TRAVIS_WITH_INTEGRATION_TESTS; then source /opt/ros/jade/setup.bash; fi
+
+
+before_script:
+  # Prepare build directory
+  - mkdir -p build
+  - if $TRAVIS_WITH_INTEGRATION_TESTS; then ln -s ../cache build/cache; fi
+
+  # Prepare cmake options
+  - . scripts/admin/generate-cmake-options.sh $(hostname) $(lsb_release -cs) continuous
+  - export YARP_INSTALL_PREFIX="${PWD}/install"
+  - export YARP_CMAKE_OPTIONS="${CMAKE_OPTIONS} -DCMAKE_INSTALL_PREFIX=${YARP_INSTALL_PREFIX}"
+  - if ! $TRAVIS_WITH_ACE; then export YARP_CMAKE_OPTIONS="${YARP_CMAKE_OPTIONS} -DSKIP_ACE=ON -DYARP_TEST_HEAP=ON"; fi
+  - if ! $TRAVIS_WITH_MATH; then export YARP_CMAKE_OPTIONS="${YARP_CMAKE_OPTIONS} -DYARP_COMPILE_libYARP_math:BOOL=OFF -DENABLE_yarpmod_fakeIMU:BOOL=OFF -DENABLE_yarpmod_fakeLaser:BOOL=OFF"; fi
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then export YARP_CMAKE_OPTIONS="${YARP_CMAKE_OPTIONS} -DENABLE_yarpcar_h264:BOOL=ON"; fi
+  - if $TRAVIS_STATIC; then export YARP_CMAKE_OPTIONS="${YARP_CMAKE_OPTIONS} -DBUILD_SHARED_LIBS=OFF"; fi
+  - if $TRAVIS_CLEAN_API; then export YARP_CMAKE_OPTIONS="${YARP_CMAKE_OPTIONS} -DYARP_CLEAN_API=ON -DYARP_COMPILE_TESTS=OFF"; fi
+  - if ! $TRAVIS_WITH_EXECUTABLES; then export YARP_CMAKE_OPTIONS="${YARP_CMAKE_OPTIONS} -DYARP_COMPILE_EXECUTABLES=OFF -DYARP_COMPILE_TESTS=OFF"; fi
+  - if $TRAVIS_WITH_VALGRIND; then export YARP_CMAKE_OPTIONS="${YARP_CMAKE_OPTIONS} -DYARP_VALGRIND_TESTS=ON -DYARP_DISABLE_FAILING_TESTS=ON"; fi
+  - if $TRAVIS_NO_DEPRECATED; then export YARP_CMAKE_OPTIONS="${YARP_CMAKE_OPTIONS} -DYARP_NO_DEPRECATED=ON"; fi
+  - if $TRAVIS_WITH_BROKEN_TESTS; then export YARP_CMAKE_OPTIONS="${YARP_CMAKE_OPTIONS} -DYARP_ENABLE_BROKEN_TESTS=ON"; fi
+  - if $TRAVIS_WITH_INTEGRATION_TESTS; then export YARP_CMAKE_OPTIONS="${YARP_CMAKE_OPTIONS} -DYARP_ENABLE_INTEGRATION_TESTS=ON"; fi
+
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then YARP_CMAKE_OPTIONS="${YARP_CMAKE_OPTIONS} -DENABLE_yarpmod_usbCamera=ON -DENABLE_yarpmod_usbCameraRaw=ON"; fi
+
+  # Build rplidar2 on linux
+  # FIXME gcc only, see https://github.com/robotology/yarp/issues/1984
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then if [ "$TRAVIS_COMPILER" == "gcc" ]; then YARP_CMAKE_OPTIONS="${YARP_CMAKE_OPTIONS} -DENABLE_yarpmod_rpLidar2=ON"; fi; fi
+
+  # Avoid building Qt5 guis twice on macOS.
+  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then YARP_CMAKE_OPTIONS="${YARP_CMAKE_OPTIONS} -DYARP_DISABLE_OSX_BUNDLES=ON"; fi
+
+  # Disable tests with race conditions on macOS.
+  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then YARP_CMAKE_OPTIONS="${YARP_CMAKE_OPTIONS} -DYARP_DISABLE_FAILING_TESTS=ON"; fi
+
+  # Print cmake flags
+  - echo "--------------------     BEGIN CMAKE FLAGS    --------------------"
+  - echo -G"${TRAVIS_CMAKE_GENERATOR}" -DCMAKE_BUILD_TYPE=${TRAVIS_BUILD_TYPE} ${YARP_CMAKE_OPTIONS}
+  - echo "--------------------      END CMAKE FLAGS     --------------------"
+
+  # Run CMake
+  - (cd build; cmake -G"${TRAVIS_CMAKE_GENERATOR}" -DCMAKE_BUILD_TYPE=${TRAVIS_BUILD_TYPE} ${YARP_CMAKE_OPTIONS} ..)
+
+  # Print cmake cache
+  - echo "--------------------     BEGIN CMAKE CACHE    --------------------"
+  - (cd build; cat CMakeCache.txt)
+  - echo "--------------------      END CMAKE CACHE     --------------------"
+
+  # Reset coverage information
+  - if [ "$TRAVIS_BUILD_TYPE" == "Profile" ]; then (cd build; lcov --directory . --zerocounters); fi
+
+
+script:
+  # Build yarp
+  - (cd build; cmake --build . --config ${TRAVIS_BUILD_TYPE})
+
+  # Configure yarp
+  - if $TRAVIS_WITH_INTEGRATION_TESTS; then build/bin/yarp conf 0 0 local; fi
+
+  # Run unit tests
+  - if $TRAVIS_RUN_UNIT_TESTS; then (cd build; ctest --build . -C ${TRAVIS_BUILD_TYPE}); fi
+
+  # Test bindings from build directory
+  - if $TRAVIS_WITH_BINDINGS; then export YARP_BINDINGS_OPTIONS="-DYARP_COMPILE_BINDINGS=ON -DCREATE_LUA=ON -DCREATE_RUBY=ON -DCREATE_PYTHON=ON -DCREATE_TCL=ON -DCREATE_JAVA=ON -DCREATE_CSHARP=ON -DCREATE_PERL=ON"; fi
+  - if $TRAVIS_WITH_BINDINGS; then (cd build; cmake -G"${TRAVIS_CMAKE_GENERATOR}" -DCMAKE_BUILD_TYPE=${TRAVIS_BUILD_TYPE} ${YARP_CMAKE_OPTIONS} ${YARP_BINDINGS_OPTIONS} ..); fi
+  - if $TRAVIS_WITH_BINDINGS; then (cd build; cmake --build . --config ${TRAVIS_BUILD_TYPE}); fi
+  - if $TRAVIS_WITH_BINDINGS; then (cd build; ctest --build . -C ${TRAVIS_BUILD_TYPE} -R bindings); fi
+
+  # Test installation
+  - (cd build; cmake --build . --config ${TRAVIS_BUILD_TYPE} --target install)
+
+  # Test bindings from yarp installation
+  - if $TRAVIS_WITH_BINDINGS; then mkdir -p "${PWD}/install/share/yarp/bindings/build"; fi
+  - if $TRAVIS_WITH_BINDINGS; then (cd "${PWD}/install/share/yarp/bindings/build" && cmake -G"${TRAVIS_CMAKE_GENERATOR}" -DCMAKE_BUILD_TYPE=${TRAVIS_BUILD_TYPE} -DYARP_DIR=${YARP_INSTALL_PREFIX}/lib/cmake/YARP ${YARP_BINDINGS_OPTIONS} ..); fi
+  - if $TRAVIS_WITH_BINDINGS; then (cd "${PWD}/install/share/yarp/bindings/build" && cmake --build . --config ${TRAVIS_BUILD_TYPE}); fi
+
+  # Build also the os examples
+  - mkdir example/os/build
+  - (cd example/os/build; cmake -G"${TRAVIS_CMAKE_GENERATOR}" -DCMAKE_BUILD_TYPE=${TRAVIS_BUILD_TYPE} -DYARP_DIR=${YARP_INSTALL_PREFIX}/lib/cmake/YARP ..)
+  - (cd example/os/build; cmake --build . --config ${TRAVIS_BUILD_TYPE})
+
+
+after_success:
+  # Capture coverage info for Profile builds
+  - if [ "$TRAVIS_BUILD_TYPE" == "Profile" ]; then (cd build; lcov --directory . --capture --output-file coverage.info); fi
+  # Filter out system and test code
+  - if [ "$TRAVIS_BUILD_TYPE" == "Profile" ]; then (cd build; lcov --remove coverage.info '/usr/*' 'tests/*' 'example/*' 'extern/*' 'idls/*' '*/harness/*' 'yarp/build/*' 'src/libYARP_serversql/*' 'src/libYARP_name/*' --output-file coverage.info); fi
+  # Debug before upload
+  - if [ "$TRAVIS_BUILD_TYPE" == "Profile" ]; then (cd build; lcov --list coverage.info); fi
+  # Uploads to coveralls
+  - if [ "$TRAVIS_BUILD_TYPE" == "Profile" ]; then (cd build; coveralls-lcov --source-encoding=ISO-8859-1 coverage.info); fi

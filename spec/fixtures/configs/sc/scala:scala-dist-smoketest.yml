@@ -1,0 +1,32 @@
+language: scala
+
+jdk: oraclejdk8
+
+env:
+  global:
+    # GITHUB_OAUTH_TOKEN (for GitHub user scala-jenkins, same token as scabot)
+    secure: "ErMvEJv2oDyQqclA0IM78thPkZG+0kjBSIKbDtI/PIoaoxMKi+gtsYH92/JFU26oNfDwgqh3B0QwU2niyK3TO0P0xjmrYsvlMXjDwgHX/w+hw7GuIXUp4r8/V1nyNF+9OGlHtNbtbDtFilThI2osS+/G304cNsE4GVa9LRxhzpQ="
+
+script:
+  - source scripts/common
+  - if [[ "$scala_sha" != "" ]]; then postCommitStatus "pending"; fi
+  - scripts/jobs/release/smoketest
+
+after_script:
+  - |
+    if [[ "$scala_sha" != "" ]]; then
+      if [[ "$TRAVIS_TEST_RESULT" == "0" ]]; then
+        local state="success"
+      else
+        local state="failure"
+      fi
+      postCommitStatus $state
+    fi
+
+cache:
+  directories:
+    - $HOME/.ivy2/cache
+    - $HOME/.sbt
+before_cache:
+  - find $HOME/.ivy2/cache -name "ivydata-*.properties" -print -delete
+  - find $HOME/.sbt        -name "*.lock"               -print -delete

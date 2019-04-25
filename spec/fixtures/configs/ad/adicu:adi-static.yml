@@ -1,0 +1,45 @@
+language: python
+python: 3.6
+
+notifications:
+  email: false
+  slack:
+    on_pull_requests: false
+    rooms:
+    - secure: KBjMwEKsgXrSyg+hJArrSdzcuT131zJMSvuQwIT07AsT2xsGhecXAsSm3GFyg9+z22hO2ygCPbKSmt1cyUVhy59X0wAx/f7Zc8ozX40eVgRAh+nxuuM69Yua4ytR9EKAF4rhSyf4ZtNoHWmqendjBpeSChngQ0MPtiwCUHWBV54VLsZm1DEZkjkkQ+uMgNq/PFkn6AIeC1hMguB8BFj7LnAwfAcAlZGI52O4108ZLV+D3J2ovfPf/k1WZZdY03+guP50yKcFQxhXSNd5S4GVbWjWBqHEv8PB9qhkCO32vrdcegGG/P0skX88o0vXeB8knEDuzvgau2E/tlUy/f/IaA8Q2G4wpnCB3sp0ZHQotnhfKo98vjSMbq+CANhoLno/UQy0kRWG8Yg8Zwj57/fQR6f3LYH4etGZjj58D76WCSf3IqG7Wic8tpkLZbyZdKCrpArRJp/CODvoODtXpKel1DW/FJg8F2LMuZwLqrPCVhjyDGCxk2zk2bGZGF73ekgVTk5Tc3Blt2yfIKHrq+aRmyUlrASVXamHGmTZltsZzlLyVQ0Ykmt4GuV84v5/8cBDoUxBxWdo2vvQp9S/2ndyaF2FK8U1I118as+2Fi0fc73BkWgOz5855jNwvDB+VH9VH7rL2QylIiJp9SlTBdn76hn5GdAqRE5N1H1zyjcpjas=
+    on_failure: always
+    on_success: change
+
+addons:
+  ssh_known_hosts: adicu.com
+
+cache:
+  directories:
+  - "$HOME/.cache/pip"
+  - webpack/node_modules
+
+before_install:
+- export TZ="US/Eastern"
+- date
+
+install:
+- pip install lektor==3.1.1
+
+script:
+- lektor build -f webpack
+
+before_deploy:
+- test $TRAVIS_BRANCH == "master"
+- openssl aes-256-cbc -K $encrypted_b4089b536350_key -iv $encrypted_b4089b536350_iv -in .ssh/deploy_rsa.enc -out .ssh/deploy_rsa -d
+- eval "$(ssh-agent -s)"
+- chmod 600 $TRAVIS_BUILD_DIR/.ssh/deploy_rsa
+- ssh-add $TRAVIS_BUILD_DIR/.ssh/deploy_rsa
+- git config user.name "ADI-Bot"
+- git config user.email "infrastructure@adicu.com"
+- pip install requests && scripts/travis-commit.sh
+
+deploy:
+  provider: script
+  script: lektor deploy production
+  on:
+    branch: master

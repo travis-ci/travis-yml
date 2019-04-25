@@ -1,0 +1,30 @@
+language: node_js
+node_js:
+  - 10.13
+## Cache NPM folder and Cypress binary
+## to avoid downloading Cypress again and again
+cache:
+  directories:
+    - ~/.npm
+    - ~/.cache
+install:
+  - npm ci
+before_script:
+  ## runs the 'start' script
+  ## the '-- --silent' suppresses output
+  ## else our travis logs would be cluttered
+  ## with output from HTTP requests
+  ## https://docs.npmjs.com/cli/start
+  ## ---------------------------------------
+  ## we use the '&' ampersand which tells
+  ## travis to run this process in the background
+  ## else it would block execution and hang travis
+  - npm run start --silent &
+script:
+  - npm run test
+  - npm run build
+  ## We will move `npm run lint` and `npm run lint-functions`
+  ## to husky pre-commit hooks in a later PR
+notifications:
+  slack:
+    secure: X5M5atIaGOaBdkMWwsc8o9m9wXb4Tkc4Su74Rfyx65h/bMlTEx1b0+KMKl2+Ne/v2REobNcgVBlVojyQds4tePErINStwS522CZeve/5/WWnoBPkv+zFNaWldG0SCxqYsBp9ytZku3NHjTQY+Fro+iLNGjwiw7j1pzrhapIDBBlrfxuKusba929mwYjwvpe/DP3lrdSBP6ea9WrQBab3xbeTg0WUP2Cc3OHX5IfaGYv/7hgu17PEkrECO5mH871sX5rAVRsiwn1MnLsA9p3oEAQEIeyEwmvSXC3WK61G388hyW5c+evUDoMgkXOhK/5meAKyaegjudRDFqXNpvPXX1VQM2gOHpLio31ahwGC7KmCZ09bE6TCUayOYY1rere/OPgetauoPVduMtIoAkolr4XRrdLKhMl2/LLH0uTUWG3733Rnht5PUw7nwe4Hgw5lr1wFChOHVDZzveuqiBDO4lluvX4uADFVGqckiGxEDbRDiEheWm9uvXnKBSyNkqlvE5cZI4xKifBsgIPkPlsOhMRpQrd1jHNWshY2JtY9tLJ9Zm2BUvNRTfAFuxt2HU5h4YfmkpRjXG7DzWr18Cl5BzRVMRFEaXC5O/kC0MkETLk+52uqF6cVUHmqJ/No4eWr9nMPvhkZBfkVvRiKSoexL/dkcvcis2ZwoQ3V8ch7vW8=

@@ -1,0 +1,24 @@
+dist: trusty
+sudo: false
+language: ruby
+rvm:
+  - 2.3.8
+env:
+- ES_VERSION=6.5.1 ES_DOWNLOAD_URL=https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-${ES_VERSION}.tar.gz
+addons:
+  postgresql: 9.3
+  apt:
+    packages:
+      - postgresql-9.3-postgis-2.3
+before_script:
+  - cp config/database.yml.travis config/database.yml
+  - psql -U postgres -c 'create database travis_ci_test'
+  - sed -i 's/SET lock_timeout = 0;//g' db/structure.sql
+  - curl -s ${ES_DOWNLOAD_URL} | tar xzf -
+  - ./elasticsearch-${ES_VERSION}/bin/elasticsearch &
+script:
+  - bundle exec rake db:structure:load
+  - bundle exec rubocop
+  - bundle exec rspec spec
+notifications:
+  slack: safecast:ANen3IrnH5Kp64Huskw6T9Ji

@@ -1,0 +1,25 @@
+sudo: true
+
+language: scala
+jdk:
+- oraclejdk8
+scala: 
+- 2.11.5
+
+# Workaround for https://github.com/travis-ci/travis-ci/issues/7703
+before_script:
+  - sudo chmod +x /usr/local/bin/sbt
+
+script:
+  - sbt clean coverage compile test && sbt coverageReport && sbt coverageAggregate
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
+
+notifications:
+  webhooks:
+    urls:
+      - https://webhooks.gitter.im/e/8cdcfcf154f562f5bfc8
+    on_success: change
+    on_failure: always
+    on_start: never

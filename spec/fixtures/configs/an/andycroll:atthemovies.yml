@@ -1,0 +1,24 @@
+addons:
+  postgresql: "9.6"
+after_script:
+  - "./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT"
+before_script:
+  - "cp config/database.yml.travis config/database.yml"
+  - "psql -c 'create database travis_ci_test;' -U postgres"
+  - "cp .env.example .env"
+  - "curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter"
+  - chmod +x ./cc-test-reporter
+  - "./cc-test-reporter before-build"
+bundler_args: "--without production --deployment --jobs=3 --retry=3"
+cache: bundler
+env:
+  global:
+    secure: xW/o/LpZDpa5zBgu4Q7fvqMdzaDA+OSblWJZmcg/ESJ4Nc1PVMvNzjY+2kX79HBPpDz21m/nunf3wU/YT8hf9qh3ZXhFuv4Y048mHh9h0oKpID+ItyhMY1GVuEo/MtYSXpsSnovlK9EeVkvjAPlLQvzn0vza8dgoyWnRCgmtQ7GTfDVYLfxtYyvGfKJfIErxaQHZ/XeSInNlcS5iZYb3n45nUUz0/pxxtgTb3GB8jnUr080U7Uk1IFtfd9fP99COaW66Ar0+hqlWIGa6mfcTGNp9XljUDMY4ZtR0cy2er8aREqhQt/ilPbQ8SxTby0wHb/hEETahRVOmTLl979xHlNednbsfM/ddeB9v8YIiVblRcMWYEevExeqUHOaMUFMnAEn7Hu1ofQVuygS/jDposnEea4ICAEt5LLXmRdXrm4MeTdQ5I8NvCbmizJ3yx9RsQMIlQlhU4dh+eA+7MlvRvmvvOcxLc9ZIUHXN9vbdw/3Pydgm5+E7NWYlGHysVkyk3k+N4AVrQKthbsDA51jUgXjKLhSSpeT/o5hlJraSlSaxQEIB3hNMjWklytkWSfV06rJKGpYpONEGwIPvIjQpCQri009sUoJG7P7WzKdKHNnZRsD1EQ2htRavdByieEJZygb65VjKTNcGWMUXscctOH3aitwXkH/nWXF2UD7FyIQ=
+language: ruby
+rvm:
+- 2.5.3
+script:
+  - bundle exec rake db:create db:schema:load RAILS_ENV=test
+  - bundle exec rspec
+services:
+  - postgresql

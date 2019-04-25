@@ -1,0 +1,27 @@
+language: python
+
+addons:
+    postgresql: '9.3'
+
+env:
+    - TOXENV=py27 DATABASE_URL="postgres://postgres@localhost:5432/codesy" TEST_RUNNER="django_nose.NoseTestSuiteRunner"
+    - TOXENV=style
+    - TOXENV=docs
+
+install:
+    - pip install tox
+
+before_script:
+    - psql -c 'create database codesy;' -U postgres
+
+script: tox
+
+notifications:
+    irc:
+        channels:
+            - irc.freenode.net#codesy
+        on_success: always
+        on_failure: always
+        use_notice: true
+    slack:
+        secure: CL19UpqHzCcV9ttYNWpcDvcI7ymrnjxcu+VdQStDco5D8cSmGgcDYaWL1XrHbtrD5fKiaiirJf8lprh2ywh9nwOrGgjE3pqWJ0etcYntzwTkEEK7MpVG5tjN+QGP4SdwlPpXwkRO8x3WtrNvTU87Uqq6omvX+bXVSXAtAI565Yc=

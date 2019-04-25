@@ -1,0 +1,20 @@
+dist: trusty
+language: node_js
+node_js:
+  - "8.12"
+env:
+  global:
+    - secure: "MyS7Ilc0PnoRmbW+ZzIFvLtPWNXf+qgAYgI4KDk/D5uiiUYDc6PoeWRdF/YZSjxWo7avIUaMR0xSawiPdHsgu+yAYNLyO3N/VqXl70YJwu3AwK9ahvMO+dsxVhfZhx820bUEZ9aLHH7v2nyH/8Vc9/48JEkqWUBB5VQPTWVHQydtxYgGGe6gOAMhhORfc6YQ17f66jlIWGvyekFjKC2B0I43mQfFlCkojaC3HJPRLX52xGFDortPbpJstgI8Q+X7ev33YtXojy+YyHXODnDUZgp0CV9uLiHGjlesZL3fTvhg2rx1IvMSdPH+k7NpL8gGZyPNNK+j1V9bKx6xlSRo38ssdlenzote+/m5R1zZXjw96zlsYQdYmdn1sYwLrY3XYs2ISxgoQwhUOvZe+eXlroZM84McHTIvCI/mOFRec8q2yEQHAENRFndFL1t8etabUqPbY61rAX4+gmfhnNlBvUgZUXgFiNnC6Jfo+m5etVE3fWrG2UlHjUmZbFom5BnT3SPTKQLM1fFuHXHiqem1ig+a7A8P8IvAqGPLfy0SVwQEAp0ucm7IVjuV0n9F2hkHpzFgFfMVCJTsG+xNXzXB2p5MLSjVD/ug7IZlz0w4YY/w+8J2wIwrOeEohqUMWcHIN8YrducVmp1kwxwcd2Fwdql5rRf7klxAP8lYrFWQchs="
+    - secure: "UPQkthaofdIdBfeYVk0+mw753VgHYQ+pqj90kK4LSTsbLLF1MbUUDPxGpfBuMxu00jX/m77MLgJpyu315rd2HCob2RKJZeVy7i/XNC30JERYiqLxZ1vYp72Inekdqn9HnCjXYLAmQZdVBz5gHODq59aFWg22V5pFz9usmAkk9TqxlX11OL4b08VK3zUdUCngd1e4hxfILg+DpeSVTUyWicDPC1AOnCA2/cLPgEfquCrvGJ/brn2e3n+GdnxEI2FKryC/2hIHUYxe1Y2kca0hjdCGW7FSiAX2bAWi4LMAT8DJZnbkkG4Y2NwVYD3yMq+hRxl2Ou+J2TJxK6SfUUyiWEuElyd0rpA05gGJ+DvGH3ASZ9ELw0odxKzihUerlKOZX5r86TsJR6kixY/dfPpdDTfnNkXTW7fE3UjwscGVoQeVUlUuR0K1ZwnkuhSZibuPBTx9DFHufd9Vn84Q9vvJv84MsJsiTpIMnaV7yDSvJMx6ai+GWx2sM24ahcUhS1NJ2uTLchHf2StD62GSTwT6D1La1UuuaMMj8YnDfOpcwa0Xv1BdEqR1mQjc2/43eqqvQ/S55muuDdKrNh4U6Jpunz2+NllUqwLG+vX1xY3IOobnY/BpxwPsBNeU/g8uo61hBGGFvy/0uXcli7bdq1JEa7ku/xo8kRvrnmGFpAzOFO0="
+install:
+  - npm install
+  - npm install -g codecov
+before_script:
+  - 'if [ "$SAUCE_USERNAME" -a "$SAUCE_ACCESS_KEY" ]; then npm explore simulato-test-site -- nohup npm start & fi'
+script: 
+  - npm run lint-ci
+  - npm run unit-test
+  - npm run coverage
+  - codecov
+  - npm run generate-acceptance-tests
+  - 'if [ "$SAUCE_USERNAME" -a "$SAUCE_ACCESS_KEY" ]; then npm run acceptance-tests -- -s; fi'

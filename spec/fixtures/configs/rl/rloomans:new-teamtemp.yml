@@ -1,0 +1,28 @@
+language: python
+dist: xenial
+sudo: true
+python:
+  - "3.6.8"
+  - "3.7.3"
+env:
+  global:
+    - DATABASE_URL="sqlite:///:memory"
+    - DJANGO_SETTINGS_MODULE=teamtemp.settings.dev
+install:
+  - pip install -U pip
+  - pip install -U setuptools wheel
+  - pip install -U coveralls
+  - pip install -r requirements/dev.txt
+  - pip install -U codeclimate-test-reporter
+  - python manage.py migrate --no-input
+  - python manage.py collectstatic --no-input
+script:
+  - coverage run manage.py test
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
+  - coveralls
+  - codeclimate-test-reporter
+  - pip list -o
+notifications:
+  slack:
+    secure: gCKAwLlLg4xBaC2N0Df2O6LG4Ba1RtwcGhP4icMPolpfk739twQL4zeqcwhKdk8v6rOx62KiNWTwim0X+QNI/2wK1/8a88ukFdbmInJ9qhgSQHD/wbTRjAlwHOBkNCntPOBZDj9/GG9LxsnS7Z2Koue8TQcB/XyVSziDgalqZtbi3QUMshsrr5Xc/psTln0mN4ZUBqr7v9tJBsW0ffXnybKoWB8y8nVcFj+CYILye1iociWc0WssS3t3tCmJRWKrcEJ5asieGVJ2A93R9DHBHf5XwcAxKG2S0FwY3s4GuiLp4iyOa77Xojm2K+70+P5BDTyRmmAK7D1fuQ8ZnV3ojsTb94T4xhI73hhg+jxEDX7/TpxfwtwnVBS4zFtPU7R1X3hvXligo5jO+ITaFViwu+DGzluE2jISL7C3aokC7ZUDDImO9KMnJ7Yr7X+rSBcL1bS1r1PEE89elm+BuNi1/XX3TS82IAyiYuHJn42cyhyRbpmbpLBWH2tgSDEjVNpPhNbAyzC6trlyr/GrGmRJ0Zo9DCAKMVsCCx1VNz1ihOiC+G7f53+yJv8cjfdFU8/neJ77lARDIzLk0taGUqLVFZjD171b1EdSq7i4ojc2XzhlHvUAz17m3SS76TaWLK7LWJwpEeALfBYaHqz3zRZlIXlQqfOYYuFbgsic8AMl7MA=

@@ -1,0 +1,20 @@
+language: php
+
+sudo: false
+
+php:
+- 5.6
+
+before_install:
+- export PATH="$HOME/.composer/vendor/bin:$PATH"
+- composer self-update
+
+install:
+- composer init -n
+- composer config repositories.repo-name vcs https://github.com/stephenharris/po-test
+- composer require stephenharris/po-test:dev-master
+
+script: 
+- vendor/bin/po-test
+
+

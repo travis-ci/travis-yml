@@ -1,0 +1,26 @@
+sudo: false
+language: node_js
+cache:
+  directories:
+  - node_modules
+services:
+- docker
+addons:
+  apt:
+    sources:
+    - ubuntu-toolchain-r-test
+    packages:
+    - g++-4.8
+env:
+  - ALGOLIA_INDEX_PREFIX=travisci
+before_install:
+- cp config.example.yml config.yml
+- export CHROME_BIN=chromium-browser
+- export DISPLAY=:99.0
+- sh -e /etc/init.d/xvfb start
+script:
+- npm run lint
+- npm run test
+- "./travis-testcafe.sh"
+after_success:
+- tools/docker-build.sh

@@ -1,0 +1,42 @@
+sudo: required
+dist: xenial
+language: python
+cache:
+  timeout: 1800
+  pip: true
+  directories:
+    - node_modules
+    - downloads
+
+python:
+  - 3.7
+
+
+before_install:
+  - sudo sh -c 'echo "deb https://cloud.r-project.org/bin/linux/ubuntu trusty/" >> /etc/apt/sources.list'
+  - sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E084DAB9
+  - sudo apt-get update
+
+
+install:
+  - curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
+  - sudo apt-get install -y nodejs
+  - sudo npm config set strict-ssl false
+  - sudo apt-get install -y pigz
+  - sudo apt-get install -y r-base
+  - bash setup.sh
+  - cd website
+  - pip install wheel
+  - pip install -r requirements.txt
+  - pip install -r analyses/requirements.txt
+  - pip install -r tests/requirements.txt
+  - bash deploy.sh
+
+
+script:
+  - python3 -m pytest -x -n 2 --cov=. -k 'not test_import_results and not test_data and not celery' -m 'not serial' -v  -p no:warnings
+  - python3 -m pytest --cov=. --cov-append -m 'serial' -v  -p no:warnings
+
+
+after_success:
+  - coveralls

@@ -1,0 +1,50 @@
+language: php
+dist: trusty
+sudo: false
+
+php:
+  - 7.1
+
+before_install:
+  - composer selfupdate
+  - phpenv config-rm xdebug.ini
+
+install:
+  - composer validate --no-check-all --ansi
+  - composer install
+  # Prepare a list of files that should be checked for coding standard.
+  # If the branch was force updated the commit range might not be good.
+  # In this case we get the difference between the master and this.
+  - git diff --quiet "$TRAVIS_COMMIT_RANGE" -- ; GIT_DIFF_EXIT_CODE=$?
+  - |
+    if [ "$GIT_DIFF_EXIT_CODE" -gt 1 ] ; then
+      git remote add upstream https://github.com/drupaltransylvania/drupal-camp.git
+      git remote set-branches --add upstream "$TRAVIS_BRANCH";
+      git fetch upstream;
+      TRAVIS_COMMIT_RANGE=upstream/"$TRAVIS_BRANCH"...;
+    fi
+  - git diff --name-only $TRAVIS_COMMIT_RANGE > changed_files.txt
+  - echo -e "\033[0;34m-- All detected changes:\033[0m" && cat changed_files.txt || true
+  # Filter out only the types of files we need to check.
+  - sed -i '/inc$\|info$\|install$\|module$\|php$\|profile$\|test$\|theme$/!d' changed_files.txt
+  - echo -e "\033[0;34m-- Changed files after extension filetering:\033[0m" && cat changed_files.txt || true
+  # Filter out deleted files which make code-sniffer fail.
+  # Also make sure the file is not empty before filtering because,
+  # in that case we will get a dot (.) in the file which will make
+  # php-cs scan everything.
+  - |
+    if [ -s changed_files.txt ] ; then
+      cat changed_files.txt | xargs ls -d 2>/dev/null > changed_existing_files.txt || true;
+    fi
+  - echo -e "\033[0;34m-- Files that will be sniffed:\033[0m" && cat changed_existing_files.txt || true
+
+script:
+  - export BRANCH=$(if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then echo $TRAVIS_BRANCH; else echo $TRAVIS_PULL_REQUEST_BRANCH; fi)
+  - echo "TRAVIS_BRANCH=$TRAVIS_BRANCH, PR=$TRAVIS_PULL_REQUEST, BRANCH=$BRANCH"
+  # Run for each changed file the code sniffer.
+  - if [[ "$TRAVIS_PULL_REQUEST" != "false" && -s changed_existing_files.txt && "$BRANCH" != "master" && "$BRANCH" != "develop" ]] ; then
+      ./vendor/bin/phpcs --file-list=changed_existing_files.txt;
+    fi;
+  - curl http://drupalcamp-transylvania.dev.pitechplus.com/deploy_git.php;
+  - curl http://drupalcamp-transylvania.dev.pitechplus.com/deploy_composer.php;
+  - curl http://drupalcamp-transylvania.dev.pitechplus.com/deploy_drush.php;

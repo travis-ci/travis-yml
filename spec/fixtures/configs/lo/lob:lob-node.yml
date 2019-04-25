@@ -1,0 +1,14 @@
+language: node_js
+sudo: false
+node_js:
+- "node"
+- 10
+- 8
+- 6
+after_script:
+- npm run lint
+- npm run enforce
+- npm run coveralls
+notifications:
+  slack:
+    secure: lWfUx2jh4yLxb2EHpQBroDaGt0ZBFAw1IpSAPO4SUmai2G0oXCfkCkkFrgfYh32qaeRGY8uixYOwcT6LXrSucygTsn3rWZ9Yygwl/0NRDLdXLANk61JRPI2q0nxX/oX15P2+KQ+aH7WWPCwvVQRbx5YvumW+LZ3kmkx139uSp8Y=

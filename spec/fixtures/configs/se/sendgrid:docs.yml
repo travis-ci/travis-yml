@@ -1,0 +1,33 @@
+sudo: required
+dist: trusty
+language: node_js
+branches:
+  only:
+  - master
+  - develop
+node_js:
+- 8.4.0
+cache:
+- pip
+- yarn
+install:
+- pip install --user awscli
+before_script:
+- yarn
+script: ./travis/build.sh
+deploy:
+  - provider: script
+    script: ./travis/deploy.sh
+    skip_cleanup: true
+    on:
+      repo: sendgrid/docs
+      all_branches: true
+      condition: $TRAVIS_BRANCH = develop || $TRAVIS_BRANCH = master
+  - provider: script
+    script: ./travis/deploy_open_source.sh
+    skip_cleanup: true
+    on:
+      repo: sendgrid/docs
+      all_branches: true
+      condition: $TRAVIS_BRANCH = develop
+after_deploy: ./travis/after_deploy.sh

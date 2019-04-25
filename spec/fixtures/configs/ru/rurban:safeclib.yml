@@ -1,0 +1,64 @@
+language: c
+sudo: false
+#cache:
+#  ccache: true
+os:
+  - linux
+  - osx
+addons:
+  apt:
+    packages:
+      - libtext-diff-perl
+matrix:
+  fast_finish: true
+  include:
+    - compiler: gcc
+      addons:
+        apt:
+          packages:
+            - valgrind
+      env: CONF="--enable-debug --enable-unsafe --enable-norm-compat" VG=1
+    - compiler: gcc
+      env: CONF="--disable-nullslack --enable-warn-dmax"
+    - compiler: g++
+      env: CONF="--enable-debug --enable-unsafe --enable-norm-compat"
+    - compiler: gcc
+      os: osx
+      env: CONF="--enable-unsafe --enable-norm-compat"
+    - compiler: clang
+      env: CFLAGS="-O2 -D_FORTIFY_SOURCE=2 -march=native" CONF="--disable-constraint-handler"
+    - compiler: gcc
+      env: CONF="--disable-extensions"
+    #- compiler: clang
+    #  os: osx
+    #  env: CONF="--disable-extensions"
+    - compiler: clang
+      addons:
+        apt:
+          packages:
+            - clang-3.8
+      env: ASAN=1 CONF="--enable-debug --enable-unsafe --enable-norm-compat"
+  # clang++ does not allow c anymore. gcc is duplicate to cc
+  #exclude:
+  #  - env: XCC="gcc" TRAVIS_OS_NAME=osx
+  #  - env: XCC="cc"  TRAVIS_OS_NAME=osx
+
+branches:
+  except:
+    - /^v[0-9]+/
+    - appveyor
+
+install:
+  - build-tools/autogen.sh
+
+script:
+  # skip duplicate compilers and overly strict clang++
+  #- if [ "$TRAVIS_OS_NAME" = "osx" -a "$XCC" = "gcc" ]; then exit 0; fi
+  # ruby swallows the space as in CC="clang -fsanitize=address", and overrides
+  # CC after the env matrix
+  - if test x$ASAN = x1; then CC="clang-3.8 -fsanitize=address"; else true; fi
+  - ./configure $CONF
+  - make -j4
+  - if test x$ASAN = x1; then make -C tests tests; else true; fi
+  - make check-log
+  - if [ "$VG" = "1" ]; then make check-valgrind && make distcheck ; fi

@@ -179,6 +179,10 @@ module Travis
             !!@required
           end
 
+          def support?
+            support.any?
+          end
+
           def support
             @support ||= {}
           end
@@ -233,7 +237,8 @@ module Travis
           end
 
           def inspect
-            vars = ivars.map { |name, value| "#{name}=#{value.inspect}" unless value.nil? }.compact.join(' ')
+            vars = ivars.reject { |name, value| name == :parent || value.nil? }
+            vars = vars.map { |name, value| "#{name}=#{value.inspect}" }.join(' ')
             "#<#{self.class.name.sub('Travis::Yml::Schema::Type::', '')}#{" #{vars}" unless vars.empty?}>"
           end
         end

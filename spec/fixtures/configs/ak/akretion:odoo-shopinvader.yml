@@ -1,0 +1,50 @@
+language: python
+sudo: false
+cache: pip
+
+python:
+  - "2.7"
+
+addons:
+  apt:
+    packages:
+      - expect-dev  # provides unbuffer utility
+      - python-lxml # because pip installation is slow
+
+env:
+  global:
+  - VERSION="10.0" TESTS="1" LINT_CHECK="0" ERRORS_IGNORE="Wrong HTTP_API_KEY;RESTFULL call to url"
+
+  matrix:
+  - TESTS="0" LINT_CHECK="1"
+  - ODOO_REPO="odoo/odoo"
+  # for speed reason all dependency are preinstalled in OCA script,
+  # stock module add specific required field that can make failed
+  # the test of module that do not depend of stock module
+  # same issue for base_url that fail if the mail module is preinstalled
+  - UNIT_TEST="1" ODOO_REPO="OCA/OCB" EXCLUDE="product_stock_state,shopinvader_product_stock,shopinvader_product_stock_state,shopinvader_delivery_carrier,base_url"
+  - UNIT_TEST="1" ODOO_REPO="OCA/OCB" INCLUDE="product_stock_state,shopinvader_product_stock,shopinvader_product_stock_state,shopinvader_delivery_carrier"
+  - UNIT_TEST="1" ODOO_REPO="OCA/OCB" INCLUDE="base_url"
+
+virtualenv:
+  system_site_packages: true
+
+install:
+  - git clone -b configure_line_with_error https://github.com/akretion/maintainer-quality-tools.git ${HOME}/maintainer-quality-tools
+  - export PATH=${HOME}/maintainer-quality-tools/travis:${PATH}
+  - travis_install_nightly
+  - pip install pylint==1.8.4
+  - printf '[options]\n\nrunning_env = dev\nkeychain_key_dev = HRdthrkXp28SCHX0kmwOgIob-82N-w8zWoE_UsctE7E=' > ${HOME}/.openerp_serverrc
+  - git clone https://github.com/akretion/akretion-quality-tools ${HOME}/akretion-quality-tools
+  - export PATH=${HOME}/akretion-quality-tools/travis:${PATH}
+  - export PATH=.travis:${PATH}
+  - travis_configure
+
+script:
+  - travis_run_tests
+
+after_success:
+  - travis_after_tests_success
+
+after_script:
+  - travis_delete_algolia_index

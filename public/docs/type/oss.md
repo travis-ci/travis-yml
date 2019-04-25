@@ -2,17 +2,21 @@
 
 
 
-## Type
+## Types
 
-Any of:
+* Array of: String (known)
+* String (known)
 
-* Sequence (Array)
-* Enum (known String)
+## Values
+
+* `linux`
+* `osx`
+* `windows`
 
 ## Flags
 
-* Expand: This is a [matrix expansion key](/matrix_expansion).
 
+* expand
 
 ## Examples
 

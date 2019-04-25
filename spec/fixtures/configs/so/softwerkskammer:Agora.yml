@@ -1,0 +1,25 @@
+language: node_js
+
+# Use faster Docker architecture on Travis. (http://blog.travis-ci.com/2014-12-17-faster-builds-with-container-based-infrastructure/)
+sudo: false
+
+notifications:
+  slack:
+    secure: GetOPWIdZf3gnY2twBmVAtmgBwy5xSHHyKc6I6w4s8kXSuOG14cpTrMOkBO2HXT3ApovcwoZ1oYv6r7jbCgRit+OVp259God31kFw3gDsI8OSpmygqCIidx0KcwJpMlez3iF2n8rNoy2WtN4se55X7ZduTJEru4OvoG6I8Vh0tw=
+
+# Run the build twice, once with mongodb 2 and 3
+# run for mongo 3 requires mongodb service to pull in all dependencies
+matrix:
+  include:
+  - node_js: "8.10"
+    services:
+    - mongodb
+    before_script:
+      - npm install -g grunt-cli
+      - mongod --version
+  - node_js: "10.1.0"
+    services:
+    - mongodb
+    before_script:
+      - npm install -g grunt-cli
+      - mongod --version

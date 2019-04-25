@@ -1,0 +1,18 @@
+language: generic
+dist: trusty
+
+env:
+  global:
+  - PATH="/opt/chefdk/bin:/opt/chef/bin:/opt/chef/embedded/bin:/opt/chefdk/embedded/bin:$PATH"
+  matrix:
+  - COOKBOOK_PATH="cookbooks"
+  - COOKBOOK_PATH="community-cookbooks"
+
+addons:
+  apt:
+    sources:
+    - chef-stable-trusty
+    packages:
+    - chefdk
+
+script: ./runtests

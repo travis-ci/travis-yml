@@ -1,0 +1,47 @@
+language: go
+go_import_path: github.com/braintree-go/braintree-go
+
+install:
+  - source .default.env
+
+jobs:
+  include:
+    - stage: analysis
+      go: "1.11.2"
+      script: make analysis
+
+    - stage: test
+      go: "tip"
+      env:
+        - GO111MODULE=on
+      script: make test
+
+    - stage: test
+      go: "tip"
+      script: make test
+
+    - stage: test
+      go: "1.11.2"
+      env:
+        - GO111MODULE=on
+      script: make test
+
+    - stage: test
+      go: "1.11.2"
+      script: make test
+
+    - stage: test
+      go: "1.10.5"
+      script: make test
+
+    - stage: test
+      go: "1.9"
+      script: make test
+
+    - stage: test
+      go: "1.8"
+      script: make test
+
+    - stage: test
+      go: "1.7"
+      script: make test

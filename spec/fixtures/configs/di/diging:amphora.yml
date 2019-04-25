@@ -1,0 +1,19 @@
+language: python
+python:
+  - "2.7"
+env:
+  global:
+    - DJANGO_SETTINGS_MODULE=jars.settings
+    - BACKEND='postgres'
+    - LOGLEVEL='ERROR'
+    - DATABASE_URL='postgres://jars@localhost:5432/jars_tests'
+    - BOTO_CONFIG=/dev/null
+before_script:
+  - createuser -d -U postgres jars;
+  - psql -c 'alter role jars createdb;' -U postgres
+  - psql -c 'create database jars_tests;' -U postgres
+  - pip install psycopg2
+install:
+  - pip install -r requirements.txt
+script:
+  - python -Wi manage.py test

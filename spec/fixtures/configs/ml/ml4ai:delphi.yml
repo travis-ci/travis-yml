@@ -1,0 +1,30 @@
+language: python
+
+python:
+  - "3.6"
+
+addons:
+  apt:
+    packages:
+    - graphviz
+
+install:
+  - pip install -e .[test,docs]
+  - curl -O http://vision.cs.arizona.edu/adarsh/delphi.db
+  - export DELPHI_DB=`pwd`/delphi.db
+
+script:
+  - make test
+  - cd docs; make apidocs; make html
+
+deploy:
+  local-dir: docs/_build/html
+  provider: pages
+  skip-cleanup: true
+  github-token: $GITHUB_TOKEN
+  on:
+    branch: master
+
+after_success: bash <(curl -s https://codecov.io/bash)
+
+cache: pip

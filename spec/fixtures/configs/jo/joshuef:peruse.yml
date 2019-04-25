@@ -1,0 +1,110 @@
+sudo: required
+dist: trusty
+os:
+- osx
+- linux
+env:
+- NODE_ENV=dev
+- NODE_ENV=prod
+language: node_js
+node_js:
+- 8
+cache:
+  yarn: true
+  directories:
+  - node_modules
+  - app/node_modules
+  - "$HOME/.electron"
+  - "$HOME/.cache"
+
+addons:
+  # chrome: stable
+  apt:
+    sources:
+    - ubuntu-toolchain-r-test
+    packages:
+    - g++-4.8
+    - icnsutils
+    - graphicsmagick
+    - xz-utils
+    - xorriso
+    - desktop-file-utils
+before_script:
+- export DISPLAY=:99.0
+- sh -e /etc/init.d/xvfb start &
+- sleep 5
+
+script:
+# update the xdg implementation on the machine. older version is buggy
+- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then cp node_modules/opn/xdg-open ~/bin/;
+  fi
+- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then xdg-open --version;
+  fi
+- yarn run build
+- yarn run rebuild
+- yarn run test-peruse
+# - travis_retry yarn run test-exts # super occasionally times out in tests.
+
+# separate tests for safe + auth as together throws error due to native libs
+# - if [[ "$NODE_ENV" != "prod" ]]; then yarn run test safe-auth;
+#   fi
+- export {no_proxy,NO_PROXY}="127.0.0.1,localhost"
+- sleep 15
+# travis retry the full string to ensure repeat tests dont crash due to first try processess hanging around...
+- if [[ "$NODE_ENV" != "prod" ]]; then travis_retry eval " pkill -f electron || pkill -f Peruse || yarn run test-e2e";
+  fi
+- if [[ "$NODE_ENV" != "prod" ]]; then travis_retry eval " pkill -f electron || pkill -f Peruse || yarn run test-exts-e2e";
+  fi
+- yarn run package-only
+- if [[ "$NODE_ENV" == "prod"  ]]; then travis_retry eval " pkill -f electron || pkill -f Peruse ||  yarn run test-e2e-prod";
+  fi
+- sleep 5
+- if [[ "$NODE_ENV" == "prod" ]]; then travis_retry eval " pkill -f electron || pkill -f Peruse || yarn run test-exts-e2e-prod";
+  fi
+
+after_success:
+- ls release
+- export RELEASE="$(ls release)";
+- echo "deploying ${RELEASE} to GitHub releases as tagged with ${TRAVIS_TAG}"
+- cd release
+- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then ditto -c -k --sequesterRsrc --keepParent ${RELEASE} ${RELEASE}.zip;
+  fi
+- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then zip -r -q ${RELEASE}.zip ${RELEASE};
+  fi
+- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then zip -d *.zip *.DS_Store && zip -d *.zip  __MACOSX/\*;
+  fi
+- cd ..
+- ls release
+
+after_failure:
+- ls /home/travis/peruse/app/node_modules/@maidsafe/safe-node-app/src/native
+# - cat ~/.local/share/applications/mimeapps.list
+# - cat ~/.local/share/applications/maidsafenet-ltd-safe-browser-authenticator.desktop
+- which xdg-open
+- xdg-open --version
+# - bash -x ~/bin/xdg-open safe-auth://whaaaaa
+- cat app/log.log;
+
+
+
+before_deploy:
+
+- export RELEASE_ZIP="$(ls release/*.zip)";
+- echo "deploying ${RELEASE_ZIP} to GitHub releases as tagged with ${TRAVIS_TAG}"
+- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sha256sum release/*.zip >> release/$RELEASE.txt; fi
+- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then shasum -a 256 release/*.zip >> release/$RELEASE.txt; fi
+- export SHA_256_SUM="$(ls release/*.txt)";
+
+
+deploy:
+  provider: releases
+  skip_cleanup: true
+  api_key:
+    secure: i7J0VE/UAxfpei1AjMNrCP440wQNh2iLGFMip8FPotFIPBqHxxJlxmz9FCkVim/3XgtdgdQbT5M29IqkIt1pwtLn4xwx5LXgVNGy5/yW7uvqR2pnowhu2/G9YdOEZti+ZPLFnWCjqgMjdvbg8CE4K6is/Qa613EeDP1PBvCf2e0lvathNX9LOKDZk0G8DpTgFKp7ndCYBH4JmPLVbyWn2D9w4nmzpaYI2sk4ma+O7yrkDaE9u+AKrLn/RtshjgBovBSfMFqlaYUipIhkukAPYynArOUOCEoGNsOxthMbyPYOlH0PqY4OWEt2pSqQOYDOq14zemeskmcoGJeKmpw2WWHdz5ZKGBex6HSq6RbxOaPot0PSfnZxis2q/P9CwlPoTBjtk16UI+Y/ZPreL2dC+PRz2+NCTqVcl2yUKs6Z8HeuCG6ntnUlcWxqURzW5kdfD/lWxJMEtyqi1MAfieLyNpZiBsF08uOJeHfjW/QwB9zL6nSzkUznUWpvKQmS19yEb2bmUyFogyQj8KRnBhJTq74HMgRAbCT/fPnvIGvq63bwjKekqF1fAViTe/z8WL5l2B5D1cFJWy+l6VUlW6O8DpFe04jmzWo3vFYWmqNok2MzesMXQHLe6yE/Mo5+wfbUr5BS87sjCAw4GXF9ThcbYk0MjLKzfOBFafTFQoiM/Rs=
+  file:
+    - "${RELEASE_ZIP}"
+    - "${SHA_256_SUM}"
+  draft: true
+  tag_name: $TRAVIS_TAG
+  on:
+    tags: true

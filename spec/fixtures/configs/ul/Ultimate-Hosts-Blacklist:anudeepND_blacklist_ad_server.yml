@@ -1,0 +1,40 @@
+addons:
+    apt:
+        packages:
+        - dos2unix
+cache:
+- pip
+dist: xenial
+env:
+    global:
+    -   secure: ggiTKN7JDmDQ1ZINNtp43GMXwUpY7wDO3Lb7Ao1OzJ1I7Z/J0gdVDHuH0JmanGWwc77QmChb2iNis/Fv2mfwvTyn0PwGvn7NOdJ+wGXDI+JKef9GTmgKIO9S5KElCIdzz4ATOj9S5fQcoxQTlrF1arwlkHVLp7nbFe19TZxoETGhdEG9wuGsgvBX9A+HDS3ZPCSCorismAsz58IN1Ni8uMSNWFo4K4dPlXW6uq5PnMnkw56LwK/s5lameU/Vaui0wmXhLAMx/9mQxLRne5nRKPCKiquYSbFFuduj5MOa6pokJjjM8I8O8O8UrerTgJ6Ukx+ikbMCl45at7ukYzB7v+eNmsWDLtQJfDjGbat3pHM6zLT4bILg92l6A0Op6aegSMQLDt2T7y67WAhYDwyyHdesmgdisivjVWjFAnqqxSkJNhbnAQDBkBtSDDUgPbg5dwdupZkaVAUccWhnkPX0NuAJzzEg0u91VNswog557nUsZvZD7aLfENhbUSey85ihH6pOeN88jW+d7ztVE8rejFIk5MrGwI3pTwYGvxwWlTA3xOXU7TxS3/OIJk9qYO4Mv1IDrB1cwlhOZ174s08qbeTioRqL14XxyLtYmwjEUrqG/2hJppbEZKZZsan+U/ktUjG/v1FFAM+UZlwMcFXPyiY+n8bSpwasC8+1b6sM+8c=
+    -   GIT_NAME: Travis CI
+    -   GIT_EMAIL: dead-hosts@funilrys.com
+    -   TRAVIS_REPO_SLUG: Ultimate-Hosts-Blacklist/anudeepND_blacklist_ad_server
+    -   GIT_BRANCH: master
+    -   UPDATE_LOCATION: https://raw.githubusercontent.com/Ultimate-Hosts-Blacklist/repository-structure/master/update.py
+    -   ADMINISTATION_LOCATION: https://raw.githubusercontent.com/Ultimate-Hosts-Blacklist/repository-structure/master/administration.py
+install:
+- pip3 install --upgrade pip
+- pip3 install requests
+- pip3 install ultimate-hosts-blacklist-whitelist PyYaml
+- if [[ ! -f .admin ]]; then wget "${UPDATE_LOCATION}" -o /dev/null -O update.py &&
+    chmod +x update.py; else echo "No need to download/update update.py."; fi
+- if [[ ! -f .admin ]]; then wget "${ADMINISTATION_LOCATION}" -o /dev/null -O administration.py
+    && chmod +x administration.py; else echo "No need to download/update administration.py.";
+    fi
+language: python
+matrix:
+    fast_finish: true
+notifications:
+    email:
+        on_failure: always
+        on_success: never
+        recipients:
+        - dead-hosts@funilrys.com
+        - mitchellkrogza+ultimatehostsblacklist@gmail.com
+python:
+- '3.7'
+script:
+- python3 ./update.py
+sudo: required

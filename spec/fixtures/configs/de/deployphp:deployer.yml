@@ -1,0 +1,41 @@
+language: php
+
+php:
+  - 7.0
+  - 7.1
+  - 7.2
+  - 7.3
+  - 7.4snapshot
+
+env:
+  matrix:
+    - COMPOSER_FLAGS="--prefer-lowest"
+    - COMPOSER_FLAGS="--prefer-stable"
+
+cache:
+  directories:
+    - $HOME/.composer/cache/files
+
+addons:
+  apt:
+    update: true
+    packages:
+      - acl
+
+install:
+  - composer self-update
+  - composer update --no-interaction --prefer-dist $COMPOSER_FLAGS
+
+script:
+  - vendor/bin/phpunit --coverage-clover=coverage.xml
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
+
+notifications:
+  webhooks:
+    urls:
+      - https://webhooks.gitter.im/e/3ffa605389816ec39774
+    on_success: change
+    on_failure: always
+    on_start: never

@@ -1,0 +1,20 @@
+language: ruby
+sudo: false
+cache: bundler
+dist: trusty
+rvm:
+  - 2.5.3
+node_js:
+  - 'node'
+before_script:
+  - cp config/example.database.yml config/database.yml
+  - psql -c "create database rad_consumer_test;" -U postgres
+  - bundle exec rake db:schema:load
+  - npm install
+  - npm install -g bower karma-cli
+  - bundle exec bowndler update
+script:
+  - bundle exec rspec
+  - bundle exec cucumber
+  - npm test
+  - bundle exec rubocop -DS

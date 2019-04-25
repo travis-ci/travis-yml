@@ -1,0 +1,276 @@
+dist: xenial
+language: cpp
+sudo: enabled
+
+matrix:
+  include:
+    # CPPCHECK
+    - env:
+      - NAME="Cppcheck C/C++ Linter"
+      language: generic
+      before_install: true
+      install: .ci/script/run-install-cppcheck.sh
+      script: .ci/script/run-cppcheck.sh -out=xml
+    # CODESPELL
+    - env:
+      - NAME="Codespell spelling check"
+      language: generic
+      before_install: true
+      install: .ci/script/run-install-codespell.sh
+      script: .ci/script/run-codespell.sh ${TRAVIS_BUILD_DIR}
+    # HOST BUILD / TEST / COVERAGE
+    - env:
+      - NAME="Host Build/Test/Coverage"
+      before_install: true
+      install: .ci/script/run-install-toolchain-host.sh
+      script:
+          - .ci/script/run-pre-test-prepare-coverage-report.sh
+          - .ci/script/run-build-libsnowfox.sh config/host-default.cmake
+          - .ci/script/run-test.sh
+          - .ci/script/run-post-test-create-coverage-report.sh
+    # ATMEL AVR
+    - env:
+      - NAME="Atmel AT90CAN32"
+      before_install: true
+      install: .ci/script/run-install-toolchain-avr.sh
+      script: .ci/script/run-build-libsnowfox.sh config/at90can32-default.cmake
+    - env:
+      - NAME="Atmel AT90CAN64"
+      before_install: true
+      install: .ci/script/run-install-toolchain-avr.sh
+      script: .ci/script/run-build-libsnowfox.sh config/at90can64-default.cmake
+    - env:
+      - NAME="Atmel AT90CAN128"
+      before_install: true
+      install: .ci/script/run-install-toolchain-avr.sh
+      script: .ci/script/run-build-libsnowfox.sh config/at90can128-default.cmake
+    - env:
+      - NAME="Atmel ATMEGA640"
+      before_install: true
+      install: .ci/script/run-install-toolchain-avr.sh
+      script: .ci/script/run-build-libsnowfox.sh config/atmega640-default.cmake
+    - env:
+      - NAME="Atmel ATMEGA1280"
+      before_install: true
+      install: .ci/script/run-install-toolchain-avr.sh
+      script: .ci/script/run-build-libsnowfox.sh config/atmega1280-default.cmake
+    - env:
+      - NAME="Atmel ATMEGA2560"
+      before_install: true
+      install: .ci/script/run-install-toolchain-avr.sh
+      script: .ci/script/run-build-libsnowfox.sh config/atmega2560-default.cmake
+    - env:
+      - NAME="Atmel ATMEGA164P"
+      before_install: true
+      install: .ci/script/run-install-toolchain-avr.sh
+      script: .ci/script/run-build-libsnowfox.sh config/atmega164p-default.cmake
+    - env:
+      - NAME="Atmel ATMEGA324P"
+      before_install: true
+      install: .ci/script/run-install-toolchain-avr.sh
+      script: .ci/script/run-build-libsnowfox.sh config/atmega324p-default.cmake
+    - env:
+      - NAME="Atmel ATMEGA644p"
+      before_install: true
+      install: .ci/script/run-install-toolchain-avr.sh
+      script: .ci/script/run-build-libsnowfox.sh config/atmega644p-default.cmake
+    - env:
+      - NAME="Atmel ATMEGA1284P"
+      before_install: true
+      install: .ci/script/run-install-toolchain-avr.sh
+      script: .ci/script/run-build-libsnowfox.sh config/atmega1284p-default.cmake
+    - env:
+      - NAME="Atmel ATMEGA328P"
+      before_install: true
+      install: .ci/script/run-install-toolchain-avr.sh
+      script: .ci/script/run-build-libsnowfox.sh config/atmega328p-default.cmake
+    - env:
+      - NAME="Atmel ATMEGA16U4"
+      before_install: true
+      install: .ci/script/run-install-toolchain-avr.sh
+      script: .ci/script/run-build-libsnowfox.sh config/atmega16u4-default.cmake
+    - env:
+      - NAME="Atmel ATMEGA32U4"
+      before_install: true
+      install: .ci/script/run-install-toolchain-avr.sh
+      script: .ci/script/run-build-libsnowfox.sh config/atmega32u4-default.cmake
+    - env:
+      - NAME="Atmel ATMEGA3209"
+      before_install: true
+      install: .ci/script/run-install-toolchain-avr.sh
+      script: true # .ci/script/run-build-libsnowfox.sh config/atmega3209-default.cmake
+    - env:
+      - NAME="Atmel ATMEGA4809"
+      before_install: true
+      install: .ci/script/run-install-toolchain-avr.sh
+      script: true # .ci/script/run-build-libsnowfox.sh config/atmega4809-default.cmake
+    # RISCV64
+    - env:
+      - NAME="SiFive FE310"
+      before_install: true
+      install:
+        - .ci/script/run-install-toolchain-riscv64.sh
+        - export PATH="$PATH:${TRAVIS_BUILD_DIR}/toolchain/riscv64-unknown-elf-gcc-8.2.0-2019.02.0-x86_64-linux-ubuntu14/bin"
+      script: .ci/script/run-build-libsnowfox.sh config/sifive-fe310-default.cmake
+    # EXAMPLES/DRIVER/CAN
+    - env:
+      - NAME="examples/driver/can"
+      before_install: true
+      install:
+        - .ci/script/run-install-toolchain-avr.sh
+        - .ci/script/run-install-toolchain-riscv64.sh
+        - export PATH="$PATH:${TRAVIS_BUILD_DIR}/toolchain/riscv64-unknown-elf-gcc-8.2.0-2019.02.0-x86_64-linux-ubuntu14/bin"
+      script:
+        - .ci/script/run-build-example.sh examples/driver/can/MCP2515/driver-mcp2515-spi-atmega328p-debug
+        - .ci/script/run-build-example.sh examples/driver/can/MCP2515/driver-mcp2515-spi-atmega328p-receiver
+        - .ci/script/run-build-example.sh examples/driver/can/MCP2515/driver-mcp2515-spi-atmega328p-transmitter
+    # EXAMPLES/DRIVER/GLCD
+    - env:
+      - NAME="examples/driver/glcd"
+      before_install: true
+      install:
+        - .ci/script/run-install-toolchain-avr.sh
+        - .ci/script/run-install-toolchain-riscv64.sh
+        - export PATH="$PATH:${TRAVIS_BUILD_DIR}/toolchain/riscv64-unknown-elf-gcc-8.2.0-2019.02.0-x86_64-linux-ubuntu14/bin"
+      script:
+        - .ci/script/run-build-example.sh examples/driver/glcd/RA6963/driver-ra6963-gpio-at90can128
+    # EXAMPLES/DRIVER/HAPTIC
+    - env:
+      - NAME="examples/driver/haptic"
+      before_install: true
+      install:
+        - .ci/script/run-install-toolchain-avr.sh
+        - .ci/script/run-install-toolchain-riscv64.sh
+        - export PATH="$PATH:${TRAVIS_BUILD_DIR}/toolchain/riscv64-unknown-elf-gcc-8.2.0-2019.02.0-x86_64-linux-ubuntu14/bin"
+      script:
+        - .ci/script/run-build-example.sh examples/driver/haptic/DRV2605/driver-drv2605-i2c-atmega328p
+        - .ci/script/run-build-example.sh examples/driver/haptic/DRV2605/driver-drv2605-i2c-atmega328p-debug
+    # EXAMPLES/DRIVER/IOEXPANDER
+    - env:
+      - NAME="examples/driver/ioexpander"
+      before_install: true
+      install:
+        - .ci/script/run-install-toolchain-avr.sh
+        - .ci/script/run-install-toolchain-riscv64.sh
+        - export PATH="$PATH:${TRAVIS_BUILD_DIR}/toolchain/riscv64-unknown-elf-gcc-8.2.0-2019.02.0-x86_64-linux-ubuntu14/bin"
+      script:
+        - .ci/script/run-build-example.sh examples/driver/ioexpander/MAX6921/driver-max6921-spi-atmega328p
+        - .ci/script/run-build-example.sh examples/driver/ioexpander/PCA9547/driver-pca9547-i2c-atmega328p
+        - .ci/script/run-build-example.sh examples/driver/ioexpander/PCA9547/driver-pca9547-i2c-atmega328p-debug
+        - .ci/script/run-build-example.sh examples/driver/ioexpander/MCP23017/driver-mcp23017-i2c-atmega328p
+        - .ci/script/run-build-example.sh examples/driver/ioexpander/MCP23017/driver-mcp23017-i2c-atmega328p-debug
+    # EXAMPLES/DRIVER/LORA
+    - env:
+      - NAME="examples/driver/lora"
+      before_install: true
+      install:
+        - .ci/script/run-install-toolchain-avr.sh
+        - .ci/script/run-install-toolchain-riscv64.sh
+        - export PATH="$PATH:${TRAVIS_BUILD_DIR}/toolchain/riscv64-unknown-elf-gcc-8.2.0-2019.02.0-x86_64-linux-ubuntu14/bin"
+      script:
+        - .ci/script/run-build-example.sh examples/driver/lora/RFM9x/driver-rfm9x-spi-atmega1284p-debug-moteino-mega-usb
+        - .ci/script/run-build-example.sh examples/driver/lora/RFM9x/driver-rfm9x-spi-atmega1284p-receiver-moteino-mega-usb
+        - .ci/script/run-build-example.sh examples/driver/lora/RFM9x/driver-rfm9x-spi-atmega1284p-transmitter-moteino-mega-usb
+        - .ci/script/run-build-example.sh examples/driver/lora/RFM9x/driver-rfm9x-spi-atmega2560-debug-dragino-lora-shield-v1.4
+        - .ci/script/run-build-example.sh examples/driver/lora/RFM9x/driver-rfm9x-spi-atmega328p-debug-dragino-lora-shield-v1.4
+        - .ci/script/run-build-example.sh examples/driver/lora/RFM9x/driver-rfm9x-spi-atmega328p-receiver-dragino-lora-shield-v1.4
+        - .ci/script/run-build-example.sh examples/driver/lora/RFM9x/driver-rfm9x-spi-atmega328p-transmitter-dragino-lora-shield-v1.4
+    # EXAMPLES/DRIVER/MEMORY
+    - env:
+      - NAME="examples/driver/memory"
+      before_install: true
+      install:
+        - .ci/script/run-install-toolchain-avr.sh
+        - .ci/script/run-install-toolchain-riscv64.sh
+        - export PATH="$PATH:${TRAVIS_BUILD_DIR}/toolchain/riscv64-unknown-elf-gcc-8.2.0-2019.02.0-x86_64-linux-ubuntu14/bin"
+      script:
+        - .ci/script/run-build-example.sh examples/driver/memory/PCF8570/driver-pcf8570-i2c-atmega328p
+    # EXAMPLES/DRIVER/SENSOR
+    - env:
+      - NAME="examples/driver/sensor"
+      before_install: true
+      install:
+        - .ci/script/run-install-toolchain-avr.sh
+        - .ci/script/run-install-toolchain-riscv64.sh
+        - export PATH="$PATH:${TRAVIS_BUILD_DIR}/toolchain/riscv64-unknown-elf-gcc-8.2.0-2019.02.0-x86_64-linux-ubuntu14/bin"
+      script:
+        - .ci/script/run-build-example.sh examples/driver/sensor/AD7151/driver-ad7151-i2c-atmega328p
+        - .ci/script/run-build-example.sh examples/driver/sensor/AD7151/driver-ad7151-i2c-atmega328p-debug
+        - .ci/script/run-build-example.sh examples/driver/sensor/AS5600/driver-as5600-i2c-atmega328p
+        - .ci/script/run-build-example.sh examples/driver/sensor/AS5600/driver-as5600-i2c-atmega328p-debug
+        - .ci/script/run-build-example.sh examples/driver/sensor/BMG160/driver-bmg160-i2c-atmega328p
+        - .ci/script/run-build-example.sh examples/driver/sensor/BMG160/driver-bmg160-i2c-atmega328p-debug
+        - .ci/script/run-build-example.sh examples/driver/sensor/INA220/driver-ina220-i2c-atmega328p
+        - .ci/script/run-build-example.sh examples/driver/sensor/INA220/driver-ina220-i2c-atmega328p-debug
+        - .ci/script/run-build-example.sh examples/driver/sensor/L3GD20/driver-l3gd20-i2c-atmega328p
+        - .ci/script/run-build-example.sh examples/driver/sensor/L3GD20/driver-l3gd20-i2c-atmega328p-debug
+        - .ci/script/run-build-example.sh examples/driver/sensor/LIS2DSH/driver-lis2dsh-i2c-atmega328p
+        - .ci/script/run-build-example.sh examples/driver/sensor/LIS2DSH/driver-lis2dsh-i2c-atmega328p-debug
+        - .ci/script/run-build-example.sh examples/driver/sensor/LIS3DSH/driver-lis3dsh-i2c-atmega328p
+        - .ci/script/run-build-example.sh examples/driver/sensor/LIS3DSH/driver-lis3dsh-i2c-atmega328p-debug
+        - .ci/script/run-build-example.sh examples/driver/sensor/LIS3MDL/driver-lis3mdl-i2c-atmega328p
+        - .ci/script/run-build-example.sh examples/driver/sensor/LIS3MDL/driver-lis3mdl-i2c-atmega328p-debug
+    # EXAMPLES/DRIVER/SERIAL
+    - env:
+      - NAME="examples/driver/serial"
+      before_install: true
+      install:
+        - .ci/script/run-install-toolchain-avr.sh
+        - .ci/script/run-install-toolchain-riscv64.sh
+        - export PATH="$PATH:${TRAVIS_BUILD_DIR}/toolchain/riscv64-unknown-elf-gcc-8.2.0-2019.02.0-x86_64-linux-ubuntu14/bin"
+      script:
+        - .ci/script/run-build-example.sh examples/driver/serial/uart0-at90can128
+        - .ci/script/run-build-example.sh examples/driver/serial/uart0-atmega328p
+        - .ci/script/run-build-example.sh examples/driver/serial/uart1-at90can128
+    # EXAMPLES/DRIVER/STEPPER
+    - env:
+      - NAME="examples/driver/stepper"
+      before_install: true
+      install:
+        - .ci/script/run-install-toolchain-avr.sh
+        - .ci/script/run-install-toolchain-riscv64.sh
+        - export PATH="$PATH:${TRAVIS_BUILD_DIR}/toolchain/riscv64-unknown-elf-gcc-8.2.0-2019.02.0-x86_64-linux-ubuntu14/bin"
+      script:
+        - .ci/script/run-build-example.sh examples/driver/stepper/TMC260x/driver-tmc260x-spi-atmega328p
+    # EXAMPLES/DRIVER/TLCD
+    - env:
+      - NAME="examples/driver/tlcd"
+      before_install: true
+      install:
+        - .ci/script/run-install-toolchain-avr.sh
+        - .ci/script/run-install-toolchain-riscv64.sh
+        - export PATH="$PATH:${TRAVIS_BUILD_DIR}/toolchain/riscv64-unknown-elf-gcc-8.2.0-2019.02.0-x86_64-linux-ubuntu14/bin"
+      script:
+        - .ci/script/run-build-example.sh examples/driver/tlcd/HD44780/driver-hd44780-gpio-atmega328p
+    # EXAMPLES/HAL
+    - env:
+      - NAME="examples/hal"
+      before_install: true
+      install:
+        - .ci/script/run-install-toolchain-avr.sh
+        - .ci/script/run-install-toolchain-riscv64.sh
+        - export PATH="$PATH:${TRAVIS_BUILD_DIR}/toolchain/riscv64-unknown-elf-gcc-8.2.0-2019.02.0-x86_64-linux-ubuntu14/bin"
+      script: 
+        - .ci/script/run-build-example.sh examples/hal/ATMEGA328P/hal-atmega328p-analog-digital-converter
+        - .ci/script/run-build-example.sh examples/hal/ATMEGA328P/hal-atmega328p-digital-in-pin
+        - .ci/script/run-build-example.sh examples/hal/ATMEGA328P/hal-atmega328p-digital-in-port
+        - .ci/script/run-build-example.sh examples/hal/ATMEGA328P/hal-atmega328p-digital-out-pin
+        - .ci/script/run-build-example.sh examples/hal/ATMEGA328P/hal-atmega328p-digital-out-port
+    # EXAMPLES/TRACE
+    - env:
+      - NAME="examples/trace"
+      before_install: true
+      install:
+        - .ci/script/run-install-toolchain-avr.sh
+        - .ci/script/run-install-toolchain-riscv64.sh
+        - export PATH="$PATH:${TRAVIS_BUILD_DIR}/toolchain/riscv64-unknown-elf-gcc-8.2.0-2019.02.0-x86_64-linux-ubuntu14/bin"
+      script: 
+        - .ci/script/run-build-example.sh examples/trace/trace-serial-at90can128-uart0
+        - .ci/script/run-build-example.sh examples/trace/trace-serial-atmega1284p-uart0
+        - .ci/script/run-build-example.sh examples/trace/trace-serial-atmega2560-uart0
+        - .ci/script/run-build-example.sh examples/trace/trace-serial-atmega328p-uart0
+        - .ci/script/run-build-example.sh examples/trace/trace-serial-atmega32u4-uart1
+
+before_install: true
+install: true
+script: true

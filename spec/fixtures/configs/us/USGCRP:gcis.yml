@@ -1,0 +1,41 @@
+language: perl
+
+sudo: false
+addons:
+    apt:
+        packages:
+            - raptor2-utils
+            - postgresql-9.6
+            - postgresql-contrib-9.6
+            - postgresql-server-dev-9.6
+            - libuuid1
+            - uuid-dev
+            - openssl
+            - libssl-dev
+            - libpq-dev
+            - libxml2
+
+perl:
+  - "5.20"
+
+env:
+    - PERL_CPANM_OPT=-n
+
+before_install :
+    - cpanm http://search.cpan.org/CPAN/authors/id/R/RE/REHSACK/List-MoreUtils-0.427_001.tar.gz
+    - cpanm App::cpanoutdated
+    - cpan-outdated | cpanm
+    - cpanm Devel::Cover Devel::Cover::Report::Coveralls
+
+script :
+   - perl Build.PL && ./Build
+   - PERL5OPT=-MDevel::Cover=-coverage,statement,branch,condition,path,subroutine ./Build test
+   - cover
+
+cache:
+    directories :
+        - /home/travis/perl5/perlbrew/perls/5.20/lib/site_perl
+        - /home/travis/perl5/perlbrew/perls/5.20/bin
+
+after_success :
+     - cover -report coveralls

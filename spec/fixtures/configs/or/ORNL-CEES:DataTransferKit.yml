@@ -1,0 +1,27 @@
+sudo: required
+
+services:
+  - docker
+
+notifications:
+  email: false
+
+env:
+  - TEST_SUITE=format_cpp
+  - TEST_SUITE=no_trailing_whitespaces_or_tabs
+  - TEST_SUITE=build_sphinx_documentation
+  - TEST_SUITE=doxygen_documentation
+
+before_install:
+  - docker pull dalg24/clang-format
+
+script:
+  - ci_env=`bash <(curl -s https://codecov.io/env)`
+  - docker run
+      --rm
+      --volume ${TRAVIS_BUILD_DIR}:/scratch
+      --workdir /scratch
+      --env DTK_REVISION=${TRAVIS_COMMIT}
+      $ci_env
+      dalg24/clang-format
+        ./docker/travis/check_${TEST_SUITE}.sh

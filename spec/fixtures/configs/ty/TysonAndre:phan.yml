@@ -1,0 +1,37 @@
+language: php
+
+# The 1.0 releases can be used with any PHP version from 7.0 to 7.3.
+php:
+  - 7.0
+  - 7.1
+  - 7.2
+  - 7.3
+
+# NOTE: Travis starts up 5 test suites at a time.
+# So, it's faster to run all of the tests at once per supported PHP version.
+dist: xenial
+sudo: false
+
+cache:
+  directories:
+    - $HOME/.composer/cache
+    - $HOME/.cache/phan-ast/build
+
+# We invoke php multiple times via CLI in several tests, so enable the opcache file cache.
+before_install:
+  - ./tests/travis_setup.sh
+  - mkdir /tmp/opcache || true; echo -e 'opcache.enable_cli=1\nopcache.file_cache=/tmp/opcache' >> ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/travis.ini
+  - composer validate
+
+# --classmap-authoritative shouldn't affect Phan's behavior, but is faster.
+# Use it for Travis and published Phars.
+install:
+  - composer --prefer-dist --classmap-authoritative install
+
+# We have a fake TEST_SUITE in tests/run_all_tests which runs Phan, and check if the exit code is non-zero and the standard output is non-empty.
+# This is used instead of a unit test because Phan currently caches too much state for this to be run with other unit tests, and the configuration might end up different within a unit test.
+# This was moved into a separate script to stop cluttering up .travis.yml
+script:
+  # NOTE: GNU parallel is not available on travis, and because we don't plan to depend on sudo in the future, it's inconvenient to install
+  - tests/run_all_tests
+  - php internal/package.php

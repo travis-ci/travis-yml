@@ -1,0 +1,29 @@
+language: python
+
+python:
+  - '3.6'
+
+# Get latest setuptools below because metadata-api installation fails without at least 40.1.0
+install: "pip install -U setuptools && pip install -r requirements.txt -r test-requirements.txt"
+
+jobs:
+  include:
+    # The linting test is fast and cheap so run it first
+    - stage: Linting Test
+      script: 
+        # Check Black code style compliance
+        - black pipeline_tools/ --skip-string-normalization --check
+        # Check PEP-8 compliance
+        - flake8
+
+    # The unit test is a bit more expensive so run it only
+    # if the linting test passes
+    - stage: Unit Test
+      script: pytest -v
+
+notifications:
+  slack:
+    on_success: change
+    on_failure: always
+    rooms:
+      secure: Nmo5fbykEJPXBxxgjWTQXH8eEbUjtsMpT+Lr05d2HJADtWcFh9fOrkvQGVGgquqqsb97IMpfGKQWNDF1+KkNVwEixwyxRFUv0OeZP9Th6zfqipA5XIHT1btm+Zd3xG6UTz1c456LuEZ9BGTvJUjFbbgwPcbcy8nTu04Oup+y/L144WfaTq+AfA0BGuSBlnwQ9kwSjYx8LbgZTaGin5/EJs0x1JLQPwP3dITwxLG+FYaUityFMYYIQ1uoZ2JxTvgc6WOXTo5LzDdUy7oPxyRZoKz/r55Cj+QLeenf+xZ8PYV5RFXUQd6Muub+7tPBb6O3fT119sp6+ieClDeb9NX8Mat6jvkXLjBb6o9IuDWxP/ebSW9QEbahzIvOaPL3idpZ7Q5bT2cEvvr94DE1Oli3+sxDrmOMKwB27SNVWYTWYaDMinJRKIb1N5SD5q7039AOzHaIcSBjLpJuMJoqY8AS/KpEU+iNQV/DZyrNinO0OcQmZUkAu09z19ilgJzswAm5wCfGoA0nxLIAaoqlgcmGVNlvjxEBlQVnuua6V054bU9iTbED+0VUF94ppLmcKnI5hsRtGrowcgeYSFbmUP9BUwdpQ+ne6FUjLaSFtGOYN27ksWh/fTGE9eXS6o7hgLmolxPuBT4sZsI3P9NLQC4ToOpTUVFvum4XOtx/zE6Qr6M=

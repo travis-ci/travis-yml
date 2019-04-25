@@ -1,0 +1,24 @@
+language: go
+go:
+  - 1.x
+
+addons:
+  apt:
+    packages:
+    - xz-utils
+
+sudo: required
+services:
+  - docker
+
+env:
+  - GOVERSION=1.11
+
+install: true
+
+cache:
+  directories:
+    - ~/.cache
+
+script:
+  - ./run_tests.sh docker

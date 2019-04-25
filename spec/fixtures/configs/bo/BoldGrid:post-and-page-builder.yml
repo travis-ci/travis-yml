@@ -1,0 +1,37 @@
+language: php
+notifications:
+  email:
+    on_success: never
+    on_failure: change
+  slack:
+    secure: U0C7obTxqgI1blt1RIhIY+M3mU94CgSVMCP3oWtPyVaXrDwYdlSZvqXGCdezJXqVzFOcMEytDlKMJxo1zM6fnXlpqvUllBGm2IJkpQj6ijUr+uQy6bVqMWQiIWDho8XRKH3GoYa812XSsNJOROX+let9JiXiO5qz0DWSs3FQ4gl+Ti+E/Znck9yE32AfY5rHEhtkbN2ih/Agx7o+8PkdGG2BGr6hqfn/Gf1sHiUA6KifdoD6lZRR/nym/1osEMlkuavbY4tOf+RBvUTpSpyBDthPXmgXCPJZ8iGGTKySic7KF367AXITWNWdZxX0ChzNB6WcmJWvdvghbxRnIZXN3nML+gtXclmNnH8GOO4iLyXtUbyh7JpoZh/5KVnqP2hmgjPzBGNm84JBmZuqB7jIKHAZwWh66u9k03uteM5wrYNxQBYvDHvTaeeP7TnOBDWhUkjvEacx61TpxmUCb6VGHahSv/MuqaAEpvolcj83BPBC4fjrLA3dj6u+WjYxTqRZeA9A35eW6qT3182beKHCj+GfN1PfsMRGCyqebxcj6CMLgGti0UMgFUBBp1w30z54vKq/lpIRCgMYXQWbETJPLhez76u9MqVCc1j9JoxD6o7we3BsvYtOhngnCbKLcpDzsQK8q/TTtVB/etfQcYdir6lkJn4wAQbvoM5US8uPQ7w=
+php:
+- 5.5
+- 5.6
+env:
+- WP_VERSION=latest WP_MULTISITE=0
+matrix:
+  include:
+  - php: 5.4
+    env: WP_VERSION=latest WP_MULTISITE=1
+before_script:
+- composer install
+- yarn install
+- bash bin/install-wp-tests.sh wordpress_test root '' localhost $WP_VERSION
+script:
+- phpunit
+- npm run build
+deploy:
+- provider: script
+  script: chmod +x ./node_modules/@boldgrid/wordpress-tag-sync/release.sh && ./node_modules/@boldgrid/wordpress-tag-sync/release.sh
+  skip_cleanup: true
+  on:
+    tags: true
+    php: '5.6'
+- provider: releases
+  api_key: "${GITHUB_TOKEN}"
+  file: post-and-page-builder.zip
+  skip_cleanup: true
+  on:
+    tags: true
+    php: '5.6'

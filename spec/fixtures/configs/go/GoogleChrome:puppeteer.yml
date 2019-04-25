@@ -1,0 +1,42 @@
+language: node_js
+dist: trusty
+addons:
+  apt:
+    packages:
+      # This is required to run new chrome on old trusty
+      - libnss3
+notifications:
+  email: false
+cache:
+  directories:
+    - node_modules
+# allow headful tests
+before_install:
+  - "sysctl kernel.unprivileged_userns_clone=1"
+  - "export DISPLAY=:99.0"
+  - "sh -e /etc/init.d/xvfb start"
+script:
+  - 'if [ "$NODE8" = "true" ]; then npm run lint; fi'
+  - 'if [ "$NODE8" = "true" ]; then npm run coverage; fi'
+  - 'if [ "$NODE8" = "true" ]; then npm run test-doclint; fi'
+  - 'if [ "$NODE8" = "true" ]; then npm run test-types; fi'
+  - 'if [ "$NODE8" = "true" ]; then npm run bundle; fi'
+  - 'if [ "$NODE8" = "true" ]; then npm run unit-bundle; fi'
+  - 'if [ "$NODE6" = "true" ]; then npm run unit-node6; fi'
+jobs:
+  include:
+    - node_js: "8.11.3"
+      env: NODE8=true
+    - node_js: "6.12.3"
+      env: NODE6=true
+before_deploy: "npm run apply-next-version"
+deploy:
+  provider: npm
+  email: aslushnikov@gmail.com
+  api_key:
+    secure: iVSXoDwqFjivS3cBVsTaBrMaPx8kvvTSU8bgK+jMGdURGLMNDD5VBLpJNVu0YKNUaueOECguYcVCB9VBr09Mg3/qB6UVf09YMEk8BsTVmLPq3renvW1H4ERZqXHiDGMuxatxhSVlJxKuBxWswDWXzKfAY7NHdjowgstA7pvG8wtBmJ6Fg6PEr3B4P3eQ7GOy2/quINbJ2VkCCSS/Giz9RFImTM3E7uE7EUGjNHR8jfMvposqPIwR5/02FvFFhzdkgDorI7+Vg5c79+dqpETrBvUhmpSM38QY8Y36qnvBY+AAGo9br80zyhO1J+CSoa7mb3Hnc5l4z1dDBXYM9w/MabdWPfq0rNyN9J2P88r7xaSSVm8adKiII20BrCCsC2Kk100JQmqCiSbdUQqAxLLhLW5mMCgHRBdg1NIoqGPDEiHiRSY+YFoKFVxKKDfolZG5mSD1uPFwsA+KyZFGslSGrLv0Jw74kPfZnxcpe+YqDxM+nOxj/BcaYFWbQuBj2IcaG9Q5n7lUOcod3v70H8ptoEnbyuRSa83pD11aUCH0t6eAErbHIkTX2VmHB0vFMueANEfSxPuAUyrnQcNMiWaqp4Ol/nR2eGXyS94fPRQnosUcNdR2txxmc/OBnjb4P1tt34piopJ3V2huFckqMMjnJilTXySAnrkAkDMtI2Yrgks=
+  on:
+    branch: master
+    condition: "$NODE8 = true"
+  skip_cleanup: true
+  tag: next

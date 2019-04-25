@@ -1,0 +1,82 @@
+# Common to all builds in the build matrixs
+os: linux
+language: python # This lets us use newer python versions from virtualenv
+sudo: required
+cache:
+  apt: true
+  pip: true
+  directories:
+    # commented out - we want to get fresh overpass file each time
+    #- /tmp # cache any previously downloaded .osm files
+  timeout: 1000
+compiler: clang
+
+python:
+  - '3.6'
+
+services:
+  - docker
+
+env:
+  global:
+    - ON_TRAVIS=true
+    - SECRET_KEY='tT\xd7\xb06\xf7\x9b\xff\x0fZL\xca\xca\x11\xefM\xacr\xfb\xdf\xca\x9b'
+    - APP_SETTINGS=app_config.AWSTestingConfig
+    - ATTIC_DATA_SERVER_URL='http://overpass-api.de/api/interpreter'
+    - DEFAULT_OVERPASS_URL='http://exports-prod.hotosm.org:6080/api/interpreter'
+
+matrix:
+  fast_finish: true
+  include:
+    - python: '3.6'
+      env: TRAVIS_CONFIG=PYTHON3
+
+  exclude:
+    - python: '3.6'
+
+git:
+  depth: 30
+
+before_install:
+
+install:
+  - pip install coveralls
+  - pip install -r deployment/docker/requirements.txt
+  - pip install -r deployment/docker/requirements-dev.txt
+
+script:
+  - bash ./.travis/pep8
+  - bash ./.travis/run_tests
+
+deploy:
+  - provider: elasticbeanstalk
+    skip_cleanup: true
+    access_key_id: $AWS_ACCESS_KEY_ID
+    secret_access_key: $AWS_SECRET_ACCESS_KEY
+    region: "us-west-2"
+    app: "field-campaigner"
+    env: "staging"
+    bucket_name: hotosm-fieldcampaigner-develop-deployments
+    on:
+      branch: develop
+  - provider: elasticbeanstalk
+    skip_cleanup: true
+    access_key_id: $AWS_ACCESS_KEY_ID
+    secret_access_key: $AWS_SECRET_ACCESS_KEY
+    region: "us-west-2"
+    app: "field-campaigner"
+    env: "production"
+    bucket_name: hotosm-fieldcampaigner-master-deployments
+    on:
+      branch: master      
+
+after_deploy:
+  - python ./.travis/deploy_lambda_functions.py
+
+after_script:
+  - coveralls
+
+email:
+  - dimas@kartoza.com
+  - irwan@kartoza.com
+  - anita@kartoza.com

@@ -1,0 +1,16 @@
+sudo: false
+language: rust
+cache: cargo
+
+os:
+  - linux
+  - osx
+
+rust:
+  - nightly
+
+script:
+  - ./prepare.sh && ./test.sh
+
+env:
+  - RUST_BACKTRACE=1

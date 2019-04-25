@@ -1,0 +1,134 @@
+language: php
+
+cache:
+  directories:
+    - "$HOME/.composer/cache"
+
+stages:
+  - style
+  - stan
+  - test
+  - deploy
+
+jobs:
+  include:
+    - stage: Style
+
+      php: 7.1
+
+      before_install:
+        - source .travis/xdebug.sh
+        - xdebug-disable
+        - composer validate
+
+      install:
+        - composer install
+
+      script:
+        - ./vendor/bin/php-cs-fixer fix --diff --dry-run --verbose
+
+    - stage: Stan
+
+      php: 7.1
+
+      before_install:
+        - source .travis/xdebug.sh
+        - xdebug-disable
+        - composer validate
+
+      install:
+        - composer install
+
+      script:
+        - ./vendor/bin/phpstan analyse -c phpstan.neon
+
+    - &TEST
+
+      stage: Test
+
+      php: 7.1
+
+      env: WITH_LOWEST=true
+
+      before_install:
+        - source .travis/xdebug.sh
+        - xdebug-disable
+        - composer validate
+
+      install:
+        - if [[ "$TRAVIS_PHP_VERSION" == "7.3" ]]; then composer remove --dev friendsofphp/php-cs-fixer; fi
+        - if [[ "$WITH_LOWEST" == "true" ]]; then composer update --prefer-lowest; fi
+        - if [[ "$WITH_HIGHEST" == "true" ]]; then composer update; fi
+
+      before_script:
+        - export TZ=Europe/Paris
+
+      script:
+        - ./vendor/bin/phpunit
+        - php bin/phpbench run --report=env --progress=dots --store
+        - php bin/phpbench run --iterations=1 --revs=1 --config=extensions/dbal/benchmarks/phpbench.json --progress=dots
+
+    - <<: *TEST
+
+      php: 7.1
+
+      env: WITH_HIGHEST=true
+
+    - <<: *TEST
+
+      php: 7.2
+
+      env: WITH_HIGHEST=true
+
+    - <<: *TEST
+
+      php: 7.3
+
+      env: WITH_HIGHEST=true
+
+    - stage: Deploy
+
+      if: (NOT type IN (pull_request)) AND (branch = master)
+
+      php: 7.1
+
+      before_install:
+        - source .travis/xdebug.sh
+        - xdebug-disable
+
+      script: skip
+
+      before_deploy:
+        - ./.travis/before-deploy.sh
+
+      deploy:
+        provider: pages
+        skip-cleanup: true
+        github-token:
+          secure: "cVKcMHHv6MV1HiP78hYPyBx6VIy+DzIv6HS0QM/g3gHnE7EWopu9mQjku2DQtQWAjqVrIPL3ClvZxJH5MjDd4/kB6kWQDGX5O2+CaqzhaJgSpT0htFLbiClqK1uvl2QnHoqwfnhIux230AWDtQfod1g1p60nryo65pLG0HGHqXU="
+        on:
+          branch: master
+
+    - stage: Deploy to GH Releases
+
+      php: 7.1
+
+      before_install:
+        - source .travis/xdebug.sh
+        - xdebug-disable
+
+      script: skip
+
+      before_deploy:
+        - ./.travis/before-deploy-gh-release.sh
+
+      deploy:
+        provider: releases
+        skip_cleanup: true
+        api_key:
+          secure: "eH6r1KiCUb5z2vOke9BcAl7BSN7GtU3TVCe4eDRHv9xO4Kg2hHD16i2jaL7POq18JjwwojqkQuOivpbkyDQeAmkZhaO5NLrdxzgwuYjkfEgbrjWhbK0AEW7W4dKTLBGn0/tiK5hPXfdkwIuzmUjQE5vU37so1NDTiKBjLJ9k44M="
+        file: 
+          - phpbench.phar
+        on:
+          repo: phpbench/phpbench
+          tags: true

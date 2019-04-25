@@ -1,0 +1,171 @@
+before_install:
+- openssl aes-256-cbc -K $encrypted_af8ee76d875e_key -iv $encrypted_af8ee76d875e_iv -in travis_secrets.tar.enc -out travis_secrets.tar -d
+- tar xvf travis_secrets.tar
+- chmod 600 pibox_installer_ci_rsa
+
+addons:
+  ssh_known_hosts:
+  - download.kiwix.org
+  - tmp.kiwix.org
+
+matrix:
+  include:
+  - language: python
+    python: 3.6
+    sudo: false
+    install:
+    - pip install -r ansiblecube/tests/requirements-dev.txt
+    script:
+    - cd ansiblecube
+    - py.test
+
+  - os: osx
+    osx_image: xcode10.1
+    language: generic
+    python: 3.7.1  # just a label
+    addons:
+      homebrew:
+        packages:
+        - pygobject3
+        - gtk+3
+        - adwaita-icon-theme
+        update: true
+    install:
+    - PIBOX_RELEASE=$(echo $TRAVIS_TAG | grep -x 'v[[:digit:]]\+.[[:digit:]]\+\(.[[:digit:]]\+\)*\(-rc[[:digit:]]\+\)\?') || true
+    - BRANCH=${TRAVIS_PULL_REQUEST_BRANCH:-$TRAVIS_BRANCH}
+    - SCOMMIT=$(git rev-parse --short ${TRAVIS_COMMIT})
+    - if [ $PIBOX_RELEASE ]; then PIBOX_VERSION=${PIBOX_RELEASE:1}; elif [ "$TRAVIS_EVENT_TYPE" = "cron" ]; then PIBOX_VERSION="nightly ($SCOMMIT)"; else PIBOX_VERSION="CI ($SCOMMIT)"; fi
+    - sed -i.bak "s/VERSION = \"devel\"/VERSION = \"${PIBOX_VERSION}\"/g" kiwix-hotspot/data.py
+
+    # following needed for create-dmg
+    - brew switch icu4c 62.1
+    - python3 -m pip install -U pip
+    - python3 -m pip install -r requirements-macos.txt
+    - python3 -m pip install -U pyinstaller
+    # following line needed locally (venv)
+    #- ln -s /usr/local/lib/python3.7/site-packages/gi $(python3 -c "import sys; print(sys.path[-1])")/
+    # fix gdk-pixbuf for codesign (https://github.com/pyinstaller/pyinstaller/pull/2596 and https://gist.github.com/rgaudin/5f027d0621e5a7639cb42f8ba753a259)
+    - wget https://gist.githubusercontent.com/rgaudin/5f027d0621e5a7639cb42f8ba753a259/raw/2211905a8366ffa5cfae5c795330fbdefdfb95d1/pyinstaller-pixbuf-sign.patch
+    - patch -p2 -d $(python3 -c "import os; import PyInstaller; print(os.path.dirname(PyInstaller.__file__))") < pyinstaller-pixbuf-sign.patch
+
+    # Download vexpress-boot
+    - wget http://mirror.download.kiwix.org/dev/vexpress-boot.zip
+    - unzip vexpress-boot.zip
+
+    # Bundle QEMU
+    - wget http://mirror.download.kiwix.org/dev/qemu-2.12.0_macOS.tar
+    - tar xf qemu-2.12.0_macOS.tar
+
+    # Bundle Etcher-cli
+    - wget http://download.kiwix.org/dev/balena-etcher-cli-1.4.8-darwin-x64.tar.gz
+    - mkdir -p etcher-cli
+    - tar xf balena-etcher-cli-1.4.8-darwin-x64.tar.gz -C etcher-cli --strip-components=1
+
+    # Run PyInstaller
+    - pyinstaller --log-level=DEBUG kiwix-hotspot-macos.spec
+
+    # update/resync time (as an offset might prevent codesign from working)
+    - sudo sntp -sS time.apple.com
+
+    # Sign application
+    - security create-keychain -p mysecretpassword build.keychain
+    - security default-keychain -s build.keychain
+    - security unlock-keychain -p mysecretpassword build.keychain
+    - security import pibox-installer.p12 -k build.keychain -P $MACOS_CERTIFICATE_PASSWORD -A
+    - "security set-key-partition-list -S apple-tool:,apple: -s -k mysecretpassword build.keychain"
+    - security find-identity -v
+    - "codesign --force --sign \"Developer ID Application: Wikimedia CH (L7HWM3SP3L)\" \"dist/Kiwix Hotspot.app\" --deep"
+
+    # Install and run create-dmg
+    - npm install --global create-dmg
+    - create-dmg dist/Kiwix\ Hotspot.app
+    - mv Kiwix*.dmg kiwix-hotspot-macos.dmg
+
+    # CI build
+    - if [ "$TRAVIS_EVENT_TYPE" != "cron" ] && [ "a$PIBOX_RELEASE" = "a" ]; then scp -v -o StrictHostKeyChecking=no -i pibox_installer_ci_rsa kiwix-hotspot-macos.dmg ci@tmp.kiwix.org:/data/tmp/ci/kiwix-hotspot-macos-$BRANCH.dmg; fi
+    # nightly build (cron master)
+    - if [ "$TRAVIS_EVENT_TYPE" = "cron" ] && [ "a$PIBOX_RELEASE" = "a" ]; then SRCDIR=nightly/$(date +'%Y-%m-%d'); mkdir -p $SRCDIR; cp kiwix-hotspot-macos.dmg $SRCDIR/; scp -r -v -o StrictHostKeyChecking=no -i pibox_installer_ci_rsa $SRCDIR ci@download.kiwix.org:/data/download/nightly/; fi
+    # release build (tagged)
+    - if [ "$TRAVIS_EVENT_TYPE" != "cron" ] && [ $PIBOX_RELEASE ]; then mkdir -p releases/$PIBOX_RELEASE; cp kiwix-hotspot-macos.dmg releases/$PIBOX_RELEASE/; scp -r -v -o StrictHostKeyChecking=no -i pibox_installer_ci_rsa releases/$PIBOX_RELEASE ci@download.kiwix.org:/data/download/release/kiwix-hotspot/; fi
+
+  - os: linux
+    language: generic
+    python: 3.7.1  # just a label
+    dist: xenial
+    sudo: required
+    addons:
+      apt:
+        packages:
+          # Some package may not be required
+          libgirepository1.0-dev
+          gcc
+          libcairo2-dev
+          pkg-config
+          python3-dev
+          gir1.2-gtk-3.0
+          libdbus-1-dev
+          libdbus-glib-1-dev
+          libffi-dev
+          build-essential
+          libssl-dev
+          libgdk-pixbuf2.0-dev
+    script:
+    - PIBOX_RELEASE=$(echo $TRAVIS_TAG | grep -x 'v[[:digit:]]\+.[[:digit:]]\+\(.[[:digit:]]\+\)*\(-rc[[:digit:]]\+\)\?') || true
+    - BRANCH=${TRAVIS_PULL_REQUEST_BRANCH:-$TRAVIS_BRANCH}
+    - SCOMMIT=$(git rev-parse --short ${TRAVIS_COMMIT})
+    - if [ $PIBOX_RELEASE ]; then PIBOX_VERSION=${PIBOX_RELEASE:1}; elif [ "$TRAVIS_EVENT_TYPE" = "cron" ]; then PIBOX_VERSION="nightly ($SCOMMIT)"; else PIBOX_VERSION="CI ($SCOMMIT)"; fi
+    - sed -i.bak "s/VERSION = \"devel\"/VERSION = \"${PIBOX_VERSION}\"/g" kiwix-hotspot/data.py
+
+    # python preps
+    - sudo add-apt-repository -y ppa:deadsnakes/ppa
+    - sudo apt-get update -y
+    - sudo apt-get install -y python3.7 python3.7-dev
+    - virtualenv -p /usr/bin/python3.7 hotspot-env
+    - source hotspot-env/bin/activate
+
+    # pygobjects
+    - pip3 install pycairo
+    - pip3 install PyGObject
+
+    # update XZ (trusty version -5.0.5 is too old)
+    - wget http://mirror.download.kiwix.org/dev/xz-5.2.4.tar.gz
+    - tar xf xz-5.2.4.tar.gz
+    - cd xz-5.2.4
+    - ./configure --enable-shared
+    - make
+    - sudo make install
+    - sudo ldconfig
+    - cd ..
+
+    # Download vexpress-boot
+    - wget http://mirror.download.kiwix.org/dev/vexpress-boot.zip
+    - unzip vexpress-boot.zip
+
+    # get static QEMU
+    - wget http://mirror.download.kiwix.org/dev/qemu-2.12.0-linux-x86_64.tar.gz
+    - tar xf qemu-2.12.0-linux-x86_64.tar.gz
+
+    # Bundle Etcher-cli
+    - wget http://download.kiwix.org/dev/balena-etcher-cli-1.4.8-linux-x64.tar.gz
+    - mkdir -p etcher-cli
+    - tar xf balena-etcher-cli-1.4.8-linux-x64.tar.gz -C etcher-cli --strip-components=1
+
+    # Install python dependancies
+    - pip3 install -r requirements-linux.txt
+
+    # Install and run pyinstaller
+    - pip3 install -U pyinstaller
+    - pyinstaller --log-level=DEBUG kiwix-hotspot-linux.spec
+    - cat build/kiwix-hotspot-linux/warnkiwix-hotspot-linux.txt || true
+
+    # Archive
+    - cd dist
+    - tar czvf kiwix-hotspot-linux.tar.gz kiwix-hotspot
+    - cd ..
+
+    # CI build
+    - if [ "$TRAVIS_EVENT_TYPE" != "cron" ] && [ "a$PIBOX_RELEASE" = "a" ]; then scp -v -o StrictHostKeyChecking=no -i pibox_installer_ci_rsa dist/kiwix-hotspot-linux.tar.gz ci@tmp.kiwix.org:/data/tmp/ci/kiwix-hotspot-linux-$BRANCH.tar.gz; fi
+    # nightly build (cron master)
+    - if [ "$TRAVIS_EVENT_TYPE" = "cron" ] && [ "a$PIBOX_RELEASE" = "a" ]; then SRCDIR=nightly/$(date +'%Y-%m-%d'); mkdir -p $SRCDIR; cp dist/kiwix-hotspot-linux.tar.gz $SRCDIR/; scp -r -v -o StrictHostKeyChecking=no -i pibox_installer_ci_rsa $SRCDIR ci@download.kiwix.org:/data/download/nightly/; fi
+    # release build (tagged)
+    - if [ "$TRAVIS_EVENT_TYPE" != "cron" ] && [ $PIBOX_RELEASE ]; then mkdir -p releases/$PIBOX_RELEASE; cp dist/kiwix-hotspot-linux.tar.gz releases/$PIBOX_RELEASE/; scp -r -v -o StrictHostKeyChecking=no -i pibox_installer_ci_rsa releases/$PIBOX_RELEASE ci@download.kiwix.org:/data/download/release/kiwix-hotspot/; fi

@@ -1,0 +1,133 @@
+language: cpp
+matrix:
+    include:
+    - os: linux
+      dist: trusty
+      env: 
+         - CXXSTANDARD="c++11"
+         - USECONDA=1
+   # works on Precise and Trusty
+    - os: linux
+      dist: trusty
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-5
+      env:
+         - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5"
+         - CXXSTANDARD="c++11"
+
+    - os: linux
+      dist: trusty
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-5
+      env:
+         - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5"
+         - CXXSTANDARD="c++14"
+
+   # works on Precise and Trusty
+    - os: linux
+      dist: trusty
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-6
+      env:
+        - MATRIX_EVAL="CC=gcc-6 && CXX=g++-6"
+        - CXXSTANDARD="c++11"
+
+    - os: linux
+      dist: trusty
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-6
+      env:
+        - MATRIX_EVAL="CC=gcc-6 && CXX=g++-6"
+        - CXXSTANDARD="c++14"
+    # works on Precise and Trusty
+    # - os: linux
+    #   dist: trusty
+    #   addons:
+    #     apt:
+    #       sources:
+    #         - ubuntu-toolchain-r-test
+    #         - llvm-toolchain-precise-3.8
+    #       packages:
+    #         - clang-3.8
+    #   env:
+    #     - MATRIX_EVAL="CC=clang-3.8 && CXX=clang++-3.8 && USECLANG=1"
+
+    # - os: linux
+    #   dist: trusty
+    #   addons:
+    #     apt:
+    #       sources:
+    #         - llvm-toolchain-trusty-3.9
+    #       packages:
+    #         - clang-3.9
+    #   env:
+    #     - MATRIX_EVAL="CC=clang-3.9 && CXX=clang++-3.9"
+
+    # # works on Trusty
+    # - os: linux
+    #   dist: trusty
+    #   addons:
+    #     apt:
+    #       sources:
+    #         - llvm-toolchain-trusty-4.0
+    #       packages:
+    #         - clang-4.0
+    #   env:
+    #     - MATRIX_EVAL="CC=clang-4.0 && CXX=clang++-4.0"
+
+    # # works on Trusty
+    # - os: linux
+    #   dist: trusty
+    #   addons:
+    #     apt:
+    #       sources:
+    #         - llvm-toolchain-trusty-5.0
+    #       packages:
+    #         - clang-5.0
+    #   env:
+    #     - MATRIX_EVAL="CC=clang-5.0 && CXX=clang++-5.0"
+
+before_install:
+    - eval "${MATRIX_EVAL}"
+#     - os: osx 
+#       osx_image: xcode8.2
+#     - os: osx 
+#       osx_image: xcode8
+#     - os: osx 
+#       osx_image: xcode7.3
+#     - os: osx 
+#       osx_image: xcode6.4
+
+sudo: true
+
+notifications:
+    email: false
+
+before_install:
+    - eval "${MATRIX_EVAL}"
+
+install: 
+    ./travis_scripts/installation_script.sh
+
+script:
+    ./travis_scripts/build_script.sh
+    #- if [ "$TRAVIS_OS_NAME" == "linux" ]; then make check; fi
+    #For some reason, make check on OS X + conda fails to respect LD_LIBRARY_PATH,
+    #so we'll run the tests manually
+    #- if [ "$TRAVIS_OS_NAME" == "osx" ]; then for i in $(find testsuite -type f -perm +111);do $i -r detailed;done; fi

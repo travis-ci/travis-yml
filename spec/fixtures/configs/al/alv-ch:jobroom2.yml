@@ -1,0 +1,71 @@
+os:
+- linux
+dist: trusty
+services:
+- docker
+language: java
+jdk:
+- oraclejdk8
+sudo: false
+cache:
+  directories:
+  - "$HOME/.gradle/wrapper"
+  - "$HOME/.gradle/caches/modules-2/files-2.1"
+env:
+  global:
+  - SPRING_OUTPUT_ANSI_ENABLED=ALWAYS
+  - SPRING_JPA_SHOW_SQL=false
+  - ANALYTICS_TRACKING_ID=UA-36686902-1
+  - secure: EV6PJPSjMZuqARknmefLNFWO5I3SdaPAbPVifja4Z+2gOiWvNFHHQvMKAgM8UwuN02Qwq7u1Mbe4vBF/BsIArcWSzOB3n8Foy7Efk6/4Kkf8AcIVgwvDTe8TTe81G7IH3q+10B3N2J8iO0kon/7GR25EmlluG8UaP1RANuQTdl0=
+  - secure: Fi2t7vytwOg4t6ZTmVtU9xVrrWFFkZlNApqL7uIi81OlJmtg10gCUg1L0Hp5bomQtaZiOhkTuj4A+Udvxq/bHlAs0LYlQUL/nrSz0XKMRaRJH8Ti9G8bJGZvl77PGRjI+Cu/AlcjLYgBGvQunYtmTuJKnh6vsr3dFRF4M9lxs8Y=
+  - secure: Tjnu+v8VPgxqVcVvnwL9xVdGRf0WLte3S4vPkr9FjVPsf0sN/75QVZhk2mZMe/HnTW61+0aeW/thjOTwXlG/uZEOBsbRtTkihFqW7Tob4nNTZBOtvfJb5UkD67ak9NyJyX51dlXy3xX+7u4mOSF0oTHJJRma9pic1nSwH4ypEaI=
+  - secure: Dc5ljX42EOCiN9s7eCZuwJtowaiqg11FLeAXKcSJAAjzCCp838AUp5xKXMeOkBbPOngGfMZWX+TaEG0Qom0TU26FzDYahnAcBnibWDqAOOVoTPC9XHLEKXUDb+sCvHLnKfHvN7J/F05j8txb6NgQG0oi/fijbxmvH/0LDC1QWFc=
+  # GIT_USER
+  - secure: W7FCL4D7VPdic+lheEN5pwn2J4Fk8axk+aux2eKs2MzpMQonbijYf6KTWVoDAqOtnthRtu8jaFpwqVav3tEnyR2NxVYqi35FR/JHoCt1qpXR4pyypE0Ttdj+uSH/hXKSJvNdGscaxbERjhtJKvPyxHqaR7FJMuNjNM2O4ta0IqI=
+  # GIT_PWD
+  - secure: MyYRydJfFOMSjmn+VKP8clMgUnifOvQnR+9TEZpSAp1Uduo+nLvrsRJlfD2TNrVnrwSPfajyKWE2Mlg0fumJ74ki0PnoZuG2+pe2gKyX1vlVrq+7cZl3vy+Enshiug17YCeaXH4jRxBzGHCglnjNk97ecoE/cmNGIrn0UrxvfR0=
+before_install:
+- git fetch --unshallow || true
+- chmod +x gradlew
+- jdk_switcher use oraclejdk8
+- java -version
+install:
+script:
+- ./gradlew check -Pprod
+after_success:
+- bash <(curl -s https://codecov.io/bash)
+before_deploy:
+- chmod +x .travis/deploy.sh
+deploy:
+- provider: script
+  skip_cleanup: true
+  script: >-
+    ./gradlew bootWar dependencyCheckAggregate pushDockerImage publish -Pprod -Pzipkin -x test -Pversion=${TRAVIS_JOB_NUMBER}-SNAPSHOT -PaddLatestTagToDockerImage=true --stacktrace
+    && .ci-travis/push-version-bump.sh ${TRAVIS_JOB_NUMBER}-SNAPSHOT ${GIT_USER} ${GIT_PWD}
+  on:
+      branch: develop
+
+- provider: script
+  skip_cleanup: true
+  script: "./gradlew bootWar bootJar publish -Pprod -Pzipkin -x test -Pversion=EIAM-SNAPSHOT --stacktrace"
+  on:
+    branch: feature/eiam-integration-poc
+
+- provider: script
+  skip_cleanup: true
+  script: "./gradlew bootWar bootJar dependencyCheckAggregate pushDockerImage publish -Pprod -Pzipkin -x test -Pversion=`echo ${TRAVIS_BRANCH} | cut -c9-`"
+  on:
+    all_branches: true
+    condition: "$TRAVIS_BRANCH =~ ^release.*$"
+
+- provider: script
+  skip_cleanup: true
+  script: "./gradlew bootWar bootJar pushDockerImage publish -Pprod -Pzipkin -x test -Pversion=${TRAVIS_TAG}"
+  on:
+    tags: true
+
+notifications:
+  webhooks:
+    on_success: change
+    on_failure: always
+    on_start: never

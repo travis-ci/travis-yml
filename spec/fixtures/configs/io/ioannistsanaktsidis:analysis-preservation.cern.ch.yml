@@ -1,0 +1,70 @@
+# -*- coding: utf-8 -*-
+#
+# This file is part of CERN Analysis Preservation Framework.
+# Copyright (C) 2016 CERN.
+#
+# CERN Analysis Preservation Framework is free software; you can redistribute
+# it and/or modify it under the terms of the GNU General Public License as
+# published by the Free Software Foundation; either version 2 of the
+# License, or (at your option) any later version.
+#
+# CERN Analysis Preservation Framework is distributed in the hope that it will
+# be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with CERN Analysis Preservation Framework; if not, write to the
+# Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston,
+# MA 02111-1307, USA.
+#
+# In applying this license, CERN does not
+# waive the privileges and immunities granted to it by virtue of its status
+# as an Intergovernmental Organization or submit itself to any jurisdiction.
+
+addons:
+  postgresql: 9.4
+notifications:
+  email: false
+
+sudo: false
+
+language: python
+
+python:
+  - "2.7"
+
+services:
+- postgresql
+- redis
+- rabbitmq
+
+env:
+  - REQUIREMENTS=lowest E2E="no" SQLALCHEMY_DATABASE_URI="postgresql+psycopg2://postgres@localhost:5432/cap" ES_VERSION=5.0.1 APP_GITLAB_OAUTH_ACCESS_TOKEN="testtoken"
+
+before_install:
+  - mkdir /tmp/elasticsearch
+  - wget -O - https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-${ES_VERSION}.tar.gz  | tar xz --directory=/tmp/elasticsearch --strip-components=1
+  - "/tmp/elasticsearch/bin/elasticsearch-plugin install -b ingest-attachment"
+  - /tmp/elasticsearch/bin/elasticsearch &
+  - sleep 30
+  - travis_retry pip install coveralls
+  - travis_retry pip install kwalitee --pre
+  - echo ${TRAVIS_COMMIT_RANGE}
+  - "travis_retry pip install --upgrade pip setuptools py"
+  - "travis_retry pip install twine wheel coveralls requirements-builder"
+  - "cat requirements.txt > .travis-lowest-requirements.txt"
+
+install:
+  - "travis_retry pip install -r .travis-${REQUIREMENTS}-requirements.txt"
+  - "travis_retry pip install -r requirements-local-forks.txt"
+  - "travis_retry pip install -e .[docs,tests,ldap]"
+
+before_script:
+  - travis_retry pip install kwalitee GitPython --pre
+
+script:
+  - "./run-tests.sh"
+
+after_success:
+  - coveralls

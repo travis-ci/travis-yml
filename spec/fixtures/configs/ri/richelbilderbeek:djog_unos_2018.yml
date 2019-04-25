@@ -1,0 +1,82 @@
+language: cpp
+compiler: gcc
+dist: xenial
+
+addons: 
+  apt: 
+    packages: 
+      - libboost-all-dev
+
+before_install:
+  # C++14
+  - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+  - sudo apt-get update -qq
+
+install: 
+  # C++14
+  - sudo apt-get install -qq g++-6
+  - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-6 90
+  # Qt5
+  - sudo apt-get install -qq qt5-qmake qt5-default
+  # SFML
+  - sudo apt-get install libsfml-dev
+  # XRandR, else you get 'Failed to use the XRandR extension while trying to get the desktop video modes'
+  - sudo apt-get install libxrandr-dev
+  # ALSA
+  - sudo apt-get install alsa-utils
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then CONFIG="$CONFIG --audio-drv-list=alsa,oss,pa,sdl"; fi
+  # clang-tidy
+  - sudo apt-get install -qq clang-3.8
+  # cppcheck
+  - sudo apt-get install -qq cppcheck
+  # Codecov
+  - sudo update-alternatives --install /usr/bin/gcov gcov /usr/bin/gcov-6 90
+  - sudo pip install codecov
+  # OCLint
+  - ./install_oclint
+  # valgrind, for helgrind and memcheck
+  - if [[ $TRAVIS_BRANCH == "richel" ]]; then sudo apt-get install -qq valgrind; fi
+  # SLOCcount
+  - sudo apt-get install sloccount
+
+# Xenial
+services:
+ - xvfb
+ - alsa
+
+script: 
+  # Build the project, then:
+  # 1) Show the version of SFML, then quit
+  # 2) Run the game for a short time, then quit
+  - qmake -qt=qt5 djog_unos_2018.pro
+  - make --silent debug
+  - ./djog_unos_2018 --version
+  - ./djog_unos_2018 --god --short
+  # Call OCLint
+  - ./do_oclint
+  # Build and run and profile normal program
+  - if [[ $TRAVIS_BRANCH == "develop" || $TRAVIS_BRANCH == "master" || $TRAVIS_BRANCH == "rob" ]]; then qmake djog_unos_2018.pro; fi
+  - if [[ $TRAVIS_BRANCH == "develop" || $TRAVIS_BRANCH == "master" || $TRAVIS_BRANCH == "rob" ]]; then make --silent release; fi
+  - if [[ $TRAVIS_BRANCH == "develop" || $TRAVIS_BRANCH == "master" || $TRAVIS_BRANCH == "rob" ]]; then time ./djog_unos_2018 --god --profiling 350 350; fi
+  - if [[ $TRAVIS_BRANCH == "develop" || $TRAVIS_BRANCH == "master" || $TRAVIS_BRANCH == "rob" ]]; then gprof djog_unos_2018 > gprof.log; fi
+  - if [[ $TRAVIS_BRANCH == "develop" || $TRAVIS_BRANCH == "master" || $TRAVIS_BRANCH == "rob" ]]; then head gprof.log -n 500; fi
+  # Get code coverage
+  - cp debug/*.* .
+  - ./get_code_cov
+  - codecov
+  # helgrind: takes long
+  # - if [[ $TRAVIS_BRANCH == "richel" ]]; then travis_wait 50 valgrind --tool=helgrind --verbose --log-file=helgrind.log -v ./djog_unos_2018 --god --short 1; fi
+  # - if [[ $TRAVIS_BRANCH == "richel" ]]; then cat helgrind.log; fi
+  # cppcheck
+  - travis_wait 50 cppcheck --quiet --error-exitcode=1 .
+  # SLOCcount
+  #   remove OCLint and .git, otherwise it will be counted as well
+  - rm -rf oclint-0.10.3 oclint-0.10.3-x86_64-linux-3.13.0-74-generic.tar.gz oclint.log
+  - rm -rf .git
+  - rm -rf debug
+  - rm -rf debug
+  - cd ..; sloccount --overhead 1 --personcost 22614 djog_unos_2018 | egrep -v "Adding"; cd djog_unos_2018
+
+after_success:
+  # Codecov
+  - bash <(curl -s https://codecov.io/bash)

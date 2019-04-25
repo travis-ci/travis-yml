@@ -1,0 +1,27 @@
+language: ruby
+rvm:
+  - 2.6.0
+branches:
+  except:
+    - "/^v[0-9]+\\.[0-9]+\\.[0-9]+(?:-.*)?/"
+notifications:
+  email:
+    on_success: change
+    on_failure: always
+  slack:
+    template:
+      - "Build <%{build_url}|#%{build_number}> %{result}"
+      - " – for %{repository_slug}:%{branch} `<%{compare_url}|%{commit}>`"
+      - " – by %{author} [%{elapsed_time}]"
+    rooms:
+      - secure: Csl7aKmYFRQj+fRxGtWcRycDIznLxOZYsNQzEUxojmjtvmUYoWMyvQp0dUhf/c1U2r/06QsC4WdFBHkWXkk9wQ+YkF+bfyostCUSOwfxHNFaE6L9j0LQqY29+ELxxRYbI9UOogcRQ5kKgRLCNZIh349j/nnxe7LxkapUmr+MsFu0Cw6jpbhkmSvcJvEgZO+Wg+0Z38fU+19wcekYdjfum018wTBQrSv8ryBKXLN+1yhNQdufJPhYAtR+N5aQpV0aJiKlJU547vAU3oAAf0eUC0mp2b8LbvUpWHes2Zq+klkLjtEAc/aIv6y62l+PNc3DUUdRw/T+lH8SqH+6UEfCdcnD/xxAtttZGPIK7TiXi5HOJKbND08+x7rE5pNupYl2UmPIdE0iqGUVvn8IDoN4Lu7yYzKjDqHmyuvQHh+xUyKNrMKZ5G5RpGMpgmgTIC1jVj/SliJ/5zt93pbRvg0cZ64Kz15bP7WPQDXVVYFBLMAcOnShvBUErmmabf+Gc6YMYgCmT1qapBelVVnTQb6vMVfhCM37XaxiBYgwG8P9PEYMzz9Zwmi0qY4SFBq4uDH5KVXYoi3oSTnYjwTbw4cR4NqWp4OtWuWcFDzTPeYW0UngRR5uYdNKP5buJdtsRnU8MeLkIphe+H7t8aVKZnR3yPSCAspccSA50D2YJQFXpo0=
+before_script:
+  - export TZ=America/Detroit
+  - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+  - chmod +x ./cc-test-reporter
+  - ./cc-test-reporter before-build
+script:
+  - bundle exec rubocop
+  - bundle exec rspec --format progress --color
+after_script:
+  - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT

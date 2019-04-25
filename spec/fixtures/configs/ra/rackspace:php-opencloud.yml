@@ -1,0 +1,35 @@
+language: php
+php:
+  - "5.6"
+  - "5.5"
+  - "5.4"
+  - hhvm
+
+sudo: false
+
+matrix:
+  allow_failures:
+    - php: hhvm
+  fast_finish: true
+
+branches:
+  only:
+    - master
+    - working
+
+before_script:
+  - composer install --prefer-source
+  - vendor/bin/parallel-lint --exclude vendor .
+  - vendor/bin/php-cs-fixer fix --dry-run --diff --level psr2 .
+
+after_script:
+  - php vendor/bin/coveralls -v
+
+notifications:
+  email:
+    - jamie.hannaford@rackspace.com
+    - glen.campbell@rackspace.com
+    - shaunak.kashyap@rackspace.com
+
+env:
+  - secure: "bdrUeYb3nSGgBB+QtDZxUHVPw6B/wjb3KXLm8TgonWrQm4GPeWKK29qhmDnFZmQjwQPfuebe7wAk1ZxGoZKbEiELVpJJ+8XYVOt6W/6V53H31JL6FqiIE5+7qBwDe+9ziveM6GcTXHT1GI5mUeACIbeBDPZaNubIJH3U6MPim64="

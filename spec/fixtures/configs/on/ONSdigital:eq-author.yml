@@ -1,0 +1,61 @@
+dist: trusty
+
+sudo: required
+
+services:
+  - docker
+
+language: node_js
+
+node_js:
+  - "10"
+
+cache:
+  yarn: true
+
+addons:
+  chrome: stable
+
+install:
+ - yarn install --frozen-lockfile
+
+before_script:
+ - set -e
+
+script:
+  - yarn lint
+  - yarn coverage
+  - yarn test:storybook
+  - yarn storybook-build
+  - docker build -t onsdigital/eq-author:$TRAVIS_BUILD_NUMBER --build-arg APPLICATION_VERSION=$(git rev-parse HEAD) -f Dockerfile .
+  - yarn test:integration
+  - yarn test:e2e
+
+
+after_success:
+  - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+  - export TAG=`if [ "$TRAVIS_PULL_REQUEST_BRANCH" == "" ]; then echo "latest"; else echo $TRAVIS_PULL_REQUEST_BRANCH; fi`
+  - docker tag onsdigital/eq-author:$TRAVIS_BUILD_NUMBER onsdigital/eq-author:$TAG
+  - echo "Pushing with tag [$TAG]"
+  - docker push onsdigital/eq-author:$TAG
+  - bash <(curl -s https://codecov.io/bash) -e TRAVIS_NODE_VERSION
+
+env:
+  global:
+    - NODE_PATH=src/
+    - secure: "g8ycyTABxfgqexweX0CWDVl0ofGG7vJY2/qFcFulttNgNY4UhdqvAgdQooj1tgJjH4i93dKmFYC9l9bmdv36m1N6Ihd08wc1HzTgvdfzmT/0f7wYOdnAdYi5kJH1mPj7vr0fExRZm56LdCJsj9ghV//y/cGKCJc1TmcEQxCSJlVMmuHiB4sSG3cOHMdSBrJ+EDl+LH8bpyRoQHfy3RPHtHU4mZp8pMBkDD1FAnuuZiPNhqtgU5d0D/BfJ3pGj0DxBW7oPe9cj0TWwZJkBs9Wa7F9FNn+U3TBm1CqGhPHtUvsA04IAo+BY/iC9A//exf/1ApvQxL2W3p20VoUwbJBSr7Yu0v6Rn3W34pwsfnLTtCU6TgQbrUoy78K4fgxMf5uNUAQL2hFBfZBY/2oKN9MCQ2RgdWYxvp/SDV6NxfB4Rb8Wawjqiu20BPyjs4lYmStRMuif18e0JFoKZcULy6svpCGMMntDxijPKYle0s8tThc/QR0V+F7gSBQ0Kzk6Vxsa53IFSzSXJ3snLzImEN9EXPiSLKRjStoiRnBZHBE3CozfniOa1D+zc6BINkfdEN3h7gQVm5OXuIVgsbUVPR4snW7odUDFEi+mb+1nx+lUXplU9oSyYtZYjKHTR5xLJJ9C6WQNvP2IAcPgNd7M5Iwe//2O/lmsI2lOF6lFnYfKI0="
+
+
+deploy:
+  local_dir: storybook-static
+  provider: pages
+  skip_cleanup: true
+  github_token: $GITHUB_TOKEN
+  on:
+    branch:
+      - master
+
+branches:
+    only:
+      - master
+      - /^greenkeeper.*$/

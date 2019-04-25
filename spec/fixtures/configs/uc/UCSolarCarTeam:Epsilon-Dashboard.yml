@@ -1,0 +1,59 @@
+sudo: required
+
+before_install:
+    - sudo apt-add-repository -y ppa:ubuntu-toolchain-r/test
+    - sudo apt-add-repository -y ppa:beineri/opt-qt551-trusty
+    - sudo apt-get -qq update
+    - sudo apt-get -qq --force-yes install g++-4.8 libc6-i386 qt55tools qt55svg qt55webkit qt55serialport  libboost-chrono-dev libboost-system-dev
+    - PATH="/opt/qt55/bin:$PATH"
+    - qt55-env.sh 
+    - export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
+    - mkdir -p build/.lib/
+
+install:
+    - sudo apt-get -qq install g++-4.8 libc6-i386 qt55tools qt55svg qt55webkit qt55serialport
+    - PATH="/opt/qt55/bin:$PATH"
+    - qt55-env.sh
+     # install googletest and googlemock
+    - git clone https://github.com/google/googletest.git
+    - sudo cp -r googletest/googletest/include/gtest /usr/local/include
+    - sudo cp -r googletest/googlemock/include/gmock /usr/local/include
+    - (cd googletest &&
+       g++ -std=c++11
+           -isystem googletest/include/
+           -Igoogletest
+           -isystem googlemock/include/
+           -Igooglemock
+           -pthread
+           -c
+           googlemock/src/gmock-all.cc &&
+       g++ -std=c++11
+           -isystem googletest/include/
+           -Igoogletest
+           -isystem googlemock/include/
+           -Igooglemock
+           -pthread
+           -c
+           googletest/src/gtest-all.cc &&
+       ar -rv libgmock.a gtest-all.o gmock-all.o)
+    - cp googletest/libgmock.a build/.lib/
+    - cd /tmp/
+    # install astyle
+    - (wget 'https://s3-us-west-2.amazonaws.com/ucsolarteam.hostedfiles/astyle' && tar -zxvf astyle)
+    - (cd ./astyle/build/gcc && make release && sudo make install && rm astyle -rf)
+    #install rabbitmq-c
+    - git clone https://github.com/alanxz/rabbitmq-c
+    - (cd rabbitmq-c && sudo cp librabbitmq/*.h /usr/local/include/ && mkdir build && cd build && cmake .. && cmake --build . && sudo cp librabbitmq/librabbitmq.a /usr/local/lib/ && sudo cp librabbitmq/*.so* /usr/local/lib/)
+    #install SimpleAmqpClient
+    - git clone https://github.com/alanxz/SimpleAmqpClient
+    - (cd SimpleAmqpClient && mkdir build && cd build && cmake -DRabbitmqc_INCLUDE_DIR=../../rabbitmq-c/librabbitmq -DRabbitmqc_LIBRARY=../../rabbitmq-c/build/librabbitmq .. && make && sudo mkdir /usr/local/include/SimpleAmqpClient && sudo cp *.so* /usr/local/lib/ && sudo cp ../src/SimpleAmqpClient/*.h /usr/local/include/SimpleAmqpClient/)
+    - cd $TRAVIS_BUILD_DIR
+
+script: 
+    - "! (astyle *.h *.cpp -r --dry-run --options=astylerc --exclude=googletest | grep Formatted)"
+    - cd src
+    - qmake
+    - make
+    - make check
+
+language: cpp

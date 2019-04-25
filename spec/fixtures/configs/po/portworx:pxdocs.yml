@@ -1,0 +1,61 @@
+sudo: required
+dist: trusty
+services:
+  - docker
+
+before_install:
+  # update gcloud apt source
+  - export CLOUD_SDK_REPO="cloud-sdk-$(lsb_release -c -s)"
+  - echo "deb http://packages.cloud.google.com/apt $CLOUD_SDK_REPO main" | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
+  - curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
+  # install docker-ce and kubectl
+  - sudo apt-get update -yq
+  - sudo apt-get -o Dpkg::Options::="--force-confnew" install -yq docker-ce kubectl
+
+script:
+  # make the build fail if there are any errors
+  - set -e
+  # setup variables based on travis env
+  # docker builds cannot use uppercase characters in the image name
+  - export LOWER_CASE_BRANCH=$(echo -n $TRAVIS_BRANCH | awk '{print tolower($0)}')
+  - export BUILDER_IMAGE="pxdocs:$TRAVIS_COMMIT"
+  - export SEARCH_INDEX_IMAGE="pxdocs-indexer:$TRAVIS_COMMIT"
+  - export DEPLOYMENT_IMAGE="gcr.io/$GCP_PROJECT_ID/pxdocs-$LOWER_CASE_BRANCH:$TRAVIS_COMMIT"
+  - export VERSIONS_CURRENT=$(bash themes/pxdocs-tooling/deploy/scripts/versions.sh get-current-branch-version)
+  - export VERSIONS_ALL=$(bash themes/pxdocs-tooling/deploy/scripts/versions.sh get-all-versions)
+  - export VERSIONS_TAG=$(echo -n "$VERSIONS_CURRENT" | sed 's/\./-/g')
+  - export ALGOLIA_INDEX_NAME=$VERSIONS_TAG
+  # build images
+  - travis_retry make image
+  # publish site -> public
+  - make publish-docker
+  # build the deployment image
+  - travis_retry make deployment-image
+  # start a container using the deployment image
+  - make start-deployment-container
+  # check the links in the deployment container
+  - travis_retry make check-links
+  # if this is a pull request then we don't want to update algolia or deploy
+  - if [ "${TRAVIS_PULL_REQUEST}" != "false" ]; then exit 0; fi
+  # this checks if the current branch is present in the BRANCH_VERSION_CONFIG variable if exists if not
+  - if [ "${TRAVIS_PULL_REQUEST}" == "false" ] && [ "$(bash themes/pxdocs-tooling/deploy/scripts/versions.sh should-build-current-branch)" != "yes" ]; then exit 0; fi
+  # update the algolia index
+  - travis_retry make search-index-image
+  - travis_retry make search-index-docker
+  # connect the GCLOUD_SERVICE_ACCOUNT_TOKEN, GCP_PROJECT_ID, GCP_ZONE and GCP_CLUSTER_ID vars -> gcloud and kubectl
+  - bash themes/pxdocs-tooling/deploy/scripts/ci_connect.sh
+  # push the image to gcr
+  - echo "pushing image $DEPLOYMENT_IMAGE"
+  - gcloud docker -- push $DEPLOYMENT_IMAGE
+  - echo "deploying image $DEPLOYMENT_IMAGE"
+  - cat themes/pxdocs-tooling/deploy/manifests/deployment.yaml | envsubst
+  - cat themes/pxdocs-tooling/deploy/manifests/deployment.yaml | envsubst | kubectl apply -f -
+  - cat themes/pxdocs-tooling/deploy/manifests/service-template.yaml | envsubst
+  - cat themes/pxdocs-tooling/deploy/manifests/service-template.yaml | envsubst | kubectl apply -f -
+
+notifications:
+  email:
+    recipients:
+      - harsh@portworx.com
+    on_success: change
+    on_failure: always

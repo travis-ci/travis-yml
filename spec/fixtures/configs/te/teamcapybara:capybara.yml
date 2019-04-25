@@ -1,0 +1,126 @@
+language: ruby
+sudo: required
+dist: trusty
+notifications:
+  webhooks: https://coveralls.io/webhook
+services:
+  - docker
+rvm:
+  - 2.6
+  - jruby-9.2.7.0
+gemfile:
+  - Gemfile
+env:
+  global:
+    - NOKOGIRI_USE_SYSTEM_LIBRARIES=true
+    - JAVA_OPTS=-Djava.security.egd=file:/dev/urandom
+
+addons:
+  chrome: stable
+  apt:
+    packages:
+      - awesome
+
+branches:
+  except:
+    - /^ie_/
+
+cache:
+  bundler: true
+  directories:
+    - ~/.webdrivers
+
+matrix:
+  include:
+    - gemfile: gemfiles/Gemfile.gumbo
+      rvm: 2.5
+      script: bundle exec rake rack_smoke
+    - gemfile: Gemfile
+      rvm: 2.5
+      env: CAPYBARA_REMOTE=true
+    - gemfile: Gemfile
+      rvm: 2.5
+      env:
+        - CAPYBARA_REMOTE=true
+        - CAPYBARA_FF=true
+    - gemfile: gemfiles/Gemfile.base-versions
+      rvm: 2.4
+      env: CAPYBARA_FF=true
+      addons:
+        firefox: latest
+        apt:
+          packages:
+            - awesome
+    - gemfile: gemfiles/Gemfile.base-versions
+      rvm: 2.4
+    - gemfile: Gemfile
+      rvm: 2.6
+      env: HEADLESS=true
+    - gemfile: gemfiles/Gemfile.beta-versions
+      rvm: 2.6
+      env: CAPYBARA_FF=true
+      addons:
+        firefox: latest-beta
+        apt:
+          packages:
+            - awesome
+    - gemfile: gemfiles/Gemfile.edge-firefox
+      rvm: ruby-head
+      env:
+        - CAPYBARA_FF=true
+        - CAPYBARA_REMOTE=true
+    - gemfile: gemfiles/Gemfile.edge-firefox
+      rvm: ruby-head
+      env:
+        - CAPYBARA_REMOTE=true
+        - HEADLESS=true
+    - gemfile: gemfiles/Gemfile.edge-firefox
+      rvm: ruby-head
+      env: CAPYBARA_FF=true RUBY_OPT=--jit
+      addons:
+        firefox: latest-nightly
+        apt:
+          packages:
+            - awesome
+
+    - gemfile: Gemfile
+      rvm: 2.4
+      env: CAPYBARA_FF=true HEADLESS=true
+      addons:
+        firefox: latest
+    - gemfile: Gemfile
+      rvm: 2.5
+      env: W3C=true HEADLESS=true
+      addons:
+        chrome: beta
+  allow_failures:
+    - gemfile: gemfiles/Gemfile.beta-versions
+    - gemfile: gemfiles/Gemfile.edge-firefox
+    - env: W3C=true HEADLESS=true
+before_install:
+  - gem update --system
+  - if [[ $BUNDLE_GEMFILE =~ Gemfile.edge-firefox$ ]]; then
+      pushd ..;
+      git clone --depth 1 https://github.com/SeleniumHQ/selenium.git;
+      cd selenium; ./go //rb:gem:build;
+      popd;
+      bundle config local.selenium-webdriver ../selenium/build/rb;
+    fi
+before_script:
+  - if [[ -z $HEADLESS && -z $CAPYBARA_REMOTE ]]; then
+      export DISPLAY=:99.0;
+      sh -e /etc/init.d/xvfb start;
+      sleep 1;
+      mkdir -p ~/.config/awesome;
+      echo "require('awful'); tags = {}; tags[1] = awful.tag({'name'})" > ~/.config/awesome/rc.lua;
+      awesome &
+    fi
+  - if [[ $CAPYBARA_REMOTE = true ]]; then
+      if [[ $CAPYBARA_FF = true ]]; then
+        docker-compose up -d selenium_firefox;
+      else
+        docker-compose up -d selenium_chrome;
+      fi;
+    fi
+
+script: "bundle exec rake travis"

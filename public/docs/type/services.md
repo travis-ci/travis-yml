@@ -2,16 +2,26 @@
 
 
 
-## Type
+## Types
 
-Any of:
+* Array of: String (known)
+* String (known)
 
-* Sequence (Array)
-* Enum (known String)
+## Values
 
-## Flags
-
-None.
+* `cassandra`
+* `couchdb`
+* `docker`
+* `elasticsearch`
+* `memcached`
+* `mongodb`
+* `mysql`
+* `neo4j`
+* `postgresql`
+* `rabbitmq`
+* `redis`
+* `riak`
+* `xvfb`
 
 
 ## Examples

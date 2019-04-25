@@ -1,0 +1,32 @@
+language: python
+dist: xenial
+sudo: true
+python:
+  - "3.5"
+  - "3.6"
+  - "3.7"
+  - "3.8-dev"
+  - "pypy3.5"
+
+branches:
+  only:
+  - gonzobot
+  # Allow tagged releases in the format v1.0
+  - /^v\d+\.\d+.*$/
+
+cache: pip
+
+install:
+  - "sudo apt-get update -q"
+  - "sudo apt-get install -y python3-lxml libenchant-dev"
+  - "pip install -r ./travis/requirements.txt"
+
+script:
+  - "pytest"
+
+after_success:
+  - codecov
+
+env:
+  - PYTHONPATH=.
+  - PYTHONPATH=. PYTHONASYNCIODEBUG=1

@@ -1,0 +1,72 @@
+# .travis.yml
+language: node_js
+dist: trusty
+sudo: required
+
+cache:
+  directories:
+  - "node_modules"
+
+matrix:
+  fast_finish: true
+  include:
+  - node_js: "11"
+    env: DB="mssql mysql mysql2 postgres sqlite3" CXX=g++-4.8 KNEX_TEST_TIMEOUT=60000
+  - node_js: "10"
+    env: DB="mssql mysql mysql2 postgres sqlite3" CXX=g++-4.8 KNEX_TEST_TIMEOUT=60000
+  - node_js: "8"
+    env: DB="mssql mysql mysql2 postgres sqlite3" CXX=g++-4.8 KNEX_TEST_TIMEOUT=60000
+  - node_js: "6"
+    env: DB="mssql mysql mysql2 postgres sqlite3" CXX=g++-4.8 KNEX_TEST_TIMEOUT=60000
+  - node_js: "10"
+    env: TEST_ORACLEDB=true NODE_VER=11 KNEX_TEST_TIMEOUT=60000
+  - node_js: "10" # node_js env is just used to have npm command availabe, all test code is ran in docker container
+    env: TEST_ORACLEDB=true NODE_VER=10 KNEX_TEST_TIMEOUT=60000
+  - node_js: "10"
+    env: TEST_ORACLEDB=true NODE_VER=8 KNEX_TEST_TIMEOUT=60000
+  - node_js: "10"
+    env: TEST_ORACLEDB=true NODE_VER=6 KNEX_TEST_TIMEOUT=60000
+  allow_failures:
+  - node_js: "10"
+    env: TEST_ORACLEDB=true NODE_VER=11 KNEX_TEST_TIMEOUT=60000
+  - node_js: "10"
+    env: TEST_ORACLEDB=true NODE_VER=10 KNEX_TEST_TIMEOUT=60000
+  - node_js: "10"
+    env: TEST_ORACLEDB=true NODE_VER=8 KNEX_TEST_TIMEOUT=60000
+  - node_js: "10"
+    env: TEST_ORACLEDB=true NODE_VER=6 KNEX_TEST_TIMEOUT=60000
+
+install:
+  - if [ -z $TEST_ORACLEDB ]; then npm i; fi
+
+before_script:
+  - if [ -z $TEST_ORACLEDB ]; then psql -c 'create database knex_test;' -U postgres; fi
+  - if [ -z $TEST_ORACLEDB ]; then mysql -e 'create database knex_test;'; fi
+  - if [ -z $TEST_ORACLEDB ]; then npm run mssql:init; fi
+  - if [ -z $TEST_ORACLEDB ]; then docker ps -a; fi
+  - if [ -z $TEST_ORACLEDB ]; then netstat -tulpn; fi
+
+script:
+  - if [ -z $TEST_ORACLEDB ]; then npm test; else npm run oracledb:test; fi
+
+after_success:
+  - if [ -z $TEST_ORACLEDB ]; then npm run coveralls; fi
+
+notifications:
+  email: false
+
+services:
+  - mysql
+addons:
+  postgresql: '9.6'
+  apt:
+    sources:
+      - mysql-5.7-trusty
+    packages:
+      - g++-4.8
+      - gcc-4.8
+      - libmysqlclient-dev
+      - libmysqlclient20
+      - mysql-community-client
+      - mysql-common
+      - mysql-community-server

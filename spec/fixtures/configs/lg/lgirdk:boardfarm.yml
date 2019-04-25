@@ -1,0 +1,22 @@
+sudo: required
+language: python
+python:
+        - "2.7"
+before_install:
+        - sudo apt-get -qq update
+        - sudo apt-get remove docker docker-engine docker.io
+        - sudo apt-get install apt-transport-https ca-certificates curl software-properties-common
+        - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+        - sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+        - sudo apt-get -qq update
+        - sudo apt-get install -y qemu-system-x86 docker-ce
+        - sudo apt-get install -y libsnmp-dev snmp-mibs-downloader
+script:
+        - ./bft -l
+        - ./bft -i
+        - yes | ./bft -b qemux86-openwrt -r https://www.dropbox.com/s/ak58icpzta1f0if/openwrt-x86-generic-combined-ext4.vmdk?dl=0 -y -x travisci
+        - grep tests_fail...0, results/test_results.json
+        - cat results/all.log
+after_failure:
+        - yes | BFT_DEBUG=y ./bft -b qemux86-openwrt -r https://www.dropbox.com/s/ak58icpzta1f0if/openwrt-x86-generic-combined-ext4.vmdk?dl=0 -y -x travisci
+        - cat results/all.log

@@ -1,0 +1,45 @@
+sudo: false
+language: python
+cache: pip
+python:
+  - "2.7"
+  - "3.3"
+  - "3.4"
+  - "3.5"
+  - "3.6"
+  - "nightly"
+  - "pypy-5.4"
+  - "pypy3"
+env:
+  TOXENV=py
+
+matrix:
+  fast_finish: true
+  include:
+    - python: 3.6
+      env: TOXENV=docs
+    - python: 3.6
+      env: TOXENV=tz
+    - python: 3.7
+      # This is required until Travis has a default image that
+      # can run Python 3.7
+      dist: xenial
+      sudo: required
+    - python: 3.7
+      env: TOXENV=build
+      dist: xenial
+  allow_failures:
+    - python: "nightly"
+
+install:
+  - pip install -U six && pip install -U 'tox<3.8.0'
+  - if [[ $TRAVIS_PYTHON_VERSION == "3.3" ]]; then pip install 'virtualenv<16.0'; fi
+  - if [[ $TRAVIS_PYTHON_VERSION == "3.3" ]]; then pip install 'setuptools<40.0'; fi
+  - if [[ $TOXENV == "py" ]]; then ./ci_tools/retry.sh python updatezinfo.py; fi
+
+script:
+  - tox
+  - if [[ $TOXENV == "build" ]]; then [ ! -e "dist/*.whl" ] && [ ! -e "dist/*.tar.gz" ]; fi
+
+after_success:
+  - if [[ $TOXENV == "py" ]]; then tox -e coverage,codecov; fi

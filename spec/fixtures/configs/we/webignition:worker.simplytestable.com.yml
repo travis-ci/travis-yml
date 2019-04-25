@@ -1,0 +1,40 @@
+services:
+  - redis-server
+  - memcached
+
+env:
+  global:
+    - APP_ENV=test
+    - DATABASE_URL=mysql://root:@127.0.0.1:3306/myapp_test
+    - APP_SECRET=Secret!
+    - CORE_URL=http://test.app.simplytestable.com
+    - HTML_VALIDATOR_PATH=/usr/local/validator/cgi-bin/check
+    - CSS_VALIDATOR_JAR_PATH=/usr/share/css-validator/2002/css-validator/css-validator.jar
+    - HOSTNAME=worker.simplytestable.com
+    - WORKER_PROCESS_COUNT=5
+    - MAX_TASKS_REQUEST_FACTOR=2
+    - RESQUE_PREFIX=worker
+    - TOKEN=7451f5f1f3028d4ed4dd1315b3a933c9
+    - LOCK_DATABASE_HOST=127.0.0.1
+    - LOCK_DATABASE_NAME=myapp_test
+    - LOCK_DATABASE_USER=root
+    - LOCK_DATABASE_PASSWORD=
+
+language: php
+php:
+  - 7.2
+
+before_install:
+  - "mkdir -p ~/.composer"
+  - cp .travis.composer.config.json ~/.composer/config.json
+  - echo "extension = memcached.so" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
+  - mysql -e 'CREATE DATABASE myapp_test;'
+  - chmod +x ./bin/console
+
+install:
+  - composer install
+  - php bin/console doctrine:migrations:migrate --no-interaction
+  - composer config --global process-timeout 2000
+
+script:
+  - composer ci

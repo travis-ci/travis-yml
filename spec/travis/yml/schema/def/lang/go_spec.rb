@@ -11,7 +11,7 @@ describe Travis::Yml::Schema::Def::Go, 'structure' do
         type: :object,
         properties: {
           go: {
-            '$ref': '#/definitions/strs'
+            '$ref': '#/definitions/type/strs'
           },
           gobuild_args: {
             type: :string

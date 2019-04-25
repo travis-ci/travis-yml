@@ -1,0 +1,43 @@
+# Modify this line to test Travis Integration ..
+sudo: required
+
+language: python
+
+matrix:
+  include:
+    - os: linux
+      sudo: required
+      services:
+        - docker
+      install:
+        - docker pull ffig/ffig-base
+        - docker build . -t ffig-ci
+      before_install:
+        - pip install autopep8
+      script:
+        # FIXME: Get boost::python to work in the face of a user-provided python binary.
+        - docker run ffig-ci /bin/bash -c "./scripts/build.py -t --require_boost_python --nodetect"
+        - docker run ffig-ci /bin/bash -c "./scripts/build.py -t --python-path python2 --venv --disable_boost_python --require_java --require_dotnet --require_lua --require_swift --require_ruby --require_go"
+        - docker run ffig-ci /bin/bash -c "./scripts/build.py -t --python-path python3 --venv --disable_boost_python --require_java --require_dotnet --require_lua --require_swift --require_ruby --require_go"
+        - docker run ffig-ci /bin/bash -c "./scripts/build.py -T \"CPP|MOCKS\" -c ASAN --python-path python2 --venv --disable_boost_python --require_java --require_dotnet --require_lua --require_swift --require_ruby --require_go "
+        - docker run ffig-ci /bin/bash -c "./scripts/build.py -T \"CPP|MOCKS\" -c ASAN --python-path python3 --venv --disable_boost_python --require_java --require_dotnet --require_lua --require_swift --require_ruby --require_go "
+        - ./scripts/codechecks.py
+
+    - os: osx
+      language: generic
+      osx_image: xcode9.3
+      install:
+        - brew update
+        - brew install ninja bazel && brew upgrade python && brew install python@2
+        - /usr/local/opt/python@2/bin/pip2 install --user --upgrade pip
+        - /usr/local/opt/python@2/bin/pip2 install --user jinja2 nose pycodestyle
+        - pip3 install --user --upgrade pip && pip3 install --user jinja2 nose pycodestyle
+        - gem install ffi
+      script:
+        - ./scripts/build.py -t --disable_boost_python --disable_dotnet
+        - ./scripts/build.py -t --disable_boost_python --disable_dotnet --python-path python3
+
+notifications:
+  slack:
+    rooms:
+      - c-api:ZTxxqvEcr25iaaB8XBS7luaA#travis-ci

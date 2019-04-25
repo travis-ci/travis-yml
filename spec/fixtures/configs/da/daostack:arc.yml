@@ -1,0 +1,31 @@
+dist: trusty
+
+language: node_js
+
+node_js:
+  - "10.15.1"
+
+before_install:
+
+install:
+  - npm ci
+  - rm -rf build/ # remove any remaining artifacts from a previous build
+  - truffle version
+
+jobs:
+  include:
+      - stage: tests
+        name: "Unit tests"
+        script: npm run test
+
+      - stage: tests
+        name: "Solidity Lint"
+        script: npm run solhint
+
+      - stage: tests
+        name: "JS Lint"
+        script: npm run lint
+
+
+notifications:
+  slack: daostack:fGuaFPsiQiV5mgmzRcSzbYqw

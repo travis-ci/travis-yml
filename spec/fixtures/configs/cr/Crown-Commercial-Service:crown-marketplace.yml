@@ -1,0 +1,25 @@
+language: ruby
+cache:
+  bundler: true
+  yarn: true
+  directories:
+    - node_modules
+    - public/assets
+    - /home/travis/.rvm/gems
+    - /home/travis/.cache/rubocop_cache
+env:
+  - RAILS_ENV=test
+services:
+  - postgresql
+addons:
+  postgresql: "9.6"
+  apt:
+    packages:
+      - postgresql-9.6-postgis-2.3
+before_install:
+  - gem install --force --conservative -v 1.16.6 bundler
+script:
+  - bundle exec rake db:test:prepare
+  - bundle exec rake assets:precompile
+  - bundle exec rake
+  - rm public/assets/.sprockets-manifest-*.json

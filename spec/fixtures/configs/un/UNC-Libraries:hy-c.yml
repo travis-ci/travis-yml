@@ -1,0 +1,45 @@
+sudo: required
+dist: trusty
+language: ruby
+addons:
+  apt:
+    packages:
+      - libclamav-dev
+      - clamav
+      - unzip
+      - imagemagick
+      - ghostscript
+cache:
+  - bundler
+services:
+  - redis-server
+  - postgresql
+rvm:
+  - 2.4.1
+before_script:
+  - curl -o /home/travis/fits-1.0.5.zip https://projects.iq.harvard.edu/files/fits/files/fits-1.0.5.zip | cat
+  - unzip /home/travis/fits-1.0.5.zip -d /home/travis
+  - chmod u=u+x /home/travis/fits-1.0.5/fits.sh
+  - psql -c "create role hyrax with createdb nosuperuser login password 'password';" -U postgres
+  - psql -c 'create database hyrax_test with owner hyrax;' -U postgres
+  - bundle exec rake hydra:test_server &
+  - sleep 150
+  - bundle exec rake test_setup RAILS_ENV=test
+before_install:
+  - gem update --system
+  - gem install bundler
+jdk:
+  - oraclejdk8
+env:
+  global:
+    - NOKOGIRI_USE_SYSTEM_LIBRARIES=true
+    - DEFAULT_ADMIN_SET='default'
+    - HYRAX_DATABASE_PASSWORD='password'
+    - FITS_LOCATION='/home/travis/fits-1.0.5/fits.sh'
+    - HYRAX_HOST='http://example.com'
+    - EMAIL_FROM_ADDRESS='hyraxapp@example.com'
+    - DATABASE_AUTH=true
+    - DATA_STORAGE=./public
+    - TEMP_STORAGE=./public
+    - DELETED_PEOPLE_FILE=./tmp/deleted_people.txt
+    - ALLOW_NOTIFICATIONS=true

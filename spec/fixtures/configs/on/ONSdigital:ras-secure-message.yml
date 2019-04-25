@@ -1,0 +1,33 @@
+language: python
+sudo: required
+dist: trusty
+python: '3.6'
+
+# before_install:
+
+cache:
+    - pip
+
+install:
+    - pip install pipenv
+    - pipenv install --dev --deploy
+
+script:
+    - make test
+    - pipenv run coverage
+
+services:
+    - postgresql
+
+after_success:
+    - pipenv run codecov
+
+branches:
+    only:
+        - master
+env:
+  global:
+    - PIPENV_IGNORE_VIRTUALENVS=1
+
+addons:
+  postgresql: "9.6"

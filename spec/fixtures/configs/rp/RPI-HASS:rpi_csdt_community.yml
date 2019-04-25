@@ -1,0 +1,49 @@
+language: python
+
+addons:
+  postgresql: 9.6
+  apt:
+    packages:
+    - postgresql-9.6-postgis-2.3
+
+node_js:
+  - "7"
+  - "node"
+
+python:
+  - 2.7
+
+services: postgresql
+
+env:
+  - DJANGO=1.11.18
+
+before_install:
+  - export DJANGO_SETTINGS_MODULE="rpi_csdt_community.settings"
+  - export PYTHONPATH="/usr/local/lib/python2.7/dist-packages"
+  - export PIP_USE_MIRRORS=true
+  - "npm config set spin false"
+  - "npm install -g npm@^5"
+  - "npm install -g request"
+
+install:
+  - $(type -P npm) install -g less
+  - $(type -P npm) install -g yuglify
+  - pip install setuptools --upgrade
+  - pip install --upgrade -r requirements.txt
+  - pip install coveralls
+  - pip install flake8
+  - sudo apt-get install -y postgresql-9.6-postgis-2.3
+  - sudo service postgresql restart
+
+before_script:
+  - psql -c "CREATE DATABASE travisci;" -U postgres
+
+script:
+  - flake8 --ignore=E722 . 
+  - python manage.py migrate
+  - coverage run --source="." manage.py test
+
+after_success:
+  - pip freeze
+  - echo Uploading code coverage data ...; coveralls

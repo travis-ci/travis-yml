@@ -13,12 +13,12 @@ end
 
 def fetch
   readme = Net::HTTP.get(URI.parse(URL))
-  File.write("#{PATH}", readme)
+  File.write("#{README}", readme)
 end
 
 URL = 'https://raw.githubusercontent.com/travis-ci/dpl/master/README.md'
 DIR = 'spec/fixtures/dpl'
-PATH = "spec/fixtures/dpl.md"
+README = "spec/fixtures/dpl.md"
 
 PARTS = /^### ((?:[^:]+):.*?)(?=^### |\Z)/m
 NAME  = /dpl --provider="?([^\s"]+)"?/
@@ -33,7 +33,7 @@ FileUtils.mkdir_p(DIR)
 fetch if opts[:fetch]
 
 def parts
-  readme = File.read(PATH)
+  readme = File.read(README)
   parts = readme.scan(PARTS).flatten
   parts.reject { |part| !part.include?('#### Options') }
 end

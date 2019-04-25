@@ -1,0 +1,7 @@
+language: node_js
+
+sudo: false
+
+after_script:
+  - npm install -g codeclimate-test-reporter
+  - codeclimate-test-reporter < lcov.info || echo "Could not upload code coverage to CodeClimate"

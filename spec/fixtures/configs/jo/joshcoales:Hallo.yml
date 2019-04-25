@@ -1,0 +1,19 @@
+language: python
+python:
+  - "3.4"
+  - "3.5"
+  - "3.5-dev"
+  - "3.6"
+  - "3.6-dev"
+  - "3.7-dev"
+  - "nightly" # currently points to 3.6-dev
+# command to install dependencies
+install: "pip install -r requirements.txt"
+# command to run tests
+#install:
+#  - pip install python-telegram-bot
+#  - pip install python-dateutil
+#  - pip install beautifulsoup4
+#  - pip install --upgrade google-api-python-client oauth2client
+script:
+  - python -m unittest discover

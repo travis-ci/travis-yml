@@ -1,0 +1,49 @@
+sudo: required
+dist: xenial
+
+services:
+  - docker
+
+language: python
+python:
+  - '3.6'
+  - '3.7'
+  - '3.8-dev'
+node_js: 'lts/*'
+
+matrix:
+  allow_failures:
+  - python: 3.8-dev
+
+cache: pip
+
+# Respa uses int4range (IntegerRangeField) so needs at least Postgres9.2
+# As of 2017-08 the new travis trusty images have broken postgis,
+# so we have to specify the exact postgres version to install right addons.
+# They also seem to miss the GDAL C library...
+addons:
+  postgresql: "9.6"
+  apt:
+    packages:
+      - libgdal-dev
+      - postgresql-9.6-postgis-2.4
+
+before_install:
+  - psql template1 -c 'CREATE EXTENSION IF NOT EXISTS hstore;'
+  - psql template1 -c 'CREATE EXTENSION IF NOT EXISTS postgis;'
+  - pip install codecov -r requirements.txt
+
+before_script:
+  - ./build-resources
+  - ls -l respa_admin/static/respa_admin/main.css  # Check main.css got built
+  - ./manage.py compilemessages
+
+script: pytest --cov . --doctest-modules
+
+after_success:
+  - codecov
+  - ./deploy/containerize.sh
+
+notifications:
+  slack:
+    secure: gm6+6ekPIw0WcNuul94MoAzsAJ1/rlP0++UdnB01uf5boXIJiQjKZn+BVyhpMX1CN3KQFyf2tXEsMj2AY8IEF0YzJJXc9+ae70p+5OQXInLUcea7SZJ/7q7Tuw2AJoXUxbDmoto83N828waEIdWjCKW5qCxM248+FG9wKNipkjswv/obASOBzlhGQ67kzRaUpCsCHYlpbgxhlg1lPZs32vKL9YOtjCjyCerxnE+SIomANE+djpd8eGFUz90SEcfR5ypGHeuIic4xsX6VhGHyzevfgEix5aq3QDiNSbH8GWClyMeiU82ov3dEsRvMheRH9vRYl6xzdKuAgWRfW61biApki8sPn2w7W6AMtD0MaHMNi3QsQVW4z0saKNICtvi7ZQXtw8DvajEYLn1GuyF6hBUh9LEoqFXN52HlBVjZ/0XnCPyCdyQy03u3pOxz/OQ1/9gOH2SQMkQUqMYbiHeELXg4KHnPpvfgNBmFAA8WybbAzLXAqF2/67nMiNOi1a0oHOMfHlEAFnxITzYcU4eQxfapHHzXdfObZXwcna7T6RXdCVEX5LmOUN35oJkKe4y4T3ngumD8thbVX07HDYrbAaeE85JoT5ok5xe7WHimf2XTuOUNogNALnsop19EROrHcRB6d88BluVoS5S3e6uS7SliUCjH2HqMkDMR0T5zRy0=

@@ -1,0 +1,27 @@
+sudo: required
+language: python
+script:
+  - python setup.py install
+  - pytest -vs tests/unit
+
+before_install:
+  - sudo apt-get install -y bedtools gzip
+  - pip install pandas synapseclient pycrypto
+
+matrix:
+  include:
+    - os: linux
+      python: 2.7.14
+    - os: linux
+      python: 3.5.3
+    - os: linux
+      python: 3.6.2
+    # - os: osx
+    #   language: generic
+    #   env: PY_VERSION=2.7.14
+    # - os: osx
+    #   language: generic
+    #   env: PY_VERSION=3.5.3
+    # - os: osx
+    #   language: generic
+    #   env: PY_VERSION=3.6.2

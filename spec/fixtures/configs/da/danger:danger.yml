@@ -1,0 +1,36 @@
+language: ruby
+cache:
+  directories:
+    - bundle
+
+rvm:
+  - 2.6.0
+  - 2.5.3
+  - 2.4.5
+  - 2.3.8
+
+bundler_args: "--without documentation --path bundle"
+
+before_install:
+  - git fetch --depth=1000000
+  - gem install bundler -v '2.0.1'
+
+after_install:
+  - rake install
+
+before_script:
+  # Tests use real git commands
+  - git config --global user.email "danger@example.com"
+  - git config --global user.name "Danger McShane"
+
+script:
+  - echo "Running Tests"
+  - bundle exec rake spec
+  - echo "Linting the documentation for Danger's internal plugins"
+  - bundle exec danger plugins lint lib/danger/danger_core/plugins/*.rb --warnings-as-errors
+  - echo "Running the Dangerfile for this repo"
+  - bundle exec danger --verbose
+  - echo "Validating that danger init is working fine"
+  - bundle exec danger init --mousey --impatient
+
+sudo: required

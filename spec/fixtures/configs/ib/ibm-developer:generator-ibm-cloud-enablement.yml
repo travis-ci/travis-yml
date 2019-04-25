@@ -1,0 +1,35 @@
+language: node_js
+node_js:
+- '8'
+before_install:
+- npm i -g makeshift && makeshift -r https://registry.npmjs.org
+- npm i -g standard-version
+before_script:
+- cd /tmp
+- wget https://github.com/github/hub/releases/download/v2.5.1/hub-linux-386-2.5.1.tgz
+- wget https://kubernetes-helm.storage.googleapis.com/helm-v2.7.2-linux-amd64.tar.gz
+- tar -xvzf hub-linux-386-2.5.1.tgz
+- tar -xvf helm-v2.7.2-linux-amd64.tar.gz
+- mv hub-linux-386-2.5.1 hub
+- export PATH=${PATH}:/tmp/hub/bin:$PWD/linux-amd64
+- git clone -b master https://github.com/ibm-developer/standard-npm-devops.git
+- cd -
+script: 
+- npm test && npm run coveralls && /tmp/standard-npm-devops/do_devops.sh
+- $DEVOPS_SCRIPT_DIR/do_devops_insights_reporting.sh
+branches:
+  only:
+  - master
+  - develop
+env:
+  global:
+    - DEV_BRANCH=develop 
+    - PROD_BRANCH=master
+    - DEVOPS_SCRIPT_DIR="/tmp/standard-npm-devops"
+    # below are idra's necessary environment variables to report to devops-insights
+    # IBM_CLOUD_API_KEY and TOOLCHAIN_ID need to be defined from travis GUI
+    - ORGANIZATION_NAME=devops-insights
+    - LOGICAL_APP_NAME=generator-ibm-cloud-enablement-test
+    - GIT_URL=https://github.com/ibm-developer/generator-ibm-cloud-enablement
+    - DEVOPS_REPORT_DIR=/tmp/devops_insights/
+

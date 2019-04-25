@@ -1,0 +1,11 @@
+sudo: false
+language: node_js
+node_js:
+  - '11'
+
+before_script:
+  - curl -L https://github.com/pocke/korat-go/releases/download/v0.0.4/korat-go-linux-amd64.tar.gz | tar zxv -C ~/bin/
+  - 'export PATH=~/bin/:$PATH'
+script:
+  - 'yarn run build:dev || yarn run build:dev'
+  - './pack.sh build'

@@ -1,0 +1,70 @@
+sudo: required
+language: node_js
+node_js:
+  - "lts/*"
+  - "node"
+
+services:
+  - docker
+
+cache:
+  directories:
+    - ~/.npm
+
+notifications:
+  email: false
+
+before_install:
+  - wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
+  - sudo apt-add-repository "deb http://apt.llvm.org/trusty/ llvm-toolchain-trusty-7 main"
+  - sudo apt-add-repository "deb http://ppa.launchpad.net/ubuntu-toolchain-r/test/ubuntu trusty main"
+  - sudo apt-get update
+  - sudo apt-get install -y clang-7 --allow-unauthenticated
+  - clang-7 --version
+  - curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain none
+  - PATH=$HOME/.cargo/bin:$PATH
+  - rustup --version
+
+script:
+  - npm run doc
+  - npm run flow
+  - npm run lint
+  - npm run codecov
+  - make -C examples/bpf-c-noop/
+  - npm run localnet:update
+  - npm run localnet:up
+  - npm run examples
+  - npm run test:live
+  - npm run localnet:down
+
+before_deploy:
+  - rm -rf deploy
+  - mkdir -p deploy
+  - cp -r doc deploy/solanaWeb3Api-$TRAVIS_BRANCH
+  - cp lib/index.iife.js deploy/solanaWeb3.min.js
+  - ( cd deploy; tar zcf solanaWeb3Api.tgz solanaWeb3Api-$TRAVIS_BRANCH )
+
+deploy:
+  - provider: pages
+    skip-cleanup: true
+    github-token: $GITHUB_TOKEN
+    local-dir: doc
+    on:
+      branch: master
+      node_js: "lts/*"
+  - provider: script
+    skip_cleanup: true
+    script:
+      - npx semantic-release
+    on:
+      branch: master
+      node_js: "lts/*"
+  - provider: releases
+    skip-cleanup: true
+    file:
+      - deploy/solanaWeb3.min.js
+      - deploy/solanaWeb3Api.tgz
+    api_key: $GITHUB_TOKEN
+    on:
+      tags: true
+      node_js: "lts/*"

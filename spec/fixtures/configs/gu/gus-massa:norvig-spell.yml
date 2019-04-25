@@ -1,0 +1,69 @@
+# Test with different Racket versions
+# More details: https://github.com/greghendershott/travis-racket
+language: c
+
+# Optional: To use Travis CI's newer container infrastructure,
+# un-comment the following line. (Also be sure RACKET_DIR is set to
+# somewhere like ~/racket that doesn't require sudo.)
+#
+sudo: false
+
+env:
+  global:
+    # Supply a global RACKET_DIR environment variable. This is where
+    # Racket will be installed. A good idea is to use ~/racket because
+    # that doesn't require sudo to install and is therefore compatible
+    # with Travis CI's newer container infrastructure.
+    - RACKET_DIR=~/racket
+  matrix:
+    # Supply at least one RACKET_VERSION environment variable. This is
+    # used by the install-racket.sh script (run at before_install,
+    # below) to select the version of Racket to download and install.
+    #
+    # Supply more than one RACKET_VERSION (as in the example below) to
+    # create a Travis-CI build matrix to test against multiple Racket
+    # versions.
+    - RACKET_VERSION=6.12
+    - RACKET_VERSION=7.1
+    - RACKET_VERSION=HEAD
+    - RACKET_VERSION=HEADCS
+    - RACKET_VERSION=RELEASE
+
+# You may want to test against certain versions of Racket, without
+# having them count against the overall success/failure.
+matrix:
+  allow_failures:
+    # - env: RACKET_VERSION=HEAD
+    # - env: RACKET_VERSION=HEADCS
+    # - env: RACKET_VERSION=RELEASE
+
+  # Fast finish: Overall build result is determined as soon as any of
+  # its rows have failed, or, all of its rows that aren't allowed to
+  # fail have succeeded.
+  fast_finish: false
+
+# Handle git submodules yourself
+# ignore submodule needed for Haskel
+git:
+    submodules: false
+
+before_install:
+  - git clone https://github.com/greghendershott/travis-racket.git
+  - cat travis-racket/install-racket.sh | bash # pipe to bash not sh!
+  - export PATH="${RACKET_DIR}/bin:${PATH}" #install-racket.sh can't set for us
+  - racket -v
+
+install:
+
+before_script:
+
+script:
+  - time racket racket/norvig.rkt data/train.txt < data/test.txt
+
+after_script:
+
+# email notifications only on failure:
+notifications:
+  email:
+    on_success: never
+    on_failure: always

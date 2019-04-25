@@ -1,0 +1,40 @@
+sudo: true
+dist: trusty
+os:
+- linux
+- osx
+language: node_js
+node_js:
+- '10.0.0'
+
+addons:
+  apt:
+    sourcees:
+      - ubuntu-toolchain-r-test
+    packages:
+      - g++-4.8
+      - desktop-file-utils
+      - xdg-utils
+
+cache:
+  directories:
+    - node_modules
+
+before_install:
+  - "[[ ${TRAVIS_OS_NAME} = linux ]] && export CXX=g++-4.8 || echo 'skipped'"
+
+install:
+- yarn
+script:
+- yarn lint
+- yarn test-coverage
+- yarn publish-coverage
+deploy:
+  provider: npm
+  skip_cleanup: true
+  email: krishna.kumar@maidsafe.net
+  api_key: $NPM_API_KEY
+  tag: latest
+  on:
+    tags: true
+    condition: $TRAVIS_OS_NAME = linux

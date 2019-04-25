@@ -1,0 +1,65 @@
+os: linux
+group: edge
+
+addons:
+  apt:
+    packages:
+    - libdevmapper-dev
+
+language: rust
+
+matrix:
+    fast_finish: true
+    allow_failures:
+        # Allow beta tasks to fail
+        - rust: beta
+        # Allow macro-expansion test to fail
+        - rust: nightly
+    include:
+
+        # MANDATORY CHECKS USING CURRENT DEVELOPMENT COMPILER
+        # rustfmt
+        - rust: 1.33.0
+          before_script:
+              - rustup component add rustfmt
+          env: TASK=travis_fmt
+        # clippy
+        - rust: 1.33.0
+          before_script:
+              - rustup component add clippy
+          env: TASK=clippy
+
+        # MANDATORY TESTING USING LOWEST SUPPORTED COMPILER
+        # tests
+        - rust: 1.33.0
+          env: TASK=test
+
+
+        # MANDATORY TESTING ON STABLE
+        # compile
+        - rust: stable
+          env: TASK=build
+        # test
+        - rust: stable
+          sudo: required
+          env: TASK=sudo_test
+        # Build docs
+        - rust: stable
+          env: TASK=docs
+
+        # ALLOWED FAILURES
+        # test on beta to be good Rustaceans
+        - rust: beta
+          sudo: required
+          env: TASK=sudo_test
+        # Run "cargo expand" on rust nightly, in order to see expanded macros
+        # that happen to be of interest.
+        - rust: nightly
+          before_script:
+              - rustup component add rustfmt
+          env: TASK=expand
+
+branches:
+    only: master
+
+script: make -f Makefile $TASK

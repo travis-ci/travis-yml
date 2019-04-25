@@ -1,0 +1,26 @@
+dist: trusty
+sudo: required
+language: c
+
+os:
+  - linux
+
+services:
+  - docker
+
+script:
+- docker pull ubuntu:bionic
+- docker run ubuntu:bionic /bin/bash -c "
+  echo Hello World
+  && export DEBIAN_FRONTEND=noninteractive
+  && mkdir -p $HOME
+  && cd $HOME
+  && apt-get -qq update
+  && apt-get -qq -y install git make
+  && git clone https://github.com/steve-cs/gnat-builder.git
+  && cd gnat-builder
+  && make depends
+  && make prefix=/usr/local release-install
+  && make gnatcoll-core-depends
+  && make gnatcoll-core
+  "

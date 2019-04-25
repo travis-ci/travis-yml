@@ -1,0 +1,90 @@
+sudo: false
+
+language: python
+
+python:
+    - 3.6
+    - "3.7-dev"
+
+before_install:
+    # alias package
+    - PACKAGE=`pwd`/archipel
+
+    # upgrade pip:
+    - pip install --upgrade pip
+
+    # install mypy:
+    - pip install mypy
+
+    # install lilypond:
+    - LILYPOND=/tmp/lilypond
+    - LILYPOND_URL=http://lilypond.org/download/binaries/linux-64/
+    - LILYPOND_SOURCE=lilypond-2.19.83-1.linux-64.sh
+    - wget -q -O $LILYPOND $LILYPOND_URL/$LILYPOND_SOURCE
+    - sh $LILYPOND --batch
+
+    # clone & install abjad dev branch:
+    - ABJAD=/tmp/abjad
+    - git clone -b trevor/dev https://github.com/Abjad/abjad.git $ABJAD
+    - pip install -e $ABJAD
+    - export MYPYPATH=$ABJAD
+    - export PATH=$PATH:$ABJAD/abjad/scr
+
+    # clone & install rmakers:
+    - RMAKERS=/tmp/abjad-ext-rmakers
+    - git clone https://github.com/Abjad/abjad-ext-rmakers.git $RMAKERS
+    - pip install -e $RMAKERS
+    - export MYPYPATH=$MYPYPATH:$RMAKERS
+
+    # clone & install baca:
+    - BACA=/tmp/baca
+    - git clone https://github.com/trevorbaca/baca.git $BACA
+    - pip install -e $BACA
+    - export MYPYPATH=$MYPYPATH:$BACA
+    - export PATH=$PATH:$BACA/scr
+
+    # clone & install ide:
+    - IDE=/tmp/ide
+    - git clone https://github.com/Abjad/ide.git $IDE
+    - pip install -e $IDE
+    - export MYPYPATH=$MYPYPATH:$IDE
+    - export PATH=$PATH:$IDE/ide/scr
+
+    # install uqbar:
+    - UQBAR=/tmp/uqbar
+    - pip install --no-deps --target $UQBAR uqbar
+    - export MYPYPATH=$MYPYPATH:$UQBAR
+
+    # install čáry:
+    - CARY=/tmp/cary
+    - git clone https://github.com/trevorbaca/cary.git $CARY
+    - pip install -e $CARY
+    - export MYPYPATH=$MYPYPATH:$CARY
+
+    # log setup:
+    - echo $MYPYPATH
+    - echo $PATH
+    - ls
+    - ls /tmp
+    - pwd
+    - which baca-doctest
+    - which mypy
+    - which prime-parser-tables
+
+install:
+    - pip install coverage
+    - pip install -e .
+    - prime-parser-tables
+    
+script:
+    # eventually uncomment:
+    # -mypy $PACKAGE
+    - coverage run -a `which baca-doctest` $PACKAGE
+    - coverage run -a `which py.test` -rf $PACKAGE
+
+after_success:
+    - pip install --quiet coveralls
+    - coveralls
+
+notifications:
+    email: false

@@ -1,0 +1,54 @@
+language: python
+
+services:
+  - redis-server
+  - mongodb
+
+python:
+  - "3.6"
+  - "3.7"
+
+env:
+    - DJANGO=2.1.5
+    - DJANGO=1.11.18
+
+matrix:
+  exclude:
+    - python: "3.7"
+      env: DJANGO=1.11.18
+
+sudo: true
+dist: xenial
+
+addons:
+  apt:
+    packages:
+      - tcl8.5
+
+before_script:
+  - git clone https://github.com/antirez/disque.git disque_server
+  - "cd disque_server/src && make && PREFIX=../ make install && cd -"
+  - "./disque_server/bin/disque-server &"
+  - ./disque_server/bin/disque PING
+
+install:
+  - pip install -q django==$DJANGO
+  - pip install -r requirements.txt
+  - pip install pytest --upgrade
+  - pip install pytest-django codecov sphinx
+  - python setup.py install
+
+script:
+  - coverage run --source=django_q -m py.test
+  - sphinx-build -b html -d docs/_build/doctrees  -nW docs docs/_build/html
+
+after_success:
+  - codecov
+
+notifications:
+  webhooks:
+    urls:
+      - https://webhooks.gitter.im/e/cbcff78c4be241602332
+    on_success: change
+    on_failure: always
+    on_start: never

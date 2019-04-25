@@ -1,0 +1,40 @@
+addons:
+    apt:
+        packages:
+        - dos2unix
+cache:
+- pip
+dist: xenial
+env:
+    global:
+    -   secure: uhYA3qg6Q6770c3DDofATISbKfw9/9LeCQzo1cyyyV1mHhX41CQOfBLK62faaSIJPTYWporYN0eIwcHMApFg+E9/iuHbZ3+x9foeDgmnOU9WhfLlAhh00853wVa3ugD32WwVHwqdo9/D8+eR2DyyYam7wGjIK32K7L9WVIA2rMNqKfTfLaoHxDKSzYNVMSMwL+y7wo0lM9azBRoDcgp4ofX+psJP3Ki3+FGn+MR4bhUJ9Nz9nJoEMz8bXfJ9o0uL4yJEbL08C2nOjkNR1EOmWtequQfqwfgW0IV4eGjx/B7NSCu+yB5nwDKARvD35mVErPJgd1NdCDl5Dfc9tQaAdLkM4U9s6ksO4T7wCgOabVLdZ7G4Ce12DmH6Pncv25kHhvjldircNFThMpBHq+6LHItGKdONRJRSkmcnd15848aCd2ewSsshucXe/PSx/SG7/NjCZJUyMVcczU+ob0RI8s8kpknvJ7oDeIasKMXY0T/PmKeSWg7nWukpOVBJegdRgwQhTAiF1iDHzVY0w0k62Ev5NuxB4scIYSje68jqg+V+0ThTbKFCW8ify1e3+tbXxYOUIEp6BgMQQmvRtetga8QT+ioq97V3t8HhTuDwQNld19psmUZ16wuI8OuKiGG1S3bwzPJRBsGIJG74URBy5aSObpjZ24bpnf1nEM2mHgw=
+    -   GIT_NAME: Travis CI
+    -   GIT_EMAIL: dead-hosts@funilrys.com
+    -   TRAVIS_REPO_SLUG: Ultimate-Hosts-Blacklist/antipopads
+    -   GIT_BRANCH: master
+    -   UPDATE_LOCATION: https://raw.githubusercontent.com/Ultimate-Hosts-Blacklist/repository-structure/master/update.py
+    -   ADMINISTATION_LOCATION: https://raw.githubusercontent.com/Ultimate-Hosts-Blacklist/repository-structure/master/administration.py
+install:
+- pip3 install --upgrade pip
+- pip3 install requests
+- pip3 install ultimate-hosts-blacklist-whitelist PyYaml
+- if [[ ! -f .admin ]]; then wget "${UPDATE_LOCATION}" -o /dev/null -O update.py &&
+    chmod +x update.py; else echo "No need to download/update update.py."; fi
+- if [[ ! -f .admin ]]; then wget "${ADMINISTATION_LOCATION}" -o /dev/null -O administration.py
+    && chmod +x administration.py; else echo "No need to download/update administration.py.";
+    fi
+language: python
+matrix:
+    fast_finish: true
+notifications:
+    email:
+        on_failure: always
+        on_success: never
+        recipients:
+        - dead-hosts@funilrys.com
+        - mitchellkrogza+ultimatehostsblacklist@gmail.com
+python:
+- '3.7'
+script:
+- python3 ./update.py
+sudo: required

@@ -2,27 +2,29 @@
 
 The branches your build will be run on.
 
-## Type
+## Types
 
-Any of:
+* Hash
+* Array of: String
+* String
 
-* Map (Hash)
-* 
-
-## Flags
-
-None.
 
 
 ## Examples
 
 ```yaml
 branches:
-  only: "[ref:strs]"
-  except: "[ref:strs]"
+  only: string
+  except: string
 ```
 
 ```yaml
-branches: "[ref:strs]"
+branches:
+- string one
+- string two
+```
+
+```yaml
+branches: string
 
 ```

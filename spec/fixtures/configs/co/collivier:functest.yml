@@ -1,0 +1,192 @@
+---
+sudo: required
+services: docker
+language: generic
+dist: xenial
+addons:
+  apt:
+    packages:
+      - libssl1.0.0
+
+before_script:
+  - sudo apt-get -y install qemu-user-static
+  - sudo add-apt-repository -y ppa:jonathonf/python-3.6
+  - sudo apt-get update
+  - sudo apt-get install python3.6 python3.6-dev
+  - sudo pip install tox
+  - sudo -E docker login -u="${DOCKER_USERNAME}" -p="${DOCKER_PASSWORD}"
+  - (cd .. && git clone https://github.com/estesp/manifest-tool)
+  - (cd ../manifest-tool && git checkout v0.9.0)
+  - (cd ../manifest-tool && sudo -E make && sudo -E make install)
+
+jobs:
+  include:
+    - stage: run unit tests
+      script: tox -e docs,pep8,pylint,yamllint,bashate,py27,py36,cover
+    - stage: build functest-core images
+      script: sudo -E bash build.sh
+      env:
+        - REPO="${DOCKER_USERNAME}"
+        - amd64_dirs="docker/core"
+        - arm64_dirs=""
+        - arm_dirs=""
+    - script: sudo -E bash build.sh
+      env:
+        - REPO="${DOCKER_USERNAME}"
+        - amd64_dirs=""
+        - arm64_dirs="docker/core"
+        - arm_dirs=""
+    - script: sudo -E bash build.sh
+      env:
+        - REPO="${DOCKER_USERNAME}"
+        - amd64_dirs=""
+        - arm64_dirs=""
+        - arm_dirs="docker/core"
+    - stage: publish functest-core manifests
+      script: >
+        sudo manifest-tool push from-args \
+          --platforms linux/amd64,linux/arm,linux/arm64 \
+          --template ${DOCKER_USERNAME}/functest-core:ARCH-hunter \
+          --target ${DOCKER_USERNAME}/functest-core:hunter
+    - stage: build functest-tempest images
+      script: sudo -E bash build.sh
+      env:
+        - REPO="${DOCKER_USERNAME}"
+        - amd64_dirs="docker/tempest"
+        - arm64_dirs=""
+        - arm_dirs=""
+    - script: sudo -E bash build.sh
+      env:
+        - REPO="${DOCKER_USERNAME}"
+        - amd64_dirs=""
+        - arm64_dirs="docker/tempest"
+        - arm_dirs=""
+    - script: sudo -E bash build.sh
+      env:
+        - REPO="${DOCKER_USERNAME}"
+        - amd64_dirs=""
+        - arm64_dirs=""
+        - arm_dirs="docker/tempest"
+    - stage: publish functest-tempest manifests
+      script: >
+        sudo manifest-tool push from-args \
+          --platforms linux/amd64,linux/arm,linux/arm64 \
+          --template ${DOCKER_USERNAME}/functest-tempest:ARCH-hunter \
+          --target ${DOCKER_USERNAME}/functest-tempest:hunter
+    - stage: build all functest images
+      script: sudo -E bash build.sh
+      env:
+        - REPO="${DOCKER_USERNAME}"
+        - amd64_dirs="docker/healthcheck"
+        - arm64_dirs=""
+        - arm_dirs=""
+    - script: sudo -E bash build.sh
+      env:
+        - REPO="${DOCKER_USERNAME}"
+        - amd64_dirs=""
+        - arm64_dirs="docker/healthcheck"
+        - arm_dirs=""
+    - script: sudo -E bash build.sh
+      env:
+        - REPO="${DOCKER_USERNAME}"
+        - amd64_dirs=""
+        - arm64_dirs=""
+        - arm_dirs="docker/healthcheck"
+    - script: sudo -E bash build.sh
+      env:
+        - REPO="${DOCKER_USERNAME}"
+        - amd64_dirs="docker/smoke"
+        - arm64_dirs=""
+        - arm_dirs=""
+    - script: sudo -E bash build.sh
+      env:
+        - REPO="${DOCKER_USERNAME}"
+        - amd64_dirs=""
+        - arm64_dirs="docker/smoke"
+        - arm_dirs=""
+    - script: sudo -E bash build.sh
+      env:
+        - REPO="${DOCKER_USERNAME}"
+        - amd64_dirs=""
+        - arm64_dirs=""
+        - arm_dirs="docker/smoke"
+    - script: sudo -E bash build.sh
+      env:
+        - REPO="${DOCKER_USERNAME}"
+        - amd64_dirs="docker/benchmarking"
+        - arm64_dirs=""
+        - arm_dirs=""
+    - script: sudo -E bash build.sh
+      env:
+        - REPO="${DOCKER_USERNAME}"
+        - amd64_dirs=""
+        - arm64_dirs="docker/benchmarking"
+        - arm_dirs=""
+    - script: sudo -E bash build.sh
+      env:
+        - REPO="${DOCKER_USERNAME}"
+        - amd64_dirs=""
+        - arm64_dirs=""
+        - arm_dirs="docker/benchmarking"
+    - script: sudo -E bash build.sh
+      env:
+        - REPO="${DOCKER_USERNAME}"
+        - amd64_dirs="docker/features"
+        - arm64_dirs=""
+        - arm_dirs=""
+    - script: sudo -E bash build.sh
+      env:
+        - REPO="${DOCKER_USERNAME}"
+        - amd64_dirs=""
+        - arm64_dirs="docker/features"
+        - arm_dirs=""
+    - script: sudo -E bash build.sh
+      env:
+        - REPO="${DOCKER_USERNAME}"
+        - amd64_dirs=""
+        - arm64_dirs=""
+        - arm_dirs="docker/features"
+    - script: sudo -E bash build.sh
+      env:
+        - REPO="${DOCKER_USERNAME}"
+        - amd64_dirs="docker/vnf"
+        - arm64_dirs=""
+        - arm_dirs=""
+    - script: sudo -E bash build.sh
+      env:
+        - REPO="${DOCKER_USERNAME}"
+        - amd64_dirs=""
+        - arm64_dirs="docker/vnf"
+        - arm_dirs=""
+    - script: sudo -E bash build.sh
+      env:
+        - REPO="${DOCKER_USERNAME}"
+        - amd64_dirs=""
+        - arm64_dirs=""
+        - arm_dirs="docker/vnf"
+    - stage: publish all manifests
+      script: >
+        sudo manifest-tool push from-args \
+          --platforms linux/amd64,linux/arm,linux/arm64 \
+          --template ${DOCKER_USERNAME}/functest-healthcheck:ARCH-hunter \
+          --target ${DOCKER_USERNAME}/functest-healthcheck:hunter
+    - script: >
+        sudo manifest-tool push from-args \
+          --platforms linux/amd64,linux/arm,linux/arm64 \
+          --template ${DOCKER_USERNAME}/functest-smoke:ARCH-hunter \
+          --target ${DOCKER_USERNAME}/functest-smoke:hunter
+    - script: >
+        sudo manifest-tool push from-args \
+          --platforms linux/amd64,linux/arm,linux/arm64 \
+          --template ${DOCKER_USERNAME}/functest-benchmarking:ARCH-hunter \
+          --target ${DOCKER_USERNAME}/functest-benchmarking:hunter
+    - script: >
+        sudo manifest-tool push from-args \
+          --platforms linux/amd64,linux/arm,linux/arm64 \
+          --template ${DOCKER_USERNAME}/functest-features:ARCH-hunter \
+          --target ${DOCKER_USERNAME}/functest-features:hunter
+    - script: >
+        sudo manifest-tool push from-args \
+          --platforms linux/amd64,linux/arm,linux/arm64 \
+          --template ${DOCKER_USERNAME}/functest-vnf:ARCH-hunter \
+          --target ${DOCKER_USERNAME}/functest-vnf:hunter

@@ -31,6 +31,21 @@ describe Travis::Yml::Schema::Def::Deploy::Rubygems, 'structure' do
               edge: {
                 '$ref': '#/definitions/deploy/edge'
               },
+              api_key: {
+                anyOf: [
+                  {
+                    type: :object,
+                    patternProperties: {
+                      '.*': {
+                        '$ref': '#/definitions/type/secure'
+                      }
+                    }
+                  },
+                  {
+                    '$ref': '#/definitions/type/secure'
+                  }
+                ]
+              },
               gem: {
                 anyOf: [
                   {
@@ -51,21 +66,6 @@ describe Travis::Yml::Schema::Def::Deploy::Rubygems, 'structure' do
               },
               gemspec: {
                 type: :string
-              },
-              api_key: {
-                anyOf: [
-                  {
-                    type: :object,
-                    patternProperties: {
-                      '.*': {
-                        '$ref': '#/definitions/secure'
-                      }
-                    }
-                  },
-                  {
-                    '$ref': '#/definitions/secure'
-                  }
-                ]
               }
             },
             normal: true,

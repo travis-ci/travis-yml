@@ -1,0 +1,80 @@
+os:
+  - linux
+
+sudo: false
+
+dist: trusty
+
+addons:
+  apt:
+    packages:
+      - lcov
+      - build-essential
+      - git
+      - libc6-i386
+      - time
+      - libblocksruntime-dev
+
+git:
+  depth: 5
+
+# We use cpp for unit tests, and c for the main project.
+language: cpp
+compiler: clang
+
+env:
+#  - PUBLISHMETA=True
+#  - PUBLISHDOCS=True
+# Specify the main Mafile supported goals.
+  - GOAL=test
+  - GOAL=targets-group-1
+  - GOAL=targets-group-2
+  - GOAL=targets-group-3
+  - GOAL=targets-group-4
+  - GOAL=unsupported
+  - GOAL=targets-group-rest
+#  - GOAL=all
+#  - GOAL=AFROMINI
+#  - GOAL=AIORACERF3
+#  - GOAL=...
+# Or specify targets to run.
+#  - TARGET=AFROMINI
+#  - TARGET=AIORACERF3
+#  - TARGET=...
+
+before_install:
+  - pip install --user cpp-coveralls
+  - gem install coveralls-lcov
+
+install:
+  - make arm_sdk_install
+
+before_script:
+  - make arm_sdk_version
+  - clang --version
+  - clang++ --version
+  - gcc --version
+  - export V=0
+
+script: ./.travis.sh
+
+after_success:
+  - cd ${TRAVIS_BUILD_DIR}
+  - lcov --directory . -b src/test --capture --output-file coverage.info # capture coverage info
+  - lcov --remove coverage.info 'lib/test/*' 'src/test/*' '/usr/*' --output-file coverage.info # filter out system and test code
+  - lcov --list coverage.info # debug before upload
+  - coveralls-lcov coverage.info # uploads to coveralls
+
+cache:
+  timeout: 1000
+  directories:
+  - downloads
+  - tools
+
+notifications:
+  irc:
+    channels:
+      - "chat.freenode.net#cleanflight"
+    use_notice: true
+    skip_join: true
+

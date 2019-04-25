@@ -1,0 +1,17 @@
+sudo: required
+language: bash
+services:
+  - docker
+
+# cache the .ccache directory between the builds
+# see https://docs.travis-ci.com/user/caching/
+cache:
+  directories:
+    - $HOME/.ccache
+
+before_install:
+  - docker build -t libstorage-ng-image .
+script:
+  # run the travis script
+  # mount the ccache as a volume (bind-mount) so the changes are available later outside the container
+  - docker run -it -e TRAVIS=1 -e TRAVIS_JOB_ID="$TRAVIS_JOB_ID" -v $HOME/.ccache:/root/.ccache libstorage-ng-image ./.travis.sh

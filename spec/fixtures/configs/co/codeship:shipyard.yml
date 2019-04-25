@@ -1,0 +1,40 @@
+language: ruby
+cache: bundler
+rvm:
+- 2.4.1
+before_install:
+- chmod +x ci/setup
+install:
+- "./ci/setup"
+before_script:
+- chmod +x ci/jekyll
+- chmod +x ci/sass_lint
+jobs:
+  include:
+  # - script: "./ci/jekyll"
+  - script: "./ci/sass_lint"
+  - script: bundle exec rspec -fd
+  - stage: Deploy
+    script: skip
+    deploy:
+      provider: rubygems
+      api_key:
+        secure: AaMZlXnSGb14LR9Xjo3j+65+U2tRCG8ZgO3iCGksV3riAWg5E0l0maM7HEXCi9+f6GbnQ3z/irEBtQiddU7fEKw1OoUmo7jkDh5juhmZjRa1y0hnn6VISRj6DpP3/KX9w++UDFJ4AWxwRr6h4sB3uhuIedBxlOuIuGlvE408Dzhd154F60EMO8/tYYNzksFBuSTBHZqmFSPnbYY1PN5OOW9VVjDO6D/FukraDqgDY0N475Tk86EpDXddd1ZSI+wJOcQBH/7SAYbAR0eL70fWZlbiBayOw6paPCAzbFZHXdN8j2oiXFwmzDwQvqKq2o1hcMzXq+EZ/KaAOoIS+99prBxyke8QEWB4fsFlkfEuB2t1HUpvQDTITwOTW0g0jI/kgiiOcmI+622ERfTeNOfNznqBEwDnL0BrGRy1Ygz4sJrIphQ9B0BURyQSk3wBR5Vy1CbgDyp1G34gezjUiDszoBasQI0k/47QLbTvtKVa+5xEP7Ud7lyAR8dHNBPIUFWb0xSJ9Nm5Qvnc15A4FikTzu948SQrAvPkDVrw2Up/RYgxHCR+lXh36npeza85/FBQCaKbRVVoVzN8dzbHgbHYMvZeQVCCW6ngFPVLsofW9NACyuSalf4+AsbNi18E9fJzVcfyVUuh+f4TH66msneYqPxk+Pat14VghO7bE3xvEgk=
+      gem: shipyard
+      on:
+        branch: master
+        repo: codeship/shipyard
+env:
+  global:
+  - NOKOGIRI_USE_SYSTEM_LIBRARIES=true
+sudo: false
+branches:
+  except:
+  - gh-pages
+  - "/skip-ci(.*)/"
+notifications:
+  email: false
+  slack:
+    on_success: always
+    rooms:
+      secure: AAXYbqh+QCyhZHHRWUiRa33qFf6ftBCJjVzjvrTZJFTEaTqFB5FwoWfZN15xggglR+42vJyQ9yVVr1XZ/uGiNhXFDi0mPhqjL2+RJ4I3etzFhDWJWp0/BcpOwYx7c0pPAzFhooK9X8cxzRrK/O7viHkM5GQ1mvXv8kld4Y1cZxPaFaoHHwK/BTAlrtZ111aloYe65TAi1qi+LBZ0oeJDBzW3jHvJ0U/4yfgCcnty8KZqzWDTX9eNzmwRdceVu9/rKfVToaNtoh4SGD128MlaXxaRPkJVzF261ZDhx2Fyi1kkzeZXWJtiadVARYmvXogSAQFPkaWfMRIEM4qHWSEYmUud0B3oB1GBTVOMmy+HKo0aRvhJUxPHNUvRejdo/vPYlRjwm66MPOyI9UUqZ3wGQ7NBzWJLB1O+C4sl4eXB5lINm5E85SojIhnStk1ARFgbFZEXiHTEaW11VedP+cA6b9UYy6FVYBokr9Yc8XpbmNiP6A0wwOscvQASslhbkaLZq/2S5IIftCD5I3EcFSP+BIMZnjA9YkBYMA3VOb2+HDETmzmFRG9cUCEoe65BQ9tGcvGg/msJQywWN2MgGu8LpgaDzkSaZ5Q3JTKSL3Sh9lYPpnFL678xTinK0YqmP5IKT5DcwxIYzoTmXnUv2setajvibaA/kBom7uEaXfFQ/yQ=

@@ -1,0 +1,21 @@
+language: python
+python:
+  - '2.7'
+  - '3.6'
+install:
+  - pip install -U pip setuptools
+  - pip install -Ur requirements-test.txt --upgrade-strategy eager
+script: py.test tests/ -v --cov wrapanapi
+after_success:
+  - coveralls
+deploy:
+  provider: pypi
+  skip_existing: true
+  user: mshriver
+  password:
+    secure: a9N8cj6YwGfuH6nZeUiDcq+cKNz5w+bb8fL5f9aw2ceRvwUR2tn6+MII0rlmHGhM8mByfeTjxYl7vQreyODxvMgNQoa3oPPc+pk2L1xbbi/qolicAslwUp/GraEAhJFqHaLGLZUPcoR5JRvIftsLDYFtxbGTroukG4yZ8m2utnQdbIxBLf+dwfC3Wu8pF+qP41DHldArsm6+y6VNYnXd3/s3GC3UOwyp56LRidgn7sYp2iKkHAUUvZghf1xJvEgs5R41wDlvX72g6Cm0iCEFezFkRj8PY0GP91wIF9gF7tpLDxVA+YH1Y7U+a1SK4fkf8sfLepEvQLKdB4JzbInZj6oF5oUibzC5+rOM+fkcv8nbZzJ1LTdaQb/pjMmgO28xjPFEZSfw72n2F93OW1fLk1n47FJENvlPwXtYEgCtO7qJYgpmISPYtfwqZSqzE0L+0dNSzFE/f0RmFV/6CVRRF6bbdRix0yV29oAC9ujoJeeZkuBiG8fMfYGEn6UbEu1a2UsvdV5om9MQ09p5qKu/TDRR44rYoqbZohQpVFxNl7p31telYpZXZrqbRwQJNPsW2HSsWa3j0BVQB20s0F47mHR36d6TPpJNl0py/7JotudpQ76wVewJaLq6A7JjiCjzKAvL+5cdbwL/yn7IAaWSj0cscgAnkaHlOVNnpQLphts=
+  on:
+    tags: true
+    distributions: sdist bdist_wheel
+    repo: ManageIQ/wrapanapi
+

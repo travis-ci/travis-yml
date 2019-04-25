@@ -1,0 +1,38 @@
+language: java
+sudo: required
+dist: trusty
+group: edge
+
+addons:
+  sonarcloud:
+    organization: "trellis-ldp"
+    token:
+      secure: "fGWpdWz1Dq7b5jDKKoZLE+wQFZlwzk8siLD9TXHqdy0x7s/hgaxmpAb05Tgob1GMgqDjGGheYZ3Ig/YZBo68N8/oLOFiBMFu8a5J+4Lkw9IjLsfGml5KwZV3e9DyQkYbC9sTX4sEl0+ERnpi0ukBWWRiKDxF1OQaSgZXBc/hQjEAb3+tZrukLgaMpI8aEgL6kCziEdZycfDLcCjE5p50pEyPHn3OZbelAgBGFiYehSvC0gkt7djvBUd7tGeU6cvzvBGvPGJZmDZvWOg7igEyZZ7/PGKnFnPvBk8i7j17Xm8FrFxGaYZkgHZuU7aAHoM/ySgORo42vsZr1DxPZOIBbLEIqm6gGXNCCyVNinDks8j9kglGGzOw0Wjv86O12JyII7S8k1Ab1dKymDvOm326keku5ucLrQtAxOCpaz4TtqiowFB/JGlGiB+s3HoDsbsG8tk4bjWFsGa5cXcyZ/zKgwqKCjhE9WL6+dtcBZc2rsGUp5lwDQ7aMPi6dbPKKgEKRQKj5buzXdw5fqgq5Ht0Q2CCxp5QrlQWCgtlLVRysvNnPO8bnnJSvKV4tKHO4LDt+6YOG/zJEK9SjLXm2kLU+zczl684nwDkQo1CXU2wiKZnhUYiWfvJ1J/Yy3SDj0XVc8CRWkiVx4B63NI98yhY1yrlJhtqPuDMiXgfQZxsMDw="
+
+before_cache:
+  - rm -f $HOME/.gradle/caches/modules-2/modules-2.lock
+  - rm -rf $HOME/.gradle/caches/*/plugin-resolution/
+
+cache:
+  directories:
+    - $HOME/.gradle/caches/
+    - $HOME/.gradle/wrapper/
+
+matrix:
+  fast_finish: true
+
+  include:
+    # JDK 8
+    - jdk: oraclejdk8
+      after_success: ./gradlew jacocoRootReport coveralls sonarqube
+
+    # JDK 10
+    - jdk: openjdk10
+
+    # JDK 11
+    - jdk: oraclejdk11
+
+  allow_failures:
+    - jdk: oraclejdk11
+
+script: ./gradlew clean check install

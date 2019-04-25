@@ -1,0 +1,19 @@
+language: ruby
+rvm:
+  - "2.4.1"
+
+# make Travis use its legacy infrastructure
+sudo: true
+
+# uncomment this line if your project needs to run something other than `rake`:
+# script: bundle exec rake lang:update
+
+before_install:
+  - sudo apt-get install exiftool
+
+install: ./script/travis_setup
+
+before_script:
+  - rake db:schema:load
+  - rake db:fixtures:load
+  - rake lang:update

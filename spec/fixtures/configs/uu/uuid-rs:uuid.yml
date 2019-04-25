@@ -1,0 +1,67 @@
+branches:
+  except:
+  - /.*(.tmp)$/
+
+language: rust
+
+matrix:
+  include:
+  - os: osx
+    rust: nightly
+  - rust: nightly
+    before_script:
+    - rustup component add rustfmt-preview
+    - cargo install cargo-web
+    script:
+    - cargo fmt --all -- --check
+    - cargo test --features "serde std v1 v3 v4 v5"
+    - cargo bench --features "serde std v1 v3 v4 v5"
+    - cargo web build --features "v3 stdweb"
+    - cargo web build --features "v4 stdweb"
+    - cargo web build --features "v5 stdweb"
+    - cargo web build --features "v3 wasm-bindgen"
+    - cargo web build --features "v4 wasm-bindgen"
+    - cargo web build --features "v5 wasm-bindgen"
+  - rust: beta
+    before_script:
+      - cargo install cargo-web
+    script:
+      - cargo web build --features "v3 wasm-bindgen"
+      - cargo web build --features "v4 wasm-bindgen"
+      - cargo web build --features "v5 wasm-bindgen"
+  - rust: stable
+    before_script:
+    - rustup component add clippy-preview
+    - rustup target add wasm32-unknown-unknown
+    script:
+    - cargo clippy --features "v1 v3 v4 v5 slog"
+    - cargo build --target wasm32-unknown-unknown --features "v3 wasm-bindgen"
+    - cargo build --target wasm32-unknown-unknown --features "v4 wasm-bindgen"
+    - cargo build --target wasm32-unknown-unknown --features "v5 wasm-bindgen"
+  - rust: 1.31.0
+    script:
+    - cargo test --features "serde std v4"
+
+notifications:
+  email:
+    on_success: never
+
+os: linux
+
+rust:
+- stable
+- beta
+- nightly
+
+script:
+- cargo test --no-default-features
+- cargo test
+- cargo test --features "serde"
+- cargo test --features "v1"
+- cargo test --features "v3"
+- cargo test --features "v4"
+- cargo test --features "v5"
+- cargo test --features "slog"
+- cargo test --features "serde std v1 v3 v4 v5"
+
+sudo: false

@@ -1,0 +1,111 @@
+language: cpp
+dist: xenial
+os: linux
+
+compiler:
+  - gcc
+  - clang
+
+env:
+  global:
+    - CACHE_DIR=~/cached-deps
+  matrix:
+    - YARP_CHECKOUT=master
+    - YARP_CHECKOUT=v3.1.1
+    - YARP_CHECKOUT=30dce54 # hotfix for v3.0.1
+    - YARP_CHECKOUT=v2.3.72.1
+    - YARP_CHECKOUT=v2.3.70.2
+
+matrix:
+  include:
+    - if: type = cron
+      compiler: gcc
+      env: ROBOTOLOGY_CHECKOUT=devel
+    - if: type = cron
+      compiler: clang
+      env: ROBOTOLOGY_CHECKOUT=devel
+
+cache:
+  directories: $CACHE_DIR
+
+addons:
+  apt:
+    packages:
+    - libboost-thread-dev # AMOR API
+    - libeigen3-dev # AMOR API and YARP
+    - libgtest-dev # unit testing
+    - lcov # code coverage
+
+before_install:
+  #-- Register SSH deploy key for AMOR API private repository
+  - source "$TRAVIS_BUILD_DIR/scripts/travis/configure-ssh.sh"
+
+  #-- Code coverage
+  - if [ "$CXX" = "g++" ]; then gem install coveralls-lcov; fi
+
+install:
+  #-- Install YCM
+  - >
+    source "$TRAVIS_BUILD_DIR/scripts/travis/git-cache-dependency.sh"
+    --package-name YCM
+    --repo-url https://github.com/robotology/ycm
+    --repo-checkout "${ROBOTOLOGY_CHECKOUT:-${YCM_CHECKOUT:-master}}"
+
+  #-- Install YARP
+  - >
+    source "$TRAVIS_BUILD_DIR/scripts/travis/git-cache-dependency.sh"
+    --package-name YARP
+    --repo-url https://github.com/robotology/yarp
+    --repo-checkout "${ROBOTOLOGY_CHECKOUT:-$YARP_CHECKOUT}"
+    --additional-cmake-options "-DSKIP_ACE:BOOL=ON -DCREATE_LIB_MATH:BOOL=ON"
+    --prepend-to-linker-path lib
+    --additional-export-paths "YARP_DATA_DIRS;share/yarp"
+
+  #-- Install KDL
+  - >
+    source "$TRAVIS_BUILD_DIR/scripts/travis/git-cache-dependency.sh"
+    --package-name KDL
+    --repo-url https://github.com/orocos/orocos_kinematics_dynamics
+    --repo-checkout master
+    --cmake-home-dir orocos_kdl
+    --prepend-to-linker-path lib
+
+  #-- Install color-debug
+  - >
+    source "$TRAVIS_BUILD_DIR/scripts/travis/git-cache-dependency.sh"
+    --package-name COLOR_DEBUG
+    --repo-url https://github.com/roboticslab-uc3m/color-debug
+    --repo-checkout develop
+
+  #-- Install AMOR API (for AmorCartesianControl)
+  - >
+    source "$TRAVIS_BUILD_DIR/scripts/travis/git-cache-dependency.sh"
+    --package-name AMOR_API
+    --repo-url git@github.com:roboticslab-uc3m/amor-api
+    --repo-checkout develop
+    --additional-cmake-options "-DENABLE_udev_rules:BOOL=OFF"
+    --prepend-to-linker-path lib
+
+  #-- Install yarp-devices (for testBasicCartesianControl and apps using proximity sensors)
+  - >
+    source "$TRAVIS_BUILD_DIR/scripts/travis/git-cache-dependency.sh"
+    --package-name ROBOTICSLAB_YARP_DEVICES
+    --repo-url https://github.com/roboticslab-uc3m/yarp-devices
+    --repo-checkout develop
+    --additional-export-paths "YARP_DATA_DIRS;share/roboticslab-yarp-devices"
+
+before_script:
+  - mkdir -p "$TRAVIS_BUILD_DIR/build" && cd "$_"
+  - cmake .. -DCMAKE_INSTALL_PREFIX="$PWD/install" -DENABLE_coverage:BOOL=ON
+  - make install
+  - export LD_LIBRARY_PATH=$PWD/install/lib:$LD_LIBRARY_PATH
+  - export YARP_DATA_DIRS=$PWD/install/share/roboticslab-kinematics-dynamics:$YARP_DATA_DIRS
+
+script:
+  - (cd tests && ctest -V)
+
+after_success:
+  #-- Code coverage
+  - if [ "$CXX" = "g++" ]; then source "$TRAVIS_BUILD_DIR/scripts/travis/coverage.sh"; fi
+
+  - make uninstall

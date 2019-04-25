@@ -1,0 +1,13 @@
+sudo: false
+language: ruby
+rvm: 2.3.4
+cache:
+  bundler: true
+env:
+  - DB_ENV_POSTGRESQL_USER_TEST=postgres DB_ENV_POSTGRESQL_PASS=""
+before_install:
+  - bundle config gems.contribsys.com $SIDEKIQ_CREDS
+before_script:
+  - bundle exec rake db:test:prepare RAILS_ENV=test
+script:
+  - bundle exec rspec && bundle exec rubocop

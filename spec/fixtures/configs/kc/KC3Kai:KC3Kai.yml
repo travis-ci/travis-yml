@@ -1,0 +1,46 @@
+sudo: false
+dist: trusty
+language: node_js
+node_js:
+- "6"
+before_install:
+- npm install -g grunt-cli
+- npm install
+- patch -N -d node_modules/grunt-contrib-uglify -p2 < misc/uglify-harmony.patch
+
+# BUILD WEBSTORE PACKAGE
+before_script:
+- npm test
+
+# DEPLOY TO CHROME WEBSTORE
+script:
+- export KC3_VERSION=$(node -p -e "require('./package.json').version")
+- if [ $TRAVIS_BRANCH == 'webstore' ]; then grunt build; fi
+- if [ $TRAVIS_BRANCH == 'webstore' ] && [ $TRAVIS_PULL_REQUEST == "false" ]; then grunt webstore; fi
+
+# DEPLOY TO GITHUB RELEASES
+before_deploy:
+  - git config --global user.email "builds@travis-ci.com"
+  - git config --global user.name "Travis CI"
+  - git tag $KC3_VERSION -a -m "Automated GitHub release for $KC3_VERSION"
+  - git push -q https://dragonjet:$GITHUB_API_KEY@github.com/KC3Kai/KC3Kai --tags
+  - mv build/release.zip build/kc3kai-$KC3_VERSION.zip
+deploy:
+  provider: releases
+  skip_cleanup: true
+  api_key: $GITHUB_API_KEY
+  file:
+    - build/kc3kai-$KC3_VERSION.zip
+  on:
+    tags: false
+    branch: webstore
+    condition: $TRAVIS_PULL_REQUEST == "false"
+
+# BUILD NOTIFICATION FOR GITTER
+notifications:
+  webhooks:
+    urls:
+    - https://webhooks.gitter.im/e/e8964a721dd35fd96e46
+    on_success: change
+    on_failure: change
+    on_start: never

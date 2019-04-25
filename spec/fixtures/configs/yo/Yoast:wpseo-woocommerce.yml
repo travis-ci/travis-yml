@@ -1,0 +1,153 @@
+language: php
+dist: trusty
+sudo: false
+
+branches:
+  only:
+    - master
+    - trunk
+    - /^release\/\d+\.\d+(\.\d+)?(-\S*)?$/
+    - /^feature\/*/
+    - /^hotfix\/\d+\.\d+(\.\d+)?(-\S*)?$/
+    # Also build tags like 1.1.1 or 1.1 for deployment.
+    - /^\d+\.\d+(\.\d+)?(-\S*)?$/
+
+jobs:
+  fast_finish: true
+  include:
+    - php: 7.3
+      env: WP_VERSION=5.0 WP_MULTISITE=1 PHPLINT=1 PHPCS=1 SECURITY=1
+    - php: 5.2
+      # As 'trusty' is not supporting PHP 5.2/5.3 anymore, we need to force using 'precise'.
+      dist: precise
+      env: WP_VERSION=4.8 WP_MULTISITE=1 PHPLINT=1
+    - php: 5.6
+      env: WP_VERSION=5.0
+    - php: 7.0
+      env: WP_VERSION=4.9
+    - php: 5.2
+      # As 'trusty' is not supporting PHP 5.2/5.3 anymore, we need to force using 'precise'.
+      dist: precise
+      env: WP_VERSION=master
+    - php: "7.4snapshot"
+      env: WP_VERSION=master
+    - stage: deploy
+      env: WP_VERSION=4.9
+      if: tag IS present
+      before_install:
+        - openssl aes-256-cbc -K $encrypted_2b922af4d08d_key -iv $encrypted_2b922af4d08d_iv -in ./deploy_keys/wpseo_woo_deploy.enc -out ./deploy_keys/wpseo_woo_deploy -d
+        - chmod 600 ./deploy_keys/wpseo_woo_deploy
+        - eval $(ssh-agent -s)
+        - ssh-add ./deploy_keys/wpseo_woo_deploy
+      before_deploy:
+        - nvm install node
+        - curl -o- -L https://yarnpkg.com/install.sh | bash
+        - export PATH=$HOME/.yarn/bin:$PATH
+        - yarn global add grunt-cli
+        - yarn install
+        - grunt set-version -new-version=$TRAVIS_TAG
+        - grunt update-version
+        - grunt artifact
+
+      # If the commit was tagged, create an artifact and push it to the distribution github
+      deploy:
+        skip_cleanup: true
+        provider: script
+        script: bash scripts/deploy_to_dist.sh $TRAVIS_TAG wpseo-woocommerce
+        on:
+          tags: true
+          repo: $TRAVIS_REPO_SLUG
+          all_branches: true
+  allow_failures:
+    # Allow failures for unstable builds.
+    - php: "7.4snapshot"
+    - env: WP_VERSION=master
+
+cache:
+  directories:
+    - vendor
+    - $HOME/.composer/cache
+
+before_install:
+- phpenv config-rm xdebug.ini || echo 'No xdebug config.'
+- export SECURITYCHECK_DIR=/tmp/security-checker
+
+install:
+- if [[ $TRAVIS_PHP_VERSION == "5.2" ]]; then phpenv local 5.6.13; fi
+- |
+  if [[ "$PHPCS" == "1" ]]; then
+    composer install --no-interaction
+    composer config-yoastcs
+  else
+    composer install --no-dev --no-interaction
+  fi
+- if [[ $TRAVIS_PHP_VERSION == "5.2" ]]; then composer remove --dev yoast/yoastcs dealerdirect/phpcodesniffer-composer-installer; fi
+- if [[ ${TRAVIS_PHP_VERSION:0:1} == "7" ]]; then composer require --dev phpunit/phpunit ^5.7; fi
+- composer dump-autoload
+- phpenv local --unset
+- if [[ "$SECURITY" == "1" ]]; then wget -P $SECURITYCHECK_DIR https://get.sensiolabs.org/security-checker.phar && chmod +x $SECURITYCHECK_DIR/security-checker.phar;fi
+
+before_script:
+- PLUGIN_SLUG=$(basename $(pwd))
+- export WP_DEVELOP_DIR=/tmp/wordpress/
+- export -f travis_fold
+- export -f travis_time_start
+- export -f travis_time_finish
+
+# Clone WordPress
+- git clone --depth=50 --branch="$WP_VERSION" git://develop.git.wordpress.org/ /tmp/wordpress
+
+# Clone WPSEO and its submodule
+- git clone --depth=50 --branch="trunk" https://github.com/Yoast/wordpress-seo.git $WP_DEVELOP_DIR/src/wp-content/plugins/wordpress-seo
+- cd /tmp/wordpress/src/wp-content/plugins/wordpress-seo
+- if [[ $TRAVIS_PHP_VERSION == "5.2" ]]; then phpenv local 5.6.13; fi
+- composer install --no-dev --no-interaction --ignore-platform-reqs
+- phpenv local --unset
+- cd -
+
+# Copy woocommerce seo to the test directory
+- cd ..
+- cp -r "$PLUGIN_SLUG" "/tmp/wordpress/src/wp-content/plugins/$PLUGIN_SLUG"
+- cd /tmp/wordpress/
+- cp wp-tests-config-sample.php wp-tests-config.php
+- sed -i "s/youremptytestdbnamehere/wordpress_tests/" wp-tests-config.php
+- sed -i "s/yourusernamehere/travis/" wp-tests-config.php
+- sed -i "s/yourpasswordhere//" wp-tests-config.php
+- mysql -e "CREATE DATABASE wordpress_tests;" -uroot
+- cd "/tmp/wordpress/src/wp-content/plugins/$PLUGIN_SLUG"
+- phpenv rehash
+
+script:
+# PHP Linting
+- |
+  if [[ "$PHPLINT" == "1" ]]; then
+    travis_fold start "PHP.check" && travis_time_start
+    find -L . -path ./vendor -prune -o -path ./node_modules -prune -o -name '*.php' -print0 | xargs -0 -n 1 -P 4 php -l
+    travis_time_finish && travis_fold end "PHP.check"
+  fi
+# PHP CS
+- |
+  if [[ "$PHPCS" == "1" ]]; then
+    travis_fold start "PHP.code-style" && travis_time_start
+    vendor/bin/phpcs -q
+    travis_time_finish && travis_fold end "PHP.code-style"
+  fi
+# PHP Tests
+- |
+  travis_fold start "PHP.tests" && travis_time_start
+  if [[ ${TRAVIS_PHP_VERSION:0:1} == "5" ]]; then
+    travis_fold start "PHP.tests" && travis_time_start
+    phpunit
+    travis_time_finish && travis_fold end "PHP.tests"
+  fi
+- |
+  if [[ ${TRAVIS_PHP_VERSION:0:1} == "7" ]]; then
+    travis_fold start "PHP.tests" && travis_time_start
+    vendor/bin/phpunit
+    travis_time_finish && travis_fold end "PHP.tests"
+  fi
+  travis_time_finish && travis_fold end "PHP.tests"
+- if [[ $TRAVIS_PHP_VERSION == "7.3" ]]; then composer validate --no-check-all; fi
+
+# Check for known security vulnerabilities in the currently locked-in dependencies.
+- if [[ "$SECURITY" == "1" ]]; then php $SECURITYCHECK_DIR/security-checker.phar -n security:check $(pwd)/composer.lock;fi

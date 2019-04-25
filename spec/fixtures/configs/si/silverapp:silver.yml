@@ -1,0 +1,22 @@
+language: python
+services: redis-server
+
+git:
+  submodules: false
+
+python:
+  - "2.7"
+  - "3.5"
+  - "3.6"
+
+env:
+  - DJANGO_VERSION="<2.0"
+
+cache: pip
+install:
+  - pip install -U -r requirements/test.txt
+  - pip install -U "Django$DJANGO_VERSION"
+
+script:
+  - make lint
+  - make test

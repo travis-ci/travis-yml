@@ -1,0 +1,136 @@
+dist: xenial
+sudo: required
+
+git:
+  depth: 9999999
+
+language: go
+go_import_path: gopkg.in/src-d/hercules.v8
+go:
+  - 1.10.x
+  - 1.11.x
+
+services:
+  - docker
+
+cache:
+  directories:
+    - $HOME/.cache/pip
+    - $HOME/gopath/src
+before_cache:
+  - cd $HOME/gopath
+  - mv $HOME/gopath/src/gopkg.in/src-d/hercules.v8/vendor $HOME/gopath/src/gopkg.in/src-d/.vendor
+  - rm -rf $HOME/gopath/src/gopkg.in/src-d/hercules.v8
+  - mkdir $HOME/gopath/src/gopkg.in/src-d/hercules.v8
+  - mv $HOME/gopath/src/gopkg.in/src-d/.vendor $HOME/gopath/src/gopkg.in/src-d/hercules.v8/vendor
+
+matrix:
+  fast_finish: true
+  allow_failures:
+    - go: tip
+
+stages:
+  - test
+  - name: deploy
+    # require any tag name to deploy
+    if: tag =~ .*
+
+env:
+  - PROTOC_VERSION=3.6.0 TENSORFLOW_VERSION=1.11.0
+
+before_install:
+  - wget -O protoc.zip https://github.com/google/protobuf/releases/download/v$PROTOC_VERSION/protoc-$PROTOC_VERSION-linux-x86_64.zip
+  - unzip -d ~/.local protoc.zip && rm protoc.zip
+  - go get -v golang.org/x/lint/golint
+  - go get -v github.com/golang/dep/cmd/dep
+  - (wget -O - https://bootstrap.pypa.io/get-pip.py || wget -O - https://raw.githubusercontent.com/pypa/get-pip/master/get-pip.py) | python3 - --user pip==18.1
+  - export PATH=~/usr/bin:$GOPATH/bin:$PATH
+  - make --version
+  - pip3 --version
+  - pip3 install --user cython
+  - pip3 install --user --no-build-isolation -r requirements.txt tensorflow flake8
+  - docker run -d --privileged -p 9432:9432 --name bblfshd bblfsh/bblfshd
+  - docker exec -it bblfshd bblfshctl driver install python bblfsh/python-driver:latest
+  - docker exec -it bblfshd bblfshctl driver install go bblfsh/go-driver:latest
+  - docker exec -it bblfshd bblfshctl driver install java bblfsh/java-driver:latest
+  - curl -L "https://storage.googleapis.com/tensorflow/libtensorflow/libtensorflow-cpu-$(go env GOOS)-x86_64-$TENSORFLOW_VERSION.tar.gz" | sudo tar -C /usr/local -xz
+  - sudo ldconfig
+install:
+  - git clean -xfd
+  - make TAGS=tensorflow
+script:
+  - set -e
+  - if [ $TRAVIS_GO_VERSION == "1.11.x" ]; then test -z "$(gofmt -s -l . | grep -v vendor/)"; fi
+  - go vet -tags tensorflow ./...
+  - golint -set_exit_status $(go list ./... | grep -v /vendor/)
+  - flake8
+  - go test -coverpkg=all -v -coverprofile=coverage.txt -covermode=count gopkg.in/src-d/hercules.v8/... && sed -i '/cmd\/hercules\|core.go/d' coverage.txt
+  - $GOPATH/bin/hercules version
+  - $GOPATH/bin/hercules --burndown --couples --devs --quiet --pb https://github.com/src-d/hercules > 1.pb
+  - cp 1.pb 2.pb
+  - $GOPATH/bin/hercules combine 1.pb 2.pb > 12.pb
+  - ($GOPATH/bin/hercules generate-plugin -n MyPlug -o myplug && cd myplug && make)
+  - (cd contrib/_plugin_example && make)
+  - $GOPATH/bin/hercules --burndown --burndown-files --burndown-people --couples --devs --quiet https://github.com/src-d/hercules | python3 labours.py -m all -o out --backend Agg --disable-projector
+  - $GOPATH/bin/hercules --burndown --burndown-files --burndown-people --couples --devs --quiet --pb https://github.com/src-d/hercules | python3 labours.py -f pb -m all -o out --backend Agg --disable-projector
+  - # $GOPATH/bin/hercules --sentiment --quiet --languages Python https://github.com/src-d/hercules > /dev/null
+  - set +e
+  - if [ $TRAVIS_GO_VERSION == "1.11.x" ]; then bash <(curl -s https://codecov.io/bash); fi
+
+jobs:
+  include:
+    - stage: test
+      addons: false
+      language: generic
+      env: DOCKER_BUILD=1
+      before_install: skip
+      install: skip
+      script: docker build -t srcd/hercules .
+    - stage: deploy
+      os: osx
+      osx_image: xcode9.3
+      go: 1.11.x
+      go_import_path: gopkg.in/src-d/hercules.v8
+      before_install:
+        - wget -O protoc.zip https://github.com/google/protobuf/releases/download/v$PROTOC_VERSION/protoc-$PROTOC_VERSION-osx-x86_64.zip
+        - unzip -d ~/.local protoc.zip && rm protoc.zip
+        - go get -v github.com/golang/dep/cmd/dep
+        - export PATH=$GOPATH/bin:$PATH
+      after_success:
+        - gzip -S .darwin_amd64.gz $GOPATH/bin/hercules
+      script: skip
+      install:
+        - make
+      deploy:
+        provider: releases
+        api_key:
+          secure: $GITHUB_TOKEN
+        file: "$GOPATH/bin/hercules.darwin_amd64.gz"
+        skip_cleanup: true
+        on:
+          tags: true
+    - stage: deploy
+      os: linux
+      go: 1.11.x
+      go_import_path: gopkg.in/src-d/hercules.v8
+      before_install:
+        - wget -O protoc.zip https://github.com/google/protobuf/releases/download/v$PROTOC_VERSION/protoc-$PROTOC_VERSION-linux-x86_64.zip
+        - unzip -d ~/.local protoc.zip && rm protoc.zip
+        - go get -v github.com/golang/dep/cmd/dep
+        - export PATH=$GOPATH/bin:$PATH
+      script: skip
+      install:
+        - make
+      after_success:
+        - gzip -S .linux_amd64.gz $GOPATH/bin/hercules
+      deploy:
+        provider: releases
+        api_key:
+          secure: $GITHUB_TOKEN
+        file: "$GOPATH/bin/hercules.linux_amd64.gz"
+        skip_cleanup: true
+        on:
+          tags: true
+
+notifications:
+  email: false

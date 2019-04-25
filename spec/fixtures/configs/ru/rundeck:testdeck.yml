@@ -1,0 +1,26 @@
+language: java
+jdk:
+  - oraclejdk8
+services:
+  - docker
+addons:
+  chrome: stable
+env:
+  PROJECT: testdeck
+before_install:
+  - sudo echo "deb https://dl.bintray.com/rundeck/rundeck-deb /" | sudo tee -a /etc/apt/sources.list.d/rundeck.list
+  - curl "https://bintray.com/user/downloadSubjectPublicKey?username=bintray" > /tmp/bintray.gpg.key
+  - sudo apt-key add - < /tmp/bintray.gpg.key
+  - sudo apt-get -y install apt-transport-https
+  - sudo apt-get -y update
+  - sudo apt-get -y install rundeck-cli
+  - nvm install 8
+install:
+  - npm install
+  - npm install -g typescript ts-node
+
+script:
+  # - ./node_modules/.bin/tslint --project .
+  # - ts-node src/main.ts -r jest
+  # - ts-node src/main.ts -r bitscript
+  - printenv

@@ -1,0 +1,62 @@
+language: elixir
+cache:
+  directories:
+    - deps
+    - _build
+services:
+  - docker
+  - postgresql
+elixir:
+  - 1.8.1
+otp_release:
+  - 21.2.5
+addons:
+  postgresql: "9.6"
+  apt:
+    packages:
+      - docker-ce
+notifications:
+  slack:
+    rooms:
+      - secure: "bt5f6r5kl4XmmIeRN2JwB2N17QWz1Uj+KAOfW3UT7+r4+U7ggWFix+HuuZNJBjVzsvvHrPn/4L7uCLOSuSrBqt2mhPxJ3QGO/xVVCLI2luUawPFlm2AVRfRVvCUb9nx+YWpMSDAR1Qkzjl20mx3BxHeW54fnDw13lCV4EAzvsYVkA94HU6bDk9BWXolVrUggx26OdQ6TdzE3Y5ce841//q1VuzaFmlf9K9FWKFf7OlWPuToWNZj5PfiWNLiwMOYnTrt0shpNMT8HkdPKDHLFS1h8RHuimoOb3CLGyBWehgEK6tlAP7O9RZ5ECeezHbmsIAeZgZVQqhU/t2mSzGS9rRidl2hTeVcXW6EzLWZqi0VhUljjq2CFe3ZmWH3/Ql65hmvpJxPlsz3VhcELV6JGZGe9vpuqmK8KZWVqwj5H1MOwO6Kr29vnli6KwXGcDUGAvbMyWrjySWpmWs7AYrjCG7v5PVfy7vYPneLjuP/tgIivgsZFXRwANaozjVo03Dp17Yz/UpZ6DymwYtn7ZpjfHqLAFxw2ZN3azQXCD6N9jvehjIOInY+V+gYEqoI/M8H1qCu+Bd+nfSqR7doX7Pt+fQf/+gFy3dBWQTAOu4GwEkZEBlEhXAmLiWK5r2G5rxtm2XCgs3W/RnE4vYyCW8XHDPfKebtS92+pLrWahsBxhv4="
+    on_success: always
+env:
+  global:
+    - MIX_ENV=test
+    - DOCKER_NAMESPACE=edenlabllc
+    - POSTGRES_VERSION=9.6
+    # Docker and GitHub credentials
+    - secure: "F8a3M90470KBwgq8Q3A7dAKeDui42z/lsiaPB9cnFspB1Uwp6NHRCUGjd2jgfGsIOtlA4kvlIvc2WE5aO3z1+djLdWhLUtU2WqgY/9Eo2zWd7qTTS+sibp9HDuhR5OjkNKkZWE1fmhEW9EDUz8Iw27pF82ZyuJf9SCqmvHfKLpgHu03Yoi+jISTLUEJ7NQiIc+pyO0VAsGRXQfSLrTwsNGZxjtmvlQqM1Z1eyhZvF7mSPTME9n28qLwEtpPTGABO714DwSiphBJxno3KFroVzjf36xHAF5y9zq0Rqtp156XaGVF/++9thgHEWnsmbulptKf0ZWhxbNYm9GiT6HLwZbXDAuGhNypxcIpqTxMrDnNL8dgl/W3f3zExPy4kDqJoShDE6NJV4CRDRRyljGWA89J3dDhBVODqgC/1SDVBCdthwcjIy7u6T9/otiGbBtD5RdAfVlm0iR4qMTYrHOJFsxhtAn5cfKmsRbsgNjiOyBVokB5z38qLtdJZkwhaqNdja4HGDONrJvJ03NLLVMSfWbCUopnV7v8RQ/h/UkM56XQL4CbTdpATRZf5oDZvgxz307+RYESRngMskaTMl7w9kBOQKTJa7qiXdD9WsgJnPF0zM7ANSlK6JhZeY0785o0IFYTYY9dd0T/fB9j5g1j2YC3bdrh5owVUw1uoMQuogFI="
+    - secure: "GYerLjERdMwmKNYa2HVRUs5690dbfaCekLfLJHn+AsqFdFAZ7NLEi+Y2f3Vl+IT1ukS8Gp5GWWsmqCQ0YBQAgEp0+lbZuWMDJ6zJ7NZosYgxVf348+DWFjuZ6MaDZOOSDxzM3TQCcBty4jgYlElmRXZD6A7geytiPcg3nmPQ67+ng6oEvAbm5aFyIZM9XTl+N1CO0kKRvgUa9iFyW6TNzU+CLYclPEDW+iBBwrjtugDAiGRySCOdISI410hgOoO2t2e/QNP0r0PciSM1E8txiKPEhCp/a9pj/ZsoeaQUd7rVBW0bU8vRb4FuGmA14cE2dUo9Y23OoEB9gTIVuLFIA9la12HigCQBZTXC0ChZkHcy5wo+e/5psBY8se+P29l8WSFIpNBjlfDeM72zkvzyzk6pu/3wD0vtJx7sVJvSUFfeLTIFvOjBpvjy5Pamf4Q/NUGxOe3w9F/2ed2A3onMn3nkkpA27PepYs3frQImt8Nf7lqHYeySaQLbqXnEWttIJW8tb945wHqBPYcg5FfXWyCwb34b4N7nh8PswdW8KvZ7+KIJZ+WjT/89zJS1nWnqTW+WpsqycgJWGIV0qLnrj/sm8Fg0ncgmak3WIrObr949Nna8CR5vdsCQI727quh7yVc5wfqFwHjfi6zl7FuM4ea4UzfOen0I7UHkSk+81x0="
+branches:
+  # Releases are generated automatically, stop infinite build loop
+  except:
+    - /[0-9]*\.[0-9]*\.[0-9]*/
+before_install:
+  - sudo apt-get install jq
+  - curl -s https://raw.githubusercontent.com/edenlabllc/ci-utils/umbrella_v2/init-db.sh -o init-db.sh; sudo sh ./init-db.sh
+jobs:
+  include:
+    - stage: "test and build"
+      name: "test"
+      # run tests
+      script: (curl -s https://raw.githubusercontent.com/edenlabllc/ci-utils/umbrella_v2/tests.sh -o tests.sh; bash ./tests.sh) || travis_terminate 1
+      # Build Docker container
+    - stage: "test and build"
+      name: "mithril_api"
+      env:
+        - DB_MIGRATE=true
+        - APPS='[{"app":"mithril_api","label":"api","namespace":"mithril","chart":"mithril", "deployment":"api"}]'
+      # "Decrypting deploy key..."
+      script:
+      - openssl aes-256-cbc -K $encrypted_792e32fefb8e_key -iv $encrypted_792e32fefb8e_iv -in eHealth-8110bd102a69.json.enc -out eHealth-8110bd102a69.json -d
+      - (curl -s https://raw.githubusercontent.com/edenlabllc/ci-utils/umbrella_v2/docker.sh -o docker.sh; bash ./docker.sh) || travis_terminate 1
+    - stage: "test and build"
+      name: "mithril_scheduler"
+      env:
+        - DB_MIGRATE=false
+        - APPS='[{"app":"mithril_scheduler","label":"mithril-scheduler","namespace":"mithril","chart":"mithril", "deployment":"mithril-scheduler"}]'
+      # "Decrypting deploy key..."
+      script:
+      - openssl aes-256-cbc -K $encrypted_792e32fefb8e_key -iv $encrypted_792e32fefb8e_iv -in eHealth-8110bd102a69.json.enc -out eHealth-8110bd102a69.json -d
+      - (curl -s https://raw.githubusercontent.com/edenlabllc/ci-utils/umbrella_v2/docker.sh -o docker.sh; bash ./docker.sh) || travis_terminate 1

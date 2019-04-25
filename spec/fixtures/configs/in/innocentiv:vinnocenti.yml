@@ -1,0 +1,22 @@
+language: node_js
+node_js:
+- '8'
+- '10'
+script:
+- npm run clean
+- npm run build
+cache: yarn
+deploy:
+  provider: s3
+  access_key_id: AKIAJ5BYJ5CWNUW2ZM2A
+  secret_access_key:
+    secure: W/UBzQknVsWrzTNYpvTBGIV+YBItuy45bsi2mMKZWgSPJEvj0mIQl91bNMT4oImEMP8/0pCP0JIEG1CrpmGHumyx1ybyQZgJYUwXep5ADLRHlWORyY02VlzkGm4CFF/GgL/0RRuX9uJnkIeXZy89EcShQcbgOYFzc1+5GdFwEro75LLHZi9wOGKSjgD0cdFIhatBRi2XA+KRvoOTUobTQNasHJQLB8cr2jB7toWYU+MRDJlEFj8frtFNLWg0HwTHJEc3kIYq/Wjv7jUCSZWmDqhpaEqUFXrmCM9Dr46r0ewLiMeRvLvAbL+BKmU8TWyUmIxiF/ua/MX6y2KLPAxnnjkdtYZWezj1cu2vg/zh/muXuxwwNbtQeCVylCHDN7NOVgnhg6NYSyU3d3/dx64nirPvheEc5eSpp+pt/HWdhVLeUXeD76bJFDGvPzHMuIHML8f9OIx0L3dPWWzG8IwiJVcRrQWHnNE3y4g80KbtLDzKrz4Qu8oqs+30V7i7QRgrlDk9ewTc1+j1PexqM9PuPhFAbjUjkel0uZ8F7KZsKjQrk/oa74SvsEXfkrvi3NnPEPjnLVBHFbsugl3+J8w5V5Hs7pyr/fHEgv3mbMKfpeBStPfcHbPKEvFUJOH9EgZDKMfMZkYkcRH6xlYaxTJdXTtt+rLfx8UPjTu5jAxGzp4=
+  bucket: vinnocenti.com
+  local-dir: public
+  skip_cleanup: true
+  acl: public_read
+  region: eu-central-1
+  default_text_charset: utf-8
+  on:
+    repo: innocentiv/vinnocenti
+    branch: master

@@ -1,0 +1,40 @@
+language: python
+python: '3.6'
+
+dist: trusty
+sudo: false
+
+addons:
+  postgresql: '9.6'
+
+  apt:
+    packages:
+    - postgresql-9.6-postgis-2.3
+
+install:
+- pip install -r requirements.txt
+
+script:
+- pytest tests
+
+deploy:
+  - provider: codedeploy
+    access_key_id: AKIAI6FQEBXYL562GLLA
+    secret_access_key:
+      secure: lzkkBz2rEAO5Ya1d1PTl3UANQyu7oqWMBqeehaoH+50DyHVPjCwNb+osJTxbQBdiqdos8GMAR5VRziUCaNO9UZMFLHbRuJAmqwj5+DyMemhUpqkMJLwGP4apwEDdf7F3EJzt0z12Ej7y2UpZrr2y3LReX9y3NPkYFdGm2HelHszrd9+ruSSRw7TAWXJJqn/O0G0joPXaPGyW90T3PPp96nqw88ritQ0VjKj3bcoELf8qPqA0eROhVZ4Cqo8JRPj4oyGW35jKTbiv8TONRxH0hsxg0TLu/bSJy5jj6mB9Rcrz6zR4NDm4CBb4d0PmOf1Eq22j4XQK8k/q3J+GBQLMmd0zKMOpPa0cL+JFGK4fkb7pb3Q6SDAw/6y2/U0/HoLSndHJiBn6oJFX0EOF9EfFUNxxUa33OaB/4/XMo8sKypQSw6wyfQzrXP0lrQy3XotAh48T/crNuRY8qZJnP8lbw28XLE/giJGWnpOfhHHEoIAqyyvnoS7cTY+gW+uvVW7DODWIg2uT12wbNrYVJOqIIs4Pw7BbxXUlbkNyLNQs0cS46SZ10oFNrECaRm7U+oIz0FCNqASex0MrZ5QJDkt665dBxv2CcvAnmu2PQtleWvka2Sa3tDfkvXOLV0EF9vCiVMBIRjzGuwThJFi9pAFS8DLU5jmSpI/1YRT/4cDnHi4=
+    revision_type: github
+    application: whowasincommand
+    deployment_group: staging
+    on:
+      branch:
+        - master
+
+  - provider: codedeploy
+    access_key_id: AKIAI6FQEBXYL562GLLA
+    secret_access_key:
+      secure: lzkkBz2rEAO5Ya1d1PTl3UANQyu7oqWMBqeehaoH+50DyHVPjCwNb+osJTxbQBdiqdos8GMAR5VRziUCaNO9UZMFLHbRuJAmqwj5+DyMemhUpqkMJLwGP4apwEDdf7F3EJzt0z12Ej7y2UpZrr2y3LReX9y3NPkYFdGm2HelHszrd9+ruSSRw7TAWXJJqn/O0G0joPXaPGyW90T3PPp96nqw88ritQ0VjKj3bcoELf8qPqA0eROhVZ4Cqo8JRPj4oyGW35jKTbiv8TONRxH0hsxg0TLu/bSJy5jj6mB9Rcrz6zR4NDm4CBb4d0PmOf1Eq22j4XQK8k/q3J+GBQLMmd0zKMOpPa0cL+JFGK4fkb7pb3Q6SDAw/6y2/U0/HoLSndHJiBn6oJFX0EOF9EfFUNxxUa33OaB/4/XMo8sKypQSw6wyfQzrXP0lrQy3XotAh48T/crNuRY8qZJnP8lbw28XLE/giJGWnpOfhHHEoIAqyyvnoS7cTY+gW+uvVW7DODWIg2uT12wbNrYVJOqIIs4Pw7BbxXUlbkNyLNQs0cS46SZ10oFNrECaRm7U+oIz0FCNqASex0MrZ5QJDkt665dBxv2CcvAnmu2PQtleWvka2Sa3tDfkvXOLV0EF9vCiVMBIRjzGuwThJFi9pAFS8DLU5jmSpI/1YRT/4cDnHi4=
+    revision_type: github
+    application: whowasincommand
+    deployment_group: production
+    on:
+      tags: true

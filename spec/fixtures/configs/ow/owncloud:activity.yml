@@ -1,0 +1,105 @@
+dist: trusty
+sudo: required
+language: php
+php:
+  - 5.6
+  - 7.0
+  - 7.1
+  - 7.2
+
+services:
+  - docker
+
+addons:
+  apt:
+    packages:
+      - mysql-server-5.6
+      - mysql-client-core-5.6
+      - mysql-client-5.6
+      - alien
+      - libaio1
+
+cache:
+  directories:
+    - $HOME/.cache/bower
+    - $HOME/.composer/cache
+    - $HOME/.npm
+    - docker
+    - /tmp/phantomjs
+  apt: true
+
+env:
+  global:
+    - CORE_BRANCH=stable10
+    - APP_NAME=activity
+  matrix:
+    - DB=sqlite
+
+branches:
+  only:
+    - master
+    - /^stable\d+(\.\d+)?$/
+
+before_install:
+  - which php
+  - more `which pecl`
+  - which phpize
+  - bash tests/.travis/before_install.sh $APP_NAME $CORE_BRANCH $DB
+
+  # Add some output debugging information
+  - cd ../core
+  - ./occ check
+  - ./occ status
+  - ./occ app:list
+
+script:
+  - cd apps/$APP_NAME/
+
+  # Test the app
+  - sh -c "if [ '$JSTESTS' != '1' -a '$CODECHECK' = '1' ]; then find . -name \*.php -exec php -l \"{}\" \;; fi"
+  - sh -c "if [ '$JSTESTS' != '1' -a '$CODECHECK' = '1' ]; then make test-php-style; fi"
+  - cd ../../
+  - sh -c "if [ '$JSTESTS' != '1' -a '$CODECHECK' = '1' ]; then ./occ app:check-code $APP_NAME -c private -c strong-comparison; fi"
+  - sh -c "if [ '$JSTESTS' != '1' -a '$CODECHECK' = '2' ]; then ./occ app:check-code $APP_NAME -c deprecation; fi"
+  - cd apps/$APP_NAME/
+
+  # Run phpunit tests
+  - cd tests/
+  - sh -c "if [ '$JSTESTS' != '1' -a '$CODECHECK' != '1' -a '$CODECHECK' != '2' ]; then ../../../lib/composer/bin/phpunit --configuration phpunit.xml; fi"
+
+  # Create coverage report
+  - sh -c "if [ '$JSTESTS' != '1' -a '$CODECHECK' != '1' -a '$CODECHECK' != '2' ]; then wget https://scrutinizer-ci.com/ocular.phar; fi"
+  - sh -c "if [ '$JSTESTS' != '1' -a '$CODECHECK' != '1' -a '$CODECHECK' != '2' ]; then php ocular.phar code-coverage:upload --format=php-clover clover.xml; fi"
+  - cd ../
+
+  # Run Javascript unit tests
+  - cd tests/js
+  - sh -c "if [ '$JSTESTS' = '1' ]; then npm install --deps; node_modules/karma/bin/karma start karma.config.js --single-run; fi"
+  - cd ../
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
+  
+matrix:
+  include:
+    - php: 5.6
+      env: DB=oracle
+    - php: 5.6
+      env: DB=mysql
+    - php: 5.6
+      env: DB=mysqlmb4
+    - php: 5.6
+      env: DB=pgsql
+    - php: 7.1
+      env: DB=pgsql CORE_BRANCH=master
+    - php: 7.2
+      env: DB=pgsql CORE_BRANCH=master
+    - php: 5.6
+      env: DB=mysql;CODECHECK=1
+    - php: 5.6
+      env: DB=mysql;CODECHECK=2
+    - php: 5.6
+      env: DB=mysql;JSTESTS=1
+  allow_failures:
+    - env: DB=mysql;CODECHECK=2
+  fast_finish: true

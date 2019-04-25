@@ -1,0 +1,33 @@
+language: node_js
+cache:
+  directories:
+    - node_modules
+node_js:
+  - "10"
+  - "8"
+  - "6"
+sudo: required
+services:
+  - docker
+env:
+  matrix:
+    - KAFKA_VERSION=0.9
+    - KAFKA_VERSION=0.10
+    - KAFKA_VERSION=0.11
+    - KAFKA_VERSION=1.0
+    - KAFKA_VERSION=1.1
+    - KAFKA_VERSION=2.0
+  global:
+    # - DEBUG=kafka-node:*
+    - KAFKA_ADVERTISED_HOST_NAME=127.0.0.1
+before_install:
+  - sudo apt-get update
+  - sudo apt-get -y -o Dpkg::Options::="--force-confnew" install docker-ce
+  - docker-compose -f docker-compose.yml -f docker/docker-compose.${KAFKA_VERSION}.yml up -d
+before_script:
+  - npm prune
+after_failure:
+  - docker ps
+  - docker-compose logs
+after_success:
+  - cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js

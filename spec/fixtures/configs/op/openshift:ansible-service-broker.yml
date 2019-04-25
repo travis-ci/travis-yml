@@ -1,0 +1,71 @@
+language: go
+go:
+  - "1.9.x"
+dist: trusty
+sudo: required
+group: edge
+branches:
+  only:
+  - master
+  - /^release-.*$/
+  - /^ansible-service-broker-([0-9.-]+)$/
+
+env:
+  - OPENSHIFT_VERSION=v3.9.0
+  - KUBERNETES_VERSION=v1.9.0
+
+matrix:
+  # TODO: re-enable latest when it isn't busted
+  allow_failures:
+    - env: OPENSHIFT_VERSION=v3.10.0
+    - env: KUBERNETES_VERSION=v1.10.0
+
+before_install:
+  - | # Copied from https://github.com/facebook/react/pull/2000
+      git diff --name-only HEAD^ | grep -qvE '(\.md$)|(^(docs|examples))/' || {
+          echo "Only docs were updated, stopping build process."
+          exit 0
+      }
+
+stages:
+  - build
+  - deploy
+
+jobs:
+  include:
+    - stage: build
+      script:
+        - go get -u github.com/golang/dep/cmd/dep
+        - go get github.com/mattn/goveralls
+        - make ci-test-coverage
+    - stage: deploy
+      if: (type = push) AND (repo = openshift/ansible-service-broker) AND ( tag =~ ^ansible-service-broker-[0-9.-]+$ )
+      script:
+        - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+        - export TAG=$TRAVIS_TAG
+        - PUBLISH=1 make publish
+    - stage: deploy
+      if: (type = push) AND (repo = openshift/ansible-service-broker) AND ( branch =~ ^master$|^release-[0-9.]+$ )
+      script:
+        - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+        - if [ $TRAVIS_BRANCH == "master" ]; then export TAG="canary"; else TAG=$TRAVIS_BRANCH; fi
+        - PUBLISH=1 make publish
+
+script:
+  - export BROKER_IMAGE="ansible-service-broker:${TRAVIS_BUILD_ID}"
+  - export APB_IMAGE="automation-broker-apb:${TRAVIS_BUILD_ID}"
+
+  # Download test shim.
+  - wget -O ${PWD}/apb-test.sh https://raw.githubusercontent.com/ansibleplaybookbundle/apb-test-shim/master/apb-test.sh
+  - SOURCE_ONLY=1 source ${PWD}/apb-test.sh
+  - requirements
+
+  # Setup cluster
+  - setup_cluster
+
+  # Build the broker + broker-apb
+  - make build-image
+  - make build-apb
+
+  # Run CI
+  - make ci

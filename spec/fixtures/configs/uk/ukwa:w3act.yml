@@ -1,0 +1,35 @@
+dist: trusty
+sudo: false
+
+services:
+  - docker
+
+before_install:
+- docker pull nginx
+- docker run -d -p 8080:80 nginx
+
+language: scala
+
+scala:
+  - 2.11.7
+
+jdk:
+  - oraclejdk8
+  - openjdk8
+
+# Allow OpenJDK8 to fail for now, as I hit problems with wsimport bindings.
+matrix:
+  allow_failures:
+  - jdk: openjdk8
+
+sbt_args: -XX:+CMSClassUnloadingEnabled
+
+before_script:
+  - mkdir -p $HOME/.sbt/launchers/0.13.8/
+  - curl -L -o $HOME/.sbt/launchers/0.13.8/sbt-launch.jar http://dl.bintray.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/0.13.8/sbt-launch.jar
+
+script:
+- sbt -Dconfig.file=conf/travis.conf test
+
+notifications:
+  slack: ukwebarchive:oqbYOo0bd09bnSXn4hGR1aUk

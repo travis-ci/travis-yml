@@ -1,0 +1,20 @@
+language: python
+python:
+- '2.7'
+before_install:
+- sudo apt-get update -qq
+- sudo apt-get install gcc libffi-dev libsasl2-dev libssl-dev python-dev
+install:
+- pip install --upgrade -e .
+- python setup.py install
+script:
+- python setup.py test
+deploy:
+  provider: pypi
+  user: opennode
+  password:
+    secure: q7ACIxgHCX65u7Ny+mZ/5vDeMK8BeJ8ZRx9+xIc8UPYCsDpDx4XINN+VnIbl7HzZxAQdaOYAaXWXOout7ZBLu/UyCad9yt957pOFo25Udjpm2DWe029Ilc6LGXh7LPH4CTqjY4EWy4NhVLFj0l5W1CM4bDFJkgDbb4rpTH5iRsI=
+  on:
+    tags: true
+    repo: opennode/waldur-core
+  distributions: "sdist bdist_wheel"

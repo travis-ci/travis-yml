@@ -1,0 +1,59 @@
+language: perl
+
+os:
+ - linux
+
+perl:
+ - "5.10"
+ - "5.12"
+ - "5.14"
+ - "5.16"
+ - "5.18"
+ - "5.20"
+ - "5.22"
+ - "5.24"
+ - "5.18-shrplib"
+ - "5.20-shrplib"
+ - "5.22-shrplib"
+ - "5.24-shrplib"
+
+env:
+ - RELEASE_TESTING=1 NETWORK_TESTING=1 AUTOMATED_TESTING=1
+
+cache:
+ - apt
+ - ccache
+
+before_install:
+ - git clone git://github.com/travis-perl/helpers ~/travis-perl-helpers
+ - source ~/travis-perl-helpers/init
+ - build-perl
+ - perl -V
+
+install:
+ - sudo apt-get -qq update
+ - sudo apt-get -qq install libssl-dev libssh2-1-dev openssh-client openssh-server
+ - git config --global user.name "p5-Git-Raw"
+ - git config --global user.email "jacquesg@cpan.org"
+ - cpanm --quiet --notest Dist::Zilla~">= 5.0000, < 6.0000"
+ - cpanm --quiet --notest Dist::Zilla::PluginBundle::Author::ALEXBIO
+ - cpanm --quiet --notest Pod::Coverage::TrustPod
+ - cpanm --quiet --notest Devel::Cover::Report::Coveralls
+ - cpanm --quiet --notest Devel::Cover::Report::Codecov
+ - cpanm --quiet --notest Dist::Zilla::App::Command::cover
+ - dzil authordeps --missing | cpanm --quiet --notest
+ - dzil listdeps --missing | cpanm --quiet --notest
+
+script:
+ - ssh-keygen -t rsa -f ~/.ssh/id_rsa -N "" -q
+ - cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
+ - ssh-keyscan -t rsa localhost >> ~/.ssh/known_hosts
+ - sudo sed -i 's,ChallengeResponseAuthentication no,ChallengeResponseAuthentication yes,g' /etc/ssh/sshd_config
+ - sudo restart ssh
+ - if [[ ! $TRAVIS_PERL_VERSION =~ "shrplib" ]]; then dzil cover -ignore_re ^deps -ignore_re CORE -ignore_re ^const -ignore_re curl -test -report coveralls -report codecov; fi
+ - if [[ $TRAVIS_PERL_VERSION =~ "shrplib" ]]; then dzil test; fi
+
+notifications:
+  email:
+    recipients:
+     - jacquesg@cpan.org

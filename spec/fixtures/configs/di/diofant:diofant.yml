@@ -1,0 +1,124 @@
+language: python
+dist: xenial
+cache: pip
+python:
+  - 3.7
+env:
+  global:
+    - PYTEST_ADDOPTS="-n auto --cov-config setup.cfg --cov-append --cov-report="
+    - COVOPTS="--cov diofant -m \"not slow and not xfail\""
+    - PYTHONHASHSEED=0
+    - secure: "VNgpd/TFAkLGjWZzRBWxujDHktdvp2Fg9D8PbGmr/pbmLcJS3a5pf6po1T/\
+               GJgioh8SI1TgPURjku5t48VHN18HoMBzABBSZ4C7cUjpNQlJMPKhWCZKmIJ\
+               alcS7yEFlTk8QqEBNh1twUFxHLxW/B9j4N5wHjOileocoo4EvhYUA="
+  matrix:
+    - SPLIT=1/3
+    - SPLIT=2/3
+    - SPLIT=3/3
+    - SPLIT=1/3 COVERAGE=on
+    - SPLIT=2/3 COVERAGE=on
+    - SPLIT=3/3 COVERAGE=on
+addons:
+  apt:
+    packages:
+      - libmpc-dev
+      - libmpfr-dev
+      - libgmp-dev
+      - libatlas-dev
+      - libatlas-base-dev
+      - liblapack-dev
+      - gfortran
+      - graphviz
+      - texlive-xetex
+      - texlive-fonts-recommended
+      - fonts-freefont-otf
+      - latexmk
+      - lmodern
+stages:
+  - quality
+  - test
+  - deploy
+matrix:
+  include:
+    - stage: quality
+      python: 3.7
+      env: COVERAGE='on'
+      script:
+        - python -We:invalid -m compileall -f diofant -q
+        - travis_wait python setup.py flake8
+        - travis_wait 30 pylint -j1 diofant
+        - |
+          if [ "${TRAVIS_EVENT_TYPE}" = "cron" ]; then
+            python setup.py build_sphinx -W -b linkcheck
+          fi
+        - pip uninstall -y gmpy2
+        - PYTEST_ADDOPTS="${PYTEST_ADDOPTS} ${COVOPTS}"
+        - DIOFANT_GROUND_TYPES='gmpy' py.test diofant/tests/domains
+        - travis_wait py.test diofant/tests/polys
+    - stage: deploy
+      env:
+        -
+      script:
+        - python setup.py build_sphinx -W -b html,latex
+        - make -C build/sphinx/latex all-pdf
+        - git clone https://github.com/diofant/diofant.github.io.git sphinx_docs
+        - rm -rf sphinx_docs/.git
+        - rsync -a --delete build/sphinx/html/ sphinx_docs/en/latest/
+        - python setup.py sdist bdist_wheel
+        - VERSION=$(python -c 'import diofant;print(diofant.__version__)')
+        - cp -a dist gdist
+        - cp -a build/sphinx/html diofant-docs-html-${VERSION}
+        - zip -r gdist/diofant-docs-html-${VERSION}.zip diofant-docs-html-${VERSION}
+        - cp -a build/sphinx/latex/diofant.pdf gdist/diofant-docs-${VERSION}.pdf
+        - SHORT_VERSION=$(echo ${VERSION}|sed 's/\([0-9]\+\.[0-9]\+\).*$/\1/')
+      deploy:
+        - provider: pypi
+          user: skirpichev
+          password:
+            secure: "OCi5YeQKvjr62Yzg1Bq9/xzIVDJSlr3q3YICp/gfnoPxTmiOiOug/Q\
+                     SM0rxl929Rb9hvf/QuNI6bpkPs0lz2roXa0PdJ2pdoNOm5Md2e43ht\
+                     bMRfH54YS98QDxL+gwasr327iGLi++avxF3N+vSyWboJLkSydDDlVh\
+                     B7k/t57Ig="
+          skip_cleanup: true
+          distributions: "sdist bdist_wheel"
+          on:
+            tags: true
+        - provider: pages
+          repo: diofant/diofant.github.io
+          local-dir: sphinx_docs
+          target-branch: master
+          github-token: $GITHUB_TOKEN
+          skip-cleanup: true
+          keep-history: true
+          on:
+            branch: master
+        - provider: releases
+          api_key: $GITHUB_TOKEN
+          skip_cleanup: true
+          draft: true
+          file_glob: true
+          file: gdist/*
+          name: "Diofant ${VERSION}"
+          body: "See [release notes](https://diofant.readthedocs.io/\
+                 en/latest/release/notes-${SHORT_VERSION}.html)."
+          prerelease: true
+          on:
+            tags: true
+            condition: "$TRAVIS_TAG =~ ^v[0-9]+\\.[0-9]+\\.[0-9]+.*$"
+before_install:
+  - pip uninstall -y pytest
+  - pip install --pre -U gmpy2
+install:
+  - travis_wait pip install .[exports,plot,interactive,develop,gmpy,docs]
+script:
+  - |
+    PYTEST_ADDOPTS="${PYTEST_ADDOPTS} --split=${SPLIT}"
+    if [ -n "${COVERAGE}" ]; then
+      PYTEST_ADDOPTS="${PYTEST_ADDOPTS} ${COVOPTS}"
+    else
+      PYTEST_ADDOPTS="${PYTEST_ADDOPTS} --doctest-modules"
+    fi
+    python setup.py test
+after_success: test -n "${COVERAGE}" && codecov
+notifications:
+  email: false

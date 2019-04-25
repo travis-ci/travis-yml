@@ -1,0 +1,51 @@
+addons:
+  apt:
+    packages:
+    - build-essential
+    - automake
+    - gcc-7
+    - g++-7
+    sources:
+    - ubuntu-toolchain-r-test
+compiler: gcc
+dist: trusty
+install:
+- sudo ln -s /usr/bin/gcc-6 /usr/local/bin/gcc
+- sudo ln -s /usr/bin/g++-6 /usr/local/bin/g++
+- export CC=gcc-7
+- export CXX=g++-7
+- export DEVKITPRO=/opt/devkitpro
+- export DEVKITA64=/opt/devkitpro/devkitA64
+language: cpp
+script:
+- gcc -v && g++ -v && cmake --version
+- wget https://github.com/devkitPro/pacman/releases/download/devkitpro-pacman-1.0.1/devkitpro-pacman.deb
+- sudo apt install ./devkitpro-pacman.deb
+- sudo dkp-pacman -Syyu --noconfirm
+- sudo dkp-pacman -S devkitA64 --noconfirm
+- sudo dkp-pacman -S libnx --noconfirm
+- sudo dkp-pacman -S switch-tools --noconfirm
+- make
+- rm source/*.o
+- rm source/*.d
+- make -f Makefile.nx
+sudo: true
+before_deploy:
+- git config --local user.name "Volcah"
+- git config --local user.email "thisisvolca@gmail.com"
+- ls
+deploy:
+  skip_cleanup: true
+  overwrite: true
+  provider: releases
+  api_key:
+    secure: R0Q/C6+MnnBzvODhpt5DVG0alwRaJN00FsRV6CYT+x3+oX/RwO+J2/oncBurTufc68Ig+xoEDA1pNaHRHzjJTkCQ3UH5hHDlypv1I/EC25w1Xgm+SZIrIyUBcrzgVoiTIvYz3T8C/tBmtH2i83XnUtoqIwjSrZeuf5SFg5shg+vJtDYqaMGGfQaN2k9wlxqDbyOYzry4hLgjhd4l9YM6B0WfhPQQ3IKLLP6ugzJxUw+VqDaGMGVbuq5QXFMtY5bAgcqgbLUr0TJauN9UuAyZRX8ZGUwQA9JMDTN8AQjSA7BMK5YrXyug/Nkk18fZafaKI6wl3dJz/nxVq6SNfioNaWyASazs5EeCeNFV4RZfDoqoPpoehDWHPdeM/VvVt3FycCxjRe9ljUPvuMVvwEwDykGYbs2wM2fh0rSKNuwEwshmWGX6g1L2FaZkuX3QeX1Kjwy7wduTbpAXSSJNCGJkKE5JuQtgwYW7tIaIKkpg9pWSGVVqGpq7E/IakKKDlYXjD9kUnsmVGgzfNuqWgop/8dJXDGpTrwXOQEXG8eQTU48BxEgTpcC3XvHa1mZK3fH059OVmnwr/QRcrVLQfWXSm4KPJrrqA9R3BKVfpqCBP8ADvcJ8x9qy7h7zP3G+qNbALKF+kuvG8LD42/r2YQdWqicc59gk7O0c2v9YKG3HQk4=
+  file_glob: true
+  file:
+  - "LezzGoDeiPoveri"
+  - "LezzGoDeiPoveri.nro"
+  on:
+    repo: Volcah/LezzGoDeiPoveri
+    all_branches: true
+after_deploy:
+- ls

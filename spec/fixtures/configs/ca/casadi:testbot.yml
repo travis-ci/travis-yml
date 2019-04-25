@@ -1,0 +1,172 @@
+env: 
+  global: 
+    - secure: bOPhFqXlBfwm73ac6BMSba2UR3vwnYVDqyXeAs/5SxrW2hW7/V/MmYLQL3h3BpOYfPBa1ganEAKYrd9K6HWJN16MHyROBEbFpZmZ5DFbK/pUjYaJp+8giSytxWBzEjo2f129azETNgvzjANbpAe0+uYaxupUPvpfQkPPrII+2Jc=
+
+os: linux
+
+
+dist: trusty
+language: generic
+
+matrix:
+  include: 
+#    - env: recipe=mingw_octave_trusty compilerprefix=x86_64-w64-mingw32 BITNESS=64
+#    - env: recipe=mingw_octave_trusty compilerprefix=i686-w64-mingw32 BITNESS=32
+    
+#    - env: recipe=ipopt_mingwoct_trusty compilerprefix=x86_64-w64-mingw32 BITNESS=64
+#    - env: recipe=ipopt_mingwoct_trusty compilerprefix=i686-w64-mingw32 BITNESS=32
+#    - env: recipe=ipopt_mingw_trusty compilerprefix=x86_64-w64-mingw32 BITNESS=64
+#    - env: recipe=ipopt_mingw_trusty compilerprefix=i686-w64-mingw32 BITNESS=32
+    - env: recipe=ipopt_dockcross DOCKCROSS=manylinux BITNESS=64
+    - env: recipe=ipopt_dockcross DOCKCROSS=manylinux BITNESS=32
+#    - env: recipe=ipopt_trusty
+#    - env: recipe=ipopt_trusty GCCVERSION=5
+#    - env: recipe=ipopt_trusty GCCVERSION=4.7
+#    - {env: recipe=ipopt_osx GCCVERSION=4.9, os: osx, osx_image: xcode7.3}
+ 
+ 
+#    - env: recipe=bonmin_mingwoct_trusty compilerprefix=x86_64-w64-mingw32 BITNESS=64 
+#    - env: recipe=bonmin_mingwoct_trusty compilerprefix=i686-w64-mingw32 BITNESS=32   
+#    - env: recipe=bonmin_mingw_trusty compilerprefix=x86_64-w64-mingw32 BITNESS=64
+#    - env: recipe=bonmin_mingw_trusty compilerprefix=i686-w64-mingw32 BITNESS=32
+#    - env: recipe=bonmin_trusty
+#    - env: recipe=bonmin_trusty GCCVERSION=5
+#    - env: recipe=bonmin_trusty GCCVERSION=4.7
+#    - {env: recipe=bonmin_osx GCCVERSION=4.9, os: osx, osx_image: xcode7.3}
+    - env: recipe=bonmin_dockcross DOCKCROSS=manylinux BITNESS=64
+    - env: recipe=bonmin_dockcross DOCKCROSS=manylinux BITNESS=32
+#    - env: recipe=ecos_mingw_trusty compilerprefix=x86_64-w64-mingw32 BITNESS=64
+#    - env: recipe=ecos_mingw_trusty compilerprefix=i686-w64-mingw32 BITNESS=32
+#    - env: recipe=ecos_trusty
+#    - env: recipe=ecos_trusty GCCVERSION=5
+#    - env: recipe=ecos_trusty GCCVERSION=4.6
+#    - {env: recipe=ecos_osx GCCVERSION=4.9, os: osx, osx_image: xcode7.3}
+    - env: recipe=ecos_dockcross DOCKCROSS=manylinux BITNESS=64
+    - env: recipe=ecos_dockcross DOCKCROSS=manylinux BITNESS=32
+#    - env: recipe=lapack_mingwoct_trusty compilerprefix=x86_64-w64-mingw32 BITNESS=64
+#    - env: recipe=lapack_mingwoct_trusty compilerprefix=i686-w64-mingw32 BITNESS=32
+#    - env: recipe=lapack_mingw_trusty compilerprefix=x86_64-w64-mingw32 BITNESS=64
+#    - env: recipe=lapack_mingw_trusty compilerprefix=i686-w64-mingw32 BITNESS=32
+#    - {env: recipe=lapack_osx GCCVERSION=4.9, os: osx, osx_image: xcode7.3}
+    
+    - env: recipe=lapack_dockcross DOCKCROSS=manylinux BITNESS=64
+    - env: recipe=lapack_dockcross DOCKCROSS=manylinux BITNESS=32    
+
+#    - env: recipe=slicot_mingw_trusty compilerprefix=x86_64-w64-mingw32 BITNESS=64
+#    - env: recipe=slicot_mingw_trusty compilerprefix=i686-w64-mingw32 BITNESS=32
+#    - env: recipe=slicot_mingwoct_trusty compilerprefix=x86_64-w64-mingw32 BITNESS=64
+#    - env: recipe=slicot_mingwoct_trusty compilerprefix=i686-w64-mingw32 BITNESS=32
+#    - {env: recipe=slicot_osx GCCVERSION=4.9, os: osx, osx_image: xcode7.3}
+#    - env: recipe=clang_mingwoct_trusty compilerprefix=x86_64-w64-mingw32 BITNESS=64
+#    - env: recipe=clang_mingwoct_trusty compilerprefix=i686-w64-mingw32 BITNESS=32
+#    - env: recipe=clang_mingw_trusty compilerprefix=x86_64-w64-mingw32 BITNESS=64
+#    - env: recipe=clang_mingw_trusty compilerprefix=i686-w64-mingw32 BITNESS=32
+#    - env: recipe=clang_trusty
+#    - env: recipe=clang_trusty GCCVERSION=5
+#    - env: recipe=clang_trusty GCCVERSION=4.6
+#    - {env: recipe=clang_osx GCCVERSION=4.9, os: osx}
+    - env: recipe=clang_dockcross DOCKCROSS=manylinux BITNESS=64
+    - env: recipe=clang_dockcross DOCKCROSS=manylinux BITNESS=32    
+#    - env: recipe=swig_trusty
+#    - env: recipe=swig_matlab_trusty BAKEVERSION=matlab-customdoc
+#    - env: recipe=swig_matlab_trusty BAKEVERSION=b921b0ee5fa928a16
+#    - env: recipe=swig_matlab_trusty BAKEVERSION=82714bf35c33fe2
+#    - env: recipe=swig_matlab_trusty BAKEVERSION=234d6ea3a08ef71
+    
+#    - { os: osx, env: recipe=swig_matlab_osx BAKEVERSION=matlab-customdoc GCCVERSION=4.9, osx_image: xcode7.3}
+#     - { os: osx, env: recipe=swig_matlab_osx BAKEVERSION=b921b0ee5fa928a16}
+#     - { os: osx, env: recipe=swig_matlab_osx BAKEVERSION=82714bf35c33fe2}
+#     - { os: osx, env: recipe=swig_matlab_osx BAKEVERSION=234d6ea3a08ef71}
+#    - env: recipe=mingw_octave_trusty
+
+#    - env: recipe=hsl_mingwoct_trusty compilerprefix=x86_64-w64-mingw32 BITNESS=64
+#    - env: recipe=hsl_mingwoct_trusty compilerprefix=i686-w64-mingw32 BITNESS=32
+#    - env: recipe=hsl_mingw_trusty compilerprefix=i686-w64-mingw32 BITNESS=32
+#    - env: recipe=hsl_mingw_trusty compilerprefix=x86_64-w64-mingw32 BITNESS=64
+    
+    - env: recipe=hsl_dockcross DOCKCROSS=manylinux BITNESS=64
+    - env: recipe=hsl_dockcross DOCKCROSS=manylinux BITNESS=32
+#    - env: recipe=hsl_trusty GCCVERSION=4.7
+#    - env: recipe=hsl_trusty GCCVERSION=5
+#    - env: recipe=hsl_trusty GCCVERSION=4.6
+#    - { env: recipe=hsl_osx GCCVERSION=4.9, os: osx, osx_image: xcode7.3 }
+    
+    
+python:
+- "2.7_with_system_site_packages"
+before_install:
+  - |
+    if [[ $TRAVIS_OS_NAME == *linux* ]]
+    then
+      sudo dpkg --add-architecture i386
+      sudo apt-get update -q
+      sudo apt-get install libpython2.7-dev libc6:i386 libncurses5:i386 libstdc++6:i386
+      sudo apt-get update -qq
+    fi
+  - source recipes/setup.sh
+  - |
+    if [[ $TRAVIS_OS_NAME == *linux* ]]
+    then
+      if [[ $GCCVERSION ]]
+        then
+          if [[ $GCCVERSION == 5 ]]
+          then
+            pinning xenial
+            sudo apt-get install -t xenial -y gcc-$GCCVERSION g++-$GCCVERSION gfortran-$GCCVERSION
+          else
+            sudo apt-get install -y gcc-$GCCVERSION g++-$GCCVERSION gfortran-$GCCVERSION
+          fi
+          export CC=gcc-$GCCVERSION
+          export CXX=g++-$GCCVERSION
+          export FC=gfortran-$GCCVERSION
+          export F77=gfortran-$GCCVERSION
+        else
+          sudo apt-get install -y gcc g++ gfortran    
+      fi
+    else
+      shell_session_update() { :; } # Workaround for travis-ci/travis-ci#6522
+      brew update
+      brew install binutils
+      brew reinstall gcc49 --with-fortran
+      export FC=gfortran-$GCCVERSION
+      export F77=gfortran-$GCCVERSION
+      export CC=gcc-$GCCVERSION
+      export CXX=g++-$GCCVERSION
+      #sudo /usr/libexec/locate.updatedb
+      #locate libstdc++*
+      #locate libgomp*
+      #locate libgcc_s*
+      #locate libquadmath*
+      #locate libgfortran*
+      #find / -name "libstdc++*"
+      #find / -name "libgomp*"
+      #find / -name "libgcc_s*"
+      #find / -name "libquadmath*"
+      #find / -name "libgfortran*"
+      if [[ $recipe == *swig* ]]
+      then
+        echo "nothing"
+      else
+        osx_rpath
+      fi
+    fi
+install:
+  - #set -e
+  - source shellhelpers && false || allowfail 1 && echo "okay"
+  - |
+    if [[ $compilerprefix == *w64* ]]
+    then
+      if [[ $recipe == *mingw_* ]]
+      then
+        if [[ $recipe == *octave* ]]
+        then
+          echo "Nothing to do"
+        else
+          mingw_setup # exclude mingwoct
+        fi
+      fi
+    fi
+  - source recipes/$recipe.sh || remote_access
+script:
+  - echo "All is fine"
+  

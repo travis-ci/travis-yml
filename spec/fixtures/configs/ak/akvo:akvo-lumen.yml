@@ -1,0 +1,33 @@
+language: bash
+sudo: required
+
+services:
+- docker
+
+cache:
+  directories:
+  - "$HOME/.m2"
+  - "$HOME/.lein"
+  - "${HOME}/google-cloud-sdk"
+  - "./client/node_modules"
+
+before_install:
+- if [[ ! -d "$HOME/.m2" ]]; then mkdir "$HOME/.m2"; fi;
+- if [[ ! -d "$HOME/.lein" ]]; then mkdir "$HOME/.lein"; fi;
+- echo "HOST_UID=$(id -u)" >> .env
+- echo "HOST_GID=$(id -g)" >> .env
+- if [[ ! -f "${HOME}/google-cloud-sdk/bin/gcloud" ]]; then rm -rf "${HOME}/google-cloud-sdk";
+  curl https://sdk.cloud.google.com | bash > /dev/null; fi
+script:
+- "./ci/build.sh && ./ci/deploy.sh"
+after_failure:
+- PROJECT_NAME=akvo-lumen docker-compose -p akvo-lumen-ci -f docker-compose.yml -f
+  docker-compose.ci.yml logs --no-color
+env:
+  global:
+  - PATH=${HOME}/google-cloud-sdk/bin:$PATH
+  - CLOUDSDK_CORE_DISABLE_PROMPTS=1
+notifications:
+  slack:
+    rooms:
+      secure: HEBk7De0JMmQGmhckq2za8qrZuK9+EkKHoB9SYf5Kv3Tn9cmA2nqOWxZTpaFkdgELy5qjaJ3tM0nhSOp60mEX6dKsGYX5GdKQMEkbhg1r27dP7c7Unfxy0ZjKN1j/apNfj6JTSqSLHCT1LDERLenjJCmNC5mMr4EynYhxtK8MSauZhfIb7yu8djMb+nIMhMSiTiGKjO/IN/w9ixa5zarV49SvZOi85TtO9m5RF0Oya1rIxR7kEICEFdcxtbpqKKltiParPP2e6qbJEWgvLp7DgVONArKIMCs3oboTcoRHPh/MJdmRWrNpvK90u6GfNV8flp5gIdLeElytmFL6N+ITVFGcV/YMAVr/TJ98+rczCgPRqZJSqCUYZXf/C1WgRQwtmUPaEDabL4vB4ElsoNlkhbPnTmPGdA7u5h+qXEU/kg9qrN6etrOOL8VYPzZjuAZe5TLpogIK+K8i80aGC3tiw+UW5FbgdV22BsC2nPtsp3tL74FW4cuHHj3OBH70qspilb1TLGQbWeSJAvISo6h58Lijyu31inH95/f7zVoSsX30bwCp6zyiYGl7iVdfjNlKSjqsPSEtIZfwyKL8PDNbRHaODag9hgoxl4291H2jpJIuhBkyZ0og43vONGDIw1U1+iUMZbNJBDzJTLS2tR5lw0m9KooDDT78Njh/rw9gTc=

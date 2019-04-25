@@ -1,0 +1,46 @@
+sudo: false
+# dist: trusty
+language: node_js
+
+os:
+#  - linux
+  - osx
+
+node_js:
+  - "4"
+  - "6"
+  - "8"
+
+branches:
+  only:
+    - master
+    - develop
+
+addons:
+  apt:
+    packages:
+      - mongodb-org-server
+  code_climate:
+    repo_token:
+      secure: "oNn07/ILtLInDkXv9gzNTgWsMTUNQ3WUDZimiuFB0R2ot30H8plkSEIi+9HLVMDGCtq+XC/VyaI4E18+lZkv5MguvjGL1k7xKUokYp4YxrudIxLt7DtBcDYBcQlr5JryYreuSMzZznM3b8lUJaHlNZQMPclvoS1DDQkrV2Q8QO3KuR8qX5u51SRKiSkhoBi/HlH6it1cVH8/MbtIpJcfIIhAGo/4jOxsfj6M4ie+ewVw81n2NPsBKLza31Ba5S01/MQfhVzE+cwj4qQALY+qjNB3GIPb9AolXh6PNLUlgWURFLHa7//OD35BBwbnt6Vjihmhp1HEIiqCsKmpwGQEpTNRZA7+NYDwB4oQ9naP9vVLMgn8CJkNA8lOgrK8Qx2oDlCr9wK/ufF3lK0yzJpjaZ+RduMdF6Jtw+Iho00jT4K5wAor0XQmZPQBlNWHG2MYHR6vm0DKr2vUWN/cN/8a6pVcElQOKjbSYFsQlhg/x2EWhNOYPuN26Y3A4Y4zkwGVGYW27xjTka4WtOBq1ZpKJUEoAWhc77UZHjUZUKcgkcYYYrcf3TDh0rmKbYVp0wHjjQBbC3CYmXnZkNjexxcAWVbQz31VLZYxZ7tJ8fWzCPNcxljFUWp82L8QNI7RhChieKWODXQHmQc55JtNMXDD70YRLgr7Cuyk1J6LLepgT4M="
+
+before_install:
+  if [[ $TRAVIS_OS_NAME = 'osx' ]]; then
+    sudo mkdir -p /data/db;
+    brew install mongodb;
+    brew services start mongodb;
+  fi
+
+services:
+  - mongodb
+
+cache:
+  directories:
+    - node_modules
+    - $HOME/Library/Caches/Homebrew
+
+after_script:
+  if [[ $TRAVIS_NODE_VERSION=~'^v?8(\.\d+){2}?$' ]]; then
+    npm install codeclimate-test-reporter;
+    node node_modules/.bin/codeclimate-test-reporter < .coverage/lcov.info;
+  fi

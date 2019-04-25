@@ -1,0 +1,32 @@
+sudo: false
+language: c
+services:
+- docker
+addons:
+  apt:
+    packages:
+    - wget
+cache:
+  apt: true
+  directories:
+  - "$HOME/bin"
+env:
+  global:
+  - S2I_VERSION=1.1.7-226afa1
+  - secure: b5fltzM73M/h3/dAFDl2rf9VyBAH/sl98bJDWi2XhEofCNxmhmGoAg1Q135bS6oAnWi3NZnQbvuxwc02haucs7DT3DLVQAOvvYNTJL+EXzo9jSiMgefJAO0B49lftvo019wDJu3QPFuaDcQZHsQwTM9DS5m/ejNZ9etpoi+AM+15VNWO7P3UexEV+OvcgbkFJ0gl6E73fnTJN1KITGwrKNogVODHE1Z8cs+PPqro9b6qLqWei2nb5v9WUjjRfVeyYUrPP2cG4pLo9vftW+gY7cORaqE+YiM9cBd6aHq4UvRL43p0lXxzmH7cR3O/XV25qCEv4JIU4Q9iwg5u0ZWSzORN8wpf68ag2mCFixLpe/49+eTjQ2nl3IWcJdiyhejZKxzxLN/NEwHyd8LUa/mpValOsFD9Wdg5uYDdm649ygxBsuIr8qSoJS5KVJC4FwpUBXLwwr8mnOAVJvPRnaVV8/vRpCcv4B8qbIcMyF9ratrKEq8zPl9T7AUD5d0uDkSbDVVgLCfUUdP/HFfql3qbBhoeAAJS4lxSIsrcbYH9IEQLmUD4poBu9zXuH/s6dB4edPAxvnL4kd6WqpuWAVpfpVC2nOBhht0S8wJaa8aittMMimFhqKqYGXIXfWcIRNijHbdw/7psSyB+AHxinOTaN37dmSg3jTUJvYIWd2n6V2I=
+  matrix:
+  - IMAGE_NAME=s2i-openresty-centos7
+before_install:
+- travis/install-s2i.sh
+- export PATH="${PATH}:${HOME}/bin"
+- export IMAGE_NAME="${IMAGE_NAME}:${TRAVIS_TAG:-${TRAVIS_BRANCH:-${TRAVIS_PULL_REQUEST}}}"
+install:
+- make build
+- make build-runtime
+script:
+- make test
+after_success:
+- if [ -n "${TRAVIS_BRANCH}" -a "${TRAVIS_PULL_REQUEST}" = "false" ] || [ -n "${TRAVIS_TAG}" ]; then
+  docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD" quay.io;
+  make tag push;
+  fi

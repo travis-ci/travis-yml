@@ -1,0 +1,14 @@
+language: ruby
+rvm:
+- 2.2.2
+sudo: false
+before_script:
+  - pip install --user yamllint
+  - pip install --user yamale
+  - gem install html-proofer
+script:
+  - yamllint _pages/*
+  - ruby tests/test_date.rb
+  - ruby tests/test_HTML.rb
+  - ruby tests/test_htmlValidation.rb
+  - bundle exec jekyll build

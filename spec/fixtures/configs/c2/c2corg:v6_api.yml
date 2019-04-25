@@ -1,0 +1,42 @@
+env:
+  global:
+  - secure: XV/MM2PoGNhAWuK4Us1cSmGFtXOMMmKyYm0Ir+mEQLEiNdrzBgiKEyY9ywwp8o+SYOs/uB6Hp3gJO4cRojZypg4Gcify0yJjNbyN9Lipkb7BvHXv/8RC+P/TlnXiRJDuTXbdtkEsXkEnGv4RdfcNHS12m2GZPBjzgQ1mznzP3DUEaAFzXJddN1n+Yk1Sc3rCRKiBYgAVzMBPEnT4KFZISvGsGdkae1I7Sq/IJrx599GeoI6dNRkHXURqNq3kcJj4jU4UUQbhKLn0+jpbX0fLQV+PRQ0sup0EGtwu0S8q+5RwniSOrNUtf552mUDwtAcI4mBbZmZ81n0Bf3qlRVqECuN+2qihN61+m5/eWhX8C195qEwy3EpHsgPBe52P54oEvgrXWGXbnYQC3rlegnXd8FUzQaq9G397kUraWgfd0OCp2zmPTLNIqCWpBqhYNfuB4xEP7fOTxugPJqvbPnZLHqqTkbK4jnsaKW50dV+CTKiUpo1dXfkCtNJbNH2wb6bjnztKkm8UUYLIMCH4WFz2wiRsUZ6xKS3eDbcAqPyveuf9Ki8oW8MyPFdOV2kOpnG79a9rtu2Nyg4FMgtlIjkl+nD+gkr+ElPCG59wOKPMa4gUKFQ1Z9h7EfZCRL6ux2RzRekNRuXNq5nebjVqO7dGUF7Z8X97xukjEban/t5nymU=
+  - secure: EWDPpmo1AhmokqHO+6z5J9qm3r3PGW1GLY747/r7U7k7rlBDJaa16L2tde0eOtJsGJIegWjIj3cGkh8lesqjmCnL64F7XQn42klWEd2N+OnEwob8eW6Yl4XbL6OHqVeaEx1lKW5LLneQTS8Zn1LvMZU5yIe4vAI0tCrmGXaiKptiiIAVkuN0ci8hZ5GSMwlPuarSi5hNvU7bktu9rWEJVbT+qlLV0poucjhBLZRe9ZrTCaIsBOekSDamYjjQ4G666BVZXi0Gk3bP4s9CZpHb9j9xpHUL4yd8bkNBnuK3sPNiO7o00iAyU558D6Z5Bpc8HnhyMIM0MU0V84ubRNsq7XtiS1MZZGujpGS3kIHs8eV2UV8U3DgDFpjCxPf2MjwpLZhx1GmzrI1vBMVjU76JeO+H8ty+9c5Sv9lLuQQmJBr3O9tkRpG2AClLf+VeOC7blAB+ijUnMK1cb93ijn2U/uL3n098jUTUDXBkL6ypFZQ3EjSl1wBN2GXaQPzgQvXgV66hRKVWXQrXOns23WWi2eruP3n52G87gG2CQy+TQtdycAznJfE5y5I8mLyaGLJiyJOy56wfJQVD8Si8Jb1w8mHxedtsJpMNPpFvvm70iM7uxIb4XaCThRhMmb9v9QyzFjSdjZcuqnZVSKZrb2j4Yj5Us33t+98HodIeJ3saWEI=
+  - secure: cD8GX9gmWaWCsByudEbWOGFK1z7gyAfOsmnV2G4+E4Sw1P4QDczJcnDYEQj1RGzVGoEym4dzaJGV5RefHcsZSVLjCD1nop1nIb/xL3jC1b02BQkeWtPmA4N3ohy2b9GuUHV7Ng//uroTOQm+jB/E/L40mSnS54FXOZLV/XudKegbiFh/YsumaczzeQje4Ya2dUwALVhcW801JueYmqc2CwwdZIrjvyCdtZY5bAp7N624bjPlF9LnhGqk8vlBp3KnjJtz0na8OkC53+tGaJb6wfQ9dG2RMaDV5HA0thjX8YSwB8mttTxR7qf/HOrtQetdpzfezkF3RQkw1i5LqcVvmyMCwVn4p4d0O6dW57y/h54hUsHs3fEeizdQ4lE4j3Sc5J79A5/mwd5o/m5KwiHJTJLnYNABUVYqy8Wil7F7uC6a1H0u0T37oUmdbNKgay9j+p4ch+HQQo8DKl0apkwG/sSzCtcS/bbM1HzMc78L2aGFx5MJkdN23Mi0lEDsARQKrB3gGGWiYgIlaDYFbWQ7EmPlVFh1oetwEt28b6KriOYnWcVd1RPB+aZ/a7l7ixpEMx7VoaMIJrCdHVLY0pSfhQXW6V210jDe8+pch4RLKLelavJuy6inevtYLK6vVhzNy71yfn3x2PBlrGJBQbbBmyyiOMy9Jpl9m2rJx+7SgVg=
+
+sudo: required
+language: python
+
+services:
+- docker
+- redis-server
+
+python:
+- 3.4
+
+addons:
+  postgresql: "9.4"
+  apt:
+    packages:
+    - postgresql-9.4-postgis-2.3
+
+install:
+- mkdir /tmp/elasticsearch
+- wget -O - https://download.elasticsearch.org/elasticsearch/release/org/elasticsearch/distribution/tar/elasticsearch/2.3.2/elasticsearch-2.3.2.tar.gz | tar xz --directory=/tmp/elasticsearch --strip-components=1
+- /tmp/elasticsearch/bin/elasticsearch --daemonize --path.data /tmp
+- make -f config/travis .build/dev-requirements.timestamp
+- make -f config/travis install
+
+before_script:
+- echo "create user \"www-data\" with password 'www-data;'" | psql -U postgres
+- PGUSER=postgres USER=travis scripts/create_user_db_test.sh
+- curl http://localhost:9200/
+
+script:
+- make -f config/travis check
+
+after_success:
+- make cleanall publish
+
+notifications:
+  email: false

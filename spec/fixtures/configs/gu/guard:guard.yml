@@ -1,0 +1,22 @@
+language: ruby
+rvm:
+  - 2.3.8
+  - 2.4.6
+  - 2.5.5
+  - 2.6.2
+  - jruby-9.1.17.0
+  - jruby-9.2.6.0
+  - rbx-3.107
+matrix:
+  allow_failures:
+    - rvm: rbx-3.107
+env:
+  global:
+    - JRUBY_OPTS="--debug"
+script:
+  - bundle exec rake
+bundler_args: --without development
+cache: bundler
+addons:
+  code_climate:
+    repo_token: 185a714e42214b9369217d0ddfd5a02d528d9a616a34482119a16c63241d6afd

@@ -1,0 +1,33 @@
+sudo: false
+language: python
+python:
+- '3.4'
+- '3.5'
+- '3.6'
+- 'nightly'
+matrix:
+  allow_failures:
+  - python: 'nightly'
+  include:
+  - python: '3.6'
+    env: TOXENV=lint
+  - python: '3.6'
+    env: TOXENV=scan
+install: make travis-install
+script: make travis-script
+after_success: codeclimate-test-reporter
+deploy:
+- provider: pypi
+  server: https://upload.pypi.org/legacy/
+  user: Andrew.Hawker
+  password:
+    secure: eVd8Zb1S48TAnIbPktCc7SGKQlugRLUv2+77CywblVC1lSZi6IrJiNbsg9E8cMInoOA2GeqlJ/ywrrqP0LVIm1Uqht3YzDyUMFioUIsHnX86M7Lhpb7Yf4++Iig4aEPmrzXe8B7/4Lq9958pjneQl4snUo+ji1ma81p7py6unIPbEZkoVvo4Hb9x5wKUIOL7O6UZsMplBo5/csQfI0IjoCRox9Rfbylda2xFWHj8GJLn5jAEP/nv17pmIwGU75u5FeWdjLKL4YQmIKIuLGRSO9Jwvrm1US8IRBL/xK2+MsGtdKNmEHtx0kehLr2t8yC0KsSw07m3Tl9id0TP+Q7b5+FIg3FnVhu2+eXBg1+2rI7eOLBEMyiwd49dTeSLAFXnHBLTywIEcRfapETjrAldxJZ20Zh6Lp2/qY0H9kYoeM8MswwhqqQA1tqlbkwnPsiEI5iT3ABToHTKX6H7xbZ48vkgTFVlELjfRL56r7lidkiogVm6yf19vsRTcKlG9wPt2Y51VHtH2CRy96N9MoPQtZmLkmqiM1wd1/wXjrOtDNSGb8F4n+ip+/mIJetcxvpHagXu/jkkfdQvJ5eWoNTt54Gviox9En5l+uQ6lWfgNgdBCRwmtQftrFBNcAcfizVXFXYFVvESGCUVDfkD/N14MkqJC1N7QsAPs9AeDS7cmfc=
+  distributions: sdist bdist_wheel
+  skip_cleanup: true
+  on:
+    branch: master
+    tags: true
+    condition: $TRAVIS_PYTHON_VERSION = "3.4"
+notifications:
+  slack:
+    secure: g+wpHKA51mTz4M77p5YJ8pRzyTGjjxT7tSsXRy5CGawXJUWGqdRDM6+Z5UxcnPNK/TNTZpi4iSyVqRinzJ8zu+phLgw9Rn1+n+eq2AULifBda+MYqV7tyBsWZZjTJBBQ2jjzNA2upygNDIy9naRIO+RgNxv18csI4UZz+1QE9Sv6e3IaaEGuIHkQT4tHGThBfRuN97ggW5mrpUY6gNI8vN5YOCDsIH0jBbc4cr1mAIyakaHWlCUj58PCLdluFjKiWeYhHXJixS7xK+8c8iVO+qHgNa0hHtjtYV2YmkLEBgdJE7swtPaCKIcGJogAOdJD+mwtffyIqp9UhNpRAYAwot3jakW7d7LFBn42f1gQe5mp+Ki2yWQ+nbzsEx4Tb19hRWm9y6yuu/BGXCpOYqSgoErtYWvVDYKBZpmR8Vqcy3s1bWAu5TMHIyQoDiX81RaDwX3Lu4JoF2tr66J4qz1UJE8X5g/Q0JrctxWAXG/10AsxMM947yPgc0eq68gfVOgt5spdr7m7yq/hM6R40ncB+EQnNYg6lJsHcwINj+T5WBNzFSaYj1O62zzNPKPD5pOfJnAQsiS+ZzxrlacAIzG6yRU+QoBDW8FyOOypA6cPIxqJR1poTt1t6ET+18FRmD7kDnBZcU9DAx+JJ1DDz8sCb5njMAA3Cihg10JqqmvFXyk=

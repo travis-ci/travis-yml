@@ -1,0 +1,49 @@
+language: ruby
+rvm: 2.6.2
+before_install:
+- gem install bundler:2.0.1
+- sudo apt-get -y --reinstall install imagemagick
+script:
+- if [ $TRAVIS_EVENT_TYPE = cron ]; then mkdir -p project ; fi
+- if [ $TRAVIS_EVENT_TYPE = cron ]; then pushd project ; fi
+- if [ $TRAVIS_EVENT_TYPE = cron ]; then echo -e "machine github.com\n  login $CI_USER_TOKEN" >> ~/.netrc ; fi
+- if [ $TRAVIS_EVENT_TYPE = cron ]; then git clone --branch develop --depth 1 https://github.com/makietan/makietan.github.io.git ; fi
+- if [ $TRAVIS_EVENT_TYPE = cron ]; then pushd makietan.github.io ; fi
+- if [ $TRAVIS_EVENT_TYPE = cron ]; then git config user.name "makietan" ; fi
+- if [ $TRAVIS_EVENT_TYPE = cron ]; then git config user.email "makietan@users.noreply.github.com" ; fi
+- if [ $TRAVIS_EVENT_TYPE = cron ]; then echo `date` > .updated ; fi
+- if [ $TRAVIS_EVENT_TYPE = cron ]; then git add .updated ; fi
+- if [ $TRAVIS_EVENT_TYPE = cron ]; then git commit -m "Update .updated" ; fi
+- if [ $TRAVIS_EVENT_TYPE = cron ]; then git push origin develop ; fi
+- if [ $TRAVIS_EVENT_TYPE = cron ]; then popd ; fi
+- if [ $TRAVIS_EVENT_TYPE = cron ]; then popd ; fi
+- if [ ! $TRAVIS_EVENT_TYPE = cron ]; then mkdir -p tmp ; fi
+- if [ ! $TRAVIS_EVENT_TYPE = cron ]; then pushd tmp ; fi
+- if [ ! $TRAVIS_EVENT_TYPE = cron ]; then echo -e "machine github.com\n  login $CI_USER_TOKEN" >> ~/.netrc ; fi
+- if [ ! $TRAVIS_EVENT_TYPE = cron ]; then git clone --branch master --depth 1 https://github.com/makietan/makietan.github.io.git ; fi
+- if [ ! $TRAVIS_EVENT_TYPE = cron ]; then pushd makietan.github.io ; fi
+- if [ ! $TRAVIS_EVENT_TYPE = cron ]; then git config user.name "makietan" ; fi
+- if [ ! $TRAVIS_EVENT_TYPE = cron ]; then git config user.email "makietan@users.noreply.github.com" ; fi
+- if [ ! $TRAVIS_EVENT_TYPE = cron ]; then popd ; fi
+- if [ ! $TRAVIS_EVENT_TYPE = cron ]; then popd ; fi
+- if [ ! $TRAVIS_EVENT_TYPE = cron ]; then bundle install --path vendor/bundle ; fi
+- if [ ! $TRAVIS_EVENT_TYPE = cron ]; then bundle exec rake -f ./lib/tasks/category.rake category:create    ; fi
+- if [ ! $TRAVIS_EVENT_TYPE = cron ]; then cp -r tmp/makietan.github.io/assets/thumbnail/ assets/thumbnail/ ; fi
+- if [ ! $TRAVIS_EVENT_TYPE = cron ]; then bundle exec rake -f ./lib/tasks/thumbnail.rake thumbnail:create  ; fi
+- if [ ! $TRAVIS_EVENT_TYPE = cron ]; then JEKYLL_ENV=production bundle exec jekyll build --destination tmp/makietan.github.io/  ; fi
+- if [ ! $TRAVIS_EVENT_TYPE = cron ]; then pushd tmp ; fi
+- if [ ! $TRAVIS_EVENT_TYPE = cron ]; then pushd makietan.github.io ; fi
+- if [ ! $TRAVIS_EVENT_TYPE = cron ]; then git add --all ; fi
+- if [ ! $TRAVIS_EVENT_TYPE = cron ]; then git commit -a -m "Update _site by Travis" ; fi
+- if [ ! $TRAVIS_EVENT_TYPE = cron ]; then git push origin master ; fi
+- if [ ! $TRAVIS_EVENT_TYPE = cron ]; then popd ; fi
+- if [ ! $TRAVIS_EVENT_TYPE = cron ]; then popd ; fi
+install: true
+branches:
+  only:
+  - develop
+notifications:
+  slack:
+    secure: rXVosnXFfQmI/bq9PgPDAUkk/VZXsRQLgIjAXIa4/bqoBxzUtkG2TlmldhY7kDDPsHjaIfxJJAZVIRCWHZxD7cH3G2ZB/ob2tYEAV8HPEx0mIysfE/76T5sy12bGtfm5tzdf/0BdzTT6qirKAY9PM92XNDW4SKrwaSqYtVgdIu5bSq/dVIqx+yhX7O198fxvnu+/bXZXV33kg1odmzjnALVZrri16W3hZFNBhvOIiDwDGXzFpqz4qsP2SqNxrBc0NDJ0/2VLesq9xHMIMfPJg6beIXuFRDPttyVHBXAnvm8H8l0tOSCbCn5JOu8ncKbt+Ppqz74El95brScm/wITuHJ8xNcumZfjivW9IojlPR/wGhC2Vz1QpvZyGhEvA7ZlDAF1/qouy82z5p5nIPsUPyE4Nzc8RIU4p7fRqo1Dy+fmvzWKTqCV3qGk2MTRFjDcSwRexP93dpeXBIy8lP7PgB7OgbW5FnR+ySA7/s6tNYZRPZeMi+cjwsMTbq44lNSIB2o8KEauEpAKJPulRPmsON3SAITJDw8/5+wv2cYkTaQyCUlqHFOTF6nEIqBTr4WcChOrKb7qe7DWcO5u98aJIbQqkIsS8p883FqT8T27SB9vtiPjFRN+dGWZarGGQKcu3Ei7SUWIaNQjGANM5KT8kxII/Qh4AQA3etl5hYmwWZE=
+    on_success: never
+    on_failure: always

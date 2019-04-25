@@ -1,0 +1,14 @@
+language: python
+dist: trusty
+
+services:
+  - docker
+
+before_install:
+  - docker build --rm -t jumpscale .
+
+script:
+  - docker run --rm -t jumpscale /bin/bash -c "source /sandbox/env.sh; pytest -v /sandbox/code/github/threefoldtech/jumpscaleX --ignore=/sandbox/code/github/threefoldtech/jumpscaleX/Jumpscale/data/schema/; pytest -v /sandbox/code/github/threefoldtech/jumpscaleX/Jumpscale/data/schema/"
+
+after_success:
+  - docker run --rm -t jumpscale /bin/bash -c "codecov"

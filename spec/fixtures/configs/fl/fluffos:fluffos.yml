@@ -1,0 +1,44 @@
+dist: trusty
+sudo: false
+
+language: cpp
+
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+      - llvm-toolchain-trusty-4.0
+    packages:
+      - g++-5
+      - clang-4.0
+      - bison
+      - autoconf
+      - expect
+      - telnet
+      - libevent-dev
+      - libmysqlclient-dev
+      - libsqlite3-dev
+      - libpq-dev
+      - libz-dev
+      - libssl-dev
+      - libpcre3-dev
+
+script: bash -x ./.travis_build.sh
+
+after_failure:
+    - cat src/thirdparty/jemalloc/config.log
+    - cat src/config.log
+    - tail -n 50 src/testsuite/log/*
+
+compiler:
+  - gcc
+
+env:
+# clang builds
+  - BUILD="x86_64" COMPILER="clang" COMPILER_FLAGS="-m64 -mtune=generic" TYPE="develop" CONFIG="testdev"
+  - BUILD="x86_64" COMPILER="clang" COMPILER_FLAGS="-m64 -mtune=generic" TYPE=""        CONFIG="testrelease"
+# gcc builds
+  - BUILD="x86_64" COMPILER="gcc" COMPILER_FLAGS="-m64 -mtune=generic" TYPE="develop" CONFIG="testdev" GCOV="yes"
+  - BUILD="x86_64" COMPILER="gcc" COMPILER_FLAGS="-m64 -mtune=generic" TYPE=""        CONFIG="testrelease"
+# coverity
+  - BUILD="x86_64" COMPILER="gcc" COMPILER_FLAGS="-m64 -mtune=generic" TYPE="develop" CONFIG="testdev" COVERITY="yes"

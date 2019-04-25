@@ -1,0 +1,28 @@
+language: ruby
+cache: bundler
+sudo: false
+rvm: 2.5.1
+
+gemfile:
+  - Gemfile
+
+script:
+  - if [ "$TRAVIS_BRANCH" == "master" ]; then echo "Master branch - deploy only - tests disabled."; elif [ "$TRAVIS_BRANCH" == "development" ]; then echo "Development branch - deploy only."; else echo "$TRAVIS_BRANCH branch."; fi
+
+deploy:
+  provider: heroku
+  api_key:
+    secure: OSp56YRohWiqx0/mwTsYmYqDnkkBYFR+co5Hg0/2a6UQNVGaQDBX2yeB9EyfWTwlDFbWiYvYtOrNr+5B6X2PHTN59iLAD68k65YYa92ZNFzMmk/9kTkbi7SJUL9yxuJFiLMnR2+rG1DdTSeSlCoTye2aAVAbXw3RVcq3q31PniI=
+  run:
+    - "rake db:migrate"
+    - restart
+    - "rake cleanup"
+  branches:
+    only:
+      - disabled-build-branch
+  app:
+    development: taudinpurkauspeli-development
+    master: taudinpurkauspeli
+
+notifications:
+  email: false

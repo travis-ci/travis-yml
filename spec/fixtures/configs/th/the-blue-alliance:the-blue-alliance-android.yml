@@ -1,0 +1,45 @@
+language: android
+jdk: openjdk11
+sudo: false
+addons:
+  apt:
+    packages:
+    - html2text
+android:
+  components:
+    - platform-tools
+    - tools
+    - build-tools-28.0.3
+    - android-28
+    - extra-android-m2repository
+    - extra-google-m2repository
+    - extra-google-google_play_services
+    - sys-img-armeabi-v7a-google_apis-28
+env:
+  matrix:
+  - JOB=UNIT
+  - JOB=COVERAGE
+  - JOB=CHECKSTYLE
+  - JOB=PROD-BUILD
+  global:
+  - GRADLE_OPTS="-Xmx512m -Xms128m -Xss1m"
+  - MALLOC_ARENA_MAX=1
+matrix:
+  include:
+  - jdk: oraclejdk8
+    env: JOB=PROD-BUILD
+before_script:
+  - ./scripts/travis/travis-before.sh $JOB
+
+script:
+  - ./scripts/travis/travis-worker.sh $JOB
+
+before_cache:
+- rm -f $HOME/.gradle/caches/modules-2/modules-2.lock
+cache:
+  directories:
+  - "$HOME/.gradle/caches/"
+  - "$HOME/.gradle/wrapper/"
+notifications:
+  slack: the-blue-alliance:m2F6L0FT1ORBmSzKdLvAEmm1
+  email: false

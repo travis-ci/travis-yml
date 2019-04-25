@@ -1,0 +1,66 @@
+language: c++
+sudo: required
+dist: trusty
+services:
+  - docker
+notifications:
+  email:
+    on_success: always
+    on_failure: always
+  slack: jsk-robotics:Av7tc8wj3IWkLYvlTzHE7x2g
+env:
+  global:
+    - secure: "Gi079QeYa0G/PtXrboD8tpn/GNL+VuvGisacywCIz9H9Rw4sDUXsUCOVTND43NuFRvliNcRs2zAWqmS2gzXMdRuZ8YC/MsGUyMzJ5OmxcqvfsVR4PZ65N/vlD7IPpz+BXHil73+V+8xKBRZeLtmBIEVGW2XbG/thJ2F/DYuC74s="
+    - USE_DOCKER=true
+    - ROS_PARALLEL_TEST_JOBS="-j2"
+    - CATKIN_PARALLEL_TEST_JOBS="-p2"
+  matrix:
+    - ROS_DISTRO=indigo USE_DEB=true
+    - ROS_DISTRO=indigo USE_DEB=true   NOT_TEST_INSTALL=true INSTALL_SRC="http://github.com/jsk-ros-pkg/jsk_planning" TEST_PKGS="task_compiler"
+    - ROS_DISTRO=indigo USE_DEB=true   ROS_REPOSITORY_PATH=http://packages.ros.org/ros/ubuntu
+    - ROS_DISTRO=indigo USE_DEB=false  NOT_TEST_INSTALL=true
+    - ROS_DISTRO=indigo USE_DEB=source NOT_TEST_INSTALL=true
+    - ROS_DISTRO=indigo USE_DEB=true   NOT_TEST_INSTALL=true INSTALL_SRC="http://github.com/jsk-ros-pkg/jsk_pr2eus" TEST_PKGS="pr2eus pr2eus_moveit"
+    - ROS_DISTRO=kinetic USE_DEB=true
+    - ROS_DISTRO=kinetic USE_DEB=true   NOT_TEST_INSTALL=true INSTALL_SRC="http://github.com/jsk-ros-pkg/jsk_planning" TEST_PKGS="task_compiler"
+    - ROS_DISTRO=kinetic USE_DEB=true   ROS_REPOSITORY_PATH=http://packages.ros.org/ros/ubuntu
+    - ROS_DISTRO=kinetic USE_DEB=false  NOT_TEST_INSTALL=true
+    - ROS_DISTRO=kinetic USE_DEB=source NOT_TEST_INSTALL=true
+    - ROS_DISTRO=kinetic USE_DEB=true   NOT_TEST_INSTALL=true INSTALL_SRC="http://github.com/jsk-ros-pkg/jsk_pr2eus" TEST_PKGS="pr2eus pr2eus_moveit"    
+    - ROS_DISTRO=melodic USE_DEB=true
+    - ROS_DISTRO=melodic USE_DEB=true   NOT_TEST_INSTALL=true INSTALL_SRC="http://github.com/jsk-ros-pkg/jsk_planning" TEST_PKGS="task_compiler"
+    - ROS_DISTRO=melodic USE_DEB=true   ROS_REPOSITORY_PATH=http://packages.ros.org/ros/ubuntu
+    - ROS_DISTRO=melodic USE_DEB=false  NOT_TEST_INSTALL=true
+    - ROS_DISTRO=melodic USE_DEB=source NOT_TEST_INSTALL=true
+    - ROS_DISTRO=melodic USE_DEB=true   NOT_TEST_INSTALL=true INSTALL_SRC="http://github.com/jsk-ros-pkg/jsk_pr2eus" TEST_PKGS="pr2eus pr2eus_moveit"
+matrix:
+  fast_finish: true
+  # allow_failures:
+  #   - env: ROS_DISTRO=melodic USE_DEB=true     ROS_REPOSITORY_PATH=http://packages.ros.org/ros/ubuntu TEST_PKGS="roseus roseus_smach" NOT_TEST_INSTALL=true
+before_script:
+  - set -x
+  - if [ "${TRAVIS_SECURE_ENV_VARS}" == "true" ]; then openssl aes-256-cbc -K $encrypted_b79fc5843df3_key -iv $encrypted_b79fc5843df3_iv -in .secrets.tar.enc -out .secrets.tar -d; tar -C ~/ -xvf .secrets.tar; if [ "${INSTALL_SRC_SECURE}" != "" ]; then export INSTALL_SRC="$INSTALL_SRC $INSTALL_SRC_SECURE"; fi; if [ "$TEST_PKGS_SECURE" != "" ]; then export TEST_PKGS="$TEST_PKGS $TEST_PKGS_SECURE"; fi; fi
+  - export REPOSITORY_NAME=`basename $PWD`
+  - if [ "${INSTALL_SRC}" != "" ] ;then sudo apt-get install python-yaml; rm .travis.rosinstall; for src in $INSTALL_SRC; do name=`basename $src`; python -c "import yaml;print yaml.dump([{'git':{'uri':'$src','local-name':'$name'}}], default_flow_style=False)" >> .travis.rosinstall; done; cat .travis.rosinstall; export USE_DEB=false; fi; # set USE_DEB false to enable .travis.rosinstall
+script:
+  - .travis/travis.sh
+after_script:
+  - sudo pkill -KILL Xorg
+  - sudo apt-get remove --purge xvfb
+  - sudo apt-get remove --purge mesa-utils x11-xserver-utils xserver-xorg-video-dummy
+after_success:
+  - TRAVIS_JOB_SUBNUMBER="${TRAVIS_JOB_NUMBER##*.}"
+  # begin hot fix
+  - sudo wget https://raw.githubusercontent.com/euslisp/EusLisp/master/lib/llib/documentation.l -O /opt/ros/$ROS_DISTRO/share/euslisp/jskeus/eus/lib/llib/documentation.l # hot fix unitl 9.12.2 is relesed
+  - REPOSITORY_NAME=${PWD##*/}
+  - rm -fr ~/ros/ws_$REPOSITORY_NAME/build/*/*.md
+  - source ~/ros/ws_$REPOSITORY_NAME/install/setup.bash
+  - for pkg in ~/ros/ws_$REPOSITORY_NAME/build/*; do (cd $pkg; pwd; make help | grep eusdoc | cut -d \  -f 2 | xargs make ); done
+  # end hot fix
+  - if [ "$TRAVIS_JOB_SUBNUMBER" == 1 -a "$TRAVIS_BRANCH" == "master" ]; then .travis/upload-docs.sh; fi
+after_failure:
+  - if [ "$ROS_DISTRO" = "hydro" -a "$USE_JENKINS" != "true" ]; then
+      source /home/travis/ros/ws_jsk_roseus/devel/setup.bash
+      rostest -t roseus test-genmsg.catkin.test
+      rostest -t roseus test-genmsg-oneworkspace.catkin.launch
+    fi

@@ -1,0 +1,28 @@
+sudo: required
+
+services:
+  - docker
+
+env:
+  - DOCKER_COMPOSE_VERSION=1.8.0
+
+before_install:
+  - sudo rm /usr/local/bin/docker-compose
+  - curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
+  - chmod +x docker-compose
+  - sudo mv docker-compose /usr/local/bin
+  - sudo /etc/init.d/mysql stop
+  - sudo chmod -R 777 .
+
+install: ./docker/up
+
+script:
+  - docker exec -u www-data chloris_php bash -c 'phing build'
+  - docker exec -u www-data chloris_php bash -c 'phing test'
+
+after_script:
+  - sudo chmod -R 777 .
+  - ./docker/down
+
+notifications:
+  slack: larvelki:KtdpTWkhFwS4j9GJZ4DT2IFk

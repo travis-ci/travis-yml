@@ -1,0 +1,41 @@
+language: python
+
+python:
+  - "3.5"
+  - "3.6"
+
+sudo: false
+
+cache:
+  directories:
+    - $HOME/wheelhouse
+
+before_install:
+  - export WHEELHOUSE=$HOME/wheelhouse
+
+install:
+  - travis_retry pip install --upgrade pip
+  - travis_retry pip install setuptools==37.0.0
+  - travis_retry pip install wheel==0.26.0
+  - travis_retry pip install invoke==0.13.0
+  - travis_retry invoke wheelhouse --develop
+  - travis_retry invoke install --develop
+
+env:
+  - MFR_CONFIG=./travis-config.json
+
+script:
+  - invoke test
+
+before_cache:
+  # force reinstall for reqs pulled from github repos
+  - rm -f $HOME/wheelhouse/xlrd-*.whl
+  - rm -f $HOME/wheelhouse/waterbutler-*.whl
+  - rm -f $HOME/wheelhouse/aiohttpretty-*.whl
+
+
+notifications:
+  flowdock: 0221882cdda034c0e9ac2a0e766053dd
+
+after_success:
+  coveralls

@@ -1,0 +1,22 @@
+sudo: required
+services:
+- redis-server
+language: python
+python:
+- '3.6'
+cache: pip
+install:
+- pip install -r kinappserver/requirements.txt
+- pip install -r kinappserver/requirements_dev.txt
+before_script:
+- export PYTHONPATH=$PYTHONPATH:$(pwd)
+script:
+- make install-cv-module; make install-sdk; make install-travis;
+- make test;
+notifications:
+  slack:
+    secure: MfEItdxC2gIEkmqI6VZkl+XoqpbdIhIeAdncrRbD61dnysbeDyrhPAHrzWBZ8jqkJs+HLbFnU5CICo1QKmsYl/V5Zu+RVWDl5x0bujw8qEnI8CnxdCqtuBsZNncl5DhPGzPbGzPE1sF73p+lnywYWL+t68iSa95c2MzgtI/yEWNSL/dPIjhoW8f+CqiFAq/vSwMj+2Nbnc6SK1j1aER5LZvazcFCJpiy8FJeI+qata6EJWuZ+x4rYkYDcxA8FLSf/adjC6WVv4L1XRl2Ja06HlBafAWvIsjC8UBHwEc0vPnxFUmJlEKz99AYvQZvhWNI5Ambtv0JRRDXttCtliwOWdkZ06gTZzWwcdKTj2BO6AIEHiRjIqFY4gZ8N6M1vGgnhTOMDcEM59L0DpNJqhNvZYHyCf/fUlRmfauplAFIEic18VY8VQCix6lR0AKLxQwgbgK7I7Z0Cn0uO0O26u5547Nth1/ozvv6TtOBWP0eL6tqA2aPDLnfmuyYCcn1H+sZpcBRTlwJknjKr/gDguZ8N387SjI64p422b+Dw5jzrYYbB8+WqNECVvQq8qdGQTsXaFHuxO3tDWhI5aQGR2L77b1rasAuaxRlKnefar9Ym1OmVlmCB2eYsyNv6yRsecn9F0+lTQNAIybrf4FNJwYOW4bpGuXIgSnHk49KODxE12c=
+before_install:
+- openssl aes-256-cbc -K $encrypted_8bd0680c521b_key -iv $encrypted_8bd0680c521b_iv
+  -in secret.enc -out ~/.ssh/secret -d; chmod 400 ~/.ssh/secret
+- 'echo -e "Host *\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config'

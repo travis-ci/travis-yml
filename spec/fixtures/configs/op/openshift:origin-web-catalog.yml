@@ -1,0 +1,12 @@
+language: node_js
+node_js:
+  - "6"
+before_install:
+  - if [[ `npm -v` != 5* ]]; then npm i -g npm@5; npm -v; fi
+before_script:
+  - make build
+script:
+  - hack/test-headless.sh test
+  - hack/verify-dist.sh
+addons:
+  firefox: "49.0"

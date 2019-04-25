@@ -1,0 +1,19 @@
+language: go
+sudo: required
+
+os:
+  - linux
+  - osx
+
+go:
+  - tip
+  - 1.12.x
+  - 1.11.x
+  - 1.10.x
+
+matrix:
+  allow_failures:
+    - go: tip
+
+before_install:
+  - if [ $TRAVIS_OS_NAME = "linux" ]; then sudo apt-get -qq update; sudo apt-get install -y dwz; fi

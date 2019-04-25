@@ -1,0 +1,43 @@
+language: python
+cache:
+  pip: true
+  directories:
+    - ".chalice/venv"
+python:
+  - 3.6
+dist: trusty
+addons:
+  apt:
+    packages:
+      - jq
+      - moreutils
+      - gettext
+before_install:
+  - export BOTO_CONFIG=/dev/null
+install:
+  - pip install -r requirements.txt
+  - pip install -r requirements-dev.txt
+  - pip list
+before_script:
+  - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+  - chmod +x ./cc-test-reporter
+  - ./cc-test-reporter before-build
+script:
+  - source config/environment
+  - make test
+after_script:
+  - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
+env:
+  global:
+    - CC_TEST_REPORTER_ID=8673a342bc2822cbdfe151982a7e72743f44fecd030867754d8d34ebf845b130
+    # AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY
+    - secure: "g40kek3jaTwlu+DMoqCebS+6epqRXfDzFIMB49qfgapGk9ugBUGq13bnckx8FcOVxWQAvJXIqMSX4/PPx/w7iwnYViQ3LZeFdsAYjBvFYpxFb7C89d1SPimemCn2ElF63KDJYja5DwlsdAI95SWfW8cWXj/w+igIOdlTDwofTdx6qppN40DuviT5FUlS3yp00GbLjkDznQKM22JXWAMcHIJ1LI1xcsBpDcYcWab/PUJq/WUQgQeZymUQ+zCrseoz5f3uQIqJTsp24EqD6DAKITOMb8o2HgW/ABrFH3ScWWqH4ijyXiXVeMGl6lKL7l89yoJQncK/bMnpkU74Fw6iaQhrnrLyamScdkK2oRQ0i6CeuGEUNpoCDLKWaqjxX9YZi9x5zBxrT7UfIOX8DPa2OgyJJbYvb2K/A2m1VY6Ir7D5X26WFtRIeWupxH1T5Y1LwClxE64P30o07GGgqCqjDcrQleif9gYOr7Mosaf41jbKrvBIden840GKtcf0agZvGuyUfLQpcU43D5AYhtsiXje3tPu11joxjPXAPYkblhF1DssOJWoUhzRrjKnSqxKAexYe13r/EP5b7JTIo8lh7aZiyQ1dvgEQ+ptv83Te2URqdYO7eBpeJR4yxiOIxH+FN0bR5lCmeEZM6uh1hjNyR/gvDr8DQG/WKKe23DCizzs="
+    - secure: "WoBXAEjmuFbtt/CNaiyY8zt4/Pj2ldxwM/EDsjV0MGMKnV6Drm7/xbpM7RNyrX6Rpko+hrGPxcBlOSIti3oqXh0USEmzDPJIk1HCVQ6GPypawz4Bk+r03VymrI7Kik5KvFxh9kZLoqDesb/5mfZVxJO4lPQtWb5/wDjAErs91iwXLv8RAqKfa82RgTWg/QHCgepQqggj1Yi5Mpy5bFAIawxHrjK8fqe61+PRALrkScyZFwTbtVdym26dKt8kTN4QEw/PfrGJfyEQjs8Bx3eKAcoMMgNGeNfkCcCp2cVHLeFZ4uxPFq6g3B9OupMbLhI2eV3EQpE0xwsDVyBZ3YGB4YrDrYe6l0Aac9UF1ZgFSmAc0EHuVN2aka4qO9ZpiZRDyZVW8PBM7js4c7GiWia6FS4rsTKX4UFkiyiBKJNLdoKLutZvLrPHxUIcnGnmbEyZ/VoMm61rwX8GRlIl9kLeLV9eMWvYQc7Jjen6jkG7U2sK6YPzepgHLmFywSOCp/8+Woa8TlYM0UfsH+0FuTmMbolYPCZEMqSht0sBCsehcPhofHIknfnLFaM75VYPwkiwWwCDb3OITlux0PstCUiyeBoVbjATB1OhUofGR9XEdz9uBfD9rMiRgdldYhyrDS5nMSurCX6EeWEe6VYRTrOIEC177ec4k/oBlNM71oM3gU8="
+    # enc_password
+    - secure: AIB4I+rWirx+fIheq0lHno8JFhWSmjg5p+/CyIK9FoD2WBb18vPaEMkuDxblUox9sUDjVAaxFNs1iTIOdxchflA9oW5LQttJKJWdjlMKW1tdJ9ipUdxZ6qnCP84OEL8fJMT4rvrzA17DTOWzXCDoJzNyab6O6TXb3WGYf57OyAkGdZ6GUJmeQmSbLmXLRYpWru0uam8Q9gtIHuFH151sOWWWNLTLFM8idxp4LIWVO1u8vADIhxd9i1HkOj4lYrrNTsHAcilVR1yMj3ovaJOTDNk1D6067ZI3rzb3lUOqZIIz1loNUwz6zqp8isAZ1Dnzz/+I5Q9uKoYIrnYX245L8I6vU71EiSTbgsHwdLn5ICLpyrBDr7YVBg68lrqzEzQWKWkBC0jeGGjCwdZitb+o4MmlG3f7W9g5a/OLelTdiDcgM+3nj2QgApGnAZle7kJW90jEC3aroNbSuHnffX6tmwdil4m5eyqqAWwwOQ3OpVR4yM4vxeaL5xnCVwJ4N3ZYTzvDlaUURqoqKOsCVlGBETS3XdOqg17MFBk+H5GsATOno1rMHo7ztBIvcqzyIj4RvxFTFrMehFnJ9lLUlpo7R0I3chXNzijLWbrkKcFJB7+Ujo/bTBH5VsvShjpAkAWlKx63Js97+bN8prslA3uJ0y4He2nKvIQmrItgztreQgs=
+    # GITHUB_ACCESS_TOKEN
+    - secure: "da2Ip1Znt2P/jNix2s3q5HDudOUCfu2GerrDhs+rksB3UkB+SZjQg7me1Lyslw+cRRBS7FKTdpq1DYXdOoBe/zpYj2vCINu46dMOyLYuITxDJOdKfCj4L5K1pzH+cq05GvcqMP/rR774oLzjzhY2URs1nGJIkurHpVhsv9kKuCOFaouXcFcpCr59+9JXBwHnxkNBn2TfC/VdBaZ4Ks+VI9cexCWgE0ZgEVNZKImd5MBbG6v8dkQX3O1tgi6/YmWNo1YDFmsrHsgrgllB69B2Iag0gAc+a5a0OUmJXx7yRmnM1unaHygYRJ+NbK6c+hHgmsR9JGCbPlZSCGVcCy6QFFpQAXd2eacdRvctFhfJd6KtSyIl+hzk5yus3QmJsYYgQ7+IwEnsn+FdxzNCJCCqq7KW2ATkn2uAfjAfD8OkQKBtFEjgZ3maIB4DmjFf2BGTdTHsdEROrMpdGXugkEzM9cVnvsSPxRgxi4sV6Afq6/XcXhFWVZ49o+sgj1lqNLa25KpkJzGWzuQimTYV/t0QCuKjuiwG7rsyb6/INS1koFXmmpnrI2j9UPZlfZ1pynbkW+2J8K9nWvFOoH+iUqkFQcBs7AHVqH0nzgt8nHW0wNm3MqEx9deMkorwNttgBtGh5SoTKZMa94k344L/aoo4Ddw+OG9KuksbSngx+9wGMh0="
+    # TERRAFORM_STATE_BUCKET
+      secure: GGxcg2APMUgjtS5qYRJ6LqpbfdvAChozvYyvDKPJg8y/uuUaTzhcgJOD+HJCYHZcsaQ3c8w7uoT/07zP7yjE4+1NsvYAfMBjcMZvuzzOq5nzo6fIK3+DludYnPW2NrcuMBS2C9pWiF5tOfD2RswY/GExWvI7f7v+EwgiiRBccbXrUcB8raGPss80uw5UxBEtlsYAqdDUZ3nLWkXgYK4RV+cUytf6C2caRNtrP9AZmF5xBNnvwp+KTW0hnmObyAuxhOzQ+CgcJcyN0+m/aE/lh9uEZhXRG1uoE0j9D8YUPLa3JXXbxQuCB9xBH1+/7nu/ld5uczFIEVeNGIw9ubUvzzpOByKulWU2hoLDVs1VHZWLiNQSXv8Gsq7Sx/5MUitVdTiPkvSJBkU1m7bYdRfOucJDPZrDwmT3FYT+4DyC+r7qr/Tvic/C/+id9cPOcie5Z0vg9UBX2XbUUgej+E9Iqce8rXR/qTedEFTNqcwTyDhy5nINVqN6TTTl5n3n7StwetE+1M6M9MDHx8ceyxkAa/2s0yQwAIux16NGblaCts3BrAQ5M04vs4AIVJvWrKoflVMLRkyYJkgp76iwXYOBw/YQuIknsmlwU5hZP71XIhz+CTUfhTBmqyYE59jcFZSr19gwFxi97R+DrrXr7Z05/0bHGzapmNGuZ3WbMQxtKWU=

@@ -1,0 +1,21 @@
+language: csharp
+script: |
+    cd "$TRAVIS_BUILD_DIR"
+    #
+    # clone + update
+    #
+    git clone -b gh-pages "https://github.com/saferpay/sndbx.git" _gh_pages
+    cp -r assets/* _gh_pages/assets
+    mono libs/GitHubPagesGenerator.exe -i "$TRAVIS_BUILD_DIR" -s "$TRAVIS_BUILD_DIR/Sitemap.json" -c "$TRAVIS_BUILD_DIR" -o _gh_pages -t "Integration Guide"  || travis_terminate 1
+    cd _gh_pages
+    #
+    # show result
+    #
+    ls
+    #
+    # commit + push changes
+    #
+    git add -v --all .
+    git -c user.name='Saferpay-DevOps' -c user.email='travis' commit -m "Updated Github pages"
+    git push -f -q https://Saferpay-DevOps:${GITHUB_API_KEY}@github.com/saferpay/sndbx.git gh-pages || travis_terminate 1
+    cd "$TRAVIS_BUILD_DIR"

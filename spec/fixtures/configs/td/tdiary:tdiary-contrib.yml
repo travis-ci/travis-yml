@@ -1,0 +1,21 @@
+language: ruby
+cache: bundler
+
+rvm:
+  - 2.4.5
+  - 2.5.4
+  - 2.6.2
+  - ruby-head
+
+before_install:
+  - gem update --system
+  - gem update bundler
+
+script: bundle exec rake spec
+
+notifications:
+  irc: "irc.freenode.org#tdiary"
+
+matrix:
+  allow_failures:
+    - rvm: ruby-head

@@ -1,0 +1,29 @@
+language: node_js
+node_js: 9
+addons:
+  chrome: stable
+before_script:
+- npm run lint
+- cp test/index.all.html test/index.html
+# `cp` because of https://github.com/Polymer/tools/issues/416#issue-327241592
+- cp wct.conf.local.json wct.conf.json
+- polymer test
+- npm run build
+script:
+- cp test/index.high-priority.html test/index.html
+- 'if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then
+    cp wct.conf.sauce-chrome.json wct.conf.json;
+    polymer test || travis_terminate 1;
+
+    cp wct.conf.sauce-firefox.json wct.conf.json;
+    polymer test || travis_terminate 1;
+
+    cp wct.conf.sauce-others.json wct.conf.json;
+    polymer test || travis_terminate 1;
+  fi'
+env:
+  global:
+    # SAUCE_USERNAME
+    - secure: MQI3qkGw7G3R1XSgABqqJt3XbrzzhoBV9xMK6UQ16eAbTi6Cw1QoD6bWa+icz1C6o/OAbU7fc+Iw0RAjITkjjlj5mXUn83Ggu5pZfjoKnC6CgGSPJXTFjz1sj2KEBUuKoURbLPxuZi8bRI4O2QWm5ZSC+6FpG9mVwXj9xPbPnJV2o1Nf2Vg45+Xm8/EuTLRzwRaiT3sDVC/x2p+zFh/C43MTRpAMSbU5wb/LZXw8Txu7DIW7VfGrLPalE4xKhyh/Q2C6tnCtDALtP7mQho63sxFWuIGJAF75OXQj7oPm5VIsaFJ8YAqQC2ymGZMAmlmz+y+X0duXG1zAbZa0gs8/JVaWRY6cE+agxyZZe5EV6xITvc7kMk/PnRrFJdtHsHxZ0BGUgpeI9WkOJ5Td16Z0Y6s2beR+VvvwEeEoAT+jKDoJkIAP1mQCoisvoBUk44BANKVsj4Uef3r8krK+G96PxlWR4Z1iHAGG+O0iIM4SjYfMthUcXDLGD4z/9dbLSIL79ph3SrY0AgD/hDXKBJ7XbsPbUkAPgDZDyG/6sRDs0lQVtuVTwWPLhyKuc3VV8IZD5/3cx8IUJ/wNoRxn33onnpFymlQNOl2fvDhuOOcNSURZ39azlJzXRJpdgvFpfgttn1xu7doTli5eW1IaWmzk5UhJqtu+aoa7H71U9aSG1sA=
+    # SAUCE_ACCESS_KEY
+    - secure: tuxL6PtBCORhxfL+lqD1fSaX46qh7/7iOM1opluDthkStcj90WHQLN9SS7cr7X3o3GKdR2y1hce5pU6zCzvB6UQYlUpn8yL631IJuyFPprKn3Bnss/1BqK5vNidnP92vapUBu8Skfw5twgxulCexpM3Wtbrw62wQU4MsswvbrbUtDlnbxMoAj8wf4gAXUifrpcAea03sdFAi/iwQ3RuV6bZPGyyoG1gtpggPRM4Eepd8U3llrctXOu96hoi8onzeUPgSeGf0OwWfKc8DiKPrkbXPsPnZxRfGiOClM7nw3l34G9RxyXIZo++dQlMHJDl6v5gFMIqNvaWjnQovncc01N5N61gJRbaOcMXFoiNIDi3gC+Z1VzNjLzcyXrQBP3z7wVASGHc0nlcgovfwADsBBce/EpLlBxiNL9US2AGgUo8sPu0D0rf9mzyRvqaNh1KOxan9WSYOCS/JzyarWVQmJ80hFqlefl2N+Jb5D+WawoK4+zDDlbjplZnmuM5LutDERd7gqK2ZI2pjyItkJqyDt8PlMq3SD9qnV8Lrq3Y8bmKuLGDXqCedeUTSjnWCZmcHjB47eKl8Fw3w2Lhh3SCCwYzXU4TyhVxwqr/aBaJSk2Da7lN6Noh3dqYKel0blPuoASw4wUy5Auv1Y/S7jQWjtcZ1O8NKwIc2Ad/IqauygzU=

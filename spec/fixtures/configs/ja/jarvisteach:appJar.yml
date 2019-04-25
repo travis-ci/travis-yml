@@ -1,0 +1,97 @@
+language: python
+
+matrix:
+    include:
+        - os: linux
+          sudo: required
+          python: 2.7
+          env:
+          - PYTHONPATH=.
+          - COVERALLS_PARALLEL=true
+        - os: linux
+          sudo: required
+          python: 3.2
+          env:
+          - PYTHONPATH=.
+          - COVERALLS_PARALLEL=true
+        - os: linux
+          sudo: required
+          python: 3.3
+          env:
+          - PYTHONPATH=.
+          - COVERALLS_PARALLEL=true
+        - os: linux
+          sudo: required
+          python: 3.4
+          env:
+          - PYTHONPATH=.
+          - COVERALLS_PARALLEL=true
+        - os: linux
+          sudo: required
+          python: 3.5
+          env:
+          - PYTHONPATH=.
+          - COVERALLS_PARALLEL=true
+        - os: linux
+          sudo: required
+          python: 3.6
+          env:
+          - PYTHONPATH=.
+          - COVERALLS_PARALLEL=true
+        - os: linux
+          sudo: required
+          python: nightly
+          env:
+          - PYTHONPATH=.
+          - COVERALLS_PARALLEL=true
+        - os: linux
+          sudo: required
+          python: pypy
+          env:
+          - PYTHONPATH=.
+          - COVERALLS_PARALLEL=true
+        - os: osx
+          language: generic
+          env:
+          - PYTHONPATH=.
+          - COVERALLS_PARALLEL=true
+    allow_failures:
+        - os: osx
+        - python: 3.2
+        - python: 3.6-dev
+        - python: nightly
+        - python: pypy
+before_install:
+    - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then tests/osx.sh; fi
+    # virtualenv>=14.0.0 has dropped Python 3.2 support (and pypy3 is based on py32)
+    - if [[ "$TRAVIS_PYTHON_VERSION" == 3.2 ]]; then pip install "virtualenv<14.0.0" ; fi
+    - pip install pytest pytest-cov
+    - if [ "$TRAVIS_PYTHON_VERSION" == "3.2" ]; then travis_retry pip install coverage==3.7.1; fi
+    - if [ "$TRAVIS_PYTHON_VERSION" != "3.2" ]; then travis_retry pip install coverage; fi
+    - pip install coveralls
+    - pip install codeclimate-test-reporter
+    - pip install numpy
+    - if [[ "$TRAVIS_PYTHON_VERSION" != 3.3 ]] && [[ "$TRAVIS_PYTHON_VERSION" != 3.2 ]]; then pip install matplotlib ; fi
+    - if [[ "$TRAVIS_OS_NAME" != "osx" ]]; then sudo apt-get install python-tk; fi
+    - if [[ "$TRAVIS_OS_NAME" != "osx" ]]; then sudo apt-get install python3-tk; fi
+
+before_script:
+    - "export DISPLAY=:99.0"
+    - if [[ "$TRAVIS_OS_NAME" != "osx" ]]; then sh -e /etc/init.d/xvfb start; fi
+    - sleep 3 # give xvfb some time to start
+    - VERS=`python -c 'import sys; print(".".join(map(str, sys.version_info[:2])))'`
+
+script:
+    - cd tests
+    - coverage run --source=appJar widget_test.py
+
+after_success:
+    - coveralls
+    - CODECLIMATE_REPO_TOKEN=3b1c31ab1ba5ee5eb7aaf75efd1245ee00e38a070f7a82fece4b5f7b9ca5f7f7 codeclimate-test-reporter
+
+addons:
+    code_climate:
+        repo_token: 3b1c31ab1ba5ee5eb7aaf75efd1245ee00e38a070f7a82fece4b5f7b9ca5f7f7
+ 
+notifications:
+    webhooks: https://coveralls.io/webhook?repo_token=7HaWcXyVGa6t5IXOXtZPb71ZCYWCYkz7Ay2pS

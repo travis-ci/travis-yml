@@ -1,0 +1,11 @@
+matrix:
+  include:
+    - language: ruby
+      rvm:
+        - "2.2.2"
+      before_install:
+        - gem install bundler -v '< 2'
+      script: "bundle exec jekyll build --future"
+    - language: node_js
+      node_js:
+        - "10"

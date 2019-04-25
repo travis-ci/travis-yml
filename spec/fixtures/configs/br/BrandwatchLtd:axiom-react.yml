@@ -1,0 +1,26 @@
+language: node_js
+cache:
+  yarn: true
+  directories:
+  - "~/bin"
+  - "~/opt"
+branches:
+  only:
+    - master
+before_script:
+- yarn ci:setup
+- git diff --exit-code # make sure that yarn.lock didn't change
+script:
+- yarn lint:commits
+- yarn lint
+- yarn build:flags
+- yarn ci:test
+- yarn build:site
+after_success:
+- bash scripts/publish_site.sh
+env:
+  global:
+  - COMPRESSION_PLUGIN: true
+  - SOURCE_BRANCH: master
+  - STORAGE_BUCKET: axiom.platform-prod.gcp0.bwcom.net
+  - secure: li5TlFI+oPOhcpP+MsG1GDKW8/ACQlJseDdFnz2QFF4ps5uuX5LyhOH4/8wABPsQ9U9CRpp7stjQP08fCQyVBTVHj78nyQIDt0O/VzDPrMfEQHCBmgGtl5xQ5eSSSPr+t1QmpyGB8FIiRSnyXoX51cGgc5YkgDadDWVummFS9sED5bEojgnnN1z46X/WcRBxGw6v+ZS9as+SgNBSCuwWl2h85KmMHFaHOpzCrC5d73Tovb4MzGPnTeecLyUvgmWmZ7BKlrVqrWFVBMOMGIp1bvdWJLHFN45hC/kh3kaYZ8deITS3j/YqIFzUW2SeuIX3tAi0Fx6O1dnGUPGjz+ws0z3FZSQsXQVaWHHbnDCRyCNE7Td30uv6SbFRA0vsmOU4IyOj9snJ0LFJTW9ru27J3FvmgRUQfBlcYl8zK+RRnjCFKzyiBjPyiZie2jC4Lt20KCU7zhmY31Mgm4EEi+krzyw+s1RaDxWpBkeCPFRhvdbZUgw2m0toGv8qlWNgakcySKM5Nclvoq7YBfXFZaPGUYVFgG6JzQWqXexsJne7lSecxwWfisdKwOYl6QC0Bmf/9xxB+R9ReY1rQhLZCzP8RT052YDBJocBXTwROdxl4ef+pftBBbUIqhQiytPTetRhAwIGnaLTr8kGc2bMr1lKybcgfqY3edGhduNpxq/LRc8=

@@ -1,0 +1,18 @@
+
+os: linux
+dist: xenial
+language: python
+python: "3.7"
+sudo: true
+
+install:
+  - pip3 install -r dev-requirements.txt
+  - pip3 install -e .
+  - curl -L -o ./source/gene_enricher/hgnc_complete_set.json "https://drive.google.com/uc?export=download&id=1foeV00qsBZs86x8929jOls_9MhWR6Oyw"
+
+script:
+  - flake8 .
+  - python -m pytest tests --cov=. --ignore=tests/integration
+
+notifications:
+  email: false

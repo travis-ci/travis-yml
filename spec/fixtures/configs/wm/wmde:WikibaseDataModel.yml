@@ -1,0 +1,30 @@
+language: php
+
+dist: trusty
+
+php:
+  - 7.0
+  - 7.1
+  - 7.2
+  - 7.3
+  - hhvm-3.18
+
+sudo: false
+
+install: travis_retry composer install
+
+# Hack: Don't run phpmd with HHVM
+script: if $(php --version | grep -q HipHop); then composer test; else composer ci; fi
+
+notifications:
+  irc:
+    channels:
+      - "chat.freenode.net#wikidata-feed"
+    on_success: change
+    on_failure: always
+    template:
+      - "%{repository}/%{branch}/%{commit} : %{author} %{message} %{build_url}"
+
+cache:
+  directories:
+    - $HOME/.composer/cache

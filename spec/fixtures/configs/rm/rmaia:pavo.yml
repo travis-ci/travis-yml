@@ -1,0 +1,33 @@
+language: r
+r:
+  - oldrel
+  - release
+  - devel
+cache: packages
+addons:
+  apt:
+    sources:
+    - sourceline: 'ppa:opencpu/imagemagick'
+    packages:
+    - libgmp3-dev
+    - libmagick++-dev
+r_packages: covr
+after_success:
+  - Rscript -e 'goodpractice::gp(checks = c("lintr_assignment_linter", "truefalse_not_tf", "rcmdcheck_partial_argument_match"))'
+  - Rscript -e 'covr::codecov()'
+notifications:
+  email:
+    on_success: never
+    on_failure: never
+  slack:
+    rooms:
+      secure: YMbPAhj0p6M//rtxMxajYTbZQvDufZhkKHNT8N7DeC/Z7FpPiyOH50ntYBahnKN3uXAI6ex/6T0c34M+ng88E3TEGZogTKSFms6WGXQBDERSqXD/mwO66Gu4G+NDJ9eBWMSF8Bpl/XhlHkgNwIP1fJ7ln67iteu2Y4h9cw51xDLDWKwJBddNnfM7UFZskx/Sv9cV0GXl72WdXC9Imb9mkf3CWLqZsT5tfOH7NuxcmNJQslQ+3WHJGYrM9Fqzay/DDORVyPEgQMUEJtO1aBc1BIpzWnx7t3HZDLf1cFnZkGCXqrGY0dKf2KjqMx8NKlOxwy6zR6WesqRjTYh/iiHd9vWBmcXwmDKSdh4MYAYoNvpcOHGTCVB2/Qi1TABtNlOBXnzFJI57HvAJKD+OSlKr0+W9Xpm49Ukn4fWBaFudGB/0No5G5nsYdb+BlJq22PTErtioK7DyM+EfKTT75q2ymOQsSAr5hQphumUjf8fV9PPsDJGKswkoHDVCmgAbrAkmWdIwN23gzEf+FZzg30eGIawfFarI0xBOyyxDzzCM6LuUvA95jv/ExhdxHsg7cJw41JNH/jsLXG0YuECfH/mhihj2dUPjbqsngFZMmxJO2oUOu2fNxE/ztrx0hNOsgIwrzlc3HSns6PnSMnHNqIv8ggvAd7Hlrcxp4s+SOImUkNo=
+    on_success: never
+before_deploy: Rscript -e 'remotes::install_cran("pkgdown")'
+deploy:
+   provider: script
+   script: Rscript -e 'pkgdown::deploy_site_github()'
+   skip_cleanup: true
+   on:
+     condition: "$TRAVIS_R_VERSION_STRING = release"
+

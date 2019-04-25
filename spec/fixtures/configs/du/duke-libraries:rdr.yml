@@ -1,0 +1,17 @@
+language: ruby
+rvm:
+  - 2.4.2
+services:
+  - postgresql
+  - redis-server
+before_install:
+  - sudo apt-get update -qq
+  - sudo apt-get install libclamav-dev libclamav7 clamav
+before_script:
+  - "cp .rspec.travis .rspec"
+  - "cp config/role_map.yml.sample config/role_map.yml"
+  - "cp config/database.yml.travis config/database.yml"
+  - "psql -c 'create database travis_ci_test;' -U postgres"
+script: "bundle exec rake ci"
+jdk:
+  - oraclejdk8

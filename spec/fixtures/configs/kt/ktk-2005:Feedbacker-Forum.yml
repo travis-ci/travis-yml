@@ -1,0 +1,161 @@
+sudo: required
+
+dist: trusty
+language: node_js
+node_js:
+  - "10.3.0"
+
+cache:
+  directories:
+    - client/node_modules
+    - server/node_modules
+
+addons:
+  hosts:
+    - one.localhost
+    - two.localhost
+    - three.localhost
+    - done.localhost
+    - dtwo.localhost
+    - dthree.localhost
+
+services:
+  - docker
+
+jobs:
+  include:
+    - name: Node
+      script:
+        - mkdir -p build
+
+        # Install Go
+        - curl https://dl.google.com/go/go1.11.linux-amd64.tar.gz -o build/go.tar.gz
+        - tar -C build -xzf build/go.tar.gz
+        - export GOROOT=$TRAVIS_BUILD_DIR/build/go
+        - export PATH=$GOROOT/bin:$PATH
+        - go get -u golang.org/x/lint/golint
+
+        # Install packages
+        - cd client && npm install && cd ..
+        - cd server && npm install && cd ..
+
+        # Start "container" servers
+        - pushd misc/one
+        - python -m SimpleHTTPServer 10001 &
+        - popd
+        - pushd misc/two
+        - python -m SimpleHTTPServer 10002 &
+        - popd
+        - pushd misc/three
+        - python -m SimpleHTTPServer 10003 &
+        - popd
+
+        # Lint server and client
+        - npm --prefix client run lint:ci
+        - npm --prefix server run lint:ci
+        - npm --prefix client run lint:sass
+
+        # Lint and fmt Go Proxy
+        - find proxy -name '*.go' | xargs gofmt -l | tee /dev/tty | wc -l | xargs test 0 -eq
+        - golint -set_exit_status proxy/...
+
+        # Check that Postgres migrations are unique
+        - ls -1 server/src/database/migrations/postgres | cut -d - -f1 | sort | uniq -d > build/migration-conflicts
+        - diff build/migration-conflicts /dev/null
+
+        # Build client development and production
+        - npm --prefix client run build:dev
+        - npm --prefix client run build
+
+        # Test documentation
+        - mkdir -p build && mv docs/api.md build/api.md
+        - npm --prefix server run start -- --listEndpoints ../build/endpoints.json
+        - npm --prefix server run doc -- --endpoints ../build/endpoints.json
+        - diff build/api.md docs/api.md
+
+        # Run client tests
+        - npm --prefix client run test
+
+        # Test local development
+        - npm --prefix server run test:api
+        - APP_SERVER_PORT=9001 npm --prefix server run start -- --testAuth &
+        - APP_SERVER_PORT=9001 bash misc/test-server.sh
+
+        # Test container proxy
+        - pushd proxy
+        - go version
+        - go build
+        - ./proxy &
+        - sleep 3
+        - popd
+        - curl one.localhost:8086/test.html -o build/one.html
+        - diff misc/one/test-injected.html build/one.html
+        - curl two.localhost:8086/test.html -o build/two.html
+        - diff misc/two/test-injected.html build/two.html
+        - curl three.localhost:8086/test.html -o build/three.html
+        - diff misc/three/test-injected.html build/three.html
+
+    - name: Docker development
+      script:
+        # Server needs to be installed for tests
+        - cd server && npm install && cd ..
+
+        # Start "container" servers
+        - pushd misc/one
+        - python -m SimpleHTTPServer 10001 &
+        - popd
+        - pushd misc/two
+        - python -m SimpleHTTPServer 10002 &
+        - popd
+        - pushd misc/three
+        - python -m SimpleHTTPServer 10003 &
+        - popd
+
+        # Test development Docker
+        - pushd docker/development
+        - USE_TEST_AUTH=1 docker-compose up --build -d
+        - popd
+        - APP_SERVER_PORT=8080 bash misc/test-server.sh
+        - curl done.localhost:8080/test.html -o build/one.html
+        - diff misc/one/test-injected.html build/one.html
+        - curl dtwo.localhost:8080/test.html -o build/two.html
+        - diff misc/two/test-injected.html build/two.html
+        - curl dthree.localhost:8080/test.html -o build/three.html
+        - diff misc/three/test-injected.html build/three.html
+        - pushd docker/development
+        - docker-compose down
+        - popd
+
+    - name: Docker production
+      script:
+        - mkdir -p build
+
+        # Server needs to be installed for tests
+        - cd server && npm install && cd ..
+
+        # Start "container" servers
+        - pushd misc/one
+        - python -m SimpleHTTPServer 10001 &
+        - popd
+        - pushd misc/two
+        - python -m SimpleHTTPServer 10002 &
+        - popd
+        - pushd misc/three
+        - python -m SimpleHTTPServer 10003 &
+        - popd
+
+        # Test production Docker
+        - pushd docker/production
+        - APP_COOKIE_SECRET=testsecret USE_TEST_AUTH=1 USE_TEST_DATA=1 docker-compose -f docker-compose.yml -f host-network.yml up --build -d
+        - popd
+        - APP_SERVER_PORT=8080 bash misc/test-server.sh
+        - curl done.localhost:8080/test.html -o build/one.html
+        - diff misc/one/test-injected.html build/one.html
+        - curl dtwo.localhost:8080/test.html -o build/two.html
+        - diff misc/two/test-injected.html build/two.html
+        - curl dtwo.localhost:8080/test.html -o build/two.html
+        - diff misc/two/test-injected.html build/two.html
+        - pushd docker/production
+        - docker-compose -f docker-compose.yml -f host-network.yml down
+        - popd
+

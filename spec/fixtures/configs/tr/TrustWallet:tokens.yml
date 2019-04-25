@@ -1,0 +1,14 @@
+language: node_js
+
+node_js:
+  - "lts/carbon"
+
+cache:
+  directories:
+    - "node_modules"
+
+script:
+  - '[ "$TRAVIS_PULL_REQUEST" = "false" ] && npm run verify || npm run test'
+
+git:
+  depth: 5

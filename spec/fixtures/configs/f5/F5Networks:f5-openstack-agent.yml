@@ -1,0 +1,97 @@
+sudo: required
+env:
+  global:
+    - DIST_REPO="f5-openstack-agent-dist"
+    - PKG_VERSION=$(python -c "import f5_openstack_agent; print f5_openstack_agent.__version__")
+    - PKG_RELEASE=$(python ${DIST_REPO}/scripts/get-version-release.py --release)
+    - PKG_RELEASE_EL7=${DIST_REPO}/rpms/build/f5-openstack-agent-${PKG_VERSION}-${PKG_RELEASE}.el7.noarch.rpm
+    - PKG_RELEASE_1404=${DIST_REPO}/deb_dist/python-f5-openstack-agent_${PKG_VERSION}-${PKG_RELEASE}_1404_all.deb
+    - RELEASE_TAG=v$(echo $PKG_VERSION | cut -d . -f 1,2)
+
+services:
+- docker
+language: python
+
+python:
+    - '2.7'
+before_install:
+    - git config --global user.email "OpenStack_TravisCI@f5.com"
+    - git config --global user.name "Travis F5 Openstack"
+    - docker pull f5devcentral/containthedocs:latest
+install:
+    - pip install tox
+    - pip install -r requirements.style.txt
+script:
+    - pep257 ./test/functional/neutronless/esd/test_esd.py
+    - flake8 --ignore=H304 ./test/functional/neutronless/esd/test_esd.py
+    - pep257 ./test/functional/neutronless/esd/conftest.py
+    - flake8 --ignore=H304 ./test/functional/neutronless/esd/conftest.py
+    - pep257 ./test/functional/neutronless/esd/test_esd_pairs.py
+    - flake8 --ignore=H304 ./test/functional/neutronless/esd/test_esd_pairs.py
+    - flake8 ./f5_openstack_agent
+    - tox -e unit
+    - python f5-openstack-agent-dist/scripts/universal_truth.py
+    - echo "setup.cfg:"
+    - cat setup.cfg
+    - echo "stdeb.cfg:"
+    - cat f5-openstack-agent-dist/deb_dist/stdeb.cfg
+    - f5-openstack-agent-dist/scripts/package_agent.sh "redhat" "7"
+    - f5-openstack-agent-dist/scripts/package_agent.sh "redhat" "6"
+    - f5-openstack-agent-dist/scripts/package_agent.sh "ubuntu" "14.04"
+    - sudo chown -R travis:travis ${DIST_REPO}/rpms/build
+    - sudo chown -R travis:travis ${DIST_REPO}/deb_dist/*.deb
+    - f5-openstack-agent-dist/scripts/test_install.sh "redhat" "7" ${PKG_RELEASE_EL7}
+    - f5-openstack-agent-dist/scripts/test_install.sh "ubuntu" "14.04" ${PKG_RELEASE_1404}
+    - |
+      if [[ "$TRAVIS_BRANCH" == *"-stable" ]]; then
+        export CTLR_VERSION=v$(echo $TRAVIS_BRANCH | sed s/-stable//g)
+      elif [[ "$TRAVIS_BRANCH" =~ ^v[0-9]+\.[0-9]+\.[0-9]* ]]; then
+        va=( ${TRAVIS_BRANCH//./ } ) # replace decimals and split into array
+        export CTLR_VERSION="${va[0]}.${va[1]}"
+      else
+        export CTLR_VERSION=$TRAVIS_BRANCH
+      fi
+
+after_success:
+  - md5sum ${PKG_RELEASE_EL7} > ${PKG_RELEASE_EL7}.md5 && md5sum --check ${PKG_RELEASE_EL7}.md5
+  - md5sum ${PKG_RELEASE_1404} > ${PKG_RELEASE_1404}.md5 && md5sum --check ${PKG_RELEASE_1404}.md5
+deploy:
+  - provider: releases
+    api_key:
+      secure: lTash9wrbwY5rsdl+ZfhYZ+Iqt2EdvZNqrq6FlLT6L4Wc4/RYCDLFwY2qrDb/n1XI3g/XhOCTyYMCu9URrw0HAY45HcAgOcEABNcAGfs/aBk5uB+l/V/42QKB+oAR9RR9qves5PJGBpJcBym9oswcxblBo8L6Z2o/yFzyGo3tHKVopTZoIw+hPqt5eAClPz8FX0ZIUZqH1iUiqMj1JJWvO9DRWECcjt4pr5HuY3u32qocQP4DUY1WQwI/R6iye5VPTAbWnsIBChJcJF1HAbsVa5IhQHhSo03RCJwZay/NF0btc9dKvIyrwqhQIUZX/RcDPvbs7TP02zg9O27HBAts2ivVRoBulN9dsHGiWGXMMQjavZGsdZ/TddKQxUvWoUKv+nHQyWGbyrE4smDHrex29NR/WgB/kHSAkNyUU1rZs8ALaoab5LY3Z0WmrFlHFs4HDb4YG+//0ODVppRe+Z8uFFnSsN4fjG9Xok+Tl+Gb9XM6/LNu+C+5DCG2VfPCnp2UGzmmo9Hm6ODhWauCR9DfJk1dUTVYb871I3ina0rwm2NQ04bKv0UHGZ2FWpq/KGx+jvXW8F54cWIluU/ze2MrJF/z9uKyTluEbDNBEr9/LaZoG22MBzHZB4xK0cEy+CSwGdOredCDCyEM7dsLlnE8ruiujbCAMvdjsHH4bu4MjU=
+    file:
+      - ${PKG_RELEASE_EL7}
+      - ${PKG_RELEASE_EL7}.md5
+      - ${PKG_RELEASE_1404}
+      - ${PKG_RELEASE_1404}.md5
+    skip_cleanup: true
+    overwrite: true
+    on:
+      repo: F5Networks/f5-openstack-agent
+      tags: true
+  #- provider: pypi
+  #  user: $PYPI_USER
+  #  password: $PYPI_PASSWORD
+  #  distributions: "sdist bdist"
+  #  server: https://upload.pypi.org/legacy/
+  #  on:
+  #    all_branches: true
+  #    tags: true
+  #    python: 2.7
+  #  skip_cleanup: true
+  - provider: script
+    skip_cleanup: true
+    on:
+      all_branches: true
+      repo: F5Networks/f5-openstack-agent
+      condition: $TRAVIS_BRANCH == *"-stable" || "$TRAVIS_BRANCH" =~ ^v[0-9]+\.[0-9]+\.[0-9]*
+    script:
+      - ./docs/scripts/docker-docs.sh ./docs/scripts/test-docs.sh && ./docs/scripts/deploy-docs.sh publish-product-docs-to-prod openstack/agent $CTLR_VERSION
+
+notifications:
+  slack:
+    rooms:
+      - f5openstackdev:$SLACK_TOKEN#f5-openstack-agent
+      - f5openstackdev:$SLACK_TOKEN#build_status
+    on_success: change
+    on_failure: always

@@ -1,0 +1,47 @@
+language: node_js
+node_js:
+  - "10"
+
+cache:
+  yarn: true
+  directories:
+    - node_modules
+
+env:
+  global:
+    - secure: "QlPJQwynPbNLFeprD57TfAnYMQzXmqmZoVRSz5NzldrKqWpavl53UGavchPZhRqBm6Qx63urUYmSne5gt8HTcgqgUX/CZBk5dKpruT2Lb/ynG77NWA5skVcSFRL9/UsU1m++l2wCGLAK1LvcRpduzD0puWS4af91ZhCD7p+kLe1C9RG4Fz4VcssaGsW0nQ9kNxdHjWsN/Gu1PXfKcxHcsMZgHafaDvrsqLt/nVWeGJxJLwj29IvabDtaRPJFQfr9VNlOEECEmqbPzXa5tUA5+0I0BHHoAmwtMfNcRAbDAIjDQurD3i7G/7eHQP1ZQb3q3s/adbsKQVGtnMGknnYSiFvzOj4mL9hp8J7WXzvnkw7ow13Dzw7qGHu4DIi4ooFQ/TlVstP7cRDh8jep0LB5kN0d/fAPlNRWVDNLhCKZkhFkZrySVNCg5VeI6EmmkHJfroJuW75cKuAK6LQ5hUq1XghvYQwowiz3RM6OugyolblLmULP5mh4k2nCO/cO7tCN+NGngcBsrs/O/EP682VjVzJHZsevgXgVpEdpQKEkxiIsjcmcFedIBzqxbgeLkheQAfbOxdciPFX+US7POC4RBM/oWOYRymt9uYksJqU6iOfDZ57WiB0oqsc3vMQlVLBrB10OUm2K1milTpyw13K3wbo/6ukZZ+JI8ddqznaWr9o="
+
+before_install:
+    - set -e
+
+branches:
+  except:
+    - release
+    - gh-pages
+    - meta
+
+notifications:
+  email: false
+
+deploy:
+  provider: npm
+  email: "#AS24-Web-Experience-Team-ds@scout24.com"
+  api_key:
+    secure: mPwWso/3t1VAyRNn1eBQZUnX0WD/k6S0emsdkrhQTjn+vdbN/oj5rlR/5MPdi3NAMl+9FyLB4Qq22qrvMxhaX9bjFQkAdj2CEwNkKpmuGDynI5CiwKHczte0nK28T+hVjg2eVHQAUqHBwOB/3trtUyRAvyzcIHlLjxWKl2w3zlfNrNA/CotsRl+Zv2mbejBWzN4lMgRuARkpJE1S4v/drQQENyXfGCR9zW6/gTerOY6lgzUirXAm+Wv9+zmj7FhcxorMLZUyS9NhPn/mD/Z7Rpa+V9F1NI+L4MtXtlRpYVxuCm/mxYKExZ6DROyngoibNeJkVWe9+XP8Gdhd6+cKL2rOQTmEbxFohpYot7XNwA421YuWUmpnq9oATMdRJluVfN7rD4MJe+gAS5E+ppQEypAAoM+mQTC3rShjxKM0uBs3SecS/6sXDi1MTUkY00WimmMXryn4J1B4r+MDEvoGD6oIP7RQUT7dU/IXyMuEO59gRhGKPY8gb26oS34lwNhA2H9e4pgv+BDRSqqZ1dTvYDRm7N4NtnzZIAe65EDnHnIWhEIoh2iLiDMVEmb7zGVcs9hwEwXH03A7+DOiX9zHnbJfLVm3Xn3r0jadX4BPHA3iG2UwzEUK+3/J/Wm4PiEwKGLz7q6zysy7EyguBBmSd++5oQgbj42nzB/ZMkOgx3U=
+  skip_cleanup: true
+  tag: next
+
+script:
+- npm run build
+- npm run docs
+- 'if  ! [[ ${TRAVIS_COMMIT_MESSAGE} == *"--skip-tests"* ]]; then
+    npm run test;
+  fi'
+
+after_success:
+  # only run for master branch, we don't want to release PRs and other branches
+  - 'if [ "$TRAVIS_PULL_REQUEST" != "true" ] && [ "$TRAVIS_BRANCH" == "master" ]; then openssl aes-256-cbc -K $encrypted_d70c34fb3c42_key -iv $encrypted_d70c34fb3c42_iv -in travis-release-key.enc -out release_key -d; fi'
+  # deploy to release branch
+  - 'if [ "$TRAVIS_PULL_REQUEST" != "true" ] && [ "$TRAVIS_BRANCH" == "master" ]; then bash ./travis_release.sh; fi'
+  # deploy to docs branch (gh-pages)
+  - 'if [ "$TRAVIS_PULL_REQUEST" != "true" ] && [ "$TRAVIS_BRANCH" == "master" ]; then bash ./travis_docs.sh; fi'

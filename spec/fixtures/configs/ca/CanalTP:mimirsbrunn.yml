@@ -1,0 +1,20 @@
+language: rust
+cache: cargo
+rust:
+  - stable
+  - beta
+  - nightly
+env:
+  - RUN=TEST
+script:
+  - cargo test --all
+services:
+  - docker
+matrix:
+  include:
+    - rust: stable
+      env: RUN=RUSTFMT
+      before_script: rustup component add rustfmt
+      script: cargo fmt --all -- --check
+  allow_failures:
+    - rust: nightly

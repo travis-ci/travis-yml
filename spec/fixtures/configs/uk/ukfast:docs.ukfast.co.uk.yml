@@ -1,0 +1,22 @@
+language: python
+python:
+- '2.7'
+addons:
+  ssh_known_hosts:
+  - 46.37.163.252
+before_install:
+- 'if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then openssl aes-256-cbc -K $encrypted_8cdc3d1850ac_key -iv $encrypted_8cdc3d1850ac_iv -in deploy_key.enc -out deploy_key -d; fi'
+install:
+- pip install Sphinx===1.6.6
+- pip install recommonmark==0.4.0
+- pip install sphinxcontrib.youtube
+script:
+- ./tests.sh
+- sphinx-build -nW -b html -d build/doctrees source/ build/html
+- make build/html/_static/css/app.css
+- make build/html/_static/app.js
+after_success:
+- 'if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then chmod 600 deploy_key; fi'
+- 'if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then mv deploy_key ~/.ssh/id_rsa; fi'
+- 'if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then ssh root@46.37.163.252 "cd /opt/docs.ukfast.co.uk/ && git pull"; fi'
+- 'if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then ssh root@46.37.163.252 bash /opt/docs.ukfast.co.uk/deploy_docs.sh; fi'

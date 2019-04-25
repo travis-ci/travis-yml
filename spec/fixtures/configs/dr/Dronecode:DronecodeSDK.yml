@@ -1,0 +1,161 @@
+language: cpp
+
+matrix:
+  fast_finish: true
+  include:
+    - os: linux
+      dist: trusty
+      sudo: true
+      compiler: gcc
+      env:
+      - MATRIX_EVAL="BUILD_TARGET=gcc_build"
+      addons:
+        apt:
+          packages:
+            - libtinyxml2-dev
+            - libcurl4-openssl-dev
+    - os: linux
+      dist: trusty
+      sudo: false
+      compiler: gcc
+      env:
+      - MATRIX_EVAL="BUILD_TARGET=gcc_build && CC=gcc-5 && CXX=g++-5"
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - gcc-5
+            - g++-5
+            - libtinyxml2-dev
+            - libcurl4-openssl-dev
+    - os: linux
+      dist: trusty
+      sudo: false
+      compiler: gcc
+      env:
+      - MATRIX_EVAL="BUILD_TARGET=coverage_build && CC=gcc-6 && CXX=g++-6"
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - gcc-6
+            - g++-6
+            - libtinyxml2-dev
+            - libcurl4-openssl-dev
+    - os: linux
+      sudo: true
+      services:
+        - docker
+      env:
+      - MATRIX_EVAL="BUILD_TARGET=docker_build_ubuntu_16.04"
+    - os: linux
+      sudo: true
+      services:
+        - docker
+      env:
+      - MATRIX_EVAL="BUILD_TARGET=docker_build_ubuntu_18.04"
+    - os: linux
+      sudo: true
+      services:
+        - docker
+      env:
+      - MATRIX_EVAL="BUILD_TARGET=docker_build_fedora_28"
+    - os: linux
+      sudo: true
+      services:
+        - docker
+      env:
+      - MATRIX_EVAL="BUILD_TARGET=docker_build_fedora_29"
+    - os: osx
+      osx_image: xcode9.3
+      env:
+        - BUILD_TARGET=osx_build
+
+before_install:
+- eval "${MATRIX_EVAL}"
+
+install:
+- set -e
+- if [[ "${BUILD_TARGET}" = "docker_build_ubuntu_16.04" ]]; then
+    docker pull dronecode/dronecode-sdk-ubuntu-16.04;
+  fi
+- if [[ "${BUILD_TARGET}" = "docker_build_ubuntu_18.04" ]]; then
+    docker pull dronecode/dronecode-sdk-ubuntu-18.04;
+  fi
+- if [[ "${BUILD_TARGET}" = "docker_build_fedora_28" ]]; then
+    docker pull dronecode/dronecode-sdk-fedora-28;
+  fi
+- if [[ "${BUILD_TARGET}" = "docker_build_fedora_29" ]]; then
+    docker pull dronecode/dronecode-sdk-fedora-29;
+  fi
+- if [[ "${BUILD_TARGET}" = "coverage_build" ]]; then
+    pip install --user cpp-coveralls;
+  fi
+
+script:
+- set -e
+- if [[ "${BUILD_TARGET}" = "gcc_build" ]]; then
+    make BUILD_TYPE=Debug run_unit_tests -j4;
+    make clean;
+    make INSTALL_PREFIX=/usr BUILD_TYPE=Release run_unit_tests -j4;
+  fi
+- if [[ "${BUILD_TARGET}" = "coverage_build" ]]; then
+    make BUILD_TYPE=Coverage run_unit_tests -j4;
+  fi
+- if [[ "${BUILD_TARGET}" = "docker_build_ubuntu_16.04" ]]; then
+    docker run -it --rm -v $TRAVIS_BUILD_DIR:/home/user/DronecodeSDK:rw -e LOCAL_USER_ID=`id -u` dronecode/dronecode-sdk-ubuntu-16.04 ./travis-docker-build.sh;
+    docker run -it --rm -v $TRAVIS_BUILD_DIR:/home/user/DronecodeSDK:rw -e LOCAL_USER_ID=`id -u` dronecode/dronecode-sdk-ubuntu-16.04 ./create_packages.sh;
+  fi
+- if [[ "${BUILD_TARGET}" = "docker_build_ubuntu_18.04" ]]; then
+    docker run -it --rm -v $TRAVIS_BUILD_DIR:/home/user/DronecodeSDK:rw -e LOCAL_USER_ID=`id -u` dronecode/dronecode-sdk-ubuntu-18.04 ./travis-docker-build.sh;
+    docker run -it --rm -v $TRAVIS_BUILD_DIR:/home/user/DronecodeSDK:rw -e LOCAL_USER_ID=`id -u` dronecode/dronecode-sdk-ubuntu-18.04 ./create_packages.sh;
+  fi
+- if [[ "${BUILD_TARGET}" = "docker_build_fedora_28" ]]; then
+    docker run -it --rm -v $TRAVIS_BUILD_DIR:/home/user/DronecodeSDK:rw -e LOCAL_USER_ID=`id -u` dronecode/dronecode-sdk-fedora-28 ./travis-docker-build.sh;
+    docker run -it --rm -v $TRAVIS_BUILD_DIR:/home/user/DronecodeSDK:rw -e LOCAL_USER_ID=`id -u` dronecode/dronecode-sdk-fedora-28 ./create_packages.sh;
+  fi
+- if [[ "${BUILD_TARGET}" = "docker_build_fedora_29" ]]; then
+    docker run -it --rm -v $TRAVIS_BUILD_DIR:/home/user/DronecodeSDK:rw -e LOCAL_USER_ID=`id -u` dronecode/dronecode-sdk-fedora-29 ./travis-docker-build.sh;
+    docker run -it --rm -v $TRAVIS_BUILD_DIR:/home/user/DronecodeSDK:rw -e LOCAL_USER_ID=`id -u` dronecode/dronecode-sdk-fedora-29 ./create_packages.sh;
+  fi
+- if [[ "${BUILD_TARGET}" = "osx_build" ]]; then
+    make;
+    make default install;
+    make run_unit_tests;
+    make clean;
+    make BUILD_TYPE=Release;
+    make default install;
+    make run_unit_tests;
+  fi
+
+after_success:
+- if [[ "${BUILD_TARGET}" = "coverage_build" ]]; then
+  coveralls --root . --build-root build/default
+    --exclude=libs --exclude="plugins"
+    --exclude="/usr/include/"
+    --exclude="core/external/curl-android-ios"
+    --exclude="core/libs/tinyxml2"
+    --exclude="debug_helpers"
+    --exclude="example"
+    --exclude="external_example"
+    --exclude-pattern=".*CMakeFiles.*"
+    --exclude-pattern=".*_test.*";
+  fi
+
+deploy:
+  provider: releases
+  skip_cleanup: true
+  api_key:
+    secure: hBX3pFWNZiDbz4yKnOjhLg3QS9Ubn1XePxSeIt2Btq5GzbomOPDCgpIFijBppliwj9oKc302EMnZSg2QWeAzFKn9UnmIflJ0E4iymYgwWdTJv+bSnYALJEmO8F6gF9FgRlPk8FCtZiECoTsa75w5TrEZKZpFpmzVYRiDu0eo6sEjW7UJPC0A2KSTXLrBCHSIZy/iasbGmuur4brG7NO0QdMOvDXvhsYfkXDRJFMTtTHvLiKJcqiunPfqARzf1H4x4iczRYscKu5Vn8Kmw3NANGkcIDvEj4ooih831EXxACRZw0VgycgNHOKRXKC9pZ4hLQMon+jxpQX+X8k/K5161oEkF/gCVKyFb31Pk/4Uwe81p1GJY2lAC7MDUxA98RKXhdvVYF2Cp44+IbF0YVoWRUtVAhknXRQ3Weg25kyVSu83q2nN2nZq2qGTnpNIbdN56s/F+uaFtipGEh+vmiv8rNUz+Z5MFrY2FQaSvBTFw9K4tNs9uc+VQd1bE7X5wh0yywEqUEw2nzqTB2xR+OubygUASbk2GLNdc254P0lrzCHbNM62Y7sRX06CM7hPlwhELEkVtUXZWJ0KuhQyLvRh3aPJ3Jj30EswTt/FGT1gzSP1FjjHBRZCK4P2D2rwJ5TMn2JrZKfPxmEd3kVmn6h80+gBbKgonGmZspd2SvPEI5g=
+  file_glob: true
+  file:
+  - "*.deb"
+  - "*.rpm"
+  on:
+    repo: Dronecode/DronecodeSDK
+    tags: true
+env:
+  global:
+  - secure: XifWUJ9By+R5snSRycmNc24yFJ4g4crAPPotHHnChZg3qSR+vvQEYwsprvy1rodKbs8Q6im8DIJzqn1+IQo3ygeh0Lb/OaqpoJbCvXVi2ejLNOWrTBdnO6enJI3pzFgcO6Kav4uvU8rZCenH6EwbZ3IW2ttq6THBxtBEiwCgGE4Msl3BtRmRlkhYohU2Mx8SyuPqsITsA4OS6y/gWI/hBWJRgCgx9SBzRSktYB5Uw7gEZC7Ysd0ao6jYcweIWHyCKEr2X2REZY5LIUtnpMCw92u+ALUf9y53vBrUdUX8miWNPrsIlKSUXzdUKiGE6GhZh4of28ile66LK229aKbJKWlUcUw6lCl4WdD7e+FxdnqOkXdYDy/xElsvUjNwa6rr4jfi7azdAYRv8gItJLKTtIyE6y5lJT6P4Katt4AxcOSMhsvqmjRZAMCzCNj5h6TULRps+pppeawKf5j8o1Q0tHPSm6BXhSy1gmIsxJcYcxESxi7auMeXvQ/mW9AfBjmd8iIxI6qi8uxyzXEtGFRKeW+rXBhqkdln+l52faAUW8vMAopgi/8eC+eARomQGoiqTTdWPiyTZjVrExMPRrXK1rr2rxOa9vKN9SbBw0HygsJ32KD0M0S5OgK69vhtgAkZROJMByWVMki/Zjq82TItpX2/u2LO/l8DP6xaWmdNdu4=

@@ -1,0 +1,36 @@
+language: python
+python:
+  - "3.6"
+notifications:
+  email: false
+
+env:
+  - TRAVIS_CI=1
+
+# conda setup copied from the conda docs
+install:
+  # We do this conditionally because it saves us some downloading if the
+  # version is the same.
+  - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
+  - bash miniconda.sh -b -p $HOME/miniconda
+  - echo ". /home/travis/miniconda/etc/profile.d/conda.sh" >> ~/.bashrc
+  - source ~/.bashrc
+  - hash -r
+  - conda config --set always_yes yes --set changeps1 no
+  - conda config --add channels conda-forge
+  - conda config --add channels pennmem
+  - conda update -q conda
+  - conda info -a
+  - conda install -n base conda-build
+  - conda build --output-folder=build/ --python $TRAVIS_PYTHON_VERSION conda.recipe/
+  - conda create -n ramutils python=$TRAVIS_PYTHON_VERSION
+  - conda activate ramutils
+  - conda install build/linux-64/ramutils-*.tar.bz2
+  - python --version
+  - conda install --file=requirements.txt
+  - pip install codecov
+script:
+  - maint/run_tests_ci.sh
+after_success:
+  - ls test_directory
+  - codecov --file test_directory/.coverage

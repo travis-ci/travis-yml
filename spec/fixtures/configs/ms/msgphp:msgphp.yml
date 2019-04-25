@@ -1,0 +1,41 @@
+notifications:
+  email: false
+
+language: generic
+dist: xenial
+services:
+  - docker
+
+branches:
+  only:
+    - master
+    - /^\d\.\d$/
+
+jobs:
+  include:
+    - stage: Unit tests
+      env: CC=true
+    - env: DEPS=low
+    - env: PHP=7.1
+    - stage: Code quality
+      script:
+        - make cs
+        - make sa
+
+before_script:
+  - if [[ ${CC} == true && ${TRAVIS_PULL_REQUEST} != false ]]; then unset CC; fi
+
+script:
+  - make ci-install
+  - if [[ ${DEPS} == low ]]; then make update-standalone-lowest; else make update-standalone; fi
+  - if [[ ${CC} == true ]]; then make phpunit-coverage; else make phpunit; fi
+
+after_success:
+  - if [[ ${CC} == true ]]; then bash <(curl -s https://codecov.io/bash); fi
+
+before_cache:
+  - rm -rf var/composer/files/msgphp
+
+cache:
+  directories:
+    - var/

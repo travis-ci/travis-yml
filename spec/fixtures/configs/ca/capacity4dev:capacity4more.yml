@@ -1,0 +1,108 @@
+language: php
+dist: trusty
+
+sudo: required
+
+env:
+  - INSTALL_PROFILE=1
+    BEHAT_TAG="api"
+    CODE_REVIEW=0
+    SIMPLETEST=1
+  - INSTALL_PROFILE=1
+    BEHAT_TAG="javascript"
+    CODE_REVIEW=0
+    SIMPLETEST=0
+  - INSTALL_PROFILE=0
+    BEHAT_TAG=
+    CODE_REVIEW=1
+    SIMPLETEST=0
+
+php:
+  - 7.0
+  - 7.1
+#  - 7.2
+#  - nightly
+
+matrix:
+  fast_finish: true
+  allow_failures:
+    - php: 7.2
+    - php: nightly
+
+mysql:
+  database: drupal
+  username: root
+  encoding: utf8
+
+before_install:
+  - date
+  - sudo apt-get update > /dev/null
+  - composer self-update
+  - export PATH="$HOME/.config/composer/vendor/bin:$PATH"
+  - nvm install 6.12 > /dev/null
+
+install:
+  - date
+
+  # Install LAMP stack.
+  - $TRAVIS_BUILD_DIR/ci/bin/install_lamp.sh
+
+  # Install drush.
+  - $TRAVIS_BUILD_DIR/ci/bin/install_drush.sh
+
+  # Install Coder for code standard reviews.
+  - $TRAVIS_BUILD_DIR/ci/bin/install_coder.sh
+
+  # Install Apache Solr, pass the name of the SOLR core.
+  - $TRAVIS_BUILD_DIR/ci/bin/install_solr.sh capacity4more
+
+  # Install Tika, pass the desired version number.
+  - $TRAVIS_BUILD_DIR/ci/bin/install_tika.sh "1.17"
+
+  # Configure Behat + Install dependencies.
+  - $TRAVIS_BUILD_DIR/ci/bin/install_behat.sh
+
+  # Run headless browser environment, only needed for javascript behat tests.
+  - $TRAVIS_BUILD_DIR/ci/bin/install_browser.sh
+
+  # Install grunt & gulp & bower
+  - $TRAVIS_BUILD_DIR/ci/bin/install_taskrunners.sh
+
+  # Install capacity4more profile.
+  - $TRAVIS_BUILD_DIR/ci/bin/install_drupal.sh
+
+before_script:
+  - date
+
+  # Index content in Solr.
+  - $TRAVIS_BUILD_DIR/ci/bin/index_drupal.sh
+
+script:
+  - date
+
+  # Run behat tests, different run based on the environment setting.
+  - $TRAVIS_BUILD_DIR/ci/bin/run_behat.sh
+
+  # Run Code Style validation.
+  - $TRAVIS_BUILD_DIR/ci/bin/run_coder.sh
+
+after_script:
+  - date
+
+after_failure:
+  - date
+
+  - echo " ===========    /var/log/apache2/error.log   ============"
+  - sudo cat $TRAVIS_BUILD_DIR/apache-error.log
+
+  - echo " ===========    /var/log/apache2/access.log   ============"
+  - sudo cat $TRAVIS_BUILD_DIR/apache-access.log
+
+  # Zip dumps and mail
+  - $TRAVIS_BUILD_DIR/ci/bin/report_behat.sh
+
+  # Output watchdog entries (errors).
+  - $TRAVIS_BUILD_DIR/ci/bin/report_watchdog.sh
+
+notifications:
+  slack: amplexor:7ssq8h2xLhkDGyJCw6rtmfOY

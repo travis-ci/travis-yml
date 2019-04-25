@@ -1,0 +1,33 @@
+sudo: false
+language: ruby
+rvm: 2.3.4
+node_js: stable
+env:
+  global:
+  - REVIEWDOG_VERSION="0.9.10"
+cache:
+  directories:
+  - vendor/bundle
+before_install:
+- git fetch --unshallow
+- nvm install stable
+install:
+- mkdir -p ~/bin/ && export export PATH="~/bin/:$PATH"
+- curl -fSL https://github.com/haya14busa/reviewdog/releases/download/$REVIEWDOG_VERSION/reviewdog_linux_amd64 -o ~/bin/reviewdog && chmod +x ~/bin/reviewdog
+- gem install bundler
+- bundle install --without production --deployment
+- npm install
+script:
+- npm run test:ci
+# git diff --name-only --diff-filter=ACMR origin/develop | grep -a '_i18n/ja/.*.md$' | xargs --no-run-if-empty $(npm bin)/textlint -f checkstyle | xargs --no-run-if-empty reviewdog -f=checkstyle -name="textlint" -reporter=github-pr-review
+- npm run build
+- node _tools/generate-amp-story.js
+- node _tools/generate-post-details-json.js
+after_success:
+- $(npm bin)/set-up-ssh --key "$encrypted_26fa663d1601_key" --iv "$encrypted_26fa663d1601_iv" --path-encrypted-key "./.travis/github_deploy_key.enc"
+- git config --global user.email "azuciao@gmail.com"
+- git config --global user.name "azu"
+- bundle exec rake deploy
+branches:
+  except:
+  - master

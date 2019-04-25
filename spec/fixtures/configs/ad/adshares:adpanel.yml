@@ -1,0 +1,35 @@
+language: node_js
+node_js:
+  - "8"
+
+env:
+  global:
+    - ADSERVER_URL="https://example.com"
+    - DEV_XDEBUG="false"
+    - APP_VERSION="travis"
+    - CONTEXT_INFO="travis"
+
+jobs:
+  include:
+    - install: true
+      script: sonar-scanner
+
+    - env: APP_ENV=prod APP_PROD=true APP_CURRENCY_CODE=USD APP_CURRENCY_SYMBOL=\$
+      before_script:
+        - envsubst < src/environments/environment.ts.template > src/environments/environment.${APP_ENV}.ts
+      script:
+        - yarn build --environment ${APP_ENV}
+
+notifications:
+  email: false
+  slack:
+    rooms:
+      secure: "eTeJ5C8XmeanrIyve/sYlFFZ0fT42bH1VLDELiz0G7rn3LNinrzh4t7i4mZHm9FLBSynEdRsR9rNi/Vk1YJLWk0G/ZJFzbDSlVNk3aWT4ZOZveob33geG2b4cCCeL+TKqdUQE5Fi7PCZ972lFXRoP/qzg66b5GwoYVnx2sIquqyB8h0XlqDbjg2tMbL7AfL34nXE+EbmCex1qeq8zb/nVXKG9dF/As6yhJ+O+FcA3sAvQ1hNfyRvfGnhkmu8LkI1XWO//y3gOzRyamSvcRBIxPBJsm0PQPtG6wATAYVxjE9kGPWQDGqQR9Fx8DYeKqLAUL2OpM5yiE/8eHXohCswfTsvNrQmZrwgJU3xzXqMngaxbQ47NwwGY4TAqdB3odzDpJFIFpMSbtEXamFHM7nnAhe5E+q57bCCWxEGwmU78UcAoZ/3AKvqQRjfmHD91lKpATxiiz4i+S/0fDvfcmzOdARUeoQbzT4lIZo8oLOSuYym3lLj/Ojtc9CIYyt6DPeNuzTmLrHCE3qUT5ny80J/miEQgkLBlnMrsuglQaNz27sb1PBXS8gwn82KxmS/8zqVBbdtBQgwe8qAmArbeAY++K+u7TP4c5CpNQZyi+QQ7LV7idP0oIZYSMpt2xtyN//UAFBRZPty1augLOP/xG2lD/amgSgqibE42FaValogozg="
+    on_success: change
+    on_failure: always
+
+addons:
+  sonarcloud:
+    organization: "adshares-github"
+    token:
+      secure: "IiwRVLQxOMtdNsqzLGUknbdgIaaRd0mVBjj6D8ra1jsYJ9T8BgjW3eGJBCAwXmG5XGBQayUi8uPgWUadIm73nlcUbnZ3R7ylRpu7s2j4tRJ2jg0PT5yMMTgAxY0UBT7A0/YxfCjLMa1oq8qq3PLbynqgF/OyOeZZqQA2Csps8VHWR7bV76CRTZEQ8VK/K15kUlfzKUitQfPenSvq7ktkpm4VKpUSmzADrTZ8RL+oEHq8cyYfAFZLwfhjg1LrLztFAFcoGPpnU6bxSaatOQxFny+QBhRTFESYoHUVJ89lFHcK3+8JiB7LoqqIMP/aT57J9SEC3lw9BKsoc1dSCwhcqwLrMgb7zZn8P92KM3qylaqhqF4z6q94s/u9gzWSCufxg7yUvQPQKHSyeWX0dX545aZnMadA28L+0aBcBZXO35aPs++jw1QLTIRh68VigK96X3VrpWrvCg8792bGXXipis/cZjHol86tOfk/cvZbgipZqt/AeZ5roF1sxJZ8z+uzFuxIRYdnBoqyDWOaf55ajYkbTJCo4eB/6F/mpNyBfXMhIgEi1k2JLQ6OxtT0p9zNT3COf/C6mllvC1DiFvPOsYL6td5Opb4FScVdYZjnOj10bBhkkpICO5sL1KCSydOb9tOq3qEAfXH56xBbo1DXrl2cZAnZ0PqNHHienH6ZBzk="

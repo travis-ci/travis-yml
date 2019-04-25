@@ -1,0 +1,89 @@
+language: c
+
+# The apt packages below are needed for sphinx builds, which can no longer
+# be installed with sudo apt-get.
+addons:
+    apt:
+        packages:
+            - graphviz
+            - texlive-latex-extra
+            - dvipng
+
+env:
+    global:
+        # The following versions are the 'default' for tests, unless
+        # overidden underneath. They are defined here in order to save having
+        # to repeat them for all configurations.
+        - PYTHON_VERSION=3.6
+        - SETUP_CMD='test'
+        - NUMPY_VERSION=stable
+        - ASTROPY_VERSION=stable
+          # matplotlib>2 is an install requirement of pvextractor, so we may as
+          # well include it here
+        - CONDA_DEPENDENCIES='matplotlib sip glue-core scipy'
+        - CONDA_CHANNELS='astropy glueviz'
+        - PVEXTRACTOR="https://github.com/radio-astro-tools/pvextractor/archive/master.zip"
+        - REGIONS="https://github.com/astropy/regions/archive/master.zip"
+        - REPROJECT="https://github.com/astropy/reproject/archive/master.zip"
+        - PIP_DEPENDENCIES="Cython $PVEXTRACTOR radio_beam $REGIONS $REPROJECT"
+        - SETUP_XVFB=True
+        - ON_TRAVIS=True
+
+matrix:
+    include:
+        - env: SETUP_CMD='egg_info'
+
+        - env: PYTHON_VERSION=3.5 CONDA_DEPENDENCIES='' PIP_DEPENDENCIES='radio_beam' NUMPY_VERSION=1.14
+          name: py35
+
+        # Test with development versions
+        - env: PYTHON_VERSION=3.5 NUMPY_VERSION=1.15 ASTROPY_VERSION='development'
+          name: py35_astropy-dev
+
+        # Do a coverage test in Python 3.
+        # make sure *everything* is run for coverage tests
+        ## COVERAGE TESTS DISABLED: they don't work any more.  I have found no combination of anything that fixes this.
+        - env: SETUP_CMD='test --coverage'
+               CONDA_DEPENDENCIES='matplotlib yt bottleneck sip aplpy joblib glue-core scipy'
+          name: coverage
+
+        # Check for sphinx doc build warnings - we do this first because it
+        # may run for a long time.
+        # We need to use an old numpy version here as there are warnings in the inherited methods when using newer one
+        - env: SETUP_CMD='build_sphinx -w' NUMPY_VERSION=1.13
+          name: docs
+
+        # test python2.7 with recent numpy version
+        - env: PYTHON_VERSION=2.7 PYTEST_VERSION="<3.7"
+               PIP_DEPENDENCIES="$PVEXTRACTOR radio_beam"
+               CONDA_DEPENDENCIES='matplotlib yt bottleneck sip aplpy scipy'
+          name: py27
+
+        - env: NUMPY_VERSION=1.11 ASTROPY_VERSION=LTS
+               CONDA_DEPENDENCIES='matplotlib aplpy bottleneck'
+               PYTEST_VERSION="<3.7"
+          name: astropy-lts_np1.11
+
+
+        - env: ASTROPY_VERSION='development'
+          name: astropy-dev
+
+        - env: CONDA_DEPENDENCIES="matplotlib=3 aplpy yt bottleneck joblib $CONDA_DEPENDENCIES"
+               ASTROPY_VERSION='development'
+          name: vistools
+
+        - env: # separate joblib-only test
+               CONDA_DEPENDENCIES="joblib $CONDA_DEPENDENCIES"
+               ASTROPY_VERSION='development'
+          name: joblib
+
+
+install:
+    - git clone git://github.com/astropy/ci-helpers.git
+    - source ci-helpers/travis/setup_conda.sh
+
+script:
+    - python setup.py $SETUP_CMD
+
+after_success:
+    - if [[ $SETUP_CMD == 'test --coverage' ]]; then coveralls --rcfile='spectral_cube/tests/coveragerc'; fi

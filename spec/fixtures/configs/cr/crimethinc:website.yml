@@ -1,0 +1,31 @@
+dist: trusty
+sudo: false
+language: ruby
+cache: bundler
+script: "./script/cibuild"
+before_script:
+  - cp config/database.yml.travis config/database.yml
+
+services:
+  - postgresql
+
+addons:
+  postgresql: '9.6'
+  chrome: stable
+
+before_install:
+  - wget -N http://chromedriver.storage.googleapis.com/2.30/chromedriver_linux64.zip -P ~/
+  - unzip ~/chromedriver_linux64.zip -d ~/
+  - rm ~/chromedriver_linux64.zip
+  - sudo mv -f ~/chromedriver /usr/local/share/
+  - sudo chmod +x /usr/local/share/chromedriver
+  - sudo ln -s /usr/local/share/chromedriver /usr/local/bin/chromedriver
+
+notifications:
+  slack:
+    secure: lPI2LWfiFjs1hLF/dPkmplZ6c56Kdri95wI21QzW73ctM9+Dyn01hGg0gYMBoW8mRsk3Je1yeJpemyGNFt7Ul2vpbZTSKIvMMh715JL9Y6QtQEkX/Tspv+lGlw9PcqxVRaCVDDTRwwr05N+h2AjBnWVYurlIbWJ+ihUB+iHXVufECp+hAn6CIDjGdXA5hMWQImCK4vZllMcYsvuInWCYz0JZchdDyUlJKKlmCfYTznC9VTVJLkxhTO7maCTtlNif1tPcUXI2dFyQ/1xZUbkYNC4etUAbf3zSG6CFaVY/FFIIC7h/g537kIwvoKqrkSRtV3IaH6FqW6qbdkx2oLSiwieXIo1cjkjfBDlynZ0/GAAHr+GV+3Mm9acxFqC7fxWcSc5XzdZxm7i3AWFrcx4KdgAxXFlDWp+pQuBOo+3Ge+3KG5Iz8+RdXM7xhFQuyDKslDXZ+0fWV1f7EfxNxQKD9LCnr8+9seoLLaNymfozRWUSKcFiXL13wEgV0FuMCy0Ci2DkNThlUJESQX3hZiqCt1R1SPFzHQPzciXeN1JlpYaAOklvAyP0TNzIrDmzzlsmKdsa4B3Lfq9tUx0QceqovLSJCbOs92W2WD2Gre9kVEpav6eLSM6hSSF4iYdxXuwLUBNYy8El1jSqZ/Gb0sb5Km0J7EZfw2vt8Nu56demgLE=
+
+env:
+  global:
+    - CODECLIMATE_REPO_TOKEN: 70b1a0a5ca106d965eb0570c0e4b7577d76c352305fb5719aa984eeae4941bdf
+

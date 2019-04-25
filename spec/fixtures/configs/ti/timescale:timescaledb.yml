@@ -1,0 +1,247 @@
+sudo: required
+language: c
+os:
+  - linux
+services:
+  - docker
+env:
+  global:
+    - secure: "TurskgAodG44RKCUPfoUb4JlT+UZwaPjUN73MS4+2ED2ayf46iUpcMODovDf7CPQRriMAvii/5xQ9UWTGYZejJy/Si3aE0fQeSKHIOPmuHqmmBkC3jgK9A5vOMpaAwljSNvIAMfwhIjVsq87nyvxHYWReDWl5SrdxTvh91RJvOiMRNdqwBbnj2j1cC30783ICGZUazrUyhDDnXispyBJYFxlHJmQJpfs6428dTRNJY/X8nVDXFwQkRjlIXarquTsrifCfzdq40Ykb8/1CS0295R8/kdKamQqXM0aS7iIkw3JFmZIz08OHKc7wcJuv6KSnCfNSftJqy2+nb1gkyIqkr3mrpYUa+2tKVwpA6OfET2S2kC5B3bOTcyBgihhnivAOS9zG8PTouLSUzqZzo+H893xdaMlX4kX3oOrOqzbj8YvTw6Dgw8PWERfnOngpKmKJFb8yboXPmGY7luSVxOplnPnYO0jaAXPU4ESsFYL3EBG5Zo4rVIuA5g7aJ0Ex+e5GQWiHDM1ubUo2vcuVVlurs/Aj8eSpNhqo0S5MjI05Jcz82X+9+asFcP+QV81UrueiXTlQ/7buAyMyVtKOgOhZwR4ImA1zzWkJjNNbZMJqeO9tPEgU7IxrqLhMgIpBB/pn0gzJZ8LN7C2oyznMYGzS5lrYaavojFUViv8vFyAQ24="
+    - secure: "S8WfPsrVGg21vZPxjrmy1X19T7zpHNgaSAoqYGzJdDZcNYuZbI87+tP3VQZo4MxjP3Ag46zTI5K+6aMjCqYqFGKufZdEaSpPSLmppFbXALgSp/rOkzp1M9HhGj0QVP7QcoPbva5Bjnj3zVi9CMAo6MwtnGAvzqBLOsdtnXTxEmKYyeNgwUVbQi2nzO38GeLgabaFL4XD3f3bmHE5jG6QAwZ/L7+jajsD1biH4sOiRLCRshtvermtYxh3SK6rML2kiwATABxTd1xDdMVRO/llmDBN373tHK6mufJyIhrwG9oTprSSDDIJlEbSPCkH0uvJBGcDvOAWf9tr4TGs/beawx3ELcXqR/4EisFqvMiVL4Vpt1gMBg9gue4Y0wpHZYoBOOef2gFtuyL7PjYe9koYJAJxg9DJ29DMxIjuCLTnbHN6yLa9425pdvxcuNEJ2K2zD0ZWoLSVueL0MxLhOZJsqlMkmmrFyI7y5cj1XvJF3vcsa5yK3S7sXroKUzeLu6QMh8hO3jD/2IvdQJ7Huy5uiJk2a+KUceLzruxLbwPF4b8SEoTquJ9NFGtagCG77lbIbLltLs2fUf+JnM8ipdpoMibVRFBOahP8NZwpL/NFzG3WLH3tDncj/c3fneMiNv3FUHLf6ufOVOayQiAEidszcMct2R20qIxggXKymrjZA3k="
+    - RETRY_PREFIX=$(if [ "${TRAVIS_PULL_REQUEST}" = "false" ]; then echo "travis_retry"; else echo ""; fi)
+before_install:
+  # We need the PostgreSQL source for running the standard PostgreSQL
+  # regression tests
+  - git clone --branch ${PG_GIT_TAG} --depth 1 https://github.com/postgres/postgres.git /tmp/postgres
+  - docker run -d --name pgbuild -v ${TRAVIS_BUILD_DIR}:/build -v /tmp/postgres:/postgres postgres:${PG_VERSION}-alpine
+install:
+  - docker exec -it pgbuild /bin/sh -c "apk add --no-cache --virtual .build-deps coreutils dpkg-dev findutils gcc libc-dev make util-linux-dev diffutils cmake bison flex curl git openssl-dev && mkdir -p /build/debug /build/debug-nossl"
+  - docker exec -it pgbuild /bin/sh -c "apk add --no-cache --virtual --update-cache --repository http://dl-3.alpinelinux.org/alpine/edge/testing/ --allow-untrusted lcov"
+  # We set /usr/local as prefix so the regression tools will be able to find
+  # initdb, psql, and postgres
+  - docker exec -it pgbuild /bin/sh -c "cd /postgres && ./configure --prefix=/usr/local --enable-debug --enable-cassert --without-readline --without-zlib"
+  # We only need to build the regress and isolation stuff
+  - docker exec -it pgbuild /bin/sh -c "make -C /postgres/src/test/regress"
+  - docker exec -it pgbuild /bin/sh -c "make -C /postgres/src/test/isolation"
+
+  # First build without OpenSSL
+  - docker exec -it pgbuild /bin/sh -c "cd /build/debug-nossl && CFLAGS='-Werror -O2' cmake .. -DCMAKE_BUILD_TYPE=Debug -DUSE_OPENSSL=false -DPG_SOURCE_DIR=/postgres ${OTHER_CMAKE_FLAGS} && make install"
+  # Now build with OpenSSL
+  - docker exec -it pgbuild /bin/sh -c "cd /build/debug && CFLAGS='-Werror -O2' cmake .. -DCMAKE_BUILD_TYPE=Debug -DUSE_OPENSSL=true -DENABLE_CODECOVERAGE=TRUE -DPG_SOURCE_DIR=/postgres ${ADDITIONAL_CMAKE_FLAGS:-} && make install"
+  # Ensure postgres user has permissions
+  - docker exec -it pgbuild /bin/bash -c "chown -R postgres:postgres /build/"
+script:
+  - ${RETRY_PREFIX} docker exec -it pgbuild /bin/bash -c "chown -R postgres:postgres /postgres/"
+  # First run only telemetry test to see that it works without OpenSSL
+  - ${RETRY_PREFIX} docker exec -u postgres -it pgbuild /bin/sh -c "make -C /build/debug-nossl installcheck TESTS=telemetry PG_REGRESS_OPTS='--temp-instance=/tmp/pgdata'"
+
+  # Now run all tests
+  - ${RETRY_PREFIX} docker exec -u postgres -it pgbuild /bin/sh -c "make -k -C /build/debug installcheck PG_REGRESS_OPTS='--temp-instance=/tmp/pgdata'"
+
+  - ${RETRY_PREFIX} docker exec -u postgres -it pgbuild /bin/sh -c "make -C /build/debug pginstallcheck PG_REGRESS_OPTS='--temp-instance=/tmp/pgdata'"
+after_failure:
+  - docker exec -u postgres -it pgbuild cat /build/debug/test/regression.diffs /build/debug/tsl/test/regression.diffs /build/debug/test/isolation/regression.diffs /build/debug/test/pgtest/regression.diffs
+after_success:
+  - ci_env=`bash <(curl -s https://codecov.io/env)`
+  - docker exec -it $ci_env pgbuild /bin/bash -c "cd /build/debug && bash <(curl -s https://codecov.io/bash) || echo \"Codecov did not collect coverage reports\" "
+after_script:
+  - docker rm -f pgbuild
+
+jobs:
+  include:
+
+    # This tests the formatting of a PR.
+    - if: (type = pull_request) OR (type = cron) OR NOT (branch = master)
+      stage: test
+      name: "clang-format and license check"
+      env:
+        - PG_VERSION=11.1 ASAN_OPTIONS="detect_leaks=0"
+      before_install:
+        - docker run -d --name pgbuild -v ${TRAVIS_BUILD_DIR}:/timescaledb timescaledev/postgres-dev-clang:clang7-pg${PG_VERSION} /bin/sleep infinity
+      install:
+        - docker exec pgbuild /bin/bash -c "mkdir /tsdb_build && chown postgres /tsdb_build"
+        - docker exec pgbuild /bin/bash -c "cd /tsdb_build && cmake /timescaledb -DCMAKE_BUILD_TYPE=Debug -DPG_SOURCE_DIR=/usr/src/postgresql/ -DUSE_DEFAULT_VISIBILITY=1 && make"
+      after_failure:
+      after_success:
+      script:
+        - docker run -it -v ${TRAVIS_BUILD_DIR}:/timescaledb timescaledev/postgres-dev-clang:clang7-pg${PG_VERSION} /timescaledb/scripts/check_license_all.sh
+        - docker run -it -v ${TRAVIS_BUILD_DIR}:/timescaledb timescaledev/postgres-dev-clang:clang7-pg${PG_VERSION} /timescaledb/scripts/clang_format_all.sh
+        - git diff --exit-code
+        - docker exec pgbuild /bin/bash -c "/tsdb_build/scripts/export_prefix_check.sh"
+
+    - if: (type = cron) OR NOT (branch = master)
+      stage: test
+      name: "Git hook tests"
+      before_install:
+      install:
+      after_failure:
+      after_script:
+      script:
+        - python2 ./scripts/githooks/commit_msg_tests.py
+        - python3 ./scripts/githooks/commit_msg_tests.py
+
+    - if: (type = pull_request) OR (type = cron) OR NOT (branch = master)
+      stage: test
+      name: "Regression 9.6"
+      env: PG_VERSION=9.6.6 PG_GIT_TAG=REL9_6_6
+
+    - if: (type = pull_request) OR (type = cron) OR NOT (branch = master)
+      stage: test
+      name: "Regression 10"
+      env: PG_VERSION=10.2 PG_GIT_TAG=REL_10_2
+
+    - if: (type = pull_request) OR (type = cron) OR NOT (branch = master)
+      stage: test
+      name: "Regression 11"
+      env: PG_VERSION=11.0 PG_GIT_TAG=REL_11_0
+
+    # This tests the ability to upgrade to the latest version from versions without constraint support
+    - if: type = cron
+      stage: test
+      env: PG_VERSION=9.6.6 PG_GIT_TAG=REL9_6_6
+      name: "Update tests (versions w/o constraints support) 9.6"
+      before_install:
+      install:
+      after_failure:
+      after_script:
+      script:
+        - ${RETRY_PREFIX} bash -x ./scripts/test_updates_no_constraints.sh
+
+    # This tests the ability to upgrade to the latest version from versions with constraint support
+    - if: type = cron
+      stage: test
+      env: PG_VERSION=9.6.6 PG_GIT_TAG=REL9_6_6
+      name: "Update tests (versions w/ constraints support) 9.6"
+      before_install:
+      install:
+      after_failure:
+      after_script:
+      script:
+        - ${RETRY_PREFIX} bash -x ./scripts/test_updates_with_constraints.sh
+
+    # This tests the ability to upgrade to the latest version on pg 10
+    - if: (type = pull_request) OR (type = cron)
+      stage: test
+      env: PG_VERSION=10.2 PG_GIT_TAG=REL_10_2
+      name: "Update tests PostgreSQL 10"
+      before_install:
+      install:
+      after_failure:
+      after_script:
+      script:
+        - ${RETRY_PREFIX} bash ./scripts/test_updates_pg10.sh
+
+    - if: type = cron
+      stage: test
+      name: "ABI breakage smoketest 9.6"
+      before_install:
+      install:
+      after_failure:
+      after_script:
+      script:
+        # Version >= 9.6.3 is required by TimescaleDB
+        - PG_MAJOR=9.6 PG_MINOR_COMPILE=3 bash -x ./scripts/docker-run-abi-test.sh
+
+    - if: type = cron
+      stage: test
+      name: "ABI breakage smoketest 10"
+      before_install:
+      install:
+      after_failure:
+      after_script:
+      script:
+        # There is a breakage of ABI between 10.1->10.2 so test starting at 10.2
+        - PG_MAJOR=10 PG_MINOR_COMPILE=2 bash -x ./scripts/docker-run-abi-test.sh
+
+    - if: type = cron
+      stage: test
+      name: "ABI breakage smoketest 11"
+      before_install:
+      install:
+      after_failure:
+      after_script:
+      script:
+        - PG_MAJOR=11 PG_MINOR_COMPILE=0 bash -x ./scripts/docker-run-abi-test.sh
+
+    # ApacheOnly regression tests
+    - if: (type = cron) OR (branch = prerelease_test)
+      stage: test
+      name: "ApacheOnly regression tests 11"
+      env: PG_VERSION=11.0 PG_GIT_TAG=REL_11_0 OTHER_CMAKE_FLAGS="-DAPACHE_ONLY=true"
+
+    - if: (type = cron) OR (branch = prerelease_test)
+      stage: test
+      name: "ApacheOnly regression tests 10.2"
+      env: PG_VERSION=10.2 PG_GIT_TAG=REL_10_2 OTHER_CMAKE_FLAGS="-DAPACHE_ONLY=true"
+
+    - if: (type = cron) OR (branch = prerelease_test)
+      stage: test
+      name: "ApacheOnly regression tests 9.6.6"
+      env: PG_VERSION=9.6.6 PG_GIT_TAG=REL9_6_6 OTHER_CMAKE_FLAGS="-DAPACHE_ONLY=true"
+
+    # Release mode regression tests
+    - if: (type = cron) OR (branch = prerelease_test)
+      stage: test
+      name: "Release regression tests 11"
+      env: PG_VERSION=11.0 PG_GIT_TAG=REL_11_0 OTHER_CMAKE_FLAGS="-DCMAKE_BUILD_TYPE='Release'"
+
+    - if: (type = cron) OR (branch = prerelease_test)
+      stage: test
+      name: "Release regression tests 10.2"
+      env: PG_VERSION=10.2 PG_GIT_TAG=REL_10_2 OTHER_CMAKE_FLAGS="-DCMAKE_BUILD_TYPE='Release'"
+
+    - if: (type = cron) OR (branch = prerelease_test)
+      stage: test
+      name: "Release regression tests 9.6.6"
+      env: PG_VERSION=9.6.6 PG_GIT_TAG=REL9_6_6 OTHER_CMAKE_FLAGS="-DCMAKE_BUILD_TYPE='Release'"
+
+    # Memory spike test when running out of order random inserts into timescaledb database
+    - if: (type = cron) OR (branch = prerelease_test)
+      stage: test
+      name: "Memory leak on insert tests"
+      before_install:
+      install:
+      after_failure:
+      after_script:
+      env:
+        - PG_VERSION=10.2 PG_GIT_TAG=REL_10_2
+      before_script:
+        - git clone --progress --verbose https://$USR:$PASSWORD@bitbucket.org/440-labs/tsdb-dev-tools.git /tmp/tsdb-dev-tools
+      script:
+        - bash ./scripts/docker-run-memory-test.sh
+
+    # Sanitizer tests
+    - if: (type = cron) OR (branch = prerelease_test)
+      stage: test
+      name: "ASAN and UBSAN tests"
+      before_install:
+      install:
+      after_failure:
+      before_script:
+      script:
+        # TEST_MAX specifies the maximum test # to go up to
+        - TIMESCALE_DIR=$TRAVIS_BUILD_DIR bash ./scripts/test_sanitizers.sh
+      after_script:
+        - kill $(jobs -p) # kill job that prints repeatedly
+
+    # Coverity test
+    - if: (branch = prerelease_test) OR (branch = coverity_scan)
+      stage: test
+      name: "Coverity"
+      env:
+        - secure: "jy4DQH2syPR2v13igCNPTr044h3H/ilbJk6FifDMxGZVrOZR0dnkBx3O7qJMQOkEQvNxKsoq41k6HCP16qcgt4+HjxhcZonz5hKIiF8IpcB9r+TIlZunNTx7HjSNFZ3WCnham4AvMEthBHgAttRUhscy39ELCNUEobKS/youi7OHLOEXXShc84yTh3aSuGR3SnDVK1diLN5ufX6tN20pc3QvLMGZmA/jmJFcIQHGilhWGwwiJ45LSLwM9slvgGKbTM/K6btVBMOUnjM0h5WqPjRjDUL2tF+iZLEIpY8lFN/MQCnj0vP/BryDdoVPZS3TDQYwYuvASevQ4sOmULnM770jFqzClq4zkeM2GhMq67aYMmXjblu/qcLeCjZL+vfjMKpBMUydK/bCb097HvdRWDEPA0zItKWX9Kd6lVf2XbJCCh0ljp5REJEyk+plJ2V12nLpOPwY6zTtzcoTxEN6wcvUJfHAdNovpp63hWTnbAbEZamIdxwyCqpzThDobeD354TeXFUaKvrUw00iAiIhGL2QvwapaCbhlwM6NQAmdU3tMy3nZpka6bRI1kjyTh7CXfdwXV98ZJSiPdUFxyIgFNI2dKiL3BI1pvFDfq3mnmi3WqzZHCaQqDKNEtUrzxC40swIJGLcLUiqc5xX37P47jNDWrNIRDs8IdbM0tS9pFM="
+      before_install:
+        - echo -n | openssl s_client -connect scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-
+        - sudo apt-get install -y postgresql-9.6 postgresql-client-9.6 postgresql-contrib-9.6 postgresql-server-dev-9.6 cmake3
+      install: echo "Success"
+      script: echo "Success"
+      addons:
+        postgresql: "9.6"
+        coverity_scan:
+          project:
+            name: "timescale/timescaledb"
+            description: "TimescaledDB an open-source time-series DB"
+          notification_email: ci@timescale.com
+          build_command_prepend: "./bootstrap -DCMAKE_BUILD_TYPE=Debug && cd build"
+          build_command: "make"
+          branch_pattern: coverity_scan|prerelease_test

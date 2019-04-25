@@ -1,0 +1,24 @@
+language: python
+matrix:
+  include:
+  - env: TARGET=py2
+  - env: TARGET=py3
+  - env: TARGET=mypy
+  allow_failures:
+  - env: TARGET=pep8
+  - env: TARGET=mypy
+sudo: required
+services:
+- docker
+install:
+- true
+script:
+- docker build . -f .travis/${TARGET}.docker
+deploy:
+  provider: pypi
+  user: sphemakh
+  password:
+    secure: ZlYqq20J2qM3z3MBfYiIYfyVFEeALsAobF7hEcN+JsJRVYqE/8er7QJucjwAuqalbfsjgn8utMgmLIcTBIXE0V5wkRawIaht6GYtsJNlHJjkf07xyiKrJH676+5vD2puPmXKRnFMTZUTc6j42NhfwEKOAqUctCkjFg0dxAlsMiNHEIYMIjJfBMROPmRpXp3QbzrmVW3sXRjdrjSU0VN0Po8a0NUsQExUlpRGRKY/eVxqqooB1pK17ba2iIqWQfH1wzmKQ7H8U1PAeC6lbyYuSOXvYuB5EAsSmOKk5900JS6DOfuXszOucIoFat1O+01JlAYglQLnojyVgcb3lDk3e0YKPPcHpHsz4Z5nhfAoXGA4KpQbqu4jM6nbBlTcswvW2omBqwnbT4ieRN9q6Y6XZrPMh3hGDWvw7uqMpVm2tUfIdoFCqZaJLUhORMp9mX6N5NtOuOdIe2qSQNOcpLd3GDoQIg27su3naghPx7VytDixs55at40n51IiYRgWqlygMFnJkidPuTyOzcbho8FWkFXVkD1m2n2s3A9wKYCybtCZohH78kuhZoEalqKjBVDnSuQ9t4viHE5w4ogV9vFErjfjEvNt9KpgRK4iyvKRtoivK0u2wHRdJNUHoBPoJpwMiWUBzyGLxro7wyyuKSfCLfRks5jZISPWmezTpGrZqi4=
+  true:
+    tags: true
+    repo: SpheMakh/Stimela

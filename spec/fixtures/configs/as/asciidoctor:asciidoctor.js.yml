@@ -1,0 +1,55 @@
+dist: trusty
+conditions: v1
+
+language: node_js
+addons:
+  chrome: stable
+
+env:
+- ASCIIDOCTOR_CORE_VERSION=v2.0.8
+- ASCIIDOCTOR_CORE_VERSION=master
+
+node_js:
+- 'lts/*'
+- 'node'
+
+jdk:
+- oraclejdk8
+
+install:
+- npm ci
+- npm ci --prefix packages/core
+
+# keep the npm cache around to speed up installs
+cache:
+  directories:
+  - "$HOME/.npm"
+
+script:
+- npm run lint
+- npm run test
+- npm run travis --prefix packages/core
+
+jobs:
+  include:
+    - stage: release
+      if: |
+        repo = 'asciidoctor/asciidoctor.js' AND \
+        tag IS present
+      script:
+      - ./scripts/package.sh
+      - ./scripts/publish.sh
+      deploy:
+        - provider: releases
+          api_key: ${GITHUB_TOKEN}
+          file: packages/core/bin/asciidoctor.js.dist.*
+          skip_cleanup: true
+          file_glob: true
+          on:
+            tags: true
+    - stage: notify
+      if: |
+        repo = 'asciidoctor/asciidoctor.js' AND \
+        branch = master AND \
+        type = 'push'
+      script: ./scripts/notify.sh

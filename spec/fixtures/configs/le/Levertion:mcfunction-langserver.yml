@@ -1,0 +1,29 @@
+language: node_js
+branches:
+    only:
+        # This is where pull requests from "bors r+" are built.
+        - staging
+        # This is where pull requests from "bors try" are built.
+        - trying
+        - master
+sudo: false
+node_js:
+    # - stable
+    # For vscode - same as stable
+    - "10"
+before_install:
+    - npm install -g npm@6
+install:
+    - npm install
+script:
+    - npm run check
+    - npm test
+    - npm run lint
+    - npm run prettier -- --list-different
+    - npm run build
+    - git diff --exit-code dist/index.js
+    # This should be working as of parcel#2020, but it isn't
+    # - git diff dist/index.map --exit-code
+env:
+    global:
+        secure: MRJdpa8qRLcMNDKhFi1OP9lalqcqVt9EK85SBuPdL63sA3RNIdu5EJw/aGCf6pJ7GJYXMTiZh/sLbUh/1mybHvP0WYu10uJxCacejhRc+dB2Txz/zqWYWbjMXLas7MX+MY8A+ChgjClJKWGZc9Xl6W67UAC6MW0aS0L+9SGRWXZwfVwPBsZDGF23694tcsaIpqvFENTD0dO9o0TX9dPsdulzA6tIWOtXrYDqdmneSQBr6VYsjobMslB9ScOgVNxU9pyPNhgvzMp5juboJLsnBohWDk1aocaQT6Qfh+24Zvic0Mw8nbh0kgiWC4sNaKwhpceh6uKiG2doKVYwABCgGdcBsc5/kkELzJYvoHJsGSABCiBZA1t7gFSz2Q1DEcyeGzsEAapESJcpYsO2hOoaZpdwR4QYd31Z+cyyIoun71nv+dl0x15Iq6Wj4VtAm8eZQlZJaXTK2Fbw0jC1MAkvpf+llaNB55xnEa0mNCvi/NVVxS03diONvBC4PiA9pp9hrqaetyfG0CR+ugCcapPj46hXf2TJo3FjWn1QbqElcHmc8y5+bNrstHUtyNazby5yXZQO7+41vHaSUaCz2mOOe0TlTAQOiCeyfNJhP6tTLzsQ5n7y0eA+KczWXScR1wA4Lm2lZEQ8Vgw15j1kDkBUoXBOUnZtXFSHaUn51yWxQpc=

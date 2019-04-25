@@ -1,0 +1,35 @@
+language: c
+
+os:
+    - linux
+    - osx
+
+sudo: false
+
+env:
+    # CONDA_JWST_DEPENDENCIES is used because CONDA_DEPENDENCIES is not truly global.
+    global:
+        - MAIN_CMD='python setup.py'
+        - CONDA_CHANNELS='http://ssb.stsci.edu/conda-dev'
+        - CONDA_DEPENDENCIES='pytest jwst sphinx nose mock lxml requests fitsverify lockfile filelock'
+        - CONDA_JWST_DEPENDENCIES='pytest jwst sphinx nose mock lxml requests fitsverify lockfile filelock'
+        - PIP_DEPENDENCIES='parsley coveralls'
+        - CRDS_SERVER_URL='https://hst-crds.stsci.edu'
+        - CRDS_TEST_ROOT=/tmp
+
+    matrix:
+        - PYTHON_VERSION=3.6
+        - PYTHON_VERSION=3.7
+
+install:
+    - git clone git://github.com/astropy/ci-helpers.git
+    - source ci-helpers/travis/setup_conda_$TRAVIS_OS_NAME.sh
+    - ./setup_test_cache $CRDS_TEST_ROOT
+    
+script:
+    - ./install
+    - conda list
+    - ./runtests --cover
+
+# after_success:
+#     coveralls

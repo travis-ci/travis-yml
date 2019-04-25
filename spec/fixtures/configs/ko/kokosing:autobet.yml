@@ -1,0 +1,27 @@
+language: java
+sudo: required
+dist: trusty
+jdk:
+    - oraclejdk8
+services:
+  - docker
+notifications:
+    email:
+    recipients:
+        - g.kokosinski@gmail.com
+
+install: ./mvnw install -DskipTests -B -q
+
+script:
+  - ./mvnw test
+  - | 
+    if ! ./bin/devenv_update.sh; then
+      ./bin/devenv_create.sh
+      ./bin/devenv_update.sh
+    fi
+
+after_success:
+    - |
+      if [ "$TRAVIS_BRANCH" == "master" ]; then
+        ./bin/devenv_save.sh
+      fi

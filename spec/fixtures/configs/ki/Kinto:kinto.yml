@@ -1,0 +1,48 @@
+dist: trusty
+language: python
+python: 3.6
+cache: pip
+services:
+  - memcached
+addons:
+  postgresql: "9.5"
+env:
+  - TOX_ENV=py36
+  - TOX_ENV=py36-raw
+  - TOX_ENV=lint
+  - TOX_ENV=docs
+install:
+  - pip install tox
+before_script:
+  - echo "Pull request ${TRAVIS_PULL_REQUEST}"
+  - sudo sed -i "s/fsync/#fsync/" /etc/postgresql/9.5/main/postgresql.conf
+  - sudo /etc/init.d/postgresql restart
+  - psql -c "CREATE DATABASE testdb ENCODING 'UTF8' TEMPLATE template0;" -U postgres
+  - make version-file
+script:
+  - tox -e $TOX_ENV
+after_success:
+  # Report coverage results to coveralls.io
+  - pip install coveralls
+  - coveralls
+
+matrix:
+  include:
+    - python: 3.7
+      dist: xenial
+      env:
+        - TOX_ENV=py37
+    - python: 3.7
+      dist: xenial
+      env: ENV=functional
+      before_install:
+        - make install-dev
+        - make install-postgres
+      script:
+        - make runkinto & sleep 5
+        - make functional
+    - python: 3.7
+      dist: xenial
+      env:
+        - ENV=build-kinto-admin
+      script: make build-kinto-admin

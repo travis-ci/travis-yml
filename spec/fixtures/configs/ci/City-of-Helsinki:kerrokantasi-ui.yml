@@ -1,0 +1,31 @@
+
+sudo: required
+
+services:
+  - docker
+
+language: node_js
+
+node_js:
+  - "lts/*"
+  - "node"
+
+cache:
+  directories:
+    - node_modules
+
+before_install:
+  - npm i -g npm@latest
+
+script:
+  - npm run lint
+  - npm run test:cov
+  - ./deploy/docker_test.sh
+
+after_success:
+  - codecov < coverage/lcov.info
+  - ./deploy/containerize.sh
+
+notifications:
+  slack:
+    secure: SGOToTvQqRUifZ68KHB7CfUX1FIjbvmzgdgcr6tn7UUlA365TrHJoX31bnq3JyZj82xXCeCU8hjh5dEjq3ibkkaRWPuPCEK8cPoW4e2hgfS9ehcNyzsF7FjCEP1nc4uuZdJ9SRH4Q2Vsr6jBIAzvdIjAjt2o+HgJtUd/1kIljTO7k/u47iZ6m04m+K60xFDpQ3Fn7fg0rqrTQ5clvw0FmiR/Z1ZDFUSAa0Yk1Ep/1iowP+nD7QzZbThYIo6Axze2sRcFZmpXObF4V4KsfPhWnHwV/5nckxP9OxxWoAcKKtmwiDqkOzD5pf/8CRsUGF7U6VFDNeECLk8XHgCzL3WD2phTmUDYAFjUUXI+jCFtW6KgVk+LXzLhkfwjZ/W22gc/6pAP2OEiCBESbrZR43K19FfaSTT1V7vZZ+6vVouBywkw99jsuSgAwoWeA+mOtetzq/frk8B4fh94cQLb/cgukUZvc/ZP129ap3JovO4a3RCGtdCAjzI+xjRdDZiaIWTkcdyqnWYCtZEn7YC6xWe1GdI9InvnC4L1ZXhMHkWDLHfY8ln0Nc8ymgrJd1VCcqgErbTijE6gsSiDjsJsqc7RRTxYLemT9jVUK4qqlx0XClXG2sz5qGcqVieMakEG4/9w7tQ9R1TMXXfReNP/BDEDbWmkd5GCi7J8WiiVwxS+hxI=

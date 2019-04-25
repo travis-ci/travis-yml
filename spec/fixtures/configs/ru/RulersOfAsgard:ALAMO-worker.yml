@@ -1,0 +1,15 @@
+language: python
+python:
+  - "3.6"
+
+env:
+  - TOX_SUITE=py36
+  - TOX_SUITE=pep8
+  - TOX_SUITE=coverage
+
+install: pip install -U tox coveralls
+
+after_success:
+    - coveralls
+
+script: tox -e$TOX_SUITE

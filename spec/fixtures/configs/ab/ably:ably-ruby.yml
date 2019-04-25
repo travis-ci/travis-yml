@@ -1,0 +1,16 @@
+sudo: false
+env:
+  - RSPEC_RETRY=true PARALLEL_TEST_PROCESSORS=4 PROTOCOL=json
+  - RSPEC_RETRY=true PARALLEL_TEST_PROCESSORS=4 PROTOCOL=msgpack
+language: ruby
+rvm:
+  - 1.9.3
+  - 2.0.0
+  - 2.1.10
+  - 2.2.0
+  - 2.3.6
+  - 2.4.4
+script: spec/run_parallel_tests
+notifications:
+  slack:
+    secure: Xe8MwDcV2C8XLGk6O6Co31LpQiRSxsmS7Toy5vM7rHds5fnVRBNn5iX6Q5mXMdLOlnsMhjKLt7zl4fsBOZv+siQ+Us0omZSIYpXCYSCIj8nofReF0Lj8M4oa6lFSL5OuygO7PH+wLKTRxQURGZ6Pi1nHU+RE5izRmsewQHkhtY0=

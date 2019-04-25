@@ -1,0 +1,69 @@
+sudo: required
+
+language: python
+
+cache:
+    directories:
+        - $HOME/.cache/pip
+
+matrix:
+    include:
+        - python: 3.5
+          os: linux
+          dist: trusty
+          env: TOXENV=py35
+        - python: 3.6
+          os: linux
+          dist: trusty
+          env: TOXENV=py36
+        - python: 3.7
+          os: linux
+          dist: xenial
+          env: TOXENV=py37
+        - python: "3.6-dev"
+          os: linux
+          dist: trusty
+          env: TOXENV=py36
+        - python: "3.7-dev"
+          os: linux
+          dist: xenial
+          env: TOXENV=py37
+        - python: 3.5
+          os: linux
+          dist: xenial
+          env: TOXENV=flake8
+        - language: generic
+          os: osx
+          osx_image: xcode8.3
+          env: TOXENV=py35
+        - language: generic
+          os: osx
+          osx_image: xcode8.3
+          env: TOXENV=py36
+
+before_install:
+- |
+    test $TRAVIS_EVENT_TYPE != "pull_request" || {
+        echo Checking whether $TRAVIS_COMMIT_RANGE changed only docs
+        git diff --name-only $TRAVIS_COMMIT_RANGE | grep --quiet --invert-match --extended-regexp '(AUTHORS|README\.rst|^(docs)/)' || {
+            echo "Only docs were updated, stopping build process."
+            exit
+        }
+    }
+
+install:
+    - git fetch --unshallow --tags
+    - ./.travis/install.sh
+
+script:
+    - ./.travis/run.sh
+
+after_success:
+    - ./.travis/upload_coverage.sh
+
+notifications:
+    irc:
+        channels:
+            - "irc.freenode.org#borgbackup"
+        use_notice: true
+        skip_join: true

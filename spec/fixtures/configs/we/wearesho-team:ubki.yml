@@ -1,0 +1,17 @@
+language: php
+
+php:
+    - '7.1'
+    - '7.2'
+    - '7.3'
+
+before_script:
+    - travis_retry composer self-update
+    - travis_retry composer install --no-interaction --prefer-source
+
+script:
+    - composer lint
+    - travis_retry composer cover
+
+after_success:
+    - bash <(curl -s https://codecov.io/bash)

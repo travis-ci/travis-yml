@@ -1,0 +1,37 @@
+---
+language: node_js
+node_js:
+  - "8"
+
+sudo: required
+dist: trusty
+
+branches:
+  only:
+    - master
+
+addons:
+  chrome: stable
+
+cache:
+  directories:
+    - $HOME/.npm
+
+env:
+  global:
+    # See https://git.io/vdao3 for details.
+    - JOBS=1
+    - PERCY_TOKEN=877df6aad8486060f69a34864b6cd33f870633743b23411343737c46a875a762
+
+before_install:
+  - npm config set spin false
+
+script:
+  - npm run lint:js
+  - ember build --prod
+  - npm test
+
+after_failure:
+  - wget https://gist.github.com/sivakumar-kailasam/730c6d2e5d0847cf9e0bc17df386c852/raw/discord_notifier.sh
+  - chmod +x discord_notifier.sh
+  - ./discord_notifier.sh

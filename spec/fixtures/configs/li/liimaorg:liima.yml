@@ -1,0 +1,33 @@
+sudo: required
+cache:
+  directories:
+  - .m2
+services:
+- docker
+install:
+- docker run -it --name amw-install -v "$PWD":/usr/src/amw -v "$PWD/.m2":"/root/.m2" -w /usr/src/amw maven:3-jdk-8 mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
+- AMW_docker/build.sh
+script:
+- docker run -it --name amw-test -v "$PWD":/usr/src/amw -v "$PWD/.m2":"/root/.m2" -w /usr/src/amw maven:3-jdk-8 mvn test -B
+before_deploy:
+- docker run -it --name amw-deploy -v "$PWD":/usr/src/amw -v "$PWD/.m2":"/root/.m2" -w /usr/src/amw maven:3-jdk-8 mvn deploy -DskipTests=true -Dmaven.javadoc.skip=true -f AMW_ear -B
+- ls -l AMW_ear/target/mvn-repo/ch/puzzle/itc/mobiliar/AMW_ear/*/AMW_ear-*.ear
+- sudo chmod 777 AMW_ear/target/mvn-repo/ch/puzzle/itc/mobiliar/AMW_ear/*/AMW_ear-*.ear
+after_success:
+  - docker login -u="$DOCKERHUB_USER" -p="$DOCKERHUB_PASSWORD"
+  - docker tag liimaorg/liima:snapshot liimaorg/liima:$TRAVIS_BRANCH
+  - docker push liimaorg/liima:$TRAVIS_BRANCH
+deploy:
+  provider: releases
+  api_key:
+    secure: aMserxLJT49UCceWT7Ti4E7TXdWGqc0pR/Wjyh7N4OYpFlZE2tx+o7T3LrplMVpKYZy+YlWuXYizeF+uL7swVzLJL8pgVb8j+zI/CNA/UL6QwzXWW8t5Cy6Ob+mcQSeIItimvowgdZ8AAja2hBS8of3xUoESZo6DsCSVS5s8BqSiPu6oV9Ua9yoKnNs2J17FjJ23x8DUAHTTVU84FKqtFVtSI+pTIBnex/b0wVgypeFMciIUIUXrp2flQewZ0pdTAYfCrIG74VNgsTRzs9ikBK5+lr8I8se62zW1m7gOP7ycYU+HJEUrahwe4W+ckfgXv4pK50P5ZsiwfYWEeo6jzKUg5qQubX1GKDoB0+LL/sDYxq/uiQ+7Djs/UIrwsBQ8Xzt/FTQEfANA0CTIyVHv0SyL+nwSJDl4wUSwmkLx76FcZIggh45HECC63g9TBcDqZxOFttWIbYWIz15UDtbgBDSvqowEOxooU3P1FkLaHR2ZvvOCkSwLRoSH0CN5aVy3PT/XA88rkzR/IT+hAm03Yr0ZeaIY28bvwBR+VXydzKxsYYraU1b1ecAw2qhdVF1vDp7xlaVC9Aaj0+u7RdJra7WRbMf6g22LQ3e8NYP6O/hLQnS6oAXdaN+XmoNV8GT44KNkg1XEKPwOj7N1z2zOCDFcMHsgmq+8CU0tQB1O3HY=
+  file_glob: true
+  file: "AMW_ear/target/mvn-repo/ch/puzzle/itc/mobiliar/AMW_ear/*/AMW_ear-*.ear"
+  skip_cleanup: true
+  on:
+    tags: true
+branches:
+  only:
+  - master
+  - /^release-.*$/
+  - /^v1.*$/

@@ -1,0 +1,86 @@
+sudo: required
+dist: trusty
+group: deprecated-2017Q2
+language: python
+python:
+  - '3.5'
+addons:
+  postgresql: '9.4'
+  apt:
+    packages:
+      - postgresql-9.4-postgis-2.3
+  browserstack:
+    username: eugenealvinvilla1
+    access_key:
+      secure: "QujZrTin9CDDSz56mRY3Lak2/KxCgKggsz2XOgbdjro+qfECbSFzVKe5xj9PhQSA8hVfAULUXGPAVstvvp+Ur38YRRanQ0MlhdlR6CbzIW5HhrARNUh7X9sDki3lvf/0HF2U63tiOCsuiNoIYZRyJvHFPUfS79EN76IuaiR0/F5Fs5GnyXNFoHgJXCRx1TA6r8m+/vA8pxCumU8HJQJSTUkT9cW4MjfMN+A2KTIz5jptUkfTbDSbJAVUp+FXk0zAqb1GMKi+9VD+w3cJXwya2uiPXai+7icdxzwuaU0Jcb1FnYpTpj42TtKZmpY5qw0Kjhi53/Qdi1b6VCONg5AvsiY+brcDaU7pPPNABPnbOwWwW7Ld80mYCCMf7XWqP4W3nQVFN40IZ8C1GYh8xSdBKlL3Xcfx11GstzcslSQb19x45wNSLBXfsvjq2vRzRWWmglNFA1yks0obovePeFjSBMpSef+SfYbLsLLj84Uj3XV6ZQcUlLpHXHyetfz55mJAaTQpOEySFZCLwQSMAurT6LyNtWapwQtOPFpIjNN3jjOuiGhFMm6zPJMBjVUQY4p8WKiAN4XRLNkLKIvRxSugfMpxtP9AiTG/dXBHe5X7PWjpoPyVzXSmFnjmUbb7BBkUDfkQeP7mQdbUdf78KVXP08PkZkKjWuCCjbmt1JV2OpU="
+  firefox: '55.0'
+
+before_install:
+  - export DEBIAN_FRONTEND=noninteractive
+  - sudo -E apt-get -yq update &>> ~/apt-get-update.log
+  - if [[ $TOX_ENV != 'py35-flake8' ]]; then sudo -E apt-get -yq --no-install-suggests --no-install-recommends --force-yes install squid3; fi
+  - sudo apt-get -yq install libgdal-dev
+  - gdal-config --version
+  - export PATH=$(echo $PATH | tr ':' "\n" | sed '/\/opt\/python/d' | tr "\n" ":" | sed "s|::|:|g")
+  - export C_INCLUDE_PATH=/usr/include/gdal
+  - export CPLUS_INCLUDE_PATH=/usr/include/gdal
+
+install:
+  - pip install tox==2.9.1
+  - if [[ $TOX_ENV =~ 'py35-functional' ]]; then sudo wget -O /tmp/geckodriver.tar.gz https://github.com/mozilla/geckodriver/releases/download/v0.19.0/geckodriver-v0.19.0-linux64.tar.gz; fi
+  - if [[ $TOX_ENV =~ 'py35-functional' ]]; then sudo tar -zxvf /tmp/geckodriver.tar.gz -C /usr/local/bin/; fi
+
+before_script:
+  - if [[ $TOX_ENV != 'py35-flake8' ]]; then sudo cp provision/roles/testing/files/squid.conf /etc/squid3/squid.conf; fi
+  - if [[ $TOX_ENV != 'py35-flake8' ]]; then sudo service squid3 restart; fi
+  - if [[ $TOX_ENV != 'py35-flake8' ]]; then export http_proxy=http://localhost:3128/; fi
+  - if [[ $TOX_ENV != 'py35-flake8' ]]; then export https_proxy=https://localhost:3128/; fi
+  - if [[ $TOX_ENV != 'py35-flake8' ]]; then psql template1 postgres -c 'create extension hstore;'; fi
+  - if [[ $TOX_ENV != 'py35-flake8' ]]; then psql -c 'create database cadasta;' -U postgres; fi
+  - if [[ $TOX_ENV != 'py35-flake8' ]]; then psql -U postgres -d cadasta -c "create extension postgis;"; fi
+  - if [[ $TOX_ENV != 'py35-flake8' ]]; then mkdir cadasta/geography/data; fi
+  - if [[ $TOX_ENV != 'py35-flake8' ]]; then export WBDATA=ne_10m_admin_0_countries.zip; fi
+  - if [[ $TOX_ENV != 'py35-flake8' ]]; then export DATADIR=cadasta/geography/data; fi
+  - if [[ $TOX_ENV != 'py35-flake8' ]]; then wget -O $DATADIR/$WBDATA https://cadasta-miscellaneous.s3.amazonaws.com/$WBDATA; fi
+  - if [[ $TOX_ENV != 'py35-flake8' ]]; then unzip $DATADIR/$WBDATA -d $DATADIR; fi
+  - if [[ $TOX_ENV =~ 'py35-functional' ]]; then echo '<span class="site-name">Travis</span>' > cadasta/templates/core/identifier.html; fi
+
+env:
+  global:
+    - DJANGO_SETTINGS_MODULE=config.settings.travis
+    - BROWSERSTACK_USERNAME=eugenealvinvilla1
+    - secure: T6bNu9c2HRPaDv9Hn0bB/D5E+nfgzH6CmsoeaEUJny0rVLEEHnMatDHEGuQ6RW7nG8o1HT8VrsKEH4eMuLDJOkb/a8e5k8GWw/tPT9HVfcgedIh01HQCn8xtNa0Q8SLUosog8JyVnj3zrDVQAuz7YxqwLaH2gXLtthrmz1zTEenbIIO5V50xv+pZC5O69e0XAlBxzjd7SfEt2hoekqn78zPLrhKWCpOzEtFmujLg5p5xWS3PPkKFBlWpSow24wtFdz81cokldjyXVm1w4SFKuCqqnzi6soh/Hr1YqkaOtItsQ0fQAI3129wgNppd3ST62UUbiNeKJUfVcgK2IzQaC5Vlix2tWETSbwO981TNnLTVbRi4WKNylOBV4aSuycTzFbKzjQHbrR1dbM9ZoC7b8+SFFkFSYOJj7u3kDTvtW2zN1klRmw+quCBlP/dFYb04HDjhT82WD2enym7MMobF1NqUFZTNcAXNc3Ypq4ReYTRt96i+zaurRcvTgD540cuclhKQfJGNAjSxoLzDEpRpEwB3XDx9qZcRCg545jiKWMrgmgLXiqBIzrmSQcmX2MEjFmgiRwW7/+ySbhHuBIaaANtJzQjXheMDT5LufjuMSeH0TKczZes58xzb/60Vs5SsAABIR1vszWd2L9cF5pN4xFJWT3PbHXZpG7DsSc2z1yo=
+
+matrix:
+  fast_finish: true
+  include:
+    -
+      if: type = push
+      env: TOX_ENV=py35-flake8
+    -
+      if: type = push
+      env: TOX_ENV=py35-django-migration
+    -
+      if: type = push
+      env: TOX_ENV=py35-django-unit
+    -
+      if: type IN (push, pull_request) AND branch = master
+      env: TOX_ENV=py35-functional-batch1
+    -
+      if: type IN (push, pull_request) AND branch = master
+      env: TOX_ENV=py35-functional-batch2
+    -
+      if: type IN (push, pull_request) AND branch = master
+      env: TOX_ENV=py35-functional-batch3
+    -
+      if: type IN (push, pull_request) AND branch = master
+      env: TOX_ENV=py35-functional-batch4
+
+script:
+  - tox -e $TOX_ENV
+
+notifications:
+  slack:
+    on_success: always
+    on_failure: change
+    secure: feHcuDtPoJ6M8C9wpQAu2nnuI98OhMZJLcPu/IgXC2GeFXHPybRzKdLvZJkDCxJZWCwqEt0DsJG/wk/Yh/jYQ/rORT6I5lYab6DvnFULl1c4C5tl7wdCEnXdwKUi3D1jxbN/FDa00GT0LEtNHaF9C08cgvalZ0WgQmVzw5gjnU7WTqqjSPVmP8Tf8Lknqwpy+v3SC5uRGn4/pr3sydfyUwg8b6DIvkKdNUDf5FsjBhjMpFcT2WERc+e34KkMMhY3/XhRW6fGjFzrkP+qyZj0Xr9B+Uuk4rzxzdwIS+E3BJ8HiPbP8AFzSVOm08YeA7cj/mleR9bY85dWH+qzmwXLhF6p7MyeRyFT2zxEajq/3PdNyi4c6im1zNFOKs+vchEQpqD0OWg2CBGeMPX9zBAgurdc6feLL6bazVzjm/Q+Xlob0QXgxWIOwhPDcGpGMbFdEonZN1POrBGQhZpXCUDVZsV9EwTmT8mNMRczsccIHlF8OxnTnMIaqIzOs2xs/TIqOz/PWIXP6R2eZEvNyY5KGFz/Eb1AJ5ayUy6bdQJeL+UTq7W376XKcP0BkSzBWaAYm1fTBtKAeiJ3owQg+z2UiagIM1EMiQBXp2NSMFqAZHUOXl0POr6K+cj9Iys/6WkBd5FvjZw63GpgY7urin6H7jfsqv1Qq28JmXD4HxfvKSY=

@@ -1,0 +1,24 @@
+language: java
+install: true
+jdk: openjdk11
+
+git:
+  depth: false  # get full git history for SQ blame info
+
+script: "./travis.sh"
+cache:
+  directories:
+  - "$HOME/.sonar"
+  - "$HOME/.gradle/caches/"
+  - "$HOME/.gradle/wrapper/"
+  - "$HOME/.gradle/go"
+before_cache:
+- rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+- rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+- rm -fr $HOME/.gradle/caches/*/fileHashes/
+- rm -fr $HOME/.gradle/caches/*/scripts/
+notifications:
+  email: false
+  webhooks:
+    - secure: Eoi8lM3fZlVMxzqVXEx1gXtO3tvOTFeoAPtNdA9ZnSLPAGH3yt9YiIh2CNViUbOK3oveVohfPAavXggmObuM87Okey10OuVWRRcOwMhdF/zl0CHPR/Ubt7uzCPE5HOTzDqowBPXojHiUIYkH2yFvEZwmNYKqjSZBl2qOUFFtmAXw4tlSr1aBJBxcwl4RzII1Ym4PJQ0+hCcIrnB9H4kj5HPUSPZgN2mFi2vCp/wW4ilDTXr7KLkLTnFj6B5aKnapug54/oqZgteNvtOxDcKy0CYxDSMu1nIqP3wcsYpSRvw+r2CsHSEAvfLu8FKqz5KKH/zpAuHodaebKjhR8egDvTEvxjWw9D7lG9lWd7Kg4xvzsKpSnmSuQcYL3dMUAWysoMa0j5FZfBd+xAnjs2pCzKeYJ/bKVcDBWPYiXo7wXpHHQaSKpBH5kj0uXLOLIRExRTFzSi8XXYg3lQhKJlr9r5pJ4zRykbB9wOELtM3F420ZIBob2AXaBZQMeZMXgvBjLcrSz7klmyQLFISeLEe9NqG+6bc3fxRtsWN4TkmctohCLPINMScKFVw9XrA9WNsrJyu0Y93hhZ101Q4lMCHHHSoPe+FAFSuq2RQpSGC/30Xyi1MAneK7x47Y8iQuTHO9JklCiXCLj2jNHc6PnmQ6Jh5qmoNCSm5+F28gQotBzhU=
+  on_start: always

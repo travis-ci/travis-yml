@@ -1,0 +1,28 @@
+# Use Ubuntu 'trusty' distribution
+dist: trusty
+sudo: required
+language: node_js
+node_js:
+  - "node"
+
+branches:
+  only:
+    - develop
+
+addons:
+  chrome: stable
+#before_script:
+#  - "export DISPLAY=:99.0"
+#  - "sh -e /etc/init.d/xvfb start"
+#  - "sleep 3"
+install:
+  - npm install
+script:
+  - npm run lint
+  - npm run headless:coverage
+  # Output something every 9 minutes (540 seconds) so Travis doesn't give up
+  - while sleep 540; do echo "=====[ $SECONDS seconds still running ]====="; done &
+  - npm run build:prod
+  # Kill background sleep loop
+  - kill %1
+  - npm run doc

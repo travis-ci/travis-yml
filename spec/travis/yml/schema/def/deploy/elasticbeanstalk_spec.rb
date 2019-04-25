@@ -32,10 +32,10 @@ describe Travis::Yml::Schema::Def::Deploy::Elasticbeanstalk, 'structure' do
                 '$ref': '#/definitions/deploy/edge'
               },
               access_key_id: {
-                '$ref': '#/definitions/secure'
+                '$ref': '#/definitions/type/secure'
               },
               securet_access_key: {
-                '$ref': '#/definitions/secure'
+                '$ref': '#/definitions/type/secure'
               },
               region: {
                 type: :string

@@ -1,0 +1,69 @@
+language: go
+
+go:
+  - 1.x
+
+os:
+  - linux
+
+dist: xenial
+
+cache:
+  directories:
+    - $HOME/.cache/go-build
+    - $HOME/gopath/pkg/mod
+
+services:
+  - docker
+
+sudo: true
+
+before_install:
+  - docker --version
+#  - sudo apt install -y linux-headers-$(uname -r)
+#  - ls -l /usr/src/linux-headers-$(uname -r)
+#  - sudo apt-get install --only-upgrade git-core
+#  - git --version
+
+addons:
+  apt:
+    update: true
+    packages:
+      - docker-ce
+
+env:
+ global:
+   - GO111MODULE=on
+
+script:
+  - ./ci/travis.gofmt.sh
+  - ./ci/travis.govet.sh
+  - ./ci/travis.codecov.sh
+  - make clean all
+  - ./ci/travis.sha256.sh
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
+  - git reset --hard HEAD
+
+#before_deploy:
+#- make clean all -j2
+
+deploy:
+  - provider: releases
+    api_key:
+      secure: $GITHUB_TOKEN
+    file: build/*
+    file_glob: true
+    skip_cleanup: true
+    draft: true
+    on:
+      tags: true
+  - provider: script
+    script: ci/deploy-docker.sh
+    skip_cleanup: true
+    on:
+      all_branches: true
+
+notifications:
+  email: false

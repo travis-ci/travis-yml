@@ -1,0 +1,54 @@
+language: python
+
+python:
+  - "2.7"
+  - "3.5"
+  - "3.6"
+
+before_install:
+  - sudo apt install openjdk-8-jre
+  - wget http://www.antlr.org/download/antlr-4.7.1-complete.jar
+  - echo \#\!/bin/bash > antlr4
+  - echo java -cp \"`pwd`/antlr-4.7.1-complete.jar:$CLASSPATH\" org.antlr.v4.Tool \"\$@\" >> antlr4
+  - echo >> antlr4
+  - chmod +x antlr4
+  - export PATH=$PATH:`pwd`
+  - pip install --upgrade pip enum34 pytest
+  - pip install -r requirements.txt
+ 
+  # gsl library to support ode-toolbox stiffness testing
+  - wget http://ftp.wrz.de/pub/gnu/gsl/gsl-2.5.tar.gz
+  - tar -xvzf gsl-2.5.tar.gz
+  - cd gsl-2.5
+  - ./configure && make && sudo make install
+  - cd ..
+  - export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
+  - pip install pygsl
+
+  #- pip install matplotlib
+  #- cd ~ && git clone https://github.com/nest/nest-simulator nest_source
+  #- mkdir nest_install
+  #- cd nest_source && mkdir build && cd build
+  #- cmake -DCMAKE_INSTALL_PREFIX=~/nest_install .. && make && make install
+  #- cd $TRAVIS_BUILD_DIR
+  - pip install git+https://github.com/nest/ode-toolbox.git
+
+install:
+  - find pynestml/generated -not -name __init__.py -a -not -name generated -delete
+  - cd pynestml/grammars
+  - ./generate_lexer_parser
+  - cd ../..
+  - export PYTHONPATH=$PYTHONPATH:`pwd`
+  - echo $PYTHONPATH
+  - python setup.py install
+
+  #- python PyNestML.py -path models -target target
+  #- cd ../target && mkdir build && cd build
+  #- cmake -Dwith-nest=~/nest_install/bin/nest-config .. && make && make install
+  #- cd $TRAVIS_BUILD_DIR
+  #- source $TRAVIS_BUILD_DIR/nest_install/bin/nest_vars.sh
+
+sudo: true
+
+script:
+  - pytest -s tests

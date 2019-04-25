@@ -1,0 +1,27 @@
+---
+language: node_js
+node_js:
+  - 8.9.0
+# Workaround for https://github.com/travis-ci/travis-ci/issues/8836
+sudo: required
+dist: trusty
+addons:
+  chrome: stable
+cache:
+  directories:
+    - $HOME/.npm
+before_install:
+  - npm config set spin false
+  - npm install -g bower
+  - bower --version
+install:
+  - npm install
+  - bower install
+before_script:
+  - greenkeeper-lockfile-update
+script:
+  - npm run test:travis
+after_script:
+  - greenkeeper-lockfile-upload
+after_success:
+  - npm run coveralls

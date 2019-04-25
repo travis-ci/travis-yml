@@ -1,0 +1,30 @@
+language: ruby
+dist: trusty
+sudo: false
+rvm:
+  - 2.5
+before_script:
+
+before_install:
+  - npm install -g npm@latest
+install:
+  - nvm install 10.13.0
+  - nvm alias default node
+  - gem install github-pages
+  - gem install jekyll-paginate
+  - gem install jekyll-paginate-v2
+  - npm install
+script: bash ./deploy.sh
+branches:
+  only:
+  - staging
+env:
+  global:
+  - ENCRYPTION_LABEL: "6315171ce8db"
+  - COMMIT_AUTHOR_EMAIL: "it@cfms.org"
+  - NOKOGIRI_USE_SYSTEM_LIBRARIES: true
+  - JEKYLL_ENV: "production"
+cache:
+  bundler: true
+  directories:
+    - node_modules

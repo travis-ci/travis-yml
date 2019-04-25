@@ -1,0 +1,10 @@
+addons:
+  apt_packages:
+    - libgl1-mesa-dev
+    - xorg-dev
+language: go
+go: master
+install:
+  - go get -u github.com/suite911/cloud911/...
+
+script: make -C examples -f travis.mk

@@ -1,0 +1,39 @@
+language: php
+
+cache:
+    directories:
+        - $HOME/.composer/cache
+        - vendor
+
+sudo: required
+
+addons:
+    firefox: "47.0.1"
+
+matrix:
+    include:
+        - php: 7.1
+          env:
+              - COMPOSER_FLAGS='--prefer-lowest'
+        - php: 7.3
+
+before_install:
+    - phpenv config-rm xdebug.ini
+    - if [[ $SYMFONY_VERSION ]]; then composer require symfony/symfony:${SYMFONY_VERSION} -n --no-update; fi;
+    # Avoid issues on composer update
+    - echo "memory_limit=-1" >> ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/travis.ini
+    - composer update $COMPOSER_FLAGS
+    - wget --no-clobber -O vendor/bin/selenium.jar http://selenium-release.storage.googleapis.com/2.53/selenium-server-standalone-2.53.1.jar || true
+
+before_script:
+    - nohup php -S localhost:8080 -t features/fixtures/project/web > /dev/null 2>&1 &
+    - sh -e /etc/init.d/xvfb start
+    - export DISPLAY=:99.0
+    - java -jar vendor/bin/selenium.jar > /dev/null 2>&1 &
+    - sleep 5
+    - features/fixtures/project/app/console assets:install features/fixtures/project/web --relative --symlink
+
+script:
+    - vendor/bin/phpstan analyse -l 1 -c phpstan.neon .
+    - vendor/bin/phpspec run --format=pretty
+    - vendor/bin/behat --no-snippets --format=progress --profile=travis -vvv

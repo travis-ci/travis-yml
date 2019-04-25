@@ -1,0 +1,13 @@
+language: java
+jdk:
+- openjdk7
+install: mvn install -q -B -Dmaven.test.skip=true -Dsiga.versao=3.14.0.0
+script: mvn test javadoc:aggregate -B -Dsiga-integration-test.skip.tests=true -Dsiga.versao=3.14.0.0
+after_success:
+- .utility/push-javadoc-to-gh-pages.sh
+env:
+  global:
+    secure: JjAbNw5rSFhPRlaG2Q07ffXBYSNGG1YmTZGTaT/1QZYxxF9hPIQZIELC27q/AJqqAC5pIM+dndRphuhNkojzAYeh/sqcgxT96m3rOoD5Re+84KvDcoGfPZbPrtTfO3ppOcSvAYa4ST5/EDAHfhH2Q9DVfBfwLqoYW+zfh8BWTNk=
+notifications:
+  slack:
+    secure: JG+iP2lf4RtOYn+fDBV+2o1E0rBSWk80CTMIXHKF+1uX3SwmW9ZGjUIB71on4pAH2QEgIMb5IYmMecsGVwtIvCOJpNo/M8nXG4G9sDsL6J4TV6dADeyjTpSRHJbuT/Q7cdVjv6Ufrj6ebwi79wwM7CedpW42hAFV6Qnyi497NAc=

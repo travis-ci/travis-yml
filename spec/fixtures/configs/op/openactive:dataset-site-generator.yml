@@ -1,0 +1,16 @@
+sudo: true
+language: node_js
+node_js:
+- '6'
+script:
+- cd generator
+- npm install
+- bash ./distribute.sh
+env:
+  global:
+    secure: EBYVhd+L3d/BlpiZikRxDMRWhzuwt85V3x5ahccFbq6uz/ClgJ+uNiTFquatoaxgUFHEdj+9GQR2lPW0Wr3EdV2XbqEprZrU9hNvwG9nba9jiX7SWCF+c6gdD7d/1MPcY2+zPA2Eb+4QFu0rYD0dPwuV0TP+EYPyGfwMYB391Guu6DL9XZuhXeCwTJASldcEAbKa6uuXdTqhKAPdXyvjKZy50RI1O75RMouJIRZVI1LO1N5z8Qw3xEHXqHR8rXNbHc7lrI2O07apFZjLoRuoSx02G8D8PQ/9qIIN1PyFaDzL8OmzcRdEZT8yg4wNLL8ZaUXjaoeZ4P52S5K5cNPWq7tsYhZdXjnF3YLUVMhS4baXuflOGKOBWoEtWePjdUV0+/jOHEfHcyL0ui/qkfXT+nCwyofFXSrUa5dl/YikQ/18P7KbnjlAmYl+tvJ1mNMxPjv30cmst5rtBQXMLfI+gm/BJh7XR/9faqFefKF0zV/FTedSStzixcUgCL3Y5P0UFHZ+9038b8D2dniJQ7+6pqdHeNAp1S8Qmj3SQ+XrnbUsr5F+Texq57iYghQmpVLTiPcDn3E/MsrVshhW4PWoYCpvPeugNxE8vst1YVCdBdT3sb3k84xS5BWhiIpgZObYs29fW2lJhT30DsoS2SkwEa0e7PE3G7HhvElVT0ZqK54=
+before_install:
+- sudo add-apt-repository ppa:git-core/ppa -y
+- sudo apt-get update -q
+- sudo apt-get install git -y
+- git --version

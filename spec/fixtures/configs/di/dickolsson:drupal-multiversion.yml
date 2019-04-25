@@ -1,0 +1,48 @@
+sudo: false
+
+language: php
+
+php:
+  - 5.6
+  - 7.2
+
+env:
+  - MAKE_FILE=drupal-8.5.x.make.yml
+  - MAKE_FILE=drupal-8.6.x.make.yml
+
+matrix:
+  allow_failures:
+    - env: MAKE_FILE=drupal-8.5.x.make.yml
+
+services:
+  - mysql
+
+addons:
+  apt:
+    packages:
+    - nginx
+
+cache:
+  directories:
+  - $HOME/.drush/cache/download
+
+before_install:
+  - cp $TRAVIS_BUILD_DIR/.travis/php.ini ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/
+  - cp $TRAVIS_BUILD_DIR/.travis/php-fpm.conf ~/.phpenv/versions/$(phpenv version-name)/etc/
+  - ~/.phpenv/versions/$(phpenv version-name)/sbin/php-fpm
+  - nginx -c $TRAVIS_BUILD_DIR/.travis/nginx.conf
+  - wget -P ~/ https://github.com/drush-ops/drush/releases/download/8.1.16/drush.phar && chmod +x ~/drush.phar
+  - php ~/drush.phar make $TRAVIS_BUILD_DIR/.travis/$MAKE_FILE $HOME/www
+  - php ~/drush.phar --root=$HOME/www --yes site-install --db-url=mysql://root:@127.0.0.1/drupal testing
+  - if [ $MAKE_FILE != drupal-8.4.x.make.yml ]; then composer --working-dir=$HOME/www run-script drupal-phpunit-upgrade; fi
+  - composer --working-dir=$HOME/www require relaxedws/lca
+
+install:
+  - ln -s $TRAVIS_BUILD_DIR ~/www/modules/multiversion
+
+script:
+  - cd ~/www && php ./core/scripts/run-tests.sh --suppress-deprecations --verbose --keep-results --color --concurrency 4 --php `which php` --sqlite /tmp/test.sqlite --url http://localhost:8080 --module multiversion
+
+after_script:
+  - find ~/www/sites/simpletest/browser_output -type f -exec cat {} \;
+  - cat /tmp/error.log

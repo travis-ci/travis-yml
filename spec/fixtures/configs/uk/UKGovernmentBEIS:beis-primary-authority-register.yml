@@ -1,0 +1,190 @@
+##############################################################################
+### BUILD                                                                  ###
+##############################################################################
+
+# Fix Travis write errors. These write errors occurred after
+# a Travis update to new Trusty images on Dec. 12th 2017. The reason for these
+# write errors is unknown. Using the deprecated builds did not fix the problem.
+# Setting 'filter_secrets: false' as suggested here
+# https://github.com/travis-ci/travis-ci/issues/4704#issuecomment-321777557
+# fixes the problem.
+filter_secrets: false
+
+language: php
+
+php:
+  - 7.1
+
+services:
+  - docker
+
+addons:
+  firefox: latest
+
+cache:
+  directories:
+    - node_modules
+    - tests/node_modules
+    - $HOME/.composer/cache/files
+
+before_install:
+
+#-----------------------------------------------------------------------------
+# Bring up Docker containers
+#-----------------------------------------------------------------------------
+  - cd devops/docker
+  - docker-compose up -d
+# set web server / docker root uid/gid to match Travis uid.
+  - docker exec -t par_beta_web bash -c "usermod --uid=2000 www-data"
+  - docker exec -t par_beta_web bash -c "groupmod --gid=2000 root"
+  - docker exec -t par_beta_web bash -c "adduser root www-data"
+  - docker exec -t par_beta_web bash -c "adduser composer www-data"
+# restart servers after changing uid/gids.
+  - docker-compose stop
+  - docker-compose up -d
+  - cd ../..
+
+#-----------------------------------------------------------------------------
+# Install dependencies
+#-----------------------------------------------------------------------------
+
+install:
+  - phpenv config-rm xdebug.ini
+  - composer install -v
+  - docker exec -it par_beta_web bash -c "/usr/local/n/versions/node/7.2.1/bin/npm install"
+  - docker exec -it par_beta_web bash -c "/usr/local/n/versions/node/7.2.1/bin/npm run gulp"
+  - docker exec -it par_beta_web bash -c "cd /var/www/html/tests && rm -rf node_modules && /usr/local/n/versions/node/7.2.1/bin/npm install"
+
+#-----------------------------------------------------------------------------
+# Setup local config defaults
+#-----------------------------------------------------------------------------
+
+#  - cp web/sites/example.settings.local.php web/sites/default/settings.local.php
+  - chmod -R 777 private
+  - chmod -R 777 web/sites/default
+  - if [ ! -d web/sites/default/files ]; then mkdir web/sites/default/files; fi
+  - chmod -R 777 web/sites/default/files
+  - docker exec -it par_beta_web bash -c "chmod -R 777 /var/www/html/private"
+  - docker exec -it par_beta_web bash -c "chmod -R 777 /var/www/html/web/sites/default/files"
+
+#-----------------------------------------------------------------------------
+# Create .env file
+#-----------------------------------------------------------------------------
+
+  - echo "S3_REGION=$S3_REGION" >> .env
+  - echo "S3_ACCESS_KEY=$S3_ACCESS_KEY" >> .env
+  - echo "S3_SECRET_KEY=$S3_SECRET_KEY" >> .env
+  - echo "S3_BUCKET_ARTIFACTS=$S3_BUCKET_ARTIFACTS" >> .env
+  - echo "S3_BUCKET_PRIVATE=$S3_BUCKET_PRIVATE" >> .env
+  - echo "S3_BUCKET_PUBLIC=$S3_BUCKET_PUBLIC" >> .env
+  - echo "PAR_HASH_SALT=$PAR_HASH_SALT" >> .env
+  - echo "DATAFILE=$DATAFILE" >> .env
+  - echo "APP_ENV=travis" >> .env
+  - echo "BSK_USER=$BSK_USER" >> .env
+  - echo "BSK_KEY=$BSK_KEY" >> .env
+  - echo "SENTRY_DSN=$SENTRY_DSN" >> .env
+  - echo "SENTRY_DSN_PUBLIC=$SENTRY_DSN_PUBLIC" >> .env
+  - echo "PAR_GOVUK_NOTIFY_KEY=$PAR_GOVUK_NOTIFY_KEY" >> .env
+  - echo "PAR_GOVUK_NOTIFY_TEMPLATE=$PAR_GOVUK_NOTIFY_TEMPLATE" >> .env
+  - echo "CLAMAV_HTTP_USER=$CLAMAV_HTTP_USER" >> .env
+  - echo "CLAMAV_HTTP_PASS=$CLAMAV_HTTP_PASS" >> .env
+  - echo "SIMPLETEST_DB=pgsql://par:123456@db:5432/par" >> .env
+
+#-----------------------------------------------------------------------------
+# Import dev data from S3
+#-----------------------------------------------------------------------------
+
+  - sleep 5
+  - docker exec -i par_beta_web bash -c "cd web && ../vendor/bin/drush sql-cli @dev < ../devops/docker/fresh_drupal_postgres.sql"
+  - docker exec -i par_beta_web bash -c "cd web && ../vendor/bin/drush cc drush"
+  - docker exec -i par_beta_web bash -c "cd web && ../vendor/bin/drush cr"
+  - docker exec -i par_beta_web bash -c "cd web && ../vendor/bin/drush fsg s3backups $DATAFILE.tar.gz /dump.sql.tar.gz"
+  - docker exec -i par_beta_web bash -c "cd / && tar --no-same-owner -zxvf dump.sql.tar.gz"
+  - docker exec -i par_beta_web bash -c "cd web && ../vendor/bin/drush sql-cli @dev < /$DATAFILE"
+  - docker exec -i par_beta_web bash -c "cd web && ../vendor/bin/drush sqlsan @dev -y"
+  - docker exec -i par_beta_web bash -c "cd web && ../vendor/bin/drush cc drush"
+  - docker exec -i par_beta_web bash -c "cd web && ../vendor/bin/drush cr"
+
+#-----------------------------------------------------------------------------
+# Run further Drush commands
+#-----------------------------------------------------------------------------
+
+  - docker exec -i par_beta_web sh /var/www/html/drupal-update.sh /var/www/html
+  - docker exec -i par_beta_web bash -c "cd web && ../vendor/bin/drush cex -n"
+  - docker exec -i par_beta_web bash -c "cd web && ../vendor/bin/drush core-requirements --severity=2"
+
+#-----------------------------------------------------------------------------
+# Run cron a handful of times.
+#-----------------------------------------------------------------------------
+
+  - docker exec -i par_beta_web bash -c "cd web && for ((n=0;n<3;n++)); do ../vendor/drush/drush/drush cron; done"
+
+#-----------------------------------------------------------------------------
+# Stamp the code with the build number
+#-----------------------------------------------------------------------------
+
+  - 'echo "{ \"build\" : \"${TRAVIS_BUILD_NUMBER}\", \"tag\":\"${TRAVIS_TAG}\", \"time\":\"$(date -u)\"}" > web/build_version.txt'
+
+##############################################################################
+### TEST                                                                   ###
+##############################################################################
+
+before_script:
+  - curl --silent http://127.0.0.1:8111 > /dev/null
+
+script:
+  - docker exec -it par_beta_web bash -c "apt-get update -y"
+  - docker exec -it par_beta_web bash -c "apt-get install -y google-chrome-stable"
+  - travis_retry docker exec -ti par_beta_web bash -c "cd tests && rm -rf node_modules && /usr/local/n/versions/node/7.2.1/bin/npm install && npm run selenium-install"
+  - docker exec -ti par_beta_web bash -c "cd tests && /usr/local/n/versions/node/7.2.1/bin/npm run nightwatch-cucumber-travis -- --tag ci"
+
+#-----------------------------------------------------------------------------
+# Run Jmeter - to be run manually on all releases against staging from now on.
+#-----------------------------------------------------------------------------
+
+#  - if [[ "$TESTTYPE" == "jmeter" ]]; then docker exec -ti par_beta_web bash -c "cd tests/nfr/jmeter && wget http://mirror.reverse.net/pub/apache/jmeter/binaries/apache-jmeter-4.0.tgz && wget https://www.apache.org/dist/jmeter/binaries/apache-jmeter-4.0.tgz.asc && wget -O - https://www.apache.org/dist/jmeter/KEYS |gpg --import && gpg --verify apache-jmeter-4.0.tgz.asc && tar -zxf apache-jmeter-4.0.tgz && rm apache-jmeter-4.0.tgz && cd apache-jmeter-4.0/lib/ext && wget https://jmeter-plugins.org/downloads/file/JMeterPlugins-Standard-1.4.0.zip && unzip JMeterPlugins-Standard-1.4.0.zip"; fi
+#  - if [[ "$TESTTYPE" == "jmeter" ]]; then docker exec -ti par_beta_web bash -c "cd tests/nfr/jmeter && chmod -R 777 ../../reports/ && ./apache-jmeter-4.0/bin/jmeter -n -t load-test-plan-travis.jmx -l ../../reports/jmeterreport.jtl -e -o ../../reports/dashboard"; fi
+
+#-----------------------------------------------------------------------------
+# Remove .env file created in previous steps.
+# If tagged build, tar up the files ready for S3.
+#-----------------------------------------------------------------------------
+
+  - rm .env
+  - if [[ $TRAVIS_TAG != '' ]]; then mkdir $TRAVIS_TAG; fi
+  - if [[ $TRAVIS_TAG != '' ]]; then tar --exclude="./$TRAVIS_TAG" -zcf $TRAVIS_TAG/$TRAVIS_TAG.tar.gz .; fi
+
+#-----------------------------------------------------------------------------
+# For tagged builds, send the packaged build to S3
+#-----------------------------------------------------------------------------
+
+deploy:
+- provider: s3
+  access_key_id: "$S3_ACCESS_KEY"
+  secret_access_key: "$S3_SECRET_KEY"
+  bucket: "$S3_BUCKET_ARTIFACTS"
+  upload-dir: builds
+  skip_cleanup: true
+  local_dir: "$TRAVIS_TAG"
+  on:
+    repo: UKGovernmentBEIS/beis-primary-authority-register
+    tags: true
+
+##############################################################################
+### STORE ARTIFACTS                                                        ###
+##############################################################################
+
+addons:
+  artifacts:
+    paths:
+    - "./tests/reports"
+    target_paths: $TRAVIS_BUILD_NUMBER
+    bucket: "beis-par-test"
+    s3_region: "eu-west-1"
+notifications:
+  slack:
+    secure: oRuAo84heWUp6MVcM22dx/FZUV5HUVvsegEDaiVggQmNo2zYzNQhgAY7P9GpnaPWo53inCoFfwrwn9V+sj2uwUwrtWQg71qCTU3FIZicqYBB44rp+7/YdpuNqCYtbbY50UJpsZtqRIffWB4iS0YZ2bd+SkvsJskzRzbHC9qRjrSq0Hmb1DuxQCiE+M9TM7n4phY1dPTxTm1g1WwShr1zKXTfhDDK2k9r9kQGpJFP5rrE5cch0kBPJP29rgijeJq5uFS99+QyiVRJcqStXYl2JvKXTMS3sVk+OgSHeeRaaY0dbQSPcn4mTgcQKMVpfAUXVD6mUlkj4WYDXjdQSZdbgVvsX5tQg/6kG52wXgB+vDsmwKoBcTZLndNUQc9nCA02A+WVLyru318JmxwtaLo7CqRJArG3vItryMl7SxUA5QM1XB77iOe25m1aXEvJkUa54p6P7T62Gr0qfaEnCAeNRu33nS/16g+Znbp34jIwmmt+f3q2Uo3XV9cQgYj46ixzSjw5OPTHQSEpCHE8jtkXP80/N8jlXYLm7kTJapSWKEdbQf6J5a7Oj8Hv7Jq0QoPZmRpfa9L5PwJHd38p1JmxnVFbZMS4dQGyTwgyehf62cIDVi+5Pl3XPdQJ9FcMSTGOCXSrPGmJRHBt+o8bOuIzWMBHYqgnmHNNQ+oK/SEFhyw=
+env:
+  global:
+  - secure: Fs3vok73zakpxIio13QqNuGlUoLVGeaE85FbFTTQI3+xdHWzVGausI7HW7GRh32cQP3jgPazcIe4WE/og4FHWwPIJzRzknbkaBN6zsmETS2nhh7H8rNCbw/vXqC1hXhXK3VdaIvuL9t+UBaqeojrgIvF7DVs5G3shtKX6om5NscxYDUmIMPeQL5gaIXVcGGIVlyL7rruQQ8swt1ld9YtNhoGv9zhJjezr5r2qGwrJkx2JkPWJJre6Dy8PaPWaOKQ9vV3NtI+uG2mbctBkBqG05XZ1Rm3V8r8lOyDhpQcWkn8M616QMkd/bWZgcS97RX7MEdKBQIhEGFAo66z76Uc+PwgnTy8hF3pM6oF1adrw9GBfbMD5gsS/KVLjs/GOlHF3blsoFALk99K/6WIt3/5682LmXxvY56lnJOBMWgDOiWk8dlmj5CXLnxEN8GCgMDphV+xkv8luN3H18dtnHQ9dp8p1w4CNwopsUXW/PgOdQput8DRP74Y0D3cpGMjoHEhY1kxuWghwy2q+SHCgrvMzjyZs4EXWJSQiGQmqw5AjUzntR2BsqEsne78L5SBC6rCcMalTcWf+BSHITI75RiEdzUg+wSciV5FMWwD1OBlAqgjeOpocWcoTvUYQW4jl6HnwWyOuIKYPTZnkqsKQjDsrfLsAgxtVZNRh4E6/y3ZJBY=
+  - secure: G/sN3FBcz3aBZgZ/rkCHc+Xrv/oVU2VUFtLmYH6A/kKLtYAckgn5Lj9FYrW545TBzr0ZumEp2/N2446xCzG4fKmU7bkFHAsbWrWJXXCF1ZQnEG1uhy33OtW2ubR4jzbUJL1qyF5JvCpers59I7dCVxQLfeZYqt0Tex87w5TZJqZzVKL6nEvnoTtrHrbk8SsaMGhkbtf+OKezO5SemT0FH9Jh4sXzmyByIXudgvfBCHTbIGqO+oFyyEhWQP84pB/fvkuppA6k74P6iscY3CwwJMvSFoQa3m4edMlEyEsgUEhbmP5TFagNl+baTWN3XS/hKOSIOm1HttsOKyfgxUzKQ4IYb9vUOl1d2CIvMWDpAgJOs8plNfHWbmZYw5SVpxp25Y/VtsfcFEFF2zYzF93swpiokchjcLVmDAVagG6repmy/VuwzoxbgaVUbbAU+sndzmdOTYBb8i1VpoGUKTpiHQOcdkDf3MDHi7fJnvgsRu/Mz+xfQ4y0Tm8OejnCzAzfiIuaAo06a0osp6NIbevqW85Z4Ag76XxxFsmfT7x3qSAGiSc9CJ0KUtg3usAi2EbixFtBk3mQMsILPOmwyhEqUMTGSX0zsM6wf+J1I58NSzoiGMo7mkFEK4wg5+aw+DbF3mLCBLRRsW+pyFegGaq2itaIZtOXMDKFsE85z6qHIL0=

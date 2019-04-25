@@ -32,13 +32,13 @@ describe Travis::Yml::Schema::Def::Deploy::Scalingo, 'structure' do
                 '$ref': '#/definitions/deploy/edge'
               },
               username: {
-                '$ref': '#/definitions/secure'
+                '$ref': '#/definitions/type/secure'
               },
               password: {
-                '$ref': '#/definitions/secure'
+                '$ref': '#/definitions/type/secure'
               },
               api_key: {
-                '$ref': '#/definitions/secure'
+                '$ref': '#/definitions/type/secure'
               },
               remote: {
                 type: :string

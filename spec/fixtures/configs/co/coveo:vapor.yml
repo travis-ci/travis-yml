@@ -1,0 +1,57 @@
+sudo: false
+
+language: node_js
+
+node_js:
+  - '8.9'
+
+before_install:
+  - rvm install 2.5.3 && rvm use 2.5.3
+  - gem install bundler
+
+install:
+  - bundle install
+  - npm install -g gulp
+  - npm install
+
+cache:
+  directories:
+    - node_modules
+    - vendor/bundle
+
+script:
+ - npm run-script lint
+ - npm run-script build
+ - npm run-script buildpages
+
+notifications:
+  email:
+    on_success: never
+    on_failure: never
+
+after_success:
+- mkdir -p "deploy/$TRAVIS_TAG"
+- cp -a dist/. "deploy/$TRAVIS_TAG"
+- eval "$(ssh-agent -s)" #start the ssh agent
+- openssl aes-256-cbc -K $encrypted_a1124e12070d_key -iv $encrypted_a1124e12070d_iv -in travis-deploy-key.enc -out travis-deploy-key -d
+- chmod 600 travis-deploy-key # this key should have push access
+- ssh-add travis-deploy-key
+
+deploy:
+  - provider: script
+    skip_cleanup: true
+    script: ./publish-pages.sh
+    on:
+      branch: master
+  - provider: s3
+    skip_cleanup: true
+    access_key_id: AKIAJ72WQIJQMW6TCHDA
+    secret_access_key:
+      secure: i3DHmH/JK5uSh8gqB1cW1LqkCneV1YhtyWrXVQZkGbFRFOrPfgZQu/21GW1GN+29/iNddBf7RN/7X1ULZq2pNBlD0kifpfxQFa4pLiJX04ZV47vF5DOPYq2xWU6hQcAOiNcLoig23DrwssbVe1EeAPxr3s3CpxZrq01UUWhTsoA= # https://docs.travis-ci.com/user/encryption-keys/
+    bucket: coveo-public-content
+    local-dir: deploy
+    upload-dir: styleguide
+    acl: public_read
+    on:
+      tags: true
+      repo: coveo/vapor

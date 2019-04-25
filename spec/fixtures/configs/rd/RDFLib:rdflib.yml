@@ -1,0 +1,44 @@
+# http://travis-ci.org/#!/RDFLib/rdflib
+sudo: false
+language: python
+branches:
+  only:
+    # only build master and release branches (merge request are built anyhow)
+    - master
+    - /^\d+\.\d+\.\d+(-.*)?$/
+git:
+  depth: 3
+
+python:
+    - 2.7
+    - 3.4
+    - 3.5
+    - 3.6
+
+matrix:
+  include:
+    - python: 3.7
+      dist: xenial
+      sudo: true
+
+before_install:
+    - pip install -U setuptools pip  # seems travis comes with a too old setuptools for html5lib
+    - bash .travis.fuseki_install_optional.sh
+
+install:
+    - pip install --default-timeout 60 -r requirements.txt
+    - pip install --default-timeout 60 coverage coveralls nose-timer && export HAS_COVERALLS=1
+    - python setup.py install
+
+before_script:
+    - flake8 --exclude=pyRdfa,extras,host,transform,rdfs,sparql,results,pyMicrodata --exit-zero rdflib
+
+script:
+    - PYTHONWARNINGS=default nosetests --with-timer --timer-top-n 42 --with-coverage --cover-tests --cover-package=rdflib
+
+after_success:
+    - if [[ $HAS_COVERALLS ]] ; then coveralls ; fi
+
+notifications:
+    irc:
+        channels: "chat.freenode.net#rdflib"

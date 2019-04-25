@@ -1,0 +1,62 @@
+language: java
+jdk:
+  - oraclejdk11
+addons:
+  sonarcloud:
+    organization: mediathekview
+    token:
+      secure: GsJx1wZ11dKiyfEhBjQqclLBY/0bzBvjzX5e8WJHmKbX8dDJgSrPX3K1gpbJ4sxCS/DW++V5Fa6dzeXdn6guWy4ymWTtRaxJamCixpKFOYrplf3wgx/nB2t8F+lAnnSm3aZv/8wvvigcLE/LY4ed/nAKC9LI60Pikvgw3/jnovSgufNi7EAqLtsheIkZYdZ0W20xx1iJ1EMuLeCnb4dj6XNoSyNIerTSNgV5eFX7dSm5rAylIx4eWfKsNbHRRbLLHfqhpdzh9+Zl4zjd9jzLStt3Jg7eYtDR4r8Tsr1ilDWXdhHFD4LEntx4F0hTB4wm+jCqfxdaE4EwEkUPQHJs4in3XPVv1jJszj07TAc94+lfF4cvDG1SnfH3OsisP/nqn1+PUacs+VUnIWJsjKgtLbrreXrwiZErPODMuzq0zXGqz2G7xuQROVZv7zKSHKZtb29996cyp9YUXg0ULHj+NZcp007KaR27fLBFZ8fv5Gamg269kZm30W6OhpzojXp0wMUhvuRdVZC7BvAwVhCauPwu1bpiUiZTcYsBC1F7DkbEzTem50tLhgwsCcl4MV4ovfFsdv7bxMWOgRXCvrM7sivjwYhXuYTJis8gtd7E9r8W8rzB6AI/hM8aS8DPjMizYyLsd8ByF//MIYR2zbJp7Hx0GsEJ8miYosRYIYtlwyE=
+    script:
+      # the following command line builds the project, runs the tests with coverage and then execute the SonarCloud analysis
+      - mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent install sonar:sonar
+notifications:
+  webhooks:
+    urls:
+      - https://scalar.vector.im/api/neb/services/hooks/dHJhdmlzLWNpLyU0MGFsZXglM0FtYXRyaXguZWxhb24uZGUvJTIxdWpSeXlUSGxQcXlRb2prcG1vJTNBbWF0cml4LmVsYW9uLmRl
+    on_success: change
+    on_failure: always
+    on_start: never
+env:
+  global:
+    - secure: pHmSb+3bIvSj1iA5j4MIgRv1ogRH1w7NKlfPxAPDXYq+AQZOyyAhWm/nTMq0mtX9x5RsrM8c7YUN7ds+pTpE5JpcA+rlOSibj+ziDeLhpmDzcBt+YUltTOxP7EVrAAmHBTu7DGjPmTLvfzLfpyGNkv6yuIXNo/oIs6BRMwQ2xHa1QdkQ/gkS6nxgh7UhqtDmNix/idHjX/a5PEX8Qse3ZvKBvt1kgrKcVN1ysOtcHKvhQ5ddMAj+7PM+aLuAPTlysfqMYN1gW+cpWOJrHriV7vGCU6lz34s2yM19wFmRFOo7yht3FhAwH8Rt6aTtwpC3HN5DzwqhcicHQkoyv59KMiBbUBN9w5SGqit+/HtFOQ9vgyV5qo5Il/UkbVGUXXl9WcY+zPV2XTlO3LH5o36Bn+da/HRdmlvveMZT8tJ5137YSQhrQRZdOVEDBWuAZmUiTh94c9u3owU85TFzS97fqWi5bvpbyIU749oGhWGv/zxmOEJmtinnQpUAJqS9fFrXrFFtjdLF6vNYWc1f1y7Xg57pLZYK0NcClWc77QwCX5WHy6VPdj3elIJHyv+3DKQw9VBrfV+bRE4b6uvLuDkllBztYECstYR1uJTOumVnhufc12GrD51m+IRqtzEp4+OlNunKsoInNGsJYyaz3t8VcdAwEN4lTE7Se7ijehIpHRA=
+    - secure: mHXNu3lHyPNMwwgRQYbQc/8qXFZI213diD3v5zhDIgaIAi5eVKeuGOZBGLKeeGcBaEjbpKhUZP9UHNHBZ6zHz14NEPxVJM8JYH8luPMFh2MuZwiJmBQimeEPan6fODGPHqdhe0d2oZNtNWUBiGuTgnunG9ksMhniITy2veem0CTpt2CzBSaDb3dBYWSSNDSAzEhoONt2opL8mBRgnlwP6CZfuPkw8mJlkjl7ujJn6Femyl3vAMjFItVLouwuFttL4YhDQFrh6WBEXKHZHJ9tcNHWzcgOh3BjbMCWBfNDKmYLaF2+po99wFgw0rAJdY6JCrGeXCU+SqIYjuKznJHvVJv7CSG9aMQErzLBdbnBD+ZJzNYP5/ontoZCDoWcpLzHBgGh6gFtt7YTUOoEeligAtOGomfjsZp2eN/yRPgEfMXnS41YvAvMwduIoe8uqnmoXv4uatiacZU3c56nZKpBMkqv6hr+ybSr3bYZAmqqdp1xmyoxXI4D/RYELCj42FFBNKqqg0aSokU4S7+lyVYSTYOrqT7NyFQg5HyqRuoETIkaTrD/oIhdpdFnuGfjQlVAkCH7s2PUp3sYFfXw7LRkzJDHlCXsdJGu2glg2mja1oAV/W+TwL8zrUPEdKZdxJU77AmbkfP5wLveKJTlvlIEnDn5coR8BiUf0XMnLtyhQv0=
+    - secure: Sj/3gogvboDfCCtpi6OkmtasiPxFfqYPdzYIqRK+5txWWMe2pqV3gvS45hwUzjHZgyzARcz69wgzN9EowPP1KYB3jIKwDoB4zmQH2SgNSoTOr8dLYDLFB/Qr0pnPwm12Rt/wq+LDR6THeeRnv5mHleGWtzSY8l/HKh8TYgI7rDklXBqKbVWx3NxCBZ5oRnb0e9RCA/A5nUjb/I0aAvPNfIjtpEEEZERjNxrgUKVGde/2dlw0JJcwthzppJ+pv7dsvnBtFFfzXEYri/RQv8vFJCUgGXFYt9L/2tJO7d19TPZoozyx6O5yjYKU615bk6hH9gB2p39W1CSbl2S5XTfSbbNETVU/WxgsKeQw7RNb3NoVWz/RHt3JxW58/0jLLw97Vk1IrWTjVKh6JcRMDacE1XJVSR26Q9Mp0NyjARDpsBsb+W8zD2xUOXe/lj4931w+TuhmtQwirG5r5piEFwXqvYRdp2WR/9D0r9zAtGT8w9dbWbC6610152gP6Oasl1XoaLRvZArl1kPr0RMKou0Kv2YlcnUTU1LEk2F7rnD+lQAC/rdfrwNKPfSheEvo7k5fOIltwt1mQtS/WH1nxWdrvjcnJ17oePna0Ad2v6eRbY0u8VBNY6Q76IkM7YnMbfSTH3OxZUf/dGbpmOo18FCd8Ht/EB6CaA+CU55Cz4vhtMM=
+    - secure: L1gbzsQ+mI2TQNDOOj3qno0+Dp9pphNKfNZRp2K4PIHkF9/RuJ3ywtC73ihReZa0mXoj5IMb24MA9Fij8tCziMiaNYPnRdCceOg6qDRSzL/5ejOKQusGaaUVa05RsWfFpExBtzsJ074HXzjm+a+qY7oBUEhkurlgPQQXcs0IOq0XLkVWQFi8+4RhFKCzIIUxM8kyJOJuSiylPrHnjJ6D3V0gZ68DfAiIuNRUhysxOrPfY4shTEoPRu1OammEcwhAep/R3Gnj/xYkwwwb/quEbMZc4vuJ7mgIQJiXUtgKwvVygMQbNNWftNN+ms+oVDNIm7FmSTpdsUPY3edZZ/VW5X6gWIGXvYi3xuYTI8On6v3Z5YDxnCqs/uS3OIojFyNIa9iFcazExf9mcoMXTjKmMdsD4dCdIrBPKj26SgrrIa4tsu1VnQ80Ec5IzO2nDz67isAU4asI+QnobbEBel8tPR33lLIdg1GP7yE4de62im4nJM23ZYhnm+Kxqb2Y3ZKzBBByqnnh7w0x+HN+WF5NQPk/Z1c/OWYtU0wkbAQGd8JvpdXlYIBfSSdkSoMOUuBWyptG+lArU0uQfz5/DCMpqkbPHSSGj4EiFPU50W/XNmGNu6LoJDFGeIT5QhUbuw2iKcCI08T7k/7aBe9GHZ8ae71LBzJQiaVwNc1aGIHrP2E=
+    - secure: ytonsgnKjRlsAYlmdjiHck+4Yhk88o9xVBbVsyW+UCT5xS2IeZ9o+pzvP/TlJfq/DL0MFoes8wASOGFmKzNjeYph812a23HncGDRCv4j0iCxFRvDF/y28JX6t9vTnpj7AAHLHrs8ggMj0ItZVrquCdbz2jllveN+w+p18YcGdXwQEoavKylaKdnnFMxbibS47BdUT+NkYzucDdKjccYmVBQEOk5ReDwegaOyFXUzqDdiGb0cuo3NIDh9p9WXjVHwYCd2XriwzbglcC4b0gLGrnwGNx9VCauOsX38mY+A7wNhpAMLPbRKyw7gKOszspeBqqB27np8oxqMOAvTbLhyMcqVbgxBmIFUS7EHV7QNet95RChLVNCp7pFhGQH0cUdxSIlP2I/qx4J180QwRslcbmRMrWoWiZ3xSZloaXNQEsdatOL9gYi2cjn7xgduq3KZXPmhmhVUGrfD5XgaFedOIC+Ur0i87WxBeO2SSxKBMzIS3rJEidq/ZnAIBXcsd3rW86W2FsgzkJN1FZ269X39t4GAgTz4cSkOPS6etf116VPyDpSsQxicl9rw56mrQ2wTntyeTikEjgznKiMNfyEnqXulGcRKcCrXkmYgurEixxe9zCPGlZisLzmlHOCVYxVRHCzB5qfyakHoCgimNNUwqrGqhInnuOzRTTcUIjdLBSg=
+    - secure: lQsf/AKM9ZLs+39A54YhD+PMvdfod/Zk+HB3908UY8mKgCDy+UdA4oSmgwmGUxLBOYMs5a16l1lc2aORlM6vuQ/KCruKdbQSBzklmndEkRqejUOSjTttS1f7ZO7av6/fDhpvHVv5pU9Ji/75W7bVOJZjMkMyzGocGHHURq1l1WCyhE+7V2TD701Zt5BwqP6BjcDD1SWQBDRbSJ5loxnP3lYZiK9xN9pIWXSaQJ2O5u1PF0duojML0bpXkqRK93kvJ6VjrQKFEXp3Zdd/g4OufgVp9Mbg8C45ury9FUt08xBJsa0Ap9D8T3ly+sdLBr4L2Rv5++IDZfr0EfzrjB5Ob4BsOBof5BN1gPJk6N85gE/5icGe0lCvOGYNhtXtcUOwd6nMsJ2PnCU5SKuRbCApFTTrq4//dBHqa62cBfbSZv5cDYHI50NwnLXcQi0I8HYu89caXWq+kvpcL/ueP1k+tTTX4rpfcGomJAr0mB0KMfESZ3Bb6VWCY6RXenCPJny1HVnJRu4LJjIcdqkVqqrpPgnwnUR3yBUBNQ3niD6fxqqqGjv6ijiNB8tloVnvg8jrpyVZ2hbhEG/7k+gebjObKac1RTEePuc0jXvMWFX69LmnORC+KXPNO/tBQgRiRTDEIxXukcXkdrintUobNdZ/RZBEg1mIVX3ejP0JJXScZfQ=
+before_script:
+  - openssl aes-256-cbc -pass pass:$ENCRYPTION_PASSWORD -in scripte/deploy/secring.gpg.enc
+    -out scripte/deploy/secring.gpg -d
+  - gpg --fast-import scripte/deploy/secring.gpg
+script:
+  - "./mvnw install"
+  - if [ "$TRAVIS_BRANCH" == "develop" ] && [ "$TRAVIS_JDK_VERSION" == "oraclejdk8" ]; then ./mvnw --settings .maven.xml deploy; fi
+after_success:
+  - sonar-scanner
+
+cache:
+  directories:
+    - .autoconf
+    - $HOME/.m2
+
+before_deploy:
+  - openssl aes-256-cbc -pass pass:$ENCRYPTION_PASSWORD -in scripte/deploy/secring.gpg.enc
+    -out scripte/deploy/secring.gpg -d
+deploy:
+  - provider: script
+    script: "./mvnw --settings .maven.xml deploy"
+    skip_cleanup: true
+    on:
+      branch: master
+      tags: true
+      jdk: oraclejdk8
+  - provider: releases
+    api_key:
+      secure: yZv3QsIr8M1rFEuRpgyYZwrAgeHtd0LVkpG9DIsLLNhboApz9LCMcU0dbYxRYi8A5V3MCD+X/rtWsWHfapIjRcoVAyi8f7YWWvz+dnjwOxKi+gHabonnUvIyFAEr8WE+Br5MYOr0GTYiEhiUMrSLg20wBWlqH5LD1Mp/dYd2e80EWN8jcZJRK/rO1CDa78esgaaBMp1Pb/6+E9jS+fuEpLuKocqacA0eHtRrPtPFbTJdVH9amQxfcF3UfEV7/0D8tGlL2cH3J45zYQ0sg/qnWqv6Vtt6W0x6H3pFrEfrkAww8jvV5sKGxyz1/bqLOQJkF8mCotjGox9pkL97/cyf+s+L3Mcux98fK9u7NOzizfFMYz5GgY1K/q0l7hzfzh6JSVPcZ/hHdH0VRqcUVgqXB//wPgs2JNGLj/nGLyxY7T53U5hJOhsqFyGGcbnpZ+thEWlB5wrbPi5PwKCtWvf+Y6H/AePxCRQEie25lwi+M2MCIPjSUB65mXoQnXy3oQahiYWPU0HIpD0Om9fp6UK5x8LXMAx3DeH6wbI7qB2gylygOxuUm0AmojieOeLaQFVK7cvcy9c2W16xyfDUDczkEnceosCe8b2nK/yifKeOfFU/eUiEdzl9ZZvOMf9y4YImQl0ZlQlvYknPGLK/myGLPlJrJhP92XtSiYESsrWOEFw=
+    file_glob: true
+    file:
+      - target/*
+    skip_cleanup: true
+    on:
+      tags: true
+      jdk: oraclejdk8

@@ -1,0 +1,50 @@
+language: python
+
+python:
+  - 3.6
+
+services:
+  - postgresql
+  - redis-server
+
+addons:
+  - postgresql: "9.6"
+
+install:
+  - pip install -r requirements.txt
+  - pip install coverage
+  - pip install coveralls
+
+env:
+  - DJANGO=2.0
+
+before_script:
+  - sudo apt-get update
+  - sudo apt-get autoremove postgis*
+  - sudo apt-get autoremove postgresql*
+  - sudo apt-get install postgresql-9.6-postgis-2.3
+  - sudo redis-server /etc/redis/redis.conf --port 6379
+  - psql -c "CREATE USER django WITH PASSWORD '123password';" -U postgres
+  - psql -c "CREATE DATABASE workery_db;" -U postgres
+  - psql -c "GRANT ALL PRIVILEGES ON DATABASE workery_db to django;" -U postgres
+  - psql -c "ALTER USER django CREATEDB;" -U postgres
+  - psql -c "ALTER ROLE django SUPERUSER;" -U postgres
+  - psql -c "CREATE EXTENSION postgis;" -U postgres
+  - ./setup_credentials.sh
+  - python workery/manage.py migrate_schemas --noinput
+  - python workery/manage.py populate_public
+  - python workery/manage.py init_app
+  - python workery/manage.py collectstatic --noinput
+  - python workery/manage.py populate_site
+  - python workery/manage.py populate_public
+
+branches:
+  only:
+  - master
+
+script:
+  - cd workery/
+  - coverage run --source='.' --omit='env/*,workery/*,static/*,staticfiles/*,manage.py,coverage.sh,tenant_historic_etl/*,shared_github_webhook/*' manage.py test
+
+after_success:
+  coveralls

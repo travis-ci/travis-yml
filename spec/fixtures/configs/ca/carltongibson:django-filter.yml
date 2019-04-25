@@ -1,0 +1,34 @@
+sudo: false
+
+dist: xenial
+language: python
+python:
+  - "3.4"
+  - "3.5"
+  - "3.6"
+  - "3.7"
+
+cache: pip
+
+install:
+  - pip install coverage tox tox-travis tox-venv
+
+script:
+  - coverage erase
+  - tox
+
+matrix:
+  fast_finish: true
+  include:
+    - python: "3.7"
+      env: TOXENV=isort,lint,docs
+    - python: "3.7"
+      env: TOXENV=warnings
+  allow_failures:
+    - env: TOXENV=warnings
+
+after_success:
+  - coverage combine --append
+  - coverage report -m
+  - pip install codecov
+  - codecov

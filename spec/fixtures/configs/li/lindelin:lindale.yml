@@ -1,0 +1,28 @@
+language: php
+
+php:
+  - 7.2
+
+sudo: required
+
+before_install:
+   - composer self-update
+
+install:
+   - phpenv config-add travis.php.ini
+   - php -ini | grep memory_limit
+   - cp .env.travis .env
+   - composer install -o
+
+before_script:
+  - mysql -e 'create database lindale;'
+  - php artisan key:generate
+  - php artisan migrate
+  - php artisan db:seed
+
+
+script:
+  - ./vendor/bin/phpunit
+
+notifications:
+    slack: lindelin:S2LWtcR8bjfvtUKN8R0bHrra

@@ -1,0 +1,40 @@
+language: r
+dist: trusty
+bioc_required: true
+warnings_are_errors: true
+cache:
+  directories:
+    - $HOME/.cache/hdf5
+    - $HOME/R/Library
+services:
+  - docker
+addons:
+  apt:
+    packages:
+      - libssh-dev  # PRISM > ssh > libssh-dev
+before_install:
+  - source <(curl -sSL https://raw.githubusercontent.com/dynverse/travis_scripts/master/helper.sh)
+  - install_hdf5
+install:
+ - use_dynverse_devel
+ - install_cran devtools covr
+ - install_cran covr
+ - install_withdeps
+after_success:
+ - R -e 'covr::codecov()'
+
+jobs:
+  include:
+    - stage: prepare hdf5
+      install:
+        - echo Skip
+      script:
+        - echo Skip
+      after_success:
+        - echo Skip
+    - stage: prepare cache
+      script:
+        - echo Skip
+      after_success:
+        - echo Skip
+    - stage: test

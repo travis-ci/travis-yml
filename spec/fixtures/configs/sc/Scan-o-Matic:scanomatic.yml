@@ -1,0 +1,57 @@
+language: generic
+sudo: required # Needed for chrome: https://github.com/travis-ci/travis-ci/issues/8836
+dist: trusty
+
+jobs:
+  include:
+    - node_js: "6"
+      addons:
+        chrome: stable
+      before_install:
+        - npm install
+        - npm install codecov
+      script:
+        - npm run flow check
+        - npm test
+      after_success:
+        - ./node_modules/.bin/codecov
+    - python: "2.7"
+      addons:
+        apt:
+          packages:
+            - postgresql
+            - python-numpy
+            - python-scipy
+            - python-matplotlib
+      before_install:
+        - sudo pip install tox codecov
+      script:
+        - tox -e py27
+      after_success:
+        - codecov
+    - stage: "Docker build & system tests"
+      python: "3.6"
+      services: ["docker"]
+      addons:
+        apt:
+          packages:
+            - docker-ce
+        firefox: latest
+      before_install:
+        - sudo pip install tox
+        - wget -O- 'https://github.com/mozilla/geckodriver/releases/download/v0.19.0/geckodriver-v0.19.0-linux64.tar.gz' | sudo tar -C /usr/local/bin -xz
+      before_script:
+        - export DISPLAY=':99.0'
+        - "/sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -ac -screen 0 1280x1024x24"
+        - sleep 3
+      script:
+        - docker-compose build
+        - tox -e system-tests -- --browser firefox
+      after_success:
+        - |
+          if [ "$TRAVIS_PULL_REQUEST" == "false" ] && [ "$TRAVIS_BRANCH" == "master" ] ;
+          then
+            echo "$DOCKER_PASSWORD" | docker login -u="$DOCKER_USERNAME" --password-stdin ;
+            docker-compose push;
+            curl "https://jenkins.molflow.com/buildByToken/buildWithParameters?job=INFRA&token=${JENKINS_TOKEN}";
+          fi

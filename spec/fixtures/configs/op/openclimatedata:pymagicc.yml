@@ -1,0 +1,19 @@
+language: python
+dist: xenial
+sudo: required
+python:
+  - "3.6"
+  - "3.7"
+before_install:
+  - sudo dpkg --add-architecture i386
+  - sudo apt-get update
+  - sudo apt-get install --no-install-recommends -y wine
+  - pip install --upgrade pip
+install:
+  - pip install .[tests]
+script:
+  - pytest --cov -rfsxEX
+  - if [[ $TRAVIS_PYTHON_VERSION == 3.6 ]]; then ./scripts/test_notebooks.sh; fi
+  - if [[ $TRAVIS_PYTHON_VERSION == 3.6 ]]; then goodtables pymagicc/definitions/datapackage.json; fi
+after_success:
+  - codecov

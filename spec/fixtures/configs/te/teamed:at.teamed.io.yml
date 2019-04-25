@@ -1,0 +1,22 @@
+language: ruby
+rvm:
+- 2.1.0
+branches:
+  only:
+  - master
+install:
+- bundle install
+- npm install phantomjs -g
+- npm install casperjs -g
+before_install:
+- set -e
+- openssl aes-256-cbc -K $encrypted_45a019302fe9_key -iv $encrypted_45a019302fe9_iv
+  -in id_rsa.enc -out id_rsa -d
+- mv id_rsa ~/.ssh
+- chmod 600 ~/.ssh/id_rsa
+script:
+- set -e
+- _test/run.sh
+- git config --global user.email "travis@teamed.io"
+- git config --global user.name "Travis"
+- jgd -u git@github.com:teamed/at.teamed.io.git

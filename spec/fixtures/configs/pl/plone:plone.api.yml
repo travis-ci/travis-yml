@@ -1,0 +1,51 @@
+language: python
+sudo: false
+cache:
+  pip: true
+  directories:
+    - $HOME/buildout-cache
+
+global:
+  - secure: "nTXMNU2aYbCtvKD74PndF8Xm2h6IvsxPjr6vj45AxjXmaB7Wf5oGi/4b6ObV\nexBtUQkFnc+M0ThGyUznOCPi3YxcbTzsyhQYhHUtmtw/6QRyYgo4E0GLDItU\n37Ff6wpxl3NMMJTvpi6SOVUvIJUl3+cs+4bkMkS48RSFGg2rGmo="  # Coveralls.io token
+matrix:
+  fast_finish: true
+  include:
+      # pyXX-plone_sunburst,pyXX-plone_barceloneta
+      - python: "2.7"
+        env: TOXENV=py27-plone-4.3
+      - python: "2.7"
+        env: TOXENV=py27-plone-5.0
+      - python: "2.7"
+        env: TOXENV=py27-plone-5.1
+      - python: "2.7"
+        env: TOXENV=isort,flake8,docs,
+
+before_install:
+    - mkdir -p $HOME/buildout-cache/{downloads,eggs,extends}
+    - mkdir $HOME/.buildout
+    - echo "[buildout]" > $HOME/.buildout/default.cfg
+    - echo "download-cache = $HOME/buildout-cache/downloads" >> $HOME/.buildout/default.cfg
+    - echo "eggs-directory = $HOME/buildout-cache/eggs" >> $HOME/.buildout/default.cfg
+    - echo "extends-cache = $HOME/buildout-cache/extends" >> $HOME/.buildout/default.cfg
+    - echo "abi-tag-eggs = true" >> $HOME/.buildout/default.cfg
+
+install:
+  - travis_retry pip install -U setuptools==33.1.1 tox coveralls coverage
+
+before_script:
+  - export DISPLAY=:99.0
+  - sh -e /etc/init.d/xvfb start
+
+script:
+    - travis_retry tox
+
+after_success:
+    - coverage combine
+    - coveralls
+
+notifications:
+  irc:
+    channels:
+      - "irc.freenode.org#sprint"
+    template:
+      - "%{repository}/#%{build_number}/%{branch} (%{author}): %{message} %{build_url}"

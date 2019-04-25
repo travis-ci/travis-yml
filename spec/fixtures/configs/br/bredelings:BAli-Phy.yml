@@ -1,0 +1,65 @@
+sudo: required
+cache: apt
+language: cpp
+
+matrix:
+  include:
+    - os: linux
+      dist: xenial
+      env: CXX_COMPILER=g++-7
+      addons:
+        apt:
+          sources:
+          - ubuntu-toolchain-r-test
+          packages:
+          - g++-7
+          - pandoc
+    - os: linux
+      dist: xenial
+      env: CXX_COMPILER=g++-8
+      addons:
+        apt:
+          sources:
+          - ubuntu-toolchain-r-test
+          packages:
+          - g++-8
+          - pandoc
+    - os: linux
+      dist: xenial
+      compiler: clang++
+      addons:
+        apt:
+          sources:
+          - ubuntu-toolchain-r-test
+          packages:
+          - g++-7
+          - pandoc
+    - os: osx
+      osx_image: xcode10.1
+
+before_install:
+  # We need to re-export CC and CXX here, because travis exports CXX=g++ or clang++ AFTER we set CXX.
+  - PATH=$HOME/local/bin:$PATH
+  - echo $PATH
+  - if [ -n "${C_COMPILER}" ]; then export CC="${C_COMPILER}"; fi
+  - if [ -n "${CXX_COMPILER}" ]; then export CXX="${CXX_COMPILER}"; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update && brew install meson; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then wget https://github.com/ninja-build/ninja/releases/download/v1.8.2/ninja-linux.zip && unzip -q ninja-linux.zip -d ~/bin && pyenv local 3.7 && pip3 install meson; fi
+
+script:
+  - meson build --prefix=$HOME/local
+  - ninja -C build install
+# Run internal test suite
+  - cd tests
+  - ./run-tests.py bali-phy
+# Run testiphy test suite
+  - cd
+  - git clone https://gitlab.com/testiphy/testiphy.git
+  - cd $HOME/testiphy
+  - which bali-phy || true
+  - ./testiphy bali-phy
+
+env:
+  global:
+  - secure: ZWEqJt9rWuQQ0uJYx1ZDKASbe1lNOq8dLxfGzRq6ItWZ7v42iFik7WQzQNRcHskfkLnpX48+3iGz8+M6QFIY+y9KKk3hgsR+zEW/kZSlBxA+VSIOP2lV3Z5zBlnO3m0WoLTrDABBfHRFGqjU2JcM2tXLc6TyislMV5Y20edJgNWLNajGdei7+7A48UBSPq1hIA0fU2LZAScdy2TxcbpL8x/aAmE5T1IRBewjXK1x4CARmLJYXZfJDeCUpif2VoApEGwCOqXQtTKrBpJbUQ+sYi+JHCGh3oDFoHmuFJeEM7HrUOJBOI8k5A7wRq/+JESGIa2UObdHu1GZDVxj22YRRSSzQTEy9QyTnFTdYbkkcG83wwZ/57EOAhKA1TqwEDj8Hhux/oQAkR/S27iQ2vCvUtx5wlzX4L2KhinHhVVW7EPs6NQLc8FiRHjAzSaEmLph8UXlSxa+2Yx/+wyQXH3SmJi4r470r5F/orVhZBkw2k7CPhg7YfBPFDODkg+QMIk60hiVE6n/ToeTOCTxti0Lfajq6pzl+KFs/pungbnwZqx8neVGkpE0Z5Lhgr1KV/W17/AxKC62+BIGTRSQXpCxignVXbWqvzLCGCgSxiJ7Y+uphS1UV5lz1EAPTqnPkcxe+1MV64vAe8zMvug4Mb2DsV9QjIvjot1X+FlyzHWhMpc=
+

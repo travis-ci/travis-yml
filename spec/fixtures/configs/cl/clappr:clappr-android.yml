@@ -1,0 +1,20 @@
+language: android
+jdk:
+  - oraclejdk8
+env:
+  - GRADLE_OPTS="-Xmx512m -XX:MaxPermSize=512m"
+before_install:
+  - yes | sdkmanager "platforms;android-27"
+android:
+  components:
+    - tools
+    - build-tools-27.0.3
+    - android-26
+    - extra-android-m2repository
+    - sys-img-x86-android-23
+  licenses:
+    - 'android-sdk-license-.+'
+    - 'google-gdk-license-.+'
+script: ./gradlew test
+notifications:
+  slack: globo:F1iVlyrzR4iX8OS7h8fwMcqx

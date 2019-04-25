@@ -1,0 +1,439 @@
+sudo: required
+dist: xenial
+language: c
+compiler:
+    #- clang
+    - gcc
+    #- icc
+env:
+    global:
+        - TRAVIS_PAR_MAKE="-j 4"
+        - SOS_GLOBAL_BUILD_OPTS="--enable-picky"
+        - FCFLAGS="-fcray-pointer"
+        #- PTL_IFACE_NAME=venet0
+        - PTL_IFACE_NAME=lo
+        ## Enabling FI logging may break UH testing harness
+        #- FI_LOG_LEVEL=warn
+        - SHMEM_OFI_USE_PROVIDER=sockets
+        - SHMEM_INFO=1
+        - SOS_ENABLE_ERROR_TESTS=0
+        - TRAVIS_INSTALL=$HOME/travis/install
+        - SOS_PM=mpiexec.hydra
+        - SOS_PM_PRE=true
+        - SOS_PM_POST=true
+        ## An encrypted value for INTEL_SERIAL_NUMBER:
+        - secure: "luxfwDy26Pva+A58T/vPP7+Zek4rBEbpB2TpdXuLdIu/MJ2laoUkaZj/ouT6YgdSxUoiyLUlGIzLnByxnrVgWqYELsWHiV9hzsXZCNfgQDdUHV8UITCqSYVcd5WGNoVdC0QohKuIj47y6bP5ttcv1sIfpV74ztPJZE1dbb2QzgvWcIKWN8Abj55364ZnIidW7ErYLrAiKlBzSxZXCKiKD6qOUbpOBN8yuzaX9diXYJViest7iBC+BfwzXO8Shuouh6QrQhJ1T4oG6u6YJn17fnOwXKJCdkeQYr/E8ka4JRf8vZm7CNO1YdwNhtGtFNEzTJaP2XFLAQGCB9vffCxcqRbpWv+lpsFRsH+eiF/zp/xKGr5qzB9sPUxNANJyhphXK0VfIqDan7nz9di99NFBEF94Jl33E+KODTCAeHb6+a7yboR5B4BalM4jXKrcn/2A4pYrk45YF5IdLLOEvzTaOyVSgHoNIzXRZvHEL2AeYuvz5qLukzMB+QClbA1EeCBNyokuXK/TemeTvveXpQpCaVKNQ8zp/v30u8eiaV8R/dFa2evlJ6kwSaeXlXpXifeXd5Px0x6HF4FT9HLOtPVQ3rZXyfL2Eh92egu15GiTqMNkdVlVGUC20+iddLjtbPqRnVw0WnZkekh62A6rGuT4cTfAbZ2GVPD+IMqzokO1IGg="
+    matrix:
+        ## Portals Builds
+        - >
+          SOS_DISABLE_EXTERNAL_TESTS=1
+          SOS_TRANSPORT_OPTS="--with-portals4=$TRAVIS_INSTALL/portals4/"
+          SOS_BUILD_OPTS="--enable-pmi-simple"
+        - >
+          SOS_DISABLE_EXTERNAL_TESTS=1
+          SOS_PM="prun -host localhost -oversubscribe" SOS_PM_PRE="prte --daemonize" SOS_PM_POST="prun -terminate"
+          SOS_TRANSPORT_OPTS="--with-portals4=$TRAVIS_INSTALL/portals4/"
+          SOS_BUILD_OPTS="--with-pmix=$TRAVIS_INSTALL/pmix"
+        - >
+          SOS_DISABLE_EXTERNAL_TESTS=1
+          SOS_TRANSPORT_OPTS="--with-portals4=$TRAVIS_INSTALL/portals4/"
+          SOS_BUILD_OPTS="--disable-cxx --enable-memcpy --enable-pmi-simple"
+        - >
+          SOS_DISABLE_EXTERNAL_TESTS=1
+          SOS_TRANSPORT_OPTS="--with-portals4=$TRAVIS_INSTALL/portals4/"
+          SOS_BUILD_OPTS="--enable-pmi-mpi CC=mpicc"
+        - >
+          SOS_DISABLE_EXTERNAL_TESTS=1 SOS_DISABLE_FORTRAN=1
+          SOS_TRANSPORT_OPTS="--with-portals4=$TRAVIS_INSTALL/portals4/"
+          SOS_BUILD_OPTS="--disable-fortran --enable-error-checking --enable-remote-virtual-addressing --disable-aslr-check --enable-pmi-simple"
+        - >
+          SOS_DISABLE_EXTERNAL_TESTS=1
+          SOS_ENABLE_ERROR_TESTS=1 SHMEM_SYMMETRIC_HEAP_USE_MALLOC=1
+          SOS_TRANSPORT_OPTS="--with-portals4=$TRAVIS_INSTALL/portals4/"
+          SOS_BUILD_OPTS="--disable-threads --enable-error-checking --enable-pmi-simple"
+        - >
+          SOS_DISABLE_EXTERNAL_TESTS=1
+          SOS_TRANSPORT_OPTS="--with-portals4=$TRAVIS_INSTALL/portals4/"
+          SOS_BUILD_OPTS="--with-cma --enable-error-checking --enable-profiling --enable-remote-virtual-addressing --enable-pmi-simple"
+        - >
+          SOS_DISABLE_EXTERNAL_TESTS=1
+          SOS_TRANSPORT_OPTS="--with-portals4=$TRAVIS_INSTALL/portals4/"
+          SOS_BUILD_OPTS="--with-xpmem=$TRAVIS_INSTALL/xpmem --enable-error-checking --enable-pmi-simple"
+        - >
+          SOS_DISABLE_EXTERNAL_TESTS=1 SOS_ENABLE_ERROR_TESTS=1
+          SHMEM_SYMMETRIC_HEAP_USE_HUGE_PAGES=1 SHMEM_BOUNCE_SIZE=0
+          SOS_TRANSPORT_OPTS="--with-portals4=$TRAVIS_INSTALL/portals4/"
+          SOS_BUILD_OPTS="--enable-error-checking --enable-remote-virtual-addressing --enable-pmi-simple --enable-ofi-fence"
+
+        ## OFI Builds
+        - >
+          SOS_TRANSPORT_OPTS="--with-ofi=$TRAVIS_INSTALL/libfabric/"
+          SOS_BUILD_OPTS="--enable-pmi-simple"
+        - >
+          SOS_PM="prun -host localhost -oversubscribe" SOS_PM_PRE="prte --daemonize" SOS_PM_POST="prun -terminate"
+          SOS_TRANSPORT_OPTS="--with-ofi=$TRAVIS_INSTALL/libfabric/"
+          SOS_BUILD_OPTS="--with-pmix=$TRAVIS_INSTALL/pmix"
+        - >
+          SOS_TRANSPORT_OPTS="--with-ofi=$TRAVIS_INSTALL/libfabric/"
+          SOS_BUILD_OPTS="--enable-ofi-mr=basic --enable-av-map --disable-cxx --enable-memcpy --enable-pmi-simple"
+        - >
+          SOS_DISABLE_FORTRAN=1
+          SOS_TRANSPORT_OPTS="--with-ofi=$TRAVIS_INSTALL/libfabric/"
+          SOS_BUILD_OPTS="--enable-pmi-mpi CC=mpicc"
+        - >
+          SOS_DISABLE_FORTRAN=1
+          SOS_TRANSPORT_OPTS="--with-ofi=$TRAVIS_INSTALL/libfabric/"
+          SOS_BUILD_OPTS="--disable-fortran --enable-error-checking --enable-remote-virtual-addressing --disable-aslr-check --enable-pmi-simple"
+        - >
+          SOS_ENABLE_ERROR_TESTS=1 SHMEM_SYMMETRIC_HEAP_USE_MALLOC=1
+          SOS_TRANSPORT_OPTS="--with-ofi=$TRAVIS_INSTALL/libfabric/"
+          SOS_BUILD_OPTS="--disable-threads --enable-error-checking --enable-pmi-simple"
+        - >
+          SOS_DISABLE_FORTRAN=1
+          SOS_TRANSPORT_OPTS="--with-ofi=$TRAVIS_INSTALL/libfabric/"
+          SOS_BUILD_OPTS="--with-cma --enable-error-checking --enable-profiling --enable-ofi-mr=basic --enable-av-map --enable-remote-virtual-addressing --enable-pmi-simple"
+        - >
+          SOS_TRANSPORT_OPTS="--with-ofi=$TRAVIS_INSTALL/libfabric/"
+          SOS_BUILD_OPTS="--with-xpmem=$TRAVIS_INSTALL/xpmem --enable-error-checking --enable-remote-virtual-addressing --enable-pmi-simple"
+        - >
+          SOS_ENABLE_ERROR_TESTS=1
+          SHMEM_SYMMETRIC_HEAP_USE_HUGE_PAGES=1 SHMEM_BOUNCE_SIZE=0
+          SOS_TRANSPORT_OPTS="--with-ofi=$TRAVIS_INSTALL/libfabric/"
+          SOS_BUILD_OPTS="--enable-error-checking --enable-remote-virtual-addressing --enable-pmi-simple --enable-ofi-fence"
+        - >
+          SOS_ENABLE_ERROR_TESTS=1
+          SHMEM_BARRIER_ALGORITHM=auto SHMEM_BCAST_ALGORITHM=auto SHMEM_REDUCE_ALGORITHM=auto SHMEM_COLLECT_ALGORITHM=auto SHMEM_FCOLLECT_ALGORITHM=auto
+          SOS_TRANSPORT_OPTS="--with-ofi=$TRAVIS_INSTALL/libfabric/"
+          SOS_BUILD_OPTS="--enable-error-checking --enable-remote-virtual-addressing --enable-thread-completion --enable-pmi-simple"
+        - >
+          SOS_ENABLE_ERROR_TESTS=1
+          SHMEM_BARRIER_ALGORITHM=linear SHMEM_BCAST_ALGORITHM=linear SHMEM_REDUCE_ALGORITHM=linear SHMEM_COLLECT_ALGORITHM=linear SHMEM_FCOLLECT_ALGORITHM=linear
+          SOS_TRANSPORT_OPTS="--with-ofi=$TRAVIS_INSTALL/libfabric/"
+          SOS_BUILD_OPTS="--enable-error-checking --enable-remote-virtual-addressing --enable-pmi-simple"
+        - >
+          SOS_ENABLE_ERROR_TESTS=1
+          SHMEM_BARRIER_ALGORITHM=tree SHMEM_BCAST_ALGORITHM=tree SHMEM_REDUCE_ALGORITHM=tree
+          SHMEM_OFI_STX_MAX=0
+          SOS_TRANSPORT_OPTS="--with-ofi=$TRAVIS_INSTALL/libfabric/"
+          SOS_BUILD_OPTS="--enable-error-checking --enable-remote-virtual-addressing --enable-pmi-simple --enable-manual-progress"
+        - >
+          SOS_DISABLE_EXTERNAL_TESTS=1 SOS_ENABLE_ERROR_TESTS=1
+          SHMEM_BARRIER_ALGORITHM=dissem SHMEM_REDUCE_ALGORITHM=recdbl SHMEM_FCOLLECT_ALGORITHM=recdbl
+          SHMEM_OFI_STX_AUTO=1
+          SOS_TRANSPORT_OPTS="--with-ofi=$TRAVIS_INSTALL/libfabric/"
+          SOS_BUILD_OPTS="--enable-error-checking --enable-remote-virtual-addressing --enable-pmi-simple --enable-manual-progress --enable-hard-polling"
+        - >
+          SOS_ENABLE_ERROR_TESTS=1
+          SHMEM_FCOLLECT_ALGORITHM=ring
+          SHMEM_OFI_TX_POLL_LIMIT=1 SHMEM_OFI_RX_POLL_LIMIT=1
+          SHMEM_OFI_STX_THRESHOLD=1024
+          SOS_TRANSPORT_OPTS="--with-ofi=$TRAVIS_INSTALL/libfabric/"
+          SOS_BUILD_OPTS="--enable-error-checking --enable-remote-virtual-addressing --enable-pmi-simple"
+        - >
+          SOS_ENABLE_ERROR_TESTS=1
+          SHMEM_OFI_STX_MAX=8 SHMEM_OFI_STX_ALLOCATOR=random
+          SOS_TRANSPORT_OPTS="--with-ofi=$TRAVIS_INSTALL/libfabric/"
+          SOS_BUILD_OPTS="--enable-error-checking --enable-remote-virtual-addressing --enable-pmi-simple"
+        - >
+          SOS_CHECK_TARBALL_RPM=1
+          SOS_TRANSPORT_OPTS="--with-ofi=$TRAVIS_INSTALL/libfabric/"
+          SOS_BUILD_OPTS="--enable-pmi-simple"
+
+os:
+    - linux
+
+addons:
+    apt:
+        packages:
+            - gfortran
+            - rpm
+            - mpich
+            - libmpich-dev
+            - cargo
+            - libhwloc-dev
+            - libev-dev
+            - libev-libevent-dev
+
+before_install:
+    ## Set up the environment
+    - mkdir $HOME/travis
+    - mkdir $HOME/travis/src
+    - mkdir $HOME/travis/install
+    - export TRAVIS_SRC=$HOME/travis/src
+    ## Disable security protection so CMA will work
+    - sudo sysctl -w kernel.yama.ptrace_scope=0
+    - sudo sysctl -w kernel.randomize_va_space=0
+    ## Run the icc installation script:
+    - >
+      if [ "$CC" = "icc" ]; then
+          if [ "$TRAVIS_REPO_SLUG" = "Sandia-OpenSHMEM/SOS" -a \
+               "$TRAVIS_PULL_REQUEST" = "false" ]; then
+              ./scripts/travis/install-icc.sh --components icc,ifort
+              source ~/.bashrc
+              CC=icc
+              CXX=icpc
+              FC=ifort
+              FCFLAGS=
+              SOS_ENABLE_ERROR_TESTS=0
+          else
+              echo "Cannot test Intel compiler on a fork.  Exiting now."
+              travis_terminate 0
+          fi
+      fi
+    ## Build Portals 4
+    - >
+      if [[ $SOS_TRANSPORT_OPTS = *"with-portals4"* ]]; then
+        cd $TRAVIS_SRC
+        git clone --depth 10 https://github.com/regrant/portals4.git portals4
+        cd portals4
+        ./autogen.sh
+        ./configure --prefix=$TRAVIS_INSTALL/portals4/ --enable-zero-mrs --enable-reliable-udp --disable-pmi-from-portals
+        # JSD: --enable-transport-shmem removed; it was causing tests to hang
+        make $TRAVIS_PAR_MAKE
+        make install
+      fi
+    ## Build libfabric
+    - >
+      if [[ $SOS_TRANSPORT_OPTS = *"with-ofi"* ]]; then
+        cd $TRAVIS_SRC
+        git clone -b v1.7.x --depth 10 https://github.com/ofiwg/libfabric.git libfabric
+        cd libfabric
+        ./autogen.sh
+        ./configure --prefix=$TRAVIS_INSTALL/libfabric
+        make $TRAVIS_PAR_MAKE
+        make install
+      fi
+    ## Build XPMEM
+    - >
+      if [[ $SOS_BUILD_OPTS = *"with-xpmem"* ]]; then
+        ## Intall Linux headers (may not be same as linux-gcp package, so has to be scripted)
+        uname -a
+        sudo apt-get install linux-headers-`uname -r`
+        ## Install XPMEM
+        cd $TRAVIS_SRC
+        git clone --depth 10 https://github.com/hjelmn/xpmem.git
+        cd xpmem
+        ./autogen.sh
+        ./configure --prefix=$TRAVIS_INSTALL/xpmem
+        make $TRAVIS_PAR_MAKE
+        make install
+        ## Hack to get SOS to see the XPMEM library
+        ln -s $TRAVIS_INSTALL/xpmem/lib $TRAVIS_INSTALL/xpmem/lib64
+        ## Install the module and allow Travis to use it
+        sudo insmod $TRAVIS_INSTALL/xpmem/lib/modules/`uname -r`/xpmem.ko
+        sudo chown `whoami` /dev/xpmem
+      fi
+    ## Fetch UH Tests
+    - cd $TRAVIS_SRC
+    - git clone --depth 10 https://github.com/openshmem-org/tests-uh.git tests-uh
+    # Fetch Cray Tests
+    - cd $TRAVIS_SRC
+    - git clone --depth 10 https://github.com/openshmem-org/tests-cray.git tests-cray
+    # Fetch Mellanox Tests
+    - cd $TRAVIS_SRC
+    - git clone --depth 10 https://github.com/openshmem-org/tests-mellanox.git tests-mellanox
+    ## Fetch ISx
+    - cd $TRAVIS_SRC
+    - git clone --depth 10 https://github.com/ParRes/ISx.git ISx
+    ## Fetch PRK
+    - cd $TRAVIS_SRC
+    - git clone --depth 10 https://github.com/ParRes/Kernels.git PRK
+    - echo -e "SHMEMCC=oshcc -std=c99\nSHMEMTOP=$$TRAVIS_INSTALL\n" > PRK/common/make.defs
+    ## Build PMIx
+    - >
+      if [[ $SOS_BUILD_OPTS = *"with-pmix"* ]]; then
+        cd $TRAVIS_SRC
+        git clone --depth 10 https://github.com/pmix/pmix pmix
+        cd pmix
+        ./autogen.pl
+        ./configure --prefix=$TRAVIS_INSTALL/pmix --with-platform=optimized --with-libev
+        make install
+      fi
+    ## Build PRRTE
+    - >
+      if [[ $SOS_BUILD_OPTS = *"with-pmix"* ]]; then
+        cd $TRAVIS_SRC
+        git clone --depth 10 https://github.com/pmix/prrte prrte
+        cd prrte
+        ./autogen.pl
+        ./configure --prefix=$TRAVIS_INSTALL/prrte --with-pmix=$TRAVIS_INSTALL/pmix --without-slurm --with-libev
+        make install
+        export PATH=$TRAVIS_INSTALL/prrte/bin:$PATH
+      fi
+
+install:
+    - cd $TRAVIS_BUILD_DIR
+    - ./autogen.sh
+
+script:
+    ###
+    ### Build without transport
+    ###
+    - cd $TRAVIS_BUILD_DIR
+    - mkdir no-transport-build
+    - cd no-transport-build
+    - ../configure --prefix=$TRAVIS_INSTALL/sos-none --without-ofi --without-portals4 $SOS_GLOBAL_BUILD_OPTS $SOS_BUILD_OPTS
+    - make $TRAVIS_PAR_MAKE
+    - make $TRAVIS_PAR_MAKE check TESTS=
+    - make install
+    - $SOS_PM_PRE
+    - $SOS_PM -np 1 test/unit/hello
+    - $SOS_PM_POST
+    ###
+    ### Build and check with transport
+    ###
+    - cd $TRAVIS_BUILD_DIR
+    - mkdir sos-build
+    - cd sos-build
+    - ../configure --prefix=$TRAVIS_INSTALL/sos $SOS_TRANSPORT_OPTS $SOS_GLOBAL_BUILD_OPTS $SOS_BUILD_OPTS
+    - make $TRAVIS_PAR_MAKE
+    - make $TRAVIS_PAR_MAKE check TESTS=
+    - $SOS_PM_PRE
+    - >
+      if [[ $SOS_TRANSPORT_OPTS = *"with-ofi"* ]]; then
+        make VERBOSE=1 TEST_RUNNER="$SOS_PM -np 2" check
+      else
+        $SOS_PM -np 1 test/unit/hello
+      fi
+    - $SOS_PM_POST
+    - make install
+    - export PATH=$TRAVIS_INSTALL/sos/bin:$PATH
+    ###
+    ### Portals builds stop here
+    ###
+    - if [ -n "SOS_DISABLE_EXTERNAL_TESTS" ]; then travis_terminate $TRAVIS_TEST_RESULT; fi
+    ###
+    ### Run the UH test suite
+    ###
+    - export OSHRUN_LAUNCHER="$SOS_PM"
+    - cd $TRAVIS_SRC/tests-uh
+    - make $TRAVIS_PAR_MAKE C_feature_tests
+    - $SOS_PM_PRE
+    - make C_feature_tests-run 2>&1 | tee uh-tests-c-feature-tests.log
+    # Check for failures in the C tests
+    - if grep "^(test_[0-9]\+) Running.*Failed$" uh-tests-c-feature-tests.log; then false; else true; fi
+    - >
+      if [ -z "$SOS_DISABLE_FORTRAN" ]; then
+          make F_feature_tests;
+          if [ $? -eq 0 ]; then
+              make F_feature_tests-run 2>&1 | tee uh-tests-f-feature-tests.log;
+              # Check for failures in the Fortran tests
+              if grep "^(test_[0-9]\+) Running.*Failed$" uh-tests-f-feature-tests.log; then false; else true; fi;
+          fi;
+      fi
+    - >
+      if [ -z "$SOS_DISABLE_FORTRAN" ]; then
+          make F_error_tests;
+          if [ $? -eq 0 -a $SOS_ENABLE_ERROR_TESTS -eq 1 ]; then
+              make F_error_tests-run 2>&1 | tee uh-tests-f-error-tests.log;
+              # Check for failures in the Fortran tests
+              if grep "^(test_[0-9]\+) Running.*Failed$" uh-tests-f-error-tests.log; then false; else true; fi;
+          fi;
+      fi
+    - $SOS_PM_POST
+    ###
+    ### Run the Cray test suite
+    ###
+    - export CUSTOM_SHMEM_DIR=$TRAVIS_INSTALL/sos
+    - export CRAY_TESTS_DIR=$TRAVIS_SRC/tests-cray
+    - $SOS_PM_PRE
+    - $TRAVIS_BUILD_DIR/scripts/travis/cray_tests.sh
+    - $SOS_PM_POST
+
+    ###
+    ### Run the Mellanox test suite
+    ###
+    - export MELLANOX_TESTS_DIR=$TRAVIS_SRC/tests-mellanox
+    - cd $MELLANOX_TESTS_DIR/verifier
+    - ./autogen.sh
+    - ./configure --prefix=$PWD/install CFLAGS=" -Wno-deprecated -Wno-deprecated-declarations -std=gnu99 -O3" LDFLAGS="-lpthread" CC=oshcc --disable-mpi --enable-quick-tests --enable-active-sets --disable-error
+    - make install
+    - make oshmem_test
+    - $SOS_PM_PRE
+    - oshrun -np 4 $PWD/install/bin/oshmem_test exec --task=atomic
+    - oshrun -np 4 $PWD/install/bin/oshmem_test exec --task=basic:start
+    - oshrun -np 4 $PWD/install/bin/oshmem_test exec --task=basic:whoami
+    ## conflicting semantic for shmem_align with a non-power of two:
+    #- oshrun -np 4 $PWD/install/bin/oshmem_test exec --task=basic:shmalloc
+    - oshrun -np 4 $PWD/install/bin/oshmem_test exec --task=basic:get
+    - oshrun -np 4 $PWD/install/bin/oshmem_test exec --task=basic:put
+    - oshrun -np 4 $PWD/install/bin/oshmem_test exec --task=basic:barrier
+    - oshrun -np 4 $PWD/install/bin/oshmem_test exec --task=basic:static
+    - oshrun -np 4 $PWD/install/bin/oshmem_test exec --task=basic:heap
+    - oshrun -np 4 $PWD/install/bin/oshmem_test exec --task=basic:fence
+    - oshrun -np 4 $PWD/install/bin/oshmem_test exec --task=coll
+    ## Unresolved occasional failures probably due to memory mismanagement/corruption:
+    #- oshrun -np 4 $PWD/install/bin/oshmem_test exec --task=data
+    - oshrun -np 4 $PWD/install/bin/oshmem_test exec --task=lock
+    - oshrun -np 4 $PWD/install/bin/oshmem_test exec --task=reduce
+    - oshrun -np 4 $PWD/install/bin/oshmem_test exec --task=sync:barrier_all
+    - oshrun -np 4 $PWD/install/bin/oshmem_test exec --task=sync:wait
+    - oshrun -np 4 $PWD/install/bin/oshmem_test exec --task=sync:wait_until
+    - oshrun -np 4 $PWD/install/bin/oshmem_test exec --task=sync:barrier
+    - oshrun -np 4 $PWD/install/bin/oshmem_test exec --task=sync:quiet
+    ## stress tests are not functional tests, and they consumes too much time:
+    #- oshrun -np 4 $PWD/install/bin/oshmem_test exec --task=sync:barrier_stress
+    #- oshrun -np 4 $PWD/install/bin/oshmem_test exec --task=sync:fence_stress
+    - oshrun -np 4 $PWD/install/bin/oshmem_test exec --task=stride
+    ## mix test is SOS with MPI, which requires an MPI lib:
+    #- oshrun -np 4 $PWD/install/bin/oshmem_test exec --task=mix
+    ## analysis test is not a functional test, and it consumes too much time:
+    #- oshrun -np 4 $PWD/install/bin/oshmem_test exec --task=analysis
+    - oshrun -np 4 $PWD/install/bin/oshmem_test exec --task=nbi
+    ## tests opal_progress() function, which SOS does not have:
+    #- oshrun -np 4 $PWD/install/bin/oshmem_test exec --task=misc
+    - $SOS_PM_POST
+    ###
+    ### Run ISx
+    ###
+    - export OSHRUN_LAUNCHER="$SOS_PM"
+    - cd $TRAVIS_SRC/ISx/SHMEM
+    - make CC=oshcc LDLIBS=-lm
+    - export SHMEM_SYMMETRIC_SIZE=4G
+    - $SOS_PM_PRE
+    - oshrun -np 4 ./bin/isx.strong 134217728 output_strong
+    - oshrun -np 4 ./bin/isx.weak 33554432 output_weak
+    - oshrun -np 4 ./bin/isx.weak_iso 33554432 output_weak_iso
+    - $SOS_PM_POST
+    - unset SHMEM_SYMMETRIC_SIZE
+    ###
+    ### Run PRK
+    ###
+    - export OSHRUN_LAUNCHER="$SOS_PM"
+    - cd $TRAVIS_SRC/PRK
+    - make allshmem
+    - $SOS_PM_PRE
+    - oshrun -np 4 ./SHMEM/Stencil/stencil 100 1000
+    - oshrun -np 4 ./SHMEM/Synch_p2p/p2p 10 1000 1000
+    - oshrun -np 4 ./SHMEM/Transpose/transpose 10 1000
+    - $SOS_PM_POST
+    ###
+    ### Tarball and RPM build check
+    ###
+    - >
+      if [ ! -z "$SOS_CHECK_TARBALL_RPM" ]; then
+          cd $TRAVIS_BUILD_DIR
+          ./configure --with-ofi=$TRAVIS_INSTALL/libfabric/ --enable-pmi-simple --enable-rpm-prefix
+          make dist
+          rpmbuild -ta ./sandia-openshmem-*.tar.gz --define "configargs --with-ofi=$TRAVIS_INSTALL/libfabric/ --enable-pmi-simple" --define "_prefix /usr/shmem"
+          make clean
+          ./configure --with-ofi=$TRAVIS_INSTALL/libfabric/ --enable-pmi-simple
+          make dist
+          rpmbuild -ta ./sandia-openshmem-*.tar.gz --define "configargs --with-ofi=$TRAVIS_INSTALL/libfabric/ --enable-pmi-simple"
+          # Sanity check distribution tarball
+          tar zxvf sandia-openshmem-*.tar.gz
+          cd sandia-openshmem-*
+          ./autogen.sh
+          mkdir build
+          cd build
+          ../configure --with-ofi=$TRAVIS_INSTALL/libfabric/ $SOS_GLOBAL_BUILD_OPTS $SOS_BUILD_OPTS
+          make $TRAVIS_PAR_MAKE check TESTS=
+          $SOS_PM_PRE
+          make VERBOSE=1 TEST_RUNNER="$SOS_PM -np 2" check
+          $SOS_PM_POST
+      fi
+after_script:
+    - >
+      if [ "$CC" = "icc" ]; then
+        '[[ ! -z "${INTEL_INSTALL_PATH}" ]] && uninstall_intel_software'
+      fi

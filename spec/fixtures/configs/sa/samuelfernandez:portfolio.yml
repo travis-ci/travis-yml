@@ -1,0 +1,129 @@
+dist: trusty
+sudo: required
+
+language: node_js
+node_js: '8'
+
+services:
+   - docker
+
+addons:
+   apt:
+      sources:
+         - google-chrome
+      packages:
+         - google-chrome-stable
+         - docker-ce
+
+before_install:
+   - export DISPLAY=:99.0 # Configuration for e2e tests
+   - npm install -g npm@latest # Update npm
+   - npm install -g greenkeeper-lockfile # Connection with Greenkeeper
+   - npm install -g wait-on
+   - echo $TRAVIS_BRANCH
+   - echo $TRAVIS_PULL_REQUEST_BRANCH
+install: npm install
+before_script:
+   - greenkeeper-lockfile-update # Connection with Greenkeeper
+   - export NODE_ENV=production # So that webpack builds with production setting
+after_script: greenkeeper-lockfile-upload # Connection with Greenkeeper
+
+cache:
+   directories:
+      - $HOME/.npm
+      - node_modules
+      - $HOME/.cache # Cache Cypress binary to avoid downloading Cypress again and again
+
+stages:
+   - test
+   - deploy
+   - release
+   - documentation
+
+jobs:
+   include:
+      - stage: test # Unit tests
+        env: TEST=Unit tests
+        before_script:
+           - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter ## Code Climate coverage script
+           - chmod +x ./cc-test-reporter
+           - ./cc-test-reporter before-build ## Code Climate hook
+        script:
+           - npm run lint
+           - npm run test:ci
+           - npm run test:doc
+        after_script:
+           - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT ## Code Climate hook
+           - cat ./docs/coverage/lcov.info | codacy-coverage ## Codacy coverage
+
+      - stage: test # Integration tests
+        env: TEST=e2e tests
+        script:
+           - npx cypress install # Install Cypress
+           - npm run build
+           - npm run server &>/dev/null & wait-on http://localhost:5000 -t 5000
+           - xvfb-run -a npm run e2e:ci
+
+      - stage: test # Docker build
+        env: TEST=Docker
+        script:
+           - npx cypress install # Install Cypress
+           - docker pull $DOCKER_APP # Speed up build process using cache
+           - docker build -t $DOCKER_APP . --pull --cache-from $DOCKER_APP # Use the cache as a base
+           - docker run -d -p 5000:5000 -e PORT=5000 $DOCKER_APP
+           - docker ps -a
+           - xvfb-run -a npm run e2e:ci
+
+      - stage: deploy # Deploy to DEV environment
+        env: HOST=https://samuel-fernandez-dev.herokuapp.com/ # Here we need to make it explicit
+        if: type = push AND (NOT branch = master) # Deploy only run for PUSH, but avoid master
+        script:
+           - npx cypress install # Install Cypress
+           - npm run dotenv # Persist env variables in .env file so that it is included in Docker container
+           - npx heroku container:login
+           - npx heroku container:push web --app $HEROKU_APP_DEV
+           - npx heroku container:release web --app $HEROKU_APP_DEV
+           - wait-on $HOST -t 60000 # Wait until server is up
+           - CYPRESS_baseUrl=$HOST xvfb-run -a npm run e2e:ci
+           - npx apollo service:check --endpoint=${HOST}graphql
+           - npm run pagespeed -- --github
+           - npm run lighthouse -- --github
+
+      - stage: release # Release to PRD environment
+        env: HOST=https://samuel-fernandez.herokuapp.com/ # Here we need to make it explicit
+        if: (NOT type = pull_request) AND branch = master
+        script:
+           - npx cypress install # Install Cypress
+           - npm run dotenv # Persist env variables in .env file so that it is included in Docker container
+           - npx heroku container:login
+           - npx heroku container:push web --app $HEROKU_APP_PRD
+           - npx heroku container:release web --app $HEROKU_APP_PRD
+           - wait-on $HOST -t 60000 # Wait until server is up
+           - CYPRESS_baseUrl=$HOST xvfb-run -a npm run e2e:ci
+           - npx apollo service:push --endpoint="${HOST}graphql"
+           - npm run pagespeed -- --github
+           - npm run lighthouse -- --github
+        deploy:
+           - provider: script
+             skip_cleanup: true
+             script:
+                - npx semantic-release
+
+      - stage: documentation # Generate documentation after release
+        env: HOST=https://samuel-fernandez.herokuapp.com/ # Here we need to make it explicit
+        if: (NOT type = pull_request) AND branch = master # Only for for master build
+        script:
+           - npx cypress install # Install Cypress
+           - npm run test:ci # Generate report from unit tests at /docs/coverage
+           - wait-on -t 60000 $HOST # Wait until server is up
+           - CYPRESS_baseUrl=$HOST xvfb-run -a npm run e2e:ci # Generate report from e2e tests at /docs/cucumber
+           - npm run compodoc # Generate report from documentation at /docs/compodoc
+           - npm run pagespeed # Generate report from pagespeed at /docs/pagespeed
+           - npm run lighthouse # Generate report from lighthouse at /docs/lighthouse
+           - cp -R img docs/ # Copy src imgs to /docs/img
+        deploy:
+           - provider: pages
+             skip_cleanup: true
+             github_token: $GH_TOKEN
+             target_branch: gh-pages
+             local_dir: docs

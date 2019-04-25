@@ -1,0 +1,34 @@
+language: java
+
+branches:
+  only:
+    - master
+
+addons:
+  apt:
+    packages:
+      - libecpg-dev
+
+before_cache:
+- rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+- rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+
+cache:
+  directories:
+  - $HOME/.cache/pip/
+  - $HOME/.gradle/caches/
+  - $HOME/.gradle/wrapper/
+
+before_install:
+  - sudo pip install pgsanity
+  - curl https://raw.githubusercontent.com/hmcts/reform-api-docs/master/bin/publish-swagger-docs-dockerless.sh > publish-swagger-docs.sh
+
+script:
+  - pgsanity --add-semicolon src/main/resources/db/migration/*.sql
+  - ./gradlew test
+  - ./gradlew integration
+
+after_success:
+  - ./gradlew jacocoTestReport
+  - bash <(curl -s https://codecov.io/bash)
+  - test "$TRAVIS_BRANCH" = "master" && test "$TRAVIS_PULL_REQUEST" = "false" && sh ./publish-swagger-docs.sh

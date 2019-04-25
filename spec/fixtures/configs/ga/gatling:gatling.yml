@@ -1,0 +1,23 @@
+language: scala
+jdk:
+  - oraclejdk8
+sbt_args: -Xmx2048M
+before_script: ./make_credentials.sh
+script: 
+  - sbt test
+  - find $HOME/.sbt -name "*.lock" | xargs rm
+  - find $HOME/.ivy2 -name "ivydata-*.properties" | xargs rm
+  - "[[ $TRAVIS_PULL_REQUEST == \"false\" ]] && sbt publishLocal || true"
+
+sudo: false
+
+# Cache settings
+cache:
+  directories:
+    - $HOME/.ivy2/cache
+    - $HOME/.sbt/launchers
+
+# whitelist
+branches:
+  only:
+    - master

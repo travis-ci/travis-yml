@@ -1,0 +1,55 @@
+# Travis continuous integration system configuration file.
+# Read more at: http://docs.travis-ci.com/user/customizing-the-build/
+
+sudo: required
+dist: xenial
+language: node_js
+node_js: 11.6.0
+
+git:
+  depth: 250
+  quiet: true
+
+cache:
+  directories:
+    - .cached_tools
+    - node_modules
+
+before_install:
+  - export PATH=$PATH:$GOPATH/bin
+  - eval "$(gimme 1.11.4)"
+  - cd $HOME
+  - mkdir -p $GOPATH/src/github.com/
+  - mv $HOME/build/kubernetes $GOPATH/src/github.com/
+  - export TRAVIS_BUILD_DIR=$GOPATH/src/github.com/kubernetes/dashboard
+  - cd $TRAVIS_BUILD_DIR
+  - mkdir -p $TRAVIS_BUILD_DIR/.tmp/src/github.com/kubernetes/dashboard/src/app
+  - cp -r $TRAVIS_BUILD_DIR/src/app/backend $TRAVIS_BUILD_DIR/.tmp/src/github.com/kubernetes/dashboard/src/app
+  - ln -s $TRAVIS_BUILD_DIR/vendor $TRAVIS_BUILD_DIR/.tmp/src/github.com/kubernetes/dashboard/src/app/backend/vendor
+
+before_script:
+  - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+  - sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) edge"
+  - sudo apt-get update
+  - sudo apt-get -y install docker-ce
+  - sudo service docker restart
+  - docker --version
+
+jobs:
+  include:
+    - stage: test
+      script: npm run check
+    - script: npm run test:coverage
+      after_success:
+        - rm -rf $TRAVIS_BUILD_DIR/.tmp
+        - bash <(curl -s https://codecov.io/bash)
+    - script: npm run cluster:start && npm run test:e2e
+    - stage: deploy
+      script:
+        - docker login -u $DOCKER_USER -p $DOCKER_PASS
+        - npm run docker:push:head:cross
+
+stages:
+  - test
+  - name: deploy
+    if: branch = master AND type != pull_request

@@ -1,0 +1,22 @@
+language: java
+
+addons:
+  sonarcloud:
+    organization: "sergiopsinformatico-github"
+    token:
+      secure: "adbb3a3250b86f7a8d608f9e5615a5cc1553ca79"
+      
+script:
+  - sonar-scanner
+
+jdk:
+  - oraclejdk8
+
+deploy:
+  provider: heroku
+  api_key:
+    secure: f2d7e482-f6a1-4fbf-b12b-fabba407e57d
+  app: sistemaflashcards
+  on:
+    repo: sergiopsinformatico/FLASHCARDS
+    branch: Sprint3

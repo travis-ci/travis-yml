@@ -1,0 +1,20 @@
+sudo: false
+git:
+  depth: 150
+language: ruby
+bundler_args: --without development
+before_install:
+  - gem install bundler -v '< 2' --no-document;
+before_script:
+  - 'git config --global user.email "you@example.com"'
+  - 'git config --global user.name "Your Name"'
+script: "bundle exec $CHECK"
+notifications:
+  email: false
+
+matrix:
+  include:
+    - rvm: 2.1.7
+      env: "CHECK='rubocop -D'"
+    - rvm: 2.1.7
+      env: "CHECK='rake commits'"

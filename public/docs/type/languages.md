@@ -2,62 +2,57 @@
 
 
 
-## Type
+## Types
 
-Any of:
+* Hash
+* Hash
+* Hash
+* Hash
+* Hash
+* Hash
+* Hash
+* Hash
+* Hash
+* Hash
+* Hash
+* Hash
+* Hash
+* Hash
+* Hash
+* Hash
+* Hash
+* Hash
+* Hash
+* Hash
+* Hash
+* Hash
+* Hash
+* Hash
+* Hash
+* Hash
+* Hash
+* Hash
+* Hash
+* Hash
+* Hash
+* Hash
+* Hash
+* Hash
+* Hash
+* Hash
+* Hash
+* Hash
 
-* Map (Hash)
-* Map (Hash)
-* Map (Hash)
-* Map (Hash)
-* Map (Hash)
-* Map (Hash)
-* Map (Hash)
-* Map (Hash)
-* Map (Hash)
-* Map (Hash)
-* Map (Hash)
-* Map (Hash)
-* Map (Hash)
-* Map (Hash)
-* Map (Hash)
-* Map (Hash)
-* Map (Hash)
-* Map (Hash)
-* Map (Hash)
-* Map (Hash)
-* Map (Hash)
-* Map (Hash)
-* Map (Hash)
-* Map (Hash)
-* Map (Hash)
-* Map (Hash)
-* Map (Hash)
-* Map (Hash)
-* Map (Hash)
-* Map (Hash)
-* Map (Hash)
-* Map (Hash)
-* Map (Hash)
-* Map (Hash)
-* Map (Hash)
-* Map (Hash)
-* Map (Hash)
-* Map (Hash)
-
-## Flags
-
-None.
 
 
 ## Examples
 
 ```yaml
 type:
-  jdk: "[ref:strs]"
+  jdk: string
   android:
-    components: "[ref:strs]"
-    licenses: "[ref:strs]"
+    components: string
+    licenses: string
 ```
 
 ```yaml
@@ -67,7 +62,7 @@ type: {}
 
 ```yaml
 type:
-  jdk: "[ref:strs]"
+  jdk: string
   lein: string
 ```
 
@@ -78,24 +73,24 @@ type: {}
 
 ```yaml
 type:
-  crystal: "[ref:strs]"
+  crystal: string
 ```
 
 ```yaml
 type:
-  dotnet: "[ref:strs]"
-  mono: "[ref:strs]"
-  solution: "[ref:strs]"
+  dotnet: string
+  mono: string
+  solution: string
 ```
 
 ```yaml
 type:
-  d: "[ref:strs]"
+  d: string
 ```
 
 ```yaml
 type:
-  dart: "[ref:strs]"
+  dart: string
   with_content_shell: true
 ```
 
@@ -118,25 +113,26 @@ type:
 
 ```yaml
 type:
-  elixir: "[ref:strs]"
-  otp_release: "[ref:strs]"
+  elixir: string
+  otp_release: string
 ```
 
 ```yaml
 type:
-  elm: "[ref:strs]"
+  elm: string
+  node_js: string
   elm_format: string
   elm_test: string
 ```
 
 ```yaml
 type:
-  otp_release: "[ref:strs]"
+  otp_release: string
 ```
 
 ```yaml
 type:
-  go: "[ref:strs]"
+  go: string
   gobuild_args: string
   go_import_path: string
   gimme_config:
@@ -146,48 +142,48 @@ type:
 
 ```yaml
 type:
-  jdk: "[ref:strs]"
+  jdk: string
 ```
 
 ```yaml
 type:
-  ghc: "[ref:strs]"
+  ghc: string
 ```
 
 ```yaml
 type:
-  haxe: "[ref:strs]"
-  hxml: "[ref:strs]"
+  haxe: string
+  hxml: string
   neko: string
 ```
 
 ```yaml
 type:
-  jdk: "[ref:strs]"
+  jdk: string
 ```
 
 ```yaml
 type:
-  julia: "[ref:strs]"
+  julia: string
 ```
 
 ```yaml
 type:
-  nix: "[ref:strs]"
+  nix: string
 ```
 
 ```yaml
 type:
-  node_js: "[ref:strs]"
+  node_js: string
   npm_args: string
 ```
 
 ```yaml
 type:
-  rvm: "[ref:strs]"
-  gemfile: "[ref:strs]"
-  xcode_scheme: "[ref:strs]"
-  xcode_sdk: "[ref:strs]"
+  rvm: string
+  gemfile: string
+  xcode_scheme: string
+  xcode_sdk: string
   podfile: string
   bundler_args: string
   xcode_destination: string
@@ -198,36 +194,36 @@ type:
 
 ```yaml
 type:
-  perl: "[ref:strs]"
+  perl: string
 ```
 
 ```yaml
 type:
-  perl6: "[ref:strs]"
+  perl6: string
 ```
 
 ```yaml
 type:
-  php: "[ref:strs]"
+  php: string
   composer_args: string
 ```
 
 ```yaml
 type:
-  python: "[ref:strs]"
+  python: string
   virtualenv:
     system_site_packages: true
 ```
 
 ```yaml
 type:
-  r: "[ref:strs]"
-  r_packages: "[ref:strs]"
-  r_binary_packages: "[ref:strs]"
-  r_github_packages: "[ref:strs]"
-  apt_packages: "[ref:strs]"
-  bioc_packages: "[ref:strs]"
-  brew_packages: "[ref:strs]"
+  r: string
+  r_packages: string
+  r_binary_packages: string
+  r_github_packages: string
+  apt_packages: string
+  bioc_packages: string
+  brew_packages: string
   bioc: string
   bioc_check: true
   bioc_required: true
@@ -247,21 +243,21 @@ type:
 
 ```yaml
 type:
-  rvm: "[ref:strs]"
-  gemfile: "[ref:strs]"
-  jdk: "[ref:strs]"
+  rvm: string
+  gemfile: string
+  jdk: string
   bundler_args: string
 ```
 
 ```yaml
 type:
-  rust: "[ref:strs]"
+  rust: string
 ```
 
 ```yaml
 type:
-  scala: "[ref:strs]"
-  jdk: "[ref:strs]"
+  scala: string
+  jdk: string
   sbt_args: string
 ```
 
@@ -272,9 +268,9 @@ type: {}
 
 ```yaml
 type:
-  smalltalk: "[ref:strs]"
-  smalltalk_config: "[ref:strs]"
-  smalltalk_vm: "[ref:strs]"
+  smalltalk: string
+  smalltalk_config: string
+  smalltalk_vm: string
   smalltalk_edge: true
 ```
 

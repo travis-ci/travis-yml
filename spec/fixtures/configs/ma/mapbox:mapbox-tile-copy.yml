@@ -1,0 +1,19 @@
+language: node_js
+
+node_js:
+  - "lts/boron"
+  - "lts/carbon"
+
+sudo: false
+
+before_install:
+  - nvm install-latest-npm
+
+addons:
+  apt:
+    sources: [ 'ubuntu-toolchain-r-test' ]
+    packages: [ 'libstdc++-5-dev' ]
+
+env:
+  global:
+  - secure: uLTEYEfOuF5VidH9fOhOdxly/9ChkAwTKw7DZltmiNfy+QZ5QmDfXIgVj0hJRfeUFPd3+r+WwL68nEFj8fG9SCAAHeYUR9ewEwKkpZ0141zF7PpgftFWuLk64YPYNgd+R4wfdS3I63OSHQWpwOykZEcd3GBVIuHopt9At+KiyB8=

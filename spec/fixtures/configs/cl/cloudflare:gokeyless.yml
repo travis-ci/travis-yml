@@ -1,0 +1,32 @@
+language: go
+sudo: false
+
+matrix:
+  include:
+    - go: 1.9.x
+    - go: 1.10.x
+    - go: 1.11.x
+    - go: 1.12.x
+  allow_failures:
+    - go: master
+
+install:
+  - go install ./vendor/golang.org/x/tools/cmd/goimports
+  - go install ./vendor/golang.org/x/lint/golint
+
+go_import_path: github.com/cloudflare/gokeyless
+
+script:
+  - make vet lint test-nohsm test-trust
+
+notifications:
+  email:
+    recipients:
+      - cbroglie@cloudflare.com
+      - gabriel@cloudflare.com
+      - leland@cloudflare.com
+      - mihir@cloudflare.com
+      - mitul@cloudflare.com
+      - nicky@cloudflare.com
+    on_success: never
+    on_failure: change

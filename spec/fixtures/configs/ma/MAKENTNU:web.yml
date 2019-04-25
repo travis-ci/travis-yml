@@ -1,0 +1,24 @@
+notifications:
+  email: false
+
+# code language
+dist: xenial
+language: python
+python:
+  - "3.6"
+
+# command to install dependencies
+install:
+  - pip install -r requirements.txt
+  - pip install -r requirements_codecov.txt
+
+# command to run tests
+script:
+  # Necessary for generating staticfiles manifest entries
+  # used by Django's `ManifestStaticFilesStorage`:
+  - python manage.py collectstatic --no-input
+  - coverage run --source='.' manage.py test
+
+# command to run after success
+after_success:
+  - codecov

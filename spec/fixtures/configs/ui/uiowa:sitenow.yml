@@ -1,0 +1,47 @@
+sudo: false
+
+language: php
+
+php:
+  - '7.1'
+
+cache:
+  directories:
+    - $HOME/.composer/cache
+
+services:
+  - mysql
+
+matrix:
+  fast_finish: true
+
+before_install:
+  - openssl aes-256-cbc -K $encrypted_7a00f6f6a8ef_key -iv $encrypted_7a00f6f6a8ef_iv -in deploy_key.enc -out deploy_key -d
+  - mv deploy_key $HOME/.ssh/id_rsa
+  - chmod 600 $HOME/.ssh/id_rsa
+  - phpenv config-rm xdebug.ini
+  - echo "extension = memcached.so" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
+  - composer self-update
+  - export PATH="$HOME/.composer/vendor/bin:$PATH"
+  - composer global require drupal/coder
+  - phpcs --config-set installed_paths ~/.composer/vendor/drupal/coder/coder_sniffer
+  - phpcs --config-set ignore_warnings_on_exit 1
+  - phpcs --standard=Drupal,DrupalPractice . --ignore='*.css,*.md'
+
+install:
+  - export REPOS=$(composer config repositories)
+  - mv tests/build ../ && cd ../build
+  - export COMPOSER_HOME=$(pwd)
+  - echo "{\"repositories\":$REPOS}" > config.json
+  - composer install --no-suggest
+  - touch vendor/onelogin/php-saml/certs/idp.crt
+  - ./vendor/bin/drush --yes site:install rusty --db-url=mysql://root@localhost/drupal --site-name=TravisCI
+
+script:
+  - export SIMPLETEST_BASE_URL=http://localhost:8080
+  - export SIMPLETEST_DB=mysql://root@localhost/drupal
+  - export SYMFONY_DEPRECATIONS_HELPER=disabled
+  - ./vendor/bin/drush runserver --default-server=builtin 8080 &
+  - sleep 3
+  - ./vendor/bin/phpunit -c docroot/core/ docroot/profiles/rusty/tests
+

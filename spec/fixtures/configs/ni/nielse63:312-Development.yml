@@ -1,0 +1,22 @@
+---
+language: node_js
+node_js:
+  - node
+dist: trusty
+env:
+  global:
+    - NODE_ENV=test
+    - API_HOST=https://three-one-two-api-server.herokuapp.com
+before_install:
+  - npm config set spin false
+  - npm i -g http-server greenkeeper-lockfile@2
+before_script:
+  - greenkeeper-lockfile-update
+after_script:
+  - greenkeeper-lockfile-upload
+after_success:
+  - npm i -g coveralls
+  - cat coverage/lcov.info | coveralls
+
+script:
+  - yarn test

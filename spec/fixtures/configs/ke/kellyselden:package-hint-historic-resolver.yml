@@ -1,0 +1,41 @@
+---
+language: node_js
+node_js:
+  - "6"
+
+sudo: false
+
+addons:
+  firefox: latest
+
+branches:
+  only:
+    - master
+    - /^greenkeeper\/.*$/
+
+cache:
+  directories:
+    - $HOME/.npm
+
+env:
+  global:
+    # See https://git.io/vdao3 for details.
+    - JOBS=1
+    - PERCY_PROJECT=kellyselden/package-hint-historic-resolver
+    - PERCY_PARALLEL_TOTAL=5
+  matrix:
+    - PARTITION=1
+    - PARTITION=2
+    - PARTITION=3
+    - PARTITION=4
+    - PARTITION=5
+
+before_install:
+  - npm config set spin false
+
+script:
+  - npm run lint:js
+  - ./scripts/travis.sh
+
+after_script:
+  - cat coverage/lcov.info | node_modules/coveralls/bin/coveralls.js

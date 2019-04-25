@@ -1,0 +1,76 @@
+language: php
+
+env:
+  global:
+    - JAVA_HOME="/usr/lib/jvm/java-8-oracle/jre"
+    - JACKRABBIT_VERSION=2.12.0
+    - SYMFONY__PHPCR__TRANSPORT=doctrinedbal
+    - SYMFONY__DATABASE__VERSION=5.5.39
+    - ES_VERSION="6.5.4"
+    - ES_DOWNLOAD_URL="https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-${ES_VERSION}.zip"
+
+cache:
+  directories:
+    - "downloads"
+    - "$HOME/.composer/cache/files"
+
+matrix:
+  include:
+    - php: 5.6
+      env:
+        - COMPOSER_FLAGS="--prefer-lowest --prefer-dist --no-interaction -vvv"
+        - ES_VERSION="5.6.14"
+        - ES_DOWNLOAD_URL="https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-${ES_VERSION}.zip"
+        - ENABLE_SWAP=true
+    - php: 7.3
+      env:
+        - COMPOSER_FLAGS="--prefer-dist --no-interaction"
+        - SYMFONY__PHPCR__TRANSPORT=jackrabbit
+        - PHPSTAN=true
+
+before_install:
+  - if [[ -z $CODE_COVERAGE ]]; then phpenv config-rm xdebug.ini ; fi
+  - phpenv config-add Tests/travis.php.ini
+  - | # enable swap
+    if [[ $ENABLE_SWAP == 'true' ]]; then
+        sudo fallocate -l 4G /swapfile
+        sudo chmod 600 /swapfile
+        sudo mkswap /swapfile
+        sudo swapon /swapfile
+        sudo sysctl vm.swappiness=10
+    fi
+  - composer self-update
+
+install:
+  - if [[ $PHPSTAN == 'true' ]]; then travis_retry composer require --dev phpstan/phpstan --no-update ; fi
+  - composer update $COMPOSER_FLAGS
+  - composer info -i
+  - java -version
+  - |
+    if [[ $SYMFONY__PHPCR__TRANSPORT = jackrabbit ]]; then
+        if [ ! -f downloads/jackrabbit-standalone-$JACKRABBIT_VERSION.jar ]; then
+            cd downloads
+            wget http://archive.apache.org/dist/jackrabbit/$JACKRABBIT_VERSION/jackrabbit-standalone-$JACKRABBIT_VERSION.jar
+            cd -
+        fi
+        java -jar downloads/jackrabbit-standalone-$JACKRABBIT_VERSION.jar > /dev/null &
+    fi
+  - wget ${ES_DOWNLOAD_URL}
+  - unzip elasticsearch-*.zip
+  - cd ./elasticsearch-*
+  - bin/elasticsearch -d
+  - cd ..
+  - ./Tests/app/console doctrine:database:create
+  - ./Tests/app/console doctrine:schema:update --force
+  - ./Tests/app/console sulu:document:initialize
+  - wget --waitretry=10 --retry-connrefused -v http://127.0.0.1:9200/
+  - ./Tests/app/console ongr:es:index:create -m default
+  - ./Tests/app/console ongr:es:index:create -m live
+
+script:
+  - ./vendor/bin/phpunit $CODE_COVERAGE
+  - if [[ $PHPSTAN == 'true' ]]; then ./vendor/bin/phpstan analyse ./ --level 1 -c phpstan.neon ; fi
+
+after_script:
+  - if [[ -n $CODE_COVERAGE ]]; then wget https://scrutinizer-ci.com/ocular.phar ; fi
+  - if [[ -n $CODE_COVERAGE ]]; then php ocular.phar code-coverage:upload --format=php-clover coverage.clover ; fi

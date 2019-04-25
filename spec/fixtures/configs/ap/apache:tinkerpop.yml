@@ -1,0 +1,39 @@
+language: java
+os:
+  - linux
+jdk:
+  - oraclejdk8
+sudo: required
+dist: trusty
+services:
+  - docker
+cache:
+  directories:
+    - $HOME/mvn-home
+
+install:
+  # install maven 3.3.9 if it is not in cache already
+  - bash .travis.install-maven.sh "3.3.9" "${HOME}/mvn-home"
+  - export M2_HOME=${HOME}/mvn-home
+  - export PATH=${HOME}/mvn-home/bin:${PATH}
+  # visual check that we have the correct maven version installed
+  - mvn -version
+
+before_install:
+  - sudo apt-get install -y dpkg # workaround for travis-ci/travis-ci#9361
+  - wget -q https://packages.microsoft.com/config/ubuntu/14.04/packages-microsoft-prod.deb
+  - sudo dpkg -i packages-microsoft-prod.deb
+  - sudo apt-get install apt-transport-https
+  - sudo apt-get update
+  - sudo apt-get install dotnet-sdk-2.2
+
+jobs:
+  include:
+    - script: "mvn clean install -Dci --batch-mode -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn"
+    - script: "touch gremlin-dotnet/src/.glv && touch gremlin-dotnet/test/.glv && mvn clean install -q -DskipTests && mvn verify -pl :gremlin-dotnet,:gremlin-dotnet-tests -P gremlin-dotnet"
+    - script: "touch gremlin-python/.glv && mvn clean install -q -DskipTests && mvn verify -pl gremlin-python"
+    - script: "mvn clean install -q -DskipTests && mvn verify -pl :gremlin-javascript"
+    - script:
+      - "mvn clean install -q -DskipTests"
+      - "travis_wait 60 mvn verify -pl :spark-gremlin -DskipIntegrationTests=false"
+    - script: "docker/build.sh"

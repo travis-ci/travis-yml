@@ -1,0 +1,42 @@
+language: C
+
+compiler:
+  - gcc
+
+env:
+  global:
+   # The next declaration is the encrypted COVERITY_SCAN_TOKEN, created
+   #   via the "travis encrypt" command using the project repo's public key
+   - secure: "C3jzY69AIsO0HiyCTGMc09Mh5bdXjV2XudvCj2miCVA33Di10hpTbeUQ9yXDg2mU5vNaRoV9j3frZchTQTwrY3l0cjXnD6p9KFJ/t1J69G1asnIBnWuouGbHcAiVOGEaq44P/tQururOuzCd0HgjEvRKnqzsSuRmR8bCYWlzgOIEjY9I3fsUBkIdN4v3Me3icSo4Rbk5uUTWPkHWYXQMHJ9yZmPpRJRrqkt1pU6xDWsz25GPKqtYRKqzBUdCJBR5M4CqiY7D55Hp1jUBqTr5qcKfVETsaS7SPJswuR5YAUkDP4dVQPJT7nIDAdu57TcjccmRXGvi9ixYbWWsod5QYLxzFBEGsc+BkYTEy+XM7kDXlbEIzqtaeqGe9BxkH+ADSq4xcQ4FicI5PnoQ4cKh2Mi6V1nOb9GjvxQ8y8MCSX9wNKZ2xsixw7Fufc3EIdp0RfPytvGBCEKQV2e4YjydskTqeTa013Abp2jIOtXvYaU+r8UPfzkUN6AZzgZSodii2cgJkYFHPWuHO7h7xzkoYO7w80+Fpn52Ho6jEGETeWPYP13iSaaBWK6yo8WiFsP/kGU8y0+sgjLj7Qnu1pVt2gqY9sgZkv5YqoRee3e4LKFQvpYjY17wYSZusnhXmTxMThpVrHnTmAvO6lzUH+nZDSGwxZZMmqSr9TBZhCKlk+c="
+
+before_install:
+  - echo -n | openssl s_client -connect https://scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-
+
+addons:
+  apt:
+    packages:
+    - autoconf
+    - pkg-config
+    - build-essential
+    - libtool
+    - wget
+  coverity_scan:
+    project:
+      name: "nayutaco/ptarmigan"
+      description: "Lightning Network ptarmigan"
+    notification_email: ueno@nayuta.co
+    build_command_prepend: ""
+    build_command: "make full"
+    branch_pattern: coverity_scan
+  
+script:
+  - make full
+  - make test
+  - make clean
+  - sed -i -e 's/NODE_TYPE=BITCOIND/NODE_TYPE=BITCOINJ/' options.mak
+  - make
+
+notifications:
+  email:
+    - hiroki.gondo@nayuta.co
+    - ueno@nayuta.co

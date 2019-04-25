@@ -1,0 +1,36 @@
+language: c
+cache: ccache
+sudo: required
+dist: trusty
+matrix:
+  include:
+    - os: linux
+      addons:
+        apt:
+          packages:
+            - ca-certificates
+            - build-essential
+            - gfortran
+            - subversion
+            - ccache
+            - libreadline-dev
+            - libx11-dev
+            - libxt-dev
+            - zlib1g-dev
+            - libbz2-dev
+            - liblzma-dev
+            - libpcre3-dev
+            - libcurl4-openssl-dev
+
+before_install: echo "SVN := svn --quiet" > Makevars
+
+install:
+  - make --version
+  - make R-devel
+
+script:
+  - make -j2
+  - test $(make | wc -l) -eq 1
+  - make update
+  - test $(make -j2 | wc -l) -gt 1
+  - test $(make | wc -l) -eq 1

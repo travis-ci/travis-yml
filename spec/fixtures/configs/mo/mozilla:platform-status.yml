@@ -1,0 +1,20 @@
+language: node_js
+node_js:
+  - 9
+env:
+  global:
+    - REDIS_URL=redis://localhost:6379
+install: npm install
+script:
+  - npm test
+before_install:
+  - 'sh -e /etc/init.d/xvfb start'
+before_script:
+  - 'export DISPLAY=:99.0'
+services:
+  - 'redis-server'
+notifications:
+  irc:
+    channels:
+      - "irc.mozilla.org#wadi"
+    skip_join: true

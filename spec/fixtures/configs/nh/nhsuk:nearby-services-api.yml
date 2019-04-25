@@ -1,0 +1,13 @@
+services: docker
+
+before_install: yarn global add greenkeeper-lockfile@1
+
+before_script: greenkeeper-lockfile-update
+
+script: bash ./scripts/test-ci
+
+after_script:
+  - docker-compose -f docker-compose-travis.yml down -v
+  - greenkeeper-lockfile-upload
+
+after_success: bash ./scripts/deploy.sh

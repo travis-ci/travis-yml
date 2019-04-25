@@ -1,0 +1,69 @@
+dist: trusty
+language: php
+php:
+  - 5.5
+  - 5.6
+  - 7.0
+
+env:
+  global:
+    - COMPOSER_BIN_DIR=~/bin
+    - CODE_EXTENSIONS=phtml,php,js,css
+    - MAGENTO_ARCHIVE=magento-1.9.4.0.tar.bz2
+    - MAGENTO_ROOT=$TRAVIS_BUILD_DIR/magento
+  matrix:
+    - TEST_SUITE=marketplace_review
+    - TEST_SUITE=phpunit
+    - TEST_SUITE=ecg_coding_standards
+    - TEST_SUITE=meqp1_coding_standards
+
+matrix:
+  allow_failures:
+    - env: TEST_SUITE=ecg_coding_standards
+    - env: TEST_SUITE=meqp1_coding_standards
+  include:
+    - php: 7.0
+      env: TEST_SUITE=editorconfig NODE_JS_VERSION=6
+
+cache:
+  directories:
+    - $HOME/.composer/cache
+
+before_install:
+  - test -n "$GITHUB_TOKEN" && echo "Found GitHub token" && composer config github-oauth.github.com "$GITHUB_TOKEN" || echo "No GitHub token found"
+  - test -n "$NODE_JS_VERSION" && . $HOME/.nvm/nvm.sh && nvm install "$NODE_JS_VERSION" && nvm use "$NODE_JS_VERSION" || true
+install:
+  - composer install --no-interaction --prefer-dist
+  - test -n "$NODE_JS_VERSION" && npm install || true
+  - |
+    if [ "$TEST_SUITE" = "phpunit" ]; then
+      wget http://ebizmartsbackup.s3.amazonaws.com/$MAGENTO_ARCHIVE &&
+      tar xjf $MAGENTO_ARCHIVE &&
+      cd magento &&
+      modman init &&
+      modman link $TRAVIS_BUILD_DIR &&
+      cd $TRAVIS_BUILD_DIR
+    fi
+
+before_script: phpcs --config-set installed_paths vendor/magento-ecg/coding-standard,vendor/magento/marketplace-eqp
+script:
+  - |
+    if [ "$TEST_SUITE" = "marketplace_review" ]; then
+      phpcs ./ --ignore=./vendor --extensions="$CODE_EXTENSIONS" --standard="MEQP1" --severity="10"
+    fi
+  - |
+    if [ "$TEST_SUITE" = "ecg_coding_standards" ]; then
+      phpcs ./ --ignore=./vendor --extensions="$CODE_EXTENSIONS" --standard="Ecg"
+    fi
+  - |
+    if [ "$TEST_SUITE" = "meqp1_coding_standards" ]; then
+      phpcs ./ --ignore=./vendor --extensions="$CODE_EXTENSIONS" --standard="MEQP1"
+    fi
+  - |
+    if [ "$TEST_SUITE" = "phpunit" ]; then
+      cd magento/dev/tests/mailchimp && phpunit && cd $TRAVIS_BUILD_DIR
+    fi
+  - |
+    if [ "$TEST_SUITE" = "editorconfig" ]; then
+      git grep --cached -Il '' | xargs `npm bin`/editorconfig-tools check
+    fi

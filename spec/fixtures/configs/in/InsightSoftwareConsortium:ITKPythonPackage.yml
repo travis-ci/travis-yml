@@ -1,0 +1,15 @@
+sudo: required
+
+services:
+  - docker
+
+cache:
+  directories:
+  - $HOME/docker
+
+before_install:
+  - sudo pip install -U scikit-ci-addons
+  - ci_addons docker load-pull-save r.j3ss.co/shellcheck
+
+script:
+  - scripts/lint-shell-scripts.sh

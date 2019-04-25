@@ -1,0 +1,304 @@
+# Conditions are documented here: https://docs.travis-ci.com/user/conditions-v1
+conditions: v1
+
+env:
+  global:
+    - PANTS_CONFIG_FILES="${TRAVIS_BUILD_DIR}/pants.travis-ci.ini"
+    - PYTEST_PASSTHRU_ARGS="-v --duration=3"
+    - LC_ALL="en_US.UTF-8"
+
+
+before_cache:
+  # Ensure permissions to do the below removals, which happen with or without caching enabled.
+  - sudo chown -R travis:travis "${HOME}" "${TRAVIS_BUILD_DIR}"
+  # Kill all python bytecode in our cached venvs.  Some files appear to
+  # get bytecode compiled in non-yet-understood circumstances leading to
+  # a full cache re-pack due to new bytecode files.
+  - find build-support -name "*.py[co]" -delete
+  # The `ivydata-*.properties` & root level `*.{properties,xml}` files'
+  # effect on resolution time is in the noise, but they are
+  # re-timestamped in internal comments and fields on each run and this
+  # leads to travis-ci cache thrash.  Kill these files before the cache
+  # check to avoid un-needed cache re-packing and re-upload (a ~100s
+  # operation).
+  - find ${HOME}/.ivy2/pants -type f -name "ivydata-*.properties" -delete
+  - rm -f ${HOME}/.ivy2/pants/*.{css,properties,xml,xsl}
+  # We have several tests that do local file:// url resolves for
+  # com.example artifacts, these disrupt the cache but are fast since
+  # they're resolved from local files when omitted from the cache.
+  - rm -rf ${HOME}/.ivy2/pants/com.example
+  # The stats cache contains timestamped reports unused by CI but that
+  # thrash the cache.  Skip caching these.
+  - rm -rf ${HOME}/.cache/pants/stats
+  # While the bin directory and rust toolchains are relatively large, they're also very quick to
+  # restore/install: prune them to keep the total cache size down.
+  #   see https://docs.travis-ci.com/user/caching/#Things-not-to-cache
+  # NB: We do _not_ prune the cargo cache, since that holds compiled tools, package indexes and
+  # individually resolved crates.
+  - rm -rf ${HOME}/.cache/pants/bin
+  - rm -rf ${HOME}/.cache/pants/rust/rustup
+  - rm -rf ${HOME}/.cache/pants/lmdb_store
+  # Render a summary of what is left in the home directory, to assist with further pruning of
+  # the cache.
+  - du -d2 ${HOME} | sort -r -n
+
+cache:
+  directories:
+    - ${HOME}/.cache/pants
+    - ${HOME}/.ivy2/pants
+    # TODO(John Sirois): Update this to ~/.npm/pants when pants starts
+    # using its own isolated cache:
+    #   https://github.com/pantsbuild/pants/issues/2485
+    - ${HOME}/.npm
+    - build-support/pants_dev_deps.venv
+    - src/rust/engine/target
+
+# Stages are documented here: https://docs.travis-ci.com/user/build-stages
+stages:
+  - Test Pants
+  - name: &build_stable Deploy Pants Pex
+    if: tag IS present AND tag =~ ^release_.*$
+  - name: &build_unstable Deploy Pants Pex Unstable
+    if: tag IS NOT present AND head_repo = "wisechengyi/pants"
+
+default_test_config: &default_test_config
+  os: linux
+  dist: trusty
+  sudo: required
+  addons:
+    apt:
+      packages:
+        - lib32stdc++6
+        - lib32z1
+        - lib32z1-dev
+        - gcc-multilib
+        - python-dev
+        - python3
+        - openssl
+        - libssl-dev
+  stage: Test Pants
+  language: python
+  python: &python_version "2.7"
+  before_install:
+    # Remove bad openjdk6 from trusty image, so
+    # Pants will pick up oraclejdk6 from `packages` above.
+    - sudo rm -rf /usr/lib/jvm/java-1.6.0-openjdk-amd64
+    - sudo rm -rf /usr/lib/jvm/java-6-openjdk-amd64
+    - jdk_switcher use oraclejdk8
+    # Increase the max number of user watches to ensure that watchman is able to watch all
+    # files in the working copy.
+    - sudo sysctl fs.inotify.max_user_watches=524288
+
+matrix:
+  include:
+
+    # Build macOS engine
+    - name: "OSX Native Engine Binary Builder"
+      os: osx
+      # We request the oldest image we can (corresponding to OSX 10.11) for maximum compatibility.
+      # We use 10.11 as a minimum to avoid https://github.com/rust-lang/regex/issues/489.
+      # See: https://docs.travis-ci.com/user/reference/osx/#OS-X-Version
+      osx_image: xcode8
+      stage: Test Pants
+      language: generic
+      env:
+        - PREPARE_DEPLOY=1
+      script:
+        - ./pants --version && ./build-support/bin/release.sh -n
+
+    # Build Linux engine
+    - name: "Linux Native Engine Binary Builder"
+      os: linux
+      stage: Test Pants
+      language: generic
+      services:
+        - docker
+      env:
+        - PREPARE_DEPLOY=1
+      before_script:
+        - ulimit -c unlimited
+      script:
+        - docker build --rm -t travis_ci
+          --build-arg "TRAVIS_USER=$(id -un)"
+          --build-arg "TRAVIS_UID=$(id -u)"
+          --build-arg "TRAVIS_GROUP=$(id -gn)"
+          --build-arg "TRAVIS_GID=$(id -g)"
+            build-support/docker/travis_ci/
+        # Mount ${HOME} to cache the ${HOME}/.cache/pants/rust-toolchain
+        - docker run --rm -t
+          -v "${HOME}:/travis/home"
+          -v "${TRAVIS_BUILD_DIR}:/travis/workdir"
+          travis_ci:latest
+          sh -c "git clean -xfd && ./pants --version && ./build-support/bin/release.sh -n"
+      after_failure:
+        - build-support/bin/ci-failure.sh
+
+    # Deploy Pex Stable
+    - name: "Deploy Pants PEX"
+      os: linux
+      language: python
+      stage: *build_stable
+      env:
+        - PANTS_PEX_RELEASE=stable
+      script:
+        - ./build-support/bin/release.sh -p
+      deploy:
+        # See https://docs.travis-ci.com/user/deployment/releases/
+        provider: releases
+        # The pantsbuild-ci-bot OAuth token, see the pantsbuild vault for details.
+        api_key:
+          secure: "u0aCsiuVGOg28YxG0sQUovuUm29kKwQfFgHbNz2TT5L+cGoHxGl4aoVOCtuwWYEtbNGmYc8/3WRS3C/jOiqQj6JEgHUzWOsnfKUObEqNhisAmXbzBbKc0wPQTL8WNK+DKFh32sD3yPYcw+a5PTLO56+o7rqlI25LK7A17WesHC4="
+        file_glob: true
+        file: dist/deploy/pex/*
+        skip_cleanup: true
+        on:
+          # We only release a pex for Pants releases, which are tagged.
+          tags: true
+          repo: pantsbuild/pants
+
+    # Deploy Pex Unstable to s3
+    - name: "Deploy Pants PEX Unstable"
+      os: linux
+      language: python
+      stage: *build_unstable
+      env:
+        - PREPARE_DEPLOY=1
+      script:
+        - ./build-support/bin/release.sh -p && mkdir -p dist/deploy/pex/ && mv dist/pants*.pex dist/deploy/pex/
+
+    - <<: *default_test_config
+      name: "Self checks, lint, and JVM tests"
+      before_install:
+        - sudo apt-get install -y pkg-config fuse libfuse-dev
+        - sudo modprobe fuse
+        - sudo chmod 666 /dev/fuse
+        - sudo chown root:$USER /etc/fuse.conf
+      script:
+        - ./build-support/bin/travis-ci.sh -fkmrjt
+
+    - <<: *default_test_config
+      name: "Py2 - Unit tests for pants and pants-plugins"
+      script:
+        - ./build-support/bin/travis-ci.sh -lp
+
+    - <<: *default_test_config
+      name: "Py3 - Unit tests for pants and pants-plugins"
+      script:
+        - ./build-support/bin/travis-ci.sh -3lp
+
+    - <<: *default_test_config
+      name: "Py2 - Python contrib tests"
+      script:
+        - ./build-support/bin/travis-ci.sh -n
+
+    - <<: *default_test_config
+      name: "Py3 - Python contrib tests"
+      script:
+        - ./build-support/bin/travis-ci.sh -3n
+
+    - <<: *default_test_config
+      name: "Python integration tests for pants - shard 1"
+      script:
+        - ./build-support/bin/travis-ci.sh -c -i 0/7
+
+    - <<: *default_test_config
+      name: "Python integration tests for pants - shard 2"
+      script:
+        - ./build-support/bin/travis-ci.sh -c -i 1/7
+
+    - <<: *default_test_config
+      name: "Python integration tests for pants - shard 3"
+      script:
+        - ./build-support/bin/travis-ci.sh -c -i 2/7
+
+    - <<: *default_test_config
+      name: "Python integration tests for pants - shard 4"
+      script:
+        - ./build-support/bin/travis-ci.sh -c -i 3/7
+
+    - <<: *default_test_config
+      name: "Python integration tests for pants - shard 5"
+      script:
+        - ./build-support/bin/travis-ci.sh -c -i 4/7
+
+    - <<: *default_test_config
+      name: "Python integration tests for pants - shard 6"
+      script:
+        - ./build-support/bin/travis-ci.sh -c -i 5/7
+
+    - <<: *default_test_config
+      name: "Python integration tests for pants - shard 7"
+      script:
+        - ./build-support/bin/travis-ci.sh -c -i 6/7
+
+    # Rust on linux
+    - name: "Rust Tests Linux"
+      os: linux
+      dist: trusty
+      sudo: required
+      stage: Test Pants
+      language: python
+      python: *python_version
+      before_install:
+        - sudo apt-get install -y pkg-config fuse libfuse-dev
+        - sudo modprobe fuse
+        - sudo chmod 666 /dev/fuse
+        - sudo chown root:$USER /etc/fuse.conf
+      before_script:
+        - ulimit -c unlimited
+        - ulimit -n 8192
+      script:
+        - ./build-support/bin/travis-ci.sh -be
+    # Rust on macOS
+    - name: "Rust + Platform-specific Tests OSX"
+      os: osx
+      # Fuse actually works on this image. It hangs on many others.
+      osx_image: xcode8.3
+      stage: Test Pants
+      language: generic
+      before_install:
+        - brew tap caskroom/cask && brew update && brew cask install osxfuse
+      before_script:
+        - ulimit -c unlimited
+        - ulimit -n 8192
+      script:
+        # Platform-specific tests currently need a pants pex, so we bootstrap here (no -b) and
+        # set -z to run the platform-specific tests.
+        - ./build-support/bin/travis-ci.sh -ez
+
+    # Rust Clippy on Linux
+    - name: "Rust Clippy on Linux"
+      os: linux
+      dist: trusty
+      sudo: required
+      stage: Test Pants
+      language: python
+      python: *python_version
+      before_install:
+        - sudo apt-get install -y pkg-config fuse libfuse-dev
+        - sudo modprobe fuse
+        - sudo chmod 666 /dev/fuse
+        - sudo chown root:$USER /etc/fuse.conf
+      before_script:
+        - ulimit -c unlimited
+        - ulimit -n 8192
+      script:
+        - ./build-support/bin/travis-ci.sh -bs
+
+deploy:
+  # See: https://docs.travis-ci.com/user/deployment/s3/
+  provider: s3
+  access_key_id: AKIAIWOKBXVU3JLY6EGQ
+  secret_access_key:
+    secure: "UBVbpdYJ81OsDGKlPRBw6FlPJGlxosnFQ4A1xBbU5GwEBfv90GoKc6J0UwF+I4CDwytj/BlAks1XbW0zYX0oeIlXDnl1Vfikm1k4hfIr6VCLHKppiU69FlEs+ph0Dktz8+aUWhrvJzICZs6Gu08kTBQ5++3ulDWDeTHqjr713YM="
+  bucket: binaries.pantsbuild.org
+  local_dir: dist/deploy
+  # Otherwise travis will stash dist/deploy and the deploy will fail.
+  skip_cleanup: true
+  acl: public_read
+  on:
+    condition: $PREPARE_DEPLOY = 1
+    # NB: We mainly want deploys for `master` commits; but we also need new binaries for stable
+    # release branches; eg `1.3.x`
+    all_branches: true
+    repo: pantsbuild/pants

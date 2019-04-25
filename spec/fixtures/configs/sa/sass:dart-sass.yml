@@ -1,0 +1,175 @@
+## Testing
+
+# Set the language to Ruby so that we can run sass-spec tests.
+language: ruby
+
+env:
+  global:
+  - DART_CHANNEL=stable
+  - DART_VERSION=latest
+  matrix:
+  # Language specs, defined in sass/sass-spec
+  - TASK=specs
+  - TASK=specs DART_CHANNEL=dev
+  - TASK=specs ASYNC=true
+
+  # Unit tests, defined in test/.
+  - TASK=tests
+  - TASK=tests DART_CHANNEL=dev
+  # TODO(nweiz): Make this "stable" when laverdet/node-fibers#409 is fixed.
+  - TASK=tests NODE_VERSION=11
+
+  # Keep these up-to-date with the latest LTS Node releases. They next need to
+  # be rotated December 2019. See https://github.com/nodejs/Release.
+  - TASK=tests NODE_VERSION=lts/carbon
+  - TASK=tests NODE_VERSION=lts/dubnium
+
+  # Miscellaneous checks.
+  - TASK=analyze
+  - TASK=format
+
+rvm:
+- 2.3.1
+
+# Only building master means that we don't run two builds for each pull request.
+branches:
+  only:
+    - master
+    # Feature branches beginning with "feature."
+    - "/^feature\\..*/"
+    # Semantic version tags and legacy branches of the form "1.2.x".
+    - "/^\\d+\\.\\d+\\.(\\d+([+-].*)?|x)$/"
+
+cache:
+  directories:
+  - $HOME/.pub-cache
+
+install:
+# Install the Dart SDK.
+- curl -o dart.zip "https://storage.googleapis.com/dart-archive/channels/$DART_CHANNEL/release/$DART_VERSION/sdk/dartsdk-linux-x64-release.zip"
+- unzip dart.zip
+- export PATH="$PATH:`pwd`/dart-sdk/bin"
+- pub get
+
+# Install the Node SDK if we're running Node tests.
+- if-node() { if [ ! -z "$NODE_VERSION" ]; then "$@"; fi }
+- if-node . "$HOME/.nvm/nvm.sh"
+- if-node nvm install "$NODE_VERSION"
+- if-node nvm use "$NODE_VERSION"
+- if-node pub run grinder before-test
+
+# Download sass-spec and install its dependencies if we're running specs.
+- if-specs() { if [ "$TASK" = specs ]; then "$@"; fi }
+- if-specs export sass_spec_ref=`tool/travis/sass-spec-ref.sh`
+- if-specs git init sass-spec
+- if-specs git -C sass-spec fetch git://github.com/sass/sass-spec "$sass_spec_ref" --depth 1
+- if-specs git -C sass-spec checkout FETCH_HEAD
+- if-specs bundle install --gemfile=sass-spec/Gemfile --jobs=3 --retry=3
+
+- if [ "$TASK" = tests ]; then pub run grinder app-snapshot; fi
+
+script: tool/travis/test.sh
+
+## Deployment
+
+jobs:
+  include:
+  # Sanity check before releasing anywhere.
+  - stage: sanity check
+    if: &deploy-if
+      (type IN (push, api)) AND (repo = sass/dart-sass) AND tag =~ ^\d+\.\d+\.\d+([+-].*)?$
+    script: pub run grinder sanity-check-before-release
+
+  # Deploy to GitHub.
+  - stage: deploy 1
+    if: *deploy-if
+    env: &github-env
+      - GITHUB_USER=sassbot
+      # GITHUB_AUTH="..."
+      #
+      # Note that this overrides the read-only auth token that's set for all
+      # builds.
+      - secure: "AAP74aT+8SQmwGeHrCsZ7GgppvCCkDAZXszivocMy3Fi9gfMCLABBCh67pGINJX4VlLW7ftPF3xivlvgGu+e4ncXz9m9jIPZ9Iza3cW5jCnCgyRGZD98gwabIDFWiv4X9V2xnJA2p1ZuYBf8Sh3TTipUFBKMjlnxVxYkIOTud4rUss/htFhxVA/oFTo0ThTZwXuxJ+GRGTM4PcuHPJvPf18iRPs2AHFV6ZP51xgc3AsXC6Zyom5EJeX0yGj9zWQ0XCjnuFdGsI6G9jmkrmqgAXuUipgqAn0tjxPYp9R/1HqnBLD3Zbrvyi5pCiSFclU6CS6kTDbefzPOc5+zrnlkaolVeF8tQ+EhZiZqtLnpLYUz9bgknoFUapUN4N0R36sKBStdRv54+sMeoOzpQ8ep3PeZW5nWbak12wcrDx38ToWs6hQ4ycb0SQDZZatHsASpSu2nX8HwzZSDAZmsAdB+epPmgA0CBjWVG1ycmVnT6l3OopUmbaY3pXBNzFUXq5Fcd7Q39/MfrmHpyxSc3QVf8xNtUx9ggYtK0Kwx6dgykhNMVzFGZRVyQgwpaiyDqgMGEU2GQzzcJhgKo9+y1fDtdfj/cctmvJ2Fo1fkk+DMkEPUHGOVo6uKFnartky9iLm1WiHDMruJ6SIOJzAnb+TMBWQTSwI+F4wyEiRVR8Zv4uA="
+    script: skip # Don't run tests
+    deploy:
+      provider: script
+      script: pub run grinder github-release
+      skip_cleanup: true # Don't clean up the Dart SDK.
+
+      # This causes the deploy to only be build when a tag is pushed. This
+      # is because the `tag` attribute in `if:` statements has a different
+      # understanding of the "current tag" than this, which uses the
+      # `TRAVIS_TAG` environment variable. `if:` statements check whether a
+      # tag exists that refers to the current commit, whereas `TRAVIS_TAG`
+      # checks whether the current build was caused by a tag.
+      #
+      # We check `if:` because it avoids unnecessary build steps, and
+      # `on: {tags: true}` ensures that we only deploy on the build caused
+      # by pushing a tag, not the build caused by pushing master.
+      on: {tags: true}
+
+  # Deploy to npm.
+  - if: *deploy-if
+    script: skip
+    deploy:
+      provider: script
+      script: tool/travis/deploy/npm.sh
+      skip_cleanup: true
+      on: {tags: true}
+
+  # Deploy to pub.
+  - if: *deploy-if
+    script: skip
+    deploy:
+      provider: script
+      script: tool/travis/deploy/pub.sh
+      skip_cleanup: true
+      on: {tags: true}
+
+  # Deploy to Homebrew.
+  - if: *deploy-if
+    env: *github-env
+    script: skip
+    deploy:
+      provider: script
+      script: pub run grinder update-homebrew
+      skip_cleanup: true
+      on: {tags: true}
+
+  # Deploy to Chocolatey.
+  - if: *deploy-if
+    env:
+      # CHOCO_TOKEN="..."
+      - secure: "cW11kQYBBEElfVsc1pJfVEHOMYwt0ZK+9STZHwSPbAISlplIRnsimMN7TqCY2aLnkWXyUMU7DphIl9uQ86M4BT1bJopsHbapj27bFSlKWHlBSDB/xylFHywV41Yk5lMlr8DLMbsSzVahasyR34xS6HYIRlDpZ9TFiQuDQNJxQmqTZJg/FC+3nqCI7tyMKGkWc48ikTcmqDMHsG9CudG2u+Q3S9sLNXArh9T4tSnAyWkTvSrS05mvFx5tC83PcG9/VkioTId+VRSJchwTmCxDFDROrTikTXZMtYn8wMAQ2wQ34TQXNZMZ9uiHA6W0IuJV2EnYerJbqV2lrJq9xqZywKu6HW6i4GhrCvizALNFZx/N7s/10xuf3UcuWizYml/e0MYT+6t4ojTYBMKv+Cx+H2Y2Jdpvdn2ZAIl6LaU3pLw4OIPJ7aXjDwZd63MPxtwGwVLHbH7Zu+oUv1erIq5LtatuocGWipD8WdiMBQvyCuDRMowpLPoAbj+mevOf+xlY2Eym4tOXpxM7iY3lXFHROo5dQbhsARfVF9J1gl5PuYXvCjxqTfK/ef9t3ZoDbi57+yAJUWlZfWa5r1zKE8OS0pA8GfQRLom/Lt0wKVw4Xiofgolzd9pEHi4JpsYIQb8O+u1ACQU6nBCS87CGrQ+ylnzKfGUs0aW2K3gvbkg0LUg="
+    script: skip
+    deploy:
+      provider: script
+      script: pub run grinder update-chocolatey
+      skip_cleanup: true
+      on: {tags: true}
+
+  # Redeploy sass-lang.com.
+  - if: *deploy-if
+    env:
+      # HEROKU_TOKEN="..."
+      - secure: "JUBfLfJr+5RIvxkk+1qqtyJxaHq2A9x78G9L9bUTjBD3C7XJOmJtt8u+pAgperL+fIfrlcAVzmYTyRGLj+0PL4VcxMTrmn604FIn+ffcgatylYKtPdpJq5dnXQ4U0+ROaZnq1mPZeUI7OHwRlVcQStIWkPxk7Eno+ZqxFyziLZ4wxo7l809iCAbhJttCfWPupyHX75cHhBMFaPEk9LYUrxQURyE0GKMQgDKHY/ehe87gyuKt3o79gi7/E0chQApv1jeua4xz5tyNBNQH/nwuJmmBCab/IdgTLn2vj4qjT1ENeB5PINCfFOT98IPVREOLbY+jiGRVwQFJbC55mOBQH21mfIt/XLhcjYHe80X4PyYhtJJ2GDadcyrzppZmHpEDHzfR8B29LEKhNM1VfUTZ8I9+TudXW8uMjtqCsXyi8bKZLsuZNNSlWVh1qIR+FXMDTrYNOnTcvgzv5yi6fbD10Uf8k1G0pHtKQiFainWatmJhNIMtGoYe7LRAB0Rj7OGWDMv/PHy/+Z7BKIj3b0LefVN1xpeuy3mMhMq9g5Q8HI8yk37DNmZQ9kwgHpIUk/t2xAdwzZ0XMSDFW9iHV48/iHwi0t5M2RCFRnI8ZaUNU5Z8QLUPHnazCucIvR4N8ns1yFwDgNQ5CzlBFrV70EwgqZhjjToAOhnIXpHMWr3AVAw="
+    install: skip
+    script: skip
+    deploy:
+      provider: script
+      # Heroku doesn't have a public API endpoint for this yet, so we use the
+      # private endpoint instead.
+      script: tool/travis/deploy/heroku.sh
+      on: {tags: true}
+
+  # Deploy to Bazel. This is in a separate deploy stage because it needs to
+  # install the npm package.
+  - stage: deploy 2
+    if: *deploy-if
+    env: *github-env
+    script: skip
+    deploy:
+      provider: script
+      script: pub run grinder update-bazel
+      skip_cleanup: true
+      on: {tags: true}

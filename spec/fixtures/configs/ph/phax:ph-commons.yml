@@ -1,0 +1,56 @@
+dist: trusty
+sudo: required
+language: java
+
+env:
+  global:
+    - SONATYPE_USERNAME=ph@phloc.com
+    - secure: "OXL7CceXjZ5cGDKYRedp1E2Pw1STHq5+siik1GTICnA2YEiT8vDokofxH6oJ37nCltr8cLjyTXP6Gm1N+/r+7xp1f
+tOetOCHtufiHjdoY5JpYbjggMq2wfQiJVpu+2BQGUBffcL9Ka4JBcXc9ouF5XfovStuP6qWd3E7ZOR8L08RVnbxSFWzD5MMfuvvB
+mgcB6obtpTCqnzmgWoNeAWj72bALSlzqYqodM+x2PVVMpAAFS3P2KCpG8bFtrdXF0mUwFNAGFRtBJ7UlL7Ydfeq7dBP5sNRDqDOR
+g2H2fW9l6WnbuAqn0nczMTxhdQUlWWLWHKk0HGnlTu/8VuPyScZ0Jku7XmoWSJiKeBbooBZHaCxLv5WbsKUFMgzNXd0LqCWyj90f
+jqzjt7PQc1sXnCIeqBxIrJXfXUQkTQ9KV3iDL49IdV1AeMIi2Gpf0uxuCink65AFwn0uUeyfS00k0FROJzh+7bbvkheMWIAawOf6
+GgAm8tAjsmE4yejBl1E4xYKoHXY2Gs1tI+/v6CQ7R5VbA+Z/LiCTO8cozl2zI0DlN7VRVDmBt0WqUCdkZKF22jd1heuPx9yNRo8H
+uHu4/XKtXs21U040Z0DoVZZqk3ZyVEdkfRdnkj3BuOkCuf4zPS+3+3y5QWWRmsTruVHETwUq3vBbo9DLEUbxU6qag/Nnao="
+    - MAVEN_OPTS=-Xmx1024m
+
+addons:
+  sonarcloud:
+    organization: "phax-github"
+    token:
+      secure: "a8TJ+zLYierSLAYkfVTvlqB8oM9yBOyxtGykaVibXVL20ruxHjHCRQmd83kWwwPCGA92AzgWLDq6Rtj0Z/0q/GlIxa7VkzXxdP/czBGf+oDIJ3EJMrNMnwiWac2KHgc0W6FQUhoz67ymBZs1n7+ps
+XQ9ptu++h+GQfyPO1Qf6dUF6jgJL2GpiPn3GdxNAOd4nM3kehNodjFfviXmBOpDwl5vL1HcnlZ16oydtM4ZZbojH392Y+PFn7F8jMeyIZTqqPxAfoSbefmAwW+J//CEdRBqRXF4rPidWgYXIyLm/g7bPIz40gHQ8
+hIci5TGKINvCjXuTebRcvPB8fhstj3xTlQW2V2T5PaBZy+J27+J1JDZ1Ci3ub9iJWSg9oKHnKel+TtxKwkH4GMIscuVOuXPvkNlr70yJA1+ma3a5I5g/mOWPVYLn8ii/mzcPNozDpypGm1SgHmkJZkeUtzmkpxk4
+EJ6d/rZueTk3CkFot4xvFiYjQ+ChgTQw3MJEIZ3K3reB/EEwPVM0oYx8pggn25Z0Q4OA7Pf9jjV+dolPd6d8hVTNS7hPVrRSQWRTx85SBipIhlQGfaw+YHH3Ecq87U3cWX/PHkCa2v2I327K+GTSIVJPQ/TaJSR3
+K8wBuzwe9c2J1nPDC022lkmiMAnfRrt/rzBkN/LwVY2rsj+/R8Eus4="
+  
+install:
+#  - mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B -V -U -P jdeps
+  - mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B -V -U
+
+cache:
+  directories:
+    - $HOME/.m2
+
+branches:
+  only:
+    - master
+
+jobs:
+  include:
+    - stage: test
+      jdk: oraclejdk8
+      script:
+        - mvn test -B -P coverage sonar:sonar
+      after_success:
+        - mvn deploy --settings travis-settings.xml -DskipTests=true -B -P travis-deploy
+        - bash <(curl -s https://codecov.io/bash)
+    - stage: test
+      jdk: oraclejdk11
+      script:
+        - mvn test -B
+    - stage: test
+      jdk: openjdk11
+      script:
+        - mvn test -B
+ 

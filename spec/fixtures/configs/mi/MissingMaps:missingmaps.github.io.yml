@@ -1,0 +1,23 @@
+language: ruby
+rvm:
+  - 2.3.1
+env:
+  global:
+  - TRAVIS_NODE_VERSION="v7.1.0"
+  - GH_REF=github.com/MissingMaps/missingmaps.github.io
+  - DEPLOY_BRANCH=publish
+  - secure: CWoizTEORW1cbd9e9wtebUIiTsztfRgS5wTRTTkRl1NJBbgK5KElLedcQxoIi3jU+rdkZCSyi5aNe6U4dAkUf1PvPlO2WCC6qOxZGdeuhXGY2SEQvpsW+VmTVa5IjE/EN2/X1Vpg5P092xEu7+n7W90d8EKlUaUIWXEPGz5S2fMIszdsDbs5SxZ5k4Bz1mMuB4Kr6w7sbVuEFIUaQII7vg63z6EjVu1CDpUoqc9nLYD+deScWLD9fCr5s1wxre36/tg4k52WvhiPddwFJAdpns3peTQxfR6Wgoc4oDch92lFG59zweDcBDRkbI/kG6yxc3m2BXges9GZztEh0c5BfenEXwqJI0gHA3cvuzcp86zTposQeaFOk3BaRzEULitBFyAP6OTIKp4oaS+fbXGGtzDgz47s4SAGwEJIOQHkRTbGCq/OlnkbPB2N+X+tMYXbeO9n4p3OGuLRgvpILx5GAO7sEUKp7cc4IfcoRdSCxbUWO/M7dcn1ZKK+Yc9rYcyaKlniimBchBOlCqTS9SZ9kxmko1pZKpvy18dPzrgkI2MVX7TKbms0ZjixV/9el7Ir/HIl+Sz3akJ7YZi8q1mQ56cTEiPg7ZC37XC5uxJylA4uwQy4jK3macvfmxwhXd+EZDxl6v0NreZNtmwhphPWIELabmR6/wrd4xhqNaup1Mk=
+# cache:
+#   directories:
+#   - node_modules
+before_install:
+  - chmod +x ./.build_scripts/deploy.sh
+before_script:
+  - . $HOME/.nvm/nvm.sh
+  - nvm install $TRAVIS_NODE_VERSION
+  - nvm use $TRAVIS_NODE_VERSION
+  - npm install -g gulp
+  - npm install
+script: gulp prod
+after_success:
+  - "./.build_scripts/deploy.sh"

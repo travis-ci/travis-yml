@@ -1,0 +1,19 @@
+dist: trusty
+language: python
+install: |
+    pip install pyyaml
+script: |
+  set -e
+  ERR=
+  for X in $(git diff --name-only $TRAVIS_COMMIT_RANGE | grep .sh); do
+    [[ -e $X ]] || continue
+    echo Linting $X
+    scripts/lint-recipes $X || ERR="$ERR $X"
+    [[ $X == defaults-*.sh ]] && continue
+
+    # If a recipe is not a system requirement, it must have a Modulefile
+    if ! grep -qE '^system_requirement:' "$X"; then
+      grep -q '^#%Module' "$X" || { echo "ERROR: recipe $X has no modulefile"; ERR="$ERR $X"; }
+    fi
+  done
+  [[ ! $ERR ]] || { echo "The following recipes need to be fixed:" $ERR; exit 1; }

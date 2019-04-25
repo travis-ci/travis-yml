@@ -1,0 +1,62 @@
+language: java
+jdk:
+- openjdk7
+sudo: required
+node_js: 
+  - "8"
+
+cache:
+  directories:
+  - $HOME/.m2
+
+install: 
+  - export PATH=$PATH:$HOME/.local/bin
+  - cd $TRAVIS_BUILD_DIR/item-review-viewer/src/main/client
+  - travis_retry npm install
+
+services:
+  - docker
+
+before_script:
+  - export BRANCH=$(if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then echo $TRAVIS_BRANCH; else echo $TRAVIS_PULL_REQUEST_BRANCH; fi)
+  - echo "TRAVIS_BRANCH=$TRAVIS_BRANCH, PR=$PR, BRANCH=$BRANCH"
+
+script:
+  - cd $TRAVIS_BUILD_DIR/item-review-viewer/src/main/client
+  - npm run build:prod  
+  - cd $TRAVIS_BUILD_DIR/item-review-viewer/
+  - mvn -B clean install
+#  - mvn checkstyle:check
+
+after_success:
+  - docker --version
+  - docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
+  - cd $TRAVIS_BUILD_DIR
+  - mv item-review-viewer/target/item-review-viewer.war docker/
+  - chmod ugo+x DeployScripts/code_docker_deploy.sh
+  - chmod ugo+x DeployScripts/app_docker_deploy.sh
+  - chmod ugo+x DeployScripts/ecs_deploy.sh
+
+deploy:
+  - provider: script
+    skip_cleanup: true
+    script: ./DeployScripts/code_docker_deploy.sh
+    on:
+        tags: true
+        branch: master
+  - provider: releases
+    api_key: $GIT_API_KEY
+    file: docker/item-review-viewer.war
+    skip_cleanup: true
+    on:
+      tags: true
+  - provider: script
+    skip_cleanup: true
+    script: ./DeployScripts/code_docker_deploy.sh 
+    on:
+      branch: dev
+  - provider: script
+    skip_cleanup: true
+    script: ./DeployScripts/code_docker_deploy.sh
+    on:
+      branch: master

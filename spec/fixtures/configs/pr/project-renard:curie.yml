@@ -1,0 +1,19 @@
+language: perl
+
+matrix:
+  include:
+    - os: linux
+      sudo: required
+      services: docker
+    - os: linux
+      sudo: required
+      services: docker
+      env: OBERTH_COVERAGE=coveralls
+    - os: osx
+
+before_install:
+  - eval "$(curl https://raw.githubusercontent.com/oberth-manoeuvre/oberth-prototype/master/script/ci/travis-oberth.sh)"
+  - travis-oberth before-install
+
+install: travis-oberth install
+script:  travis-oberth script

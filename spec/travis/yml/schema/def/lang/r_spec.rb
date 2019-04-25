@@ -11,25 +11,25 @@ describe Travis::Yml::Schema::Def::R, 'structure' do
         type: :object,
         properties: {
           r: {
-            '$ref': '#/definitions/strs'
+            '$ref': '#/definitions/type/strs'
           },
           r_packages: {
-            '$ref': '#/definitions/strs'
+            '$ref': '#/definitions/type/strs'
           },
           r_binary_packages: {
-            '$ref': '#/definitions/strs'
+            '$ref': '#/definitions/type/strs'
           },
           r_github_packages: {
-            '$ref': '#/definitions/strs'
+            '$ref': '#/definitions/type/strs'
           },
           apt_packages: {
-            '$ref': '#/definitions/strs'
+            '$ref': '#/definitions/type/strs'
           },
           bioc_packages: {
-            '$ref': '#/definitions/strs'
+            '$ref': '#/definitions/type/strs'
           },
           brew_packages: {
-            '$ref': '#/definitions/strs'
+            '$ref': '#/definitions/type/strs'
           },
           bioc: {
             type: :string

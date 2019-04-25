@@ -1,0 +1,12 @@
+language: php
+php:
+- 7.1
+install: composer install
+script:
+- ./vendor/bin/phing test
+after_script:
+- ./vendor/bin/coveralls -vvv
+notifications:
+  email:
+    recipients:
+    - bram@2dotstwice.be

@@ -67,17 +67,17 @@ describe Travis::Yml::Schema::Def::Deploy::Heroku, 'structure' do
                     type: :object,
                     patternProperties: {
                       '.*': {
-                        '$ref': '#/definitions/secure'
+                        '$ref': '#/definitions/type/secure'
                       }
                     }
                   },
                   {
-                    '$ref': '#/definitions/secure'
+                    '$ref': '#/definitions/type/secure'
                   }
                 ]
               },
               run: {
-                '$ref': '#/definitions/strs'
+                '$ref': '#/definitions/type/strs'
               }
             },
             normal: true,

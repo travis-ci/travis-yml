@@ -1,0 +1,193 @@
+# This file is based on the travis.yml file of stack. 
+# (https://github.com/commercialhaskell/stack/blob/master/.travis.yml)
+#
+dist: xenial
+sudo: required
+language: php
+
+php:
+  - 7.1
+
+cache:
+   directories:
+       - $HOME/.ghc
+       - $HOME/.cabal
+       - $HOME/.stack
+
+# The different configurations we want to test. We have BUILD=cabal which uses
+# cabal-install, and BUILD=stack which uses Stack. More documentation on each
+# of those below.
+#
+# We set the compiler values here to tell Travis to use a different
+# cache file per set of arguments.
+#
+# If you need to have different apt packages for each combination in the
+# matrix, you can use a line such as:
+#     addons: {apt: {packages: [libfcgi-dev,libgmp-dev]}}
+matrix:
+  fast_finish: true
+  include:
+  # The Stack builds. We can pass in arbitrary Stack arguments via the ARGS
+  # variable, such as using --stack-yaml to point to a different file.
+  - name: "linux, stack"
+    env: 
+      - BUILD=stack
+      - ARGS="--interleaved-output"
+      - STACK_YAML=stack.yaml
+      - AMPERSAND_RELEASE_BRANCH=master
+    compiler: ": #stack"
+    addons: {apt: {packages: [ ] 
+                  ,sources: [hvr-ghc]}}
+#  - name: "osx, stack"
+#    env: BUILD=stack ARGS="--interleaved-output" STACK_YAML=stack.yaml osx
+#    compiler: ": #stack"
+#    os: osx
+
+
+  # We grab the appropriate GHC and cabal-install versions from hvr's PPA. See:
+  # https://github.com/hvr/multi-ghc-travis
+  - name: "linux, cabal"
+    env: BUILD=cabal GHCVER=8.6.4 CABALVER=2.4
+    compiler: ": #GHC 8.6.4"
+    addons: {apt: {packages: [ ghc-ppa-tools
+                             , cabal-install-2.4
+                             , ghc-8.6.4
+                             ] 
+                  ,sources: [hvr-ghc]}}
+#  - name: "osx, cabal"
+#    env: BUILD=cabal GHCVER=8.6.4 CABALVER=2.4 osx
+#    compiler: ": #GHC 8.6.4"
+#    addons: {apt: {packages: [ ghc-ppa-tools
+#                             , cabal-install-2.4
+#                             , ghc-8.6.4
+#                             ] 
+#                  ,sources: [hvr-ghc]}}
+#    os: osx
+
+  # Build with the newest GHC and cabal-install.
+  - name: "linux, cabal, latest"
+    env: BUILD=cabal GHCVER=head  CABALVER=head
+    compiler: ": #GHC HEAD"
+    addons: {apt: {packages: [ ghc-ppa-tools
+                             , cabal-install-head
+                             , ghc-head
+                             ] 
+                  ,sources: [hvr-ghc]}}
+  - name: "linux, stack, latest"
+    env: BUILD=stack ARGS="--interleaved-output --resolver nightly"
+    compiler: ": #stack nightly"
+    addons: {apt: {packages: [libgmp-dev]}}
+
+
+  allow_failures:
+  # Temporarily, because cabal does not build, but stack does
+  - name: "linux, cabal"
+  
+  # Nightly builds are allowed to fail
+  - name: "linux, stack, latest"
+  - name: "linux, cabal, latest"
+
+#  # OSX builds currently (sept 2016) do not work, because PHP isn't available
+#  - name: "osx, stack"
+#  - name: "osx, cabal"
+  
+
+  
+
+
+
+# Note: the distinction between `before_install` and `install` is not important.
+# - in before_install we install build tools
+# - in install we install (haskell) dependencies
+before_install:
+# Using compiler above sets CC to an invalid value, so unset it
+- unset CC
+
+# We want to always allow newer versions of packages when building on GHC HEAD
+- CABALARGS=""
+- if [ "x$GHCVER" = "xhead" ]; then CABALARGS=--allow-newer; fi
+
+# We need to ensure that there is enough memory. See:
+# http://stackoverflow.com/questions/13104630/exitfailure-9-when-trying-to-install-ghc-mod-using-cabal 
+- sudo dd if=/dev/zero of=/swapfile bs=1M count=1024
+- sudo mkswap /swapfile
+- sudo swapon /swapfile
+
+# Export the git version for use with cabal (See https://github.com/haskell/cabal/issues/5934 for the discussion)
+- export GIT_SHA=`git rev-parse --short HEAD`
+- export GIT_Branch=`git rev-parse --abbrev-ref HEAD`
+- echo $GIT_SHA
+- echo $GIT_Branch
+
+# Download and unpack the stack executable
+- export PATH=/opt/ghc/$GHCVER/bin:/opt/cabal/$CABALVER/bin:$HOME/.local/bin:/home/travis/build/AmpersandTarski/Ampersand/dist:$PATH
+- mkdir -p ~/.local/bin
+- |
+  if [ `uname` = "Darwin" ]
+  then
+    curl --insecure -L https://www.stackage.org/stack/osx-x86_64 | tar xz --strip-components=1 --include '*/stack' -C ~/.local/bin
+  else
+    curl -L https://www.stackage.org/stack/linux-x86_64 | tar xz --wildcards --strip-components=1 -C ~/.local/bin '*/stack'
+  fi
+
+install:
+- echo "Starting install"
+- echo "$(ghc --version) [$(ghc --print-project-git-commit-id 2> /dev/null || echo '?')]"
+- chmod +x ./travis_long
+- if [ -f configure.ac ]; then autoreconf -i; fi
+- PATH=$PATH:~/.cabal/bin
+- mkdir dist
+- |
+  case "$BUILD" in
+    stack)
+      ./travis_long stack --no-terminal --install-ghc $ARGS test --only-dependencies
+      ;;
+    cabal)
+      cabal --version
+      travis_retry cabal new-update
+      ./travis_long cabal new-install exe:ampersand exe:ampPreProc lib:ampersand --flags=buildAll -j1 --overwrite-policy=always
+      ;;
+  esac
+
+# We need composer for the Ampersand Prototypes to be installed.
+before_script: composer install
+
+script:
+  - echo "Starting script"
+  - |
+    case "$BUILD" in
+      stack)
+      ./travis_long stack --no-terminal --test --local-bin-path=dist --copy-bins $ARGS build --flag ampersand:buildAll
+        ;;
+      cabal)
+      ./travis_long cabal new-test -j1 
+        ;;
+    esac
+# Run weeder, to check that there are no weeds (see https://github.com/ndmitchell/weeder )
+# - curl -sL https://raw.github.com/ndmitchell/weeder/master/misc/travis.sh | sh -s .
+
+after_success:
+  - export AMPERSAND_VERSION=`stack exec -- ampersand -v | sed 's/ .*//'`
+
+before_deploy:
+  # Set up git user name and tag this commit
+  - git config --local user.name "Ampersand-Sentinel"
+  - git config --local user.email "han.joosten.han+Ampersand-Sentinel@gmail.com"
+  - export TRAVIS_TAG=${AMPERSAND_VERSION}
+  - git tag $TRAVIS_TAG
+
+deploy:
+  # Release to Github releases
+  - provider: releases
+    skip_cleanup: true
+    draft: true
+    file: 
+      - dist/ampersand
+      - dist/ampPreProc
+    on:
+      repo: AmpersandTarski/Ampersand
+      branch: ${AMPERSAND_RELEASE_BRANCH}
+      tags: false
+      condition: $BUILD = stack
+    api_key:
+      secure: Mwgh+iWba66M+GFKGSOl4dQISFGBnE+FOyswA44P6JdXDQczpC9atxkPIQj7QVxJr4jMPor06Pl8Hcw1vhi5j4evLFXBONEV++7bCmNe0M0Z6hMU38NgIsfuvN3+NKgqOafBOlPmjHBKeVjiWqKQICn3tYgrKG9eXIBL3tn0aus=

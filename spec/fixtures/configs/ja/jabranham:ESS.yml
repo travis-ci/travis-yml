@@ -1,0 +1,47 @@
+language: emacs-lisp
+env:
+  # When there's a new major Emacs release, also update
+  # byte-compile-error-on-warn to the new release, below
+  - EVM_EMACS=emacs-25.1-travis
+  - EVM_EMACS=emacs-25.3-travis
+  - EVM_EMACS=emacs-26.1-travis
+  - EVM_EMACS=emacs-26.2-travis
+  - EVM_EMACS=emacs-git-snapshot-travis
+
+before_install:
+  - echo "deb https://cloud.r-project.org/bin/linux/ubuntu trusty/" | sudo tee -a /etc/apt/sources.list
+  - sudo add-apt-repository ppa:marutter/c2d4u -y
+  - sudo apt-get update -qq
+  - sudo apt-get install -y --no-install-recommends --allow-unauthenticated
+      r-recommended
+      r-cran-roxygen2
+      texinfo
+      texlive-latex-base
+      texlive-latex-recommended
+      texlive-latex-extra
+
+  - git clone https://github.com/rejeep/evm.git $HOME/.evm
+  - export PATH=$HOME/.evm/bin:$PATH
+
+  - evm config path /tmp
+  - evm install $EVM_EMACS --use --skip
+
+before_script:
+  # link R executable to test defining runners based on other R
+  # versions found on PATH. We're lying here that it is in fact a
+  # different R version but that doesn't matter.
+  - mkdir ess-r
+  - ln -s $(which R) $PWD/ess-r/R-3.2.1
+  - export PATH=$PATH:$PWD/ess-r/
+
+script:
+- emacs --version
+- R --version
+- cd lisp; make julia-mode.elc
+- cd ..
+- make -C test -k all
+- make -C doc ../README
+# Create package.el-installable tar file, test that it installs
+# successfully:
+- make package
+- emacs --script targets/travis-install-package.el

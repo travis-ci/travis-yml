@@ -1,0 +1,42 @@
+language: node_js
+node_js:
+  - "6.9.4"
+addons:
+  apt:
+    packages:
+      - sshpass
+  chrome: stable
+before_install:
+  - export DISPLAY=:99.0
+  - sh -e /etc/init.d/xvfb start
+before_script:
+  - npm install -g bower grunt-cli codacy-coverage coveralls
+  - bower install --force
+after_script:
+  - cat coverage/**/lcov.info | codacy-coverage
+  - cat coverage/**/lcov.info | coveralls
+before_deploy:
+  - grunt build:package
+  - sed -i "s/__RELEASE_VERSION__/$TRAVIS_TAG/g" bintray-release.json
+deploy:
+  - provider: bintray
+    edge:
+      branch: v1.8.47
+    file: "bintray.json"
+    user: "psbrandt"
+    key: $BINTRAY_API_KEY
+    dry-run: false
+    on:
+      branch: master
+  - provider: bintray
+    edge:
+      branch: v1.8.47
+    file: "bintray-release.json"
+    user: "psbrandt"
+    key: $BINTRAY_API_KEY
+    dry-run: false
+    on:
+      tags: true
+after_deploy:
+  - sh scripts/trigger-docker-image-build.sh
+  - sh scripts/deploy.sh

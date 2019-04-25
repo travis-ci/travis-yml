@@ -1,0 +1,28 @@
+language: cpp
+
+script:
+  - make CXX=clang++-6.0 source
+  - make clean
+  - make CXX=g++-8
+  - cppcheck --enable=all .
+  - bash <(curl -s https://codecov.io/bash)
+
+deploy:
+  provider: pages
+  github-token: ${api_key}
+  skip-cleanup: true
+  on:
+    branch: master
+
+matrix:
+  include:
+    - os: linux
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-trusty-6.0
+          packages:
+            - clang++-6.0
+            - g++-8
+            - cppcheck

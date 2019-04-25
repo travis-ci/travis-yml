@@ -1,0 +1,57 @@
+env:
+  global:
+    - CC_TEST_REPORTER_ID=08c7e43e5cdaf0614c7e61dcf6279865630cb6992fa9f1f09856f72fd641218b
+
+language: ruby
+dist: trusty
+sudo: false
+bundler_args: "--without documentation --jobs=3 --retry=3 --path=${BUNDLE_PATH:-vendor/bundle}"
+before_install:
+  - "rm Gemfile.lock"
+  - "rm -rf spec/dummy"
+  - "gem update --system"
+  - "gem install bundler"
+
+
+before_script:
+  - bundle update
+  - bundle exec rails dummy:app --trace
+  - cp travis/database.yml spec/dummy/config/database.yml
+  - mysql -e 'CREATE DATABASE socializer_test;'
+  - psql -c 'create database socializer_test;' -U postgres
+  - bundle exec rails app:db:migrate RAILS_ENV=test
+  - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+  - chmod +x ./cc-test-reporter
+  - ./cc-test-reporter before-build
+
+cache:
+  bundler: true
+  yarn: true
+  directories:
+    - node_modules
+
+script:
+  - "bundle exec rspec"
+
+after_script:
+  - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
+
+matrix:
+  fast_finish: true
+  # FIXME: resolve errors when running against postgres and mysql
+  include:
+    - rvm: 2.5.3
+      gemfile: Gemfile
+      env: DB=sqlite
+    # - rvm: 2.4.3
+    #   gemfile: gemfiles/gemfile.pg
+    #   env: DB=postgres
+    #   services: postgresql
+    # - rvm: 2.4.3
+    #   gemfile: gemfiles/gemfile.mysql
+    #   env: DB=mysql
+    #   services: mysql
+
+addons:
+  code_climate:
+    repo_token: 08c7e43e5cdaf0614c7e61dcf6279865630cb6992fa9f1f09856f72fd641218b

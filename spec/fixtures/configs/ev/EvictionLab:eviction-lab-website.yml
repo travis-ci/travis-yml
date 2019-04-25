@@ -1,0 +1,40 @@
+language: node_js
+dist: trusty
+node_js:
+- '8'
+script:
+- if [ "$TRAVIS_BRANCH" = "master" ]; then export HUGO_BASEURL=$PROD_URL && cp site/layouts/robots.prod.txt site/layouts/robots.txt; fi
+- if [ "$TRAVIS_BRANCH" = "cms-dev" ]; then export HUGO_BASEURL=$STAGING_URL; fi
+- npm run build
+before_deploy:
+- pip install --user awscli
+- export PATH=$PATH:$HOME/.local/bin
+deploy:
+- skip_cleanup: true
+  provider: s3
+  access_key_id: $AWS_ACCESS_KEY_ID
+  secret_access_key: $AWS_SECRET_ACCESS_KEY
+  bucket: eviction-lab-website-staging
+  region: us-east-1
+  acl: public_read
+  local_dir: dist
+  on:
+    branch: cms-dev
+- provider: script
+  script: aws cloudfront create-invalidation --distribution-id=$CLOUDFRONT_ID_DEV --paths="/*"
+  on:
+    branch: cms-dev
+- skip_cleanup: true
+  provider: s3
+  access_key_id: $AWS_ACCESS_KEY_ID
+  secret_access_key: $AWS_SECRET_ACCESS_KEY
+  bucket: eviction-lab-website
+  region: us-east-1
+  acl: public_read
+  local_dir: dist
+  on:
+    branch: master
+- provider: script
+  script: aws cloudfront create-invalidation --distribution-id=$CLOUDFRONT_ID_PROD --paths="/*"
+  on:
+    branch: master

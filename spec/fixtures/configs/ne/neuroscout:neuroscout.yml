@@ -1,0 +1,33 @@
+language: python
+python:
+  - "3.6"
+install:
+  - pip install -r neuroscout/requirements.txt
+  - pip install -e git+https://github.com/tyarkoni/pliers.git#egg=pliers
+  - pip install pytest-cov
+script:
+  - python -m pytest tests/ --cov=./
+  # cd frontend && npm test
+env:
+- APP_SETTINGS=config.app.TravisConfig PYTHONHASHSEED=0
+addons:
+  postgresql: "9.4"
+before_script:
+  - cp neuroscout/config/example_app.py neuroscout/config/app.py
+  - cp neuroscout/frontend/src/config.ts.example neuroscout/frontend/src/config.ts
+  - psql -c 'create database travis_ci_test;' -U postgres
+  # CI=""; cd neuroscout/frontend && yarn install --ignore-engines --concurrency=1 && yarn build --concurrency=1
+  - CI="true"; cd neuroscout 
+  - python -m pliers.support.download
+before_install:
+  - sudo add-apt-repository -y ppa:mc3man/trusty-media && sudo apt-get -qq update && sudo apt-get install -y ffmpeg
+  - bash <(wget -q -O- http://neuro.debian.net/_files/neurodebian-travis.sh)
+  - curl -sL https://deb.nodesource.com/setup_11.x | sudo bash -
+  - curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
+  - echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
+  - sudo apt-get -qq update
+  - sudo apt-get install -yq git-annex-standalone tesseract-ocr
+  - sudo apt-get install -yq nodejs yarn
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)

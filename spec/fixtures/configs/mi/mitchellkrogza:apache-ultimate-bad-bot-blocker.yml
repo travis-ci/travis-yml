@@ -1,0 +1,65 @@
+addons:
+    apt:
+        packages:
+        - mailutils
+    hosts:
+     - local.dev
+cache:
+- apt
+dist: xenial
+env:
+  global:
+    - secure: j4hwh5XrHRSAjjVYIxS7l3Rj+lnvIRHSBgqVc2nQvKrYIDU91bsqhE3SfFrYVTga447KSHYqrPgUWk18my2myjoKZntb/zWfveEvD62fOQeAzxwLSsSV5W1hekYmntBcFG+mkEeENpaVLJ/YoPuRIQeLPQDNaEaB8lLlR3NU6MNmUvJxoPpES8K9brL7nBcw349raspuJzEjObUJFU1IWWsv1PNCueksBWHtS5mGrMfqpzvu+C22djKi/ooAhG1LkCcV88czLhs3dGYB3+q6ZCr54cP/gB6vrSv8WnNEEI3NneMeiH1fFm3sLI2v+ECA/SVTPJfbG7n5ww+Whcsyp88ECRCisgdOR7RoBbdFO4WDNsXvl+865iQkXrEaaskQ7CJuXHy89gHYA6JmshKqerW5CY3wgvM2dDqyYQCVuwFmvOkG9p0+FVg/lvjVm1XiltQA/G2OTwfhJZ+FtA/NlR0inQRMc3X1Uh/0lGvPfQ0lbaf7T537mmL1bcOZuw15jW/FoDzXFhmloOYzJoZWFG8m1KYcLbZ9X4zprcxDlKR5IBa0vwgtjVasQ8grgDoxqvUFJdeiFQPmZuiy87un9Ao/+o1W7UpTgqyCGhMM+K0TB3myAQSGFV3NKE4jmNaZ79nLVPhPSooBdM+193aaI7KSCsZI9OTnkrRpnvCVMeo=
+    - GIT_NAME: Travis CI
+    - GIT_EMAIL: mitchellkrog@gmail.com
+    - TRAVIS_REPO_SLUG: mitchellkrogza/apache-ultimate-bad-bot-blocker
+    - GIT_BRANCH: master
+    - TZ:       Africa/Johannesburg
+  matrix:
+    - USE_NETWORK=true
+
+language: php
+
+matrix:
+  include:
+    - php: 7.0
+  allow_failures:
+    - php: 7.0
+    - php: hhvm
+  fast_finish: true
+
+sudo:           required
+
+script:
+  - bash .dev-tools/generate-files.sh
+  - bash .dev-tools/install-apache-2.2.sh
+  - bash .dev-tools/run-curl-tests-2.2.sh
+  - bash .dev-tools/install-apache-2.4.sh
+  - bash .dev-tools/run-curl-tests-2.4.sh
+  - bash .dev-tools/modify-files-and-commit.sh
+
+before_deploy:
+  - bash .dev-tools/deploy-package.sh
+
+deploy:
+  provider: releases
+  api_key:
+    secure: ${GH_TOKEN}
+  file:
+      - .latest_release/Apache_2.2.tar.gz
+      - .latest_release/Apache_2.4.tar.gz
+  skip_cleanup: true
+  on:
+    repo: mitchellkrogza/apache-ultimate-bad-bot-blocker
+    tags: false
+    branches:
+      except:
+        - "/^v[0-9]/"
+        - "/^V.*$/"
+    branches:
+       only:
+         - "master"
+
+notifications:
+  on_success:   change
+  on_failure:   always

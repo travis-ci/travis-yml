@@ -1,0 +1,24 @@
+language: node_js
+sudo: required
+node_js:
+  - "8"
+env:
+  matrix:
+  - DEPLOY_ENVIRONMENT=staging DEPLOY_BRANCH=master
+  - DEPLOY_ENVIRONMENT=production DEPLOY_TAGS=true
+  - DEPLOY_ENVIRONMENT=sparktesting DEPLOY_BRANCH=master
+  - ""
+cache:
+  directories:
+install:
+  - if [ -z "${DEPLOY_ENVIRONMENT}" ]; then yarn install --dev --pure-lockfile; fi
+before_script:
+  - if [ -z "${DEPLOY_ENVIRONMENT}" ]; then yarn run createdb && cp .travis/travis.env .env; fi
+script:
+  - if [ -z "${DEPLOY_ENVIRONMENT}" ]; then yarn run knex migrate:latest && yarn run test; fi
+  - .travis/continuous_deployment.sh
+after_success:
+  - if [ -z "${DEPLOY_ENVIRONMENT}" ]; then ./.travis/opbeat_notify.sh; fi
+services:
+  - mysql
+  - docker

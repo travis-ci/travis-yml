@@ -11,7 +11,7 @@ describe Travis::Yml::Schema::Def::Julia, 'structure' do
         type: :object,
         properties: {
           julia: {
-            '$ref': '#/definitions/strs'
+            '$ref': '#/definitions/type/strs'
           }
         },
         normal: true,

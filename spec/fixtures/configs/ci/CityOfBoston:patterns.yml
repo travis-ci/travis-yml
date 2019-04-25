@@ -1,0 +1,46 @@
+language: node_js
+node_js:
+- '8'
+cache:
+  directories:
+  - node_modules
+branches:
+  only:
+  - develop
+  - production
+install:
+- npm install
+- gem install percy-cli
+before_script:
+- export TZ=America/New_York
+- export BROWSERSTACK_PROJECT_NAME=$TRAVIS_REPO_SLUG
+- export BROWSERSTACK_BUILD_ID=$TRAVIS_BUILD_NUMBER
+# Percy automatically uses branches from PRs. This is so for both develop and
+# production we don't make diffs against master, which is unused.
+- export PERCY_TARGET_BRANCH=$TRAVIS_BRANCH
+script:
+- npm run build
+- npm run jest.ci
+- npm run testcafe.ci
+after_script:
+- bash ./travis/percy.sh
+deploy:
+  provider: s3
+  skip_cleanup: true
+  access_key_id: "$AWS_ACCESS_KEY_ID"
+  secret_access_key: "$AWS_SECRET_ACCESS_KEY"
+  bucket: patterns.boston.gov
+  acl: public_read
+  region: "$AWS_DEFAULT_REGION"
+  local_dir: public
+  on:
+    branch: production
+after_deploy:
+- bash ./travis/invalidate_cache.sh
+env:
+  global:
+  - secure: DQrWraUARyNuUA1KXDT1IJxQG6SrflD622+TX1SKeL0UemhxzliGMBqOgYt2KSrXqTjzimUcGyeSpJhC3hM5ACgNF3ft3Eikw5/2jc9P8oBRzPafnm/QtbD2EI5rwA+VxjqmSbP6rh49CB/ftnkymp0OLH0PD3Epw7BwlmoPPRueyh3uAR5YyMcfSuVaEeJMu6sk3hKaPF0ykGxqDKJcNs0dw50V2hBqYoaj9aWvsvLYZO7j/vrz8Qm+/m7bm0TDVXsnjwTpuSvpSPPQZW4ul92DldYSrvEXxBOL0tSjYa3+uEjto7WZlkRHUgtDvoznxQImrYCpSwlSh1VJdG+JB9STj5xD/+6LPrQiW4s9Q3BPP4KPneT71wTDaaPVE3syx/ZlhK0qBOqhd+KqFdzQ5+r4vysOc8MKVRGtBHJ/7dbN+27wguV9KE/10c2Ln+FUs7TVBnWKhwarT5erVj36/zdWNEPFtZSj41uYwKUc1Q2gwPnyzf6wA49P8UDgIISqWDEWRA6fuDpPZbwP4KGdlLjyAD/CT6ZgyEoLZpmSVRRJ4P/MraSRCaN28dsR/6YrddgpHcZfcngGF79ftP3EsP0Y34lU/UEgQuB+gfz5b5UxeF3VY8uApEl1q8llz/6SKZsrUZ3VVPbb3gMoylgsWmAlfC2v9KcdLC05Ry6YO14=
+notifications:
+  slack:
+    rooms:
+      secure: MPRUJz/NDJij0NzOIkkrZMywDGfH0swGAtgInvwLtlDElLsLVUTWapGFP2VPyqyLWkWhuVptr9tj5/f9WvjO5k/LCKG3u5lYHsnl7Cgbqw7ETggGpzeLGLFSa8bS5oU5hoX5ifswcN/c+gNKs7eYi7RHUgClUjUXdXNXdTAN/ZGLMlFaaDKLnV4NbGCZM6cOQcFF+i4nIX8taQRHe1jo9GXjAtVWztsQqlvGIezssddVCab9lFTHlFIUoJ/vpn0EHvAUegX/sLKXnYY+FVXPcOUjdWIPpN9vx4ewM6fOO3qM5YkjrO3nPZ10FjhBL8T66gVKX1PGgKNFqLw2j3dIT4MTFLxxXydXdIAVEHF8Tg8GxiWLNy3hyy5q6dfHRuGu3nY3dAQW/L8E0d3pGNPT/2fj8aZbUQO1wIbnRly4MXBWXBCbX9E2XW3YhYuu6AMtyKx/meZJF7343LHoCO4ccUtVAhIT3flEImHjglFY7F56ukXC1sVAkPl0oFhx15Z8ED+3dttYEjFu4RVJOzglcBdERge4HCpcPPo+WmwIvoTzI5iQqXGOyDhxzT0ZSWgWC4pskHFLTcTswO8RE/hJT1RPyiBYxQVBIHnUhBZY5JmaGwS+GJf4EIh7L34dAfQL8O4YnAg5bHoYFEcNrOUGPIXENi/Xz0RFU4PIY2Xb5xE=

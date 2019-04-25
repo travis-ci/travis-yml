@@ -1,0 +1,23 @@
+install:
+ - source ./support/texlive.sh
+
+cache:
+  directories:
+    - /tmp/texlive
+    - $HOME/.texlive
+
+jobs:
+  include:
+    - script: l3build check -q -H
+      name: "Test suite"
+    - script: l3build doc -q -H
+      name: "Documentation"
+
+notifications:
+  email:
+    recipients:
+      - latex3-commits@tug.org
+    on_success: change
+    on_failure: always
+    on_start:   never
+

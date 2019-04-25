@@ -1,0 +1,41 @@
+language: node_js
+node_js:
+- '8'
+env:
+  global:
+  - GH_USER_EMAIL="travis@example.org"
+  - GH_USER_NAME="cozy-bot"
+  - DEPLOY_REPOSITORY="git@github.com:konnectors/cozy-konnector-trainline.git"
+  - secure: Zrws2LKlidB15JxoceFit9C8XhCDarUlfY6SniSFrafMZKTPinTLlAuQ8vaPSBVvxMJNSYhiTSEq3XMq9PBasvq1WT1xZp5B0AAoq5ulUVcW2PIbGjzeE3Xo2sneLmPQDrcsvdY90BjWalgcG0UkIcFvdcMZFjgzhbqcVxxGTuN7IXia3PbRo50u+uVtMWcXH7HAR2YHyLqxkKS4+jpTJlGj0wDvQv5KC0UqxZnnR6hEG4vuZi2h4Pg2CFm6Svc028NqicYYr7KaVcSkbLeVXEm7be6q+DuF1nWiZiSGInlXoya0Lz3fj+OGG8vJVAne/2fkGEP+UAr+SEUbBiu3/gZ/JJXMUa10gVLznQ+Q6e34tA1Zy2AvLxcT/I2VhX2+G2jb/rXlotASrzh36XhWPKKCoUPk/p4aB2dnRGreoGz0+aR2AnifP5yQlpXwqZbuOEXEm2B3GuZIFOcu/USmu3PlNYe+VS9hoDM++XEz6jzqR7ylgAhEO12WEKBEj9GUA82xGghWkqs7w9LDtvh7lEkTWD4417iADqNX5EDuXhWXJO7w9aq4DjJ7tKR2nfetPUVy3ZnFebqCi8h+TUuUZQHfrDoLZyk71RYFBKUz01aGImIVmO502n7L67or7kNi3WRqZobs/mtGQrALY0gRMN5rFccTACI3ibve2fl0ROE=
+cache:
+  yarn: true
+  directories:
+  - node_modules
+branches:
+  except:
+  - build
+  - build-debug
+script:
+- yarn lint
+- yarn build
+# - yarn run check
+deploy:
+- provider: script
+  skip-cleanup: true
+  script: DEPLOY_BRANCH=build yarn deploy && yarn cozyPublish
+  on:
+    branch: master
+- provider: script
+  skip-cleanup: true
+  script: DEPLOY_BRANCH=build yarn deploy && yarn cozyPublish
+  on:
+    tags: true
+before_install:
+- openssl aes-256-cbc -K $encrypted_70abefe03a61_key -iv $encrypted_70abefe03a61_iv
+  -in github_deploy_key.enc -out /tmp/github_deploy_key -d
+- eval "$(ssh-agent -s)"
+- chmod 600 /tmp/github_deploy_key
+- ssh-add /tmp/github_deploy_key
+after_deploy:
+- rm /tmp/github_deploy_key
+- ssh-add -D

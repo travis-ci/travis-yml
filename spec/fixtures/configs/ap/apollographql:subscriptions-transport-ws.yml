@@ -1,0 +1,20 @@
+language: node_js
+node_js:
+  - "10"
+  - "8"
+  - "6"
+
+install:
+  - rm -rf node_modules
+  - npm install -g coveralls
+  - npm install
+
+script:
+  # remove unused node modules from cache
+  - npm prune
+  - npm test
+  - npm run coverage
+  - coveralls < ./coverage/lcov.info || true # ignore coveralls error
+
+# Allow Travis tests to run in containers.
+# sudo: false

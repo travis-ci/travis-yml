@@ -1,0 +1,24 @@
+language: node_js
+node_js:
+- 10
+
+env:
+  global:
+    secure: eupDYU/hnBEV4zJXlfIWW5/y7oxJCIUqwKdFVicagnipOCIS1c/FROZgXqm/o5RMDSADQnSZfSx71Ziu/HOTf3k9wIycJhzz3uW4ERRBXJidjiqBWzMJEsiHhMdBS9TyyJODlxOFa/5rnpJ9TitAA8QScKrmPj4n39lj8qY2/zKLR2VI2jSaFIWwF9otpH3UquqJV7/slTvnTV8noUVgIeszgDvGRrvQ3bUELykcBFWQRJZ965QNYgwoBJdy+q9t1VW5AvvEDfV5qGyvrn7GZnkMvut1IXctpxwZOLFkZvS202dN0urdKRWgMiydO8o3yJLuQTjlxWIC2uizdFN1F78lr6yABNJRa5Ps75rfFPhHXL8Xx0w5QKu196EUOOaicEktO8k6r03t2iZc8nhYzBDPLxmrMgzwA0l90JAgq9y2QouI5vn4IRoxBABgCk38Bnsf6Zu9iDMakhyLhMBRYeORbQsK4k/GycfY4slMR89GQRWppuFkKgMtjFCIpzzvH9jv7R0cG5iLxM/GkncV7pNdIyLLnciHlBRzdBpKg5TJbFa2sz4DpM/ZofChuQ+16CXXv04seiKZpJNnvQSF7x2LODWWM8ebiRhVYteZCs3HiayXy3py+0o7N1mqhIWnrNB5fNFwV2b+s838p/gWs3buKJKumQSbsn9Ns7xs4/k=
+
+install:
+- yarn
+- yarn build-packages
+
+script:
+- yarn flow
+- yarn eslint
+- yarn test
+
+deploy:
+- provider: script
+  script: bin/publish.sh
+  skip_cleanup: true
+  on:
+    branch: master
+    tags: false

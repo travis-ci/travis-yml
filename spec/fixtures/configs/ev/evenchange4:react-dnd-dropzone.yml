@@ -1,0 +1,47 @@
+sudo: false
+language: node_js
+node_js:
+  - '11.9.0'
+
+env:
+  global:
+    - YARN_VERSION=1.13.0
+
+before_install:
+  - export PATH="$HOME/.yarn/bin:$PATH"
+  - |
+    if [[ ! -e ~/.yarn/bin/yarn || $(yarn --version) != "${YARN_VERSION}" ]]; then
+      curl -o- -L https://yarnpkg.com/install.sh | bash -s -- --version $YARN_VERSION
+    fi
+
+install:
+  - yarn install --pure-lockfile
+
+script:
+  - yarn run eslint
+  - yarn run test
+  - yarn run flow-coverage
+  - yarn run build
+
+after_success:
+  - ./node_modules/.bin/codecov
+
+deploy:
+  - provider: npm
+    email: evenchange4@gmail.com
+    api_key:
+      secure: DFbWR1eBrOktIK3x7Dx+DWcBkVMrwhdUlpoG+glVl7/Y6Re9oRMaYsl5NdTDlR6lU5XgH/5nmu6nfDsen5INS7CJOD3PaX84NJkWrDu3OKFz4CRqqyvACcQ/LvR9KmREgY9CZ/t72V0MoaJLvmzgvXJ7c9aVUg6GQG4pPVVB4qRC36HwzwRt+jKM4p80GRgzUta8gXu263CztcXcdp3L8JRTuW56Ej4CjncpLyvHQmr9xaFV7+jP5wgfnumNbqnmFUsx8rYoKSvZPdpiD6x94g+d0dxCL7wYzYxrEqRLbdgoLtxrRxhPms/qO0FHxXTn/KHZMsuW7l/l2D8F38dtzWxaIcSvlFMQrS5In/XUhne/WrZgTx5lc56Pr2UooutU4uj4WXUX6DZEk0HJdBjxbQcn72Hrginz/CIPM7phbSMfVZRBB576D3TTaVkyo+5laZSvod/y3pF84iMgTx9t+Yge+5Sliax9C0po0Y61gwPJH9savNdbgsg6R986XSFa3fwpk4GR0vfDeku53wmEuZG+0yCF7SOzlpRPkxEYkgUWtyNaB9nkkrsMgeeIYC+LK2w/SNejdPwtqcI9A1Ro6sy1hjbt8aNnk5r+i0S8E1HR4nmLJWyQep7OzJ0aBqf2yydmg1yzVCXiWJzZrSl8PEeFw/m2ewfumDKjsqwyJt4=
+    skip_cleanup: true
+    on:
+      tags: true
+      repo: evenchange4/react-dnd-dropzone
+
+cache:
+  yarn: true
+  directories:
+    - '~/.yarn'
+    - node_modules
+
+notifications:
+  email:
+    - evenchange4@gmail.com

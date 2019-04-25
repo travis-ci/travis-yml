@@ -1,0 +1,37 @@
+dist: trusty
+sudo: required
+
+language: java
+jdk:
+  - openjdk8
+
+env:
+  global:
+  - secure: KOKI6DUF+3bo7A/fk87p7DlYtLw5KESbJ6HfBQlaBey7jfgSty+hjvFQBsFrlYwjE4VfGpyPOsAqQcG0aql8ATweIlGWGv6p94TILQT4pqD6GW+lXHtAAmfqlf+AWiq3QicZ17UlXiG3wq8Ubf8WN0Ya298TEhsI3BtQLHoD7qEUswIeKXMqpVUPpA8DPWyb5BVCALvRgWIHedTkh9dqsFe/Z+IvqExBZPCKK6Luhdg7vu2drbPbWKQUrWkB0vL1qLHodu3SKJ7X/skglRoNhCJ6iseT2tyOxm1YojavVARxejqHvMuUdv5F69D51h3gl4WDBAX41n5Rai8LNMMEaHd8rS0Qq9M8fzwqukJFdZW5hBIm83UKzMBh+86fVmZ40rV03t0ry/v2zRi8DA8mVEUY2hEd5GuUpYe7fS7AjmFfRuyCC+ERvn4WHd8ayrviJz7mIFFOUGp/BKr93cJfCjTFZnfDjErEUW6ouj0b7X5QDjHi5Xqhp2K3YEcKVjl3QfclD1kqdokHFOqvHfChW3z9DorEVzNNrIbOGdlx2Y5f3F+hoD93qBtE0qbEMeBYfpf/OgBumuElK4k8SM8WwfhqdWYVGsbPwLirxMYfJBK0fE/g12YvW7BLmStA0lxsjY13Gigo37oppjE4SgncYCVT2Rghrxp+dqwqwrfDc6s=
+  - secure: kC/B1q6aWW6AvRaW5CW4H3lEIbV2325CyNdAsutwLhxgtsvZ0KOf5BwmUHO4EgZEAk5tJXjRvqYPaVmGU1luOuWQBU3j9EaTVrNeiITqpD2gMjCQao8utwLgqxAV/RSv1DR0EXj6x/Fg5kOQzjVR1mJOpHdAZhOUAbqo1b7CNs58eT5LqVBmRPbyIS+bdqE7w/ZBFyvPt5fa4aJ26oKMNpca4A+losYkKBzkIwfqQTAagG56kcXNO76l3bI06j5V3Am0n9tyHnD4tUhfGjcEUsEaEHrs2HEpw8zy1X0or9IL6b7hkcDEaQgn9i846nMLdIc4VY522n9rENFUxuj2LJF8Ua6myPJpRVOU6Am8BNRD+zF9GAt8Jg2U+IOT1SAONd53z4BkjZfNf8UxXzni1B2wzLHFGxwzQujoAL7V3q5VxhxAo1tJrSVFixeNC1aCS+CxBrJFx3zTXOEnQBkkkKT6XenNfGH3KU1LJ0H8l2406WbTrif1Lezt0icS8TBgaYB9YOZpftYs2nltpNVtY54n7fVC9D9eALL81cBbIgr3aoE7dPCtsZ2uZ09s3GqSklJL8gbvas7sboJsagjsR9EyC+CjWuaW7+BgXNEQWXWzn3p6z3JPyoyK6eeYqsaSMKIL+R3/nKX6+KWxmhV5krMBkcKEtK6eJEG2wp72IeA=
+
+services:
+- docker
+
+before_cache:
+- rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+- rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+
+# https://docs.travis-ci.com/user/languages/java/#caching : Cache doesn't work with 'sudo'
+cache:
+  directories:
+  - "$HOME/.gradle/caches/"
+  - "$HOME/.gradle/wrapper/"
+  - "$HOME/.npm"
+  - ".gradle"
+  - "./keyscore-manager/node_modules"
+  - "./keyscore-manager/.gradle"
+
+install:
+- ./gradlew dependencies
+
+script:
+- ./gradlew check --continue
+
+after_success:
+- ./gradlew pushDockerImage -Pversion=$TRAVIS_BRANCH

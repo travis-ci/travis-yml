@@ -1,0 +1,108 @@
+language: python
+
+python:
+  - "2.7"
+  - "3.4"
+  - "3.5"
+  - "3.6"
+
+cache:
+  directories:
+    - $HOME/.cache/pip
+
+# Set up our environment
+env:
+  global:
+    - DJANGO_SETTINGS_MODULE=stackdio.server.settings.testing
+  matrix:
+    - DB=default
+    - DB=postgres
+    - DB=mysql
+
+# Only test postgres on older versions of python 3
+matrix:
+  exclude:
+    - python: "3.4"
+      env: DB=default
+    - python: "3.4"
+      env: DB=mysql
+    - python: "3.5"
+      env: DB=default
+    - python: "3.5"
+      env: DB=mysql
+
+# So that we get a docker container
+sudo: false
+
+# Make sure our pip install works
+addons:
+  postgresql: "9.4"
+  apt:
+    packages:
+      - swig
+
+services:
+  - mysql
+
+before_install:
+  - mysql -e "CREATE DATABASE IF NOT EXISTS stackdio;" -u root
+
+## Customize dependencies
+install:
+  - npm install -g bower
+  - bower install
+  - pip install -U pip
+  - pip install -U wheel
+  - pip install -U twine
+  - pip install -U opbeat
+  - pip install -U pytest
+  - pip install -U -e .[testing,mysql,postgresql]
+
+script:
+  # Run code style checks first
+  - pycodestyle stackdio
+  - pylint stackdio
+
+  # Place the proper config file in place based on the environment
+  - tests/place_config.sh
+
+  # Run init to make sure the salt config files are in place
+  - stackdio init --no-prompt
+
+  # Run migration and tests
+  - python manage.py migrate
+  - pytest --cov=stackdio stackdio
+
+# Only build artifacts on success
+after_success:
+  - coveralls
+  - python manage.py build_ui
+  - python setup.py sdist
+  - python setup.py bdist_wheel
+
+deploy:
+  - provider: releases
+    api_key:
+      secure: dJIj78Kl5nvtE2OpYl2I4ICEw20kLVXyr+eGOcWVV3kbU+PS6zKqOtLM+sGuVYNSbqWviRR9um6zbzjqS3S2wjFOdeStMogo19EKepSc0S97t6BkmbH0KooFuFah/YFOzLu+UBzDa3EETvgd1/988Eoojr0Ea2kZRJcvx/S0vDI=
+    file:
+      - dist/stackdio-server-${TRAVIS_TAG}.tar.gz
+      - dist/stackdio_server-${TRAVIS_TAG}-py2-none-any.whl
+    skip_cleanup: true
+    on:
+      tags: true
+      repo: stackdio/stackdio
+      python: "2.7"
+      condition: $DB = postgres
+
+  # Upload to pypi.  Do this instead of the pypi provider so that we
+  # ensure the exact same artifact is uploaded to github and pypi.
+  # The pypi provider will re-build the 2 artifacts, which is not ideal.
+  # This requires setting TWINE_USERNAME and TWINE_PASSWORD in travis.
+  - provider: script
+    script: twine upload dist/stackdio-server-${TRAVIS_TAG}.tar.gz dist/stackdio_server-${TRAVIS_TAG}-py2-none-any.whl
+    skip_cleanup: true
+    on:
+      tags: true
+      repo: stackdio/stackdio
+      python: "2.7"
+      condition: $DB = postgres

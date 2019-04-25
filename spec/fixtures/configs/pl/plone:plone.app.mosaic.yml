@@ -1,0 +1,63 @@
+language: python
+sudo: false
+addons:
+  apt:
+    sources:
+      - google-chrome
+    packages:
+      - google-chrome-stable
+matrix:
+  include:
+    - python: "2.7"
+      env: PLONE_VERSION=5.1.x
+    - python: "2.7"
+      env: PLONE_VERSION=5.2.x
+    - python: "3.6"
+      env: PLONE_VERSION=5.2.x
+    - python: "3.7"
+      env: PLONE_VERSION=5.2.x
+      dist: xenial
+      sudo: true
+cache:
+  pip: true
+  directories:
+    - node_modules
+    - components
+    - $HOME/buildout-cache
+before_install:
+# install chrome webdriver
+  - mkdir webdriver;
+    wget https://chromedriver.storage.googleapis.com/2.40/chromedriver_linux64.zip;
+    unzip chromedriver_linux64.zip -d webdriver;
+    export PATH=$PATH:$(pwd)/webdriver;
+  - mkdir -p $HOME/buildout-cache/{eggs,downloads}
+  - mkdir $HOME/.buildout
+  - echo "[buildout]" > $HOME/.buildout/default.cfg
+  - echo "download-cache = $HOME/buildout-cache/downloads" >> $HOME/.buildout/default.cfg
+  - echo "eggs-directory = $HOME/buildout-cache/eggs" >> $HOME/.buildout/default.cfg
+  - pip install -r requirements.txt
+  - cp test-$PLONE_VERSION.cfg buildout.cfg
+install:
+  - nvm install node
+  - nvm use node
+  - rm -rf $HOME/buildout-cache/eggs/plone.app.locales*
+  - buildout -N -t 3 annotate
+  - buildout -N -t 3
+  - mkdir -p parts/test/_screenshots
+  - make install
+  - make clean all mode=release
+before_script:
+  - 'export DISPLAY=:99.0'
+  - Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
+  - sleep 3
+script:
+# Run code-analysis, except on Python 3.6, which mysteriously fails to find zc.buildout.
+  - python --version 2> /dev/stdout | grep 3.6 || bin/code-analysis
+  - bin/test --all
+after_script:
+  - bin/createcoverage --output-dir=parts/test/coverage
+after_success:
+  - pip install -q coveralls
+  - coveralls
+notifications:
+  irc: irc.freenode.org#plone-testing

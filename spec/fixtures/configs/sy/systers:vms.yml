@@ -1,0 +1,38 @@
+language: python
+
+env:
+  - MOZ_HEADLESS=1
+
+addons:
+  firefox: "60.0"
+
+python:
+  - "3.6.5"
+
+services: postgresql
+
+before_install:
+  - bash setup-geckodriver.sh
+
+install:
+  - pip install -r requirements.txt
+
+before_script:
+  - psql -c "create role vmsadmin with createrole createdb login password '0xdeadbeef';" -U postgres
+  - psql -c "CREATE DATABASE vms;" -U postgres
+  - "export DISPLAY=:99.0"
+  - "sh -e /etc/init.d/xvfb start"
+  - sleep 3
+  - export DJANGO_SECRET_KEY=foobarbaz
+
+script:
+  - cd vms
+  - python manage.py makemigrations cities_light auth volunteer administrator organization event job shift registration
+  - python manage.py migrate --noinput --traceback --settings=vms.settings
+  - python manage.py cities_light
+  - flake8
+  - coverage run --source='.' manage.py test -v 2
+  - coverage report -m
+
+after_success:
+    coveralls --rcfile=.coveragerc

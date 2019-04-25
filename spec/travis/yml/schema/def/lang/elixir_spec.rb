@@ -11,10 +11,10 @@ describe Travis::Yml::Schema::Def::Elixir, 'structure' do
         type: :object,
         properties: {
           elixir: {
-            '$ref': '#/definitions/strs'
+            '$ref': '#/definitions/type/strs'
           },
           otp_release: {
-            '$ref': '#/definitions/strs'
+            '$ref': '#/definitions/type/strs'
           }
         },
         normal: true,

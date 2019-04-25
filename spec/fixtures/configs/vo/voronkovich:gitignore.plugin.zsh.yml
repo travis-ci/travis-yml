@@ -1,0 +1,11 @@
+sudo: true
+before_install:
+    - sudo apt-get install -y zsh
+    - sudo sh -c 'curl -Ls https://raw.githubusercontent.com/molovo/revolver/master/revolver > /usr/local/bin/revolver'
+    - sudo chmod +x /usr/local/bin/revolver
+    - sudo sh -c 'curl -Ls https://github.com/zunit-zsh/zunit/releases/download/v0.8.2/zunit > /usr/local/bin/zunit'
+    - sudo chmod +x /usr/local/bin/zunit
+
+script:
+    - if [[ "$TRAVIS_EVENT_TYPE" == 'cron' ]]; then ./tools/update-templates; exit 0; fi
+    - zunit

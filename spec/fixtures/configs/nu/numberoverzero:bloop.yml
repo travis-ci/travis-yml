@@ -1,0 +1,25 @@
+dist: trusty
+sudo: required
+language: python
+dist: trusty
+python: 3.6
+cache: pip
+services:
+  - docker
+env:
+  matrix:
+  - TOXENV=unit
+  - TOXENV=integ
+  - TOXENV=docs
+install: pip install tox codecov
+script: tox -e $TOXENV -- -s
+
+notifications:
+  slack:
+    secure: cXjzhmFI0oAWifBilGvTApiL8VSyM7/4v3Ve4TZeU+15EoYf05AhNoHs0FKVcj+ockYPqlj3p+SIUXnGfcI41QFlO09gGvFVB/FA/PHH2n4hb20+zxSx5Ic9ac3B2Nb5u2lWGsSsRTvCHtC0Wcxx878ML5UFrP5yu4vKIgj8AyE=
+  webhooks:
+    urls:
+      - https://webhooks.gitter.im/e/12807f3b2c9083de2e36
+    on_success: change
+    on_failure: always
+    on_start: never

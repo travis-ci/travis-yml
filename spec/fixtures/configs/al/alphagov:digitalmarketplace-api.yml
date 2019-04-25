@@ -1,0 +1,18 @@
+language: python
+python:
+  - "3.6"
+addons:
+  postgresql: "9.5"
+dist: "trusty"
+env:
+  - SQLALCHEMY_DATABASE_URI=postgresql://postgres:@localhost:5432/digitalmarketplace_test
+install:
+  - make requirements-dev
+before_script:
+  - psql -c 'create database digitalmarketplace_test;' -U postgres
+script:
+  - PYTEST_ARGS='--cov=app --cov-report=term-missing' make test
+after_success:
+  - coveralls
+notifications:
+  email: false

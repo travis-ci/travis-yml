@@ -1,0 +1,36 @@
+language: node_js
+
+node_js:
+  - "8"
+
+sudo: false
+
+cache:
+  directories:
+    - node_modules
+
+notifications:
+  irc:
+    channels:
+      - 'irc.mozilla.org#fxa-bots'
+    use_notice: false
+    skip_join: false
+  email:
+    recipients: 
+      - pmo@mozilla.com
+      - rfk@mozilla.com
+      - stomlinson@mozilla.com
+      - vfilippov@mozilla.com
+      - pbooth@mozilla.com
+    on_success: change
+    on_failure: always
+
+before_install:
+  - npm install -g grunt-cli
+
+install:
+  - npm install
+
+# now run the tests!
+script:
+  - travis_retry npm test

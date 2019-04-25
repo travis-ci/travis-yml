@@ -1,0 +1,21 @@
+services:
+- docker
+
+git:
+  submodules: false
+  depth: false
+
+notifications:
+  slack:
+    rooms:
+      - secure: "wd0TnzxzZpO1hSihz6tyAbSJNijYru7HvCLIT5dq8N0JS0Bu6qnSuMD/mKs6oXegWR2hMoujtn64YLrnWUNImZFJEIK6s/Ai4bYTvCfI4z+KJ+R3/MliDCqylLO2Loxpreojji8BW76BwzwRrmAxAwhZKJFUfdE6zVLdkqWQWDTneHgOx8BX+rtEbxJ2/zpFBys5Ilq5gLsQbnuUugLEDnAxGlstDT5odZEAbwaW33P0xIlUnyZ4fI8U/CUlF1Vfifg+mJEjDHa+xO6JThZudoymyyQ7ODDfJ9rjPUCXiIhX+iAItNq3qQC6KXuXPPcvm8q4zf1lUTLW80aao4EikpGkceBdZzDIa5X1/9AV0GkIFfoYp5h1WVe7PpbYGrtFY1fJNIELqWrAZPyf7lzNHc9Tw/JLq+MB5zAJI4uH3eh98y90DoCrw3Nj32nCo7KJDIFEzJWiuT3VcYQG1ZoLVuAfkWt9uDYbWUvqJ/STFmPkfzAcmtFDU70twpaBgZIM+XVoUl5CjlxK3Lhrq5xwBIqQOyjpAVx0X0ZmVH5OsWtlT7qq863TunWc638fGnzkZZ+CEm1ekeMNzuxUx27cqkWDQr72yGzuqf+x3lvhZjqnMYjXwcg8SEck2zkwoeLuBFWZFMabNm+L/G04AHfCjAJ1wR0pf1g3tpRp9cIiI4I="
+    on_success: change
+    on_failure: always
+    on_pull_requests: true
+
+before_install:
+- sed -i 's/git@github.com:/https:\/\/github.com\//' .gitmodules
+- git submodule update --init --recursive
+
+script:
+- docker run --cap-add SYS_ADMIN --device /dev/fuse -it -v `pwd`:/gopathroot/src/github.com/swiftstack/ProxyFS swiftstack/proxyfs_unit_tests

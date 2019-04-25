@@ -1,0 +1,105 @@
+language: elixir
+git:
+  depth: 1000
+cache:
+  directories:
+    - _build
+    - deps
+services:
+  - redis-server
+addons:
+  apt:
+    packages:
+      - docker-ce
+
+elixir:
+  - 1.8.1
+otp_release:
+  - 21.2.5
+notifications:
+  slack:
+    rooms:
+      - secure: "Q2D+hcUpBzOwAR+PgZcmVa8+begpJ8dk9pFwUQ1tbAOAVK2vCVq25451T3/qoM6d+dXYz11L8GmtIbY+UruZQtxe8xgIzjyW2WvtUSwDo51ccsRdvj9/wWLSSwovrBSZ1znkMIrxDeUtsUxHvd/zWTpsVUeSWd5VoZoO0FaBFUl7gnxgalUcnARFLa6Oq0214VFuRINfAkq0dtunynjfH96pKbE9G0c0mNyhFrJpjvsNjiTw4RzQ10cxoGEMjjwxEIhHWKGWKHIlp2VinJrWb/sIykyD9XzqAWXrAqdO+LoPTdQn9AgU9KrFR5MPuJjH+9VIcI+Kx2Pw/qUrzi52ShQHic781Hx9l6xcIHUMR1PBPyMkThkGshobF7Ctiu2145CareTu6dOxpvc18oveBxzJUDyMejgHwRDd5aoznRD3ksSKgYALKJHIP50V+oXlzWZ2CSbCOmFuHoY8tWYHhB2wII/b8UfbrkKjQDvP4T3w+JLxeFGeb7kwr7pJXB7LkYjUpM5ExQZKDNaZHT6g1ZsLIo29xf1huInxtU8ojXZlP/t1nwR9p10f9ErBGT/jEm+2ZSLFvuE3vvhzR5yinPEuhPK3RW0heLQpdfb4lMLamr7ugxPC3jEgYNeWEOEO+4wrPj7tqmbX/tNAI1FhnYUkqSwTNeYFVgEubgkegU0="
+    on_success: always
+env:
+  global:
+    - NO_ECTO_SETUP=true
+    - MIX_ENV=test
+    - DOCKER_NAMESPACE=edenlabllc
+    - APPS='[{"app":"medical_events_api","chart":"medical-events-api","namespace":"me","deployment":"api-medical-events","label":"api-medical-events"},{"app":"event_consumer","chart":"medical-events-api","namespace":"me","deployment":"api-event-consumer","label":"api-event-consumer"},{"app":"person_consumer","chart":"medical-events-api","namespace":"me","deployment":"api-person-consumer","label":"api-person-consumer"}]'
+    - secure: "EV/+bi5rDxHPFeguR1E042mcknMJ1PSuLlhMGgaVgC6O/y0JQFjt9geFetcUhEJPRq+Z/EOP9RYXXej9RXRfz02o/cWl/HovWj+2Roxuj5InHRS+O8sJyAz8QUqaZoP2QQXChH8up6Z3/UkmZdtZaV97HPdkqTLL2WnTxSzn8gfbn+7Sb6XG/j6mItIQ6LTybs9JMoeZtU7SNZvM6ttQp89uN1bajB2PFnwxRe6LgCH9RZVCU8/7GEdlPRKRuGY0q9Yhc6HAMF4sOYbk820Pwit48uAee3XLgRkLa+NaC8Hv8AupR9NoARP31YMbeY1742hoxBShCWnNY71TOG9Slw7xXqBoyMlyW7gEGmRx6Vi5uK3MxWL4wmjfOdWCJDncFuGEBz/I4vITby0ungrSmWH69FnO21OsOov+J0HJ3e7OSv88wismJBo7gweAHr1ljoTe4nBPhIGlh5UWZeOW6Vt4qQI+6mJM3w6w3+nzGiz3Xo+0gJ9R91u3dKB1jLP+d7dJFi81BK45Xb3C6VNjS452iBiNbg2dwnaUFxZUeGngDcXDxFpTxuu301FR3ZxO221IJ5W3PFoE1xOOoZLNJHCa7wdwAWOXknqMa2QGe4EVhurNbovdfPIYOeF1QUMVGrQGEPcs/hr8rlACNqPAnQB5iWrkcqtaJ9zPKE2fQtk="
+    - secure: "YQ7TpAXh6kIaHz15Y0jEjWz7XIIT31tc8nZyiBAIrDufTWbiJrOEUXOzurz2wDK/tXARAXPh2QbLmTMfzFkvw2YH+4jG1qNIYa7oRiJ2SJIqoMRWDmGBCA35bInO8KKwC/W4I50bVDbUChr0HzEoRK89i50hCj0fpGzzwPETJn4fGIe2496V7A/teBZHzML50pSLN6j8quhCRLKLz0SfEHHYNkrOhj0LlZWjG25rSehKL5NSw3hpWG8ISWTNnHXBi25PTOhLBQ3xjO4RqxV+pbO4W+HEW3KEpBJlNiWaJsiK5l4eACQH1QTgGFE2UxZu8Q9KeMPVewVbQ/eaAPDVBqzUzcHtBchmlJQoOSKY7lrB+Mr70FpoJDLmL5lgjZtJoyPkajIONnWPLYNZWkDAIj3wvaMbnVK8QxG/YqGPfhIjuj300Mzf3yOzkiy8QoNRbsvs8BtDBqMeuGb5oEYjW3wlMHT74mAcqEYPER3ow/hejm4EoWdcdaOBB9VujHd0AeCk+d1J8dQg5NbCt+ersFHHYuqZu3rFOeeK0QicpS5vZ1gHdaYd9t+KrFAlFQhO9MzpgZisTMk9lyp9/F/00E1Vw4DcwhiEU10vt0cC7bxsQAX1b/NnPPxObtIt2J1UZ595GrQtCdWuHKSFfzoajcYEEeicgFXHO2Cr5MOw9Do="
+branches:
+  except:
+    - /[0-9]*\.[0-9]*\.[0-9]*/
+before_install:
+  - sudo apt-get install jq
+  - curl -s https://raw.githubusercontent.com/edenlabllc/ci-utils/umbrella_v2/install-mongodb.sh -o install-mongodb.sh; sudo sh ./install-mongodb.sh
+  - curl -s https://raw.githubusercontent.com/edenlabllc/ci-utils/umbrella_v2/init-redis.sh -o init-redis.sh; sudo sh ./init-redis.sh
+  - curl -s https://raw.githubusercontent.com/edenlabllc/ci-utils/umbrella_v2/init-kafka.sh -o init-kafka.sh; sudo sh ./init-kafka.sh
+  # create kafka topics
+  - kafka/bin/kafka-topics.sh --create --partitions 1 --replication-factor 1 --zookeeper localhost:2181 --topic medical_events
+  - kafka/bin/kafka-topics.sh --create --partitions 1 --replication-factor 1 --zookeeper localhost:2181 --topic person_events
+  - kafka/bin/kafka-topics.sh --create --partitions 1 --replication-factor 1 --zookeeper localhost:2181 --topic mongo_events
+
+jobs:
+  include:
+    - stage: "test and build"
+      name: "Run tests"
+      script:
+      - mongo --version
+      - (curl -s https://raw.githubusercontent.com/edenlabllc/ci-utils/umbrella_v2/tests.sh -o tests.sh; bash ./tests.sh) || travis_terminate 1
+
+    - stage: "test and build"
+      name: "Build Docker containers. API with Core"
+      env:
+        - APPS='[{"app":"medical_events_api","chart":"medical-events-api","namespace":"me","deployment":"api-medical-events","label":"api-medical-events"}]'
+      # "Decrypting deploy key..."
+      script:
+      - openssl aes-256-cbc -K $encrypted_727565a690f3_key -iv $encrypted_727565a690f3_iv -in eHealth-8110bd102a69.json.enc -out eHealth-8110bd102a69.json -d
+      - (curl -s https://raw.githubusercontent.com/edenlabllc/ci-utils/umbrella_v2/docker.sh -o docker.sh; bash ./docker.sh) || travis_terminate 1
+
+    - stage: "test and build"
+      name: "Event Consumer"
+      env:
+        - APPS='[{"app":"event_consumer","chart":"medical-events-api","namespace":"me","deployment":"event-consumer","label":"event-consumer"}]'
+      # "Decrypting deploy key..."
+      script:
+      - openssl aes-256-cbc -K $encrypted_727565a690f3_key -iv $encrypted_727565a690f3_iv -in eHealth-8110bd102a69.json.enc -out eHealth-8110bd102a69.json -d
+      - (curl -s https://raw.githubusercontent.com/edenlabllc/ci-utils/umbrella_v2/docker.sh -o docker.sh; bash ./docker.sh) || travis_terminate 1
+
+    - stage: "test and build"
+      name: "Person Consumer"
+      env:
+        - APPS='[{"app":"person_consumer","chart":"medical-events-api","namespace":"me","deployment":"person-consumer","label":"person-consumer"}]'
+      # "Decrypting deploy key..."
+      script:
+      - openssl aes-256-cbc -K $encrypted_727565a690f3_key -iv $encrypted_727565a690f3_iv -in eHealth-8110bd102a69.json.enc -out eHealth-8110bd102a69.json -d
+      - (curl -s https://raw.githubusercontent.com/edenlabllc/ci-utils/umbrella_v2/docker.sh -o docker.sh; bash ./docker.sh) || travis_terminate 1
+
+    - stage: "test and build"
+      name: "Audit log Consumer"
+      env:
+      - APPS='[{"app":"audit_log_consumer","chart":"medical-events-api","namespace":"me","deployment":"audit-log-consumer","label":"audit-log-consumer"}]'
+      # "Decrypting deploy key..."
+      script:
+      - openssl aes-256-cbc -K $encrypted_727565a690f3_key -iv $encrypted_727565a690f3_iv -in eHealth-8110bd102a69.json.enc -out eHealth-8110bd102a69.json -d
+      - (curl -s https://raw.githubusercontent.com/edenlabllc/ci-utils/umbrella_v2/docker.sh -o docker.sh; bash ./docker.sh) || travis_terminate 1
+
+    - stage: "test and build"
+      name: "Number generator"
+      env:
+      - APPS='[{"app":"number_generator","chart":"medical-events-api","namespace":"me","deployment":"number-generator","label":"number-generator"}]'
+      # "Decrypting deploy key..."
+      script:
+      - openssl aes-256-cbc -K $encrypted_727565a690f3_key -iv $encrypted_727565a690f3_iv -in eHealth-8110bd102a69.json.enc -out eHealth-8110bd102a69.json -d
+      - (curl -s https://raw.githubusercontent.com/edenlabllc/ci-utils/umbrella_v2/docker.sh -o docker.sh; bash ./docker.sh) || travis_terminate 1
+
+    - stage: "test and build"
+      name: "Medical events scheduler"
+      env:
+      - APPS='[{"app":"medical_events_scheduler","chart":"medical-events-api","namespace":"me","deployment":"medical-events-scheduler","label":"medical-events-scheduler"}]'
+      # "Decrypting deploy key..."
+      script:
+      - openssl aes-256-cbc -K $encrypted_727565a690f3_key -iv $encrypted_727565a690f3_iv -in eHealth-8110bd102a69.json.enc -out eHealth-8110bd102a69.json -d
+      - (curl -s https://raw.githubusercontent.com/edenlabllc/ci-utils/umbrella_v2/docker.sh -o docker.sh; bash ./docker.sh) || travis_terminate 1

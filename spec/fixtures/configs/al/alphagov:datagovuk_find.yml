@@ -1,0 +1,55 @@
+env:
+  global:
+  - NOKOGIRI_USE_SYSTEM_LIBRARIES=true
+  - RAILS_ENV=test
+  - GIT_COMMITTED_AT=$(if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then git log -1 --pretty=format:%ct;
+    else git log -1 --skip 1 --pretty=format:%ct; fi)
+sudo: false
+language: ruby
+cache:
+  bundler: true
+  yarn: true
+branches:
+  only:
+    - master
+    - /^v\d+\.\d+\.\d+$/
+services:
+  - postgresql
+  - elasticsearch
+addons:
+  chrome: stable
+before_install:
+  - gem update --system
+  - gem install bundler --no-document
+  - echo "73.0.3683.68" > ~/.chromedriver-version
+install:
+  - bundle install --path vendor/bundle
+  - yarn
+before_script:
+  - sleep 10
+  - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64
+    > ./cc-test-reporter
+  - chmod +x ./cc-test-reporter
+  - "./cc-test-reporter before-build"
+script:
+  - bundle exec rake
+after_script:
+  - if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then ./cc-test-reporter after-build --exit-code
+    $TRAVIS_TEST_RESULT; fi
+after_success:
+  - wget -q -O - https://packages.cloudfoundry.org/debian/cli.cloudfoundry.org.key | sudo apt-key add -
+  - echo "deb http://packages.cloudfoundry.org/debian stable main" | sudo tee /etc/apt/sources.list.d/cloudfoundry-cli.list
+  - sudo apt-get update
+  - sudo apt-get install cf-cli
+deploy:
+  # To staging
+  - provider: script
+    script: scripts/deploy.sh find-data-beta-staging staging
+    on:
+      repo: alphagov/datagovuk_find
+  # To production
+  - provider: script
+    script: scripts/deploy.sh find-data-beta production
+    on:
+      repo: alphagov/datagovuk_find
+      tags: true

@@ -1,0 +1,22 @@
+language: ruby
+
+cache:
+  bundler: true
+  directories:
+    - node_modules
+    - .rvm
+
+
+services: postgresql
+
+addons:
+  chrome: stable
+  postgresql: "9.4"
+
+before_script:
+  - bundle exec rails db:create
+  - bundle exec rails db:schema:load
+
+script:
+  - bundle exec rails test:system
+  - bundle exec rails test

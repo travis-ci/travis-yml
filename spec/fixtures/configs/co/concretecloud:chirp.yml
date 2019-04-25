@@ -1,0 +1,64 @@
+sudo: required
+
+language: generic
+
+before_install:
+  - echo '{"ipv6":true,"fixed-cidr-v6":"fc00:beef:beef::/40"}' | sudo tee /etc/docker/daemon.json
+  - sudo service docker restart 2> null | grep -v 'warning:'
+
+cache:
+  directories:
+    - ci/alpine/.cache/
+    - ci/arch/.cache/
+
+before_cache:
+    - ./ci/alpine/clean-cache.sh
+    - ./ci/arch/clean-cache.sh
+
+matrix:
+  include:
+    - os: linux
+      env: CC=gcc CI_DISTRO=alpine TLS=openssl NO_MEMCHECK=True
+      services: docker
+      script: ./ci/alpine.sh
+    - os: linux
+      env: CC=gcc CI_DISTRO=alpine TLS=libressl NO_MEMCHECK=True
+      services: docker
+      script: ./ci/alpine.sh
+    - os: linux
+      env: CC=gcc CI_DISTRO=alpine TLS=libressl MODE=release NO_MEMCHECK=True
+      services: docker
+      script: ./ci/alpine.sh
+    - os: linux
+      env: CC=gcc CI_DISTRO=alpine TLS=libressl MACRO_DEBUG=True NO_MEMCHECK=True
+      services: docker
+      script: ./ci/alpine.sh
+    - os: linux
+      env: DOC_FORMAT=True CI_DISTRO=alpine NO_MEMCHECK=True
+      services: docker
+      script: ./ci/alpine.sh
+    - os: linux
+      env: CC=gcc CI_DISTRO=arch NO_MEMCHECK=True
+      services: docker
+      script: ./ci/arch.sh
+    - os: linux
+      env: CC=gcc CI_DISTRO=arch
+      services: docker
+      script: ./ci/arch.sh
+    - os: linux
+      env: CC=gcc CI_DISTRO=alpine TLS=libressl
+      services: docker
+      script: ./ci/alpine.sh
+    - os: linux
+      env: CC=gcc CI_DISTRO=alpine TLS=libressl WITHOUT_TLS=True
+      services: docker
+      script: ./ci/alpine.sh
+  allow_failures:
+    - os: linux
+      env: CC=gcc CI_DISTRO=arch NO_MEMCHECK=True
+      services: docker
+      script: ./ci/arch.sh
+    - os: linux
+      env: CC=gcc CI_DISTRO=arch
+      services: docker
+      script: ./ci/arch.sh

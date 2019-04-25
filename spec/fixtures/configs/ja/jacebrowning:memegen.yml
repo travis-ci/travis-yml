@@ -1,0 +1,41 @@
+language: python
+matrix:
+  include:
+    - python: 3.7
+      dist: xenial
+      sudo: true
+
+cache:
+  pip: true
+  directories:
+    - .venv
+    - data/templates
+
+env:
+  global:
+    - RANDOM_SEED=0
+
+before_install:
+  - pip install pipenv
+  - make doctor
+
+install:
+  - make install
+
+script:
+  - make check
+  - make test
+  - make validate
+
+before_cache:
+  - find data/templates -name "*.yml" -delete
+
+after_success:
+  - pip install coveralls scrutinizer-ocular
+  - coveralls
+  - ocular
+
+notifications:
+  email:
+    on_success: never
+    on_failure: never

@@ -1,0 +1,74 @@
+sudo: required
+language: c
+
+cache:
+  apt: true
+  directories:
+    - mk/.cache
+
+env:
+  global:
+    # Encrypted COVERITY_SCAN_TOKEN
+    - secure: KKhG29VpIOr5mq9xHptpDSfFEcSRKB8BX4e5zL0VQNJGkrNAHJ7ba+boHKEmSJJ1fZvHC18XOb886BIsn0i+lFrVymYDR8L8ca3e/k26LktnqMn76ORK1WYkD1fiRg3lX25v/j0TkoLB7pmDnMhZyGzg20675V1sHbl/KCO1LJI=
+  matrix:
+    - TEMPLATE=arm/qemu
+    - TEMPLATE=arm/stm32_f4
+    - TEMPLATE=arm/stm32f4cube
+    - TEMPLATE=x86/qemu
+    - TEMPLATE=x86/smp
+    - TEMPLATE=x86/user_apps
+    - TEMPLATE=x86/qt-app
+    - TEMPLATE=x86/test/lang
+    - TEMPLATE=x86/test/fs
+    - TEMPLATE=x86/test/net
+    - TEMPLATE=x86/test/packetdrill
+    - TEMPLATE=x86/test/qt-vnc
+    - TEMPLATE=sparc/qemu
+    - TEMPLATE=mips/qemu
+    - TEMPLATE=ppc/qemu
+    - TEMPLATE=microblaze/qemu
+    - TEMPLATE=usermode86/debug
+#matrix:
+#  include:
+#  - env: UNCRUSTIFY
+#    install:
+#      - SRC=$PWD/uncrustify INSTALL=$PWD/uncrustify/dist ./scripts/codestyle/install_uncrustify.sh
+#    before_script:
+#      - export PATH=$PWD/uncrustify/dist/bin:$PATH
+#    script:
+#      - uncrustify -v
+#      - ./scripts/codestyle/travis_uncrustify.sh
+
+before_script:
+  - set -e # make this script fail as soon as any individual command fail
+  - sudo modprobe nfsd
+  - DOCKER_START_WAIT_TIME_SEC=60 ./scripts/docker/docker_start.sh embox/emdocker-test
+  - |
+    if [ "${COVERITY_SCAN_BRANCH}" != 1 ]
+    then
+      function run() { echo -e '$' "${ANSI_GREEN}$@${ANSI_RESET}"; "$@"; }
+    else
+      function run() { echo "Not running '$@': Coverity scan build"; }
+    fi
+
+script:
+  - set -e # make this script fail as soon as any individual command fail
+  - . ./scripts/docker/docker_rc.sh
+  - dr make confload-"$TEMPLATE"
+  - run dr ./scripts/continuous/build.sh
+  - run dr ./scripts/continuous/run.sh "$TEMPLATE"
+
+addons:
+  coverity_scan:
+    project:
+      name: "embox/embox"
+      description: "Build submitted via Travis CI"
+    notification_email: eldar.abusalimov@gmail.com
+    build_command: make
+    branch_pattern: coverity
+
+notifications:
+  slack:
+    secure: XIP8diNjLokES+oeQJtSQLiGAGxvqlBdoKZqccLsOZWtYToDMoNlILAurNI9wCkb1i9TmNbaNYaGqm4h6jbt/+2gOsi6u1Nu4QpTF+g294hqgE4ztxmqcX7JSOGldLxdG+o+eu6D+yUEwFbrBA0WSEVgB26Sd3JQ0jvnxAk4sJw=
+    on_success: change
+    on_failure: always

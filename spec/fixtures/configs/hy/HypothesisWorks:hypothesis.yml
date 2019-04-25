@@ -1,0 +1,77 @@
+language: c
+
+sudo: false
+
+env: PYTHONDONTWRITEBYTECODE=x
+
+os:
+    - linux
+
+branches:
+  only:
+    - "master"
+
+cache:
+    apt: true
+    directories:
+        - $HOME/.cargo
+        - $HOME/.rustup
+        - $HOME/.gem
+        - $HOME/.cache/pip
+        - $HOME/wheelhouse
+        - $HOME/.stack
+        - $HOME/.local
+        - vendor/bundle
+
+env:
+    global:
+        - BUILD_RUNTIMES=$HOME/.runtimes
+        - FORMAT_ALL=true
+
+jobs:
+  include:
+    # Prechecks that we want to run first.
+    - stage: precheck
+      env: TASK=check-whole-repo-tests
+    - env: TASK=lint
+    - env: TASK=lint-ruby
+    - env: TASK=check-format
+    - env: TASK=check-rust-tests
+
+    - stage: main
+      env: TASK=check-coverage
+    - env: TASK=check-py27
+    - env: TASK=check-py36
+      sudo: required
+      dist: xenial
+    - env: TASK=check-ruby-tests
+    - env: TASK=check-django111
+    - env: TASK=check-pandas24
+
+    - stage: deploy
+      env: TASK=deploy
+
+script:
+    - ./build.sh
+
+matrix:
+    fast_finish: true
+
+stages:
+    - precheck
+    - main
+    - extras
+    - name: deploy
+      if: type = push
+
+notifications:
+  email:
+    recipients:
+      - david@drmaciver.com
+    on_success: never
+    on_failure: change
+
+addons:
+  apt:
+    packages:
+      - libgmp-dev

@@ -32,10 +32,10 @@ describe Travis::Yml::Schema::Def::Deploy::Bitballoon, 'structure' do
                 '$ref': '#/definitions/deploy/edge'
               },
               'access-token': {
-                '$ref': '#/definitions/secure'
+                '$ref': '#/definitions/type/secure'
               },
               'site-id': {
-                '$ref': '#/definitions/secure'
+                '$ref': '#/definitions/type/secure'
               },
               'local-dir': {
                 type: :string

@@ -1,0 +1,127 @@
+sudo: required
+language: r
+cache: packages
+cran: https://cran.rstudio.com/
+env:
+  global:
+  - secure: 3BXzHYdDU0aCDB88S0JFTgV2Z4prE1j7asKSO8FGrQazvja6Cx0sStfuDa6SRjcAm4BWkP7Feixr6yGqL57ep4UC3Z+BcHvxFBdgfL5FAzdbnuMwEn7DJ11uXZPJampbORLgS8WniVgeRiEcHtZm+z2HHWf5fo0aJXEFEXGYLqU=
+matrix:
+  include:
+  - os: linux
+    dist: trusty
+    r: 3.3.0
+    addons:
+      apt:
+        sources:
+        - sourceline: 'ppa:ubuntugis/ubuntugis-unstable'
+        packages:
+        - libgdal-dev
+        - libgdal1-dev
+        - libgeos-dev
+        - libnlopt-dev
+        - libproj-dev
+        - libudunits2-dev
+        - gdal-bin
+    before_install:
+    - export DISPLAY=:99.0
+    - sh -e /etc/init.d/xvfb start
+  - os: linux
+    dist: trusty
+    r: 3.4.0
+    addons:
+      apt:
+        sources:
+        - sourceline: 'ppa:ubuntugis/ubuntugis-unstable'
+        packages:
+        - libgdal-dev
+        - libgdal1-dev
+        - libgeos-dev
+        - libnlopt-dev
+        - libproj-dev
+        - libudunits2-dev
+        - gdal-bin
+    before_install:
+    - export DISPLAY=:99.0
+    - sh -e /etc/init.d/xvfb start
+  - os: linux
+    dist: trusty
+    r: oldrel
+    addons:
+      apt:
+        sources:
+        - sourceline: 'ppa:ubuntugis/ubuntugis-unstable'
+        packages:
+        - libgdal-dev
+        - libgdal1-dev
+        - libgeos-dev
+        - libnlopt-dev
+        - libproj-dev
+        - libudunits2-dev
+        - gdal-bin
+    before_install:
+    - export DISPLAY=:99.0
+    - sh -e /etc/init.d/xvfb start
+  - os: linux
+    dist: trusty
+    r: release
+    addons:
+      apt:
+        sources:
+        - sourceline: 'ppa:ubuntugis/ubuntugis-unstable'
+        packages:
+        - libgdal-dev
+        - libgdal1-dev
+        - libgeos-dev
+        - libnlopt-dev
+        - libproj-dev
+        - libudunits2-dev
+        - gdal-bin
+    r_github_packages:
+      - jimhester/lintr
+    before_install:
+    - export DISPLAY=:99.0
+    - sh -e /etc/init.d/xvfb start
+    after_success:
+    - Rscript -e 'covr::coveralls(package_coverage(type = "all", quiet = FALSE)))'
+    - Rscript -e 'lintr::lint_package()'
+    r_packages:
+    - devtools
+  - os: linux
+    dist: trusty
+    r: devel
+    addons:
+      apt:
+        sources:
+        - sourceline: 'ppa:ubuntugis/ubuntugis-unstable'
+        packages:
+        - libgdal-dev
+        - libgdal1-dev
+        - libgeos-dev
+        - libnlopt-dev
+        - libproj-dev
+        - libudunits2-dev
+        - gdal-bin
+    before_install:
+    - export DISPLAY=:99.0
+    - sh -e /etc/init.d/xvfb start
+    r_packages:
+    - devtools
+  - os: osx
+    osx_image: xcode9.2
+    latex: false
+    r_build_args: "--no-build-vignettes"
+    r_check_args: "--as-cran --ignore-vignettes --no-examples"
+    before_install:
+    - Rscript -e 'install.packages("digest", repos = "https://cran.rstudio.com", type = "source")'
+r_build_args: " "
+r_check_args: "--as-cran"
+warnings_are_errors: true
+notifications:
+  email:
+    on_success: change
+    on_failure: change
+branches:
+  only:
+  - master
+  - development
+  - testing

@@ -1,0 +1,38 @@
+language: python
+
+dist: xenial
+sudo: required # this is needed for docker!
+
+python:
+  - "3.6"
+  - "3.7"
+
+services:
+  - docker
+
+install:
+  - pip install .
+  - pip install coveralls
+  - pip install codeclimate-test-reporter
+
+env:
+  - PYHA_SKIP_GATE=""
+
+script:
+  - coverage run --source pyha -m pytest
+
+after_success:
+  - coveralls
+  - codeclimate-test-reporter
+
+deploy:
+  provider: pypi
+  user: gkarm
+  password:
+    secure: WJNwo9GBtd9Uxe+rXhgJMIu090ZYH/5IhJRzv2dq17w617xaY0uJb4ahwzLgxvXeDiNFTZjimLXQImg7bWUCnc8q2vrBwN5iix+9r+FtO/tz8o5JIzB3gN8PusXDkcAuxNNAKpN/2Q7zAfzLTT1iBXqlL+0iru3deRMlXfFZ65E7t8fio4Zt4z+/A8nFyQYcGhjIyNVZ+vUNk8ZNaoF48hd0jsqEUC5RWOSYmfVgjl4ZrWlUvs543IkfNYrAke3EoI/SxX91XsGiHqzZyGsk2H3zhC3un1Iy3dCjVWWbNsaw5xh3ufbCCsRsByHqpngaSMAAOagPmWf8YvaolwOM+L7bSd7315cOxkQERIXsxTbd9vXuZoY/xWiZMR9oni0ykw3//yP9l5h7GJsjf5VevUtU3kE7UrgqZk+aCrdI+hi0BPMXrrxQ6inz63NpIGMtFHiK9zv5eDBd/hFsVnJS7+Xz3k2X2ikrPkH4jux+2Ri8M2Gh+Ttx8J/9ox5iu95Pc6aF8gS9XaQ87f1HiMFg+YMarTZPwjsgTFVOg8onH2uPH/1F7Yhv76ORZQ/bn32skj0jjjtQB1Wm55w0RVqGywxOt0XHmqZfevgslUYo4AvLFqGx0m+YY3gG0OSNz+poQpKYK1s2roKMzXKLJFxGzJ2AhcJOsW99gBnHlbtPlvs=
+  distributions: "bdist_wheel"
+  on:
+    branch: master
+    tags: true
+    repo: gasparka/pyha
+    python: '3.7'

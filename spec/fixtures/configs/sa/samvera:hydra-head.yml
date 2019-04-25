@@ -1,0 +1,20 @@
+language: ruby
+sudo: false
+rvm: 2.5.1
+
+matrix:
+  include:
+    - env: "RAILS_VERSION=5.2.2"
+    - env: "RAILS_VERSION=5.1.6"
+    - rvm: 2.4.3
+      env: "BLACKLIGHT_VERSION=5.19.2 RAILS_VERSION=5.0.7"
+    - env: "ACTIVE_FEDORA_VERSION='~>11.5' RAILS_VERSION=5.1.6"
+    - env: "ACTIVE_FEDORA_VERSION='~>10.3' RAILS_VERSION=5.0.7"
+env:
+  global:
+    - NOKOGIRI_USE_SYSTEM_LIBRARIES=true
+    - BLACKLIGHT_VERSION=6.14.1
+before_install:
+  - gem update --system
+
+jdk: oraclejdk8

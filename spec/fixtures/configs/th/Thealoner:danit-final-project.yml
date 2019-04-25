@@ -1,0 +1,23 @@
+dist: trusty
+language: java
+jdk:
+- oraclejdk8
+cache:
+  directories:
+  - "$HOME/.m2"
+  - "./front-end/node_modules/"
+  - "$HOME/.sonar"
+  - "$HOME/.sonarscanner"
+before_script:
+- npm install --prefix front-end/
+- mvn clean install
+script:
+- mvn clean test jacoco:report coveralls:report
+- npm run eslint --prefix front-end/
+- npm run build --prefix front-end/
+- sonar-scanner
+addons:
+  sonarcloud:
+    organization: final-project-group
+    token:
+      secure: eUrLacRV34wtZS3I81wmFHBveM6hLmHVbVkS3QVzg1mBCpI9RBXUBjyhMAQe1Kvb/SY36lXKyv/IDAkjvURnO++arFU+zpdKCjelaruCWFVQbWb3wW+/+1afJyk755c1Bx1MBnf3lGqLIY1jK4Iy9zSW+m4FPqVY5OaWQgVtCHyaOkAN4Aa0YmRwsHFvUECmW7t+WIvJyjVumuVnMZ1G/fplQBdWrzfaK/FgctpvI3KiOYXCAr2Jb/COus8+ronHYsGq4NKDUm+I7fkYurTBhiZhrO29RHEvdtJHKYSyVgfY98/Tptqc2OMd+aPah00xc9RwwbN81qxQLtW46zzCZatXFJIzVtlzhYXOwZYDfKBpIKG85HgYOWQFZmvptrZDghexEAPciypzTKfBg4P0rm0OapXkGGggsZDRZFxp5LCim3P1GJJWUpJrNaNbB5d3+GwKl14t/Oo4ldy9gjAKwgum3l5hFP57yPpk2+fZlcD461B8HXTuvDhUN+j2NhojrPV5z8dhUAKE6f5JaExVEuV6jJyaiN8GrWOBOhzacrW13FqcdJ3tyiSv7eSBQSUFPbkBGnn8vyiEj9+DGL1u/QTKYPcTPxJQxapGgziIWihAGZbHWiG5QpXAcoLHSF+Hx+zD/wJhh1YHxgD6k+8PIXIUmkLT/NpuY8vUm4nv8xI=

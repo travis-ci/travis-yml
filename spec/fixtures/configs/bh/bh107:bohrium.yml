@@ -1,0 +1,56 @@
+services:
+  - docker
+
+language: python
+
+env:
+  global:
+    - BH_OPENMP_PROF=true
+    - BH_OPENMP_VOLATILE=true
+    - BH_OPENCL_PROF=true
+    - BH_OPENCL_TO_COL_MAJOR=true
+    - BH_OPENCL_VOLATILE=true
+    - TEST_ALL="/bh/test/python/run.py /bh/test/python/tests/test_*.py"
+    - TEST_SMALL="/bh/test/python/run.py /bh/test/python/tests/test_primitives.py /bh/test/python/tests/test_reduce.py"
+    - TEST_DEPS="numpy scipy matplotlib netCDF4"
+
+script:
+  - env | grep -E "BH_|EXEC" | sort > .env-file
+  - cat .env-file
+  - docker pull bohrium/wheel:latest
+  - docker run -t --env-file .env-file bohrium/wheel
+
+jobs:
+  include:
+    - stage: build docker image
+      script:
+        - docker login -u="$DOCKER_USER" -p="$DOCKER_PASSWORD"
+        - if [ "$TRAVIS_BRANCH" = "master" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
+            docker build -t bohrium/wheel --build-arg BUILD_TYPE=Release -f package/docker/create_wheel.dockerfile . || travis_terminate 1;
+          else
+            docker build -t bohrium/wheel --build-arg BUILD_TYPE=Debug -f package/docker/create_wheel.dockerfile . || travis_terminate 1;
+          fi
+        - docker push bohrium/wheel
+
+    - stage: verify
+    # Test suite
+      env: BH_STACK=openmp EXEC="cp27-cp27mu -m pip install $TEST_DEPS; cp27-cp27mu $TEST_ALL"
+      env: BH_STACK=opencl EXEC="cp27-cp27mu -m pip install $TEST_DEPS; cp27-cp27mu $TEST_ALL"
+    - env: BH_STACK=opencl BH_OPENCL_NUM_THREADS=2 EXEC="cp27-cp27mu $TEST_ALL"
+    - env: BH_STACK=opencl BH_OPENCL_NUM_THREADS=2 BH_OPENCL_NUM_THREADS_ROUND_ROBIN=1 EXEC="cp27-cp27mu $TEST_ALL"
+    - env: BH_STACK=openmp EXEC="cp37-cp37m -m pip install $TEST_DEPS; cp37-cp37m $TEST_ALL"
+    - env: BH_STACK=opencl EXEC="cp37-cp37m -m pip install $TEST_DEPS; cp37-cp37m $TEST_ALL"
+      env: BH_STACK=openmp BH_OPENMP_MONOLITHIC=1 EXEC="cp27-cp27mu $TEST_SMALL"
+
+    # Test of older Python versions
+    - env: BH_STACK=opencl EXEC="cp35-cp35m -m pip install $TEST_DEPS; cp35-cp35m $TEST_ALL"
+    - env: BH_STACK=opencl EXEC="cp36-cp36m -m pip install $TEST_DEPS; cp36-cp36m $TEST_ALL"
+
+deploy:
+  provider: script
+  script: docker pull bohrium/wheel:latest && docker run -e TWINE_USERNAME=$TWINE_USERNAME -e TWINE_PASSWORD=$TWINE_PASSWORD -e EXEC="/bh/deploy.sh" bohrium/wheel
+  on:
+    branch: master
+
+notifications:
+  slack: bohrium:BCAEW8qYK5fmkt8f5mW95GUe

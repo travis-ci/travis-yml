@@ -1,0 +1,30 @@
+language: node_js
+node_js:
+  - '10'
+#os: osx todo restore safari
+install: ./build/npm-install.sh
+before_install: if [[ `npm -v` != 6* ]]; then npm i -g npm; fi
+script:
+  - npm run deploy
+after_script:
+  - node ./node_modules/coveralls/bin/coveralls.js -v < ./reports/report-lcov/lcov.info
+sudo: required
+deploy:
+  - provider: npm
+    skip_cleanup: true
+    email: comindware-awesome-bot@comindware.com
+    api_key:
+      secure: pYxiDVCRQR1HHKDMu9Uun+oiZMEa+Hek7q0nLSMGyh1imGA5S9MT68CMpqTcMniaSJE78KpgfjdMnRtmmYOfuUaLsmoD1D8P78zHo4TjjqBZEEZg+SjumP2wu+c9GSsW65W0QABKgDjSAeaX3g1R9tuMFTayPHAOcBCj5Ooue2CZ/sl/36NqUtPQ08ikpEFzyDIYRzAZlkJKWSR2nxD/1NxAbDrlFv0BuDuKLXf2nVhzIulr6CdPaxj5Kl3bqoGgpmhTeviAmCoa1zVdcdqmFw8S1fWS+cS3RtBgRWONrTiqYfBHepAN8h7OZEb93Y0AiN6QNLk4Y+cPIzETOvZpEJ5n3Yj2BYqSpPh4GFBPPVlv1/Q6iLKkj6Yg2Y0s8ig2MrV3QgsLiU1PJA4lmx2xl6D5/eQUByKpheCuq6mIDuNK972QpU3a8Vd4Drcwxl+3FNw9Zh0ZilIgOB8rDAPxuamYop32YI35XPv6ChknbHfvXd9Rb7izp2KUpCivYEL7Dt4LfekGxvZzqbdU2kLbEEoACh6srF6oCCZ4l8XMM1aYnZC79uivdnt9UBLEBIqDeUqeazSnHyvpDbwHXzwfViZxSXyiIUt+dh2ZMlXaoUPBBgLemFto0/UnCjks2vatQd7lZBtB9dOc3fam70zp83HJPMaP2LFYxxVjb5IPPbM=
+    on:
+      tags: true
+      repo: comindware/core-ui
+      branch: master
+  - provider: script
+    script: npm run deploy:pages
+    skip_cleanup: true
+    on:
+      tags: true
+      repo: comindware/core-ui
+      branch: master
+addons:
+  firefox: "latest"

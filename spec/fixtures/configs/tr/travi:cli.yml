@@ -1,0 +1,26 @@
+language: node_js
+addons:
+  apt:
+    sources:
+    - ubuntu-toolchain-r-test
+    packages:
+    - libstdc++-4.9-dev
+notifications:
+  email: false
+branches:
+  except:
+  - /^v\d+\.\d+\.\d+(-(alpha|beta)\.\d+(@(alpha|beta))?)?$/
+before_script:
+- npm ls --production >/dev/null
+- curl ifconfig.co
+after_success: npm run coverage:report
+deploy:
+  provider: script
+  skip_cleanup: true
+  script: npx semantic-release@beta
+  on:
+    all_branches: true
+env:
+  global:
+  - FORCE_COLOR=1
+  - NPM_CONFIG_COLOR=always

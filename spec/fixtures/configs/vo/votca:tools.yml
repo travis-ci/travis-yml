@@ -1,0 +1,126 @@
+# the original source of this file can be found in votca/votca repository
+# add changes there!
+# To update:
+# wget -O .travis.yml https://raw.githubusercontent.com/votca/votca/master/.travis.yml
+language: cpp
+
+sudo: required
+
+services:
+- docker
+
+env:
+  matrix:
+    - ENV=1
+    - ENV=2
+    - ENV=3
+    - ENV=4
+    - ENV=5
+    - ENV=6
+    - ENV=7
+    - ENV=8
+    - ENV=9
+    - ENV=10
+    - ENV=11
+    - ENV=12
+    - ENV=13
+    - ENV=14
+    - ENV=15
+    - ENV=16
+    - ENV=17
+    - ENV=18
+    - ENV=19
+    - ENV=20
+
+before_script:
+ - git checkout -b current_commit
+ - cd ../../
+ - if [[ ${TRAVIS_REPO_SLUG} = */votca ]]; then
+     if [[ ${TRAVIS_BRANCH} = next ]]; then
+       git -C ${TRAVIS_REPO_SLUG} submodule foreach git checkout master;
+       git -C ${TRAVIS_REPO_SLUG} submodule foreach git pull;
+     fi;
+     cp -vr ${TRAVIS_REPO_SLUG}/docker ${HOME};
+     mv -v ${TRAVIS_REPO_SLUG} $HOME/docker;
+   else
+     git clone --recursive https://github.com/votca/votca.git $HOME/docker/votca;
+     if [[ ${TRAVIS_BRANCH} != master ]]; then
+       git -C ${HOME}/docker/votca checkout -b ${TRAVIS_BRANCH} ${TRAVIS_TAG:-origin/${TRAVIS_BRANCH}} && git -C ${HOME}/docker/votca submodule update --recursive --init;
+     fi;
+     git -C ${HOME}/docker/votca/${TRAVIS_REPO_SLUG#*/} fetch ${PWD}/${TRAVIS_REPO_SLUG} current_commit;
+     git -C ${HOME}/docker/votca/${TRAVIS_REPO_SLUG#*/} checkout -f FETCH_HEAD;
+     cp -vr ${HOME}/docker/votca/docker/* ${HOME}/docker;
+     if [[ -d ${TRAVIS_REPO_SLUG}/docker ]]; then cp -vr ${TRAVIS_REPO_SLUG}/docker/* ${HOME}/docker; fi;
+   fi
+ - source ${HOME}/docker/set_env.sh
+ - cp -r $HOME/.ccache ${HOME}/docker/ccache
+ - sed -i "1s/latest/${DISTRO:-latest}/" ${HOME}/docker/Dockerfile
+ - if [[ ! ${SKIP} ]]; then 
+     travis_retry timeout 540 docker pull $(sed -n '1s/FROM //p' ${HOME}/docker/Dockerfile);
+   fi
+
+script:
+ - if [[ ! ${SKIP} ]]; then
+     travis_retry docker build "${docker_opts[@]}"
+                 --build-arg CC=${CC} --build-arg CXX=${CXX} --build-arg CXXFLAGS="-Wall ${WERROR:+-Werror}"
+                 --build-arg CI=${CI} --build-arg TRAVIS=${TRAVIS} --build-arg TRAVIS_OS_NAME=${DISTRO:-fedora}
+                 --build-arg TRAVIS_BRANCH=${TRAVIS_BRANCH} --build-arg TRAVIS_JOB_NUMBER=${TRAVIS_JOB_NUMBER}
+                 --build-arg TRAVIS_PULL_REQUEST=${TRAVIS_PULL_REQUEST} --build-arg TRAVIS_JOB_ID=${TRAVIS_JOB_ID}
+                 --build-arg TRAVIS_TAG=${TRAVIS_TAG} --build-arg TRAVIS_REPO_SLUG=${TRAVIS_REPO_SLUG}
+                 --build-arg TRAVIS_COMMIT=${TRAVIS_COMMIT}
+                 ${TRAVIS_TAG:+-t votca/votca:${TRAVIS_TAG}}
+                 -t votca/votca:latest -t votca/votca:${TRAVIS_BRANCH} ${HOME}/docker/ &&
+     rm -rf $HOME/.ccache &&
+     CON=$(docker run -d votca/votca:${TRAVIS_BRANCH} /bin/bash) &&
+     docker cp ${CON}:/home/votca/.ccache ${HOME}/;
+   fi
+
+after_success:
+  - shopt -s extglob && [[ ${TRAVIS_BRANCH} = @(master|stable|v1.*) && ${CC} = *gcc* && ${DOCKERHUB} = yes && ! ${SKIP} ]] && DEPLOY=yes
+  - if [[ ${TRAVIS_BRANCH} = master ]]; then DOCKER_TAG=latest; else DOCKER_TAG="${TRAVIS_BRANCH}"; fi
+  - if [[ ${DOCKER_USERNAME} && ${DOCKER_PASSWORD} && ${TRAVIS_PULL_REQUEST} == false && ${DEPLOY} ]]; then
+        docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
+        docker push "${TRAVIS_REPO_SLUG}:${DOCKER_TAG}";
+    fi
+  - if [[ ${DOXYGEN} = yes && ! ${SKIP} ]]; then
+      git clone --depth=1 https://github.com/votca/doxygen.git "$HOME/devdoc";
+      cd $HOME/devdoc;
+      rm -f *;
+      git checkout -- CNAME;
+      docker cp ${CON}:/home/votca/votca/build/share/doc/html . ;
+      mv html/* .; rmdir html;
+      docker cp ${CON}:/home/votca/votca/build/csg-manual/manual.pdf . ;
+      docker cp ${CON}:/home/votca/votca/build/ctp/manual/ctp-manual.pdf . ;
+      docker cp ${CON}:/home/votca/votca/build/xtp/manual/xtp-manual.pdf . ;
+      git add --all .;
+      if [[ ${TRAVIS_BRANCH} = master && ${encrypted_7abbb71c3ba6_key} && ${encrypted_7abbb71c3ba6_iv} && ${TRAVIS_PULL_REQUEST} == false ]]; then
+        git config --global user.name "Automatic Deployment (Travis CI)";
+        git config --global user.email "votca-commits@googlegroups.com";
+        git commit -m "Documentation Update";
+        openssl aes-256-cbc -K $encrypted_7abbb71c3ba6_key -iv $encrypted_7abbb71c3ba6_iv -in keys/deploy3.enc -out ~/.ssh/id_rsa -d;
+        chmod 600 ~/.ssh/id_rsa;
+        git push git@github.com:votca/doxygen.git gh-pages;
+      else
+        git status;
+        git diff --cached --no-color | head -c 1k;
+      fi;
+    fi
+
+branches:
+  only:
+  - master
+  - development
+  - stable
+  - next
+  - /^v\d+\.\d+(\.\d+|_rc\d+)?$/
+
+cache:
+  - ccache
+
+compiler:
+  - gcc
+  - clang
+
+notifications:
+  email:
+    - votca-commits@googlegroups.com

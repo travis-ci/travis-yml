@@ -1,0 +1,107 @@
+language: node_js
+# At this time, the travis trusty sudo environment works, but the sudo: false
+# environment doesn't (it might with a bunch of apt packages).
+sudo: required
+dist: trusty
+
+node_js:
+  - 8
+
+addons:
+  firefox: latest  # version 55.0 - 57.x have an issue with screenshots.
+  # firefox: 54.0.1
+  # We can change to a specific version of Chrome later.  Versions 68 - 70 have
+  # an issue with webgl fallback rendering.
+  chrome: stable
+  apt:
+    packages:
+      - optipng
+
+cache:
+  directories:
+    - node_modules
+    - "$HOME/cache"
+    - "$TRAVIS_BUILD_DIR/_build/ExternalData"
+
+before_install:
+  # Start xvfb with a specific resolution and pixel depth
+  - "/sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -ac -screen 0 1280x1024x24"
+  - CACHE="${HOME}/cache" CMAKE_VERSION=3.5.0 CMAKE_SHORT_VERSION=3.5 source ./scripts/install_cmake.sh
+  - npm install -g npm@latest
+  # Prune the npm packages.  If this fails for any reason, just remove them all
+  - npm prune || rm -r node_modules
+  # Get a specific version of Chrome.
+  # - CHROME_VERSION=67.0.3396.79
+  # - if ! [ -f "${HOME}/cache/chrome64_${CHROME_VERSION}.deb" ]; then curl -L "https://www.slimjet.com/chrome/download-chrome.php?file=lnx%2Fchrome64_${CHROME_VERSION}.deb" -o "${HOME}/cache/chrome64_${CHROME_VERSION}.deb"; fi
+  # - sudo dpkg -i "${HOME}/cache/chrome64_${CHROME_VERSION}.deb"
+  - google-chrome --version
+
+install:
+  # travis moved to "npm ci", but that fails with canvas-prebuilt as it tries
+  # to install it before node-pre-gyp
+  - npm install
+  # Install for the website build
+  - npm run setup-website
+  # Download and extract the glslangValidator tool
+  - curl -OL https://github.com/KhronosGroup/glslang/releases/download/master-tot/glslang-master-linux-Release.zip
+  - unzip glslang-master-linux-Release.zip bin/glslangValidator
+
+before_script:
+  - export DISPLAY=:99.0
+
+script:
+  - npm run build
+  - npm run docs
+  - mkdir -p _build
+  # Use the glslangValidator to validate all .frag and .vert files
+  - find . \( -name '*.frag' -o -name '*.vert' \) -exec bin/glslangValidator {} \+
+  - ctest -S cmake/travis_build.cmake -VV || true
+  - if [ -f _build/test_failed ] ; then false ; fi
+  # Build the website to ensure that it will pass
+  - npm run build-website
+
+after_failure:
+  # Upload test results.  First make them smaller with optipng.
+  - pip install --user --upgrade girder-client requests[security]
+  - find _build/images -name '*-test.png' -exec optipng {} \+
+  - find _build/images -name '*-test.png' -exec python scripts/upload_test_images.py {} \+
+
+after_success:
+  - npm run codecov
+  # This was used to send build notes to an S3 bucket
+  # - pip install --user GitPython boto3
+  # - python $TRAVIS_BUILD_DIR/scripts/upload_notes.py --repo $TRAVIS_BUILD_DIR --upload $TRAVIS_BUILD_DIR/_build/build_notes.json
+
+# Use this for AWS credentials
+# env:
+#   global:
+#     - secure: JYWs3zJV09uAb7CvX32pADRYTH2XqSGvImNEI6zVFxJxs9r0JsGgyOTz4PPBgs3dv1OjVBXqxu4GD2ZBKeo0Ax13ZnBNVR/BacupBtIwXbxp/FG2lr+WBzE0YnEBhAF/mW5DEkNBWJyLSiBlxYA5QFAAHYwb/GOADl+Z9Qi2FIU=
+#     - secure: on13Ka+3jkLDCXxqzxuT+CY4sPM0Zxfbe9M2F3LE0yhN2ww5vaBKdbTrzEWa0TOlBkM2qQUPAFybjHXfHeRyKpZDlsssjogH8YO5qx4zFRP5ZB9ny39QAqBsfZTuXt2WmOTLEcXkByYXVH8my/8ZqZqofSeBZsZdeauzoLbr0R0=
+
+deploy:
+  - provider: pages
+    local-dir: website/public
+    github-token: $GITHUB_TOKEN
+    skip-cleanup: true
+    on:
+      branch: master
+  - provider: releases
+    api_key: $GITHUB_TOKEN
+    file:
+      - dist/built/geo.js
+      - dist/built/geo.min.js
+      - dist/built/geo.lean.js
+      - dist/built/geo.lean.min.js
+    skip-cleanup: true
+    on:
+      tags: true
+      # We could emit artifacts on all branches rather than just master
+      branch: master
+      # all_branches: true
+  - provider: npm
+    api_key: $NPM_TOKEN
+    email: david.manthey@kitware.com
+    skip-cleanup: true
+    script: "npm publish"
+    on:
+      tags: true

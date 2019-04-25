@@ -1,0 +1,14 @@
+
+language: ruby
+sudo: required
+install:
+  - bin/setup
+  - rake alces:setup:geckodriver
+# Run tests with xvfb to imitate a display, so Selenium tests work (see
+# https://docs.travis-ci.com/user/gui-and-headless-browsers/#Using-xvfb-to-Run-Tests-That-Require-a-GUI).
+script: xvfb-run bundle exec rake
+addons:
+  postgresql: "9.6"
+  firefox: "latest"
+apt:
+  update: true

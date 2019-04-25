@@ -2,16 +2,14 @@
 
 
 
-## Type
+## Types
 
-Any of:
+* Hash
+* String (known)
 
-* Map (Hash)
-* Enum (known String)
+## Values
 
-## Flags
-
-None.
+* `engineyard`
 
 
 ## Examples
@@ -26,9 +24,31 @@ deploy:
   username: 
   password: 
   api_key: 
-  app: string
-  environment: {}
   migrate: string
+```
+
+```yaml
+deploy:
+  provider: engineyard
+  app: {}
+```
+
+```yaml
+deploy:
+  provider: engineyard
+  app: string
+```
+
+```yaml
+deploy:
+  provider: engineyard
+  environment: {}
+```
+
+```yaml
+deploy:
+  provider: engineyard
+  environment: string
 ```
 
 ```yaml

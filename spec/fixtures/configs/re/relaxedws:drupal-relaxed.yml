@@ -1,0 +1,73 @@
+sudo: false
+
+language: php
+
+php:
+  - 5.6
+  - 7.1
+
+matrix:
+  allow_failures:
+    - env: SCRIPT='modules/relaxed/tests/bin/pouchdb.sh' MAKE_FILE=drupal-8.5.x.make.yml
+    - env: SCRIPT='modules/relaxed/tests/bin/pouchdb.sh' MAKE_FILE=drupal-8.6.x.make.yml
+  fast_finish: true
+
+services:
+  - mysql
+  # In Docker we will have CouchDB 2.3.0 on 127.0.0.1:3001.
+  - docker
+  # CouchDB 1.6.1 on 127.0.0.1:5984.
+  - couchdb
+
+addons:
+  apt:
+    packages:
+    - nginx
+
+env:
+  matrix:
+    - SCRIPT='modules/relaxed/tests/bin/drupal.sh' MAKE_FILE=drupal-8.5.x.make.yml
+    - SCRIPT='modules/relaxed/tests/bin/replication.sh' MAKE_FILE=drupal-8.5.x.make.yml COUCHDB_VERSION=2.3.0
+    - SCRIPT='modules/relaxed/tests/bin/replication.sh' MAKE_FILE=drupal-8.5.x.make.yml COUCHDB_VERSION=1.6.1
+    - SCRIPT='modules/relaxed/tests/bin/pouchdb.sh' MAKE_FILE=drupal-8.5.x.make.yml
+    - SCRIPT='modules/relaxed/tests/bin/drupal.sh' MAKE_FILE=drupal-8.6.x.make.yml
+    - SCRIPT='modules/relaxed/tests/bin/replication.sh' MAKE_FILE=drupal-8.6.x.make.yml COUCHDB_VERSION=2.3.0
+    - SCRIPT='modules/relaxed/tests/bin/replication.sh' MAKE_FILE=drupal-8.6.x.make.yml COUCHDB_VERSION=1.6.1
+    - SCRIPT='modules/relaxed/tests/bin/pouchdb.sh' MAKE_FILE=drupal-8.6.x.make.yml
+
+notifications:
+  slack: det:YiOiwfzUBtt9aTnWvocK8uDI
+
+cache:
+  directories:
+  - $HOME/.drush/cache/download
+
+before_install:
+  - composer self-update
+  - mysql -uroot < $TRAVIS_BUILD_DIR/.travis/mysql.sql
+  - cp $TRAVIS_BUILD_DIR/.travis/php.ini ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/
+  - cp $TRAVIS_BUILD_DIR/.travis/php-fpm.conf ~/.phpenv/versions/$(phpenv version-name)/etc/
+  - ~/.phpenv/versions/$(phpenv version-name)/sbin/php-fpm
+  - nginx -c $TRAVIS_BUILD_DIR/.travis/nginx.conf
+  - wget -P ~/ https://github.com/drush-ops/drush/releases/download/8.1.16/drush.phar && chmod +x ~/drush.phar
+  - php ~/drush.phar make $TRAVIS_BUILD_DIR/.travis/$MAKE_FILE $HOME/www
+  - composer --working-dir=$HOME/www require relaxedws/replicator:dev-master
+  # Install CouchDB.
+  - if [ $COUCHDB_VERSION ]; then source ./tests/bin/run-couchdb.sh; fi
+
+install:
+  - ln -s $TRAVIS_BUILD_DIR ~/www/modules/relaxed
+  - php ~/drush.phar --root=$HOME/www --yes site-install --account-pass=admin --db-url=mysql://root:@127.0.0.1/drupal0 testing
+  - composer --working-dir=$HOME/www run-script drupal-phpunit-upgrade
+
+script:
+  - cd ~/www && bash $SCRIPT
+
+after_script:
+  - find ~/www/sites/simpletest/browser_output -type f -exec cat {} \;
+  - cat /tmp/error.log
+  # -----------------------
+  - cat /tmp/access8080.log
+  # -----------------------
+  - cat /tmp/access8081.log
+  # -----------------------

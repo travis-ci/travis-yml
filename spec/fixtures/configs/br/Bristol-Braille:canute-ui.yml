@@ -1,0 +1,12 @@
+language: python
+python:
+  - "3.5"
+  - "3.6"
+
+install: "pip3 install -r requirements.txt"
+
+script:
+  - ./test
+  - ./lint
+  - mkdir ~/canute-media && cp -r books ~/canute-media/sd-card && cp config.rc.travis config.rc
+  - ./canute_ui --fuzz 550

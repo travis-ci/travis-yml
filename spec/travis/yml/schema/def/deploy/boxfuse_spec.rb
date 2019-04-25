@@ -32,10 +32,10 @@ describe Travis::Yml::Schema::Def::Deploy::Boxfuse, 'structure' do
                 '$ref': '#/definitions/deploy/edge'
               },
               user: {
-                '$ref': '#/definitions/secure'
+                '$ref': '#/definitions/type/secure'
               },
               secret: {
-                '$ref': '#/definitions/secure'
+                '$ref': '#/definitions/type/secure'
               },
               configfile: {
                 type: :string

@@ -1,0 +1,28 @@
+language: java
+jdk:
+- openjdk8
+services:
+- postgresql
+cache:
+  directories:
+  - $HOME/.m2
+install:
+- cp src/main/resources/application.travis.properties src/main/resources/application.properties
+- cp src/main/resources/database.travis.properties src/main/resources/database.properties
+- cp src/main/resources/database.test.travis.properties src/main/resources/database.test.properties
+- cp src/main/resources/migrations/environments/development.travis.properties src/main/resources/migrations/environments/development.properties
+- cp src/main/resources/migrations/environments/test.travis.properties src/main/resources/migrations/environments/test.properties
+before_script:
+- psql -c 'create database easytests;' -U postgres
+- psql -c 'create database easyteststest;' -U postgres
+script:
+- ./mvnw install -DskipTests=true -Dmaven.javadoc.skip=true -B -V --quiet
+- APITESTRESULT=$(curl -X POST --data-binary @src/main/resources/api/api.yaml -H 'content-type:application/yaml' http://online.swagger.io/validator/debug)
+- test "$APITESTRESULT" = '{}' || (echo $APITESTRESULT && false)
+- ./mvnw checkstyle:check --quiet
+- ./mvnw migration:up --quiet
+- ./mvnw migration:up -Dmigration.env=test --quiet
+- psql -d easyteststest -U postgres < src/main/resources/sql/mappersTestData.sql
+- ./mvnw test jacoco:report --quiet
+after_success:
+- ./mvnw coveralls:report --quiet

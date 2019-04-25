@@ -1,0 +1,8 @@
+sudo: false
+language: python
+python:
+  - "3.4"
+install:
+  - pip install PyYAML requests
+  - git clone https://github.com/freifunk/icvpn-scripts.git
+script: icvpn-scripts/check -s .

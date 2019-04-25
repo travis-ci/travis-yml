@@ -1,0 +1,25 @@
+sudo: false
+language: python
+matrix:
+  include:
+    - python: 2.7
+      env: TOX_ENV=flake8
+    - python: 3.6
+      env: TOX_ENV=py3flake8
+    - python: 2.7
+      env: TOX_ENV=py27
+    # - python: 3.3 # Currently has a problem installing codecov
+    #   env: TOX_ENV=py33
+    - python: 3.4
+      env: TOX_ENV=py34
+    - python: 3.5
+      env: TOX_ENV=py35
+    - python: 3.6
+      env: TOX_ENV=py36
+install:
+    - pip install tox
+    - pip install codecov
+script:
+    - make testone TOX_ENV="$TOX_ENV"
+after_success:
+  - codecov

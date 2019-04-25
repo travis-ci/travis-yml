@@ -1,0 +1,42 @@
+dist: trusty
+sudo: false
+script: bundle exec rake
+before_script: ${PHANTOMJS:-phantomjs} --version
+before_install:
+   - mkdir -p travis-phantomjs2 travis-phantomjs21
+   - if [ ! -f $PWD/travis-phantomjs2/phantomjs ]; then wget https://github.com/Pyppe/phantomjs2.0-ubuntu14.04x64/raw/master/bin/phantomjs -O $PWD/travis-phantomjs2/phantomjs; fi
+   - chmod +x $PWD/travis-phantomjs2/phantomjs
+   - gem update bundler
+cache:
+  directories:
+    - $PWD/travis-phantomjs2
+
+rvm:
+  - 2.5.1
+  - 2.4.4
+  - 2.3.7
+  - jruby-9.1.16.0
+gemfile:
+  - Gemfile
+env:
+  global:
+    - NOKOGIRI_USE_SYSTEM_LIBRARIES=true
+    - POLTERGEIST_TEST_HOST=poltergeist.test.com
+
+addons:
+  hosts:
+    # Used to test custom host driver feature
+    - poltergeist.test.com
+
+matrix:
+  include:
+    - rvm: 2.5.1
+      gemfile: gemfiles/Gemfile.capy2
+    - rvm: 2.3.7
+      gemfile: Gemfile
+      env: PHANTOMJS=$PWD/travis-phantomjs2/phantomjs
+    - rvm: 2.5.1
+      gemfile: gemfiles/Gemfile.capybara_master
+  allow_failures:
+    - gemfile: gemfiles/Gemfile.capybara_master
+    - rvm: jruby-9.1.16.0

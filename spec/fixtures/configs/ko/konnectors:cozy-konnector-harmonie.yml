@@ -1,0 +1,41 @@
+language: node_js
+node_js:
+- '8'
+env:
+  global:
+  - GH_USER_EMAIL="travis@example.org"
+  - GH_USER_NAME="cozy-bot"
+  - DEPLOY_REPOSITORY="git@github.com:konnectors/cozy-konnector-harmonie.git"
+  - secure: ajf3N5Q9XiGywrHXwH+rahi5Vi6j/2XM+Lqsuma7v1MuteIWkQYvVQuXh5GKYR4WK0zcWs1voB5ze9iYp8oLSzNlOTO394Gzdc9TvMqju3gl5kXc8nk+v58iECi9aaOMJfoGY84Ugrx+o6PREiMSbzO6rC1sqTS+N5qO/4BRbw0cy2A0S55qwpWo8ZoUxWZeZj+/v4UI4LcqLFmimS/97d5O2N0qxo01FdPx+tupDzzAvcxaXCNgMJRbT5ZmHaaRG6uB79Rw2LU6igdentQFDrqGP/UYpaJth7WRbeytLr/IV61lkGgHeH33Ol6Tcp/MEIspRVVl/XGBY9B+jDRJiZAZhkJU90gAx+atxeXfqlK2/V/D4USh0p2X+4OkkEOcsxKU2SVMTZjR701+DllLw/5gLFfBtxXIAa6wlDftLAJq9v41PWfvuedqiCfSItN5OaknD1kxqZjk9OiwrN9Z9p8ENbLi3w4gT/euYvCBN1ku35jqI2Qbeko9QNlSoMIQw7riR/BU4/EBGujlTxiq3J+chwyNOoA7mW7j2ybimCe5Ft0iS7hO0o2jCe/M1Qz2A3Gq+JltHzdSXoyEbJ8h4dFwe3W5y8WFqmo6Ev+02xxCTFkrUcrGu9uKDtPbznaSJXZI5w6lj5k6jE8xE2PRiXDCBRYvZ0KzKmWkf2bkZic=
+cache:
+  yarn: true
+  directories:
+  - node_modules
+branches:
+  except:
+  - build
+  - build-debug
+script:
+- yarn lint
+- yarn build
+- yarn run check
+deploy:
+- provider: script
+  skip-cleanup: true
+  script: DEPLOY_BRANCH=build yarn deploy && yarn cozyPublish
+  on:
+    branch: master
+- provider: script
+  skip-cleanup: true
+  script: DEPLOY_BRANCH=build yarn deploy && yarn cozyPublish
+  on:
+    tags: true
+before_install:
+- openssl aes-256-cbc -K $encrypted_15281412d487_key -iv $encrypted_15281412d487_iv
+  -in github_deploy_key.enc -out /tmp/github_deploy_key -d
+- eval "$(ssh-agent -s)"
+- chmod 600 /tmp/github_deploy_key
+- ssh-add /tmp/github_deploy_key
+after_deploy:
+- rm /tmp/github_deploy_key
+- ssh-add -D

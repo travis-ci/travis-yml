@@ -1,0 +1,48 @@
+os:
+  - linux
+  - osx
+language: java
+osx_image: xcode8.2
+before_install:
+  - >
+    case "${TRAVIS_OS_NAME:-linux}" in
+    linux)
+      sudo apt-get update -qq
+      sudo apt-get install -qq oracle-java8-installer
+      jdk_switcher use oraclejdk8
+      ./platform_linux/build.sh
+      ;;
+    osx)
+      brew install ant p7zip
+      ./platform_osx/build.sh
+      ;;
+    esac;
+    javac -version;
+
+script:
+  - ant
+  - ant check_fw
+  - ant -Dbuild.bundle=true bundle
+  - ant -Dbuild.runtime=true runtime
+
+before_deploy:
+  - pwd
+  - ls ${TRAVIS_BUILD_DIR}
+  - ls ${TRAVIS_BUILD_DIR}/build
+  - ls ${TRAVIS_BUILD_DIR}/build/bundles
+    
+deploy:
+  provider: releases
+  api_key:
+    secure: LlmFhw4NWvaRzlefhBs6L0JXdasgh8t8mjAXxR/bYgEf50zBHdO3bAvEOg2IrFF4th/cWIO8130UkboZ7pgpyrct8jrGE7knWeFgbgdW2JYobpgSx5fthX036xhx6OiShnYgOnxDds68jJK9duLA2MDrQov5itzPdrEgZuSqgYYusiV4x1lJ2iEdOErO8N6Om25M2QAVVsbu6wb5RjHbf/Uf+X1B2Mb+9J33vFnCr5P0/IBQxQkhlSA7V7RiqRyOtC2QrPsmoeAc7QjxeAClGYzWMjQ/2WNfEX8/9ZdYlf48qYnoFqbuQDkjgOxKencj9gFWJdgJw8KxL+ygU51kuvTdZaixY82Y/C34kDd4WyxO1kKS7jyvm/MWEnap/wYly+woiplrjjTMM+a6OwG0YMjpbxZn6GjUB0YP91libmLSNggwQMYxLpkSoEyAsjVM8pEH4Y+6MgmU6UQqpnUat9PnNG/BGXoTWRWefu771nWSPMW1bzds0vEF54I0daISd8gUwNAuBYSPW38woTLBzPd+M15uJ9ThVD6EfwJsifZ5RDNGSr6JFn37sKQ7Imcu7d3QKVXV9URpOZs/enJmfiGgVaKXCWA0Cw1rSP90XK8ERJqguQJ5uGfuAMcWuXzgvXAVPzDopY1ZzYHFqd3B+ro2WmsqzT8OLGKdlrfsFX0=
+  file: 
+    - build/bundles/*
+    - build/runtime/*/axo_runtime*
+  file_glob: true  
+  skip_cleanup: true
+  on:
+    repo: axoloti/axoloti
+    tags: true
+    all_branches: true
+git:
+    depth: 1000

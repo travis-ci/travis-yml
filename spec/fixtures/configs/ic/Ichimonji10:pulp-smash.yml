@@ -1,0 +1,21 @@
+sudo: false
+language: python
+python:
+- 3.4
+- 3.5
+- 3.6
+# Python 3.7+ is only available on Xenial, due to dependency requirements. For
+# these builds, "sudo" must be enabled, or else Trusty will be used.
+matrix:
+  include:
+  - python: 3.7
+    dist: xenial
+    sudo: required
+install:
+- ./setup.py test; git clean -dfx
+# Old versions of pip can't handle extras_require in setup.py.
+- pip install --upgrade pip
+- pip install .[dev]
+script: make all
+cache: pip
+after_success: coveralls

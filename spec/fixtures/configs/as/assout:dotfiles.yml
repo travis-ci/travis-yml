@@ -1,0 +1,27 @@
+# TODO: To container base. shellcheckが入れられない
+language: ruby
+cache:
+  apt: true
+  pip: true
+
+before_install:
+  - sudo add-apt-repository -y "deb http://archive.ubuntu.com/ubuntu/ trusty-backports restricted main universe"
+  - sudo apt-get update -qq
+
+install:
+  - sudo apt-get -qq install devscripts
+  - sudo apt-get -qq install shellcheck
+  - sudo pip install vim-vint
+  - sudo pip install bashate
+
+script:
+  - sh -xv test/test.sh
+  # - vim --cmd version --cmd quit
+  #
+  # - vint --version
+  # - vint vim/.vimrc
+  # - vint vim/.gvimrc
+  # # TODO: vlmlparser通らないっぽいからダメ - vint eclipse/_vrapperrc
+  #
+  # - bashate -i E002,E003 .bashrc $(find -name "*.sh")
+  # - shellcheck .bashrc $(find -name "*.sh")

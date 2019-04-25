@@ -1,0 +1,63 @@
+dist: xenial
+sudo: required
+language: python
+cache: pip
+_autorest_install: &_autorest_install
+  before_install:
+  - git clone --recursive https://github.com/Azure/autorest.python.git
+  - sudo apt-get install libunwind8-dev
+  - nvm install 8
+  - pushd autorest.python
+  - npm install # Install test server pre-requisites
+  - popd
+matrix:
+  include:
+    - python: 2.7
+      env: TOXENV=py27
+    - python: 3.4
+      env: TOXENV=py34
+      dist: trusty
+    - python: 3.5
+      env: TOXENV=py35
+    - python: 3.6
+      env: TOXENV=py36
+    - python: 3.7
+      env: TOXENV=py37
+    - python: 2.7
+      env: TOXENV=py27-autorest
+      <<: *_autorest_install
+    - python: 3.4
+      env: TOXENV=py34-autorest
+      dist: trusty
+      <<: *_autorest_install
+    - python: 3.5
+      env: TOXENV=py35-autorest
+      <<: *_autorest_install
+    - python: 3.6
+      env: TOXENV=py36-autorest
+      <<: *_autorest_install
+    - python: 3.7
+      env: TOXENV=py37-autorest
+      <<: *_autorest_install
+  allow_failures:
+    - env: TOXENV=py27-autorest
+    - env: TOXENV=py34-autorest
+    - env: TOXENV=py35-autorest
+    - env: TOXENV=py36-autorest
+    - env: TOXENV=py37-autorest
+install:
+  - pip install tox
+script:
+  - tox
+after_success:
+  - bash <(curl -s https://codecov.io/bash) -e TOXENV -f $TRAVIS_BUILD_DIR/test/coverage.xml
+deploy:
+  provider: pypi
+  user: Laurent.Mazuel
+  skip_upload_docs: true
+  skip_cleanup: true
+  # password: use $PYPI_PASSWORD
+  distributions: "sdist bdist_wheel"
+  on:
+    tags: true
+    python: '3.6'

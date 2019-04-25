@@ -1,0 +1,19 @@
+env:
+  global:
+    secure: GRI/L8Gy596OjIo3iK0vevyLcqXaMGjdGSuqsm2CNqVfVCXxeBrez2GxQ2TBTRyusfjPXOq/3+aYBRy/IXLOIB5O7Rfz4QX/x6jlLqS/5R8PybNcBeXi0/4/wPQa6DdmguWFvvts8ENbblkushmraoGLMgaM2VN8ZlXhvvp7yS/S8XtwlrnMSPlZrlxb+QrvgRyeLiypv0B3HBmEyFcyFMK9XWxxbguNgoO0t/uQH6RPt7n46rf8bEhKXNs7qk5b1zQXDBcTlCyLXKXnTxej+qmHPkTl5eKx8dDil1ODfZyXvdFXFNJYLoLNRwhc87HCsL7e56f3mZNkm4aKFuFUhjze8IUPnDCOOStqLfMXJie5d1loPmM+v0q+dy4A6nXNZ75PyIo65E3outGIEgVHzQKenbw1o6+P91XjfiqypzqF0Vzm5EkXrayEGoQfHtKlt31KyKSA8GY7EI6aTJjahA8OBEaSnmAdxCn5AKkOjmwSScTWYA2z9jwn6Vaup5lUZQs0591ycPpxeUv0ifwA+nfvltzWhiCSulgUJPsAKxi6wjhrTEMtSNwclaTkSYuF1MO31PMnuN6INlQyNeTbDkG2qfCymKN9mVksY1p2SHVioHEXEUZ4SxgYyT579EO+Nx9rvjfmNEYF62O2a3QuaBH3wp4bzg571/7PGCtDIQg=
+script: python scripts/fix.py && python scripts/nav.py
+after_script:
+  - git config credential.helper "store --file=.git/credentials"
+  - echo "https://${GH_TOKEN}:@github.com" > .git/credentials
+  - git remote add github https://github.com/InfiniteFlightAirportEditing/Navigation.git
+  - git add .
+  - git config --global user.email "airports@liveflightapp.com"
+  - git config --global user.name "Airport Editing (via Travis)"
+  - git commit -m "Created .dat files via Travis"
+  - git config --global push.default simple
+  - git push github HEAD:master
+notifications:
+  slack: airportediting:Khe0lsGunLHhWLh1rGyKZhbd
+branches:
+  only:
+    - master

@@ -1,0 +1,39 @@
+language: php
+php:
+    - 7.2
+addons:
+    chrome: stable
+env:
+    - COMPOSER_NO_INTERACTION=1
+      COMPOSER_PROCESS_TIMEOUT=0
+      PATH="$HOME/.composer/vendor/bin:$PATH"
+install:
+    - travis_retry composer create-project --prefer-dist
+before_script:
+    - composer lint
+    - php artisan serve 2>/dev/null & # Laravel Dusk
+script:
+    - composer test
+    - travis_retry composer test-e2e
+after_success:
+    - bash <(curl -s https://codecov.io/bash)
+    - composer build # Prevent merging PRs that fail the build
+before_deploy:
+    - composer global require amercier/webconsole-cli
+deploy:
+    # Staging
+    - provider: script
+      skip_cleanup: true
+      on:
+          branch: master
+      script: scripts/deploy staging && curl --fail --silent --show-error $STAGING_URL >/dev/null
+    # Production
+    - provider: script
+      on:
+          tags: true
+      skip_cleanup: true
+      script: scripts/deploy production && curl --fail --silent --show-error $PRODUCTION_URL >/dev/null
+cache:
+    directories:
+        - $HOME/.composer/cache
+        - $HOME/.npm

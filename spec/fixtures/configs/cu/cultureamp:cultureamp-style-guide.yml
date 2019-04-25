@@ -1,0 +1,25 @@
+language: node_js
+os: linux
+node_js: lts/*
+cache:
+  yarn: true
+before_script:
+# Increase the number of watches to prevent Gatsby ENOSPC error.
+- echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
+- bin/setup
+- yarn list
+script:
+- yarn flow
+- yarn jest
+- bin/buildSite
+- yarn semantic-release
+deploy:
+  provider: pages
+  local-dir: guide/public
+  fqdn: www.cultureamp.design
+  skip-cleanup: true
+  github-token: $GITHUB_TOKEN  # Set in travis-ci.org dashboard, marked secure
+  keep-history: true
+  on:
+    repo: cultureamp/cultureamp-style-guide
+    branch: master

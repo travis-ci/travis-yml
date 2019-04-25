@@ -1,0 +1,12 @@
+language: objective-c
+osx_image: xcode10.2
+xcode_project: Vienna.xcodeproj
+xcode_scheme: Vienna
+
+cache: carthage
+
+before_script:
+  - brew outdated carthage || brew upgrade carthage
+  - carthage version
+  - brew outdated swiftlint || brew upgrade swiftlint
+  - swiftlint version

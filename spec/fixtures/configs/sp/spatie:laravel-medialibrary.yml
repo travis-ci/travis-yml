@@ -1,0 +1,29 @@
+sudo: required
+
+language: php
+
+php:
+  - 7.2
+  - 7.3
+
+env:
+  matrix:
+    - COMPOSER_FLAGS="--prefer-lowest"
+    - COMPOSER_FLAGS=""
+
+before_install:
+  - sudo apt-get update
+  - travis_retry composer self-update
+
+install:
+  - travis_retry composer update --prefer-source $COMPOSER_FLAGS
+  - travis_retry composer require league/flysystem-aws-s3-v3
+  - yes | pecl install imagick
+  - sudo apt-get install -y ghostscript
+
+script:
+  - vendor/bin/phpunit
+
+branches:
+  only:
+    - master

@@ -1,0 +1,24 @@
+language: node_js
+
+git:
+  depth: 5
+
+node_js:
+  - "6"
+
+addons:
+  code_climate:
+    repo_token: 1e3ede5f1df39fc6ae35a0128f9e61fceb61a6f4
+
+install:
+   - npm install -g yarn
+   - yarn install
+#  - npm install -g firebase-tools
+
+script:
+   - npm run test
+#  - npm run build
+
+after_script:
+#  - firebase deploy --token=${FIREBASE_API_TOKEN}
+   - codeclimate-test-reporter < lcov.info

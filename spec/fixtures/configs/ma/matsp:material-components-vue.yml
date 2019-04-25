@@ -1,0 +1,36 @@
+language: node_js
+node_js:
+  - lts/*
+before_install: 
+  - export PATH=$PATH:`yarn global bin`
+  - yarn global add greenkeeper-lockfile@1
+install: yarn
+before_script: greenkeeper-lockfile-update
+script: 
+  - yarn test
+  - yarn build
+  - yarn build:min
+  - yarn docs:prod
+after_script: greenkeeper-lockfile-upload
+deploy:
+  - provider: pages
+    skip_cleanup: true
+    github_token: $GH_TOKEN
+    local_dir: docs/.vuepress/dist
+    skip_cleanup: true
+    on:
+      tags: true
+  - provider: npm
+    skip_cleanup: true
+    email: mats.pfeiffer@googlemail.com
+    api_key: $NPM_TOKEN
+    on:
+      tags: true
+cache:
+  yarn: true
+  directories:
+    - node_modules
+notifications:
+  email:
+    on_success: never
+    on_failure: always

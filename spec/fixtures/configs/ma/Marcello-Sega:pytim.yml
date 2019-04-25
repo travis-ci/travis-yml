@@ -1,0 +1,78 @@
+language: python
+
+branches:
+  except:
+  - dev
+  - extended_datafiles
+
+
+env:
+    global:
+        - CC_TEST_REPORTER_ID=bdc5010b5f2e62769ccd2d885f0d7eb59691844de9a2018e9e3da255a37282e2
+
+matrix:
+    include:
+        - os: linux
+          sudo: required
+          python: 2.7
+          env: MDAv=0.19
+
+        - os: linux
+          sudo: required
+          python: 2.7
+          env: MDAv=0.19.2
+
+        - os: linux
+          sudo: required
+          python: 3.6
+          env: MDAv=0.17
+
+        - os: linux
+          sudo: required
+          python: 3.6
+          env: MDAv=0.19.2
+
+
+
+
+       # - os: osx
+       #   language: generic
+       #   env: MDAv=0.16
+
+
+before_install:
+    - if [[ "$TRAVIS_OS_NAME" == "osx"   ]] ; then 
+        brew update;
+        curl -s --location "https://bootstrap.pypa.io/get-pip.py" -o get-pip.py ;
+        python get-pip.py --user ; 
+        alias pip='pip2'
+        pip install --upgrade pip  ; 
+      fi
+#    - if [[ "$TRAVIS_OS_NAME" == "linux" ]] ; then sudo apt-get install liblapack-dev -y   ; fi
+
+install:
+- pip install codecov
+- pip install pylama
+- pip install pytest-cov
+- pip install Sphinx>=1.4.3
+- pip install matplotlib
+- pip install cython
+- pip install MDAnalysis==$MDAv
+- pip install pandas
+- pip install mdtraj
+- pip install nose
+- pip install .
+# command to run tests
+
+before_script:
+  - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+  - chmod +x ./cc-test-reporter
+  - ./cc-test-reporter before-build
+
+script: python setup.py test
+
+
+after_script:
+  if ([ "$TRAVIS_OS_NAME" == "linux" ] && [ "$MDAv" == "0.19" ]) ; then
+        pip install codecov; pip install pytest-cov ; py.test --cov=pytim pytim/*py pytim/observables/*py pytim/datafiles/*py --doctest-modules --cov-report xml ;  ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT ; codecov ; fi
+

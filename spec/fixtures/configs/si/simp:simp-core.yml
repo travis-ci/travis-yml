@@ -1,0 +1,106 @@
+# The pipeline considers the ruby/puppet versions supported by the present SIMP:
+# ------------------------------------------------------------------------------
+# Release       Puppet   Ruby   EOL
+# SIMP 6.3      5.5      2.4.4  TBD***
+---
+language: ruby
+cache: bundler
+sudo: false
+bundler_args: --without development system_tests --path vendor
+notifications:
+  email: false
+addons:
+  apt:
+    packages:
+      - rpm
+      # provides unbuffer
+      - expect-dev
+
+stages:
+  - check
+  - spec
+  - package
+  - name: deploy
+    if: 'tag IS present'
+
+before_install:
+  - rm -f Gemfile.lock
+  - gem install -v '~> 1.16' bundler
+
+global:
+  - STRICT_VARIABLES=yes
+  - PUPPET_VERSION="~> 5.5"
+
+rvm: 2.4.4
+
+jobs:
+  include:
+    - stage: check
+      name: 'Validation and metadata checks'
+      script:
+        - bundle exec rake check:dot_underscore
+        - bundle exec rake check:test_file
+        - bundle exec rake metadata_lint
+
+    - stage: check
+      name: 'Check Puppetfile.*'
+      script:
+        - bundle exec rake spec
+
+    - stage: package
+      name: 'Build EL6 SIMP Packages'
+      if: 'NOT env(TRAVIS_IS_SLOW_TODAY) = yes'
+      sudo: required
+      services:
+        - docker
+      script:
+        - bundle exec rake beaker:suites[rpm_docker,el6]
+
+    - stage: package
+      name: 'Build EL6 SIMP Packages (using travis_wait)'
+      if: 'env(TRAVIS_IS_SLOW_TODAY) = yes'
+      sudo: required
+      services:
+        - docker
+      script:
+        - travis_wait 45 unbuffer bundle exec rake beaker:suites[rpm_docker,el6]
+
+    - stage: package
+      name: 'Build EL7 SIMP Packages'
+      if: 'NOT env(TRAVIS_IS_SLOW_TODAY) = yes'
+      sudo: required
+      services:
+        - docker
+      script:
+        - bundle exec rake beaker:suites[rpm_docker,el7]
+
+    - stage: package
+      name: 'Build EL7 SIMP Packages (using travis_wait)'
+      if: 'env(TRAVIS_IS_SLOW_TODAY) = yes'
+      sudo: required
+      services:
+        - docker
+      script:
+        - travis_wait 45 unbuffer bundle exec rake beaker:suites[rpm_docker,el7]
+
+    - stage: deploy
+      script:
+        - bundle exec rake spec
+      before_deploy:
+        - "export PUPMOD_METADATA_VERSION=`ruby -r json -e \"puts JSON.parse(File.read('metadata.json')).fetch('version')\"`"
+        - '[[ "${TRAVIS_TAG}" =~ ^simp-${PUPMOD_METADATA_VERSION}(-.+)?$|^${PUPMOD_METADATA_VERSION}(-.+)?$ ]]'
+      deploy:
+        - provider: puppetforge
+          user: simp
+          password:
+            secure: "iqm/z8Aet3wM4LT1Nl5QrLz/q8SBfu3i7YtdTQcrW0nEiwdVsh+nTvSS9Fz5gfub+7vZXx9rABSCh3lj0RNLjq+n17VSJiPQOA8Prvrd239xDmbZPXoHjsjJBbxmbvrwvaLWBZBsNkZsMZ5WUOacKHdyKgJVqxuOQSoreb7ShyqXpC4zhRfzFmPvlWRR03qq9KpHkJkEPA8kyKwmVJw28mfhkuqgDfplp6/8lJhc54FgT67EuhhY2ON73bp4pbA3Usz4+cT/+Ee34J91f7/b6FPydoQgPlfFmLa6ERRe608MZ6S8xpRQDAORFWWucS7qcb+Htn0Grsgl3GEnDMNET2eRAd6TK2XcHaOmZ1m4Ox+72TpYdITDDPBD1k6eV+jvIInVTIeH2VmV8xHeZAlWq8ReY5YOqdVWJDkYGmIyrn/I6vIgyXEARSlrzRhcS1EhrAixMarFTkaP8iHWND96M6zst76s8ETmX+Pnw12sEe5qy/UcKCBpubQh/CGMLzVP59pPvMOScry5COhJdF5Heh98ZekP6rnSIuaYsGM3cLjVaYrrpTo2eRFKThS6cteoPF2QS91xhp0PYA3FlX/PekubKzA1qRUdSnoTYSNVSqAjSJlYIjrK2S7678SJjKs3KAVRgRfkoAMXz+AsvX8LgO1H4JgOchvcm+kCJf01rzM="
+          on:
+            tags: true
+            condition: '($SKIP_FORGE_PUBLISH != true)'
+        - provider: releases
+          api_key:
+            secure: "j4c1OwPY+SRpzc36pXXvBIl7VZ8GsQm5rX5KD980GkZKU9UlpgMg1thUHVG+tkpkndJvqjMQPfXrmX96p6UN2esFX3bL8BzTRbOD+Die/WyCZ5AnHbtI5x8uRYL9PVj0G6YeDtIwgvPm04TjegewfsyuBBkzxEOt+4CITDrUmuDQbRyHRnSHKbACMkck2canaCyHiwNHz6soZpjeAvNzEgjDwWIwWhLueE629kMdy4KGTFUrEiaYWC9eCj2Ic+aD1wvBCaiYt6m5DYdAprraZU9znmJGbzp+06MNHHahAdnLARvNRhp01I1Op2CusH6B9GwdPY26TJm2kRI0JGqdwUJb93fnDlgdbDzFYGtJsjIphM4STP/HWvRl8CWnTOwRGYZGGlC54r5TGqNKA3UlNBkpnPe6jOLLhd+8wyZ5P9WV6w9FntWEXYplGJcsHsgpreIsvKghiFmrFLoMAabbc6/cS2CseJ30uLGCROPILLuWSEYKV5iOG4lZMJPwZhwR4ndFjMyt4YYwTzNpZiCPDrCIKH5EtuZXTsN6zpa3nRvl0v8Lm/UF6OQxXacbCMv5af6h58YwZMX2t7ZfmJqQwQDnaFQyLC8+QZT2KUCyFsLGHS60yPFI0bBjXPMIvpvacjqCX6tyNguFkFfUBhanh5uqXjLpWTakacaX/5q5W4s="
+          skip_cleanup: true
+          on:
+            tags: true
+            condition: '($SKIP_FORGE_PUBLISH != true)'

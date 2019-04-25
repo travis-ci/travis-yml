@@ -1,0 +1,41 @@
+install: npm install
+before_install:
+- sudo apt-get install libgif-dev
+- npm install -g greenkeeper-lockfile@1
+language: node_js
+node_js:
+- '10'
+cache:
+  directories:
+  - node_modules
+branches:
+  only:
+  - /^v\d+\.\d+(\.\d+)?(-\S*)?$/
+  - /^greenkeeper/.*$/
+  - master
+  - staging
+  - dev
+before_script: greenkeeper-lockfile-update
+after_script: greenkeeper-lockfile-upload
+script: npm run ci
+deploy:
+  - provider: npm
+    skip_cleanup: true
+    email: sebastien.tasson@gmail.com
+    api_key:
+      secure: Mot+1zVEid1MfZh7/HgPRMCjuzvyIlVMCe412AHSkYcnrYm8K/jmYAnLauGciHbsZR9phlrbu5xmdKjWmsMfjf9LYsBwEn9IlNUEWqhZ3DKfi87FN/PfV4lNrq1pgQJhtH1/bi656wFNAOG1JE2wjyEFknMN5I/rh33R7U5VnhubWBG5qdE4R54Z/AT1GTHgHd5NZISjxZsv2oLD35ktTpY/Z2zNXQ+eLdmOhOUN4jKr/0niq298fwdRG64lv2MikihJFM/88FYNQ/qIODnpS5b/vnxpYRHc6bHiWlZsVqzQXnA9xg/61ePm9+dTjSGSRmPkDzB+LFO8+XV7AcTzqoUrfSssU2JXcNqS/ZKlcJQcBPN7X6BAwHb7PXUuofSTIhIXv1xNfIpIh1w8aoLhDiUFIiWKo96B8Dy7Or44LeazM+vxVZCtm4aLpb1oFA0VLG2RffE7EbQmo8ehMeMLk2H/dy6tt0fdR+J0MI+ycS8FG7abKP0KZngvnT9ZbtzNow8rCYmGM+FSqiZVrL8MgBmJlsQifqPb5lUcBIEbIdnvCD/jSFMoKJckJKM/rZMy3untPD73dUQ55IjPyO4bn5cIxYBrdF1sU8oQnclNTT6norTImwCXQgqoHwh7aRVyfgNtPssczngb4DHn9Igi5yUIYOUHq9swU8D26Bi4TYM=
+    on:
+      repo: stasson/vue-mdc-adapter
+      tags: true
+  - edge:
+      branch: v1.8.47
+    provider: pages
+    skip_cleanup: true
+    github_token: $GH_TOKEN
+    local_dir: public/vue-mdc-adapter
+    on:
+      repo: stasson/vue-mdc-adapter
+      tags: true
+env:
+  global:
+    secure: ONJLXVJXS5wD1Xs3AiEutRPzBgAiY524E1EDVheutcTC5lVM9rEBDMgBy/WhvoEinI14sZ6x/+TV9wpW0iyk5BBnjHKAUgPsLS15o5TzLr053c66RYGO1HPKeojJAB0tBdtkeMGStA07jNGko8trm+jNUrGJs/HwvzZfPqjymynahEo4rL+l8ujOU/iUkG5FMtL2TbAZpPoF/V/i6kyST4CPBO8FOWJzZnJEtU7E8CFVnJtW9WReyCTlX27o+MXEz4KYr8OvUfzTNEQSpik5Ag5GoFzMeHWO76iDT/YzJ5EGrhybmVfYRClTuh4uw/52v0HBLQFO1biQQvltvjfWZ8uBMnwX6pL7Bl23ej+7/pvrEssRoeNdwUWkM46T52U/DZpjDREZVRuNcJgE83kpvYzR0sWrajWlAb+MTEaSEyxTFYqMWVPKXhIyJMQ2B6qDjNlDtygHS2gdn8LZcJMgmQgvUe+BFfilqaT7iy8SFUC6thf2a/t0Hc8dJThKhh6MjeyDAjVtuuRwmYXbW4baR7Bua3h9bGTTDBcMCYAMHYKnhmWIB6S/x1u47lgfixBrNo04IpM2dR454oWu429EBdtwdB4aXxBvWt6oKz9tvWhfkGzw1hcge9XEtLSjfbOkOOxHk/SZtpnF0GT5Skls/Y2khYmcjyYMm2cbx4SGIlU=

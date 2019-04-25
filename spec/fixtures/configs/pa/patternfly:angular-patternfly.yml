@@ -1,0 +1,42 @@
+language: node_js
+node_js:
+  - '8'
+
+cache:
+  directories:
+    - node_modules
+
+notifications:
+  email: false
+
+env:
+  global:
+    - ENCRYPTION_LABEL: "aa286ccd339e"
+    - COMMIT_AUTHOR_EMAIL: "patternfly-build@redhat.com"
+    - TRIGGER_REPO_SLUG: "patternfly/angular-patternfly"
+    - TRIGGER_REPO_BRANCH: "master"
+
+before_install:
+  - npm install -g npm@5.4.0
+  - npm install -g bower grunt-cli
+  - npm install patternfly-eng-release
+
+install: true
+
+script:
+  - sh -x ./node_modules/patternfly-eng-release/scripts/_build.sh -a
+
+after_success:
+  - 'if [[ "$TRAVIS_SECURE_ENV_VARS" = "true" && "$TRAVIS_BRANCH" = "master-dist" ]]; then
+       npm prune;
+       npm run semantic-release-pre;
+       sh -x ./node_modules/patternfly-eng-release/scripts/semantic-release/_bump.sh -a;
+       sh -x ./node_modules/patternfly-eng-release/scripts/semantic-release/_publish-npm.sh || travis_terminate 0;
+       npm run semantic-release-post;
+       - sh -x ./node_modules/patternfly-eng-release/scripts/semantic-release/_publish-webjar.sh -a;
+     fi'
+  - ./scripts/publish-ghpages.sh -t docs
+
+branches:
+  except:
+    - /^v\d+\.\d+\.\d+$/

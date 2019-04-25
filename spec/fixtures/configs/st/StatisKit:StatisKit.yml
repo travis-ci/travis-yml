@@ -1,0 +1,119 @@
+## Copyright [2017-2018] UMR MISTEA INRA, UMR LEPSE INRA,                ##
+##                       UMR AGAP CIRAD, EPI Virtual Plants Inria        ##
+## Copyright [2015-2016] UMR AGAP CIRAD, EPI Virtual Plants Inria        ##
+##                                                                       ##
+## This file is part of the StatisKit project. More information can be   ##
+## found at                                                              ##
+##                                                                       ##
+##     http://statiskit.rtfd.io                                          ##
+##                                                                       ##
+## The Apache Software Foundation (ASF) licenses this file to you under  ##
+## the Apache License, Version 2.0 (the "License"); you may not use this ##
+## file except in compliance with the License. You should have received  ##
+## a copy of the Apache License, Version 2.0 along with this file; see   ##
+## the file LICENSE. If not, you may obtain a copy of the License at     ##
+##                                                                       ##
+##     http://www.apache.org/licenses/LICENSE-2.0                        ##
+##                                                                       ##
+## Unless required by applicable law or agreed to in writing, software   ##
+## distributed under the License is distributed on an "AS IS" BASIS,     ##
+## WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or       ##
+## mplied. See the License for the specific language governing           ##
+## permissions and limitations under the License.                        ##
+
+branches:
+  except:
+  - doc
+  
+language: cpp
+
+sudo: required
+
+git:
+  depth: false
+
+services:
+  - docker
+
+os:
+  - linux
+  - osx
+  - windows
+
+dist: trusty
+osx_image: xcode8.3
+
+env:
+  global:
+    - ANACONDA_LABEL=release
+  matrix:
+    - ANACONDA_RELEASE=start
+    - CONDA_RECIPE=etc/conda/libstatiskit-dev
+    - CONDA_RECIPE=etc/conda/autowig-libstatiskit
+    - CONDA_RECIPE=etc/conda/libstatiskit
+    - CONDA_RECIPE=etc/conda/python-statiskit
+    - CONDA_RECIPE=etc/conda/statiskit-toolchain
+    - DOCKER_CONTEXT=etc/docker/statiskit-toolchain
+      DOCKER_CONTAINER=statiskit-toolchain
+    - ANACONDA_RELEASE=finish
+
+matrix:
+  exclude:
+    - os: osx
+      env:
+        CONDA_RECIPE=etc/conda/autowig-libstatiskit
+    - os: osx
+      env:
+        DOCKER_CONTEXT=etc/docker/python-statiskit
+        DOCKER_CONTAINER=python-statiskit
+    - os: osx
+      env:
+        DOCKER_CONTEXT=etc/docker/statiskit-toolchain
+        DOCKER_CONTAINER=statiskit-toolchain
+    - os: windows
+      env:
+        CONDA_RECIPE=etc/conda/autowig-libstatiskit
+    - os: windows
+      env:
+        DOCKER_CONTEXT=etc/docker/python-statiskit
+        DOCKER_CONTAINER=python-statiskit
+    - os: windows
+      env:
+        DOCKER_CONTEXT=etc/docker/statiskit-toolchain
+        DOCKER_CONTAINER=statiskit-toolchain
+
+before_install:
+  - git clone https://github.com/StatisKit/travis-ci.git --depth=1
+  - cd travis-ci
+  - ./before_install
+
+install:
+  - ./install
+
+before_script:
+  - ./before_script
+
+script:
+  - ./script
+
+after_success:
+  - ./after_success
+
+after_failure:
+  - ./after_failure
+
+before_deploy:
+  - ./before_deploy
+
+deploy:
+  skip_cleanup: true
+  provider: script
+  on:
+      all_branches: true
+  script: ./deploy_script
+
+after_deploy:
+  - ./after_deploy
+
+after_script:
+  - ./after_script

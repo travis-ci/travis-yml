@@ -1,0 +1,26 @@
+sudo: false
+dist: trusty
+language: node_js
+node_js:
+- "8"
+branches:
+  except:
+  - gh-pages
+before_script:
+- yarn add polymer-cli
+- bower install
+after_success:
+- if [ "${TRAVIS_PULL_REQUEST}" = "false" ]; then openssl aes-256-cbc -k "$password"
+  -in id_rsa.enc -out id_rsa -d; fi
+- mv id_rsa ~/.ssh/
+- eval `ssh-agent -s`
+- chmod 0400 ~/.ssh/id_rsa
+- git remote set-url origin git@github.com:predix-ui/predix-ui.github.io.git
+- if [ "${TRAVIS_BRANCH}" = "source" ] && [ "${TRAVIS_PULL_REQUEST}" = "false" ];
+  then gulp prodBuild; fi
+
+env:
+  global:
+  - secure: AKESuYef+Ccx6bj52IancFbwArmidiCmgiOIfKPyUNZ7QZ9h6UFgsc2gmCCSP3Gia2pxXP0Qn8LY/cbU3C5E5KAqsBYS4qKeLqdF3u52uXnBBWoh1tlLPQFBX1+j/pikgfu/rG0fg6pSiBVurAbnptWLyFmHdCVbDUOvUmlwoobMwPib3lvg2jMb2vqMmE1IYHig6TfZ96fGW/MzawCVI2SKUHdfJp/1JPNidYWrUSJHIZKxRTvAijQPGQhFVtGlE0jwBTkuKF8xE0Cl9JUZdk3u/07BHnAB+MT+RaXEcHDiJBdaieFz4pK/BeDlowNgpsayE9pLOfZBiKF9Igp/2QhmgTobXojohoWjwggrLqYRwHtzCvoxnlleSlAADbK8EW/Whuc28GrD/nSXa9bIO/fDRMx6gzc/owg8Kl3BvNFRz6izcGfarq3jf+ITntd+4tN5FV5WeVKcyvU04L+Tdw5WgE/HYRg/OsXsSmBzdkbtab3gYc/cbMlSDQjYa2lrgZgEnezdCqSzIYgduLKjVtm05LnnpE7rtm4m4BhOeNa9SKkfoewd0U3KmBPkWqE4Jbj50cyAYD/MRbXrt38ZX4xWQSdNPqAGRHfszGVmE5YDMsxYQHf9XmGB4h+4cZmg5dlhxTVmmzozPlrY/jRwrQMBeFG8jJGI2TAxSmj013c=
+  - secure: BT/OQTAFk6xjsU0uXZAacJJdjV5a//FzMCQeL0YtaItEK2lNr5f1n9Ot5qFTkZOEJGI8+vZg0MPuQNtqU+gQoJSOcG41KGjKi0Ij/AA4BnD6tSAVooxs/jT28PuGODw+xmj9wx8fWtB+/MCZM29NBLNJumPpPfaIjW4hSD6vpO0xtHvZhXXcwZmsAEQOuweqGwi2xx2y8gal8BXzGAj0m7NLSLP7F0p2ZqGYaD8pJIRUE2X4Lgl3i0ribJZij+TcRf/XAqoudkeIfRrW6XbgT0T3COvsqOmNrgPQXV4VhN8R7p7CY6bAGk9XWR1/6kj32MC5UydRu3UYHe2S0XLa1Jroknvq8nKaNDSQWLZGS3hZe0n/8G4hF9T7TP8gwO7j4hauQtU0Xk92jNb9jT3VkF+IIQ/B8EtSuQsIdIKcnErobGjFcY8gyewM3iMO1LA0AKdTOG+87dLQhvGXjbyzrkC0BUBVD06T17xiB3KG7Wu/9fbkjOmpYD+WGceNn0JRnqIl/k6PEi4+2Y4KnwPDnn71T3ftszZqDusXVDyC9rY2KnmGGkOMKBCv//VJSFSmPgKD1CTQ+2AGSMtcimVTHdKOScZ8JJ27b7NalfXQTRFVwdHcTiqyTA+6fqEctwSaXDd2PnHpHE0PQFIIWxCwcC4EETHNY1J2R8t2rhTyoTo=
+  - secure: Hg3uPfPXISBn9aGBscXPZjJwKE92q1aVHpbcbS5jW6hKfK5xAUBi70kEvm4krtXFwgUtPDCzrB5bGuZ0z/ac8NsgIjlT2BsGbGZ8oaU40IinhrR+5eQCsDcFHxar6oO7LokME53oI2aLH9+CUZUKvAq6lcsLbqX/LKeP1LkV0Lhnxnhr30rEvVloirXsctWvE3ok/rHI3XkG+2Glboh1GVuJqOJ5y4WYciwAKQcejwHrFI5xZvo3w+N08tHeab+DOy7ZaJsiWrQbIGwBpNle1QeMI1Wmbx+fwsRppTyERbApPmaPpZ7FjgRO7xtkQKWmsxm2D053xR5WbsoyXhGWkaQoaHzFHv2jz/TXeVUPG4dxr0Zh1ospZE/KE/3Iw21mUZjPXJiwtdrSN/Adg3kOX7/52USVlhfMv/1sGNBENrGnwCwBkXEFCnWQkqSE/F6YBL1tlRTZquhArgg8Jp3IzMU/e7C+HbD6ZFnpkBCpTiTK6N0Zh2GKgpL7MUlcsBgQbnnV8nPgbvab7p8O9ToixumHzFFqelpoi2I7Fo+zkHzeSQ8tnU7DzGg/KMDrIeBFor6kHZI9W13Z37KkGCZVx6VnrYbzMIvglwoSnX2sHJOU+41uM8cq9WHqhzDmhjooAz4sbEuY8XQplUBC+vI/sjW5hvoPw9f/BllUuM4nh1s=

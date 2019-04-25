@@ -1,0 +1,34 @@
+language: rust
+cache: cargo
+rust:
+  - nightly-2018-11-23
+
+matrix:
+  include:
+    - env: TARGET=thumbv6m-none-eabi
+      if: (type = push AND branch = master)
+    - env: TARGET=thumbv7m-none-eabi
+      if: (type = push AND branch = master)
+    - env: TARGET=thumbv7em-none-eabi
+      if: (type = push AND branch = master)
+    - env: TARGET=thumbv7em-none-eabihf
+      if: (type = push AND branch = master)
+    - env: TARGET=x86_64-unknown-linux-gnu
+
+notifications:
+  email:
+    on_success: change
+    on_failure: change
+git:
+  submodules: false
+before_install:
+  - ci/submodule.sh
+install:
+  - ci/install.sh
+  - rustup component add clippy-preview llvm-tools-preview
+script:
+  - ci/script.sh
+env:
+  global:
+    secure: >-
+      gH2hEJF33p7sb3YpdcZ6x52ts92qHkuw95crOyJOUgoBR/j8sj7CtL7LQCYdVgQpUBE8k1VVp1idUmVJQzEg3POI4CXp2OSmb9n/giqJ/7qQCcS6OYTmbGkPHkghqJsn8Eoylwk0TKy3jt/Un/h0F4pkKynVsa4gvM/CasWJ7PiNpFnR759QhztkJsS1/HUAUu/6ulEgAgcicEVi/lujNg82Nji+F5s6xDKxRC+EHMRMP7pQsZEAMRXjqjpXumwAm0FZu3g0/H+OXxLKf8H6xuIwWIkm9GTz+0u+A0sZ8+oaLLPiTmmc6nfPSiuDjQ6PGH0h4W78ckqT5vPiyYcepDofM4jGsnML9w8yO84i/F+eLEhQHecbiirnrRIIZS3QNbUmbQYM/a8fUx01MRWPVcWL+onPTx7itlNXua5na6nJUtFY19JW70YLvd51nz+sgApyIFumNrwor4L2Np37KfipT5GUH/9LvYBRH4hctSPH+yZss46et3vteBieMXHMdaZFzZgVtAoH4s9bWOTaWii1ioyMhgJjy87yQMWQ5UVJxlU6f2TiYSU1Lr4oMa1RxXavNhpqcuwwDrbElEYh2tCqppNjXXyPrfG3T43UEyiF9jePnE+COPkyIyu2cRn8hxjLjNFr41GBFNUuk/NoVhccLRGGvpWrqMuHwOeWa1E=

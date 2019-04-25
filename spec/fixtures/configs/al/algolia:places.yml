@@ -1,0 +1,24 @@
+language: node_js
+node_js: stable
+before_install:
+- curl -o- -L https://yarnpkg.com/install.sh | bash -s -- --version 1.7.0
+- git config --global user.email "algobot@users.noreply.github.com"
+- git config --global user.name "algobot"
+- rvm install 2.4.0
+- rvm use 2.4.0
+- "(cd docs && bundle install)"
+script:
+- npm run test:ci
+branches:
+  only:
+  - master
+notifications:
+  slack:
+    rooms:
+      secure: ksGBanrJ0rmBUpMJT8TWCvjJ6F8Rlin8a9DQNPNOa1s+bCGswp87V1a1bSybz/166JflMqSutf6ES2/qBcp8uhXS3hfKdpj3wJwUPtiWQ+Q1GRAsL7ZiPlz/OgOkACihyrONipjzTANSKhAy7NiJSGOMbSn09yUaaun+wp5iy1KJ2qcC/GRbytkyyDkzzVYDKonNV96KINeTnv3WnM+cgt/1YEzvQ6lPLExS0S90m4m/JUn+pO4CNfw0uHc1NEd3whPQi7WDr1a43qNGea7/WFg9f8yDn1PFnkLujYku77rfFrn164s1UaerUuHusEX7Qff/0BZ3Fy29LPfmQIqZzrb5RGRnsYxv+nyZwMuWw1xP/Ag2fs+GuPw8JG2JJNE61aAKL+HgbC/g4XaSckvwMzA3T/5cvJVh7aIBQmptDuB8AWygp6srBKgKtTmZxqFnpZaHm1Pz5A2C/mERQNf6YQorv/QBtT7seek9CtS5DBqlaBxogHTRN1qJ+dNZ/t1S8Tk5QT4w8Wt8L3xS4fBEakH0eaFXtKAPDO8optNMQhHesvBGUfOJ+bjaT/2626BFK9FXJg3VTlgPMZlto8QSaax6zJocmC3PGxvHOevB4cjR3j44msvmRRtgkRXIuxTK1mXamCbH2UCXLN5aVgXWSQjZY9W5uG8sqwFjnao4VZg=
+cache:
+  bundler: true
+  yarn: true
+env:
+  global:
+    secure: o9jGb6EMsAv955rn+Mu1GPLX+3aA6j5POM5rjq3X3T+zRSV5eBEnP8TiRSmUqIz+aLXmvQMKsCJsFc4oI9udjotjwBUXKvl4Zq7Ph45iVunQLi06Bp+4DaB7pSrAn/qeY5R2P38jIonN5nitjDQSf/htgxsvurC8aX0QR1Bp4TdQNVQUuedaGjHfGitBDwgGIjU7LatHwPKguJA/NnKKg9qFZNJDrZ3Wb9O9//RJyWxcnYF4JEVKztgk7I+vGXkN7a7mpCsesUxS6qjs2MRTY7qjFRXHV3HrltLEwYs6z+0ijmTJl3e6W8KO1kKj3qfQCTpkZV1R6YWDtefKpQfzW0SBFgTX8rJ/pnt+o0DxLRFzHpnUCZBcAqvtjZOzwP2qJyqI3S9LGLZ6QZ2OpqTGamBm4DLrAUmeB84jImbgj2buiRDMStY0ut2z9RURdr2zWSUouVojjJmlhbBTWvwGk6x6ZbQy1P+SZGSzjXbKn25X9c14B6OJUjv5NFdDZf4zxWdYaMhX8tum+SMvnwZjoGC57R+WyrN0M27Xu0OAO30PyEFTBpe0y3JN7bdeL1AnZxqlSJ+gX2BfRZaoLnQzdTcUW+VUIRBwRsLJCFqGo6GAATe2kDbDDZshSKkP8sJnbmbty7BY9j5PTe1tXqDwCT0l7WZtq+K6WRxFVay44xU=

@@ -1,0 +1,30 @@
+sudo: required
+services:
+  - docker
+language: python
+env:
+  global:
+    # Docker
+    - DOCKER_REPOSITORY=mozorg/snippets
+    # Django
+    - DEBUG=False
+    - SECURE_SSL_REDIRECT=False
+    - ALLOWED_HOSTS=*
+    - SECRET_KEY=foo
+    - DATABASE_URL=postgres://snippets:snippets@db/snippets
+    - SITE_URL=http://localhost:8000
+    - CACHE_URL=dummy://
+    - ENABLE_ADMIN=True
+before_install:
+  - docker --version
+  - echo "ENV GIT_SHA ${TRAVIS_COMMIT}" >> Dockerfile
+install:
+  - docker build -t ${DOCKER_REPOSITORY}:${TRAVIS_COMMIT} --pull=true .
+before_script:
+  - env > .env
+script:
+  - docker run -d --name postgres -e POSTGRES_PASSWORD=snippets -e POSTGRES_USER=snippets -e POSTGRES_DB=snippets postgres:11-alpine
+  - docker run ${DOCKER_REPOSITORY}:${TRAVIS_COMMIT} flake8 snippets
+  # Wait mysql to initialize.
+  - docker run --link postgres:db -e CHECK_PORT=5432 -e CHECK_HOST=db giorgos/takis
+  - docker run --env-file .env --link postgres:db ${DOCKER_REPOSITORY}:${TRAVIS_COMMIT} ./manage.py test --parallel

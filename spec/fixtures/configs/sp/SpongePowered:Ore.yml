@@ -1,0 +1,39 @@
+sudo: false
+notifications:
+  email: false
+
+language: scala
+jdk:
+  - oraclejdk8
+  - openjdk8
+
+scala:
+  - 2.12.8
+
+services: postgresql
+
+addons:
+  postgresql: "9.6"
+
+before_script:
+  - psql -c 'CREATE DATABASE ore_test;' -U postgres
+  - cp conf/application.conf.template conf/application.conf
+
+env:
+  - DB_USERNAME=postgres
+
+# Caching taken from https://www.scala-sbt.org/1.0/docs/Travis-CI-with-sbt.html#Caching
+cache:
+  directories:
+    - $HOME/.ivy2/cache
+    - $HOME/.sbt
+    - $HOME/.coursier/cache
+
+before_cache:
+  # Cleanup the cached directories to avoid unnecessary cache updates
+  - find $HOME/.ivy2/cache -name "ivydata-*.properties" -print -delete
+  - find $HOME/.sbt        -name "*.lock"               -print -delete
+
+script:
+  - sbt ++$TRAVIS_SCALA_VERSION test
+  - ./scalafmt app test build.sbt --test --non-interactive

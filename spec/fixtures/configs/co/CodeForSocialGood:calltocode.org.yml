@@ -1,0 +1,51 @@
+sudo: required
+
+language: node_js
+
+services:
+- docker
+- mongodb
+
+addons:
+  chrome: stable
+
+install:
+- wget -N http://chromedriver.storage.googleapis.com/2.30/chromedriver_linux64.zip -P ~/
+- unzip ~/chromedriver_linux64.zip -d ~/
+- rm ~/chromedriver_linux64.zip
+- sudo mv -f ~/chromedriver /usr/local/share/
+- sudo chmod +x /usr/local/share/chromedriver
+- sudo ln -s /usr/local/share/chromedriver /usr/local/bin/chromedriver
+
+branches:
+  only:
+  - master
+  - /^greenkeeper/.*$/
+
+before_install: npm install --global greenkeeper-lockfile@1
+
+before_script: greenkeeper-lockfile-update
+
+script:
+- yarn install
+- yarn test
+- mongo --eval "db.getSiblingDB('admin').shutdownServer()"
+# - yarn e2e -e ci --tag smoke
+
+after_script: greenkeeper-lockfile-upload
+
+after_success:
+- if [ "$TRAVIS_BRANCH" == "master" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ]; then ./.deploy/build.sh && ./.deploy/deploy.sh; fi
+
+cache:
+  directories:
+  - node_modules
+  - ~/.mongodb-binaries
+  yarn: true
+
+notifications:
+  email: false
+
+notifications:
+  slack:
+    secure: "$SLACK_TOKEN"

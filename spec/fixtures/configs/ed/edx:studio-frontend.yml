@@ -1,0 +1,42 @@
+language: node_js
+node_js:
+- 8.11
+install:
+- npm i -g npm@5.8.0
+- npm ci
+branches:
+  only:
+  - master
+  - "/v\\d+\\.\\d+\\.d+$/"
+cache:
+  directories:
+  - "$HOME/.npm"
+stages:
+- PR checks ✅
+- name: "Ship It \U0001F6A2"
+  if: branch=master AND type=push
+jobs:
+  include:
+  - stage: PR checks ✅
+    env:
+    - NAME=Unit Tests
+    script: npm run test
+    after_script:
+    - codecov
+  - stage: PR checks ✅
+    env:
+    - NAME=Validation Checks
+    script: "./.travis/validate_changes_for_merge.sh"
+  - stage: "Ship It \U0001F6A2"
+    env:
+    - NAME=Publish
+    script: semantic-release
+notifications:
+  webhooks: https://www.travisbuddy.com/
+  hipchat:
+    rooms:
+      secure: jLi64vC05Chtjofdqs2GwdsIoZJn2OE8Nk+TBqRGwAWkRQ6UVP9kbyxZYTB7y0Jr60x2grUs9m3sQycjZrAy0Me4ge+pfAuVhim98RiAVOUPeQGRJujXoIAR4xpB8FTMsmW3vGuAz5v5cq+jKm0i6c4/5Jqn7wPkGCVYDUApmriRKuMgKsbx8FSC4kYWsRBaDEOuFU2P8LiMHaJTVZVEhnSKlJelyi8CYK7if5U82A501kuYYFbDgd24BQunkFsKL881YZ7hBjnY/JzMIXxGfLtIyUq61SQQjpu1ccum9nw+8DoJ52jTFTulgfrLupi3InOKaRzjq1POnGiZyrXEedGCWvH4lb61fKlL9OYp5yExvPlClsdwLFq+3EZhwWkquWeCftvTECdjIX6k2wFCaFl9VnkF8RCPfQioVKdE2qk8mEUsQHIjEt/84q/qoJGl5pgw97sS/+JkYmB4eytrSFwP6H9uDrRRutAp2EMHPbmYUTvWeDEOwjaHLb1iChvkkxMDydY2bO1EHWrLXl0R4QT8lOub7WRKQywgtopNLJWc+FZtntOjb5YX7rLnrFSXH/G2nczSvWScNOzqNrXzS/y1SvDoFw2dm1gO8RXhYwwYPJPqLAmFMXEClAdScPehWn8qG9YV1KI/L1PTktYX4RxCUjSKbOMDZi4vP984fdo=
+env:
+  global:
+  - secure: hyP3JOMcU7Kpda0zxyo+qgTkclFpk7cU5J1KrilVQe4hidwJHKMdLjo00+4Pa7E3QwWqWwTblyO1k/l2mCHGoz2oA6MBUPjEimXR9CTvaxf5NOVS0vmBIYErorO7IaFKXlylXpwOKIETumHr9Uc51S0Eii9lxF9pU8h98MYTUWcOY1HdlSvotXQJi/z66WGAL3NWy8k72Y0R1XIfvnCOijYUHz0/kZJvmHHm7Cb2luEh+c7bOKWlpCN2rEcN5p/v/qo54bG+ZsejmKyguzrV9Pn5BV0GtCtKu33T8g7TZMS9dUilER/LCaG5Z1EarKQ2zdn4avHlP3RgHwE7w4EZuSIG5kQo2MKxkRKeeae8XX0UlgEru81n3IAZgKbviKVYiorV0OihxKXUQxSD0Jw0Bv2wYkLKFoxaJxMZPAdlpaOmkt0zGfNsEOrM/Z80fAF41s47nVzdyk7Zk4noVfK7/3qzejT9DG5K/aR6NSC2bY6MQHoRWqZKW8pa+kfToaC+zvh2tB2ohsHrPJX3H+OodS65Qw1Qh7kBQRIY9Sqn+mCTqMmfTGRbn8v64kLoMn2SbpZYIOeaN5UWGLsOtdw0LetnfdOBGMgkIi0CwTZ9jKnqo4dGmyX5AYH9WP/yzuyBCDZjSA1rVg5OUyQN0KyU/Yj4tKwuuC1rdyueSiguiBw=
+  - secure: f+T0iS4Y1RsmgpuY8lqtXTHBcmj2VWwGPenoSPd6OJfWGyi423i2Bsx0bY9fa2xOv5LZB7ySocz5CK6IPVth84i2Yv+qYIRkcQwakC9aYJ/D4R7RWApIyJ7+RMfZWywLi/Fo4xFrdJCyb02OXLxoiXLfUBOB9u70hTxDIUcf9Rbes1W9Pob4PqGWgW91IcabqlEg8tgx5K5xoOy9bshZ6oNvuyZHsuB/uzKpiYECHKStujk5uQEYDX7ERDqSoefVSilz/SSgY04yop4COyD6Ha/He/MKOvKg02zMbq7wbY2S4UuCcY7ndtOaGvJEhar8VJkyZscEbg6r6kz9EAZQNnO8x4gDicbdBqILdvSuTam/zTBFM4nwLWC2UpCZkjaQ7yjhDQC74s5kNuww0m/iH3C9bV9FQf7c4Jv29KNu9jgNyorjn08UfqzDaa6BMF8Z58wjJfSTuLL7SU2hKaTSS8pN7U0MS3CtUk9DQRlng+4QZfGVf+NqHzO9onQhgS0zbtkYQWH9LIUp8iWjIy5Gaa3xxrE0fUhQWU1083iq/G6Hmz30CtQj0vMQCKwCf7tJCDcPjJVjazwrQKvSel8o/CXdwHCcWlYPFKRwuPmRGClfMZ5YvccAoFcSBjK3/Om2LVDyWuIRq1i5H8fk3uDLApSJYMdn6Pd53hIZ0mpuDxY=

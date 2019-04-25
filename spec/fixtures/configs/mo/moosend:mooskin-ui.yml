@@ -1,0 +1,19 @@
+language: node_js
+sudo: false,
+node_js:
+- "10.15.3"
+script:
+- npm run prepare
+- npm test
+notifications:
+  slack:
+    secure: esI54KRgxOXGMaj2XkL0hqzxbyPDvAjameywVBkFUFFxDJt3NnxtB4vkmA0iv5Qv+J9jqZ9UaVGnJhhsDJLYQXzkgLfONGiGE4JK/t55N8rGZDUB/3GRz0VMJBeAVYQai817IPoiSKAL88QDKYTuxtmfIrw1f36L6Dps6lWSowc2veYGrHRuTPPw7UtzZzGl29jx4Oahlh1JykC9TnyjbpRNRGsj11ru2k9J0cTEaIbD8Nu/26wBK/7+GJpY7lQ2JbD2ntJFBy965kz5ZXTbAwyBvHh4PLuy6SXNWcJd++ziYixmER+i/AK0lx8qEes+IbrYOeCnG88yWiNc5IZTqKuy9kW+U+N7RnFFy4l+mGaeNNOH9YZSot/ntLQJ6n2sEC4KhidkYPpZsU1tJZftX50LXQ9g0X2Kdsz7hQnqnyTG2OapTvxLBh/rTgLrPtvAzN2YZw6E/3qcEuxwVVkQJOkx2jiGL8TyOjNkXJ6YH2HTBM7E+8yaTRUy18q54MEOS0Mrm2/bPBpP25+V+gnOj+3CoCL+1iU/4FGfnXhxRfb9pUM+fiupLVi/8aW2k7YzVoai9CjAhSW72OxXvpyO1JFRCbi2tMi0oxfCIcSLToZGqpMdXGo/J5joT6SaAUjejM6VoKAzzSSnVUynep4CHwFKfPUV9ZertxhBa8n06mw=
+deploy:
+  provider: npm
+  email: gentgaashi@gmail.com
+  skip_cleanup: true
+  api_key:
+    secure: ZOEdUQvhRLivydqlBS26uuKUm760/QeDSU6Juk5bVHmAjcfSfQBQSPOabJAXirXlsTKu4drXtll+P+5iB0HLfxSdC0Nh3uhKau/ApkYd9ESm03djyDX2jeJBbfWVmug7x+j7q/yOJkd5Qy/bHqXj89HYsMGx4A+Sq16D4FpSAf21dxyzGrNyuc1zZWJSxLJmCI9XfQhyN6SqLyLxY8M0IBhgPe0K6xfkCLOsnKSgqNDw7JV9WLi46C78RdWAZOmG1R08ZCw8rGeAs/TRf0dfteyQenVVNdRZhyEKrRWPCFqvWC/3Z37d7fxoNdyCzO8kZuW+c/xpAVEsixUXMrj9D9cCCxoW58yzHlGGMhxf1Yy8EuJeDbx/uaW3KzKHhTUG6WnbEr2D/hOTzuTwgoo0kJhvkTfSRXDSVRQTNlUEL8Tux5AF38QXFhYu1KmEYn8WkHH/IZ9TsJLTC+5lPpFaLbbg4fOuSkhOb835E6wtii2Reo8WTnjBSHJj4DH+IN0Ptunnwh6a/fzjlO19W/yJ5c2hUqrZ9bSyE7htXxS0EyTtc/zBBdED4bxdqaSVbnmdW8WuTGnEhLkC06nS69oZbO7ZI+NCIfTbvh2lEfY62l07k6KeAJVd6DV75E9gNZObkHeBg4ZXrJLEZJbP0fduyJcMzzcWO3flGl76BW3YVQU=
+  on:
+    tags: true
+    branch: master

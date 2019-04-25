@@ -1,0 +1,51 @@
+dist: xenial
+language: python
+python:
+  - "3.7"
+
+matrix:
+  include:
+    - env:
+      - TOX_ENV=py37
+      - OMAHA_SERVER_PRIVATE=True
+    - env:
+      - TOX_ENV=py37
+      - OMAHA_SERVER_PRIVATE=False
+    - env:
+      - TOX_ENV=py37
+      - DJANGO_SETTINGS_MODULE=omaha_server.settings_test_postgres
+      - OMAHA_SERVER_PRIVATE=True
+    - env:
+      - TOX_ENV=py37
+      - PATH_TO_TEST=omaha.tests.test_public
+      - DJANGO_SETTINGS_MODULE=omaha_server.settings_test_postgres
+      - OMAHA_SERVER_PRIVATE=False
+    - env:
+      - TOX_ENV=coverage
+
+addons:
+  apt:
+    packages:
+    - python-lxml
+    - python-psycopg2
+    - python-dev
+
+env:
+  global:
+    - HOST_NAME: 'travis-ci'
+    - SECRET_KEY: 'SECRET_KEY'
+    - GRPC_PYTHON_BUILD_WITH_CYTHON: 1
+
+cache: pip
+sudo: false
+
+services:
+  - redis-server
+  - postgresql
+
+install:
+  - pip install tox==3.9.0
+  - pip install google-compute-engine
+
+script:
+  - tox -e $TOX_ENV

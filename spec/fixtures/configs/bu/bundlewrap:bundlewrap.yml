@@ -1,0 +1,23 @@
+language: python
+python:
+- 2.7
+- 3.5
+- 3.6
+- 3.7
+dist: xenial  # required for Python 3.7 https://github.com/travis-ci/travis-ci/issues/9815
+services:
+- postgresql
+install:
+- pip install .
+before_script:
+- ssh-keygen -f ~/.ssh/id_rsa -N ""
+- cp ~/.ssh/id_rsa.pub ~/.ssh/authorized_keys
+- ssh -o StrictHostKeyChecking=no localhost id
+script:
+- py.test tests
+notifications:
+  irc:
+    channels:
+      - "irc.freenode.org#bundlewrap"
+    use_notice: true
+    skip_join: true

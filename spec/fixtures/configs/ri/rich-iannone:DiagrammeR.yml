@@ -1,0 +1,27 @@
+language: r
+
+r:
+  - oldrel
+  - release
+
+warnings_are_errors: false
+
+sudo: required
+
+apt_packages:
+  - libv8-dev
+  - librsvg2-dev
+
+r_packages:
+  - rstudioapi
+  - stringr
+  - shiny
+
+notifications:
+  email:
+    on_success: change
+    on_failure: change
+
+after_success:
+  - Rscript -e 'covr::codecov()'
+

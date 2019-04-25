@@ -1,0 +1,20 @@
+language: node_js
+node_js:
+  - "8"
+services:
+  - mongodb
+  - rabbitmq
+before_install:
+  - npm install -g codeclimate-test-reporter
+install:
+  - npm install
+#after_success:
+  #- codeclimate-test-reporter < coverage/lcov.info
+notifications:
+  slack: financialtimes:F7ol60TlTlcG7ZP0DvAZWan5
+addons:
+  apt:
+    sources:
+      - mongodb-3.0.6
+    packages:
+      - mongodb-org-server

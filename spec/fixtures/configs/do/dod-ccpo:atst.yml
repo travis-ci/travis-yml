@@ -1,0 +1,57 @@
+sudo: required
+language: minimal
+dist: trusty
+services:
+  - docker
+git:
+    submodules: false
+env:
+  global:
+    - PROD_IMAGE_NAME=atst-prod
+    - TESTER_IMAGE1_NAME=atst-tester-nocrls
+    - TESTER_IMAGE2_NAME=atst-tester
+    - GIT_SHA="$(git rev-parse --short HEAD)"
+cache:
+  directories:
+    - crl
+
+before_install:
+  # Use sed to replace the SSH URL with the public URL
+  - sed -i 's/git@github.com:/https:\/\/github.com\//' .gitmodules
+  # Manually initialize submodules
+  - git submodule update --init --recursive
+install:
+  - curl -Lo kubectl https://storage.googleapis.com/kubernetes-release/release/v1.10.4/bin/linux/amd64/kubectl && chmod +x kubectl && sudo mv kubectl /usr/local/bin/
+
+before_script:
+  - docker run -d --name postgres96 postgres:9.6-alpine
+  - docker run -d --name redis redis:4.0.10-alpine
+  - docker run --link postgres96:postgres96 --link redis:redis waisbrot/wait
+  - export postgres_ip="$(docker inspect -f "{{ .NetworkSettings.IPAddress }}" postgres96)"
+  - export redis_ip="$(docker inspect -f "{{ .NetworkSettings.IPAddress }}" redis)"
+  - ./script/generate_build_info.sh
+  - docker login -u $ATAT_DOCKER_REGISTRY_USERNAME -p $ATAT_DOCKER_REGISTRY_PASSWORD $ATAT_DOCKER_REGISTRY_URL
+  - docker build --tag "${TESTER_IMAGE1_NAME}" --add-host "postgreshost:${postgres_ip}" --add-host "redishost:${redis_ip}" . -f deploy/docker/tester/Dockerfile
+
+script:
+  - docker run -d --entrypoint='/bin/sh' -t --name current-atst-tester "${TESTER_IMAGE1_NAME}"
+  - docker container exec -t current-atst-tester script/sync-crls
+  - docker commit
+    --change='ENTRYPOINT ["/usr/bin/dumb-init", "--"]'
+    --change='CMD ["bash", "-c", "${APP_DIR}/script/cibuild"]'
+    current-atst-tester
+    "${TESTER_IMAGE2_NAME}"
+  - docker cp current-atst-tester:/opt/atat/atst/crl/. ./crl/
+  - docker container stop current-atst-tester
+  - docker run --add-host "postgreshost:${postgres_ip}" --add-host "redishost:${redis_ip}" "${TESTER_IMAGE2_NAME}"
+
+deploy:
+  provider: script
+  script: echo "Deployment now handles by CircleCI"
+  on:
+    branch: master
+
+notifications:
+  slack:
+    rooms:
+      secure: vF3QhfpAmuy0Uv9tzraOkL6Js8X630PnGbsC+No4ghbf1hY6nt3+dAKBG9CgvTFEAobJf9Nb0L8Covrtu5rwJjXIT8HPfh/kf9frXDA1+ndlpgFdHxIQDv51xn70Co8NojXkupuxekYaQpB8dCeVc6iIBj6ZbTaMEi/PQFriqO44zxeAIM/vbE0Flo5YBbGgfT4eBn2iJ9J7Pc1ZRuscV6dCgU735Kt8FZY307q2imopIgFw88ZJ1wNNRYqy0qbu/Z81j8IAK5qbFubsz7jZOKjD/Q7ua5iUQVUTJmHgLakTQ/O1ydTlckKnM9xzQELJBXOHzFzpaCYs3bmK49xdX3kvWLlXKDfSG4Uebk5aFQkpuIVpzCJwMKbg/GYUwNZWoY/VZVqOHnBxyrKiPuTagZ74gQDhUgrG86JIHc5LDuTD7oep7EnNIg5fGw+9wiC0+YE5ROh4GzhUwsGynlaQvac2jKIGBOXVDoyJ1kGdtOnAM9fk3/8W1FsIiloz1W+0j7mbu8G/Aq+wOIbglG+rwn73gbfzSDLTvXOrL6Ke67b16NGBG5Lrgop/Vh4BoGwtRqR/WwFh8nxbZ5539ceH/vGG8wuJ9XvnqWjM0kqgzX12efH5YL9IiWjHHGS4i3yl+UUFY8Hrr8foZb60psZhfjdOboSb7xidT1p93SKuT9g=

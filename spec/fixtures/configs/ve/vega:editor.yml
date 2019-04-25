@@ -1,0 +1,25 @@
+language: node_js
+node_js:
+  - "11"
+script:
+  - yarn lint
+  - yarn build
+before_deploy:
+  - yarn generate-example-images
+cache: yarn
+deploy:
+  provider: pages
+  skip-cleanup: true
+  github-token: $GITHUB_TOKEN
+  keep-history: true
+  local-dir: dist
+  name: Dominik Moritz
+  email: domoritz@gmail.com
+  project-name: editor
+  on:
+    branch: master
+    tags: true
+addons:
+  apt:
+    packages:
+      - parallel

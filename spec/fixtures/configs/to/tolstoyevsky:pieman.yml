@@ -1,0 +1,31 @@
+language: python
+
+python:
+  - 3.6
+
+env:
+  # for test_functions.sh
+  - PIEMAN_UTILS_DIR=$TRAVIS_BUILD_DIR/pieman/bin PYTHONPATH=$PYTHONPATH:$TRAVIS_BUILD_DIR/pieman
+
+addons:
+  apt:
+    sources:
+    - debian-sid
+
+install:
+  - sudo apt-get install -y bash cabal-install pandoc shunit2
+  - pip install -r pieman/requirements.txt
+  - pip install pylint
+  - cabal update
+  - cabal install shellcheck
+
+script:
+  # Disable duplicate-code since there are some problems related to it. One of
+  # the problems described here https://github.com/PyCQA/pylint/issues/2368.
+  - find -name "*.py" -not -path "./.git/*" | xargs pylint --disable=R0801
+  - bash -c 'cd test && ./test_essentials.sh'
+  - bash -c 'cd test && ./test_functions.sh'
+  - bash -c 'shellcheck -x pieman.sh'
+  - bash -c 'shellcheck -e SC2148 helpers/*.sh'
+  - python pieman/test/runtest.py
+

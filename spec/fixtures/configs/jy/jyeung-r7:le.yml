@@ -1,0 +1,10 @@
+language: python
+python:
+  - "3.4"
+# Command to install dependencies
+install:
+  - pip install -r test/unittests/requirements.pip
+  - python setup.py install
+# command to run tests
+script:
+  - python -m unittest discover test/unittests

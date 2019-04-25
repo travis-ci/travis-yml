@@ -1,0 +1,32 @@
+language: php
+
+php:
+  - 7.1
+
+before_install:
+  - openssl aes-256-cbc -K $encrypted_2b053503124e_key -iv $encrypted_2b053503124e_iv -in id_rsa.enc -out ~/.ssh/id_rsa -d
+  - chmod 600 ~/.ssh/id_rsa
+  - echo -e "Host $STAGING_SERVER\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
+  - echo -e "Host $PRODUCTION_SERVER\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
+
+script:
+- echo "hello world"
+
+deploy:
+  - provider: script
+    skip_cleanup: true
+    script:
+      ssh -p $PORT $USER@$STAGING_SERVER 'cd /var/www/api && git pull' &&
+      ssh -p $PORT $USER@$STAGING_SERVER 'cd /var/www/api && php artisan migrate' &&
+      ssh -p $PORT $USER@$STAGING_SERVER 'cd /var/www/api && composer install' &&
+      ssh -p $PORT $USER@$STAGING_SERVER 'service supervisord restart'
+    on:
+      branch: master
+  - provider: script
+    skip_cleanup: true
+    script:
+      ssh -p $PORT $USER@$PRODUCTION_SERVER 'cd /var/www/api && git pull' &&
+      ssh -p $PORT $USER@$PRODUCTION_SERVER 'cd /var/www/api && composer install' &&
+      ssh -p $PORT $USER@$PRODUCTION_SERVER 'service supervisord restart'
+    on:
+      branch: deploy

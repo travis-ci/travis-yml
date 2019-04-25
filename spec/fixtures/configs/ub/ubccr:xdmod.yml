@@ -1,0 +1,31 @@
+# Use container-based environment for quicker initialization
+sudo: false
+
+# Specify the build matrix
+language: php
+php:
+    - '5.4'
+    - '7.0'
+    - '7.1.6'
+env:
+    global:
+        - NODE_VERSION=6
+        - XDMOD_TEST_ARTIFACTS_MIRROR="$HOME/xdmod-test-artifacts.git"
+        - XDMOD_IS_CORE=true
+
+# Add dependency directories to the Travis cache
+cache:
+    directories:
+        - $HOME/.npm
+        - $HOME/.composer/cache
+        - /tmp/pear/cache
+        - $XDMOD_TEST_ARTIFACTS_MIRROR
+
+# Obtain the shared QA assets before using them.
+before_install: git clone --depth=1 --branch="v1" https://github.com/ubccr/xdmod-qa.git .qa
+
+# Delegate the installation step to the shared Travis installation script
+install: .qa/travis/install.sh
+
+# Delegate the build step to the shared Travis build script
+script: .qa/travis/build.sh

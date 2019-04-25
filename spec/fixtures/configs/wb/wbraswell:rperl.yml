@@ -1,0 +1,123 @@
+# NEED UPDATE, CORRELATION #rp037: all changes made to this file MUST be propagated to the corresponding .travis.yml files for all other RPerl Family software suites 
+language: perl
+# v0.104_000
+perl:
+# NEED ANSWER, CORRELATION #rp000: is RPerl truly incompatible with Perl v5.8 and earlier?
+# Perl v5.8 causes $CPP_LINKED global symbol errors, currently disabled
+#    - "5.8"
+    - "5.10"
+    - "5.12"
+    - "5.14"
+    - "5.16"
+    - "5.18"
+    - "5.20"
+    - "5.22"
+    - "5.24"
+    - "5.26"
+    - "blead"  # built using Travis-CI Helper
+
+# DEV NOTE, CORRELATION #rp011: update g++ to 4.8 for full C++11 support, including:
+# -std=c++11, std::string::pop_back(), etc.
+
+# new Docker container-based Travis-CI stack, currently disabled, does not support update-alternatives
+#addons:
+#    apt:
+#       sources:
+#           - ubuntu-toolchain-r-test
+#addons:
+#    apt:
+#       packages:
+#           - g++-4.8
+#           - time
+
+# [ BEGIN Travis-CI Helper, for building blead ]
+matrix:
+    allow_failures:
+        # NEED FIX, CORRELATION #aj100: in Alien::JPCRE2, why is File::Find::Rule from t/02_make_check.t failing in v5.25 and v5.27 only?!?
+        - perl: "blead"
+before_install:
+    # DEV NOTE: allow Perlbrew and/or Travis errors related to building blead, such as shown below, as long as the `perl -V` command still shows blead version is properly installed
+    # ERROR: The installation "blead" is unknown.
+    - git clone git://github.com/travis-perl/helpers ~/travis-perl-helpers
+    - source ~/travis-perl-helpers/init
+    - build-perl
+    - perl -V
+# [ END Travis-CI Helper, for building blead ]
+
+    # legacy Travis-CI stack, currently enabled, supports sudo & update-alternatives
+    - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+    - sudo apt-get update -qq
+
+install:
+    - sudo apt-get install gcc-5 g++-5
+    - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-5 90 --slave /usr/bin/g++ g++ /usr/bin/g++-5
+#   - sudo apt-get install libpcre2-8-0 libpcre2-16-0 libpcre2-32-0 libpcre2-dev  # DEV NOTE, CORRELATION #rp060: disabled, does not exist until Ubuntu v16.04 Xenial
+#   - sudo apt-get install libjpcre2-dev                                          # DEV NOTE, CORRELATION #rp060: disabled, does not exist
+    - perl -e 'if ($ENV{ALIEN_INSTALL_TYPE} eq q{system}) { system qw(sudo apt-get install astyle); }'       # "system" install via Ubuntu  here vs "share" install via CPAN Alien::astyle
+    - perl -e 'if ($ENV{ALIEN_INSTALL_TYPE} eq q{system}) { system qw(sudo apt-get install libgmp-dev); }'   # "system" install via Ubuntu  here vs "share" install via CPAN Alien::GMP
+    - perl -e 'if ($ENV{ALIEN_INSTALL_TYPE} eq q{system}) { system qw(sudo apt-get install libgsl0-dev); }'  # "system" install via Ubuntu  here vs "share" install via CPAN Alien::GSL
+    - perl -e 'if ($ENV{ALIEN_INSTALL_TYPE} eq q{system}) { system qw(sudo apt-get install texinfo); }'      # "system" install via Ubuntu  here vs "share" install via CPAN Alien::Texinfo (A::Pluto dep)
+    - perl -e 'if ($ENV{ALIEN_INSTALL_TYPE} eq q{system}) { system q{wget https://github.com/bondhugula/pluto/files/737550/pluto-0.11.4.tar.gz; tar -xzvf pluto-0.11.4.tar.gz; cd pluto-0.11.4/; ./configure; make; make test; sudo make install; cd .. }; }'  # "system" install via tarball here vs "share" install via CPAN Alien::Pluto
+
+before_script:
+    # DEV NOTE, CORRELATION #rp060: must force share install of dists which are not available via system install; PCRE2 & JPCRE2 are not readily available via the OS package manager
+    # EXAMPLE ERROR:  Configuring Alien-PCRE2-xxx ... Alien::Build::Plugin::PkgConfig::Negotiate> Using PkgConfig plugin: PkgConfig::CommandLine
+    # Alien::Build::CommandSequence> + pkg-config --exists libpcreX-X
+    # external command failed at xxx/Alien/Build/CommandSequence.pm line XX.
+    # N/A    ! Configure failed for Alien-PCRE2-xxx
+    - ALIEN_INSTALL_TYPE=share && cpanm --verbose Alien::PCRE2 && cpanm --verbose Alien::JPCRE2
+
+    # NEED FIX: remove following 1 line when bug is fixed    https://github.com/daoswald/Inline-CPP/issues/38
+    - cpanm --verbose --force ExtUtils::CppGuess
+
+    # VERBOSE BUILD: modify following line to enable TEST_VERBOSE stdout during `make test`
+    - export RPERL_VERBOSE=1
+    # DEBUG BUILD: uncomment following line to enable noisy build during `make test`; REQUIRES RPERL_VERBOSE=1 ABOVE
+    - export RPERL_DEBUG=1
+
+    # DEV MODULES: uncomment following line for dev versions of modules, which travis can't get from Makefile.PL
+#    - cpanm -n INGY/Inline-C-0.62_03.tar.gz
+
+    # NEED REMOVE, WHEN INSTALL ISSUES RESOLVED: https://github.com/ingydotnet/inline-c-pm/issues/72
+    - cpanm --dev Inline::C
+
+    # DEV NOTE: beginning in mid-March 2018, Travis must be forced to use HTTP for file transfers, at least in the case of Alien::GSL; reason unknown
+    # EXAMPLE ERROR:  Could not find any matching files at /home/travis/perl5/perlbrew/perls/5.10/lib/site_perl/5.10.1/Alien/Base/ModuleBuild.pm line 404.
+    # no files found in repository at /home/travis/perl5/perlbrew/perls/5.10/lib/site_perl/5.10.1/Alien/Base/ModuleBuild.pm line 415
+    - export ALIEN_GSL_REPO_FTP_PROTOCOL=http
+
+    # DEV NOTE: verbose install to debug specific CPAN failures
+#    - cpanm --verbose SOME::BUGGY::DISTRIBUTION
+
+    # DEV NOTE: after adding multiple Alien dependencies with build times, we exceeded Travis' ~40-minute time limit;
+    # disable CPAN tests for now to shorten non-RPerl build times
+#    - cpanm --verbose --installdeps --notest .
+
+    # DEV NOTE: after adding multiple Alien dependencies with build times, we exceeded Travis' ~4MB log data limit;
+    # disable verbose CPAN output for now to shorten non-RPerl log output
+    - cpanm --installdeps --notest .
+
+# replace default build command "perl Makefile.PL && make test"
+# DEV NOTE: TEST_VERBOSE variable for ExtUtils::MakeMaker 'make' command disables suppression of stdout;
+# this variable is different than, and inherits the value of, the $RPERL_VERBOSE environmental variable 
+script: perl Makefile.PL && make test TEST_VERBOSE=$RPERL_VERBOSE
+
+notifications:
+    irc:
+        channels:
+            - "irc.perl.org#perl11"
+        on_success: always
+        on_failure: always
+        # DEV NOTE: to enable skip_join, in IRC channel first execute `/mode -n`
+        skip_join: true
+        template:
+            - "RPerl build %{result}. %{author} says '%{commit_message}'"
+            - "%{build_url} %{compare_url}"
+
+env:
+    global:
+        - AUTHOR_TESTING=0
+    matrix:
+        # NEED FIX: re-enable Alien share builds when all Alien::* requirements are implemented and working properly 
+#        - ALIEN_INSTALL_TYPE=share
+        - ALIEN_INSTALL_TYPE=system

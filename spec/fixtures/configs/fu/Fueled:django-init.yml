@@ -1,0 +1,37 @@
+# For more information about the configurations used in this file, please
+# see the Travis CI documentation: https://docs.travis-ci.com
+
+language: python
+sudo: false
+python:
+- '3.6'
+
+services:
+  - postgresql
+
+addons:
+  postgresql: "10.6"
+  apt:
+    packages:
+      - postgresql-10-postgis-2.4
+      - postgresql-client-10
+
+env:
+  global:
+  - PGPORT=5432
+
+install:
+  - pip install -U pip cookiecutter fabric3 ansible==2.5.0
+
+before_script:
+- sudo sed -i 's/port = 5433/port = 5432/' /etc/postgresql/10/main/postgresql.conf
+- sudo cp /etc/postgresql/{9.4,10}/main/pg_hba.conf
+- sudo service postgresql restart
+
+script:
+  - ./run_test.sh
+
+notifications:
+  email:
+    on_success: change  # [always|never|change]
+    on_failure: always  # [always|never|change]

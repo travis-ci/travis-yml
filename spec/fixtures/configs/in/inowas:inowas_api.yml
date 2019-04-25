@@ -1,0 +1,45 @@
+language: php
+
+php:
+  - '7.1'
+
+env:
+  - ENGINE=GEOS34
+
+addons:
+    postgresql: "9.6"
+    apt:
+      packages:
+      - postgresql-9.6-postgis-2.3
+
+before_script:
+  - sudo apt-get update
+  - bash ./build/build.geos.travis.sh
+  - sed -i 's/git@github.com:/https:\/\/github.com\//' .gitmodules
+  - git submodule update --init --recursive
+  - cp app/config/parameters.yml.travis app/config/parameters.yml
+  - psql -U postgres -c "CREATE ROLE travis_ci_user WITH PASSWORD 'travis' LOGIN SUPERUSER;"
+  - composer install
+  - composer dump-autoload -o
+  - bin/console doctrine:database:create --env=test
+  - bin/console inowas:postgis:install --env=test
+  - php bin/console doctrine:schema:create --env=test
+  - php bin/console inowas:es:schema:create --env=test
+  - php bin/console inowas:projections:reset --env=test
+
+script:
+  - mkdir -p build/logs
+  - php bin/phpunit --coverage-clover build/logs/clover.xml
+
+after_script:
+  - php bin/coveralls -v
+
+# Handle git submodules yourself
+git:
+    submodules: false
+
+sudo: required
+dist: trusty
+
+notifications:
+    slack: inowas:aYWjRSnYz2k5hvnbRbCeM5Gq

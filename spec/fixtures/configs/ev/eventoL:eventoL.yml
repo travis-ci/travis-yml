@@ -1,0 +1,64 @@
+sudo: required
+language: python
+python:
+  - "3.6"
+env:
+  global:
+    - DB=postgres
+    - PSQL_PORT=5000
+    - PSQL_VERSION=9.6
+    - PSQL_USER=eventol
+    - NODE_VERSION=10.15
+    - YARN_VERSION=1.13.0
+    - PSQL_DBNAME=eventol
+    - PSQL_HOST=localhost
+    - PSQL_PASSWORD=secret
+    - CC_TEST_REPORTER_ID=74cbdb599d4cabc78a5dd07f26f1ddcc36910ffca3104c35c2ba66603818031c 
+  matrix:
+    - DJANGO=1.11.20
+services:
+  - docker
+cache:
+  pip: true
+  yarn: true
+  directories:
+    - eventol/front/node_modules
+before_install:
+  - docker run --name eventol-postgres -e POSTGRES_PASSWORD=$PSQL_PASSWORD -e POSTGRES_USER=$PSQL_USER -e POSTGRES_DB=$PSQL_DBNAME -p $PSQL_PORT:5432 -d postgres:$PSQL_VERSION
+  - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+  - chmod +x ./cc-test-reporter
+  - ./cc-test-reporter before-build 
+  - curl -o- -L https://yarnpkg.com/install.sh | bash -s -- --version $YARN_VERSION
+  - export PATH=$HOME/.yarn/bin:$PATH
+  - nvm install $NODE_VERSION
+install:
+  - pip install -U pip wheel
+  - pip install coverage coveralls
+  - pip install -r requirements.txt
+  - pip install -r requirements-dev.txt
+script:
+  - cd eventol/front
+  - yarn build
+  - cd -
+  - mkdir -p eventol/static
+  - cd eventol
+  - python manage.py makemigrations manager
+  - python manage.py migrate
+  - python manage.py collectstatic --noinput
+  - py.test --cov-report xml --cov-report term-missing --cov-report html --cov --cov-branch
+  - cd -
+  - cd eventol/front
+  - yarn install
+  - yarn test
+  - cd -
+after_success:
+  - cd eventol
+  - coverage report
+  - coveralls
+  - cd -
+  - mv cc-test-reporter eventol/cc-test-reporter 
+  - cd eventol
+  - ./cc-test-reporter format-coverage -d -t coverage.py -o coverage/python.json --add-prefix eventol
+  - ./cc-test-reporter format-coverage ./front/coverage/lcov.info -d -t lcov -o ./coverage/javascript.json --add-prefix eventol
+  - ./cc-test-reporter sum-coverage --output coverage/codeclimate.json -d -p 2 coverage/python.json coverage/javascript.json
+  - ./cc-test-reporter upload-coverage -d

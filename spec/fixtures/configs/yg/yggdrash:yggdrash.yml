@@ -1,0 +1,15 @@
+language: java
+jdk:
+  - oraclejdk8
+cache:
+  directories:
+  - $HOME/.m2/repository
+  - $HOME/.gradle
+env:
+  global:
+  - SPRING_OUTPUT_ANSI_ENABLED=ALWAYS
+script:
+  - ./gradlew clean build -PspringProfiles=ci
+after_success:
+  - ./gradlew jacocoRootReport coveralls
+  - bash <(curl -s https://codecov.io/bash)

@@ -1,0 +1,34 @@
+sudo: false
+
+language: node_js
+
+node_js:
+  - "10"
+
+notifications:
+  email: false
+
+cache:
+  yarn: true
+  directories:
+    # Includes both yarn and Cypress caches
+    - ~/.cache
+
+before_install:
+  # Install yarn
+  - curl -o- -L https://yarnpkg.com/install.sh | bash -s -- --version 1.15.2
+  - export PATH=$HOME/.yarn/bin:$PATH
+
+script:
+  - set -e
+  - yarn run jest --projects jest.test.config.js jest.eslint.config.js jest.stylelint.config.js --maxWorkers=4 --reporters jest-silent-reporter
+  - yarn build
+  - yarn run-if:percy
+  - yarn playground:build
+  - yarn run server-test playground:start:prod:local 3001 test:e2e:playground
+  - yarn template-starter:build
+  - yarn run server-test template-starter:start:prod:local 3001 test:e2e:template-starter
+  - set +e
+
+after_success:
+  - ./scripts/release_canary.sh

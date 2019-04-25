@@ -1,0 +1,41 @@
+language: julia
+os:
+  - osx
+  - linux
+julia:
+  - 0.7
+  - 1.0
+notifications:
+  email: false
+# addons:
+#   apt:
+#     packages:
+#       - hdf5-tools
+#       - python-numpy
+#       - python3-numpy
+#       - python-matplotlib
+#       - python3-matplotlib
+# env:
+#   global:
+#     - MADS_TRAVIS=""
+#     - PYCALL_DEBUG_BUILD="yes"
+#   matrix:
+#     - PYTHON=python  # python 2.7
+#     # - PYTHON=python3 # python 3.6
+#     # - PYTHON=Conda # not actually a python version, here to test Conda.jl's python
+# matrix:
+#   exclude:
+#     - os: osx
+#       env: PYTHON=python # I'm not sure how to install Python 3 on Travis OSX
+before_script:
+  - test "x$TRAVIS_OS_NAME" = xosx -o "x$PYTHON" = xConda || (sudo apt-get -qq update && sudo apt-get install -y $PYTHON)
+  - if [ $TRAVIS_OS_NAME = osx ]; then brew install gcc; brew link --overwrite gcc; brew install hdf5; fi
+  # - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then pip install matplotlib pyyaml; fi
+  # - if [[ $TRAVIS_OS_NAME == 'linux' ]]; then sudo pip install matplotlib pyyaml; fi
+# script:
+#   - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
+#   - julia -e 'Pkg.clone(pwd());'
+#   $ - julia -e 'ENV["MADS_NO_PYTHON"]=""; ENV["MADS_NO_PLOT"]=""; Pkg.build("Mads"); Pkg.test("Mads"; coverage=true)'
+#   - julia -e 'ENV["MADS_TRAVIS"]=""; Pkg.build("Mads"); Pkg.test("Mads"; coverage=true)'
+after_success:
+  - julia -e 'cd(Pkg.dir("Mads")); Pkg.add("Coverage"); using Coverage; Coveralls.submit(Coveralls.process_folder()); Codecov.submit(Codecov.process_folder())'

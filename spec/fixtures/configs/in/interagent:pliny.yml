@@ -1,0 +1,20 @@
+language: ruby
+rvm:
+  - 2.5
+  - 2.4
+  - 2.3
+  - 2.2
+env:
+  - SINATRA_MAJOR=1
+  - SINATRA_MAJOR=2
+addons:
+  postgresql: '9.3'
+before_install:
+  - gem update --system
+before_script:
+  - createdb pliny-gem-test
+sudo: false
+cache: bundler
+notifications:
+  email: false
+script: bundle exec rake

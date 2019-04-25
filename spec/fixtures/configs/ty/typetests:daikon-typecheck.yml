@@ -1,0 +1,59 @@
+language: java
+
+jdk:
+  - oraclejdk8
+
+## On rare occasions, this breaks the build.  So don't use a cache.
+# before_cache:
+#   - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+#   - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+# cache:
+#   directories:
+#     - $HOME/.gradle/caches/
+#     - $HOME/.gradle/wrapper/
+#     - $HOME/.m2
+
+env:
+  - GROUP=formatter
+  - GROUP=index
+  - GROUP=interning
+  - GROUP=lock
+  - GROUP=nullness-fbc
+  - GROUP=nullness-raw
+  - GROUP=regex
+  - GROUP=signature
+## This is just to determine the time to do the background build.
+#  - GROUP=nothing
+
+## This sometimes times out.
+# matrix:
+#   allow_failures:
+#     - env: GROUP=index
+
+# The fcntl line works around a bug where Travis truncates logs and fails.
+script:
+- python -c "import fcntl; fcntl.fcntl(1, fcntl.F_SETFL, 0)"
+- travis_wait 120 ./.travis-build.sh $GROUP
+
+after_success:
+  - |
+      if [[ ($TRAVIS_BRANCH == master) &&
+            ($TRAVIS_PULL_REQUEST == false) &&
+            ( (! $TRAVIS_JOB_NUMBER == *.*) || ($TRAVIS_JOB_NUMBER == *.1) ) ]] ; then
+        curl -LO https://raw.github.com/plume-lib/trigger-travis/master/trigger-travis.sh
+        # sh trigger-travis.sh typetests daikon-typecheck-formatter $TRAVIS_ACCESS_TOKEN
+        # sleep 1
+        # sh trigger-travis.sh typetests daikon-typecheck-interning $TRAVIS_ACCESS_TOKEN
+        # sleep 1
+        # sh trigger-travis.sh typetests daikon-typecheck-lock $TRAVIS_ACCESS_TOKEN
+        # sleep 1
+        # sh trigger-travis.sh typetests daikon-typecheck-nullness $TRAVIS_ACCESS_TOKEN
+        # sleep 1
+        # sh trigger-travis.sh typetests daikon-typecheck-regex $TRAVIS_ACCESS_TOKEN
+        # sleep 1
+        # sh trigger-travis.sh typetests daikon-typecheck-signature $TRAVIS_ACCESS_TOKEN
+        # sleep 1
+      fi
+
+git:
+  depth: 3

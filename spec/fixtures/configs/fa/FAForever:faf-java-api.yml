@@ -1,0 +1,51 @@
+language: java
+
+services:
+  - docker
+
+sudo: required
+git:
+  depth: 3
+
+before_install:
+  - sudo /etc/init.d/mysql stop
+  - sudo rm /usr/local/bin/docker-compose
+  - curl -L https://github.com/docker/compose/releases/download/1.16.1/docker-compose-`uname -s`-`uname -m` > /tmp/docker-compose
+  - chmod +x /tmp/docker-compose
+  - sudo mv /tmp/docker-compose /usr/local/bin
+  - APP_VERSION=$([ -n "${TRAVIS_TAG}" ] && echo "${TRAVIS_TAG#*v}" || echo "${TRAVIS_BRANCH##*/}")
+  - DOCEKR_IMAGE_VERSION=$([ -n "${TRAVIS_TAG}" ] && echo "${TRAVIS_TAG}" || echo "${TRAVIS_BRANCH##*/}")
+
+install:
+  - git clone https://github.com/FAForever/faf-stack.git faf-stack
+      && pushd faf-stack
+    && git checkout 572bef1c
+      && cp -r config.template config
+      && ./scripts/init-db.sh
+      && popd
+
+script:
+- chmod +x gradlew && ./gradlew build -Pversion=${APP_VERSION} --info
+
+after_success:
+  - ./gradlew jacocoTestReport coveralls
+  - export IMAGE_TAG=faf-java-api;
+  - export REPO=faforever/faf-java-api;
+  - if [ -n "${TRAVIS_TAG}" -o "${TRAVIS_BRANCH}" == "develop" ]; then
+    docker build -t ${IMAGE_TAG} . &&
+    echo "${DOCKER_PASSWORD}" | docker login -u "${DOCKER_USERNAME}" --password-stdin &&
+    docker tag ${IMAGE_TAG} ${REPO}:${DOCEKR_IMAGE_VERSION} &&
+    docker push ${REPO};
+    fi
+# TODO Codacy coverage reporter does not yet support Java 9. See https://github.com/codacy/codacy-coverage-reporter/issues/76
+#      ./gradlew sendCoverageToCodacy;
+
+before_cache:
+  - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+  - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+
+cache:
+  directories:
+    - $HOME/.gradle/caches/
+    - $HOME/.gradle/wrapper/
+    - /home/travis/build/FAForever/faf-java-api/build/cache/

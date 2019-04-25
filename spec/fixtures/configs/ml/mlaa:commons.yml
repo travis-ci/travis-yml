@@ -1,0 +1,23 @@
+sudo: false
+dist: precise
+language: php
+php:
+- 7.0
+addons:
+  hosts:
+  - travis.dev
+env:
+  global:
+  - secure: Mc37WgZczC3sVsv4Y/wPxrImxYpvNsTbPrJLpLfmDeb8x1JG3xpxky9jbLjmlY3GfgNxGXxHhuzcp+VSpqwJiqMOI8eE17iAHHLQ2W11+vRMhJ83HqdIcsEnmS2/ybrlDnVGiWwkzpOlZ0o9zinItAUoGS1m1wkhD+Q3U9zAayU=
+  - secure: FJti+LkBeyOMtdWNOwpkFgV/cFMP6sKDnP/r7JC1nlpQaapWyTdeJBe5IDHzBaDXzUyUwjdI4t77xqBlhjcBAPHHaUzurn9OMHIMsiJnYe7gZHKBQfsy9lCfRp2BHnGJ1ujEwfgUujYgFKv9VnNCWwx7mcY9jiQ6sz7IPB19bmA=
+before_install:
+- pip install --user awscli
+- export PATH=$PATH:$HOME/.local/bin
+script:
+- composer validate
+- composer install
+- "./tests/bin/setup.sh"
+- "./vendor/bin/codecept run"
+notifications:
+  slack:
+    secure: hkVUzVKCzCDU832d6JqjdReJFAsJ2E+8XV4/pwLOKBY7f8kYhNNLfsw+alR614EiPUS0D/9G7aGR0HlyifceqI+RtKi+qYYb7eLS8tmJVV9Dl4hVj1Zt4TNuqC+CNSSwNKIL1zhqRY8PNeMztY9VO+TU3w0jtw527Bbp7pTiBQ4=

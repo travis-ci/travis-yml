@@ -1,0 +1,33 @@
+language: c
+
+os:
+ - linux
+ - osx
+
+env:
+ - EXTRALIBS="gettext"
+ - EXTRALIBS="gettext libusb-dev"
+ - EXTRALIBS="gettext libusb-1.0-0-dev libgd2-xpm-dev"
+
+# Note: Keep the sudo commands in .travis.yml - they do not work from
+#       a helper shell script.
+before_install:
+ - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update; fi
+ - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew uninstall libtool; fi
+ - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install $(sh .travis-translate-pkgs $EXTRALIBS); fi
+ - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install libtool; fi
+ - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo apt-get update -qq; fi
+ - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo apt-get install -y $(sh .travis-translate-pkgs $EXTRALIBS); fi
+
+compiler:
+ - clang
+ - gcc
+
+script:
+ - PATH=/usr/local/opt/gettext/bin:$PATH autoreconf -i -f
+ - ./configure && make && make check
+
+notifications:
+  email:
+    on_success: change
+    on_failure: always

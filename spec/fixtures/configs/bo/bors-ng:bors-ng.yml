@@ -1,0 +1,36 @@
+language: elixir
+elixir:
+  - 1.5
+  - 1.7.3
+otp_release:
+  - 20.0
+  - 21.0.9
+branches:
+    only:
+      - master
+      - staging
+      - trying
+
+cache:
+  directories:
+    - _build
+    - deps
+
+install:
+  - mix do local.rebar --force, local.hex --force, deps.get
+
+script:
+  - mix test
+
+env:
+  - TYPE=test
+  - TYPE=test BORS_TEST_DATABASE=mysql
+
+matrix:
+  fast_finish: true
+  exclude:
+    - elixir: 1.5
+      otp_release: 21.0.9
+
+notifications:
+  email: false

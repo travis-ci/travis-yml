@@ -1,0 +1,26 @@
+# R for travis: see documentation at https://docs.travis-ci.com/user/languages/r
+
+dist: trusty
+language: R
+env:
+ - TEST_BROWSER=chrome
+ - TEST_BROWSER=firefox
+sudo: false
+cache:
+  packages: true
+addons:
+  sauce_connect: true
+script: Rscript test.R
+after_success:
+  - ". ./SAUCE"
+  - "curl -X PUT -s -d '{\"passed\": true}' -u $SAUCE_USERNAME:$SAUCE_ACCESS_KEY https://saucelabs.com/rest/v1/$SAUCE_USERNAME/jobs/$SAUCE_JOB"
+after_failure:
+  - ". ./SAUCE"
+  - "curl -X PUT -s -d '{\"passed\": false}' -u $SAUCE_USERNAME:$SAUCE_ACCESS_KEY https://saucelabs.com/rest/v1/$SAUCE_USERNAME/jobs/$SAUCE_JOB"
+notifications:
+  email: false
+  slack:
+    rooms:
+      - secure: LVPcabTlz8z7LAcls4UlBqVPonppwHAFzZjvhmDdZQsQjWxbecjyobVp3wVjmsbEMFgqBQGnkYJsbVwcIYhu6lqr+83dZ+BzgH7FOAzYDBpb8T3tW/FH+P23XRR5uleUah5Ldhlbt8iOj3rfygG1r/OOAr80rJJls0hcfUI6vSUksLxaL86InhViEXSSNIiHRyDUVsFJaUi2hOaLgBQQYdQlIy+hOlrQIuVRUbSGDaepF0jQHCosU5LEgdE3kBV65tLsmX8iIVcVP7wTKKXBL4mujnnfbO8o8SmOFv2mQ0oOoq9nENEjiJgNh0asxs3yBXs/8j9/wboyw7ZAMLXP0/ZsvBuLisYzjqD6dx/yPsQrhIQ9OVRAFWpc7J1FoH+tgf8ungU3qDpqAtDT5ulaTXLOTjNSJuHGkI0Nh+u45oP5fvQo07jTDTqktEIOEvQQ6olJ44PV79fKBOoT/AfuRAe3WcfpaDl/Fw1W9VvcJ0kElOp7lU7ewkPsQ2+yrElZl4Vv06FDkd8NO2FMXBHt0/NNRsHWdcsvkJVVOzGP3u7AS8u7msCB/nnBfhdQcsAjJcsG6o375oOaXqctmeYDwkLDpCSAX+pNA80rTsnpQgVxd3AOh2DNTFi5oSNT2tzbQTxQqRx/n5FOLJ53j/WFfE2nrhFJTnSFY44sgVwbxAY=
+    on_success: change # send a notification when the build status changes
+    on_failure: always # always send a notification

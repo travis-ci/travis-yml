@@ -1,0 +1,59 @@
+ #----------------------------------------------------------------
+# Travis-CI configuration for Bioconductor packages
+#
+# REFERENCES:
+# * Travis CI: https://travis-ci.org/
+# * tutorial: https://docs.travis-ci.com/user/languages/r
+# * see also: https://blog.rstudio.org/2016/03/09/r-on-travis-ci/
+# * covr: https://github.com/jimhester/covr
+# * Coveralls: https://coveralls.io/
+#
+# Validate your .travis.yml file at http://lint.travis-ci.org/
+#----------------------------------------------------------------
+language: r
+cache: packages
+# Temporarily enable when caching Bioconductor packages
+#script: true
+
+
+# R versions to be tested on
+r:
+#  - bioc-release
+  - bioc-devel
+
+# External dependencies
+addons:
+  apt:
+    packages:
+      - gsl-bin
+      - libgsl-dev
+
+## Turn this to true before submission to CRAN/Bioconductor
+warnings_are_errors: false
+
+# r_build_args: "--no-build-vignettes"
+# r_check_args: "--no-vignettes"
+
+notifications:
+  email:
+    on_success: change
+    on_failure: change
+
+## Use patched devtools
+#r_github_packages:
+#  - Bioconductor/S4Vectors
+#  - Bioconductor/DelayedArray
+#  - Bioconductor/HDF5Array
+
+
+## Code coverage
+#r_packages:
+#  - covr
+
+## BiocCheck
+bioc_packages:
+  - BiocCheck
+
+after_success:
+#  - Rscript -e 'covr::coveralls(quiet=FALSE)'
+  - R CMD BiocCheck .

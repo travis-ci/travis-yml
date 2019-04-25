@@ -1,0 +1,57 @@
+language: python
+sudo: false
+branches:
+only:
+  - master
+python:
+  - 3.5
+  - 3.6
+
+env:
+  - PYSAL_PLUS=false MPLBACKEND="pdf"
+  - PYSAL_PLUS=true MPLBACKEND="pdf"
+
+before_install:
+  - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
+  - chmod +x miniconda.sh
+  - ./miniconda.sh -b -p ./miniconda
+  - export PATH=`pwd`/miniconda/bin:$PATH
+  - conda update --yes conda
+  - conda config --add channels conda-forge
+  - conda config --set channel_priority strict
+  - conda create -y -q -n test-env python=$TRAVIS_PYTHON_VERSION
+  - source activate test-env
+
+install:
+  - conda install --yes pip
+  - if [ "$PYSAL_PLUS" == true ]; then
+        echo 'plus testing'; conda install --yes --file requirements_plus.txt;
+        else conda install --yes --file requirements.txt;
+    fi;
+
+  - conda install --yes geopandas
+  - pip install -r requirements_dev.txt
+  - make download
+  - make convert
+
+script:
+  - python setup.py sdist >/dev/null
+  - python setup.py install
+  - travis_wait 45 nosetests --verbose --with-coverage --cover-package=pysal;
+
+  #- cd doc; make pickle; make doctest
+notifications:
+    email:
+        recipients:
+            - sjsrey@gmail.com
+            - levi.john.wolf@gmail.com
+            - weikang9009@gmail.com
+            - tayoshan@gmail.com
+            - marynia.kolak@gmail.com
+            - jgaboardi@gmail.com
+            - phil.stphns@gmail.com
+        on_success: always
+        on_failure: always
+
+after_success:
+  - coveralls

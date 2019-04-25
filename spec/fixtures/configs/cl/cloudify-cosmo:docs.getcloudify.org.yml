@@ -1,0 +1,48 @@
+language: node_js
+node_js:
+- '4.5'
+before_install:
+- wget https://github.com/spf13/hugo/releases/download/v0.14/hugo_0.14_linux_amd64.tar.gz -O /tmp/hugo.tar.gz
+- tar -xvf /tmp/hugo.tar.gz
+- mv hugo_0.14_linux_amd64/hugo_0.14_linux_amd64 hugo_0.14_linux_amd64/hugo
+- export PATH=$PATH:$PWD/hugo_0.14_linux_amd64
+- 'echo -e {\\n    \"content\" :\\n    {\\n        \"root\" : \"$PWD\"\\n    }\\n}  > config.json'
+- export CONFIG_JSON=$PWD/config.json
+- git clone https://github.com/cloudify-cosmo/docs.getcloudify.org-site.git
+install:
+- npm install -g bower
+- npm install -g grunt-cli
+- cd docs.getcloudify.org-site
+- bower install
+- npm install
+script:
+- >
+  regex_version='^([0-9]+\.[0-9]+\.[0-9]+)-build$'
+
+  if [[ $TRAVIS_PULL_REQUEST != true ]] ;then
+    if [[ $TRAVIS_BRANCH == "master" ]] ;then
+      export DOCS_SITE_BASE_URL="http://docs.cloudify.co/staging/dev"
+    elif [[ $TRAVIS_BRANCH =~ $regex_version ]] ;then
+      export DOCS_VERSION=${BASH_REMATCH[1]}
+      export DOCS_SITE_BASE_URL="http://docs.cloudify.co/$DOCS_VERSION"
+    else
+      export DOCS_SITE_BASE_URL="http://docs.cloudify.co/staging/$TRAVIS_BRANCH/"
+    fi
+  fi
+
+  echo baseurl: $DOCS_SITE_BASE_URL
+- grunt build
+deploy:
+- provider: s3
+  skip_cleanup: true
+  access_key_id: AKIAJZWYILFE5EERNQ6A
+  secret_access_key:
+    secure: XiEdtf3cr6JnnHZ03lkyD3D/h4zPwNZDvX63CxVpw/3V80CtgiXKZW7Qo0J7z0RDu4wSymmEEc7S84Uov2NBZ13Wzi/z8e865djW+MVo8sOiRUtNo82hF7jyKQkIIIA2GtOR5h5mgY4vaoaN9/vto9rerN//mwRqb71aNwwyEuXPXupjdRSrXgOVSo+6K/FoRneyBhu6dd9XtsFFm9BFS6KRFzVCVX5An1I9WDQEsmJyfeBDRQOQWRITVcBog+lO0QT/QenyjMcMC1/UGxeUVRIh/n2JwBB5xNQyZm9WFOXqrTCZlUQuaJSZADQwdiVnJsufAaI20/ZR5E0mxcWFurJP+U7obYFvcxoWBYxU/F15x66lc34ew8g5FDGgi5uThG5ObO+jcYoNnXoSOASHBQqEVrxOvNj/oiAUFp4y/dy3N4QO59MASFM0GUk+AdCgcezbPu4lGT9UXE00pbIrHoQN8Q/HwP5dC1+dIiMOmctN0CQbujsvytO+Vbf6LlCGIfy4ADbZSdqU5SajU2+zKmBH3skkJ0oRMD1Nmn0KFFcF73jprUWcAjZPrZi+FMmGuJo++DH2YGijvnQYmPJFUJNbaEQKCZrdWftmiQN26lXvAjpaKi/x4KaCT1U4Vf/klbCgKNT8RdqzYyaun6iFM7zbAWcj3YKMp9FK3spi9DY=
+  bucket: docs.cloudify.co
+  local_dir: public
+  upload_dir: $DOCS_VERSION
+  acl: public_read
+  cache_control: "no-cache no-store"
+  on:
+    all_branches: true
+    condition: $TRAVIS_BRANCH =~ ^[0-9]+\.[0-9]+\.[0-9]+-build$

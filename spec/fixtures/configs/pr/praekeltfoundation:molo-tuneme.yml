@@ -1,0 +1,65 @@
+sudo: false  # Force container-based builds.
+language: python
+python:
+  - "2.7"
+  - "3.6"
+
+cache:
+  - pip
+services:
+  - elasticsearch
+  - redis-server
+before_install:
+  - pip install --upgrade pip
+install:
+  - pip install -e .
+  - pip install -r requirements.txt
+  - pip install -r requirements-dev.txt
+  - pip install coveralls
+script:
+  - flake8
+  - py.test
+after_success:
+  - coveralls
+
+
+jobs:
+  include:
+    - stage: test
+    - stage: docker
+      python: "2.7"
+      sudo: required
+      dist: trusty
+      services: [docker]
+      env:
+        - IMAGE_NAME=praekeltfoundation/molo-tuneme
+        - REGISTRY_USER=praekeltorgdeploy
+        - secure: "Zs+8YVxHmVBmpJc7R+810uTY7Vz9F3BoMPtwVTmjj1uF+NZAyIL6AtKgY7IoWxxW0AT3wFN7OfK646G6Euu1jBFHAIlic/mrfgMjUjOIIqgfI7SHhLfRVM+J5ss0CG72ZaCvYFoCOiZxGIfTZ6xKCkU1ET+uIKbhC88i0otQZ+25pMiVOs1eBoihnpYhEkChrvtpCaQEIMXC4K82hYavRt0N03W1QI9T2vjMgCtjUvOLz43gneeCLfLlcK7Kgl7m1wKo3AvTei5sh4WLjrGQ9i2A+c8f0xradVQ+2795/VV69uL124PU6Rkwh9Zs+bu0WPEMcl268X7D56RSPndekDVhtRcentqcTAiEQ/b6gK79fcUa825UNwAdGhBewoFcKghR5fA7bN9TYupmpEJMd4S18Yfvoow/c+CSF+QFm2ntF/NVKVJe2dW9v9tdpxxL0BhOyVBYmHxR1Rix9zhWwm1WRM752W58T/NaJDbwQN+6q/Xq6/cNJUypHeU1XTkTSlGu6H9LSQcFInhau+AgG2Ff+YQK9RfNkP4Jq87n6sffiZ5k7scT2pYo82JlsrEc30Nreg8r5klcWFY0Khae6clAg8DuIoCadXJNssMq8iiv5o5VRq4x6RUvaZ/oBvApje8CnWJZ3hz9i6szEqabPECa4QXwrRTQT7DMnq3wycY="
+
+      # Update Docker: we want some new docker build features
+      install:
+        - sudo apt-get update
+        - sudo apt-get install -y -o Dpkg::Options::="--force-confold" docker-ce
+
+      before_script:
+        - molo_version="$(sed -nE 's/^molo\.core==(.*)$/\1/p' requirements.txt)"
+        - docker pull "$IMAGE_NAME" || true
+      script:
+        - docker build --pull --cache-from "$IMAGE_NAME" --tag "$IMAGE_NAME" --build-arg MOLO_VERSION="$molo_version" .
+
+      before_deploy:
+        - pip install docker-ci-deploy==0.3.0
+        - docker login -u "$REGISTRY_USER" -p "$REGISTRY_PASS"
+      deploy:
+        - provider: script
+          script: dcd --version "$(git rev-parse --short HEAD)" --version-latest "$IMAGE_NAME"
+          on:
+            branch: develop
+        - provider: script
+          script: dcd --tag "$TRAVIS_TAG" -- "$IMAGE_NAME"
+          on:
+            tags: true
+
+      # Built steps inherited from the default stage that we don't want
+      before_install: ignore
+      after_success: []

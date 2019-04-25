@@ -1,0 +1,17 @@
+# Use this so that headless chrome can be used to test l20n
+dist: trusty
+addons:
+  chrome: stable
+before_install:
+  - # start your web application and listen on `localhost`
+  - google-chrome-stable --headless --disable-gpu --remote-debugging-port=9222 http://localhost
+
+language: node_js
+node_js:
+  - "6.9.1"
+before_install: ./script/bootstrap
+script: ./script/test
+sudo: false
+notifications:
+  slack:
+    secure: ZqxFr/ndkffS+qYhf7ThPHJ7lcYlC8zlu989Fjh4V896TPyTaQ1yqQIppSy8oUxofGQa0GLa+1tC/baN9QA4lCH8uk8HrUmATCk5CKNsyt7H8ekmsS31t+O1Og/bwx6r1aJTFt90FRYAoMvdrT2jAIVl3hwSZSuPL73hwBy4H9w=

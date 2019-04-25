@@ -1,0 +1,20 @@
+language: node_js
+node_js:
+- "6.9.1"
+
+sudo: false
+
+before_script:
+- npm install -g sails@0.12.13
+- npm install -g appdevdesigns/appdev-cli
+- cd /tmp
+- chmod +x /home/travis/build/appdevdesigns/app_builder/test/setup/install.sh
+- /home/travis/build/appdevdesigns/app_builder/test/setup/install.sh
+- cd ad-test/node_modules
+- mv /home/travis/build/appdevdesigns/app_builder .
+- cd app_builder
+- npm install --production=false
+- npm run build
+
+script:
+- npm test

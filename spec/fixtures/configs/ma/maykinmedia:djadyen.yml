@@ -1,0 +1,25 @@
+language: python
+python:
+  - "3.6"
+
+services:
+  - postgresql
+
+addons:
+  postgresql: "9.4"
+
+install:
+  - pip install codecov coveralls tox
+script:
+  - tox --
+after_success:
+  - coveralls
+  - codecov
+env:
+  - TOXENV=py34-django111
+  - TOXENV=py35-django111
+  - TOXENV=py36-django111
+
+  - TOXENV=py34-django20
+  - TOXENV=py35-django20
+  - TOXENV=py36-django20

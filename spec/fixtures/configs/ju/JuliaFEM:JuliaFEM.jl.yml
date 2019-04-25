@@ -1,0 +1,21 @@
+language: julia
+
+os:
+  - linux
+
+julia:
+  - 0.7
+  - 1.0
+  - nightly
+
+addons:
+    apt:
+        packages:
+            - hdf5-tools
+
+matrix:
+   allow_failures:
+       - julia: nightly
+
+after_success:
+    - julia -e 'cd(Pkg.dir("JuliaFEM")); Pkg.add("Coverage"); using Coverage; Coveralls.submit(Coveralls.process_folder())'

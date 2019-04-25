@@ -1,0 +1,60 @@
+dist: trusty
+
+branches:
+  only:
+    - master
+    - /^greenkeeper/.*$/
+
+language: node_js
+
+node_js:
+  - node
+
+python:
+  - 3.6
+
+os:
+  - linux
+  - osx
+
+env:
+  global:
+    - R_LIBS_USER=${HOME}/R/library
+
+cache:
+  directories:
+    - ${R_LIBS_USER}
+    - ${HOME}/.cache/pip
+
+before_cache:
+  - rm -f ${HOME}/.cache/pip/log/debug.log
+
+addons:
+  apt:
+    sources:
+      - r-packages-trusty
+    packages:
+      - asymptote
+      - biber
+      - feynmf
+      - latex-xcolor
+      - lhs2tex
+      - python3-pip
+      - r-recommended
+      - texlive-bibtex-extra
+      - texlive-extra-utils
+      - texlive-lang-cjk
+      - texlive-latex-base
+      - texlive-latex-extra
+      - texlive-latex-recommended
+      - texlive-metapost
+      - texlive-xetex
+      - xindy
+
+before_install:
+  - source ./scripts/ci-install
+
+before_script:
+  - echo -e 'travis_fold:start:bootstrapping\033[33;1mBootstrapping\033[0m\r'
+  - source ./scripts/ci-before-test
+  - echo -e 'travis_fold:end:bootstrapping\r'

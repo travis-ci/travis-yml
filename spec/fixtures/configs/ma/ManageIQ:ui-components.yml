@@ -1,0 +1,28 @@
+sudo: required
+dist: trusty
+language: node_js
+node_js:
+  - '6'
+
+npm:
+  - '3'
+
+cache:
+  yarn: true
+  directories:
+    - node_modules
+
+before_install:
+  - 'yarn global add typings webpack karma@3.1.1 typescript'
+
+script: ./scripts/travis.sh
+
+after_success: ./scripts/.coverage.sh
+
+notifications:
+  webhooks:
+    urls:
+    - https://webhooks.gitter.im/e/9a9f972a1225d28e0f05
+    on_success: change
+    on_failure: always
+    on_start: never

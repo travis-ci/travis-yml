@@ -1,0 +1,71 @@
+language: node_js
+node_js:
+- lts/*
+- '8'
+- '7'
+
+sudo: required
+addons:
+  chrome: stable
+
+install:
+  - npm install
+  - echo TRAVIS_TAG=${TRAVIS_TAG}
+  - echo TRAVIS_TAG=${TRAVIS_BRANCH}
+  - git fetch --tags
+  - npm run build
+
+cache:
+  directories:
+  - node_modules
+
+notifications:
+  slack:
+    email : false
+    secure: RJiPWGMnu05o/ywMqJup7FA4+TaXQ9DyGGfou9a0a37Ptm+JeK8bYOZEoDG7xGwP+VMXtYbn9c3WCf0bPrt1+zMeR3s0VRWTyjwTwwD60uob8yv9ppe+41yg8/77Myc51fdWFZD/I6KdorCP8G9Uhg4xQAVq1fuW798yDy64LO/1uXvxE7oWhwpg1ezuRNBB6N0LYAH4kOp8Z5DSEgmQZeu6S+NEk/b0xG6sHqwIPVCfz3BpI4okp2AsaUo67pwT6AOtw0QtoXMab4mSda1luLV5E3PI4scWvgjbeq9KB7tAOtRfp3N0bfY2bx5GHb3GS5JQ0gwC5X8wJdnIwo31UzcEwU3u7o2g0Sotznf3nZcHjgDIEJos6YPefb7giSk0HV6JrXCDFquiaASgKjzwp3yGjiHOQyNv1KwKwEwalFzze4HbiiskEe8nnofBxpv8W/YesnpH3KLSkoisD17hRttklDTqj1ly0TsLleqxCphB2pDk8mefgSoBE005r90V9gxcIWyEvtZXz0QMFmFXob6A6UAV//KIcrzA21kPu4b54CaJjqFbQwPxNA6bH4boFnO1IE6LF7Lt5IjwAzlCMzLAUGa5/K99XSIh3Iq980tOCACZ+mw14HgthVIVeXhsS1VJe4mcmaw9WGO0tChbT0eK5SJuHK7DMGo/WJZ7nPM=
+
+
+#after_success:
+#  - npm install -g travis-deploy-once
+#  - git checkout master
+#  - git add --all
+#  - git commit -m "build by travisCI"
+#  - 'export OBNIZ_COMMITTER_EMAIL="$(git log -1 $TRAVIS_COMMIT --pretty="%cE")"'
+#  - 'export OBNIZ_COMMIT_INFO="$(git log -1 $TRAVIS_COMMIT --pretty="%d")"'
+#  - echo OBNIZ_COMMITTER_EMAIL=${OBNIZ_COMMITTER_EMAIL}
+#  - echo OBNIZ_COMMIT_INFO=${OBNIZ_COMMIT_INFO}
+#  - echo TRAVIS_COMMIT_MESSAGE=${TRAVIS_COMMIT_MESSAGE}
+#  - '[ "$TRAVIS_TAG" = ""  ] && [ "$TRAVIS_BRANCH" = "master"  ] && travis-deploy-once  && OBNIZ_DEPLOY=1' #ほかのプロセス終了確認
+#  - 'if [[ ${OBNIZ_COMMIT_INFO} = *"${TRAVIS_COMMIT_MESSAGE}"* ]] ; then OBNIZ_DEPLOY=0 ; fi;'
+#  - echo OBNIZ_DEPLOY=${OBNIZ_DEPLOY}
+
+
+#before_deploy :
+#  - npm version patch
+#  - git push --tags --force https://${GITHUB_TOKEN}@github.com/obniz/obniz.git master
+#  - git fetch
+#  - git log --oneline --graph --decorate -5
+#  - echo OBNIZ_DEPLOY=${OBNIZ_DEPLOY}
+#
+#
+#
+#deploy:
+#  provider: npm
+#  email: kido@9wick.com
+#  api_key:
+#    secure: "lO+SLWEI/6AqnZxT4h2dEz2hDKrxviEhPdHlmpzYuRJqEXHPBic7K9jM8zar9NVJa1vnusxZP22X9NaCD0VIkIknZcQQM7uSlDWvqIKXD52VVkvgLmIfapx8tWY5NyjUjAwojVQDDPGE1Y5bp1ffkbWGOjHtV4dxN0SDSidTyqowxNO+KZDIeeYobIi64mYEoX4IGckYgZif0NDvLHQ9UtK90aCGV0z+c+AVwle3ejQg/Jo8x2OfiyDr5t0DDXQT1ER7Vr9CQDsxPtD4nGkaOwFgNPpn7Oc5BAs81VA6Is+9Lwb2z7QP7Vdzb3lT++Ey98DH3OQG1SSH++afzVsbXnCS6O6la3Ehdh8mnuhsemeQoYyaR/gAvYoyALbxfBwck5tYUR0fg4kvQLGCwT9dWFT777hRUxvdOv+hhSDGLIAbN4E4SyJDLjoAP8fk4TqT9pSPCXfQQmywDG6lOuL1rUToFRI7zxqUPmnpoCY64FGOSLrNM1XIEtShX1tspQhKKBS/hF4TmQZ03J0pqzmiKa8oq0JoN+UmMkkVp+2Ky/uFa0AGflw5LiSGI/wugT4NJ034u4E19vQSeD5pwlqlGCSODWCGskVDxiJqvUwbGd7lYy2RAiaVM+mdiaib5kp+Z6YY1PHZPa6BEOyyMk2QgM0gBzKQWRQMSSf0kqZm3xk="
+#  on:
+#    branch: master
+#    repo: obniz/obniz
+#    tags: false
+#    node: lts/*
+#    condition: ' ${OBNIZ_DEPLOY} = 1  '
+#
+#  skip_cleanup: true
+
+env:
+  global:
+    - GIT_COMMITTER_NAME=deploy@travis-ci.org
+    - GIT_COMMITTER_EMAIL=deploy@travis-ci.org
+    - GIT_AUTHOR_NAME=deploy@travis-ci.org
+    - GIT_AUTHOR_EMAIL=deploy@travis-ci.org

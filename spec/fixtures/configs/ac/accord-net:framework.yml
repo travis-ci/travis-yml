@@ -1,0 +1,37 @@
+language: csharp
+
+os:
+  - linux
+  - osx
+
+mono:
+  - latest
+  - 4.8.0
+  - 4.4.2
+  
+install:
+  - nuget restore Sources/Accord.NET.sln
+  - nuget restore Samples/Samples.sln
+  
+script:
+  - ./autogen.sh
+  - make
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]] ; then make test-reduced ; else make test ; fi
+  - make check
+    
+before_install:
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then 
+       brew update;
+       brew cask install mono-mdk; 
+       export PKG_CONFIG_PATH=/Library/Frameworks/Mono.framework/Versions/Current/lib/pkgconfig/;
+       export MONO=/Library/Frameworks/Mono.framework/Versions/Current/bin/mono;
+       export XBUILD=/Library/Frameworks/Mono.framework/Versions/Current/bin/xbuild;
+    fi
+
+matrix:
+  exclude:
+    - os: osx
+      mono: 4.4.2
+    - os: osx
+      mono: 4.8.0
+      

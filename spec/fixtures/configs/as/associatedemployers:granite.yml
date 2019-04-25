@@ -1,0 +1,26 @@
+language: node_js
+node_js:
+- '10'
+sudo: false
+dist: trusty
+addons:
+  chrome: stable
+cache: yarn
+env:
+  global:
+  - JOBS=1
+  - secure: YCcIDw+mcoJW1DpHMB5VGlueOM1HbJl3fHvrASAN1A5Mj807P/9L5Wzj+Gwa79CHXZbIRA+uyOsxGICbd06NRiYGQTYtm5DYBnVazyyL/uYCytHRDCirbE6cJGg6egczC/Vuv0UhhznPDWj1+ot5ISWcfdYZxh1CZ11Ob8QGHxMaAucpLPRBBH1dP0Bt8yfXBDGaGyUDZ1GqNuqMYOq2LMS36QoGW29uwiAXqEJM8TD4Tu264vf7ex3Ua7l/mcLYuHONbVr1DPCL89zfu831k+5T0XP/mWV8t5G6mzqNJ1j1Ns0f/Xnqa7Hp1/B2Loc2xgHOXY6T6LZEFSard8VXy/2gZIJoigmb+yG8sdfjhqyS3GE5r0NASASs72h6MW2ltdvNRy8Mc2nmHpj0Zjw9AUCMeR+MaeIKlvv1Cb4eYScoe34CVpbQxFqQwgzrMU8uNm5uGN4KGhal08HrkkPWBjLTTy0GUpWa1Qz21hadX4c0YSBo7Xhn5zntGMDoh8nDJV5uzNHq3RhrD1gXS+7iCnrVTLU7TwvcIvrDKyKKUZBHoP+YW0S7sVn8kcU3bcqlsJpIRf+sNtwSUHrJvrQ+0fZYDKriwxnNccB898aGPJ2dg+gAxYx7rgg/kdAHGX8MusdXbEok+tytiXSAboispsygNl/6zTkXxjvf/lVGpn4=
+  - secure: fhE9s5DWQHw4lk2DX6oZIW6I5o7er2zATTWrE04r98FWRQF13uTOa4SWg0/l1SF/D9BND9R71mh/60LMDdqBnFmof58iWURJtM11WF7cpwhBqi1QdgLI/8akGitFF7yYOkUy11vfxoHzHQBDwwmt93ByygQqQ2zVm+FM6wPsbOdrJWgdgcSQrBnCLMcg9AT74u6TTOShDre3f1gvZhwSY09dz033y3pb3bfK9i/26chFlxTZ8iYJRJ5TgTdKD6m4SZrqNezo4enKKPe74UopAUoGiaI7Mj34/Oq6xRiu3Z5Vd5+pE2mIFOBgfy8UYDFUsFmBiE6Z1NKuFhxZFjJimaswsO5qC/524CIcauaFjRaei4makprtPcZZWL8Cpji7lyU8BbKDFFm+3zizLtmIuIuN7oULWEkqMH6AXi3uLb2OZkD+cXbs9kc/cdNJC9HtphKSwvgiT+v6ADmxptcKEdeLNfBhmHO316fXmormMOzvQFR5C05NF+smZZdP65jUCg1XHAUWH1NPd2FXXJHgpFyDfZKFcBbvDqQjM9AJ5sRD3UOiTOKX6MRQeHmuPeVSUhoTIujY4+dvhRl8ss2Dl2dmCK/B8dA0jt7imJsqX8jM3tQicAgVrfveghpvNqePDH2iiRgBi5sF+BNATU7sft1P7ugWQISRNEJz2xIpYks=
+before_install:
+- curl -o- -L https://yarnpkg.com/install.sh | bash
+- export PATH=$HOME/.yarn/bin:$PATH
+install:
+- yarn install --non-interactive
+before_script:
+- ember browserstack:connect
+script:
+- yarn lint:js
+- yarn lint:hbs
+- yarn test-ci
+after_script:
+- ember browserstack:disconnect

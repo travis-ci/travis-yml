@@ -1,0 +1,28 @@
+warnings_are_errors: false # So that travis don't treat warning as errors
+# set notification options
+notifications: 
+  email:
+    recipients:
+      - hou32hou@gmail.com
+    on_success: always
+    on_failure: always
+
+language: node_js # specify your language
+
+node_js: # specify version of node js
+  - "6.11.3"
+
+cache: # cache node modules so that every build don't have to reinstall those node package again
+  directories:
+    - "node_modules"
+
+before_script:
+  - sed -i "s/polyfill/polyfill --coverage/g" ./package.json #Add --coverage option for running test
+  - sed -i "s/es5/es6/g" ./ts/tsconfig.json # Let TS compiler to transpile into ES6, so that the code coverage result will be more accurate
+
+script:
+  - ./scripts/transpile
+  - npm run test
+
+after_script:
+  - codecov

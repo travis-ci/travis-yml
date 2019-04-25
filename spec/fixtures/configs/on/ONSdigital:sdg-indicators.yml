@@ -1,0 +1,34 @@
+language: ruby
+rvm:
+- 2.4.0
+dist: trusty
+sudo: false
+branches:
+  except:
+  - gh-pages
+env:
+  global:
+  - NOKOGIRI_USE_SYSTEM_LIBRARIES=true
+# Build. _site directory is the artifact
+before_script:
+- chmod +x ./scripts/*.sh
+- chmod +x ./scripts/deploy/*.sh
+script:
+- scripts/cibuild.sh
+# Deploy. Staging goes back to gh-pages here and prod to external repo
+deploy:
+- provider: script
+  script: scripts/deploy/deploy_staging.sh
+  skip_cleanup: true
+  on:
+    branch: develop
+- provider: script
+  script: scripts/deploy/deploy.sh
+  skip_cleanup: true
+  on:
+    branch: master
+- provider: script
+  script: scripts/deploy/deploy_testing.sh
+  skip_cleanup: true
+  on:
+    all_branches: true

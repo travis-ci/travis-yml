@@ -1,0 +1,36 @@
+language: node_js
+
+jobs:
+  include:
+    - stage: test
+      name: 'Node.js 10 / Postgres 10'
+      dist: xenial # required for postgres 10
+      node_js: '10'
+      services:
+        - postgresql
+      addons:
+        postgresql: '10'
+      script:
+        - npm run lint
+        - npm run coverage
+      after_success:
+        - npm run coveralls
+    - stage: test
+      name: 'Node.js 8 / Postgres 9'
+      node_js: '8'
+      services:
+        - postgresql
+      addons:
+        postgresql: '9.6'
+      script:
+        - npm run test:mocha
+    - stage: release
+      node_js: '10'
+      script: skip
+      branches:
+        only:
+          - master
+      deploy:
+        provider: script
+        skip_cleanup: true
+        script: npx semantic-release

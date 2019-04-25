@@ -1,0 +1,94 @@
+language: python
+
+# Setting sudo to false opts in to Travis-CI container-based builds.
+sudo: false
+
+# The apt packages below are needed for sphinx builds, which can no longer
+# be installed with sudo apt-get.
+addons:
+    apt:
+        packages:
+            - graphviz
+            - texlive-latex-extra
+            - dvipng
+
+python:
+    - 3.5
+    - 3.6
+
+env:
+    global:
+        # The following versions are the 'default' for tests, unless
+        # overridden underneath. They are defined here in order to save having
+        # to repeat them for all configurations.
+        - NUMPY_VERSION=stable
+        - ASTROPY_VERSION=stable
+        - CONDA_DEPENDENCIES='scipy reproject psutil cython astroscrappy'
+
+        # Need the latest scikit-image (0.14.2 or higher), which is not in
+        # anaconda yet.
+        - PIP_DEPENDENCIES='scikit-image'
+        - MAIN_CMD='python setup.py'
+        - SETUP_CMD='test'
+        - CONDA_CHANNELS='astropy-ci-extras astropy'
+        - ASTROPY_USE_SYSTEM_PYTEST=1
+
+    matrix:
+        - SETUP_CMD='egg_info'
+
+matrix:
+    include:
+        - env: PYTHON_VERSION=3.7
+               SETUP_CMD='egg_info'
+
+        # Try Astropy/NumPy development versions. This requires them to be
+        # compiled during setup which takes some time.
+        - env: PYTHON_VERSION=3.7
+               ASTROPY_VERSION=development
+               NUMPY_VERSION=dev
+               SETUP_CMD='test --coverage'
+
+        # Check for sphinx doc build warnings
+        - env: PYTHON_VERSION=3.7
+               SETUP_CMD='build_docs -w'
+
+        # Do coverage tests for both latest Python versions
+        - env: PYTHON_VERSION=3.7
+               ASTROPY_VERSION=3
+               SETUP_CMD='test --coverage'
+
+        # Check compatibility with the current astropy LTS release
+        - python: 3.6
+          env: ASTROPY_VERSION=2
+               PYTEST_VERSION=3.6
+
+        - python: 3.5
+          env: NUMPY_VERSION=1.13
+
+        - python: 3.6
+          env: NUMPY_VERSION=1.14
+
+        # Try numpy pre-release version. This runs only when a pre-release
+        # is available on pypi.
+        - env: PYTHON_VERSION=3.7
+               NUMPY_VERSION=prerelease
+
+        # pycodestyle test, see setup.cfg for tested pep8 warnings/errors
+        - env: PYTHON_VERSION=3.7
+               MAIN_CMD='pycodestyle ccdproc --count  --show-source --show-pep8'
+               SETUP_CMD=''
+
+install:
+
+    - git clone git://github.com/astropy/ci-helpers.git
+    - source ci-helpers/travis/setup_conda.sh
+
+
+script:
+   - $MAIN_CMD $SETUP_CMD
+
+after_success:
+    # If coveralls.io is set up for this package, uncomment the line
+    # below and replace "packagename" with the name of your package.
+    # The coveragerc file may be customized as needed for your package.
+    - if [[ $SETUP_CMD == 'test --coverage' ]]; then coveralls --rcfile='ccdproc/tests/coveragerc'; fi

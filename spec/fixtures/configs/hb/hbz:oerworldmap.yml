@@ -1,0 +1,31 @@
+language: scala
+dist: precise
+scala:
+  - 2.11.7
+jdk: oraclejdk8
+sudo: false
+cache:
+  directories:
+  - $HOME/.ivy2/cache
+  - $HOME/.sonar/cache
+before_install:
+  - curl https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-6.2.1.tar.gz | tar xz --directory=$HOME
+  - $HOME/elasticsearch-6.2.1/bin/elasticsearch-plugin install analysis-icu
+  - $HOME/elasticsearch-6.2.1/bin/elasticsearch --daemonize -Epath.data=/tmp && sleep 20s
+install:
+  - npm install node-python
+before_script:
+  - cp conf/travis.conf conf/test.conf
+  - touch /tmp/htprofiles
+  - mkdir -p data/consents/objects/
+  - touch data/consents/history
+addons:
+  sonarqube: true
+branches:
+  only:
+    - master
+env:
+  global:
+    secure: "O3mnIElHHjHfG83ihUhxxq9oHDtZW9rh9rnMuw6zvHl/QC0zwEMNTykwZcNP24pNk4+sMLd8LyfRIRm/GRPAlakCAbCktFbkOHsm4Abk/s4jbiNLlV/WVn3N9zCDCE359zrDPSw9GIsgTnM015ZiATO+2zCpt26VFKLJrWHofuA="
+    secure: "flK1dkGh7jGp4wVL1ahbk6Bn16eeZS/yZ/E2a518eIzLehIG7CooKn1ZrH4sMC3lRGB7XvklO9oqeRPTrw8HyQTyCUqrd0/cDQn59mjvXYnv6pP/ES0k354fjvAvFFFuSC88DdFF4fWGssP+GB1JwMSBzC5rXmYVqxbpEji5SMU="
+    secure: "EbyNRW7CgdBw8Sr+ShyUm4JZ7ThCo8K9he2syk0yjCMa1zT0u+xtK0FztA3dfvc/gI9Exf7FkJkS/3Qa8mgEnVL4WyCiaR33WU8d1lhccQGot2Go3nTYtDfku/lfbxaPpcVKfACGG9QSnUozlnGY8rVArP0MnXpHb0Fpg8Zahck="

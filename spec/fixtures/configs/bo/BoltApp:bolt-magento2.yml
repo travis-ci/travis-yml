@@ -1,0 +1,53 @@
+language: php
+
+php:
+  - 7.0
+  - 7.1
+
+addons:
+  apt:
+    packages:
+    - mysql-server-5.6
+    - mysql-client-core-5.6
+    - mysql-client-5.6
+  hosts:
+    - magento2.travis
+
+deploy:
+  - github-token: $GITHUB_TOKEN
+
+env:
+  global:
+    - COMPOSER_BIN_DIR=~/bin
+    - DB_NAME="magento2"
+    - DB=mysql
+    - MAGENTO_HOST_NAME="magento2.travis"
+  matrix:
+    - TEST_SUITE=unit
+
+cache:
+  apt: true
+  directories:
+    - $HOME/.composer/cache
+
+before_install: phpenv config-rm xdebug.ini
+
+before_script:
+  - composer self-update -q
+  - if [ -n "$GITHUB_TOKEN" ]; then composer config github-oauth.github.com ${GITHUB_TOKEN}; fi;
+  - composer show -i
+  - echo "{\"http-basic\":{\"repo.magento.com\":{\"username\":\"${MAGENTO_USERNAME}\",\"password\":\"${MAGENTO_PASSWORD}\"}}}" > $HOME/.composer/auth.json
+  - cd /home/travis/build/
+  - composer create-project --repository-url=https://repo.magento.com/ magento/project-community-edition=2.2.6 magento/
+  - cd magento/
+  - composer install
+
+script:
+  - cd /home/travis/build/
+  - mkdir -p magento/app/code/Bolt/Boltpay
+  - cp -r BoltApp/bolt-magento2/. magento/app/code/Bolt/Boltpay/
+  - cd magento/
+  - bash app/code/Bolt/Boltpay/.travis/before_script.sh
+  - cp app/code/Bolt/Boltpay/Test/Unit/phpunit.xml dev/tests/unit/bolt_phpunit.xml
+  - echo "Starting Bolt Unit Tests"
+  - php vendor/phpunit/phpunit/phpunit -c dev/tests/unit/bolt_phpunit.xml

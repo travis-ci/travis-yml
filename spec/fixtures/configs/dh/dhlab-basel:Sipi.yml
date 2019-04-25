@@ -1,0 +1,50 @@
+# get us a vm with ubuntu 16.04
+dist: trusty
+sudo: required
+
+# only pull the last commit (faster)
+git:
+  depth: 1
+
+# provides us docker
+services:
+  - docker
+
+language: cpp
+
+# define some additional environment variables
+env:
+  global:
+    - secure: WPQBoKTtyd80dNfPUvR/L83SYb3riCYtI/tyf5ReHY2lZ9y7+ZQAcb2R2YFWw7b12yAZ/HKqrA1m+6UyRtfM/HgA8BIUoMPeV0+sV9+cf7rPMNz7+iuk3wgRMDgbs5mD7w5RPWEqRuSiAjTJdDYv8gVx9SLwOVWSoM8/Uj9eccf30WkQuG024I1HUoaJBJH+7vD8qleUyoxescX94xeg8o5IOT6vNVJV1MK61EJmd1as6aKBhzmo4kxyHnDYQGPhbwpzwKMxhpcOjX3Mvr7YoLbRvnhddHU2TXrC9yRhaDF/Iu/Uu1uoSdfZ3XifIAywRH/TYqEqZbwW0T3bRZ8qqt3JrA2PGAYQ9+HDjm+7Thg4xW2QuOnvmWK9gumK2NQgdzINQR+iC+hFRszD5rMSy4867LlJYJgxrZcW801w4wzYIc0QhP0VktYl1OG35b8FXqVtMV2D23G8mVg6K2MGqv1A/JTEQU7MAz3C+P+XhQDvrynDeRh3XLsaNSJlj7RMx/OSLnSg4xPZ+PO7Uj/kqmdLb9XHjhNnE609CH3Kn5NgdR2sE+/sZYI9jkWbT3sxvuVdQBnrSdbzXAKLp0V/GHAP6ymw/ci7U+TGDMhiEU+U53O/oNAQ2BVhYL8IIvtygPUK+QT/L5OW12tbtSK/2Sa8Au6jf5OPHusoc6tormk= # DOCKER_USER
+    - secure: ZEjIXow+plBGsZyjWqytSHHGCacAAD6Gdj+NmFK+JDdL4F9i2ndhDl8pcaunr6PHQWXgzyNWt9YOauQWGuiUSwIyJBkkSzC1KRCZXQR/ZxrJEk9vSFcYHHTPCJgDNViiqo0l1gNYcP/Po/EpE6Fljs4JLveFh/zmetRHKE0vAvc5tfeDjXXRoEQ4CYF1yycWF21mCHg493UVK67FR+3XAeNi7of9ZIT4iGmxUH+9Htd5srhkdDTTJqqwEe1Ql5EJ3LW5+Ssj8fRDNr7vgTnLz9wb8Wv9Ez3/q2Fukv1VIB4rWTMmUERxzWkxyu05tK2DYOFrSN8LQdJVu+pzRl0qHmQSITwekCq974Bav89BvkoEb7xT0kbCwZOLswqVBt+jLOBRLBUmlZn7REkRGcBEHNhIR82q4hVS7aZHeLIx8QGYoREKKKKVcvEr+LxucqvsO6RbGtkeqUjOmv4q8qzWrewGuzS5J+NmI9V7h3QWGyDVU/cdKf6lyo9nmnZ8YmUp5xeKwaiL1yfO7K16jxYnNQvfnPc+3VmiX8Wb8PRAxUysmY2fCQJIyMsSSSNaHv7dA0AJFRqOeZDzaPHN5zOHS8mvSBou4Sq878R97poFkU5k9PWFkQ0pc+fSh07L1wClMosqd2qpxEypFxWV5DkQKZk3gF+mnrsvrKoKcy1CB68= # DOCKER_PASS
+    - REPO=dhlabbasel/sipi
+
+stages:
+  - test
+  - name: publish # generally, only publish if we are on 'develop' or tagged
+    if: branch = develop OR tag IS present
+
+jobs:
+  include:
+    - stage: test
+      script:
+        # decrypt archive containing the kakadu library
+        - openssl aes-256-cbc -K $encrypted_53935862068b_key -iv $encrypted_53935862068b_iv -in vendor/v7_A_5-01382N.zip.enc -out vendor/v7_A_5-01382N.zip -d
+        # run compile and tests inside docker
+        - docker run -v $PWD:/sipi dhlabbasel/sipi-base:18.04 /bin/sh -c "cd /sipi/build; cmake .. && make && ctest --verbose"
+
+    - stage: publish
+      script:
+        # decrypt archive containing the kakadu library
+        - openssl aes-256-cbc -K $encrypted_53935862068b_key -iv $encrypted_53935862068b_iv -in vendor/v7_A_5-01382N.zip.enc -out vendor/v7_A_5-01382N.zip -d
+        # login into docker hub, build image, and push but only when on the "develop" branch or tagged
+        # when on 'develop' then $TRAVIS_BRANCH = develop
+        # when on 'tag' then $TRAVIS_BRANCH = tag, e.g., v1.2.0
+        - docker login -u $DOCKER_USER -p $DOCKER_PASS
+        - docker build -t $REPO:$TRAVIS_BRANCH .
+        - docker tag $REPO:$TRAVIS_BRANCH $REPO:latest
+        - docker push $REPO
+
+notifications:
+  slack:
+    secure: "PxvA5zguh3T64J+c7JHnXtKM9jo8S5qIDJ6IT7d2l66xI48Hf3hiM/Tr9C+Duc1krrMViB935AzDFaK5QZPOgzbzHd1AMugLTSD/ds+puimZ8W8gwZVH3MkYyqPXVofCEZaCKPbGOQTQ5Z6wAaGLZ2wuaAwMaqvKi8fMPc6r7M/Ggaagsiw8t9ScRcMTFt2PbmXfdcazIaPigMramLFXDel+AgFW3ay5D9ophs2QsfRlNAxd1OxAHZFIgoimI13H9fM7Efs1TWBywqUVkd9Fsl5aiY5zEcJN7NezgAJrUynL9FJwPBV+NcOAfm/WBqJ82K0zCSE2blhLr2ixVsfhuceEUXVa/2Y1qthOkKFEgggcfnth7D12RjLOY5Qr8J8f9q45A1cTqsiitKS9qfgulcV1fNqho4X9EROrVY20Li9eWNDQOK4EiHclpfnBZ1NVH0DrRt7y19zdyW749RUOy9NO1MMhjl93E6K9KELVGlfCOsm9ZxKGzZsV4XA3nClXlIn7IdE7jlc/bmyC0nWf8HGge8l+HSJp0c4F078VOF5eIq3aNm9H740736ycSr/W6Puj34QblFTslR4/7qCDtfB/Hf7HNyPSK+thiHlNUZa4WeOT7lb/iDHevpCBQ2+HFQFfxwLIFbC+jlZKQfRNHIwoHG5rzCZPf1stUtREKN0="

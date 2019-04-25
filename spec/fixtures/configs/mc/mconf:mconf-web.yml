@@ -1,0 +1,23 @@
+sudo: false
+dist: precise
+language: ruby
+cache: bundler
+services:
+  - redis-server
+  - mysql
+addons:
+  apt:
+    packages:
+      - libqtwebkit-dev
+bundler_args: "--without production development"
+env:
+  global:
+  - MCONF_DATABASE_TEST_ADAPTER='mysql2'
+  - MCONF_DATABASE_TEST_NAME='mconf_test'
+  - MCONF_DATABASE_TEST_USERNAME='travis'
+  - MCONF_DATABASE_TEST_PASSWORD=''
+before_script:
+  - "mysql -e 'create database mconf_test;'"
+script: bundle exec rake
+rvm:
+  - 2.2.5

@@ -1,0 +1,28 @@
+notifications:
+  email: false
+
+sudo: required
+dist: trusty
+language: generic
+
+services:
+  - docker
+
+before_install:
+  - sudo rm /usr/local/bin/docker-compose
+  - curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
+  - chmod +x docker-compose
+  - sudo mv docker-compose /usr/local/bin
+  - sudo groupadd -g 880 eventkit
+  - sudo useradd -u 8800 -g 880 eventkit
+
+before_script:
+    - docker-compose build webpack
+
+script:
+    - docker-compose run --rm -T webpack npm run lint
+    - docker-compose run --rm -T webpack npm test
+    # The backend tests take too long to build and run here.
+
+env:
+  - DOCKER_COMPOSE_VERSION=1.22.0 SITE_NAME=cloud.eventkit.test SITE_IP=$(/sbin/ip -o -4 addr list eth0 | awk '{print $4}' | cut -d/ -f1)

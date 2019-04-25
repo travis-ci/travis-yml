@@ -1,0 +1,26 @@
+---
+language: python
+
+python:
+  - "2.7"
+
+# This (sudo: false) is needed to "run on container-based infrastructure" on
+# which cache: is available
+# http://docs.travis-ci.com/user/workers/container-based-infrastructure/
+sudo: false
+
+cache: pip
+
+install:
+  - pip install PyYAML "pandas<0.19" "flake8<3.6.0" yamllint
+  - python setup.py install
+
+before_script:
+  - flake8 -v .
+  - yamllint .
+
+script:
+  - find idr* -type f -name '*.screen' -print0 | xargs -0 -n1 python scripts/check_screen.py -v
+  - find . -type f -name '*study.txt' | xargs python pyidr/study_parser.py
+  - python scripts/travis-check.py
+  - python test/all_tests.py

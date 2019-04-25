@@ -1,0 +1,21 @@
+language: python
+python: 3.6
+dist: bionic
+sudo: true
+install:
+ - git config credential.helper "store --file=.git/credentials"
+ - echo $cred > .git/credentials
+script:
+ - git config --global user.email "monkeyboy2805@gmail.com"
+ - git config --global user.name "monkeyboy2805"
+ - curl --url https://www.python.org/ftp/python/3.7.1/Python-3.7.1.tgz --location --output ./source.tgz
+ - tar -xzf ./source.tgz
+ - mv ./Python-3.7.1/ ./python
+ - cd ./python
+ - ./configure --enable-optimizations
+ - sudo make altinstall
+ - cd ../
+ - ./python/python ./ci/CI.py
+ - git reset --hard
+ - git checkout $TRAVIS_BRANCH
+ - ./python/python ./ci/build/update/CIRepoAutoUpdate.py

@@ -1,0 +1,15 @@
+language: python
+python:
+    - "3.4.2"
+#   - "3.6"
+
+env:
+    - DJANGO_SECRET_KEY=0 OPENNEBULA_USERNAME='test' OPENNEBULA_PASSWORD='test' OPENNEBULA_PROTOCOL='http' OPENNEBULA_DOMAIN='test_domain' OPENNEBULA_PORT='2633' OPENNEBULA_ENDPOINT='/RPC2' DCL_TEXT='Data Center Light' CELERY_MAX_RETRIES=0 UNGLEICH_SITE_CONFIGS='{"localhost":{"MULTISITE_CMS_URL":"dynamicweb.urls"}}'
+# install dependencies
+install: "pip install -r requirements.txt"
+script:
+- flake8
+- python manage.py compilemessages
+- python manage.py test -v 3
+# - coverage run --source='.' manage.py test dynamicweb -v 3
+# - coverage report

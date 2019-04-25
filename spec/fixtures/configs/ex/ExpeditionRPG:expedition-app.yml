@@ -1,0 +1,23 @@
+language: node_js
+env:
+- CXX=g++-4.8
+addons:
+  apt:
+    sources:
+    - ubuntu-toolchain-r-test
+    packages:
+    - g++-4.8
+before_install: nvm install "$(jq -r '.engines.node' package.json)" && node --version
+before_deploy: "pip install awscli --upgrade --user"
+cache:
+  directories:
+    - node_modules
+deploy:
+  provider: script
+  script: ./scripts/beta.sh
+  skip_cleanup: true
+  on:
+    repo: ExpeditionRPG/expedition-app
+    branch: master
+notifications:
+  email: false

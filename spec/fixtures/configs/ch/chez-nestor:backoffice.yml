@@ -1,0 +1,41 @@
+dist: xenial
+language: node_js
+node_js:
+- v8
+# services:
+#   - mysql
+# addons:
+# - mariadb: '10.3'
+# env:
+# - DB=mariadb
+branches:
+  only:
+  - master
+  - release
+before_install:
+- openssl aes-256-cbc -K $encrypted_44d89451484b_key -iv $encrypted_44d89451484b_iv
+  -in .env.js.enc -out .env.js -d
+- curl -sfLO https://raw.githubusercontent.com/apex/up/master/install.sh
+- curl -o- -L https://yarnpkg.com/install.sh | bash
+- export PATH="$HOME/.yarn/bin:$PATH"
+# - mysql -e 'CREATE DATABASE IF NOT EXISTS test;'
+install:
+- sh install.sh -b ./bin v0.8.0
+- ./bin/up version
+- npm install
+# script:
+# - npm run gulp -- test:localmysql
+deploy:
+  - provider: script
+    on:
+      branch: master
+    script: npm run gulp -- stag:deploy
+    skip_cleanup: true
+  - provider: script
+    on:
+      branch: release
+    script: npm run gulp -- prod:deploy
+    skip_cleanup: true
+after_deploy:
+  - '[ $TRAVIS_BRANCH == master ] && npm run gulp -- stag:ping'
+  - '[ $TRAVIS_BRANCH == release ] && npm run gulp -- prod:ping'

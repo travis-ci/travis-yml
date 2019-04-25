@@ -1,0 +1,50 @@
+language: python
+
+matrix:
+  # bail-out early for failures
+  fast_finish: true
+
+  include:
+    - python: '2.7'
+      env: PIP_FLAGS="--quiet --pre"
+    - python: '3.5'
+      env: PIP_FLAGS="--quiet --pre"
+    - python: '3.6'
+      env: PIP_FLAGS="--quiet --pre"
+    - python: '3.7'
+      dist: xenial
+      sudo: required
+      env: PIP_FLAGS="--quiet --pre"
+
+    - python: '2.7'
+      env: PIP_FLAGS="--quiet"
+    - python: '3.5'
+      env: PIP_FLAGS="--quiet"
+    - python: '3.6'
+      env: PIP_FLAGS="--quiet"
+    - python: '3.7'
+      dist: xenial
+      sudo: required
+      env: PIP_FLAGS="--quiet"
+
+before_install:
+  - python -m pip install ${PIP_FLAGS} --upgrade pip
+  - python -m pip install ${PIP_FLAGS} -r requirements.txt
+  - npm -g install acorn
+
+install:
+  - python -m pip install ${PIP_FLAGS} --editable .
+
+script:
+  - python -m coverage run ./setup.py test
+  - bash ci/test-bin.sh
+  - acorn --silent gwdetchar/_static/bootstrap-ligo.min.js
+  - acorn --silent gwdetchar/_static/gwdetchar.min.js
+
+after_success:
+  - python -m pip install ${PIP_FLAGS} codecov
+  - python -m coverage report
+  - python -m codecov --flags $(uname) python${TRAVIS_PYTHON_VERSION/./}
+
+cache:
+  pip: true

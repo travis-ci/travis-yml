@@ -1,0 +1,16 @@
+language: node_js
+cache: npm
+notifications:
+  email: false
+node_js:
+  - 'lts/*'
+before_script:
+  - npm prune
+install:
+  - npm install
+script:
+  - npm run link
+  - npm run lint
+  - npm run test
+after_success:
+  - ./node_modules/.bin/nyc report --reporter=text-lcov | ./node_modules/.bin/coveralls

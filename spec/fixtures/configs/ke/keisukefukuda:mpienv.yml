@@ -1,0 +1,86 @@
+language: python
+
+sudo: false
+
+dist: trusty
+
+env:
+  - PIP_VER=19.0.3 TEST_SHELL_CMD=bash  LANG=C
+  - PIP_VER=18.0   TEST_SHELL_CMD=zsh   LANG=C
+  - PIP_VER=10.0.1 TEST_SHELL_CMD=zsh   LANG=en_US.utf-8
+  - PIP_VER=10.0.1 TEST_SHELL_CMD=bash  LANG=ja_JP.utf-8
+  - PIP_VER=18.0   TEST_SHELL_CMD=bash  LANG=en_US.utf-8
+  - PIP_VER=19.0.3 TEST_SHELL_CMD=zsh   LANG=ja_JP.utf-8
+  - PIP_VER=19.0.3 TEST_SHELL_CMD=zsh   LANG=en_US.utf-8
+  - PIP_VER=18.0   TEST_SHELL_CMD=zsh   LANG=ja_JP.utf-8
+  - PIP_VER=10.0.1 TEST_SHELL_CMD=zsh   LANG=C
+
+
+#  - PIP_VER=19.0.3  TEST_SHELL_CMD=zsh   LANG=C
+#  - PIP_VER=19.0.3  TEST_SHELL_CMD=zsh   LANG=en_US.utf-8
+#  - PIP_VER=19.0.3  TEST_SHELL_CMD=zsh   LANG=ja_JP.utf-8
+#  - PIP_VER=19.0.3  TEST_SHELL_CMD=bash  LANG=C
+#  - PIP_VER=19.0.3  TEST_SHELL_CMD=bash  LANG=en_US.utf-8
+#  - PIP_VER=19.0.3  TEST_SHELL_CMD=bash  LANG=ja_JP.utf-8
+#  - PIP_VER=18.0   TEST_SHELL_CMD=zsh   LANG=C
+#  - PIP_VER=18.0   TEST_SHELL_CMD=zsh   LANG=en_US.utf-8
+#  - PIP_VER=18.0   TEST_SHELL_CMD=zsh   LANG=ja_JP.utf-8
+#  - PIP_VER=18.0   TEST_SHELL_CMD=bash  LANG=C
+#  - PIP_VER=18.0   TEST_SHELL_CMD=bash  LANG=en_US.utf-8
+#  - PIP_VER=18.0   TEST_SHELL_CMD=bash  LANG=ja_JP.utf-8
+#  - PIP_VER=10.0.1 TEST_SHELL_CMD=zsh   LANG=C
+#  - PIP_VER=10.0.1 TEST_SHELL_CMD=zsh   LANG=en_US.utf-8
+#  - PIP_VER=10.0.1 TEST_SHELL_CMD=zsh   LANG=ja_JP.utf-8
+#  - PIP_VER=10.0.1 TEST_SHELL_CMD=bash  LANG=C
+#  - PIP_VER=10.0.1 TEST_SHELL_CMD=bash  LANG=en_US.utf-8
+#  - PIP_VER=10.0.1 TEST_SHELL_CMD=bash  LANG=ja_JP.utf-8
+
+
+python:
+  # - "2.6"
+  - 2.7
+  # - "3.2"
+  # - "3.3"
+  # - "3.4"
+  # - 3.5
+  - 3.6
+  # - 3.7-dev  # To be '3.7' ?
+  - "nightly"
+
+cache:
+  - pip: true
+  - directories:
+      - $HOME/mpi
+      - $HOME/zsh
+      - $HOME/.mpienv-test
+      - $HOME/.mpienv-build
+      - $HOME/.mpienv-cache
+
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - ibverbs-utils
+      - libibverbs-dev
+      - wget
+      - zsh
+
+before_script:
+  - export MPI=openmpi-3.1.2
+  - bash tests/build_mpi.sh
+
+install:
+  - pip install "pip==${PIP_VER}"
+  - pip install -r requirements.txt
+  - pip install pytest
+
+script:
+  - autopep8 --diff -r . --global-config .pep8 | tee check_autopep8
+  - test ! -s check_autopep8
+  - flake8 $(find . -name "*.py")
+  - export MPI=$HOME/mpienv/openmpi-3.1.2
+  - export PATH=$MPI/bin:$PATH
+  - export LD_LIBRARY_PATH=$MPI/lib:$LD_LIBRARY_PATH
+  - ${TEST_SHELL_CMD} ./tests/test_main.sh
+  # - codeclimate-test-reporter || true # CODECLIMATE_REPO_TOKEN is defined in TravisCI's setting

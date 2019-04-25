@@ -1,0 +1,14 @@
+jdk:
+  - oraclejdk8
+
+language: scala
+
+scala:
+  - 2.11.7
+
+script: AGORA_URL_ROOT='http://localhost:8989' RAWLS_URL_ROOT='http://localhost:8990' THURLOE_URL_ROOT='http://localhost:8991' FIRE_CLOUD_ID='123' sbt coverage test coverageReport
+
+after_success: sbt coveralls
+
+notifications:
+  email: false

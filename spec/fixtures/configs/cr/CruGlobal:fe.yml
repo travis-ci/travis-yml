@@ -1,0 +1,14 @@
+language: ruby
+
+rvm:
+  - 2.2.5
+env:
+  - DB=mysql
+  - DB=postgresql
+
+before_script: rake setup_db # creates the database used for tests
+
+sudo: false
+
+# using default travis command
+### script: bundle exec rake

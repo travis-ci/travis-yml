@@ -1,0 +1,27 @@
+language: python
+python: 2.7
+install:
+- pip install -r requirements.txt
+- pip install -r test_requirements.txt
+- pip install coveralls==1.1 # pinpointing the version. too learn more take a look at https://github.com/QualiSystems/shellfoundry/issues/175
+script: coverage run --source=shellfoundry setup.py test
+after_success: coveralls
+deploy:
+  - provider: pypi
+    server: https://test.pypi.org/legacy/
+    distributions: "sdist bdist_wheel"
+    user: quali
+    password:
+      secure: MK+VUYiTM5zu+h9vGc380y2IjyoeAzJ15Wnl++Qu5xU9qjWTodS1ezQl/RyP0sPfuC5XfdyUnM0SOe46w8Xyf61Q/Ki3Q8DD8i2aLdSkuJ1KqVnSFJohmk00E3uCayppQyr1aKtPAv6Wsidk1kkHQDgLwo89vjYLOat4pHg71UB6CbCCZ89okdYhlkwT/X+lvmtUd5SPKBLL1O/ALlwdMo6ulOqPXmXbnXWkVh2veyAKcoDDnLAC0WUOZXqBR8sj9X0qO3VuYZeolnvFPHumSAWfUlDS59UDLudklaA5ckZBSPmMpy46PS4GQtkQbZ5nH6YZPWxQk0vziQZUfIRTeWjjouuNNnAiL+PDLlImz5bfkyu+NzrL67tC4tQDshCxRDHN7OaesrEHSDyxOeKa1inQUJIJHh/U2B9hSHlG4uCNAG78q6Cswz3CIEpbnH0SvzH1UrJ+WWGxXrb5P2v808lwNuLEVuFHYgV+d5LDc4ZVgnnFgGjVCBpLLxXZcktowuzTu6hEYs3bHsgvQyJ7W+XXYPyYKqRGSDOXWmSrtagBEYt1DLYwC5ZMSPz5ZMu/5h2HrwKYjX47Aibd52quqT7BU/keHM2S9TXhKh5KErcTRvFL0WrFyGBQm7wOJdMUll4kiIs4e282Z0vdzZQJnRnWrZstkPx6itwu7kMnMRY=
+    on:
+      branch: master
+      condition: $TRAVIS_PYTHON_VERSION = "2.7"
+  - provider: pypi
+    distribution: "sdist bdist_wheel"
+    user: quali
+    password:
+      secure: MK+VUYiTM5zu+h9vGc380y2IjyoeAzJ15Wnl++Qu5xU9qjWTodS1ezQl/RyP0sPfuC5XfdyUnM0SOe46w8Xyf61Q/Ki3Q8DD8i2aLdSkuJ1KqVnSFJohmk00E3uCayppQyr1aKtPAv6Wsidk1kkHQDgLwo89vjYLOat4pHg71UB6CbCCZ89okdYhlkwT/X+lvmtUd5SPKBLL1O/ALlwdMo6ulOqPXmXbnXWkVh2veyAKcoDDnLAC0WUOZXqBR8sj9X0qO3VuYZeolnvFPHumSAWfUlDS59UDLudklaA5ckZBSPmMpy46PS4GQtkQbZ5nH6YZPWxQk0vziQZUfIRTeWjjouuNNnAiL+PDLlImz5bfkyu+NzrL67tC4tQDshCxRDHN7OaesrEHSDyxOeKa1inQUJIJHh/U2B9hSHlG4uCNAG78q6Cswz3CIEpbnH0SvzH1UrJ+WWGxXrb5P2v808lwNuLEVuFHYgV+d5LDc4ZVgnnFgGjVCBpLLxXZcktowuzTu6hEYs3bHsgvQyJ7W+XXYPyYKqRGSDOXWmSrtagBEYt1DLYwC5ZMSPz5ZMu/5h2HrwKYjX47Aibd52quqT7BU/keHM2S9TXhKh5KErcTRvFL0WrFyGBQm7wOJdMUll4kiIs4e282Z0vdzZQJnRnWrZstkPx6itwu7kMnMRY=
+    on:
+      branch: master
+      tags: true
+      condition: $TRAVIS_PYTHON_VERSION = "2.7"

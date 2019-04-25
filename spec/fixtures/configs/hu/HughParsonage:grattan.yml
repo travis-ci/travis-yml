@@ -1,0 +1,46 @@
+language: r
+
+pandoc: true
+pandoc_version: 2.6
+
+env:
+  global:
+    - _R_CHECK_LENGTH_1_LOGIC2_=true
+
+matrix:
+  include:
+  - r: oldrel
+    r_build_args: --no-build-vignettes
+    r_check_args: --no-multiarch --ignore-vignettes --no-vignettes
+  - r: oldrel
+    r_build_args: --no-manual --no-build-vignettes
+    r_check_args: --no-multiarch --ignore-vignettes --no-vignettes --no-tests
+  - r: release
+    r_build_args: --no-build-vignettes
+    r_check_args: --no-multiarch --ignore-vignettes --no-vignettes --no-tests
+  - r: devel
+    r_build_args: --no-build-vignettes
+    r_check_args: --no-multiarch --ignore-vignettes --no-vignettes
+
+
+cache: packages
+warnings_are_errors: true
+
+r_github_packages:
+  - hughparsonage/formalCoverage
+  - jimhester/covr
+
+after_success:
+  - Rscript -e 'Sys.time()'
+  - Rscript -e 'hutils::RQ("devtools", install.packages(c("devtools")))'
+  - Rscript -e 'hutils::RQ("roxygen2", install.packages(c("roxygen2")))'
+  - if [ $TRAVIS_R_VERSION_STRING == "release" ] && [ $TRAVIS_PULL_REQUEST == "false" ]; then Rscript -e 'tryCatch(covr::codecov(line_exclusions = c("R/zzz.R", "R/install_taxstats.R", "R/youth_unemployment.R", "R/utils-test.R"), quiet = FALSE), error = function(e) devtools::test())'; fi
+
+after_failure:
+  - Rscript -e 'hutils::RQ("devtools", install.packages(c("devtools")))'
+  - Rscript -e 'hutils::RQ("roxygen2", install.packages(c("roxygen2")))'
+  # - Rscript -e 'devtools::test()'
+  - cd vignettes
+  - Rscript -e 'knitr::knit("grattan.Rmd")'
+  #- Rscript -e 'install.packages("taxstats", repos = "https://hughparsonage.github.io/drat/", type = "source")'
+  

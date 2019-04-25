@@ -1,0 +1,64 @@
+sudo: required
+language: java
+jdk:
+  - oraclejdk8
+addons:
+  firefox: "38.8.0esr"
+cache:
+  directories:
+    - $HOME/.m2
+env:
+  global:
+    - ARCHETYPE_VERSION=5.4.2-SNAPSHOT
+    - CARGO_DAEMON_WEBAPP_VERSION=1.4.17
+  matrix:
+    # todo
+    - TARGET_TUTORIAL=todo ARCHETYPE_ARTIFACT_ID=terasoluna-gfw-web-blank-archetype ARTIFACT_ID=todo
+    - TARGET_TUTORIAL=todo ARCHETYPE_ARTIFACT_ID=terasoluna-gfw-web-blank-mybatis3-archetype ARTIFACT_ID=todo-mybatis3
+    - TARGET_TUTORIAL=todo ARCHETYPE_ARTIFACT_ID=terasoluna-gfw-multi-web-blank-mybatis3-archetype ARTIFACT_ID=todo-mybatis3-multi
+    - TARGET_TUTORIAL=todo ARCHETYPE_ARTIFACT_ID=terasoluna-gfw-web-blank-jpa-archetype ARTIFACT_ID=todo-jpa
+    - TARGET_TUTORIAL=todo ARCHETYPE_ARTIFACT_ID=terasoluna-gfw-multi-web-blank-jpa-archetype ARTIFACT_ID=todo-jpa-multi
+    # todo-rest
+    - TARGET_TUTORIAL=todo-rest ARCHETYPE_ARTIFACT_ID=terasoluna-gfw-web-blank-archetype ARTIFACT_ID=todo-api
+    - TARGET_TUTORIAL=todo-rest ARCHETYPE_ARTIFACT_ID=terasoluna-gfw-web-blank-mybatis3-archetype ARTIFACT_ID=todo-api-mybatis3
+    - TARGET_TUTORIAL=todo-rest ARCHETYPE_ARTIFACT_ID=terasoluna-gfw-multi-web-blank-mybatis3-archetype ARTIFACT_ID=todo-api-mybatis3-multi
+    - TARGET_TUTORIAL=todo-rest ARCHETYPE_ARTIFACT_ID=terasoluna-gfw-web-blank-jpa-archetype ARTIFACT_ID=todo-api-jpa
+    - TARGET_TUTORIAL=todo-rest ARCHETYPE_ARTIFACT_ID=terasoluna-gfw-multi-web-blank-jpa-archetype ARTIFACT_ID=todo-api-jpa-multi
+    # first-spring-security
+    - TARGET_TUTORIAL=first-spring-security ARCHETYPE_ARTIFACT_ID=terasoluna-gfw-web-blank-mybatis3-archetype ARTIFACT_ID=first-spring-security-mybatis3
+    - TARGET_TUTORIAL=first-spring-security ARCHETYPE_ARTIFACT_ID=terasoluna-gfw-multi-web-blank-mybatis3-archetype ARTIFACT_ID=first-spring-security-mybatis3-multi
+    # session-tutorial-init
+    - TARGET_TUTORIAL=session-tutorial-init ARCHETYPE_ARTIFACT_ID=terasoluna-gfw-multi-web-blank-mybatis3-archetype ARTIFACT_ID=session-tutorial-init
+    # session-tutorial-complete
+    - TARGET_TUTORIAL=session-tutorial-complete ARCHETYPE_ARTIFACT_ID=terasoluna-gfw-multi-web-blank-mybatis3-archetype ARTIFACT_ID=session-tutorial-complete
+    # secure-login-demo
+    - TARGET_TUTORIAL=secure-login-demo ARCHETYPE_ARTIFACT_ID=terasoluna-gfw-multi-web-blank-mybatis3-archetype ARTIFACT_ID=secure-login
+  
+before_script:
+  - export DISPLAY=:99.0
+  - sh -e /etc/init.d/xvfb start
+  - bash ./common/scripts/change-maven-settings.sh
+  - mvn dependency:copy -Dartifact=org.codehaus.cargo:cargo-daemon-webapp:${CARGO_DAEMON_WEBAPP_VERSION}:war -DoutputDirectory=./
+  - java -jar ./cargo-daemon-webapp-${CARGO_DAEMON_WEBAPP_VERSION}.war &
+
+script: 
+  - echo "==================== Validate code format ===================="
+  - |
+    mvn xml:check-format
+    mvn formatter:validate
+    
+  - echo "==================== Generate Tutorial App ===================="
+  - |
+    bash ./${TARGET_TUTORIAL}/scripts/create-app.sh
+    
+  - echo "==================== Build Tutorial App and execute Tests ===================="
+  - |
+    POM=./${TARGET_TUTORIAL}/target-project/${ARTIFACT_ID}/pom.xml
+    if test `echo $ARCHETYPE_ARTIFACT_ID | grep multi`;then
+      echo "execute ./mvn-multiproject-build"
+      bash ./common/scripts/mvn-multiproject-build.sh "$POM"
+    else
+      echo "execute ./mvn-singleproject-build"
+      bash ./common/scripts/mvn-singleproject-build.sh "$POM"
+    fi
+    exit $?

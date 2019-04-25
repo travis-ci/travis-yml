@@ -1,0 +1,93 @@
+sudo: required
+dist: xenial
+language: scala
+
+before_install:
+  # make comparing to origin/master work
+  - git remote set-branches --add origin master && git fetch
+  # fetch full history for correct current and previous version detection
+  - git fetch --unshallow
+  # using jabba for custom jdk management
+  - curl -sL https://raw.githubusercontent.com/shyiko/jabba/0.11.1/install.sh | bash && . ~/.jabba/jabba.sh
+  - jabba install adopt@1.8.192-12
+  - jabba install adopt@1.11.0-1
+
+script:
+  - jabba use ${JDK:=adopt@1.8.192-12}
+  - java -version
+  - sbt -jvm-opts .jvmopts-travis "$CMD"
+
+before_cache:
+  - find $HOME/.ivy2 -name "ivydata-*.properties" -print -delete
+  - find $HOME/.sbt  -name "*.lock"               -print -delete
+
+cache:
+  directories:
+    - $HOME/.ivy2/cache
+    - $HOME/.sbt/boot
+    - $HOME/.jabba/jdk
+
+before_script:
+  - unset _JAVA_OPTIONS
+
+jobs:
+  include:
+  - stage: test
+    script:
+    - jabba use "adopt@1.8.192-12"
+    - git branch -f "$TRAVIS_BRANCH" && git checkout "$TRAVIS_BRANCH"
+    - sbt -jvm-opts .jvmopts-travis ";+test:compile;docs/paradox"
+    - git diff --exit-code --color || { echo "[error] Unformatted code found. Please run 'test:compile' and commit the reformatted code."; false; }
+    env: DOCS_AND_FORMATTING
+  
+  - stage: test
+    env: CMD="+test"
+
+  - env:
+    - JDK="adopt@1.11.0-1"
+    - CMD="+test"
+
+  - script: ./scripts/setup-minikube-for-linux.sh && ./integration-test/kubernetes-api/test.sh
+    env: K8S_API
+
+  - script:
+    - ./scripts/setup-minikube-for-linux.sh
+    - ./integration-test/kubernetes-dns/test.sh
+    env: K8S_DNS
+
+  - script: ./scripts/setup-minikube-for-linux.sh && ./integration-test/kubernetes-api-java/test.sh
+    env: K8S_API_MAVEN
+
+  - stage: whitesource
+    script:
+      - jabba use "adopt@1.8.192-12"
+      - git branch -f "$TRAVIS_BRANCH" && git checkout "$TRAVIS_BRANCH" && sbt 'set credentials += Credentials("whitesource", "whitesourcesoftware.com", "", System.getenv("WHITESOURCE_KEY"))' whitesourceCheckPolicies whitesourceUpdate
+    env: WHITESOURCE
+
+stages:
+  - name: check
+    if: NOT tag =~ ^v
+  - name: test
+    if: NOT tag =~ ^v
+  - name: whitesource
+    if: repo = akka/akka-management AND ( ( branch = master AND type = push ) OR tag =~ ^v )
+  
+deploy:
+  provider: script
+  skip_cleanup: true
+  script:
+    - sbt -J-XX:ReservedCodeCacheSize=128m +publish && curl -I https://ci.lightbend.com/job/techhub-publisher/build?token=$TECH_HUB_TOKEN
+  on:
+    tags: true
+    repo: akka/akka-management
+    
+env:
+  global:
+    # encrypt with: travis encrypt WHITESOURCE_KEY=...
+    - secure: "KK7AsqpqUBRl3vnPzVfmlfogl/HMq7Xb2t6EHHB9pi8QWmK25ufPAxF6G+vx0mIAAP7r6n/lkdVBnuZC1jp6G1/I4adsXJOkCF6YTSb9XmH9jK+YhI6xuqFx5vRqxb2faK+6VY6IJXQFD8/1gkdVr0hN3Hq4I5Yg0GAUxAaKKNWeh7VsFmrFiMCj7Q8s2U4+aGSgyKnptQ35JV63SPZV0rgPPIv1kZuqLi526fQMwOIfhpaRh763v7wgINJjZhvAjIbpicGmayZSnZPhs0+Z/jh9pK8sja1S+dUJSEe4IIfGMJINko58fKNPrxaenk05pwTJ+pWKmYWwxyEIiJrTkNHHUnXYCaJf7Qfiyv+sdZ9opGTs0xXS+/kaI9WPQ/vToyMTSjhZnCx0D9vJMuIVDM0OD+1GO66LqdBWK5nC+tgSstf79HK0gZP7hLzhxNj+4mXajECBlg+GucN6wmhrUB2UMGZ6/NvfIdzuXFFQCuSf3Hp+4z7yDV+FgqZeiedLLlZrvaE0IKrNaJ1CfzZ8jIzhjYXFFG9ERMeyGp7n8/7LW2NcHOI+BvKcaNOV4umRXWcXh7mQqzmZ+t3t+4IQFCR1lTrYj59KA4UI2Z9viZBefwIll1X2UNJ2uzbcCqdQSNrTi8LPfuqU39hdxYcw69it7K55Ktah6qiFwKpPlUc="
+    # encrypt with: travis encrypt BINTRAY_USER=...
+    - secure: "aV03M2fhMugeGddRWpVHmY1v82mC1uF1uivyeHKNzEPKSYKWpHbiK9hx2RDY6dSccBURFIIkpzzGYCAyJa7AnDsvUy/voyscDZo0/cCbC2gMz5pTB0MpuzTnBPTbjzl4E8JNRryBszdMn7SXCRL9JTyrQLe9JS/XxQvv5ZBYXYg1A68Xa+RaIJkODzkzpD31ITnSpqtRUv1j2h/VqLIvVT03av4AOmq2In4WSQDmBj8Eq0enYPvQ9kLgeQ13zew2nOT0WL7Src+HO9BMwifdpih1kXw0qYs/rJMGwZOw2ksHjxZqO8BGHIxqcRo+wZnUDgK4S5SFSumPatdqFJeAegHV2TNSm6DPDcPxitl0oHkopHF+wCvSX+vv/VFwTATJy+gAi2L8X0D1XxjPz2V/CbDXsiPA6p7uE6YVmcnGe3pnx5jJCWduBr7O2g9ggUqtkNAYYeqb26zIZN2eEjBAmYeEC/B5HMLW8WcanRioDFA/pp4r7ilIBBuQ4AmRN3aaN8+N/a95NBuwbnP8wFqErNYwfV1Bqa576AuPF5sVCHgvmXDkrYshmbkuqjoJxtRhKMbyX9sbIJ1mah20b9k+3sndwh73zKPb3r8eF8ozxlLohPNOYshl6LFJRFRKMSK4fJ6y9lYgHZhYWSWcHACxGI90QCPWesSWTMfNwRM0Sno="
+    # encrypt with: travis encrypt BINTRAY_PASS=...
+    - secure: "YgwDYNlmCsGCtmf+Avm0TwkqsvaAVWsYilTRdsI/h1OEwn80j9F63QSF0qIg1qzGP9dNFA8VyS5gDgF8yMH0GwIa8a8kI8PXbRB3fH0jWjFGfMoJ+LKyG2MKIvdAMdqs5nVhARSjEajEDbjd7Azk32mSymc4ZSwxLr8yYR75pdfaIH+s4famoaHpUcwKxbd6fg2QY/ny5uckwcZwyu+y1+V0/i4ej0Btr82jtDnqRcIMyH+Fo35xVzosNiLD8s7faYfRoVaywcbjTSVr8TsonXRFKiaMBCbSs36GhHuC3IWzqXSnVwGIJ2eYkSoIwm9Qbg55UbpOUnPFPO9EHsg5jxXO4MxjPcl5ofipdBKWL6uYfq6Q5rzSRv8aJafMes6L87/YKeyDxel0BGcik7mLxNpuVjJ2RnYodN0KKGBO2PZhx4WErfieEsW2zz2TTZUxvMO2SCgzr1HUpRpWQmwlVnyI+q/U0bKAFmcGezHiGoXGp4zDZxwDE3LcZiriDa4M5qJLjHH5hGnU/FHBXDYygCPJyahgb7GjW+IZ8OaDhF19SJYgVqfw//c09pODDSAdKq4ae0cnM/c+vjzdaS/T93LCHKU7mlCRZmiG13Om9tK/WupUVAYNCjr86Pdqj8+pmTHzU2EG0RvzdHlQa4S6Xy97G2ZsJ+C9fvt+Glr/yPA="
+    # encrypt with travis encrypt TECH_HUB_TOKEN=...
+    - secure: "Ou3Hcn2WCz2YAP5gcG4k6zmLx8ZlolW9m2RxgV0mpMyN5gUhECVI+21HtxasvfBWHTKmCcfOLs9sZhoFq2kxTvTsNNFTfcDB2wwqg6dCEzmzop+oZLcNRmYfCJA7+8MOiwunK/GvSPwnbcy2o2ZYrIj3z9q1Qv8Nztsz6BO5ceMWmP28sJwnlzved/n3UipD9/jmTLIRthkolnvqcWCbXq+XLss20VukQYcj59KB7+HEpeTdy7ism5ndnIR7oW8F+aDA6hrrk0oKNpWwBqBzFvRCoqVbAKEJ+amO4qo0EjgBpx1m8E4ANatEsTGiL2QLiJvM7JQ4rIw2JRf+oB2UvCAS2jHYuzhYk8GvTmawbv9/U1D3fBc2huh3kcC5ggs8O92Zoa/QyDrjcuSzJdSj8aGQguUlGqnT76KezechT66SUdz/bgCXbppTTh1qPSUcP5G1wyc6+/0an4u3gmsnoDo6dtTM8rOxAJ+QtcxSo9b50n2YDQqmBN+JVzqvC2GwfORvAIE+h6KIS45v7l5/PN5KPuPut2Y6GZ8dJUKVGeeTNqxRk5SE1H7/oPM3dmN62nl5H15uP1pPopchvYaQ+qANwAFa1RQxxOWX9ImnSkogFB3R0Vy7Yw1bQRsst/LDUFBbm8C1KB4Dr+2HP/JwGpXvKxhBymDDDPZCqRETNPA="

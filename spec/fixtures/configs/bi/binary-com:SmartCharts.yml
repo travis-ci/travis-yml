@@ -1,0 +1,36 @@
+language: node_js
+node_js:
+  - "8"
+matrix:
+  fast_finish: true
+
+branches:
+  only:
+  - dev
+  - master
+
+notifications:
+  slack:
+    secure: xnqNWap8ZhOvrpy81bGVUVLzEk3Le9cs5u4OzUsbqzkwFuX9gegNSTN03Dmgt6smGGk/RRJ/syTRyWtBgip7x82/nyVstIsIiOxE54TeWKkJCUiHiD/8WF/61VmiBwrweciAwGPmmLA31CS9iLG8gqaU9AEQ0HZZ+PtPDPC2/SJStGbd/CiWzzGejUAQ3SsrecI3MhJY1b05dRRZiyLIwbH2zHIHFnA3wwvmx59IpxiGtZn9Mm6MQTnuzW00D2tjscaGXMJKm4JhIN4LY4wnF6Zm/PTvdx31MjQhTviT+CZIZG0b2/iN8/dGm89Ztq+Bfv07QBmguKThCWHa9KGNL9DMoQhnV0axHXSTQrUceEGTfVZiDBXxloe9N8ZmOW55R0YR5sSqc+CsIe2xjrkTLxWBUL1gW/7DReKKTi8ls4b33boYHEUjcxKy6e6vniwgrs0rMW2ywhW66m9eWRqm12lzBhUkvcFNmc83uUMuYcuwLG5BBKwLLR9ikxpWZErnYu7ceOHio8kKLSS+NjhXWRHFE7BKcFxsYBvcpL0x/acQWbUbtX7TUcURmbC1QlSroer9MZ1owbX+keDn9K4Jjt+XbDxYzgM7+rfTPFYA7vN6TIZAFhocspkHZbzcBCeOPn7z/lEHeP3D3DYhBWq/xOeARJA/BFJYUhOhkZxTtso=
+    on_pull_requests: false
+    on_success: never
+
+before_script:
+  - yarn test
+
+script:
+  - yarn build-travis
+
+before_deploy:
+  - bash scripts/prepare-deploy.sh
+
+deploy:
+  provider: pages
+  skip-cleanup: true
+  keep-history: true
+  github-token: $GITHUB_TOKEN
+  local-dir: ghpages
+  on:
+    branch:
+    - master
+    - dev

@@ -1,0 +1,19 @@
+language: node_js
+
+node_js:
+  - "10"
+  - "8"
+
+cache: yarn
+
+sudo: false
+
+notifications:
+  email: false
+
+script:
+  - yarn test:cover
+  - yarn danger ci
+
+after_success:
+  - yarn run test:cover:CI

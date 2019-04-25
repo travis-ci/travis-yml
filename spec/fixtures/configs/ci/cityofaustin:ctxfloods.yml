@@ -1,0 +1,25 @@
+language: node_js
+node_js:
+- 8
+install:
+  - yarn
+  - pip install --user awscli
+  - export PATH=$PATH:$HOME/.local/bin
+script: yarn test;
+deploy:
+  - provider: script
+    script: bash ./deployment/deploy.sh prod
+    skip_cleanup: true
+    on:
+      branch: master
+  - provider: script
+    script: bash ./deployment/deploy.sh prod-legacy-sync
+    skip_cleanup: true
+    on:
+      branch: master
+  - provider: script
+    script: bash ./deployment/deploy.sh
+    skip_cleanup: true
+    on:
+      all_branches: true
+      condition: "$(node ./deployment/shouldDeploy.js) = true"

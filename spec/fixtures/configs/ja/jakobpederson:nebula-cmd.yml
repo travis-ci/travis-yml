@@ -1,0 +1,15 @@
+language: python
+dist: xenial
+python:
+  - "3.7"
+install:
+- pip install -r requirements.txt
+script:
+- sudo sh test/travis_ci_scripts/travis_ci_build_script.sh
+- python -m unittest discover
+after_success:
+- chmod +x test/travis_ci_scripts/upload_nebulactl.sh
+- test/travis_ci_scripts/upload_nebulactl.sh
+env:
+  matrix:
+    secure: NhDoIISkLBzlUQyLaI+fH5oasxQS0GGebstF8rUOv1GpQf/lEkSWzI5A39UShcnx2c0lvaGzNtpl+JHHTJBZq2OM8G8+9rYe3fy8pEk48Fc6WA7OidmXJsikEpaP5gdV79oqM6/aDpCIRr9d2F8uUVPfRhd7mligmaPzrFR8a+qvhCWbgOnUB5fCp+e7jg3fv6LB3kE908i8Hwe8ZYBd0408AdcF+0lnMuh7lYRKWC+ZiEmeKi4jbZ58re7Ob5Ewgnj/KWVoaPP7krloNzxEN/inGY76rWx78irPgXmQvtZhY3NMirV8/ctAkqiGD9VnH9FHnEH+cCThPC791hgXZifZPlCxRarQ+t1ePX0m7hJ6k1sLttgBjoHDLPBaCofrEgHc9cDt4/sDlJRjpgGt1Ffa80Ub3kI0v3TBaQFih8qTAPAsBxEg9IVwXri+zp1VSCglX9dT2tXl7dOPXdfIHMVOpP/OGSAKcZEMoDEcJSJs6mjsm1AZqT6eZw0hZy65VM6iPQNWj29gj83/A1Gonxe58YLzHW0vLe2HawGbj6Y6W4lgnFUUMMoCf3VqLZR9yJ7FYEPy2hDT+lCrtpA5JNE08B6lGo+QdNca5UIEvwAxxXgiXPoxkvvXPCxER/tfVVQD1dyv0AYitRybefar2Hu1UjNFdR/i36j0Llf9UWw=

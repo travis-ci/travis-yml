@@ -1,0 +1,17 @@
+os: linux
+dist: xenial
+language: python
+matrix:
+  include:
+    - python: 3.6
+      env: TOXENV=py36,flake8,tests
+    - python: 3.7
+      env: TOXENV=py37,flake8,tests
+services:
+  - mongodb
+install:
+  - pip install tox
+script:
+  - tox
+after_success:
+  coveralls

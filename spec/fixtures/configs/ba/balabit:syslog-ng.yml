@@ -1,0 +1,217 @@
+language: c
+git:
+  submodules: false
+
+env: B=autotools
+
+os: linux
+
+cache:
+  apt: true
+
+services:
+  - docker
+
+addons:
+  homebrew:
+    brewfile: contrib/Brewfile
+    update: true
+  apt:
+    sources:
+      - sourceline: 'deb http://download.opensuse.org/repositories/home:/laszlo_budai:/syslog-ng/xUbuntu_14.04 ./'
+        key_url: 'http://download.opensuse.org/repositories/home:/laszlo_budai:/syslog-ng/xUbuntu_14.04/Release.key'
+    packages:
+      - autoconf-archive
+      - bison
+      - docbook-xsl
+      - flex
+      - gradle-2.2.1
+      - libcap-dev
+      - libdbd-sqlite3
+      - libdbi0-dev
+      - libesmtp-dev
+      - libgeoip-dev
+      - libglib2.0-dev
+      - libhiredis-dev
+      - libivykis-dev
+      - librabbitmq-dev
+      - libmongoc-dev
+      - libjson0-dev
+      - libnet1-dev
+      - libriemann-client-dev
+      - libwrap0-dev
+      - pkg-config
+      - sqlite3
+      - xsltproc
+      - criterion-dev
+      - libmaxminddb-dev
+      - libxml2-utils
+      - doxygen
+install:
+      - pip install --user -r requirements.txt
+      - pip list
+before_script:
+  - echo 'Europe/Budapest' | sudo tee /etc/timezone
+  - sudo dpkg-reconfigure --frontend noninteractive tzdata
+  - ./autogen.sh
+  - unset PYTHON_CFLAGS # HACK
+  - if [ "$CC" = "gcc" ]; then
+      EXTRA_WARN="--enable-extra-warnings";
+    fi
+  - CONFIGURE_FLAGS="
+      CFLAGS=-Werror
+      --prefix=$HOME/install/syslog-ng
+      --with-ivykis=internal
+      --with-jsonc=system
+      --disable-env-wrapper
+      --disable-memtrace
+      --enable-tcp-wrapper
+      --enable-linux-caps
+      --disable-sun-streams
+      --enable-all-modules
+      --disable-sql
+      --enable-pacct
+      --enable-manpages
+      --enable-force-gnu99
+      --with-python=2
+      $EXTRA_WARN
+      $DISABLE_MONGODB
+      "
+  - ./configure $CONFIGURE_FLAGS
+script:
+  - . tests/build-log-cflags-propagation.sh;
+    if [ "$CC" = "gcc" ]; then
+      export DISTCHECK_CONFIGURE_FLAGS="$CONFIGURE_FLAGS";
+      exec_prop_check "make distcheck -j 3 V=1 --keep-going" ||
+      {
+        S=$?;
+        make V=1 distcheck;
+        find . -name test-suite.log | xargs cat;
+        return $S;
+      };
+      find . -name test-suite.log | xargs cat;
+    else
+      make --keep-going -j $(nproc);
+      S=$?;
+      if [ "$S" = "0" ]; then
+        make install
+        . scripts/get-libjvm-path.sh || return $?;
+        export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$JNI_LIBDIR";
+        make func-test V=1;
+        make pytest-self-check;
+        make pytest-check;
+      elif [ "$S" = "42" ]; then
+        return $S;
+      else
+        make V=1 install;
+        return $S;
+      fi;
+    fi
+compiler:
+  - gcc
+  - clang
+
+matrix:
+  include:
+    - env: B=style-check
+      dist: trusty
+      sudo: required
+      addons:
+      before_install:
+      - docker pull balabit/syslog-ng-ubuntu-bionic
+      install:
+      before_script:
+      script:
+      - ./dbld/rules run RUN_COMMAND="cd /source && astyle --version && scripts/style-checker.sh format"
+      - git diff --exit-code
+    - env: B=copyright-check
+      sudo: false
+      compiler: gcc
+      install:
+      before_script:
+      script:
+        - export COPYRIGHTVERBOSITY=1
+        - tests/copyright/check.sh . .
+    - env: B=trusty-cmake-internal
+      compiler: gcc
+      dist: trusty
+      sudo: required
+      before_script:
+      git:
+        submodules: true
+      script:
+        - mkdir build
+        - cd build
+        - cmake
+            -DCMAKE_C_FLAGS=-Werror
+            -DPYTHON_VERSION=2
+            -DCMAKE_INSTALL_PREFIX=$HOME/install/syslog-ng
+            ..
+        - make --keep-going -j $(nproc) ARGS="-j $(nproc)" all test install
+        - make VERBOSE=1 func-test
+        - make pytest-self-check
+        - make pytest-check
+    - env: B=trusty-cmake
+      compiler: clang
+      dist: trusty
+      sudo: required
+      before_script:
+      script:
+        - mkdir build
+        - cd build
+        - cmake
+            -DCMAKE_C_FLAGS=-Werror
+            -DPYTHON_VERSION=2
+            -DCMAKE_INSTALL_PREFIX=$HOME/install/syslog-ng
+            -DENABLE_EXTRA_WARNINGS=no
+            ..
+        - make --keep-going -j $(nproc) ARGS="-j $(nproc)" all test install
+    - env: B=check
+      os: osx
+      osx_image: xcode9.3
+      compiler: clang
+      env:
+        - PYTHONUSERBASE=$HOME/python_packages
+        - PATH=/usr/local/opt/bison/bin:/usr/local/opt/libnet/bin:$PYTHONUSERBASE/bin:$PATH
+        - PKG_CONFIG_PATH=/usr/local/opt/openssl/lib/pkgconfig:$PKG_CONFIG_PATH
+      before_script:
+        - ./autogen.sh
+        - ./configure
+            --with-ivykis=system
+            --disable-sun-streams
+            --disable-systemd
+            --disable-pacct
+            --disable-smtp
+            --disable-geoip
+            --enable-all-modules
+        - make --keep-going -j $(sysctl -n hw.physicalcpu) ||
+          {
+            S=$?;
+            make V=1;
+            return $S;
+          }
+      script:
+        - make --keep-going check -j $(sysctl -n hw.physicalcpu) ||
+          {
+            S=$?;
+            echo "Output of first test invocation:";
+            find . -name test-suite.log | xargs cat;
+            make V=1 check;
+            echo "Output of second test invocation:";
+            find . -name test-suite.log | xargs cat;
+            return $S;
+          }
+
+branches:
+  except:
+    - /wip/
+notifications:
+  irc:
+    channels:
+      - "irc.freenode.org#balabit"
+  webhooks:
+      urls:
+        - https://webhooks.gitter.im/e/1c6e3a6f10348748585a
+      on_success: always  # options: [always|never|change] default: always
+      on_failure: always  # options: [always|never|change] default: always
+      on_start: true     # default: false

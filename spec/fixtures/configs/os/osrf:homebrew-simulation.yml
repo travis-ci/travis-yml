@@ -1,0 +1,34 @@
+language: ruby
+matrix:
+  include:
+    - env: OSX=10.12
+      os: osx
+      osx_image: xcode9.2
+    - env: OSX=10.14
+      os: osx
+      osx_image: xcode10.2
+
+before_install:
+  - export TRAVIS_COMMIT="$(git rev-parse --verify -q HEAD)"
+  - if [ -f ".git/shallow" ]; then
+      travis_retry git fetch --unshallow;
+    fi
+  - sudo chown -R $USER "$(brew --repo)"
+  - git -C "$(brew --repo)" reset --hard origin/master
+  - git -C "$(brew --repo)" clean -qxdff
+  - export HOMEBREW_DEVELOPER="1"
+  - brew update || brew update
+  - rm -rf "$(brew --repo $TRAVIS_REPO_SLUG)"
+  - mkdir -p "$(brew --repo $TRAVIS_REPO_SLUG)"
+  - rsync -az "$TRAVIS_BUILD_DIR/" "$(brew --repo $TRAVIS_REPO_SLUG)"
+  - export TRAVIS_BUILD_DIR="$(brew --repo $TRAVIS_REPO_SLUG)"
+  - cd "$(brew --repo)"
+  - ulimit -n 1024
+
+script:
+  - brew test-bot --fast --skip-setup $TEST_BOT_ARGS
+
+notifications:
+  email:
+    on_success: never
+    on_failure: always

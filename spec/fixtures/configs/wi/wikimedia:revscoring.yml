@@ -1,0 +1,71 @@
+os: linux
+dist: xenial
+group: stable
+language: python
+python:
+  # Track Python version on future production machines, Debian Stretch.
+  - 3.5
+sudo: required
+addons:
+  apt:
+    packages:
+    - g++
+    - gfortran
+    - libblas-dev
+    - liblapack-dev
+    - libopenblas-dev
+    - python3-dev
+    - enchant
+    - aspell-ar
+    - aspell-bn
+    - myspell-cs
+    - aspell-de
+    - myspell-es
+    - myspell-en-au
+    - myspell-en-gb
+    - myspell-en-us
+    - myspell-en-za
+    - aspell-et
+    - aspell-el
+    - myspell-fa
+    - myspell-fr
+    - myspell-he
+    - myspell-hr
+    - aspell-hi
+    - aspell-hu
+    - aspell-id
+    - myspell-it
+    - myspell-nb
+    - aspell-nl
+    - aspell-pl
+    - aspell-sv
+    - myspell-pt
+    - aspell-ro
+    - aspell-ru
+    - aspell-ta
+    - aspell-uk
+    - hunspell-vi
+    - hunspell-sr
+    - myspell-lv
+    - aspell-is
+    - myspell-ca
+    - hunspell-gl
+
+before_install: {}
+install:
+  - pip install -r requirements.txt
+  - python -m nltk.downloader stopwords
+  - pip install -r test-requirements.txt
+script:
+  - flake8 . --max-line-length=85 --exclude=.svn,CVS,.bzr,.hg,.git,__pycache__,.tox,.eggs,*.egg,doc
+  - pytest --cov=revscoring -m "not nottravis"
+after_success:
+  - codecov
+notifications:
+  irc:
+    channels:
+      - "chat.freenode.net#wikimedia-ai"
+    on_success: change
+    on_failure: change
+    template:
+      - "%{repository_slug}#%{build_number} (%{branch} - %{commit} : %{author}): %{message} %{build_url}"

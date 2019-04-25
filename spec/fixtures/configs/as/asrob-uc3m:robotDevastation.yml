@@ -1,0 +1,125 @@
+# Authors: see AUTHORS.md at project root.
+# CopyPolicy: released under the terms of the LGPLv2.1, see LICENSE at project root.
+# URL: https://github.com/asrob-uc3m/robotDevastation
+
+language: cpp
+dist: xenial
+os: linux
+
+compiler:
+  - gcc
+  - clang
+
+env:
+  global:
+    - SDL_AUDIODRIVER=dummy # avoid ALSA errors
+    - CACHE_DIR=~/cached-deps # common cache location
+  matrix:
+    - YARP_CHECKOUT=master
+    - YARP_CHECKOUT=v3.1.1
+    - YARP_CHECKOUT=30dce54 # hotfix for v3.0.1
+    - YARP_CHECKOUT=v2.3.72.1
+    - YARP_CHECKOUT=v2.3.70.2
+
+cache:
+  directories: $CACHE_DIR
+
+addons:
+  apt:
+    packages:
+    - libjpeg-dev
+    - libsdl2-dev
+    - libsdl2-image-dev
+    - libsdl2-mixer-dev
+    - libsdl2-ttf-dev
+    - libzbar-dev
+    - libgtest-dev
+    - lcov
+    - doxygen
+
+services:
+  - xvfb
+
+branches:
+  except:
+  - /^.*appveyor.*$/
+
+before_install:
+  #-- Code coverage
+  - if [ "$CXX" = "g++" ]; then gem install coveralls-lcov; fi
+
+install:
+  #-- Install YCM
+  - >
+    source "$TRAVIS_BUILD_DIR/scripts/travis/git-cache-dependency.sh"
+    --package-name YCM
+    --repo-url https://github.com/robotology/ycm
+    --repo-checkout "${ROBOTOLOGY_CHECKOUT:-${YCM_CHECKOUT:-master}}"
+
+  #-- Install YARP
+  - >
+    source "$TRAVIS_BUILD_DIR/scripts/travis/git-cache-dependency.sh"
+    --package-name YARP
+    --repo-url https://github.com/robotology/yarp
+    --repo-checkout "${ROBOTOLOGY_CHECKOUT:-$YARP_CHECKOUT}"
+    --additional-cmake-options "-DSKIP_ACE:BOOL=ON -DCREATE_OPTIONAL_CARRIERS:BOOL=ON -DENABLE_yarpcar_mjpeg:BOOL=ON"
+    --prepend-to-linker-path lib
+    --additional-export-paths "YARP_DATA_DIRS;share/yarp"
+
+  #-- Install color-debug
+  - >
+    source "$TRAVIS_BUILD_DIR/scripts/travis/git-cache-dependency.sh"
+    --package-name COLOR_DEBUG
+    --repo-url https://github.com/roboticslab-uc3m/color-debug
+    --repo-checkout master
+
+  #-- Install yarp-devices
+  - >
+    source "$TRAVIS_BUILD_DIR/scripts/travis/git-cache-dependency.sh"
+    --package-name ROBOTICSLAB_YARP_DEVICES
+    --repo-url https://github.com/asrob-uc3m/yarp-devices
+    --repo-checkout develop
+    --additional-export-paths "YARP_DATA_DIRS;share/asrob-yarp-devices"
+
+before_script:
+  - mkdir -p "$TRAVIS_BUILD_DIR/build" && cd "$_"
+  - cmake .. -DCMAKE_INSTALL_PREFIX:PATH="$PWD/install" -DENABLE_coverage:BOOL=ON
+  - cmake --build . --target install
+  - export YARP_DATA_DIRS=$PWD/install/share/rd:$YARP_DATA_DIRS
+
+script:
+  - bin/testDeadState
+  - bin/testFSMBuilder
+  - bin/testFSM
+  - bin/testGameState
+  - bin/testInitState
+  - bin/testMentalMap
+  - bin/testMockAudioManager
+  - bin/testMockInputManager
+  - bin/testMockRobotManager
+  - bin/testProcessorImageEventListener
+  - bin/testYarpNetworkManager
+  - bin/testSDLAudioManager
+  - bin/testRobotDevastation
+
+after_success:
+  #-- Code coverage
+  - if [ "$CXX" = "g++" ]; then source "$TRAVIS_BUILD_DIR/scripts/travis/coverage.sh"; fi
+
+before_deploy:
+  - cmake .. -DGENERATE_doc_html:BOOL=ON
+  - cmake --build . --target dox
+  - cmake --build . --target install
+  - cd install
+  - tar -zcvf robotDevastation_travis-${TRAVIS_BUILD_NUMBER}_trusty_x64.tar.gz *
+
+deploy:
+  provider: releases
+  api_key:
+    secure: DORjZTWdhauq/l3s+pQj0ywjtkKxb00YNy9Tj3RH5+4I8/aRF2u6nFP61tnLUEEzz6GcEDp/lyIOtbuOI+hKO2M4Nq2stI++8FNvPjA8sdmNGXm3w2yIQFY+wFwZyLcn9y3l/7I8FeiQnfFk47/vHfy5DrdsqOr3Z6Ub7xINpKM=
+  file_glob: true
+  file: '*.tar.gz'
+  skip_cleanup: true
+  on:
+    tags: true
+    condition: $CXX = g++

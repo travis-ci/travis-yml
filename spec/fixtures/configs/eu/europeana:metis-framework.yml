@@ -1,0 +1,14 @@
+notifications:
+  email: false
+  slack:
+    secure: FVCUhAKbOsiSWJrRNwO8rVW1Um/bVX+UDTqg8CWpG3qt5KpBayBs/BOy+J0O8A5KC0Et+k9G0+DPWS+3cfvtvjsy5sbBePOqHsZVChKo1VY2nIw5xwCHyQRVHCmkpqnlR+aP5hmUMt/WjGPsnKlbBrkF/MByQd+AlyXxeWtwKJfezlubrAScspFRQix1y/9zS/9SeCYHQLDNt2R9OoyvZS5qo+dJEOUT29hQF7YjEbFvoBr+ioDwonH5bsSrQi9L0Mf51O4Np6L2ouxcq+o3CRCHR+7pUJpo+yElTRRbCcMsujjW36Vl8u24bn+T52LaAGBLnzY39wXw+gZzcyn3g9AfCDmdcuwk94HZ7mFq+C99llSMAYEK7fj3n98O1TJoTJ3q+6yIHNFSEGEsGcsvYMKDQH+XJPnv1WdlIx8X7I+OyGDLW53+G1Ff3KJYLIoFyFiybpUFNzRIHoqEhw11EF9nNOPAAvvYo0msmgRZzyMWYyP2OfSw7KmfN1j313TdG69Px7GJUZx46a3ap/+6HXQKHZ6TC7JhkI3Hvp07dsoQvBSuY9GzywK1q18GatSuoYMsbXttVSD79lZhxUlB15P3wBcs0iLy2pbWx1647Oij1Gh75J57X1gFvNAlx0Q7sXJZmVN51g91t6xuGZX4qQs4JpBCTB4+a04McqWpuCU=
+sudo: false
+language: java
+jdk:
+  - oraclejdk8
+cache:
+  directories:
+    - $HOME/.m2
+install: true
+script:
+  - mvn clean install -DskipITs -Dmaven.javadoc.skip=true cobertura:cobertura coveralls:report -B -V

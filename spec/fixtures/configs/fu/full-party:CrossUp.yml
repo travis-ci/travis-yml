@@ -1,0 +1,26 @@
+language: php
+php:
+- 7.1
+before_script:
+- mysql -uroot -e "create database cross_up"
+install: true
+script:
+- cp .env.travis .env
+- composer install
+- php artisan migrate --force
+- php artisan db:seed
+- php artisan db:seed --class=TestDatabaseSeeder
+- phpunit
+notifications:
+  slack: full-party:ITmQQI6GSQEkcoU6e0NN3X2B
+services:
+- mysql
+deploy:
+  provider: heroku
+  api_key:
+    secure: SspUr7hAuNAv4WxtYj2sKhycH64eNpBLo3Uw9EVTR+3YszY1fvsK+fum7jcUUEN6JA31KUttjDER65zKu6KKN+Z7mW9ZemsERiWu0/jGYFase5pSpKeLzcWiZWfUp4R8mcgC2R7AeSjhHhMQtAU9soEfspH0raAM4E2AlQfdtwt/B8FvMmgSdg8i9YGKqY+ipXowAE1RuK8CDP3mgUtcflIbyXUHvfI87XZ5ppsElnctrftWKG755oFZtJB5x0bHMsa85mnouEG78UMStRxaMyWQVfR5qeanBo0jBN12qmwZjhImt839NaRAB22lcuRS4QMhycfm0kiE+svqZhfwD6Fhd+yTKV+F5OUylXkx33ygJbcKgzhC6ya4GVcFHG473pUL9tijEHzKtEhl5CqOylMmedYLFmq1WehX4ntmCW/F3sHi38ntxIdCStGtvgen+jB7c8yTIFRsv+lBgaSj5kkLcCffOULpZEsBhjJjwTIX8bfY8IEVKDuiMa3OWJEOjsR0/VfHfCyIL5s2oVddU2+09xS0gUSTAoF114QueN6NPOnGCkE2gt72Q6LjAFdVQEb3NJLzuOXisZeaT3cV9LPl/pEd0EihO9Km5fovCSGsJtiZcecQ3us9+65etapc9IG/6kL1onv7w84z3/+rowKrh13LvKwB4CMOYT1eoEQ=
+  app: kakumemo
+  on:
+    repo: full-party/CrossUp
+  run:
+  - php artisan migrate --force

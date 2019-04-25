@@ -1,0 +1,43 @@
+language: php
+
+env:
+  global:
+    - GLPI_SOURCE="https://github.com/glpi-project/glpi"
+    - CS=7.2
+    - DBUSER=root
+    - DBNAME=glpitest
+    - OLDDBNAME=glpiupgradetest
+    - AFTER_SUCCESS_BRANCH=9.4/bugfixes
+  matrix:
+    - GLPI_BRANCH=9.3.0
+    - GLPI_BRANCH=9.3/bugfixes
+    - GLPI_BRANCH=9.4/bugfixes
+#    - GLPI_BRANCH=master
+
+php:
+  - 5.6
+  - 7.0
+  - 7.1
+  - 7.2
+  - 7.3
+  - nightly
+
+matrix:
+  allow_failures:
+    - php: nightly
+#    - env: GLPI_BRANCH=master
+
+before_script:
+  - "./tests/before_script.sh"
+
+script:
+  - "./tests/script.sh"
+
+after_success:
+  # let's update the documentation and locales
+  - if [ ${TRAVIS_PHP_VERSION:0:3} == "$CS" ] && [ "$GLPI_BRANCH" = "$AFTER_SUCCESS_BRANCH" ]; then tests/after_success.sh; fi
+  - if [ ${TRAVIS_PHP_VERSION:0:3} == "$APIDOCS_PHP" ] && [ "$GLPI_BRANCH" = "$AFTER_SUCCESS_BRANCH" ]; then tests/apidocs.sh; fi
+
+cache:
+  directories:
+    - $HOME/.composer/cache

@@ -1,0 +1,42 @@
+language: cpp
+#sudo: false
+sudo: required
+dist: trusty
+addons:
+  apt:
+#    sources:
+#      - debian-sid
+    packages:
+      - gcc-arm-none-eabi
+      - libnewlib-arm-none-eabi
+#      - libstdc++-arm-none-eabi-newlib
+#	- gcc-arm-none-eabi binutils-arm-none-eabi python-usb libnewlib-arm-none-eabi
+
+compiler:
+  - gcc
+#  - clang
+
+os:
+  - linux
+#  - osx
+
+matrix:
+  exclude:
+    - os: osx
+      compiler: gcc
+    - os: linux
+      compiler: clang
+
+before_install:
+  - "if [ ${TRAVIS_OS_NAME:-'linux'} = 'osx' ]; then brew tap px4/px4; brew update; fi"
+  - "if [ ${TRAVIS_OS_NAME:-'linux'} = 'osx' ]; then brew install gcc-arm-none-eabi; fi"  
+#  - "if [ ${TRAVIS_OS_NAME:-'linux'} = 'osx' ]; then sudo ln -s /usr/bin/python /usr/bin/python2; fi"
+
+script:
+# Please don't change anything here. Instead, add any extra build commands to ci-script.sh
+# This saves having to edit commands in three places for GnuWin32, CygWin & Linux
+  - bash -x ci-script.sh
+
+notifications:
+  email: false
+

@@ -1,0 +1,39 @@
+language: cpp
+sudo: false
+services: docker
+dist: trusty
+
+matrix:
+    include:
+        - compiler: clang
+          env: BUILD_TYPE=Release
+        - compiler: g++
+          env: BUILD_TYPE=Release
+        - compiler: g++
+          env: BUILD_TYPE=Debug COVERAGE=--coverage
+        - compiler: clang
+          env: BUILD_TYPE=Release WERROR=-Werror
+        - compiler: g++
+          env: BUILD_TYPE=Release WERROR=-Werror
+        - compiler: g++
+          env: BUILD_TYPE=Release DOCKER_IMAGE=dev_ubuntu
+    allow_failures:
+        - env: BUILD_TYPE=Release WERROR=-Werror
+
+before_install:
+    - CI_ENV=`bash <(curl -s https://codecov.io/env)`
+    - IMAGE=${DOCKER_IMAGE:-dev} # if `DOCKER_IMAGE` is not defined, use `dev`
+    - travis_retry timeout 120 docker pull nuto/nuto_docker:${IMAGE}
+    - docker run $CI_ENV -itd --user nuto --name dock -v $(pwd):/home/nuto/source nuto/nuto_docker:${IMAGE}
+
+script:
+    # - We log in /home/nuto (set as WORKDIR in Dockerfile). This will be our build directory avoid changing directories.
+    # - The source code from travis is 'mounted' as /home/nuto/source via the -v option in the docker run command above
+    - docker exec dock cmake -DCMAKE_CXX_COMPILER=$CXX -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_CXX_FLAGS="$COVERAGE $WERROR" ../source
+    - docker exec dock make -j2 unit
+    - if [[ "$COVERAGE" == "--coverage" ]]; then docker exec dock bash -c "cd ../source && scripts/upload_coverage.sh unittests"; fi
+    - docker exec dock make -j2 integrationtests
+    - docker exec dock ctest -R "^integration" --output-on-failure
+    - if [[ "$COVERAGE" == "--coverage" ]]; then docker exec dock bash -c "cd ../source && scripts/upload_coverage.sh integrationtests"; fi
+    - docker exec dock make -j2
+    - docker exec dock bash ../source/scripts/check_install.sh

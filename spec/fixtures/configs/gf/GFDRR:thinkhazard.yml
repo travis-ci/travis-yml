@@ -1,0 +1,29 @@
+language: python
+dist: trusty
+cache:
+  directories:
+  - "$HOME/.cache/pip"
+python:
+- 2.7
+addons:
+  postgresql: '9.3'
+before_install:
+- sudo apt-get install --no-install-recommends libgdal-dev postgresql-9.3-postgis-2.3
+install:
+- make install
+- createuser www-data --no-superuser --no-createdb --no-createrole -U postgres
+- createdb -O www-data thinkhazard_tests -U postgres
+- psql -d thinkhazard_tests -c 'CREATE EXTENSION postgis;' -U postgres
+- psql -d thinkhazard_tests -c 'CREATE EXTENSION unaccent;' -U postgres
+script:
+- make check
+- echo [app:public] >> local.tests.ini
+- echo sqlalchemy.url = postgresql://www-data:www-data@localhost/thinkhazard_tests
+  >> local.tests.ini
+- echo [app:admin] >> local.tests.ini
+- echo sqlalchemy.url = postgresql://www-data:www-data@localhost/thinkhazard_tests
+  >> local.tests.ini
+- make test
+env:
+  matrix:
+    secure: ksUzWo3He56TT497XjuCDnj2rIz1pIOYq5tugCwfAlWFVakbajWhcsvnlZ4n4PzgCV6JbseDDZbz4S4uQxujkumjAZ0DOsGeilOhqnyge7D5wFeKsRv2wJTBOLrCeE1GnBXnhZyjDyl69eNNxLzCuDCwrle5gTz/nddWx4waFBM=

@@ -1,0 +1,18 @@
+language: node_js
+node_js: 8
+
+notifications:
+  email: false
+
+branches:
+  except:
+    - /^v\d+\.\d+\.\d+$/
+
+script:
+  - yarn build
+  - yarn lint
+  - yarn test
+  - cat ./coverage/lcov.info | yarn coveralls
+
+after_success:
+  - yarn release

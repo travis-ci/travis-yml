@@ -1,0 +1,25 @@
+language: node_js
+
+node_js:
+- 4
+- 6
+- 8
+# - stable https://github.com/facebook/jest/issues/4731
+
+before_install:
+- yarn global add codecov
+
+script:
+- yarn lint
+- yarn test --verbose --runInBand
+
+after_script:
+- codecov
+
+cache:
+  yarn: true
+  directories:
+  - node_modules
+
+matrix:
+  fast_finish: true

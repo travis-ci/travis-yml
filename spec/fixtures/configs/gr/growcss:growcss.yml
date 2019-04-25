@@ -1,0 +1,131 @@
+dist: trusty
+language: node_js
+
+git:
+  depth: 3
+
+cache:
+  directories:
+    - /home/travis/.rush/
+    - /home/travis/config/rush/temp/
+
+node_js:
+  - lts/*
+
+env:
+  global:
+   - secure: "P7mJnPygO2Qeh3zJZZlKgSs5i4M1LaD+aEVLvlm1KPA7ArK+ijySPVHt6O6REUqCA+yf6RVe04vCeH9rbUV3KGjwR5IrgwONI+oM7BhQHgbGgw8xtHCVxuKZFkdWv9XvHLGtEOE9WbIrUmXT28fqRSu2CSOGkdCCuL8pspdu5L2MdOwr7Zi4foFJFVwLMBB6RcApAnIUE2XW38oWp5NuRMGqIGnpoSulCZPOfdjPrBoLO6XwFyASxlB2LTaC8gspfhKGZ6D92K5DUh+FbQek1kkRTsuENmrgkbJH9ufkgrAsaJOa5VDTuw54FNn3W4X2mrH0uv7p/fScP9F3shQ9nB8roWWjtTejwTuDhwRAlvaK4OZxTZ8VrKWsyG1OOkd96hh0wmogm/281Dc8WQeajlJqBXEYFJwyw8vMiOl0IQWQn33T1zpzv7uwzCEziCJmZpDhBXEDgg82ue4y9Z0Do0ffrZ5rDPU3z7JbVsGtpv2llpcKcUn/SpIp//FEnKnqwZx/kvQEkRhQAOHdB6DSzkUyaNsSBOTiHnlCJoFXUNCW9rc6fqzjRvSl7hzCZPHYU8OH2s5XHA+yzg+Y7D1t9iItmH7tyJloS9pNXk/rEUwTOw1bsbSNjL0yG1rVoT0VDTdhXRDnAfMwxqL1GGpWWsrrbGv6rT+1cdxeAaSnu1g="
+
+before_install:
+  - node --version
+
+install:
+  - echo 'Installing...' && echo -en 'travis_fold:start:install\\r'
+  - node common/scripts/install-run-rush.js install
+  - echo -en 'travis_fold:end:install\\r'
+
+before_script:
+  - echo 'Building...' && echo -en 'travis_fold:start:build\\r'
+  - node common/scripts/install-run-rush.js rebuild --verbose
+  - echo -en 'travis_fold:end:build\\r'
+
+jobs:
+  include:
+    - stage: Test # test for lts/*
+      script:
+        - node common/scripts/install-run-rush.js test-ci
+    - stage: Test
+      node_js:
+        - "11.10.1"
+      script:
+        - node common/scripts/install-run-rush.js test-ci
+
+    - stage: Coding standard
+      before_install:
+        - echo "skip"
+      before_script:
+        - echo "skip"
+      script:
+        - node common/scripts/install-run-rush.js lint
+
+    - stage: Coverage
+      before_install:
+        - npm install -g codecov
+      script:
+        - node common/scripts/install-run-rush.js test-coverage
+      after_success:
+        - codecov
+
+    - stage: Checking for missing change logs...
+      if: type = pull_request
+      before_install:
+        - echo skip
+      install:
+        - echo skip
+      before_script:
+        - echo skip
+      script:
+        - set -e
+        - git fetch origin master:refs/remotes/origin/master -a
+        - node common/scripts/install-run-rush.js change -v
+
+    - stage: Release Master
+      if: branch = master AND type = push
+      script:
+        - |
+          git config --local user.email "$GH_USER_EMAIL"
+          git config --local user.name "$GH_USER_NAME"
+          git config credential.helper "store --file=.git/credentials";
+          echo "https://$GH_TOKEN:@github.com" > .git/credentials;
+        - set -e
+        - node common/scripts/install-run-rush.js publish -a -b master -p --add-commit-details --npm-auth-token "$NPM_TOKEN"
+        - node build/release/update-release-notes.js --token="$GH_TOKEN" --apply
+      after_success:
+        - echo 0
+
+    - stage: Release RC
+      if: branch = next AND type = push
+      script:
+        - |
+          git config --local user.email "$GH_USER_EMAIL"
+          git config --local user.name "$GH_USER_NAME"
+          git config credential.helper "store --file=.git/credentials";
+          echo "https://$GH_TOKEN:@github.com" > .git/credentials;
+        - set -e
+        - node common/scripts/install-run-rush.js publish -a -b master -p --add-commit-details --npm-auth-token "$NPM_TOKEN" --prerelease-name=rc
+        - node build/release/update-release-notes.js --token="$GH_TOKEN" --apply
+      after_success:
+        - echo 0
+
+    - stage: Release Beta
+      if: branch = beta AND type = push
+      script:
+        - |
+          git config --local user.email "$GH_USER_EMAIL"
+          git config --local user.name "$GH_USER_NAME"
+          git config credential.helper "store --file=.git/credentials";
+          echo "https://$GH_TOKEN:@github.com" > .git/credentials;
+        - set -e
+        - node common/scripts/install-run-rush.js publish -a -b master -p --add-commit-details --npm-auth-token "$NPM_TOKEN" --prerelease-name=beta
+        - node build/release/update-release-notes.js --token="$GH_TOKEN" --apply
+      after_success:
+        - echo 0
+
+    - stage: Release Alpha
+      if: branch = alpha AND type = push
+      script:
+        - |
+          git config --local user.email "$GH_USER_EMAIL"
+          git config --local user.name "$GH_USER_NAME"
+          git config credential.helper "store --file=.git/credentials";
+          echo "https://$GH_TOKEN:@github.com" > .git/credentials;
+        - set -e
+        - node common/scripts/install-run-rush.js publish -a -b master -p --add-commit-details --npm-auth-token "$NPM_TOKEN" --prerelease-name=alpha
+        - node build/release/update-release-notes.js --token="$GH_TOKEN" --apply
+      after_success:
+        - echo 0
+
+notifications:
+  email:
+    on_success: never
+    on_failure: change

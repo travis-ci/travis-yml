@@ -1,0 +1,54 @@
+dist: trusty
+
+language: d
+
+d:
+  - dmd
+  - dmd-beta
+  - ldc
+  - ldc-beta
+
+addons:
+  postgresql: 9.6
+  apt:
+    packages:
+      - libevent-dev # is need for scod
+
+services: postgresql
+
+env:
+  - CONN_STRING="dbname=postgres"
+
+before_script:
+  - psql -c 'create database "dpq2-test"' -U postgres
+
+script:
+  - dub run dpq2:integration_tests --build=unittest -- --conninfo="${CONN_STRING}"
+  - dub run dpq2:integration_tests --build=release -- --conninfo="${CONN_STRING}"
+
+matrix:
+  include:
+    - d: dmd
+
+      script:
+        - dub run dpq2:integration_tests --build=unittest-cov -- --conninfo="${CONN_STRING}"
+        - dub run dpq2:example --build=release -- --conninfo="${CONN_STRING}"
+        #- dub build --build=ddox #disabled because it fails: vibe-d-0.8.4/vibe-d/data/vibe/data/json.d(2138,6): Warning: Ddoc: parameter count mismatch
+
+      before_install:
+        - dub fetch dscanner
+        - dub fetch doveralls
+
+      after_success:
+        - dub run doveralls
+        - bash <(curl -s https://codecov.io/bash)
+
+      cache: { directories: [$HOME/.dub] }
+
+      deploy:
+        provider: pages
+        skip_cleanup: true
+        keep-history: true
+        github_token: $GITHUB_API_KEY
+        on:
+          branch: master

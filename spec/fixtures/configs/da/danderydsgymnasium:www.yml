@@ -1,0 +1,20 @@
+language: ruby
+rvm: 2.3.0
+
+branches:
+  only:
+    - master
+
+notifications:
+  email: false
+
+env:
+  - JEKYLL_ENV=production
+
+install:
+  - nvm install 7
+  - gem install jekyll
+  - bundle install
+  - npm install -g firebase-tools
+
+script: bundle exec jekyll build && firebase deploy --token $FIREBASE_TOKEN --non-interactive

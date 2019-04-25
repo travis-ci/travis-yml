@@ -1,0 +1,9 @@
+language: java
+jdk: oraclejdk8
+sudo: true 
+
+script:
+  -  mvn -Dkripton.debug=false cobertura:cobertura
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)

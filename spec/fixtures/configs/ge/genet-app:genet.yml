@@ -1,0 +1,33 @@
+
+language: node_js
+node_js:
+- '10'
+os:
+- linux
+- osx
+osx_image: xcode9
+addons:
+  apt:
+    sources:
+    - ubuntu-toolchain-r-test
+    packages:
+    - g++-5
+    - libcap-dev
+cache:
+  cargo: true
+install:
+- curl https://sh.rustup.rs -sSf | sh -s -- -y
+- export PATH=$PATH:$HOME/.cargo/bin
+- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then source scripts/linux-before-install.sh;
+  fi
+- npm install -g node-gyp
+- npm ci
+script:
+- node_modules/.bin/webpack
+- cargo build
+- cargo test
+- (cd genet-node && node-gyp rebuild --debug)
+- (cd gpm && npm i && npm test)
+- (cd gpm && npm i && GENET_TARGET=debug npm test)
+notifications:
+  email: false

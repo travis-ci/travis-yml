@@ -1,0 +1,14 @@
+language: node_js
+# Trying to configure npm as well? Look a little bit further down this file.
+node_js:
+  - "7.7.4"
+sudo: false
+script: "BABEL_ENV=tests npm run coverage"
+# This makes sure that we use the latest npm before installing the packages
+# Node sometimes falls behind
+before_install: npm i -g npm@3.10.6
+after_success:
+  - npm install -g codeclimate-test-reporter
+  - codeclimate-test-reporter < coverage/lcov.info
+notifications:
+  email: false

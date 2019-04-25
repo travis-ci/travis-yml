@@ -1,0 +1,163 @@
+language: java
+jdk:
+  - oraclejdk8
+
+# Cache Maven and Node dependencies
+cache:
+  directories:
+    - scripts/node_modules
+    - $HOME/.m2
+
+stages:
+  - lint
+  - build
+  - test
+  - name: release
+    if: ((branch = master) AND (type = push)) OR (tag = true)
+
+jobs:
+  include:
+
+    ## STAGE 1: Lint ##
+
+    - stage: lint
+      name: ESLint
+      language: node_js
+      node_js:
+        - node
+      install: npm --prefix scripts/ install
+      script: npm --prefix scripts/ run lint
+
+    - stage: lint
+      name: Shellcheck
+      env: CACHE_NAME=SHELLCHECK
+      install: skip
+      script: shellcheck scripts/**/*.sh
+
+    ## STAGE 2: Build and Test JAR ##
+
+    - stage: build
+      name: Build & Test
+      env: CACHE_NAME=JARTEST
+      install:
+        - mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
+        - npm --prefix scripts/ install
+      script:
+        - mvn clean package jacoco:report
+        - sh -c scripts/tools/integration-tests.sh
+      after_success:
+        - bash <(curl -s https://codecov.io/bash)
+
+      # Publish application jar to Github Releases on tagged commit
+      deploy:
+        provider: releases
+        api_key:
+          secure: ZnBFf8dP6tJsKH2NInqACYJE8JGnAJK0/8GTgFlmv3fF4JxAxObAzSvzeNfouy10Jenklt4sk3lpsh7Hfok52YhM/odwej40IW5BuDl5pKNceDmLGGNoRygdpDtKz81WYKUgPLhHrSfODxa7ZDl9Y1s3hwFJ66wfxVn2aLSIgG6aUKqc/IwtQ2zhixg566c+ZW8YL0JvbTT5L100Jqf0d/sqgK7lcL88tolL9qewUSJPHcsaftC3D2ocD6qUGGoC+ed/Ad4UF6UmukOutG5TMRFTrDAXjdyEqFFBat2DzX0ax7I1HFn0ngg6zqDU4E7tdFh2Cyy7Z/+plX04/cNpCLltEwKLcyYbpVoCkel+71GN+idKyB9MN5z2yocvS1GaCNF5RIL+yrATert3EE2SQd4LNbmeqrVdKF5CEcVUCECIxDQB/ceWnMtLImgZ/+3Zo7JBnhwNbk9rk5hgBAK4yVeQGkMVjgLWtyo6LOQ2vUXcOVduPCVFG6ylCdnF1li8k1r2bPsWq1+hu09pmtf5aCTT4RgU1FcrCXyWwciOz9pD4BYyXAbkq2aBE+/IDIveWhiqqppSGZsUIO0N29gKN60kXjz0Zq7jNYVzY4GDrIBtTRaoZcb542LwpfOJPYnrSeNqOgNza7b82toVdsHDWnkagJ/a3PMDu/RRSrC3CJ0=
+        file: application/target/application-*.jar
+        file_glob: true
+        skip_cleanup: true
+        on:
+          tags: true
+
+    ## STAGE 3: Integration Tests ##
+
+    - stage: test
+      name: Integration Test - General
+      services:
+        - docker
+      env: CACHE_NAME=INTEGRATION1
+      install:
+        - npm --prefix scripts/ install
+      script:
+        - mvn clean package -Dmaven.test.skip=true -pl '!client'
+        - ./scripts/ci/docker-integration-tests.sh general
+
+    - stage: test
+      name: Integration Test - Update Existing Email
+      services:
+        - docker
+      env: CACHE_NAME=INTEGRATION2
+      install:
+        - npm --prefix scripts/ install
+      script:
+        - mvn clean package -Dmaven.test.skip=true -pl '!client'
+        - ./scripts/ci/docker-integration-tests.sh update-existing-email
+
+    - stage: test
+      name: Integration Test - Disabled Email
+      services:
+        - docker
+      env: CACHE_NAME=INTEGRATION3
+      install:
+        - npm --prefix scripts/ install
+      script:
+        - mvn clean package -Dmaven.test.skip=true -pl '!client'
+        - ./scripts/ci/docker-integration-tests.sh disabled-email
+
+    - stage: test
+      name: Integration Test - BCrypt Hashing Algorithm
+      services:
+        - docker
+      env: CACHE_NAME=BCRYPT_INTEGRATION
+      install:
+        - npm --prefix scripts/ install
+      script:
+        - mvn clean package -Dmaven.test.skip=true -pl '!client'
+        - ./scripts/ci/docker-integration-tests.sh bcrypt
+
+    - stage: test
+      name: Integration Test - MD5 Hashing Algorithm
+      services:
+        - docker
+      env: CACHE_NAME=MD5_INTEGRATION
+      install:
+        - npm --prefix scripts/ install
+      script:
+        - mvn clean package -Dmaven.test.skip=true -pl '!client'
+        - ./scripts/ci/docker-integration-tests.sh md5
+
+    - stage: test
+      name: Integration Test - Disabled Password Header
+      services:
+        - docker
+      env: CACHE_NAME=DISABLED_HEADER_INTEGRATION
+      install:
+        - npm --prefix scripts/ install
+      script:
+        - mvn clean package -Dmaven.test.skip=true -pl '!client'
+        - ./scripts/ci/docker-integration-tests.sh disabled-password-header
+
+    ## STAGE 4: Push Docker Image ##
+
+    - stage: release
+      name: Release Docker Image
+      services:
+        - docker
+      env: CACHE_NAME=DOCKERRELEASE
+      install:
+        - mvn install -Dmaven.test.skip=true -Dmaven.javadoc.skip=true -B -V
+      before_script:
+        - echo "$DOCKER_PASSWORD" | docker login -u rohannagar --password-stdin
+      script:
+        - mvn clean package -Dmaven.test.skip=true
+        - docker build -t rohannagar/thunder:edge .
+        - docker push rohannagar/thunder:edge
+
+      # Publish a versioned Docker image on tagged commit
+      deploy:
+        provider: script
+        script: bash scripts/ci/docker_push.sh
+        on:
+          tags: true
+
+# Restrict builds to master and tags
+branches:
+  only:
+    - master
+    - /^[v](\d+\.)?(\d+\.)?(\d+)$/
+
+# Dummy AWS keys to use the AWS SDK
+env:
+  global:
+    - AWS_ACCESS_KEY_ID=1234567890
+    - AWS_SECRET_ACCESS_KEY=1234567890

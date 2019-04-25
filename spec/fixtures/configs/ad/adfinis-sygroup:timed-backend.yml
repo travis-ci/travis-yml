@@ -1,0 +1,28 @@
+language: python
+
+python:
+  - "3.6"
+
+services:
+  - postgresql
+
+cache:
+  pip: true
+  directories:
+    - .hypothesis
+
+install:
+  - echo "ENV=travis" > .env
+  - pip install --upgrade -r requirements.txt -r requirements-dev.txt
+
+before_script:
+  - psql -c "CREATE ROLE timed CREATEDB LOGIN PASSWORD 'timed';" -U postgres
+  - psql -c "CREATE DATABASE timed;" -U postgres
+
+script:
+  - black --check .
+  - flake8
+  - pytest --no-cov-on-fail --cov --create-db
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)

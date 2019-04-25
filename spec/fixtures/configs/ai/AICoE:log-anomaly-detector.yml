@@ -1,0 +1,16 @@
+language: python
+python:
+  - "3.6.7"
+env:
+  global:
+    - PIPENV_VENV_IN_PROJECT=1
+    - PIPENV_IGNORE_VIRTUALENVS=1
+    - LAD_LS_INPUT_PATH=validation_data/Hadoop_2k.json
+    - LAD_LS_OUTPUT_PATH=/tmp/local-results.txt
+# https://github.com/spulec/moto/issues/1771#issuecomment-412209380
+before_install:
+  - export BOTO_CONFIG=/dev/null
+install:
+  - "pipenv install --dev --deploy"
+script:
+  - "pipenv run pytest --cov=$PWD"

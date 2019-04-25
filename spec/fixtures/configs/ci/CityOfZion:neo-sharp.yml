@@ -1,0 +1,45 @@
+language: csharp
+os:
+  - linux
+dist: trusty
+dotnet: 2.1.300
+mono: none
+sudo: required
+
+env:
+  global:
+    - secure: "vibmv0PUN88Ad7VTFriFP4hAUeRjF0A0vis04bdn+EtZ+9enwoEDbsK25SH9k2oBUknLAGjglh3e02sA1rBohelfE9f6W6o7+OEj71ye2dI6RVO6WVYiC7HYJcu3NSioa9NGrzq3GJYIUUyfuQAEgVzwVySr5rfBYXc6xqGf3Rm0KeuGeWH4B27hO2BkJi2Ha5VqMs9vDdEleXBuzplQulY2TLMtTPKvHJ+lGee0LLUnzmcADH1C3A3wF/NDGe1NYEy/yl6TFx5fyrqC8KmyepnXl8CE/0MQ+TnXSALDaw6Q+MB1R6bJ9HxHxaJCSgVFCOriTBUsRd8Bp4zo67CkHFKoyVW+kaW+a/CKKR4IHpIhf0c8WU0j1mheskvSqOpF0f1sWzzGsNZYj7G2rvWkcIBYTCeAEOBrijpcmNSS7XnJiVNR9GkATIw2IYrTl4E+I+G4/a1nvTAeXIZ0BdJADSqLy8udLay49/u3gfEDtAEc6TgM/71tlY2hLuxdLqYNWZJLGBlWV3QSpWary8ZT20ezEDUC7lTSkIOPvHAY2MrG5GaX1nltaGr5W7ZHIbUP80w1nxQ3orhQ0ckrR96CEW6v5JgMp4Vh+XTKIYYfN1Nqs3LNt4TU5pA0BBHfyh+m084yqBI1t00Rs/xlH9AzxNGFD5J/Yu5xH0yPssaWTzo="
+    - secure: "Me7eETqdxWm98oUq1PoZxo0lL+RJDLhoqGL6soIA19E2tGPIEOXPhKOtyqf3h+kHtwn/+qALmGX7BEHjnrdXoVuqqdhJVjLf+eOv5/Pwlh7O+hlSI05Yyz89278bT1LLZR99IxxCJL+Y/CW/J2nOoMgIcOTp6yOTDLSsNPCxW+4a11vDdBbu87tUPpD5i6SXSsRbmuhUnE4onNAYSd004hGAY4pcsfPUyu/vZ81TrkZqUOvKaFg5eyIZ5lBEzutSGTYZH8aqz1wGZxQwdVTVkvzKS6NnAXd3I0ZrxSNUgBW5vu1YvFPjRLCXATzcvWCnmjQ0qOZO0MGzhEip2Ycu31oW3buiUh4E5KbRJD/CGdZRjaZxJ2wUDA+KXRVhJ08IlPQrkcdFxSXOXqNQgI6vF5+NU0iDVtASCopkJYqf0lS+00vGAPpixa6xvPZLMtUBwt6d+p4zrom8TeLtQcCkGg4yXobFmLDc0n9lhpXTxFtaSvZz56eSsTvovlaXCC5mhkxs4mOEZTyuno0Kjb/hI11yygmxzlAim+hJCDryQ7PZq1FXVz9awL8OAAqhbASOehII3NoRUWmVtAKNTMfJ79dSwoq7906KvzCQlUH1zZpVzATORk44n4DowTEYjbmzkIWnqvadO6FgDyBzpCn9bHAzWNPMFDnVW/IxVJmcFto="
+services:
+  - docker
+
+install:
+  # Build both docker images (sdk and runtime)
+  - docker build --target builder -t neo-sharp_sdk ./containers/
+  - docker build --target runtime -t neo-sharp_runtime ./containers/
+
+script:
+  - dotnet restore
+  - find test -name *.csproj | xargs -I % dotnet add % package coverlet.msbuild
+  - dotnet test /p:CollectCoverage=true /p:CoverletOutputFormat=opencover
+  - docker run -p 8000:8000 -p 10332:10332 -d --rm --name neo-sharp-node neo-sharp_runtime
+  - bash -c "sleep 10;if [ $(docker inspect -f '{{.State.Running}}' neo-sharp-node) = 'true' ]; then exit 0; else echo 'neo-sharp Node is not starting inside the clean runtime container!!' && exit 1; fi"
+
+after_success:
+  # After all tests OK, Send CodeDov report
+  - echo "Test Success - Branch($TRAVIS_BRANCH) Pull Request($TRAVIS_PULL_REQUEST) Tag($TRAVIS_TAG)"
+  - bash <(curl -s https://codecov.io/bash) -v
+
+before_deploy:
+  # To deploy the docker images, first do login and tag
+  - bash -c "echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin"
+  - export TAG=`if [ "$TRAVIS_BRANCH" == "master" ]; then echo "latest"; else echo $TRAVIS_BRANCH; fi`
+  - docker tag neo-sharp_sdk cityofzion/neo-sharp:sdk_$TAG
+  - docker tag neo-sharp_runtime cityofzion/neo-sharp:$TAG
+
+deploy:
+  # Push images to official docker repository
+  - provider: script
+    script: bash -c "docker push cityofzion/neo-sharp"
+    on:
+      repo: CityOfZion/neo-sharp

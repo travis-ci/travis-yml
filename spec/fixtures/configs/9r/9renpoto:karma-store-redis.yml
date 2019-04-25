@@ -1,0 +1,20 @@
+sudo: false
+language: node_js
+services:
+- redis-server
+node_js:
+- stable
+- lts/*
+- 6
+env:
+  matrix:
+  - CMD=lint
+  - CMD=test
+script:
+- npm run $CMD
+after_success:
+- '[ "$CMD" == "test" ] && npm run coverage'
+notifications:
+  email: false
+  slack:
+    secure: UozdPO/CKFiFIiW6qUFO4VGqQrZn/51hRQGfovr1JO20QWBu3s1uAT5wNS9CLmjGLvbtdKXERMqTb7wB9DZ2GR19EqfoSv31mK2Li55WXV5PoVumK/RFBnhyeo73NxHTkFUS0Az4R1+kgjWlRPgw9ZWhPO921NWJ8mzHd/mVjDDEnDnKP59FGlMKgEpaSAkQuPJ9qhXrBxtNgvDKs4WM17sD9K7S8uHGBOEqxwBtqZ7fAJICiNQHWOAwjk3GP5bFC/9aAgJ5dLs404QEM3LAeafLMCkO1vWziutlSEaRgMLiBuig58EHf+Zb7vwUIBqbLKeaOE+Wsq/iOvEAmdryQDPghBx+Qw71N/S3Ls/4WD/2I1kwuq9Dx748S6bJbVNKTvD64hcr6mK9KpTVWj4FGqJET++5ZQ7vcZhRC9jvH8O8JohINUpOdrikSCffOrSAvcXX2JJ/Zc1UyKSh9rrezLp1cWlh3xjfVwbhbQHXcRoWj5KAo8YIzOBavs4Q5JFPOqhffMcRhU21CebgOTUWMth5Q2GXKoit3Gp8ildlTatyhZ7cxRgWSbmzXbBMiA1tQYf/F/cp8ke+WMi6oTATBg32e++4dbExfJhe2iI6j967V5PkmOamGXmh53IUAr/MHDMK1M00DYL+HqXtuOl5XjEWhIn8OBVK7g7ghfe8txA=

@@ -1,0 +1,24 @@
+language: node_js
+dist: trusty
+node_js:
+  - "10"
+addons:
+  chrome: stable
+env:
+  global:
+  - JOBS=1
+  - secure: m3WlrWqtR+v9KJkmzz/uBNmCvK3rzIeVZLq69CdJoAW+rO+Oz/TCTYlfX2gtwgexFxoRKbHdsqvUDLIFIz84Jbfk+6RT7jZ2rYowGXFu//cxRmkckmXAfnBcdwYuamIDUEAbFdFO6PRGEzJu60T/CYuihhKRpw2YHy9jliuZiLMM9NMmZ+QYJbGmzwjGICqSdc9QGzsxA3ke8ebFQTTDnOXIEW9AldrOV1cbipt9LMbWSbpSpraWaUqgbBmuyX283zSGb6120g0kJPVakSJsl06A7zBvhWMjl6quV5Jkb0TAFk4UJ1OWriVUmRYwpSgwoMVG3mXS6rE/DZUT2N14qzoWy9kVC5wdeC0ZD2cY2k7icwzyCGdLI8v/tCgXuiKwKbakL40YakWNX8pzieqY8gOU0sYmw3IE2tnh9XUF8LlK4mLKetb+dfPwnKTQz+28dsx5EDEIojaA5noTMet/xLabvBD1MknO9ESDNlhg/gfS3+RIsv4+YqRgfADRvhZNrYd1Elf8xhhQOEE6btPZ8yLE0Ufvk4gmiy9U/O5x2Jv8Ddr3iMdNOqEmM2v/+eMcYrc9nerKAxaiizaJphj4Nbfy4/wzkuAfuC0ct8Elug7oU6zJ7iLDkpsvnZAjAhen3QneEllDWux60M0S/bL2hvH6SBUCfLqY3UrHBj+uMec=
+before_install:
+- npm config set spin false
+install:
+- npm install
+script:
+  - ember test --test-port=4200
+before_deploy:
+  - ember build --environment=surge
+deploy:
+  provider: surge
+  project: "./dist/"
+  domain: pass-jhu.surge.sh
+  on: master
+  skip_cleanup: true

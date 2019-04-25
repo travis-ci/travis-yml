@@ -1,0 +1,45 @@
+language: node_js
+
+node_js:
+  - "8"
+
+dist: trusty
+
+sudo: required
+
+addons:
+  chrome: stable
+  postgresql: "9.6"
+
+before_install:
+  - google-chrome-stable --headless --disable-gpu --remote-debugging-port=9222 http://localhost &
+
+install:
+  - npm install
+  - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+  - chmod +x ./cc-test-reporter
+
+services:
+  - postgresql
+
+before_script:
+  - psql -c 'create database travis_ci_test;' -U postgres
+  - npm run migrate
+
+script:
+  - npm run lint
+  - npm run test:travis
+
+after_success:
+  - npm run codecov
+
+after_script:
+  - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT -t lcov
+
+env:
+  global:
+    - DATABASE_URL=postgres://postgres:@localhost:5432/travis_ci_test
+    - JWT_SECRET=secret
+    - JWT_TOKEN=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTIzNH0.MOREC6-Kszb9bDFw0O1UKywpnkcP-c5cPjASMpjk8Po
+    - PORT=8001
+    - NOTIFY_KEY=somerealnotifykey-00000000-0000-0000-0000-000000000000-00000000-0000-0000-0000-000000000000

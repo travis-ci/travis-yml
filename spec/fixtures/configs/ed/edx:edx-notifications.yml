@@ -1,0 +1,36 @@
+language: python
+python:
+  - "2.7"
+
+addons:
+  firefox: "46.0"
+
+env:
+  - DJANGO_SETTINGS_MODULE=settings
+
+before_install:
+  - "export DISPLAY=:99.0"
+  - "sh -e /etc/init.d/xvfb start"
+
+install:
+    - npm install
+    - "pip install -r requirements.txt"
+    - "pip install -r test_requirements.txt"
+    - "pip install coveralls==1.1"
+
+script:
+    - ./manage.py migrate --settings=testserver.settings
+    - coverage run ./manage.py test edx_notifications
+    - coverage report -m
+    - ./node_modules/gulp/bin/gulp.js test
+    - bash ./run_bokchoy_tests.sh
+    - pep8 edx_notifications
+    - pylint edx_notifications --report=no
+
+after_success: coveralls
+
+branches:
+    only:
+      - master
+      - cdodge/mcka-master
+      - cdodge/notification-digest

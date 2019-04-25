@@ -1,0 +1,19 @@
+after_success: coveralls
+env: 
+  - CLOUD_SHELL_SHELL_CORE=1
+install: 
+  - pip install -r external_requirements.txt
+  - pip install -r test_requirements.txt
+  - pip install "cloudshell-automation-api>=9.0.0.0,<9.0.1.0" --extra-index-url https://test.pypi.org/simple
+  - pip install "cloudshell-cp-core>=1.0.0,<1.1.0" --extra-index-url https://test.pypi.org/simple
+language: python
+notifications: 
+  webhools: "https://qualisystems.getbadges.io/api/app/webhook/63350e33-4119-49c3-8127-075aaa022926"
+python: 
+  - "2.7"
+script: 
+  - pushd package
+  - python setup.py develop
+  - popd  
+  - chmod 777 ./run_static_or_vcenter_tests.sh
+  - ./run_static_or_vcenter_tests.sh 

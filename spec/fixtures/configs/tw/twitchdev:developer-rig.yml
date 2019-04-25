@@ -1,0 +1,43 @@
+# Build with latest nodejs available on Travis
+language: node_js
+
+# Lock compatible node versions
+node_js:
+  - "node"
+  - "9"
+  - "8"
+
+# Build on Ubuntu Trust 14.04
+dist: trusty
+
+# "sudo: required" forces build in a complete virtual environment rather than containerized
+sudo: required
+
+# Build and Test
+script:
+  - yarn test
+  - yarn build
+
+# Publish coverage results to coveralls.io
+after_success:
+  - npm install -g travis-deploy-once
+  - travis-deploy-once "coveralls < coverage/lcov.info"
+
+before_deploy:
+  - cd $TRAVIS_BUILD_DIR
+  - echo $TRAVIS_TAG > ./.release
+  - sudo zip -rX devrig.zip ./* -x "*/.*"
+  - sudo zip -r devrig.zip .release
+
+# Deploy to GitHub Releases (api key is encrypted)
+# Deploy only master built on latest stable version of node
+deploy:
+  provider: releases
+  api_key: $GH_TOKEN
+  file: $TRAVIS_BUILD_DIR/devrig.zip
+  skip_cleanup: true
+  on:
+    repo: twitchdev/developer-rig
+    branch: master
+    node_js: "9"
+    tags: true

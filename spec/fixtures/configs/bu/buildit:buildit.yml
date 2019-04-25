@@ -1,0 +1,82 @@
+language: node_js
+
+before_install:
+  - |
+    if [ "$TRAVIS_EVENT_TYPE" == "cron" ]; then
+      git checkout tags/$TAG;
+    fi
+
+env:
+  global:
+    - TAG=$(git describe --abbrev=0 --tags)
+    - PROD_TAG_REGEXP="^v([0-9]{1,3}\.){2}[0-9]{1,3}.*$" #Regexp for release (deploy to Prod) tags
+    - secure: "yuOsuEAFh3xvvhiAa1qFqdDJ8UY0jnmFB2Vb5fa88yTlQO8FCV2VWH45vlOAZ1EhEeAo/8LFO1iEV/8ykMQICqTeS+dXUxrut8PpIAccgfRO0OnuebY2KKSADbBKsw+lsMPXuaFNxn0mv0vuHMulX0oPR8f/Zx0ZJGf2jo7NuhUPvJhZPIT8cT9VxAdgk7wMdJ6qGIOla5e8icM14JS9lLg+GegL3ks34OZRJW1ciWPAgz/Qp437ByTutHsaRu+/5GXbCLS0k+vSQOzgB6vpcnG4YAPmVXrcFl2LfM3Tqc7yaC/JjPCY44RXvf3SGlsUy/12pbOZ4YYZ5eCXMwN+605YAHYL2uLelYNmhhTy5pYmJwFeO0MaBzS8QSmilhA6GPd0pjQiV/vA9uF4Mj9eUTK6+Tnw67oAWjND5JKr7cbKzVzK74Y8ekFGJbRCRGR0JoOuT5tDQ49tuYBFGiUc+WeE2FcdkLL6TDF3FJHVQ2VjYm6o4oyK7DhOizS606A1XtwvWWElrsTWLWPldKJiQLvxdAmYbWHzQ0DC3LLsA5ZAp3ZpSBCZKyAivMGpWaHkg/Dl9Y3O96cHQVDZepF/lftGoR2lhxNEzhH0USotJpbPdaKyo+4f1uDm7shzCduBYIngd2eTb/NLjCf5CkLjcOuGr50l7xY6g2UCaDBBtQM=" #SLACK_NOTIFICATION_URL
+
+script:
+  - commitlint-travis
+  - npm run-script test
+  - |
+    if [ "$TRAVIS_BRANCH" == "master" ] || [ "$TRAVIS_EVENT_TYPE" == "cron" ]; then
+      npm run-script build -- --env production;
+    elif [ "$TRAVIS_BRANCH" == "develop" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
+      npm run-script build -- --env staging;
+    else
+      npm run-script build;
+    fi
+  - npm run cypress:travis
+
+before_deploy:
+  - pip install --user awscli
+
+deploy:
+  - provider: script
+    skip_cleanup: true
+    script:
+      npx semantic-release
+
+  # deploy develop to Staging
+  - provider: script
+    script:
+      ~/.local/bin/aws s3 sync dist s3://${STAGING_BUCKET} --delete --region=${STAGING_BUCKET_REGION} --exclude "*" --include "*.html" --content-type "text/html; charset=utf-8" &&
+      ~/.local/bin/aws s3 sync dist s3://${STAGING_BUCKET} --delete --region=${STAGING_BUCKET_REGION} --exclude "*" --include "*.css" --content-type "text/css; charset=utf-8" &&
+      ~/.local/bin/aws s3 sync dist s3://${STAGING_BUCKET} --delete --region=${STAGING_BUCKET_REGION} --exclude "*" --include "*.js" --content-type "application/javascript; charset=utf-8" &&
+      ~/.local/bin/aws s3 sync dist s3://${STAGING_BUCKET} --delete --region=${STAGING_BUCKET_REGION} --include "*" --exclude "*.js" --exclude "*.html" --exclude "*.css" &&
+      ~/.local/bin/aws cloudfront create-invalidation --distribution-id ${STAGING_DISTRIBUTION_ID} --paths "/*"
+    skip_cleanup: true
+    on:
+      branch: develop
+
+  # deploy master merges to production
+  - provider: script
+    script:
+      ~/.local/bin/aws s3 sync dist s3://${PROD_BUCKET} --delete --region=${PROD_BUCKET_REGION} --exclude "*" --include "*.html" --content-type "text/html; charset=utf-8" &&
+      ~/.local/bin/aws s3 sync dist s3://${PROD_BUCKET} --delete --region=${PROD_BUCKET_REGION} --exclude "*" --include "*.css" --content-type "text/css; charset=utf-8" &&
+      ~/.local/bin/aws s3 sync dist s3://${PROD_BUCKET} --delete --region=${PROD_BUCKET_REGION} --exclude "*" --include "*.js" --content-type "application/javascript; charset=utf-8" &&
+      ~/.local/bin/aws s3 sync dist s3://${PROD_BUCKET} --delete --region=${PROD_BUCKET_REGION} --include "*" --exclude "*.js" --exclude "*.html" --exclude "*.css" &&
+      ~/.local/bin/aws cloudfront create-invalidation --distribution-id ${PROD_DISTRIBUTION_ID} --paths "/*"
+    skip_cleanup: true
+    on:
+      branch: master
+
+  # deploy master branch to Production once a day
+  - provider: script
+    script:
+      ~/.local/bin/aws s3 sync dist s3://${PROD_BUCKET} --delete --region=${PROD_BUCKET_REGION} --exclude "*" --include "*.html" --content-type "text/html; charset=utf-8" &&
+      ~/.local/bin/aws s3 sync dist s3://${PROD_BUCKET} --delete --region=${PROD_BUCKET_REGION} --exclude "*" --include "*.css" --content-type "text/css; charset=utf-8" &&
+      ~/.local/bin/aws s3 sync dist s3://${PROD_BUCKET} --delete --region=${PROD_BUCKET_REGION} --exclude "*" --include "*.js" --content-type "application/javascript; charset=utf-8" &&
+      ~/.local/bin/aws s3 sync dist s3://${PROD_BUCKET} --delete --region=${PROD_BUCKET_REGION} --include "*" --exclude "*.js" --exclude "*.html" --exclude "*.css" &&
+      ~/.local/bin/aws cloudfront create-invalidation --distribution-id ${PROD_DISTRIBUTION_ID} --paths "/*"
+    skip_cleanup: true
+    on:
+      branch: master
+      condition: $TRAVIS_EVENT_TYPE == "cron"
+
+notifications:
+  slack:
+    rooms:
+      - secure: lqpbNypYyLua0TCRYQvi8QXoVyTtUdohsvIERQA4NMt3gW2/8NHXNGDUAFfJq8fYTUY+cF9lzunYngeInsb/x54fQbNqAL6/V6NxVDaUyKAKJsBKfngeKAfiAkp7JPQlEoE9uRXmvalIBTTwcv26/uwgqeXimF9DTRpa56PYI6LZX6Y1+A8DEfUd5rXzT6NrehawsSUsSeZCo5Mla/umbKuAkEzqCuiXBdgcDOn9IoqMbRRq004fC0Gh8ysjf5Oap86bdWeRomufBz9Cf0ewXUD74EuRlTHj1Ykfpb0U95LsjMSyrsjxBmt9j2ElAt+vlBHKCZi40FNZIHaXYaolhsTWy9iwXs2txcFbfHBgvnJ/2sKFTaVU6hDQuWV7wga/Hd3JAvoyRiDBEzV2iokQBzmkv3xw+hdw/hUX0/BavMuiRVpgbMB4SRl5auCLBdJ6Of/bTX4RNOyeDWG944RmdO9xbiAJd8sMtf2sp239zxkZUzZ1sRTZs1TbsOtJRJ2TbFLpi4EWQTMQkc7UXWGdyLX0vX9sLfoYatNYchtcEuXBPsSmAwNE/nfv7B4WKTTCgSn5mmGqUadqpc0/t1Jk7P9ZLla9Y4JNj66U4sR1yuT25mcCbxaz3tr2VY7QUFQPt9CbMUUGTRRIK8sLRydoCSVs+KXgMvmZcLUhNlwsf/k=
+    on_pull_requests: true
+    on_success: change
+
+after_deploy:
+  - ./scripts/notify.sh

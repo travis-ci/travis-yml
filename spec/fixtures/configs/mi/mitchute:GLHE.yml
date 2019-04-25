@@ -1,0 +1,24 @@
+language: python
+
+python: 3.6
+
+cache:
+    pip: true
+    directories:
+    - .tox
+
+env:
+  matrix:
+    - TOX_ENV=py36
+    - TOX_ENV=flake8
+    - TOX_ENV=spelling
+
+install:
+  - pip install --upgrade pip
+  - pip install --upgrade setuptools
+  - pip install tox coveralls
+
+script:
+  - tox -e $TOX_ENV
+
+after_success: test $TOX_ENV = "py36" && coveralls

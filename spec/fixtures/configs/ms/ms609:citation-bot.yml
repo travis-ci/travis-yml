@@ -1,0 +1,39 @@
+sudo: false
+dist: trusty
+branches:
+  except: release
+
+language: php
+    
+matrix:
+  include:
+    - stage: test
+      php: 7.3
+      before_script:  
+        - travis_retry composer self-update
+        - composer require mediawiki/oauthclient
+        - '! find . -type f -name "*.php" -exec php -d error_reporting=32767 -l {} \; 2>&1 >&- | grep "^"'
+      script: phpunit --coverage-clover coverage.xml --bootstrap setup.php tests/phpunit
+      after_success: bash <(curl -s https://codecov.io/bash)
+    - php: 5.6.40  # Newer version has SSL in php curl
+      before_script:  
+        - travis_retry composer self-update
+        - composer require mediawiki/oauthclient
+        - '! find . -type f -name "*.php" -exec php -d error_reporting=32767 -l {} \; 2>&1 >&- | grep "^"'
+      script: phpunit --bootstrap setup.php tests/phpunit
+    - stage: deploy-to-master
+      name: "Update WMFlabs servers"
+      if: branch = master AND type != pull_request
+      php: 5.6 # Avoid downloading and installing 5.5
+      script:
+        - wget -O- https://tools.wmflabs.org/citations/gitpull.php
+        - wget -O- https://tools.wmflabs.org/citations/maintain_files.php
+    - stage: deploy-to-development
+      name: "Update WMFlabs test servers"
+      if: branch = development AND type != pull_request
+      script:
+        - wget -O- https://tools.wmflabs.org/citations-dev/gitpull.php
+        - wget -O- https://tools.wmflabs.org/citations-dev/maintain_files.php
+git:
+  depth: 3
+  

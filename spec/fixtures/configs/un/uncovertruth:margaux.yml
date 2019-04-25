@@ -1,0 +1,30 @@
+sudo: false
+addons:
+  chrome: stable
+language: node_js
+node_js: stable
+cache:
+  yarn: true
+  directories:
+  - node_modules
+env:
+  matrix:
+  - CMD=lint
+  - CMD=test
+before_install:
+- export CHROME_BIN=chromium-browser
+- export DISPLAY=:99.0
+- sh -e /etc/init.d/xvfb start
+- sleep 5
+before_script:
+- npm start &
+- sleep 10
+script:
+- export NODE_WEBSNAPSHOT_NUM_BROWSER=1
+- npm run $CMD
+after_success:
+- '[ "${CMD}" == "test" ] && npm run codecov'
+notifications:
+  email: false
+  slack:
+    secure: DR4E2r8rfFly+gs4q0JJJCJb6wlHLIXloVqKN2x22Qg0QcR1sdYd1lIIXUMCx40L/E7OJuXt/pBVT+Br01z1v4C/1UmKJpw57sS4e1I6TYOvFo+qwXD0uQpY6f5Hz8OiiSznLWLTNze7pdFU12wJAozsCiVjMxYthvacjE4fxPfkbCTvCopFO4UWb8k7pia3oQ7+CeugSW684F4cHy0VSDyPoQVQaWF/16MvRWPV98p8CsiwVnUhdv6ifUXwaiepE5JB5cnItNDdiQ2CarGCvnjBhuVCwEPM1cWyP3pMcDkrtEqoXBJA+IwIs6XHzcNjMjKcyNuSupC/WEtvfFzZtjoH2e+WSxmuWaguqRS2Oc1mlFXQU1g29IkewvbEoyaukFp4xxDmvREZLxW0FL67YKfg6dFTp8UCl94i91yddkUBjTD83mszuWBLOoDEMnsmDWDc+p/ErGsVMaoBlPkLraVsogQwxLcEgOgjn/OsbYhV6R4f35+OnYlZIja0kHvhXMI5gATqsor3C7VR+Y7ldHv5JmJo4a1MWvySKsWMfM0hO3vx1BTod9RrHsUUQCh1L2rjEkCpJXHowqJHK7GWz1IxE6NEt3jiF9glPw9hGsZLveCJ/WFN7iRWlaB3ozNTExk6hXFs2mCLwopHoEFYkYuMVajvPisMpnvuTbda5BQ=

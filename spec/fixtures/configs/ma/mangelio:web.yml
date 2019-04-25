@@ -1,0 +1,106 @@
+language: php
+sudo: false
+
+node_js:
+  - "lts/10"
+
+cache:
+  directories:
+    - $HOME/.composer/cache/files
+    - $HOME/symfony-bridge/.phpunit
+    - $HOME/.sonar/cache
+
+env:
+  global:
+    - SYMFONY_PHPUNIT_DIR="$HOME/symfony-bridge/.phpunit"
+
+matrix:
+  fast_finish: true
+  include:
+    - php: 7.2
+      env:
+        - COVERAGE=true
+    - php: nightly
+  allow_failures:
+    - php: nightly
+
+# prepare virtual environment
+before_install:
+  - if [[ $COVERAGE == false ]]; then phpenv config-rm xdebug.ini; fi
+
+  # install git, libmagickwand-dev (for imagick extension) & use node 10.4
+  - sudo apt-get update
+  - sudo apt-get install -y gnupg git libmagickwand-dev php-pear
+  - nvm install 10.4
+
+  # install phpunit
+  - sudo curl --location --output /usr/local/bin/phpunit https://phar.phpunit.de/phpunit-7.phar
+  - sudo chmod +x /usr/local/bin/phpunit
+
+  # install imagick requirements
+  - printf "\n" | sudo pecl install imagick-3.4.3
+  - echo "extension=imagick.so" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
+
+  # print versions just in case
+  - php --version
+  - /usr/local/bin/phpunit --version
+  - node --version
+
+# prepare programming environment
+install:
+  # copy config files
+  - cp .env.test.travis .env.test
+  - cp phpunit.xml.dist phpunit.xml
+
+  # configure fontawesome
+  - npm config set "@fortawesome:registry" https://npm.fontawesome.com/
+  - npm config set "//npm.fontawesome.com/:_authToken" $FONTAWESOME_AUTH_TOKEN
+  
+  # install dependencies
+  - composer install --no-scripts
+  - yarn install
+  - chmod +x ./bin/console
+
+  # check if travis fulfills symfony requirements
+  - php ./vendor/bin/requirements-checker
+
+# prepare tests
+before_script:
+  # warmup cache to avoid excessive memory usage
+  - php bin/console cache:warmup
+
+  # init db & data
+  - php bin/console doctrine:migrations:migrate -q
+  - php bin/console doctrine:fixtures:load -q
+
+  # init frontend
+  - yarn encore production
+
+# execute tests
+script:
+  # frontend lint
+  - ./node_modules/.bin/eslint assets/js
+
+  # frontend vulnerability check
+  # - yarn audit skipped because online old version of yarn
+
+    # backend lint
+  - '[[ "$TRAVIS_PHP_VERSION" == "nightly" ]] || ./vendor/bin/php-cs-fixer fix --diff --dry-run -v'
+  - ./bin/console lint:yaml config
+  - ./bin/console lint:yaml translations
+  - ./bin/console lint:twig templates
+  - composer validate --strict
+
+  # backend vulnerability check
+  - ./bin/console security:check
+
+  # backend tests
+  - ./bin/console doctrine:schema:validate --skip-sync -vvv --no-interaction
+  - /usr/local/bin/phpunit
+
+# report code coverage
+after_script:
+  # scrutinizer reporting
+  - if [[ $COVERAGE == true ]]; then wget https://scrutinizer-ci.com/ocular.phar && php ocular.phar code-coverage:upload --format=php-clover ./build/logs/clover.xml; fi
+  # codacy reporting
+  - if [[ $COVERAGE == true ]]; then bash <(curl -s https://codecov.io/bash); fi

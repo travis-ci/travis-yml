@@ -1,0 +1,54 @@
+rvm:
+- 2.3.3
+env:
+  global:
+  - HALO_AGENT_VERSION=4.2.4-1
+  - CHEF_DK_VERSION=3.1.0
+  - secure: lAdnVTA9kMiTucF8p4Rii4xPO8LP4z/5udbNfPIFKEsEXSlsA6GwDzEzGcooVRXWjAOlyqthtQOgZcfUfL4MXbH7FjywPEapW8+0yB63V1yWPGaBbmBBDbjl8wZuRbq5aJgy5Pg9bC3mDGkvTkC6U5SEGxPyirrN2tf8CWdwQZE=
+  - secure: iy2DuZsk5Oxey7DblKydMbnDhdJ7t5a/wVyTCvV9gQN+ukxRRcAAeee0ZedHcqn2LieMbeBxkt7ox7UL+NVwFQ8hZKPYKoEv5kn64kwlHq+ekh2Risz+sZQj0akVECP8x/JlGWJqJj2Di+LqyD+ctLBVbICJkRKTBzfBM0Vdpk4=
+  - secure: ojN0DVSfWMvDwLaboprmV1FCF6cj69FKnxU7yQYCPeSqajZTHs77NDAuhRQn3kkTHjU1muxEGApDZUAsik/U3eBapUVgJUOq0UPIIEiEv9yY99DJCzW20yLCeiZgHsWlcak7onI9NxYQPUzNQd5e6Dwqq5dGUpQnmY4J9Fy+L5w=
+  matrix:
+  - CHEF_OMNIBUS_VERSION=14.3
+  - CHEF_OMNIBUS_VERSION=14.2
+  - CHEF_OMNIBUS_VERSION=14.1
+  - CHEF_OMNIBUS_VERSION=14.0
+  - CHEF_OMNIBUS_VERSION=13.9
+  - CHEF_OMNIBUS_VERSION=13.8
+  - CHEF_OMNIBUS_VERSION=13.7
+  - CHEF_OMNIBUS_VERSION=13.6
+  - CHEF_OMNIBUS_VERSION=13.5
+  - CHEF_OMNIBUS_VERSION=13.4
+  - CHEF_OMNIBUS_VERSION=13.3
+  - CHEF_OMNIBUS_VERSION=13.1
+  - CHEF_OMNIBUS_VERSION=13.0
+  - CHEF_OMNIBUS_VERSION=12.22
+  - CHEF_OMNIBUS_VERSION=12.21
+  - CHEF_OMNIBUS_VERSION=12.19
+  - CHEF_OMNIBUS_VERSION=12.18
+  - CHEF_OMNIBUS_VERSION=12.17
+  - CHEF_OMNIBUS_VERSION=12.16
+  - CHEF_OMNIBUS_VERSION=12.15
+  - CHEF_OMNIBUS_VERSION=12.14
+
+sudo: required
+
+before_install:
+- openssl aes-256-cbc -K $encrypted_28d7e97ee39c_key -iv $encrypted_28d7e97ee39c_iv
+  -in ci_cloudpassage_chef_cookbook.pem.enc -out ci_cloudpassage_chef_cookbook -d
+- ls -lah ./
+- curl -L https://www.chef.io/chef/install.sh | sudo bash -s -- -P chefdk -v ${CHEF_DK_VERSION}
+install:
+- chef exec bundle install
+script:
+- ". ./vars_ami_reference"
+- ". ./vars_aws_environment"
+- chef exec berks install
+- chef exec rake travis
+- chef exec rake integration:amzn
+- chef exec rake integration:centos
+- chef exec rake integration:debian
+- chef exec rake integration:oracle
+- chef exec rake integration:rhel
+- chef exec rake integration:ubuntu
+# Windows doesn't work because of busser bug
+# - chef exec rake integration:windows

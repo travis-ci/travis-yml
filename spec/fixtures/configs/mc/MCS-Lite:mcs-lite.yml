@@ -1,0 +1,36 @@
+sudo: false
+language: node_js
+node_js:
+  - "9.11.1"
+env:
+  global:
+    - YARN_VERSION=1.6.0
+
+before_install:
+  - export PATH="$HOME/.yarn/bin:$PATH"
+  - |
+    if [[ ! -e ~/.yarn/bin/yarn || $(yarn --version) != "${YARN_VERSION}" ]]; then
+      curl -o- -L https://yarnpkg.com/install.sh | bash -s -- --version $YARN_VERSION
+    fi
+
+install:
+  - yarn install --pure-lockfile
+
+script:
+  - yarn run danger
+  - ./tasks/lint.sh
+  - ./tasks/test.sh
+  # Use CircleCI 2.0 to speedup
+  # - ./tasks/test-page.sh
+
+after_success:
+  - ./node_modules/.bin/codecov
+
+cache:
+  yarn: true
+  directories:
+    - ~/.yarn
+    - node_modules
+
+notifications:
+  email: evenchange4@gmail.com

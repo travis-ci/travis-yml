@@ -1,0 +1,40 @@
+language: generic
+sudo: required
+cache:
+  timeout: 600
+  directories:
+  - $HOME/.cargo
+services:
+  - docker
+env:
+  - HASH_ALGO=sha3hash    CRYPTO_ALGO=secp256k1 UPLOAD_COVERAGE=true
+  #- HASH_ALGO=sha3hash    CRYPTO_ALGO=ed25519
+  #- HASH_ALGO=sha3hash    CRYPTO_ALGO=sm2
+  #- HASH_ALGO=blake2bhash CRYPTO_ALGO=secp256k1
+  - HASH_ALGO=blake2bhash CRYPTO_ALGO=ed25519
+  #- HASH_ALGO=blake2bhash CRYPTO_ALGO=sm2
+  #- HASH_ALGO=sm3hash     CRYPTO_ALGO=secp256k1
+  #- HASH_ALGO=sm3hash     CRYPTO_ALGO=ed25519
+  - HASH_ALGO=sm3hash     CRYPTO_ALGO=sm2
+install:
+  - docker pull cita/cita-build:ubuntu-18.04-20190107
+script:
+  - bash '.ci-scripts/test' $HASH_ALGO $CRYPTO_ALGO $UPLOAD_COVERAGE
+stages:
+  - Format
+  - Clippy
+  - Test
+jobs:
+  include:
+    - stage: Format
+      env:
+      script: bash '.ci-scripts/format'
+    - stage: Clippy
+      env:
+      script: bash '.ci-scripts/clippy'
+    - stage: Test
+      name: Run Benches
+      env:
+      script: bash '.ci-scripts/bench'
+before_cache:
+    - sudo chown -R travis:travis $HOME/.cargo

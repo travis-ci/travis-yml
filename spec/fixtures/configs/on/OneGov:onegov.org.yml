@@ -1,0 +1,53 @@
+cache: pip
+
+# required for google chrome
+dist: trusty
+
+matrix:
+  include:
+    - language: python
+      python: "3.6"
+      env: TOXENV=py36
+
+    - language: python
+      python: "3.6"
+      env: TOXENV=pep8
+
+addons:
+    postgresql: "9.6"
+    chrome: stable
+    apt:
+        packages:
+            - oracle-java9-set-default
+            - ghostscript
+            - libpoppler-cpp-dev
+
+install: ./.travis-install.sh
+
+script:
+    - tox -e $TOXENV
+
+after_success:
+    - if [ "$TOXENV" = 'py36' ]; then coveralls; fi
+    - 'if [ "$TOXENV" = "py36" ]; then $TRAVIS_BUILD_DIR/.tox/py36/bin/pip freeze | sed -r "s/^-e git.*?egg=([a-z\._]+)$/\1==${TRAVIS_TAG:1}/g" > $TRAVIS_BUILD_DIR/requirements.txt; fi'
+    - if [ "$TOXENV" = 'py36' ]; then cat requirements.txt; fi
+
+deploy:
+
+  - provider: releases
+    api_key:
+        secure: "pbIV+tSHsQDeM+MRQX0Jik+btaP/4JaKyqlyeak1X5plCl9AB1la87T9S1nJLSZ48Nb2nT7rEs0yooQXMkHhmIkOU6Hz4v9gg0HVWuaO0FLB6SJPFWEdploUqkIJ1vEbG1iHSJ98g+gn5UEkDRy8AcAWSdBDKvNUC0gr9nWDZ6XzpYNKDVGADQriom/ND+J0mW/Vk14rVLsDPxhmqu0KeO2ECaAZBxNSMhl2GmyH4JCwHgsO4S7RmvbIBTlhSABkvkNIeG60LoS1C2X90Ny1qbF5xJ+mqlCNgRm83icDg+9Pw3r2kPN0NlF48Yc17Tt2PdFLv8WAblsL1axmj+PYOngoLCko8Z22mmGoLerPkcjMEzBdVI/+IgBaFP5vQuMNku3zM3mopA6oyfCOyB+pDga/T0AZN2daVXRCZSnjUYS6LX8q+TH3rCuWc3iMDjf4keDp6njnOaESk7q9wOxIvqvQJ4kyI+Zgq28Z+V+dDdWs2e9RMTa4unQ/R95siJDsDWS/6UfYbedh2pXA3kL0qi+SuuTX73D2QZGy88YRcDA93sgDAkwaCwVkkZiVWbqOkN6fKFW2khPYzSBdFF0SxtlKRwPS8NKU0qT/1As0aybY1MWVkbTclJyBlnGr2Z6NjwDa3D89ePW9IBmE3pV2l5lV1/mfqPvaMnJQyTdcylU="
+    file: requirements.txt
+    skip_cleanup: true
+    on:
+        tags: true
+        condition: $TOXENV = py36
+
+  - provider: pypi
+    distributions: "sdist bdist_wheel"
+    user: seantis
+    password:
+        secure: "gN38WfPyD7jE7kqJwyCprn8pl1xuw5qZmjd8/EhKAp4cqdHxDdrgYqoQ0ZR78CY/UZKfTpb4Iap/jsrClOGvkrgurKo6XB5Lfs2Ykr2OzcjVlBt1JCP/LnaP68YE2UF+Klegv0rXWOcR9nX7d1VuTkXKSn9Rj2QrhClGKyUtd7UsRjgqo+fSZ2jDp6kqW+jCywVAi0NotHvxO+J9F4RsGhAk32P6ZdX3SHwgaLdtdYaD+4CzcncezO29ghc1eEtza1XNpe5VttY7u7VymOhstoKVKLGhQksAdl7i6hju+snMBdwSRgXD1LP24t2poJJLsZ+Qj1UT3Z57VBlW8LQACdHDkEJMCRbwhkyvoOTN7Zb69Y4OnwwoAgRNjgF+7BoiDA+ytslQCxsAwxUzHcbwNUIwIhVd+2K8Au85wIdTSWp/IERp3BCLB8ykh+spDNv5/TSj9eV9woQ6vGFeq4x1FBX2TPy+C4ERVrqXv6YlRZKMtEoazWJHWX4P9LfUjWROBCnXhkmvGl6h22Y6obLdkffW5isUvidnyiJG28oLHbC7tuCIwaqcrekQAROGkXOQUsdtb2iWXNUgIucozEvxj4Y952IaRtSAvlAhNQU1uBMGya0kA055zFfdI+jArUsVlQtEAa2OH1If7kMUmfSdbgV6CFZ7ePt3tjD9+MYUv7k="
+    on:
+        tags: true
+        condition: $TOXENV = py36

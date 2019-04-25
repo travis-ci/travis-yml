@@ -1,0 +1,41 @@
+language: java
+jdk:
+  - oraclejdk8
+install: ant compile jar
+before_install:
+ - mkdir libs
+ - cd libs
+ - wget $DOWNLOAD_LINK/5zig.jar
+ - wget $DOWNLOAD_LINK/netty.jar
+ - wget $DOWNLOAD_LINK/lwjgl.jar
+ - wget $DOWNLOAD_LINK/log4j-api.jar
+ - wget $DOWNLOAD_LINK/log4j-core.jar
+ - wget $DOWNLOAD_LINK/authlib.jar
+ - wget $DOWNLOAD_LINK/jna-4.5.0.jar
+ - wget $DOWNLOAD_LINK/jsr305-3.0.2.jar
+ - wget $DOWNLOAD_LINK/SoundSystem.jar
+ - cd ..
+ - echo "${TRAVIS_BRANCH} ${TRAVIS_COMMIT}" > src/version.txt
+before_deploy:
+ - mkdir todeploy
+ - mkdir todeploy/$TRAVIS_BRANCH
+ - mkdir todeploy/$TRAVIS_BRANCH/jar/
+ - mv build/jar/* todeploy/$TRAVIS_BRANCH/jar/
+deploy:
+  - provider: pages
+    skip_cleanup: true
+    local_dir: todeploy/
+    github_token: $GITHUB_TOKEN 
+    repo: RoccoDev/Beezig-Deploy
+    target_branch: $TRAVIS_BRANCH
+    on: 
+     all_branches: true
+     tags: false
+  - provider: releases
+    api_key: $GITHUB_TOKEN
+    file: todeploy/$TRAVIS_BRANCH/jar/*.jar
+    file_glob: true
+    skip_cleanup: true
+    on: 
+     tags: true
+

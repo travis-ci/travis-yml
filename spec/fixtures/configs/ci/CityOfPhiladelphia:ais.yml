@@ -1,0 +1,30 @@
+language: python
+python: "3.5"
+
+addons:
+  apt:
+    packages:
+    - python-virtualenv
+    - python3-dev
+    - build-essential
+    - libaio1
+    - libpq-dev
+    - libgeos-dev
+    - unzip
+    - nginx
+
+install:
+  - .travis/install_tests.sh
+
+script: .travis/test.sh
+after_script: .travis/clean_up.sh
+
+deploy:
+  provider: script
+  script: .travis/deploy.sh
+  on:
+    branch:
+      - master
+      - develop
+      - develop_test
+after_deploy: .travis/clean_up.sh

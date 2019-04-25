@@ -20,10 +20,10 @@ describe Travis::Yml::Schema::Def::Notification::Pushover, 'structure' do
                 type: :boolean
               },
               api_key: {
-                '$ref': '#/definitions/secures'
+                '$ref': '#/definitions/type/secures'
               },
               users: {
-                '$ref': '#/definitions/secures'
+                '$ref': '#/definitions/type/secures'
               },
               template: {
                 '$ref': '#/definitions/notification/templates'

@@ -1,0 +1,48 @@
+language: d
+d:
+  - dmd
+  - ldc
+sudo: false
+addons:
+  apt:
+    packages:
+    - libevent-dev
+    - libssl-dev
+
+env:
+ - VIBED_SSL=openssl
+ - VIBED_SSL=botan
+
+# Data definition directives inside inline asm are not supported yet.
+matrix:
+  allow_failures:
+      - env: VIBED_SSL=botan
+
+script: dub test --override-config="vibe-d:tls/${VIBED_SSL}"
+
+jobs:
+  include:
+    - stage: dockerhub-stable
+      d: dmd
+      os: linux
+      script:
+        - echo "Deploying to DockerHub..."
+        - dub build --build=release
+        - docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
+        - LATEST_TAG="$(git describe --abbrev=0 --tags)"
+        - docker build -t "dlangcommunity/dub-registry:${LATEST_TAG} ."
+        - docker push "dlangcommunity/dub-registry:${LATEST_TAG}"
+      on:
+          tags: true
+    - stage: dockerhub-latest
+      d: dmd
+      os: linux
+      script:
+        - echo "Deploying to DockerHub..."
+        - dub build --build=release
+        - docker build -t dlangcommunity/dub-registry:latest .
+        - if [[ "$TRAVIS_BRANCH" == "master" && "$TRAVIS_PULL_REQUEST" == "false" ]] ; then docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD" ; fi
+        - if [[ "$TRAVIS_BRANCH" == "master" && "$TRAVIS_PULL_REQUEST" == "false" ]] ; then docker push dlangcommunity/dub-registry:latest ; fi
+stages:
+  - name: dockerhub-stable
+    if: branch = master AND tag IS present

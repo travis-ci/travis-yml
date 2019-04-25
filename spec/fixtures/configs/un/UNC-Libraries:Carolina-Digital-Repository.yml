@@ -1,0 +1,15 @@
+language: java
+jdk:
+  - oraclejdk8
+before_install:
+  - gem install sass
+services:
+- redis-server
+script: mvn verify -pl access,access-common,admin,deposit,fcrepo-clients,metadata,persistence,security,services,services-camel,solr-ingest,solr-search,sword-server
+sudo: false
+cache:
+  directories:
+  - "$HOME/.m2/repository"
+notifications:
+  slack:
+    secure: BXw3zt45l8M4Uu0rzyu4DhEza3PcXEw4eMrd+G9KLYFw039/XLPAhPOhcTrShRp8RR2e85NaTw5hJjl7chSpah+PvM9oLPV/yuwf6Wo9BZtSh1eFd+GWOWYyWlIALjUyDRQbqrrGM70aIky1gCGkb+93pJtJfyYWBW3TMWngYDQ=

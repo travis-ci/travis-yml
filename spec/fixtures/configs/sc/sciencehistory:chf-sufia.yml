@@ -1,0 +1,36 @@
+language: ruby
+script: bundle exec rake dev:spec_with_app_load
+rvm:
+  - 2.5.1
+cache:
+  bundler: true
+  directories:
+    - ./tmp/solr_dist
+    # cache phantomjs auto-installed by jasmine and phantomjs gem, speed
+    # things up a bit.
+    - $HOME/.phantomjs
+
+# NOTE:
+# To make the tests go much faster, you can
+# remove this "addons" stanza (which installs ffmpeg)
+# and set:
+# ffmpeg_is_available = false
+# in audio_derivative_maker.spec.
+addons:
+  apt:
+    sources:
+    - sourceline: "ppa:mc3man/trusty-media"
+    packages:
+    - ffmpeg
+# END NOTE
+
+
+before_script:
+  - jdk_switcher use oraclejdk8
+  - psql -c 'create database scihist_sufia_test;' -U postgres
+  -
+# We need redis even in test due to sufia/curation_concerns
+# use of redlock gem in some internals.
+services:
+  - redis-server
+  - postgresql

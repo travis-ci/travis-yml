@@ -1,0 +1,61 @@
+dist: trusty
+sudo: false
+language: ruby
+cache:
+  directories:
+  - node_modules
+  - public/assets
+  - vendor/bundle
+addons:
+  apt:
+    sources:
+    - sourceline: deb https://dl.yarnpkg.com/debian/ stable main
+      key_url: https://dl.yarnpkg.com/debian/pubkey.gpg
+    packages:
+    - yarn
+  postgresql: '9.6'
+before_install:
+- nvm install 6
+- nvm use 6
+- pip install --user awscli
+- yarn global add greenkeeper-lockfile@1
+- curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+- chmod +x ./cc-test-reporter
+install:
+- bundle install --without development --path=${BUNDLE_PATH:-vendor/bundle}
+- bin/yarn install
+before_script:
+- greenkeeper-lockfile-update
+- cp config/database.travis.yml config/database.yml
+- bin/rails db:create db:schema:load
+- bin/rails assets:precompile
+jobs:
+  include:
+  - stage: pre-test
+    script: skip
+    after_script: greenkeeper-lockfile-upload
+  - stage: test
+    script: bin/rspec
+    after_script:
+    - ./cc-test-reporter format-coverage --output coverage/codeclimate.rspec.json
+    - aws s3 cp coverage/codeclimate.rspec.json s3://ttgn-pokesite-coverage/$TRAVIS_COMMIT/codeclimate.rspec.json
+  - stage: test
+    script: bin/cucumber
+    after_script:
+    - ./cc-test-reporter format-coverage --output coverage/codeclimate.cucumber.json
+    - aws s3 cp coverage/codeclimate.cucumber.json s3://ttgn-pokesite-coverage/$TRAVIS_COMMIT/codeclimate.cucumber.json
+  - stage: post-test
+    script: skip
+    after_script:
+    - aws s3 sync s3://ttgn-pokesite-coverage/$TRAVIS_COMMIT coverage/
+    - ./cc-test-reporter sum-coverage coverage/codeclimate.*.json
+    - if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then ./cc-test-reporter upload-coverage; fi
+    - aws s3 rm --recursive s3://ttgn-pokesite-coverage/$TRAVIS_COMMIT
+notifications:
+  slack:
+    secure: ECe3Q1nDfQQK7mufVOd5HA47G2Q6MJDL40rS7ldDwPOl0FQCegHWk3/7aZ+3tMbe3HfaTgAitAumIw+6ENdr9uK3TXLOZtHtNFZnFwfr9g4Ijt4w1dZvr8AqhNNAqcJBS39SlFEf8Xp2qY2q1qPhQ2sMgr0/8LCmqTYCNNjtBBSJVpyjmoNHcRuRh86w5WNdoh1tGO6GyD1SEvQWJgIdgxlSLrovuzmN+1/UnH+QCE6+W5iAbataPPAywpv0KXUVyFTuTCITeAdwYG3/kCpzWmD1FQa+Ixc+3DiVeE2wB2argJE84CXzmFfLxDzRjRC1RjY8YH1i6dWuk++6il4RzOSq8IkBsrqF6jW4uLV5wGQcAYYtfaFyE972gpiITqYDT9TuyZBecb/x2YYk0Gp2KJOcR0zq+zFfDJYyAiaaKWD9P+t+90xEq0CpTHk6yymRVWl29TuYPHpLBRJTMKvE23hlQraXIVa9tofuz07IdSoQ7lA7pEj3Y6e23IT0GGQrqxeUISwS2ocJaH10sZIxdzd/MDjHYmXksiOhg1KIIXiC6vkglz7/GkRo3H2d9Z8gWGhE1uYvcsOh5FwUKVr4cySLyuUykB7UTz/I2bq47Gvgh5oHZRUiRvHyOBll6+B9VRl1ptKsrTuL1cI1bltaiXt6cv02ljpRxBuHc5OQo64=
+env:
+  global:
+  - secure: euXH+fPtYLXScBEA1CC9LOO//y0cIC5jFl75UQH87JZvO/4LLQSr5Wz+nTFVdL/evycoMcxjlyHCPFO+npbPNsM1jaGuLT7HL0zVaKN503lphbaIMOazPeZUz4bPwRj9Ew+e2Y8Fel1HjcT7VFCVFIYGQIzXb+7aBE2EyMRe7C3LBCjgC2MmCQ3+PDD3M6pdA1Nb2OiV2/zHGYRI1eM8cXtGPo1FwGglw04+JNvELCdiw4zqHj/8ZslolX+jdZzgH9zmPr5WQ6+PDG9P0/8g8JYZ29GGnS7hVZhk1SlxbvEy1TQ07l1rHbyNuySOCfAEVFitCj92xbqTEEQmgRUf/x7Dt/mTtWs6TuzQBCXEkqtaCBvICsHTB4d1N4vVpy+YzHw280lQskBISh2jc1V4AopjC/GmEXFmPCpvHn+9aiXlQr5axobc0oodob7vTnNgxj+74OlaK1jt9xqsvW9l7oooKt6LOx118olFxnt+nJizx9i5ej9PcfafSZ+Yor/2Z5zKc3o1qL7rgAUAfYB2Jc0Y4hBG09p/ddl9ow1XQd7mHPEP7f6J8BgnN+hws4dBw68dSyiYDMiicEoE0Rya3Y9R3xZGcPwnpHCkImdecuoB4On97jMWVcC8Akyn85Ug8imqB7IvE4DgQMuA868hGN7eYTxYLBPGwp3Eoy5vPAM=
+  - secure: FZtHIpafagSHwLbCjghBswuTl2Je5oM4fbUCJjeBEHAA3QPM/z2JDfqDF7e9UCJf2dQxdgRbbGjtAzXyKQyceBPb+1R5552xxXUoGtc2S/Zm8WoFrsGtsGw9RUEXECahZLmFQX2dwaARcYd63G/Lsh4N32x/Mu1zziMlItjqnHRNR2X/TzLEvLNT/zQif5VgyLHXK+0FRy+JpdSNBmBeQbkdjSNIptsiTIwqE9hu1PcmlDLKB9ZwoWbWL/eWUi4hNkfa6Z1yyWq+Wh8gz6MH5DpG7XK9dMFbDvvMDziZvs87UxRskadI3KeTUJYNJA7eqVoqoNe/Ah+PhxJanFAPI968M72IrmucqpRe3FRRyvQoEub/PVL4zdZQFm2gvdP+ise1wygllf/9cz9babLv8XyYMhqBqEMvxrwdz1p1svHXe3qtGOhC5dX1USA5ZpkdmWS2eLAAjm33m93SThuy5HJOkjPRFgTE09ksU1UrsWW3Zy7z8m+K+OkHJyDsKvXPB2L2ukZ9jreX8Av1PorGW62ATncfibnq/mLdkMRydZc1oD+ffFki8Q0nL3wovMhh/8Ezm/gKICdV1Yo6YINoeD+9ObfHkfQedJCMdiFBbX8bHr3VBCOmx3EEByQVdBzMAyOxwuqPRsvesRHnvKy6QA2gNf726ujFw+2NQesd9Cw=
+  - secure: jJbR7h+UeBtOaRqjXOk7zg2L51rAzYDAxsBROL6xUg1bf10PQJkpXBI9BqakBTVxwWDduBVDkpoC8MyuxEZ3YXbdEWVQPEcmFWE4HeQXyO1v/Xfas56WAEWPTEVUyxV4hwxeqxREofKqrJeNmPqCEPk/7ThcBV4/ugNApDky3KHYEoVU/BCDVkS1AYpjiYFbUVmLXXOM4p83ApnZt7whvb7IQV+Vj5eQgAe42A+3bNygd/qKbHpz0Fp2EOQ91HlgCCukksP9CKULDcC9as3Xk9YZbIcdXRQUaNsGhd3zZBWG7iUZkvCAvZhvggGok69IyP5x88JX0wrmbDMX9KWzf6xgxCviAaOHrPvPQQ7bF6RNwyJETCeZdQuQTVIXrb6hKPN/v8bK85Ok2DcvLeG/IPbWriO7TJez9dgb+L7twbGoHp/KVe67XvUvzJmXfNxDPF0Gv/WGWNeQKLU69svdh8MwizugfcumJvKIxcMxr71chQGg9pHveo3sYOqZEJzjTdEKcH3Uk88gtSTwYYsRRBHs6o2AkmlNa6HoVO9Vh/F5OhVG6cwf21AiQd6K8pJWXJjfYEJ0a0ivaF2KSK2CgH6zB2oJQB9/9xvecEku8NsKQJ69E9DIx45s7XEo78+Hurnu5dir4cJyBuNmq86MgprOA4p6o4oz781bbYfKQ34=

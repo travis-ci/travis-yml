@@ -1,0 +1,21 @@
+language: node_js
+matrix:
+  fast_finish: true
+node_js:
+- 8
+env:
+  matrix:
+  - TESTS_SUITE=tools
+  - TESTS_SUITE=cozy-scripts:default
+  - TESTS_SUITE=cozy-scripts:vue
+  - TESTS_SUITE=cozy-scripts-vanilla
+cache:
+  yarn: true
+  directories:
+  - node_modules
+before_install:
+  - curl -o- -L https://yarnpkg.com/install.sh | bash
+  - export PATH="$HOME/.yarn/bin:$PATH"
+script:
+- yarn lint
+- yarn test:$TESTS_SUITE

@@ -1,0 +1,10 @@
+sudo: false
+language: python
+python:
+- 3.6
+install:
+  - pip install --upgrade pip
+  - pip install ansible 'jenkins-job-builder==2.0.2' 'requests<=2.20.0'
+script:
+  - ansible-playbook --syntax-check ci/ansible/*.yaml
+  - cd ci/jjb && jenkins-jobs --conf jenkins_jobs.ini test -r -o "$(mktemp --directory)" jobs

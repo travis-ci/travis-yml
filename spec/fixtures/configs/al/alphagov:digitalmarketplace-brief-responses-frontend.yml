@@ -1,0 +1,17 @@
+language: python
+cache:
+  pip: true
+  directories:
+    - node_modules
+python:
+  - "3.6"
+before_install:
+  - nvm install 6.12.2
+install:
+  - make requirements-dev yarn-install
+script:
+  - PYTEST_ARGS='--cov=app --cov-report=term-missing' make test
+after_success:
+  - coveralls
+notifications:
+  email: false

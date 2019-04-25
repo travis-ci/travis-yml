@@ -1,0 +1,23 @@
+dist: xenial
+language: ruby
+rvm:
+- 2.4.5
+- 2.5.3
+sudo: false
+cache: bundler
+env:
+  global:
+  - RUBY_GC_HEAP_GROWTH_MAX_SLOTS=300000
+  - RUBY_GC_HEAP_INIT_SLOTS=600000
+  - RUBY_GC_HEAP_GROWTH_FACTOR=1.25
+addons:
+  postgresql: '10'
+install: bin/setup
+after_script: bundle exec codeclimate-test-reporter
+notifications:
+  webhooks:
+    urls:
+    - https://webhooks.gitter.im/e/71f0f9e87a97ad67d2fd
+    on_success: change
+    on_failure: always
+    on_start: never

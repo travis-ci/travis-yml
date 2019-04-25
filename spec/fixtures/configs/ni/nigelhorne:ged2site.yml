@@ -1,0 +1,33 @@
+language: perl
+
+os:
+  - linux
+  # - osx
+
+# services:
+  # - docker
+
+perl:
+  # - "5.26-extras"
+  - "5.24-extras"
+  - "5.22-extras"
+  - "5.20-extras"
+  - "5.18-extras"
+
+before_install:
+  # Needed for Locale::Object
+  - cpanm --installdeps --quiet --notest DBD::SQLite
+  - cpanm --notest --quiet DBD::SQLite Locale::Object::Country Gzip::Faster
+  - sudo apt-get update -q
+  - sudo apt-get install -y libdb-dev libyaml-syck-perl libchi-perl libconfig-auto-perl
+
+install:
+  - sudo apt-get update -q
+  - sudo apt-get install -y liblog-log4perl-perl libtemplate-perl liburi-perl
+  - cpanm --skip-satisfied -q -n Gedcom Moo~2.002004 Genealogy::Gedcom::Date Date::Parse Getopt::Std Geo::Coder::OSM Term::ANSIColor Lingua::EN::NameParse Lingua::EN::NameCase Lingua::EN::Numbers::Ordinate Tie::Static DateTime::Format::Natural HTML::Entities B::Lint HTTP::Cache::Transparent Image::Info URI::Find::Schemeless LWP::Simple LWP::UserAgent::Throttled HTML::GoogleMaps::V3 Sort::Key::DateTime String::ProgressBar Text::Names::GB IPC::System::Simple autodie Memoize Lingua::EN::ABC warnings::unused File::Copy Data::Fetch Geo::Coder::GooglePlaces Geo::Coder::List Config::Auto Lingua::EN::Inflect Geo::Coder::CA DBD::SQLite Locale::Object::Country FCGI Log::Log4perl CGI::Carp CGI::Info CGI::Lingua FCGI::Buffer File::HomeDir Log::WarnDie Template::Plugin::EnvHash CHI HTML::SocialMedia Statistics::LineFit File::pfopen Statistics::Lite Geo::Coder::XYZ URI~1.73 Geo::StreetAddress::US Locale::US Log::Any::Adapter::Log4perl Text::CSV::Slurp Gzip::Faster Geo::Coder::Postcodes List::Util File::Fetch~0.56 Geo::Coder::Free Geo::Coder::US::Census Geo::Coder::Ovi Geo::Coder::RandMcnally Geo::Parser::Text Log::Dispatch::File YAML::Any Mo Geo::Coder::Bing Geo::GeoNames POSIX HTML::TagCloud YAML::XS Text::xSV::Slurp DateTime::Format::Genealogy File::Print::Many
+
+script:
+  - perl -c -MO=Lint ./ged2site
+  - perl -c -Mwarnings::unused ./ged2site
+  - cd dynamic-site/cgi-bin && perl -c -MO=Lint ./page.fcgi '' && perl -c -Mwarnings::unused ./page.fcgi ''
+  - perl page.fcgi page=reports

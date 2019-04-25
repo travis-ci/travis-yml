@@ -1,0 +1,51 @@
+language: php
+
+sudo: false
+
+cache:
+    directories:
+        - $HOME/.composer/cache
+
+php:
+  - 7.1
+  - 7.2
+  - 7.3
+
+env:
+  - # dev
+  - COMPOSER_EXTRA_ARGS="--prefer-stable"
+  - COMPOSER_EXTRA_ARGS="--prefer-lowest --prefer-stable"
+
+matrix:
+  fast_finish: true
+  include:
+    - php: 7.3
+      env: COMPOSER_EXTRA_ARGS="--prefer-stable" COVERAGE="--coverage ./coverage.xml --coverage-src ./src" TESTER_RUNTIME="phpdbg"
+    - php: 7.3
+      env: COMPOSER_EXTRA_ARGS="--prefer-stable" PHPSTAN=1
+    - php: 7.3
+      env: COMPOSER_EXTRA_ARGS="--prefer-stable" CODING_STANDARD=1
+  exclude:
+    - php: 7.3
+      env: COMPOSER_EXTRA_ARGS="--prefer-stable"
+  allow_failures:
+    - env:
+
+install:
+  - if [ "$CODING_STANDARD" = "1" ]; then composer require --dev --no-update kdyby/coding-standard:^1.0@dev; fi
+  - if [ "$PHPSTAN" = "1" ]; then composer require --dev --no-update phpstan/phpstan-shim:^0.9; fi
+  - travis_retry composer update --no-interaction --no-suggest --no-progress --prefer-dist $COMPOSER_EXTRA_ARGS
+  - travis_retry composer create-project --no-interaction jakub-onderka/php-parallel-lint /tmp/php-parallel-lint
+  - if [ "$COVERAGE" != "" ]; then travis_retry wget -O /tmp/coveralls.phar https://github.com/satooshi/php-coveralls/releases/download/v1.0.1/coveralls.phar; fi
+
+script:
+  - php /tmp/php-parallel-lint/parallel-lint.php -e php,phpt --exclude vendor .
+  - if [ "$PHPSTAN" = "1" ]; then php vendor/phpstan/phpstan-shim/phpstan.phar analyse --ansi --no-progress -l7 -c phpstan.neon src tests/KdybyTests; fi
+  - if [ "$CODING_STANDARD" = "1" ]; then php vendor/bin/phpcs --standard=ruleset.xml --encoding=utf-8 -sp src tests; fi
+  - vendor/bin/tester $COVERAGE -s -p ${TESTER_RUNTIME:-php} -c ./tests/php.ini-unix ./tests/KdybyTests/
+
+after_script:
+  - if [ "$COVERAGE" != "" ]; then php /tmp/coveralls.phar --verbose --config tests/.coveralls.yml || true; fi
+
+after_failure:
+  - 'for i in $(find ./tests -name \*.actual); do echo "--- $i"; cat $i; echo; echo; done'

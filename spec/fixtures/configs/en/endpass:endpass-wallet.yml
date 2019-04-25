@@ -1,0 +1,29 @@
+language: node_js
+node_js:
+- '10'
+env:
+  matrix:
+  - TEST_SUITE=unit
+  - TEST_SUITE=e2e
+cache:
+  directories:
+  - "~/.cache"
+install: yarn install --frozen-lockfile
+before_script:
+- yarn dev &
+- sleep 5
+script:
+- yarn $TEST_SUITE
+- yarn dev-build
+before_deploy:
+- pip install --user awscli
+deploy:
+- provider: script
+  script: "~/.local/bin/aws s3 sync dist s3://wallet-dev.endpass.com --region=us-east-1
+    --delete"
+  skip_cleanup: true
+  on:
+    branch: master
+notifications:
+  slack:
+    secure: drPbedzN3LBD4UjN1pMW/aYTjj7nvkepyi+wJTsZ5cv2FEgU3Hni4BMvTyuHE5mPa4H/9+iNjsSP5K8UwgqYHHV8lHnld6X2ydKxCvDzDSdm5iQR5xl7Wb9QyTOOz2FpgWGCTgnMpnnbNCmpbyABHoIS1GDflKuyyzTL6UPhPmCiO4JqH20O3tl/ovG+7+JtTStausRbgSwHtCUubinpI79m012q8Nw0dOFcEGbexX9LglGy2tPxZAHjEFtkYSa2GcQHdcbB/mrhAGJOv5QhYgny66yJhDXcxQWqwFVnEwIy49Q69uEdxXs/1ab5rnPE0ZrD7CVHt23hEoSKJwiNoA2EGiu+J+g8S2Mg/7nU5t4vmDo6grexk0PI3dEyL8dzHSgSbNzcfK7OqkHfZAYvEjHquRFTkfwcbqL2Cbo2i/BTqcrlgN1HLnZ4fVnctDt1Mv7ARyxDPH5GIAdIiLVAUp8z8cEV9gGXfXIed3cbmE3s89ofDgzmmU1p+QerMKOLMXqgTBptPsujg+h+q2Xh1nso30ZsS1s92yCpt/ihofSd9ORpOnVz5bHR3N/jTrjheJe9LF0ekQL0SDvLuyyMU5CA/1TapZD70x4mdEmPhJWakHu7kfQXt18TFsaRTSGCiuruOXCLFDTR8GmNh4fYePTLskZeWSCq43DsV2ALa1s=

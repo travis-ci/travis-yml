@@ -1,0 +1,40 @@
+dist: trusty
+sudo: false
+language: python
+python:
+  - '3.5'
+
+install:
+  - pip install tox
+
+script:
+  - tox
+
+addons:
+  postgresql: '9.5'
+
+git:
+  depth: 1000000
+
+services:
+  - postgresql
+
+deploy:
+  - provider: pypi
+    user: tlocke
+    skip_upload_docs: true
+    password:
+      secure: lRk8A7PKy4rnS4RLhp6iuHElCjsNBy2/QGal51QDbQfz1q3QqU4DOIxS35wtuBWTOskfv4mqty/tNsybII0dsxSsEh99cgUdu3EnPDjwIErAVWRqDcm2nX1hZv/rWuDNPf7YNSQ4Ttbk7utfGu0UQCmYC4pJrBcz4rDAA8N7LTo=
+    server: https://test.pypi.org/legacy/
+    on:
+      branch: test
+    distributions: "bdist_wheel --test"
+  - provider: pypi
+    user: tlocke
+    skip_upload_docs: true
+    password:
+      secure: lRk8A7PKy4rnS4RLhp6iuHElCjsNBy2/QGal51QDbQfz1q3QqU4DOIxS35wtuBWTOskfv4mqty/tNsybII0dsxSsEh99cgUdu3EnPDjwIErAVWRqDcm2nX1hZv/rWuDNPf7YNSQ4Ttbk7utfGu0UQCmYC4pJrBcz4rDAA8N7LTo=
+    server: https://upload.pypi.org/legacy/
+    on:
+      branch: master
+    distributions: "bdist_wheel"

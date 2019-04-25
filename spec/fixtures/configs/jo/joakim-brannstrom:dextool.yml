@@ -1,0 +1,43 @@
+language: d
+
+os:
+    - linux
+
+matrix:
+    include:
+        - d: dmd
+          env: DEXTOOL_BUILD="DebugCov"
+        - d: dmd
+          env: DEXTOOL_BUILD="Release" BUILD_DOC="ON"
+        - d: dmd-2.081.2
+          env: DEXTOOL_BUILD="Debug"
+        - d: ldc-1.11.0
+          env: DEXTOOL_BUILD="Release"
+        - d: ldc
+          env: DEXTOOL_BUILD="Release"
+
+sudo: required
+group: edge
+dist: trusty
+
+notifications:
+    email: false
+
+git:
+    depth: 1
+
+branches:
+    only:
+        - master
+
+script: ./tools/travis.d
+after_success: |-
+    # [[ $TRAVIS_JOB_NUMBER = *.1 ]] && # only generate docs once per commit
+    [[ $DC = "dmd" ]] && # only generate docs once per commit
+    [[ $DEXTOOL_BUILD = "Release" ]] &&
+    [ $TRAVIS_BRANCH = master ] && # don't overwrite the only docs with branches other than master
+    [ $TRAVIS_PULL_REQUEST = true ] && # don't overwrite the only docs with not-yet-merged pull requests
+    ./tools/build_doc.d --ddox --output docs # add command for generating documentation here
+    pip install ghp-import --user && export PATH=$HOME/.local/bin:$PATH &&
+    ghp-import -n docs &&
+    git push -fq https://${GH_TOKEN}@github.com/${TRAVIS_REPO_SLUG}.git gh-pages

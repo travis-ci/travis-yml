@@ -1,0 +1,21 @@
+sudo: required
+dist: trusty
+language: node_js
+node_js:
+  - "stable"
+before_script:
+  - export CHROME_BIN=/usr/bin/google-chrome
+  - export DISPLAY=:99.0
+  - sh -e /etc/init.d/xvfb start
+  - sudo apt-get install -y libappindicator1 fonts-liberation libxss1 libindicator7
+  - wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+  - sudo dpkg -i google-chrome*.deb
+script: npm test
+env:
+- secure: "dFR/NyXj6EnduX2wJK+92KHE/Vly+0vNoersvW7C5YWLI98sGR1q2IGtefnO1lCOUTyFXwW2iaYFNQP8e/hswqkOd88Pps64AnN5K1A8uowEKnmx3/4NyzzlP8TNPJ+vOFcH5R4PIYwBY5Se95BIj+iyMFhyXWWMRDGB6Z42hlqxnY6qjmpo2kJjumlu4+Vgsy3yZkJXoSIBHuhcSEgLfmeP/w+zyjeNAv72an6y/XeKalGAcBDjExvqdterAkHTiPHQ8sjcrLH0wbGxryhGOZMiScKLQTtmU1zmNGaKFIJIWfsddKJPkTOyT38sDx8zUpuPYhZMSjx/9TZkLWv8RQs5wFpUeQHEEbsoQGhQTfW03fjrvJhXKv1EtxVpsNvNx5fQVq38soL19eXr6bi1UiyUqhqnhAqzhD752JhaLWmcR+P3XUVzunCCIlJ76QmO/d6An75OhU4aGYISVqLUwv2X8degI5LVlwZ/tPNDxxkWPCs6ySw8X0ABUcYkU97BlPc64DRSaiW2JOeSBr0l+JPuCCTvmtova5FNW+Qi257CJlNLsYYNKkL5VdaDZbNwDYTwm73pzHI3X5GBVJrwzvEOE8wBRU1tsaeByoKPWaYMDn4GS7lEFDOcdJ4S/fyK7WKxYx40dz3kL75E5t9pW/gIYEq6oShZ/+gPwkPlCZQ="
+before_install:
+  - sudo pip install codecov
+after_success:
+  - codecov
+  - ./deploy-jsdoc.sh
+

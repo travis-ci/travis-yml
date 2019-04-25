@@ -1,0 +1,46 @@
+language: ruby
+rvm:
+  - 2.6.2
+branches:
+  only:
+  - master
+  - staging
+  - "/gh(?:\\d)+(?:-.+)?/"
+services:
+  - postgresql
+env:
+  global:
+    - secret_key_base="abcd1234"
+    - osm_api_name="Test API"
+    - osm_api_id="12"
+    - osm_api_token="1234567890"
+    - recaptcha_public_key="11223344556677889900"
+    - recaptcha_private_key="00998877665544332211"
+    - status_keys="test-a:test-b"
+    - mailgun_domain="osmx.example.com"
+    - contact_us_to_address="contactus@example.com"
+before_install:
+  - gem install bundler
+  - gem install bundle-audit
+  - gem install brakeman
+before_script:
+  - psql -c 'create database travis_ci_test;' -U postgres
+  - cp config/database.yml.travis config/database.yml
+  - bundle exec rake db:create
+  - bundle exec rake db:migrate
+  - bundle exec rake db:seed
+  - bundle exec rake db:fixtures:load
+script:
+  - bundle exec rake assets:precompile
+  - bundle exec rspec
+  - bundle exec cucumber
+  - bundle audit
+  - brakeman -c .brakeman-config --no-pager
+after_script:
+  - bundle exec rails runner 'require "coveralls"; FakeWeb.allow_net_connect = true; Coveralls.push!'
+notifications:
+  slack:
+    on_success: always
+    on_failure: always
+    rooms:
+    - secure: 1lx1VAIZrVtE1HhjJYm8wtYR2jWYzJDYR2SeAGqP7qlBVIO14PX8sEMPGCezonxyPnUhBwQHZ1xphAJvnGuJtfSvPDHb9HxjGwa4m9RMkhwHsat7Pxlm2qmQnf/dRVVMb6/3dLlDy5Ey09LsUxNEL7+lVjPTEHMjalcGA157phw=

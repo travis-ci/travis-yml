@@ -1,0 +1,23 @@
+sudo: false
+language: node_js
+dist: trusty
+sudo: required
+addons:
+  chrome: stable
+before_install:
+  - google-chrome-stable --headless --disable-gpu --remote-debugging-port=9222 http://localhost &
+node_js:
+- '6'
+env:
+  global:
+  - SAUCE_USERNAME: dojo2-ts-ci
+  - SAUCE_ACCESS_KEY: e92610e3-834e-4bec-a3b5-6f7b9d874601
+  - FORCE_COLOR: 1
+install:
+- travis_retry npm install
+script:
+- npm run lint && npm run test:ci && npm run uploadCoverage
+notifications:
+  slack:
+    secure: O9m3cCkl3H8VXRIuKLFfx91C01n9yLlehem9K3snnBMiyrtGWR2aXo+t1eeZYGfFWIl8UBEaSPlDurI1KspIcW/JbszuYAVje21rbl+ptkp008f5gDVfFCFpqdM9S5+lrVJLlx1mrikWKBRsjYqZHYV9EJx/ss+P86JsQ0utC7zgBFYId+UCMybAemzi1FPfeULFWpoi8QavoN8fNr4yHBayrqOlqnnIhlYLoTiGL6yY8L/meUrmWVxSY3JMDxLeIYNppt4puvTGUD1hU2LZgFZp1y6jGMcAlZI5amGV+iyTl/h2w1wiB6q5tolJ1JslosFvh53y7+1Crbm8wQDkX42+z7Rn3/jXRUBFwLZBGZQ99FcE0Yz+XBaQA3GuCgPNd0rcHmJxeYAKMm7jg2B8Nzd6It3q5mjdp9ITA5kR2G7g+iH8R4y112FXCpvt4/RUvHuyhl7w8lFlHK+LslH3DBjDi3fKUuwiGtU8oD3xpCunJ4JUgQmAWIOy3mpFIOX4QPcBKqByp10fNw3G73JDsJ9DXrFGb/+WnA2OgpDnKOnjoporwufRZLeioRwCJAWM0DbFDvRc1mbnECwcKiedzKdTxSWUGyJ6sxKydZtC11tF356BkzIsf3x7cKSed2LI8VXYNiPOJu9P+/s5/jRf/7kZ+i2ETfuKZC2awhgkBGo=
+    on_success: change

@@ -1,0 +1,57 @@
+#
+# This is a basic build configuration for Travis CI.
+# See http://conda.pydata.org/docs/travis.html for more info.
+#
+
+language: generic
+
+env:
+  global:
+    # GITHUB_TOKEN
+    - secure: "M2DcERJD62BHx/rjlQXClgEmZA0aRKyz89BlaPwiirxBjzJcF6ywkDiW5AOguqwc7Cxj9Hp4cv+5iItUw+hA61l51HaH+94Llf5h8oZgMfSC3WCA2Ppfhdb6i7yDvFfp/jIeCofTq6S3wVQzVRitidhBeTH/E0ui7lm3K8l3AAWGJvJ4lEGVr/MrCvfg/RKK8WnXo6kGu1evfy4j6g2RQwN/s/nY/z22a+lRy7QL/5o15GzP3hVw1SWyd6LVsYHEl+Zvd5QF+7Co6KThzpU/jKIlQ4Xf11k/pPd67bxTh8YLdWT1X5v8lL4hF14wbp5VvbiRj4hI3xKwyNvuStTjsZG/4CzShRa1ZxE/n5t0abRD5H6aTxiK/0Lhs2mH6p6631KsYWpGbEZUbKP8rOC+4AdvoE10eR9M011N0hnfDbHlyCmsEjsYOl/OyR0Jkd7/+hRdTv+RFsmLTel71W8l7RJG7i1YGKkOxpjPfp20Z7Fzoumg5sTJIpdgBaZh1o5VJvKwvmPYX8odHvQjAdaskQTGbRYHvQWS5Az2YFH/8+uHeIjC+BSBWIe910bueLtwEyeSTs0qSljQqHWfh5YgGHN9zHpocdu6Uw4Dud7Ff69J5zgkMlnhdaZUHH5SeRZIqX3p1nUq43J7rGR7JCRr5ZthGqcjKj9gGbybRNpISNI="
+
+os:
+  - linux
+  - osx
+
+before_install:
+  - source ./ci/amend_github_commit.sh "pending" "flake8 check in progress"
+
+install:
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+      wget https://repo.continuum.io/miniconda/Miniconda3-latest-MacOSX-x86_64.sh -O miniconda.sh;
+    else
+      wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
+    fi
+  - bash miniconda.sh -b -p $HOME/miniconda
+  - export PATH="$HOME/miniconda/bin:$PATH"
+  - hash -r
+  - conda config --set always_yes yes --set changeps1 no
+  - conda update -q conda
+  # Useful for debugging any issues with conda
+  - conda info -a
+
+  - conda env create --file environment.yml
+  - source activate cate-env
+  - conda list
+  - python setup.py install
+
+script:
+  # For the unit-tests, disable Numba JIT, otherwise Coverage wont reach the actual Python code
+  - export NUMBA_DISABLE_JIT=1
+  # Uncomment following line if web testing on travis breaks our build
+  - export CATE_DISABLE_WEB_TESTS=1
+  - export CATE_DISABLE_PLOT_TESTS=1
+  - export CATE_DISABLE_CLI_UPDATE_TESTS=1
+  - py.test -v --cov=cate test
+
+after_success:
+  - pip install codecov
+  - codecov --env TRAVIS_PYTHON_VERSION
+  - flake8 --exit-zero|tee flake8_report.txt
+  - FLAKE8_COUNT=$(cat flake8_report.txt | wc -l)
+  - if [ ${FLAKE8_COUNT} -eq 0 ]; then
+      source ./ci/amend_github_commit.sh "success" "flake8 test succeeded";
+    else
+      source ./ci/amend_github_commit.sh "failure" "flake8 test found ${FLAKE8_COUNT} problems";
+    fi

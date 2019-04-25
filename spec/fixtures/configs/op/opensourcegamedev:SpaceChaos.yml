@@ -1,0 +1,34 @@
+language: java
+jdk: oraclejdk8
+
+before_cache:
+  - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+  - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+cache:
+  directories:
+    - $HOME/.gradle/caches/
+    - $HOME/.gradle/wrapper/
+    - $HOME/.sonar/cache
+
+addons:
+  sonarqube:
+    organization: "opensourcegamedev-spacechaos" # the key of the org you chose at step #3
+
+before_install:
+ - chmod +x gradlew
+
+#script:
+#- mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
+#- mvn clean verify
+#- mvn clean install
+
+script:
+- ./gradlew clean assemble
+- ./gradlew check build
+#- ./gradlew sonarqube -Dsonar.host.url=https://sonarqube.com -Dsonar.organization=OpenSourceGameDev-github -Dsonar.login=token1234
+# other script steps might be done before running the actual SonarQube analysis
+- sonar-scanner
+
+notifications:
+email: false
+slack: opensourcegamedev:IZZQ4Lh9St0wrTvDrekftk4q

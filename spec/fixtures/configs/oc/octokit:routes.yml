@@ -1,0 +1,38 @@
+language: node_js
+cache: npm
+node_js: lts/*
+
+# Trigger a push build on master and greenkeeper branches + PRs build on every branches
+# Avoid double build on PRs (See https://github.com/travis-ci/travis-ci/issues/1147)
+branches:
+  only:
+    - master
+    - /^greenkeeper.*$/
+
+jobs:
+  include:
+    - stage: lint
+      script: standard
+    - stage: test
+      script: npm run test
+      env: 'tests'
+    - script: bin/octokit-rest-routes.js check --cached
+      env: 'check cached'
+    - stage: release
+      script: semantic-release --debug
+      env: 'semantic-release'
+    - stage: cron
+      script:
+        - rm -rf routes cache
+        - bin/octokit-rest-routes.js update && bin/octokit-rest-routes.js update --ghe && bin/create-pull-request-on-change.js
+      env: 'cron job'
+
+stages:
+  - name: lint
+    if: NOT type IN (cron)
+  - name: test
+    if: NOT type IN (cron)
+  - name: release
+    if: branch = master AND type IN (push)
+  - name: cron
+    if: type IN (cron)

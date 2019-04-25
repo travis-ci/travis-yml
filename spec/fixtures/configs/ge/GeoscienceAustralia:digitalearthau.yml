@@ -1,0 +1,142 @@
+dist: xenial
+language: python
+python:
+  - '3.6'
+sudo: true
+git:
+  # We need a deeper depth for 'git describe' to ensure
+  # we can reach the last tagged version. Defaults to only 50
+  depth: 99999
+addons:
+  apt:
+    sources:
+      - sourceline: ppa:nextgis/ppa
+    packages:
+      - gdal-bin
+      - gdal-data
+      - libgdal-dev
+      - libgdal-dev
+      - libgdal20
+      - libudunits2-0
+      - libudunits2-dev
+      - gfortran
+      - libatlas-base-dev
+      - libatlas-dev
+      - liblapack-dev
+      - libproj-dev
+      - libxml2-dev
+      - libxslt-dev
+      - pandoc
+      - shellcheck
+      - cython3
+  postgresql: "9.6"
+
+services:
+  - postgresql
+
+env:
+  global:
+    - CC_TEST_REPORTER_ID=7fabf748ee918a406d3cd9dfeace7d4f599a4d9c3c70c65e877e8448cc0d4a3b
+
+cache:
+  directories:
+    - $HOME/.cache/pip
+
+before_install:
+  - createdb dea_integration
+
+  # Download and Install PDS Tools
+  - mkdir pdstools
+  - pushd pdstools
+  - travis_retry wget https://raw.githubusercontent.com/GeoscienceAustralia/pds-tools/988b0b6e8495f9224c384ec0ac4c720c054d022c/pdsinfo.c
+  - clang -O pdsinfo.c -lm -o pdsinfo
+  - export PATH="$(pwd):${PATH}"
+  - popd
+
+  # Set paths for building python-gdal
+  - export CPLUS_INCLUDE_PATH=/usr/include/gdal
+  - export C_INCLUDE_PATH=/usr/include/gdal
+  - export GDAL_DATA="$(gdal-config --datadir)"
+  - pip install --upgrade pip
+  - pip install --progress-bar off coveralls codecov
+  - pip install NetCDF4==1.4.1
+
+  # Install pygdal bindings compatible with dpkg based gdal libs
+  - pip install pygdal>="$(gdal-config --version)"
+
+install:
+  - travis_retry pip install --upgrade pytest
+  - travis_retry pip install codecov cython boto3
+  - travis_retry pip install git+https://github.com/GeoscienceAustralia/eo-datasets.git
+  - travis_retry pip install --extra-index-url https://packages.dea.gadevs.ga/ 'datacube>=0.0.dev0'
+  - travis_retry pip install -e .[doc,test]
+
+before_script:
+  # Download and install the Code Climate CLI tool
+  - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+  - chmod +x ./cc-test-reporter
+  - ./cc-test-reporter before-build
+
+  # For debugging, show versions of all installed python packages
+  - pip freeze
+
+script:
+  - ./check-code.sh integration_tests
+
+
+after_script:
+  - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
+
+after_success:
+  - codecov
+  - python setup.py sdist bdist_wheel
+
+  # We only deploy docs from develop, so lets only build them there too
+  - |
+    if [ "${TRAVIS_PULL_REQUEST_BRANCH:-$TRAVIS_BRANCH}" = "develop" ]; then
+        pushd docs && make fetchnotebooks html && popd
+    fi
+
+
+# On success, upload a package to an S3 Bucket. Used for continuous deployment.
+deploy:
+  # Deploy the source dist tarball to s3 for tags or the develop branch, so that it can be installed on other systems
+  # For tags, the object will be GeoscienceAustralia/digitalearthau/datacube-1.0.0/3.6/digitalearthau-1.0.0.tar.gz
+  # For develop, the object will be GeoscienceAustralia/digitalearthau/develop/3.6/digitalearthau-1.0.0+91.g43bd4e12.tar.gz
+  - provider: s3
+    bucket: "datacube-core-deployment"
+    region: "ap-southeast-2"
+    local_dir: dist
+    upload_dir: digitalearthau
+    skip_cleanup: true
+    on:
+      all_branches: true  # Let the condition below decide if the branch is to be deployed
+      condition: $TRAVIS_BRANCH = "develop" || ! -z "${TRAVIS_TAG}"  # develop branch or tags
+      repo: GeoscienceAustralia/digitalearthau
+      python: "3.6"
+
+  - provider: s3
+    bucket: "docs.dea.ga.gov.au"
+    region: "ap-southeast-2"
+    local_dir: docs/_build/html/
+    skip_cleanup: true
+    on:
+      branch: develop
+      repo: GeoscienceAustralia/digitalearthau
+
+  - provider: pages
+    skip-cleanup: true
+    github-token: $GITHUB_TOKEN  # Set in the settings page of your repository, as a secure variable
+    local-dir: docs/_build/html/
+    keep-history: true
+    committer-from-gh: true
+    verbose: true
+    on:
+      branch: develop
+      repo: GeoscienceAustralia/digitalearthau
+
+notifications:
+  slack:
+    on_success: change
+    on_failure: always
+    secure: lsNEGmbGTX8Dcu4ruuEchsrUjqtNisrnbE5qq7hWm0xYseav5RdokfJhXw2k++qOiKJntwqM5BrE1DQLDdhEEuViiy1Q8dyqnjIfiV41WjIPCm3qtBRvg5J+pHi6aBn0rNHRd8scCZEIX3BecLpkX61LDcX0Q0HTIe4bAccpIg7TjZk2Viln2G2oEfKkaLlXnF2SY2dUdkUrEDql+rGc1j1JGFZHwSEEZEF+dBX73wQPPHQRAhF5yL76qF2A1Ceh9v2ZT/4DcX9MEcZzHxc83zwiDL9/0UKb7cKDQk4kqqtq4E2l99HkTwdZmsjPnFvhh1Rt0dXYuwdEBkx/s9A+1ndgat7a9strOhnKZt8Bf6zWLEHab6opEZfEAn4+y2hotx3UKHeQWGCZ0GeWFQg+BUjL1gq7wGnmCjc+990nL74hk2FCKS65RXR77oY/D3jlWDIRnkC1hy7YH21C1sJH66MyyqbA1aPCOtHfGxQ5/EoIp9bN7sZHwz/VPX7YrGnf8Ams+S3hZJTL0N+YCYR2QLYw8uVZAw48zOb7tmnevpsAxlBHHTKUoYTzv8SpRdK1AhNVgIHmdk3dTsVvbs2MpjUsDKqM8rKqlb77KzQhYYVOpQIQZwDlqUT42UMW4s+wiVFgpwBFUddbKgyyh99lF2eIpW6Oi0Llc+5yCnULs8A=

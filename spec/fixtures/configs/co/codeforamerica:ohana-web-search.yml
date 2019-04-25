@@ -1,0 +1,16 @@
+language: ruby
+bundler_args: "--without development:production:staging"
+cache: bundler
+sudo: false
+before_install:
+  - gem update --system
+  - yarn install
+script: bundle exec rspec
+rvm:
+- 2.5.1
+notifications:
+  webhooks: http://cfa-project-monitor.herokuapp.com/projects/67f80d53-afb0-4344-bd40-2644f55a4462/status
+env:
+  global:
+  - OHANA_API_ENDPOINT=http://ohana-api-test.herokuapp.com/api
+  - DOMAIN_NAME=lvh.me

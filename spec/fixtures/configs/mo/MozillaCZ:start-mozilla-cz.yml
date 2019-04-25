@@ -1,0 +1,32 @@
+language: ruby
+bundler_args: --path $HOME/.bundle --with test
+cache:
+  directories:
+    - $HOME/.bundle
+
+script:
+ - bundle exec jekyll build
+ - bundle exec htmlproofer ./_site --disable-external --allow-hash-href
+
+before_deploy:
+ - touch ./_site/.nojekyll
+
+deploy:
+- provider: pages
+  skip-cleanup: true
+  local-dir: _site
+  github-token: $GITHUB_TOKEN
+  on:
+    branch: master
+
+notifications:
+  email: false
+  slack:
+    secure: fqIpBj5L5VjgCQ/prBMeAkbU+SFEYjiWIWjUNcOBDL9BpCeVI0n8bGGYO2xeo1JHjyprYkAzI85yPMocC9Kic5DWVtqi+1DK/3HzatFi8o0sdSx5M80ZWRZIY5okmxXjbEMkiSUNgH9i+8bQ545lRxmtwmnF12J0Yi0zMydG7tTBTwyvr0SsWiFxHSUufrFGM+VTBD7t+duXkARhQ7QU8MxrTc8mBqW7ZH6U0IvScvGZ54sx1aaiBqTckw7vQj7fapCai1Jlb03WCLqVK6a1q07eoth67nCT+WxQ0tGaR/gg8/PCCmBp9kHyVvNmdw8foUasgNgpy4Sd6YiSUNdQ8u/V5VbEOjaUtAObW7afIKgC5h6iHZOTW1083R3ka1YaXfu4Kiof+tMaSjwPyrSZ6qKVMFKNbXXfyfyDRPHpANso5630PnWE/bkmOvnhWOobEsVxCTuT4XVMsBCc7frn5I1G9QM6leDMpzgtrLmCbI9gvZikffqG/K800LCa09KIKwDLSvDHXs8jQOCtuSL6yeDhFyigUl2X3k462ynykMvo8O/FFzwWSdR1JmB9W9Q1Yqb4BT4jzwBfYbSK+fwdFQ7YoWkcCko+H1WUT5+BcJDQaq6jedWPb+0b2xHBmeN9pXqPSQYzhJQP1pOvv+4vEeYlGOayvDraQ3ewN92AUIo=
+    on_success: change
+    on_failure: always
+    on_pull_requests: true
+
+env:
+  global:
+  - NOKOGIRI_USE_SYSTEM_LIBRARIES=true # speeds up installation of html-proofer

@@ -1,0 +1,113 @@
+language: cpp
+compiler: clang
+
+env:
+  global:
+  - secure: "eCI8SsitkQ8hbFBvZfPJSCUjoTymjwUiRB+Qs6i5IO/kPg6utJtLnLXwMEcZMRtL3bCRxXXo02I+4era0ItpZq3ea2PjR9d3CnS1tAogJkMzy+MDBR91/UqpKh6LKIFLcS2K10Up3UHfFH9bMnYyaD7ehtuSruEDvdDCOCvlTetKf5EoQx3cFo/dhpnb+M7WIG4PQ454Cwb5Fk8Z9/ihDzLiMNg2OI70H6Bc0QjhjIt96p2G4LLtFesXVpG0o5q0dDo7upkv22ub8kP8CAaot9uq1LHIbn6ykZNMPazFb+Bq8rX2hbFpFLAee7fYhf0YMP4ZgurD4tuGll3n0i/32zkq+Oq/gjTkJkcvzV9jFGJHnTbdmZXd4N8bU8youT9SxRaeTk2vGVfeL0+qCdRe9/sPbrEwdA14H6gGTczuPmIsospqmDaKsyaD1tldzsCQtfR9BVtmnTywJ6d9AaIRgo0lKzNqzcKqNHtFRedTgnCiMH4NrJkGV8IPFdJRxpz50Iwbw/QattwHucEOH1tiNIAdNZEy+V2fnAuP9zF/OXnYTDcrXMLT3iKQWc86VjzqTt1K6A3CyPCxT0GTKKlkCd3FF7JzdhHgIigM9IlnxkboOfnwLYZo5f/JcPqlXOVru4wF0t7th24ilmOL6GAN0Pym8yVZHTQ2diRSxhjgfkc="
+  - secure: "QeLGb9g6Oj0AP96zC1WRAM04/p60Xeie43iN4FA7JNkwCC/KQe3MIcWVVO5wzrTWyy6w3ZwFc7GOVekg5pNjE4chH81MMQXxRtKqIQbAw9syKHM9iMVUVuzQ5Q3qEPfIdD7vmWlYbVVa5oQmsejDS/wh4pDzOqcntKhvSl7olNhF6DUj2dJHAdP/VrC2xZqamET/18Bqxa1xUv6fMXOe1QdaHAnLoEAxIBCdNuHPFQkMZ+PfQFyayiNyzMrHi8GNkHIHUDP+zBVCjz5OUG1DdiMe0YzjCQfhR+EPMvbbZ3k3ozAEJz8Gm4Bf6s8dds49GxX8UOChbqDyX31qmhe/u+il+cdqKXVkRexwntqinr8Oc5qMKppIe2pZ+A6j3L8OkAV9eLCab0dabxolk3KeTjUapEDuZbqhXS5GTW+RNsnnxaVUv5xk8e9i72uGbdKfK0s/he9hUcmb1Tag7qJh51t/8+6XplVXosCDZ9cowUVOq71g5X0vH2jvcCvN2avEExRFHZYAC9Xjiv5of0C8Zyc1+y6MJLr2wtlMRwUzyJc12Po4nJiG2BjLnxXc+hYHiI3HD4opXLUuKyIIHlEweYAo8awoKnWy/us5oDWZOxFzRUmXADIPsxpbU3u/30bcprJxraU69wU674JULAlmFw0modDcMUHm7iMg0gdRQvE="
+  - secure: "HNGOyYffISvFt2+ITAkjJ+SJL0Eur0q8crPJa35AIcxUWHe52vJgnO+ORKOukD8b/2V5i/7SemXqsUMw+xyIH+vEnmUwTzVWg+6ZfRScLrQgwLVgLT5Ni1Ll2lrwMno13L+0KoXwCPn4d/QZNqwJOvhQAsHnbwtzdJmtcrLQL89Ghg76NmUNGCzw1PyU88gM51Br0lTi+KeQ/ypkDp72cznoBSRonMsjGITrfduRPtZm1/uDpjSd+z4Cb1Oexi/wSgXBHlVte81tJBgjWCFy3C55kv2M1KpQKLrGZLslcFyEz3p6GzN98nv6AV0H5IFr3knGxvTNVGziefhoma4d+c++asFtdh/FQliMYZvyW6dn6F3gkGh/YK2ZMGuXbQ+XaAoJ8axurobqr9GjG2JNPLsB7R0gu7lHEX59+2X0p7RPxo+1SNUTxpEIwmLKI2dmvaetNGyW+IKR1dNTAi9IHEbgcQ2cYCGaz6PAwgtKMPBzLhd9V73RwIWwwjEYDheNb2OF1tUQNbVgnGz3n/z8ng8+KZU3F49of7efLJ4hFJhecwkJ88ulLz7ZxDna/nmeE+EztlbtHapUf4QHYXO2ImDzWj3WX528U05djkFzkuI2dJaTahz+FpnFNLcGcqvEm7UI3bxVZ5BVdER7FZLkJFDkb+hTtnw2NE/mfbZq0Mc="
+
+matrix:
+  exclude:
+    # Workaround to prevent building in an empty environment
+    - compiler: clang
+  include:
+    ####################### macOS #######################
+    ###
+    ### macOS 10.13
+    ###
+    - os: osx
+      osx_image: xcode9.3
+      env:
+        - dist: "macos"
+        - distver: "10.13"
+        - distname: "high-sierra"
+    ###
+    ### macOS 10.12
+    ###
+    - os: osx
+      osx_image: xcode9.2
+      env:
+        - dist: "macos"
+        - distver: "10.12"
+        - distname: "sierra"
+    ####################### Linux #######################
+    - os: linux
+      dist: trusty
+      sudo: required
+      env:
+        - qtenv: /opt/qt510/bin/qt510-env.sh
+        - qtpkg: "'qt510base qt510quickcontrols qt510quickcontrols2 qt510svg qt510x11extras mesa-common-dev libgl1-mesa-dev'"
+        - qtppa: ppa:beineri/opt-qt-5.10.1-trusty
+
+before_install:
+  ### Create aliases for checking variables
+  - function run() {
+      if [ "$1" = "false" ]; then
+        return 0;
+      fi;
+      shift;
+      "$@";
+    }
+  - export isLinux=$( [[ "$TRAVIS_OS_NAME" == "linux" ]] && echo true || echo false )
+  - export isOsX=$( [[ "$TRAVIS_OS_NAME" == "osx" ]] && echo true || echo false )
+  - export isMacOs=$( [[ "$isOsX" == "true" && "${distver}" > "10.11" ]] && echo true || echo false )
+  ### Version names
+  - if [ -z "${TRAVIS_TAG}" ]; then
+      export TRAVIS_VERSION="branch-${TRAVIS_BRANCH}";
+      export VERSION="${TRAVIS_BRANCH}";
+      if [ "${TRAVIS_BRANCH}" == "master" ]; then export VERSION="9999"; fi;
+    else
+      export TRAVIS_VERSION="${TRAVIS_TAG}";
+      export VERSION="${TRAVIS_TAG#v}";
+    fi
+  - run $isLinux export PREFIX=redtimer-${TRAVIS_VERSION}-linux-x86_64
+  - run $isOsX export PREFIX=redtimer-${TRAVIS_VERSION}-${dist}-${distver}-${distname}
+  ### Linux
+  - run $isLinux sudo add-apt-repository -y ${qtppa}
+  - run $isLinux sudo apt-get update
+  ### OS X
+  - run $isOsX brew update
+
+install:
+  ### Linux
+  # Install dependencies
+  - run $isLinux sudo apt-get install -y --force-yes ${qtpkg}
+  ### OS X
+  ### Install Qt5
+  - run $isOsX brew install qt5
+  - run $isOsX brew link --force qt5
+
+script:
+  - run $isLinux source ${qtenv}
+  - qmake -r
+  - make
+
+after_success:
+  # Linux
+  - run $isLinux sudo apt-get install -y --force-yes ruby-dev build-essential rpm
+  - run $isLinux git clone https://github.com/jordansissel/fpm.git
+  - run $isLinux pushd fpm
+  - run $isLinux bundle install
+  - run $isLinux make
+  - run $isLinux sudo make install
+  - run $isLinux popd
+  - run $isLinux deploy/deploy.linux.sh $PREFIX $VERSION
+  # OS X
+  - run $isOsX deploy/deploy.osx.sh $PREFIX $VERSION
+  # Both
+  - export DEPLOYFILE=$PREFIX.*
+  - if [ -z "${TRAVIS_TAG}" ]; then
+      find $DEPLOYFILE -exec curl -T '{}' -u ${FTP_USER}:${FTP_PASS} ftp://${FTP_HOST}/ \;;
+    fi
+
+deploy:
+  ### Upload releases
+  - provider: releases
+    api_key:
+      secure: F3wBYR8oHwrLEJWwH6eQbTjhrNFCdklUQhjfq4wzixZO3bm5PTR/K3wvxaINmhsSoEdYHnSwzyVC3kWzcKWQX/3msCV4VyLvo1SULoz3RA2f4iY63Kbo0KzKiT+2rmOuGNHDDXCvIVKIhD81H5hR5YYhTPF7aBGfxvpb1Z2l9zfASP7fd6oZhdxolNfT3OS03AIB1on6pLgtv/aaizh5vAlVn32OwyFiJ5iOo+owFvYgImj082YTN025tVUh9KMjWD5naLgQ5ltflcWnIndjOwnasHQesmSKmCU5TBB7gAjpaRt0zKNdgDZ2RS8UFmaV5BIzF6TgP3I/IsVET5Fqqjil8PUSJZrGm/fbL+8yp9tpQ5chQcTV/ssYoQPZ0I2asZjuV6ypgSCIVuCdzcUewZgkLJglfKKTf1WqxKsjleaTZu9HpCyZ+XYp5L2Y+twsFZGgzYZoa43+/GtinNabNG75rIq0mc3cnNM/BQRvyUeAf9JUGeauQhTjJloiSKs3wl3VVYtvCiggWmKEjPYDNqgDLMaw10WMLt55f+i1VwzcBtRyZOkBC0/YVKLrM21JGOgbgEBtTam5G9+0Ysb6bwymTTD02N6tXjLFS9om2UyN1LzGzW+Sy0PW4L8RhoafwZEVTMDwxZh6Noo8JTZAN/XmOPM7cGfavVZchn2CWZc=
+    file_glob: true
+    file: ${DEPLOYFILE}
+    skip_cleanup: true
+    on:
+      tags: true

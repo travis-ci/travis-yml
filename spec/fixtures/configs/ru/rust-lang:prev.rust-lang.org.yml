@@ -1,0 +1,25 @@
+language: ruby
+rvm:
+- 2.1
+
+# Containers are cool!
+sudo: false
+
+install:
+- bundle install
+
+before_script: bash tidy.sh
+
+# Build and deploy the site to the S3 bucket on push to master, unless PR
+script: bundle exec jekyll build
+branches:
+  only:
+  - master
+
+deploy:
+  provider: pages
+  skip-cleanup: true
+  github-token: $GITHUB_TOKEN  # Set in the settings page of your repository, as a secure variable
+  local-dir: _site
+  on:
+    branch: master

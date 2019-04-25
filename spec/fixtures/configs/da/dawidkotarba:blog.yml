@@ -1,0 +1,44 @@
+matrix:
+  include:
+
+  - language: java
+    jdk: oraclejdk8
+    services: docker
+    after_success:
+      - ./gradlew jacocoTestReport coveralls pitest
+      - python <(curl -s https://raw.githubusercontent.com/TouK/sputnik-ci/master/sputnik-ci.py)
+      - if [ "$TRAVIS_BRANCH" == "master" ]; then
+        docker build -t dawidkotarba/blog:latest .;
+        docker login -u "$DOCKERHUB_USERNAME" -p "$DOCKERHUB_PASSWORD";
+        docker push dawidkotarba/blog:latest;
+        fi
+    deploy:
+      provider: releases
+      api_key: $GITHUB_API_KEY
+      file: "build/libs/blog-0.1.0.jar"
+      skip_cleanup: true
+      on:
+        tags: true
+        branch: master
+        repo: dawidkotarba/blog
+
+  - language: node_js
+    sudo: required
+    node_js: '9.3.0'
+    addons:
+    apt:
+      sources: google-chrome
+      packages:
+        - google-chrome-stable
+        - google-chrome-beta
+    before_install:
+      - export CHROME_BIN=chromium-browser
+      - export DISPLAY=:99.0
+      - sh -e /etc/init.d/xvfb start
+    before_script:
+    - cd ngblog;
+      npm install -g @angular/cli;
+      npm install -g karma;
+      npm install;
+      ng build;
+    script: karma start karma.conf.js --single-run

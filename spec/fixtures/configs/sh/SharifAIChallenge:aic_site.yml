@@ -1,0 +1,43 @@
+language: python
+python: 3.6
+stages:
+- test
+- name: deploy_test
+  if: type = push AND (branch IN (travis_integration, production-test))
+- name: deploy_production
+  if: type = push AND (branch IN (master))
+jobs:
+  include:
+  - stage: test
+    services: postgresql
+    before_install:
+    - export DJANGO_SETTINGS_MODULE=aic_site.settings.development
+    - export PYTHONPATH=$HOME/builds/SharifAIChallenge/aic_site
+    - export PIP_USE_MIRRORS=true
+    install:
+    - pip install -r requirements/production.txt
+    before_script:
+    - psql -c "CREATE DATABASE mydb;" -U postgres
+    script:
+    - python manage.py test
+  - stage: deploy_production
+    script:
+    - CRES=$(eval "curl -H 'X-token:${TOKEN}' -X GET http://193.70.90.145:3589/deploy_production")
+    - ADDRESS=$(echo $CRES | grep -o "http://[^']*txt")
+    - COND="false"
+    - echo "waiting for deployment server"
+    - echo "live log is available in $ADDRESS"
+    - while [[ $COND == *"false"* ]]; do sleep 3s; echo -n "."; LAST_LINE=$(curl $ADDRESS | tail -1); if [[ $LAST_LINE == *"~~~~~>   DEPLOYMENT DONE SUCCESSFULLY"* ]]; then COND="true"; fi; done
+    - curl $ADDRESS
+  - stage: deploy_test
+    script:
+    - CRES=$(eval "curl -H 'X-token:${TOKEN}' -X GET http://193.70.90.145:3589/deploy_test")
+    - ADDRESS=$(echo $CRES | grep -o "http://[^']*txt")
+    - COND="false"
+    - echo "waiting for deployment server"
+    - echo "live log is available in $ADDRESS"
+    - while [[ $COND == *"false"* ]]; do sleep 3s; echo -n "."; LAST_LINE=$(curl $ADDRESS | tail -1); if [[ $LAST_LINE == *"~~~~~>   DEPLOYMENT DONE SUCCESSFULLY"* ]]; then COND="true"; fi; done
+    - curl $ADDRESS
+env:
+  global:
+    secure: lUkrtMkdZeT9WjrmLG/2DSv96B7NNZIWPmzKIyTXQ5Sjztm1ECAG9vPnNVAzOy3eLMNCsuvuU4Pfjn4OxFrI7dXoP2r6I9QiNSXt38sAVNoTPIhoSVR5IJBqZDKuAUwTcNRRHlvwVlMSnSD1+Pl4v6xNR+rupPrLg08KIiUQ44W8pCnAyBCmjbpzqP8ty4erd0XXgLyPbPNyka1hNxJyiiXjyMXvPykpaG83jvq+3O76NLmfW1ZDDBeuwkprcdqXFF7i7cyJmdgZ2oihT5SJiMGfLF0TJK1q6dVeWcxskXgeXOiTA9NFl9KOGHRUbyKOZxIUTr0G5rb7+ZVjOPUxeq0JCLmZIzXKpeHw7GpWio9bWKrjqApQ6WHHmUROONtM3Of8BH81vhbq69S7Rn7UhkQBTM8DTLFZuytfyG/fTSjkAcu/cUBKZUkQUpFCBoR9C75yaogieEAIfjiQNZslR5/ue+MV7AhEew2lg6lbusyULJKWK/vIdHI4m1GDaEC9yV7zcFEMjMsKaiyouGLqBxlRh9ukOKxHrv2B9aU5zIhQpPG0LCRnfh+MC/JrXg7Diir8KE1qzDN7fN15JF1AHgaZd6zKG1/bfBlew5hP1rsYDQuaItStTfT41y4W1QXv+q7vkb0q1nAzYtamf9VMX0+5Sz7bbe4DC8IdBpA0WuM=

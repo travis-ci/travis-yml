@@ -1,0 +1,22 @@
+sudo: false
+language: ruby
+cache:
+  bundler: true
+rvm:
+- 2.4
+addons:
+  postgresql: '9.4'
+before_script:
+- export DISPLAY=:99.0
+- sh -e /etc/init.d/xvfb start
+- cp config/secrets.yml.travis config/secrets.yml
+- cp config/database.yml.travis config/database.yml
+- psql -c 'create database travis_ci_test;' -U postgres
+script: bundle exec rspec spec
+notifications:
+  hipchat:
+    on_success: change
+    on_failure: change
+    notify: true
+    rooms:
+      secure: g+Mhc3e13CVy0KX6Ukf1ALkQdzBWslxo3ZlfOrhm6QVzT6+0+Dk7zGwmq0bGuAMeU7dqV2rXCtTA7QSd1/HIc9TTA0SPY94ySBudZbVqbf4YZboXCVlq4yNy8ky06vQ8Hy5N5xmF4NGVVu/MnboogjCug58rZ/5vAemUoJvklj8=

@@ -1,0 +1,55 @@
+dist: trusty
+sudo: false
+
+language: python
+
+# currently only testing for python 2.7
+python:
+  - "2.7"
+
+# This tests against all the versions of DB supported by Eden
+env:
+ - DB=mysql
+ - DB=sqlite3
+ - DB=postgres-9.4
+ - DB=postgres-9.4+postgis
+ - DB=postgres-9.6
+ - DB=postgres-9.6+postgis
+
+virtualenv:
+  system_site_packages: true
+
+# Uncomment below to only test the master branch
+# branches:
+#  only:
+#   - master
+
+notifications:
+ email: false
+
+# install web2py
+before_install:
+ - chmod +x tests/travis/*
+ - sudo tests/travis/install_web2py.sh
+
+# install Eden. This generates generated_requirements.txt which is given as an
+# argument to pip
+install:
+  - sudo tests/travis/install_eden.sh
+
+# set up the testing environment
+before_script:
+ - cd ../../web2py/
+ - sudo chown -R ${USER} .
+ # configure DB settings based on the env. variable
+ - ./applications/eden/tests/travis/configure_db.sh
+ # for debugging in the logs
+ - cat ./applications/eden/models/000_config.py
+ # prepop
+ - python web2py.py -S eden -M -R applications/eden/static/scripts/tools/noop.py
+
+script:
+ - python web2py.py -S eden -M -R applications/eden/modules/unit_tests/suite.py
+
+after_script:
+  - echo  "Travis Test Result" $TRAVIS_TEST_RESULT

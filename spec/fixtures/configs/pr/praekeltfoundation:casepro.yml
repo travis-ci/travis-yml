@@ -1,0 +1,42 @@
+language: python
+sudo: false
+
+python:
+ - '3.6'
+
+services:
+ - redis-server
+ 
+addons:
+  postgresql: '9.6'
+
+cache:
+  directories:
+   - $HOME/.cache/pip
+
+install:
+ - pip install --upgrade pip
+ - pip install -r pip-freeze.txt --upgrade
+ - pip install coveralls
+ - npm install
+
+before_script:
+ - psql -U postgres -c "CREATE USER casepro WITH PASSWORD 'nyaruka';"
+ - psql -U postgres -c "ALTER ROLE casepro WITH SUPERUSER;"
+ - psql -U casepro postgres -c "CREATE DATABASE casepro;"
+ - ln -s $TRAVIS_BUILD_DIR/casepro/settings.py.dev $TRAVIS_BUILD_DIR/casepro/settings.py
+
+script:
+ - coverage run manage.py test --verbosity=2 --noinput
+ - python manage.py makemigrations --dry-run | grep 'No changes detected' || (echo 'There are changes which require migrations.' && exit 1)
+ - python manage.py collectstatic --noinput
+ - (! python manage.py compress --extension=".haml" --settings=casepro.settings_travis | grep 'Error') || exit 1
+ - flake8
+ - node_modules/karma/bin/karma start karma.conf.coffee --single-run --browsers PhantomJS
+
+after_success:
+ - coveralls
+
+notifications:
+  slack:
+    secure: EmQGwxkgzSU5y7dcT7B6TF4yIq/V9hBnSoysTv+D5nyQjSL99QVKK1psJ5gH0H7zvnHRTJ88Qip5G7SvbF0L1ReUEWwHGMYj8yd64mU75Vnx1SmXzvfzCejDyvS01QuYo22Ei15EYYfQWm5bz0soYMkgd1ySt1VoZ+0qd1ANNb8=

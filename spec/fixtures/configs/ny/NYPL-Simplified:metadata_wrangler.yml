@@ -1,0 +1,33 @@
+addons:
+  postgresql: "9.3"
+
+services:
+  - postgresql
+
+language: python
+
+python:
+  - "2.7"
+
+cache: pip
+
+env:
+  - SIMPLIFIED_TEST_DATABASE="postgres://simplified_test:test@localhost:5432/simplified_metadata_test"
+
+git:
+  submodules: false
+
+before_install:
+  - git config submodule.core.url https://github.com/NYPL-Simplified/server_core.git
+  - git submodule update --init --recursive
+
+install:
+  - pip install -r requirements.txt
+  - python -m textblob.download_corpora
+
+before_script:
+  - psql -c 'create user simplified_test;' -U postgres
+  - psql -c 'create database simplified_metadata_test;' -U postgres
+  - psql -c 'grant all privileges on database simplified_metadata_test to simplified_test;' -U postgres
+
+script: ./test

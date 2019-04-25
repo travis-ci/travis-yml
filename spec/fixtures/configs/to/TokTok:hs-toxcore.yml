@@ -1,0 +1,26 @@
+---
+language: generic
+
+cache:
+  directories:
+    - $HOME/.local
+    - $HOME/.stack
+
+before_install:
+  - export PATH=$HOME/.local/bin:$PATH
+  - travis_retry curl -L https://github.com/TokTok/hs-tools/releases/download/v0.1/hs-tools-v0.1.tar.gz | tar xz -C $HOME
+
+install:
+  # Where to find libraries.
+  - export LD_LIBRARY_PATH=$HOME/.local/lib
+  - export PKG_CONFIG_PATH=$HOME/.local/lib/pkgconfig
+  # libsodium
+  - git clone --depth=1 --branch=stable https://github.com/jedisct1/libsodium
+  - test -f $HOME/.local/lib/libsodium.so || (cd libsodium && ./configure --prefix=$HOME/.local && make install -j$(nproc))
+
+script:
+  - hlint .
+  - stylish-haskell-lhs -i .
+  - git diff --exit-code
+  - stack --no-terminal test --coverage --extra-include-dirs=$HOME/.local/include --extra-lib-dirs=$HOME/.local/lib
+  - shc hstox testsuite

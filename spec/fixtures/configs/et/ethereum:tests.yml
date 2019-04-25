@@ -1,0 +1,13 @@
+language: python
+python: 
+  - "3.6"
+branches:
+  only:
+    - master
+    - develop
+sudo: false
+install: "pip install pyyaml jsonschema pysha3"
+script:
+
+# sanitation checks against testsets
+- make sani

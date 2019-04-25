@@ -1,0 +1,15 @@
+language: python
+python:
+- '2.7'
+- '3.5'
+- '3.6'
+script:
+- PYTHONPATH=`pwd` pytest -s ./tests
+deploy:
+  provider: pypi
+  user: lensonp
+  password:
+    secure: q0v0T8FrN1EXdw8e+Zv2fTh/lYrwsKJg/wSR+qQVHArtHBUvJIxoY1pqbd54uqA8vAWZ3bWZnc9UlpSZzOrjVL3cfMQhZr6/HeN751LfPN856xUbQxgnYWHKJWM6k0ExPMZ8mWu31DyAd+/uHOhFD+PN2JQZ2BE7lgxaTCIprtM2ZDkZNctJFxLvK2AeMwl5U0iGSWzPZCbRP3BJtmJtQyvp+hce1CRQq8/3i1TAs3ISE/0Sreaqxq0cxKY4t0R9Tj4p6sBUg9p1bHuYyoEG/srqscH6x8rH4MxV9owC31lsrr0m5PCYEXFA7tmQF7MBqOlI3nInI9MJo2WanYJAc3k0Dyv00BAVGGUj4SVBsIZX807Cyt43hfY1ewNF26z27+628YwGzu65CU1c9ugOIIvZXp/gOCA2WpnDmLJ76UiIflqARxK+bLHuefEAs0FD3AYNXPpYtO1NQdU8ZFafbJYFcmI1Z1mGKZqYj5+J4r+VfGiC5gCX/OV+VwMxUW2tJ0T/944hy5Jhia3LAURZgTN01bEaRk1OjAbhsugcIZVcaqTRKlO5q78q7kbVe2TAhBpVwKdw5AKINo/wAPVtsCike+8nz8KPlp9WVWJAWa3Loa+Nvmdtgov+cl0/JJ9iz3P7vH0+qfLc8RStF8N7tQaeGp7xD6AXgJPGfJTi2aM=
+  on:
+    distributions: sdist bdist_wheel
+    branch: master

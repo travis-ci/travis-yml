@@ -1,0 +1,52 @@
+# Run `travis lint` when changing this file to avoid breaking the build.
+
+
+# Use a larger VM as we run a lot of services
+# https://docs.travis-ci.com/user/ci-environment/#Virtualization-environments
+sudo: required
+dist: trusty
+
+cache:
+  directories:
+  # zipkin-ui gets dependencies via NPM
+  - $HOME/.npm
+  - $HOME/.m2
+
+language: java
+
+jdk:
+  - oraclejdk8
+
+services:
+  - docker
+  - rabbitmq
+
+before_install:
+
+  # Required for Elasticsearch 5 (See https://github.com/docker-library/docs/tree/master/elasticsearch#host-setup)
+  - sudo sysctl -w vm.max_map_count=262144
+
+  # Manually install and run zk+kafka as it isn't an available service
+  - curl -SL https://archive.apache.org/dist/kafka/0.8.2.2/kafka_2.11-0.8.2.2.tgz | tar xz
+  - nohup bash -c "cd kafka_* && bin/zookeeper-server-start.sh config/zookeeper.properties >/dev/null 2>&1 &"
+  - nohup bash -c "cd kafka_* && bin/kafka-server-start.sh config/server.properties >/dev/null 2>&1 &"
+
+  # Quiet Maven invoker logs (Downloading... when running zipkin-server/src/it)
+  - echo "MAVEN_OPTS='-Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn'" > ~/.mavenrc
+
+  # Override default travis to use the maven wrapper
+install: ./mvnw install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
+script: ./mvnw clean verify -B
+
+# Don't build release tags. This avoids publish conflicts because the version commit exists both on master and the release tag.
+# See https://github.com/travis-ci/travis-ci/issues/1532
+branches:
+  except:
+    - /^[0-9]/
+
+notifications:
+  webhooks:
+    urls:
+      - https://webhooks.gitter.im/e/637e968b45032d16ee26
+    on_success: change
+    on_failure: always

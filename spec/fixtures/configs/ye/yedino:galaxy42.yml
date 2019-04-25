@@ -1,0 +1,126 @@
+# For creating tun
+sudo: required
+
+# Enable C++ support
+language: cpp
+
+os:
+  - linux
+dist: trusty
+
+group: edge
+
+addons:
+  apt:
+    sources: ['ubuntu-toolchain-r-test', 'llvm-toolchain-trusty-4.0']
+    packages:
+      - gcc-5
+      - g++-5
+      - clang-4.0
+      - libboost-system-dev
+      - libboost-filesystem-dev
+      - libboost-program-options-dev
+      - libboost-thread-dev
+      - libboost-locale-dev
+      - libcap-ng-dev
+      - libfftw3-dev
+      - shellcheck
+
+compiler:
+  - gcc
+  - clang
+
+# add manually apt-key key for ppa:chris-lea becouse retrieving it from server occurs randomly some problems
+before_install:
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo apt-key add "$TRAVIS_BUILD_DIR"/doc/pubkey/chris_lea_libsodium.pub ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo add-apt-repository ppa:chris-lea/libsodium -y                      ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo apt-get update -q                                                  ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo apt-get install libsodium-dev -y                                   ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then pip install --user cpp-coveralls                                        ; fi
+
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then bash share/script/setup-osx-brew   ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then CC=clang  ; fi
+
+install:
+  - if [[ "$CC" == "gcc" ]]; then export CXX="g++-5" CC="gcc-5"  ; fi
+  - if [[ "$CC" == "clang" ]]; then export CXX="clang++" CC="clang"  ; fi
+  - echo "PATH=${PATH}"
+  - echo "CC=${CC}, $(which ${CC})"
+  - echo "CXX=${CXX}, $(which ${CXX})"
+
+env:
+  global:
+    - COVERAGE=0
+    - EXTLEVEL=0
+  matrix:
+    # - EXTLEVEL=30   commented becauce of too big compilation matrix
+    - EXTLEVEL=20
+    - EXTLEVEL=10
+
+matrix:
+    fast_finish: true
+    exclude:
+      - os: linux
+        compiler: clang
+      - os: osx
+        compiler: gcc
+
+    include:
+      - os: linux
+        env: COVERAGE=1 EXTLEVEL=0
+        compiler: gcc
+
+      - os: linux
+        env: EXTLEVEL=0
+        compiler: clang
+
+      - os: osx
+        osx_image: xcode8.2
+        env: EXTLEVEL=0
+        compiler: clang
+
+      - os: osx
+        osx_image: xcode8.2
+        env: EXTLEVEL=10
+        compiler: clang
+
+      - os: osx
+        osx_image: xcode8.2
+        env: EXTLEVEL=20
+        compiler: clang
+
+    allow_failures:
+      - env: EXTLEVEL=30
+      - env: EXTLEVEL=20
+      - env: EXTLEVEL=10
+
+# Adding setcap for tunserver.elf etc.
+before_script:
+  - cd ${TRAVIS_BUILD_DIR} # back to main dir
+  - cd share/script/install-as-root/ && sudo ./install -y
+
+script:
+  - cd ${TRAVIS_BUILD_DIR}
+  - ./check
+  - ./do --go
+  - ./build/unittests.elf    # run gtests
+
+after_success:
+  - if [[ "$COVERAGE" == "1" ]]; then coveralls -i 'src/' -e 'src/test/' --gcov-options '\-lp' --gcov 'gcov-5' ; fi
+
+notifications:
+  irc:
+    on_success: change
+    on_failure: change
+    channels:
+      - "icann.irc.meshnet.pl#antinet-dev"
+    template:
+      - "%{repository}#%{build_number} (%{branch} - %{commit} : %{author}): %{message} (%{build_url})"
+
+  email: false
+  #  to minimize spam
+  #  on_success: change
+  #  on_failure: always
+  #recipients:
+  #  - one@example.com
+  #  - other@example.com

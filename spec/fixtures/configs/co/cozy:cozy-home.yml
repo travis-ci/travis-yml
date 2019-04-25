@@ -1,0 +1,63 @@
+language: node_js
+matrix:
+  fast_finish: true
+node_js:
+- '8.10'
+env:
+  global:
+  - CXX=g++-4.8
+  - MATTERMOST_CHANNEL=Plateformers-release
+  - TARGETS_DEV=recette.cozy.works
+  - TARGETS_BETA=betatest.cozy.works
+  # to generate secure ENV VARS : travis encrypt MY_VAR=<value> -r cozy/cozy-home
+  # GITHUB_TOKEN
+  - secure: r1KjnXjMYKWD9S9oQo2ubG8J0rfADXLJQFgId/L0c16f72Be0YFmpKRq8Zx3haREcydgLUSJEjrdLGp0USY6AqY+iOcKRUrJzxueqRpSWnoF2Lvh9h21zXocRsDzJcwxCUA2y4pxe8e/A9CL4IP8s9DB+DfkBwQB+I6Vm5DOPkYojWFG1uXggrxLhgf8c5AMyAwQGkpBTc9a7PqtIHjSHd5rpSdoRFUNCLJfz0Qow7mf0M8j4fKfeNe8teU7qmkUvPTI1v/SBhU9hebOHjjY9bxfG4kVSpPaCVcVtKqyyemiPU1aZ2vJpgxJ1Y2A3zGe4IA2xJGKDZY4xDz0oGWlJisPWOW6l9BALDLUV8QhVoqhFfyCHYiGEweGcIaZk9t6a1CNhNb3FXlUw8S4XMo91g4hLu2q42PnVX6862fSOGF7FyEHAha20nFOitOpqsEwmfEm8dhyi4wzVEuTEvQlQAHN9x4wRwnE2x56eHftKV0XDVMiJKybO5vpyofFUBeyWzvDxJoV/2vwGyTpG5te7g7VmyT5XzPRioWwWRJryYDHm9zZeuhYSJiG4ARgWmjkluOe5n/WAcdFeDkx+AEQ+kXBfuGuJD9IMartlWL8K4TavgfTEUdYgkCeyHHhXS8o5IMuRIkc/sl4gb3kcNtt+FHQpKV4VYQy+gPcoN51FOU=
+  # MATTERMOST_HOOK_URL
+  - secure: "LS+qWAoU+waiikOkwEgetLUh/60f7eTGSU6ihE9Lpyo70CZqfPn37V1tN+6xKc89OQXs2O9C5RDzZlbjUkqZnJ6s+VBxZUHT5cc6FybtT7ICcGd4/rpgZC558V6c6A2K11BUT2nKfZ38eUEDQKYudD7QgWJL40VSBYS2gPXfn/0qViHZA7Ub+AemUmJpc/RtC6MTy0epDhpim+ANKqczdHUnBkICHmN+XLrescnfRdM8OeoOdJ4jykuUuzIjR9tdU9ekR7bmZx37m0luIiqkjQJlnDamcfKh0jUc15ib+s6pfAwpkkbs7pIUaNKb+kXZgNJFUEd8d9EKGgBFJ7lxl8Ju9nfzL9FMn6O7wzjIQm/ri3e0qYp473HaUhg1+0hVHKVxYx8wEwedzeEfGXFQ222e4YRVruOLoORs56wbAahRoSC3X57kNNEZziz4S0GEoDQtNHtVb2B+GbKazcOwri/3Fvto7ZuKJNGg4waCFjerCNfkP17mlJyXcZ4l+6OVvmg4qgXr9z4vdi4sW43U9FAxFABNRUt2E6pe2H5vZMub6WIbU9FpKpl/IP6d/juT3/+055BhgrOQLO+fbqm8E2WIFVXHACysHyx8ApGdqdRdS27TWfLp/EsIBqe/T/ivT8GEPX0qYXegItBtIvQEGavQ9keLpExDbtxH7Z+N72g="
+  # TX_PASSWD
+  - secure: "O/1luMDKS1tIhCfT/ARkKEdDp7ygk6hDHtW/zbl8nqf0LVsYhyBJ01NTDcOzuppQFTpJHpshhN/2jM+p+ot/7PUgufMAErx2ERxksXB7xZ324ghTptQdakMSIcNee7zWskCozbRsEYnvpT/2opT7CjN2b5Wdr7Qp6Q4Al/01c2Neo3ZZc7WRPzh0MrY+wX/pllWWZMe3KMi7qnSu0RWvl5wDRvUqeqJvCW23oU0Q+7jpj1JkdHltpawX4RT09cfGCUJ38BOTWLchErj3LJ2Bu/9sZS4YpLvf4w1ppA8t4fdXqKf/lfWO9b7iIKjxWWsjLcegtkuyqvRf0H8hEh89qjwSf6w/uCncs5vDol0R/wq88N2wejYrP3957PMLXVeHCy+VsaShhy3cEVteN1kGmOKsn2UUcKciG/ByB96nvfX2YD00/8/BYhbFU+LuGHmXx4Na3O8zzoLetMyfdzcSXo4eov93aVb2J8ifP0IgmyBQq+GBKGn2Ge3NyvcPpTxnbvRQT4JdyE7ut9m+BQaUFcneMNYy9S28jWmEhdfYrDWpsYIOS8U4sJidAOW9/wFS9WzmObesy4jgRBxUyqZEw32QEmq7IaR04Yq4YkuAkmdawaJc6uy8IgCzHmHFBs1DJXbSdK2679jF2li2MLtnlV81QIv/cNEsavpor3xH4jc="
+  # REGISTRY_TOKEN
+  - secure: A7pRywtbi1an4bW+Hi3gDtPja4D1hA0x+P4X6XbafZQWA9GmjUY7esUVg22jjF5G+UQDe/UTC2IqCnZXcZA8WoAWTKMg/7UHp9NiehXk0qNwfl0QHhqj5Woc4rLoTQ2Xxv8aJfcRbRPAxS4dXRGW0OHJQOAl3IdtsJpxRLy3EYClRu+JviWEu+SB3rN4ffz1Ylm8E47JtuozEQF8MswOqWKZRMrzGBocXYiMuIRKPXcPT8S53HmgOl9jLEjx857thNrvwCnQ9kt8HAF3k+ev2DPGB2HPm9efEppq8frIr1AXuPZ7NzZNtHGAEwwArE4geb6uu09dB8dcAqPTYGYFTT3thTZwCw7C2M3jiKPSv9Vhy7WsFcviikm8rRwtpNxhRmmQUasliY0Mn57EQxj1Dud8FrD4Vd4cQDHz02tcacPrScisCBKmWx9PzaXqBM1dIzxPWgvQbbaxkgtg/jAEc8DpiC9GThU6RU+Cip4s1AANSHkVKBlqq7xVwgXju/E1i1yir4ldacaSM8FT1UN4nFyf992toGWa3l2P9dhRyeCYlx5SUQkojs7rKKdQPIbC5LskFKF9vu9jj4CF9CKICVVqYPu/lAr3W4pYbzn9j1hAwF9+Akcq9GwC06GKabVymDISei0aC0SWQ9pS/sJd3LeLZuP7tp4SAsC2IJIiieE=
+  # RUNDECK_TOKEN
+  - secure: TIuR4l+T3XBBWT1Nz/C93b8DGXO1lom8TbUiWzTcdNXNXAHW2Q/k2qt0KdohYa0m9ULemknxYMewBVyeDbmQIJ1cx/+SrgnrWkcH8Pk6GWkY2ugzicwQPPvLPS/u+MMZC0w7tcOpPdeL1AYF+f+eQxgYvumCnzR/kKWajFaYEHRXWxSQNypsbbkAQmtD4nhtg934MdNamPMMZAV7v7Y7VvmUQeZKV3B63zCr5L28KD2S1yH5l3qFcKm3KFcK5VJgOAjmhUQSg0lBztV2gXMbS/EHecCsUJtu/29EzG/6bGhjP5NSYl6gO2BaemY85oWVK9aWpnuB1fMbnzdJb9+jD4C5NQmVWTLmwlBr1Sf5GrHX0Inc+QNn/XcFe0bUg40FqAjlPPMsNuPSn745QEq+B3IKZGF9o94DIMalZdGoM6CGSqh0hDJ7B6e/7K5vEfw2PZQoVwKfzstrc6EUadkXohtdgv8+b33KHRfOH4A8171LrQn9a4J+SOcns31iGMg/0MXfA+bMZkGrwCQxcnKQ13Epvs3qDaOflbdE0YKOAsUpMDO3zLcY7uVu3FjsBp6x8PL6pYF3iKfp7jD6OSEpGBl39eUMavL8hv+2LFo1O/aiUZJ/9fLPoCqZ/Cbp87T8VMVHHiRfqWs+W0AWRCJs0BpY1qFnOxti/ZrXNo/T1qQ=
+addons:
+  apt:
+    sources:
+    - ubuntu-toolchain-r-test
+    - deadsnakes
+    packages:
+    - g++-4.8
+    - python3.5
+cache:
+  yarn: true
+  directories:
+  - node_modules
+before_install:
+- 'if [ "$TRAVIS_SECURE_ENV_VARS" != "false" ]; then openssl aes-256-cbc -K $encrypted_8431ed5600b0_key -iv $encrypted_8431ed5600b0_iv -in ./scripts/id_rsa.enc -out /tmp/deploy_rsa -d; fi'
+- 'if [ "$TRAVIS_SECURE_ENV_VARS" != "false" ]; then eval "$(ssh-agent -s)"; fi'
+- 'if [ "$TRAVIS_SECURE_ENV_VARS" != "false" ]; then chmod 600 /tmp/deploy_rsa; fi'
+- 'if [ "$TRAVIS_SECURE_ENV_VARS" != "false" ]; then ssh-add /tmp/deploy_rsa; fi'
+- curl -o- -L https://yarnpkg.com/install.sh | bash -s -- --version 1.2.1
+- export PATH="$HOME/.yarn/bin:$PATH"
+- curl -fsSL https://bootstrap.pypa.io/get-pip.py | python3.5 - --user
+- travis_retry pip3.5 install --user transifex-client==0.12.5
+- install -m0644 .transifexrc.tpl ~/.transifexrc
+- echo "password = $TX_PASSWD" >> ~/.transifexrc
+script:
+- yarn test
+- yarn build
+before_deploy:
+- yarn add cozy-app-publish
+deploy:
+  - provider: script
+    repo: cozy/cozy-home
+    skip-cleanup: true
+    script: yarn cozyPublish
+    on:
+      branch: master
+  - provider: script
+    repo: cozy/cozy-home
+    skip-cleanup: true
+    script: yarn cozyPublish
+    on:
+      tags: true

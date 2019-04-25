@@ -1,0 +1,39 @@
+language: node_js
+node_js:
+- "4"
+- "6"
+env:
+  - CXX=g++-4.8
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - g++-4.8
+
+before_script:
+- export DISPLAY=:99.0
+- sh -e /etc/init.d/xvfb start
+- git config --global user.email "travis@openseamap.org"
+- git config --global user.name "TravisCI"
+- git remote rm origin
+- git remote add origin https://aAXEe:${GH_TOKEN}@github.com/aAXEe/online_chart_ol3
+- export DISABLE_NOTIFIER=true
+
+branches:
+  except:
+    - gh-pages
+cache:
+  directories:
+    - node_modules
+    - bower_components
+
+script:
+- npm test
+
+after_success:
+  - test $TRAVIS_BRANCH = "master" && test $TRAVIS_PULL_REQUEST = "false" && npm run deploy
+
+env:
+  global:
+  - secure: lHX7rDeQUGoZ07LxtLOeam6qNY+Mo9ULkgVGGXRlSFM7EL9INTDoStHWeoSXevbhtEzBiOgj02zznYY76ugPucqJv1jZSLD/sMfrBRQFWu1AzFAR8cJiyTJmsqCedeCFvG4/4uPPsDveFJDRX//fHzFN+LHVtVEZ8CzrTEdtqmSk0PbLsXDpazZho8RjSXKxlJhv18C0j+6qlf9Lo2kLkEAKN0XAH5tz+V4eYpdKV4nj1l2JrYtb/CGPDS2azho1mE+Iw0kHzBB1vZTd/JK2F9i16mN49VsGpYS0EceoCd1oOTFn8eCI53VljAtbNasmhYt8puiT1O4irV0B7PRNdCf6fF1dR+4OXY2qC3GWqcMD5EIlg7D6B2TvCB1zuDoLaJ/j84IgG1iQ1pCPkvHy2bZ+maet9HD+wAHqBJL5e2gm4H8/g5yKlFsBQ9YiCvIRbAdJcHWC+h4uSOg8NNZOFZYdmQaQU5kkJljgVLwDiUx6hn2SQxkknUBkMTi57xPZGbZ6zEH63tAFwnYhkXCt5Z5wqxyA19uTVR/nXywNsc6ZvyPpZfucrUAgPhZ9m4HlvQu5+Sgfa4GxRjcUVDBwYDPQmcPGkB8/mXsGlOd5XomOqw0r5R3LoXeGX+TtJlt21+CgPEOVsl56Iz1y9DGkKV427YwR3WLW+QFfvhh1aOM=

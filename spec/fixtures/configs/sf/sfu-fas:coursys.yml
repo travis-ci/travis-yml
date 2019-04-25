@@ -1,0 +1,10 @@
+notifications:
+    email:
+      - coursys-help@sfu.ca
+cache: pip
+sudo: required
+services:
+  - docker
+install:
+  - docker pull ggbaker/coursys-test-py3
+script: "docker run ggbaker/coursys-test-py3"

@@ -1,0 +1,60 @@
+language: node_js
+cache:
+  - yarn
+  - pip
+
+node_js: 10
+
+stages:
+  - name: test
+  - name: deploy
+
+jobs:
+  include:
+    - stage: test
+      env: SCRIPT=lint:tslint
+
+    - stage: test
+      env: SCRIPT=lint:prettier
+
+    - stage: test
+      env: SCRIPT=build
+
+    - stage: deploy
+      if: branch = master AND type = push
+      env: NODE_ENV=production
+      install:
+        - npm install -g gulp webpack yarn
+        - yarn --pure-lockfile
+        - pip install --user awscli
+      script:
+        - yarn build
+        - aws s3 sync --delete dist/ s3://$S3_DEFAULT_BUCKET/branches/$TRAVIS_BRANCH/
+        - gulp sentry:release
+
+install:
+  - npm install -g gulp webpack yarn
+  - yarn --pure-lockfile
+
+script: yarn run $SCRIPT
+
+matrix:
+  allow_failures:
+    - env: SCRIPT=lint:tslint
+
+git:
+  depth: false
+
+notifications:
+  email:
+    on_failure: always
+    on_success: change
+  irc:
+    channels:
+      - "chat.freenode.net#hearthsim-commits"
+    use_notice: true
+    skip_join: true
+    on_failure: always
+    on_success: change
+    template:
+      - "(%{branch} @ %{commit} : %{author}): %{message} %{build_url}"

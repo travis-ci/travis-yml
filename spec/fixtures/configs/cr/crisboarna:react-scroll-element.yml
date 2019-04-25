@@ -1,0 +1,31 @@
+language: node_js
+sudo: false
+cache:
+  directories:
+    - ~/.npm
+    - node_modules
+notifications:
+  email: false
+node_js:
+  - "8"
+env:
+  - CI=TRAVISCI
+before_script:
+  - greenkeeper-lockfile-update
+script:
+  - npm test
+  - npm run build
+after_script:
+  - greenkeeper-lockfile-upload
+after_success:
+  - npm run report-coverage
+  - npm run semantic-release
+branches:
+  except:
+    - /^v\d+\.\d+\.\d+$/
+deploy:
+  provider: pages
+  name: Cristian Boarna
+  skip_cleanup: true
+  github_token: $GH_TOKEN
+  local_dir: build-ghpage

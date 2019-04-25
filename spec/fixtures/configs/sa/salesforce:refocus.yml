@@ -1,0 +1,56 @@
+language: node_js
+node_js:
+  - "8"
+
+# safelist - only do branch build for "master" (keep doing PR builds for
+# every pr)
+branches:
+  only:
+  - master
+
+# Set sudo to false for "container-based" environment, a fast boot time
+# environment in which sudo commands are not available.
+sudo: false
+
+# By default, travis clones repositories to a depth of 50 commits, which is
+# only really useful if you are performing git operations. Please note that if
+# you use a depth of 1 and have a queue of jobs, Travis CI won’t build commits
+# that are in the queue when you push a new commit.
+git:
+  depth: 2
+
+# cache:
+#   timeout: 3600
+#   directories:
+#     - node_modules
+
+env:
+  global:
+    - NODE_ENV=build
+    - CXX=g++-4.8
+
+addons:
+  postgresql: "9.6"
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - g++-4.8
+
+services:
+  - redis-server
+
+script:
+  - npm run jscs-enforce
+  - npm run checkdb
+  - travis_retry npm run test-travis
+
+before_install:
+  - travis_retry npm install -g npm@^5.7.0
+
+install:
+  - travis_retry npm ci
+
+cache:
+  directories:
+    - "$HOME/.npm"

@@ -1,0 +1,19 @@
+language: ruby
+rvm:
+- 2.4.5
+cache: bundler
+env:
+  global:
+    - EMAIL_FROM_ADDRESS="heatseek@test.com"
+    - DATABASE_USERNAME="postgres"
+    - DATABASE_PASSWORD=""
+    - secure: wMOkyOiC7B9wCoStmW7FvoMqAn7h8GXzt1WOOKQutLIVdoI0dvhrIRViT5ZICvgHIqUoIdRx42AUfXIxC4y+FOatJTmo2GCa4SsctqWLOjX9lQSn1wqaflIfgi5mYoYSKJzJ6KSxIdMQsWA6PLlhSlHLVyKJsINoIADcrxh1Hw0=
+    - secure: il0FXkyOk8iPr5sk4SE/TVAapZZiZjiELkPrm4Z1T4FAqbUCKDILQHMAms6wbzt2qYNFx2SmDs/Z5odMg94ll/PlvsmZx/IBJC87hiPVjao6PBxzscNcBGK+sPtkmM0hcjpJLrpqZYLL4EtN8UMZN7Ck2yS1R5Xsg7VXrMia5+g=
+    - secure: FT4wY8FQIXeWJQKqhZRe9rp2h2d1thrYxPW7HSiFlW679XZyUbR17v1tqKb/upfY3xivHrExIusaJu4XjB+WxNSFDiEZCZEYL59o6OuyBwVYjLvGB6tBXBfXIpVlhMItHmbgEVJ4lT4ngEHwegXLcx3ArXJAqWTC1WyeBv1yBss=
+    - secure: zxqE3f9RpwU7PdIWb6e2NmfBqrxmeTABgfHzjKNEZEpctEWuLF/AU1IwR8/nbQ0Jl51wyGADFfT8ss/ZRCMLiQmjJsDl1CLyiPTGOJbNr+7c5jlcwed9oJutSL0Ix0yij4KT22hyJvvd9wQ3Ire0WQhDUvv+bX38LxaMhOR9gSk=
+notifications:
+  email: false
+script:
+  - RAILS_ENV=test bundle exec rake db:create
+  - RAILS_ENV=test bundle exec rake db:test:prepare
+  - bundle exec rspec spec

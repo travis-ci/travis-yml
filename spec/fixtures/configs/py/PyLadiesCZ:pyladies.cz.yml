@@ -1,0 +1,17 @@
+language: "python"
+python:
+    - "3.6"
+cache: "pip"
+script:
+    - "python pyladies_cz.py freeze"
+env:
+  global:
+    - secure: "N+iAAkw+nVaPyI/yPUr3LeHRlLgbmjcn58768zKdeHqBYjJGB+wLe54yE4a6ed5evT5wabHV6fc2XfYbjkjmWNh7XLbEYqzU1HfelhZogo7VZEL2txkpjx8MM37XDFb2BxXieDuX/Gs0myCJj+eoVNWmD9ia6Y3lKgryJmtdR+qRDrxvLpHrDhJ3bpbd0nk14O6LKQI5SW7fMm9wLx62xb9F94H5hWx/TPRuKq/txuda7eATbiWvsDGfH6TDmJD89DKmMiLdJkVms1BA9wi5fAetf8orsAD+CUdm0QZm368MexIxeRbIUDUkqsFgyQk3UOUny7sc4HyXxO6WBaAE7qsxFeiSTzBvAY0ZH+OfTG8QW26tZy7aGBwcbDWvsFUoZ7egX5GLJ83g14xd2tY63S0iNbKuQUAhz3FEUoCrLCzOeY3kP2q6X12BCYqJkcPw4ylUnQYnHKloeacw52ae1KCwm/JE3wq0/9yQ2NwlEY5QYAAi895Say/BIxMkIdJp8qXa0bIRmKLJlgArtoCEXOdwlMckP2aYS0YLF8dsOQpdvTp0+32dcfeaL8W3Cg9SAgic9yOq0GWH0L6kMkYLQRDj6iZU9mgpuMFkEebuV06BwO0795HB0QrqC2mW+EgpvY0kuSjsDGmloozSx0h4wWGHKQ6i+Ai6tgXxGSvO3Jw="
+deploy:
+    provider: "script"
+    script: "python pyladies_cz.py deploy --no-freeze --push"
+    skip_cleanup: true
+    on:
+        branch: "master"
+        repo: "PyLadiesCZ/pyladies.cz"
+sudo: false

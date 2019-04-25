@@ -2,16 +2,12 @@
 
 
 
-## Type
+## Types
 
-Any of:
+* Hash
+* Array of: String
+* String
 
-* Map (Hash)
-* 
-
-## Flags
-
-None.
 
 
 ## Examples
@@ -28,12 +24,18 @@ cache:
   pip: true
   yarn: true
   edge: true
-  directories: "[ref:strs]"
+  directories: string
   timeout: 1
   branch: string
 ```
 
 ```yaml
-cache: "[ref:strs]"
+cache:
+- string one
+- string two
+```
+
+```yaml
+cache: string
 
 ```

@@ -1,0 +1,22 @@
+language: python
+python:
+- 3.5
+before_install:
+- openssl aes-256-cbc -K $encrypted_8f1589bc8b8c_key -iv $encrypted_8f1589bc8b8c_iv -in secrets.tar.enc -out secrets.tar -d
+- tar xvf secrets.tar
+- mv deploy-key ~/.ssh/deploy-key
+- chmod u=rw,og= ~/.ssh/deploy-key
+- echo "Host github.com" >> ~/.ssh/config
+- echo "HostName github.com" >> ~/.ssh/config
+- echo "IdentityFile ~/.ssh/deploy-key" >> ~/.ssh/config
+- echo "User git" >> ~/.ssh/config
+- git remote set-url origin git@github.com:mozilla/stab-crashes.git
+- git fetch origin -f gh-pages:gh-pages
+install:
+- pip install --upgrade pip
+- pip install "setuptools>=28.6.1"
+- pip install -r requirements.txt
+- pip install -r test-requirements.txt
+script:
+- flake8 .
+- '[ "${TRAVIS_PULL_REQUEST}" = "false" ] && [ "${TRAVIS_BRANCH}" = "master" ] && python generate-data.py && ghp-import -n -p -m "Updates" dist'

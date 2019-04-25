@@ -16,13 +16,13 @@ describe Travis::Yml::Schema::Def::Addon::Homebrew, 'structure' do
                 type: :boolean
               },
               packages: {
-                '$ref': '#/definitions/strs'
+                '$ref': '#/definitions/type/strs'
               },
               casks: {
-                '$ref': '#/definitions/strs'
+                '$ref': '#/definitions/type/strs'
               },
               taps: {
-                '$ref': '#/definitions/strs'
+                '$ref': '#/definitions/type/strs'
               },
               brewfile: {
                 type: :string
@@ -38,7 +38,7 @@ describe Travis::Yml::Schema::Def::Addon::Homebrew, 'structure' do
             ],
           },
           {
-            '$ref': '#/definitions/strs'
+            '$ref': '#/definitions/type/strs'
           },
           {
             type: :boolean

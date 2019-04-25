@@ -1,0 +1,229 @@
+# Control file for Travis CI (http://travis-ci.org)
+# Must be located in the root directory of the Git repository.
+
+# By default, notification emails are sent to the PR creator and commiter.
+notifications:
+  email: false
+
+# We define the job matrix explicitly, in order to minimize the
+# combinations.
+# For OS-X, using an explicit matrix is required, because Travis at
+# this point only has half-baked support for Python on OS-X that does
+# not work. Also, on OS-X, it needs to be invoked with language=generic
+# and an empty 'python' variable in order to prevent that Travis attempts
+# to install Python.
+# TODO: Figure out how specific versions of Python 3.x can be used with OS-X
+
+# When defining the job matrix explicitly, there are Travis environments
+# that produce an additional default job. See these Travis issues:
+#   https://github.com/travis-ci/travis-ci/issues/1228
+#   https://github.com/travis-ci/travis-ci/issues/4681
+#   https://github.com/travis-ci/travis-ci/issues/9843
+# The public Travis does not seem to have this issue anymore,
+# but Travis@IBM does have this issue (as of 9/2018). The workaround for
+# this issue is to define variables globally and to exclude this same
+# variable value in the matrix definition. Experiments have shown that
+# not all variable combinations work. Using a combination of 'language'
+# and 'os' set to the default values works.
+
+# See note about explicit job matrix, above.
+language: ruby
+os: linux
+
+matrix:
+
+  # See note about explicit job matrix, above.
+  exclude:
+    - language: ruby
+    - os: linux
+
+  include:
+    - os: linux
+      language: python
+      python: "2.7"
+      env:
+        - PACKAGE_LEVEL=minimum
+      cache: pip
+    - os: linux
+      language: python
+      python: "2.7"
+      env:
+        - PACKAGE_LEVEL=latest
+      cache: pip
+    - os: linux
+      language: python
+      python: "3.4"
+      env:
+        - PACKAGE_LEVEL=minimum
+      cache: pip
+    - os: linux
+      language: python
+      python: "3.4"
+      env:
+        - PACKAGE_LEVEL=latest
+      cache: pip
+    - os: linux
+      language: python
+      python: "3.5"
+      env:
+        - PACKAGE_LEVEL=minimum
+      cache: pip
+    - os: linux
+      language: python
+      python: "3.5"
+      env:
+        - PACKAGE_LEVEL=latest
+      cache: pip
+    - os: linux
+      language: python
+      python: "3.6"
+      env:
+        - PACKAGE_LEVEL=minimum
+      cache: pip
+    - os: linux
+      language: python
+      python: "3.6"
+      env:
+        - PACKAGE_LEVEL=latest
+      cache: pip
+    - os: linux
+      dist: xenial
+      sudo: required
+      language: python
+      python: "3.7"
+      env:
+        - PACKAGE_LEVEL=minimum
+      cache: pip
+    - os: linux
+      dist: xenial
+      sudo: required
+      language: python
+      python: "3.7"
+      env:
+        - PACKAGE_LEVEL=latest
+      cache: pip
+#    - os: linux
+#      language: python
+#      python: "pypy-5.3.1"  # Python 2.7.10
+#      env:
+#        - PACKAGE_LEVEL=minimum
+#      cache: pip
+#    - os: linux
+#      language: python
+#      python: "pypy-5.3.1"  # Python 2.7.10
+#      env:
+#        - PACKAGE_LEVEL=latest
+#      cache: pip
+    - os: osx
+      language: generic
+      python:
+      env:
+        - PACKAGE_LEVEL=minimum
+        - PYTHON=2
+      cache: pip
+    - os: osx
+      language: generic
+      python:
+      env:
+        - PACKAGE_LEVEL=latest
+        - PYTHON=2
+      cache: pip
+    - os: osx
+      language: generic
+      python:
+      env:
+        - PACKAGE_LEVEL=minimum
+        - PYTHON=3
+      cache: pip
+    - os: osx
+      language: generic
+      python:
+      env:
+        - PACKAGE_LEVEL=latest
+        - PYTHON=3
+      cache: pip
+
+before_install:
+  - env | sort
+
+  # The following statement is a workaround to leave an OS-X job
+  # when running on Linux. That happens on Travis@IBM which does not
+  # have OS-X support but still runs os=osx on Linux.
+  - if [[ "$TRAVIS_OS_NAME" == "osx" && "$_system_type" == "Linux" ]]; then
+      echo "Exiting from OS-X job running on Linux";
+      exit;
+    fi
+
+  # The following statement is a safety net in case the matrix exclusion
+  # does not work for some reason.
+  - if [[ "$TRAVIS_LANGUAGE" == "ruby" ]]; then
+      echo "Exiting from unwanted default Ruby job";
+      exit;
+    fi
+
+  - if [[ "$TRAVIS_BRANCH" == "manual-ci-run" ]]; then
+      export _NEED_REBASE=true;
+    fi
+  - if [[ -n $_NEED_REBASE ]]; then git fetch origin master; fi
+  - if [[ -n $_NEED_REBASE ]]; then git branch master FETCH_HEAD; fi
+  - if [[ -n $_NEED_REBASE ]]; then git rebase master; fi
+  - git branch -av
+
+# commands to install dependencies
+install:
+  - which python
+  - python --version
+  - if [[ "$TRAVIS_BRANCH" == "manual-ci-run" || "$TRAVIS_PULL_REQUEST_BRANCH" == "manual-ci-run" ]]; then
+      export _MANUAL_CI_RUN=true;
+    fi
+  - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then
+      if [[ ${PYTHON:0:1} == '2' ]]; then
+        OSX_PYTHON_PKG=python;
+        OSX_PYTHON_CMD=python;
+      else
+        OSX_PYTHON_PKG=python3;
+        OSX_PYTHON_CMD=python3;
+      fi;
+      which $OSX_PYTHON_CMD || brew install $OSX_PYTHON_PKG;
+    fi
+
+  # Reason for setting up a Python virtualenv on OS-X:
+  # Some Ansible scripts are invoked directly from the cloned Ansible repo
+  # directory, so their hashbang is '/usr/bin/env python'. This requires
+  # that the 'python' command and environment is the desired one. On OS-X,
+  # when installing Python 3, only the 'python3' command invokes Python 3,
+  # but the 'python' command invokes Python 2. Therefore, a virtualenv is
+  # needed in which the desired Python version is available as the
+  # 'python'. command. Travis does not set up a virtualenv on its OS-X
+  # machines, so we need to do that here.
+  - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then
+      pip install virtualenv;
+      VENV=$HOME/virtualenv/$OSX_PYTHON_CMD;
+      virtualenv -p $OSX_PYTHON_CMD $VENV;
+      source $VENV/bin/activate;
+    fi
+
+  - which python
+  - python --version
+  - which pip
+  - pip --version
+  - pip list
+  - make install
+  - pip list
+  - make develop
+  - pip list
+  - pip install python-coveralls
+  - pip list
+
+# commands to run builds & tests
+script:
+  - make check
+  - if [[ -n $_MANUAL_CI_RUN ]]; then make pylint; fi
+  - make test
+  - make build
+  - make builddoc
+
+after_success:
+  - if [[ "$TRAVIS_OS_NAME" == "linux" && "$TRAVIS_PYTHON_VERSION" == "2.7" && "$PACKAGE_LEVEL" == "latest" && -z $_MANUAL_CI_RUN ]]; then
+      coveralls;
+    fi

@@ -1,0 +1,49 @@
+dist: trusty
+language: python
+python: 2.7.13
+
+cache:
+  directories:
+    - node_modules
+    - temp/google-cloud-sdk
+    - browsers
+    - $HOME/.cache/pip
+
+addons:
+  apt:
+    packages:
+      - pulseaudio
+
+env:
+  global:
+    - DISPLAY=:99.0
+  matrix:
+    - BROWSER=chrome  BVER=stable
+    - BROWSER=chrome  BVER=beta
+    - BROWSER=chrome  BVER=unstable
+    - BROWSER=firefox BVER=stable
+
+matrix:
+  fast_finish: true
+
+  allow_failures:
+    - env: BROWSER=chrome  BVER=unstable
+
+before_install:
+  - nvm install 6
+  - nvm use 6
+
+before_script:
+  - npm install
+  - /sbin/start-stop-daemon --start --quiet --pidfile /tmp/cucumber_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -ac -screen 0 1600x1200x16
+  - pulseaudio --start
+
+script:
+  - ./node_modules/.bin/grunt  --verbose
+
+notifications:
+  email:
+    recipients:
+      forward-webrtc-github@webrtc.org
+    on_success: change
+    on_failure: always

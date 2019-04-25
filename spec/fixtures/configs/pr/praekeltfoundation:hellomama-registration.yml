@@ -1,0 +1,75 @@
+language: python
+python:
+  - "2.7"
+  - "3.6"
+addons:
+  postgresql: "9.4"
+services:
+  - postgresql
+install:
+  - "pip install -e ."
+  - "pip install -r requirements-dev.txt"
+before_script:
+  - psql -c 'create database hellomama_registration;' -U postgres
+script:
+  - flake8
+  - py.test
+  - python manage.py makemigrations registrations changes uniqueids vas2nets reports --dry-run | grep 'No changes detected' || (echo 'There are changes which require migrations.' && exit 1)
+
+matrix:
+  include:
+    # Create docker image on merge to develop
+    - python: "2.7"
+      sudo: required
+      dist: trusty
+      services: [docker]
+      env:
+        - IMAGE_NAME=praekeltfoundation/hellomama-registration:develop
+        - REGISTRY_USER=praekeltorgdeploy
+        # REGISTRY_PASS
+        - secure: "cnijgF6DCMJi9D3Hfrh8mSyFEgv8wZZj5BcDKgkEFVWsHVpsLwkM1agiQGKPRzc2Zs+SpDELs3+FtxsgsFkQ6dO2Tl0USMs/t2da3XslEUqntopdM6REm2CqEj+Q0VakchUijF4I9h+OzJR4Kx5NJqWc+1P9enSMOuiaBXpFYYEHV7TlqhTYlXSz3iLURraeD64Hr2CunYJfe0MCfVp6XonzqtZAUbfm81izj7WF16+XekS1DO7xcdBH+Xmc08mYJ8xA3XW9ygnqS8Fa1TYXDv0PwyTEqA1ni/iYf79fS/AdbrPDJkUaTY+RXlYQtNfiSJ+VZO/1yPrborbqkkBAKuVSblXvDZRfm6CbSCiD4xe0yibsQv+1EjcnNbj9rKz+qJHq/XkC4vdF9HCl85eIvsp8pr/XFj/gaRZefhDLTrbmu4O1v4/5UfGqrPi95+Lwe9wsjnibno+aXIB64rU73RP30f4s/7kO7tSUeXwHDfClHK9Xv3Q7NJpDyIbm2vom7xSmkr7S7EJsmyopkYzKx14fE6FG4Uw6gOU4bPRR8f2PTakmJOq4ddPUkBVRfCJLIcu9rr8+cMKBaaOSMvLVwuft/BMYgkMOj10J5j8so0mF1aiGnRvvg/S+ZKwVOrWPGCisbzB/ocDpBQIGGq1AuIND1DAIJvfw5vxrq3gzvXA="
+      before_script:
+        - docker pull "$IMAGE_NAME" || true
+      script:
+        - docker build --tag "$IMAGE_NAME" --cache-from "$IMAGE_NAME" .
+
+      before_deploy:
+        - pip install docker-ci-deploy==0.3.0
+        - docker login -u "$REGISTRY_USER" -p "$REGISTRY_PASS"
+      deploy:
+        provider: script
+        script: dcd --version "$(git rev-parse --short HEAD)" --version-latest "$IMAGE_NAME"
+        on:
+          branch: develop
+
+      # Inherited build steps that we don't want
+      install: []
+      addons: {}
+
+    # Create docker image on new tags
+    - python: "2.7"
+      sudo: required
+      dist: trusty
+      services: [docker]
+      env:
+        - IMAGE_NAME=praekeltfoundation/hellomama-registration
+        - REGISTRY_USER=praekeltorgdeploy
+        # REGISTRY_PASS
+        - secure: "cnijgF6DCMJi9D3Hfrh8mSyFEgv8wZZj5BcDKgkEFVWsHVpsLwkM1agiQGKPRzc2Zs+SpDELs3+FtxsgsFkQ6dO2Tl0USMs/t2da3XslEUqntopdM6REm2CqEj+Q0VakchUijF4I9h+OzJR4Kx5NJqWc+1P9enSMOuiaBXpFYYEHV7TlqhTYlXSz3iLURraeD64Hr2CunYJfe0MCfVp6XonzqtZAUbfm81izj7WF16+XekS1DO7xcdBH+Xmc08mYJ8xA3XW9ygnqS8Fa1TYXDv0PwyTEqA1ni/iYf79fS/AdbrPDJkUaTY+RXlYQtNfiSJ+VZO/1yPrborbqkkBAKuVSblXvDZRfm6CbSCiD4xe0yibsQv+1EjcnNbj9rKz+qJHq/XkC4vdF9HCl85eIvsp8pr/XFj/gaRZefhDLTrbmu4O1v4/5UfGqrPi95+Lwe9wsjnibno+aXIB64rU73RP30f4s/7kO7tSUeXwHDfClHK9Xv3Q7NJpDyIbm2vom7xSmkr7S7EJsmyopkYzKx14fE6FG4Uw6gOU4bPRR8f2PTakmJOq4ddPUkBVRfCJLIcu9rr8+cMKBaaOSMvLVwuft/BMYgkMOj10J5j8so0mF1aiGnRvvg/S+ZKwVOrWPGCisbzB/ocDpBQIGGq1AuIND1DAIJvfw5vxrq3gzvXA="
+      before_script:
+        - docker pull "$IMAGE_NAME" || true
+      script:
+        - docker build --tag "$IMAGE_NAME" --cache-from "$IMAGE_NAME" .
+
+      before_deploy:
+        - pip install docker-ci-deploy==0.3.0
+        - docker login -u "$REGISTRY_USER" -p "$REGISTRY_PASS"
+      deploy:
+        provider: script
+        script: dcd --version "$(git tag -l --points-at HEAD)" --version-semver --version-latest "$IMAGE_NAME"
+        on:
+          tags: true
+
+      # Inherited build steps that we don't want
+      install: []
+      addons: {}

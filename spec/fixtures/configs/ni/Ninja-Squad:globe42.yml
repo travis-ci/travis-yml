@@ -1,0 +1,50 @@
+language: java
+
+dist: trusty
+
+addons:
+  chrome: stable
+
+services:
+  - postgresql
+
+before_install:
+  - sudo apt-get update
+  - sudo apt-get install language-pack-fr
+  - sudo /etc/init.d/postgresql stop
+  - sudo /etc/init.d/postgresql start 9.2
+
+before_script:
+  - psql -f backend/database/database.sql -U postgres
+
+jdk:
+  - oraclejdk8
+
+# Gradle cache
+# see https://docs.travis-ci.com/user/languages/java/#Caching
+before_cache:
+  - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+  - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+
+cache:
+  directories:
+    - $HOME/.gradle/caches/
+    - $HOME/.gradle/wrapper/
+    # NPM and node_modules cache
+    # see https://docs.travis-ci.com/user/languages/javascript-with-nodejs/#Caching-with-npm
+    - "frontend/.gradle/npm"
+    # do not cache "frontend/node_modules", because it's fragile and makes the build unstable
+  # Yarn cache
+  # see https://docs.travis-ci.com/user/languages/javascript-with-nodejs/#Caching-with-yarn
+    - "frontend/.gradle/yarn"
+    - $HOME/.cache/yarn
+
+script:
+  - ./gradlew check jacocoTestReport
+
+after_success:
+# upload code coverage to codecov.io
+- cd frontend
+- npm run codecov
+# check bundle sizes
+- npm run bundlesize

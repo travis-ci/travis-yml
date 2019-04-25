@@ -1,0 +1,59 @@
+language: node_js
+node_js:
+  - '8'
+sudo: false
+dist: trusty
+addons:
+  chrome: stable
+cache:
+  yarn: true
+env:
+  global:
+    - JOBS=1
+stages:
+  - Tests
+  - Additional Tests
+  - Canary Tests
+  - name: Deploy
+    if: branch = master AND type = push
+jobs:
+  fail_fast: true
+  allow_failures:
+    - env: EMBER_TRY_SCENARIO=ember-canary
+  include:
+    - stage: Tests
+      name: Tests
+      install:
+        - yarn install --non-interactive
+      script:
+        - yarn lint:js
+        - ember test
+    - name: Floating Dependencies
+      script:
+        - ember test
+    - stage: Additional Tests
+      node_js: 10
+      env: EMBER_TRY_SCENARIO=ember-lts-2.12
+    - env: EMBER_TRY_SCENARIO=ember-lts-2.16
+    - env: EMBER_TRY_SCENARIO=ember-lts-2.18
+    - env: EMBER_TRY_SCENARIO=ember-release
+    - env: EMBER_TRY_SCENARIO=ember-beta
+    - env: EMBER_TRY_SCENARIO=ember-canary
+    - env: EMBER_TRY_SCENARIO=ember-default
+before_install:
+  - curl -o- -L https://yarnpkg.com/install.sh | bash
+  - export PATH=$HOME/.yarn/bin:$PATH
+install:
+  - yarn install --no-lockfile --non-interactive
+script:
+  - node_modules/.bin/ember try:one $EMBER_TRY_SCENARIO
+branches:
+  except:
+    - "/^v\\d+\\.\\d+\\.\\d+$/"
+deploy:
+  provider: heroku
+  api_key:
+    secure: tqUSZtyOHwNSaZRu4YaYmbqKULEL4WmrxhTgecpSvMIhG0jcVrnEdPXYgxnxP3jVHxsHeQchgq8/Jkp7KKDj4d0sYOIsOq2rXRrphm1FW3qFKeEj/weygg4winwp8LFtS5Pbsp6CZaLIWfe1KYZeK/1TQQDz/F9Yt6D6X6OODQMA3peAbu1PJ3CmdTpjNG/n9C1Rzi4dyHduKICDbbP5VJf8mM5C6DsKkPwyIKx4tOMfHhurvVT5Swn+1QMQsyDx+5stIv9zrPNlfN6Ci+u0n0IAQHX5kWZd5hWhrDee1RsdwoAH8WZxoBxs0t48FIHVYpuqjAdhJVXj5/GPNjulUrRACMlP/8wgiCBK9g8ludpQOJE2XLl6fEifxFqEhc+HELfNFrjaQIUjGGGOVDKMuPsvG2VZlJlgKWuWYOFudd8iyofuaA3XxaJ3sqSzHSs3L72zRedA1mIZWkwyk3krbPQtWydFlhwLbwgLlMO6u7JGkokiS0v2z9EEfhBmAel9X4WIUTvpFIC9BdFaW28tYkIbxFZs32DVys+Jq99G0HISZ38WABpMclZn55AUc3GEQ5P23aOy6Stil6PQGZ2JhpAlTqfo8AU+OUo9svjkep9mAXbhwI5fW+GMWlYtv29beWdPO7eEjhN1Zu96juUgx8FkdzZaP8+jeGEKJ1xfCdg=
+  app: ember-oembed-demo
+  on:
+    repo: mike-north/ember-oembed

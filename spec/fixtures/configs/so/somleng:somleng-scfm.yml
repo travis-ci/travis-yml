@@ -1,0 +1,42 @@
+language: ruby
+cache: bundler
+addons:
+  chrome: stable
+  postgresql: '10'
+  apt:
+    packages:
+    - postgresql-10
+    - postgresql-client-10
+env:
+  global:
+  - AWS_REGION=ap-southeast-1
+  - PGPORT=5433
+  - CC_TEST_REPORTER_ID=d99f01c52006e27c30fcd5f4f2840fa04597d4eca56cbbc36a9f795d8466ee3f
+  # AWS Deploy Credentials
+  - secure: nFrgm72fvqLHDUHWXsIukcImvWHDurR0TfPwdWSYJziMjirJVOAkWR4IUX9zlRFpr0CPiCfRbxsHPxCXbAGBhF7Qy7VpkkhZXCw5mOmiwseTdYl5ic5qbM4rGzmAAMxHbYfr2mL38dfZxvHSdkptD7203IU8G4deSnNT2YULZNpLtDYPWybZhAQ4qgxE3Vcywb4S7ACJDjUcm7X5TB4t7z+7yugIwOxUbpzfvuZqVF0s2Tnr0db4h/Dj7WKfw2fMJIz9yT7CjRRYf4A2FNMECWwgMQz5Bx3kBsG2QzrIvbbzzAvCxexLrm/ZK8kmdqW1WyJcsEz02WcNjwy3o62YJegAaAh7D4mi9GNru0TS9SczChEdR70nty1Xipm0b/zZhl/VUAFFsg0ZGCiraArr2flpkWMkO05EkWJytTKMwLZOSs+D162gB91DC+c3yDfzoVsZuFNmyOO6o7yJm5r+h0mziW83U0nSDCeteJgB4SLcXRhHSEpgRJvNZE6pTL7+ko/g3riS7/AlGwW2zchTmuvXOKKdYT5LwzTzi+wxONF2BDkbc5qh8JVRyUmTurX3lGj6GTK0RjcLVAJu89B+iRsiUfWEEtp2g8+jU9Val/tjfQPJ41dZNzZqtqDACvN5P/DU6exhLyx82S6eA24ou5m9UPnsT2emutUGXN3y/Fc=
+before_install:
+- curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64
+  > ./cc-test-reporter
+- chmod +x ./cc-test-reporter
+- gem install bundler
+before_script:
+- google-chrome-stable --headless --disable-gpu --no-sandbox
+- psql -c 'create database somleng_scfm_test;' -U travis
+- "./cc-test-reporter before-build"
+after_success:
+- "./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT"
+deploy:
+- provider: elasticbeanstalk
+  region: ap-southeast-1
+  app: somleng-scfm
+  env: somleng-scfm-webserver
+  bucket_name: deploy.somleng.org
+  on:
+    branch: master
+- provider: elasticbeanstalk
+  region: ap-southeast-1
+  app: somleng-scfm
+  env: somleng-scfm-worker
+  bucket_name: deploy.somleng.org
+  on:
+    branch: master

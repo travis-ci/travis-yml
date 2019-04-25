@@ -1,0 +1,68 @@
+branches:
+ except:
+  - /appveyor/
+before_install:
+ - . port/travis-ci/travis-functions.sh
+ - init_travis
+ - wrapper init_env_vars
+ - wrapper init_perl
+ - wrapper init_apt
+ - wrapper install_non_perl_dependencies
+ - wrapper install_perl_testonly_dependencies
+ - wrapper install_perl_58_dependencies
+ - wrapper install_cpan_hacks
+ - wrapper install_webserver_dependencies
+ - wrapper install_selenium
+install:
+ - wrapper install_perl_dependencies
+before_script:
+ - wrapper init_cgi_config
+ - wrapper fix_cgis
+ - wrapper init_webserver_config
+ - wrapper start_webserver
+ - wrapper start_xserver
+ - wrapper init_webserver_environment
+ - wrapper start_selenium
+ - wrapper init_data
+script:
+ - perl Makefile.PL && make test HARNESS_OPTIONS=j4
+after_script:
+ - make distcheck
+language: perl
+dist: trusty
+matrix:
+  include:
+## Fastest results (5-6 min)
+    - perl: "5.14"
+      env: USE_MODPERL=1 USE_SYSTEM_PERL=1
+      dist: precise
+## Also fast
+    - perl: "5.18"
+      env: USE_MODPERL=1 USE_SYSTEM_PERL=1
+      dist: trusty
+## Slowest both, should also be in the first group
+    - perl: "5.20-shrplib"
+      env: USE_MODPERL=1
+      dist: precise
+    - perl: "5.20-shrplib"
+      env: USE_MODPERL=1
+## Perl with no dot in @INC
+    - perl: "5.26"
+      env: BBBIKE_TEST_SKIP_MODPERL=1 BBBIKE_TEST_GUI=1
+    - perl: "5.20"
+      env: BBBIKE_TEST_SKIP_MODPERL=1 BBBIKE_TEST_SKIP_MAPSERVER=0
+    - perl: "5.18"
+      env: BBBIKE_TEST_SKIP_MODPERL=1 BBBIKE_TEST_GUI=1
+    - perl: "5.10"
+      env: BBBIKE_TEST_SKIP_MODPERL=1
+    - perl: "5.8"
+      env: BBBIKE_TEST_SKIP_MODPERL=1
+    - perl: "5.14"
+      env: USE_MODPERL=1 USE_SYSTEM_PERL=1
+    - perl: "5.24"
+      env: BBBIKE_TEST_SKIP_MODPERL=1
+  allow_failures:
+## XXX TODO: bbbike-org-download.t currently fails because of ssl issues
+    - perl: "5.14"
+      env: USE_MODPERL=1 USE_SYSTEM_PERL=1
+      dist: precise

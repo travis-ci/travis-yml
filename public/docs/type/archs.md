@@ -2,17 +2,20 @@
 
 The architectures that will be selected for the build environments.
 
-## Type
+## Types
 
-Any of:
+* Array of: String (known)
+* String (known)
 
-* Sequence (Array)
-* Enum (known String)
+## Values
+
+* `amd64`
+* `ppc64le`
 
 ## Flags
 
-* Expand: This is a [matrix expansion key](/matrix_expansion).
 
+* expand
 
 ## Examples
 

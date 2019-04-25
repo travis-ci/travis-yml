@@ -1,0 +1,16 @@
+language: ruby
+
+services:
+  - docker
+
+before_script:
+  - make build
+  - docker-compose up -d web
+  - sleep 15
+  - docker ps -a
+
+script:
+  - make test
+
+after_script:
+  - docker-compose down

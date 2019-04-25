@@ -1,0 +1,32 @@
+language: node_js
+
+node_js:
+  - "node"  # Current - Latest features
+  - "10"    # LTS - Recommended for most users
+
+matrix:
+  fast_finish: true
+
+install:
+  - yarn install
+
+script:
+  - echo -e "$(curl --silent https://raw.githubusercontent.com/FantasticFiasco/logo/master/logo.ansi)"
+  - if [ "$TRAVIS_NODE_VERSION" == "node" ]; then yarn coverage:publish; fi
+  - if [ "$TRAVIS_NODE_VERSION" != "node" ]; then yarn test; fi
+  - yarn lint
+
+deploy:
+  - provider: npm
+    email: mattias.kindborg@gmail.com
+    api_key:
+      secure: v4vvBvFXBWsImXPJmMz2mc70y+6mju8LDwqJ7Nw8P5i6KhcbVuLuOJYE9Fn08HgnjoGVRUo18xFJeE5GyEEUcFPUZ3gZw5wWM+vnA65sj/AA1hkZKIwRKFL0Mq94tKve1Na4hUVGq7Og5Kw9YI06otjkC+blEVXjIegxJOF406atZuFclagKNIsIDmtec5zO3B3s056FgrpgoEhmKxZgNuO1Ygau2AqtOmie8eCCj43mieUYj2Ml/LA1uiYu8OUc4rX6uC4cjY1exb+GcEvbOiEp08D2BtsqE88S0zz0VWUjyXpTkUbXI6Sg1Si6bGYLwT/W6/Ymb8C7fV6JLa0YJ/L2YWaIuaRWGHY1BmjiU4VP7ez/cq7PQSNTMPwj4ostbRaXNzOmj0g9xOP4He254Qn3hI6iag7iy0KxjAefjbTyubSTkqCiijc2Rupnu7d/bclkfRe5KCJvOWCBIrzZgJS+fx3XmGEYeNnEgsEM/FNvB6y/k7UAAPGmqO7kHw/kplzYme6Y3/QIcKt4c/YJR+vG+PGLmuk29mfCFVZXpYg/V4QrwdVHOHZ1L9hYS+6Sx1vfqEiNs/19oKdzkQP4E8UZCuy+vV1DCkSTNWgDAysI47QCNKLlQ5M0Qc1hR4PHTmnA0pL4e55g5ldhH3M1QvY+HLkxIilGWdyiQ8aVYH0=
+    skip_cleanup: true
+    on:
+      tags: true
+  - provider: releases
+    name: Release $TRAVIS_TAG
+    api_key:
+      secure: fZ700HmE2w9Uy15Z+Dou756Qf/s6yvCDAs//auNGn7Nkw1gpyxpOj8Dbbk2k2iMfKB0KWm7NRpT0g72xXkmZ8/IBhgJIvEeThRi6UgR2lZ1DDzU7kmDYAyIld0RG4AInam1xVNoi3uUQnVd5kTjUditbBb88iP4MFlJkJH9XuE6XVNClH56wDnmDBjSSrfdHTgNfzsODy67FylDsh03Er0TloR3OmuNIA5NGN+G1cxHTK4qOW0oaoEQSrzZSG97dwJ5lls4rb2cfRNu9xXPQCXqvbeNkPoalM3Rbz9G1z9ugWptojfdaS6XSuHWAUme8CI7nv0ZEsTQOxL1NUX/8GVmt4+fNLTy7aSSnwkggZzxAx9ZTWtpwX7S2787dewPyrBkoZe+q15ALjq8upm6ww2CDVndWkWlAeITx3FGVa8wSM5NE8+wm4PzLEMQ55pQgnz68SrCCS07KJFRSP5p9qj/vcKi0+9C8X1KCgOA/Wg804U1+HFymfBNQADqq9FQU99q8f7HI60vTprO1wvR9GzAL4/vAxFkh8bo1ttdkshOmgMp3rYKnAp/rkSIxUM61kCwJW1Qk6E9xL72l2rp9nCbyRhw2AaBYq5p75QqcxUp5w5wpXjp8/KX+sYLsaLxtXnVj/f1skYZxIZ1G7SFcQb9o6NieTJZ7Ir9JhHvravM=
+    on:
+      tags: true

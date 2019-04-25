@@ -1,0 +1,118 @@
+language: python
+sudo: required
+dist: trusty
+
+cache:
+  directories:
+  - eggs
+  - .npm
+addons:
+  apt:
+    packages:
+    - oracle-java9-set-default
+    - bsdtar
+    - graphviz
+    - redis-server
+env:
+  global:
+  - BOTO_CONFIG=/bogus/value # see: https://github.com/boto/boto/issues/3263
+  - secure: |-
+      j9Ako+NzgzqQH8Vj13m/HyAad3nwM9YW/Wdjox7MsSV0xb75G0kuQWf6+hvIi
+      Nw10G8z7JQB3Wdh9CWaCf8Lqo2o72NmU1Gm3ZmJWFkHS1PNI7Hlnn80oDddR5
+      ruf3fPtHJGAC6cdID4Y+pqqYCnvhAh+BXRLNzve8W8GP9FJJjnK5YDMWv9Bo6
+      CxTqiSkQvNogvaNGTHOqEzsdMr8Yan/9Ev4bte+jWmkprBUFVpVbcgJPOM5Vr
+      XTF2Aum8lVBYJeG6PtK+F8IpcobpLfnPT38EY5P7nICOoWqdgwGttNPcM7nK+
+      +bgpfoonZ7BUUHRf5Dudm5jc3mZGSM0iUAq1jbUjnqHClQUXD+mdcITRE838t
+      iIUj+ydOEBVaUNBo76uYO7m79cqJeRpESX9FsikvTBfqE3/kt+CJyxOHewDiS
+      Wm594M0LAuLSMcaq9Fl9qQM5LkMYIHe+c9uMTxSCYRkE4EcY8qjyynUXmrJdn
+      jPbqH0vvCY6JosvSjFbm8k8Csh3QLhcUE2JuNypPRj/Hzo7F8I1FF5zZLMaWl
+      Dxa10WUqDgU8oP2POzWiQGuakECkGK8Om8QjVhvBdi6vVwgZXG5vF3CunVzBR
+      Q6baeRBgyeLqOsnqiC9japGKOhYOz1Tta4P679VBurzXaUsmboumARSEGDhpN
+      fXLT/z+xeiLw=
+  - secure: |-
+      N/IgA/htX86U+Tk0+RI15bWKCAEvg2/UuEjWzINRwlrTkPiwqOQdoJ8/DWdDW
+      W2qU5a4zrBbS5ZlhHxGcLObsS6grsoscPh8b+sfSTD53YFlDMWfmmDABUVwEl
+      gwm4OETRBg2yBkdMi6rusQIuBy/iU1K6B3jv7kC4nYor0ps1r2/QO8VgrTgWt
+      J62eRf7kp/EY2k8KBidJtj+ljinHQdBtgzu78QyNBUueLwzme6zZiH9EGMRj5
+      Q+sD/Wn+oM09vjsZZjDAWPNVNo+Lvs1M7DsVWfZrVR7+oLnCTGetYpp/2EC5b
+      XEd6CnHO7NlHecbuqvr/GyN+55GOSPJxLnRKURGhZwpRQwGr4Apy6URSE7SDI
+      kZ6fhrDrC0/eiUlFMAaWiegkojTiWBRmeEj9O9MSmLXFMXQGiY3YC6ukj4QS3
+      iKuXgPXH7S9lj8kTF2lNaoqcDw4TGU0i/cQv0BEqsSTKoxNuQhev0sqz8jv87
+      8SYtCTI1/1gheYjFhdV0aGdsn6JuJirNWmr5Ebb15IpMXKMvq6H491qMJFYCJ
+      C0cq1ad+T3gAsxRdvIgWrU86QMLNxlgyNW+eijTZH5XDvYtVjBovyuf2zZ2P4
+      7F+UQNsSLGGLVORcsmBG7ByCMYljVk8i14rWonrXVjPP1fuwIp2AIZzNK6KrJ
+      tQzLeb5gEy3A=
+  - BOTO_CONFIG=tmp/bogusvalue
+  - JAVA_HOME=/usr/lib/jvm/java-9-oracle
+  - ES_VERSION=5.6.1
+  - ES_DOWNLOAD_URL=https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-${ES_VERSION}.deb
+  - PATH="/usr/share/elasticsearch/bin:/usr/lib/postgresql/9.3/bin:$PATH"
+  - ES_JAVA_OPTS="-Xms2g -Xmx2g"
+
+matrix:
+  include:
+  - python: '3.4.3'
+    env: BROWSER=Chrome
+  - python: '3.4.3'
+    env: BROWSER=
+before_install:
+- postgres --version
+- initdb --version
+- nvm install 6
+- node --version
+- npm config set python /usr/bin/python2.7
+- curl -O  ${ES_DOWNLOAD_URL} && sudo dpkg -i --force-confnew elasticsearch-${ES_VERSION}.deb && sudo service elasticsearch stop
+- pip install -U zc.buildout setuptools redis
+- gem install compass
+install:
+- buildout bootstrap
+- bin/buildout -c buildout-travis.cfg || (echo "Retrying buildout" && bin/buildout
+  -c buildout-travis.cfg)
+- sudo chown -R travis /etc/elasticsearch
+
+before_script:
+- |
+  if test -n "$BROWSER"; then
+    CONNECT_URL=https://saucelabs.com/downloads/sc-4.4.4-linux.tar.gz
+    CONNECT_DOWNLOAD=sc.tar.gz
+    SC_READYFILE=sauce-connect-ready-$RANDOM
+    SC_LOGFILE=$HOME/sauce-connect.log
+    SC_PIDFILE=$HOME/sauce-connect.pid
+    curl $CONNECT_URL > $CONNECT_DOWNLOAD
+    mkdir sc
+    tar -zxf $CONNECT_DOWNLOAD --strip 1 --directory sc
+    sc/bin/sc --readyfile $SC_READYFILE \
+      --logfile $SC_LOGFILE \
+      --pidfile $SC_PIDFILE \
+      --tunnel-identifier $TRAVIS_JOB_NUMBER \
+      --user $SAUCE_USERNAME --api-key $SAUCE_ACCESS_KEY > /dev/null &
+    while test -f "$SC_PIDFILE" && test ! -f "$SC_READYFILE"; do sleep .5; done
+  fi
+script:
+- if test -z "$BROWSER"; then npm test; fi
+- if test -z "$BROWSER"; then bin/test -v -v --timeout=400 -m "not bdd"; fi
+- |
+  if test -n "$BROWSER"; then
+    test -f "$SC_PIDFILE" && bin/test -v -v --timeout=400 -m "bdd" --tb=short \
+      --splinter-implicit-wait 20 \
+      --splinter-webdriver remote \
+      --splinter-remote-url "http://$SAUCE_USERNAME:$SAUCE_ACCESS_KEY@localhost:4445/wd/hub" \
+      --splinter-socket-timeout 300 \
+      --browser-arg tunnel-identifier "$TRAVIS_JOB_NUMBER" \
+      --browser-arg-int build  "$TRAVIS_BUILD_NUMBER" \
+      --browser-arg-int idleTimeout 300 \
+      --browser-arg name "$TRAVIS_REPO_SLUG $TRAVIS_BRANCH $TRAVIS_COMMIT" \
+      --browser-arg browser "$BROWSER" \
+      --browser-arg platform "Linux"
+  fi
+after_script:
+- |
+  if test -f "$SC_PIDFILE"; then
+    SAUCE_JOB_ID=`grep -m 1 /session/ "$HOME/sauce-connect.log" | cut -d / -f 7`
+    SAUCE_PASSED=`((TRAVIS_TEST_RESULT == 0)) && echo true || echo false`
+    curl -H "Content-Type:text/json" -s -X PUT -d "{\"passed\": $SAUCE_PASSED}" \
+      "http://$SAUCE_USERNAME:$SAUCE_ACCESS_KEY@saucelabs.com/rest/v1/$SAUCE_USERNAME/jobs/$SAUCE_JOB_ID" > /dev/null
+    echo "Sauce test page https://saucelabs.com/tests/$SAUCE_JOB_ID"
+    kill $(cat "$SC_PIDFILE")
+    wait $(cat "$SC_PIDFILE")
+  fi

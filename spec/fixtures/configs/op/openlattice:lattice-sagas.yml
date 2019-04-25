@@ -1,0 +1,28 @@
+#
+# Travis CI
+# A distributed continuous integration service used to build and test projects hosted at GitHub.
+#
+# https://docs.travis-ci.com/
+# https://docs.travis-ci.com/user/getting-started
+# https://docs.travis-ci.com/user/customizing-the-build
+# https://docs.travis-ci.com/user/languages/javascript-with-nodejs
+#
+sudo: false
+language: node_js
+node_js:
+  - "10"
+
+cache:
+  directories:
+    - node_modules
+
+before_script:
+  - npm run lint
+  - npm run flow
+  - npm run test:travis
+
+script:
+  - npm run build:prod
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)

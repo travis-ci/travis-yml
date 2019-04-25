@@ -1,0 +1,21 @@
+language: node_js
+cache:
+  directories:
+    - ~/.npm
+install:
+  - npm ci
+notifications:
+  email: true
+node_js:
+  - '10'
+before_script:
+  - npm prune
+script:
+  - npm test
+  - echo "Running unit tests again"
+  - npm test
+after_success:
+  - npm run semantic-release
+branches:
+  except:
+    - /^v\d+\.\d+\.\d+$/

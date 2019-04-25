@@ -1,0 +1,20 @@
+language: ruby
+cache: bundler
+
+addons:
+  chrome: stable
+  postgresql: "9.6"
+
+before_install:
+  - wget "https://chromedriver.storage.googleapis.com/73.0.3683.68/chromedriver_linux64.zip"
+  - unzip chromedriver_linux64.zip
+  - rm chromedriver_linux64.zip
+  - mv chromedriver /home/travis/bin/
+
+script:
+  - bin/rails db:setup test:full
+
+env:
+  secure: KhzvCYgAuP5G/6gnHrYLVa/XJ3oFPAXUtsM/HqpY9U+TKXmp/mw3ktAgYBu5ydQCkjQd6mNOB2z42RC6jfJh8LKoT84IB4Iz5v0nmPuSal5QMYd8culUFH+B/9olrekYFb2xVuyCzv2Vvi0dS33nE1yrLCtayVt/G7HtQ2LvNhg=
+  RAILS_MAX_THREADS: 1
+  WEB_CONCURRENCY: 0

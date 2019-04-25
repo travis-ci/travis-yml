@@ -1,0 +1,58 @@
+dist: precise
+
+language: php
+
+git:
+  depth: 1
+
+php:
+  - 5.6
+  - 7.1
+  - 7.2
+
+env:
+  global:
+    - PATH=$PATH:/home/travis/.composer/vendor/bin:$TRAVIS_BUILD_DIR/vendor/bin
+    - COMPOSER_MEMORY_LIMIT=2G
+
+install:
+  - composer self-update
+  - composer install
+
+before_script:
+  # Install apache just to have the ab command.
+  - sudo apt-get install apache2
+  # Set sendmail so drush doesn't throw an error during site install.
+  - echo "sendmail_path=`which true`" >> `php --ini | grep "Loaded Configuration" | awk '{print $4}'`
+  - run drupal:site-install
+  - drush --root=$PWD/build --debug runserver :8888 > ~/debug.txt 2>&1 &
+  - sleep 4s
+
+script:
+  - ./vendor/bin/grumphp run
+
+after_success:
+  - cd $TRAVIS_BUILD_DIR/build
+  - drush dl zen mothership bootstrap
+  - drush vset theme_default bartik
+  - ab -n 500 -kc 10 http://127.0.0.1:8888/
+  - drush vset theme_default zen
+  - ab -n 500 -kc 10 http://127.0.0.1:8888/
+  - drush vset theme_default mothership
+  - ab -n 500 -kc 10 http://127.0.0.1:8888/
+  - drush vset theme_default atomium
+  - ab -n 500 -kc 10 http://127.0.0.1:8888/
+  - drush en realistic_dummy_content devel -y
+  - drush en devel_generate -y
+  - drush generate-content 50
+  - drush vset theme_default bartik
+  - ab -n 500 -kc 10 http://127.0.0.1:8888/
+  - drush vset theme_default zen
+  - ab -n 500 -kc 10 http://127.0.0.1:8888/
+  - drush vset theme_default mothership
+  - ab -n 500 -kc 10 http://127.0.0.1:8888/
+  - drush vset theme_default atomium
+  - ab -n 500 -kc 10 http://127.0.0.1:8888/
+
+notifications:
+  email: false

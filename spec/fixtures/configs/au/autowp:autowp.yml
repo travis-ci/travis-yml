@@ -1,0 +1,37 @@
+sudo: required
+language: generic
+services:
+  - docker
+
+addons:
+  sonarcloud:
+    organization: "autowp-github"
+    token:
+      secure: $SONARCLOUD_TOKEN
+
+before_install:
+  - docker pull $DOCKER_REPO || true
+  - docker build --cache-from $DOCKER_REPO -t $DOCKER_REPO . || travis_terminate 1;
+  - docker-compose -f docker-compose-test.yml up -d || travis_terminate 1;
+  - docker exec -it autowp_test_web bash -c "waitforit -host=autowp_test_mysql -port=3306 -timeout=60" || travis_terminate 1;
+  - docker exec -it autowp_test_web bash -c "waitforit -host=autowp_test_goautowp -port=80 -timeout=60" || travis_terminate 1;
+
+script:
+  - docker exec -it autowp_test_web sh -c "./install-dev-db.sh" || travis_terminate 1;
+  - docker exec -it autowp_test_web sh -c "./install-dev.sh" || travis_terminate 1;
+  - docker exec -it autowp_test_web sh -c "./vendor/bin/security-checker security:check composer.lock"
+  - docker exec -it autowp_test_web sh -c "./vendor/bin/phpcs --encoding=utf-8" || travis_terminate 1;
+  - docker exec -it autowp_test_web sh -c "./vendor/bin/phpcf module" || travis_terminate 1;
+  - docker exec -it autowp_test_web sh -c "./composer.phar phpmd" || travis_terminate 1;
+  - docker exec -it autowp_test_web sh -c "php -dzend_extension=xdebug.so -dmemory_limit=768M vendor/bin/phpunit --log-junit ./logs/junit.xml --coverage-clover ./logs/clover.xml" || travis_terminate 1;
+  - docker cp autowp_test_web:/app/logs/junit.xml junit.xml || travis_terminate 1;
+  - docker cp autowp_test_web:/app/logs/clover.xml clover.xml || travis_terminate 1;
+  - sonar-scanner || travis_terminate 1;
+
+after_success:
+  - docker exec -it autowp_test_web bash -c "./vendor/bin/coveralls -v"
+  - docker exec -it autowp_test_web bash -c "./vendor/bin/test-reporter -v --coverage-report=./logs/clover.xml"
+  - if [ "$TRAVIS_BRANCH" == "master" ]; then
+    docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
+    docker push $DOCKER_REPO;
+    fi

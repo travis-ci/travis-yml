@@ -1,0 +1,38 @@
+sudo: false  
+language: java    
+cache:  
+    directories:  
+        - $HOME/.m2  
+
+# TODO we start xvfb separately (instead of only using xvfb-run for mvn install, because during "deploy" the tests are currently executed again, which should be avoided
+before_script:
+  - "export DISPLAY=:99.0"
+  - "sh -e /etc/init.d/xvfb start"
+  - sleep 3 # give xvfb some time to start
+  
+install: true
+
+script: mvn install -U
+
+after_success:
+  - find -name '*.zip' #DEBUG
+  - bash <(curl -s https://codecov.io/bash)
+
+# based on https://blog.travis-ci.com/2017-03-30-deploy-maven-travis-ci-packagecloud/
+deploy:
+  - provider: script
+    script: "./deploy.sh"
+    skip_cleanup: true
+    on:
+      repo: btc-ag/service-idl
+      all_branches: true
+  - provider: releases
+    api_key:
+      secure: sBBKOHsfxDuoMzjoqGAh3Ps6BUL0/3YuWYQKofYexzNYGffCiDWNaW2tX49MwIVzNZEbIHgi1m1e7gcqJ66RhfypyATaAA4N8jaT9QYI8l/SH73ZEuCnknf1J4vNyJi3Ml5cUWvFrrIJBBok7WX7HFofGXiOozJ9PcGJ8EknRxeMQXpOSXFztOIRUraDm30oh7nBEvTGjW0Pl0sG3d771Ez9C163hbcatvsihfJt+/7K0pwz77fM4nLRnLQcktrSou1phbeg064zRU4PAPm7iozxHfSKLX+/Ci6+IHiFiSbBVYi4MauP1Xw2nvcXWKUbahTGS3DCjKRTrL53OFOy0Qc1Hk0nGBuZqtPJ/EvV7f4FJJ1Y9Lu769YcFoB20ZnNnwsvtiSkdZO5w5Jwi9VWmInV6QOqc0RuhH7La+f4gD0SoB845tEADYLqYurITif5lnJEE+Q+MgbdcbmyVQU+4smj03gRcL9KIm8WMWuwCODr5IhsvA6EYO9ElGgpNjhTkOTBpaR/LWIz570syYHCEyHw8eqo/78roHy6+5MHoFZZwA0Ok+0Jw8HN6i78s5vQKJQXWEDNqyl/znuQ1dd1D+gh3C5BscsmHNz8iFoxrt2iFYkupRIL6Lnuu+d5ve8T9tDUCA2wZHqPlDagI/H/NvrUDgu8p1Zb4QH5UDo/3eE=
+    file_glob: true
+    file: 
+        - "${TRAVIS_BUILD_DIR}/com.btc.serviceidl.plainjava/target/com.btc.serviceidl.plainjava-*.jar"
+    skip_cleanup: true
+    on:
+      repo: btc-ag/service-idl
+      tags: true

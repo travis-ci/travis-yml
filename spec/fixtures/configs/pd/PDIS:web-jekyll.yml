@@ -1,0 +1,38 @@
+jobs:
+  include:
+##### translate stage - Check if there have articles need to translate #####
+    - stage: translate
+      if: commit_message !~ /(auto translate)|(update tracks.json)/
+      language: node_js
+      node_js: 8.9.1
+      script:
+        - git remote set-url origin https://$GITHUB_TOKEN@github.com/pdis/web-jekyll
+        - git checkout master
+        - npm install
+        - node articles_translate.js
+        - git config --global user.email "auto_translate@pdis.tw"
+        - git config --global user.name "auto_translate"
+        - git add .
+        - git commit -m 'auto translate' --allow-empty
+        - git push origin master
+      before_install:
+      - openssl aes-256-cbc -K $encrypted_2fb15357d122_key -iv $encrypted_2fb15357d122_iv
+        -in GCP.json.enc -out GCP.json -d
+
+##### deploy stage - Deploy to gh-pages #####
+    - stage: deploy
+      if: commit_message ~= /(auto translate)|(update tracks.json)/
+      rvm: 2.4.1
+      script:
+        - bundle exec jekyll build
+      deploy:
+        provider: pages
+        skip_cleanup: true
+        github_token: "$GITHUB_TOKEN"
+        local_dir: _site
+        keep_history: true
+env:
+  global:
+    - secure: LADl6lzwBcY8haGEt+ag+Dn88VxsBAEMC7d+YArmpBLmmPOgystf7tCzv1E6eJKydXW9EWHDHTdvGgowuqMfDcMIFo6R+HhG50mma/XQUQbuZqB0bf/1wtZM5IlcsjL9LkpP2Fg73ibB/NvPRw+jpfj77WDmJBTu3PgSXpegEhGWoLve/afV7w0VdgE5Sc9CdOcxi7l/NQfYv2cUbRw/HQ7hO7HuI3QqYbZV+ogBLhF6emC/8JmwfkDLIcFLJGxNycXc2sBXABvxdsDRxncPhkfAusNPfdlwXM/39+kIIlRwZGPcu+55OSc1nBoQjaQ9sDeijBFvYkXLUFJbYu0EjW3wpCpLSeP8L1Wxrkzs4oisQR7UZDBFB1skjn0/IOxXgOtcRpvFvkF30c4q3wJG2ERXxr/CjtFFCTC4cQl3B/NHmzbzqc7SZGF3p953g5mym7H26dPpTAG8CcrFqAgh294SJxz94aw8TlLE5VP6fYH8Jh9K5h1zDa9/lVzHmEsyyG2EoKZlI75C3k5w8SIqClCJBs/CYbimIZjI5CvtJPCWCbKseOimObujyJI3f+zKRoYLYgcQdyDVUhemcB71nNy9x6veEUxMPr4vx4Q23MfcFxEmPMl3OfrrWamCnFnERUP3nm8eh0QbxXxO774XEFZjttCTFx50V3tnEUELWd4=
+    - secure: dTXs0DikM5MGQ12bUivVgTFb7hUXl02EqAbAJGCsHoPL9sIpp5nPJc78+FriWPzyNMmFvY5idcfeTcKsc8sbn1iviy9b2PqB7r1VrPl+Cg2AycOIUndZGbFsYUJny0fum0bE+jIy5XmMHpYnZrG4yz2o+rXuR7DJPe0KbKrg5UsHLlgxE4F8zutRLodfq5Sb0bXmgpPwwJM7CFnnCqgABgOmj8V1RJJL3xcSR5VxhaeQmm3LWr64//dvRZ5O0rIsbuNpEE7qt7W10Mx+QhCyg8hAQiRczQl1kiGv2AtZWW8p630r1KV8/Pn94Apu0wdxO0ctszIt8FFrvkg1GiDL3knKuwIJ65S5qPiLpxuJBzjcIqMEFW1nyzvNDV1RmaRkdkYbbosY0ig+X1RMYd4Jl/evgS/CT8oKORnYi7lJV6EqmCXA/E+PPPkcvV0XGLSaDYUas0KquzlKOYJcc3FLg0TJCYyuSx6ZyVNOBlhu1HYafQHZ/weLXR/6f8Y3d1ab4joUnMlk157n5dm4CTpz+8UnCQ/RfPLFZI76lmrNVokJip2WsdvTG4LIXRQt01YL5c2Y5dn6WTwpqp6/8a6HN5HgMKwu2cSGOl7ALpoBxY6AXc5Hg41s7aWHRfvfoIYVUEGAa2+UvnUQXOBZX1b5tlL9Ln9kpK1EmHbNPfBGXww=
+      

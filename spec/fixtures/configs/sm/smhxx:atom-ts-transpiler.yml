@@ -1,0 +1,67 @@
+sudo: false
+dist: trusty
+language: node_js
+node_js:
+  - "9"
+
+cache:
+  directories:
+    - $HOME/.npm
+
+branches:
+  except:
+    - gh-pages
+
+notifications:
+  email:
+    on_success: change
+    on_failure: always
+
+stages:
+  - Unit Tests
+  - Integration Tests
+  - name: Deployment
+    if: branch = master
+
+jobs:
+  include:
+
+    - stage: Unit Tests
+      before_install:
+        - npm install -g codecov
+      script:
+        - npm run lint
+        - npm run lintspec
+        - npm run coverage
+        - npm run examples
+      after_script:
+        - codecov
+
+    - stage: Integration Tests
+      env:
+        - ATOM_CHANNEL=stable
+      before_script:
+        - npm run build
+        - cd spec/integration
+        - curl -s -O https://raw.githubusercontent.com/atom/ci/master/build-package.sh
+        - chmod u+x build-package.sh
+      script:
+        - ./build-package.sh
+
+    - stage: Integration Tests
+      env:
+        - ATOM_CHANNEL=beta
+      before_script:
+        - npm run build
+        - cd spec/integration
+        - curl -s -O https://raw.githubusercontent.com/atom/ci/master/build-package.sh
+        - chmod u+x build-package.sh
+      script:
+        - ./build-package.sh
+
+    - stage: Deployment
+      env:
+        - secure: Zeuto7Ysb9lCzrQvL6YqCmcJ4faMbijNcQgC2T3YWaVTccuXNg3qvmfREDAUfEbia5MjB1TRaXHICf8mKJ+iZd3N69AEEq4yQWhVdQE6trvaT35jXrW2MlaY1p5JcFdc0pyC6WSz2sPtM67wNchvhY6ADX1JayiVZ+fJRg8MRXpmkwjfX7BMLBf9f6XUuEyWSVezjt0sYGSJDwaimgdfddMFDXT+mHHPHkd6AThhrc3gWFwiUcUn2LH+dgOERgtAqyTT6BnJurkETN/vwuEQLywL772i0EBq8FMmZt/Fskj8P14T5EunQ5hDRkrd7waZpE1B/kXgaNCrLvIT9Du3Do/dPSR0tsnO3MaLWlrGi2H/WEsQy6nXpLz2F4Pmn8oh02JUkIoi3Xl28uvLrW4YdLp7LhN2krlZPVzeuDghYxLtmYTNrJUWLvP7X1LHWCJRRJWvvcBeypZw/s6gbhqZtVakpTFYO1mE2VJ6Ss4WUbnENQvjk9zme4xXQ6z3+Sv0dxJIsfgth2OXw43ys4lFZ7+o33xhOe0eCuE6vWtb0XkEzlopY+Foa+o5AZjgRttOze9+ZTX/5pOkRUEzW2Iw113BSRRdpvSSzRmtRjD90KcWCKEiUozmrF28/dxC2m5fq6BLi2m0eG7C1smA8niyEcnEoF1R5D3+YF45dlBHchw=
+        - secure: mpb6JRasBxiBeU869mED1EL3MOp80dqUpT4urDKphg4U6yd9zZm0vEGpVzmlgbugo8Ky3mkl1efu55qdkTefBO+5569oqPf9Vnq1n4lp3j1R3SpfHFebQ8ArJz+dC1ezmPenU0/+80lkR5xDcqGwia6atU0mYVljY3zR0A/ySYLICoaOUIkNw9HKug0J8RcgC0h9D02eYIslKIvIJ2FLT03VgOdEg0UHFPDfnYTHvGmOsV9raCX/raRa9Ja63b90Oxha5iqIFDy6k4JHBM4xdZY9TiINZ/XFeIM8bnDfLnmYD6VputfCChpcSWDEAVRsxCoAf/0/HmBFCOgY4M7O8YTLuUj6Q7BadnTzYTWc5Pk6OG0MCqCexblC6dcqUDWyiPaCG2VH8J0U2+UN1/RRKDiFjkYBfo8KPa6q8DuCbLY4fqSfPOCMu2uQkSfoDBJgff2Fx+eQ4O7GbYYegMDuTpaj6ZRfNkDpn15Jqr1v2xh6ACCEUjtxfii8qZEnN8K4ZGVyqwPVHgpeOp4hOgvjUdNpEjhYk5Z3FASYI7/DmZpyti8sPyxAHEp+f5iZUlvjFa6fEJpeNLOW9x4LvyT2+zMEVFqLoxVobnCEuOdVliLyxCntPIaHbVoFXeID2OseKCP/BmrzEUEagKEHCHt0c8u1cTu2j7bKT6tYx9oi0lA=
+      script:
+        - npm run deploy

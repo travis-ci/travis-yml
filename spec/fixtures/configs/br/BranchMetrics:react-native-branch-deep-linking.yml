@@ -1,0 +1,26 @@
+# Use macOS with XCode 9
+os: osx
+osx_image: xcode9
+
+# Use Node 7.x and yarn
+language: node_js
+node_js:
+  - "7"
+cache: yarn
+
+install:
+# Set up RVM, RubyGems, Bundler
+  - rvm install 2.4.1
+  - rvm use 2.4.1 --default
+  - gem update --system
+  - gem install bundler
+  - bundle install
+# Install NPM deps
+  - yarn
+
+script:
+  # Requires Android SDK
+  # - bundle exec fastlane android test
+  - bundle exec fastlane ios test
+  - yarn lint
+  - yarn test

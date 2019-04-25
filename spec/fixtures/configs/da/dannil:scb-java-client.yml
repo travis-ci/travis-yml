@@ -1,0 +1,53 @@
+language: java
+os: linux
+dist: xenial
+jdk:
+  - openjdk8
+  - openjdk9
+  - openjdk10
+  - openjdk11
+  - openjdk12
+git:
+  depth: 99999
+branches:
+  except:
+  - gh-pages
+  - /^tag.*$/
+env:
+  global:
+  - secure: CVqkXOwmA2dibvbozNA7ZwJJF3YNCU99zQOv+setaPMXgunqotOtuA9Tr1chRUici8zw8AZeIC6nsVPmNY1x5FdNl+SuTCl/RYlljnb2DqTXAseIL0B5omdvtHcqFI+9kA4AuWknmR/ddkrM0hvl5anifhIfu3w4ARKxwAUfh8c=
+  - secure: jP+6no77LmkNsx9/ih/q4fECS+6g2HxXcmLk3kEw309BTfmi270578YTFrhquwnXO4iRWG02Uza3Qs7lwLLlUIz+KRhBgDG1kcLa/juJEqxBfJ9nsbxbBU6ncnSHvOGWh3dYXWGjXzWKACSb0tGF+BL4RG8aq4/9k60++/11zM8=
+  - secure: p4TxOFCOSPKKb6g3ZlDeJFuUQ35wKKT+5Ae5ugDORnh09RXzwLRSglItEY29s2mK/lnAyn77U3HZQiXPGkLiZK5w8Vzb6KFr8NYbMvwz53MIMyZlKEg6nJEddk998vwNdB06tJ0qjmZYK1aGJx53oPm90drF00uLmOk65WRk2P0=
+  - secure: Ob+txuzaiED1BdNO67hQbDCNv+/7vnngKfptzqKYVlW8ZA9RpwU9I27+dHAdfVvFkzY1xP/hk6Y3u//Js5u/5dpiNU4RWo37koK0hgmNtMKiSNwUkIii+yFvFn0y5ynG6HPRyQca3i0EXSqIZg0PvONLAcV76132qgMJs0cmOKk=
+  matrix:
+  - MAVEN_VERSION=3.3.9
+matrix:
+  exclude:
+  # Exclude some runtimes from the default matrix so we can override their behavior
+  - jdk: openjdk8
+    env: MAVEN_VERSION=3.3.9
+  include:
+  - jdk: openjdk8
+    env: MAVEN_VERSION=3.3.9
+    after_success:
+    # SonarQube needs to be run with at least Java 8
+    # Make sure we are on the correct branch
+    - if [[ $TRAVIS_BRANCH == test/run-all-tests ]]; then
+        mvn sonar:sonar -Dsonar.organization=dannil-github -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=$SONARQUBE_TOKEN;
+        rm -rf apache-maven-${MAVEN_VERSION}* && sh push_build_results.sh;
+      fi;
+before_install:
+- wget https://archive.apache.org/dist/maven/maven-3/${MAVEN_VERSION}/binaries/apache-maven-${MAVEN_VERSION}-bin.zip
+- unzip -qq apache-maven-${MAVEN_VERSION}-bin.zip
+- export M2_HOME=$PWD/apache-maven-${MAVEN_VERSION}
+- export PATH=$M2_HOME/bin:$PATH
+install:
+- true
+before_script:
+# If we get the same IP on concurrent builds and this triggers an error
+# on the API (rate limiting), this can be easily debugged by checking the log
+- dig +short myip.opendns.com @resolver1.opendns.com
+script:
+- mvn install -B -V -DtestsDayLimit=7
+after_success:
+# - mvn com.gavinmogan:codacy-maven-plugin:coverage -DcoverageReportFile=target/site/jacoco/jacoco.xml -DprojectToken=$CODACY_PROJECT_TOKEN -DapiToken=$CODACY_API_TOKEN

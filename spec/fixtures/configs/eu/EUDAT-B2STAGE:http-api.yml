@@ -1,0 +1,30 @@
+language: python
+sudo: required
+# dist: trusty
+# group: deprecated-2017Q2
+python:
+# - 3.6.3
+- 3.6
+services:
+- docker
+env:
+- PROJECT=b2stage
+# - PROJECT=seadata
+
+install:
+- data/scripts/prerequisites.sh
+- chmod -R o+Xw projects # fix permissions for coverage to be computed
+
+script:
+- docker --version && docker-compose --version
+- pip list --format columns | grep docker && pip search rapydo-
+
+- /bin/bash templates/create_testing_projectrc.sh 
+- rapydo init --no-builds
+- rapydo pull
+- rapydo start
+- rapydo shell backend --command 'restapi tests --wait'
+
+# coverage within a docker container
+after_success:
+- rapydo --log-level VERBOSE coverall

@@ -1,0 +1,33 @@
+dist: trusty
+sudo: required
+group: deprecated-2017Q4
+language: python
+python:
+  - "3.5"
+  - "3.6"
+env:
+  - TRAVIS_NODE_VERSION="6"
+before_install:
+  - rm -rf ~/.nvm && git clone https://github.com/creationix/nvm.git ~/.nvm && (cd ~/.nvm && git checkout `git describe --abbrev=0 --tags`) && source ~/.nvm/nvm.sh && nvm install $TRAVIS_NODE_VERSION
+  - npm install -g npm@latest
+install:
+  - sudo apt-get -qq update
+  - sudo apt-get install lcov
+  - gem install coveralls-lcov
+  - pip install -r requirements.txt
+  - pip install coveralls
+  - npm install
+before_script:
+  - node_modules/gulp/bin/gulp.js build
+  - node_modules/gulp/bin/gulp.js build --production
+  - DJANGO_SETTINGS_MODULE=crowdgezwitscher.settings.production python crowdgezwitscher/manage.py migrate
+  - DJANGO_SETTINGS_MODULE=crowdgezwitscher.settings.production python crowdgezwitscher/manage.py runserver --insecure &
+script:
+  - node_modules/gulp/bin/gulp.js coverage:python
+  - node_modules/gulp/bin/gulp.js coverage:typescript
+  - node_modules/gulp/bin/gulp.js test:e2e
+after_success:
+  - coveralls-lcov -v -n ./.report/remap/lcov.info > ./.report/coverage.json
+  - coveralls --merge=./.report/coverage.json
+  - cd .travis
+  - ./deploy.sh

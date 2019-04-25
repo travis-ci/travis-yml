@@ -1,0 +1,52 @@
+dist: trusty
+sudo: false
+
+language: ruby
+rvm: 2.6.2
+
+cache:
+  bundler: true
+  yarn: true
+  directories:
+    - node_modules
+
+env:
+  global:
+    - TMPDIR=$TRAVIS_BUILD_DIR/tmp
+    - DISPLAY=":99.0"
+    - RAILS_ENV=test
+    - DATABASE_URL="postgres:///rletters_test?username=postgres"
+    - CC_TEST_REPORTER_ID=8f6c00a1149fc25667a28154b0036edf3679b3dc82ac57fe3ad375a944cfe3c9
+    - PGPORT=5433
+
+addons:
+  postgresql: "10"
+  chrome: stable
+  apt:
+    packages:
+    - postgresql-10
+    - postgresql-client-10
+before_install:
+  - gem install bundler
+  - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+  - chmod +x ./cc-test-reporter
+
+install:
+  - jdk_switcher home oraclejdk9
+  - git clone --depth=1 https://github.com/rletters/solr-example.git vendor/solr
+  - bundle install --without production development tools --jobs 3 --retry 3
+  - yarn
+  - ln -s .env.example .env
+
+before_script:
+  - sh -e /etc/init.d/xvfb start
+  - pushd vendor/solr && bin/solr start && popd
+  - bin/rails db:create db:schema:load
+  - ./cc-test-reporter before-build
+
+script:
+  - bin/rails test
+  - bin/rails test:system
+
+after_script:
+  - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT

@@ -1,0 +1,53 @@
+language: c
+sudo: false
+cache: ccache
+addons:
+  apt:
+    packages:
+      - texinfo
+      - cmake
+      - libgmp-dev
+      - libmpfr-dev
+      - libntl-dev
+
+env:
+  MAKE="make -j"
+
+os:
+  - osx
+  - linux
+
+osx_image: xcode6.4
+
+compiler:
+  - gcc
+  - clang
+
+install:
+  - export LOCAL=$(pwd)/local
+  - ./.build_dependencies
+  - ./configure --with-mpir=${LOCAL} --with-mpfr=${LOCAL} --prefix=${LOCAL}
+  - ${MAKE}
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then otool -L libflint.dylib; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+       ldd libflint.so;
+       echo "Running cmake build";
+       mkdir build;
+       cd build;
+       cmake -G"Unix Makefiles" -DWITH_NTL=yes -DBUILD_TESTING=yes -DCMAKE_BUILD_TYPE=Release ..;
+       ${MAKE};
+       ldd lib/libflint.so;
+       cd ..;
+    fi
+
+script:
+  - ${MAKE} check
+  - ${MAKE} install
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then otool -L local/lib/libflint.dylib; fi
+  - PREFIX=$(pwd)/local ./.check_post_install
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+       cd build;
+       echo "Running cmake build testing";
+       ${MAKE} test;
+       cd ..;
+    fi

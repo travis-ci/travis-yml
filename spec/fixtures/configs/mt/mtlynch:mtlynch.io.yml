@@ -1,0 +1,16 @@
+sudo: required
+services:
+  - docker
+dist: trusty
+language: python
+python:
+  - "2.7"
+script: _tests/docker_build
+deploy:
+  provider: firebase
+  token:
+    secure: "pQKpLmABLbHeiHkb2Mv1ZnmFLhiMZIN+g9DbHuFgW6TfB9U5Zti57qvbFYsy9kl7JEBV1ankF95Mpxp8cN6NK8fiRfHMGpZmpz8ztXZQ1d0ufv4IE0Awi8/G8lauJ8vUWPMnnbI2567vmxHEc6lAAyjWhQ/wVAzrIfWMJ4KfktHcw+Y7dQmzzlm/fMttcFoLU8NQh6l6rgcZoIlAcq7DV35Oe+VOy+JU+wFzxVyoq8aEPYk3Wsj9LbZ9l9HS73tZJ5ZgzFcy5jIn9l9LurIhR61qpGu7p4CM81k1D7/G7Z2+rdi28JQJirJpOVPKJQykXsjaUbimYJ7tcOWAx2J/lgqhN7RwMUbHXD9Ks7DEQKkAfYhc9Fx/xFNyJRSTTq6eK6+AXYgyCKX52ebUeYkimT21VtQSKzdY9a67Ph+I3Eeht3z65rpIOe0+nmmZNKsZV6PoYloFK7OJPUYtbDOlt+37KcMGp2A1qBqEtmIoo8h+9dSexMFZBOZyRiWHrsIEWjwgbgEWNNiVQez4yXRH+5chDQHkWIvmbC+e+iNSGlN8L1r47nRT909TOON5GPwnGDnLXqKKYqk5gz+6wQyVUlj8pcm7iovr3QUcu6OMbEui7NdUFzejQ2kGCR87gTOFKRM4TrmXrfZGP+KxQa75qRM4Ju/aJhVIMsKIeQYzFWg="
+  skip_cleanup: true
+notifications:
+  email:
+    on_failure: change

@@ -1,0 +1,90 @@
+---
+sudo: required
+dist: trusty
+env:
+  matrix: 
+    - >
+      TEST_IMAGES="corpusops/ubuntu:18.04_preprovision"
+      IMAGES="${TEST_IMAGES} corpusops/ubuntu:18.04"
+    - >
+      TEST_IMAGES="corpusops/ubuntu:16.04_preprovision"
+      IMAGES="${TEST_IMAGES} corpusops/ubuntu:16.04"
+    - >
+      TEST_IMAGES="corpusops/ubuntu:14.04_preprovision"
+      IMAGES="${TEST_IMAGES} corpusops/ubuntu:14.04"
+    - >
+      TEST_IMAGES="corpusops/ubuntu:latest_preprovision"
+      IMAGES="${TEST_IMAGES} corpusops/ubuntu:latest"
+    - >
+      TEST_IMAGES="corpusops/archlinux:latest_preprovision"
+      IMAGES="${TEST_IMAGES} corpusops/archlinux:latest_preprovision"
+    - >
+      TEST_IMAGES="corpusops/debian:latest_preprovision"
+      IMAGES="${TEST_IMAGES} corpusops/debian:latest"
+    - >
+      TEST_IMAGES="corpusops/debian:stretch_preprovision"
+      IMAGES="${TEST_IMAGES} corpusops/debian:stretch"
+    - >
+      TEST_IMAGES="corpusops/debian:jessie_preprovision"
+      IMAGES="${TEST_IMAGES} corpusops/debian:jessie"
+    - >
+      TEST_IMAGES="corpusops/centos:7_preprovision"
+      IMAGES="${TEST_IMAGES} corpusops/centos:7"
+language: python
+python: "2.7"
+before_install:
+  - sudo apt-get update -qq
+install:
+# update block if neccessary
+#    for j in venv/src/ansible roles/corpusops.roles playbooks/corpusops;do
+#      i=$TRAVIS_BUILD_DIR/$j;
+#      if [ -e "$i" ];then
+#        pushd "$i";
+#        git pull
+#        ret=$?;
+#        popd;
+#        if [ "x$ret" != "x0" ];then
+#          echo "Removing cached $i";rm -rf "$i";
+#        fi
+#      fi;
+#    done
+  - deactivate
+  - |
+    echo "TRAVIS_ENV_VARS:" >&2
+    env | grep TRAVIS | sort -u | sed -re "s/^/  /g" >&2
+  - |
+    if [[ "${TRAVIS_PULL_REQUEST}" != "false" ]];then
+        CORPUSOPS_BRANCH="$(git log HEAD|head -n1|awk '{print $2}')"
+    else
+        CORPUSOPS_BRANCH="${TRAVIS_BRANCH}"
+    fi
+    echo "Pinning corpusops to branch/changeset: ${CORPUSOPS_BRANCH}" >&2
+    export CORPUSOPS_BRANCH
+    if ! ( bin/install.sh -C -S -b ${CORPUSOPS_BRANCH}; );then
+      echo "Busting venv cache && rebuilding"
+      rm -rf $TRAVIS_BUILD_DIR/venv/*
+      bin/install.sh -C -S -b ${CORPUSOPS_BRANCH}
+    fi
+    if ! bin/install.sh -C --synchronize-code;then
+      rm -rf $TRAVIS_BUILD_DIR/roles/corpusops.roles $TRAVIS_BUILD_DIR/playbooks/corpusops
+      bin/install.sh -C --synchronize-code
+    fi
+  - sudo service docker stop
+  - bin/silent_run bin/cops_apply_role -vvvv --sudo roles/corpusops.roles/services_virt_docker/role.yml
+script:
+  - |
+    if [[ "${TRAVIS_PULL_REQUEST}" != "false" ]];then
+        CORPUSOPS_BRANCH="$(git log HEAD|head -n1|awk '{print $2}')"
+    else
+        CORPUSOPS_BRANCH="${TRAVIS_BRANCH}"
+    fi
+    echo "Pinning corpusops to branch/changeset: ${CORPUSOPS_BRANCH}" >&2
+    export CORPUSOPS_BRANCH
+    NO_SYNC=1 hacking/test_script
+after_success:
+  - DEBUG=1 hacking/docker_release
+cache:
+  directories:
+    - $HOME/.cache/pip
+    - $TRAVIS_BUILD_DIR/venv
+    - $TRAVIS_BUILD_DIR/roles/corpusops.roles

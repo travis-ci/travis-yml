@@ -17,10 +17,10 @@ describe Travis::Yml::Schema::Def::Addon::SauceConnect, 'structure' do
                 type: :boolean
               },
               username: {
-                '$ref': '#/definitions/secure'
+                '$ref': '#/definitions/type/secure'
               },
               access_key: {
-                '$ref': '#/definitions/secure'
+                '$ref': '#/definitions/type/secure'
               },
               direct_domains: {
                 type: :string

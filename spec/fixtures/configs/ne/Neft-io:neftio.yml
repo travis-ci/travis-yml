@@ -1,0 +1,126 @@
+dist: trusty
+sudo: false
+language: generic
+notifications:
+    email: false
+branches:
+    only:
+        - master
+cache:
+    directories:
+        - $HOME/.nvm
+        - node_modules
+install:
+    # install nvm
+    - if test ! -e ~/.nvm ; then curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.32.1/install.sh | bash ; fi
+    - export NVM_DIR="$HOME/.nvm"
+    - "[ -s \"$NVM_DIR/nvm.sh\" ] && . \"$NVM_DIR/nvm.sh\""
+    - nvm install 8.1.2
+
+    # install project dependencies
+    - rm package-lock.json
+    - npm install
+script:
+    - npm test -- --verbose
+env:
+    global:
+        - LOG_SCREENSHOT_DATA_URI=1
+matrix:
+    include:
+        # Linux Node
+        -
+            env:
+                - TEST_NODE=1
+            before_script:
+                - npm run bundle -- --node
+
+        # Linux HTML & WebGL
+        -
+            dist: precise
+            env:
+                - TEST_CHROME=1
+            addons:
+                apt:
+                    packages:
+                        - imagemagick
+                        - chromium-browser
+            before_script:
+                - npm run bundle -- --node --html --webgl
+            before_install:
+                # run xvfb
+                - export DISPLAY=:99.0
+                - sh -e /etc/init.d/xvfb start
+
+        # Linux Android
+        -
+            sudo: required
+            dist: precise
+            language: android
+            jdk: oraclejdk8
+            addons:
+                apt:
+                    packages:
+                        - imagemagick
+                        - net-tools
+            env:
+                - TEST_ANDROID_ARM=1
+            android:
+                components:
+                    - tools
+                    - platform-tools
+                    # build
+                    - build-tools-27.0.3
+                    - android-25
+                    # emulators
+                    - android-24
+                    - sys-img-armeabi-v7a-android-24
+            before_script:
+                - npm run bundle -- --node --android
+            before_install:
+                # run xvfb
+                - export DISPLAY=:99.0
+                - sh -e /etc/init.d/xvfb start
+
+                # create and run emulator to speed up tests
+                - echo no | $ANDROID_HOME/tools/android create avd --force -n neft-android-24-default_armeabi-v7a-200x250 -t android-24 --abi default/armeabi-v7a --skin 200x250
+                - $ANDROID_HOME/tools/emulator -port 5554 -avd neft-android-24-default_armeabi-v7a-200x250 &
+
+        # OSX iOS
+        -
+            os: osx
+            osx_image: xcode9.3
+            env:
+                - TEST_IOS=1
+            before_script:
+                - npm run bundle -- --node --ios
+            before_install:
+                - HOMEBREW_NO_AUTO_UPDATE=1 brew install imagemagick
+                - HOMEBREW_NO_AUTO_UPDATE=1 brew install lcdf-typetools
+
+        # OSX Node and MacOS
+        -
+            os: osx
+            osx_image: xcode9.3
+            env:
+                - TEST_NODE=1
+                - TEST_MACOS=1
+            before_script:
+                - npm run bundle -- --node --macos
+            before_install:
+                - HOMEBREW_NO_AUTO_UPDATE=1 brew install imagemagick
+                - HOMEBREW_NO_AUTO_UPDATE=1 brew install lcdf-typetools
+
+        # Generate docs on master
+        -
+            stage: deploy
+            if: branch = master
+            deploy:
+                provider: pages
+                skip-cleanup: true
+                github-token: $GITHUB_TOKEN
+                keep-history: true
+                local-dir: build/docs
+                fqdn: neft.io
+            script:
+                - npm run update-api-docs
+                - npm run generate-docs

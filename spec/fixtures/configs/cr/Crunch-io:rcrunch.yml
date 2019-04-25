@@ -1,0 +1,43 @@
+language: r
+cache: packages
+after_success:
+- Rscript -e 'covr::codecov()'
+- bash pkgdown.sh
+
+# matrix to include a windows build this can be removed when
+# https://github.com/travis-ci/travis-build/pull/1538 is merged in
+# the windows build steps are similar to what's in the PR and the process other
+# oses use
+matrix:
+  include:
+  - os: linux
+    r: 3.3
+    # Ignore warnings in 3.3; this is mainly for the `median` method signature difference
+    warnings_are_errors: false
+    env:
+      - _R_CHECK_LENGTH_1_LOGIC2_=true
+  - os: linux
+    r: oldrel
+    env:
+      - _R_CHECK_LENGTH_1_LOGIC2_=true
+  - os: linux
+    r: release
+    env:
+      - _R_CHECK_LENGTH_1_LOGIC2_=true
+      - secure: "BWvMPmOiTzFNfFz3Ok+WHk6FjNNjK8qV5QohBhS0bgsMgeCrx4Zu3IXp42cXaEzzCe/VEnnEyYYTkZROS3mdLRAlOHnEHvCJMtETOODOK6EFGUFDv+C7AXZyqbdoNPrGrW5QKppHAVbTuL/A9z+tnBaeyG68GhOmOFBk4mciHNc="
+  - os: linux
+    r: devel
+    env:
+      - _R_CHECK_LENGTH_1_LOGIC2_=true
+  - os: windows
+    language: shell
+    env:
+      - _R_CHECK_LENGTH_1_LOGIC2_=true
+      - _R_CHECK_CRAN_INCOMING_=false
+      - R_QPDF=true
+    before_install:
+      - source .travis.win.install.sh
+    script:
+      - R.exe CMD build . --no-manual
+      - R.exe CMD check $PKG_TARBALL --no-manual --as-cran --install-args=--build
+    after_success: echo 'Done!'

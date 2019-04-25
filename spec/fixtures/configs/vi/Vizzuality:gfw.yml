@@ -1,0 +1,22 @@
+language: ruby
+
+node_js:
+  - 10.15.2
+
+rvm:
+  - 2.4.0
+
+services:
+  - redis-server
+
+cache:
+  bundler: true
+  directories:
+    - ~/.npm
+    - node_modules
+
+install:
+  - bundle install && npm install
+
+script:
+  - npm run ci

@@ -1,0 +1,30 @@
+# .travis.yml
+language: node_js
+dist: xenial
+sudo: false
+
+cache:
+  directories:
+    - node_modules
+
+services:
+  - postgresql
+  - mysql
+
+node_js:
+  - '6'
+  - '8'
+  - '10'
+
+before_script:
+  - psql -c 'create database bookshelf_test;' -U postgres
+  - mysql -e 'create database bookshelf_test;'
+
+notifications:
+  email: false
+
+env:
+  - KNEX_TEST_TIMEOUT=60000
+
+matrix:
+  fast_finish: true

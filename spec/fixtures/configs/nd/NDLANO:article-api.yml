@@ -1,0 +1,37 @@
+dist: trusty
+language: scala
+scala:
+  - 2.12.7
+jdk:
+  - openjdk8
+# Use container-based infrastructure
+sudo: false
+# These directories are cached to S3 at the end of the build
+cache:
+  directories:
+    - $HOME/.ivy2/cache
+    - $HOME/.sbt/boot/
+before_cache:
+  # Tricks to avoid unnecessary cache updates
+  - find $HOME/.ivy2 -name "ivydata-*.properties" -delete
+  - find $HOME/.sbt -name "*.lock" -delete
+notifications:
+  slack:
+    on_success: change
+    on_failure: always
+    rooms:
+      secure: uN95TzhVYysowpEEkaEXRV8xgcDDazDmSrnnzfPgcOfHP7H4U6KE51W/MCZlMwesRTtW7eBsfMBgq9XxmtZ7rZzNuKlL/R/nslDD8wATlcn4OjU9eG5y/k5aMYHS6zowUe117J7/laFOYgmSRQVQ2VO6d67IO8jA6Jq7L44fRwBOFyU9Pm/EDhyLHO8O5GKqMKBjCp2fMmmM4XZfS957B1v5GzKpyLi6LgSs92Y9f3agbnno18lWZfb5kDRJkm3hImPphXebTh87fQbCjenBmamcu4O7PUCmWjP+7G+4+zstuJrJT6TGVI6XuH+NNPZAh3Q2rrANoM/wffZ2kme379/ehBbHnDxMp3YdOwDZWrSeaGTuQawApb4MqRPd/e5sL1AnVA8w58bfFw02c4Z8Khqg0r7tErRdDknR2gtnzn14f6HjBIh/nca2VL4s/ieLhnSCsvlHlJ/irnWnxmLUCZzFHFWUKhizGEij+Hii8/46Y3XJimlgdLXGojom+iY8frFR54shs1Qk/4QMbyCjeeuhSvvsUPXYiTtJYBgZcB7DICzr0noOxFlpWFhxsHQoxWTCb8mxm6AveU2chBv3mxtDCLnf3YHk9/TEQGWcNlR0PDnF11m0XhXz/Ox7douvx4UKk0UGsHSaD3RG+zg0d74SowMoNU4cFSUzn0Grt3Y=
+matrix:
+  include:
+    - stage: Unit tests with pact publication
+      script: sbt ++$TRAVIS_SCALA_VERSION pactPublish
+    - stage: Pact provider verification tests
+      script: sbt ++$TRAVIS_SCALA_VERSION "pact:testOnly -- -n PactProviderTest"
+env:
+  - META_PASSWORD=""
+services:
+  - postgresql
+before_script:
+  - psql -c 'create database test_db;' -U postgres
+addons:
+  postgresql: "9.5"

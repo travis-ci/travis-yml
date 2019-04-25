@@ -1,0 +1,21 @@
+language: python
+python: 3.6
+env:
+  - TOXENV=py27
+  - TOXENV=py36
+
+install:
+  - pip install -U tox
+
+script:
+  - tox
+
+deploy:
+  provider: pypi
+  user: ChristophSchabert
+  password:
+    secure: EH2TV0durcS4tZEkivldvgi7QtgX67EA9NDbhg6mL/j2dUeD72/Sqyc8weZ6+sPS1SvVqkWZmlwH3rlbTtNj+33nI+X+cav+TwM6RRYm+8tXZy0PepQY5SjfqvWrRgrRB02wdkqs3X2k2nNzebj5L66xynthXa23AWBHIUKIlKj8fPYVxBo0Tf0mpMs0lXGWdWxMSaLxSOjsLjWmoCvVd1KlC82iID6g9j7UyEX7GEr3tZ417hRiM7YtGatbPd7oDcmuRItPtRgkDxOp+94tGNVQLw+U1K9gP4cFzf69YXnWUUQBBVeCjesiqzx98ihUH5t9cFFliEAmDjRk8S1+2W3MFQaq8Fks0HsnFTliVh8kKpNZEKVOvfRD3Z0Yd+PSJEeE12ZhB1s9Ppyhzusfrad7HQF+4E76UEEYY0K6uK46PNenTQaIG3A5LXyaJKTuCqCuzhopOmejp1dyoWs+9S68OVTuANR9NoXlyuXMQE9/u970rBI7hr9qRSzI/krwfeY/ygQZ5yJ6eSLHIQwoAkmbnJKCLw3aik0qp429D+00XsEEFejAhIpmnNJHIb0BnrfxUutpyKZkHhxmi4SFcRTe6DMQVeUVgWe3X42kZ7jASY73WLBrONcVIkJ4mkKSRsV6Sd433p6iqhv7fZZYHdMizrzDnydq6eChAJIa7CA=
+  on:
+    tags: true
+    repo: CloudHeads/lambda_utils
+    condition: $TOXENV == py27

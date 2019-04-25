@@ -1,0 +1,129 @@
+language: python
+sudo: false
+
+addons:
+  apt_packages:
+      - pandoc
+env:
+  global:
+    - RUN_TESTS: true
+    - BUILD_DOCS: false
+    - GH_REF: github.com/scikit-beam/scikit-beam.git
+    - secure: "KzntGlmLDUZlAB8ZiSRBtONJypv4atrnFxl+THCW8kg6YbiODcCxG9cez7mfmh63wpJ54+zeGvgGljeVvjb7bjB2p+4hZy+mLoP9xoE1w5qF4XaQ5YTOYaSQqCeWa5cEIi+854gFX7gOfW5qL+EJf7h3HtmndI15zaU5gOPjSDU="
+
+matrix:
+  include:
+    - python: 3.6
+      env: BUILD_DOCS=true RUN_TESTS=false NUMPY=1.13
+  exclude:
+  - env: NUMPY=1.10
+    python: 3.6
+
+python:
+  - 2.7
+  - 3.5
+  - 3.6
+
+env:
+  - NUMPY=1.10
+  - NUMPY=1.11
+  - NUMPY=1.12
+  - NUMPY=1.13
+
+
+before_install:
+  - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
+  - chmod +x miniconda.sh
+  - ./miniconda.sh -b -p ~/mc
+  - export PATH=~/mc/bin:$PATH
+  - conda update conda --yes
+  - export CONDARC=ci/condarc
+
+install:
+  - export GIT_FULL_HASH=`git rev-parse HEAD`
+  - conda create -n testenv pip nose pytest python=$TRAVIS_PYTHON_VERSION numpy=$NUMPY scipy scikit-image six coverage cython xraylib lmfit=0.8.3 netcdf4 flake8 pyfai
+  - source activate testenv
+  # # need to build_ext -i for the tests so that the .so is local to the source
+  # # code.  We could also setup.py develop, but I'm not sure if that is any
+  # # better
+  - python setup.py install build_ext -i
+  - pip install codecov
+
+before_script:
+  # define a merge size check function that ensures no huge file was committed
+  # to the repo by accident
+  - size_check() {
+        GIT_TARGET_EXTRA="+refs/heads/${TRAVIS_BRANCH}";
+        GIT_SOURCE_EXTRA="+refs/pull/${TRAVIS_PULL_REQUEST}/merge";
+        echo TRAVIS_BRANCH=$TRAVIS_BRANCH;
+        echo TRAVIS_PULL_REQUEST=$TRAVIS_PULL_REQUEST;
+        echo TRAVIS_REPO_SLUG=$TRAVIS_REPO_SLUG;
+        echo GIT_TARGET_EXTRA=$GIT_TARGET_EXTRA;
+        echo GIT_SOURCE_EXTRA=$GIT_SOURCE_EXTRA;
+        mkdir ~/repo-clone;
+        pushd ~/repo-clone;
+        git init && git remote add -t ${TRAVIS_BRANCH} origin git://github.com/${TRAVIS_REPO_SLUG}.git;
+        git fetch origin ${GIT_TARGET_EXTRA};
+        git checkout -qf FETCH_HEAD;
+        git tag travis-merge-target;
+        git gc --aggressive;
+        TARGET_SIZE=`du -s . | sed -e "s/\t.*//"`;
+        echo TARGET_SIZE=$TARGET_SIZE;
+        git pull origin ${GIT_SOURCE_EXTRA};
+        git gc --aggressive;
+        MERGE_SIZE=`du -s . | sed -e "s/\t.*//"`;
+        popd
+        echo MERGE_SIZE=$MERGE_SIZE;
+        if [ "${MERGE_SIZE}" != "${TARGET_SIZE}" ]; then
+          SIZE_DIFF=`expr \( ${MERGE_SIZE} - ${TARGET_SIZE} \)`;
+        else
+          SIZE_DIFF=0;
+        fi;
+
+        echo SIZE_DIFF=$SIZE_DIFF;
+
+        echo -e "Estimated content size difference = ${SIZE_DIFF} kB";
+
+        if test ${SIZE_DIFF} -lt $1; then
+          echo "Size check passed";
+          return 0;
+        else
+          echo "Size check failed";
+          return 1;
+        fi;
+
+      };
+script:
+  - coverage run run_tests.py
+  - coverage report -m
+  - if [ $RUN_TESTS == 'true' ]; then flake8 $TRAVIS_BUILD_DIR/skbeam; fi;
+  # Check the merge size to make sure nothing huge was committed, but only do
+  # it on one of the branches
+  - if [ $BUILD_DOCS == 'true' ]; then
+      size_check 100;
+    fi;
+  - if [ $BUILD_DOCS == 'true' ]; then
+      conda install sphinx numpydoc ipython jupyter pip matplotlib;
+      pip install sphinx_bootstrap_theme sphinxcontrib-napoleon;
+      pushd ../;
+      git clone https://github.com/scikit-beam/scikit-beam-examples.git;
+      popd;
+      pushd doc;
+      chmod +x build_docs.sh;
+      ./build_docs.sh;
+      popd;
+    fi;
+
+
+after_success:
+  - if [ $RUN_TESTS == 'true' ]; then codecov; fi;
+  - if [ $TRAVIS_BRANCH == 'master' ] && [ $TRAVIS_PULL_REQUEST == 'false' ] && [ $BUILD_DOCS ]; then
+      openssl aes-256-cbc -K $encrypted_b4ed46da4197_key -iv $encrypted_b4ed46da4197_iv -in skbeam-docs-deploy.enc -out skbeam-docs-deploy -d;
+      eval `ssh-agent -s`;
+      chmod 600 skbeam-docs-deploy;
+      ssh-add skbeam-docs-deploy;
+      pushd doc;
+      chmod +x push_docs.sh;
+      ./push_docs.sh;
+      popd;
+    fi;

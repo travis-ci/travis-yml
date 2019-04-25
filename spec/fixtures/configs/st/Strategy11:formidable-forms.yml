@@ -1,0 +1,102 @@
+language: php
+
+sudo: false
+
+matrix:
+  include:
+    - php: 7.1
+      env: WP_VERSION=master WP_MULTISITE=1 SNIFF=1
+    - php: 5.6
+      env: WP_VERSION=master WP_MULTISITE=1
+    - php: 5.3
+      env: WP_VERSION=4.9 WP_MULTISITE=1
+      dist: precise
+    - php: 7.0
+      env: WP_VERSION=4.9 SCRIPT_DEBUG=1
+    - php: 7.0
+      env: WP_VERSION=4.9 COVERAGE=1 PHPUNIT=0
+    - php: 5.6
+      env: WP_VERSION=4.8
+    - php: 5.6
+      env: WP_VERSION=4.7
+    - php: 5.6
+      env: WP_VERSION=4.6
+    - php: 5.5
+      env: WP_VERSION=4.5 SCRIPT_DEBUG=1
+    - php: 5.4
+      env: WP_VERSION=4.5
+    - php: nightly
+      env: WP_VERSION=master
+  allow_failures:
+    - php: nightly
+
+install:
+- if [[ $TRAVIS_PHP_VERSION == "5.2.17" || $TRAVIS_PHP_VERSION == "5.3" ]]; then phpenv local 5.6.13; fi
+- travis_retry composer selfupdate 1.0.0 --no-interaction
+- if [[ ${TRAVIS_PHP_VERSION:0:1} == "7" || $TRAVIS_PHP_VERSION == "nightly" ]]; then travis_retry composer require --dev phpunit/phpunit ^5.7; fi
+- travis_retry composer install --no-interaction
+- if [[ $TRAVIS_PHP_VERSION == "5.2.17" || $TRAVIS_PHP_VERSION == "5.3" ]]; then phpenv local --unset; fi
+
+before_script:
+- phpunit --version
+- export PHPCS_DIR=/tmp/phpcs
+- export SNIFFS_DIR=/tmp/sniffs
+# Install CodeSniffer for WordPress Coding Standards checks.
+- if [[ "$SNIFF" == "1" ]]; then git clone -b master --depth 1 https://github.com/squizlabs/PHP_CodeSniffer.git $PHPCS_DIR; fi
+# Install WordPress Coding Standards.
+- if [[ "$SNIFF" == "1" ]]; then git clone -b master --depth 1 https://github.com/WordPress-Coding-Standards/WordPress-Coding-Standards.git $SNIFFS_DIR; fi
+# Install PHP Compatibility sniffs.
+- if [[ "$SNIFF" == "1" ]]; then git clone -b master --depth 1 https://github.com/wimg/PHPCompatibility.git $SNIFFS_DIR/PHPCompatibility; fi
+# Set install path for PHPCS sniffs.
+# @link https://github.com/squizlabs/PHP_CodeSniffer/blob/4237c2fc98cc838730b76ee9cee316f99286a2a7/CodeSniffer.php#L1941
+- if [[ "$SNIFF" == "1" ]]; then $PHPCS_DIR/bin/phpcs --config-set installed_paths $SNIFFS_DIR; fi
+- PLUGIN_SLUG=$(basename $(pwd))
+- export WP_DEVELOP_DIR=/tmp/wordpress/
+- git clone --depth=50 --branch="$WP_VERSION" git://develop.git.wordpress.org/ /tmp/wordpress
+- cd ..
+- cp -r "$PLUGIN_SLUG" "/tmp/wordpress/src/wp-content/plugins/formidable"
+- cd /tmp/wordpress/
+- cp wp-tests-config-sample.php wp-tests-config.php
+- sed -i "s/youremptytestdbnamehere/wordpress_tests/" wp-tests-config.php
+- sed -i "s/yourusernamehere/travis/" wp-tests-config.php
+- sed -i "s/yourpasswordhere//" wp-tests-config.php
+- mysql -e "CREATE DATABASE wordpress_tests;" -uroot
+- cd "/tmp/wordpress/src/wp-content/plugins/formidable"
+- phpenv rehash
+# Install JSCS: JavaScript Code Style checker.
+# @link http://jscs.info/
+- if [[ "$SNIFF" == "1" ]]; then npm install -g jscs; fi
+# Install JSHint, a JavaScript Code Quality Tool.
+# @link http://jshint.com/docs/
+- if [[ "$SNIFF" == "1" ]]; then npm install -g jshint; fi
+# Pull in the WP Core jshint rules.
+- if [[ "$SNIFF" == "1" ]]; then wget https://develop.svn.wordpress.org/trunk/.jshintrc; fi
+
+script:
+- if [[ "$SCRIPT_DUBUG" == "1" ]]; then php -r "define('SCRIPT_DUBUG', true);"; fi
+- if [[ "$SCRIPT_DUBUG" == "0" ]]; then php -r "define('SCRIPT_DUBUG', false);"; fi
+# Search for PHP syntax errors.
+- find -L .  -path ./vendor -prune -o -name '*.php' -print0 | xargs -0 -n 1 -P 4 php -l
+# Run the theme through JSHint. Turn on in 3.0
+#- if [[ "$SNIFF" == "1" ]]; then jshint ./js/formidable*; fi
+# Run the theme through JavaScript Code Style checker. Turn on in 3.0
+#- if [[ "$SNIFF" == "1" ]]; then jscs .; fi
+# WordPress Coding Standards.
+# @link https://github.com/WordPress-Coding-Standards/WordPress-Coding-Standards
+# @link http://pear.php.net/package/PHP_CodeSniffer/
+# -p flag: Show progress of the run.
+# -s flag: Show sniff codes in all reports.
+# -v flag: Print verbose output.
+# -n flag: Do not print warnings. (shortcut for --warning-severity=0)
+# --standard: Use WordPress as the standard.
+# --extensions: Only sniff PHP files.
+- if [[ "$SNIFF" == "1" ]]; then $PHPCS_DIR/bin/phpcs -p -s -v -n . --standard=./phpcs.xml --extensions=php; fi
+- if [[ "$PHPUNIT" != "0" ]]; then phpunit --group=ajax -c phpunit.xml; fi
+- if [[ "$PHPUNIT" != "0" ]]; then phpunit --group=entries -c phpunit.xml; fi
+- if [[ "$PHPUNIT" != "0" ]]; then phpunit --group=styles -c phpunit.xml; fi
+- if [[ "$PHPUNIT" != "0" ]]; then phpunit --exclude-group=ajax,entries,styles -c phpunit.xml; fi
+- if [[ "$COVERAGE" == "1" ]]; then vendor/bin/phpunit --coverage-clover=coverage.xml; fi
+
+after_script:
+# upload coverage.xml file to Codecov
+- if [[ "$COVERAGE" == "1" ]]; then bash <(curl -s https://codecov.io/bash); fi

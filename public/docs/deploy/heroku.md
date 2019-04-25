@@ -2,16 +2,14 @@
 
 
 
-## Type
+## Types
 
-Any of:
+* Hash
+* String (known)
 
-* Map (Hash)
-* Enum (known String)
+## Values
 
-## Flags
-
-None.
+* `heroku`
 
 
 ## Examples
@@ -25,9 +23,31 @@ deploy:
   edge: true
   strategy: api
   buildpack: string
+  run: string
+```
+
+```yaml
+deploy:
+  provider: heroku
+  app: {}
+```
+
+```yaml
+deploy:
+  provider: heroku
   app: string
-  api_key: 
-  run: "[ref:strs]"
+```
+
+```yaml
+deploy:
+  provider: heroku
+  api_key: {}
+```
+
+```yaml
+deploy:
+  provider: heroku
+  api_key:
 ```
 
 ```yaml

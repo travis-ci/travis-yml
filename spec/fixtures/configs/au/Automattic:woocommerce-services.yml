@@ -1,0 +1,50 @@
+# Travis CI Configuration File
+
+# Tell Travis CI we're using PHP
+language: php
+
+# Define our matrix of build configurations to test against.
+matrix:
+  include:
+   - php: 5.2
+     env: WP_VERSION=4.4 WC_VERSION=2.6.14
+     sudo: true
+     dist: precise
+   - php: 5.2
+     env: WP_VERSION=latest WC_VERSION=3.3.3
+     sudo: true
+     dist: precise
+   - php: 5.3
+     env: WP_VERSION=4.5 WC_VERSION=3.2.6
+     sudo: true
+     dist: precise
+   - php: 5.4
+     env: WP_VERSION=4.6 WC_VERSION=3.1.2
+   - php: 5.5
+     env: WP_VERSION=4.7 WC_VERSION=3.0.9
+   - php: 5.6
+     env: WP_VERSION=4.8 WC_VERSION=2.6.14
+   - php: 7.0
+     env: WP_VERSION=latest WC_VERSION=2.6.14
+   - php: 7.1
+     env: WP_VERSION=latest WC_VERSION=3.0.3
+   - php: 7.2
+     env: WP_VERSION=4.4 WC_VERSION=2.6.14
+     # Older versions of WP are not compatible with PHPUnit 6+. Manually install PHPUnit 5.
+     script: curl -sSfL -o ~/.phpenv/versions/7.2/bin/phpunit https://phar.phpunit.de/phpunit-5.7.phar && phpunit
+   - php: 7.2
+     env: WP_VERSION=latest WC_VERSION=3.3.3
+     # Not even the latest WP version is compatible with PHPUnit 7. Manually install PHPUnit 6.
+     script: curl -sSfL -o ~/.phpenv/versions/7.2/bin/phpunit https://phar.phpunit.de/phpunit-6.4.phar && phpunit
+     # Run the JS tests in a separate container
+   - language: node_js
+     before_script: ""
+
+# Clones WordPress and configures our testing environment.
+before_script: bash tests/bin/install-wc-tests.sh wordpress_test root '' localhost $WP_VERSION $WC_VERSION
+
+sudo: false
+
+notifications:
+   email:
+       - hydra@matticspace.com

@@ -1,0 +1,133 @@
+dist: trusty
+
+language: php
+cache:
+  bundler: true
+  directories:
+    - "$HOME/.composer/cache"
+    - "$HOME/.drush/cache"
+    - "$HOME/.npm"
+    - "$HOME/.selenium/cache"
+
+php:
+  - 7.2
+
+env:
+  - AFATG=01-website-base-requirements
+  - AFATG=02-user-management
+  - AFATG=03-admin-management
+  - AFATG=04-content-structure
+  - AFATG=05-content-management
+
+matrix:
+  exclude:
+# Automated Functional Acceptance Testing group: 01 website base requirements
+  - php: 7.2
+    env: AFATG=01-website-base-requirements
+
+# Automated Functional Acceptance Testing group: 02 user management
+  - php: 7.2
+    env: AFATG=02-user-management
+
+# Automated Functional Acceptance Testing group: 03 admin management
+  - php: 7.2
+    env: AFATG=03-admin-management
+
+# Automated Functional Acceptance Testing group: 04 content structure
+  - php: 7.2
+    env: AFATG=04-content-structure
+
+# Automated Functional Acceptance Testing group: 05 content-management
+  - php: 7.2
+    env: AFATG=05-content-management
+
+mysql:
+  database: test_varbase6c
+  username: root
+  encoding: utf8
+
+before_install:
+  - phpenv config-rm xdebug.ini
+  - phpenv rehash
+  - composer self-update
+  - composer --version
+
+  # Composer Configurations.
+  - export PATH="$HOME/.composer/vendor/bin:$TRAVIS_BUILD_DIR/bin:$PATH"
+  - export COMPOSER_EXIT_ON_PATCH_FAILURE=1
+
+  # MySQL Configurations.
+  - mysql -e 'SET GLOBAL wait_timeout = 5400;'
+  - mysql -e "SHOW VARIABLES LIKE 'wait_timeout'"
+
+  # PHP Configurations.
+  - echo 'max_execution_time = 1200' >> varbase.php.ini;
+  - echo 'max_input_time = 180' >> varbase.php.ini;
+  - echo 'max_input_vars = 10000' >> varbase.php.ini;
+  - echo 'memory_limit = 3000M' >> varbase.php.ini;
+  - echo 'error_reporting = E_ALL' >> varbase.php.ini;
+  - echo 'post_max_size = 64M' >> varbase.php.ini;
+  - echo 'upload_max_filesize = 32M' >> varbase.php.ini;
+  - echo 'max_file_uploads = 40' >> varbase.php.ini;
+  - echo 'sendmail_path = /bin/true' >> varbase.php.ini;
+  - phpenv config-add varbase.php.ini
+  - phpenv rehash
+
+  # Configure and run the virtual display.
+  - export DISPLAY=:99
+  - sh -e /etc/init.d/xvfb start
+  - Xvfb :99 -ac -screen 0 1366x768x24 &>/dev/null &
+  - sleep 3
+
+  # Download Chrome Driver.
+  - LATEST_CHROMEDRIVER=$(wget -q -O - http://chromedriver.storage.googleapis.com/LATEST_RELEASE)
+  - wget http://chromedriver.storage.googleapis.com/$LATEST_CHROMEDRIVER/chromedriver_linux64.zip
+  - unzip chromedriver_linux64.zip
+  - chmod +x chromedriver
+  - mkdir -p $HOME/.composer/vendor/bin
+  - mv -f chromedriver $HOME/.composer/vendor/bin/
+  - rm chromedriver_linux64.zip
+
+  # Update Chrome.
+  - export CHROME_BIN=/usr/bin/google-chrome
+  - wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+  - sudo dpkg -i google-chrome-stable_current_amd64.deb
+  - rm google-chrome-stable_current_amd64.deb
+  - google-chrome --version
+
+  # Run selenium standalone server.
+  - SELENIUM="$HOME/.selenium/cache/selenium-server-standalone-2.53.1.jar";
+  - if [[ ! -f $SELENIUM ]]; then wget -O $SELENIUM http://selenium-release.storage.googleapis.com/2.53/selenium-server-standalone-2.53.1.jar; fi
+  - java -jar $SELENIUM -port 4445 > /dev/null 2>&1 &
+  - echo "[  OK  ] Starting Selenium on the 4445 port ..."
+install:
+  - git checkout $TRAVIS_COMMIT
+  ## Build with the composer.
+  - composer install --no-interaction
+
+  ## Install with drush.
+  - cd docroot
+  - drush site-install varbase --yes --site-name='Test Varbase6c' --account-name=webmaster --account-pass=dD.123123ddd --account-mail=webmaster@vardot.com --db-url="mysql://root:@localhost/test_varbase6c" varbase_multilingual_configuration.enable_multilingual=true varbase_extra_components.vmi=true varbase_extra_components.varbase_heroslider_media=true varbase_extra_components.varbase_carousels=true varbase_extra_components.varbase_search=true varbase_extra_components.varbase_blog=true varbase_extra_components.varbase_auth=true varbase_development_tools.varbase_development=true
+  - drush pm-enable varbase_styleguide --yes
+  - drush pm-enable vbp_text_and_image --yes
+  - drush pm-enable varbase_media_instagram --yes
+  - drush pm-enable varbase_media_twitter --yes
+  - drush pm-enable social_auth_google --yes
+  - drush pm-enable social_auth_facebook --yes
+  - drush pm-enable social_auth_twitter --yes
+  - drush pm-enable social_auth_linkedin --yes
+  - drush config-set system.performance css.preprocess 0 --yes
+  - drush config-set system.performance js.preprocess 0 --yes
+  - drush config-set system.logging error_level all --yes
+  - drush cr
+before_script:
+  - drush runserver --default-server=builtin 8080 &>/dev/null &
+  - sleep 5
+script:
+  - cd ./profiles/varbase
+  - behat --strict tests/features/varbase/step1-init-tests/
+  - behat --strict tests/features/varbase/step2-apply-tests/$AFATG
+#  - behat --strict tests/features/varbase/step3-cleanup-tests/  # no need as we build every time.
+
+matrix:
+  fast_finish: true

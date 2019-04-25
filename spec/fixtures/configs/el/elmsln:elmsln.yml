@@ -1,0 +1,116 @@
+language: php
+
+php:
+  - 5.6
+
+matrix:
+  env:
+    global:
+      - ES_VER=1.0.1
+      - ES_MAPPER_ATTACHMENTS_VER=2.0.0.RC1
+      - ES_TRANSPORT_THRIFT_VER=2.0.0.RC1
+      - ES_GEOCLUSTER_FACET_VER=0.0.10
+      - ES_WAIT_ON_MAPPING_CHANGE=true
+      - DATABASE='drupal'
+      - DB_USERNAME='root'
+      - DB_ENCODE='utf8'
+    matrix:
+      - DRUPAL_3RD_PARTY='composer_manager'
+      - DRUPAL_3RD_PARTY='libraries'
+
+mysql:
+  database: $DATABASE
+  username: $DB_USERNAME
+  encoding: $DB_ENCODE
+
+before_install:
+  - phpenv config-rm xdebug.ini
+  - ~/.phpenv/versions/$(phpenv version-name)/bin/composer self-update
+  - export UPDATE TRAVIS_BUILD_DIR
+  - BUILD_TOP=`dirname $TRAVIS_BUILD_DIR`
+  - EXIT_VALUE=0
+
+  - sudo apt-get update > /dev/null
+  - sudo apt-get install -y --force-yes uuid uuid-runtime
+  # mail requirements
+  - sudo apt-get update -qq
+  - sudo apt-get install -y -qq postfix
+install:
+  - sudo apt-get install -y --force-yes php5-cgi php5-mysql
+  # install drush globally
+  - composer global require drush/drush:7.*
+  # add composer's global bin directory to the path
+  # see: https://github.com/drush-ops/drush#install---composer
+  - export PATH="$HOME/.composer/vendor/bin:$PATH"
+  - export PATH="$HOME/.config/composer/vendor/bin:$PATH"
+before_script:
+  - cd ../../../
+  - sudo apt-get install apache2 libapache2-mod-fastcgi
+  # enable php-fpm
+  - sudo cp ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf.default ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf
+  - sudo a2enmod rewrite actions fastcgi alias
+  - echo "cgi.fix_pathinfo = 1" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
+  - ~/.phpenv/versions/$(phpenv version-name)/sbin/php-fpm
+  # configure apache virtual hosts
+  - sudo mkdir -p /etc/apache2/sites-available
+  - sudo mkdir -p /etc/apache2/sites-enabled
+  - sudo service apache2 restart
+  # setup fake mailserver
+  - sudo service postfix stop
+  - smtp-sink -d "%d.%H.%M.%S" 127.0.0.1:2500 1000 &
+  - echo -e '#!/usr/bin/env bash\nexit 0' | sudo tee /usr/sbin/sendmail
+  - echo 'sendmail_path = "/usr/sbin/sendmail -t -i "' | sudo tee "/home/travis/.phpenv/versions/`php -i | grep "PHP Version" | head -n 1 | grep -o -P '\d+\.\d+\.\d+.*'`/etc/conf.d/sendmail.ini"
+  - sudo mkdir -p /var/www
+  - sudo chown -R travis:travis /var/www
+  # symlink to the code that was pulled in for testing
+  - ln -s /home/travis/build/elmsln/elmsln /var/www/elmsln
+  # move into scope of our instance
+  - cd /var/www/elmsln
+  # replace config w/ the example provided
+  - rm -rf config
+  - git clone https://github.com/elmsln/elmsln-config-example.git config
+  # get the travis build parameters to pipe into the system as input
+  - cd /home/travis
+  - sudo git clone https://github.com/elmsln/elmsln-config-travis-ci.git
+  # tee up the preinstall values
+  - cat /home/travis/elmsln-config-travis-ci/elmsln-preinstall-values
+  - cat /home/travis/elmsln-config-travis-ci/elmsln-preinstall-values | sudo bash /var/www/elmsln/scripts/install/root/elmsln-preinstall.sh
+  # list whats in .drush, .bashrc and the generated config file to verify they worked
+  - ls /home/travis/.drush
+  - sudo chown -R travis:travis /home/travis/.drush
+  - cat /home/travis/.bashrc
+  - cat /var/www/elmsln/config/scripts/drush-create-site/config.cfg
+  # due to weirdness in travis w/ php versions we have to do it this way
+  - cat /var/www/elmsln/scripts/server/php.txt >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
+  - ls -lasD /etc/apache2/sites-enabled
+  - ls -lasD /etc/apache2/sites-available
+  - sudo service apache2 restart
+script:
+  - sudo chown -R travis:travis /var/www/elmsln
+  - sudo chown -R travis:travis /var/www/elmsln/config
+  - cd /var/www/elmsln
+  - ls -lasD
+  - pwd
+  # run the installer
+  - bash /var/www/elmsln/scripts/install/elmsln-install.sh
+  - drush sa
+  - drush @online cc drush
+  - drush @online en cis_example_cis --y
+  # now run through the site upgrade routine
+  #- bash /var/www/elmsln/scripts/upgrade/elmsln-upgrade-sites.sh
+  # eventually we want to create all this stuff automatically
+  #- drush @online cis-kraken --actually_run --y
+  - ls -lasD /var/www/elmsln/config/jobs -v
+  #-sudo bash /var/www/elmsln/scripts/drush-create-site/drush-create-site
+
+after_script:
+  - drush @online status
+
+notifications:
+  irc: irc.freenode.org#elmsln
+  webhooks: https://demo.elmsln.org/build-passed.php?token=POijnbYhujiH7*768iJNnjNamkkdjnhba9873654rtghnfjBNz
+  email: false
+  slack:
+    rooms:
+      - elmsln:WmKTRMe7k3IjprunaAVV3Jjg#qa
+      - elmsln:WmKTRMe7k3IjprunaAVV3Jjg#code

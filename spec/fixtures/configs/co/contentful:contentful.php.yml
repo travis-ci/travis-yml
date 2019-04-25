@@ -1,0 +1,81 @@
+language: php
+
+env:
+  global:
+    - GH_REPO="github.com/${TRAVIS_REPO_SLUG}.git"
+    - BUILD_LEAD=0
+    - QUALITY_CHECK=0
+
+matrix:
+  fast_finish: true
+  include:
+    - php: 7.2
+      env: QUALITY_CHECK=1
+    - php: 7.0
+    - php: 7.1
+      env: BUILD_LEAD=1
+    - php: 7.2
+    - php: 7.3
+
+branches:
+  only:
+    - master
+
+before_install:
+  # Disable XDebug
+  - |
+    if [ $BUILD_LEAD == 0 ]; then
+      phpenv config-rm xdebug.ini
+    fi
+
+install:
+  - composer install
+  - |
+    if [ $QUALITY_CHECK == 1 ]; then
+      wget https://github.com/phpstan/phpstan/releases/download/0.10.3/phpstan.phar -q -O phpstan.phar
+      wget http://cs.sensiolabs.org/download/php-cs-fixer-v2.phar -q -O php-cs-fixer.phar
+    fi
+
+script:
+  # PHPUnit tests
+  - |
+    if [ $QUALITY_CHECK == 0 ]; then
+      php vendor/bin/phpunit --stop-on-error --stop-on-failure -v
+    fi
+
+  # Static analysis
+  - |
+    if [ $QUALITY_CHECK == 1 ]; then
+      php phpstan.phar analyse --no-progress --level=max src/
+    fi
+
+  # Syntax tests
+  - |
+    if [ $QUALITY_CHECK == 1 ]; then
+      php php-cs-fixer.phar fix --dry-run --stop-on-violation --show-progress=none --verbose
+    fi
+
+after_success:
+  # Upload code coverage
+  - |
+    if [ $BUILD_LEAD == 1 ]; then
+      travis_retry bash <(curl -s https://codecov.io/bash) -f clover.xml
+    fi
+
+  # Generate API docs
+  - |
+    if [[ ($TRAVIS_PULL_REQUEST == false || $TRAVIS_TAG != '') && $BUILD_LEAD == 1 ]]; then
+      sh ./scripts/prepare-docs.sh
+    fi
+
+deploy:
+  provider: pages
+  skip_cleanup: true
+  github_token: $GITHUB_TOKEN
+  local_dir: build/docs
+  on:
+    condition: ($TRAVIS_PULL_REQUEST == false || $TRAVIS_TAG != '') && $BUILD_LEAD == 1
+
+notifications:
+  slack:
+    secure: CMTkQ1GJQ+DVMoiRSPOO0h+eu3f2qmoMCSF2xQ5gqA0TXN6YTWR0CgfMucGFiynnUwswtEO7ZX/ubfMtL9drwD1+L0AZcMZf9T9v/MPHhkoIeJKhnrkl0oO8BcINUNk696172LhY8wVuiXYtztoPJgI8Jlhb1E1ZOaw9Qa3NbobVTKEaDfPjqua4h9/xgUW7r3vQT/0TowtmXypUZ+bGDnEXPIlcQZ8MLZYSlyIFpQSEXb5BRC09PHCmohPsHjsKmx/UcYXxNkodxNk+2cHPd+RpTBvC+yetRXN38UYbKz0JP7rBFC+74W7k2hA3hREBdqhmqUaXX6iqLvzWuCdYKP6X5VCOVxNGPom5xLW9wSsugFusy9VxDw+yMiYDpsD5M4gPNac8erBC1Y/c9jhPmBA47dbIxS6uF0q7jfC/h2iUvK0ZGintvGcQ2H6nMcczyDJ4TI/bhX3tw8dcR2xEmt2rb/rgr450noYB6a4LNNVYvyxB/ttb82PYuRZBcKI4Gjk1GTpHg1flYHrahJfqXxgTnzuXoMqPQ0KUAD4T2dbfbaal+WX6VIZBtwKRq857iUNbaXOrCDBr7CzU9ms91x2IYvXNr+7jBrC0TGa4ImK/iohLrEG9w7x7hzGPoupFsTqaxN33mL0ktu/z0/ESUkuoQ0y7FkWXRZ6JEaPO0j0=

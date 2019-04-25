@@ -1,0 +1,48 @@
+language: d
+sudo: false
+dist: trusty
+
+addons:
+  apt:
+    packages:
+    - libevent-dev
+    - libssl-dev
+    - pkg-config
+    - zlib1g-dev
+
+d:
+  # order: latest DMD, oldest DMD, LDC/GDC, remaining DMD versions
+  # this way the overall test time gets cut down (GDC/LDC are a lot
+  # slower tham DMD, so they should be started early), while still
+  # catching most DMD version related build failures early
+  - ldc-1.4.0
+  - ldc-1.5.0
+  - ldc-1.6.0
+  - ldc-1.7.0
+  - ldc-1.8.0
+  - ldc-1.9.0
+  - ldc-1.10.0
+  - ldc-beta
+  - dmd-2.074.0
+  - dmd-2.074.1
+  - dmd-2.075.0
+  - dmd-2.075.1
+  - dmd-2.076.1
+  - dmd-2.077.0
+  - dmd-2.078.0
+  - dmd-2.079.0
+  - dmd-2.080.0
+  - dmd-2.081.1
+  - dmd-beta
+
+matrix:
+  allow_failures:
+    - d: dmd-beta
+    - d: ldc-beta
+
+script: ./travis-ci.sh
+
+cache:
+  directories:
+  - $HOME/.dub
+  - .dub

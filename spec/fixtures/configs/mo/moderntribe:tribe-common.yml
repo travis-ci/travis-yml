@@ -1,0 +1,123 @@
+sudo: required
+
+dist: xenial
+
+language: php
+
+notifications:
+  email: false
+
+php:
+  - '7.0'
+
+services:
+  - mysql
+
+addons:
+  apt:
+    packages:
+      - libjpeg-dev
+      - libpng12-dev
+      - php-mysql
+
+# disable the default submodule logic
+git:
+  submodules: false
+
+cache:
+  directories:
+    - vendor
+    - $HOME/.composer/cache
+
+env:
+  global:
+    - WP_VERSION="latest"
+    - WP_ROOT_FOLDER="/tmp/wordpress"
+    - WP_URL="http://localhost:9000"
+    - WP_DOMAIN="localhost:9000"
+    - WP_TABLE_PREFIX="wp_"
+    - DB_NAME="wp"
+    - TEST_DB_NAME="test"
+    - WP_ADMIN_USERNAME="admin"
+    - WP_ADMIN_PASSWORD="password"
+
+before_install:
+  # create the databases needed for the tests
+  - mysql -e "create database IF NOT EXISTS $DB_NAME;" -uroot
+  - mysql -e "create database IF NOT EXISTS $TEST_DB_NAME;" -uroot
+
+  # tweak git to correctly work with submodules
+  - sed -i 's/git@github.com:/git:\/\/github.com\//' .gitmodules
+  - git submodule update --init --recursive
+
+install:
+  # disable XDebug to speed up the tests
+   - phpenv config-rm xdebug.ini
+
+before_script:
+  # set up folders
+  - mkdir -p /tmp/tools $WP_ROOT_FOLDER
+
+  # get the current branch name from Travis
+  - export CURRENT_BRANCH=$(if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then echo $TRAVIS_BRANCH; else echo $TRAVIS_PULL_REQUEST_BRANCH; fi) && echo "Current branch is $CURRENT_BRANCH"
+
+  # install wp-cli
+  - wget https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar -P /tmp/tools/
+  - chmod +x /tmp/tools/wp-cli.phar && mv /tmp/tools/wp-cli.phar /tmp/tools/wp
+  - export PATH=$PATH:/tmp/tools:vendor/bin
+
+  # install WordPress in the `wordpress` folder
+  - cd $WP_ROOT_FOLDER
+  - wp core download --version=$WP_VERSION
+  - wp config create --dbname="$DB_NAME" --dbuser="root" --dbpass="" --dbhost="127.0.0.1" --dbprefix="$WP_TABLE_PREFIX"
+  - wp core install --url="$WP_URL" --title="TEC Tests" --admin_user="$WP_ADMIN_USERNAME" --admin_password="$WP_ADMIN_PASSWORD" --admin_email="admin@tribe.localhost" --skip-email
+
+  # clone The Events Calendar in the plugins folder
+  - cd ${WP_ROOT_FOLDER}/wp-content/plugins
+  - git clone --branch=master https://github.com/moderntribe/the-events-calendar.git the-events-calendar
+  - cd the-events-calendar
+  - git fetch
+  # if the plugin has the current branch as a remote use that
+  - if [ $CURRENT_BRANCH ]; then export HAS_BRANCH=$(git branch -r | grep $CURRENT_BRANCH) && echo "Found current branch - $HAS_BRANCH"; else export HAS_BRANCH=0; fi
+  - if [ $TRAVIS_BRANCH ]; then export HAS_TRAVIS_BRANCH=$(git branch -r | grep $TRAVIS_BRANCH) && echo "Found Travis Branch - $TRAVIS_BRANCH"; else export HAS_TRAVIS_BRANCH=0; fi
+  - if [ $HAS_BRANCH ]; then export TEC_BRANCH=$CURRENT_BRANCH; else export TEC_BRANCH=$TRAVIS_BRANCH; fi; echo "TEC Branch is $TEC_BRANCH"
+  # allow a TEC build branch to override the branch
+  - if [ $TEC_BUILD_BRANCH ]; then export TEC_BRANCH=$TEC_BUILD_BRANCH; fi; echo "TEC Branch is $TEC_BRANCH"
+  - git checkout ${TEC_BRANCH}
+  - sed -i 's/git@github.com:/git:\/\/github.com\//' .gitmodules
+  - git submodule update --init --recursive
+
+  # Copy the Dependency Test plugin in the plugins folder.
+  - cp -r ${TRAVIS_BUILD_DIR}/tests/_data/dependency/dependency-test ${WP_ROOT_FOLDER}/wp-content/plugins
+  - ls -la ${WP_ROOT_FOLDER}/wp-content/plugins/dependency-test
+
+  # get back to the build folder
+  - cd $TRAVIS_BUILD_DIR
+
+  # spin up the PHP server in background
+  - nohup php -S ${WP_DOMAIN} -t ${WP_ROOT_FOLDER} > phpd.log 2>&1 &
+
+  # Setup the dependency test dump
+  - cd $WP_ROOT_FOLDER
+  - wp rewrite structure '/%postname%/' --hard
+  - wp core update-db
+  - wp plugin deactivate --all
+
+  # pull the correct common branch we are testing
+  - export PLUGIN_DIR="$WP_ROOT_FOLDER/wp-content/plugins/the-events-calendar/common"
+
+  - cd $PLUGIN_DIR
+  - git checkout origin/$CURRENT_BRANCH
+  - composer update
+
+  # get to the common dir
+  - cd $PLUGIN_DIR
+
+  # Generate a dependency-test dedicated dump
+  - wp db export ${PLUGIN_DIR}/tests/_data/dependency-dump.sql
+
+script:
+  - codecept run integration
+  - codecept run wpunit
+  - codecept run muwpunit
+  - codecept run dependency

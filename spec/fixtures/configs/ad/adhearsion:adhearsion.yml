@@ -1,0 +1,25 @@
+language: ruby
+rvm:
+  - 2.3.7
+  - 2.4.4
+  - 2.5.3
+  - jruby-9.1.17.0
+  - jruby-9.2.5.0
+  - ruby-head
+  - jruby-head
+jdk:
+  - openjdk8 # for jruby
+before_install:
+  - ruby -v # for (j)ruby-head
+  - rvm @global @default do gem uninstall bundler -a -x --silent || true
+  - gem install bundler -v '<2'
+matrix:
+  allow_failures:
+    - rvm: ruby-head
+    - rvm: jruby-head
+    - rvm: jruby-9.2.5.0
+env: ARUBA_TIMEOUT=120 AHN_ENV=development JRUBY_OPTS="-J-Xmx512m"
+sudo: false
+notifications:
+  slack:
+    secure: Y7EqF/9FY7mca63c1DM7kEr34fNtFclWXJj9vLqVQJwR3rCDZUZSD8DlqHJDwE6KRCCDsSkyV4lihCim+GEM28CRcJir0AEUJhXHvIMckjH7n38W9OGN26RuJGZTapjgCSMOBeq0YpSe6dAnZeRpZRJxsTFtP5ptLD5RRjIMzZM=

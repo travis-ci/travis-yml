@@ -1,0 +1,20 @@
+sudo: required
+
+services:
+    - docker
+
+script:
+    - cp docker-compose.yml.dist docker-compose.yml
+    - sed -i "s/REPLACE_WITH_YOUR_EMAIL/jeyser-crm.travis@example.com/g" docker-compose.yml
+    - docker-compose build
+    # check prod env is working
+    - docker-compose up -d
+    - sleep 10 && docker-compose run --rm web php bin/console cache:clear -e prod --no-warmup
+    - docker-compose run --rm web composer install:first
+    - docker-compose run --rm web php bin/console doctrine:schema:validate --ansi
+    # Run tests on test env
+    - sleep 10 && docker-compose run --rm web php bin/console cache:clear -e test --no-warmup
+    - docker-compose run --rm web php -d memory_limit=1024M vendor/bin/behat ./features/
+    - docker-compose stop
+
+

@@ -1,0 +1,17 @@
+language: node_js
+node_js:
+- '8'
+- '9'
+- '10'
+install:
+  - npm install -g codecov
+script:
+- npm install
+- npm test
+- codecov
+cache:
+  directories:
+  - node_modules
+notifications:
+  slack:
+    secure: bpLDq7PUd1GDJ2EneEl4k/ypYzw4gFS+j5VxuQS1biSDyFP+vkdTcq0IZ72tl3BJA+Imtw6/rdtbjrcRmae+yRcWMxEoU++fa3ANgnkLQjLA3W4eZFpdsvYxyC8TTmMjdRd4acDZQFcSo5aLzBTKoDDXhsmEwd9s5aK1g2en6uEecEXqValhbRMYLT+XtrO+NM1ZuqFgAhDB+qTrFxOK3iJtiRGulYVjJxDx655VNWJgCDEmLxbpLAnzrap1vrTQMGqLa1rl3DuvFGI49u8sLUySU6mJFYkzJcXcibauCTi6wOiHs7Uq/43R6NiDbT1sTvu5LvaboW4bVAyuzrwlH1dixbum+bovJ0dkdhb2eeKr/Bj5Dz5EOXlv53bCF2kNzP99AEiVuEX9I1b8exJvPi6BzARcdr+iC6dhKErFe3Ixs8324fBsV5u3DCis2TZ74lqlhtOR8NffMAzQBTE7dcolk0Xau77dt3t2bxcGlCHy0j9smjsAFIfzkYkOsj/lAmEWbneBmnAM+ZBiMUIgHolMxO+jVWk1+ITY/6W72QshobMhyA/ScHx4jSAUiXqNuNIcO0Vym2uyNMvMsuPy2qkOrHE1lcDC8A2GPmJB5GXCoD7Iw8ve+uxyPFV85/9nNcDKDZJZLw1UC87qPKXwZACQeasmU420elvec7hP+Ok=

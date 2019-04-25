@@ -1,0 +1,271 @@
+language: node_js
+dist: trusty
+matrix:
+  fast_finish: true
+  allow_failures:
+    - node_js: '10'
+    - node_js: '11'
+env:
+  global:
+    - CPUS_COUNT=4
+    - TRAVIS_AUTHOR_EMAIL=travis@randytarampi.ca
+    - TRAVIS_AUTHOR_NAME=Travis
+    - SENTRY_ORG=randytarampi
+    - SENTRY_PROJECT=me
+    - SENTRY_LOG_LEVEL=debug
+    - secure: ZTBYFZ10aI9BZPy5svRBilIqEbx88fLxUVgblqhlWStF8jhnWslOULzjXFbz2dpTboEYDxlFwfo9+K0hYUJmL7iDtpnKX9pbA5SXQxok2W9zoGGrNDedcXIQxyCWMKKmpcco5B6PFS+uScuYSQzUu9FEwkcEXoxr1hUom2THEXm3FxRHMP5iCr9HwNb0ZmHq622G5jEtCImWErHauLYyuay9A9geFysHuUE5qNITsQP5IjNH2vEqs3KAGZxLAUbV7OKwafEh2mPDqYV/96uOf4uGtQA5EV2yfoemkLN1OgffGGLoPqdL5kDzkcrPacbVvQSc8pL5T4irsNOngs3PsiEtz21qdkA0o9pwsbmC4HWRxq/4A86ECH1mWoLXp6aF6LmUpxclnQIj46986Dm+DSfg9wmUHP4WJsfrQOfJ4ZIgtAG0hS5nKSHY9qep9bkLNgP4K6ZCVosUG3QgA5nImyP++90H8eM6hzNCpXCBX71S1QmW6iQqPT1B34S2fJzPQYU3mFX05itP7V9ikKsFXy9YDjmzc8f1E09/WH1bJcW/4kcHUxyki6PZy4hWM7252H7iI1wcseOExzmS9awkZUKyGqVrVQ9D7/KZxmh9zHfRHXRZj1FSDtLBaPSlAS8Do0EDToFpUsFEdHUyvgf3QWg6jwweS9zXlXTmKxBPxz8=
+    - secure: oxfqOoaXj7BuY0mNwqJdvj/3HPShjhKpS5iCAhd02IvrJHXsYVzOf1JEj6fO94VntDNKpep/2fzl+pfIBgsyGCB8JsGVTyszitbJVSZio7kJFgNj9XZr6WajFU2jfSmqV7H7Z1pGcEESTbPdGdLAwL7PJnik8OEWKleP6WDC5IPDN7yVycn6h72vMoX8VDqZPnP0ZuaiW1VaGrHCcg5Fg9Id5TRzHsmz5yE0DYOPL5QO8NI3JAk5Sq+nqCvb0/Ac0pSTJgqfKXDryIws17y18VubKuLAQMhfHXC9k5C2HSR/TWUqvzv6X0+tnxhJmvcmk6O2zF5YhLInJSrRjTOWnHAgYfBOC+8+Zoz7kl/YYKAFnn7LGT5e3L11KFO6Esip84MPJWU95swiQcu014Kf906WYN2kKlW5J5njOwrGqY3pXh9VrZp+7tUH1611F7/HBmXqe874pByDUdUBcnVEnCUdtvAYlJLVeIvmemQDn3oiXcHXrC+454BbDUL5CDlUGIhwibxbxj+Z9wPdHuflXf0ecegFopAjDBSQhJpQ1CxP3BiDSPKiI5J1UmA5HGnxuTF5/EEbDSvWC3VCm0MzN9SlmU74bAaCLDWIU4HKESmzfmX7z12gGpDgpALyjXq+zGTeGSkpMBa1NBWHzqWxn8WsKKMUgqM8FGMDzRNpl90=
+cache: npm
+before_install:
+  - export TRAVIS_REPO_OWNER=${TRAVIS_REPO_SLUG%/*}
+  - export TRAVIS_REPO_NAME=${TRAVIS_REPO_SLUG#*/}
+  - export PRINTABLE_PUPPETEER_NO_SANDBOX=${CI:=true}
+  - uname -a
+  - lscpu
+  - npm install -g npm
+stages:
+  - name: Test
+    if: tag IS blank AND NOT commit_message ~= /(?:^release\(travis\):)/
+  - name: Deploy (dev)
+    if: tag IS blank AND type = push AND branch = master AND NOT commit_message ~= /(?:^release\(travis\):)/
+  - name: Release
+    if: commit_message ~= /(?:^release\(force\):)/ OR (tag IS blank AND type = push
+      AND branch = master AND NOT commit_message ~= /(?:^release\(travis\):)/)
+  - name: Deploy (prd)
+    if: tag IS present
+jobs:
+  include:
+    - stage: Test
+      node_js: '8.10'
+      env: &1
+        - NODE_ENV=test
+      before_script: &2
+        - npm run pretest
+        - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64
+          > ./cc-test-reporter
+        - chmod +x ./cc-test-reporter
+        - "./cc-test-reporter before-build"
+      script: &3
+        - npm run cover:actual
+      after_script: &4
+        - npm run cover:collect
+        - npm run coveralls
+        - "./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT"
+      after_failure: &5
+        - npm run kill --prefix packages/service
+      after_success: &6
+        - npm run coveralls
+    - stage: Test
+      node_js: '10'
+      env: *1
+      before_script: *2
+      script: *3
+      after_script: *4
+      after_failure: *5
+      after_success: *6
+    - stage: Test
+      node_js: '11'
+      env: *1
+      before_script: *2
+      script: *3
+      after_script: *4
+      after_failure: *5
+      after_success: *6
+    - stage: Release
+      name: GitHub
+      node_js: '8.10'
+      env:
+        - NODE_ENV=prd
+        - RELEASE=true
+        - secure: OdYWXWY8Ienb9lqPDNzGm1fuq2Yew7ubT44iCSuUSi4BvYIffvSEzrMsi1/ao+09joWPZWRzqqrSiUNjr3oSPQOXKDlYNczLaKty7oTjOKVEC/oH3kRdE1fj+eWXVisKHOLyBT5h52eCIwPosq2zAxLB1ANt+bvmzvCQBatZgox0stJ8KNTXsPWCqRGl5EbBM1xBCFLoo3nZ9+kbzhcqsyzUAvPXwea+5ySndYYqebqoYH1mzG84l2hXPwZm1/kvr7ujhUxAsre4RlhxiuWGmTVztOpXjhN1yFbp52bU2jlrscnh77HDTJZgvqhfVFA6HOT5Vi7Uy/VRU6TJaTDVrCafmbiU3AeZNq44WkDBtoiNEsLQVJr2xzr0pIw/MueVZt87/DcspYqjAMNvyhsL4esHs5HiS+/0zwc9IVbLq92WIX3vIIKMCQe7/q8gq4WKrusHgNQABy3j7JKttp4Oq31HkiFbg59tTf3LIbPzDCyws7IXyWDp9EUuDqPAfmJHg+Rwd1SGu5/okqmCYqCeGNMosyBNORr1V5Yogemi+N8cqaGnLfPkaOMtuRdRfhLaD+3biEVV8SkeMTEqz5B7zjDzvz3ONJ91OyOdwmpUNlv9k0fKq0iwzTsSV/gZ7XvETwXAAorGai0kDPzHB2FAEPIx5XyMcloDj5e1EGZ+aew=
+      install:
+        - git checkout $TRAVIS_BRANCH
+        - HAS_PUBLISHABLE_CHANGES=`npx lerna changed -alp || true`
+        - IS_FORCED_RELEASE=`[[ $TRAVIS_COMMIT_MESSAGE =~ (^release\(force\):) ]] && echo
+          true || true`
+        - LETTER_PACKAGE_DIR=$TRAVIS_BUILD_DIR/packages/letter
+        - RESUME_PACKAGE_DIR=$TRAVIS_BUILD_DIR/packages/resume
+        - JSONRESUME_PACKAGE_DIR=$TRAVIS_BUILD_DIR/packages/jsonresume-theme
+        - WWW_PACKAGE_DIR=$TRAVIS_BUILD_DIR/packages/www
+        - git config --local user.name "$TRAVIS_AUTHOR_NAME"
+        - export COMMIT_AUTHOR=`git --no-pager show -s --format='%ae' \`git rev-parse\``
+        - git config --local user.email "$TRAVIS_AUTHOR_EMAIL"
+        - git remote add ci-push https://${GH_TOKEN}@github.com/${TRAVIS_REPO_SLUG}.git
+        - if [[ -n "$HAS_PUBLISHABLE_CHANGES" || -n "$IS_FORCED_RELEASE" ]]; then
+          git status;
+          npx lerna version --no-git-tag-version --no-push --conventional-commits --yes --exact &&
+          npm ci &&
+          npm run letter --prefix packages/letter &&
+          npm run resume --prefix packages/resume &&
+          npm run resume --prefix packages/jsonresume-theme &&
+          npm run docs --prefix packages/letter &&
+          npm run docs --prefix packages/resume &&
+          npm run docs --prefix packages/jsonresume-theme &&
+          npm run docs --prefix packages/www;
+          fi;
+      before_script: skip
+      script: skip
+      after_script: skip
+      before_deploy:
+        - REPO_VERSION=$(node -p 'require("./lerna.json").version')
+        - if [ -d "$LETTER_PACKAGE_DIR/docs" ]; then git add --verbose --force --all $LETTER_PACKAGE_DIR/docs; fi;
+        - if [ -d "$RESUME_PACKAGE_DIR/docs" ]; then git add --verbose --force --all $RESUME_PACKAGE_DIR/docs; fi;
+        - if [ -d "$JSONRESUME_PACKAGE_DIR/docs" ]; then git add --verbose --force --all $JSONRESUME_PACKAGE_DIR/docs $JSONRESUME_PACKAGE_DIR/resume.json; fi;
+        - git rm --ignore-unmatch --force $WWW_PACKAGE_DIR/docs/precache-manifest.*.js;
+        - if [ -d "$WWW_PACKAGE_DIR/docs" ]; then git add --verbose --force --all $WWW_PACKAGE_DIR/docs; fi;
+        - git add packages/*/CHANGELOG.md
+        - git rm --ignore-unmatch --force **/*.pdf_original # FIXME-RT: Ugh. Can't just pass `exiftool` `--overwrite_original` otherwise it just seems to hang. At least on my machine.
+        - echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
+        - export TRAVIS_TAG=${TRAVIS_TAG:=v$REPO_VERSION}
+        - export TRAVIS_TAG_COMMIT=${TRAVIS_TAG_COMMIT:=$(git rev-parse HEAD)}
+        - 'if [[ -n $(git status -s) ]]; then git commit -am "release(travis): Release
+      v$REPO_VERSION."; export TRAVIS_TAG_COMMIT=$(git rev-parse HEAD); git tag $TRAVIS_TAG; git push ci-push master; IS_PUBLISHING=true npx lerna publish from-git --yes --concurrency ${CPUS_COUNT}; fi;'
+        - mkdir -p $TRAVIS_BUILD_DIR/../dpl_cd_upload
+        - tar -zcf $TRAVIS_BUILD_DIR/../dpl_cd_upload/me.tar.gz -C $TRAVIS_BUILD_DIR/ $TRAVIS_BUILD_DIR
+      deploy:
+        - provider: releases
+          api_key:
+            secure: bscGrBY4fO8ca32Tr35yEZuMgt7QDMydEDghvsOEhvkoTQ2piicg5QeAJDbhd1lxszLbQ/8sN0Dn08VM1GN4iWMLyZPVcf0vFAxm+8kkNr5zepjwxvOkzMv4FfnILSQEWgMIS6xTopuLxKAe7OsPGOjV/H7S+3/UOil2Av1dKx4jd93L1Q+ciERDHtDgnA6zIYqtuFe6aoiMe8TDL5/q2Xvbp6M3UJpOor64u5uuc1ruoxPewJV9NYtwP0M6JR3wMMW/chOPNRVfp2WlXPYf/U8HOThWeAhBHZNgj2pXhvvNDq8w6Z6jcHt2mb+2ot8XZAUMqllONwSKQUBagkY2frXCTB1B4BVyVkQL2N3KlpQbPfjh3yk3qU9n0o5TECSWhqxAtCe9Zk6hy5/VSQib7zmVTh74JfoEMdudHtgciEeE5BMz8aEwo0+nInQcwVI1qQkTJ/WqMHAz7UDckMsgmnPoD5xYF13tRCJBk5ctmb28uKJYd2/1CQwOHI/KzpMhWO/KgcrjFSy4J3zDFtX8v9j7ZCMtjwpnf+juMADEoYbdchfsYVPFxhdYlGIdTPfKMuvrSIxpld07RMLM6/8gRUKCNpItf7GWKGNwMOd1j5cS266nCLBjA9HoG0fE0oCEcyP3lHgWRtiD3It5hj+Fv/d2eYgRLBZyE9VVoUFvaIE=
+          file_glob: true
+          file:
+            - me.tar.gz
+            - "$TRAVIS_BUILD_DIR/packages/jsonresume-theme/docs/resume.*.pdf"
+            - "$TRAVIS_BUILD_DIR/packages/letter/docs/letter.*.pdf"
+          skip_cleanup: true
+          on:
+            condition: "-n $HAS_PUBLISHABLE_CHANGES"
+          target_commitish: "$TRAVIS_TAG_COMMIT"
+    - stage: Deploy (dev)
+      name: www
+      node_js: '8.10'
+      env:
+        - BABEL_ENV=production
+        - NODE_ENV=dev
+        - DEPLOY=true
+        - WWW_PACKAGE_DIR=$TRAVIS_BUILD_DIR/packages/www
+        - secure: BqXseN/Q6y0i7wX9eqO+3qmfNybZcOJXB1FHDa4vEfM58HvXGAzDsxc5cLn+Cv4DlZ5jBQDgPQxKz5uVPuTZI1m+Ev39S2aR9be3EGISfyShYB1SM8Mzq4vic6/gdarR7rtRMVtdU/CeZPQCXVde9NxR4oNjvDP7GwHGDsm4fjgOW7c2am70JFl26z5O2lqiw/NPQnEo45vGuIlhZaGxayn9Dy0EVHdNMYQ+2JsBXvEC0CTgAbNS8ODL223YSe3UOiN/cKOEtBOe5Sd25pu2JXHrMDWSiJnTIJRwg7VAUqNvEb+9QEGzEzKJKxSfNo7z1QnQ3JMLd8T7HJQ+TaXUr5uiOqNLHybDLumcSSghNHZQVY6+m2wFs0AwZvWHi/nPs1ld7WvlDzPVwfs8FQA3g5w07aMaVrd1O+xo0/5ZXVUkocxksLtSuXTRutwHQMbEMrbmp0uzXRH3FZvbzrmvhtbP3Kz1dO+aFC7IKaWezj5PRkdNtWPkqS+gT0IXrJnJ8gAEsRXToxEruJGwBdKkhQqQwoz7hjf8VChUOMfnOfW64/Os6yK9Grr/UyAdkf9jUL45gb8I1C16ddz6getXtrcQV/YFGkBckNnMO6SAsPci84ESlX69tlXnpLwAjf5MOpwmY/MJfX7Cd1AibzcX1rXHufPVuOdV4iSsyS+ioWY=
+      install:
+        - git checkout $TRAVIS_BRANCH
+        - npx lerna version --no-git-tag-version --no-push --yes prerelease --preid=$TRAVIS_COMMIT
+        - npm ci
+        - npm run docs --prefix packages/www
+      before_script: skip
+      script: skip
+      after_script: skip
+      before_deploy:
+        - echo "dev.randytarampi.ca" > $WWW_PACKAGE_DIR/docs/CNAME;
+        - if [ -d "$WWW_PACKAGE_DIR/docs" ]; then git add --verbose --force --all $WWW_PACKAGE_DIR/docs; fi;
+        - 'if [[ -n $(git status -s) ]]; then git commit -m "release(travis): Prepare
+      to deploy \`www\` to ${TRAVIS_REPO_OWNER}.github.io.git"; fi;'
+      deploy:
+        - provider: pages
+          local-dir: packages/www/docs
+          repo: "${TRAVIS_REPO_OWNER}/${TRAVIS_REPO_OWNER}.github.io"
+          target-branch: master
+          verbose: true
+          email: "$TRAVIS_AUTHOR_EMAIL"
+          name: "$TRAVIS_AUTHOR_NAME"
+          github-token: "$GH_TOKEN"
+          skip_cleanup: true
+          on:
+            branch: master
+    - stage: Deploy (dev)
+      name: posts
+      node_js: '8.10'
+      env:
+        - BABEL_ENV=production
+        - NODE_ENV=dev
+        - DEPLOY=true
+        - secure: BqXseN/Q6y0i7wX9eqO+3qmfNybZcOJXB1FHDa4vEfM58HvXGAzDsxc5cLn+Cv4DlZ5jBQDgPQxKz5uVPuTZI1m+Ev39S2aR9be3EGISfyShYB1SM8Mzq4vic6/gdarR7rtRMVtdU/CeZPQCXVde9NxR4oNjvDP7GwHGDsm4fjgOW7c2am70JFl26z5O2lqiw/NPQnEo45vGuIlhZaGxayn9Dy0EVHdNMYQ+2JsBXvEC0CTgAbNS8ODL223YSe3UOiN/cKOEtBOe5Sd25pu2JXHrMDWSiJnTIJRwg7VAUqNvEb+9QEGzEzKJKxSfNo7z1QnQ3JMLd8T7HJQ+TaXUr5uiOqNLHybDLumcSSghNHZQVY6+m2wFs0AwZvWHi/nPs1ld7WvlDzPVwfs8FQA3g5w07aMaVrd1O+xo0/5ZXVUkocxksLtSuXTRutwHQMbEMrbmp0uzXRH3FZvbzrmvhtbP3Kz1dO+aFC7IKaWezj5PRkdNtWPkqS+gT0IXrJnJ8gAEsRXToxEruJGwBdKkhQqQwoz7hjf8VChUOMfnOfW64/Os6yK9Grr/UyAdkf9jUL45gb8I1C16ddz6getXtrcQV/YFGkBckNnMO6SAsPci84ESlX69tlXnpLwAjf5MOpwmY/MJfX7Cd1AibzcX1rXHufPVuOdV4iSsyS+ioWY=
+        - AWS_ACCESS_KEY_ID=AKIAIEKKCTFCDTGKKHMA
+        - secure: HG5SiuIvZNcqaAGjaPwyQFVxW5uUfGbrN3fwqDEyh3oLW1pcnofNCNGLotWoFTexSXkPGcJeswEPfo5koRej84h1CqmNOPJNmwomjR/lLVf1/CSRY5eo4rf8no9wwEOhzsSX+r4yCyOKoBQ8iaxkcwo/fvPIEwAo1NPLcDYusm7bvAsCrO5NDpZ0KkhYqrD823UqSKLtpVAj8ZVZih3ySI+QL/cPN1LlaOwbREbSHmKvDj7p63k0F/znQ9y+jip/dRgAYreTVLOHKKQmdTLDbl0Lf6yn1m8NvC94Cl2Klt4791i/AUqrC1JV7eEE9f9n7jI3l5M469C5DWVFC9Nc9S1d2tcUAbQS441hZMsp0Hh7iLb601GSQZwI/KbNtM1hYJa/ONSrfJcWjU6MQudUHuOIZo1AoiDjlenznouRiIssJ+f3KKxK8t9UEzlTVsHSoBMvQ9lVabae7iTltM6zVD/BlirUhWFpSInSQsHOIMV1fkDep/0lfXX8rufb5pHm41A8yz3bkwLSPQILEwY9O21ngkffSKlu1sUFqvSdE6SwH5nvXEDaF44QvO9OAn3T6BRz+mHvtGCe9xwq9ixsdpEHzGcC6xHD+coJwFshByWkaMP6+RRobGwpHaxn59DGoTPWY5bhaL2EOiAQBK8d4iQg/rPM++Mcd7jDHZKnXzc=
+      install:
+        - git checkout $TRAVIS_BRANCH
+        - npx lerna version --no-git-tag-version --no-push --yes prerelease --preid=$TRAVIS_COMMIT
+        - npm ci
+      before_script: skip
+      script: skip
+      after_script: skip
+      deploy:
+        - provider: script
+          script: npm run deploy --prefix packages/service
+          skip_cleanup: true
+          on:
+            master: true
+    - stage: Deploy (prd)
+      name: www
+      node_js: '8.10'
+      env:
+        - NODE_ENV=prd
+        - DEPLOY=true
+        - secure: BqXseN/Q6y0i7wX9eqO+3qmfNybZcOJXB1FHDa4vEfM58HvXGAzDsxc5cLn+Cv4DlZ5jBQDgPQxKz5uVPuTZI1m+Ev39S2aR9be3EGISfyShYB1SM8Mzq4vic6/gdarR7rtRMVtdU/CeZPQCXVde9NxR4oNjvDP7GwHGDsm4fjgOW7c2am70JFl26z5O2lqiw/NPQnEo45vGuIlhZaGxayn9Dy0EVHdNMYQ+2JsBXvEC0CTgAbNS8ODL223YSe3UOiN/cKOEtBOe5Sd25pu2JXHrMDWSiJnTIJRwg7VAUqNvEb+9QEGzEzKJKxSfNo7z1QnQ3JMLd8T7HJQ+TaXUr5uiOqNLHybDLumcSSghNHZQVY6+m2wFs0AwZvWHi/nPs1ld7WvlDzPVwfs8FQA3g5w07aMaVrd1O+xo0/5ZXVUkocxksLtSuXTRutwHQMbEMrbmp0uzXRH3FZvbzrmvhtbP3Kz1dO+aFC7IKaWezj5PRkdNtWPkqS+gT0IXrJnJ8gAEsRXToxEruJGwBdKkhQqQwoz7hjf8VChUOMfnOfW64/Os6yK9Grr/UyAdkf9jUL45gb8I1C16ddz6getXtrcQV/YFGkBckNnMO6SAsPci84ESlX69tlXnpLwAjf5MOpwmY/MJfX7Cd1AibzcX1rXHufPVuOdV4iSsyS+ioWY=
+      install:
+        - npm ci
+        - npm run docs --prefix packages/www
+      before_script: skip
+      script: skip
+      after_script: skip
+      deploy:
+        - provider: pages
+          local-dir: packages/www/docs
+          repo: "$TRAVIS_REPO_SLUG"
+          target-branch: gh-pages
+          verbose: true
+          email: "$TRAVIS_AUTHOR_EMAIL"
+          name: "$TRAVIS_AUTHOR_NAME"
+          github-token: "$GH_TOKEN"
+          skip_cleanup: true
+          on:
+            tags: true
+    - stage: Deploy (prd)
+      name: resume
+      node_js: '8.10'
+      env:
+        - NODE_ENV=prd
+        - DEPLOY=true
+      install: skip
+      before_script: skip
+      script: skip
+      after_script: skip
+      deploy:
+        - provider: pages
+          local-dir: packages/jsonresume-theme/docs
+          repo: "${TRAVIS_REPO_OWNER}/me.resume"
+          target-branch: master
+          verbose: true
+          email: "$TRAVIS_AUTHOR_EMAIL"
+          name: "$TRAVIS_AUTHOR_NAME"
+          github-token: "$GH_TOKEN"
+          skip_cleanup: true
+          on:
+            tags: true
+    - stage: Deploy (prd)
+      name: posts
+      node_js: '8.10'
+      env:
+        - NODE_ENV=prd
+        - DEPLOY=true
+        - secure: BqXseN/Q6y0i7wX9eqO+3qmfNybZcOJXB1FHDa4vEfM58HvXGAzDsxc5cLn+Cv4DlZ5jBQDgPQxKz5uVPuTZI1m+Ev39S2aR9be3EGISfyShYB1SM8Mzq4vic6/gdarR7rtRMVtdU/CeZPQCXVde9NxR4oNjvDP7GwHGDsm4fjgOW7c2am70JFl26z5O2lqiw/NPQnEo45vGuIlhZaGxayn9Dy0EVHdNMYQ+2JsBXvEC0CTgAbNS8ODL223YSe3UOiN/cKOEtBOe5Sd25pu2JXHrMDWSiJnTIJRwg7VAUqNvEb+9QEGzEzKJKxSfNo7z1QnQ3JMLd8T7HJQ+TaXUr5uiOqNLHybDLumcSSghNHZQVY6+m2wFs0AwZvWHi/nPs1ld7WvlDzPVwfs8FQA3g5w07aMaVrd1O+xo0/5ZXVUkocxksLtSuXTRutwHQMbEMrbmp0uzXRH3FZvbzrmvhtbP3Kz1dO+aFC7IKaWezj5PRkdNtWPkqS+gT0IXrJnJ8gAEsRXToxEruJGwBdKkhQqQwoz7hjf8VChUOMfnOfW64/Os6yK9Grr/UyAdkf9jUL45gb8I1C16ddz6getXtrcQV/YFGkBckNnMO6SAsPci84ESlX69tlXnpLwAjf5MOpwmY/MJfX7Cd1AibzcX1rXHufPVuOdV4iSsyS+ioWY=
+        - AWS_ACCESS_KEY_ID=AKIAIEKKCTFCDTGKKHMA
+        - secure: HG5SiuIvZNcqaAGjaPwyQFVxW5uUfGbrN3fwqDEyh3oLW1pcnofNCNGLotWoFTexSXkPGcJeswEPfo5koRej84h1CqmNOPJNmwomjR/lLVf1/CSRY5eo4rf8no9wwEOhzsSX+r4yCyOKoBQ8iaxkcwo/fvPIEwAo1NPLcDYusm7bvAsCrO5NDpZ0KkhYqrD823UqSKLtpVAj8ZVZih3ySI+QL/cPN1LlaOwbREbSHmKvDj7p63k0F/znQ9y+jip/dRgAYreTVLOHKKQmdTLDbl0Lf6yn1m8NvC94Cl2Klt4791i/AUqrC1JV7eEE9f9n7jI3l5M469C5DWVFC9Nc9S1d2tcUAbQS441hZMsp0Hh7iLb601GSQZwI/KbNtM1hYJa/ONSrfJcWjU6MQudUHuOIZo1AoiDjlenznouRiIssJ+f3KKxK8t9UEzlTVsHSoBMvQ9lVabae7iTltM6zVD/BlirUhWFpSInSQsHOIMV1fkDep/0lfXX8rufb5pHm41A8yz3bkwLSPQILEwY9O21ngkffSKlu1sUFqvSdE6SwH5nvXEDaF44QvO9OAn3T6BRz+mHvtGCe9xwq9ixsdpEHzGcC6xHD+coJwFshByWkaMP6+RRobGwpHaxn59DGoTPWY5bhaL2EOiAQBK8d4iQg/rPM++Mcd7jDHZKnXzc=
+      before_script: skip
+      script: skip
+      after_script: skip
+      deploy:
+        - provider: script
+          script: npm run deploy --prefix packages/service
+          skip_cleanup: true
+          on:
+            tags: true
+notifications:
+  slack:
+    secure: MTSym0Ymg+oYMx+Fmf3a2g2LyVtPJ8hg4sjtbfdyPBZAhO3rU9RxRFrBimNp9knZppwFpofosW4C6bKEBAN6p2AfeZOqQmYuRetZdS27pO6mdBpH56EJ7o2VJS/5ec9Lqw77802FO8XiRtWwySvxyE9nEHmm5dxOYf2JYj9OTiyNqmyRJFTRQiURZLOxn1CJLUI3OB8A0dtRU1hI3xx0kP+q7fHXp8xdNssB8ETBXwzG3HFE12VQRseCe01U0PdmGiRwQRQGXcGg00KTPFU1Gin7LY9mhSHRV9TsmvTtx6gXMYHo2UiLts0Omeb80k1nDZwBcAYsY4bIpgI1e01jJpDIHbg4lWskbnnSZWHG9QPIsOcG236Oqz/5bj+J70gRMw1zu+UYnH8XcfgcV+tBOu86oj8rtWeFGr58mh1HOiNedvqef2xNi+Yc3Ykj3ZfjVITlI/Lfpi6ZPNhjpL4Bbanmyd3KbbaYpdWkY5+SYJOhidq6VpHpBIqsACUwsLl6X8Yajteh5TLMK9ixkaTL97BT8niHTtEwkraMs5a0yfi9EDQNOjFERJq48Jrhpuq+MosgmyMmgX+31khzIgMr9+AUy3wL3dmIO198+Wm/k2rElYJmYuORI+txzIwYDGsaUbusyhy578Q5ilsiLbF1jZnPrvlQKVLCTIAMlXdmTpw=
+addons:
+  apt:
+    packages:
+      - language-pack-ja
+      - japan*
+      - fonts-wqy-microhei
+      - ttf-wqy-microhei
+  hosts:
+    - dynamodb-local

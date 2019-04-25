@@ -1,0 +1,43 @@
+language: c
+cache: ccache
+compiler: gcc
+dist: trusty
+sudo: false
+env:
+  global:
+  - COMMIT_AUTHOR_EMAIL: piercus+travis@gmail.com
+addons:
+  apt:
+    packages:
+    - figlet
+    - frei0r-plugins-dev
+    #- libass-dev
+    - libfribidi-dev
+    - libmp3lame-dev
+    - libopencore-amrnb-dev
+    - libopencore-amrwb-dev
+    - libopenjpeg-dev
+    - libopus-dev
+    - libsoxr-dev
+    - libspeex-dev
+    - libtheora-dev
+    - libvorbis-dev
+    - libvo-amrwbenc-dev
+    - libwebp-dev
+    - libx264-dev
+    - libxvidcore-dev
+    - texinfo
+    - yasm
+before_install:
+- openssl aes-256-cbc -K $encrypted_f13d51a86e4e_key -iv $encrypted_f13d51a86e4e_iv -in deploy_key.enc -out deploy_key -d
+- git config user.name "Travis CI"
+- git config user.email "$COMMIT_AUTHOR_EMAIL"
+script: ./build.sh
+deploy:
+  provider: releases
+  api_key:
+    secure: WdSCrxAPUv58NCFrIRwaim3qrKUHnda73B+Xh39K2DiYbG1OMyP5OT7N5tiPVlF5n3Whdw++QFgnR0sI+6LqYEWU5pNxNqx27SpdJEXw8pmUak6DaUxyDAFR8lLaJ6DH0iSvCwr/A2Ux/UnrmxmfQWsufgxOIiuIT2bf3XMh0JYXb1QFasYTzVoxX3s6Frb38Be2ZfSrXAVIQ6uwggfHf3QytUF64JQAsw5Qp2TbC5hKOcUNsbCMzmU4WMy/h8OVm/wahC9y3D1Ote2W6hgX04Z3KAYNYe+7ZLBFiNPCz2didvMroM2L+aHbb43CJ8sOBD1Bb/1FLiP2prt8B/v1kmoL19Uk0mYmdlLddpq6iJZTwdzPoJQWnMwVDCchu9qiERqFVSXAvwldtQQ6T0fQ4FFgrTYbV0+zF0z5r5qZZed01AkEZq4Oc4+VFz7/uTQQuPU0egqwtwU4OJjehnSow61iGeMayxyXujGWqjf0RboHEI9iFCTY/qvDKvo81JyBI7SmhWNfTyqru0N/7HIAfqUcv90ClYxVD2wjuWO/AieOEsRMbEOqUQUX65mgtJVPnYpFxC1bRGQpnV4J6hVxU4EfpZchik5w8FlEJkavvHzRtZUzYZxg73Okh9VNrEhFJ5jbz3tYrscdfxRXKLukXgu2ANAL9uw66jUNVOGQKus=
+  file: ffmpeg-build-lambda.tar.gz
+  skip_cleanup: true
+  on:
+    tags: true

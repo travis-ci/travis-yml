@@ -1,0 +1,38 @@
+language: php
+php:
+- 7.1
+sudo: false
+before_script:
+- travis_retry composer self-update
+- travis_retry composer install --prefer-source --no-interaction
+- mysql -e 'create database bbms_acceptance_testing;'
+- touch storage/database.sqlite
+- export DISPLAY=:99.0
+- sh -e /etc/init.d/xvfb start
+script:
+- phpunit
+after_script:
+- wget https://scrutinizer-ci.com/ocular.phar
+- php ocular.phar code-coverage:upload --format=php-clover app/tests/codeception/_output/coverage.xml
+notifications:
+  email: false
+  webhooks:
+    on_success: always
+    on_failure: never
+  slack:
+    secure: qtxqVtoL6Qgp1MzfU8/lTqhG/7/J5djnIcBIzHyyd2waV9w4leWCNe3VIdPsAeAUmdLRndSRMWyijW1aqDAbH1x+wMjtakFegBvIc212Up20Uu1b3wQMAuKQkODT3kmkP5Z6Datry30K8Kn+QuLHadl942tSaVV9UsXsB+isCEk=
+env:
+  global:
+  - secure: LDABli5OS2hrPHtBHDcKPFPeRwxFNH4eybgoe6SwB8PzyNA2GA2V1J14J3nat179PHP+SRTsoJQ7/juiHgLJjl0wc8NZDBqzPkJQYoaYrfCbnci7+0Qe/EJqypMUJlOmdSAzMGgib7lppy3u0hzZYfQnyXl2QIeJtwKXS40R9cU=
+  - DB_DATABASE=bbms_acceptance_testing
+  - DB_USERNAME=root
+  - DB_PASSWORD=
+  - DB_HOST=localhost
+  - APP_ENV=testing
+  - CACHE_DRIVER=array
+  - SESSION_DRIVER=array
+  - QUEUE_DRIVER=sync
+  - ENCRYPTION_KEY=emd3liEAgqQIPi4m396yQBkLSwS0n4KT
+  - FILE_STORE=local
+  - MAIL_DRIVER=log
+  - BROADCAST_DRIVER=log

@@ -1,0 +1,13 @@
+language: ruby
+
+sudo: false
+
+os: linux
+dist: trusty
+
+before_script:
+  - wget https://github.com/premake/premake-core/releases/download/v5.0.0-alpha12/premake-5.0.0-alpha12-linux.tar.gz
+  - tar xf premake-5.0.0-alpha12-linux.tar.gz
+
+script:
+  - PREMAKE='./premake5' bundle exec rake

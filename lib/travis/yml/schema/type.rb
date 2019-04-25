@@ -28,12 +28,14 @@ module Travis
         #   map                      => [map]
         #
         def expand(node)
-          case node.type
-          when :any
+          case node
+          when Any
             node.types.map { |node| expand(node) }.flatten
-          when :seq
+          when Seq
             nodes = node.types.map { |node| expand(node) }.flatten
             nodes.map { |node| Seq.new(node.parent, types: [node]) }
+          when Ref
+            expand(node.lookup)
           else
             [node]
           end
@@ -44,12 +46,19 @@ module Travis
         end
 
         def export(obj)
+          # raise "cannot export a ref #{obj.inspect}" if obj.ref?
           exports[obj.namespace] ||= {}
           exports[obj.namespace][obj.id] = obj
         end
 
         def exports
-          @exports ||= {}
+          @exports ||= {
+            type: {
+              strs: transform(Strs.new),
+              secures: transform(Secures.new),
+              secure: transform(Secure.new),
+            }
+          }
         end
 
         def resolve(type)

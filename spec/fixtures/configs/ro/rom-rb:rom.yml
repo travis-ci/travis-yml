@@ -1,0 +1,34 @@
+language: ruby
+sudo: false
+before_install: gem update --system
+install:
+  - cd $TRAVIS_BUILD_DIR/core
+  - bundle install --without sql benchmarks console tools --gemfile ./Gemfile
+  - cd $TRAVIS_BUILD_DIR/repository
+  - bundle install --without benchmarks console tools --gemfile ./Gemfile
+  - cd $TRAVIS_BUILD_DIR/changeset
+  - bundle install --without benchmarks console tools --gemfile ./Gemfile
+  - cd $TRAVIS_BUILD_DIR
+  - bundle install --without benchmarks console tools --gemfile ./Gemfile
+  - gem install codeclimate-test-reporter
+before_script:
+  - psql -c 'create database rom_repository' -U postgres
+script:
+  - cd $TRAVIS_BUILD_DIR
+  - rake spec
+after_success:
+  - "[ -d coverage ] && codeclimate-test-reporter"
+rvm:
+  - 2.6.2
+  - 2.5.5
+  - 2.4.6
+  - jruby-9.2.7.0
+env:
+  global:
+    - COVERAGE='true'
+notifications:
+  webhooks:
+    urls:
+      - https://rom-rb.zulipchat.com/api/v1/external/travis?api_key=S1S2GRkXHlzlaCGyUwm7o4lg50IZrwCH&stream=notifications&topic=ci
+    on_success: change
+    on_failure: always

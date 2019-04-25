@@ -1,0 +1,12 @@
+language: go
+go:
+- 1.11.5
+before_install:
+- sudo apt-get update -qq
+- sudo apt-get install -y libglpk-dev protobuf-compiler
+- curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s -- -b $(go env GOPATH)/bin v1.15.0
+- go get -t ./...
+script: make lint
+notifications:
+  slack:
+    secure: P2JFOgAACLACdu7mq7fn8quA9zQL+bjrxUTY4r5+h96kY18ftBaL9xkURhmyxBS31fh4odI4LHy1Se6vRCZQfL7+AzzBqDrkjwezjN1TXY8XCFR3kV/Qes6QFFA4gYaSHYPw7ump+iU36EtR3veXf6eRmdu3WWuiRxCm/LS1y6qfhdnqVEO4x9/xLwyA6mnxTJ8AM9VS772Do6vrPSTGk2KhAj4Hy5kBZCeNf1vIJAKDj5e8oqUwfbZeRlHj9oPTISBlFYXmYdDM9iaVgtRoRNiuHl4NBdqIgDyhYo/Pqetg+JeZjWdOkMH9uu3p9tkEoJ371uDaoGpRf61ptfvxowr697IrWGiMXSNjKrxoKAvchUBUggFvklFCUlhxG1GQvEgG39GrT6rQswQSTwbU09ZHlpno7H4X3QedjeyEe0s/yfypHyQBjkS4JsPqGuEhdOov9i0lAeLd0tgU4DRjdhOfbFmR+TgvvQU7OTQ95+XRl4T6jUbIJoHvuYny+OyEyxHeT00Zo3gtlmuJOxmxGnxBqnVgZkglPI2D2AIT1do88lg70hnGMmuenTlP4gPUk9VT2iaCDZIwSA0O4c5UjGlxVieoO2L4mNbwAZJr3YBS/izyLqM6CUf2i9TzxuKPwsu1XRzeW3U+IgguqU4mvyYopyLnkzD7MuF52WXqbho=

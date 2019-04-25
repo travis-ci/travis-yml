@@ -1,0 +1,34 @@
+sudo: required
+
+dist: trusty
+
+language: node_js
+
+node_js:
+  - '10'
+  - '11'
+
+cache:
+  yarn: true
+  directories:
+    - node_modules/
+    - packages/*/node_modules
+
+addons:
+  apt:
+    sources:
+      - sourceline: 'deb http://packages.prosody.im/debian trusty main'
+        key_url: 'https://prosody.im/files/prosody-debian-packages.key'
+    packages:
+      - prosody-0.10
+      - lua-bitop # websocket
+      - lua-sec # tls
+
+before_script:
+  - sudo service prosody stop
+
+script:
+  - make test-ci
+
+after_failure:
+  - cat server/prosody.err

@@ -1,0 +1,43 @@
+language: scala
+
+scala:
+  - 2.10.7
+  - 2.11.12
+  - 2.12.8
+  - 2.13.0-RC1
+
+cache:
+  directories:
+    - $HOME/.ivy2/cache
+    - $HOME/.sbt/launchers
+
+jdk:
+  - oraclejdk8
+
+sudo: false
+
+script:
+  - git config core.whitespace tab-in-indent,trailing-space,space-before-tab,cr-at-eol
+  - git show --oneline --check
+  - wget https://raw.githubusercontent.com/paulp/sbt-extras/3c8fcadc3376e/sbt && chmod +x ./sbt
+  - ./sbt ++${TRAVIS_SCALA_VERSION} checkGenerateCodeError compile test:compile scalapropsTestNames scalapropsJS/test scalapropsJVM/test
+before_cache:
+  - find $HOME/.ivy2/cache -name "ivydata-*.properties" | xargs rm
+  - find $HOME/.ivy2/cache -name "*SNAPSHOT*" | xargs rm -rf
+  - if [[ ${JAVA_HOME} == $(jdk_switcher home oraclejdk11) ]]; then rm -rf $HOME/.ivy2/cache ; fi
+
+matrix:
+  include:
+    - scala: SCALA_NATIVE
+      jdk: oraclejdk8
+      sudo: required
+      before_install:
+      - curl https://raw.githubusercontent.com/scala-native/scala-native/master/scripts/travis_setup.sh | bash -x
+      - wget https://raw.githubusercontent.com/paulp/sbt-extras/3c8fcadc3376e/sbt && chmod +x ./sbt
+      script:
+      - ./sbt -J-Xmx5G rootNative/compile scalapropsNative/test
+    - scala: 2.12.8
+      jdk: oraclejdk11
+      script:
+      - java -version
+      - sbt ++$TRAVIS_SCALA_VERSION scalapropsJS/test scalapropsJVM/test

@@ -1,0 +1,12 @@
+language: node_js
+node_js:
+- '8'
+services:
+- docker
+after_success:
+- docker build -t aggipp/mathmlben .
+- if [[ "$TRAVIS_BRANCH" == "master" ]]; then docker login -u aggippbot -p $DOCKER_PASSWORD
+  ; docker push aggipp/mathmlben ; fi
+env:
+  global:
+    secure: SHNSbZzeLsU+XwVPkfNq6Se8tUzQTIhzpHAFABjODdUw2oDTCpR91kBouk1W9EogM801LTLmB0hA0A6fXm/Ghtbfb8mj7oLFeJKwU2N0awO3LSZDA1q1174o6vLbPPurnSVuV5fsT4S2T4ZCxAGEx2+9islbZ1PB2OtrHlllZyeW9K9ZOM14xkpcbdzT0aYQ7gdRx8xoXXUqKsHVtlXqdUwYmdCjN3qkt4cIySOFrCYdMXSMTXvl92YaXoQ6GDPIg+GAUkx9+HYypLNz/yt2hO44vd/rJ8TK7zy1a98W0BHQ+0O8qDZdIgTj5ZY8TxA2mLJrAukLqsUnn9p6gZkwwFBhg3V36kRL9tBI97V3+f89u7CaV/EsJAQM82F8gLA1T6CjHJjdY2RW8EvH64gsuAQt1AxczSTH3/f9CDAnjN9msuVykKmd45S6xfYil61h1LpOXz7gAPOTX6g5jwkvJtXseUPRPoO5y4jYywCKJYjgsuM5IWZ/5CRSolHiSMdXpqZ1c7r4FTHAMr8TBVQikfcOzaLP/3HdXvqi88/U8v6n1FVGwb/ho9hi2R9cphi8byWen+zNMfP2nRvJacDxZtMa+A0svik9MITER/juyZD9Y9h9dsGliXhms0w6PyoccrQT2au+uTZfjewtQGOLlIcfiNUupFqY/KS0PvguRP4=

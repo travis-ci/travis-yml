@@ -1,0 +1,8 @@
+sudo: required
+
+services:
+  - docker
+
+script:
+  - docker build -t android-nodejs .
+  - docker run android-nodejs /bin/sh -c "android list && node -v && npm -v"

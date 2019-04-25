@@ -1,0 +1,19 @@
+language: python
+
+python:
+    - "2.7"
+    - "2.6"
+
+branches:
+    only:
+        - master
+
+sudo: false
+
+install:
+    - pip install -r requirements-travis.txt
+
+script:
+    - inspekt lint
+    - inspekt indent
+    - inspekt style

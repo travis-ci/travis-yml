@@ -1,0 +1,84 @@
+sudo: required
+dist: xenial
+language: cpp
+matrix:
+  include:
+  - os: linux
+    compiler: gcc
+    language: python
+    python: "3.5"
+  - os: linux
+    compiler: clang
+    language: python
+    python: "3.5"
+  - os: osx
+    compiler: clang
+  - os: linux
+    compiler: clang
+    language: python
+    python: "3.6"
+  - os: linux
+    compiler: clang
+    language: python
+    python: "3.7-dev"
+
+addons:
+  apt:
+    sources:
+    - ubuntu-toolchain-r-test
+    packages:
+    - clang
+    - libboost-dev
+    - libgsl-dev
+    - python-dev
+    - python3-dev
+    - python3
+    - python
+    - wget
+
+before_install:
+- if [ "$TRAVIS_OS_NAME" == "osx" ]; then
+    brew update;
+    brew install gsl ffmpeg hdf5@1.10;
+    cp /usr/local/Cellar/hdf5/1.10.3/include/* /usr/local/include/;
+    cp /usr/local/Cellar/hdf5/1.10.3/lib/* /usr/local/lib/;
+    brew upgrade python;
+    brew install freetype;
+    curl -O https://bootstrap.pypa.io/get-pip.py;
+    python3 get-pip.py;
+  fi
+- if [ "$TRAVIS_OS_NAME" == "linux" ]; then
+    mkdir /opt/src;
+    pushd /opt/src;
+    curl -LO https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.10/hdf5-1.10.4/src/hdf5-1.10.4.tar.bz2;
+    tar xf hdf5-1.10.4.tar.bz2;
+    cd hdf5-1.10.4;
+    ./configure --enable-cxx --prefix=/opt/hdf5 && make && sudo make install;
+    export PATH=/opt/hdf5/bin:${PATH};
+    export LD_LIBRARY_PATH=/opt/hdf5/lib:${LD_LIBRARY_PATH};
+    export INCLUDE_PATH=/opt/hdf5/include:${INCLUDE_PATH};
+    cd /opt/src;
+    wget https://bootstrap.pypa.io/get-pip.py;
+    python3 get-pip.py;
+    cd /opt;
+    wget https://cmake.org/files/v3.12/cmake-3.12.1-Linux-x86_64.tar.gz;
+    tar xf cmake-3.12.1-Linux-x86_64.tar.gz;
+    export PATH=/opt/cmake-3.12.1-Linux-x86_64/bin:${PATH};
+    popd;
+  fi
+- python3 -m pip install -U setuptools
+
+script:
+- python3 setup.py build
+- python3 setup.py install
+- python3 -c 'import ecell4'
+
+
+cache: false
+notifications:
+  webhooks:
+    urls:
+    - http://dev.e-cell.org/ecell-bot/travis/notification
+  slack:
+    secure: kCN8PCrinRfaDFKn93TMrYY5LberBt8GHDHOtSbR7B1Zmo9Pr/uHxxqoXlu1g9XYxgs2lud/AKo0gKMu8n+QHWeAXaOwe8GSccEqBdilXDVp4fzO96jT2R82RYljQ2wAR5ug1YIACRq06mtFn6U7GRZRnpRI4VsEUFLJPljZ+UM=
+    slack: ecell-project:LvsPrINO4bNonZNTNw3IqMhV

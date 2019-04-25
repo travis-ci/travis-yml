@@ -1,0 +1,26 @@
+cache:
+  yarn: true
+  directories:
+    - node_modules
+language: node_js
+node_js:
+- "10"
+cache:
+  directories:
+    - node_modules
+install:
+  - yarn install
+script: yarn run cover --maxWorkers=4 --ci
+after_script: cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js
+branches:
+  only:
+  - develop
+notifications:
+  email: false
+  slack:
+    template:
+      - "%{repository_slug}"
+      - "<%{build_url}|#%{build_number}> - %{message}"
+      - "Commit: \"%{commit_subject}\" by %{author}"
+    rooms:
+      - secure: dbamgzDxvSMjnW3A4zfuImyq0FF6B3dZAekrb0cl5fy5wUEiNPCG37JJOh69iuctsLFRYfME7kEvst0iT/XRKS5qNpFob5mmcQ5Z0FkVOInjNBH/LjgcPbekP/0KnOfDFDK4bNubYR+ku8T8cIP9/kYV+jWvBfmGjxzdyUSBCBuFF8SkoNM+gQR+0yCy3uPCEzVkxJhm0r/ZOuTAl3/XZeQF2SRLYF4z88Nsbz7/SnZVxQOBhBQ9nXoF+HbcP/duQgIE3Ia5RDWhKvpOKRbhLR3RAjtTeyRpmteq5zaBYOpDS6a3tqZEHGruoGKO8s56Rh6KC0Wd+XRaogcN8CYlT2vNlabbzCEkjv7UwAboN8s/EFq5YFmCfm3/7SvwEQnKc8GVI+W06ALwZT2uul3j8cjSJ+L1isBiZug0E16khdUHLXjJWpgfTxMP2cv48TmMCWnU1KaRZqbWVqPLwyikqRZH39yekhM+fiahEkbTAfdRPN0a1mKRAYArzAsA2g+NeCD0DnQGQ7YcTur4ebx6fNA5jwELMan4pfvJ2KcUxADoA3gNhp/ybflLsxqJ7kHY/093n7IMnwClgTUnxW2EJspoRTihS0LrNaCcL+7c7NEeYjQQ5MJ1R2UoRFj3PHlSh1aLG55nb0UpZvr/Nv1/rFzRNQBuyq0W2OVchF+O2PQ=

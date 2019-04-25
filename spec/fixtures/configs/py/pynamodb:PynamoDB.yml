@@ -1,0 +1,37 @@
+language: python
+
+python:
+  - "3.6"
+  - "3.5"
+  - "2.7"
+  - "pypy"
+
+
+# See https://github.com/travis-ci/travis-ci/issues/9815
+matrix:
+  include:
+    - python: "3.7"
+      dist: xenial
+      sudo: true
+
+env:
+  - AWS_SECRET_ACCESS_KEY=fake_key AWS_ACCESS_KEY_ID=fake_id
+
+before_install:
+  - pip install six==1.9.0
+
+install:
+  - pip install -r requirements-dev.txt
+
+before_script:
+  - wget http://dynamodb-local.s3-website-us-west-2.amazonaws.com/dynamodb_local_latest.tar.gz -O /tmp/dynamodb_local_latest.tar.gz
+  - tar -xzf /tmp/dynamodb_local_latest.tar.gz -C /tmp
+  - java -Djava.library.path=/tmp/DynamoDBLocal_lib -jar /tmp/DynamoDBLocal.jar -inMemory -port 8000 &
+  - sleep 2
+
+script:
+  - py.test --cov-report term-missing --cov=pynamodb pynamodb/tests/
+  - if [[ "$TRAVIS_PYTHON_VERSION" == "3.7" ]]; then mypy .; fi
+
+after_success:
+  - coveralls

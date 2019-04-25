@@ -1,0 +1,38 @@
+addons:
+  chrome: stable
+
+language: node_js
+
+git:
+    depth: 3
+
+node_js:
+    - "8"
+    - "10"
+
+before_install:
+  - google-chrome-stable --product-version
+
+install:
+    - bundle install --jobs=3
+    - npm install
+
+cache:
+    directories:
+        - node_modules
+        - vendor/bundle
+
+env:
+    global:
+        - NPM_CONFIG_PROGRESS="false"
+    matrix:
+        - TEST_SAUCE="false"
+
+matrix:
+    fast_finish: true
+    exclude:
+        - node_js: "10"
+          env: TEST_SAUCE="false"
+    include:
+        - node_js: "10"
+          env: TEST_SAUCE="true"

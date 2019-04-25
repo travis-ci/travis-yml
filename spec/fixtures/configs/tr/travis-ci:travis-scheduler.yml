@@ -1,0 +1,25 @@
+language: ruby
+dist: trusty
+rvm: 2.4.2
+
+cache:
+  bundler: true
+
+services:
+- redis
+- rabbitmq
+
+addons:
+  postgresql: 9.6
+
+env:
+  matrix:
+  - RAKE_TASK=spec
+  global:
+    secure: BdVC3OHqYcgePLrkKIk28Ewn/dxCYFf3Cx+Q8P+BCDj6UPJyRSbKmILBzuX96H5xhKmUFo0A/upUhJI9UUP9aXHO7MzRe04/c88QdO4wGacVUaIyB20S0pr262zbc/nA50K9cVgpmWc64n6uQR1tgM6ZyyBnBeXkLzCAOHPq99I=
+
+before_install: gem install bundler
+
+before_script: bundle exec rake db:create --trace
+
+script: bundle exec rspec spec

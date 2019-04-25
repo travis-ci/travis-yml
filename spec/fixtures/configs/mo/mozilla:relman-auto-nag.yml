@@ -1,0 +1,17 @@
+sudo: required
+language: python
+env:
+    - TOX_ENV=py27
+python:
+  - "2.7"
+
+install:
+    - travis_retry pip install -r requirements-test.txt
+
+script:
+    - flake8 auto_nag/ --exclude=auto_nag/tests/
+    - tox -e $TOX_ENV
+
+after_success:
+    - coveralls
+

@@ -1,0 +1,54 @@
+language: cpp
+
+sudo: required
+dist: trusty
+
+cache:
+  bundler: true
+  directories:
+  - $HOME/ffmpeg
+
+addons:
+  apt:
+    sources:
+    - ubuntu-sdk-team
+    packages:
+    - qtbase5-dev
+    - lcov
+    - libboost-test-dev
+    - libqt5opengl5
+    - libqt5opengl5-dev
+    - yasm
+
+compiler:
+  - gcc
+
+before_script:
+  # Fake X server
+  - export DISPLAY=:99.0
+  - sh -e /etc/init.d/xvfb start
+
+install:
+  # Build and install third-party locally.
+  - ./scripts/travis-build-and-install-ffmpeg.sh
+  - bundle install
+
+script:
+  # Build libraries.
+  - mkdir build
+  - cd build
+  - cmake -DCMAKE_BUILD_TYPE=Debug -DSARA_BUILD_TESTS=ON -DSARA_BUILD_SAMPLES=ON -DSARA_BUILD_VIDEOIO=ON -DSARA_FFMPEG_DIR=$HOME/ffmpeg ..
+  - make -j$(nproc)
+  # Run tests.
+  - ctest --output-on-failure
+  # Make package.
+  - make package
+
+after_success:
+  - cd ..
+  - lcov --compat-libtool --directory build --base-directory=cpp/src --capture --output-file=coverage.info
+  - lcov --remove coverage.info 'usr/*' --output-file coverage.info
+  - lcov --remove coverage.info 'cpp/third-party/*' --output-file coverage.info
+  - lcov --remove coverage.info 'cpp/test/*' --output-file coverage.info
+  - lcov --remove coverage.info 'build/moc_*' --output-file coverage.info
+  - coveralls-lcov coverage.info

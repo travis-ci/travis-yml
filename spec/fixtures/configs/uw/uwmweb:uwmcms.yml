@@ -1,0 +1,90 @@
+sudo: true
+language: php
+dist: trusty
+
+# Adjust the version of PHP to match your production environment.
+# Making this version number greater than the production environment can have unintended consequences
+# including a non-functional prod environment.
+php:
+  - 7.1
+
+matrix:
+  fast_finish: true
+
+env:
+  global:
+    - COMPOSER_BIN=$TRAVIS_BUILD_DIR/vendor/bin
+    - BLT_DIR=$TRAVIS_BUILD_DIR/vendor/acquia/blt
+    - LOCAL_BLT_DIR=$TRAVIS_BUILD_DIR/blt/
+    - BUILD_DIR=$TRAVIS_BUILD_DIR
+
+jdk:
+  - oraclejdk8
+
+cache:
+  bundler: true
+  apt: true
+  directories:
+  - "$HOME/.composer/cache"
+  - "$HOME/.drush/cache"
+  - "$HOME/.npm"
+  - "$HOME/.nvm"
+  - "vendor"
+  # Cache front end dependecies to dramatically improve build time.
+  - "docroot/themes/custom/chew/node_modules"
+  - "docroot/themes/custom/uwmed/node_modules"
+  - ".rules"
+
+addons:
+  ssh_known_hosts:
+    - svn-23450.prod.hosting.acquia.com
+    - uwmeddev.ssh.prod.acquia-sites.com
+  chrome: stable
+
+# @see https://docs.travis-ci.com/user/notifications
+notifications:
+# - hipchat: [api token]@[room id or name]
+# - slack: '<account>:<token>#[channel]'
+
+before_install:
+  # Disable xdebug.
+  - phpenv config-rm xdebug.ini
+  - composer self-update
+  - composer validate --no-check-all --ansi
+  - composer install
+  # Exit build early if only documentation was changed in a Pull Request.
+  - source ${BLT_DIR}/scripts/travis/exit_early
+
+install:
+  - source ${LOCAL_BLT_DIR}/custom-scripts/travis/setup_environment
+  - source ${LOCAL_BLT_DIR}/custom-scripts/travis/setup_project
+
+script:
+  - source ${BLT_DIR}/scripts/travis/run_tests
+
+# The version below MUST match the php version indicated at the top of this file, otherwise the artifact won't build.
+deploy:
+   - provider: script
+     script: "${LOCAL_BLT_DIR}/custom-scripts/travis/deploy_branch"
+     skip_cleanup: true
+     on:
+       branch: stage
+       php: 7.1
+   - provider: script
+     script: "${LOCAL_BLT_DIR}/custom-scripts/travis/deploy_branch"
+     skip_cleanup: true
+     on:
+       branch: develop
+       php: 7.1
+   - provider: script
+     script: "${LOCAL_BLT_DIR}/custom-scripts/travis/deploy_branch"
+     skip_cleanup: true
+     on:
+       branch: master
+       php: 7.1
+   - provider: script
+     script: "${LOCAL_BLT_DIR}/custom-scripts/travis/deploy_tag"
+     skip_cleanup: true
+     on:
+       tags: true
+       php: 7.1

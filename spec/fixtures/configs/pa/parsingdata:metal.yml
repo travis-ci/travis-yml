@@ -1,0 +1,16 @@
+language: java
+sudo: false # faster builds
+
+install: mvn clean install -DskipTests
+
+script: mvn clean verify
+
+jdk:
+  - oraclejdk8
+  - oraclejdk9
+
+before_install:
+    - pip install --user codecov
+
+after_success:
+    - codecov

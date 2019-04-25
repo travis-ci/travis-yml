@@ -1,0 +1,15 @@
+language: node_js
+cache:
+  directories:
+    - node_modules
+node_js:
+  - 10
+  - 8
+services:
+  - couchdb
+env:
+  - REST_ON_COUCH_USERNAME=admin REST_ON_COUCH_PASSWORD=admin
+before_script:
+  - sh setupDatabase.sh
+script: 'npm run test-travis'
+after_script: 'bash <(curl -s https://codecov.io/bash)'

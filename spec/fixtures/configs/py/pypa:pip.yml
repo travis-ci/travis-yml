@@ -1,0 +1,82 @@
+language: python
+cache: pip
+dist: xenial
+python: 3.6
+addons:
+  apt:
+    packages:
+    - bzr
+
+stages:
+- primary
+- secondary
+
+jobs:
+  include:
+    # Basic Checks
+    - stage: primary
+      env: TOXENV=docs
+    - env: TOXENV=lint-py2
+      python: 2.7
+    - env: TOXENV=lint-py3
+    - env: TOXENV=mypy
+    - env: TOXENV=packaging
+    # Latest CPython
+    - env: GROUP=1
+      python: 2.7
+    - env: GROUP=2
+      python: 2.7
+    - env: GROUP=1
+      python: 3.6
+    - env: GROUP=2
+      python: 3.6
+
+    # Complete checking for ensuring compatibility
+    # PyPy
+    - stage: secondary
+      env: GROUP=1
+      python: pypy3.5-6.0
+    - env: GROUP=2
+      python: pypy3.5-6.0
+    - env: GROUP=1
+      python: pypy2.7-6.0
+    - env: GROUP=2
+      python: pypy2.7-6.0
+    # Other Supported CPython
+    - env: GROUP=1
+      python: 3.7
+    - env: GROUP=2
+      python: 3.7
+    - env: GROUP=1
+      python: 3.5
+    - env: GROUP=2
+      python: 3.5
+    - env: GROUP=1
+      python: 3.4
+    - env: GROUP=2
+      python: 3.4
+
+    - env: GROUP=1
+      python: 3.8-dev
+    - env: GROUP=2
+      python: 3.8-dev
+
+  fast_finish: true
+  # It's okay to fail on the in-development CPython version.
+  allow_failures:
+    - python: 3.8-dev
+
+before_install: tools/travis/setup.sh
+install: travis_retry tools/travis/install.sh
+script: tools/travis/run.sh
+
+notifications:
+  irc:
+    channels:
+      # This is set to a secure variable to prevent forks from notifying the
+      # IRC channel whenever they fail a build. This can be removed when travis
+      # implements https://github.com/travis-ci/travis-ci/issues/1094.
+      # The actual value here is: irc.freenode.org#pypa-dev
+      - secure: zAlwcmrDThlRsZz7CPDGpj4ABTzf7bc/zQXYtvIuqmSj0yJMAwsO5Vx/+qdTGYBvmW/oHw2s/uUgtkZzntSQiVQToKMag2fs0d3wV5bLJQUE2Si2jnH2JOQo3JZWSo9HOqL6WYmlKGI8lH9FVTdVLgpeJmIpLy1bN4zx4/TiJjc=
+    skip_join: true
+    use_notice: true

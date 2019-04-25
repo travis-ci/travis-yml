@@ -1,0 +1,17 @@
+language: node_js
+node_js:
+  - "0.12"
+before_script:
+  - "tsd reinstall"
+sudo: false
+after_success:
+    - "jake upload"
+notifications:
+  email:
+    - touchdevelop-build@microsoft.com
+cache:
+  directories:
+    - node_modules
+    - nw_cache
+    - build/nw/node_modules
+    - typings

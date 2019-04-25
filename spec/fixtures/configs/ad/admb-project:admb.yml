@@ -1,0 +1,351 @@
+sudo: require
+language: cpp
+
+git:
+  depth: false
+
+branches:
+  only:
+    - master
+
+notifications:
+  email: false
+
+matrix:
+  include:
+  - os: linux
+    env:
+     - CXXFLAGS="-coverage -O0" LDFLAGS="-coverage -O0" DEBUG="yes" PROG=
+    dist: xenial
+    compiler: gcc
+    before_install:
+    - sudo pip install codecov
+    after_success:
+    - bash <(curl -s https://codecov.io/bash) -a "--object-directory=build/objects/debug"
+    script:
+    - make clean
+    - make coverage
+    - codecov
+
+  - os: linux
+    dist: xenial
+    env:
+     - SAFE_ONLY=yes
+     - DEBUG=yes
+     - PROG=../../../utilities/run-valgrind-memcheck
+    before_install:
+    - sudo apt-get install -y valgrind
+    compiler: gcc
+    script:
+    - make clean
+    - make dist 
+    - make --directory=examples admb
+
+  - os: linux
+    dist: xenial
+    env:
+     - SAFE_ONLY=yes
+     - DEBUG=yes
+     - PROG=../../../utilities/run-valgrind-memcheck
+    before_install:
+    - sudo apt-get install -y valgrind
+    compiler: gcc
+    script:
+    - make clean
+    - make dist 
+    - make --directory=examples ham4
+
+  - os: linux
+    dist: xenial
+    env:
+     - SAFE_ONLY=yes
+     - DEBUG=yes
+     - PROG=../../../utilities/run-valgrind-memcheck
+    before_install:
+    - sudo apt-get install -y valgrind
+    compiler: gcc
+    script:
+    - make clean
+    - make dist 
+    - make --directory=examples ham5
+
+  - os: linux
+    dist: xenial
+    env:
+     - SAFE_ONLY=yes
+     - DEBUG=yes
+     - PROG=../../../utilities/run-valgrind-memcheck
+    before_install:
+    - sudo apt-get install -y valgrind
+    compiler: gcc
+    script:
+    - make clean
+    - make dist 
+    - make --directory=examples admb-re
+
+  - os: linux
+    dist: xenial
+    env:
+     - SAFE_ONLY=yes
+     - DEBUG=yes
+     - PROG=../../../utilities/run-valgrind-memcheck
+    before_install:
+    - sudo apt-get install -y valgrind
+    compiler: gcc
+    script:
+    - make clean
+    - make dist 
+    - make --directory=examples logistic
+
+  - os: linux
+    dist: xenial
+    env:
+     - SAFE_ONLY=yes
+     - DEBUG=yes
+     - PROG=../../../utilities/run-valgrind-memcheck
+    before_install:
+    - sudo apt-get install -y valgrind
+    compiler: gcc
+    script:
+    - make clean
+    - make dist 
+    - make --directory=examples nested4
+
+  - os: linux
+    dist: xenial
+    env:
+     - SAFE_ONLY=yes
+     - DEBUG=yes
+     - PROG=../../../utilities/run-valgrind-memcheck
+    before_install:
+    - sudo apt-get install -y valgrind
+    compiler: gcc
+    script:
+    - make clean
+    - make dist 
+    - make --directory=examples skewed
+
+  - os: linux
+    dist: xenial
+    env:
+     - SAFE_ONLY=yes
+     - DEBUG=yes
+     - PROG=../../../utilities/run-valgrind-memcheck
+    before_install:
+    - sudo apt-get install -y valgrind
+    compiler: gcc
+    script:
+    - make clean
+    - make dist 
+    - make --directory=examples socatt
+
+  - os: linux
+    dist: xenial
+    env:
+     - SAFE_ONLY=yes
+     - DEBUG=yes
+     - PROG=../../../utilities/run-valgrind-memcheck
+    before_install:
+    - sudo apt-get install -y valgrind
+    compiler: gcc
+    script:
+    - make clean
+    - make dist 
+    - make --directory=examples spatial
+
+  - os: linux
+    dist: xenial
+    env:
+     - SAFE_ONLY=yes
+     - DEBUG=yes
+     - PROG=../../../utilities/run-valgrind-memcheck
+    before_install:
+    - sudo apt-get install -y valgrind
+    compiler: gcc
+    script:
+    - make clean
+    - make dist 
+    - make --directory=examples union
+
+  - os: linux
+    dist: xenial
+    env:
+     - SAFE_ONLY=yes
+     - DEBUG=yes
+     - PROG=../../../utilities/run-valgrind-memcheck
+    before_install:
+    - sudo apt-get install -y valgrind
+    compiler: gcc
+    script:
+    - make clean
+    - make dist 
+    - make --directory=examples weights
+
+  - os: linux
+    dist: xenial
+    env:
+     - SAFE_ONLY=yes
+     - DEBUG=yes
+     - PROG=../../../utilities/run-valgrind-cachegrind
+    before_install:
+    - sudo apt-get install -y valgrind
+    compiler: gcc
+    script:
+    - make clean
+    - make dist 
+    - make --directory=examples admb
+
+  - os: linux
+    dist: xenial
+    env:
+     - SAFE_ONLY=yes
+     - DEBUG=yes
+     - PROG=../../../utilities/run-valgrind-cachegrind
+    before_install:
+    - sudo apt-get install -y valgrind
+    compiler: gcc
+    script:
+    - make clean
+    - make dist 
+    - make --directory=examples admb-re
+
+  - os: linux
+    dist: xenial
+    env:
+     - SAFE_ONLY=yes
+     - DEBUG=yes
+     - PROG=../../../utilities/run-valgrind-callgrind
+    before_install:
+    - sudo apt-get install -y valgrind
+    compiler: gcc
+    script:
+    - make clean
+    - make dist 
+    - make --directory=examples admb
+
+  - os: linux
+    dist: xenial
+    env:
+     - SAFE_ONLY=yes
+     - DEBUG=yes
+     - PROG=../../../utilities/run-valgrind-callgrind
+    before_install:
+    - sudo apt-get install -y valgrind
+    compiler: gcc
+    script:
+    - make clean
+    - make dist 
+    - make --directory=examples admb-re
+
+  - os: linux
+    dist: xenial
+    compiler: gcc
+    script:
+    - make clean
+    - make dist 
+    - make verify
+    - make gtests
+
+  - os: linux
+    dist: xenial
+    compiler: gcc
+    script:
+    - make clean
+    - make
+    - make gtests
+
+  - os: linux
+    dist: xenial
+    compiler: gcc
+    script:
+    - make clean
+    - make dist
+    - make shared
+    - make all
+    - make gtests
+
+  - os: linux
+    dist: xenial
+    compiler: gcc
+    script:
+    - make clean
+    - make shared
+    - make dist
+    - make all
+    - make gtests
+
+  - os: osx
+    before_install:
+    - sudo pip install scan-build
+    compiler: clang
+    env:
+     - DEBUG=yes
+     - SAFE_ONLY=yes
+    script:
+    - make clean
+    - scan-build -v make dist
+
+  - os: osx
+    before_install:
+    - sudo pip install cpplint
+    script:
+    - make clean
+    - cpplint --recursive --filter=-whitespace,-runtime,-build,-readability,-legal src
+
+  - os: osx
+    env:
+     - SAFE_ONLY=yes
+    compiler: clang
+    script:
+    - make clean
+    - make dist
+    - make test
+
+  - os: osx
+    env:
+     - SAFE_ONLY=yes
+    compiler: gcc
+    script:
+    - make clean
+    - make dist
+    - make test
+
+  - os: windows
+    install: choco install -y make
+    env:
+    - SAFE_ONLY=yes
+    compiler: gcc
+    script:
+    - make.exe clean
+    - make.exe dist
+    - make.exe gtests
+
+  - os: windows
+    env:
+    - SAFE_ONLY=yes
+    script:
+    - utilities/travis-windows-vc-build.bat
+
+  - os: windows
+    env:
+    - DEBUG=yes
+    - SAFE_ONLY=yes
+    - MAKEFLAGS=
+    script:
+    - utilities/travis-windows-vc-build-analyze.bat objects1
+
+  - os: windows
+    env:
+    - DEBUG=yes
+    - SAFE_ONLY=yes
+    - MAKEFLAGS=
+    script:
+    - utilities/travis-windows-vc-build-analyze.bat objects2
+
+  - os: windows
+    env:
+    - DEBUG=yes
+    - SAFE_ONLY=yes
+    - MAKEFLAGS=
+    script:
+    - utilities/travis-windows-vc-build-analyze.bat objects3

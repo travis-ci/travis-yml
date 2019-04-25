@@ -1,0 +1,51 @@
+sudo: false
+dist: xenial
+language: c
+matrix:
+  include:
+    - os: linux
+      compiler: clang
+      env:
+        - T=linux-clang-asan
+        - CFLAGS=-Werror
+        - DEBUG='-g -fsanitize=address -fno-sanitize-recover=all'
+
+    - os: linux
+      compiler: clang
+      env:
+        - T=linux-clang-ubsan
+        - CFLAGS=-Werror
+        - DEBUG='-g -fsanitize=undefined -fno-sanitize-recover=all'
+
+    - os: linux
+      compiler: gcc
+      env:
+        - T=linux-gcc-asan
+        - CFLAGS=-Werror
+        - DEBUG='-g -fsanitize=address -fno-sanitize-recover=all'
+
+    - os: linux
+      compiler: gcc
+      env:
+        - T=linux-gcc-ubsan
+        - CFLAGS=-Werror
+        - DEBUG='-g -fsanitize=undefined -fno-sanitize-recover=all'
+
+    - os: osx
+      compiler: clang
+      env:
+        - T=macos-clang
+        - CFLAGS=-Werror
+
+script:
+  - |
+    (
+    set -ex
+    case $T in
+    *)
+      ./configure || true
+      cat config.log
+      make test
+      ;;
+    esac
+    )

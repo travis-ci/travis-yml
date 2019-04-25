@@ -1,0 +1,22 @@
+language: ruby
+rvm:
+  - 2.5.0
+services:
+  - mysql
+branches:
+  except:
+    # starting with depfu/
+    - /^depfu\/.*/
+notifications:
+  email:
+    on_success: change
+    on_failure: change
+before_install:
+  - "echo 'gem: --no-ri --no-rdoc' > ~/.gemrc"
+  - 'wget -nv http://sphinxsearch.com/files/dicts/en.pak'
+  - 'sudo apt-get -qq update'
+  - 'sudo apt-get install sphinxsearch'
+before_script:
+  - RAILS_ENV=test bundle exec rake dev:bootstrap --trace
+script:
+  - 'bundle exec rspec --color --format documentation'

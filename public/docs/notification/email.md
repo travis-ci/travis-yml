@@ -2,31 +2,42 @@
 
 
 
-## Type
+## Types
 
-Any of:
-
-* Map (Hash)
+* Hash
+* Array of: 
 * 
 * Boolean
 
-## Flags
-
-None.
 
 
 ## Examples
 
 ```yaml
 email:
-  recipients: "[ref:secures]"
   enabled: true
   on_success: always
   on_failure: always
 ```
 
 ```yaml
-email: "[ref:secures]"
+email:
+  recipients:
+  - secure: encrypted string
+```
+
+```yaml
+email:
+  recipients:
+```
+
+```yaml
+email:
+- secure: encrypted string
+```
+
+```yaml
+email:
 
 ```
 

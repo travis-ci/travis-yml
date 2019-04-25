@@ -2,16 +2,14 @@
 
 
 
-## Type
+## Types
 
-Any of:
+* Hash
+* String (known)
 
-* Map (Hash)
-* Enum (known String)
+## Values
 
-## Flags
-
-None.
+* `launchpad`
 
 
 ## Examples
@@ -20,12 +18,12 @@ None.
 deploy:
   provider: launchpad
   slug: string
-  oauth_token: 
-  oauth_token_secret: 
   on: {}
   allow_failure: true
   skip_cleanup: true
   edge: true
+  oauth_token: 
+  oauth_token_secret:
 ```
 
 ```yaml

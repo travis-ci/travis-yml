@@ -1,0 +1,93 @@
+language: php
+
+dist: trusty
+
+php:
+  - 5.6
+  - 7.2
+
+addons:
+  firefox: latest
+  chrome: stable
+  jwt:
+    secure: XKHU62aeWKe1M9cP7M1Is63NbiuVJUB9o6ijuLvChiiu4/jOW+YU3WtcLfsbWjZj4IwMF8AlZ6gmoA2RVi3JeviyWddax+tgsF8TyTTqW9jjdu2fdkTW1lCaVBoTVbi0u+1Gx6NJBqr0DUTgKSW7orEwvHDO0X5LZD6KZqNl7xZI+aI/321pvp5KexooDH4TrutKKYb3xJcVkc8m5RnSwaCFoiP+yWZsjAoN7sshtIpAKsX1271XhH+SSvOXLr2fH7GHB2iSQMBljf1fh9kSy7RVW4rL29/X6gwcQUZ9E9EB3KhQjaqsNFxzHzHBqesUfYwkWTL4MH7q9Jn3GBXFiqRGIvvub5dvoNtZcPnqF59UJNRb5/i7XJpJ5uTOBIfQQaLXp72DGP7udbGjakG9HvdaosjtsJLj0vt8voHLWXo9+HD2S8yC11Um5/FpleiNAlID4MAKJSrZiV4BGz54l4DmmTlCSBNm/9NhKVqyNnTl62xGTG/wjimUhfWB/DNrbqtYdr2EvZoyB8shZ/D5JYByCj0VogMJi3qVAkEU9UaFSTKprTZn2uTdZoOICPOl/FLKFKbdabfnIg4c1GCQ9zs7mzsV9wpj4fUnwpWkNYbg9F0l06kXBdYTG4+mnQW6Pbwejfpp1wt8CcXoxvYmwgXJp9PrhnbNq8ffh10RPUg=
+
+env:
+  global:
+    - SELENIUM_SERVER_VERSION="3.8.1"
+    - CHROMEDRIVER_VERSION="2.35"
+    - GECKODRIVER_VERSION="0.19.1"
+  matrix:
+    - BROWSER=phantomjs
+    - BROWSER=firefox
+    - BROWSER=chrome
+
+matrix:
+  include:
+    - php: 7.2
+      env: BROWSER=microsoftedge SAUCELABS=1 # run tests in MicrosoftEdge on SauceLabs cloud
+      install:
+        - composer install --no-interaction
+      before_script: ~
+      script:
+        - ./vendor/bin/steward run production $BROWSER -vvv --server-url=http://$SAUCE_USERNAME:$SAUCE_ACCESS_KEY@ondemand.saucelabs.com  --capability="platform:Windows 10" --capability="version:'14.14393'"
+      after_script: ~
+    - php: 7.2
+      env: BROWSER=firefox SAUCELABS=1 # run tests in Firefox on SauceLabs cloud
+      install:
+        - composer install --no-interaction
+      before_script: ~
+      script:
+        - ./vendor/bin/steward run production $BROWSER -vvv --server-url=http://$SAUCE_USERNAME:$SAUCE_ACCESS_KEY@ondemand.saucelabs.com  --capability="platform:Windows 10" --capability="version:'52.0'"
+      after_script: ~
+  allow_failures:
+    - env: BROWSER=firefox
+    - env: BROWSER=phantomjs
+
+install:
+  - composer install --no-interaction # Install Steward and its dependencies
+  - SELENIUM_PATH=$(./vendor/bin/steward install $SELENIUM_SERVER_VERSION --no-interaction) # Download the Selenium standalone server jar file
+  - echo "Selenium server path:" $SELENIUM_PATH
+  - if [ "$BROWSER" = "chrome" ]; then mkdir chromedriver; wget -q -t 3 https://chromedriver.storage.googleapis.com/$CHROMEDRIVER_VERSION/chromedriver_linux64.zip; unzip chromedriver_linux64 -d chromedriver; fi
+  - if [ "$BROWSER" = "chrome" ]; then export CHROMEDRIVER_PATH=./chromedriver/chromedriver; fi
+  - if [ "$BROWSER" = "firefox" ]; then mkdir geckodriver; wget -q -t 3 https://github.com/mozilla/geckodriver/releases/download/v$GECKODRIVER_VERSION/geckodriver-v$GECKODRIVER_VERSION-linux64.tar.gz; tar -xzf geckodriver-v$GECKODRIVER_VERSION-linux64.tar.gz -C geckodriver; fi
+  - if [ "$BROWSER" = "firefox" ]; then export GECKODRIVER_PATH=./geckodriver/geckodriver; fi
+  - if [ "$BROWSER" = "phantomjs" ]; then wget https://bitbucket.org/ariya/phantomjs/downloads/phantomjs-1.9.8-linux-x86_64.tar.bz2; fi
+  - if [ "$BROWSER" = "phantomjs" ]; then tar -xvf ./phantomjs-1.9.8-linux-x86_64.tar.bz2; fi
+  - if [ "$BROWSER" = "phantomjs" ]; then export PATH=$PWD/phantomjs-1.9.8-linux-x86_64/bin:$PATH; fi
+
+before_script:
+  - java -jar $SELENIUM_PATH -role hub -enablePassThrough false -log selenium-server.log &
+  - until $(echo | nc localhost 4444); do sleep 1; echo Waiting for selenium-server to start...; done;
+
+  # Start two PhantomJS instances
+  - if [ "$BROWSER" = "phantomjs" ]; then phantomjs --webdriver-selenium-grid-hub=http://127.0.0.1:4444 --webdriver=8910 & fi
+  - if [ "$BROWSER" = "phantomjs" ]; then phantomjs --webdriver-selenium-grid-hub=http://127.0.0.1:4444 --webdriver=8911 & fi
+
+  # Start Chrome on first Selenium node
+  - if [ "$BROWSER" = "chrome" ]; then java -Dwebdriver.chrome.driver="$CHROMEDRIVER_PATH" -jar $SELENIUM_PATH -role node -port 8910 -log selenium-node-1.log -enablePassThrough false & fi
+
+  # Start Firefox on first Selenium node
+  - if [ "$BROWSER" = "firefox" ]; then Xvfb :99 -nolisten tcp -ac -screen 0 1280x1024x24 & fi
+  - if [ "$BROWSER" = "firefox" ]; then export DISPLAY=:99.0; fi
+  - if [ "$BROWSER" = "firefox" ]; then java -Dwebdriver.gecko.driver="$GECKODRIVER_PATH" -jar $SELENIUM_PATH -role node -port 8910 -maxSession 1 -log selenium-node-1.log -enablePassThrough false & fi
+
+  # Start Firefox on second Selenium node
+  - if [ "$BROWSER" = "firefox" ]; then Xvfb :98 -nolisten tcp -ac -screen 0 1280x1024x24 & fi
+  - if [ "$BROWSER" = "firefox" ]; then export DISPLAY=:98.0; fi
+  - if [ "$BROWSER" = "firefox" ]; then java -Dwebdriver.gecko.driver="$GECKODRIVER_PATH" -jar $SELENIUM_PATH -role node -port 8911 -maxSession 1 -log selenium-node-2.log -enablePassThrough false  & fi
+
+  - sleep 3 # wait until browsers starts
+
+script:
+  - ./vendor/bin/steward run production $BROWSER -vvv # Run the tests in $BROWSER and specify `production` as an environment name
+
+after_script:
+  - ./vendor/bin/steward results -vvv
+  - cat selenium-server.log
+  - cat selenium-node-1.log
+  - cat selenium-node-2.log
+
+cache:
+  directories:
+    - $HOME/.composer/cache

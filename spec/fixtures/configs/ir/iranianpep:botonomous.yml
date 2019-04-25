@@ -1,0 +1,35 @@
+env:
+  global:
+    - CC_TEST_REPORTER_ID=e3f592753a2a1c938f2fc8597a5344c91f3e1baa6e44ac5fdb88970c3a94265d
+
+language: php
+
+matrix:
+  include:
+  - php: 7.0
+  - php: 7.1
+  - php: 7.2
+
+sudo: false
+
+addons:
+  code_climate:
+    repo_token: e3f592753a2a1c938f2fc8597a5344c91f3e1baa6e44ac5fdb88970c3a94265d
+
+install:
+  - composer install
+
+before_script:
+  - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+  - chmod +x ./cc-test-reporter
+  - ./cc-test-reporter before-build
+
+script:
+  - vendor/bin/phpunit --coverage-clover build/logs/clover.xml --configuration phpunit.xml
+
+after_success:
+  - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
+
+notifications:
+  slack:
+    secure: j0e4qbj2/fHlyyAg/CuTKYMaTtpmhiSzgFQLdPLP7/WPX6tfHYm732K58CMEbHc4MlDmiUelBWhWR39EgBBoX4QBLc+l8EdgT3gYOfwJ7LQWtdMbP2tdXyAPoTe2WOnUr5hG2LMIsM4P6JjGKKAJrlLoRRpkfIz1h1Z70VKR9+4qMjOP2s2NCd82E6g/wDHJbMEXbE/tvh1/r1w7eb23Emkv59or3hD4LA969YqMN+ycPjwGP4vLsiZ8kRdcSS/B9AZLmVvbc8SU4onGDQboiDVJvM8t0XxUGM8yceh2kWSVLkQv+I/BrtNDCiAa3WNVjWEVpkJ6Rn4k/FDNN3AWnFhpy38S+EwDgGS3CioYQmMAa1OgekciMIxsxdwRsCeQhgbnlYDvTNtcAoNHwC3wBBOX2qGjMLoupkk+akATmAAHlBs/n9ap2IUT1+SPOtJQ4COb36rK3Lq+jCYdlRR5O+dbbyFhMt+RijGwER3no0D8QW1Q23c9yj5VQ/NA2VAMCcD04w+AlnT3vni/Gs5UIjNus63YQbfY1GS7sRC/LSuSOslBXTWCr7/w/dNrVLUy3ouBNuep0OAJejAi7o7/JF9gEY9j88TkU6BNb+6D0qgZbHF1N1NuPiR4STh3LpKxXPY+FMNaT8yjy5xvdpANbSe8fJEwcjUUA1Iupp2W/cw=

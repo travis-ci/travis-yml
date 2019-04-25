@@ -1,0 +1,53 @@
+sudo: required
+
+language: d
+
+services:
+  - docker
+
+d:
+  - dmd
+  - dmd-beta
+  - dmd-nightly
+
+matrix:
+  allow_failures:
+    - d: dmd-nightly
+  include:
+    - d: ldc-1.11.0
+      env: TOUR_DEPLOY=1
+
+
+cache:
+  - $HOME/.dub
+
+branches:
+  only:
+    - master
+    - testing
+
+addons:
+  apt:
+    packages:
+    - libevent-dev
+    - libblas-dev
+    - liblapack-dev
+    - libopenblas-dev
+
+script:
+  # Update all language repos to their latest content
+  - git pull --recurse-submodules
+  - git submodule update --remote --recursive
+  # Compile & test with all compilers
+  # https://issues.dlang.org/show_bug.cgi?id=13742 + separate linking not implemented for LDC
+  - if [[ "${DC}" == "dmd" ]]; then  dub test --compiler=${DC} --build=unittest-cov --build-mode=singleFile ; else dub test --compiler=${DC} ; fi
+  - dub --compiler=${DC} -- --sanitycheck
+  # Compile to static binary with ldc
+  - if [[ "${DC}" == "ldc2" ]]; then  dub build -c static --compiler=${DC}; fi
+  - if [[ "${DC}" == "ldc2" ]]; then docker build -t dlangtour/core . ; fi
+  - if [[ "${DC}" == "ldc2" ]]; then docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -ti dlangtour/core --wait-until-pulled --sanitycheck ; fi
+
+after_success:
+  - if [[ "${TOUR_DEPLOY}" == "1" && "${TRAVIS_BRANCH}" == "master" && "${TRAVIS_PULL_REQUEST}" == "false" ]]; then docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"; fi
+  - if [[ "${TOUR_DEPLOY}" == "1" && "${TRAVIS_BRANCH}" == "master" && "${TRAVIS_PULL_REQUEST}" == "false" ]]; then docker push dlangtour/core ; fi
+  - bash <(curl -s https://codecov.io/bash)

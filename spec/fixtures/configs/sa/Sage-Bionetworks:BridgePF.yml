@@ -1,0 +1,43 @@
+sudo: required
+language: scala
+scala:
+- 2.11
+jdk:
+- oraclejdk8
+env:
+  global:
+  - BRIDGE_USER=travis
+  - BRIDGE_ENV=dev
+  - secure: SsM07kjCSWjGTFDhkCtTuZdM5WrChFXgRmeMMRJr4JlbtJoaaVUXcXDofZ+4NrESiOvW7CiRXK6Oz3I9eL7vn8RCwlN5jf2OlmD4vKIiiINlvuuEe6hEu738RO7nUGN8SFh2k4ryzJ6XldghjBiBvBEqzVhwXteLhF3AVCsRB1s=
+  - secure: kByWq5ygVVnXuBcHKhe6BdcGhUugS1Ux4nbrR/MY23KI7FC1vJ3LCx6N5TIVbOhjwCPwnWNfkydPlfO48hco6gpz8mJ6Sz7OdjyAWb1Ofx/XO5mI+8AIW0P1gXN9jbThSLEaTGUZlrDNfkcfkFUaLJHmmWOQ5CWCPzo5sw2cEDg=
+  - secure: Z+qjzEGwJbnmSYpvb6FLa449FaRaMlHt31InRtlqZVpoKmGFY6hUofYdtBcDdwz/Y2X1QRyCOG88s/TpaNQo0lt7tOETwrkwAfQ6E97hnX7W/Gd4PhDAmkMc8w1PGtuvMl2/ZklLoNDUwbBC+U3tG1UcUlSiNheoAbRviQfFL00=
+  - secure: tfbxUsq8+FVvICBJGZIKoWRkWYfQMrm5ODbYL2BnVgLnTBvAxX2tBjzuUkkEVG7eVmoKcIBbisbOIM2epi0lQ2cqHxwbYKb5Qr0EYBQOAl5wRNvbAdiuVmHQhoQtrPMw0uTbihJ8hqCdxN/l+n2lXcQkXeFxJN/9sA/Fm2uT9eU=
+  - secure: HepX8b2aoAqu0MPuyEpy+PB2IbkTl/OE8h+CmWoaqDXLEPnYN0tQTdKAmqPk+G5VNb/UzNcCc4b4lMioKyJtx80eQo4io6R68lq/uG9FAkE20J6PhzxB9ZBRULi1BurxrE5lRj3RxU4lXn3bJJYyoormCqTSOai6nCtsIJ4MOaU=
+  - secure: hG+O3ytuluFaq+Un3Y7uVrCTlVZWrBufVNd2WluKCNJ62zCUEhFgw43SO3g+/eRuhhPAos0n/y1KeOEpisFdFNCBthlHTA1solk2TVE7pVoJkEtv0DTdt9d5Dg3Rit7XA0QzsMvlErdZrCE7NhfjFe7clwnUQfgIEM7jVlsESro=
+  - secure: R0bZSTX5dYjPSv9Skb3EtojMYPkl0hyFjLHknCE8+C1i9jrpT9iQFV3Xb0JrM9MEgdlbKtk19mYGfK7SFL8yjJIXYSR2a/Is5Q5+A7n9HCH1jyEoNDuem9EvCzbY5ywCpb7cHQ0TUK1tMdwDZ/OrMJ6No1eajI/hGRSni4kGcOU=
+before_script:
+- mkdir -p $HOME/.sbt/launchers/0.13.8/
+- curl -L -o $HOME/.sbt/launchers/0.13.8/sbt-launch.jar http://dl.bintray.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/0.13.8/sbt-launch.jar
+script:
+- sbt clean test dist
+branches:
+  only:
+  - develop
+  - uat
+  - prod
+deploy:
+  - provider: elasticbeanstalk
+    skip_cleanup: true
+    bucket_name: org-sagebridge-bridgepf-deployment-bridgepf-$TRAVIS_BRANCH
+    zip_file: target/universal/bridgepf-0.1-SNAPSHOT.zip
+    region: us-east-1
+    app: bridgepf-$TRAVIS_BRANCH-application
+    env:
+      develop: bridgepf-develop
+      uat: bridgepf-uat
+      prod: bridgepf-prod
+    on:
+      all_branches: true
+    access_key_id: AKIAJ6YWVFOX3GHDXVRQ
+    secret_access_key:
+      secure: Jod2Jr1sj/ZqoK32+xkUTSlFhQbtUGTXkGmETCr132nEcCFK71ecysXA/ZsjxsJJDYUAP+xzMqs/tH0xq5YldW96yI0yzq9RH4lHaYJBVxp5LwLlmlGlSQ+tVrUxt4VW6djV/GtmVDKHjin10PTUjQp9WiLOBOOaf69Y+JxJ26I=

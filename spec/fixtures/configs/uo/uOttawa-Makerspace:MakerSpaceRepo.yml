@@ -1,0 +1,31 @@
+language: ruby
+cache: bundler
+rvm:
+- 2.5.3
+services:
+- postgresql
+before_script:
+- psql -c 'create database makerspacerepo;' -U postgres
+- openssl req -x509 -newkey rsa:4096 -keyout certs/saml.key -out certs/saml.crt -days 1 -nodes -subj "/C=CA/ST=Ontario/L=Ottawa/O=uOttawa/OU=Richard L'Abbé Makerspace/CN=makerepo.com/emailAddress=travis-ci@makerepo.com"
+jobs:
+  include:
+  - stage: test
+    name: Test
+    script:
+    - bundle exec rake db:migrate RAILS_ENV=test
+    - bundle exec rake test RAILS_ENV=test
+  - stage: deploy
+    name: Deploy
+    script:
+    - openssl aes-256-cbc -k $DEPLOY_KEY -d -a -in config/deploy_id_rsa_enc_travis -out config/deploy_id_rsa
+    - chmod 600 config/deploy_id_rsa
+    - eval "$(ssh-agent -s)"
+    - ssh-add config/deploy_id_rsa
+    - bundle exec cap staging deploy
+stages:
+- name: test
+- name: deploy
+  if: branch = staging
+notifications:
+  slack:
+    secure: oHDfEWV0mSjs0EVsbQAs9Dcbzz+/ylHGV/D/6mT1+R1otaa6w88gqPdXyciyZsEfJDIDUaj7fhhmpr9Q+91ISVo0BXvenbxOmjK0HNs7qKiemFHT2UhgiE59JIMXdZo8VXcW2eWazbBfwlcf4zSeJqb7jg02rRZdbE0FERuzvQ7M/cnqGEid1YHy7kmjfKR0IwRH96YWdcVxmeroT6B9YZaziUjsTrQanAjfmpAZ0r2C04mPx1CYEo6lg/rFRZAdGo4nTjQ2kaNZW4PFRDWX4sksFaYzJZinlb3mublY9XtI+VqvlJxl96vS2S0NsYPYk9qoXm5XmqEWPefoUdvCTqkkGrDtMDGZdxMjiY9+fryvmnkLWlx+Mcs7IPuSyU2tIctc1pnRIgxsyCygpyiO/VmAyBu/NQSuqYoqxNIis+12Ft48AOHHGfGf8gwVfubAS0e90ih2CxvlJeI5bBGAq2LOJY/bb7hvqCB3PlgZc9hcX02k6zGAnCS8fKPdWQ+K6hM2zrLlCZpwtul78ygQ8GlJry4S2rwosMJIVZQBtsLDIGesyqnHTWig+ppYFYrzy85y+iykg1dA6UJWmnhrKhm1hc8ORWJh39plGqHzbto5n+eSSEK/ylQoNAmTXcbyJZrYq+kdEUHhcFSnW4LWVWBdndkS2/AvxgiRp0aQnkk=

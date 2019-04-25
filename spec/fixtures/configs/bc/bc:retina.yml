@@ -1,0 +1,25 @@
+language: r
+cache: packages
+warnings_are_errors: false
+sudo: false 
+git:
+  depth: 1
+env:
+  os:
+    - linux
+    # - osx
+  matrix:
+    # - RVERSION=devel
+    - RVERSION=release
+    # - RVERSION=oldrel
+    # - RVERSION=3.5.0
+notifications:
+     slack: kaspectscientists:OFGveqm4qxt26CPytZrHUxSV
+r_packages:
+      - covr
+r_github_packages:
+  - jimhester/lintr
+after_success:
+      - Rscript -e 'library(covr); codecov()'
+      - bash <(curl -s https://codecov.io/bash)
+      - Rscript -e 'lintr::lint_package()'

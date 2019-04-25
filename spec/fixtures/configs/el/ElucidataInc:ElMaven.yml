@@ -1,0 +1,75 @@
+sudo: required
+
+matrix:
+  include:
+    - os: linux
+      addons:
+        apt:
+          sources:
+            - sourceline: 'deb http://archive.neon.kde.org/user/lts/ xenial main binary-amd64'
+      dist: xenial
+      language: cpp
+      compiler: gcc-5
+      group: deprecated-2017Q2
+    - os: osx
+
+env:
+  global:
+    - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5"
+
+
+before_install:
+    -  if [ "$TRAVIS_OS_NAME" == "linux" ]; then
+            sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 0C49F3730359A14518585931BC711F9BA15703C6;
+       fi
+
+install:
+  - |
+
+    if [ "$TRAVIS_OS_NAME" == "osx" ]; then
+        brew install llvm@3.7;
+        brew install cppcheck qt;
+        brew link qt5 --force;
+    fi
+
+    if [ "$TRAVIS_OS_NAME" == "linux" ]; then
+      sudo apt-get install -qq lcov;
+      sudo apt-get update -qq;
+      sudo apt-get install -y -qq --allow-unauthenticated qt5-qmake qtbase5-dev qtscript5-dev qtdeclarative5-dev libqt5webkit5-dev libqt5opengl5 libsqlite3-dev libboost-all-dev libnetcdf-dev;
+      eval "${MATRIX_EVAL}";
+    fi
+
+
+
+before_script:
+  #- if [ "$TRAVIS_OS_NAME" == "linux" ]; then
+        #source /opt/qt59/bin/qt59-env.sh;
+    #fi
+  #- qmake -v
+
+
+script:
+  - |
+
+    if [ "$TRAVIS_OS_NAME" == "osx" ]; then
+      qmake CONFIG+=debug -o Makefile build.pro;
+      make -j4;
+      ./run_tests.sh;
+    fi
+
+    if [ "$TRAVIS_OS_NAME" == "linux" ]; then
+      export CXX="g++-5";
+      export CC="gcc-5";
+      sudo unlink /usr/bin/gcc && sudo ln -s /usr/bin/gcc-5 /usr/bin/gcc;
+      sudo unlink /usr/bin/g++ && sudo ln -s /usr/bin/g++-5 /usr/bin/g++;
+      g++ -v;
+      lcov -v;
+      export QT_SELECT=qt5
+      qmake -v;
+      echo no | ./run.sh
+    fi
+
+
+after_script:
+  - export CODECOV_TOKEN="9a0f9704-6d63-48c6-8c1a-ded361a26597"
+  - bash <(curl -s https://codecov.io/bash)

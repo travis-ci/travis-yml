@@ -1,0 +1,64 @@
+language: python
+sudo: false
+dist: trusty
+group: edge
+python:
+  - "2.7"
+
+before_install:
+  - test/setup_gtest.sh
+
+before_script:
+  - if [ "$TRAVIS_EVENT_TYPE" == "api_DISABLE" ]; then
+       ./update_wakaama.sh;
+    fi;
+  - if [ "$TRAVIS_EVENT_TYPE" == "cron_DISABLE" ]; then
+       ./update_wakaama.sh;
+    fi;
+
+install:
+  - pip install --upgrade pip > /dev/null
+  - pio --version > /dev/null 2>&1 || pip install -U platformio > /dev/null
+  - pip install -U cpp-coveralls
+  - test/setup_test_network.sh || echo "Network bridge setup failed!"
+
+after_success: test/teardown_test_network.sh || echo ""
+after_failure: test/teardown_test_network.sh || echo ""
+
+addons:
+  apt:
+    sources:
+    - sourceline: ppa:george-edison55/cmake-3.x
+    - ubuntu-toolchain-r-test
+    - llvm-toolchain-precise-3.6
+    packages:
+    - g++-6
+    - gcc-6
+    - clang-3.6
+    - libunwind8-dev
+    - libgtest-dev
+    - cmake
+
+#  - SCRIPT=examples/arduino_example/build.sh BOARD=arduino:avr:mega:cpu=atmega1280 VERSION=1.8.3
+env:
+  global:
+    - GTEST_DIR=~/gtest
+    - secure=fNOM2LUil0pumVEIzZ15MNmJUIyyYNPzlDmEpPQms9rG7UbnwC5LkJLKjOrGvrYBqCdBDYEVx/kbev8/RjPn2SivcdNRo4CVVWudr1rF6/Bi+9f+KSisRJbb8UDH91NGheLv3v6fzdTKrYMlMPpFzUONsBWKIf65+UDe8Px+BgL3lWzx3BISyPtSZoGarKmAwOZWVdpDEKeteJzQrPxxLSkdf9p+z0vz7NQR80rPaDcgz4Mh/AwbJl6o+4rQ+XZb8HibTPpfZBX32WAHA9JgBwlxDnHfcdsfcUypxlo+ocp4OM/rd7XqSxxqwHBPTMULDdhmptPdMiZh8U73GxNx9gBrrAgsH6RDpMMjbYhPL7Xq02Czbamg1/LJGmKvOtba9fADZeZEgldz09eWsrIbIDoNg6FB37FiBe4Q1W5s/Bg3uojp9ZoiecyQjcqNTN5osiJpWUj70z0kOm1DXWnPNhhYD2C5iJwAj+YomI1jOAGnhtm2zBmG3NinDTOuVNwC+JTO/TTimo6lAHIccoVhwBj+wRdMVc1dmElbYJA6OxTkj3d3Vhwfj/ODXY7w1CN80KKfbjRwMGbk0Bdh9qpnHYEtKeKEidr6IsY3m0/+RHFOu2yqbo1jv5MjwkV3TsymLqwW4ykuslDtLE/pNkmEYkPy2fKsA+emwwkYz2q0V2g=
+  matrix:
+    - SCRIPT="test/testall.sh CMAKE_CXX_COMPILER=g++-6 CMAKE_C_COMPILER=gcc-6"
+    - SCRIPT="test/testall.sh CMAKE_CXX_COMPILER=clang++-3.6 CMAKE_C_COMPILER=clang-3.6"
+    - SCRIPT="pio run -d examples/nodemcu_with_led/platformio.ini"
+    - SCRIPT="pio run -d examples/linux_win_custom_object_c/platformio.ini"
+    - SCRIPT="pio run -d examples/linux_win_screen_control/platformio.ini"
+
+script: ${SCRIPT}
+
+matrix:
+  fast_finish: false
+
+cache:
+  apt: true
+  directories:
+  - "~/.platformio"
+  - "~/arduino"
+  - "~/gtest"

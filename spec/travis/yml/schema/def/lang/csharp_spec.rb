@@ -11,13 +11,13 @@ describe Travis::Yml::Schema::Def::Csharp, 'structure' do
         type: :object,
         properties: {
           dotnet: {
-            '$ref': '#/definitions/strs'
+            '$ref': '#/definitions/type/strs'
           },
           mono: {
-            '$ref': '#/definitions/strs'
+            '$ref': '#/definitions/type/strs'
           },
           solution: {
-            '$ref': '#/definitions/strs'
+            '$ref': '#/definitions/type/strs'
           }
         },
         normal: true,

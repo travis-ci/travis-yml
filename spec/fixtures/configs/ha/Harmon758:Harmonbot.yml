@@ -1,0 +1,45 @@
+matrix:
+  include:
+    - name: Discord
+      language: python
+      python: 3.7.2
+      # Workaround for Python 3.7
+      # https://github.com/travis-ci/travis-ci/issues/9815
+      dist: xenial
+      sudo: true
+      services:
+        - postgresql
+      addons:
+        postgresql: "10"
+      cache:
+        pip: true
+      before_script:
+        - psql -c "CREATE DATABASE harmonbot"
+        - psql -c "CREATE USER harmonbot SUPERUSER"
+        - cd Discord
+      script:
+        - python Harmonbot.py
+    - name: Telegram
+      language: python
+      python: 3.7.2
+      # Workaround for Python 3.7
+      # https://github.com/travis-ci/travis-ci/issues/9815
+      dist: xenial
+      sudo: true
+      cache:
+        pip: true
+      before_script:
+        - cd Telegram
+      script:
+        - python Telegram_Harmonbot.py
+    - name: Discord Listener
+      language: go
+      go: "1.10"
+      install:
+        - go get github.com/bwmarrin/discordgo
+        - go get github.com/bwmarrin/dgvoice
+        - go get github.com/joho/godotenv
+      before_script:
+        - cd Discord
+      script:
+        - go run Harmonbot_Listener.go

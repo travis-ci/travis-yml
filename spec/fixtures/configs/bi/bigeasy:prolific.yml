@@ -1,0 +1,20 @@
+sudo: false
+
+language: node_js
+
+node_js:
+  - '10'
+
+branches:
+  only:
+    - master
+    - travis-ci
+
+install:
+  - for dir in prolific.*; do (cd $dir && npm install --no-save --no-package-lock); done
+  - npm install --no-save --no-package-lock
+  - npm install -g nyc
+  - git checkout .
+
+script:
+  - nyc npm test

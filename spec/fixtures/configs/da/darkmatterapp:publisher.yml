@@ -1,0 +1,31 @@
+dist: trusty
+sudo: false
+language: ruby
+script: "./script/cibuild"
+
+before_script:
+- psql -c 'create database darkmatter_publisher_server_rails_test;' -U postgres
+
+before_install:
+  - wget -N http://chromedriver.storage.googleapis.com/2.30/chromedriver_linux64.zip -P ~/
+  - unzip ~/chromedriver_linux64.zip -d ~/
+  - rm ~/chromedriver_linux64.zip
+  - sudo mv -f ~/chromedriver /usr/local/share/
+  - sudo chmod +x /usr/local/share/chromedriver
+  - sudo ln -s /usr/local/share/chromedriver /usr/local/bin/chromedriver
+
+services:
+  - postgresql
+
+addons:
+  postgresql: '9.6'
+  chrome: stable
+  code_climate:
+    secure: guQBIrZA43bbX6AE+RY86vHLgQNCCPuxNnMReKuN4oyhMa0iiCMNb8yXp9rSA4JgraBjTuyUWwVdmCo1hSZFjpb+100AvdFTwFpTyjqcBw+VudliBJN10mxmacoaWztKf2qln9vdM30WzrD5n7nSSKnvAYhMLIF9j5DJUHEOCQL+ZWjOGH1GlbOH4BFGLtIEX8aekVgVp4elcwwPuGfQzDbjpS3Q6Cq3b7cFZHZlA/rMOCH2zEqFPxcDMlZ1DyU6eYTnrNiq0hPkkbnqmzDBA3d7m6nDG1OO1jxZ06Y8AdU98Ti6cZOq9Zyrn5LArHl79NY0oNwbcKYl/73bwi7wen4aMhGZfwU+UqNdLEGrdCYFoQQ61nQb9WHvCB6Ji74X3jvFo7jvgqZG/uhA0qjAtPnfpIoQ4McIbDeriPye5xP1Tt9HSjvVh3jNeSiG4llq+H14KmqW05ysnaopvNC7psVT1UtRtKjzZodCyYZqAVEh4lFz270zkN+QkwTBgqT+EuakNpdhWItqL0cZCJMqvLvCqL+AiJ155MsZn464LpIS5ceG82G3pFZOoOIHePInx8C/eP1c/579clkJPzciRLqukpHhZT/eLXHYCMPAv3ZYoLQoVB/LRry4Eb0l0Jo5omqi6GKa6m8LcDqpc/G9/6RkuDplCeWQQQG4h7w56ns=
+  apt:
+    packages:
+    - libidn11
+
+notifications:
+  slack:
+    secure: ucXteRifpqAwfjgcC0Kk/zjQ4jB4FNOD1RTvEkVT1SctOU9xCSbexU8ZClDfKxCrXLa0WCRMVSlCTyvUiPFAiLzlz2hQHFwzzbFiP7S64m1dHQMp6v+Nz3qGSCCZnHLZC0MVlkhrhStLIUMCsEFbHm47otYVgazshwXM1gZit0BuiMJy+MIRUGLym2GHEknmZktf2Eg1h+ToDPnLwO/TkQD4J2I/vVyi57O9Y+7Y6ZPPTP/ZdHwHpV4Ek8r0R/rpNOdLtXKW1Ag5439Vt7eOivvwF2bG8KYw7+WW9Y9gdpTefSYAhObdDgIsjakt2imsp8Pd8TI7ijiR1z23mODYOrZ5QZt9FTb5GXSZAORDjkHTInsXvNwh5+NT2OWdiWLmy68aTuqFwSS+CdErefhlhz34zfGleRP3QY7x/L7whotgWdkUcGHlQ0WYMrgDEUAL+ws/T84Bz7QAO38WhMpu9wdkmwt9IFhny9rth3zhBom9bYxpNC3RTq/ctqFFbrFsKNzn6HrzHrs4kguCOJWjlddfv8i+/IpufvxXwiIE33nw+Fiv/VCzuVDOK+4skKaLtcDlBh1K/Angh4JuBUj0HkAzW+6NzfUhaX2BtGrVOMR2ZWLC1lqyilGQXLCHbkocwDGCBFBaSn/7dv3pbkCKzOn2n7At+4Il126eIKeZouI=

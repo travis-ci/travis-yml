@@ -1,0 +1,29 @@
+language: java
+
+#We build against the latest JDK
+jdk:
+  - oraclejdk8
+
+env:
+  - TERM=dumb
+
+# We build at Ubuntu 14.04 (Trusty Thar) as we want to use a more recent Ubuntu version
+# These settings are required, because
+#   - we enabled travis building around 2015
+#   - travis ensures backward compatibility
+#   - new projects have different default settings than old projects
+sudo: required
+dist: trusty
+
+before_install:
+  # This is https://github.com/codacy/codacy-coverage-reporter#install-jpm, but the SSL certificate is expired, therefore we directly do the commands of the install script here
+  # This is needed, because we use TypeScript and Java in one project
+  # Disabled because of https://github.com/codacy/codacy-coverage-reporter/issues/46
+  #- curl -sL https://cdn.rawgit.com/jpm4j/jpm4j.installers/6b3c5176/dist/biz.aQute.jpm.run.jar >jpm4j.jar
+  #- java -jar jpm4j.jar -u init
+  # - ~/jpm/bin/jpm install com.codacy:codacy-coverage-reporter:assembly
+  - mvn -q resources:resources -pl org.eclipse.winery.repository.configuration
+
+script:
+  - mvn -q package
+#  - mvn jacoco:report-aggregate

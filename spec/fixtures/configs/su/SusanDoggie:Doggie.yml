@@ -1,0 +1,33 @@
+language: generic
+sudo: required
+notifications: never
+env:
+  global:
+    - SWIFT_SNAPSHOT="4.2.1"
+
+matrix:
+  include:
+    - os: osx
+      osx_image: xcode10.1
+      env: USE_XCODEBUILD=true CODECOV_ELIGIBLE=true
+    - os: osx
+      osx_image: xcode10.1
+      env: DESTINATION="platform=iOS Simulator,name=iPhone XS" SDK=iphonesimulator USE_XCODEBUILD=true
+    - os: osx
+      osx_image: xcode10.1
+      env: DESTINATION="platform=tvOS Simulator,name=Apple TV 4K" SDK=appletvsimulator USE_XCODEBUILD=true
+    - os: osx
+      osx_image: xcode10.1
+    - os: linux
+    - os: linux
+      services: docker
+      env: DOCKER_IMAGE=ubuntu:14.04
+    - os: linux
+      services: docker
+      env: DOCKER_IMAGE=ubuntu:16.04
+    - os: linux
+      services: docker
+      env: DOCKER_IMAGE=ubuntu:18.04
+
+script:
+  - ./.travis-build.sh

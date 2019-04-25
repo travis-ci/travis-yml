@@ -1,0 +1,47 @@
+deploy:
+    on:
+        condition: $TRAVIS_PYTHON_VERSION == 3.6
+        repo: guykisel/inline-plz
+        tags: true
+    distributions: sdist bdist_wheel
+    password:
+        - secure: >-
+              kaDQlskSlm33X6IScstcWCvg4q28ArHVqBDvNQ5Wky5J75qdyIGZpy3+JOiM5PrgYC4YI684DmvAau0MsryoCbvH2CBOjiE0lplXFGWXHaybhj2MWtuMB/Jy5rgw6YSs6iDRqepK74JiIe8IxApjOBs/z8WJ7ErREZmEqi99dg05+0uI/LmBq0eALVcHVewWml40ABGOPD4hfdj1Msm7oOQRgpVptys1qZ5OzKoR9misl3qAIOv49hOBKQyKpJzL1BQ7CCviVou8HWKq7Tn4ehPe5RS+HlTuNnifbOEslBHSdt12JiaJk3pSa6ye6fI4s3NUB9MI33cValOk6YzgVswGgZgpM+FjJ7Kx1XzNo/qM5dmvNR7AVnd3MiCiENUWbdiP/ZPQ4t/EkeaWJrOeu2zjgLU+CbGACcXJKt6uJAy5p1zVUV9Fsc7Hfy/VEY32SgXNaafdp9Oqab6r3gIRQGz2LrWwpkOEzGR16Je7RyELQcqAe3ZXDet+cYaoLdT8Jmp/G5/gn4WHBZc3dOcTmDVEYB+kkT1Cj3bsfMx7OAKwxT+csB6CobcuuiN6aNCza2eUAKLJiMkDvK6iN2nOU10621TvNe0fR1mwCLzf94oNVmBHUhbcZSSItdG8X43gKiNKXhZxqAJ4Y43CrvbxkAmy+sWC8lYHdJrrxziSSII=
+    provider: pypi
+    user: guykisel
+env:
+    global:
+        secure: >-
+            hJjNRzaBuateybOSFPW8nkmWfXOfP4FM1S3FtbyTTB4NAoE9L7Hoo1ZiUjt+oLDy0kAre0tO8aKjin18lKE2No0IddE67XRTZAF+ah8iiDUkBIyN7kkgDm8M7byIK+nRS0jrSdcrFcWvAGtufQHT5MN6kfMNGJIe5m2QttS0rRLOxF+nO0CjiBOF4K+YyyBbwojfk8UY4aCNDlIucH16wwxv+LjV2d3eDxb+Rh6F+h8A5y7xk3F01NPM3K853LPR+nMqlXXGGt/gkM3sFDPRnVZ6k67geOJoWXVtFovQ/0iWgI8tW+Yr58NO23YiGSt+Uq7fDfOvjf1KXjr33dOl15mcUGWy3P6i3h1xnbVWCOCmH5ld14hTIK6mcMM226AjP3iXi3T6QqNzOaSDTO6JQXAIKKEdNsvQdNKzG39rLUot+JUmfpxIAZGeWj5TwIlSFOj87UbQL8cGZKKMB/4iyMNDkdXKQvdRwJy2QOp+tssbyAfm4650EDIA1nltbTFyHn8wWPNAkcdnLMb2gF2RBqQpe7mbfqR3P04Y17MPDUEIyaeNb2zROo4Twxb6xB2uKU0ZtpOM+ksDV6AkLWOQkkMApHdMVeYjiE5xi4itSNfv1kpGYpgpKQOg/FqMIqlQZd48r4ukbLnNwUDZ7sKtR744IOd/94C7Kpt+h3stotA=
+before_install:
+    - python -c "import fcntl; fcntl.fcntl(1, fcntl.F_SETFL, 0)" # https://github.com/travis-ci/travis-ci/issues/8920
+install:
+    - pip install -U pip
+    # temporarily ignore failure for installing pipx https://github.com/cs01/pipx/issues/25
+    - curl https://raw.githubusercontent.com/cs01/pipx/master/get-pipx.py | python || true
+    - pip install tox-travis
+    - pip install -r requirements_dev.txt
+    - pip install --upgrade twine
+    - python setup.py develop
+dist: xenial
+language: python
+python:
+    - "3.7"
+    - "3.6"
+    - "3.5"
+script:
+    - tox
+    # https://stackoverflow.com/questions/34405047/how-do-you-merge-into-another-branch-using-travis-with-git-commands
+    - 'if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then git config --replace-all remote.origin.fetch +refs/heads/*:refs/remotes/origin/*; fi'
+    - 'if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then git fetch; fi'
+    - 'if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then git fetch --tags; fi'
+    - 'if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then for branch in $(git branch -r|grep -v HEAD); do git checkout -qf ${branch#origin/}; done; fi'
+    - 'if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then git checkout "$TRAVIS_PULL_REQUEST_BRANCH"; fi'
+    - inline-plz --dryrun --autorun
+    - inline-plz --dryrun --autorun --config-dir=./inlineplz/linters/config
+    - inline-plz --autorun --delete-outdated --autofix --set-status
+cache:
+    pip: true
+    yarn: true
+    directories:
+        - node_modules # NPM packages

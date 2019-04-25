@@ -1,0 +1,19 @@
+language: ruby
+sudo: false
+cache: bundler
+rvm:
+  - 2.2.7
+services:
+  - redis
+bundler_args: --without development
+cache: bundler
+sudo: false
+before_script: cp config/database.example.yml config/database.yml && bundle exec rake db:schema:load
+env:
+  global:
+    - REDIS_URL="redis://localhost:6379"
+    - CERTIFICATE_HOSTNAME="test.host"
+    - COVERAGE=1
+    - RUBYOPT=W0
+git:
+  depth: 10

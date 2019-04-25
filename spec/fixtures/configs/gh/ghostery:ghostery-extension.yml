@@ -1,0 +1,15 @@
+language: node_js
+node_js:
+  - "lts/carbon"
+sudo: false
+
+cache:
+  yarn: true
+
+install:
+  - yarn install --frozen-lockfile
+
+script:
+  - node ./tools/licenses/fetchLicenses.js
+  - yarn run lint
+  - yarn run test.unit

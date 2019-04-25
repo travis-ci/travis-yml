@@ -1,0 +1,8 @@
+language: generic
+sudo: required
+before_script:
+- curl -L https://bin.equinox.io/c/46sMA3YsjZ6/opctl-stable-linux-amd64.tgz | sudo tar -xzv -C /usr/local/bin
+services:
+- docker
+script:
+- opctl run -a gitBranch=$TRAVIS_BRANCH build

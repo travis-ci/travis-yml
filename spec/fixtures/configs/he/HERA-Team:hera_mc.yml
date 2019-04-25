@@ -1,0 +1,50 @@
+language: python
+python:
+  # We don't actually use the Travis Python, but this keeps it organized.
+  - "2.7"
+  - "3.6"
+env:
+  global:
+    - COVERALLS_PARALLEL=true
+install:
+  - sudo apt-get update
+  # We do this conditionally because it saves us some downloading if the
+  # version is the same.
+  - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
+      wget https://repo.continuum.io/miniconda/Miniconda2-4.3.21-Linux-x86_64.sh -O miniconda.sh;
+    else
+      wget https://repo.continuum.io/miniconda/Miniconda3-4.3.21-Linux-x86_64.sh -O miniconda.sh;
+    fi
+  - bash miniconda.sh -b -p $HOME/miniconda
+  - export PATH="$HOME/miniconda/bin:$PATH"
+  - hash -r
+  - conda config --set always_yes yes --set changeps1 no
+  - conda config --add channels conda-forge
+  - conda update -q conda
+  # Useful for debugging any issues with conda
+  - conda info -a
+  - conda install six numpy astropy scipy python-dateutil sqlalchemy psycopg2 pandas
+    matplotlib tabulate psutil cartopy nose pip pycodestyle alembic coveralls pyuvdata
+    h5py
+  - conda list
+  - pip install git+https://github.com/HERA-Team/hera_qm.git;
+  - python setup.py install
+addons:
+    postgresql: "9.5"
+services:
+    - postgresql
+before_script:
+  - psql -c 'create database hera_mc_test;' -U postgres
+  - psql -c 'create database hera_mc;' -U postgres
+  - psql -c 'create user hera;' -U postgres
+  - mkdir ~/.hera_mc
+  - cp ci/example_config.json ~/.hera_mc/mc_config.json
+  - alembic upgrade head
+script:
+  - nosetests --with-coverage --cover-package=hera_mc
+  - pycodestyle . --ignore=E501,W503 --exclude=alembic
+
+after_success:
+    - coveralls
+notifications:
+  webhooks: https://coveralls.io/webhook?repo_token=$COVERALLS_REPO_TOKEN

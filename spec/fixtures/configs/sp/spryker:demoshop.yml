@@ -1,0 +1,136 @@
+language: php
+
+env:
+  global:
+    - APPLICATION_ENV=devtest
+    - APPLICATION_STORE=DE
+    - PROJECT=demoshop
+
+matrix:
+  fast_finish: true
+
+  allow_failures:
+    - php: "7.3"
+      env:
+        - TEST_GROUP=acceptance
+        - ON_EVENTS=push,cron
+        - DB=mysql
+
+  include:
+    - php: "7.1"
+      env:
+        - TEST_GROUP=without-acceptance
+    - php: "7.2"
+      env:
+        - TEST_GROUP=without-acceptance
+        - DB=mysql
+    - php: "7.1"
+      env:
+        - TEST_GROUP=acceptance
+    - php: "7.2"
+      env:
+        - TEST_GROUP=acceptance
+        - ON_EVENTS=push,cron
+        - DB=mysql
+    - php: "7.2"
+      env:
+        - TEST_GROUP=acceptance
+        - DB=mysql
+    - php: "7.2"
+      env:
+        - VALIDATION=1
+
+addons:
+  postgresql: 9.6
+  mysql: 5.7
+
+  apt:
+    packages:
+      - graphviz
+
+  hosts:
+    - zed.de.spryker.test
+    - www.de.spryker.test
+
+cache:
+  directories:
+    - $HOME/.composer/cache
+
+services:
+  - postgresql
+  - mysql
+  - redis
+  - rabbitmq
+
+sudo: required
+
+before_install:
+  - if [[ $VALIDATION != 1 && $ON_EVENTS != *$TRAVIS_EVENT_TYPE* ]]; then exit ; fi
+
+  - echo "extension = redis.so" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
+  - if [[ $DB == 'mysql' ]]; then chmod +x ./config/Shared/ci/travis/mysql/* ; fi
+  - if [[ $DB == 'mysql' ]]; then ./config/Shared/ci/travis/mysql/travis_mysql_5.7.sh ; fi
+  # Merges travis-ci/stores.php into the general stores.php at the defined "travis hook" line. Uses temporary file during the process.
+  # - grabs all lines until the travis hook from stores.php (including that line)
+  # - grabs all lines after the 1st line in travis-ci/stores.php (php opening tag)
+  # - grabs the remaining lines from stores.php (including the hook line again)
+  # - uses temporary file to avoid content loss because of the partial output writing of the operating system
+  - ( awk '1;/@hook travis-ci/{exit}' config/Shared/stores.php ; awk 'NR>1' config/Shared/ci/travis/stores.php ; awk '/@hook travis-ci/,0' config/Shared/stores.php ) > config/Shared/stores_tmp.php ; mv config/Shared/stores_tmp.php config/Shared/stores.php
+
+install:
+  - chmod -R a+x config/Shared/ci/travis/
+  - COMPOSER_MEMORY_LIMIT=-1 composer remove --dev spryker/git-hook
+  - composer install --optimize-autoloader --no-interaction
+  - config/Shared/ci/travis/install_elasticsearch.sh
+  - config/Shared/ci/travis/install_mailcatcher.sh
+
+before_script:
+  - nvm install 6
+
+  - mkdir -p shared/data/common/jenkins
+  - mkdir -p shared/data/common/jenkins/jobs
+  - mkdir -p data/DE/cache/Yves/twig -m 0777
+  - mkdir -p data/DE/cache/Zed/twig -m 0777
+  - mkdir -p data/DE/logs -m 0777
+  - chmod -R 777 data/
+  - chmod -R 660 config/Zed/dev_only_private.key
+  - chmod -R 660 config/Zed/dev_only_public.key
+
+  - if [[ -z $DB ]]; then cat config/Shared/ci/travis/postgresql_ci.config >> config/Shared/ci/travis/config_ci.php ; fi
+  - if [[ $DB == 'mysql' ]]; then cat config/Shared/ci/travis/mysql_ci.config >> config/Shared/ci/travis/config_ci.php ; fi
+
+  - cp config/Shared/ci/travis/config_ci.php config/Shared/config_local.php
+
+  - if [[ $DB == 'mysql' ]]; then sudo cp config/Shared/ci/travis/mysql/my.cnf /etc/ ; fi
+  - if [[ $DB == 'mysql' ]]; then sudo service mysql restart ; fi
+
+  - if [[ $TEST_GROUP == 'acceptance' ]] ; then config/Shared/ci/travis/acceptance_env.sh ; fi
+
+  - if [[ $TEST_GROUP == 'acceptance' ]] ; then vendor/bin/install DE -r testing ; fi
+  - if [[ $TEST_GROUP == 'without-acceptance' ]] ; then vendor/bin/install DE -r testing -x frontend ; fi
+
+  - if [[ $VALIDATION == 1 ]] ; then vendor/bin/console transfer:generate ; fi
+  - if [[ $VALIDATION == 1 ]] ; then vendor/bin/console propel:install ; fi
+  - if [[ $VALIDATION == 1 ]] ; then vendor/bin/console transfer:generate ; fi
+  - if [[ $VALIDATION == 1 ]] ; then vendor/bin/console dev:ide:generate-auto-completion ; fi
+  - if [[ $VALIDATION == 1 ]] ; then vendor/bin/codecept build --ansi ; fi
+  - if [[ $VALIDATION == 1 ]] ; then vendor/bin/console transfer:databuilder:generate ; fi
+  - if [[ $VALIDATION == 1 ]] ; then vendor/bin/console setup:search ; fi
+
+script:
+  - if [[ $VALIDATION == 1 ]] ; then vendor/bin/phpstan analyze -c phpstan.neon src/ -l 4 ; fi
+
+  - if [[ $VALIDATION == 1 ]] ; then vendor/bin/console propel:schema:validate ; fi
+  - if [[ $VALIDATION == 1 ]] ; then vendor/bin/console propel:schema:validate-xml-names ; fi
+  - if [[ $VALIDATION == 1 ]] ; then vendor/bin/console transfer:validate ; fi
+  - if [[ $VALIDATION == 1 ]] ; then vendor/bin/console code:sniff:style ; fi
+
+  - if [[ $VALIDATION == 1 ]] ; then vendor/bin/phpmd src/ text vendor/spryker/architecture-sniffer/src/ruleset.xml --minimumpriority 2 ; fi
+
+  - vendor/bin/phantomjs --webdriver=4444 &
+
+  - if [[ $TEST_GROUP == 'without-acceptance' ]]; then vendor/bin/codecept run -x Presentation ; fi
+  - if [[ $TEST_GROUP == 'acceptance' ]]; then vendor/bin/codecept run -g Presentation ; fi
+
+notifications:
+  email: false

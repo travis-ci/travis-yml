@@ -1,0 +1,36 @@
+language: node_js
+sudo: required
+node_js:
+- '4.2'
+before_install:
+- cp ci/travis-ci.sh $HOME/
+- chmod +x $HOME/travis-ci.sh
+- $HOME/travis-ci.sh before-install
+before_script:
+- $HOME/travis-ci.sh before-script
+script:
+- $HOME/travis-ci.sh script
+after_script:
+- $HOME/travis-ci.sh after-script
+after_success:
+- $HOME/travis-ci.sh after-success
+before_deploy:
+- $HOME/travis-ci.sh before-deploy
+after_deploy:
+- $HOME/travis-ci.sh after-deploy
+cache:
+  directories:
+  - node_modules
+notifications:
+  email:
+    recipients:
+    - mike@kalabox.io
+    on_success: always
+env:
+  global:
+  - DOCKER_HOST: tcp://10.13.37.100:2375
+  matrix:
+  - TEST_GROUP=apidev
+  - TEST_GROUP=apiprod
+  - TEST_GROUP=appdev
+  - TEST_GROUP=appprod VIPERKS_SUPER_SECRET_PASSWORD=test

@@ -1,0 +1,14 @@
+rvm: '2.5.0'
+
+script:
+  - mkdir -p spec && bundle exec rspec spec
+
+before_install:
+- sudo apt-get update -qq
+- sudo apt-get install -qq postgresql-server-dev-9.3
+
+before_script:
+  - psql -c 'create database chitter_test;' -U postgres
+
+env:
+  - PSQL_USER=postgres PSQL_PASSWORD=password TEST_DATABASE=chitter_test HOST=localhost

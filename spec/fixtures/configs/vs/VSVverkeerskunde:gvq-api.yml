@@ -1,0 +1,21 @@
+language:
+  php
+
+php:
+  - 7.2
+
+before_install:
+  echo "extension = redis.so" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
+
+install:
+  composer install
+
+script:
+  - ./check_strict_types.sh
+  - ./vendor/bin/phpstan --level=7 analyse src tests
+  - ./vendor/bin/phpcs
+  - ./vendor/bin/phpunit
+  - ./bin/console lint:twig templates/
+
+after_success:
+  - ./vendor/bin/php-coveralls -v

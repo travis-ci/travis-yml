@@ -1,0 +1,70 @@
+language: c
+os: linux
+compiler:
+  - gcc
+
+env:
+  global:
+   # The next declaration is the encrypted COVERITY_SCAN_TOKEN, created
+   #   via the "travis encrypt" command using the project repo's public key
+   - secure: "LZmNzxg2O+34twcNEv7n11ZZcXmbYGC/In78kytq4wgQaBK9EWC5p08UqtnTrGHxkIzFU53p01BRL8qBW5GxnnPMiSQWp41FPaYnpTXUTqHxFqY6yeNdRfGsQ7EPcFLc8R8YYG6bbJ8ODrLULUpMGUVrdk4L+g2gv9Q9++hpE9TEhLDN/4jhGoZ+94AzjKCUSghtOfWocW9hTtyFFvY+cD4feCvZsk1Dr3mNat2ZcJf/uBNNV0Pm2F+jzdrbBD1FToevLMCMmh5PKOrASXaNj4RNdaVmDvV/O1NRxAk2lOQkZyq3jWz6Xg1EKHgF8JRgLEUDVkvHMFz5w1JyHYRt0nirsdJXzV7yB7/uQQFpXJ2EHsvrhWD1BghHwdIFyNWf4hEG0bXbwYC2oaNhr2LoItbWoDNs73OEefExcjpVLJR2LKMn/HvgdXMQ54lMoLPbTlGSolqsuvgTmgYsEyIH2gTFKtLr8dYhi+QKJYtVcwzliu16MziX+6vKEHKsSRVTy6gCVj5JKxbs81dmE/zIh/8ZGh7dCQHGuoyq3/I8pZY4WoamgJUKoDjQGZLxweirjB1SRnrNKwwSU768wMjPIddwwbeJNwMEn9n9oPwBZqiF0T3wLASurNPX3fYV0TpNka3yxr69fc2urwtFflEqEqbgx9SRxUahZvRG02dZwos="
+
+addons:
+  apt:
+    packages:
+#      - make
+
+  coverity_scan:
+    project:
+      name: "naver/rye"
+      description: "Build submitted via Travis CI"
+    notification_email: dl_oss_rye@navercorp.com
+    build_command_prepend: "bash ./build.sh -m release -t x86_64 prepare; cd build_x86_64_release; ../configure" # TODO - refer build.sh usage
+    build_command:   "make"
+    branch_pattern: "coverity_scan|v1.1"
+
+before_install:
+      - echo -n | openssl s_client -connect scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-
+
+install: true
+
+script:
+#  - if [[ "${COVERITY_SCAN_BRANCH}" == 1 ]];
+#      then
+#        echo "Don't build on coverty_scan branch.";
+#        exit 0;
+#    fi
+
+# Build only
+  - bash ./build.sh -m release -t x86_64 build
+# Install
+  - if [[ "${COVERITY_SCAN_BRANCH}" != 1 ]];
+      then
+        cd build_x86_64_release;
+        make install;
+    fi
+
+#  - ./autogen.sh
+#  - rm -rf Release64
+#  - mkdir Release64
+#  - cd Release64
+#  - ../configure
+#  - make
+
+notifications:
+  email:
+    - dl_oss_rye@navercorp.com
+  slack: naver-paas-rye:r6unVRd61PSdLd51vQUdS2BP
+
+# blocklist
+#branches:
+#  except:
+#  - legacy
+#  - experimental
+
+# safelist
+#branches:
+#  only:
+#  - master
+#  - stable
+#  - v1.0

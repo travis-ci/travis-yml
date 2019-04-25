@@ -1,0 +1,14 @@
+language: python
+python:
+  - "3.6"
+sudo: required
+
+before_install:
+   - curl -LO https://github.com/BurntSushi/ripgrep/releases/download/0.8.1/ripgrep_0.8.1_amd64.deb
+   - sudo dpkg -i ripgrep_0.8.1_amd64.deb
+
+install:
+  - make install
+
+script:
+  - make black check_conftest_imports doctest coverage

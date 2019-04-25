@@ -1,0 +1,16 @@
+language: node_js
+node_js:
+- node
+before_script:
+- npm run build
+script:
+- npm test
+install:
+- npm install
+deploy:
+  skip_clean: true
+  provider: heroku
+  app: knowledge-rocket-v1
+  on: master
+  api_key:
+    secure: IGAoUw0x7aodk0ZSQTicaHGygaHqG8lb69Vn9PtlHvXzYNJoe/oxtGfOqkOIwQnZTsFn1Lcwb30Ij7RnxzrixYy4ICRCeouN121vOjZiebyTWvPacbuNWKqhytMmtIcE7FhjiKp4KZOCRDPNQ6l47MRoFc7olFlZL6PK2I2btBt1gOhj3f+CUOcApcgkzF17rgFC+UbIBJvak+Hq0a8IEwe8g7rxfb1jl6FPxW+OkDyuNnkLlwj6i2vU0+cf4tVxXDQ09oUhNcuWhfveRvbQt/Clc3xvWVZxF28cqTmUo7VZbpIbkr8XbV1QmtshS4ogu4W/AM8eTkI01CWbPKAsdtvbwTsm5qWTljQSpQl7dTXc0vjMrL/4Ms7ShWo1Isynhr7JQQ/fjiFzmLvGeFrLOPo+8SIHG9AlUhLirS4brlgQkPmZnhjRsQlEoW439V5Z38LuVuTWsqCA8CpbE64270mXDeYyffa5RD54snO2BbfIjztnGEYv86yglKrvqKJ9Hn+DdLnII9wkQU1dl93mTEgSIZV5jPjkz+ch0nawgTQIvleoYJxU5uRrFG2zihRSPsiA8apxHWXaED1/NHEn36QgBEFO3iyClbe9aGRXm3R/2x2evGzRqAwkDpcyXdtV027rbr1yNGjU+a8BEOsRoNu7u/wxJS+1lgmS+kBTha0=

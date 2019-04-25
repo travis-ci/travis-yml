@@ -1,0 +1,50 @@
+#######################
+# General Configuration
+#######################
+language: java
+sudo: false
+dist: xenial
+jdk:
+  - openjdk9
+os:
+  - linux
+
+
+install: true
+
+notifications:
+  email:
+    on_success: change
+    on_failure: always
+  slack:
+    on_success: change
+    on_failure: change
+    rooms:
+      - vaader-ietr:EEtUq0RrGRpHSXWZiEApSDwS#preesm
+
+addons:
+  sonarcloud:
+    organization: "preesm-sonarcloud-org"
+    token:
+      secure: "7edfa331c5de80bf665aee04f0e9dbcbc3efa122"
+    branches: .*
+
+script: 
+  - ./releng/build_and_test.sh --fast
+
+
+
+#https://docs.travis-ci.com/user/deployment/pages/
+# GITHUB_TOKEN is set in https://travis-ci.org/m2e-code-quality/m2e-code-quality/settings
+# see https://github.com/m2e-code-quality/m2e-code-quality/issues/123
+deploy:
+  - provider: pages
+    skip_cleanup: true
+    github_token: $GITHUB_TOKEN
+    local_dir: new-site
+    repo: preesm/preesm-snapshot-site
+    target_branch: gh-pages
+    on: 
+      branch: develop
+
+before_deploy: ./releng/snapshot_predeploy.sh

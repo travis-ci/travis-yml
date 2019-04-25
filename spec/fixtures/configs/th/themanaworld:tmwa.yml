@@ -1,0 +1,125 @@
+## Doesn't appear to do anything useful.
+language: cpp
+
+## Notifications
+## The default is to send email on all failures and changed success
+## Adding other notifiers (like IRC) does not disable the email one
+notifications:
+  ## This is, in fact, the default email setting so it is unnecessary.
+  ## It would probably be too annoying to set on_success: always
+  email:
+    on_success: changed
+    on_failure: always
+  irc:
+    channels:
+      - "ircs://chat.freenode.net:8000/#evol-dev"
+    on_success: change
+    on_failure: always
+
+## Use the container-based infrastructure
+sudo: required
+dist: xenial
+python:
+  - 2.7
+
+## Commands before installing
+before_install:
+  - if [ $(git rev-list --count HEAD ^master) -gt 50 ] ; then exit 1; fi
+  - export CC="${REAL_CC} ${REAL_EXTRA}" CXX="${REAL_CXX} ${REAL_EXTRA}"
+
+install:
+  - make --version
+  - python --version
+  - mkdir build
+  - cd build
+  - git init
+  - ../configure --build=x86_64-linux-gnu --dev CPPFLAGS=-DQUIET `! [[ $CXX =~ clang* ]] || echo --disable-abi` $EXTRA_CONFIGURE_ARGS
+  - sed -n '/One Makefile/q;p' Makefile
+
+## Main test script
+script:
+  - make -R -k -j2
+  # Use - instead of :- to allow forcing an empty one
+  - make -R -k -j2 test TESTER="${FORCE_TESTER-${DEFAULT_TESTER}}"
+  - make -R -k -j2 format
+  - git --git-dir=../.git --work-tree=.. diff --exit-code
+  - make -R -k -j2 dist bindist
+
+### The rest of the file creates a build matrix
+env:
+  global:
+    - DEFAULT_TESTER='valgrind --error-exitcode=1 --track-fds=yes'
+matrix:
+  fast-finish: true
+  include:
+    - compiler: clang
+      env: REAL_CC=clang-6.0     REAL_CXX=clang++-6.0
+      addons:
+        apt:
+          sources:
+          - llvm-toolchain-xenial-6.0
+          - ubuntu-toolchain-r-test
+          packages:
+          - clang-6.0
+          - libstdc++6-6-dbg
+          - libgtest-dev
+          - valgrind
+          - gdb
+    - compiler: clang
+      env: REAL_CC=clang-7     REAL_CXX=clang++-7
+      addons:
+        apt:
+          sources:
+          - llvm-toolchain-xenial-7
+          - ubuntu-toolchain-r-test
+          packages:
+          - clang-7
+          - libstdc++6-7-dbg
+          - libgtest-dev
+          - valgrind
+          - gdb
+    - compiler: gcc
+      env: REAL_CC=gcc-7     REAL_CXX=g++-7   LDFLAGS="-fuse-ld=gold"
+      addons:
+        apt:
+          sources:
+          - ubuntu-toolchain-r-test
+          packages:
+          - g++-7
+          - libstdc++6-7-dbg
+          - libgtest-dev
+          - valgrind
+          - gdb
+    - compiler: gcc
+      env: REAL_CC=gcc-8     REAL_CXX=g++-8   LDFLAGS="-fuse-ld=gold"
+      addons:
+        apt:
+          sources:
+          - ubuntu-toolchain-r-test
+          packages:
+          - g++-8
+          - libstdc++6-8-dbg
+          - libgtest-dev
+          - valgrind
+          - gdb
+    - compiler: gcc
+      env: REAL_CC=gcc-8     REAL_CXX=g++-8  REAL_EXTRA=-fsanitize=address  FORCE_TESTER='' ASAN_OPTIONS=detect_leaks=0   LDFLAGS="-fuse-ld=gold"
+      addons:
+        apt:
+          sources:
+          - ubuntu-toolchain-r-test
+          packages:
+          - g++-8
+          - libstdc++6-8-dbg
+          - libgtest-dev
+          - gdb
+  allow_failures: # got no time to deal with gcc right now
+    - compiler: gcc
+
+# everything that was pushed to stable was already on 'master', except
+# the version change and some doc changes.
+# everything that was pushed to test-server was in a PR so it passed travis
+branches:
+  except:
+    - stable
+    - test-server

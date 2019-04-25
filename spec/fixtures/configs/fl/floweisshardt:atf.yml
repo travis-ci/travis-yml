@@ -1,0 +1,20 @@
+sudo: required
+dist: trusty
+language: generic
+notifications:
+  email:
+    on_success: change
+    on_failure: always
+env:
+  global:
+    - ROS_REPO=ros
+    - NOT_TEST_INSTALL=true
+    - VERBOSE_TESTS=false
+    - CATKIN_PARALLEL_TEST_JOBS=-p1
+  matrix:
+    - ROS_DISTRO=kinetic UPSTREAM_WORKSPACE=file
+install:
+  - git clone https://github.com/ros-industrial/industrial_ci.git .ci_config
+script:
+  - .ci_config/travis.sh
+#  - ./travis.sh  # Enable this when you have a package-local script 

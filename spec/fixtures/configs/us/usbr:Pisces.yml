@@ -1,0 +1,32 @@
+## Travis CI Integration
+sudo: true
+language: csharp
+
+env:
+  - WORKERS=4
+
+branches:
+  only:
+  - master
+
+before_install:
+  - mkdir -p .nuget
+  - wget -O .nuget/nuget.exe https://dist.nuget.org/win-x86-commandline/latest/nuget.exe
+
+install:
+  - mono .nuget/nuget.exe restore Pisces.sln -Verbosity quiet
+  - mono .nuget/nuget.exe install NUnit.ConsoleRunner -Version 3.8.0 -OutputDirectory testrunner
+
+script:
+  - msbuild /p:Configuration=Debug /p:Platform="Any CPU" /p:DefineConstants="__MonoCS__" /p:DefineConstants="PISCES_OPEN" /noconlog /maxcpucount /v:quiet Pisces.sln
+
+  ## Test the libraries
+  - mono ./testrunner/NUnit.ConsoleRunner.3.8.0/tools/nunit3-console.exe --out=/dev/null --workers=$WORKERS ./Core/bin/Debug/Reclamation.Core.dll
+  - mono ./testrunner/NUnit.ConsoleRunner.3.8.0/tools/nunit3-console.exe --out=/dev/null --workers=$WORKERS ./TimeSeries/bin/Debug/Reclamation.TimeSeries.dll
+
+notifications: 
+  email: 
+    recipients: 
+      - ktarbet@gmail.com
+      - jrocha@usbr.gov 
+      - blounsbury@usbr.gov 

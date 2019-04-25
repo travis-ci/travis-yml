@@ -1,0 +1,45 @@
+language: node_js
+node_js:
+  - "10"
+cache:
+  yarn: true
+  directories:
+    - "node_modules"
+    - "$HOME/.sonar/cache"
+addons:
+  sonarcloud:
+    organization: "epam"
+  ssh_known_hosts:
+    - "$DEPLOY_SERVER"
+before_install:
+  - curl -o- -L https://yarnpkg.com/install.sh | bash -s -- --version 1.15.2
+  - export PATH="$HOME/.yarn/bin:$PATH"
+before_script:
+  - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > /tmp/cc-test-reporter
+  - chmod +x /tmp/cc-test-reporter
+script:
+  - yarn run ci
+after_success:
+  - sonar-scanner
+  - npm run coveralls
+  - if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then /tmp/cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT; fi
+deploy:
+  - provider: npm
+    skip_cleanup: true
+    email: "$NPM_EMAIL"
+    api_key: "$NPM_AUTH_TOKEN"
+    tag: latest
+    on:
+      tags: true
+      node: "10"
+      condition: $TRAVIS_TAG =~ ^v[0-9]+\.[0-9]+\.[0-9]+$
+  - provider: script
+    skip_cleanup: true
+    script: "chmod +x ./tools/deploy.sh && ./tools/deploy.sh"
+    on:
+      all_branches: true
+      node: "10"
+notifications:
+  slack:
+    secure: CkwGMCqK7Liq81tnr7wMUJ893JW09caDeio5oOYQmjGwu3FBkwNU7zApRltN6NJ/a14Of97fHre0vMPga7BrNmhDH9ztvh6qafEmZXPYxiZSbOQ5JGYP3SlotIFF+z0WowCt6erXmNeRHzTBCoZKo4Sxd/2ZHLrkm3nVcCnugpIlyiFrhGnv+QIS2JbMVhai/0rYU1+CsIm6Lb/Kt4cpUgbdJGOsUizTZNKHxhgbnElFczaF0bUFbifkP7LRqdEXtsJPodLfPOezKM62BA6rBnlFGPrRKER1r3ZCHOHimAjyIWD6emUc331w2OmhXDuHGL4ZXq94joiHJVhfrnUsIzgewIxE0qKCMO7y4WcAdXCiwY+x1SoOUlUreJp6EkDI0IgiKOCfb8BnjSXV7VhqymGPjuvFvNzBxXyLjo9jceathGsKQ7usFjhVT1JBkmNYadVN8Y7PYEbyzOjWJol/f5Ol4B28pzypVMP3N6M0KKLJZ4gp6vFtobC72u7/7ThCfUfjDaPyf/yoUNmMQN6lLTRGvZnix+NU/DWVptbDrfAOm9+bBN7Z53Kdhfhpzjedr1Bb7Y+UuHSbNbQe0AvZdhzX3qCrneKDmlbIUvJfe1yzVh8981RedBFTXFcAb38wVfofnMrbZPaWw9k9L3fP1V52GYGjN6L2AX0VQZ3/arE=
+    on_success: change

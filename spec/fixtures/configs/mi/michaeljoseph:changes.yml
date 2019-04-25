@@ -1,0 +1,24 @@
+language: python
+matrix:
+    include:
+        -   env: TOXENV=py36
+            python: 3.6
+        -   env: TOXENV=py37
+            python: 3.7
+            sudo: required
+            dist: xenial
+        -   env: TOXENV=lint
+            python: 3.6
+        -   env: TOXENV=safety
+            python: 3.6
+
+install: pip install tox-travis
+script: tox
+after_success:
+  - tox -e coverage
+notifications:
+  webhooks:
+    urls:
+      - https://webhooks.gitter.im/e/bb499a791e0cf35113e1
+    on_success: change
+    on_failure: always

@@ -1,0 +1,22 @@
+language: java
+jdk:
+  - openjdk11
+install:
+  - make
+before_script:
+  # 
+  # Clearing _JAVA_OPTIONS_ addresses javadoc compliance failure caused by the following warning.
+  #
+  #   [WARNING] Javadoc Warnings
+  #   [WARNING] Picked up _JAVA_OPTIONS: -Xmx2048m -Xms512m
+  #   ...
+  #   [ERROR] Failed to execute goal org.apache.maven.plugins:maven-javadoc-plugin:3.0.1:javadoc (javadoc-execution) on project mt-dynamodb: An error has occurred in Javadoc report generation: Project contains Javadoc Warnings -> [Help 1]
+  #
+  # Details: https://github.com/travis-ci/travis-ci/issues/8408
+  #
+  - unset _JAVA_OPTIONS
+script:
+  - make test
+  - make validate
+after_success:
+  - make coveralls

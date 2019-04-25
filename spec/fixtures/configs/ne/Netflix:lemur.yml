@@ -1,0 +1,48 @@
+language: python
+dist: xenial
+
+node_js:
+  - "6.2.0"
+
+addons:
+  postgresql: "9.4"
+
+matrix:
+  include:
+    - python: "3.7"
+      env: TOXENV=py37
+
+cache:
+  directories:
+    - node_modules
+    - .pip_download_cache
+
+env:
+  global:
+    - PIP_DOWNLOAD_CACHE=".pip_download_cache"
+    # do not load /etc/boto.cfg with Python 3 incompatible plugin
+    # https://github.com/travis-ci/travis-ci/issues/5246#issuecomment-166460882
+    - BOTO_CONFIG=/doesnotexist
+
+before_script:
+  - psql -c "create database lemur;" -U postgres
+  - psql -c "create user lemur with password 'lemur;'" -U postgres
+  - psql lemur -c "create extension IF NOT EXISTS pg_trgm;" -U postgres
+  - npm config set registry https://registry.npmjs.org
+  - npm install -g bower
+  - pip install --upgrade setuptools
+
+install:
+  - pip install coveralls
+  - pip install bandit
+
+script:
+  - make test
+  - bandit -r . -ll -ii -x lemur/tests/,docs
+
+after_success:
+  - coveralls
+
+notifications:
+  email:
+    ccastrapel@netflix.com

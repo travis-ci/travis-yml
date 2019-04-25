@@ -48,6 +48,7 @@ end
 def format(obj)
   str = obj.ai(AI)
   str = str.gsub(/(\w+) +:/, '\1:')
+  str = str.gsub(/' +:/, '"')
   str = str.gsub('$ref', "'$ref'")
   str = str.gsub('$id', "'$id'")
   str = str.gsub('"', "'")
@@ -70,10 +71,10 @@ providers = %i(
   azure_web_apps
   bintray
   bitballoon
-  bluemixcf
+  bluemixcloudfoundry
   boxfuse
   catalyze
-  chef_supermarket
+  chef-supermarket
   cloud66
   cloudcontrol
   cloudfiles

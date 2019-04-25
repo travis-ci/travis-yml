@@ -1,0 +1,36 @@
+dist: xenial
+addons:
+  apt:
+    packages:
+    # For OpenSSL support
+    - libssl-dev
+
+language: c
+
+compiler:
+  - clang
+  - gcc
+
+env:
+  global:
+  matrix:
+    - FLAG_SSL=""            FLAG_MEMPROF=""                   FLAG_DEBUG=""
+    - FLAG_SSL="--with-ssl"  FLAG_MEMPROF="--enable-memprof"   FLAG_DEBUG="--enable-debug"
+    - FLAG_SSL=""            FLAG_MEMPROF="--enable-memprof"   FLAG_DEBUG="--enable-debug"
+    - FLAG_SSL="--with-ssl"  FLAG_MEMPROF="--enable-memprof"   FLAG_DEBUG=""
+    - FLAG_SSL=""            FLAG_MEMPROF="--enable-memprof"   FLAG_DEBUG=""
+    - FLAG_SSL="--with-ssl"  FLAG_MEMPROF=""                   FLAG_DEBUG="--enable-debug"
+    - FLAG_SSL=""            FLAG_MEMPROF=""                   FLAG_DEBUG="--enable-debug"
+    - FLAG_SSL="--with-ssl"  FLAG_MEMPROF=""                   FLAG_DEBUG=""
+
+script:
+  # Set up configure flags
+  - ./configure --prefix="$PWD/fuzzpre" $FLAG_SSL $FLAG_MEMPROF $FLAG_DEBUG
+  # Speed up CI builds
+  - printf '/CFLAGS=/s/-g//\ns/-O2//\nw\nq\n' | ed -s src/Makefile
+  # Clean up build directory
+  - make clean
+  # Make Fuzzball and all related code
+  - make
+  # Check whether install works
+  - make install

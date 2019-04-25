@@ -1,0 +1,20 @@
+language: node_js
+
+node_js:
+  - 10.14.1
+
+script:
+  - unset CI
+  - yarn build-css && yarn test-ci
+  - yarn build
+
+notifications:
+  email:
+    on_failure: change
+
+after_success: 'npm run coveralls'
+
+cache:
+  yarn: true
+  directories:
+    - node_modules

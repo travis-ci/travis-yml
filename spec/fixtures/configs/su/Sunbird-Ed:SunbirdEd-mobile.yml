@@ -1,0 +1,72 @@
+# branches:
+#   only:
+#   - master
+matrix:
+  include:
+  - os: linux
+    sudo: false
+    language: android
+    android:
+      components:
+      - tools
+      - platform-tools
+      - tools
+      - build-tools-26.0.2
+      - android-26
+      - extra-google-google_play_services
+      - extra-google-m2repository
+      - extra-android-m2repository
+    addons:
+      apt:
+        sources:
+        - sourceline: deb https://dl.yarnpkg.com/debian/ stable main
+          key_url: https://dl.yarnpkg.com/debian/pubkey.gpg
+        packages:
+        - oracle-java8-installer
+        - oracle-java8-set-default
+        - yarn
+        - jq
+    licenses:
+    - android-sdk-preview-license-.+
+    - android-sdk-license-.+
+    - google-gdk-license-.+
+
+before_cache:
+- rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+- rm -f  $HOME/.gradle/caches/transforms-1/transforms-1.lock
+- rm -rf $HOME/.gradle/caches/*/fileHashes/
+- rm -rf $HOME/.gradle/caches/*/plugin-resolution/
+cache:
+  directories:
+  - $HOME/.gradle/caches/
+  - $HOME/.gradle/wrapper/
+  - $HOME/.cache/yarn/v1/
+before_install:
+- export LANG=en_US.UTF-8
+- nvm install 8
+- npm install -g ionic cordova
+- openssl aes-256-cbc -K $encrypted_26e32d2c13cd_key -iv $encrypted_26e32d2c13cd_iv -in ./buildConfig/secret.tar.enc -out ./buildConfig/secret.tar -d
+- cd buildConfig
+- tar xvf secret.tar
+- cd ..
+
+before_script:
+- echo "Before Script"
+script:
+- 'if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then  ./build.sh $BUILD_BRANCH; fi'
+
+env:
+  global:
+  - JAVA_HOME=/usr/lib/jvm/java-8-oracle
+  - BUILD_BRANCH=$(git ls-remote origin | sed -n "\|$TRAVIS_COMMIT\s\+refs/heads/|{s///p}")
+
+deploy:
+  provider: releases
+  file_glob: true
+  file: "platforms/android/app/build/outputs/apk/**/*/sunbird-*.apk"
+  skip_cleanup: true
+  on:
+    repo: Sunbird-Ed/SunbirdEd-mobile
+    tags: true
+  api_key:
+    secure: "gOoQcqCCNUcyfLpiBfYwK1YOH7ti+NVzzE3BjUy14mO8ym9me5c9yzdbA3+uj0quYGpt5Yj2ViRMWX45JyVzSQF2WZ/L0E8e39HoHOd36FQogdixqZlOTBZdmuWWHiSLEsBrjhqn7XxD08x6xy2NZNKcdFKEvLmjnSIH3lNubkzYyQoMizddKUPuDZRyhpOWJoC6rGND6nbc1bIyrbvLlX9hlMCo54S2oPpwqkMUW4XsVX9pZEUd6XDgk4J6lX5XvHDYxvFyjr8WZI4wPWqtEMdiQ+m83ZTUdBN7IzYp5myB27hVZml/0zAi+Ppj/zQWF7n5QvYmeG10RujHwPfhuo3AGXmsgiEMb3fgGOPI4bYqokNik46E7JXZLWXGprMRA9PJD0J9gQwOY2TYEifil43SE3+nVsG3D2vOCKNcUxeepVMsBQ0NifmKvYfTuAjcfYvNs3OeTEsPunmqjMeq9DVcBQPkofarHYtJAO1lLCgHULF/Q4SV/o2mK637gzn+JseNAFHO9jdibKmnnN6l5FJVDwyzYoAfvNXwif89UVB9f1RHyB/nReipgfgH2vDGqvQ2py3k2nQ+RzcoQ6wIA9Hh3pYN9sLixXkdyLDDCnybPU968/Y95CYoOObmxs3VgSaZRtJ2drd4fVhCDFhxYtfI8Ee/N4NpQQtzzWSLdOQ="

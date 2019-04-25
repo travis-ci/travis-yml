@@ -1,0 +1,23 @@
+dist: xenial
+sudo: required
+language: python
+python:
+  - "2.7"
+  - "3.5"
+addons:
+  snaps:
+  - name: juju
+    classic: true
+    channel: stable
+before_install:
+   - sudo apt -qq update
+   - sudo apt install -y libapt-pkg-dev  # For python-apt wheel build
+# NOTE(beisner): Avoid test pollution by not enabling system site packages.
+virtualenv:
+  system_site_packages: false
+install:
+  - pip install tox
+script:
+  - tox -c tox.ini -e pep8
+  - tox -c tox.ini -e py3
+  - tox -c tox.ini -e py2

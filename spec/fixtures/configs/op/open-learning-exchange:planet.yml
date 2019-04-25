@@ -1,0 +1,134 @@
+_prepare_deploy: &_prepare_deploy
+  before_script:
+    - source ./.travis/travis_utils.sh
+    - login_docker
+    - prepare_everything
+    - docker pull $PLANET_TEST
+    - docker pull $DOCKER_DB_INIT_TEST
+_prepare_multiarch: &_prepare_multiarch
+  before_script:
+    - source ./.travis/travis_utils.sh
+    - login_docker
+    - prepare_everything
+    - prepare_yq
+    - prepare_multiarch_manifest_tool
+    - prepare_db_init_rpi
+    - prepare_planet_rpi
+_use_chrome: &_use_chrome
+  addons:
+    apt:
+      sources:
+        - google-chrome
+      packages:
+        - google-chrome-stable
+        - google-chrome-beta
+        - jq
+_use_nodejs: &_use_nodejs
+  language: node_js
+  node_js:
+    - "8"
+
+sudo: required
+branches:
+  except:
+  - l10n_master
+addons:
+  apt:
+    update: true
+    packages:
+      - docker-ce
+env:
+  global:
+    # DOCKER_USER
+    - secure: "V/U6r8NEg46zbazfEyPJaSjMONaGRlzd5QeJQpqxnf+KSkC8rkkxTh8/LW7k3emGmXnqdSRtQ9keShKo1fb7qJpTxvFuK2YspEmSB69pAxxRj3C+3ikXSz5bM1VHtzC96T+eXzxug6/qAEgWR/OM3aD9GJC14R7sdv5dKxneFgJDZO2nB7pLsU19EYyPdsi4NQt11GQy/vCwYF2qEdWWo7SUmkI6DTQvdyu/dSulID0cfiBUvHcB4A3nMeewEjAY0KFKOr3zcKX6FJ5zKF47r/A/LYF25TtNRfJFvh5txkJFu3HlFSY7FEukB6eOdmqN5jm1omZd+yESzvp5Fm6qvpJb18j1zxKyJzQ3ZIhH4c8c7JNUL+nlKDTzU06Lmu+QypE4EXnlmj1v/4n56VtS8krJdefMlVDLl1Uod6/tVI+gGYj4UbSfV/yd2NS1Y0ksxUI74h2XBkUvs7pqySSob1ErkBkndvCQrEceyBEe9n+OzJ6fC9CKhaaTT0Dv7+pDl34G0FfbxESDvqSh5/aPUyZnIxwnb92iQfM5tIFl89kGyHhvkRf2es3Ga5Y35SwQ9+BT20jvPfcFfm3fHkzvZhYRS0Km+1uuyCPXuZXa53nlZkEee6StzGd6sO1sAAB3RgcH3UioiRh2yK0G+IDDv65N6ov1mMhGn1PXUT6pIIM="
+    # DOCKER_PASS
+    - secure: "GGxsb26T994fAPprzoGFEcUtQvXpZ7FLf3Vnsp2AQ/OeBUOpACPoB4CsYx8Zx168m7HEt3YDEnqEvCyNhD8Hpsls4g4rGT37r7j5nBd1jsxlKbP1F5CsHUXe41R2QrVGiL/dJ27JGdrTdySL4hfP2dvBUtYNBmMAvbI6PkBxO13lU/sjCherRHEpzgf5FUQj9sbWac5UWWbdLYmsErcoh6/+fhr4OHWZyk3DiELRC6WYceA8YfaYrBy/MKqOV2sBtQTBtSsjNmfQbMG1S7nrw28Gp+uFnfUfF4DC6EwBAZj9NBPwVlllqCIdC0CGm5RWEesaDA62krgzpT2EalSg0ADGj0wXA8dMd34QEzwulsEQWhmgy1fL/EEorC7arcOdoFMkyg1gx/Vg8S+hdjZuX1GmWlbs9oN6+00pJDfmubQw6lOsjipZDGjIiM9OpY1mWcowCxjMRWxO5HEzMLKRZXIEtLfEyrQG03gqsavL6SmpAFVXQj/nkm9DWx6QVOG9tpzsw8jESW4S1BTPjp9gWLCA56VdFaP3ECkSeNWUZJw/1hMh+nol+QjJZa8AvWG75n8tc/Qo6vI/mCoQZBQc5Yf1yc04BhEuqV+AtTMq2NNBW4/DI/CJVpyTnGUt4/0Vefn5cB+qvwVFKuaQL8Badcco7ecB8YJ+50I4IgrLLlc="
+cache:
+  directories:
+    - "$(npm root -g)"
+    - node_modules
+
+stages:
+  - docker-creation
+  - automated-test
+  - docker-release
+  - multiarch-release
+
+jobs:
+  include:
+    - stage: docker-creation
+      script:
+        - set -e
+        - source ./.travis/travis_utils.sh
+        - prepare_ci
+        - prepare_planet_test
+        - deploy_docker './docker/planet/Dockerfile' $PLANET_TEST $PLANET_TEST_LATEST
+    - stage: docker-creation
+      script:
+        - set -e
+        - source ./.travis/travis_utils.sh
+        - prepare_ci
+        - prepare_db_init_test
+        - deploy_docker './docker/db-init/Dockerfile' $DOCKER_DB_INIT_TEST $DOCKER_DB_INIT_TEST_LATEST
+    - stage: automated-test
+      <<: *_use_chrome
+      <<: *_use_nodejs
+      before_install:
+        - source ./.travis/travis_utils.sh
+        - prepare_ci
+        - prepare_planet_test
+        - prepare_db_init_test
+        - render_compose_travis
+        - nohup docker-compose -f ./.travis/planet-travis.yml up &
+        - export CHROME_BIN=chromium-browser
+        - export DISPLAY=:99.0
+        - sh -e /etc/init.d/xvfb start
+      install:
+        - rm -rf ~/.nvm && git clone https://github.com/creationix/nvm.git ~/.nvm && (cd ~/.nvm
+              && git checkout `git describe --abbrev=0 --tags`) && source ~/.nvm/nvm.sh
+              && nvm install $TRAVIS_NODE_VERSION
+      before_script:
+        - travis_retry npm install
+        - travis_retry npm install -g @angular/cli
+        - travis_retry npm install -g karma
+      script:
+        - set -e
+        - echo  "Waiting for couchdb to start"; WAIT_TIME=0; until curl http://127.0.0.1:5984/_all_dbs || [ $WAIT_TIME -eq 180 ]; do echo "..."; sleep 5; WAIT_TIME=$(expr $WAIT_TIME + 5); done
+        - i=$(curl -X GET http://127.0.0.1:5984/_all_dbs | jq length); if [ $i -ne 32 ]; then exit 1; fi
+        - ng e2e
+    - stage: docker-release
+      <<: *_prepare_deploy
+      script: #x86 tagging
+        - set -e
+        - tag_docker $PLANET_TEST $PLANET $PLANET_LATEST
+        - tag_docker $DOCKER_DB_INIT_TEST $DOCKER_DB_INIT $DOCKER_DB_INIT_LATEST
+        - push_docker $PLANET $PLANET_LATEST
+        - push_docker $DOCKER_DB_INIT $DOCKER_DB_INIT_LATEST
+        - deploy_tag $PLANET_TEST $PLANET_VERSIONED
+        - deploy_tag $DOCKER_DB_INIT_TEST $DOCKER_DB_INIT_VERSIONED
+        - docker logout
+    - stage: docker-release
+      script: #arm image building planet
+        - docker run --rm --privileged multiarch/qemu-user-static:register --reset
+        - travis_wait 45 bash ./.travis/deploy_rpi.sh --branch="$TRAVIS_BRANCH" --commit="$TRAVIS_COMMIT" --pull="$TRAVIS_PULL_REQUEST" --duser="$DOCKER_USER" --dpass="$DOCKER_PASS" --gtag="$TRAVIS_TAG" --image=planet
+
+    - stage: docker-release
+      script: #arm image building planet
+        - docker run --rm --privileged multiarch/qemu-user-static:register --reset
+        - travis_wait 45 bash ./.travis/deploy_rpi.sh --branch="$TRAVIS_BRANCH" --commit="$TRAVIS_COMMIT" --pull="$TRAVIS_PULL_REQUEST" --duser="$DOCKER_USER" --dpass="$DOCKER_PASS" --gtag="$TRAVIS_TAG" --image=db-init
+
+    - stage: multiarch-release
+      <<: *_prepare_multiarch
+      script: #Pushing multiarch
+        - set -e
+        - create_multiarch_manifest_planet $PLANET_RPI_LATEST $PLANET_LATEST $PLANET_RPI_VERSIONED $PLANET_VERSIONED
+        - create_multiarch_manifest_dbinit $DOCKER_DB_INIT_RPI_LATEST $DOCKER_DB_INIT_LATEST $DOCKER_DB_INIT_RPI_VERSIONED $DOCKER_DB_INIT_VERSIONED
+        - push_multiarch_manifests
+
+notifications:
+  webhooks:
+    urls:
+      - https://webhooks.gitter.im/e/063276d3941fa8443947
+    on_success: always  # options: [always|never|change] default: change
+    on_failure: always  # options: [always|never|change] default: always
+    on_start: never     # options: [always|never|change] default: never

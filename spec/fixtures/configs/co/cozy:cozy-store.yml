@@ -1,0 +1,72 @@
+language: node_js
+matrix:
+  fast_finish: true
+node_js:
+- '8'
+branches:
+  only:
+  - master
+  # tags
+  - /^\d+\.\d+\.\d+(\-beta.\d+)?$/
+env:
+  global:
+  - TARGETS_DEV=recette.cozy.works
+  - TARGETS_BETA=betatest.cozy.works
+  - MATTERMOST_CHANNEL=Plateformers-release
+  # to generate secure ENV VARS : travis encrypt MY_VAR=value -r cozy/cozy-store
+  # RUNDECK_TOKEN
+  - secure: "UBXl3CoUb33AJ3mKcvZiUHpSppe/YcTLTB2MoiYPyDAlQjNNg4pDLywmPFwg/PmuigconEh29e8XHRHMW7WbdUTWwRKmBS1B6QDCbpXJSrJsupvHCa718Zm6UfMolyZ2t0wZGeabuTF6HJkV+teM2MkBX/baHawIQivUSk7gGLxx3Wa6HgzvCnJbPsVQI75wSlxsVmIX8GeykBN8ZN0drIDPhFJ+lHB5D2MPEJyU/N3DxetLzVtJe8D0PJWOSQ3xyCWEA5HK2gPpXzVni98v4ekEoRBayBGd/rmUVMHxp08vQyuKDv4c+N83vtb1eMmqOV86dkfyfvLGhyhOMzEPcmcTreUhQbwcIzonZPNe/HFfDIrwdaYiy+BIvFs9ETG0d0UW6wHqINBHuu0KOSkM085Sn4XMwJ+iXuuFm0/RwRqdl5SN3H2jnjY3ZIaF3a0cvSUB9b24yaz84ejXPAFKDM3QgJAOJkDQSlifCEbnZ6D7h4EEjIz7WMn7u6eWehZagi2nlLSRc3hQVPuVgCK0mAjqAia4CoGc5Gnf90dV+CLHPCYOnmgLBUfatb8eZej6KFNRf8+Uri6tYJJZfDXTf1O++1hIJJru2bxD1m8uTY4iObCC0HhVrxO+JrCo6rdAbadROuznFtnww/ByaIXmm1pyDuMG10kxlJlDLwhPQsA="
+  # MATTERMOST_HOOK_URL
+  - secure: "wQLxrFhwcA7/XKNBo8sQNfVKVithxwowDws8GKxHdTIS0RpILs+yXt9d4cb/QGYvtqvty+X2n9Mn3OjKUy4NaX3BcnDA4wITtDySzAa5DKhzJtyDy8LdHv77QAzJRkisQrKR1Cic8CFMg2TD85GNRJrPtYUgEUl+jci+4/wfQDqYPKdzZHBhg31e3KBeUdW2ahs8Ti0sNfY5YKCYbMNfgj1O+ahQ088NoH4U1BUbYVcocVgok7yaUaRlhKBh4K0h0Io0SM45sjWp2GMSMTS6C+oVGZyXyobxhBzWT2MPhGMu6pNMojDQAc2s4b2fCbNjS6NHGT/6Vt0zcOnAOpE5cEHjGYicRydKs5tT12XqgGIwEJhA+L45yzKylqlU3EEAHoY5gIYKA5WVRh8FHC/mtlA0vfOjSay3Sp/p/LSN6vvqrccy7wxU41ZqCyZa8z7d2fwPTZoVjp17aKkVrKBxItf2SNcidetmplRJQDpg5pKZUJoxRCvyJV0WEtxsse9sviWI3mQ0xb/PHKh7Jm/uEYTyumZQNjG7ZiHQUXbm9ybRAn2GXM3hcHvWNOCC6AN8hzJg89+VOAmTsHLF/fDyfK3lxpxYK9xHYpC53VQiz/hPx2/jAKawSOvPxcMa04uVPgti2XYYgLVtHRY8AAo7QTzHki3hjLGe+2+XaNd12PM="
+  # TX_PASSWD
+  - secure: UMe84F7f9T1pezGfYvqemKT628rSduOyMKDdhc2mGyJG7f8+2yZWLpDUdKO4fGzshC7GvJ9kPj0LtrxQ0tXZlCxoskxNf3rYhUlFv+xqowndaj4DNdKOvC0HLgHmxitWo8/vyJmM7b9EMJWY9/BGJhqy/ckc63hd5dOHHRj2pJxSbnkbjlhLebJ7+8rmSgyzxFYlW52A+4aV33Kv3F185FUVLHWMYhrlfmUg+u7VcY58jONsXRtvuNCGEbk/uI2k7C6wDh/6+rRFXXpyNzDwUvEbKCQtSJcngTC4yk979KjzZit0fwLBi5628jKg1QrDQDeF9Za13OC1jT380yv7eCBpaQoiwgcyFnLiEV4DZVw6WAp5TmtJX6uP7gM5cCuPFPy/i3rma9mHBZH+B3eOqt1IIjYf2XUnumMGgEBkpu9+Q6ROWuldx8Zfa4s0CXtOk7OzMG4HewX1WbK0+DLda4gF7oMVGPq401X4Z6UJHhDQd2V08HbzsamsQ58Q6ub7UvYssDyhq7ZPKdQhCcXo1niLsPN/REfehRvZOLD88M7FMsr1gEG0PxYp0bJxvn2fn+11B3gYIlYZf0INKB5Qkm+7Mu5va3iupex4wGNE3fapXBp3mXDJ6e/qzYhcgIlEESVg9qHATP/Vc3NZfXFq8CP309RjkAtxHu2bE/ZS4Rw=
+  # GITHUB_TOKEN
+  - secure: jYQ0y7bxmoO8eUJla36y1zrhtnxi0guSD4ufRQGnYmAlp7sWYeCBQj4ACXnIaTOwAhd2EpFUUp8BZ0z7W5sDUgOdYqAQe1eTe17kc2xJmDHMkW3INRYAW7LVgZTDmFLAmh5pXcdv0roGqB3KoU9PauhO8Q1h6IHwwbRslPngX2A2MYQLpobugmi0AxUff1C6bSP3rdO0GHbaAN6sYMtPzZRTeiRLaBCh3gbQhYVLFmfqVdYulHAS1TqaOGUpMEosfC+FIw/14b1u+pyWQHA5BSBrDDmqnHjcQZtugQNJP2Epw8UW1aVM1HwlU5fh3/Ru/LZ/+bDc/Xg26C+OKJzF5Loo8owdlFcPjh7/hnamARz8jhB2jCJzwpTtBeTkX6O9xVDoPcBnNypaf3Ck8glZ0xg9AbnpOwmy7KYbKffDe6uRq6whJEQOvgmdTYlFXWS1wY0IS2J2pPw9QaHmhM+eQNxS1mrL59CPsP9y+b58mNRPLMscE3RYn5un5xlRYQKbT1JUHh0eFmVlAciEl5U5t2FGccPwSUyPN9pM2yf/1jmyNq16sR8XCvMgzHXI2Hev8UumEq2qthQfZ6WfXQDSfJhgPCsCZq89IhxmzwOLACk7Tk/Bw4ryrSfldfGxpozuJmppQGRatPwaJToHKLg1CcoQ/6d5wxpViS68X1HrZWY=
+  # REGISTRY_TOKEN
+  - secure: lG8EXRnx6k/pS5ABk1UJl1743VSEU9GXmya/z0cIhgeSiQ9IWpQoS3Kdk5ZDgm35Sm/MnBvcfFPbqsWGLIXGYBEV9TW7kf7I0JL/x8doG+otau2fHT54J1yC4lzpJbxgwnmsEo6iusaiqTthrDO4BV5tboB0YarJIfZ56q/ASGB/18oTafItVC73x8iH9hiX6n1MjqFyVAfmyBoUAOKI4m83ijB+LyqbOLWpZg3LCD5LxbIRAqG/+a/AOBRl5gvH9z5+ZIJZD2JYBlkhnQL9rZ65Q2lLH5N8BbaC/85IZTEUb4zBV0qgO9suZepMM5TNmYKy7Ix70z+FgAEwGkLEEB2KbMya9ZoL+mu+ImffsSs2CIT9OJxNpT0yWwRnXUvI7VgT8bJuirMTWCVPDO5qmW7uKED0PFd7Q/7MnqWQhqoHAt4xa7lYQvKbfs8ISMbiWlLXyaqRT3hdrZnBJ89Vrotu5eu2ce5sCgS4FcKEAWZ0NwATqkJHMf23H88gD7VrIqYQpX/DM5vuw2rCAVcBcbdOI5CEyt8foF6Ib9aSNGd7whLLcTxue7x7vPj658nfzS8hiZQcBiyQvKiLy5lGfBQ7T7edilFWX91HfnO2dACWtZJfVw0DrXu8G6HKuJM77wwrMZanTXw82oWxiyCRn0EGgmYYBNFn5dj3Vzd/ZmM=
+cache: yarn
+stages:
+  - prebuild
+  - build
+jobs:
+  include:
+    - name: 'Lint'
+      stage: 'prebuild'
+      before_install:
+        # The default version of yarn on travis is very old and does not install the correct version of eslint-preset-cozy-app
+        - curl -o- -L https://yarnpkg.com/install.sh | bash -s -- --version 1.15.2
+        - export PATH=$HOME/.yarn/bin:$PATH
+      script: yarn lint
+    - name: 'Tests'
+      stage: 'prebuild'
+      before_install:
+        - curl -o- -L https://yarnpkg.com/install.sh | bash -s -- --version 1.15.2
+        - export PATH=$HOME/.yarn/bin:$PATH
+      script: yarn test
+    - name: 'Build app'
+      stage: 'build'
+      before_install:
+        - curl -o- -L https://yarnpkg.com/install.sh | bash -s -- --version 1.15.2
+        - export PATH=$HOME/.yarn/bin:$PATH
+        - if [ "$TRAVIS_SECURE_ENV_VARS" != "false" ]; then openssl aes-256-cbc -K $encrypted_e8e75da126d5_key -iv $encrypted_e8e75da126d5_iv -in deploy/id_rsa_downcloud_cozy-store.enc -out /tmp/id_rsa_downcloud_cozy-store -d; fi
+        - if [ "$TRAVIS_SECURE_ENV_VARS" != "false" ]; then eval "$(ssh-agent -s)"; fi
+        - if [ "$TRAVIS_SECURE_ENV_VARS" != "false" ]; then chmod 600 /tmp/id_rsa_downcloud_cozy-store; fi
+        - if [ "$TRAVIS_SECURE_ENV_VARS" != "false" ]; then ssh-add /tmp/id_rsa_downcloud_cozy-store; fi
+        - curl -fsSL https://bootstrap.pypa.io/get-pip.py | python - --user
+        - travis_retry pip install --user transifex-client==0.12.5
+        - install -m0644 .transifexrc.tpl ~/.transifexrc
+        - echo "password = $TX_PASSWD" >> ~/.transifexrc
+      script: yarn build
+      deploy:
+        - provider: script
+          repo: cozy/cozy-store
+          skip-cleanup: true
+          script: yarn cozyPublish
+          on:
+            branch: master
+        - provider: script
+          repo: cozy/cozy-store
+          skip-cleanup: true
+          script: yarn cozyPublish
+          on:
+            tags: true

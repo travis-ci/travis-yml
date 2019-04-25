@@ -1,0 +1,30 @@
+services:
+  - docker
+os:
+  - linux
+dist: trusty
+cache:
+  directories:
+    - node_modules
+  # use container-based build env for faster boot
+sudo: true
+addons:
+  chrome: stable
+language: node_js
+
+node_js:
+  - "8"
+
+before_install: npm install -g greenkeeper-lockfile
+install:
+  - git clone https://github.com/$TRAVIS_REPO_SLUG.git $TRAVIS_REPO_SLUG
+  - cd $TRAVIS_REPO_SLUG
+  - git checkout -qf $TRAVIS_COMMIT
+  - case $TRAVIS_BRANCH in greenkeeper*) npm i;; *) npm ci;; esac;
+
+before_script: greenkeeper-lockfile-update
+after_script: greenkeeper-lockfile-upload
+
+script:
+  - npm install
+  - npm run build

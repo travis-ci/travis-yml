@@ -1,0 +1,25 @@
+---
+language: 'generic'
+sudo: 'required'
+dist: 'xenial'
+group: 'edge'
+
+env:
+  global:
+    - secure: "wxRB6lTROM3RuJrs/DqPa7w2/PTqJaWwuVqndBG2XXkpl25sXcuRaKP/85NBD+tzlqs06/Fa+he8Xx3akGdYs255716sPHH2g31lwSL49T9JkPDvm0N1/HmBPZNgJlIsLy/UekvDCWL5TEAG9QTtt4Q3ctfvXof20bBZ2dr7W2vKCcaI0TrBHQlaUsXD8qBzeVKrcSHgONW6nobAo6RsHu7Mu47alTt6vF/vuXYffagmFDxbGXeA6szP+IG8yMQvfoLZPcZzocU99tu4fEjncP+T3LEgkvubDT3PUnIB/mySyqbNqdwP7rzkx5SF38oKzHknzOltXrulZ2lzQoiRahgtT4Q7bZroPZVnt5F3lf8fdMDH1c6xhQzgj2kXcR+hN41uOT1zcHKcWEMWTIp2U5MLzfaMgYMGEXd0qZc7V728+smRttM09qG8/R60K5l7OCCZ68UBIx/0KZC3DXdQkeK2QV/iLw1Y4710UsDAPfk82+Vql8TFDisUNA+K8/hSiaAHwoB99Z3A0sJt5B0d395mnswdErzUhPXmS2hd+JNQVzxi7XSjFx/vK1HKbCFEwe4y25qF8P4vG1fDxUAXfbXPZp0vikxbxeCAXd3NdcaH6vUTXcrZ7jfZGTtrq3FUUIze4NYskRxizOqbZEHnz7f6XM3InDk82vM7mB7oFkk="
+    - 'DEBIAN_FRONTEND=noninteractive'
+
+script:
+  - 'set -e'
+  - 'sudo apt-get remove --purge postgresql* || true'
+  - './bootstrap.sh'
+  - 'set +e'
+
+notifications:
+  email: false
+  webhooks:
+    urls:
+      - secure: "Yc69+HTj8mDCL/cXcM2oh+ixkxoZOKzRNRyZpR4u9A0Hof4GUyOPhwO6nQtx9NbQag2Wz5in4pLE1twSFSkLl56YV1nMtYtPGcnSI3/H9j/qjT52xigqTPs2aIN/p7uuxsiomNDOTIiJ79sNmUw5O+S+hVcTXXEsyjDBkl4v37/wgY4b3G9yv9Uol26FuM/cG7uE4zbaSJIHgDrIjYpuBvMgv9tEM8ipdQmLmk9n9Wn4bZUoW12ZRjPNIePEaUVdApUGaptrETIby6Ax350qtk3MzWzs7sDhYc3vjoy+mXQ0gQA5xbqg1kkcNbB2XaRd7VTk640KlOeaRQKXIRSRioOT3Tb9efrOBWUfZ7HP2v0kEpxNsY5z1c/blvi7CdXbSn3os3e7iJ8LKaVLxw295ugumZ3+9nIJ/6SqnOLyjU6wTMig66tyrZI8c6sW17NYX8KrIXtdCk5Lwc3QaHirOaYf3z2fVwJ6GxBZ2b+O/5+ZZglZqto8FX8BMU1EazOxaSgfLwoCBlTEfvOv5CAe4O38jfGVdIvTfFEUm13NlmBKq1E4JR/5/Nyd8yXjNJkhrat8mavSnZzSJgFnUVTtUihvWvE6MmW7V/kdq7ueEMbg1TNhedQeaK1Wt00jc6aqOjIGAId+9efkACrdYrMu7JfRMVJudepQi0XgMsjkJ3E="
+    on_success: change  # options: [always|never|change] default: always
+    on_failure: always  # options: [always|never|change] default: always
+    on_start: never     # options: [always|never|change] default: always

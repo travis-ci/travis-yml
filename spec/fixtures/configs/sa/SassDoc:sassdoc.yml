@@ -1,0 +1,22 @@
+language: node_js
+
+node_js:
+  - 6
+  - 8
+  - lts/*
+  - stable
+
+before_install:
+  - npm i npm@latest -g
+
+sudo: false
+
+git:
+  depth: 10
+
+script: make lint dist test cover
+after_success: make coveralls
+
+notifications:
+  slack:
+    secure: BiCHWsLTzlEd6MjRZY27BgmtCA3DmBFo5jcSsjSqmInbgla0lzDAA40xfIKTswIwK0pzuQdVaanl5Jy78wul0lfxpa5LLWX/bQmR1LGrygphC5tFG7GDM9Hdjatce5XEYVsSAUddNFEVQtMEUuUkSOiUll7kRq4LQtvAiIy1isk=

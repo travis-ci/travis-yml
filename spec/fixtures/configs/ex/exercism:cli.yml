@@ -1,0 +1,16 @@
+language: go
+
+sudo: false
+
+go:
+  - "1.11.x"
+  - "1.12.x"
+  - tip
+
+matrix:
+    allow_failures:
+        - go: tip
+
+script:
+  - ./.travis.gofmt.sh
+  - go test -cover ./...

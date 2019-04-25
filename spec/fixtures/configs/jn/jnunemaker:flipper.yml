@@ -1,0 +1,27 @@
+language: ruby
+rvm:
+  - 2.1
+  - 2.2
+  - 2.3
+  - 2.4
+  - 2.5
+before_install:
+  - gem install bundler -v 1.17.3 --no-rdoc --no-ri --without guard
+  - bundle _1.17.3_ install
+script: bundle exec rubocop -D && bundle exec rake
+services:
+  - redis-server
+  - mongodb
+  - memcached
+env:
+  - RAILS_VERSION=5.1.4
+  - RAILS_VERSION=5.0.0
+  - RAILS_VERSION=4.2.5
+  - RAILS_VERSION=3.2.21
+matrix:
+  # don't run rails 5 on ruby versions that can't install rack 2
+  exclude:
+    - rvm: 2.1
+      env: RAILS_VERSION=5.0.0
+    - rvm: 2.1
+      env: RAILS_VERSION=5.1.4

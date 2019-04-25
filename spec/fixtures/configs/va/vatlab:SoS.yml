@@ -1,0 +1,79 @@
+dist: trusty
+group: edge
+os:
+    - linux
+    # travis does not support python on osx yet (https://github.com/travis-ci/travis-ci/issues/4729)
+language: python
+python:
+    - "3.6"
+
+addons:
+  apt:
+    update: true
+    packages:
+      - flawfinder
+      - squashfs-tools
+      - uuid-dev
+      - libuuid1
+      - libssl-dev
+      - libssl1.0.0
+      - libarchive-dev
+      - libgpgme11-dev
+      - libseccomp-dev
+      - git
+      - build-essential
+      - libtool
+      - autotools-dev
+      - automake
+      - autoconf
+      - uuid-dev
+      - libmagickwand-dev
+      - libmagickcore5-extra
+      - graphviz
+      - octave
+      - ruby-full
+
+before_install:
+    # singularity
+    - sudo sed -i -e 's/^Defaults\tsecure_path.*$//' /etc/sudoers
+    - pip install sregistry[all]
+    - olddir=`pwd` && cd /tmp && wget https://github.com/singularityware/singularity/archive/2.6.0.tar.gz && tar zxf 2.6.0.tar.gz && cd singularity-2.6.0 && ./autogen.sh && ./configure --prefix=/usr/local && make && sudo make install && cd $olddir
+
+    # install anaconda Python 3
+    - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then wget https://repo.continuum.io/miniconda/Miniconda3-4.5.11-Linux-x86_64.sh -O miniconda.sh; fi
+    #- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then wget  https://repo.continuum.io/miniconda/Miniconda3-latest-MacOSX-x86_64.sh -O miniconda.sh; fi
+    - bash miniconda.sh -b -p $HOME/miniconda
+    - export PATH="$HOME/miniconda/bin:$PATH"
+    - hash -r
+    - conda config --set always_yes yes --set changeps1 no
+    - conda update -q conda
+    # Useful for debugging any issues with conda
+    #- conda info -a
+    - source activate 
+
+    # R
+    - conda install --quiet -c r r-markdown r-rmarkdown r-base64enc  pandoc pandas numpy gxx_linux-64
+    # add docker
+    - pip install docker pyyaml psutil tqdm fasteners pygments networkx pydot pydotplus graphviz imageio pillow entrypoints jupyter coverage codacy-coverage pytest pytest-cov python-coveralls
+
+sudo: required
+services:
+    - docker
+install: "pip install ."
+before_script:
+    - cd test
+    - sh build_test_docker.sh
+script:
+    - pytest -x -v --cov sos --cov-config ../.coveragerc --cov-report=xml
+
+after_success:
+    - coverage combine;
+    - coveralls
+
+notifications:
+    email:
+        recipients:
+            - ben.bob@gmail.com
+        on_success: never
+        on_failure: always
+

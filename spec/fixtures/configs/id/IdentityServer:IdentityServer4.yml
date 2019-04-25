@@ -1,0 +1,31 @@
+notifications:
+  email:
+    recipients:
+      - identity@leastprivilege.com
+
+language: csharp
+
+os:
+  - linux
+script:
+  - ./build_travis.sh
+
+# .NET CLI require Ubuntu 14.04
+sudo: required
+dist: trusty
+addons:
+  apt:
+    packages: 
+    - gettext
+    - libcurl4-openssl-dev
+    - libicu-dev
+    - libssl-dev
+    - libunwind8
+
+mono:  
+  - 4.6.0
+
+cache:
+  directories:
+    - src/packages
+    - tools

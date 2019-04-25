@@ -1,0 +1,22 @@
+language: java
+jdk:
+  - oraclejdk8
+cache:
+  directories:
+   - $HOME/.m2
+# We need to set the DISPLAY and run xvfb on Travis to have a functional UI for the Eclipse tests
+# http://muelder.blogspot.nl/2015/08/building-eclipse-plugins-with-maven.html
+env:
+ global:
+  - DISPLAY=:99.0
+before_install:
+ - sh -e /etc/init.d/xvfb start - sleep 10
+ - sudo apt-get update
+ - sudo apt-get install ruby
+ - sudo apt-get install rubygems-integration
+ - sudo gem install bundler
+ - ./intellij/fetchidea.sh
+services:
+  - mongodb
+script: mvn verify
+after_failure: cat eclipse/tests/target/work/data/.metadata/.log

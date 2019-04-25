@@ -1,0 +1,22 @@
+language: ruby
+sudo: false
+env:
+  - JRUBY_OPTS="-J-Xmx1g --2.0"
+jdk:
+  - oraclejdk8
+  - openjdk7
+rvm:
+  - jruby-1.7.26
+before_install:
+  - gem install bundler --version '<2.0'
+before_script:
+  - gem pristine executable-hooks
+  - gem pristine gem-wrappers
+  - gem pristine jruby-launcher
+  - gem --version
+  - bundle exec cap local externals:setup
+  - touch config/environments/test_secret.rb
+  - bundle exec rake git:db:canonical:clone
+  - bundle exec rake db:migrate
+after_failure:
+  - curl --upload-file log/test.log https://transfer.sh/test.log

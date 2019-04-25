@@ -1,0 +1,172 @@
+language: cpp
+dist: trusty
+env:
+matrix:
+  fast_finish: true
+  include:
+    - os: linux
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-4.9
+      env: COMPILER=gcc GCC=4.9
+    - os: linux
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-5
+      env: COMPILER=gcc GCC=5 DISABLE_XSIMD=1
+    - os: linux
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-6
+      env: COMPILER=gcc GCC=6 ENABLE_TBB=1
+    - os: linux
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-6
+      env: COMPILER=gcc GCC=6 BOUND_CHECKS=1 BUILD_BENCHMARK=1
+    - os: linux
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-6
+      env: COMPILER=gcc GCC=6 COLUMN_MAJOR_LAYOUT=1
+    - os: linux
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-7
+      env: COMPILER=gcc GCC=7 
+    - os: linux
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-7
+      env: COMPILER=gcc GCC=7 ENABLE_CPP17=1
+    - os: linux
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-4.9
+            - clang-3.6
+      env: COMPILER=clang CLANG=3.6 DISABLE_XSIMD=1 
+    - os: linux
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-trusty-3.9
+          packages:
+            - g++-4.9
+            - clang-3.9
+      env: COMPILER=clang CLANG=3.9
+    - os: linux
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-trusty-4.0
+          packages:
+            - g++-4.9
+            - clang-4.0
+      env: COMPILER=clang CLANG=4.0 DISABLE_XSIMD=1
+    - os: linux
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-trusty-5.0
+          packages:
+            - g++-4.9
+            - clang-5.0
+      env: COMPILER=clang CLANG=5.0 ENABLE_TBB=1 DISABLE_XSIMD=1
+    - os: linux
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-trusty-6.0
+          packages:
+            - clang-6.0
+      env: COMPILER=clang CLANG=6.0
+    - os: osx
+      osx_image: xcode8
+      compiler: clang
+env:
+  global:
+    - MINCONDA_VERSION="latest"
+    - MINCONDA_LINUX="Linux-x86_64"
+    - MINCONDA_OSX="MacOSX-x86_64"
+before_install:
+    - |
+      # Configure build variables
+      if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+        if [[ "$COMPILER" == "gcc" ]]; then
+          export CXX=g++-$GCC CC=gcc-$GCC;
+        fi
+        if [[ "$COMPILER" == "clang" ]]; then
+          export CXX=clang++-$CLANG CC=clang-$CLANG;
+        fi
+      elif [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+        export CXX=clang++ CC=clang;
+      fi
+install:
+    # Define the version of miniconda to download
+    - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+        MINCONDA_OS=$MINCONDA_LINUX;
+      elif [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+        MINCONDA_OS=$MINCONDA_OSX;
+      fi
+    - wget "http://repo.continuum.io/miniconda/Miniconda3-$MINCONDA_VERSION-$MINCONDA_OS.sh" -O miniconda.sh;
+    - bash miniconda.sh -b -p $HOME/miniconda
+    - export PATH="$HOME/miniconda/bin:$PATH"
+    - hash -r
+    - conda config --set always_yes yes --set changeps1 no
+    - conda update -q conda
+    - conda install cmake -c conda-forge
+    - conda install xtl==0.6.2 xsimd nlohmann_json -c conda-forge
+    - if [[ "$ENABLE_TBB" == 1 ]]; then
+        conda install tbb-devel -c conda-forge;
+      fi
+    # Testing
+    - mkdir build
+    - cd build
+    - if [[ "$BOUND_CHECKS" == 1 ]]; then
+        cmake -DXTENSOR_ENABLE_ASSERT=ON -DDOWNLOAD_GTEST=ON -DBUILD_BENCHMARK=ON ..;
+      elif [[ "$COLUMN_MAJOR_LAYOUT" == 1 ]]; then
+        cmake -DDOWNLOAD_GTEST=ON -DDEFAULT_COLUMN_MAJOR=ON ..;
+      elif [[ "$DISABLE_XSIMD" == 1 ]]; then
+        cmake -DDOWNLOAD_GTEST=ON ..;
+      elif [[ "$ENABLE_TBB" == 1 ]]; then
+        cmake -DDOWNLOAD_GTEST=ON -DXTENSOR_USE_XSIMD=ON -DXTENSOR_USE_TBB=ON -DTBB_INCLUDE_DIR=/home/travis/miniconda/include -DTBB_LIBRARY=/home/travis/miniconda/lib ..;
+      elif [[ "$ENABLE_CPP17" == 1 ]]; then
+        cmake -DDOWNLOAD_GTEST=ON -DXTENSOR_USE_XSIMD=ON -DCPP17=ON ..;
+      else
+        cmake -DXTENSOR_USE_XSIMD=ON -DDOWNLOAD_GTEST=ON ..;
+      fi
+    - make -j2 test_xtensor_lib
+    - if [[ "$BUILD_BENCHMARK" == 1 ]]; then
+        make -j2 benchmark_xtensor ;
+      fi
+    - cd test
+script:
+    - ./test_xtensor_lib

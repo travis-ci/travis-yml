@@ -1,0 +1,29 @@
+language: php
+
+services:
+    - mysql
+
+php:
+    - 7.2
+
+before_install:
+    - echo "memory_limit=3G" >> ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/travis.ini
+    - cp ./etc/travis/.env ./.env.test.local -f
+
+install:
+    - make install
+    - make tests@database
+    - make assets@build
+    - bin/console smoker:generate-cache --env=test
+    - bin/console server:start --env=test
+
+script:
+  - bin/phpunit
+  - bin/php-cs-fixer fix -v --diff --dry-run
+  - bin/console smoker:smoke --env=test
+  - bin/console cms:assets:optimize --env=test
+  - bin/console security:check
+
+after_script:
+  - wget https://scrutinizer-ci.com/ocular.phar
+  - php ocular.phar code-coverage:upload --format=php-clover coverage.clover

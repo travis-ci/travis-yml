@@ -1,0 +1,31 @@
+sudo: required
+language: ruby
+cache: bundler
+dist: trusty
+
+rvm:
+  - 2.3.3
+
+bundler_args: --without development doc --deployment --jobs=3 --retry=3
+
+before_install:
+  - gem update --system 2.6.4
+  - gem --version
+
+before_script:
+  - export DISPLAY=:99.0
+  - sh -e /etc/init.d/xvfb start
+  - cp config/database.travis.yml config/database.yml
+  - cp config/secrets.yml.example config/secrets.yml
+  - cp config/server.yml.example config/server.yml
+
+script:
+  - bundle exec rubocop
+  - RAILS_ENV=test bundle exec rake db:create
+  - bundle exec rspec spec --tag ~pending --order rand
+  - DRIVER=webkit bundle exec cucumber
+
+addons:
+  apt:
+    packages:
+      - libqtwebkit-dev

@@ -1,0 +1,27 @@
+sudo: false
+
+branches:
+  only:
+    - master
+    - /^\d+\.\d+\.x$/ # release forked patches branch
+
+addons:
+  apt:
+    sources:
+      - chef-stable-precise
+    packages:
+      - chefdk
+
+# Don't `bundle install`
+install: echo "skip bundle install"
+
+# Ensure we make ChefDK's Ruby the default
+before_script:
+  - eval "$(/opt/chefdk/bin/chef shell-init bash)"
+  - chef gem install coveralls -v '0.8.19'
+  - chef gem install json_spec -v '~> 1.1.4'
+
+script:
+  - chef --version
+  - chef gem query -d chefspec rubocop foodcritic rake
+  - chef exec rake

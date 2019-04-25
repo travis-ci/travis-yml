@@ -1,0 +1,19 @@
+sudo_required: true
+language: node_js
+node_js: node
+services: docker
+
+before_install:
+  - yarn global add greenkeeper-lockfile@1
+
+install: sudo sysctl -w vm.max_map_count=262144
+
+before_script: greenkeeper-lockfile-update
+
+script: scripts/test-ci
+
+after_script:
+  - docker-compose -f docker-compose-tests.yml down -v
+  - greenkeeper-lockfile-upload
+
+after_success: scripts/deploy.sh

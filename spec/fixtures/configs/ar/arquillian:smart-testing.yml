@@ -1,0 +1,87 @@
+sudo: required
+services:
+  - docker
+addons:
+   apt:
+     sources:
+       - git-core
+     packages:
+       - git
+
+language: java
+
+jdk:
+  - oraclejdk8
+
+cache:
+  directories:
+    - $HOME/.m2
+
+before_install:
+  - BRANCH=${TRAVIS_PULL_REQUEST_BRANCH:-$TRAVIS_BRANCH}
+  - MODIFIED_DOCS=$(git diff --name-only $TRAVIS_COMMIT_RANGE | grep -E 'README.adoc|^docs/.*.adoc$' | wc -l)
+  - COMMITS_WITH_FORCED_GEN=$(git log --format=%B  $TRAVIS_COMMIT_RANGE | grep -i "\[gen docs\]" | wc -l)
+  - git describe --tags --exact-match HEAD >/dev/null 2>&1 && TAGGED=0 || TAGGED=1
+  - '[ $TAGGED -eq 0 ] || [ $COMMITS_WITH_FORCED_GEN -gt 0 ] || [ $MODIFIED_DOCS -ge 1 ] && GENERATE_DOC=0 || GENERATE_DOC=1'
+  - '[ "${BRANCH}" == "master" ] && [ "${TRAVIS_REPO_SLUG}" == "arquillian/smart-testing" ] || [ ! -z "${TRAVIS_PULL_REQUEST// }"  -a "${TRAVIS_PULL_REQUEST}" != "false" ] && GENERATE_DOC=0 || GENERATE_DOC=1'
+  - 'if [ $GENERATE_DOC -eq 0 ]; then
+      git config user.name "${GH_USER}";
+      git config user.email "${GH_EMAIL}";
+      git config remote.origin.fetch +refs/heads/*:refs/remotes/origin/*;
+      git fetch --unshallow origin gh-pages;
+      git worktree add -b gh-pages gh-pages origin/gh-pages;
+      GH_REF=$(git remote get-url origin | awk "{sub(/https:\/\//,\"https://${GH_TOKEN}@\")}; 1" | awk "{sub(/\.git/, \"\")} 1");
+      docker pull rochdev/alpine-asciidoctor:mini;
+    fi'
+
+before_script:
+  # Cleanup PR doc previews - until we figure out how to have a webhook on closing the PR
+  - 'if [ "${BRANCH}" == "master" ] && [ $GENERATE_DOC -eq 0 ]; then
+        cd gh-pages;
+        EXISTING_PR_RANGE=$(ls -1p pr/ 2>/dev/null | grep "/$" | sed "s/\/$//");
+        UPDATE_GH_PAGES=0;
+        for pr in $EXISTING_PR_RANGE; do
+            PR_CLOSED=$(curl https://api.github.com/repos/${TRAVIS_REPO_SLUG}/pulls/$pr/merge -H "Authorization:token ${GH_TOKEN}" -I -s -o /dev/null -w "%{http_code}");
+            if [ "${PR_CLOSED}" == "204" ]; then
+                UPDATE_GH_PAGES=1;
+                rm -rf pr/${pr};
+                curl https://api.github.com/repos/${TRAVIS_REPO_SLUG}/issues/${pr}/comments -H "Authorization:token ${GH_TOKEN}" -X POST -d "{ \"body\": \"Documentation has been merged with master - latest version can be found at http://arquillian.org/smart-testing/.\"}";
+            fi
+        done;
+
+        if [ $UPDATE_GH_PAGES -eq 1 ]; then
+            git add -A .;
+            git commit -m"docs: cleans up closed PR doc previews";
+            git push --quiet "${GH_REF}" gh-pages > /dev/null 2>&1;
+        fi;
+        cd ..;
+      fi
+  '
+
+script:
+
+  - ./mvnw clean verify -P travis -DJAVA_OPTS="-XX:-UseLoopPredicate"
+  - 'if [ $GENERATE_DOC -eq 0 ]; then
+        ./.asciidoctor/generate.sh --keep;
+     fi'
+
+after_success:
+  - 'if [ $GENERATE_DOC -eq 0 ]; then
+      cd gh-pages;
+      git add .;
+      git commit -m"docs: publishes new documentation";
+      git push --quiet "${GH_REF}" gh-pages > /dev/null 2>&1;
+      if [ ! -z "${TRAVIS_PULL_REQUEST// }" ] && [ "${TRAVIS_PULL_REQUEST}" != "false" ]; then
+        curl https://api.github.com/repos/${TRAVIS_REPO_SLUG}/issues/${TRAVIS_PULL_REQUEST}/comments -H "Authorization:token ${GH_TOKEN}" -X POST -d "{ \"body\": \"Greeting earthlings! Documentation is ready for preview at http://arquillian.org/smart-testing/pr/${TRAVIS_PULL_REQUEST}. Just be patient. It might take a few minutes for the changes to show up.\"}";
+      fi;
+    fi'
+
+after_error:
+  - 'if [ $GENERATE_DOC -eq 0 ]; then
+      docker logs adoc-to-html;
+    fi'
+
+after_failure:
+  - 'if [ $GENERATE_DOC -eq 0 ]; then
+      docker logs adoc-to-html;
+    fi'

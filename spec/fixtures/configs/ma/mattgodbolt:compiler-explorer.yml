@@ -1,0 +1,38 @@
+sudo: false
+
+language: node_js
+
+before_install:
+    - etc/scripts/travis.sh
+
+node_js:
+    - "10"
+
+before_script:
+    - export PATH=$PATH:$PWD/.travis-compilers/ghc/bin
+    - ghc --version
+    - export PATH=$PATH:$PWD/.travis-compilers/gdc/x86_64-pc-linux-gnu/bin
+    - gdc --version
+    - export PATH=$PATH:$PWD/.travis-compilers/rust/bin
+    - rustc --version
+
+cache:
+    directories:
+        - .travis-compilers
+
+script:
+    - yarn run check
+    - yarn run codecov
+    - make changelog
+    - make -j$(nproc) travis-dist
+
+deploy:
+    on:
+        all_branches:
+            true
+    provider: s3
+    bucket: "compiler-explorer"
+    skip_cleanup: true
+    acl: public_read
+    local_dir: out/dist-bin
+    upload-dir: dist/travis/${TRAVIS_BRANCH}

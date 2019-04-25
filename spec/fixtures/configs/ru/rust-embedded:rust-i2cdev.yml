@@ -1,0 +1,10 @@
+language: rust
+sudo: false
+
+os:
+- linux
+- osx
+
+script:
+- cargo build --verbose
+- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then cargo test --verbose; fi

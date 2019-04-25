@@ -1,0 +1,31 @@
+language: python
+python:
+- '2.7'
+- '3.5'
+git:
+  submodules: false
+before_install:
+- sed -i 's/git@github.com:/https:\/\/github.com\//' .gitmodules
+- git submodule update --init --recursive
+- sudo apt-get -qq update
+- sudo apt-get install -y pandoc
+install: make init
+cache: pip
+script: make test
+env:
+  global:
+  - secure: V7dR6IVAnEAGqcEVOaH97jzB2qxUssqRY7jHt6HbgJWVYrdmZ3r2F42UVCUFK/8w5WHlpg4v/HKew+G8FXVIq0jhtJuNz6sA6ODsd+VldmjddtACa+t7opvwfgdcXRibeI0MZ1YW9Y/tYVkIj5zeinxfiMWCykzvRAALXD9CxrMrdmVR2XBfk5KGgAQQGUnZNoZsI17Ojzz+4CXQhZOwo/giZP6xxa5bPPQ7wgu6h3Q2aOiMQfFYHqx91lrZSnlQVjzxpH7MI7GTQZBs/1mqP4vFtjwyAdkcGKqEY8N+yvQjNRABv1Vhr8AGphDe1hPx8dm8A8L7knEvuQoYKL3RPTXKqpWPHWSJ9dRFhj4O9A4zOFK39cCAkRCRW42V1mvwmTWArWh/MoHXJjdLa+pBNls2fEwoUg4lQBxPLwuka+UWQfUMbBiq4Z4pU78V8BHd6e32yDaeh4HRP+w6K0K74n99PSF4tERxyIvY8gxX0y8ENN7PTxI61tVZP6ABOAaUUV23KhC3LHleUjmXbdOQzbYF5glr3HlUTC0pYd7fj9MjbL6seT/A7WARqKC4YGp64r71dmy5E/U7A3PmlCOAvDouvJwdNA1iE+nGPeMkuTACrC8fS2ZwlqL2vv0mKzmpNSOXCsQM+QIn8/kY5/ZIoFFz7omayMP2UNN7QMpSssI=
+deploy:
+  provider: pypi
+  user: ops
+  password:
+    secure: tIR4sBdg/GI6frjUQSwYASCtUxYWopvFencyaukCLgK4OSz65ibsa5/qj9xHUigyFRI5JL03sG2IS3yJ21pcz+B4Ejt5uxPWpb9Z9zvuEIt/Az1chZg4AowG3wBaCmEZwWty6w8tZqWYtuSuycGl8pC71E4HeOC94XrT7O+pkd7PHYEvpcKprj+Sll64m7JtvxFA1LDTuNS1xe+jnibTB/qQg6dfTlsbNVCQqSqKCKMzS6mmTgbcyAnKt+r1q8KghdQjK+4I+S7YDv4yS+PTVdDEO1ha0lAjEMBBhhfPw7KFpefy4k5sTTh9CffJf3MlNCMRp+uzgTIBf0QkTVtRSFn98deagirPbfUR4OSo8Gj6tG4NX1sSKRWRA9WCjohtp9oLc629kScn3bqEzZl3VOpSwQs1H4c0m8HFxc5Umjgv5NEQ/kVW1u5Ja3DeGdfIE22HJmwwWZGknOjoZaVa7hA7+w/mfGPDa/75oUPQ8dagPu0BTe4pW+a7wmhdQYIQRiiCwLctOrwtExdXmEZQYx2A6SdXNJHWTwh4/XnKbP0juEYQeJKTbecNf8zHA88IxmR1BjSHetYFl3mL1iJ01lYPHCciBy5cBdE7R4xZfQiskDVmBC7FtBWlwePBLvmICjep9FhViZaw4RbvsPLHFEi6v69UXTOEXU+JRYitD+Q=
+  distributions: bdist_wheel
+  on:
+    tags: true
+    branch: master
+    python: '3.5'
+notifications:
+  slack: craft-ai:ZNnQErHJhw40oKmphy3fNGza
+  email:
+  - ops@craft.ai

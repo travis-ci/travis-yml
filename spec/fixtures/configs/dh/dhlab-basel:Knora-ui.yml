@@ -1,0 +1,41 @@
+dist: trusty
+sudo: required
+
+language: node_js
+
+node_js:
+  - "8"
+
+cache:
+  yarn: true
+  directories:
+    - node_modules
+
+addons:
+  chrome: stable
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - g++-4.9
+
+env:
+  global:
+    - CXX=g++-4.9
+
+install: export CXX="g++-4.9"
+
+before_script:
+  - yarn global add @angular/cli
+  - yarn install
+
+script:
+  - ng build @knora/core
+  - ng build @knora/action
+  - ng build @knora/viewer
+  - ng build @knora/search
+  - ng t --project @knora/core --watch=false --browsers=ChromeHeadless
+  - ng t --project @knora/action --watch=false --browsers=ChromeHeadless
+  - ng t --project @knora/search --watch=false --browsers=ChromeHeadless
+  - ng t --project @knora/viewer --watch=false --browsers=ChromeHeadless
+  

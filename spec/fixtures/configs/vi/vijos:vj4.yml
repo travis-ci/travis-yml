@@ -1,0 +1,33 @@
+dist: trusty
+sudo: false
+services:
+- rabbitmq
+- mongodb
+language: python
+python:
+- 3.5
+- 3.6
+install:
+- pip install -r requirements.txt
+- npm install
+script:
+- npm run build:production
+- python -m unittest
+before_cache:
+- rm -f $HOME/.cache/pip/log/debug.log
+cache:
+  directories:
+  - "$HOME/.cache/pip"
+  - node_modules
+before_deploy:
+- tar -cJf uibuild.tar.xz vj4/.uibuild vj4/constant
+deploy:
+  provider: releases
+  api_key: $GITHUB_TOKEN
+  name: uibuild-$(git rev-parse --short HEAD)
+  file: uibuild.tar.xz
+  skip_cleanup: true
+  on:
+    repo: vijos/vj4
+    tags: true
+    python: 3.5

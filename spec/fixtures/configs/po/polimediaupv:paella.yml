@@ -1,0 +1,57 @@
+sudo: required
+
+services:
+  - docker
+  
+language: node_js
+
+node_js:
+  - "lts/*"
+  
+before_install:
+
+
+install:
+  - sudo apt-get install -y jq
+  - npm install -g gulp
+  - npm install
+
+
+jobs:
+  include:
+    - stage: Tests
+      script:
+        - npm run markdownlint
+
+    - stage: build and deploy
+      script:
+        - npm run build
+        #- gulp build.debug
+        #- docker run -d --name paella-test-nginx -v `pwd`/build:/usr/share/nginx/html:ro nginx:alpine
+        #- docker run -d --name paella-test-selenium --link paella-test-nginx:paella -p 4444:4444 selenium/standalone-chrome:3.3.0
+        #- gulp test:local
+      before_deploy:
+        - export PRERELEASE=$(bash ./.publish_scripts/is_prerelease_version.sh ${TRAVIS_TAG})
+      deploy:
+        - provider: script
+          script: ./.publish_scripts/publish_on_branch.sh -b ${TRAVIS_BRANCH}
+          skip_cleanup: true
+          on:
+            all_branches: true
+            condition: $TRAVIS_BRANCH =~ ^(([0-9]+\.[0-9]+\.x)|(develop))$
+        - provider: script
+          script: ./.publish_scripts/publish_on_tag.sh -v ${TRAVIS_TAG}
+          skip_cleanup: true
+          on:
+            repo: polimediaupv/paella
+            tags: true
+        - provider: releases
+          skip_cleanup: true
+          api_key:
+            secure: UI6zIHGkhy7p/OtViLbi1yxuyYPteAoRGFO7D8xhc8N6YAkzxYFmlTHdUQgFj4Hgh+5gO6/jW9kpTkbkbATSIVLOLcuLyJEq6jDuorM2q8D2VInpc5ZpNddFjiQdKaIkZL8CeBnncKvmxCBZeHgE4MQPOGHtCQ900viROEVY0ak=
+          file:
+            - ${HOME}/prebuilt/paella-prebuilt-${TRAVIS_TAG}.tar.gz
+          prerelease: ${PRERELEASE}
+          on:
+            repo: polimediaupv/paella
+            tags: true

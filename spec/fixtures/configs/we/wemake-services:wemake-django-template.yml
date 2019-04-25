@@ -1,0 +1,35 @@
+dist: xenial
+language: python
+
+python: 3.7
+
+addons:
+  apt:
+    packages:
+      - docker-ce
+
+services:
+  - docker
+
+env:
+  - POETRY_VERSION=0.12.12
+
+install:
+  - pip freeze | xargs pip uninstall -y
+  - pip install -U docker-compose
+  - curl -sSL "https://raw.githubusercontent.com/sdispater/poetry/master/get-poetry.py" | python
+  - source "$HOME/.poetry/env"
+  - docker --version && docker-compose --version && poetry --version
+  - poetry install --no-interaction --no-ansi
+
+script:
+  - flake8 hooks tests
+  - pytest --strict
+  - sh tests/test_integration.sh
+  - poetry check
+  - safety check --bare --full-report
+
+notifications:
+  email:
+    on_success: never
+    on_failure: change

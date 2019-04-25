@@ -1,0 +1,52 @@
+sudo:                 required
+services:
+- docker
+language:             node_js
+node_js:
+- '8'
+env:
+  global:
+  - COMMIT=${TRAVIS_COMMIT::8}
+  - GH_REPO=redbox-mint/redbox-portal
+  - GIT_NAME=DeploymentBot
+  - GIT_EMAIL=deploy@travis-ci.org
+  - CXX=g++-4.9
+  - secure:           1G/Q3Xmm9Q9l90r2Z4LvxxP8ka18mUGJU9tkr/ykFWZYZbcJlWrO8xJp37c0Dt6VpKbyLSgmFRlal3WBaFGZfZ1RqVlChts62qQO7b8RWZ7kMIXPl+RVShO7v2Yqb9JdI1+AOjDbOwGOvOhYnUQQ26Z6XwVcSLdXoyjDOyTLIVWtniBJJooDI57fxIGVuBbvBxgdvOTVJjfqSbQM/U8LMOJv74M4mYp053CqO9Qm3Yey/77OMLpR4eI0Jpby2ZbCp5VZztttWzBvkWnPWQLoxN2qRTcC7zILpfoB9wgmAK84PkAbvC+pQrLH3O/Ko/2XGqxMjQZe8iBe+bhkboNxctCDzF/VjJOQritjR0HqEBe7707n+s7Od3tX5riyt57gYbqALb2qHM4AQoLq9yCU7q3rYbgHw5IF1i5sxZBqQttyil748cF7nI3zGKFKa0uPNFrqSF7Sm3v4r+orX9FHKecI7vq2rsNmxSya/2mVyU0CCuHK973ZMqyG/DCQPd4mUeNJLyfgr0K8f4LntjgNo2oQLQ8qZhauxK0+kIoMn6uEA+dFRkF2k6GG8zT5d4axDIljYk+zauzjJxbPJZ3LDt0WdpoznwRUBHoRBBRu3hgmDKQ7GhM0HKOdyinIpUQEMWLHxi5BTVPf+V0efbxvQ3g/5YZGYBSj92Or78r1uEg=
+  - secure:           qyU45ba9ivKRmX3ajn2cOPXlHgHjC0xAQMSqk7k7Kg3DgWMo5PhmxuTbe0MPaUGAqbAqYHbKJ2zV65hPkWaZk4oXAEGcT9X1iHAqhQ18NWjDvNbE5e0oUcuw2PWjdiv2YA/0OysbNTYJhE/6yVdIErZhsTGFlN52StFukqXnYCQ+6eRY3QNytS/oLS848/LR2ItmfIP12Zr31p3k6amXJGlkylZvmtNkahPgyL5iJ9juY3WKxDAIaevuY7wd8J+9ODUWfgcrtSJpEzaJFtip6Z4IIiMnSSONveO1qa8RGwB2OW5yhGicuI0XnAbKuTnLd7faOe5kn6M56MMvsdzemeuJacZGZxP+MdyoJh5JBeblKfX6CVPAFr8yUCYoeGeRZq9DwzBJnNJbdf5buv376qUcSIhckjYPy7pwP1y9oljNzrX2NadPp1VbIp9eabZgY96EZJSgqmnuWBco3gz/feEi1EAbaUi/F9pEE46Q4GYUYo5lePr3CQNrckjZ9e5N2clIeoKHFpZPCZU22MP7h+BUxVP3FN1eqSSBEXOnWeohTVOxrtLC8xs93bUPwVmR+xoCBqcrjfIWpniAxQjgjYRIK9x9+HyrGyZW5BodOVts8pkQrJLP1x4EOMMMO5+QZHeWo2IKmAqWDI5WA0l4Nvr/zKcr6I9fop2d3RYuLMc=
+  - secure:           PvOY9upqqgOQ3gmh02cksO+E5BVW47GcHxz0tzgvGHrbynC5SpMYvXYJkJQGCG+XAORmXaigHeOrR/HcGs5pO2BNf3JpuRNJ/lTqIzeopoV4sGfIoE9z/XIu1IewzpY4A8HJO6p7EDxsOKXQon7r+s4eGk2w5gFffcJRNQuH2qs6Btig8LBdDFjrwO9AkURLjs+ms8fbd4nkLacUwVBXXNI/ecGxLpZPNEGOwPN1eSf4PUZnunlMxVjmx5gM2TMbNVbQ/b1wzuS9mOQ2b14WCD3XZHpKRjuN7MsrAI06cafeDD+wwF7uE2yC88e5BOekavbd8xGBWOSz13RYb1hF3P/9GI4BgsPRBLzaIdm+rX7MjwwLRLqTzYoP/9F5LA7r+BPpbdaGdXq7nmnbkHV2ab1wRKf6FwRRK5KDrqNSMVuSz2Nquuzrn90m/aRfeh8U9+pGCgBxNXRyv92Gu1XlyGXQMWvNFXbhQxFkVpF9JyqeVnUTOmVzvmhO85ado5Eo3mi8Eu/n6jppwM+GT0BrR7LNJXDPRMKBqj0dKSWSr8ma8VLkbKS0QhMGITqKtMHf/EZ59mNAjMSAkioIqSQd1Sjz/M1cymruPHNZ+YqydmZaa/v2IfIVQRc3AFbMs3r0T1u9sD9g4QwqZCTGphJDnFFeK6f1H9LNNh7AwN1ila8=
+  - secure:           qBVWqqlZUARYb1y2Fn8mUt82NJcelob/VHjfWnjsWF6/jSYH3qJ2bIfCj8f2X+CVaw4ZRrcayODt9HXIELTeM0EKssVUw40LhHlGeGMSRdk28YrcWETMXvtt+6kuYGdeETlVdFHr+osxCz8Uit6jCTxhiDLHCw95aRQLXkxlvCHUzsEAn1nUjpY98hlw40y9s0tx9hmPuGPNXe4+bI2yvqnyDjcPk4SIIelshh8UhgExhfVC6hOnL5GUmiCHFvr3k3wHrtB7DXvONeIOFAelL9fW/eVWAeOetOCbvSrrgi+0SiOAk1ewzErcLH1frD1xHVpR31M88WDZzs3+KxLU8W80V1upx3xmBnLlInobCUP8mFWMyU6ZesFm2OykCP/CZlhpyE0V4yMiNVs8h30bkch7e4/xb+onSAuRQ0PWAa/WaNmgQosWy8QJ06mEKjTZo4R6HCuIzFK3sMxNkZnvyeY82IS/F9R8NXCk5GLH8nDjBgbUsuO7VyEXqymnDc8wcrULpWH0BtFe3RxHRw6lbNL/0maz/f2I5LUaZOdw2C1NmGjxGqOLEIGMJmtvHeB73DNZbbkzlfsANl8/TnhXKSIlDsAx2SVikytf3BSTsnfspOdd3lJJfxnp7zMysOO+DR1s6A/n+JklSkMEUL8WP4TKRCfvxxwDUn3HZjpnols=
+  - secure:           r5mK8eLu+Q28bs4a0rIjTop6r66RU/gpSpxnY3+NLJ6wnfZ7kDZMt8EIslpgmpbR0FuGATBxpoRoyc8v5s5syFwqVXg3+iZaqlwP2nwzYMcQNfiwrHLNEGBIWtOKIKz9JeguFqlKppvVZr2cfn9ivk+fxysTzerxvCbgxAvTjgFWOdgptHRzZSPge7LLVkNVyomOCV5AWPa4lDDVDUZKsZQdX399Gpe0ChiegFR+gTnJSRnLeC4EB8Q1z1K5lOTrOyGzJeoPQEeC0LaqcMCnzumPxAHlov0JAwnTl8KshwQAHGpvHrU0l2iP0cBLEotuc13dbswqYcTmAYAj+CQTAcUdSy6Q1jmWKVKZaz/54ypQM+syg9gp3b9lJcfME/9wOzafyPvjvJpuygCvvlASmmug27y8284l2fRuJiLoHmfwaIy0xVbrrNw77BN/mE8pcBuvpXjUtzCxy4TneRzh6gXAUrFLnmjioxa0RttlC/BnTD4k/QROdN6U0swrcPJgNuQpkCGYVW6U5RfMUunB8d3TeQPh4XPCUMxXArlNihOWugGpkGRlDeSWCfysxbJ3nnCJMoZBRJU/NjFlR0vlRtmxRFLREPtEC/q+IVSQAn+OhKEhYxTPAj4PgQlbw2yNRKYjBmKO0BC0kdMSNg6utR1ZG/xnvpzIAbRUPJPQE/I=
+addons:
+  apt:
+    sources:
+    - ubuntu-toolchain-r-test
+    packages:
+    - g++-4.9
+jobs:
+  include:
+  - stage:            Build and deploy
+    before_install:   npm i nyc -g && npm i codecov -g && npm i typescript -g
+    install:          chmod +x buildTypescript.sh && ./buildTypescript.sh
+    before_script:    tsc -p tsconfig-codecov.json; cd support/integration-testing; chmod +x triggerIntegrationTests.sh;
+      ./triggerIntegrationTests.sh; cd ../../; tsc;
+    script:           nyc report --reporter=text-lcov > coverage.lcov;codecov -t $CODECOV_TOKEN; rm coverage.lcov
+    after_success:
+    - npm run doc-ng2
+    - if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then bash dockerhub_deploy.sh; chmod
+      +x deploySnapshotToBranch.sh; ./deploySnapshotToBranch.sh; fi
+    before_deploy:    npm pack
+    after_deploy:     rm *.tgz
+    deploy:
+      - provider:     pages
+        skip_cleanup: true
+        github_token: "$GH_TOKEN"
+        local_dir:    support/docs/generated/ng2
+        on:
+         branch:      master
+         script:      true
+      - provider:     releases
+        skip_cleanup: true
+        api_key:      "$GH_TOKEN"
+        file:         "*.tgz"
+        on:
+         tags:        true

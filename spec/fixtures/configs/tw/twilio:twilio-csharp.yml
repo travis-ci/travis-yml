@@ -1,0 +1,25 @@
+language: csharp
+solution: Twilio.sln
+dist: trusty
+sudo: required
+mono: none
+dotnet: 2.1.4
+
+services:
+  - docker
+
+install:
+  - dotnet restore
+  - dotnet build --framework netstandard1.4 src/Twilio/Twilio.csproj
+  - dotnet build --framework netstandard2.0 src/Twilio/Twilio.csproj
+  - dotnet build --framework netcoreapp2.0 test/Twilio.Test/Twilio.Test.csproj
+
+script:
+  - dotnet run --framework netcoreapp2.0 --project test/Twilio.Test/Twilio.Test.csproj
+
+deploy:
+  provider: script
+  script: make docker-build && make docker-push
+  skip_cleanup: true
+  on:
+    tags: true

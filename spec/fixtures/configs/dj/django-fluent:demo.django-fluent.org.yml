@@ -1,0 +1,33 @@
+sudo: false
+language: python
+cache: pip
+
+python:
+- '3.6'
+
+env:
+- DJANGO_SETTINGS_MODULE=fluentdemo.settings.unittest
+
+install:
+- pip install -U pip wheel setuptools
+- pip install -r src/requirements/docker.txt
+
+before_script: cd src
+script:
+- coverage run ./manage.py check
+- py.test --cov --cov-append --nomigrations --reuse-db
+
+after_success:
+- bash <(curl -s https://codecov.io/bash)
+
+notifications:
+  email:
+    ## TODO: Replace this for your own projects
+    recipients:
+    - travis@edoburu.nl
+    on_success: never
+    on_failure: always
+#  slack:
+#    secure: ....
+#    on_success: never
+#    on_failure: always

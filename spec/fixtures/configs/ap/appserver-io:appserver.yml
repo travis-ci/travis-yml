@@ -1,0 +1,29 @@
+language: php
+
+php:
+  - 7.0
+  - 5.6
+  - 5.5
+
+matrix:
+  allow_failures:
+    - php: 7.0
+
+before_install:
+  - if [[ "$TRAVIS_PHP_VERSION" < "7.0" ]]; then pecl install pthreads-2.0.10; fi
+  - if [[ "$TRAVIS_PHP_VERSION" = "7.0" ]] || [[ "$TRAVIS_PHP_VERSION" > "7.0" ]]; then pecl install pthreads-3.1.6; fi
+  - pecl install xdebug-2.5.5
+  - phpenv rehash
+  - wget https://scrutinizer-ci.com/ocular.phar
+  - wget https://getcomposer.org/composer.phar
+
+script:
+  - php -d memory_limit=-1 composer.phar update
+  - vendor/bin/robo build
+  - php ocular.phar code-coverage:upload --format=php-clover $TRAVIS_BUILD_DIR/target/reports/unit/clover.xml
+
+notifications:
+  email: info@appserver.io
+  hipchat: 95d47a72c5372d4a0fef20048c3200@Appserver
+  webhooks: https://app.fossa.io/hooks/travisci
+  

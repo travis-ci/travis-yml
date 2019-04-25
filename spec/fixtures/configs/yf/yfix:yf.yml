@@ -1,0 +1,27 @@
+language: php
+dist: xenial
+
+php:
+  - 7.1
+  - 7.2
+#  - hhvm
+
+services:
+  - memcached
+  - redis-server
+
+env:
+  - YF_DB_PSWD=
+
+before_script:
+  - env | sort
+  - composer self-update
+  - composer require --prefer-source --no-interaction jakub-onderka/php-parallel-lint
+
+script: export YF_DB_PSWD=""; cd ./.dev/tests/bin/ && ./php_parallel_lint_all.sh && ./phpunit_run_all.sh
+
+matrix:
+  fast_finish: true
+
+notifications:
+  slack: yfix:g116ToSWgVpzNUZoXSJipxsB

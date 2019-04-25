@@ -1,0 +1,45 @@
+env:
+  global:
+  - secure: e52IdljY4WXnMTlfUmOO26R9mzozhryNmZL58nxu6uSiLvNN3ulnwMTqE3GCb02jRJwaYtbsPmR8aQRmiOBM+STbFy+H6Vv0d71ilVVCfnqAvCFZBnmVZ/VTW/Vdr4FAx3IoG+cCywjN6dRKcFFOX/y3gpHzYVzIgUuAvQYncDw=
+  - secure: VuB194vj6xFjCFB6THnTeqZG21Koxe3O5Uti0sX2siXAUsLhWKIRxNZV6UlEa4OvlqmsijEOs5vkLEyRs8ShcH2/Ld5bRxd13Fl6j0eNEb4zVJ9PPoNjraSNARyfuV0C6pZFioyV+XOaP0r5dj0h6T9hGqZMzut2wjDZI/EaehE=
+  - secure: peY7/WOA4cQiVctIp+qGBQ3pQzUNwOwLwV+XB/aCYz/8r3yEGTUcn8hE50WLhM4e44gqM7Tp2SXx0v/xALkhQEpxqK2I38P4JHoWaQrm7J1bOK34U037fQLZyazIC5k6jzAhL0KmkMV7B/b0fhQ39bjhSIWmAdQIcue+r4WWyEk=
+  - SX_DEBUG=true
+  - NAMESPACE=startx
+  - ISFATAL=false
+sudo: required
+services:
+- docker
+before_install:
+- "./travis/prepare-begin              fedora        latest rawhide"
+- "./travis/prepare-docker             fedora        latest rawhide"
+- "./travis/prepare-cache              fedora        latest rawhide"
+- "./travis/prepare-dockerhub          fedora        latest rawhide"
+- "./travis/prepare-end                fedora        latest rawhide"
+script:
+- "./travis/test    OS                 fedora        latest"
+- "./travis/test    Services/apache    sv-apache     latest"
+- "./travis/test    Services/couchbase sv-couchbase  latest"
+- "./travis/test    Services/mariadb   sv-mariadb    latest"
+- "./travis/test    Services/memcache  sv-memcache   latest"
+- "./travis/test    Services/mongo     sv-mongo      latest"
+- "./travis/test    Services/nodejs    sv-nodejs     latest"
+- "./travis/test    Services/ooconv    sv-ooconv     latest"
+- "./travis/test    Services/php       sv-php        latest"
+- "./travis/test    Services/postgres  sv-postgres   latest"
+- "./travis/test    VDI/chrome         vdi-chrome    latest"
+- "./travis/test    VDI/firefox        vdi-firefox   latest"
+- "./travis/test    Applications/phpmyadmin  app-phpmyadmin   latest"
+after_success:
+- "./travis/publish OS                 fedora        latest"
+- "./travis/publish Services/apache    sv-apache     latest"
+- "./travis/publish Services/couchbase sv-couchbase  latest"
+- "./travis/publish Services/mariadb   sv-mariadb    latest"
+- "./travis/publish Services/memcache  sv-memcache   latest"
+- "./travis/publish Services/mongo     sv-mongo      latest"
+- "./travis/publish Services/nodejs    sv-nodejs     latest"
+- "./travis/publish Services/ooconv    sv-ooconv     latest"
+- "./travis/publish Services/php       sv-php        latest"
+- "./travis/publish Services/postgres  sv-postgres   latest"
+- "./travis/publish VDI/chrome         vdi-chrome    latest"
+- "./travis/publish VDI/firefox        vdi-firefox   latest"
+- "./travis/publish Applications/phpmyadmin  app-phpmyadmin   latest"

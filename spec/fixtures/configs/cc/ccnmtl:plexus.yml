@@ -1,0 +1,15 @@
+language: python
+sudo: false
+install:
+  - pip install -U pip wheel
+  - pip install -U setuptools
+  - pip install -r requirements.txt
+python:
+  - "2.7.6"
+  - "2.7"
+  - "3.6"
+script:
+  - make flake8
+  - make
+notifications:
+  slack: ccnmtl:GizSNscLWJLldjQrffB8mwgm

@@ -1,0 +1,20 @@
+language: node_js
+node_js:
+  - "10"
+
+sudo: required
+
+dist: trusty
+
+before_install:
+  - wget https://github.com/ethereum/solidity/releases/download/v0.5.3/solc-static-linux
+  - chmod ugo+x solc-static-linux
+  - sudo mv solc-static-linux /usr/bin/solc
+
+install:
+  - npm install
+  - npm install -g eslint ethlint
+
+script:
+  - npm run eslint && npm run ethlint && npm run test
+

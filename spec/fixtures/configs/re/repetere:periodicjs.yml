@@ -1,0 +1,52 @@
+language: node_js
+node_js:
+  - '10'
+  - '9'
+  - '8'
+env:
+  - CXX=g++-4.8
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - g++-4.8
+
+services:
+  - mongodb
+  - postgresql
+  - redis-server
+  
+notifications:
+  irc:
+    channels:
+      - "irc.freenode.org#periodicjs"
+    template:
+      - "Build by %{author} :"
+      - "Git Info: %{branch} - %{commit} with the message %{commit_message}"
+      - "Travis states: %{message}"
+      - "Build Details: %{build_url}"
+      - "Change View: %{compare_url}"
+      - "result = %{result}"
+      - "elapsed time... %{duration}"
+    use_notice: true
+    skip_join: false
+
+install:
+  - npm install  grunt-cli istanbul -g
+  - npm install 
+  # - npm install --skip_app_post_install=true
+
+branches:
+  only:
+    - master
+    - periodic10
+    - devel
+git:
+  submodules: false
+
+before_script:
+  - psql -c 'create database travis_ci_test;' -U postgres
+
+script:
+  - npm set progress=false && grunt test

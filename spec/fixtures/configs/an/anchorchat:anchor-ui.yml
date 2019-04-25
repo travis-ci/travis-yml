@@ -1,0 +1,27 @@
+language: node_js
+node_js:
+  - "8"
+before_install:
+  cd docs && npm install && cd ../
+before_script:
+  npm run compile:before-lint && npm run lint
+after_success: npm run coverage
+before_deploy:
+  cd docs && npm run build && cd ../ && npm run build:travis && zip -r build.zip anchor-ui
+deploy:
+  provider: releases
+  api_key: $GITHUB_TOKEN # Set in travis-ci.org dashboard
+  file: "build.zip"
+  skip_cleanup: true
+  on:
+    tags: true
+  provider: pages
+  skip_cleanup: true
+  github_token: $GITHUB_TOKEN # Set in travis-ci.org dashboard
+  local_dir: docs/build
+  email: automation@anchor.chat
+  name: ac-automation
+  on:
+    branch: master
+notifications:
+  email: false

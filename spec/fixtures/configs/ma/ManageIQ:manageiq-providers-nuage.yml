@@ -1,0 +1,37 @@
+dist: xenial
+language: ruby
+rvm:
+- 2.4.5
+- 2.5.3
+sudo: required
+cache:
+  bundler: true
+  yarn: true
+env:
+  global:
+  - RUBY_GC_HEAP_GROWTH_MAX_SLOTS=300000
+  - RUBY_GC_HEAP_INIT_SLOTS=600000
+  - RUBY_GC_HEAP_GROWTH_FACTOR=1.25
+  - BUNDLE_WITH=qpid_proton
+  matrix:
+  - TEST_SUITE=spec
+  - TEST_SUITE=yarn:test
+matrix:
+  exclude:
+  - rvm: 2.3.6
+    env: TEST_SUITE=yarn:test
+addons:
+  postgresql: '10'
+before_install: bin/qpid_install.sh
+install:
+- bin/setup
+- bundle exec rake yarn:install
+script: bundle exec rake $TEST_SUITE
+after_script: bundle exec codeclimate-test-reporter
+notifications:
+  webhooks:
+    urls:
+    - https://webhooks.gitter.im/e/c8c0999427c13a6c13c5
+    on_success: change
+    on_failure: always
+    on_start: never

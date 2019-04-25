@@ -1,0 +1,40 @@
+addons:
+    apt:
+        packages:
+        - dos2unix
+cache:
+- pip
+dist: xenial
+env:
+    global:
+    -   secure: ZYDCI/zO1kSfqWfvKYDChHgmyuhDT2XZdvcNQv6WqOFi9XKKzMGdBmtk0XJUrn87Pxtns94vLIRW/hSYptvXlZ6ekoBB9AdzYqnbxRB3wX4weCz9N8HUL6aJsNahl1JsAzqk4s5xJx0ZJMK3majU6TxcEMnrn4IZFqeFFl5Bd5Ec2Xs76izUnTOT/8Y7pn4C7CStdUfC8boMzH+1wQQngY5KLnpw6gXBXXGdv82eMnuMUgnuA9kg4h8IbGoah3uLWRAM8eKx4c0FL7GNxDOHO+jZKJouzK+UoEKg6uYt21QQBa3+4YOY4J29Yh54f+GhERI4/V0k59fmA+Rd7ib2T+rsVgb8w2JO6q4VJb8i9yn1+V8jGzUwDVhby2XDSsNOloflAyB/p890P6iYCcoLwfDKxvF+AXSJuaoJsyav6gmupE/IMRoXG7cPjdTlcr9Ycn3Oh1GpRr5a5vOB4rrzlexC2G2lkLJ+EZxpJjC/JuBN+MFn7xNNhwS4110i3SP1jIY5YzxoQ4Ie35t3Wr5iBfjmwXsitUKN+m0BNyFRfqYCCF0Fxn2eGhurws0rmumFIdaAMQMwapaZmBq7zbjHTqQVhb4XR+G8L+jerT8Ybk6YLUAeRQ/D3Kh6/P2WGcUTLpFyMWeS3NllnAgpR4kb8Fnc3DbDfVBVsg+KmNlfx7o=
+    -   GIT_NAME: Travis CI
+    -   GIT_EMAIL: dead-hosts@funilrys.com
+    -   TRAVIS_REPO_SLUG: Ultimate-Hosts-Blacklist/Suspicious.Snooping.Sniffing.Hacking.IP.Addresses
+    -   GIT_BRANCH: master
+    -   UPDATE_LOCATION: https://raw.githubusercontent.com/Ultimate-Hosts-Blacklist/repository-structure/master/update.py
+    -   ADMINISTATION_LOCATION: https://raw.githubusercontent.com/Ultimate-Hosts-Blacklist/repository-structure/master/administration.py
+install:
+- pip3 install --upgrade pip
+- pip3 install requests
+- pip3 install ultimate-hosts-blacklist-whitelist PyYaml
+- if [[ ! -f .admin ]]; then wget "${UPDATE_LOCATION}" -o /dev/null -O update.py &&
+    chmod +x update.py; else echo "No need to download/update update.py."; fi
+- if [[ ! -f .admin ]]; then wget "${ADMINISTATION_LOCATION}" -o /dev/null -O administration.py
+    && chmod +x administration.py; else echo "No need to download/update administration.py.";
+    fi
+language: python
+matrix:
+    fast_finish: true
+notifications:
+    email:
+        on_failure: always
+        on_success: never
+        recipients:
+        - dead-hosts@funilrys.com
+        - mitchellkrogza+ultimatehostsblacklist@gmail.com
+python:
+- '3.7'
+script:
+- python3 ./update.py
+sudo: required

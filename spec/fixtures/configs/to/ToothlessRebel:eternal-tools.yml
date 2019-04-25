@@ -1,0 +1,17 @@
+language: php
+services:
+  - postgresql
+php:
+  - '7.1'
+  - '7.2'
+before_script:
+  - psql -c 'create database travis_ci_test;' -U postgres
+  - "./artisan migrate"
+install:
+  - "composer install"
+  - "npm install"
+  - "npm run dev"
+cache:
+directories:
+  - node_modules
+  - vendor

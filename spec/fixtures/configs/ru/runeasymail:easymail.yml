@@ -1,0 +1,40 @@
+language: bash
+
+services:
+  - docker
+
+script:
+    - mkdir -p /opt/easymail/data/{mysql,dovecot,opendkim,ssl}
+    - docker run -it -v /home/travis/build/runeasymail/easymail/:/easymail -p=110:110 -p=25:25 -p=995:995 -p=80:80 -p=443:443 -p=587:587 -p=993:993 -p=143:143 -p=465:465 --name="easymail" ubuntu:16.04 /bin/sh -c "bash /easymail/install.sh"
+    - docker commit easymail easymail-img
+ 
+# Smoke tests START
+    - docker rm easymail
+    - docker run -itd -v /home/travis/build/runeasymail/easymail/:/easymail  -v /opt/easymail/data/ssl/:/opt/easymail/data/ssl/ -v /opt/easymail/data/dovecot/:/var/mail/vhosts/ -v /opt/easymail/data/mysql/:/opt/easymail/data/mysql/ -p=110:110 -p=25:25 -p=995:995 -p=80:80 -p=443:443 -p=587:587 -p=993:993 -p=143:143 -p=465:465 -h "test.example.com" --name="easymail" easymail-img /bin/sh -c "bash /opt/easymail/post_install.sh; exec /bin/bash"
+    - sleep 20
+    - docker exec easymail wget --no-check-certificate https://test.example.com
+# Smoke tests END
+
+# Integration tests START
+    - docker exec easymail bash /easymail/tests/install.sh
+    - docker exec easymail php /easymail/tests/imap_integration_test.php
+    - docker exec easymail php /easymail/tests/pop3_integration_test.php
+    - docker exec easymail php /easymail/tests/smtp_integration_test.php
+# Integration tests END
+
+env:
+  global:
+    - secure: "Z6z/fFxVZWBjUSH/6Thg9WOg1r9yqXekS1COYxQ+mZeeakPOOnC7N1zy/DR7/8eWdQvXMDcgpqBXN68wtUdxi6VtuRuwqSRz0o3eytrpbP/kTg+fx7wRHzhEOonlZM/Gd1rJioPQQGgp2TBWEUi4jAduYSGswMeLIqLC6jMu1OfXGzolvctI+DNhNAvvIvuAiyv3uQTt9fHtgKi3ZeprM6Z0OVRRphW4IE07d3kP4pQ3P6MznN4054xR1zypacen7xMPWzOzFjELucYJmOkgVbHbHf6s9M5ElyOrfUcV7L4rvyZX4ze7H8OVGh2NVYC8LwCwkhSNtjeI6onCJBogj6VQ53xW/XRmD4QF5xN6g57gUzGluonuv/kPisMXETUizYFEjaUyH3djJcsErPegvmwhldjrH11AGlDl+fTKcb5sdE8XHLPPRwB97sPhlSZmDnG3zGCBPoV8DJkxO22Z0yity63ijAdH5Yi2UqccpR+n7An+YgZTiTnwOxsQVtgiEcRvUJ680X5WR0EjA4Z2DLjmztxxoa5GyE/LipZ6b1ZorvMfLeff1BwHXnB7Xq8CLoP+NOONgaFxfOyFxB1oMrjlQ8FlgXwe/xJu5whoyCc1hs/HL0rrprcZ8pKgkDq37ge97gMmYsKCP2ZaJOrqeKU8VCxFVTml6js+/9Wwkqk=" # DOCKER_EMAIL
+    - secure: "nqCxdcWfn6qPXzxAwPjNjaqRpDRqP1q1gwgG4R68JrPbFODQRHCVbvTwWoJIR+Png4B93NJ9lJF82gmwODGg9BC0GlBH0h6PeRXflIyVlC80h/RnSYQxXM2+zZQPjnnKHY673YdWiBw9URl0ztbhp8xiQQ8fYvhIUuxs2gsDcK3NoQtRhcHbDA1lt3Jmffm9k1MHwaAI2H7UmsnJo/runCJVwoyF3iF0vUG6lqvd0dEqLhAX9ayw+AMVrlFtx8IE3+eSuFcHQQlOfr6iw7suyuiEkMzbsCgO0YbLJC187gRXYzgIQ6sVQNLaC7z5pKSmGMQi22QG1iDwTBPpwtaUq9cyhakdGJ9qUxrFjsVwNdB4zmbGYlEiGOtpmXwYGf900GOPYtutq7ToI230yTpsyQfk/KF8tGQw0mAh4F79KteJVnvaPoffEpNUk2nNdFtNc7Ot8yFynaUF+LXTG4US+w4HUPis2HMV57WVYk0z4hgwoBnHjv/9dSfI5VfmywtR+ctMzv7cqBE/UqHUpH9A69XlLvLyMn32aEao1437QnZAKvdHTzGOlRBXrCIPMkE1W3uljKH9wECogxpKbUpTmVukaHJ7Y5cb7o696T6YTJJ7VfTNqrsfCIK3QMN39RN/uJdam27isiLfpDugN9YQ3nYi7wT4yVIIe7k3dX4pv/k=" # DOCKER_USER
+    - secure: "ZMkxy/nq2cfjMqB7Geq965cbijd2ghgOIAgdteKtm8SYVtl2kL8zujE62elOR8QTLDgjbbTudn3vriGiOj2Mz200j7aLJekEEByVgAD9vzgfm8uu49fbuSkV6/ADKx0FFWBONXIa9Od/1AAoG0P2T6MM/7fWh3gUG5ZjmA5B6UNQpRHYQFMWe/Ikbm860wyOFA98fz2nk5APQowzmCiGe5MQSE3fysQ5Dy8Al8IbC2f4ORWnADYS1S7xdtgQHt9lUaKBYq0rpx1ImfbtwzOOQCn+VOujlURgqaPhKzPjC7eL2luTFe4oIeqb+ENnRqj5SRJoB3xxfVIy/0TdL5eTqUaq/5PJmGbC/xC5pGl+czD3PkszVFqD3IHszD31WqVDvtNURNx+5GBAEioE2AgeaYAcX27mBYDbpvGkfYos3pBVlBP8xcmfA9EeagvCvB1edqBe9jtcIw7Va8qX73zVIJgjxCAhtA3BH/Sr4KYxdDQ1T/sQ5Fcs6yDyXauE+Jo3xxWToQi7dP2jpwStWeLCYr6rJtFK89fExNkEzAkz2kQfSKb0g53o+n5DuKu2Fa311Lz/9QdnDQiNoDYPKeWkZgWDNvSGApTaDRzLaOhCL3nGzrrRcuUYPWfdYoRm8CNzrbUGRBOc+8AX5oECdjEnC75AIGlxhZW0chPQHwex0Qo=" # DOCKER_PASS
+
+after_success:
+  - if [ "$TRAVIS_TAG" != "" ]; then
+      docker login -u $DOCKER_USER -p $DOCKER_PASS &&
+      docker tag easymail-img easymail/easymail:$TRAVIS_TAG &&
+      docker push easymail/easymail:$TRAVIS_TAG;
+    else
+      docker login -u $DOCKER_USER -p $DOCKER_PASS &&
+      docker tag easymail-img easymail/only-for-testing-purposes:$TRAVIS_BUILD_NUMBER &&
+      docker push easymail/only-for-testing-purposes:$TRAVIS_BUILD_NUMBER;
+    fi

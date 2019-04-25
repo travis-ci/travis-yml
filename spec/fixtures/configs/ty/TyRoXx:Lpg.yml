@@ -1,0 +1,53 @@
+language: c
+os:
+ - linux
+sudo: false
+notifications:
+ email:
+  on_success: change # [always|never|change] # default: change
+  on_failure: always # [always|never|change] # default: always
+
+addons:
+  apt:
+    sources:
+    - ubuntu-toolchain-r-test
+    - llvm-toolchain-precise-3.8
+    packages:
+    - gcc-7
+    - clang-3.8
+    - valgrind
+    - ninja-build
+    - nodejs
+
+env:
+ - MYCC=gcc-7     BUILD_TYPE=Debug          UB_SANITIZER=OFF MEMORY_SANITIZER=OFF ADDRESS_SANITIZER=OFF THREAD_SANITIZER=OFF LPG_WITH_NODEJS=ON
+ - MYCC=gcc-7     BUILD_TYPE=RelWithDebInfo UB_SANITIZER=OFF MEMORY_SANITIZER=OFF ADDRESS_SANITIZER=OFF THREAD_SANITIZER=OFF LPG_WITH_NODEJS=OFF
+ - MYCC=clang-3.8 BUILD_TYPE=RelWithDebInfo UB_SANITIZER=ON  MEMORY_SANITIZER=OFF ADDRESS_SANITIZER=OFF THREAD_SANITIZER=OFF LPG_WITH_NODEJS=ON
+ - MYCC=clang-3.8 BUILD_TYPE=RelWithDebInfo UB_SANITIZER=OFF MEMORY_SANITIZER=ON  ADDRESS_SANITIZER=OFF THREAD_SANITIZER=OFF LPG_WITH_NODEJS=ON
+ - MYCC=clang-3.8 BUILD_TYPE=RelWithDebInfo UB_SANITIZER=OFF MEMORY_SANITIZER=OFF ADDRESS_SANITIZER=ON  THREAD_SANITIZER=OFF LPG_WITH_NODEJS=ON
+ - MYCC=clang-3.8 BUILD_TYPE=RelWithDebInfo UB_SANITIZER=OFF MEMORY_SANITIZER=OFF ADDRESS_SANITIZER=OFF THREAD_SANITIZER=ON  LPG_WITH_NODEJS=ON
+
+script:
+ - which node
+ - $MYCC --version
+ - cmake --version
+ - mkdir build
+ - cd build
+ - CC=$MYCC cmake .. -DCMAKE_VERBOSE_MAKEFILE=ON -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DLPG_WITH_NODEJS=$LPG_WITH_NODEJS -DLPG_WITH_CLANG_FORMAT=OFF -DLPG_WITH_UB_SANITIZER=$UB_SANITIZER -DLPG_WITH_MEMORY_SANITIZER=$MEMORY_SANITIZER -DLPG_WITH_ADDRESS_SANITIZER=$ADDRESS_SANITIZER -DLPG_WITH_THREAD_SANITIZER=$THREAD_SANITIZER || exit 1
+ - cmake -LA . || exit 1
+ - cmake --build . -- -j2 || exit 1
+ - export UBSAN_OPTIONS=print_stacktrace=1:exitcode=55
+ - export MSAN_OPTIONS=poison_in_dtor=1:exitcode=55
+ - export ASAN_OPTIONS=check_initialization_order=1:exitcode=55
+ - export TSAN_OPTIONS=exitcode=55:halt_on_error=1
+ - export LD_LIBRARY_PATH=.:/usr/lib/clang/3.8.0/lib/linux/
+ - if [ "$UB_SANITIZER" == "ON" ] || [ "$MEMORY_SANITIZER" == "ON" ] || [ "$ADDRESS_SANITIZER" == "ON" ] || [ "$THREAD_SANITIZER" == "ON" ]; then
+     tests/tests || exit 1;
+     cli/lpg run ../tests/in_lpg/empty.lpg || exit 1;
+   else
+     valgrind --error-exitcode=42 --leak-check=full ./tests/tests || exit 1;
+     valgrind --error-exitcode=42 --leak-check=full ./cli/lpg run ../tests/in_lpg/empty.lpg || exit 1;
+   fi
+ - LD_LIBRARY_PATH=.:/usr/lib/clang/3.8.0/lib/linux/ CTEST_OUTPUT_ON_FAILURE=1 ctest || exit 1
+ - cd ..
+ - python documentation/compile_documentation.py

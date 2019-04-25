@@ -1,0 +1,86 @@
+# Even though we run everything inside docker,
+# Travis requires us to pick a language else it will pick Ruby by default.
+# Let's choose a lightweight base image then we provide our own build tools.
+# Note: `language: generic` was failing in OSX so in that case you can use language: c
+# UPDATE: Switching to python as we want to run Zalenium tests from the host
+language: python
+python:
+  - "3.6"
+
+sudo: required
+
+os: linux
+dist: trusty
+
+services:
+  - docker
+
+branches:
+  except:
+  - latest
+
+env:
+  global:
+    - TEST_SLEEPS="0.7"
+    - ADDED_TEST_SLEEP="6.5"
+    - DOCKER_VERSION="stable"
+
+jobs:
+  include:
+    - stage: Docker build (re-use in stages)
+      env: step=build_push
+      script:
+        - travis_retry ./test/before_install_build
+
+    - stage: Integration and Unit Tests
+      env: test=scenario_basic__restart
+      script:
+        - travis_retry ./test/before_install_pull
+        - travis_retry ./test/script_scenario_basic
+        - travis_retry ./test/script_scenario_restart
+
+    - env: test=scenario_arbitrary_uid
+      script:
+        - travis_retry ./test/before_install_pull
+        - travis_retry ./test/script_scenario_arbitrary_uid
+
+    - env: test=scenario_node_dies
+      script:
+        - travis_retry ./test/before_install_pull
+        - travis_retry ./test/script_scenario_node_dies
+
+    - env: test=scenario_make
+      script:
+        - travis_retry ./test/before_install_pull
+        - travis_retry ./test/script_scenario_make
+
+    - env: test=scenario_compose_N_N
+      script:
+        - travis_retry ./test/before_install_pull
+        - travis_retry ./test/script_scenario_compose_N_N
+
+    - env: test=Zalenium_Prev
+      script:
+        - gem install bitballoon || true
+        - travis_retry ./test/before_install_pull
+        - travis_retry ./test/script_scenario_zalenium "3.14.0g"
+
+    - env: test=Zalenium_Latest
+      script:
+        - gem install bitballoon || true
+        - travis_retry ./test/before_install_pull
+        - travis_retry ./test/script_scenario_zalenium
+
+    - stage: Bump versions
+      if: branch = master AND sender != elgalubot AND tag IS blank AND type != pull_request
+      script:
+        - travis_retry ./test/install_hub_cli
+        - travis_retry ./test/before_install_pull
+        - ./ci_cd/deploy.sh bump
+
+    - stage: Push Image & Release
+      if: tag =~ ^\d+\.\d+\.\d+-p\d+$ AND type != pull_request
+      script:
+        - travis_retry ./test/install_hub_cli
+        - travis_retry ./test/before_install_pull
+        - ./ci_cd/deploy.sh release

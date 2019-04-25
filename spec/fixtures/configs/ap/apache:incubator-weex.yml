@@ -1,0 +1,80 @@
+os:
+  - osx
+  - linux
+language: node_js
+node_js: 7.6
+rvm: 2.0.0
+env:
+  - TEST_SUITE=danger
+  - TEST_SUITE=jsfm
+  - TEST_SUITE=android
+matrix:
+    fast_finish: true
+    exclude:
+      - os: osx
+        env: TEST_SUITE=danger
+      - os: osx
+        env: TEST_SUITE=jsfm
+      - os: osx
+        env: TEST_SUITE=android
+      - os: linux
+        env: TEST_SUITE=android
+    include:
+      - os: linux
+        env: TEST_SUITE=android
+        jdk: oraclejdk8
+        language: android
+        android:
+          components:
+            - platform-tools
+            - tools
+            - build-tools-26.0.3
+            - android-26
+            - extra-google-m2repository
+            - extra-android-m2repository
+            - sys-img-armeabi-v7a-android-22
+cache:
+  directories:
+  - node_modules
+  - $HOME/.m2
+  - $HOME/.gradle
+before_script:
+  - |
+    if [[ $TEST_SUITE = "android" ]]; then
+      curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.33.2/install.sh | bash
+      nvm install 7.0
+      npm install
+    fi
+  - |
+    if [[ $TEST_SUITE = "jsfm" ]]; then
+      npm install
+    fi
+  - |
+    if [[ $TEST_SUITE = "danger" ]]; then
+      npm install
+    fi
+script:
+  - |
+    if [[ $TEST_SUITE = "android" ]]; then
+      npm run danger -- run --dangerfile ./dangerfile-android.js
+    fi
+  - |
+    if [[ $TEST_SUITE = "jsfm" ]]; then
+      npm run danger -- run --dangerfile ./dangerfile-jsfm.js
+    fi
+  - |
+    if [[ $TEST_SUITE = "danger" ]]; then
+      npm run danger -- run --dangerfile ./dangerfile.js
+    fi
+notifications:
+  webhooks:
+    on_pull_requests: false
+    urls:
+      - https://oapi.dingtalk.com/robot/send?access_token=5a6be5eb6ad180fa4d04bdda0b24857ee49c3dd985361efdf0964aa9134ee623
+    on_success: never 
+    on_failure: always
+  email:
+    recipients:
+      - weexnotify@gmail.com
+    on_success: never
+    on_failure: always

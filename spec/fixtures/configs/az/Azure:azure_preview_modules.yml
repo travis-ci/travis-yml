@@ -1,0 +1,204 @@
+language: python
+python: '2.7'
+
+env:
+  global:
+    - exit_code=0
+    - number_per_job=2
+    - message=()
+    - ANSIBLE_VERSION=latest
+    - max_retry_count=2
+    #- ANSIBLE_VERSION=2.5.5
+  matrix:
+    - id=1
+    - id=2
+    - id=3
+    - id=4
+    - id=5
+    - id=6
+    - id=7
+    - id=8
+    - id=9
+    - id=10
+    - id=11
+    - id=12
+    - id=13
+    - id=14
+    - id=15
+    - id=16
+    - id=17
+    - id=18
+    - id=19
+    - id=20
+    - id=21
+    - id=22
+    - id=23
+    - id=24
+    - id=25
+    - id=26
+    - id=27
+    - id=28
+    - id=29
+    - id=30
+
+before_install:
+  - sudo apt-get update -qq
+  - mkdir ~/.azure
+  - touch ~/.azure/credentials
+  - printf "[default]\nsubscription_id=${subscriptionId}\nclient_id=${clientId}\nsecret=${secret}\ntenant=${tenant}" > ~/.azure/credentials
+  - run_test(){
+      file=$1;
+      filename=${file##tests/integration/};
+      test_name=${file##tests/integration/targets/};
+      test_name=${test_name%%/tasks/main.yml};
+      m=1;
+
+      echo Run test $test_name from $filename;
+      resource_group="asb-roletest-${test_name##azure_rm_}$(date +%s)";
+      resource_group_secondary="asb-roletest-${test_name##azure_rm_}$(date +%s)2nd";
+      resource_prefix=$(date +%s);
+
+      printf "{\"resource_group\":\"$resource_group\",\n\"test\":\"$filename\",\n\"resource_group_secondary\":\"$resource_group_secondary\",\n\"azure_object_id\":\"$AZURE_OBJECT_ID\",\n\"resource_prefix\":\"$resource_prefix\"}" > ~/arg.json;
+      cat ~/arg.json;
+
+      while [ $m -le $max_retry_count ]; do
+        echo Run test $m time;
+
+        travis_wait 50 ansible-playbook tests/integration/main.yml;
+
+        if [ $? -ne 0 ]; then
+          echo test $test_name failed;
+
+          if [ $m -eq $max_retry_count ]; then
+            message+=($test_name);
+            export exit_code=1;
+          fi;
+
+          m=$[$m+1];
+        else
+          echo test $test_name passed;
+          break;
+        fi;
+        
+      done;
+      
+    }
+
+
+  - scan_test() {
+      end=$((id * number_per_job));
+      start=$((end - number_per_job));
+
+      branch=$TRAVIS_BRANCH;
+      echo branch is $branch;
+      diffstr=$(git diff $branch remotes/origin/master --name-only  -- * --no-pager);
+
+      liststr=tests/integration/targets/azure_rm_*;
+      list=($liststr);
+
+      run_all=false
+ 
+      for item in ${diffstr[*]}; do
+        if [[ "$item" != *"main.yml" ]] && [[ "$item" != *"aliases" ]] && [[ "$item" != *"virtualmachines.yml" ]]; then
+          if [[ "$item" != *"azure_rm_"*.py ]]; then
+            run_all=true;
+            break;
+          elif [[ "$item" == *"azure_rm_common"*.py ]]; then
+            run_all=true;
+            break;
+          fi
+        fi
+      done;
+
+      echo run_all is $run_all;
+      echo start = $start, end = $end, list_lenth = ${#listall[@]};
+      
+      if [ "$run_all" == true ]; then
+        listfiles=tests/integration/targets/azure_rm_*/tasks/main.yml;
+        listall=($listfiles);
+        
+        for (( i = $start; i < $end; i++ )); do
+          if [ "$i" -lt "${#listall[@]}" ]; then
+            aliasFile="${listall[$i]}/../aliases";
+            if grep -Fxq "unsupported" "${alias}/aliases"; then
+              echo "not supported test";
+            else
+              run_test ${listall[$i]};
+            fi;
+          fi;
+        done;
+      else
+        testlist=();
+        for (( i = $start; i < $end; i++ )); do
+          if [ "$i" -lt "${#diffstr[@]}" ]; then
+            for changedfile in ${diffstr[*]}; do
+              arrChanged=(${changedfile//// });
+              changedFileName=${arrChanged[-1]};
+              changedFileNameWithPath=${arrChanged[-2]};
+              echo changedfile is $changedfile;
+
+              fileNameNoExtension=${changedFileName%%.py};
+
+              if [[ ! -f $changedfile ]]; then
+                continue;
+              fi;
+
+              if [[ -d "tests/integration/targets/${fileNameNoExtension}" ]]; then
+                echo test tests/integration/targets/${fileNameNoExtension}/tasks/main.yml;
+                testList=("tests/integration/targets/${fileNameNoExtension}/tasks/main.yml" "${testList[@]}");
+              elif [ "$changedFileName" == "main.yml" ]; then
+                if [[ "$changedFileNameWithPath" == "tasks" ]]; then
+                  echo test $changedfile;
+                  testList=("${changedfile}" "${testList[@]}");
+                fi;
+              else
+                for alias in "${list[@]}"; do
+                  if grep -Fxq "$changedFileName" "${alias}/aliases"; then
+                    if grep -Fxq "unsupported" "${alias}/aliases"; then
+                      echo "not supported test";
+                    else
+                      echo test $alias;
+                      testList=("${alias}/tasks/main.yml" "${testList[@]}");
+                      break;
+                    fi;
+                  fi;
+                done;
+              fi;
+            done;
+          fi
+
+          sorted_unique_testList=($(echo "${testList[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' '));
+          echo start = $start, end = $end, list_lenth = ${#sorted_unique_testList[@]};
+          for (( i = $start; i < $end; i++ )); do
+            if [ "$i" -lt "${#sorted_unique_testList[@]}" ]; then
+              for test in "${sorted_unique_testList[@]}"; do
+                echo test file is $test;
+                run_test $test;
+              done;
+            fi
+          done;
+        done;
+      fi
+    }
+
+install:
+  - if [ "$ANSIBLE_VERSION" == "latest" ]; then pip install ansible[azure]; else pip
+    install ansible[azure]==$ANSIBLE_VERSION; fi
+  - "{ echo '[defaults]'; echo 'roles_path = ../'; echo 'lookup_plugins = ./tests/integration/targets/azure_rm_keyvaultkey/lookup_plugins'; } >> ansible.cfg"
+  - ansible --version
+  - pip install -I -r ./files/requirements-azure.txt
+  - pip install xmltodict
+  - pip freeze
+  - git remote set-branches --add origin master
+  - git fetch
+
+script:
+  - scan_test
+  - exit $exit_code
+
+notifications:
+  webhooks: https://galaxy.ansible.com/api/v1/notifications/
+  email:
+    - yuwzho@microsoft.com
+    - zikalino@microsoft.com
+    - yungez@microsoft.com

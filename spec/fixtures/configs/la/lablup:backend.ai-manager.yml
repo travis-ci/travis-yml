@@ -1,0 +1,91 @@
+language: python
+cache: pip
+addons:
+  postgresql: "9.6"
+services:
+  - docker
+  - postgresql
+  - redis-server
+
+# stage decl.
+stages:
+  - name: test
+  - name: deploy
+    if: tag IS present
+
+# build matrix for test stage
+python:
+  - "3.6"
+os:
+  - linux
+env:
+  global:
+    - BACKEND_ETCD_ADDR=localhost:2379
+    - BACKEND_REDIS_ADDR=localhost:6379
+    - BACKEND_DB_ADDR=localhost:5432
+    - BACKEND_DB_USER=postgres
+    - BACKEND_DB_PASSWORD=
+    # namespace and db_name are random-generated.
+
+# stage def.
+jobs:
+  include:
+
+    - stage: test
+      install:
+        - pip install -U pip setuptools
+        - sudo apt-get install libsnappy-dev
+        # install backend.ai-agent from github
+        - cd ${HOME}/build/lablup
+        - git clone https://github.com/lablup/backend.ai-agent.git
+        - cd backend.ai-agent
+        - pip install -U -e .
+        - cd ../backend.ai-manager
+        # install manager requirements
+        - if [[ $TRAVIS_BRANCH == "develop" ]]; then BRANCH="develop"; else BRANCH="master"; fi
+        - sed -i'' -e "s/{BRANCH}/$BRANCH/g" requirements-ci.txt
+        - pip install -U -r requirements-ci.txt
+      before_script:
+        # etcd
+        - mkdir -p /tmp/etcd/vroot
+        - docker run -d -p 2379:2379 -p 2380:2380
+           -v /tmp/etcd:/etcd-data
+           --name backendai-etcd
+           quay.io/coreos/etcd:v3.2.8
+           /usr/local/bin/etcd
+           --name backendai-etcd
+           --data-dir /etcd-data
+           --listen-client-urls http://0.0.0.0:2379
+           --advertise-client-urls http://0.0.0.0:2379
+           --listen-peer-urls http://0.0.0.0:2380
+           --initial-advertise-peer-urls http://0.0.0.0:2380
+           --initial-cluster backendai-etcd=http://0.0.0.0:2380
+           --initial-cluster-token backendai-etcd-token
+           --initial-cluster-state new
+           --auto-compaction-retention 1
+        # load agent server
+        - mkdir -p /tmp/scratches
+        - docker pull lablup/kernel-lua:5.3-alpine
+      script:
+        - python -m flake8 src tests
+        - python -m pytest -m 'not integration' -v --cov=src
+      after_success:
+        - codecov
+
+    - stage: deploy
+      python: "3.6"
+      install: skip
+      script: skip
+      deploy:
+        on:
+          tags: true
+        provider: pypi
+        distributions: sdist bdist_wheel
+        skip_upload_docs: true
+        user: lablup
+        password:
+          secure: "WrXihyliutPMclOWZZE5CsXBbVmaZv19dqGf0JSjuDpbc2Be+t4+940fpEKJIknQ86+zMqj3Ku/0MeZ3gYAqo5Z8oQnQ7teqahyK11f/nDQXZxmQfr87bC/DQ2SDLjMQkGyaHRqw9lqp22q3RILJUjP1ZOvhpKMKEsekjSTFwttUGVxl2pYRdXqDhz+YrE29vIR7HNZ/K8sECfgcCNcMCC1TJIvOv5Bx60dFCaYkkXq/bNAGWe5/mLWD95m4MKGnsr8x/uu65XHlfwgBLbEskjIa+5nX7hb27B+MIPIP9tTsqntu/TZo6hrueD0aylW5IdjCzuMOF0xkF/nV+lBFXwdEE0DcKBs1T9MXWv6zqNs5JIq0Y4YFv4BrX5RrzUlj061DZ6PixcNdaFHUkJ6yjCkn6+PxEg/t35WALX4LVCxE2zgCOfJ4EQzKZfpQZo8U9o/S6Ne7sT3EQATs+i88LN0e9WcXOFNm9NMwnzr2nCnAyz/iRaIkNl4n80JSyQvyCy96xcmsgIrmID17ADOPqrnaIeMiH9Ad8bsP2zsHcaxwnq/h0c2Vo2Ala0RAM8i45FaVVoDq8gnNaUEcs3Ml6jmOS4lsFg0SY2Ksq2yrrcxpjInlzO5zNoZ4Jly4HYrxCajA0XocDPk2ycsC3PPRE7bOxq34E3+xEqxu22Hkh7I="
+
+notifications:
+  webhooks:
+    secure: "q/cRHikmt2PkdzP5Q9MoZ5gE0qIo/bn6fqSLvWoEbEljUS6QxM2jCgHxA3Yb+TH9yS0KW8LsgxvQBeGgnCMv1pdV0qTtVY9Wq9A4klccufkMKOTr3c/YscmekWeWgsjE9rdiGgMDcET2R6GzLN0mT7YS6sO8pfsPwPB+mx92SmsTrOab+e5sYZMMa5rE82wsSxnXCgf+Nk73Euda4GUno0OtoypyfPsQXjVyf3nhdlHnYgcER4QwjVxbACEJiUkCqA43qrI+oiLsGwlWzIVOMilWW9upgDN6yCm3z6yynPZMaaqAy08HilYYoZFGnUSC9BI6UH1lsk39EumBPnS9q6nMbMGXTbcayyjy6wi3pkxJVvwIBcIVMewRfJHS4gkMPx0WPUvp3YdlWjZ8DH8C5NYmpVSFhBHb8rO9FzMwttk2xk/sEUOM/+aAbI3kQDLzYQC2wdCP6AvxVbCo8h7l+oF+HibdSucr2lW+821KL2tzS8lpvjMHV2yj4Rmsa/lGoTT6WPHBzwA7WIJvj7LskL4bzUl6Y59w6l0fEbtiqAS+8a7Ji3U/WhBU6cerw4CMqg6H9MXjkifHFVD8Oxb1KidKSX339xeALWXATXHxTvMIj51sEe23GGaMCk2G7UxZ9IIdYoEoargbH6vvBhmLZcTL1LCueDnImWIepgGb7pg="

@@ -1,0 +1,137 @@
+language: cpp
+sudo: false
+dist: xenial
+ruby: 2.2.0
+notifications:
+  slack:
+    secure: F2nQIW6SiaGdw1LjuZOlgBu8rUVMllrDG/5bhmTQP7gyETfViFBjTsHQdTle6jtdb+LudleZaG7WhdEiVcKUa834rKqDk1UOt9p6bsmgbsBZBAaxmPh01iVFhKn3ML7JLjfr1YtH7MWJcsS60cNBrohXfVKfFzNgDqZEu/llr90=
+cache:
+  bundler: true
+  ccache: true
+  pip: true
+env:
+  global:
+    - USE_CCACHE=1
+    - CCACHE_COMPRESS=1
+    - CCACHE_MAXSIZE=200M
+    - CCACHE_CPP2=1
+    - PIPENV_VENV_IN_PROJECT=1
+    - PIPENV_IGNORE_VIRTUALENVS=1
+branches:
+  except:
+    - fix-appveyor
+matrix:
+  include:
+    - os: linux
+      addons:
+        apt:
+          packages:
+            - clang
+            - clang-format-3.9
+            - gfortran
+            - libboost-math-dev
+            - python3
+            - python3-pip
+      env:
+        - CXX_COMPILER='clang++'
+        - C_COMPILER='clang'
+        - Fortran_COMPILER='gfortran'
+        - BUILD_TYPE='release'
+        - RUN_DANGER=true
+    - os: linux
+      addons:
+        apt:
+          packages:
+            - g++-4.8
+            - gcc-4.8
+            - gfortran-4.8
+            - libboost-math-dev
+            - python3
+            - python3-pip
+      env:
+        - CXX_COMPILER='g++-4.8'
+        - C_COMPILER='gcc-4.8'
+        - Fortran_COMPILER='gfortran-4.8'
+        - BUILD_TYPE='release'
+        - RUN_DANGER=false
+    - os: linux
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-6
+            - gcc-6
+            - gfortran-6
+            - libboost-math-dev
+            - python3
+            - python3-pip
+      env:
+        - CXX_COMPILER='g++-6'
+        - C_COMPILER='gcc-6'
+        - Fortran_COMPILER='gfortran-6'
+        - BUILD_TYPE='release'
+        - STATIC='--static'
+        - RUN_DANGER=false
+    - os: linux
+      addons:
+        apt:
+          packages:
+            - g++
+            - gcc
+            - gfortran
+            - libboost-math-dev
+            - lcov
+            - python3
+            - python3-pip
+      env:
+        - CXX_COMPILER='g++'
+        - C_COMPILER='gcc'
+        - Fortran_COMPILER='gfortran'
+        - BUILD_TYPE='debug'
+        - COVERAGE='--coverage'
+        - RUN_DANGER=false
+before_install:
+  - test -n $CC && unset CC
+  - test -n $CXX && unset CXX
+  - test -n $FC && unset FC
+install:
+  - pip3 install --user pipenv --upgrade
+  - pipenv --python $(type -P python3) install --dev
+before_script:
+  - ./.ci/report_versions.sh
+  - cd $TRAVIS_BUILD_DIR
+  - echo 'Build set up summary'
+  - |
+    if [[ "$RUN_DANGER" = true ]]; then
+      bundle install --gemfile=.ci/Gemfile
+    fi
+script:
+  - |
+    if [[ "$RUN_DANGER" = true ]]; then
+      BUNDLE_GEMFILE=.ci/Gemfile bundle exec danger --dangerfile=.ci/Dangerfile --verbose
+    fi
+  - |
+    pipenv run python setup.py --cxx=$CXX_COMPILER \
+                    --cc=$C_COMPILER \
+                    --fc=$Fortran_COMPILER \
+                    --type=$BUILD_TYPE \
+                    $STATIC \
+                    $COVERAGE \
+                    --prefix=$HOME/Software/pcmsolver
+  - cd build
+  - ../.ci/ci_build.sh
+  - travis_wait 40 pipenv run python ../.ci/ci_test.py ctest --output-on-failure --verbose --parallel 2
+  - pipenv run python ../.ci/ci_print_failing.py
+after_success:
+  - |
+    if [[ "$COVERAGE" = "--coverage" ]]; then
+      cd $TRAVIS_BUILD_DIR
+      lcov --version
+      lcov --directory . --capture --output-file coverage.info
+      lcov --remove coverage.info '/usr/*' --output-file coverage.info
+      lcov --remove coverage.info 'external/*' --output-file coverage.info
+      lcov --remove coverage.info 'tests/*' --output-file coverage.info
+      lcov --list coverage.info
+      bash <(curl -s https://codecov.io/bash) -X gcov || echo "Codecov did not collect coverage reports"
+    fi

@@ -1,0 +1,111 @@
+language: c
+
+sudo: required
+dist: trusty
+
+env:
+    global:
+        # The next declaration is the encrypted COVERITY_SCAN_TOKEN, created
+        #   via the "travis encrypt" command using the project repo's public key
+        - secure: "Q6OAiurgQl7/iZy7JfaPbUCWFe30ES35uO5eGg/0ty/fKMGAov3Bp+8oQqpmxmi6+E316cDMW3WIY9h8j79kaF4IbQNU6YcHft7Am7iFhw1Ocql1aknqqbdA/Hx9R95JUX2ZSBCTnw03GKv9JNEUuY2cV5RaJr1x+N5SfdAc3Jo="
+
+cache:
+    directories:
+        - build/dl
+
+matrix:
+    include:
+        - os: linux
+          compiler: gcc
+          env: MODE=windows
+        - os: linux
+          compiler: gcc
+          env: MODE=raspberrypi
+        - os: linux
+          compiler: gcc
+          env: MODE=static
+        - os: linux
+          compiler: gcc
+          env: MODE=dynamic
+        - os: linux
+          compiler: gcc
+          env: MODE=singlethread
+        - os: osx
+          compiler: clang
+          env: MODE=static
+        - os: osx
+          compiler: clang
+          env: MODE=dynamic
+
+before_install:
+    - scripts/ci_install_deps.sh
+
+script:
+    - scripts/ci_build.sh
+
+after_success:
+    - scripts/ci_after_success.sh
+
+before_deploy:
+    - scripts/ci_deploy.sh
+
+deploy:
+    # Deploy tagged releases to GitHub
+    - provider: releases
+      api_key: $GITHUB_API_KEY
+      file_glob: true
+      file:
+          - "artifacts/fwup-*-1.x86_64.rpm"
+          - "artifacts/fwup_*_amd64.deb"
+          - "artifacts/fwup-*.tar.gz"
+      skip_cleanup: true
+      on:
+          repo: fhunleth/fwup
+          tags: true
+          condition: $TRAVIS_OS_NAME = linux && $MODE=static
+    # Deploy tagged releases to GitHub
+    - provider: releases
+      api_key: $GITHUB_API_KEY
+      file_glob: true
+      file:
+          - "artifacts/fwup.exe"
+          - "artifacts/fwup.*.nupkg"
+      skip_cleanup: true
+      on:
+          repo: fhunleth/fwup
+          tags: true
+          condition: $TRAVIS_OS_NAME = linux && $MODE=windows
+    # Deploy tagged releases to GitHub
+    - provider: releases
+      api_key: $GITHUB_API_KEY
+      file_glob: true
+      file:
+          - "artifacts/fwup_*_armhf.deb"
+      skip_cleanup: true
+      on:
+          repo: fhunleth/fwup
+          tags: true
+          condition: $TRAVIS_OS_NAME = linux && $MODE=raspberrypi
+    # Copy all build products to S3
+    - provider: s3
+      access_key_id: $ARTIFACTS_KEY
+      secret_access_key: $ARTIFACTS_SECRET
+      bucket: $ARTIFACTS_BUCKET
+      skip_cleanup: true
+      local_dir: artifacts
+      upload-dir: fwup
+      storage_class: "REDUCED_REDUNDANCY"  # See https://github.com/travis-ci/dpl/issues/291
+      on:
+          repo: fhunleth/fwup
+          all_branches: true
+          condition: $TRAVIS_OS_NAME = linux && ( $MODE=static || $MODE=windows || $MODE=raspberrypi )
+
+addons:
+      coverity_scan:
+             project:
+                name: "fhunleth/fwup"
+             notification_email: fhunleth@troodon-software.com
+             build_command_prepend: "./autogen.sh && ./configure"
+             build_command: "make"
+             branch_pattern: coverity_scan
+

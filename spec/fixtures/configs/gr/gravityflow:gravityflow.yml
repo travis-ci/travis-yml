@@ -1,0 +1,114 @@
+dist: trusty
+language: php
+cache:
+  directories:
+  - node_modules
+php:
+  - 5.4
+  - 5.5
+  - 5.6
+  - 7.0
+  - 7.1
+env:
+  matrix:
+    - WP_VERSION=latest WP_MULTISITE=0
+    - WP_VERSION=4.9 WP_MULTISITE=0
+    - WP_VERSION=4.8 WP_MULTISITE=0
+    - WP_VERSION=4.7 WP_MULTISITE=0
+    - WP_VERSION=4.6 WP_MULTISITE=0
+    - WP_VERSION=4.5 WP_MULTISITE=0
+  global:
+  - WP_TRAVISCI=travis:phpunit
+before_script:
+- |
+  # Remove Xdebug for a huge performance increase, but not from nightly or hhvm:
+    stable='^[0-9\.]+$'
+    if [[ "$TRAVIS_PHP_VERSION" =~ $stable ]]; then
+      phpenv config-rm xdebug.ini
+    fi
+- |
+  # Export Composer's global bin dir to PATH, but not on PHP 5.2:
+  if [[ ${TRAVIS_PHP_VERSION:0:3} != "5.2" ]]; then
+    composer config --list --global
+    export PATH=`composer config --list --global | grep '\[home\]' | { read a; echo "${a#* }/vendor/bin:$PATH"; }`
+  fi
+- |
+  # Install the specified version of PHPUnit depending on the PHP version:
+  if [[ "$WP_TRAVISCI" == "travis:phpunit" ]]; then
+    case "$TRAVIS_PHP_VERSION" in
+      7.2|7.3)
+        echo "Using PHPUnit 6.0"
+        composer global require "phpunit/phpunit=6.0.*"
+        ;;
+      7.1|7.0|hhvm|nightly)
+        echo "Using PHPUnit 5.7"
+        composer global require "phpunit/phpunit=5.7.*"
+        ;;
+      5.6|5.5|5.4|5.3)
+        echo "Using PHPUnit 4.8"
+        composer global require "phpunit/phpunit=4.8.*"
+        ;;
+      5.2)
+        # Do nothing, use default PHPUnit 3.6.x
+        echo "Using default PHPUnit, hopefully 3.6"
+        ;;
+      *)
+        echo "No PHPUnit version handling for PHP version $TRAVIS_PHP_VERSION"
+        exit 1
+        ;;
+    esac
+  fi
+- npm --version
+- node --version
+- nvm install 6.9.1
+- npm install -g grunt-cli
+- npm install
+- npm prune
+- mysql --version
+- phpenv versions
+- php --version
+- |
+  # Debug PHP extensions, but not on HHVM because the command hangs indefinitely:
+  if [[ "$TRAVIS_PHP_VERSION" != 'hhvm' ]]; then
+    php -m
+  fi
+- npm --version
+- node --version
+- which phpunit
+- phpunit --version
+- curl --version
+- grunt --version
+- git --version
+- svn --version
+- |
+  # Clone Gravity Forms and install the tests
+  if [[ "$WP_TRAVISCI" == "travis:phpunit" ]]; then
+    git clone https://${GFTOKEN}@github.com/gravityforms/gravityforms.git $PWD/tmp/gravityforms
+    bash tests/bin/install.sh wordpress_unit_tests root '' localhost $WP_VERSION
+  fi
+
+script: phpunit
+notifications:
+  slack:
+    secure: hH7wi24qUvXh49XoGjuuMhQR0yyflKogIYHY0PBF2JyR7O8MnKBLnuU5fbfsr7QtZmZwk921Bl/S3lwAhYJNeztpvUOrOKVBnP6P7y6upVzOU5cU4rxrZRt6blOnhZX07mxuV05RLifdV3Ic0JCUFpE7ymPgb0ULR1uS35rzsOTQwM/OeCso17Wjo1yYsHFBrQ3OlpMtk9UJGI87HZI8xqFQu7ddfI+gBtWspvNnbqiWHHjDHgAn3OgXyKGGf/wgdiFHGXEfcinew/HPvND8DSuvU8DdYW8JtustcbhBzBqFZMQEbPI+Ls3Kk5pQ7LrUB2358WeRjGSPJQGHObq7P7HAo4pmkmInqvWLogZqo//6lS16/TzSVAgZHr2y6GxLTI160fNnzuDJz3EetHQSpAruICa+7luJXRT2KH+Ug+SuO+3t4jklHL7wZ5LPQQcYR44HFyj+Lo6QPwsPpfjbN07orNKZPFs2dEBhBEKfDW77oD83hdSo/oNwbCNUu9bct976VZs89AjahTXkU/mUVogeESvnV6RRVWOt+H5jPq5/rQ4aZoo4puxJOd28XeuHIr27b7I2Jd5Su4f1FBUlZxZmYG5wqqGKhi39Eln5FmghA3v+L0qmxXa71Lx340FmU7Hjq2wCMZeb89yqOInVr6NC9d8J/tOP6cjAspZcEWA=
+  webhooks:
+    urls:
+      secure: gEfRUPngUkfJIke6ZBxED14AHlcDLoKyX+j7UJR9hHWiI9ydoBVU7X+td8sgx0oBgckDvbXdHgZl+LR7ftV5CIAhyeWTgJPny5+YsECU3+SSnL6NvwL3SGGavhhgt495NkW0fyvW2m92TqBSgcQMnDkd7Klxb+7euxOIwEKsVtVWd0UAQgr2Pkg4T35ZHtvqPFsIOdOqUB8l93H6cTl4Z1/bHHlPKWKaGMNkGca/VEP/+NIyi2uYVqcbsGR439vvOw/tJI+pn6202K0glPF7zZDjCvzZ4litSgzHh3n6C4qOciVFqvCWmC2JSFVfii5ZhrLORsvHRmph7iuiXvsrdJ+U/RydB1kP5K0ONGf9NR79ulLT07s+FNd4tRO+YHjfKtPfxpbkRMQG7IMyay2tym2cI55nw2Zm3xkgXmU33NHNczDbQujY+qs7vKnnFX4ExyPKUWFrKQMNaD3102kIf2O5jeyNOnLxokYu4yyC0thPenCsBwLysD0VLDG4Mu/Gw9kVLp7BtR4tBqzRzwf0fcXMpkmuzQlaCExJScwyk6TwpFvW/GQ4DIKAHVFagMNme2Ka3piQG88mJJuGDqcFMiWsvyBVGPb24U0SvALB8EWcceWVyJ7QDshjE1zkUjBnSTlaOzQbAxTf/19Ipd/rQnbN02mE90HN/2CV2AHlF9U=
+jobs:
+  include:
+  - php: 5.2
+    dist: precise
+  - php: 5.3
+    dist: precise
+  - php: 7.2
+  - php: 7.3
+  - stage: Extensions
+    env: WP_TRAVISCI=none
+    script: |
+      echo "TRAVIS_BRANCH=$TRAVIS_BRANCH TRAVIS_PULL_REQUEST=$TRAVIS_PULL_REQUEST"
+      if [[ ($TRAVIS_BRANCH == master) &&
+            ($TRAVIS_PULL_REQUEST == false) ]] ; then
+        curl -LO --retry 3 https://raw.github.com/mernst/plume-lib/master/bin/trigger-travis.sh
+        sh trigger-travis.sh --pro gravityflow gravityflowformconnector $TRAVIS_ACCESS_TOKEN
+        sh trigger-travis.sh --pro gravityflow gravityflowincomingwebhook $TRAVIS_ACCESS_TOKEN
+      fi

@@ -1,0 +1,54 @@
+# define language and JDK version, we use JAVA 8 and tha code should pass both with Oracle JDK and OpenJDK
+language: java
+jdk:
+  - oraclejdk8
+#  - openjdk8
+# Define OS image for TravisCI to use: Ubuntu 14.04 LTS (Trusty Tahr)
+dist: trusty
+# The selected image is headless (without display server), but for GUI related tests it is required, so the X virtual
+# framebuffer (xvfb) is initiated before the repo is cloned and tests are run.
+before_script:
+  - "export DISPLAY=:99.0"
+  - "sh -e /etc/init.d/xvfb start"
+  - sleep 3 # give xvfb some time to start
+# install necessary tools for code coverage reporters
+before_install:
+  # these needs for Codacy's code coverage tracker
+  #- sudo apt-get install jq
+  #- wget -O ~/codacy-coverage-reporter-assembly-latest.jar $(curl https://api.github.com/repos/codacy/codacy-coverage-reporter/releases/latest | jq -r .assets[0].browser_download_url)
+  # for nightly releaser script
+  - gem install rest-client
+#  - sudo apt-get install openjfx # not available for trusty image
+after_success:
+  # this creates the report for Codacy's code coverage tracker
+  #- java -cp ~/codacy-coverage-reporter-assembly-latest.jar com.codacy.CodacyCoverageReporter -l Java -r build/reports/jacoco/test/jacocoTestReport.xml
+  # the actual testing and reporting
+  - mvn clean test jacoco:report coveralls:report
+  # generate Javadoc
+  - mvn javadoc:javadoc
+  # publish Javadoc
+  - "chmod +x .publish_javadoc.sh"
+  - "$TRAVIS_BUILD_DIR/.publish_javadoc.sh"
+  # create nightly build
+  - ruby .release_nightly.rb
+# send notifications when tests fail or start to pass after failure
+notifications:
+  webhooks:
+    urls:
+     - https://webhooks.gitter.im/e/cd6532c44781746ec425
+    on_success: change  # always|never|change
+    on_failure: always
+    on_start: never
+  email:
+    on_success: change
+    on_failure: always
+# secure token for javadoc publishing
+# more info: https://benlimmer.com/2013/12/26/automatically-publish-javadoc-to-gh-pages-with-travis-ci/
+env:
+  global:
+    secure: nz76hynet3vgLaWFBshx4P788BNs9n5F5kgjbhpRlbPJMtrm2BYV503V+sQQkVKbzPhwtdNjTicK+Nf5VgDdRcgqXcWmusRjowJpH2W/4MdKMc/2K2mFGS4yn0IEdz1q86JBci6Qdz38BEyQRhhtRqr/b4hNW+dKzvhgBgghRpitiJxPu+KsQmx3nMB2CCjE01YB0KbIG95N72W5UvTmwZ2Xa1dxSvlJukPZdOg7Y4luIddGwn5fcD9r0Alsk8yLXvFZ9Q+bmJdeb6Wlkg/ffT/jnBDU2PUQVC39/zbhFJnoDofMUr0OLJh4DFQh+v4mlAE5OJ1b+3ElpyFjg2Mp/6xTBKOpaYnkU1hllJYtnjkabFdOBlglDKJsI0irJdlKFoqreL+0PwA7RsQUmx02NFrdlTm/Srq1YDY4PvucczsrUZrF5aVogfkFaLi1dmz740vLRKdpX5IMGvuFsENUzSnSmMCR7XNaOlrxz1HEV03pQHLflEEQE28SVh7TVVgarwR+Iquk/pxdVCYI6eq5rKN5zT84WlxNpiA5fBDQQ/VT1HIRWvuLYn1/SOkj8ztjIoyrtlSLf5RhxS3OWEHxEWOt8U+U+2MMDZvdy4xvaGLktQdtrvP0FEsStOEnZPVLB5YgEiFYUJr/J7Kk1qM81nm/xFpVOnBBzH3PZLWFJVU=
+# for speeding up the CI cache the dependencies
+cache:
+  directories:
+  - $HOME/.gem # ruby
+  - $HOME/.m2 # maven

@@ -1,0 +1,48 @@
+sudo: required
+
+services:
+  - docker
+
+language: php
+
+env:
+  global:
+    - BEDITA_API_KEY=12345
+    - BEDITA_API=http://127.0.0.1:8080
+    - BEDITA_ADMIN_USR=admin
+    - BEDITA_ADMIN_PWD=admin
+
+before_install:
+  # Use GitHub OAuth token with Composer to increase API limits.
+  - if [ -n "$GH_TOKEN" ]; then composer config github-oauth.github.com ${GH_TOKEN}; fi
+  - docker pull bedita/bedita:4-cactus
+  - docker run -d -p 127.0.0.1:8080:80 --env BEDITA_API_KEY=${BEDITA_API_KEY} --env BEDITA_ADMIN_USR=${BEDITA_ADMIN_USR} --env BEDITA_ADMIN_PWD=${BEDITA_ADMIN_PWD} bedita/bedita:4-cactus
+  - sleep 10
+  - docker ps -a
+
+install:
+  # Install Composer dependencies.
+  - composer install --prefer-dist --no-interaction
+
+script:
+  # Run PHPUnit with coverage.
+  - vendor/bin/phpunit --coverage-clover=clover.xml
+
+after_success:
+  # Upload coverage report to CodeCov.io
+  - bash <(curl -s https://codecov.io/bash)
+
+jobs:
+  fast_finish: true
+
+  include:
+    - php: 7.1
+    - php: 7.2
+    - php: 7.2
+      env: "RUN=phpcs"
+      before_install: skip
+      script: |
+        vendor/bin/phpcs -n -p --extensions=php \
+          --standard=vendor/cakephp/cakephp-codesniffer/CakePHP --ignore=/Migrations/,/Seeds/ \
+          ./config ./src ./tests
+      after_success: skip

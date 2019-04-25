@@ -1,0 +1,75 @@
+language: python
+sudo: true
+
+addons:
+  apt:
+    packages:
+      - openconnect
+      - vpnc
+
+python:
+  - "2.7"
+
+branches:
+  only:
+    - master
+
+install:
+  - pip install -r requirements.txt
+
+before_script:
+  # Sets up SSH key for rsync into compneuro
+  - echo -n $id_rsa_{00..30} >> ~/.ssh/id_rsa_base64
+  - base64 --decode --ignore-garbage ~/.ssh/id_rsa_base64 > ~/.ssh/id_rsa
+  - chmod 600 ~/.ssh/id_rsa
+  - echo -e "Host compneuro.uwaterloo.ca\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
+  - sudo apt-get install curl vpnc-scripts build-essential libssl-dev libxml2-dev liblz4-dev
+  - curl -O https://raw.githubusercontent.com/celiasmith/syde556/master/openconnect-7.08.tar.gz
+  ###- curl -O ftp://ftp.infradead.org/pub/openconnect/openconnect-7.08.tar.gz
+  ###- curl -O ftp://ftp.infradead.org/pub/openconnect/openconnect-7.08.tar.gz.asc
+  #- gpg --keyserver pgp.mit.edu --recv-key 67e2f359
+  #- gpg --verify openconnect-7.08.tar.gz.asc
+  - tar xzf openconnect-7.08.tar.gz
+  - cd openconnect-7.08
+  - ./configure --without-gnutls --with-vpnc-script=/usr/share/vpnc-scripts/vpnc-script
+  - make
+  - sudo make install
+  - sudo ldconfig /usr/local/lib
+  - cd ..
+
+script:
+  - echo "$vpnpass" | sudo openconnect -u cnrglab --passwd-on-stdin --no-dtls --script /etc/vpnc/vpnc-script -b --pid-file /var/run/openconnect --interface=tun1.pid cn-vpn.uwaterloo.ca
+  - python manage.py up cnrglab@compneuro.uwaterloo.ca:/home/cnrglab/public_html/
+
+after_script:
+  - ssh cnrglab@compneuro.uwaterloo.ca 'ln -s /home/cnrglab/files /home/cnrglab/public_html/'
+  - sudo kill $(cat /var/run/openconnect.pid)
+
+env:
+  global:
+    # VPN password. Encoded. See https://gist.github.com/wakefield/5519563
+    - secure: "OJR9Ax5MZW3ROUI9YkuHLdEtaKgmGTs4O5/toXMWjQ4uWXzxDqxTLRCw/8n2FErPwGegGk4m5JswQpL/l1HDy0wenb8HmH0Uey6+1suzrJNBCYwFa9IROHGptQjQEj9dfULu+ADfnl5+2wjt6accL9hOiNCgp8gafsLYoRzsgfk="
+    # SSH key
+    - secure: "j/6ZQBCK2DvLtn5LRowL1Tf2jSkHJHr2LFh/Mlb8Mn6WOsypF0of6dPWjfHj\nVlr++ZzrWmKL3gmFJZttKEa6pYbGfH4qVSoAt/OtMrXrFdPe9u5b8weW8qeN\nQ9glEEnqSj8s9gOBMIXKVfl9h+YKSCgxI5TsseYYQG4e6KFD36k="
+    - secure: "VloV2Mag9JAs9YCJicdHpbA5JxnQLe2SUGUYuzf9fAXoEixuMbsVcU/jSmVE\nQHXI+SmmQf/Rvk7AeE86H0FNtM9SgrvUNi+JmUGjz4MK1mmACen4q/0WEicx\n5Kq2+hR1K8128ZZMkHHJ05IxDJ7ddh3+kpgkP+Olmgoh2yqsnHg="
+    - secure: "CZNbE9Gheyi7fahRWHMYX7RV6xti4Dw2H19ztDBULqlMnQzBb+IxHVikEnuE\n4Pd3/W/pFBV9L2s5NRkKXeXGA+gHOMxNnQrJWKLwhiTal+e4zWoVtm3MMmME\nr1QyKwzFlhcM0JobKTRO4BRRBh4+MEB41iZL1Lpm2P5c99a6g2M="
+    - secure: "iMIp7c7rO14HnmBCYHUiwcOVB1vVgvS1gqg0eQ69bSzCFNWGYzL5EW+HajbC\n7w7kTNTdTIcpK4GwKZ3mwmbROvUiHg+a6ldNBez/1Z8bi1QQ55TOUd6E1vul\nGlsZWBzbPf3AarLkcZzyrPSrFpYgm2WHlQZQhslnrPW7fVEnk1w="
+    - secure: "dIeXlF9zI2P8YhSFu6a/qGqckfTYNhfZQ6iD4hqdnTjKEHQOMXkrWxvMv6re\nirZMhDcmn42byMvzvvscjgXrUakrtr4dLncvCKlZKSFkmnjUIfYA5v8ZAMHe\nRNHWr6FpJ8tqFudy5wW51CYSw1hvNRkf2QC+SvdRMpZkr0JCtfw="
+    - secure: "Y34KBLHMEVILA8uFz6fTmhRY+At2Kk2XtU9r/YnRtW+dyWI88TpXnd+86xBF\nEeXsc8p3rsR5irCFO64DzoGhYhieh/14Cki/rXpfM16CCqGpL9K7aJ4ISdhU\nKmQrke5e6Bme/O6aPseOocH6MkcEISocsXO9ljpuxjm0zAgd7gc="
+    - secure: "bueobqWvdEmJQyfp/Eee9b/P4C71wn6Yp4erSth/o3DkzsibvkQ7VsCI8iRZ\nevYuKEA8HFLQckotsAZ//qWSCtOkIZCRNsRZdo1SAAuvhlSD20urdh7wKv+r\ndHCzgAqFvLV8iGnjgtWm02f6MgEYo+sPvU5dqGTfVgGZ1hppodk="
+    - secure: "IjLhJ6m+1aQjVGLU1bHHjbHC4pomoutvwYuPlqP63A23khByqrGkURQD59ES\nigVW/TAcKgf0W2tzwTw6cs5L1zS5fuYF+XZMazOrtTTCuoAsO2+gSS4GTsjh\nKBCNDYN5nFpsmXSYb5gXHAuSU3TXTjbd/LBmmrgh2n+YTpTdKjA="
+    - secure: "JXN/jan5hIzAAe10tmQ4ksgi7TsEuXoorZ8yHe6o09wzkye9WM3lCQC8frc2\nX1h63P7EwTkWmfulcZnjBBuskSLempZN3n2AVzYf9zvAAwcSQhu3cs31Dgjx\nCi5FkYDxeNpr7fgeh2zqEB2PTptdyixWkhW7UDU3MunKXOUdqMQ="
+    - secure: "UZQWJuqUpRhCJFJshffg9T4bD8x/X71BWTYjcqEmp4sEIDSuZmMGWqpkZpy1\n5K0jsA+7Kv0RUjYJ6/Ng3atnCYsemL0np+ZHpdbXFn38+AWuB7TiYyO+F1Yh\nd0XHRAauRfYwxc6JLed63oCgTppbFZ5oZ+KZuZXYLrxharQAhK8="
+    - secure: "OXMYR5RIFlbl28s8htA3Y4pSaFLzmYa500ufiwuVFBAH15TvVRU3Abu6VSc3\nKWBYS55UWqrKbRvLG5kTkicKpSKnKTcnXQTWyLcwCX7ccG+usJctEn3zA3pY\nNIyEtsubv1wHkRgopDCIvdOBpeOZmCp4oDu9aD9ZShFGwXAzWFk="
+    - secure: "b6Owf65YBT9fV+SbeS2OPdRLm28odjQOBPkcVHvRpeAaOTpPs7Ke+T95plaa\noYcit6X8oSrcw9E3ePc2rRisZOqHa/mWrVolseyPWclNvJi4xfz8u6/37bHn\niP4zuqjjBrgkYwV66RJuS0kASnfyycZWDdI3sP7BWolrhHGnD8k="
+    - secure: "TbLEzth6+AmUVc9RTNKTUGoHL5o6ZrdwbbQa8l5yuV5VLxK0eBgxi2mIUWv7\nWFhpNtdgxPggoAe/KA3eMiQ1u6jhdSre661ltqFPGvc1M3IpJLRLpdNIZCmI\n5cRHn8xlYe3PIR3e4p8UeIGWj78SjmZva22ph5i2w5ChtKhMzBc="
+    - secure: "WOjpd24/QxU6POHwqD4kS4SvhbNS4CHwS2t/ZULYdwYPy0XxLlBTnCn3lrEE\nX1VukDIoVF8VYU5D8Mng4nrNhjc4H/s2c+YpIulapLwxcK5zYvQ+n7MZ5OMd\nlJEZol5a62t/pRm7cx7Nqf2D1Cj4Utr4QT6jBPMHWepjBQ2KgKA="
+    - secure: "TsyiwlucsQLC9VA19VqACVnXd1Jx1hJbv38ohSiA9WqLGyTYp8wcJN3p2/5V\nihwm8Y3i//mqCF/PaaU8ergmXHFAwecBA9NRH0vxConNJD25zcOTPVxjj4Y3\n1S8Ch27WV0d9WeSn9v5el8WOXaZoFlYHZTddL8KHnkQrpioukRw="
+    - secure: "Uyeckkhyyi9eooGjYZAIY8iGfetQJ0FMTcuA2fJumoyjskUrVFGlLI7rQt1i\nPFJQ7FbOloCOYnhS+5viFfhKT1aUY7z6PEjV+TcrhrPpbHMQoEdY3T2cR+VG\nieldHAAHnNcECdnOrbJvPnkmCdbsxhn/MzQ6Rs+3ZVKk5WJHAmk="
+    - secure: "jZzzDZ0LgzpN4cPAdr2TPflzXlAg2CnQGWf8qLrg2smLkCbnGPSCMV3CM+T7\nBEhYxm9oDBgqcgex8AhSuxhzmkMo+qnWwdWVmd5G34i2/7nX0icyCyT1d1vX\nYwgZfQY5ZV5o7WkZAf547v89r6RBeq2G/QaJ0FDAe7mi427wHCY="
+    - secure: "dUBBKSQo1+blyqyX9PCuq+K4eb0gRB5eYkzhfH8q7O2Snj1Is2hVd9l1hP/u\nN8OFifZUZLuFLykFeUEdcM0hu/N6suEEc1dvl0o9XEc9XD00gh3Qm9ueQDQO\nqqCwANC5WM4cbBhLxMQcPjTdep0LKyENlz+iLXjSuIEMprLZSG4="
+    - secure: "LAjPsVyB2rqmLqkhSvW753Mskv5UBgQGRw4rsiPqsRP2Rk2yveETtdQQINWz\nvlrnUkGUWx7fhQAAIF+nb1hVBczHw2g54bGAOuwiaNCc89AQ/D/vShneq8VQ\nG6mZnffJxV8Bt5jryX4e+7x+Nh326NStPFsSE/x5cl8g2ym9uAQ="
+    - secure: "aHyaObn1uolYdG/cIxeHohw0F5GS+ith+XTdWpQXD8ACBtbfjq78ZRfqoGP4\nHIcOQ8Ul1Tg6WctlBeBMvLVoeya8gwxliYdzwjf5IG+vHpiEau/4VYx+0ii4\nHbwIhSjk5CqECGqegrNqwTAmybAl6GWw5RT9MqOSlq08E3o2g0Y="
+    - secure: "GiuMEJ1mpecwHwbenrA+EIeb8xsDPIRpeY/DoVB6SjD1Iaxz/axkbjDrH1Ho\naLlPMPJyEm0rlfW0miwULhBHvJaM1HHO/wqoR2VyPq8bhLw6T4EfOIWpcjNU\n/EtQ10ZtwvNGCSETabYBkESWLzT7bAdN3df7ccKIJXxlEgoMSWw="
+    - secure: "W/aCBv5t0KMrYimxfeyOg6IBXGeUIxmF07EDQ0IE3Iw3Q3p9FCCrljddMSZt\n4rR28EMO0jp5Ph0mvtV/fPMLLLBFerXhP0IA9NbmdlpyGwkUyfb2X82VgzKO\npyYRa+NJzxknlAAtBkLPE3PWWXPeHNz5m2XOAGasLLW/ZeGEQyM="
+    - secure: "AyXq99SdsOgNncjfjctRfP/m7BLqPGaEZ4RFKcUmNV93R/9+UdhxdEm0ICzR\n8n4Qm3qZCeXQ0zXVW3TPxtVsDi94aVIlkllAMRJqztXsHq/1LnvRc3mQg/BW\nOyLSG6pMBlwTFQfKlSxgWkTE4xSpOIL+BWWulIRdOiY3YrPwNxw="

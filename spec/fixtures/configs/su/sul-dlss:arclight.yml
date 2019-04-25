@@ -1,0 +1,27 @@
+sudo: false
+language: ruby
+notifications:
+  email: false
+rvm:
+  - 2.5.1
+  - 2.6.0
+jdk:
+  - oraclejdk8
+
+before_script:
+  - find spec/fixtures/ead -name '*.xml' | xargs xmllint --noout --schema spec/fixtures/xsd/ead.xsd
+  - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+  - chmod +x ./cc-test-reporter
+  - ./cc-test-reporter before-build
+addons:
+  apt:
+    packages:
+    - libxml2-utils
+  chrome: stable
+
+env:
+  global:
+    - CC_TEST_REPORTER_ID=65288e8c489d9d571730d098a9e7ec951e286f7d8ca3d728f4bb812dd7eeb46d
+
+after_script:
+  - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT

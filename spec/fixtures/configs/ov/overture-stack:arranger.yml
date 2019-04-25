@@ -1,0 +1,9 @@
+language: node_js
+node_js:
+  - "8"
+install:
+  - npm i && npm run bootstrap
+services:
+  - elasticsearch
+before_install:
+  - curl -O https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-6.2.2.deb && sudo dpkg -i --force-confnew elasticsearch-6.2.2.deb && sudo service elasticsearch restart

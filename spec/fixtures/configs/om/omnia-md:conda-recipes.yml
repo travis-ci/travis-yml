@@ -1,0 +1,71 @@
+# Use old trusty image since new one breaks our builds
+# See: https://blog.travis-ci.com/2017-12-12-new-trusty-images-q4-launch
+group: deprecated-2017Q4
+
+os:
+  - linux
+  - osx
+
+
+# Supported osx/xcode versions: https://docs.travis-ci.com/user/languages/objective-c/#Supported-Xcode-versions
+# See also: https://blog.travis-ci.com/2016-10-04-osx-73-default-image-live/
+osx_image: xcode6.4
+
+#cache:
+#  directories:
+#    # Disabled homebrew cache, did not appear to do anything
+#    #- $HOME/Library/Caches/Homebrew
+#    - $HOME/nvidia_cache
+#  # https://docs.travis-ci.com/user/caching/#Setting-the-timeout
+#  timeout: 540  # seconds: 9 min cache upload time (default is 3 min)
+
+language: c
+sudo: required
+
+services:
+  - docker
+
+env:
+  matrix:
+    - CUDA_VERSION="7.5" CUDA_SHORT_VERSION="75"
+    - CUDA_VERSION="8.0" CUDA_SHORT_VERSION="80"
+    - CUDA_VERSION="9.0" CUDA_SHORT_VERSION="90"
+    - CUDA_VERSION="9.1" CUDA_SHORT_VERSION="91"
+    - CUDA_VERSION="9.2" CUDA_SHORT_VERSION="92"
+  secure:
+    - "K3LSjERPC+kKtF3qeE0i6r0LNvmliJcZIgFCS2jJv24KBYRLhRQit+WD0KgyuSOlEgW80zU1qbqxWWLRkVhUGtaZvKEnQHLS8ww1akYLBoWbEjJv4p2B+MiHo2fa7G8AYw5L28Ahmb4C6+/3/KjapX2K0xd5w7bSWVF1+iZPnts="
+
+install:
+  - export DOCKER_IMAGE="jchodera/omnia-linux-anvil:texlive18-cuda${CUDA_SHORT_VERSION}"
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+      docker pull ${DOCKER_IMAGE};
+    fi
+
+script:
+  # Retrieve conda-build-all
+  # DEBUG: Temporarily commented out to test
+  #- wget -O conda-build-all --quiet https://raw.githubusercontent.com/omnia-md/conda-recipes/master/conda-build-all
+  - chmod +x conda-build-all
+  # Select upload destination
+  - export CHECK_AGAINST="--check-against omnia --check-against omnia/label/cuda${CUDA_SHORT_VERSION}"
+  - export CHECK_AGAINST="$CHECK_AGAINST --check-against omnia/label/beta --check-against omnia/label/betacuda${CUDA_SHORT_VERSION}"
+  - export CHECK_AGAISNT="$CHECK_AGAINST --check-against omnia/label/dev --check-against omnia/label/devcuda${CUDA_SHORT_VERSION}"
+  - if [[ "${TRAVIS_PULL_REQUEST}" == "false" && "${TRAVIS_BRANCH}" == "master" ]]; then
+        export UPLOAD="$CHECK_AGAINST --upload omnia";
+    else
+        export UPLOAD="%CHECK_AGAINST";
+    fi
+  - echo $UPLOAD
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+
+        docker run -e UPLOAD -e BINSTAR_TOKEN -e CUDA_VERSION -e CUDA_SHORT_VERSION -e TRAVIS_PULL_REQUEST
+            -t -i --rm -v `pwd`:/io ${DOCKER_IMAGE}
+            bash /io/devtools/docker-build.sh;
+
+    elif [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+
+        echo "Building osx...";
+        export NVIDIA_CACHE=$HOME/nvidia_cache;
+        bash devtools/osx-build.sh;
+
+    fi

@@ -1,0 +1,67 @@
+language: python
+
+python:
+  - 3.4
+  - 3.5
+  - 3.6
+
+sudo: false
+
+addons:
+    postgresql: "9.4"
+    apt:
+       sources:
+       - elasticsearch-2.x
+       packages:
+       - elasticsearch=2.4.5
+       - python-requests
+       - python-lxml
+       - curl
+       - libffi-dev
+       - libssl-dev
+       - ghostscript
+
+services:
+  - postgresql
+  - redis
+  - elasticsearch
+
+env:
+  global:
+      # RoMEO API key
+    - secure: "hQg8tso/Qv4zXhP4A2ahKKhFZQSariIvUr+xqzzoTVtuN/9OuzBFjZ1UF8atM5KKGZ47fFMK2wTjbVOWjSyLH/SF3Wy8bX9oHHg1P8bXcsle6O/tfa3U/2s0UiYtThEdxp+iyQIr6cjBA0gmB0v/vFrQot91GvjlUbi70Xjfcts="
+      # Zenodo Sandbox API key
+    - secure: "KjRrTKrNyhv1xVl2UBtJ/qH0uFGItvxw7/pGFfPrcwxD5YAB5daePDaIGe/tlVy+lrQi0D9x1CA8MB2vm+Lf4jrfO+3ZHCkmb4ecbumPV7DxEbgFsralBx65PRRVUiDW1Oy0RyigxXNNdtNLvTVr1PYrZYD407HZnP6LrJP0ONM="
+    - PIP_DOWNLOAD_CACHE=$HOME/.pip-cache
+
+before_install:
+  - export DJANGO_SETTINGS_MODULE=dissemin.settings
+  - export PYTHONPATH=$HOME/builds/dissemin/dissemin
+  - export PIP_USE_MIRRORS=true
+  - echo "from .travis import *" > dissemin/settings/__init__.py
+  - cp dissemin/settings/secret_template.py dissemin/settings/secret.py
+
+install:
+  - pip install setuptools --upgrade
+  - pip install psycopg2 --quiet
+  - pip install -r requirements.txt --upgrade
+  - pip install -r requirements-dev.txt --upgrade
+  - pip install coveralls
+  - ./pyflakes.sh
+  - pip freeze
+
+before_script:
+  - psql --version
+  - psql -c "CREATE DATABASE dissemin;" -U postgres
+
+script:
+  - coverage run --source=dissemin,papers,backend,deposit,upload,statistics --omit="*/migrations/*,dissemin/settings/*" -m py.test 
+  - python manage.py compilemessages
+
+after_success:
+  - coveralls
+
+cache:
+  directories:
+  - $HOME/.pip-cache/
+

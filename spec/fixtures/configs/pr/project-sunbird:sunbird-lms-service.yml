@@ -1,0 +1,25 @@
+language: java
+jdk: openjdk8
+install: echo "Over-riding default script for travis-ci"
+script:
+  - jdk_switcher use openjdk8
+  - mvn clean package '-Dtest=!%regex[io.opensaber.registry.client.*]' -DfailIfNoTests=false
+  - bash <(curl -s https://codecov.io/bash)
+cache:
+  directories:
+  - "$HOME/.m2"
+notifications:
+   slack: sunbird-ci:UegIg4Bf86V3HcXAB2uXNLGI
+   on_success: never
+   on_failure: always
+   email:
+     recipients:
+      - manzarul.haque@tarento.com
+      - amit.kumar@tarento.com
+      - vinayab@ilimi.in
+     on_success: never
+     on_failure: always
+git:
+  submodules: false
+before_install:
+  - git submodule update --init --recursive --remote

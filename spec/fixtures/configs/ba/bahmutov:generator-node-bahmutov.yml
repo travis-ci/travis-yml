@@ -1,0 +1,26 @@
+sudo: false
+language: node_js
+cache:
+  directories:
+    - node_modules
+notifications:
+  email: true
+node_js:
+  - '8'
+before_install:
+  - npm i -g yo
+  - git config --global user.email "test@test.com"
+  - git config --global user.name "Test Tester"
+before_script:
+  - npm prune
+script:
+  - npm run deps
+  - npm run unused-deps
+  - DEBUG=gen npm test
+  - npm run e2e
+  - npm run e2e-typescript
+after_success:
+  - npm run semantic-release
+branches:
+  except:
+    - "/^v\\d+\\.\\d+\\.\\d+$/"

@@ -1,0 +1,38 @@
+language: smalltalk
+
+os: osx
+osx_image: xcode7.3 # use macOS 10.11
+
+smalltalk:
+  - Squeak-trunk
+  - Squeak64-trunk # experimental
+  # - Squeak-5.2
+  # - Squeak64-5.2
+  # - Squeak-5.1
+  # - Squeak64-5.1
+  # - Squeak-5.0
+
+  # - Etoys64-trunk
+  # - Etoys-trunk
+
+# matrix:
+#   allow_failures:
+#     - smalltalk: Squeak64-trunk
+#     - smalltalk: Squeak64-5.1
+#     - smalltalk: Squeak-5.0 # currently broken due to a stale test
+#     - smalltalk: Etoys64-trunk
+#     - smalltalk: Etoys-trunk
+
+# Increase display resolution (1176x885 max on Travis CI's macOS containers)
+before_script: /Library/Application\ Support/VMware\ Tools/vmware-resolutionSet 1200 900
+
+script: ./prepare.sh
+
+notifications:
+  slack:
+    rooms:
+      - squeak:ID1VVfPsB1X17YiDK9F1VUcS#trunk
+    template:
+      - "Build <%{build_url}|#%{build_number}> of <https://github.com/squeak-smalltalk/squeak-app|squeak-app> %{result} in %{duration}"
+    on_success: change
+    on_failure: always

@@ -1,0 +1,36 @@
+language: python
+
+python:
+  - '3.4'
+  - '3.5'
+  - '3.6'
+
+env:
+  - EMG_CONFIG=$TRAVIS_BUILD_DIR/travis/config.yaml
+
+services:
+  - mysql
+  - mongodb
+
+before_install:
+  - mysql -e 'CREATE DATABASE emg;'
+  - python -V
+
+install:
+  - pip install -U pytest
+  - pip install "flake8==3.4" "pycodestyle==2.3.1" pep8-naming
+  - python setup.py sdist
+  - pip install "git+git://github.com/EBI-Metagenomics/django-rest-framework-json-api@develop#egg=djangorestframework-jsonapi"
+
+before_script:
+  - flake8 --version
+  - flake8 -v .
+
+script:
+  - pip install -U .
+  - pip freeze
+  - python setup.py test
+
+notifications:
+  slack:
+    secure: D1lBmpLSuEeXIk/LYekDz+tzH9jxIGw+ocCI44Pwzxq8hLzQ9vSR6m4djogWLjmgw6eqxd+RVj9i/9+eccuHJ9CNTl+8Hy8p2i6ou/OjAR2gRry/wFOuSBJyX2Lc8/tA8kuYstkXgCE7RpoI40gH/ksI2yr/rUKLLd9yUPpo3kdZ3ZZ2qpiaz38n8Hojp3BDjjzWc1cQfGat59uF5Pkf3PPjv2fHQglBSph1ei2ldY77ui71BBDTetXFOPchRo2Xl0mDCu3BVtro8xpXhAWgfFCtuwqSqXYrOhGXAI20Rkp+ZUrEGTIDmUNyMLVBO+V7S8o2D/K4XtMQbrAnpo2y4fQRiuFHtl+5wS6oj6S8ICl/CfKDyENzEGDZjB6jQ0ygix/z4rmdYjPcc9T+zBE8FJnC3SBzTEEFvMPZOm/nGYOOIFhr8jdvS78jXemTndhvWiDYtRY9guL4vseF8Cg/msOsaKbr9ZmPomk0mqZZ6eNv+4lUJvpczo7DiAQIoMEg0yLT/51raEzQd0JdrrTg8ePvH+vfYEgzxTv+TuCJ8S/kbxkh4zRDfqTUT3gIH5Y7+onpMiOHkZYufbso00JHyJM+LzocjxC5pzJ7TJteMt7RrLll4qf2+DQQ0p+kSnxf/LZklGFY4xVnI52fDPQHqWWwj1GfN/eojHoviuMCnqo=

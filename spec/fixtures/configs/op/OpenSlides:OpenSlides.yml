@@ -1,0 +1,148 @@
+dist: xenial
+sudo: true
+
+matrix:
+  include:
+    - language: python
+      name: "Server: Tests Python 3.6"
+      cache:
+        pip: true
+      python:
+        - "3.6"
+      install:
+        - python --version
+        - pip install --upgrade setuptools pip
+        - pip install --upgrade --requirement requirements/development.txt
+        - pip install --upgrade .[big_mode]
+        - pip freeze
+      script:
+        - python -m mypy openslides/ tests/
+        - python -W ignore -m pytest --cov --cov-fail-under=70
+
+    - language: python
+      name: "Server: Tests Python 3.7"
+      cache:
+        pip: true
+      python:
+        - "3.7"
+      install:
+        - python --version
+        - pip install --upgrade setuptools pip
+        - pip install --upgrade --requirement requirements/development.txt
+        - pip install --upgrade .[big_mode]
+        - pip freeze
+      script:
+        - flake8 openslides tests
+        - isort --check-only --diff --recursive openslides tests
+        - black --check --diff --target-version py36 openslides tests
+        - python -m mypy openslides/ tests/
+        - python -W ignore -m pytest --cov --cov-fail-under=70
+
+    - language: python
+      name: "Server: Tests Startup Routine Python 3.7"
+      cache:
+        pip: true
+      python:
+        - "3.7"
+      install:
+        - python --version
+        - pip install --upgrade setuptools pip
+        - pip install --upgrade --requirement requirements/development.txt
+        - pip install --upgrade .[big_mode]
+        - pip freeze
+      script:
+        - set -e
+        - python manage.py createsettings
+        - python manage.py migrate
+        - python manage.py runserver --noreload & (sleep 15 && kill $(ps aux | grep 'manage.py runserver' | head -n -1 | awk '{print $2}'))
+        - set +e
+
+    - language: node_js
+      name: "Client: Linting"
+      node_js:
+        - "10.5"
+      cache:
+        directories:
+          - node_modules
+      before_install:
+        - npm install -g @angular/cli
+        - ng --version
+        - cd client
+      install:
+        - npm install
+      script:
+        - npm run lint
+
+    - language: node_js
+      name: "Client: Code Formatting Check"
+      node_js:
+        - "10.5"
+      cache:
+        directories:
+          - node_modules
+      before_install:
+        - npm install -g @angular/cli
+        - ng --version
+        - cd client
+      install:
+        - npm install
+      script:
+        - npm list --depth=0 || cat --help
+        - npm run prettify-check
+
+    - language: node_js
+      name: "Client: Testing"
+      node_js:
+        - "10.5"
+      apt:
+        sources:
+          - google-chrome
+        packages:
+          - google-chrome-stable
+      cache:
+        directories:
+          - node_modules
+      services:
+        - xvfb
+      before_install:
+        - export CHROME_BIN=/usr/bin/google-chrome
+        - export DISPLAY=:99.0
+        - npm install -g @angular/cli
+        - ng --version
+        - cd client
+      install:
+        - npm install
+      script:
+        - ng test --watch=false
+
+    - language: node_js
+      name: "Client: Build"
+      node_js:
+        - "10.5"
+      cache:
+        directories:
+          - node_modules
+      before_install:
+        - npm install -g @angular/cli
+        - ng --version
+        - cd client
+      install:
+        - npm install
+      script:
+        - ng build
+
+    - language: node_js
+      name: "Client: Production Build"
+      node_js:
+        - "10.5"
+      cache:
+        directories:
+          - node_modules
+      before_install:
+        - npm install -g @angular/cli
+        - ng --version
+        - cd client
+      install:
+        - npm install
+      script:
+        - ng build --prod

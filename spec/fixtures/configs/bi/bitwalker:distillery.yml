@@ -1,0 +1,24 @@
+sudo: false
+language: elixir
+git:
+  quiet: true
+  depth: 3
+elixir:
+  - 1.6
+  - 1.7
+otp_release:
+  - 21.0
+env:
+  - MIX_ENV=test VERBOSE_TESTS=true
+cache:
+  directories:
+    - _build
+    - deps
+before_script:
+  - epmd -daemon
+  - mix do deps.get, eqc.install --mini
+script:
+  - bin/travis
+notifications:
+  email:
+    - paulschoenfelder@gmail.com

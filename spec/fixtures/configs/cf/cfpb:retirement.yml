@@ -1,0 +1,25 @@
+language: python
+python:
+- '2.7'
+cache: pip
+env: DJ_KEY=testkey
+install:
+- pip install coveralls tox
+before_script:
+  - npm install -g gulp-cli
+script:
+- npm config set package-lock false
+- tox
+- python2.7 setup.py bdist_wheel
+- ls dist/*
+after_success:
+- coveralls
+deploy:
+  provider: releases
+  skip_cleanup: true
+  api_key:
+    secure: e24xlCO9zGNwFqicknFg/HAqui5duz2aQM2ruPFDpPbmw4rMD9ABYMq9DUqu/o4bXQMtCqH32fgaKnz6j4LYoMHEedPYpPuluszqXj2coHUoE+p93w/AYrGFiGfMukUtcW8xBxJnLJi4HOovKdSKqaravb7BCCtc/OjfcrPOn+g=
+  file_glob: true
+  file: 'dist/*.whl'
+  on:
+      tags: true

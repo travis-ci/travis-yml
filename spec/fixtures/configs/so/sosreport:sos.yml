@@ -1,0 +1,34 @@
+language: python
+python:
+  - "2.7"
+  - "3.4"
+  - "3.5"
+  - "3.6"
+  - "3.7"
+  - "nightly"
+matrix:
+  allow_failures:
+    - python: "nightly"
+notifications:
+  email:
+    sos-devel@redhat.com
+  irc:
+    channels:
+      - "us.freenode.net#sosreport"
+    on_success: change
+dist: xenial
+install:
+  - "pip install -r requirements.txt"
+  - "python setup.py install"
+script:
+  - "pycodestyle sos"
+  - "pycodestyle --version"
+  - "nosetests -v --with-cover --cover-package=sos --cover-html"
+  - "sudo ~/virtualenv/python$TRAVIS_PYTHON_VERSION/bin/python ./sosreport --help"
+  - "sudo ~/virtualenv/python$TRAVIS_PYTHON_VERSION/bin/python ./sosreport -l --config-file=sos.conf"
+  - "sudo ~/virtualenv/python$TRAVIS_PYTHON_VERSION/bin/python ./sosreport --batch --config-file=sos.conf 2> errors | tee batch_output"
+  - "[[ ! -s errors ]]"
+  - "cat errors"
+  - "sudo ~/virtualenv/python$TRAVIS_PYTHON_VERSION/bin/python ./sosreport --batch --build --config-file=sos.conf"
+git:
+  depth: 5

@@ -1,0 +1,74 @@
+language: cpp
+matrix:
+  include:
+    - os: linux
+      env: NAME="clang-format"
+      sudo: required
+      dist: trusty
+      services: docker
+      install: "./.travis/clang-format/deps.sh"
+      script: "./.travis/clang-format/build.sh"
+    - os: linux
+      env: NAME="linux build"
+      sudo: required
+      dist: trusty
+      services: docker
+      addons:
+        apt:
+          packages:
+            - p7zip-full
+      install: "./.travis/linux/deps.sh"
+      script: "./.travis/linux/build.sh"
+      after_success: "./.travis/linux/upload.sh"
+      cache: ccache
+    - if: repo = citra-emu/citra AND branch = master AND type = push
+      os: linux
+      env: NAME="transifex push"
+      sudo: required
+      dist: trusty
+      services: docker
+      install: "./.travis/transifex/deps.sh"
+      script: "./.travis/transifex/build.sh"
+    - os: osx
+      env: NAME="macos build"
+      sudo: false
+      osx_image: xcode10
+      install: "./.travis/macos/deps.sh"
+      script: "./.travis/macos/build.sh"
+      after_success: "./.travis/macos/upload.sh"
+      cache: ccache
+    - os: linux
+      env: NAME="linux build (frozen versions of dependencies)"
+      sudo: required
+      dist: trusty
+      services: docker
+      cache: ccache
+      script: "./.travis/linux-frozen/build.sh"
+    - os: linux
+      env: NAME="MinGW build"
+      sudo: required
+      dist: trusty
+      services: docker
+      addons:
+        apt:
+          packages:
+            - p7zip-full
+      install: "./.travis/linux-mingw/deps.sh"
+      script: "./.travis/linux-mingw/build.sh"
+      after_success: "./.travis/linux-mingw/upload.sh"
+      cache: ccache
+
+deploy:
+  provider: releases
+  api_key:
+    secure: "lfOXGtH+Pq6bOoMX9gC2QroVluy6ZaQYVc+fNcO6LCnt5xCQbsg1Rwmb8ew/gEVhmHfssG9W90tI2NyubA7FA2RyZNPkHTNCcO+M/GSHpeivBYVP/GzmDF6dgeo96r4H0E09/shooC1JYrLEmc5pxCdsMAOguLab0pX09cA94nFJNzKOhfzratI3vl3/ekn/HH+kRgmhFWGkMg+7qcTPW8onSX6wTJS3+jh3RyclzvKJRAAGCi3ZDuEezHrSbiW0y53BwjZMD606PB15O26nimzJHzco8B6nsjngbz91az4EaKs7iefCVMAAAKKNXk+ntNQxHfASt7RanDlGwGrBz15OKKPKs1n46fauE6lC9c/it8b5gZR+Rv67jDY2eRR32PRkEy5KWnksIjhSimqG9TLcLbbD78LYSaUwdV1RFnSzrZrMVj1/yhtiZN/tKreFVCDsr8irVjgdpOmkOVRLrYTDu+EoIgsOGybEfU1C8l8MwFEj4IpX7VqILIsJgFiwRQI4ThgOKWiYmQL/bcnUtyn9yUjPvKfvhJ6yGKddZk7yTv9jj1823P8FDqcPJdNoRNsrwuk1ebRpchatG7Kyyur9hLRJT2hswuDzC003svhFRjFbzW0qyucSmgIrwuuCAshxhDY6WKC3pYk5BRsD70A1xGmqkhixUTpULkmqTWM="
+  file_glob: true
+  file: "artifacts/*"
+  skip_cleanup: true
+  on:
+    tags: true
+
+notifications:
+  webhooks:
+    urls:
+      - https://api.citra-emu.org/code/travis/notify

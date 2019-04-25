@@ -1,0 +1,22 @@
+sudo: required
+language: php
+php:
+  - 7.0
+  - 7.2
+
+before_install:
+- sudo rm -vf /etc/apt/sources.list.d/*riak*
+- sudo apt-get update
+
+script:
+- sudo add-apt-repository ppa:git-core/ppa -y
+- sudo apt-get update
+- curl -OL https://squizlabs.github.io/PHP_CodeSniffer/phpcs.phar
+- if find . -name "*.php" ! -path "./vendor/*" -exec php -l {} 2>&1 \; | grep "syntax
+  error, unexpected"; then exit 1; fi
+- if find . -name "*.php" ! -path "./vendor/*" -exec php other/buildTools/check-sbb-license.php
+  {} 2>&1 \; | grep "Error:"; then exit 1; fi
+- php phpcs.phar .
+
+notifications:
+  email: false

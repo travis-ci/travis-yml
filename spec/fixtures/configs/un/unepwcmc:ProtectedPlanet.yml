@@ -1,0 +1,47 @@
+language: ruby
+# Manually handle git submodules
+git:
+  submodules: false
+before_install:
+  - sed -i 's/git@github.com:/https:\/\/github.com\//' .gitmodules
+  - git submodule update --init --recursive
+  - sudo apt-get purge libgdal1
+  - sudo apt-add-repository --remove ppa:ubuntugis/ppa -y
+  - sudo apt-get update
+  - sudo apt-get install libgdal1h
+  - sudo apt-get install gdal-bin
+  - sudo apt-get install libproj-dev
+  - sudo apt-get install libspatialite-dev --force-yes
+  - sudo apt-get install libgeos-c1 --force-yes
+  - echo libgeos-c1 hold | sudo dpkg --set-selections
+  - echo libgdal1 hold | sudo dpkg --set-selections
+  - sudo apt-get install libgdal-dev --force-yes
+  - sudo apt-get install libgdal1-dev --force-yes
+  - sudo apt-get install postgresql-9.3-postgis-2.3 -f
+  - psql -c 'create database pp_test' -U postgres
+  - psql -c 'create database pp_test_backup' -U postgres
+  - psql -c 'CREATE EXTENSION postgis;' -U postgres -d pp_test
+  - psql -c 'CREATE EXTENSION postgis_topology;' -U postgres -d pp_test
+bundler_args: --without development production staging --jobs=6
+rvm:
+  - 2.1.2
+before_script:
+  - cp .env.example .env
+  - RAILS_ENV=test bundle exec rake db:migrate
+notifications:
+  email:
+    - andrea.rossi@unep-wcmc.org
+  slack:
+    secure: PXeuZLPRuD9rEwdwZ3Gq4SIcu1wDrahuKXa9GiP6HHqgDVWvMgLYPzFTrfKOlY27vyaNfUxk4bGiaexf8wR/zOYBkWDMrPLnfyMhfqcWOFj/IK/cqylTQWkjk2I5N2ljfK2lzebz0Tta1MMohVcvAl7Zsfa51uEXHPXMz0Cn6SM=
+branches:
+  only:
+    - master
+    - develop
+addons:
+  code_climate:
+    repo_token:
+      secure: "YsOamnH3K8SwysSe2EKm11Wi+Qi0ZsTMGDL3jD+9uWYWM6+MIFEFY7xJf2psoImHzzMoJE5EYtIbQBNk0WB2dtehdaI29yaQ+5RFoMw+z+M2t119GKE3QgD8W0vlhXWKadVXbSnU3EUCaHn+u2rzFU0jNx/+GCoPuG2ltfJf404="
+  postgresql: 9.3
+services:
+  - redis-server
+  - elasticsearch

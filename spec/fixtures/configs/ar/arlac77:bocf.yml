@@ -1,0 +1,29 @@
+language: node_js
+node_js:
+  - 10.6.0
+sudo: 'false'
+branches:
+  only:
+    - master
+    - /^greenkeeper/.*$/
+cache:
+  directories:
+    - node_modules
+notifications:
+  email:
+    - markus.felten@gmx.de
+before_install:
+  - npm i -g npm@latest
+before_script:
+  - npm prune
+  - npm install -g --production coveralls codecov
+script:
+  - npm run cover
+  - npm run lint
+  - npm run docs
+after_script:
+  - codecov
+  - cat ./build/coverage/lcov.info | coveralls
+  - npm run docs
+after_success:
+  - npm run travis-deploy-once "npm run semantic-release"

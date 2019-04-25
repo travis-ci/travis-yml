@@ -1,0 +1,48 @@
+language: ruby
+sudo: false
+cache:
+  bundler: true
+  directories:
+    - tmp/solr_downloads
+    - tmp/fedora_downloads
+dist: trusty
+addons:
+  apt:
+    packages:
+    - libclamav-dev
+    - clamav
+    - chromium-browser
+    - chromium-chromedriver
+jdk:
+- oraclejdk8
+rvm:
+- 2.5
+env:
+  global:
+    - DATABASE_USERNAME=travis
+    - secure: "eTxFESeEn4I3u5sHFtg4/EFsOlryXVRv21Va7OZbZGbCY/mbDtaKDkW7IRkMkARKDxIo9RNnFNvKULCQZTkF24LWa3Ohjbse3UdEPv2FsW9sRZSLBAOaKUiKX6l7xbiaMRD5iwcZ+PMXaRxGhFhKFp+Rl3s4+R/8gJNJn8G75j+q7dzqTS8dPdAseidv8Dm2SJVTXgYp4v965RJMG3tKw3VW1IASWO342+HIfQYPL4qaUFMhDbrAol0hXLk8wH6FN0HQsb8OvxRr+xb6yOa5NKnWDmGVQ/P0vUQRy6jmTIUd+X/tFBQv4NfrkHjcyphGdIwrEgGG7rpWNQDVCXXQCIYTO0eAkC3lR+PFAB3iwJHdoeOm6kS8HQW87e27HdQl4asPyj4z4t+SMPW/jO+u/fRKQCDISABwudLFL+ad2pNTffoCs2hsRf64NMVcAoY/vVjden5Rzon2Ww6xGkPzez0T89ANsdOsqrVrg1hvaxkM8n3gFpazOAhPY1gziX2LR7rMSZT04FzQLQVnxVafqsZDpWB4Gbv2yeokf7xnqUY86WqiIzpQRfIRPxkIdWemO7WWSPTsinAZg7TLQKRDtjKMKbsb4UNxM4vD4GPTzBpt95+mTlF2L8jrq9EuwNpFrw4CXgLpAEA3/DBl/VdpeVyxa/3gBOo6jISmMgd8riY="
+    - secure: "ll9ZY7VKG+ieb2Nwd7Q0CVAGAKlOw1TexAno9JxNGnccezZxG4FaT6SrqINnfrZBV2Dv6S9g5cWwITj6fz6v+V/tRhbqaJWcnRcgbi+/jUpfjpQ6sjUUEnykHpxnZ2EhratjA6u6OTneR02YWSYj8GJNRymFfihRmLcVM9IcYkvs6LXsRq9id5umA9q64ikjaccfpEFE122hDkL2wfcqkxuVAL7wSRhl2o4aOw01nbXTbNWb0mQ8ccY8VjUGl7C7h9u3EV2b5ve5F0EAaZwvPpkwDxMzcSvEHlwxdt9gnTDmoHr+ZLXpcnxoYBefIq+mHO5gJMUk5sdjZaTdlGL/M43kGdybnNvMlJEhALTto1SR9Ys9kxghEwX7fH164jDJMwaZ5OZsz1KEwzzIS9ouEkT5AL1ghGGlLjR7J05M7YUrUK1c+zQ0gCWpJuRb/thlBCq1bxK2kfrpqIUIjPtqDuJKbwWUCm+VvrQ5mbguXBTHB4tERgXXQCHT3J440yhXfmY1kFR4udQCpFz2ZSoHfMO1HTZjx2cuIywg1p1hM0wNzZNvtcM0E7BR9B8eOa2XZTwx1mm3NL63BZtMTTNY8vzacZuRmcaW9eMiPBEGTomx9O66cW68uiO7PQDJDl4mjhtpJ9RMUkI2O03NZWMPmvWeNg/tdshPVuFux8vqK2I="
+before_install:
+  - gem update --system
+  - gem install bundler:1.17.3
+  - curl -sLO https://projects.iq.harvard.edu/files/fits/files/fits-0.8.6_1.zip
+  - unzip fits-0.8.6_1.zip
+  - chmod +x fits-0.8.6/fits.sh
+  - export PATH="$(pwd)/fits-0.8.6:$PATH"
+before_script:
+  - bundle exec rake db:create
+  - ln --symbolic /usr/lib/chromium-browser/chromedriver "${HOME}/bin/chromedriver"
+  - google-chrome-stable --headless --disable-gpu --remote-debugging-port=9222 http://localhost &
+script:
+  - bundle exec rake
+services:
+  - redis-server
+  - mysql
+after_success:
+- |
+  if [[ $TRAVIS_BRANCH == 'master' && $TRAVIS_PULL_REQUEST == 'false' ]]; then
+    curl "$JENKINS_DEPLOY_URL"
+  fi
+  if [[ $TRAVIS_TAG != "" ]]; then
+    curl "$JENKINS_TAG_DEPLOY_URL"
+  fi

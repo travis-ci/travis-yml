@@ -1,0 +1,35 @@
+language: ruby
+
+services:
+  - docker
+
+before_install:
+  - docker pull mongo:latest
+  - docker run --name mongo -p 27017:27017 -d mongo mongod --smallfiles
+  - docker pull rabbitmq:latest
+  - docker run -d --hostname rabbitmq --name rabbitmq rabbitmq:latest
+  - docker build --tag webgold .
+  - docker ps -a
+  - docker run --link mongo:mongo --link rabbitmq:rabbitmq -v `pwd`:/srv/host webgold /bin/sh -c "export WRIO_CONFIG=config.json.travis && gulp test"
+
+script:
+  - docker ps -a
+
+branches:
+  only:
+    - master
+    - production
+
+notifications:
+  slack: wrioos:XDZWFBrf9TDtoEOcw5YGBM4a
+
+deploy:
+  - provider: s3
+    access_key_id:
+      secure: e6CpXbDmuJOZTf/kyurb4bk8kn83pj3Knq9XxmkaqvXFytPlyzV1aJV440Ha+rci5dZn5yktavx6Hl13FGsRRYx7wYKPz8Lh+4BiOqZTT/ZiFAITLffu3e2uSSCrp+cGNi/cIweFSTp0fA8vcoUbMbxfa6d1O4hTiY8DMPvpnjQ=
+    secret_access_key:
+      secure: oZLlSoCrrz6s5Ylv/uec+fQTwZFz5a6N3YkmYC4h5dqkW+UrTBHifXGOZACLzjkyXga8/oKXKTHCiKCQ0BnODZyauoTH/qWy7PK1ckvg9QWWyM/w+HAf7mipFC+TeGdI0cEcX2VDsjcVLUuX2sjTPFHl9hKbX1CSpcPfuIA0Ikg=
+    bucket: wrioos.com
+    upload-dir: webGold-WRIO-App
+    acl: public_read
+

@@ -1,0 +1,15 @@
+language: python
+python:
+    - "3.6"
+    - "3.5"
+    - "3.4"
+before_install:
+    - pip install --upgrade pip
+install:
+    - make build
+    - pip install -r test_requirements.txt
+    - pip install codecov
+script:
+    - pytest -v tests/ --cov=app --cov-report html
+after_success:
+    - codecov

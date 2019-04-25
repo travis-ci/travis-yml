@@ -1,0 +1,59 @@
+sudo: false
+language: python
+cache:
+  - pip
+before_install:
+  - pip install --upgrade pip
+install:
+  - pip install -e .
+  - pip install -r requirements-dev.txt
+  - pip install coveralls
+script:
+  - flake8
+  - py.test
+after_success:
+  - coveralls
+
+
+jobs:
+  include:
+    - stage: test
+      python: "2.7"
+    - python: "3.6"
+    - stage: docker
+      python: "3.6"
+      sudo: required
+      dist: trusty
+      services: [docker]
+      env:
+        - IMAGE_NAME=praekeltfoundation/nurseconnect
+        - REGISTRY_USER=praekeltorgdeploy
+        - secure: "NCYJda292/G3brt2E7x9wDLM2UsdcwSl0Q+6m+TtcGyJSCt7aSVW8wR2ts5+9nu2THG0h/aotKVCfUX2jycZdT5AX72pLpm48sosVP1X5Inwt16+FfaSZPwr7RvIQEQdfPbJUmUvZKCQ6EfGRAppcBDc46s+br2VKwbmZSHkMTua8qUwvayIYOoOFQSUYoWuIT3IiwxwSHTyHpOsKS7PkZ+boPWV4jcO2SIl2rfJzvI9Hx/GCqWNpngqCyP79DlDvFu+or/+D+HlvkfGhg4CmriewLGOHP+l3nxDsXDQO4OoYfZoxBs8e9TgeeuC+VhyFUqPf21OfOQVvh8M/aCCy/hmtPdRGFtcqwwK+sjIeC4EjRMKhS92XJeypdh+umlJNP1dMlxPiky8i/Rdl23cBX4tuVU5knTzMLB08S8eFoCUGYOKOUN2WO36J4b5GzbzVKoJRsWeNW1IoCad3t57+OrCI3db+HYCqxsuQS/xQsCxjmycYmtkAiRIMWdFZGXHqPg/IShTKlvigQzJj11D63Z4ujVA6qdPi2zdrUg6jETtjq5plmd9jUaWzLV72DkonckLzkAWvM6WpYPOlGN3qrWEWPTZaGpE2+1Rw1Z40aFaxb0nlE8/POOwMdJA+OZCAkUl6sNffCPWYdK1reSN4BxqqfLI7rEp222bGWXAaa8="
+
+      # Update Docker: we want some new docker build features
+      install:
+        - sudo apt-get update
+        - sudo apt-get install -y -o Dpkg::Options::="--force-confold" docker-ce
+
+      before_script:
+        - molo_version="$(sed -nE 's/^molo\.core==(.*)$/\1/p' requirements.txt)"
+        - docker pull "$IMAGE_NAME" || true
+      script:
+        - docker build --pull --cache-from "$IMAGE_NAME" --tag "$IMAGE_NAME" --build-arg MOLO_VERSION="$molo_version" .
+
+      before_deploy:
+        - pip install docker-ci-deploy==0.3.0
+        - echo -n $REGISTRY_PASS | docker login -u "$REGISTRY_USER" --password-stdin
+      deploy:
+        - provider: script
+          script: dcd --version "$(git rev-parse --short HEAD)" --version-latest "$IMAGE_NAME"
+          on:
+            branch: develop
+        - provider: script
+          script: dcd --tag "$TRAVIS_TAG" -- "$IMAGE_NAME"
+          on:
+            tags: true
+
+      # Built steps inherited from the default stage that we don't want
+      before_install: ignore
+      after_success: []

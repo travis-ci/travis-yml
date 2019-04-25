@@ -1,0 +1,26 @@
+sudo: false
+dist: xenial
+language: c
+compiler:
+  - gcc
+  - clang
+addons:
+  apt:
+    packages:
+    - libssl-dev
+    - libunbound-dev
+    - libidn11-dev
+    - libyaml-dev
+    - check
+    - libevent-dev
+    - libev-dev
+    - libuv-dev
+    - valgrind
+    - clang
+    - wget
+    - openssh-client
+script:
+  - mkdir tests
+  - cd tests
+  - ../src/test/tpkg/run-all.sh
+# - ../src/test/tpkg/run-one.sh 225-stub-only-valgrind-checks

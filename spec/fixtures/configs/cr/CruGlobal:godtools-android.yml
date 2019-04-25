@@ -1,0 +1,119 @@
+language: android
+sudo: required
+jdk:
+  - oraclejdk8
+env:
+  global:
+    - GRADLE_OPTS="-Xmx3072m"
+    # wait up to 10 minutes for adb to connect to emulator
+    - ADB_INSTALL_TIMEOUT=10
+    # FABRIC_BUILD_SECRET={Build Secret}
+    - secure: nfuUV6H+kpR21OxyyFMGzjyItoE/bQIzxeWLKSFiisuVc4uG9unyk7XPHnKYV1u6d0FJ9ieV7bmri39igYANmGtzEzO2KbZhW4/xGQwcEbc0cxtPfwkXRP1bwoBMSqEYEHYwyLImFrtHNpP9rSVbR0L09f/kfWKUUOr9J/hRkNQ=
+    # BETA_KEYSTORE_PASSWORD={password}
+    - secure: jBb7ri2he+o7e17rtiNt6tnPb5gKpjP6Wuh5wTHi6ftdAC5cAGKPqSTGuCnyK/bSZqLdKDoLzgjXEwxY3L4qetrILcAJZKQWY4sb+OVk51/FY8VQx32LpwGtxtZn7XGdHNxTYxGFsDc/BW+Eo7vdRbvUBh2nCJisVYCWSlHdVB4=
+  matrix:
+    - ANDROID_TARGET=android-24 ANDROID_ABI=armeabi-v7a
+    - ANDROID_TARGET=android-16 ANDROID_ABI=armeabi-v7a
+#    - ANDROID_TARGET=android-21 ANDROID_ABI=armeabi-v7a
+#    - ANDROID_TARGET=android-23 ANDROID_ABI=armeabi-v7a
+branches:
+  only:
+    - develop
+    - master
+
+stages:
+- compile
+- test
+- name: deploy
+  if: branch = develop AND type = push
+
+before_cache:
+  - rm -f $HOME/.gradle/caches/modules-2/modules-2.lock
+  - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+
+cache:
+  directories:
+    - $HOME/.android/build-cache
+    - $HOME/.gradle/caches/
+    - $HOME/.gradle/wrapper/
+
+before_install:
+  # Install SDK license so Android Gradle plugin can install deps.
+  - mkdir "$ANDROID_HOME/licenses" || true
+  - echo "8933bad161af4178b1185d1a37fbf41ea5269c55" > "$ANDROID_HOME/licenses/android-sdk-license"
+  - echo "d56f5187479451eabf01fb78af6dfcb131a6481e" >> "$ANDROID_HOME/licenses/android-sdk-license"
+  - echo "24333f8a63b6825ea9c5514f83c2829b004d1fee" >> "$ANDROID_HOME/licenses/android-sdk-license"
+
+  # set Fabric apiSecret so fabric is correctly configured in the build
+  - echo apiSecret=$FABRIC_BUILD_SECRET >> app/fabric.properties
+
+install:
+  # Install the rest of tools (e.g., avdmanager)
+  - sdkmanager tools
+  # Install the system image
+  - sdkmanager "system-images;$ANDROID_TARGET;default;$ANDROID_ABI"
+  # Create and start emulator for the script. Meant to race the install task.
+  - echo no | avdmanager create avd --force -n test -k "system-images;$ANDROID_TARGET;default;$ANDROID_ABI"
+  - $ANDROID_HOME/emulator/emulator -avd test -no-audio -no-window &
+  # build the tests
+  - ./gradlew clean assembleAndroidTest --continue --stacktrace --parallel
+script:
+  - android-wait-for-emulator
+  - adb shell input keyevent 82 &
+  - ./gradlew connectedCheck --continue --stacktrace --parallel
+
+# gradle options
+#  --parallel      : build/test multiple subprojects simultaneously
+#  --continue      : continue processing on an error to try and capture all errors
+#  --stacktrace    : output stacktraces for failures to aid in debugging
+#  --max-workers   : limit the number of workers gradle will spawn
+#  --no-daemon     : disable the background gradle build daemon
+#  -PdisablePreDex : disable library pre-dex to improve build server performance
+jobs:
+  fast_finish: true
+  include:
+  - name: "Build Debug"
+    stage: compile
+
+    install: skip
+    script: ./gradlew clean assembleDebug --continue --stacktrace --parallel
+
+  - name: "Build Release"
+    stage: test
+
+    install: skip
+    script: ./gradlew clean assembleRelease --continue --stacktrace --parallel
+
+  - name: "Static Analysis"
+    stage: compile
+
+    install: skip
+    script: ./gradlew check --continue --stacktrace --parallel
+
+    after_failure:
+    - cat /home/travis/build/CruGlobal/godtools-android/build/reports/lint-results*.xml
+    - cat /home/travis/build/CruGlobal/godtools-android/*/build/reports/lint-results*.xml
+
+  - name: "Release Beta"
+    stage: deploy
+
+    install:
+    # Fetch the entire git history to correctly generate version codes
+    - git fetch --unshallow
+    # configure the keystore
+    - echo crashlyticsBetaKeystoreStorePassword=$BETA_KEYSTORE_PASSWORD >> ~/.gradle/gradle.properties
+    - echo crashlyticsBetaKeystoreKeyPassword=$BETA_KEYSTORE_PASSWORD >> ~/.gradle/gradle.properties
+    script:
+    - ./gradlew clean :app:assembleProductionDebug -PcrashlyticsBetaBuild --continue --stacktrace --parallel
+
+    deploy:
+      provider: script
+      skip_cleanup: true
+      script: ./gradlew crashlyticsUploadDistributionProductionDebug -PcrashlyticsBetaBuild --parallel
+      on:
+        repo: CruGlobal/godtools-android
+        branch: develop
+        jdk: oraclejdk8
+
+notifications:
+  email: false

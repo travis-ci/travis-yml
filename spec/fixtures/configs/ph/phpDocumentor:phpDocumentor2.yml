@@ -1,0 +1,153 @@
+language: php
+php: [ 7.1, 7.2, 7.3, nightly ]
+sudo: false
+
+branches:
+except: /^(\S*)-nightly-(\S*)$/
+
+matrix:
+  fast_finish: true
+  allow_failures:
+    - php: nightly
+
+install:
+  - travis_retry composer install --no-interaction --prefer-dist --optimize-autoloader
+before_script:
+  - travis_retry composer global require phpunit/phpunit ^6 # cannot use phpunit.phar or require-dev, because this package is a phpunit dep
+script:
+  - $HOME/.composer/vendor/bin/phpunit --no-coverage && bin/behat -p default
+
+jobs:
+  include:
+
+    - stage: test
+      php: 7.1
+      name: "php 7.1 Smoke test"
+      before_script:
+        - travis_retry sudo apt install graphviz
+      script:
+        - ./bin/phpdoc run 
+
+    - stage: test
+      php: 7.1
+      name: "php 7.1 Behat with phar"
+      before_script:
+        - travis_retry sudo apt install graphviz
+      script:
+        - git tag v3.999.999
+        - php bin/console cache:warmup --env=prod && php -d phar.readonly=false tools/box.phar compile --config=box.nosign.json && bin/behat -p phar
+        - php build/phpDocumentor.phar run
+
+    - stage: test
+      php: 7.1
+      name: "php 7.1 Behat templates"
+      script:
+        - mkdir -p /tmp/phpdoc-behat/clean_template/simple
+        - bin/behat -p template
+
+    - stage: analysis
+      php: 7.1
+      name: "Phpunit code coverage"
+      script:
+        - $HOME/.composer/vendor/bin/phpunit
+      after_script:
+        - travis_retry wget --no-verbose https://phar.io/releases/phive.phar
+        - travis_retry php phive.phar --no-progress install --trust-gpg-keys E82B2FB314E9906E php-coveralls/php-coveralls && ./tools/php-coveralls --verbose
+        - travis_retry wget --no-verbose https://scrutinizer-ci.com/ocular.phar && php ocular.phar code-coverage:upload --format=php-clover build/logs/clover.xml
+
+    - stage: analysis
+      php: 7.1
+      name: "PHPStan"
+      services:
+        - docker
+      script:
+        - docker-compose run --rm phpstan
+
+    - stage: analysis
+      php: 7.1.18
+      name: "Composer require checker"
+      env:
+        secure: pD0swAjWY7a/i1D12K+8vqBlpl0ES6dA994+NLYYoxYrM03XnrxoSBNApuz2MSoIzKJbXq1GtYHgeVf4qcHL9jQ/PQ1igJ/wL4YrMggfy1M8JSaZ2rBDdKcyRl716dKX2bRyszJlFbkA9mE4aCa2Cqf2eMeWHzqNjrHPQ4m7iNY=
+      before_script:
+        - echo 'xdebug.max_nesting_level=1024' >> ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/travis.ini
+        - travis_retry wget --no-verbose https://phar.io/releases/phive.phar
+        - travis_retry php phive.phar --no-progress install --trust-gpg-keys D2CCAC42F6295E7D,4AA394086372C20A
+      script:
+        - tools/composer-require-checker check --config-file $(pwd)/composer-require-config.json composer.json
+
+    - stage: release
+      if: repo = phpDocumentor/phpDocumentor2 AND (branch IN (develop, master) OR tag IS present)
+      name: Release
+      php: 7.1
+      env:
+        - VERSION=$(echo $TRAVIS_TAG | cut -c 2-10)
+      before_install: |
+        if [[ "$TRAVIS_PULL_REQUEST_SLUG" == "" || "$TRAVIS_PULL_REQUEST_SLUG" == "$TRAVIS_REPO_SLUG" ]];then
+          openssl aes-256-cbc -K $encrypted_f23adc84ec09_key -iv $encrypted_f23adc84ec09_iv -in .travis/secrets.tar.enc -out .travis/secrets.tar -d && \
+          tar xvf .travis/secrets.tar -C .travis
+        fi;
+      script:
+        - echo "${VERSION}" > VERSION
+        - php ./bin/console --env=prod cache:warm && php -d phar.readonly=false tools/box.phar compile --config=box.json && openssl sha1 build/phpDocumentor.phar
+        - echo "Update https://github.com/josegonzalez/homebrew-php/blob/master/Formula/phpdocumentor.rb with the latest version number and the SHA1 that is shown above with the path /get/phpDocumentor-${VERSION}.phar"
+      deploy:
+        provider: releases
+        api_key:
+          secure: WUchZXQQdIDtVQTYZsQ++2R1y6I+EzBrAACRuc33wAVd0mlqNmu3nb/c1Ou4pTk5JxjyGqm9Siyp9vobhBtzBh/hdXAnbZDWNx2l6R1M9S4R/Z/VbcQ+uIJ/VOoh2KvIOCcyVuFVmsemlVQCuatCRKswKmK/OuyQXy6ppyZMilA=
+        file:
+          - "build/phpDocumentor.phar"
+          - "build/phpDocumentor.phar.pubkey"
+        skip_cleanup: true
+        on:
+          repo: phpDocumentor/phpDocumentor2
+          tags: true
+
+    - stage: release
+      name: Nightly release
+      if: type IN (push) AND repo = phpDocumentor/phpDocumentor2 AND branch IN (develop) AND false # disable for now
+      php: 7.1
+      env:
+        - VERSION=$(echo $TRAVIS_TAG | cut -c 2-10)
+      before_install: |
+        if [[ "$TRAVIS_PULL_REQUEST_SLUG" == "" || "$TRAVIS_PULL_REQUEST_SLUG" == "$TRAVIS_REPO_SLUG" ]];then
+          openssl aes-256-cbc -K $encrypted_f23adc84ec09_key -iv $encrypted_f23adc84ec09_iv -in .travis/secrets.tar.enc -out .travis/secrets.tar -d && \
+          tar xvf .travis/secrets.tar -C .travis
+        fi;
+      script:
+        - echo "${VERSION}" > VERSION
+        - git config --global user.email "builds@travis-ci.com"
+        - git config --global user.name "Travis CI"
+        - export GIT_TAG=$(git describe --tags --exclude="*nightly*" | sed -E "s/\-[a-z0-9]+\-/-nightly-/")
+        - |
+          if [ "${TRAVIS_TAG}" == "" ]; then
+            git tag $GIT_TAG -a -m "Nightly build. Not a stable release. Expect bugs!";
+            echo "${GIT_TAG}" > VERSION
+          fi
+        - php ./bin/console --env=prod cache:warm && php -d phar.readonly=false tools/box.phar compile
+      deploy:
+        provider: releases
+        api_key:
+          secure: WUchZXQQdIDtVQTYZsQ++2R1y6I+EzBrAACRuc33wAVd0mlqNmu3nb/c1Ou4pTk5JxjyGqm9Siyp9vobhBtzBh/hdXAnbZDWNx2l6R1M9S4R/Z/VbcQ+uIJ/VOoh2KvIOCcyVuFVmsemlVQCuatCRKswKmK/OuyQXy6ppyZMilA=
+        file:
+          - "build/phpDocumentor.phar"
+          - "build/phpDocumentor.phar.pubkey"
+        skip_cleanup: true
+        on:
+          repo: phpDocumentor/phpDocumentor2
+          tags: false
+          branch:
+            - develop
+
+cache:
+  directories:
+  - $HOME/.composer
+  - $HOME/.phive
+  - ./docker
+
+notifications:
+  irc: "irc.freenode.org#phpdocumentor"
+  slack:
+    secure: "fjumM0h+4w3EYM4dpgqvpiCug7m4sSIC5+HATgwga/Nrc6IjlbWvGOv3JPgD3kQUhi18VmZfUYPmCv916SIbMnv8JWcrSaJXnPCgmxidvYkuzQDIw1HDJbVppGnkmwQA/qjIrM3sIEMfnu/arLRJQLI363aStZzGPxwIa4PDKcg="
+  email:
+  - me@mikevanriel.com
+  - ashnazg@php.net

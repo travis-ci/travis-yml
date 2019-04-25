@@ -1,0 +1,32 @@
+language: python
+cache: pip
+python:
+- '3.6'
+services:
+- redis-server
+- rabbitmq
+- mongodb
+before_install:
+- sudo apt-get -qq update
+- sudo apt-get install -y libxml2-utils
+install:
+- pip install -r requirements.txt
+script:
+- make test
+- cd docs && make html && cd ..
+deploy:
+  - provider: pypi
+    user: categulario
+    password:
+      secure: sADbXR9A0Opyw149/segtj/USakLToxC4lva0Eak34n1hxcnWRDvzor4T46gSaBOf6GMwt5Vc1bVcD0sx6gCAY6bp5scwJvo8z7L4mYr5kMiFZz+ZuMwXs0kLgd42KIJglczPd5pW5SoV5VainT3X4pmq3KAp9EkcIyk2u5ikAejGkTv1APQJ1TjUe9EP1lrtW81qIG+BYP38+3JCRh1WhJxDOFt026F2VvxrqVf5zEVjg/t7/dQLaIWTR43HF2BuSHZ2DwAvw9eJ+vxCdo5AgI1Xyu1Ln6WAcLK1l0/Q+ClsFoYUJvY5aSkmGpGbR0xLm6u1VLwQVAupOla31dRUv7RS446UnI7irvp5cbKStfeBVaBJ+axQQH5fxTjbX+BhAIiH0QuOPDvWNjRFPGRtA3Ic5x8Qt/GqHD0umXx0GAOkJbVFqQM2ydaDzFMSK9Zf7fh+0FxfuAod2DTDad6jQ+pA0XbZaqLrN15l0nzJ0oy914ZCxAQO016Fz3PyLmSjHKk5HLU5rGHrBIWjGdFr+5NITi0koEanz+hOxZXZoRa9B0pM9YJ3k+0hH0JEXI65Xz57f22FL/dGfBpSqD05gNypEVgrQWqZPUu9uIG9nw88yING8Z/yyQbFBEocfs/2yNlmzh3A77PrOcNWumbO0fEb/XYgU6jlSK5wsz0utc=
+    on:
+      tags: true
+    distributions: "sdist bdist_wheel"
+    skip_existing: true
+  - provider: pages
+    skip-cleanup: true
+    github-token: $GITHUB_TOKEN
+    keep-history: true
+    local-dir: docs/build/html
+    on:
+      branch: master

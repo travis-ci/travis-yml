@@ -1,0 +1,24 @@
+sudo: required
+dist: trusty
+language: c
+services:
+  - postgresql
+before_install:
+  - make rule-check
+  - sudo add-apt-repository -y ppa:avsm/ppa
+  - sudo apt-get -qq update
+  - sudo apt-get install -y ocaml-nox ocaml-native-compilers
+  - ./install_local_opam2.sh
+  - ./opam2_local switch create 4.06.1
+  - eval `./opam2_local config env`
+  - ./opam2_local install -y postgresql oUnit
+  - psql -c 'create database links;' -U postgres
+script:
+  - ./opam2_local pin add links . -y
+  - ./opam2_local pin add links-postgresql . -y
+  - ./opam2_local pin add links-sqlite3 . -y
+  - make all-release
+  - make tests
+  - ./run-tests db-only shredding
+  - ./run-tests db-only relational-lenses
+  - ./run-tests unit

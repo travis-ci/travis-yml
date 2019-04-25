@@ -1,0 +1,59 @@
+language: cpp
+branches:
+  only:
+    - develop
+compiler:
+  - gcc
+env:
+# Make has issues with multiple targets and parallel builds
+  - BUILD="IMP.kernel IMP.test IMP.benchmark" TEST=XXX PERCPP=kernel:benchmark
+  - BUILD="IMP.algebra -j 2" TEST=XXX PERCPP=algebra
+  - BUILD="IMP.container" TEST=XXX PERCPP=container
+  - BUILD="-j 2 IMP.core" TEST=XXX PERCPP=core:score_functor
+  - BUILD="-j 2 IMP.rmf" TEST=XXX PERCPP=rmf
+  #- TEST=XXX BUILD="-j 2 IMP.algebra" PERCPP=algebra
+  - TEST=XXX BUILD="-j 2 IMP.atom" PERCPP=atom
+  #- TEST=XXX BUILD="-j 2 IMP.cgal" PERCPP=cgal
+  #- TEST=XXX BUILD="-j 2 IMP.cnmultifit" PERCPP=cnmultifit
+  - TEST=XXX BUILD="-j 2 IMP.display" PERCPP=display
+  - TEST=XXX BUILD="-j 2 IMP.domino" PERCPP=domino
+  - TEST=XXX BUILD="-j 2 IMP.em" PERCPP=em
+  #- TEST=XXX BUILD="-j 2 IMP.em2d" PERCPP=em2d
+  # too slow
+  #- TEST=XXX BUILD="-j 2 IMP.example" PERCPP=example
+  #- TEST=XXX BUILD="-j 2 IMP.gsl" PERCPP=gsl
+  # very slow
+  #- TEST=XXX BUILD="-j 2 IMP.isd" PERCPP=isd
+  - TEST=XXX BUILD="-j 2 IMP.kinematics" PERCPP=kinematics
+  - TEST=XXX BUILD="-j 2 IMP.kmeans" PERCPP=kmeans
+  - TEST=XXX BUILD="-j 2 IMP.misc" PERCPP=misc
+  #- TEST=XXX BUILD="-j 2 IMP.modeller" PERCPP=modeller
+  #- TEST=XXX BUILD="-j 2 IMP.mpi" PERCPP=mpi
+  #- TEST=XXX BUILD="-j 2 IMP.multifit" PERCPP=multifit
+  #- TEST=XXX BUILD="-j 2 IMP.parallel" PERCPP=parallel
+  # no C++, lots of dependencies
+  #- TEST=XXX BUILD="-j 2 IMP.pepdock" PERCPP=pepdock
+  - TEST=XXX BUILD="-j 2 IMP.rotamer" PERCPP=rotamer
+  - TEST=XXX BUILD="-j 2 IMP.saxs" PERCPP=saxs
+  #- TEST=XXX BUILD="-j 2 IMP.score_functor" PERCPP=score_functor
+  # boring
+  # - TEST=XXX BUILD="-j 2 IMP.scratch" PERCPP=scratch
+  - TEST=XXX BUILD="-j 2 IMP.statistics" PERCPP=statistics
+  - TEST=XXX BUILD="-j 2 IMP.symmetry" PERCPP=symmetry
+  #- TEST=XXX BUILD="-j 2 IMP.test" PERCPP=test
+
+
+git:
+  submodules: false
+
+before_install:
+ - sudo apt-get update -qq
+ - sudo apt-get install -qq libboost$BOOST-all-dev swig libhdf5-serial-dev libeigen3-dev
+ - ./setup_git.py
+
+script:
+ - mkdir ../build
+ - cd ../build
+ - cmake ../imp -DIMP_PER_CPP_COMPILATION=$PERCPP
+ - make -k $BUILD
+ - ctest -j 2 -R $TEST

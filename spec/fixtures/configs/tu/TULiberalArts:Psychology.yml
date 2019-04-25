@@ -1,0 +1,25 @@
+language: ruby
+rvm: 2.5
+env:
+  global:
+  - NOKOGIRI_USE_SYSTEM_LIBRARIES=true
+sudo: false
+branches:
+  only:
+  - master
+install:
+- bundle install
+script:
+- "wget -O ./_data/news.csv $(bundle exec yaml get news-feed -F=_config.yml) || :"
+- "wget -O ./_data/events.csv $(bundle exec yaml get events-feed -F=_config.yml) || :"
+- 'wget -O ./_data/profiles.csv $(bundle exec yaml get faculty-feed -F=_config.yml) || :'
+- 'wget -O ./_data/media-mentions.csv $(bundle exec yaml get media-mentions-feed -F=_config.yml) || :'
+- bundle exec jekyll build
+- bundle exec htmlproofer ./_site --check-html --check-favicon --allow-hash-href
+  --external_only --only-4xx --http-status-ignore 429
+after_success: s3_website push
+notifications:
+  slack:
+    rooms:
+      - secure: dV11ui5u/Ozn3vSbN0SD+IdkHr5pfIRIh59pi5TiU8iJnelHL8suNqlMdxU0/OspphKMrN9GdLoBsnc7QJ1GDVnNRjSGlTwlvrJakljgUjRCYTMx9PFhUmMBqjUgYDdt0jLEA87uTnW3TkdsfacPOZh1BM8pv1QSJ4auK6frT6o94CVzXRwsuearHs2rQBtO+84VPTzHDWM6g+ytMKMDiTKICUavvjEGR71T0fBARMHcSaLToOXm1QkSL+xX6wRUIFOluiqk2o7sF9/PNkN+vYdUsQdqzJaPs6cZ5yjeuiY2SrNODBYwHZFLk3C+TumISKgQIeTnbqLM0e1mF9aZ1TQeHgyGzGb1ljFuq6/xDOFKBnnwvRb6bfGQZseLTxgjnm0PzEKUlbXWDwF7jQYf80VLmFQsa5R03E1W2B6567lmvqUXRP+iNjtfKZLBMVMkyN4IAczeHjjj5IpIx0YbrIr5vmwoMd7iJvS0R7T3eKIIHhDlxgHkmNH0gBVU+YfoTn8OqIvarxfNNwLb3KtgKrQrTAXn/LuI0ebjXpCJlge3GNsGaHquDsVr2gvKP+pZIC+awgG6Ezsrt2Xl3tkczlQOMdn3qz9Anr2jxtaL4tNE14aN6xCr/iZJIdv5MUhzg141RU4gAKTjlIDmC6LpqcKN1v5O/mBDU2jwyTcz02A=
+    on_success: always

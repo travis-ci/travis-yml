@@ -1,0 +1,19 @@
+language: csharp
+sudo: false
+dist: trusty
+dotnet: 2.0.0
+mono: none
+env:
+  global:
+    - DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+    - DOTNET_CLI_TELEMETRY_OPTOUT: 1
+    - SkipNetFramework: true
+branches:
+  only:
+    - master
+    - release
+    - dev
+    - /^(.*\/)?ci-.*$/
+    - servicing/1.0.x
+script:
+  - ./build.sh -p:Configuration=Release

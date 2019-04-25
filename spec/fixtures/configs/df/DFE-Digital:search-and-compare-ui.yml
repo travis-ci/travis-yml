@@ -1,0 +1,54 @@
+matrix:
+  include:
+  - language: csharp
+    dist: trusty
+    sudo: required
+    mono: none
+    dotnet: 2.1
+    script:
+    - "./travis-build.sh --quiet verify"
+    deploy:
+    - provider: script
+      script: "./deploy.sh dev"
+      on: master
+    - provider: script
+      script: "./deploy.sh staging"
+      on: staging
+    - provider: script
+      script: "./deploy.sh prod"
+      on: production
+    - provider: script
+      skip_cleanup: true
+      script: "./travis-nuget-deploy.sh"
+      on:
+        all_branches: true
+  - language: node_js
+    node_js:
+    - 10.8
+    cache:
+      directories:
+      - "~/.npm"
+      - "~/.cache"
+      override:
+      - npm ci
+    before_script:
+    - cd src
+    - npm ci
+    script:
+    - npm test
+    - cd ..
+env:
+  global:
+  # APP_CREDENTIALS_DEV_PWD
+  - secure: nlbGF3FYmKnt2f0QbID12dKQCsUds5hLjUKDQpXSwIlKoEmMJlSsiSSJliaMbi++AFGtkUcrClwlpd4XJT3SIZkh+WedIq4YjYpQ03h+eJF8+iEILavKct3XQZVFcHEAAKP0ENvFEzT+QfCJ8o9jV0gFYaUmrdJmbP/sFFkWx+lb+5pww3WdjtGK33depyPTVS1xyRavZ6hjOSCQxXfYqqwJUwukEhCAYB2cIjOtYtCId2sIAZ4ZcbEJGZy1dh0QeYnl2D7pQPTQbWholyBGwvfP9b8cmBxxdspIJuZn/hvjHQ/U7vzMv1GfmNEr+NEJbbCz4K4qtC9ZlnPF098TxapDFMN7FvywhSSI/WMQmVvUUn0P++D4UsHuNq71tH2G8YGudxF89VbhVMTTXz21o75mTj27YSvhSz5A5QJC3Cvz853aKvbTAmCL147CP6loqo1MuP6i9RWVUeUmMnUfqqHfpvvbc7uJAyjmSPEH5s/qTdkMRPW06VFIQPTgw1f95tOwq+s2uLDSRoRTTuDDZYLIsvL7rx4p3cxEsWDN3cXxIUqfa2BFtX8ZKNMCgjQ/0IQKxempOVvKLeW94uL/gpaZSxK0lUIg+U+L/fjyJkEb6syynuX/TtOHWNq4YxL2BHcu3w3ZKdoBSa7PGLZ9nLTwRMxSF5xTNPmoqJmjZ94=
+  # APP_CREDENTIALS_STAGING_PWD
+  - secure: niltxqkLffTERbnlgD1VhN0rdH0Pf45GylFA+ME3hs4XTLKUOpx1FT0QFPkxowqnqp1j7Z8JgzO6lphbs3B3pXjG6OnDS6wV+2JhTtpI8HO13xIh/RUc6M+xBn6e1blnfWlwKWhBYGxZtYOXO9wuceHbyPJptS3gE4LOOcdgj1f2aMCsjN0b1asuzepBUrrS17uVmTXEbB7mqLkoGG4T8hTSFWOuqM6WxfbxlX6NTl+Tce4udFkQ3vsb10TkFlhCe+5wAnMEA+I9XvVi31P+aC2JTwcWfDvNtPL9wyiPOk7c0RiP8isqAtGlX6PoqR+I94FwftC6uuSoWCVBUCkkWy5omkiws28SoBMbPulpTiZ3ydy1jg/hA2TR50RQHAx4www/Ga1GGJZemD6Yy+U3so4MHyoP44LsBIbUrQHDAQ58NfmWi13xf5uttKDi0zQIl7xEMENbHtxcEeihf5QFVeGEYbAZ8oDJiryKRvmqye0tEQ84frDB3DZmvec6CY2pzH9cyyu0XG3OwskD2ypBrJiasH/tU5zb7OL2gJ+P56yXrLAD4Us00JvrxnCmkQ9SF/Jje9wezGpapiZBVOA8E42jgyiZm+pdzCjNrOF9PuZzAfvPHzesMf4ywB1bR+oeJuE2YHDrZS0mo+DDGITY9iqG/dWywfUumRqAtnAckQg=
+  # APP_CREDENTIALS_PROD_PWD
+  - secure: hbI2Bd0ZBv/UfJ1z1whCLuFEZHUgeu4EW0DxX7bj23jXdstKyBn/KTL9IiZzi+h1YFeVjh2WLFPh1QY4t612jVgoFZUbJEVnO9jDu2P5NbpxH4lYnwRTl1bsTUO0tt8F2cYdOBHyjvPxUugBrSHjOT0lkQHpJEreIV9QkefXQZdX2qkBArIYo+ltGlRUJvp7m8zAWie8sXJjz5eLKEHgzGJ5wUZiMDwxXFwzhO9n26WnTO85jFOt/En3vT1Tgutgoq9o97lbhdtt4k97X5xop+1uXJcuZ+E2hc6yIl0Y/eSXSGupLFF5VhETn3L8DCmf8DBptTMyGuFHpFWqe5iYMYqWiAZKp3WhOrfWExSh9h+4kglhIDH6zhwdmmv3OJhXgwa8O1FafJyV9flFW5oTbWeL8UDNOR2NfINUZHLIsMfpZd+7YS+zSym67QomDNrR8bF8v3l+KMBYSNJIwgvFCF8vcllZmVIbvL8F87mWrOOgEWZ64c42pIshPyqa+0mBJdibbnFc7c+w/WsV+1NHBeooO/D+8dYMVr+VJisHWPrKk5Z3t79uzmsr//JMULD81dHIkBk1bbu219AubsE+A7FHkwpGWeqYkdinwYoNXKGjMKUs6VmpJF+OKwL6gv6o8MXNG7DQCII1JEHon+ASqSgktp5GU+3o5s+5sBha1nM=
+  # NUGET_API_KEY
+  - secure: f7FBkOk7xsHx2VVOOiAvBlZzFR9X/CLIiuiwlFxDEXnIlKDsmqaGsf6SRd+1bU3JAMlipr/b2CXcoGmbqMtQnLfwuEQB8ROwpAy10TGYGq2gdmzE/mKDUlrCRR1mJEMVdTqvOA76bM8Xre6MslxVRCU/BDZPHhYtl3Lbq7Yroztulb/yxKfGwmwMOP/i7yX67X8nvoJAjtIRUrp+AEQn07IeT5xbpwwmHz8Rfy0RI26VD7WEmmZY7V3PGlNDJr7qh9gAd1NBfXC2jJDSNx5az5PfCpTjgCx0uk2Iml4kfy+C8NVjthC63U8LIoIKtBiPcPUA2Rou8sk7upneoF6HiDhk8kcRP5kJ7zV+4O9fus57XcJ6VsZVptg/QwUPqEVsvGuoN1mplrCojeipztJKcq1k0Sq8WJY4aIeu8v2K8LLq7beF3ZahLLzS3jCg26KvphfNRYS2qS2X4ZkmWq1mzFM+T22SAAaxIC/qoyFXKJYSRep3ZpcRht4IyvCv8tRwxE2+pRUrG+OwXhlWtP4XtHJ1dsPqYqi45CYRT0DNOLO3akVMK1z3sFgRR77OlFyT/bZlADZSgF5j3zWXKhjb3PTuMjnfE7CRr7FvoL3myxfNiIU+ud+XOJYCr1Pvh6YlnZxkEI1H2ls+YgqxWrDX0BlRCtcEgNAfdj1BPslXl64=
+notifications:
+  slack:
+    secure: XdmOobsi4wzrlcJWjWis3zfdk04/y3sdgYk0U2O2P5owGFW4cJk3ZX0yFaTgxuM+hiWiN425Zd8RLGDNl9VaX5Gf4tWRGoNtNHUemUTg2FtT2wFH6Z+EBGLrjqcdy39rKrEIU7S5Z2xaUnrrgR0a7j7sJGe25dG9j4vhmbAl0wKBzxnZQUmD0/Zvd09tHOjh3fHnsVvkhGQvH9BcISDWU0jwYdvZV03FPVDY2fgF25rbinuYA3nkL21lodevJNCVrBF8WKWzRgLty0yuX/aSAMIAKM+XtZykPbMql2xLFO7B8lVjWmg0JoO7TayXaG5WQkaz3BlLg2olZFkpL4ar3hi2xAE84ChR0VYXt2weSLFl94jd6M/UeSINJoR8AaaS845T6xwfpSddzCTtZ6+Ts72wLfVN27J0yiDYViRHL9EP7EZOYdYYVvx0mNl24XWop2MmpWX0fWiJWpmPbhHH3Y7UomzMpQVjD+raoZIE0R6wwa5oVX2krooT0bEzo8VmdCrzgDO8YXFOy7krG0LFfoeJQwE5cYbodWebTydNzGL6z/qtCM1dFXl87Q9I61vhLa0XbttyLEALNimjEcrMW6boxLbuwxpuCX6RWHNP8JrZxNbxrFHjY9Oq1NRIb+z5oJ0ljLaBsaUymToEHXYrmB6RRVi15dBoklnSFo1ldq4=
+  on_success: always
+  on_failure: always

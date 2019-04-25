@@ -1,0 +1,23 @@
+language: python
+python:
+- '2.7'
+- '3.6'
+install:
+- pip install tox-travis
+script:
+- nvm install 8 && nvm use 8
+- npm install -g gulp-cli
+- npm config set package-lock false
+- npm install
+- tox
+- npm test
+- python setup.py bdist_wheel --universal
+deploy:
+  provider: releases
+  api_key:
+    secure: lp2w7zEKGEZwoPr8Y2tzHha00hU0USLNLgFbpGJeLuvzNIlT4mf3h0Er+xzC/Vqq9TmNll5A8qWHlIspHsHN0zhOpziHZIVhS/W2LvhAhmlqfSlZsTXIlO5ERNnzi85kWvC3zMoPwyUEhwM6Q8fyLiZfgxxmFiCDZlrmUiIwp8zDItpkzwVhDUNaxheUadDPu7AYXnnQWN6GQBG/LOaZUExN47AFETGgo/BG/rVibhrPR15EDq4YWFfEBRND28jFubWpIf+JXOztMwuoJlmr/qfAtH43v6gbfjwM/7cagx+k+FW420V7to7r9HyBOKta1apxOSzE2YAC6P2it6lh+ak0npOmw7N6kCsKcMND77rrOX/wAUII6jiXsscG0P2aguPWnVV6TSUSGeZEe/9FqFNAS4kZD4RIy+QI24V7mTVe3XKSPypb1QtY3TkAe6yiuUH4WcoDCwzgRQWO1co7WLmqCstpMFlzl4TsrcVam5NbKI7ZPhRQVlSZDEXipwnUcJW6LsFxE4F+LYWyLasvZ4GIDuliKtkfWYXVe/0YGq0+mdoJ1geibxamkjfzn9FmOj5Oet+mEENE9jbPezZ0rPTxXq3OJ/XTpfwmour+zmnZjfojhNglP51BuKtHDsRPS+n8H4Ovh3RRheQJeXQ/xixOHIb5JVng4gPhsybU/mM=
+  skip_cleanup: true
+  file_glob: true
+  file: dist/*.whl
+  on:
+    tags: true

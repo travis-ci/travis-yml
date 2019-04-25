@@ -1,0 +1,49 @@
+language: node_js
+node_js:
+- '6'
+matrix:
+  include:
+  - language: node_js
+    addons:
+      apt:
+        sources:
+        - ubuntu-toolchain-r-test
+        packages:
+        - g++-4.8
+    install:
+    - npm install
+    script:
+    - ./scripts/ci-build-node.sh
+  - language: android
+    jdk: oraclejdk8
+    android:
+      components:
+      - tools
+      - tools
+      - platform-tools
+      - build-tools-25.0.3
+      - build-tools-25.0.0
+      - build-tools-23.0.1
+      - build-tools-25.0.2
+      - build-tools-26.0.1
+      - build-tools-25.0.1
+      - android-25
+      - android-23
+      - android-26
+    env:
+    - CXX=g++-4.8
+    addons:
+      apt:
+        sources:
+        - ubuntu-toolchain-r-test
+        packages:
+        - g++-4.8
+    before_install:
+    - openssl aes-256-cbc -K $encrypted_a533b106a22c_key -iv $encrypted_a533b106a22c_iv -in android/release.properties.enc -out android/release.properties -d
+    - nvm install 8
+    - node --version
+    - npm i -g npm@5.0.3
+    - npm --version
+    - npm install
+    script:
+    - travis_retry ./scripts/ci-build-android.sh

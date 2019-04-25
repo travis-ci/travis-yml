@@ -2,16 +2,14 @@
 
 
 
-## Type
+## Types
 
-Any of:
+* Hash
+* String (known)
 
-* Map (Hash)
-* Enum (known String)
+## Values
 
-## Flags
-
-None.
+* `openshift`
 
 
 ## Examples
@@ -25,9 +23,31 @@ deploy:
   edge: true
   user: 
   password: 
-  domain: string
-  app: string
   deployment_branch: string
+```
+
+```yaml
+deploy:
+  provider: openshift
+  domain: {}
+```
+
+```yaml
+deploy:
+  provider: openshift
+  domain: string
+```
+
+```yaml
+deploy:
+  provider: openshift
+  app: {}
+```
+
+```yaml
+deploy:
+  provider: openshift
+  app: string
 ```
 
 ```yaml

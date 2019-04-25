@@ -1,0 +1,16 @@
+install: gradle wrapper --gradle-version 4.6
+
+language: java
+
+jdk:
+- oraclejdk8
+
+before_install:
+  - sudo apt-get install jq
+
+after_success:
+- wget -O ~/codacy-coverage-reporter-assembly-latest.jar $(curl https://api.github.com/repos/codacy/codacy-coverage-reporter/releases/latest | jq -r .assets[0].browser_download_url)
+- ./gradlew check jacocoTestReport pitest
+- bash <(curl -s https://codecov.io/bash)
+- java -cp ~/codacy-coverage-reporter-assembly-latest.jar com.codacy.CodacyCoverageReporter -l Java -r jacocoTestReport.xml
+- bash <(curl -X POST -d @build/reports/pitest/mutations.xml http://rossdrew.pythonanywhere.com/report)

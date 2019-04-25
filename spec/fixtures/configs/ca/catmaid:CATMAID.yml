@@ -1,0 +1,66 @@
+dist: xenial
+sudo: required
+notifications:
+  email: false
+language: python
+cache: pip
+python:
+  - "3.5"
+  - "3.6"
+  - "3.7"
+  - "3.8-dev"
+  - "pypy3.5"
+  - "pypy3.6-7.1.1"
+matrix:
+  allow_failures:
+  - python: "3.8-dev"
+services:
+  - postgresql
+addons:
+  chrome: stable
+  postgresql: 10
+  sauce_connect:
+    username: catmaid
+    access_key:
+      secure: "rFiPF3KRokQqUaMHzr34wdt98pbYKyO47CFm9sJPO/HOKePhDCW6bMhiNa4x5Q2T5oAb0SRb/6CECExlGtA4mnzC5u47S8E9TidlZZ1m/n2TRZr2cvzhBJFhnYYZxcF8+6vCKq4DWVU+wD2/4wWktIHkcBJ9XMErl8HyICUHzLo="
+before_install:
+  - mkdir tmp
+  - travis_retry sudo apt-get update -y -qq
+  - bash scripts/travis/install_postgres.sh
+  - bash scripts/travis/install_python.sh
+  - nvm install 11
+install:
+  # Install requirements for running CATMAID and its unit tests
+  - ./scripts/travis/install_requirements.sh
+  - pip install coveralls flake8
+  - npm install
+before_script:
+  # Set up and start postgres, create database, write config files
+  - ./scripts/travis/setup_database.sh
+  - ./scripts/travis/configure_catmaid.sh
+script:
+  - flake8 --config=.travis.flake8 --statistics --count --exit-zero -q -q django
+    # see "scripts" in package.json
+  - npm run lint
+  - npm run jsdoc
+  - cd $TRAVIS_BUILD_DIR
+  # Static type checking for Python, for now only as warning and when mypy is
+  # available (which it isn't in PyPy).
+  - if [ -x "$(command -v mypy)" ]; then mypy --config-file mypy.ini django/ || true; fi
+  - cd django/projects
+  - python manage.py migrate --noinput
+  - python manage.py collectstatic --link --noinput
+  # Make sure there is no migration information missing. Makemigrations returns
+  # a non-zero exit code (1) when a new migration is created and otherwise zero.
+  - python manage.py makemigrations catmaid
+  # Run tests
+  - coverage run manage.py test catmaid.tests
+  # Remove login requirement from QUnit test page
+  - sed -i 's/login_required(\([^)]*\))/\1/g' ../applications/catmaid/urls.py
+  - python -Wall -Wignore::ImportWarning manage.py runserver &
+  - sleep 5
+  - cd ../..
+  # Run QUnit through karma in headless Chrome
+  - npm run karma
+after_success:
+  - cd django/projects && coveralls

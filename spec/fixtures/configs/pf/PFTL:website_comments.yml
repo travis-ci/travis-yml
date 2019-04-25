@@ -1,0 +1,28 @@
+addons:
+  ssh_known_hosts: pythonforthelab.com
+
+language: python
+python:
+  - "3.6"
+
+sudo: disabled
+
+install:
+  - pip install -r requirements.txt
+
+script:
+  - render_comments
+
+deploy:
+  provider: script
+  skip_cleanup: true
+  script: rsync -r --delete-after --quiet $TRAVIS_BUILD_DIR/comments pftl_comments@pythonforthelab.com:~/
+  on:
+    branch: master
+
+before_deploy:
+- openssl aes-256-cbc -K $encrypted_faa521db7e24_key -iv $encrypted_faa521db7e24_iv
+  -in deploy_rsa.enc -out /tmp/deploy_rsa -d
+- eval "$(ssh-agent -s)"
+- chmod 600 /tmp/deploy_rsa
+- ssh-add /tmp/deploy_rsa

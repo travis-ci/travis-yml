@@ -1,0 +1,41 @@
+language: node_js
+node_js:
+- '8'
+env:
+  global:
+  - GH_USER_EMAIL="travis@example.org"
+  - GH_USER_NAME="cozy-bot"
+  - DEPLOY_REPOSITORY="git@github.com:konnectors/cozy-konnector-free-mobile.git"
+  - secure: IOJBrDQhgAJQS+Kb59Q2Ihkv5la0MxoCR6Iw0NQuEQAZbK6QXtKFCvIpO8GzbN5lcj53XvJ7wYBc5VmuL/1FHOSiv3MR7kBm4k1/3G4DzpTfUCGZr5lmiF50eJeemiAdOpQHF0oUUe9WLh1iEDHMKch8Byg56h/fLMp40ff3KsQ37RsV0q/AAkx7pz4pv58TBIWXuTQH0dRbrPcMBMOkjFuSNfXuOdnLMZRZg2hFURkRJXLxYEylDvR9BkvsWRmy6JhCN3XBp5X+oMWa01+yFMJLIi4JuJGAuJzIQbZTyide1gjMqYjdED5cy2npVF1hAcgTHQqLPimkld6QPN+6hjn3MyQF+GHqLRyQ7zSTetZ0mjgYQVWEzVyU3QVOD0ZfY02Uk3Doo2kV37a6a6H6ivHjuEurYYa3BXwfpsJswTG2DFQAfo0aQVkq7MUPIV1mgwwVnKnD1B3/53G/EN+hl10BzAob8x4r46kW5n+t/jrlH+fGHD/jxwYndNlHYvYrxKP+7q8jN1IpGSvudYMt6+7JD7O8ZBnRBTzduN/T4UIdI9CCSSoY5MgrI0JYzOtUajp8Hg7HLWjOtT0l7yJPH095PTG9LVgYRXsY/qKX22RiykTI8Y1jmti0Zeb0htuw5TK4PS0LWyYLo8o7jLNT1wu9rcd6rHZ4iLX8JFtylUs=
+cache:
+  yarn: true
+  directories:
+  - node_modules
+branches:
+  except:
+  - build
+  - build-debug
+script:
+- yarn lint
+- yarn build
+# - yarn run check
+deploy:
+- provider: script
+  skip-cleanup: true
+  script: DEPLOY_BRANCH=build yarn deploy && yarn cozyPublish
+  on:
+    branch: master
+- provider: script
+  skip-cleanup: true
+  script: DEPLOY_BRANCH=build yarn deploy && yarn cozyPublish
+  on:
+    tags: true
+before_install:
+- openssl aes-256-cbc -K $encrypted_efd10db72745_key -iv $encrypted_efd10db72745_iv
+  -in github_deploy_key.enc -out /tmp/github_deploy_key -d
+- eval "$(ssh-agent -s)"
+- chmod 600 /tmp/github_deploy_key
+- ssh-add /tmp/github_deploy_key
+after_deploy:
+- rm /tmp/github_deploy_key
+- ssh-add -D

@@ -1,0 +1,43 @@
+language: python
+
+sudo: required
+
+cache: pip
+
+dist: "xenial"
+
+services:
+  - mysql
+
+python:
+  - '2.7'
+  - '3.5'
+  - '3.6'
+  - '3.6-dev'
+  - '3.7'
+  - '3.7-dev'
+  - 'pypy3.5'
+
+matrix:
+  allow_failures:
+    - python: '3.6-dev'
+    - python: '3.7-dev'
+
+install:
+  - pip install -e .
+
+before_script:
+  - pip install coverage
+  - pip install codecov
+
+before_install:
+  - mysql -e 'create database pydal;'
+
+script: export COVERAGE_PROCESS_START=gluon/tests/coverage.ini; ./web2py.py --run_system_tests --with_coverage
+
+after_success:
+  - coverage combine;
+  - codecov
+
+notifications:
+  email: true

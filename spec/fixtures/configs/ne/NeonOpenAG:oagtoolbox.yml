@@ -1,0 +1,28 @@
+notifications:
+  email: tobias@neontribe.co.uk
+  slack:
+    secure: Z59e+C3zQobvu06XoVsLijvjlW28NZkYYITH3Se8IMEiudaEzH/9bVsRsBprSpbz9mtGzj9cmOXSrRrs5h2D6SqoAnlSMPTYFxiZwoZufzOO8+WqzQnGukajlO+LNMUDwcvVQhLO0CXuprQZt3H4gCOz2pvekyae3XbNZMfO03Qrpv7u/NosCVrWbmL9Ns/9WneUyU4iVutZegS+m/HNIhHM6fu7YSk9ut/a1ftq3a3UZWLbD8n0643+BqzKLLBwMIrWrkodMWGo2+7A9PN4oD86cxbJwHrkh5XY+huKIdtkx1qU+15vYS5S/JVtT3d1VxJVr7FVqewF99WOCUZfsyeYLtst2ZJzWA9SnmTThqEYu0pyx9bBAjp5A9xDeGZIvqj+AIU+Ps4mHBsTgbRtNcCctRMkzUHtnDiB1t0ooqb+2qO0l+r6T1trkTJfpR5j1K7gnhy0rb93sdxtn5uq1jnTTz8a1lNzu05uiyzVV+4HIsOxNO2EdQeFOBo5omftXwkf+ZDzNNoO6pcdsHJIBiNbebC9aZsfzigEd/6AnOwktorZKKLX+BqE8YctujS2ZB5fPVUb5e5+PdDK+msuhlrIiGSzfBMNx3iBpUvfjADJ8AGdnGjV3S+VUDxRwh0KBVQQszbCSxPu6tWCuJneNreTSXG08z5S39OSwy1WKpQ=
+language: php
+php:
+- 7.1
+sudo: false
+cache:
+  directories:
+  - "$HOME/.composer/cache/files"
+env:
+  matrix:
+  - SYMFONY_VERSION="3.3.*" DB=sqlite
+before-install:
+- composer self-update
+install:
+- git submodule update --init --recursive
+- sudo apt install ruby-sass
+- sudo ln -s /usr/bin/sass /usr/local/bin/sass
+- composer install -n
+script:
+- "./vendor/bin/simple-phpunit -c phpunit.xml"
+deploy:
+  provider: script
+  script: wget -O /dev/null http://ci.openag.org.uk/app.php?branch=$TRAVIS_BRANCH
+  on:
+    all_branches: true

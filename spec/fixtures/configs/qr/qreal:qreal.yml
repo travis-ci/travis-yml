@@ -1,0 +1,82 @@
+language: generic
+
+git:
+  depth: 1
+
+env:
+  global:
+    - PYENV_ROOT="$HOME/pyenv.root"
+    - CONFIG=release
+    - VERA=false
+    - PROJECT=qrealRobots
+    - TESTS=true
+    - CELLAR_CACHE_DIR=$([ $TRAVIS_OS_NAME = 'osx' ] && echo "/usr/local/Cellar" || { mkdir -p .empty/{qt,ccache,python@3,pyenv} ; echo .empty ; } )
+    - EARLY_START_DOCKER_PULL_PID=$( if [ $TRAVIS_OS_NAME = 'linux' ] ; then docker pull trikset/linux-builder ; else true ; fi & echo $!)
+    - HEARTBEAT=$(while sleep 100; do echo "=====[ $SECONDS seconds, still building... ]====="; done >&2 & echo $! )
+    - ALL_TESTS="./robots_kitBase_unittests-d && ./robots_interpreterCore_unittests-d && ./robots_twoDModel_unittests-d && ./trik-v62-qts-generator-tests-d && ./robots_utils_unittests-d && ./run-simulator-tests.sh"
+cache:
+  timeout: 1000
+  apt: true
+  ccache: true
+  pip: true
+  directories:
+    - $CELLAR_CACHE_DIR/qt
+    - $CELLAR_CACHE_DIR/ccache
+    - $CELLAR_CACHE_DIR/python@3
+    - $CELLAR_CACHE_DIR/pyenv
+    - $PYENV_ROOT
+#    - /usr/local/opt/
+#    - /usr/local/lib/
+#    - $HOME/.ccache
+#    - $HOME/.cache
+
+addons:
+  apt:
+    update: true
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - python-pip
+  artifacts:
+    paths:
+      - build.log
+
+matrix:
+  include:
+    - os: linux
+      dist: trusty
+      sudo: required
+      services: docker
+      name: "Linux release"
+    - os: linux
+      dist: trusty
+      sudo: required
+      services: docker
+      env: CONFIG=debug  VERA=true PROJECT=qrealRobotsTest TESTS=$ALL_TESTS
+      name: "Linux debug + vera + tests"
+    - os: osx
+      language: cpp
+      name: "macOS release"
+    - os: osx
+      language: cpp
+      name: "macOS debug + tests"
+      env: CONFIG=debug  VERA=false PROJECT=qrealRobotsTest TESTS=$ALL_TESTS
+
+before_install:
+  - wait $EARLY_START_DOCKER_PULL_PID || true
+  - ./buildScripts/travis/before_install.sh
+
+install:
+  - ./buildScripts/travis/install.sh
+
+script:
+  - ./buildScripts/travis/script.sh & WPID=$!
+  - sleep 2400 && { kill $WPID || true ; echo "***KILLED ON TIMEOUT***" ; } & KPID=$!
+  - wait $WPID ; RES=$?; kill $KPID > /dev/null ; ( exit $RES )
+after_script:
+  - ./buildScripts/travis/after_script.sh
+  - kill $HEARTBEAT
+  - tail -n 1000 build.log
+
+after_success:
+  - true

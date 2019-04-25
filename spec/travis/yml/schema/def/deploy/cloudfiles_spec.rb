@@ -32,10 +32,10 @@ describe Travis::Yml::Schema::Def::Deploy::Cloudfiles, 'structure' do
                 '$ref': '#/definitions/deploy/edge'
               },
               username: {
-                '$ref': '#/definitions/secure'
+                '$ref': '#/definitions/type/secure'
               },
               api_key: {
-                '$ref': '#/definitions/secure'
+                '$ref': '#/definitions/type/secure'
               },
               region: {
                 type: :string

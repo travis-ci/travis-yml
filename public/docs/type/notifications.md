@@ -2,20 +2,14 @@
 
 
 
-## Type
+## Types
 
-Any of:
-
-* Map (Hash)
-* Any of:
-
-* Map (Hash)
+* Hash
+* Hash
+* Array of: 
 * 
 * Boolean
 
-## Flags
-
-None.
 
 
 ## Examples
@@ -36,14 +30,29 @@ notifications:
 
 ```yaml
 notifications:
-  recipients: "[ref:secures]"
   enabled: true
   on_success: always
   on_failure: always
 ```
 
 ```yaml
-notifications: "[ref:secures]"
+notifications:
+  recipients:
+  - secure: encrypted string
+```
+
+```yaml
+notifications:
+  recipients:
+```
+
+```yaml
+notifications:
+- secure: encrypted string
+```
+
+```yaml
+notifications:
 
 ```
 

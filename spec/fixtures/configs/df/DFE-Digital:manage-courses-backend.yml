@@ -1,0 +1,26 @@
+language: minimal
+git:
+  depth: false
+services:
+  - docker
+before_script:
+  - source ./config.sh
+  - ./docker-login.sh
+  - docker-compose pull
+  - docker-compose build
+  - docker-compose up --no-build -d
+  - docker-compose exec web /bin/sh -c "./wait-for-command.sh -c 'nc -z db 5432' -s 0 -t 20" # Wait for the database to wake up, so we can set up the schema and run the tests.
+  - docker-compose exec web /bin/sh -c "bundle exec rails db:setup"
+script:
+  - docker-compose exec web /bin/sh -c "bundle exec rake spec"
+  - docker-compose exec web /bin/sh -c "bundle exec rubocop app config db lib spec Gemfile --format clang"
+deploy:
+  provider: script
+  script: bash docker-push.sh
+  skip_cleanup: true
+  on:
+    all_branches: true
+    condition: $TRAVIS_BRANCH =~ ^(master|staging|production)$
+env:
+  global:
+    secure: p3cx6N2Fdv9UCNniQhdOokgZGeOw0fUgnUVD8+Adk9OvAYVmRIXjPY2EttHFlz/5GTZ11KZBcprUO/IeFxhqHG5LJWEaX+q1BKazECiJ3BzwLDLXFwQJ24XdKvRE1p3XulPSy9hioH7q6n9r6wpEf0i6KgelpLIWCCUjIDYM8udXsfNLsCkBuwMC3RMc0xY4XNPXhJX3VVZJxC8hp5egJn8X11mhiQXQNLjQzaKIPNXa5AOfegCXuL8oDIYKvazhLvDvsvRn4GisZfvZVIOO4AXYdV/YPzBmGO5QJYDL6tglZQ8plb4hd1KrHsrbw+Aw3h400uySsI/cWgdC8vSkCEkdobGp0Uz5KM0mqowOV8eMb2scplFUGNyajy9fZmwsQMgxNmpdyONPSZ1yLnYJaObWdj5qoe6vG7UUwLzL/v87erRKo12se5KK4ejbumkDWztzXb9xmWcEDe09ieAoDNuUIN74cwf92KtYna2uJIkCkK8wat5rRw9HuSun6GdDS7KAay7LL8xm+Qxu03yWTSLAssdWdtFpbQasWDoGWce3KrPjz8k14Ck58Ib+nI6+HVrUAoyH/5wYCJAOp3dCzAbp2TmAi1hayQuFmNX6NY9MoPC4MJ4moIiH6b97DiMJ4L33GOfeb3Iwfok/pj+uSSdFmQa7oWwZU4IdzbNWTa0=

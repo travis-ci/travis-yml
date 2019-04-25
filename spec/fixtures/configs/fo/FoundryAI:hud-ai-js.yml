@@ -1,0 +1,28 @@
+language: node_js
+install:
+- npm update -g npm@5
+- npm install -g typescript
+- npm install
+script: npm test
+node_js:
+- '6'
+- '7'
+- '8'
+- '9'
+- '10'
+cache:
+  directories:
+  - "$HOME/.npm"
+jobs:
+  include:
+  - stage: npm release
+    node_js: '8'
+    script: echo "Deploying to npm ..."
+    deploy:
+      provider: npm
+      skip_cleanup: true
+      email: engineering@foundry.ai
+      api_key:
+        secure: CkxY8j444ct81spS5DPKR49rNvBzWVUM1H8/6MXIZ7NRs9sq5/WMzvUULfHWHzcZqy8V6rvg4thRww6T5wx4AgQyeDiZOzrtFF8XJ1L0aKqBs14ivcDSu1FiQXFQ6Zy387e7zMN+0l8Hp/K/45QfSWbJJVTO7GfnYmDafEh0LlItvqymCym6cumTFJ05g9+5okzINUfzynNkCLyPOo01Nc6vB248nUKgHZzBeagCuFLbXOozFZmP85U5oDXTUxaDqplzzLI6W18UEmwfseE1FqurA0DRwHfCxtAf6LvoYhKDmWGydiC9ozlAHfFHNOLQlEarOf6A/bTzXfiN67W3H5do+Bvc5zY1VbwdNczBs+DjjUyJU3TwzhF/Hka/Y7zsRuJSkY6Id6zb8y2FxQywwveTFgerUA6NmhPNSPbXlbNxc40i77fkpBuJmsaENyUUPy0Oq0GMLlDRohw7CNrfu2XKYeLfcwX3kBfKVQ7b7tHYGEqOhDeexlCUMdYF3rFPsOqt5iy/wpajlnjpTdS+QtMUqhMcxP18H4Pd0Z2cBsuNxre2pnI38scseOuTwO/lzFmrQIKp7Vv9wtqBFmOEb/CYYRrwjjc1Ym4mUSm4sWX0SbXon5UJy5hXd9E8XRabf9eosA/6KBBWlTgGm4yKAFPLgJnX88wt2BR+QoOV+vI=
+      on:
+        tags: true

@@ -1,0 +1,71 @@
+language: python
+sudo: required
+dist: trusty
+git:
+  depth: false
+python:
+  - 3.6
+addons:
+    postgresql: "9.5"
+    sauce_connect: true
+
+env:
+  global:
+    - DOCKER_COMPOSE_VERSION=1.11.2
+    - DOCKER_HOST=tcp://127.0.0.1:2375
+    - SAUCE_USERNAME=vmalloc
+    - SAUCELABS_USERNAME=vmalloc
+    - secure: UK8uZD6VvqxxosDCsog6cl0hFng1KVerbEPAfulFpMBybPRM6M0ifspl+hK0AfHQvHtA8PMCs+KsZBb3CV2E5RwoIgXWEBC2t8+XsfU3p2fnhbuz/5S2xs/CvGLhMloeIpc8fIQ7qdRk0pdOqkUK5yMkkV7jfJsqw2HyTS5FOAk=
+    - secure: UoIM5vtfs+bBcb63aNa4aFV4lCrwgaABKrdYlqkw+vwE6S212a5ssfIn/41Tw80jZ/qBhSMhylIi2Cp6XWQbuSLjNUK1Ar7O0K8HX69QdcUCnofxwHLKSe7wREYhF6QtAegsw5pmSIYTLvHnp3k+6I0tw2DyvSJejS0dv3WWKzw=
+
+branches:
+  except:
+    - trying.tmp
+    - staging.tmp
+
+
+services:
+  - redis-server
+  - postgresql
+
+before_install:
+
+  # update docker
+  - curl https://releases.rancher.com/install-docker/17.09.sh | sudo bash -
+
+  # build the Backslash docker image
+  - python scripts/travis_version_fix.py
+  - sudo docker build -f ./docker/Dockerfile -t getslash/backslash .
+
+
+  # update docker-compose
+  - curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
+  - chmod +x docker-compose
+  - sudo mv docker-compose /usr/local/bin
+  - docker-compose --version
+
+install:
+  # db and env setup
+  - psql -c 'create database backslash;' -U postgres
+  - pip install pipenv
+  - pipenv install -d
+  - pipenv run manage db upgrade
+
+  # run docker-compose setup in testing mode
+  - sudo docker-compose -f docker/docker-compose.yml -p backslash build
+  - sudo docker-compose -f docker/docker-compose.yml -p backslash -f docker/docker-compose-testing-override.yml up -d
+
+script:
+  # Workaround for terminal failures on Travis (See https://github.com/travis-ci/travis-ci/issues/8982)
+  - python -c "import fcntl; fcntl.fcntl(1, fcntl.F_SETFL, 0)"
+  # create empty index.html so that the test on get / passes
+  - mkdir webapp/dist && touch webapp/dist/index.html
+  - pipenv run pytest tests --tb=line
+  - if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then pipenv run pytest integration_tests --tb=short --app-url http://127.0.0.1:8000 --driver SauceLabs --capability browserName Firefox --capability platform "Windows 10" --capability version latest --capability tunnelIdentifier $TRAVIS_JOB_NUMBER; fi
+
+after_failure:
+  - sudo docker logs backslash_webapp_1
+  - sudo docker logs backslash_api-server_1
+
+after_success:
+  - pipenv run travis_publish

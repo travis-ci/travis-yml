@@ -1,0 +1,27 @@
+language: java
+jdk:
+  - openjdk7
+#  - openjdk6
+
+# Skip separate install phase as for some reason running the two default phases
+# on Travis seem to cause the second phases to select the wrong profile
+# (doesn't happen locally when running the exact same commands). And with maven
+# it's not needed to have a separate install phase.
+# Default install phase: mvn install -DskipTests=true -B
+# Default script phase: mvn test -B
+install: echo 'Skipping separate install phase'
+script: mvn install -B
+
+notifications:
+  email:
+    recipients:
+      - travis-j@ibissource.org
+      - travis-j2@ibissource.org
+      - travis-n@ibissource.org
+      - travis-p@ibissource.org
+      - travis-g@ibissource.org
+#    on_success: always # default: change
+#    on_failure: always # default: always
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)

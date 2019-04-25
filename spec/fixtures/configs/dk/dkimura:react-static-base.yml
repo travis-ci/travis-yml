@@ -1,0 +1,17 @@
+sudo: required
+
+services:
+  - docker
+
+language: node_js
+
+addons:
+  apt:
+    packages:
+      - docker-ce
+
+before_install:
+  - docker build -t react-static-base .
+
+script:
+  - docker run react-static-base

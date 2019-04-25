@@ -1,0 +1,24 @@
+language: python
+python:
+  - '2.7'
+  - '3.4'
+  - '3.5'
+  - '3.6'
+before_install:
+  - 'sudo apt-get install -y gdb python-dbg'
+  - 'pip install --editable .[test]'
+install:
+  - 'pip install -r requirements.txt'
+before_script:
+  - 'ulimit -c unlimited -S'
+script:
+  - 'python -m pytest ./tests/test_*.py --cov snippy -m "not docker"'
+after_success:
+  - 'codecov'
+after_failure:
+  - 'ls -al'
+  - "python -c 'import sqlite3; print(sqlite3.sqlite_version)'"
+  - "cat ./core | strings | grep -Eo '^_=([^[:space:]]{5,})'"
+  - 'gdb -c ./core -ex "set pagination 0" -batch'
+  - 'gdb -c ./core -ex "thread info" -ex "set pagination 0" -batch'
+  - 'gdb -c ./core -ex "bt" -ex "set pagination 0" -batch'

@@ -1,0 +1,15 @@
+sudo: false
+language: node_js
+node_js:
+  - 8
+os:
+  - linux
+before_install:
+  - npm i -g npm@5.6.0
+  - npm --version
+install:
+  - npm i
+  - npm i -g jest eslint codecov
+script:
+  - eslint ./src && jest --coverage
+  - codecov

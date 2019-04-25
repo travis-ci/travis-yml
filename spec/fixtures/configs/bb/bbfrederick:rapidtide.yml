@@ -1,0 +1,33 @@
+language: python
+python:
+  - "2.7"
+  - "3.4"
+  - "3.5"
+  - "3.6"
+  - "nightly" # currently points to 3.6-dev
+
+matrix:
+  include:
+    - python: 3.6
+      env:
+        - COVERAGE=1
+
+# Setup anaconda
+before_install:
+  - pip install pytest pytest-cov codecov
+  - pip install -r requirements.txt
+
+install:
+  - python setup.py install
+
+script:
+  - |
+    if [ "${COVERAGE}" == "1" ]; then
+        TEST_ARGS="--cov-report term-missing --cov=rapidtide";
+    else
+        TEST_ARGS="";
+    fi
+    py.test ${TEST_ARGS} rapidtide;
+
+after_success:
+  - codecov

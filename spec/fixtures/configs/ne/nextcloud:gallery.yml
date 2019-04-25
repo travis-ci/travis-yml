@@ -1,0 +1,143 @@
+sudo: false
+language: php
+php:
+  - 5.6
+  - 7.0
+  - 7.1
+addons:
+  apt:
+    packages:
+      - graphviz
+      - gdb
+      - ghostscript
+  firefox: "latest"
+env:
+  global:
+    - CORE_BRANCH=stable12
+    - APP_NAME=gallery
+    - SERVER_FOLDER=server
+    - CLOUD=nextcloud
+    - GH_REF: github.com/nextcloud/gallery.git
+    - secure: "cLmMqrbVZrvn2GAoVs6JWa5h70tzrAISjPZUfENjl0KYT6B84z3B94W/dGU+I2mxwvyBqEP+x83Bih2CxEflqc7tJmdqC+MM/ZZiigPX7RCjq5XHbzUpPpMbC8MFxT2K3jcFXUitfwZvNaZXJIiK3ZQJU4ayKaegLvI91x1SqH0="
+  matrix:
+    - DB=sqlite
+    - DB=mysql
+
+branches:
+  only:
+    - master
+    - /^stable\d+(\.\d+)?$/
+
+cache:
+  directories:
+    # ${TRAVIS_BUILD_DIR} is /home/travis/build/nextcloud/gallery/
+    - ${TRAVIS_BUILD_DIR}/travis/php-cache
+    - ${TRAVIS_BUILD_DIR}/travis/lib-cache
+    - $HOME/.composer/cache
+
+before_cache:
+  # Archive the vendor folder. Watch closely!
+  - cp -r ${TRAVIS_BUILD_DIR}/../${SERVER_FOLDER}/apps/$APP_NAME/vendor ${TRAVIS_BUILD_DIR}/travis/php-cache/`php-config --vernum`
+
+before_install:
+  # Disable opcache on PHP 7.0 as it crashes too easily
+  - php --modules
+
+  # Setup Selenium
+  - export DISPLAY=:99.0
+  - sh -e /etc/init.d/xvfb start
+  - sleep 3
+  - wget https://github.com/mozilla/geckodriver/releases/download/v0.19.1/geckodriver-v0.19.1-linux64.tar.gz
+  - mkdir geckodriver
+  - tar -xzf geckodriver-v0.19.1-linux64.tar.gz -C geckodriver
+  - export PATH=$PATH:$PWD/geckodriver
+  - sh -c "wget -O ${TRAVIS_BUILD_DIR}/travis/lib-cache/selenium.jar https://selenium-release.storage.googleapis.com/3.7/selenium-server-standalone-3.7.1.jar;"
+  - java -jar ${TRAVIS_BUILD_DIR}/travis/lib-cache/selenium.jar -port 4444 -enablePassThrough false >/dev/null 2>&1 & # WARNING - Takes a long time to start up. Keep here
+
+  # Ghostdriver does not work on Travis - Download the latest PhantomJS
+  #- mkdir travis-phantomjs
+  #- sh -c "if [ ! -e ${TRAVIS_BUILD_DIR}/travis/lib-cache/phantomjs.tar.bz2 ]; then wget -O ${TRAVIS_BUILD_DIR}/travis/lib-cache/phantomjs.tar.bz2  https://s3.amazonaws.com/travis-phantomjs/phantomjs-2.0.0-ubuntu-12.04.tar.bz2; fi;"
+  #- tar -xvf ${TRAVIS_BUILD_DIR}/travis/lib-cache/phantomjs.tar.bz2
+  #- export PATH=${TRAVIS_BUILD_DIR}/travis/lib-cache/phantomjs:$PATH
+  #- phantomjs --webdriver=4444 --ignore-ssl-errors=true --webdriver-loglevel=DEBUG &
+
+  # Get rid of Github limits
+  # Only enable temporarily when making large package changes with composer
+  #- git config --global github.accesstoken $GH_TOKEN
+
+  # Make modifications to the environment to allow us to retrieve core dumps
+  # When debugging, make sure you enable sudo by commenting out the first line of this file
+  #- ulimit -c unlimited -S
+  #- cat /proc/sys/kernel/core_pattern
+  #- sh -c "if [ '$TRAVIS_PHP_VERSION' = '7.0' ]; then echo '/tmp/core_%e.%p' | sudo tee /proc/sys/kernel/core_pattern; fi;"
+  #- cat /proc/sys/kernel/core_pattern
+
+  # Installing the server
+  - wget https://raw.githubusercontent.com/nextcloud/travis_ci/master/before_install.sh
+  - bash ./before_install.sh $APP_NAME $CORE_BRANCH $DB
+  - cd ../${SERVER_FOLDER}
+  - php occ app:enable $APP_NAME
+
+before_script:
+  # Make sure Webdriver is running
+  - curl http://localhost:4444/wd/hub/status
+  #- phantomjs --version
+
+  # Install the Imagick PHP extension
+  - sh -c "pecl config-set preferred_state beta; echo yes | printf "\n" | pecl install imagick;"
+
+  # Disable xdebug when we don't need coverage to speed up testing
+  - sh -c "if [ '$TRAVIS_PHP_VERSION' != '7.0' ]; then phpenv config-rm xdebug.ini; fi;"
+  - sh -c "if [ '$TRAVIS_PHP_VERSION' = '7.0' ] && [ '$DB' != 'mysql' ]; then phpenv config-rm xdebug.ini; fi;"
+  # Always install the latest version of the xdebug PHP extension
+  - sh -c "if [ '$TRAVIS_PHP_VERSION' = '7.0' ] && [ '$DB' = 'mysql' ]; then cd build; bash xdebug_install.sh; cd ${TRAVIS_BUILD_DIR}/../${SERVER_FOLDER}/apps/$APP_NAME; fi"
+
+  # Sets up the PHP composer cache
+  - sh -c "if [ ! -d ${TRAVIS_BUILD_DIR}/travis/php-cache/`php-config --vernum` ]; then mkdir -p ${TRAVIS_BUILD_DIR}/travis/php-cache/`php-config --vernum`; fi;"
+  - rm -rf ${TRAVIS_BUILD_DIR}/../${SERVER_FOLDER}/apps/$APP_NAME/vendor
+  - sh -c "if [ -d ${TRAVIS_BUILD_DIR}/travis/php-cache/`php-config --vernum`/vendor ]; then cp -r ${TRAVIS_BUILD_DIR}/travis/php-cache/`php-config --vernum`/vendor ${TRAVIS_BUILD_DIR}/../${SERVER_FOLDER}/apps/$APP_NAME; fi;"
+
+  # Composer
+  - cd ${TRAVIS_BUILD_DIR}/../${SERVER_FOLDER}/apps/$APP_NAME
+  - composer self-update
+  - composer install -o --prefer-dist --no-interaction
+  - composer show
+
+script:
+  # Test lint
+  - php vendor/bin/parallel-lint --exclude vendor/composer/autoload_static.php --exclude travis --exclude vendor . vendor/composer vendor/symfony/yaml vendor/autoload.php
+
+  # Acceptance tests, using Firefox, without code coverage
+  - php vendor/bin/codecept run acceptance --env firefox
+  # Unit, integration and api tests, without code coverage
+  - sh -c "if [ '$TRAVIS_PHP_VERSION' != '7.0' ]; then php vendor/bin/codecept run unit,integration,api; fi;"
+  - sh -c "if [ '$TRAVIS_PHP_VERSION' = '7.0' ] && [ '$DB' != 'mysql' ]; then php vendor/bin/codecept run unit,integration,api; fi;"
+
+  # PHP 7.0 ONLY: Unit, integration and api tests with code coverage
+  - sh -c "if [ '$TRAVIS_PHP_VERSION' = '7.0' ] && [ '$DB' = 'mysql' ]; then php vendor/bin/codecept run unit,integration,api --coverage --coverage-xml --coverage-html; fi;"
+  # We can't use phpdbg only as it doesn't work with the webdriver and we can't use it for some tests only as we can't merge html reports
+  # - sh -c "if [ '$TRAVIS_PHP_VERSION' = '7.0' ] && [ '$DB' = 'mysql' ]; then phpenv config-rm xdebug.ini; phpdbg -qrr vendor/bin/codecept run unit,integration,api --coverage --coverage-xml --coverage-html; fi;"
+
+after_success:
+  # Send coverage report to Codecov
+  - sh -c "if [ '$TRAVIS_PHP_VERSION' = '7.0' ] && [ '$DB' = 'mysql' ]; then wget https://codecov.io/bash -O codecov.sh; fi"
+  - sh -c "if [ '$TRAVIS_PHP_VERSION' = '7.0' ] && [ '$DB' = 'mysql' ] && [ '$TRAVIS_PULL_REQUEST' ]; then bash codecov.sh -B $TRAVIS_BRANCH -C $TRAVIS_COMMIT -P $TRAVIS_PULL_REQUEST -t 739120c2-700d-47c4-845c-c0d0c9c3707d -f tests/_output/coverage.xml; fi"
+  - sh -c "if [ '$TRAVIS_PHP_VERSION' = '7.0' ] && [ '$DB' = 'mysql' ]; then bash codecov.sh -B $TRAVIS_BRANCH -C $TRAVIS_COMMIT -t 739120c2-700d-47c4-845c-c0d0c9c3707d -f tests/_output/coverage.xml; fi"
+
+  # Generate API documentation
+  - sh -c "if [ '$TRAVIS_PHP_VERSION' = '7.0' ] && [ '$DB' = 'mysql' ]; then php vendor/bin/phpdoc run; fi"
+  # Generate Wiki documentation
+  - sh -c "if [ '$TRAVIS_PHP_VERSION' = '7.0' ] && [ '$DB' = 'mysql' ]; then git submodule update --init; fi"
+  # Send documentation to Github Pages
+  - sh -c "if [ '$TRAVIS_PHP_VERSION' = '7.0' ] && [ '$DB' = 'mysql' ]; then cd build/documentation; bash ./docpublisher.sh; fi"
+
+after_failure:
+  - cat tests/_output/phpbuiltinserver.errors.txt
+  - cat tests/_output/phpbuiltinserver.access_log.txt
+  - bash build/after_failure.sh
+
+matrix:
+  include:
+    - php: 5.6
+      env: DB=pgsql
+  fast_finish: true

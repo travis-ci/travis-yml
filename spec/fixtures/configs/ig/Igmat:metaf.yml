@@ -1,0 +1,29 @@
+dist: trusty
+sudo: true
+language: node_js
+cache:
+  directories:
+    - ~/.npm
+notifications:
+  email: false
+node_js:
+  - '10'
+  - '9'
+  - '8'
+ # - '6'
+
+before_script: npm run build && ./node_modules/.bin/greenkeeper-lockfile-update
+script: travis_wait 30 npm test
+after_script: ./node_modules/.bin/greenkeeper-lockfile-upload
+
+jobs:
+  include:
+    - stage: release
+      if: branch = master
+      node_js: "8 x64"
+      script: sh ./scripts/authenticate.sh
+      deploy:
+        provider: script
+        skip_cleanup: true
+        script: npm run release
+

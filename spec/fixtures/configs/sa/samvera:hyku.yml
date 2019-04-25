@@ -1,0 +1,70 @@
+sudo: required
+language: ruby
+notifications:
+  email: false
+dist: trusty
+rvm:
+  - 2.4.1
+# We provide AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY encrypted by travis here
+env:
+  global:
+    - NOKOGIRI_USE_SYSTEM_LIBRARIES=true
+    - AWS_REGION=us-east-1
+    - secure: BnmjWPatxrNOpYKw05B54q+CUiDRw16bnL0YMvBU6XDotOTNnGjG24oul3et0wmOx0TfgLXLQ3twyWnOkW5HEIUGzjX825Pd/Ur8YaHZI9KeQc9FrAn43aDIVAtbnkg7lxMqsJZUmfSHzUXkbyPmMtLc+LK9wteQ0kdzIplsenyLV7VRTP8jINxkUnt/TYj5poah1RU9NemvGcUKW2hC3aW0d8/yjAV7boZodgBSiMSHSLQvScNNvS3+Goymlq15hl26ZjMqddLMJgRZwskZhDyAgUQuZpSHymXlzRSiSzSshJW1ST0MLmECImRdJ6t/JP2cf0ZHN/sR2XBG0ABc9dQfKB/aLITbZ5IbSHyjOoBzlilSixNVT7+VoW6MfbnXFlg2cwFfKgKPkXElADcIUT7lRcTiR5EO7oJILJ8C1psOFtC1XtbKVT1P4zHXoFqvaNQ8iWg0sMdSbYfDxfG9ObAA0SYA4d7ZvbZ0bt8XUhWFsBoMEAi6bzDxsp4jPkKIAjboDar/iol/rEIF2FwaRIjoTsM+MzN+p+P1bqjMFIJsFRX7DqzJ/6XP+vm+z437oEWKbTGnPlCWCwBw2qOpQNwe9o5wzP2H3KN2u0AcVs2UUcyE/pPObvWFKiGXC5FAljdyjv1jjHmuvBnnsuAkB3siqbEpvT7S/c4Qi8L8/To=
+    - secure: FknMcFAQQAZMZZeUOgm1pyYI7s2/I+JYpKzCDI4y7MjwdGjRWs1vM1suud2sEtBEtCajeedvXDhrENHPEwVaBwKwgOkQxb6WjcVHLm9MBzrG5apWOZre9hAdbZXcs5QVpoA/xj3ASLF/XV4wndyN03eex0cAYRekh/rTsHPhItdEOc1PuZKuLb+3UNWKp9tyQ1oHA7ZqeEvyEK6EqOMBBW9EBdnkYN6JT5x1NwAtm0FPTia58UQyUdqjSLv7oWUAutACyPCS5zNsBwpzJWaQ2x7qhCDuRB8X0J0lz5lReuBx9j2FW0dWLEdj11gam0osdYux85Tk5fPOOGtKRmNwWFqSPrvzIvcuR/C3pzlfr35d+KduK+OD3EnsKL2Cp6mkgQPlBDGvKGl6GH0aiOenhHxjNIsG5eK29Gyit0EQRLosHy+eDZymzvT97WNheali+PKTFmopatmFILmID2Gnk66yvtdeNFFBUCAMVH3t0C/8hsSt484HP1AiwaPR4aeucMOJmK+H7xvwQRPs+vYemGYL7bBRoQE7F6tr9UQFMyw7/WuKPNSx1KV8bhcmoCOrOpjxzVvMjhokX83CGxok2hA/vhhHMHjh3D+Z+uhJzLja/gDJAa5rPHkqQMUdUssJ0/R9IiW+tEGHdUM8hPrzyFU5V1DmcO1DEBFvSeTvL/4=
+
+cache:
+  bundler: true
+
+jdk:
+  - oraclejdk8
+addons:
+  chrome: stable
+  hosts:
+    - tenant1.localhost
+    - tenant2.localhost
+    - test.host
+
+before_install:
+  - gem update --system
+  - gem install bundler
+  - google-chrome-stable --headless --disable-gpu --no-sandbox --remote-debugging-port=9222 http://localhost &
+
+before_script:
+  - bundle exec rake db:create
+  - bundle exec chromedriver-update 73.0.3683.68
+
+before_deploy:
+  - git clean -dxf; rm -rf vendor/bundle
+  - echo $TRAVIS_COMMIT > REVISION
+  - mkdir build; zip -q -r build/hyku.zip .
+
+services:
+  - postgresql
+  - redis-server
+
+deploy:
+  - provider: s3
+    access_key_id:
+      secure: "VPgy/7mq+jzSDx2cHOQ2M5O8k4Khi7czmXZAVPH2fA87dlnmCpprJkfuekinvMVXyMkCfs6DYfKkJ/dbzPfzIm7N3kxvI6fcfOCR/kuQFW8SAJMUhxLiE4DqXHvU725b5jT6Zc+3WdJBcFzrtBCdf6YorhQCFLVpfc0tCJIS1sPE+a7jZFQvrsaALPZZpOG9jmxZhX9Q0GKnc4xpzwLSv1fVkqT1GEAwmDiboVHdDN0MPh7Lp2L2VpXnuBidMpuXEimW35iVbcCDhbkoBbTnz+jRhQBCAFIsTwNi/BjjibZ7KuuRZQ3s0i0zFnhu/TWyia5jbgr7tcB4Emo5rw5vVRmmYrA79NqImBGDAXcyIrrMOsHxjTPq47ws2KAjGEQ7dQtaw/pQkveY361Uvnib72KZC4Go+FMKYGTxhgLYJXuwBWa0lX+DLfezNcKFkRdH6V8Z/nwkvJi8L+CRfwjiuILch+ABZWgn07t7EQ9wAtscuYAJhdiYrpK4yUd44aWqIkLZHzF78jIaWRu8zdLcFSeA+g67LLBNj6Wa7ZWxMUzcgJh4+KiLN3rGVzUCstTAIFiZYCBWdq270wWjVRkNHy184vt53i4iQxmjRRFLUwmAIFvO1PCjw/4m6gCdrfoABIAdu7b8Gt8B+HEwFCGVn9IghkDkR2rTlVavj36MndA="
+    secret_access_key:
+      secure: iaeQhv5WMVaxAvVRS3DckUipqNDUyNd+BMPCSn+RttLPDJrzTjjw2WrQiNI1/z0aVfhkItNZ/nkect+IHTidRIgF4ZlD2KQmQvsI3uyHn9SkWqn8jn78UDEnaJ3fJgRoNL2Fiyb29GMoCzaL3jjPoy8XByrtJxk+3NrEtE5SnShr6b/yuFLDXtzZMSvuzM+BF6YZNGkJLhaFGF1Q/Tg3qgST+Oph/0lxZiF9HtqhV+tKw/yFlWOZJhx3JMv+dMWs/LUpetHw8mdXIg21lkpecQ6+vg4OWc7PLrKBSiAssQkb5506E4b42SFOw+1kWZcbyBa6E4KlxO/Yobbh1BCq8dZKk9+xknVI0lptZ6moOKnVMMXCljlaD6acpsQm8hvc2OFxv4agzwZHpNX7mbe8FLtBsK00P8gmFckiMMQQP+SkZJKVgKr4i2doCS7x0WuLIWn21dOZGBKEyLwPuJOcgjMCaC8sg4Q0Vf4uJdvuwwdN9K4Pi8paCKtbGb6RbQF3eA08gnbHdd1BRRSo7bMfx37VQ9ZeuySN5F49fiOIuVgCXawXYKah5KQza0ge510djOhFunBaaIl3uk4Y80lyH9oQoxHIUzf1EseclmJ6tWNJRpSQVM8sctjiKFs+SkCC7azPfvSKtcWHbO3vAuhIWHUSDXLeDo14kYGJHiZ1ReA=
+    bucket: hybox-deployment-artifacts
+    region: us-east-1
+    local_dir: build
+    skip_cleanup: true
+    upload-dir: hyku/branch/${TRAVIS_BRANCH}
+    acl: public_read
+    on:
+      all_branches: true
+  - provider: s3
+    access_key_id:
+      secure: "VPgy/7mq+jzSDx2cHOQ2M5O8k4Khi7czmXZAVPH2fA87dlnmCpprJkfuekinvMVXyMkCfs6DYfKkJ/dbzPfzIm7N3kxvI6fcfOCR/kuQFW8SAJMUhxLiE4DqXHvU725b5jT6Zc+3WdJBcFzrtBCdf6YorhQCFLVpfc0tCJIS1sPE+a7jZFQvrsaALPZZpOG9jmxZhX9Q0GKnc4xpzwLSv1fVkqT1GEAwmDiboVHdDN0MPh7Lp2L2VpXnuBidMpuXEimW35iVbcCDhbkoBbTnz+jRhQBCAFIsTwNi/BjjibZ7KuuRZQ3s0i0zFnhu/TWyia5jbgr7tcB4Emo5rw5vVRmmYrA79NqImBGDAXcyIrrMOsHxjTPq47ws2KAjGEQ7dQtaw/pQkveY361Uvnib72KZC4Go+FMKYGTxhgLYJXuwBWa0lX+DLfezNcKFkRdH6V8Z/nwkvJi8L+CRfwjiuILch+ABZWgn07t7EQ9wAtscuYAJhdiYrpK4yUd44aWqIkLZHzF78jIaWRu8zdLcFSeA+g67LLBNj6Wa7ZWxMUzcgJh4+KiLN3rGVzUCstTAIFiZYCBWdq270wWjVRkNHy184vt53i4iQxmjRRFLUwmAIFvO1PCjw/4m6gCdrfoABIAdu7b8Gt8B+HEwFCGVn9IghkDkR2rTlVavj36MndA="
+    secret_access_key:
+      secure: iaeQhv5WMVaxAvVRS3DckUipqNDUyNd+BMPCSn+RttLPDJrzTjjw2WrQiNI1/z0aVfhkItNZ/nkect+IHTidRIgF4ZlD2KQmQvsI3uyHn9SkWqn8jn78UDEnaJ3fJgRoNL2Fiyb29GMoCzaL3jjPoy8XByrtJxk+3NrEtE5SnShr6b/yuFLDXtzZMSvuzM+BF6YZNGkJLhaFGF1Q/Tg3qgST+Oph/0lxZiF9HtqhV+tKw/yFlWOZJhx3JMv+dMWs/LUpetHw8mdXIg21lkpecQ6+vg4OWc7PLrKBSiAssQkb5506E4b42SFOw+1kWZcbyBa6E4KlxO/Yobbh1BCq8dZKk9+xknVI0lptZ6moOKnVMMXCljlaD6acpsQm8hvc2OFxv4agzwZHpNX7mbe8FLtBsK00P8gmFckiMMQQP+SkZJKVgKr4i2doCS7x0WuLIWn21dOZGBKEyLwPuJOcgjMCaC8sg4Q0Vf4uJdvuwwdN9K4Pi8paCKtbGb6RbQF3eA08gnbHdd1BRRSo7bMfx37VQ9ZeuySN5F49fiOIuVgCXawXYKah5KQza0ge510djOhFunBaaIl3uk4Y80lyH9oQoxHIUzf1EseclmJ6tWNJRpSQVM8sctjiKFs+SkCC7azPfvSKtcWHbO3vAuhIWHUSDXLeDo14kYGJHiZ1ReA=
+    bucket: hybox-deployment-artifacts
+    region: us-east-1
+    skip_cleanup: true
+    local_dir: build
+    upload-dir: hyku/current
+    acl: public_read

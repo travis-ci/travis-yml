@@ -1,0 +1,237 @@
+language: generic
+dist: trusty
+
+# Always explicitly set sudo.  Otherwise travis' defaults may vary
+# based on when the repository testing was enabled.
+sudo: required
+
+services:
+  - docker
+
+# The test specifications are all extracted from the PDB_TEST value.
+
+# jdk_switcher is a shell function, so we can't handle it in
+# prep-os-essentials-for:
+# https://github.com/travis-ci/travis-ci/issues/9927
+
+# We explicitly set up lein and pgbox at the top level so that we can
+# use them in commands like test-config, and so we can't end up doing
+# it multiple times if any of the (e.g. boxed-) sub-commands also make
+# the attempt.
+
+aliases:
+  - &run-core-and-ext-tests |
+    set -e
+    jdk="$(ext/bin/jdk-from-spec "$PDB_TEST")"
+    jdkver="${jdk##*jdk}"
+    ext/travisci/prep-os-essentials-for "$PDB_TEST"
+    case "$OSTYPE" in
+      linux*)
+        if test "$jdkver" -lt 9 ; then
+          jdk_switcher use "$jdk";
+        else
+          ext/bin/require-jdk "$jdk" ext/travisci/local
+          export JAVA_HOME="$(pwd)/ext/travisci/local/jdk"
+          export PATH="$JAVA_HOME/bin:$PATH"
+        fi
+        ;;
+      darwin*)
+        export JAVA_HOME="/Library/Java/JavaVirtualMachines/adoptopenjdk-$jdkver.jdk/Contents/Home"
+        export PATH="$JAVA_HOME/bin:$PATH"
+        hash -r
+        ;;
+      *)
+        echo "$OSTYPE is not a supported system" 1>&2
+        exit 2
+        ;;
+    esac
+    mkdir -p ext/travisci/local
+    export PATH="$(pwd)/ext/travisci/local/bin:$PATH"
+    ext/bin/require-leiningen default ext/travisci/local
+    ext/bin/require-pgbox default ext/travisci/local
+    pgver="$(ext/travisci/prefixed-ref-from-spec "$PDB_TEST" pg-)"
+    ext/bin/test-config --set pgver "$pgver"
+    ext/bin/test-config --set pgport 34335
+    ext/bin/check-spec-env "$PDB_TEST"
+    ext/bin/boxed-core-tests -- lein test
+    ext/bin/run-external-tests
+
+  - &run-integration-tests |
+    set -e
+    jdk="$(ext/bin/jdk-from-spec "$PDB_TEST")"
+    jdkver="${jdk##*jdk}"
+    ext/travisci/prep-os-essentials-for "$PDB_TEST"
+    case "$OSTYPE" in
+      linux*)
+        if test "$jdkver" -lt 9 ; then
+          jdk_switcher use "$jdk";
+        else
+          ext/bin/require-jdk "$jdk" ext/travisci/local
+          export JAVA_HOME="$(pwd)/ext/travisci/local/jdk"
+          export PATH="$JAVA_HOME/bin:$PATH"
+        fi
+        ;;
+      darwin*)
+        export JAVA_HOME="/Library/Java/JavaVirtualMachines/adoptopenjdk-$jdkver.jdk/Contents/Home"
+        export PATH="$JAVA_HOME/bin:$PATH"
+        hash -r
+        ;;
+      *)
+        echo "$OSTYPE is not a supported system" 1>&2
+        exit 2
+        ;;
+    esac
+    mkdir -p ext/travisci/local
+    export PATH="$(pwd)/ext/travisci/local/bin:$PATH"
+    ext/bin/require-leiningen default ext/travisci/local
+    ext/bin/require-pgbox default ext/travisci/local
+    pgver="$(ext/travisci/prefixed-ref-from-spec "$PDB_TEST" pg-)"
+    puppet="$(ext/travisci/prefixed-ref-from-spec "$PDB_TEST" pup-)"
+    server="$(ext/travisci/prefixed-ref-from-spec "$PDB_TEST" srv-)"
+    ext/bin/test-config --set pgver "$pgver"
+    ext/bin/test-config --set pgport 34335
+    ext/bin/test-config --set puppet-ref "$puppet"
+    ext/bin/test-config --set puppetserver-ref "$server"
+    PDB_TEST_RICH_DATA="$(ext/travisci/spec-includes "$PDB_TEST" rich)"
+    export PDB_TEST_RICH_DATA
+    ext/bin/check-spec-env "$PDB_TEST"
+    ext/bin/boxed-integration-tests -- lein test :integration
+
+  - &run-spec-tests |
+    set -e
+    puppet_ref="$(ext/travisci/prefixed-ref-from-spec "$PDB_TEST" pup-)"
+    ext/bin/check-spec-env "$PDB_TEST"
+    ext/bin/run-rspec-tests "$puppet_ref"
+
+  - &run-docker-tests |
+    set -ex
+    cd docker
+    make lint
+    make build
+    make test
+
+jobs:
+  include:
+
+    # === core+ext tests
+    - stage: ❧ pdb tests
+      env: PDB_TEST=core+ext/openjdk8/pg-9.6
+      script: *run-core-and-ext-tests
+
+    - stage: ❧ pdb tests
+      env: PDB_TEST=core+ext/oraclejdk8/pg-9.6
+      script: *run-core-and-ext-tests
+
+    - stage: ❧ pdb tests
+      env: PDB_TEST=core+ext/openjdk11/pg-9.6
+      script: *run-core-and-ext-tests
+
+    - stage: ❧ pdb tests
+      env: PDB_TEST=core+ext/openjdk8/pg-11
+      script: *run-core-and-ext-tests
+
+    # === integration with master branches
+    - stage: ❧ pdb tests
+      env: PDB_TEST=int/openjdk11/pup-master/srv-master/pg-9.6
+      script: *run-integration-tests
+
+    - stage: ❧ pdb tests
+      env: PDB_TEST=int/openjdk11/pup-master/srv-master/pg-9.6/rich
+      script: *run-integration-tests
+
+    - stage: ❧ pdb tests
+      env: PDB_TEST=int/openjdk11/pup-master/srv-master/pg-11/rich
+      script: *run-integration-tests
+
+    - stage: ❧ pdb tests
+      env: PDB_TEST=int/openjdk8/pup-master/srv-master/pg-9.6/rich
+      script: *run-integration-tests
+
+    - stage: ❧ pdb tests
+      env: PDB_TEST=int/oraclejdk8/pup-master/srv-master/pg-9.6/rich
+      script: *run-integration-tests
+
+    - stage: ❧ pdb tests
+      env: PDB_TEST=int/openjdk8/pup-master/srv-master/pg-11
+      script: *run-integration-tests
+
+    # === integration with current platform
+    - stage: ❧ pdb tests
+      env: PDB_TEST=int/openjdk11/pup-6.0.x/srv-6.0.x/pg-9.6
+      script: *run-integration-tests
+
+    - stage: ❧ pdb tests
+      env: PDB_TEST=int/openjdk11/pup-6.0.x/srv-6.0.x/pg-9.6/rich
+      script: *run-integration-tests
+
+    - stage: ❧ pdb tests
+      env: PDB_TEST=int/openjdk8/pup-6.0.x/srv-6.0.x/pg-9.6/rich
+      script: *run-integration-tests
+
+    - stage: ❧ pdb tests
+      env: PDB_TEST=int/oraclejdk8/pup-6.0.x/srv-6.0.x/pg-9.6/rich
+      script: *run-integration-tests
+
+    # === rspec tests
+    - stage: ❧ pdb tests
+      env: PDB_TEST=rspec/pup-6.0.x
+      script: *run-spec-tests
+
+    - stage: ❧ pdb tests
+      env: PDB_TEST=rspec/pup-5.5.x
+      script: *run-spec-tests
+
+    # ==== osx
+
+    # === core+ext tests
+    - stage: ❧ pdb tests
+      env: PDB_TEST=core+ext/openjdk8/pg-9.6
+      script: *run-core-and-ext-tests
+      os: osx
+
+    - stage: ❧ pdb tests
+      env: PDB_TEST=core+ext/openjdk11/pg-9.6
+      script: *run-core-and-ext-tests
+      os: osx
+
+    # === integration tests
+    - stage: ❧ pdb tests
+      env: PDB_TEST=int/openjdk11/pup-master/srv-master/pg-9.6/rich
+      script: *run-integration-tests
+      os: osx
+
+    - stage: ❧ pdb tests
+      env: PDB_TEST=int/openjdk8/pup-6.0.x/srv-6.0.x/pg-9.6/rich
+      script: *run-integration-tests
+      os: osx
+
+    # === rspec tests
+    - stage: ❧ pdb tests
+      env: PDB_TEST=rspec/pup-6.0.x
+      script: *run-spec-tests
+      os: osx
+
+    - stage: ❧ pdb container tests
+      script: *run-docker-tests
+
+matrix:
+  allow_failures:
+  - os: osx
+
+on_success: ext/travisci/on-success
+
+notifications:
+  email: false
+  slack:
+    template:
+      - "<%{compare_url}|%{commit_subject}> | %{author}"
+      - "%{repository_slug} %{branch} | <%{build_url}|#%{build_number}> %{result} in %{elapsed_time}"
+    rooms:
+      secure: IJU0YgGYbKgM7NupaOmE2BYra2mNx7+e5vAYNL+5oaRXolbHCyg0WzfFWilhMK3KEi8oIMKXR4ZzoUZLAqeOQzX7nnsLqC3wjyDHCgxtp4O+5GNKyeLN4ItoI1f2d6qyiiBPkHgVPuLhG3yyQ+wD0dMc9vSYmxfoazqe9HD/9UE=
+
+cache:
+  directories:
+    - $HOME/.m2
+    - $HOME/Library/Caches/Homebrew
+    - vendor/bundle/ruby
+    - ext/travisci/local/jdk

@@ -1,0 +1,34 @@
+sudo: true
+language: go
+go: "1.10"
+addons:
+  postgresql: "9.5"
+  apt:
+    sources:
+    - deadsnakes # source required so it finds the package definition below
+    packages:
+    - slapd
+    - python3.6
+    - python3.6-dev
+cache:
+- pip
+- curl
+install:
+    - go version
+    - sudo cp config/ldap.conf /etc/ldap/ldap.conf
+    - sudo dpkg-reconfigure slapd
+    - go get go.mozilla.org/autograph
+    - psql -c "CREATE DATABASE dbname ENCODING 'UTF8' TEMPLATE template0;" -U postgres
+    - psql -c "CREATE USER admin WITH PASSWORD 'pass';" -U postgres
+    - psql -c "GRANT ALL PRIVILEGES ON DATABASE dbname TO admin;" -U postgres
+    - cd $TRAVIS_BUILD_DIR
+    - make install
+    - make migrate
+before_script:
+    - cd tests && python3.6 -m http.server 8080 &
+    - cp $TRAVIS_BUILD_DIR/app.wsgi $HOME/
+    - export PATH=$PWD/.venv/bin:$PATH
+    - cd $HOME && KINTO_INI=$TRAVIS_BUILD_DIR/config/development.ini pserve $TRAVIS_BUILD_DIR/config/development.ini &
+    - autograph -c $TRAVIS_BUILD_DIR/.autograph.yml &
+script:
+    - bash $TRAVIS_BUILD_DIR/tests/smoke-test.sh

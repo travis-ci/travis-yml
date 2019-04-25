@@ -1,0 +1,111 @@
+language: elixir
+git:
+  depth: 1000
+cache:
+  directories:
+    - _build
+    - deps
+services:
+  - docker
+  - postgresql
+  - redis-server
+addons:
+  postgresql: "9.6"
+  apt:
+    packages:
+      - postgresql-9.6-postgis-2.3
+      - docker-ce
+elixir:
+  - 1.8.1
+otp_release:
+  - 21.2.5
+notifications:
+  slack:
+    rooms:
+      - secure: "MAZDwNhuRd9NtHMrbVjKwjMZdAACrdKIcJwzNdORnowmYja11WruAOdtjC6N/dlIAlL1vJRlA0BXswg3M44uqt3zHXY7e3JPMfVDpLUH8b/CwdRhNK7N/CnSse7kZ5P7v8AVXk567Jm84b7fhJzGZkobRhT/R2hdPMHA/M50cOObUzY62ZEucROyvuwuDhmJYaZoUGK6X2tOpmxBtf1RQm5rVNFZWXhhtyupn/m2Hy8meTFdEdEyGoCQYtI8BCuD9Pa5XKWwZ28b38ws9ZlKV/kiDpwq0Uz1k+SKlzpo7zVZkEbdCHJF/e6JnetRmpm6i05zQdzMqc3gCC09rbZMlCoSTtcRvGZmE94YaOKd24qJK504ZJzl8PnkaUA3JXVUo4PpZqiA71sBPBe15qpnoURPMqzYKeqTHrNlhYXNBVibncl09OSSSNxBOgH0n2uqeTLS2ZXVpHUEUw6OQ8yQ6tR63qnW27xxSesewxZWvoKDOt1HLkhYAaRR4p/UOI4ae0iyUwAIBvuSH0gviqethMQ+vUWNDlI7bL7CTkiBGCApkHJPL5bPoJIE00LyuA2K7KBJsuv4ojzQ23K4zYaHTNG+7Z/nriePcJFoox1JY74apPf0VQrrPs6nxv6g6mXn9riuaU9g3jUyFwTEKUgd9FfrIHgFHZpV1jF9isByUGY="
+    on_success: always
+env:
+  global:
+    - MIX_ENV=test
+    - DOCKER_NAMESPACE=edenlabllc
+    - POSTGRES_VERSION=9.6
+    - secure: "cm8F6poDy8DYOHjUDdJ4lqeFN9jAjwCeQlyvrM6mgPjthGEdjzUp7+4YkBPDrDkyj6KkBXyFIAizmp/YKWifQBs0C4J6wfXXdB5c1z39K4DY9omdzZ+r4o2EsmUBG2qHPhUhq9mT+BHGA+GmgzaaZzVzTLvo1XnF0voP+dAmkAcujhIQW7pa8Hi80EOHuHRpKRZ1Yo5VnmdktZU+AHSR5de8QP71nfmXTOaXWVM/I1OoyIaP/9X9vl5qsy0VdAWwI4+5mUzVgXcggYIBBbtNvwJ+CSZdOl5NzRu8mxcHu4YFNRejRf9rENlF4QmdmVfTvIiOGnyVjZudRsP6CahjEpXxICRub+PanXGjwOIzwsswnXZmyYI/ZZdViXRJ25nBAe2u8H+67v7PA9jdlKy4X4O7kCENSPaxFuTD7cRxgfDLxOfr+tlvagFPaXSPQ7ZZYxMY0xVKpsl4Ng1gFVywSeigTgTwTZDf4494nW0Kwg78rnnDVUdWNS4k4WT933GmSxl3EwootuvWbLPMAqJX/uPIj7LQ2iD2jXrZn2s3a3eXNh9PWmsxzurSSpr2CXbkmOOoqeOgCXafP/98X/kswBojaHh3wZj+3+D7dWr95fYluz2o7tISpOCSKxO9LhRE5JxSI6CfH5ddCJn1Eyf1MDcPRguCTOCZF1ttreVWVj8="
+    - secure: "P5OkzHv8ToKlrm0ZkbsPVTOgDXRFbsZB/izg4AGAdAFJKjKoNe76G3TEgx+wWlLtx9DQ/8R9dYa2MlwdUGDN+lcMVPXOjRDv23h6XJwqIRWzU2tMk7tvuOUmQjqKtKgwa8yX+AaMs9DX484ypyg3TEGiv023yFXuXuWKvo3Mej5Ro8xqxzwXv7L+rmTUGJEJdXoOz2ciJnIe1zkqPLnB8c/35tlekqY7nOG8zy9AqnSiQVs7LxnaxBhiENJC3+LWKJ3JE95I1nQq6K1LoEDJLPlvyEQd53HxN4G9GibNsTUu/Vd85jI7ImxmEhwl3x0eb1ApIgeoQxthMIT7/zkZSAlCPFDI4/pixzUMKL/BCeWak+aR60hAPyYYjQC9Jx15B0FdneO9bGvtIAN3caaDWLxkMGpkFWVenb5hHk2wHEkz0DP+YXNtre7flE4aR+moTzfsp4kB70lvMDbC4QzpYan0eLDZWxRH+7klI5YB/+2jZeXMIeT5UfpP/Utm0K+p2yHshzJuA4jdCjnw4wO1sDZIXh58nBjOsJx3B3+XeKFarb+D+S/D1S8ByHvILY4a6PeQDsI/9jDcY2LzXFn4ESY4dmZs/ns9lK/NDApC0oQzTPclKfl4n/AcfTbxPxEvpdQPx9Y3RiaGoNd0QPMDG7p74qClK8+TsqojUzgUdFc="
+branches:
+  except:
+    - /[0-9]*\.[0-9]*\.[0-9]*/
+before_script:
+  - psql -U postgres -c "create extension postgis"
+before_install:
+  - sudo apt-get install jq
+  - curl -s https://raw.githubusercontent.com/edenlabllc/ci-utils/umbrella/init-db.sh -o init-db.sh; sudo sh ./init-db.sh
+  - curl -s https://raw.githubusercontent.com/edenlabllc/ci-utils/umbrella_v2/install-mongodb.sh -o install-mongodb.sh; sudo sh ./install-mongodb.sh
+  - curl -s https://raw.githubusercontent.com/edenlabllc/ci-utils/umbrella_v2/init-kafka.sh -o init-kafka.sh; sudo sh ./init-kafka.sh
+  - kafka/bin/kafka-topics.sh --create --partitions 1 --replication-factor 1 --zookeeper localhost:2181 --topic merge_legal_entities
+  - kafka/bin/kafka-topics.sh --create --partitions 1 --replication-factor 1 --zookeeper localhost:2181 --topic deactivate_legal_entity_event
+  - kafka/bin/kafka-topics.sh --create --partitions 1 --replication-factor 1 --zookeeper localhost:2181 --topic edr_verification_events
+jobs:
+  include:
+    - stage: "test and build"
+      name: "Run tests"
+      script:
+        - mongo --version
+        - (curl -s https://raw.githubusercontent.com/edenlabllc/ci-utils/umbrella/tests.sh -o tests.sh; bash ./tests.sh) || travis_terminate 1
+        - cd apps/graphql && mix white_bread.run
+        - if [ "$?" -eq 0 ]; then echo "mix white_bread.run successfully completed" else echo "mix white_bread.run finished with errors, exited with 1" is_failed=1; fi;
+
+    - stage: "test and build"
+      name: "Build Docker container for EHealth API"
+      env:
+      - APPS='[{"app":"ehealth","chart":"il","namespace":"il","deployment":"api","label":"api"}]'
+      script:
+      - openssl aes-256-cbc -K $encrypted_c996ec964e08_key -iv $encrypted_c996ec964e08_iv -in eHealth-8110bd102a69.json.enc -out eHealth-8110bd102a69.json -d
+      - (curl -s https://raw.githubusercontent.com/edenlabllc/ci-utils/umbrella_v2/docker.sh -o docker.sh; bash ./docker.sh) || travis_terminate 1
+
+    - stage: "test and build"
+      name: "Build Docker container for Casher"
+      env:
+      - APPS='[{"app":"casher","chart":"il","namespace":"il","deployment":"casher","label":"casher"}]'
+      script:
+      - openssl aes-256-cbc -K $encrypted_c996ec964e08_key -iv $encrypted_c996ec964e08_iv -in eHealth-8110bd102a69.json.enc -out eHealth-8110bd102a69.json -d
+      - (curl -s https://raw.githubusercontent.com/edenlabllc/ci-utils/umbrella_v2/docker.sh -o docker.sh; bash ./docker.sh) || travis_terminate 1
+
+    - stage: "test and build"
+      name: "Build Docker container for GraphQL"
+      env:
+      - APPS='[{"app":"graphql","chart":"il","namespace":"il","deployment":"graphql","label":"graphql"}]'
+      script:
+      - openssl aes-256-cbc -K $encrypted_c996ec964e08_key -iv $encrypted_c996ec964e08_iv -in eHealth-8110bd102a69.json.enc -out eHealth-8110bd102a69.json -d
+      - (curl -s https://raw.githubusercontent.com/edenlabllc/ci-utils/umbrella_v2/docker.sh -o docker.sh; bash ./docker.sh) || travis_terminate 1
+
+    - stage: "test and build"
+      name: "Build Docker container for MergeLegalEntities consumer"
+      env:
+      - APPS='[{"app":"merge_legal_entities_consumer","chart":"il","namespace":"il","deployment":"merge-legal-entities-consumer","label":"merge-legal-entities-consumer"}]'
+      script:
+      - openssl aes-256-cbc -K $encrypted_c996ec964e08_key -iv $encrypted_c996ec964e08_iv -in eHealth-8110bd102a69.json.enc -out eHealth-8110bd102a69.json -d
+      - (curl -s https://raw.githubusercontent.com/edenlabllc/ci-utils/umbrella_v2/docker.sh -o docker.sh; bash ./docker.sh) || travis_terminate 1
+
+    - stage: "test and build"
+      name: "Build Docker container for DeactivateLegalEntities consumer"
+      env:
+      - APPS='[{"app":"deactivate_legal_entity_consumer","chart":"il","namespace":"il","deployment":"deactivate-legal-entity-consumer","label":"deactivate-legal-entity-consumer"}]'
+      script:
+      - openssl aes-256-cbc -K $encrypted_c996ec964e08_key -iv $encrypted_c996ec964e08_iv -in eHealth-8110bd102a69.json.enc -out eHealth-8110bd102a69.json -d
+      - (curl -s https://raw.githubusercontent.com/edenlabllc/ci-utils/umbrella_v2/docker.sh -o docker.sh; bash ./docker.sh) || travis_terminate 1
+
+    - stage: "test and build"
+      name: "Build Docker container for EdrValidations consumer"
+      env:
+      - APPS='[{"app":"edr_validations_consumer","chart":"il","namespace":"il","deployment":"edr-validations-consumer","label":"edr-validations-consumer"}]'
+      script:
+      - openssl aes-256-cbc -K $encrypted_c996ec964e08_key -iv $encrypted_c996ec964e08_iv -in eHealth-8110bd102a69.json.enc -out eHealth-8110bd102a69.json -d
+      - (curl -s https://raw.githubusercontent.com/edenlabllc/ci-utils/umbrella_v2/docker.sh -o docker.sh; bash ./docker.sh) || travis_terminate 1
+
+    - stage: "test and build"
+      name: "Build Docker container for Scheduler"
+      env:
+      - APPS='[{"app":"ehealth_scheduler","chart":"il","namespace":"il","deployment":"ehealth-scheduler","label":"ehealth-scheduler"}]'
+      script:
+      - openssl aes-256-cbc -K $encrypted_c996ec964e08_key -iv $encrypted_c996ec964e08_iv -in eHealth-8110bd102a69.json.enc -out eHealth-8110bd102a69.json -d
+      - (curl -s https://raw.githubusercontent.com/edenlabllc/ci-utils/umbrella_v2/docker.sh -o docker.sh; bash ./docker.sh) || travis_terminate 1

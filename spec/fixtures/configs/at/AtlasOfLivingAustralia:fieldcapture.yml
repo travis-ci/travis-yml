@@ -1,0 +1,23 @@
+language: groovy
+jdk:
+- oraclejdk8
+branches:
+  only:
+  - master
+  - dev
+  - /^feature\/.*$/
+before_install:
+- export TZ=Australia/Canberra
+- wget -q https://raw.githubusercontent.com/AtlasOfLivingAustralia/travis-build-configuration/master/ala_common.sh
+- chmod +x ala_common.sh
+- source ./ala_common.sh
+- ala_travis_grails_setup_env
+before_script:
+- npm install
+script:
+- node_modules/karma/bin/karma start karma.conf.js --single-run --browsers PhantomJS
+- grails clean; grails refresh-dependencies --non-interactive && grails test-app -clover.on :unit --non-interactive --stacktrace && ala_travis_grails_build
+env:
+  global:
+  - secure: cWYm92Lwc8jyxwd4eYDEEtXJhF5SrFD/eN+e2d6V3Vk22qTlCZDOzKY3XEg5O5KAM0htYdSVcif47fpFJh6GFnvO0C2AiSoWLeqMXwiTijQK/nfc/WirqRK71UtGvQYTVjNn3Si8XETsFB3jwYuqV5T20cJ/13bZxxWCc6cU6M4=
+  - secure: us9oCHkG8Ls9EogTh6h5ZbICKiwuKFX4IhuaayyGlPBgg5XLl3VY+FHEPMsxrSOaEhCvdXz3dijvfRp43HRa9bx9No1iL3ttIERwaXP7ERYKlRWUD6xh8p30XZ+NABo9xCFsIOYSJQbkvxaAFAbG11h4BX557s7bwNwJbVDBspc=

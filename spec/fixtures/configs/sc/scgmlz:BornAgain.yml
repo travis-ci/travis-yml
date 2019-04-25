@@ -1,0 +1,28 @@
+language: cpp
+sudo: required
+
+#services:
+#- docker
+
+ 
+#env:
+#- BUILD_TYPE=Release
+
+matrix:
+  include:
+    - os: linux
+      services: docker
+      env: BUILD_TYPE=Release
+#    - os: osx
+#      osx_image: xcode7.3
+#      env: BUILD_TYPE=Release
+
+before_install:
+- chmod +x .travis/*/*.sh
+
+install:
+- .travis/${TRAVIS_OS_NAME}/install.sh
+
+script:
+- .travis/${TRAVIS_OS_NAME}/build.sh
+- .travis/${TRAVIS_OS_NAME}/test.sh

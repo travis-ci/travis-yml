@@ -1,0 +1,74 @@
+language: python
+python: "3.6"
+cache: pip
+
+matrix:
+  include:
+    # Run tests
+    - addons:
+        postgresql: "9.4"
+      services:
+        - postgresql
+        - redis-server
+      install:
+        - "pip install -r requirements.txt --use-wheel"
+        - "pip install -r requirements-dev.txt --use-wheel"
+        - django-admin compilemessages
+      script:
+        - flake8
+        - mypy .
+        - py.test
+        - createdb ndoh_hub
+        - python manage.py makemigrations registrations changes --dry-run | grep 'No changes detected' || (echo 'There are changes which require migrations.' && exit 1)
+        - black --check .
+        - isort -c -rc .
+
+    # Create docker image on merge to develop
+    - sudo: required
+      dist: trusty
+      services: [docker]
+      env:
+        - IMAGE_NAME=praekeltfoundation/ndoh-hub:develop
+        - REGISTRY_USER=praekeltorgdeploy
+        # REGISTRY_PASS
+        - secure: "HdNKmMAw+2K6APKFp/Cy5SVxFDDDtx83UeIA5h9mBF4wrjRQcNLwZCbDGQTKmeZ/HZZLqxj3H8k034Y1vw6iQRGvv2X5Jazanh6ett4zH6QNd8Tnk4CqsZZ7MIG71ZFaSbdotpq2KgWP//Sz2BlnzXugr2CWbydTDOGE3dyRwwphs8DXgUu2gOeSFVolf3H0zYbnWPkDyb4EB/lOsTETEXRN1F3jgwY58RQU6LAV/k/FAr4WDWE+qX8f9Kr13UhMJYKS8mouJsSU1Q2Uq/hMXz/2QZ1h8vdv/lV9l3JRcK7JOEwXRGyFNYVFpBMSzUQpb6OwcaLgiBQ25y4HLtrViiVGg1abGrWqXH2Uiv1gnkKsJ37VIXtR7gso7n48j7lNBUHdJUE6JdiktOlmt1KvLjGzdWyukmMpRB2Ci2KQkPbAqF7pxgC7Tq0x/XT+2M85g/xv+U9uP+SBPA5V1ZPaHntHgWKjjlU224tfXB/PhVRe3wSx2kHKQEHzbxGCB0i5bLkcVhMUxpuod6H6cYt5RqI3JQMWcQMup7suUyQKn8iu8oLeVAZIeJAEZRSLSUvFpvAvEmrNyflUtOLJ3eCCXaAgThej5ZNaH9np1yVMa8CVt3ccudA2l8M00oC2qu1qkgbY2SPePBkfo9htoUWJ7cQF0oGrim/TA4TBM6BQwOk="
+      before_script:
+        - docker pull "$IMAGE_NAME" || true
+        - pip install -r seaworthy/requirements.txt
+      script:
+        - docker build --tag "$IMAGE_NAME" --cache-from "$IMAGE_NAME" .
+        - (cd seaworthy; py.test -v --hub-image "$IMAGE_NAME" test.py)
+
+      before_deploy:
+        - pip install docker-ci-deploy==0.3.0
+        - docker login -u "$REGISTRY_USER" -p "$REGISTRY_PASS"
+      deploy:
+        provider: script
+        script: dcd --version "$(git rev-parse --short HEAD)" --version-latest "$IMAGE_NAME"
+        on:
+          branch: develop
+
+    # Create docker images for tagged releases
+    - sudo: required
+      dist: trusty
+      services: [docker]
+      env:
+        - IMAGE_NAME=praekeltfoundation/ndoh-hub
+        - REGISTRY_USER=praekeltorgdeploy
+        # REGISTRY_PASS
+        - secure: "HdNKmMAw+2K6APKFp/Cy5SVxFDDDtx83UeIA5h9mBF4wrjRQcNLwZCbDGQTKmeZ/HZZLqxj3H8k034Y1vw6iQRGvv2X5Jazanh6ett4zH6QNd8Tnk4CqsZZ7MIG71ZFaSbdotpq2KgWP//Sz2BlnzXugr2CWbydTDOGE3dyRwwphs8DXgUu2gOeSFVolf3H0zYbnWPkDyb4EB/lOsTETEXRN1F3jgwY58RQU6LAV/k/FAr4WDWE+qX8f9Kr13UhMJYKS8mouJsSU1Q2Uq/hMXz/2QZ1h8vdv/lV9l3JRcK7JOEwXRGyFNYVFpBMSzUQpb6OwcaLgiBQ25y4HLtrViiVGg1abGrWqXH2Uiv1gnkKsJ37VIXtR7gso7n48j7lNBUHdJUE6JdiktOlmt1KvLjGzdWyukmMpRB2Ci2KQkPbAqF7pxgC7Tq0x/XT+2M85g/xv+U9uP+SBPA5V1ZPaHntHgWKjjlU224tfXB/PhVRe3wSx2kHKQEHzbxGCB0i5bLkcVhMUxpuod6H6cYt5RqI3JQMWcQMup7suUyQKn8iu8oLeVAZIeJAEZRSLSUvFpvAvEmrNyflUtOLJ3eCCXaAgThej5ZNaH9np1yVMa8CVt3ccudA2l8M00oC2qu1qkgbY2SPePBkfo9htoUWJ7cQF0oGrim/TA4TBM6BQwOk="
+      before_script:
+        - docker pull "$IMAGE_NAME" || true
+        - pip install -r seaworthy/requirements.txt
+      script:
+        - docker build --tag "$IMAGE_NAME" --cache-from "$IMAGE_NAME" .
+        - (cd seaworthy; py.test -v --hub-image "$IMAGE_NAME" test.py)
+
+      before_deploy:
+        - pip install docker-ci-deploy==0.3.0
+        - docker login -u "$REGISTRY_USER" -p "$REGISTRY_PASS"
+      deploy:
+        provider: script
+        script: dcd --version "$(git tag -l --points-at HEAD)" --version-semver --version-latest "$IMAGE_NAME"
+        on:
+          tags: true

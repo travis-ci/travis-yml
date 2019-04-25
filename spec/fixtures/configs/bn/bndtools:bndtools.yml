@@ -1,0 +1,36 @@
+sudo: false
+
+language: java
+
+env:
+  global:
+
+matrix:
+  include:
+    - name: "OpenJDK8"
+  allow_failures:
+    - env: ALLOW_FAILURE=true
+
+before_install:
+  - "unset _JAVA_OPTIONS"
+  - "curl -O -L --retry 3 https://github.com/sormuras/bach/raw/master/install-jdk.sh"
+
+install:
+  - "source install-jdk.sh --url https://cdn.azul.com/zulu/bin/zulu8.33.0.1-jdk8.0.192-linux_x64.tar.gz"
+
+before_script:
+  - "./gradlew --no-daemon --version"
+
+script:
+  - "./gradlew --no-daemon -Dmaven.repo.local=cnf/cache/stable/m2 --continue"
+
+before_cache:
+  - "git status"
+  - "rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock"
+  - "rm -rf $HOME/.gradle/caches/*/plugin-resolution/"
+
+cache:
+  directories:
+    - $HOME/.gradle/caches/
+    - $HOME/.gradle/wrapper/
+    - cnf/cache/stable/

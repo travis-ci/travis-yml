@@ -1,0 +1,113 @@
+language: cpp
+
+os:
+  - linux
+  - osx
+
+dist: xenial
+
+compiler:
+  - clang
+  - gcc
+
+env:
+  - QT=5
+  # Tip: curl -s 'https://api.launchpad.net/1.0/~beineri/ppas?ws.size=200' | jq -r '"beineri/" + .entries[].name' | sed -nEe 's/.*opt-qt(([0-9]{2})[0-9]?|-([0-9])+\.([0-9]+)\.([0-9]+))-xenial/  - QT=\2\3\4 PPA=&/p'
+  - QT=56 PPA=beineri/opt-qt562-xenial
+  - QT=56 PPA=beineri/opt-qt563-xenial
+  - QT=57 PPA=beineri/opt-qt571-xenial
+  - QT=58 PPA=beineri/opt-qt58-xenial
+  - QT=59 PPA=beineri/opt-qt59-xenial
+  - QT=59 PPA=beineri/opt-qt591-xenial
+  - QT=59 PPA=beineri/opt-qt592-xenial
+  - QT=59 PPA=beineri/opt-qt593-xenial
+  - QT=59 PPA=beineri/opt-qt594-xenial
+  - QT=59 PPA=beineri/opt-qt595-xenial
+  - QT=59 PPA=beineri/opt-qt596-xenial
+  - QT=59 PPA=beineri/opt-qt597-xenial
+  - QT=510 PPA=beineri/opt-qt-5.10.0-xenial
+  - QT=510 PPA=beineri/opt-qt-5.10.1-xenial
+  - QT=511 PPA=beineri/opt-qt-5.11.0-xenial
+  - QT=511 PPA=beineri/opt-qt-5.11.1-xenial
+  - QT=511 PPA=beineri/opt-qt-5.11.2-xenial
+  - QT=511 PPA=beineri/opt-qt-5.11.3-xenial
+  - QT=512 PPA=beineri/opt-qt-5.12.0-xenial
+  - QT=512 PPA=beineri/opt-qt-5.12.1-xenial
+
+matrix:
+  # Qt no longer supports GCC on OSX.
+  allow_failures:
+    - { os: osx, compiler: gcc, env: QT=5 }
+  exclude:
+    # Tip: curl -s 'https://api.launchpad.net/1.0/~beineri/ppas?ws.size=200' | jq -r '"beineri/" + .entries[].name' | sed -nEe 's/.*opt-qt(([0-9]{2})[0-9]?|-([0-9])+\.([0-9]+)\.([0-9]+))-xenial/    - { os: osx, env: QT=\2\3\4 PPA=& }/p'
+    - { os: osx, env: QT=56 PPA=beineri/opt-qt562-xenial }
+    - { os: osx, env: QT=56 PPA=beineri/opt-qt563-xenial }
+    - { os: osx, env: QT=57 PPA=beineri/opt-qt571-xenial }
+    - { os: osx, env: QT=58 PPA=beineri/opt-qt58-xenial }
+    - { os: osx, env: QT=59 PPA=beineri/opt-qt59-xenial }
+    - { os: osx, env: QT=59 PPA=beineri/opt-qt591-xenial }
+    - { os: osx, env: QT=59 PPA=beineri/opt-qt592-xenial }
+    - { os: osx, env: QT=59 PPA=beineri/opt-qt593-xenial }
+    - { os: osx, env: QT=59 PPA=beineri/opt-qt594-xenial }
+    - { os: osx, env: QT=59 PPA=beineri/opt-qt595-xenial }
+    - { os: osx, env: QT=59 PPA=beineri/opt-qt596-xenial }
+    - { os: osx, env: QT=59 PPA=beineri/opt-qt597-xenial }
+    - { os: osx, env: QT=510 PPA=beineri/opt-qt-5.10.0-xenial }
+    - { os: osx, env: QT=510 PPA=beineri/opt-qt-5.10.1-xenial }
+    - { os: osx, env: QT=511 PPA=beineri/opt-qt-5.11.0-xenial }
+    - { os: osx, env: QT=511 PPA=beineri/opt-qt-5.11.1-xenial }
+    - { os: osx, env: QT=511 PPA=beineri/opt-qt-5.11.2-xenial }
+    - { os: osx, env: QT=511 PPA=beineri/opt-qt-5.11.3-xenial }
+    - { os: osx, env: QT=512 PPA=beineri/opt-qt-5.12.0-xenial }
+    - { os: osx, env: QT=512 PPA=beineri/opt-qt-5.12.1-xenial }
+
+before_install:
+  - '[[ "$TRAVIS_OS_NAME" != linux || -z "$PPA" ]] || sudo add-apt-repository -y ppa:$PPA'
+  - '[ "$TRAVIS_OS_NAME" != linux ] || sudo apt-get -qy update'
+  - '[ "$TRAVIS_OS_NAME" != osx ] || brew update'
+# - '[ "$TRAVIS_OS_NAME" != osx ] || brew search qt' # Causes Homebrew API rate-limit issues.
+
+install:
+  - '[ "$TRAVIS_OS_NAME" != linux ] || sudo apt-get -qy install cppcheck'
+  - '[[ "$TRAVIS_OS_NAME" != linux || "$PPA" != */opt-* ]] || sudo apt-get -qy install qt${QT}base qt${QT}xmlpatterns libgl1-mesa-dev'
+  - '[[ "$TRAVIS_OS_NAME" != linux || "$PPA" == */opt-* ]] || sudo apt-get -qy install qt5-qmake qtbase5-dev libqt5xmlpatterns5-dev'
+  # Pin OSX to Qt 5.12.1 for now, since the Qt 5.12.2 Brew formula (#9980171) has an odd build issue.
+  #- '[ "$TRAVIS_OS_NAME" != osx ] || brew install cppcheck qt'
+  - '[ "$TRAVIS_OS_NAME" != osx ] || brew install cppcheck https://raw.githubusercontent.com/Homebrew/homebrew-core/bc03ca8ad8f74be348801c99b78905926d91abc1/Formula/qt.rb'
+  - '[ "$TRAVIS_OS_NAME" != osx ] || brew link --force qt'
+
+before_script:
+  # Skip cppcheck on OSX for now https://github.com/pcolby/bipolar/issues/79 http://trac.cppcheck.net/ticket/7792
+  - '[ "$TRAVIS_OS_NAME" == osx ] || ./.cppcheck.sh'
+  - '[[ "$TRAVIS_OS_NAME" != linux || "$CXX" != clang++ ]] || export QMAKESPEC=linux-clang'
+  - '[[ "$TRAVIS_OS_NAME" != linux || "$CXX" != g++     ]] || export QMAKESPEC=linux-g++'
+  - '[[ "$TRAVIS_OS_NAME" != osx   || "$CXX" != clang++ ]] || export QMAKESPEC=macx-clang'
+  - '[[ "$TRAVIS_OS_NAME" != osx   || "$CXX" != g++     ]] || export QMAKESPEC=macx-g++'
+  - '[[ "$TRAVIS_OS_NAME" != linux || "$PPA" != */opt-* ]] || . /opt/qt$QT/bin/qt$QT-env.sh'
+  - '[[ "$TRAVIS_OS_NAME" != linux || "$PPA" == */opt-* ]] || export QT_SELECT=qt5'
+  - mkdir -p "$TRAVIS_BUILD_DIR-build"
+  - qmake -v
+  - qmake -o "$TRAVIS_BUILD_DIR-build" -r -Wall -Wlogic -Wparser CONFIG+=debug_and_release "$TRAVIS_BUILD_DIR"
+
+script:
+  - make -C "$TRAVIS_BUILD_DIR-build" -j2 all
+  - make -C "$TRAVIS_BUILD_DIR-build" -j2 check
+  - BIPOLAR_TEST_LOCALE=de_DE.UTF-8 make -C "$TRAVIS_BUILD_DIR-build" -j2 check
+  - '[ "$TRAVIS_OS_NAME" != osx ] || make -C "$TRAVIS_BUILD_DIR-build/pkg/osx" dmg'
+
+deploy:
+  provider: releases
+  api_key: $RELEASES_API_KEY
+  file_glob: true
+  file: $TRAVIS_BUILD_DIR-build/pkg/$TRAVIS_OS_NAME/Bipolar-*.$TRAVIS_BUILD_NUMBER.dmg
+  on:
+    condition: '"$TRAVIS_OS_NAME" == osx && "$CXX" == clang++ && "$QT" == 5'
+    tags: true
+
+notifications:
+  webhooks:
+    urls:
+      - https://webhooks.gitter.im/e/2b8ecf97afdf630edcec
+    on_success: change
+    on_failure: always
+    on_start: never

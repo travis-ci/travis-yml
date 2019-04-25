@@ -1,0 +1,27 @@
+sudo: required
+dist: trusty
+
+language: node_js
+node_js:
+  - "8"
+env:
+  - CXX=g++-4.8
+addons:
+  postgresql: "9.5"
+  apt:
+    sources:
+    - ubuntu-toolchain-r-test
+    packages:
+    - imagemagick
+    - ghostscript
+    - poppler-utils
+    - g++-4.8
+services:
+    - redis-server
+before_install:
+  - psql -c 'create database test;' -U postgres
+  - 'yarn install'
+  - mkdir /tmp/.gc
+script:
+  - 'npm test'
+after_success: npm run coverage

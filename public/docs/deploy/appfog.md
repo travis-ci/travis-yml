@@ -2,16 +2,14 @@
 
 
 
-## Type
+## Types
 
-Any of:
+* Hash
+* String (known)
 
-* Map (Hash)
-* Enum (known String)
+## Values
 
-## Flags
-
-None.
+* `appfog`
 
 
 ## Examples
@@ -25,9 +23,20 @@ deploy:
   edge: true
   user: 
   api_key: 
-  address: "[ref:strs]"
+  address: string
   metadata: string
-  after_deploy: "[ref:strs]"
+  after_deploy: string
+```
+
+```yaml
+deploy:
+  provider: appfog
+  app: {}
+```
+
+```yaml
+deploy:
+  provider: appfog
   app: string
 ```
 

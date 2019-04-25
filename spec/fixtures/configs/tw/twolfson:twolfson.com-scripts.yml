@@ -1,0 +1,59 @@
+# Leverage 14.04 LTS, same as Vagrant
+sudo: required
+dist: trusty
+
+# Set our language to generic for a minimal setup
+# https://docs.travis-ci.com/user/trusty-ci-environment#Image-differences-from-Precise
+language: generic
+
+# Test both provisioning on an existing and fresh machine
+# DEV: Provisioning on an existing machine catches edge cases like forgetting to delete files
+env:
+  - BOOTSTRAP_LAST_TAG=FALSE
+  - BOOTSTRAP_LAST_TAG=TRUE
+
+# DEV: Due to the nature of Travis CI, we must use the `exec` backend for testing
+#   Additionally, since we need to execute some commands as root
+#   and since Serverspec doesn't support `sudo` invocations with the `exec`
+#   we need to install/invoke our test commands with `sudo`
+#   https://github.com/mizzy/specinfra/pull/509
+#   https://rvm.io/integration/sudo
+before_install:
+  # Install bundler for the root user
+  - sudo gem install bundler
+
+  # Output OS information
+  - sudo ruby --version
+  - rvmsudo bundle --version
+
+install:
+  # Install repo specific dependencies
+  - rvmsudo bundle install
+
+  # Hackishly remove Node.js
+  # DEV: It's not installed via `apt` and it's tedious to debug Travis CI
+  #   https://travis-ci.org/twolfson/twolfson.com-scripts/jobs/253497908#L580
+  #   https://travis-ci.org/twolfson/twolfson.com-scripts/jobs/253504794#L580
+  - sudo rm "$(which node)"
+
+script:
+  # If we want to provision the last tag, then provision it
+  # DEV: We allow this step to fail since we could have stale dependencies in past revisions
+  #   The real test is about files and their states
+  - if test "$BOOTSTRAP_LAST_TAG" = "TRUE"; then bin/bootstrap-last-tag-travis-ci.sh || true; fi
+
+  # Run our provisioner
+  # DEV: Avoid using `sudo` for this line
+  #   to guarantee provisioning can be done by a non-root user
+  - bin/bootstrap-travis-ci.sh
+
+  # Run Travis tests
+  - rvmsudo bin/test-travis-ci.sh
+
+# Only receive notifications on the start of a new branch and when it changes status
+notifications:
+  email:
+    recipients:
+      - todd@twolfson.com
+    on_success: change
+    on_failure: always

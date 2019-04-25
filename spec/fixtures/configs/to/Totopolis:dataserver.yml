@@ -1,0 +1,33 @@
+sudo: required
+dist: trusty
+
+language: cpp
+
+branches:
+  only:
+  - master
+
+matrix:
+  include:
+    - os: linux
+      compiler: gcc
+      install:
+        - if [ "$CXX" = "g++" ]; then export CXX="g++-4.9" CC="gcc-4.9"; fi
+      addons:
+          apt:
+            sources:
+            - ubuntu-toolchain-r-test
+            packages:
+            - gcc-4.9
+            - g++-4.9
+    - os: osx
+      compiler: clang++
+    
+script:
+- mkdir build && cd build
+- cmake ..
+- make
+- cd ..
+- mkdir datasets
+- curl -o datasets/set1.mdf https://sdlpublic.blob.core.windows.net/datasets/set1.mdf
+- ./bin/test_dataserver -i ./datasets/set1.mdf -b 0 -s 0 -u 1 -a 1 -r 10 -v 2 -x 40 -q 0 -j -1 -o ./datasets/$$$.h -w 0 --internal 0 --index_for_table 1

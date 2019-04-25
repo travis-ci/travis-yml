@@ -1,0 +1,16 @@
+language: ruby
+# caches gems between builds
+cache: bundler
+sudo: false
+notifications:
+  email: false
+
+rvm:
+  - 2.5.3
+
+before_install:
+  - docker run -d -p 8983:8080 suldlss/fcrepo:no-messaging-latest
+  - docker ps
+
+env:
+  - 'RAILS_VERSION="~> 5.2.3"'

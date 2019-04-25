@@ -1,0 +1,30 @@
+language: cpp
+
+notifications:
+  email: false
+
+sudo: required
+dist: xenial
+
+branches:
+  except:
+    - B2_5_Release
+    - B2_1_Release
+    - B2_0_Release
+    - B1_5_Release
+
+addons:
+  apt:
+    packages:
+    - libtool-bin
+    - libtommath0
+    - libtommath-dev
+    - libicu-dev
+    - zlib1g-dev
+
+script:
+  - ./autogen.sh --enable-binreloc --with-builtin-tomcrypt --prefix=/opt/firebird
+  - make -j4
+  - make dist
+  - tar xzvf gen/Firebird-[0-9]*.tar.gz
+  - (cd Firebird-[0-9]*; sudo ./install.sh -silent)

@@ -1,0 +1,32 @@
+sudo: required
+language: node_js
+node_js:
+  - "6.13.1"
+
+addons:
+  postgresql: "9.5"
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - g++-4.8
+
+env:
+  - CXX=g++-4.8
+
+before_install:
+  - sudo apt-get -qq update
+  - sudo apt-get install -y libgif-dev
+
+  - cd $TRAVIS_BUILD_DIR
+
+  # Configure postgres
+  - psql -c 'create database suitec_travis;' -U postgres
+  - psql suitec_travis -c 'create extension pg_trgm;' -U postgres
+  - psql suitec_travis -c 'create role suitec superuser login; alter schema public owner to suitec;' -U postgres
+
+  # Set API key for caliper-js access on Github
+  - echo -e "machine github.com\n  login $CALIPER_JS_ACCESS_TOKEN" >> ~/.netrc
+
+script:
+  - node_modules/.bin/gulp travis

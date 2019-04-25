@@ -1,0 +1,28 @@
+language: java
+jdk:
+  - openjdk8
+
+before_cache:
+  - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+  - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+
+cache:
+  directories:
+    - $HOME/.gradle/caches/
+    - $HOME/.gradle/wrapper/
+
+script:
+  - "./gradlew build --info"
+  - "./gradlew dependencyCheckAnalyze || echo 'dependencyCheckAnalyze failed'"
+  - "./gradlew sendCoverageToCodacy || echo sendCoverageToCodacy failed"
+
+env:
+  global:
+    - CODACY_PROJECT_TOKEN=24f7bf62b3fa4328aa3b9bf32c07b0d9
+
+before_install:
+  - curl https://raw.githubusercontent.com/hmcts/reform-api-docs/master/bin/publish-swagger-group-docs.sh > publish-swagger-group-docs.sh
+
+after_success:
+  - 'bash <(curl -s https://codecov.io/bash) || echo "Codecov failed to upload"'
+  - '[ "$TRAVIS_BRANCH" = "master" -a "$TRAVIS_PULL_REQUEST" = "false" ] && sh ./publish-swagger-group-docs.sh v1 v2'

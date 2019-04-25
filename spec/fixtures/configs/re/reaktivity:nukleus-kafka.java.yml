@@ -1,0 +1,14 @@
+dist: trusty
+language: java
+before_install:
+  - rm ~/.m2/settings.xml
+jdk:
+  - oraclejdk8
+install: mvn -v
+script: mvn -B -nsu verify
+cache:
+  directories:
+    - $HOME/.m2
+branches:
+  except:
+  - /^release\/.*$/

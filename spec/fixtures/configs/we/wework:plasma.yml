@@ -1,0 +1,16 @@
+sudo: required
+dist: trusty
+cache:
+  yarn: true
+  directories:
+    - node_modules
+node_js:
+  - 10.9.0
+before_script:
+  - yarn global add gulp-cli
+  - yarn
+script:
+  - yarn lint
+  - yarn prettier:ci
+  - yarn test
+  - yarn flow

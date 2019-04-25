@@ -1,0 +1,43 @@
+sudo: required
+dist: trusty
+
+language: java
+jdk: openjdk8
+
+env:
+  global:
+    # encrypted COVERITY_SCAN_TOKEN
+    - secure: "WkngHI6zO+6m8ZNqrbFZN+V8xCUxXVUMzLGBcOMa2/iiSDGxnRRpGU2jH+4Uf4ChCE4dXLrTXvs4vDjUT7aZ9KVFzcTo4HYejdLeMayFPLeztSYdFUG7EYtambZlh1Ldp67+ZBXLJ152iTWvCm5t/JXs3tA+Q5puZ24OO+U5xAE="
+    - BUILD_CLIENT_TESTS=true
+
+before_install:
+  - echo -n | openssl s_client -connect scan.coverity.com:443 2>./openssl-connect.stderr | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-certificates.crt
+  - echo "OpenSSL connect stderr:"
+  - cat ./openssl-connect.stderr
+  - rm ./openssl-connect.stderr
+
+addons:
+  apt:
+    packages:
+      - libboost-all-dev
+      - libfuse-dev
+      - fuse
+      - libssl-dev
+      - libattr1-dev
+      - make
+      - cmake
+      - automake
+      - python
+      - valgrind
+      - net-tools
+  coverity_scan:
+    project:
+      name: "xtreemfs/xtreemfs"
+      description: "Distributed Fault-Tolerant File System http://www.xtreemfs.org"
+    notification_email: xtreemfs-test@googlegroups.com
+    build_command_prepend: make distclean
+    build_command: make client_debug server hadoop-client
+    branch_pattern: coverity_scan
+
+script:
+  - true

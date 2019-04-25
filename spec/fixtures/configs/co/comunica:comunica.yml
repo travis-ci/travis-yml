@@ -1,0 +1,75 @@
+sudo: required
+services:
+ - docker
+language: node_js
+matrix:
+  include:
+    - node_js: '8'
+    - node_js: '10'
+    - node_js: 'node'
+      env: DOCUMENTATION_BUILD=true DOCKER_BUILD=true
+os:
+ - linux
+# - osx # Temporary disabled, not very stable yet on Travis
+# - windows # Temporary disabled, not very stable yet on Travis
+before_install: yarn global add greenkeeper-lockfile@1
+install: yarn install --pure-lockfile
+before_script: greenkeeper-lockfile-update
+after_script: greenkeeper-lockfile-upload
+script:
+  - yarn run lint
+  - yarn run test-ci
+  - lerna run browser
+  - lerna run spec
+  - if [ "$DOCKER_BUILD" = "true" ]; then ( sh -c "`curl -fsSl https://raw.githubusercontent.com/comunica/comunica-lerna-docker/master/install.sh`" && ~/.comunica-lerna-docker/bin/comunica-lerna-docker build ) fi
+after_success:
+  - yarn run coveralls-ci
+  - if [ "$DOCUMENTATION_BUILD" = "true" ]; then ( yarn global add typedoc && yarn run doc ) fi
+cache:
+  yarn: true
+  directories:
+    - node_modules
+    - .rdf-test-suite-cache
+deploy:
+  - provider: pages
+    skip-cleanup: true
+    github-token: $GH_TOKEN
+    keep-history: true
+    local-dir: documentation
+    on:
+      tags: false
+      branch: master
+      node_js: "node"
+      os: "linux"
+  - provider: script
+    skip-cleanup: true
+    script: ~/.comunica-lerna-docker/bin/comunica-lerna-docker push
+    on:
+      tags: false
+      branch: master
+      node_js: "node"
+      os: "linux"
+  - provider: script
+    skip-cleanup: true
+    script: ~/.comunica-lerna-docker/bin/comunica-lerna-docker push
+    on:
+      tags: true
+      all_branches: true
+      node_js: "node"
+      os: "linux"
+  - provider: script
+    skip-cleanup: true
+    script: ./.travis/deploy_browser.sh
+    on:
+      tags: false
+      branch: master
+      node_js: "node"
+      os: "linux"
+  - provider: script
+    skip-cleanup: true
+    script: ./.travis/deploy_browser.sh
+    on:
+      tags: true
+      all_branches: true
+      node_js: "node"
+      os: "linux"

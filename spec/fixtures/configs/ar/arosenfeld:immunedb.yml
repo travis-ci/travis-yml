@@ -1,0 +1,32 @@
+language: python
+python:
+- '3.6'
+services:
+- mysql
+addons:
+  mariadb: '10.3'
+  apt:
+    packages:
+    - python-dev
+    - build-essential
+    - libatlas-base-dev
+    - gfortran
+    - unzip
+install:
+- pip install numpy
+- pip install nose
+- pip install codecov
+- pip install airr
+- python setup.py install
+- wget https://github.com/BenLangmead/bowtie2/releases/download/v2.3.3/bowtie2-2.3.3-linux-x86_64.zip
+- unzip bowtie2-2.3.3-linux-x86_64.zip
+- PATH=$PATH:`pwd`/bowtie2-2.3.3
+script:
+- cd $TRAVIS_BUILD_DIR
+- "./tests/run.sh"
+after_success:
+- coverage combine
+- bash <(curl -s https://codecov.io/bash)
+notifications:
+  slack:
+    secure: C5eLcphfLBTJltALo7zDmMifsyAty0Mpi7EZPrrgzNC+4Zn0qoO2LM5nmLL57/Dsue3CYP8iT0Cs9X1E/5GlgzzwX01Swr9VaPcG4UmjepB/hwQWY6E1hdA9BQ6Z3f64VVzMexHRmvf86hlwjZI9G0y4nWD+StQq7ts+ZEQ1ryA=

@@ -1,0 +1,85 @@
+language: cpp
+matrix:
+  include:
+    - os: linux
+      compiler: gcc
+      env: LANG=cpp ALT_CC=gcc ALT_CXX=g++ PUBLISH_DOCS=ON
+      sudo: required
+      dist: trusty
+    - os: linux
+      compiler: gcc
+      env: LANG=cpp ALT_CC=gcc-5 ALT_CXX=g++-5
+      sudo: required
+      dist: trusty
+    - os: linux
+      compiler: gcc
+      env: LANG=cpp ALT_CC=gcc-6 ALT_CXX=g++-6
+      sudo: required
+      dist: trusty
+    - os: linux
+      compiler: clang
+      env: LANG=cpp ALT_CC=clang-3.6 ALT_CXX=clang++-3.6
+      sudo: required
+      dist: trusty
+    - os: linux
+      compiler: gcc
+      env: LANG=php LANG_VERSION=5.6
+      sudo: required
+      dist: trusty
+    - os: linux
+      compiler: gcc
+      env: LANG=php LANG_VERSION=7.0
+      sudo: required
+      dist: trusty
+    - os: linux
+      compiler: gcc
+      env: LANG=php LANG_VERSION=7.1
+      sudo: required
+      dist: trusty
+    - os: linux
+      compiler: gcc
+      env: LANG=php LANG_VERSION=7.2
+      sudo: required
+      dist: trusty
+env:
+  global:
+    - VIRGIL_CRYPTO_FEATURE_LOW_LEVEL_WRAP=ON
+    - VIRGIL_CRYPTO_FEATURE_PYTHIA=ON
+    - PROJECT_ROOT=${TRAVIS_BUILD_DIR}
+    - CMAKE_VERSION=3.10.2
+    - SWIG_VERSION=3.0.12
+cache:
+  directories:
+    - cmake-${CMAKE_VERSION}
+    - swig-${SWIG_VERSION}
+before_install:
+  - date -u
+  - uname -a
+  - if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then lscpu; fi
+    # Travis overrides CC environment with compiler predefined values
+  - if [ -n "${ALT_CC}" ]; then export CC="${ALT_CC}"; fi
+  - if [ -n "${ALT_CXX}" ]; then export CXX="${ALT_CXX}"; fi
+  - if [ "${TRAVIS_PULL_REQUEST}" = "false" ]; then source "${PROJECT_ROOT}/ci/install-deployment-key.sh"; fi
+install:
+    # Use clean dependencies installation to avoid versions collision.
+  - export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+  - if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then source "${PROJECT_ROOT}/ci/install-dependencies.sh"; fi
+  - ${CC} --version
+  - ${CXX} --version
+  - cmake --version
+  - swig -version
+  - doxygen --version
+before_script:
+  - CMAKE_ARGS="-DLANG=${LANG} -DPLATFORM_ARCH=`uname -m`"
+  - CMAKE_ARGS+=" -DVIRGIL_CRYPTO_FEATURE_LOW_LEVEL_WRAP=${VIRGIL_CRYPTO_FEATURE_LOW_LEVEL_WRAP}"
+  - CMAKE_ARGS+=" -DVIRGIL_CRYPTO_FEATURE_PYTHIA=${VIRGIL_CRYPTO_FEATURE_PYTHIA}"
+  - CMAKE_ARGS+=" -DCMAKE_INSTALL_PREFIX=${PROJECT_ROOT}/install"
+  - CMAKE_ARGS+=" -DLANG_VERSION=${LANG_VERSION}"
+  - if [ "${LANG}" = "cpp" ]; then CMAKE_ARGS+=" -DVIRGIL_CRYPTO_FEATURE_STREAM_IMPL=ON"; fi
+  - cmake -H"${PROJECT_ROOT}" -B"${PROJECT_ROOT}/build" ${CMAKE_ARGS}
+script:
+  - cmake --build "${PROJECT_ROOT}/build" -- -j4
+  - cd "${PROJECT_ROOT}/build" && ctest --verbose && cd -
+after_success:
+  - source "${PROJECT_ROOT}/ci/publish-docs.sh"
+

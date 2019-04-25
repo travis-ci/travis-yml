@@ -1,0 +1,15 @@
+language: ruby
+sudo: false
+rvm:
+  - 2.4.5
+  - 2.5.3
+env:
+  global:
+    - NOKOGIRI_USE_SYSTEM_LIBRARIES=true
+  matrix:
+    - "RAILS_VERSION=5.0.7"
+    - "RAILS_VERSION=5.1.6"
+    - "RAILS_VERSION=5.2.2"
+
+before_install:
+  - gem update --system

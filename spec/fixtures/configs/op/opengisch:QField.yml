@@ -1,0 +1,71 @@
+language: python
+python:
+  - 3.5
+rvm:
+  - 2.0.0
+
+# Handle git submodules manually
+git:
+  submodules: false
+
+services:
+  - docker
+
+before_install:
+  - sed -i 's/git@github.com:/https:\/\/github.com\//' .gitmodules
+  - git submodule update --init --recursive
+  - openssl aes-256-cbc -K $encrypted_c158cd588669_key -iv $encrypted_c158cd588669_iv -in keystore.p12.enc -out keystore.p12 -d
+  - gem update --system
+  - gem --version
+
+script:
+  - export QFIELD_SDK_VERSION=20190306
+  - echo "travis_fold:start:docker-pull"
+  - docker pull opengisch/qfield-sdk:${QFIELD_SDK_VERSION}
+  - echo "travis_fold:end:docker-pull"
+  - echo "travis_fold:start:tx-pull"
+  - ./scripts/ci/pull_translations.sh
+  - echo "travis_fold:end:tx-pull"
+  - docker run -v $(pwd):/usr/src/qfield -e "BUILD_FOLDER=build-${ARCH}" -e "ARCH=${ARCH}" -e "STOREPASS=${STOREPASS}" -e "KEYNAME=${KEYNAME}" -e "KEYPASS=${KEYPASS}" -e "VERSION=${TRAVIS_TAG}" opengisch/qfield-sdk:${QFIELD_SDK_VERSION} /usr/src/qfield/scripts/docker-build.sh
+  - ./scripts/upload-artifacts.sh
+
+jobs:
+  allow_failures:
+  #  - name: testing
+  include:
+    - stage: test
+      name: "🍳 Testing"
+      script:
+        - echo "travis_fold:start:build\n$(tput bold)Build QField $(tput sgr0)"
+        - docker-compose -f .docker/testing/docker-compose-travis.yml run qgis /usr/src/.docker/testing/build-test.sh
+      if: type = pull_request OR tag IS present OR branch = master
+    - stage: test
+      name: "📱 build ARMv7"
+      env:
+        - ARCH=armv7
+      if: type = pull_request OR tag IS present OR branch = master
+    - stage: test
+      name: "☎ build X86"
+      env:
+        - ARCH=x86
+      if: type = pull_request OR tag IS present OR branch = master
+    - stage: deploy
+      name: "🍺 Deploy"
+      if: type = pull_request OR tag IS present OR branch = master
+      script:
+        - pip install pyopenssl
+        - pip install google-api-python-client
+        - ./scripts/deploy.sh # Upload pull request apk artifacts if possible
+    - stage: deploy
+      name: "🌍 Translations"
+      if: branch = master AND type != pull_request
+      addons:
+        apt:
+          packages:
+          - qttools5-dev-tools
+      install:
+        pip install -r requirements.txt
+      script: ./scripts/ci/update-translations.sh
+
+matrix:
+  fast_finish: true 

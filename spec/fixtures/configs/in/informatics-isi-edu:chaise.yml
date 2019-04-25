@@ -1,0 +1,133 @@
+language: node_js
+node_js:
+- "6"
+
+sudo: required
+dist: trusty
+
+branches:
+  only:
+    - master
+    - system-columns
+
+addons:
+  sauce_connect: true
+  hosts:
+    - travis.dev
+
+python:
+- 2.7
+
+notifications:
+  email:
+    on_success: change
+    on_failure: always
+
+cache:
+  directories:
+  - node_modules
+  - scripts/vendor
+
+services:
+  - postgresql
+
+before_install:
+  - export TZ=America/Los_Angeles
+  - sudo apt-get -y update
+  - sudo service postgresql stop
+  - sudo apt-get -y purge postgresql-9.1 postgresql-9.2 postgresql-9.3 postgresql-9.4 postgresql-9.5 postgresql-9.6
+  - sudo apt-get -y install postgresql-10 libpq-dev postgresql-server-dev-10 python-dev
+  - sudo apt-get -y install apache2 apache2-dev libjson-c-dev ssl-cert libapache2-mod-wsgi python python-dateutil python-ply python-tz
+  - sudo service postgresql start 10
+  - sudo apt-get -y purge python-psycopg2
+  - sudo pip install web.py
+  - sudo pip install psycopg2
+  - pip install requests
+  - sudo ln -s /etc/apache2/conf-enabled /etc/apache2/conf.d
+  - sudo ln -s /var/run/apache2 /var/run/httpd
+  - sudo a2enmod ssl
+  - sudo a2ensite default-ssl
+  - cd ..
+  - git clone https://github.com/informatics-isi-edu/webauthn.git
+  - cd webauthn
+  - sudo make testvars
+  - sudo make install
+  - sudo make deploy
+  - sudo a2enmod webauthn
+  - sudo bash ./test/ubuntu-travis-setup.sh
+  - cd ..
+  - git clone https://github.com/informatics-isi-edu/hatrac.git
+  - cd hatrac
+  - sudo python ./setup.py install
+  - sudo useradd -m -r hatrac
+  - sudo -H -u postgres createuser -d hatrac
+  - sudo -H -u postgres psql -c "GRANT webauthn TO hatrac"
+  - sudo -H -u hatrac createdb hatrac
+  - sudo cp test/hatrac_config.json ~hatrac/
+  - sudo -H -u hatrac hatrac-deploy admin
+  - sudo cp test/wsgi_hatrac_travis.conf /etc/apache2/conf.d/
+  - sudo mkdir /var/www/hatrac
+  - sudo chown hatrac /var/www/hatrac
+  - cd ..
+  - git clone https://github.com/informatics-isi-edu/ermrest.git
+  - cd ermrest
+  - sudo make install PLATFORM=ubuntu1204
+  - sudo make deploy PLATFORM=ubuntu1204
+  - cd ..
+  - curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -
+  - sudo apt-get install -y nodejs
+  - git clone https://github.com/informatics-isi-edu/ErmrestDataUtils.git
+  - cd ErmrestDataUtils
+  - sudo npm install
+  - cd ..
+  - git clone https://github.com/informatics-isi-edu/ermrestjs.git
+  - cd ermrestjs
+  - sudo npm install
+  - bower install
+  - sudo make build
+  - sudo make install
+  - cd ../chaise
+  - sudo cp test/ermrest_config.json /home/ermrest/
+  - sudo chmod a+r /home/ermrest/ermrest_config.json
+  - sudo npm install
+
+install:
+  - sudo mkdir -p /var/www/html/chaise
+  - sudo make build
+  - sudo make install
+  - sudo cp chaise-config.js /var/www/html/chaise/chaise-config.js
+  - sudo service apache2 restart
+  - sudo cat /var/www/html/chaise/chaise-config.js
+  - sudo cat /var/www/html/chaise/version.txt
+
+before_script:
+  - sudo -H -u webauthn webauthn2-manage adduser test1
+  - sudo -H -u webauthn webauthn2-manage passwd test1 dummypassword
+  - sudo -H -u webauthn webauthn2-manage addattr admin
+  - sudo -H -u webauthn webauthn2-manage assign test1 admin
+
+script:
+  - make build
+  - make testfullfeaturesconfirmation
+  - make testdefaultconfig
+  - make testfullfeatures
+  - make testdeleteprohibited
+
+after_failure:
+  - sudo cat ${HTTPD_ERROR_LOG}
+  - sudo ls -lR /etc/apache2
+  - sudo ls -lR /var/run/apache2
+  - sudo cat /etc/apache2/conf.d/webauthn.conf
+  - sudo cat /etc/apache2/conf.d/wsgi_webauthn2.conf
+  - sudo cat /etc/apache2/conf.d/wsgi_ermrest.conf
+
+env:
+  global:
+  - COOKIES: ~/cookies
+  - VERBOSE: brief
+  - HTTPD_ERROR_LOG: /var/log/apache2/error.log
+  - CHAISE_BASE_URL: http://travis.dev/chaise
+  - ERMREST_URL: http://travis.dev/ermrest
+  - SHARDING: true
+  - secure: lTRJNmSQjXTp4uBrBTBnbrjVgHYH5G7NICEv+zOJ496Z0y7SXKYDvDYn5jQWMZthB2UXz7xEUmPLWv73QY2UOEHXkQb3jtZtG6mwHsU1GBKcVsxGYBJURMto1g//xPbPwWG1oGMwDnrw3RjgCZoiVgaDEvDaOypbXC9Kof5c+NNuXpYGLMDI3FiZJCL9LzJM38YrKmXW6ksU/8NgXfpiKTjuOkr2FwxQFigpjxtLbnb8SnDSbDMpm8qJY8zPQ76f+ahIXY/22+3tFmoLCfbLqcCqvL3+6DV6HOjk9LAdIevF707goZpUDYHqDmIXFCUzCEywV+teU1XXYUngeRxM4UrWnZ8SNZ8h84U+spQ+IJzl1KAZR1ApxlGMvf2YjmyPKJY0EV4McG1mf1MGOz7hSrbT/ksFFLQiXYssK7U3b5tC77cEFIvXnTzg56L0fd/iN/bKoeafbkG6feA4XOhCUaH+lxLqkqMuiCp0oJGZ8gu1PXFRuPWJQ3Y97Pw8JQ/joNmlCmiDVLYAw1R2z1X2ZAoGH4bpkrt6FFii0rOHJyxcyaXQEnD3zPhkG/Tj8NcH/LFICm/9K3Z5K78xeBoSJamv8HvKFZy7evb0TGyvMmZU3phvPQaHRoLL69FAKiLc8l7yxhjh7MIoaaOlx6MI9Ssepc05eiMmeheo/wHjNh0=
+  - secure: nb1ovleOgN3DhF/rxxmTeNG887tO/m6jrmA7rtygvo5Q/PwMiY/OdtBSAAZP144nIwUMc9pG/1TKm7HeoZUnCBuChn17HMD/fLtlpi/+A+6dTPgkK4S/JuvtuS288VJWzt7Jo7NAB5n1vjkSkCGrKwk6jirqRKSnOGKA1e1Pp+V0a3TQRM2wCV1XYjHMQcHB+c6jdPeen9sCHVjnOtPBUM4NhiKgrpVzOMh19B7TeEl78wbwBhYHvGWbXvJ+Qvzv2OvJtXDC7cVoogbS5JAkL9pq9r7koHqgHHss6mPsWJekny35zNHO3DqiSNxsrDZyucX8HcHtTmg9Pv7Bd9RedhS2V2GwQ0Rqa2qB0gZNx3yBuCHuC5sONGytycDHZrDhWji7wjZI1tD/atKgC+bekaOrqaKusJM+tYbCrkuYo5AfOjkFODMXzN6ykPM4SYBGnxGylHNkVnPQTLrxiu4X/j1hsx4iwkH11xlQ7fIQNEh3PFnx778v1gSzdgVSI4U9p2np8SKPbPRCNJ7pkv9CjvQ1PkFfe3dM8PsRRr0qY2gwE6csTWQC7q3bcIkSQyl1yiRcSX7nmpoJjtYrW5+tq94kWZnp9LZqlu2plLZDZOb//ITIjCoRTLYgjBFP/5asDeO7GjzT4NHU6RPyYLz0oBbifGgV0sAVESB+N/z+o0c=

@@ -1,0 +1,230 @@
+language: python
+# https://docs.travis-ci.com/user/languages/python/
+# Because the code depends a lot on the Python interpreter
+# used (Python version and Python implementation), we want
+# to test all the possible configurations, including
+# deprecated versions.
+# Also, on Travis, all versions do not exist on all distros
+# (and when they do, they might actually correspond to
+# different minor versions of the interpreter). Thus, we end
+# end with a matrix to perform tests on different distros.
+# Failure is allowed on versions that are known to be missing
+# (these configs are tested anyway in case they come back).
+matrix:
+  include:
+  - os: linux
+    dist: trusty
+    python: 2.6
+  - os: linux
+    dist: xenial
+    python: 2.6
+  - os: linux
+    dist: trusty
+    python: 2.7
+  - os: linux
+    dist: xenial
+    python: 2.7
+  - os: linux
+    dist: trusty
+    python: 3.2
+  - os: linux
+    dist: xenial
+    python: 3.2
+  - os: linux
+    dist: trusty
+    python: 3.3
+  - os: linux
+    dist: xenial
+    python: 3.3
+  - os: linux
+    dist: trusty
+    python: 3.4
+  - os: linux
+    dist: xenial
+    python: 3.4
+  - os: linux
+    dist: trusty
+    python: 3.5
+  - os: linux
+    dist: xenial
+    python: 3.5
+  - os: linux
+    dist: trusty
+    python: 3.5-dev
+  - os: linux
+    dist: xenial
+    python: 3.5-dev
+  - os: linux
+    dist: trusty
+    python: 3.6
+  - os: linux
+    dist: xenial
+    python: 3.6
+  - os: linux
+    dist: trusty
+    python: 3.6-dev
+  - os: linux
+    dist: xenial
+    python: 3.6-dev
+  - os: linux
+    dist: trusty
+    python: 3.7
+  - os: linux
+    dist: xenial
+    python: 3.7
+  - os: linux
+    dist: trusty
+    python: 3.7-dev
+  - os: linux
+    dist: xenial
+    python: 3.7-dev
+  - os: linux
+    dist: trusty
+    python: 3.8
+  - os: linux
+    dist: xenial
+    python: 3.8
+  - os: linux
+    dist: trusty
+    python: 3.8-dev
+  - os: linux
+    dist: xenial
+    python: 3.8-dev
+  - os: linux
+    dist: trusty
+    python: nightly
+  - os: linux
+    dist: xenial
+    python: nightly
+  - os: linux
+    dist: trusty
+    python: pypy-5.3.1
+  - os: linux
+    dist: xenial
+    python: pypy-5.3.1
+  - os: linux
+    dist: trusty
+    python: pypy-5.4.1
+  - os: linux
+    dist: xenial
+    python: pypy-5.4.1
+  - os: linux
+    dist: trusty
+    python: pypy
+  - os: linux
+    dist: xenial
+    python: pypy
+  - os: linux
+    dist: trusty
+    python: pypy3
+  - os: linux
+    dist: xenial
+    python: pypy3
+  allow_failures:
+  - os: linux
+    dist: xenial
+    python: 2.6
+  - os: linux
+    dist: xenial
+    python: 3.2
+  - os: linux
+    dist: xenial
+    python: 3.3
+  - os: linux
+    dist: trusty
+    python: 3.7
+  - os: linux
+    dist: trusty
+    python: 3.8
+  - os: linux
+    dist: xenial
+    python: 3.8
+  - os: linux
+    dist: trusty
+    python: 3.8-dev
+  - os: linux
+    dist: xenial
+    python: pypy-5.3.1
+  - os: linux
+    dist: xenial
+    python: pypy-5.4.1
+  - os: linux
+    dist: xenial
+    python: pypy
+  - os: linux
+    dist: xenial
+    python: pypy3
+
+
+install:
+  # From https://github.com/frol/flask-restplus-server-example/blob/master/.travis.yml
+  # Travis has pypy 2.5.0, which is way too old, so we upgrade it on the fly:
+  - |
+      if ([ "$TRAVIS_PYTHON_VERSION" = "pypy-5.3.1" ] ||
+          [ "$TRAVIS_PYTHON_VERSION" = "pypy-5.4.1" ]); then
+        export PYENV_ROOT="$HOME/.pyenv"
+        if [ -f "$PYENV_ROOT/bin/pyenv" ]; then
+          pushd "$PYENV_ROOT" && git pull && popd
+        else
+          rm -rf "$PYENV_ROOT" && git clone --depth 1 https://github.com/yyuu/pyenv.git "$PYENV_ROOT"
+        fi
+        case "$TRAVIS_PYTHON_VERSION" in
+            "pypy-5.3.1") export PYPY_VERSION="5.3.1";;
+            "pypy-5.4.1") export PYPY_VERSION="5.4.1";;
+        esac
+        "$PYENV_ROOT/bin/pyenv" install --skip-existing "pypy-$PYPY_VERSION"
+        virtualenv --python="$PYENV_ROOT/versions/pypy-$PYPY_VERSION/bin/python" "$HOME/virtualenvs/pypy-$PYPY_VERSION"
+        source "$HOME/virtualenvs/pypy-$PYPY_VERSION/bin/activate"
+      fi
+  - pip install --upgrade pep8
+  - pip install pep257
+  - |
+      if ([ "$TRAVIS_PYTHON_VERSION" != "2.6" ]); then
+        pip install --upgrade pyflakes
+      fi
+  - pip install unittest2
+  - |
+      # https://bitbucket.org/ned/coveragepy/issues/407/coverage-failing-on-python-325-using
+      if ([ "$TRAVIS_PYTHON_VERSION" != "3.2" ]); then
+        pip install coverage
+      else
+        pip install coverage==3.7.1
+      fi
+  - |
+      case "$TRAVIS_PYTHON_VERSION" in
+          "2.6") ;; # coveralls not supported
+          "pypy-5.3.1") ;; # coveralls not supported
+          *) pip install coveralls;;
+      esac
+  - pip install codecov
+
+before_script:
+ # Information about Python version
+ - python -VV
+ - python -c "import sys; print(sys._git)" || true
+ - pep8 *.py */*.py
+ - pep257 *.py */*.py
+ - pyflakes . || true
+
+script:
+# Coverage leads to a different behavior sometimes - so we run the tests
+# without and with coverage and failures are allowed on the second- #36
+# (Except for Python 2.6 because the direct run fails)
+ - |
+      if ([ "$TRAVIS_PYTHON_VERSION" != "2.6" ]); then
+        python -m unittest2 discover --start-directory=didyoumean --pattern=*.py
+      fi
+ - |
+      if ([ "$TRAVIS_PYTHON_VERSION" != "2.6" ]); then
+        coverage run -m unittest2 discover --start-directory=didyoumean --pattern=*.py || true
+      else
+        coverage run -m unittest2 discover --start-directory=didyoumean --pattern=*.py
+      fi
+ - python didyoumean/readme_examples.py
+ - pip install .
+
+after_success:
+ - coveralls
+ - codecov
+ # Information about Python builtins/keywords
+ # - python -c "import sys; import keyword; print({sys.version_info: {'kword': set(keyword.kwlist), 'builtins': set(dir(__builtins__))}})" || true

@@ -1,0 +1,17 @@
+sudo: false
+language: erlang
+otp_release:
+  - 21.1
+install:
+  - make
+before_script:
+  - epmd -daemon
+script:
+  - make test
+  - make xref
+  - make dialyzer
+  - make lint
+  - rebar3 coveralls send
+notifications:
+  slack: haslab:jhAnACJzswFtYwKXpbZzjbFq
+  email: false

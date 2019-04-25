@@ -1,0 +1,22 @@
+language: bash
+sudo: required
+script: sudo bash buildall
+dist: xenial
+services:
+  - docker
+before_install:
+  - docker version
+  # Fix for Ubuntu Xenial apt-daily.service triggering
+  # https://unix.stackexchange.com/questions/315502/how-to-disable-apt-daily-service-on-ubuntu-cloud-vm-image
+  - |
+    while sudo fuser /var/{lib/{dpkg,apt/lists},cache/apt/archives}/lock >/dev/null 2>&1; do
+      sleep 1
+    done
+  - sudo apt-get -qq update
+  - sudo apt-get install -y debian-archive-keyring debootstrap
+deploy:
+  provider: script
+  script: bash pushall
+  skip_cleanup: true
+  on:
+    branch: master

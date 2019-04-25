@@ -1,0 +1,36 @@
+sudo: required
+language: objective-c
+cache: cocoapods
+osx_image: xcode9.1
+xcode_project: MercadoPagoSDK/MercadoPagoSDK.xcworkspace
+xcode_scheme: MercadoPagoSDK
+xcode_sdk: iphonesimulator
+podfile: MercadoPagoSDK/Podfile
+
+before_script:
+  - cd MercadoPagoSDK
+
+branches:
+  only: 
+    - master
+    - development
+    - betaVersion
+
+install:
+- gem install xcpretty --no-rdoc --no-ri --no-document --quiet
+
+script:
+- pod update
+- cd ../scripts
+- "./run_tests_on_devices.sh"
+
+after_success:
+- cd ..
+- bash <(curl -s https://codecov.io/bash) -J 'MercadoPagoSDK'
+
+notifications:
+  slack:
+    rooms:
+      # secure: XMxBQ/H6QavNPHLp3PyuJBLiXmONsmjP47HIokFA8tF3IZBmTrhsEnkk72g2fH756RnLLFgCNvO+BG54um+YAmxkvUzZf9Q/AsS3PZt+6f4OsTq3NNRH9uEujHZIty0pdcRT4cPMKCTtM8WsVDxBszp2lisr/xHu04Aq/3F2RnR9CMeaRTiM7K0mHGDBElq31TTSOI/AS5cJ3YZVTfM5xGr42cVB7rH8KLLWNkWt67xTvbh5i6egSCFenFi9S0TOiyUXJ/5dD1C7xZGYvYKojIcNOljAXetostNnd6K9T2TVG0ZQA0Er5/9WD9h2k/uHV2BSv4dXL+Hf/Ch9avN2AkCz5A3DebiOYlLPzkRiCGhp/FSGdqhCZVxEN+BPjso++/9f45QtPrSA2eHiBayNnupl1kh/XKcvuvp3r5zgd8Sf/9qr9s9MaxKcsykfvtLAFrkyFqr6Oo9Oq98NCflyjfK6qJrqoMzFec3eIXpMm/VNR3CCcIuA9HSv5sOKJofeakuhbvw3VWrnOnKWViGLf7JaMF+I3zVWBphRBZcSJbZj6TNDILI5NMwFwSfHdpEvaPLUFz7gRFp7NwQe8ZGBNFh9CbTOuNChJ/VZKmut9jPzD1nzwoWWJ5OB07iZAo6hhr19wp5HqQ4+Q3LRvCBHwm5U9GklCt9bim+4UbLC9U4=
+    on_success: never
+    on_failure: always

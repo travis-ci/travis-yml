@@ -1,0 +1,39 @@
+language: ruby
+cache: bundler
+dist: xenial
+
+addons:
+  apt:
+    sources:
+      - chef-stable-xenial
+    packages:
+      - chefdk
+      - wget
+      - unzip
+      - ssh
+
+matrix:
+  include:
+    - rvm: 2.0
+    - rvm: 2.1.10
+    - rvm: 2.2.10
+    - rvm: 2.3.8
+    - rvm: 2.4.5
+    - rvm: 2.5.5
+    - rvm: 2.6.2
+    - rvm: ruby-head
+  allow_failures:
+    - rvm: ruby-head
+
+branches:
+  only:
+    - master
+
+bundler_args: --without docs development
+
+before_install:
+  - gem install bundler -v 1.17.3 # we need an older Bundler to support older Rubies
+  - bundle --version
+  - gem --version
+
+script: bundle exec rake

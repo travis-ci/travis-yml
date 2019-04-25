@@ -1,0 +1,29 @@
+notifications:
+  email: false
+
+sudo: required
+
+services:
+  - docker
+
+language: python
+# python versions
+python:
+  - "3.4"
+# install requirements
+install:
+  - pip install coveralls
+  - pip install codecov
+  - pip install django-coverage-plugin
+
+script:
+  - docker-compose -f test.yml run django
+
+after_success:
+  - coveralls
+  - codecov
+  - if [ "$TRAVIS_BRANCH" == "pre-develop" -o "$TRAVIS_BRANCH" == "master" ]; then
+    docker login -u "$DOCKER_USER" -p "$DOCKER_PASS";
+    docker tag youthrefferalplatform_django $DOCKER_USER/$DOCKER_REPO:$TRAVIS_BRANCH;
+    docker push $DOCKER_USER/$DOCKER_REPO:$TRAVIS_BRANCH;
+    fi

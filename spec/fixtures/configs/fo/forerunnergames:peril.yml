@@ -1,0 +1,71 @@
+#
+# Copyright © 2016 Forerunner Games, LLC.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
+#
+
+sudo: required
+install: true
+language: android
+jdk: oraclejdk8
+
+android:
+  components:
+    - tools
+    - platform-tools
+    - build-tools-23.0.3
+    - android-23
+
+before_install:
+  - pip install --user s3cmd
+  - export PATH=$PATH:$HOME/.local/bin
+
+script:
+  - ./scripts/ci-build-command.sh
+
+after_success:
+  - ./scripts/create-executables.sh
+  - ./scripts/upload-coverage-reports.sh
+  - ./scripts/travis-collect-upload-build-artifacts.sh
+  - ./scripts/travis-create-upload-last-successful-build-number.sh
+  - ./scripts/travis-collect-upload-assets.sh
+
+after_failure:
+  - ./scripts/travis-collect-upload-build-artifacts.sh
+
+before_cache:
+  - rm -f $HOME/.gradle/caches/modules-2/modules-2.lock
+
+cache:
+  directories:
+    - $HOME/.gradle/caches/
+    - $HOME/.gradle/wrapper/
+
+notifications:
+  email:
+    recipients:
+      - developers@forerunner.games
+    on_success: change
+    on_failure: always
+  slack:
+    on_start: always
+    on_success: always
+    on_failure: always
+    on_pull_requests: true
+    secure: aMqcWUj/oB3RxJ4cYmpgPpY0x76cuC2sW63ugsTZOecW5Eh1cm7vTVdKvLrKXxxLhjXcKpprj1HoE7mwRrKkEYM8J5R85ltJU5lUWucfQa17o5tLysdpq6/LP1KhIpCSlgLc75/KnMK9izPwuSK1TgLJyk1NpFF6VhyvsdDN8bD/grQbDnYl5usu/jHlo7T4MvDoFvC1OZUQg0jXIU+578nVdyHG4YH16nyc0yZBIP1jGELAqzXJobmmB6Woq0FCMpewq/8jrYGJgO+b9zL1AwNMzuMOzfZXzGtJLq1wg+YZOZzAXiV85rMChh6EKjCJg6lL+yKqr55hLaJ9IBtvMLb33oEd8+bU0BJKZ4o90ax28iREpjU7IUkeJ4ErWiLGhMXMuQwhFMh/SOXIwC4M+LoQsszWmX1uMYdYxFzHVEXMwI9gYlJOsdOdd5++EbpJ7O82A/QLuluMZnDhw/xpZXpEYc9skSsmmrgsdcT8Rwgz89bd1/of2DR9GuvhnUsyQsrWuumiDjfyWvnViL8ywpR0bdIEavOTCkRp6fKDFlzaDOevo0RLh2jBYA87oH37MQ1vcm3LmW+F+/XfLXcE2/virTRLR+ct9B4hssHjvTeTZVI/rsUuL0CabGbEt4VkGoThtmMXJcv+xvQPlBf160jMR+SXSrqB4NlAB2+md0I=
+env:
+  global:
+    # Amazon S3 credentials
+    - secure: hJGlGp4bz8nq6DEr5Qa6rTM7yNt8HuawMdwarX132iNetpuPohKEMnIj9WSqkcH0rLyosj6AQVAJqTXEJ5WcRKyfSYnp8EVAHr2RsVak+qSCvZAhJeMq+do41CI29LBxb40ygW4rB7McDkLmlN+WlFK5DCD1TPyvexg0OUoegq3sAKSO2MmXaydbCDutrt5tkx67YEt1viwfd+iheINZX1ZxalrqCtKeun0+yVwRrdL/jjf/HjexWwtigDq3WKOzerj1UuGuey6XWNMikBmbDIxMDjg8HY3xOfkTiaJ9Q1ou+EVk+a2f/bc+32dMaxeuGnEXh5R7M6wHTuUh1I6vur3ceqRbvw6DoVAJLTjkT7c4NS0C+DZ2qAUk9YEoSKv4vTioSPISii5sVfs8XDT8S1SSmY3tqRx9pg9gou6lWMJOjymz6OoiWgw2T30OvkOJ5Goc4pI28LzqZRykYdR8AOGQul+av0+GyHBijBXgPBComWoDaM9iSqQWcbmrJD4kECoOD1kE/J68RHCEXUYvRINlkFpefhcTg7ce0j1x5udyrCIZuhFXKLMj7M8hYFl4aitU25FqQFUin9+el00w0AUdZp3ZAQjF7fUJd3JareFJaE15Sx+pfNR4xPIxKS0i37YjFp4XYZbQgu0lTtpNgri3uGNct2bXfTtTyedRr7g=
+    - secure: 1Pm5SbrQrzLZuSv0CoU0wdI0Gnyt3GDbTHzie087Be/dtOBPmNDTHx1xEtCFziWWiS+8YvASSuJ1ZhLRWvqxtC0S2lQ9ENyDeUULX9RYoAqHnArpYR5QAWHHM3xEiIjG7fKQTknpvI+RbXW122JKxWgsmsR3argWXvgJvsgfyavwq245RB3lG0AXLqOGk+VL5w4IaBE8E1B2iU9wRe0gA4pNbWaF61uiSFo/J8/lt89STA9WDeCdEQ3swdsd2L7/FPpujb5tpmjCpZS69xF/jGkUG5YiEZ9jx5a6kDcJ/SLt4BBDgd9aBxVBigW16PW/yZd+VU6T7PnHBnosgmzFJkauMp2OyW9DDzezveXs/xbEkSXJ2hgueKHULX7DvM/TIXPZio1X9/29pJ3LbMUjWnLXuFVf8Xfi3NEmc+TyJECWJqokaPIcP0WobLgtpqkGcbcMRBnxPNh/H0R+zssAj1ZlewOiGwZN/rCpncXfn4vtwessdNRV6MEaq/0/QRJfMlMPimZw5EFzozMhM76TlU+ycAmWpDx94Z2djz1kk4JQiKXIfFc5g6VmMCn43aE8QxlgfGgHNTsGY1fFT2aADJDSOC4y1/G8oAeicdyuDMV8M2wMVUopqumFRYli02BI2zMZVX+41eD9kPEzBWadFiaOUdQapjROk6SCzWkv2JU=

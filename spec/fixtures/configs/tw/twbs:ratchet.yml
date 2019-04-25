@@ -1,0 +1,32 @@
+sudo: required
+
+dist: trusty
+
+language: node_js
+
+git:
+  depth: 10
+
+node_js:
+  - "4"
+  - "5"
+
+env:
+  matrix:
+    - RUBY_VERSION=2.2
+
+before_install:
+  - rvm install $RUBY_VERSION
+  - rvm use $RUBY_VERSION --fuzzy
+  - export GEMDIR=$(rvm gemdir)
+
+install:
+  - travis_retry npm install -g grunt-cli
+  - travis_retry npm install
+  - travis_retry gem install --no-document "jekyll:~>3.1"
+
+matrix:
+  fast_finish: true
+
+notifications:
+  slack: heybb:51atQXKR2rpnbohAZ0X1vNbE

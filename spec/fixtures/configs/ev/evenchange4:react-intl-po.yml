@@ -1,0 +1,45 @@
+sudo: false
+language: node_js
+node_js:
+  - "6"
+  - "8"
+  - "9"
+
+env:
+  global:
+    - YARN_VERSION=1.5.1
+
+before_install:
+  - export PATH="$HOME/.yarn/bin:$PATH"
+  - |
+    if [[ ! -e ~/.yarn/bin/yarn || $(yarn --version) != "${YARN_VERSION}" ]]; then
+      curl -o- -L https://yarnpkg.com/install.sh | bash -s -- --version $YARN_VERSION
+    fi
+
+install:
+  - yarn install --pure-lockfile
+
+script:
+  - yarn run eslint
+  - yarn run test:coverage
+
+after_success: npm run codecov
+
+deploy:
+  - provider: npm
+    email: evenchange4@gmail.com
+    api_key:
+      secure: F1tJf6xnxw8MJy1STJqdZORZYI8gdOh2csxkktQstT6kztUtggYRtdtnzcAEsvNDhcWadI5D8mgvEd8g2ZvaK9u1bTDhFmM7zDJYzZkTNxFEdBs+xBfetOkjrHzEAthocRNKzja8PVrcxhCVuiabymhiZZkt/+2Diw1pxLRq1BeCtmFodZfyew5DDJqQn36R0+mxh19JaIxiNU2HglDCpdrpGLhCIDpnDzgIdRG6YPH2NA3Bft4hsZdEDtvnkXL4rDOOD2YBO6/RE4di6NIpOYYo9mvKlwX8968gfi56QqEBlytlgP6bl8Zh2kVPfLnrW2P0f4xELi03oZIBtiNYhaTryQOMLXe+9Nn8QxM+IerllslTfy7rX17JmHrbgPvqfZMH3b144CJbWkrCuPrVRQXQFg6TNiwgd6e54/lSLZFKJkcrsr3VCEWLpXwoj8ojQ5ELs0RvQXW/OWHsAsmLRMMI1QGlVZvCpPU/Nt0dz5rEsXYiyc1ITC4mf/mJBgMnjD/wCKlIrvgN6r26YsIdp1Vzt244gxXPQCmR+epZ4Pwa25xFzTNyn3NchgZNfYzhqiXBxeCf7Y2dMSPgqKB++TrgJUctK/fxcr6d+7KsduydZ2A5FKxo/rLnRDJgdsDa5QbsYwPRY8k60ABSs3na9Wcj+nVCNVFQvnGAk7E/dTY=
+    skip_cleanup: true
+    on:
+      tags: true
+      repo: evenchange4/react-intl-po
+
+cache:
+  yarn: true
+  directories:
+    - "~/.yarn"
+    - node_modules
+
+notifications:
+  email: evenchange4@gmail.com

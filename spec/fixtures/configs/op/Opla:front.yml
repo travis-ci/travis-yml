@@ -1,0 +1,65 @@
+_test_script: &nodetest
+  language: node_js
+  script:
+  - yarn lint
+  - yarn test
+
+jobs:
+  include:
+    - stage: test
+      <<: *nodetest
+      node_js: '8'
+    - stage: test
+      <<: *nodetest 
+      node_js: '9'
+
+    - stage: publish
+      language: ruby
+      provider: script
+      services:
+        - docker
+      install: &setupmyke
+        - curl -LO https://github.com/goeuro/myke/releases/download/v1.0.0/myke_linux_amd64
+        - chmod +x myke_linux_amd64
+        - sudo mv myke_linux_amd64 /usr/local/bin/myke
+        - myke --version
+      script: ./travis/publish.sh
+   
+    - stage: "deploy to QA :rocket:"
+      language: ruby
+      services:
+        - docker
+      if: type IN (push) and branch in (master, myke)
+      env:
+        - GCLOUD_CLUSTER_ID=qa
+        - GCLOUD_CLUSTER_ZONE=europe-west1-b
+        - COMMIT_ID=$TRAVIS_COMMIT
+        - K8S_ENV=qa
+        - K8S_NAMESPACE=qa-ce
+        #CLIENT_ID
+        - secure: "aezc24cmaaqRWklrsdPz0rjeMbQRUAJZ7jtHOnCOohDvtODzPmtxRtNQ8bf02i8T2YL3K30NoyzokgPHdomYoFb8Zx8WIsJJ7IcParUScfFe8B68ZOKXYzbohKo5w1UKLLSyyIc189fY7enRrrtubN2Qmj5BEeyooZ3KfxIkVltXEfv4d0vE2ET4Z8M8UHpY/8iepGTLANYHPMp1Cul50odLFj8c/zjoDdtg0MPONk8cn6GIdX3/tRzIdw5hEtD/lWDM2tGLqC2Hwlx9RCtjYOa/C5g6eUrOy8RtSnSPqUJrc0EhLuTwDOnGrjVPpdtpVnv1+7yR3VbnNspyRRA7Wlaqd2goF6SMR8oiixoTQYitNx1u8+OtsfxrfgE51jAleeLcPZbE1IxKDBSpQllNDWgx8YrFNkVTznF2pDintf2lpiBuxzyXcPHnPh/QcMe3JtKsrUBciMKskC/EkgRipKzZn5iAvZ2uV55nDJ5b7RdkgXto74TShgQ5OIg269HCptWzH96BVxKkB2G6ee9ZXGLaixpteiUcYRM0KMM4Vn6Y54enLAb6nVrHe5REl7YU7viGlRqXIKMv/HGhXKmmQ7/rTzAGi5M0dR8jJh/suwv9six/bAgNd0JitqJpp7PsAEGRBSjCHtumNq3LZ9iwdcRnmsCfDCsSFXBh/zgBfnE="
+        #CLIENT_SECRET
+        - secure: "XFM1kXneaHgX3Rn9E6mfw5u8OfG6Id/Wrm/B6JaH5nWS3uSS7uBNgSTIZ4qmAfoUPtf7FCQUQ9J98qZx1r4KFtY9CB0KR2tB3vhozgZIXRg6auqBhCNKzmBmz8xfivMSgJgKoCGF9ABlGZTyzFZY6cLhGRF9CQQPxj2oKUYN001isRCq8yRldDZCnlO7hOgx2YG7YWsVxSQkbEtGEeeB+ugiJOOOTT3m0djZL4/FIxgD63hUJ44zpzruCZtBMnr7EEHy6rhbIPYD2CJwniOYLal0CCgQLB4QnjTeOoi2CoiGgL9HdAcUYHYSESgaOuzITsGL150Pz6EXFuqqErGDBw0+09XFzVnWLjQ1/olyYpV2O8TP574KuprsPtiaA+c+fKOokUECjV+E/7mKqIL8bQsqyJUMb2YXIMSeyKyvjQB+WeT3y5/Pc5iH0AewDelHC672P4qn1crMen3g/MOmG9BFyjUTpfJQMVteYJOl51pP7kK1GS5zUTgEeq/yTwZ24DWwEuReJNlKhzdEM2NSwTR7rdlvSeuJaIRuUtH1atQzljAXfLXyJLiczkQD0V1X5dvSFMskdt8VA7TWnOd8X1IppERsMtqkDcrgKdNACmXSFjfnsm7AbIMbUb3JswRi7bdorlXEgLqqtpZdeoK4TPjg+HnMMBYyb7BiDC2yl1o="
+        #GCLOUD_PROJECT_ID
+        - secure: "FVz4Y+6ryHbAG1y6K5TlWlD3VCFLcd4M4axoLAi/mbh6wHL/8FeAgGr/2BlCHhP/LIkmmNesmJptlFazmRwdWhTqhZQ8yEDNXpqpisL5CfnPL7VA+zTHMcKkpZn3fOKQ4C8GgkX5pfsYvOuEyMVgcUX0MtqI41oRZs5YSPiwsiVH3ohijxhCyq2zOVEdmj8g1+Sn3p6lMmS0PMa985Cj0gpjkAZwAYmSH3STsVqMpzzpf1LXWJ87BJUEW7yZPY0GJYc5tkvZmdUPTMCQuM5T5j6xR/cUeQuuAc0th2EH7exK41YpfZ57ciE/OhNhOL1RbaC6b8SJJO502g5FblwSA54SVgtVWoqv7WexAOTO/bV1z41gm70fHHMhtoQaj3/Qix/7c4s5Yn452CcRyKTsCddVhXI7iaxUMjgUR0THFSKx7IJ+r7aT/P++Sh33S1BxOh4yv7J+RyVfYVI4rbah+TS+wNXT0ZYCcL9Wt1aTPuFt4LQDLUpTaWrbXBMUyAAbzcu7rmiRBpHCyD2OmQ6Io/BcS7YrmnF5ri1soweSpaPXo5IDtb08PzI+aYvAe4XWrHg67nxu5doma71QOtkTuoAaNLA8+O8QyHls2tSklJ1/QyDaqtYhmdqfyY+Go2WDIEOB53LD0vAXH/rVKrU88xxQqAU/yrGWBuU1s6JDVkw="
+        #API_DOMAIN
+        - secure: "jS/WTlFW6bnxCSsievfsbMDVbpUnJprTBbQch779Weos36JVlISG+G5A5AIcN69Zuj2J2M4+Gn/Y9Qb5oiy0wNwbQnZNGqIwWsrzmDOdmu6Be0aRemTK+p3rivRdL3w9Xcytpcd7v5z5Bb+vFA/5IJAD92fiGLJNYFkuAM/qWAziGodkEmlY/73BFGVD+JbVJEFXSIGG4loFJlLnPk+/7XtyGRiF4bKo1JPY3h155f9XTgWic1RR5JjuYXvPKwX7Yqv0WDaJ4CSurkBzzb6VR36djNbZJtX+Ezq3x/Fk1SlgAThfhF/0DPNHZsLG0FhsCPHMBIr67RNFDUFNghTtpUA2JutI0lFvblBZCt378o9v98iDMJEbdd+eN9Xy5dQx+sTFZ2RMXWjTU2BC9X7QcnJ1nzqVFMC2YGC5jhh1sOqmnZkKXZSsCtGysFF0IrG6SN8pNLq3tlZegy9XmCYXdJKGXEjx9EMNO8ehUqlinIYIPRdnY9CpwBPqcJxuN+uDaTRZ6bXcf+FVcMReleEJ/YYVliC7dr84ooEtjUV1RgoXq4TDBmcxYQDyUrGEIDlUawjpL+QxqROmMc1yjfVXCn8C3nX1FRT5cKR+BGepsmAp45wP91AFENh1qBDpx1zlaY0EpHm2hDZWpa3njdP+bELfSQK9TaXgV0ncfdU5L1k="
+        #FRONT_DOMAIN
+        - secure: "TnFpOEweYt5+P6Dyr03LUdnVdOJOQyoXMXjOi10CVS+FY6S3Lx6BZDUKwXrveJYMJD6BDALqIFE7W2e+0+kiczpSr6O1Q9KoBwN+08y/Z2yddvSbH8+vhMEiGHEpXA5DIfNPsjYtL9VynodZgCezZpDm74kAoLtBrVygfAf6BhBZHe038aimIRBdK3qDfdJjlYto0Ed4cj97gtNgxJD3OOogaCQMVUWxvdyV7R7cHvt9D5H8W9iJz73tLGKviBKpghB/A1oMUd5yuus2xAGzx581Eby8nRA+T3nQ829oimxSiZu/VwhRSPQgYjtzrvcSNIrTGilSQuSSX2Vkn5Wzl+ZiDp7uA35WfssvkQnQ6aOmEW8KrvfBldBNOTO1uNRLd5icZ2oUlwrBaKy+Nb2l69OvXK62iyXb6S7E6B5MkI7z3s53uc+iOzpTg2NS4PsDlaysjc+H/nHHMr4ccVlfQ6Ikq219vH6yzvIG9fg06N8gMM+iPgNOEtdcJ5mOSemlElxCwWFV3Urmqnnod67ChFrf8tNpRDS2pWqtvLlQVOvirlTAUqLLpsQOXPN+L54NSWQgzjUNZF07Y3+kw6YrwH1JfytcBdDHEoRVnUjNeJ3mYkUlS6i8xkanMup/tupR17H+RxX3XpJZy/VmF7rgx3YGaw29ZB8HUHxJsl7fTEU="
+      install: ./travis/setup_k8s.sh
+      script: myke deploy
+      after_script: ./travis/slack/notify.sh
+
+stages:
+- test
+- publish
+- "deploy to QA :rocket:"
+
+env:
+  global:
+  #DOCKER_USER
+  - secure: Gg9DGLKjP7jTxdPwZmzAFI0+dqzIC9Guh1URkDefc+YvHAcpCBBiP22eY3Nyf3oakNL2JSd+Zdwi83ruWGDMjH2KL5wWdPYqWj4PG/atNde6o/lc2S9EZZKqziC1J//FN2IWQyITvDMXlCs4idCu3KTdOttB40KfHHtax8zz/pTqBnmQqCRd6CLTN0sZLP1vt02ORFhiXufVvMtfngjYl7ZEQYn3JNGsj+TDjUswXtvZ97qYauARo01V8ql4uHLeapU0kkoDmRMTFmE5p8fiNPQOLHuH3iJNX5VOZilfI5/ljpgLy84Y+R238ehAhqBZ4bUiPHQrgBP3uADyR0d7Yi3Khw2TF8P60vBX0JqK0R0Be+FINaOIgQ/YxOa5ut2lhkTlRIIkvinl0cuY+nxyNJTfxevaQB4GKphyuhdcbj4QqCDPcu3qsBnAYMInqySmRAlZPvnQd6z0tV0aTKd+ICz7v1vcC1tbjaq/dyrZf9pqdReTs1YQgpPC7TY2oMCMHiIJAJZQXw+7OWJRFrWJhN7f2lmNmk8tmBMccoct2KaQ2jYUW/hJpMAy8F5vzoHEnlQfZUa+EL+6gaC+OTCxsbvL9RGEHvvvgomDtzreVq7GEbPXgk/88p+QOeFvUMDH/DzJwpoTRpwxL03DSjB4gN6tSYbQbELGkD14Ab9qy9Q=
+  #DOCKER_PASS
+  - secure: Uk3D7/n+vN6X4YjmVShiccyL9bynmkyL9fWuH5IHn5wGc3vNYfHM180aReVT2LSphRvyO1uWG0bzQ8MM8gkuTc6A/DsrjBaSgKVpuvEFwBwo3rt9ZSyGcPFu7YJCRqlHHhiMkYCP5gzQ9mShjSO/KduVAZ3ktSVRokr/e4sfCNxHexmUciU3Y00U/govAh8/G8vN51y57r5iU2kO+z8UcxmwNbc8BsAu6hOKLfLVc/xQyGYqoqGqjjfvO5tNsAySuhhkLDW5taHQOMfy/E4pzGguze+Z42FH1fEYXibZDHPp+0D65VzwUhVQba2lha+FYq2v/VQgjb04xWmeel1l7jDexmhAp1cwZJ1uxr6H94xcsb1Fckip8JOY4ObQRDZpwRU7SrdIuNRPBmGPhOfejhhkNSLlCWieYxK8xHdsLy1W6CR9SU8Z/lDmEqOV0jda/zsd8Yv6kwhPyj36jpx1HP+q1wanzyDpG4Eksryp7hF/5VKvzRTFZ5zhYCv0X4hfXL+pJaFwkbe0jDCOK3CusXpZfSOC/aQr8TkmHR3MRlcl6K1GRPkhbs/fXua3E2TWO8Wd5XT2xyZY/N92Tji491+LSxW8ApXnQZguo6cPDfuLZ52RfyZ6rfTJ29Ta2Bg9HmilsC3bWG5bLh6UmsUEIUqr9T5gYpozfFrJD9UBvtU=
+  #SLACK_HOOK
+  - secure: aJiThswU8xDmcbOIyGiTBZ2wKOWYCUUauYrP5gfJVFicwHB3BSWTTO4VT9KnLDhnZcYYonohZYk8X7YO8AH8vQSp+ahGrKb9bdb+5/A2M3/l4RjtskhTRz+L0822eVIf41Gfg2XOFoKv3LgA5NWHSPK8Lxet3gu5WRmrsvdvSB/MpZ4xiHm9DbYHX0ZIKFgPNnqgtuxyxttIpL16/j9Rbf3WACoOJXCxTxP7JE0rMMX/X9DafNz4N6ZsIRB+okl1Cxufnbz7p+Y3WVVPBAGayz5RP4zlhfCiSzT9m6u2h4iyHM+r6toP8z8cbZeMxgFvIDDUb5fbFpepB1h2W/f+s4n3rPZ6xA2LiIWKO2Fe7oHIQjZU9TZ4S5EZpabNjMMAoLD6Csr1LOFPzcbE9PLxML6iQvPaN37SXaiLpwRZrD4s18PFl1G6GOy7M0Vq2Ki2XuPOKDwX2MQc9YG800QqeUzO7Y3cvkg+1d/ka1nOYZBOikwFg0Mb3QmM1h6M1keyLFT8MXyeyuCIKjZ+OilrUA+Ew8Zvu7//OOr9rGTTiCt9pEJnJero2/BDqJEtywwBD8KyN2gKFRA32QDLNEQ7KrRLH7rgoUHlewCfmUiUq6jCzABMfulbvu/Gy6yGm/4jNxh7Mg7HfzFVRXFhVJ3P/wcqR7iaJleSvgrSoMo9QFg=

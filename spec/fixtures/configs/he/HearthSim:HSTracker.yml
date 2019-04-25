@@ -1,0 +1,15 @@
+language: objective-c
+osx_image: xcode10.2
+
+cache:
+  bundler: true
+  directories:
+    - Carthage
+
+before_install:
+  - brew outdated carthage || brew upgrade carthage
+  - ./bootstrap.sh
+
+script:
+  - bundle exec fastlane ci
+

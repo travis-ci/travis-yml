@@ -1,0 +1,37 @@
+language: php
+php:
+  - '7.0'
+  - '7.1'
+  - '7.2'
+dist: xenial
+node_js:
+  - '8'
+sudo: required # this seems to be required for some reason to get MySQL to work
+services:
+  - mysql
+cache:
+  directories:
+    - "node_modules"
+    - $HOME/.composer/cache/files
+before_install:
+  - mysql -e 'CREATE DATABASE IF NOT EXISTS testdb'
+  - mysql -e "GRANT ALL ON testdb.* TO 'travis'@'localhost'"
+  - nvm install --lts
+  - nvm use --lts
+  - npm install -g gulp-cli eslint
+  - npm install
+before_script:
+  - composer install
+script:
+  - ./dt-core/test/test_for_syntax_errors.sh
+  - ./dt-core/test/test_installation.sh
+  - ./dt-core/test/test_phpcs.sh
+  - ./dt-core/test/test_eslint.sh
+  - find dt-assets/ -iname "*.min.js" -or -iname "*.map" -or -iname "*.min.css" -delete && rm -rf build/
+  - gulp
+  - git diff --exit-code -- . ':(exclude)package-lock.json'
+  # If the previous command returns a non-zero exit code, that means gulp has
+  # modified some files in version control. This shouldn't happen, developers
+  # should remember to run gulp before committing. (We're excluding
+  # package-lock.json, as changes can be caused merely by a different version
+  # of npm.)

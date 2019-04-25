@@ -1,0 +1,23 @@
+language: go
+
+go:
+  - 1.11
+
+install:
+  - go get github.com/Masterminds/glide
+  - glide install
+
+script: go test -v $(glide novendor)
+
+branches:
+  only: master
+
+notifications:
+  irc:
+    channels:
+      - "irc.freenode.net#cgrates"
+    on_success: change
+    on_failure: always
+  email:
+    on_success: never
+    on_failure: always

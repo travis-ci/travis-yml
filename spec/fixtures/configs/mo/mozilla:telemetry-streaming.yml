@@ -1,0 +1,64 @@
+sudo: required
+
+language: scala
+
+jdk:
+- oraclejdk8
+
+addons:
+  apt:
+    packages:
+    - net-tools
+
+cache:
+  directories:
+  - "$HOME/.ivy2/cache"
+  - "$HOME/.sbt/boot/"
+
+before_cache:
+  - find $HOME/.ivy2 -name "ivydata-*.properties" -delete
+  - find $HOME/.sbt -name "*.lock" -delete
+
+services:
+  - docker
+
+scala:
+  - 2.11.8
+
+env:
+  - DOCKER_DIR="../docker/"
+
+script:
+  - export TEST_SKIP_REGEX="\[skip-tests\]"
+  - if [[ (! $TRAVIS_COMMIT_MESSAGE =~ $TEST_SKIP_REGEX) || -n $TRAVIS_TAG || $TRAVIS_BRANCH == "master" ]];
+      then sbt ci;
+    else
+      echo "Skipping tests";
+    fi
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
+
+before_deploy:
+  - wget https://raw.githubusercontent.com/mozilla/telemetry-batch-view/spark-2.3.0/deploy.sh
+  - export JAR="target/scala-2.11/telemetry-streaming-assembly-0.1-SNAPSHOT.jar"
+  - sbt assembly
+  - git config --local user.name "Auto Deployer"
+  - git config --local user.email "telemetry-alerts@mozilla.com"
+  - git tag "$(date +'%Y%m%d%H%M%S')-$(git log --format=%h -1)"
+
+deploy:
+  - provider: releases
+    skip_cleanup: true
+    api_key:
+      secure: Kac5/sXg9TM8cBHrwNch78UiVTl4aA2KQ9jnv0vipUzi341XfmO3EbdEnSCWN+ew39Pc+tAR+nOB+e/AHbOyFjJ5gggA3Z/3UWPYse/8iIPcRs8GC55KfprDrVkD8HO3pPzOXOyDtn64Y6z3cQXGj110QKfPjG6v+LHzNDSl1oxZB7f8bnoNEom5WxZCMAvZO3odbrnKPP333gPpjtmXfe24WlPqBMg3FN+RJMy1lz+bjlDB0hd1qbVdUO3DYivodcn/q1Sdp98EipwCWnOq3JqrmfDhf9rRL1UnSC+WsbcxJL73ee36EkNORSTYVFzhfoSRmNlhqNgGI8DdDhO654fKecXPiWDHyZw+cF/DQHsvmSk5zr5VobeqyByM9cqFj+5gs3RN3CI2UaUbceRwuerwpuFCAVt2WHSw2heYeOlmoLNX2+HFYPCXFJOkzQ5pZl5fEsc280riU/9wlvNfLhKTIJNyP3n3OlU/YlU0FYfR2jF637KAhLX9z8LxY1aEcdcAI7sWCz5jyMGRwvCS7prRneg1ouPn+bUSab7+GMi8F3Rdf1qWZx8IivpXiOw3MubsLLBeXep+PbE70n6AFB68ThgKEAhJsJpqtZKbqpz3w+w6iOe9Ig85P+WdXTK7zC4itWzZfEihk8TTGzerlSHgpMR9lBgvkzJkFY3MQqI=
+    on:
+      repo: mozilla/telemetry-streaming
+      condition: $TRAVIS_COMMIT_MESSAGE == *"[auto-deploy]"*
+      branch: master
+  - provider: script
+    script: bash deploy.sh
+    skip_cleanup: true
+    on:
+      repo: mozilla/telemetry-streaming
+      all_branches: true

@@ -1,0 +1,57 @@
+language: php
+dist: xenial
+
+php:
+  - 7.1
+  - 7.2
+
+env:
+  global:
+    - COMPOSER_BIN=$TRAVIS_BUILD_DIR/vendor/bin
+    - BLT_DIR=$TRAVIS_BUILD_DIR
+    - DRUPAL_CORE_HEAD=8.7.x-dev
+  matrix:
+    - DRUPAL_CORE_VERSION=default PHPUNIT_EXCLUDE_GROUP='drupal,long,requires-vm'
+    - DRUPAL_CORE_VERSION=default PHPUNIT_GROUP='long' PHPUNIT_EXCLUDE_GROUP='drupal,requires-vm'
+    - DRUPAL_CORE_VERSION=default PHPUNIT_GROUP='drupal' PHPUNIT_EXCLUDE_GROUP='long,requires-vm'
+    - DRUPAL_CORE_VERSION=$DRUPAL_CORE_HEAD
+
+matrix:
+  allow_failures:
+    - env: DRUPAL_CORE_VERSION=$DRUPAL_CORE_HEAD
+  fast_finish: true
+
+cache:
+  bundler: true
+  apt: true
+  directories:
+  - "$HOME/.composer/cache"
+  - "$HOME/.console"
+  - "$HOME/.drush/cache"
+  - "$HOME/.nvm"
+  -  "/tmp/blt-sandbox-instance/.rules"
+
+services:
+- mysql
+- xvfb
+
+addons:
+  chrome: stable
+
+before_install:
+  # Exit build early if only documentation was changed in a Pull Request.
+  - source ${BLT_DIR}/scripts/travis/exit_early
+  - phpenv config-rm xdebug.ini
+  - phpenv config-add travis.php.ini
+  - composer validate --no-check-all --ansi
+  - composer install
+
+install:
+  - source ${BLT_DIR}/scripts/travis/setup_environment
+  # Create extra dbs for multisite testing.
+  - mysql -u root -e "CREATE DATABASE drupal2; GRANT ALL ON drupal2.* TO 'drupal'@'localhost';"
+  - mysql -u root -e "CREATE DATABASE drupal3; GRANT ALL ON drupal3.* TO 'drupal'@'localhost';"
+  - mysql -u root -e "CREATE DATABASE drupal4; GRANT ALL ON drupal4.* TO 'drupal'@'localhost';"
+
+script:
+  - ${BLT_DIR}/vendor/bin/robo release:test

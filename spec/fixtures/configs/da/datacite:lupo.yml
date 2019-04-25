@@ -1,0 +1,109 @@
+language: ruby
+rvm:
+- 2.4.4
+sudo: required
+dist: trusty
+
+services:
+  - mysql
+  - docker
+  - memcached
+
+addons:
+  code_climate:
+    repo_token: $CODECLIMATE_REPO_TOKEN
+  apt:
+    packages:
+      - oracle-java9-set-default
+      - mysql-server
+      - mysql-client
+    sources:
+      - mysql-5.7-trusty
+
+before_install:
+  - curl -O https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-6.3.2.deb
+  - sudo dpkg -i --force-confnew elasticsearch-6.3.2.deb
+  - sudo service elasticsearch start
+  - sudo mysql -e "use mysql; update user set authentication_string=PASSWORD('') where User='root'; update user set plugin='mysql_native_password';FLUSH PRIVILEGES;"
+  - sudo mysql_upgrade -u root
+  - sudo service mysql restart
+  - mysql -e 'CREATE DATABASE lupo_test;'
+
+install:
+  - travis_retry bundle install
+  - curl -sL https://sentry.io/get-cli/ | bash
+  - sentry-cli --version
+
+before_script:
+  - memcached -p 11211 &
+  - cp .env.travis .env
+  - mkdir -p tmp/pids
+  - mkdir -p log
+  - bundle exec rake db:setup RAILS_ENV=test
+
+script:
+  - bundle exec rspec spec
+  - bundle exec codeclimate-test-reporter
+
+after_success:
+  - docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD";
+  - REPO=datacite/lupo;
+  - AUTO_DEPLOY=false;
+  - if [ "${TRAVIS_TAG?}" ]; then
+      docker build -f Dockerfile -t $REPO:$TRAVIS_TAG .;
+      docker push $REPO:$TRAVIS_TAG;
+      echo "Pushed to" $REPO:$TRAVIS_TAG;
+      AUTO_DEPLOY=true;
+    elif [ "$TRAVIS_BRANCH" == "master" ]; then
+      docker build -f Dockerfile -t $REPO .;
+      docker push $REPO;
+      echo "Pushed to" $REPO;
+      AUTO_DEPLOY=true;
+    else
+      docker build -f Dockerfile -t $REPO:$TRAVIS_BRANCH .;
+      docker push $REPO:$TRAVIS_BRANCH;
+      echo "Pushed to" $REPO:$TRAVIS_BRANCH;
+      AUTO_DEPLOY=true;
+    fi
+
+  - if [ "$AUTO_DEPLOY" == "true" ]; then
+      wget https://github.com/jwilder/dockerize/releases/download/v0.6.0/dockerize-linux-amd64-v0.6.0.tar.gz;
+      tar -xzvf dockerize-linux-amd64-v0.6.0.tar.gz;
+      rm dockerize-linux-amd64-v0.6.0.tar.gz;
+      export GIT_SHA=$(git rev-parse --short HEAD);
+      export GIT_REVISION=$(git rev-parse HEAD);
+      export GIT_TAG=$(git describe --tags $(git rev-list --tags --max-count=1));
+
+      git clone "https://${TRAVIS_SECURE_TOKEN}@github.com/datacite/mastino.git";
+      ./dockerize -template vendor/docker/_lupo.auto.tfvars.tmpl:mastino/stage/services/client-api/_lupo.auto.tfvars;
+
+      sentry-cli releases new lupo:${GIT_TAG} --finalize --project lupo;
+
+      if [ "${TRAVIS_TAG?}" ]; then
+        ./dockerize -template vendor/docker/_lupo.auto.tfvars.tmpl:mastino/prod-eu-west/services/client-api/_lupo.auto.tfvars;
+        sentry-cli releases deploys lupo:${GIT_TAG} new -e production;
+      else
+        sentry-cli releases deploys lupo:${GIT_TAG} new -e stage;
+      fi
+
+      sentry-cli releases set-commits --auto lupo:${GIT_TAG};
+      
+      cd mastino;
+      git remote;
+      git config user.email ${DOCKER_EMAIL};
+      git config user.name ${DOCKER_USERNAME};
+      
+      if [ "${TRAVIS_TAG?}" ]; then
+        git add prod-eu-west/services/client-api/_lupo.auto.tfvars;
+        git commit -m "Adding lupo git variables for commit tagged ${TRAVIS_TAG?}";
+        git push "https://${TRAVIS_SECURE_TOKEN}@github.com/datacite/mastino.git" master;
+      else
+        git add stage/services/client-api/_lupo.auto.tfvars;
+        git commit -m "Adding lupo git variables for latest commit";
+        git push "https://${TRAVIS_SECURE_TOKEN}@github.com/datacite/mastino.git" master;
+      fi
+    fi
+
+notifications:
+  slack: datacite:Wt8En0ALoTA6Kjc5EOKNDWxN
+  email: false

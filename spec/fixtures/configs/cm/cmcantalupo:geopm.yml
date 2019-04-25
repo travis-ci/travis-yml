@@ -1,0 +1,109 @@
+#
+#  Copyright (c) 2015, 2016, 2017, 2018, 2019, Intel Corporation
+#
+#  Redistribution and use in source and binary forms, with or without
+#  modification, are permitted provided that the following conditions
+#  are met:
+#
+#      * Redistributions of source code must retain the above copyright
+#        notice, this list of conditions and the following disclaimer.
+#
+#      * Redistributions in binary form must reproduce the above copyright
+#        notice, this list of conditions and the following disclaimer in
+#        the documentation and/or other materials provided with the
+#        distribution.
+#
+#      * Neither the name of Intel Corporation nor the names of its
+#        contributors may be used to endorse or promote products derived
+#        from this software without specific prior written permission.
+#
+#  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+#  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+#  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+#  A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+#  OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+#  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+#  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+#  DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+#  THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+#  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY LOG OF THE USE
+#  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+
+sudo: false
+
+compiler:
+    - clang #todo version?
+    - g++-4.8
+
+dist: trusty
+
+language: cpp
+
+git:
+    quiet: true
+    depth: false
+
+before_install:
+    - rvm install 2.0.0
+    - git fetch origin --tags
+    - git fetch origin $TRAVIS_BRANCH
+    - ./autogen.sh
+    - pip install --user -r ./scripts/requirements.txt
+
+install:
+    - ./configure --disable-fortran --enable-debug --prefix=$GEOPM_INSTALL_ROOT
+
+cache:
+    directories:
+      - googletest-release-1.8.1/
+
+script:
+    - ./travis_ci.sh
+
+env:
+    matrix:
+        - CI_MODE=unit
+    global:
+        - INSTALL_ROOT=$TRAVIS_BUILD_DIR/../tmp_install
+        - GEOPM_INSTALL_ROOT=$INSTALL_ROOT/geopm
+        - PATH="$GEOPM_INSTALL_ROOT/bin:$PATH"
+        - PYTHONPATH="$GEOPM_INSTALL_ROOT/lib/python2.7/site-packages/:$TRAVIS_BUILD_DIR/scripts/build/lib/:$PYTHONPATH"
+        - MANPATH="$GEOPM_INSTALL_ROOT/share/man:$MANPATH"
+        - MAKEFLAGS="-j 2"
+        - MPLBACKEND='Agg'
+        # OSC_CREDENTIALS for geopm/geopm
+        - secure: "J5TFi7y/vy6upnrENCHD1PnRM8HX46LK+66CFoTP17Fmx1Zo4eR2aFT2WBEkxBOsuw3HbSxC7NCOx4T9cyAWhcC5CaKtuQGJHJdGzbjmv85OHN9hxjvjCQRsiW2V/XBhl9DJr56Z23OS2oyIGTJzdQPV45Lgmu2yXE2gY8Kdk21P2/PxaeyzyJCBM+ejX9kQK7FYdAT/xSlMiHUFkdd6Sj2se23jUHD2MqN+EcLGqBzWdYIoAexJuDPAe3fR/yl66DDIBulYQinuQv07hej9TxLcNcRyWzZqUbHe0V1nKt+zwGjtSv6rEwqB1gPRIVr1mUOidbucHs42EwQNgqxaNMPo/XOPpeOgNPiNKr2xxWElzSMi2WZv14x3uDmkBZ2Yiew3F8oG28qeQWSHbXE0/m8WDlnrHx1r4h1/ir32tTQa/u8/w/creqGm3/flRvDlIim8cuv+cSoU5a/V9dhZrzyCQfNrjGFLaDl7FWXpU3oScDuP5CB/ZIdZkIFR2HQPQScuXEUw5gE10toLrO9G5G8+nf8GlDvasdgJON8kvRVyrYnDSvQrAyMp+8IbsN5HXN4S2Gpf1jpMkTlpCZ91yagkiS8mWNMHbPljmyrR3KyOFqK4b3MCeFdYspUQWQxAxhCeaN4EGJXT9Of62qcf4NsUMu7YHjVK9Nl9iHcynDo="
+        # OSC_CREDENTIALS for cmcantalupo/geopm
+        - secure: "i7+m1SqcoDLD0FAodAk1XOEi+2O1mjoo/C+cIv03yoWUwasJ8qaGuI8wEba8ViuZ4xBbT5aVH8/xUqwjeUWEk+NCQy47OP86mKBm6BAeLfONaZeHXu8K+IJg4lzKL0VzRjd3Svf4cjRgzD3yWGoiuDMGRWFEdtALdglE8jCoq94mViD4K+0lxpyFU7K2ACIfguuhtFeEq3YzdUWIDxkDock7HcpMWrHHa0Rpf05v6zWPxzvmBR36czcnouweNo4Dtirss0elsXyePyOJLYxEzmj1f2Mlhet7iIw/ZyajlNXn80KJMUEnU8wd8PLXtxBpr97p4B8meL+54nv/eeJcB4bzyL7RFOqV0kJMUkNqV9uU/qFPqVzipQVaZbUr2l8Nhy/Lmu24BQA5PNVq2i9ayhN6N2dLSdLu1A1EdMZHcB91PlbG4zbBXYM5RDrJ1ATDhD+NXYiCxGei2Sct2RCK2nbI8XbXiGo91OC8D/wtEYHpz8WIEQXyIpEBC6OVrMEUtDxBbvIJfn/zpyyTPcSCojP5NYtMTie8At832Aa8L5/7w5hDGFafYYqZDoyTS9supIXD4pwcVg4JNRWViQEuU/csNV+/WXwTKFkxD4UA+77B2Pv6vsA0t1AqONa9Ydg6GzkPj7q5u9fPQ3oFh63AbGB5Unjotjst5Z346OoEDyU="
+        # OSC_CREDENTIALS for bgeltz/geopm
+        - secure: "F3NbmvrA0JQ6WKLBtDw98kqgHv3/+GKZEvdxa1pvs7HTD+nY+MOVocN3/24SMTDtAgwCnacUV2zYq9NipYPICLCdNzkB0DBVRDALFjmSAhouYpdPWYeQqRqTzVYktpYgPRhQOXuTgREqUlko2ZHMGtNwCmdafrI4YWI78sUk120tuiZxpK1JaWTiH2lyoA4EzEX7H0Ti//zsKiyUnxMeU547JkZFKbW/ojtbYum08YgRAL31qar9x0DQ86EM2hx3K3uy3/B4wbalS9qqAp7JKhB0DoNcgL3Xx0ysbKEE1+AA2FwuogAIOWva8xWS4Gd26JLsrzYPWzNxD2TwDZ5cntzewdyeJdu15e3tu3vYrE+0BiDOvMpuQiY+89R1qy61gJkXZeNPskevEIRGjLiPXrj0PaYBJ8z4bn/iJJKhY50N4W/UEosB6hg64GDUo5pI8YJWqCBpkM+AdTdWeJGxKZMyELHAa2zfYmXitNlvzQKTjseQz1i0xpl2/oX3NTv0ZC0YfCaH7nrADOEFHggmwBaA3vdOs2JqdxnP6bidD2RQzmloRgDWD6NTtZkzGZzb+D5irgZWvQTc2G9m4D86vOt99wMYRapk/7rC+jTUrL5gInukjB82JOTwFf6z82s4BzbQ0DuU4tndnoGqELZwnyFPGehnbxtENPgpFzzgMR0="
+        # OSC_CREDENTIALS for dianarg/geopm
+        - secure: "fupAbhWPpKVuQiJE1KbPbQFBEb67IRq39wl18+h0897HbyIka5moRRK8ImDaXYQIFAar7TbgBGq9aveTQusCMN8krAodI1tquNICx9S+/BEipdL27w1F597UErwkTNkxdq2RmQ355+Lf6AkcHudfO2tHvWEhj5SHjlt6zCG7dVU4SxJ/zgGHYwqyN9omYfv/5WsP186BgOvcdRiG7scx8f+cEsRV894PQvKGOvzq+LyS4QlH63Bzsy0uXfzL7Jr06/1/CJEQFXEFbUVGFECt3L7Mw/zKvYcvBpH7M5s4X3T2pqoReo4QqSzaW7bP3YFNith1YQfLPnCkmagc7ZLmPMBhZ/s2MAHCVmKN3y98g3yK9obk5X1q4ALV4QOxTQ+umksSYfWU+fhWDNiRsFyK95rhSymPaQzVHWyEB4/WoK002nv+WU1jM8iwIyn/I1XBt/+tD5FMSft9E0smEGgx6Crmf/KLnEp9Lq2/lOdMkkjEVd25zYRbqNwp67zHXroCJqJ3Q8PaGCARQtSDX/BbmpYSX+oYEb5kSPOIbJIzx8CltQe/npVEEYKpeSJWZX9dutA1Hyr9oPZIu/U1QOiiCUsfIhHY7NhaIe4rw2V0hQtLBOFbCuH1WzFsbx+HIPcwgv6d3UifqE5uxcMe3Ss6lEfYhyqd0pBFC5tH7MYfknw="
+        # OSC_CREDENTIALS for bakerbrandond/geopm
+        - secure: "XVTtoccFxsQfev1a9urWQyW7HV0R/VHT3Obtx+xjG8n5JJ4LxK+wK1OPFZ1bqlOalVMyMgAvStx/vTC3J+Pisxlsmc9U88+Xav1fpEr4mAr2JVQC2O73zic5fZmMChhGB/bwaL1UjkXgx8LLqXGZhzgrA4o6JocUZcZVodr9bcp8XJ0MQEWwIv4kxONvwZgl2Y6kWBxjKWv72uOzYJtUjBRvG6DTQBpPAj1NkwnMHQlSM00pxlSxVvhv8Iv7XlFOVi3VAU1leeLxsM6UD+DSVNjNN49iRbjHepXnFA/3dFfDSSfUpO+4bZH2RyQN6axOXRnP8Tra+rMs5nCM2FM/aReQoy0fqN+lTB4nQNtkdVuinY7/NnfD9XqLiOKiPU3tjcjGS0Etg17lbrKFPqMhoTkd2Jac+N4Z/Z3A1+xxLdYrp5GbGqEAEuGvFfTev0aj5X1KMcgmRk3RFlRLlfwKXHmqEJ0XZLhy72xRSRG9PJX+EvM1bvvnWmLaOmORk4u7pAVAxM+HQzz8GS2gCMZVcHTr+Od73XxMKC7NeAUrX6R/vepgkpWhMSbO+8QwP+OKuyHkwjsM+227unLqvGztnj2gdOf31xR6GHzT/8ZvMsTOn9GFEtOZDWu7gVkGzPJ8qX3Vt2cfC1mPsrJ+Z9f7xa/W+lD/1LE/kbrhXgbbINk="
+
+after_success:
+    - ./.travis_obs.sh
+
+after_failure:
+    - cat scripts/test/pytest_links/*.log
+    - cat test/gtest_links/*.log
+
+addons:
+  apt:
+    sources:
+    - ubuntu-toolchain-r-test
+    packages:
+    - clang #todo version?
+    - gcc-4.8
+    - g++-4.8
+    - openmpi-bin
+    - libopenmpi-dev
+    - rpm
+    - osc
+    - python-pip
+
+notifications:
+  slack:
+    secure: i6sNQH8/RbqkqHdYLiQnZxD6slWBryfujn5+VB0KhUgK+f2cBCNzf0c50sfsJg7qWKPfrsDfbpyFqZqVxKLYrlsJPcqm8TmVV3GTQpqIy7AH+EA4LcC4uH7Kj7uFuP6kSjmNo18AHfYcPEgRN1sjEHuoY59Xl/SzlmN9HEvtEQhn9OF5yt+Rj0vF35XR3yefdeP1GaTzz2VNXk/74ojOI87eq3s6oFDAFvdKxew4ooyUwthek8zJT42+qZDQDyxX5eOlOcJe8A9E7HyckUlAOm6+HhG5OxbHbTV0VNAYfve9eVoafp5gK8TYiPREpg1SfmxtgbScyal7YEow9TVJgFM7ls14cUuudyxUxUv5uUua9tpO7qCLkhH7rGA6T/zTT7T5RHPeLf71YTpSW6MGFp/uY7uENMZTU9J20g/BZ6vrrp+hFyhrrkIV8Z6DrOfEvsw1dOql+NHH2w3r0+1/3P1kvn1nCjQypYIw1Z0ep0VsMnaNPBtGYQ6Hjd49UaZkyxJkMgsPSDJ3L/k133u8FpXN3y80GvkktJ3gHVvgFM6W3QYvSB3egq5tqpI5yxg4rOx2VMI1E4Taaz2l9qv8yrQroCV7EnUutneDWfOlnuHUNOht2rqWrID4+xiZmqg+LRUbjyX6kP+6DMMbpNUj0/d9AKXNG/B6CZ2KrOkrkQ8=

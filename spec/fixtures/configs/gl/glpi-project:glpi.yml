@@ -1,0 +1,82 @@
+language: php
+sudo: required
+
+env:
+  - DB=mysql
+
+before_script:
+  - phpenv config-rm xdebug.ini
+  - ./tests/LDAP/ldap_run.sh
+  - composer self-update
+  - sed -e '/"php":/d' -i composer.json
+  - rm -f composer.lock
+  - composer install --optimize-autoloader
+  - mysql -u root -e 'create database glpitest;'
+  - bin/console glpi:database:install --config-dir=./tests --no-interaction --db-name=glpitest --db-user=root
+  - ./tests/LDAP/ldap_fixtures.sh > /dev/null
+
+script:
+  - mysql -u root -e 'select version();'
+  - composer testldap
+
+#note: default maria version is 5.5 for all main php versions list exept nightly
+matrix:
+  include:
+    - php: 5.6
+      addons:
+        apt:
+          packages:
+            - ldap-utils
+            - slapd
+    - php: 7.0
+      addons:
+        mariadb: 10.2
+        apt:
+          packages:
+            - ldap-utils
+            - slapd
+    - php: 7.1
+      addons:
+        mariadb: 10.1
+        apt:
+          packages:
+            - ldap-utils
+            - slapd
+    - php: 7.2
+      addons:
+        apt:
+          packages:
+            - ldap-utils
+            - slapd
+    - php: 7.3
+      addons:
+        apt:
+          packages:
+            - ldap-utils
+            - slapd
+    - php: nightly
+      addons:
+        apt:
+          packages:
+            - ldap-utils
+            - slapd
+  allow_failures:
+    - php: nightly
+
+cache:
+  directories:
+    - $HOME/.composer/cache
+
+notifications:
+  irc:
+    channels:
+      - "chat.freenode.org#glpi"
+    on_success: change
+    on_failure: always
+    use_notice: true
+    skip_join: true
+
+#exclude old branches, without tests
+branches:
+  except:
+    - /^0\..*$/

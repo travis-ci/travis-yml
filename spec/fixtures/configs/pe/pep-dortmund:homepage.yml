@@ -1,0 +1,15 @@
+language: ruby
+rvm:
+  - 2.3.2
+
+script:
+  - bundle exec jekyll build
+  - bundle exec htmlproofer ./_site --allow-hash-href --check-html --only-4xx --disable-external --empty-alt-ignore
+
+after_success:
+  - bash ./.deploy_site.sh
+
+env:
+  global:
+  - GH_REF: github.com/pep-dortmund/towards-a-new-website.git
+  - secure: QelTwGne26AX7B6ou2cx0ZCAS610wSMGju2QAmTcSbnbxCUE411UOGM1PJ2YgZOBGVYaDTWKxJpFPdwvOMGXGCTeU4dWSLEwiqqJ3jKKv7WWMaJOXN0UCe4ittFdUU99W6T2ATDYg4/66oc3tFNmCFfZZ/j6+jn58lTNcptsRPQ=

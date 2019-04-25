@@ -1,0 +1,33 @@
+ # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+#   ╔╦╗╦═╗╔═╗╦  ╦╦╔═╗ ┬ ┬┌┬┐┬                           #
+#    ║ ╠╦╝╠═╣╚╗╔╝║╚═╗ └┬┘││││                           #
+#  o ╩ ╩╚═╩ ╩ ╚╝ ╩╚═╝o ┴ ┴ ┴┴─┘                         #
+#                                                       #
+# This file configures Travis CI.                       #
+# (i.e. how we run the tests... mainly)                 #
+#                                                       #
+# https://docs.travis-ci.com/user/customizing-the-build #
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+language: node_js
+
+node_js:
+  - "4"
+  - "6"
+  - "8"
+  - "10"
+  - "node"
+
+branches:
+  only:
+    - master
+    - 0.12
+
+notifications:
+  email:
+    - ci@sailsjs.com
+
+env:
+  TEST_REDIS_SESSION=true
+
+before_script: sudo redis-server /etc/redis/redis.conf --port 6380 --requirepass 'secret'

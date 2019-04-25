@@ -3,7 +3,7 @@ describe Travis::Yml::Schema::Type::Forms, 'seq' do
 
   subject { described_class.apply(dsl.node).to_h }
 
-  after { Travis::Yml::Schema::Type.exports.clear } # hmmm.
+  # after { Travis::Yml::Schema::Type.exports.clear } # hmmm.
 
   before do
     dsl.type *types

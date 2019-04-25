@@ -1,0 +1,25 @@
+language: android
+
+jdk:
+    - oraclejdk8
+
+android:
+    components:
+        - tools
+        - build-tools-27.0.3
+        - platform-tools
+        - android-23
+        - extra-android-support
+
+before_install:
+    - export TERM=dumb
+    - pip install --user codecov
+
+script:
+    bash gradlew test jacocoTestReport
+
+notifications:
+    email: false
+
+after_success:
+    - bash <(curl -s https://codecov.io/bash)

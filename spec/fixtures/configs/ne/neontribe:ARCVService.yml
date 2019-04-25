@@ -1,0 +1,49 @@
+language: php
+php:
+- '7.0'
+sudo: required
+dist: trusty
+addons:
+  ssh_known_hosts: 46.101.18.83
+before_script:
+- cp .env.travis .env
+- mysql -e 'create database homestead;'
+- composer install --no-interaction
+- php artisan key:generate
+- php artisan passport:keys
+- php artisan migrate --seed --force
+- sudo apt-get update && sudo apt-get install -y libxpm4 libxrender1 libgtk2.0-0 libnss3 libgconf-2-4
+- sudo apt-get install -y chromium-browser
+- sudo apt-get install -y xvfb gtk2-engines-pixbuf
+- sudo apt-get -y install xfonts-cyrillic xfonts-100dpi xfonts-75dpi xfonts-base xfonts-scalable
+- sudo apt-get -y install imagemagick x11-apps
+- Xvfb -ac :0 -screen 0 1280x1024x16 &
+- chmod a+x ./vendor/laravel/dusk/bin/chromedriver-linux
+- ./vendor/laravel/dusk/bin/chromedriver-linux --port=8888 &
+- php artisan serve &
+before_deploy:
+- openssl aes-256-cbc -K $encrypted_499e418efa07_key -iv $encrypted_499e418efa07_iv
+  -in deploy_rsa.enc -out deploy_rsa -d
+- eval "$(ssh-agent -s)"
+- chmod 600 deploy_rsa
+- ssh-add deploy_rsa
+deploy:
+  # Deploy to staging.
+  - provider: script
+    skip_cleanup: true
+    script: rsync -r --exclude storage --delete-after --quiet $TRAVIS_BUILD_DIR/* $DEPLOY_USER@$DEPLOY_IP:/var/www/$DEPLOY_DIR
+    on:
+      branch: 1.5/release
+  # Create production release tarball.
+  - provider: script
+    skip_cleanup: true
+    script: tar -czf $TRAVIS_TAG.tar.gz ARCVService && scp $TRAVIS_TAG.tar.gz $DEPLOY_USER@$DEPLOY_IP:/home/$DEPLOY_USER/releases/service
+    on:
+      tags: true
+services:
+- mysql
+env:
+  global:
+  - secure: dZgXUcAyVEo9l/89PM1/KvUKrAOAY1pmphl702SHC6zwrGFbTri7YOa5KBDBB3/PBiHoI10qDjLnF+l5v3BAo4zr2/ZmMF6UjvSickqmKOMWZU31EI7nhxQbPIBOwZW9+OfP/aNL/3m95HqxPtQiWuUicvqlcyV9EBnsEISxyTpMd7HDJ9znDj/g2xdwknMpaiIvxssEg++C/6UgqVtc8NpwIHT2CnaC4e7FiiH6QgfzABSLr7iMLsjr5NkLNAkhyKzF+hXakrzLm3tMVoZ6gDFIyNHaCyH2wKLtSDKS9gmcahnCtlopHtw+ohrJsoE/JJzwqNOc7ghkaqvT/wD+zOW2vaqL9tWDcusm8Uy3SEx52fqZ0+OQiRv3bpEap5NmziM5e1uTg2M/L78HpcPY1BUrKr6eUEcoH5u5oXUSqVKL/SqmxJpAHTLk9C+3sXm8kL4MDL8o3WK2/nnZMjJe5gxFSfTj2iX6hBk5Vx6aeR6RBiy726RqPgQ4HYxZe2m5mbCcGtKfFn5DDVWVqQvKE/glHBO29gc+uOn0ocNgjp2AbwxNouAXzXnbWrRZxqU9nRSYellzwGMEVau9KFrXpeyrJ4YOO2xO1mURVcH4l/L8e1FRhXN/Ca+tt4FKQm2DMQRlcSBg5EmwvFfRiWYbflAoYnZ7lPWldxDtitUIrtU=
+  - secure: GIJEgPaepKwgM1AgDXmPAk7z0PeNchlxeWTp4qSR4FPf2tDlA2uABLJtjs2vARaTI531CUi/9AWJzyA7be2HOrDM7H9JBWQNeUE0Bg6QwARpZUJ9Kws/qv2mWrqZJJ3f/EvZFM72AJorMLuvQugQEPlM+s/sch7IJgTORq7EEyT1GD8nnDJd6xdBOWWS0Ae2obRTvuciZL8oXnId5ga1B0iQAzo+kdr20y4Izgz1mAniQBa7SDsbHYTHb7noWERa9QzYFoIBIJ8Prm5uh63nTzyRpwRBi6xemNH1PMa3qLvfoPOPYGU7kANZjmwOeljCKmHAZoKiA3XEAFPUAv7Nsr/cYdhLZS9NstfscK1Yu4Hap6ak2XnlCCPSx5LIb+lLpmAICgJIM5+8kRRrAFU0N7m++tZ9iDr5tu6zcP//EmB/2ay6MmXa8V0oYXUYH8zIzvb6knl/DkZwYLTF9homis7YogDJtkWJAcCkAHLhN/8CY0EwIQOXMB6QRHPsVrseEi498+2EMe3lPUYNjlyjFyXyTo6yGDCl4LK0TXX42TpGb0q6IXy56Pq4mWG6dSK9ZPoE0ykd6zX61jFVC5PvvkbpdBTIBarFXQ96v5wj1NC6je8qSMIXEQRLaa9PiNBX7bZVQ+sQH62ILTItdVnPs5YcZ93KUEpczkZUvVnUw+M=
+  - secure: GZJSaaREv8y8et2579vb4MZ7tCmuyZb3Tl5nqG8Hk3uAlyve97/i4bnPY3qs79UYH7kdyuXlhFbqkQ8dH+eBWTsXuAg0sewl7QK80EPDVhTzPeTNlx9avHym7GgzniZXvy9m7OyvVF2g9b5X6glmjEov40eNRoLuLNUsuUIePhaD0usGAoeazshilU5RekYK5v6YlTirzkY/ovRjAnEn273BlHSSEOnWZQWVJMv/pHtg3PJrQttuxLb2xH426jr/Y6MR+xgfrej3PHpOBxjRwUGYoIFGj1K79WKF9c3N/5p0v5QIAgu+89zitBd/i3mczKyCRIU68GWGe3D59DP2inG0MpVTagTluocj604qICtFCKM8ZhZrbxaKalWEo2mNVAzuKMgkm1C/iPHWc32i/ZvYPVQd1jHhtcWG7fFvUW4/+MLf6tL4GfIlhMdSZh8X6aGvuhP1k8viyUwWCFU288KdGLU8cJ+a6d6z4Wdl4GWrPe2959Mo235SVfwB9Ffnvu2B5eMoht8j0y6xEDfeQVaixWmBM5Qkq2j7P8JrcxLZlfQ/t/HJz890fVybzg2qhZzczbOtbIQtzSdujMSNSN0KEbJ6Jvbg3xvq1FkiR2GTVqHeRLOZWAiRdjsf4OcGkSV3SNfweI3ZU4EHRcaPeccwzulFYQlUMTPSWYXZaNU=

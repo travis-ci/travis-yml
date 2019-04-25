@@ -1,0 +1,122 @@
+sudo: required
+dist: trusty
+
+language: ruby
+
+cache:
+  bundler: true
+  directories:
+    - $HOME/system-test
+
+rvm:
+  - 2.5.3
+
+services:
+  - postgresql
+
+notifications:
+  email: false
+
+addons:
+  postgresql: '9.6'
+  apt:
+    packages:
+      - postgresql-server-dev-9.6
+      - git-svn
+
+matrix:
+  fast_finish: true
+  allow_failures:
+    - env: JOB=system-test
+  include:
+    - env: JOB=seeds
+      services:
+        - rabbitmq
+        - elasticsearch
+        - postgresql
+      before_install:
+        - gem install bundler
+        - sudo rabbitmq-plugins enable rabbitmq_recent_history_exchange
+        - sudo rabbitmqctl add_vhost ontohub_development
+        - sudo rabbitmqctl set_permissions -p ontohub_development guest ".*" ".*" ".*"
+      before_script:
+        - |
+          echo "git_shell:" > config/settings.local.yml
+          echo "  path: spec/support/git-shell" >> config/settings.local.yml
+          echo "  copy_authorized_keys_executable: spec/support/git-shell-copy-authorized-keys" >> config/settings.local.yml
+      script:
+        - ping_elasticsearch="curl localhost:9200"; while (! $ping_elasticsearch > /dev/null 2> /dev/null); do sleep 0.1; done
+        - RAILS_ENV=development bundle exec rails db:recreate:seed
+
+    - env: JOB=rspec
+      services:
+        - elasticsearch
+        - postgresql
+      before_install:
+        - gem install bundler
+      before_script:
+        - RAILS_ENV=test bundle exec rails db:recreate
+        - ping_elasticsearch="curl localhost:9200"; while (! $ping_elasticsearch > /dev/null 2> /dev/null); do sleep 0.1; done
+
+      script:
+        - bundle exec rspec --format progress
+
+    - env: JOB=system-test
+      gemfile: $HOME/system-test/Gemfile
+      services:
+        - rabbitmq
+        - elasticsearch
+        - postgresql
+      before_install:
+        - gem install bundler
+        - sudo rabbitmq-plugins enable rabbitmq_recent_history_exchange
+      install:
+        - EMAJ_VERSION=2.1.0
+        - curl -Lo /tmp/emaj.zip http://api.pgxn.org/dist/e-maj/$EMAJ_VERSION/e-maj-$EMAJ_VERSION.zip
+        - EMAJ_TMPDIR=/tmp/emaj
+        - unzip /tmp/emaj.zip -d $EMAJ_TMPDIR/
+        - EMAJ_SQL_FILE=$EMAJ_TMPDIR/e-maj-$EMAJ_VERSION/sql/emaj--$EMAJ_VERSION.sql
+        - EMAJ_CONTROL_FILE=$EMAJ_TMPDIR/e-maj-$EMAJ_VERSION/emaj.control
+        - SHAREDIR=$(pg_config --sharedir)
+        - sudo mkdir -p $SHAREDIR/extension/
+        - sudo cp $EMAJ_SQL_FILE $EMAJ_CONTROL_FILE $SHAREDIR/extension/
+      before_script:
+        # Disable SSH host key checking for localhost (for testing the git-shell)
+        - echo "Host 127.0.0.1 localhost" > ~/.ssh/config
+        - echo "  StrictHostKeyChecking no" >> ~/.ssh/config
+        - echo "  UserKnownHostsFile /dev/null" >> ~/.ssh/config
+        - echo "  User travis" >> ~/.ssh/config
+        - echo "  IdentityFile ~/.ssh/self" >> ~/.ssh/config
+
+        # Create an SSH key and allow to connect with localhost (for testing the git-shell)
+        - ssh-keygen -t rsa -b 2048 -N '' -f ~/.ssh/self
+        - ls -la ~/.ssh
+        - cat ~/.ssh/self.pub > ~/.ssh/authorized_keys
+        - ssh travis@localhost echo "SSH setup complete"
+
+        # Set up RabbitMQ VirtualHost
+        - sudo rabbitmqctl add_vhost ontohub_system_test
+        - sudo rabbitmqctl set_permissions -p ontohub_system_test guest ".*" ".*" ".*"
+
+        # Set up the system-tests
+        - |
+          if [ -d $HOME/system-test/.git ]
+          then
+            pushd $HOME/system-test
+            git fetch
+            popd
+          else
+            git clone https://github.com/ontohub/system-test.git $HOME/system-test
+          fi
+        - pushd $HOME/system-test
+        - git checkout origin/master
+        - echo "Using system-test revision $(git log -1 --format=%H)"
+        - bundle install
+        - popd
+        - ping_elasticsearch="curl localhost:9200"; while (! $ping_elasticsearch > /dev/null 2> /dev/null); do sleep 0.1; done
+
+      script:
+        - pushd $HOME/system-test
+        - echo "Testing commit $TRAVIS_COMMIT"
+        - ONTOHUB_BACKEND_VERSION=$TRAVIS_COMMIT bundle exec rspec
+        - popd

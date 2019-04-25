@@ -1,0 +1,45 @@
+language: node_js
+cache: yarn
+after_script:
+- npm run codecov
+sudo: false
+addons:
+  ssh_known_hosts: design.optimizely.com
+before_deploy:
+- rm -rfv dist
+- yarn build
+- PACKAGE_VERSION=$(node -p -e "require('./package.json').version")
+deploy:
+- provider: npm
+  skip_cleanup: true
+  api_key:
+    secure: ZP5NyAOstUcvmQEaAjJ9TRr+7GqiuK3iKBScADkVgetVhgBRaRy0O5x1OrRyy2i2p9Z2NnzIXe4jjDqueZ4lrpmBWgkfSFdVn1zYTgmc5g8yMP5HUIPHhQMj2DZ81VXCWLS2cdPyYspcIm1nFtzXQn6T0H8lH0hzWebXP2/cHrI=
+  email:
+    secure: cKTOKErgXo7WcyaqQFzBIGBpEz5X+MwtN/wHXNmLDU6BJ98IKfRcOS2oY8jG/JFoy+EQDdC8iwLfN7+z8gysMoVVbZYm/sKKLg2UXEBCe02p1mJlPDh/o/E+9ofNe1PMv/o1j4CY3YBfaVA+HB7WCGyKivu6tFgFOuoxbPdOleA=
+  on:
+    tags: true
+- provider: s3
+  access_key_id: $AWS_ACCESS_KEY_ID
+  secret_access_key: $AWS_SECRET_ACCESS_KEY
+  bucket: "design.optimizely.com"
+  region: us-west-2
+  upload-dir: oui/latest
+  local_dir: dist/
+  skip_cleanup: true
+  acl: public_read
+  on:
+    tags: true
+- provider: s3
+  access_key_id: $AWS_ACCESS_KEY_ID
+  secret_access_key: $AWS_SECRET_ACCESS_KEY
+  bucket: "design.optimizely.com"
+  region: us-west-2
+  upload-dir: oui/$PACKAGE_VERSION
+  local_dir: dist/
+  skip_cleanup: true
+  acl: public_read
+  on:
+    tags: true
+notifications:
+  slack:
+    secure: FIA2Sujap77bqerxvU1PQrTbmdoJ4Lt3zisa+nO7jiQE/QqVfS+ZSHTYIqvi03Vj58YcTss+I6KUqntEEyVdECuXx4mkpdzLSET7FDkp5Uyixni/x4v+DaWHrXxkfdUS1AecQEXKRgHtKOkUBq32p25VLTHVA+ysR80N/f1XaVg=

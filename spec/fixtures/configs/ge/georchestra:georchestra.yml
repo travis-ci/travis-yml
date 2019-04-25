@@ -1,0 +1,24 @@
+language: java
+sudo: false
+git:
+  depth: 1
+  submodules: true
+cache:
+  directories:
+    - $HOME/.m2
+notifications:
+  irc:
+    channels:
+      - irc.freenode.net#georchestra
+    template:
+      - "%{repository}#%{build_number} (%{branch}) %{message} %{build_url}"
+before_script: sudo sh -c 'echo 0 > /proc/sys/net/ipv6/conf/all/disable_ipv6'
+install: mvn install -DskipTests -P-all,travis -Dadditionalparam=-Xdoclint:none
+script: mvn verify -P-all,travis,it -Dadditionalparam=-Xdoclint:none
+addons:
+  apt:
+    packages:
+      - ant
+      - ant-optional
+      - python-virtualenv
+      - python-pip

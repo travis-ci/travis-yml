@@ -1,0 +1,96 @@
+# This is the config file for building proj.4 and running its test suite
+# with Travis-ci.org
+language: cpp
+
+branches:
+  except:
+  - /^(cherry-pick-)?backport-\d+-to-/
+
+cache:
+    directories:
+        - $HOME/.ccache
+
+matrix:
+  fast_finish: true
+  include:
+
+    - os: linux
+      dist: trusty
+      compiler: gcc
+      sudo: required
+      services:
+        - docker
+      env:
+        - BUILD_NAME=linux_gcc
+        - DETAILS="linux, gcc"
+
+    - os: linux
+      dist: trusty
+      compiler: gcc
+      sudo: required
+      services:
+        - docker
+      env:
+        - BUILD_NAME=linux_gcc7
+        - DETAILS="linux, gcc7"
+        - CC=gcc-7
+        - CXX=g++-7
+        - CXXFLAGS='-g -D_GLIBCXX_ASSERTIONS'
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages: ['g++-7','make','autoconf','automake']
+
+    - os: linux
+      dist: trusty
+      compiler: clang
+      sudo: required
+      services:
+        - docker
+      env:
+        - BUILD_NAME=linux_clang
+        - DETAILS="linux, clang"
+
+    - os: osx
+      env:
+        - BUILD_NAME=osx
+        - DETAILS="osx"
+
+    - os: linux
+      dist: trusty
+      compiler: gcc
+      sudo: required
+      env:
+        - BUILD_NAME=mingw32
+        - DETAILS="mingw32"
+
+    - os: linux
+      compiler: gcc
+      dist: trusty
+      sudo: required
+      env:
+        - BUILD_NAME=csa
+        - DETAILS="CLang Static Analyzer"
+
+  allow_failures:
+      - env: BUILD_NAME=mingw32
+
+before_install: ./travis/${BUILD_NAME}/before_install.sh
+
+install: ./travis/${BUILD_NAME}/install.sh
+
+script:
+  - echo "done"
+
+after_success: ./travis/${BUILD_NAME}/after_success.sh
+
+notifications:
+  #email:
+  #  recipients:
+  #    - gdal-commits@lists.osgeo.org
+
+  irc:
+    channels:
+      - "irc.freenode.org#gdal"
+    use_notice: true

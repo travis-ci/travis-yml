@@ -1,0 +1,29 @@
+language: node_js
+cache: npm
+stages:
+  - check
+  - test
+  - cov
+
+node_js:
+  - 10
+
+os:
+  - linux
+  - osx
+  - windows
+
+script: npm run test:node -- --bail
+
+matrix:
+  fast_finish: true
+  allow_failures:
+    - os: windows
+    - node_js: 11
+
+jobs:
+  include:
+    - stage: check
+      node_js: 10
+      script:
+        - npm run lint

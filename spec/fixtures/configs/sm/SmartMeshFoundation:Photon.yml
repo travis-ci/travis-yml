@@ -1,0 +1,25 @@
+language: go
+go:
+- '1.10'
+sudo: false
+install:
+- go get -v github.com/alecthomas/gometalinter
+- gometalinter --install
+script:
+  #- go get  ./...
+  - chmod +x ./goclean.sh
+  - ./goclean.sh
+  - go build
+  - pwd
+  - chmod +x ./rungotest.sh
+  - ./rungotest.sh
+  # - pwd
+#  - go test -v  -failfast -timeout 10m -short `go list ./... | grep -v contracts |grep -v casemanager`
+##  - chmod +x ./smoketest.sh
+##  - ./smoketest.sh
+
+
+notifications:
+  email:
+    on_success: never
+    on_failure: always

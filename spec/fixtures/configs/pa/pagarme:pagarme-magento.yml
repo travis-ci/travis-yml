@@ -1,0 +1,37 @@
+sudo: required
+
+services:
+  - docker
+
+env:
+  global:
+    - DOCKER_COMPOSE_VERSION=1.17.0
+    - COMPOSER_VERSION=1.4.1
+    - COVERALLS_VERSION=v1.0.0
+  matrix:
+    - MAGENTO_VERSION=1.9.1.0 TEST_SUITE=credit_card
+    - MAGENTO_VERSION=1.9.1.0 TEST_SUITE=boleto
+    - MAGENTO_VERSION=1.9.1.0 TEST_SUITE=postback
+    - MAGENTO_VERSION=1.8.1.0 TEST_SUITE=credit_card
+    - MAGENTO_VERSION=1.8.1.0 TEST_SUITE=boleto
+    - MAGENTO_VERSION=1.8.1.0 TEST_SUITE=postback
+    - MAGENTO_VERSION=1.7.0.2 TEST_SUITE=credit_card
+    - MAGENTO_VERSION=1.7.0.2 TEST_SUITE=boleto
+    - MAGENTO_VERSION=1.7.0.2 TEST_SUITE=postback
+
+before_install:
+  - sudo rm /usr/local/bin/docker-compose
+  - curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
+  - chmod +x docker-compose
+  - sudo mv docker-compose /usr/local/bin
+  - echo "MAGENTO_VERSION=$MAGENTO_VERSION" >> .env
+  - echo "IMGUR_CLIENT_ID=$IMGUR_CLIENT_ID" >> .env
+
+script:
+  - chmod +x ./forgotten_keys.sh
+  - ./forgotten_keys.sh
+  - script/test.sh
+
+after_failure:
+  - docker-compose exec magento cat var/log/system.log
+  - docker-compose exec magento cat var/log/exception.log

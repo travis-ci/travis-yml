@@ -1,0 +1,90 @@
+# Validate with: ruby -ryaml -e 'YAML.load_file ".travis.yml"'
+
+# Generic option gives us Git, Ruby, NodeJS, JVM, i.e. everything we need.
+# https://docs.travis-ci.com/user/languages/minimal-and-generic/#generic
+language: generic
+
+# Travis CI does not fetch the repository alltogether by default, and we need
+# to count commits to evaluate application build number. See also:
+# https://github.com/travis-ci/travis-ci/issues/7422.
+# TODO(dotdoom): use CI build number instead of commit count.
+git:
+  depth: false
+
+env:
+  global:
+    - TERM=dumb
+    - PAGER=cat
+    - SDK_ROOT="$HOME/sdk"
+    - ANDROID_SDK_ROOT="$SDK_ROOT/android"
+    - BUILD_LOG=/tmp/build.log
+    # Gradle uses old env: https://issuetracker.google.com/issues/125138969.
+    - ANDROID_HOME="$ANDROID_SDK_ROOT"
+    - PATH="$SDK_ROOT/flutter/bin:$SDK_ROOT/google-cloud-sdk/bin:$PATH"
+    - GRADLE_OPTS="-Dorg.gradle.daemon=false"
+    - CLOUDSDK_CORE_DISABLE_PROMPTS=1
+    - ANDROID_KEYSTORE_PATH="$HOME/.android/release.keystore"
+    # This environment variable is read by Firebase CLI, which uses the same
+    # account we use to access GCloud, to deploy Firebase artifacts.
+    - GOOGLE_APPLICATION_CREDENTIALS="$HOME/gcloud-service-account.json"
+    # This environment variable is read by Fastlane Supply, which uses the same
+    # account we use to access GCloud, to upload the app to Play Store.
+    - SUPPLY_JSON_KEY="$GOOGLE_APPLICATION_CREDENTIALS"
+    # A workaround to hide large dumps of text files, see also
+    # https://github.com/flutter/flutter/pull/4989.
+    - BOT=false
+    # npm: less verbose, do not save installed packages.
+    - NPM_CONFIG_LOGLEVEL=error
+    - NPM_CONFIG_SAVE=false
+
+os: osx
+
+# Starting March 2019, all iOS apps submitted to the App Store must be built
+# with the iOS 12.1 SDK or later, included in Xcode 10.1 or later.
+osx_image: xcode10.1
+
+branches:
+  only:
+    - master
+    - /^[0-9]+[.][0-9]+$/
+    - gssoc19
+
+cache:
+  timeout: 500
+  directories:
+    # Caching a lot of small files is slow because of md5 calculation of each:
+    # https://github.com/travis-ci/travis-ci/issues/9009. Cache selectively.
+    - $HOME/.gradle/caches/
+    - $HOME/.gradle/wrapper/
+    - $ANDROID_SDK_ROOT
+    - $SDK_ROOT/flutter
+
+# When one of the steps in the install fails, the build stops immediately and is
+# marked as errored. The after_failure is not run in this case, not printing the
+# extended log.
+# When one of the build commands returns a non-zero exit code, the Travis CI
+# build runs the subsequent commands as well, and accumulates the build result.
+# We don't want it to advance to publish if test fail.
+script: |
+  tools/ci.sh dependencies &&
+  tools/ci.sh build &&
+  # Deploy only from "master" branch or a tag.
+  if [[ "$TRAVIS_PULL_REQUEST" == "false" &&
+        ( "$TRAVIS_BRANCH" == "master" || "$TRAVIS_TAG" != "" ) ]]; then
+    tools/ci.sh deploy
+  fi
+
+after_failure: cat "${BUILD_LOG?}"
+
+before_cache:
+  - |
+    # Delete volatile files:
+    # https://docs.travis-ci.com/user/languages/java/#projects-using-gradle
+    rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+    rm -f  $HOME/.gradle/caches/*/javaCompile/javaCompile.lock
+    rm -fr $HOME/.gradle/caches/journal-1/
+    rm -fr $HOME/.gradle/caches/transforms-1/
+    rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+    rm -fr $HOME/.gradle/caches/*/fileHashes/
+    rm -fr $HOME/.gradle/caches/*/scripts-remapped/
+    rm -fr $HOME/.gradle/caches/*/scripts/

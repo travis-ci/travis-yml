@@ -1,0 +1,22 @@
+language: node_js
+node_js:
+- '6'
+cache:
+  directories:
+  - node_modules
+script:
+- npm run build
+deploy:
+  provider: npm
+  email: jason.p.pickering@gmail.com
+  api_key:
+    secure: LMreLgxTIwhOSaX0Gs0+xZJPqY8tYK+0eDAK/HJCGitokefjzYoQXQh/2k5Ci6Vpg4tXqJ3DQXvFIlYddLE5p6/X2f/PIDG4oxm8bplwbsMrFY/itqtUTo+4cQRkxKnsmOWC6BrryFR9rOMMTC1BYVKvvoAN0/Ifs5WY1aA9Q0+i1pKEL5MlGwG8EFgr9Gc49GtoO/pWgl8t5IuImy2OdlyKT6FwkshcL1sjsMcIkcBhi2QT+TNkB2kUgvxxO+YMw7EvJdsBO7DBrZM5OWyiHf0FytnBSJR1ts9BEm6rngy4SQ0AbGITNBrgLiIaTo++54CWBy1lcQN3I06OKsZX7QQ8afhR94ZHE3q/dXbPsvZfO4E2SjhYP2FmlI8/cFSnLWCSCy0CFtLB/Ztfduwe/3UsAYI6kzN7Z+UxLC3CZC8yc6/J/NjpvEu/xXs9GMwhhl93fAlXkEq9iizaH++DYSREpTKOOC2/ni4z71LR8obZlCvwv8NjMiI46z7zRBNfY7MdXiT1EngpgTln+18pcPCq/we6ta+0Zf4JU7RavRqbnvC33YQJF/HxjdA2KUnDfo2Ur+cyElGmaJMaKDkxFN0itSUaaZpI+AuRB9JZTPTBLNXF6cST9HtZHUSOxw6+DV5Ndc5gz/hWBCesXkB9pbzY11rOSduDZiXZYqwtedY=
+  skip_cleanup: true
+  on:
+    tags: true
+    repo: dhis2/d2-analysis
+notifications:
+  slack:
+    secure: Nv3V2w3pYFtt2BQ6eJpKbzxEm7MON9MYRVSUDNFEh8G+3jPbAtL7C10v8K+3nYR7f1LoTtKzawgfLja+xcE2SUTN1mS6qCay2A2Dd6oKoXM7XYsPzJA8LvwXgx0s3TDqzsuR/1k0zqaQIuTI8je1nx3q/Qjj6YySGs0iLZPw6OcF6Y/AfI02KpP/RDK1gWJ72iYc5I8+yYJ6hMB6GhGeBx02o0d5oUCnQHWY05zVehnqWlkXJpY0aIXuCF1dhlKboWG8D5ldZVcDNlXo870uSxWEJFfqlGDIJH9ggzn0FYeD2O0AeDcNMv7GGbzKEK1kf/LeV/NsGBBIDIlPra/yyjAxJBn5Zw0nlcbUJHjGTpTGp6cWw8EnAbR+EMKVDd+UT1CE9IBjKgrXs80uSoMTCqEO3bPbd8PpXRyEHTczX+gdQuOyHnZnCzC5yzPM6ZV69CrN1AL/nqyO5y75MS89ziIDNvdZsRDNG9TtHrNcpQrUW6i8bCvS0Bxjb9qXiyiNKQmmYCX8ZhSZEk1+4CMCCzmmRtis50dU/Z2KLnrOZj6o1Giy8i+RtNkDioiUPHLLKfTbF9pNQQQGpH+2wHmTUZSym4iMOYnBDtTlOoPmHtSOkYRzS22waSng5fyCMXMTdQ7RgS/cdPG+Omfiu9lELcJC4sWMFXea2czPxEqTrBg=a
+    on_failure: always
+    on_success: change

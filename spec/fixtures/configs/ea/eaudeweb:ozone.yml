@@ -1,0 +1,156 @@
+matrix:
+  include:
+    - language: python
+      cache:
+       - pip
+      name: "Backend Tests"
+      python:
+       - 3.6
+      services: postgresql
+      addons:
+        postgresql: "9.4"
+      before_install:
+        # XXX Remove this when Travis fixes their issues.
+        # See https://travis-ci.community/t/then-sudo-apt-get-update-failed-public-key-is-not-available-no-pubkey-6b05f25d762e3157-in-ubuntu-xenial/1728?u=alexkiro
+        - sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 6B05F25D762E3157
+        - sudo apt update
+        - sudo apt install -y wget
+        # Install tusd
+        - wget https://github.com/tus/tusd/releases/download/0.11.0/tusd_linux_amd64.tar.gz
+        - tar -xzvf tusd_linux_amd64.tar.gz
+        # Load environment variables
+        - export DJANGO_SETTINGS_MODULE=config.settings.test
+        - source .envrc.travis
+      install:
+        - pip install -r requirements/tests.txt
+      before_script:
+        - psql -c "CREATE DATABASE travisci;" -U postgres
+        # Start tusd server
+        - nohup tusd_linux_amd64/tusd -dir $TUSD_UPLOADS_DIR -hooks-http http://$BACKEND_HOST:$BACKEND_PORT/api/uploads/ &
+      script:
+        - coverage run --omit='*/tests/*,*/migrations/*'  --source='ozone' manage.py test --keepdb
+      after_success:
+        - pip install python-coveralls
+        - coveralls
+    - language: node_js
+      cache:
+       - npm
+      name: "Frontend Tests"
+      services:
+      addons:
+      node_js:
+        - 8.12
+      install:
+        - cd frontend && npm install
+      before_script:
+      script:
+        - npm run test-cover
+      after_success:
+        # We need to change back to the parent dir, so coveralls knows where
+        # to find the files in the repo.
+        - cd .. ; cat ./frontend/coverage/lcov.info | ./frontend/node_modules/.bin/coveralls
+    - language: python
+      cache:
+       - pip
+       - npm
+      name: "E2E Tests"
+      python:
+        - 3.6
+      services: postgresql
+      addons:
+        postgresql: "9.4"
+        chrome: stable
+      before_install:
+        # XXX Remove this when Travis fixes their issues.
+        # See https://travis-ci.community/t/then-sudo-apt-get-update-failed-public-key-is-not-available-no-pubkey-6b05f25d762e3157-in-ubuntu-xenial/1728?u=alexkiro
+        - sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 6B05F25D762E3157
+        # Install nvm
+        - sudo apt update --allow-unauthenticated
+        - sudo apt install -y wget tar
+        - wget -qO- https://raw.githubusercontent.com/creationix/nvm/v0.33.0/install.sh | bash
+        - source ~/.bashrc
+        # Install node
+        - nvm install 8.12
+        - node --version
+        - npm --version
+        # Install tusd
+        - wget https://github.com/tus/tusd/releases/download/0.11.0/tusd_linux_amd64.tar.gz
+        - tar -xzvf tusd_linux_amd64.tar.gz
+      install:
+        - pip install -r requirements/tests.txt
+      before_script:
+        - export DJANGO_SETTINGS_MODULE=config.settings.test
+        - source .envrc.travis
+        - psql -c "CREATE DATABASE travisci;" -U postgres
+        - python manage.py migrate
+        # Start backend server
+        - nohup python manage.py runserver &
+        # Start tusd server
+        - nohup tusd_linux_amd64/tusd -dir $TUSD_UPLOADS_DIR -hooks-http http://$BACKEND_HOST:$BACKEND_PORT/api/uploads/ &
+        # Install frontend dependencies
+        - cd frontend && npm install
+      script:
+        - npm run e2e
+      after_success:
+    - language: python
+      cache:
+       - pip
+      name: "Update ozone-translations Backend"
+      python:
+        - 3.6
+      services: postgresql
+      addons:
+        postgresql: "9.4"
+      before_install:
+        - if ! [[ $TRAVIS_BRANCH = 'develop' && $TRAVIS_PULL_REQUEST = 'false' ]]; then exit 0; fi
+        - export DJANGO_SETTINGS_MODULE=config.settings.test
+        - source .envrc.travis
+      install:
+        - pip install -r requirements/tests.txt
+      before_script:
+        - psql -c "CREATE DATABASE travisci;" -U postgres
+      script:
+        - git clone https://github.com/eaudeweb/ozone-translations.git translations
+        - python manage.py makemessages
+        - cd translations
+        - ../utility/push_from_travis.sh
+    - language: python
+      cache:
+       - pip
+       - npm
+      name: "Update ozone-translations Frontend"
+      python:
+        - 3.6
+      services:
+      addons:
+      before_install:
+        - if ! [[ $TRAVIS_BRANCH = 'develop' && $TRAVIS_PULL_REQUEST = 'false' ]]; then exit 0; fi
+        # XXX Remove this when Travis fixes their issues.
+        # See https://travis-ci.community/t/then-sudo-apt-get-update-failed-public-key-is-not-available-no-pubkey-6b05f25d762e3157-in-ubuntu-xenial/1728?u=alexkiro
+        - sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 6B05F25D762E3157
+        # Install nvm
+        - sudo apt update --allow-unauthenticated
+        - sudo apt install -y wget tar
+        - wget -qO- https://raw.githubusercontent.com/creationix/nvm/v0.33.0/install.sh | bash
+        - source ~/.bashrc
+        # Install node
+        - nvm install 8.12
+        - node --version
+        - npm --version
+      install:
+        - pip install -r requirements/translations.txt
+        - git clone https://github.com/eaudeweb/ozone-translations.git translations
+        - cd frontend && npm install
+      before_script:
+      script:
+        - make makemessages
+        - cd ../translations
+        - git pull
+        - ../utility/push_from_travis.sh
+env:
+  global:
+    - secure: V8t8Vy7HP0jaKkV+75HfgHHmuw3zQ8uL/qxuNBi3h04TLjwjiJWY1C2z19lSuRN8MyNExmbPinVqNBsrDzgEKK7NUjH+2Xm0hyafwS63A7E2cP2QhF5Z1F886tj6EXPJ40zt2lG3t6X7YSC4ofs4klwPDPjlakmc95TjuCS87gREkAVNil3DsRLH5jrO89jOZ0eAF9B5oKhN+KTWbkjk9NbTYnwzW3Lcl2Ol7Qjy8uwQd5KB2D2Mt57U63Vuc+8PAX+D1bsU27c+1G0cfz9AeGXK+i8HL4FIYPrUT0TBNor41O8ofNUwnmbGiyO9WwoRANF1DsdLPP0bK3l3I3ovB26ophqkp5sPF+/ptL5zBeaqdjZaElXx7RNqyU6aTJQSYc+uy6hd8iQTU5Pf+G5cp52SAeNz09HC5Rl8RcZ6QpvV7Bm+qyPXt9FKKH1I5s5+hLahdLi4zJPvKBEgTVz4NpEcpC3BlBKI4FuYLpRgl8/h9FGAob4Yr8KkI3MGEqBIHCI3KMU4kOusA7g0SmtXTiNZTmkSpxfyIvN3u9evVPoNKa4G7r+hDcTKUGrzMw0M+/ImSTfyvbDncA17SjhJLfFk0/X0k0V5XDMN8PSQi2K1UXEhmjulvo33r9IoUiLnJKkHf0LxSwQb5CyHs6kCTrXdCBUSzzjtlG86Oy1bZLc=
+    - COVERALLS_PARALLEL=true
+
+notifications:
+  webhooks: https://coveralls.io/webhook

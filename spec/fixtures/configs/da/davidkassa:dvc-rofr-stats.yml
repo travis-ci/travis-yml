@@ -1,0 +1,30 @@
+language: node_js
+node_js:
+  - "8"
+# Using 8 to match Firebase Functions version
+
+# Not needed with `npm ci`
+# cache:
+#   directories:
+#   - node_modules/
+#   - functions/node_modules/
+
+install:
+  - npm ci
+  - cd ./functions && npm ci && cd ..
+
+script:
+  - npm run test:unit
+  - if [ "$TRAVIS_BRANCH" = "master" ]; then npm run build; fi
+  - if [ "$TRAVIS_BRANCH" != "master" ]; then npm run build-staging; fi
+
+# using instead of deploy as non-0 deploy still succeeds
+after_success:
+   - if [ "$TRAVIS_BRANCH" = "develop" ] && [ $TRAVIS_PULL_REQUEST == "false" ]; then
+       npm i -g firebase-tools;
+       firebase deploy --token $FIREBASE_DEPLOY_KEY --project staging;
+     fi
+   - if [ "$TRAVIS_BRANCH" = "master" ] && [ $TRAVIS_PULL_REQUEST == "false" ]; then
+       npm i -g firebase-tools;
+       firebase deploy --token $FIREBASE_DEPLOY_KEY --project prod;
+     fi    

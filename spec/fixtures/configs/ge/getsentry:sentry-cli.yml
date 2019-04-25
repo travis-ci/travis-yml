@@ -1,0 +1,93 @@
+language: generic
+dist: trusty
+services:
+  - docker
+
+branches:
+  only:
+  - master
+  - /^release\/[\d.]+$/
+
+cache:
+  directories:
+    - "node_modules"
+    - $HOME/.cargo
+    - $TRAVIS_BUILD_DIR/target
+
+before_install:
+  - npm install -g @zeus-ci/cli
+
+matrix:
+  include:
+    # Linux 32-bit statically linked binary
+    - os: linux
+      sudo: required
+      env:
+        - TARGET=i686-unknown-linux-musl
+        - DOCKER_IMAGE=messense/rust-musl-cross:i686-musl
+      script: bash scripts/build-in-docker.sh
+      after_success:
+        - zeus upload -t "application/octet-stream"
+                      -n "sentry-cli-Linux-i686"
+                      "./target/${TARGET}/release/sentry-cli"
+
+    # Linux 64-bit statically linked binary
+    - os: linux
+      sudo: required
+      env:
+        - TARGET=x86_64-unknown-linux-musl
+        - DOCKER_IMAGE=messense/rust-musl-cross:x86_64-musl
+      script: bash scripts/build-in-docker.sh
+      after_success:
+        - zeus upload -t "application/octet-stream"
+                      -n "sentry-cli-Linux-x86_64"
+                      "./target/${TARGET}/release/sentry-cli"
+
+    # Build on older OS X for more portable binaries
+    - os: osx
+      osx_image: xcode8
+      language: rust
+      env:
+        - TARGET=x86_64-apple-darwin
+      script: cargo build --release --locked
+      after_success:
+        - zeus upload -t "application/octet-stream"
+                      -n "sentry-cli-Darwin-x86_64"
+                      "./target/release/sentry-cli"
+
+    # Test minimum js
+    - os: linux
+      language: node_js
+      node_js: "4"
+      install: true
+      env: SENTRYCLI_LOCAL_CDNURL="http://localhost:8999/"
+      script: npm install && npm test
+
+    # Test latest js
+    - os: linux
+      language: node_js
+      node_js: "8"
+      install: true
+      env: SENTRYCLI_LOCAL_CDNURL="http://localhost:8999/"
+      script: npm install && npm test
+
+    # Build the @sentry/cli NPM package
+    - os: linux
+      language: node_js
+      node_js: "8"
+      install: true
+      before_deploy: mkdir -p dist && mv *.tgz dist/package.tgz
+      env: TARGET=npm
+      script: npm pack
+      after_success:
+        - zeus upload -t "application/tar+npm" -n package.tgz *.tgz
+
+notifications:
+  webhooks:
+    urls:
+      - https://zeus.ci/hooks/94ed0760-efce-11e7-9b3c-0a580a282505/public/provider/travis/webhook
+    on_success: always
+    on_failure: always
+    on_start: always
+    on_cancel: always
+    on_error: always

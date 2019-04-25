@@ -1,0 +1,28 @@
+notifications:
+  email: false
+sudo: false
+language: ruby
+rvm:
+  - 2.6.0
+bundler_args: --without development:production:doc:profiling
+cache:
+  bundler: true
+services:
+  - docker
+addons:
+  firefox: latest
+before_script:
+  - bundle exec bin/portal dockerize test --europeana_api_key=$EUROPEANA_API_KEY
+  - docker-compose pull
+  - docker-compose build
+  - docker-compose up -d
+  - RAILS_ENV=test bundle exec rake db:setup
+  - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+  - chmod +x ./cc-test-reporter
+  - ./cc-test-reporter before-build
+script:
+  - bundle exec rspec
+after_script:
+  - ./cc-test-reporter after-build -t simplecov --exit-code $TRAVIS_TEST_RESULT
+env:
+  - RAILS_ENV=test

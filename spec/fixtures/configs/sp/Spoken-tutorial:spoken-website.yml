@@ -1,0 +1,39 @@
+language: python
+sudo: false
+
+python:
+- 2.7.11
+
+services:
+  # - mysql
+
+cache:
+  directories:
+    - $HOME/.cache/pip
+    - $HOME/.pip-accel
+
+before_cache:
+  - rm -f $HOME/.cache/pip/log/debug.log
+
+install:
+  # - pip install python-coveralls
+  - pip install -r requirements-dev.txt
+
+before_script:
+  # - cp config.sample.py config.py
+  # - mysql -e 'create database test_spoken_test_db;'
+  # - sed -i "s/your_database_name_here/spoken_test_db/g" config.py
+  # - sed -i "s/your_database_user_here/root/g" config.py
+  # - sed -i "s/your_database_password_here//g" config.py
+
+script:
+- ./lint.sh
+# - py.test --create-db --cov -v --tb=native
+
+after_success:
+  # - coveralls
+
+notifications:
+  email:
+    on_success: change  # [always|never|change]
+    on_failure: always  # [always|never|change]

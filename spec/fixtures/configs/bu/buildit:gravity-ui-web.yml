@@ -1,0 +1,60 @@
+language: node_js
+# Not specifying Node version here, so that Travis uses .nvmrc
+
+env:
+  global:
+    - PROD_TAG_REGEXP="^v[0-9]+\.[0-9]+\.[0-9]+.*"
+    - secure: "yuOsuEAFh3xvvhiAa1qFqdDJ8UY0jnmFB2Vb5fa88yTlQO8FCV2VWH45vlOAZ1EhEeAo/8LFO1iEV/8ykMQICqTeS+dXUxrut8PpIAccgfRO0OnuebY2KKSADbBKsw+lsMPXuaFNxn0mv0vuHMulX0oPR8f/Zx0ZJGf2jo7NuhUPvJhZPIT8cT9VxAdgk7wMdJ6qGIOla5e8icM14JS9lLg+GegL3ks34OZRJW1ciWPAgz/Qp437ByTutHsaRu+/5GXbCLS0k+vSQOzgB6vpcnG4YAPmVXrcFl2LfM3Tqc7yaC/JjPCY44RXvf3SGlsUy/12pbOZ4YYZ5eCXMwN+605YAHYL2uLelYNmhhTy5pYmJwFeO0MaBzS8QSmilhA6GPd0pjQiV/vA9uF4Mj9eUTK6+Tnw67oAWjND5JKr7cbKzVzK74Y8ekFGJbRCRGR0JoOuT5tDQ49tuYBFGiUc+WeE2FcdkLL6TDF3FJHVQ2VjYm6o4oyK7DhOizS606A1XtwvWWElrsTWLWPldKJiQLvxdAmYbWHzQ0DC3LLsA5ZAp3ZpSBCZKyAivMGpWaHkg/Dl9Y3O96cHQVDZepF/lftGoR2lhxNEzhH0USotJpbPdaKyo+4f1uDm7shzCduBYIngd2eTb/NLjCf5CkLjcOuGr50l7xY6g2UCaDBBtQM=" #SLACK_NOTIFICATION_URL
+    - secure: "RKsKsLHCiNnJwgvZzU8bpSwYCe1Eq2c5xhotB9K7tXv3baPfbWu+hwDqmWnRk2LGEBYmPK1Z/omhAfPX27CFwUtFSr664td9uNGOyQBzac9K1kLeUwCJqgDAhueI8rmwvivMnjqsiGJ49nsUVGumydqz+qKNDBuk8PfNgeJUtCDWLc2NNQXWJk2cNf4bCo6BaApZpSRjpO453EcqDllbUCXYo4KU9rjjmcTiHJty/poUly5yabs0SZzD2wrsf5V6dtzFbI2gt1/GtlaG0xD9+TQMl4m0yE5QXl/lvU4B+1t4jb4BBHyV3iAt1TCysofxb/88zjGFpv+0LoY2aaUnGczaAA0wMNhkk6fsSMJ4Z6lYZksR9pAWRBjnPyzGf1yf3Aq9IlSWeQn5BgSeyd1DIduHQk7K/b6wtlT2zWKqw2zF1jt9KHB6WQ7O0gQl6PqL9uCZTCwgSNxU1QxZO3uuFZI5Vd8pjvZs/mS+Jxkq2BTINYnSxZYXAdM5wkH/ys9guyNc05hpUjepchL/q7mpBB2XorofMbDA3oas5SvnJqRRb9oWy3Har1rtb58GeiRrhLCZLqJk7cZmCYNnlHsXt3GLRt3kkDYLe2X4enBcuJcuhYUxub1b8U6Pz0j13sIMRhYmtw5IwwOnm1VXQKPc9lRXNBG9lOXQi8AcCDERKNg=" #ENCRYPTD_NPM_AUTH_TOKEN environment variable
+install:
+  - npm ci
+script:
+  - commitlint-travis
+  - npm run-script styleguide
+before_deploy:
+  - pip install --user awscli
+deploy:
+  - provider: script
+    skip_cleanup: true
+    script:
+      npx semantic-release
+  # deploy develop to Staging
+  - provider: script
+    script:
+      ~/.local/bin/aws s3 sync dist s3://${STAGING_BUCKET} --delete --region=${STAGING_BUCKET_REGION} --exclude "*" --include "*.html" --content-type "text/html; charset=utf-8" &&
+      ~/.local/bin/aws s3 sync dist s3://${STAGING_BUCKET} --delete --region=${STAGING_BUCKET_REGION} --exclude "*" --include "*.css" --content-type "text/css; charset=utf-8" &&
+      ~/.local/bin/aws s3 sync dist s3://${STAGING_BUCKET} --delete --region=${STAGING_BUCKET_REGION} --exclude "*" --include "*.js" --content-type "application/javascript; charset=utf-8" &&
+      ~/.local/bin/aws s3 sync dist s3://${STAGING_BUCKET} --delete --region=${STAGING_BUCKET_REGION} --include "*" --exclude "*.js" --exclude "*.html" --exclude "*.css"
+    skip_cleanup: true
+    on:
+      branch: develop
+  # deploy next to Next (staging)
+  - provider: script
+    script:
+      ~/.local/bin/aws s3 sync dist s3://${NEXT_BUCKET} --delete --region=${NEXT_BUCKET_REGION} --exclude "*" --include "*.html" --content-type "text/html; charset=utf-8" &&
+      ~/.local/bin/aws s3 sync dist s3://${NEXT_BUCKET} --delete --region=${NEXT_BUCKET_REGION} --exclude "*" --include "*.css" --content-type "text/css; charset=utf-8" &&
+      ~/.local/bin/aws s3 sync dist s3://${NEXT_BUCKET} --delete --region=${NEXT_BUCKET_REGION} --exclude "*" --include "*.js" --content-type "application/javascript; charset=utf-8" &&
+      ~/.local/bin/aws s3 sync dist s3://${NEXT_BUCKET} --delete --region=${NEXT_BUCKET_REGION} --include "*" --exclude "*.js" --exclude "*.html" --exclude "*.css"
+    skip_cleanup: true
+    on:
+      branch: next
+  # deploy tags matching v#.#.*  to Production
+  - provider: script
+    script:
+      ~/.local/bin/aws s3 sync dist s3://${PROD_BUCKET} --delete --region=${PROD_BUCKET_REGION} --exclude "*" --include "*.html" --content-type "text/html; charset=utf-8" &&
+      ~/.local/bin/aws s3 sync dist s3://${PROD_BUCKET} --delete --region=${PROD_BUCKET_REGION} --exclude "*" --include "*.css" --content-type "text/css; charset=utf-8" &&
+      ~/.local/bin/aws s3 sync dist s3://${PROD_BUCKET} --delete --region=${PROD_BUCKET_REGION} --exclude "*" --include "*.js" --content-type "application/javascript; charset=utf-8" &&
+      ~/.local/bin/aws s3 sync dist s3://${PROD_BUCKET} --delete --region=${PROD_BUCKET_REGION} --include "*" --exclude "*.js" --exclude "*.html" --exclude "*.css" &&
+      ./scripts/cdn_publish.sh
+    skip_cleanup: true
+    on:
+      branch: master
+notifications:
+  slack:
+    rooms:
+      - secure: DTS+4w2beFCJ3byMW/YbYY69P5YDkou7fIf3h+mlLjIh3w8NBt7S2FOnoLwP/uRp271IcxobYlClQy51w+RVYlydo6Vap527x0bOycGbvL0KAB407nrslepqAzg2kGRp8YIk4HSu3O6s/ThJDigVXZG20trxJkX+/FF0HW5pUmb2ZngzXDqGKZC7Iqrm0cunIOoJYbHhLdHNm+Loc/czDvMxSSkyjVs4DpSukuarTSR60m0mhvLtBCXY8/FknNhuuAo5ir2nBGaN7aY1wwpcIucP5yxNjL1jB+dQuvZgRChTRPMUWZS3xA0jLycq8yjjDehxMUXwT5sxuDI/6irtu1kNGKCUxNF93tG9alWpB6P9MMRmh78lyKp4kraSeuqbrbN/Py6AUkCa1MZ4aQ/FkgXrv3aazDhJSCNTBD/yW/zh39nUYalVCyyJvX/RTB7z1s+y5Kqh7rAesSV0teSpjhvZC4+KyOXuyuihonexXTOk3GzCf7RNlyA1jegmJROBwfhXIEmFPhUAJkJRp4kaXao1O+2TKRlOOn4+Mwca+QDSLI+CmQRTZ5oqvRm11Mu/HxuJoB/7r56T6VPpdHtAi1vSQRkwrTz4ef89II6MUg7lpxl+VlI5I0Oycnuz/psFJJ2rSmnoggKuUCOagorahquDITUMIP8+9TB8dv2qCUg=
+    on_pull_requests: false
+    on_success: change
+    on_failure: always
+after_deploy:
+  - ./scripts/notify.sh

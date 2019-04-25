@@ -1,0 +1,21 @@
+language: rust
+
+rust: nightly
+
+addons:
+  apt:
+    packages:
+    - ruby
+
+# Don't test on macOS for now.
+# os:
+#   - linux
+#   - osx
+
+install:
+  - git clone https://github.com/aquynh/capstone
+  - (cd capstone && git checkout 3.0.4 && sudo make install)
+
+script:
+  - tools/test
+  - tools/test-release

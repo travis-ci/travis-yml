@@ -1,0 +1,39 @@
+dist: xenial
+sudo: required
+
+language: python
+
+cache: pip
+
+python:
+  - 3.5
+  - 3.6
+  - 3.7
+
+env:
+  - AMY_ENABLE_PYDATA=true
+    AMY_PYDATA_USERNAME=username
+    AMY_PYDATA_PASSWORD=password
+    # With PyData enabled, there's always one migration missing,
+    # so let's not check migrations.
+    # CHECK_MIGRATION=true
+  - CHECK_MIGRATION=true
+
+install:
+  - pip install -r requirements.txt
+  - pip install coveralls
+
+before_script:
+  - if [[ $CHECK_MIGRATION == true ]]; then
+      python manage.py makemigrations --dry-run --check;
+      export STATUS_CODE=$?;
+      if [[ "$STATUS_CODE" != "0" ]]; then
+        exit 1;
+      fi;
+    fi;
+
+script:
+  - coverage run --source=amy manage.py test
+
+after_success:
+  coveralls

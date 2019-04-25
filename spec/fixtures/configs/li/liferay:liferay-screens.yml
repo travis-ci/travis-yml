@@ -1,0 +1,38 @@
+language: objective-c
+osx_image: xcode9
+
+env:
+  global:
+   - ADB_INSTALL_TIMEOUT=10
+   - LICENSES="android-sdk-license-5be876d5|mips-android-sysimage-license-15de68cc|intel-android-sysimage-license-1ea702d1|android-sdk-license-ed0d0a5b|android-sdk-license-c81a61d9|android-sdk-license-2742d1c5"
+   - COMPONENTS=build-tools-25.0.2,android-25,build-tools-26.0.2,android-26,extra-android-m2repository,extra-google-m2repository
+  matrix:
+    - PLATFORM=iOS
+    - PLATFORM=Android
+    - DANGER=1
+
+before_cache:
+  # Do not cache a few Gradle files/directories (see https://docs.travis-ci.com/user/languages/java/#Caching)
+  - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+  - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+
+cache:
+  directories:
+    - $HOME/android/library/.gradle/
+    - $HOME/.gradle/caches/
+    - $HOME/.gradle/wrapper/
+    - $HOME/.android/build-cache
+
+podfile: ios/Framework
+before_script:
+ - |
+   if [ "$PLATFORM" = Android ]; then
+        curl -L https://raw.github.com/embarkmobile/android-sdk-installer/version-2/android-sdk-installer | bash /dev/stdin --install=$COMPONENTS --accept=$LICENSES && source ~/.android-sdk-installer/env
+        mkdir -p $ANDROID_HOME/licenses
+        echo "8933bad161af4178b1185d1a37fbf41ea5269c55" > $ANDROID_HOME/licenses/android-sdk-license
+        echo "d56f5187479451eabf01fb78af6dfcb131a6481e" >> $ANDROID_HOME/licenses/android-sdk-license
+        echo "84831b9409646a918e30573bab4c9c91346d8abd" >> $ANDROID_HOME/licenses/android-sdk-license
+   fi
+ 
+script:
+- sh scripts/travis.sh

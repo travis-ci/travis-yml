@@ -1,0 +1,28 @@
+language: c++
+compiler: clang
+os: osx
+osx_image: xcode9.3
+
+install:
+  - brew update
+
+  # Only install this stuff if it's not already installed. Otherwise Homebrew
+  # will throw an error and the build will fail.
+
+  - "[ -z \"`brew ls --versions llvm`\" ] && brew install llvm || true"
+  - "[ -z \"`brew ls --versions boost`\" ] && brew install boost || true"
+  - "[ -z \"`brew ls --versions sdl2`\" ] && brew install sdl2 || true"
+  - "[ -z \"`brew ls --versions glew`\" ] && brew install glew || true"
+  - "[ -z \"`brew ls --versions freetype`\" ] && brew install freetype || true"
+  - "[ -z \"`brew ls --versions harfbuzz`\" ] && brew install harfbuzz || true"
+  - "[ -z \"`brew ls --versions physfs`\" ] && brew install physfs || true"
+  - "[ -z \"`brew ls --versions assimp`\" ] && brew install assimp || true"
+  - "[ -z \"`brew ls --versions pugixml`\" ] && brew install pugixml || true"
+  - "[ -z \"`brew ls --versions icu4c`\" ] && brew install icu4c || true"
+  - "[ -z \"`brew ls --versions bullet`\" ] && brew install bullet || true"
+  - "[ -z \"`brew ls --versions premake`\" ] && brew install --devel premake || true"
+
+script:
+  - premake5 gmake
+  - make CXX=/usr/local/opt/llvm/bin/clang++
+  - binaries/macosx/x86_64/release/tests

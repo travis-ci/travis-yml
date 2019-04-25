@@ -1,0 +1,47 @@
+language: python
+python:
+  - "2.7"
+
+branches:
+  only:
+    - master
+
+sudo: required
+
+services:
+  - docker
+
+cache: pip
+
+env:
+  global:
+    - secure: NLqmm18NpV3JRwD4CaugXm5cMWgxjdOA88xRFocmmVrduv0QT9JxBZFGebLYmFQOoKNJ23hz6g3EHe1aWfhLYnr1iUYerrwIriSI1wzuqbXJBRN6gO2n3YW+IfG83OLMZkOIMswT8MEdT3JPWVJL3bsocjHp8bYhRCt1KTCMJjY=
+    - secure: aG8l39jaLFWXB5CEOOAR9mJTT3GnqxCl/oFM/7NvTZCBoSWIPIztpFhSAkRE9xSIiKUKXakZcL5H349NLC28jdlHPVsNAaKKt2YNhB6MjmePihp3RPwZGn8c/SjslwY7DPVUKMdWsI7AVNJBH8ab30OPxKwXFAMOiJJza206CYQ=
+
+# Do NOT install Python requirements.
+# Doing so is a waste of time since they won't be used.
+install: true
+
+before_install:
+  # Confirm Docker version
+  - docker --version
+
+  # Upgrade Docker
+  - sudo apt-get -y update
+  - sudo apt-get -y install -o Dpkg::Options::="--force-confnew" docker-ce
+  - docker --version
+
+  # Pull the docker image
+  - make docker-pull
+
+  # Ensure we have a place to store coverage output
+  - mkdir -p coverage
+
+script:
+  - make test-docker
+  - make quality-docker
+  - make coverage-docker
+
+after_success:
+  - pip install --upgrade codecov
+  - codecov

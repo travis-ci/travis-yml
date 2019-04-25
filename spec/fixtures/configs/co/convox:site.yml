@@ -1,0 +1,16 @@
+sudo: required
+
+services:
+  - docker
+
+before_install: |
+  curl -O https://bin.equinox.io/c/jewmwFCp7w9/convox-stable-linux-amd64.tgz &&\
+  sudo tar zxvf convox-stable-linux-amd64.tgz -C /usr/local/bin
+
+before_script:
+  convox start&
+
+script:
+  make test TARGET=http://localhost
+
+install: true

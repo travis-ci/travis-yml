@@ -1,0 +1,15 @@
+language: python
+sudo: false
+addons:
+  firefox: "52.6.0esr"
+env:
+  - TEST_SUITE=jenkins
+  - TEST_SUITE=harvest1
+  - TEST_SUITE=harvest2
+python:
+  - "2.7.6"
+  - "2.7"
+before_install:
+  - pip install --upgrade setuptools pip wheel
+script:
+  - make $TEST_SUITE

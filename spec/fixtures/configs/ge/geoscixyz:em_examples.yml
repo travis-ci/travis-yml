@@ -1,0 +1,39 @@
+language: python
+python:
+  - 2.7
+  - 3.6
+
+sudo: false
+
+env:
+  global:
+    - PYPI_PY=3.6  # deploy to pypi from python 3.6
+
+env:
+  - TEST_DIR="tests"
+
+install:
+  - pip install --upgrade pip
+  - pip install -r requirements.txt
+  - echo $PWD
+  - cd ../
+  - git clone https://github.com/geoscixyz/em_apps.git
+  - cd em_examples
+  - echo $PWD
+
+# Run test
+script:
+  - nosetests $TEST_DIR -v -s
+
+after_success:
+  #deploy to pypi
+  - if [ "$TRAVIS_TAG" = "true" ]; then
+      openssl aes-256-cbc -K $encrypted_99d6f572e516_key -iv $encrypted_99d6f572e516_iv -in credentials.tar.gz.enc -out credentials.tar.gz -d;
+      tar -xzf credentials.tar.gz;
+      mv credentials/.pypirc ~/.pypirc ;
+      python setup.py sdist bdist_wheel ;
+      travis_wait 20 twine upload -r pypi --skip-existing dist/* ;
+    fi
+
+notifications:
+  slack: ubcgif:1Z2lR3XYRSM3GHflG71ZHEN6

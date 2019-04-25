@@ -1,0 +1,40 @@
+language: node_js
+node_js: node
+branches:
+  only:
+    - raw
+before_install:
+  - npm install -g npm-check-updates
+  - npm-check-updates -u
+install:
+  - npm install
+before_script:
+  - npm install -g hexo
+  - npm install -g hexo-cli
+  - npm install -g gulp
+  - export HEXO_ALGOLIA_INDEXING_KEY=$HEXO_ALGOLIA_INDEXING_KEY
+script:
+  - hexo clean
+  - hexo algolia
+  - hexo g
+  - gulp
+after_success: 
+  - cd ./public
+  - echo "$STATIC_JSON" > static.json
+  - git init
+  - git config --global user.name "baiyangliu" 
+  - git config --global user.email "cun.liu@qq.com"
+  - git add .
+  - git commit -m "Updated by travis-ci at $(date)"
+  - git push --force https://$DEPLOY_TOKEN@github.com/baiyangliu/baiyangliu.github.io.git master:master
+  
+  - echo -e "$SSH_KEY" > id_rsa
+  - chmod 600 id_rsa
+  - eval $(ssh-agent -s)
+  - ssh-add id_rsa
+  - rm -rf id_rsa
+  - ssh -o "StrictHostKeyChecking no" git@git.oschina.net
+  - ssh -o "StrictHostKeyChecking no" git@git.coding.net
+  - git push --force git@git.coding.net:baiyangliu/baiyangliu.git master:master
+  - git push --force git@git.oschina.net:baiyangliu/baiyangliu.git master:master
+  

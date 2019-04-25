@@ -1,0 +1,5 @@
+language: node_js
+node_js:
+  - "4.1"
+script:
+  DEBUG_FD=3 ./node_modules/.bin/tape test tests/**/*.js 3>debug.log && cat debug.log

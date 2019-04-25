@@ -1,0 +1,9 @@
+language: bash
+sudo: required
+services:
+  - docker
+install:
+  - docker-compose build
+script:
+  - docker-compose run -e RAILS_ENV=test web bundle exec rake db:migrate
+  - docker-compose run -e RAILS_ENV=test web bundle exec rspec

@@ -1,0 +1,23 @@
+language: python
+python:
+  - "2.7"
+addons:
+    postgresql: "9.3"
+cache:
+    directories:
+        - .pip_download_cache
+        - "$HOME/virtualenv/python2.7.9"
+before_install:
+  - sudo rm -f /etc/boto.cfg
+  - pip install setuptools==40.6.3
+# command to install dependencies
+install: pip install -r requirements.txt -r requirements-dev.txt
+env: TEST_DB_URI=postgres://postgres@127.0.0.1:5432/travis_ci_test TEST_DB_STATS_URI=postgres://postgres@127.0.0.1:5432/travis_ci_stats_test
+before_script:
+  - psql -c 'create database travis_ci_test;' -U postgres
+  - psql -c 'create database travis_ci_stats_test;' -U postgres
+# command to run the build
+script:
+  - fab build
+after_success:
+  - coveralls

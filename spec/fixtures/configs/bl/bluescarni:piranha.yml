@@ -1,0 +1,237 @@
+language: cpp
+
+# NOTE: as of today, the sudo-enabled instances have more RAM:
+# https://docs.travis-ci.com/user/reference/overview/
+sudo: required
+dist: trusty
+
+# Do not build branches of the form "pr/*". By prefixing pull requests coming
+# from branches inside the repository with pr/, this avoids building both the
+# branch push _and_ the pull request.
+branches:
+  except: /pr\/.*/
+
+env:
+  global:
+    - secure: "Z2BoXKwSnvgXtGmW0oykroagBQSGZU+OQukG/AFtK1OAh9rxsF4tvQZ5mtGSo84BSiuZPcu9ThAJ7tEL9bJxgeGL6GIQTsPub8o8/WPFLuSoKYhi2mssuK4tIVJHvbxUHQOHQnGUEsGWmF9xwroehwE8sVwtMOxUDZjMRT54IEFMq9MQ/O1dqK44i+/ub6tm/+oodq9GNDiCca3dULUa3zrmbuePZoAx9WPk9IswPG4fdrYlPmji6jYZxrXtYlz1DA7pVtV3Uom0K2mU2WnG8Pp0oz9o6D/jc951Pe4cF0f9gTB6t24bNHkW5DkC3arO9MIHXqIAMCUe2CtNH/WQ193dcN8UguMrYHsyZXxJqoOLgQJUy0KTptL+XlidPdlSlIHqwBHEdCYFVB3I8PJ625e6EYvHf7G2iHx6OgJLBH2818wuFMmKbiaBbpzqq3sFooODBfY0PtcUjC8zVdENOYbVQqa1c5afZPhzVqnaULahqDW/TW0K5NM4HzXoCsdELR92OxYaE9KjE4zpntFtmPSIPhWlKd9Jgo13wCivr9IIZiRF3YNCF/1rbH8rfyJPs/Ih8UDzEjPuwxGpfLahoeqJwlBrAoLXsjX+yVKY/I/JEgv2BiEr7EupBHkey3YBx3ffBzoPLNet60kCSWDUoJWASZLqi4T9xnahXOLusDs="
+    - secure: "YAFDKbEchL+t/DUaahOX1vAa5ilzq08uln70a7/QHhHJqIazrXA5Pf+pSImydDJpt73Kbd5h1urZs6JXGMKVhPPnSo0aV5PuuiNbLw8sqHA5s3sm2vTgEsSCko2i2nI7SO92+lw7dRJHSO4Rz3QL8aGMS+pR8PMbGD+MuBz0ASCvc9GBMuIkyB0Sbm0v25cCWmi+M+FAj2Adg3IPlr/SgPDnSPxjXauTPrkcnSqoGH9c9A8Jxfk+7ER/Zbo3i1cW4oOb/L5diACjTsbV503onFlqvG3jOngEm4x8KfEwZZGiaOuCYP9n0/xOOVgjf+l+um0bzdt/wt/949f7lJFyVK5bxa4k6JJlIpKhP4bH2QASA2nip3HDbdi7bfMz79CAYyJ5I3F/PHWQ9kH5DK5PrZKdPGqyPDuBoq2W5ERy+3bJzkd1tYjhW/5vjvSiRiILxa6PF43jQ+73nx09td7CtCtd6aWsM1rOtyCfoZpzzCvKWqaVdw3au2fzKZBcuCK8CQT+xQTPNzqrH1/iA80K4M9r1Z9o0YRksYko9i7WlIi8nQc14g0g4namHSPrD/kPhj3/gYErXXNn/GmyqgBQrRfpi0PXl9M9Bcg3YMHT8sqbR3Y1GAxgCOh7+lAq7HwTsxESXQl0ywmmzHsGIvAingTFSauwzotWGYR82IxUDjk="
+
+matrix:
+  include:
+    - env: PIRANHA_BUILD="ReleaseGCC48"
+      compiler: gcc
+      os: linux
+      addons:
+        apt:
+          sources:
+          - ubuntu-toolchain-r-test
+          packages:
+          - g++-4.8
+    - env: PIRANHA_BUILD="Documentation"
+      os: linux
+      addons:
+        apt:
+          sources:
+          - ubuntu-toolchain-r-test
+          packages:
+          - g++-4.8
+          - texlive
+          - texlive-latex-extra
+          - texlive-xetex
+          - lmodern
+          - latexmk
+    - env: PIRANHA_BUILD="DebugGCC48" SPLIT_TEST_NUM="0" TEST_NSPLIT="5"
+      compiler: gcc
+      os: linux
+      addons:
+        apt:
+          sources:
+          - ubuntu-toolchain-r-test
+          packages:
+          - g++-4.8
+    - env: PIRANHA_BUILD="DebugGCC48" SPLIT_TEST_NUM="1" TEST_NSPLIT="5"
+      compiler: gcc
+      os: linux
+      addons:
+        apt:
+          sources:
+          - ubuntu-toolchain-r-test
+          packages:
+          - g++-4.8
+    - env: PIRANHA_BUILD="DebugGCC48" SPLIT_TEST_NUM="2" TEST_NSPLIT="5"
+      compiler: gcc
+      os: linux
+      addons:
+        apt:
+          sources:
+          - ubuntu-toolchain-r-test
+          packages:
+          - g++-4.8
+    - env: PIRANHA_BUILD="DebugGCC48" SPLIT_TEST_NUM="3" TEST_NSPLIT="5"
+      compiler: gcc
+      os: linux
+      addons:
+        apt:
+          sources:
+          - ubuntu-toolchain-r-test
+          packages:
+          - g++-4.8
+    - env: PIRANHA_BUILD="DebugGCC48" SPLIT_TEST_NUM="4" TEST_NSPLIT="5"
+      compiler: gcc
+      os: linux
+      addons:
+        apt:
+          sources:
+          - ubuntu-toolchain-r-test
+          packages:
+          - g++-4.8
+    - env: PIRANHA_BUILD="DebugGCC7" SPLIT_TEST_NUM="0" TEST_NSPLIT="4"
+      compiler: gcc
+      os: linux
+      addons:
+        apt:
+          sources:
+          - ubuntu-toolchain-r-test
+          packages:
+          - gcc-7
+          - g++-7
+    - env: PIRANHA_BUILD="DebugGCC7" SPLIT_TEST_NUM="1" TEST_NSPLIT="4"
+      compiler: gcc
+      os: linux
+      addons:
+        apt:
+          sources:
+          - ubuntu-toolchain-r-test
+          packages:
+          - gcc-7
+          - g++-7
+    - env: PIRANHA_BUILD="DebugGCC7" SPLIT_TEST_NUM="2" TEST_NSPLIT="4"
+      compiler: gcc
+      os: linux
+      addons:
+        apt:
+          sources:
+          - ubuntu-toolchain-r-test
+          packages:
+          - gcc-7
+          - g++-7
+    - env: PIRANHA_BUILD="DebugGCC7" SPLIT_TEST_NUM="3" TEST_NSPLIT="4"
+      compiler: gcc
+      os: linux
+      addons:
+        apt:
+          sources:
+          - ubuntu-toolchain-r-test
+          packages:
+          - gcc-7
+          - g++-7
+    - env: PIRANHA_BUILD="DebugGCC6" SPLIT_TEST_NUM="0" TEST_NSPLIT="4"
+      compiler: gcc
+      os: linux
+      addons:
+        apt:
+          sources:
+          - ubuntu-toolchain-r-test
+          packages:
+          - gcc-6
+          - g++-6
+    - env: PIRANHA_BUILD="DebugGCC6" SPLIT_TEST_NUM="1" TEST_NSPLIT="4"
+      compiler: gcc
+      os: linux
+      addons:
+        apt:
+          sources:
+          - ubuntu-toolchain-r-test
+          packages:
+          - gcc-6
+          - g++-6
+    - env: PIRANHA_BUILD="DebugGCC6" SPLIT_TEST_NUM="2" TEST_NSPLIT="4"
+      compiler: gcc
+      os: linux
+      addons:
+        apt:
+          sources:
+          - ubuntu-toolchain-r-test
+          packages:
+          - gcc-6
+          - g++-6
+    - env: PIRANHA_BUILD="DebugGCC6" SPLIT_TEST_NUM="3" TEST_NSPLIT="4"
+      compiler: gcc
+      os: linux
+      addons:
+        apt:
+          sources:
+          - ubuntu-toolchain-r-test
+          packages:
+          - gcc-6
+          - g++-6
+    - env: PIRANHA_BUILD="DebugClang39" SPLIT_TEST_NUM="0" TEST_NSPLIT="4"
+      compiler: clang
+      os: linux
+      addons:
+        apt:
+          sources:
+          - llvm-toolchain-trusty-3.9
+          - ubuntu-toolchain-r-test
+          packages:
+          - clang-3.9
+          - gcc-7
+          - g++-7
+    - env: PIRANHA_BUILD="DebugClang39" SPLIT_TEST_NUM="1" TEST_NSPLIT="4"
+      compiler: clang
+      os: linux
+      addons:
+        apt:
+          sources:
+          - llvm-toolchain-trusty-3.9
+          - ubuntu-toolchain-r-test
+          packages:
+          - clang-3.9
+          - gcc-7
+          - g++-7
+    - env: PIRANHA_BUILD="DebugClang39" SPLIT_TEST_NUM="2" TEST_NSPLIT="4"
+      compiler: clang
+      os: linux
+      addons:
+        apt:
+          sources:
+          - llvm-toolchain-trusty-3.9
+          - ubuntu-toolchain-r-test
+          packages:
+          - clang-3.9
+          - gcc-7
+          - g++-7
+    - env: PIRANHA_BUILD="DebugClang39" SPLIT_TEST_NUM="3" TEST_NSPLIT="4"
+      compiler: clang
+      os: linux
+      addons:
+        apt:
+          sources:
+          - llvm-toolchain-trusty-3.9
+          - ubuntu-toolchain-r-test
+          packages:
+          - clang-3.9
+          - gcc-7
+          - g++-7
+    - env: PIRANHA_BUILD="OSXDebug" SPLIT_TEST_NUM="0" TEST_NSPLIT="3"
+      os: osx
+      osx_image: xcode6.4
+    - env: PIRANHA_BUILD="OSXDebug" SPLIT_TEST_NUM="1" TEST_NSPLIT="3"
+      os: osx
+      osx_image: xcode6.4
+    - env: PIRANHA_BUILD="OSXDebug" SPLIT_TEST_NUM="2" TEST_NSPLIT="3"
+      os: osx
+      osx_image: xcode6.4
+
+script:
+    - mkdir build
+    - cd build
+    # NOTE: currently, travis does not stop automatically if one of these
+    # 2 scripts returns an error code. Thus, we run them together as a single
+    # command, so that if install_deps.sh fails the whole build fails immediately
+    # rather than executing install_travis.sh as well. See
+    # https://github.com/travis-ci/travis-ci/issues/1066
+    - ../tools/install_deps.sh && ../tools/install_travis.sh
+
+notifications:
+  email: false

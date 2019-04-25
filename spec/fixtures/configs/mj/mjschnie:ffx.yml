@@ -1,0 +1,44 @@
+# Force Field X configuration for Travis-CI
+
+language: java
+
+sudo: false
+
+matrix:
+  include:
+    - os: linux
+      jdk: oraclejdk8
+    - os: linux
+      jdk: oraclejdk11
+    - os: linux
+      jdk: openjdk8
+    - os: linux
+      jdk: openjdk9
+    - os: linux
+      jdk: openjdk10
+    - os: linux
+      jdk: openjdk11
+    - os: linux
+      jdk: openjdk12
+    - os: osx
+      osx_image: xcode8.3
+    - os: osx
+      osx_image: xcode9.4
+    - os: osx
+      osx_image: xcode10.1
+
+cache:
+  directories:
+  - $HOME/.m2
+
+notifications:
+  email:
+    recipients:
+      michael-schnieders@uiowa.edu
+      jacob-litman@uiowa.edu
+    on_success: change
+    on_failure: always
+
+script: mvn test -B -DskipTests=false -Dpj.nt=2 -Dffx.log=WARNING -Dffx.test.log=FINE
+
+

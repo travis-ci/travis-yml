@@ -1,0 +1,32 @@
+language: rust
+sudo: false
+matrix:
+  include:
+    - rust: stable
+      env:
+       - RUST_TEST_THREADS=1
+    - rust: beta
+      env:
+       - RUST_TEST_THREADS=1
+    - rust: nightly
+      env:
+       - RUST_TEST_THREADS=1
+       - FEATURES=
+       - BENCH=
+branches:
+  only:
+    - master
+script:
+  - |
+      cargo build --verbose &&
+      cargo test --verbose &&
+      ([ -z "$FEATURES" ] || cargo build --verbose --features "$FEATURES") &&
+      ([ -z "$FEATURES" ] || cargo test --verbose --features "$FEATURES") &&
+      ([ "$BENCH" != 1 ] || cargo bench --verbose --features "$FEATURES") &&
+      cd klt-sys &&
+      cargo build --verbose &&
+      cargo test --verbose &&
+      ([ -z "$FEATURES" ] || cargo build --verbose --features "$FEATURES") &&
+      ([ -z "$FEATURES" ] || cargo test --verbose --features "$FEATURES") &&
+      ([ "$BENCH" != 1 ] || cargo bench --verbose --features "$FEATURES")
+

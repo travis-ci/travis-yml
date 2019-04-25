@@ -11,7 +11,7 @@ describe Travis::Yml::Schema::Def::Haskell, 'structure' do
         type: :object,
         properties: {
           ghc: {
-            '$ref': '#/definitions/strs'
+            '$ref': '#/definitions/type/strs'
           }
         },
         normal: true,

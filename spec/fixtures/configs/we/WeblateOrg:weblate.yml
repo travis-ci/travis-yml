@@ -1,0 +1,124 @@
+#
+# Weblate testsuite for Travis-CI
+#
+# - Test against all supported Django versions with postgresql
+# - Test against all supported databases with current Django
+# - Run Selenium tests on current Django
+# - Test setup.py
+#
+dist: trusty
+language: python
+python:
+  - "3.6"
+# build matrix configuration
+env:
+  global:
+    - DJANGO_SETTINGS_MODULE=weblate.settings_test
+    - CI_MODE=test
+    - CI_DATABASE=postgresql
+    - SAUCE_USERNAME=nijel
+    - CC_TEST_REPORTER_ID=b477753e9d539176556058b92f0f6594e7823ab95d1db1348f189745ea618af6
+before_install:
+ - python -c "import fcntl; fcntl.fcntl(1, fcntl.F_SETFL, 0)"
+# commands to install dependencies
+install:
+  - export TESSERACT_INSTALL=$HOME/.tesseract
+  - export TESSERACT_PKG=$TESSERACT_INSTALL/lib/pkgconfig
+  - export LD_LIBRARY_PATH=$TESSERACT_INSTALL/lib:$LD_LIBRARY_PATH
+  - export PKG_CONFIG_PATH=$TESSERACT_PKG:$PKG_CONFIG_PATH
+  - wget -O - https://github.com/nijel/tesseract-ocr-build/releases/download/3.05.02-3/tesseract.tar.xz | tar -C $HOME -xJf -
+  - export SAUCE_ACCESS_KEY=`echo MTBlOGE0MzItZmI0Mi00MmZhLTk5NjgtMTE4N2E3YjhlYTAy | base64 --decode`
+  # Get newer pip and whell for binary caching support
+  - pip install --upgrade pip wheel
+  # Install PyPI packages
+  - pip install $CI_DEPS Cython
+  - pip install -r requirements-optional.txt -r requirements-test.txt -r ci/requirements-travis.txt -r docs/requirements.txt
+  - if [ "$CI_MODE" = selenium -a -n "$SAUCE_USERNAME" -a -n "$SAUCE_ACCESS_KEY" ] ; then ./ci/install-sauce ; fi
+# create databases
+before_script:
+  - mysql -e 'SET GLOBAL character_set_server=utf8' -uroot
+  - mysql -e 'SET GLOBAL collation_server=utf8_general_ci' -uroot
+  - mysql -e 'DROP DATABASE IF EXISTS weblate;' -uroot
+  - mysql -e 'CREATE DATABASE weblate CHARACTER SET utf8 COLLATE utf8_general_ci;' -uroot
+  - mysql -e 'SHOW VARIABLES LIKE "%version%";' -uroot
+  - psql -c 'DROP DATABASE IF EXISTS weblate;' -U postgres
+  - psql -c 'CREATE DATABASE weblate;' -U postgres
+  - psql -c 'SELECT version();' -U postgres
+  - ./manage.py list_versions
+  - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+  - chmod +x ./cc-test-reporter
+  - ./cc-test-reporter before-build
+# commands to run tests
+script:
+  - ./manage.py compilemessages
+  - ./ci/run-$CI_MODE
+# upload coverage
+after_script:
+  # Kill Sauce Connect Proxy if running
+  - if [ -f ~/.sauce-pid ] ; then kill `cat ~/.sauce-pid` ; cat ~/.sauce-log ; fi
+  # Combine partial reports
+  - coverage combine
+  - coverage xml
+  # CodeCov
+  - codecov
+  # Codacy
+  - python-codacy-coverage -r coverage.xml
+  # CodeClimate
+  - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
+matrix:
+  include:
+    - name: "Django 2.1, sqlite"
+      python: "3.6"
+      env: CI_DEPS="Django>=2.1,<2.2" CI_DATABASE=sqlite
+    - name: "Django 2.1, mysql"
+      python: "3.6"
+      env: CI_DEPS="Django>=2.1,<2.2" CI_DATABASE=mysql
+    - name: "Django 2.1, postgresql"
+      python: "3.6"
+      env: CI_DEPS="Django>=2.1,<2.2" CI_DATABASE=postgresql
+    - name: "Django 2.1, selenium"
+      python: "3.6"
+      env: CI_DEPS="Django>=2.1,<2.2" CI_MODE=selenium
+    - name: 'Django 2.2'
+      python: "3.6"
+      env: CI_DEPS="Django>=2.0,<2.1"
+    - dist: xenial
+      name: 'Django 2.2, Python 3.7'
+      python: "3.7"
+      env: CI_DEPS="Django>=2.0,<2.1"
+    - name: 'Django 2.0'
+      python: "3.6"
+      env: CI_DEPS="Django>=2.0,<2.1"
+    - name: 'Django 1.11'
+      python: "2.7"
+      env: CI_DEPS="Django>=1.11,<1.12"
+    - name: 'translate-toolkit pre-release'
+      python: "3.6"
+      env: CI_DEPS="https://github.com/translate/translate/archive/master.zip"
+    - name: "Setup"
+      python: "3.6"
+      env: CI_MODE=setup
+    - name: "Migrations"
+      python: "3.6"
+      env: CI_DEPS="Django>=2.0,<2.1" CI_MODE=migrate
+    - name: "Documentation"
+      python: "3.6"
+      env: CI_MODE=docs
+addons:
+  apt:
+    packages:
+    - git-svn
+    - graphviz
+    - g++
+    sources:
+    - git-core
+  postgresql: "9.6"
+  mariadb: "10.3"
+services:
+  - postgresql
+  - mysql
+cache:
+  pip: true
+git:
+  depth: 3000
+  submodules: false

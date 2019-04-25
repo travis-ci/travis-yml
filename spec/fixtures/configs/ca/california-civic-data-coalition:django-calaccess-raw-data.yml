@@ -1,0 +1,51 @@
+language: python
+
+sudo: false
+
+cache:
+  - pip
+
+python:
+ - "3.5"
+ - "3.6"
+ - "3.7-dev"
+
+env:
+ - DJANGO_VERSION=1.11.* DATABASE_SETTINGS='settings_test_postgresql.py'
+ - DJANGO_VERSION=1.11.* DATABASE_SETTINGS='settings_test_multi_dbs.py'
+ - DJANGO_VERSION=2.0.* DATABASE_SETTINGS='settings_test_postgresql.py'
+ - DJANGO_VERSION=2.0.* DATABASE_SETTINGS='settings_test_multi_dbs.py'
+ - DJANGO_VERSION=2.1.* DATABASE_SETTINGS='settings_test_postgresql.py'
+ - DJANGO_VERSION=2.1.* DATABASE_SETTINGS='settings_test_multi_dbs.py'
+
+matrix:
+  exclude:
+  - python: "2.7"
+    env: DJANGO_VERSION=2.0.* DATABASE_SETTINGS='settings_test_postgresql.py'
+  - python: "2.7"
+    env: DJANGO_VERSION=2.0.* DATABASE_SETTINGS='settings_test_multi_dbs.py'
+  - python: "2.7"
+    env: DJANGO_VERSION=2.1.* DATABASE_SETTINGS='settings_test_postgresql.py'
+  - python: "2.7"
+    env: DJANGO_VERSION=2.1.* DATABASE_SETTINGS='settings_test_multi_dbs.py'
+  - python: "3.7-dev"
+    env: DJANGO_VERSION=1.11.* DATABASE_SETTINGS='settings_test_postgresql.py'
+  - python: "3.7-dev"
+    env: DJANGO_VERSION=1.11.* DATABASE_SETTINGS='settings_test_multi_dbs.py'
+
+install:
+ - pip install -r requirements.txt
+ - pip uninstall -y Django
+ - pip install -q Django==$DJANGO_VERSION
+
+before_script:
+  - psql -c 'create database calaccess_raw;' -U postgres
+  - cp example/$DATABASE_SETTINGS.template example/settings_local.py
+
+script:
+ - flake8 calaccess_raw
+ - python example/manage.py migrate
+ - coverage run example/manage.py test calaccess_raw
+
+after_success:
+ - coveralls

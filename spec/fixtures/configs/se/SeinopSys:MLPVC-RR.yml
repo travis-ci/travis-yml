@@ -1,0 +1,18 @@
+language: php
+php:
+  - '7.3'
+before_install:
+  - echo "extension = redis.so" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
+install:
+  - cp .env.example .env
+  - composer install
+services:
+  - postgresql
+before_script:
+  - psql -c 'CREATE DATABASE "mlpvc-rr";' -U postgres
+  - psql -c "CREATE USER \"mlpvc-rr\" WITH LOGIN PASSWORD 'example-password'" -U postgres
+  - psql "mlpvc-rr" < ./setup/create_extensions.pg.sql
+  - vendor/bin/phinx migrate
+dist: xenial
+addons:
+  postgresql: "9.6"

@@ -1,0 +1,23 @@
+language: php
+php:
+  - '7.0'
+  - '7.1'
+env:
+  - SYMFONY_DEPRECATIONS_HELPER=disabled
+
+before_script:
+    - composer self-update
+    - composer install
+    - cp app/config/expansion.yml.dist app/config/expansion.yml
+    - cp app/config/bundles.yml.dist app/config/bundles.yml
+
+script:
+    # See if errors while building caches.
+    - ./bin/console --env=test && ./vendor/bin/phpunit  -c phpunit.xml.dist --coverage-clover=coverage.clover
+    -
+
+notifications:
+    email: false
+
+after_script:
+    - wget https://scrutinizer-ci.com/ocular.phar && php ocular.phar code-coverage:upload --format=php-clover coverage.clover

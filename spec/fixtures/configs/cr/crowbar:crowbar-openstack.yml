@@ -1,0 +1,20 @@
+language: ruby
+sudo: false
+cache: bundler
+dist: trusty
+
+rvm: 2.1.9
+
+before_install:
+  - rvm @global do gem install bundler -v '< 2.0.0'
+
+matrix:
+  include:
+    - env: SYNTAXCHECK
+      script:
+      - bundle exec rake syntaxcheck
+    - env: SPEC_TESTS
+      script:
+      - bundle exec rake spec
+    - name: "Databag testing"
+      script: bundle exec crowbar-validate-databags chef/data_bags/crowbar

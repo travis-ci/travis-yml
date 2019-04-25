@@ -1,0 +1,26 @@
+sudo: false
+language: ruby
+rvm:
+- 2.3.4
+addons:
+  postgresql: '9.4'
+  apt:
+    packages:
+    - libgeos-dev
+    - libproj-dev
+    - postgresql-9.4-postgis-2.3
+before_script:
+- psql -U postgres -c "create extension postgis"
+- RAILS_ENV=test bundle exec rails db:create db:schema:load
+cache: bundler
+notifications:
+  slack:
+    secure: Zg3iPakWnLUMaxWemK4DfdRMyUSiOvflR2lo1yP64MY+arZjJd4cUB0uAGj1xAx2ThXsdDJwbfwISxhGDpvUtiDbS8QA/4oGDTFFsWY9NK2rWvzR33X/z1XO/AnyYW1hIPvw0nr/GI4syvlYlckeGp7NhrSgpKp0eFKCQ+yCxIw=
+deploy:
+  provider: heroku
+  api_key:
+    secure: iYPQC83Qe1QeLyaRbE4vqeY6ISJgd2ZMptQCLcf1kLlO/FtmmI9kuUclNvPw08P7o7lZ7XSCNh4hn4PNiLi251bdTeiC2phX/rQZ2el9nAkdjLQG+f6OG5zIeiPJV2OSyNW867H3bL8R3Bm5XDN6Ci0EMT+NJJnxBolyWleLUOM=
+  app:
+    master: imgraetzl
+    staging: imgraetzl-staging
+  # run: "rake db:migrate"

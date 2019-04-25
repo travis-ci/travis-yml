@@ -1,0 +1,13 @@
+language: python
+python:
+  - "3.7"
+dist: xenial
+sudo: true
+install:
+  - pip install .
+  - sudo apt-get install graphviz
+  - pip install graphviz
+script:
+  - nosetests
+notifications:
+  email: false

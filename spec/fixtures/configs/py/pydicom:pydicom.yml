@@ -1,0 +1,67 @@
+dist: trusty
+sudo: true
+
+language: python
+
+cache:
+  apt: true
+  directories:
+  - $HOME/.cache/pip
+  - $HOME/.ccache
+
+matrix:
+  include:
+    - env: DISTRIB="pypy" PYTHON_VERSION="2.7" NUMPY=false PILLOW=false JPEG_LS=false GDCM=false
+    - env: DISTRIB="pypy" PYTHON_VERSION="2.7" NUMPY=true PILLOW=false JPEG_LS=false GDCM=false
+    - env: DISTRIB="pypy" PYTHON_VERSION="3.5" NUMPY=false PILLOW=false JPEG_LS=false GDCM=false
+    - env: DISTRIB="pypy" PYTHON_VERSION="3.5" NUMPY=true PILLOW=false JPEG_LS=false GDCM=false
+
+    - env: DISTRIB="conda" PYTHON_VERSION="2.7" NUMPY=false PILLOW=false JPEG_LS=false GDCM=false
+    - env: DISTRIB="conda" PYTHON_VERSION="2.7" NUMPY=true  PILLOW=false JPEG_LS=false GDCM=false
+    - env: DISTRIB="conda" PYTHON_VERSION="2.7" NUMPY=true  PILLOW=false JPEG_LS=false GDCM=true
+    - env: DISTRIB="conda" PYTHON_VERSION="2.7" NUMPY=true  PILLOW=both JPEG_LS=false GDCM=false
+    - env: DISTRIB="conda" PYTHON_VERSION="2.7" NUMPY=true  PILLOW=both JPEG_LS=true  GDCM=false
+    - env: DISTRIB="conda" PYTHON_VERSION="2.7" NUMPY=true  PILLOW=both JPEG_LS=true  GDCM=true
+
+    - env: DISTRIB="conda" PYTHON_VERSION="3.4" NUMPY=false PILLOW=false JPEG_LS=false GDCM=false
+    - env: DISTRIB="conda" PYTHON_VERSION="3.4" NUMPY=true  PILLOW=false JPEG_LS=false GDCM=false
+    - env: DISTRIB="conda" PYTHON_VERSION="3.4" NUMPY=true  PILLOW=false JPEG_LS=false GDCM=true
+    - env: DISTRIB="conda" PYTHON_VERSION="3.4" NUMPY=true  PILLOW=both JPEG_LS=false GDCM=false
+    - env: DISTRIB="conda" PYTHON_VERSION="3.4" NUMPY=true  PILLOW=both JPEG_LS=true  GDCM=false
+    - env: DISTRIB="conda" PYTHON_VERSION="3.4" NUMPY=true  PILLOW=both JPEG_LS=true  GDCM=true
+
+    - env: DISTRIB="conda" PYTHON_VERSION="3.5" NUMPY=false PILLOW=false JPEG_LS=false GDCM=false
+    - env: DISTRIB="conda" PYTHON_VERSION="3.5" NUMPY=true  PILLOW=false JPEG_LS=false GDCM=false
+    - env: DISTRIB="conda" PYTHON_VERSION="3.5" NUMPY=true  PILLOW=false JPEG_LS=false GDCM=true
+    - env: DISTRIB="conda" PYTHON_VERSION="3.5" NUMPY=true  PILLOW=both JPEG_LS=false GDCM=false
+    - env: DISTRIB="conda" PYTHON_VERSION="3.5" NUMPY=true  PILLOW=both JPEG_LS=true  GDCM=false
+    - env: DISTRIB="conda" PYTHON_VERSION="3.5" NUMPY=true  PILLOW=both JPEG_LS=true  GDCM=true
+
+    - env: DISTRIB="conda" PYTHON_VERSION="3.6" NUMPY=false PILLOW=false JPEG_LS=false GDCM=false
+    - env: DISTRIB="conda" PYTHON_VERSION="3.6" NUMPY=true  PILLOW=false JPEG_LS=false GDCM=false
+    - env: DISTRIB="conda" PYTHON_VERSION="3.6" NUMPY=true  PILLOW=false JPEG_LS=false GDCM=true
+    - env: DISTRIB="conda" PYTHON_VERSION="3.6" NUMPY=true  PILLOW=both JPEG_LS=false GDCM=false
+    - env: DISTRIB="conda" PYTHON_VERSION="3.6" NUMPY=true  PILLOW=both JPEG_LS=true  GDCM=false
+    - env: DISTRIB="conda" PYTHON_VERSION="3.6" NUMPY=true  PILLOW=both JPEG_LS=true  GDCM=true
+    - env: DISTRIB="conda" PYTHON_VERSION="3.6" NUMPY=true  PILLOW=false JPEG_LS=false GDCM=old
+
+    - env: DISTRIB="conda" PYTHON_VERSION="3.7" NUMPY=false PILLOW=false JPEG_LS=false GDCM=false
+    - env: DISTRIB="conda" PYTHON_VERSION="3.7" NUMPY=true  PILLOW=false JPEG_LS=false GDCM=false
+    #- env: DISTRIB="conda" PYTHON_VERSION="3.7" NUMPY=true  PILLOW=false JPEG_LS=false GDCM=true
+    - env: DISTRIB="conda" PYTHON_VERSION="3.7" NUMPY=true  PILLOW=both JPEG_LS=false GDCM=false
+    - env: DISTRIB="conda" PYTHON_VERSION="3.7" NUMPY=true  PILLOW=both JPEG_LS=true  GDCM=false
+    #- env: DISTRIB="conda" PYTHON_VERSION="3.7" NUMPY=true  PILLOW=both JPEG_LS=true  GDCM=true
+
+    - env: DISTRIB="conda" PYTHON_VERSION="2.7" NUMPY=true  PILLOW=jpeg JPEG_LS=false GDCM=false
+    - env: DISTRIB="conda" PYTHON_VERSION="3.7" NUMPY=true  PILLOW=jpeg JPEG_LS=false GDCM=false
+
+    - env: DISTRIB="ubuntu" PYTHON_VERSION="2.7" NUMPY=false PILLOW=false JPEG_LS=false GDCM=false
+    - env: DISTRIB="ubuntu" PYTHON_VERSION="2.7" NUMPY=true PILLOW=false JPEG_LS=false GDCM=false
+
+install: source build_tools/travis/install.sh
+
+script:
+  - py.test --cov=pydicom -r sx --pyargs pydicom
+
+after_success:
+  - codecov

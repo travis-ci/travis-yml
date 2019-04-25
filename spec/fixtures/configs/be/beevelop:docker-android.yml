@@ -1,0 +1,10 @@
+sudo: required
+
+services:
+  - docker
+
+script:
+  - docker build -t beendroid .
+  - docker run -d beendroid
+  - docker ps -a
+  - docker run beendroid /bin/sh -c "android list && mvn -v && gradle -v && java -version && ant -version"

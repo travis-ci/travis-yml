@@ -1,0 +1,44 @@
+sudo: required
+services:
+  - docker
+language: python
+python:
+  - 3.5
+install:
+  - pip install -r backend/requirements/dev.txt
+
+  - nvm install 9.3.0
+  - cd frontend && npm install && cd -
+script:
+  - cd backend
+  - pycodestyle --exclude='apps/volontulo/migrations/*,node_modules,.ropeproject' .
+  - pylint apps
+  - export VOLONTULO_SECRET_KEY="a63eb5ef-3b25-4595-846a-5d97d99486f0"
+  - coverage run --source='./apps' manage.py test --settings=volontulo_org.settings.dev_local -v 3
+  - coverage xml
+  - cd apps/volontulo && npm install && npm build && cd -
+  - cd ..
+
+  - cd frontend
+  - $(npm bin)/ng build --prod --env=dev
+  - $(npm bin)/ng lint
+  - $(npm bin)/ng test --single-run --code-coverage --browsers HeadlessChrome
+  - cd ..
+after_success:
+  - codecov --file backend/coverage.xml
+  - codecov --file frontend/coverage/lcov.info
+
+  - if [ "$TRAVIS_BRANCH" == "master" ] && [ "$TRAVIS_PULL_REQUEST" = false ]; then
+      docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD;
+      cd backend;
+      docker build -f Dockerfile -t codeforpoznan/volontulo-backend:latest .;
+      docker push codeforpoznan/volontulo-backend;
+      cd ../frontend;
+      docker build -f Dockerfile -t codeforpoznan/volontulo-frontend:latest .;
+      docker push codeforpoznan/volontulo-frontend;
+      cd ..;
+
+      source ~/virtualenv/python2.7/bin/activate;
+      pip install fabric==1.14;
+      fab -p $SSH_PASSWORD update;
+    fi

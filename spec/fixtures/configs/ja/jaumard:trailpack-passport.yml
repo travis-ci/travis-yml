@@ -1,0 +1,27 @@
+sudo: false
+language: node_js
+os:
+- linux
+node_js:
+- 4
+- 5
+- 6
+- 7
+services:
+- mongodb
+notifications:
+  email: false
+  webhooks:
+    urls:
+    - https://webhooks.gitter.im/e/54f8a1e753f859f5ca1a
+    on_start: never
+    on_failure: change
+deploy:
+  provider: npm
+  email: jimmy.aumard@gmail.com
+  api_key:
+    secure: e4OC3sJXq8zlnBhUxbTI42u/WJMHfJY8dlBhWjOF86hRalKzOH6LChi8+2b6UWCAAc3emp0W1ZWyUjkcr7s917k8JjcmzUnF+zMK2vvbXeOxtKaUC2qE+ci2FZAYd45H66ByUcPcQsvbxuLH9ejHVsxU5we7GkqfcjT9WIRsaHOOd5+z7wURVyAo9tGPFQYFvPdyJb859qy3iTfx80OhDDKvybN0bA6UK8zSDhd8mfLcuoRt3B9s3HiFQvVcKGKC8B8VWBD3LHKfYVIVKhFIpb3mQ0gQdfjWCq0bCYefrilGClzUKCQYqGLLict8bLr4LdQjsdOST1/imAfjeXOMzhEBOu0FPkdmVRnqlmtn5UziAqdggUqEjN6Q4t3fK5W1xqTurfsQs90euK26WsTQJjdEolEuMVC6D64o+cIQ4UGRgueiloeYl5XaHNZ6/FnI3V3hL8oe0R4TgSwjeeZ0fhMF/chUEvQeCBOBCE32HcroW0jYi0pLBXQTR/wXtYWOIVab3vWvu3+j59xBbvMP4Cmgu0yBGIM64tScmyYMdgkdnjFjE0jUvk5BHkiDqHeUjMQ2PFL+DDlyRki0RC6A6H+X5lIZkOpp8jBtkNdc+HlOq34pTm+vO4rEg3+dAZkWBOZ5z/mvB9r//lj2aEYLasV7E6m5g+8tyMNkKunIll4=
+  on:
+    tags: true
+    repo: jaumard/trailpack-passport
+    node: 6

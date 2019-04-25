@@ -1,0 +1,31 @@
+language: java
+sudo: required
+
+jdk:
+  - oraclejdk8
+
+cache:
+  directories:
+    - $TRAVIS_BUILD_DIR/libraries
+
+env:
+  global:
+    - ANT_OPTS=-Xmx6g
+    - COMUPTERNAME=travis
+    - HOSTNAME=travis
+
+jobs:
+  include:
+    # FIXME: Temporarily Disabled
+    # - stage: verify_code
+    #   name: Verify Code
+    #   script:
+    #     - bash scripts/check_copyrights.sh
+    #     - bash scripts/format_code.sh
+    #     - bash scripts/repush_formatted_code.sh
+    - stage: run_tests
+      name: Run Tests
+      script:
+        # FIXME: Temporarily Disabled
+        # - git pull
+        - $TRAVIS_BUILD_DIR/libraries/apache-ant/apache-ant-1.10.5/bin/ant -lib $TRAVIS_BUILD_DIR/libraries/apache-ant-contrib/javalib/ivy-2.4.0.jar:$TRAVIS_BUILD_DIR/parallel/build/libs/parallel-junit-0.1.jar -file $TRAVIS_BUILD_DIR/oscm-build/cruisecontrol.xml runTravisUT        

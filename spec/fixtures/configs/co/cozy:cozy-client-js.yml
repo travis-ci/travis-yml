@@ -1,0 +1,44 @@
+language: node_js
+node_js:
+- '8'
+services:
+- docker
+env:
+  global:
+  - GOPATH=${TRAVIS_BUILD_DIR}/_workspace
+  - COZY_V3_DOMAIN="localhost:8080"
+  - COZY_V3_PASSPHRASE="CozyTest_1"
+cache:
+  yarn: true
+  directories:
+  - node_modules
+before_script:
+- docker run -d -p 5984:5984 --name couch apache/couchdb:2.1
+- eval "$(gimme 1.10)"
+- mkdir $GOPATH
+- go get -u github.com/cozy/cozy-stack
+- go get -u github.com/rif/spark
+- curl -X PUT http://127.0.0.1:5984/{_users,_replicator,_global_changes}
+- $GOPATH/bin/cozy-stack serve &
+- sleep 1
+- $GOPATH/bin/cozy-stack instances add --dev --passphrase "$COZY_V3_PASSPHRASE" "$COZY_V3_DOMAIN"
+- export NAME=client-js
+- export TOKEN=apptoken
+- $TRAVIS_BUILD_DIR/test/testapp-git-daemon.sh /tmp/testapp $TRAVIS_BUILD_DIR/test/testapp-manifest.json
+  &
+- sleep 2
+- sudo $GOPATH/bin/spark -port 80 /tmp/testapp &
+- sleep 2
+- $GOPATH/bin/cozy-stack apps install --domain "$COZY_V3_DOMAIN" mini "git://localhost/"
+- export COZY_STACK_TOKEN=$($GOPATH/bin/cozy-stack instances token-app "$COZY_V3_DOMAIN"
+  "mini")
+script:
+- yarn build
+deploy:
+  provider: npm
+  email: npm@cozycloud.cc
+  api_key:
+    secure: XC+urJ3qAbcdSKoWjTG3eBPx6DEJ2ddTa8nZarRBMIQmfKd5SlP2w6poD9XWm3E1Z9OxEWsksbWHWp+krCQaK/USKunDbEJrqvRDO6QIJnEdv/QAYCb8x9iHhZPADclV34hcQLLOGoIphVi3pBUmbsT1H4KvZadzJBX2DkeRMYGCvbH/If+PQmsLJm8yeF4zox2WXeRA4weIB/Lx9M7HJxTF1gre/lKjpAB7bDZhpVUQYC7m2IAgHaTFdZUlpNJQyZntCjuge+8Lckyjye64bHfMaomyqHYdn0q8Ik5vxcUuek0dGJfTtbEzoooaeG0eZ4m1nU0qPYdpJFwHsIvbsxAJrNN5w3baM/71zbCyG42bPkbYipHhtt4k9nvTaOlViLwq1Y2Il0iwXid5jjvRfQDCxEx79g+Jd8Os2DLy2G6x9XVI+gd9oLNvB3QPhMzUjSuN9gV2wNcjDSfsje/DhRaMxU6xTGajcgVy97cyhWtKKUKTVd1Bojhe0WwoCwIs4X5zsITmchjVGsnuzaguiUoTcyooMe5xYx7oYfmhALAtN/+9SWYmYPcNuSURl8OjUxI4A45hw6AXj8vqa+QU45AtQwol7+VMBS9kEfyiiVamFmq/tRM3E8ebTmifMblIOO8cEkKa93+uepVcrOX/omWc6my3JJDdDpyELdD7Y7g=
+  on:
+    tags: true
+    repo: cozy/cozy-client-js

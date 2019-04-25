@@ -1,0 +1,38 @@
+dist: xenial
+language: python
+sudo: false
+group: edge
+python:
+  - "3.6"
+cache:
+  pip: true
+  directories:
+    - node_modules
+addons:
+  postgresql: 10
+  apt:
+    packages:
+      - postgresql-10-postgis-2.4
+env:
+ - DEBUG=True
+before_install:
+  - rvm install 2.2
+  - nvm install node
+install:
+  - pip install -U pip==18.0 pipenv wheel
+  - pipenv install --dev
+  - gem install sass
+  - npm install
+before_script:
+  - psql -U postgres -c 'create extension postgis'
+  - psql -U postgres -c 'create database bustimes'
+  - ./manage.py migrate
+script:
+  - coverage run manage.py collectstatic --noinput
+  - coverage run --append manage.py test
+  - flake8
+  - node_modules/.bin/sass-lint 'busstops/static/css/*' -v
+  - node_modules/.bin/eslint 'busstops/static/js/*.js'
+after_success:
+  - coveralls
+  - git status

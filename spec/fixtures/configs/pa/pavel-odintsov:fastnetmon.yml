@@ -1,0 +1,18 @@
+sudo: required
+dist: trusty
+language: cpp
+compiler:
+  - gcc
+  - clang
+before_install:
+  - sudo apt-get update; true
+before_script:
+  - sudo -i -E perl $TRAVIS_BUILD_DIR/src/fastnetmon_install.pl --use-git-master
+  - cd $TRAVIS_BUILD_DIR/src
+script: mkdir -p build; cd build; cmake ..; make
+notifications:
+  email:
+    recipients:
+      - pavel.odintsov@gmail.com
+    on_success: change
+    on_failure: always

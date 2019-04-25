@@ -1,0 +1,43 @@
+notifications:
+  webhooks:
+    - https://webhook.commit-email.info/
+
+dist: trusty
+
+sudo: required
+
+services:
+  - docker
+
+matrix:
+  include:
+    - env: TYPE=ruby-2.1
+    - env: TYPE=ruby-2.2
+    - env: TYPE=ruby-2.3
+    - env: TYPE=ruby-2.4
+    - env: TYPE=ruby-2.5
+    - env: TYPE=ruby-2.6
+    - env: TYPE=ubuntu-14.04
+    - env: TYPE=ubuntu-16.04
+    - env: TYPE=ubuntu-18.04
+    - env: TYPE=centos-6
+    - env: TYPE=centos-7
+    - os: osx
+      rvm: 2.6
+      install:
+        - bundle install
+      script:
+        - bundle exec rake build
+        # TODO: Run tests
+
+install:
+  - docker build
+      -t ruby-gnome2/ruby-gnome2-${TYPE}
+      -f travis/Dockerfile.${TYPE}
+      .
+
+script:
+  - docker run
+      --interactive
+      --tty
+      ruby-gnome2/ruby-gnome2-${TYPE}

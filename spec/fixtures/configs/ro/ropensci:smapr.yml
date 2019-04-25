@@ -1,0 +1,47 @@
+language: r
+
+r:
+  - release
+  - oldrel
+  - devel
+
+sudo: required
+dist: trusty
+cache:
+  - packages
+  - ccache
+  
+addons:
+  apt:
+    sources:
+      - sourceline: 'ppa:ubuntugis/ubuntugis-unstable'
+    packages:
+      - libproj-dev
+      - libgeos-dev
+      - libgdal-dev
+
+r_packages:
+  - rgdal
+
+bioc_packages:
+  - rhdf5
+
+r_github_packages:
+  - jimhester/covr
+
+before_install:
+  - echo "ed_un="$ed_un >> ~/.Renviron
+  - echo "ed_pw="$ed_pw >> ~/.Renviron
+
+after_success:
+- Rscript -e 'library(covr);codecov()'
+
+notifications:
+  email:
+    on_success: change
+    on_failure: change
+
+script:
+  - |
+    R CMD build .
+    travis_wait 20 R CMD check smapr*tar.gz

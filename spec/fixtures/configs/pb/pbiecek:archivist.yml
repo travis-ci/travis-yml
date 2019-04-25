@@ -1,0 +1,29 @@
+language: r
+
+dist: trusty
+
+env: _R_CHECK_CRAN_INCOMING_=FALSE
+
+r_packages:
+ - RCurl
+ - digest
+ - httr
+ - DBI
+ - lubridate
+ - shiny
+ - RSQLite
+ - testthat
+ - ggplot2
+ - dplyr
+ - knitr
+ - covr
+ - devtools
+ - archivist.github
+
+sudo: required
+
+r_github_packages:
+  - codecov/example-r
+
+after_success:
+  - Rscript -e 'library(covr);codecov()'

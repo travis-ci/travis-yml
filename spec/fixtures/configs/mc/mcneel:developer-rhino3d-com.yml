@@ -1,0 +1,20 @@
+language: ruby
+# see .ruby-version
+cache:
+  bundler: true
+  directories:
+    - /home/travis/.rvm/
+git:
+  depth: false # required for jekyll-last-modified-at (WWW-316)
+script: script/cibuild
+before_script:
+- openssl aes-256-cbc -K $encrypted_5727dd035aee_key -iv $encrypted_5727dd035aee_iv -in script/.ssh/bozo.enc -out script/.ssh/bozo -d
+- chmod 600 script/.ssh/bozo
+- eval `ssh-agent -s`
+- ssh-add script/.ssh/bozo
+- git submodule foreach git lfs pull
+notifications:
+  slack:
+    rooms:
+    - secure: jYYK9q9bT9tSWSVMEW6Syu8rEei/hvssWxz+vlcxQIrMR7WZOawup7jStujw+XB264WWsRk/dAZ8IoalBRfbNPVycPRS24e8A/ZQ9KWLeJ/XS0id/MYYqJtTpTGG0KPWP7kOFoQlHAETBHvcPwE2QnflyjKI8fkb+92Bf4+2XZvHE6Lilbv5F3xIClmla/eTUIDB9k4F55wp6crpC+FN9Tm4WZBaO740oDL2uekDs+20H5tv/HIkpxWmJldk1t9CIN7hRZOWYGxXQFz7FpJfk0sJP9wtU/qTiBGL+nIWIj2dYEwiiWeOkpWcxNy9K7tGJaRuNct7BdcAUfXmMre4Ca+hve6iVhV5Xkd4gnSQIOJKY8EmNYKbfZ3lFaig1+Kma0zsa8Qzte9VJzlpxz2Z+eneWQlN9HhZZPR2V3TYO4blKQmh43wzEaIJyTvwZ13bdiv74xCTl7bFPiEOOmHFS3gBE3w4Iuxc43zPAyr8XUV+Di65iffEx0qORgsCiwUnfOVmz9+3073k//2CB4RxawuSOZwhjSX9wfuNpbqIbs627J0+LgR89mQ+MnSGSiO2uhlNB9Uxe+whsfemmt6HmkQsSblfcInAlOQH6AkwkeLE5a8ujMeXaF2bjZzzDvNnMOYWypOIP9jOS4YDbvjwRpzWGJLVRRcWvtCCKoQ4u3w=
+    on_success: change

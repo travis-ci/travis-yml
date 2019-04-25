@@ -1,0 +1,53 @@
+language: java
+jdk: oraclejdk8
+
+services:
+  - postgresql
+
+branches:
+  except:
+    - code-analysis
+
+env:
+  global:
+    - MAVEN_OPTS="-Xms1024m -Xmx4g -Dmaven.repo.local=$HOME/.m2/repository -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=WARN -Dorg.slf4j.simpleLogger.showDateTime=true -Djava.awt.headless=true"
+    - MAVEN_CLI_OPTS="--batch-mode --errors --fail-at-end --show-version"
+    - DPT_MYSQL_USER="root"
+    - DPT_MYSQL_PASS=""
+    - DPT_POSTGRESQL_USER="postgres"
+    - DPT_POSTGRESQL_PASS=""
+
+addons:
+  mariadb: '10.1'
+  sonarcloud:
+    organization: "keeps"
+    token:
+      secure: ccxxJ80A2fo5zKRxu8Rko61b3QIo1z2jqkjqamGO6zPfpwzKcXt5wjYWksJOlV7m3uNNkVV0Z7YeiTQ3nr+XMa5lhgOip1/ZnNI2pbUR9csE+0NTRFBe5e9nho/BUC5j79yrH1A8GTi6nTqZbxUOl9karfpjrCcs3CMojYtN5Dk=
+
+before_install:
+  - sed -r "s/ORACLE_MAVEN_USERNAME/$ORACLE_MAVEN_USERNAME/g;s/ORACLE_MAVEN_PASSWORD/$ORACLE_MAVEN_PASSWORD/g;s/ARTIFACTORY_USER/$ARTIFACTORY_USER/g;s/ARTIFACTORY_PASS/$ARTIFACTORY_PASS/g" .travis/maven_settings.xml > $HOME/.m2/settings.xml
+
+install:
+  - mvn $MAVEN_CLI_OPTS install -Pdbptk-bindings -DskipTests=true -Dmaven.javadoc.skip=true -B -V
+  - mvn $MAVEN_CLI_OPTS install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
+
+script:
+  # the following command line builds the project, runs the tests with coverage and then execute the SonarQube analysis
+  - travis_wait 30 mvn $MAVEN_CLI_OPTS -Dtestng.groups="travis-ci" -Dlogback.configurationFile=logback-travis.xml -Dsonar.scm.disabled=true clean org.jacoco:jacoco-maven-plugin:prepare-agent install sonar:sonar
+
+deploy:
+  provider: script
+  script: .travis/deploy.sh
+  all_branches: true
+
+after_script:
+  - rm $HOME/.m2/settings.xml
+
+cache:
+  directories:
+    - $HOME/.m2/repository
+    - $HOME/.sonar/cache
+
+notifications:
+  slack:
+    secure: M7jJ1dmO1cx//vgzY5UgE650Fe/lm21Dm8WLDXJfz66hmjQihoYCzW19Id/ySgPs/exjEvS1Lvxa4r4t5mgQOe+uPpQOZKEK3IfQ6h7zIv40Rbsa6mY9GaAW4x1Obji5a7HNGD7BQiolYDX1jmtBxOcSetesvL5iX1Bru0E/R78=

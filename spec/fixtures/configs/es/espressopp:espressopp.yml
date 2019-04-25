@@ -1,0 +1,89 @@
+language: cpp
+
+sudo: required
+
+services:
+- docker
+
+stages:
+  - canary
+  - test
+  - coverage
+  - deploy
+
+env:
+    - DISTRO=ubuntu EXTERNAL=ON BUILD_UG=ON
+    - DISTRO=ubuntu EXTERNAL=OFF
+    - DISTRO=ubuntu_rolling EXTERNAL=ON
+    - DISTRO=ubuntu_rolling EXTERNAL=OFF
+    - DISTRO=ubuntu_mpich EXTERNAL=ON
+    - DISTRO=ubuntu_mpich EXTERNAL=OFF
+    - DISTRO=fedora EXTERNAL=ON
+    - DISTRO=fedora EXTERNAL=OFF
+    - DISTRO=fedora_mpich EXTERNAL=ON
+    - DISTRO=fedora_mpich EXTERNAL=OFF
+    - DISTRO=opensuse EXTERNAL=ON
+    - DISTRO=opensuse EXTERNAL=OFF
+
+script:
+  - if [[ ${TRAVIS_BRANCH} = master ]]; then export DOCKER_TAG=latest; else export DOCKER_TAG="${TRAVIS_BRANCH}"; fi
+  - deployment/build.sh
+
+jobs:
+    include:
+        - stage: canary
+          env: DISTRO=ubuntu EXTERNAL=ON
+        - stage: coverage
+          env: DISTRO=ubuntu EXTERNAL=ON COVERAGE=ON
+        - stage: deploy
+          if: type != pull_request
+          env: DISTRO=ubuntu EXTERNAL=ON BUILD_UG=ON
+
+after_success:
+  - test "${TRAVIS_BUILD_STAGE_NAME}" = "Deploy" || travis_terminate 0
+  - shopt -s extglob && [[ ${TRAVIS_BRANCH} = @(master|v[12].*) ]] && DEPLOY=yes
+  - if [[ ${DOCKER_USERNAME} && ${DOCKER_PASSWORD} && ${TRAVIS_PULL_REQUEST} == false && ${DEPLOY} ]]; then
+        docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
+        docker push "espressopp/espressopp:${DOCKER_TAG}";
+    fi
+  - if [[ ${BUILD_UG} = ON ]]; then
+      cd ../..; 
+      git clone --depth 1 https://github.com/espressopp/espressopp.github.io.git html;
+      CON=$(docker run -d espressopp/espressopp:${DOCKER_TAG}) && docker cp ${CON}:/home/espressopp/espressopp/doc . ;
+      if [[ ${TRAVIS_BRANCH} = v[12].* ]]; then
+        rm -rf html/${TRAVIS_BRANCH};
+        mkdir -p html/${TRAVIS_BRANCH};
+        mv doc/dg/html html/${TRAVIS_BRANCH}/doxygen;
+        mv doc/ug/_build/latex/ESPResSo++.pdf html/${TRAVIS_BRANCH}/;
+        mv doc/ug/_build/html/* html/${TRAVIS_BRANCH}/;
+      else
+         rm -rf html/[^v][^12]*;
+         mv doc/dg/html html/doxygen;
+         mv doc/ug/_build/latex/ESPResSo++.pdf html/;
+         mv doc/ug/_build/html/* html/;
+      fi;
+      rm -rvf doc;
+      cd html;
+      if [[ ${DEPLOY} && ${encrypted_194b3d1e9306_key} && ${encrypted_194b3d1e9306_iv} && ${TRAVIS_PULL_REQUEST} == false ]]; then
+        git config --global user.name "Automatic Deployment (Travis CI)";
+        git config --global user.email "espp-devel@listserv.mpip-mainz.mpg.de";
+        git add --all && git commit -m "Documentation Update";
+        openssl aes-256-cbc -K $encrypted_194b3d1e9306_key -iv $encrypted_194b3d1e9306_iv -in $HOME/docker/espressopp/doc/ug/deploy.enc -out ~/.ssh/id_rsa -d;
+        chmod 600 ~/.ssh/id_rsa;
+        git push git@github.com:espressopp/espressopp.github.io.git master;
+      else
+        git diff --no-color | head -n 500;
+      fi;
+    fi
+
+branches:
+  only:
+  - master
+  - /^v\d+\.\d+(\.\d+|_rc\d+)?$/
+
+cache:
+  - ccache
+
+compiler:
+  - gcc
+  - clang

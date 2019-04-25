@@ -1,0 +1,38 @@
+language: bash
+
+dist: trusty
+sudo: required
+
+git:
+    depth: 200
+
+env:
+    global:
+        - PATH=$PATH:$HOME/bin
+
+    matrix:
+        - XLINT=1
+        - ARCH=x86_64 BOOTSTRAP=x86_64
+        - ARCH=i686 BOOTSTRAP=i686
+        - ARCH=aarch64 BOOTSTRAP=x86_64
+        - ARCH=armv7l BOOTSTRAP=x86_64
+        - ARCH=x86_64-musl BOOTSTRAP=x86_64-musl
+        - ARCH=armv6l-musl BOOTSTRAP=x86_64-musl
+        - ARCH=aarch64-musl BOOTSTRAP=x86_64-musl
+
+before_script:
+    - common/travis/set_mirror.sh
+    - common/travis/prepare.sh
+    - common/travis/fetch_upstream.sh
+    - common/travis/changed_templates.sh
+    - common/travis/xlint.sh
+    - common/travis/bootstrap.sh $BOOTSTRAP
+
+script:
+    - common/travis/build.sh $BOOTSTRAP $ARCH
+
+after_script:
+    - common/travis/show_files.sh $BOOTSTRAP $ARCH
+
+notifications:
+    email: false

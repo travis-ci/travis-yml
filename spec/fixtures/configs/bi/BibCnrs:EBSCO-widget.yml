@@ -1,0 +1,16 @@
+sudo: required
+services:
+  - docker
+language: node_js
+node_js:
+  - "8.9.1"
+install:
+    - "make install"
+script:
+  - make test
+cache:
+  directories:
+  - node_modules
+notifications:
+  slack:
+    secure: hUu6GZz3FvDtd/F+TpP1vUHhBYgAqWbWVcgVeRJ1Ms/jieGkGKNAyJ0os7EWjG4ofZhyMHYu5XCgZDp79xbTH75D2K6ca+iT0bRjp8BLsa6TbJHCcTDzxWCN4g2oZXkYva3QEkZ5tqm70cKeIQKQ1Vm2zEGXSly11JGN5r3RvSbJUU/ey+ybo/hNT6bBesnJZpNoHUVBMW+f+NQjiGmAio//RAr3InDRCuUWuSdo/ECsPjzkkJQlMQmT9l3j1izJlBJIuP/6itft+lAR0/2NYq9u8oF40wdqhMJd8p7ggqwYTyr0j+3KeLStluTLcEw1I4COx6C4pbgqjA5kGzlnPMQsX4NDyus6JmvWGkbipVQZfBxhdFx3WBATK/AzWdm3qOGlMXvtE82rM2M5iyGKsArhYf1LrK3p3EOD2gCePmJZcvF3oZHy5f1GOnU8F5Bxk2E1kY2FjgcNsSbMPYhzbh5qd7whUeH8/m/igJwuHGdS1iPt0q3zf9HM0pla+0SWPy7FvWI6vb2ZAJLQYVH0s+fv+L7mugg+glgzm0y58dC34mTJFYIudnssIAScsUAs5nny6sBzMo7h7BVmFzKPhgJM8RsJ7W9q2OFlbYifou+6S2vtOwwmDXkuluN/xCenXafvZOQxtFJtrP/q84fHyQxAyXqxj+xwl47qpeXBhSA=

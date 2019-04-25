@@ -1,0 +1,64 @@
+language: ruby
+
+os: linux
+sudo: required
+dist: trusty
+addons:
+  apt:
+    update: true
+    sources:
+      - sourceline: 'ppa:latthias/qgis-travis-deps'
+    packages:
+    - ruby-all-dev
+    - rake
+    - cmake
+    - pkg-config
+    - g++
+    - libfftw3-dev
+    - libffi-dev
+    - libqt5scintilla2-dev
+    - qtbase5-dev
+    - qttools5-dev
+    - qttools5-dev-tools
+    - qt5-default
+    - libqt5opengl5-dev
+    - libqt5svg5-dev
+    - libqwt-qt5-dev
+    - libboost-all-dev
+compiler: gcc
+
+cache:
+ - apt
+ - ccache
+
+rvm:
+  - 2.1.10
+  - 2.2.10
+  - 2.3.7
+  - 2.4.4
+  - 2.5.1
+
+before_install:
+ - wget http://aubio.org/pub/aubio-0.4.4.tar.bz2
+ - tar xvjf aubio-0.4.4.tar.bz2
+ - cd aubio-0.4.4
+ - ./waf configure build
+ - sudo ./waf install
+
+script:
+ - set -e
+# the | starts a multiline YAML entry
+ - |
+    # this compiles the gems and runs the Sonic Pi test suite with the ruby installed through Travis's rvm
+    echo ""
+    echo "***********************************"
+    echo "* Compiling the vendor/ ruby gems *"
+    echo "***********************************"
+    cd $TRAVIS_BUILD_DIR/app/server/ruby/bin
+    ruby ./compile-extensions.rb
+    echo ""
+    echo "***********************************"
+    echo "* Running the Sonic Pi test suite *"
+    echo "***********************************"
+    cd $TRAVIS_BUILD_DIR/app/server/ruby/test
+    rake test

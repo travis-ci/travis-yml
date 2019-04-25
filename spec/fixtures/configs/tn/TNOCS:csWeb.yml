@@ -1,0 +1,18 @@
+sudo: false
+language: node_js
+node_js:
+  - "8"
+install:
+  # - "npm install -g npm@4.0.5"
+  - "npm install -g bower"
+  - "npm install -g typescript@3.2.1"
+  - "npm install"
+script:
+    - gulp travis
+    - npm test
+    # - cd .. && cat coverage/*/lcov.info | test/coveralls.js
+notifications:
+  slack: webcs:AnvBbkHIi7v9aTiS2H4suMkr
+env:
+  matrix:
+    secure: TxWwQB+JJ87CiHT95wBgRGrUA6f46D3adx3FSDEi+KWrc/K15uARaoVWbPyX2OcFt1+QZDcJ7oQIa4F5cOp4e6caN1+pp8+kk7Un1WDDe5fqTeYxUypYWIIcosXAZyM4gAJin1t8RyHFUVdMVyDhQm0ONDda+vfsxL8GdNY/ZcI=

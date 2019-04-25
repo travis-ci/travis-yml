@@ -1,0 +1,47 @@
+language: python
+dist: trusty
+sudo: required
+services:
+- docker
+env:
+  global:
+    - GCC_VERSION=4
+    - CC=gcc-5
+    - CXX=g++-5
+addons:
+  apt:
+    update: yes
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - g++-5
+python:
+- '3.5'
+- '3.6'
+# https://askubuntu.com/questions/777803/apt-relocation-error-version-glibcxx-3-4-21-not-defined-in-file-libstdc-so-6/792471
+# inspired by: https://stackoverflow.com/questions/50038634/how-to-set-up-z3-solver-on-travis-ci-machine
+before_install:
+- mkdir -p /opt/z3
+- export Z3="z3-4.6.0-x64-ubuntu-14.04"
+- export Z3_URL="https://github.com/Z3Prover/bin/raw/master/releases/${Z3}.zip"
+- wget -nv -O z3.zip "${Z3_URL}"
+- unzip z3.zip
+- mv "${Z3}/bin" /opt/z3
+- mv "${Z3}/include" /opt/z3
+- rm -rf "${Z3}" /opt/z3/bin/python/example.py
+- export PATH="/opt/z3/bin:${PATH}"
+- export PYTHONPATH="/opt/z3/bin/python:${PYTHONPATH}"
+- z3 --version
+install:
+- pip install git+https://github.com/dronekit/dronekit-python@0eb7715
+- pip install coveralls
+- pip install pycodestyle
+- pip install --upgrade .
+script:
+- pycodestyle houston
+- pytest test
+- coverage run --source=houston setup.py test
+after_success:
+  - coveralls
+notifications:
+  email: false

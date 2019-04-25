@@ -1,0 +1,41 @@
+dist: trusty
+sudo: required
+language: node_js
+node_js:
+- '8'
+addons:
+  apt:
+    sources:
+    - google-chrome
+    packages:
+    - google-chrome-stable fluxbox
+  artifacts:
+    paths:
+    - $(find backstop_data -type f| tr "\n" ":")
+services:
+- docker
+cache:
+  yarn: true
+  directories:
+  - node_modules
+  - functions/node_modules
+  - ".cache"
+before_install: yarn global add greenkeeper-lockfile@2
+before_script:
+- export DISPLAY=:99.0
+- sh -e /etc/init.d/xvfb start
+- sleep 3
+- fluxbox >/dev/null 2>&1 &
+- yarn run predeploy
+- greenkeeper-lockfile-update
+before_deploy:
+- "( cd functions ; yarn install )"
+after_script: greenkeeper-lockfile-upload
+deploy:
+  provider: firebase
+  skip_cleanup: true
+  token:
+    secure: dPrwE/jvWrsFHxwc0ooQUHPuw6nLMpMDJUdOV1t+RR3qSjngNsS51DGGo0qqhpwnsYzoy75fGs4fFzPXNdVfYj1D2W5HFPPkXrHi7HaeLDmhaCpvCiEIHOUaRcp1FaAkutepa8JwgMhL37z5quQtp8qLA9qT3Lo8vBKF7taRvb7z3JV8n30XY6vvTxQqVcbYc99jH0QWxuHkxqxOkplKAppRLAtsYYLCs9srhzTX2/PsadXD41RNwH+zM2o5z4thRiYtBtcPf/t0kv+yrtFYGH5tax4aU513shfcXGwVw2T0Lr5Nb/mk24zlAWppCkTvStUncGF6myYAssc8bm60mLw7+4FqpyHRODhCHkqSbd9yP2HQo+xn47nLteq2q8FAb+4WZkN2Yq5Spa5dWVrCkQpvyPF8ADAV7HE1YoIYdYpslRGKs1DKJ3U6MwIAic/bld7TCTr9zh8zl1VDAqUl2Mo3x8fczEV1KcSCkJxhTfFKlYct1NJ59c9+8ICbmqrfV8jpGHC8w0acTTgwLI24L5a2Nyh6sgxC7EzeYMrPvVeTyuO7e0pVQEeYXHY/K6IXT2FOHhq04QsPqJRxd+bxHhczq5KRBJvl/HQ+/Dqh+B8IbFNgq3GoQgMERR3AwqEq1rAWTTL++JU+x6s5j80hnkbzsir1aV0ZqbSkDHKEmuY=
+env:
+  global:
+    secure: m/vxtj1BZH1rxsVq6uJmFMsU3ImWsejpgwT2BVJTYZhZC5/WdlSH53qqTT9+UbOEtXhQQ4cVLOHTOW8v8uKhc4A36u+iqTmDhJ+dBdx6Clx+N2BsVL8ZD5Wgq1PmKXdF2skHgII47q2GQX88MT7cKPPTMd6YyEsEDG8qU/vZeLmfDKC38MAGpDVSi87x5Xa3T1+5wtHsuvfTbuoPWqpye1Vkl46UJvxponB0s9mwUQueUDKUUWb/iyvdNBLLAm8WpH9V4KuvxMyl4J7CRUEmxiT0yPGfGiR+yiJDco0N45LUl7jTCiZSyMokZepB3iGxkJ44nTMG3xtRp/HSwjJbDujNIUU/1u4hOYjhoLJQrM7/nPdIuwe/HCDnCPHjZYojiCwVke/0nZPW/OpCtR0TF2lTqa//2EP+ZnFyfULWjwkRYS6qpUWnDEL020cpHLICxJ/5ZO4SrG18C1Hh4VHpBZJ6BK4ikoG6jUMKmfBK08UlxIfviKG1zNzx7HW/UJsZmIJR06M0z8i3mR+60J7zCtlmuOu5fdhYXNnKEqPvh2WAu8Bf6q4c2L7GtO91/KvfA1nTTfiy5lGzjM0VDj1bYPm8Vh5v4GE7LAZ3CXGK/cXczsiYoXMpY20h1Rbx5LtN6YE0uUbUJQg+5uqwIo5e7bZrk0+m8IoCxSOxZrZntJY=

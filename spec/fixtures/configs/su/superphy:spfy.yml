@@ -1,0 +1,85 @@
+language: python
+
+matrix:
+  include:
+    - python: 2.7
+      env:
+        - TO_TEST=CONDA
+        - ENV_BRANCH=master
+        - CARD=broadstreet-v2.0.1.tar.gz
+    - python: 2.7
+      env: TO_TEST=DOCKER
+
+sudo: required
+services:
+  - docker
+
+before_install:
+  - sudo apt-get update
+  # Check Python version.
+  - python --version
+  # Turn off O_NONBLOCK. See https://github.com/travis-ci/travis-ci/issues/4704#issuecomment-348435959
+  - python -c 'import os,sys,fcntl; flags = fcntl.fcntl(sys.stdout, fcntl.F_GETFL); fcntl.fcntl(sys.stdout, fcntl.F_SETFL, flags&~os.O_NONBLOCK);'
+  # Increase workers for NODE DNS resolution. https://stackoverflow.com/questions/35387264/node-js-request-module-getting-etimedout-and-esockettimedout
+  - export UV_THREADPOOL_SIZE=16
+  #### miniconda install:
+  - if [ "$TO_TEST" = "CONDA" ]; then
+      wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O miniconda.sh;
+      bash miniconda.sh -b -p $HOME/miniconda;
+      export PATH="$HOME/miniconda/bin:$PATH";
+      hash -r;
+      conda config --set always_yes yes --set changeps1 no;
+      conda config --add channels bioconda;
+      conda config --add channels conda-forge;
+      conda update -q conda;
+      conda info -a;
+    fi
+  - if [ "$TO_TEST" = "DOCKER" ]; then
+      docker-compose up -d;
+      docker ps -a;
+      docker-compose logs webserver;
+      ls;
+    fi
+install:
+  - cd app/
+  - ls
+  #### Recreate our Conda env for testing
+  - if [ "$TO_TEST" = "CONDA" ]; then
+      wget https://raw.githubusercontent.com/superphy/docker-flask-conda/$ENV_BRANCH/app/environment.yml;
+      conda env create -q -f environment.yml -n backend;
+      source activate backend;
+      wget https://raw.githubusercontent.com/superphy/docker-flask-conda/webserver/app/environment.yml -O environment-webserver.yml;
+      conda env update -q -f environment-webserver.yml;
+      wget https://raw.githubusercontent.com/superphy/docker-flask-conda/$ENV_BRANCH/app/requirements.txt;
+      pip install -r requirements.txt;
+    fi
+  # Additional setup for conda.
+  - if [ "$TO_TEST" = "CONDA" ]; then
+      wget https://card.mcmaster.ca/download/0/$CARD;
+      tar -xf $CARD;
+      rgi load --afile card.json;
+    fi
+  # Install pytest
+  - pip install pytest
+  # Install any additional requirements for tests.
+  - pip install -r tests/test_requirements.txt
+script:
+  #### Run Pytest
+  - if [ "$TO_TEST" = "CONDA" ]; then
+      python -m pytest -v --ignore modules/ectyper/ecoli_serotyping --ignore tests/docker/;
+    fi
+  - if [ "$TO_TEST" = "DOCKER" ]; then
+      python -m pytest -v tests/docker/;
+    fi
+after_failure:
+  - if [ "$TO_TEST" = "CONDA" ]; then
+      rgi -h;
+      ectyper -h;
+    fi
+  # Check the logs if tests fail.
+  - if [ "$TO_TEST" = "DOCKER" ]; then
+      docker-compose logs webserver;
+      docker-compose logs blazegraph;
+    fi
+notifications:
+  email: false

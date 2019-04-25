@@ -1,0 +1,70 @@
+language: python
+cache:
+  apt: true
+  directories:
+    - $HOME/.cache/pip
+
+python:
+  - "2.7"
+
+compiler:
+  - gcc
+
+addons:
+  apt:
+    packages:
+      - expect-dev  # provides unbuffer utility
+      - python-lxml  # because pip installation is slow
+      - python-simplejson
+      - python-serial
+      - python-yaml
+      - python-cups
+      - wkhtmltopdf
+    # OpenCV requirements packages
+      - zbar-tools
+      - python-zbar
+
+env:
+  global:
+  - VERSION="10.0" TESTS="0" LINT_CHECK="0" TRANSIFEX="0"
+  - PHANTOMJS_VERSION="latest"
+  # The above line controls the PhantomJS version that is used for JS testing.
+  #   It is not necessary to include this value unless you are altering the default.
+  #   Use `OS` to skip the PhantomJS upgrade & use the system version instead.
+
+  matrix:
+  - LINT_CHECK="1"
+  - TESTS="1" ODOO_REPO="odoo/odoo" EXCLUDE="geo_project_compassion"
+
+
+virtualenv:
+  system_site_packages: true
+
+before_install:
+  - sudo apt-get update
+
+install:
+  - pip install -r requirements.txt
+  - git clone --depth=1 https://github.com/OCA/maintainer-quality-tools.git ${HOME}/maintainer-quality-tools
+  - export PATH=${HOME}/maintainer-quality-tools/travis:${PATH}
+  - travis_install_nightly
+  - printf '[options]\n\nrunning_env = dev\n' > ${HOME}/.openerp_serverrc
+
+#before_script:
+#  - echo "Installing opencv ..."; sh ${HOME}/build/CompassionCH/compassion-modules/sbc_compassion/tools/install_opencv.sh 1> ~/error.log
+#  - echo "Errors :"
+#  - cat ~/error.log
+
+script:
+  - travis_run_tests
+
+after_success:
+  - travis_after_tests_success
+
+coverage:
+  status:
+    project:
+      default:
+        # basic
+        target: 40%
+        threshold: 1%

@@ -1,0 +1,27 @@
+language: node_js
+node_js:
+- 8.11.1
+before_script:
+- npm install --global @dhis2/deploy-build
+- npm rebuild node-sass
+script:
+- npm run build
+deploy:
+- provider: script
+  script: deploy-build
+  skip_cleanup: true
+  on:
+    all_branches: true
+- provider: script
+  script: publish-build
+  skip_cleanup: true
+  on:
+    tags: true
+notifications:
+  slack:
+    secure: ebgMYULQtJ8znNboQgD46c0SFriyfMVFujDBrq9vOdJiMC2PEX3numNDHSCyfQz2L3/lsRhDQ1ex687pMh2m+wQR1937z1jvOANsLnBuhVRKAwFu3L9YSLqhzJ/Nyz+uE8g6QBdYBPoN7DvntClr0tiWXxj+Zg3e2lN2PLrRvnp9Opp9h71b43fXbMPDqISoU8q/EmkzLnGoO6u7t3QgE7FQezdq9JUrTL+5UKQwyv7C3psEr1ytXGpyMxT0K2aikbyF8TF/2hIlrD8ibQt6iuuf7CSpzUq8VGVUffBJLOPiu8N0/GgAq/39UvOgq/Ic+uPoXmFLg2lfCnGaKoYhye4J0iiMdkU04UdQdnqcvoEFgHsVYgT2exUtdOLzxxkmq7NgHrBq3hpKC9ay6ENUsBVo4rj2Lev9KQPLZIILzX8rFAqfG1jsVi89R8yaepMvWQeqAI0VHPHpm7uyf5BjP9dEHIH/ms3+voptx6wbQ5KfU4LqcOeMKj+EAD3vCsxcE6DkC6lwx/9BwGTjShcByc60c519qc1Ft56fDU28W1szYPAurPzmLsPDenT5xTcr7Xmv6v7HMslblHH4n7bQpHoi9haJlKGbvZXOqsUK4fFI35+vTsjams8oyYMTwpF4cXnb6EmPPO9742xgSFtmbaqxMgAEAuTsHNEbyyRmZ+U=
+    on_success: change
+    on_failure: always
+env:
+  global:
+    secure: qQ9GHj4mv/mG4cwin8yGm49AEQfYWP9sTulpUYLCS3kQid86jFVXxLtT+b/FSmKsLOZqtUNhpoxGV/VEQkqcKmF78Khe0gUGwm8r2Is924dERrLDieig2gR7zVZ7XSR1uN1hHS+bUKo337Ux7kfD4FZJ6hxu06VeYvnSz1fHV/QtFofGo7DOLKb4GHvcApXgPHDrK3HiafNwLsc3aU+Q4TiDvyXznlRDHxNweXRd7tmIeqMrXDq4/eAPZs5kD19YasmGWAYKs86gXq0Gjs05VaUzQLlIyJ0zAWUncr47i/iqqicagFQUZOpONMFGDMB5e38hwS0poiTlxm+K5Qcgm2rqlDXujO4QEGAXL/fEZ4gtR/QFYvt6tcIXKg/YlR7ZHPKTb23nUkV5QlW8bOb/zlybU3fz/0P61HuRhgLrD+NslADtL61bHG2VF7hSmttTyDH7Ddxq5JDQG5pIJ5uJh+i0tHZu0yXsoQNgl8jTEfvBVNUnR7QaWEv1ZeF89JynQ/I+r7BksKtV19Ndy2mZ5XCQHRXJVfLVOmGyI0XoJo5R39SvvIv+ASYtuvqTLySacUMAyvTifwxf0/sDv8KmlJgEJkFyuLsw7mGvyEJgmWtCPcClcf6CCR2gtgdXxK7hajiHIMZrULIewNOdud3rM5jtOFUxUYEXPd6/g7xfEg4=

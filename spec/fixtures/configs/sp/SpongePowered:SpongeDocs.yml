@@ -1,0 +1,17 @@
+sudo: false
+
+language: python
+python: 3.6
+
+before_script: source travis-prepare
+script: sphinx-build -W -d build/doctrees source build/html
+
+# Deploy PR preview if this build is a pull request
+after_success: '[[ "$TRAVIS_PULL_REQUEST" != "false" ]] && pr-deploy'
+
+env:
+  global:
+  - secure: "S4ZpYUToi3L0Stus5/7eCsr634zby+Y/is1CZBX3VLHTQ8XZNr/4SIeEcd6foUTEvY+nAiQnpXoEVph8kqZjp3ATVJbyV4qK0HTSCEm+TAG0Xk/pMixvb8wx7zsQN94Z3KDTCG2UKcmIMUU2EYMRlhCl+RVBU5DxOPO+4TOFVQ0="
+
+notifications:
+  email: false

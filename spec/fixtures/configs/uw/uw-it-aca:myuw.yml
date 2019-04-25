@@ -1,0 +1,54 @@
+sudo: false
+language: python
+services:
+  - memcached
+  - mysql
+python:
+  - "3.6"
+env:
+  matrix:
+    - DB=sqlite3
+    # - DB=mysql
+install:
+  - sudo apt-get install libxml2-dev libxmlsec1-dev
+  - pip install pyyaml ua-parser user-agents
+  - pip install -r requirements.txt
+before_script:
+  - if [ "$DB" = "mysql" ] ; then mysql -u root -e 'create database myuw'; fi
+  - if [ "$DB" = "mysql" ] ; then mysql -u root -e 'create user "myuw" identified by "my_pass"'; fi
+  - if [ "$DB" = "mysql" ] ; then mysql -u root -e 'grant all on *.* to myuw'; fi
+  - if [ "$DB" = "mysql" ] ; then pip install mysqlclient; fi
+
+  - pip install coverage
+  - pip install coveralls
+  - pip install pycodestyle
+  - npm install jquery
+  - npm install moment
+  - npm install moment-timezone
+  - npm install datejs
+  - npm install -g jshint
+  - npm install -g mocha
+  - npm install -g istanbul
+  - npm install jsdom
+  - npm install sinon
+  - npm install coveralls
+  - gem install coveralls-lcov
+  - cp travis-ci/manage.py manage.py
+  - python manage.py migrate
+
+script:
+  - which mocha
+  - which _mocha
+  - which istanbul
+  - pycodestyle myuw/ --exclude=migrations,myuw/static
+  # Find </br> tags
+  - grep -re '<\s*/\s*br\s*>' myuw/templates/ ; test $? -eq 1
+  - grep -r 'static/' myuw/ | grep -v /test/ | grep -v washington.edu/static; test $? -eq 1
+  - jshint myuw/static/js/  --verbose
+  - mocha myuw/static/js/test/ --recursive
+  - istanbul cover --include-all-sources -x "**/vendor/**" -x "**/site-packages/**" _mocha -- -R spec myuw/static/js/test/
+  - FORCE_VIEW_TESTS=1 coverage run --source=myuw/ --omit=myuw/migrations/* manage.py test myuw
+  - coveralls-lcov -v -n coverage/lcov.info > js-coverage.json
+after_script:
+  - coveralls --merge=js-coverage.json
+notifications:

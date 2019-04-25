@@ -1,0 +1,26 @@
+branches:
+  except:
+    - gh-pages
+language: scala
+scala:
+  - 2.11.12
+  - 2.12.7
+jdk:
+  - oraclejdk8
+cache:
+  directories:
+  - "$HOME/.ivy2/cache"
+  - "$HOME/.sbt/boot/"
+script:
+  - sbt ++$TRAVIS_SCALA_VERSION validate
+  - if [[ $TRAVIS_SCALA_VERSION == 2.12* ]]; then sbt ++$TRAVIS_SCALA_VERSION validateDocs; fi
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
+matrix:
+  include:
+  - scala: 2.11.12
+    sudo: required
+    before_install:
+      - curl https://raw.githubusercontent.com/scala-native/scala-native/master/scripts/travis_setup.sh | bash -x
+    script:
+      - sbt ++$TRAVIS_SCALA_VERSION validateNative

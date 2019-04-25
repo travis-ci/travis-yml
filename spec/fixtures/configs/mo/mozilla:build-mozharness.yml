@@ -1,0 +1,23 @@
+language: python
+python:
+  - 2.7
+
+install:
+  - pip install tox
+
+script:
+  - tox
+
+after_script:
+  - tox -e py27-coveralls
+
+# The channel name "irc.mozilla.org#releng-bots" is encrypted against mozilla/build-mozharness to prevent IRC spam of forks
+# Generated with: travis encrypt --repo mozilla/build-mozharness # --skip-version-check irc.mozilla.org#releng-bots
+notifications:
+  irc:
+    channels:
+      - secure: "ZVDRAkK5pJt4Kt1GeLLw2bDlkuFVoLhSZ5tVAgge7P5BM8xDN4tOdz06wHFgmPiP9y3U7ss4yPKlVsLZm/JNxEmauGKSsePVV9YBhBawL0O8jIQryF+6c7lgt8xW/AUTkC3+HkN2jcMyOjEizda48I43L91Coks5A5Ce76V9s5s="
+    on_success: always
+    on_failure: always
+    template:
+      - "\x02%{repository_name}\x0314#%{build_number}\x03\x02 (%{branch} - %{commit} : %{author}): \x02\x0312%{message}\x02\x03 (\x0314%{build_url}\x03)"

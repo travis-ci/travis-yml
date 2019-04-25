@@ -1,0 +1,46 @@
+sudo: false
+language: ruby
+cache:
+  bundler: true
+  directories:
+    - $(npm root)
+    - ~/bin
+rvm:
+  - '1.8.7-p371'
+  - '1.9.3-p551'
+  - '2.0.0-p648'
+  - '2.1.10'
+  - '2.2.10'
+  - '2.3.8'
+  - '2.4.6'
+  - '2.5.5'
+  - '2.6.3'
+  - 'jruby-9.1.9.0'
+script:
+  - bundle exec image_optim --info
+  - bundle exec rspec
+before_install:
+  - gem install rubygems-update || gem install rubygems-update --version '< 3'
+  - gem update --system
+  - gem install bundler || gem install bundler --version '< 2'
+  - nvm install stable
+  - mkdir -p ~/bin
+  - command -v svgo || npm install -g svgo
+  - command -v pngout || curl -L "http://static.jonof.id.au/dl/kenutils/pngout-20150319-linux.tar.gz" | tar -xz -C ~/bin --strip-components 2 --wildcards '*/x86_64/pngout'
+matrix:
+  include:
+    - env: CODECLIMATE=✓
+      rvm: '2.4.6'
+      after_success: bundle exec codeclimate-test-reporter
+    - env: RUBOCOP=✓
+      rvm: '2.4.6'
+      script: bundle exec rubocop
+      before_install: gem update --system && gem install bundler
+    - env: CHECK_RUBIES=✓
+      rvm: '2.4.6'
+      script: bundle exec travis_check_rubies
+      before_install: gem update --system && gem install bundler
+addons:
+  code_climate:
+    repo_token:
+      secure: FDikT3JnOJHOAFSaKwVPB1VOphU0sSzAnzQ+YjSt9XFE+9uFQHth/j4rFoVoqALhCj+47trv6spwkbcSjGCVzm+87OI80GkLCCzNjDOz2W4sP9JWItVgS1VoWW+ioPxpLgpguTb3wutwKOUMEAf+40EX657ZiHumM7nNHrF+RCU=

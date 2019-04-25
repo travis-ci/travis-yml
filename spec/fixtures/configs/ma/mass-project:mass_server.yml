@@ -1,0 +1,32 @@
+language: python
+cache: pip
+python:
+  - "3.4"
+  - "3.5"
+  - "3.6"
+sudo: required
+addons:
+  apt:
+    sources:
+      - mongodb-upstart
+      - mongodb-3.2-precise
+    packages:
+      - mongodb-org-server
+      - mongodb-org-shell
+services:
+  - mongodb
+  - rabbitmq
+install:
+  - "BUILD_LIB=1 pip install -r requirements.txt" # Install requirements, add BUILD_LIB=1 for ssdeep
+  - "mongod --version" # Check if current MongoDB version is correctly installed
+before_script:
+  - "mkdir ./instance"
+  - "cp testing.cfg.example ./instance/testing.cfg"
+script:
+  - "CONFIG_PATH=mass_server.config.config_testing.TestingConfig nosetests"
+after_success:
+  - codecov
+notifications:
+  webhooks:
+    urls:
+      - https://webhooks.gitter.im/e/a3003f118577918a4392

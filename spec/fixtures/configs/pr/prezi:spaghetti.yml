@@ -1,0 +1,28 @@
+language: java
+jdk:
+  - oraclejdk8
+sudo: false
+env:
+  global:
+    - GRADLE_OPTS=-Xmx1g
+before_install:
+  # NPM
+  - npm install -g npm@3.10.8
+
+  # Haxe
+  - curl http://old.haxe.org/file/haxe-3.1.3-linux64.tar.gz | tar xz
+  - export HAXE_HOME=$PWD/haxe-3.1.3
+  - export HAXE_STD_PATH=$PWD/haxe-3.1.3/std
+  - export PATH=$PATH:$HAXE_HOME
+  - haxe -version
+
+  # Kotlin
+  - curl -L https://github.com/JetBrains/kotlin/releases/download/build-0.12.613/kotlin-compiler-0.12.613.zip -o kotlin-compiler.zip
+  - unzip kotlin-compiler.zip
+  - export KOTLIN_HOME=$PWD/kotlinc
+  - export PATH=$PATH:$KOTLIN_HOME/bin
+  - kotlinc-js -version 2>&1 | head -n1 || true
+
+  # TypeScript
+  - npm install -g typescript
+  - tsc --version

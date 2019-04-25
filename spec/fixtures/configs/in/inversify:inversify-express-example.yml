@@ -1,0 +1,23 @@
+sudo: false
+
+language: node_js
+
+services:
+  - mongodb
+
+cache:
+  directories:
+    - node_modules
+
+node_js:
+  - 8.8.1
+
+before_install:
+  - npm config set progress=false
+
+before_script:
+  - sleep 15
+  - npm prune
+
+script:
+  - npm run test:all

@@ -1,0 +1,59 @@
+
+# This file was adapted from work by Keith James (keithj). The original source
+# can be found as part of the wtsi-npg/data_handling project here:
+#
+#   https://github.com/wtsi-npg/data_handling
+#
+# iRODS setup added by Iain Bancarz (ib5), adapted from baton:
+#   https://github.com/wtsi-npg/baton
+
+sudo: required
+
+language: perl
+
+perl:
+  - "5.22-shrplib"
+
+dist:
+  - precise
+
+addons:
+  postgresql: "9.3"
+  apt:
+    update: true
+
+env:
+  global:
+    - secure: cDfB188ECmloGfScZQezqwiFef7l+gXgn2RiTOxINriy9wYS6RmZxuZBHGuR36u7QV3QEJtMdihyQ+XBN2eQPf5jULQXV15t7gArXEVPzzF8i+f8MTgVHugU3TqmPLQkY94wBBbpzvRD9xCAC/uNiQcLLwuD2SjPfTXkqgqqtd0=
+    - PGVERSION="9.3"
+    - DISPOSABLE_IRODS_VERSION="1.3"
+    - JANSSON_VERSION="2.7"
+    - BATON_VERSION="1.0.0"
+    - TRAVIS_NODE_VERSION="6.12.2"
+    - TRAVIS_NPM_VERSION="4.5.0"
+    - TRAVIS_YARN_VERSION="1.3.2"
+    - TRAVIS_PYTHON_VERSION="2.7"
+    - WTSI_NPG_GITHUB_URL=https://github.com/wtsi-npg
+    - IRODS_VERSION=4.1.10 PG_PLUGIN_VERSION=1.10 PLATFORM=ubuntu12
+    - CONDA_CHANNEL=https://dnap.cog.sanger.ac.uk/npg/conda/test/Ubuntu/12.04/
+    - CONDA_TEST_ENV=test-environment
+
+before_install:
+  # workaround for iRODS buffer overflow
+  # see https://github.com/travis-ci/travis-ci/issues/5227
+  - sudo hostname "$(hostname | cut -c1-63)"
+  - sed -e "s/^\\(127\\.0\\.0\\.1.*\\)/\\1 $(hostname | cut -c1-63)/" /etc/hosts > /tmp/hosts
+  - sudo mv /tmp/hosts /etc/hosts
+  - ./.travis/before_install_conda.sh
+  - ./.travis/before_install.sh
+
+install:
+  - ./.travis/install.sh
+
+script:
+  - ienv
+  - ils
+  - ilsresc -l
+  - export PATH="$HOME/miniconda/bin:$PATH"
+  - source activate "$CONDA_TEST_ENV"
+  - ./.travis/script.sh

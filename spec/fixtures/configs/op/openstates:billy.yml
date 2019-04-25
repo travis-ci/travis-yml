@@ -1,0 +1,16 @@
+sudo: no
+language: python
+services: mongodb
+python:
+    - "2.7"
+env:
+    - DJANGO_PACKAGE="Django>=1.9,<1.10"
+    - DJANGO_PACKAGE="Django>=1.10,<1.11"
+    - DJANGO_PACKAGE="Django>=1.11,<2"
+install: pip install "pymongo<3" nose name_tools validictory scrapelib jellyfish $DJANGO_PACKAGE pytz  icalendar boto python-dateutil unicodecsv -e git+https://github.com/openstates/django-piston.git#egg=django-piston django-pjax
+
+before_script: echo -e "API_KEY = 'fake'\nBOUNDARY_SERVICE_URL = 'http://geo.openstates.org/'\nBOUNDARY_SERVICE_SETS='sldl-14,sldu-14'" > billy_settings.py
+script: ./run_tests.sh
+notifications:
+    email:
+        - james@openstates.org

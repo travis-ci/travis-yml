@@ -1,0 +1,31 @@
+language: node_js
+dist: xenial
+
+addons:
+  chrome: stable
+
+cache: npm
+
+env:
+  - COVERAGE=true
+  - FIREBASE_SCENARIO=latest
+  - FIREBASE_SCENARIO=next
+  - FIREBASE_SCENARIO=canary
+  - EMBER_SCENARIO=latest
+  - EMBER_SCENARIO=beta
+  - EMBER_SCENARIO=lts
+
+matrix:
+  fast_finish: true
+  allow_failures:
+    - env: FIREBASE_SCENARIO=canary
+    - env: FIREBASE_SCENARIO=next
+    - env: EMBER_SCENARIO=beta
+
+before_install:
+  - if [[ $FIREBASE_SCENARIO == 'latest' ]]; then npm i --save firebase@latest; fi
+  - if [[ $FIREBASE_SCENARIO == 'next'   ]]; then npm i --save firebase@next; fi
+  - if [[ $FIREBASE_SCENARIO == 'canary' ]]; then npm i --save firebase@canary; fi
+  - if [[ $EMBER_SCENARIO == 'latest' ]]; then npm i --save-dev ember-source@latest ember-data@latest; fi
+  - if [[ $EMBER_SCENARIO == 'beta' ]]; then npm i --save-dev ember-source@beta ember-data@beta; fi
+  - if [[ $EMBER_SCENARIO == 'lts' ]]; then npm i --save-dev ember-source@lts ember-data@lts; fi

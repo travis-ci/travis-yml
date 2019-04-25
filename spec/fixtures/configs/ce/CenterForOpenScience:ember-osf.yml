@@ -1,0 +1,31 @@
+language: node_js
+
+sudo: required
+dist: trusty
+
+addons:
+  chrome: stable
+  firefox: latest
+
+env:
+  global:
+    - SUPPRESS_NO_CONFIG_WARNING=true
+    - PERSONAL_ACCESS_TOKEN=TEST_TOKEN
+
+cache:
+  yarn: true
+  directories:
+    - node_modules
+    - $HOME/.cache # includes bowers cache
+
+install:
+  - curl -o- -L https://yarnpkg.com/install.sh | bash
+  - export PATH=$HOME/.yarn/bin:$PATH
+  - yarn --frozen-lockfile --ignore-engines
+  - ./node_modules/.bin/bower install --config.interactive=false
+
+script:
+  - yarn test:cover
+
+after_success:
+  - cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js

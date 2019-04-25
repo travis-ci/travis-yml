@@ -1,0 +1,42 @@
+sudo: false
+
+language: ruby
+
+services:
+  - docker
+
+rvm:
+- 2.5.0
+
+cache: bundler
+
+addons:
+  postgresql: "9.5"
+
+env:
+   global:
+    - COMMIT=${TRAVIS_COMMIT::8}
+    - SANITIZED_BRANCH=$(echo $TRAVIS_BRANCH|sed 's|/|-|g')
+    - REPO=sheltertechsf/askdarcel-api
+
+before_install:
+  - nvm install 6
+  - nvm use 6
+
+install:
+  # bundle install command copied from Travis's default install.bundler
+  - bundle install --jobs=3 --retry=3 --deployment --path=${BUNDLE_PATH:-vendor/bundle}
+  - npm install -g newman
+
+before_script: bundle exec rake db:create db:schema:load rswag:specs:swaggerize
+
+script:
+  - bundle exec rake rubocop spec
+  - ./travis/postman.sh
+
+after_success:
+  - echo 'export DATABASE_URL="'$PRECOMPILE_DATABASE_URL'"' >> .env
+  - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+  - export TAG=`if [[ -n "$TRAVIS_TAG" ]]; then echo "$TRAVIS_TAG"; else if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then echo "pull-request-$TRAVIS_PULL_REQUEST"; else if [ "$SANITIZED_BRANCH" == "master" ]; then echo "latest"; else echo "branch-$SANITIZED_BRANCH"; fi; fi; fi`
+  - docker build -f Dockerfile -t $REPO:$TAG .
+  - docker push $REPO

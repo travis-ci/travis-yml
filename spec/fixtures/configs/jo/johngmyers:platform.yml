@@ -1,0 +1,23 @@
+language: java
+
+sudo: false
+
+services:
+  - docker
+
+jdk:
+  - openjdk8
+
+addons:
+  apt:
+    packages:
+      - rpm
+
+cache:
+  directories:
+    - $HOME/.m2/repository
+
+install: true
+
+script:
+  - mvn -P ci -B install

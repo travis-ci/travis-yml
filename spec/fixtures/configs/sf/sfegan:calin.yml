@@ -1,0 +1,245 @@
+# Build script for Travis CI container-based architecture
+# Stephen Fegan - sfegan@llr.in2p3.fr - 2015-11-01
+
+dist: trusty
+#sudo: false
+language: cpp
+
+addons:
+  apt:
+    sources: &common_sources
+    - ubuntu-toolchain-r-test
+    packages: &common_packages
+    - gsl-bin
+    - libgsl0-dev
+    - libfftw3-dev
+    - python-numpy
+    - libzmq3-dev
+    - python3
+    - python3-dev
+    - python3-numpy
+    - libxerces-c-dev
+
+matrix:
+  include:
+    - compiler: gcc-4.9
+      env: BUILD_TYPE=Release GEANT4=FALSE BUILD_CC=gcc-4.9 BUILD_CXX=g++-4.9 BUILD_CXXFLAGS=-fabi-version=0
+      addons: &gcc49_addons
+        apt:
+          sources:
+          - *common_sources
+          packages:
+          - *common_packages
+          - g++-4.9
+#    - compiler: gcc-4.9
+#      env: BUILD_TYPE=Release GEANT4=TRUE BUILD_CC=gcc-4.9 BUILD_CXX=g++-4.9
+#      addons:
+#        <<: *gcc49_addons
+#    - compiler: gcc-4.9
+#      env: BUILD_TYPE=Release GEANT4=FALSE BUILD_CC=gcc-4.9 BUILD_CXX=g++-4.9
+#      addons:
+#        <<: *gcc49_addons
+    - compiler: gcc-5
+      env: BUILD_TYPE=Release GEANT4=FALSE BUILD_CC=gcc-5 BUILD_CXX=g++-5
+      addons: &gcc5_addons
+        apt:
+          sources:
+          - *common_sources
+          packages:
+          - *common_packages
+          - g++-5
+#    - compiler: gcc-5
+#      env: BUILD_TYPE=Release GEANT4=TRUE BUILD_CC=gcc-5 BUILD_CXX=g++-5
+#      addons:
+#        <<: *gcc5_addons
+#    - compiler: gcc-5
+#      env: BUILD_TYPE=Release GEANT4=TRUE BUILD_CC=gcc-5 BUILD_CXX=g++-5
+#      addons:
+#        <<: *gcc5_addons
+    - compiler: gcc-6
+      env: BUILD_TYPE=Release GEANT4=FALSE BUILD_CC=gcc-6 BUILD_CXX=g++-6
+      addons: &gcc6_addons
+        apt:
+          sources:
+          - *common_sources
+          packages:
+          - *common_packages
+          - g++-6
+    - compiler: gcc-7
+      env: BUILD_TYPE=Release GEANT4=FALSE BUILD_CC=gcc-7 BUILD_CXX=g++-7
+      addons: &gcc7_addons
+        apt:
+          sources:
+          - *common_sources
+          packages:
+          - *common_packages
+          - g++-7
+    - compiler: gcc-8
+      env: BUILD_TYPE=Release GEANT4=FALSE BUILD_CC=gcc-8 BUILD_CXX=g++-8
+      addons: &gcc8_addons
+        apt:
+          sources:
+          - *common_sources
+          packages:
+          - *common_packages
+          - g++-8
+    # - compiler: clang-3.9
+    #   env: BUILD_TYPE=Debug GEANT4=FALSE BUILD_CC=clang-3.9 BUILD_CXX=clang++-3.9
+    #   addons: &clang39_addons
+    #     apt:
+    #       sources:
+    #       - *common_sources
+    #       - llvm-toolchain-trusty-3.9
+    #       packages:
+    #       - *common_packages
+    #       - clang-3.9
+    - compiler: clang-4.0
+      env: BUILD_TYPE=Release GEANT4=FALSE BUILD_CC=clang-4.0 BUILD_CXX=clang++-4.0
+      addons: &clang40_addons
+        apt:
+          sources:
+          - *common_sources
+          - llvm-toolchain-trusty-4.0
+          packages:
+          - *common_packages
+          - clang-4.0
+    - compiler: clang-5.0
+      env: BUILD_TYPE=Release GEANT4=FALSE BUILD_CC=clang-5.0 BUILD_CXX=clang++-5.0
+      addons: &clang50_addons
+        apt:
+          sources:
+          - *common_sources
+          - llvm-toolchain-trusty-5.0
+          packages:
+          - *common_packages
+          - clang-5.0
+    - compiler: clang-6.0
+      env: BUILD_TYPE=Release GEANT4=FALSE BUILD_CC=clang-6.0 BUILD_CXX=clang++-6.0
+      addons: &clang60_addons
+        apt:
+          sources:
+          - *common_sources
+          - llvm-toolchain-trusty-6.0
+          packages:
+          - *common_packages
+          - clang-6.0
+    # - compiler: clang-7
+    #   env: BUILD_TYPE=Release GEANT4=FALSE BUILD_CC=clang-7 BUILD_CXX=clang++-7
+    #   addons: &clang7_addons
+    #     apt:
+    #       sources:
+    #       - *common_sources
+    #       - llvm-toolchain-trusty-7
+    #       packages:
+    #       - *common_packages
+    #       - clang-7
+
+cache:
+  directories:
+  - $HOME/local
+
+before_install:
+  - if test -n "$BUILD_CC"; then export CC="$BUILD_CC"; fi
+  - if test -n "$BUILD_CFLAGS"; then export CFLAGS="$BUILD_CFLAGS"; fi
+  - if test -n "$BUILD_CXX"; then export CXX="$BUILD_CXX"; fi
+  - if test -n "$BUILD_CXXFLAGS"; then export CXXFLAGS="$BUILD_CXXFLAGS"; fi
+  - export LOCAL=$HOME/local/$CC
+  - export PATH=$LOCAL/bin:$PATH
+  - export LD_LIBRARY_PATH=$LOCAL/lib64:$LOCAL/lib:$LD_LIBRARY_PATH
+
+# Build SWIG-3, protobuf-3 and Geant4-10 if not available in the cache
+# Download and unpack Geant4 data files if necessary
+install:
+  - |
+    echo $HOME
+    if [ -d $HOME ]; then ls -l $HOME ; fi
+    echo $HOME/local
+    if [ -d $HOME/local ]; then ls -l $HOME/local ; fi
+    echo $LOCAL
+    if [ -d $LOCAL ]; then ls -l $LOCAL ; fi
+    echo $LOCAL/bin
+    if [ -d $LOCAL/bin ]; then ls -l $LOCAL/bin ; fi
+  # - |
+  #   if [ ! -f $LOCAL/bin/cmake ];
+  #   then (
+  #     wget --no-check-certificate https://cmake.org/files/v3.9/cmake-3.9.6.tar.gz &&
+  #     tar zxf cmake-3.9.6.tar.gz &&
+  #     cd cmake-3.9.6 &&
+  #     ./bootstrap  --parallel=3 --prefix=$LOCAL &&
+  #     make -j3 &&
+  #     make install > /dev/null &&
+  #     touch $HOME/suppress_geant_build
+  #   ); fi
+  - |
+    if [ ! -f $LOCAL/bin/swig ]
+    then (
+      wget https://github.com/swig/swig/archive/rel-3.0.12.tar.gz &&
+      tar zxf rel-3.0.12.tar.gz &&
+      cd swig-rel-3.0.12 &&
+      ./autogen.sh &&
+      ./configure --prefix=$LOCAL --without-alllang --with-python &&
+      make -j3 &&
+      make install > /dev/null &&
+      touch $HOME/suppress_geant_build
+    ); fi
+  - |
+    if [ ! -f $LOCAL/bin/protoc ]
+    then (
+      wget https://github.com/protocolbuffers/protobuf/releases/download/v3.6.1/protobuf-cpp-3.6.1.tar.gz &&
+      tar zxf protobuf-cpp-3.6.1.tar.gz &&
+      cd protobuf-3.6.1 &&
+      ./configure --prefix=$LOCAL &&
+      make -j3 &&
+      make install > /dev/null &&
+      touch $HOME/suppress_geant_build
+    ); fi
+  - |
+    if [ "x$GEANT4" == "xTRUE" -a ! -f $LOCAL/bin/geant4.sh -a ! -f $HOME/suppress_geant_build ]
+    then (
+      wget http://geant4.cern.ch/support/source/geant4.10.04.tar.gz &&
+      tar zxf geant4.10.04.tar.gz &&
+      cd geant4.10.04 &&
+      mkdir mybuild &&
+      cd mybuild &&
+      cmake -DCMAKE_C_COMPILER=$CC -DCMAKE_CXX_COMPILER=$CXX -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$LOCAL -DGEANT4_INSTALL_DATA=ON .. &&
+      make -j3 &&
+      make install > /dev/null
+    ); fi
+  - |
+    if [ "x$GEANT4" == "xTRUE" -a -f $LOCAL/bin/geant4.sh ]
+    then
+      NO_GEANT4=""
+      . $LOCAL/bin/geant4.sh
+    else
+      NO_GEANT4=-DNO_GEANT4:BOOLEAN=TRUE
+    fi
+
+before_script:
+  - swig -version
+  - cmake -version
+  - $CC -v
+  - python -V
+  - python3 -V
+
+script:
+  - |
+    mkdir mybuild-travis &&
+    cd mybuild-travis &&
+    cmake -DCMAKE_PREFIX_PATH=$LOCAL \
+          -DCMAKE_C_COMPILER=$CC -DCMAKE_CXX_COMPILER=$CXX \
+          -DCMAKE_CXX_FLAGS=$CXXFLAGS \
+          -DCMAKE_BUILD_TYPE=$BUILD_TYPE \
+          -DPYTHON_EXECUTABLE=`which python3` \
+          $NO_GEANT4 \
+          -DCMAKE_INSTALL_PREFIX=build .. &&
+    make -j3 &&
+    make install | tail &&
+    ./src/bin/write_system_info &&
+    make test
+    ./unit_tests/simulation/test_vcl_raytracer
+#    ./unit_tests/math/speedtest_rng &&
+#    ./unit_tests/math/test_rng_vcl &&
+#    ./unit_tests/math/test_rng
+
+#after_failure:
+#  - cat CMakeFiles/CMakeError.log

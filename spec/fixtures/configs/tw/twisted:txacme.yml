@@ -1,0 +1,101 @@
+language: python
+sudo: false
+cache: pip
+branches:
+  only:
+    - master
+
+matrix:
+  include:
+  - python: 2.7
+    env: TOXENV=py27-twlatest-alldeps
+  - python: 3.4
+    env: TOXENV=py34-twlatest-alldeps
+  - python: 3.5
+    env: TOXENV=py35-twlatest-alldeps
+  - python: 3.6
+    env: TOXENV=py36-twlatest-alldeps
+  - python: 3.7
+    env: TOXENV=py37-twlatest-alldeps
+    dist: xenial
+    sudo: true
+  - python: pypy
+    env: TOXENV=pypy-twlatest-alldeps PYENV_VERSION=pypy2.7-6.0.0
+  - python: pypy
+    env: TOXENV=pypy3-twlatest-alldeps PYENV_VERSION=pypy3.5-6.0.0
+  - python: 2.7
+    env: TOXENV=py27-twtrunk-acmaster-alldeps
+  - python: 3.4
+    env: TOXENV=py34-twtrunk-acmaster-alldeps
+  - python: 3.5
+    env: TOXENV=py35-twtrunk-acmaster-alldeps
+  - python: 3.6
+    env: TOXENV=py36-twtrunk-acmaster-alldeps
+  - python: 3.7
+    env: TOXENV=py37-twtrunk-acmaster-alldeps
+    dist: xenial
+    sudo: true
+  - python: pypy
+    env: TOXENV=pypy-twtrunk-acmaster-alldeps PYENV_VERSION=pypy2.7-6.0.0
+  - python: pypy
+    env: TOXENV=pypy3-twtrunk-acmaster-alldeps PYENV_VERSION=pypy3.5-6.0.0
+  - python: 2.7
+    env: TOXENV=py27-twlowest-alldeps
+  - python: 3.4
+    env: TOXENV=py34-twlowest-alldeps
+  - python: 3.5
+    env: TOXENV=py35-twlowest-alldeps
+  - python: 3.6
+    env: TOXENV=py36-twlowest-alldeps
+  - python: 3.7
+    env: TOXENV=py37-twlowest-alldeps
+    dist: xenial
+    sudo: true
+  - python: pypy
+    env: TOXENV=pypy-twlowest-alldeps PYENV_VERSION=pypy2.7-6.0.0
+  - python: pypy
+    env: TOXENV=pypy3-twlowest-alldeps PYENV_VERSION=pypy3.5-6.0.0
+  - python: 2.7
+    env: TOXENV=py27-twlatest
+  - python: 2.7
+    env: TOXENV=docs
+    addons:
+      apt:
+        packages:
+        - libenchant-dev
+  - python: 3.6
+    env: TOXENV=flake8
+  allow_failures:
+  - env: TOXENV=py27-twtrunk-acmaster-alldeps
+  - env: TOXENV=py34-twtrunk-acmaster-alldeps
+  - env: TOXENV=py35-twtrunk-acmaster-alldeps
+  - env: TOXENV=py36-twtrunk-acmaster-alldeps
+  - env: TOXENV=py37-twtrunk-acmaster-alldeps
+  - env: TOXENV=pypy-twtrunk-acmaster-alldeps
+  - env: TOXENV=pypy3-twtrunk-acmaster-alldeps
+install:
+  # Upgrade packaging tools separately, so that other installations are
+  # performed with the upgraded tools.
+  - pip install -U pip setuptools wheel
+  - pip install tox codecov
+  - |
+    if [ -n "$PYENV_VERSION" ]; then
+      git clone --depth 1 https://github.com/yyuu/pyenv.git ~/.pyenv
+      PYENV_ROOT="$HOME/.pyenv"
+      PATH="$PYENV_ROOT/bin:$PATH"
+      eval "$(pyenv init -)"
+      pyenv install "$PYENV_VERSION"
+      pyenv global "$PYENV_VERSION"
+    fi
+
+script:
+  - tox
+
+after_success:
+  # Codecov needs combined coverage, and having the raw report in the test
+  # output can be useful.
+  - tox -e coverage-report
+  - codecov
+
+notifications:
+  email: false

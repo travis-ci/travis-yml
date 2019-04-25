@@ -1,0 +1,54 @@
+language: python
+python:
+  - 2.7
+  - 3.6
+dist: trusty
+matrix:
+  include:
+    - python: 3.7
+      dist: xenial
+      sudo: true
+cache: pip
+
+env:
+  # Need this environment if we're doing tests without a config file
+  - READTHEDOCS=True
+
+before_install:
+  # Work around ludicrous Travis bug
+  - git clone https://github.com/SpiNNakerManchester/SupportScripts.git support
+  - python support/travis_blocking_stdout.py
+  # Bring pip up to date 
+  - pip install --upgrade pip setuptools wheel
+  - pip install --only-binary=numpy,scipy numpy scipy
+  # SpiNNakerManchester internal dependencies; development mode
+  - support/pipinstall.sh git://github.com/SpiNNakerManchester/SpiNNUtils.git
+  - support/pipinstall.sh git://github.com/SpiNNakerManchester/SpiNNMachine.git
+  - support/pipinstall.sh git://github.com/SpiNNakerManchester/SpiNNStorageHandlers.git
+  - support/pipinstall.sh git://github.com/SpiNNakerManchester/SpiNNMan.git
+  - support/pipinstall.sh git://github.com/SpiNNakerManchester/PACMAN.git
+  - support/pipinstall.sh git://github.com/SpiNNakerManchester/DataSpecification.git
+  - support/pipinstall.sh git://github.com/SpiNNakerManchester/spalloc.git
+  - support/pipinstall.sh git://github.com/SpiNNakerManchester/SpiNNFrontEndCommon.git
+
+install:
+  - pip install -r requirements-test.txt
+  - pip install python-coveralls 'coverage>=4.4'
+  - python ./setup.py install
+
+script:
+  # Tests
+  - py.test unittests --cov spinnaker_graph_front_end
+  # Code quality check
+  - flake8 spinnaker_graph_front_end
+  - flake8 unittests
+  - flake8 gfe_integration_tests
+  # Documentation build check
+  - cd doc/source
+  - sphinx-build -T -E -b html -d _build/doctrees-readthedocsdirhtml -D language=en . _build/html
+  - sphinx-build -T -b json -d _build/doctrees-json -D language=en . _build/json
+  - sphinx-build -T -b singlehtml -d _build/doctrees-readthedocssinglehtmllocalmedia -D language=en . _build/localmedia
+
+after_success:
+  - cd $TRAVIS_BUILD_DIR
+  - coveralls

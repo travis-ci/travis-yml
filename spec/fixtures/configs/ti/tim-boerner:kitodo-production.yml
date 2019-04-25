@@ -1,0 +1,50 @@
+# Travis continuous integration for kitodo-production
+
+language: java
+
+cache:
+  directories:
+    - $HOME/.m2
+  timeout: 1000
+
+dist: trusty
+
+jdk:
+  - oraclejdk8
+  - openjdk8
+
+addons:
+  chrome: stable
+  apt:
+      sources:
+        - mysql-5.7-trusty
+      packages:
+        - mysql-server
+
+env: DB=mysql
+
+services:
+  - mysql
+
+script:
+  - mvn clean install -B -Pall-tests,flyway,checkstyle,findbugs,!development && mvn clean install -B -Pselenium,!development
+
+# install: true is deactivating the separate install-step, which runs before the script
+install: true
+
+before_install:
+
+before_script:
+  - cp config/database.yml.travis config/database.yml
+  - cp Kitodo-DataManagement/src/main/resources/db/config/flyway.properties.travis Kitodo-DataManagement/src/main/resources/db/config/flyway.properties
+  - sudo mysql_upgrade -u root
+  - sudo service mysql restart
+  - mysql -u root -e 'CREATE DATABASE kitodo;'
+  - mysql -u root -e "CREATE USER 'kitodo'@'localhost' IDENTIFIED BY 'kitodo';"
+  - mysql -u root -e "GRANT ALL ON kitodo.* TO 'kitodo'@'localhost';"
+  - mysql -u root kitodo < Kitodo/setup/schema.sql
+  - mysql -u root kitodo < Kitodo/setup/default.sql
+  - export DISPLAY=:99.0
+  - "sh -e /etc/init.d/xvfb start"
+  - sleep 3 # give xvfb some time to start
+  - export MAVEN_OPTS=-Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn

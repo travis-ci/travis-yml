@@ -1,0 +1,50 @@
+sudo: enabled
+addons:
+  chrome: stable
+
+language: php
+
+services:
+- mysql
+
+deploy:
+  skip-cleanup: false
+  github-token: $GITHUB_TOKEN
+
+env:
+  global:
+    - CODE_COVERAGE=false
+    - DB=mysql
+    - DB_NAME="magento_travis"
+    - PHPUNIT_ENVIRONMENT=true
+    - HOST_NAME="travis_magento.loc"
+    - TEST_ENV=local
+
+matrix:
+  include:
+    - env: TEST_SUITE=unit PHPUNIT_PHAR=tests/unit/phpunit-4.8.36.phar MAGENTO_VERSION=magento-mirror-1.8.1.0
+      php: 5.5
+    - env: TEST_SUITE=unit PHPUNIT_PHAR=tests/unit/phpunit-4.8.36.phar MAGENTO_VERSION=magento-mirror-1.9.3.6
+      php: 5.5
+    - env: TEST_SUITE=unit PHPUNIT_PHAR=tests/unit/phpunit-5.7.9.phar MAGENTO_VERSION=magento-mirror-1.8.1.0
+      php: 5.6
+    - env: TEST_SUITE=unit PHPUNIT_PHAR=tests/unit/phpunit-5.7.9.phar MAGENTO_VERSION=magento-mirror-1.9.3.6
+      php: 5.6
+    - env: TEST_SUITE=integration MAGENTO_VERSION=magento-mirror-1.9.3.6
+      php: 5.6
+
+before_install:
+  - mysql -e 'DROP DATABASE IF EXISTS `$DB_NAME`;'
+  - mysql -e 'CREATE DATABASE IF NOT EXISTS `$DB_NAME`;'
+
+before_script:
+  - composer self-update -q
+  - if [ -n "$GITHUB_TOKEN" ]; then composer config github-oauth.github.com ${GITHUB_TOKEN}; fi;
+  - if [ -n "INTEGRATION_TESTS_TOKEN" ]; then composer config github-oauth.github.com ${INTEGRATION_TESTS_TOKEN}; fi;
+  - composer show -i
+  - if [ "${TEST_SUITE}" == "unit" ]; then bash /home/travis/build/BoltApp/bolt-magento1/tests/scripts/magento_install.sh; fi;
+
+script:
+  - if [ "${TEST_SUITE}" == "unit" ]; then bash tests/scripts/run_phpunit_tests.sh; fi;
+  - if [ "${TEST_SUITE}" == "unit" ]; then bash /home/travis/build/BoltApp/bolt-magento1/tests/scripts/magento_check_reports; fi;
+  - if [ "${TEST_SUITE}" == "integration" ]; then bash tests/scripts/run_integration_tests.sh; fi;

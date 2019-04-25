@@ -1,0 +1,27 @@
+language: go
+go:
+- 1.11
+sudo: false
+dist: trusty
+addons:
+  apt:
+    packages:
+      - realpath
+env:
+  global:
+  - PATH=$PATH:$GOPATH/bin
+before_install:
+- set -e
+- go get github.com/mattn/goveralls
+script:
+- go test -covermode=count -coverprofile=/tmp/coverage.out ./...
+- $HOME/gopath/bin/goveralls -ignore 'e2e/*.go' -coverprofile=/tmp/coverage.out -race -service=travis-ci -package github.com/ksonnet/ksonnet/...
+- go vet ./...
+after_script: set +e
+branches:
+  only:
+  - master
+  - "/^v\\d+\\.\\d+\\.\\d+.*$/"
+notifications:
+  email:
+    on_success: never

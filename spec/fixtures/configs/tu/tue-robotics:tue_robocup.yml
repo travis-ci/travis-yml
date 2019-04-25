@@ -1,0 +1,20 @@
+sudo: true
+
+language: cpp
+
+services:
+  - docker
+
+before_install:
+  - wget https://raw.githubusercontent.com/tue-robotics/tue-env/master/ci/install-package.sh
+  - wget https://raw.githubusercontent.com/tue-robotics/tue-env/master/ci/build-package.sh
+  - wget https://raw.githubusercontent.com/tue-robotics/tue-env/master/ci/packages.sh
+  # Determine packages modified in this commit
+  - source packages.sh
+
+script:
+  - 'for PACKAGE in $PACKAGES;
+     do
+     bash install-package.sh --package=$PACKAGE --branch=${TRAVIS_PULL_REQUEST_BRANCH:-$TRAVIS_BRANCH} --commit=$TRAVIS_COMMIT --pullrequest=$TRAVIS_PULL_REQUEST &&
+     bash build-package.sh --package=$PACKAGE;
+     done'

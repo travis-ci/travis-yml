@@ -1,0 +1,13 @@
+language: java
+script: mvn clean verify
+dist: precise
+jdk:
+  - oraclejdk8
+
+notifications:
+  email:
+    - serge@jkiss.org
+    
+before_install: echo "MAVEN_OPTS='-Xmx2048m -XX:MaxPermSize=512m'" > ~/.mavenrc
+
+install: true

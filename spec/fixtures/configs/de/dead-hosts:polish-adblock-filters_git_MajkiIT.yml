@@ -1,0 +1,43 @@
+env:
+  global:
+    - secure: D53m58W17P8lHH55UrvQPHl1BeKcOI5Le9syt1GXV7SKrPfF/urPPsz80zZqrTZREwYuuTzcWwZXKQz/qLYpdvYeh7FHAFG0tnXDLtIfZMqjI07z9aM8KfJQpKcoNY+xYA3YhHE8FOOJIAGQs1h2aA8iopGHSBOy6NwWC5i2SetbB8Apy3rkXgza8XaMza8Zpo8dIoW5dv1+2ugKEIkJxFHQF91HfmIrIZrPdZ6EB9u7/DNlsr3FUg7+m1T09uPHURBhgkc7TK9OWeRW43zInHkyFrtguaj5YVJAZw6+PvF5iP8d9heZpPxSp5qSzYa3utgU5w6iGxcAChRnZUjxlTekLIpBI/ez2gpyKxGN+d5INZ1j3AYs8aWXYLDG63uv+6gCidjkFzRoQFc0nPdbONTyetO5+Y/u3TDZG6Ztkl8FGV5TawQ00/mm+qPuwa6OjtZIa71o7I8TV/qMZuXxMNqZMnlot7OYkUv6oM3JK2NKNBedS1S2YKAK4NgrD+wev1zHYYmOd9XFLujkNggO7OkSmPWLpxDzuvqAm0Iq/57+amq/7d9Cge1emfQmmfWFqe5hLy5xQuI3MwTQ+ClFUVFNNKinMvSRtvWskTGELrkQQ1qLNpQFb8C2JqbGpxROim8DC+mPy9jDJ8klm/MIiVQBK/sZomQ6S4D9xzHm/cE=
+    - GIT_NAME: Travis CI
+    - GIT_EMAIL: dead-hosts@funilrys.com
+    - TRAVIS_REPO_SLUG: dead-hosts/polish-adblock-filters_git_MajkiIT
+    - GIT_BRANCH: master
+    - UPDATE_ME_LOCATION: https://raw.githubusercontent.com/dead-hosts/repository-structure/master/update_me.py
+    - ADMIN_LOCATION: https://raw.githubusercontent.com/dead-hosts/repository-structure/master/admin.py
+
+dist: xenial
+sudo: required
+
+language: python
+
+python:
+  - "3.7"
+
+matrix:
+  fast_finish: true
+
+cache:
+  - pip
+
+addons:
+  apt:
+    packages:
+      - dos2unix
+
+install:
+  - pip3 install --upgrade pip
+  - pip3 install requests
+
+before_script:
+  - if [[ ! -f .administrators ]]; then wget "${UPDATE_ME_LOCATION}" -o /dev/null -O update_me.py && chmod +x update_me.py; else echo "update_me not downloaded :)"; fi
+  - if [[ ! -f .administrators ]]; then wget "${ADMIN_LOCATION}" -o /dev/null -O admin.py && chmod +x admin.py; else echo "admin not downloaded :)"; fi
+
+script:
+  - python3 update_me.py
+
+notifications:
+  on_success: change
+  on_failure: always

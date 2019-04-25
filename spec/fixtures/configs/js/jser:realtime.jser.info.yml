@@ -1,0 +1,18 @@
+language: ruby
+rvm:
+- 2.5.1
+env:
+  - NODE_JS_VERSION='6'
+install:
+  - nvm install $NODE_JS_VERSION
+  - nvm use $NODE_JS_VERSION
+  - bundle install --without production --deployment
+  - npm install
+cache:
+  directories:
+  - vendor/bundle
+  - node_modules
+script: bundle exec jekyll build --trace
+branches:
+  only:
+  - gh-pages

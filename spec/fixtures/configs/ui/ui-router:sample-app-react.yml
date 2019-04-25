@@ -1,0 +1,18 @@
+language: node_js
+node_js: 8.9.1
+before_install:
+- sh -e /etc/init.d/xvfb start
+- export PATH=$HOME/.yarn/bin:$PATH
+- curl -o- -L https://yarnpkg.com/install.sh | bash -s -- --version 1.5.1
+notifications:
+  slack:
+    on_success: never
+    rooms:
+      secure: MDU9cEYS9SO42Ci2BQgpFqlXEcrzZOEKIzOAEp2SrK/lsLO3r2eoXDm+VcnfWMXoL8ptDVAdzCkWSac0PLQveKgkOEnKJce1VhnVQ7Boijh4HriqdIr7h6iwVC2uBUQ7M01VZJEbN3fMjgZ5+6tHN7mw4tCfDbVrMISZQb8sY0y45hr/Koji9YvE3Q9vs4nyhFeQgnPpQaUm7D1RDJbwcr3pSL0k4T1/feH8Vib22IenWEnbVGGT7uU5Slts75zWF6/EFuxmSI0b8gxOeNVMMpqfbqsZU1MUXzRzQ2lTyP1i5GrQtCJME0OuWY05SMp5AzONIdyIZSlWLJDOY12Nr7JpamJ2hBwqM6lsz98GsOobpTusAlUriSK2WdIrKZFaH9GB7A8HDGC1ohNYaklo3CIyFi2A9e5a34AQ0K3qJ8RSbIH+r+oB6ITLv8d9cTMzuTFHRhqRxu3jJih4DN7yL6gXOWNeLwapEeDj3vYo7cHCefi57D53Yq1EaaaQ2OOHEkrYst3QuF2y2hjbRGMhIL1Et4SpY5Xv1kdbl3I3+hyGqNjxAaXUaL4EAz9bkUkaELlEwD22RxYV7NgyrPP4uh+iELphmRsMnVrxH4k+4kfwR+MoB71sYMqRm/IyCOyKSs+EIntehySJDVGQrcZI6lTnpng+xwlE9HOmZaIbN2E=
+sudo: false
+git:
+  depth: 3
+cache:
+  directories:
+  - node_modules
+  - ".downstream_cache"

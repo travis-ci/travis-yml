@@ -1,0 +1,70 @@
+language: php
+
+sudo: false
+dist: trusty
+
+cache:
+  - apt
+
+addons:
+  hosts:
+    - jmb.localhost
+    - jonnybarnes.localhost
+  postgresql: "9.6"
+  apt:
+    packages:
+      - nginx-full
+      - realpath
+      - postgresql-9.6-postgis-2.3
+      - imagemagick
+      #- google-chrome-stable
+  artifacts:
+    s3_region: "eu-west-1"
+    paths:
+      - $(ls tests/Browser/screenshots/*.png | tr "\n" ":")
+      - $(ls tests/Browser/console/*.log | tr "\n" ":")
+      - $(ls storage/logs/*.log | tr "\n" ":")
+      - $(ls /tmp/*.log | tr "\n" ":")
+
+services:
+  - postgresql
+
+env:
+  global:
+    - setup=basic
+
+php:
+  - 7.2
+  - 7.3
+
+before_install:
+  - printf "\n" | pecl install imagick
+  - cp .env.travis .env
+  - echo 'error_log = "/tmp/php.error.log"' >> ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/travis.ini
+  - psql -U travis -c 'create database travis_ci_test'
+  - psql -U travis -d travis_ci_test -c 'create extension postgis'
+  - travis_retry composer self-update --preview
+  - curl -OL https://squizlabs.github.io/PHP_CodeSniffer/phpcs.phar
+
+install:
+  - if [[ $setup = 'basic' ]];  then travis_retry composer install --no-interaction --prefer-dist; fi
+  - if [[ $setup = 'stable' ]]; then travis_retry composer update --no-interaction --prefer-dist --prefer-stable; fi
+  - if [[ $setup = 'lowest' ]]; then travis_retry composer update --no-interaction --prefer-dist --prefer-lowest --prefer-stable; fi
+  - travis/install-nginx.sh
+  - . $HOME/.nvm/nvm.sh
+  - nvm install stable
+  - nvm use stable
+  - npm i puppeteer
+
+before_script:
+  - php artisan key:generate
+  - php artisan migrate
+  - php artisan db:seed
+  #- google-chrome-stable --headless --disable-gpu --remote-debugging-port=9515 http://localhost:8000 &
+  #- sleep 5
+
+script:
+  - php vendor/bin/phpunit --stop-on-failure
+  - php phpcs.phar
+  #- php artisan dusk
+  - php vendor/bin/security-checker security:check

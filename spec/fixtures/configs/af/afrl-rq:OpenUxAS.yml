@@ -1,0 +1,29 @@
+dist: trusty
+
+matrix:
+  include:
+    - services: docker
+      os: linux
+      env: BUILD_FLAVOR=linux_docker
+      sudo: required
+    - os: linux
+      env: BUILD_FLAVOR=linux_native
+      sudo: false
+      addons:
+        apt:
+          sources:
+            - deadsnakes
+          packages:
+            - uuid-dev
+            - libgtest-dev
+            - ant
+            - oracle-java8-set-default
+            - python3.6
+    - os: osx
+      env: BUILD_FLAVOR=osx_native
+      sudo: false
+
+language: cpp
+
+script:
+  - bash ci/travis.sh

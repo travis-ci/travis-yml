@@ -1,0 +1,26 @@
+language: node_js
+dist: trusty
+node_js:
+  - "8"
+services:
+  - docker
+cache:
+  directories:
+    - $HOME/node_modules
+    - $HOME/.nvm/.cache/bin
+branches:
+  except:
+    - prod
+    - stg
+    - stable
+before_install:
+  - docker-compose --version
+  - docker-compose pull
+  - cp env/travis.env current.env
+  - . ./current.env
+  - docker-compose up -d
+script:
+  - npm run db-migrate --silent
+  - npm run test-full --silent
+after_script:
+  - npm run coverage && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage

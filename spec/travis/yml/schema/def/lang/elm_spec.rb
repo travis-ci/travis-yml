@@ -11,10 +11,10 @@ describe Travis::Yml::Schema::Def::Elm, 'structure' do
         type: :object,
         properties: {
           elm: {
-            '$ref': '#/definitions/strs'
+            '$ref': '#/definitions/type/strs'
           },
           node_js: {
-            '$ref': '#/definitions/strs'
+            '$ref': '#/definitions/type/strs'
           },
           elm_format: {
             type: :string

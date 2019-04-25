@@ -1,0 +1,21 @@
+
+language: cpp
+
+matrix:
+  include:
+    - compiler: gcc
+      os: linux
+      script: ./.travis_linux.sh
+      before_install:
+        - sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y;
+        - sudo apt-get update
+        - sudo apt-get install python3 -y
+        - sudo apt-get install libglew-dev -y
+        - sudo apt-get install gcc-7 g++-7 -y
+        - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-7 60
+    - compiler: clang
+      os: osx
+      script: ./.travis.sh
+    - language: glsl
+      os: osx
+      script: ./.travis_glsl.sh

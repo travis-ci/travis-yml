@@ -1,0 +1,26 @@
+os: osx
+language: node_js
+node_js: 9
+cache: yarn
+env:
+  global:
+  - OSENV=travis
+  - CLOUDSDK_CORE_DISABLE_PROMPTS=1
+before_install:
+  - curl https://sdk.cloud.google.com | bash
+  - source $HOME/google-cloud-sdk/path.bash.inc
+  - npm i -g gulp-cli electron-packager
+  - npm install --global yarn
+before_script:
+  - echo {\"dsn\":\"${SENTRY_DSN}\"} > src/main/assets/data/sentry.json
+  - yarn dist --publish=never
+script:
+  - yarn test
+after_script:
+  - bash deploy.sh $TRAVIS_COMMIT
+deploy:
+  provider: script
+  skip_cleanup: true
+  script: yarn publish-build 
+  on:
+    branch: dev

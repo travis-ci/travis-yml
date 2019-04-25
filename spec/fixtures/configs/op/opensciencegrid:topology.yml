@@ -1,0 +1,12 @@
+language: python
+python:
+  - "3.6"
+before_install: sudo apt-get install libxml2-utils apache2-dev libldap2-dev
+install: pip install -r requirements-apache.txt
+script:
+  - ./src/tests/test_verify_schema.sh
+  - ./src/tests/verify_downtimes.py
+  - ./src/tests/verify_unique_downtime_ids.sh
+  - ./src/tests/verify_resources.py
+  - ./src/tests/verify_authfile.sh
+  - ./src/tests/verify_origin_authfile.sh

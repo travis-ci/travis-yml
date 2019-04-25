@@ -1,0 +1,65 @@
+sudo: required
+
+language: python
+
+services: docker
+
+env:
+  global:
+    - DOCKER_COMPOSE_VERSION=1.20.1
+      # get all the branches referencing this commit
+    - IS_RELEASE=$(git ls-remote origin | grep "$TRAVIS_COMMIT\s\+refs/heads/release$")
+    - RELEASE_TAG=$(git tag -l --points-at HEAD | head -n1)
+    - BRANCH=$(if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then echo $TRAVIS_BRANCH; else echo $TRAVIS_PULL_REQUEST_BRANCH; fi)
+    - DJANGO_ACCELERATOR_REVISION=`./infer_repository_revision.sh "$BRANCH" https://www.github.com/masschallenge/django-accelerator.git`
+    - FRONT_END_REVISION=`./infer_repository_revision.sh "$BRANCH" https://$GITHUB_ACCESS_TOKEN@github.com/masschallenge/front-end.git`
+
+before_install:
+- echo -e "machine github.com\n  login $GITHUB_ACCESS_TOKEN" >> ~/.netrc
+- sudo apt-add-repository 'deb http://archive.ubuntu.com/ubuntu trusty-backports universe'
+- sudo apt-get update -qq
+- docker-compose --version
+- sudo apt-get update
+- sudo apt-get install -o Dpkg::Options::="--force-confold" --force-yes -y docker-ce
+- sudo rm /usr/local/bin/docker-compose
+- curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
+- chmod +x docker-compose
+- sudo mv docker-compose /usr/local/bin
+- docker-compose --version
+
+before_script:
+- if [ -z $TRAVIS_TAG ]; then git remote set-branches origin $BRANCH; fi
+- git fetch
+- git checkout $BRANCH
+- echo "" >> .prod.env
+- keys="DJANGO_SECRET_KEY SEGMENT_TOKEN IMPACT_API_V0_SECURITY_KEY IMPACT_API_V0_IMAGE_PASSWORD ACCELERATE_SITE_URL ALGOLIA_INDEX_NAME ALGOLIA_APPLICATION_ID ALGOLIA_SEARCH_ONLY_API_KEY ALGOLIA_STAFF_SEARCH_ONLY_API_KEY ALGOLIA_API_KEY"
+- for key in $keys; do echo "$key=${!key}" >> .prod.env; echo "" >> .prod.env; done
+- echo "DATABASE_URL=mysql://${DATABASE_USER}:${DATABASE_PASSWORD}@${DATABASE_HOST}/${DATABASE_NAME}" >> .prod.env
+- echo "" >> .prod.env
+- git clone https://$GITHUB_ACCESS_TOKEN@github.com/masschallenge/front-end -b $FRONT_END_REVISION ../front-end
+- cp .prod.env ../front-end/.env
+- cp .prod.env .env
+- docker build --no-cache -t masschallenge/front-end ../front-end
+- docker run -v $(pwd)/../front-end/dist:/usr/src/app/dist -t masschallenge/front-end
+- cp -r ../front-end/dist web/impact/static/front-end-dist
+- cp ../front-end/dist/index.html web/impact/templates/front-end.html
+- docker network create impact-api_default 
+- docker-compose -f docker-compose.travis.yml build --no-cache --build-arg DJANGO_ACCELERATOR_REVISION=$DJANGO_ACCELERATOR_REVISION
+- docker-compose -f docker-compose.travis.yml up -d
+
+script:
+- make test
+
+after_success:
+- if [ "$DEPLOY_ENVIRONMENT" = "" ]; then export DEPLOY_ENVIRONMENT=$(if [ "$BRANCH" = "master" ]; then echo "production"; else echo "staging"; fi); fi;
+- sudo curl -o /usr/local/bin/ecs-cli https://s3.amazonaws.com/amazon-ecs-cli/ecs-cli-linux-amd64-latest;
+- sudo chmod +x /usr/local/bin/ecs-cli;
+- pip install awscli==1.15.3;
+- export PATH=$PATH:$HOME/.local/bin;
+- export TAG=$(if [ "$RELEASE_TAG" = "" ]; then echo "$BRANCH"; else echo "$RELEASE_TAG"; fi);
+- export ECR_TOKEN=`aws ecr get-authorization-token --region us-east-1 --output text --query 'authorizationData[].authorizationToken' | base64 --decode | cut -d':' -f2`
+- export ECR_HOST=`aws ecr get-authorization-token --region us-east-1 --output text --query 'authorizationData[].proxyEndpoint'`
+- export DOCKER_USER=AWS
+- export DOCKER_PASSWORD=$ECR_TOKEN
+- echo $DOCKER_PASSWORD | docker login -u $DOCKER_USER --password-stdin $ECR_HOST
+- make travis-release AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY ENVIRONMENT=$DEPLOY_ENVIRONMENT DOCKER_REGISTRY=$DOCKER_REGISTRY IMAGE_TAG=$TAG;

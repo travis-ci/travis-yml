@@ -1,0 +1,120 @@
+# Travis configuration for annotation-service
+#
+#  * decrypt service account credentials
+#  * install the Google Cloud SDK command line tools (gcloud)
+#  * cache the gcloud installation and setup
+#  * test and build the go code
+#  * on success, deploy the result when the origin branch or tag matches
+#    a supported deployment target.
+
+# A lot of these lines are long shell command invocations that exceed
+# yamllint's recommended line length, so turn off the line-length warning in
+# this file.
+#
+# yamllint disable rule:line-length
+
+# CGO broken in go 1.12.2 with trusty, so this forces xenial, which should work.
+# https://github.com/golang/go/issues/31293
+dist: xenial
+
+language: go
+go: 
+ - 1.12
+
+# Without this, annotator.sh fails, related to gcloud.
+sudo: required
+
+before_install:
+- go get github.com/mattn/goveralls
+- sudo apt-get update -q
+- sudo apt-get install -y libgeoip-dev pkg-config
+- go get gopkg.in/check.v1
+- go get -t -v ./...
+
+# This installs gcloud, sets up devappserver.
+- $TRAVIS_BUILD_DIR/annotator.sh
+
+# NB: Encrypted values are not defined in forks or pull requests.
+#
+# Decrypt the tar archive containing the GCP service account key files.
+# After unpacking, there should be one service account key file for every GCP
+# project referenced in the "deploy" section. These keys authenticate the
+# gcloud deploy operations.
+#
+# Reusing the etl-travis-deploy service accounts, since we need identical
+# capabilities.  The tar file contains newly created keys for each of the three
+# service accounts.
+- travis/decrypt.sh "$encrypted_ca29bb0d9214_key" "$encrypted_ca29bb0d9214_iv"
+  keys/service-accounts.tar.enc /tmp/service-accounts.tar /tmp
+- if [[ -r /tmp/service-accounts.tar ]] ; then
+  tar tvf /tmp/service-accounts.tar ;
+  fi
+
+- echo Branch is ${TRAVIS_BRANCH} and Tag is $TRAVIS_TAG
+
+- if [[ -n "$SERVICE_ACCOUNT_mlab_testing" ]] ; then
+  echo "$SERVICE_ACCOUNT_mlab_testing" > $TRAVIS_BUILD_DIR/creds.json ;
+  export GOOGLE_APPLICATION_CREDENTIALS=$TRAVIS_BUILD_DIR/creds.json ;
+  fi
+
+# These directories will be cached on successful "script" builds, and restored,
+# if available, to save time on future builds.
+cache:
+  directories:
+  - $HOME/google-cloud-sdk/
+
+script:
+# This sets up the dev appserver for the aetest support used by unit tests.
+- if [[ -r "${HOME}/gcloud-service-key.json" ]]; then
+  export GOOGLE_APPLICATION_CREDENTIALS="${HOME}/gcloud-service-key.json";
+  fi
+- export APPENGINE_DEV_APPSERVER="${HOME}/google-cloud-sdk/bin/dev_appserver.py"
+- source "${HOME}/google-cloud-sdk/path.bash.inc"
+
+# Run all tests and gather and submit coverage information.
+- GCLOUD_PROJECT=mlab-testing go test -coverprofile=cover.cov ./...
+- $HOME/gopath/bin/goveralls -coverprofile=cover.cov -service=travis-ci
+# Run benchmarks
+- go test -bench . ./geolite2/...
+
+# Build and prepare for deployment
+- go build
+- $TRAVIS_BUILD_DIR/travis/install_gcloud.sh
+
+# Deploy steps never trigger on a new Pull Request. Deploy steps will trigger
+# after a merge with matching "on:" conditions.
+deploy:
+######################################################################
+## Service: annotation-service -- AppEngine Flexible Environment.
+
+# SANDBOX:  Allows any branch with sandbox-*, to trigger deploying that
+# branch to sandbox for pre-review testing.
+- provider: script
+  script:
+    $TRAVIS_BUILD_DIR/travis/deploy_app_legacy_keyfile.sh mlab-sandbox /tmp/mlab-sandbox.json $TRAVIS_BUILD_DIR annotator.yaml
+  skip_cleanup: true
+  on:
+    repo: m-lab/annotation-service
+    branch: sandbox-*
+    condition: "$TRAVIS_EVENT_TYPE == push"
+
+
+# STAGING: Should trigger AFTER code review and commit to master branch.
+- provider: script
+  script:
+    $TRAVIS_BUILD_DIR/travis/deploy_app_legacy_keyfile.sh mlab-staging /tmp/mlab-staging.json $TRAVIS_BUILD_DIR annotator.yaml
+  skip_cleanup: true
+  on:
+    repo: m-lab/annotation-service
+    branch: master
+
+# PROD: Should trigger AFTER code review and commit to master branch. Triggers
+# when tagged with prod-*.
+- provider: script
+  script:
+    $TRAVIS_BUILD_DIR/travis/deploy_app_legacy_keyfile.sh mlab-oti /tmp/mlab-oti.json $TRAVIS_BUILD_DIR annotator.yaml
+  skip_cleanup: true
+  on:
+    repo: m-lab/annotation-service
+    all_branches: true
+    condition: "$TRAVIS_TAG == prod-*"

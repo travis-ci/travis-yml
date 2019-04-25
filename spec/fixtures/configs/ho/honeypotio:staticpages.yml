@@ -1,0 +1,31 @@
+language: node_js
+node_js:
+  - "6.9.5"
+cache:
+  bundler: true
+  directories:
+    - node_modules
+before_install:
+  - ruby --version
+install:
+  - npm install node-smushit -g
+  - npm install
+  - bundle install
+
+script: npm test && travis_wait ./bin/deploy
+
+env:
+  global:
+    - PREFIX_FOLDER=$([ "$TRAVIS_PULL_REQUEST" != "false" ] && echo "pr-$TRAVIS_PULL_REQUEST")
+    - HOST=$([ "$TRAVIS_TAG" != "" ] && echo "$PROD_HOST" || echo "$STAGING_HOST")
+    - APP_HOST=$([ "$TRAVIS_TAG" != "" ] && echo "$PROD_APP_HOST" || echo "$STAGING_APP_HOST")
+    - API_HOST=$([ "$TRAVIS_TAG" != "" ] && echo "$PROD_API_HOST" || echo "$STAGING_API_HOST")
+    - BLOG_HOST=$([ "$TRAVIS_TAG" != "" ] && echo "$PROD_BLOG_HOST" || echo "$STAGING_BLOG_HOST")
+    - ROLLBAR_TOKEN=$([ "$TRAVIS_TAG" != "" ] && echo "$PROD_ROLLBAR_TOKEN" || echo "$STAGING_ROLLBAR_TOKEN")
+    - URL_BASE=$([ "$PREFIX_FOLDER" != "" ] && echo "/$PREFIX_FOLDER")
+    - GTM_ID=$([ "$TRAVIS_TAG" != "" ] && echo "$PROD_GTM_ID" || echo "$STAGING_GTM_ID")
+    - GA_ID=$([ "$TRAVIS_TAG" != "" ] && echo "$PROD_GA_ID" || echo "$STAGING_GA_ID")
+    - COOKIE_DOMAIN=$([ "$TRAVIS_TAG" != "" ] && echo "$PROD_COOKIE_DOMAIN" || echo "$STAGING_COOKIE_DOMAIN")
+    - CF_DISTRIBUTION=$([ "$TRAVIS_TAG" != "" ] && echo "$PROD_CF_DISTRIBUTION" || echo "$STAGING_CF_DISTRIBUTION")
+    - S3_FORCE=$(git log $TRAVIS_PULL_REQUEST_SHA -1 --pretty=%B | grep -E "^\[#s3 .*force.*]" --ignore-case)
+    - S3_CFG=$(git log $TRAVIS_PULL_REQUEST_SHA -1 --pretty=%B | grep -E "^\[#s3 .*configure.*]" --ignore-case)

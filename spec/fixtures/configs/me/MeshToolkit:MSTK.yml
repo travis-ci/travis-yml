@@ -1,0 +1,65 @@
+language: c
+
+sudo: required
+dist: xenial
+
+addons:
+  apt:
+    packages:
+      - libopenmpi-dev
+      - openmpi-bin
+      - libmetis-dev
+      - libhdf5-openmpi-dev
+      - libnetcdf-dev
+      - libexodusii-dev
+      - libexodusii5
+      - libnemesis3
+      - libunittest++-dev
+env:
+  global:
+    - CCACHE_CPP2=yes
+  matrix:
+    - PARALLEL=ON
+    - PARALLEL=OFF
+
+before_install:
+  - test -n $CC && unset CC
+  - test -n $CXX && unset CXX
+
+after_failure:
+  - echo $TRAVIS_TEST_RESULT
+  - cat Testing/Temporary/LastTest.log
+
+script:
+  - >
+     mkdir build &&
+     cd build &&
+     cmake 
+     -DCMAKE_C_COMPILER:FILEPATH=`which mpicc`
+     -DCMAKE_CXX_COMPILER:FILEPATH=`which mpiCC`
+     -DCMAKE_BUILD_TYPE=Release
+     -DINSTALL_ADD_VERSION=no
+     -DENABLE_PARALLEL=$PARALLEL
+     -DENABLE_METIS=yes
+     -DMETIS_INCLUDE_DIR=/usr/include
+     -DHDF5_INCLUDE_DIRS=/usr/include/hdf5/openmpi
+     -DENABLE_ExodusII=ON
+     -DENABLE_Tests=yes
+     -DUnitTest_DIR:FILEPATH=/usr/include/unittest++
+     ..    && 
+     make -j2 &&
+     make test &&
+     make install DESTDIR=$HOME
+
+cache:
+  - ccache
+
+compiler:
+  - gcc
+  - clang
+
+notifications:
+  email:
+    - rao@lanl.gov
+  on_success: never
+  on_failure: always

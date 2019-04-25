@@ -1,0 +1,60 @@
+dist: trusty
+sudo: required
+language: python
+python: 3.5.2
+
+services:
+  - postgresql
+
+addons:
+  sonarqube:
+    organization: "metronus-github"
+    token:
+      secure: $SONAR_TOKEN
+    branches:
+    - dev
+    - master
+env:
+  global:
+    - DJANGO=1.10.4
+    - DJANGO_SETTINGS_MODULE=metronus.settings
+    - PYTHONPATH=$HOME/builds/Metronus/metronus
+    - PIP_USE_MIRRORS=true
+    - METRONUS_DB_NAME=metronus_db_travis
+    - METRONUS_DB_USER=metronus_user_travis
+    - METRONUS_DB_PASS=metronus_pass_travis
+    - DJANGO_SECRET_KEY=travistravistravistravistravistravistravis
+    - METRONUS_MAIL_HOST='smtp.gmail.com'
+    - METRONUS_MAIL_PORT=587
+    - METRONUS_MAIL_USER='metronus.info@gmail.com'
+    - METRONUS_MAIL_DEFAULTFROM='Metronus-DEV <metronus.info@gmail.com>'
+
+cache: pip3
+
+install:
+  - pip install -r requirements.txt
+
+before_script:
+  - psql -c "CREATE USER $METRONUS_DB_USER WITH PASSWORD '$METRONUS_DB_PASS';" -U postgres
+  - psql -c "ALTER USER $METRONUS_DB_USER CREATEDB;" -U postgres
+  - psql -c "CREATE DATABASE $METRONUS_DB_NAME;" -U postgres
+  - psql -c "GRANT ALL PRIVILEGES ON DATABASE $METRONUS_DB_NAME TO $METRONUS_DB_USER;" -U postgres
+  - cd $TRAVIS_BUILD_DIR/Metronus-Project/
+  - rm -r metronus_app/migrations/
+
+script:
+  - python3 manage.py makemigrations --noinput && python3 manage.py makemigrations metronus_app --noinput
+  - python3 manage.py migrate --noinput
+  - python3 manage.py compilemessages
+  - python3 manage.py populate
+  - printf 'yes\n' | python3 manage.py flush
+  - python3 manage.py populaternd
+  - coverage run --source=. manage.py test
+  - mv .coverage ../
+  - cd $TRAVIS_BUILD_DIR/
+  - coveralls
+  - sonar-scanner
+
+cache:
+  directories:
+    '$HOME/.sonar/cache'

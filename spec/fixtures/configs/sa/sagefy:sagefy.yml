@@ -1,0 +1,30 @@
+language: python
+python:
+  - 3.6
+services:
+  - redis-server
+  - elasticsearch
+addons:
+  postgresql: "9.6"
+before_install:
+  - nvm install 6.11.0
+install:
+  - pip install -r server/requirements.txt
+  - source ~/virtualenv/python2.7/bin/activate
+  - nvm use 6.11.0
+  - 'cd client && yarn install && cd ..'
+  - source ~/virtualenv/python3.6/bin/activate
+before_script:
+  - psql -U postgres -a -f ./postgres/sagefy_tables.sql
+script:
+  - cd server
+  - pylint $(find . -iname "*.py") -j 4
+  - coverage run --module py.test
+  - cd ../client
+  - nvm use 6.11.0
+  - yarn test
+  - cd ..
+after_success:
+  - coverage report --omit="server/test/*,*site-packages*,*distutils*"
+notifications:
+  email: true

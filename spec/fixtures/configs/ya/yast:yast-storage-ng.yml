@@ -1,0 +1,23 @@
+sudo: required
+language: bash
+services:
+  - docker
+
+before_install:
+  - docker build -t yast-storage-ng-image .
+    # list the installed packages (just for easier debugging)
+  - docker run --rm -it yast-storage-ng-image rpm -qa | sort
+
+# define jobs running in parallel to speed up the build
+env:
+  # only the unit tests
+  - CMD='yast-travis-ruby -o tests'
+  # only rubocop
+  - CMD='yast-travis-ruby -o rubocop'
+  # the rest, -y uses "rake check:doc" instead of plain "yardoc"
+  - CMD='yast-travis-ruby -y -x tests -x rubocop'
+
+script:
+  # the "yast-travis-ruby" script is included in the base yastdevel/ruby image
+  # see https://github.com/yast/docker-yast-ruby/blob/master/yast-travis-ruby
+  - docker run -it -e TRAVIS=1 -e TRAVIS_JOB_ID="$TRAVIS_JOB_ID" yast-storage-ng-image $CMD

@@ -1,0 +1,39 @@
+language: python
+install: pip install pip --upgrade
+matrix:
+    include:
+        - python: 2.7
+        - python: 3.6
+        - python: 3.7
+          dist: xenial
+          sudo: required
+script: tox -e "$(echo py$TRAVIS_PYTHON_VERSION | tr -d .)-style"
+notifications:
+  webhooks:
+    urls:
+    - https://webhooks.gitter.im/e/8ae38b9a790ed3e31c7a
+    on_success: change
+    on_failure: change
+    on_start: false
+git:
+  depth: 2147483647
+cache:
+  directories:
+  - $HOME/.cache/pip
+deploy:
+  provider: pypi
+  user: wvangeit
+  password:
+    secure: c9fJz1IliA0Scg4MS1HBAFbyGHnTOViYbF0I0WhrspqeNyyF4WKBx2kQzvMguc6JVm8MrcqdrM2P/me7WiD9vO4geqO/kXsjeg8kE2JnlGtAgX8PpOaR0P/IFdVcmfIc//05QS8PyovVZMxqlOrya1CN9cO4NMDRM9LS2dAaih0=
+  distributions: sdist
+  on:
+    condition: $TRAVIS_EVENT_TYPE != cron && $TRAVIS_PYTHON_VERSION == 2.7
+before_install:
+- pip install pip --upgrade
+- pip install tox --upgrade
+- pip install codecov
+after_success:
+- codecov
+addons:
+  code_climate:
+    repo_token: 93198de899a0c9fdd2352396517f526f168656dcbec8aa51129c6689445276f5

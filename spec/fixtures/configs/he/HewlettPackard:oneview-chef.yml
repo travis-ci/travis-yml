@@ -1,0 +1,15 @@
+language: ruby
+rvm:
+  - 2.2.6
+  - 2.3.1
+  - 2.4
+
+before_install: gem update bundler
+
+script:
+  - rake test
+  - bundle exec codeclimate-test-reporter
+
+matrix:
+  allow_failures:
+    - rvm: 2.4

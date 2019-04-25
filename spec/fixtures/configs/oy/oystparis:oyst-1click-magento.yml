@@ -1,0 +1,107 @@
+sudo: false
+dist: precise
+language: php
+
+php:
+  - 5.3
+  - 5.4
+  - 5.5
+  - 5.6
+  - 7.0
+
+matrix:
+  fast_finish: true
+  #allow_failures:
+  #  - php: 5.6
+  exclude:
+    # Newer Magento versions uses newer PHP versions
+    - php: 5.3
+      env: MAGENTO_VERSION="magento-mirror-1.9.3.1"
+    # Old Magento Versions are not officially supported to run with PHP 5.5
+    - php: 5.5
+      env: MAGENTO_VERSION="magento-mirror-1.6.2.0"
+    - php: 5.5
+      env: MAGENTO_VERSION="magento-mirror-1.7.0.2"
+    # Old Magento Versions are not officially supported to run with PHP 5.6
+    - php: 5.6
+      env: MAGENTO_VERSION="magento-mirror-1.6.2.0"
+    - php: 5.6
+      env: MAGENTO_VERSION="magento-mirror-1.7.0.2"
+    - php: 5.6
+      env: MAGENTO_VERSION="magento-mirror-1.8.1.0"
+    - php: 5.6
+      env: MAGENTO_VERSION="magento-mirror-1.9.0.1"
+    # Old Magento Versions are not officially supported to run with PHP 7.0
+    - php: 7.0
+      env: MAGENTO_VERSION="magento-mirror-1.6.2.0"
+    - php: 7.0
+      env: MAGENTO_VERSION="magento-mirror-1.7.0.2"
+    - php: 7.0
+      env: MAGENTO_VERSION="magento-mirror-1.8.1.0"
+    - php: 7.0
+      env: MAGENTO_VERSION="magento-mirror-1.9.0.1"
+
+env:
+  global:
+    - MAGENTO_DB_ALLOWSAME=1
+    - SKIP_CLEANUP=1
+  matrix:
+    - MAGENTO_VERSION="magento-mirror-1.6.2.0"
+    - MAGENTO_VERSION="magento-mirror-1.7.0.2"
+    - MAGENTO_VERSION="magento-mirror-1.8.1.0"
+    - MAGENTO_VERSION="magento-mirror-1.9.3.1"
+
+cache:
+  apt: true
+  directories:
+    - $HOME/.composer/cache
+    - $HOME/.cache/bin
+
+before_install:
+  - test -n "$GITHUB_TOKEN" && echo "Found GitHub token" && composer config github-oauth.github.com "$GITHUB_TOKEN" || echo "No GitHub token found"
+
+install:
+  - composer install --no-interaction
+  - phpenv rehash
+
+script:
+  - mkdir -p build/logs
+  - curl --retry 2 --retry-delay 5 -H "Authorization":"token $GITHUB_TOKEN" -f -sSL https://raw.githubusercontent.com/AOEpeople/MageTestStand//master/setup.sh | bash
+  ## PHP CodeSniffer disable error on exit
+  - vendor/bin/phpcs --config-set ignore_warnings_on_exit 1
+  ## PHP Copy/Paste Detector
+  - vendor/bin/phpcpd --exclude lib --exclude vendor $TRAVIS_BUILD_DIR
+  ## PHP Mess Detector
+  - vendor/bin/phpmd $TRAVIS_BUILD_DIR text cleancode --exclude lib,vendor --ignore-violations-on-exit
+  - vendor/bin/phpmd $TRAVIS_BUILD_DIR text codesize --exclude lib,vendor --ignore-violations-on-exit
+  - vendor/bin/phpmd $TRAVIS_BUILD_DIR text controversial --exclude lib,vendor --ignore-violations-on-exit
+  - vendor/bin/phpmd $TRAVIS_BUILD_DIR text design --exclude lib,vendor --ignore-violations-on-exit
+  - vendor/bin/phpmd $TRAVIS_BUILD_DIR text naming --exclude lib,vendor --ignore-violations-on-exit
+  - vendor/bin/phpmd $TRAVIS_BUILD_DIR text unusedcode --exclude lib,vendor --ignore-violations-on-exit
+  ## PHPLOC
+  - vendor/bin/phploc $TRAVIS_BUILD_DIR --exclude lib --exclude vendor
+  ## LINT
+  - '! find $TRAVIS_BUILD_DIR/app -type f -name \*.php -exec php -l {} \; 2>&1 >&- | grep "^"'
+  ## Magento EQP Code Sniffer Coding Standard
+  - if [[ "$TRAVIS_PHP_VERSION" == "5.6" ]] || [[ "$TRAVIS_PHP_VERSION" == "7.0" ]]; then
+      composer config http-basic.repo.magento.com $MAGENTO_REPO_PUBLIC_KEY $MAGENTO_REPO_PRIVATE_KEY &&
+      composer config repositories.magento-eqp git https://github.com/magento/marketplace-eqp &&
+      composer require "magento/marketplace-eqp:dev-master" &&
+      cp -a vendor/magento/marketplace-eqp/MEQP vendor/squizlabs/php_codesniffer/src/Standards/ &&
+      cp -a vendor/magento/marketplace-eqp/MEQP1 vendor/squizlabs/php_codesniffer/src/Standards/ &&
+      vendor/bin/phpcs --standard=MEQP1 --extensions=php,phtml --ignore=lib,vendor --severity=10 $TRAVIS_BUILD_DIR;
+    fi
+  ## Magento ECG Code Sniffer Coding Standard
+  - if [[ "$TRAVIS_PHP_VERSION" == "5.3" ]]; then
+      cp -a vendor/magento-ecg/coding-standard/Ecg vendor/squizlabs/php_codesniffer/CodeSniffer/Standards/Ecg;
+    else
+      vendor/bin/phpcs --config-set installed_paths vendor/magento-ecg/coding-standard/Ecg;
+    fi
+  - vendor/bin/phpcs --standard=Ecg --extensions=php,phtml --ignore=lib,vendor $TRAVIS_BUILD_DIR
+  ## PHPCompatibility
+  - vendor/bin/phpcs --config-set installed_paths vendor/wimg/php-compatibility && vendor/bin/phpcs --standard=PHPCompatibility --extensions=php,phtml --ignore=lib,vendor --runtime-set testVersion $TRAVIS_PHP_VERSION $TRAVIS_BUILD_DIR
+
+notifications:
+  email:
+    on_success: never  # options: [always|never|change] default: always
+    on_failure: never  # options: [always|never|change] default: always

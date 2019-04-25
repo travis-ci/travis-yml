@@ -1,0 +1,101 @@
+dist: xenial
+sudo: required
+
+language: cpp
+
+git:
+  depth: false
+
+if: |
+  branch IN (staging, trying, master)
+  OR type = pull_request
+
+addons:
+  snaps:
+  - lxd
+
+env:
+  global:
+  - SNAPCRAFT_ENABLE_ERROR_REPORTING=0
+
+install:
+- sudo apt remove --assume-yes lxd
+- sudo /snap/bin/lxd waitready
+- sudo /snap/bin/lxd init --auto
+- sudo adduser $USER lxd
+- ccache --max-size=5G
+
+before_script:
+- "[ ! -f tests/travis.patch ] || patch -p1 --no-backup-if-mismatch < tests/travis.patch"
+- "[ ! -f tests/travis-${BUILD_TYPE}.patch ] || patch -p1 < tests/travis-${BUILD_TYPE}.patch"
+- sg lxd -c 'lxc remote add --protocol simplestreams ubuntu-minimal https://cloud-images.ubuntu.com/minimal/releases/'
+- |
+    sg lxd -c "$( printf '/snap/bin/lxc launch ubuntu-minimal:16.04 snapcraft-multipass \
+      --config user.user-data="#cloud-config\npackages: [ccache]" \
+      --config environment.PATH="/usr/lib/ccache:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin" \
+      --config raw.idmap="uid %s 0\ngid %s 0"' $( id -u ) $( id -g ) )"
+- sg lxd -c "/snap/bin/lxc config device add snapcraft-multipass project disk source=$PWD path=/root/project"
+- sg lxd -c "/snap/bin/lxc config device add snapcraft-multipass ccache disk source=${HOME}/.ccache/ path=/root/.ccache"
+- while ! sg lxd -c '/snap/bin/lxc exec snapcraft-multipass -- cloud-init status' | grep 'done'; do sleep 5; done
+- while ! sg lxd -c '/snap/bin/lxc exec snapcraft-multipass -- snap install snapcraft --classic'; do sleep 5; done
+- ccache --zero-stats
+
+after_failure:
+- cat /tmp/*/trace.txt
+
+after_success:
+- ccache --show-stats
+
+cache: ccache
+
+jobs:
+  include:
+    - env: BUILD_TYPE=RelWithDebInfo
+      script:
+      - sg lxd -c '/snap/bin/lxc exec snapcraft-multipass -- sh -c "cd project; snapcraft"'
+
+    - env: BUILD_TYPE=Debug
+      script:
+      - sg lxd -c '/snap/bin/lxc exec snapcraft-multipass -- sh -c "cd project; snapcraft build multipass"'
+      - sg lxd -c
+          '/snap/bin/lxc exec snapcraft-multipass --
+             env CTEST_OUTPUT_ON_FAILURE=1
+                 LD_LIBRARY_PATH=/root/project/stage/usr/lib/x86_64-linux-gnu/:/root/project/stage/lib/
+                 /root/project/parts/multipass/build/bin/multipass_tests'
+
+    - env: BUILD_TYPE=Coverage
+      script:
+      - sg lxd -c '/snap/bin/lxc exec snapcraft-multipass -- sh -c "cd project; snapcraft build multipass"'
+      - sg lxd -c
+          '/snap/bin/lxc exec snapcraft-multipass --
+             env CTEST_OUTPUT_ON_FAILURE=1
+                 LD_LIBRARY_PATH=/root/project/stage/usr/lib/x86_64-linux-gnu/:/root/project/stage/lib/
+                 cmake --build /root/project/parts/multipass/build --target covreport'
+      after_success:
+      - bash <(curl -s https://codecov.io/bash) || echo "Codecov did not collect coverage reports"
+    - if: |
+        repo = CanonicalLtd/multipass
+               AND (type != pull_request
+                    OR head_repo = repo)
+      env: BUILD_TYPE=macOS
+      git:
+        submodules: false
+      sudo: false
+      addons: ~
+      before_install:
+      - openssl aes-256-cbc -K $encrypted_8d49841daf21_key -iv $encrypted_8d49841daf21_iv
+        -in tools/bot-data.tar.xz.enc -out tools/bot-data.tar.xz -d
+      - tar --extract --xz --file tools/bot-data.tar.xz --directory ${HOME}
+      install: ~
+      before_script: ~
+      script:
+      - |
+        if [ "${TRAVIS_EVENT_TYPE}" == "pull_request" ]; then
+          REF="+refs/pull/${TRAVIS_PULL_REQUEST}/merge"
+        else
+          REF="${TRAVIS_COMMIT}"
+        fi
+        ssh -q -p ${MAC_PORT} ${MAC_USERHOST} multipass-build/build-in-snapshot.sh "${REF}"
+      after_success: ~
+      after_failure: ~
+      cache: ~

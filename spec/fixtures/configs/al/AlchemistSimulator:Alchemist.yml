@@ -1,0 +1,98 @@
+sudo: required
+dist: xenial
+git:
+  depth: false
+language: java
+jdk:
+  - openjdk8
+  - openjdk11
+  - openjdk12
+
+before_install:
+  - sudo apt-get -qq update
+  - sudo apt-get install -y graphviz openjfx
+
+env:
+  global:
+    - secure: "OMDTeFBKjw0acBlmqh4+FZ5nnt/Aj2pF705Tta0qm3Sf61S+k1u503Dzt+nDs+/yY19HyyDFUj3+56a88IssEjd3xUVzPOz7kCW0p/lcqbAQ8jIATmoWpoMM9cOI4Xv9h+JJxOqLR54ODR0MGo/BVa51w93jsdpDnrlLNOoNf08r1bfA2Hifh/iKD/YzMyGqFI+vxvED7HhbDNG48chsr3QSGxsizXDtEZK+u0JZ6/CR2rHZTQzD6bkv3N2Vbq/4tc4pZVdH7zMXWRkrGunhHchwmgEwz90iJeo4fEeMBiWpchWg7Huxr2LUisdRKjzNqf+UjV5DljtK/RDbzyjC8vIAllD2hsmPJW1EfTOrIfIVgT2CoRrKKGIp/Dk5LkOTePMCXloe+M7gYipEWreAXeGYotAOdnxW1IoxhM3Dsbb4yxd6h1h2bFXToj0bzIEMySgivYJ0n0PhvuwWb/KUf2vt8r+ULdWvPVjgqQUDv38fgnqyfMmgMDfABlGpSxQWT2gy5VAinpgQzfNrVeOkDxxGDBLa4vOMy/yQm/bnXJyyUA0NAv5xQBCZhsDqjTOwzKWGFWkdrN0e91JjF7+bvkKnH1JQhz8yuLdLASm5LEj5nZbCZeDu4jbZhags1pkmNxwlPJjWfpzeXiiXwMdAkIn1RrkMefHPfJ5hq+G3y9I="
+    - secure: "NxGbZ0Ni7kc4KTux5xmTEPLc0A6pohfst76lPPBFSnsGiDt+xVA0nywYc/UUR9UsWRKXdqCqSiqjwjldbbMjkhGILl/+cV6UNhfWUDc++u0keeBVVYpz9Ekfqz+U0mnuZXh8gIh6+bCNYH4iCmqYU/UcZCtJGa0AxDMWXPKwhd/WPoUF5DOcHgRj9WpBwnOG1TtSlWBk18wCbscYAUbtu2gOmStingjTfn4nZ1IhaYFbC1Ba+gcTmLxGf4JSBxZ0CYnH+IVOQQK5PKsxht9yRFpfcmYEZMZFZ/kp0H25gBPdITeHuz7zq7oe2Si7UZ6PJp8Gnin0gMmp0FZPlqbV2Xl1AKaQD/2+AxqBSNDnEWIHwLToFbrER3zJX/Fhds8iXt1o3RrNQHwPrWiJMjzSZbAqCd1tgzSMSSPQFsrOh5P8FX+xiroz454BQBmYPikh7InAHXxF2iu2hZ+fr0RHKYMYhdZZMd0Cx2ph+5W7R/QDlTIHmsmSkBfi5s299tRCPHCenk+50t3zboVHLw9BjcVpSEbziB1GQI3EkJxE9m8Etoir++bgB7EQn30uwS9xErDdl+p0pfEM6acQVc10VfeIGmkLT2KhqPHDAvo2EYGFzN0W1st2/sGQp5YJ5TmBq3deqyVN8qWy63JPa9XyqcrON1dNaWWLR1os+6r0X/k="
+    - secure: "AIH65k/wBxQVL1mbgi63at7qxk7YyI5C94K++QS/bmHqbsQAWOqmguvh87p21ZrfN2VeMiMdL3ROd0wnI2PPPGEU3I/q4RfYFZhphM5E82DLkF+rXL9g2LvIEN4ggRoWKb2PXUYxCq+XV/HSqMl1xdMuaBlYlUzZMS8NKD2mWclBqqdUie03h7v8ypFFaLN/n2FojOl289f7KUfMjc+crwxIKUAU7Olr5hp44NkL3ruBY5bWUqEmFPGkX12ZVRgf/K9m29P/tdvQxL1huvK/znlv+/uF5jbsy7VhfJBwt857KehRmkOo9sMhFzfyQkXUrF2NmLG4ZQjHfrn6QDumjb79L94v8Tb3CsxIkEuWzJfh0XPEsnqky3IPM5uM1noxHyzqGiUk6r+QiPlFlH4H09GbTcXKJeLHChG4rw0HqINQ9J9r3jeP6H7wcRZx03DEuu6wZIcsl3aHHRGeTmIv1qwfYciOKC7fvOhL1B9R8/6R7bmAokcazCSrPDMzXjViCPu08as3/sg6y0AX/94NCfkBN5fsmLi1CB8KYgZYANOn6BJEWiOYpyRwUcxaCUpxk1N5y44aJk4XBVlj/NaESQZzT/z1YsJ5MmDuV4gfqid2GISjNXbMPo6Ffwilhx1+86ioRnrkvDOQTciMqCgmtzbdX/WBSWLaGEcAVkebOTM="
+    - secure: "G7b+NejZABu2+j1+rrNfhEFiAYMZ9KizzI6AdUx8dh/k7zcjn6TaBnPFRbR5+4QS6121USQABwrvDdi2MAcGuzBfjejNWOm6oH7a+3ko3RPY/T2h0d5/eSyRuhFYx4GJpx4MJyjcSsrjjEUwrAnf7A6olkjHLJn3ROP6qK7Vh9i+Y4WvFypyLSN3sboI1oi6LWHv2JajZJnmceiCp3R5BrzpXqjBI6hiuvYgEbZ67lCFiXGa2poXAUFVplT6mq5mHoTfc+dDvJ9i5gk+14I3ZSdBREtY/Z1zo/mtpJyl1P+GqvhQhOBBZ0qk0S7SdJXLHV7IBezZcyihwVCfhShs3XAi2UuPrhuBtNoJMCaf0ITwp9ZKtGfK9hQ5NecVpjIUOyQpqM93ygrPwiBbHklJJtIfMg7yWP9GIgRAncwslonW/EkefX+LNNuDQmj+kHEtkZVGxpnTBlrO3qCerc83N0+8YH7W0Ur94dIYKYD/LYC+3/4nCJ3DlUuW6lc/SMi8DtkXplmGueUUpY2HWAn0Q2EpERhEIowdcPw+2KxCHbGIQSH7BJqqfsdwrnVeLdl1Fjnx244N5E9KRpNHECgHx3pZQaHqGJNriax0gginr7VAHh1zpNCNctYjpFYiswyxdcjGoGN1gRSOeGrYo/ed8R1kz6ag/HvDiRfDc3vCzOg="
+    - secure: "emv/wjP9BXCzoEzxlAruXOCMPaswObCaEESdhKfdikJt8gDFQfKydcu95XrfXPG6Eww4QleoOnxIppTNpphbcMbcZu/aa7N4JH+DV3XPqqlsvosz+CLhVjBr4OVtBoHxzKeTqeP+uE5D0hOdFJrIJK+qvelDO05Bknx3xLLayz1viE/chHdvX2zRMRCEA97GapkwfaQrCfNO0rkViy20v/A4C3HjkoL5yGgu3iqJdq2l89LXSsQgvyfevGV1vkhiqOEsd5FU7UmfgbKphbhUSSL7qV+i4hyMIjQFhFluCeC2+dXZdCr011pjYrNfLcpp0gesHsIhi7om42tQ8hTTNC5WO/QXGkIWcUql1eVgpRaDIAffGmTSXf4CQvKS7LVSfFW7njy01xcDF6fsukoMW9JU3toCUtyhGrmgaDldzE+ZsDl8nnqMNGqBSdeVzwPF1GzjPZUxWIntBNU3XrtXb/vyNldbkXQpzPZ+ah5K3c6989BHleBcL8ynlpE9CBrSyB4oSQ2GpoKJuIUYnKkhTHU0W08jTKx1Ac/O2UbvfTY+hYPiqTUKvO5bfmyKQK6T8qMRlZSq1935QNnahcRRBPyNn9CAXbOcNRdEmMB44PETiEeIMTQG8oLc+gLxXnPKqSrFzJOA84pmH7SRS0QtyB9YOzRfMnxOU7E6V6poXlw="
+    - secure: "NRvVMuGymr4zVygjC2xIGlSb4U8kl2PtDw81BxD49tz8vnxOyY/a1ZuICoTYlS/wCaSBWa1SiBQVMxDl0VXZDCujo2bk2ZEmZMxHBNV+L0Q7ulq9YR469GiY93/5WSyi8XLRoHRCPPEv83WkLikSP4WrT/JqzsxqvlUqfitxM/ZS3t9j87gkq7L3CMFZTgGk1hMAkcSiMc9d2BDja4J7mCGA8O3hHyrD7H2Lq2uyexS7NuyDDklaFXiA6J+lqkzStTHt3JInVqiSnAWlNkVarSAUXWsnREz7/pE2F6e+ytN34UwOECgq9LfYU0SLiJEy4AxSb4hkcppMULHICNd7v9vWXlGlm6lrfFEwTMtMDQB05etbIZ8QKm6XLYBgFpXGD2M8X7xnJZVoWBFiELirRgWtH1+Kppk37JgAdTpyam3GaiZyB1UDrUnsckAbn3uT6hlB5Wp/3pBSyc0Wqc3Wd2ZPPOXseePmoN8Uxd14wC87s8vBdjyFtp2V3wQW/stVbHDiVyKPjX0SsNs8am7DkX6GEuFvEjP92vB2McJvQ0iAlq28bz/OSfRQ0GSOKHxAsmKjSKduIGrTFshu18J41t8twGY3wqJPuzs4ywzKwPBFv9firMIewX4E62UX1/VJhQiLH3iOHMBy1Qs8o65qnOhdaS3ehxZG+6mzZ++hFu0="
+    - secure: "YkhodE9pmi+NooHmAdVWFaDaVtWZv2y5qaKhHqJoMIDhdaaS4f0t5Fn9S48ndPh0VlAboD5oF8bR2BwotEJNOoI5bsA9TzlIxIFaK+yS2UrkMEpC5BswmfyidY6H8wJZPFbaGxLXuw77aPE5G0QhTO4kKjpUxJSG2Yp0y9uEOeY8FZMjSsV7i4+2XllCXMG3jc8N7UC9vvAqYA5TwzL/CyyBdrRVO7QFzb+F1V5464ha5JJlAAvrNZDHq+g0NZvBsWLAe9VgGNbDms7q7BC1ZXOHM9do86i/Ca4AHndJwl5KdipyscNdgz1IFgTHJaMB5Xqhh8lmh/1rZX/5oeChigxuLB6mOcgcqmcI8Ye/6EXSA0Y33nmfKoXmG8+EBXOPYtD8iQSJlq1hTHdwZOleUBKaDVkn57MHvdiOMH/De2kqHiBGJRpsnBtu/zK7TTocZOgis7MmeCf8FPLJ0IL69pXYlXHZeO5OC890s7AkZgWgHsctozjdJK0t6dpWNO3HP2ZGb+EysbeVjV7eSF5WBtXhAnm1RIHZRdZolCCj5zpQev6t4ULcsD171zWdvnBQ8cKWl9JxlqSaaZx9c4zp+b/atMMBpvTrIOddvCRurPVXbXR8X+KT9wExT0Sfe3RE8OIN99DU1fWXDGV6J6t0Lzveenwr47hm/2IfrjTaXls="
+    - TERM=dumb
+  matrix:
+    - PUBLISH=true
+    - PUBLISH=false
+matrix:
+  exclude:
+    - jdk: openjdk8
+      env: PUBLISH=false
+    - jdk: openjdk11
+      env: PUBLISH=false
+    - jdk: openjdk12
+      env: PUBLISH=true
+
+install: true
+
+script:
+  - 'if [ "$TRAVIS_PULL_REQUEST" = "false" ] && [ "$TRAVIS_REPO_SLUG" = "AlchemistSimulator/Alchemist" ]; then bash travis_build.sh; else bash travis_build_pull_request.sh; fi'
+
+after_success:
+  - cd alchemist
+  - if [ "$PUBLISH" = true ]; then ./gradlew bintrayUpload publishMainPublicationToMavenRepository -x dokka -x javadoc > >(egrep -v '(null:-1:-1)|(t find node by signature)'); fi
+
+deploy:
+  - provider: releases
+    skip_cleanup: true
+    api_key:
+      secure: OiCBDNskosVJ+svWTi6VrgjRiQJr/veNuz79FpoVZk3wFjWHj6yQICkBHEcYO/XQzXB9EYwZsXQkMNhMBX3OTeG3c1nHDvFINpGKB2cKqYS8/qmY228ZPF51ovXmT1v+C6Y+TMJFK8+uNVMHukzJZMW0TupFgjXaFRGr7odee62Oa5zYd5WWl2a5NkCtrHllKdyTnrizaLAVMGU9CUqIDMKHrIe4tD79utn9rgo1uAxIKSrPZMKomul6D+kp3eZAkBi0YWqem9QPzSXa+Bs8e4QbhydwFYx7B5OcnY2e5iYZlM6AXJJeUQ499Ntyhw7t64C6ThPevKrdg7zQ8MCcSbOFNv0Sehm639AzgM+5ripXowSJVpLxb5+dEbe+uc8TKb9NKEniY4Ox5Ml3o193+1BSUDVEapoLA7VVGc+E+qeL1ZwGyNwTmMQJ3pg50AS9xH4cO5F2Z7ffnX1iUGEGoAc1aS7nr4fu7cH04P4CJ0OYYmB9/ERUudPbTdx4Jt8+WaiRLarnLRdgr8Ui7MgVL+Ck5auwA7z5Rw/gX4GNlxmqZeCNUmo7qkwo+e5HqjbifrZifIynl45oj/bbBy8JeioC5ug0FK5I8IKDFyTn2doHHpoU4Wq6EGhTK02Mcvc5brVz5D2cV4++lzauDGUUypJO1o19W6Kbb1THZTLgYAQ=
+    file_glob: true
+    file: "${HOME}/build/${TRAVIS_REPO_SLUG}/alchemist/build/libs/alchemist-redist*.jar"
+    on:
+      repo: AlchemistSimulator/Alchemist
+      tags: true
+      jdk: openjdk8
+  - provider: releases
+    skip_cleanup: true
+    api_key:
+      secure: OiCBDNskosVJ+svWTi6VrgjRiQJr/veNuz79FpoVZk3wFjWHj6yQICkBHEcYO/XQzXB9EYwZsXQkMNhMBX3OTeG3c1nHDvFINpGKB2cKqYS8/qmY228ZPF51ovXmT1v+C6Y+TMJFK8+uNVMHukzJZMW0TupFgjXaFRGr7odee62Oa5zYd5WWl2a5NkCtrHllKdyTnrizaLAVMGU9CUqIDMKHrIe4tD79utn9rgo1uAxIKSrPZMKomul6D+kp3eZAkBi0YWqem9QPzSXa+Bs8e4QbhydwFYx7B5OcnY2e5iYZlM6AXJJeUQ499Ntyhw7t64C6ThPevKrdg7zQ8MCcSbOFNv0Sehm639AzgM+5ripXowSJVpLxb5+dEbe+uc8TKb9NKEniY4Ox5Ml3o193+1BSUDVEapoLA7VVGc+E+qeL1ZwGyNwTmMQJ3pg50AS9xH4cO5F2Z7ffnX1iUGEGoAc1aS7nr4fu7cH04P4CJ0OYYmB9/ERUudPbTdx4Jt8+WaiRLarnLRdgr8Ui7MgVL+Ck5auwA7z5Rw/gX4GNlxmqZeCNUmo7qkwo+e5HqjbifrZifIynl45oj/bbBy8JeioC5ug0FK5I8IKDFyTn2doHHpoU4Wq6EGhTK02Mcvc5brVz5D2cV4++lzauDGUUypJO1o19W6Kbb1THZTLgYAQ=
+    file_glob: true
+    file: "${HOME}/build/${TRAVIS_REPO_SLUG}/alchemist/build/libs/alchemist-redist*.jar"
+    on:
+      repo: AlchemistSimulator/Alchemist
+      tags: true
+      jdk: openjdk11
+  - provider: surge
+    skip_cleanup: true
+    project: "./alchemist/build/docs/javadoc/"
+    domain: alchemist-unstable-doc.surge.sh
+    on:
+      repo: AlchemistSimulator/Alchemist
+      jdk: openjdk8
+      branch: develop
+  - provider: surge
+    skip_cleanup: true
+    project: "./alchemist/report"
+    domain: alchemist-unstable-reports.surge.sh
+    on:
+      repo: AlchemistSimulator/Alchemist
+      jdk: openjdk8
+      branch: develop
+  - provider: surge
+    skip_cleanup: true
+    project: "./alchemist/build/docs/javadoc/"
+    domain: alchemist-doc.surge.sh
+    on:
+      repo: AlchemistSimulator/Alchemist
+      tags: true
+      jdk: openjdk8
+  - provider: surge
+    skip_cleanup: true
+    project: "./alchemist/report"
+    domain: alchemist-reports.surge.sh
+    on:
+      repo: AlchemistSimulator/Alchemist
+      tags: true
+      jdk: openjdk8

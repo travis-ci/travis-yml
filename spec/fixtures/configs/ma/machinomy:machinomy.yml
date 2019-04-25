@@ -1,0 +1,28 @@
+---
+language: node_js
+node_js:
+  - 9
+cache: yarn
+services:
+  - postgresql
+env:
+  - PGUSER=postgres PGDATABASE=machinomy_test NODE_ENV=test
+before_install:
+  - curl -o- -L https://yarnpkg.com/install.sh | bash -s -- --version 1.7.0
+  - export PATH="$HOME/.yarn/bin:$PATH"
+  - yarn global add lerna
+  - yarn global add codecov
+  - lerna bootstrap
+  - lerna link
+before_script:
+  - psql -c 'create database machinomy_test;' -U postgres -d postgres
+  - psql -c "create user testuser with password 'testpassword' createdb;" -U postgres
+  - PGPASSWORD='testpassword' psql -c 'create database testdb;' -U testuser -d postgres
+script:
+  - yarn global add @machinomy/wraptso
+  - yarn run lint
+  - yarn run build
+  - yarn run test
+  - yarn run coverage
+after_script:
+  - bash <(curl -s https://codecov.io/bash) -s packages -t $CODECOV

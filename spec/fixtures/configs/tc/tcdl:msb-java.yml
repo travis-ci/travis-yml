@@ -1,0 +1,20 @@
+language: java
+jdk:
+- oraclejdk8
+services:
+- rabbitmq
+- docker
+before_install:
+  - docker pull webcenter/activemq:latest
+  - docker run -d --name='activemq' -p 8161:8161 -p 61616:61616 -p 61613:61613 webcenter/activemq:latest
+  - docker ps -a
+  - docker inspect activemq
+install: ''
+script:
+- mvn clean deploy --settings settings.xml -B -V
+after_success:
+- mvn clean test jacoco:report coveralls:report
+env:
+  global:
+  - secure: LIfUuBznv98TeC2mzZG6beSXgoyAtAnVdEkj+HfLR2Dm5wmqAC/LujAtFcqEL79c8+48/g4K3sM8OoUWyELdS8G9uYGgh6BLxpI+jAjpUoYGSlzfpM5Q6V5FG6oixkzBMMGV2tNDvH+0IcrhR7uPN1pMz8vvS01AqOlWXAD83Ms=
+  - secure: CBVCm/P1QMFd4B6jqdfJV5cwYeubIMcMyppS8PS//QL3OzaC9x+h5wWf2Rv7x4PItCOHPEy7kavIBJRAEel8H5egVVydkoNSvGglqBO5uQQvojl89VJGAfCp/7Evv9PP8Z9YhCIWPzQbr0kuL9+6amkUcIRxOLgcvQxrDvubqw8=

@@ -1,0 +1,36 @@
+language: rust
+
+rust:
+  - stable
+  - beta
+  - nightly
+
+matrix:
+  allow_failures:
+    - rust: nightly
+  include:
+    - rust: stable
+      install:
+        - rustup component add rustfmt
+      script:
+        - cargo build
+        - cargo fmt -- --check
+    - rust: stable
+      install:
+        - rustup component add clippy
+      script:
+        - cargo build
+        - cargo clippy -- -D clippy
+
+services:
+  - postgresql
+
+env:
+  - DATABASE_URL=postgresql://postgres@localhost:5432 NB_CONNECTION=1 RUST_TEST_THREADS=1
+
+cache: cargo
+
+before_script:
+  - export PATH="$PATH:$HOME/.cargo/bin"
+  - which diesel || cargo install diesel_cli --no-default-features --features postgres
+  - diesel setup

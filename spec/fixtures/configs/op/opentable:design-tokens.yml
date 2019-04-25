@@ -1,0 +1,20 @@
+language: node_js
+
+matrix:
+  include:
+    - node_js: "8"
+
+after_success:
+  - if [ $TRAVIS_PULL_REQUEST == false ] && [ $TRAVIS_BRANCH == "master" ]; then
+        npm config set //registry.npmjs.org/:_authToken=$NPM_TOKEN -q;
+        git config --global user.name ${GH_USERNAME};
+        git config --global user.email ${GH_EMAIL};
+        git checkout master;
+        git remote set-url origin https://${GH_TOKEN}@github.com/opentable/design-tokens.git; 
+        npm run automatic-release;
+      else
+        npm run automatic-release-test;
+      fi
+
+notifications:
+  email: false

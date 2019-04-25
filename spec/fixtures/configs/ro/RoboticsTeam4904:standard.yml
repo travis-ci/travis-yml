@@ -1,0 +1,15 @@
+language: java
+jdk:
+- oraclejdk11
+
+install:
+- git clone --recursive https://github.com/RoboticsTeam4904/VS-Simple ~/VS-Simple
+- cd ~/VS-Simple/src/main/java/frc4904/standard
+- git fetch
+- git checkout $TRAVIS_BRANCH
+- cd ~/VS-Simple
+
+notifications:
+  email: none
+
+script: ./gradlew build

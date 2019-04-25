@@ -1,0 +1,19 @@
+language: "python"
+python: "3.6"
+sudo: required
+addons:
+  apt:
+    update: true
+    sources:
+    - debian-sid
+install:
+  - sudo apt install shellcheck qemu-system-x86
+  - pip install flake8 pytest-cov python-coveralls
+script:
+  - .travis/travis_script.sh
+after_success:
+  - coveralls
+after_failure:
+  - .travis/travis_after_failure.sh
+notifications:
+  - email: false

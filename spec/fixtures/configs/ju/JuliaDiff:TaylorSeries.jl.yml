@@ -1,0 +1,37 @@
+language: julia
+
+os:
+  - linux
+  - osx
+
+julia:
+    - 0.7
+    - 1.0
+    - 1.1
+    - nightly
+
+notifications:
+    email: false
+
+matrix:
+  allow_failures:
+   - julia: nightly
+
+env:
+  global:
+    - DOCUMENTER_DEBUG=true
+
+jobs:
+  include:
+    - stage: "Documentation"
+      julia: 1.1
+      os: linux
+      script:
+        - julia --project=docs/ -e 'using Pkg; Pkg.develop(PackageSpec(path=pwd())); Pkg.instantiate()'
+        - julia --project=docs/ docs/make.jl
+      after_success: skip
+
+after_success:
+  - julia -e 'import Pkg; Pkg.add("Coverage"); using Coverage; Coveralls.submit(Coveralls.process_folder())'
+
+sudo: false

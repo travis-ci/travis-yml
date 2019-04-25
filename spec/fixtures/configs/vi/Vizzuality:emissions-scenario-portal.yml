@@ -1,0 +1,15 @@
+dist: trusty
+sudo: false
+language: ruby
+rvm:
+  - 2.5.0
+addons:
+  postgresql: 9.6
+env:
+  - MAILER_DEFAULT_FROM=no-reply@example.com MAILER_DEFAULT_URL=example.com
+before_script:
+  - bundle exec rails db:drop db:create db:structure:load RAILS_ENV=test
+script:
+  - bundle exec rails spec
+notifications:
+  slack: vizzuality:jd7HURe31GqlUW0nHF5n7fm0

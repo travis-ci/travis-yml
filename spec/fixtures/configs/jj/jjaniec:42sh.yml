@@ -1,0 +1,123 @@
+language: c
+sudo: true
+notifications:
+  email: false
+  slack: 42born2code:7VKgN0wy7keo3PVkYmKvkbJf
+before_install:
+    - if [ $TRAVIS_OS_NAME == linux ]; then sudo apt-get update && wget https://sonarcloud.io/static/cpp/build-wrapper-linux-x86.zip && unzip build-wrapper-linux-x86.zip && cp build-wrapper-linux-x86/libinterceptor-x86_64.so build-wrapper-linux-x86/libinterceptor-haswell.so;
+      else brew update && wget https://sonarcloud.io/static/cpp/build-wrapper-macosx-x86.zip && unzip build-wrapper-macosx-x86.zip;
+      fi;
+after_script:
+    - if [ $TRAVIS_OS_NAME = linux ]; then echo " --- Leaks --- " && cat Leaks.log | tail -n 20 | grep -A5 'LEAK SUMMARY' && echo " ---Leaks Full log $(cat Leaks.log | curl -F 'f:1=<-' ix.io)"; fi;
+    - bash <(curl -s https://codecov.io/bash) -F unittests
+    - sonar-scanner -X
+git:
+  depth: 3
+addons:
+  apt:
+    sources:
+    - ubuntu-toolchain-r-test
+    packages:
+    - gcc-8
+    - gcc-7
+    - gcc-4.8
+    - valgrind
+    - libncurses-dev
+    # - clang-6.0
+    # - clang-5.0
+  sonarcloud:
+    organization: "jjaniec-github"
+    token:
+      secure: "uqXQvrn2QWEiPTnErDdmtbllU/9RxI8wHyfIpcqwy5hp1dagR4ld8I4uHu4LKu+U3/Mt6OZdaU7cmiCLBb7M1GxZVtSXTa2KDiVp7D5PJe1kGHHRHm/AguPn4/LDTA2QfDZywsuqbGgN4rHtQhw5rEtdGjjT/7Pid2H8xwWsiAwCyrjFtiJXyaEB6Hzw5kacJ9z1n30HN2RjS7ezXQSQ3bb3v0oVzbUKwsizcMZm5pM0+wvjtp33idwIjxpLxKQC7lY7OZSK+H5pG+SJXvPtDBfUH7g7pUrXrvMM+H5xmRxcmc7N3P+iO9nLl/hrmR9jU1AV9DJJmyGBbD3d+yqIfvfAg3YAG7pCfP1duzb6YBSZCQE3oh9W9hY6DICYQ+uJkWE+Crrd1cPqAGiRm2X0qYmmIyOaynAQLmVuhAnWyFevBTB9JLBhh/qWNzFtrOygsDKYZiMoud0spBB9RXn2AFeBe3FHQLCuZp20CREfpa7+AeDcex1Yqsu/XVvXEWAPuRAWUjEv3H6ei/1HvcUKjq+k1LRRvBUz8E/gMGVQkXs3ruB7KpbUlI7g2Woe6hEeC9QE6WYrX1doFNRU+/kCN85/r/1z4SU1B/WT4uUgxFngezt2wl3Tod8mQAuqzeqjgOLUeU3toM/FgheLiaVDnuzYBwAbNkgdK3dkVYVS6xI="
+matrix:
+    fast_finish: true
+    include:
+        - os: osx
+          compiler: gcc
+          osx_image: xcode9.4
+          env: CXX=gcc
+        - os: osx
+          compiler: clang
+          osx_image: xcode9.4
+          env: CXX=clang
+        - os: osx
+          compiler: gcc
+          osx_image: xcode9.2
+          env: CXX=gcc
+        - os: osx
+          compiler: clang
+          osx_image: xcode9.2
+          env: CXX=clang
+        - os: osx
+          compiler: gcc
+          osx_image: xcode8
+          env: CXX=gcc
+        - os: osx
+          compiler: clang
+          osx_image: xcode8
+          env: CXX=clang
+        - os: linux
+          compiler: gcc-8
+          env: CXX=gcc-8
+        - os: linux
+          compiler: gcc-7
+          env: CXX=gcc-7
+        - os: linux
+          compiler: gcc-4.8
+          env: CXX=gcc-4.8
+        - os: linux
+          compiler: clang
+          env: CXX=clang
+        # - os: linux
+        #   compiler: clang-6.0
+        #   env: CXX=clang-6.0
+        # - os: linux
+        #   compiler: clang-5.0
+        #   env: CXX=clang-5.0
+    allow_failures:
+        - os: osx
+          compiler: gcc
+          osx_image: xcode9.4
+          env: CXX=gcc
+        - os: osx
+          compiler: clang
+          osx_image: xcode9.4
+          env: CXX=clang
+        - os: osx
+          compiler: gcc
+          osx_image: xcode8
+          env: CXX=gcc
+        - os: osx
+          compiler: clang
+          osx_image: xcode8
+          env: CXX=clang
+        - os: linux
+          compiler: gcc-8
+          env: CXX=gcc-8
+        - os: linux
+          compiler: gcc-7
+          env: CXX=gcc-7
+        - os: linux
+          compiler: gcc-4.8
+          env: CXX=gcc-4.8
+        - os: linux
+          compiler: clang
+          env: CXX=clang
+        # - os: linux
+        #   compiler: clang-6.0
+        #   env: CXX=clang-6.0
+        # - os: linux
+        #   compiler: clang-5.0
+        #   env: CXX=clang-5.0
+script: >
+  if [ $TRAVIS_OS_NAME == linux ];
+  then ./build-wrapper-linux-x86/build-wrapper-linux-x86-64 --out-dir bw-output make CC=$CXX ADDITIONAL_FLAGS="-DCI_TEST=1" tests;
+  else ./build-wrapper-macosx-x86/build-wrapper-macosx-x86 --out-dir bw-output make CC=$CXX ADDITIONAL_FLAGS="-DCI_TEST=1" tests;
+  fi;
+  if [ $TRAVIS_OS_NAME == osx ];
+  then ./42sh_tests;
+  else valgrind --leak-check=full ./42sh_tests 2> Leaks.log;
+  fi;
+  r=$?;
+  make coverage;
+  return $r;

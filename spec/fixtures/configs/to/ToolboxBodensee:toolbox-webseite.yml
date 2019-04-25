@@ -1,0 +1,17 @@
+language: python
+python: 3.6
+git:
+  lfs_skip_smudge: true
+cache:
+  directories:
+    - $HOME/.cache/pip
+before_install:
+  - git lfs pull
+install:
+  - pip install lektor
+
+script: "lektor build -f webpack"
+before_deploy: "echo 'c3woc.de ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBC5NslYj+wtriBuKIxJfDRm9E2hnlstWR8durQ6pKvVvP7wjcoXIyAxe41GvJ9SoEhSjF7oVlzlw+zAkzl5WOZ4=' > ~/.ssh/known_hosts"
+deploy:
+  provider: script
+  script: "lektor deploy --key $LEKTOR_DEPLOY_KEY toolbox"

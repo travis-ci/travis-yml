@@ -1,0 +1,40 @@
+language: c
+sudo: required
+
+env:
+  global:
+   - PATH=~/.roswell/bin:$PATH
+   - ROSWELL_BRANCH=master
+   - ROSWELL_INSTALL_DIR=$HOME/.roswell
+   - LISP=sbcl-bin/1.4.15
+  matrix:
+    - TARGET=x86-64
+    - TARGET=x86
+
+os:
+  - linux
+  - osx
+
+addons:
+  apt:
+    packages:
+      - lib32z1-dev
+      - gcc-multilib
+
+cache:
+  directories:
+    - $HOME/.roswell
+
+install:
+  - if [ $TARGET = x86 ] && [ $TRAVIS_OS_NAME = linux ]; then sudo ln -s /usr/include/x86_64-linux-gnu/zconf.h /usr/include; fi
+  - curl -L https://raw.githubusercontent.com/roswell/roswell/$ROSWELL_BRANCH/scripts/install-for-ci.sh | sh
+  - if ! which lake ; then ros install snmsts/sn.github Rudolph-Miller/cl-gists lake;lake-tools dump; fi
+
+script:
+  - lake
+
+jobs:
+  include:
+    - stage: deploy
+      script: lake upload-buiild-list
+      os: linux

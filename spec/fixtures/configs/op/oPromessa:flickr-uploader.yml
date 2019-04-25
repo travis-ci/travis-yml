@@ -1,0 +1,292 @@
+# -----------------------------------------------------------------------------
+# Use travis settings maximum_number_of_builds --set 1 as the builds envs depend on flickr
+#
+# Sections:
+#    python
+#    branches
+#    before_install
+#    install
+#    env
+#    before_script
+#    script
+#    after_failure
+#    after_script
+#    deploy
+
+# -----------------------------------------------------------------------------
+# language
+language: python
+python:
+  - "2.7"
+  - "3.6"
+  - "3.7"
+
+# -----------------------------------------------------------------------------
+# dist: trusty (not python 3.7 compatible) or xenial (python 3.7 compatible)
+dist: xenial
+
+# -----------------------------------------------------------------------------
+#branches:
+#  except:
+#    - dev-oct18b
+
+# -----------------------------------------------------------------------------
+before_install:
+  # For use with wget into github account
+  - echo -e "machine github.com\n  login $CI_USER\n  password $CI_USER_PASSWORD" >> ~/.netrc
+  # Install exiftool
+  - sudo apt-get -qq update
+  - sudo apt-get install -y libimage-exiftool-perl
+  - which exiftool
+
+# -----------------------------------------------------------------------------
+# install dependencies
+install:
+  - pip install -r requirements.txt
+  # Get deletr to delete all pics Flickr prior to a run
+  - wget https://github.com/oPromessa/flickr-deletr/archive/master.tar.gz -O flickr-deletr-master.tar.gz
+  - tar zxvf flickr-deletr-master.tar.gz -C ..
+  # Run python setup.py install. Allow --old-and-unmanageable to copy ini file to etc folder
+  - python setup.py install --old-and-unmanageable
+  - which uploadr.py
+
+# -----------------------------------------------------------------------------
+# env
+env:
+  global:
+    - PYTHONPATH=..:.
+    - LC_ALL=en_US.utf8
+    - LANG=en_US.utf8
+    - VerboseVar=-v          # Set to -v for Verbose option of uploadr
+    - BadFilesVar=-b
+    - ExcludedVar=--remove-excluded
+    - ListPhotosNotInSet="-l 100"
+    - TAIL_LINES=20          # Tail $TAIL_LINES for output logging. Default: 20
+    - WAIT_TIME=1            # Sleep time between first and second run
+    - DeleteAllFromFlickr=0  # To ensure an empty Flickr. Set DeleteAllFromFlickr=1. 0 otherwise.
+    - NOHUPOUTFILE=/home/travis/build/oPromessa/flickr-uploader/uploadr.out
+    - NOHUPERRFILE=/home/travis/build/oPromessa/flickr-uploader/uploadr.err.lst
+    - NOHUPLOGFILE=/home/travis/build/oPromessa/flickr-uploader/uploadr.log
+# -----------------------------------------------------------------------------
+# Matrix of Test Scenarios
+#   Help
+#   DryRunNoToken
+#   Badfiles (disabled for now)
+#   Multiprocessing
+#   add_albums_tag
+#   RemoveReplace, Multiprocessing, Clean BadFiles, ListPhotosNotInSet
+#   ExcludedFolders+IgnoredFiles in Single Processing mode.
+#       Also test cleaning up badfiles database entries and listing files not in set. Plus RAW files.
+#       Also test -m/--mask-sensitive option
+#       Also test ROTATING_LOGGING into uploadr.err file
+#   Old273INI to test previous INI config file format using os.path.dirname(sys.argv[0]) vs os.getcwd()
+#   NoVerbose
+#       Also test ROTATING_LOGGING into uploadr.err file
+  matrix:
+# TestScenario: Help, DryRunNoToken, BadFiles, MultiProcessing, Remove, Replace, RemoveReplace, Old273INI
+    - TestScenario=Help UploadrOptions="$VerboseVar --help" DeleteAllFromFlickr=1
+    - TestScenario=DryRunNoToken UploadrOptions="$VerboseVar -n -p 10"
+    #- TestScenario=BadFiles UploadrOptions="$VerboseVar $BadFilesVar"
+    - TestScenario=MultiProcessing UploadrOptions="$VerboseVar $BadFilesVar -p 20"
+    - TestScenario=add_albums_tag UploadrOptions="$VerboseVar -p 20"
+    - TestScenario=RemoveReplace UploadrOptions="$VerboseVar $BadFilesVar $ListPhotosNotInSet -p 10 -c"
+    - TestScenario=ExcludedFolders UploadrOptions="$VerboseVar $BadFilesVar $ExcludedVar -c -l 50 -m"
+    - TestScenario=Old273INI UploadrOptions="$VerboseVar $BadFilesVar $ExcludedVar -p 10"
+    - TestScenario=NoVerbose UploadrOptions="-p 20"
+
+# -----------------------------------------------------------------------------
+# before_script
+#    - Get database token ready
+#    - Get uploadr.ini from tests
+#    - Use environment secure variable for private settings
+before_script:
+  - pwd
+  - pythonVersion=`python -V 2>&1 | cut -d\  -f2`
+  - echo $pythonVersion
+  - echo Travis Python Version
+  - echo ${TRAVIS_PYTHON_VERSION}
+  - cp tests/uploadr.ini .
+  - cp tests/uploadr.ini /home/travis/virtualenv/python$pythonVersion/etc/uploadr.ini || cp tests/uploadr.ini /home/travis/virtualenv/python${TRAVIS_PYTHON_VERSION}/etc/uploadr.ini
+  - grep PATH uploadr.ini
+  - echo "INSERT INTO oauth_tokens ( api_key, lookup_key, oauth_token, oauth_token_secret, access_level, fullname, username, user_nsid) VALUES ( '"$api_key"', '', '"$oauth_token"', '"$oauth_token_secret"', 'delete', '"$fullname"', '"$username"', '"$user_nsid"');" | sqlite3 token/oauth-tokens.sqlite
+  - sqlite3 token/oauth-tokens.sqlite 'SELECT * FROM oauth_tokens;'
+#  - find "./tests/Test Photo Library" -type f -exec md5sum '{}' \;
+# Prevent errors in case log and err files are not generated
+  - touch build.txt
+  - touch $NOHUPOUTFILE $NOHUPERRFILE $NOHUPLOGFILE
+  - touch /home/travis/build/oPromessa/flickr-uploader/dbrun1.log
+  - touch /home/travis/build/oPromessa/flickr-uploader/dbrun2.log
+# INI File for deletr... to bypass error "pytest --doctest-modules" exited with 2.
+  - cp ../flickr-deletr-master/tests/deletr.ini /home/travis/virtualenv/python$pythonVersion/bin/deletr.ini || cp ../flickr-deletr-master/tests/deletr.ini /home/travis/virtualenv/python${TRAVIS_PYTHON_VERSION}/bin/deletr.ini
+
+# -----------------------------------------------------------------------------
+# run script for tests
+#     CODE CHECK
+#     DELETE RUN
+#     First RUN
+#     DB OUTPUT for First RUN
+#     Second RUN
+script:
+# CODE CHECK: flakes, flake8, doctest, unittests ------------------------------
+#     pytest --flakes (Code analysis)
+#     pytest
+#     pytest --doctest-modules flickr-uploader
+#     unittests
+#     flake8
+  - |
+    if [[ $TestScenario == Help ]]
+    then
+      pytest -v --flakes;             ec1=$?
+      pytest -v;                      ec2=$?
+      pytest --doctest-modules;       ec3=$?
+      python tests/TestModules.py;    ec4=$?
+      flake8;                         ec5=$?
+      echo $ec1 $ec2 $ec3 $ec4 $ec5
+    fi; (( ! ( ec1 + ec2 + ec3 + ec4 + ec5 ) ))
+
+# DELETE RUN: DeleteAllFromFlickr == 1 (Python 2.7 compatible only)------------
+  - |
+    if [[ $TRAVIS_PYTHON_VERSION == 2* && $DeleteAllFromFlickr == 1 ]]
+    then
+      cp ../flickr-deletr-master/tests/deletr.ini ../flickr-deletr-master/deletr.ini
+      cp token/oauth-tokens.sqlite ../flickr-deletr-master/token/oauth-tokens.sqlite
+      coverage run -a --concurrency multiprocessing ../flickr-deletr-master/delete.py
+    fi
+
+# First RUN -------------------------------------------------------------------
+  # stdout to LOG file, stderr to LST file
+  - coverage run -a --concurrency multiprocessing `which uploadr.py` $VerboseVar $UploadrOptions > $NOHUPOUTFILE 2> $NOHUPERRFILE
+  - tail -n $TAIL_LINES $NOHUPOUTFILE $NOHUPERRFILE
+
+  - coverage combine
+  - coverage html
+  - tar czf coverage_html.tar.gz htmlcov || echo ok
+
+# DB OUTPUT for First RUN -----------------------------------------------------
+  - |
+    if [[ $TestScenario != Help ]]
+    then
+      sqlite3 flickrdb "SELECT *, datetime( last_modified, 'unixepoch', 'localtime') FROM files ORDER BY path;"
+      sqlite3 flickrdb 'SELECT * FROM badfiles ORDER BY path;'
+      sqlite3 flickrdb 'SELECT * FROM sets ORDER BY name;'
+      sqlite3 flickrdb 'SELECT sets.set_id, sets.name, count(*) FROM sets, files WHERE sets.set_id = files.set_id GROUP BY 1, 2 ORDER BY 2;'
+      sqlite3 flickrdb 'SELECT sets.set_id, sets.name, count(*) FROM sets, files WHERE sets.set_id = files.set_id GROUP BY 1, 2 ORDER BY 2;' > dbrun1.log
+      sqlite3 flickrdb 'SELECT sets.set_id, sets.name, files_id, path FROM sets, files WHERE sets.set_id = files.set_id ORDER BY sets.name, path;'
+    fi
+
+  - echo DBRUN1------------------------------Start DB sets check
+  - diff <(sed -r 's/^[0-9]{17}\|/REPLACE\|/' dbrun1.log) <(sed -r 's/^[0-9]{17}\|/REPLACE\|/' tests/dbrunok.log) || echo ok
+  - echo DBRUN1--------------------------------End DB sets check
+
+# Second RUN (Prepare and actual Run) -----------------------------------------
+  # Prepare
+  - sleep $WAIT_TIME
+  - if [[ $TestScenario == DryRunNoToken ]]; then rm -fr token; fi
+
+  - |
+    if [[ $TestScenario == add_albums_tag ]]
+    then
+      sqlite3 flickrdb 'PRAGMA user_version="2"'
+      export UploadrOptions="$UploadrOptions --add-albums-migrate"
+      echo $UploadrOptions
+    fi
+
+  - |
+    if [[ $TestScenario == RemoveReplace ]]
+    then
+      rm "./tests/Test Photo Library/photo.jpg"
+      rm "./tests/Test Photo Library/photo_Excepção.jpg"
+      cp "./tests/Test Photo Library/ReplaceTest/file_34_Substituição.ForReplace" "./tests/Test Photo Library/Pics.Replaced/file_34_Substituição.jpg"
+      cp "./tests/Test Photo Library/ReplaceTest/file_35.jpg.ForReplace" "./tests/Test Photo Library/Pics.Replaced/file_35.jpg"
+      cp "./tests/Test Photo Library/ReplaceTest/Video03.ToReplace.MP4.ForReplace" "./tests/Test Photo Library/Pics.Replaced/Video03.ToReplace.MP4"
+    elif [[ $TestScenario == ExcludedFolders ]]
+    then
+      cp ./tests/uploadr_excluded.ini ./uploadr.ini
+      cp ./tests/uploadr_excluded.ini /home/travis/virtualenv/python$pythonVersion/etc/uploadr.ini || cp ./tests/uploadr_excluded.ini /home/travis/virtualenv/python${TRAVIS_PYTHON_VERSION}/etc/uploadr.ini
+    elif [[ $TestScenario == Old273INI ]]
+    then
+      cp ./tests/uploadr_excluded_2.7.3.ini ./uploadr.ini
+      cp ./tests/uploadr_excluded_2.7.3.ini /home/travis/virtualenv/python$pythonVersion/etc/uploadr.ini || cp ./tests/uploadr_excluded_2.7.3.ini /home/travis/virtualenv/python${TRAVIS_PYTHON_VERSION}/etc/uploadr.ini
+    elif [[ $TestScenario == NoVerbose ]]
+    then
+      cp ./tests/uploadr_NoVerbose.ini ./uploadr.ini
+      cp ./tests/uploadr_NoVerbose.ini /home/travis/virtualenv/python$pythonVersion/etc/uploadr.ini || cp ./tests/uploadr_NoVerbose.ini /home/travis/virtualenv/python${TRAVIS_PYTHON_VERSION}/etc/uploadr.ini
+    fi
+
+  # Actual RUN
+  # Scenario Old273INI: run ./uploadr.py instead of `which uploadr.py`
+  - if [[ $TestScenario == Old273INI ]]; then coverage run -a --concurrency multiprocessing uploadr.py $UploadrOptions >> $NOHUPOUTFILE 2>> $NOHUPERRFILE; fi
+  - if [[ $TestScenario == DryRunNoToken ]]; then coverage run -a --concurrency multiprocessing `which uploadr.py` $UploadrOptions >> $NOHUPOUTFILE 2>> $NOHUPERRFILE < /home/travis/build/oPromessa/flickr-uploader/tests/verifiercode.txt || echo ok; fi
+  - if [[ $TestScenario != Old273INI && $TestScenario != DryRunNoToken ]]; then coverage run -a --concurrency multiprocessing `which uploadr.py` $UploadrOptions >> $NOHUPOUTFILE 2>> $NOHUPERRFILE; fi
+
+  - tail -n $TAIL_LINES $NOHUPOUTFILE $NOHUPERRFILE
+
+  - coverage combine
+  - sleep $WAIT_TIME
+
+# Deleted Pics Non existant on FLickr -----------------------------------------
+# For testing a local deleted file also not available in flickr
+# - sleep $WAIT_TIME
+# Test Deleted file
+#  - coverage run -a uploadr.py $VerboseVar -bl 10
+#  - coverage report -m uploadr.py
+#  - sqlite3 flickrdb "SELECT *, datetime( last_modified, 'unixepoch', 'localtime') FROM files;"
+
+# -----------------------------------------------------------------------------
+# after_failure
+# Not applicable to "Build times out because no output was received"
+after_failure:
+  # Write build related data to control file
+  - echo -e "TRAVIS_TEST_RESULT:\t${TRAVIS_TEST_RESULT}\nTRAVIS_PYTHON_VERSION:\t${TRAVIS_PYTHON_VERSION}\nTRAVIS_BUILD_DIR:\t${TRAVIS_BUILD_DIR}\nTRAVIS_BUILD_ID:\t${TRAVIS_BUILD_ID}\nTRAVIS_BUILD_NUMBER:\t${TRAVIS_BUILD_NUMBER}\nTRAVIS_JOB_NUMBER:\t${TRAVIS_JOB_NUMBER}\nTRAVIS_EVENT_TYPE:\t${TRAVIS_EVENT_TYPE}\nTRAVIS_COMMIT:\t\t${TRAVIS_COMMIT}\nTRAVIS_COMMIT_MESSAGE:\t${TRAVIS_COMMIT_MESSAGE}\n" >> build.txt
+  # Upload OUT/LOG/ERR files to dropbox
+  - python tests/drop.py --token $DROPBOX_TOKEN build.txt $TRAVIS_BUILD_NUMBER/${TRAVIS_JOB_NUMBER}-${TRAVIS_TEST_RESULT}_${TestScenario}
+  - python tests/drop.py --token $DROPBOX_TOKEN `basename $NOHUPOUTFILE` $TRAVIS_BUILD_NUMBER/${TRAVIS_JOB_NUMBER}-${TRAVIS_TEST_RESULT}_${TestScenario}
+  - python tests/drop.py --token $DROPBOX_TOKEN `basename $NOHUPERRFILE` $TRAVIS_BUILD_NUMBER/${TRAVIS_JOB_NUMBER}-${TRAVIS_TEST_RESULT}_${TestScenario}
+  - python tests/drop.py --token $DROPBOX_TOKEN dbrun1.log $TRAVIS_BUILD_NUMBER/${TRAVIS_JOB_NUMBER}-${TRAVIS_TEST_RESULT}_${TestScenario}
+  - python tests/drop.py --token $DROPBOX_TOKEN dbrun2.log $TRAVIS_BUILD_NUMBER/${TRAVIS_JOB_NUMBER}-${TRAVIS_TEST_RESULT}_${TestScenario}
+  - python tests/drop.py --token $DROPBOX_TOKEN `basename $NOHUPLOGFILE` $TRAVIS_BUILD_NUMBER/${TRAVIS_JOB_NUMBER}-${TRAVIS_TEST_RESULT}_${TestScenario}
+
+  - tail -n $TAIL_LINES $NOHUPERRFILE
+
+# -----------------------------------------------------------------------------
+# after_script
+after_script:
+  # MD5SUM Output for REFERENCE -----------------------------------------------
+#  - if [[ $TestScenario == RemoveReplace ]]; then find "./tests/Test Photo Library" -type f -exec md5sum '{}' \; ; fi
+  # DB OUTPUT for Second RUN#2------------------------------------------------
+  - sqlite3 flickrdb "SELECT *, datetime( last_modified, 'unixepoch', 'localtime') FROM files ORDER BY path;"
+  - sqlite3 flickrdb 'SELECT * FROM badfiles ORDER BY path;'
+  - sqlite3 flickrdb 'SELECT * FROM sets ORDER BY name;'
+  - sqlite3 flickrdb 'SELECT sets.set_id, sets.name, count(*) FROM sets, files WHERE sets.set_id = files.set_id GROUP BY 1, 2 ORDER BY 2;'
+  - sqlite3 flickrdb 'SELECT sets.set_id, sets.name, count(*) FROM sets, files WHERE sets.set_id = files.set_id GROUP BY 1, 2 ORDER BY 2;' > dbrun2.log
+  - sqlite3 flickrdb 'SELECT sets.set_id, sets.name, files_id, path FROM sets, files WHERE sets.set_id = files.set_id ORDER BY sets.name, path;'
+  - echo DBRUN2-----Start DB sets check
+  - diff <(sed -r 's/^[0-9]{17}\|/REPLACE\|/' dbrun1.log) <(sed -r 's/^[0-9]{17}\|/REPLACE\|/' tests/dbrunok.log) || echo ok
+  - echo DBRUN2-------End DB sets check
+  # Write build related data to control file
+  - echo -e "TRAVIS_TEST_RESULT:\t${TRAVIS_TEST_RESULT}\nTRAVIS_PYTHON_VERSION:\t${TRAVIS_PYTHON_VERSION}\nTRAVIS_BUILD_DIR:\t${TRAVIS_BUILD_DIR}\nTRAVIS_BUILD_ID:\t${TRAVIS_BUILD_ID}\nTRAVIS_BUILD_NUMBER:\t${TRAVIS_BUILD_NUMBER}\nTRAVIS_JOB_NUMBER:\t${TRAVIS_JOB_NUMBER}\nTRAVIS_EVENT_TYPE:\t${TRAVIS_EVENT_TYPE}\nTRAVIS_COMMIT:\t\t${TRAVIS_COMMIT}\nTRAVIS_COMMIT_MESSAGE:\t${TRAVIS_COMMIT_MESSAGE}\n" >> build.txt
+  # Upload OUT/LOG/ERR files to dropbox
+  - python tests/drop.py --token $DROPBOX_TOKEN build.txt $TRAVIS_BUILD_NUMBER/${TRAVIS_JOB_NUMBER}-${TRAVIS_TEST_RESULT}_${TestScenario}
+  - python tests/drop.py --token $DROPBOX_TOKEN `basename $NOHUPOUTFILE` $TRAVIS_BUILD_NUMBER/${TRAVIS_JOB_NUMBER}-${TRAVIS_TEST_RESULT}_${TestScenario}
+  - python tests/drop.py --token $DROPBOX_TOKEN `basename $NOHUPERRFILE` $TRAVIS_BUILD_NUMBER/${TRAVIS_JOB_NUMBER}-${TRAVIS_TEST_RESULT}_${TestScenario}
+  - python tests/drop.py --token $DROPBOX_TOKEN dbrun1.log $TRAVIS_BUILD_NUMBER/${TRAVIS_JOB_NUMBER}-${TRAVIS_TEST_RESULT}_${TestScenario}
+  - python tests/drop.py --token $DROPBOX_TOKEN dbrun2.log $TRAVIS_BUILD_NUMBER/${TRAVIS_JOB_NUMBER}-${TRAVIS_TEST_RESULT}_${TestScenario}
+  - python tests/drop.py --token $DROPBOX_TOKEN `basename $NOHUPLOGFILE` $TRAVIS_BUILD_NUMBER/${TRAVIS_JOB_NUMBER}-${TRAVIS_TEST_RESULT}_${TestScenario}
+
+  # Coverage is uploaded to coveralls.io
+#  - python tests/drop.py --token $DROPBOX_TOKEN coverage_html.tar.gz $TRAVIS_BUILD_NUMBER/${TRAVIS_JOB_NUMBER}-${TRAVIS_TEST_RESULT}_${TestScenario} || echo ok
+
+# -----------------------------------------------------------------------------
+# Deploy to Heroku
+#deploy:
+#  provider: heroku
+#  api_key: $HEROKU_API_KEY
+#  #app: uploadr-showcase
+#  on:
+#    branch: master
+#    #repo: oPromessa/flickr-uploadr
+
+# -----------------------------------------------------------------------------
+# after_succes
+after_success:
+  - coveralls

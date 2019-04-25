@@ -1,0 +1,45 @@
+language: java
+sudo: required
+
+cache:
+  directories:
+  - $HOME/.m2
+  - $HOME/esmf
+  - $HOME/ESMF-INSTALL
+  - $HOME/openmpi-1.10.7-install
+  - $HOME/openmpi-2.1.2-install
+
+before_script:
+# Linux
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo apt-get update -q ;fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo apt-get install gfortran libopenmpi-dev openmpi-bin openjdk-7-jdk -y ;fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then export DISPLAY=:99.0  ;fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sh -e /etc/init.d/xvfb start  ;fi
+
+# OSX
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update ;fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then sudo rm /usr/local/include/c++ ;fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install gcc open-mpi ;fi
+#  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then $TRAVIS_BUILD_DIR/build_mpi.sh ;fi
+#  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then export PATH=$HOME/openmpi-1.10.7-install/bin:$PATH ;fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then ( sudo Xvfb :99 -ac -screen 0 1024x768x8; echo ok )& fi
+#  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then export _JAVA_OPTIONS="-XstartOnFirstThread" ;fi
+
+# common
+  - if [[ ! -d "$HOME/ESMF-INSTALL/ESMF_7_1_0r/lib" ]]; then $TRAVIS_BUILD_DIR/build_esmf.sh ESMF_7_1_0r openmpi ;fi
+  - export ESMF_INSTALL_ROOT=$HOME/ESMF-INSTALL
+
+osx_image: xcode9.3
+
+matrix:
+  include:
+    - os: osx
+#      env: JAVA_HOME=$(/usr/libexec/java_home)
+    - os: linux
+      jdk: oraclejdk8
+    - os: linux
+      jdk: openjdk8
+
+script: cd $TRAVIS_BUILD_DIR/org.earthsystemmodeling.cupid.releng && mvn clean verify
+
+after_failure: cat $TRAVIS_BUILD_DIR/org.earthsystemmodeling.cupid.test/target/work/data/.metadata/.log

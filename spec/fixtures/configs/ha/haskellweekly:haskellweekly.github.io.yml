@@ -1,0 +1,28 @@
+sudo: false
+language: c
+addons:
+  apt:
+    packages:
+      - libgmp-dev
+cache:
+  directories:
+    - $HOME/.local/bin
+    - $HOME/.stack
+before_install:
+  - sh tools/install-stack.sh
+install:
+  - stack setup
+  - stack build --only-dependencies
+script:
+  - stack build --pedantic
+  - stack sdist
+  - stack exec haskell-weekly
+deploy:
+  provider: pages
+  fqdn: haskellweekly.news
+  github-token: $GITHUB_TOKEN
+  local-dir: _site
+  skip-cleanup: true
+  target-branch: master
+  on:
+    branch: base

@@ -1,0 +1,28 @@
+language: node_js
+
+node_js:
+  - '10'
+  - '9'
+
+addons:
+  apt:
+    packages:
+      - graphicsmagick
+      - net-tools
+
+before_install:
+  - npm install -g npm@latest
+
+install:
+  - npm ci
+
+script:
+  - npm run test
+  - npm run build
+
+notifications:
+  slack:
+    rooms:
+      secure: dvi9Pi1Gi4+EFx5mlfpY2xrm/FIea4fKs8TvmcT+2OzycgBgtXQU+hUYyYhOMc6PvcXT/DZkvY4GHxB0lYt5x8/BYi+oX4HGcNnhu814Dr97SGvOhVWQV+4Psgy5WP7QsfsUB0ovYX/IVyAM2bTPqxscPeUq8qRn8IKOVEdxf7E=
+    on_success: change
+    on_failure: always

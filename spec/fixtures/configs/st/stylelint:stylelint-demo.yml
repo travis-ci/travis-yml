@@ -1,0 +1,32 @@
+sudo: false
+
+git:
+  depth: 1
+
+branches:
+  only:
+    - master
+    - /^greenkeeper/.*$/
+
+language: node_js
+
+node_js:
+  - '8'
+  - '10'
+
+# cache node modules
+cache:
+  directories:
+    - $HOME/.npm
+    - node_modules
+
+before_install:
+  - npm install -g npm@latest
+
+deploy:
+  provider: heroku
+  api_key:
+    secure: WdnsRBwmzckP5zpOAzGaZSplgT8uCozjl0rGPD6tAcpqFXv1TbC9K9UNm6NuPvT/XYTGulKexBOESIUJna3VZye+3HwmH6zxAdRHjUtLFl+4wtMEHNMBPyryh+MjR+05NLneS41iRmNpaMMnPJXQKAP+tyE6XJ+dwoKIzZB6y0urGbXdU3sKFV+z410cUsViVTsDmBuj6jEFQ0iKvgmZhXrg/jhIZZYsM8ik7NNrggQ8eWjaeVkdmIfnBY0sxhI34Ym2Y7WULBJgEX4HsH748lbJ2fvLajfTxay1rjqlpuJ9GJyXCeVkSyhK2U/OhpaKsyHf3Miy/2Ft2adJ4zxpR57FC/AhE2gPwX37CYs+sJu9ofQdpRrf1R5L5d0Y3tT12p4CJuRB8Lr/qGIiPlnia6Mr9y2Ng0qiKYd+/FR4z/t1gGG2z/dpz+XQ9oZHKjeIyOZTxmgwYKAkhE1YYBGuxAxa3XekTonf5WwDsb8xRZ5slonJNvT6wjQ6ErH2ixczvyaKDYHphhf0p/BNd79IARkGubJslC2X/02mn3SD5JCqsE44I5UtNU9Kb7uLrQn9fTxg8jRdhAt4TbYT4sBY+GgkWgo8/fcNAloRgrWb95diAQisfTFm0ya2EWhOcqCWfPNisRCQwJS0UkjYXdxH5hfKI6XHmyj8bvJHxJYbmpI=
+  app: stylelint-demo
+  on:
+    repo: stylelint/stylelint-demo

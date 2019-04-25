@@ -1,0 +1,69 @@
+language: "perl"
+
+perl:
+  - "5.14"      # The other Ensembl components must be compatible with 5.14
+  #- "5.16"      # EOL but default in RHEL7
+  #- "5.18"      # EOL but default in Ubuntu 14.04 LTS
+  #- "5.22"      # EOL but default in Ubuntu 16.04 LTS
+  #- "5.24"      # Maintained
+  - "5.26"      # Maintained -- Latest
+
+git:
+  depth: false
+
+env:
+  - EHIVE_TEST_PIPELINE_URLS='mysql://travis@127.0.0.1/'
+  - EHIVE_TEST_PIPELINE_URLS='pgsql://postgres@127.0.0.1/'
+  - EHIVE_TEST_PIPELINE_URLS='sqlite:///'
+
+sudo: false
+
+addons:
+  apt:
+    packages:
+    - python3
+    #- oracle-java8-installer      # Installed by default on Trusty
+    - ant
+    - graphviz
+
+before_install:
+    - git clone --branch v1.6.x --depth 1 https://github.com/bioperl/bioperl-live
+    - mysql -u root -h localhost -e 'GRANT ALL PRIVILEGES ON *.* TO "travis"@"%"'
+    - mysql -hlocalhost -utravis -e "SET GLOBAL sql_mode = 'TRADITIONAL'"
+    - psql --version
+    - echo -e '#!/bin/bash\n\nperl '`which psql`' "$@"' > psql
+    - chmod +x psql
+    - export PATH=$PWD:$PATH
+    - mkdir deps
+    - ln -s /usr/share/perl5/PgCommon.pm deps/
+    - export PATH=/usr/lib/jvm/java-8-oracle/jre/bin/:$PATH
+    - export JAVA_HOME=/usr/lib/jvm/java-8-oracle
+    - java -version
+    - ant -version
+    - mysql --version
+    - sqlite3 --version
+    - env
+    - cd wrappers/java
+    - ant clean jar
+    - cd ../..
+
+
+install:
+    - cpanm -v --installdeps --with-recommends --notest .
+    - cpanm -n Devel::Cover::Report::Coveralls
+    - cpanm -n Devel::Cover::Report::Codecov
+
+script: "./scripts/dev/travis_run_tests.sh"
+
+notifications:
+  email:
+    on_success: always
+    on_failure: always
+  slack:
+    rooms:
+      # coregithub
+      - secure: gL6s4PRts/S293qOTVDFub8i7DWxqXVpDz5il8Vx7LxSYgOiA9AJcbT1zuXxhfONA5RwXJ62gRze0LllDcAS9TiUl199SSq7x+hBMBKzGxWV5I0P6m5aPMRi2vdC4yiATMQYF97PaH3zWobEDiGEHRAS+mkGNBExXY1hwZSasy8=
+      # ehive-commits
+      - secure: XUShBwss607RlWDQyn4tkVDX390+aIXv1ntaUzr9MtsXMpCNm5X/7PPle7Cq6FZ57vHzkIOM0+FM3kIou7vbc3ediwHEv9/o8PwDah7xH46/ukjCsI+labR6jxoX8YX9SRvUUm4FV9Vo2gkWi0IYM+k+VI6AyDFyhEzyJOIGHEY=
+    on_failure: change
+

@@ -1,0 +1,104 @@
+env:
+  global:
+      - REPO_DIR=pandas
+      # on release change this to a version
+      - BUILD_COMMIT=0.24.x
+      - PLAT=x86_64
+      - UNICODE_WIDTH=32
+      - NP_BUILD_DEP="numpy==1.12.1"
+      - NP_TEST_DEP="numpy==1.12.1"
+      - WHEELHOUSE_UPLOADER_USERNAME=travis-worker
+      # Following generated with
+      # travis encrypt -r MacPython/pandas-wheels WHEELHOUSE_UPLOADER_SECRET=<the api key>
+      - secure:
+          "FUNzoxHJjaTGlki4FTwW+/JsVfyulQHIAVzoc126SOWXn3noeEtW6xMurYGFSASYBT+dcPafo6HUBMlxG6a8BWjOnT5mjTWQWRYcVG435rSxrbtbZ9RvkL+E+uquDemjCEeesmCD397kYj96ZoQPbLy/B11IlaTAremyoesmA7g="
+
+language: python
+# Default Python version is usually 2.7
+python: 3.5
+sudo: required
+dist: trusty
+group: deprecated-2017Q4
+services: docker
+
+matrix:
+  exclude:
+      # Exclude the default Python 3.5 build
+      - python: 3.5
+  include:
+    - os: linux
+      env:
+        - MB_PYTHON_VERSION=3.7
+        - NP_BUILD_DEP="numpy==1.14.5"
+        - NP_TEST_DEP="numpy==1.14.5"
+    - os: osx
+      language: generic
+      env:
+        - MB_PYTHON_VERSION=3.7
+        - NP_BUILD_DEP="numpy==1.14.5"
+        - NP_TEST_DEP="numpy==1.14.5"
+    - os: linux
+      env:
+        - MB_PYTHON_VERSION=2.7
+    - os: linux
+      env:
+        - MB_PYTHON_VERSION=2.7
+        - PLAT=i686
+    - os: linux
+      env:
+        - MB_PYTHON_VERSION=3.5
+    - os: linux
+      env:
+        - MB_PYTHON_VERSION=3.5
+        - PLAT=i686
+    - os: linux
+      env:
+        - MB_PYTHON_VERSION=3.6
+    - os: linux
+      env:
+        - MB_PYTHON_VERSION=3.6
+        - PLAT=i686
+    - os: osx
+      language: generic
+      env:
+        - MB_PYTHON_VERSION=2.7
+        - MACOSX_DEPLOYMENT_TARGET=10.6 # since pandas PR24274, mac builds default to 10.9
+    - os: osx
+      language: generic
+      env:
+        - MB_PYTHON_VERSION=3.5
+        - MACOSX_DEPLOYMENT_TARGET=10.6 # since pandas PR24274, mac builds default to 10.9
+    - os: osx
+      language: generic
+      env:
+        - MB_PYTHON_VERSION=3.6
+        - MACOSX_DEPLOYMENT_TARGET=10.6 # since pandas PR24274, mac builds default to 10.9
+
+
+before_install:
+    # See:
+    # https://github.com/travis-ci/travis-ci/issues/8920#issuecomment-352661024
+    - python -c "import fcntl; fcntl.fcntl(1, fcntl.F_SETFL, 0)"
+    - CONTAINER="wheels";
+    - BUILD_COMMIT=$BUILD_COMMIT;
+    - BUILD_DEPENDS="$NP_BUILD_DEP Cython==0.28.2"
+    - TEST_DEPENDS="$NP_TEST_DEP pytest==3.8.2 pytest-xdist==1.26.1 pytest-mock moto hypothesis wheel==0.31.1"
+    - source multibuild/common_utils.sh
+    - source multibuild/travis_steps.sh
+    - before_install
+
+install:
+    # Maybe get and clean and patch source
+    - clean_code $REPO_DIR $BUILD_COMMIT
+    - build_wheel $REPO_DIR $PLAT
+
+script:
+    - install_run $PLAT
+
+after_success:
+    # Upload wheels to Rackspace container
+    - pip install futures==3.1.1 wheelhouse-uploader
+    - python -m wheelhouse_uploader upload --local-folder
+          ${TRAVIS_BUILD_DIR}/wheelhouse/
+          --no-update-index
+          $CONTAINER

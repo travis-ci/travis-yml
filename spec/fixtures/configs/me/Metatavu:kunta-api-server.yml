@@ -1,0 +1,29 @@
+language: java
+sudo: required
+jdk: oraclejdk8
+cache:
+  directories:
+  - $HOME/.sonar
+  - $HOME/.m2
+  - $HOME/.cargo
+  
+addons:
+  hosts:
+    - api.kunta-api.test
+  apt:
+    packages:
+      - oracle-java8-installer
+  mariadb: '10.3'
+
+install: true
+
+before_script:
+  - . travis-before-script.sh
+  
+script:
+  - . travis.sh
+
+notifications:
+  email: false
+  webhooks:
+    - http://travis.metatavu.io:7333/travisping

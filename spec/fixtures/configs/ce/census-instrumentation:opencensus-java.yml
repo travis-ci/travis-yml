@@ -1,0 +1,64 @@
+sudo: false
+
+language: java
+
+matrix:
+  fast_finish: true
+  include:
+  - jdk: oraclejdk8
+    env: TASK=BUILD
+    os: linux
+
+  - jdk: oraclejdk9
+    env: TASK=BUILD
+    os: linux
+
+  - jdk: oraclejdk8
+    env: TASK=CHECKER_FRAMEWORK
+    os: linux
+
+  - env: TASK=CHECK_GIT_HISTORY
+    os: linux
+
+  # Build example projects last, since they are affected by fewer pull requests.
+  - jdk: oraclejdk8
+    env: TASK=BUILD_EXAMPLES_GRADLE
+    os: linux
+
+  - jdk: oraclejdk8
+    env: TASK=BUILD_EXAMPLES_MAVEN
+    os: linux
+
+  # Work around https://github.com/travis-ci/travis-ci/issues/2317
+  - env: TASK=BUILD
+    # Set the java version to 1.8 until we fix the build for java10.
+    osx_image: xcode9.3
+    os: osx
+
+  allow_failures:
+  # Allowing failures because osx builds are very slow.
+  - env: TASK=BUILD
+    os: osx
+
+before_install:
+  - git log --oneline --decorate --graph -30
+
+# Skip Travis' default Gradle install step. See http://stackoverflow.com/a/26575080.
+install: true
+
+script:
+  - buildscripts/travis_script
+
+after_success:
+  - if \[ "$TASK" == "BUILD" \] && \[ "$TRAVIS_JDK_VERSION" == "oraclejdk8" \] && \[ "$TRAVIS_OS_NAME" = linux \]; then
+      bash <(curl -s https://codecov.io/bash) ;
+    fi
+
+before_cache:
+  - rm -fr $HOME/.gradle/caches/modules-2/modules-2.lock
+
+cache:
+  directories:
+    - $HOME/.gradle
+    - $HOME/.gradle/caches/
+    - $HOME/.gradle/wrapper/

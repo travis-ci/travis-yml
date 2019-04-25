@@ -1,0 +1,48 @@
+dist: xenial
+language: clojure
+node_js:
+  - "11"
+script: lein doo node "server-tests" once
+notifications:
+  email:
+    recipients:
+      - juan@district0x.io
+      - daniel@district0x.io
+    on_success: never
+    on_failure: always
+  slack:
+    on_success: always
+    on_failure: always
+    rooms:
+    - district0x:53vhalUfg0MitsQwzjP5PWdd#travis-ci
+before_install:
+  - nvm use 11.0.0
+  - npm install -g truffle@4.1.14
+  - npm install -g ganache-cli
+  - sudo wget --no-check-certificate -P /bin https://github.com/ethereum/solidity/releases/download/v0.4.24/solc-static-linux
+  - sudo chmod a+x /bin/solc-static-linux
+  - sudo ln -s /bin/solc-static-linux /usr/bin/solc
+before_script:
+  - ganache-cli -p 8549 -l 8000000 -d -m district0x > /dev/null &
+  - wget https://dist.ipfs.io/ipfs-update/v1.5.2/ipfs-update_v1.5.2_linux-amd64.tar.gz -O ipfs-update.tar.gz
+  - tar -xzf ipfs-update.tar.gz
+  - ipfs-update/ipfs-update install latest
+  - ipfs init
+  - ipfs daemon > /dev/null &
+  - truffle migrate --network ganache --reset
+env:
+  global:
+  - secure: eytgGGwytSDE0DMDtL7X4iRTo3Egln5rPxnUVqcROAHJSsZONOUedqJSUM4NbS9zxdkpj8sC577FONvLgEaIYXGawBzxJAWXy0FvNn1edBJYfCEwJVWcNW9GYwdHLKSFzSp4LGvrVtshY6gr8irVOzPwJxW5BmiX1jhortcaitAQQEPAMUNaVb2AiJ93T46s0LQw+oqMX/cdrORqVTO1tnthZk6O4XaqX2objIeBVvG3GeR7NzOS6FsnJCXRiX/VEAviy3eNPYpbe5V/M7++3eie6A0sJa1AT6Ixjo1VB1aTX+ONzvuQzPB9yuBmLg0qRsj40rfauP6BsPa4gPx4NbsgDkwVfZXYdt+8MDzu4ORRmMmWHTKe48QjNvAsSPdpafAnsLBSBcr+1H13HgUP+tiEjhOD+0gSdNnswUKe0bCnbGaY9gGyawZaYXpqWVeI54QHmh0t97cIM1Iju1lu1QYUkD+I33zryDxEtymap3rbuOKld5qK4mGQ8vqlm5mYWRunsLOgb3UVUiGLUSEdSyHlYrsbWgxYBMT4XLgH+Ox048fVI3mPng6UPvoRKcUxSUijS2qKNAx3A0ke0fnNj1DlRQUmGLS7xedA0R9BLwgVgo1oSYnC8e30QMBSKTuWAiV7tUk2gW5EZSKZi/aorNfW7FqUOx6J1dTApWX6yjY=
+  - secure: V+Xe97oLDki0EJHs3mqKxm4CD8hmRGp4joQpuKtygPdakHB4mGyTSO19Ql8XW5yAKTK58Cgqq3mq+Dmbw+vytDjSSC9BsHmSFO0jakJAsiVdt14DrO1sLtWyCH6BSUHFN6qcwNpmoJ7lPywQWRl0yYP+VGNPynBDoy980nzbOf97tHA7pCSNQYlO4yM/UveYbH4TtXeuWAjdAJDQDQcJo5wanCLQxcGJh6X2byztOoX1vb3yvlle/hHifAG2TyNKtU0u122U92KDSC0pkW0kY2fKpDPEZkBQulBkScN7BeVKUyKBqBlhlApJ7ZChzryMoKZKiKTcBSqncewsmA4bAhErabEo5DU+rIT6h+KyPLJLsqUBX5Yn2Fgx4DOum5rjHg5Afx9nBE9QLJrqQYMdAtTYnoNTshJ4hKFTZCx23xqqj/+AXXctgOByGSsebYQlB9hPO3rbhGyW0+ZklODLVH0Sq2/VPkbYjhFPo7Q5QsEjCTnQ1svf01phZI90xzuOkZnyb5g58ei0+9cCAvZBy+25SElPh6oz/ZL1tI9OTlCU/clnc28dFMLUqDbRFanO2SGvsojcB93r8KgUuQ00y8eK1a9AM8gbNpNHkgrMkpIRVaobhk6OJUIXFs88Hikro22F5WyzUYOR5SqZ3aZ/KhkcfKN2sgkE9VvjpPXepsY=
+  - secure: Qo3Y2f0HmSK3lQ88YOCTFJCchhNtWKNOv/WH86iZ5NSyPXC9CvPBCQ8a2wQ+EeaFfnvtOvQdCGamGxN1NQ+MngdLkcd6nevqLINMGfXpSk934Se/qrXBWPxkNQA4K/8oNdDX2V6PPA9R4nUBF+QQ3ZAR+MXfxin5sRSu1ylauNFSNfp4lRBnSXt0G31R/Cl8VVO+mbor6xPUnaG/hHiiJK+UkLvpZy7nwFtzkczrrBQH1IhuhqMMXZUCoXGZ8M7AiXUts2GV4VNce+HrzmNsTMxGxdl8h0bfEgUJLRTdC/8pJaaE189jxLL7veaMECt92xblTRpUkL26SsXiLwJX6zpezxG4Y1d5kHnwGCB8BJHw7GpVmAtQX5gp3FnqNSmX+h6CY4AOFH8tioYkhG3e9ohxjTEfJeg96JDSdXjzzAzHSIOX6Ii3cdti6mi7hz0ziclgz35Wb6ToW5pvbwL0qZ8ZHFFj625kXXCRFHlSIQG1MQWROYYJdfyuqVL4yu0oqB0qRJB0dn2+on2+/pzzJAo2OCvlF26XccHXpAXVRpWTolcg0cDEO6b9gOZZ66BfvC7qN96w1BCtyP711M7Lk3h4SHleQ4u16+2O9OnuZflI/6b25hyXTy6qCY67UkuFApQLjFk60DMuaIj6/+7TYynyPHVT3bxeG+oO4+H+1Ug=
+services:
+  - docker
+deploy:
+  - provider: script
+    script: bash docker-push.sh qa
+    on:
+      branch: master
+  - provider: script
+    script: bash docker-push.sh production
+    on:
+      branch: production

@@ -1,0 +1,18 @@
+sudo: required
+dist: trusty
+language: node_js
+node_js:
+  - "9"
+  - "7"
+before_install:
+  - npm install -g rollup yarn
+  - yarn -V
+install:
+  - yarn install
+before_script:
+  - rollup -c
+  - npm run deploy
+script:
+  - npm test
+  - DIST=1 npm test
+  - npm run lint

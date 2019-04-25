@@ -1,0 +1,62 @@
+language: php
+php:
+  - 7.1
+  - 7.2
+  - 7.3
+
+before_install:
+  # Turn off XDebug
+  - phpenv config-rm xdebug.ini || return 0
+
+install:
+  # Composer
+  - travis_retry composer install --no-progress --prefer-dist
+
+script:
+  # Tests
+  - composer run-script tests
+
+
+jobs:
+  include:
+    - env: title="Lowest Dependencies 7.1"
+      php: 7.1
+      install:
+        - travis_retry composer update --no-progress --prefer-dist --prefer-lowest
+      script:
+        - composer run-script tests
+
+    - stage: Quality Assurance
+      php: 7.1
+      script:
+        - composer run-script qa
+
+    - stage: Phpstan
+      php: 7.1
+      script:
+        - composer run-script phpstan-install
+        - composer run-script phpstan
+
+    - stage: Test Coverage
+      if: branch = master AND type = push
+      php: 7.1
+      script:
+        - composer run-script coverage
+      after_script:
+        - wget https://github.com/php-coveralls/php-coveralls/releases/download/v2.1.0/php-coveralls.phar
+        - php php-coveralls.phar --verbose --config tests/.coveralls.yml
+
+    - stage: Outdated Dependencies
+      if: branch = master AND type = cron
+      php: 7.1
+      script:
+        - composer outdated --direct --strict
+
+  allow_failures:
+    - stage: Test Coverage
+
+sudo: false
+
+cache:
+  directories:
+    - $HOME/.composer/cache

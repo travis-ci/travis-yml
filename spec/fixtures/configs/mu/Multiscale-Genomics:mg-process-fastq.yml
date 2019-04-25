@@ -1,0 +1,240 @@
+# See the NOTICE file distributed with this work for additional information
+# regarding copyright ownership.
+
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+
+#     http://www.apache.org/licenses/LICENSE-2.0
+
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+language: python
+
+os: linux
+
+python:
+    - "2.7"
+    - "3.6"
+
+cache:
+    directories:
+        - $HOME/.cache/pip
+        - ${HOME}/lib
+
+before_cache:
+    - rm -f $HOME/.cache/pip/log/debug.log
+
+env:
+    matrix:
+        - TESTENV=docs
+        - TESTENV=pylint
+        - TESTENV=code
+        - TESTENV=wgbs_code_1
+        - TESTENV=wgbs_code_2
+
+addons:
+    apt:
+        packages:
+            #system environment
+            - make
+            - python-dev
+            - build-essential
+            - libssl-dev
+            - zlib1g-dev
+            - libbz2-dev
+            - libreadline-dev
+            - libsqlite3-dev
+            - libtiff5-dev
+            - libjpeg8-dev
+            - libfreetype6-dev
+            - liblcms2-dev
+            - libwebp-dev
+            - tcl8.6-dev
+            - tk8.6-dev
+            - python-tk
+            - wget
+            - curl
+            - llvm
+            - libncurses5-dev
+            - libncursesw5-dev
+            - xz-utils
+            - tk-dev
+            - mcl
+            - libgtk2.0-dev
+            - libcurl4-gnutls-dev
+            - unzip
+            - liblzma-dev
+            - libtool
+            - pigz
+            - tree
+            - libblas-dev
+            - liblapack-dev
+
+# env:
+#   - COVERALLS=false
+
+before_install:
+    - pwd
+    - ls /usr/lib/
+    - mkdir -p ${HOME}/bin
+    - mkdir -p ${HOME}/lib
+    - mkdir -p ${HOME}/code
+    - mkdir -p ${HOME}/R
+    - lsb_release -a
+
+    # Install the latest version of R
+    - sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E084DAB9
+    - echo "deb http://cran.r-project.org/bin/linux/ubuntu trusty/" | sudo tee -a /etc/apt/sources.list
+    - sudo apt-get update -qq
+
+    - cd ${HOME}/build/Multiscale-Genomics/mg-process-fastq
+    - sudo chmod +x scripts/travis/includeMAC2.sh
+    - sudo chmod +x scripts/travis/includeTADbit.sh
+    - sudo chmod +x scripts/travis/install_wgbs_code.sh
+
+    - if [[ "$TESTENV" == "code" ]]; then sudo apt-get install r-base-core; fi
+    - if [[ "$TESTENV" == "code" ]]; then sudo apt-get install python-rpy2; fi
+    - if [[ "$TESTENV" == "code" ]]; then sudo ./scripts/travis/install_code_test_dependencies.sh; fi
+    - if [[ "$TESTENV" == "code" ]]; then pip install Cython; fi
+    - if [[ "$TESTENV" == "code" ]]; then ./scripts/travis/includeMAC2.sh; fi
+    - if [[ "$TESTENV" == "code" ]]; then ./scripts/travis/includeTADbit.sh; fi
+    - if [[ "$TESTENV" == "wgbs_code_1" ]]; then sudo ./scripts/travis/install_wgbs_code.sh; fi
+    - if [[ "$TESTENV" == "wgbs_code_2" ]]; then sudo ./scripts/travis/install_wgbs_code.sh; fi
+    - if [[ "$TESTENV" == "pylint" ]]; then ./scripts/travis/includeMAC2.sh; fi
+    - if [[ "$TESTENV" == "pylint" ]]; then ./scripts/travis/includeTADbit.sh; fi
+
+services:
+    - docker
+
+install:
+    # libtbb-dev did not seem to be installing correctly without using sudo
+    - sudo apt-get install libtbb-dev
+
+    # Install APIs and Pipelines
+    - cd ${HOME}/build/Multiscale-Genomics/mg-process-fastq
+    - git status
+    - pip install --upgrade -e .
+    - pip install -r requirements.txt
+
+    - if [[ "$TESTENV" == "code" ]]; then pip install cutadapt; fi
+    - if [[ "$TESTENV" == "docs" ]]; then pip install sphinx; fi
+    # Fixed version so that it matches the numpy version required by h5py
+    - if [[ "$TESTENV" == "docs" ]]; then pip install --upgrade numpy==1.14; fi
+    - if [[ "$TESTENV" == "pylint" ]]; then pip install pylint; fi
+
+    # Install BSseeker
+    - cd ${HOME}/lib
+    - if [[ ! -d "BSseeker2" ]]; then git clone https://github.com/BSSeeker/BSseeker2.git; fi
+
+    - cd ${HOME}/build/Multiscale-Genomics/mg-process-fastq
+    - ln -s ${HOME}/lib/BSseeker2/bs_align bs_align
+    - ln -s ${HOME}/lib/BSseeker2/bs_index bs_index
+    - ln -s ${HOME}/lib/BSseeker2/bs_utils bs_utils
+    - ln -s ${HOME}/lib/BSseeker2/FilterReads.py FilterReads.py
+
+before_script:
+    - cd ${HOME}/bin
+
+    - ln -s ${HOME}/lib/FastQC/fastqc
+    - ln -s ${HOME}/lib/TrimGalore-0.5.0/trim_galore trim_galore
+
+    - ln -s ${HOME}/lib/bedtools2/bin/bedtools bedtools
+
+    - ln -s ${HOME}/lib/bedToBigBed bedToBigBed
+    - ln -s ${HOME}/lib/wigToBigWig wigToBigWig
+    - ln -s ${HOME}/lib/faToTwoBit faToTwoBit
+    - ln -s ${HOME}/lib/twoBitInfo twoBitInfo
+    - ln -s ${HOME}/lib/kallisto_linux-v0.43.1/kallisto kallisto
+
+    - ln -s ${HOME}/build/Multiscale-Genomics/mg-process-fastq/scripts/iNPS iNPS
+
+    - ln -s ${HOME}/lib/bwa/bwa bwa
+
+    - ln -s ${HOME}/lib/bowtie2-2.3.4-linux-x86_64/bowtie2 bowtie2
+    - ln -s ${HOME}/lib/bowtie2-2.3.4-linux-x86_64/bowtie2-align-s bowtie2-align-s
+    - ln -s ${HOME}/lib/bowtie2-2.3.4-linux-x86_64/bowtie2-align-l bowtie2-align-l
+    - ln -s ${HOME}/lib/bowtie2-2.3.4-linux-x86_64/bowtie2-build bowtie2-build
+    - ln -s ${HOME}/lib/bowtie2-2.3.4-linux-x86_64/bowtie2-build-s bowtie2-build-s
+    - ln -s ${HOME}/lib/bowtie2-2.3.4-linux-x86_64/bowtie2-build-l bowtie2-build-l
+    - ln -s ${HOME}/lib/bowtie2-2.3.4-linux-x86_64/bowtie2-inspect bowtie2-inspect
+    - ln -s ${HOME}/lib/bowtie2-2.3.4-linux-x86_64/bowtie2-inspect-s bowtie2-inspect-s
+    - ln -s ${HOME}/lib/bowtie2-2.3.4-linux-x86_64/bowtie2-inspect-l bowtie2-inspect-l
+
+    - ln -s ${HOME}/lib/gemtools-1.7.1-core2/bin/gem-2-bed gem-2-bed
+    - ln -s ${HOME}/lib/gemtools-1.7.1-core2/bin/gem-2-gem gem-2-gem
+    - ln -s ${HOME}/lib/gemtools-1.7.1-core2/bin/gem-2-sam gem-2-sam
+    - ln -s ${HOME}/lib/gemtools-1.7.1-core2/bin/gem-2-wig gem-2-wig
+    - ln -s ${HOME}/lib/gemtools-1.7.1-core2/bin/gem-indexer gem-indexer
+    - ln -s ${HOME}/lib/gemtools-1.7.1-core2/bin/gem-indexer_bwt-dna gem-indexer_bwt-dna
+    - ln -s ${HOME}/lib/gemtools-1.7.1-core2/bin/gem-indexer_fasta2meta+cont gem-indexer_fasta2meta+cont
+    - ln -s ${HOME}/lib/gemtools-1.7.1-core2/bin/gem-indexer_generate gem-indexer_generate
+    - ln -s ${HOME}/lib/gemtools-1.7.1-core2/bin/gem-info gem-info
+    - ln -s ${HOME}/lib/gemtools-1.7.1-core2/bin/gem-mapper gem-mapper
+    - ln -s ${HOME}/lib/gemtools-1.7.1-core2/bin/gemtools gemtools
+
+    - ln -s ${HOME}/lib/htslib/bin/bgzip bgzip
+    - ln -s ${HOME}/lib/htslib/bin/htsfile htsfile
+    - ln -s ${HOME}/lib/htslib/bin/tabix tabix
+
+    - ln -s ${HOME}/lib/samtools/bin/ace2sam ace2sam
+    - ln -s ${HOME}/lib/samtools/bin/blast2sam.pl blast2sam.pl
+    - ln -s ${HOME}/lib/samtools/bin/bowtie2sam.pl bowtie2sam.pl
+    - ln -s ${HOME}/lib/samtools/bin/export2sam.pl export2sam.pl
+    - ln -s ${HOME}/lib/samtools/bin/interpolate_sam.pl interpolate_sam.pl
+    - ln -s ${HOME}/lib/samtools/bin/maq2sam-long maq2sam-long
+    - ln -s ${HOME}/lib/samtools/bin/maq2sam-short maq2sam-short
+    - ln -s ${HOME}/lib/samtools/bin/md5fa md5fa
+    - ln -s ${HOME}/lib/samtools/bin/md5sum-lite md5sum-lite
+    - ln -s ${HOME}/lib/samtools/bin/novo2sam.pl novo2sam.pl
+    - ln -s ${HOME}/lib/samtools/bin/plot-bamstats plot-bamstats
+    - ln -s ${HOME}/lib/samtools/bin/psl2sam.pl psl2sam.pl
+    - ln -s ${HOME}/lib/samtools/bin/sam2vcf.pl sam2vcf.pl
+    - ln -s ${HOME}/lib/samtools/bin/samtools samtools
+    - ln -s ${HOME}/lib/samtools/bin/samtools.pl samtools.pl
+    - ln -s ${HOME}/lib/samtools/bin/seq_cache_populate.pl seq_cache_populate.pl
+    - ln -s ${HOME}/lib/samtools/bin/soap2sam.pl soap2sam.pl
+    - ln -s ${HOME}/lib/samtools/bin/varfilter.py varfilter.py
+    - ln -s ${HOME}/lib/samtools/bin/wgsim wgsim
+    - ln -s ${HOME}/lib/samtools/bin/wgsim_eval.pl wgsim_eval.pl
+    - ln -s ${HOME}/lib/samtools/bin/zoom2sam.pl zoom2sam.pl
+
+    - cd ${HOME}/build/Multiscale-Genomics/mg-process-fastq
+
+    # - echo "R_LIB=${HOME}/R" > ${HOME}/.Renviron
+    # - echo "options(repos = c(CRAN = 'http://mirrors.ebi.ac.uk/CRAN/'))" > ${HOME}/.Rprofile
+    # - echo ".libPaths('~/R')" >> ${HOME}/.Rprofile
+    # - echo 'message("Using library:", .libPaths()[1])' >> ${HOME}/.Rprofile
+    # - Rscript scripts/install_packages.R
+
+
+    - cd ${HOME}/build/Multiscale-Genomics/mg-process-fastq
+    - docker run -p 80:80 --name biobambamcontainer multiscalegenomics/mgprocessfastqbbb:latest
+    - pwd
+
+    - cd ${HOME}/build/Multiscale-Genomics/mg-process-fastq
+    - chmod +x shims/*
+    - export PATH="$PWD/shims:$PATH"
+    - docker ps -a
+
+    - cd ${HOME}/build/Multiscale-Genomics/mg-process-fastq
+    - chmod +x scripts/travis/harness.sh
+    - chmod +x scripts/travis/wgbs_harness.sh
+    - chmod +x scripts/travis/docs_harness.sh
+    - chmod +x scripts/travis/pylint_harness.sh
+    - ls tests/data/
+    - git status
+
+    - export PATH="${HOME}/bin:$PATH"
+
+script:
+    - if [[ "$TESTENV" == "code" ]]; then ./scripts/travis/harness.sh; fi
+    - if [[ "$TESTENV" == "wgbs_code_1" ]]; then ./scripts/travis/wgbs_harness.sh; fi
+    - if [[ "$TESTENV" == "wgbs_code_2" ]]; then ./scripts/travis/wgbs_harness.sh; fi
+    - if [[ "$TESTENV" == "docs" ]]; then ./scripts/travis/docs_harness.sh; fi
+    - if [[ "$TESTENV" == "pylint" ]]; then ./scripts/travis/pylint_harness.sh; fi
+

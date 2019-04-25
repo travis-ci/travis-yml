@@ -1,0 +1,102 @@
+# We set the language to c because python isn't supported on the MacOS X nodes
+# on Travis. However, the language ends up being irrelevant anyway, since we
+# install Python ourselves using conda.
+language: c
+
+os:
+    - linux
+
+# Setting sudo to false opts in to Travis-CI container-based builds.
+sudo: false
+
+# The apt packages below are needed for sphinx builds, which can no longer
+# be installed with sudo apt-get.
+addons:
+    apt:
+        packages:
+            - graphviz
+
+env:
+    global:
+
+        # This is the Python version that will be used by the parent conda
+        # environment, but it will not be used in the test environments
+        # themselves.
+        - PYTHON_VERSION=3.6
+
+        # The following versions are the 'default' for tests, unless
+        # overidden underneath. They are defined here in order to save having
+        # to repeat them for all configurations.
+        - TOX_CMD='tox --'
+        - TOX_ARGS='--remote-data'
+        - SETUP_XVFB=True
+
+    matrix:
+        # Make sure that installation does not fail
+        - TOXENV='py36' TOX_CMD='tox --notest' TOX_ARGS=''
+        # Make sure README will display properly on pypi
+        - TOXENV='checkdocs'
+        # Run a test with stable dependencies
+        - TOXENV='py36-test'
+        - TOXENV='py37-test'
+
+matrix:
+
+    # Don't wait for allowed failures
+    fast_finish: true
+
+    include:
+        # Do a coverage test
+        - env: TOXENV='coverage' TOX_ARGS=''
+
+        # Perform a sanity check of packaging using twine
+        - env: TOXENV='twine' TOX_ARGS=''
+
+        # Check for sphinx doc build warnings - we do this first because it
+        # may run for a long time
+        - env: TOXENV='docbuild' TOX_ARGS=''
+
+        # Do a code style check
+        - env: TOXENV='style' TOX_ARGS=''
+
+        # Try MacOS X and Windows
+        - os: osx
+          env: TOXENV='py36-test'
+
+        - os: windows
+          env: TOXENV='py36-test'
+
+        # Try building against Astropy dev
+        - env: TOXENV='py37-astrodev-test'
+
+        # Test against numpy dev
+        - env: TOXENV='py37-numpydev-test'
+
+        # Test against oldest supported version of Glue
+        - env: TOXENV='py36-glueold-test'
+
+        # Test against latest development version of Glue
+        - env: TOXENV='py37-gluedev-test'
+
+    allow_failures:
+        - env: TOXENV='style' TOX_ARGS=''
+        - env: TOXENV='py37-astrodev-test'
+        - env: TOXENV='py37-numpydev-test'
+        - env: TOXENV='py37-gluedev-test'
+
+        - os: windows
+          env: TOXENV='py36-test'
+
+install:
+    - git clone git://github.com/astropy/ci-helpers.git
+    - source ci-helpers/travis/setup_conda.sh
+    - pip install tox tox-conda
+
+script:
+   - conda info
+   - $TOX_CMD $TOX_ARGS
+   - if [[ $TRAVIS_OS_NAME != windows && $TOXENV == *-test ]]; then
+        JWST_DATA_TEST=1 $TOX_CMD mosviz/loaders/tests/test_load_NIRSpec_data.py $TOX_ARGS;
+     fi
+   - find mosviz -name "*.ui" -exec grep "pointsize" {} \; >& font.log
+   - test ! -s font.log

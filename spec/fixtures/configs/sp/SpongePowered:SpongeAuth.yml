@@ -1,0 +1,32 @@
+sudo: false
+
+language: python
+matrix:
+  include:
+#    - python: 3.5
+#      env:
+#      - TOX_ENV=py35
+    - python: 3.6
+      env:
+      - TOX_ENV=py36-cov
+      services:
+      - postgresql
+      addons:
+        postgresql: "9.6"
+    - python: 3.6
+      env:
+      - TOX_ENV=lint
+cache:
+  directories:
+    - ~/.cache/pip
+    - node_modules
+
+install:
+  - pip install tox
+  - nvm install 9
+  - nvm use 9
+  - npm install
+  - npm install gulp-cli
+script:
+  - node_modules/.bin/gulp fonts styles scripts images
+  - tox -e $TOX_ENV

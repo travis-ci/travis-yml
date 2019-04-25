@@ -1,0 +1,91 @@
+sudo: required
+
+dist: trusty
+
+language: python
+
+matrix:
+  include:
+    - python: 3.5
+      # not available on xenial and the redis version is too old (<5), there => no redis tests
+    - python: 3.6
+      dist: xenial
+      sudo: true
+      env:
+        - REDIS_URL=redis://localhost:6379
+    - python: 3.7
+      dist: xenial
+      sudo: true
+      env:
+        - REDIS_URL=redis://localhost:6379
+
+services:
+- redis-server
+
+env:
+  global:
+  - BERKELEYDB_LIBDIR=/usr/lib/x86_64-linux-gnu BERKELEYDB_INCDIR=/usr/include
+
+before_install:
+- chmod o+rx /home/travis
+- sudo sed -i '/plugin_directory/d' /etc/boto.cfg
+- ssh-keygen -t rsa -C your_email@youremail.com -P '' -f ~/.ssh/id_rsa
+- cat /home/travis/.ssh/id_rsa.pub >> /home/travis/.ssh/authorized_keys
+- ln -s /home/travis/.ssh/authorized_keys /home/travis/.ssh/authorized_keys2
+- echo "Host localhost" >> /home/travis/.ssh/config
+- echo "    StrictHostKeyChecking no" >> /home/travis/.ssh/config
+- chmod g-rw,o-rw /home/travis/.ssh/*
+
+- chmod 644 ~/.bashrc
+- echo "PATH=${PATH}" > ~/.bashrc
+
+- sudo rm -rf /usr/local
+- sudo apt-get update
+- sudo apt-get install -y --force-yes libstdc++-4.8-dev libc6 libmapnik-dev apache2 libapache2-mod-fcgid cgi-mapserver libdb-dev optipng
+
+- sudo service postgresql stop
+- docker build --tag=test-db docker/test-db
+- docker run --publish=5432:5432 --detach test-db
+
+- sudo a2enmod fcgid
+- sudo cp tilecloud_chain/tests/apache.conf /etc/apache2/sites-enabled/apache.conf
+- sudo apache2ctl graceful
+
+- ssh localhost echo add to know host
+
+- sudo mkdir /tmp/tests
+- sudo chmod g+s,o+w /tmp/tests
+
+install:
+- (python --version | grep -q " 3.5" && pip install "c2cwsgiutils<3") || true
+- pip install --requirement=requirements.txt
+- pip install --requirement=dev-requirements.txt
+- pip install --editable=.
+- touch tilecloud_chain/OpenLayers.js
+
+script:
+- flake8 tilecloud_chain
+- vvv-validate-rst README.rst
+- vvv-validate-rst CHANGES.rst
+- python setup.py --long-description > PYPI.rst
+- vvv-validate-rst PYPI.rst
+- python setup.py nosetests --logging-filter=tilecloud,tilecloud_chain --attr '!'nopy`echo $TRAVIS_PYTHON_VERSION | awk -F . '{{print $1}}'`
+- git --no-pager diff --check `git log --oneline | tail -1 | cut --fields=1 --delimiter=' '`
+- docker build .
+
+after_success:
+# Report coverage results to coveralls.io
+- pip install coveralls
+- coveralls
+
+deploy:
+- provider: pypi
+  user: sbrunner
+  password:
+    secure: "ZDpDuMznPwMQlZHQCUvWhnsVIdZdhZPVVuFCi+89Cvv1nh78LVe+DKxNohUIUsPNyF+MDI7uL3bH2mIH4oKSTxoxATZZM+bUgSznpbO0HE+sF4GoauFzxbTrYjDCMKE3JJNz+vKnuuO71oTl5+j6+sYjYzJIHk3OC2o/WLNl964="
+  skip_cleanup: true
+  distributions: sdist bdist_wheel
+  on:
+    tags: true
+    python: 3.6
+    condition: '"${TRAVIS_TAG}" == "`python setup.py --version`"'

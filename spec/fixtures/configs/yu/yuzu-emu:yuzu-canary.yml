@@ -1,0 +1,59 @@
+language: cpp
+matrix:
+  include:
+    - os: linux
+      env: NAME="clang-format"
+      sudo: required
+      dist: trusty
+      services: docker
+      install: "./.travis/clang-format/deps.sh"
+      script: "./.travis/clang-format/build.sh"
+    - os: linux
+      env: NAME="linux build"
+      sudo: required
+      dist: trusty
+      services: docker
+      addons:
+        apt:
+          packages:
+            - p7zip-full
+      install: "./.travis/linux/deps.sh"
+      script: "./.travis/linux/build.sh"
+      after_success: "./.travis/linux/upload.sh"
+      cache: ccache
+    - os: osx
+      env: NAME="macos build"
+      sudo: false
+      osx_image: xcode10.1
+      install: "./.travis/macos/deps.sh"
+      script: "./.travis/macos/build.sh"
+      after_success: "./.travis/macos/upload.sh"
+      cache: ccache
+    - os: linux
+      env: NAME="MinGW build"
+      sudo: required
+      dist: trusty
+      services: docker
+      addons:
+        apt:
+          packages:
+            - p7zip-full
+      install: "./.travis/linux-mingw/deps.sh"
+      script: "./.travis/linux-mingw/build.sh"
+      after_success: "./.travis/linux-mingw/upload.sh"
+      cache: ccache
+
+deploy:
+  provider: releases
+  api_key:
+    secure: YUhont9wkkx2/aRV1oKWENp1Ig3Fwjs8qKUrbYkWUcgaC3be0xbs6LGFhXT7ENI4Uw+lZ0OUC5H71UGv8mLfQnuqsHNClo+8c+XrYnwsMN0GUPYaMDOkfaY3zq+j/0YvOpbnNwGz/pcvElbluqAHSrPsqiXqCRmnqAwIZYvy8HYFQDfCbob1bq1OE52hCLf0+Eso+l2ZWgVNxjD8TbarD86TSHzBgCmQUUnXtbYbgsVzmsNQolyaxdSTIZilO61LbgoMBCSrJJ/0i/mvyhuInhEIqklv6ey4i8mQTyxFox2LPOO0DDo9x/2ODzYpF3kcE16LrGaFD8P/zXhfHSxlEkeiwobrniaTskje/WUhhyZesoJ6NymgCkfpkqfdCJ54ATdixOqdLArWHPaAodbhLfn6dFH8+bGP9hpvodnFlQ+b2ypIY9UflyUlDN4E04aJAnWp3pFL6G80SN2rms/qvbKgbe5NPiRTyww50PbFTE3eDxg52vopv6IqU0r64f7zXNmaHZ8mPKNigrdqZYBGdviRajmd0Hen2faD8+/gibFW+OKLRiSesKe5mjF+ybh6rqy0H/RTOpVY3/RDjJ2sM6fyV99GTB5I+JxM04dIDJZ+2yMppeQSvIsBFlc5SazB+ooDnmkbWXC5v9qe0LsJVjARjcj5T8o+Ws7L3h/hW7A=
+  file_glob: true
+  file: "artifacts/*"
+  skip_cleanup: true
+  on:
+    tags: true
+
+notifications:
+  webhooks:
+    urls:
+      - https://api.yuzu-emu.org/code/travis/notify

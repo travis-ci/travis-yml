@@ -1,0 +1,42 @@
+language: java
+jdk:
+- oraclejdk8
+services:
+- docker
+notifications:
+  email: false
+  slack:
+    on_success: change
+    on_failure: always
+    rooms:
+    - secure: Ch12lKiGgb6P1YrVkzhrAJrj+P4Bh4qcoPEVwBjUapRO02GbR7hJefYMAcBMbKv2CPQoHZHYaGn+XZ2//mIUdAW4fqjrKtY+Ep4EkhpBg8E/Hpu2TfKShOujIlnJfc4hxrzRK2mg/Avv4mUHIeLxDgzWGdNix7LHMLRi/aqsEYGH1llsa6vqfxXUta0FT9GlpaIDKF053gt3meAT+WPwpsu08NRWlb/JeXMW+PbP92HtUFbI40gAtCN8WCMRaEB4tQpkOlvEKo95NkU/ZdYZuGJ4ftOIGQW9ucxNBxOx4Hvv3qzX2hbQtx2WMLb3IJ6UvX3ybGjxozE6KwJsQHBVgJQl/6CBC8oVf5bcLJIW1LHPnUOXH2L/T4sVfATiKGFvJ/XAOFgJ4ylhjoud6NX98MhQD1D4OhiHi5wA4XJiqr7STBNO/uIHOU4vnbpUya/LeDRuoPmDgajTzp4VB0TlKfD3a3t3pfdBbxSgkG/e+8MLQVQMTUvwVeej0zRKNB/rvo9SbD+65NFzdL2DEhCEQGZrzHI+eKXftzhx6eDqM6u1Nhcka7yTu0weyzjldivDjCXZQ0eo9NsSclUKf3WmndPgD71pD01Dj57phoLxvc1zR5AD+bZ4VzXNxt3zBYHlHB8FTVmskp8ePp9A0kldS+b/tVeAHQmIuaxED1INXj4=
+before_cache:
+- rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+- rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+cache:
+  directories:
+  - $HOME/.gradle/caches/
+  - $HOME/.gradle/wrapper/
+  - .gradle
+  - api-search/build
+  - api-search/dist
+  - api-metadata/build
+  - api-metadata/dist
+  - buildSrc/.gradle
+  - buildSrc/build
+  - client/.gradle
+  - client/node_modules
+  - client/build
+env:
+  global:
+  - secure: AuWZ1nkrl2ORtguiZ0VPToo3T+X+JpNqMAvC9mQePFGFeZNILW7S4TicgQL0T41ElFumJbNf/sAV+gbomeLjecii2lAKPlcSrRNVZiYnnEmRiDi4EvjLvWS1fqdau3Deb9jZc2WYZN2wBQfHlT9TvpgcGtqDjjD8TLSTGJLRYDLQP8QS7BsmQhcZv0jLjEO9vfi7puiq1XGmK3+dzydXnPx3SGG4k6KlSNIaw9AZqUlLvA8MHl533WxM2pN6ate86RV1WsuZ8YxZxsOApVTS4Kw+CMJq9Jdra2UdgjdPgxYj6S9TeUCA/lsNS6JlkEy+bimo9lXl2HriSItBVfw0TOz7u29ww8qDafKe5tAtGr/Q0Bxjy8lq49GMp1FhKzsdQXYHVWOmTDLrdq1agkT6iKJ2UZzoyLnWtvo4TiTlc7LfyMzIHmF95CcF1WXTDyKE7u7Co/vn4JP3i2GYLR5QlAvRTZDtufKrQQq01BKJfIpr5kYU+QDyyKj9JzDRGEcxdYYkPmmd2NWDYl2TDbXyxo1RrCdfScxLEYEMoc9KlxfLWaACkaKa6/YcV9QAImZhMZ6wPteGk2HW0kmN1eOUt6JSPLPLGEDzQWzvtaOmo/mEz9uhJyST1A/aAOSm9sTkkFFVbAxDUa73GcjjzcidwBREPbA6mqcXMJKoKIFhZ+4=
+  - secure: OR7u1Kws3r4cBlfF6TaDhRzKjlj9D23rJ4OzovPAz+CndYwUPdED6+AIpF6jPC0B4CPGyF+m0dmDuyqeof+nuQrCja5CsLgXXf0xcDvIz/WM/S5SXse0oT90krVUGk1Uxmx+wHE9KmM5xo0nhxwDZk6BYqqmCtB0S+WrEy0JMkhrizzELHO7W2TGwI28JykmBgfa0i42Dy1D5Z9WUMu4OO1EPyc/rEbLDWAxu7QEh4rYRDnhrkij78zEndxE8B33c1cStGpjcIPpoRa36z4kI39qq0FCYQW0g6cjPpQ8cwokggf6FWHQNN2edJMQJGC/DVXmGzGjuSc8M32Kkz1QSofCEnq2S9+nqXek0PAL/mx4wPWXujTa8QHCLZoYB9GAsjOr6glxsendlkHtNnVsTtJThiCgT2mjQdqFwslOjPbmO6Ys1gUJ3zTDxLVKX1VlpbwFoH7r5B8xTb+PcM+MMW+4ryPM2u5lSu/Q0khPE7shz110wk8bbjtvo+2K1q1fK/P3QAZAD5v3088C3YFZKUWGXPnfIFO+BNytABn3Q49F/oIy3ewJMIOdtc99zj/taZrsOpEgSuuON0vwPjSJINStQu6CcWBJApgLjVWobnqoB/MeeonddYCBoDfSh/L8W7BtnfPcZGFrUB1hxlr9s41I7oxykdQZrbYByiWGHb0=
+  - secure: bdPqf+gu3N+4uvTMM0EZMQJX10QscH38dLb/LRQASCWhCBSEB96nnw+WUolWETgThn1rmekdFPuDxQA3A8zU7ubFK/JhwNgwYR/dZOHV4y+W9zYnncEPV+igOWXhIGeW9oQBWomPfVQN3dNk1qKKeDjyFyZJPfnsMbY+EZxqT93EtDmtgzbybLc2ruSXoBwBn3xWa2MM7W9wtVAW6Fb6fIsci+J+72F0urWd5x+ccbdo36jUw2EFQJCGf/zxIB1bq4Mtp471PpK60fnZZ05Pp43o5SIaM2UZegGHphoolOE/l3DI3uvosp8or8B/y8he+ZRB6POExVDkOMUBbNHOe5rdfNwU69YOnwk9003bkefKA+hvoMw85slk7T638WMLRMiDKMtCZITc4/RJM+apHaAdcSnRWcJ3P0+tsXDoFclaFnkuv2ZttAdVp3oiIdb6LzJIJ3LrAHhRYen2LMKbaBQAM10FE+jPHAn1Dg2z0qMETsmDFIGFZfnsZNqXjtS29kLhnoa5yC5fEpBEBUd8VGagTtx2N4rKYVEN8M0AXvB2lHk4uSA2dvLFN/EVFVMSa4Ef+Bi+TkGAhfqUjL6K0h9T+22LP5qFoew0Egmejrnv6RWVSqUN3FU5kUGTvRlv7fxGes/9l+FlucORoNuBa/CCLBupCZRNDOeCgJx6h/o=
+  - secure: THhIjVJUKOwPeXlo9plvx8VT91rzbpb2kJfFAjrXjl2IN62MCsJJqbN6+HVghab8N0nExOvWQHlSXGW7th87/UxuDlDR8mOEufIfVm4xyr7/nizygHEYO+inzSxDJbc3wFDc6IgMOOeWkPeH1ck1Pj9Wx7AxuWFbzjGUJiDPH8/SIxmzYKrx5SsMArguURER9sw4838gaqm6RuloroAqWk/tf6aRUUdBNeHU2pDwR9YRi1ygWI3Cgd/0MWlHoZIf3BF3aYOcFwKCKbrCNgVqZj6mPY9uqot4p5l6/5oMPKAkukT+qEtg67nqwcLiDr00elf1fWriV8zSJxileI438dwtBKpgQPmgn3mMHZfS7mjG2w42JNUR/hq58A8A93i+wrETgcRlIWaOBH3rXK97rW/+axEh93Aqze06+jPsqwDtuT0CxWqzFoaMdkLGgqlIKaB93N80bWwxsYSCiL7APR069J5110yV+6svhBRrd6kBJsQHYGbZtV6tOsNIKtp1Dra2CEb91Vo1Ls9GYIQoPhvjNj9Ns0W1+ZJ0nWhaPofB/iqkmZXih8sFIAeRvB9CDhWwq2crNYuksAbYRWd6RbYqLPL1oROuEZCtGhDqh/3co3w1lroBp+YjaMFV+5DMdE7suVc38UthX/K8y2frkCKUCUg9O80okwvIVYDhJOc=
+install: true
+script:
+- if [[ "$TRAVIS_BRANCH" == 'master' ]] || [[ "$TRAVIS_BRANCH" == "release/*" ]] ||
+  [[ "$TRAVIS_BRANCH" == v* ]]; then echo "Calling
+  publish as part of build for $TRAVIS_BRANCH"; ./gradlew build publish --scan --stacktrace;
+  else echo "Calling build without publish for $TRAVIS_BRANCH"; ./gradlew build --scan
+  --stacktrace; fi

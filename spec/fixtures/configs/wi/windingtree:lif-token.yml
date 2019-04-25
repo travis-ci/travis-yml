@@ -1,0 +1,24 @@
+dist: xenial
+sudo: required
+group: beta
+language: node_js
+node_js:
+  - "10.3.0"
+env:
+  -
+  - SOLIDITY_COVERAGE=true
+matrix:
+  fast_finish: true
+  allow_failures:
+    - env: SOLIDITY_COVERAGE=true
+script:
+  - ./scripts/ci.sh
+before_deploy: npm run buildfornpm
+deploy:
+  provider: npm
+  email: devops@windingtree.com
+  skip_cleanup: true
+  api_key: $NPM_TOKEN
+  on:
+    repo: windingtree/lif-token
+    tags: true

@@ -1,0 +1,36 @@
+language: node_js
+dist: xenial
+node_js:
+  - '10'
+
+# Cache yarn to speed up the build
+cache:
+  yarn: true
+  directories:
+    # We have to be careful with this cache, note that below we check
+    # if the lock file has changed and if so we purge this folder
+    - node_modules
+    - .awcache
+
+env:
+  - YARN_COMMAND=build:ci
+  - YARN_COMMAND=tslint
+  - YARN_COMMAND=test:ci
+  - YARN_COMMAND=protobuf
+
+# Only build the master branch, PRs will build also due to settings in the web ui
+branches:
+  only:
+    - 'master'
+
+# Don't spam people with emails
+notifications:
+  email: false
+  slack:
+    secure: NNfB0Gp16izdMuEgZ134D9fTWHnPlT4JaWNEz1eWqmGjzHXUusY0GjKHoRA4Rh1OHukgfP4oUdyyBMhiI5MycQpTQfaZSGfNkFhsQ6tQ7Ism0JKK9qcsUBWWh/kxeauRo6DY3y1Zyw3Z87DMokY4FUZPlgOtwfFQuyW5TPlJMAjjFs1JixQrFFAcB9tpR4VjcRle9KrWkH8fJ271QvE9+sWSQ3962ebCXZfi2TMGwGkJ4s1pDIsJUxfpDhRYaomQ/PAEL57RfWt3gPzt+2SQ8cfMFSGis7iAqGZk/WE1emkGSXDyl2XyDaFiaSRdhuo1s4p0R5rRHZI/jkf839kXO1/10oflSlRi98U7OVdaRbqbPnJaXQZx3oPH8AW7yC/S5NHZ4uPhTWNx5A1VMS664wdJiD73fTOyxY6zkZjeMSs6L6jFW5qtgZvefw0Oq+LkEjeIG9m/cBjmYXWDLXC4ZHV3BPq1ImL+Ag3rBRkougB7fPng66zuDbdfDsTypmXoj8fD6Tgc/cX5pJsDQm9kRMK9yeo7BoOeWH3ow6zJLIhL5XmqzSdYlITtHDtb9atmkbPTnVcEzihGFlWGHLID0zVEQPXbi2L1CtSFK7aXRQ9m2uu/2fmkulgDW4pS7i9R5j+hb6aMgBGizX0m9VQHjAGd+r5HE7dAAnAlVLCdZVE=
+
+before_install:
+  # If our yarn lock file has changed then purge our node_modules cache
+  - cmp --silent yarn.lock /home/travis/.cache/yarn/yarn.lock || (echo "Clearing node_modules" && find node_modules -mindepth 1 -delete && cp yarn.lock /home/travis/.cache/yarn/yarn.lock)
+script:
+  - yarn $YARN_COMMAND

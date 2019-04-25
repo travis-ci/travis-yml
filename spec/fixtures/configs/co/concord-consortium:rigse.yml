@@ -1,0 +1,66 @@
+sudo: false # see: http://docs.travis-ci.com/user/workers/container-based-infrastructure/
+language: ruby
+rvm:
+  - "2.2.6"
+
+dist: trusty
+
+env:
+  matrix:
+  - RAILS_ENV=test TEST_SUITE=spec
+  - RAILS_ENV=cucumber TEST_SUITE=ci:cucumber_without_javascript
+  - RAILS_ENV=cucumber TEST_SUITE=ci:cucumber_javascript
+  - RAILS_ENV=cucumber TEST_SUITE=ci:cucumber_search
+  global:
+  - ARTIFACTS_BUCKET=cc-travis-artifacts
+  - CC_TEST_REPORTER_ID=555af44da071264ef9c30bc5d16bcaceee2b8c2e40cccdbc74fc2b7db9839a92
+  - PORTAL_PAGES_LIBRARY_URL=https://portal-pages.concord.org/library
+before_install:
+  - "export DISPLAY=:99.0"
+  - pip install --user awscli
+  - bundle config gems.railslts.com $RAILS_LTS_USER:$RAILS_LTS_PASSWORD
+
+before_script:
+  - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+  - chmod +x ./cc-test-reporter
+  - sh -c "if [ '$TRAVIS_BUILD_STAGE_NAME' = 'Test'  ]; then ./script/travis_test_setup; fi"
+
+after_script:
+  - RAILS_ENV=test ./bin/rake sunspot:solr:stop
+  - ./cc-test-reporter format-coverage -t simplecov -o "coverage/codeclimate.$TEST_SUITE.json"
+  - ls coverage/
+  - aws s3 sync coverage/ "s3://$ARTIFACTS_BUCKET/coverage/$TRAVIS_BUILD_NUMBER"
+
+# uncomment this line if your project needs to run something other than `rake`:
+script: ./bin/rake $TEST_SUITE
+
+cache: bundler
+
+bundler_args: --binstubs --without development
+
+addons:
+  chrome: stable
+  artifacts:
+    paths:
+    - ./tmp/capybara
+  code_climate:
+    repo_token: 555af44da071264ef9c30bc5d16bcaceee2b8c2e40cccdbc74fc2b7db9839a92
+
+jobs:
+  include:
+    - stage: cc-reporter
+      env:
+        matrix: TEST_SUITE=none
+      install: skip
+      script:
+        - aws s3 sync "s3://$ARTIFACTS_BUCKET/coverage/$TRAVIS_BUILD_NUMBER" coverage/
+        - ./cc-test-reporter sum-coverage -p 4 coverage/codeclimate.*.json
+        - ./cc-test-reporter upload-coverage
+      after_script:
+        - aws s3 rm --recursive "s3://$ARTIFACTS_BUCKET/coverage/$TRAVIS_BUILD_NUMBER"
+
+# blacklist - these branches aren't feature branches and shouldn't be getting direct commits
+# branches:
+#   except:
+#     - staging
+#     - production

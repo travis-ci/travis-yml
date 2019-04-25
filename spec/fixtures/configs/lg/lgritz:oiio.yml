@@ -1,0 +1,224 @@
+# .travis.yml for OIIO
+
+language: cpp
+osx_image: xcode10
+dist: trusty
+
+
+# Add-ons: specify apt packages for Linux
+addons:
+  apt:
+   sources:
+      - ubuntu-toolchain-r-test
+      - sourceline: 'ppa:jonathonf/ffmpeg-3'
+   packages:
+      - g++-6
+      - g++-7
+      - g++-8
+      - libboost-filesystem1.55
+      - libboost-regex1.55
+      - libboost-system1.55
+      - libboost-thread1.55
+      - libgif-dev
+      - libopenjpeg-dev
+      - libwebp-dev
+      - libfreetype6-dev
+      - libjpeg-turbo8-dev
+      - dcmtk
+      - libavcodec-dev
+      - libavformat-dev
+      - libswscale-dev
+      - libavutil-dev
+      - locales
+      - python-numpy
+      - libraw-dev
+      - ninja-build
+      # - qtbase5-dev   # FIXME: enable Qt5 on Linux
+      # - bzip2
+      # - libtinyxml-dev
+      # - liblcms2-dev
+      # - libyaml-cpp-dev
+
+cache:
+    ccache: true
+    apt: true
+    directories:
+      - $HOME/.ccache
+      - $PWD/oiio-images
+      - $PWD/libtiffpic
+
+before_install:
+    - source src/build-scripts/ci-startup.bash
+    - export WHICHGCC=${WHICHGCC:="4.8"}
+    - if [ "$CXX" == "g++" ]; then export CXX="g++-${WHICHGCC}" ; fi
+
+install:
+    - if [ $TRAVIS_OS_NAME == osx ] ; then
+          source src/build-scripts/install_homebrew_deps.bash ;
+      elif [ $TRAVIS_OS_NAME == linux ] ; then
+          CXX="ccache $CXX" source src/build-scripts/build_openexr.bash ;
+          CXX="ccache $CXX" source src/build-scripts/build_ocio.bash ;
+      fi
+    - src/build-scripts/install_test_images.bash
+
+# before_script:
+
+script:
+    - source src/build-scripts/ci-build-and-test.bash
+
+
+
+branches:
+  only:
+    - master
+    - /RB-/
+    - /lg-/
+
+matrix:
+    fast_finish: true
+    exclude:
+      - os: osx
+        compiler: gcc
+      - os: linux
+        compiler: clang
+
+    include:
+    # test default compile: C++11, optimized, default compilers, SSE2
+      - name: "VFX Platform 2017 (gcc48, py27, exr2.2)"
+        os: linux
+        compiler: gcc
+        env: EXRBRANCH=v2.2.0
+      - name: "Mac (latest clang, py37)"
+        os: osx
+        compiler: clang
+        env: PYTHON_VERSION=3.7
+    # Make sure Python 2.7 still works on OSX, but only for PRs, master/RB
+    # pushes, or if the branch name includes "python".
+      - name: "Mac py27 (latest clang)"
+        os: osx
+        compiler: clang
+        env: PYTHON_VERSION=2.7
+        if: branch =~ /(master|RB|travis|python)/ OR type = pull_request
+    # test debug build with default compiler
+      - name: "Linux DEBUG"
+        os: linux
+        compiler: gcc
+        env: DEBUG=1
+      # - os: osx
+      #   compiler: clang
+      #   env: DEBUG=1
+    # test with C++14, gcc 6, SSE 4.2
+      - name: "VFX Platform 2018 (gcc6, cpp14, exr2.2), sse4.2"
+        os: linux
+        compiler: gcc
+        env: WHICHGCC=6 USE_CPP=14 USE_SIMD=sse4.2 EXRBRANCH=v2.2.0
+    # test with C++14, gcc 7, latest SIMD flags supported by TravisCI VMs
+      - name: "gcc7, cpp14, avx, exr2.3"
+        os: linux
+        compiler: gcc
+        env: WHICHGCC=7 USE_CPP=14 USE_SIMD=avx,f16c
+    # Test LINKSTATIC on both platforms. This is incomplete and to make it
+    # work we still need to disable a bunch of specific plugins.
+      # FIXME: Don't have LINKSTATIC working on Travis for Linux, it's
+      # complaining about PIC issues.
+      # - os: linux
+      #   compiler: gcc
+      #   env: LINKSTATIC=1 USE_FFMPEG=0 USE_OCIO=0 USE_OPENCV=0 MY_CMAKE_FLAGS="-DUSE_fPIC=1"
+      ##### TEMPORARILY DISABLED -- Travis upgraded some packages and this
+      ##    is having link errors. Look into fixing this later.
+      ## - os: osx
+      ##  osx_image: xcode8.3
+      ##  compiler: clang
+      ##  env: LINKSTATIC=1 USE_FFMPEG=0 USE_OCIO=0 USE_OPENCV=0
+    # Dynamic analysis: build with sanitizers and run most tests.
+    # Because this test takes so long to run, only build for PRs, direct
+    # pushes to master or RB branches, or if the branch name includes
+    # "sanitize". Other ordinary work branch pushes don't need to run this
+    # every time.
+      - name: "Sanitizers"
+        os: linux
+        compiler: gcc
+        env: WHICHGCC=6 SANITIZE=address USE_PYTHON=0
+        if: branch =~ /(master|RB|travis|san)/ OR type = pull_request
+    # One more, just for the heck of it, turn all SIMD off, and also make
+    # sure we're falling back on libjpeg, not jpeg-turbo, and don't embed
+    # the plugins (to make sure that doesn't rust away).  I guess this
+    # should/could be both platforms, but in the interest of making the
+    # tests go faster, don't bother doing it on OSX.
+    # Only build this case for PRs, direct pushes to master or RB branches,
+    # or if the branch name includes "simd". Other ordinary work branch
+    # pushes don't need to run this.
+      - name: "Oldest everything: no simd, no jpegturbo, dso plugins, exr2.2"
+        os: linux
+        compiler: gcc
+        env: USE_SIMD=0 USE_JPEGTURBO=0 EMBEDPLUGINS=0 EXRBRANCH=v2.2.0
+        if: branch =~ /(master|RB|travis|simd)/ OR type = pull_request
+    # test with C++14, gcc 8, latest SIMD flags supported by TravisCI VMs
+    # Since VFXPlatform doesn't bless gcc8 yet, only build this
+    # case for PRs, direct pushes to master or RB branches, or if the branch
+    # name includes "gcc". Other ordinary work branch pushes don't
+    # need to run this.
+      - name: "Linux gcc8 cpp14 avx"
+        os: linux
+        compiler: gcc
+        env: WHICHGCC=8 USE_CPP=14 USE_SIMD=avx,f16c
+        if: branch =~ /(master|RB|travis|gcc)/ OR type = pull_request
+    # test with C++17, gcc 8, latest SIMD flags supported by TravisCI VMs.
+    # Since VFXPlatform doesn't bless C++17 or gcc8 yet, only build this
+    # case for PRs, direct pushes to master or RB branches, or if the branch
+    # name includes "17" or "gcc". Other ordinary work branch pushes don't
+    # need to run this.
+      - name: "Linux most advanced (gcc8, cpp17, avx/f16c)"
+        os: linux
+        compiler: gcc
+        env: WHICHGCC=8 USE_CPP=17 USE_SIMD=avx,f16c
+        if: branch =~ /(master|RB|travis|gcc|17)/ OR type = pull_request
+    # build for AVX2, don't run the tests (ensure against build breaks)
+    # Only build this case for PRs, direct pushes to master or RB branches,
+    # or if the branch name includes "simd". Other ordinary work branch
+    # pushes don't need to run this.
+      - name: "Build clean AVX2 (no tests)"
+        os: linux
+        compiler: gcc
+        env: WHICHGCC=6 USE_SIMD=avx2 SKIP_TESTS=1
+        if: branch =~ /(master|RB|travis|simd)/ OR type = pull_request
+    # build for AVX512, don't run the tests (ensure against build breaks)
+    # Only build this case for PRs, direct pushes to master or RB branches,
+    # or if the branch name includes "simd". Other ordinary work branch
+    # pushes don't need to run this.
+      - name: "Build clean AVX512 (no tests)"
+        os: linux
+        compiler: gcc
+        env: WHICHGCC=7 USE_SIMD=avx2,avx512f,f16c SKIP_TESTS=1
+        if: branch =~ /(master|RB|travis|simd)/ OR type = pull_request
+    # Just run clang-format, this test only checks formatting rule conformance
+      - name: "clang-format format verification"
+        os: osx
+        compiler: clang
+        env: BUILDTARGET=clang-format SKIP_TESTS=1 BUILD_MISSING_DEPS=0
+        #if: branch =~ /(master|RB|travis|simd)/ OR type = pull_request
+    # Static analysis: build with clang-tidy.
+    # Disabled -- this takes so long to run, it can't complete in Travis's
+    # 50 minute time limit. Left here just to show how it should work.
+      #  - name: "Static analysis / clang-tidy"
+      #    os: linux
+      #    compiler: gcc
+      #    env: CLANG_TIDY=1 CLANG_TIDY_FIX=1 SKIP_TESTS=1
+      #    if: branch =~ /(master|RB|travis|tidy)/ OR type = pull_request
+    # Build with EMBEDPLUGINS=0, both platforms.
+      # FIXME: doesn't work yet on Travis
+      # - os: linux
+      #   compiler: gcc
+      #   env: EMBEDPLUGINS=0
+      # FIXME: don't have OSX EMBEDPLUGINS=0 working yet on Travis (though
+      # it works fine on my laptop).
+      # - os: osx
+      #   compiler: clang
+      #   env: EMBEDPLUGINS=0
+
+notifications:
+    email:
+        recipients:
+            - lg@openimageio.org
+        on_success: change
+        on_failure: always

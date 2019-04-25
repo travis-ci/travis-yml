@@ -11,10 +11,10 @@ describe Travis::Yml::Schema::Def::Haxe, 'structure' do
         type: :object,
         properties: {
           haxe: {
-            '$ref': '#/definitions/strs'
+            '$ref': '#/definitions/type/strs'
           },
           hxml: {
-            '$ref': '#/definitions/strs'
+            '$ref': '#/definitions/type/strs'
           },
           neko: {
             type: :string

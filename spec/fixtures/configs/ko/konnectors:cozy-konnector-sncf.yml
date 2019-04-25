@@ -1,0 +1,41 @@
+language: node_js
+node_js:
+- '8'
+env:
+  global:
+  - GH_USER_EMAIL="travis@example.org"
+  - GH_USER_NAME="cozy-bot"
+  - DEPLOY_REPOSITORY="git@github.com:konnectors/cozy-konnector-sncf.git"
+  - secure: E7DVcVX2H56jXk4gfYTnh/sCIeavZrwMjvLZXRl4AFzgSTUZmFXe1xAKHo0QPYtIuVpgAvJTNFgXob7mWf4EofLo0QrNz3vPk3jn5IG0OGuF4t5TB9BtlLgT/oS20Z89nLR/OBfEPihcmobw9BAahSd8wFuI1d/29dyTwNhA5m0axYNWUuxn1fTS2p35nO+eh2QPDD7kmlES8OwZW32U8hMRJ1rHmzT5/Ph28Y1XR14XB6fjK9jty3m822RcglfzgPGDCDpx7fMh1PgBV9G7kcyjPloAwSmmY9QVujaRFdw0cAXKXCFKsNq1TVav6SghrW20hKJbGKKCM1/NzmzaW6OXspLO7szHfdgsDIZa31tCS8KRpakWNFEyV4wbxE5y54FKxMcAojh8uLDeMLD1dW1oZAhcp345Bgj7EeVklN9y1fX4LFQib/JTKhK1cG0NRGDMQ9BiwERYkxx9S+3xhP9IugF0l908cG3klSJuKL6rLyugQxdvxANEEO4QC2+63XpYVRf1qMSLbhbFWQf2QffXoEIZHX8Yzc96Uscv8zDXyH4i9CI5wIgDVpIId7CINOSxq3GqLM+1SpRYY8PgtrhzCWSOpWBnAESxGT15ZbOfRBqEEGU7uu8e6b6Kxcjx9eqq7Xj1Dp7Ixcqj+MUAzpoA+eD5MoR6eK+fuuanXDY=
+cache:
+  yarn: true
+  directories:
+  - node_modules
+branches:
+  except:
+  - build
+  - build-debug
+script:
+- yarn lint
+- yarn build
+- yarn run check
+deploy:
+- provider: script
+  skip-cleanup: true
+  script: DEPLOY_BRANCH=build yarn deploy && yarn cozyPublish
+  on:
+    branch: master
+- provider: script
+  skip-cleanup: true
+  script: DEPLOY_BRANCH=build yarn deploy && yarn cozyPublish
+  on:
+    tags: true
+before_install:
+- openssl aes-256-cbc -K $encrypted_cd8f4583e81c_key -iv $encrypted_cd8f4583e81c_iv
+  -in github_deploy_key.enc -out /tmp/github_deploy_key -d
+- eval "$(ssh-agent -s)"
+- chmod 600 /tmp/github_deploy_key
+- ssh-add /tmp/github_deploy_key
+after_deploy:
+- rm /tmp/github_deploy_key
+- ssh-add -D

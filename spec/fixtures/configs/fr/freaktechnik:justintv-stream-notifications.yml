@@ -1,0 +1,58 @@
+sudo: false
+group: travis_latest
+language: node_js
+node_js: stable
+cache:
+  directories:
+    - $HOME/.npm
+branches:
+  except:
+  - gh-pages
+notifications:
+  email:
+    on_failure: change
+env:
+  - CI_NODE_TOTAL=4
+stages:
+  - dependencies
+  - lint
+  - test
+jobs:
+  include:
+    - stage: dependencies
+      script: skip
+      name: "Update deps cache"
+    - stage: lint
+      name: "Lint JS"
+      script: npm run lint:js
+    - script: npm run lint:css
+      name: "Lint CSS"
+    - script: npm run lint:webext
+      before_script: npm run ci-init
+      name: "Lint Extension"
+    - script: npm run lint:ec
+      name: "Lint by editorconfig"
+    - script: npm run lint:json
+      name: "Lint JSON"
+    - stage: test
+      name: "Unit tests"
+      script: npm run test:ava
+      after_success: npm run coverage
+      env:
+        - CI_NODE_TOTAL=4
+        - CI_NODE_INDEX=0
+    - script: npm run test:ava
+      after_success: npm run coverage
+      env:
+        - CI_NODE_TOTAL=4
+        - CI_NODE_INDEX=1
+    - script: npm run test:ava
+      after_success: npm run coverage
+      env:
+        - CI_NODE_TOTAL=4
+        - CI_NODE_INDEX=2
+    - script: npm run test:ava
+      after_success: npm run coverage
+      env:
+        - CI_NODE_TOTAL=4
+        - CI_NODE_INDEX=3

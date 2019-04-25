@@ -1,0 +1,21 @@
+language: node_js
+node_js:
+  - "11"
+  - "10"
+  - "9"
+  - "8"
+  - "7"
+  - "6"
+
+before_script:
+  - node --version
+  - npm --version
+
+script:
+  - npm test
+
+after_script:
+  - npm run coverage
+
+matrix:
+  fast_finish: true

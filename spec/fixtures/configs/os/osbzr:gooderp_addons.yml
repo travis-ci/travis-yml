@@ -1,0 +1,38 @@
+language: python
+sudo: false
+cache:
+  apt: true
+  directories:
+    - $HOME/.cache/pip
+
+python:
+  - "2.7.13"
+
+addons:
+  postgresql: "9.5"
+  apt:
+    packages:
+      - expect-dev  # provides unbuffer utility
+
+env:
+  global:
+  - VERSION="10.0" ODOO_REPO="osbzr/base" LINT_CHECK="0" PGPASSWORD="travis"
+  - PHANTOMJS_VERSION="latest"
+
+install:
+  - git clone http://github.com/GoodERPJeff/maintainer-quality-tools.git ${HOME}/maintainer-quality-tools
+  - export PATH=${HOME}/maintainer-quality-tools/travis:${PATH}
+  - travis_install_nightly
+  - pip install xlrd
+  - pip install xlutils
+  - pip install docxtpl
+  - pip install python-ooxml
+  - pip install pdfkit
+  - pip install wkhtmltopdf
+  - pip install httplib2
+
+script:
+  - travis_run_tests
+
+after_success:
+  - travis_after_tests_success

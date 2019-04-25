@@ -1,0 +1,15 @@
+language: php
+php:
+- 7.0
+git:
+  depth: 30
+before_script:
+  - composer require squizlabs/php_codesniffer:2.*
+  - mkdir -p ~/build
+  - git clone --branch hubzero-cms-2.1 --depth=1 https://github.com/hubzero/standards ~/build/standards
+  - git config diff.renameLimit 0
+  - changed_files=`git diff --diff-filter=ACMRTUXB --name-only $TRAVIS_COMMIT_RANGE`
+  - echo "The following will be tested:"
+  - echo $changed_files
+script:
+- core/bin/php_tests.sh $changed_files

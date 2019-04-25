@@ -1,0 +1,27 @@
+sudo: required
+
+language: go
+
+git:
+  depth: 1
+
+install: 
+  - sudo pip install Pygments
+  - sudo pip install requests
+  - go get -v github.com/gohugoio/hugo
+
+script:
+  - hugo
+
+deploy:
+  provider: pages
+  skip_cleanup: true
+  # token is set in travis-ci.org dashboard
+  github_token: $GITHUB_API_KEY
+  on:
+    branch: master
+  local_dir: public
+  repo: DailyEng/DailyEng.github.io
+  target_branch: master
+  email: deploy@travis-ci.org
+  name: deployment-bot

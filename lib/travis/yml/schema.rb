@@ -1,5 +1,6 @@
 require 'travis/yml/schema/def'
 require 'travis/yml/schema/dsl'
+require 'travis/yml/schema/docs'
 require 'travis/yml/schema/examples'
 require 'travis/yml/schema/json'
 require 'travis/yml/schema/type'

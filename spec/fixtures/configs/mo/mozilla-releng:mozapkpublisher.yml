@@ -1,0 +1,27 @@
+sudo: false
+
+language: python
+
+matrix:
+  include:
+    - python: 3.5
+      env:
+        - TOXENV=py35
+        - SKIP_NETWORK_TESTS=0
+    - python: 3.6
+      env:
+        - TOXENV=py36
+        - SKIP_NETWORK_TESTS=0
+    - python: 3.7
+      # from https://github.com/travis-ci/travis-ci/issues/9815#issuecomment-401756442
+      dist: xenial
+      sudo: true
+      env:
+        - TOXENV=py37
+        - SKIP_NETWORK_TESTS=0
+
+install:
+    - travis_retry pip install tox
+script:
+    - tox -e "$TOXENV"
+    - if [[ $TOXENV == 'py36' ]] ; then tox -e coveralls; else echo "No coverage to do"; fi

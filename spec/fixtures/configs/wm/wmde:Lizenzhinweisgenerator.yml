@@ -1,0 +1,15 @@
+language: node_js
+
+node_js:
+  - '0.10'
+
+sudo: false
+
+install:
+  - travis_retry npm install qunit-phantomjs-runner jshint jscs
+  - npm install && npm run build-test
+
+script:
+  - phantomjs ./node_modules/qunit-phantomjs-runner/runner.js ./tests/index.html
+  - ./node_modules/jshint/bin/jshint .
+  - ./node_modules/jscs/bin/jscs .

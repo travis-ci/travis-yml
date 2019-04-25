@@ -1,0 +1,29 @@
+os:
+- linux
+language: node_js
+node_js:
+- '10'
+sudo: required
+addons:
+  chrome: stable
+dist: trusty
+before_install:
+- if [ "$TRAVIS_OS_NAME" == "linux" ]; then export CHROME_BIN=/usr/bin/google-chrome;
+  fi
+- if [ "$TRAVIS_OS_NAME" == "linux" ]; then export DISPLAY=:99.0; fi
+- if [ "$TRAVIS_OS_NAME" == "linux" ]; then sh -e /etc/init.d/xvfb start; fi
+- npm i -g npm
+install:
+- npm install
+before_script:
+- npm run start
+script:
+- npm run check-version
+- npm run lint
+- if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then npm run unit; else npm run test;
+  fi
+notifications:
+  slack:
+    secure: PUPMZ2+nU9DJ0IExfVdjXK2QuYuB6AcVIWsWc/JGKkPyhJo1fWdKF7yrBURwD2bj++99yPcnbtWtzju2w0hKm2pcx/08hcGVmsitOfdPYNc/tN8nJUAFJutqAibxLDmYh0OXlU0N6AiFAbka/ePrEa7tCEtUrF5PRcEHdJuClCTqR+URWZCp65fGpY+bMCrw5EXETxNQce4OLzEcQXi9B4CYqv/VNcXlHHaLYjojgHNCdL927AJJkQww41Myo5vqAaycwARS1+LRCzEOHGauxMJvMxDME5VykSRdVsU3vKx/070XU+QmDfVaFiBJBixFzEwwcGh7r6SwSdJRf3CNgtfm7sYUsRl28DBBhjZ5uHMZZfiGllfEdNZDW1safxZpk1Sr5oC5EKEwqcdSiqoNJgdVqf9vdliBcVu9TzhZUexyNKsi5Kaer90aWNcLksTbzvf2h3cgdAUXqSMOboRgRFlgtHc0zxz/AN4CXm3feGVLX3q+6jXXPqlXD2laBzdMquSJOXPvA7tr9qn7XZrSAEMtTUGVHzu77B1u0tAfc7SOvVRVa/YWe3QxWDQVEQvsqrxtyon/NfP5xVLkcbxrVZN6rJtyTRR9+11ZviMLE5WEcqKkyjubrekrR8CdHU8ZplqsyvQZN1YhBS/by+am758u1Zd/TZf1TsGcmFIWUpg=
+    on_success: change
+    on_failure: always

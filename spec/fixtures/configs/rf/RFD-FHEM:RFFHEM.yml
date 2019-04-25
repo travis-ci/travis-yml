@@ -1,0 +1,30 @@
+sudo: enabled
+language: perl
+perl:
+- '5.26'
+- '5.24'
+- "5.18"
+env:
+  global:
+    secure: QZkNIahKdBIE/ANg04akx6MNgFItbLVSvGrR2By6rjHqrU9kllv862aVmcOjJw5/lcewEgRMgdK8ddhCKunW5HKpgW9CrkTi2GYVcmnJpw39ye7UnIIyOJM1N3YC+vWAaru+LJh8rHkXSfopKiiOjq9uTtfFCt+kngP7oIRKfPJ/7qdgKWvYpqKnqGoFoXghBWKe3V63xunILMkRVeTg+ogBOXbRy+3OU4WBIc4DsGdKOz+XkTecjLM9sdoyYLWUodLcmqwfCNGKWKwjVOaIe+859QtIoAEkclJtXunn6wYOeaumAJ+dILKZmOt4ORQxVYtVs+3W0eUl8+Z12xi6SGCenIQQGFHjxQgbjekXCiN56vf5LQUlxSEktjK67o9tq3+8VpgnPxqAgFOh4CvX4Ite3IT2+mPMegFOJavuyN/xOTuZgTe3sXDJzCfDBTQdBrb94ex/eZWZPn0M5Dkupiegh1CK6lJFVUwHpcJWb11SI2hzQRsGtPmlxDOfi48n23gVt7/bDeJS8rUlQoehF5fTVY1lMo4SZkB1Zs/ykm+NjPFg7h03j9E1msGFE/wQOZsN550GSxnpacZT9HandaxundiQHmVUfHHR54ieLxd3/xSTjqEpZcai21Oiq2ghmagGp8s+eRdNejMWLVWuHuWynFr72XU3LSXBW6YWyIc=
+git:
+  depth: false
+before_install:
+ - git config --global user.email "travis@travis-ci.org"
+ - git config --global user.name "Travis CI"
+ - git config --global push.default simple
+ - git remote set-url origin https://${GH_API_KEY}@github.com/RFD-FHEM/RFFHEM.git
+ - wget -qO - http://debian.fhem.de/archive.key | sudo apt-key add -
+ - echo "deb http://debian.fhem.de/nightly/ /" | sudo tee -a /etc/apt/sources.list
+install:
+ - cpanm File::Find File::Basename Mock::Sub Test::More Test::Device::SerialPort Devel::Cover Devel::Cover::Report::Coveralls JSON --notest 
+ - sudo apt-get update -qq
+ - sudo apt-get install fhem -y
+ - sudo chown travis -R /opt/fhem
+script:
+ - make test -j2
+ - ./build_controls_list.sh 
+ - git commit -m "Travis automatic update controls file. Build (${TRAVIS_BUILD_NUMBER}) [skip ci]" ./controls_signalduino.txt || true
+ - 'if [ "$TRAVIS_PULL_REQUEST" = "false" ] && [[ $TRAVIS_JOB_NUMBER == *.1 ]]; then git push origin HEAD:$TRAVIS_BRANCH ; fi'
+ - cp -R /opt/fhem/cover_db ./
+ - git --no-pager diff --diff-filter=d --name-only $TRAVIS_COMMIT_RANGE | grep .pm | xargs -I@ echo -select @ | xargs cover -report coveralls

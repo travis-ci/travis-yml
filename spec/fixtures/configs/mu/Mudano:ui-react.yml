@@ -1,0 +1,24 @@
+language: node_js
+node_js:
+    - "8"
+sudo: required
+dist: trusty
+cache: yarn
+install:
+    - yarn install
+before_script:
+    - yarn test:int-setup &
+    - sleep 3
+script:
+    - yarn lint:js
+    - yarn lint:scss
+    - yarn test:unit
+    - yarn test:int
+    - yarn storybook:build
+deploy:
+    provider: pages
+    skip-cleanup: true
+    github-token: $GITHUB_TOKEN # Set in travis-ci.org dashboard
+    local-dir: storybook-static
+    on:
+        branch: master

@@ -1,0 +1,16 @@
+sudo: false
+language: python
+python:
+ - "2.7"
+ - "3.4"
+ - "3.5"
+ - "3.6"
+install:
+ - pip install -U setuptools
+ - pip install -r requirements-dev.txt #fix versions
+ - python setup.py develop
+ - pip install -U pytest pytest-cov coveralls webtest #install test deps
+script:
+ - py.test --cov atramhasis --cov-report term-missing tests
+after_success:
+ - coveralls

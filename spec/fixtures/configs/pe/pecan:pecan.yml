@@ -1,0 +1,40 @@
+sudo: required
+language: python
+matrix:
+  include:
+    - python: 2.7
+      env: TOXENV=py27
+    - python: 2.7
+      env: TOXENV=scaffolds-27
+    - python: 2.7
+      env: TOXENV=scaffolds-27-rest-api
+    - python: 3.4
+      env: TOXENV=py34
+    - python: 3.5
+      env: TOXENV=py35
+    - python: 3.6
+      env: TOXENV=py36
+    - python: 3.6
+      env: TOXENV=scaffolds-36
+    - python: 3.6
+      env: TOXENV=scaffolds-36-rest-api
+    - python: pypy
+      env: TOXENV=pypy
+    - env: TOXENV=pep8
+cache: pip
+
+install:
+  - travis_retry pip install tox
+
+script:
+  - tox -r
+
+addons:
+  - apt:
+      packages:
+        -libpython3.6-dev
+
+notifications:
+  irc:
+    channels:
+      - "chat.freenode.net#pecanpy"

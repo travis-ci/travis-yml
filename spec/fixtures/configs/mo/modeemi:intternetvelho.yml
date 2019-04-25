@@ -1,0 +1,22 @@
+language: python
+python: "3.6"
+addons:
+  postgresql: "9.6"
+env:
+    - DJANGO_SETTINGS_MODULE=config.settings.test
+install:
+    - pip install wheel
+    - pip install -r requirements.txt
+    - pip install coveralls
+before_script:
+    - psql -U postgres -c "CREATE USER modeemi WITH PASSWORD 'modeemi';"
+    - psql -U postgres -c "ALTER USER modeemi CREATEDB;"
+    - psql -U postgres -c "CREATE DATABASE modeemi ENCODING 'UTF8' OWNER modeemi;"
+    - psql -U postgres -c "CREATE USER modeemiuserdb WITH PASSWORD 'modeemiuserdb';"
+    - psql -U postgres -c "ALTER USER modeemiuserdb CREATEDB;"
+    - psql -U postgres -c "CREATE DATABASE modeemiuserdb ENCODING 'UTF8' OWNER modeemiuserdb;"
+script:
+    - python manage.py migrate
+    - coverage run --source=modeemintternet manage.py test
+after_success:
+    - coveralls

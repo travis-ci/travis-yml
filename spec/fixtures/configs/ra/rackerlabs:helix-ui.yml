@@ -1,0 +1,27 @@
+sudo: required
+dist: trusty
+language: node_js
+node_js:
+- '8'
+notifications:
+  email: false
+addons:
+  firefox: '61.0'
+  sauce_connect: true
+branch:
+  only:
+  - master
+install:
+- npm i -g yarn
+- travis_retry yarn install
+- cd test; travis_retry yarn install; yarn run webdriver:update; cd -;
+before_script:
+- export DISPLAY=:99.0
+- sh -e /etc/init.d/xvfb start
+- jdk_switcher use oraclejdk8
+- yarn serve > /dev/null 2>&1 &
+- while ! curl --silent http://localhost:3000 > /dev/null 2>&1; do sleep 1; done
+script:
+# - yarn test:coverage  
+- yarn lint
+- yarn test

@@ -1,0 +1,19 @@
+language: ruby
+
+before_install:
+  - gem update --system
+  - gem install bundler
+  - scripts/install_toxiproxy.sh
+
+rvm:
+  - '2.3.1'
+  - '2.4'
+  - '2.5'
+
+gemfile:
+  - gemfiles/mysql2-0-4-10.gemfile
+  - gemfiles/mysql2-0-5-0.gemfile
+  - gemfiles/hiredis-0-6.gemfile
+
+services:
+  - redis-server

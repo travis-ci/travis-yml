@@ -1,0 +1,73 @@
+dist: trusty
+
+language: php
+
+env:
+    global:
+        - APP_ENV=test
+        - JEDISJEUX_CACHE_DIR=$HOME/.jedisjeux-cache
+        - JEDISJEUX_BUILD_DIR=etc/build
+
+matrix:
+    include:
+        -
+            sudo: required
+            php: 7.2
+            env:
+                - JEDISJEUX_SUITE="application"
+                - TRAVIS_NODE_VERSION="7.5"
+            services:
+                - memcached
+                - elasticsearch
+            addons:
+                apt:
+                    sources:
+                        - elasticsearch-5.x
+                    packages:
+                        - elasticsearch
+                        - oracle-java9-set-default
+        -
+            sudo: false
+            php: 7.2
+            env: JEDISJEUX_SUITE="docs packages"
+            addons:
+                apt:
+                    packages:
+                        - parallel
+
+cache:
+    yarn: true
+    directories:
+        - ~/.composer/cache/files
+        - ~/.cache/pip
+        - vendor
+        - node_modules
+        - $JEDISJEUX_CACHE_DIR
+
+before_install:
+    - git config merge.renameLimit 999999
+    - etc/travis/run-suite before_install "${JEDISJEUX_SUITE}"
+
+install:
+    - etc/travis/run-suite install "${JEDISJEUX_SUITE}"
+
+before_script:
+    - etc/travis/run-suite before_script "${JEDISJEUX_SUITE}"
+
+script:
+    - etc/travis/run-suite script "${JEDISJEUX_SUITE}"
+
+before_cache:
+    - etc/travis/run-suite before_cache "${JEDISJEUX_SUITE}"
+
+after_success:
+    - etc/travis/run-suite after_success "${JEDISJEUX_SUITE}"
+
+after_failure:
+    - etc/travis/run-suite after_failure "${JEDISJEUX_SUITE}"
+
+after_script:
+    - etc/travis/run-suite after_script "${JEDISJEUX_SUITE}"
+
+notifications:
+    email: false

@@ -1,0 +1,79 @@
+sudo: false
+language: php
+dist: trusty
+
+matrix:
+  fast_finish: true
+  include:
+    - php: 5.4
+    - php: 5.5
+    - php: 5.5
+      env: CUSTOM_INI=1 XMLLINT=1
+      addons:
+        apt:
+          packages:
+            - libxml2-utils
+    - php: 5.6
+    - php: 7.0
+    - php: 7.0
+      env: CUSTOM_INI=1 PEAR_VALIDATE=1
+    - php: 7.1
+    - php: 7.2
+      env: PHPUNIT_INCOMPAT=1
+    - php: 7.3
+      env: PHPUNIT_INCOMPAT=1
+    - php: "7.4snapshot"
+      env: PHPSTAN=1 PHPUNIT_INCOMPAT=1
+      addons:
+        apt:
+          packages:
+            - libonig-dev
+    # Nightly is PHP 8.0 since Feb 2019.
+    - php: nightly
+      env: PHPUNIT_INCOMPAT=1
+      addons:
+        apt:
+          packages:
+            - libonig-dev
+
+  allow_failures:
+    - php: "7.4snapshot"
+    - php: nightly
+
+before_install:
+  - export XMLLINT_INDENT="    "
+  # Speed up build time by disabling Xdebug when its not needed.
+  - phpenv config-rm xdebug.ini || echo 'No xdebug config.'
+  # PHPUnit 8.x is not (yet) supported, so prevent issues with Travis images using it.
+  - if [[ $PHPUNIT_INCOMPAT == "1" && $TRAVIS_PHP_VERSION != "nightly" ]]; then composer install; fi
+
+before_script:
+  - if [[ $CUSTOM_INI == "1" && ${TRAVIS_PHP_VERSION:0:1} == "5" ]]; then phpenv config-add php5-testingConfig.ini; fi
+  - if [[ $CUSTOM_INI == "1" ]] && [[ ${TRAVIS_PHP_VERSION:0:1} == "7" || $TRAVIS_PHP_VERSION == "nightly" ]]; then phpenv config-add php7-testingConfig.ini; fi
+
+script:
+  - php bin/phpcs --config-set php_path php
+  - if [[ $PHPUNIT_INCOMPAT != "1" ]]; then phpunit tests/AllTests.php; fi
+  # Don't run the unit tests on nightly (PHP 8.0) as there is no compatible PHPUnit version available yet.
+  - if [[ $PHPUNIT_INCOMPAT == "1" && $TRAVIS_PHP_VERSION != "nightly" ]]; then vendor/bin/phpunit tests/AllTests.php; fi
+  - if [[ $CUSTOM_INI != "1" ]]; then php bin/phpcs --no-cache --parallel=1; fi
+  - if [[ $CUSTOM_INI != "1" && $TRAVIS_PHP_VERSION != "nightly" ]]; then pear package-validate package.xml; fi
+  - if [[ $PEAR_VALIDATE == "1" ]]; then php scripts/validate-pear-package.php; fi
+  - if [[ $CUSTOM_INI != "1" ]]; then composer validate --no-check-all --strict; fi
+  - if [[ $CUSTOM_INI != "1" ]]; then php scripts/build-phar.php; fi
+  - if [[ $CUSTOM_INI != "1" ]]; then php phpcs.phar; fi
+  # Validate the xml ruleset files.
+  # @link http://xmlsoft.org/xmllint.html
+  - if [[ $XMLLINT == "1" ]]; then xmllint --noout --schema phpcs.xsd ./src/Standards/*/ruleset.xml; fi
+  # Check the code-style consistency of the xml files.
+  - if [[ $XMLLINT == "1" ]]; then diff -B ./phpcs.xml.dist <(xmllint --format "./phpcs.xml.dist"); fi
+  - if [[ $XMLLINT == "1" ]]; then diff -B ./src/Standards/Generic/ruleset.xml <(xmllint --format "./src/Standards/Generic/ruleset.xml"); fi
+  - if [[ $XMLLINT == "1" ]]; then diff -B ./src/Standards/MySource/ruleset.xml <(xmllint --format "./src/Standards/MySource/ruleset.xml"); fi
+  - if [[ $XMLLINT == "1" ]]; then diff -B ./src/Standards/PEAR/ruleset.xml <(xmllint --format "./src/Standards/PEAR/ruleset.xml"); fi
+  - if [[ $XMLLINT == "1" ]]; then diff -B ./src/Standards/PSR1/ruleset.xml <(xmllint --format "./src/Standards/PSR1/ruleset.xml"); fi
+  - if [[ $XMLLINT == "1" ]]; then diff -B ./src/Standards/PSR2/ruleset.xml <(xmllint --format "./src/Standards/PSR2/ruleset.xml"); fi
+  - if [[ $XMLLINT == "1" ]]; then diff -B ./src/Standards/PSR12/ruleset.xml <(xmllint --format "./src/Standards/PSR12/ruleset.xml"); fi
+  - if [[ $XMLLINT == "1" ]]; then diff -B ./src/Standards/Squiz/ruleset.xml <(xmllint --format "./src/Standards/Squiz/ruleset.xml"); fi
+  - if [[ $XMLLINT == "1" ]]; then diff -B ./src/Standards/Zend/ruleset.xml <(xmllint --format "./src/Standards/Zend/ruleset.xml"); fi
+  # Run PHPStan
+  - if [[ $PHPSTAN == "1" ]]; then composer require --dev phpstan/phpstan && php vendor/bin/phpstan analyse src --level=0 --configuration=phpstan.neon --autoload-file=tests/bootstrap.php; fi

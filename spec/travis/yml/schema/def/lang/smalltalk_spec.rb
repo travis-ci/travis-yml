@@ -11,13 +11,13 @@ describe Travis::Yml::Schema::Def::Smalltalk, 'structure' do
         type: :object,
         properties: {
           smalltalk: {
-            '$ref': '#/definitions/strs'
+            '$ref': '#/definitions/type/strs'
           },
           smalltalk_config: {
-            '$ref': '#/definitions/strs'
+            '$ref': '#/definitions/type/strs'
           },
           smalltalk_vm: {
-            '$ref': '#/definitions/strs'
+            '$ref': '#/definitions/type/strs'
           },
           smalltalk_edge: {
             type: :boolean

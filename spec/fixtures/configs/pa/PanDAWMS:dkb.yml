@@ -1,0 +1,34 @@
+notifications:
+    email: false
+
+jobs:
+  include:
+    - stage: python_check
+      language: python
+      python: 2.7
+      before_install:
+        - pip install pycodestyle
+
+      script:
+        - errors=`find . -name "*.py" -exec pycodestyle --ignore W503,W292 {} \; `
+        - |
+            if [ -z "$errors" ]; then
+              true
+            else
+              echo "$errors"
+              false
+            fi
+
+    - stage: python_check
+      language: python
+      python: 2.7
+
+      script:
+        - errors=`find . -name "*.py" -exec python -m py_compile {} \; 2>&1`
+        - |
+            if [ -z "$errors" ]; then
+              true
+            else
+              echo "$errors"
+              false
+            fi

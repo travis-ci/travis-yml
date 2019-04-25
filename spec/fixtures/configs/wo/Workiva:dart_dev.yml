@@ -1,0 +1,54 @@
+language: dart
+
+# Workaround for issue with sandboxed Chrome in containerized Travis builds.
+sudo: required
+
+addons:
+  apt:
+    packages:
+    - ttf-kochi-mincho
+    - ttf-kochi-gothic
+    - ttf-dejavu
+    - ttf-indic-fonts
+    - fonts-tlwg-garuda
+  chrome: stable
+
+dart:
+  - 1.24.3
+  - stable
+
+before_install:
+  # Workaround for https://github.com/travis-ci/travis-ci/issues/8607
+  - sudo rm -vf /etc/apt/sources.list.d/*riak*
+  # Content shell needs this font. Since it has a EULA, we need to manually
+  # install it.
+  #
+  # TODO: remove this and use "sudo: false" when travis-ci/travis-ci#4714 is
+  # fixed.
+  - sudo apt-get update -yq
+  - sudo sh -c "echo ttf-mscorefonts-installer msttcorefonts/accepted-mscorefonts-eula select true | debconf-set-selections"
+  - sudo apt-get install msttcorefonts -qq
+
+  - mkdir -p bin
+  - export PATH="$PATH:`pwd`/bin/"
+  - ln -s `which chromium-browser` bin/google-chrome
+
+  - wget "http://gsdview.appspot.com/dart-archive/channels/stable/release/latest/dartium/content_shell-linux-x64-release.zip"
+  - unzip content_shell-linux-x64-release.zip
+  - ln -s `pwd`/`echo drt-linux-*`/content_shell bin/content_shell
+
+  -  export DISPLAY=:99.0
+  -  ./tool/setup_dartium.sh
+  -  export PATH=$PATH":$PWD"
+  -  sh -e /etc/init.d/xvfb start
+
+script:
+  - pub run dependency_validator -i browser,coverage,dart_style,test
+  - pub run dart_dev dart2-only -- format --check
+  - pub run dart_dev analyze
+  - pub run dart_dev dart1-only ./tool/build_functional_coverage_fixture.sh
+  - pub run dart_dev dart1-only -- test -P dart1
+  - pub run dart_dev dart2-only -- test -P dart2
+# TODO: no way to use a preset with coverage
+#  - pub run dart_dev dart1-only coverage --integration --no-html
+#  - bash <(curl -s https://codecov.io/bash) -f coverage/coverage.lcov

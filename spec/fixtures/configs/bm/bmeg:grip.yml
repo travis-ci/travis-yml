@@ -1,0 +1,122 @@
+os:
+  - linux
+language: go
+go:
+  - "1.10"
+sudo: required
+
+services:
+  - docker
+
+cache:
+  directories:
+    - $GOPATH/pkg
+    - $GOPATH/src/github.com/bmeg/grip/.git/modules
+    - $GOPATH/src/github.com/bmeg/grip/vendor
+
+git:
+  submodules: false
+
+install:
+  - make depends
+  - make
+  - sudo pip install -U numpy
+  - sudo pip install -U requests
+  - sudo pip install -U flake8
+
+jobs:
+  include:
+    - stage: all
+      script:
+        - make lint
+      env:
+        - n=lint
+    - script:
+        - make test
+      env:
+        - n=tests
+    - script:
+        - grip server --rpc-port 18202 --http-port 18201 --config ./test/badger.yml &
+        - sleep 5
+        - make test-conformance
+        - go test ./test
+      env:
+        - n=badger
+    - script:
+        - grip server --rpc-port 18202 --http-port 18201 --config ./test/bolt.yml &
+        - sleep 5
+        - make test-conformance
+        - go test ./test -config bolt.yml
+      env:
+        - n=boltdb
+    - script:
+        - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+        - sudo apt-get update -qq
+        - sudo apt-get install libsnappy-dev zlib1g-dev libbz2-dev -qq
+
+        - wget https://launchpad.net/ubuntu/+archive/primary/+files/libgflags2_2.0-1.1ubuntu1_amd64.deb
+        - sudo dpkg -i libgflags2_2.0-1.1ubuntu1_amd64.deb
+        - wget https://launchpad.net/ubuntu/+archive/primary/+files/libgflags-dev_2.0-1.1ubuntu1_amd64.deb
+        - sudo dpkg -i libgflags-dev_2.0-1.1ubuntu1_amd64.deb
+
+        - git clone https://github.com/facebook/rocksdb.git /tmp/rocksdb
+        - pushd /tmp/rocksdb
+        - sudo make static_lib
+        - sudo cp --preserve=links ./librocksdb.* /usr/lib/
+        - sudo cp -r ./include/rocksdb/ /usr/include/
+        - popd
+
+        - make with-rocksdb
+        - grip server --rpc-port 18202 --http-port 18201 --config ./test/rocks.yml &
+        - sleep 5
+        - make test-conformance
+        - go test ./test -tags rocksdb -config rocks.yml
+        - go test ./kvgraph/test -tags rocksdb
+      env:
+        - n=rocksdb
+    - script:
+        - grip server --rpc-port 18202 --http-port 18201 --config ./test/level.yml &
+        - sleep 5
+        - make test-conformance
+        - go test ./test -config level.yml
+      env:
+        - n=leveldb
+    - script:
+        - make start-mongo
+        - sleep 15
+        - grip server --rpc-port 18202 --http-port 18201 --config ./test/mongo.yml &
+        - sleep 5
+        - make test-conformance
+        - go test ./test -config mongo.yml
+        - go test ./test -config mongo-core-processor.yml
+      env:
+        - n=mongodb
+    - script:
+        - make start-elastic
+        - sleep 15
+        - grip server --rpc-port 18202 --http-port 18201 --config ./test/elastic.yml &
+        - sleep 5
+        - make test-conformance
+        - go test ./test -config elastic.yml
+      env:
+        - n=elasticsearch
+    - script:
+        - make start-postgres
+        - sleep 15
+        - go test ./test -config existing-sql.yml
+      env:
+        - n=existing-sql
+    - script:
+        - make start-postgres
+        - sleep 15
+        - grip server --rpc-port 18202 --http-port 18201 --config ./test/psql.yml &
+        - sleep 5
+        # - make test-conformance
+        - python conformance/run_conformance.py http://localhost:18201 --exclude index aggregations
+        - go test ./test -config psql.yml
+      env:
+        - n=postgres
+
+
+notifications:
+  email: false

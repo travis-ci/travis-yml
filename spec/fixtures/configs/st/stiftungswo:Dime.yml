@@ -1,0 +1,60 @@
+language: php
+sudo: false
+php:
+- 7.1
+
+stages:
+- name: test
+  if: NOT commit_message =~ \[skip-tests\]
+- name: deploy
+  if: branch = master OR branch = production OR branch =~ \b-DEPLOY\b
+
+cache:
+  directories:
+  - $HOME/.composer/cache/files
+  - $HOME/dart-sdk
+  - $HOME/.pub-cache
+
+# install programming languages
+before_install:
+- ./ci/install_dart_sdk.sh
+
+# install packages
+install:
+- cp app/config/parameters.yml.travis app/config/parameters.yml.dist
+- composer install --no-interaction
+
+jobs:
+  include:
+  # run the test steps
+  - stage: test
+    script: ./ci/run_backend_test.sh Suite_P0
+    name: "Run part 1 of PHPUnit suite"
+  - script: ./ci/run_backend_test.sh Suite_P1
+    name: "Run part 2 of PHPUnit suite"
+  - script: ./ci/run_backend_test.sh Suite_P2
+    name: "Run part 3 of PHPUnit suite"
+  - script: ./ci/run_backend_test.sh Suite_P3
+    name: "Run part 4 of PHPUnit suite"
+  - script: ./ci/run_backend_test.sh Suite_P4
+    name: "Run part 5 of PHPUnit suite"
+  - script: ./ci/build_dart_frontend.sh
+    name: "Build frontend (to check if any build errors occur)"
+    if: branch = master OR branch = production OR branch =~ \b-DEPLOY\b
+  - script: ./ci/check_format.sh
+    name: "Check formatting of front- and backend"
+
+  - stage: deploy
+    script: skip
+    env:
+    - DEPLOY_SYSTEM: $(if [ "$TRAVIS_BRANCH" == "production" ]; then echo "prod"; else echo "test"; fi)
+    deploy:
+    - provider: script
+      script: ./ci/build_dart_frontend.sh && ./ci/build_php_frontend.sh && ./ci/deploy.sh $DEPLOY_SYSTEM
+      skip_cleanup: true
+      on:
+        all_branches: true
+
+env:
+  global:
+  - secure: "ELFgvd3Wm426wLb0jrQvHIQ9yqZsqvk7quQvMIWR7QcAf9IGsUwxlQHIT99Ol+czx+4oP4OMw+39obS9zBf4RmzOi1seqHrkix1bRjKtEgnYDZUum87V5AXRd1/4wv8o2+7TUli3fIF2bEK6CGhd7bs/Lt6TRD1GL6zVBnd6Wh4=" #target

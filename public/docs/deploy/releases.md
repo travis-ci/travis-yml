@@ -2,16 +2,14 @@
 
 
 
-## Type
+## Types
 
-Any of:
+* Hash
+* String (known)
 
-* Map (Hash)
-* Enum (known String)
+## Values
 
-## Flags
-
-None.
+* `releases`
 
 
 ## Examples
@@ -27,9 +25,9 @@ deploy:
   password: 
   api_key: 
   repo: string
-  file: "[ref:strs]"
-  file_glob: string
-  overwrite: string
+  file: string
+  file_glob: true
+  overwrite: true
   release_number: string
   prerelease: true
 ```

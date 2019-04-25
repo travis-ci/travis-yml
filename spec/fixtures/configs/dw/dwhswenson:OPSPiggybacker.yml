@@ -1,0 +1,51 @@
+language: python
+
+before_install:
+    - deactivate
+    - source devtools/ci/miniconda_install.sh
+    - export PYTHONUNBUFFERED=true
+    - conda config --set always_yes true
+    - conda config --add channels conda-forge
+    - conda config --add channels omnia
+    - conda create -q -y --name test conda pyyaml python=$CONDA_PY
+    - source activate test
+    - conda config --env --add pinned_packages python=$CONDA_PY
+    - conda install pip
+
+install:
+    # the next two are if the OPS conda build isn't working
+    #- source devtools/no-ops-conda/make_build.sh
+    #- source devtools/no-ops-conda/build.sh
+    # the next three are preferred if the OPS conda build is working
+    #- conda build devtools/conda-recipe
+    #- conda install --use-local ops_piggybacker-dev
+    - conda install -y -c conda-forge -c omnia openpathsampling
+    - conda uninstall -y openpathsampling
+    - pushd ~
+    - git clone https://github.com/openpathsampling/openpathsampling.git
+    - cd openpathsampling && pip install -e . && cd ..
+    - popd
+    - which pip
+    - pip list
+    - conda install nose coveralls
+
+script:
+    - conda list
+    - python -c "from __future__ import print_function; import openpathsampling; print('OPS version' + openpathsampling.version.full_version)"
+    - python ops_piggybacker/tests/common_test_data.py
+    - nosetests -v --with-coverage
+
+after_success:
+    - coveralls
+
+env:
+    matrix:
+        - CONDA_PY="2.7"
+        - CONDA_PY="3.6"
+        - CONDA_PY="3.7"
+# only run travis on master: either as PR (where the PR tests the merge with
+# master) or as a push (where the push is directly to master, as happens
+# when a PR is officially merged into master and pushed to GH)
+branches:
+    only:  
+        master

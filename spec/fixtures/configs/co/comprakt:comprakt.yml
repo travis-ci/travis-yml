@@ -1,0 +1,117 @@
+language: rust
+
+rust:
+  - nightly-2018-12-17
+
+# Caching must not be activated because runner-integration-test
+# lacks cache invalidation when new integration-tests/* are added.
+
+branches:
+  only:
+    # This is where pull requests from "bors r+" are built.
+    - staging
+    # This is where pull requests from "bors try" are built.
+    - trying
+    # This is enabled to build pull requests.
+    - master
+
+matrix:
+  include:
+    - os: linux
+      name: "unit and integration tests in debug mode"
+      env: TEST_KIND="comprakt-debug"
+      if: branch IN (staging, trying) OR type = pull_request
+    - os: linux
+      name: "unit and integration tests in release mode"
+      env: TEST_KIND="comprakt-release"
+      if: branch IN (staging, trying)
+    - os: linux
+      name: "mj-tests via original python script"
+      env: TEST_KIND="mjtest"
+      if: branch IN (staging, trying) OR type = pull_request
+    - os: linux
+      name: "submission: integration tests using build and run scripts"
+      env: TEST_KIND="submission-system"
+      if: type != pull_request
+    - os: linux
+      name: "continous deployment"
+      env: TEST_KIND="deploy"
+      if: type != pull_request AND branch IN (master)
+
+install: |
+    case "$TEST_KIND" in
+      comprakt-*)
+        rustup component add clippy-preview && \
+        rustup component add rustfmt-preview && \
+        cc -v;
+        ;;
+      mjtest)
+        curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && python3 get-pip.py --user && \
+        pip install typing --user && \
+        git clone https://git.scc.kit.edu/IPDSnelting/mjtest.git && \
+        cd mjtest && \
+        git submodule update --init --remote && \
+        rm tests/exec/big/bench_binarytrees.* && \
+        cd -;
+        ;;
+      submission-system)
+        ;;
+      deploy)
+          sudo apt-get update \
+          && sudo apt-get install -y doxygen graphviz;
+        ;;
+      *)
+        echo "INVALID TEST_KIND=$TEST_KIND";
+        return 1;
+        ;;
+    esac
+
+script: |
+    case "$TEST_KIND" in
+      comprakt-*)
+        case "$TEST_KIND" in
+          comprakt-release)
+            FLAGS="--release"
+            export RUST_MIN_STACK=$((8 * 1024 * 1024)) # 8 MiB
+        esac
+        cargo fmt --all -- --check && \
+        cargo clippy $FLAGS --all-targets --all-features -- -D warnings && \
+        cargo test $FLAGS ;
+        ;;
+      mjtest)
+        ./build && \
+        MJ_TIMEOUT=60 MJ_RUN=./run python3 ./mjtest/mjt.py lexer && \
+        MJ_TIMEOUT=60 MJ_RUN=./run python3 ./mjtest/mjt.py syntax && \
+        MJ_TIMEOUT=60 MJ_RUN=./run python3 ./mjtest/mjt.py semantic && \
+        MJ_TIMEOUT=0 MJ_RUN=./run python3 ./mjtest/mjt.py compile-firm --all_exec_tests && \
+        BENCH=1 MJ_TIMEOUT=0 MJ_RUN=./run python3 ./mjtest/mjt.py compile-firm --all_exec_tests && \
+        MJ_TIMEOUT=0 MJ_RUN=./run python3 ./mjtest/mjt.py compile --all_exec_tests && \
+        BENCH=1 MJ_TIMEOUT=0 MJ_RUN=./run python3 ./mjtest/mjt.py compile --all_exec_tests ;
+        ;;
+      submission-system)
+        ./build && \
+        COMPILER_BINARY="$(pwd)/run" cargo test --release --test integration ;
+        ;;
+      deploy)
+        cargo doc \
+        && echo '<!doctype html><title>Redirecting...</title><meta http-equiv=refresh content=0;url=compiler_cli/index.html><a href="compiler_cli/index.html">Redirecting to "compiler-cli" crate...</a>' > target/doc/index.html \
+        && make -C libfirm-rs-bindings/libfirm doc \
+        && rm -rf target/doc/doxygen_libfirm \
+        && mv libfirm-rs-bindings/libfirm/build/doc/html target/doc/doxygen_libfirm;
+        ;;
+      *)
+        echo "INVALID TEST_KIND=$TEST_KIND"
+        return 1 ;
+        ;;
+    esac
+
+
+deploy:
+  provider: pages
+  skip-cleanup: true
+  github-token: $GITHUB_TOKEN
+  keep-history: true
+  local-dir: target/doc/
+  on:
+    branch: master
+    condition: $TEST_KIND = deploy

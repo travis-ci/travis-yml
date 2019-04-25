@@ -1,0 +1,113 @@
+# only build master - otherwise we would double-build PRs that are also branches
+branches:
+  only:
+    - master
+
+env:
+  global:
+    # this is the code-push access key - needs to be here because it cannot be set
+    # on the individual job due to:
+    # https://github.com/travis-ci/beta-features/issues/28#issuecomment-377189003
+    - secure: p9cnqkDl8IIubBnRolyGz7YhMkhxlbFiYjiZaVMiBLdTsIgE814unq75WChzq1wr5OAIRcDZOE4cMDBY6kXtlD/MkmSjlj8VDIDocqeOvKh5dPcm5x1t4btoPiEj5G2xPHnn4nMmD/27Bt/7bV2M1AvnZaXCEhYoys31wP05CNEvB+JmA5B4hxYND7rOb1ZjhFoogQrNcPeiw5BBCwo0CvOtjGn5PumHGOV86YdMGbegzYvcibE/jx4EZ3o6lcnne1AxAgmav2Apdmkj45JeKg6ZeKjLJnUN8Ozn8byjWo7r9vQijBclY1esOQBPQEeuT+7LAc7r9E6aQOXSiV4JDgqRrAuVSl3u+qs+qVlE/5p+tkDX1fNtAoadwzKuccGJWfzp2r4iNQvxYioQ0GT9Q6sa83uSY69u1W02dqyA+GFNVBROMlgt6u5Udag62Sj3OB7lbO5b/4Xg2iKPLBZCEgTFISFQiokpK6uo/Mk/YFb2NxMsYpNXcaNtKBsuPU63+MFXT6BnlmIt8Pm98OAb479HgVaoJLp3SVvMm1iEbV43ug7zNfHAK8ni2LvmHxwXWdXxQjboSRaoGTu3O3VrNfy7SvxnAipE0jlsuzJevir6OogOX2+sbUJWqfNEAQcXTx/ctfBtAppN5lws9ozKLPwv7ynwUgMVrQJguCE0bdM=
+
+    # S3 push keys
+    - AWS_ACCESS_KEY_ID=AKIAIJKCIEXQV7AKWAXA
+    - secure: jaDeAzMUjWsjjFS43zCIYKi/z6kmzfRSs4/1vYXvSkZM/Hx2YtvHcVONdR/eZpzjv4g49Q/lRtghOjSw+I9FpE6XQgSE8BgpU2VY+55iNXKp1kviJXYAfB/OE2601Dpa8/phaRy7esNoxOCEg7rR51Y2TbSZKGLTjOVRUBl5v1JUQ8f5FbxX5lJzaorve3zALv/VKytZPT/8+8eAXKBtUDb6dm8eWHIsoEqcdl7sw+UswGCrK2dZXp0He+Qh3O1DOxXQ6lTFJF0+Chif1ag0DdOMjlfSvc6ohIGwUDS9F++YbdmEkGLbWsGkyKCwfZTSahXVW26LwgdcUD6rXHJUP+qKRz3wJfWTsOM1s0ZrQmRUsXM0p3sB+e5+pncDiPvDk+24JOLFdPI3hyTbX9fmEYOV1fzWdQ3Ju+vImtKH4HmJ68vkyutN/7TkBDskjaMaqiFOlfjiudZHGvETSFgPGu53a27MUo3uVYYEnLjOxynv0GxXvuQycPA1P4udBrJ8ppsiQ/BJF8YDq25ImfVJHTyVwKMShOPBhpUMMyI04I141dzxZS8mrO/KuNkwvUlSgbJIiHImUxnCTJWQRDAs4WC+QJwuYK2pO5MppTiAbiD0BLlidz4qztS1CKinhRtttDOlNs9EDziGYR2Jbeb+qQTQoopYydmP0nKm4bz8b4M=
+
+# list of build stages to run. Stages with the same name get run in parallel.
+jobs:
+  include:
+  - stage: run tests and linters
+    language: node_js
+    node_js: 6
+    cache: yarn
+    env: COMPONENT=client CMD=lint
+    before_install: cd client
+    script: bash ../scripts/travis-yarn.sh
+  - stage: run tests and linters
+    language: node_js
+    node_js: 6
+    cache: yarn
+    env: COMPONENT=client CMD=test-and-coverage
+    before_install: cd client
+    script: bash ../scripts/travis-yarn.sh
+  - stage: run tests and linters
+    language: node_js
+    node_js: 6
+    cache: yarn
+    env: COMPONENT=server CMD=lint
+    before_install: cd server
+    script: bash ../scripts/travis-yarn.sh
+  - stage: run tests and linters
+    language: node_js
+    node_js: 6
+    cache: yarn
+    env: COMPONENT=server CMD=test-integration
+    before_install: cd server
+    script: bash ../scripts/travis-yarn.sh
+  - stage: run tests and linters
+    language: node_js
+    node_js: 6
+    cache: yarn
+    env: COMPONENT=server CMD=test-unit
+    before_install: cd server
+    script: bash ../scripts/travis-yarn.sh
+  - stage: deploy server
+    language: node_js
+    node_js: 6
+    cache: yarn
+    env: COMPONENT=server CMD=build
+    before_install: cd server
+    script: bash ../scripts/travis-yarn.sh
+    before_deploy: cd dist
+    deploy:
+      provider: heroku
+      skip_cleanup: true
+      app: ses-availability-api
+      on: master
+      api_key:
+        secure: lQeTIxRHSTTxOwTCd93DjWweDsGeZTD9VVqulNTPijwggEcE+hCXTLW6h15mv52FK/ikBXwUI0y7Y+Ot8mNTJspitw4bQVOHPbXZTAoti2Jy/4gHe+vtqXZW6GvvibuI6hePGRBum2lVTaCO3LPyMM397Em/ziCpPC45XM8IQdNhIpP4gBrq/x6Qrs4SsD3NlYDxDbyn2bhP0mYP4GGfdFJ0WiLEUL9xsHQ2H77z14FMSX9H65G7wul3O0xOga+4nK+T/eoL3drNydT2KPCdIV1nP4xxfA6b17gy2L1o03xolGH2+dF9iGBh8DrxF/6KLsAOdjMQWzfROoqxsCQlj+sr2rVzDEZXbBDSZQZDGlUzUI8lWfYO32bwZ29jk4rserLJnhbIq5HYVw8LrAQVHcUtfF0yJNZFUc3DJUOeV7NZKW0q4iPCisd4OkqopdhOj+XIfAcYc1wRZMmyhQMSPyscVWo0fgWju+T20xaEDoPYWCDpvk7dF/RqUDlGAjTjr/wgZ2LeO9Ko6W89UuGiLIMKJyWIdotBmBz5TdkPD4ZoDQrJaUhzUprhzUSFTqTA7CHicgUAddrSxYkrDsU9bsNEyBFljSwSoQ6iRe6D+KOOHdBBlJ7PkOOpxq7Hqv0PtBMjRfb9cQhWLiqslN29pAiYdxN0E8w6NA3efdUqMu8=
+  - stage: deploy clients
+    language: node_js
+    node_js: 6
+    cache: yarn
+    if: branch = master AND type != pull_request
+    before_install: cd client
+    script: skip
+    env:
+      COMPONENT=client PLATFORM=ios
+    deploy:
+      provider: script
+      skip_cleanup: true
+      script: bash ../scripts/travis-code-push.sh
+      on:
+        branch: master
+  - stage: deploy clients
+    language: node_js
+    node_js: 6
+    cache: yarn
+    if: branch = master AND type != pull_request
+    before_install: cd client
+    script: skip
+    env:
+      COMPONENT=client PLATFORM=android
+    deploy:
+      provider: script
+      skip_cleanup: true
+      script: bash ../scripts/travis-code-push.sh
+      on:
+        branch: master
+  - stage: deploy clients
+    language: node_js
+    node_js: 6
+    cache: yarn
+    before_install: cd web
+    script: bash ../scripts/travis-yarn.sh
+    env:
+      COMPONENT=web CMD=build:prod
+    deploy:
+      provider: script
+      skip_cleanup: true
+      script: bash ../scripts/travis-deploy-web.sh
+      on:
+        branch: master

@@ -1,0 +1,26 @@
+language: python
+python:
+  - "2.7"
+install:
+  - pip install -r requirements.txt
+  
+addons:
+  postgresql: "9.6"
+services:
+  - redis-server
+script:
+  - python setup.py install
+  - printf 'export NEX2_URI="postgresql://"\n' > test_variables.sh
+  - printf 'export ES_URI="http://localhost:9200/"\n' >> test_variables.sh
+  - printf 'export S3_BUCKET="S3 BUCKET"\n' >> test_variables.sh
+  - printf 'export S3_SECRET_KEY="S3 SECRET KEY"\n' >> test_variables.sh
+  - printf 'export S3_ACCESS_KEY="S3 ACCESS KEY"\n' >> test_variables.sh
+  - printf 'export BOTO_CONFIG=/dev/null\n' >> test_variables.sh
+  - source test_variables.sh && nosetests -s --with-coverage
+after_success:
+  - coveralls
+
+notifications:
+  email:
+    recipients:
+      -yeastgenome.dev@gmail.com

@@ -1,0 +1,22 @@
+sudo: false
+language: node_js
+addons:
+  sonarcloud:
+    organization: "sling"
+    token:
+      secure: ${SONAR_TOKEN}
+notifications:
+  email: false
+node_js:
+  - "8"
+script:
+  - npm run lint
+  - npm test
+  - npm run spec
+  - npm run build-prod
+after_success:
+  - npm run send-coverage
+  - sonar-scanner
+  - npm run semantic-release
+git:
+  depth: 1

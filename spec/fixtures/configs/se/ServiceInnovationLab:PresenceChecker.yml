@@ -1,0 +1,49 @@
+sudo: required
+language: ruby
+cache:
+  bundler: true
+  yarn: true
+  directories:
+    - node_modules
+before_install:
+  - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64  > ./cc-test-reporter
+  - chmod +x ./cc-test-reporter
+  - cp env-example .env
+install:
+  - bundle install
+  - yarn install
+script:
+  - yarn test
+  - RAILS_ENV=test bundle exec rake db:create db:migrate
+  - bundle exec rspec
+after_script:
+- "./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT -t simplecov --id $CC_TEST_REPORTER_ID"
+deploy:
+  provider: heroku
+  skip_cleanup: true
+  on:
+    repo: ServiceInnovationLab/PresenceChecker
+  app:
+    # dev: presencechecker-staging
+    master: presence-prod
+  run:
+  - bundle install
+  - yarn install
+  - bundle exec rake db:migrate
+  - bundle exec rake assets:precompile
+  - restart
+  api_key:
+    secure: omb+eniAp2kNU+FVCVWCdmMm+sDA5tSOUtB4CcQt7k+G4XOyLE5KxJEal8QqL6Ci3Zb3K9wwpmPrRNTCMajL2DAl7oQEKJQ/bW4kPD6eRJuSYe04X12GNKzgJHVPHkwag0fiJLHrwKQmfQHaapEnv/XtZCWYe6ceW7zjLHz4yDRAAZ+xCSY2W11EVnrNOc6vSFMcjGbGBnrkvQoTTtkh87AtmruB7Zu223CQuGtwmCNLY6+W7FPyQx2cctPAXhlyCteoX4UTFI2FRuI+18TxMQkJl0kbMMrxw2iO0OmcqC6pM0xOLnBWt/uK7OoduaAdK7jmQX+a8u6Vq/A+51zu1G1vbYoPKDRHvHFnO+gJH/fvt9k8NkDu8cVKrpnHz9U+ZQ8UztwevPtxqVnmbGy+3gtvWiRqfnHhOHeibnIPKqpZ83hdd3nitsv2nM+XiHSwLkeaBn4fjaxcHhG2QaoVAJVFqW1SLKZfQX0xah2ol/TIoQqf+IO28/BE/GBpyFtVzvwzQmd0etQIdc5EHoKezB8euBqyt32pk7c9bdQkVELJ3rqUompoDUifMNuQgY70KnPAvhcZJNTmSIWN0O5Up0ypueFSo8aCScNtVu9SOdmRLTi3swpebjPiTYjHaadzWDmrd9+2nHoYqhyQDhJyGOve0blM3sSBFQR3QE279J4=
+
+addons:
+  postgresql: 10
+  apt:
+    packages:
+      - postgresql-10-postgis-2.4
+      - postgresql-10-postgis-2.4-scripts
+      - postgresql-client-10
+env:
+  global:
+    - PGUSER=travis
+    - PGHOST=""
+    - PGPORT=5433

@@ -1,0 +1,43 @@
+branches:
+  only:
+  - master
+language: nix
+sudo: required
+os:
+- linux
+env:
+  global:
+    secure: KwRrujVomKcehzss5vFgEI0C0uVXwBdJD9Db7bH4FlOpisYM/TdJ5ysmV6ljiXfkeldL2N9PwraNJ1Cet6FwohVcQE/YVUKDz6tdP0jwPIAZwIqEKxMoprK8A4PURyIRpV/UAVEyMrbWoVcDo22AOuSCb8bsGzVW6idUtvig3ay7jJdM+b+BEmFccsEqiC69ZDG0Ai+zU79JHlL4OUEtpgJcjuMeH8ZHHlxTSdUKNDbpclcDMg7b0z6UD0q5UdGx9FckAqt9Y/cztSSij/JBwj47y9Z6YM8eN/UW+TfLzPXNPgWvg0Znu9lDoOtlboFC9OTyNrpOZNnCkV653GsFXBCKQUJPUQXpZVqWwFQ3pnBVnZip7bjhTneDGJzHBKAhcpMKDkLUdvv0XFVJIAMAuVCByOGSPpnB3vPA2YCNY6UueDBhUyLciSz+jUTpMiCltJnR+hTse2olLZ/Q8LSXmIBBwNY7+v1rEsOIFrtdBOn9m4XiEP14aMZnfsV0yDvXVS7EabFghMdscijfZZsgBf0bswXqR2xEsO2R9Bw4+6VOkk1k5JO4pBGVEtUW6rWKL0vJIAyjdW1RC7MUA+zq2l8TcHu49GSHgw2E5pPqVvHwJULgpQMAFisKaePflEnJaQWjcxwFdPz90wJjXTARGR0XVW16nCAuWpbsS1N12b8=
+  matrix:
+  - PYTHON_SET=science
+  - PYTHON_SET=attrs
+  - PYTHON_SET=django
+  - PYTHON_SET=flake8
+  - PYTHON_SET=flask
+  - PYTHON_SET=httpie
+  - PYTHON_SET=openstackclient
+  - PYTHON_SET=pelican
+  - PYTHON_SET=pykube
+  - PYTHON_SET=pypiserver
+  - PYTHON_SET=pyramid
+  - PYTHON_SET=pytest
+  - PYTHON_SET=sphinx
+before_install:
+- source .travis/before_install
+script:
+- nix-env -iQf https://github.com/garbas/pypi2nix/tarball/master
+- travis_wait 60 make $PYTHON_SET;
+- cachix push nixpkgs-python ./result-$PYTHON_SET
+after_success:
+- source .travis/after_success
+deploy:
+  provider: gcs
+  access_key_id: GOOGKCPBZ6QQ7ZPJZLCNERHL
+  secret_access_key:
+    secure: brgzOwP4k/XmmWG0vpzjVMSOc+i0bw28Zk0i0zPT9YmFybWbQ17AXZj7OKnju4Wre2C192xG2u+jE9Jnge5nxbEPdRKKNvVvnLoHKcNg/SbOdU8yK8yKdsQDYYALu79WMsR6vw/YPRyEQBqVWNNY/ZRmGG5U9mzn18mkkyPY3lCsNTPLpf0WoNoIPfzY4ml7+UnzjM25t+eDZoOOWs8JHI4rTx/55YVqVCwH2aAWhzoxHq2amHcaqPX0l0hnsRG8tGjw0+3RLdtUQsymSJIIA72i76GvFbqML+pXix4Tyzgfec2qF+rZCnO+JmnjS6Lm9uuXdAFCDYUycBdH9jEpb2u+1TXQigoIVct9uvkvUr//CWYzWUOd2++xagVLP8ZeXdHMGWESkZnCPwt4WeJoMNFeqWo6nFVhw86NiFu4pggN3AOJb4Gag2iu/LmZGfUbTvjdqJrDnkGRw23IoNpYxllgh+CiVOMugPWQ5psfC7nqVlRqEji3kNs17G3H2InCeRVuyA21RQWdst06R21vOH0RnbPIJKIcLqRjK661myu3YrgSXWq7aVT8BCc1Sf3FqMGot2BZY4hZjoT0D7a4ADxq40AvGuCUpoGD2Ez/6gSh4CEoG+HE1Hdr+ZoiAD2E+qJsV/nXy3YShZG4e0vM78wGTPRiqP5/j6a+/8XUa/c=
+  bucket: nixpkgs-python-wheels
+  local-dir: "/tmp/pypi2nix/cache/wheel/"
+  on:
+    repo: garbas/nixpkgs-python
+  skip_cleanup: true
+  acl: public-read

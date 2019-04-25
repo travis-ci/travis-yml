@@ -1,0 +1,52 @@
+sudo: required
+
+language:
+  - bash
+  - python
+
+python:
+  - "3.4"
+cache: pip
+
+services:
+  - docker
+
+addons:
+  apt:
+    packages:
+      - docker-ce
+
+before_install:
+  - sudo apt-get -y update
+  - sudo apt-get -y install python3 python3-pip python3-yaml python3-dev
+  - python3 -V
+  - pip3 -V
+  - sudo pip3 install jinja2
+
+install:
+  - ./scripts/syntax-check
+  - sudo docker build --rm -t surfnet/centos7-openconext -f tests/Dockerfile.centos-7 .
+
+script:
+  - sudo /bin/bash ./tests/travis-build.sh
+
+after_failure:
+  - sudo docker exec -t ansible-test yum install -y net-tools
+  - sudo docker exec -t ansible-test netstat -apn
+  - sudo docker exec -t ansible-test systemctl status -l haproxy
+  - sudo docker exec -t ansible-test systemctl status -l httpd
+  - sudo docker exec -t ansible-test systemctl status teams.service
+  - sudo docker exec -t ansible-test systemctl status -l influxdb
+  - sudo docker exec -t ansible-test tail -500 /var/log/messages
+  - sudo docker exec -t ansible-test cat /var/log/teams/teams.log
+  - sudo docker exec -t ansible-test cat /var/log/manage/manage.log
+  - sudo docker exec -t ansible-test ls -ltr /var/log
+  - sudo docker exec -t ansible-test cat /var/log/voot/voot.log
+  - sudo docker exec -t ansible-test cat /var/log/attribute-aggregation/attribute-aggregation.log
+  - sudo docker exec -t ansible-test cat /var/log/pdp/pdp.log
+  - sudo docker exec -t ansible-test env TERM=xterm tail -500 /var/log/messages
+  - sudo docker exec -t ansible-test cat /var/log/tomcat/oidc.log
+
+after_script:
+  - sudo docker stop ansible-test
+

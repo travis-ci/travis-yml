@@ -1,0 +1,16 @@
+language: java
+# sudo: required instructs Travis to use a "real VM" instead of a docker VM
+sudo: required
+jdk:
+- oraclejdk8
+services:
+- mongodb
+before_install:
+- sudo apt-get update -qq
+- sudo apt-get install -qq ant-optional
+notifications:
+  email:
+    on_success: always
+    on_failure: always
+script:
+- ./scripts/travis_checks.sh

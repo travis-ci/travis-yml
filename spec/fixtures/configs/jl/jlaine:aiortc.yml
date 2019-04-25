@@ -1,0 +1,31 @@
+addons:
+  apt:
+    packages:
+    - libmp3lame-dev
+    - libopus-dev
+    - libvpx-dev
+    - libx264-dev
+    - yasm
+  homebrew:
+    packages:
+    - ffmpeg
+    - opus
+    - libvpx
+cache:
+  directories: $HOME/.local
+  pip: true
+dist: xenial
+install: source .travis/install
+language: python
+matrix:
+  include:
+  - language: generic
+    os: osx
+  - python: "3.5"
+  - python: "3.6"
+  - python: "3.7"
+  - env: BUILD=sdist
+    install: true
+    python: "3.6"
+script: .travis/script
+sudo: true

@@ -1,0 +1,171 @@
+cache:
+  ccache: true
+  directories:
+  - "$HOME/Library/Caches/Homebrew"
+  - "js/node_modules"
+  - "thymio-blockly-standalone/node_modules"
+
+matrix:
+  include:
+  - os: linux
+    dist: xenial
+    language: cpp
+    node_js: '8'
+    addons:
+      apt:
+        sources:
+        - ubuntu-toolchain-r-test
+        - sourceline: ppa:beineri/opt-qt-5.12.0-xenial
+        packages:
+        - g++-7
+        - libudev-dev
+        - qt512base
+        - qt512declarative
+        - qt512xmlpatterns
+        - qt512serialport
+        - qt512tools
+        - qt512translations
+        - qt512quickcontrols2
+        - qt512svg
+        - qt512x11extras
+        - qt512charts-no-lgpl
+        - qt512webengine
+        - libboost-python-dev
+        - ninja-build
+        - libxml2-dev
+        - libsdl2-dev
+        - libavahi-compat-libdnssd-dev
+        - valgrind
+        - lcov
+    env: COMPILER=clang-7  CXX_COMPILER=clang++-7
+  - os: osx
+    node_js: '8'
+    language: cpp
+    osx_image: xcode10
+    env: COMPILER=clang  CXX_COMPILER=clang++
+  #- os: linux
+    #addons:
+      #apt:
+        #packages:
+        #- build-essential
+        #- ninja-build
+        #- p7zip-full
+        #- make
+        #- cmake-data
+        #- cmake
+    #env: ANDROID=1
+    #language: cpp
+    #node_js: '8'
+    #jdk: oraclejdk8
+
+before_script:
+- cd ${TRAVIS_BUILD_DIR}
+- git submodule update --remote
+- (cd third_party/spdlog/spdlog/ && git checkout v1.2.1)
+- (cd third_party/flatbuffers && git checkout 600f3fbcd4ef38b15398b1273f90697587b5a1d1)
+- rm -rf thymio-blockly-standalone
+- git clone --depth 1 https://github.com/mobsya/thymio-blockly-standalone.git thymio-blockly-standalone --recurse-submodules
+
+before_install:
+- |
+  set -e
+  if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+    brew update
+    brew bundle || true
+  else
+    # install cmake through pip - should give us cmake 3.11 - which we need for boost
+    pip install --user --upgrade pip
+    pip install --user --upgrade cmake
+    if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+        wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
+        sudo add-apt-repository "deb http://apt.llvm.org/trusty/ llvm-toolchain-trusty-7 main"
+        sudo apt-get update -qq
+    fi
+  fi
+  if [[ "$ANDROID" ]]; then
+    cd $HOME
+    wget -q https://dl.google.com/android/repository/sdk-tools-linux-3859397.zip -O $HOME/android-sdk.zip 1>/dev/null
+    mkdir android
+    unzip -q android-sdk.zip -d android/sdk
+    export PATH=${PATH}:$HOME/android/sdk/tools:$HOME/android/sdk/tools/bin
+    echo  y | sdkmanager "platform-tools"
+    echo  y | sdkmanager "platforms;android-20"
+    rm -rf $HOME/android-ndk-r10e
+    wget -q https://dl.google.com/android/repository/android-ndk-r10e-linux-x86_64.zip 1>/dev/null
+    unzip -oq android-ndk-r10e-linux-x86_64.zip
+    export ANDROID_NDK_HOME=$HOME/android-ndk-r10e
+    export ANDROID_NDK=$HOME/android-ndk-r10e
+    rm -fr $HOME/qt5-android
+    mkdir  $HOME/qt5-android
+    pushd  $HOME/qt5-android
+    wget -q https://github.com/Mobsya/ci-data/releases/download/data/qt_5.11.1-android-armv7.7z 1>/dev/null
+    7z x qt_5.11.1-android-armv7.7z 1>/dev/null
+    popd
+  fi
+  set +e
+
+install:
+- |
+  if [[ "$TRAVIS_OS_NAME" == "linux" ]] && [[ -z "$ANDROID" ]]; then
+        sudo apt-get install --allow-unauthenticated clang-7
+  fi
+  nvm install 8
+  npm --version
+
+script:
+- |
+  cmake --version
+  set +e
+  set -x
+  cd ${TRAVIS_BUILD_DIR}
+  rm -rf build || true
+  mkdir build && cd build
+  export CC=${COMPILER}
+  export CXX=${CXX_COMPILER}
+  export CFLAGS="-Wall -Wextra -Wno-unused-parameter"
+  export CXXFLAGS="-Wall -Wextra -Wno-unused-parameter"
+  set -e
+  if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+    export CMAKE_PREFIX_PATH="${CMAKE_PREFIX_PATH}:$(brew --prefix qt)"
+    #export PATH="(brew --prefix llvm)/bin:${PATH}"
+    cmake -GNinja -DBoost_DEBUG=ON -DOPENSSL_LIBRARIES=/usr/local/opt/openssl/lib -DOPENSSL_INCLUDE_DIR=/usr/local/opt/openssl/include -DCMAKE_BUILD_TYPE=Debug -DBUILD_SHARED_LIBS=OFF ..
+    ninja -v
+    ctest .
+  fi
+  if [[ "$TRAVIS_OS_NAME" == "linux" ]] && [[ -z "$ANDROID" ]]; then
+      ls /opt/qt512/
+      /opt/qt512/bin/qt512-env.sh
+      export CMAKE_PREFIX_PATH="${CMAKE_PREFIX_PATH}:/opt/qt512/"
+      cmake -GNinja -DBoost_DEBUG=ON -DCMAKE_BUILD_TYPE=Debug -DBUILD_SHARED_LIBS=OFF ..
+      ninja -v
+      ctest .
+  fi
+  if [[ "$ANDROID" ]]; then
+      export ANDROID_NDK=$HOME/android-ndk-r10e
+      export ANDROID_HOME=$HOME/android/sdk
+      export ANDROID_SDK=$HOME/android/sdk
+      export CMAKE_PREFIX_PATH="${CMAKE_PREFIX_PATH}:$HOME/qt5-android/5.11.1/android_armv7/"
+      cmake .. -GNinja -DBoost_DEBUG=ON -DANDROID_NATIVE_API_LEVEL=14 -DANDROID_STL=gnustl_shared -DCMAKE_MAKE_PROGRAM=$(which ninja) -DCMAKE_TOOLCHAIN_FILE=`pwd`/../android/qt-android-cmake/toolchain/android.toolchain.cmake "-DCMAKE_PROGRAM_PATH=$(dirname $(which npm))"
+      ninja -v
+      ctest .
+  fi
+  set +e
+
+before_deploy:
+- git config --local user.name "Travis"
+- git config --local user.email "ci@mobsya.org"
+- git tag "nightly"
+- export TRAVIS_TAG=nightly
+
+deploy:
+  provider: releases
+  skip_cleanup: true
+  overwrite: true
+  file_glob: true
+  api_key:
+    secure: wLPkO2Y+xruITg/3Bav+8o8WDRjnOnxgHT5wxRNpHdU1naI9mXirG0rMYULezlnLnMYSn3SJO41Nzqmp1B05MOlr9Pr8uu5W4aOnUoBbeaOwdmSaU3euI/AxJQH4ozYSx2EDN58mTKYLCKPSXxE6E/mkba75wCUZGudjhc7OsM9duB1yKHD+EjO/qiXr8GE0Rz1j0ZR+TjqL357x3zQgokYebEeVEOF91Mqx5M5tXv+iW84NUViN9zdlYBNT0378O4Qm0R7hhG5L6X1XMF8lTppzrSJ4Z/GhLTJMOgMwLqHW4nQy36kbvyqGP3EvqqNyuGC/cu/G4CRaqLUageSwndLf8b6He3p0X7nWPm1gZN0Eh3XSHCzxgNUbfq9+BpiLYO3FKyMGP2aJVj6zBWvNsrmYJB8bc+PVy1XZ+TrzoLkGdQkoBTfalp33BnkJF6IJ/rX4urxxQXF6C5QOaIdKaNBm+UN5t0kUZmUDSFaB4VHRwoCeCZbvSKfZHfX5Di5JgEL0bYrt08zr9itkQ+LRLd3SiJ02zlQR22R0O77aaEF2c0GgU3yUrLkVaR4MOaH6uG9iR5qjtloDDKCmUHgErA/5yUcBtJwlWIj6JIgFNcMqWy/mgViKvd8WFsuokDXQS96UWuOkZghJocbiMhvFvkO+8wrd/+6kKEbXhCge4jQ=
+  file: "${TRAVIS_BUILD_DIR}/build/bin/*.apk"
+  on:
+    repo: Mobsya/aseba
+    branch: master
+    condition: "$ANDROID"

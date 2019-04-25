@@ -1,0 +1,31 @@
+sudo: required
+language: node_js
+node_js:
+  - "6.13"
+script: cd server && npm install && npm test
+
+services:
+  - docker
+
+before_deploy:
+  - pip install --user awscli
+  - aws s3 cp s3://tw-config/config.js ./config/config.js --region ap-northeast-2
+  - aws s3 cp s3://tw-config/todayair-74958-firebase-adminsdk-2n8hn-68ad361049.json ./config/ --region ap-northeast-2
+  - aws s3 cp s3://tw-config/admob-app-id-6159460161-firebase-adminsdk-r2shn-9e77fbe119.json ./config/ --region ap-northeast-2
+  - git add config/config.js config/todayair-74958-firebase-adminsdk-2n8hn-68ad361049.json config/admob-app-id-6159460161-firebase-adminsdk-r2shn-9e77fbe119.json
+  - git commit -m "update release-config.js"
+
+after_deploy:
+  - echo "done deploying"
+
+deploy:
+  - provider: elasticbeanstalk
+    access_key_id: $AWS_ACCESS_KEY_ID
+    secret_access_key:
+      secure: "$AWS_SECRET_ACCESS_KEY"
+    region: "ap-northeast-2"
+    app: "tw-seoul-test"
+    env: "TwSeoulTest-env"
+    bucket_name: "elasticbeanstalk-ap-northeast-2-141248341265"
+    on:
+      branch: master

@@ -1,0 +1,29 @@
+language: python
+sudo: required
+dist: xenial
+python:
+  - "3.5"
+  - "3.6"
+#Tensorflow 1.5.0 is not available for python 3.7
+#  - "3.7"
+before_install:
+  - sudo apt-get -qq update
+  - sudo apt-get install -y ghostscript
+install:
+  #Remove the following line when pvacseq-client is first pushed to the live pypi site
+  #This has been updated to pull from the live pypi site, instead of test pypi.
+  #Not sure if it can or needs to be deleted altogether.
+  - pip install -e .
+  - mhcflurry-downloads fetch
+  #with the newest version of the spec validator our swagger yml doesn't
+  #validate anymore. Use a version that works.
+  - pip install swagger-spec-validator==2.1.0
+  - pip install connexion==1.4.2
+  - pip install bokeh==0.13.0
+  - pip install tornado==5.0.2
+  - pip install jsonschema==2.6.0
+services:
+  - postgresql
+script:
+  - TEST_FLAG=1 python3 -m unittest discover -v
+  - prove --recurse --verbose

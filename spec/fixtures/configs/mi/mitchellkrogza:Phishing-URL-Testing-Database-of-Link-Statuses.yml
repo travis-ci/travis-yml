@@ -1,0 +1,44 @@
+env:
+  global:
+    - secure:   ZSYKn5CXhODXapNQ61Wb7/Fr2jX7IDQLkykS/SHvsRBTnNEhM05R+si9G5avAdlNQcxLK9/TlqyqPn2szX2XU6cT3Meb5gWPRoFc7iS5prK8kpcnqBhBV0XZ2cp0AVNkUx89nZ+aDrMB9lNc+ZYBHywXpT/2sTmXn4xx/8PordCLJamdkH4BldQ+huXeiTRE2hkbuNaqlnFCDabFfoYrnDG1sZFWB+tIz6voExhw26jq29kEWiOGruxtRwnIKA4vcRyKRHqH/8wBWgJuYIyn+fIWTYJeGwVcf1a3a9bf8nUrBMI8ge5IKu33NgJo0xJRUMYI6d7isxBg2x0G8XeYtjM4noM0jlG0WFn7oj1t5+LJGO7QVEUySj9gAoLBGh3dZRcyY3NUICjS7AoiLCajWAT9+cZc+KN2A8AE6UHvkhTRBK3aGKr+0+YjHlerz5lbCrBYtNKY6obfyxwnYt7e5rmjZ1fKQLKI9ji72QSLDSP880qtq54ufux7WMuN1o3LvRfL/B4zt78QKq2NpllO1fy4y/ZKceRfcE7kGOdd2ghDWvOjwmm8SIOp+sp2fh9gBdIgQja697BXy4fg2i02FpxbNU/C2hDG/WAqT3zZYcYAfqCX2Wp5UT1XGETkg4lO1yjWayRai1UCX1x2ZhXQkhuK7um0mJBvjK+gxo+Yv2U=
+    - GIT_NAME: Travis CI
+    - GIT_EMAIL: mitchellkrog@gmail.com
+    - TRAVIS_REPO_SLUG: mitchellkrogza/Phishing-URL-Testing-Database-of-Link-Statuses
+    - GIT_BRANCH: master
+    - TZ:       Africa/Johannesburg
+    - PYFUNCEBLE_AUTO_CONFIGURATION: PyFunceble
+  matrix:
+    - USE_NETWORK=true
+
+language:       python
+
+python:
+  - "3.6"
+
+matrix:
+  fast_finish:  true
+
+cache:
+  - apt
+  - pip3
+
+sudo:           required
+
+addons:
+  apt:
+    packages:
+      - dos2unix
+      - pandoc
+
+install:
+  - pip3 install --upgrade pip
+  - pip3 install git+https://github.com/funilrys/PyFunceble.git@dev#egg=PyFunceble
+  - pip3 install git+https://github.com/funilrys/domain2idna.git@master#egg=domain2idna
+
+script:
+  # We put both in same statement so that if one fails the whole test result will fail.
+  - bash dev-tools/pulldata.sh && bash dev-tools/generate.sh
+
+notifications:
+  on_success:   change
+  on_failure:   always

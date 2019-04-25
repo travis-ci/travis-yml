@@ -1,0 +1,18 @@
+---
+sudo: required
+services:
+  - docker
+before_script:
+  - git clone https://github.com/exercism/problem-specifications.git
+  - bin/fetch-configlet
+  - docker build -t exercism-rakudo-star .
+script:
+  - bin/configlet lint .
+  - docker run
+    --volume $PWD:/exercism
+    exercism-rakudo-star /bin/bash -c 'cd /exercism
+    && prove exercises/*/.meta/solutions/
+      --recurse
+      --jobs 2
+    && prove t/
+      --directives'

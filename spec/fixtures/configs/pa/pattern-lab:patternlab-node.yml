@@ -1,0 +1,27 @@
+language: node_js
+
+before_install:
+  - phantomjs --version
+
+before_script:
+  - npm install -g lerna@3.2.1
+  - npm run setup
+  - lerna add @pattern-lab/engine-mustache --scope=@pattern-lab/core
+  - lerna add @pattern-lab/engine-handlebars --scope=@pattern-lab/core
+  - lerna add @pattern-lab/engine-underscore --scope=@pattern-lab/core
+  - lerna add @pattern-lab/engine-liquid --scope=@pattern-lab/core
+  - lerna add @pattern-lab/engine-twig --scope=@pattern-lab/core
+  - lerna add @pattern-lab/engine-react --scope=@pattern-lab/core
+
+branches:
+  only:
+    - master
+    - dev
+
+notifications:
+  webhooks:
+    urls:
+      - https://webhooks.gitter.im/e/a14f537f16b0756d9470
+    on_success: always
+    on_failure: always
+    on_start: never

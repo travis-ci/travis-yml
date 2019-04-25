@@ -1,0 +1,138 @@
+language: cpp
+matrix:
+  include:
+  - os: osx
+    osx_image: xcode9.4
+    compiler: clang
+    env: CONFIG=Release
+  - os: osx
+    osx_image: xcode9.4
+    compiler: clang
+    env: CONFIG=Debug
+  - os: linux
+    compiler: clang
+    env: CONFIG=Release
+  - os: linux
+    compiler: clang
+    env: CONFIG=Debug
+  - os: linux
+    compiler: gcc
+    env: CONFIG=Release
+  - os: linux
+    compiler: gcc
+    env: CONFIG=Debug
+cache:
+  directories:
+    $HOME/deps-rel
+    $HOME/deps-dbg
+before_install:
+  - $CC -v
+  - if [ $TRAVIS_OS_NAME = 'linux' ]; then export INSTPRF=$HOME/p; mkdir -p $INSTPRF; fi
+  - if [ $TRAVIS_OS_NAME = 'linux' ]; then export OPENCV_VER=3.0.0; fi
+  - "if [ $TRAVIS_OS_NAME = 'linux' ]; then
+       if [ $CONFIG = 'Release' ]; then
+         export DEPSDIR=$HOME/deps-rel;
+       else
+         export DEPSDIR=$HOME/deps-dbg;
+       fi;
+     fi"
+  - "if [ $TRAVIS_OS_NAME = 'linux' ]; then
+      mkdir -p $DEPSDIR;
+      pushd $DEPSDIR;
+        if [ -d jsoncpp ]; then
+          pushd jsoncpp;
+            git checkout 1.8.4;
+            git pull;
+          popd;
+        else
+          git clone https://github.com/open-source-parsers/jsoncpp.git;
+          git checkout 1.8.4;
+        fi;
+        if [ -d libfunctionality ]; then
+          pushd libfunctionality;
+            git pull;
+          popd;
+        else
+          git clone https://github.com/OSVR/libfunctionality.git;
+        fi;
+        if [ -d libuvc ]; then
+          pushd libuvc;
+            git pull;
+          popd;
+        else
+          git clone https://github.com/ktossell/libuvc.git;
+        fi;
+        if [ ! -d opencv-${OPENCV_VER} ]; then
+          curl -LR https://github.com/Itseez/opencv/archive/${OPENCV_VER}.zip -o opencv-${OPENCV_VER}.zip;
+          unzip opencv-${OPENCV_VER}.zip;
+        fi;
+      popd;
+    fi"
+install:
+  - "if [ $TRAVIS_OS_NAME = 'linux' ]; then
+      pushd $DEPSDIR;
+        mkdir -p libfunctionality/build;
+        pushd libfunctionality/build;
+          cmake .. -DCMAKE_INSTALL_PREFIX=$INSTPRF -DCMAKE_BUILD_TYPE=${CONFIG};
+          make -j2 install;
+        popd;
+        mkdir -p jsoncpp/build;
+        pushd jsoncpp/build;
+          cmake .. -DCMAKE_INSTALL_PREFIX=$INSTPRF -DCMAKE_BUILD_TYPE=${CONFIG} -DBUILD_STATIC_LIBS=OFF -DBUILD_SHARED_LIBS=ON -DJSONCPP_WITH_CMAKE_PACKAGE=ON;
+          make -j2 install;
+        popd;
+        mkdir -p libuvc/build;
+	pushd libuvc/build;
+	  cmake .. -DCMAKE_INSTALL_PREFIX=$INSTPRF -DCMAKE_BUILD_TYPE=${CONFIG} -DINSTALL_CMAKE_DIR=$INSTPRF/lib/cmake/libuvc;
+	  make -j2 install;
+	popd;
+        mkdir -p opencv-${OPENCV_VER}/build;
+        pushd opencv-${OPENCV_VER}/build;
+          cmake .. -DCMAKE_INSTALL_PREFIX=$INSTPRF -DCMAKE_BUILD_TYPE=${CONFIG} \
+            -DWITH_1394=OFF -DWITH_FFMPEG=OFF -DWITH_IPP=OFF -DWITH_WEBP=OFF \
+            -DBUILD_DOCS=OFF -DBUILD_PERF_TESTS=OFF -DBUILD_TESTS=OFF \
+            -DBUILD_opencv_apps=OFF -DBUILD_opencv_java=OFF -DBUILD_opencv_python2=OFF \
+            -DBUILD_opencv_ts=OFF;
+          make -j2 install;
+        popd;
+      popd;
+    fi"
+script:
+  - "git submodule update --init --recursive;"
+  - "mkdir build;"
+  - "cd build;"
+  - "if [ $TRAVIS_OS_NAME = 'osx' ]; then cmake .. -DCMAKE_BUILD_TYPE=${CONFIG} -DCMAKE_OSX_ARCHITECTURES=x86_64 -DBUILD_WITH_OPENCV=OFF; fi"
+  - "if [ $TRAVIS_OS_NAME = 'linux' ]; then cmake .. -DCMAKE_PREFIX_PATH=$INSTPRF -DCMAKE_BUILD_TYPE=${CONFIG}; fi"
+  - "make all -j2"
+# TODO need to sort out false-failures due to container/platform issues.
+#  - "ctest -V"
+sudo: false
+addons:
+  homebrew:
+    update: true
+    brewfile: true
+  apt:
+    # Details and approved sources are
+    # from https://github.com/travis-ci/apt-source-whitelist/blob/master/ubuntu.json
+    sources:
+    # they have a strange definition of latest that stops at 1.55, but that's enough.
+    - boost-latest
+    # provides CMake 3.2.3 (quite useful) and Doxygen 1.8.3 (meh)
+    - george-edison55-precise-backports
+    # GCC toolchain backports (needed for both GCC and Clang (libstdc++))
+    - ubuntu-toolchain-r-test
+    # Clang 3.7
+    - llvm-toolchain-precise-3.7
+    packages:
+    - libusb-1.0-0-dev
+    - libboost-thread1.55-dev
+    - libboost-system1.55-dev
+    - libboost-date-time1.55-dev
+    - libboost-chrono1.55-dev
+    - libboost-program-options1.55-dev
+    - libboost-filesystem1.55-dev
+    - cmake-data
+    - cmake
+    - gcc-5
+    - g++-5
+    - clang-3.7

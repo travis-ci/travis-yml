@@ -1,0 +1,23 @@
+language: java
+
+cache:
+  directories:
+    - '$HOME/.m2'
+    - '$HOME/.sonar/cache'
+
+before_install:
+  - export MAVEN_OPTS=-Xmx1024m
+
+jdk:
+  - oraclejdk8
+  - oraclejdk9
+  - openjdk10
+  - openjdk11
+  - openjdk12
+
+branches:
+  only:
+    - 2.x
+
+script:
+  - mvn clean package

@@ -1,0 +1,21 @@
+language: php
+sudo: required
+php:
+- 7.0
+- 5.6
+- 5.5
+services:
+- redis
+- docker
+before_install:
+- docker pull rossfsinger/mongo-2.6.12
+- docker run -d -p 127.0.0.1:27017:27017 -v ~/data:/data/db rossfsinger/mongo-2.6.12:latest
+- echo "extension = mongodb.so" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
+- sleep 15
+install:
+- composer install
+script: ant
+notifications:
+  hipchat:
+    rooms:
+      secure: ZVAxv+jZawDdIgLyNERg8IkK3EPZNz04OKZeUrVj55clceDXPmpYv3TC/Gw/xuR19i52HGlqFlYDMNlfl689lzJE45rhabTwMNpAch8R7p5QAKUTCZOkIRfBKPTW68dSRndJf/Y6nsf0kSdKEdgSFCced3JchhvZrScPGBoSRaI=

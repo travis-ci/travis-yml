@@ -1,0 +1,37 @@
+language: python
+python:
+  - 2.7
+  - 3.5
+  - 3.6
+  - pypy
+  - pypy3
+matrix:
+    include:
+        - python: "3.7"
+          dist: xenial
+          env: SUBUNIT=true
+        - python: "3.7"
+          dist: xenial
+          env: SUBUNIT=false
+        - python: "3.8-dev"
+          dist: xenial
+          env: SUBUNIT=true
+        - python: "3.8-dev"
+          dist: xenial
+          env: SUBUNIT=false
+env:
+  - SUBUNIT=true
+  - SUBUNIT=false
+install:
+    - pip install -U pip setuptools
+    - pip install -U coverage coveralls
+    - pip install -U -e .[test]
+    - test "$SUBUNIT" != true || pip install -U -e .[subunit]
+script:
+    - COVERAGE_PROCESS_START=`pwd`/.coveragerc coverage run setup.py -q test -q
+after_success:
+    - coverage combine
+    - coveralls
+notifications:
+    email: false
+cache: pip

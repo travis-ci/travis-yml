@@ -1,0 +1,99 @@
+language: php
+php:
+  # aliased to a recent 5.4.x version
+  - 5.4
+  # aliased to a recent 5.5.x version
+  - 5.5
+  # aliased to a recent 5.6.xversion
+  - 5.6
+  # aliased to a recent 7.x version
+  - 7.0
+
+env:
+  # Let Selenium use Firefox driver.
+  - LOVD_SELENIUM_DRIVER=firefox
+  # Let Selenium use Chrome driver.
+  - LOVD_SELENIUM_DRIVER=chrome
+
+matrix:
+  exclude:
+    # Exclude some combinations of php version and selenium driver.
+    - php: 5.4
+      env: LOVD_SELENIUM_DRIVER=chrome
+    - php: 5.5
+      env: LOVD_SELENIUM_DRIVER=firefox
+    - php: 5.6
+      env: LOVD_SELENIUM_DRIVER=chrome
+    - php: 7.0
+      env: LOVD_SELENIUM_DRIVER=firefox
+
+sudo: required
+dist: trusty
+
+# Currently running on an image that was deprecated 2017-06-21. The latest
+# Trusty image does not have a firefox version that plays well with the
+# facebook webdriver client and Selenium 2.53 or 3.4 stack. At least partially
+# due to this bug: https://github.com/SeleniumHQ/selenium/issues/3607 which
+# also seems to affect the PHP client. Travis will disable the deprecated image
+# by first of September, a solution is needed by then.
+# FIXME: upgrade to latest Trusty image by removing line below.
+group: deprecated-2017Q2
+
+addons:
+  apt:
+    packages:
+    - mysql-server-5.6
+    - mysql-client-core-5.6
+    - mysql-client-5.6
+
+before_install:
+ - ./tests/travis/setup/setup_chrome.sh
+ - ./tests/travis/setup/setup_mysql.sh
+
+before_script:
+  - ./tests/travis/setup/setup_apache.sh --githubaccount=LOVDnl
+  - ./tests/travis/setup/setup_config.sh
+  - ./tests/travis/setup/setup_selenium_server.sh
+  - phpenv config-rm xdebug.ini
+
+script:
+  # Use phpunit or vendor/bin/phpunit to start tests.
+  # vendor/bin/phpunit is the best option to run the tests. Because this one
+  # is installed via composer.
+  # Not running phpunit installed via composer gives errors, has to do with the
+  # versions of the dependencies.
+
+  # This is a travis test. This test if travis is working as expected.
+  # Two test are done which are independent of LOVD.
+  - vendor/bin/phpunit --configuration ./tests/selenium_tests/phpunit.xml ./tests/travis/tests/
+
+  # Run all test suites.
+  - vendor/bin/phpunit -v --testsuite admin_tests --configuration ./tests/selenium_tests/phpunit.xml
+  - ./tests/upload_test_results.sh
+  - vendor/bin/phpunit -v --testsuite authorization_tests --configuration ./tests/selenium_tests/phpunit.xml
+  - ./tests/upload_test_results.sh
+  - vendor/bin/phpunit -v --testsuite collaborator_tests --configuration ./tests/selenium_tests/phpunit.xml
+  - ./tests/upload_test_results.sh
+  - vendor/bin/phpunit -v --testsuite curator_tests --configuration ./tests/selenium_tests/phpunit.xml
+  - ./tests/upload_test_results.sh
+  - vendor/bin/phpunit -v --testsuite import_tests --configuration ./tests/selenium_tests/phpunit.xml
+  - ./tests/upload_test_results.sh
+  - vendor/bin/phpunit -v --testsuite manager_tests --configuration ./tests/selenium_tests/phpunit.xml
+  - ./tests/upload_test_results.sh
+  - vendor/bin/phpunit -v --testsuite submitter_tests --configuration ./tests/selenium_tests/phpunit.xml
+  - ./tests/upload_test_results.sh
+  - vendor/bin/phpunit -v --testsuite access_sharing_tests --configuration ./tests/selenium_tests/phpunit.xml
+  - ./tests/upload_test_results.sh
+  - vendor/bin/phpunit -v --testsuite find_replace_tests --configuration ./tests/selenium_tests/phpunit.xml
+  - ./tests/upload_test_results.sh
+  - vendor/bin/phpunit -v --configuration ./tests/unit_tests/phpunit.xml
+  - ./tests/upload_test_results.sh
+
+notifications:
+  email:
+   recipients:
+      - I.F.A.C.Fokkema@lumc.nl
+   on_success: never
+   ## [always|never|change] # default: change
+   on_failure: always
+   ## [always|never|change] # default: always

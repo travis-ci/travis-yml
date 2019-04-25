@@ -1,0 +1,52 @@
+language: node_js
+sudo: false
+script: npm run ${NPM_SCRIPT}
+after_success: cat ${TRAVIS_BUILD_DIR}/coverage/lcov.info | coveralls
+node_js:
+  - '8'
+env:
+  global:
+  # SAUCE_USERNAME
+  - secure: SGYVs5XUYWTZVbc7OCXjw8EeWZvmoM46vWk/bTJRLLLDrNGxSSNubhuToDmEWC0lV02qtp8W1XKJt2d/nmG/dJ7K1SZfLQSZi/zTRfkPWtf9uaaPOHMGt7O69lipnuaaSOavVlZfOPIg02iVjCj9Mwy/BAaRSR4qWeN+N6Sp0kI=
+  # SAUCE_ACCESS_KEY
+  - secure: gmcCnuKOboJ2hFKZV8gxUzg1w/RbYr2YN0fky6llXQWi+VHZMa+YIN4HPOP4JVyvbGQA/6JQTj4E9JVAb9MnnBk58nXcEn5R8V9RU5EMBC8+zme22ILMFIvnrPhcMzjoEuupfGxbXmqzASNTWtQQd0qQ2flm8OyOMl+jCqAWCHs=
+
+matrix:
+  fast_finish: true
+  include:
+    - env: NPM_SCRIPT=lint
+
+    # unit tests
+    - env: NPM_SCRIPT='test-unit --coverage'
+
+    # functional tests that do not require browsers
+    - env: NPM_SCRIPT='test-func --coverage'
+
+    # functional tests that require browsers
+    - env:
+      - BROWSER=chrome
+      - NPM_SCRIPT='test-browser --coverage'
+    - env:
+      - BROWSER=firefox
+      - NPM_SCRIPT='test-browser --coverage'
+    - env:
+      - BROWSER=ie8
+      - NPM_SCRIPT='test-browser --coverage'
+    - env:
+      - BROWSER=ie9
+      - NPM_SCRIPT='test-browser --coverage'
+    - env:
+      - BROWSER=ie10
+      - NPM_SCRIPT='test-browser --coverage'
+    - env:
+      - BROWSER=ie11
+      - NPM_SCRIPT='test-browser --coverage'
+    - env:
+      - BROWSER=opera12
+      - NPM_SCRIPT='test-browser --coverage'
+    - env:
+      - BROWSER=android4.4
+      - NPM_SCRIPT='test-browser --coverage'
+    - env:
+      - BROWSER=android5
+      - NPM_SCRIPT='test-browser --coverage'

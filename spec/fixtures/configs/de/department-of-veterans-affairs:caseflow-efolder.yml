@@ -1,0 +1,57 @@
+language: ruby
+dist: trusty
+sudo: required
+
+branches:
+    only:
+        - master
+rvm:
+  - 2.5.3
+
+before_install:
+  - nvm install $(cat .nvmrc)
+  - node -v
+
+  # Yarn install instructions from https://yarnpkg.com/en/docs/install#linux-tab
+  - curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
+  - echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
+  - ./ci-bin/retry.bash sudo apt-get update
+  - sudo apt-get install yarn=1.2.1-1
+
+  # Travis has an old version of yarn installed at /usr/local/bin, and that comes first in the PATH,
+  # so we need to explicitly point to the version of Yarn we just installed.
+  - export YARN=/usr/bin/yarn
+  - cd ./client && $YARN --frozen-lockfile
+
+  # Build the javascript bundle that forms the basis of the single page app
+  - yarn run build
+  - cd ..
+
+  - wget https://s3-us-gov-west-1.amazonaws.com/dsva-appeals-devops/chromium-chromedriver_53.0.2785.143-0ubuntu0.14.04.1.1145_amd64.deb -O $PWD/chromium-chromedriver.deb
+  - sudo dpkg -i $PWD/chromium-chromedriver.deb
+  - sudo apt-get install -f
+  - "export PATH=$PATH:/usr/lib/chromium-browser/"
+  - "export DISPLAY=:99.0"
+
+before_script:
+  - RAILS_ENV=test bundle exec rake db:create
+  - RAILS_ENV=test bundle exec rake db:schema:load
+  - sudo apt-get install pdftk
+
+  - sh -e /etc/init.d/xvfb start
+  - sleep 3 # give xvfb some time to start
+
+script:
+  - bundle exec rake
+
+bundler_args: "--deployment --without development"
+cache:
+  - bundler
+
+notifications:
+  email: false
+
+services:
+  - redis-server
+
+group: deprecated-2017Q2

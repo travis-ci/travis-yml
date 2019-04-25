@@ -1,0 +1,291 @@
+language: c
+
+env:
+  global:
+    - CACHE=$HOME/.sdlpal-caches
+
+cache:
+  branch: md5deep
+  directories:
+    - $CACHE
+
+before_script:
+  - mkdir deploy
+
+matrix:
+    fast_finish: true
+    include:
+      - os: linux
+        env: TARGET=Linux
+        addons:
+          apt:
+            packages:
+            - libsdl2-dev
+            - libfltk1.3-dev
+            - upx-ucl
+        script:
+          - cd unix
+          - make
+          - upx --best --lzma sdlpal
+          - mv sdlpal ../deploy/sdlpal-linux
+          - make clean
+          - make check
+          - cd ..
+
+      - os: linux
+        env: TARGET=MinGW32 SDL2_VERSION=2.0.8
+        addons:
+          apt:
+            packages:
+            - binutils-mingw-w64-i686
+            - gcc-mingw-w64-i686
+            - g++-mingw-w64-i686
+            - zip
+            - upx-ucl
+        before_install:
+          - cd win32
+          - |
+            if ! [ -d $CACHE/SDL2-$SDL2_VERSION ]
+            then
+                export PUSHD="$(pwd)"
+                mkdir -p "${CACHE}"
+                cd $CACHE
+                wget http://libsdl.org/release/SDL2-devel-$SDL2_VERSION-mingw.tar.gz
+                tar xvf SDL2-devel-$SDL2_VERSION-mingw.tar.gz
+                sed -i "s@/usr/local@$PUSHD/SDL2-$SDL2_VERSION@g" SDL2-$SDL2_VERSION/i686-w64-mingw32/bin/sdl2-config
+                rm *.gz
+                cd "${PUSHD}"
+            fi
+          - ln -sf $CACHE/SDL2-$SDL2_VERSION
+          - export PATH=$(pwd)/SDL2-$SDL2_VERSION/i686-w64-mingw32/bin:$PATH
+          - cat SDL2-$SDL2_VERSION/i686-w64-mingw32/bin/sdl2-config
+          - cd ..
+        script:
+          - cd win32
+          - make HOST=i686-w64-mingw32-
+          - i686-w64-mingw32-strip -s sdlpal.exe
+          - upx --best --lzma sdlpal.exe
+          - zip sdlpal-win32-mingw.zip sdlpal.exe
+          - mv sdlpal-win32-mingw.zip ../deploy/
+          - cd ..
+
+      - os: linux
+        env: TARGET=wii
+        before_install:
+          - export DEVKITPRO=$CACHE/devkitPro
+          - export DEVKITPPC=${DEVKITPRO}/devkitPPC
+          - export PATH=$DEVKITPPC/bin:$PATH
+          - |
+            if ! [ -f $DEVKITPRO/libogc/include/gctypes.h ]
+            then
+                rm -rfv $DEVKITPRO 
+            fi
+          - |
+            if ! [ -d $DEVKITPRO ]
+            then
+                export PUSHD="$(pwd)"
+                mkdir -p $DEVKITPRO
+                (
+                    cd $DEVKITPRO &&
+                    wget https://github.com/sdlpal/tools/releases/download/sensedown/devkitPPC_r27-x86_64-linux.tar.bz2 &&
+                    wget https://github.com/sdlpal/tools/releases/download/sensedown/libogc-1.8.12.tar.bz2 &&
+                    wget https://github.com/sdlpal/tools/releases/download/sensedown/libfat-ogc-1.0.13.tar.bz2 &&
+                    wget https://github.com/dborth/sdl-wii/releases/download/2013-10-28/SDL.Wii.10-28-2013.zip
+                )&&(
+                    cd $DEVKITPRO
+                    tar xvf devkitPPC_r27-x86_64-linux.tar.bz2
+                    mkdir libogc
+                    tar xvf libogc-1.8.12.tar.bz2 -C libogc
+                    tar xvf libfat-ogc-1.0.13.tar.bz2 -C libogc
+                    unzip SDL.Wii.10-28-2013.zip
+                    rm -v *.zip *.bz2
+                    echo "cache finished!"
+                )||( 
+                    rm -rfv $DEVKITPRO 
+                    echo "download failed! clearing cache"
+                )
+            fi
+        script:
+          - cd wii
+          - make
+          - tar cvjf ../deploy/sdlpal-wii.tar.bz2 icon.png meta.xml boot.dol
+          - make clean
+          - cd ..
+          
+      - os: linux
+        env: TARGET=3ds
+        sudo: enabled
+        addons:
+          apt:
+            packages:
+            - unzip
+        before_install:
+          - export PUSHD="$(pwd)"
+          - mkdir -p $CACHE/
+          - cd $CACHE/
+          - wget https://github.com/devkitPro/pacman/releases/download/devkitpro-pacman-1.0.1/devkitpro-pacman.deb
+          - sudo dpkg -i devkitpro-pacman.deb
+          - sudo dkp-pacman -Syu
+          - sudo dkp-pacman -S 3ds-dev --noconfirm
+          - export DEVKITPRO=/opt/devkitpro
+          - export DEVKITARM=/opt/devkitpro/devkitARM
+          - sudo chown $(whoami):$(whoami) /opt/devkitpro
+          - rm -rf SDL-1.2-N3DS
+          - git clone https://github.com/zephray/SDL-1.2-N3DS.git
+          - cd SDL-1.2-N3DS/SDL-1.2.15
+          - make -f Makefile.n3ds install
+          - wget https://github.com/profi200/Project_CTR/releases/download/0.15/makerom_015_ctrtool.zip
+          - unzip makerom_015_ctrtool.zip
+          - sudo mkdir -p /opt/ctrtool/bin
+          - sudo cp Linux_x86_64/* /opt/ctrtool/bin/
+          - sudo chmod +x /opt/ctrtool/bin/*
+          - export PATH=/opt/ctrtool/bin:$PATH
+          - cd "${PUSHD}"
+        script:
+          - cd 3ds
+          - make
+          - make cia
+          - cp sdlpal.cia ../deploy/sdlpal-3ds.cia
+          - cd ..
+
+      - os: linux
+        language: android
+        env: TARGET=Android ANDROID_BUILD_TOOLS=26.0.2 NDK_VERSION=r16 TERM=dumb
+        android:
+          components:
+          - tools
+          - platform-tools
+          - tools
+          - build-tools-$ANDROID_BUILD_TOOLS
+          - android-26
+          licenses:
+          - android-sdk-preview-license-.+
+          - android-sdk-license-.+
+          - google-gdk-license-.+
+        cache:
+          branch: md5deep
+          directories:
+            - $HOME/.gradle/caches/
+            - $HOME/.gradle/wrapper/dists/
+        before_install:
+          - export PUSHD="$(pwd)"
+          - mkdir -p $CACHE/
+          - cd $CACHE/
+          # After measuring, caching android NDK is more slow than direct download
+          - wget http://dl.google.com/android/repository/android-ndk-$NDK_VERSION-linux-x86_64.zip -O ndk.zip
+          - unzip ndk.zip > /dev/null
+          - export ANDROID_NDK_HOME=`pwd`/android-ndk-$NDK_VERSION
+          - cd "${PUSHD}"
+        script:
+          - cd android
+          - sed -i.bak s/"android:versionCode.*"/"android:versionCode=\"`date +%Y%m%d`\""/g ./app/src/main/AndroidManifest.xml
+          - ./gradlew assembleRelease
+          - cd ..
+          - jarsigner -storetype pkcs12 -keystore winrt/SDLPal.UWP/SDLPal_TemporaryKey.pfx -sigalg SHA1withRSA -digestalg SHA1 -signedjar deploy/sdlpal-release.apk -storepass "" android/app/build/outputs/apk/release/app-release-unsigned.apk 1
+
+      - os: osx
+        osx_image: xcode9.2
+        env: TARGET=iOS
+        cache: cocoapods
+        podfile: ios/SDLPal/Podfile
+        script:
+          - cd ios/SDLPal
+          - pod install
+          - xcodebuild -workspace SDLPal.xcworkspace -scheme SDLPal ONLY_ACTIVE_ARCH=NO CODE_SIGNING_ALLOWED=NO -configuration Release CONFIGURATION_BUILD_DIR=/tmp/sdlpal-build
+          - mkdir -p Payload
+          - mv /tmp/sdlpal-build/SDLPal.app Payload
+          - zip ../../deploy/sdlpal-impactor.ipa -r Payload
+          - cd ../..
+
+      - os: osx
+        osx_image: xcode9.2
+        env: TARGET=macOS
+        language: objective-c
+        script:
+          - cd macos
+          - xcodebuild -project Pal.xcodeproj -configuration Release
+          - hdiutil create -srcfolder build/Release/Pal.app -volname "SDLPal" ../deploy/sdlpal-macos.dmg
+          - #xcodebuild test -scheme PalTests #disabled since always fail in travis-ci
+          - cd ..
+
+      - os: osx
+        osx_image: xcode9.2
+        env: TARGET=macOS SDL=1.2.15
+        before_install:
+          - |
+            if ! [ -d /Library/Frameworks/SDL.framework ]
+            then 
+              export PUSHD="$(pwd)"
+              mkdir -p "${CACHE}"
+              cd "${CACHE}"
+              if ! [ -f SDL-$SDL.dmg ]
+              then
+                curl -O -L https://www.libsdl.org/release/SDL-$SDL.dmg
+              fi
+              hdiutil attach SDL-$SDL.dmg
+              sudo cp -a /Volumes/SDL/SDL.framework /Library/Frameworks/
+              hdiutil detach /Volumes/SDL
+              rm *.dmg
+              cd "${PUSHD}"
+            fi
+        script:
+          - cd macos
+          - xcodebuild -project Pal_SDL12.xcodeproj -configuration Release
+          - hdiutil create -srcfolder build/Release/Pal.app -volname "SDLPal-SDL1" ../deploy/sdlpal-sdl1-macos.dmg
+          - cd ..
+
+before_deploy:
+  - sed=sed; date=date
+  - |
+    if [[ "$TRAVIS_OS_NAME" == "osx" ]]
+    then
+        brew update
+        brew install gnu-sed
+        sed=gsed
+        date=gdate
+    fi
+  - DATE=$($date -d $(git show -s --format=%cI) "+%F")
+  - COMMIT=$(git rev-parse --short HEAD)
+  - set -f
+  - |
+    $sed -i "
+    s/@VERSION@/v$DATE-g$COMMIT/g
+    s/@DESC@/$(echo -n $TRAVIS_COMMIT_MESSAGE|tr '\r' '\\r'|tr '\n' '\\n'|sed -e 's@[\\"]@\\&@g;s@[/&\$]@\\&@g')/g
+    s/@RELEASE_DATE@/$(git show -s --format=%cI)/g
+    s/@VCS_TAG@/$(git describe --tags)/g
+    s/@AUTHOR@/$(git show -s --format=%an)/g
+    s/@AUTHOR_DATE@/$(git show -s --format=%ai)/g
+    s/@CIMMITER@/$(git show -s --format=%cn)/g
+    s/@BRANCH@/$TRAVIS_BRANCH/g
+    s/@COMMITID@/$(git show -s --format=%h)/g
+    " bintray.json
+  - set +f
+  - cat bintray.json
+
+deploy:
+  - provider: releases
+    api_key:
+      secure: FFV8UBcz6GkeSoGRbrL9tnTpVqXoFjFK2QtW0Ml8YvvqaHhxOaIWs2nAabOGsW1mJop/QlpuUNw1TfLl7TokcUDgOHrFRdC8hVY7K1uSWMnt7m4ZRPatVybIkzgrnItHlnMrL4uJK2xXb6Jc5+cSrU5jRMcmTZjaOKLTBwF97+6AgqpdmKUCVYZJzQYg0Jn9GfaL1EOGl7ISt/VEgi/tKFzJvJVxJBU3NuKyxXlfEwkTiSOFuGoD5qWDjCE+aGxTR6RQefsADPIDfeU3TJHTJE/ORGy9gl+Y41JgU0Bfgipcqg1RSwNclclmxgi8lo/XNUiZAMTyQrXjByBWcvYovk+H4h9mbvJlrVSjI8Wxb5ICcYkhDVkNxtEXX7AsIk4yHiNTi1MAW0qJJKinaFxLmK2U3LGEK3DudXl/0eVRoQATmRcXLdBQezISt2CWpTktCxlQmtz/GsoHv0PcWdkJYL4qbbRrBRFj9++VjlnCI124YZnbVjC3+jtWN1Zluxynj0GDBY3r7EdLWWKZo5XnygPOZ8+uaTMYfqmTvQWPc5GRRRdVJowQFQhb48hzKyWYqsf8eyS3VuZ9b/DwES3dutOaX7sIL9Vkg3DlQYOEz938MB4VbTGizUUrBbrIP4Kz/+WOZ9pxM9X+qsgMYkw8FvHqn2TvCWxPDCgqq3zUWig=
+    file_glob: true
+    file: deploy/*
+    skip_cleanup: true
+    overwrite: true
+    on:
+      all_branches: true
+      tags: true
+  - provider: bintray
+    user: palxex
+    key:
+      secure: NQl1hNntoXlHyj7uAMiHr3OsMwrEgAeYIIopUSY6Ete9ODVFSTzSqm2lb/Nwq+4ZV5UCYVpDdpBlhWZlxZ/TO9cPVJuwi7oPtRKHNKvAAHRNHWsyO965Y8qtMIo1SGPnNIF5fA8KS9W0iKUAlUubMNHpJBnT2GT2ylrmf7YHkb2mv7OTGswcbMdtQosOy2T4WMCOPTGsu8jcVPX1TMlmhIrbEQqQ4SV8Lz7VoNDPDswlcZrx/X3ZkBHz+iAZQM3vyrAfpJNHpR1qdVXpSQ6AJNrvxAyv3iXCQTmy28o4Skn9ciU4A8kNXSyrKK8O3lKv65XuSGG9XoaldII1SvG3woI2t1dwAxcxmn2/Yf2Uznuostz7j5L5FtJqW9+c4KGXxCh+RgMrTbM1n0yvFMwcxuTIYemFb7OOyLnYf2hhVZXN8GBItoqhZoGboBp0s1usT1XqHSKHtf6RXd9IGOZH1LwRyUNYoLTY8cMJVrzQ9LtpdHeapZgr3idtrRCOmEF7d4/q8WUD+yOZuzUECL2QEnEgg6Ho79chWAUngUCdI4v70nCaMNCwLaTVJY5jtnt3VVUCYJ6vsoimxTbhQT2Cf6HTRcHt1JKhI4cGTBcCRIRdXWqSX4VmxBUCQ/XvskJX5Kj9FJC2/jhZDfIXcKfrYjw0tk3+7FzZuAwt8FnznUs=
+    file: bintray.json
+    skip_cleanup: true
+    on:
+      all_branches: true
+
+notifications:
+  webhooks:
+    urls:
+      - https://webhooks.gitter.im/e/922838d6727e919df50e
+    on_success: always  # options: [always|never|change] default: always
+    on_failure: always  # options: [always|never|change] default: always
+    on_start: never     # options: [always|never|change] default: always

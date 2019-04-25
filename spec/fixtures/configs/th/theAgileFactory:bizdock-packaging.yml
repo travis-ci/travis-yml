@@ -1,0 +1,53 @@
+language: java
+jdk:
+- oraclejdk8
+env:
+  global:
+  - ACTIVATOR_VERSION=1.3.7
+  - ACTIVATOR_ZIP_FILE=typesafe-activator-${ACTIVATOR_VERSION}-minimal.zip
+  - ACTIVATOR_ZIP_URL=http://downloads.typesafe.com/typesafe-activator/${ACTIVATOR_VERSION}/${ACTIVATOR_ZIP_FILE}
+  - PLAY2_HOME=${TRAVIS_BUILD_DIR}/activator-${ACTIVATOR_VERSION}-minimal
+  - SBT_EXECUTABLE_NAME=activator
+  - GH_REF=github.com/theAgileFactory/bizdock-packaging
+  - secure: mwztLeRfWua66kRUBFeq4666iqiSawAwzRtETDY0f6kmze62rR+BYfHCqEp2v9jf9C5t0ST6rA3m4pKmm3cfY/vJGi2G/+mEhqfeAHYkwArrhnJNsXE2DaOg6HZFjE6Gc3v5BbBdtA6pRouEvNsbFT5YRVqaOEkPaoFajjegC7JRpFZL1gumcu/ktS5cP8BGl4+YRyaq/KUE1LKhQMLqn17Mb2OzVIemU9cCCqev45/OHQBEtOOwI9jEv/DhG6ogcBDxhoDvE4vfoY05rICmnCaJKEMyJrO8OBNHcGdbMyHmn0z+tBYKyzRpkVPq8pf5tGfZHd0SlBtITBIMDRT2h5lkAZHBkTWHo9gPoCotT61XB/9DdohPfmb75AjjIZmNfsM+H3gCFHs4h2Y+LXn1kcDYH6dCgf8nfyB3KVq0pzdUk9fYamkbiRK1YyQoryowSjnpku8zsLAlmpchdRvr6Jy50Q5pBg8FS9mIgpP2Eh/+lt8ZjKCJ0a66EPHVZhGcPf75SHNUk9XiIpQCrf2XHLA/ap39hr/P+aQjCkjwBGNgR9M01OA7yrzM/idkcfoN3vk5+h0SzY12CQRRA5l5n09Dbe0UkPConsrONkR0tSK/YbkJW9psalq0oiwEZX4+W1TWsva86yFV07XK4YfqaVZboDzZt9ZzfZWHGNTSbK4=
+  - secure: jlYPoDEs4pYf2CovU/D//IULOJFj8m04fQTlxkWQFd2fHPSmK0g26/lS4B4UWLj7XwqFNVjO2w9RcqVRY0922RTX/t0PG15BpS8OyctUHS21UbKcm9zrF0r0XAhWUkdPufyii1ngJYWlDKD8HjkTS9u+mnHngf/hWoujNJgZEQyU/bN/jOJJezA1lkJJwrkNRcZFMIp8TXUeRpI56peBcqpkjUEFhhkrs336AYk0qrrfBbWG+Ook99z6YXwZG/LDhjyAi2LFdKWAcdgzB8T7ueUWDCxSyaBpgvT7xKJER25mVQ3bIhKgNwRPBvP5/rL1CgOdCpiFfWpq9kz6I/TLz6C5OLQ/sk30BNf4Bm0jGLUfoAp2yzS/lcfUKo/v69B+5tLrIRKiIJu8DjdeGYfr5zR8TGkzxvPxlo0uWgVAE0ZzIUwmISczck8WFZNB8ma+VhCzqApWppe0M47P82aNoMgXegrfVHzb7SnnymcdivDwa1awzM9LYL0a5lOKmMlb6L8pPx6Mr4JBpVIjDjS0FwyH404oRycIoFPku+gfFQNRjDJ2smCtJQUIj6+ojn6RQO+xHeO0mJJLoTlpUKh9NnRBwP0F0HbD2cpCHm4SZEbWHCad/wFtuwd5plOYYesdhZs0dpeHAGv7zzuD4OokObTk2SqaYYGuzWiwO+QD73M=
+  - secure: F0lBnPLUHQ1Za0qC8daEnKWKhZMeD5pJXk6sF4MBdYSM6veTobCJ5gJrQWfcLboGdPgD1QXSJkB06CFlf1biD+WRVXBNrqiqYIkOlPXGnLG2dvRMIyt87ajoKCycrucdg6fDUR8l2rXBjEvXNIpqE12Ar5bseSD0ndaWN9ck2qAJFAaCZSqkXWWfvu6vCq5Qmvxp3MJFEgAEvqZ5rXL5MuUAhK3FVltflaINcIIiwg5sbYiI6Jv2heh/sAAIC9L3QgPKI0cjvboUievLeTPS5j6SxRUrUqyrox2BmXUQKp9mMuUqLaJ7iy8i5cJ8wssOZ3EhxIxubd8WJ7ELVp6AcUi4MTkmsWbsLj28ml1t2skxsQWPfyG7X/xVceWL91Byxr6QeOQUb6a6+za/TybxmM+E3ZZ72YTTyR3/yvTrQYKYzY9iY+W5zD4qJfO1Ayt/luuZR87PXMTOR5rOEHfBbVFAIYrC5ncgv0SOJN7zql+hvsuPjlE/rAo94E/r8Q+QcrB6VUzcZmtF/dOIMiOvh+xQRRn5pGwgiD+grEnGLbj+0JRV4tsrUdzguUfK956Y31VJ9YWTz4WOAUysaQuz6rDM3YqZhe3B8DXOAzif4bfk2mDnX0z8CeV9mRWllxRG+i6Z+ORQtstfNiSSxMHHWPL3c+/Q4jMNlPKH3MkkFtk=
+  - secure: KCaLtXQoug8C8pc53/e01X/nfXvbyKDqUuWujFG+APHwUf+cxqqcK2jr6CEmhx/ugmjCtemlkKpUG1Sb+KCWwFYJw5/ASmrENm98VjroxYisXUaaDcj8pH0A92Ne5UI/x5OOTfqGl4fvbMfVhm+Fjt3Zu1UckvDyjZcnhbWVKVdIP95rm66a/KffxVkk9na9ej+gQrblqsjSuhVbnbgorA5MKr7b4VyXYdoyqazEqNERYGPv5HlP/FqWE51uFOE0M/6DRYbbzMFJ+efh9zncWQv07XNOAeVrbZskWrlyR2t9X5QzdX0o+szU4nbaf+phGZjsLyH2jjtb0By/l/VI9r6L2ulClMolDq9be+uVPqxBd8aYpHWp93pnL+uMzNh/iirfDTDwpu73lpkvl3H1aQ7nQJXHvGsdPEIlzpQ5CCXWqJZms1X+mqOXbx0IddHDDJR3mPSO6OQPWcoDsfyUadOZhxK6ijJnZ3eLf4mQB7MBN7rZHUAbUcFfc3o70h48FUkkzrTR9GvQHEHTOpuPHxt/lCmCs5R2Y/+y3Un9LtQm3dgFY+yAYAXIm9XSD1jINmczec4Dzn4QvtKq5V6Wre+tg6RmUavaf4wcS5PF1NLTfVNavNiq3sadn6BIOMuL6ZQ8USbrv4Q7cyg4wP5tyIA8LMYFvpU9yyO5renef2A=
+  - secure: LKRPBBK3RHdssNDy1MST8WDzEB1Crkc2d6yk3Dj9GF5Kp87PR9pz67JliHDB55EdZvVqcM2oEfo3wCqVwY5gAuuDt71gbNkf55IyPlI0t2z5+8ARe9xjGOGS5DPV/FSrmg1BNd+UCLOCBRJU9Pj2SIRukt+DL6qmtY51pf1x5RAG6RQSADwcMnTHy5/ul1SYqzGxP4nDcc2oMkCDjmN3R9TRdzE3Jn7X2yDfQTkt3GXXxQFZciub/plVQT84yKf32r+QYz96SwIM5ItadIPltSjdf2pbsmjNfPuSq+R1lroCvu4KwOEEDlZLVAA0g2jU6yHX3ruOuwFPZ4XZjxKxTnQeRob7i06tcUXcalW1grXoPmDQc9WbxOkyOHBJHBxHTt9aeqdc0cdLJL26Pq2PbGBWWvs28DOtIIPhKYr+Pc77xYy/52tz1cUfkVfSnhokO4kutee8RE2bn1Q608TBXnLT2B7cyi8eorqh2FKXR1DDZf61IpDc87lvdVjkLv3MOkzZUGHXEZ+d/770lQyqJLsPqgAqexiTjHsmF0IhVy4xWMbKj1LhKQ7Js30T7VuCcKI9q3zLWfPMRMPg/QX10eaq3uE7/m31TbHT7c6/hsdDog4Fs6dF4B1eTI6D/f9HZd6765Rr4vwXbqGAUeY68eEvSq5MtGkh09ZhWrz+Kic=
+before_install:
+- sudo apt-get update
+- sudo apt-get install --only-upgrade -y oracle-java8-installer
+- export SBT_OPTS="-Xms4096m -Xmx4096m -Xss4096k"
+- mkdir -p ~/.gnupg
+- openssl aes-256-cbc -pass pass:$ENCRYPTION_PASSWORD -in secring.gpg.enc -out ~/.gnupg/secring.gpg
+  -d
+- openssl aes-256-cbc -pass pass:$ENCRYPTION_PASSWORD -in pubring.gpg.enc -out ~/.gnupg/pubring.gpg
+  -d
+- echo "<settings><servers><server><id>ossrh</id><username>\${OSSRH_JIRA_USERNAME}</username><password>\${OSSRH_JIRA_PASSWORD}</password></server></servers></settings>"
+  > ~/.m2/settings.xml
+install:
+- wget ${ACTIVATOR_ZIP_URL}
+- unzip -q ${ACTIVATOR_ZIP_FILE}
+script:
+- mvn -U clean install -Dgpg.passphrase="${GPG_PASSPHRASE}" --settings ~/.m2/settings.xml
+after_success:
+- .travis/deploy.sh
+- .travis/build_dependents.sh
+after_script:
+- rm ~/.gnupg/secring.gpg
+- rm ~/.gnupg/pubring.gpg
+- rm ~/.m2/settings.xml
+notifications:
+  email: true
+branches:
+  only:
+  - master
+  - R17
+scala:
+- 2.11.8
+cache:
+  directories:
+  - .autoconf
+  - ~/.m2
+  - ~/.sbt
+  - ~/.ivy

@@ -1,0 +1,16 @@
+language: node_js
+node_js:
+  - "8"
+before_install:
+  - npm install --global karma-cli
+install:
+  - npm install
+before_script:
+  - npm run build
+script:
+  # - protractor protractor.conf-ci.js
+  - karma start karma.conf-ci.js
+notifications:
+  slack: financialtimes:F7ol60TlTlcG7ZP0DvAZWan5
+addons:
+  sauce_connect: true

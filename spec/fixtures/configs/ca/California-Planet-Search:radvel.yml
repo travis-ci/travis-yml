@@ -1,0 +1,44 @@
+language: python
+sudo: False
+
+cache:
+   directories:
+     - $HOME/download
+     - $HOME/miniconda2
+     - $HOME/miniconda3
+     - $HOME/.cache/pip
+     - $HOME/.ccache
+
+python:
+  - "2.7"
+  - "3.6"
+
+before_install:
+    - export py="$(echo $TRAVIS_PYTHON_VERSION | head -c 1)"
+    - wget http://repo.continuum.io/miniconda/Miniconda${py}-latest-Linux-x86_64.sh -O miniconda.sh
+    - chmod +x miniconda.sh
+    - bash miniconda.sh -b -u -p $HOME/miniconda
+    - export PATH=/home/travis/miniconda/bin:$PATH
+    - conda update --yes conda
+    - sudo rm -rf /dev/shm
+    - sudo ln -s /run/shm /dev/shm
+
+install:
+    - if [ ${py} == "2" ]; then conda install --yes configparser==3.5.0b2; fi
+    - conda install --yes pip numpy scipy matplotlib>=2.0.0 cython pandas nose nbformat nbconvert jupyter_client ipykernel tornado==4.5.3
+    - pip install coveralls pybind11
+    - pip install celerite
+    - pip install .
+    - python setup.py build_ext -i
+
+# configure a headless display using xvbf to test plot generation
+before_script:
+    - "export DISPLAY=:99.0"
+    - "sh -e /etc/init.d/xvfb start"
+    - sleep 2 # give xvfb some time to start
+
+script:
+    - nosetests radvel --with-coverage --cover-package=radvel
+
+after_success:
+    - coveralls

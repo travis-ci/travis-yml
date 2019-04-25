@@ -1,0 +1,32 @@
+dist: trusty
+group: travis_latest
+services: docker
+env:
+  global:
+  - GIT_BRANCH="$TRAVIS_BRANCH" # Specify the branch name manually when on a detached HEAD
+  matrix:
+  - DOCKER_BUILD_PATH=ls/ DOCKER_REPO=vladgh/ls
+  - DOCKER_BUILD_PATH=ps/ DOCKER_REPO=vladgh/ps
+  - DOCKER_BUILD_PATH=rs/ DOCKER_REPO=vladgh/rs
+install:
+- git clone https://github.com/vghn/vgs.git ~/vgs
+- sudo apt-get -qy update && sudo apt-get -qy -o Dpkg::Options::="--force-confdef"
+  -o Dpkg::Options::="--force-confold" install docker-ce
+  docker --version
+- |
+  mkdir -p ~/bin
+  export PATH="${PATH}":~/bin
+  export GOSS_DST=~/bin
+  curl -fsSL https://goss.rocks/install | sh
+  goss -version
+script:
+- ~/vgs/scripts/docker.sh build
+- echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin
+- if [[ "$TRAVIS_BRANCH" == "master" ]] && [[ "$TRAVIS_PULL_REQUEST" == "false" ]]; then ~/vgs/scripts/docker.sh push; fi
+- if [[ "$TRAVIS_TAG" =~ ^v[0-9]+ ]]; then ~/vgs/scripts/docker.sh push && ~/vgs/scripts/docker.sh tag; fi
+- MICROBADGER_TOKENS_FILE=.microbadger && ~/vgs/scripts/docker.sh notify
+notifications:
+  webhooks:
+    urls: https://vbot.ghn.me/travis
+  slack:
+    secure: n4zlSRILuHPorcEezRGHIMriCzjzspNpjgcJj7j3s9NElQAISOHUjw2NKGEH/Rpo3odQe3TFuxAz+th9om/LuONAyApR+Ph4gzMLfoEl+i5ORQx0Q+679o08RrY+fqIUCX+m5BjAElagPgQ+MCnEXqL5+IiLen7cPmJuY6nyQS15eVMDYdnt0e5NDyYSDQyVOMK1ErwdsiBsIMqVy7cqlCB9Bd+OgzmAua+IVepr7IKLg2N4IuXEvzfx17y7ZKnUtSelzU6muULMhwiizhdLPBSn0cGNbFBzqnnm+oxfy2JwTc871uOTP8u1eMi/CCzaZjtYyfoYMT+rwUoFDzwJw0Mp6zXkwQdURQh/pmJGgXkDyxuN8ZKPh4G2JvwW02D+15ZqyNdLtQJM1PvpJpj3bNy/+A1xugJ8KdrSb3m2OpRdqbfAgi7086dqpOV/HMJYzsH0zeLFaLDF8WvKjjsmLil41oYhIxKxOXfHBHRJfcqnYCN97bxuqk9fFBE2tZwA9Im4xlAAmc748LYWnNgs1CvyBMOjNJN/RRuDkcLhWsgcpbR1ByteBX0YiOZ7z26MFuHl++Coq81iW2WZHl5Ra+t6kdshFHTJxv0aM67y9jidAq1q0Q6idEj/JEqOazLXuqhedLGPwa9Knd48H/8WNwU3x9V1BS0a2JAFpygnHug=

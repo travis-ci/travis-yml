@@ -32,10 +32,10 @@ describe Travis::Yml::Schema::Def::Deploy::Cloudfoundry, 'structure' do
                 '$ref': '#/definitions/deploy/edge'
               },
               username: {
-                '$ref': '#/definitions/secure'
+                '$ref': '#/definitions/type/secure'
               },
               password: {
-                '$ref': '#/definitions/secure'
+                '$ref': '#/definitions/type/secure'
               },
               organization: {
                 type: :string

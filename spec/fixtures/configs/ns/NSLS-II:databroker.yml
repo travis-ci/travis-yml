@@ -1,0 +1,47 @@
+language: python
+sudo: false
+
+env:
+  global:
+    - secure: "vJnQwcJw7t9fSS3A/u3JXjXVLErDKIPcAnwx4HaKhuPmXB8Mq5455jSJvK65DOl7Wh4q1WvHGiFdTJ7JtHOxyTCCAJQBElzhT4/6IjjgrqG5s5HIN/qyACimpeXLCdM0FslyCu4bpt0TTd/FReV0Oq3pHt1FiQkpBq07W0t1NvrSv4lymtadT6ZgVlVOFGOcbmUH6sdexBm4TSJnVJjFva8v11zaICFXCIm1PRAraj5ueBm13SpozQ6lZA0e2aOnMqgQg3cId3Hag1SzYmZeYZ8F0ZzCDOX4grbu0S5tUacz0RxieJpx3TTP3lLEXyJvkmFIwuV8aPquZZpVxtzksHnUwED4B0icSVJ1WGMw8hCQpxRHYf9W2wqlIzYb7p3eBhnbl0zrdf6+hMwRontI7HhBnqbEvWpBJArYcaYEMfw714i63bJiD7fZLZ+8Nz7pjwKxhD6dF2ZR37MPAkKeGt3Z/QfAZBZ++hW2mPxSMEMUjGX7FJsMCuryNzVDqKGk3vLc2k+OKU+DjnJyYZq+00defVfjJL0Hh4ZUnC0C97MwLgeHiC9jLcnhdqTg5U12muj4eQJ1roolNTgkjbyS8FLA2kmAVft04hgaqKg/FaAvlpxMAASwkaKO8C7Kz7TDQ8SwxpX0S1qpmd/gblbMHl0k1jfqnwoYRHxJ3jb8Whs="
+
+cache:
+  directories:
+    - $HOME/.cache/pip
+    - $HOME/.cache/matplotlib
+
+services:
+  - mongodb
+
+before_install:
+  - export TZ=US/Eastern
+
+matrix:
+  fast_finish: true
+  include:
+    - python: 3.6
+      env: PUBLISH_DOCS=1
+    - python: nightly
+  allow_failures:
+    - python: nightly
+
+install:
+  - pip install --upgrade cython
+  - pip install --quiet --upgrade --global-option='--without-libyaml' pyyaml
+  - pip install .[all]
+  - pip install -r test-requirements.txt
+
+script:
+  - coverage run run_tests.py
+  - coverage report -m
+  - set -e
+  - pip install -r docs-requirements.txt
+  - make -C doc html
+  - |
+    if [ $PUBLISH_DOCS ]; then
+      pip install doctr;
+      doctr deploy --deploy-repo NSLS-II/NSLS-II.github.io --deploy-branch-name master databroker
+    fi
+
+after_success:
+  - codecov

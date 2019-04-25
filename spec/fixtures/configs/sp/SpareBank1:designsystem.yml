@@ -1,0 +1,21 @@
+language: node_js
+node_js:
+  - "lts/*"
+cache:
+  directories:
+    - "node_modules"
+script:
+  - npm run build:all
+  - npm run test:ci
+deploy:
+  provider: pages
+  github-token: $GITHUB_TOKEN   # Set in travis-ci.org dashboard, marked secure
+  skip-cleanup: true            # Set so Travis CI does not delete the files we are trying to deploy
+  local-dir: dist
+  fqdn: design.sparebank1.no
+  project-name: "SpareBank 1 Designsystem"
+  commiter-from-gh: true        # Set so Travis will pose as the owner of the access token. Only this account is allowed to push to gh-pages.
+  target-branch: gh-pages
+  keep-history: true            # Required since branch is protected
+  on:
+    branch: master

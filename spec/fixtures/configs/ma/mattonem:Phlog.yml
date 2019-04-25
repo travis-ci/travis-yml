@@ -1,0 +1,22 @@
+language: smalltalk
+sudo: false
+
+# Select operating system(s)
+os:
+  - linux
+
+# Select compatible Smalltalk image(s)
+smalltalk:
+  - Pharo-5.0
+  - Pharo-6.1
+
+deploy:
+  provider: releases
+  api_key:
+    secure: JceHjW4Ft7+1QhW+DtYVOQK1uIKwXayxOEprxLbTQYZ56PnzxY56zemxNxpHCa1tqzsT8Os0WZLky3cXh2g9h/5zYHE9wOMWLPeO++pbgJi2av+MBbjnJbMZ1h/uoD6h/tkX2d+s+sAKANyfY85OAIIlBUY3ouSudvSJEnF3Q3Xg/1YQeNUC2XB0CeVzGIuKwXJ/vVlo5WiPW0ImkrAnRV//HS80umLINxY4MDCFBmz1FnlRCsv5EgZ+a5VwToa0C7jMSJFeUltkDHpYn4UrW7PcqgfjpcmyC6QjtmVV4G115rqJrAs/piVF2bwI9HYSI/IUswVcQAaRtSuAQ5FeCV9xs66qeVY+tNienL3wHAQ+F41S3Nu+6hR3Kre1EWFvDTP2xS3w4Xofk12NJM+ExzK85WQzuGO9rmz5kn6lMJi3BBUJvalLYxT52Ts9jtEsm54HSo9rKu7EfLUxhKkEjFU9I5FnYCvu/ZHIxtJiEyuanDIasf97zye1jCTDtFZco4jTZ9mbxcCxCyumjJlG4gZ5ydbY9B8eg2bFzOedDF7uqrZguabQoM/w52PpIsQ464XcE2fed7bu08WWdcEbi4+5APecTkBmuoQShkYxOqP9ED4zeaeBhnsKpGtrT5lc9tubgJfqPNaZwqtvP8wdW/dydW7ZcNqKUQT8Eq7BnqQ=
+  file: 
+    - /home/travis/smalltalkCI-master/_builds/TravisCI.changes
+    - /home/travis/smalltalkCI-master/_builds/TravisCI.image
+  skip_cleanup: true
+  on:
+    tags: true

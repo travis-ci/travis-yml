@@ -1,0 +1,12 @@
+language: python
+python:
+        - "3.4"
+
+before_install:
+        - sudo apt-get -qq update
+        - sudo apt-get install -y graphviz
+
+install:
+        - pip3 install tox
+
+script: tox -r

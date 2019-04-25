@@ -1,0 +1,46 @@
+language: python
+sudo: required
+dist: trusty
+
+cache:
+  directories:
+    - /home/travis/docker
+
+services:
+  - docker
+
+env:
+  global:
+    - DOCKER_CACHE_FILE=/home/travis/docker/cache.tar.gz
+    - DOCKER_COMPOSE="docker-compose -f docker-compose.test.yml"
+    - DOCKER_COMPOSE_VERSION=1.22.0
+    - UID=$TRAVIS_UID
+
+before_install:
+  # TODO: Remove when travis has a adequate docker version preinstalled
+  - ./helpers/install_latest_docker.sh
+  # list docker-engine versions
+  - apt-cache madison docker-engine
+  - "docker version"
+  - "docker-compose version"
+  - env
+  - ./helpers/docker_cache.sh load_cache || echo "Cache loading failed"
+  - "docker images -a"
+
+# skip the builtin pip install
+install:
+  - $DOCKER_COMPOSE build
+  - "docker images -a"
+
+before_script:
+  - $DOCKER_COMPOSE up -d
+
+script:
+  - $DOCKER_COMPOSE run --rm test-app webpack --mode production
+  - $DOCKER_COMPOSE run --rm test-app test
+
+after_success:
+  - sudo ./helpers/registry.sh all
+
+before_cache:
+  - ./helpers/docker_cache.sh save_cache || echo "Cache saving failed"

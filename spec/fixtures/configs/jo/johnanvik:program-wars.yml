@@ -1,0 +1,37 @@
+language: node_js
+node_js:
+- node
+notifications:
+  email: false
+  slack:
+    rooms:
+    - programwarscardgame:u1VhNgRjj1X8gxpEWhfLw6MP#builds
+    on_success: change
+    on_failure: always
+cache:
+  directories:
+  - node_modules
+env:
+  global:
+  - secure: HyJuoLRVsNJR0TVgd9/pozY0pddTyQhXERZkespaQeAFWppg+XZDl6WR9Cw2oMuIIzWr3UIIhMT976PetEBdIcBV8bNrbjSJOI118rsieHOI8CR4ycTyjWQpRU9iU94rOkM1+H0q0j0mDLg0QjA5bkh3BVj0/IdrSCgRF1gb7UDK+Q/RQYpAOvovKIRlOZrC9Va+YygeGmjrR/A0GGw6wVf/K0DLNkMEdHEbrSSpfQ2Un5YlzqskL22jzbzWNN32jEuwJqc9cIQlFRZAZBAinxBRW4fGNIbcN/ZLnwSI3fvqUuRi00g67dmU+ebFCMfymGAECM//DGcFLdPVa/MzfuyW2IRkMarW3ZPEr5O5ApOC6TlqY0RXBXimPBIMCORfmQipd7LN57EzLyjFcFxW2Symmvv4664BxZ/HiI2KDC0dG+PgpAX/Mffywet0Zxuu37kQZyytie5EynY03haPjQFI66ZCpXOHOl7PxH9CSTdAkP8RddlJHW2VeuIJejxzZNE8U6AVu2j/YRmTqOLB7f90hDZvaAZMQIxECHhOE3TdiTHZ8xcfhZOZxWGqZAQiJrLkWRmNn78yG/MaAMV+iF5vocC+oYOZ8wPEgBWM9zWUbSMbjn50UbA4W698vjlWcOU3N0Fqa3u1ZQKR7CwpHgYY2OnzRpFz4Uur4KXtopc=
+  - secure: P2VduVXNWti/yjbrtWWJEgyJluq/9BKL0f5ijuKYebF1giesmQ3SKoZZamho3tS8TCiST0hX2RvshwoNdNr1/4M6ucImaDo6KA0sj5HuX6xb5PnXrIbHLd9ZFaB/yHE3XZCDASWYF6mnPmgVh+rv2PIwX7yYLetOrrqk/qVgnPs8mLO+0Z+rctMeBcc6aFKmlZO205jDOvriFcflPgmgDjLJ+Hp7VwAkS3cMVsiwQH7oxjYgNRQ8WWHoUOhNM/5S0vD4z1eeoRB8rPlT8+U8PIkQCAwQh5u/NxgS3IyLst6YujbxgqX5Sb4mesW4m7cEQa/j3FsK1M7aWf3YlLnzZbmDm8+NusGK6m4k9R01NAABMiQUezGmZFZ/Nczy16nVSfemlO4IO7aGPc+jhRxDJXmWZRU5cpCngxHb0ekXiNaC2VzVg+CGiz0hgpPzyWXs4NeEfORxuK+4W3R6jh8zvf40L3fwWoJd7HNFWvJCNq2Q2mW6Kyr5ce2C+mGiqCH5nVci4tIUlAsGrdyHVuSFXgwWwwrv/9GT+SjB7T4U3dbYSztHx99tJQppD/4IdMk3VTtyyprR0zz/Bi7sDdpU7qKsZfOWsrDWRgjrv1mzjmKX9Eytp4uHkn4rTDowgoxLMsKMi5KXvm/gtVBoraW3mv+MVnnNMY3MF6/lNh7GTZ4=
+  - secure: mtaA4qRKE1uyyhMiquo1nfjAlUZBcd49vqWs074IKFrOFt7pJ6IjlYKH/wmOgz8+6F2Idm6leS4VztRQmRh8P0HHjSpC9mGbx5a87qtVga9z186qRscD0LX4ERiF8/L476lTEpL7TIJyHSkbtxryUpsl72qsTLxEnLl+8QLutktvJVfoVN17Dg3Sj8fZuTQ01f8GYW7DB+9LF4rt6NVlU3w5OOXsATcfiypMpl2u4uNRbZgH2YDdXmzZaSlRuWKsNE+rkhZuQG0/fvivPpeI1+82XZzaiDrGsxjnjirrw2CNBk4Y9mAkEzRlLRjB2cBR7pL9YnbXIyobtddPWwtrGyQZvn/kkbgaE7yyOMyk/2HTWnKgYRT7kf5fgrEHP7SW2wAAnH9EVQHntrJVKjrmd73GEaO8xhfXS/XqnkJZgKj180beBcBX7kBlNpC398+lQGDetVejWOtgN7DMQJc/v9dGSUfGgHO0gcZpz4Z2ccVMuESPyZPznm4hkq71ItNN1z8tfz8D92hpY0w30IP6XG0qbJufCmo+q1CjE0Aw4SCT18/BgnjDxQeCAxzo7X69tTSNAMNgQFYNQG1iNueDZ9MXL9IggBAmAJEc2T3e0ekyGKI0WEcha+0LBXCVZqAxoaA+mk8LRzkPkz97eMwvnAGb5dUrSJ9dhiJe2XwL+/g=
+before_script:
+- export DISPLAY=:99.0
+- sh -e /etc/init.d/xvfb start
+install:
+- npm install
+script:
+- npm run test
+after_success:
+- cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js
+before_deploy:
+- npm run  build
+if: branch = master
+deploy:
+  provider: firebase
+  skip_cleanup: true
+  token:
+    secure: 1/OylsAC4o83Rry0RcwPwn0YGzAokOzRd0j5vyxVnjUkM
+  on:
+    branch: master

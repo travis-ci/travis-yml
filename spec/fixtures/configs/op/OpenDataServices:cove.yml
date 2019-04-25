@@ -1,0 +1,42 @@
+dist: xenial
+addons:
+  chrome: stable
+
+language: python
+
+python:
+  - "3.5"
+
+before_install:
+  # install Java 8 as required by vnu.jar
+  # install gettext for translations
+  - sudo apt-get update
+  - sudo apt-get install openjdk-8-jdk gettext build-essential libxml2-dev libxslt1-dev python3-dev
+  # Install translate toolkit to get pocount binary
+  - sudo apt-get install translate-toolkit
+
+install: 
+  - "pip install -r requirements_dev.txt"
+  - "pip install Cython"
+  - "pip install -r requirements_iati.txt"
+  - wget "https://github.com/validator/validator/releases/download/16.3.3/vnu.jar_16.3.3.zip"; unzip vnu.jar_16.3.3.zip
+  - "wget https://chromedriver.storage.googleapis.com/2.36/chromedriver_linux64.zip; unzip chromedriver_linux64.zip -d chromedriver; export PATH=$PATH:`pwd`/chromedriver"
+
+script:
+  # Check that messages used by OCDS CoVE are translated
+  - "python manage.py makemessages -l es"
+  - "[ \"$TRAVIS_PULL_REQUEST\" = \"false\" ] || [ \"`pocount --incomplete cove/locale/es/LC_MESSAGES/django.po`\" = \"\" ]"
+  - "[ \"$TRAVIS_PULL_REQUEST\" = \"false\" ] || [ \"`pocount --incomplete cove_ocds/locale/es/LC_MESSAGES/django.po`\" = \"\" ]"
+  - "flake8 ."
+  - "DJANGO_SETTINGS_MODULE=cove_360.settings py.test -n 2 cove_360 --cov-append --cov --cov-report="
+  - "DJANGO_SETTINGS_MODULE=cove_ocds.settings py.test -n 2 cove_ocds --cov-append --cov"
+  - "DJANGO_SETTINGS_MODULE=cove_iati.settings py.test -n 2 cove_iati --cov-append --cov"
+  # Next 2 lines: arbitrarily chosen 360 - just need something to run those subcommands against before the next tests.
+  - "DJANGO_SETTINGS_MODULE=cove_360.settings python manage.py migrate"
+  - "DJANGO_SETTINGS_MODULE=cove_360.settings python manage.py compilemessages"
+  - "DJANGO_SETTINGS_MODULE=cove_360.settings DEBUG=false ALLOWED_HOSTS=localhost python manage.py runserver & (sleep 10s; java -jar dist/vnu.jar 'http://localhost:8000/' 'http://localhost:8000/?source_url=https://github.com/OpenDataServices/cove/raw/master/cove_360/fixtures/fundingproviders_grants_2_grants.csv
+  ' 'http://localhost:8000/common_errors/' 'http://localhost:8000/additional_checks/')"
+  - "DJANGO_SETTINGS_MODULE=cove_ocds.settings DEBUG=false ALLOWED_HOSTS=localhost python manage.py runserver localhost:8001 & (sleep 10s; java -jar dist/vnu.jar http://localhost:8001/ 'http://localhost:8001/?source_url=https://github.com/OpenDataServices/cove/raw/master/cove_ocds/fixtures/tenders_releases_2_releases.json')"
+  - "if [ \"$TRAVIS_PULL_REQUEST\" != \"false\" ]; then ./get_secret_data.sh; python secret_data_test.py; fi"
+
+after_success: coveralls

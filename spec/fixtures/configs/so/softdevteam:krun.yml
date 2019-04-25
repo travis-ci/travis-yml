@@ -1,0 +1,32 @@
+sudo: required
+
+language: python
+
+before_install:
+    - sudo apt-get update -qq
+    - sudo apt-get install linux-libc-dev libc6-dev
+    - sudo apt-get install oracle-java8-installer
+    - sudo apt-get install virt-what
+    - sudo apt-get install pypy
+    - sudo apt-get install luajit
+
+install:
+    - pip install -r requirements.txt
+    - pip install colorlog
+
+script:
+    - sudo update-java-alternatives -l || true  # returns 1 on success!
+    - sudo update-java-alternatives -s `sudo update-java-alternatives -l | grep 8-oracle | awk '{print $1}'`
+    - uname -a
+    - make --version
+    - ldd --version
+    - java -version
+    - JAVA_CPPFLAGS='"-I${JAVA_HOME}/include -I${JAVA_HOME}/include/linux"' JAVA_LDFLAGS=-L${JAVA_HOME}/lib ENABLE_JAVA=1 make
+    - cd examples/benchmarks
+    - make
+    - make java-bench
+    - cd ../../
+    - make
+    - py.test --cov-report term --cov=krun krun libkrun
+    - cd examples
+    - python ../krun.py --quick --no-pstate-check --no-tickless-check --no-user-change travis.krun

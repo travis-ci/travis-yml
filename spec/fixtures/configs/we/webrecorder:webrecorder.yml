@@ -1,0 +1,60 @@
+sudo: false
+
+matrix:
+  include:
+    - os: linux
+      dist: xenial
+      language: python
+      python: "3.6"
+      sudo: false
+    - os: osx
+      osx_image: xcode8
+      language: generic
+      sudo: required
+      env: PY_VER=3.6.8
+
+env:
+  global:
+    - ARTIFACTS_TARGET_PATHS="webrecorder-player/$TRAVIS_BRANCH"
+
+
+addons:
+  artifacts:
+    paths:
+      - webrecorder-$TRAVIS_OS_NAME
+      - webrecorder-player-$TRAVIS_OS_NAME
+
+before_install: |
+  if [[ $TRAVIS_OS_NAME == 'osx' ]]; then
+      brew update;
+      brew install pyenv;
+      eval "$(pyenv init -)";
+      PYTHON_CONFIGURE_OPTS="--enable-shared" pyenv install $PY_VER;
+      pyenv global $PY_VER;
+      pip install -U setuptools;
+      pip install pyopenssl;
+  fi
+
+install:
+  - cd webrecorder
+  - pip install 'urllib3==1.23'
+  - python setup.py install
+  - pip install coverage pytest-cov codecov
+  - pip install 'pyinstaller==3.3'
+
+script:
+  - python setup.py test
+  - cd webrecorder/standalone
+  - pyinstaller --clean --additional-hooks-dir ./hooks/ -y -F ./webrecorder_player.py
+  - mv ./dist/webrecorder_player $TRAVIS_BUILD_DIR/webrecorder-player-$TRAVIS_OS_NAME
+  - $TRAVIS_BUILD_DIR/webrecorder-player-$TRAVIS_OS_NAME -v
+  - pyinstaller --clean --additional-hooks-dir ./hooks/ -y -F ./webrecorder_full.py
+  - mv ./dist/webrecorder_full $TRAVIS_BUILD_DIR/webrecorder-$TRAVIS_OS_NAME
+  - $TRAVIS_BUILD_DIR/webrecorder-$TRAVIS_OS_NAME -v
+
+
+
+after_success:
+  - cd $TRAVIS_BUILD_DIR/webrecorder
+  - codecov
+

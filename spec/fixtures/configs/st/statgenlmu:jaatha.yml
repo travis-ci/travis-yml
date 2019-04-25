@@ -1,0 +1,21 @@
+language: r
+cache: packages
+
+r:
+  - oldrel
+  - release
+  - devel
+
+before_install:
+  # Set CXX1X for R-devel, as R-devel does currently not detect CXX1X support for gcc 4.6.3
+  # Check if we can remove this at some point in 2017
+  - if [[ "$TRAVIS_R_VERSION_STRING" = 'devel' ]]; then mkdir ~/.R && echo 'CXX1X=g++ -std=c++0x -g -O2 -fPIC' > ~/.R/Makevars; fi
+
+r_packages:
+  - lintr
+  - covr
+
+after_success:
+  - Rscript -e "lintr::lint_package()"
+  - Rscript -e "library(covr); coveralls()"
+

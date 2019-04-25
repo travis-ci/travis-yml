@@ -1,0 +1,27 @@
+bundler_args: ""
+language: ruby
+gemfile:
+  - spec/gemfiles/42.gemfile
+  - spec/gemfiles/50.gemfile
+  - spec/gemfiles/51.gemfile
+  - spec/gemfiles/52.gemfile
+rvm:
+  - "2.3"
+  - "2.4"
+  - "2.5"
+script: bundle exec rake spec
+
+addons:
+  postgresql: "9.6"
+
+services:
+  - redis-server
+
+before_install:
+  - gem update bundler
+
+before_script:
+  - psql -c 'create database "inst-jobs-test-1";' -U postgres
+
+env:
+  - TEST_DB_USERNAME=postgres

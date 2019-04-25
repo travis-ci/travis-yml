@@ -1,0 +1,38 @@
+language: c
+
+compiler:
+  - gcc
+  - clang
+
+dist: trusty
+sudo: false
+
+addons:
+  apt:
+    packages:
+      - libcunit1-dev
+      - libaio-dev
+      - libssl-dev
+      - uuid-dev
+      - libnuma-dev
+
+before_script:
+  - git submodule update --init
+  - export MAKEFLAGS="-j$(nproc)"
+
+script:
+  - ./scripts/check_format.sh
+  - ./configure --enable-werror
+  - make
+  - ./test/unit/unittest.sh
+
+notifications:
+  if: repository_slug = spdk/spdk
+  irc:
+    channels:
+      - "chat.freenode.net#spdk"
+    template:
+      - "(%{repository_name}/%{branch}) %{commit_subject} (%{author})"
+      - "Diff URL: %{compare_url}"
+    on_success: always
+    on_failure: always

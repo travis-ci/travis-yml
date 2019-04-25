@@ -1,0 +1,36 @@
+sudo: required
+language: node_js
+
+cache:
+  yarn: true
+  directories:
+    - node_modules
+
+install:
+  - yarn
+
+jobs:
+  include:
+    - stage: Build
+      script:
+        - yarn lint
+        - yarn build
+      node_js: "8"
+    - script:
+        - yarn lint
+        - yarn build
+      node_js: "10"
+
+    - stage: Tests
+      script: yarn test:unit
+      name: "Unit Tests NodeJS 8"
+      node_js: "8"
+    - script: yarn test:unit
+      name: "Unit Tests NodeJS 10"
+      node_js: "10"
+    - script: yarn installer:ci
+      name: "E2E Tests"
+      if: branch IN (master, develop)
+      node_js: "8"
+      addons:
+        chrome: stable

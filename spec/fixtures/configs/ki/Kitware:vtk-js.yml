@@ -1,0 +1,30 @@
+language: node_js
+os: linux
+sudo: required
+dist: trusty
+group: travis_lts
+before_install:
+  - sudo apt-get -qq update
+  - sudo apt-get install build-essential libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev
+addons:
+  chrome: stable
+node_js:
+  - '8'
+install:
+  - npm ci
+notifications:
+  email:
+    recipients:
+      - sebastien.jourdain@kitware.com
+      - ken.martin@kitware.com
+    on_success: change
+    on_failure: always
+
+cache:
+  directories:
+    - "$HOME/.npm"
+    - Documentation/build-tmp
+
+script:
+  - if [ "$TRAVIS_EVENT_TYPE" == "pull_request" ]; then ./Utilities/ci/travis-test.sh; fi
+  - if [ "$TRAVIS_EVENT_TYPE" == "push" ] && [ "$TRAVIS_BRANCH" == "master" ]; then ./Utilities/ci/travis-release.sh; fi

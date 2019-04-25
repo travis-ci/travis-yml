@@ -1,0 +1,26 @@
+sudo: false
+language: scala
+scala:
+  - 2.12.5
+jdk:
+  - oraclejdk8
+install:
+  - . $HOME/.nvm/nvm.sh
+  - nvm install 7
+  - nvm use 7
+  - export NODE_PATH="$(npm config get prefix)"/lib/node_modules
+  - npm install
+  - npm install jsdom source-map-support
+script:
+  - sbt clean +test
+  - sbt coverage coreJVM/test communicationJVM/test server/test serverUndertow/test stream/test appJVM/test
+  - sbt coverageReport
+  - sbt coverageAggregate
+  - sbt codacyCoverage
+cache:
+  directories:
+    - $HOME/.ivy2/cache
+    - $HOME/.sbt/boot
+before_cache:
+  - find $HOME/.ivy2 -name "ivydata-*.properties" -delete
+  - find $HOME/.sbt -name "*.lock" -delete

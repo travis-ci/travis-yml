@@ -1,0 +1,26 @@
+language: java
+jdk:
+- openjdk8
+notifications:
+  email:
+    on_success: never
+    on_failure: always
+branches:
+  except:
+    - /^(?i:l10n).*$/
+before_install:
+- export MYWARP_COMMIT_HASH_SHORT="$(git rev-parse --short HEAD)"
+- export MYWARP_COMMIT_AUTHOR_NAME="$(git log -1 ${TRAVIS_COMMIT} --pretty="%aN")"
+- export MYWARP_COMMIT_SUBJECT="$(git log -1 ${TRAVIS_COMMIT} --pretty="%s")"
+install: ./gradlew assemble -PcrowdinKey=${CROWDIN_API_KEY} -PbuildNumber=${TRAVIS_BUILD_NUMBER} -PciSystem=travis -Pcommit=${MYWARP_COMMIT_HASH_SHORT} --scan
+before_cache:
+  - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+  - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+cache:
+  directories:
+    - $HOME/.gradle/caches/
+    - $HOME/.gradle/wrapper/
+before_script:
+- chmod +x config/deploy_to_gh_pages.sh
+after_success:
+- config/deploy_to_gh_pages.sh

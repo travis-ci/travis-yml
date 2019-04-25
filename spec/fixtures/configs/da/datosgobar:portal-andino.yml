@@ -1,0 +1,80 @@
+sudo: required
+env:
+  DOCKER_COMPOSE_VERSION: 1.13.0
+
+addons:
+  apt:
+    packages:
+    - net-tools
+    - openvpn
+
+services:
+- docker
+
+before_install:
+- docker info
+- sudo apt-get remove docker docker-engine
+- sudo apt-get update
+- sudo apt-get install linux-image-extra-$(uname -r) linux-image-extra-virtual apt-transport-https ca-certificates curl software-properties-common npm
+- curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+- sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+- sudo apt-get update
+- sudo apt-get install docker-ce
+- docker info
+- sudo rm /usr/local/bin/docker-compose
+- curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
+- chmod +x docker-compose
+- sudo mv docker-compose /usr/local/bin
+- sudo pip install --upgrade pip
+
+before_script:
+- sudo pip install nose
+- sudo apt-get install openssl
+- sudo mkdir -p /tmp/ssl
+- sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -subj '/CN=localhost/O=My Company Name LTD./C=AR' -keyout /tmp/ssl/andino.key -out /tmp/ssl/andino.crt
+- echo "Choosing between PR branch ($TRAVIS_PULL_REQUEST_BRANCH), tag version ($TRAVIS_TAG) and branch ($TRAVIS_BRANCH)"
+- if ! [ -z $TRAVIS_PULL_REQUEST_BRANCH ] ; then BRANCH_TO_USE=$TRAVIS_PULL_REQUEST_BRANCH && echo "Using PR branch" ; elif ! [ -z $TRAVIS_TAG ] ; then BRANCH_TO_USE=$TRAVIS_TAG && echo "Using tag" ; else BRANCH_TO_USE=$TRAVIS_BRANCH && echo "Using branch" ; fi
+- echo "Building portal with branch or tag $BRANCH_TO_USE"
+- docker build -t datosgobar/portal-andino:$BRANCH_TO_USE .
+- cd install/
+- EMAIL=admin@example.com
+- HOST=localhost
+- DB_USER=ckan
+- DB_PASS=ckan
+- STORE_USER=ckan_store
+- STORE_PASS=ckan_store
+
+script:
+- sudo python ./install.py --error_email "$EMAIL" --site_host="$HOST" --database_user="$DB_USER" --database_password="$DB_PASS" --datastore_user="$STORE_USER" --datastore_password="$STORE_PASS" --andino_version=$BRANCH_TO_USE --branch=$BRANCH_TO_USE
+- cd -
+- cd tests/
+- nosetests tests_portal_with_base_config.py
+- cd -
+- cd install/
+- sudo python ./update.py --andino_version=$BRANCH_TO_USE --branch=$BRANCH_TO_USE --site_host=localhost --ssl_key_path="/tmp/ssl/andino.key" --ssl_crt_path="/tmp/ssl/andino.crt" --nginx_ssl --nginx_ssl_port="7777" --nginx-extended-cache --file_size_limit=1024
+- cd -
+- docker ps
+- docker exec -it andino-nginx bash -c 'ls $NGINX_SSL_CONFIG_DATA'
+- docker exec -it andino-nginx bash -c 'echo $NGINX_CONFIG_FILE'
+- while [[ "200" != $(echo $(curl -k -s -o /dev/null -w "%{http_code}" "https://localhost:7777")) ]]; do sleep 10s ; echo $(curl -k -s -o /dev/null -w "%{http_code}" "https://localhost:7777") ; done
+- cd tests/
+- sudo nosetests configurations/ globals/
+- cd -
+- docker kill $(docker ps -q)
+- env PORTAL_VERSION="${TRAVIS_TAG:-$TRAVIS_COMMIT}" docker-compose -f dev.yml up -d --build portal
+
+deploy:
+- provider: script
+  skip_cleanup: true
+  script: "scripts/run_deploy.sh 'release-$TRAVIS_TAG' 'andino-stg;datosgobar-stg'"
+  on:
+    tags: true
+- provider: script
+  skip_cleanup: true
+  script: "scripts/run_deploy.sh latest 'andino-dev;datosgobar-dev'"
+  on:
+    branch: master
+
+git:
+  depth:
+     1

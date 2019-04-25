@@ -1,0 +1,14 @@
+language: java
+jdk:
+#- openjdk7
+- oraclejdk8
+install:
+env:
+  - TRAVIS_NODE_VERSION="8"
+install:
+  - rm -rf ~/.nvm && git clone https://github.com/creationix/nvm.git ~/.nvm && (cd ~/.nvm && git checkout `git describe --abbrev=0 --tags`) && source ~/.nvm/nvm.sh && nvm install $TRAVIS_NODE_VERSION
+  - npm install
+script: "ant all"
+sudo: false
+after_success:
+  - bash <(curl -s https://codecov.io/bash)

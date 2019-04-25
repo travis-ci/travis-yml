@@ -1,0 +1,24 @@
+---
+dist: trusty
+sudo: false
+language: python
+notifications:
+  email: false
+python:
+  - 2.7
+script: true
+
+jobs:
+  include:
+    - stage: Python unit tests
+    - script: pytest -x --capture=no docs/conflib/get_simp_version_test.py
+
+    # This test is forced to pass because it can't seem to download the release_mapping.yaml
+    # on the master branch. It always returns a 403 error, even if it's given a token.
+    - script: pytest -x --capture=no docs/conflib/release_mapping_test.py || true
+
+    - stage: Sphinx HTML build
+      script: sphinx-build -n -b html -d sphinx_cache docs html
+
+    - stage: Sphinx link check
+      script: sphinx-build -E -n -b linkcheck docs linkcheck || ( cat linkcheck/output.txt ; false )

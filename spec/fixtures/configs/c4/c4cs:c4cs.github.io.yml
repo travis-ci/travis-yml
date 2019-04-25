@@ -1,0 +1,23 @@
+dist: trusty
+sudo: false
+language: ruby
+rvm:
+- 2.2.2
+cache: bundler
+script:
+- bundle exec jekyll build
+- bundle exec htmlproofer --assume-extension --check-html --disable-external ./_site
+  --file-ignore /lectures/f16/,/lectures/w17/,/lectures/f17/,/lectures/w18/,/lectures/f18/,/archive/
+after_success:
+  - chmod +x ./deploy.sh
+  - ./deploy.sh
+env:
+  global:
+  - NOKOGIRI_USE_SYSTEM_LIBRARIES=true
+  - secure: d9dyFKHuhygj2a5cprreluPU7wmx8DCwu7T3fnKsCZKVJ3S0up2A3BOuR1/3i8C9ypS0S9DKthcIeSW4oVR94toHQRPeLn+q0YDesachgbpe6ri4aMsIlX7/E7ouLVzkRAjimosvmP6LN1g5Ks16FyL+U0e3wPDhxVl3y+4vvQG0AK82FnRS+9qXF4UABOsf2D9P4SvtL3FLW0dFLFxUM9ziXXbgPu2eb+jlnozuMLkHilPDtAuQtMF2W8yw6F3zmpZw4VYeHXmgVc5bQT6jdbutba0hM4MeEkJlDAHocTLB/GEce+QfiQ3dL7WWcz3TmjI8bvtH0a+rI6/WB//OTk8futuENLRvKa329xA9f62xYi0JTanZCOL5jEoCJO16b8hekbvi27DtvWXFQA9s/5dpF26iqkT7Iwrf9Vfm48DVoMh1hvNDX9s9H+Hnx622x537kHHjZsh/Die5j94GMyn4apLB6oFR7P84LiwtQ5sPXvj7aZPYRa7m9BhgASwGptWcHCTtoxI/stYBf1gGtkHtx7iLqjvZPyE2UMlFrb/2HJtJ7QqXMK2L0Rp4prjJ5RcM0tISqX0Q+/YROnHA64dWv4qVnwV6BGwt62ocRRoYO7l6fp4VOd+QzXoPI2+eQdqnGtxpkhMntg3mJ9sBq5mpz76KOKWekHzSGFrYE38=
+notifications:
+  slack:
+    secure: LlCVlH+acLKwi+U6o9Idi4irUWmhx2vKtKE7pBPpmKOaou1VbkyLga+/dJpjG8nHpxz7T1G/XeInXWJInJ0SzBKTFAe/XdHERFfdgvXAnTxJFjjU9Udd4HyVPuDap/cx7VfrOoHvpq6dQseaHFhn/RByY5aMGqH4Hqkie2ifyN+3+ieIaYSy5HJSTsSHuDMZsXlDjjRbmG5r3fnt+i2oxaLA5nFUmPt0/kAAIiTdFp1tvt8TrR5oqXa1VZWwW7FM3i0uWPbW6z82q/be/ZcSMLyXy/mCpDDjolqx/KIj91uwvq5TmrcqNO9fROjc5KUnkM3+JAvATbiwWXqOWTygTkZYJnwVKuXwhxg71pWNReCEgR52nz6Du5KXwMnhjtJkpaulpfm0eZFm/Ya2naZK1unvJFE/4bPdxms04R+vEGrpJIQ+OdDcjLvfQN+etE4qL7VyjuGk8zZSOmsNt38lo3hRvTeJm9zJ1rce3V0xxkqmQRDSVN0x2hZF56+rt69U56ghuuLeCuNsAS0Io7yc4m9XWNtyBKJ079hqQq3CXGB9hmvPY2wGk2NUXn/oddKEKuJ1ZHxPkuSmTGjTAST7cGl6ytvxkGjBx3VmEIWQlXUTRVTp+NjReXAr8Gojo0X/V4HOTGj83yjTvyA6BKFUD/eDfkHZU97n+yo5EVFv/Us=
+  email:
+    recipients:
+    - c4cs-staff@umich.edu

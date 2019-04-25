@@ -1,0 +1,17 @@
+language: node_js
+os:
+  - linux
+  - osx
+node_js:
+  - '8'
+before_install: yarn global add greenkeeper-lockfile@1
+before_script: greenkeeper-lockfile-update
+script:
+  - yarn install
+  - yarn run lint
+  - yarn run build-package
+after_script: greenkeeper-lockfile-upload
+cache:
+  yarn: true
+  directories:
+    - node_modules

@@ -2,12 +2,23 @@
 
 
 
-## Type
+## Types
 
-Enum (known String)
+* String (known)
+
+## Values
+
+* `connie`
+* `amethyst`
+* `garnet`
+* `stevonnie`
+* `opal`
+* `sardonyx`
+* `onion`
+* `cookiecat`
 
 ## Flags
 
-* Edge: 
 
+* edge
 

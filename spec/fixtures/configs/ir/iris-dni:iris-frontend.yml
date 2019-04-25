@@ -1,0 +1,32 @@
+language: node_js
+node_js:
+  - '4'
+
+branches:
+  only:
+    - 'master'
+    - 'develop'
+    - 'staging'
+
+cache:
+  directories:
+    - node_modules
+
+deploy:
+  provider: heroku
+  api_key:
+    secure: W7TVfLwdg5vIQLNk31o2lVwRId8EjFoGtzAWBdUT2XLgK94PsTNJSk7bDlU7SmyPrlBuL9pvAyBkDLGiuc4Q8rII/n6aEqQeaMGE9iO3kiT+mAJ2q6sBBBIZshe1ZysYE/d5165HnzqS3DlPK5vdJkm633MYSP0G4z66mjjooLNu1a4K1uSX2QOtnOi31Tj2J+BFbURnfETfV8H0Kpsm9n0ztAnBtOVpdpTP4ZUeERrajeq/nk1lwue7tPAg5I732jmtVHXznGUNVwZgbD05SGL/XTly1J3T6JsKwP9j9iz4rl0DYVv6jngSKORbB3hqLa7I5oYqcGTIpsYOuG3H2XkGiegQsooPwefTF9Z9Mxqsy0t5OCmgs8T2dHSC1tRzzUjITVPMu6tFeyG+YS/+53qwQpannqO9yLpqh8gIy3JewfJxqhsFcitUz67QWGB78W3HQbX32vn+Jiitae3QWnMou7kRz+twVjntCdxzffCeda9qHRCSENldxubw9fecK86lC1ik0eZjCkdtzQqgr777d30/kbpKRtWGA/nA6GXVcUEas5GnWoONy4Uld5DCLKDBjC96zWedDLe04ysUey8xC1s+EP+ocp6yXOFAKyyhqiQcQX8DYMPCaIoFznXzfHsyV4kVFe4r3/HPQSZBBPA9eXe3cjDS/v5CYLNCLbg=
+  app:
+    master: iris-frontend
+    develop: iris-frontend-dev
+    staging: iris-frontend-staging
+
+addons:
+  apt:
+    sources:
+    - ubuntu-toolchain-r-test
+    packages:
+    - gcc-4.8
+    - g++-4.8
+env:
+  - TRAVIS=travis CXX=g++-4.8

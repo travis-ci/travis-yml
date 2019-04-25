@@ -1,0 +1,46 @@
+language: java
+
+sudo: required
+dist: trusty
+
+services:
+  - postgresql
+
+addons:
+  apt:
+    packages:
+    - mysql-server-5.6
+    - mysql-client-core-5.6
+    - mysql-client-5.6
+
+matrix:
+  include:
+    - jdk: oraclejdk9
+      install: . ./.travis/install-jdk-9.sh
+      script: mvn package -B -Pjdk19,dev9
+    - jdk: oraclejdk8
+      script:  mvn package javadoc:javadoc -B -Pdev && mvn -P travis,!dev -DserviceName=travis-ci jacoco:report coveralls:report
+    - jdk: openjdk7
+      script:  mvn package javadoc:javadoc -B
+      install: . ./.travis/install-jdk-7.sh
+    - script:  mvn package -B -Pjdk19,dev9
+      install: . ./.travis/install-jdk-10.sh
+    - script:  mvn package -B -Pjdk19,dev9
+      install: . ./.travis/install-jdk-11.sh
+    - script:  mvn package -B -Pjdk19,dev9
+      install: . ./.travis/install-jdk-12.sh
+    - script:  mvn package -B -Pjdk19,dev9
+      install: . ./.travis/install-jdk-13.sh
+
+env:
+  - MAVEN_SKIP_RC=true TRAVISBUILD=true
+
+before_install:
+  - echo "127.0.0.1    $HOSTNAME" | sudo tee -a /etc/hosts
+
+  
+before_script:
+  - mysql --verbose -u root -e 'create database sfm;'
+  - mysql --verbose -u root -e "CREATE USER 'sfm'@'localhost';"
+  - mysql --verbose -u root -e "GRANT ALL ON sfm.* TO 'sfm'@'localhost';"
+  - psql -c 'create database sfm;' -U postgres

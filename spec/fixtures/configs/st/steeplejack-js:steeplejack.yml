@@ -1,0 +1,46 @@
+language: node_js
+
+node_js:
+- '8'
+- '7'
+- '6'
+- '5'
+- '4'
+
+matrix:
+  fast_finish: true
+
+sudo: false
+
+env:
+  matrix:
+  - TZ=Etc/UTC
+  - TZ=America/Los_Angeles
+
+before_install:
+- date
+
+script:
+- npm run ci
+
+before_deploy:
+- npm run compile
+- cd build
+
+deploy:
+  provider: npm
+  email: simon@simonemms.com
+  api_key:
+    secure: GEZaXkGETbRGdmz7NPBykU9XPEvPVZvqQVTEuhidZrjB/CBa/7sdIl9TYEJ8Cd+APTs6qFXP6r7QoES0xYbtaIXHlZwRfzPS8r1VubHvKrnvBCtwcEKoXZOO9uus8phtHIOn4ad0l250ZhmCR5CpGnFZNIg0pT4edE7EOprVim8=
+  skip_cleanup: true
+  on:
+    tags: true
+    repo: steeplejack-js/steeplejack
+
+notifications:
+  webhooks:
+    urls:
+    - https://webhooks.gitter.im/e/d048e712b735c6cb4cf2
+    on_success: change
+    on_failure: always
+    on_start: false

@@ -1,0 +1,84 @@
+language: c
+dist: trusty
+
+os:
+  - osx
+
+osx_image:
+  - xcode7.3
+  - xcode8.3
+  - xcode9.4
+  - xcode10.2
+
+compiler:
+  - clang
+
+addons:
+  homebrew:
+    packages:
+    - lua
+    - ruby
+    - python3
+    update: true
+
+env:
+  - MACOSX_DEPLOYMENT_TARGET=10.8
+    XCODEFLAGS="MACOSX_DEPLOYMENT_TARGET=10.8"
+    VERSIONER_PERL_VERSION=5.18
+    VERSIONER_PYTHON_VERSION=2.7
+    vi_cv_path_python=/usr/bin/python
+    vi_cv_path_python3=/usr/local/bin/python3
+    vi_cv_path_plain_lua=/usr/local/bin/lua
+    vi_cv_dll_name_perl=/System/Library/Perl/5.18/darwin-thread-multi-2level/CORE/libperl.dylib
+    vi_cv_dll_name_python=/System/Library/Frameworks/Python.framework/Versions/2.7/Python
+    vi_cv_dll_name_python3=/usr/local/Frameworks/Python.framework/Versions/3.7/Python
+    VIMCMD=src/MacVim/build/Release/MacVim.app/Contents/MacOS/Vim
+    "CONFOPT='--with-features=huge --enable-multibyte --enable-terminal --enable-netbeans --with-tlib=ncurses --enable-cscope --enable-perlinterp=dynamic --enable-pythoninterp=dynamic --enable-python3interp=dynamic --enable-rubyinterp=dynamic --with-ruby-command=/usr/local/opt/ruby/bin/ruby --enable-luainterp=dynamic --with-lua-prefix=/usr/local --enable-gui=macvim'"
+    DYLD_LIBRARY_PATH=/usr/local/opt/ruby/lib:$DYLD_LIBRARY_PATH # Ruby is keg-only in Homebrew, so need to manually link in the path so Vim will know where to look for the binaries.
+
+sudo: false
+
+script:
+  - set -e
+  - if [ "$TRAVIS_OSX_IMAGE" = "xcode8.3" ]; then brew reinstall --build-from-source ruby; fi
+  - echo "Configuring MacVim" && echo -en "travis_fold:start:config\\r"
+  - NPROC=$(getconf _NPROCESSORS_ONLN)
+  - ./configure $CONFOPT --enable-fail-if-missing
+  - cat src/auto/config.mk
+  - cat src/auto/config.h
+  - grep -q -- "-DDYNAMIC_PERL_DLL=\\\\\"$vi_cv_dll_name_perl\\\\\"" src/auto/config.mk
+  - grep -q -- "-DDYNAMIC_PYTHON_DLL=\\\\\"$vi_cv_dll_name_python\\\\\"" src/auto/config.mk
+  - grep -q -- "-DDYNAMIC_PYTHON3_DLL=\\\\\"$vi_cv_dll_name_python3\\\\\"" src/auto/config.mk
+  - echo -en "travis_fold:end:config\\r"
+  - echo "Building MacVim" && echo -en "travis_fold:start:build\\r"
+  - make -j$NPROC
+  - echo -en "travis_fold:end:build\\r"
+  - echo "Testing MacVim" && echo -en "travis_fold:start:test\\r"
+  - rm -f result; $VIMCMD -g -f -c "redir>result" -c "lua print(\"Test\")" -c "redir END" -c q; cat result; echo; grep -q -w Test result
+  - rm -f result; $VIMCMD -g -f -c "redir>result" -c "perl VIM::Msg(\"Test\")" -c "redir END" -c q; cat result; echo; grep -q -w Test result
+  - rm -f result; $VIMCMD -g -f -c "redir>result" -c "py import sys; print(\"Test\")" -c "redir END" -c q; cat result; echo; grep -q -w Test result
+  - rm -f result; $VIMCMD -g -f -c "redir>result" -c "py3 import sys; print(\"Test\")" -c "redir END" -c q; cat result; echo; grep -q -w Test result
+  - rm -f result; $VIMCMD -g -f -c "redir>result" -c "ruby puts(\"Test\")" -c "redir END" -c q; cat result; echo; grep -q -w Test result
+  - rm -f result;
+  - make test
+  - echo -en "travis_fold:end:test\\r"
+  - echo "Testing MacVim (GUI)" && echo -en "travis_fold:start:test_gui\\r"
+  - make -C src/testdir clean
+  - make -C src testgui
+  - echo -en "travis_fold:end:test_gui\\r"
+
+before_deploy:
+  - make -C src macvim-dmg
+deploy:
+  provider: releases
+  api_key:
+    secure: HYHKVbuSG2Trc5zEN+aQO0TO/020qtTokoaaatd9GhQ/ImOI2uhOuVsk47mcViCINyE9+wwVEr23Tk7GqzsJBS66FoZJeOsgYoO/LFlQjCYyya+48Ajez6I2VAIGKn0JD6jpW+ZYIX7MAWLCQKv/vW03MrBMDLZvjB89pHe72MLQFlVcEzxsWnr7smTzLcuKShkV+AVZopE/HRdY1k/zjWf/TzcJgqXwThuJOPYY+CcGUv1CMJjWB8pBuH31pbQ2AVOXV7VG5oxy2HSbCeDRShKT3GooecWj7xjh9SApNqEIzC44RlufgyC73M0DeILUasmbF0g2Q+AsDaj3+9w3LbLbmfpV5kEM9E/PbzWEn+0EgRKV+HCscZnPMlzkiVWKnjzfwKGMOmTwD0aN4Bt6Y9z+UvQKfsQN+6wHmh7xcSpaeR1J6PBeaCd+QyhD7t9ZxP2qmZWCBMFpnkqO4+LoclJNV+IxYstNFjaKIvxEe/S9GM2w+i2cSDDrxSNz+kUGWzshyu6HXxRtrNo+qM6sCO8TiOMMALPAkLCJT2P/TPMRkdy2wjCDwprc1ePDqikIHIGGwQ8Csd5IqFUcJs405xw4HfVkOuhWL/SpLuI6OHOVQqAkqMEMaEhlfh1swFNkT4ffDJGzvklB8v2980B003eWbcHr6lMGtpqQecqgS9A=
+  file: src/MacVim/build/Release/MacVim.dmg
+  skip_cleanup: true
+  on:
+    condition: $TRAVIS_OSX_IMAGE = xcode10.2
+    all_branches: true
+    tags: true
+    repo: macvim-dev/macvim
+
+# vim:set sts=2 sw=2 tw=0 et:

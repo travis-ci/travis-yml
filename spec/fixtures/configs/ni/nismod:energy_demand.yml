@@ -1,0 +1,27 @@
+sudo: false
+language: python
+virtualenv:
+  system_site_packages: true
+env:
+  matrix:
+  - DISTRIB="conda" PYTHON_VERSION="3.5" COVERAGE="true"
+  - DISTRIB="conda" PYTHON_VERSION="3.7" COVERAGE="true"
+install:
+- source tests/travis_install.sh
+before_script:
+- git config --global user.email "sven.eggimann@ouce.ox.ac.uk"
+- git config --global user.name "Sven Eggimann"
+script:
+- python setup.py test
+after_success:
+- if [[ "$COVERAGE" == "true" ]]; then coveralls || echo "failed"; fi
+notifications:
+  email: false
+deploy:
+  provider: pypi
+  user: roaldl
+  password:
+    secure: h4dJGC4oGqBJeqcffKE3WJSG8pr/WwGSFMa1LUGe4iWqgDe18Yvz889xfgK/Ah7jBFOg3plMVaztA/bc24vr8nbAZ5m8WQI2OpRR62GgnjqmEmh1vpyIU8rD6araMrYNUdQW1JE8oxZSD6NnrMsxHaLOJMB9bBxfTj0U1pTsQIgDehl1LWoULXBXZFENskN8qvHGj9fQEXu8uainUnBMXXW/E2dPOG5MY2a799aY6aW80M3BQG1fjUw2U+x4s51d5SzD/afG++U7wp2BrQzH3jZ1Ojgioqp2l5KJG0imtTX++zfH20jcQ4c2K785yHIMMkGitHEP6RO499vkTMvM5aSdNmW5frrqH7XbAk4GRcnfIkkXZzb7Hv8mPNh0WdbPJUBmK+iamMGI8Ghj85bpvX39kYF2d+bOyVDm2TlnUr4JTWsBKwJW1luQOZQmGYFukqkr/N1xjWHEgzPOiQHEtyBS4ibaNukYbGZK5PY8wAd8uGlLNGWsH4hJ7rlTXCxaF7Gzhbjb/hJhLDWIHODQaNbt3zTJ7CBXIa47y7NjiYr8ulwlLznzXBNUTMrWk7mFv9mH3JBt8Y2xZCS7voPnzHiSkiIIii8VcOcPhxmtupgZfhYdXr6nQyCUaxrBVKpeUpovOuntuPEH94qq0RQu0QxuQEtlSNiHuwkNx4H/zSo=
+  on:
+    tags: true
+    branch: master

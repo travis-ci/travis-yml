@@ -13,7 +13,7 @@ describe Travis::Yml::Schema::Def::Notification::Slack, 'structure' do
             type: :object,
             properties: {
               rooms: {
-                '$ref': '#/definitions/secures'
+                '$ref': '#/definitions/type/secures'
               },
               template: {
                 '$ref': '#/definitions/notification/templates'
@@ -44,7 +44,7 @@ describe Travis::Yml::Schema::Def::Notification::Slack, 'structure' do
             ]
           },
           {
-            '$ref': '#/definitions/secures'
+            '$ref': '#/definitions/type/secures'
           },
           {
             type: :boolean

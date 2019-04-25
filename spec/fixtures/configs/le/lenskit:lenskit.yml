@@ -1,0 +1,76 @@
+sudo: false
+dist: trusty
+language: java
+jdk:
+- openjdk8
+- oraclejdk9
+- oraclejdk10
+- oraclejdk11
+matrix:
+  allow_failures:
+    - jdk: oraclejdk11
+cache:
+  directories:
+  - "$HOME/.gradle/caches/modules-2"
+  - "$HOME/.gradle/caches/jars-1"
+  - "$HOME/.gradle/wrapper"
+before_install:
+- git fetch --unshallow origin
+- ./etc/decrypt-ssh-key.sh
+- cp etc/gradle-ci.properties .
+- git config --global user.email cibot@lenskit.org
+- git config --global user.name "LensKit CI"
+- "echo \"JAVA_HOME: $JAVA_HOME\""
+install:
+- "./gradlew ciPrep --stacktrace"
+script: "./gradlew ciTest --parallel --stacktrace --scan"
+after_failure:
+- jps -lvm
+after_success:
+- bash <(curl -s https://codecov.io/bash)
+before_cache:
+- rm -f $HOME/.gradle/caches/*/*.lock
+stages:
+- compile
+- test
+- deploy
+jobs:
+  include:
+    - stage: compile
+      script: ./gradlew test -Ptests.slow.skip=true
+    - stage: deploy
+      script: skip
+      deploy:
+        provider: script
+        skip_cleanup: true
+        script: ./gradlew test ciPublish --stacktrace -Ptests.slow.skip=true
+      if: repo = lenskit/lenskit
+notifications:
+  webhooks:
+    urls:
+      - https://webhooks.gitter.im/e/12b880d9f4086ef2a62c
+    on_success: always
+    on_failure: always
+env:
+  global:
+  - TERM=dumb
+  - TZ=UTC
+  - "_JAVA_OPTIONS=-Xmx1g -Xms512m"
+  # SONAR_TOKEN
+  - secure: "JSzx8Y50B4uPM5jYyED1d4LdlhxqG0pmGLnNfdHlxfwx3HWn7Trzlip2eNeVXor1OMbQxyDfzOLXjepfXY/lLB3FrmOdkEROy+WnZUBjMM55g+sOKskOzI3FbnKl09uf1hvprzij8UMImfZHgoQIbDgf2GpAmp1vskCVe7BDqsE="
+  # SONATYPE_USER
+  - secure: "KZlIPTwPJwh3mbsk4M98YnY+Jf7B0on5MVK4Q+0nKR6HJS9cn5zAmO5NU7ouLfl6/HCzD7YftqQEybuV3w1S5WM2CJvSe1yS5RDilQ0cFSx8QZe6xDprcFPawMfQ+DN3fEtqXieu8lVcqGtKL+JqF7piTmrN26ojCCdC6zpiy24="
+  # SONATYPE_PASSWORD
+  - secure: "JSZlPX3fbNrbUfBRcH6OdfQfAk65G3l1diJ4vxu/VvKGsH+eAOt6gfaKVNe8JRuPyyzmArgSK4QlM2lwvxKwgSEblw2hF1VDotJwHeD//NxTQBjeeOu3dV8BtsJE7kxT66ywyLai5jcGxLgFgWEEiA1ZwZjmBaZzn1rCwJVGKHk="
+  # Coverity token
+  - secure: "Bj66Sq92T/khNFGwMU4JYExlycwrkogdsf35GFeB4YiEC7bhrDsshpFWMWcQstUMo5+tJmTBCuXY6YHOHMUcjxjr+RFSuetwluzCumklJGHQms3s83peqle4E8Lu6b5Y1VKekf8Iri6P2+efI2fii5Pr0BD1RozPdBCQfZGqQYc="
+
+addons:
+  coverity_scan:
+    project:
+      name: "lenskit/lenskit"
+      description: "<Your project description here>"
+    notification_email: md@ekstrandom.net
+    build_command_prepend: "./gradlew clean"
+    build_command:   "./gradlew classes"
+    branch_pattern: coverity_scan

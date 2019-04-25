@@ -1,0 +1,51 @@
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements. See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License. You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# cpp tools are outdated, so use docker
+language: generic
+
+# required for docker
+sudo: required
+
+services:
+  - docker
+
+env:
+  global:
+    - DOCKER_ARGS="--rm --volume=${TRAVIS_BUILD_DIR}:/geode-native"
+    - DOCKER_IMAGE="apachegeode/geode-native-build:clang"
+    - SOURCE_DIR="/geode-native"
+
+  matrix:
+    - DOCKER_COMMAND="echo rat && mkdir build && cd build && cmake ${SOURCE_DIR} -DUSE_RAT=ON && cmake --build . --target rat-check"
+    - DOCKER_COMMAND="echo test && mkdir build && cd build && cmake ${SOURCE_DIR} -DCMAKE_CXX_FLAGS=-stdlib=libc++ -DCMAKE_CXX_CLANG_TIDY=clang-tidy && cmake --build . -- -j2 && ./cppcache/test/apache-geode_unittests && git -C ${SOURCE_DIR} diff --exit-code"
+
+install:
+  - docker pull "${DOCKER_IMAGE}"
+
+script:
+  - docker run ${DOCKER_ARGS} "${DOCKER_IMAGE}" bash -c "${DOCKER_COMMAND}"
+
+notifications:
+  email:
+    recipients:
+      - dev@geode.apache.org
+    on_success: change
+    on_failure: change
+
+branches:
+  except:
+    - /^feature.*$/
+    - asf-site

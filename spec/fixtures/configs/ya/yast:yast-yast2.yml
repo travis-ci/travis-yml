@@ -1,0 +1,15 @@
+sudo: required
+language: ruby
+services:
+  - docker
+
+before_install:
+  # uses ./Dockerfile
+  - docker build -t yast-yast2-image .
+  # list the installed packages (just for easier debugging)
+  - docker run --rm -it yast-yast2-image rpm -qa | sort
+
+script:
+  # the "yast-travis-ruby" script is included in the base yastdevel/ruby image
+  # see https://github.com/yast/docker-yast-ruby/blob/master/yast-travis-ruby
+  - docker run -it -e TRAVIS=1 -e TRAVIS_JOB_ID="$TRAVIS_JOB_ID" yast-yast2-image yast-travis-ruby

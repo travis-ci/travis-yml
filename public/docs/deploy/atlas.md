@@ -2,16 +2,14 @@
 
 
 
-## Type
+## Types
 
-Any of:
+* Hash
+* String (known)
 
-* Map (Hash)
-* Enum (known String)
+## Values
 
-## Flags
-
-None.
+* `atlas`
 
 
 ## Examples
@@ -25,13 +23,13 @@ deploy:
   edge: true
   token: 
   app: string
-  exclude: "[ref:strs]"
-  include: "[ref:strs]"
+  exclude: string
+  include: string
   address: string
-  vcs: true
-  metadata: "[ref:strs]"
+  metadata: string
   debug: true
-  version: string
+  vcs: true
+  version: true
 ```
 
 ```yaml

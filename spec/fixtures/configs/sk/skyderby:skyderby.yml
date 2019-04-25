@@ -1,0 +1,49 @@
+language: ruby
+
+sudo: required
+
+cache:
+  bundler: true
+  directories:
+    - node_modules
+
+rvm:
+  - 2.6.2
+
+addons:
+  postgresql: '9.6'
+  chrome: stable
+
+env:
+  REDIS_HOST: localhost
+  REDIS_PORT: 6379
+  REDIS_DB: 12
+  RAILS_ENV: test
+
+services:
+  - postgresql
+  - redis-server
+  - docker
+
+before_install:
+  # Chrome driver
+  - google-chrome-stable --headless --no-sandbox --remote-debugging-port=9222 http://localhost &
+  - wget http://chromedriver.storage.googleapis.com/2.36/chromedriver_linux64.zip
+  - unzip chromedriver_linux64.zip
+  - sudo cp chromedriver /usr/local/bin/.
+  - sudo chmod +x /usr/local/bin/chromedriver
+  # track-scanner
+  - docker pull skyderby/track-scanner
+  - docker run -d -p 127.0.0.1:8000:80 skyderby/track-scanner
+  - docker ps -a
+
+before_script:
+  - cp config/database.travis.yml config/database.yml
+  - psql -c 'create database travis_ci_test;' -U postgres
+  - bundle exec rails db:test:prepare
+  - bundle exec rails assets:precompile
+
+script: bundle exec rspec spec/
+
+after_success:
+  - bundle exec codeclimate-test-reporter

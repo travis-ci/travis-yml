@@ -1,0 +1,47 @@
+language: scala
+if: tag IS blank
+addons:
+  apt:
+    packages:
+    - rpm
+cache:
+  directories:
+  - "$HOME/.ivy2/cache"
+  - "$HOME/.sbt/boot/"
+  - geoip-resources
+script:
+- git config --local user.name "travis"
+- git config --local user.email "travis+fake@actionfps.com"
+- mkdir -p journals
+- touch journals/journal.tsv
+- |
+  if [ "$TRAVIS_BRANCH" = "master" ]; then
+    git checkout master && \
+    git remote set-url origin https://${GH_TOKEN}@github.com/ActionFPS/ActionFPS.git && \
+    git fetch origin -u && \
+    sbt clean test:compile it:compile test 'release with-defaults';
+  fi
+- if [ ! "$TRAVIS_BRANCH" = "master" ]; then sbt clean test:compile it:compile test; fi
+jdk:
+- oraclejdk11
+env:
+  global:
+  - secure: bMO/S9kKKWHZYxFOGmOtGa740wzX0H7eywq9I0FJPlR+HvBHW0idBMwfM7xwzUFL/rgUWyCxtgrAZawDLWq7dKBOm36fpMlMa6onML2rUBZaIv+aiyHuPaMOKgsYKTyKpoiD439bgXi1zff5WyRNc+qzf4re3ujKOwPCxHG2Y8fPGFapEQr9OLL/q8kkwVeU46bs8I89rsh2K0VrpA+9d4+2mQq5HiYZ4t79szEz0+6G4NvtYzY76Sz7N6tpy4gZnjcsM9qRtOGV0MiXLNlJH0LXwQaukuEQPEYE2gOR3wmF/Ej6CwDtJP99WifXnZrXNmgG4BmryNivmurni1b0kxR8OylV0k0/4WnSnRD9ACHlTOxDfzVHEmcC0cIs5OxzSCeIiLd2QsxBidnTd1/dwMYDqSJI6WVTJ3h0EC6N17JTa/rmnlK58JflLB0u19eyRFeC26fCgqjrvHjtOfnC5ayrTdH4fu2N8XMjcHSrt3R1+Dp04IgkBM2k5KULTvOkXou/Hwda00FG+II6Kmr2LJzCZUE3jIWt6EEu+fMOA64XA8jwydXuD+wV3z914aiTwPp8Kxgj1RUGX5HeupKISp4y3NRtelrbtbASkcgVNlDlZHE+Fcap0En8U6YWlCXGLzRrWRTQBAgs3V8j3cf+ufNSUzSLXXncVpu57AOENEA=
+  - secure: VGFuNg4c8kAOdH2yFd9kDAuKro3ANwXivnNd95qP+orDOL2kYdzV7kcSECMqFOknORG9qAWuYCggIgbx3KgcJdeQOX8mDDkY1gEvIHtakZMvmzm3PeriZ61eT2qaUK8+fDvjEXVCCy/N7mT//GfCV8AjzeWO/WAmS5wZyb/8YsL6EAzKc76GstmUUf0BSCAP4YZepKOOaklso8OXnqY9V4ifcrNMfQBafD6sjt3pAebWOnCko5X0ppnx8c++ckjt8K59/mZ0NZFbBXInj+u+mQcKM9LJSiIEzk9tFWNU6S4vbwtGoIhKyK2yI5iDrUVpTTKXuL3AGgn9SPml4bI2fNPTxaHPFim+40dwu+axLT+4BKqjJOWhUH3v/3ASS1RZBZ4cYg2fuuHE8lFCRftcIaoUZzi2rbXM4oIKtN1jVja36ro4TZDPPULzZ7N1uqnIGBFog5yQi7tYzdmFTupq+F7/ZWeTd7irr6kAKoYSRiSk8nukMc4RpSr7teLRQE14l5rigMA03sPqSfg98saUjCGwdZYdERy794u0F8NOtXeZmxjBfrfUziBSTsh9kaRaZ7fuGIyjEcoaIamglkre0uUeAvuzIzvcOvEk+UxOM71rs9CRMcoxVl/Fs2p1CyCSg5GMlEA0TZwlQBVffSGZ5/WyZwb10+P5nbRl0eVHqCk=
+  - secure: Hns9fPr9jLCKiRQZTyyJpVkSAuqHSPPQDV6zq06KoHK18xr3+F2swU5IYUzdguFICZB/E4sM0EHKaKoyzXHMZ7ZMfcm23nkGDcdjRINXtb1jyYlzSNNR3J+3j9AxaO01w5Cqygs+l2Mkh/SXSlpY3+CBgsiNRuvdZTeZ9x+Q1NEehM+NGBFJnPYAIvIqqV16SdZfzQ3gwX+XT/7ijGGDBrwNs/jkuKRan6t1D1ityNSdxywA/nPDqA72ruQW0Qjeyy0urJGlHoeQVsRfCPBaS48l4kDnF/Jmf6G3GG97vxq9OsOUzvOagrEvDLGBww4NK74WpkEtp+M+rbEbJlrRrA6ElefSqr1tZU6NngDp+lDnJUtbvXjDnnnuuH2A+YYFvauO2pYoRTb6L8cUsutgg0B1S5u3tXgx/EjTq5snTGmw5lqylNYuBfmQIyzjYi+dELJubd3hZvOmeK0iJ6DwemCC8wXdGWXJMeuNW94nO+CBhIO0VHBg68FXm98h+4hELt/eW9tbHFvytGS3PnV7pcYrUjISTvo9h7kq6CHPGhwlNwe8uGW+j4PXoM8Bg28p41fq0oVUR9T4tbOPTBWG1sPKQLkKMK734Q0odsjEflHBgyA+fx9xgj2sXBdn2WJ1YnmFBZ/YFvTrMa7mhvUU5k3u817vltWWVE/f8nlrj0U=
+deploy:
+  provider: packagecloud
+  username: actionfps
+  token:
+    secure: XbEL32fPmBiTnxg4V3LcBFtUtlRnfYEi2KK2XEchSRG/nNwpASbYoYsPioSVvdY1bh4Y1YAi3rdGWLpo0hEiq6QZ3YaorxhaRU4gCuVa5dMMQR1PPM4zDDIDFpYhQ91hSLLs9s2UAGdUSDxF23O/Ad40iMUI8Oia3f7vuRwJYscVEy+Cw6pqp46cVi6y9uNI2m1GeDs4M22jlQBzsGfd0TkzA0mhkz7npiAucwms8zrgXbsQdU5OrlPoBYdwmcg4ZZENiizVXcXov+713h9GKfAxK0Ad70GbMDPM4PupeBWhqUtghs0ARX2enjd5ffrUar6aBL+VF/jwiM7EPxPVEaNAYNhUmLgJUjveDIHC55CjJmo9fP0haQrwBUu9IsZiNebIfsCyLHN6TuCjVQhmzZ/6Lb62cl6P/zWOYcBT9RKuHSR2vmJu2SjoPAZHwg+6d52b/ucIn38L23FCc+yROX2TBj19MZ1uM8OnOdq48ZpmLQIAs+iNXZK77IATPZ7Qma7arfgq9oBTZI2av7SjlTcSiyfGQL5aJ5x27X5juVLZkX50hTEHxcHzJ7LsXa4w7uYHRFFplXBsbZ5mSckNVckWXoIaQMPcD7Y+PYpcqwabwZdnDrgnjfx1MfH6oldY4aFR6JJdSTYjwhoPFGOKpFuUS3ceKtUTKrAmx5+TYO8=
+  on:
+    branch: master
+  repository: ActionFPS
+  dist: el/7
+  local_dir: "/home/travis/build/ActionFPS/ActionFPS/nouveau-web/target/rpm/RPMS/noarch/"
+  skip_cleanup: true
+after_deploy:
+  - echo "${CONTROL_KEY}" | base64 --decode > /tmp/control_rsa
+  - chmod 0600 /tmp/control_rsa
+  - sleep 15
+  - ssh -oStrictHostKeyChecking=no actionfps-web-control-upgrade@actionfps.com -i /tmp/control_rsa

@@ -1,0 +1,75 @@
+sudo: required
+
+services:
+  - docker
+
+# Try to keep things quick here since this section runs on every job whether it invokes sbt or not.
+before_install:
+  - export LOCAL_JAR='target/scala-2.11/telemetry-batch-view-1.1.jar'
+  - export STAGED_JAR_URL="s3://$ARTIFACTS_BUCKET/tmp/$TRAVIS_REPO_SLUG/build-$TRAVIS_BUILD_NUMBER.jar"
+  - shopt -s expand_aliases
+  - env | grep TRAVIS > .travis-env
+  - CI_ENV=`bash <(curl -s https://codecov.io/env)`
+  - alias docker-run='docker run -v $PWD:/telemetry-batch-view $CI_ENV --env-file .travis-env telemetry-batch-view'
+
+env:
+  # There should be one job defined for each Scalatest tag defined in
+  # src/test/scala/com/mozilla/telemetry/tags/Tags.scala
+  - SCALATEST_ARGS='-n ScalarAnalyzerBuild'
+  - SCALATEST_ARGS='-n ExperimentsBuild'
+  - SCALATEST_ARGS='-n ClientsDailyBuild'
+  # This final build must exclude (-l) all of the tags above and no others
+  # in order to assure we get full test coverage across the parallel builds.
+  - SCALATEST_ARGS='-l "ScalarAnalyzerBuild ExperimentsBuild ClientsDailyBuild"'
+
+# Code to run for the main test jobs.
+script:
+  - export TEST_SKIP_REGEX="\[skip-tests\]"
+  - if [[ (! $TRAVIS_COMMIT_MESSAGE =~ $TEST_SKIP_REGEX) || -n $TRAVIS_TAG || $TRAVIS_BRANCH == "master" ]]; then
+      docker build -t telemetry-batch-view .;
+      docker-run ./run-sbt.sh coverage "testOnly * -- $SCALATEST_ARGS" coverageReport;
+    else
+      echo "Skipping tests";
+    fi
+
+before_deploy:
+  - git config --local user.name "Auto Deployer"
+  - git config --local user.email "telemetry-alerts@mozilla.com"
+  - git tag "$(date +'%Y%m%d%H%M%S')-$(git log --format=%h -1)"
+
+jobs:
+  include:
+    # Add an additional job to the 'test' stage for assembling the uberjar and staging in S3.
+    - stage: test
+      if: fork = false
+      env:
+        - PURPOSE='stage the uberjar to S3'
+      script:
+        - pip install --user awscli
+        - docker build -t telemetry-batch-view .
+        - docker-run ./run-sbt.sh assembly
+        - aws s3 cp $LOCAL_JAR $STAGED_JAR_URL
+    # The deploy stage jobs only run once all jobs from the previous phase succeed.
+    - stage: deploy
+      env:
+        - PURPOSE='run a GitHub release'
+      script: skip
+      deploy:
+      - provider: releases
+        skip_cleanup: true
+        api_key:
+          secure: Kac5/sXg9TM8cBHrwNch78UiVTl4aA2KQ9jnv0vipUzi341XfmO3EbdEnSCWN+ew39Pc+tAR+nOB+e/AHbOyFjJ5gggA3Z/3UWPYse/8iIPcRs8GC55KfprDrVkD8HO3pPzOXOyDtn64Y6z3cQXGj110QKfPjG6v+LHzNDSl1oxZB7f8bnoNEom5WxZCMAvZO3odbrnKPP333gPpjtmXfe24WlPqBMg3FN+RJMy1lz+bjlDB0hd1qbVdUO3DYivodcn/q1Sdp98EipwCWnOq3JqrmfDhf9rRL1UnSC+WsbcxJL73ee36EkNORSTYVFzhfoSRmNlhqNgGI8DdDhO654fKecXPiWDHyZw+cF/DQHsvmSk5zr5VobeqyByM9cqFj+5gs3RN3CI2UaUbceRwuerwpuFCAVt2WHSw2heYeOlmoLNX2+HFYPCXFJOkzQ5pZl5fEsc280riU/9wlvNfLhKTIJNyP3n3OlU/YlU0FYfR2jF637KAhLX9z8LxY1aEcdcAI7sWCz5jyMGRwvCS7prRneg1ouPn+bUSab7+GMi8F3Rdf1qWZx8IivpXiOw3MubsLLBeXep+PbE70n6AFB68ThgKEAhJsJpqtZKbqpz3w+w6iOe9Ig85P+WdXTK7zC4itWzZfEihk8TTGzerlSHgpMR9lBgvkzJkFY3MQqI=
+        on:
+          repo: mozilla/telemetry-batch-view
+          condition: $TRAVIS_COMMIT_MESSAGE == *"[auto-deploy]"*
+          branch: master
+    - stage: deploy
+      if: fork = false
+      env:
+        - PURPOSE='deploy the staged uberjar to S3'
+      script:
+        - pip install --user awscli
+        - mkdir -p $(dirname $LOCAL_JAR)
+        - aws s3 cp $STAGED_JAR_URL $LOCAL_JAR
+        - JAR=$LOCAL_JAR bash deploy.sh
+        - aws s3 rm $STAGED_JAR_URL

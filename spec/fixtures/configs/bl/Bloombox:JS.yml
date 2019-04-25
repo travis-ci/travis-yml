@@ -1,0 +1,31 @@
+env:
+  global:
+  - CC_TEST_REPORTER_ID=18c66a6738c0718369a787a4cb2e97f0bef655c5ccb747332486636fac394664
+  - CODACY_PROJECT_TOKEN=61032013369f42c2883a039c33987e2c
+  - CODECOV_TOKEN=aab0a4ce-97e1-4949-99fb-ce016cdb20a6
+language: node_js
+node_js:
+- '10'
+cache:
+  yarn: true
+  directories:
+  - node_modules/
+before_script:
+- npm install -g codecov
+- curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+- curl -L https://github.com/codacy/codacy-coverage-reporter/releases/download/2.0.2/codacy-coverage-reporter-2.0.2-assembly.jar > ./codacy-coverage-reporter.jar
+- chmod +x ./cc-test-reporter
+- export DISPLAY=:99.0
+- sh -e /etc/init.d/xvfb start
+- sleep 3
+- yarn
+- ./cc-test-reporter before-build
+script:
+- make
+- make serve &
+- karma start karma.conf.js --single-run
+after_script:
+- # cp -fv target/coverage/cobertura.xml ./cobertura.xml
+- ./cc-test-reporter after-build -d --exit-code $TRAVIS_TEST_RESULT --coverage-input-type cobertura --prefix /home/travis/build/Bloombox/JS
+- java -cp codacy-coverage-reporter.jar com.codacy.CodacyCoverageReporter --language Javascript -r target/coverage/cobertura.xml --prefix /home/travis/build/Bloombox/JS
+- codecov

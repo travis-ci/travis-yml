@@ -1,0 +1,66 @@
+matrix:
+  include:
+    - os: osx
+      osx_image: xcode9.3
+      env:
+        - ELECTRON_CACHE=$HOME/.cache/electron
+        - ELECTRON_BUILDER_CACHE=$HOME/.cache/electron-builder
+        - USE_HARD_LINKS=false
+      if: tag IS present
+      cache:
+        directories:
+          - node_modules
+          - $HOME/.cache/electron
+          - $HOME/.cache/electron-builder
+          - $HOME/.npm/_prebuilds
+
+    - os: linux
+      dist: trusty
+      sudo: required
+      services: docker
+      env:
+        - DEPLOY_RELEASE=true
+      cache:
+        directories:
+          - node_modules
+          - $HOME/.npm/_prebuilds
+
+language: node_js
+node_js: "8"
+
+install: npm install
+
+before_script:
+  - chmod +x ./tools/test-{linux,osx}.sh
+
+script:
+  - ./tools/test-linux.sh
+  - ./tools/test-osx.sh
+
+before_cache:
+  - rm -rf $HOME/.cache/electron-builder/wine
+
+deploy:
+  - provider: s3
+    access_key_id: $AWS_ACCESS_KEY
+    secret_access_key: $AWS_SECRET_KEY
+    bucket: $AWS_S3_BUCKET
+    local_dir: dist
+    skip_cleanup: true
+    acl: public_read
+    on:
+      branch: develop
+      condition: $DEPLOY_RELEASE = true
+  - provider: s3
+    access_key_id: $AWS_ACCESS_KEY
+    secret_access_key: $AWS_SECRET_KEY
+    bucket: $AWS_S3_PROD_BUCKET
+    local_dir: dist
+    skip_cleanup: true
+    acl: public_read
+    on:
+      branch: master
+      condition: $DEPLOY_RELEASE = true
+notifications:
+  slack:
+    secure: $SLACK_NOTIFICATIONS

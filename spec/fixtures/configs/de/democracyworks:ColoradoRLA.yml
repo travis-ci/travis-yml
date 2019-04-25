@@ -1,0 +1,25 @@
+language: java
+
+notifications:
+  email: false
+  slack:
+    secure: nvweEeuWZaUOImDw38q1WB6d85N5LemQK445CsTlu70YcD2GchZ8L65JDe7RkDNdtuMT9EsKkbUEp/kV7h41ogX0C/4HQoLlP3ZAUTjA9fENln251wKBU7EWOwDlFrAq2FFj6XRoPohWPyMcyb3RrGzCVofKc3mda22IJ8kaohbc8vJrjZF0N+ql/fRdL84+ib0/JUHZlPz0xu9qy7ApP0WSpnJ7Aw8K4BepUd7LDM7JX04pDH/Urb40rYdOZEXjkeyDk1TU2DS5O7UeWYfv8as+Z06KpbHvA837qsUYLjVFdKMuzPxcrKW2crEvW7UgCy1cbMZDbESnXNIGCjOQJ+HWvFvwtrcdUtEsJmMNOgzKAe3n1shIVcGECu23NvkwO7C6oOu5RlOlvc18hqVuPjnB3z1DYABoZRg9H4oCWU3j4Bmm0T3HkrZbogDeaFMBycBbSOFtghTLhidgxPov2g/fk/k3giPhHRQmxMGNP0vCmF0l7q0KcUMWhLyv/eTYT7IuUur7OVxBckWcP/QrjA4ie3tzNMv6lRUlga2BGMRZ0SyalKYLYeutC5jg23VjubOQjEKmWZi0P5Qyb13XftZkV94As5lM/wwVo1MmNXMmUec012vCv/QHmyohkpNTr/TsUYYb37WR7yupHnPuFOzq+JOW5IgkZaQS2WH9hGI=
+
+install:
+  - nvm install 'lts/*';
+    nvm use 'lts/*';
+    cd "${TRAVIS_BUILD_DIR}/client";
+    npm install;
+
+before_script:
+  - export CLIENT_DIR="${TRAVIS_BUILD_DIR}/client";
+  - export SERVER_DIR="${TRAVIS_BUILD_DIR}/server/eclipse-project";
+
+script:
+  # WARNING: If changes only occur in files outside of the checked
+  # directory, the checks below will not be executed.
+  - ${TRAVIS_BUILD_DIR}/ci/check-client
+
+  # WARNING: If changes only occur in files outside of the checked
+  # directory, the checks below will not be executed.
+  - ${TRAVIS_BUILD_DIR}/ci/check-server

@@ -1,0 +1,69 @@
+# Use a lightweight base image; we provide our own build tools.
+language: c
+
+# Docker builds make GHC much slower for some reason:
+# https://github.com/travis-ci/travis-ci/issues/5623
+sudo: true
+
+cache:
+  timeout: 600 # 10 minutes
+  directories:
+  - $HOME/.ghc
+  - $HOME/.stack
+  - $HOME/.cabal
+
+matrix:
+  include:
+  - env: BUILD=cabal GHCVER=8.0.2 CABALVER=1.24
+    addons: {apt: {packages: [cabal-install-1.24, ghc-8.0.2], sources: [hvr-ghc]}}
+  - env: BUILD=cabal GHCVER=8.2.2 CABALVER=2.0
+    addons: {apt: {packages: [cabal-install-2.0, ghc-8.2.2], sources: [hvr-ghc]}}
+  - env: BUILD=stack STACK='stack --resolver=lts-8.24'
+    addons: {apt: {packages: [libgmp-dev]}}
+  - env: BUILD=stack STACK='stack --resolver=lts-9.6'
+    addons: {apt: {packages: [libgmp-dev]}}
+  - env: BUILD=stack STACK=stack --resolver=11.22'
+    addons: {apt: {packages: [libgmp-dev]}}
+  - env: BUILD=stack STACK='stack'  # Use the resolver in stack.yaml
+    addons: {apt: {packages: [libgmp-dev]}}
+  - env: BUILD=stack STACK='stack --stack-yaml=stack-ghc-8.6.yaml'
+    addons: {apt: {packages: [libgmp-dev]}}
+
+before_install:
+  - mkdir -p $HOME/.local/bin
+  - case "$BUILD" in
+      stack)
+        export PATH=/opt/ghc/$GHCVER/bin:$HOME/.local/bin:$PATH;;
+      cabal)
+        export PATH=/opt/ghc/$GHCVER/bin:/opt/cabal/$CABALVER/bin:$HOME/.local/bin:$HOME/.cabal/bin:$PATH;;
+    esac
+  - curl -L https://github.com/commercialhaskell/stack/releases/download/v1.7.1/stack-1.7.1-linux-x86_64.tar.gz | tar xz --wildcards --strip-components=1 -C $HOME/.local/bin '*/stack'
+  - curl -L https://github.com/protocolbuffers/protobuf/releases/download/v3.7.1/protoc-3.7.1-linux-x86_64.zip > protoc-release.zip
+  - unzip -p protoc-release.zip bin/protoc > $HOME/.local/bin/protoc
+  - chmod a+x $HOME/.local/bin/protoc
+  - rm protoc-release.zip
+
+install:
+  - case "$BUILD" in
+      stack)
+        $STACK setup --no-terminal;
+        $STACK build --no-terminal happy;
+        $STACK build --only-dependencies --no-terminal;;
+      cabal)
+        cabal update;;
+    esac
+
+script:
+  # Separate stack's build and test commands, since build by itself hits some
+  # edge cases around custom Setup.hs script dependencies.
+  # Also build the tutorial, with proto-lens-* as extra-deps.  Note that
+  # since stack is not hermetic, the extra-deps for the tutorial reuse some
+  # build outputs from the regular build.
+  - case "$BUILD" in
+      stack)
+        STACK_ARGS=(--haddock --no-haddock-deps);
+        $STACK build --bench --no-run-benchmarks "${STACK_ARGS[@]}" && $STACK test "${STACK_ARGS[@]}" &&
+        (cd proto-lens-tutorial && $STACK build "${STACK_ARGS[@]}");;
+      cabal)
+        ./travis-cabal.sh;;
+    esac

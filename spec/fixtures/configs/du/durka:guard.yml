@@ -1,0 +1,32 @@
+language: rust
+sudo: false
+cache: cargo
+matrix:
+  include:
+    - rust: stable
+    - rust: beta
+    - rust: nightly
+      env:
+       - FEATURES=nightly
+       - BENCH=
+branches:
+  only:
+    - master
+script:
+  - |
+      cargo build --verbose --features "$FEATURES" &&
+      cargo test --verbose --features "$FEATURES" &&
+      if [[ "$TRAVIS_RUST_VERSION" == nightly* ]]; then
+        if cargo install --force clippy 2>/dev/null; then
+            cargo clippy --verbose --features "$FEATURES" &&
+            echo "clippy: clean"
+        else
+            echo "clippy: not installed"
+        fi
+      else
+        echo "clippy: skipped"
+      fi &&
+      if [ "$BENCH" == 1 ]; then
+        cargo bench --verbose --features "$FEATURES"
+      fi
+

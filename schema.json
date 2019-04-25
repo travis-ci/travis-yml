@@ -2,62 +2,64 @@
   "$schema": "http://json-schema.org/draft-04/schema#",
   "title": "JSON schema for Travis CI configuration files",
   "definitions": {
-    "secure": {
-      "$id": "secure",
-      "anyOf": [
-        {
-          "type": "object",
-          "properties": {
-            "secure": {
-              "type": "string"
-            }
-          },
-          "additionalProperties": false,
-          "maxProperties": 1,
-          "normal": true
-        },
-        {
-          "type": "string",
-          "normal": true
-        }
-      ]
-    },
-    "secures": {
-      "$id": "secures",
-      "anyOf": [
-        {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/secure"
-          },
-          "normal": true
-        },
-        {
-          "$ref": "#/definitions/secure"
-        }
-      ]
-    },
-    "strs": {
-      "$id": "strs",
-      "anyOf": [
-        {
-          "type": "array",
-          "minItems": 1,
-          "items": {
-            "anyOf": [
-              {
+    "type": {
+      "secure": {
+        "$id": "secure",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "secure": {
                 "type": "string"
               }
-            ]
+            },
+            "additionalProperties": false,
+            "maxProperties": 1,
+            "normal": true
           },
-          "normal": true
-        },
-        {
-          "type": "string"
-        }
-      ]
-    },
-    "type": {
+          {
+            "type": "string",
+            "normal": true
+          }
+        ],
+        "title": "Secure"
+      },
+      "secures": {
+        "$id": "secures",
+        "anyOf": [
+          {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/type/secure"
+            },
+            "normal": true
+          },
+          {
+            "$ref": "#/definitions/type/secure"
+          }
+        ],
+        "title": "Secures"
+      },
+      "strs": {
+        "$id": "strs",
+        "anyOf": [
+          {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                }
+              ]
+            },
+            "normal": true
+          },
+          {
+            "type": "string"
+          }
+        ]
+      },
       "addons": {
         "$id": "addons",
         "title": "Addons",
@@ -67,7 +69,7 @@
             "$ref": "#/definitions/addon/apt"
           },
           "apt_packages": {
-            "$ref": "#/definitions/strs"
+            "$ref": "#/definitions/type/strs"
           },
           "artifacts": {
             "$ref": "#/definitions/addon/artifacts"
@@ -95,7 +97,7 @@
             "type": "string"
           },
           "hosts": {
-            "$ref": "#/definitions/strs"
+            "$ref": "#/definitions/type/strs"
           },
           "jwt": {
             "$ref": "#/definitions/addon/jwts"
@@ -107,7 +109,7 @@
             "$ref": "#/definitions/addon/snaps"
           },
           "ssh_known_hosts": {
-            "$ref": "#/definitions/strs"
+            "$ref": "#/definitions/type/strs"
           },
           "sonarcloud": {
             "type": "object",
@@ -116,13 +118,13 @@
                 "type": "string"
               },
               "token": {
-                "$ref": "#/definitions/secure"
+                "$ref": "#/definitions/type/secure"
               },
               "github_token": {
-                "$ref": "#/definitions/secure"
+                "$ref": "#/definitions/type/secure"
               },
               "branches": {
-                "$ref": "#/definitions/strs"
+                "$ref": "#/definitions/type/strs"
               }
             },
             "additionalProperties": false,
@@ -229,10 +231,10 @@
             "type": "object",
             "properties": {
               "only": {
-                "$ref": "#/definitions/strs"
+                "$ref": "#/definitions/type/strs"
               },
               "except": {
-                "$ref": "#/definitions/strs"
+                "$ref": "#/definitions/type/strs"
               }
             },
             "additionalProperties": false,
@@ -247,7 +249,7 @@
             }
           },
           {
-            "$ref": "#/definitions/strs"
+            "$ref": "#/definitions/type/strs"
           }
         ]
       },
@@ -292,7 +294,7 @@
                 ]
               },
               "directories": {
-                "$ref": "#/definitions/strs"
+                "$ref": "#/definitions/type/strs"
               },
               "timeout": {
                 "type": "number"
@@ -311,14 +313,25 @@
             ]
           },
           {
-            "$ref": "#/definitions/strs"
+            "$ref": "#/definitions/type/strs"
           }
         ]
       },
       "compilers": {
         "$id": "compilers",
         "title": "Compilers",
-        "$ref": "#/definitions/strs"
+        "anyOf": [
+          {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "normal": true
+          },
+          {
+            "type": "string"
+          }
+        ]
       },
       "conditions": {
         "$id": "conditions",
@@ -441,7 +454,7 @@
           },
           {
             "type": "string",
-            "pattern": "^[^=]+=[^=]+$"
+            "pattern": "^[^=]+=[^=]*$"
           }
         ]
       },
@@ -590,46 +603,46 @@
                 "$ref": "#/definitions/type/git"
               },
               "source_key": {
-                "$ref": "#/definitions/secure"
+                "$ref": "#/definitions/type/secure"
               },
               "if": {
                 "type": "string"
               },
               "before_install": {
-                "$ref": "#/definitions/strs"
+                "$ref": "#/definitions/type/strs"
               },
               "install": {
-                "$ref": "#/definitions/strs"
+                "$ref": "#/definitions/type/strs"
               },
               "after_install": {
-                "$ref": "#/definitions/strs"
+                "$ref": "#/definitions/type/strs"
               },
               "before_script": {
-                "$ref": "#/definitions/strs"
+                "$ref": "#/definitions/type/strs"
               },
               "script": {
-                "$ref": "#/definitions/strs"
+                "$ref": "#/definitions/type/strs"
               },
               "after_script": {
-                "$ref": "#/definitions/strs"
+                "$ref": "#/definitions/type/strs"
               },
               "after_result": {
-                "$ref": "#/definitions/strs"
+                "$ref": "#/definitions/type/strs"
               },
               "after_success": {
-                "$ref": "#/definitions/strs"
+                "$ref": "#/definitions/type/strs"
               },
               "after_failure": {
-                "$ref": "#/definitions/strs"
+                "$ref": "#/definitions/type/strs"
               },
               "before_deploy": {
-                "$ref": "#/definitions/strs"
+                "$ref": "#/definitions/type/strs"
               },
               "after_deploy": {
-                "$ref": "#/definitions/strs"
+                "$ref": "#/definitions/type/strs"
               },
               "before_cache": {
-                "$ref": "#/definitions/strs"
+                "$ref": "#/definitions/type/strs"
               }
             },
             "keys": {
@@ -1247,7 +1260,7 @@
             "type": "object",
             "properties": {
               "packages": {
-                "$ref": "#/definitions/strs"
+                "$ref": "#/definitions/type/strs"
               },
               "sources": {
                 "anyOf": [
@@ -1327,7 +1340,7 @@
             ]
           },
           {
-            "$ref": "#/definitions/strs"
+            "$ref": "#/definitions/type/strs"
           },
           {
             "type": "boolean"
@@ -1351,13 +1364,13 @@
                 "type": "string"
               },
               "key": {
-                "$ref": "#/definitions/secure"
+                "$ref": "#/definitions/type/secure"
               },
               "secret": {
-                "$ref": "#/definitions/secure"
+                "$ref": "#/definitions/type/secure"
               },
               "paths": {
-                "$ref": "#/definitions/strs"
+                "$ref": "#/definitions/type/strs"
               },
               "branch": {
                 "type": "string"
@@ -1366,7 +1379,7 @@
                 "type": "string"
               },
               "target_paths": {
-                "$ref": "#/definitions/strs"
+                "$ref": "#/definitions/type/strs"
               },
               "debug": {
                 "type": "boolean"
@@ -1437,7 +1450,7 @@
                 "type": "string"
               },
               "access_key": {
-                "$ref": "#/definitions/secure"
+                "$ref": "#/definitions/type/secure"
               },
               "forcelocal": {
                 "type": "boolean"
@@ -1458,7 +1471,7 @@
                 "type": "string"
               },
               "proxyPass": {
-                "$ref": "#/definitions/secure"
+                "$ref": "#/definitions/type/secure"
               }
             },
             "additionalProperties": false,
@@ -1483,7 +1496,7 @@
             "type": "object",
             "properties": {
               "repo_token": {
-                "$ref": "#/definitions/secure"
+                "$ref": "#/definitions/type/secure"
               }
             },
             "additionalProperties": false,
@@ -1496,7 +1509,7 @@
             ]
           },
           {
-            "$ref": "#/definitions/secure"
+            "$ref": "#/definitions/type/secure"
           },
           {
             "type": "boolean"
@@ -1578,13 +1591,13 @@
                 "type": "boolean"
               },
               "packages": {
-                "$ref": "#/definitions/strs"
+                "$ref": "#/definitions/type/strs"
               },
               "casks": {
-                "$ref": "#/definitions/strs"
+                "$ref": "#/definitions/type/strs"
               },
               "taps": {
-                "$ref": "#/definitions/strs"
+                "$ref": "#/definitions/type/strs"
               },
               "brewfile": {
                 "type": "string"
@@ -1600,7 +1613,7 @@
             ]
           },
           {
-            "$ref": "#/definitions/strs"
+            "$ref": "#/definitions/type/strs"
           },
           {
             "type": "boolean"
@@ -1610,7 +1623,18 @@
       "jwts": {
         "$id": "addon_jwts",
         "title": "JSON Web Tokens",
-        "$ref": "#/definitions/secures"
+        "anyOf": [
+          {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/type/secure"
+            },
+            "normal": true
+          },
+          {
+            "$ref": "#/definitions/type/secure"
+          }
+        ]
       },
       "sauce_connect": {
         "$id": "addon_sauce_connect",
@@ -1623,10 +1647,10 @@
                 "type": "boolean"
               },
               "username": {
-                "$ref": "#/definitions/secure"
+                "$ref": "#/definitions/type/secure"
               },
               "access_key": {
-                "$ref": "#/definitions/secure"
+                "$ref": "#/definitions/type/secure"
               },
               "direct_domains": {
                 "type": "string"
@@ -1732,10 +1756,10 @@
                 "$ref": "#/definitions/deploy/edge"
               },
               "username": {
-                "$ref": "#/definitions/secure"
+                "$ref": "#/definitions/type/secure"
               },
               "password": {
-                "$ref": "#/definitions/secure"
+                "$ref": "#/definitions/type/secure"
               },
               "organization": {
                 "type": "string"
@@ -1786,19 +1810,19 @@
                 "$ref": "#/definitions/deploy/edge"
               },
               "user": {
-                "$ref": "#/definitions/secure"
+                "$ref": "#/definitions/type/secure"
               },
               "api_key": {
-                "$ref": "#/definitions/secure"
+                "$ref": "#/definitions/type/secure"
               },
               "address": {
-                "$ref": "#/definitions/strs"
+                "$ref": "#/definitions/type/strs"
               },
               "metadata": {
                 "type": "string"
               },
               "after_deploy": {
-                "$ref": "#/definitions/strs"
+                "$ref": "#/definitions/type/strs"
               },
               "app": {
                 "anyOf": [
@@ -1821,12 +1845,12 @@
                     "type": "object",
                     "patternProperties": {
                       ".*": {
-                        "$ref": "#/definitions/secure"
+                        "$ref": "#/definitions/type/secure"
                       }
                     }
                   },
                   {
-                    "$ref": "#/definitions/secure"
+                    "$ref": "#/definitions/type/secure"
                   }
                 ]
               },
@@ -1836,12 +1860,12 @@
                     "type": "object",
                     "patternProperties": {
                       ".*": {
-                        "$ref": "#/definitions/secure"
+                        "$ref": "#/definitions/type/secure"
                       }
                     }
                   },
                   {
-                    "$ref": "#/definitions/secure"
+                    "$ref": "#/definitions/type/secure"
                   }
                 ]
               }
@@ -1888,22 +1912,22 @@
                 "$ref": "#/definitions/deploy/edge"
               },
               "token": {
-                "$ref": "#/definitions/secure"
+                "$ref": "#/definitions/type/secure"
               },
               "app": {
                 "type": "string"
               },
               "exclude": {
-                "$ref": "#/definitions/strs"
+                "$ref": "#/definitions/type/strs"
               },
               "include": {
-                "$ref": "#/definitions/strs"
+                "$ref": "#/definitions/type/strs"
               },
               "address": {
                 "type": "string"
               },
               "metadata": {
-                "$ref": "#/definitions/strs"
+                "$ref": "#/definitions/type/strs"
               },
               "debug": {
                 "type": "boolean"
@@ -1963,10 +1987,10 @@
                 "type": "string"
               },
               "username": {
-                "$ref": "#/definitions/secure"
+                "$ref": "#/definitions/type/secure"
               },
               "password": {
-                "$ref": "#/definitions/secure"
+                "$ref": "#/definitions/type/secure"
               },
               "verbose": {
                 "type": "boolean"
@@ -2017,13 +2041,13 @@
                 "type": "string"
               },
               "user": {
-                "$ref": "#/definitions/secure"
+                "$ref": "#/definitions/type/secure"
               },
               "key": {
-                "$ref": "#/definitions/secure"
+                "$ref": "#/definitions/type/secure"
               },
               "passphrase": {
-                "$ref": "#/definitions/secure"
+                "$ref": "#/definitions/type/secure"
               },
               "dry_run": {
                 "type": "boolean"
@@ -2071,10 +2095,10 @@
                 "$ref": "#/definitions/deploy/edge"
               },
               "access-token": {
-                "$ref": "#/definitions/secure"
+                "$ref": "#/definitions/type/secure"
               },
               "site-id": {
-                "$ref": "#/definitions/secure"
+                "$ref": "#/definitions/type/secure"
               },
               "local-dir": {
                 "type": "string"
@@ -2122,10 +2146,10 @@
                 "$ref": "#/definitions/deploy/edge"
               },
               "username": {
-                "$ref": "#/definitions/secure"
+                "$ref": "#/definitions/type/secure"
               },
               "password": {
-                "$ref": "#/definitions/secure"
+                "$ref": "#/definitions/type/secure"
               },
               "organization": {
                 "type": "string"
@@ -2188,10 +2212,10 @@
                 "$ref": "#/definitions/deploy/edge"
               },
               "user": {
-                "$ref": "#/definitions/secure"
+                "$ref": "#/definitions/type/secure"
               },
               "secret": {
-                "$ref": "#/definitions/secure"
+                "$ref": "#/definitions/type/secure"
               },
               "configfile": {
                 "type": "string"
@@ -2275,7 +2299,7 @@
                 "$ref": "#/definitions/deploy/edge"
               },
               "token": {
-                "$ref": "#/definitions/secure"
+                "$ref": "#/definitions/type/secure"
               }
             },
             "normal": true,
@@ -2368,10 +2392,10 @@
                 "$ref": "#/definitions/deploy/edge"
               },
               "user_id": {
-                "$ref": "#/definitions/secure"
+                "$ref": "#/definitions/type/secure"
               },
               "client_key": {
-                "$ref": "#/definitions/secure"
+                "$ref": "#/definitions/type/secure"
               },
               "cookbook_category": {
                 "type": "string"
@@ -2464,10 +2488,10 @@
                 "$ref": "#/definitions/deploy/edge"
               },
               "email": {
-                "$ref": "#/definitions/secure"
+                "$ref": "#/definitions/type/secure"
               },
               "password": {
-                "$ref": "#/definitions/secure"
+                "$ref": "#/definitions/type/secure"
               },
               "deployment": {
                 "type": "string"
@@ -2515,10 +2539,10 @@
                 "$ref": "#/definitions/deploy/edge"
               },
               "username": {
-                "$ref": "#/definitions/secure"
+                "$ref": "#/definitions/type/secure"
               },
               "api_key": {
-                "$ref": "#/definitions/secure"
+                "$ref": "#/definitions/type/secure"
               },
               "region": {
                 "type": "string"
@@ -2572,10 +2596,10 @@
                 "$ref": "#/definitions/deploy/edge"
               },
               "username": {
-                "$ref": "#/definitions/secure"
+                "$ref": "#/definitions/type/secure"
               },
               "password": {
-                "$ref": "#/definitions/secure"
+                "$ref": "#/definitions/type/secure"
               },
               "organization": {
                 "type": "string"
@@ -2638,10 +2662,10 @@
                 "$ref": "#/definitions/deploy/edge"
               },
               "access_key_id": {
-                "$ref": "#/definitions/secure"
+                "$ref": "#/definitions/type/secure"
               },
               "secret_access_key": {
-                "$ref": "#/definitions/secure"
+                "$ref": "#/definitions/type/secure"
               },
               "application": {
                 "type": "string"
@@ -2766,10 +2790,10 @@
                 "type": "string"
               },
               "username": {
-                "$ref": "#/definitions/secure"
+                "$ref": "#/definitions/type/secure"
               },
               "password": {
-                "$ref": "#/definitions/secure"
+                "$ref": "#/definitions/type/secure"
               },
               "app": {
                 "type": "string"
@@ -2820,7 +2844,7 @@
                 "$ref": "#/definitions/deploy/edge"
               },
               "api_key": {
-                "$ref": "#/definitions/secure"
+                "$ref": "#/definitions/type/secure"
               },
               "environment": {
                 "type": "string"
@@ -2904,10 +2928,10 @@
                 "$ref": "#/definitions/deploy/edge"
               },
               "access_key_id": {
-                "$ref": "#/definitions/secure"
+                "$ref": "#/definitions/type/secure"
               },
               "securet_access_key": {
-                "$ref": "#/definitions/secure"
+                "$ref": "#/definitions/type/secure"
               },
               "region": {
                 "type": "string"
@@ -2973,13 +2997,13 @@
                 "$ref": "#/definitions/deploy/edge"
               },
               "username": {
-                "$ref": "#/definitions/secure"
+                "$ref": "#/definitions/type/secure"
               },
               "password": {
-                "$ref": "#/definitions/secure"
+                "$ref": "#/definitions/type/secure"
               },
               "api_key": {
-                "$ref": "#/definitions/secure"
+                "$ref": "#/definitions/type/secure"
               },
               "app": {
                 "anyOf": [
@@ -3060,7 +3084,7 @@
                 "type": "string"
               },
               "token": {
-                "$ref": "#/definitions/secure"
+                "$ref": "#/definitions/type/secure"
               },
               "message": {
                 "type": "string"
@@ -3171,10 +3195,10 @@
                 "$ref": "#/definitions/deploy/edge"
               },
               "access_key_id": {
-                "$ref": "#/definitions/secure"
+                "$ref": "#/definitions/type/secure"
               },
               "secret_access_key": {
-                "$ref": "#/definitions/secure"
+                "$ref": "#/definitions/type/secure"
               },
               "bucket": {
                 "type": "string"
@@ -3240,10 +3264,10 @@
                 "$ref": "#/definitions/deploy/edge"
               },
               "username": {
-                "$ref": "#/definitions/secure"
+                "$ref": "#/definitions/type/secure"
               },
               "password": {
-                "$ref": "#/definitions/secure"
+                "$ref": "#/definitions/type/secure"
               }
             },
             "normal": true,
@@ -3323,17 +3347,17 @@
                     "type": "object",
                     "patternProperties": {
                       ".*": {
-                        "$ref": "#/definitions/secure"
+                        "$ref": "#/definitions/type/secure"
                       }
                     }
                   },
                   {
-                    "$ref": "#/definitions/secure"
+                    "$ref": "#/definitions/type/secure"
                   }
                 ]
               },
               "run": {
-                "$ref": "#/definitions/strs"
+                "$ref": "#/definitions/type/strs"
               }
             },
             "normal": true,
@@ -3378,10 +3402,10 @@
                 "$ref": "#/definitions/deploy/edge"
               },
               "access_key_id": {
-                "$ref": "#/definitions/secure"
+                "$ref": "#/definitions/type/secure"
               },
               "secret_access_key": {
-                "$ref": "#/definitions/secure"
+                "$ref": "#/definitions/type/secure"
               },
               "region": {
                 "type": "string"
@@ -3414,13 +3438,13 @@
                 "type": "string"
               },
               "environment_variables": {
-                "$ref": "#/definitions/secure"
+                "$ref": "#/definitions/type/secure"
               },
               "security_group_ids": {
-                "$ref": "#/definitions/strs"
+                "$ref": "#/definitions/type/strs"
               },
               "subnet_ids": {
-                "$ref": "#/definitions/strs"
+                "$ref": "#/definitions/type/strs"
               },
               "dead_letter_config": {
                 "type": "string"
@@ -3439,7 +3463,7 @@
                 "type": "boolean"
               },
               "function_tags": {
-                "$ref": "#/definitions/secure"
+                "$ref": "#/definitions/type/secure"
               }
             },
             "normal": true,
@@ -3487,10 +3511,10 @@
                 "type": "string"
               },
               "oauth_token": {
-                "$ref": "#/definitions/secure"
+                "$ref": "#/definitions/type/secure"
               },
               "oauth_token_secret": {
-                "$ref": "#/definitions/secure"
+                "$ref": "#/definitions/type/secure"
               }
             },
             "normal": true,
@@ -3538,7 +3562,7 @@
                 "$ref": "#/definitions/deploy/edge"
               },
               "api_key": {
-                "$ref": "#/definitions/secure"
+                "$ref": "#/definitions/type/secure"
               },
               "project_name": {
                 "type": "string"
@@ -3586,10 +3610,10 @@
                 "$ref": "#/definitions/deploy/edge"
               },
               "email": {
-                "$ref": "#/definitions/secure"
+                "$ref": "#/definitions/type/secure"
               },
               "api_key": {
-                "$ref": "#/definitions/secure"
+                "$ref": "#/definitions/type/secure"
               }
             },
             "normal": true,
@@ -3634,10 +3658,10 @@
                 "$ref": "#/definitions/deploy/edge"
               },
               "user": {
-                "$ref": "#/definitions/secure"
+                "$ref": "#/definitions/type/secure"
               },
               "password": {
-                "$ref": "#/definitions/secure"
+                "$ref": "#/definitions/type/secure"
               },
               "domain": {
                 "anyOf": [
@@ -3715,10 +3739,10 @@
                 "$ref": "#/definitions/deploy/edge"
               },
               "access_key_id": {
-                "$ref": "#/definitions/secure"
+                "$ref": "#/definitions/type/secure"
               },
               "secret_access_key": {
-                "$ref": "#/definitions/secure"
+                "$ref": "#/definitions/type/secure"
               },
               "app_id": {
                 "type": "string"
@@ -3781,10 +3805,10 @@
                 "$ref": "#/definitions/deploy/edge"
               },
               "username": {
-                "$ref": "#/definitions/secure"
+                "$ref": "#/definitions/type/secure"
               },
               "token": {
-                "$ref": "#/definitions/secure"
+                "$ref": "#/definitions/type/secure"
               },
               "repository": {
                 "type": "string"
@@ -3844,7 +3868,7 @@
                 "$ref": "#/definitions/deploy/edge"
               },
               "github_token": {
-                "$ref": "#/definitions/secure"
+                "$ref": "#/definitions/type/secure"
               },
               "repo": {
                 "type": "string"
@@ -4065,10 +4089,10 @@
                 "$ref": "#/definitions/deploy/edge"
               },
               "user": {
-                "$ref": "#/definitions/secure"
+                "$ref": "#/definitions/type/secure"
               },
               "password": {
-                "$ref": "#/definitions/secure"
+                "$ref": "#/definitions/type/secure"
               },
               "url": {
                 "type": "string"
@@ -4118,13 +4142,13 @@
                 "$ref": "#/definitions/deploy/edge"
               },
               "user": {
-                "$ref": "#/definitions/secure"
+                "$ref": "#/definitions/type/secure"
               },
               "password": {
-                "$ref": "#/definitions/secure"
+                "$ref": "#/definitions/type/secure"
               },
               "api_key": {
-                "$ref": "#/definitions/secure"
+                "$ref": "#/definitions/type/secure"
               },
               "server": {
                 "type": "string"
@@ -4178,19 +4202,19 @@
                 "$ref": "#/definitions/deploy/edge"
               },
               "user": {
-                "$ref": "#/definitions/secure"
+                "$ref": "#/definitions/type/secure"
               },
               "password": {
-                "$ref": "#/definitions/secure"
+                "$ref": "#/definitions/type/secure"
               },
               "api_key": {
-                "$ref": "#/definitions/secure"
+                "$ref": "#/definitions/type/secure"
               },
               "repo": {
                 "type": "string"
               },
               "file": {
-                "$ref": "#/definitions/strs"
+                "$ref": "#/definitions/type/strs"
               },
               "file_glob": {
                 "type": "boolean"
@@ -4252,12 +4276,12 @@
                     "type": "object",
                     "patternProperties": {
                       ".*": {
-                        "$ref": "#/definitions/secure"
+                        "$ref": "#/definitions/type/secure"
                       }
                     }
                   },
                   {
-                    "$ref": "#/definitions/secure"
+                    "$ref": "#/definitions/type/secure"
                   }
                 ]
               },
@@ -4325,10 +4349,10 @@
                 "$ref": "#/definitions/deploy/edge"
               },
               "access_key_id": {
-                "$ref": "#/definitions/secure"
+                "$ref": "#/definitions/type/secure"
               },
               "secret_access_key": {
-                "$ref": "#/definitions/secure"
+                "$ref": "#/definitions/type/secure"
               },
               "bucket": {
                 "type": "string"
@@ -4412,13 +4436,13 @@
                 "$ref": "#/definitions/deploy/edge"
               },
               "username": {
-                "$ref": "#/definitions/secure"
+                "$ref": "#/definitions/type/secure"
               },
               "password": {
-                "$ref": "#/definitions/secure"
+                "$ref": "#/definitions/type/secure"
               },
               "api_key": {
-                "$ref": "#/definitions/secure"
+                "$ref": "#/definitions/type/secure"
               },
               "remote": {
                 "type": "string"
@@ -4472,7 +4496,7 @@
                 "$ref": "#/definitions/deploy/edge"
               },
               "script": {
-                "type": "string"
+                "$ref": "#/definitions/type/strs"
               }
             },
             "normal": true,
@@ -4523,7 +4547,7 @@
                 "type": "string"
               },
               "token": {
-                "$ref": "#/definitions/secure"
+                "$ref": "#/definitions/type/secure"
               }
             },
             "normal": true,
@@ -4616,7 +4640,7 @@
                 "$ref": "#/definitions/deploy/edge"
               },
               "api_key": {
-                "$ref": "#/definitions/secure"
+                "$ref": "#/definitions/type/secure"
               },
               "app_file": {
                 "type": "string"
@@ -4759,16 +4783,33 @@
         "type": "object",
         "properties": {
           "jdk": {
-            "$ref": "#/definitions/strs"
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "flags": [
+                  "expand"
+                ],
+                "normal": true
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "flags": [
+              "expand"
+            ]
           },
           "android": {
             "type": "object",
             "properties": {
               "components": {
-                "$ref": "#/definitions/strs"
+                "$ref": "#/definitions/type/strs"
               },
               "licenses": {
-                "$ref": "#/definitions/strs"
+                "$ref": "#/definitions/type/strs"
               }
             },
             "additionalProperties": false
@@ -4809,7 +4850,24 @@
         "type": "object",
         "properties": {
           "jdk": {
-            "$ref": "#/definitions/strs"
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "flags": [
+                  "expand"
+                ],
+                "normal": true
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "flags": [
+              "expand"
+            ]
           },
           "lein": {
             "type": "string"
@@ -4850,7 +4908,7 @@
         "type": "object",
         "properties": {
           "crystal": {
-            "$ref": "#/definitions/strs"
+            "$ref": "#/definitions/type/strs"
           }
         },
         "normal": true,
@@ -4870,13 +4928,13 @@
         "type": "object",
         "properties": {
           "dotnet": {
-            "$ref": "#/definitions/strs"
+            "$ref": "#/definitions/type/strs"
           },
           "mono": {
-            "$ref": "#/definitions/strs"
+            "$ref": "#/definitions/type/strs"
           },
           "solution": {
-            "$ref": "#/definitions/strs"
+            "$ref": "#/definitions/type/strs"
           }
         },
         "normal": true,
@@ -4910,7 +4968,7 @@
         "type": "object",
         "properties": {
           "d": {
-            "$ref": "#/definitions/strs"
+            "$ref": "#/definitions/type/strs"
           }
         },
         "normal": true,
@@ -4930,7 +4988,7 @@
         "type": "object",
         "properties": {
           "dart": {
-            "$ref": "#/definitions/strs"
+            "$ref": "#/definitions/type/strs"
           },
           "dart_task": {
             "anyOf": [
@@ -5005,10 +5063,10 @@
         "type": "object",
         "properties": {
           "elixir": {
-            "$ref": "#/definitions/strs"
+            "$ref": "#/definitions/type/strs"
           },
           "otp_release": {
-            "$ref": "#/definitions/strs"
+            "$ref": "#/definitions/type/strs"
           }
         },
         "normal": true,
@@ -5035,10 +5093,10 @@
         "type": "object",
         "properties": {
           "elm": {
-            "$ref": "#/definitions/strs"
+            "$ref": "#/definitions/type/strs"
           },
           "node_js": {
-            "$ref": "#/definitions/strs"
+            "$ref": "#/definitions/type/strs"
           },
           "elm_format": {
             "type": "string"
@@ -5085,7 +5143,7 @@
         "type": "object",
         "properties": {
           "otp_release": {
-            "$ref": "#/definitions/strs"
+            "$ref": "#/definitions/type/strs"
           }
         },
         "normal": true,
@@ -5105,7 +5163,7 @@
         "type": "object",
         "properties": {
           "go": {
-            "$ref": "#/definitions/strs"
+            "$ref": "#/definitions/type/strs"
           },
           "gobuild_args": {
             "type": "string"
@@ -5164,7 +5222,24 @@
         "type": "object",
         "properties": {
           "jdk": {
-            "$ref": "#/definitions/strs"
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "flags": [
+                  "expand"
+                ],
+                "normal": true
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "flags": [
+              "expand"
+            ]
           }
         },
         "normal": true,
@@ -5189,7 +5264,7 @@
         "type": "object",
         "properties": {
           "ghc": {
-            "$ref": "#/definitions/strs"
+            "$ref": "#/definitions/type/strs"
           }
         },
         "normal": true,
@@ -5209,10 +5284,10 @@
         "type": "object",
         "properties": {
           "haxe": {
-            "$ref": "#/definitions/strs"
+            "$ref": "#/definitions/type/strs"
           },
           "hxml": {
-            "$ref": "#/definitions/strs"
+            "$ref": "#/definitions/type/strs"
           },
           "neko": {
             "type": "string"
@@ -5249,7 +5324,24 @@
         "type": "object",
         "properties": {
           "jdk": {
-            "$ref": "#/definitions/strs"
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "flags": [
+                  "expand"
+                ],
+                "normal": true
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "flags": [
+              "expand"
+            ]
           }
         },
         "normal": true,
@@ -5274,7 +5366,7 @@
         "type": "object",
         "properties": {
           "julia": {
-            "$ref": "#/definitions/strs"
+            "$ref": "#/definitions/type/strs"
           }
         },
         "normal": true,
@@ -5294,7 +5386,7 @@
         "type": "object",
         "properties": {
           "nix": {
-            "$ref": "#/definitions/strs"
+            "$ref": "#/definitions/type/strs"
           }
         },
         "normal": true,
@@ -5314,7 +5406,7 @@
         "type": "object",
         "properties": {
           "node_js": {
-            "$ref": "#/definitions/strs"
+            "$ref": "#/definitions/type/strs"
           },
           "npm_args": {
             "type": "string"
@@ -5347,16 +5439,16 @@
         "type": "object",
         "properties": {
           "rvm": {
-            "$ref": "#/definitions/strs"
+            "$ref": "#/definitions/type/strs"
           },
           "gemfile": {
-            "$ref": "#/definitions/strs"
+            "$ref": "#/definitions/type/strs"
           },
           "xcode_scheme": {
-            "$ref": "#/definitions/strs"
+            "$ref": "#/definitions/type/strs"
           },
           "xcode_sdk": {
-            "$ref": "#/definitions/strs"
+            "$ref": "#/definitions/type/strs"
           },
           "podfile": {
             "type": "string"
@@ -5460,7 +5552,7 @@
         "type": "object",
         "properties": {
           "perl": {
-            "$ref": "#/definitions/strs"
+            "$ref": "#/definitions/type/strs"
           }
         },
         "normal": true,
@@ -5480,7 +5572,7 @@
         "type": "object",
         "properties": {
           "perl6": {
-            "$ref": "#/definitions/strs"
+            "$ref": "#/definitions/type/strs"
           }
         },
         "normal": true,
@@ -5500,7 +5592,7 @@
         "type": "object",
         "properties": {
           "php": {
-            "$ref": "#/definitions/strs"
+            "$ref": "#/definitions/type/strs"
           },
           "composer_args": {
             "type": "string"
@@ -5530,7 +5622,7 @@
         "type": "object",
         "properties": {
           "python": {
-            "$ref": "#/definitions/strs"
+            "$ref": "#/definitions/type/strs"
           },
           "virtualenv": {
             "type": "object",
@@ -5568,25 +5660,25 @@
         "type": "object",
         "properties": {
           "r": {
-            "$ref": "#/definitions/strs"
+            "$ref": "#/definitions/type/strs"
           },
           "r_packages": {
-            "$ref": "#/definitions/strs"
+            "$ref": "#/definitions/type/strs"
           },
           "r_binary_packages": {
-            "$ref": "#/definitions/strs"
+            "$ref": "#/definitions/type/strs"
           },
           "r_github_packages": {
-            "$ref": "#/definitions/strs"
+            "$ref": "#/definitions/type/strs"
           },
           "apt_packages": {
-            "$ref": "#/definitions/strs"
+            "$ref": "#/definitions/type/strs"
           },
           "bioc_packages": {
-            "$ref": "#/definitions/strs"
+            "$ref": "#/definitions/type/strs"
           },
           "brew_packages": {
-            "$ref": "#/definitions/strs"
+            "$ref": "#/definitions/type/strs"
           },
           "bioc": {
             "type": "string"
@@ -5801,13 +5893,30 @@
         "type": "object",
         "properties": {
           "rvm": {
-            "$ref": "#/definitions/strs"
+            "$ref": "#/definitions/type/strs"
           },
           "gemfile": {
-            "$ref": "#/definitions/strs"
+            "$ref": "#/definitions/type/strs"
           },
           "jdk": {
-            "$ref": "#/definitions/strs"
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "flags": [
+                  "expand"
+                ],
+                "normal": true
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "flags": [
+              "expand"
+            ]
           },
           "bundler_args": {
             "type": "string"
@@ -5862,7 +5971,7 @@
         "type": "object",
         "properties": {
           "rust": {
-            "$ref": "#/definitions/strs"
+            "$ref": "#/definitions/type/strs"
           }
         },
         "normal": true,
@@ -5882,10 +5991,27 @@
         "type": "object",
         "properties": {
           "scala": {
-            "$ref": "#/definitions/strs"
+            "$ref": "#/definitions/type/strs"
           },
           "jdk": {
-            "$ref": "#/definitions/strs"
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "flags": [
+                  "expand"
+                ],
+                "normal": true
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "flags": [
+              "expand"
+            ]
           },
           "sbt_args": {
             "type": "string"
@@ -5933,13 +6059,13 @@
         "type": "object",
         "properties": {
           "smalltalk": {
-            "$ref": "#/definitions/strs"
+            "$ref": "#/definitions/type/strs"
           },
           "smalltalk_config": {
-            "$ref": "#/definitions/strs"
+            "$ref": "#/definitions/type/strs"
           },
           "smalltalk_vm": {
-            "$ref": "#/definitions/strs"
+            "$ref": "#/definitions/type/strs"
           },
           "smalltalk_edge": {
             "type": "boolean"
@@ -5987,7 +6113,7 @@
             "type": "object",
             "properties": {
               "rooms": {
-                "$ref": "#/definitions/secures"
+                "$ref": "#/definitions/type/secures"
               },
               "template": {
                 "$ref": "#/definitions/notification/templates"
@@ -6015,7 +6141,7 @@
             ]
           },
           {
-            "$ref": "#/definitions/secures"
+            "$ref": "#/definitions/type/secures"
           },
           {
             "type": "boolean"
@@ -6030,7 +6156,7 @@
             "type": "object",
             "properties": {
               "recipients": {
-                "$ref": "#/definitions/secures"
+                "$ref": "#/definitions/type/secures"
               },
               "enabled": {
                 "type": "boolean"
@@ -6055,7 +6181,7 @@
             ]
           },
           {
-            "$ref": "#/definitions/secures"
+            "$ref": "#/definitions/type/secures"
           },
           {
             "type": "boolean"
@@ -6070,7 +6196,7 @@
             "type": "object",
             "properties": {
               "api_token": {
-                "$ref": "#/definitions/secure"
+                "$ref": "#/definitions/type/secure"
               },
               "template": {
                 "$ref": "#/definitions/notification/templates"
@@ -6098,7 +6224,7 @@
             ]
           },
           {
-            "$ref": "#/definitions/secure"
+            "$ref": "#/definitions/type/secure"
           },
           {
             "type": "boolean"
@@ -6140,7 +6266,7 @@
             "type": "object",
             "properties": {
               "rooms": {
-                "$ref": "#/definitions/secures"
+                "$ref": "#/definitions/type/secures"
               },
               "format": {
                 "type": "string",
@@ -6181,7 +6307,7 @@
             ]
           },
           {
-            "$ref": "#/definitions/secures"
+            "$ref": "#/definitions/type/secures"
           },
           {
             "type": "boolean"
@@ -6196,19 +6322,19 @@
             "type": "object",
             "properties": {
               "channels": {
-                "$ref": "#/definitions/secures"
+                "$ref": "#/definitions/type/secures"
               },
               "channel_key": {
-                "$ref": "#/definitions/secure"
+                "$ref": "#/definitions/type/secure"
               },
               "password": {
-                "$ref": "#/definitions/secure"
+                "$ref": "#/definitions/type/secure"
               },
               "nickserv_password": {
-                "$ref": "#/definitions/secure"
+                "$ref": "#/definitions/type/secure"
               },
               "nick": {
-                "$ref": "#/definitions/secure"
+                "$ref": "#/definitions/type/secure"
               },
               "use_notice": {
                 "type": "boolean"
@@ -6242,7 +6368,7 @@
             ]
           },
           {
-            "$ref": "#/definitions/secures"
+            "$ref": "#/definitions/type/secures"
           },
           {
             "type": "boolean"
@@ -6263,10 +6389,10 @@
                 "type": "boolean"
               },
               "api_key": {
-                "$ref": "#/definitions/secures"
+                "$ref": "#/definitions/type/secures"
               },
               "users": {
-                "$ref": "#/definitions/secures"
+                "$ref": "#/definitions/type/secures"
               },
               "template": {
                 "$ref": "#/definitions/notification/templates"
@@ -6300,7 +6426,7 @@
             "type": "object",
             "properties": {
               "rooms": {
-                "$ref": "#/definitions/secures"
+                "$ref": "#/definitions/type/secures"
               },
               "template": {
                 "$ref": "#/definitions/notification/templates"
@@ -6331,7 +6457,7 @@
             ]
           },
           {
-            "$ref": "#/definitions/secures"
+            "$ref": "#/definitions/type/secures"
           },
           {
             "type": "boolean"
@@ -6388,7 +6514,7 @@
             "type": "object",
             "properties": {
               "urls": {
-                "$ref": "#/definitions/secures"
+                "$ref": "#/definitions/type/secures"
               },
               "on_start": {
                 "$ref": "#/definitions/notification/frequency"
@@ -6422,7 +6548,7 @@
             ]
           },
           {
-            "$ref": "#/definitions/secures"
+            "$ref": "#/definitions/type/secures"
           },
           {
             "type": "boolean"

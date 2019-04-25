@@ -1,0 +1,24 @@
+language: node_js
+node_js: '10'
+
+jobs:
+  include:
+    - stage: test
+      addons:
+        firefox: 'latest-esr'
+      before_script:
+        - ./tasks/wiredeps
+      script:
+        - COVERAGE=1 TEST_BROWSERS=Firefox,PhantomJS xvfb-run npm run all
+        - npx codecov
+    - stage: update integration test
+      script: './tasks/stages/update-integration-test'
+    - stage: update examples
+      script: './tasks/stages/update-examples'
+
+stages:
+  - test
+  - name: update integration test
+    if: tag =~ ^v\d
+  - name: update examples
+    if: tag =~ ^v\d

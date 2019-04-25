@@ -1,0 +1,148 @@
+---
+sudo: false
+dist: trusty
+services: docker
+language: ruby
+cache: bundler
+before_install:
+  - if [ $BUNDLER_VERSION ]; then
+      gem install -v $BUNDLER_VERSION bundler --no-rdoc --no-ri;
+    fi
+  - bundle -v
+  - rm -f Gemfile.lock
+  - gem update --system $RUBYGEMS_VERSION
+  - gem --version
+  - bundle -v
+bundler_args: --without system_tests
+
+branches:
+  only:
+    - master
+
+# execute all commands in a single script with 'set -e' at the top
+# otherwise if you specify >1 command here, travis will try to run them
+# all and if one fails it will ignore the failure and go onto the next
+script:
+  - build/scripts/ci.sh
+  
+matrix:
+  fast_finish: true
+  include:
+    - name: "Unit Testing - Puppet 4"
+      rvm: 2.1
+      # use default Gemfile in repo root (from PDK)
+      env:
+        - UNIT_TEST="true"
+        - PUPPET_GEM_VERSION="~> 4.0"
+        - CHECK="syntax lint metadata_lint check:symlinks check:git_ignore check:dot_underscore check:test_file rubocop parallel_spec"
+        # rubygem-update 3.0.0 requires ruby 2.3.0 and Puppet 4 requires ruby 2.1.0
+        # Bundler 2.0+ requires ruby 2.3.0 and Puppet 4 requires ruby 2.1.0
+        # We need to lock bundler and rubygems to old versions in order to keep the build happy
+        - BUNDLER_VERSION=1.17.3
+        - RUBYGEMS_VERSION=2.7.8
+    - name: "Unit Testing - Puppet 5"
+      rvm: 2.4
+      # use default Gemfile in repo root (from PDK)
+      env:
+        - UNIT_TEST="true"
+        - PUPPET_GEM_VERSION="~> 5.0"
+        - CHECK="syntax lint metadata_lint check:symlinks check:git_ignore check:dot_underscore check:test_file rubocop parallel_spec"
+    - name: "Unit Testing - Puppet 6"
+      rvm: 2.5
+      # use default Gemfile in repo root (from PDK)
+      env:
+        - UNIT_TEST="true"
+        - PUPPET_GEM_VERSION="~> 6.0"
+        - CHECK="syntax lint metadata_lint check:symlinks check:git_ignore check:dot_underscore check:test_file rubocop parallel_spec"
+    - name: "Unit Testing - Bolt Tasks Python 2.7"
+      language: python
+      python: 2.7
+      cache: pip
+      before_install:
+        - echo 'no bundler needed here'
+      script:
+        - make
+    - name: "Unit Testing - Bolt Tasks Python 3.6"
+      language: python
+      python: 3.6
+      cache: pip
+      before_install:
+        - echo 'no bundler needed here'
+      script:
+        - make
+    - name: "Documentation Testing"
+      rvm: 2.5
+      # use default Gemfile in repo root (from PDK)
+      env:
+        - DOCS_TEST="true"
+        - PUPPET_GEM_VERSION="~> 6.0"
+    - name: "RHEL/CentOS 6 - Puppet 4"
+      rvm: 2.4
+      gemfile: build/kitchen/Gemfile
+      env:
+        - TEST_NAME="centos6-puppet4"
+    - name: "RHEL/CentOS 6 - Puppet 5"
+      rvm: 2.4
+      gemfile: build/kitchen/Gemfile
+      env:
+        - TEST_NAME="centos6-puppet5"
+    - name: "RHEL/CentOS 6 - Puppet 6"
+      rvm: 2.4
+      gemfile: build/kitchen/Gemfile
+      env:
+        - TEST_NAME="centos6-puppet6"
+    - name: "RHEL/CentOS 7 - Puppet 4"
+      rvm: 2.4
+      gemfile: build/kitchen/Gemfile
+      env:
+        - TEST_NAME="centos7-puppet4"
+    - name: "RHEL/CentOS 7 - Puppet 5"
+      rvm: 2.4
+      gemfile: build/kitchen/Gemfile
+      env:
+        - TEST_NAME="centos7-puppet5"
+    - name: "RHEL/CentOS 7 - Puppet 6"
+      rvm: 2.4
+      gemfile: build/kitchen/Gemfile
+      env:
+        - TEST_NAME="centos7-puppet6"
+    - name: "Ubuntu 14 - Puppet 4"
+      rvm: 2.4
+      gemfile: build/kitchen/Gemfile
+      env:
+        - TEST_NAME="ubuntu14-puppet4"
+    - name: "Ubuntu 14 - Puppet 5"
+      rvm: 2.4
+      gemfile: build/kitchen/Gemfile
+      env:
+        - TEST_NAME="ubuntu14-puppet5"
+    - name: "Ubuntu 14 - Puppet 6"
+      rvm: 2.4
+      gemfile: build/kitchen/Gemfile
+      env:
+        - TEST_NAME="ubuntu14-puppet6"
+    - name: "Ubuntu 16 - Puppet 4"
+      rvm: 2.4
+      gemfile: build/kitchen/Gemfile
+      env:
+        - TEST_NAME="ubuntu16-puppet4"
+    - name: "Ubuntu 16 - Puppet 5"
+      rvm: 2.4
+      gemfile: build/kitchen/Gemfile
+      env:
+        - TEST_NAME="ubuntu16-puppet5"
+    - name: "Ubuntu 16 - Puppet 6"
+      rvm: 2.4
+      gemfile: build/kitchen/Gemfile
+      env:
+        - TEST_NAME="ubuntu16-puppet6"
+
+notifications:
+  # Post build failures to '#puppet' channel in 'stackstorm-community' Slack
+  slack:
+    rooms:
+      - secure: SJ0wpsrrq7oYeepFawJs2iSuKLpWr6aoyWgP+fTPLq8tcZGuIUKJSLM+1FZddYE08QvykO1E0jyeqBrTyvFc7EwsW6vD5bpFYGtVMSMJJIgk76UEhmXbqtTJTjfjYT7/7RDnWlEGXXS7icIZSkEP1moz34fXEDbXKzCpFtqZkAo=
+    on_pull_requests: false
+    on_success: change # default: always
+    on_failure: always # default: always
+

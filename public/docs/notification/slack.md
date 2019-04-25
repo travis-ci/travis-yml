@@ -2,24 +2,19 @@
 
 
 
-## Type
+## Types
 
-Any of:
-
-* Map (Hash)
+* Hash
+* Array of: 
 * 
 * Boolean
 
-## Flags
-
-None.
 
 
 ## Examples
 
 ```yaml
 slack:
-  rooms: "[ref:secures]"
   template: string
   enabled: true
   on_success: always
@@ -28,7 +23,23 @@ slack:
 ```
 
 ```yaml
-slack: "[ref:secures]"
+slack:
+  rooms:
+  - secure: encrypted string
+```
+
+```yaml
+slack:
+  rooms:
+```
+
+```yaml
+slack:
+- secure: encrypted string
+```
+
+```yaml
+slack:
 
 ```
 

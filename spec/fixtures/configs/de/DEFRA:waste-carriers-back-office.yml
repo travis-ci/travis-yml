@@ -1,0 +1,43 @@
+env:
+  global:
+    - CC_TEST_REPORTER_ID=9db6462028452d95a747379abb11cd1f15f52499e7327904c50896883fffc2e8
+    - WCRS_REGISTRATION_EXPIRES_AFTER=3
+    - WCRS_REGISTRATION_RENEWAL_WINDOW=3
+    - WCRS_RENEWAL_CHARGE=10500
+    - WCRS_TYPE_CHANGE_CHARGE=4000
+    - WCRS_CARD_CHARGE=500
+
+language: ruby
+rvm: 2.4.2
+cache: bundler
+
+# Travis CI clones repositories to a depth of 50 commits, which is only really
+# useful if you are performing git operations.
+# https://docs.travis-ci.com/user/customizing-the-build/#Git-Clone-Depth
+git:
+  depth: 3
+services:
+  - mongodb
+before_install:
+  - export TZ=UTC
+  - gem install -v 1.17.2 bundler --no-rdoc --no-ri
+
+before_script:
+  # Set up Mongo databases
+  - mongo waste-carriers-test --eval 'db.createUser({user:"mongoUser", pwd:"password1234", roles:["readWrite", "dbAdmin", "userAdmin"]})'
+  - mongo waste-carriers-users-test --eval 'db.createUser({user:"mongoUser", pwd:"password1234", roles:["readWrite", "dbAdmin", "userAdmin"]})'
+  # Setup to support the CodeClimate test coverage submission
+  # As per CodeClimate's documentation, they suggest only running
+  # ./cc-test-reporter commands on travis-ci push builds only. Hence we wrap all
+  # the codeclimate test coverage related commands in a check that tests if we
+  # are in a pull request or not.
+  - if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter; fi
+  - if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then chmod +x ./cc-test-reporter; fi
+  - if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then ./cc-test-reporter before-build; fi
+  # Run rubocop. Its installed as a dependency (hence no install step) as this
+  # allows projects to control the version they are using (rather than getting)
+  # surprise build failures.
+  - bundle exec rubocop
+
+after_script:
+  - if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT; fi

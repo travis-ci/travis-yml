@@ -1,0 +1,36 @@
+sudo: required
+services:
+  - docker
+
+env:
+  global:
+    - APP_WEBROOT=/app/html
+    - DOCKER_COMPOSE_VERSION=1.14.0
+    - DOCKER_IMAGE_NAME=unblibraries/nginx-php
+    - DOCKER_IMAGE_PARENT=unblibraries/nginx:alpine-edge
+    - DOCKER_IMAGE_TAG=alpine-php7
+    - ENDPOINT_NAME=Nginx
+
+before_install:
+  - curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
+  - chmod +x docker-compose
+  - sudo mv docker-compose /usr/local/bin
+
+before_script:
+  - docker pull "$DOCKER_IMAGE_PARENT"
+  - 'sed -i "s|image: $DOCKER_IMAGE_NAME:$DOCKER_IMAGE_TAG|build: .|g" docker-compose.yml'
+  - 'echo "    volumes:" >> docker-compose.yml'
+  - 'echo "      - ./travis/htdocs:$APP_WEBROOT" >> docker-compose.yml'
+
+script:
+  - docker-compose build
+  - docker-compose up -d
+  - travis/waitForDeploy.sh
+  - travis/testPHP.sh
+
+after_success:
+  - travis/triggerDockerHubBuild.sh
+
+notifications:
+  slack:
+    secure: U4RI8FZZVxuwxa+chyZVVkBWM70wAeInBBpM+Yf7PqkV+UrX88w4ldb1pMAPfuGYCq7inuJC5uT0AKm8ejgzIPIyiO83GLu/ymtMkBdvfbgpQ9GHJQ75dDRUuh/AuL4CT3zq0eeBEKLAiuuNZ+pycHwuiH7Tuh5v8xL3y7ltRAbxScZM4L3RpqKEaqFuIBAcIgHUlYrc98F0SJweL+08jiKNTllauSToGPuqIVVOL1cUQ8N6yUDXvABZktxtWcXXY8UjF5PxAglrCyitCSlJNWxPiQAK86h8AprSPmlef5zL4cbiYknLuLHyBIIn2tozrTE8gL/IfVS4eCo3c8HdMqGt89tFGr3MhB20y4Kpmh9S0YM9d1NSCji2NiT9rfRa7PsUGd6YPOy5iJei3gPiChERJmUXwRXAc66G3aGU+8hdEsEjV6PX3rYA47Y13jGmx3/fpD/NFujwAWP6Uagk/ymUG15vaETfCxvaoi9aRmoEgv1SEfEjSsxHlREWVWT3SYEFxmomgt3gWLbdPCa48yANDYXupOtf3qNyPGDhqxxTH0w0EOaPvHpRXkFyJI22wpTJ6dKCQJa2ImGY2dBKojbCvM2V2f/Fybh0KhzmIceZE+y2WptgBjKAHgXbYIxS3TMPzHfgHTxAy7OWjq0RqCfTasryPU0lvqAOL+Aoxtg=

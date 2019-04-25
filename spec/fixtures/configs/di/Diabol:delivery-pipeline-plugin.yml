@@ -1,0 +1,30 @@
+sudo: required
+language: java
+env:
+  global:
+    - JENKINSCI_USERNAME=diabol_jenkins
+    - secure: "R3Wz/PgUYQqelwxXu+mMkHHzpLaFTxWmj6m+fOxnlJ85njJXOf/4jrMwMMLlvUM3DgZ+dJp8nANNxUPkOBIBLfbSNWGZTsLEJkGu+hEtBKCZhHLLXfIYhVc8tVFgEvfQo4QP+LXk63COfaIlE45cD8NIqFzebbMeN9K/MCOAIuw="
+notifications:
+  slack:
+    secure: phVNsiDfu5nDM7okqhGgX1Qhh3Sawqy5X3p5bgDarh9RX82V2OAebyiiKiw6aNGyDCoD0ElMHmz7tbdBODsR3muWyoQ5EJBsDgNv1NM9dhkdeIQ/182bF7EBFciPW5SYjl0+dOkIeMn9DHdg8i0RVxwjy6GjJX2r/6oUmYxExQk=
+before_install:
+  - "export DISPLAY=:99.0"
+  - "sh -e /etc/init.d/xvfb start"
+  - "sed 's/localhost.localdomain localhost/localhost localhost.localdomain/' /etc/hosts > /tmp/etchostsfile && cat /tmp/etchostsfile | sudo tee /etc/hosts"
+  - echo "MAVEN_OPTS='-Xmx2g -XX:MaxPermSize=1024m'" > ~/.mavenrc
+  - wget -N http://chromedriver.storage.googleapis.com/2.35/chromedriver_linux64.zip -P ~/
+  - unzip ~/chromedriver_linux64.zip -d ~/
+  - rm ~/chromedriver_linux64.zip
+  - sudo mv -f ~/chromedriver /usr/local/share/
+  - sudo chmod +x /usr/local/share/chromedriver
+script:
+  - "if [[ -z $TRAVIS_TAG ]]; then mvn --batch-mode -Dwebdriver.chrome.driver=/usr/local/share/chromedriver install; fi"
+  - "if [[ -n $TRAVIS_TAG ]]; then ./release.sh master $TRAVIS_TAG; fi"
+cache:
+  directories:
+  - $HOME/.m2
+after_success:
+  - mvn jacoco:report coveralls:report
+  - bash <(curl -s https://codecov.io/bash)
+addons:
+  chrome: stable

@@ -1,0 +1,39 @@
+language: node_js
+node_js:
+  - "8.11.1"  # Highest 8.* in Azure
+  - "lts/*"   # Latest Node LTS
+  - "10.6.0"  # Highest Azure 10.*
+  - "node"    # Latest stable Node
+cache: yarn
+before_install:
+  - curl -o- -L https://yarnpkg.com/install.sh | bash -s --
+  - export PATH="$HOME/.yarn/bin:$PATH"
+install:
+  - npm install -g codecov
+  - npm install -g @angular/cli
+  - yarn install --frozen-lockfile
+addons:
+  apt:
+    sources:
+      - google-chrome
+    packages:
+      - google-chrome-stable
+script:
+  - yarn --version
+  - yarn lint
+  - yarn test
+  - yarn build
+  - yarn install:demo
+  - yarn build:demo
+after_success:
+  - yarn test:codacy-upload
+  - yarn coverage
+deploy:
+  provider: npm
+  email: jenkins-reform@hmcts.net
+  api_key:
+    secure: IdEpB/GfBj9X91W18+41hA5+QetbQL8eyo9pfosR27ulkC06YsWcu5Svo+iLDIKZatm6JcowYFJxV98PPOnaPlm/HND7k3H3qnNiCVc2J5/wlum9vsEIesCB+ZG+aVjxngL8qj19bMJ8sHHINZeyHQAwCNXEvXZolGXAgjGqU2cPmnV3Ou9rmvi4CqZghQQTWxgOlXbjnbyYirMVmTbdxJxNHeOEmoDhEDbea2wKsbZs81pal1oF7C4WzuQyid0meKfaBI+kekN4fk8MAWPlAf3jb1lp8VehC6Kv9GbWuefsgB3ySqT3wBZaiF6bVoBxC2m4EkcB1VkhlpgZltSvJ2WYAPWKxv4rJAKqZEw4l7ChH17KXQNxkhkWevZFHFqEBnEcRI7Wy6OQOALSQvhZq2dy7f8qYzEQk/R2sJby4T5ZzGhzuPOf2li8aJn968qZq24nN1ZdLAIgpJ5cWjqycweGj9KBSGVZdW+Z1+c9o6sMN62S46X3m1uQT87JErGDhVu9onTMgmm9q6V1pgWcC49lSzls4uJ9D2o7i3ojTZ+RPtTZVgY4bMu0QdUipDVn2PWY1WAMKLTEzT+vnOH/cNcLsSQ5udpp2v/kEvsnvfMLEBowsxHz3klNPjYvAtphKlV70+uz8BH7irKZS07shwHjEtHQwFmBCO4fMfnvN+o=
+  on:
+    tags: true
+    repo: hmcts/ccd-case-ui-toolkit
+  skip_cleanup: true

@@ -1,0 +1,32 @@
+language: go
+
+script: cd 
+
+# Only the last two Go releases are supported by the Go team with security
+# updates. Any versions older than that should be considered deprecated.
+# Don't bother testing with them. tip builds your code with the latest
+# development version of Go. This can warn you that your code will break
+# in the next version of Go. Don't worry! Later we declare that test runs
+# are allowed to fail on Go tip.
+go:
+  - 1.11
+  - master 
+
+# Skip the install step. Don't `go get` dependencies. Only build with the
+# code in vendor/
+install: true
+
+matrix:
+  # It's ok if our code fails on unstable development versions of Go.
+  allow_failures:
+    - go: master
+  # Don't wait for tip tests to finish. Mark the test run green if the
+  # tests pass on the stable versions of Go.
+  fast_finish: true
+  
+before_script:
+- hack/verify-gofmt.sh
+- hack/verify-golint.sh
+- hack/verify-govet.sh
+
+script: go build ./cmd/... ./pkg/... && go test ./cmd/... ./pkg/...

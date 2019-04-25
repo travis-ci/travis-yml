@@ -1,0 +1,39 @@
+dist: trusty
+sudo: false
+
+language: go
+
+go:
+  - 1.8
+
+services:
+  - postgresql
+  - mysql
+
+addons:
+  postgresql: "9.5"
+
+env:
+  global:
+  - PGVERSION=9.5
+  - DB_PASSWORD=abc123
+
+before_install:
+  - go get github.com/onsi/ginkgo/ginkgo
+
+install:
+  # Prevent default install task that does a `go get -t ./...`
+  - true
+
+before_script:
+  - psql -c 'create database mydb;' -U postgres
+  # Add authentication to postgresql
+  - psql -U postgres -c "ALTER USER postgres WITH PASSWORD '${DB_PASSWORD}';"
+  - sudo rm /etc/postgresql/$PGVERSION/main/pg_hba.conf
+  - echo "local all all trust" | sudo tee /etc/postgresql/$PGVERSION/main/pg_hba.conf
+  - echo "host all all 127.0.0.1 255.255.255.255 md5" | sudo tee -a /etc/postgresql/$PGVERSION/main/pg_hba.conf
+  - echo "host all all ::1/128 md5" | sudo tee -a /etc/postgresql/$PGVERSION/main/pg_hba.conf
+  - sudo service postgresql restart
+
+script:
+  - make unit POSTGRESQL_PASSWORD=${DB_PASSWORD}

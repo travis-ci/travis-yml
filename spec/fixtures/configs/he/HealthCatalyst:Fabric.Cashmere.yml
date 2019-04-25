@@ -1,0 +1,39 @@
+language: node_js
+sudo: false
+dist: trusty
+
+node_js:
+  - '8'
+
+addons:
+  chrome: stable
+
+stages:
+  - Build/Test
+  - name: Publish
+    if: (NOT type IN (pull_request)) AND (branch = master)
+
+jobs:
+  include:
+    - stage: Build/Test
+      env: "PHASE=unit"
+    - env: "PHASE=lint"
+    - env: "PHASE=build"
+    - stage: Publish
+      env: "PHASE=publish"
+      deploy:
+        provider: pages
+        skip_cleanup: true
+        github-token: $GITHUB_TOKEN
+        local-dir: dist/user-guide
+        on:
+          branch: master
+
+before_install:
+  - dpkg --compare-versions `npm -v` ge 5.8 || npm i -g npm@^5.8
+
+install:
+  - npm ci
+
+script:
+  - ./scripts/travis-script.sh

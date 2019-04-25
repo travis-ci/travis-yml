@@ -1,0 +1,32 @@
+language: node_js
+
+node_js:
+  - "node"
+
+cache:
+  directories:
+  - node_modules
+
+install:
+  - npm i -g codecov
+
+script:
+  - npm install
+  - npm run test
+
+jobs:
+  include:
+    - # require the branch name to be master (note for PRs this is the base branch name)
+      if: branch = master
+      stage: release
+      node_js: lts/*
+      # Advanced: optionally overwrite your default `script` step to skip the tests
+      # script: skip
+      deploy:
+        provider: script
+        skip_cleanup: true
+        script:
+          - npm run build && npx semantic-release
+          - curl -X POST --data-urlencode "payload={ \"text\" : \"A new version of `react-lite-ui` was published to NPM :tada:\" }" $RELEASE_NOTIF_URL
+
+after_success: npm run coverage

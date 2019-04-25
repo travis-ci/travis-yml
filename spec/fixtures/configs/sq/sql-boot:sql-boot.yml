@@ -1,0 +1,37 @@
+dist: trusty
+
+language: java
+
+jdk:
+  - openjdk8
+
+sudo: required
+
+services:
+  - docker
+
+## Run integration tests
+script:
+  - mvn verify
+  - mvn compile jacoco:report
+  - mvn docker:build
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
+  - docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
+  - docker push mgramin/sql-boot
+
+before_deploy:
+  - export TRAVIS_TAG=v0.3.0
+  - git tag $TRAVIS_TAG --force
+
+deploy:
+  provider: releases
+  api_key: $GITHUB_TOKEN
+  file: target/sql-boot.zip
+  skip_cleanup: true
+  name: v0.3.0
+  overwrite: true
+  on:
+    all_branches: true
+    tags: false

@@ -1,0 +1,40 @@
+addons:
+    apt:
+        packages:
+        - dos2unix
+cache:
+- pip
+dist: xenial
+env:
+    global:
+    -   secure: 2Qe5QAP58p4a/a2S3uh3BELkHO5MWPf+7gEhDjHBCrkC/HP2//3C0KrNFaADWO81dPVFB4Q7k711wxJUT5dPJm5oXbW9r4H0x5F4WwcvbitPienUhhIuLB8ps6THPNmGL8bYeTH0jKrtPqgXLNXVjVBJyBBMti8DVuB+txJIYqvqX+HZVr3t0W3hwbpQUUcXhyfjMcoY+hC/NXCiIzOggQui1/LS3Cr8ifUuFWHg6VKP9RAj6IJpHqPsL1PQw06NTLBsvBHmzdB/9zpAQOfJA78Fd/8NOxltrOi/IF8a/7smt+PKK+8Nya2P6zKCYw0Fv5gk71j3tgmg248MzgwhrSyTFI6woNC4ZZh8DTkADY0FqGlh+6uzNProxgMF8mIlyBKMfK2wBKrndJGxzCF3z2EpFriqFzcKcezHtTf/Qwxim5ztbLK8fCuwKf+d7z6cmmrK1P3xtYsjzn4yoW/oL9AdeV39uzOiaE3wFXluXimpu1Uhatlp32sfCTBFPktMny5ziUhNs7HUI5UEsNUiZACb+6oxgWvL4z12e/vcy8atg2pKbECLtL9bbeqz5cgxp2hLrk1QjeO6rGeDW0UV5VUy5MyY63VgmnCxmLHu0ZjuYzgxhrf+C5EwDBnvI1j2vzgsQfpSECNg7PCs27K9PSdLBO1LuOdgLhOuRl+eCMg=
+    -   GIT_NAME: Travis CI
+    -   GIT_EMAIL: dead-hosts@funilrys.com
+    -   TRAVIS_REPO_SLUG: Ultimate-Hosts-Blacklist/BadIPs.com_Level_3
+    -   GIT_BRANCH: master
+    -   UPDATE_LOCATION: https://raw.githubusercontent.com/Ultimate-Hosts-Blacklist/repository-structure/master/update.py
+    -   ADMINISTATION_LOCATION: https://raw.githubusercontent.com/Ultimate-Hosts-Blacklist/repository-structure/master/administration.py
+install:
+- pip3 install --upgrade pip
+- pip3 install requests
+- pip3 install ultimate-hosts-blacklist-whitelist PyYaml
+- if [[ ! -f .admin ]]; then wget "${UPDATE_LOCATION}" -o /dev/null -O update.py &&
+    chmod +x update.py; else echo "No need to download/update update.py."; fi
+- if [[ ! -f .admin ]]; then wget "${ADMINISTATION_LOCATION}" -o /dev/null -O administration.py
+    && chmod +x administration.py; else echo "No need to download/update administration.py.";
+    fi
+language: python
+matrix:
+    fast_finish: true
+notifications:
+    email:
+        on_failure: always
+        on_success: never
+        recipients:
+        - dead-hosts@funilrys.com
+        - mitchellkrogza+ultimatehostsblacklist@gmail.com
+python:
+- '3.7'
+script:
+- python3 ./update.py
+sudo: required

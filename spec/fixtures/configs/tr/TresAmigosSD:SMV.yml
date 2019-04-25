@@ -1,0 +1,22 @@
+sudo: required
+dist: trusty
+language: python
+python: 3.6.5
+install:
+  - pip install tox
+  - pyenv install --skip-existing 2.7.13
+  - pyenv install --skip-existing 3.5.3
+  - pyenv install --skip-existing 3.6.5
+  - pyenv global 3.6.5 3.5.3 2.7.13
+jobs:
+  include:
+    - name: thorough
+      # run thorough tests for daily cron test
+      # also allow thorough tests to be forced through the Travis UI
+      if: type = cron or env(TEST_TYPE) = thorough
+      stage: test
+      script: make test-thorough
+    - name: quick
+      if: type != cron and env(TEST_TYPE) != thorough
+      stage: test
+      script: make test-quick

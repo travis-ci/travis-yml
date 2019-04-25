@@ -1,0 +1,55 @@
+# .travis.yml file based on:
+# https://gist.github.com/dan-blanchard/7045057
+
+language: python
+python:
+  - "3.6"
+env:
+  - CONDA_TYPE=miniconda CONDA_VERS=https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
+  - CONDA_TYPE=miniconda CONDA_VERS=https://repo.continuum.io/miniconda/Miniconda3-4.5.11-Linux-x86_64.sh
+
+addons:
+  apt:
+    packages:
+    - libusb-1.0-0-dev
+
+install:
+  # Setup anaconda. See http://conda.pydata.org/docs/travis.html
+  - echo "Using $CONDA_TYPE"
+  - wget $CONDA_VERS -O miniconda.sh
+  - bash miniconda.sh -h | sed '4q;d'
+  - bash miniconda.sh -b -p $HOME/miniconda
+  - export PATH="$HOME/miniconda/bin:$PATH"
+  # - export BBN_DB="$PWD/bbn.sqlite"
+  # - echo "Database file at $BBN_DB"
+  - hash -r
+  - conda config --set always_yes yes --set changeps1 no
+  - conda update -q conda
+  # Useful for debugging any issues with conda
+  - conda info -a
+
+  # Create conda environment with dependencies
+  - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION numpy scipy h5py sphinx matplotlib pandas networkx cffi jupyter psutil sqlalchemy ipykernel ipywidgets
+  - source activate test-environment
+  - export GIT_LFS_SKIP_SMUDGE=1
+  - pip install git+https://github.com/BBN-Q/bbndb.git
+  - pip install git+https://github.com/BBN-Q/Adapt.git
+  - pip install git+https://github.com/BBN-Q/QGL.git@sqlalchemy
+  - pip install git+https://github.com/spatialaudio/nbsphinx.git@master
+  - pip install pyvisa coveralls scikit-learn pyusb future python-usbtmc setproctitle
+  - export GIT_LFS_SKIP_SMUDGE=0
+  - export PYTHONPATH=$PYTHONPATH:$PWD/src
+
+script:
+  - coverage run -m unittest discover -v test
+
+after_script:
+  - coveralls
+
+# necessary to run on new container-based infrastructure
+sudo: false
+
+cache:
+  directories:
+    - $HOME/download
+    - $HOME/.cache/pip

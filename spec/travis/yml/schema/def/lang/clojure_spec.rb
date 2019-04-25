@@ -11,7 +11,24 @@ describe Travis::Yml::Schema::Def::Clojure, 'structure' do
         type: :object,
         properties: {
           jdk: {
-            '$ref': '#/definitions/strs'
+            anyOf: [
+              {
+                type: :array,
+                items: {
+                  type: :string
+                },
+                flags: [
+                  :expand
+                ],
+                normal: true
+              },
+              {
+                type: :string
+              }
+            ],
+            flags: [
+              :expand
+            ]
           },
           lein: {
             type: :string

@@ -1,0 +1,24 @@
+language: node_js
+
+cache:
+  yarn: true
+  directories:
+    - node_modules
+
+notifications:
+  email: false
+
+node_js:
+  - 8
+
+install:
+  - yarn
+
+script:
+  - yarn build
+  - yarn lint
+
+branches:
+  only:
+    - master
+    - '/^greenkeeper/.*$/'

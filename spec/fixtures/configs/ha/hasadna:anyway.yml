@@ -1,0 +1,51 @@
+language: python
+
+cache:
+  - pip
+  - yarn
+
+python:
+  - 2.7.11
+  - 3.5
+  - 3.6
+
+node_js:
+  - "6"
+
+addons:
+  sauce_connect: true
+  postgresql: 9.6
+  apt:
+    packages:
+    - postgresql-9.6-postgis-2.3
+
+env:
+  global:
+    - SAUCELABS_USERNAME=anyway
+    - SAUCE_USERNAME=anyway
+    - DATABASE_URL='postgresql://postgres@localhost/anyway'
+    - secure: "RYGbTO5b15B5BJnmLQAajWskG7F/lDT+BO/P2EjP8xU5P70hME3PNgaZPJ1phPq49XRS4Oe2t4c7ta6V1JdDMc10MkihmEqgdsRyxw4UhVtz6i4mDYFZFrgntYofqbvfrc5r9Z4C81y8a79wY6D/H10L2ocpEeEsZWilh+N8mWE="
+    - secure: "HmWdkaHFKlvFKgpTc/TFtOwPxgu/FE+/J27sTMsXkFxf7MCSa4817CtEs6BumlVAuoPtnxy9es6RYsUoqv5+eIJBwCryx+DtmxjUqMtRM2RlNOPtRABOjZ/QECqgaRtNEAsSxQH3XWWWkniqQgXFCS6crKUhA+elpvivKgf9iyQ="
+
+services:
+  - postgresql
+  - rabbitmq
+
+sudo: false
+
+install:
+  - pip install -r requirements.txt -r test_requirements.txt
+  - yarn global add eslint --ignore-engines
+
+before_script:
+  - psql -c 'create database anyway;' -U postgres
+  - alembic upgrade head
+  - celery worker -A anyway.clusters_calculator -D
+
+script:
+  - pylint -j $(nproc) anyway tests main.py
+  - eslint static/js --ignore-path=static/js/.eslintignore
+  - ./main.py process registered_vehicles
+  - ./main.py process cbs
+  - pytest tests -m "not browser"
+#  - if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then for BROWSER in Chrome Firefox; do pytest tests -m browser --driver SauceLabs --capability browserName $BROWSER --capability tunnelIdentifier $TRAVIS_JOB_NUMBER; done; fi

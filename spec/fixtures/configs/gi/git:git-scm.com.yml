@@ -1,0 +1,18 @@
+language: ruby
+
+sudo: false
+
+before_script:
+  - bundle exec rake db:create db:schema:load
+
+bundler_args: --without development production --jobs=3 --retry=3
+
+cache:
+  bundler: true
+
+notifications:
+  email: false
+
+script:
+  - bundle exec rubocop -P
+  - bundle exec rspec

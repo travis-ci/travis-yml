@@ -1,0 +1,37 @@
+language: java
+sudo: required
+
+dist: trusty
+
+jdk:
+  - oraclejdk8
+  - openjdk8
+
+services:
+  - docker
+
+before_install:
+  - sudo netstat -lnp46
+  - sudo ls /etc/init.d/
+  - sudo /etc/init.d/postgresql stop
+  - sudo /etc/init.d/mysql stop
+  - sudo /etc/init.d/memcached stop
+  - sudo /etc/init.d/ssh stop
+  - sudo netstat -lnp46
+  - sudo sysctl vm.max_map_count=262144
+  - env
+  - cd docker
+  - sudo -H pip install -U docker-compose
+  - travis_wait 40 docker-compose up -d
+  - cd $TRAVIS_BUILD_DIR
+
+before_script:
+  - ./gradlew configureEnvironment
+
+script:
+  - sudo netstat -lnp46
+  - ./gradlew -info check
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
+

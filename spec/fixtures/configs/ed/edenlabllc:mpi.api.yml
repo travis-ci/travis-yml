@@ -1,0 +1,100 @@
+dist: xenial
+language: elixir
+sudo: required
+cache:
+  directories:
+    - deps
+services:
+  - docker
+  - postgresql
+addons:
+  postgresql: "9.6"
+  apt:
+    packages:
+      - docker-ce
+      - python3-pip
+elixir:
+  - 1.8.1
+otp_release:
+  - 21.2.5
+notifications:
+  slack:
+    rooms:
+      - secure: "unvWzXrygQzOm5umNQ9cD12y1zu1G1Vp51+TcDzzBVYxowW+zCOGJct1CO5TRyBWyU6Ex6WLlRdtDyk03b1ChqcjN1Ej56mS88SPjCUjmErbRlXalPr7P5U7PZOe+LFZMnNLwrMUWgqXpjqisbIkFZFzsuTCceOisBxOThRI1mvyweXIRTUO3TXReOyqiReO95gjSAlZDfREbAayIOSdPM5pNwGvT6vSqI2PA9I5kKoNabJvZFJY5i2DNCk1sEP/SbMJX4dNhnO/CCeLijUFOAivrkypzhU05n+WLN6lGvDdNEV36S0md6O60rWTdDJKbjJDjSlnIHrvWiP+KyMaUGPLKtRZJSyhPPDetRf2KVxCQPkXqgQAbkPKiJOqWKkJfNpBvB20CXhMIv3JiU/5glOOcG0wKopLswymI6ZvvoE6EE8z1yBvGmBdhJIjN6FwGxaP6lQGona8cT2l7yP1Tx5VIEfWtQn/fD6fGwopwGszRg/B4znUPRnnw7F596HujIrlO4LfEIDDYu5Qhx0/S9vMH2/65/9Zcn3JZpnF8rxSCdbjl5nnQxIfql11mT6NuAXsorm5+NiYHzz4Vb8H/k33g1iSugrzucwoLWOWgAg+8eCvmWoJUArvPS5v05+RheCh1iyGQJXE4rx0Ao0+If1i8aXkAHR58FgKKlYogOI="
+    on_success: always
+apt:
+  packages:
+    - inotify-tools
+env:
+  global:
+    - MIX_ENV=test
+    - DOCKER_NAMESPACE=edenlabllc
+    - POSTGRES_VERSION=9.6
+    - APPS='[{"app":"mpi","chart":"mpi","namespace":"mpi","deployment":"api","label":"api"}]'
+    # Docker Credentials
+    - secure: "lNSOl7jubWCk2H7lgiTE5iII0LziJ8SuTZtUsSIJxZV0RtLZUmf5c7HmEeXCG8quotX53k0Mw8FDPF+Y+NuBJ4sCmP9u8MLLWmRWgUwwNRzADwjekGvKOvEcaZURXK7asUvt+Vbsd1VcmFyUvh870jHIsbXhh5L8KpDXpjSXeH/x9HORr+TwMPHxpMWH40DGHjd46cjSaU1h9f2PwHwjukZNDthHdk0SCbuJl0rxfUNpOCy9bD5lZAgd8vB6QITUShgkJfy7fb5zEH51DdF5ZUsl+lB1Zrgxbu1kX32pzX1yVwKDEcJgqc1h93WKQzcHRu2E5h6nVe6PHvSOi4SadZ1O/4sjj7FrbYDvpwHt2Tzd8pur+x6uvOgag2VwwVYnl9fclayJ7x2fJI0a5LihQD92GmGFabV8aUxIB97Yl8GcJPWqrlgzkogwelzb2fcSRbsv/Nyhdvw4qrM7DURx3oDVMmrsZYvGGoyKOY8GnqlOmcEtDUoxabMdenzW6/dhirHU1y8u1SPY1dUmbuk7Zwu66uIok1K0xDpoP/FgKATVHq0KYWSZfrf7XuzEeB9lGq29YG4lBVnatmiRoeiNNdprxy+aa0AxS4TqycrI0A3onMT1pr05gcRkfduBSI4tiRuxiL5odko5Qogxv//4py7iL6Ln4F3X/hlr9R2lCBg="
+    # GitHub Credentials
+    - secure: "Y+b6/APwqIIdMc0L+fmRt0PU+tQZv1xQS2fP6cfUjIObx0B+1CmBkFHOFCVwi9TzzmxAp4aqH2dzgLizs06RHqyAJT/tnlLdh5pN5Mqc+tJ8OHtABGTkPuWPibrADwaowzQyfpm2rwj5wcJ2Auq0opa+7pjoI7pBkoyOr/lBleLiMBKRk8k/0IbHQciGHzTyMIcJYcnhdnAmBKIyNS5019lvdT3nbmjkYRJuP+WhSA9YLVJdh78GOSIdHKykgJL+JdJO8x3hD0dZBGEAVJvg6jmSG0cn2kJJcACZyPFbenyQXxcYaMWUJOJEsmTRKnUvX919rVWUu58xNpq8Q62oedAedXRyUP/mygd973TflLpeLmQwmmAW98hOlDi6XaJ2eJJcQVMEfa2LYXrxz9pGB8YAovjZDfBWuckpz9D0rPgZl//ZquUdJ7oR46tMWMCbKlr+veFvXVs/kaIweqfGB5O1FhjZ+ITdG3iy4RFSa1kcLcndREaN3mKkCTRoFJ02b/bw8LrkahOCiZP/qTU/7JHkRqXMnQD6Zy3xZZJ/QS4S2Ug28OvgjRORSLRjbDPPBF/JwSVCyrTjHSoV+gxQv4PInYT2G8o6RowqmfIxXw0xpSkqFu/0euPl/LeTLT/ZwJ+2wz7CFQ+dpYzaH0YrsSOGOp9fN3rHu5uYABfUBjM="
+branches:
+  # Releases are generated automatically, stop infinite build loop
+  except:
+    - /[0-9]*\.[0-9]*\.[0-9]*/
+before_install:
+  - sudo apt-get install jq
+  - curl -s https://raw.githubusercontent.com/edenlabllc/ci-utils/umbrella_v2/init-db.sh -o init-db.sh; sudo sh ./init-db.sh
+  - curl -s https://raw.githubusercontent.com/edenlabllc/ci-utils/umbrella_v2/init-kafka.sh -o init-kafka.sh; sudo sh ./init-kafka.sh
+  # create kafka topics
+  - kafka/bin/kafka-topics.sh --create --partitions 1 --replication-factor 1 --zookeeper localhost:2181 --topic medical_events
+  - kafka/bin/kafka-topics.sh --create --partitions 1 --replication-factor 1 --zookeeper localhost:2181 --topic person_events
+  - kafka/bin/kafka-topics.sh --create --partitions 1 --replication-factor 1 --zookeeper localhost:2181 --topic mongo_events
+jobs:
+  include:
+    - stage: "test and build"
+      # run tests
+      script:
+      - pip3 install setuptools wheel
+      - pip3 install -r python_requirements.txt
+      - (curl -s https://raw.githubusercontent.com/edenlabllc/ci-utils/umbrella_v2/tests.sh -o tests.sh; bash ./tests.sh) || travis_terminate 1
+      # Build Docker container
+    - stage: "test and build"
+      name: "build manual_merger"
+      env: APPS='[{"app":"manual_merger","chart":"mpi","namespace":"mpi","deployment":"manual-merger", "label":"manual-merger"}]'
+      # "Decrypting deploy key..."
+      script:
+      - openssl aes-256-cbc -K $encrypted_c0f7b939d2bc_key -iv $encrypted_c0f7b939d2bc_iv -in eHealth-8110bd102a69.json.enc -out eHealth-8110bd102a69.json -d
+      - (curl -s https://raw.githubusercontent.com/edenlabllc/ci-utils/umbrella_v2/docker.sh -o docker.sh; bash ./docker.sh) || travis_terminate 1
+    - stage: "test and build"
+      name: "build person_deactivator"
+      env: APPS='[{"app":"person_deactivator","chart":"mpi","namespace":"mpi","deployment":"person-deactivator", "label":"person-deactivator"}]'
+      # "Decrypting deploy key..."
+      script:
+      - openssl aes-256-cbc -K $encrypted_c0f7b939d2bc_key -iv $encrypted_c0f7b939d2bc_iv -in eHealth-8110bd102a69.json.enc -out eHealth-8110bd102a69.json -d
+      - (curl -s https://raw.githubusercontent.com/edenlabllc/ci-utils/umbrella_v2/docker.sh -o docker.sh; bash ./docker.sh) || travis_terminate 1
+    - stage: "test and build"
+      name: "build mpi"
+      env: APPS='[{"app":"mpi","chart":"mpi","namespace":"mpi","deployment":"api","label":"api"}]'
+      # "Decrypting deploy key..."
+      script:
+      - openssl aes-256-cbc -K $encrypted_c0f7b939d2bc_key -iv $encrypted_c0f7b939d2bc_iv -in eHealth-8110bd102a69.json.enc -out eHealth-8110bd102a69.json -d
+      - (curl -s https://raw.githubusercontent.com/edenlabllc/ci-utils/umbrella_v2/docker.sh -o docker.sh; bash ./docker.sh) || travis_terminate 1
+    - stage: "test and build"
+      name: "build mpi_scheduler"
+      env: APPS='[{"app":"mpi_scheduler","chart":"mpi","namespace":"mpi","deployment":"mpi-scheduler","label":"mpi-scheduler"}]'
+      # "Decrypting deploy key..."
+      script:
+      - openssl aes-256-cbc -K $encrypted_c0f7b939d2bc_key -iv $encrypted_c0f7b939d2bc_iv -in eHealth-8110bd102a69.json.enc -out eHealth-8110bd102a69.json -d
+      - (curl -s https://raw.githubusercontent.com/edenlabllc/ci-utils/umbrella_v2/docker.sh -o docker.sh; bash ./docker.sh) || travis_terminate 1
+    - stage: "test and build"
+      name: "build person_updates_producer"
+      env: APPS='[{"app":"person_updates_producer","chart":"mpi","namespace":"mpi","job":"true"}]'
+      # "Decrypting deploy key..."
+      script:
+      - openssl aes-256-cbc -K $encrypted_c0f7b939d2bc_key -iv $encrypted_c0f7b939d2bc_iv -in eHealth-8110bd102a69.json.enc -out eHealth-8110bd102a69.json -d
+      - (curl -s https://raw.githubusercontent.com/edenlabllc/ci-utils/umbrella_v2/docker.sh -o docker.sh; bash ./docker.sh) || travis_terminate 1
+    - stage: "test and build"
+      name: "build deduplication"
+      env: APPS='[{"app":"deduplication","chart":"mpi","namespace":"mpi","job":"true","dockerfile":"Dockerfile.deduplication"}]'
+      # "Decrypting deploy key..."
+      script:
+      - openssl aes-256-cbc -K $encrypted_c0f7b939d2bc_key -iv $encrypted_c0f7b939d2bc_iv -in eHealth-8110bd102a69.json.enc -out eHealth-8110bd102a69.json -d
+      - (curl -s https://raw.githubusercontent.com/edenlabllc/ci-utils/umbrella_v2/docker.sh -o docker.sh; bash ./docker.sh) || travis_terminate 1

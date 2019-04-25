@@ -1,0 +1,24 @@
+language: node_js
+node_js: 8
+
+env:
+  global:
+  - DEBUG: phenomic:*
+
+before_install:
+  # Install Yarn
+  - curl -o- -L https://yarnpkg.com/install.sh | bash
+  - export PATH=$HOME/.yarn/bin:$PATH
+  # Install Watchman dependency
+  - git clone --depth=1 --branch=v4.7.0 https://github.com/facebook/watchman.git
+  - pushd watchman && ./autogen.sh && ./configure --without-python && make && sudo make install && popd
+
+cache:
+  yarn: true
+  directories:
+    - node_modules
+    - website/.screenshots
+    - website/public/showcase/entry
+
+script:
+  - yarn run test-without-lint

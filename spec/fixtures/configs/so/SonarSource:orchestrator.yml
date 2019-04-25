@@ -1,0 +1,19 @@
+language: java
+sudo: false
+jdk: openjdk8
+install: true
+script: ./travis.sh
+
+notifications:
+  email: false
+
+cache:
+  directories:
+    - $HOME/.m2/repository
+    - $HOME/.sonar
+
+notifications:
+  email: false
+  webhooks:
+    secure: "FbvroC2dU48lfDbGBc+EiNFWV5npRgo4NWOnKtCZ1b0fsHUu25Ir92NoEwl2LkqOhHLi7llle/66ZFv+Hpy3ODZQyhWH58nZByMJRAdBCDqUb6wp3ztnwMzTwhJjWAWlja42m8VwG46PyPLeQsWEY5H6IyQtTNBLv9TgAddFkEXlYL9GHxCOkJ9XHIEqyIYmOZnj17uZXQ2qgG01iCXVjV846bV8mwuypGFjBth8UU4L3vWkcFusbznE6rs7Wbu4HvOtPFhO2tEwxmVRsQLn8KNzMvNR0MsRjRtRtRCmJTDmBdFYjOjlJ6NC24GUNk0lMSh+KNycIy61pYdqK/bGqzKAh8Jdob3ouojjPYF3usgtUmeB+ZEXN/IrM4nQlFXyHojm74juS1ljgVwas0gC9982kskTewtbEomtixU3mOKfDh4SdYIVw//LCYvV0n4qH0jgajh2mTsIAy6nAmBlmZkXDcjXBBlBOB+NCFClVBfw2NB8S3/LUtMIzy2yAP9P5clXWMZBjlKtrFisblLvF6S77QcBugkuCQ6tFIiOdfeoiGvudIa1o0xY1xJBNyPIzwSdKFs0g0kjMS5jclpjkanR1oo/TT0x1kaoDYPjNd2GHdTPg9tR0eKGs7LeqpfBfksz7tQH+cE0b7aipw4+yBb2PpphpSUwhSPNIFY38T0="
+  on_start: always

@@ -1,0 +1,17 @@
+language: node_js
+sudo: false
+dist: trusty
+
+env:
+    - POSTGRESQL_VERSION="10"
+
+node_js:
+  - "10"
+
+before_install:
+  - sudo service postgresql stop;
+  - sudo apt-get install -y --allow-unauthenticated --no-install-recommends --no-install-suggests postgresql-$POSTGRESQL_VERSION postgresql-client-$POSTGRESQL_VERSION postgresql-server-dev-$POSTGRESQL_VERSION postgresql-$POSTGRESQL_VERSION-postgis-2.4 postgresql-$POSTGRESQL_VERSION-postgis-2.4-scripts postgresql-plpython-$POSTGRESQL_VERSION
+  - echo -e "# TYPE  DATABASE        USER            ADDRESS                 METHOD \nlocal   all             postgres                                trust\nlocal   all             all                                     trust\nhost    all             all             127.0.0.1/32            trust"  | sudo tee /etc/postgresql/$POSTGRESQL_VERSION/main/pg_hba.conf
+  - export PGPORT=`grep ^port /etc/postgresql/$POSTGRESQL_VERSION/main/postgresql.conf | awk '{print $3}'`
+  - sed -i 's/5432/'"$PGPORT"'/g' test/test-config.js
+  - sudo service postgresql restart $POSTGRESQL_VERSION;

@@ -1,0 +1,29 @@
+language: cpp
+
+sudo: false
+
+os:
+  - linux
+  - osx
+
+dist: trusty
+
+compiler:
+  - gcc
+  - clang
+
+addons:
+  apt:
+    packages:
+      - libcppunit-dev
+      - zlib1g-dev
+
+matrix:
+  exclude:
+    - os: osx
+      compiler: gcc
+
+install:
+  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew install cppunit; fi
+
+script: cmake -DBUILD_TESTS=ON -DBUILD_EXAMPLES=ON -DBUILD_BINDINGS=ON -DCMAKE_CXX_FLAGS="-std=c++11" . && make && make check

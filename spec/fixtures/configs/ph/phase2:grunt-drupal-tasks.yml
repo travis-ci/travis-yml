@@ -1,0 +1,64 @@
+sudo: false
+language: php
+php:
+  - 5.5
+  - 5.6
+  - 7
+addons:
+ apt:
+   sources:
+   - ubuntu-toolchain-r-test
+   packages:
+   - gcc-4.8
+   - g++-4.8
+env:
+  - NVM_NODE_VERSION="4" GDT_DRUPAL_CORE="7" GDT_TEST_URL="http://127.0.0.1:8080/misc/drupal.js" CXX=g++-4.8
+  - NVM_NODE_VERSION="7" GDT_DRUPAL_CORE="8" GDT_TEST_URL="http://127.0.0.1:8080/core/misc/drupal.js" CXX=g++-4.8
+  - NVM_NODE_VERSION="6" GDT_DRUPAL_CORE="8" GDT_TEST_URL="http://127.0.0.1:8080/core/misc/drupal.js" CXX=g++-4.8
+matrix:
+  exclude:
+    # Skip Drupal 7 on PHP 7
+    - php: 7
+      env: NVM_NODE_VERSION="4" GDT_DRUPAL_CORE="7" GDT_TEST_URL="http://127.0.0.1:8080/misc/drupal.js" CXX=g++-4.8
+    # Skip PHP 5.5 and 5.6 with Node.js 7
+    - php: 5.5
+      env: NVM_NODE_VERSION="6" GDT_DRUPAL_CORE="8" GDT_TEST_URL="http://127.0.0.1:8080/core/misc/drupal.js" CXX=g++-4.8
+    # Skip PHP 5.5 and 5.6 with Node.js 7
+    - php: 5.5
+      env: NVM_NODE_VERSION="7" GDT_DRUPAL_CORE="8" GDT_TEST_URL="http://127.0.0.1:8080/core/misc/drupal.js" CXX=g++-4.8
+    - php: 5.6
+      env: NVM_NODE_VERSION="7" GDT_DRUPAL_CORE="8" GDT_TEST_URL="http://127.0.0.1:8080/core/misc/drupal.js" CXX=g++-4.8
+before_install:
+  - rm -rf ~/.nvm && git clone https://github.com/creationix/nvm.git ~/.nvm && (cd ~/.nvm && git checkout `git describe --abbrev=0 --tags`) && source ~/.nvm/nvm.sh && nvm install $NVM_NODE_VERSION
+  - node --version
+  - npm --version
+  - composer self-update
+  - echo "sendmail_path='true'" >> `php --ini | grep "Loaded Configuration" | awk '{print $4}'`
+  - phpenv config-add test/travis.php.ini
+install:
+  - npm set progress=false
+  - npm install -g grunt-cli@^1.0.0
+  - npm install -g mocha
+  - npm install
+script:
+  - echo "Code checkout disk usage"; du -chs .
+  # Disable linting until outstanding PRs are merged.
+  # Updating eslint has caused it to explode.
+  # - npm run lint
+  - ./test/create_working_copy.sh
+  - cd test/working_copy/
+  - echo "Working copy disk usage"; du -chs .
+  - grunt --version
+  - grunt help
+  - grunt --quiet --timer
+  - echo "Fully built disk usage"; du -chs .
+  - grunt install --db-url=sqlite:/`pwd`/.ht.sqlite --quiet
+  - grunt serve:test >/dev/null &
+  - until curl -I -XGET -s $GDT_TEST_URL 2>/dev/null | egrep -q '^HTTP.*200'; do sleep 0.5; done
+  - vendor/bin/drush --root=build/html en -y simpletest
+  - grunt test
+  - sleep 1; while (ps aux | grep '[b]ehat' > /dev/null); do sleep 1; done
+  - for pid in `ps aux | grep drush | grep runserver | awk '{print $2}'`; do echo "Stopping drush pid $pid"; kill -SIGINT $pid; done;
+  - grunt package --quiet
+  - mocha --timeout 30000 node_modules/grunt-drupal-tasks/test/build.js
+  - mocha node_modules/grunt-drupal-tasks/test/library.js

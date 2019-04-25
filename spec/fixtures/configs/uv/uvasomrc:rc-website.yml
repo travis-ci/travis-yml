@@ -1,0 +1,14 @@
+language: bash
+
+services:
+  - docker
+
+install:
+  - docker run -it -e TRAVIS_BRANCH=$TRAVIS_BRANCH -e BUCKET_NAME=$BUCKET_NAME -e DISTRIBUTION_ID=$DISTRIBUTION_ID -e BUCKET_NAME_STAGING=$BUCKET_NAME_STAGING -e STAGING_DISTRIBUTION_ID=$STAGING_DISTRIBUTION_ID -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY -e MAX_AGE=$MAX_AGE uvarc/hugo-build:v1 /root/build-site.sh
+
+notifications:
+  email:
+    on_success: change
+    on_failure: always
+    recipients:
+      - nmagee@virginia.edu

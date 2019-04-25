@@ -1,0 +1,56 @@
+sudo: required
+dist: xenial
+language: perl
+
+perl:
+  - "5.26"
+  - "5.24"
+  - "5.22"
+
+cache:
+  directories:
+    - perl_modules
+    - es_download
+
+env: GEARMAN_NETWORK_TEST=1 NETWORK_TEST=0 THUMBNAIL_TEST=0 CSL_TEST=1 DEVEL_COVER=0 ES_VERSION=6.5.0 ES_DOWNLOAD_URL=https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-${ES_VERSION}.tar.gz
+matrix:
+  include:
+    - perl: "5.28"
+      env: GEARMAN_NETWORK_TEST=1 NETWORK_TEST=0 THUMBNAIL_TEST=0 CSL_TEST=1 DEVEL_COVER=1 ES_VERSION=6.5.0 ES_DOWNLOAD_URL=https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-${ES_VERSION}.tar.gz
+
+before_install:
+  - docker pull librecat/citeproc-node
+  - docker run -d -p 8085:8085 librecat/citeproc-node
+  - test -e es_download/elasticsearch-* || wget -P es_download/ ${ES_DOWNLOAD_URL}
+  - cd es_download && tar -xzf elasticsearch-${ES_VERSION}.tar.gz && ./elasticsearch-${ES_VERSION}/bin/elasticsearch &
+  - sudo apt-get install --yes --force-yes gearman gearman-tools gearman-job-server libgearman-dev imagemagick ghostscript
+  - cpanm local::lib
+  - eval "$(perl -Mlocal::lib=${PWD}/perl_modules)"
+
+after_install:
+  - bin/librecat queue start
+
+before_script:
+  - sleep 3
+  # cf. https://stackoverflow.com/questions/42928765/convertnot-authorized-aaaa-error-constitute-c-readimage-453
+  - sudo sed -i -e 's/<\/policymap>/  <policy domain="coder" rights="read|write" pattern="PDF"\/>\n  <policy domain="coder" rights="read|write" pattern="LABEL"\/>\n\/policymap>/g' /etc/ImageMagick-6/policy.xml
+
+service:
+  - sqlite3
+  - docker
+
+install:
+  - cpanm --quiet --installdeps --notest --force .
+  - if [ "$DEVEL_COVER" = "1" ]; then cpanm --quiet --notest Devel::Cover; fi
+
+script:
+  - if [ "$DEVEL_COVER" = "1" ]; then cover -t +select ^lib +ignore ^ -make 'prove -Ilib -j 1 -r t; exit $?'; fi
+  - if [ "$DEVEL_COVER" = "0" ]; then prove -lr t/; fi
+
+after_success:
+  - if [ "$DEVEL_COVER" = "1" ]; then cpanm --quiet --notest --skip-satisfied Devel::Cover::Report::Coveralls; fi
+  - if [ "$DEVEL_COVER" = "1" ]; then cover -report coveralls; fi
+
+notifications:
+  email: false
+  slack: librecat:2Rvl147KSMvEdivUg88Ktrbk

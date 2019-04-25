@@ -1,0 +1,20 @@
+language: node_js
+node_js:
+  - '8'
+before_install:
+  - npm install -g npm
+  - npm install -g greenkeeper-lockfile@1
+install:
+  - npm install
+  - npm run install:demo
+  - npm run build
+before_script: greenkeeper-lockfile-update
+script:
+  - npm run lint
+after_script: greenkeeper-lockfile-upload
+notifications:
+  email: false
+  slack:
+    rooms:
+      secure: sLEr25+6MLiUSTZhWdt0gQAd7+m9fh8LlaxxpAh5leaNSV+kYCduuKNBGaBVCqgTSL3MHYec347GYBBIO8oGU/cS3OewpCP1tngDepvCesTCjmQe/HIJQpAEpn/5h+hDfB52KnlUuwXkDahsCDtLX3zs35iEnNpk95IJAigiOFV6DB8kCgO6hoYQXrfWliSGkciYbwAi550c0MRXnpFIzvpcZU19Un/9y4rcigFq24fmI384mXI6Cwm9A0O2xMEUn8kRJHqcinc5awehwecpazzGnXHvSZ2Z/qbqCqDvCQk3/C3EPqltlgCHDT0bSHa4Tle+J8YgqZR2Ekzh/qpAA2d3OwzZXnBSyqpdMZJhWPaolmKoLhIVW+c8oLnuEc0ndoM1SLVYhubYD9n68OrLINnqeSWkBpKcy2qeIfaePhxr1/cSBuuiGYa78EdmH7UHQvYBdl9ycZXxO27JF2wXW8USAyqARuyDiTc3fcMPATrFwZP6s691CtVHSJYLvu+Ye3uwUDAttwWs5XtuVUtZj4V7Q3wjjKreDaUZsfX/Vhi34oaM7UGAzep+eQFY8ydzIgnn85DhvbezxJl/aelGOWnD+iOc4PlJJkZ4lucPFbj/rcFmosGOQYlQ4Zg7SarqCYWOjUeMkqcyt4O3Sswio9+A3SUpV7lFkbpsyY5qEq4=
+    on_success: change

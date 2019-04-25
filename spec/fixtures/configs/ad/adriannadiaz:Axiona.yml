@@ -1,0 +1,24 @@
+sudo: required
+services:
+- docker
+language: node_js
+before_install:
+  - export CHROME_BIN=chromium-browser
+  - export DISPLAY=:99.0
+  - sh -e /etc/init.d/xvfb start
+  - npm install -g npm
+  - npm install -g @angular/cli
+install: npm install
+test: npm test
+node_js:
+  - '10'
+cache:
+        directories:
+                - node_modules
+                - public
+notifications:
+  email: false
+env:
+  global:
+    - secure: jT+t41fvA0dDkeOVUunHxGZrZVeMgl7pROTonl/ib5QaOblFvmyr2PHkfzF4RAUibCtbN1jcXb0okcMkvcQOqR9GRy9rfm3qZbMqrbC8IXUeKoP6+ZGFSN6ea6H0XcOKAx4OzhGA6JkgZCbmQc60aS9ai9uSXJ0O/0zpkO5VqHmRHC4wPizuVg5jXNQ6Uka6AuXv2secK2PRPRANc7CJvgPZKRYGmyoJjw22tAMnaatJYUSkR2IaLd1JZgsWDFrrTvw8r83vhJGgFZaqKacyXCVenbCNiZvNYqkG/zVQbv3dZoqM4D/BL3VJp/YZO6FXPSj4+jQTqJx1x7aWlJfqnrhFMlgK2yHaek2te/FBc5cPwBG4qLwmHn+c+IhVaSKUyA0T/VBUS6L6s153+MnTBir3+CQTykbb7ERBCzIzuCj3gTvdTuUPaeM8hAMJiyiLaEo7E8pwgtDGRxcpT8vQ4M+l5U+cxZTtElK8cuR1td8rKAxppoFXYpltS3z2bQk++PF/O9kA+/qE8xOqT7BeUmduyqzN0d+FVHfV30I5f/whmp4jpaMRktvzBjc33FL8Sn5G2+lsgywMcYnkzZZXywWMSUtTiAQmcRsT97oFnIaUFdlBZ1keodWxe1uVjgjkmXXbyrwnuXxxAA4Mj+E7jyOGM4v9p5LzjFqdO0xWGSM=
+    - secure: qyugG0w+XP97vdPL8Gbg7zkF0y5VI7e10DHE7QUaIlnCj+PYOtFnbdQf1V+m1tTQoRXknd1Fc0jDRH4g7ESLaGVFHdctZfe9QxlLpFonhMstVbhrWpRl+lZC5U7Y1yN22r6WYYpHC0p8uqlDPXXrahUMu+ou4WV3hArwx/ES0bilyAq+/R6f5gVoVBBanXXWUyaBUbWwcdcxLqF5iT3dBHYnFGrHecbw3jPr8FvmXVRssJZL4pWatuE7iHWEJyRzQfQi4uwL4O5pusCfWHXD98n1n9IQ7QxEC+m7A15NoPZfUK0f+GO3W8t9tdh7jn/eywmQVkYJyu9oQy6nhRFW69/vpmj54EwVAag28Klh/emOcsXI4pV0y0ZuVm2Cmyd57aPecPQvpgguB68ssDkp4w38THJnLwB1xEHD4NaqX0wP064jEVcDTgdomsdnans8T7snGnGaAYTlOxQ45GFrFp86v5efTLwhAzqPVBBjxbtYg+efWuiw7RgUg3PHAJ/Xhl21zU+cGz4ztQLjDiJzBBuFDfDjxkNGjG1soTjMZT1JixqmEPgbUdiX/V7GRzYT1IGWUXu2GW1uMbiieIHeWJJ8Zof0xH98d9XO99nvO2OWPKcGuMnlTBe1qbPNqa3RaQgStk/8tHvQZIi8Ahj829nuLyYSAxlV049lRiPmaDE=

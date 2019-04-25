@@ -1,0 +1,20 @@
+language: node_js
+node_js:
+  - "4"
+before_script:
+  - npm install -g grunt-cli
+  - npm install -g codeclimate-test-reporter
+  - export DISPLAY=:99.0
+  - sh -e /etc/init.d/xvfb start
+after_script:
+  - codeclimate-test-reporter < coverage/lcov.info
+script:
+  - npm run test-travis
+notifications:
+  webhooks:
+    urls:
+      - https://webhooks.gitter.im/e/fa05c7298c3ed38f779f
+    on_success: change  # options: [always|never|change] default: always
+    on_failure: always  # options: [always|never|change] default: always
+    on_start: false     # default: false
+sudo: false

@@ -1,0 +1,69 @@
+language: cpp
+
+sudo: required
+
+cache:
+  ccache: true
+  directories:
+  - ${HOME}/.ccache
+
+addons:
+  apt:
+    packages:
+    - python3-pip
+    - python3-setuptools
+
+services:
+- docker
+
+install:
+- pip3 install --user --upgrade pip
+- pip3 install --user docker-compose
+
+matrix:
+  include:
+  - os: linux
+    dist: xenial
+    env: BUILD_ARGS='pg docker gcc debug'
+
+  - os: linux
+    dist: xenial
+    env: BUILD_ARGS='pg docker gcc release'
+
+  - os: linux
+    dist: xenial
+    env: BUILD_ARGS='pg docker clang debug'
+
+  - os: linux
+    dist: xenial
+    env: BUILD_ARGS='pg docker clang release'
+
+  - os: linux
+    dist: xenial
+    env: BUILD_ARGS='pg docker clang asan'
+
+  - os: linux
+    dist: xenial
+    env: BUILD_ARGS='pg docker clang ubsan'
+
+  - os: linux
+    dist: xenial
+    env: BUILD_ARGS='pg docker clang tsan'
+
+  # - os: linux
+  #   dist: xenial
+  #   env: BUILD_ARGS='pg docker gcc coverage'
+  #   after_success:
+  #   - >
+  #     docker run -ti --rm -v ${PWD}:/code $(bash <(curl -s https://codecov.io/env)) \
+  #       ozo_build /codecov.sh -f "!*tests*" -f "!*error.h*" -f "!*do_nothing.h*"
+
+  - os: osx
+    osx_image: xcode10
+    install:
+    - brew update
+    - brew upgrade
+    - brew install boost postgresql ccache
+    env: BUILD_ARGS='clang debug'
+
+script: scripts/build.sh ${BUILD_ARGS}

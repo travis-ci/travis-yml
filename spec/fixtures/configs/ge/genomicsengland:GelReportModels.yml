@@ -1,0 +1,13 @@
+language: python
+python:
+- '2.7'
+- '3.6'
+install:
+- pip install .
+script:
+- python --version
+- python build.py --skip-docs --skip-java
+- python -m unittest discover .
+notifications:
+  slack:
+    secure: TxOHA9L70iDUs7R6Qvcifd5o11nA9zidkPf0Ewl5WVO54liHUZCMrBb5ifRelJ6NiuHDeyacxbytjE3HXHW06AOl1g8cizv8kGr/9ZbIhMUV7r0BUC0T7t7psRvHFiTq5frFEizrxXRMIztB1wmnP6+idsbRgBlzIsAQMXkFUdYVvPA3ynlodE88b+BLIcOrEVMwA9ZNEBnb+4MZmpFBnT6RwzIy7bVN4Lnz9IcDGnZk6hYzAcQNuRJCbWkZ1/L5bJjRXS0/h+GqzxivDEihavbLTQP4z9oZ1p/a9AKGaXTXZrvNew6jyxrAAmdBXSPsD3pfgBDGQEm9cXNNDj/iFj7A9LlJtFcy5F7qX8LFv4ieCxuzidhP1FWzlfRKVXbZcEzf9JRbhMcYZO1eV6k7xKTRSHMfHMC4tHoqK0doPEG0yoSOsT5Kuj/JwvdMIDeSjnb2CIJOMRpBymL2btql4fZ1CzMydjZxmpyXmpNRzePUpl2lz9n2SHi8VYmnxFjLfMCjz8IV45ZAq+IXeNdNnj7O6IonUffh8ybcF93dojw49NKVmWr2AorKA+Z7/0JzA6ckLB0D4yxXhynMjldHxEk9cHDYNUIRaamNWWFNdfAnqkW7RlYobswJckO7hUpJYZxNpwxaPrd/25+zQkqwCv1X4fBqb9m86cdlXka2WPQ=

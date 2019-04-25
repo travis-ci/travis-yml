@@ -1,0 +1,16 @@
+language: python
+python:
+  - "2.7"
+services:
+  - redis-server
+  - postgresql
+env:
+  global:
+    - DJANGO_SETTINGS_MODULE=vogon.settings
+    - REDIS_URL=redis://
+    - CELERY_TASK_SERIALIZER=json
+    - DATABASE_URL=postgres://vogonweb:vogonweb@localhost:5432/vogonweb
+before_script:
+  - psql -c "create role vogonweb with password 'vogonweb'; alter role vogonweb createdb; alter role vogonweb login;" -U postgres
+script:
+  - python manage.py test

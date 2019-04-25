@@ -1,0 +1,14 @@
+language: node_js
+node_js:
+  - node
+cache:
+  yarn: true
+  directories:
+  - node_modules
+script:
+  - yarn run check
+  - yarn run flow-coverage
+  - yarn run test-coverage && codecov
+  # If there are any warnings left int the code, this build
+  # will fail because Travis sets environment variable 'CI=true'.
+  - yarn run build

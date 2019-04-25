@@ -1,0 +1,43 @@
+sudo: false
+language: java
+dist: trusty
+jdk:
+- openjdk8
+addons:
+  apt:
+    packages:
+    - "python3"
+    - "python3-pip"
+before_install:
+  - sudo pip3 install -U pip
+install: true # skips travis' default installation step which executes gradle assemble.
+jobs:
+  include:
+    - stage: benchmark
+      if: branch = master AND commit_message =~ /^(Merge pull request .*)/
+      script: ./gradlew clean setLibraryVersion benchmark benchmarkCommit
+    - stage: full build
+      script: ./gradlew clean dependencyUpdates setLibraryVersion build
+      after_success:
+      - bash <(curl -s https://codecov.io/bash)
+      - ./travis-publish.sh || travis_terminate 1
+# The before_cache and the cache steps cache the gradle installation on travis.
+before_cache:
+- rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+- rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+cache:
+  directories:
+  - $HOME/.gradle/caches/
+  - $HOME/.gradle/wrapper/
+notifications:
+  slack:
+    template:
+    - '<https://github.com/commercetools/commercetools-sync-java|%{repository}>#<%{build_url}|%{build_number}>'
+    - '(%{branch} - <%{compare_url}|%{commit}> : %{author}): *%{message}*'
+    - 'Build duration:'
+    - '%{duration}.'
+    on_pull_requests: false
+    on_success: change
+    on_failure: always
+    rooms:
+      secure: diL83Fqrx+Eyxd7ViNbmxHH+TO8BT1jqdVqcAVAJxRlr4ka+dG3CLaGvgK26/0cb/mj576eWIxmUFhOct+x4WziVl9EFxIP1aEQUxSMIBE9x/G3tFEfNlwDr9RlxqBbTKyuk4gQ6aZtS6eIqa7Zuz3uRfdQkUXTYe3CTR2Y3jTGBdJpwaZkGj1goGVkQb2YY1IT1YR6c5Mh7ac1g+xA3ES8fn6jEHwAQCjw+1Heo0A4PMLVFDZ+ySKS7U1trvpu+4o1uwv9Xf30czsSgcFa64fUw7rP8SrzaI68wvy4aqx1gPH3BdQdHY0uduywT8pUAaE+ZoZ6Mn80J/IuYQlsr7zrFjdAPHEOiKFFJrT+eEtMv/f6iQ6rsBhzwjca+Ah3SVHbrzYGNdWSwrpbN+uPbyVuXMjym+q/i6lvDpzgl1rEov4RJGFGsLZs06KqJ2Ql47qcMOB8zg4lGnqg6A7i0GkvF5Ftc//0BliMVvO0zpZW6wDVromNIqJmIKLgHZS9fb4NNwHiEHwA17zyrOucvCLXYgvSR+mcluBDfluRbQbyPUdevSkI11Uevfj5WWdfOBHGqVOq5kIwsG0pHKGcTfqtDYPaoP4TorKLEIFm8Ce8Ame77A8f/BB7gZaNuttPU937mXRLqTQXheHVwtYra9uKAmT3+NzhisMyTgS4IyOQ=

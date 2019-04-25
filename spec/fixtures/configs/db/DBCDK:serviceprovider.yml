@@ -1,0 +1,22 @@
+language: node_js
+sudo: required
+dist: trusty
+env:
+  - PG_CONNECTION_STRING=postgresql://postgres@localhost/serviceprovider
+services:
+  - postgresql
+before_script:
+  - psql -c 'create database serviceprovider;' -U postgres
+  - echo 'Europe/Copenhagen' | sudo tee /etc/timezone
+  - sudo dpkg-reconfigure --frontend noninteractive tzdata
+script:
+  - ./start-service-provider.sh
+  - PORT=9000 TZ='Europe/Copenhagen' npm test
+  - npm run lint
+  - npm run swagger:validate # NOTE: expects a running SP!
+after_script:
+  - PORT=9000 TZ='Europe/Copenhagen' npm run coverage
+  - npm run coveralls
+notifications:
+  slack:
+    secure: HlVzAxMXqiys9H7kgAZe6JOnhIwXHHDE4HUvdJZAmCXedX2Iv3mi86nHVzrTECVcENQLcYXJKB9QqEHN1yUIfwfE5FotxkzlEKiWz4d3aiA0VDjEj6xNSGzHoLtfd8Mu/fUWpQZQrcVka5lXEEB95XdYdywdNqAXVEDz7N1eFh6K9sTrxhokHWV6sXlu9dv6mVBdID/dcu9saCQ0lEu15QtC+hizhhvtVVnGsE551k9Opm9bs+UtXwiCUS3yEKs7Z77JxDsaoHEQpvHrMzCX6cl2N8Fa8MAwz/Emr2Q/as7illXDWxG09F7JJkRGJKMBOtqPc3H8zC4XH+akgUu1hwq7tplIPEKp7SH3UKWgPh+kbLEu5uzZ2hdZzOQvRnic5om+WP3C+RvsI/7gxQUQoj5B6Z6kouzfCrDv52MeNrh0qaPmXH33baNbGlL8/dkObdEhtjxvSb5umqlLSX3gkkkcqjzW0gUT6O0qOFuvjGnzZayV9hIHWCFPtImjgdoeIuCaeS0836By9X4mUJY6Ro9hJW1+rodHBmIJ3M4S4j0kOXQGShTG+B4VKMd1SIrHHUjWdo8OEVzOzpSF9H6OhQJIyDPgeB6AFtU/ilLh9apA+Y9mwtijR0VBg91JH8wVtCm+wuvSJyZHJ3IG66J8/jAzRB+SH2eTaPCiTGe6xzw=

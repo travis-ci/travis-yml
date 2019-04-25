@@ -41,11 +41,89 @@ module Travis
           end
         end
 
-        class Secure < Scalar
+        # can we export these and remove them from the hardcoded schema defintion?
+
+        class Strs < Node
+          register :strs
+
+          def to_h
+            {
+              '$id': :strs,
+              anyOf: [
+                {
+                  type: :array,
+                  minItems: 1,
+                  items: {
+                    anyOf: [
+                      { type: :string }
+                    ]
+                  },
+                  normal: true
+                },
+                {
+                  type: :string
+                }
+              ]
+            }
+          end
+
+          def export?
+            true
+          end
+        end
+
+        class Secure < Node
           register :secure
 
           def to_h
-            ref(:secure)
+            {
+              '$id': :secure,
+              anyOf: [
+                {
+                  type: :object,
+                  properties: {
+                    secure: {
+                      type: :string
+                    }
+                  },
+                  additionalProperties: false,
+                  maxProperties: 1,
+                  normal: true
+                },
+                {
+                  type: :string,
+                  normal: true
+                }
+              ]
+            }
+          end
+
+          def export?
+            true
+          end
+        end
+
+        class Secures < Node
+          register :secures
+
+          def to_h
+            {
+              '$id': :secures,
+              anyOf: [
+                {
+                  type: :array,
+                  items: { '$ref': '#/definitions/type/secure' },
+                  normal: true
+                },
+                {
+                  '$ref': '#/definitions/type/secure'
+                }
+              ]
+            }
+          end
+
+          def export?
+            true
           end
         end
       end

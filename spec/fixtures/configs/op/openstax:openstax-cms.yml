@@ -1,0 +1,22 @@
+language: python
+python:
+- '3.5'
+cache: pip
+addons:
+  postgresql: '9.4'
+before_install:
+- openssl aes-256-cbc -K $encrypted_025c1544cb17_key -iv $encrypted_025c1544cb17_iv
+  -in openstax/settings/local.py.travis -out openstax/settings/local.py -d
+- pip install coverage
+- pip install coveralls
+install:
+- pip install -r requirements/dev.txt
+before_script:
+- createdb -U postgres openstax
+script:
+- coverage run manage.py test --verbosity=2 --settings=openstax.settings.test
+after_success:
+- coveralls
+notifications:
+  email: false
+sudo: false

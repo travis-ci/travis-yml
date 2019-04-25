@@ -1,0 +1,34 @@
+language: bash
+
+sudo: required
+
+services:
+  - docker
+
+env:
+  DOCKER_COMPOSE_VERSION: 1.23.0-rc3
+
+before_install:
+  - docker-compose --version
+  - docker pull koalaman/shellcheck:v0.4.6
+  - docker pull lukasmartinelli/hadolint:latest
+  - curl -L https://github.com/docker/compose/releases/download/1.23.0-rc3/docker-compose-`uname -s`-`uname -m` -o docker-compose
+  - chmod +x docker-compose
+  - sudo mv docker-compose /usr/local/bin/
+  - docker-compose --version
+  - wget https://ftpmirror.gnu.org/parallel/parallel-20181022.tar.bz2
+  - bzip2 -dc parallel-20181022.tar.bz2 | tar xvf -
+  - (cd parallel-20181022 && ./configure && make && sudo make install && cd ../ && rm -rf parallel-20181022*)
+
+script:
+  - bash ./test.sh
+
+after_success:
+  - |
+    if [ "$TRAVIS_BRANCH" == "master" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ] ; then
+      docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD" quay.io && DO_PUBLISH='y' bash ./build.sh
+    fi
+  - |
+    if [ "$TRAVIS_BRANCH" == "force-eol" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ] ; then
+      docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD" quay.io && DO_PUBLISH='y' EOL_BUILD=true bash ./build.sh
+    fi

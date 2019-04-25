@@ -1,0 +1,87 @@
+language: python
+dist: trusty
+sudo: false
+cache:
+  apt: true
+env:
+    # The _EXPYFUN_SILENT is a workaround for a silly Py3/Travis bug
+    global: PYTHON=3.7 DISPLAY=:99.0
+
+addons:
+  apt:
+    packages:
+      - pulseaudio
+      - libavbin-dev
+      - libavbin0
+      - libportaudio2
+
+matrix:
+  exclude:
+      # Exclude the default Python 2.7 build
+      - python: 2.7
+  include:
+    - os: linux
+      env: _EXPYFUN_SILENT=true
+    - os: osx
+      language: objective-c
+    - os: linux
+      env: PYTHON=2.7 DEPS=minimal _EXPYFUN_SILENT=true
+
+
+before_install:
+    # Rvm overrides cd with a function so that it can hook into it to run
+    # some scripts, see https://github.com/travis-ci/travis-ci/issues/8703
+    - if [ "${TRAVIS_OS_NAME}" == "osx" ]; then
+        unset -f cd;
+        brew install portaudio;
+        export CONDA_OS="MacOSX";
+      else
+        export CONDA_OS="Linux";
+      fi;
+    # Easy dependencies (pulseaudio, scipy, matplotlib, pytest, coverage, codecov, flake8)
+    - wget http://repo.continuum.io/miniconda/Miniconda3-latest-${CONDA_OS}-x86_64.sh -O ~/miniconda.sh
+    - chmod +x ~/miniconda.sh
+    - ~/miniconda.sh -b -p ~/anaconda
+    - export PATH=~/anaconda/bin:$PATH
+    - conda update --yes conda
+    - conda create -n testenv --yes --quiet pip python=$PYTHON
+    - source activate testenv
+    - conda install --yes scipy matplotlib coverage setuptools pytest pytest-cov pytest-timeout
+    - pip install -q codecov pytest-sugar codespell pydocstyle numpydoc
+    # install python-rtmixer
+    - ./make/install_rtmixer.sh
+    # install AVbin
+    - if [ "${TRAVIS_OS_NAME}" == "osx" ]; then
+        curl -L https://github.com/downloads/AVbin/AVbin/AVbin10.pkg -o ~/AVbin10.pkg;
+        sudo installer -pkg ~/AVbin10.pkg -target /;
+        git clone git://github.com/kyleneideck/BackgroundMusic --depth=50;
+        sudo xcodebuild -project BackgroundMusic/BGMApp/BGMAppTests/NullAudio/AudioDriverExamples.xcodeproj -target NullAudio DSTROOT="/" install;
+        sudo launchctl kickstart -kp system/com.apple.audio.coreaudiod || sudo killall coreaudiod;
+      else
+        /sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -screen 0 1400x900x24 -ac +extension GLX +render -noreset;
+        dbus-launch pulseaudio --start;
+      fi;
+    - python -m sounddevice
+    # Only install these deps if necessary (slow on Py3k)
+    - pip install -q flake8 pyglet mne  # mne is a dependency now that resample is taken from it
+    # Full dependencies (pandas, mne-python, h5py, joblib)
+    - if [ "${DEPS}" != "minimal" ]; then
+        conda install --yes --quiet pandas h5py;
+        pip install -q joblib;
+      fi;
+    # Import matplotlib ahead of time so it doesn't affect test timings
+    # (e.g., building fc-cache)
+    - python -c "import matplotlib.pyplot as plt"
+
+install:
+    - python setup.py develop
+
+script:
+    - pytest expyfun
+    - make flake
+    - make codespell-error
+    - make docstyle
+
+after_success:
+    # Need to run from source dir to execute appropriate "git" commands
+    - codecov

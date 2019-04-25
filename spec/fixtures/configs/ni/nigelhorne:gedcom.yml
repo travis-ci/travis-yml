@@ -1,0 +1,24 @@
+language: perl
+
+os:
+  - linux
+  # - osx
+
+# services:
+  # - docker
+
+perl:
+  # - "5.26-extras"
+  - "5.24-extras"
+  - "5.22-extras"
+  - "5.20-extras"
+  - "5.18-extras"
+
+install:
+  - sudo apt-get update -q
+  - sudo apt-get install -y liburi-perl
+  - cpanm --skip-satisfied -n Gedcom Genealogy::Gedcom::Date Date::Parse Getopt::Std Geo::Coder::OSM Geo::Coder::XYZ Term::ANSIColor Lingua::EN::NameParse Lingua::EN::NameCase Lingua::EN::Numbers::Ordinate Tie::Static DateTime::Format::Natural B::Lint LWP::UserAgent::Throttled LWP::Simple URI::Find::Schemeless Sort::Key::DateTime Text::Names::GB autodie IPC::System::Simple Memoize Lingua::EN::ABC warnings::unused Data::Fetch Lingua::EN::Inflect WWW::Scrape::FindaGrave Geo::Coder::List Geo::Coder::CA Geo::StreetAddress::US Locale::US Geo::Coder::Postcodes List::Util File::Fetch~0.56 Geo::Coder::Free Geo::Coder::Ovi Geo::Coder::RandMcnally Geo::Coder::US::Census Geo::Coder::Bing Geo::Coder::GooglePlaces Geo::GeoNames HTML::Table HTTP::Cache::Transparent DateTime::Format::Genealogy Locale::Object::Country Config::Auto Module::Load
+
+script:
+  - perl -MO=Lint ./gedcom
+  - perl -c -Mwarnings::unused ./gedcom

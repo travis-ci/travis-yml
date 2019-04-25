@@ -1,0 +1,25 @@
+language: ruby
+cache: bundler
+bundler_args: --without development production staging
+sudo: false
+rvm:
+  - 2.2.3
+addons:
+  postgresql: 9.4
+  code_climate:
+    repo_token: dd9c26c5738d807099d3f35926ddb76902d4e2a7b899a8fe3b866152ffe8bbf1
+# uncomment this line if your project needs to run something other than `rake`:
+
+env:
+  - MAILER_HOST=http://localhost:3000 MAILER_FROM=no-reply@unep-wcmc.org
+
+before_script:
+  - psql -c 'create database sapi_test' -U postgres
+  - cp config/database.yml.sample config/database.yml
+  - RAILS_ENV=test bundle exec rake db:migrate
+script:
+  - CODECLIMATE_REPO_TOKEN=dd9c26c5738d807099d3f35926ddb76902d4e2a7b899a8fe3b866152ffe8bbf1 bundle exec rspec spec --fail-fast
+notifications:
+  slack: wcmc:38bMoeEC28Tm3cnSGmhdGYVh
+services:
+  - redis-server

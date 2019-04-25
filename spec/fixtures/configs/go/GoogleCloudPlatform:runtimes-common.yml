@@ -1,0 +1,30 @@
+sudo: required
+dist: trusty
+
+
+language: java
+python:
+        - "2.7"
+language: go
+go:
+        - 1.8.1
+go_import_path: github.com/GoogleCloudPlatform/runtimes-common
+
+jdk:
+  - oraclejdk8
+
+env:
+  - NODE_VERSION="6.11.4"
+
+before_install:
+  - pip install --user --upgrade -r requirements.txt
+  - nvm install $NODE_VERSION
+
+install:
+  - export PATH=$PATH:$HOME/bin && mkdir -p $HOME/bin
+  - wget https://github.com/bazelbuild/buildtools/releases/download/0.11.1/buildifier && chmod +x buildifier && mv buildifier $HOME/bin/
+  - wget https://github.com/bazelbuild/bazel/releases/download/0.19.2/bazel-0.19.2-linux-x86_64 && mv bazel-0.19.2-linux-x86_64 bazel && chmod +x bazel && mv bazel $HOME/bin/
+  - pip install wheel
+
+script:
+- ./test.sh

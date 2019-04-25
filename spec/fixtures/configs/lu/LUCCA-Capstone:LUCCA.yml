@@ -1,0 +1,15 @@
+language: node_js 
+node_js:
+  - "node"
+#This script should fix the "Error - Mocha permissions denied"
+before_script: 
+  - chmod 0777 ./node_modules/.bin/mocha
+  - npm install sequelize-cli
+  - psql -c 'create database database_test;' -U postgres
+  - sequelize db:migrate
+  - sequelize db:seed:all
+  - sed -i -e 's/^;\(validate_client_certificate=\).*/\1false/' -e 's!path/to/cert!test/cert/certificate!' lucca.conf
+  - npm start &
+  - sleep 3
+before_install:
+  - sudo apt-get install -qq python3-requests

@@ -1,0 +1,27 @@
+language: go
+os:
+  - linux
+  - osx
+sudo: false
+go:
+  - 1.11.x
+  - 1.12.x
+env:
+  - CGO_ENABLED=0
+  - CGO_ENABLED=0 GO111MODULE=on
+jobs:
+  include:
+    # NOTE: Coverages are not enabled for pull requests yet
+    - stage: deploy
+      name: Generate and upload Linux coverage profiles
+      script: make coverage-travis
+      if: type = push
+      os: linux
+    - name: Generate and upload macOS coverage profiles
+      script: make coverage-travis
+      if: type = push
+      os: osx
+    - name: Build and upload binaries to bintray
+      script: make binaries-travis
+      if: type = push
+script: make test

@@ -1,0 +1,53 @@
+language: python
+python:
+  - 2.7
+  - 3.5
+  - 3.6
+  - pypy
+cache:
+  pip: true
+  apt: true
+matrix:
+  fast_finish: true
+  allow_failures:
+    - python: 3.5
+    - python: 3.6
+    - python: pypy
+  exclude:
+    - python: 3.5
+      env: LINT_TEST=1
+    - python: 3.6
+      env: LINT_TEST=1
+    - python: pypy
+      env: LINT_TEST=1
+env:
+  - LINT_TEST=1
+  - INTEGRATION_TEST=1
+  - UNIT_TEST=1
+addons:
+  apt:
+    sources:
+    - trusty-media
+    packages:
+    - libjpeg-progs
+    - libimage-exiftool-perl
+    - gifsicle
+    - python-all-dev
+    - scons
+    - libboost-python-dev
+    - libexiv2-dev
+    - ffmpeg
+install:
+  - pip install --upgrade pip
+  - pip install -I https://github.com/escaped/pyexiv2/archive/69dd6448f9831bd826137b7519f9d797b23ab4ec.zip
+  - cd $TRAVIS_BUILD_DIR && make setup_python
+  - pip install coveralls
+before_script:
+  - cd $TRAVIS_BUILD_DIR && make redis
+script:
+  make compile_ext ci_test
+notifications:
+  slack:
+    secure: Sf6TJa/H3mq+RGqpLwKNRpNw0YQKX3+5bt5e37CSs8rOC+SoFHVNr29QhbXFPwmqQuy9qKb0t5rzChDIIvXErywU2lEw3/JlQtCt1xLsoUfpBF8g8ldoy6ESO2j9Jj6Y/M/4RN2zN3AAd5gfXPrdLHa++eiRaiAXXU+9ZvtUxuc=
+after_success:
+  coveralls

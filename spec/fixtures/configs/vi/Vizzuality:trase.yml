@@ -1,0 +1,71 @@
+dist: xenial
+env:
+  global:
+    - CC_TEST_REPORTER_ID=ae4098e380eed3c112bd34c4c2ceec913288ce9479bb748bf098a57b75ff5de5
+    - API_V3_URL=http://0.0.0.0:3000
+    - PORT=3000
+    - JEST_CI=true
+    - USE_PLAIN_URL_STATE=true
+    - GFW_WIDGETS_BASE_URL=
+    - SURGE_LOGIN=trase.vizzuality@gmail.com
+    - SURGE_TOKEN=$SURGE_TOKEN # Set in the settings page of your repository, as a secure variable
+matrix:
+  include:
+    - language: ruby
+      rvm:
+        - 2.4.2
+        - 2.5.3
+      services:
+        - postgresql
+      addons:
+        postgresql: 10
+      before_install:
+        - sudo apt-get install -y graphviz
+      before_script:
+        - bundle exec rake db:drop db:create db:structure:load RAILS_ENV=test
+        - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+        - chmod +x ./cc-test-reporter
+        - ./cc-test-reporter before-build
+
+      script:
+        - TRASE_LOCAL_MIRROR_SCHEMA=tool_tables TRASE_LOCAL_SCHEMA=public bundle exec rspec spec --fail-fast
+
+      after_script:
+        - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
+
+      before_deploy:
+        - bundle exec rake db:doc:html
+
+      deploy:
+        - provider: pages
+          skip-cleanup: true
+          github-token: $GITHUB_TOKEN # Set in the settings page of your repository, as a secure variable
+          keep-history: true
+          local-dir: doc/db/gh-pages
+          on:
+            branch: master
+        - provider: surge
+          project: ./frontend/docs/
+          domain: trase.surge.sh
+          skip_cleanup: true
+          on: develop
+
+    - language: node_js
+      node_js:
+        - 10
+        - 11
+      cache: yarn
+      before_install:
+        - cd frontend
+      install:
+        - yarn install
+      before_script:
+        -
+        - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+        - chmod +x ./cc-test-reporter
+        - ./cc-test-reporter before-build
+      script:
+        - yarn ci
+      after_script:
+        - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
+

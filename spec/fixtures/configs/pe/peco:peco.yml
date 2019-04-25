@@ -1,0 +1,12 @@
+language: go
+go:
+  - 1.11.x
+  - tip
+sudo: false
+cache:
+  directories:
+    - vendor
+    - _internal_bin/$(go version | awk '{ print $NF }')
+script:
+  - make test
+  - make all

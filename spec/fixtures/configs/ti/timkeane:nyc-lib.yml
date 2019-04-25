@@ -1,0 +1,19 @@
+language: node_js
+
+node_js:
+  - "v8.11.1"
+
+before_install:
+  - export NODE_ENV=prd
+  - export GEOCLIENT_KEY="app_key=key&app_id=id"
+  - export GOOGLE_ANALYTICS="/* google analytics code */"
+  - export GOOGLE_DIRECTIONS="https://maps.googleapis.com/maps/api/js?client=&travis&sensor=false&libraries=visualization"
+  - yarn global add postcss-cli
+
+install:
+  - yarn install
+
+script:
+  - yarn build
+
+after_script: "cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js"

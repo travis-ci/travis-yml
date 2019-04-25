@@ -1,0 +1,19 @@
+language: python
+cache: pip
+python:
+  - "2.7"
+# command to install dependencies
+install: "pip install -r .gitlab-ci.d/requirements.txt"
+# command to run tests
+script:
+  - cd ..
+  - wget https://github.com/DIRACGrid/DIRAC/archive/rel-v6r20.zip
+  - unzip -q rel-v6r20.zip
+  - mv DIRAC-rel-v6r20 DIRAC
+  - export DIRAC=${PWD}
+  - cd ILCDIRAC
+  - export PYTHONPATH=${PWD%/*}
+  - echo $PYTHONPATH
+  - .gitlab-ci.d/run-unittests.sh
+after_success:
+  - codecov

@@ -1,0 +1,69 @@
+language: php
+php:
+- 7.0
+matrix:
+  allow_failures:
+  - php: hhvm
+cache:
+  directories:
+  - "$HOME/.composer/cache"
+git:
+  depth: 1
+addons:
+  mariadb: '10.1'
+  firefox: 47.0.1
+  hosts:
+  - xepan-local.org
+  - demo.xepan-local.org
+before_install:
+- "/sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --make-pidfile
+  --background --exec /usr/bin/Xvfb -- :99 -ac -screen 0 1280x1024x16"
+install:
+- cp -r tests ~/tests
+- rm -rf *
+- rm -rf .git
+- git clone --depth=1 --branch=develop https://github.com/xepan/xepan2.git
+- mv xepan2/* .
+- echo "Extracting firefox and setting PATH variable..."
+- tar -xjf /tmp/firefox-47.0.1.tar.bz2 --directory /tmp
+- export PATH="/tmp/firefox:$PATH"
+- echo "Using firefox version `firefox --version`"
+- sudo curl -LsS http://codeception.com/codecept.phar -o /usr/local/bin/codecept
+- sudo chmod a+x /usr/local/bin/codecept
+- sudo apt-get update
+- sudo apt-get install apache2 libapache2-mod-fastcgi
+- sudo cp ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf.default ~/.phpenv/versions/$(phpenv
+  version-name)/etc/php-fpm.conf
+- sudo cp ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.d/www.conf.default
+  ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.d/www.conf
+- sudo a2enmod rewrite actions fastcgi alias
+- echo "cgi.fix_pathinfo = 1" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
+- sudo sed -i -e "s,www-data,travis,g" /etc/apache2/envvars
+- sudo chown -R travis:travis /var/lib/apache2/fastcgi
+- "~/.phpenv/versions/$(phpenv version-name)/sbin/php-fpm"
+- sudo cp -f tests/travis/build/travis-ci-apache /etc/apache2/sites-available/000-default.conf
+- sudo sed -e "s?%TRAVIS_BUILD_DIR%?$(pwd)?g" --in-place /etc/apache2/sites-available/000-default.conf
+- sudo service apache2 restart
+- wget http://selenium-release.storage.googleapis.com/2.53/selenium-server-standalone-2.53.1.jar
+- wget -P ~/Downloads https://github.com/mozilla/geckodriver/releases/download/v0.10.0/geckodriver-v0.10.0-linux64.tar.gz
+- tar -xf ~/Downloads/geckodriver-v0.10.0-linux64.tar.gz -C ~/Downloads
+- composer self-update
+- composer install --prefer-source --no-dev
+- ulimit -c unlimited || true
+before_script:
+- export DISPLAY=:99.0
+- sh -e /etc/init.d/xvfb start
+- sleep 3
+- java -jar selenium-server-standalone-2.53.1.jar -port 4444 > /dev/null &
+- sleep 5
+- mysql -e 'create database testdb;'
+- cp -r ~/tests .
+- codecept build
+script:
+- codecept run acceptance --env travis --html index.html
+- bash ./tests/deploy-to-gh-pages.sh
+env:
+  global:
+  - GITHUB_REPO: xavoctechnocratspvtltd/_xepan2
+  - REPORT_FOLDER: base
+  - secure: F9AxMxvOY9lmWl/WORqvPyyEl37fbHv4Hz6MF8ii9ypMjecAzrsyYLnYjntIyRuvFzBq5ecBByUuv+LQxA+DwsVPyWD/cX1wW8ItS/BtwAZ79xTKl7GCvzHhRjPB3rgVFII3H6TStZUC3T32y5VGI9rcGT6KTGvB00NVzIlvKeqYkFGwHKJZHNN3fcgLIT1SSHVL7K5AlWIQ737MRSG1VGKVC+7xVwgF8D03z8UmhQJ+uRf7+ow5Cvzu+AXfH9/4a7OTo3RY+RuZPukI9wV68cA8iudoSTbqQ9Zv2lU9SekjG5EIlOu51iXhWp6wQ5CXv1qLzXpesEO4g8XLgwwhkfl2sENg4fc7IJWytpGR8hP59IoIwh7QgUXLpjZN443ElGJSZ3OTfFbLCSFN0aDDSOnafCrOFVADJ8SRgcNJp5Auji98S/llBdoNDw05gIsQKaQdwO1r3rRMbJO1EHdh7taOEO3oH0T/KFmrtbaN8TyvPUkRFMub+p22Q1EykZo23ZePZiK6GC9t/WVQaFcOZj9ghEFJAzOTeN/v7t81XttxXw6AfQlZFM2pbqKGVLjFZs9JCJW6RjDeEar+DqCIPL0tHKXQtjvWEWPzyIFD2PJ/K7z1R4fKtJMNaBrkodpuZ5ym/tCwDjit+3j5GgrMD/qI2DWjD4dx1eBoA1zh1Qg=

@@ -1,0 +1,68 @@
+os:
+  - linux
+# not testing on osx for now
+#  - osx
+
+dist: precise
+
+before_install:
+    # ridiculous set of hacks to update setuptools in the travis precise
+    # environment (can probably go away whenever we upgrade to trusty)
+    - sudo pip install requests[security]
+    - sudo pip uninstall distribute -y || true
+    - sudo pip uninstall setuptools -y || true
+    - sudo pip install setuptools
+
+install:
+    - if [ "$TRAVIS_OS_NAME" == "linux" ]; then
+          export DISPLAY=:99.0;
+          sh -e /etc/init.d/xvfb start;
+          sudo apt-get update -qq;
+          sudo apt-get install python-qt4 pyqt4-dev-tools;
+      fi
+    - if [ "$TRAVIS_OS_NAME" == "osx" ]; then
+          brew update; brew outdated xctool || brew upgrade xctool;
+          pip install virtualenv;
+          brew install pyqt;
+          brew linkapps qt;
+          MOZPATH="$PWD";
+          mkdir -p /Users/travis/Library/Python/2.7/lib/python/site-packages;
+          echo 'import site; site.addsitedir("/usr/local/lib/python2.7/site-packages")' >> /Users/travis/Library/Python/2.7/lib/python/site-packages/homebrew.pth;
+          export PYTHONPATH=/usr/local/lib/python2.7/site-packages:$PYTHONPATH;
+          cd /usr/local/opt/pyqt/lib/python2.7/site-packages/PyQt4;
+          sudo install_name_tool -id $PWD/QtCore.so QtCore.so;
+          sudo install_name_tool -id $PWD/QtGui.so QtGui.so;
+          cd $MOZPATH;
+      fi
+    - virtualenv --system-site-packages venv
+    - source venv/bin/activate
+    - pip install -r  requirements-gui-dev.txt
+
+script:
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then ./check.py --with-coverage --with-gui; fi
+  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then ./check.py --with-gui; fi
+  - python gui/build.py bundle
+
+after_success:
+    - if [ "$TRAVIS_OS_NAME" == "linux" ]; then pip install coveralls; coveralls; fi
+
+deploy:
+  - provider: releases
+    api-key:
+       secure: VxxmZhovtqrV7I/DXvePslX+Egpj9+iwJnY/sdIfJ8ZpUttHmqbxfZ+0iCS8DUtLs0TBY2nz7Q20XxZfaPuQUnmgQk4w2RLkiPal/pwU04Q3M60NCAk8Cj7564b7slOqXAMgiE5QO+QA3w+wH2kXL21Sx1Q9Oj/2ROvl5Qh8tGg=
+    file: gui/dist/mozregression-gui.dmg
+    skip_cleanup: true
+    on:
+      tags: true
+      condition:
+        - $TRAVIS_OS_NAME == osx
+
+  - provider: releases
+    api-key:
+       secure: VxxmZhovtqrV7I/DXvePslX+Egpj9+iwJnY/sdIfJ8ZpUttHmqbxfZ+0iCS8DUtLs0TBY2nz7Q20XxZfaPuQUnmgQk4w2RLkiPal/pwU04Q3M60NCAk8Cj7564b7slOqXAMgiE5QO+QA3w+wH2kXL21Sx1Q9Oj/2ROvl5Qh8tGg=
+    file: gui/mozregression-gui.tar.gz
+    skip_cleanup: true
+    on:
+      tags: true
+      condition:
+        - $TRAVIS_OS_NAME == linux

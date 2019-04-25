@@ -1,0 +1,16 @@
+language: python
+python:
+  - "2.7"
+cache:
+  - pip
+
+# command to install dependencies
+install:
+  - pip install --upgrade pip  # Get a newer version of pip to be able to use many-linux wheels
+  - pip install -r requirements/travis.txt
+
+# command to run tests
+script: tox
+
+after_success:
+  - codecov

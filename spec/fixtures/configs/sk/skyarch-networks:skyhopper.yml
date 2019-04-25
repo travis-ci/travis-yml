@@ -1,0 +1,25 @@
+language: ruby
+
+rvm:
+  - 2.4.4
+#  - ruby-head  # because can't build ruby-head
+
+cache: bundler
+bundler_args: --jobs=4 --retry=3 --deployment
+sudo: false
+
+
+branches:
+  except: /^no-ci-.*$/
+
+before_script:
+  - cp .travis/database.yml config/database.yml
+  - touch log/test.log
+  - bundle exec rake db:migrate:reset
+
+
+script:
+  - bundle exec rspec
+
+notifications:
+  slack: skyarch:RrGXgQVUmTe0r565gbHYMnmQ

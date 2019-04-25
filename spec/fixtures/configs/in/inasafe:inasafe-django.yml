@@ -1,0 +1,73 @@
+sudo: required
+
+language: python
+
+services:
+  - docker
+
+env:
+  global:
+    - ON_TRAVIS=True
+  matrix:
+    - INTEGRATION_TEST=False
+    - INTEGRATION_TEST=True
+
+virtualenv:
+  system_site_packages: true
+
+python:
+  - '2.7'
+
+install:
+  - sudo apt install zip wget
+  - pip install -r REQUIREMENTS-TRAVIS.txt
+  - pushd deployment
+  - cp ansible/development/group_vars/all.travis.yml ansible/development/group_vars/all.yml
+  - make setup-ansible ANSIBLE_ARGS="--extra-vars='ansible_sudo_pass=\"\"' --extra-vars='pycharm_version=\"\"' --skip-tags=development"
+  - make build
+  - make pull-external-services
+  - make up
+  - make status
+  - mkdir -p headless-data/qgis-templates
+  - mkdir -p headless-data/contexts
+  # Retrieve latest templates
+  - sudo git clone https://github.com/inasafe/inasafe-realtime-resources.git headless-data/qgis-templates
+  - cat docker-compose.override.yml
+  - until make migrate; do echo "Retrying"; sleep 5; done
+  - popd
+
+script:
+  - pushd deployment
+  - make check-flake8
+  - if [ "$INTEGRATION_TEST" = "False" ]; then make coverage-tests; fi
+  # Do integration tests
+  - make inasafe-worker-stop
+  - make realtime-worker
+  - make headless-worker
+  - sleep 30
+  # Retrieve analysis context data
+  - if [ "$INTEGRATION_TEST" = "True" ]; then make retrieve-context-data; fi
+  - if [ "$INTEGRATION_TEST" = "True" ]; then make integration-tests; fi
+  - popd
+
+after_script:
+  # Clean up
+  - pushd deployment
+  - make down
+  - popd
+
+after_success:
+  - pushd django_project
+  - coverage combine
+  # Fix path (codecov.yml doesn't work)
+  # Replace parent directory to travis directory, because we are running
+  # coverage using docker mount
+  - sed -i 's/home\/web\/django_project/home\/travis\/build\/inasafe\/inasafe-django\/django_project/g' .coverage
+  - cat .coverage
+  - codecov
+  - cat coverage.xml
+  - popd
+
+email:
+ - lana.pcfre@gmail.com
+ - imajimatika@gmail.com

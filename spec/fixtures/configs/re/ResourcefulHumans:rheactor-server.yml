@@ -1,0 +1,34 @@
+language: node_js
+node_js: 'node'
+env:
+  global:
+    - CXX=g++-4.8
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - g++-4.8
+cache:
+  directories:
+    - node_modules
+notifications:
+  email: false
+services:
+  - redis-server
+before_install:
+  - npm install -g npm-install-peers
+install:
+  - npm prune
+  - npm install
+  - npm-install-peers
+  - cd node_modules; ln -s ../ rheactor-server; cd ..
+script:
+  - npm run lint
+  - make dist
+  - npm run test:coverage-travis
+after_success:
+  - npm run semantic-release
+branches:
+  except:
+    - /^v\d+\.\d+\.\d+$/

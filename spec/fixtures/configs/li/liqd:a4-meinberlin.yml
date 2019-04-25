@@ -1,0 +1,31 @@
+language: python
+dist: xenial
+python:
+  - "3.6"
+cache:
+  pip: true
+  directories:
+    - node_modules
+install:
+  - nvm install 8
+  - npm install
+  - npm run build
+  - pip install -r requirements/dev.txt
+  - pip install coveralls
+script:
+  - python manage.py collectstatic > /dev/null
+  - py.test --cov
+  - python manage.py makemigrations --dry-run --check --noinput
+  - isort --diff -rc -c meinberlin tests
+  - flake8 meinberlin tests --exclude migrations,settings
+  - npm run lint
+after_success:
+  - coveralls
+deploy:
+  - provider: script
+    script: scripts/deploy.sh
+    on:
+      branch: master
+env:
+  global:
+    secure: ANl5UApKixg3rlx2sXSisoEPKJLdjeH+F28UUmE6R1imqI5EEVku7qeXZFoiJfZJECX5GFwX1Y9fQQsga2M4Z+sQGcc8Hmd0WakVG4BxWlqSsbwxHzu6vXW7olbWxccxLbuRAnZQvI0IlEAUw11vk82oPWMgS8czxnvgiEeKiFVen0lDWzSSlWh61k6jB2FkfTGkftaOvKCQ1AUqjCncL90Got9F4X872+sDXf/QERiywZUW2Id7sNbmckZndzV0vvUSWorimU6r57ZhyfoyBV1P9NNGrTdV6lddhfGWqYUPU2KzBSILFRIhYhaVLVGmLUmyLpBrZ+8I4+LVW6QS5B4Sca/SsfKru6L5Ubd0QnuTDfbSnzH057vUS7dUE8DCQQskw2y/6h9CNEB7+GVySbY6Rw1b9B+S1MPk1ZBVnVFylltiNBcaf0qFuCCi7CyXjsrp4VT6gWMLE/nD/PsQHGIcCwZtpzZzVQfx46W4k+qVGb8UqW2sAjgfwB4hBfgWc/oLNIWoA7310oEXg7TYPUB7JQ8fvs49He6niJJ0KmDUTcdUPCDd3/S/Rv7zUD6m+GntIW1vE4jEBVithWGvMm2oeqHQnnjm+Yypzps/nGd1V8GeP0B/pugFARHuZgRnBrlZYzdvDJKbnZHrXonVUv/sjA6a5dUEGBcxRKB3Dfs=

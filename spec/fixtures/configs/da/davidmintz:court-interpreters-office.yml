@@ -1,0 +1,37 @@
+
+
+# this is .travis.yml
+
+language: php
+
+php:
+
+  - 7.2
+
+install:  composer install
+
+#services:
+#    - mysql
+
+# there may be a better way, but to compel travis-ci to use our test
+# config (sqlite) we replace the configuration file.
+
+before_script:
+    #- echo 'CREATE DATABASE IF NOT EXISTS test_office' |mysql
+    #- bin/initialize-test-db.sh
+    - cp config/autoload/doctrine.test.php config/autoload/doctrine.local.php
+    - cp config/autoload/development.local.php.dist config/autoload/development.local.php
+    - mkdir -p data/log
+    - mkdir data/mail
+    - mkdir data/cache
+    - phpenv config-rm xdebug.ini
+    #- echo "Database version? " && echo 'SELECT VERSION();'|mysql
+
+script:
+
+    - vendor/bin/phpunit --testdox
+
+# thank you, https://gist.github.com/Pierstoval/5d3101055e9d6a5fc19e
+cache:
+  directories:
+    - $HOME/.composer/cache

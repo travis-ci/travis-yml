@@ -1,0 +1,17 @@
+dist: xenial
+language: node_js
+node_js:
+  - 10
+addons:
+  apt:
+    sources:
+      - google-chrome
+    packages:
+      - google-chrome-stable
+      - coreutils
+before_install:
+  - npm i -g yarn@1
+  - chmod +x -R ./scripts
+install: ./scripts/install_all.sh
+script:
+  - sh -x ./scripts/ci_all.sh

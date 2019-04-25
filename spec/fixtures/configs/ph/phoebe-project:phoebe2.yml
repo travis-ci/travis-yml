@@ -1,0 +1,139 @@
+# https://travis-ci.org/phoebe-project/phoebe2
+
+language: none
+
+sudo: required
+dist: trusty
+group: deprecated-2017Q4
+
+env:
+  global:
+    # Set defaults to avoid repeating in most cases
+    - CONDA_DEPENDENCIES='scipy matplotlib sympy requests mpi4py'
+    - PIP_DEPENDENCIES='nose rebound requests mpi4py'
+    - NOSETESTS=1
+    - BENCHMARK=0
+    - PHOEBE_ENABLE_PLOTTING = 'FALSE'
+
+
+matrix:
+
+  # Don't wait for allowed failures
+  fast_finish: true
+
+  include:
+
+    # Try with various compilers with default version of numpy/astropy
+    - os: linux
+      compiler: g++-5
+      env: CXX=g++-5 CC=gcc-5 PYTHON_VERSION=2.7 NUMPY_VERSION=1.10 ASTROPY_VERSION=1.0 NOSETESTS=1
+      addons:
+        apt:
+          sources: [ubuntu-toolchain-r-test]
+          packages: [gfortran, g++-5, gcc-5, libstdc++-5-dev, libopenmpi-dev]
+
+    - os: osx
+      compiler: clang
+      env: MACOSX_DEPLOYMENT_TARGET=10.9 CXX=clang++ CC=clang PYTHON_VERSION=2.7 NUMPY_VERSION=1.10 ASTROPY_VERSION=1.0 NOSETESTS=0
+      osx_image: xcode9.4
+
+    # Try with various versions of numpy/astropy with default compiler
+    - os: linux
+      compiler: g++-5
+      env: CXX=g++-5 CC=gcc-5 PYTHON_VERSION=2.7 NUMPY_VERSION=stable ASTROPY_VERSION=2.0 NOSETESTS=1
+      addons:
+        apt:
+          sources: [ubuntu-toolchain-r-test]
+          packages: [gfortran, g++-5, gcc-5, libstdc++-5-dev, libopenmpi-dev]
+
+    - os: linux
+      compiler: g++-5
+      env: CXX=g++-5 CC=gcc-5 PYTHON_VERSION=2.7 NUMPY_VERSION=stable ASTROPY_VERSION=stable NOSETESTS=1
+      addons:
+        apt:
+          sources: [ubuntu-toolchain-r-test]
+          packages: [gfortran, g++-5, gcc-5, libstdc++-5-dev, libopenmpi-dev]
+
+    # Try with Python 3.6 (earliest supported version) and latest minor version (3.7)
+    - os: linux
+      compiler: g++-5
+      env: CXX=g++-5 CC=gcc-5 PYTHON_VERSION=3.6 NUMPY_VERSION=stable ASTROPY_VERSION=stable NOSETESTS=1
+      addons:
+        apt:
+          sources: [ubuntu-toolchain-r-test]
+          packages: [gfortran, g++-5, gcc-5, libstdc++-5-dev, libopenmpi-dev]
+
+    - os: linux
+      compiler: g++-5
+      env: CXX=g++-5 CC=gcc-5 PYTHON_VERSION=3.7 NUMPY_VERSION=stable ASTROPY_VERSION=stable NOSETESTS=1
+      addons:
+        apt:
+          sources: [ubuntu-toolchain-r-test]
+          packages: [gfortran, g++-5, gcc-5, libstdc++-5-dev, libopenmpi-dev]
+
+    # and lastly, run the benchmarks
+    - os: linux
+      compiler: g++-5
+      env: CXX=g++-5 CC=gcc-5 PYTHON_VERSION=2.7 NUMPY_VERSION=1.10 ASTROPY_VERSION=1.0 NOSETESTS=0 BENCHMARK=1
+      addons:
+        apt:
+          sources: [ubuntu-toolchain-r-test]
+          packages: [gfortran, g++-5, gcc-5, libstdc++-5-dev, libopenmpi-dev]
+
+  allow_failures:
+    # run with development versions of numpy as astropy (require python 3.5+)
+    - env: NUMPY_VERSION=dev
+    - os: linux
+      compiler: g++-5
+      env: CXX=g++-5 CC=gcc-5 PYTHON_VERSION=3.7 NUMPY_VERSION=dev ASTROPY_VERSION=dev NOSETESTS=1
+      addons:
+        apt:
+          sources: [ubuntu-toolchain-r-test]
+          packages: [gfortran, g++-5, gcc-5, libstdc++-5-dev, libopenmpi-dev]
+
+before_install:
+  - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then
+      brew install llvm --with-clang --with-clang-extra-tools;
+      brew install gcc;
+      DIR=`find /usr/local ! -path '*/i386/*' -name libgfortran.a -exec dirname "{}" \; -quit`;
+      export LIBRARY_PATH=${DIR}:${LIBRARY_PATH};
+    fi;
+
+install:
+  - git clone git://github.com/astropy/ci-helpers.git
+  - source ci-helpers/travis/setup_conda.sh
+  - python setup.py build
+  - python setup.py install --user
+  - git clone -b phoebe_legacy git://github.com/phoebe-project/phoebe1.git
+  - cd phoebe1
+  - python setup_static.py install --user
+  - cd ..
+  - git clone git://github.com/phoebe-project/photodynam.git
+  - cd photodynam
+  - make
+  - sudo cp photodynam /usr/local/bin/
+  - python setup.py build
+  - python setup.py install --user
+  - cd ..
+
+
+script:
+    - if [ $NOSETESTS == 1 ];
+      then nosetests -v -s -d -w tests/nosetests/;
+      fi;
+
+after_success: |
+    if [ $BENCHMARK == 1 ] && [ -n $GITHUB_API_KEY ] && [ $TRAVIS_PULL_REQUEST == 'false' ]; then
+        git clone --depth 1 git://github.com/phoebe-project/phoebe2-benchmark.git
+        cp ./phoebe2-benchmark/*.log ./tests/benchmark/ 2>/dev/null || :
+        cd tests && python run_tests.py benchmark
+        cp ./benchmark/*.profile ../phoebe2-benchmark/ 2>/dev/null || :
+        cp ./benchmark/*.log ../phoebe2-benchmark/ 2>/dev/null || :
+        cp ./benchmark/*.log.png ../phoebe2-benchmark 2>/dev/null || :
+        cd ../phoebe2-benchmark
+        git add *.profile
+        git add *.log
+        git add *.png
+        git -c user.name='travis' -c user.email='travis' commit -m "updating benchmarks" -m "branch: $TRAVIS_BRANCH   commit: https://github.com/phoebe-project/phoebe2/commit/$TRAVIS_COMMIT"
+        git push -q -f https://kecnry:$GITHUB_API_KEY@github.com/phoebe-project/phoebe2-benchmark master
+    fi

@@ -1,0 +1,94 @@
+matrix:
+  include:
+    - language: java
+      jdk: openjdk8
+      env:
+        - DB=pgsql
+      services:
+        - postgresql
+      before_script:
+        - cd postgres && ./setup-travis.sh && cd ..
+      script:
+        - cd webservice && mvn clean verify && mvn test && mvn cobertura:cobertura
+      after_success:
+        - bash <(curl -s https://codecov.io/bash)
+
+    - language: node_js
+      node_js: 8
+      script:
+        - cd user-app && npm install
+        - cd ../admin-web-app && npm install
+
+    - language: android
+      if: tag =~ ^release
+      before_install:
+        - nvm install 8
+        - yes | sdkmanager "platforms;android-23"
+      install:
+        - cd user-app
+        - npm install
+      script: 
+        - openssl aes-256-cbc -K 12345678 -iv 12345678 -in my-release-key.keystore.enc -out my-release-key.keystore -d
+        - expect npm_run_eject.exp
+        - cd android && ./gradlew assembleRelease
+        - cd app/build/outputs/apk/
+        - jarsigner -verbose -sigalg SHA1withRSA -digestalg SHA1 -keystore $TRAVIS_BUILD_DIR/user-app/my-release-key.keystore -storepass 12345678 -keypass 12345678 app-release-unsigned.apk my-key-alias
+        - jarsigner -verify app-release-unsigned.apk
+        - "${ANDROID_HOME}/build-tools/23.0.1/zipalign -v 4 app-release-unsigned.apk Asepart.apk"
+
+
+before_deploy:
+  - echo 'ready P1?'
+
+deploy:
+  - provider: heroku
+    api_key:
+      secure: "NL3g0U2tRWu2ekZcVkyYFNAMcwFzw9hFRBGdGNgU1VYIfo8P0jNhbdhh90Yf36gxwxnialaXD6vsa4JXNG81pygFqZJ59tN40scxxzHqXMe6lhLWslXuGiRRJl0NfWGG/E9JfV1mVBtCVVJonoOAc6Amq1tRMfk1dpFNZ1wXiznYKLRAhYHRQpJv6YMrbxBQ5ET/484abh77EzZszzpJ77hM6sglT4XKP+HH1P7xxYt8XVdVtftYpgVgSooVeCYxMxIBem4S20QyH2QsO83AJVA8s6cSUwlrbCu7Dpkcm410nqkS/eRts5dW3hTY6DRpvMVgJsPsXV8a55JNYjWz3f2W3lAe+h3rTCIDCZB4oPhZiavzkpLbimORAyfiPCDG64zLFz1VVtdT62WC8txjok9CvVft/nKio4dHx2Te0XQ0JOIFs8EZcfzootlYLPfWSEuDf61sadBpguBM97M/cDePyPBxmfMiyYldtTAtHF7MKcZvnBxFwZloikULWxREYms5G4L3qOsAFcDg1ItDrJQxNVlLgFj1y0V1Gi7sp93oMaFgFvmE51A8g2zw6LZmTcupp+nnwtZWNXfwwv42XYNYX+7ScpfmSUJ/8gMeV0IRq77dvpuRNLgSS88aeG6oP3wyggbauMcGWURVHqQlBx+4+HOLlOIom+tkG5ioQu0="
+    app: asepartback
+    on:
+      jdk: openjdk8
+      all_branches: true
+      tags: true
+    skip_cleanup: true
+
+  - provider: heroku
+    api_key:
+      secure: "NL3g0U2tRWu2ekZcVkyYFNAMcwFzw9hFRBGdGNgU1VYIfo8P0jNhbdhh90Yf36gxwxnialaXD6vsa4JXNG81pygFqZJ59tN40scxxzHqXMe6lhLWslXuGiRRJl0NfWGG/E9JfV1mVBtCVVJonoOAc6Amq1tRMfk1dpFNZ1wXiznYKLRAhYHRQpJv6YMrbxBQ5ET/484abh77EzZszzpJ77hM6sglT4XKP+HH1P7xxYt8XVdVtftYpgVgSooVeCYxMxIBem4S20QyH2QsO83AJVA8s6cSUwlrbCu7Dpkcm410nqkS/eRts5dW3hTY6DRpvMVgJsPsXV8a55JNYjWz3f2W3lAe+h3rTCIDCZB4oPhZiavzkpLbimORAyfiPCDG64zLFz1VVtdT62WC8txjok9CvVft/nKio4dHx2Te0XQ0JOIFs8EZcfzootlYLPfWSEuDf61sadBpguBM97M/cDePyPBxmfMiyYldtTAtHF7MKcZvnBxFwZloikULWxREYms5G4L3qOsAFcDg1ItDrJQxNVlLgFj1y0V1Gi7sp93oMaFgFvmE51A8g2zw6LZmTcupp+nnwtZWNXfwwv42XYNYX+7ScpfmSUJ/8gMeV0IRq77dvpuRNLgSS88aeG6oP3wyggbauMcGWURVHqQlBx+4+HOLlOIom+tkG5ioQu0="
+    app: asepartback-dev
+    on:
+      jdk: openjdk8
+      all_branches: true
+      tags: false
+    skip_cleanup: true
+
+  - provider: heroku
+    api_key:
+      secure: "NL3g0U2tRWu2ekZcVkyYFNAMcwFzw9hFRBGdGNgU1VYIfo8P0jNhbdhh90Yf36gxwxnialaXD6vsa4JXNG81pygFqZJ59tN40scxxzHqXMe6lhLWslXuGiRRJl0NfWGG/E9JfV1mVBtCVVJonoOAc6Amq1tRMfk1dpFNZ1wXiznYKLRAhYHRQpJv6YMrbxBQ5ET/484abh77EzZszzpJ77hM6sglT4XKP+HH1P7xxYt8XVdVtftYpgVgSooVeCYxMxIBem4S20QyH2QsO83AJVA8s6cSUwlrbCu7Dpkcm410nqkS/eRts5dW3hTY6DRpvMVgJsPsXV8a55JNYjWz3f2W3lAe+h3rTCIDCZB4oPhZiavzkpLbimORAyfiPCDG64zLFz1VVtdT62WC8txjok9CvVft/nKio4dHx2Te0XQ0JOIFs8EZcfzootlYLPfWSEuDf61sadBpguBM97M/cDePyPBxmfMiyYldtTAtHF7MKcZvnBxFwZloikULWxREYms5G4L3qOsAFcDg1ItDrJQxNVlLgFj1y0V1Gi7sp93oMaFgFvmE51A8g2zw6LZmTcupp+nnwtZWNXfwwv42XYNYX+7ScpfmSUJ/8gMeV0IRq77dvpuRNLgSS88aeG6oP3wyggbauMcGWURVHqQlBx+4+HOLlOIom+tkG5ioQu0="
+    app: asepartweb
+    on:
+      node: 8
+      all_branches: true
+      tags: true
+    skip_cleanup: true
+
+  - provider: heroku
+    api_key:
+      secure: "NL3g0U2tRWu2ekZcVkyYFNAMcwFzw9hFRBGdGNgU1VYIfo8P0jNhbdhh90Yf36gxwxnialaXD6vsa4JXNG81pygFqZJ59tN40scxxzHqXMe6lhLWslXuGiRRJl0NfWGG/E9JfV1mVBtCVVJonoOAc6Amq1tRMfk1dpFNZ1wXiznYKLRAhYHRQpJv6YMrbxBQ5ET/484abh77EzZszzpJ77hM6sglT4XKP+HH1P7xxYt8XVdVtftYpgVgSooVeCYxMxIBem4S20QyH2QsO83AJVA8s6cSUwlrbCu7Dpkcm410nqkS/eRts5dW3hTY6DRpvMVgJsPsXV8a55JNYjWz3f2W3lAe+h3rTCIDCZB4oPhZiavzkpLbimORAyfiPCDG64zLFz1VVtdT62WC8txjok9CvVft/nKio4dHx2Te0XQ0JOIFs8EZcfzootlYLPfWSEuDf61sadBpguBM97M/cDePyPBxmfMiyYldtTAtHF7MKcZvnBxFwZloikULWxREYms5G4L3qOsAFcDg1ItDrJQxNVlLgFj1y0V1Gi7sp93oMaFgFvmE51A8g2zw6LZmTcupp+nnwtZWNXfwwv42XYNYX+7ScpfmSUJ/8gMeV0IRq77dvpuRNLgSS88aeG6oP3wyggbauMcGWURVHqQlBx+4+HOLlOIom+tkG5ioQu0="
+    app: asepartweb-dev
+    on:
+      node: 8
+      all_branches: true
+      tags: false
+    skip_cleanup: true
+  
+  - provider: releases
+    api_key:
+      secure: NVlIErgUFazaYfXpTJEn/zAKooePzE8YifC4TyyxlwJEOYAeKOD9GVDygxfiCI2jv7EbcthKw0T8jIoreqAK49rFP9ad7dc2b0HVGJ9zho+Q432XvEH/Lrf+KvsKBqJM7Ao9xlqcO9+m1Rtm+J59PaVqrr3NTtGDjbnQW1ni2DxL4wwR8MujqNWBqi6WkJjxnrzthO9X7937KF+6BPpDD4+NsQcKQkLl2xkJfjzMJ1oBPkW6uzDonj9hPsd5GUhEsP+hetYZu1bO7lmAaKTvsM+RUy2cfVhm1mBTXF72CIBYr6wQBpU9/tSDtC8SNZdrzYvMQXq318ya0HijLn5IG1ndvCm7fJYu7B0fpIBqtvIdUEi31Eo3HXzQvpI1HPpgiNOYlHC/LPj9csjarB6rtQGLa4qC71lMh0oTLNCaetooERLnFHZA6lkBK1XQAPxvxWmRhQMISjTyZMJle1zruYnKjT5c3DSxt/kkHaJcPXd/IRQbG1SRf7Gp3erPExKTbhdg5qAgz+a1+JjrAoj/Cv0XRrI0SO/GSHwWD34/94gfALEIy5Ev4yZhCujT+Mr2kiTDMWh7SepZ9D/KuUW8L1DwboaHsVy3HUWypgulZ8bB3PSSrf8edZ8zV2AwONd76prGIoOJWeMxO2TV5+qgBYYN+0EtAIuWM6GERpFcOOQ=
+    file: Asepart.apk
+    on:
+      repo: asepart/amosss182
+      tags: true
+    skip_cleanup: true
+    
+notifications:
+    slack: amosss182:Jy3u9zaYLt3M9abd8PnYID3D

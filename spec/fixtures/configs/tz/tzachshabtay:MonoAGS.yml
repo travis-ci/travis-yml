@@ -1,0 +1,24 @@
+language: csharp
+solution: MonoAGS.sln
+matrix:
+  include:
+    - os: linux
+      mono: latest
+      env: BUILD_CONFIG=DesktopRelease BUILD_PLATFORM="Any CPU" DOTNET_SKIP_FIRST_TIME_EXPERIENCE=true MSBuildExtensionsPath32=/usr/lib/mono/xbuild
+      dotnet: 2.0.2
+      dist: trusty
+    - os: osx
+      mono: latest
+      env: BUILD_CONFIG=DesktopRelease BUILD_PLATFORM="Any CPU" DOTNET_SKIP_FIRST_TIME_EXPERIENCE=true
+      dotnet: 2.0.2
+
+install:
+  - git fetch --unshallow
+  - curl -L -o nuget.exe https://dist.nuget.org/win-x86-commandline/latest/nuget.exe
+  - nuget install NUnit.Runners -Version 2.6.4 -OutputDirectory testrunner
+
+script:
+ - dotnet restore
+ - mono nuget.exe restore MonoAGS.sln
+ - msbuild /p:Configuration=$BUILD_CONFIG /p:Platform="$BUILD_PLATFORM" MonoAGS.sln
+ - mono ./testrunner/NUnit.Runners.2.6.4/tools/nunit-console.exe ./Source/Tests/bin/Release/Tests.dll

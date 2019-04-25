@@ -1,0 +1,20 @@
+language: c
+sudo: required
+
+install: ./travis.sh install
+script: ./travis.sh script
+
+git:
+    submodules: false
+
+services:
+  - docker
+
+# cache:
+#   directories:
+#     - ~/cache
+#   timeout:
+#     1000
+
+env:
+  - USE_CACHE=0 # set to 1 to enable

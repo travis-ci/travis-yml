@@ -1,0 +1,64 @@
+#
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
+
+# .travis.yml
+sudo: required
+dist: trusty
+
+matrix:
+  include:
+    # For maven builds
+    - language: java
+      jdk: oraclejdk8
+      before_install:
+        - sudo apt update && sudo apt install -y libgif-dev
+      install: true
+      script:
+        # the following command line builds the project, runs the tests with coverage and then execute the SonarCloud analysis if it's not an external PR (It's to be supported later on)
+        - if [ "$TRAVIS_PULL_REQUEST" == false ]; then travis_retry mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent $GOAL sonar:sonar -Dsonar.host.url=https://sonarcloud.io $SONAR_PROJECT_KEY; fi
+        - if [ "$TRAVIS_PULL_REQUEST" != false ]; then travis_retry mvn clean $GOAL; fi
+      cache:
+        directories:
+        - '$HOME/.m2/repository'
+        - '$HOME/.sonar/cache'
+      env:
+        - HADOOP_HOME="/"
+        - GOAL="validate"
+        - GOAL="verify -B -q -ff -Dsurefire.useFile=false -Dorg.slf4j.simpleLogger.defaultLogLevel=info"
+
+    # For web ui build
+    - language: node_js
+      node_js:
+        - node
+      before_install:
+        - pushd webui
+        - npm install
+      script:
+        - npm test && popd
+
+notifications:
+  slack:
+    rooms:
+      # Apache
+      - secure: iDNSliZcKu4PW55tOe8a2jxvr1OGfqaX2sCqAmHMkAH7rvOBFwln5UBaeUY8p8BIa0P12oHLCOAtqWzHiXqe2CGVz7xyXhMHD2FzAtUIQ6GocNRXkdU5JJBXMN4XOPGMX/r38GbHRhO1ThjHr3hJIhfISjnXaOMxUoIOE6aLr/Dk9LUm6iQ2eBUajmcz4vy7BuS8Wec1DOaUIH025SRDyxzkhezJjB2JgPdLsc91amWfV04tZg+NBLZmn3DhB6Jl3dRrvABbszhBqDM2tZfV1MXuI522fzKa2tMuT2dd1BxUIkIicF+IB5tLnlKmnbRXCT7gQR0KAP5bXzdZnRY8UZo+Bbd6AlHHdIHWcNItJ2b0k4LLOVJ0MfoaKmoOJoQgkAYNPIGaDHM+q1FrhJSGtPCRKN4oaGevwWQPBZot9RY8QCU0v07p+MG9wQ8sR1nbfjF0jLQiLODSVsSNVSv2c01t6HkwmOfHe+YbTy9WkKIxQq3wMLcPT7iNcHAzsY3QQ+MSJn+xWrWcvJmfsGocVUUy20DV946NGUzpfHlXnfAxLTSOkUIj4kTXmUthIolzsRDqueoTeliIN5yeHFhQr7aX+NMrrVPba48EXRLsdQUzq6okTF6XnTDoDiLSu/AxKzItqz2lAVmpc011L6F9YIN/RQi6kK44++CvHf5kaHw=
+      - secure: T6NnhwIw61J2yCzC9icgB1ez90LDcfbiJR5I5/OOCT694d0apHSWeQshTfYBoWbMa1XYiQgSHqzIzRFsTQZHDOY+6TXeP3XljUcnLij6zFw6pW6IgiJalgUso/4+wVun3QfgNDDDouuSvzov+h+MPR32UasYM/3d0MbwcDjf34asIf6aq7cbN9b4B9FU2WzNGi7wo84B4yLSxkKQHSKrm+I923UzUFza1kyuqwAHHf/XknaJvI5ZKm3Lszo4BpM1vzIcXYhahIi5yYvI8SIwYYooZUooEIYzOCZCBD5IzfKyM3XQWw5tldkMVwssQy0NL3eHdXU7+xCFSZuJ9dAqp8UMcikE/QEXG5jdLRNtjz836gfOl2U8OWXQ7vPKciPIQL/8tpltkuBGjR8Du4qW4P0B3vOcjAnwhF4WrMkGqODy6GqxBS38ZTtVsUP0OdlVUCeA4XlqB7gycTxLzcphaGCCYui6zvI7nGuR+C5+5L2o56dd26j+5L4J2fvN4ArpXoWtGIn0SJRJR+Y+ABUApZq3SDnlC+2hzIaduORRG72R6rTjJm1tEnv0XNGOgJJsnQ+M+27y9y1BPOuJL0RnDYjTw6Z5OYJ14wvNIrDgoaJ5gogwwfHH5VzzOSUCiOYrq9dqwDgiv/28r+BwJf8coFmjs/GI0U/ykDYUvGvECoA=
+
+addons:
+  sonarcloud:
+    organization: "$SONAR_ORGANIZATION"
+    token: "$SONAR_TOKEN"

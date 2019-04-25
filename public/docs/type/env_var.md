@@ -2,17 +2,12 @@
 
 
 
-## Type
+## Types
 
-Any of:
-
-* Map (Hash)
-* Map (Hash)
+* Hash
+* Hash
 * String
 
-## Flags
-
-None.
 
 
 ## Examples

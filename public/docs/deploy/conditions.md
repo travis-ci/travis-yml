@@ -2,19 +2,11 @@
 
 
 
-## Type
-
-Any of:
+## Types
 
 * 
-* Any of:
+* Hash
 
-* Sequence (Array)
-* Map (Hash)
-
-## Flags
-
-None.
 
 
 ## Examples

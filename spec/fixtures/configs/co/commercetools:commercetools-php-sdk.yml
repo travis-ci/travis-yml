@@ -1,0 +1,62 @@
+dist: xenial
+sudo: false
+language: php
+php:
+- 7.0
+- 5.6
+- 7.1
+- 7.2
+- nightly
+env:
+  - GUZZLE=5
+  - GUZZLE=6
+matrix:
+  allow_failures:
+  - php: nightly
+services:
+- redis-server
+cache:
+  directories:
+  - vendor
+before_install:
+- openssl aes-256-cbc -K $encrypted_17acaeff100f_key -iv $encrypted_17acaeff100f_iv -in github_deploy_key.enc -out github_deploy_key -d
+- chmod 600 github_deploy_key
+- eval $(ssh-agent -s)
+- ssh-add github_deploy_key
+- rm github_deploy_key
+- PHP=$TRAVIS_PHP_VERSION
+- if [ $PHP != 'hhvm' ] ; then echo "extension = redis.so" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini ; fi
+before_script:
+- composer config -g github-oauth.github.com $GITHUB_OAUTH_TOKEN
+- if [ $GUZZLE == '5' ] ; then ./set_guzzle5.sh; fi
+- if [ $GUZZLE == '5' ] ; then composer update -o --prefer-dist --prefer-lowest; fi
+- if [ $GUZZLE != '5' ] ; then composer install -o --prefer-dist; fi
+script:
+- if [ $PHP == '7.1' ] && [ $GUZZLE == '6' ]; then vendor/bin/phpcs --standard=PSR2 --extensions=php --ignore=autoload.php,src/Core/Builder src/; fi
+- if [ $GUZZLE == '5' ] || [ $PHP == '5.6' ] || [ $PHP == 'hhvm' ] ; then vendor/bin/phpunit -c phpunit5.xml.dist --testsuite=unit; fi
+- if [ $GUZZLE == '6' ] && [ $PHP != '5.6' ] ; then vendor/bin/phpunit --testsuite=unit; fi
+- if [ $PHP == '7.0' ] && [ $GUZZLE == '6' ] && [ $TRAVIS_PULL_REQUEST == 'false' ]; then vendor/bin/phpunit --testsuite=integration; fi
+- bin/ctp-tlscheck.php
+before_deploy:
+  - if [ $PHP == '7.1' ] && [ $GUZZLE == '6' ] ; then ./install-apigen.sh && php apigen.phar generate --debug --config build/apigen.neon; fi
+deploy:
+  - provider: script
+    skip_cleanup: true
+    script: ./push-docs-to-gh-pages.sh
+    on:
+      branch: master
+      condition: $GUZZLE = '6'
+      php: 7.1
+  - provider: script
+    skip_cleanup: true
+    script: ./push-docs-to-gh-pages.sh
+    on:
+      tags: true
+      condition: $GUZZLE = '6'
+      php: 7.1
+notifications:
+  hipchat:
+    rooms:
+      secure: VD5RvUZYVg1aokw8OeMhNfDPc39o2r4Jjq8s6U2QvMXzoiopHpj6+VYX1AHbhxMpBGmsgKfzbYQ6XfubJUeHq+FMzW3YEekwcyqXKCfWi5tLCE7Epb0dCySatztVTkqlXzXaAM6NhzdFxG6kQPiA9OcSvRPZmSwjuX4eYXRokRw=
+  slack:
+    secure: ZZ4PVXEv9FXuk81pRBCYAPZYeKnqvYYPd5DKB3E9WWKZQAZExMtSvqa7cDcbvQRk7jsD6E1RvTIn42p2jjypXN8ZKbmjsshrVd02fhmmwP7cQk9s3WE1fZhYt7CnCu0EJHOK3/fC3ddOXFJ/xlFvM3DXDd1RRZfBzVz5XWeQDr8=

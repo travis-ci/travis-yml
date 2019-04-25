@@ -32,7 +32,7 @@ describe Travis::Yml::Schema::Def::Deploy::Pages, 'structure' do
                 '$ref': '#/definitions/deploy/edge'
               },
               github_token: {
-                '$ref': '#/definitions/secure'
+                '$ref': '#/definitions/type/secure'
               },
               repo: {
                 type: :string

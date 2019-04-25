@@ -1,0 +1,53 @@
+language: rust
+cache: cargo
+dist: xenial
+services:
+  - postgresql
+before_install:
+  - sudo add-apt-repository ppa:wireguard/wireguard -y
+  - sudo add-apt-repository universe
+  - sudo apt-get -qq update
+  - sudo apt-get install -y libsqlite3-dev postgresql-client-11 postgresql-server-dev-11 libpq-dev iperf3 python3-pip bridge-utils wireguard linux-source linux-headers-$(uname -r) curl git libssl-dev pkg-config build-essential ipset python3-setuptools python3-wheel
+  - command -v cross 1>/dev/null || cargo install cross
+  - psql -c 'create database test;' -U postgres
+
+env:
+  matrix:
+    - CMD="cross build --target x86_64-unknown-linux-gnu --verbose -p rita --bin rita && cross test --target x86_64-unknown-linux-gnu --verbose -p rita --bin rita -- --test-threads=1"
+    - CMD="cross build --target mips-unknown-linux-gnu --verbose -p rita --bin rita && cross test --target mips-unknown-linux-gnu --verbose -p rita --bin rita -- --test-threads=1"
+    - CMD="cross build --target mipsel-unknown-linux-gnu --verbose -p rita --bin rita && cross test --target mipsel-unknown-linux-gnu --verbose -p rita --bin rita -- --test-threads=1"
+    - CMD="cross build --target mips64-unknown-linux-gnuabi64 --verbose -p rita --bin rita && cross test --target mips64-unknown-linux-gnuabi64 --verbose -p rita --bin rita -- --test-threads=1"
+    - CMD="cross build --target mips64el-unknown-linux-gnuabi64 --verbose -p rita --bin rita && cross test --target mips64el-unknown-linux-gnuabi64 --verbose -p rita --bin rita -- --test-threads=1"
+    - CMD="cross build --target aarch64-unknown-linux-gnu --verbose -p rita --bin rita && cross test --target aarch64-unknown-linux-gnu --verbose -p rita --bin rita -- --test-threads=1"
+    - CMD="cross build --target armv7-unknown-linux-gnueabihf --verbose -p rita --bin rita && cross test --target armv7-unknown-linux-gnueabihf --verbose -p rita --bin rita -- --test-threads=1"
+    # test Rita exit only on x86 since cross does not include postgres libs :(
+    - CMD="cargo build --all && RUST_TEST_THREADS=1 cargo test --verbose --all"
+
+rust:
+  - stable
+  - beta
+  - nightly
+
+script:
+  - eval "$CMD"
+
+matrix:
+  allow_failures:
+    - rust: nightly
+  fast_finish: true
+
+  include:
+    - rust: stable
+      env:
+      before_install:
+      script:
+        - rustup component add rustfmt-preview
+        - cargo fmt --all -- --check
+        # to stop opt level 3 from sneaking in
+        - "grep -q 'opt-level = \"z\"' Cargo.toml"
+    - script: ./integration-tests/rita.sh
+      env: INITIAL_POLL_INTERVAL=5 BACKOFF_FACTOR="1.5" VERBOSE=1 POSTGRES_USER=postgres POSTGRES_BIN=/usr/lib/postgresql/9.6/bin/postgres POSTGRES_DATABASE=/var/ramfs/postgresql/9.6/main POSTGRES_CONFIG=/etc/postgresql/9.6/main/postgresql.conf
+    - script: ./integration-tests/rita.sh
+      env: REVISION_B=release REMOTE_A=.. REMOTE_B="https://github.com/althea-mesh/althea_rs.git" COMPAT_LAYOUT="inner_ring_old" INITIAL_POLL_INTERVAL=5 BACKOFF_FACTOR="1.5" VERBOSE=1 POSTGRES_USER=postgres POSTGRES_BIN=/usr/lib/postgresql/9.6/bin/postgres POSTGRES_DATABASE=/var/ramfs/postgresql/9.6/main POSTGRES_CONFIG=/etc/postgresql/9.6/main/postgresql.conf
+    - script: ./integration-tests/rita.sh
+      env: REVISION_B=master REMOTE_A=.. REMOTE_B="https://github.com/althea-mesh/althea_rs.git" COMPAT_LAYOUT="inner_ring_old" INITIAL_POLL_INTERVAL=5 BACKOFF_FACTOR="1.5" VERBOSE=1 POSTGRES_USER=postgres POSTGRES_BIN=/usr/lib/postgresql/9.6/bin/postgres POSTGRES_DATABASE=/var/ramfs/postgresql/9.6/main POSTGRES_CONFIG=/etc/postgresql/9.6/main/postgresql.conf

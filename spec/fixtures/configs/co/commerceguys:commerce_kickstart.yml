@@ -1,0 +1,168 @@
+language: php
+sudo: false
+dist: trusty
+addons:
+  chrome: stable
+php:
+  - 5.6
+
+branches:
+  except:
+    - 7.x-1.x
+
+mysql:
+  database: drupal
+  username: root
+  encoding: utf8
+
+env:
+  - UPGRADE=none
+  - UPGRADE=7.x-2.55
+  - UPGRADE=7.x-2.54
+  - UPGRADE=7.x-2.53
+  - UPGRADE=7.x-2.52
+  - UPGRADE=7.x-2.51
+  - UPGRADE=7.x-2.50
+  - UPGRADE=7.x-2.49
+  - UPGRADE=7.x-2.48
+  - UPGRADE=7.x-2.47
+  - UPGRADE=7.x-2.46
+
+matrix:
+  fast_finish: true
+  include:
+    - php: 5.6
+      env: UPGRADE=7.x-2.23 TEST_FEATURES_OVERRIDES=1
+    - php: 7.1
+      env: UPGRADE=none
+    - php: 7.2
+      env: UPGRADE=none
+  allow_failures:
+    - php: 7.1
+    - php: 7.2
+
+# Cache Composer & Drush directories.
+cache:
+  directories:
+    - $HOME/.composer/cache
+    - tests/behat/vendor
+before_install:
+  # Remove xdebug for the moment. We aren't generating code coverage, and it slows us down.
+  - rm /home/travis/.phpenv/versions/$(phpenv version-name)/etc/conf.d/xdebug.ini
+
+install:
+  # Install Chromedriver.
+  - CHROMEDRIVER_VERSION=$(wget http://chromedriver.storage.googleapis.com/LATEST_RELEASE -qO-)
+  - wget http://chromedriver.storage.googleapis.com/$CHROMEDRIVER_VERSION/chromedriver_linux64.zip
+  - unzip chromedriver_linux64.zip && rm -f chromedriver_linux64.zip
+  - chmod a+x chromedriver
+  - mv chromedriver ~/
+
+  # Create database.
+  - "mysql -e 'create database drupal;'"
+
+  # Install latest Drush 6.
+  - travis_retry composer self-update && composer --version
+  - travis_retry composer global require "drush/drush:6.*"
+  - export PATH="$HOME/.composer/vendor/bin:$PATH"
+
+  # Drupal.org verify tool
+  - drush dl -y drupalorg_drush-7.x-1.x-dev --destination=$HOME/.drush
+  - drush cc drush
+
+  # Build Behat dependencies
+  - cd ./tests/behat
+  - travis_retry composer install --prefer-dist --no-interaction
+  - cd ../../../
+
+  # Setting Behat environment
+  - BUILD_TOP=`dirname $TRAVIS_BUILD_DIR`
+  - BEHAT_PARAMS='{"extensions":{"Drupal\\DrupalExtension":{"drupal":{"drupal_root":"BUILD_TOP/drupal"}}}}'
+  - BEHAT_PARAMS=`echo $BEHAT_PARAMS | sed -e s#BUILD_TOP#$BUILD_TOP#`
+  - export BEHAT_PARAMS
+
+  # Build Codebase
+  - mkdir private_files
+  - mkdir profiles
+  - mv commerce_kickstart profiles/
+  - mkdir drupal
+  - mv profiles drupal/
+
+  # Build the current branch
+  - cd drupal
+  - drush make --yes profiles/commerce_kickstart/drupal-org-core.make --prepare-install
+  - drush make --yes profiles/commerce_kickstart/drupal-org.make --no-core --contrib-destination=profiles/commerce_kickstart
+  # Download Diff module for checking overridden features through Drush.
+  - drush dl diff
+  - cd ../
+
+  # Verify that all the .make files will work on Drupal.org.
+  # @todo uncomment before merge.
+  # - drush verify-makefile drupal/profiles/commerce_kickstart/drupal-org.make
+  # - find drupal/profiles/commerce_kickstart/modules -name \*.make -print0 | xargs -0 -n1 drush verify-makefile
+
+  # Download an old version to test upgrading from.
+  - if [[ "$UPGRADE" != none ]]; then drush dl commerce_kickstart-$UPGRADE; fi
+
+  # Setup files
+  - chmod -R 777 drupal/sites/all
+
+   # Disable sendmail
+  - echo sendmail_path=`which true` >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
+
+  # Increase the MySQL connection timeout on the PHP end.
+  - echo "mysql.connect_timeout=3000" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
+  - echo "default_socket_timeout=3000" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
+
+  # Multibyte string input conversion in PHP is active and must be disabled for Drupal on PHP 5.6.
+  - echo "mbstring.http_input = pass" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
+  - echo "mbstring.http_output = pass" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
+
+  # Increase the MySQL server timetout and packet size.
+  - mysql -e "SET GLOBAL wait_timeout = 36000;"
+  - mysql -e "SET GLOBAL max_allowed_packet = 33554432;"
+
+before_script:
+
+  # Do the site install (either the current revision or old for the upgrade).
+  - if [[ "$UPGRADE" == none ]]; then cd drupal; else cd commerce_kickstart-$UPGRADE; fi
+
+
+  # Copy override module into sites/default/modules so it carries over when testing upgrades.
+  - if [[ "$TEST_FEATURES_OVERRIDES" == 1 ]]; then mkdir sites/default/modules && cp -r ../drupal/profiles/commerce_kickstart/tests/commerce_kickstart_overrides_test sites/default/modules/commerce_kickstart_overrides_test; fi
+
+  - drush si commerce_kickstart --db-url=mysql://root:@127.0.0.1/drupal --account-name=admin --account-pass=admin --site-mail=admin@example.com --site-name="Commerce Kickstart" --yes
+  - drush pm-disable dblog --yes
+
+  # If testing the override, enable it and revert feature it's overriding (because we didn't on the same install.)
+  # We need to download rc2, because rc3 requires a function in Features 2.7,
+  # breaking test.
+  - if [[ "$TEST_FEATURES_OVERRIDES" == 1 ]]; then drush dl features_override-7.x-2.0-rc2 && drush en -y commerce_kickstart_overrides_test && drush fr -y commerce_kickstart_blog; fi
+
+  - cd ../drupal
+
+  # If we're an upgrade test, run the upgrade process.
+  - if [[ "$UPGRADE" != none ]]; then cp -a ../commerce_kickstart-$UPGRADE/sites/default/* sites/default/ && drush updb --yes; drush cc all;  fi
+
+  # Start server
+  - drush runserver --server=builtin 8888 > /dev/null 2>&1 &
+  - nc -zvv localhost 8888; out=$?; while [[ $out -ne 0 ]]; do echo "Retry hit port 8888..."; nc -zvv localhost 8888; out=$?; sleep 5; done
+  - cd profiles/commerce_kickstart/tests/behat
+
+  # Start Chrome
+  - ~/chromedriver > /dev/null 2>&1 &
+
+script:
+
+  # If this isn't an upgrade, we test if any features are overridden.
+  - if [[ "$UPGRADE" == none ]]; then ../../scripts/check-overridden.sh; fi
+
+  # Fix bad Commerce Migrate release for testing the demo.
+  - if [[ "$UPGRADE" == "7.x-2.34" || "$UPGRADE" == "7.x-2.33" || "$UPGRADE" == "7.x-2.32" || "$UPGRADE" == "7.x-2.31" || "$UPGRADE" == "7.x-2.30" || "$UPGRADE" == "7.x-2.29" || "$UPGRADE" == "7.x-2.28" || "$UPGRADE" == "7.x-2.27" ]]; then drush mi --all --update; fi
+
+  # Run Behat tests.
+  - if [[ "$TEST_FEATURES_OVERRIDES" != 1 ]]; then ./bin/behat --config behat.travis.yml --tags ~@overrides; fi
+  - if [[ "$TEST_FEATURES_OVERRIDES" == 1 ]]; then ./bin/behat --config behat.travis.yml --tags @overrides; fi
+
+notifications:
+  irc: "chat.freenode.net#drupal-commerce"

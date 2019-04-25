@@ -1,0 +1,77 @@
+# -*- coding: utf-8 -*-
+#
+# This file is part of hepcrawl.
+# Copyright (C) 2015, 2016, 2017, 2019 CERN.
+#
+# hepcrawl is a free software; you can redistribute it and/or modify it
+# under the terms of the Revised BSD License; see LICENSE file for
+# more details.
+
+sudo: false
+
+language: python
+
+services:
+  - docker
+
+python:
+  - "2.7"
+
+env:
+  global:
+    - EXTRAS=docs,tests
+    - DOCKER_COMPOSE_VERSION=1.13.0
+    - DOCKER_DATA=/tmp/hepcrawl_docker_data
+    - BASE_USER_UID=2000
+    - BASE_USER_GID=2000
+  matrix:
+    - PYTHON=py2 SUITE=unit
+    - PYTHON=py2 SUITE=functional_wsp
+    - PYTHON=py2 SUITE=functional_arxiv
+    - PYTHON=py2 SUITE=functional_desy
+    - PYTHON=py2 SUITE=functional_cds
+    - PYTHON=py2 SUITE=functional_pos
+    - PYTHON=py3 SUITE=unit
+
+matrix:
+  fast_finish: true
+
+before_install:
+  - travis_retry pip install twine wheel coveralls check-manifest
+  - sudo rm -f /usr/local/bin/docker-compose
+  - curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
+  - chmod +x docker-compose
+  - sudo mv docker-compose /usr/local/bin
+
+install:
+  - travis_retry docker-compose -f docker-compose.deps.${PYTHON}.yml run --rm pip
+  - travis_retry docker-compose -f docker-compose.test.${PYTHON}.yml run --rm scrapyd-deploy
+
+script:
+  - docker-compose -f docker-compose.test.${PYTHON}.yml run --rm ${SUITE}
+
+after_success:
+  - docker-compose -f docker-compose.test.${PYTHON}.yml kill -s SIGTERM
+  - docker-compose -f docker-compose.test.${PYTHON}.yml rm -f
+  - coverage combine
+  - sed -i 's@\"/code/@'"\"$(pwd)/"'@g' .coverage
+  - coveralls
+
+after_failure:
+  - docker-compose -f docker-compose.test.${PYTHON}.yml logs --tail=200
+  - bash -c 'for log in logs/*/*; do echo $log; cat $log; done'
+
+notifications:
+  email: false
+
+deploy:
+  - provider: pypi
+    user: inspirehep
+    password:
+      secure: JRlzmzXjqr0c8m8nWwvDwmbPVuA64SanUMX6hqqtCOqHW06LMyC51MQr4mkq0SFLxLQsh2aPNmVB7IAO1ZR44cQh+1ECZgM6+cRfwb5lEJFsnVhaGV+VVwUUBYRjrb/IOui05nOlxp+aIOOqhegTcMzt7dsBnVBQgI87t2j4BOe6d6j+qoMALmltXbPcaiLATFAjqJq/AFEJlHiLFozWAU5m2H1OTUkHv5FOV31VdQwNfhFAzTegO1anTSkKiGAz1E1ihsKoRGoa00cw7H9woqrSOEHnrzdziZQtbVutSoiHFBDqIpBmxhcMHUl12KnjQUSaCFrDryD2PbLoJ6EGKydJWBLPMNMQVvK6mkcoMIuJxNRYW7Y4PLqBf8neAYpW/Wvnov80vlkRLic/Kwz+iDgmW2UhQUqLjJIp5fNdhHbI4EI0MZ1tchLaXVeQpdAa6tk6yIFhRLrvf8+Wz4c5yH6GM95qHOlh9I+/6ubZbMWO1AhSV510eUsh8M0CvGTb3VeI7mSMHe+Jur5gv+M+Nlerszx19k6aPH0vYM2NXpjSTKqW3t7H+ebxCnXpbgiwPKaBKWscCdH8Ru9HEvug2CtfoPyS3A+TYs7CpsmmEETEL9RNH3dQmNAhStilWI21kISEznNgCkhZZ082+Z19/I9vXg5X/fgKl+nK+zcdScw=
+    on:
+      branch: master
+      python: 2.7
+      distributions: sdist
+      repo: inspirehep/hepcrawl
+      condition: $SUITE = functional_arxiv && $PYTHON = py2

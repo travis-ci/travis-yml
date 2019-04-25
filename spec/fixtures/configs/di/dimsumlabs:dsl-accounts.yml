@@ -1,0 +1,26 @@
+language: python
+
+python:
+  - 2.7
+  - 3.5
+
+install:
+  - pip install --quiet flake8 coverage mock
+  - sudo apt-get install gnuplot
+
+script:
+  - make test
+  - make pages
+  - make pages/stats.pdf
+
+deploy:
+    provider: pages
+    repo: dimsumlabs/dsl-accounts-pages
+    local-dir: pages
+    target-branch: master
+    skip-cleanup: true
+    github-token: $GITHUB_TOKEN
+    on:
+        branch: master
+        python: 3.5
+        condition: $GITHUB_TOKEN

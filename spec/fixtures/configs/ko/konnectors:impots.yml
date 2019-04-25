@@ -1,0 +1,41 @@
+language: node_js
+node_js:
+- '8'
+env:
+  global:
+  - GH_USER_EMAIL="travis@example.org"
+  - GH_USER_NAME="cozy-bot"
+  - DEPLOY_REPOSITORY="git@github.com:konnectors/impots.git"
+  - secure: JlGKtBasuh2R+E/SbYQ8YMIgaWgBk7ChbzyThSye6HTOBA1lAMqMUPUdC+d/RkGftIHGaC6K3lhwiYGH/7/i/UhEAdFXT+p3OiF571KyhFWolxaeAO5S5SmY3FBNo54t0nC1j8MQk8mjqYMTp98qJdNgMXr8QJkUi+M4Rf7kMBXCm7CYtJYaCgAZzwhACJBYx+PbyX64OndInr7xu7bjQRyoNL8fVA83mzGef0qPnZy7sAnrBEou8mx9VlyAS8o/M8FwPw2JKZawAEaeTcQxuMD1HSEjZC7BSx2/iTavV5ZzfeUu3LJAWOK2M5HgIBwaA1XIlt0I7VKGQH2kZdjuniUpgJfSSmrOLsS45IHXCvGb1ruGHJt5nHDeuRuPs7VqRfuWboW6bYDIosQtWZrluubf3jXiJLV67HF/NDoqqv9+nv3aQO51HT+iLgATP+ajBhnSTFAFpZsUZN9ZPiyjWJ1ADRhpyIAx+hq78w04mCY/MiYBBsd/Fp+lbifpcDUB/TGCdBgE4tOXHbqeCbintWir+DG10hUBZtNHQrz6tPWxHz4Lnh0XdR3SAAEUefF8XhMDltmHnvKUoDVwQ2446L0DNfiUOz3j5XoQRH5UgXMyctdMJJHQ7DA6JGOrMWmhVX5yx6Ke3/wi6ojNqkiVm7tiF6VDMpHwurc73rCOvcA=
+cache:
+  yarn: true
+  directories:
+  - node_modules
+branches:
+  except:
+  - build
+  - build-debug
+script:
+- yarn lint
+- yarn build
+- yarn run check
+deploy:
+- provider: script
+  skip-cleanup: true
+  script: DEPLOY_BRANCH=build yarn deploy && yarn cozyPublish
+  on:
+    branch: master
+- provider: script
+  skip-cleanup: true
+  script: DEPLOY_BRANCH=build yarn deploy && yarn cozyPublish
+  on:
+    tags: true
+before_install:
+- openssl aes-256-cbc -K $encrypted_6a635ac16364_key -iv $encrypted_6a635ac16364_iv
+  -in github_deploy_key.enc -out /tmp/github_deploy_key -d
+- eval "$(ssh-agent -s)"
+- chmod 600 /tmp/github_deploy_key
+- ssh-add /tmp/github_deploy_key
+after_deploy:
+- rm /tmp/github_deploy_key
+- ssh-add -D

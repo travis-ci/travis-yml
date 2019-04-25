@@ -1,0 +1,23 @@
+language: scala
+matrix:
+  include:
+  - jdk: oraclejdk8
+    env: BINTRAY_PUBLISH=true
+  - jdk: openjdk11
+    env: BINTRAY_PUBLISH=false
+  - jdk: openjdk12
+    env: BINTRAY_PUBLISH=false
+scala:
+- 2.12.8
+script:
+- ./buildViaTravis.sh
+env:
+  global:
+  - secure: bFjGtHP0PLJ1ZQ18Zz4ImmheKPYGi6Yf1uRbrUyDtNtxuR92TUTaNQ7z7gGDJzco0kh6/balhaOeijgta+NdPq1TgPv6aVxQMG5HiZBimowZ2rzONX0T5tBlME+qLbTU6cVdRWFV4qzLptcYUjIyKV6Jr+HoKLGE+rujxKyogfo=
+  - secure: KYjhuZPuD9YCLai8J11jT49Qpxja8QTD7Gwm4JByTj6iWEHKbnZwNA8tgViDsZr9qojzXb+YO9wUR8KGRu1iqsfBirFZmy4q3jT28Wyf2XAf+KpQWBONM/bynZoNyRp1HTPVT3pAfB+mWKJ89MJZkueI4CwVZvtHchqwUbLFwpY=
+  - secure: ZF9PY9oyuvHdJGoS6bvv8wtMolRUYtY1TdkqSew+ucjBXx8rtTGN1UHRJauBs7GED0b199PWBro7LJ+ZeyxSM326mWlZiD41E4FbPvkH0gFZNKumq6z6OWNQJzMh9xZ7wQk5WLA962Z+qpm9klnIcEwjAOUo1ONZy3LxqiVvDfw=
+  - secure: VtXYX25Av+TZuUEbh7yPM2KATpxpZt/cATTJTmnBL4/fIlVTdVyhXIuD5IbdRPbKEilgmldUqC8bmM/4FtyRovFrw9cVTbwl1/hdB28FqogrDRTfjXcAhGOxEx/q1F6ncuaUOgXlNam84j7jhS82VVaNgboLzXy7ORFx6NmrHbw=
+cache:
+  directories:
+  - $HOME/.sbt
+  - $HOME/.ivy2

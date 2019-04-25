@@ -1,0 +1,42 @@
+language: "perl"
+perl:
+  - "5.26"
+  - "5.16"
+# There is little reason to have travis run multiple Perls.
+#  - "5.14"
+#  - "5.12"
+#  - "5.10"
+
+addons:
+  apt:
+    packages:
+      - libgmp-dev
+      - libmpfr-dev
+
+before_install:
+#    - sudo apt-get install libgmp-dev
+#    - sudo apt-get install libmpfr-dev
+    - cpanm Test::Pod # optional dependency
+    - cpanm Math::Prime::Util::GMP
+
+env:
+    -
+    - MPU_NO_GMP=1
+    - MPU_NO_XS=1 MPU_NO_GMP=1
+
+
+install:
+    #- cpanm -v --installdeps --notest --mirror http://cpan.mirrors.travis-ci.org --mirror http://dl.ambiweb.de/mirrors/ftp.cpan.org --mirror http://cpan.cse.msu.edu .
+    - cpanm -v --installdeps --notest .
+
+script: "perl Makefile.PL; make test"
+# branches:
+#   only:
+#     - master
+notifications:
+  recipients:
+    - dana@acm.org
+  email:
+    on_success: change
+    on_failure: always
+#env:

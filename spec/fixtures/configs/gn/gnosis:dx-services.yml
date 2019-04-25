@@ -1,0 +1,51 @@
+sudo: required
+language: node_js
+node_js:
+- '8'
+services:
+- docker
+before_install:
+- docker pull trufflesuite/ganache-cli:v6.4.1
+- docker run -d -p 8545:8545 --net host trufflesuite/ganache-cli:v6.4.1 -d --mnemonic 'candy maple cake sugar pudding cream honey rich smooth crumble sweet treat' --defaultBalanceEther '500000000000000'
+install:
+  - docker build -t dx-services .
+script:
+  - docker run --mount source=app-contracts,destination=/usr/src/app/build
+    --mount source=dx-contracts,destination=/usr/src/app/node_modules/@gnosis.pm/dx-contracts/build
+    --mount type=tmpfs,destination=/usr/src/app/coverage
+    -e TRAVIS=$TRAVIS -e TRAVIS_JOB_ID=$TRAVIS_JOB_ID
+    --net host dx-services /bin/sh -c "yarn migrate; yarn test-coverage"
+after_success:
+- |
+  # Create Docker image if branch master or develop and not on pull requests
+  if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
+    docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD";
+
+    PACKAGE_VERSION=$(node -p -e "require('./package.json').version");
+    echo "Pushing to Docker-hub version $PACKAGE_VERSION, generated from branch $TRAVIS_BRANCH";
+
+    if [[ $PACKAGE_VERSION = *"-SNAPSHOT"* ]]; then
+      echo "Pushing image release...";
+      docker tag dx-services gnosispm/dx-services:release;
+      docker push gnosispm/dx-services:release;
+    elif [ "$TRAVIS_BRANCH" == "master" ]; then
+      echo "Pushing image staging...";
+      docker tag dx-services gnosispm/dx-services:staging;
+      docker push gnosispm/dx-services:staging;
+    elif [ "$TRAVIS_BRANCH" == "develop" ]; then
+      echo "Pushing image develop...";
+      docker tag dx-services gnosispm/dx-services:develop;
+      docker push gnosispm/dx-services:develop;
+    elif [[ $TRAVIS_TAG = $TRAVIS_BRANCH ]]; then
+      echo "Pushing image tag $TRAVIS_TAG...";
+      docker tag dx-services gnosispm/dx-services:$TRAVIS_TAG;
+      docker push gnosispm/dx-services:$TRAVIS_TAG;
+    fi
+    echo "The image has been pushed";
+  else
+    echo "There's no need to push the image to Docker-hub";
+  fi
+env:
+  global:
+  - secure: Kr41EhhJnPqaLfXDAVVzOT1KdfMa/AdrdiIt2VC725WsK1teWruGAez/K20HKPNbfsO0Fihnn2kvCnJgZ250pcbh6WNWG8Q+zJE847RoQXNcl+XfFpMSjaO5NSNRX6GpV2YY2b+l6zx3b1XI3co9cc9Tro7g6hV2/xk2nvjJGnxAJhCzhVxnhAuyWL3grKQSTMgLA3vdYZuEmgYlkTw+xLlSKdtekYXT+6C3qyK1sa5ls/2yI9/2HSCemcD8xDFw0g+DjUEo7f2tY7O93ICg4eyI/7RfsZeHJpx3tfmKb9HWXDp1+LaVvytYLoaSwWoQylCYE30CaV0Ya6hqJZM7ziocwyKe6emCI0svUH8115njyJq+yjvI0wrkV+xW1Rnqt27IsttcflmpSMN1GOaZgWQfONvZltn7rM4NYHimrQ9IgVBcyngfnTZZUwL//YLsiAfd8MlGjQSK2/uRCV+2wbuEYucSqTkq2BeNNRbUmwTpaykoqO3RPzEf3CT3XB1L5Xu39BmYGkPS9JeN3XHI2gKVhiXZU1zznUQNv1rGb9iUMwqWKmyiKFS+NkzgSN8AR5GFOuxYI1ssIpiVsbEUB0/jNConZMmAa1cgge2FlioeD6TUIQ6LmfHnnEE5PcjF+/t4XbCCS+UyPl2gsHAcxyaiLxUQQFwn6zRFOjFnQGY=
+  - secure: Yo8W6HaNaC4URfb/ay+v1bkEotE2V+q4nmH4Bt9k6g9W4mkHfBiZxfYPxaAZfObGqgo4j5xh4pRKL4pBoz5oIlJsy3+olD8fQXUGDJtZHgJLpcFiM8xbRarnj4+mihqwDjPVOZEPvWxbP/EMzasuzD6TF/gRdVv5Xe9+7i0lAvquxqBJb931eQE4vqy9m5Hs+JjPVK3POone8mfTWrLFlSKLFjyoKFamWo4I1bklPDkJoc/+ZkDTSq3s+aySp3r33477VhCy6zsT4DZtgDeAvI3Li1v8+7W5WS33igrLEpL+Y9vkjnLkt9XQsJlLJHLFNQG3UjUIdOR4xPkiCvtqPHa91+YH5Sfhvroi4jiQPyd9oVVy7mGrLOhBlUwsAc9G9PLqSrJXq0Tx5TIALZ6zXbaIVBy0tdhuQ9xQfmuJ9xK7mYSv2W61Sgy5j16OTXekKH21cMc7Fk4PDQ0I+tf+VUIEEWQtLq4POyUpGWdBs54CWkG9eUy7kGLxyEEXYL7/d50jKgevdaW3yi3dAmEAxKLcpYw+p3GVNsEXd9Im1DJ4Q8kp8Kcm5WOxgm6gWzKvjljolTDaMv41GtbW5x/s/TkkJtIPtVkVSAES9sEk7JHYnByD82F3WIVnExrxg8qOPZcdfrQcfPlAz96+b0NHGVFdgmcgIUdlTlfjJ1oZYiE=

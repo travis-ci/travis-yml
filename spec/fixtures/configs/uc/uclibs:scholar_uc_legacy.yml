@@ -1,0 +1,51 @@
+language: ruby
+sudo: false
+
+cache:
+  bundler: true
+  directories:
+    - "travis_phantomjs"
+
+before_install:
+  - gem update --system 2.6.10
+  - gem --version
+  - gem install bundler
+  - gem install rubocop -v '0.48.1'
+  - gem install rubocop-rspec -v '1.10.0'
+  - "phantomjs --version"
+  - "export PATH=$PWD/travis_phantomjs/phantomjs-2.1.1-linux-x86_64/bin:$PATH"
+  - "phantomjs --version"
+  - "if [ $(phantomjs --version) != '2.1.1' ]; then rm -rf $PWD/travis_phantomjs; mkdir -p $PWD/travis_phantomjs; fi"
+  - "if [ $(phantomjs --version) != '2.1.1' ]; then wget https://assets.membergetmember.co/software/phantomjs-2.1.1-linux-x86_64.tar.bz2 -O $PWD/travis_phantomjs/phantomjs-2.1.1-linux-x86_64.tar.bz2; fi"
+  - "if [ $(phantomjs --version) != '2.1.1' ]; then tar -xvf $PWD/travis_phantomjs/phantomjs-2.1.1-linux-x86_64.tar.bz2 -C $PWD/travis_phantomjs; fi"
+  - "phantomjs --version"
+rvm:
+  - 2.4.1
+env:
+  global:
+    - NOKOGIRI_USE_SYSTEM_LIBRARIES=true
+  matrix:
+    - RAILS_VERSION="5.0.3"
+notifications:
+  email:
+    recipients:
+      - crowesn@ucmail.uc.edu
+      - scherztc@ucmail.uc.edu
+script:
+  - bundle exec rake ci
+services:
+  - redis-server
+before_script:
+  - jdk_switcher use oraclejdk8
+  - rubocop
+  - "cp config/blacklight.yml.sample config/blacklight.yml"
+  - "cp config/database.yml.sample config/database.yml"
+  - "cp config/doi.yml.sample config/doi.yml"
+  - "cp config/fedora.yml.sample config/fedora.yml"
+  - "cp config/solr.yml.sample config/solr.yml"
+  - "cp config/initializers/hyrax.rb.sample config/initializers/hyrax.rb"
+  - "cp config/initializers/devise.rb.sample config/initializers/devise.rb"
+  - "cp config/authentication.yml.sample config/authentication.yml"
+
+notifications:
+  slack: uc-libraries-digital:7gc9gvfCKedkWXORxCo5Hndx

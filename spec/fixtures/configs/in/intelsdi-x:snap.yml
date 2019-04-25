@@ -1,0 +1,64 @@
+sudo: true
+language: go
+go:
+- 1.9.x
+- 1.8.x
+- 1.7.x
+before_install:
+- bash scripts/gitcookie.sh
+- go get github.com/smartystreets/goconvey/convey
+- if [ ! -d $SNAP_SOURCE ]; then mkdir -p $HOME/gopath/src/github.com/intelsdi-x; ln -s $TRAVIS_BUILD_DIR $SNAP_SOURCE; fi # CI for forks not from intelsdi-x
+- go get -u github.com/alecthomas/gometalinter
+env:
+  global:
+  - SNAP_SOURCE=/home/travis/gopath/src/github.com/intelsdi-x/snap
+  - GO15VENDOREXPERIMENT=1
+  - GLIDE_HOME="${HOME}/.glide"
+  matrix:
+  - SNAP_TEST_TYPE=legacy
+  - SNAP_TEST_TYPE=small
+  - SNAP_TEST_TYPE=medium
+  - SNAP_TEST_TYPE=build
+install:
+- export TMPDIR=$HOME/tmp
+- mkdir -p $TMPDIR
+- cd $SNAP_SOURCE # change dir into source
+- make
+- gometalinter --install
+script:
+- make test 2>&1 # Run test suite
+- gometalinter ./... || true
+notifications:
+  email: false
+  slack:
+    secure: VkbZLIc2RH8yf3PtIAxUNPdAu3rQQ7yQx0GcK124JhbEnZGaHyK615V0rbG7HcVmYKGPdB0cXqZiLBDKGqGKb2zR1NepOe1nF03jxGSpPq8jIFeEXSJGEYGL34ScDzZZGuG6qwbjFcXiW5lqn6t8igzp7v2+URYBaZo5ktCS2xY=
+before_deploy:
+- make all
+- "./scripts/pre_deploy.sh"
+deploy:
+- provider: s3
+  access_key_id: $AWS_ACCESS_KEY_ID
+  secret_access_key: $AWS_SECRET_ACCESS_KEY 
+  bucket: snap.ci.snap-telemetry.io
+  region: us-west-2
+  skip_cleanup: true
+  local-dir: s3/snap
+  upload-dir: snap
+  acl: public_read
+  on:
+    repo: intelsdi-x/snap
+    branch: master
+    condition: $SNAP_TEST_TYPE = build && $TRAVIS_GO_VERSION = "1.7.3"
+- provider: s3
+  access_key_id: $AWS_ACCESS_KEY_ID
+  secret_access_key: $AWS_SECRET_ACCESS_KEY
+  bucket: snap.ci.snap-telemetry.io
+  region: us-west-2
+  skip_cleanup: true
+  local-dir: s3/snap
+  upload-dir: snap
+  acl: public_read
+  on:
+    repo: intelsdi-x/snap
+    tags: true
+    condition: $SNAP_TEST_TYPE = build && $TRAVIS_GO_VERSION = "1.7.3"

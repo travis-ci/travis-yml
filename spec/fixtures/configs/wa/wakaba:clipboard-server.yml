@@ -1,0 +1,18 @@
+git:
+  submodules: false
+language: perl
+before_install: git submodule update --init
+install: "make test-deps"
+script: "make test"
+notifications:
+  email:
+    - wakaba@suikawiki.org
+  irc:
+    channels:
+      - "ircs://irc.suikawiki.org:6697#mechanize"
+    use_notice: true
+env:
+  global:
+    secure: "prU78s6PDFnAVcG3HlnS+U+voohcMh/IUwRZ8K8IxfkvIpDPhCCWU+RPowf4cH6YfoA3zFUGrNsH7W4fmCivT/5TM2nSmwKQC+LwxaPzjlPeIUGvqHL4IDv1Rcf7WEVDnZQcPL9yh/AHrBp/Y0Z9KvdhAK6NDqe2hmrPvd+Du/yywtZcepf/RgPE4W/Epky7IboE8Ui8I6oiHPYk6Fm7sNB0qO2nPDWF53/An8xvQgdUa95PvWn2ruRvRnfKCMfqmxOVg6IxUhsfNiHlTwn5itbrMuiVat+l0MhBtAXV4QV/DaWSSLVLYHnQCZ2FJeeHTmtS1yBtXyyPeJHn6qzIL/e2p+ejB/V3wINc9d+GgCVbhOHY2+K1Ahn1Z+5uoRgPcmqdTpdBlNszmpojpp3dC0WA0rhfj9nznT0Gz75fAZxrnEkKCgtXj6pTidaH2/358WxP9NsnEK4r9HZiE90ewhYC5s1Ri5h/rjvpdnIm985qiasMiyezwo2WsMO5Fs180Qm3NGEV0V42T4/ybFJUYEo4t1X4HE6ffmeUarnsKFuFxNsn2KIrriBNFO3zH5wY9j4es7/hAz3tqKI2irYCkeftXN8gzNspDNoAIp96HwhgAJcmqCOIyN+2ehd+3sKpRZOhio0SL4PvqOt8c4pKDqcix55H4krsIbbYPvYPQ5c="
+after_success:
+  - curl -s -S -L https://gist.githubusercontent.com/wakaba/9970857/raw/travis-merger.pl | perl

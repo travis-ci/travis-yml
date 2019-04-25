@@ -1,0 +1,117 @@
+sudo: required
+dist: trusty
+
+language: c
+
+services:
+  - docker
+
+branches:
+  only:
+    - master
+    - /^v\d+\.\d+\.0-release$/
+
+before_install:
+  - eval "$(ssh-agent -s)"
+  - ./scripts/travis.sh before_install
+after_script:
+  - ./scripts/travis.sh after_script
+  - ssh-agent -k
+
+matrix:
+  include:
+
+    # Check formatting
+    - env:
+        - TRAVIS_TARGET=format
+      script:
+        - ./scripts/travis.sh script
+      after_success:
+        - ./scripts/travis.sh after_success
+      after_failure:
+        - ./scripts/travis.sh after_failure
+
+    # Normal image build
+    - env:
+        - TRAVIS_TARGET=internal
+      script:
+        - ./scripts/travis.sh script
+      after_success:
+        - ./scripts/travis.sh after_success
+      after_failure:
+        - ./scripts/travis.sh after_failure
+
+    # Release image build
+    - env:
+        - TRAVIS_TARGET=release
+      script:
+        - ./scripts/travis.sh script
+      after_success:
+        - ./scripts/travis.sh after_success
+      after_failure:
+        - ./scripts/travis.sh after_failure
+
+    # Host image build to run tests
+    - env:
+        - TRAVIS_TARGET=host
+      script:
+        - ./scripts/travis.sh script
+      after_success:
+        - ./scripts/travis.sh after_success
+      after_failure:
+        - ./scripts/travis.sh after_failure
+
+    # Nano image build, for Starling-EVK
+    - env:
+        - TRAVIS_TARGET=nano
+      script:
+        - ./scripts/travis.sh script
+      after_success:
+        - ./scripts/travis.sh after_success
+      after_failure:
+        - ./scripts/travis.sh after_failure
+
+    # Toolchain build: builds normally, but also builds the
+    #   SDK sample app, piksi_ins_ref, and exports a buildroot
+    #   toolchain
+    - env:
+        - TRAVIS_TARGET=toolchain
+      script:
+        - ./scripts/travis.sh script
+      after_success:
+        - ./scripts/travis.sh after_success
+      after_failure:
+        - ./scripts/travis.sh after_failure
+
+    # Creates a build with SSH enabled, no INS, no private artifacts
+    - if: branch != master
+      env:
+        - TRAVIS_TARGET=sdk
+      script:
+        - ./scripts/travis.sh script
+      after_success:
+        - ./scripts/travis.sh after_success
+      after_failure:
+        - ./scripts/travis.sh after_failure
+
+env:
+  global:
+    - DOCKER_SUFFIX=travis
+    - PIKSI_NON_INTERACTIVE_BUILD=y
+    # Secure keys below are encrypted with travis encrypt gem
+    # Example encryption: travis encrypt AWS_SECRET_ACCESS_KEY=foo
+    # See https://docs.travis-ci.com/user/encryption-keys/
+    # AWS_ACCESS_KEY_ID
+    - secure: Ls9hEi04qvyDOEBbmDeNCjP7yfrQdke0EMFB8289xZPDrYNnysJmKzyh4Pt9PUyT7Y9pzrI1HKSziisshfQZWhhvG6K1fnM5glChoesK2pg4zeoz44gCsU/zGJqBNBH8z6VQgmAzeHvBPvOO9UJMy7ywD2Wz9+nQsYbWLgVE/63YuzEFsHI3jqLz5EyM4umpq2i6joQcD3Pdlvgs8KZj56lQ2IxrkTf1QMlwFN2/xmKa0eQctonCP7MwVyVCZEILUgpk7e0glfn86A+53fej/S8UhmCH6XHwUw9FQrmtEl4pwPmU1bna1pncWIorGChhcPorWD0ePfOCT4AKIrQAveaiSN/tnCzcmccVnGpe8WWXoRwFQ6B8110PbSwZlB9H5UUmZcpwmvIXnPyedbGVSXT2p2ubsjGBWbtnFj/uAms4izGAmOLUrvOx+rCb4ol2rP4WEnW22U927y6sotSAuj1BOkt4/x4nP6CZQNDXIOS4+kLRDjtNUrMFENhxbsdXbQ5ANZO5ssDPwI3hqNYamQWYKyasXgueLMBQdfaQ32nxBMQmN8dbvThsT/klQmsp5YoihndK6SGuF2IEIuWZG0cWACGnjHzrcv4dfBO2V5/7aoVhmSMKTUAvxkZsITYZuorUe+2HwQl6n59+0A2FhQdRLDMAXrOK7AN2faoJFhw=
+    # AWS_SECRET_ACCESS_KEY
+    - secure: vNHhGAZoaGmTiZ/Bjf0pqx4w9T37sDJNUOp6C5EXCapXAsYx+4G8v3xNlWBHWrPAs5q4XHJgbcNH7k1tRAI3nwd0RCv14SBNsVv5eouzpPd+o2ploDGCW++p/CL1kjQJBOqmz9sYCwxqra9LG7MCA/MzTG3eNa4/3lCf2tut7yhtxHbhIrVBaFgiHPYoZ1Pe6DPTQjjp32Xf2UHElHfa3oDQ/pw45hKWdwBx+fQjfLl1fVbHE3AhuXd7Q51tmL3qPNVox4/oLkmwpggzF0LoDQDZbZmOFSzcIiv/cpnqkaP9iy3TVQelrZivN9EXiyZsyhcrXll2pll/hvbg+cPVxBnC+p+yrPyZ4CaNwgID3c8ZRiPjJoyo+z4wxse3AaMv2AGsHVNGavYm61nFcJsRc0FQUfvkksdDu3LdfQbxkAKK7vgM7k4jWlcHe8wmQOXf/EPl5Hd2RNwHDfSEfR8YGPBDqsrdDFRO1fi/+kwpkLTfgN7WqbBBHCax54gQ1GZAEJC3nPqqnajKU/oduA4lXB2VJXlFl/NMeoX/z508Kc9wxaATCUFhGB68H2kKx8WT1ZMuBo9Eu7nXYSXg9jA+kCcb7GW3QgWk9h1Klcf6v5vw59UCFCEGfnPYinnWp6LMPHIY8q7ChpfEYq6rDma7o4bYExUHGo9Qip/qeEypetI=
+    # GITHUB_TOKEN
+    - secure: "x8K9GXfhLM+uVxsD4BB9MowOXxowzx/PUAccQpXWLjoQi4GnIFPGNASkFJNL7EVo4IwX7fiG6FE14SfG+jybYB5t5R9BUis5wKSO1ghUUO4SOLHBNW04YfwVn9p33YuipOL/N+Co74jSh0oEDacaN1TTLP6RuFyrLy0ew8JwE+EiRpNc2NMLSIap0C0ePkrtultvx9NnZ0aTJ1mhs2lOesqBPSvWXlglQqPcseldBcpTt1ch+m9I41xxzQzmOnGyka59wvqLyJDaJEzKI0kJobwwZY6OOANz3Yvrus1ahAhGXsRwjuJWdyrkV5uXuWE2KLy1MY31fFqh6I/9FMdvEBt2zCtkMLtOYjn7IpiOom0P0cZkGXJeGlTMojaw1eostC5mZCYKf6gNtGOc95U9r3hDSHhYFeLCj5rE14SGjh84uogx6rO8vGYbjl3vgpdVFJy37Xx7tQHyueLfrUVATjuGc4/x7Ukez4Vb9thfXcHvV1W77YfEIM0uM2HSpFOdWq7lbNDcLSAkmJHdEZcssDoaUhCqFz8YFeSyEW4iZF6j5Uqljkkuj1YDIcrkF5ggbmoZGfZL85iDedVsYPdxgXTBiXEcJGfbTfD7X36Uc6+6jxpVUZDgF5dBF6jCK9gdVLgiGLU0NcSCTork1lNByuKNmsp34GLTJso9OAiHsTI="
+    # SLACK_TOKEN
+    - secure: "g0KII9TK5MhOS3j9h68jzQZk1bn6mVIaSMPrtB9aA7jrEMALm6biP+pYL2CgWyzGtFbsFVIG81fuyMpYjMR3ImFI/sGh+w0650HMaD97TEWYVc/gVtqjZsDbzGYtmG9tmxahJxl/LjAsO2xmddVYKlpyVzCGtAECe0IWX7LxYODIr01NQgmh6X+DClb1S6P1S6jgO4tjsnatstYo3us4jGHLqSDz9n9pH70YzZn8EB2cDQkLA5visc/w3mAMqmA3a3RWoBMNd3M63zEdlHWtiEaPY9JYDGASP1gp4rXAwKk5RTnNw6BBhVqqInfs1gFpXVve5zNus/YUZ342NuCyy2+pSSmJyWmA26pKE+PtHOoMuUwCqCrC/OdoLX7p7PTO++4XIr2vYV7KPlFELfzvlnCjXqlq8+AaiSb6z4FGijuHXRWNVvnasTcP3MDJn5OtjtBBNTiYm9fYj+z6PNVf9DwZbukiHN3GKNFEBGA1ACMvkD12BjDfrHsgLqHPUd9oRhU1qNGQVZozmVeKRczsP2lhwQp1GdrLhaz1ABeT0IjYqm+87LuE5eR0oQ/5ETOCDHdlfd4Vf6oz68lvkBbb2Yof55eJrSPUIzmLqCucEC1TI9WZui7isyRkhH9K5XCMQS0FKx6AvATOP4aG6zy8N5jAUYupR+NsCbDJUsQRc54="
+    # DOCKER_PASS
+    - secure: "KzpNCyL/gUCXlenrsusVFIhDw9dGMUlE2dwwqDQktbvYEZzW8FOSRsGJr96iLf31HcI5rv/g2ki/9Y2tVI5sJ+hGci5ZaJq/hxkHV/ZqT6bmSDecW1716b2PYwlcpPTFQreCoFPhE2fqbjLXAZepO3R6J6ddEFyNOfg/toM+n6+eWbpBzx8Zle9Xo9u81sxnOPtH13xuq338HKR5rjDMrwy5sM/PaJG/qorUqhxeAlpy/rxji+IZnvLkntQi1QZo/YPlZjAF5GrEU7fstFkzUu9DRQGri4iJX3MF6mz+rFIKawG9j0AEr4JVSZoeoSt8EOConCjm6KNvq3/tM4n4ThgRFtcpSuALRylO/r3GypsChOL4iQYV054L/P9yFSvz+vwJeoi/CFKHY/YbL2j/MlEkuzvwiyP7Wyo3YVM/cT/ulL/wlS6L2vEyOyRmjHg3HPPrLv5JIZxGQoaiTcKZl01nHi1u0LKYr0t9pOu0IMmUe7iVya+sJrFkUtmt7UZbwUhvaQ5a+C6OYZ016gJGg9FyJpT3kb2Giad497/Eu87+FUeMUbEQ4HMuT2MfFLkWTB0LV226HNo9+w4eq4R0ErsDPlosPlI6kE9VCL2CA1/MQV0QI3+nF9UlcIZf4MM68uziBjtsJUeqfPzaOYL06txo/cmf489uBUEF3hX6yXM="
+    # HITL_API_GITHUB_TOKEN
+    - secure: "MGsHo2hh8eWExKKVQdUeI5XzxseZMzgxFeLZQ1Cy/rAc0MirfU6NsXIEVXP+lUkjlpESmmPQlXStLM9ShfgPEspbf0DZNp1OEr+RLsg73+ToW8vf6vBvreXamYl3IkYMz8AKBiIJaFQxEZhIy274QZg/5fIpghxRUH15Wsj1krQd6mt+v7HJ8HUHx6dJk4vCr6SS1ZqCH2R2EJSq66EexDqMAE6SLsl5IlG1fxZxZqOXlTqSUv3uEWMxFFCGYtl7ev4YraIXRS4HddFH+lrC5dlf3qafgJ87lSsyt9Ni8MWI9cjroAehPYmJGuFV1BYQfqWWFJGzUgpw4CTtqsEiDzqyFWLK6RRd2yA/p0wzH50cwPd3FlwD1Kp5WPqUpxvXC9jc093fRuydfnUcCjBalFVYXLIYHZDKzVepG1gRSZzSQgRcQEDy1ZRT6jdLPEeC6+r/2VN3Xq6HEmSWAKEiCF27CG+hqjE2Vl1+CUqJbRA9vIm1MbL2fT1F+YN9z5zrTIVVxN62/fQ8hVLcc+Iw1sW6V1ENVBWXp7ZayRTBC0gjWm7N5h2s6zw2LzUYO60PhquB34/0sRY9cr1UpGszkbo1p6ygo+Xrj7ohJjj2FRLLY12XwCj0h0NNvuNA+xWdH/Ms395cJchQQnuBRpZeffZdnCyKA6Y6LZ2VwZQMfBg="
+    # GITHUB_COMMENT_TOKEN
+    - secure: "s8xau44uBGqRyyWQLCvNvJKpR0O+D86+xdt2sgK5sCtLhnpwXf0nv2YEpvHK022gM9M3O/RNRSmKPlDCm8kEDhOZbTIrI52vUY1nQKJdHY71Zc6D6M6xur4uPlTlEM+/qsMl2Q9NwYXANZHzG8S6RoBhLXjMhKB6dmFJIkyEPW6czFy1FRyk1+ffeaOQ+GXffwEcL2jhXMRNNgYsieZgJnEKSfTqBw3uBgdfTh10N1A9KyMYz1xvV+0538pnDS/E/xsY8vVDZoOZXDIwQiE1NtUl+OpUigkLeKgqcU5uQFAyioGsnuTN4ITB/VldMEEXjLbUpQ7xdVFZMFfa18AmGGiNOfHj/nx22PcClkxC4Na/dgPaRXDP8pkzSOLaLo85yfd16Y8KzcmriOSkCkLpn8SkwYH2n//LhsI9VP6/E55OlJZR7GT/i0Xt5FL2ayzx5bdyL4fhCkUv+z/WWB+nVp2vkNd4EbQ+6TrBJqgLyIV3fbFGZgTMLK2n7QkUI211Uhvsjxahe8yG6TaycdhIrhIUY5kLFIvv7Kve4tB7aLMl3naHhaFiYszEgivHsYW2npsiFupf02GgVqkulb5ZZ2kYXdlqNVwCrWcP6TK5xc/qlZfps1P9ad65PEfpXaYaFgZRlYDbJmQ+xfD7T+XFRGCGPLZcwMrmwe8dvOae0+0="

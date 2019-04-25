@@ -10,11 +10,12 @@ describe Travis::Yml::Schema::Def::Root, 'structure' do
 
   describe 'definitions' do
     describe 'secure' do
-      subject { Travis::Yml.schema[:definitions][:secure] }
+      subject { Travis::Yml.schema[:definitions][:type][:secure] }
 
       it do
         should eq(
           '$id': :secure,
+          title: 'Secure',
           anyOf: [
             {
               type: :object,
@@ -37,19 +38,20 @@ describe Travis::Yml::Schema::Def::Root, 'structure' do
     end
 
     describe 'secures' do
-      subject { Travis::Yml.schema[:definitions][:secures] }
+      subject { Travis::Yml.schema[:definitions][:type][:secures] }
 
       it do
         should eq(
           '$id': :secures,
+          title: 'Secures',
           anyOf: [
             {
               type: :array,
-              items: { '$ref': '#/definitions/secure' },
+              items: { '$ref': '#/definitions/type/secure' },
               normal: true
             },
             {
-              '$ref': '#/definitions/secure'
+              '$ref': '#/definitions/type/secure'
             }
           ]
         )
@@ -57,7 +59,7 @@ describe Travis::Yml::Schema::Def::Root, 'structure' do
     end
 
     describe 'strs' do
-      subject { Travis::Yml.schema[:definitions][:strs] }
+      subject { Travis::Yml.schema[:definitions][:type][:strs] }
 
       it do
         should eq(
@@ -111,11 +113,14 @@ describe Travis::Yml::Schema::Def::Root, 'structure' do
           notifications
           os
           oss
+          secure
+          secures
           service
           services
           stack
           stage
           stages
+          strs
           sudo
           version
         ),

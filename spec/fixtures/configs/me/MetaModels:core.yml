@@ -1,0 +1,63 @@
+dist: xenial
+
+addons:
+  apt:
+    packages:
+      - ant-optional
+
+language: php
+
+php:
+  - "7.3"
+  - "7.2"
+  - "7.1"
+
+env:
+  - CONTAO_VERSION=~4.7.0
+  - CONTAO_VERSION=~4.6.0
+  - CONTAO_VERSION=~4.5.0
+  - CONTAO_VERSION=~4.4.0
+
+# Exclude impossible Contao Version combinations.
+matrix:
+  exclude:
+  fast_finish: true
+  allow_failures:
+    - env: CONTAO_VERSION=~4.7.0
+    - env: CONTAO_VERSION=~4.6.0
+    - env: CONTAO_VERSION=~4.5.0
+
+before_script:
+  - echo "memory_limit=-1" >> ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/travis.ini
+  - travis_retry composer self-update && composer --version
+  - travis_retry composer require contao/core-bundle $CONTAO_VERSION --no-update
+  - >
+    if [ "x${TRAVIS_TAG}" != "x" ]; then
+      export COMPOSER_ROOT_VERSION=${TRAVIS_TAG}
+    else
+      export COMPOSER_ROOT_VERSION=$([[ ${TRAVIS_BRANCH} =~ (hotfix|release)/([0-9.]*(-(alpha|beta|rc)[0-9]+)?) ]] \
+        && echo ${BASH_REMATCH[2]} \
+        || echo dev-${TRAVIS_BRANCH})
+    fi
+  - echo "Using root version ${COMPOSER_ROOT_VERSION}"
+  - >
+    echo "PHP version: ${TRAVIS_PHP_VERSION}";
+    if [ "x${TRAVIS_PHP_VERSION}" == "xnightly" ]; then
+      travis_retry composer update --ignore-platform-reqs --prefer-dist --no-interaction --no-suggest
+    else
+      travis_retry composer update --prefer-dist --no-interaction --no-suggest
+    fi
+
+script: ant -keep-going
+
+# Hack to make things work again - we can not use a shallow repository.
+git:
+  depth: 2147483647
+
+branches:
+  except:
+    - /.*-translation/
+
+cache:
+  directories:
+    - vendor

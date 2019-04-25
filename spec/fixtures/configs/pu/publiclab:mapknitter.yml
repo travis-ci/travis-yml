@@ -1,0 +1,21 @@
+sudo: required
+services:
+  - docker
+
+install:
+  - cp config/database.yml.example config/database.yml
+  - cp config/config.yml.example config/config.yml
+  - cp db/schema.rb.example db/schema.rb
+  - docker-compose up -d --build
+  - docker-compose exec web bash -l -c "sleep 10"
+  - docker-compose exec web bash -l -c "bundle install"
+  - docker-compose exec web bash -l -c "rake db:setup || rake db:migrate"
+
+script:
+  - docker-compose exec web bash -l -c "CI=true TRAVIS=true rake test:all"
+  - bash <(curl -s https://codecov.io/bash)
+
+branches:
+  only:
+    - main
+    - unstable

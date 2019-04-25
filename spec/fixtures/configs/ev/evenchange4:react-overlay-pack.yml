@@ -1,0 +1,47 @@
+sudo: false
+language: node_js
+node_js:
+  - '11.9.0'
+
+env:
+  global:
+    - YARN_VERSION=1.13.0
+
+install:
+  - yarn install --pure-lockfile
+
+before_install:
+  - export PATH="$HOME/.yarn/bin:$PATH"
+  - |
+    if [[ ! -e ~/.yarn/bin/yarn || $(yarn --version) != "${YARN_VERSION}" ]]; then
+      curl -o- -L https://yarnpkg.com/install.sh | bash -s -- --version $YARN_VERSION
+    fi
+
+script:
+  - yarn run eslint
+  - yarn run test
+  - yarn run flow-coverage
+  - yarn run build
+
+after_success:
+  - ./node_modules/.bin/codecov
+
+deploy:
+  - provider: npm
+    email: evenchange4@gmail.com
+    api_key:
+      secure: bKlcgu90ast7vC2FlJsXsut9mTYtVnJT5mCVshIo0vZh2kGEvvGw0JTbW+lxiDIWMk497B2tVX0fR2TXgXOFdKsYQU4bc06WBlBKOb+DV+WeI/VwvMJZlXU0RmXlS5v3k84d/n0OadTwfy/xAL8gTC/kqR2BgU3wCr6HSbJNfxrbYJGiG85B4XrlKeeN6prsQyR7aNt6wj/hdn+4QfwhjlGf/iOaVyUKIla6/Rl3fkabFx/dFL/JRYzmKK4edull0xuk8+J7JXiUGym/hXSwDOK2uPOyDtMlwHMs2uXBWmNrDa6S4lRYfI3j2svtM82ZyB9ahii7yiJqVHrasqHh915VKavt0Hc6F+hbzTXAZVi8KNkXd4e4NTRpsgTY4RHpZz7zxkIpJKp7dwfwui9MC7jxuYP4oZVxRxqh6z9kgpfvlWaakfR3MOMvtrDmvoJnLx31tdVbNfavC9ZrtXFI10zNwVCD/eLEDvG695VVN9DrWJXLQUQupny0kJxltOi5WZqPziV/Q3o2lVrSnKnK7viPc/dSki0mICdFoBZSyAS0VAQWyF9XlOr5NfHljD2doGTx/JF3iOWk/4xCHv9y5vNT2yHbrI5Gssbwp8mUnhQNR1C9tfcT20WU2Hj0IB20G1ehjfAG905D8UF1+kLgYSJG4UwWTTBkv6kkbZezZns=
+    skip_cleanup: true
+    on:
+      tags: true
+      repo: evenchange4/react-overlay-pack
+
+cache:
+  yarn: true
+  directories:
+    - '~/.yarn'
+    - node_modules
+
+notifications:
+  email:
+    - evenchange4@gmail.com

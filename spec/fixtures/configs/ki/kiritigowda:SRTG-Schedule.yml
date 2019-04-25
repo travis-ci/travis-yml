@@ -1,0 +1,42 @@
+language: c
+sudo: false
+dist: trusty
+
+os:
+  - linux
+
+compiler:
+  - gcc
+
+addons:
+    apt:
+        sources:
+            - ubuntu-toolchain-r-test
+        packages:
+            - lcov
+  
+branches:
+  - master
+  - develop
+  - visual-profile
+  - 1.0.0
+
+
+before_script:
+  - mkdir build
+  - cd build
+  - cmake -DCMAKE_C_FLAGS="-Wall -fprofile-arcs -ftest-coverage -std=c99" ../RTG-scheduler
+
+script: 
+  - make 
+
+after_success:
+  - ./../RTG-scheduler/testScripts/runCodeCoverage.sh
+  - lcov --directory . --capture --output-file coverage.info
+  - lcov --remove coverage.info '/usr/*' --output-file coverage.info
+  - lcov --list coverage.info
+  - bash <(curl -s https://codecov.io/bash) || echo "codecov did not collect coverage reports"
+
+notifications:
+  email:
+    - kiritigowda@gmail.com

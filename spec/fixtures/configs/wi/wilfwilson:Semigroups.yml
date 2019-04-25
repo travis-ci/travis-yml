@@ -1,0 +1,112 @@
+dist:
+  xenial
+
+language:
+  cpp
+
+compiler:
+  gcc
+
+#   GAP version: |       master | stable-4.10 | stable-4.9 |     required |
+# ---------------+--------------+-------------+------------+--------------+
+# pkgs:   latest | 64- & 32-bit |      32-bit |          - |            - |
+# pkgs: required |  coverage-64 |      64-bit |     64-bit | 64- & 32-bit |
+
+matrix:
+  include:
+    - env:
+      - SUITE=lint
+
+    - env:
+      - SUITE=test
+      - ABI=64
+      - GAP=master
+      - PACKAGES=latest
+
+    - env:
+      - SUITE=test
+      - ABI=32
+      - GAP=master
+      - PACKAGES=latest
+      addons:
+        apt_packages:
+          - g++-multilib
+
+    - env:
+      - SUITE=test
+      - ABI=32
+      - GAP=stable-4.10
+      - PACKAGES=latest
+      addons:
+        apt_packages:
+          - g++-multilib
+
+    - env:
+      - SUITE=test
+      - ABI=64
+      - GAP=stable-4.10
+      - PACKAGES=required
+
+    - env:
+      - SUITE=test
+      - ABI=64
+      - GAP=stable-4.9
+      - PACKAGES=required
+
+    - env:
+      - SUITE=test
+      - ABI=64
+      - GAP=required
+      - PACKAGES=required
+
+    - env:
+      - SUITE=test
+      - ABI=32
+      - GAP=required
+      - PACKAGES=required
+      addons:
+        apt_packages:
+          - g++-multilib
+
+    - env:
+      - SUITE=coverage
+      - ABI=64
+      - GAP=master
+      - PACKAGES=required
+      - THRESHOLD=95
+    
+    - env:
+      - SUITE=external-libsemigroups
+      - ABI=64
+      - GAP=stable-4.10
+      - PACKAGES=required
+      - EXTRA_PKG_FLAGS="--with-external-libsemigroups"
+      - PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$HOME/miniconda2/lib/pkgconfig
+      - LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/miniconda2/lib
+
+
+before_install:
+  - if [ "$SUITE" == "external-libsemigroups" ]; then
+      wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh;
+      chmod +x miniconda.sh;
+      ./miniconda.sh -b;
+      export PATH=/home/travis/miniconda2/bin:$PATH;
+      conda update --yes conda;
+      conda config --add channels conda-forge;
+      conda install --yes libsemigroups;
+      conda install --yes readline;
+    fi;
+
+install:
+  # GAP and some packages require special flags for compilation in 32-bit mode
+  - if [ "$ABI" == "32" ]; then
+      export GAP_FLAGS="ABI=32 --host=i686-linux-gnu";
+      export PKG_FLAGS="CFLAGS=-m32 CXXFLAGS=-m32 LDFLAGS=-m32 LOPTS=-m32 --host=i686-linux-gnu";
+    fi;
+
+before_script:
+  - export GAPROOT="$HOME/gap"
+  - scripts/travis-build-dependencies.sh
+
+script:
+  - scripts/travis-build-semigroups.sh && scripts/travis-test.sh

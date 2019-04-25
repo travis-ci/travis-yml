@@ -1,0 +1,54 @@
+services: docker
+
+language: ruby
+rvm:
+  - 2.5.1
+cache: bundler
+
+.disable_global: &disable_global
+  rvm: false
+  cache: false
+  before_install: false
+  install: false
+  script: false
+
+env:
+jobs:
+  include:
+    - stage: moban
+      <<: *disable_global
+      language: python
+      python: 3.6
+      cache: pip
+      install: pip install moban
+      script: .ci/check_moban.sh
+    - stage: coala
+      <<: *disable_global
+      language: python
+      python: 3.6
+      cache: pip
+      install:
+        - cOALA_ZIP_URL=https://github.com/coala/coala/archive/master.zip
+        - curl -fsSL -o coala-master.zip $cOALA_ZIP_URL
+        - pip install coala-master.zip
+        - BEARS_ZIP_URL=https://codeload.github.com/coala/coala-bears/zip
+        - curl -fsSL -o coala-bears.zip $BEARS_ZIP_URL/master
+        - pip install coala-bears.zip[alldeps] --pre -U
+      script: coala --ci
+
+before_install:
+  # Speeds installation of html-proofer
+  - export NOKOGIRI_USE_SYSTEM_LIBRARIES=true
+
+# Assume bundler is being used, therefore
+# the `install` step will run `bundle install` by default.
+script:
+  - .ci/build.sh
+
+notifications:
+  email: false
+  webhooks: https://www.travisbuddy.com/
+  on_success: never
+
+# Route your build to the container-based infrastructure for a faster build
+sudo: false

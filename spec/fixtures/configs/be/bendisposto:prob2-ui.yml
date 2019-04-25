@@ -1,0 +1,68 @@
+matrix:
+  include:
+    - jdk: oraclejdk8
+      env: DO_AFTER_SUCCESS=true
+    - jdk: oraclejdk9
+    # We can't test on Java 10. OpenJDK 10 doesn't include JavaFX (and there's no good way to install it). Oracle JDK 10 (which includes JavaFX) is no longer supported by Travis.
+    - jdk: openjdk11
+      env: REPLACE_CACERTS=true
+
+language: java
+
+branches:
+  only:
+  - master
+  - develop
+
+addons:
+  apt:
+    packages:
+    - pandoc
+  sonarcloud:
+    organization: prob2
+
+env:
+  global:
+  - secure: ghArb+3bPNLUtjyRhQdUIcAXIOxBWPz//dg/VDw4kHbsLgWQ+9AcdnetZ6S0C7OHqm1gTx/YJI5aolMIjsAHpMzgsUIlzbvtfdI54RWp76jaCvhqOjYApjQMOOKDtvPE0mIWhfm2FaX7e+v9SKeyAWWiLoiUxJAf9DsQcKEY4dXVSgIlU8DQGVYOn426pcjoUtTsVqdmNpcytdtQE/Eax8WNLU5gythSarZ/jopZO+WCZPRVCCalhDJ3jHRSCPAtKtKG7vijRL50b7lPDtVqMKHYwbMhPgRnTRVT9HTc0oxVCHDIuoTwMb7JBIdBIAh1BaJBcEkoKaPAOmAIMnVHcNDaPj6YVMocZhVllNA51qwOBeeI+l+1slJhK0iUILVNEqmkHxL/QMnjxYAPY1CYrTCMbkyOCU/gBi7Fx1x9yUe2Zm81+T4MJD3aW7fLM/3PxWcDPupUia5u0PBlXI3KznIyb8zE6qSRoNIla15OMx+X9XXSv/6KbPlWceQC4ITNt7oBkIlN1+zcI29qf/q08CT72TP5z8y6py3roMIQ7knCGjmS+YO58Bq6+r260VOW7btLHSzAJd/8N8tINzVGBBztPl0ytVVD7AJgflM2rTm3FTDPNnOcZLPtb2+5haXXd4af0+au5+Ovx9LTSK9d6jCAAl8RkIAwR+mNVWrhrVQ=
+  - secure: FOWN70kC1DijANcdPHPO6CqKmuvpSef3snEDrStABtyEnhwKpARHti9NesvzK6LmFWJVb5v9CZ5NikLDxslSnmecHI97FQRPZfrXAnZB+z9LQd3GThYbR/jxPmyz9ohojmEJSN3EWWbwW469TWhelfLtZc2z187dCpFfeL11VP/S8EKK0c34vffC0poD46+AMXmnFwSP5Qdesvn+ZqndSlANqdSgWQ3+Ku1bP/D0vNlw2RW9cUvdsADQZyAGnBb1kL04sZ0iiy0s6CSMBkgLM2izvc/eqb3SPcSxfMIm3QIV7CWNeTlUn/Yq6aXEA3WJm+7xYWzaOi3gUA2bfNeD6wDkdDyFk0KWuNBSBtX4i17lghKO0RExkpWKqnKvpr/zwoKYjkgzjq8T3Ho22EoWXljeD7iAkpbf8BUVmTRmNSM3uUpUWjAw2lLSJvPrk1dEGlREreSk10QHM6Fin+99kAnWdU9D9QXP0z6iMAD+OFW0DgzOjxBWBuJPGJHYdhoxJd94S+u4j1CDsFouA49gOvm2qi55LYsCm0DLfPSotQ10s24Jc0UlyCMXhdhZnSWLDYGZ604N0BXaNbAZ+uu4tc0WK4kUY1H1pB5hHEAAbae2TWewQTINLxPwt5Nrm/H72LZMnWz2IJNOPNO2IlgMl0h18YgNeZwJxFbp7yDe+Ik=
+  - secure: c+NGBCkOS0FTkW0/VZdLpMq280LO89hfJrLrPp6vxjgLBvzo4ai8qz4Z4pUE34/z5V/LiT6LdvkEI6WQIWdqU5UqBX7PyN66/Da4wtPLxqeTRv0giEXmziSRcePhdJzHxujCSU6a3ANZqSU+weeaqLHyyhuenDNvmXRz2vZLOIBxSzPDpOCm3bBV0BShutn/+zJHX/xW1mRrCZ24n2mL2rD/plYK7Ipc4+S5f7alSeQVHcYs5LTIyV2eGTU58XLaZorjFHKk7YA0HkU0fWDs3Jh28JSsVGKY3Ssj4lhHqrS/NqHBzjoWb8d7EOPnUWFp9bjRk/ia5gtUF8Ev6ljJGnnkbc/Kt2XdJNR0uRn2dnfaBVHmzpSRZZnx4b5MLg/ET8UZKIlee3ZupJEVPWWurmD52iXhm/tAD5YxIcSVg1SSYE9lF3uBZgb43Cf/txbuU9zY+VqkgwR9v1i2C0J+JOQSX4jYcuRJd1fQbhcSSbbkaitz/q7LQmZ1Nx+0Oilw94+oc0n3q+ye+km+gYb2g6VqFf+ooVKe0W7b8hxPvdRBKTnBduEuCnsvqWqYODcg9EGlHuJxj8EDnM3hIT+SUnyzqUS80oI71whgu8XTGJDgaTDjW0hHxKLqtFUI/Hy419/L86oklQBkJ+mrxFdyVKD9LrT/OQ4qoQAgsjeQIHE=
+  - secure: R4Hg5t8plAqVlWVTUlFIf2PLaBGYur4LgPzMucRHxPI3F7HbG3/MaoINyVQ//oFnsSXBO/4LsaDz01IMGDo8shvXLi2mN3GGfVSjQx443gwWZEC34ftomYZduXikCGILlV64mdiM7lHTW4Ficu32K3FwRKrTjhtlcIKqWW8WOlSfW2QqS3E38iOe2WyjhVIj/+QObrJFdvnqPxcXOQN/MHaSOhmZ0oUJZ3EFDnvaij9nZR67V0IQr8YTCUKLP2Q+UqfWS7mJXkkhBBo7Ff425JvyaoHMogBCtdKTgftRm3TIGOlI3hiYIaLnG2esINWGeaBJ0bSFgetvcsPrwcaqN/TF6m4S+P89BMt4r2htR0q7vM6fNf5fOmyCidtWmU5bSMLusZ4WC4GT3IarMiI/faOX+W38byMsGe06tKperpP5dmkJR/QWGCYJlrmlU8/u7LTuFeeLaPx5IOGnLdqqVNk83rjj6Ws1LdVUxVcBbHu2SUGV+MFmgIpkleYgS1b9bRaUGQRagiMc4FgOOhJOhhucNnpTOXRU7mKgnuVVjMlnfm03iZXOy0NmoOLs5XPTgOD28jZQBZI7PyrGCGPch9dmIdb484N8nO2EXjulRqYeb0A7fihZ/S65gPyzYTgY+mJTDmGaIAfSXxI5id11lDcXiz9E45yxsbnAZQO1lZk=
+  - secure: oaBvSWCDGimkM3H238VHCP07ZIn9kS1R8Y8F79YyWe7x8nhqH4zV2jX2EkRPQdqJrDBSsvAOzVP2Vmbrg8tOxpx622sjfOAODqLmDwWEvcMfBIzZinOZTt3/LX7V9y6TwqMkRKjDfSIRvGHegrsWhnNh1sLZkBdjFVZMtUgVqxfsn3MCABQCnbkxY2DW8LxmLJAdGiqrZKzMKDbNwsq5X6/7ekVYZKIti6QSQi0paxgplK7tWxhKVIxNCNQaImOde+xGHdTdXu0sBn1IN3hND4ok8s9YcbrPtN654BKT77/bhuQ77rYkx5pxuj1Z8MgzfwFX5ynn8Wpq+qxbi49ICAms/ZBw9MxMwpYpD/B4cOXlLU5Zn4AkwNJmGZm7KFcX9HHu9qjPGswlRqx8xx8XfxWNE60FQqh0SzAGjpg/ZSFN/Jhl0QrInx8PG+Mol6XtAY/LkzLDNQds2T54ABfBexWXNiliEc0Hp9SorlXW7N5y2HwqwK4ed4nD4h5gHLglK8HS/0lZWh6TL7upI4NHQXlypSeZTR1WFeOxwPTm6rPQ+ExJv90LHe4/QXRWPw9DKDcHLd6xfxaB7OSnYgc00mZ3dX5yB6xw2T9NxjYY5xmkrv1R+n8lO7GgWuUZO7xScAyjMFvB4q2/rZAJrOqavWkfAFUn3Xbw+Qlw96NsR3g=
+
+before_install:
+# Always use the system-wide certificates (OpenJDK doesn't include the certificates needed to connect to oss.sonatype.org)
+- |
+  if [[ "${REPLACE_CACERTS}" == "true" ]]
+  then
+    rm "${JAVA_HOME}/lib/security/cacerts"
+    ln -s "/etc/ssl/certs/java/cacerts" "${JAVA_HOME}/lib/security/cacerts"
+  fi
+
+install:
+- rvm install 2.2.6
+- gem install travis-custom-deploy
+
+script:
+- ./gradlew distZip shadowJar createAppZip --stacktrace --warning-mode=all
+
+before_cache:
+- rm -f $HOME/.gradle/caches/modules-2/modules-2.lock
+- rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+
+cache:
+  directories:
+  - $HOME/.gradle/caches/
+  - $HOME/.gradle/wrapper/
+
+after_success:
+- |
+  if [[ "${DO_AFTER_SUCCESS}" == "true" ]]
+  then
+    # Start uploading in the background while SonarQube runs
+    travis-custom-deploy sftp build/distributions/*.zip build/libs/*-all.jar &
+    
+    git fetch --unshallow
+    ./gradlew sonarqube --info --stacktrace --warning-mode=all
+    
+    wait # Wait for travis-custom-deploy (started in the background) to finish
+  fi

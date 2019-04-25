@@ -1,0 +1,15 @@
+dist: xenial
+language: node_js
+node_js:
+  - 8
+  - 10
+  - 11
+sudo: false
+services:
+  - postgresql
+addons:
+  postgresql: '10'
+before_script:
+  - psql -c 'create database test_globalstorage_database;' -U postgres
+script:
+  - npm test

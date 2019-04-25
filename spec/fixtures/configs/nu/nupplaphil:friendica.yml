@@ -1,0 +1,29 @@
+---
+language: php
+## Friendica officially supports PHP version >= 7.1
+php:
+ - 7.1
+ - 7.2
+ - 7.3
+
+services:
+ - mysql
+ - redis-server
+ - memcached
+env:
+ - MYSQL_HOST=localhost MYSQL_PORT=3306 MYSQL_USERNAME=travis MYSQL_PASSWORD= MYSQL_DATABASE=test
+
+install:
+ - composer install
+before_script:
+ - cp config/local-sample.config.php config/local.config.php
+ - mysql -e 'CREATE DATABASE IF NOT EXISTS test;'
+ - mysql -utravis test < database.sql
+ - pecl channel-update pecl.php.net
+ - pecl config-set preferred_state beta
+ - if [[ $TRAVIS_PHP_VERSION != "7.1" ]]; then echo yes | pecl upgrade apcu; fi
+ - if [[ $TRAVIS_PHP_VERSION != "7.1" ]]; then phpenv config-add .travis/apcu.ini; fi
+ - phpenv config-add .travis/redis.ini
+ - phpenv config-add .travis/memcached.ini
+
+after_success: bash <(curl -s https://codecov.io/bash)

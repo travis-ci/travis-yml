@@ -1,0 +1,97 @@
+# Copyright (c) 2018 Piero Dalle Pezze
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+
+language: python
+sudo: required
+python:
+  # We don't actually use the Travis Python, but this keeps it organized.
+  - "2.7"
+  - "3.6"
+install:
+
+
+  # install xvfb
+  # we don't have X11 on Travis-CI, so we use a virtual framebuffer
+  # because R packages for generating figures were compiled with X11
+  # support.
+  - sudo apt-get update
+  - sudo apt-get install xvfb
+  - PID=$$
+  # create a virtual screen and suppress the output
+  - Xvfb :$PID -screen 0 800x600x16 2>/dev/null 1>&2 &
+  - xvfb_pid=$!
+  - export DISPLAY=:$PID.0
+
+
+
+  # install copasi
+  - wget https://github.com/copasi/COPASI/releases/download/Build-170/COPASI-4.22.170-Linux-64bit.tar.gz
+  - tar xvzf COPASI-4.22.170-Linux-64bit.tar.gz
+  - PATH=$PATH:$(pwd)/COPASI-4.22.170-Linux-64bit/bin/
+
+
+
+  # install miniconda
+  - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
+      wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O miniconda.sh;
+    else
+      wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
+    fi
+  - bash miniconda.sh -b -p $HOME/miniconda
+  - export PATH="$HOME/miniconda/bin:$PATH"
+  - hash -r
+  - conda config --set always_yes yes --set changeps1 no
+  - conda update -q conda
+  # Useful for debugging any issues with conda
+  - conda info -a
+
+  # install conda build in order to build the conda package for SBpipe
+  - conda install conda-build
+  - conda config --set anaconda_upload no
+
+  # install SBpipe. R code for SBpipe (sbpiper) is retrieved
+  # from Anaconda Cloud as dependencies.
+  # create the `sbpipe` environment
+  - conda env create --name sbpipe --file environment.yaml
+  - source activate sbpipe
+
+  # install sbpipe using conda-build (which internally runs `python setup.py install`)
+  - conda-build conda_recipe/meta.yaml -c pdp10 -c conda-forge -c fbergmann -c defaults
+  - conda install sbpipe --use-local
+
+
+  # install SBpipe (optional packages)
+  # install snakemake (optional for Python 3)
+  - if [[ "$TRAVIS_PYTHON_VERSION" == "3.6" ]]; then
+      conda install -c bioconda snakemake ;
+    fi
+
+  # install latex dependencies (optional)
+  - conda install -c pkgw/label/superseded texlive-core=20160520 texlive-selected=20160715
+
+  # install additional R dependencies for testing R models
+  - conda install r-desolve r-minpack.lm -c conda-forge
+
+# command to run tests
+script:
+  # Override SBpipe logging configuration (we don't want it to write anything into the log file).
+  - sed -i 's/level=DEBUG/level=CRITICAL/g' sbpipe/logging_config.ini
+  - nosetests test_suite.py --nocapture --verbose

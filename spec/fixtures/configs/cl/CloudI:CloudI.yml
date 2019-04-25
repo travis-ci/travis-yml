@@ -1,0 +1,79 @@
+dist: trusty
+sudo: required
+language: erlang
+matrix:
+  include:
+    # works on Precise and Trusty
+    - os: linux
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-7
+      env:
+        - CONFIGURE_ENV="CC=gcc-7 CXX=g++-7"
+    # works on Trusty
+    - os: linux
+      addons:
+        apt:
+          sources:
+            # method 1
+            - llvm-toolchain-trusty-5.0
+            # method 2
+            # Clang 4.0/5.0 broken for Trusty
+            # at http://apt.llvm.org/trusty/ (2017-09-04)
+            #- sourceline: 'deb http://apt.llvm.org/trusty/ llvm-toolchain-trusty-5.0 main'
+            #  key_url: 'http://apt.llvm.org/llvm-snapshot.gpg.key'
+            #- ubuntu-toolchain-r-test
+          packages:
+            - clang-5.0
+      env:
+        - CONFIGURE_ENV="CC=clang-5.0 CXX=clang++-5.0"
+compiler:
+  - clang
+  - gcc
+otp_release:
+  - 21.1
+  - 20.3
+  - 19.3
+python:
+  - "3.6"
+rvm:
+  - 2.4.0
+before_install:
+  - sudo apt-get update
+# travis default image has: make autoconf automake libtool g++ git perl python python-dev
+  - sudo apt-get install default-jdk php5 libboost-system-dev libboost-thread-dev libboost-dev libgmp3-dev
+before_script:
+  - kerl list installations
+  - mkdir build
+  - cd build
+  - ../src/autogen.sh
+  - export ${CONFIGURE_ENV}
+  - ../src/configure --with-cxx-backtrace --prefix=`pwd`/../install_local
+  - mysql -u root -e "CREATE DATABASE cloudi_tests;"
+  - mysql -u root -e "CREATE USER 'cloudi_tests'@'localhost' IDENTIFIED BY 'cloudi_tests'; GRANT ALL ON cloudi_tests.* TO cloudi_tests;"
+  - psql -U postgres -c "CREATE DATABASE cloudi_tests;"
+  - psql -U postgres -c "CREATE USER cloudi_tests WITH PASSWORD 'cloudi_tests'; GRANT ALL PRIVILEGES ON DATABASE cloudi_tests to cloudi_tests;"
+  - gem install test-unit
+script:
+  - ../src/make_dev test install || ( find ../src/ -mmin 1 \( -name 'raw.log' -o -name 'cloudi.log' \) -printf '%C@ %p\n' | sort -r | cut -d ' ' -f 2 | xargs cat && exit 1 )
+  - ../src/make_dev install DESTDIR=`pwd`/../install_pkgdir/
+after_script:
+  - make distclean
+branches:
+  only:
+    - master
+    - develop
+notifications:
+  email:
+    recipients:
+      - mjtruog@gmail.com
+  irc:
+    channels:
+      - "chat.freenode.net#cloudi"
+    template:
+      - "%{repository_slug} (%{branch} - %{commit}) %{author}: %{commit_message}"
+      - "View Changes %{compare_url}"
+      - "Build #%{build_number}: %{message} (%{build_url})"

@@ -1,0 +1,14 @@
+language: c
+sudo: required
+dist: trusty
+
+services:
+  - docker
+
+before_script:
+  - docker build -t centos7 -f contrib/Dockerfile .
+
+script:
+  - docker run -t -v `pwd`:/build centos7 ./uploadedfile_test.py
+  - docker run -t -v `pwd`:/build centos7 ./pylint_test.py
+  - docker run --privileged -t -v `pwd`:/build centos7 ./lvfs_test.py

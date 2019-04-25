@@ -1,0 +1,23 @@
+language: php
+
+services:
+  - mysql
+  - redis-server
+
+php:
+  - 7.1.3
+
+before_script:
+  - cp .env.travis .env
+  - mysql -e 'CREATE DATABASE portail;'
+  - composer self-update
+  - composer install --no-interaction
+  - php artisan key:generate
+  - php artisan migrate:fresh --seed
+  - npm -g i npm
+  - npm i
+  - npm run dev
+  - php artisan portail:clear
+
+script:
+  - php artisan portail:test

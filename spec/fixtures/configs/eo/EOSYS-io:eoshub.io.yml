@@ -1,0 +1,94 @@
+branches:
+  only:
+  - master
+  - alpha
+sudo: required
+
+git:
+  submodules: false
+
+jobs:
+  include:
+    - stage: Test
+      language: ruby
+      cache:
+        bundler: true
+        directories:
+          - /home/travis/.rvm/
+      services:
+        - redis-server
+        - postgresql
+      addons:
+        postgresql: "9.6"
+      env:
+        - RACK_ENV=test
+        - RAILS_ENV=test
+        - TEST_DATABASE_URL=postgresql://postgres:@localhost/eoshub_test
+        - NODE_ENV=test
+        - TZ=Asia/Seoul
+      before_install:
+        - echo -e "\n\nmachine github.com\n  login $CI_USER_TOKEN\n" >~/.netrc
+        - git submodule update --init --recursive
+        - nvm install 10
+        - yarn install
+        - yarn run elm package install -y
+      before_script:
+        - psql -c 'create database eoshub_test;' -U postgres
+        - bundle exec rake db:migrate
+        - bundle exec rake assets:precompile
+      script:
+        - bundle exec rake test
+        # Test elm.
+        - yarn run elm-test
+    - stage: Build and push docker image / DB migration
+      if: type != pull_request
+      language: python
+      python:
+        - "3.6"
+      cache: pip
+      services:
+        - docker
+      install:
+        # install AWS SDK
+        - pip install awscli
+        - export PATH=$PATH:$HOME/.local/bin
+        # install necessary dependency for ecs-deploy
+        - sudo apt-get update
+        - sudo apt-get install jq -y
+        # install ecs-deploy
+        - curl https://raw.githubusercontent.com/silinternational/ecs-deploy/master/ecs-deploy | sudo tee -a /usr/bin/ecs-deploy
+        - sudo chmod +x /usr/bin/ecs-deploy
+      before_script:
+        - echo -e "\n\nmachine github.com\n  login $CI_USER_TOKEN\n" >~/.netrc
+        - git submodule update --init --recursive
+        - if [ "$TRAVIS_BRANCH" == "alpha" ]; then
+            export DEPLOYMENT_ENV=alpha;
+          elif [ "$TRAVIS_BRANCH" == "master" ]; then
+            export DEPLOYMENT_ENV=production;
+          fi
+        - export DOCKER_TAG=$TRAVIS_COMMIT
+        # Dockerhub login
+        - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+      script:
+        # Rails app docker build and push
+        - export EOSHUB_DOCKER_IMAGE=$DOCKER_HUB_REPO-$DEPLOYMENT_ENV:$DOCKER_TAG
+        - docker build -f deploy/$DEPLOYMENT_ENV/dockerfile -t $EOSHUB_DOCKER_IMAGE --build-arg RAILS_MASTER_KEY=$RAILS_MASTER_KEY .
+        - docker push $EOSHUB_DOCKER_IMAGE
+        # Sidekiq docker build and push
+        - export SIDEKIQ_DOCKER_IMAGE=$DOCKER_HUB_REPO_SIDEKIQ-$DEPLOYMENT_ENV:$DOCKER_TAG
+        - docker build -f deploy/$DEPLOYMENT_ENV-sidekiq/dockerfile -t $SIDEKIQ_DOCKER_IMAGE --build-arg RAILS_MASTER_KEY=$RAILS_MASTER_KEY --build-arg EOSHUB_DOCKER_IMAGE=$EOSHUB_DOCKER_IMAGE .
+        - docker push $SIDEKIQ_DOCKER_IMAGE
+        # DB migration
+        - export DB_MIGRATION_TASK=eoshub-db-migration-$DEPLOYMENT_ENV
+        - ecs-deploy -d $DB_MIGRATION_TASK -i $EOSHUB_DOCKER_IMAGE
+        - export OVERRIDES="{\"containerOverrides\":[{\"name\":\"$DB_MIGRATION_TASK\",\"command\":[\"bundle\",\"exec\",\"rake\",\"db:migrate\"]}]}"
+        - aws ecs run-task --cluster eosys --task-definition $DB_MIGRATION_TASK --overrides "$OVERRIDES"
+        # Deploy Rails app
+        - ecs-deploy -c $AWS_CLUSTER_NAME -n $AWS_SERVICE_NAME-$DEPLOYMENT_ENV -i $EOSHUB_DOCKER_IMAGE -t 900 --skip-deployments-check
+        # Deploy Sidekiq
+        - ecs-deploy -c $AWS_CLUSTER_NAME -n $AWS_SERVICE_NAME_SIDEKIQ-$DEPLOYMENT_ENV -i $SIDEKIQ_DOCKER_IMAGE -t 900 --skip-deployments-check
+
+notifications:
+  email: false
+  slack:
+    secure: NYIhR65QVav3UgtYE7S0hBtDpOj0V0/jZPdcab6OawphCIVAuGbDFN3whKIRDZD/Gtgcs9GBS5jKqg57GOu8uGwfv5QK3z1TrZTkJ285KMlfsreEFluDLeJBYogCwURUBsaMbZ7z4eb33qyMAH1/SCVw/R5ppxLpcSoOjlSRAwKZDyEeOHdXcRe9Jn0nOGTQEZYYT0wO3fDViu0D2mLd6ELjZONjqvkDx6w91/ZoXFg+Orpaq4IOdIHaseRS3iHihtIaNFtqJ5tzzlNx602XpWC06bsAN6Gm6brN2rVl1M6HqALYz3zwS5lqVhPdhOYNxRxdd7D+tYVzaXIqYvBf51ZOmaozLG2xrAbRMSg4kBtKB5mvWh24AUoe3+/f7PPijdu9RQOaYBY8q1HePmIgkMA3vdovbdTOv5qhEpgsHDM1bbJhAQJU574BD7APkCgHaRv5VY8qKAMZkxYNIi9EOAkxWwSfwaRCl3o8dJHnAljkaFdoOHDfn86n/uaJjlmYE6eXNu3d8LNABLxcLQsj+Bx2qNKAf2mgPL5B/P0mPIRwhKvxJQkK9h+MBnQxmGf8HfT9P3O2xtV4rvPdK0pgQvbPTalvD5SIqaJ9yNEjT51DDzGihnREZOCHicdQTX5qrf8yeo5aBDAC7M2MA+nvVioH9NKRw5+kceNIYmzL1Jo=

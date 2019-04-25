@@ -1,0 +1,52 @@
+language: minimal
+dist: xenial
+services:
+  - docker
+
+before_install:
+  - curl https://raw.githubusercontent.com/plicease/cip/master/bin/travis-bootstrap | bash
+  - cip before-install
+
+install:
+  - cip diag
+  - cip install
+
+script:
+  - cip script
+
+jobs:
+  include:
+    - env: CIP_TAG=5.29
+    - env: CIP_TAG=5.28
+    - env: CIP_TAG=5.28 CIP_ENV=FFI_PLATYPUS_MEMORY_STRDUP_IMPL=ffi
+    - env: CIP_TAG=5.28-threads
+    - env: CIP_TAG=5.28-longdouble
+    - env: CIP_TAG=5.28-quadmath
+    - env: CIP_TAG=5.28-ffimaster
+    - env: CIP_TAG=5.28 CIP_ENV=FFI_PLATYPUS_DEBUG_FAKE32=1
+    - env: CIP_TAG=5.28 CIP_ENV=FFI_PLATYPUS_NO_ALLOCA=1
+    - env: CIP_TAG=5.26
+    - env: CIP_TAG=5.24
+    - env: CIP_TAG=5.22
+    - env: CIP_TAG=5.20
+    - env: CIP_TAG=5.18
+    - env: CIP_TAG=5.16
+    - env: CIP_TAG=5.14
+    - env: CIP_TAG=5.14-threads
+    - env: CIP_TAG=5.14-longdouble
+    - env: CIP_TAG=5.12
+    - env: CIP_TAG=5.10.1
+    - env: CIP_TAG=5.10.1-threads
+    - env: CIP_TAG=5.10.0
+    - env: CIP_TAG=5.10.0-threads
+    - env: CIP_TAG=5.8.9
+    - env: CIP_TAG=5.8.8
+    - env: CIP_TAG=5.8.8-threads
+    - env: CIP_TAG=5.8.1
+    - env: CIP_TAG=5.8.1-threads
+  allow_failures:
+    - env: CIP_TAG=5.10.0-threads
+
+cache:
+  directories:
+    - "$HOME/.cip"

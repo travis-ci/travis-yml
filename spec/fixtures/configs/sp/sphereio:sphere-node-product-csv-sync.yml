@@ -1,0 +1,39 @@
+language: node_js
+branches:
+  except:
+    - latest
+node_js:
+  - '8'
+  - '6'
+before_script:
+  - npm install -g grunt-cli
+  - ./create_config.sh
+  - gem install cucumber
+  - gem install aruba -v 0.7.4
+script:
+  - npm test
+  - cucumber -t ~@wip
+  - cat data/simple-import.csv | ./bin/product-csv-sync import --projectKey ${SPHERE_PROJECT_KEY} --clientId ${SPHERE_CLIENT_ID} --clientSecret ${SPHERE_CLIENT_SECRET} --suppressMissingHeaderWarning --matchBy sku
+  - cat data/template_sample.csv | ./bin/product-csv-sync export --projectKey ${SPHERE_PROJECT_KEY} --clientId ${SPHERE_CLIENT_ID} --clientSecret ${SPHERE_CLIENT_SECRET}
+  - ./bin/product-csv-sync import --projectKey ${SPHERE_PROJECT_KEY} --clientId ${SPHERE_CLIENT_ID} --clientSecret ${SPHERE_CLIENT_SECRET} --csv data/simple-import.csv --suppressMissingHeaderWarning --matchBy sku
+  - ./bin/product-csv-sync template --projectKey ${SPHERE_PROJECT_KEY} --clientId ${SPHERE_CLIENT_ID} --clientSecret ${SPHERE_CLIENT_SECRET} --out data/template_sample.csv --all
+  - ./bin/product-csv-sync export --projectKey ${SPHERE_PROJECT_KEY} --clientId ${SPHERE_CLIENT_ID} --clientSecret ${SPHERE_CLIENT_SECRET} --template data/template_sample.csv --out data/exported.csv
+  - ./bin/product-csv-sync state --projectKey ${SPHERE_PROJECT_KEY} --clientId ${SPHERE_CLIENT_ID} --clientSecret ${SPHERE_CLIENT_SECRET} --changeTo delete --forceDelete
+branches:
+  except:
+    - /^v[0-9]\.[0-9]\.[0-9]$/
+notifications:
+  hipchat:
+    rooms:
+      secure: KgryNM2IN5oc407jAiNxKFnKohyOccHdcJ7Tb+RamcuMOGj6xftMMnTwDvlqLGsXiaoMNQh44E5DGiHiBtrwPx7x1Qn7uXWD4lYxCQL3Tbd0DnsW+1PyFmOR6X1N7qcYKRtq3xwS+lW0WuTr1HkbXZ8pZpKR2/ipLzANQJUITgY=
+    template:
+    - '%{repository}#%{build_number} (%{author}): %{message} (<a href="%{build_url}">Details</a>/<a href="%{compare_url}">Compare</a>)'
+    format: html
+    on_success: change
+    on_failure: change
+env:
+  global:
+    - secure: nd50EfL32KaVoqMGNp4/gyl1XwvTDDRVfiMpMjHajorp9kAfMfFWVqo7N43PT9or2Bkks1h9/cFrDMLFwOz/Oc+D6CCcuvhEJbRq7gcMvaR5Ei2rEo2hG+Liph5EAj7yeiFoI73D4Oj0iQY/+qleRh451I4x3XW5ef8AP8pV+D8=
+    - secure: dQ35ND3Dd5FSBcePLRv7InBPkbvYm0011/xkPJeyOkLPLSmB+SXxTzBZur50YZELld9CYfNvMLkBluaNTjP/hVcb921Q53UUKG/k36X38sWXACQzIwEvbOHnU7p+A42oJDQWGLi1AKZrTUvaMZiEFf4HyB04dKnf+Xsc5aXwKQE=
+    - secure: d06TBgyndHegzTVf9aX7EkJvaQx1sDavv6jcfWQ2umhIvkK+hFN5T2+i2aTdOAzsmkew/zjKgVnY7sJ5eTCmCzd5HVKZz+EVGX/xr7Wo6omdyEyRkXliARQoaYumFUs9JFAAZXEUEvT52ClkeulGOF8yPFgh98KMmismsE9qapA=
+sudo: false

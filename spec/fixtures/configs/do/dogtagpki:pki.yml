@@ -1,0 +1,56 @@
+sudo: required
+language: python
+
+services:
+  - docker
+cache: pip
+
+env:
+  - BASE_IMAGE_VERSION=28 TASK="PKI"
+  - BASE_IMAGE_VERSION=28 TASK="IPA"
+  - BASE_IMAGE_VERSION=29 TASK="PKI"
+  - BASE_IMAGE_VERSION=29 TASK="IPA"
+
+before_install:
+  - set -a && source travis/global_variables
+  - touch ${LOGS}
+
+install:
+  # Setup the required build environment
+  - travis/builder-init.sh
+
+  # Initialize PKI build env
+  - docker exec -i ${CONTAINER} ${SCRIPTDIR}/pki-init.sh
+
+  # Trigger build process
+  - docker exec -i ${CONTAINER} ${SCRIPTDIR}/pki-build.sh
+
+  # If IPA, first initialize IPA env, then install new PKI RPMS
+  - if [ $TASK = "IPA" ]; then docker exec -i ${CONTAINER} ${SCRIPTDIR}/ipa-init.sh; fi
+
+  # Install recently build Dogtag RPMS
+  - docker exec -i ${CONTAINER} ${SCRIPTDIR}/pki-install.sh
+  
+script:
+  - >
+    if [ $TASK = "IPA" ]; then
+      docker exec -i ${CONTAINER} ${SCRIPTDIR}/ipa-test.sh
+    else
+      docker exec -i ${CONTAINER} ${SCRIPTDIR}/ds-create.sh
+      docker exec -i ${CONTAINER} ${SCRIPTDIR}/ca-create.sh
+      docker exec -i ${CONTAINER} ${SCRIPTDIR}/kra-create.sh
+      docker exec -i ${CONTAINER} ${SCRIPTDIR}/ocsp-create.sh
+      docker exec -i ${CONTAINER} ${SCRIPTDIR}/tks-create.sh
+      docker exec -i ${CONTAINER} ${SCRIPTDIR}/tps-create.sh
+      docker exec -i ${CONTAINER} ${SCRIPTDIR}/tps-remove.sh
+      docker exec -i ${CONTAINER} ${SCRIPTDIR}/tks-remove.sh
+      docker exec -i ${CONTAINER} ${SCRIPTDIR}/ocsp-remove.sh
+      docker exec -i ${CONTAINER} ${SCRIPTDIR}/kra-remove.sh
+      docker exec -i ${CONTAINER} ${SCRIPTDIR}/ca-remove.sh
+      docker exec -i ${CONTAINER} ${SCRIPTDIR}/ds-remove.sh
+    fi
+
+after_script:
+  - cat ${LOGS}
+  - docker kill ${CONTAINER}
+  - docker rm ${CONTAINER}

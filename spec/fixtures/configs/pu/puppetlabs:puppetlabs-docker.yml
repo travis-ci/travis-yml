@@ -1,0 +1,38 @@
+---
+sudo: false
+dist: trusty
+language: ruby
+cache: bundler
+before_install:
+  - bundle -v
+  - rm -f Gemfile.lock
+  - gem update --system
+  - gem --version
+  - bundle -v
+script:
+  - 'bundle exec rake syntax lint metadata_lint check:symlinks check:git_ignore check:dot_underscore check:test_file rubocop'
+  - 'bundle exec rake parallel_spec'
+bundler_args:
+rvm:
+  - 2.4.4
+env:
+  - PUPPET_GEM_VERSION="~> 4.0"
+  - PUPPET_GEM_VERSION="~> 5.0"
+  - PUPPET_GEM_VERSION="~> 6.0"
+matrix:
+  fast_finish: true
+branches:
+  only:
+    - master
+    - /^v\d/
+notifications:
+  email: false
+deploy:
+  provider: puppetforge
+  user: puppet
+  password:
+    secure: ""
+  on:
+    tags: true
+    all_branches: true
+    condition: "$DEPLOY_TO_FORGE = yes"

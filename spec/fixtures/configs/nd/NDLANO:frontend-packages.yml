@@ -1,0 +1,25 @@
+language: node_js
+node_js:
+  - '10'
+before_install:
+  - curl -o- -L https://yarnpkg.com/install.sh | bash
+  - export PATH="$HOME/.yarn/bin:$PATH"
+script:
+  - yarn bootstrap
+  - yarn check-all
+  - yarn build-storybook
+cache:
+  yarn: true
+  directories:
+    - node_modules
+after_success:
+  - travis_wait node scripts/run-ndla-script.js now-travis
+notifications:
+  slack:
+    on_success: change
+    on_failure: always
+    rooms:
+      secure: WNfcwzr+3A/WTIkYjrrM5d90+UByJG+w8ziuTM0/Bm3CihpO72/GZVmBant9/GRBlA1O+Xtm+Ll4QHmsP8ICtwtYcX25nnJznf5/XsanYicyfjqtsJfdLCthfX4QaJNoIPr9oY+B2cG/1va5fBDjl7FOU9PctfimakhhACbvJb96N7q+ANgh9uNxHVPIHFX1Enq+eML+Cah0knx3M8pvnEKVnBkB18dbb6hkievzFiVym92141lDMzc7StD9WHklyp6at7f51ZBpIF/COAc+dBkJs4f3jRhhH2hvUW0J2oyXYHeU7LOIY9TtQJqQdsa2AmqBSGV8LRk4FdK8FvkdU32MgvfoElwgSRpIXJYtUwpfuwnjBNLCScsj41v9yb5eQ/T2AT370tn6TBMu3xJLPJij7Ph0WeZ03OOynldnNFz4jJyGtcQnOsiyIiDqp1n+K2RzmO8e0Gm0GHuMAudHL0I8NTfoY7ZUZlBgSf9czj0m6Ig2MsZMdjzcI83GT0n/oxvzPxIrG+kt4Msj8roPpiVTpH+gS1wsYnGf8UflGc6xagtKM40ytO0SWjFKWbXeOvweNhgI8rf9aWqX6zNh1A/XSu/Ln6mefUQQ/h56b4Jni8EMQGHCZYX6VJJm7JyWGV6Sf7Wy9A85fW0L3Ca+NrYhQN7aRUGRGmdzHVriDEE=
+env:
+  global:
+    - secure: HdHFuU5U48S8kQlvs3667vuXSdMW85ZbR38ysVXkw7xdBaDIW9/I8bWQALIBW7qBAiWcp+c5T8ZLWBNdZcb7ZZL1X5TLgbqlzZ2ZpiRM7ux6I1dWV5ViW//Xe4+hP1QiyGDpasD6shRDjwXYLeVt/lagmElVhAkQFkwTA81Y5a5eCfoU1D+iNCuyUB6BkarSUovtup/0AR0TaPoAmnVHyKb8f9ztgBeReMPbYK71Mr3wHLkdAsN0Ov0K+JiFPHsEzoIvIGkd9m0bGUW08TCpnXwafe8+lz3gUVmi9VHtimrp5KWlHQH5eiVQ4uF37qLMTbMPr5f+szJ1u/rf87aS6MzSXEeAcz8Nf8u5P6EKAbHivtTcE03DKw+NhT1s+H7LiYi75jSjJS+e69aQchXY8g/l3EaJPUXvS1jQxbwIOU6k5Jan6jeeGTmMLgsVXWJm5cpEJ37lcPLZbDOJUAMmuylvYtzevTnT0xliT3u60S/8cm2fEg0CjB0Mx2OxRMO9BPOmcKrF53n4lYRhjqy6PSednefdg11L+U00CBMJ0aBKV2mI6SkLFN3fRaKPwJASAqBTFiKihUMaOPooXPhKLNw7g1gPyRyOS0dmlfA2sJVbtMVRGonTrfKIkU99qvrz3YUn2gZm3rt1Xh+T4ipYmABnVRlLm7VfbWqAHD/f4Gs=

@@ -1,0 +1,54 @@
+language: java
+jdk:
+- oraclejdk8
+sudo: required
+install: true
+services:
+  - docker
+
+env:
+ global:
+ - MAVEN_OPTS="-Xms1024m -Xmx4g -Dmaven.repo.local=$HOME/.m2/repository -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=WARN -Dorg.slf4j.simpleLogger.showDateTime=true -Djava.awt.headless=true"
+ - MAVEN_CLI_OPTS="--batch-mode --errors --fail-at-end --show-version -DinstallAtEnd=true -DdeployAtEnd=true"
+ # DOCKER_USERNAME
+ - secure: "K23OtDvjFOuxGedcv7Y3kiu2XtpGDwLO0FWN0eieFzjlMHZU1k/whRMD41FhN89ocjKMI5pEQFIzPlETzq+ZxZa/YtQL7spcif4Q3ppe9RXfG6uUdgfFHpP5IUnpnDN8jqX3yRc+W371H3726s3s+LzoP/ANILd/WQP9rzXd8Ts="
+ # DOCKER_PASSWORD
+ - secure: "gDM83kopiEhqJfP9bEMSFmqAnbfLU+HInDpvZ8LQBZ2kA/0CjXCmcm4St/R70FJxd2iFo6YRUl6olPCpmuk4XJ9YSaRBtKcP2QV0tcxjLmtGlS3N6fsuLWn87Q/GUAdE30sp71fo47FAmdcfL68UzK0UgQcqZIKeZZ288ScrbIc="
+ # GITLAB_RODA_DEV_TRIGGER
+ - secure: "q3J6RREQFMDIPZ1e2G5V7yP/9Oxt6v/O7lZ8B3bEBvrE0NRg0fvoNSi2G3Qqq7CyXbt1BbJkfO1iGREBqOr3vOYsa9eYkF9jfInf+hivRn3jLTLMpGb9PWgjXYDxz3EFaIVBpgcnh2hyOowN7S4flD2vo2dMaCo+RbTwf0yyoMs="
+ # GITLAB_RODA_DEV_TRIGGER_TOKEN
+ - secure: "oeN++dcM4qph7ZKovkbj8nxS0PGibotwdlmWABGr9Q3IllvKmI1wt5PTwqVmbN2+1tbobaeZX6HoJ4b77QWaPRqk/56sBrYj/xnQhRoPDW/Oq6nqlpTm08wfrIExeDfxpZ5DiQBoXDoIYo4N17gxdXdPKLDQa6M29Ev7lryunvk="
+ # GREN_GITHUB_TOKEN
+ - secure: "pfZx774qy6nhBXK+/xnbMexEN/717Bv7V+nyh67IEQ2IBeNLmsnIRMsKL31jTwdpgxLKcofVgBm4VJ+j5wHU3s5NxlLuyUEAavNZTfpWCjQtcWWQMsv/lJcf4iErpm21onOO9O0ulABw8Gyzm6PMd8IBfaLngDiJcCzcCojQC20="
+
+addons:
+  sonarqube:
+    organization: "keeps"
+    token:
+      secure: "On53R35PWhHE5kJZophSGhiyfU3w/df/TgdVObsw1N64LGaGXiQQxaYuaYRTYT34SQHuZPRqpV84L8QMW5WGDEwH3EhaN3I3on1w6djrQ4lqk0+2yrqHtKkhL5+hByC50UQcdLoX84q6Ri6A570/tpNhT+/GnT2+1deJ5C+fjiU="
+    branches:
+      - master
+      - development
+
+before_script:
+  - chmod +x .travis/*.sh
+  - .travis/before_script.sh
+
+script:
+  - .travis/script.sh
+
+before_cache:
+    - sudo chown -R travis:travis $HOME/.m2/
+    - sudo chown -R travis:travis $HOME/.sonar/cache
+
+cache:
+  directories:
+    - $HOME/.m2/
+    - $HOME/.sonar/cache
+
+notifications:
+  slack:
+    secure: Hg2xvznD2QGhbCHRXN9DFM6dYIfeiZStj0Ud+OBS2swX9YOM77ufbDkMWF/yAAwxNg45QIC3a3okVy6TLzY5hA/PSKlc/5/ClujgRy02HLXlbYZ9psQH22/VFrER3uFkIpvMPhrxh3NLo/UMWfwvmwq26ziFnW4W6UDn/XXCHPE=
+
+after_success:
+  - .travis/after_success.sh

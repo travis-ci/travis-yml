@@ -32,19 +32,19 @@ describe Travis::Yml::Schema::Def::Deploy::Releases, 'structure' do
                 '$ref': '#/definitions/deploy/edge'
               },
               user: {
-                '$ref': '#/definitions/secure'
+                '$ref': '#/definitions/type/secure'
               },
               password: {
-                '$ref': '#/definitions/secure'
+                '$ref': '#/definitions/type/secure'
               },
               api_key: {
-                '$ref': '#/definitions/secure'
+                '$ref': '#/definitions/type/secure'
               },
               repo: {
                 type: :string
               },
               file: {
-                '$ref': '#/definitions/strs'
+                '$ref': '#/definitions/type/strs'
               },
               file_glob: {
                 type: :boolean

@@ -1,0 +1,51 @@
+sudo: required
+addons:
+  - chrome: stable
+  - mariadb: '10.0'
+os:
+  - linux
+  - osx
+language: node_js
+node_js: '8.9.4'
+env:
+  matrix:
+  - ZMQ="4.1.6" ZMQ_REPO="zeromq4-1"
+before_install:
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install mariadb; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then mkdir /usr/local/etc/my.cnf.d; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then mysql.server start; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install zeromq; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then export CC=/usr/bin/clang; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then export CXX=/usr/bin/clang++; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then mkdir ldlocal; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then export LDHACK=`pwd`/ldlocal; export LD_RUN_PATH=$LDHACK/lib; export LD_LIBRARY_PATH=$LDHACK/lib; export PKG_CONFIG_PATH=$LDHACK/lib/pkgconfig; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then wget https://github.com/zeromq/$ZMQ_REPO/releases/download/v$ZMQ/zeromq-$ZMQ.tar.gz; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then tar xzvf zeromq-$ZMQ.tar.gz; cd zeromq-$ZMQ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then ./autogen.sh; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then ./configure --prefix=$LDHACK --without-libsodium; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then make -j install; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then cd ..; fi
+  - mysql -uroot -e 'CREATE DATABASE INFOLOGGER;'
+  - chmod +x .travis.bash; ./.travis.bash;
+install:
+  - if [[ -f "$TRAVIS_BUILD_DIR/Framework/_TEST" ]]; then cd $TRAVIS_BUILD_DIR/Framework; npm install; fi
+  - if [[ -f "$TRAVIS_BUILD_DIR/Control/_TEST" ]]; then cd $TRAVIS_BUILD_DIR/Control; npm install; fi
+  - if [[ -f "$TRAVIS_BUILD_DIR/QualityControl/_TEST" ]]; then cd $TRAVIS_BUILD_DIR/QualityControl; rm -f binding.gyp; sed -i.bak -e '12d' package.json; sed -i -e 's/mocha-\*",/mocha-\*"/g' package.json; npm install; fi
+  - if [[ -f "$TRAVIS_BUILD_DIR/InfoLogger/_TEST" ]]; then cd $TRAVIS_BUILD_DIR/InfoLogger; npm install; fi
+before_script:
+  - npm install -g codecov nyc jsdoc-to-markdown
+  - cd $TRAVIS_BUILD_DIR/Framework/Backend; openssl req -new  -newkey rsa:2048 -days 365 -nodes -x509 -subj "/C=CH/ST=Test/L=Test/O=Tst/CN=localhost" -keyout test.key -out test.pem
+  - cd $TRAVIS_BUILD_DIR/Framework/Backend/test; rm mocha-ws.js; sed -i -e 's/const skip = true/const skip = false/g' mocha-db.js
+script:
+  - if [[ -f "$TRAVIS_BUILD_DIR/Framework/_TEST" ]]; then cd $TRAVIS_BUILD_DIR/Framework; npm test; fi
+  - if [[ -f "$TRAVIS_BUILD_DIR/Control/_TEST" ]]; then cd $TRAVIS_BUILD_DIR/Control; npm test; fi
+  - if [[ -f "$TRAVIS_BUILD_DIR/QualityControl/_TEST" ]]; then cd $TRAVIS_BUILD_DIR/QualityControl; sed -i -e "s/require('..\/build\/Release\/tobject2json.node')/null/g" lib/TObject2JsonClient.js; npm test; fi
+  - if [[ -f "$TRAVIS_BUILD_DIR/InfoLogger/_TEST" ]]; then cd $TRAVIS_BUILD_DIR/InfoLogger; npm test; fi
+after_success:
+  - cd $TRAVIS_BUILD_DIR/Framework/Backend; jsdoc2md --files ./*.js http/*.js jwt/*.js public/*.js websocket/*.js zeromq/*.js test/*.js db/*.js log/*.js > docs/API.md
+  - cd $TRAVIS_BUILD_DIR/Framework; nyc ./node_modules/mocha/bin/mocha Backend/test
+  - cd $TRAVIS_BUILD_DIR/Framework; nyc report --reporter=text-lcov > coverage.lcov && codecov
+notifications:
+  email: false
+  slack:
+    secure: mmn5dhsQ78Ak+d5GrT52G6SUqklTXp0Dl+rpsrSIMubSxKQmRtrU/KkSjVNP39+LllvwYVHNOZPVti6LYXD9Yq3ZAtipkLuZKqypTa8QdoBsYWVsN+8upQr1ywEbH+88QriFALZIFZz4wGwtentKFPWdUerpuK3r85MQmlxfirz+pRmmpsI2z4XfnfSc0lXphXX2czWCwt/wVotOUITn44ZqVdaZksjp2pXvvmqMXdt7HcVDVzigTRI7W8s9Mfsh8CYHVI6W9z7FSblb/tCA7MoaMhKjE2myA6cEocmj1FfXAvPY4VLDLoJk7c80y1RkxIsofip3fNyzSzqAkC7hLfUROYbNLXuJ0jLiK/7Benl21BHiP9Me23UIETr4SZC0li8mLkqYHMWzzGMPODpHj5e1zYtRCfw5XXxtjtyVSAO4oTZC5BjvQxEo+xAZZLdv65O4g94dqpQsEKSbAPiHUguIjQRxql4DBzIEVFrd0KpdxG8vBdB272b5x+WyGBagKU2HypnakwMGVQwM4WfwD3PWb8ZM+n314d51faypgvTQmZge98TI8m7z6D3B42+Yza/tKetkK/vFPWsO+QunUqMswxUs1RhBSX8wMFFFYx8GKzJYKziQbF0jvDWU+rUmPy68hXZGgLuqNIwACez7jcxz5lHkQAkI4q4H4SLKgoo=

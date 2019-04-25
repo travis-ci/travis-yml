@@ -15,7 +15,7 @@ module Travis
           attr_reader :namespace, :id
 
           def ref
-            @ref || "#{namespace}/#{id}"
+            "#{namespace}/#{id}"
           end
 
           def lookup

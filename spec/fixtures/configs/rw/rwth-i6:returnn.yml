@@ -1,0 +1,102 @@
+# https://docs.travis-ci.com/user/getting-started/
+
+language: python
+python:
+  - "3.6"
+  - "2.7"
+
+# https://docs.travis-ci.com/user/reference/overview/
+# https://blog.travis-ci.com/2017-04-17-precise-EOL
+# Also needed for TensorFlow for glibc 2.7.
+dist: trusty
+sudo: false  # should use the faster container based image
+
+# command to install dependencies
+# quiet (-qq) to keep log smaller
+# |cat to avoid interactive banner (which blows up the log)
+# Note: pip is from a virtualenv, thus --user does not seem to work.
+# pip2 without --user (if pip is PY3) also does not work because we don't have root access.
+# pip2 with --user (if pip is PY2) does not work, because it the same as pip.
+install:
+  - pip2 install -qq --upgrade pip setuptools wheel six | cat  # Python2<->Python3
+  - pip2 install --user -r requirements.txt | cat  # need for Python2<->Python3 communication tests
+  - pip2 install --user typing | cat
+  - pip install typing | cat  # needed for Python 2 in some cases
+  - pip install -qq --upgrade pip setuptools wheel
+  - pip install --upgrade numpy scipy | cat  # TF usually needs the latest Numpy
+  - pip install -r requirements.txt | cat
+  - pip install $TF_PACKAGE | cat
+  - pip install theano==0.9 | cat
+  - pip install -qq nose
+  - echo "[global]" >> ~/.theanorc
+  - echo "device = cpu" >> ~/.theanorc
+  - echo "floatX = float32" >> ~/.theanorc
+  - python --version
+  - python -c "import numpy; print(numpy.version.full_version)"
+  - python -c "import tensorflow as tf; print(tf.GIT_VERSION, tf.VERSION)"
+  - python -c "import theano; print(theano.__version__)"
+
+# https://docs.travis-ci.com/user/environment-variables/
+# TF tests first, because more relevant (for me), then ordered by alphabet
+env:
+  global:
+    - TF_PACKAGE=tensorflow
+  matrix:
+    - TEST=TFEngine
+    - TEST=TFNativeOp
+    - TEST=TFNativeOp TF_PACKAGE=tensorflow==1.8.0
+    - TEST=TFNativeOp TF_PACKAGE=tensorflow==1.4.0
+    - TEST=TFNetworkLayer
+    - TEST=TFNetworkRecLayer
+    - TEST=TFNetworkSigProcLayer
+    - TEST=TFUpdater
+    - TEST=TFUtil
+    - TEST=Config
+    - TEST=Dataset
+    - TEST=demos
+    - TEST=Device
+    - TEST=EngineTask
+    - TEST=EngineUtil
+    - TEST=fork_exec
+    - TEST=Fsa
+    - TEST=GeneratingDataset
+    - TEST=hdf_dump
+    - TEST=HDFDataset
+    - TEST=LearningRateControl
+    - TEST=Log
+    - TEST=multi_target
+    - TEST=MultiBatchBeam
+    - TEST=NativeOp
+    - TEST=NativeOp_chunk
+    - TEST=NativeOp_sparse
+    - TEST=NativeOp_subtensor_batched_index
+    - TEST=Network
+    - TEST=NetworkBaseLayer
+    - TEST=NetworkDescription
+    - TEST=NetworkLayer
+    - TEST=Pretrain
+    - TEST=SprintDataset
+    - TEST=SprintInterface
+    - TEST=TaskSystem
+    - TEST=TaskSystem_SharedMem
+    - TEST=TheanoUtil
+    - TEST=Util
+
+matrix:
+  include:
+    - env: RUN=tests/pylint.py
+    - env: RUN=tests/pycharm-inspect.py
+  allow_failures:
+    - env: RUN=tests/pylint.py
+    - env: RUN=tests/pycharm-inspect.py
+  fast_finish: true
+
+# command to run tests
+script:
+  - 'if [[ ! -z "$TEST" ]]; then nosetests tests/test_$TEST.py; fi'
+  - 'if [[ ! -z "$RUN" ]]; then $RUN; fi'
+
+# https://docs.travis-ci.com/user/notifications
+# no notifications
+notifications:
+  email: false

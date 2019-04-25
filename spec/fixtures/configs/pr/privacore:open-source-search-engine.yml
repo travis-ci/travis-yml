@@ -1,0 +1,30 @@
+language: cpp
+sudo: required
+dist: trusty
+
+compiler:
+- gcc
+
+os:
+- linux
+
+script:
+- if [[ "$TRAVIS_EVENT_TYPE" == "cron" ]]; then
+    export CXX=g++-5;
+    ./runCoverityAnalysis.sh;
+    ./runSonarQubeAnalysis.sh;
+  else
+    make CXX=g++-5 -j4;
+  fi
+
+addons:
+  sonarqube: true
+  apt:
+    sources:
+    - ubuntu-toolchain-r-test
+    packages:
+    - g++-5
+    - libssl-dev
+    - protobuf-compiler
+    - libprotobuf-dev
+    - libc-ares-dev

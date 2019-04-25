@@ -1,0 +1,21 @@
+language: csharp
+mono:
+  - latest
+  - 3.12.0
+  - 3.10.0
+install:
+  - sudo apt-get install -y gtk-sharp2
+  - nuget restore KalturaClient.sln
+script: 
+    - sed -e "s#@YOUR_PARTNER_ID@#$PARTNER_ID#g" -e "s#@YOUR_ADMIN_SECRET@#$ADMIN_SECRET#g" -e "s#@SERVICE_URL@#https://www.kaltura.com#g" -i KalturaClientTester/ClientTester.cs
+    - xbuild KalturaClient.sln && cd ./KalturaClientTester/bin/Debug/ &&  echo | mono KalturaClientTester.exe
+notifications:
+ email:
+    recipients:
+      - moshe.maor@kaltura.com
+      - jess.portnoy@kaltura.com
+      - Noad.arad@kaltura.com
+      - Elad.cohen@kaltura.com
+      - Jonathan.Kanarek@kaltura.com
+    on_success: change
+    on_failure: always

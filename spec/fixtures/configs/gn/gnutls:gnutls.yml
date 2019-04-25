@@ -1,0 +1,37 @@
+os:
+ - osx
+
+language: c
+compiler:
+  - clang
+
+git:
+  submodules: false
+
+notifications:
+  email:
+    on_success: change
+    on_failure: always
+
+
+before_install:
+  - if [[ "$TRAVIS_OS_NAME" = "osx" ]]; then
+        brew update;
+        for pkg in autoconf automake autogen libtool nettle p11-kit libtasn1 gettext;do
+          brew install $pkg || true;
+        done;
+        for pkg in nettle p11-kit libtasn1;do
+          brew upgrade $pkg || true;
+        done;
+    fi
+
+script:
+  - PATH=/usr/local/opt/gettext/bin:$PATH ./bootstrap
+  - PATH=/usr/local/opt/gettext/bin:$PATH ./configure --disable-full-test-suite --disable-valgrind-tests --disable-doc --disable-guile --disable-dependency-tracking
+  - make -j$(sysctl -n hw.ncpu)
+  - make -j$(sysctl -n hw.ncpu) check gl_public_submodule_commit=
+
+after_failure:
+  - find . -name 'test-suite.log' -execdir grep -il "FAILED" {} \; -exec echo {} \; -exec cat {} \;
+  - for i in tests/*.log fuzz/*.log;do echo "" && echo $i && cat $i;done
+

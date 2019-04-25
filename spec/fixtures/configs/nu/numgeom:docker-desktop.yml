@@ -1,0 +1,10 @@
+os: linux
+language: python
+services: docker
+
+before_script:
+  - git clone --depth=1 https://$GIT_TOKEN@github.com/xmjiao/ci-util.git 2> /dev/null
+
+script:
+  - './ci-util/build-docker.sh : numgeom/desktop --build-arg SSHKEY_ID=$SSHKEY_ID --build-arg MFILE_ID=$MFILE_ID &&
+    ./ci-util/trigger-via-api.sh'

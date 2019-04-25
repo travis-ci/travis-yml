@@ -18,6 +18,10 @@ module Travis
             :enum
           end
 
+          def enum
+            opts[:enum]
+          end
+
           def strict?
             false?(opts[:strict]) ? false : true
           end

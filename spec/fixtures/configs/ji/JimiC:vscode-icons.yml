@@ -1,0 +1,74 @@
+language: node_js
+os:
+  - linux
+  - osx
+node_js:
+  - node   # latest node
+  - 10.2.0 # vscode >= 1.31.0
+  - 8.9.3  # vscode >= 1.26.0 < 1.31.0
+  - 7.9.0  # vscode >= 1.16.0 < 1.26.0
+git:
+  depth: 5
+  submodules: false
+matrix:
+  allow_failures:
+    - node_js: node
+  fast_finish: true
+cache: yarn
+before_install:
+  - curl -L https://yarnpkg.com/install.sh | bash
+  - export PATH=$HOME/.yarn/bin:$PATH
+before_script:
+  - npm i codeclimate-test-reporter codecov --no-save
+  - npm run postinstall
+script: npm test
+after_success:
+  - if [[ $CODECLIMATE_REPO_TOKEN ]] ; then codeclimate-test-reporter < ./coverage/lcov.info ; fi
+  - codecov --disable=gcov
+
+jobs:
+  include:
+    - stage: wiki pages icons list update
+      if: repo =~ ^vscode-icons AND branch = master AND type = push
+      os: linux
+      node_js: 8.9.3
+      addons:
+        apt:
+          sources: [ubuntu-toolchain-r-test]
+          packages: [libstdc++-4.9-dev]
+      before_script:
+        - npm i vscode-icons/wpilgenerator --no-save
+        - npm run postinstall
+      script: npm run compile
+      after_success: wpilgen
+
+    - stage: publish
+      if: repo =~ ^vscode-icons AND tag IS present AND type = push
+      os: linux
+      node_js: 8.9.3
+      before_script:
+        - npm i vsce --no-save
+        - npm run postinstall
+      script: vsce publish -p $VSCE_TOKEN
+      after_success:
+
+    - stage: docker vsi:latest
+      if: repo =~ ^vscode-icons AND branch = master AND type = push
+      sudo: required
+      language: generic
+      before_install:
+      before_script:
+      script: curl -L $DOCKER_TRIGGER_URL | bash -s -- --token $TRAVIS_TOKEN
+      after_success:
+
+    - stage: docker vsi:tag
+      if: repo =~ ^vscode-icons AND tag IS present AND type = push
+      sudo: required
+      language: generic
+      before_install:
+      before_script:
+      script: curl -L $DOCKER_TRIGGER_URL | bash -s -- --token $TRAVIS_TOKEN --tag $TRAVIS_TAG
+      after_success:
+
+# See this if we need to test the extension via vscode:
+# https://code.visualstudio.com/Docs/extensions/testing-extensions#_running-tests-automatically-on-travis-ci-build-machines

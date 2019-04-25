@@ -1,0 +1,50 @@
+sudo: required
+os:
+  - linux
+language: node_js
+node_js:
+  - '11'
+
+addons:
+  chrome: stable # have Travis install chrome stable.
+
+before_cache:
+  - rm -f $HOME/.gradle/caches/modules-2/modules-2.lock
+  - rm -rf $HOME/.gradle/caches/*/plugin-resolution/
+cache:
+  directories:
+    - $HOME/.gradle/caches
+    - $HOME/.gradle/wrapper
+    - node
+    - node_modules
+
+env:
+  global:
+    - GB_BASE=$TRAVIS_BUILD_DIR
+    - TERM=dumb
+
+before_install:
+  - sudo chown root /opt/google/chrome/chrome-sandbox
+  - sudo chmod 4755 /opt/google/chrome/chrome-sandbox
+  - export TZ=Europe/Amsterdam
+  - date
+  - export CHROME_BIN=google-chrome-stable
+  - export DISPLAY=:99.0
+  - sh -e /etc/init.d/xvfb start
+  - gradle wrapper
+  - GRADLE_SCRIPT="$(pwd)/gradlew"
+  - ${GRADLE_SCRIPT} --version
+install:
+  - ${GRADLE_SCRIPT} assemble
+  - ${GRADLE_SCRIPT} publishToMavenLocal
+script:
+  - ${GRADLE_SCRIPT} check
+after_success:
+  - ${GRADLE_SCRIPT} yarnCodecov
+
+notifications:
+  webhooks:
+    on_success: change
+    on_failure: always
+    on_start: false
+

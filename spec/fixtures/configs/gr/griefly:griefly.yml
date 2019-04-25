@@ -1,0 +1,55 @@
+matrix:
+  include:
+    - os: linux
+      sudo: required
+      dist: trusty
+    - os: osx
+      sudo: required
+      osx_image: xcode9.2
+
+language: cpp 
+
+compiler: gcc
+
+services:
+  - docker
+
+before_install:
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+    docker pull kremius/griefly-build;
+    fi
+  
+install:
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+    brew update;
+    brew install gimme;
+    eval "$(gimme 1.9)";
+    brew install qt;
+    brew upgrade python;
+    brew info qt;
+    brew info python;
+    export PATH="/usr/local/opt/qt/bin:$PATH";
+    export LDFLAGS="-L/usr/local/opt/qt/lib";
+    export CPPFLAGS="-I/usr/local/opt/qt/include";
+    fi
+    
+before_script:
+  - "export DISPLAY=:99.0"
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then ( sudo Xvfb :99 -ac -screen 0 1024x768x8; echo ok )& fi
+  
+script:
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+    ./make.sh -DBUILD_TESTS=ON -DCMAKE_BUILD_TYPE=Debug -DPYTHON_EXECUTABLE:FILEPATH=/usr/local/bin/python3;
+    cd exec;
+    ./KVEngineTests;
+    fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+    docker run -v $TRAVIS_BUILD_DIR:/app
+    -e TRAVIS
+    -e TRAVIS_REPO_SLUG
+    -e TRAVIS_JOB_ID
+    -e TRAVIS_PULL_REQUEST
+    -e TRAVIS_BRANCH
+    -e COVERALLS_TOKEN
+    kremius/griefly-build /app/build-in-docker.sh;
+    fi

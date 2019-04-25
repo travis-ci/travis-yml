@@ -1,0 +1,14 @@
+language: node_js
+node_js:
+- '4.3.2'
+before_install:
+- eval `ssh-agent -s`
+before_script:
+- npm install -g gulp
+- gulp travis-prepare
+script: '[ "${TRAVIS_PULL_REQUEST}" = "false" ] && gulp deploy || gulp build'
+after_script:
+- eval `/usr/bin/ssh-agent -k`
+branches:
+  only: 
+    - master

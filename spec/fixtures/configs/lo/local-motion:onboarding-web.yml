@@ -1,0 +1,37 @@
+sudo: required
+language: node_js
+services:
+- docker
+node_js:
+- '10'
+cache:
+  directories:
+  - node_modules
+env:
+  global:
+  - COMMIT=${TRAVIS_COMMIT::7}
+  - secure: Y+WlqmuI2przy6FALQsI9+Ubz3/8RmZgSexK+Jfuv1tUrp4vCON7FxgUcO+S8opLTo36HPqZnSq+1M0ivE00+ugqKBbtjkD9trFG1HKdXvoHuZrcJfQYr+t9/7CfKXuuDUutf/vYqJ3Ai52yVbS+qVQBz6zQTPmq6ZdB31BlGjcxThSBvT99R6df//y9l19SM7yoW4YOTQD+3aQre/tr3BNPw9FiaqC5yg7jqmAjqw0CqfFYEug75fMLdxepzeol28vWkB5s06Tl6rTCQSuoFPUTuYdoUu0tut+YFzbej1NA/WOnLcWLB3fMhow3Fko4DZKisuzvA5y+8mJS35frulqWSq0DwKVtUyhwUEnmb5OsEBP43MkQlEbkpYYo8+ywtikPBctyIFb3b9yNuCipDHLQdRUncj7/4IoafQ6Ml5tLyRk0yyJuJj3HIh5inVXqYcL5A87ufjtyEt15HXALlcF2brQ7+FiW/9vjTwMk8HuCaQUtrkS3CQWz3Nrqv+UGU69E04km/oL5jwn072X7D0+P1IxO97+Gm4fYTrrEqn52rbIVhwxoMWo5Lhgfa7vrg63Zj90tPS7a8wHh/GD6FDHwj7NFCMPib0/P28EnAMo8vmfvZenWvzWbPBRHE5l4KbDmLktvEEqJaysmvZthN7ZvwcZzukvucRq4Ez2IsPA=
+  - secure: DrkaOq6MloFcj33ik8+3/MNZAP5sFnGylkfZqkTkrUxd5Rt8DAiUqka2iUhNZDQN7ShOukdUfzD/fSmkYnU4HczWnhGStSMnlMKKAFQsG4Z9BeihG8qxKdUEipDUlUY0ZJTWUoY8YUsvrs68sic5kIrIZ4zkJX5TXpRDhzLJn3eQC01RbXQRY09TNlfXGnDuM/9MaUMbmeU82b41yCg/jNBBZqTJPYb9DKAXKKR50j3EIKuK8ftDUj4mGOPC7rZG+eK/Sd9L1RcJiPc0CMR23OTlTTYLB7weiCOtEMbHMZT4pId0TiaMuYTuW/sD2vioa2l+/bkmna1AxwxCvbCaPO7qaWbhRaJbMJf/B4vyv6zvqc8rRp+ZYg+F+pL6YoT6KCrEECp9FLl4v9TR94Jv2Rk5l8rePrjgq/9djygDmkRS031pv9g4CURHtbtjsZ/HRk7WtZfcxbCKUNtkgjuB5CzxD+UhuJ5s8zWlsp2H6jzZtooCp77KdObdN6z/NQAXcfc1P/HMONaEeSKqSK8PUegrLkrBewKMXUG9+nP7ZdS5KRrfgRX2Ilyck2BPVU7glBGxXIXcA4hHdjX+TdaDxUHm72WHiBSBk8Wi5Y0AxchrE8KACIbQENpkC3ROGT5WY1v9PQaQeDBXS3lsFotODTI8ChEcIOCci9nz5U4nT+U=
+  - secure: aLtIn0EzFn7UIannujkWd1RZcCqklRAkT1LI9ouWTogtMPhBiFHxOv/+oOMjPh37bhoQ34+qEpAspgxOO0nhYXtvn9C4JuM0Y/koMSqbc48oQgGH0kA1vP6qfp87fE5nDLf/yRQPf9cjGohQtgJMwOjteglr/NBizQcLB1lWZ0l+3dpSAAuY3Cgp/Ao2TuAPz8QVwrPUzHBV5GFHmVqlSu+TN62OX9N69TBzR26qem4MaatiwTY3t+9lhOUzPwcA08WdzQXjW48rY632EQYik5tuTZxmqFwwDc92hA50jY201AzCR/XqrK+gdHaxF5Iy4KOc4EG4IwZmCKM7aM+WJ3CF2KR5VMYauqxaVPLlOijo68kVipgYHiKMu+NFUVFtIq0bc+lHsFSZiaUNWmlT8XZ6aWMV1Sxfg6rTZRLvejpHexAvHqDyM6Z88m4dU14ZlMZ6iumOub+mXmw8VBHJMls47Z0X/MI6RDIa/XbUrAdGjQFG4/0Od6Z6pa+SB1A3Je8GZAHBC+T2/g3TspQ2IUS6jzYE2eTPRbNoMlzqe6feA7621xx+zOpep5D3Y/Wg/sYwjsuTtlKw+ki6Fb1aXXr1gSrePUUA67I2Ok0K4PMC/ARrbX3DNCxl/U6YZVzxbfA9+yQFKx0Pw2ktALkHFP7bbh9JVru4VWHAcnmyOP0=
+jobs:
+  include:
+  - stage: production build
+    script:
+    - npm test
+    - npm run-script build
+    - docker login -u $DOCKER_USER -p $DOCKER_PASS
+    - export REPO=localmotion/onboarding-web
+    - export TAG=`if [ "$TRAVIS_BRANCH" == "master" ]; then echo "latest"; else echo
+      $TRAVIS_BRANCH | sed 's/\//_/g' ; fi`
+    - docker build -f Dockerfile -t $REPO:$COMMIT .
+    - docker tag $REPO:$COMMIT $REPO:$TAG
+    - docker tag $REPO:$COMMIT $REPO:travis-$TRAVIS_BUILD_NUMBER
+    - docker push $REPO
+true:
+  branch: master
+notifications:
+  slack:
+    rooms:
+      secure: rvZGY2vGAm32kvJZDgCO9Tt8/kRvavzRE1WGGYRqbTp1xuqXgEJu4eHIDQFHMNp1G2mTD5a36VxCl8nXYdE8UIlpRGHKjn+lyje9BVkWC2bF9tnLkkcggb+Y+E96VaO8AVv+4tW7PRUWfEikbB0GHAXY7eZp7LNldlCHvO76oZa8t4mgFDAKjtbs3F0fuqpbObvN7CVqtZn7f8evKqpdHeFhUJd9dRfv/s4TsX7rCM8kBdfxfPtzD7dleJ+Xr7RrgMVenVe9eWwm+TR1bkcoE35AeeeiQsLXeGfOy1HpSnbmpCtg/aqU9uEub6QV8CVT1t+Mbzl4Fe7vY84YMOiG57GTKAp/dlNPxGd6pHHMvjwq03HdR7QoRm/PUfJiR8iUgkLuFEh6LZyKftihqDf+e3+HAYKY7BCLYNTgD25BBb0dWbj6gHOxZddZdNa64ukn4osoJKhTX9BkNfOMXVpAmLL+BmERAm9AjfamMdyAzEiyGTfOaHKaEBK5i24QlT7rW+cizgMspDaMsxszpS4kNDDPv2d5CMLBP3Lbzu2lGHF0BuZi8nzcrL8shZoTW2TJioO9Kz7FVFwf7SNwftUbRIqXakkwf33QSpAfRi9GyDchsUCeBxtRLdiQLbHb7hDpCVH+VTrLflGhh4qUTNC+Xerrzkhv0JqAcDQMzVo84OY=
+    on_success: always
+    on_failure: always

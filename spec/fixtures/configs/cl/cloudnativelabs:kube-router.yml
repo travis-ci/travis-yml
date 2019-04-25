@@ -1,0 +1,33 @@
+services:
+  - docker
+
+language: go
+go:
+  - 1.10.8
+
+branches:
+  only: 
+    - master
+    - /^bzub-.*$/
+    - /^v\d+\.\d+(\.\d+)?(-\S*)?$/
+    - /^PR\d*$/
+
+env:
+  global:
+    - REPO=cloudnativelabs/kube-router
+    - REPO_PATH=$HOME/gopath/src/github.com/$REPO
+    - GIT_BRANCH=$TRAVIS_BRANCH
+
+script:
+  - build/travis-test.sh
+  # All successfully built commits get an image placed in the kube-router-git
+  # image repo and tagged with the commit hash.
+  - build/travis-deploy.sh
+
+# This fixes issues when a contributor uses their own Travis CI account to test
+# code/CI changes.
+before_install:
+  - mkdir -p $REPO_PATH
+  - rsync -az ${TRAVIS_BUILD_DIR}/ $REPO_PATH
+  - export TRAVIS_BUILD_DIR=$REPO_PATH
+  - cd $REPO_PATH

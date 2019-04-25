@@ -1,0 +1,19 @@
+language: php
+php:
+  - '7.1'
+notifications:
+  email:
+    on_success: never # default: change
+    on_failure: always # default: always
+  irc:
+    channel:
+      - "irc.tuxfamily.org#Libertempo"
+    on_success: never # default: change
+    on_failure: always # default: always
+script: make test
+
+before_script:
+    - make install-dep
+
+after_script:
+  - php vendor/bin/codacycoverage clover clover.xml

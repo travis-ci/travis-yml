@@ -1,0 +1,22 @@
+language: python
+
+matrix:
+  fast_finish: true
+  include:
+    - python: 3.6
+      dist: trusty
+      env: TOXENV=py36 NO_TESTS_OVER_WIRE=1
+      sudo: false
+    - python: 3.7
+      # from https://github.com/travis-ci/travis-ci/issues/9815#issuecomment-401756442
+      dist: xenial
+      env: TOXENV=py37 NO_TESTS_OVER_WIRE=1
+      sudo: true
+
+install:
+  - python -mpip install tox
+  - sudo rm /dev/random && sudo ln -s /dev/urandom /dev/random  # speed up gpg testing
+script:
+  - tox
+after_success:
+  - tox -e coveralls

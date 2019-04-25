@@ -1,0 +1,122 @@
+language: groovy
+sudo: required
+jdk:
+- openjdk8
+services:
+- docker
+- mysql
+branches:
+  only:
+  - master
+git:
+  submodules: false
+before_install:
+- curl -s http://get.sdkman.io | bash
+- echo sdkman_auto_answer=true > ~/.sdkman/etc/config
+- source "/home/travis/.sdkman/bin/sdkman-init.sh"
+- sdk install grails 2.5.6
+- sed -i 's/git@github.com:/https:\/\/github.com\//' .gitmodules
+- git submodule update --init --recursive
+- npm i -g npm@6.4.0
+addons:
+  chrome: stable
+env:
+  global:
+  - secure: Icz6PgvdiMvqiC1yMBknaSMqHvvthOo0hUrVCTGA8pWXaqofX5fKNVI8GL4kvRK7a+YpEZ7SCvHH1cgEfBx8jC+Wc0XjGfBZXH1C1gyo8X1keCcJQVRyhxXkrjaeOLF0Cas8m9MdgAqJlwDcAXkWh426kvpAbU1SbNkkSCX3Ksp6M43LVUEbtkdOCf0GxavfgsGL5S9fk7WUf7hU4+HqL/UbbM+XMTz9hgajI5zzyRPiFwMPLGohNfopLKZvRWL/2IDY4ldVEzRi8koxIYrhO68o5RJJsptw+Gfaf3mzmgDGP9jU/cWYxsrfWogtVGFOiB2nDA+opbDU79vwHCpP5dcZJUEDvgOMVA0aTRT6Mc6hXM07wiL9noJwrSqoudkXianDDJqCKja+myKNi4wVWpisZV0HfF3nWeiKoxBaQdlCc7UUadS4OYK30Xll/Z9Z3ebWWGRmdKRSeD+QmM4j8VMu/t624AX/Q0laAS7/6BKOjMaDUqm3Q7plNWTSQWRmVUFzaH0xRL1DPLIbz/8Z8D1IVOfnq6k2FYTtVnjKQdHH65ddtqZMwtsSJsS9fQRYOm3ly0avPvDNnNeEYEuhY5lF8Tiw1lwh+BHOhiQLAPi7dqTiV/I2ImgdFH6a8wr/KICSquaSRWzwWnod3Jstrz9WWQW+K9JKu4deIRUOEx4=
+  - secure: Ro0tLYzPfBquDume3DCVOBcwGQtnkDCsitIteCjoiA75epYyweTN4pdaVdmI+nM41mKlXhbo6MYPukOVlxC0DqERsbAbQH8LKuJi+Ylio27ueC8pC0eDS+HjBu0OYLRzNuuhYalHRjAIZFI67CD1CHwFmbws6mENfte5L0sWdieOfnAmM74/82+ZpAibCC1FlIu4qLJxmHSYmH8bC5ZmNTQ59yx2h2BmsXdpJ5b2AVnoevnY8fxSb7mYC98tfS9x979+CMth510v5MzQR4AhwhmnaBcm7wjDgyINVcCG3YSQIs9nhP+AOOi8p+WCibCHGwU9uCPiDBy9KZvNppG7Wpw2JhKVSKOQvZsaxy6tarPxXEFXwaZjLbFw4aUVTe/aPsiOq+LZCljlSNFHANwVpAFqpxtUip2nap9156XNueegWDsgHHkmvp17bHRgsbk+KXvNuD2ieCiuMBJPXSKjm/6oyYsqFc9sPo/0jficsQWkegPkbBZu13acniqRZHENN91SyIh/OfZJQ5hapd8eaPS68iBVseVjplMXbaoId2PMuLw9BF1RXkc/LXHP6mN3DzrILdlezcHzdd87zJseY9+GIgEnihqvhXa53LGEB3KHe22mX0zuw7pOpaxWE89N/mSQFVehh/nnU20lylsiWpXWHe/B9vjMlmk8FnBvjuI=
+jobs:
+  include:
+  - stage: Unit tests
+    env:
+    - BACKEND_END_TEST=true
+    script: "./travis_scripts/unit_test.sh"
+  - env:
+    - FRONT_END_TEST=true
+    script: "./travis_scripts/fe_unit_test.sh"
+  - stage: Integration tests
+    script: "travis_retry ./travis_scripts/integration_test.sh"
+  - stage: Build war Staging
+    script: "./travis_scripts/build_war.sh"
+    env:
+    - WS_URL="wss://ee-staging.streamr.com/api/v1/ws"
+    deploy:
+    - provider: s3
+      access_key_id: AKIAI3FGPGMK3EREJJTQ
+      secret_access_key:
+        secure: VHz9wZb/IuYsfVko6q5zUzkfg2Impn9wrhfWJB5KQtHu73eozlbd6okkwl324dwS6TwB/oo7PdVyQL4ugLGvGlgbN6T4z/5KwQ/roS/z6ycKHIspeFZiiU7TYPTboOwOhWhV0ze+FmQD/E8I49J6mTOkwW2Y0rHA5awMQHz5LSWsF5heTlo3NAeQO2ynPW+Ely6HNoSP39a/d84gUJ+VTlkIivoQr7QwEe0JWrpvncMVkGvTinH+2oWeLwAkRFD2e9tu8jr9f182JfA0m6SHCJaCTp0e+3Uv4BQZ2NM/xtMgjjBDBvCZG4ZbO06+U2NwPe2nI4IQBj/23NXdTn1D4O1/7xYzk1H/mSzOYNFe7ATpfp7fOanJI6TB0Hq+jY+xHrQcD66sPPJPg8qkf8TuDRpsQqWVbHxmfQT0L3pDFajwG18kwtJ3LBwynwDcsZeGpAWQLXKYvVRVGDbKb+sZBq/qJKjDc0lJ0C/Ml6MNbJS8OP8b68nP6/sJ/N3Hbb9MQu+xhei3FCCrWqarE7fgpWT+oTHjNEC1ceUUMV+2rEb5fskSwipchHVADrIAqtiUPvNiKMp4Iom306OfmljBR85pA238AHGy1X7DOfEM0hSg9FkWWxZI/4d2GL+wfk5bhVVwlnFUrd4azco5l7W172I97PhpMqcRnaHrzpvGvj4=
+      bucket: eu-west-1-stg-streamr-vault
+      upload-dir: engine-editor/releases
+      acl: private
+      region: eu-west-1
+      skip_cleanup: true
+      local_dir: build
+    - provider: codedeploy
+      access_key_id: AKIAI3FGPGMK3EREJJTQ
+      secret_access_key:
+        secure: VHz9wZb/IuYsfVko6q5zUzkfg2Impn9wrhfWJB5KQtHu73eozlbd6okkwl324dwS6TwB/oo7PdVyQL4ugLGvGlgbN6T4z/5KwQ/roS/z6ycKHIspeFZiiU7TYPTboOwOhWhV0ze+FmQD/E8I49J6mTOkwW2Y0rHA5awMQHz5LSWsF5heTlo3NAeQO2ynPW+Ely6HNoSP39a/d84gUJ+VTlkIivoQr7QwEe0JWrpvncMVkGvTinH+2oWeLwAkRFD2e9tu8jr9f182JfA0m6SHCJaCTp0e+3Uv4BQZ2NM/xtMgjjBDBvCZG4ZbO06+U2NwPe2nI4IQBj/23NXdTn1D4O1/7xYzk1H/mSzOYNFe7ATpfp7fOanJI6TB0Hq+jY+xHrQcD66sPPJPg8qkf8TuDRpsQqWVbHxmfQT0L3pDFajwG18kwtJ3LBwynwDcsZeGpAWQLXKYvVRVGDbKb+sZBq/qJKjDc0lJ0C/Ml6MNbJS8OP8b68nP6/sJ/N3Hbb9MQu+xhei3FCCrWqarE7fgpWT+oTHjNEC1ceUUMV+2rEb5fskSwipchHVADrIAqtiUPvNiKMp4Iom306OfmljBR85pA238AHGy1X7DOfEM0hSg9FkWWxZI/4d2GL+wfk5bhVVwlnFUrd4azco5l7W172I97PhpMqcRnaHrzpvGvj4=
+      bucket: eu-west-1-stg-streamr-vault
+      key: engine-editor/releases/ee.tar
+      application: eu-west-1-stg-ee-codedeploy
+      deployment_group: eu-west-1-stg-ee-deployment-group
+      region: eu-west-1
+    if: NOT type IN (pull_request)
+  - stage: Build war Lisboa
+    script: "./travis_scripts/build_war.sh"
+    env:
+    - WS_URL="wss://ee-lisboa.streamr.com/api/v1/ws"
+    deploy:
+    - provider: s3
+      access_key_id: AKIAJBAGP3WA5UXQ3AZQ
+      secret_access_key:
+        secure: h4tMVVTqRfYz8B4mNX6PWknLHiNdUeXaNTJQ87ZJfEgtfHUQBkOjLvar93HLlsrbDOr49K9c1evYK2nyYtaNiW9Q0TCUySJZNiPlgM5DdKyPLdMN4XrUfCvmP0BIxeaDollfnbtGkvvTyUpaoJvsqyhmoAkAEyHJWJ+SfRYcg4ktvrQJQY0yDiuHpAdduAZDbV4qbwhFZc3VMauCP5dPEwHARwLK3QklTwkKVOZjE1rwvWlZPGus4JQ+Eo3wAXdobeDzxZTOK9IxL9bJKRZJpPXazo2/taN56G6iUVjJT3HUNudO3BC5fuTJm2TnnM7o/TKHMM2LZ1L0j/gsuT6n9oi9X6sl0UizcSFeyrRRO8N6875wsvcYtaL8KdjpERw19Bd4ZNHXVZHFkNhHTnUA6HjOB57ic4TT8lODs2kUgUeqNFn7rvSdwPNm8cbnBSbFRJMiDi5ofbKhdu5qAxZ3fx8SsuciZaXCflNzmoPKqRUSgHhc17WAi65wPdPufCuFjB01BcayN66QmRApdeAcKF8dkvKQF2/IY/RBhw7LQ5mfvGpWDLiF/NnCkPxX19LBHx92jSYlfuy1BLCs2OWXs5YQLrISjuiDlHm7IvN7KGLNaCtCxyxXxJCVvzOxpLpdQF/hAvgV6BGu5AB+lS2GNg3vnx8vAZaMpV2NTWc1xL0=
+      bucket: eu-west-1-lx-streamr-vault
+      upload-dir: engine-editor/releases
+      acl: private
+      region: eu-west-1
+      skip_cleanup: true
+      local_dir: build
+    - provider: codedeploy
+      access_key_id: AKIAJBAGP3WA5UXQ3AZQ
+      secret_access_key:
+        secure: h4tMVVTqRfYz8B4mNX6PWknLHiNdUeXaNTJQ87ZJfEgtfHUQBkOjLvar93HLlsrbDOr49K9c1evYK2nyYtaNiW9Q0TCUySJZNiPlgM5DdKyPLdMN4XrUfCvmP0BIxeaDollfnbtGkvvTyUpaoJvsqyhmoAkAEyHJWJ+SfRYcg4ktvrQJQY0yDiuHpAdduAZDbV4qbwhFZc3VMauCP5dPEwHARwLK3QklTwkKVOZjE1rwvWlZPGus4JQ+Eo3wAXdobeDzxZTOK9IxL9bJKRZJpPXazo2/taN56G6iUVjJT3HUNudO3BC5fuTJm2TnnM7o/TKHMM2LZ1L0j/gsuT6n9oi9X6sl0UizcSFeyrRRO8N6875wsvcYtaL8KdjpERw19Bd4ZNHXVZHFkNhHTnUA6HjOB57ic4TT8lODs2kUgUeqNFn7rvSdwPNm8cbnBSbFRJMiDi5ofbKhdu5qAxZ3fx8SsuciZaXCflNzmoPKqRUSgHhc17WAi65wPdPufCuFjB01BcayN66QmRApdeAcKF8dkvKQF2/IY/RBhw7LQ5mfvGpWDLiF/NnCkPxX19LBHx92jSYlfuy1BLCs2OWXs5YQLrISjuiDlHm7IvN7KGLNaCtCxyxXxJCVvzOxpLpdQF/hAvgV6BGu5AB+lS2GNg3vnx8vAZaMpV2NTWc1xL0=
+      bucket: eu-west-1-lx-streamr-vault
+      key: engine-editor/releases/ee.tar
+      application: eu-west-1-lx-ee-codedeploy
+      deployment_group: eu-west-1-lx-ee-deployment-group
+      region: eu-west-1
+    if: NOT type IN (pull_request)
+  - stage: Build docker dev
+    env:
+    - OWNER=streamr
+    - IMAGE_NAME=engine-and-editor
+    - TAG=dev
+    script:
+    - grails clean
+    - npm install
+    - grails test war
+    - docker build -f Dockerfile.dev -t $OWNER/$IMAGE_NAME:$TAG .
+    deploy:
+    - provider: script
+      script: bash travis_scripts/deploy_docker.sh staging
+    if: NOT type IN (pull_request)
+  - stage: Build docker Staging
+    env:
+    - OWNER=streamr
+    - IMAGE_NAME=engine-and-editor
+    - TAG=stg
+    script:
+    - grails clean
+    - npm install
+    - grails war
+    - docker build -f Dockerfile.stg -t $OWNER/$IMAGE_NAME:$TAG .
+    deploy:
+    - provider: script
+      script: bash travis_scripts/deploy_docker.sh staging
+    if: NOT type IN (pull_request)
+after_failure: "./travis-after-failure.sh"
+notifications:
+  slack:
+    secure: rX8I0YHsgA0mvjlKhQ+69ZsO8mww0xYV/wc2VolQaBXIZ5Jcj4A82cLRAAyhoJxEP7tZUFhVBMkwmMSHnL4AvGG5JREialedQltAww/0/kTACxCc62/bxnbV+YDapxP4VIpOdL+/La+gWt4FsoW6oKavwMkNgPuNE65+IGK3ay2+G+BTfjldWkBLcBa8MAsKXp3XQdt04eyh3b3HBUk04rgotIPB+ndSW97NUTdj8LifiKFYV8n5c5LOLRWTgP68t1ktjPCWvjHzjwWRlSnxRcdXkj870mjCdH/l8WI93YzZE4g2auUjWFV8MzbGfObnCQ9McaoVwhiUt4IjpI51Iuc0qUwpoIfMk0J3BobZWcehXFilQknOTF9y5LqRplHND5Om3Dw8DdKWCzZVFw8S3dd5oBgKgxuOt01KD4lpQ/5nJZzmykrKMNWa7NkbYw6pLHVSaIMu4WVycZLnnyz4Rt/LZIdq7IH38QT0DDR9aG7CMgomnzAvgfSkte7lMdfeOo+uMsu2JA0MXOd1BYfEzwWCRh7QWhr5UgZXPX9sFReal/TtEODh71ZMI945iQVDNaEh3ypuBdraiFSR7SZbLTdvZEVbzCC2kS6JKBdUsUVTroWSyIl+gJUsXoyZ88c1YmFBMdj6jDSyzz4Ig4uBRwMEcx0aqtwDnQrvEtNhzKY=
+  on_success: change
+  on_failure: always
+  on_pull_requests: false

@@ -1,0 +1,59 @@
+language: python
+
+env:
+  global:
+    # travis encrypt COVERALLS_REPO_TOKEN=...
+    secure: "PDkXXb0fWo5Dt5ohs4frc+bIRGyIkf/ggzq2+fInopn8rMjTn5WHR2bK3Gd0fagpLH48T+kwGcI+W9Oww0FHAGkALoB/8H7xAlGwl8M1twGrZqFgRGK/Jx272BtycsNrxFSmIuHpyf4diSfyl4Kh9GpNfz+QBAyKbXqZJO6QsBi08+jRjDWHNtpKBvsvehee8CvcxU9RFPtngpSMvhHNG6CZWSfx9t0JMLyryatZ9cRkrrYA5zLNFc0C2kcMsQ8ErS1DelBHzpAIxLUeasvSQ9mbwTgFlWlqTdKpE/k4WjL511TpFKXh2wzDVC12R6H/hxMn1PoklNzZUeLY1eJHEP3iMQwdwZceuPPh1ufc87Pr6WTaPzHIsPXMzt9bBgrPZB8Z/0ewTvD6sKOiJrih0w5B3cg7v5UFkzOt3OXQMk1a9k5GdLbeZhn9Rza4iG3MalxoSh5I4Joa2iDLvIlZ7XBM2B+D0fsyawT0LNIg8PF7eLjxOaMNz1cWqc3qke1HqfX6UN8iGH4t9Z8mxP4Qvp+YAcLwfxre7kx/Rfc77FEE79Ze05VFvPq1CFs6z7ap5h8CsTdWAjR28KsSd5UxtOos33OxbVu7QbqrCC/9NrPjmxdtchlx01+zRGZVpl3YkOQTNLumAOBDOo8G+zPaLz0UuPolr9gzPv2XysG9FnQ="
+
+addons:
+  postgresql: "9.2"
+
+python:
+  - "3.6"
+  - "2.7"
+
+# command to install dependencies
+install: "pip install -Ue .[test,build]"
+
+before_script:
+- sh -c "psql -c 'create database testdb' -U postgres"
+- sh -c 'psql -d testdb -c "CREATE EXTENSION btree_gist;" -U postgres'
+- psql --version
+
+# command to run tests, e.g. python setup.py test
+script: DB_URL=postgres://postgres@localhost/testdb coverage run -m pytest
+
+after_success:
+  - "COVERALLS_PARALLEL=true coveralls"
+
+jobs:
+  include:
+
+    - stage: coverage
+      if: type != cron
+      python: 3.6
+      after_success: skip
+
+      install: "pip install -U coveralls-check"
+      script: "coveralls-check $TRAVIS_COMMIT --parallel-build-number $TRAVIS_BUILD_NUMBER --repo-token $COVERALLS_REPO_TOKEN"
+
+    - stage: release
+      if: tag IS present
+      python: 3.6
+      script: skip
+      # work around https://github.com/travis-ci/travis-ci/issues/8337:
+      after_success: true
+
+      install:
+      - "pip install --upgrade pip setuptools"
+      - "pip install -Ue .[build]"
+      deploy:
+        provider: pypi
+        user: chrisw
+        password:
+          secure: RAgcCDH/F3zIMBaENqcWlk1Y9npIMVjHgCxY2qL7C1qRCgzyAfoHI+pIOvnHqVRXG1Cz4+MaYTo+B4Iec5HxUF9gjWl9XOtrNVUCzmaCCCyrLq24esQ2IJ5r5y2jJCt/nOQdh9OFTWr0IxPzYhOrm4/HZwP4IZ+WmnNnWhWs7TT/mClzuCOd6tp1YgCnahp5ea2T2hY3zrBiCUtCtpY31kCXoane/7jx69xzdNMmCjjt95BZLYLL0Ync3K4dDi0aDb9/2Ca/gRXx1KPycv9cymkE9Z4DjdKCY/EklciiObJfIibRxvV22gVJPfKWIVnmtHchr0yo+EloQK0bhVKUGnLlHOMk2sJlpk9Ak4e0+gJegWae9bugqxpeif8HAa6J5DmK+EkfauzG5TK7UuKEkb6LTV+vP6wPpdex7abjfxv0VbXjVMblBa8XdYjfMHYFM8g90G7Y+6rZPAEGshRqnXhO+ccvskyCnOKkTihHdQd/m7M93aQJDVwv8zi0KSQXal6UsjkYtnqiflRzIPtGjLlVYxrpZdLUo7Hv5LP6LVnzgPYvbJMkwevypDrhVXuTlTiy9F+Rh9qqyaIAcpOkZInVytanJ+OMme/7jHaWzhq5OlFvGUCE61ArG/ctRyWSafp+bUrhyFfi6rieu2ByMaLsYdw7ncxybU7sf522WUA=
+        on:
+          tags: true
+          repo: Mortar/mortar_mixins
+        skip_cleanup: true
+        distributions: "sdist bdist_wheel"

@@ -1,0 +1,43 @@
+sudo: required
+dist: trusty
+
+language: ruby
+
+env:
+  - DB=postgres
+  - DB=mysql
+
+gemfile:
+  - gemfiles/spree_3_2.gemfile
+  - gemfiles/spree_3_5.gemfile
+  - gemfiles/spree_3_7.gemfile
+  - gemfiles/spree_master.gemfile
+
+script:
+  - bundle exec rake test_app
+  - bundle exec rake spec
+
+rvm:
+  - 2.5.1
+  - 2.4.4
+  - 2.3.3
+
+matrix:
+    allow_failures:
+          - gemfile: gemfiles/spree_master.gemfile
+
+addons:
+  apt:
+    packages:
+    - mysql-server-5.6
+    - mysql-client-core-5.6
+    - mysql-client-5.6
+  chrome: stable
+
+before_install:
+  - wget -N https://chromedriver.storage.googleapis.com/2.35/chromedriver_linux64.zip -P ~/
+  - unzip ~/chromedriver_linux64.zip -d ~/
+  - rm ~/chromedriver_linux64.zip
+  - sudo mv -f ~/chromedriver /usr/local/share/
+  - sudo chmod +x /usr/local/share/chromedriver
+  - sudo ln -s /usr/local/share/chromedriver /usr/local/bin/chromedriver

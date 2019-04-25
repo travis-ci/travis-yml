@@ -1,0 +1,56 @@
+dist: trusty
+sudo: false
+
+rvm: 2.4.2
+
+cache: bundler
+
+env:
+  global:
+  - COVERAGE=1
+
+services:
+  - memcached
+  - redis
+  - rabbitmq
+
+addons:
+  postgresql: 9.6
+
+before_install:
+  - bundle config https://gems.contribsys.com/ $BUNDLE_GEMS__CONTRIBSYS__COM
+
+before_script:
+  - createdb travis_test || true
+  - curl -fs https://raw.githubusercontent.com/travis-ci/travis-migrations/master/db/main/structure.sql | psql travis_test
+
+script:
+  - bundle exec rspec
+
+
+jobs:
+  include:
+    - stage: "testing time"
+    - stage: ":ship: it to Quay.io"
+      sudo: required
+      dist: trusty
+      ruby:
+      services:
+      addons:
+      before_install: echo "skipping"
+      install: echo "skipping"
+      before_script:
+        - curl -L https://github.com/docker/compose/releases/download/1.13.0/docker-compose-`uname -s`-`uname -m` > ./docker-compose
+        - sudo mv ./docker-compose /usr/local/bin/docker-compose
+        - sudo chmod +x /usr/local/bin/docker-compose
+      script: ./script/docker-build-and-push
+
+    - stage: "trigger automated build on Docker Hub"
+      ruby:
+      services:
+      addons:
+      before_install: echo "skipping"
+      before_script: echo "skipping"
+      install: echo "skipping"
+      script: script/send-docker-hub-trigger
+      if: (NOT type IN (pull_request)) AND (branch = master)

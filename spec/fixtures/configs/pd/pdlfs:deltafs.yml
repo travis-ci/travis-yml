@@ -1,0 +1,149 @@
+#
+# Copyright (c) 2019 Carnegie Mellon University,
+# Copyright (c) 2019 Triad National Security, LLC, as operator of
+#     Los Alamos National Laboratory.
+#
+# All rights reserved.
+#
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file. See the AUTHORS file for names of contributors.
+#
+
+#
+# .travis.yml  travis ci config for pdlfs-common
+# 07-Oct-2016  chuck@ece.cmu.edu
+#
+
+# disable sudo, causes us to build in a container environment
+sudo: false
+
+# set OS dist we want, rather than taking the default
+dist: trusty
+
+# setup for a c/c++ based project
+language: cpp
+
+# additional packages.  gmp/mpfr/mpc are for building gcc.
+addons:
+  apt:
+    packages:
+      - automake
+      - libboost-dev
+      - libgmp-dev
+      - libmpfr-dev
+      - libmpc-dev
+
+# cache directory persists between runs (prebuild stuff here, like gcc, cmake, mpich)
+cache:
+  directories:
+    - $HOME/cache
+
+# define build matrix using os/compiler/env
+os:
+- linux
+- osx
+
+compiler:
+- clang
+- gcc
+
+env:
+  global:
+    - PKG=deltafs
+    - XCMAKE=${HOME}/cache/bin/cmake
+  matrix:
+    - BUILD=Release SANI=Off
+    - BUILD=Debug SANI=Off
+    - BUILD=Debug SANI=Address
+
+# the default matrix is (os) x (compiler) x (env-matrix), but we can exclude
+# rows here if we want to
+# e.g.
+
+matrix:
+  exclude:
+   - os: osx
+     env: BUILD=Debug SANI=Address
+   - os: linux
+     env: BUILD=Debug SANI=Address
+     compiler: clang
+
+#
+# git related config (restrict to master and zap submodules)
+branches:
+  only:
+    - master
+
+git:
+  submodules: false
+
+#
+# note: before_install, install, before_script, script all get combined
+# into one shell script that runs on the travis node.  e.g. changing
+# an environment variable in before_install will impact the install
+# and everything else that comes after it.
+#
+
+# before_install: add all depends, including the ones that go in the cache
+before_install:
+  - echo "Before install"
+  - echo "Home directory is ${HOME}"
+  - echo "Contents of ${HOME}"
+  - ls -a ${HOME}
+  - export PATH=${HOME}/cache/bin:${PATH}
+  - >
+    if [ x${TRAVIS_OS_NAME} = xlinux -a x${CC} = xgcc ]; then
+        echo "Adding extra envs for custom gcc environment"
+        export PATH=${HOME}/cache/gcc/bin:${PATH}
+        gcclib=${HOME}/cache/gcc
+        export LD_LIBRARY_PATH=${gcclib}/lib:${gcclib}/lib64:${LD_LIBRARY_PATH}
+    fi
+  - echo "Environment"
+  - printenv
+  - export CACHE_INITSRC=ftp://ftp:ftp@ftp.pdl.cmu.edu/pub/pdlfs
+  - ./external/pdlfs-common/cmake/travis-checkcache.sh
+  - echo contents of cache
+  - ls ${HOME}/cache
+  - ls ${HOME}/cache/bin
+  - ls ${HOME}/cache/lib*
+  - echo cmake version after cache
+  - ${XCMAKE} --version
+  - echo compiler version after cache
+  - which ${CC}
+  - ${CC} --version
+
+# install: build our code and do a test install
+install:
+  - echo "Install"
+  - echo "PATH is ${PATH}"
+  - ${XCMAKE} --version
+  - ${CC} --version
+  - mkdir -p build
+  - cd build
+  - >
+    ${XCMAKE} -DCMAKE_INSTALL_PREFIX=/tmp/${PKG} \
+              -DCMAKE_BUILD_TYPE=${BUILD} \
+              -DCMAKE_PREFIX_PATH=${HOME}/cache \
+              -DBUILD_SHARED_LIBS=ON \
+              -DBUILD_TESTS=ON \
+              -DPDLFS_GFLAGS=ON \
+              -DPDLFS_GLOG=ON \
+              -DPDLFS_MARGO_RPC=OFF \
+              -DPDLFS_MERCURY_RPC=ON \
+              -DPDLFS_RADOS=OFF \
+              -DPDLFS_SNAPPY=ON \
+              -DDELTAFS_COMMON_INTREE=ON \
+              ..
+  - make && make install
+  - echo "Installed into /tmp/${PKG}"
+  - ls /tmp/${PKG}/lib
+
+# before_script: anything to do before starting test
+before_script:
+  - echo "Before Script"
+  - echo "PATH is ${PATH}"
+  - pwd
+
+# script: run the test itself
+script:
+  - ctest -VV --output-on-failure

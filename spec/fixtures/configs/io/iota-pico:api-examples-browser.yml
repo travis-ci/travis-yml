@@ -1,0 +1,26 @@
+language: node_js
+node_js:
+  - 10
+install:
+  - cd ../../
+  - git clone --branch=$TRAVIS_BRANCH https://github.com/iota-pico/core.git iota-pico/core
+  - cd iota-pico/core
+  - npm link
+  - cd ../../
+  - git clone --branch=$TRAVIS_BRANCH https://github.com/iota-pico/api.git iota-pico/api
+  - cd iota-pico/api
+  - npm link @iota-pico/core
+  - npm link
+  - cd ../../
+  - git clone --branch=$TRAVIS_BRANCH https://github.com/iota-pico/pal-browser.git iota-pico/pal-browser
+  - cd iota-pico/pal-browser
+  - npm link @iota-pico/core
+  - npm link
+  - cd ../api-examples-browser
+  - npm link @iota-pico/core @iota-pico/api @iota-pico/pal-browser
+  - npm install
+script:
+  - npm run dist || travis_terminate 1
+cache:
+  directories:
+    - "node_modules"

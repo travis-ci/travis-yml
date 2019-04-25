@@ -1,0 +1,89 @@
+sudo: required
+services: docker
+dist: xenial
+group: edge
+language: ruby
+addons:
+    apt:
+        sources:
+            - sourceline: "deb http://deb.debian.org/debian sid main contrib non-free"
+              key_url: "https://ftp-master.debian.org/keys/archive-key-9.asc"
+        packages:
+            - debootstrap
+branches:
+    only:
+        - master
+        - develop
+env:
+    global:
+        # Docker Hub username ${DH_USERNAME}
+        - DH_USERNAME="luisalejandro"
+        # Docker Hub password ${DH_PASSWORD}
+        - secure: "gOxNCewy0xuQS3SbOkk++sqT5NCFMCEAP5HNBIsJFcle0Qbkv7XF+hKwn+oGbWc+Ti1SgXi251O0hTkXwWhcQOMUH6ZzVwQ2wFhKyUP9bIqORDm03+8G6ZPfw8NP70N/MfihmuWTgKl79kZ2S5mYPdig0RlcENwKq95Rw4wtT45BLGS2Tj7X9Hch2F1sqhEOKgoLomQ5Qs1KezLC/rRwNxocW41WiGYUdgvaSmLeaITcliYIOqwsXc381IDiVIrrGc9MI/LCrxuDiliaFvK+t4sv7Fz7ogCn2d7WNGZQsPi6xNImUco6pCiSmQ3CFTe1il9mcZXHVDJ4dMmVqHgH1s2WWr7Ygd901Dnq3awusI2TELIQk2whKxRExYfz0wTae6dE1KOZHsHMAY1CotUEtyja9D8dnGfqFa+qDiagAP+c7FmxImDiaTrqZ0ez6XlKnmw6RefElvlFgbrtNtW0ZsX7c1futtiW8PArmud6ikuvR7lhiKMMeVnhktbniEqkxX50DplTODyq9DZPXBMHIkPSqe9uNfKu+bOhKjfkfyFtQ/uIFLq2tdtgtXbIn6UOq+ncNFEhJkR0gvLXrZ5Wj0SHofbdU9vFV1LB37ecA+H0j5hE477lB7qNRb41lTilS7D87wW+TWCAN/BRXvnMRUrvAiX0F0CIeowHTcnllKs="
+    matrix:
+        - DOCKER_IMAGE_NAME="dockershelf/debian:wheezy" DOCKER_IMAGE_EXTRA_TAGS="dockershelf/debian:oldoldstable"
+        - DOCKER_IMAGE_NAME="dockershelf/debian:jessie" DOCKER_IMAGE_EXTRA_TAGS="dockershelf/debian:oldstable"
+        - DOCKER_IMAGE_NAME="dockershelf/debian:stretch" DOCKER_IMAGE_EXTRA_TAGS="dockershelf/debian:stable"
+        - DOCKER_IMAGE_NAME="dockershelf/debian:buster" DOCKER_IMAGE_EXTRA_TAGS="dockershelf/debian:testing"
+        - DOCKER_IMAGE_NAME="dockershelf/debian:sid" DOCKER_IMAGE_EXTRA_TAGS="dockershelf/debian:unstable dockershelf/debian:latest"
+        - DOCKER_IMAGE_NAME="dockershelf/latex:basic" DOCKER_IMAGE_EXTRA_TAGS="dockershelf/latex:latest"
+        - DOCKER_IMAGE_NAME="dockershelf/latex:full"
+        - DOCKER_IMAGE_NAME="dockershelf/python:2.6"
+        - DOCKER_IMAGE_NAME="dockershelf/python:2.7" DOCKER_IMAGE_EXTRA_TAGS="dockershelf/python:2"
+        - DOCKER_IMAGE_NAME="dockershelf/python:3.2"
+        - DOCKER_IMAGE_NAME="dockershelf/python:3.4"
+        - DOCKER_IMAGE_NAME="dockershelf/python:3.5" DOCKER_IMAGE_EXTRA_TAGS="dockershelf/python:3"
+        - DOCKER_IMAGE_NAME="dockershelf/python:3.6"
+        - DOCKER_IMAGE_NAME="dockershelf/python:3.7" DOCKER_IMAGE_EXTRA_TAGS="dockershelf/python:latest"
+        - DOCKER_IMAGE_NAME="dockershelf/ruby:1.8"
+        - DOCKER_IMAGE_NAME="dockershelf/ruby:1.9.1"
+        - DOCKER_IMAGE_NAME="dockershelf/ruby:2.1"
+        - DOCKER_IMAGE_NAME="dockershelf/ruby:2.3"
+        - DOCKER_IMAGE_NAME="dockershelf/ruby:2.5" DOCKER_IMAGE_EXTRA_TAGS="dockershelf/ruby:latest"
+        - DOCKER_IMAGE_NAME="dockershelf/node:6"
+        - DOCKER_IMAGE_NAME="dockershelf/node:7"
+        - DOCKER_IMAGE_NAME="dockershelf/node:8"
+        - DOCKER_IMAGE_NAME="dockershelf/node:9"
+        - DOCKER_IMAGE_NAME="dockershelf/node:10"
+        - DOCKER_IMAGE_NAME="dockershelf/node:11" DOCKER_IMAGE_EXTRA_TAGS="dockershelf/node:latest"
+        - DOCKER_IMAGE_NAME="dockershelf/mongo:3.4"
+        - DOCKER_IMAGE_NAME="dockershelf/mongo:3.6"
+        - DOCKER_IMAGE_NAME="dockershelf/mongo:4.0" DOCKER_IMAGE_EXTRA_TAGS="dockershelf/mongo:latest"
+        - DOCKER_IMAGE_NAME="dockershelf/postgres:9.3"
+        - DOCKER_IMAGE_NAME="dockershelf/postgres:9.4"
+        - DOCKER_IMAGE_NAME="dockershelf/postgres:9.5"
+        - DOCKER_IMAGE_NAME="dockershelf/postgres:9.6"
+        - DOCKER_IMAGE_NAME="dockershelf/postgres:10"
+        - DOCKER_IMAGE_NAME="dockershelf/postgres:11" DOCKER_IMAGE_EXTRA_TAGS="dockershelf/postgres:latest"
+        - DOCKER_IMAGE_NAME="dockershelf/odoo:10.0"
+        - DOCKER_IMAGE_NAME="dockershelf/odoo:11.0"
+        - DOCKER_IMAGE_NAME="dockershelf/odoo:12.0" DOCKER_IMAGE_EXTRA_TAGS="dockershelf/odoo:latest"
+install:
+    - gem install docker-api serverspec
+before_script:
+    - |
+        if [ "${TRAVIS_BRANCH}" == "develop" ]; then
+            DOCKER_IMAGE_TARGET="${DOCKER_IMAGE_NAME##dockershelf/}"
+            sed -i -r 's|FROM\s*(.*?)|FROM \1-dev|g' "${DOCKER_IMAGE_TARGET/://}/Dockerfile"
+            sed -i -r 's|FROM scratch-dev|FROM scratch|g' "${DOCKER_IMAGE_TARGET/://}/Dockerfile"
+        fi
+    - bash build-image.sh ${DOCKER_IMAGE_NAME}
+script:
+    - bash test-image.sh ${DOCKER_IMAGE_NAME}
+after_success:
+    - |
+        if [ "${TRAVIS_BRANCH}" == "develop" ]; then
+            docker tag ${DOCKER_IMAGE_NAME} ${DOCKER_IMAGE_NAME}-dev
+            DOCKER_IMAGE_NAME="${DOCKER_IMAGE_NAME}-dev"
+        fi
+    - bash push-image.sh ${DOCKER_IMAGE_NAME} ${DH_USERNAME} ${DH_PASSWORD}
+    - |
+        if [ -n "${DOCKER_IMAGE_EXTRA_TAGS}" ]; then
+            for EXTRA_TAG in ${DOCKER_IMAGE_EXTRA_TAGS}; do
+                if [ "${TRAVIS_BRANCH}" == "develop" ]; then
+                    EXTRA_TAG="${EXTRA_TAG}-dev"
+                fi
+                docker tag ${DOCKER_IMAGE_NAME} ${EXTRA_TAG}
+                bash push-image.sh ${EXTRA_TAG} ${DH_USERNAME} ${DH_PASSWORD}
+            done
+        fi

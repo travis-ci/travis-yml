@@ -1,0 +1,109 @@
+language: generic
+dist: xenial
+cache:
+  directories:
+  - $HOME/.cache/pip
+before_cache:
+  - rm -f $HOME/.cache/pip/log/debug.log
+
+
+matrix:
+  include:
+  - os: linux
+    env:
+      - PYTHON=3.6
+  - os: linux
+    env:
+      - PYTHON=3.7
+  - os: osx
+    env:
+      - PYTHON=3.6
+  - os: osx
+    env:
+      - PYTHON=3.7
+  fast_finish: true
+
+services:
+- postgresql
+
+addons:
+  postgresql: '10'
+
+notifications:
+  email: false
+
+before_install:
+- if [ "$TRAVIS_OS_NAME" = "linux" ]; then OS=Linux-x86_64; else OS=MacOSX-x86_64; fi
+- if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo apt-get install -q -y libmecab-dev swig mecab unidic-mecab; fi
+- if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew update;fi
+- if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew install swig mecab mecab-unidic; fi
+- if [ "$TRAVIS_OS_NAME" = "osx" ]; then sed -i -e "s/ipadic/unidic/" /usr/local/etc/mecabrc; fi
+- wget -O miniconda.sh https://repo.continuum.io/miniconda/Miniconda3-latest-$OS.sh
+- bash miniconda.sh -b -p $HOME/miniconda
+- export PATH="$HOME/miniconda/bin:$PATH"
+- conda config --set always_yes yes --set changeps1 no
+- conda config --add channels conda-forge
+- conda update -q conda
+- conda install -q conda-build
+- conda install -q poppler
+- if [ -n "$PYTHON" ]; then conda create -q -n test-environment python=${PYTHON}; fi
+- source activate test-environment
+- conda install -q pip
+# Start postgresql for osx
+- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then rm -rf /usr/local/var/postgres; fi
+- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then initdb /usr/local/var/postgres; fi
+- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then pg_ctl -D /usr/local/var/postgres start; sleep 5; fi
+- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then createuser -s postgres; fi
+
+- pdfinfo -v
+- psql --version
+- python --version
+- pip --version
+- mecab -D || true
+
+# Install PyTorch for Linux with no CUDA support
+- |
+  if [ "$TRAVIS_OS_NAME" = "linux" ]; then
+    if [ "${PYTHON}" = "3.6" ]; then
+      pip install https://download.pytorch.org/whl/cpu/torch-1.0.1.post2-cp36-cp36m-linux_x86_64.whl
+    fi
+    if [ "${PYTHON}" = "3.7" ]; then
+      pip install https://download.pytorch.org/whl/cpu/torch-1.0.1.post2-cp37-cp37m-linux_x86_64.whl
+    fi
+  fi
+
+install:
+# Install fonduer dev deps and check code style
+- make -s dev_extra
+- make check
+- make docs
+- pip install -q coveralls
+- python -m spacy download en
+
+before_script:
+- psql -c 'create database parser_test;' -U postgres
+- psql -c 'create database e2e_test;' -U postgres
+- psql -c 'create database inc_test;' -U postgres
+- psql -c 'create database cand_test;' -U postgres
+- psql -c 'create database meta_test;' -U postgres
+- cd tests/
+- "./download_data.sh"
+- cd ..
+
+script:
+- travis_wait 50 coverage run --source=fonduer -m pytest tests
+
+after_success:
+- coveralls
+
+deploy:
+  provider: pypi
+  user: lukehsiao
+  password:
+    secure: ddkakQE29dAbKo362iFHA1kAzPe6GuMV+zP5GkwYsglYgIOY+iYnPWlnZPaxLOkJyGTASOqOVdtRMg9K67kfTBT7h0yBOozZy6rs595cLX7gNLsjKHbciEK1pyebh82wMmiifCqNfwyf/epOqVAPxV8rzzVRw/x9lVMzNZasIpLQ1yVQyGjnAvm/8BIMhTFfN7DbASWpUUFBZDwjqLtHP8HsJLYucd4y7Hle9FqJ+HA7QGS71D+FVbYu16QNG2iwqnKLjYA8xJbNmzDCYUWZW6De89nbddoGmCfqCFXQK+aALpHjpy/vt811313c6sZy97glJmqRsTo7Z/xxmytYpG6+2Tvid1O0BS3AZOOVYEd/JvW3SURWuxdD1eI6LlZL6oAjNraq7h8XbPhyFfAsBXyahfsMA2tLoHqsLP0jnpVqcMzjn8auWGg0qWhNMxMCkMc0SSVY6mqvpQbnj7ntA5JaweCG56BddYqeOiSGtHhK56sGsQw7+CN/2l4GRlgT0FLkRVJBimD2yd2elyJK9r2gePeaD9Ea/Y2xhEIdilTMDSttZMMkwGsZqpY6//KiGGzFfyV66lWJkY6I1btCwB6DaW86lbRFvuqyzDwKbqZUyLdPHiBmoOjtmAtZyaUKQbnffqiGw1w0nu9viR22iF7zQctQ84R/wTq03tiZfco=
+  distributions: sdist bdist_wheel
+  skip_cleanup: true
+  on:
+    tags: true
+    branch: master
+    condition: $TRAVIS_OS_NAME = "linux" && $PYTHON = "3.7"

@@ -1,0 +1,51 @@
+language: c
+sudo: false
+addons:
+  apt:
+    sources:
+    - ubuntu-toolchain-r-test
+
+install:
+  - bash -x devtools/travis-ci/install.sh
+  - export PYTHONUNBUFFERED=true
+  - export PATH=$HOME/miniconda/bin:$PATH
+
+script:
+  # Add conda channel
+  - conda config --add channels conda-forge 
+  # Build the recipe
+  - conda build devtools/conda-recipe
+
+env:
+  matrix:
+    - python=2.7  CONDA_PY=27
+    - python=3.5  CONDA_PY=35
+    - python=3.6  CONDA_PY=36 CONDA_NPY=114
+
+
+  global:
+    - ORGNAME="omnia" # the name of the organization
+    - PACKAGENAME="bhmm" # the name of your package
+    # encrypted BINSTAR_TOKEN for push of dev package to binstar
+    - secure: "dlmnPV822CrsiUT6pBnplScFKHE1ZPImZB6Ctz5mdRydWLJ00UisZER/d5RO3ik4RKHPn2giJ/t89ldtgQyHtLAx60+glvxoeydolyQQS00th6PjBC/Ey8e/ZkbxI/9OEXtJg+oCjOKxLezx0/Xj1IA+lp9DOjvl6stRFOJ8vQI5yiGbcUO41m7ykHeDu9gST9Wiej2jtVRc5oGr8sznq9zXcVM6AVq4tbSf10XdAJzMmNjU7D6hM/mknwIZUhyW2mb3AR39zmVmq+vMkmyHRtFUcTUjlPVAjuJKIPhT+nZcNfoNW+xxJ9aEGuVeV98vY6DnlZkWaR6LOGVbJMHZHeoIASpEcJnZKztvAHnjMMIbfF5yC6AFzjqGW49IZeaxgXkT1IJoLE8jWbR2PXZNZ0WaYOpsoTHXWOmq0LB5sHOH2r0GvzaA7J8226C3oO59NsRfB4DOK/isNnQWkynUkHxP0YzIEoGpwKSI9eV/jfWglCB9bcOdiHFsAUQEOtLGMzWH69zNlYVPvciIK//TLaDXCQV2FAaZe586AqpfQ9zsjXj8BugTZTwr1DsY0cFJ9kmrmek/KVhLiNn+hLRGBFAmehfeJoJvMuSTl0uvvcrTxMcwwQsVjq1YzQL0QXMe+LGqSPdNx5uf6DZd0VLqa9UBVKsMYdxezAi+bTUpT3w="
+
+after_success:
+  - echo "after_success"
+  - if [ "$TRAVIS_SECURE_ENV_VARS" == true ]; then source devtools/travis-ci/after_success.sh; fi
+
+deploy:
+  edge: true # testing bleeding edge git deployment code
+  provider: pypi
+  distributions: "sdist"
+  skip_cleanup: true
+# docs_dir is ignored by travis (despite the issue filed against this feature, maybe its not yet active?
+#  docs_dir: doc/build/html
+# TODO: security tokens are encrypted on repository base (reencrypt when moving repo to cmb organisation)
+  user:
+    secure: "Z6h333HK9R9b4vwYzk5N54IeMJ8vmd4V+vXRTLNnOCCqVkWcocWY9HBX2s9jk3TkSJbg9eL/EVzCv7HVGY1A80czNN160Vj3z5J51WEfHk4hhC7GDSXEU1CGRdp3j+79/WeaioOstq3y4Mxy6v1Afn3k7gAY7ui+yYbSEbRIG0A="
+  password:
+    secure: "F3I26Mx0vbiIrSf/MsE8OGNV4xr82Wx4AWItHcXEq+pwBreNyCg/KVQInJ90lSh2RmvGAMmzw6rQ4EFaHYrFuAekilM/4tkRBGF/pSrEG7KSL2ysyoJIqTRncJCs1USyNYWodmXjRTQjLyJKoZufpNZ4u6Da1pVQDZqbsL0LtZo="
+  on:
+    python: 2.7 # only upload docs and sdist for py27
+    tags: true
+    branches: master

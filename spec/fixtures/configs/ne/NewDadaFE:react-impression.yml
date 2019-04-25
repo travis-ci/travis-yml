@@ -1,0 +1,22 @@
+language: node_js
+node_js: lts/*
+sudo: false
+before_install:
+  - curl -o- -L https://yarnpkg.com/install.sh | bash
+  - export PATH=$HOME/.yarn/bin:$PATH
+  - yarn global add surge
+install:
+  - yarn install
+script:
+  - node scripts/build.js
+cache:
+  yarn: true
+after_success:
+  - node scripts/deploy.js
+deploy:
+  provider: pages
+  skip_cleanup: true
+  github-token: $GITHUB_TOKEN
+  on:
+    branch: master
+  local-dir: dist

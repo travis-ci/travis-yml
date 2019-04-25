@@ -1,0 +1,38 @@
+dist: trusty
+language: ruby
+cache:
+- bundler
+sudo: required
+rvm:
+- 2.5.1
+bundler_args: "--without production"
+addons:
+  postgresql: '9.6'
+  chrome: stable
+  firefox: latest
+env:
+  global:
+  - ARTIFACTS_AWS_REGION=us-east-1
+  - ARTIFACTS_S3_BUCKET=travis-ci-screenshots
+  - secure: CJKFy918mjHbn7oDpuhbhiVR1d2qT4ktu/mABcrLAdT31pcPO9RKExNw/fp3P3gkfcLB/kQhWQfdrknqlHWiQiJj2z2HlaJJLQDNelpKsKPOHRo0GAq0N/aBwEu6wDk+GQb2PjxeYHFaQ0uupzNiqAup6glWokCpPuUUV2eb6js=
+  - secure: AnnnXIFPy93JvGO+DuqSpYGPd9MZNSxwciYKTcCV6Yx5htJwZFU6adAak9UWvXr8vjtfwrHJD/VqViC6GII7toVCF9O9XEc6ooHVHsLGxfqvl0uOy+prgZS0F8bYW8n6EjFrWPfywdEoMn8PsZ/9iNxPFC2tH8vVKmJAq/FnxUo=
+  - secure: XPOKBecqK22Xz+hGvl/LVMs4POWweFMFzj0f2N3La8lJxmX5CJB3H9hC1RHjKFIdook4orxOe+6+Cvxeeez2goFXlaHIFsN0yMNbkg58owc4Lj7077IQi7lmVIioJ15olZS2tIitLKI7OhKXJSedj4Yt0AMDIBTiw5iG2v11BvQ=
+  - secure: xEuLhxIAOZANe5DNk8mRmxTm60/QAA6IG00rqdKKERChZ1L77ACD29viMw7pQ3wnDsU6bC+oCPdyNwFPbMA3wLqpKMuQBh5tKNJPs+wldgsX8AHMXRJXhQgsz0jzh/tvl26reK1nofRyPtVsq6Ev2ZBEglOHp4l+rk8MaGjQ17w=
+  matrix:
+  - BROWSER=chrome_headless SUITE=spec/
+  - BROWSER=firefox_headless SUITE=spec/features
+script:
+- RAILS_ENV=test bundle exec rake db:migrate --trace
+- bundle exec rake db:test:prepare
+- BROWSER=$BROWSER bundle exec rspec $SUITE
+before_install:
+- wget https://github.com/mozilla/geckodriver/releases/download/v0.21.0/geckodriver-v0.21.0-linux64.tar.gz
+- mkdir geckodriver
+- tar -xzf geckodriver-v0.21.0-linux64.tar.gz -C geckodriver
+- export PATH=$PATH:$PWD/geckodriver
+before_script:
+- psql -c 'create database travis_ci_test;' -U postgres
+- cp config/database.yml.travis config/database.yml
+- gem install travis-artifacts
+after_failure:
+- travis-artifacts upload --path tmp/capybara/

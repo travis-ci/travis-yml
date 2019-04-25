@@ -1,0 +1,47 @@
+dist: xenial
+language: python
+python:
+- '3.5'
+- '3.6'
+- '3.7'
+addons:
+  apt:
+    packages:
+    - libvoikko1
+    - voikko-fi
+    - libboost-program-options-dev
+    - libboost-python-dev
+    - zlib1g-dev
+cache: pip
+before_install:
+- export BOTO_CONFIG=/dev/null
+install:
+- pip install pipenv
+- pip install --upgrade pytest
+- pipenv install --dev --skip-lock
+- travis_wait 30 python -m nltk.downloader punkt
+# For Python 3.5, also install optional dependencies that were not specified in Pipfile
+# For other Python versions we will only run the tests that depend on pure Python modules
+# - fastText dependencies
+- if [[ $TRAVIS_PYTHON_VERSION == '3.5' ]]; then pip install fasttextmirror; fi
+# - voikko dependencies
+- if [[ $TRAVIS_PYTHON_VERSION == '3.5' ]]; then pip install voikko; fi
+# - vw dependencies
+- if [[ $TRAVIS_PYTHON_VERSION == '3.5' ]]; then sudo ln -sf /usr/lib/x86_64-linux-gnu/libboost_python-py35.a /usr/lib/x86_64-linux-gnu/libboost_python.a; fi
+- if [[ $TRAVIS_PYTHON_VERSION == '3.5' ]]; then sudo ln -sf /usr/lib/x86_64-linux-gnu/libboost_python-py35.so /usr/lib/x86_64-linux-gnu/libboost_python.so; fi
+- if [[ $TRAVIS_PYTHON_VERSION == '3.5' ]]; then pip install vowpalwabbit; fi
+script:
+- pytest --cov=./
+after_success:
+- codecov
+notifications:
+  slack: kansalliskirjasto:tyt7yhMrgqceJoKiSNt09nvV
+deploy:
+  provider: pypi
+  user: osma
+  password:
+    secure: b6uEmuk1zlKYC9+GKvf5YUx/+I9A7O2rJi172HpN3dOJCvWBoPtCINdSGxyFfRuhu39T/8UjB8ZmdLbw0bz+0/K02VJsbxXWkBFRS+YA3Go1GscydRXrbtxfKrRTWWE/7FG9HKlvaXFhcZLKGFu6dle0IfEY/P+sEzP1a+hWHwReO4KL37bsA9922mD2zeJW4D3GrGwkg8pOrMEDvSMEd4DhGLo6LjgBhr+ErbF7Ngk29bBgrVbWR+z0c6KkOa4uhoxl/7YJqypjJsFzJKGGMGxhhSeVpqrbVT2t8GZG/0GV3HUkHW3neMJWsy6sX8QBYlwH0nW/je4LUdAE70nB3H2zDRYcVburQZv/aX5246x+I8Ur/wlxnHM9LQ4ipc8RFgQVhNxWgQkbIt1K1EuaX/uf3shKowx8U0XIwUTuLdVTxQQIYEJ9RSF1V4dVBaImOtIteIEI26dFh1jg7VdWpTxY5eZ9bv1ahjhuFpp33YfTe7ylAweSNY+Mtb4ibIYAn/6aRoyOELrwLlrL8qli7I+qjwItlXCzv3pwWq2mTFdjMRD9j6K2HW22dwoEgZQ3/NqrriYp9L2pyubcHqSS71Xlg4bjt1zZzqG1hSXqMfEaxic+uFlLVtAcxpBm5LndxUGo3rMJu3Nh8hOHLP6tLdmylxgiYb+alB8twqwdQ20=
+  on:
+    tags: true
+  distributions: "sdist bdist_wheel"
+  skip_existing: true

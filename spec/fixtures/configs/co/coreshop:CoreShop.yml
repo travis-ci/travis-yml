@@ -1,0 +1,92 @@
+sudo: false
+language: php
+
+addons:
+    mariadb: '10.1'
+    hosts:
+        - pimcore-test.dev
+env:
+    global:
+        - PIMCORE_ENVIRONMENT=test
+        - PIMCORE_TEST_DB_DSN="mysql://root@localhost/coreshop_test"
+        - PIMCORE_VERSION="^5"
+        - CORESHOP_TEST=1
+        - CORESHOP_SUITE=application
+
+matrix:
+    include:
+        - sudo: required
+          php: 7.1
+          env:
+            - CORESHOP_SUITE=codestyle
+
+        - sudo: required
+          php: 7.2
+          env:
+            - CORESHOP_SUITE=stan
+            - PIMCORE_VERSION="^5.5"
+
+        - sudo: required
+          php: 7.2
+          env:
+            - CORESHOP_SUITE=stan
+
+        - sudo: required
+          php: 7.1
+          env:
+            - PIMCORE_VERSION="~5.4.0"
+
+        - sudo: required
+          php: 7.2
+          env:
+            - PIMCORE_VERSION="~5.4.0"
+
+        - sudo: required
+          php: 7.1
+          env:
+            - PIMCORE_VERSION="~5.5.0"
+
+        - sudo: required
+          php: 7.2
+          env:
+            - PIMCORE_VERSION="~5.5.0"
+
+        - sudo: required
+          php: 7.1
+          env:
+            - PIMCORE_VERSION="~5.6.0"
+
+        - sudo: required
+          php: 7.2
+          env:
+            - PIMCORE_VERSION="~5.6.0"
+
+        - sudo: required
+          php: 7.1
+          env:
+            - PIMCORE_VERSION="dev-master"
+
+        - sudo: required
+          php: 7.2
+          env:
+            - PIMCORE_VERSION="dev-master"
+    allow_failures:
+        - env:
+            - CORESHOP_SUITE=codestyle
+        - env:
+            - PIMCORE_VERSION="dev-master"
+    fast_finish: true
+
+cache:
+    directories:
+        - $HOME/.cache/composer
+
+install:
+    - etc/travis/install
+
+script:
+    - etc/travis/script
+
+notifications:
+    email:
+        - travis-ci@coreshop.org

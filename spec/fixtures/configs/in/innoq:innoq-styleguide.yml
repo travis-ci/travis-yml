@@ -1,0 +1,48 @@
+language: node_js
+cache: yarn
+node_js:
+- '11'
+before_install:
+- yarn global add greenkeeper-lockfile@1
+before_script: greenkeeper-lockfile-update
+script:
+- yarn test
+- yarn dist
+after_script: greenkeeper-lockfile-upload
+deploy:
+- provider: s3
+  access_key_id: AKIAI5OHN3ZFPEPRGZBA
+  secret_access_key:
+    secure: eI9CadfarqWXdZ3uCHjp1PHDaai17e3EyTO6KyTFjFv0z9K1EVSc+xsT43OWMQ5nLo55kqxQSRmhMxRm0QUOAy1l5Rm3QW7LU/G95I4HZ2ZbHaIiK+MxtYAMtnxjKvNdMIWbxuVu0BNJauaVMkQTrZVt1cYl+ahj8KDPWu+GSvlOAi2vAi49djbolujS5JVSW7fWpqFJgaqlyxcuJBAwIjRv3F9tRkTAPp32G2/5YQtFu85hkIaxmbf4CoU0laf+w4VneFaO8+RvdM/uwin17hDVSPEoNVde1dGk48du8B1OMjxRfxjuonKpI54pu9AjYORpZ1JVsTL4fsPU5kUK+toVBtY9ytf8NOJNve+7ung/LG8sgpcLGabbqB9aZbsJ/y5nPZfqTEqcpuoOrN3aSDVxG3d/L0g4MOOEs2ItCJBLtCRpD8f6buSVqlUZJx0mBY7xhLpvuRQV80F23qK60+Ypcl77idl+kdr1IPr20nCKn5zXADMPv894QZZj0jcNtQorhmooP6f/A/wcZwvXFljJZvW+DYeVTmHEnLWpjTjCamK+dLItnaufKi0CFLRYElxSIb81ma5vBX89sifv0MJZvLTRwWY+y0DprhHAeeGYSLrvgYYc7FJeaN9OHG19KvYKmsBt7x1Tm6W4TUwdGRoTsFZqcO0CrRZRsPz7DuQ=
+  bucket: innoq.style
+  skip_cleanup: true
+  acl: public_read
+  cache_control: max-age=600
+  default_text_charset: utf-8
+  region: eu-central-1
+  local_dir: dist/site
+- provider: npm
+  skip_cleanup: true
+  email: mail@robert-glaser.de
+  api_key:
+    secure: "ykPfB3n9FZiEMYX0nsEtAA02Qop2+PzB9nNvtqpyfO7syJbE+coA8d+FHcYkH1gLydZV688z3ZnLqT8L8lI9KuJG5Vb+/Lleiza4WiPzORpMf1Xkqdfo6PXuy3FsGWg56+U/5+E6z5OjVjcK6A0+o9jV64UGVQequTz3EFwXR/A/1qQeqeQb3YTTOx2wzbH83/wlBbx067Qmzn/8aEGqA66kZ+BR39TlBgTK/XCoiZbDKb8k/54dr2CbWJtW4/yqUfMW8rVLfQduRaIra15qIL5gsQ0Ksx9yx3+nfK89fNvRCBzf8eSqZtrSqjlHk1S27X7PqA2pRQYKtYdnnTnDtCDiBXC255v6bW2jAgwQCc3wy7vXcwEUF1/GOx1/g/kCGKky06jOuq/BZR0bblpF+pNKiLaDw/y/mbSHW6wD0+tSHG5Pqpe2MzOFod0Oxxt+okZ/DHv/kb8HYUx0oT9ggWHAVVszBM/soKy7+yHoiApJcfdPmwEbXZPlIZtz0BsDhrcAYVGQXbm82FYKbEp60YeV4Ij5ubldVML5LAqLBHopmcMVN/6OmxOrjszQaX0zbvQ6Lye1Or3a/vI3lsEo8+eiLXFUTcZpSwAbi/5qKJj+H0ZekhY/UnpYxcUXYJ0C1iNNPqo9/7NoJQChlDORkYGhRDdIdcJ+2+deYScBXlw="
+  on:
+    tags: true
+    repo: innoq/innoq-styleguide
+- provider: releases
+  skip_cleanup: true
+  api_key:
+    secure: WSUrEpJZ6TFUQxS2WglW7ys+aky1MRDVWxEc0f6dCFYfqqAxIxKjbYtLPK0I++9AvEX0x63bMXDZJQZHjm3CzJ/s3QsTmpdfHClAZEWx07UdAYWxxqifJhElc7ZUqnN3x1/08XR/HRvH+00+SDbWNPIAcrm2IK7HmaHTouNbN5qv+9ilnrTU3oosW2nIpWoAi2IRhFMGDR4qXmXBGzaTeGTlCfIwNc+tnPdlVaTsKAqkiFSoSii2ju3XuWoNqrARIdL9uPUgSi/2ef1KgNUoFIi8avPGAl3MBupYAzBF0LBRjuqiLRYgAISSzQicGBNIq+6LOoH9wnfnTgFKbOO18CKC+QyQ9YpvZI3fLYfK0Dk8+NHepb4z17u85qli2yrOsymR/FGzovPX4uG23YTIKwyRkeqh+ZmhONEADLcaiRGe278wsBIw9lKxKIhguysjkXIbIFVN5Tg7Jr2I5rRLaEmSDbZbPJWyx45hEghUUZonLHUJrMpsooDSFGfINB16foKk6j8tW/k1N0X4Ac+Nh0bQ7aELLmCFpjRT/v0S71QSye91Izkes49emEGwokMva7QGh4Ja872F1ZvxoLUZQOBv9qX4JnjXwkq4aJQnXPE21DdGfJKy0iFPUJHPmaw1Svhh02iWNGr31MOpYl852gYAzgjzqkeV448m8YHWa8E=
+  file: innoq-styleguide-$TRAVIS_TAG.zip
+  on:
+    tags: true
+notifications:
+  email: false
+  slack:
+    rooms:
+    - secure: gqcUUAv9Qtm0WNckZqdQqnQXeU7CsLjH1OxFRklj1bZ4qMXNM74YG6LnaEoZsBPUQdoIYq6t1olZhUlg568mtZJ/gGBD+TcVK1NGppcToE4R6Mk8jatqYwBskrtHUYnunmmOFCwkqi6r2y3KMmTzwI4QX8ZkWoJbL+i70517KIT/Ib+X87KhVD5IAzZhrkaCqmnCkOXNjJpHPfPG66/TQydJRNl/9GQ25uQ/2rSYB65Oo06uP4QFLrCkRofs5sR2+kHYnb6VzN3TeyTsXtXvIosdLB0lx3ct4phgN9bkiWOtOl+a10LVkCGXWXqhC6WsyE1fdC7+M5WAdaFEUMv9nChjTBRqlY/xHU5I68d7n+i9T8BfYkgA35BTurXf+zmldoTirp1X+G9Ofj1TgaPwH0UBdc3mkDtbfxJFY/ldT8uBsroIcAqeKCa1zbJHe3niKyI69fqNdE7SXKmbJQyh7vR7BwOPUk7A+4bOifg6xgOIwD0Y1AcxpFykJK4oJnRAqG0nu3jhK+YvQcE4z8gIjNMI5rq7c7qDfkTAjZLdwAiAyBd3l3kBthNCxVV9TeB1ClTHfKWVmIGhsEinLyJDd9YbXmhQqwpZWxQiFHfPol/Or5HOM85JDrO9lzKuFemBu9SKZ66Y712soNKJfPdquF7icIBNaiXF5d+ZnyFJCeE=
+    on_success: change
+    on_failure: always
+env:
+  global:
+    secure: bf1L+uVib5H1aRCuEfZewwLlej2OmzbiwZG7+RvVvT4VwYVew/8+LSFSu1CQmsLD52e/Rlo7njQ8Jr3QgjFlYhxbuu/00e/6hjO19g93GildlniXEdAXW/tmhHKiwmkX23ToFj6Lx+LinU0N+theN5nJ+zCEsGhhpi327XKYpOuUQb6iU1mlvRTYMqC9DsN0OHp4a0S4uknkOFzrmn4JpjofLSkdfHGAvhwct1NmdL4KE7SSEoawMLS77Ut3bdkF8xrGXfUTHdxWnOeOFF+Uov8wKogGEq9B5wroJeL+J1teb09KfQGZVvbRL/94XUO56w2/qItXnJCvuzKdQpkEXPAS6iLddjPZvXbW4iM86WMVL9Ush/E4pjSHEDums2JHx364zTGgoyzYtUXe5m2gtROG6xiJI1wLSx+fsx61XDIlLAtrehlt8Bj0lJcuDsZFjltIPnlFOPR/12RpSIlyZypbZ0/50cMM51ZA+6jZtVv4TAGz/oo7nfra/3Wc8upqzLGEFcF/A8luOYsjTJ6ZD/uBny17JOY3CO/dbSv+SnntVssDmiLH9sG0fBgBRjJxExYTxj6udOU2IhPCzKs8mW0HSS4Q2I3ybP0OnN/6II46N8SdLzeXxPJjQyIadwfprxAQEILsSdWMxLgkVYg9FW22+2ELDf+mwiHg2TOFOI8=

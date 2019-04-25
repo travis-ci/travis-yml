@@ -1,0 +1,33 @@
+language: ruby
+cache:
+  bundler: true
+  directories:
+  - tmp/parallel_runtime_log
+env:
+  global:
+    - DB_PORT=5433
+    - S3_PORT=9000
+    - CC_TEST_REPORTER_ID=adf7487514f01c0e5d3274c0f0351f946b792aadc1978f99ec099fd9a3a01b0d
+before_install:
+  - chmod +x ./bin/wait-for-it.sh
+before_script:
+  - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+  - chmod +x ./cc-test-reporter
+  - ./cc-test-reporter before-build
+  - ./bin/dev/docker-support-services up -d
+  - ./bin/wait-for-it.sh localhost:5433
+  - sleep 5
+  - ./bin/wait-for-it.sh localhost:5433
+  - ./bin/wait-for-it.sh localhost:9000
+  - bundle exec rake parallel:create parallel:migrate
+script:
+  - bundle exec rake parallel:spec
+  - TEST_LOCALE=cy bundle exec rake parallel:spec
+after_script:
+  - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
+addons:
+  chrome: stable
+  firefox: latest
+  postgresql: "9.6"
+services:
+  - postgresql

@@ -1,0 +1,51 @@
+language: python
+python:
+  # We don't actually use the Travis Python, but this keeps it organized.
+  - "2.7"
+  - "3.6"
+env:
+  global:
+    - COVERALLS_PARALLEL=true
+install:
+  # ensure that we have the full tag information available for version.py
+  - git fetch --unshallow --tags
+  - sudo apt-get update
+  # We do this conditionally because it saves us some downloading if the
+  # version is the same.
+  - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
+      wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O miniconda.sh;
+    else
+      wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
+    fi
+  - bash miniconda.sh -b -p $HOME/miniconda
+  - export PATH="$HOME/miniconda/bin:$PATH"
+  - hash -r
+  - conda config --set always_yes yes --set changeps1 no
+  - conda config --add channels conda-forge
+  - conda install -q conda
+  - conda update -q conda
+  # Useful for debugging any issues with conda
+  - conda info -a
+
+  # create environment and install dependencies
+  - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION pip coverage
+  - source activate test-environment
+  - conda install numpy scipy nose matplotlib astropy scikit-learn h5py coveralls aipy six pycodestyle pydocstyle
+  - pip install git+https://github.com/RadioAstronomySoftwareGroup/pyuvdata.git
+  - pip install git+https://github.com/HERA-Team/linsolve.git
+  - pip install git+https://github.com/HERA-Team/uvtools.git
+  - pip install git+https://github.com/HERA-Team/hera_cal.git
+  - conda list
+before_script:
+  - "export DISPLAY=:99.0"
+  - "sh -e /etc/init.d/xvfb start"
+  - sleep 3
+  - python -c "from pyuvdata import version; version.main()"
+script:
+  - nosetests hera_qm --nologcapture --with-coverage --cover-package=hera_qm
+  - pycodestyle */*.py hera_qm/tests/*.py --ignore=E501,W503
+  - pydocstyle hera_qm/*.py --convention=numpy
+after_success:
+  - coveralls
+notifications:
+  webhooks: https://coveralls.io/webhook?repo_token=$COVERALLS_REPO_TOKEN

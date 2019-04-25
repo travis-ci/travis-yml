@@ -1,0 +1,48 @@
+language: node_js
+sudo: false
+jdk:
+- oraclejdk8
+node_js: lts/*
+matrix:
+  allow_failures:
+  - env: CMD=test:sauce
+addon:
+  firefox: latest
+env:
+  matrix:
+  - CMD=test:sauce
+  - CMD=test
+  - CMD=lint
+before_install:
+- export DISPLAY=:99.0
+- sh -e /etc/init.d/xvfb start
+- sleep 5
+script:
+- npm run $CMD
+before_deploy:
+- npm run build
+deploy:
+- provider: npm
+  skip_cleanup: true
+  email: develop@uncovertruth.co.jp
+  api_key:
+    secure: aGKtfwPsNUlNqTfpBU9SJoTOtwli7+LLcjg/HtZJgFcPrQVow+yOzsKuq7KCMN3IBIxf8yK9rIlvknpquyacU8ma5uMRb26BN8AMqfPwspK+sFm3JdGPpQBB5zPELCA+PeYVyYTeTOUB61cBdce9rJ7LPWap3wQOiUAlRkIMlr8PRpOXaCjUHFWHiJH2yRDnnGqjouM9q6SexquvKeAyYuYxD+FeBWXBs74Z7/CG54Emhsr2GDd6jPUAfV4SdfAGWNKpjY/8hL4BejS1CU2cb/uaog8BKD/f9mSq6V+NOjqM1SN9eCDeB8vfhYDytGM686Pu1QiV6a9Zt1t2ePjzjtqhGmLzJ2WZahuQk8Ziv6fBwlmCw6GNe+ImLoYEwfzd1DLZHz4RF7BFmxbRjmwrl9dF4HVWN2XSsPvlhNwQQQmybkQiR1lbCZ+q2kb8cfGAA/BwxkvAYq2b3l/EKxq4N7ZXQpwjbbTrqk+jBjgcVKdEFAZy833sJxNOBvej+AFrV6VkD5TblJLhH3tSFOAbsSxr3YlXiZmEpmpMMJDj2PwUHqU9PBivajr3dxqGxvB47iS3DH4TZtzdaPiM4aFSoWv8nTLYjsSQn0oMcX/3RGAEi9JUbAPT6UHtZgBnP6MZye3ohYCo3oPh8sDZiszIe0WzrqdXQATYLwcevl/8v1Q=
+  on:
+    repo: uncovertruth/auto-cookie
+    tags: true
+    condition: "$CMD = test"
+- provider: pages
+  skip-cleanup: true
+  github-token:
+    secure: lZFJI/yhD/IzB0aAw53o1IzFBMTpF/ec3oGN/JV5JYZ1QVrAkRzlX3CAbeLTYY/7vTuuXs39XyG9gtvYNM3wlAbCZhNk6a6HfHfq3yzfId0TX8I5FmUoXY4Qmp4O61K1CDOKgd+dKwVoyU6OKdmnMAXu1YZC9QBWKrV49+yiBhmJdfPtj3Zj6S3NzzuPCMGZNeY4LCuaaddwjGSt3BqbmY1rmi+UJyWIpNKrAA4rPUzptBkLr6XN0Xz+1/4q+hW96vU6z1fVn5bt0h3hwRVCB2KiKrhZy0Gy7uxokLNs33gSFqeB4kU8f2Q1+1CPnUE/XWqM3qtPzcgs6t0GtPf+FXp6YVMB9xb7ofopeK8nRfco4TJK/wyKx3px72Abu/yu+oKr5OovUZOERdPrwN4I6ZYYH22Kq+Sl44g74cwKzFZYzqEzV+2pNd975KKnK8jWvGNNL0PeFI21A/RMsGnkVjkAFORIaWr1nb+SAd8CIGVIsWEo0v4HM9XYrcdsHkhUrCSru4yJYg1qDF1nYonNdbuUgHCuSeXKd4rBufI6FgfOR3YFNV0MlVZ+0i24o4c+9Fm1vi7/hrHfP2zWW43uQ7U2mHPHkR4HM7H9sTwwuFyGQoUFjShYcKYnZs922FaAkKlbMGEY8hG+xpVoT67cy1aStFjDhmouj9MVnIhvnbk=
+  keep-history: true
+  local-dir: example
+  on:
+    repo: uncovertruth/auto-cookie
+    tags: true
+    condition: "$CMD = 'test'"
+notifications:
+  email: false
+  slack:
+    rooms:
+      secure: i8a1B/3flSOmHh5otvsYleYl4CVQ6gKhQUcdHZBfHaLGmkCboygXZOv1W3ED3wpjP5BpvAIfZ/vRmjk2glKjCQ90oGE3i/aixW3GjpGAeM9CSDtxQojwSnt+vBdntMZ95Jt0P5phtwS8CRC47X1iGtGN/7pydCyl8pzrHfyYf3Np/iuxpal0XWJf8EPDu1eGabTcpz5JS4XBaYrK+VHeo+Yhh37akufaBJxH2wm0Hu6KoqcJHtVT8IsNnSrxKWuKvQPrgPPu9PUOPNNOxiB3MD2YTisrvnUj/kTm0xMKk5zbyAPC/EyoPq6KBk2Rg53gkb4d08EjlnSYpXHBGBQGOZhMEJCfRTc0ZNWUCBmoQpcsFZtCi+g25xK/Qj7/5Xu2zU1wacVtss+REwhiO93028+HmrWKYZqE11P+BJWJo4OLLR5lzIAvy+FpKCZx88TS0glAfLVXP/YGFo5WULQt6deR75x6Ard2Gl8NbXfGGba0BYoTdhiPcxgqQiRiT9htFf6uBTs57xKjMj+hhI/14iCkJqcKpE9pSyhIRO2m41zrhUcmYpc/w5IXmGVIHCmoK9a2rDvRokUMs4oy/QnWpt6fanvh51/d5GO8jcGNodulv6sl/itZABaq0dtEy71LQaM1yWSHh4om8oJj8ZsGDy7VTRSAop/PEJT6l29x2Ys=

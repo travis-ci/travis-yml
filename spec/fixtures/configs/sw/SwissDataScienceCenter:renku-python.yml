@@ -1,0 +1,151 @@
+# -*- coding: utf-8 -*-
+#
+# Copyright 2017-2018 - Swiss Data Science Center (SDSC)
+# A partnership between École Polytechnique Fédérale de Lausanne (EPFL) and
+# Eidgenössische Technische Hochschule Zürich (ETHZ).
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+notifications:
+  email: false
+
+git:
+  depth: false
+
+language: python
+
+matrix:
+  fast_finish: true
+
+cache:
+  - pip
+
+env:
+  - REQUIREMENTS=lowest
+  - REQUIREMENTS=release
+
+python:
+  - "3.5"
+  - "3.6"
+
+stages:
+  - name: test
+  - name: publish 🐍  🐳
+    if: type = push AND (branch = master OR tag IS present)
+  - name: brew 🍺
+    if: type = push AND tag IS present
+
+before_install:
+  - git fetch --tags
+  - if [[ $TRAVIS_OS_NAME == 'linux' ]]; then
+        sudo apt-get update;
+        sudo apt-get -y install shellcheck;
+        travis_retry python -m pip install --upgrade pip setuptools py;
+        travis_retry python -m pip install twine wheel coveralls requirements-builder;
+        requirements-builder -e all --level=min setup.py > .travis-lowest-requirements.txt;
+        requirements-builder -e all --level=pypi setup.py > .travis-release-requirements.txt;
+        requirements-builder -e all --level=dev --req requirements-devel.txt setup.py > .travis-devel-requirements.txt;
+    elif [[ $TRAVIS_OS_NAME == 'osx' ]]; then
+        brew update;
+        brew upgrade python;
+        brew unlink python;
+        brew link python;
+        brew install git-lfs jq node pipenv shellcheck;
+        brew upgrade node;
+        git config --global --add user.name "John Doe";
+        git config --global --add user.email "john.doe@example.com";
+    fi
+
+install:
+  - if [[ $TRAVIS_OS_NAME == 'linux' ]]; then
+        travis_retry python -m pip install -r .travis-${REQUIREMENTS}-requirements.txt;
+        travis_retry python -m pip install -e .[all];
+    elif [[ $TRAVIS_OS_NAME == 'osx' ]]; then
+        travis_retry pipenv install --deploy;
+        source "$(pipenv --venv)/bin/activate";
+        travis_retry pip install -e .[all];
+    fi
+
+script:
+  - "./run-tests.sh"
+
+after_success:
+  - coveralls
+
+jobs:
+  include:
+    - stage: test
+      language: generic
+      sudo: true
+      os: osx
+      osx_image: xcode10.1
+    - language: generic
+      sudo: true
+      os: osx
+      osx_image: xcode9.2
+    - python: "3.7"
+      os: linux
+      dist: xenial
+      language: python
+      env:
+        - REQUIREMENTS=release
+
+    - stage: publish 🐍  🐳
+      python: 3.6
+      script: echo "Publishing on PyPI.io ..."
+      deploy:
+        - provider: pypi
+          user: ${PYPI_USERNAME}
+          password: ${PYPI_PASSWORD}
+          distributions: "sdist bdist_wheel"
+          on:
+            all_branches: true
+    - # stage: publish
+      sudo: required
+      services:
+        - docker
+      install:
+        - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+        - sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+        - sudo apt-get update
+        - sudo apt-get -y install docker-ce
+      script: make docker-login docker-push
+
+    - stage: brew 🍺
+      language: generic
+      sudo: true
+      os: osx
+      osx_image: xcode10.2
+      before_install: brew install jq
+      install: python -m pip install requests
+      script:
+        - echo PY_BREW_VERSION=$(python setup.py --version)
+        - make -e PY_BREW_VERSION=$(python setup.py --version) brew-commit-formula brew-build-bottle brew-commit-bottle
+      deploy:
+        - provider: releases
+          api_key: ${GITHUB_TOKEN}
+          file_glob: true
+          file: "*.bottle.*"
+          skip_cleanup: true
+          on:
+            all_branches: true
+        - provider: pages
+          skip-cleanup: true
+          # Set in the settings page of your repository, as a secure variable
+          github-token: ${GITHUB_TOKEN}
+          repo: swissdatasciencecenter/homebrew-renku
+          target-branch: master
+          keep-history: true
+          local-dir: /usr/local/Homebrew/Library/Taps/swissdatasciencecenter/homebrew-renku/
+          on:
+            all_branches: true

@@ -1,0 +1,37 @@
+language: java
+jdk:
+- oraclejdk8
+before_install:
+- nvm install 10.8.0
+- nvm use 10.8.0
+- npm install -g jspm@0.16.54
+- jspm config endpoints.github.auth $JSPM_GITHUB_AUTH_TOKEN
+before_script:
+script:
+- mvn test
+- touch output.txt
+- bash ./wise.sh run > output.txt &
+- while ! grep "Started Application" output.txt >/dev/null; do sleep 2; echo "polling for WISE server..."; done
+- npm test
+- npm run test-angular-portal
+notifications:
+  email:
+  - honchikun@gmail.com
+  - geoffreykwan@gmail.com
+  - breity10@gmail.com
+  slack:
+    secure: 61bwiA2adujTpxYYJ45x8TYlexUM1JX/WYEbX/v0YmBqYA8O2h8YoAopK4VLvt/wNPqV5avQz3IoZP4YqzZlH8Ef4DaSwbPt6rSEKb8RiPuysAyd1ZiOKNzTQtB7kAhWmwC4Qj1xRTI8WutbeUma5LCYJlGpKcIM22HBILxJWWpUTeyabG6sxATlckQ6at3zCE6RpthoSBW/HA1PeDMYPDWK2MkF/Qn9J9qXGKkqfTK+Wtvsed/BZowJwQKpMSx7cTHVPuZPx3wleeR/mTcWzZl/EmTceTYEvBvOQ2SV9mR6rMcqKyhd8YRtME3ikqgyvbJsf4tUS5rt34scw+sPahbisl/NudArs2MTUWHMrmR3duVwikQHdUS8iHL/09c8jV0OqoUEFz18ByQvh2kVnazy4LewQvxU9xYeb0CVqxil+oktuk5dp/zFeuhcCEKnWvfXJC2R5mxSAc5RaWe1H1vD6j7RlED9viLae86F5xPP+Ve1tX9DF6iid5h7e0tf0EesmT58pAILj9O3TE2VeBkMUgrn9BPXbmPgBUTd4Ye/xt5KkkQBHYJkb2PCRBpW6n4khm5NM5ceNKjuDLthsDxfGEVRQd62pNkBRPeo9CGOSszHM9ckTvH7Oic3ogIVRUHjLms6aEbXnO6UlhYzmSPAjt6k5zL/XQtX3hTonTY=
+    on_success: change
+  webhooks:
+      urls:
+        - https://webhooks.gitter.im/e/456693e9cf8d8162a411
+      on_success: change
+      on_failure: always
+      on_start: never
+env:
+  global:
+  - secure: God9fsnKx0rLFxhUt4hadhi8U/WvpCxp5tDg9cx8UpZdDE1cvpNQores2RUo1IULK4G7wUOD4P8eiqXbQelBvn1qbt0+ZgaLWiYsVfS3VlrBmcws1KUdCFqgPEk4Iv6m7ixqlBx4/b9vJ6URJg7RVFkF1GAbgitouGRYpLl0rRqjNJuz0/9gQs395fVc5n9UA9K9SMThxbRiExlDKHo2nfptR+Qtdbn/TP4EjmEGEq5CqBK8rvGi3gpprAXguCLPRItIL7hCaMaxPOeX8K9s07W6ueXlMUemUywAFWH2auwVT+4B5KYYPhooXTf9jNPJ6BwpYKZAGErF8dkgld60S11Df0aHKNx34FX77qdPDKvFspRTJRz18xzh9cLB0RhpNoQHVnVGpA7q54SkETO3yhFZK3Q1R0nCB4qLb85mq4uvC4AVFMimqF0CKAgu/0uk1aeg1b+9DaJkqimjxSgPRJgfPtGJrit5eaaSYK/4/t0qbdaRBCtQND2CWfkqysf60B0+JSeBQAivVcOaE93Rqq6r9TbSI68UgHRNB7JtOUc68gfJqHpPhWwBb7+aP4/gWuulqSLXg9nMm3dlecMsi+oWpF9xnvKjeht11Izzgvnsia7vrNt1PZ4wpAgmL+mFeU1YWCQnaOBNa3rkyTmXvCs/WGImlybWD47b42ms6zI=
+  - secure: u2dKmevonrZURg68ILxXOk+aobyzIB33SuDShKSrBdjChIbgK94l8pzGBBXBRnCOmh0D1MNEamcwxbdpGc7tVM92KkK2QotNGm8otHD5ennOmwnnZBgdMDLGKUoN0rZ5PzR6/lw87djf8dlLfuW3CLDVCArlEhBnvrlp1rRASgwzZ3Y2ABVBYX+WYSn7FjH3g7HQoepirdDI2edXplr61DEA2pWXbfI1T7wcyY14hETyXE4UWtH55ISNr63JnaVFb4F25OPmoUEewgO/13ZYa12LfuY8GIOaQEXsA0Mf1dBMCiLpkh3hG6G6N/iuXmrjtySSIpC1rog/ErLQZ2lB6Vkfb6Wcjvm5ug4r/x5muKYgzSE5zmuebl/1+oeeraQY70z4DnDmwUOhC6cMw5rKTCAl7q5iVJz+W7BzRnKncC3KodXUKR+PNU9djUigPImkaS8UzwYDzVv6qNBxYEjVO3KuG0U3Zw5vqXdzxJuiMmCRyun3pl4BjY+jhBCQ0a5pNPHvvPuMVOArG4wu0peesoiUZo941aJNGGxCZhvgvh2sKJvIqtxEwgIb3aDw2Sn6Lwiv6pNBw6M6R1WzPiMUnY2YiuMrx2uME6Dh2VUs6WQYDQubxFz9UQ/VlYKaSeoS2b+BrztNzP9uJ/gi9k+HFbH8kA//b7cjoeXeW8qbCa8=
+addons:
+  sauce_connect: true
+  chrome: stable

@@ -1,0 +1,28 @@
+language: java
+sudo: false
+cache:
+  directories:
+    - $HOME/.m2
+script:
+  - set -e
+  - mvn -version
+  - mvn clean
+  - pdd --source=$(pwd) --file=/dev/null
+  - est --dir=est --file=/dev/null
+  - mvn clean install -Pqulice -Pjacoco --errors --batch-mode
+before_install:
+  - rvm install 2.2.2
+  - rvm use 2.2.2
+install:
+  - gem install pdd
+  - gem install est
+  - gem install xcop
+env:
+  global:
+    - MAVEN_OPTS="-Xmx256m"
+    - JAVA_OPTS="-Xmx256m"
+jdk:
+  - oraclejdk8
+  #- openjdk6 - jcabi-http doesn't work with JDK 6
+after_success:
+  - "bash <(curl -s https://codecov.io/bash)"

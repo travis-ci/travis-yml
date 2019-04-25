@@ -11,7 +11,7 @@ describe Travis::Yml::Schema::Def::Crystal, 'structure' do
         type: :object,
         properties: {
           crystal: {
-            '$ref': '#/definitions/strs'
+            '$ref': '#/definitions/type/strs'
           }
         },
         normal: true,

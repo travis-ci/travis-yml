@@ -1,0 +1,49 @@
+language: android
+cache:
+  directories:
+  - $HOME/.android
+sudo: false
+
+jdk:
+  - oraclejdk8
+
+env:
+  - QEMU_AUDIO_DRV=none
+
+android:
+  components:
+    - tools
+    - platform-tools
+    - build-tools-25.1.1
+    - build-tools-25.0.3
+    - build-tools-25.0.2
+    - build-tools-23.0.2
+    - build-tools-23.0.1
+    - build-tools-22.0.1
+    - build-tools-22.0.0
+    - build-tools-21.1.2
+    - build-tools-21.1.1
+    - build-tools-20.0.0
+    - build-tools-19.1.0
+    - android-25
+    - android-24
+    - android-21
+    - android-22
+    - android-19
+    - extra-android-m2repository
+    - sys-img-armeabi-v7a-android-24
+
+before_script:
+     - echo no | android create avd --force -n test -t android-24 --abi armeabi-v7a
+     - emulator -avd test -no-skin -no-window &
+     - android-wait-for-emulator
+     - adb shell input keyevent 82 &
+
+script:
+     - ./scripts/find-missing-strings.sh
+     - ./scripts/build-witness.sh
+     - ./gradlew connectedCheck -PdisablePreDex -PtaskThreads=1 -PandroidThread=1
+     - rm -rf ~/.android/avd
+
+after_success:
+     - ./scripts/travis-upload.sh $KEY

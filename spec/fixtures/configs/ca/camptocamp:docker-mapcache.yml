@@ -1,0 +1,12 @@
+---
+sudo: false
+dist: trusty
+
+services: docker
+env:
+  MAIN_BRANCH=1.4
+
+script:
+  - ./.build.sh
+after_success:
+  - ./.publish.sh
