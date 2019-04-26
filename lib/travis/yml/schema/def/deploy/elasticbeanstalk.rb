@@ -4,13 +4,12 @@ module Travis
     module Schema
       module Def
         module Deploy
-          # docs do not mention elasticbeanstalk
           class Elasticbeanstalk < Deploy
             register :elasticbeanstalk
 
             def define
               map :access_key_id,           to: :secure
-              map :securet_access_key,      to: :secure
+              map :secret_access_key,       to: :secure
               map :region,                  to: :str
               map :app,                     to: :str
               map :env,                     to: :str

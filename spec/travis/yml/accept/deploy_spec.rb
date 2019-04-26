@@ -8,7 +8,7 @@ describe Travis::Yml, 'deploy' do
       deploy: true
     )
     it { should serialize_to empty }
-    it { should have_msg [:error, :deploy, :invalid_type, expected: :seq, actual: :bool, value: true] }
+    it { should have_msg [:error, :deploy, :invalid_type, expected: :map, actual: :bool, value: true] }
   end
 
   describe 'given nil' do
@@ -16,7 +16,7 @@ describe Travis::Yml, 'deploy' do
       deploy:
     )
     it { should serialize_to empty }
-    it { should have_msg([:warn, :deploy, :empty]) }
+    it(nil, empty: true) { should have_msg([:warn, :deploy, :empty]) }
   end
 
   describe 'given a string' do
@@ -52,7 +52,7 @@ describe Travis::Yml, 'deploy' do
           provider: heroku
     )
     it { should serialize_to empty }
-    it { should have_msg [:error, :deploy, :invalid_type, expected: :seq, actual: :map, value: { provider: { provider: 'heroku' } }] }
+    it { should have_msg [:error, :'deploy.provider', :invalid_type, expected: :enum, actual: :map, value: { provider: 'heroku' }] }
   end
 
   describe 'given a map' do
@@ -226,8 +226,8 @@ describe Travis::Yml, 'deploy' do
                 production:
                   bucket: production_branch
       )
-      it { should serialize_to deploy: [provider: 'heroku', on: { branch: { production: { bucket: 'production_branch' } } }] }
-      it { should have_msg [:warn, :'deploy.on.branch', :deprecated, deprecation: :branch_specific_option_hash] }
+      xit { should serialize_to deploy: [provider: 'heroku', on: { branch: { production: { bucket: 'production_branch' } } }] }
+      xit { should have_msg [:warn, :'deploy.on.branch', :deprecated, deprecation: :branch_specific_option_hash] }
     end
 
     # kinda hard to support if we want strict structure on deploy keys

@@ -104,7 +104,7 @@ describe Travis::Yml::Doc::Validate, 'invalid_type' do
   end
 
   describe 'secure' do
-    let(:schema) { Travis::Yml.schema[:definitions][:secure] }
+    let(:schema) { Travis::Yml.schema[:definitions][:type][:secure] }
 
     describe 'given a str' do
       let(:value) { 'bar' }

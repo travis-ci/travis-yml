@@ -12,6 +12,7 @@ module Travis
             '$schema': 'http://json-schema.org/draft-04/schema#'
           }
 
+          # get rid of this
           DEFINITIONS = {
             type: {
               secure: {
@@ -73,7 +74,7 @@ module Travis
             schema = schema.merge(
               title: node.title,
               definitions: definitions,
-              expand: node.expand,
+              expand: node.expand_keys.sort,
             )
             schema.merge(all)
           end

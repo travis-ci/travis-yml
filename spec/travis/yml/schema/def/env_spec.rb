@@ -94,7 +94,7 @@ describe Travis::Yml::Schema::Def::Env, 'structure' do
             },
             {
               type: :string,
-              pattern: '^[^=]+=[^=]+$'
+              pattern: '^[^=]+=[^=]*$'
             }
           ]
         )

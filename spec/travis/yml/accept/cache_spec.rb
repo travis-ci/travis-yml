@@ -109,8 +109,8 @@ describe Travis::Yml, 'cache' do
         - apt: true
         - unknown: true
     )
-    it { should serialize_to empty }
-    it { should have_msg [:error, :cache, :invalid_type, expected: :map, actual: :seq, value: [{ apt: true }, { unknown: true }]] }
+    it { should serialize_to cache: { apt: true, unknown: true } }
+    it { should have_msg [:warn, :cache, :unknown_key, key: :unknown, value: true] }
   end
 
   describe 'given a map' do

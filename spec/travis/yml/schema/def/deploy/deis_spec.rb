@@ -47,11 +47,12 @@ describe Travis::Yml::Schema::Def::Deploy::Deis, 'structure' do
                 type: :string
               }
             },
-            normal: true,
+            additionalProperties: false,
             prefix: :provider,
             required: [
               :provider
-            ]
+            ],
+            normal: true
           },
           {
             type: :string,

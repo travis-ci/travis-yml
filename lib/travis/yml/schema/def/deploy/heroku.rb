@@ -15,6 +15,8 @@ module Travis
               map :buildpack, to: :str
               map :app,       to: :map, type: :str
               map :api_key,   to: :map, type: :secure
+              map :username,  to: :secure
+              map :password,  to: :secure
               map :run,       to: :seq
             end
           end

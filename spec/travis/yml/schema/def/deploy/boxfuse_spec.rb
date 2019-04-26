@@ -59,11 +59,12 @@ describe Travis::Yml::Schema::Def::Deploy::Boxfuse, 'structure' do
                 type: :string
               }
             },
-            normal: true,
+            additionalProperties: false,
             prefix: :provider,
             required: [
               :provider
-            ]
+            ],
+            normal: true
           },
           {
             type: :string,

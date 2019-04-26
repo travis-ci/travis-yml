@@ -24,6 +24,7 @@ module Travis
               map :wait_until_deployed, to: :bool
               map :bucket,              to: :str
               map :key,                 to: :str
+              map :bundle_type,         to: :str
             end
           end
         end

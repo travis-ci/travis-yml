@@ -48,13 +48,20 @@ describe Travis::Yml::Schema::Def::Deploy::Pypi, 'structure' do
               },
               docs_dir: {
                 type: :string
+              },
+              skip_existing: {
+                type: :boolean
+              },
+              skip_upload_docs: {
+                type: :boolean
               }
             },
-            normal: true,
+            additionalProperties: false,
             prefix: :provider,
             required: [
               :provider
-            ]
+            ],
+            normal: true
           },
           {
             type: :string,

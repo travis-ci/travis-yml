@@ -13,7 +13,7 @@ AI = {
 TPL = ERB.new <<~tpl
 describe <%= const %>, 'structure' do
   describe 'definitions' do
-    subject { Travis::Yml.schema[:definitions][:deploy][:<%= name %>] }
+    subject { Travis::Yml.schema[:definitions][:deploy][<%= name.inspect %>] }
 
     # it { puts JSON.pretty_generate(subject) }
 
@@ -48,7 +48,7 @@ end
 def format(obj)
   str = obj.ai(AI)
   str = str.gsub(/(\w+) +:/, '\1:')
-  str = str.gsub(/' +:/, '"')
+  str = str.gsub(/(") +:/, '\1:')
   str = str.gsub('$ref', "'$ref'")
   str = str.gsub('$id', "'$id'")
   str = str.gsub('"', "'")
@@ -107,8 +107,7 @@ providers = %i(
   surge
   testfairy
 )
-  # heroku
-# providers = [:atlas]
+# providers = [:'chef-supermarket']
 
 path = "spec/travis/yml/schema/def/deploy/%s_spec.rb"
 

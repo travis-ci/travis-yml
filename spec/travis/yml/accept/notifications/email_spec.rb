@@ -214,8 +214,8 @@ describe Travis::Yml, 'notifications: email' do
             - str
             - on_success: change
       )
-      it { should serialize_to empty }
-      it { should have_msg [:error, :'notifications.email', :invalid_type, expected: :map, actual: :seq, value: ['str', { on_success: 'change' }]] }
+      it { should serialize_to notifications: { email: { recipients: ['str'] } } }
+      it { should have_msg [:warn, :'notifications.email', :invalid_seq, value: 'str'] }
     end
 
     describe 'given a mixed array of hashes and secure' do
@@ -225,8 +225,8 @@ describe Travis::Yml, 'notifications: email' do
             - secure: secure
             - on_success: change
       )
-      it { should serialize_to empty }
-      it { should have_msg [:error, :'notifications.email', :invalid_type, expected: :map, actual: :seq, value: [{ secure: 'secure' }, { on_success: 'change' }]] }
+      it { should serialize_to notifications: { email: { recipients: [secure: 'secure'] } } }
+      it { should have_msg [:warn, :'notifications.email', :invalid_seq, value: { secure: 'secure' }] }
     end
 
     describe 'prefixes with :email, given a hash with the key :recipients, and a key :email', v2: true, migrate: true do

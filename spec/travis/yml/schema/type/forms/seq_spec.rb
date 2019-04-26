@@ -18,7 +18,7 @@ describe Travis::Yml::Schema::Type::Forms, 'seq' do
         {
           type: :ref,
           export: true,
-          ref: 'strs',
+          ref: 'type/strs',
         }
       )
     end
@@ -32,7 +32,7 @@ describe Travis::Yml::Schema::Type::Forms, 'seq' do
         {
           type: :ref,
           export: true,
-          ref: 'strs',
+          ref: 'type/strs',
           flags: [
             :edge
           ]

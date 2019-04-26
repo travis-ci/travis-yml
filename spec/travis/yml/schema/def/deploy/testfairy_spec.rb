@@ -67,7 +67,7 @@ describe Travis::Yml::Schema::Def::Deploy::Testfairy, 'structure' do
               data_only_wifi: {
                 type: :boolean
               },
-              record_on_backgroup: {
+              record_on_background: {
                 type: :boolean
               },
               video: {
@@ -80,11 +80,12 @@ describe Travis::Yml::Schema::Def::Deploy::Testfairy, 'structure' do
                 type: :string
               }
             },
-            normal: true,
+            additionalProperties: false,
             prefix: :provider,
             required: [
               :provider
-            ]
+            ],
+            normal: true
           },
           {
             type: :string,

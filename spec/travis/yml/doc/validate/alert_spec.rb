@@ -1,7 +1,7 @@
 describe Travis::Yml::Doc::Validate, 'alert' do
   subject { described_class.apply(build_schema(schema), build_value(value, opts)) }
 
-  let(:schema) { Travis::Yml.schema[:definitions][:secure] }
+  let(:schema) { Travis::Yml.schema[:definitions][:type][:secure] }
 
   describe 'with opts[:alert] == true' do
     let(:opts) { { alert: true } }

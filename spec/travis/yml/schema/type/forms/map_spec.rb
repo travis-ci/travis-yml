@@ -66,7 +66,7 @@ describe Travis::Yml::Schema::Type::Forms, 'map' do
           map: {
             foo: {
               type: :ref,
-              ref: 'strs'
+              ref: 'type/strs'
             }
           }
         }

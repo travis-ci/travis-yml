@@ -76,15 +76,22 @@ describe Travis::Yml::Schema::Def::Deploy::Heroku, 'structure' do
                   }
                 ]
               },
+              username: {
+                '$ref': '#/definitions/type/secure'
+              },
+              password: {
+                '$ref': '#/definitions/type/secure'
+              },
               run: {
                 '$ref': '#/definitions/type/strs'
               }
             },
-            normal: true,
+            additionalProperties: false,
             prefix: :provider,
             required: [
               :provider
-            ]
+            ],
+            normal: true
           },
           {
             type: :string,

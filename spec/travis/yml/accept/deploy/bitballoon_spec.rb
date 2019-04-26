@@ -6,10 +6,10 @@ describe Travis::Yml, 'bitballoon' do
       yaml %(
         deploy:
           provider: bitballoon
-          access_token:
+          access-token:
             secure: secure
       )
-      it { should serialize_to deploy: [provider: 'bitballoon', access_token: { secure: 'secure' }] }
+      it { should serialize_to deploy: [provider: 'bitballoon', 'access-token': { secure: 'secure' }] }
       it { should_not have_msg }
     end
   end
@@ -19,9 +19,9 @@ describe Travis::Yml, 'bitballoon' do
       yaml %(
         deploy:
           provider: bitballoon
-          site_id: str
+          site-id: str
       )
-      it { should serialize_to deploy: [provider: 'bitballoon', site_id: 'str'] }
+      it { should serialize_to deploy: [provider: 'bitballoon', 'site-id': 'str'] }
       it { should_not have_msg }
     end
   end
@@ -31,9 +31,9 @@ describe Travis::Yml, 'bitballoon' do
       yaml %(
         deploy:
           provider: bitballoon
-          local_dir: str
+          local-dir: str
       )
-      it { should serialize_to deploy: [provider: 'bitballoon', local_dir: 'str'] }
+      it { should serialize_to deploy: [provider: 'bitballoon', 'local-dir': 'str'] }
       it { should_not have_msg }
     end
   end

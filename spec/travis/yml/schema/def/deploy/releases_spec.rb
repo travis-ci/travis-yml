@@ -57,13 +57,17 @@ describe Travis::Yml::Schema::Def::Deploy::Releases, 'structure' do
               },
               prerelease: {
                 type: :boolean
+              },
+              draft: {
+                type: :boolean
               }
             },
-            normal: true,
+            additionalProperties: false,
             prefix: :provider,
             required: [
               :provider
-            ]
+            ],
+            normal: true
           },
           {
             type: :string,

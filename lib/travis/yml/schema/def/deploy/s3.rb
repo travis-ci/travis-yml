@@ -25,6 +25,7 @@ module Travis
               map :index_document_suffix,  to: :str
               map :default_text_charset,   to: :str
               map :server_side_encryption, to: :bool
+              map :endpoint,               to: :str
             end
           end
         end

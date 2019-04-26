@@ -56,7 +56,7 @@ describe Travis::Yml, 'invalid_type' do
     describe 'given a map' do
       let(:value) { { os: { name: 'linux' } } }
       it { should serialize_to empty }
-      it { should have_msg [:error, :os, :invalid_type, expected: :seq, actual: :map, value: { name: 'linux' }] }
+      it { should have_msg [:error, :os, :invalid_type, expected: :enum, actual: :map, value: { name: 'linux' }] }
     end
   end
 

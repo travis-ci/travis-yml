@@ -42,13 +42,17 @@ describe Travis::Yml::Schema::Def::Deploy::Anynines, 'structure' do
               },
               space: {
                 type: :string
+              },
+              app_name: {
+                type: :string
               }
             },
-            normal: true,
+            additionalProperties: false,
             prefix: :provider,
             required: [
               :provider
-            ]
+            ],
+            normal: true
           },
           {
             type: :string,

@@ -13,6 +13,7 @@ module Travis
           extend Forwardable
           include Opts, Registry
 
+          registry :type
           register :node
 
           opts %i(changes deprecated flags normal)
@@ -147,8 +148,12 @@ module Travis
             @examples ||= {}
           end
 
-          def expand(key = nil)
-            key.nil? ? @expand ||= [] : expand.push(key).sort!.uniq!
+          def expand_key(key)
+            expand_keys.push(key).sort!.uniq!
+          end
+
+          def expand_keys
+            @expand_keys ||= []
           end
 
           def export

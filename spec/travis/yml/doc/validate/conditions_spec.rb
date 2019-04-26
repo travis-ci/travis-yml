@@ -5,13 +5,13 @@ describe Travis::Yml::Doc::Validate, 'conditions' do
 
   describe 'given a valid condition' do
     let(:value) { { if: 'tag = v1.0.0' } }
-    it { should_not have_msg }
     it { should serialize_to value }
+    it { should_not have_msg }
   end
 
   describe 'given an empty str' do
     let(:value) { { if: 'and true' } }
+    it { should serialize_to if: nil } # hmm.
     it { should have_msg [:error, :if, :invalid_condition, condition: 'and true'] }
-    it { should serialize_to({}) }
   end
 end

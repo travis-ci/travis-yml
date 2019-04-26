@@ -59,11 +59,12 @@ describe Travis::Yml::Schema::Def::Deploy::Atlas, 'structure' do
                 type: :boolean
               }
             },
-            normal: true,
+            additionalProperties: false,
             prefix: :provider,
             required: [
               :provider
-            ]
+            ],
+            normal: true
           },
           {
             type: :string,

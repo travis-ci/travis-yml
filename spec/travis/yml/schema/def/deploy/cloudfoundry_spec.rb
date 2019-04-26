@@ -54,13 +54,17 @@ describe Travis::Yml::Schema::Def::Deploy::Cloudfoundry, 'structure' do
               },
               skip_ssl_validation: {
                 type: :boolean
+              },
+              app_name: {
+                type: :string
               }
             },
-            normal: true,
+            additionalProperties: false,
             prefix: :provider,
             required: [
               :provider
-            ]
+            ],
+            normal: true
           },
           {
             type: :string,

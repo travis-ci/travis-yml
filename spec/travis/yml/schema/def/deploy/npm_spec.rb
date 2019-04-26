@@ -36,13 +36,17 @@ describe Travis::Yml::Schema::Def::Deploy::Npm, 'structure' do
               },
               api_key: {
                 '$ref': '#/definitions/type/secure'
+              },
+              tag: {
+                type: :string
               }
             },
-            normal: true,
+            additionalProperties: false,
             prefix: :provider,
             required: [
               :provider
-            ]
+            ],
+            normal: true
           },
           {
             type: :string,

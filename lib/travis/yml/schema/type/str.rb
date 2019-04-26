@@ -41,8 +41,12 @@ module Travis
             :strs
           end
 
+          def namespace
+            :type
+          end
+
           def id
-            :strs
+            registry_key
           end
 
           def types

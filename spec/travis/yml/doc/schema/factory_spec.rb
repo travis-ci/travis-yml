@@ -103,7 +103,7 @@ describe Travis::Yml::Doc::Schema, 'build' do
   describe 'a secure (ref)' do
     let(:schema) do
       {
-        '$ref': '#/definitions/secure'
+        '$ref': '#/definitions/type/secure'
       }
     end
 

@@ -34,7 +34,7 @@ describe Travis::Yml::Schema::Def::Deploy::Elasticbeanstalk, 'structure' do
               access_key_id: {
                 '$ref': '#/definitions/type/secure'
               },
-              securet_access_key: {
+              secret_access_key: {
                 '$ref': '#/definitions/type/secure'
               },
               region: {
@@ -59,11 +59,12 @@ describe Travis::Yml::Schema::Def::Deploy::Elasticbeanstalk, 'structure' do
                 type: :boolean
               }
             },
-            normal: true,
+            additionalProperties: false,
             prefix: :provider,
             required: [
               :provider
-            ]
+            ],
+            normal: true
           },
           {
             type: :string,

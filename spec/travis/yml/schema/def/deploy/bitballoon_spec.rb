@@ -41,11 +41,12 @@ describe Travis::Yml::Schema::Def::Deploy::Bitballoon, 'structure' do
                 type: :string
               }
             },
-            normal: true,
+            additionalProperties: false,
             prefix: :provider,
             required: [
               :provider
-            ]
+            ],
+            normal: true
           },
           {
             type: :string,

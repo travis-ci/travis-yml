@@ -47,11 +47,12 @@ describe Travis::Yml::Schema::Def::Deploy::Cloudfiles, 'structure' do
                 type: :boolean
               }
             },
-            normal: true,
+            additionalProperties: false,
             prefix: :provider,
             required: [
               :provider
-            ]
+            ],
+            normal: true
           },
           {
             type: :string,

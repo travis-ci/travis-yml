@@ -63,7 +63,7 @@ describe Travis::Yml, 'arch' do
         name: amd64
     )
     it { should serialize_to empty }
-    it { should have_msg [:error, :arch, :invalid_type, expected: :seq, actual: :map, value: { name: 'amd64' }] }
+    it { should have_msg [:error, :arch, :invalid_type, expected: :enum, actual: :map, value: { name: 'amd64' }] }
   end
 
   describe 'given an unknown value' do

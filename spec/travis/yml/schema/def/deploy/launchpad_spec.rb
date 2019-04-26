@@ -41,14 +41,15 @@ describe Travis::Yml::Schema::Def::Deploy::Launchpad, 'structure' do
                 '$ref': '#/definitions/type/secure'
               }
             },
-            normal: true,
+            additionalProperties: false,
             prefix: :provider,
             required: [
               :provider,
               :slug,
               :oauth_token,
               :oauth_token_secret
-            ]
+            ],
+            normal: true
           },
           {
             type: :string,
