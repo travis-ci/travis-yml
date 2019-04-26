@@ -37,14 +37,14 @@ module Travis
               strict false
               aliases :jobs
 
-              map :name, to: :str, unique: true
+              map :name,     to: :str, unique: true
               map :language
               map :os
               map :arch
               map :dist
               map :sudo
-              map :env, to: :env_vars
-              map :stage
+              map :env,      to: :env_vars
+              map :stage,    to: :str
               map :compiler, to: :compilers
 
               include :job

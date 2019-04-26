@@ -280,4 +280,16 @@ describe Travis::Yml, 'notifications: email' do
       end
     end
   end
+
+  describe 'misplaced skip_join' do
+    yaml %(
+      notifications:
+        email:
+          - str
+        skip_join: true
+    )
+
+    it { should serialize_to notifications: { email: { recipients: ['str'] }, skip_join: true } }
+    it { should have_msg [:warn, :notifications, :misplaced_key, key: :skip_join, value: true] }
+  end
 end

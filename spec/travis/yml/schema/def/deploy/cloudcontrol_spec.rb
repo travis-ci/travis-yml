@@ -42,11 +42,11 @@ describe Travis::Yml::Schema::Def::Deploy::Cloudcontrol, 'structure' do
               }
             },
             additionalProperties: false,
+            normal: true,
             prefix: :provider,
             required: [
               :provider
-            ],
-            normal: true
+            ]
           },
           {
             type: :string,
@@ -55,7 +55,8 @@ describe Travis::Yml::Schema::Def::Deploy::Cloudcontrol, 'structure' do
             ],
             strict: true
           }
-        ]
+        ],
+        normal: true
       )
     end
   end

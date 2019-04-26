@@ -8,6 +8,7 @@ describe Travis::Yml::Schema::Def::Notification::Email, 'structure' do
       should eq(
         '$id': :notification_email,
         title: 'Notification Email',
+        normal: true,
         anyOf: [
           {
             type: :object,

@@ -26,7 +26,7 @@ module Travis
           end
 
           def warn?
-            !value.errored?
+            !value.errored? && value.enabled?(:empty)
           end
         end
       end

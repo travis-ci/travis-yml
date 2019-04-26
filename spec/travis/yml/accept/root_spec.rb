@@ -226,8 +226,7 @@ describe Travis::Yml, 'root' do
     )
     it { should serialize_to script: ['./foo'] }
     it { should have_msg [:warn, :addons, :migrate, key: :script, to: :root, value: 'foo'] }
-    it { should have_msg [:warn, :root, :empty, key: :addons] }
-    it { expect(msgs.size).to eq 2 }
+    it { expect(msgs.size).to eq 1 }
   end
 
   describe 'given a misplaced key (down) on a nested section', v2: true, migrate: true do

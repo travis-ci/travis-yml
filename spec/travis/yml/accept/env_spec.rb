@@ -17,6 +17,16 @@ describe Travis::Yml, 'env' do
     it { should_not have_msg }
   end
 
+  describe 'given vars on a multiline str' do
+    yaml %(
+      env:
+        FOO=foo
+        BAR=bar
+    )
+    it { should serialize_to env: { matrix: [{ FOO: 'foo' }, { BAR: 'bar' }] } }
+    it { should_not have_msg }
+  end
+
   describe 'given a seq of vars' do
     yaml %(
       env:
@@ -33,7 +43,7 @@ describe Travis::Yml, 'env' do
         -
     )
     it { should serialize_to empty }
-    it(nil, empty: true) { should have_msg [:warn, :env, :empty] }
+    it { should_not have_msg }
   end
 
   describe 'given a map' do
@@ -159,6 +169,17 @@ describe Travis::Yml, 'env' do
       )
       it { should serialize_to env: { global: [{ secure: 'secure' }] } }
       it { should have_msg [:warn, :root, :migrate, key: :global, to: :env, value: { secure: 'secure' }] }
+    end
+
+    describe 'mixing secure and global keys' do
+      yaml %(
+        env:
+          secure: secure
+          global:
+            secure: secure
+      )
+      it { should serialize_to env: { matrix: [{ secure: 'secure' }], global: [{ secure: 'secure' }] } }
+      it { should_not have_msg }
     end
   end
 

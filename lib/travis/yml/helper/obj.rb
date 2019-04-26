@@ -122,6 +122,10 @@ module Travis
           hash.reject { |key, _| keys.include?(key) }.to_h
         end
 
+        def split(hash, *keys)
+          [only(hash, *keys), except(hash, *keys)]
+        end
+
         MERGE = -> (_, lft, rgt) do
           if lft.is_a?(::Hash) && rgt.is_a?(::Hash)
             lft.merge(rgt, &MERGE)

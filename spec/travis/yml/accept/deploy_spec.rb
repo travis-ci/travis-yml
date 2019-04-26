@@ -16,7 +16,7 @@ describe Travis::Yml, 'deploy' do
       deploy:
     )
     it { should serialize_to empty }
-    it(nil, empty: true) { should have_msg([:warn, :deploy, :empty]) }
+    it { should_not have_msg }
   end
 
   describe 'given a string' do
@@ -34,6 +34,15 @@ describe Travis::Yml, 'deploy' do
     )
     it { should serialize_to deploy: [provider: 'heroku'] }
     it { should_not have_msg }
+  end
+
+  describe 'typo in the provider' do
+    yaml %(
+      deploy:
+        - provider: heruko
+    )
+    it { should serialize_to deploy: [provider: 'heroku'] }
+    it { should have_msg [:warn, :'deploy.provider', :find_value, original: 'heruko', value: 'heroku'] }
   end
 
   describe 'unknown provider' do
@@ -142,6 +151,7 @@ describe Travis::Yml, 'deploy' do
               secure: secure
       )
       it { should serialize_to deploy: [provider: 'heroku', api_key: { secure: 'secure' }] }
+      it { should_not have_msg }
     end
   end
 
@@ -153,6 +163,7 @@ describe Travis::Yml, 'deploy' do
           on: master
       )
       it { should serialize_to deploy: [provider: 'heroku', on: { branch: ['master'] }] }
+      it { should_not have_msg }
     end
 
     describe 'given a map' do
@@ -164,6 +175,7 @@ describe Travis::Yml, 'deploy' do
               repo: foo/bar
         )
         it { should serialize_to deploy: [provider: 'heroku', on: { repo: 'foo/bar' }] }
+        it { should_not have_msg }
       end
 
       describe 'branch' do
@@ -174,6 +186,53 @@ describe Travis::Yml, 'deploy' do
               branch: master
         )
         it { should serialize_to deploy: [provider: 'heroku', on: { branch: ['master'] }] }
+        it { should_not have_msg }
+      end
+
+      describe 'branch with an unknown key' do
+        yaml %(
+          deploy:
+            provider: heroku
+            script: str
+            on:
+              branch: master
+        )
+        it { should serialize_to deploy: [provider: 'heroku', script: 'str', on: { branch: ['master'] }] }
+        it { should have_msg [:warn, :deploy, :misplaced_key, key: :script, value: 'str'] }
+      end
+
+      describe 'repo' do
+        yaml %(
+          deploy:
+            provider: heroku
+            on:
+              repo: str
+        )
+        it { should serialize_to deploy: [provider: 'heroku', on: { repo: 'str' }] }
+        it { should_not have_msg }
+      end
+
+      describe 'condition (given a str)' do
+        yaml %(
+          deploy:
+            provider: heroku
+            on:
+              condition: str
+        )
+        it { should serialize_to deploy: [provider: 'heroku', on: { condition: ['str'] }] }
+        it { should_not have_msg }
+      end
+
+      describe 'condition (given a seq)' do
+        yaml %(
+          deploy:
+            provider: heroku
+            on:
+              condition:
+                - str
+        )
+        it { should serialize_to deploy: [provider: 'heroku', on: { condition: ['str'] }] }
+        it { should_not have_msg }
       end
 
       describe 'all_branches' do
@@ -184,36 +243,63 @@ describe Travis::Yml, 'deploy' do
               all_branches: true
         )
         it { should serialize_to deploy: [provider: 'heroku', on: { all_branches: true }] }
+        it { should_not have_msg }
       end
 
-      describe 'language specific key' do
+      describe 'tags (given true)' do
+        yaml %(
+          deploy:
+            provider: heroku
+            on:
+              tags: true
+        )
+        it { should serialize_to deploy: [provider: 'heroku', on: { tags: true }] }
+        it { should_not have_msg }
+      end
+
+      describe 'tags (given a str)' do
+        yaml %(
+          deploy:
+            provider: heroku
+            on:
+              tags: str
+        )
+        it { should serialize_to deploy: [provider: 'heroku'] }
+        it { should have_msg [:error, :'deploy.on.tags', :invalid_type, expected: :bool, actual: :str, value: 'str'] }
+      end
+
+      describe 'language specific key rvm' do
         yaml %(
           deploy:
             provider: heroku
             on:
               rvm: 2.3.1
         )
-        it { should serialize_to deploy: [provider: 'heroku', on: { rvm: ['2.3.1'] }] }
+        it { should serialize_to deploy: [provider: 'heroku', on: { rvm: '2.3.1' }] }
+        it { should_not have_msg }
       end
 
-      describe 'language specific setting (with an alias)' do
+      describe 'language specific key ruby (alias)' do
         yaml %(
           deploy:
             provider: heroku
             on:
               ruby: 2.3.1
         )
-        it { should serialize_to deploy: [provider: 'heroku', on: { rvm: ['2.3.1'] }] }
+        it { should serialize_to deploy: [provider: 'heroku', on: { rvm: '2.3.1' }] }
+        it { should have_msg [:info, :'deploy.on', :alias, alias: :ruby, key: :rvm] }
       end
 
-      describe 'language specific key on the wrong language' do
+      describe 'language specific key python on ruby' do
         yaml %(
+          language: ruby
           deploy:
             provider: heroku
             on:
               python: 2.7
         )
-        it { should serialize_to deploy: [provider: 'heroku', on: { python: ['2.7'] }] }
+        it { should serialize_to language: 'ruby', deploy: [provider: 'heroku', on: { python: '2.7' }] }
+        it { should_not have_msg }
       end
     end
 
@@ -262,6 +348,7 @@ describe Travis::Yml, 'deploy' do
         allow_failure: true
     )
     it { should serialize_to deploy: [provider: 'heroku', allow_failure: true] }
+    it { should_not have_msg }
   end
 
   describe 'app and condition' do
@@ -271,7 +358,8 @@ describe Travis::Yml, 'deploy' do
           app:
             master: production
             dev: staging
-          on: master
+          on:
+            branch: master
     )
     it { should serialize_to deploy: [provider: 'heroku', app: { master: 'production', dev: 'staging' }, on: { branch: ['master'] }] }
     it { should_not have_msg }
@@ -294,12 +382,13 @@ describe Travis::Yml, 'deploy' do
     describe 'given a map' do
       yaml %(
         deploy:
-          provider: herou
+          provider: heroku
           edge:
             source: source
             branch: branch
       )
       it { should serialize_to deploy: [provider: 'heroku', edge: { source: 'source', branch: 'branch' }] }
+      it { should have_msg [:info, :'deploy.edge', :edge] }
     end
   end
 

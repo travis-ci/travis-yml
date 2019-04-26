@@ -8,6 +8,7 @@ describe Travis::Yml::Schema::Def::Cache, 'structure' do
       should eq(
         '$id': :cache,
         title: 'Cache',
+        normal: true,
         anyOf: [
           {
             type: :object,

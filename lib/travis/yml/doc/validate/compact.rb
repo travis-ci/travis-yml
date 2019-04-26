@@ -25,24 +25,15 @@ module Travis
           end
 
           def compact_seq
-            value.reject { |value| warn(value) if value.missing? }
+            value.reject(&:missing?)
           end
 
           def compact_map
-            value.reject { |_, value| warn(value) if value.missing? }.to_h
+            value.reject { |_, value| value.missing? }.to_h
           end
 
           def values
             value.seq? ? value : value.values
-          end
-
-          def warn(value)
-            value.msg :warn, :empty if warn?(value)
-            true
-          end
-
-          def warn?(value)
-            !value.none? && !value.errored?
           end
         end
       end

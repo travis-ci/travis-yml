@@ -69,13 +69,10 @@ module Travis
             schemas = Schema.select(schema, value)
             schemas.detect do |schema|
               other = Change.apply(schema, value)
-              # if schema.seq?
-              #   puts
-              #   p schema.type
-              #   p other.serialize
-              #   p schema.matches?(other)
-              #   p schema.normal?
-              # end
+              # puts
+              # p schema.type
+              # p other.serialize
+              # p schema.matches?(other) || schema.normal?
               break other if schema.normal? || schema.matches?(other)
             end || value
           end

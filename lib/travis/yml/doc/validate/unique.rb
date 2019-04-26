@@ -49,7 +49,7 @@ module Travis
             end
 
             def warn
-              value.warn :duplicate, dupes
+              value.info :duplicate, dupes
             end
 
             def compact(obj)

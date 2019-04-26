@@ -1,7 +1,7 @@
 module Spec
   module Support
     module Doc
-      OPTS = [:alert, :required, :defaults]
+      OPTS = [:alert, :defaults, :empty]
 
       def self.included(const)
         const.let(:empty) { {} }

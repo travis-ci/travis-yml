@@ -42,6 +42,7 @@ module Travis
 
           def clean(key)
             other = clean_key(key)
+            return key if key == :"_#{other}" # allowed custom keys
             return key unless known?(other) || misplaced?(other)
             warn :clean_key, key.to_sym, other.to_sym if key.to_s != other.to_s
             other
@@ -58,6 +59,7 @@ module Travis
           def find(key)
             return key unless strict?
             other = match_key(allowed, key)
+            return key if key == :"_#{other}" # allowed custom keys
             return key unless known?(other) || alias?(other) || misplaced?(other)
             warn :find_key, key.to_sym, other.to_sym if key != other
             other

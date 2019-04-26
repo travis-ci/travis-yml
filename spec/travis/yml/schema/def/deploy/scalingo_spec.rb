@@ -51,6 +51,7 @@ describe Travis::Yml::Schema::Def::Deploy::Scalingo, 'structure' do
               }
             },
             additionalProperties: false,
+            normal: true,
             prefix: :provider,
             required: [
               :provider
@@ -61,8 +62,7 @@ describe Travis::Yml::Schema::Def::Deploy::Scalingo, 'structure' do
                   :user
                 ]
               }
-            },
-            normal: true
+            }
           },
           {
             type: :string,
@@ -71,7 +71,8 @@ describe Travis::Yml::Schema::Def::Deploy::Scalingo, 'structure' do
             ],
             strict: true
           }
-        ]
+        ],
+        normal: true
       )
     end
   end

@@ -28,21 +28,38 @@ describe Travis::Yml, 'matrix' do
   end
 
   describe 'prefix include' do
-    describe 'given a map' do
+    describe 'given a map (rvm)' do
       yaml %(
         matrix:
-          include:
-            rvm: 2.3
+          rvm: 2.3
       )
       it { should serialize_to matrix: { include: [rvm: ['2.3']] } }
+      it { should_not have_msg }
+    end
+
+    describe 'given a map (script)' do
+      yaml %(
+        matrix:
+          script: str
+      )
+      it { should serialize_to matrix: { include: [script: ['str']] } }
+      it { should_not have_msg }
+    end
+
+    describe 'given a map (stage)' do
+      yaml %(
+        matrix:
+          stage: str
+      )
+      it { should serialize_to matrix: { include: [stage: 'str'] } }
+      it { should_not have_msg }
     end
 
     describe 'given a seq of maps' do
       yaml %(
         matrix:
-          include:
-            - rvm: 2.3
-            - rvm: 2.4
+          - rvm: 2.3
+          - rvm: 2.4
       )
       it { should serialize_to matrix: { include: [{ rvm: ['2.3'] }, { rvm: ['2.4'] }] } }
       it { should_not have_msg }
@@ -89,9 +106,9 @@ describe Travis::Yml, 'matrix' do
         matrix:
           include:
             - rvm: 2.3
-              stage: one
+              stage: str
       )
-      it { should serialize_to matrix: { include: [rvm: ['2.3'], stage: { name: 'one' }] } }
+      it { should serialize_to matrix: { include: [rvm: ['2.3'], stage: 'str'] } }
     end
 
     describe 'given a map' do
@@ -164,7 +181,7 @@ describe Travis::Yml, 'matrix' do
             - name: name
       )
       it { should serialize_to matrix: { include: [{ name: 'name' }, { name: 'name' }] } }
-      it { should have_msg [:warn, :'matrix.include', :duplicate, name: ['name']] }
+      it { should have_msg [:info, :'matrix.include', :duplicate, name: ['name']] }
     end
 
     describe 'given addons' do
@@ -413,27 +430,5 @@ describe Travis::Yml, 'matrix' do
     it { should serialize_to matrix: { include: [addons: { apt: { packages: ['clang'] } }] } }
     it { should have_msg [:warn, :'matrix.include', :migrate, key: :apt, to: :addons, value: { packages: ['clang'] }] }
     it { should have_msg [:warn, :'matrix.include', :migrate, key: :apt, to: :addons, value: nil] }
-    it { should have_msg [:warn, :'matrix.include', :empty, key: :include] }
-  end
-
-  describe 'whatever this is' do
-    yaml %(
-      language: cpp
-      dist: trusty
-      sudo: required
-
-      matrix:
-        include:
-          - os: linux
-            addons:
-              apt:
-                sources:
-                  - ubuntu-toolchain-r-test
-                packages:
-                  - g++-4.8
-                  - libgmp-dev
-            env: COMPILER=gcc VERSION=4.8 CXXFLAGS="-std=c++11"
-    )
-    it { should_not have_msg }
   end
 end

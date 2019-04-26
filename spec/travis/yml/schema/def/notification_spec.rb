@@ -9,6 +9,7 @@ describe Travis::Yml::Schema::Def::Notification::Notifications, 'structure' do
       should eq(
         '$id': :notifications,
         title: 'Notifications',
+        normal: true,
         anyOf: [
           {
             type: :object,

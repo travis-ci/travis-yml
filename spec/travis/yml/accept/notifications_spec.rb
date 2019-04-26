@@ -6,7 +6,15 @@ describe Travis::Yml, 'notifications' do
       notifications:
     )
     it { should serialize_to empty }
-    it { should have_msg [:warn, :notifications, :empty] }
+    it { should_not have_msg }
+  end
+
+  describe 'given true' do
+    yaml %(
+      notifications: true
+    )
+    it { should serialize_to notifications: { email: { enabled: true } } }
+    it { should_not have_msg }
   end
 
   describe 'given false' do
@@ -18,6 +26,15 @@ describe Travis::Yml, 'notifications' do
   end
 
   describe 'notifications.email' do
+    describe 'given nil' do
+      yaml %(
+        notifications:
+          email:
+      )
+      it { should serialize_to empty }
+      it { should_not have_msg }
+    end
+
     describe 'given true' do
       yaml %(
         notifications:

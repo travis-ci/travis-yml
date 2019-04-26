@@ -8,6 +8,7 @@ describe Travis::Yml::Schema::Def::Notification::Campfire, 'structure' do
       should eq(
         '$id': :notification_campfire,
         title: 'Notification Campfire',
+        normal: true,
         anyOf: [
           {
             type: :object,

@@ -1,3 +1,5 @@
+require 'travis/yml/doc/helper/match'
+
 module Travis
   module Yml
     module Doc
@@ -42,14 +44,17 @@ module Travis
             def applies?(map)
               key = schema.opts[:detect]
               return unless enum = map[key]
-              enum.known?(value_for(key)) if enum.enum? && enum.size == 1
+              return unless enum.enum? && enum.size == 1
+              return unless str = value_for(enum, key)
+              return unless str.is_a?(String)
+              enum.known?(str) || enum.known?(match(enum, str))
             end
 
             def normal
               schema.select(&:normal?)
             end
 
-            def value_for(key)
+            def value_for(enum, key)
               case value.type
               when :map
                 value[key]&.value
@@ -58,6 +63,10 @@ module Travis
               else
                 value&.value
               end
+            end
+
+            def match(enum, str)
+              Match.new(enum.values.map(&:to_s), str).run
             end
 
             def maps(schema)

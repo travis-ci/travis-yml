@@ -18,6 +18,8 @@ module Travis
           def define
             strict false
 
+            include :languages
+
             map :group
             map :osx_image, to: :str, edge: true, only: { os: :osx } # TODO move the opts to the definition
 
@@ -43,8 +45,6 @@ module Travis
             map :before_deploy,  to: :seq
             map :after_deploy,   to: :seq
             map :before_cache,   to: :seq
-
-            include :languages
 
             export
           end

@@ -35,6 +35,7 @@ module Travis
           sdk
           slack
           start_script
+          test
           trusty
           vimscript
         )

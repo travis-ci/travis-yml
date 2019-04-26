@@ -6,12 +6,13 @@ module Travis
     module Schema
       module Dsl
         class Group < Node
-          def add(*types)
+          def type(*types)
             types = types.flatten
             opts = types.last.is_a?(Hash) ? types.pop : {}
             types = types.map { |type| build(self, type, opts).node }
             node.types.concat(types)
           end
+          alias add type # remove this
         end
       end
     end

@@ -35,7 +35,7 @@ module Travis
             map :jwt,             to: :jwts
             map :sauce_connect,   to: :sauce_connect
             map :snaps
-            map :ssh_known_hosts, to: :seq
+            map :ssh_known_hosts, to: :seq, type: :secure
             map :sonarcloud
 
             # turn this into a proper addon definition. the map allows the key debug: true
