@@ -10,6 +10,7 @@ module Travis
             def define
               map :email,   to: :secure
               map :api_key, to: :secure
+              map :tag,     to: :str
             end
           end
         end

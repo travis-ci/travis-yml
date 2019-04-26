@@ -18,7 +18,8 @@ module Travis
         extend self
 
         def apply(schema, value)
-          build(schema, value).apply
+          other = build(schema, value).apply
+          other
         end
 
         def build(schema, value)
@@ -48,7 +49,7 @@ module Travis
         CHANGES = {
           all: [],
           any: [],
-          map: [Keys, Cache, Enable, Prefix, Pick, EnvVar, Inherit],
+          map: [Keys, Cache, Enable, Prefix, Pick, Inherit],
           seq: [Pick, Wrap, EnvVars],
           obj: [Pick, Cast, Downcase, Value],
         }
@@ -68,7 +69,14 @@ module Travis
             schemas = Schema.select(schema, value)
             schemas.detect do |schema|
               other = Change.apply(schema, value)
-              break other if schema.matches?(other)
+              # if schema.seq?
+              #   puts
+              #   p schema.type
+              #   p other.serialize
+              #   p schema.matches?(other)
+              #   p schema.normal?
+              # end
+              break other if schema.normal? || schema.matches?(other)
             end || value
           end
 

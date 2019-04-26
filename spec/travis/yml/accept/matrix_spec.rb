@@ -81,7 +81,7 @@ describe Travis::Yml, 'matrix' do
           include: true
       )
       it { should serialize_to empty }
-      it { should have_msg [:error, :"matrix.include", :invalid_type, expected: :seq, actual: :bool, value: true] }
+      it { should have_msg [:error, :"matrix.include", :invalid_type, expected: :map, actual: :bool, value: true] }
     end
 
     describe 'given a seq of maps' do
@@ -103,7 +103,7 @@ describe Travis::Yml, 'matrix' do
       it { should serialize_to matrix: { include: [rvm: ['2.3']] } }
     end
 
-    describe 'given a nested map with a version number' do
+    describe 'given a nested map with a broken env string (missing newline)' do
       yaml %(
         matrix:
           include:
@@ -111,7 +111,7 @@ describe Travis::Yml, 'matrix' do
               4.0.5env: EDITOR=nvim
       )
       it { should serialize_to empty }
-      it { should have_msg [:error, :'matrix.include', :invalid_type, expected: :seq, actual: :map, value: { mono: { :'4.0.5env' => 'EDITOR=nvim' } }] }
+      it { should have_msg [:error, :'matrix.include.mono', :invalid_type, expected: :str, actual: :map, value: { :'4.0.5env' => 'EDITOR=nvim' }] }
     end
 
     describe 'given a seq of maps (with env given as a map)' do
@@ -259,7 +259,7 @@ describe Travis::Yml, 'matrix' do
             #{key}: true
         )
         it { should serialize_to empty }
-        it { should have_msg [:error, :"matrix.#{key}", :invalid_type, expected: :seq, actual: :bool, value: true] }
+        it { should have_msg [:error, :"matrix.#{key}", :invalid_type, expected: :map, actual: :bool, value: true] }
       end
 
       describe 'default language', defaults: true do

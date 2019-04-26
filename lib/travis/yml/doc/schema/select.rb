@@ -26,23 +26,23 @@ module Travis
           # quite ideal).
 
           def apply
-            schemas = [required || normal].flatten
+            schemas = [detect || normal].flatten
             schemas.any? ? schemas : schema.schemas
           end
 
           private
 
-            def required
+            def detect
               return unless schema.detect?
-              maps = select(schema, &:required?)
-              maps.detect(&method(:requires?))
+              schema.detect do |schema|
+                maps(schema).detect(&method(:applies?))
+              end
             end
 
-            def requires?(map)
-              map.required.any? do |key|
-                next unless enum = map[key]
-                enum.known?(value_for(key)) if enum.enum? && enum.size == 1
-              end
+            def applies?(map)
+              key = schema.opts[:detect]
+              return unless enum = map[key]
+              enum.known?(value_for(key)) if enum.enum? && enum.size == 1
             end
 
             def normal
@@ -60,10 +60,10 @@ module Travis
               end
             end
 
-            def select(schema, &block)
+            def maps(schema)
               case schema.type
               when :any
-                schema.map { |schema| select(schema, &block) }.flatten
+                schema.map { |schema| maps(schema) }.flatten
               when :seq
                 [schema.schema] if schema.schema.map?
               when :map

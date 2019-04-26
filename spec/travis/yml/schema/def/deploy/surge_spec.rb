@@ -38,11 +38,12 @@ describe Travis::Yml::Schema::Def::Deploy::Surge, 'structure' do
                 type: :string
               }
             },
-            normal: true,
+            additionalProperties: false,
             prefix: :provider,
             required: [
               :provider
-            ]
+            ],
+            normal: true
           },
           {
             type: :string,

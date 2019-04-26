@@ -12,7 +12,7 @@ module Travis
           end
 
           def matrix(key, opts = {})
-            node.root.expand(key)
+            node.root.expand_key(key)
             map(key, opts.merge(expand: key))
           end
 

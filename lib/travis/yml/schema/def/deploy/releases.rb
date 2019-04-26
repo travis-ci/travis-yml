@@ -24,6 +24,7 @@ module Travis
               map :overwrite,      to: :bool
               map :release_number, to: :str
               map :prerelease,     to: :bool
+              map :draft,          to: :bool
             end
           end
         end

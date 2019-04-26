@@ -40,9 +40,9 @@ module Travis
             registry :deploy
 
             def before_define
-              normal
+              # normal
 
-              strict false
+              # strict false
               prefix :provider
 
               map :provider,      to: :enum, values: registry_key, required: true, strict: true

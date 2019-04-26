@@ -92,11 +92,12 @@ describe Travis::Yml::Schema::Def::Deploy::Appfog, 'structure' do
                 ]
               }
             },
-            normal: true,
+            additionalProperties: false,
             prefix: :provider,
             required: [
               :provider
-            ]
+            ],
+            normal: true
           },
           {
             type: :string,

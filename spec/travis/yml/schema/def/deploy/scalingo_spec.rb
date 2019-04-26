@@ -50,11 +50,19 @@ describe Travis::Yml::Schema::Def::Deploy::Scalingo, 'structure' do
                 type: :string
               }
             },
-            normal: true,
+            additionalProperties: false,
             prefix: :provider,
             required: [
               :provider
-            ]
+            ],
+            keys: {
+              username: {
+                aliases: [
+                  :user
+                ]
+              }
+            },
+            normal: true
           },
           {
             type: :string,

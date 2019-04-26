@@ -30,6 +30,14 @@ module Travis
             :secure
           end
 
+          def namespace
+            :type
+          end
+
+          def id
+            registry_key
+          end
+
           def export?
             true
           end
@@ -52,8 +60,12 @@ module Travis
             :secures
           end
 
+          def namespace
+            :type
+          end
+
           def id
-            :secures
+            registry_key
           end
 
           def types

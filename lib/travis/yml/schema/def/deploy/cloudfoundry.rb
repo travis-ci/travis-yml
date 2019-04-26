@@ -19,6 +19,7 @@ module Travis
               map :key,                 to: :str
               map :manifest,            to: :str
               map :skip_ssl_validation, to: :bool
+              map :app_name,            to: :str
             end
           end
         end

@@ -27,7 +27,7 @@ describe Travis::Yml, 'root' do
       rvm:
         foo: foo
     )
-    it { should have_msg [:error, :rvm, :invalid_type, expected: :seq, actual: :map, value: { foo: 'foo' }] }
+    it { should have_msg [:error, :rvm, :invalid_type, expected: :str, actual: :map, value: { foo: 'foo' }] }
   end
 
   describe 'corrects' do

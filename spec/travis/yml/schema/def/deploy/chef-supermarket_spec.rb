@@ -1,6 +1,6 @@
 describe Travis::Yml::Schema::Def::Deploy::ChefSupermarket, 'structure' do
   describe 'definitions' do
-    subject { Travis::Yml.schema[:definitions][:deploy][:'chef-supermarket'] }
+    subject { Travis::Yml.schema[:definitions][:deploy][:"chef-supermarket"] }
 
     # it { puts JSON.pretty_generate(subject) }
 
@@ -41,11 +41,12 @@ describe Travis::Yml::Schema::Def::Deploy::ChefSupermarket, 'structure' do
                 type: :string
               }
             },
-            normal: true,
+            additionalProperties: false,
             prefix: :provider,
             required: [
               :provider
-            ]
+            ],
+            normal: true
           },
           {
             type: :string,

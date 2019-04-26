@@ -1,6 +1,17 @@
 describe Travis::Yml, 'testfairy' do
   subject { described_class.apply(parse(yaml)) }
 
+  describe 'selects' do
+    yaml %(
+      deploy:
+        provider: testfairy
+        api-key: str
+        app-file: str
+    )
+      it { should serialize_to deploy: [provider: 'testfairy', 'api_key': 'str', 'app_file': 'str'] }
+      # it { should_not have_msg }
+  end
+
   describe 'api_key' do
     describe 'given a secure' do
       yaml %(
@@ -151,9 +162,9 @@ describe Travis::Yml, 'testfairy' do
       yaml %(
         deploy:
           provider: testfairy
-          record_on_backgroup: true
+          record_on_background: true
       )
-      it { should serialize_to deploy: [provider: 'testfairy', record_on_backgroup: true] }
+      it { should serialize_to deploy: [provider: 'testfairy', record_on_background: true] }
       it { should_not have_msg }
     end
   end

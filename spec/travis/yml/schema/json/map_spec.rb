@@ -109,7 +109,7 @@ describe Travis::Yml::Schema::Json::Map do
                 type: :object
               },
               {
-                '$ref': '#/definitions/secure'
+                '$ref': '#/definitions/type/secure'
               },
             ]
           }

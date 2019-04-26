@@ -13,7 +13,7 @@ module Travis
           end
 
           def apply?
-            schema.seq? && value.seq? || schema.map? && value.map?
+            schema.seq? && value.seq? || schema.map? && schema.strict? && value.map?
           end
 
           def compact?

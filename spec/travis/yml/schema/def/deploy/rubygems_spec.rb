@@ -66,13 +66,17 @@ describe Travis::Yml::Schema::Def::Deploy::Rubygems, 'structure' do
               },
               gemspec: {
                 type: :string
+              },
+              gemspec_glob: {
+                type: :string
               }
             },
-            normal: true,
+            additionalProperties: false,
             prefix: :provider,
             required: [
               :provider
-            ]
+            ],
+            normal: true
           },
           {
             type: :string,

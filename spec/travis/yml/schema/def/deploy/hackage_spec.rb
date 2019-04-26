@@ -38,11 +38,12 @@ describe Travis::Yml::Schema::Def::Deploy::Hackage, 'structure' do
                 '$ref': '#/definitions/type/secure'
               }
             },
-            normal: true,
+            additionalProperties: false,
             prefix: :provider,
             required: [
               :provider
-            ]
+            ],
+            normal: true
           },
           {
             type: :string,

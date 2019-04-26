@@ -9,12 +9,14 @@ module Travis
             register :pypi
 
             def define
-              map :user,          to: :secure
-              map :password,      to: :secure
-              map :api_key,       to: :secure
-              map :server,        to: :str
-              map :distributions, to: :str
-              map :docs_dir,      to: :str
+              map :user,             to: :secure
+              map :password,         to: :secure
+              map :api_key,          to: :secure
+              map :server,           to: :str
+              map :distributions,    to: :str
+              map :docs_dir,         to: :str
+              map :skip_existing,    to: :bool
+              map :skip_upload_docs, to: :bool
             end
           end
         end

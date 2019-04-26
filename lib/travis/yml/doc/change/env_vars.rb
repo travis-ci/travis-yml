@@ -6,44 +6,45 @@ module Travis
   module Yml
     module Doc
       module Change
-        class EnvVar < Base
+        class EnvVars < Base
           def apply
-            parse? ? parse : value
+            # puts
+            # p env_vars?
+            # p value.serialize
+            apply? && env_vars? ? env_vars : value
           end
 
           private
 
-            def parse?
-              value.str? && value.value.include?('=')
+            def apply?
+              schema.change?(:env_vars)
             end
 
-            def parse
+            def env_vars?
+              value.seq? && value.all? do |value|
+                value.map? || value.secure? || value.str?
+              end
+            end
+
+            def env_vars
+              vars = value.value.map do |value|
+                value = parse(value) if value.str? && value.value.include?('=')
+                value = split(value) if value.map?
+                value
+              end
+              build(vars.flatten(1))
+            end
+
+            def split(value)
+              value.map { |key, value| { key => value } }
+            end
+
+            def parse(value)
               vars = Travis::EnvVars::String.new(value.value).parse
               vars = symbolize(vars)
               build(vars)
             rescue Travis::EnvVars::ParseError => e
               value
-            end
-        end
-
-        class EnvVars < Base
-          def apply
-            env_vars? && split? ? split : value
-          end
-
-          private
-
-            def env_vars?
-              schema.change?(:env_vars)
-            end
-
-            def split?
-              value.seq? && value.all? { |value| value.map? || value.secure? }
-            end
-
-            def split
-              vars = value.value.map { |map| map.map { |key, value| { key => value } } }
-              build(vars.flatten(1))
             end
         end
       end

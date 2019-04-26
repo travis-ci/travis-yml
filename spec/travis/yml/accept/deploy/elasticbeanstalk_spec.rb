@@ -14,15 +14,15 @@ describe Travis::Yml, 'elasticbeanstalk' do
     end
   end
 
-  describe 'securet_access_key' do
+  describe 'secret_access_key' do
     describe 'given a secure' do
       yaml %(
         deploy:
           provider: elasticbeanstalk
-          securet_access_key:
+          secret_access_key:
             secure: secure
       )
-      it { should serialize_to deploy: [provider: 'elasticbeanstalk', securet_access_key: { secure: 'secure' }] }
+      it { should serialize_to deploy: [provider: 'elasticbeanstalk', secret_access_key: { secure: 'secure' }] }
       it { should_not have_msg }
     end
   end

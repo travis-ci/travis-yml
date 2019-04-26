@@ -12,6 +12,7 @@ module Travis
               map :password,     to: :secure
               map :organization, to: :str
               map :space,        to: :str
+              map :app_name,     to: :str
             end
           end
         end

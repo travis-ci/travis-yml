@@ -15,8 +15,7 @@ describe Travis::Yml, dpl: true do
 
   def filter(msg)
     msg[2] == :underscore_key ||
-    msg[2] == :unknown_value && msg[3][:value] == 'nodejitsu' || # dead provider # dead provider # dead provider # dead provider
-    msg[2] == :unknown_value && msg[3][:value] == 'hephy'        # new provider? not mentioned in docs
+    msg[2] == :find_key && [:access_token, :local_dir, :site_id].include?(msg[3][:original])
   end
 
   VALUES = {
@@ -41,6 +40,8 @@ describe Travis::Yml, dpl: true do
 
   dpls.each do |provider, dpl|
     describe provider do
+      next if provider == 'hephy'      # dead provider
+      next if provider == 'nodejitsu'  # new provider?
       dpl[:opts].each do |key, value|
         describe key.to_s do
           yaml %(

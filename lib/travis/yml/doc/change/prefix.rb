@@ -8,12 +8,8 @@ module Travis
       module Change
         class Prefix < Base
           def apply
-            # puts
-            # p value.serialize
-            # p schema.type
-            # p schema.prefix
-            # p prefix?
-            apply? && prefix? ? prefixed : value
+            other = apply? && prefix? ? prefixed : value
+            other
           end
 
           def apply?
@@ -33,7 +29,8 @@ module Travis
 
           def prefixed
             other = build(schema.prefix => value)
-            other
+            other = Change.apply(schema, other) unless schema.matches?(other)
+            schema.matches?(other) ? other : value
           end
 
           def keys(value)

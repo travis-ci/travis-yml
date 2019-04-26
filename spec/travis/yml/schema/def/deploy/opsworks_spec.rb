@@ -37,6 +37,9 @@ describe Travis::Yml::Schema::Def::Deploy::Opsworks, 'structure' do
               secret_access_key: {
                 '$ref': '#/definitions/type/secure'
               },
+              region: {
+                type: :string
+              },
               app_id: {
                 type: :string
               },
@@ -54,13 +57,17 @@ describe Travis::Yml::Schema::Def::Deploy::Opsworks, 'structure' do
               },
               custom_json: {
                 type: :string
+              },
+              update_app_on_success: {
+                type: :boolean
               }
             },
-            normal: true,
+            additionalProperties: false,
             prefix: :provider,
             required: [
               :provider
-            ]
+            ],
+            normal: true
           },
           {
             type: :string,

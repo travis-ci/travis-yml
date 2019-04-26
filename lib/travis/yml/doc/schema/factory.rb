@@ -162,7 +162,6 @@ module Travis
               definitions
               description
               examples
-              expand
               items
               maxProperties
               minItems

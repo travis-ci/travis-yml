@@ -8,6 +8,10 @@ module Travis
       module Change
         class Wrap < Base
           def apply
+            # puts
+            # p :WRAP
+            # p wrap?
+            # p value.serialize
             wrap? ? wrap : value
           end
 

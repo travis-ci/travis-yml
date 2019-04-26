@@ -212,7 +212,7 @@ module Travis
 
             def includes(node)
               all = super(node.transform(:map))
-              opts = { title: node.title, schema: all, expand: node.expand }
+              opts = { title: node.title, schema: all, expand_keys: node.expand_keys }
               Type::Schema.new(nil, opts)
             end
           end

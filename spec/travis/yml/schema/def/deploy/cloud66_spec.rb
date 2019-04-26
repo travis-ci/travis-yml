@@ -35,11 +35,12 @@ describe Travis::Yml::Schema::Def::Deploy::Cloud66, 'structure' do
                 type: :string
               }
             },
-            normal: true,
+            additionalProperties: false,
             prefix: :provider,
             required: [
               :provider
-            ]
+            ],
+            normal: true
           },
           {
             type: :string,

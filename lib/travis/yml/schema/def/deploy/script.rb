@@ -8,7 +8,7 @@ module Travis
             register :script
 
             def define
-              map :script, to: :seq
+              map :script, to: :str
             end
           end
         end

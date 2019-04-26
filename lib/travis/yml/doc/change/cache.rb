@@ -76,10 +76,7 @@ module Travis
             end
 
             def strs
-              strs = value.reject { |value| dir?(value) }.map(&:serialize)
-              strs = strs.map { |value| value.is_a?(Hash) ? except(value, *bool_keys) : value }
-              strs = strs.reject(&:empty?) if strs.any?
-              strs - bool_keys.map(&:to_s)
+              value.select(&:str?).map(&:serialize) - bool_keys.map(&:to_s)
             end
 
             def others
@@ -91,7 +88,6 @@ module Travis
             end
 
             def bool_keys
-              # schema.values.select(&:bool?).map(&:key) - [:edge]
               schema.keys.select { |key| schema[key].bool? } - [:edge]
             end
             memoize :bool_keys

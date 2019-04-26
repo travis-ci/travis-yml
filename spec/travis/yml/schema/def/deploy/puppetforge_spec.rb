@@ -41,13 +41,14 @@ describe Travis::Yml::Schema::Def::Deploy::Puppetforge, 'structure' do
                 type: :string
               }
             },
-            normal: true,
+            additionalProperties: false,
             prefix: :provider,
             required: [
               :provider,
               :user,
               :password
-            ]
+            ],
+            normal: true
           },
           {
             type: :string,

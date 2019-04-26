@@ -67,13 +67,17 @@ describe Travis::Yml::Schema::Def::Deploy::Codedeploy, 'structure' do
               },
               key: {
                 type: :string
+              },
+              bundle_type: {
+                type: :string
               }
             },
-            normal: true,
+            additionalProperties: false,
             prefix: :provider,
             required: [
               :provider
-            ]
+            ],
+            normal: true
           },
           {
             type: :string,

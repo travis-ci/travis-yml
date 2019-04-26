@@ -89,12 +89,12 @@ describe Travis::Yml::Doc::Change do
 
     describe 'a map with an arch' do
       let(:value) { { name: 'amd64' } }
-      it { should serialize_to name: 'amd64' }
+      it { should serialize_to [name: 'amd64'] }
     end
 
     describe 'a map with a seq of strs' do
       let(:value) { { name: ['amd64'] } }
-      it { should serialize_to name: ['amd64'] }
+      it { should serialize_to [name: ['amd64']] }
     end
   end
 
@@ -169,6 +169,11 @@ describe Travis::Yml::Doc::Change do
       it { should serialize_to matrix: [FOO: 'foo'] }
     end
 
+    describe 'an empty var' do
+      let(:value) { 'FOO=' }
+      it { should serialize_to matrix: [FOO: nil] }
+    end
+
     describe 'several vars' do
       let(:value) { 'FOO=foo BAR=bar' }
       it { should serialize_to matrix: [{ FOO: 'foo', }, { BAR: 'bar' }] }
@@ -229,7 +234,7 @@ describe Travis::Yml::Doc::Change do
 
     describe 'a str' do
       let(:value) { { matrix: 'foo' } }
-      it { should serialize_to value }
+      it { should serialize_to matrix: ['foo'] }
     end
 
     describe 'a seq of strs' do
@@ -389,12 +394,12 @@ describe Travis::Yml::Doc::Change do
 
     describe 'a map with a str' do
       let(:value) { { name: 'linux' } }
-      it { should serialize_to name: 'linux' }
+      it { should serialize_to [name: 'linux'] }
     end
 
     describe 'a map with a seq' do
       let(:value) { { name: ['linux'] } }
-      it { should serialize_to name: ['linux'] }
+      it { should serialize_to [name: ['linux']] }
     end
   end
 
@@ -413,12 +418,12 @@ describe Travis::Yml::Doc::Change do
 
     describe 'a map with a str' do
       let(:value) { { name: 'redis' } }
-      it { should serialize_to name: 'redis' }
+      it { should serialize_to [name: 'redis'] }
     end
 
     describe 'a map with a seq' do
       let(:value) { { name: ['redis'] } }
-      it { should serialize_to name: ['redis'] }
+      it { should serialize_to [name: ['redis']] }
     end
   end
 

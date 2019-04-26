@@ -1,7 +1,7 @@
 describe Travis::Yml, 'env' do
   subject { described_class.apply(parse(yaml)) }
 
-  describe 'given a string' do
+  describe 'given a var' do
     yaml %(
       env: FOO=foo
     )
@@ -9,7 +9,15 @@ describe Travis::Yml, 'env' do
     it { should_not have_msg }
   end
 
-  describe 'given a seq of strings' do
+  describe 'given an empty var' do
+    yaml %(
+      env: FOO=
+    )
+    it { should serialize_to env: { matrix: [FOO: nil] } }
+    it { should_not have_msg }
+  end
+
+  describe 'given a seq of vars' do
     yaml %(
       env:
         - FOO=foo
@@ -25,7 +33,7 @@ describe Travis::Yml, 'env' do
         -
     )
     it { should serialize_to empty }
-    it { should have_msg [:warn, :env, :empty] }
+    it(nil, empty: true) { should have_msg [:warn, :env, :empty] }
   end
 
   describe 'given a map' do
