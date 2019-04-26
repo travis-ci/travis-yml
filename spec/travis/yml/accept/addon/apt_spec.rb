@@ -169,4 +169,18 @@ describe Travis::Yml, 'addon: apt' do
     it { should serialize_to addons: { apt: { update: true } } }
     it { should_not have_msg }
   end
+
+  describe 'expanding a yaml reference into a seq (common practise, but technically wrong) (on addons)' do
+    yaml %(
+      _sources: &sources
+        - one
+      addons:
+        apt:
+          sources:
+            - *sources
+            - two
+    )
+    it { should serialize_to addons: { apt: { sources: [{ name: 'one' }, { name: 'two' }] } } }
+    it { should have_msg [:warn, :'addons.apt.sources.name', :invalid_seq, value: 'one'] }
+  end
 end

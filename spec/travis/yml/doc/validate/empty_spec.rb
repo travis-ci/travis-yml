@@ -1,5 +1,5 @@
-describe Travis::Yml::Doc::Validate, 'empty' do
-  subject { described_class.apply(build_schema(schema), build_value(value)) }
+describe Travis::Yml::Doc::Validate, 'empty', empty: true do
+  subject { described_class.apply(build_schema(schema), build_value(value, opts)) }
 
   describe 'str' do
     let(:schema) { { type: :string } }

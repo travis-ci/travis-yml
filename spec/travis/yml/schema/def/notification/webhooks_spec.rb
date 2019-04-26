@@ -8,6 +8,7 @@ describe Travis::Yml::Schema::Def::Notification::Webhooks, 'structure' do
       should eq(
         '$id': :notification_webhooks,
         title: 'Notification Webhooks',
+        normal: true,
         anyOf: [
           {
             type: :object,

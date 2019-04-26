@@ -1,5 +1,5 @@
-describe Travis::Yml, 'empty' do
-  subject { described_class.apply(value) }
+describe Travis::Yml, 'empty', empty: true do
+  subject { described_class.apply(value, opts) }
 
   describe 'seq' do
     describe 'given a seq' do

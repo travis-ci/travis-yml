@@ -8,7 +8,7 @@ module Travis
       module Change
         class Prefix < Base
           def apply
-            other = apply? && prefix? ? prefixed : value
+            other = apply? && prefix? ? prefix : value
             other
           end
 
@@ -17,18 +17,30 @@ module Travis
           end
 
           def prefix?
-            schema.prefix? && !known_keys?(value)
+            schema.prefix? && !prefixed? && value.given?
           end
 
-          def known_keys?(value)
-            case value.type
-            when :map then keys(value).any? { |key| schema.known?(key) }
-            when :seq then known_keys?(value.first)
-            end
+          def prefixed?
+            value.map? && value.key?(schema.prefix)
           end
 
-          def prefixed
+          def prefix
+            value.map? ? prefix_map : prefix_obj
+          end
+
+          def prefix_map
+            return value if value.keys.all? { |key| schema.known?(key) }
+            known, other = split(value.value, *schema.keys)
+            other = build({ schema.prefix => other }.merge(known))
+            matching(other)
+          end
+
+          def prefix_obj
             other = build(schema.prefix => value)
+            matching(other)
+          end
+
+          def matching(other)
             other = Change.apply(schema, other) unless schema.matches?(other)
             schema.matches?(other) ? other : value
           end

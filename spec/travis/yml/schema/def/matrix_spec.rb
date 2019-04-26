@@ -9,6 +9,7 @@ describe Travis::Yml::Schema::Def::Matrix, 'structure' do
         should eq(
           '$id': :matrix,
           title: 'Matrix',
+          normal: true,
           anyOf: [
             {
               type: :object,
@@ -98,7 +99,7 @@ describe Travis::Yml::Schema::Def::Matrix, 'structure' do
         it { should include sudo: { '$ref': '#/definitions/type/sudo' } }
         it { should include env: { '$ref': '#/definitions/type/env_vars' } }
         it { should include compiler: { '$ref': '#/definitions/type/compilers' } }
-        it { should include stage: { '$ref': '#/definitions/type/stage' } }
+        it { should include stage: { type: :string } }
       end
     end
   end

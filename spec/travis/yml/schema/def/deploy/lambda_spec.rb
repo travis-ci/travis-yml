@@ -97,11 +97,11 @@ describe Travis::Yml::Schema::Def::Deploy::Lambda, 'structure' do
               }
             },
             additionalProperties: false,
+            normal: true,
             prefix: :provider,
             required: [
               :provider
-            ],
-            normal: true
+            ]
           },
           {
             type: :string,
@@ -110,7 +110,8 @@ describe Travis::Yml::Schema::Def::Deploy::Lambda, 'structure' do
             ],
             strict: true
           }
-        ]
+        ],
+        normal: true
       )
     end
   end

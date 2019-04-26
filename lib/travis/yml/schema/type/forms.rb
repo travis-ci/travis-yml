@@ -142,7 +142,7 @@ module Travis
             def prefix(node, child, prefix)
               any = node.transform(:any)
               any.types = [node, child]
-              any.unset :prefix, :changes, :keys, :normal, :required, :unique
+              any.unset :prefix, :changes, :keys, :required, :unique
 
               child.example = node.examples[prefix]
 

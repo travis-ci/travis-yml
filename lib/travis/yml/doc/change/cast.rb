@@ -18,12 +18,11 @@ module Travis
             end
 
             def cast?
-              schema.type != value.type && !schema.secure? && !value.secure?
+              !schema.is?(value.type) && !schema.secure? && !value.secure?
             end
 
             def cast
               return value if value.value == casted
-              # p [:cast, schema.parent[:provider].values.first.value]
               store_msgs
               build(casted)
             end

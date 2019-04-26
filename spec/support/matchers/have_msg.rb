@@ -15,12 +15,16 @@ RSpec::Matchers.define :have_msg do |msg = nil|
     end
   end
 
+  def trunc(str)
+    str.size < 1000 ? str : "#{str[0..1000]} ..."
+  end
+
   failure_message do |node|
     if node.msgs.any?
       <<~str
         expected the node
 
-          #{node.inspect}
+          #{trunc(node.inspect)}
 
         to have the msg
 
@@ -34,7 +38,7 @@ RSpec::Matchers.define :have_msg do |msg = nil|
       <<~str
         expected the node
 
-          #{node.inspect}
+          #{trunc(node.inspect)}
 
         to have the msg
 
@@ -50,7 +54,7 @@ RSpec::Matchers.define :have_msg do |msg = nil|
       <<~str
         expected the node
 
-          #{node.inspect}
+          #{trunc(node.inspect)}
 
         to not have the msg
 
@@ -64,7 +68,7 @@ RSpec::Matchers.define :have_msg do |msg = nil|
       <<~str
         expected the node
 
-          #{node.inspect}
+          #{trunc(node.inspect)}
 
         to not have any msgs, but it does:
 

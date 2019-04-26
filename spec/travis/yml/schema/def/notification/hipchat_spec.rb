@@ -8,6 +8,7 @@ describe Travis::Yml::Schema::Def::Notification::Hipchat, 'structure' do
       should eq(
         '$id': :notification_hipchat,
         title: 'Notification Hipchat',
+        normal: true,
         anyOf: [
           {
             type: :object,

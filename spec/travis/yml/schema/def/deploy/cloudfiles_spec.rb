@@ -48,11 +48,11 @@ describe Travis::Yml::Schema::Def::Deploy::Cloudfiles, 'structure' do
               }
             },
             additionalProperties: false,
+            normal: true,
             prefix: :provider,
             required: [
               :provider
-            ],
-            normal: true
+            ]
           },
           {
             type: :string,
@@ -61,7 +61,8 @@ describe Travis::Yml::Schema::Def::Deploy::Cloudfiles, 'structure' do
             ],
             strict: true
           }
-        ]
+        ],
+        normal: true
       )
     end
   end

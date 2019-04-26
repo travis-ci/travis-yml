@@ -8,6 +8,7 @@ describe Travis::Yml::Schema::Def::Addon::CodeClimate, 'structure' do
       should eq(
         '$id': :addon_code_climate,
         title: 'Addon Code Climate',
+        normal: true,
         anyOf: [
           {
             type: :object,

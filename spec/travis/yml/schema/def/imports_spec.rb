@@ -32,6 +32,7 @@ describe Travis::Yml::Schema::Def::Imports, 'structure' do
         should eq(
           '$id': :import,
           title: 'Import',
+          normal: true,
           anyOf: [
             {
               type: :object,

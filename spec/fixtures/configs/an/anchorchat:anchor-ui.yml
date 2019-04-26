@@ -1,13 +1,13 @@
-language: node_js
-node_js:
-  - "8"
-before_install:
-  cd docs && npm install && cd ../
-before_script:
-  npm run compile:before-lint && npm run lint
-after_success: npm run coverage
-before_deploy:
-  cd docs && npm run build && cd ../ && npm run build:travis && zip -r build.zip anchor-ui
+# language: node_js
+# node_js:
+#   - "8"
+# before_install:
+#   cd docs && npm install && cd ../
+# before_script:
+#   npm run compile:before-lint && npm run lint
+# after_success: npm run coverage
+# before_deploy:
+#   cd docs && npm run build && cd ../ && npm run build:travis && zip -r build.zip anchor-ui
 deploy:
   provider: releases
   api_key: $GITHUB_TOKEN # Set in travis-ci.org dashboard
@@ -23,5 +23,5 @@ deploy:
   name: ac-automation
   on:
     branch: master
-notifications:
-  email: false
+# notifications:
+#   email: false

@@ -61,10 +61,16 @@ describe Travis::Yml::Doc::Change::Keys do
     it { should have_msg [:warn, :root, :clean_key, original: :'sudo?!', key: :sudo] }
   end
 
-  describe 'an unknown key starting or ending with an underscore' do
-    let(:value) { { '_sudo': true } }
+  describe 'an unknown key starting with an underscore' do
+    let(:value) { { '_custom': true } }
+    it { should serialize_to _custom: true }
+    it { should_not have_msg }
+  end
+
+  describe 'an unknown key ending with an underscore' do
+    let(:value) { { 'sudo_': true } }
     it { should serialize_to sudo: true }
-    it { should have_msg [:warn, :root, :clean_key, original: :'_sudo', key: :sudo] }
+    it { should have_msg [:warn, :root, :clean_key, original: :'sudo_', key: :sudo] }
   end
 
   describe 'an unknown key with two underscores' do

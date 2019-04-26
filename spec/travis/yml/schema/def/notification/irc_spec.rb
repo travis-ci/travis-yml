@@ -8,6 +8,7 @@ describe Travis::Yml::Schema::Def::Notification::Irc, 'structure' do
       should eq(
         '$id': :notification_irc,
         title: 'IRC',
+        normal: true,
         anyOf: [
           {
             type: :object,

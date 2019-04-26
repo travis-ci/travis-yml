@@ -40,7 +40,7 @@ module Travis
             registry :deploy
 
             def before_define
-              # normal
+              normal
 
               # strict false
               prefix :provider
@@ -58,7 +58,7 @@ module Travis
               #     function_name:
               #       develop: foo
               #       production: bar
-
+              #
               # map :'.*', to: :branches
 
               export
@@ -70,18 +70,32 @@ module Travis
             register :conditions
 
             def define
-              include :languages
-
               normal
-              prefix :branch
+              prefix :branch # deprecate this
 
               map :branch,       to: :branches, alias: :branches
               map :repo,         to: :str
-              map :condition,    to: :str
+              map :condition,    to: :seq, type: :str
               map :all_branches, to: :bool
               map :tags,         to: :bool
 
+              language_keys.map do |key, opts|
+                map key, opts.merge(to: :str)
+              end
+
               export
+            end
+
+            # ugh. we do not want to include all of :languages, but only the keys
+            # that are also expand keys
+            def language_keys
+              keys = root.node.expand_keys
+              opts = Type.exports[:language].values.map(&:opts)
+              opts = only(merge(*opts.map { |opts| opts[:keys] }.compact), *keys)
+              opts = opts.map { |key, opts| [key, only(opts, :aliases)] }.to_h
+              keys = keys - opts.keys - [:env]
+              opts = opts.merge(keys.map { |key| [key, {}] }.to_h)
+              opts
             end
           end
 
@@ -90,7 +104,7 @@ module Travis
             register :branches
 
             def define
-              add :seq, normal: true #, prefix: :branch
+              add :seq, normal: true
               add Branch
               export
             end

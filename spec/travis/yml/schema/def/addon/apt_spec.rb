@@ -9,6 +9,7 @@ describe Travis::Yml::Schema::Def::Addon::Apt, 'structure' do
       should eq(
         '$id': :addon_apt,
         title: 'Addon Apt',
+        normal: true,
         anyOf: [
           {
             type: :object,

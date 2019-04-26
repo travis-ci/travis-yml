@@ -42,13 +42,13 @@ describe Travis::Yml::Schema::Def::Deploy::Puppetforge, 'structure' do
               }
             },
             additionalProperties: false,
+            normal: true,
             prefix: :provider,
             required: [
               :provider,
               :user,
               :password
-            ],
-            normal: true
+            ]
           },
           {
             type: :string,
@@ -57,7 +57,8 @@ describe Travis::Yml::Schema::Def::Deploy::Puppetforge, 'structure' do
             ],
             strict: true
           }
-        ]
+        ],
+        normal: true
       )
     end
   end

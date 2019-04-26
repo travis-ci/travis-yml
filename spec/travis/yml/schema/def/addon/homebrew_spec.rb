@@ -8,6 +8,7 @@ describe Travis::Yml::Schema::Def::Addon::Homebrew, 'structure' do
       should eq(
         '$id': :addon_homebrew,
         title: 'Addon Homebrew',
+        normal: true,
         anyOf: [
           {
             type: :object,
