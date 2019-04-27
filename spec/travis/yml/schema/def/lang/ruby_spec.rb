@@ -44,7 +44,8 @@ describe Travis::Yml::Schema::Def::Ruby, 'structure' do
         keys: {
           rvm: {
             aliases: [
-              :ruby
+              :ruby,
+              :rbenv
             ],
             only: {
               language: [

@@ -9,7 +9,7 @@ module Travis
           register :node_js
 
           def define
-            aliases :javascript
+            aliases :javascript, :js, :node
 
             matrix :node_js, alias: [:node]
             map :npm_args, to: :str

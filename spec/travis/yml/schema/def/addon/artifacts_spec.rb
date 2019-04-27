@@ -72,17 +72,18 @@ describe Travis::Yml::Schema::Def::Addon::Artifacts, 'structure' do
             keys: {
               key: {
                 aliases: [
+                  :aws_access_key_id,
                   :aws_access_key,
+                  :access_key_id,
                   :access_key
                 ],
               },
               secret: {
                 aliases: [
-                  :secret_key,
-                  :secret_access_key,
-                  :aws_secret,
+                  :aws_secret_access_key,
                   :aws_secret_key,
-                  :aws_secret_access_key
+                  :secret_access_key,
+                  :secret_key,
                 ],
               },
               region: {

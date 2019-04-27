@@ -15,16 +15,22 @@ module Travis
             register :releases
 
             def define
-              map :user,           to: :secure
-              map :password,       to: :secure
-              map :api_key,        to: :secure
-              map :repo,           to: :str
-              map :file,           to: :seq
-              map :file_glob,      to: :bool
-              map :overwrite,      to: :bool
-              map :release_number, to: :str
-              map :prerelease,     to: :bool
-              map :draft,          to: :bool
+              map :user,               to: :secure
+              map :password,           to: :secure
+              map :api_key,            to: :secure
+              map :repo,               to: :str
+              map :file,               to: :seq
+              map :file_glob,          to: :bool
+              map :overwrite,          to: :bool
+
+              map :body,               to: :str
+              map :draft,              to: :bool
+              map :name,               to: :str
+              map :prerelease,         to: :bool
+              map :release_number,     to: :str
+              map :tag_name,           to: :str
+              map :target_commitish,   to: :str
+              map :'preserve-history', to: :bool
             end
           end
         end

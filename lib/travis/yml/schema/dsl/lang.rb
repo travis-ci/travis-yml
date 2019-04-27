@@ -41,7 +41,8 @@ module Travis
           end
 
           def language
-            root.node.mappings[:language]
+            # root.node.mappings[:language]
+            Type.exports[:type][:language]
           end
         end
       end

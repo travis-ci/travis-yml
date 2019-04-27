@@ -9,7 +9,7 @@ module Travis
           register :shell
 
           def define
-            aliases *%i(bash generic minimal)
+            aliases *%i(bash generic minimal sh)
           end
         end
       end

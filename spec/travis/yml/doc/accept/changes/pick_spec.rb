@@ -14,12 +14,4 @@ describe Travis::Yml, 'pick' do
       it { should have_msg [:warn, :language, :invalid_seq, value: 'ruby'] }
     end
   end
-
-  describe 'os' do
-    describe 'given a nested seq of strs' do
-      let(:value) { { os: [['linux', 'osx']] } }
-      it { should serialize_to os: ['linux', 'osx'] }
-      it { should have_msg [:warn, :os, :invalid_seq, value: ['linux', 'osx']] }
-    end
-  end
 end

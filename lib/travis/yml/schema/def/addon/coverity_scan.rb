@@ -13,7 +13,7 @@ module Travis
               map :project, to: Project
               map :build_script_url,      to: :str
               map :branch_pattern,        to: :str
-              map :notification_email,    to: :str
+              map :notification_email,    to: :secure
               map :build_command,         to: :str
               map :build_command_prepend, to: :str
               super

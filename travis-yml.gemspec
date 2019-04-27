@@ -22,6 +22,6 @@ Gem::Specification.new do |s|
   s.add_dependency 'ruby-obj', '~> 1.0.0'
   s.add_dependency 'memoyze', '~> 0.0.1'
   s.add_dependency 'regstry', '~> 1.0.2'
+  s.add_dependency 'sh_vars', '~> 1.0.0'
   s.add_dependency 'travis-conditions', '~> 1.0.5'
-  s.add_dependency 'travis-env_vars', '~> 0.1.1'
 end

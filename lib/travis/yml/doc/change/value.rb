@@ -44,7 +44,7 @@ module Travis
             end
 
             def find(value)
-              return value unless other = Match.new(values, value.value).run
+              return value unless other = Match.new(values, value.value, schema.stop).run
               value.warn :find_value, original: value.value, value: other
               value.set(other)
             end

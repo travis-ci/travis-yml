@@ -1,5 +1,5 @@
 # frozen_string_literal: true
-require 'travis/env_vars'
+require 'sh_vars'
 require 'travis/yml/doc/change/base'
 
 module Travis
@@ -8,10 +8,7 @@ module Travis
       module Change
         class EnvVars < Base
           def apply
-            # puts
-            # p env_vars?
-            # p value.serialize
-            apply? && env_vars? ? env_vars : value
+            apply? ? env_vars : value
           end
 
           private
@@ -20,16 +17,12 @@ module Travis
               schema.change?(:env_vars)
             end
 
-            def env_vars?
-              value.seq? && value.all? do |value|
-                value.map? || value.secure? || value.str?
-              end
-            end
-
             def env_vars
-              vars = value.value.map do |value|
-                value = parse(value) if value.str? && value.value.include?('=')
+              vars = value.seq? ? value.value : [value]
+              vars = vars.map do |value|
+                value = parse(value) if value.str?
                 value = split(value) if value.map?
+                value = [{}] if value.none?
                 value
               end
               build(vars.flatten(1))
@@ -40,10 +33,12 @@ module Travis
             end
 
             def parse(value)
-              vars = Travis::EnvVars::String.new(value.value).parse
-              vars = symbolize(vars)
+              str = value.value
+              vars = str.empty? ? [[]] : ShVars.parse(str)
+              vars = vars.map { |pair| pair.empty? ? {} : symbolize([pair].to_h) }
               build(vars)
-            rescue Travis::EnvVars::ParseError => e
+            rescue ShVars::ParseError => e
+              # add a new msg :invalid_env_var
               value
             end
         end

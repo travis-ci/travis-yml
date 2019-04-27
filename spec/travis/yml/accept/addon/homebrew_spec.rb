@@ -41,7 +41,7 @@ describe Travis::Yml, 'addon: homebrew' do
               - str
       )
       it { should serialize_to addons: { homebrew: { packages: ['str'] } } }
-      it { should have_msg [:warn, :'addons.homebrew.packages', :invalid_seq, value: ['str']] }
+      it { should_not have_msg }
     end
   end
 

@@ -23,6 +23,7 @@ module Travis
               map :allow_empty_commit, to: :bool
               map :committer_from_gh,  to: :bool
               map :deployment_file,    to: :bool
+              map :detect_encoding,    to: :bool # TODO validate this, it's being used and Dpl::Provider has the method, not sure.
             end
           end
         end

@@ -51,7 +51,6 @@ module Travis
       clean_value:       'value %{original} is not known, but %{value} is, using %{value}',
       underscore_key:    'key %{original} is camelcased, using %{key}',
       migrate:           'migrating %{key} to %{to} (value: %{value})', # does this need action? (answer: yes, it does [Sv])
-      misplaced_key:     'dropping misplaced key %{key} (%{value})',
       unknown_key:       'dropping unknown key %{key} (%{value})',
       unknown_value:     'dropping unknown value: %{value}',
       unknown_default:   'dropping unknown value: %{value}, defaulting to %{default}',
@@ -108,34 +107,36 @@ module Travis
       end
 
       def keys
-        @keys ||= expand.all_keys - R_KEYS
+        @keys ||= expand.all_keys - r_keys
       end
 
       # R's known keys on root should definitely be reduced
-
-      R_KEYS = %i(
-        r_packages
-        r_binary_packages
-        r_github_packages
-        apt_packages
-        bioc_packages
-        brew_packages
-        bioc
-        bioc_check
-        bioc_required
-        bioc_use_devel
-        cran
-        disable_homebrew
-        latex
-        pandoc
-        pandoc_version
-        r_build_args
-        r_check_args
-        r_check_revdep
-        warnings_are_errors
-        remotes
-        repos
-      )
+      def r_keys
+        %i(
+          r_packages
+          r_binary_packages
+          r_github_packages
+          apt_packages
+          bioc_packages
+          brew_packages
+          bioc
+          bioc_check
+          bioc_required
+          bioc_use_devel
+          cran
+          disable_homebrew
+          latex
+          pandoc
+          pandoc_version
+          r_build_args
+          r_check_args
+          r_check_revdep
+          warnings_are_errors
+          remotes
+          repos
+        )
+      end
+      memoize :r_keys
 
       def expand_keys
         expand.expand_keys

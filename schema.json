@@ -676,6 +676,133 @@
           }
         ]
       },
+      "language": {
+        "$id": "language",
+        "title": "Language",
+        "type": "string",
+        "downcase": true,
+        "defaults": [
+          {
+            "value": "ruby",
+            "only": {
+              "os": [
+                "linux",
+                "windows"
+              ]
+            }
+          },
+          {
+            "value": "objective-c",
+            "only": {
+              "os": [
+                "osx"
+              ]
+            }
+          }
+        ],
+        "enum": [
+          "android",
+          "c",
+          "clojure",
+          "cpp",
+          "crystal",
+          "csharp",
+          "d",
+          "dart",
+          "elixir",
+          "elm",
+          "erlang",
+          "go",
+          "groovy",
+          "haskell",
+          "haxe",
+          "java",
+          "julia",
+          "nix",
+          "node_js",
+          "objective-c",
+          "perl",
+          "perl6",
+          "php",
+          "python",
+          "r",
+          "ruby",
+          "rust",
+          "scala",
+          "shell",
+          "smalltalk",
+          "__connie__",
+          "__amethyst__",
+          "__garnet__",
+          "__stevonnie__",
+          "__opal__",
+          "__sardonyx__",
+          "__onion__",
+          "__cookiecat__"
+        ],
+        "values": {
+          "cpp": {
+            "aliases": [
+              "c++"
+            ]
+          },
+          "go": {
+            "aliases": [
+              "golang"
+            ]
+          },
+          "java": {
+            "aliases": [
+              "jvm"
+            ]
+          },
+          "node_js": {
+            "aliases": [
+              "javascript",
+              "js",
+              "node"
+            ]
+          },
+          "objective-c": {
+            "aliases": [
+              "objective_c",
+              "swift"
+            ]
+          },
+          "shell": {
+            "aliases": [
+              "bash",
+              "generic",
+              "minimal",
+              "sh"
+            ]
+          },
+          "__connie__": {
+            "deprecated": "experimental_stack_language"
+          },
+          "__amethyst__": {
+            "deprecated": "experimental_stack_language"
+          },
+          "__garnet__": {
+            "deprecated": "experimental_stack_language"
+          },
+          "__stevonnie__": {
+            "deprecated": "experimental_stack_language"
+          },
+          "__opal__": {
+            "deprecated": "experimental_stack_language"
+          },
+          "__sardonyx__": {
+            "deprecated": "experimental_stack_language"
+          },
+          "__onion__": {
+            "deprecated": "experimental_stack_language"
+          },
+          "__cookiecat__": {
+            "deprecated": "experimental_stack_language"
+          }
+        }
+      },
       "languages": {
         "$id": "languages",
         "title": "Languages",
@@ -868,27 +995,7 @@
                 "type": "string"
               },
               "language": {
-                "type": "string",
-                "downcase": true,
-                "defaults": [
-                  {
-                    "value": "ruby",
-                    "only": {
-                      "os": [
-                        "linux",
-                        "windows"
-                      ]
-                    }
-                  },
-                  {
-                    "value": "objective-c",
-                    "only": {
-                      "os": [
-                        "osx"
-                      ]
-                    }
-                  }
-                ]
+                "$ref": "#/definitions/type/language"
               },
               "os": {
                 "$ref": "#/definitions/type/os"
@@ -1071,6 +1178,7 @@
             "aliases": [
               "mac",
               "macos",
+              "macosx",
               "ios"
             ],
             "except": {
@@ -1433,17 +1541,18 @@
             "keys": {
               "key": {
                 "aliases": [
+                  "aws_access_key_id",
                   "aws_access_key",
+                  "access_key_id",
                   "access_key"
                 ]
               },
               "secret": {
                 "aliases": [
-                  "secret_key",
-                  "secret_access_key",
-                  "aws_secret",
+                  "aws_secret_access_key",
                   "aws_secret_key",
-                  "aws_secret_access_key"
+                  "secret_access_key",
+                  "secret_key"
                 ]
               },
               "region": {
@@ -1473,7 +1582,7 @@
             "type": "object",
             "properties": {
               "username": {
-                "type": "string"
+                "$ref": "#/definitions/type/secure"
               },
               "access_key": {
                 "$ref": "#/definitions/type/secure"
@@ -1588,7 +1697,7 @@
                 "type": "string"
               },
               "notification_email": {
-                "type": "string"
+                "$ref": "#/definitions/type/secure"
               },
               "build_command": {
                 "type": "string"
@@ -2975,7 +3084,8 @@
               },
               "rvm": {
                 "aliases": [
-                  "ruby"
+                  "ruby",
+                  "rbenv"
                 ]
               },
               "gemfile": {
@@ -3176,10 +3286,34 @@
                 "type": "string"
               },
               "app": {
-                "type": "string"
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "patternProperties": {
+                      ".*": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  {
+                    "type": "string"
+                  }
+                ]
               },
               "env": {
-                "type": "string"
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "patternProperties": {
+                      ".*": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  {
+                    "type": "string"
+                  }
+                ]
               },
               "zip_file": {
                 "type": "string"
@@ -3400,7 +3534,13 @@
               "no_stop_previous_version": {
                 "type": "boolean"
               },
+              "default": {
+                "type": "boolean"
+              },
               "verbosity": {
+                "type": "string"
+              },
+              "docker_build": {
                 "type": "string"
               }
             },
@@ -4218,6 +4358,9 @@
               },
               "deployment_file": {
                 "type": "boolean"
+              },
+              "detect_encoding": {
+                "type": "boolean"
               }
             },
             "additionalProperties": false,
@@ -4550,13 +4693,28 @@
               "overwrite": {
                 "type": "boolean"
               },
-              "release_number": {
+              "body": {
+                "type": "string"
+              },
+              "draft": {
+                "type": "boolean"
+              },
+              "name": {
                 "type": "string"
               },
               "prerelease": {
                 "type": "boolean"
               },
-              "draft": {
+              "release_number": {
+                "type": "string"
+              },
+              "tag_name": {
+                "type": "string"
+              },
+              "target_commitish": {
+                "type": "string"
+              },
+              "preserve-history": {
                 "type": "boolean"
               }
             },
@@ -6302,7 +6460,8 @@
         "keys": {
           "rvm": {
             "aliases": [
-              "ruby"
+              "ruby",
+              "rbenv"
             ],
             "only": {
               "language": [
@@ -6444,7 +6603,16 @@
             "$ref": "#/definitions/type/strs"
           },
           "smalltalk_edge": {
-            "type": "boolean"
+            "type": "object",
+            "properties": {
+              "source": {
+                "type": "string"
+              },
+              "branch": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
           }
         },
         "normal": true,
@@ -6750,6 +6918,13 @@
             "prefix": {
               "key": "channels"
             },
+            "keys": {
+              "channels": {
+                "aliases": [
+                  "channel"
+                ]
+              }
+            },
             "normal": true,
             "changes": [
               {
@@ -7002,126 +7177,7 @@
           "$ref": "#/definitions/type/imports"
         },
         "language": {
-          "type": "string",
-          "downcase": true,
-          "defaults": [
-            {
-              "value": "ruby",
-              "only": {
-                "os": [
-                  "linux",
-                  "windows"
-                ]
-              }
-            },
-            {
-              "value": "objective-c",
-              "only": {
-                "os": [
-                  "osx"
-                ]
-              }
-            }
-          ],
-          "enum": [
-            "android",
-            "c",
-            "clojure",
-            "cpp",
-            "crystal",
-            "csharp",
-            "d",
-            "dart",
-            "elixir",
-            "elm",
-            "erlang",
-            "go",
-            "groovy",
-            "haskell",
-            "haxe",
-            "java",
-            "julia",
-            "nix",
-            "node_js",
-            "objective-c",
-            "perl",
-            "perl6",
-            "php",
-            "python",
-            "r",
-            "ruby",
-            "rust",
-            "scala",
-            "shell",
-            "smalltalk",
-            "__connie__",
-            "__amethyst__",
-            "__garnet__",
-            "__stevonnie__",
-            "__opal__",
-            "__sardonyx__",
-            "__onion__",
-            "__cookiecat__"
-          ],
-          "values": {
-            "cpp": {
-              "aliases": [
-                "c++"
-              ]
-            },
-            "go": {
-              "aliases": [
-                "golang"
-              ]
-            },
-            "java": {
-              "aliases": [
-                "jvm"
-              ]
-            },
-            "node_js": {
-              "aliases": [
-                "javascript"
-              ]
-            },
-            "objective-c": {
-              "aliases": [
-                "objective_c",
-                "swift"
-              ]
-            },
-            "shell": {
-              "aliases": [
-                "bash",
-                "generic",
-                "minimal"
-              ]
-            },
-            "__connie__": {
-              "deprecated": "experimental_stack_language"
-            },
-            "__amethyst__": {
-              "deprecated": "experimental_stack_language"
-            },
-            "__garnet__": {
-              "deprecated": "experimental_stack_language"
-            },
-            "__stevonnie__": {
-              "deprecated": "experimental_stack_language"
-            },
-            "__opal__": {
-              "deprecated": "experimental_stack_language"
-            },
-            "__sardonyx__": {
-              "deprecated": "experimental_stack_language"
-            },
-            "__onion__": {
-              "deprecated": "experimental_stack_language"
-            },
-            "__cookiecat__": {
-              "deprecated": "experimental_stack_language"
-            }
-          }
+          "$ref": "#/definitions/type/language"
         },
         "os": {
           "$ref": "#/definitions/type/oss"

@@ -27,6 +27,12 @@ module Travis
           }
         }
 
+        ALIAS = {
+          linux:   %i(ubuntu),
+          osx:     %i(mac macos macosx ios),
+          windows: %i(win)
+        }
+
         class Oss < Dsl::Seq
           register :oss
 
@@ -47,9 +53,9 @@ module Travis
             default :osx,     except: EXCEPT[:osx]
             default :windows, only:   ONLY[:windows]
 
-            value   :linux,   alias: %i(ubuntu),        except: EXCEPT[:linux]
-            value   :osx,     alias: %i(mac macos ios), except: EXCEPT[:osx]
-            value   :windows, alias: %i(win),           only:   ONLY[:windows]
+            value   :linux,   alias: ALIAS[:linux],   except: EXCEPT[:linux]
+            value   :osx,     alias: ALIAS[:osx],     except: EXCEPT[:osx]
+            value   :windows, alias: ALIAS[:windows], only:   ONLY[:windows]
 
             export
           end

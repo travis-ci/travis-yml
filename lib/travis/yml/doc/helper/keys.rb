@@ -20,35 +20,13 @@ module Travis
 
         DICT = dict
 
-        STOP = %i(
-          after_vendor
-          branch
-          branches
-          erlang
-          gcc
-          golang
-          html
-          jvm
-          nvm
-          pip
-          prose
-          sdk
-          slack
-          start_script
-          test
-          trusty
-          vimscript
-        )
-
-        def match_key(keys, key)
-          return if STOP.include?(key.to_sym)
-          key = Match.new(keys.map(&:to_s), key.to_s).run
+        def lookup_key(key)
+          key = DICT[key] unless schema.stop?(key)
           key.to_sym if key
         end
 
-        def lookup_key(key)
-          return if STOP.include?(key.to_sym)
-          key = Keys::DICT[key]
+        def match_key(keys, key)
+          key = Match.new(keys.map(&:to_s), key.to_s, schema.stop).run
           key.to_sym if key
         end
 

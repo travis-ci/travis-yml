@@ -57,7 +57,7 @@ module Travis
           end
 
           def match(keys, key)
-            Match.new(keys, key.to_s).run
+            Match.new(keys, key.to_s, schema.stop).run
           end
         end
       end

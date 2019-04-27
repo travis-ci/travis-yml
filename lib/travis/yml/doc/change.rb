@@ -2,6 +2,7 @@
 require 'travis/yml/doc/change/cache'
 require 'travis/yml/doc/change/enable'
 require 'travis/yml/doc/change/env_vars'
+require 'travis/yml/doc/change/flatten'
 require 'travis/yml/doc/change/inherit'
 require 'travis/yml/doc/change/cast'
 require 'travis/yml/doc/change/downcase'
@@ -50,7 +51,7 @@ module Travis
           all: [],
           any: [],
           map: [Keys, Cache, Enable, Prefix, Pick, Inherit],
-          seq: [Pick, Wrap, EnvVars],
+          seq: [EnvVars, Flatten, Pick, Wrap],
           obj: [Pick, Cast, Downcase, Value],
         }
 
@@ -69,10 +70,6 @@ module Travis
             schemas = Schema.select(schema, value)
             schemas.detect do |schema|
               other = Change.apply(schema, value)
-              # puts
-              # p schema.type
-              # p other.serialize
-              # p schema.matches?(other) || schema.normal?
               break other if schema.normal? || schema.matches?(other)
             end || value
           end
@@ -87,9 +84,9 @@ module Travis
           def apply
             other = changes.inject(value) do |value, change|
               value = change.new(schema, value, opts).apply
-              value = change_items(schema.schema, value) if value.seq?
               value
             end
+            other = change_items(schema.schema, other) if other.seq?
             other
           end
 

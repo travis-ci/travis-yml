@@ -11,7 +11,7 @@ module Travis
           end
 
           def pick?
-            value.seq? && value.given? && matches?
+            !schema.matches?(value) && value.seq? && value.given? && matches?
           end
 
           def matches?

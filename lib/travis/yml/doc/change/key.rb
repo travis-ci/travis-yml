@@ -89,7 +89,7 @@ module Travis
           end
 
           def allowed
-            schema.keys + schema.aliases.keys
+            schema.keys + schema.aliases.keys - Yml.r_keys
           end
           memoize :allowed
 

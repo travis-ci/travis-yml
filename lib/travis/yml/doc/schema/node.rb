@@ -150,6 +150,40 @@ module Travis
             opts[:deprecated]
           end
 
+          STOP = %w(
+            after_vendor
+            branch
+            branches
+            e2e_tests
+            erlang
+            gcc
+            golang
+            html
+            jvm
+            nvm
+            osx
+            pip
+            pgsql
+            postgres
+            prose
+            sdk
+            slack
+            start_script
+            test
+            trusty
+            versions
+            vimscript
+          )
+
+          def stop?(key)
+            stop.include?(key.to_s)
+          end
+
+          def stop
+            Yml.keys.map(&:to_s) + STOP
+          end
+          memoize :stop
+
           def all_keys
             []
           end

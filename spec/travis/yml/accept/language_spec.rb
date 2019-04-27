@@ -86,6 +86,16 @@ describe Travis::Yml, 'language' do
     it { should have_msg [:warn, :language, :find_value, original: 'ruby!', value: 'ruby'] }
   end
 
+  describe 'unknown value, with an unsupported key' do
+    yaml %(
+      language: node_js - 9
+      compiler: gcc
+    )
+    it { should serialize_to language: 'node_js', compiler: ['gcc'] }
+    it { should have_msg [:warn, :language, :clean_value, original: 'node_js - 9', value: 'node_js'] }
+    it { should have_msg [:warn, :compiler, :unsupported, on_key: :language, on_value: 'node_js', key: :compiler, value: ['gcc']] }
+  end
+
   describe 'uppercased alias with non-word chars' do
     yaml %(
       language: C++

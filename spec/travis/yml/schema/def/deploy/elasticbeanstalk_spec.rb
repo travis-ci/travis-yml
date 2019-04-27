@@ -41,10 +41,34 @@ describe Travis::Yml::Schema::Def::Deploy::Elasticbeanstalk, 'structure' do
                 type: :string
               },
               app: {
-                type: :string
+                anyOf: [
+                  {
+                    type: :object,
+                    patternProperties: {
+                      '.*': {
+                        type: :string
+                      }
+                    }
+                  },
+                  {
+                    type: :string
+                  }
+                ]
               },
               env: {
-                type: :string
+                anyOf: [
+                  {
+                    type: :object,
+                    patternProperties: {
+                      '.*': {
+                        type: :string
+                      }
+                    }
+                  },
+                  {
+                    type: :string
+                  }
+                ]
               },
               zip_file: {
                 type: :string

@@ -20,7 +20,16 @@ describe Travis::Yml::Schema::Def::Smalltalk, 'structure' do
             '$ref': '#/definitions/type/strs'
           },
           smalltalk_edge: {
-            type: :boolean
+            type: :object,
+            properties: {
+              source: {
+                type: :string
+              },
+              branch: {
+                type: :string
+              }
+            },
+            additionalProperties: false
           }
         },
         normal: true,

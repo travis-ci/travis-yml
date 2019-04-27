@@ -8,7 +8,7 @@ describe Travis::Yml::Schema::Def::Deploy::Deploy, 'structure' do
     describe 'conditions' do
       subject { Travis::Yml.schema[:definitions][:deploy][:conditions] }
 
-      xit { puts JSON.pretty_generate(subject) }
+      # it { puts JSON.pretty_generate(subject) }
 
       it do
         should eq(
@@ -141,7 +141,9 @@ describe Travis::Yml::Schema::Def::Deploy::Deploy, 'structure' do
               additionalProperties: false,
               prefix: {
                 key: :branch,
-                only: [:str],
+                only: [
+                  :str
+                ],
                 deprecated: :deploy_on_prefix_branch
               },
               keys: {
@@ -157,7 +159,8 @@ describe Travis::Yml::Schema::Def::Deploy::Deploy, 'structure' do
                 },
                 rvm: {
                   aliases: [
-                    :ruby
+                    :ruby,
+                    :rbenv
                   ]
                 },
                 gemfile: {

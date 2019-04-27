@@ -156,12 +156,12 @@ describe Travis::Yml::Doc::Change do
 
     describe 'a str' do
       let(:value) { 'foo' }
-      it { should serialize_to value }
+      it { should serialize_to matrix: [foo: ''] }
     end
 
     describe 'a seq of strs' do
       let(:value) { ['foo'] }
-      it { should serialize_to value }
+      it { should serialize_to matrix: [foo: ''] }
     end
 
     describe 'a var' do
@@ -171,7 +171,7 @@ describe Travis::Yml::Doc::Change do
 
     describe 'an empty var' do
       let(:value) { 'FOO=' }
-      it { should serialize_to matrix: [FOO: nil] }
+      it { should serialize_to matrix: [FOO: ''] }
     end
 
     describe 'several vars' do
@@ -234,12 +234,12 @@ describe Travis::Yml::Doc::Change do
 
     describe 'a str' do
       let(:value) { { matrix: 'foo' } }
-      it { should serialize_to matrix: ['foo'] }
+      it { should serialize_to matrix: [foo: ''] }
     end
 
     describe 'a seq of strs' do
       let(:value) { { matrix: ['foo'] } }
-      it { should serialize_to value }
+      it { should serialize_to matrix: [foo: ''] }
     end
 
     describe 'a var' do
