@@ -42,7 +42,9 @@ describe Travis::Yml::Schema::Def::Imports, 'structure' do
               },
               additionalProperties: false,
               normal: true,
-              prefix: :source,
+              prefix: {
+                key: :source
+              },
             },
             {
               type: :string

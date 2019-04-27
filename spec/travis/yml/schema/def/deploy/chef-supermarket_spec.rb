@@ -43,7 +43,9 @@ describe Travis::Yml::Schema::Def::Deploy::ChefSupermarket, 'structure' do
             },
             additionalProperties: false,
             normal: true,
-            prefix: :provider,
+            prefix: {
+              key: :provider
+            },
             required: [
               :provider
             ]

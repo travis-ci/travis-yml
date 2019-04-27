@@ -49,7 +49,9 @@ describe Travis::Yml::Schema::Def::Deploy::Anynines, 'structure' do
             },
             additionalProperties: false,
             normal: true,
-            prefix: :provider,
+            prefix: {
+              key: :provider
+            },
             required: [
               :provider
             ]

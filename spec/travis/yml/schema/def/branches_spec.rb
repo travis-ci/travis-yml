@@ -24,7 +24,9 @@ describe Travis::Yml::Schema::Def::Branches, 'structure' do
             },
             additionalProperties: false,
             normal: true,
-            prefix: :only,
+            prefix: {
+              key: :only
+            },
             keys: {
               except: {
                 aliases: [

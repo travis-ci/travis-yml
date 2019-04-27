@@ -18,7 +18,9 @@ describe Travis::Yml::Schema::Def::Addon::CodeClimate, 'structure' do
               }
             },
             additionalProperties: false,
-            prefix: :repo_token,
+            prefix: {
+              key: :repo_token
+            },
             normal: true,
             changes: [
               {

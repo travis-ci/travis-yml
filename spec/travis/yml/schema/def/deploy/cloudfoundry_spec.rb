@@ -61,7 +61,9 @@ describe Travis::Yml::Schema::Def::Deploy::Cloudfoundry, 'structure' do
             },
             additionalProperties: false,
             normal: true,
-            prefix: :provider,
+            prefix: {
+              key: :provider
+            },
             required: [
               :provider
             ]

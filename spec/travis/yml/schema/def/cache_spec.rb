@@ -58,7 +58,9 @@ describe Travis::Yml::Schema::Def::Cache, 'structure' do
             },
             additionalProperties: false,
             normal: true,
-            prefix: :directories,
+            prefix: {
+              key: :directories
+            },
             changes: [
               {
                 change: :cache

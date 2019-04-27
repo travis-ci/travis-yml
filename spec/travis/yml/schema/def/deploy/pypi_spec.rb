@@ -58,7 +58,9 @@ describe Travis::Yml::Schema::Def::Deploy::Pypi, 'structure' do
             },
             additionalProperties: false,
             normal: true,
-            prefix: :provider,
+            prefix: {
+              key: :provider
+            },
             required: [
               :provider
             ]

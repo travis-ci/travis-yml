@@ -139,7 +139,11 @@ describe Travis::Yml::Schema::Def::Deploy::Deploy, 'structure' do
                 }
               },
               additionalProperties: false,
-              prefix: :branch,
+              prefix: {
+                key: :branch,
+                only: [:str],
+                deprecated: :deploy_on_prefix_branch
+              },
               keys: {
                 branch: {
                   aliases: [

@@ -26,7 +26,9 @@ describe Travis::Yml::Schema::Def::Addon::Snaps, 'structure' do
                 }
               },
               additionalProperties: false,
-              prefix: :name,
+              prefix: {
+                key: :name
+              },
             },
             normal: true
           },
@@ -44,7 +46,9 @@ describe Travis::Yml::Schema::Def::Addon::Snaps, 'structure' do
               }
             },
             additionalProperties: false,
-            prefix: :name,
+            prefix: {
+              key: :name
+            },
           },
           {
             type: :array,

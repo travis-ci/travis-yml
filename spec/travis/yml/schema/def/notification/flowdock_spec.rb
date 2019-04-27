@@ -34,7 +34,9 @@ describe Travis::Yml::Schema::Def::Notification::Flowdock, 'structure' do
             },
             additionalProperties: false,
             normal: true,
-            prefix: :api_token,
+            prefix: {
+              key: :api_token
+            },
             changes: [
               {
                 change: :enable,

@@ -40,7 +40,9 @@ describe Travis::Yml::Schema::Def::Notification::Webhooks, 'structure' do
             },
             additionalProperties: false,
             normal: true,
-            prefix: :urls,
+            prefix: {
+              key: :urls
+            },
             changes: [
               {
                 change: :enable,
