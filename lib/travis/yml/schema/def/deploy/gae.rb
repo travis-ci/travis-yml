@@ -17,7 +17,9 @@ module Travis
               map :version,                  to: :str
               map :no_promote,               to: :bool
               map :no_stop_previous_version, to: :bool
+              map :default,                  to: :bool
               map :verbosity,                to: :str
+              map :docker_build,             to: :str
             end
           end
         end

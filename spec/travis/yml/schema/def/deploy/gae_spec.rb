@@ -49,7 +49,13 @@ describe Travis::Yml::Schema::Def::Deploy::Gae, 'structure' do
               no_stop_previous_version: {
                 type: :boolean
               },
+              default: {
+                type: :boolean
+              },
               verbosity: {
+                type: :string
+              },
+              docker_build: {
                 type: :string
               }
             },

@@ -198,7 +198,7 @@ describe Travis::Yml, 'deploy' do
               branch: master
         )
         it { should serialize_to deploy: [provider: 'heroku', script: 'str', on: { branch: ['master'] }] }
-        it { should have_msg [:warn, :deploy, :misplaced_key, key: :script, value: 'str'] }
+        it { should have_msg [:warn, :deploy, :unknown_key, key: :script, value: 'str'] }
       end
 
       describe 'repo' do
@@ -433,6 +433,6 @@ describe Travis::Yml, 'deploy' do
       file: file
     )
     it { should serialize_to file: 'file' }
-    it { should have_msg [:warn, :root, :misplaced_key, key: :file, value: 'file'] }
+    it { should have_msg [:warn, :root, :unknown_key, key: :file, value: 'file'] }
   end
 end

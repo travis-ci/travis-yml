@@ -40,10 +40,13 @@ describe Travis::Yml::Doc::Keys do
       codecov
       dd
       java
+      mac_before_install
+      make_install
       on
       on_change
       phpunit
       slack
+      stage_osx
       use_bioc
       vendor
       wget
@@ -68,7 +71,7 @@ describe Travis::Yml::Doc::Keys do
       trusty
       vimscript
     ).map do |key|
-      describe "does not corrects they key #{key} (stopword)" do
+      describe "does not corrects the key #{key} (stopword)" do
         let(:schema) { Travis::Yml.expand }
         let(:keys) { schema.keys + schema.aliases.keys }
         it { expect(match_key(keys, key)).to eq nil }
@@ -83,11 +86,11 @@ describe Travis::Yml::Doc::Keys do
       ['afer_success', 'after_success'],
       ['affter_success', 'after_success'],
       ['after__success', 'after_success'],
-      ['after_deployment', 'after_deploy'],
+      # ['after_deployment', 'after_deploy'],
       ['after_fail', 'after_failure'],
       ['after_faile', 'after_failure'],
       ['after_failiure', 'after_failure'],
-      # ['after_failures', 'after_failure'],
+      ['after_failures', 'after_failure'],
       ['after_sccess', 'after_success'],
       ['after_scipt', 'after_script'],
       ['after_scripts', 'after_script'],
@@ -110,9 +113,9 @@ describe Travis::Yml::Doc::Keys do
       ['before.install', 'before_install'],
       ['beforeScript', 'before_script'],
       ['before__install', 'before_install'],
-      ['before_archive', 'before_cache'],
+      # ['before_archive', 'before_cache'],
       ['before_delpoy', 'before_deploy'],
-      ['before_deployment', 'before_deploy'],
+      # ['before_deployment', 'before_deploy'],
       ['before_insall', 'before_install'],
       ['before_instal', 'before_install'],
       ['before_instrall', 'before_install'],
@@ -182,7 +185,7 @@ describe Travis::Yml::Doc::Keys do
       ['langauage', 'language'],
       ['langauge', 'language'],
       ['langiage', 'language'],
-      ['langlanguage', 'language'],
+      # ['langlanguage', 'language'],
       ['languace', 'language'],
       ['languag', 'language'],
       ['languagee', 'language'],
@@ -248,7 +251,7 @@ describe Travis::Yml::Doc::Keys do
       ['pytho', 'python'],
       ['pythonl', 'python'],
       ['pyton', 'python'],
-      ['qqsudo', 'sudo'],
+      # ['qqsudo', 'sudo'],
       ['rlanguage', 'language'],
       ['rmv', 'rvm'],
       ['rvms', 'rvm'],
@@ -334,7 +337,6 @@ describe Travis::Yml::Doc::Keys do
       ['fast_finis', 'fast_finish'],
       ['fast_finishe', 'fast_finish'],
       ['fast_finished', 'fast_finish'],
-      # ['allow_failure', 'allow_failures'], ??
       ['alllow_failure', 'allow_failures'],
       ['allo_failures', 'allow_failures'],
       ['allow_failtures', 'allow_failures'],
@@ -342,7 +344,7 @@ describe Travis::Yml::Doc::Keys do
       ['allow_faliures', 'allow_failures'],
       ['allow_falures', 'allow_failures'],
       ['allow_features', 'allow_failures'],
-      ['allowable_failures', 'allowed_failures'], # :thinking_face:
+      # ['allowable_failures', 'allowed_failures'], # :thinking_face:
       ['allows_failures', 'allow_failures'],
     ]
     pairs.each do |(one, other)|

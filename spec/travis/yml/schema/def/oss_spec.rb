@@ -97,6 +97,7 @@ describe Travis::Yml::Schema::Def::Oss, 'structure' do
               aliases: [
                 'mac',
                 'macos',
+                'macosx',
                 'ios'
               ],
               except: {

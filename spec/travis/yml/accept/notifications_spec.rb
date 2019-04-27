@@ -25,6 +25,16 @@ describe Travis::Yml, 'notifications' do
     it { should_not have_msg }
   end
 
+  describe 'misplaced :recipients' do
+    yaml %(
+      notifications:
+        recipients:
+          - str
+    )
+    it { should serialize_to notifications: { email: { recipients: ['str'] } } }
+    it { should_not have_msg }
+  end
+
   describe 'notifications.email' do
     describe 'given nil' do
       yaml %(

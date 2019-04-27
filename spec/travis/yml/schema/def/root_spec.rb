@@ -106,6 +106,7 @@ describe Travis::Yml::Schema::Def::Root, 'structure' do
           import
           imports
           job
+          language
           languages
           matrix
           matrix_entries

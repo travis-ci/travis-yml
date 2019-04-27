@@ -52,13 +52,28 @@ describe Travis::Yml::Schema::Def::Deploy::Releases, 'structure' do
               overwrite: {
                 type: :boolean
               },
-              release_number: {
+              body: {
+                type: :string
+              },
+              draft: {
+                type: :boolean
+              },
+              name: {
                 type: :string
               },
               prerelease: {
                 type: :boolean
               },
-              draft: {
+              release_number: {
+                type: :string
+              },
+              tag_name: {
+                type: :string
+              },
+              target_commitish: {
+                type: :string
+              },
+              'preserve-history': {
                 type: :boolean
               }
             },

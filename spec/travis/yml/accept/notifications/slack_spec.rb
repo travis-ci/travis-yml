@@ -19,6 +19,37 @@ describe Travis::Yml, 'notifications: slack' do
     it { should_not have_msg }
   end
 
+  describe 'given a str' do
+    yaml %(
+      notifications:
+        slack: str
+    )
+    it { should serialize_to notifications: { slack: { rooms: ['str'] } } }
+    it { should_not have_msg }
+  end
+
+  describe 'given a secure' do
+    yaml %(
+      notifications:
+        slack:
+          secure: secure
+    )
+    it { should serialize_to notifications: { slack: { rooms: [secure: 'secure'] } } }
+    it { should_not have_msg }
+  end
+
+  describe 'given a secure, and a broken nested key :slack' do
+    yaml %(
+      notifications:
+        slack:
+          secure: secure
+          slack: str
+    )
+    it { should serialize_to notifications: { slack: { secure: 'secure', slack: 'str' } } }
+    it { should have_msg [:warn, :'notifications.slack', :unknown_key, key: :secure, value: 'secure'] }
+    it { should have_msg [:warn, :'notifications.slack', :unknown_key, key: :slack, value: 'str'] }
+  end
+
   describe 'given disabled: true' do
     yaml %(
       notifications:
@@ -59,25 +90,6 @@ describe Travis::Yml, 'notifications: slack' do
     it { should_not have_msg }
   end
 
-  describe 'given a str' do
-    yaml %(
-      notifications:
-        slack: str
-    )
-    it { should serialize_to notifications: { slack: { rooms: ['str'] } } }
-    it { should_not have_msg }
-  end
-
-  describe 'given a secure' do
-    yaml %(
-      notifications:
-        slack:
-          secure: secure
-    )
-    it { should serialize_to notifications: { slack: { rooms: [secure: 'secure'] } } }
-    it { should_not have_msg }
-  end
-
   describe 'given a seq of strs' do
     yaml %(
       notifications:
@@ -86,6 +98,16 @@ describe Travis::Yml, 'notifications: slack' do
           - bar
     )
     it { should serialize_to notifications: { slack: { rooms: ['foo', 'bar'] } } }
+    it { should_not have_msg }
+  end
+
+  describe 'given a seq of secures' do
+    yaml %(
+      notifications:
+        slack:
+          - secure: secure
+    )
+    it { should serialize_to notifications: { slack: { rooms: [secure: 'secure'] } } }
     it { should_not have_msg }
   end
 

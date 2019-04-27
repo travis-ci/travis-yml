@@ -10,7 +10,7 @@ module Travis
           register :ruby
 
           def define
-            matrix :rvm, alias: :ruby
+            matrix :rvm, alias: [:ruby, :rbenv]
             matrix :gemfile, alias: :gemfiles
             matrix :jdk, to: :jdks
 

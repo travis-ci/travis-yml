@@ -27,8 +27,7 @@ module Travis
             end
 
             def unknown(parent, key, value)
-              type = misplaced?(key) ? :misplaced_key : :unknown_key
-              warn(parent, type, value) unless silent?(key)
+              warn(parent, :unknown_key, value) unless silent?(key)
               parent.delete(value) if drop? || silent?(key)
               parent
             end

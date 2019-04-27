@@ -9,17 +9,33 @@ module Travis
           class Artifacts < Addon
             register :artifacts
 
+            # validate these
+            ALIASES = {
+              key: %i(
+                aws_access_key_id
+                aws_access_key
+                access_key_id
+                access_key
+              ),
+              secret: %i(
+                aws_secret_access_key
+                aws_secret_key
+                secret_access_key
+                secret_key
+              )
+            }
+
             def define
               # change :enable
 
               map :enabled,       to: :bool
               map :bucket,        to: :str
               map :endpoint,      to: :str
-              map :key,           to: :secure, alias: %i(aws_access_key access_key) # TODO validate these
-              map :secret,        to: :secure, alias: %i(secret_key secret_access_key aws_secret aws_secret_key aws_secret_access_key)
+              map :key,           to: :secure, alias: ALIASES[:key]
+              map :secret,        to: :secure, alias: ALIASES[:secret]
               map :paths,         to: :seq
 
-              map :branch,        to: :str
+              map :branch,        to: :str # can this be a seq?
               map :log_format,    to: :str
               map :target_paths,  to: :seq
 

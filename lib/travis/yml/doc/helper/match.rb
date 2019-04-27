@@ -3,9 +3,10 @@ require 'amatch'
 
 module Travis
   module Yml
-    class Match < Obj.new(:strs, :str)
+    class Match < Obj.new(:strs, :str, stop: [])
       def run
         return if str.size < 3
+        return if stop.include?(str)
         pairs = by_equality(strs)
         pairs = by_levenshtein(strs) if pairs.empty?
         pairs = by_permutation(strs) if pairs.empty? && str.size < 6
@@ -27,7 +28,7 @@ module Travis
       def by_levenshtein(strs)
         pairs = strs.map do |other|
           distance = Amatch::Levenshtein.new(other).match(str)
-          [distance, other] if distance <= max && distance < 6
+          [distance, other] if distance < max(other)
         end
         pairs = pairs.compact.sort_by(&:first)
         pairs
@@ -57,8 +58,11 @@ module Travis
         str.size
       end
 
-      def max
-        str.size.to_f / 3 # + 1
+      MAX = 4
+
+      def max(other)
+        max = [str.size.to_f / 2, other.size.to_f / 2].min
+        max > MAX ? MAX : max
       end
     end
   end

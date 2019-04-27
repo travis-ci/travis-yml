@@ -11,8 +11,8 @@ module Travis
               map :access_key_id,           to: :secure
               map :secret_access_key,       to: :secure
               map :region,                  to: :str
-              map :app,                     to: :str
-              map :env,                     to: :str
+              map :app,                     to: :map, type: :str
+              map :env,                     to: :map, type: :str # docs are unclear on this, but users seem to expect this?
               map :zip_file,                to: :str
               map :bucket_name,             to: :str
               map :bucket_path,             to: :str

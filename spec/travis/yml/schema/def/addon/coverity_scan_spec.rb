@@ -49,7 +49,7 @@ describe Travis::Yml::Schema::Def::Addon::CoverityScan, 'structure' do
                 type: :string
               },
               notification_email: {
-                type: :string
+                '$ref': '#/definitions/type/secure'
               },
               build_command: {
                 type: :string

@@ -14,7 +14,7 @@ module Travis
 
               prefix :channels
 
-              map :channels,          to: :seq, type: :secure
+              map :channels,          to: :seq, type: :secure, alias: :channel
               map :channel_key,       to: :secure
               map :password,          to: :secure
               map :nickserv_password, to: :secure

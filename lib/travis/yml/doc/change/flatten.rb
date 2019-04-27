@@ -5,17 +5,17 @@ module Travis
   module Yml
     module Doc
       module Change
-        class Wrap < Base
+        class Flatten < Base
           def apply
-            wrap? ? wrap : value
+            flatten? ? flatten : value
           end
 
-          def wrap?
-            schema.seq? && !value.seq?
+          def flatten?
+            schema.seq? && value.seq? && value.any?(&:seq?)
           end
 
-          def wrap
-            node = build([value])
+          def flatten
+            node = build(value.serialize.flatten)
             node
           end
         end

@@ -6,78 +6,12 @@ end
 
 # accept:
 #
-#   # probably to be accepted
-#   [:error, :"matrix.include.addons.coverity_scan.notification_email", :invalid_type, {:expected=>:str, :actual=>:secure, :value
-#
-#   # hmmm?
-#   [:warn, :"addons.artifacts", :find_key, {:original=>:access_key_id, :key=>:access_key}
-#
-#    # not sure ...
-#    env:
-#      -
-#      - FOO=foo
-#
-#   # results in invalid_seq value: nil on notifications.emails.recipients
-#   notifications:
-#   email:
-#     recipients:
-#       - tomaug@ceh.ac.uk
-#
-#   # shouldn't this be prefixed?
-#   notifications:
-#     slack:
-#       - secure: str
-#
-#   # clean_value should check how many chars it removes, or something:
-#   [:warn, :language, :clean_value, {:original=>"python - \"3.6\"", :value=>"python"}]
-#   [:warn, :language, :clean_value, {:original=>"java scala node_js", :value=>"java"}]
-#
-#   # do we not check the language before we check support?
-#   [:warn, :"matrix.include.compiler", :unsupported, {:on_key=>:language, :on_value=>"node_js - \"9\"", :key=>:compiler, :value=>["
-
-#   # does this work in production? (elmsln:elmsln)
-#   matrix:
-#     env:
-#       global:
-#         - ES_VER=1.0.1
-#
-#   # does this work in production? (fossasia:susi_server)
-#   matrix:
-#     include:
-#       env:
-#         global:
-#           - GH_REF: github.com/fossasia/susi_server.git
-#           - secure: WAjBBsbaxnj+6N9wu3v20AVcikJB4Q9U4CuqR1Ws8jPlRl5e8LxMzwQreFokEk22ymIuOpMMChTqdZTMtEQI24xPaDIpGd9byo5XYjX8Ln1LD0ndXboRdf0WNG88rtrQmaTvGKG6ahEzAFlmgwJ62ahA+DxuTDLKypWNNymqk49mmbV2g2c2Leh9fJYIDEGg3elZrKJnsretTo/PMC9SJP32W+3xonUh43FxinGJU+UEXXF9VtoMhfxCxl2zC4w2pXvrJpHhtw2tB42P2fHRH/MYOwM7okstgyBdIfWLMjWPSrpMosTQx3LrtX35tVNEqGmqPlYDXKFzeX0vawUtc08hQgIz2eWrc4YJ8YoAxuUCMW2OodEoLEuOizP59eAAJ3jmPlH1kY50T0JOxS47AxSLYT9QQWNKbGEX0EPfKSqNTTmUZb/RaXR3iYNJKZLS+9rZ91Ck3rmuMqxdJOsrZ6zWpxX6spNOqjtLrQvQaHcpK9JDFBE7oTf5fR2r+b4yY7K2cYCLDhUJfGC64qfVutwFQYhQx+QEEODiiR3ubSXrvH9IzAmlWrq8sUJB7qCOpyIb3AraH72BhGL1XgQIEodx7wkX4ZWTCu1q6GoY6MUbu270dPHTRcoesTh2LFCriqAKzKXia2EQiYZXFi18Vo2YQ/Km2FAWhdJZrhgVl9M=
-#           - PATH=$PATH:${HOME}/google-cloud-sdk/bin
-#           - CLOUDSDK_CORE_DISABLE_PROMPTS=1
-#
-#   # holy shit, geoblacklight:geoblacklight is using this, and it might actually work
-#   global_env:
-#     - FOO=str
-#
 #   # should `skip` be a generic feature? (grondo:flux-core)
 #   [:error, :"matrix.include.deploy", :invalid_type, {:expected=>:map, :actual=>:str, :value=>"skip"}]
-#
-#   # these don't look great:
-#   [:warn, :root, :find_key, {:original=>:mac_before_install, :key=>:before_install}]
-#   [:warn, :root, :find_key, {:original=>:make_install, :key=>:after_install}]
-#
-#   # wat, his is a valid condition, isn't it?
-#   [:error, :"matrix.include.if", :invalid_condition, {:condition=>"(branch = dev) AND (type IS cron)"}]
 #
 #   # somehow relax env vars so that doesn't raise an error, but maybe just a warning?
 #   [:error, :env, :invalid_type, {:expected=>:map, :actual=>:seq, :value=>["USER_LANGUAGE=en USER_REGION=US'"]}]
 #
-#   # can we communicate that sonarqube is gone?
-#
-#   # if a deploy provider has been detected by :provider, can this be included to all message?
-#
-#   # should this be a stop word?
-#   [:warn, :root, :find_key, {:original=>:osx, :key=>:os}]
-#
-#   # bring back repair_value?
-#   [:error, :"matrix.include.after_script", :invalid_type, {:expected=>:str, :actual=>:map, :value=>{:"echo \"========== Server log"=>"============\""}}]
-
 
 describe Travis::Yml, configs: true do
   skip = [
@@ -85,386 +19,919 @@ describe Travis::Yml, configs: true do
     'ApollosProject:apollos-prototype',        # bogus deploy.master: true (not sure if this should pass)
     'apache:incubator-openwhisk-cli',          # deploy.on.tags: $TAG (not sure if this should pass, docs are a little weird there)
     'apache:incubator-openwhisk-wskdeploy',    # deploy.on.tags: $TAG (not sure if this should pass, docs are a little weird there)
-
-    # bug in Psych?
-    'artisan-roaster-scope:artisan',           # yaml turning a string containing a colon into a map even though quoted: export UPLOADTOOL_BODY="WARNING: pre-release builds may not work. Use at your own risk."
-
-    # accept
-    'active-citizen',
-    '42ity:fty-rest', # all sorts of msgs
   ]
+
+  KEYS = {
+    language: %i(
+      language
+      matrix.include.language
+    ),
+    dist: %i(
+      dist
+      matrix.include.dist
+    ),
+    event: %i(
+      notifications
+      notifications.email
+      notifications.irc
+      notifications.slack
+      notifications.webhooks
+    ),
+    os: %i(
+      linux-ppc64le
+      os
+      matrix.include.os
+      matrix.exclude.os
+    ),
+    stage: %i(
+      root
+      matrix.include
+    ),
+    service: %i(
+      services
+      matrix.include.services
+    ),
+    value: %i(
+      notifications.email.on_failure
+    )
+  }
+
+  UNKNOWN = {
+    language: %w(
+      common-lisp
+      emacs-lisp
+      general
+      glsl
+      kotlin
+      none
+      sage
+      sass
+      vim
+    ),
+    os: %w(
+      android
+      centos
+      linux-ppc64le
+    ),
+    dist: %w(
+      1803-containers
+      bionic
+      current
+    ),
+    service: %w(
+      alsa
+      docker-compose
+      haveged
+      ignore
+      mariadb
+      pgsql
+      skip
+      sqlite
+      sqlite3
+      zookeeper
+    ),
+    stage: %i(
+      after_error
+    ),
+    event: [
+      :on_start,         # on notifications other than webhooks
+      :on_cancel,        # on notifications other than webhooks
+      :on_pull_requests, # on notifications other than slack
+      :on_change,
+    ],
+    value: %w(
+      jhunt@starkandwayne.com
+    )
+  }
+
+  BROKEN = {
+    language: [
+      'java scala node_js',
+      'python - "2.7"',
+      'python - "3.6"',
+      'node_js - "6"',
+      'node_js - "9"',
+    ]
+  }
+
+  TYPOS = %w(
+    -docker
+    :change
+    _addons
+    after_acript
+    alwayss
+    before_srcipt
+    bundle
+    chnage
+    commiter-from-gh
+    deployg
+    derscription
+    directory
+    disable
+    distribution
+    distro
+    esudo
+    evn
+    globale
+    keep-hisotry
+    langauge
+    nguage
+    notfications
+    on_sucess
+    phps
+    pyton
+    python2.7
+    python3
+    recepients
+    rmv
+    serivce
+    ssh_know_hosts
+    skip_clean
+    skript
+    sourcees
+    sudo;
+    state
+    trust
+    webhools
+  ) << 'change  always' << 'always  always' << 'never     always'
+
+  POTENTIAL_ALIASES = %w(
+    nodejs
+    require
+    notification
+    addon
+    service
+    fail_fast
+    lang
+    username
+    add_ons
+    allow_failure
+    scripts
+    caches
+  )
+
+  DEPRECATIONS = %i(
+    cache_enable_all
+    deprecated_value
+    deprecated_sonarcloud_branches
+    deprecated_sonarcloud_github_token
+  )
+
+  YAML_REFERENCE_TARGETS = %i(
+    .apt_sources
+    .check_moban
+    .disable_global
+    .mixins
+    .org.ruby-lang.ci.matrix-definitions
+    .deploy_job_template
+    DEPLOY_TO_GITHUB
+    GH_TOKEN
+    INSTALL_AWS
+    INSTALL_GECKODRIVER
+    INSTALL_NODE_VIA_NVM
+    addons_shortcuts
+    aliases
+    apt_targets
+    aws_deploy_pants_pex
+    aws_get_pants_pex
+    default_test_config
+    base_build_wheels
+    base_deploy
+    base_deploy_stable_muliplatform_pex
+    base_deploy_unstable_multiplatform_pex
+    base_jvm_tests
+    base_linux_build_engine
+    base_linux_build_wheels
+    base_linux_config
+    base_linux_test_config
+    base_osx_10_12_sanity_check
+    base_osx_10_13_sanity_check
+    base_osx_build_engine
+    base_osx_build_wheels
+    base_osx_config
+    base_osx_sanity_check
+    base_osx_test_config
+    base_rust_lints
+    base_rust_tests
+    cargo_audit
+    cmake_install
+    cmake_script
+    common_sources
+    conan-linux
+    conan-osx
+    defaults
+    defaults_go
+    defaults_js
+    docker_cmake_install
+    docker_cmake_script
+    docker_make_script
+    docker_template
+    doctr
+    e2e_tests
+    eccube_setup
+    flake8-steps
+    install_linux
+    install_mongo
+    node_js_defaults
+    docker_defaults
+    include_base
+    install_osx
+    integration_script
+    java_11
+    java_8
+    karma_runner
+    linux
+    linux-ppc64le
+    linux32_install
+    linux64_install
+    linux_apt_template
+    linux_rust_clippy
+    linux_rust_tests
+    linux_template
+    linux_with_fuse
+    linux-gcc-7
+    linux-gcc-8
+    linux_clang
+    linux_gcc
+    mpi_linux_clang
+    mpi_linux_gcc
+    osx_clang
+    mac_before_install
+    macos_template
+    make_install
+    make_script
+    max_amd64_conf
+    max_amd64_deps
+    max_x86_conf
+    max_x86_deps
+    min_amd64_conf
+    min_amd64_deps
+    native_engine_cache_config
+    node-preset
+    node_js-steps
+    osx
+    osx_rust_tests
+    package_api_setup
+    packagecloud_deb_template
+    packagecloud_rpm_template
+    pants_run_cache_config
+    pkg_deps_prereqs_distro
+    pkg_deps_devtools
+    pkg_deps_doctools
+    pkg_deps_prereqs
+    pkg_deps_prereqs_distro
+    pkg_deps_prereqs_source
+    pkg_deps_zproject
+    pkg_src_zeromq_ubuntu12
+    pkg_src_zeromq_ubuntu14
+    pkg_src_zeromq_ubuntu16
+    py27_deploy_stable_multiplatform_pex
+    py27_deploy_unstable_multiplatform_pex
+    py27_jvm_tests
+    py27_lint
+    py27_linux_build_engine
+    py27_linux_build_wheels_ucs2
+    py27_linux_build_wheels_ucs4
+    py27_linux_config
+    py27_linux_test_config
+    py27_osx_10_12_sanity_check
+    py27_osx_10_13_sanity_check
+    py27_osx_build_engine
+    py27_osx_build_wheels_ucs2
+    py27_osx_build_wheels_ucs4
+    py27_osx_config
+    py27_osx_platform_tests
+    py27_osx_test_config
+    py36_deploy_stable_multiplatform_pex
+    py36_deploy_unstable_multiplatform_pex
+    py36_jvm_tests
+    py36_lint
+    py36_linux_build_engine
+    py36_linux_build_wheels
+    py36_linux_config
+    py36_linux_test_config
+    py36_osx_10_12_sanity_check
+    py36_osx_10_13_sanity_check
+    py36_osx_build_engine
+    py36_osx_build_wheels
+    py36_osx_config
+    py36_osx_platform_tests
+    py36_osx_test_config
+    py37_jvm_tests
+    py37_lint
+    py37_linux_build_engine
+    py37_linux_config
+    py37_linux_test_config
+    py37_osx_10_12_sanity_check
+    py37_osx_10_13_sanity_check
+    py37_osx_build_engine
+    py37_osx_config
+    py37_osx_platform_tests
+    py37_osx_test_config
+    run_tests_under_pantsd
+    scala_version_211
+    scala_version_212
+    scala_version_213
+    scoot_integration_tests
+    script-anchors
+    stage_generic_linux
+    stage_generic_linuxg
+    stage_linux_36
+    stage_linux_36g
+    stage_linux_37
+    stage_linux_37_omp
+    stage_linux_37_ompg
+    stage_linux_37_openblas
+    stage_linux_37_openblasg
+    stage_linux_37g
+    stage_osx
+    stage_osxg
+    templates
+    testSmokeCy
+    testPostDeploy
+    travis_docker_image
+    unit_script
+    windows_template
+    x-ccache-setup-steps
+    x-linux-27-shard
+    x-linux-37-shard
+    x-linux-pypy-shard
+    x-linux-shard
+    x-osx-27-shard
+    x-osx-37-shard
+    x-osx-shard
+    x-osx-ssl
+    x-py27
+    x-py37
+    x-pyenv-shard
+    x-pypy
+    x_base_steps
+  )
+
+  YAML_CUSTOM_CONFIG = %i(
+    coverage
+    dd
+    travisBuddy
+    SECRET_KEY_BASE=593146e0067b8b14fcdcd5ebfc0b4b0e987a889f
+  )
+
+  UNKNOWN_KEYS = {
+    addons: %i(
+      addons
+      branches
+      google-chrome
+      mysql
+      packages
+      s3_region
+      services
+      sonarqube
+      sources
+      ulimit
+    ),
+    'addons.apt': %i(
+      cache
+      chrome
+      config
+      coverity_scan
+      packages-without-jansson
+      ssh_known_hosts
+    ),
+    'addons.artifacts': %i(
+      acl
+      provider
+    ),
+    # is conditions on coverity_scan actually unknown?
+    'addons.coverity_scan': %i(
+      condition
+    ),
+    'addons.coverity_scan.project': %i(
+      branch_pattern
+      build_command
+    ),
+    'addons.sonarcloud': %i(
+      script
+    ),
+    branches: %i(
+      branches
+      global
+      submodules
+    ),
+    cache: %i(
+      before_cache
+      branches
+      cache
+      files
+      gradle
+      install
+      override
+      python
+    ),
+    deploy: %i(
+      access
+      after_deploy
+      all_branches
+      api_key
+      before_deploy
+      branch
+      branches
+      condition
+      client_id
+      client_secret
+      deploy
+      file
+      file_glob
+      github_commit
+      if
+      local_dir
+      node
+      only
+      options
+      overwrite
+      preserve-history
+      repo
+      script
+      tags
+      upload_docs
+      verbose
+    ),
+    'deploy.on': %i(
+      distributions
+      java
+      master
+      onBranch
+      prerelease
+      skip_cleanup
+    ),
+    env: %i(
+      allow_failures
+      fast_finish
+      os
+      secure
+    ),
+    git: %i(
+      clone
+      go_import_path
+    ),
+    # is sudo on matrix actually unknown?
+    matrix: %i(
+      before_install
+      global
+      sudo
+    ),
+    'matrix.allow_failures': %i(
+      canfail
+    ),
+    # should filter_secrets be valid?
+    'matrix.include': %i(
+      allow_failures
+      apt
+      canfail
+      cache.directories
+      git.depth
+      directories
+      distribution
+      fast_finish
+      file
+      filter_secrets
+      fortran
+      licenses
+      notifications
+      on
+      only
+      provider
+      skip_cleanup
+      version
+    ),
+    'matrix.include.addons': %i(
+      cache
+      sources
+      sonarqube
+    ),
+    'matrix.include.addons.apt': %i(
+      config
+      sources
+    ),
+    'matrix.include.cache': %i(
+      override
+    ),
+    # it's kinda fun that travis-ci/dpl has invalid keys on the rubygems
+    # provider (script and if)
+    'matrix.include.deploy': %i(
+      app
+      repo
+      github_commit
+      if
+      overwrite
+      script
+    ),
+    # TODO master should probably be allowed here, shouldn't it?
+    'matrix.include.deploy.on': %i(
+      on
+      script
+      master
+    ),
+    # notifications.if would make a ton of sense, actually
+    notifications: %i(
+      branches
+      channels
+      if
+      recipients
+      skip_join
+      template
+      urls
+      use_notice
+    ),
+    'notifications.email': %i(
+      slack
+    ),
+    'notifications.hipchat': %i(
+      secure
+    ),
+    'notifications.irc': %i(
+      branches
+      only
+      on_error
+    ),
+    'notifications.slack': %i(
+      email
+      format
+      on
+      secure
+      slack
+    ),
+    'notifications.webhooks': %i(
+      slack
+    ),
+    # is name actually unknown on root? or does it propagate to the jobs?
+    root: %i(
+      after_success:before_script
+      allow_failure
+      allow_failures
+      apt
+      before-caching
+      binary_packages
+      build
+      code_climate
+      default-cflags
+      deploy_docs
+      deps
+      directories
+      edge
+      email
+      exclude
+      except
+      fast_finish
+      fortran
+      global
+      global_env
+      image
+      include
+      licenses
+      mysql
+      name
+      npm
+      nvm
+      on
+      on_failure
+      on_success
+      only
+      postgres
+      repo_token
+      sbt
+      secure
+      serialGroup
+      service_name
+      slack
+      sources
+      stage
+      sudo_required
+      tags
+      test
+      versions
+      webhooks
+      wttd-notifications
+      yarn
+    ),
+    stages: %i(
+      branches
+    ),
+  }
+
+  INVALID_SEQS = %i(
+    addons
+    addons.artifacts.branch
+    addons.coverity_scan.build_command
+    deploy.api_key
+    deploy.password
+    deploy.script
+    language
+    matrix.fast_finish
+    matrix.include.addons.apt.update
+    matrix.include.addons.homebrew.update
+    matrix.include.deploy.script
+    matrix.include.os
+    notifications
+    notifications.email.on_failure
+    notifications.email.on_success
+    notifications.flowdock.api_token
+    osx_image
+    sudo
+  )
+
+  INVALID_TYPE = {
+    # people often "turn off" sections in huge matrices
+    bool: %i(
+      matrix.include.deploy
+      matrix.include.addons
+      matrix.allow_failures.addons
+      matrix.allow_failures.deploy
+    ),
+    str: %i(
+      deploy
+      deploy.prerelease
+      deploy.on.all_branches
+      matrix.include.addons
+      matrix.include.deploy.prerelease
+      matrix.allow_failures
+    ),
+    seq: %i(
+      matrix
+    ),
+    # on scripts this is often caused by YAML parsing a quoted string with a colon into a map
+    map: %i(
+      arch
+      after_failure
+      deploy.api_key
+      deploy.env
+      deploy.on.branch
+      matrix.include.cache.directories
+      matrix.include.script
+      matrix.include.after_script
+      after_success
+    ),
+  }
+
+  INVALID_CONDITIONS = [
+    '(branch = dev) AND (type IS cron)' # invalid condition (should be type = cron)
+  ]
+
+  UNKNOWN_VARS = %w(
+    repository_name,
+  )
+
+  ENUMS = %i(
+    notifications.hipchat.format
+  )
+
+  # how much of this is true?
+  UNSUPPORTED = {
+    android: %w(
+      cpp
+    ),
+    bundler_args: %w(
+      java
+      node_js
+      python
+    ),
+    compiler: %w(
+      java
+      erlang
+      generic
+      nix
+      node_js
+      objective-c
+      php
+      python
+      r
+      ruby
+      shell
+    ),
+    d: %w(
+      generic
+      shell
+    ),
+    dist: %w(
+      osx
+    ),
+    go: %w(
+      python
+    ),
+    jdk: %w(
+      c
+      cpp
+      go
+      node_js
+      objective-c
+      php
+      python
+      osx
+    ),
+    node_js: %w(
+      android
+      cpp
+      clojure
+      csharp
+      generic
+      go
+      java
+      groovy
+      ruby
+      rust
+      objective-c
+      php
+      python
+      scala
+      shell
+    ),
+    pandoc_version: %w(
+      php
+    ),
+    perl: %w(
+      node_js
+    ),
+    python: %w(
+      android
+      c
+      cpp
+      csharp
+      erlang
+      generic
+      go
+      java
+      node_js
+      php
+      ruby
+      scala
+      shell
+    ),
+    rvm: %w(
+      cpp
+      erlang
+      go
+      java
+      node_js
+      python
+    ),
+    scala: %w(
+      java
+    ),
+    smalltalk: %w(
+      bash
+      shell
+    ),
+    osx_image: %w(
+      linux
+    ),
+    osx: %w(
+      perl
+      scala
+    ),
+    solution: %w(
+      node_js
+    ),
+    virtualenv: %(
+      cpp
+      node_js
+    ),
+    warnings_are_errors: %w(
+      python
+    ),
+    windows: %w(
+      sh
+      php
+    ),
+  }
+
+  def unknown?(key, msg)
+    KEYS[key].include?(msg[1]) && (UNKNOWN[key].include?(msg[3][:key]) || UNKNOWN[key].include?(msg[3][:value]))
+  end
+
+  def broken?(key, msg)
+    KEYS[key].include?(msg[1]) && BROKEN[key].include?(msg[3][:original])
+  end
+
+  def dist_group_expansion?(msg)
+    return true if msg[1] == :dist && msg[2] == :invalid_seq
+  end
+
+  def unsupported_dist?(msg)
+    return true if msg[1] == :dist && msg[2] == :unknown_value && msg[3][:value] == 'bionic'
+  end
+
+  def typo?(msg)
+    %i(clean_key clean_value find_key find_value).include?(msg[2]) && TYPOS.include?(msg[3][:original].to_s)
+  end
+
+  def potential_alias?(msg)
+    %i(find_key find_value).include?(msg[2]) && POTENTIAL_ALIASES.include?(msg[3][:original].to_s) ||
+    %i(unknown_key).include?(msg[2]) && POTENTIAL_ALIASES.include?(msg[3][:key].to_s)
+  end
+
+  def deprecated?(msg)
+    msg[2] == :deprecated && DEPRECATIONS.include?(msg[3][:deprecation])
+  end
+
+  # unknown key for YAML references/aliases, would be nice if we could know Psych has resolved a node from this key
+  def yaml_reference_target?(msg)
+    msg[2] == :unknown_key && YAML_REFERENCE_TARGETS.include?(msg[3][:key]) && %i(root matrix).include?(msg[1])
+  end
+
+  # unkown keys that look like the user might parse .travis.yml during the build
+  def yaml_custom_config?(msg)
+    msg[2] == :unknown_key && msg[1] == :root && YAML_CUSTOM_CONFIG.include?(msg[3][:key])
+  end
+
+  def unknown_key?(msg, &block)
+    return false unless msg[2] == :unknown_key && UNKNOWN_KEYS.fetch(msg[1], []).include?(msg[3][:key])
+    block ? block.call : true
+  end
+
+  def questionable_env?(msg)
+    return false unless msg[2] == :unknown_key && msg[1] == :matrix && msg[3][:key] == :env
+    value = msg[3][:value]
+    return true if value.is_a?(Hash)  && value.key?(:global)    # e.g. elmsln:elmsln
+    return true if value.is_a?(Array) && value[0].is_a?(String)
+  end
+
+  def invalid_seq?(msg)
+    return false unless msg[2] == :invalid_seq
+    return true if INVALID_SEQS.include?(msg[1])
+    msg[1] == :notifications && msg[3][:value] == { email: false }
+  end
+
+  def invalid_type?(msg)
+    return false unless msg[2] == :invalid_type
+    return true if INVALID_TYPE[msg[3][:actual]]&.include?(msg[1])
+    return true if msg[1] == :env && msg[3][:value].include?('global -')
+    return true if msg[1] == :env && msg[3][:value].any? { |str| str.is_a?(String) && str =~ /^[^']+'$/ } # bogus single quote at the end
+    return true if msg[1] == :'matrix.include.env' && msg[3][:value].key?(:matrix)
+    return true if msg[1] == :'matrix.include.env' && msg[3][:value].key?(:global) # results in 'global=[{:FOO=>"foo"}]' in production https://travis-ci.org/svenfuchs/test/builds/525372730
+  end
+
+  def invalid_condition?(msg)
+    msg[2] == :invalid_condition && INVALID_CONDITIONS.include?(msg[3][:condition])
+  end
+
+  def unknown_var?(msg)
+    msg[2] == :unknown_var && UNKNOWN_VARS.include?(msg[3][:var])
+  end
+
+  def unsupported?(msg)
+    # i think i found enough of these to know that this is probably way too spammy
+    return true if msg[2] == :unsupported
+    # return false unless msg[2] == :unsupported
+    # return true if UNSUPPORTED[msg[3][:key]]&.include?(msg[3][:on_value])
+    # msg[3][:value].is_a?(String) && UNSUPPORTED[msg[3][:value].to_sym]&.include?(msg[3][:on_value])
+  end
+
+  def unknown_value(msg, &block)
+    return false unless  msg[2] == :unknown_value
+    return false unless ENUMS.include?(msg[1])
+    block ? block.call(msg[3][:value]) : true
+  end
 
   def filter(msg)
     return true if msg[0] == :info
-    # return true if msg[2] == :empty
+    # return true if msg[0] == :warn
+    # return false
 
-    # unknown languages
-    return true if msg[1] == :language && msg[3][:value] == 'common-lisp'
-    return true if msg[1] == :language && msg[3][:value] == 'emacs-lisp'
-    return true if msg[1] == :language && msg[3][:value] == 'general'
-    return true if msg[1] == :language && msg[3][:value] == 'js' # restore the alias
-    return true if msg[1] == :language && msg[3][:value] == 'kotlin'
-    return true if msg[1] == :language && msg[3][:value] == 'none'
-    return true if msg[1] == :language && msg[3][:value] == 'sage'
-    return true if msg[1] == :language && msg[3][:value] == 'sh' # restore the alias
+    return true if broken?(:language, msg)
+    return true if unknown?(:language, msg)
+    return true if unknown?(:os, msg)
+    return true if unknown?(:dist, msg)
+    return true if unknown?(:service, msg)
+    return true if unknown?(:stage, msg)
+    return true if unknown?(:event, msg)
+    return true if unknown?(:value, msg)
 
-    # unknown os
-    return true if msg[1] == :'matrix.include.os' && msg[3][:value] == 'linux-ppc64le'
+    return true if typo?(msg)
+    return true if potential_alias?(msg)
+    return true if deprecated?(msg)
 
-    # unknown dist
-    return true if msg[1] == :dist && msg[3][:value] == 'bionic'
-    return true if msg[1] == :dist && msg[3][:value] == 'current'
+    return true if dist_group_expansion?(msg)  # the feature flag allowing this is off on both org and com
+    return true if unsupported_dist?(msg)
 
-    # unknown services
-    return true if msg[2] == :unknown_value && msg[3][:value] == 'haveged'
-    return true if msg[2] == :unknown_value && msg[3][:value] == 'ignore'
-    return true if msg[2] == :unknown_value && msg[3][:value] == 'mariadb'
-    return true if msg[2] == :unknown_value && msg[3][:value] == 'pgsql'
-    return true if msg[2] == :unknown_value && msg[3][:value] == 'zookeeper'
+    return true if unknown_value(msg) { |value| value.include?('%{repository}') } # template string on hipchat.format
 
-    # dist/group expansion (the feature flag allowing this is off on both org and com)
-    return true if msg[2] == :invalid_seq && msg[1] == :dist
+    return true if yaml_reference_target?(msg) # people using unknown keys for storing yaml references
+    return true if yaml_custom_config?(msg)    # people using .travis.yml as a config store that they parse at build time
+    return true if questionable_env?(msg)      # should investigate these again
 
-    # fix this
-    return true if msg == [:warn, :cache, :deprecated, deprecation: :cache_enable_all, value: false]
+    return true if unknown_key?(msg)           # actually misplaced keys
+    return true if invalid_seq?(msg)           # actually invalid seqs
+    return true if invalid_type?(msg)          # actually invalid types
+    return true if invalid_condition?(msg)     # actually invalid conditions
+    return true if unknown_var?(msg)           # actually invalid template vars
+    return true if unsupported?(msg)
 
-    # rename to :unexpected_seq and move to :info
-    return true if msg[2] == :invalid_seq && msg[1] == :language
-    return true if msg[2] == :invalid_seq && msg[1] == :addons && msg[3][:value].keys.include?(:chrome)
-    return true if msg[2] == :invalid_seq && msg[1] == :'deploy.script'
-    return true if msg[2] == :invalid_seq && msg[1] == :'matrix.include.deploy.script'
-    return true if msg[2] == :invalid_seq && msg[1] == :'matrix.include.os'
+    return true if msg[1] == :language && msg[3][:value].include?('$travis_branch')
 
-    # bogus invalid_seq on notifications.email.recipients
-    return true if msg[2] == :invalid_seq && msg[1] == :'notifications.email.recipients'
-
-    # invalid_seq due to bogus YAML references
-    return true if msg[2] == :invalid_seq && msg[1] == :'matrix.include.addons.apt.packages'
-    return true if msg[2] == :invalid_seq && msg[1] == :'matrix.exclude.addons.apt.packages'
-
-    # misc invalid_seq
-    return true if msg[2] == :invalid_seq && msg[1] == :'deploy.api_key'
-    return true if msg[2] == :invalid_seq && msg[1] == :addons
-    return true if msg[2] == :invalid_seq && msg[1] == :osx_image
-    return true if msg[2] == :invalid_seq && msg[1] == :sudo
-    return true if msg[2] == :invalid_seq && msg[1] == :'matrix.fast_finish' # [true]
-    return true if msg[2] == :invalid_seq && msg[1] == :'matrix.include.addons.apt.update'
-    return true if msg[2] == :invalid_seq && msg[1] == :'matrix.include.addons.homebrew.update'
-    return true if msg[2] == :invalid_seq && msg[1] == :'addons.coverity_scan.build_command'
-    return true if msg[2] == :invalid_seq && msg[1] == :'deploy.password'
-    return true if msg[2] == :invalid_seq && msg[1] == :notifications && msg[3][:value] == { email: false }
-    return true if msg[2] == :invalid_seq && msg[1] == :'notifications.flowdock.api_token'
-
-    # unsupported dist
-    return true if msg[2] == :unknown_value && msg[3][:value] == 'bionic'
-
-    # typo
-    return true if msg[2] == :find_value && msg[3][:original] == '-docker'
-    return true if msg[2] == :find_value && msg[3][:original] == 'trust'
-    return true if msg[2] == :find_value && msg[3][:original] == 'alwayss'
-    return true if msg[2] == :clean_key  && msg[3][:original] == :_addons
-    return true if msg[2] == :find_key   && msg[3][:original] == :deployg
-    return true if msg[2] == :find_key   && msg[3][:original] == :pyton
-    return true if msg[2] == :find_key   && msg[3][:original] == :state  # should have been stage
-    return true if msg[2] == :find_key   && msg[3][:original] == :serivce
-    return true if msg[2] == :find_key   && msg[3][:original] == :'keep-hisotry'
-    return true if msg[2] == :find_key   && msg[3][:original] == :'commiter-from-gh'
-    return true if msg[2] == :find_key   && msg[3][:original] == :langauge
-
-    # just wrong
-    return true if msg[2] == :find_key   && msg[3][:original] == :'before-caching'
-
-    # alias
-    return true if msg[2] == :find_value && msg[3][:original] == 'nodejs'
-    return true if msg[2] == :find_value && msg[3][:original] == 'require'
-    return true if msg[2] == :find_key   && msg[3][:original] == :notification
-    return true if msg[2] == :find_key   && msg[3][:original] == :addon
-    return true if msg[2] == :find_key   && msg[3][:original] == :service
-
-    # deprecated alias key?
-    return true if msg[2] == :unknown_key   && msg[3][:key] == :fail_fast
-    return true if msg[2] == :unknown_key   && msg[3][:key] == :lang
-    return true if msg[2] == :misplaced_key && msg[3][:key] == :username && msg[1] == :'matrix.include.deploy'
-    return true if msg[2] == :find_key      && msg[3][:original] == :add_ons
-    return true if msg[2] == :find_key      && msg[3][:original] == :allow_failure
-    return true if msg[2] == :find_key      && msg[3][:original] == :scripts
-    return true if msg[2] == :find_key      && msg[3][:original] == :caches
-
-    # how much of this is true?
-    return true if msg[2] == :unsupported && msg[3][:key] == :bundler_args && msg[3][:on_value] == 'java'
-    return true if msg[2] == :unsupported && msg[3][:key] == :bundler_args && msg[3][:on_value] == 'node_js'
-    return true if msg[2] == :unsupported && msg[3][:key] == :compiler     && msg[3][:on_value] == 'java'
-    return true if msg[2] == :unsupported && msg[3][:key] == :compiler     && msg[3][:on_value] == 'erlang'
-    return true if msg[2] == :unsupported && msg[3][:key] == :compiler     && msg[3][:on_value] == 'generic'
-    return true if msg[2] == :unsupported && msg[3][:key] == :compiler     && msg[3][:on_value] == 'node_js'
-    return true if msg[2] == :unsupported && msg[3][:key] == :compiler     && msg[3][:on_value] == 'php'
-    return true if msg[2] == :unsupported && msg[3][:key] == :compiler     && msg[3][:on_value] == 'python'
-    return true if msg[2] == :unsupported && msg[3][:key] == :compiler     && msg[3][:on_value] == 'r'
-    return true if msg[2] == :unsupported && msg[3][:key] == :compiler     && msg[3][:on_value] == 'shell'
-    return true if msg[2] == :unsupported && msg[3][:key] == :d            && msg[3][:on_value] == 'generic'
-    return true if msg[2] == :unsupported && msg[3][:key] == :dist         && msg[3][:on_value] == 'osx'
-    return true if msg[2] == :unsupported && msg[3][:key] == :jdk          && msg[3][:on_value] == 'c'
-    return true if msg[2] == :unsupported && msg[3][:key] == :jdk          && msg[3][:on_value] == 'cpp'
-    return true if msg[2] == :unsupported && msg[3][:key] == :jdk          && msg[3][:on_value] == 'go'
-    return true if msg[2] == :unsupported && msg[3][:key] == :jdk          && msg[3][:on_value] == 'node_js'
-    return true if msg[2] == :unsupported && msg[3][:key] == :jdk          && msg[3][:on_value] == 'python'
-    return true if msg[2] == :unsupported && msg[3][:key] == :jdk          && msg[3][:on_value] == 'osx'
-    return true if msg[2] == :unsupported && msg[3][:key] == :node_js      && msg[3][:on_value] == 'android'
-    return true if msg[2] == :unsupported && msg[3][:key] == :node_js      && msg[3][:on_value] == 'cpp'
-    return true if msg[2] == :unsupported && msg[3][:key] == :node_js      && msg[3][:on_value] == 'clojure'
-    return true if msg[2] == :unsupported && msg[3][:key] == :node_js      && msg[3][:on_value] == 'csharp'
-    return true if msg[2] == :unsupported && msg[3][:key] == :node_js      && msg[3][:on_value] == 'generic'
-    return true if msg[2] == :unsupported && msg[3][:key] == :node_js      && msg[3][:on_value] == 'java'
-    return true if msg[2] == :unsupported && msg[3][:key] == :node_js      && msg[3][:on_value] == 'groovy'
-    return true if msg[2] == :unsupported && msg[3][:key] == :node_js      && msg[3][:on_value] == 'ruby'
-    return true if msg[2] == :unsupported && msg[3][:key] == :node_js      && msg[3][:on_value] == 'rust'
-    return true if msg[2] == :unsupported && msg[3][:key] == :node_js      && msg[3][:on_value] == 'objective-c'
-    return true if msg[2] == :unsupported && msg[3][:key] == :node_js      && msg[3][:on_value] == 'php'
-    return true if msg[2] == :unsupported && msg[3][:key] == :node_js      && msg[3][:on_value] == 'python'
-    return true if msg[2] == :unsupported && msg[3][:key] == :perl         && msg[3][:on_value] == 'node_js'
-    return true if msg[2] == :unsupported && msg[3][:key] == :python       && msg[3][:on_value] == 'android'
-    return true if msg[2] == :unsupported && msg[3][:key] == :python       && msg[3][:on_value] == 'c'
-    return true if msg[2] == :unsupported && msg[3][:key] == :python       && msg[3][:on_value] == 'cpp'
-    return true if msg[2] == :unsupported && msg[3][:key] == :python       && msg[3][:on_value] == 'erlang'
-    return true if msg[2] == :unsupported && msg[3][:key] == :python       && msg[3][:on_value] == 'generic'
-    return true if msg[2] == :unsupported && msg[3][:key] == :python       && msg[3][:on_value] == 'go'
-    return true if msg[2] == :unsupported && msg[3][:key] == :python       && msg[3][:on_value] == 'node_js'
-    return true if msg[2] == :unsupported && msg[3][:key] == :python       && msg[3][:on_value] == 'ruby'
-    return true if msg[2] == :unsupported && msg[3][:key] == :python       && msg[3][:on_value] == 'scala'
-    return true if msg[2] == :unsupported && msg[3][:key] == :python       && msg[3][:on_value] == 'sh'
-    return true if msg[2] == :unsupported && msg[3][:key] == :python       && msg[3][:on_value] == 'shell'
-    return true if msg[2] == :unsupported && msg[3][:key] == :rvm          && msg[3][:on_value] == 'erlang'
-    return true if msg[2] == :unsupported && msg[3][:key] == :rvm          && msg[3][:on_value] == 'java'
-    return true if msg[2] == :unsupported && msg[3][:key] == :rvm          && msg[3][:on_value] == 'node_js'
-    return true if msg[2] == :unsupported && msg[3][:key] == :rvm          && msg[3][:on_value] == 'python'
-    return true if msg[2] == :unsupported && msg[3][:key] == :scala        && msg[3][:on_value] == 'java'
-    return true if msg[2] == :unsupported && msg[3][:key] == :osx_image    && msg[3][:on_value] == 'linux'
-    return true if msg[2] == :unsupported && msg[3][:key] == :smalltalk    && msg[3][:on_value] == 'bash'
-    return true if msg[2] == :unsupported && msg[3][:key] == :solution     && msg[3][:on_value] == 'node_js'
-    return true if msg[2] == :unsupported && msg[3][:key] == :warnings_are_errors && msg[3][:on_value] == 'python'
-    return true if msg[2] == :unsupported && msg[3][:value] == 'osx'       && msg[3][:on_value] == 'scala'
-    return true if msg[2] == :unsupported && msg[3][:value] == 'windows'   && msg[3][:on_value] == 'sh' # restore the alias
-
-    # after_error stage
-    return true if msg[2] == :unknown_key && msg[3][:key] == :after_error
-
-    # on_start, on_cancel on notifications other than webhooks
-    return true if msg[2] == :misplaced_key && msg[3][:key] == :on_start
-    return true if msg[2] == :misplaced_key && msg[3][:key] == :on_cancel
-
-    # on_pull_requests on notifications other than slack
-    return true if msg[2] == :misplaced_key && msg[3][:key] == :on_pull_requests
-
-    # on_change on notifications.email
-    return true if msg[2] == :unknown_key && msg[3][:key] == :on_change
-
-    # deprecations
-    return true if msg[2] == :deprecated && msg[3][:deprecation] == :cache_enable_all
-    return true if msg[2] == :deprecated && msg[3][:deprecation] == :deprecated_sonarcloud_branches
-    return true if msg[2] == :deprecated && msg[3][:deprecation] == :deprecated_sonarcloud_github_token
-
-    # unknown key for YAML references/aliases, would be nice if we could know
-    # Psych has resolved a node from this key
-    return true if msg[2] == :unknown_key && msg[1] == :matrix && msg[3][:key] == :templates
-    return true if msg[2] == :unknown_key && msg[1] == :root   && msg[3][:key] == :'.apt_sources'
-    return true if msg[2] == :unknown_key && msg[1] == :root   && msg[3][:key] == :'.check_moban'
-    return true if msg[2] == :unknown_key && msg[1] == :root   && msg[3][:key] == :'.disable_global'
-    return true if msg[2] == :unknown_key && msg[1] == :root   && msg[3][:key] == :'conan-linux'
-    return true if msg[2] == :unknown_key && msg[1] == :root   && msg[3][:key] == :'conan-osx'
-    return true if msg[2] == :unknown_key && msg[1] == :root   && msg[3][:key] == :'flake8-steps'
-    return true if msg[2] == :unknown_key && msg[1] == :root   && msg[3][:key] == :'linux-ppc64le'
-    return true if msg[2] == :unknown_key && msg[1] == :root   && msg[3][:key] == :'node-preset'
-    return true if msg[2] == :unknown_key && msg[1] == :root   && msg[3][:key] == :aliases
-    return true if msg[2] == :unknown_key && msg[1] == :root   && msg[3][:key] == :apt_targets
-    return true if msg[2] == :unknown_key && msg[1] == :root   && msg[3][:key] == :common_sources
-    return true if msg[2] == :unknown_key && msg[1] == :root   && msg[3][:key] == :defaults
-    return true if msg[2] == :unknown_key && msg[1] == :root   && msg[3][:key] == :defaults_go
-    return true if msg[2] == :unknown_key && msg[1] == :root   && msg[3][:key] == :defaults_js
-    return true if msg[2] == :unknown_key && msg[1] == :root   && msg[3][:key] == :doctr
-    return true if msg[2] == :unknown_key && msg[1] == :root   && msg[3][:key] == :docker_template
-    return true if msg[2] == :unknown_key && msg[1] == :root   && msg[3][:key] == :linux_template
-    return true if msg[2] == :unknown_key && msg[1] == :root   && msg[3][:key] == :linux_apt_template
-    return true if msg[2] == :unknown_key && msg[1] == :root   && msg[3][:key] == :macos_template
-    return true if msg[2] == :unknown_key && msg[1] == :root   && msg[3][:key] == :packagecloud_deb_template
-    return true if msg[2] == :unknown_key && msg[1] == :root   && msg[3][:key] == :packagecloud_rpm_template
-    return true if msg[2] == :unknown_key && msg[1] == :root   && msg[3][:key] == :windows_template
-    return true if msg[2] == :unknown_key && msg[1] == :root   && msg[3][:key] == :install_linux
-    return true if msg[2] == :unknown_key && msg[1] == :root   && msg[3][:key] == :install_osx
-    return true if msg[2] == :unknown_key && msg[1] == :root   && msg[3][:key] == :linux32_install
-    return true if msg[2] == :unknown_key && msg[1] == :root   && msg[3][:key] == :linux64_install
-    return true if msg[2] == :unknown_key && msg[1] == :root   && msg[3][:key] == :docker_cmake_install
-    return true if msg[2] == :unknown_key && msg[1] == :root   && msg[3][:key] == :docker_cmake_script
-    return true if msg[2] == :unknown_key && msg[1] == :root   && msg[3][:key] == :docker_make_script
-    return true if msg[2] == :unknown_key && msg[1] == :root   && msg[3][:key] == :cmake_install
-    return true if msg[2] == :unknown_key && msg[1] == :root   && msg[3][:key] == :cmake_script
-    return true if msg[2] == :unknown_key && msg[1] == :root   && msg[3][:key] == :make_script
-    return true if msg[2] == :unknown_key && msg[1] == :root   && msg[3][:key] == :scala_version_211
-    return true if msg[2] == :unknown_key && msg[1] == :root   && msg[3][:key] == :scala_version_212
-    return true if msg[2] == :unknown_key && msg[1] == :root   && msg[3][:key] == :scala_version_213
-    return true if msg[2] == :unknown_key && msg[1] == :root   && msg[3][:key] == :java_8
-    return true if msg[2] == :unknown_key && msg[1] == :root   && msg[3][:key] == :java_11
-
-    # unkown keys that look like the user might parse .travis.yml during the build
-    return true if msg[2] == :unknown_key && msg[1] == :root   && msg[3][:key] == :coverage    # CompassionCH:compassion-modules
-    return true if msg[2] == :unknown_key && msg[1] == :root   && msg[3][:key] == :travisBuddy # HoeenCoder::Wavelength
-
-    # unknown and misplaced keys
-    return true if msg[2] == :misplaced_key && msg[3][:key] == :branches        && msg[1] == :addons
-    return true if msg[2] == :misplaced_key && msg[3][:key] == :sources         && msg[1] == :addons
-    return true if msg[2] == :misplaced_key && msg[3][:key] == :packages        && msg[1] == :addons
-    return true if msg[2] == :unknown_key   && msg[3][:key] == :sonarqube       && msg[1] == :addons
-    return true if msg[2] == :unknown_key   && msg[3][:key] == :ulimit          && msg[1] == :addons
-    return true if msg[2] == :misplaced_key && msg[3][:key] == :provider        && msg[1] == :'addons.artifacts'
-    return true if msg[2] == :misplaced_key && msg[3][:key] == :acl             && msg[1] == :'addons.artifacts'
-    return true if msg[2] == :misplaced_key && msg[3][:key] == :condition       && msg[1] == :'addons.coverity_scan'
-    return true if msg[2] == :misplaced_key && msg[3][:key] == :cache           && msg[1] == :'addons.apt'
-    return true if msg[2] == :misplaced_key && msg[3][:key] == :config          && msg[1] == :'addons.apt'
-    return true if msg[2] == :misplaced_key && msg[3][:key] == :ssh_known_hosts && msg[1] == :'addons.apt'
-    return true if msg[2] == :misplaced_key && msg[3][:key] == :branches        && msg[1] == :branches
-    return true if msg[2] == :misplaced_key && msg[3][:key] == :submodules      && msg[1] == :branches
-    return true if msg[2] == :misplaced_key && msg[3][:key] == :before_cache    && msg[1] == :cache
-    return true if msg[2] == :unknown_key   && msg[3][:key] == :override        && msg[1] == :cache
-    return true if msg[2] == :misplaced_key && msg[3][:key] == :os              && msg[1] == :env
-    return true if msg[2] == :misplaced_key && msg[3][:key] == :fast_finish     && msg[1] == :env
-    return true if msg[2] == :misplaced_key && msg[3][:key] == :go_import_path  && msg[1] == :git
-    return true if msg[2] == :misplaced_key && msg[3][:key] == :global          && msg[1] == :matrix
-    return true if msg[2] == :misplaced_key && msg[3][:key] == :sudo            && msg[1] == :matrix
-    return true if msg[2] == :misplaced_key && msg[3][:key] == :apt             && msg[1] == :'matrix.include'
-    return true if msg[2] == :unknown_key   && msg[3][:key] == :distribution    && msg[1] == :'matrix.include'
-    return true if msg[2] == :misplaced_key && msg[3][:key] == :fast_finish     && msg[1] == :'matrix.include'
-    return true if msg[2] == :misplaced_key && msg[3][:key] == :file            && msg[1] == :'matrix.include'
-    return true if msg[2] == :misplaced_key && msg[3][:key] == :on              && msg[1] == :'matrix.include'
-    return true if msg[2] == :misplaced_key && msg[3][:key] == :provider        && msg[1] == :'matrix.include'
-    return true if msg[2] == :misplaced_key && msg[3][:key] == :skip_cleanup    && msg[1] == :'matrix.include'
-    return true if msg[2] == :misplaced_key && msg[3][:key] == :version         && msg[1] == :'matrix.include'
-    return true if msg[2] == :misplaced_key && msg[3][:key] == :cache           && msg[1] == :'matrix.include.addons'
-    return true if msg[2] == :misplaced_key && msg[3][:key] == :sources         && msg[1] == :'matrix.include.addons'
-    return true if msg[2] == :misplaced_key && msg[3][:key] == :config          && msg[1] == :'matrix.include.addons.apt'
-    return true if msg[2] == :unknown_key   && msg[3][:key] == :override        && msg[1] == :'matrix.include.cache'
-    return true if msg[2] == :misplaced_key && msg[3][:key] == :apt             && msg[1] == :root
-    return true if msg[2] == :misplaced_key && msg[3][:key] == :allow_failures  && msg[1] == :root
-    return true if msg[2] == :misplaced_key && msg[3][:key] == :code_climate    && msg[1] == :root
-    return true if msg[2] == :unknown_key   && msg[3][:key] == :deploy_docs     && msg[1] == :root
-    return true if msg[2] == :misplaced_key && msg[3][:key] == :directories     && msg[1] == :root
-    return true if msg[2] == :misplaced_key && msg[3][:key] == :email           && msg[1] == :root
-    return true if msg[2] == :misplaced_key && msg[3][:key] == :global          && msg[1] == :root
-    return true if msg[2] == :misplaced_key && msg[3][:key] == :global_env      && msg[1] == :root
-    return true if msg[2] == :misplaced_key && msg[3][:key] == :include         && msg[1] == :root
-    return true if msg[2] == :misplaced_key && msg[3][:key] == :licenses        && msg[1] == :root
-    return true if msg[2] == :unknown_key   && msg[3][:key] == :linux           && msg[1] == :root
-    return true if msg[2] == :unknown_key   && msg[3][:key] == :mysql           && msg[1] == :root
-    return true if msg[2] == :misplaced_key && msg[3][:key] == :only            && msg[1] == :root
-    return true if msg[2] == :unknown_key   && msg[3][:key] == :sbt             && msg[1] == :root
-    return true if msg[2] == :misplaced_key && msg[3][:key] == :secure          && msg[1] == :root
-    return true if msg[2] == :misplaced_key && msg[3][:key] == :sources         && msg[1] == :root
-    return true if msg[2] == :misplaced_key && msg[3][:key] == :tags            && msg[1] == :root
-    return true if msg[2] == :misplaced_key && msg[3][:key] == :test            && msg[1] == :root
-    return true if msg[2] == :misplaced_key && msg[3][:key] == :webhooks        && msg[1] == :root
-    return true if msg[2] == :misplaced_key && msg[3][:key] == :on_failure      && msg[1] == :root
-    return true if msg[2] == :misplaced_key && msg[3][:key] == :branches        && msg[1] == :stages
-
-    # misplaced stage on root
-    return true if msg[2] == :find_key && msg[3][:original] == :stage && msg[1] == :root
-
-    # misplaced notifications on matrix.include
-    return true if msg[2] == :misplaced_key && msg[3][:key] == :notifications && msg[1] == :'matrix.include'
-
-    # misplaced keys on notifications
-    return true if msg[2] == :misplaced_key && msg[3][:key] == :recipients    && msg[1] == :notifications
-    return true if msg[2] == :misplaced_key && msg[3][:key] == :skip_join     && msg[1] == :notifications
-    return true if msg[2] == :misplaced_key && msg[3][:key] == :urls          && msg[1] == :notifications
-    return true if msg[2] == :misplaced_key && msg[3][:key] == :slack         && msg[1] == :'notifications.email'
-    return true if msg[2] == :misplaced_key && msg[3][:key] == :secure        && msg[1] == :'notifications.hipchat'
-
-    # unknown keys on deploy and deploy.on
-    return true if msg[2] == :misplaced_key && msg[3][:key] == :all_branches  && msg[1] == :deploy
-    return true if msg[2] == :misplaced_key && msg[3][:key] == :script        && msg[1] == :deploy # script on npm
-    return true if msg[2] == :unknown_key   && msg[3][:key] == :access        && msg[1] == :deploy # S3 acl?
-    return true if msg[2] == :misplaced_key && msg[3][:key] == :before_deploy && msg[1] == :deploy
-    return true if msg[2] == :misplaced_key && msg[3][:key] == :after_deploy  && msg[1] == :deploy
-    return true if msg[2] == :misplaced_key && msg[3][:key] == :condition     && msg[1] == :deploy
-    return true if msg[2] == :unknown_key   && msg[3][:key] == :node          && msg[1] == :deploy
-    return true if msg[2] == :misplaced_key && msg[3][:key] == :verbose       && msg[1] == :deploy # verbose on github pages
-    return true if msg[2] == :misplaced_key && msg[3][:key] == :repo          && msg[1] == :deploy
-    return true if msg[2] == :misplaced_key && msg[3][:key] == :distributions && msg[1] == :'deploy.on'
-    return true if msg[2] == :unknown_key   && msg[3][:key] == :java          && msg[1] == :'deploy.on'
-    return true if msg[2] == :unknown_key   && msg[3][:key] == :master        && msg[1] == :'deploy.on'
-    return true if msg[2] == :misplaced_key && msg[3][:key] == :prerelease    && msg[1] == :'deploy.on'
-    return true if msg[2] == :unknown_key   && msg[3][:key] == :onBranch      && msg[1] == :'deploy.on'
-    return true if msg[2] == :misplaced_key && msg[3][:key] == :repo          && msg[1] == :'matrix.include.deploy'
-
-    # invalid type on deploy.on.branch (root.branches syntax using :only)
-    return true if msg[2] == :invalid_type && msg[3][:actual] == :map && msg[1] == :'deploy.on.branch' && msg[3][:value].key?(:only)
-
-    # recognized as broken by the user (cfengine:core)
-    return true if msg[2] == :invalid_type && msg[3][:actual] == :str && msg[1] == :'deploy.prerelease'
-
-    # invalid_type
-    return true if msg[2] == :invalid_type && msg[3][:actual] == :str  && msg[1] == :'deploy'
-    return true if msg[2] == :invalid_type && msg[3][:actual] == :str  && msg[1] == :'env' && msg[3][:value].include?('global -')
-    return true if msg[2] == :invalid_type && msg[3][:actual] == :bool && msg[1] == :'matrix.include.addons'
-    return true if msg[2] == :invalid_type && msg[3][:actual] == :bool && msg[1] == :'matrix.include.deploy'
-    return true if msg[2] == :invalid_type && msg[3][:actual] == :map  && msg[1] == :'matrix.include.env' && msg[3][:value].key?(:matrix)
-    return true if msg[2] == :invalid_type && msg[3][:actual] == :map  && msg[1] == :'matrix.include.env' && msg[3][:value].key?(:global)
-    return true if msg[2] == :invalid_type && msg[3][:actual] == :bool && msg[1] == :'matrix.allow_failures.addons'
-    return true if msg[2] == :invalid_type && msg[3][:actual] == :bool && msg[1] == :'matrix.allow_failures.deploy'
-
-    # unkown value
-    return true if msg[2] == :unknown_value && msg[1] == :'notifications.hipchat.format' && msg[3][:value].include?('%{repository}')
-
-    # accept
-    #
-    # deploy github release oktokit keys
-    # https://github.com/octokit/octokit.rb/blob/master/lib/octokit/client/releases.rb
-    return true if msg[1] == :deploy && msg[2] == :misplaced_key && msg[3][:key] == :api_key
-    return true if msg[1] == :deploy && msg[2] == :unknown_key   && msg[3][:key] == :body
-    return true if msg[1] == :deploy && msg[2] == :misplaced_key && msg[3][:key] == :name
-    return true if msg[1] == :deploy && msg[2] == :unknown_key   && msg[3][:key] == :tag_name
-    return true if msg[1] == :deploy && msg[2] == :unknown_key   && msg[3][:key] == :target_commitish
-    return true if msg[1] == :deploy && msg[2] == :unknown_key   && msg[3][:key] == :options
-    return true if msg[1] == :deploy && msg[2] == :unknown_key   && msg[3][:key] == :'preserve-history'
-    return true if msg[1] == :'matrix.include.deploy' && msg[2] == :unknown_key   && msg[3][:key] == :body
-    return true if msg[1] == :'matrix.include.deploy' && msg[2] == :misplaced_key && msg[3][:key] == :name
-
-    # accept
-    #
-    # 3343/edge
-    return true if msg[2] == :invalid_type && msg[1] == :'matrix.include.addons.coverity_scan.notification_email'
-    # akumuli:Akumuli
-    return true if msg[2] == :find_key && msg[3][:original] == :access_key_id
-    # curl:curl (omg)
-    return true if msg[2] == :invalid_seq && msg[1] == :'matrix.include.addons.apt.sources.name'
-    # not sure
-    return true if msg[2] == :invalid_seq && msg[1] == :'env.matrix'
-    return true if msg[2] == :invalid_seq && msg[1] == :'notifications.slack'
-    return true if msg[2] == :misplaced_key && msg[3][:key] == :slack && msg[1] == :'notifications.slack'
-    return true if msg[2] == :misplaced_key && msg[3][:key] == :secure && msg[1] == :'notifications.slack'
-    # elmsln:elmsln
-    return true if msg[2] == :misplaced_key && msg[3][:key] == :env && msg[1] == :matrix
-    # firefox-devtools:debugger
-    return true if msg[2] == :clean_value && msg[3][:original] == 'python - "3.6"'
-    # fluent:fluent-bit
-    return true if msg[2] == :unsupported && msg[3][:on_value] == 'node_js - "9"'
-    # geoblacklight:geoblacklight
-    return true if msg[2] == :unknown_key  && msg[3][:key] == :global_env
+    # geoblacklight:geoblacklight (holy shit)
+    return true if msg[2] == :unknown_key && msg[3][:key] == :global_env
     # grondo:flux-core
     return true if msg[2] == :invalid_type && msg[3][:value] == 'skip'
-    # HaxeFoundation:hashlink
-    return true if msg[2] == :find_key && msg[3][:original] == :mac_before_install
-    return true if msg[2] == :find_key && msg[3][:original] == :make_install
-    # hammer-io:tyr
-    return true if msg[2] == :invalid_condition && msg[3][:condition] == '(branch = dev) AND (type IS cron)'
-    # hashmapinc:Drillflow
-    return true if msg[2] == :invalid_type && msg[1] == :env && msg[3][:actual] == :seq
-    # higlasss:higlass
-    return true if msg[2] == :misplaced_key && msg[1] == :deploy && msg[3][:key] == :file
-    # hyperion-project:hyperion.ng
-    return true if msg[2] == :find_key && msg[3][:original] == :osx
-    return true if msg[2] == :invalid_type && msg[3][:value] == { os: 'osx' }
-    # apache:griffin
-    return true if msg[1] == :language && msg[3][:original] == 'java scala node_js'
-    # Azure:azure-ssk-for-net
-    return true if msg[2] == :invalid_type && msg[1] == :'matrix.include.after_script' && msg[3][:actual] == :map
+    # fix this
+    return true if msg == [:warn, :cache, :deprecated, deprecation: :cache_enable_all, value: false]
 
     p msg
     false
@@ -472,8 +939,7 @@ describe Travis::Yml, configs: true do
 
   paths = Dir['spec/fixtures/configs/**/*.yml'].sort
   paths = paths.reject { |path| skip.any? { |skip| path.include?(skip) } }
-  paths = paths[0..3500]
-  # paths = paths[3500..5000]
+  paths = paths[0..10_000]
 
   configs = paths.map { |path| [path, File.read(path)] }
 

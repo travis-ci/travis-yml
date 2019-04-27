@@ -17,7 +17,7 @@ module Travis
           end
 
           def compact?
-            values.any?(&:missing?)
+            values.any?(&:missing?) && !schema.change?(:env_vars)
           end
 
           def compact

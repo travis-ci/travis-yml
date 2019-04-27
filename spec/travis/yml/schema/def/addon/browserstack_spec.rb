@@ -14,7 +14,7 @@ describe Travis::Yml::Schema::Def::Addon::Browserstack, 'structure' do
             type: :object,
             properties: {
               username: {
-                type: :string
+                '$ref': '#/definitions/type/secure'
               },
               access_key: {
                 '$ref': '#/definitions/type/secure'

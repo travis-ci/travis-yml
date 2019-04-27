@@ -8,6 +8,7 @@ describe Travis::Yml, 'matrix' do
           fast_finish: true
       )
       it { should serialize_to matrix: { fast_finish: true } }
+      it { should_not have_msg }
     end
 
     describe 'on alias jobs' do
@@ -16,6 +17,7 @@ describe Travis::Yml, 'matrix' do
           fast_finish: true
       )
       it { should serialize_to matrix: { fast_finish: true } }
+      it { should have_msg [:info, :root, :alias, alias: :jobs, key: :matrix] }
     end
 
     describe 'alias fast_failure' do
@@ -24,6 +26,7 @@ describe Travis::Yml, 'matrix' do
           fast_failure: true
       )
       it { should serialize_to matrix: { fast_finish: true } }
+      it { should have_msg [:info, :matrix, :alias, alias: :fast_failure, key: :fast_finish] }
     end
   end
 
@@ -79,6 +82,7 @@ describe Travis::Yml, 'matrix' do
           - rvm: 2.3
       )
       it { should serialize_to matrix: { allow_failures: [rvm: ['2.3']] } }
+      it { should_not have_msg }
     end
 
     describe 'given a misplaced alias :allowed_failures (typo)', v2: true, migrate: true do
@@ -109,6 +113,7 @@ describe Travis::Yml, 'matrix' do
               stage: str
       )
       it { should serialize_to matrix: { include: [rvm: ['2.3'], stage: 'str'] } }
+      it { should_not have_msg }
     end
 
     describe 'given a map' do
@@ -118,6 +123,7 @@ describe Travis::Yml, 'matrix' do
             rvm: 2.3
       )
       it { should serialize_to matrix: { include: [rvm: ['2.3']] } }
+      it { should_not have_msg }
     end
 
     describe 'given a nested map with a broken env string (missing newline)' do
@@ -140,9 +146,10 @@ describe Travis::Yml, 'matrix' do
                 FOO: foo
       )
       it { should serialize_to matrix: { include: [rvm: ['2.3'], env: [FOO: 'foo']] } }
+      it { should_not have_msg }
     end
 
-    describe 'given a seq of maps (with env given as a string)' do
+    describe 'given a seq of maps (with rvm given as a string)' do
       yaml %(
         matrix:
           include:
@@ -150,6 +157,7 @@ describe Travis::Yml, 'matrix' do
               env: FOO=foo
       )
       it { should serialize_to matrix: { include: [rvm: ['2.3'], env: [FOO: 'foo']] } }
+      it { should_not have_msg }
     end
 
     describe 'given a seq of maps (with env given as a seq of strings)' do
@@ -164,6 +172,51 @@ describe Travis::Yml, 'matrix' do
       it { should serialize_to matrix: { include: [rvm: ['2.3'], env: [{ FOO: 'foo' }, { BAR: 'bar' }]] } }
     end
 
+    describe 'given a language' do
+      yaml %(
+        matrix:
+          include:
+            language: ruby
+      )
+      it { should serialize_to matrix: { include: [language: 'ruby'] } }
+      it { should_not have_msg }
+    end
+
+    describe 'given a language with a typo' do
+      yaml %(
+        matrix:
+          include:
+            language: ruby`
+      )
+      it { should serialize_to matrix: { include: [language: 'ruby'] } }
+      it { should have_msg [:warn, :'matrix.include.language', :find_value, original: 'ruby`', value: 'ruby'] }
+    end
+
+    describe 'given licenses' do
+      yaml %(
+        matrix:
+          include:
+          - language: android
+            android:
+              licenses:
+                - str
+      )
+      it { should serialize_to matrix: { include: [language: 'android', android: { licenses: ['str'] }] } }
+      it { should_not have_msg }
+    end
+
+    describe 'unknown value, with an unsupported key' do
+      yaml %(
+        matrix:
+          include:
+            language: node_js - 9
+            compiler: gcc
+      )
+      it { should serialize_to matrix: { include: [language: 'node_js', compiler: ['gcc']] } }
+      it { should have_msg [:warn, :'matrix.include.language', :clean_value, original: 'node_js - 9', value: 'node_js'] }
+      it { should have_msg [:warn, :'matrix.include.compiler', :unsupported, on_key: :language, on_value: 'node_js', key: :compiler, value: ['gcc']] }
+    end
+
     describe 'given a name' do
       yaml %(
         matrix:
@@ -171,6 +224,7 @@ describe Travis::Yml, 'matrix' do
             name: name
       )
       it { should serialize_to matrix: { include: [name: 'name'] } }
+      it { should_not have_msg }
     end
 
     describe 'given duplicate names' do
@@ -259,6 +313,7 @@ describe Travis::Yml, 'matrix' do
               rvm: 2.3
         )
         it { should serialize_to matrix: { key => [rvm: ['2.3']] } }
+        it { should_not have_msg }
       end
 
       describe 'given a seq of maps' do
@@ -268,6 +323,7 @@ describe Travis::Yml, 'matrix' do
               - rvm: 2.3
         )
         it { should serialize_to matrix: { key => [rvm: ['2.3']] } }
+        it { should_not have_msg }
       end
 
       describe 'given true' do
@@ -306,6 +362,7 @@ describe Travis::Yml, 'matrix' do
                 env: 'FOO=foo BAR=bar'
           )
           it { should serialize_to matrix: { key => [env: [{ FOO: 'foo' }, { BAR: 'bar' }]] } }
+          it { should_not have_msg }
         end
 
         describe 'given as a seq of strings' do
@@ -317,6 +374,7 @@ describe Travis::Yml, 'matrix' do
                   - BAR=bar
           )
           it { should serialize_to matrix: { key => [env: [{ FOO: 'foo' }, { BAR: 'bar' }]] } }
+          it { should_not have_msg }
         end
 
         describe 'given as a map' do
@@ -328,6 +386,7 @@ describe Travis::Yml, 'matrix' do
                   BAR: bar
           )
           it { should serialize_to matrix: { key => [env: [{ FOO: 'foo' }, { BAR: 'bar' }]] } }
+          it { should_not have_msg }
         end
 
         describe 'given as a seq of maps' do
@@ -339,7 +398,21 @@ describe Travis::Yml, 'matrix' do
                   - BAR: bar
           )
           it { should serialize_to matrix: { key => [env: [{ FOO: 'foo' }, { BAR: 'bar' }]] } }
+          it { should_not have_msg }
         end
+      end
+
+      describe 'given licenses' do
+        yaml %(
+          matrix:
+            #{key}:
+            - language: android
+              android:
+                licenses:
+                  - str
+        )
+        it { should serialize_to matrix: { key => [language: 'android', android: { licenses: ['str'] }] } }
+        it { should_not have_msg }
       end
 
       describe 'given an unsupported key' do
@@ -390,6 +463,7 @@ describe Travis::Yml, 'matrix' do
             rvm: 2.3
       )
       it { should serialize_to matrix: { allow_failures: [rvm: ['2.3']] } }
+      it { should have_msg [:info, :matrix, :alias, alias: :allowed_failures, key: :allow_failures] }
     end
 
     describe 'allow_failures given a seq of strings (common mistake)' do

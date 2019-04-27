@@ -14,8 +14,8 @@ describe Travis::Yml, dpl: true do
   subject { described_class.apply(parse(yaml)) }
 
   def filter(msg)
-    msg[2] == :underscore_key ||
-    msg[2] == :find_key && [:access_token, :local_dir, :site_id].include?(msg[3][:original])
+    msg[2] == :underscore_key # ||
+    # msg[2] == :find_key && [:access_token, :local_dir, :site_id].include?(msg[3][:original])
   end
 
   VALUES = {
@@ -42,7 +42,12 @@ describe Travis::Yml, dpl: true do
     describe provider do
       next if provider == 'hephy'      # dead provider
       next if provider == 'nodejitsu'  # new provider?
+
       dpl[:opts].each do |key, value|
+
+        # the dpl readme is confused about underscored vs dasherized keys, too
+        key = key.to_s.gsub('_', '-').to_sym if %i(access_token local_dir site_id).include?(key)
+
         describe key.to_s do
           yaml %(
             deploy:

@@ -14,9 +14,10 @@ describe Travis::Yml, 'addon: apt' do
     yaml %(
       addons:
         apt:
-        - str
+        - one
+        - two
     )
-    it { should serialize_to addons: { apt: { packages: ['str'] } } }
+    it { should serialize_to addons: { apt: { packages: ['one', 'two'] } } }
     it { should_not have_msg }
   end
 
@@ -36,9 +37,10 @@ describe Travis::Yml, 'addon: apt' do
         addons:
           apt:
             packages:
-            - str
+            - one
+            - two
       )
-      it { should serialize_to addons: { apt: { packages: ['str'] } } }
+      it { should serialize_to addons: { apt: { packages: ['one', 'two'] } } }
       it { should_not have_msg }
     end
 
@@ -62,7 +64,7 @@ describe Travis::Yml, 'addon: apt' do
               - two
       )
       it { should serialize_to addons: { apt: { packages: ['one', 'two'] } } }
-      it { should have_msg [:warn, :'addons.apt.packages', :invalid_seq, value: ['one', 'two']] }
+      it { should_not have_msg }
     end
 
     describe 'given wild nested arrays (using yml aliases)' do
@@ -79,8 +81,45 @@ describe Travis::Yml, 'addon: apt' do
                   - 'd'
                 - 'e'
       )
-      it { should serialize_to empty }
-      it { should have_msg [:error, :'addons.apt.packages', :invalid_type, expected: :str, actual: :seq, value: [[['a', 'b'], 'c', 'd'], 'e']] }
+      it { should serialize_to addons: { apt: { packages: ['a', 'b', 'c', 'd', 'e'] } } }
+      it { should_not have_msg }
+    end
+
+    describe 'given seq references including seq references on matrix.include.addons.apt.packages (yes, people do this)' do
+      yaml %(
+        one: &one
+          - one
+
+        two: &two
+          - *one
+
+        matrix:
+          include:
+          - addons:
+              apt:
+                packages:
+                - *two
+                - other
+      )
+
+      it do
+        should serialize_to(
+          one: ['one'],
+          two: [['one']],
+          matrix: {
+            include: [
+              addons: {
+                apt: {
+                  packages: [
+                    'one',
+                    'other'
+                  ]
+                }
+              }
+            ]
+          }
+        )
+      end
     end
   end
 
@@ -170,7 +209,7 @@ describe Travis::Yml, 'addon: apt' do
     it { should_not have_msg }
   end
 
-  describe 'expanding a yaml reference into a seq (common practise, but technically wrong) (on addons)' do
+  describe 'expanding a yaml reference into a seq (common practise, technically wrong, but there is no solution from YAML) (on addons)' do
     yaml %(
       _sources: &sources
         - one
@@ -181,6 +220,6 @@ describe Travis::Yml, 'addon: apt' do
             - two
     )
     it { should serialize_to addons: { apt: { sources: [{ name: 'one' }, { name: 'two' }] } } }
-    it { should have_msg [:warn, :'addons.apt.sources.name', :invalid_seq, value: 'one'] }
+    it { should_not have_msg }
   end
 end

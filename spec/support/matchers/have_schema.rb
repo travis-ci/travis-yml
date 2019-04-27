@@ -3,11 +3,15 @@ RSpec::Matchers.define :have_schema do |schema|
     node.schema == schema
   end
 
+  def trunc(str)
+    str.size < 1000 ? str : "#{str[0..1000]} ..."
+  end
+
   failure_message do |node|
     <<~msg
       Expected the node
 
-        #{node.inspect}
+        #{trunc(node.inspect)}
 
       to have the schema
 

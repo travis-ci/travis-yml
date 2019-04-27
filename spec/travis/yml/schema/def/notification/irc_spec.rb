@@ -59,7 +59,14 @@ describe Travis::Yml::Schema::Def::Notification::Irc, 'structure' do
               {
                 change: :enable,
               }
-            ]
+            ],
+            keys: {
+              channels: {
+                aliases: [
+                  :channel
+                ]
+              }
+            }
           },
           {
             '$ref': '#/definitions/type/secures'

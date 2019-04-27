@@ -74,7 +74,7 @@ describe Travis::Yml, 'notifications: email' do
           template: str
     )
     it { should serialize_to notifications: { email: { template: 'str' } } }
-    it { should have_msg [:warn, :'notifications.email', :misplaced_key, key: :template, value: 'str'] }
+    it { should have_msg [:warn, :'notifications.email', :unknown_key, key: :template, value: 'str'] }
   end
 
   describe 'emails (alias)' do
@@ -290,6 +290,6 @@ describe Travis::Yml, 'notifications: email' do
     )
 
     it { should serialize_to notifications: { email: { recipients: ['str'] }, skip_join: true } }
-    it { should have_msg [:warn, :notifications, :misplaced_key, key: :skip_join, value: true] }
+    it { should have_msg [:warn, :notifications, :unknown_key, key: :skip_join, value: true] }
   end
 end

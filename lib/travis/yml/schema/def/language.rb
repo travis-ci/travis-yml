@@ -35,13 +35,15 @@ module Travis
         class Language < Dsl::Enum
           register :language
 
+          # enum values will be registered from Dsl::Lang
+
           def define
             downcase
 
             default :ruby,          only: { os: [:linux, :windows] }
             default :'objective-c', only: { os: [:osx] }
 
-            # enum values will be registered from Dsl::Lang
+            export
           end
         end
       end

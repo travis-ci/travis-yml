@@ -72,6 +72,9 @@ describe Travis::Yml::Schema::Def::Deploy::Pages, 'structure' do
               },
               deployment_file: {
                 type: :boolean
+              },
+              detect_encoding: {
+                type: :boolean
               }
             },
             additionalProperties: false,

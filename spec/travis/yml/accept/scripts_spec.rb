@@ -67,6 +67,17 @@ describe Travis::Yml, 'scripts' do
     it { should_not have_msg }
   end
 
+  describe 'a str that parses into a map' do
+    yaml %(
+      script:
+        - echo "== Foo: ==
+        - ./script
+    )
+
+    it { should serialize_to script: ['./script'] }
+    it { should have_msg [:error, :script, :invalid_type, expected: :str, actual: :map, value: { 'echo "== Foo': '==' }] }
+  end
+
   # describe 'repairs a broken scalar that is parsed into a hash', v2: true, repair: true do
   #   yaml %(
   #     script:

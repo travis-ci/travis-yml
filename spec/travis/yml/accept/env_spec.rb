@@ -13,7 +13,7 @@ describe Travis::Yml, 'env' do
     yaml %(
       env: FOO=
     )
-    it { should serialize_to env: { matrix: [FOO: nil] } }
+    it { should serialize_to env: { matrix: [FOO: ''] } }
     it { should_not have_msg }
   end
 
@@ -24,6 +24,15 @@ describe Travis::Yml, 'env' do
         BAR=bar
     )
     it { should serialize_to env: { matrix: [{ FOO: 'foo' }, { BAR: 'bar' }] } }
+    it { should_not have_msg }
+  end
+
+  describe 'given a secure' do
+    yaml %(
+      env:
+        secure: secure
+    )
+    it { should serialize_to env: { matrix: [{ secure: 'secure' }] } }
     it { should_not have_msg }
   end
 
@@ -42,7 +51,29 @@ describe Travis::Yml, 'env' do
       env:
         -
     )
-    it { should serialize_to empty }
+    it { should serialize_to env: { matrix: [{}] } }
+    it { should_not have_msg }
+  end
+
+  describe 'given a seq with nil, and valid vars' do
+    yaml %(
+      env:
+        -
+        - FOO=foo
+        - BAR=bar BAZ=baz
+    )
+    it { should serialize_to env: { matrix: [{}, { FOO: 'foo' }, { BAR: 'bar' }, { BAZ: 'baz' }] } }
+    it { should_not have_msg }
+  end
+
+  describe 'given a seq with an empty str, and valid vars' do
+    yaml %(
+      env:
+        - ''
+        - FOO=foo
+        - BAR=bar BAZ=baz
+    )
+    it { should serialize_to env: { matrix: [{}, { FOO: 'foo' }, { BAR: 'bar' }, { BAZ: 'baz' }] } }
     it { should_not have_msg }
   end
 
@@ -222,5 +253,13 @@ describe Travis::Yml, 'env' do
       env: FOO=foo
     )
     it { should serialize_to env: { matrix: [FOO: 'foo'] } }
+  end
+
+  describe 'vim' do
+    yaml %(
+      env:
+        - FOO=foo "BAR='bar'"
+    )
+    it { should serialize_to env: { matrix: [{ FOO: 'foo' }, { BAR: "'bar'" }] } }
   end
 end
