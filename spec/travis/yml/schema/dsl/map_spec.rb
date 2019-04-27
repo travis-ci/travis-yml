@@ -18,8 +18,8 @@ describe Travis::Yml::Schema::Dsl::Map do
   end
 
   describe 'prefix' do
-    let(:define) { -> { prefix :foo } }
-    it { expect(map).to have_opts prefix: :foo }
+    let(:define) { -> { prefix :foo, only: :str } }
+    it { expect(map).to have_opts prefix: { key: :foo, only: [:str] } }
   end
 
   describe 'strict' do

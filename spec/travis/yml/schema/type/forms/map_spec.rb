@@ -86,7 +86,9 @@ describe Travis::Yml::Schema::Type::Forms, 'map' do
         types: [
           {
             type: :map,
-            prefix: :foo,
+            prefix: {
+              key: :foo,
+            },
             normal: true,
             map: {
               foo: {
@@ -123,7 +125,9 @@ describe Travis::Yml::Schema::Type::Forms, 'map' do
         types: [
           {
             type: :map,
-            prefix: :foo,
+            prefix: {
+              key: :foo,
+            },
             normal: true,
             map: {
               foo: {
@@ -131,7 +135,9 @@ describe Travis::Yml::Schema::Type::Forms, 'map' do
                 types: [
                   {
                     type: :map,
-                    prefix: :bar,
+                    prefix: {
+                      key: :bar,
+                    },
                     map: {
                       bar: {
                         type: :str
@@ -147,7 +153,9 @@ describe Travis::Yml::Schema::Type::Forms, 'map' do
           },
           {
             type: :map,
-            prefix: :bar,
+            prefix: {
+              key: :bar
+            },
             map: {
               bar: {
                 type: :str

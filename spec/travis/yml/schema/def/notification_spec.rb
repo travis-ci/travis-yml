@@ -47,7 +47,9 @@ describe Travis::Yml::Schema::Def::Notification::Notifications, 'structure' do
             },
             additionalProperties: false,
             normal: true,
-            prefix: :email,
+            prefix: {
+              key: :email
+            },
             keys: {
               email: {
                 aliases: [

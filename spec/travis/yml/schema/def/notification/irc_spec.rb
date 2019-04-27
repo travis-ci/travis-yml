@@ -52,7 +52,9 @@ describe Travis::Yml::Schema::Def::Notification::Irc, 'structure' do
             },
             additionalProperties: false,
             normal: true,
-            prefix: :channels,
+            prefix: {
+              key: :channels
+            },
             changes: [
               {
                 change: :enable,

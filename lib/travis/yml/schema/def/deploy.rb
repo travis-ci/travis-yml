@@ -42,7 +42,6 @@ module Travis
             def before_define
               normal
 
-              # strict false
               prefix :provider
 
               map :provider,      to: :enum, values: registry_key, required: true, strict: true
@@ -71,7 +70,7 @@ module Travis
 
             def define
               normal
-              prefix :branch # deprecate this
+              prefix :branch, only: :str, deprecated: :deploy_on_prefix_branch
 
               map :branch,       to: :branches, alias: :branches
               map :repo,         to: :str

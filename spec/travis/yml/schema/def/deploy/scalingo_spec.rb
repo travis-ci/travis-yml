@@ -52,7 +52,9 @@ describe Travis::Yml::Schema::Def::Deploy::Scalingo, 'structure' do
             },
             additionalProperties: false,
             normal: true,
-            prefix: :provider,
+            prefix: {
+              key: :provider
+            },
             required: [
               :provider
             ],

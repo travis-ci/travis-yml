@@ -1,7 +1,7 @@
 describe Travis::Yml::Doc::Change, 'various types' do
   let(:str)    { { type: :string } }
   let(:strs)   { { type: :array, items: { type: :string } } }
-  let(:obj)    { { type: :object, properties: { bar: str }, prefix: :bar } }
+  let(:obj)    { { type: :object, properties: { bar: str }, prefix: { key: :bar } } }
   let(:objs)   { { type: :array, items: obj } }
 
   subject { described_class.apply(build_schema(schema), build_value(value)) }

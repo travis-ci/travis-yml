@@ -35,7 +35,9 @@ describe Travis::Yml::Schema::Def::Addon::Apt, 'structure' do
                         }
                       },
                       additionalProperties: false,
-                      prefix: :name,
+                      prefix: {
+                        key: :name
+                      }
                     },
                     normal: true
                   },
@@ -53,7 +55,9 @@ describe Travis::Yml::Schema::Def::Addon::Apt, 'structure' do
                       }
                     },
                     additionalProperties: false,
-                    prefix: :name,
+                    prefix: {
+                      key: :name
+                    }
                   },
                   {
                     type: :array,
@@ -74,7 +78,9 @@ describe Travis::Yml::Schema::Def::Addon::Apt, 'structure' do
               }
             },
             additionalProperties: false,
-            prefix: :packages,
+            prefix: {
+              key: :packages
+            },
             keys: {
               packages: {
                 aliases: [

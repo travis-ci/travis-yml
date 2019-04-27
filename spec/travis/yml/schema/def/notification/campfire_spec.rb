@@ -33,7 +33,9 @@ describe Travis::Yml::Schema::Def::Notification::Campfire, 'structure' do
               },
             },
             additionalProperties: false,
-            prefix: :rooms,
+            prefix: {
+              key: :rooms
+            },
             normal: true,
             changes: [
               {

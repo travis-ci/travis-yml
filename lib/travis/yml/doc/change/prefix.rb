@@ -17,11 +17,16 @@ module Travis
           end
 
           def prefix?
-            schema.prefix? && !prefixed? && value.given?
+            schema.prefix? && !prefixed? && matches? && value.given?
           end
 
           def prefixed?
-            value.map? && value.key?(schema.prefix)
+            value.map? && value.key?(schema.prefix[:key])
+          end
+
+          def matches?
+            types = schema.prefix[:only]
+            types.nil? || types.any? { |type| value.is?(type) }
           end
 
           def prefix
@@ -31,12 +36,12 @@ module Travis
           def prefix_map
             return value if value.keys.all? { |key| schema.known?(key) }
             known, other = split(value.value, *schema.keys)
-            other = build({ schema.prefix => other }.merge(known))
+            other = build({ schema.prefix[:key] => other }.merge(known))
             matching(other)
           end
 
           def prefix_obj
-            other = build(schema.prefix => value)
+            other = build(schema.prefix[:key] => value)
             matching(other)
           end
 

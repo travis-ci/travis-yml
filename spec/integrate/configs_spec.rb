@@ -12,12 +12,6 @@ end
 #   # hmmm?
 #   [:warn, :"addons.artifacts", :find_key, {:original=>:access_key_id, :key=>:access_key}
 #
-#   # results in invalid_type on deploy.on.branch
-#   deploy:
-#     provider: pypi
-#     on:
-#       distributions: sdist bdist_wheel
-#
 #    # not sure ...
 #    env:
 #      -
@@ -393,7 +387,14 @@ describe Travis::Yml, configs: true do
     return true if msg[2] == :misplaced_key && msg[3][:key] == :verbose       && msg[1] == :deploy # verbose on github pages
     return true if msg[2] == :misplaced_key && msg[3][:key] == :repo          && msg[1] == :deploy
     return true if msg[2] == :misplaced_key && msg[3][:key] == :distributions && msg[1] == :'deploy.on'
+    return true if msg[2] == :unknown_key   && msg[3][:key] == :java          && msg[1] == :'deploy.on'
+    return true if msg[2] == :unknown_key   && msg[3][:key] == :master        && msg[1] == :'deploy.on'
+    return true if msg[2] == :misplaced_key && msg[3][:key] == :prerelease    && msg[1] == :'deploy.on'
+    return true if msg[2] == :unknown_key   && msg[3][:key] == :onBranch      && msg[1] == :'deploy.on'
     return true if msg[2] == :misplaced_key && msg[3][:key] == :repo          && msg[1] == :'matrix.include.deploy'
+
+    # invalid type on deploy.on.branch (root.branches syntax using :only)
+    return true if msg[2] == :invalid_type && msg[3][:actual] == :map && msg[1] == :'deploy.on.branch' && msg[3][:value].key?(:only)
 
     # recognized as broken by the user (cfengine:core)
     return true if msg[2] == :invalid_type && msg[3][:actual] == :str && msg[1] == :'deploy.prerelease'
@@ -411,6 +412,8 @@ describe Travis::Yml, configs: true do
     # unkown value
     return true if msg[2] == :unknown_value && msg[1] == :'notifications.hipchat.format' && msg[3][:value].include?('%{repository}')
 
+    # accept
+    #
     # deploy github release oktokit keys
     # https://github.com/octokit/octokit.rb/blob/master/lib/octokit/client/releases.rb
     return true if msg[1] == :deploy && msg[2] == :misplaced_key && msg[3][:key] == :api_key
@@ -429,8 +432,6 @@ describe Travis::Yml, configs: true do
     return true if msg[2] == :invalid_type && msg[1] == :'matrix.include.addons.coverity_scan.notification_email'
     # akumuli:Akumuli
     return true if msg[2] == :find_key && msg[3][:original] == :access_key_id
-    # Carrene:restfulpy, ClimateImpactLab:impactlab-tools
-    # return true if msg[2] == :invalid_type && msg[3][:actual] == :map && msg[1] == :'deploy.on.branch'
     # curl:curl (omg)
     return true if msg[2] == :invalid_seq && msg[1] == :'matrix.include.addons.apt.sources.name'
     # not sure

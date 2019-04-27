@@ -47,8 +47,9 @@ module Travis
             node.set :max_size, max_size
           end
 
-          def prefix(prefix)
-            node.set :prefix, prefix
+          def prefix(prefix, opts = {})
+            opts[:only] = to_syms(opts[:only])
+            node.set :prefix, { key: prefix }.merge(opts)
           end
 
           def strict(obj = nil)

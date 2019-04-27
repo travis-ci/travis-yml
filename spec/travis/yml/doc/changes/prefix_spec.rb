@@ -12,40 +12,59 @@ describe Travis::Yml::Doc::Change::Prefix do
           type: :string
         },
       },
-      prefix: :foo
+      prefix: prefix
     }
   end
 
-  describe 'given a str' do
-    let(:value) { 'foo' }
-    it { should serialize_to foo: 'foo' }
-    it { should_not have_msg }
+  describe 'types' do
+    let(:prefix) { { key: :foo } }
+
+    describe 'given a str' do
+      let(:value) { 'foo' }
+      it { should serialize_to foo: 'foo' }
+      it { should_not have_msg }
+    end
+
+    describe 'given a num' do
+      let(:value) { 1 }
+      it { should serialize_to foo: '1' }
+      it { should have_msg [:info, :foo, :cast, given_value: 1, given_type: :num, value: '1', type: :str] }
+    end
+
+    describe 'given a seq of strs' do
+      let(:value) { ['foo', 'bar'] }
+      it { should serialize_to foo: 'foo' }
+      it { should have_msg [:warn, :foo, :invalid_seq, value: 'foo'] }
+    end
+
+    describe 'given a map with the prefix key' do
+      let(:value) { { foo: 'str' } }
+      it { should serialize_to foo: 'str' }
+    end
+
+    describe 'given a map with a known key' do
+      let(:value) { { bar: 'str' } }
+      it { should serialize_to bar: 'str' }
+    end
+
+    describe 'given a map with an unknown key' do
+      let(:value) { { baz: 'str' } }
+      it { should serialize_to baz: 'str' }
+    end
   end
 
-  describe 'given a num' do
-    let(:value) { 1 }
-    it { should serialize_to foo: '1' }
-    it { should have_msg [:info, :foo, :cast, given_value: 1, given_type: :num, value: '1', type: :str] }
-  end
+  describe 'given prefix :only' do
+    let(:prefix) { { key: :foo, only: [:str] } }
 
-  describe 'given a seq of strs' do
-    let(:value) { ['foo', 'bar'] }
-    it { should serialize_to foo: 'foo' }
-    it { should have_msg [:warn, :foo, :invalid_seq, value: 'foo'] }
-  end
+    describe 'given a str' do
+      let(:value) { 'foo' }
+      it { should serialize_to foo: 'foo' }
+      it { should_not have_msg }
+    end
 
-  describe 'given a map with the prefix key' do
-    let(:value) { { foo: 'str' } }
-    it { should serialize_to foo: 'str' }
-  end
-
-  describe 'given a map with a known key' do
-    let(:value) { { bar: 'str' } }
-    it { should serialize_to bar: 'str' }
-  end
-
-  describe 'given a map with an unknown key' do
-    let(:value) { { baz: 'str' } }
-    it { should serialize_to baz: 'str' }
+    describe 'given a num' do
+      let(:value) { 1 }
+      it { should serialize_to 1 }
+    end
   end
 end

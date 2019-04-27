@@ -47,7 +47,9 @@ describe Travis::Yml::Schema::Def::Notification::Hipchat, 'structure' do
             },
             additionalProperties: false,
             normal: true,
-            prefix: :rooms,
+            prefix: {
+              key: :rooms
+            },
             changes: [
               {
                 change: :enable,

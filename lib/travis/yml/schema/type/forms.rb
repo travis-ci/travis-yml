@@ -90,7 +90,7 @@ module Travis
               node = expand_map(node)
               node = expand_includes(node) if node.includes?
               other = includes(node) if node.includes?
-              other = prefix(other || node, node[node.prefix], node.prefix) if node.prefix?
+              other = prefix(other || node, node[node.prefix[:key]], node.prefix) if node.prefix?
               other = enable(other || node) if node.change?(:enable)
               other = typed(other || node) if node.types.any?
               other || node

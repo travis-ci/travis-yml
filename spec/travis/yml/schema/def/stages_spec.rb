@@ -40,7 +40,9 @@ describe Travis::Yml::Schema::Def::Stages, 'structure' do
                 if: { type: :string }
               },
               additionalProperties: false,
-              prefix: :name,
+              prefix: {
+                key: :name
+              },
               normal: true
             },
             {

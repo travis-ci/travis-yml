@@ -94,7 +94,9 @@ describe Travis::Yml::Schema::Def::Deploy::Appfog, 'structure' do
             },
             additionalProperties: false,
             normal: true,
-            prefix: :provider,
+            prefix: {
+              key: :provider
+            },
             required: [
               :provider
             ]

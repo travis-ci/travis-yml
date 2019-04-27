@@ -90,7 +90,9 @@ describe Travis::Yml::Schema::Type::Forms, 'seq' do
               types: [
                 {
                   type: :map,
-                  prefix: :foo,
+                  prefix: {
+                    key: :foo
+                  },
                   map: {
                     foo: {
                       type: :str
@@ -101,7 +103,9 @@ describe Travis::Yml::Schema::Type::Forms, 'seq' do
             },
             {
               type: :map,
-              prefix: :foo,
+              prefix: {
+                key: :foo
+              },
               map: {
                 foo: {
                   type: :str

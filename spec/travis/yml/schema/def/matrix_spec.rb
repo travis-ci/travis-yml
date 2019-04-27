@@ -29,7 +29,9 @@ describe Travis::Yml::Schema::Def::Matrix, 'structure' do
               },
               additionalProperties: false,
               normal: true,
-              prefix: :include,
+              prefix: {
+                key: :include
+              },
               keys: {
                 allow_failures: {
                   aliases: [

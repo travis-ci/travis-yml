@@ -22,7 +22,9 @@ describe Travis::Yml::Schema::Def::Env, 'structure' do
               },
               additionalProperties: false,
               normal: true,
-              prefix: :matrix,
+              prefix: {
+                key: :matrix
+              },
             },
             {
               '$ref': '#/definitions/type/env_vars'

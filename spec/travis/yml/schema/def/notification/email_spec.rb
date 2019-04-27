@@ -31,7 +31,9 @@ describe Travis::Yml::Schema::Def::Notification::Email, 'structure' do
             },
             additionalProperties: false,
             normal: true,
-            prefix: :recipients,
+            prefix: {
+              key: :recipients
+            },
             changes: [
               {
                 change: :enable,

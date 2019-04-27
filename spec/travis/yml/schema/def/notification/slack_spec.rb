@@ -37,7 +37,9 @@ describe Travis::Yml::Schema::Def::Notification::Slack, 'structure' do
             },
             additionalProperties: false,
             normal: true,
-            prefix: :rooms,
+            prefix: {
+              key: :rooms
+            },
             changes: [
               {
                 change: :enable,

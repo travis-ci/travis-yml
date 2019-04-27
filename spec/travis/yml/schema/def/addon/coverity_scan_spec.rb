@@ -29,7 +29,9 @@ describe Travis::Yml::Schema::Def::Addon::CoverityScan, 'structure' do
                       }
                     },
                     additionalProperties: false,
-                    prefix: :name,
+                    prefix: {
+                      key: :name
+                    },
                     required: [
                       :name
                     ],

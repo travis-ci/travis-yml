@@ -10,7 +10,9 @@ describe Travis::Yml::Doc::Change::Map do
             type: :string
           }
         },
-        prefix: :foo
+        prefix: {
+          key: :foo
+        }
       }
     end
 
@@ -57,7 +59,9 @@ describe Travis::Yml::Doc::Change::Map do
             }
           }
         },
-        prefix: :foo
+        prefix: {
+          key: :foo
+        }
       }
     end
 
@@ -93,7 +97,6 @@ describe Travis::Yml::Doc::Change::Map do
   end
 
   describe 'with a nested map property with a seq' do
-    let(:schema) { { type: :object, properties: { foo: { type: :object, properties: { bar: { type: :string } }, prefix: :bar } }, prefix: :foo } }
     let(:schema) do
       {
         type: :object,
@@ -108,10 +111,14 @@ describe Travis::Yml::Doc::Change::Map do
                 }
               }
             },
-            prefix: :bar
+            prefix: {
+              key: :bar
+            }
           }
         },
-        prefix: :foo
+        prefix: {
+          key: :foo
+        }
       }
     end
 

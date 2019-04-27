@@ -301,6 +301,18 @@ describe Travis::Yml, 'deploy' do
         it { should serialize_to language: 'ruby', deploy: [provider: 'heroku', on: { python: '2.7' }] }
         it { should_not have_msg }
       end
+
+      describe 'unknown key' do
+        yaml %(
+          language: ruby
+          deploy:
+            provider: heroku
+            on:
+              unknown: str
+        )
+        it { should serialize_to language: 'ruby', deploy: [provider: 'heroku', on: { unknown: 'str' }] }
+        it { should have_msg [:warn, :'deploy.on', :unknown_key, key: :unknown, value: 'str'] }
+      end
     end
 
     describe 'branch specific option hashes (holy shit. example for a valid hash from travis-build)' do
@@ -314,18 +326,6 @@ describe Travis::Yml, 'deploy' do
       )
       xit { should serialize_to deploy: [provider: 'heroku', on: { branch: { production: { bucket: 'production_branch' } } }] }
       xit { should have_msg [:warn, :'deploy.on.branch', :deprecated, deprecation: :branch_specific_option_hash] }
-    end
-
-    # kinda hard to support if we want strict structure on deploy keys
-    describe 'option specific branch hashes (deprecated, according to travis-build)' do
-      yaml %(
-        deploy:
-          - provider: heroku
-            run:
-              production: production
-      )
-      xit { should serialize_to deploy: [provider: 'heroku', run: { production: 'production' }] }
-      xit { should have_msg [:warn, :'deploy.run', :deprecated, given: :run, info: :branch_specific_option_hash] }
     end
 
     describe 'migrating :tags, with :tags already given', v2: true, migrate: true do
@@ -390,6 +390,18 @@ describe Travis::Yml, 'deploy' do
       it { should serialize_to deploy: [provider: 'heroku', edge: { source: 'source', branch: 'branch' }] }
       it { should have_msg [:info, :'deploy.edge', :edge] }
     end
+  end
+
+  # kinda hard to support if we want strict structure on deploy keys
+  describe 'option specific branch hashes (deprecated, according to travis-build)' do
+    yaml %(
+      deploy:
+        - provider: heroku
+          run:
+            production: production
+    )
+    xit { should serialize_to deploy: [provider: 'heroku', run: { production: 'production' }] }
+    xit { should have_msg [:warn, :'deploy.run', :deprecated, given: :run, info: :branch_specific_option_hash] }
   end
 
   describe 'misplaced keys', v2: true, migrate: true do
