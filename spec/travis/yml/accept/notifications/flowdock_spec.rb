@@ -86,7 +86,7 @@ describe Travis::Yml, 'notifications: flowdock' do
           - other
     )
     it { should serialize_to notifications: { flowdock: { api_token: 'str' } } }
-    it { should have_msg [:warn, :'notifications.flowdock.api_token', :invalid_seq, value: 'str'] }
+    it { should have_msg [:warn, :'notifications.flowdock.api_token', :unexpected_seq, value: 'str'] }
   end
 
   describe 'api_token' do
@@ -120,7 +120,7 @@ describe Travis::Yml, 'notifications: flowdock' do
             - other
       )
       it { should serialize_to notifications: { flowdock: { api_token: 'str' } } }
-      it { should have_msg [:warn, :'notifications.flowdock.api_token', :invalid_seq, value: 'str'] }
+      it { should have_msg [:warn, :'notifications.flowdock.api_token', :unexpected_seq, value: 'str'] }
     end
   end
 

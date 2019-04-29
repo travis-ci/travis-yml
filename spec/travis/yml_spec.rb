@@ -191,7 +191,7 @@ describe Travis::Yml do
     end
 
     describe 'invalid_seq' do
-      let(:msg) { [:info, :key, :invalid_seq, value: 'value'] }
+      let(:msg) { [:info, :key, :unexpected_seq, value: 'value'] }
       it { should eq '[info] on key: unexpected sequence, using the first value (value)' }
     end
   end

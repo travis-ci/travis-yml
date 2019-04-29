@@ -811,7 +811,7 @@ describe Travis::Yml, configs: true do
   end
 
   def dist_group_expansion?(msg)
-    return true if msg[1] == :dist && msg[2] == :invalid_seq
+    return true if msg[1] == :dist && msg[2] == :unexpected_seq
   end
 
   def unsupported_dist?(msg)
@@ -854,7 +854,7 @@ describe Travis::Yml, configs: true do
   end
 
   def invalid_seq?(msg)
-    return false unless msg[2] == :invalid_seq
+    return false unless msg[2] == :unexpected_seq
     return true if INVALID_SEQS.include?(msg[1])
     msg[1] == :notifications && msg[3][:value] == { email: false }
   end

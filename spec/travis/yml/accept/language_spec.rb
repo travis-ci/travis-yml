@@ -39,7 +39,7 @@ describe Travis::Yml, 'language' do
       - ruby
     )
     it { should serialize_to language: 'ruby' }
-    it { should have_msg [:warn, :language, :invalid_seq, value: 'ruby'] }
+    it { should have_msg [:warn, :language, :unexpected_seq, value: 'ruby'] }
   end
 
   describe 'given a seq with an uppercased value' do
@@ -74,7 +74,7 @@ describe Travis::Yml, 'language' do
       - ruby
     )
     it { should serialize_to language: 'ruby' }
-    it { should have_msg [:warn, :language, :invalid_seq, value: 'ruby'] }
+    it { should have_msg [:warn, :language, :unexpected_seq, value: 'ruby'] }
   end
 
   describe 'known value with extra special chars' do

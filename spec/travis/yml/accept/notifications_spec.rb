@@ -78,7 +78,7 @@ describe Travis::Yml, 'notifications' do
           - email: me@email.com
       )
       it { should serialize_to notifications: { email: { recipients: ['me@email.com'] } } }
-      it { should have_msg [:warn, :notifications, :invalid_seq, value: { email: 'me@email.com' }] }
+      it { should have_msg [:warn, :notifications, :unexpected_seq, value: { email: 'me@email.com' }] }
     end
 
     describe 'given a seq with a hash with a bool' do
@@ -87,7 +87,7 @@ describe Travis::Yml, 'notifications' do
           - email: true
       )
       it { should serialize_to notifications: { email: { enabled: true } } }
-      it { should have_msg [:warn, :notifications, :invalid_seq, value: { email: true }] }
+      it { should have_msg [:warn, :notifications, :unexpected_seq, value: { email: true }] }
     end
 
     describe 'given a seq with a map with a bool on an alias' do
@@ -96,7 +96,7 @@ describe Travis::Yml, 'notifications' do
           - emails: true
       )
       it { should serialize_to notifications: { email: { enabled: true } } }
-      it { should have_msg [:warn, :notifications, :invalid_seq, value: { email: true }] }
+      it { should have_msg [:warn, :notifications, :unexpected_seq, value: { email: true }] }
     end
 
     describe 'given a seq with a map with a bool on a key with a typo' do
@@ -105,7 +105,7 @@ describe Travis::Yml, 'notifications' do
           - emial: true
       )
       it { should serialize_to notifications: { email: { enabled: true } } }
-      it { should have_msg [:warn, :notifications, :invalid_seq, value: { email: true }] }
+      it { should have_msg [:warn, :notifications, :unexpected_seq, value: { email: true }] }
     end
   end
 
@@ -157,7 +157,7 @@ describe Travis::Yml, 'notifications' do
         - on_success: always
     )
     it { should serialize_to notifications: { slack: { on_success: 'always' } } }
-    it { should have_msg [:warn, :'notifications.slack', :invalid_seq, value: { on_success: 'always' }] }
+    it { should have_msg [:warn, :'notifications.slack', :unexpected_seq, value: { on_success: 'always' }] }
   end
 
   describe 'given a seq with two map with the same key' do
@@ -167,7 +167,7 @@ describe Travis::Yml, 'notifications' do
         - slack: bar
     )
     it { should serialize_to notifications: { slack: { rooms: ['foo'] } } }
-    it { should have_msg [:warn, :notifications, :invalid_seq, value: { slack: 'foo' }] }
+    it { should have_msg [:warn, :notifications, :unexpected_seq, value: { slack: 'foo' }] }
   end
 
   describe 'given a seq with email: true, and irc: channel' do

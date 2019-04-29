@@ -34,7 +34,7 @@ describe Travis::Yml::Doc::Change::Prefix do
     describe 'given a seq of strs' do
       let(:value) { ['foo', 'bar'] }
       it { should serialize_to foo: 'foo' }
-      it { should have_msg [:warn, :foo, :invalid_seq, value: 'foo'] }
+      it { should have_msg [:warn, :foo, :unexpected_seq, value: 'foo'] }
     end
 
     describe 'given a map with the prefix key' do

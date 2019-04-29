@@ -43,7 +43,7 @@ describe Travis::Yml, 'dist' do
       - trusty
     )
     it { should serialize_to dist: 'trusty' }
-    it { should have_msg [:warn, :dist, :invalid_seq, value: 'trusty'] }
+    it { should have_msg [:warn, :dist, :unexpected_seq, value: 'trusty'] }
   end
 
   describe 'unsupported on osx' do

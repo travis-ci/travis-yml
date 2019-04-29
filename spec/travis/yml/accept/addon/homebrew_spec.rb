@@ -136,7 +136,7 @@ describe Travis::Yml, 'addon: homebrew' do
             - str
       )
       it { should serialize_to addons: { homebrew: { brewfile: 'str' } } }
-      it { should have_msg [:warn, :'addons.homebrew.brewfile', :invalid_seq, value: 'str'] }
+      it { should have_msg [:warn, :'addons.homebrew.brewfile', :unexpected_seq, value: 'str'] }
     end
   end
 end

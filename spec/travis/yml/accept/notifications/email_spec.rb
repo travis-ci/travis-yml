@@ -115,7 +115,7 @@ describe Travis::Yml, 'notifications: email' do
               - str
       )
       it { should serialize_to notifications: { email: { recipients: ['str'] } } }
-      it { should have_msg [:warn, :'notifications.email', :invalid_seq, value: { recipients: ['str'] }] }
+      it { should have_msg [:warn, :'notifications.email', :unexpected_seq, value: { recipients: ['str'] }] }
     end
 
     describe 'given an array with a secure' do
@@ -126,7 +126,7 @@ describe Travis::Yml, 'notifications: email' do
               - secure: secure
       )
       it { should serialize_to notifications: { email: { recipients: [secure: 'secure'] } } }
-      it { should have_msg [:warn, :'notifications.email', :invalid_seq, value: { recipients: [secure: 'secure'] }] }
+      it { should have_msg [:warn, :'notifications.email', :unexpected_seq, value: { recipients: [secure: 'secure'] }] }
     end
 
     describe 'given a hash with a string' do
@@ -215,7 +215,7 @@ describe Travis::Yml, 'notifications: email' do
             - on_success: change
       )
       it { should serialize_to notifications: { email: { recipients: ['str'] } } }
-      it { should have_msg [:warn, :'notifications.email', :invalid_seq, value: 'str'] }
+      it { should have_msg [:warn, :'notifications.email', :unexpected_seq, value: 'str'] }
     end
 
     describe 'given a mixed array of hashes and secure' do
@@ -226,7 +226,7 @@ describe Travis::Yml, 'notifications: email' do
             - on_success: change
       )
       it { should serialize_to notifications: { email: { recipients: [secure: 'secure'] } } }
-      it { should have_msg [:warn, :'notifications.email', :invalid_seq, value: { secure: 'secure' }] }
+      it { should have_msg [:warn, :'notifications.email', :unexpected_seq, value: { secure: 'secure' }] }
     end
 
     describe 'prefixes with :email, given a hash with the key :recipients, and a key :email', v2: true, migrate: true do
