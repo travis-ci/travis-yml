@@ -40,7 +40,7 @@ describe Travis::Yml::Doc::Change, 'various types' do
     describe 'given a seq of strs' do
       let(:value) { { foo: ['foo'] } }
       it { should serialize_to foo: { bar: 'foo' } }
-      it { should have_msg [:warn, :'foo.bar', :invalid_seq, value: 'foo'] }
+      it { should have_msg [:warn, :'foo.bar', :unexpected_seq, value: 'foo'] }
     end
   end
 
@@ -64,6 +64,6 @@ describe Travis::Yml::Doc::Change, 'various types' do
     let(:schema) { { type: :object, properties: { foo: { type: :string } } } }
     let(:value) { { foo: ['foo', 'bar'] } }
     it { should serialize_to foo: 'foo' }
-    it { should have_msg [:warn, :foo, :invalid_seq, value: 'foo'] }
+    it { should have_msg [:warn, :foo, :unexpected_seq, value: 'foo'] }
   end
 end

@@ -41,7 +41,7 @@ describe Travis::Yml, 'addons' do
           name: name
           build_command: cmd
     )
-    it { should have_msg [:warn, :addons, :invalid_seq, value: value[:addons][0]] }
+    it { should have_msg [:warn, :addons, :unexpected_seq, value: value[:addons][0]] }
     it { should have_msg [:warn, :addons, :migrate, key: :project, to: :coverity_scan, value: { name: 'name', build_command: 'cmd' }] }
     it { should have_msg [:warn, :'addons.coverity_scan.project', :migrate, key: :build_command, to: :coverity_scan, value: 'cmd'] }
   end

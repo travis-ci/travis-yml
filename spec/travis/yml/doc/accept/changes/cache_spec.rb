@@ -42,7 +42,7 @@ describe Travis::Yml, 'cache' do
     let(:value) { { cache: [:apt, [:unknown], directories: ['str']] } }
     it { should serialize_to cache: { apt: true, directories: ['str'] } }
     # rewrite Change::Cache to not drop unexpected things
-    xit { should have_msg [:warn, :'cache.directories', :invalid_seq, value: 'unknown'] }
+    xit { should have_msg [:warn, :'cache.directories', :unexpected_seq, value: 'unknown'] }
   end
 
   describe 'given a seq with apt, directories, and an unknown key with a str' do

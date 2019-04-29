@@ -69,7 +69,7 @@ describe Travis::Yml, 'appfog' do
           - str
       )
       it { should serialize_to deploy: [provider: 'appfog', email: 'str'] }
-      it { should have_msg [:warn, :'deploy.email', :invalid_seq, value: 'str'] }
+      it { should have_msg [:warn, :'deploy.email', :unexpected_seq, value: 'str'] }
     end
   end
 

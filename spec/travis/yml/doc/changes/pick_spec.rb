@@ -13,19 +13,19 @@ describe Travis::Yml::Doc::Change::Pick do
     describe 'given a seq of strs' do
       let(:value) { ['foo', 'bar'] }
       it { should serialize_to 'foo' }
-      it { should have_msg [:warn, :root, :invalid_seq, value: 'foo'] }
+      it { should have_msg [:warn, :root, :unexpected_seq, value: 'foo'] }
     end
 
     describe 'given a seq of nums' do
       let(:value) { [1, 2] }
       it { should serialize_to 1 }
-      it { should have_msg [:warn, :root, :invalid_seq, value: 1] }
+      it { should have_msg [:warn, :root, :unexpected_seq, value: 1] }
     end
 
     describe 'given a seq of seqs' do
       let(:value) { [[1], [2]] }
       it { should serialize_to [1] }
-      it { should have_msg [:warn, :root, :invalid_seq, value: [1]] }
+      it { should have_msg [:warn, :root, :unexpected_seq, value: [1]] }
     end
   end
 
@@ -35,7 +35,7 @@ describe Travis::Yml::Doc::Change::Pick do
     describe 'given a nested seq of strs' do
       let(:value) { [['foo', 'bar']] }
       it { should serialize_to ['foo', 'bar'] }
-      it { should have_msg [:warn, :root, :invalid_seq, value: ['foo', 'bar']] }
+      it { should have_msg [:warn, :root, :unexpected_seq, value: ['foo', 'bar']] }
     end
   end
 end

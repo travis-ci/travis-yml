@@ -28,7 +28,7 @@ module Travis
           end
 
           def pick
-            value.warn :invalid_seq, value: value.first.serialize
+            value.warn :unexpected_seq, value: value.first.serialize
             value.first
           end
         end
