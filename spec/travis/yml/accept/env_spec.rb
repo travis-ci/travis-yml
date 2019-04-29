@@ -27,6 +27,14 @@ describe Travis::Yml, 'env' do
     it { should_not have_msg }
   end
 
+  describe 'given an invalid var' do
+    yaml %(
+      env: FOO="
+    )
+    it { should serialize_to env: { matrix: [{}] } }
+    it { should have_msg [:error, :'env.matrix', :invalid_env_var, var: 'FOO="'] }
+  end
+
   describe 'given a secure' do
     yaml %(
       env:

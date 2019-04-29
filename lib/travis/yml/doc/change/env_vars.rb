@@ -38,8 +38,8 @@ module Travis
               vars = vars.map { |pair| pair.empty? ? {} : symbolize([pair].to_h) }
               build(vars)
             rescue ShVars::ParseError => e
-              # add a new msg :invalid_env_var
-              value
+              value.error :invalid_env_var, var: str
+              none
             end
         end
       end

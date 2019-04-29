@@ -56,11 +56,11 @@ module Travis
       unknown_default:   'dropping unknown value: %{value}, defaulting to %{default}',
       unknown_var:       'unknown template variable %{var}',
       invalid_key:       '%{key} is not a valid key',
+      invalid_seq:       'unexpected sequence, using the first value (%{value})',
       invalid_type:      'dropping unexpected %{actual}, expected %{expected} (%{value})',
       invalid_format:    'dropping invalid format %{value}',
       invalid_condition: 'invalid condition: %{condition}',
-      invalid_seq:       'unexpected sequence, using the first value (%{value})',
-      invalid_cond:      'unable to parse condition (%{value})',
+      invalid_env_var:   'invalid env var: %{var}',
     }
 
     class << self
