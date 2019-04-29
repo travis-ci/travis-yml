@@ -3,16 +3,15 @@ require 'amatch'
 
 module Travis
   module Yml
-    class Match < Obj.new(:strs, :str, stop: [])
+    class Match < Obj.new(:strs, :str, schema: nil)
       def run
         return if str.size < 3
-        return if stop.include?(str)
         pairs = by_equality(strs)
         pairs = by_levenshtein(strs) if pairs.empty?
         pairs = by_permutation(strs) if pairs.empty? && str.size < 6
         pairs = by_letters(pairs.map(&:last)) if ambiguous?(pairs)
         pairs = by_length(pairs) if ambiguous?(pairs)
-        pairs[0][1] unless pairs.empty?
+        pairs[0][1] unless pairs.empty? || stop?(str, pairs[0][1])
       end
 
       def ambiguous?(pairs)
@@ -56,6 +55,10 @@ module Travis
 
       def size
         str.size
+      end
+
+      def stop?(from, to)
+        schema && schema.stop?(from, to)
       end
 
       MAX = 4

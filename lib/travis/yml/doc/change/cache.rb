@@ -35,7 +35,7 @@ module Travis
             end
 
             def from_str
-              str = Match.new(bool_keys.map(&:to_s), value.value).run || value.value
+              str = schema.match(bool_keys.map(&:to_s), value.value) || value.value
               value.info(:find_value, original: value.value, value: str) unless value.value == str
               return value unless bool_keys.map(&:to_s).include?(str)
               build(str.to_sym => true)

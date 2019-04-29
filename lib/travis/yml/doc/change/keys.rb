@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 require 'travis/yml/doc/change/base'
-# require 'travis/yml/doc/change/migrate'
 require 'travis/yml/doc/change/key'
-require 'travis/yml/doc/helper/keys'
 
 module Travis
   module Yml
@@ -33,15 +31,9 @@ module Travis
                 key  = Key.new(schema, node, opts).apply
                 next parent if key == node.key && known?(key)
                 parent.move(node.key, key)
-                # next parent if known?(key)
-                # migrate(node) || parent
                 parent
               end
             end
-
-            # def migrate(value)
-            #   Migrate.new(spec, value, opts).apply
-            # end
 
             def known?(key)
               schema.key?(key)

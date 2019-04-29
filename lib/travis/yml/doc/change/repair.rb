@@ -1,14 +1,11 @@
 # frozen_string_literal: true
 require 'travis/yml/doc/change/base'
-require 'travis/yml/doc/helper/keys'
 
 module Travis
   module Yml
     module Doc
       module Change
         class Repair < Base
-          include Helper::Keys
-
           def apply
             # repair? ? repair : value
             value

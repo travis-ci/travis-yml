@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 require 'travis/yml/doc/change/base'
-require 'travis/yml/doc/helper/match'
 
 module Travis
   module Yml
@@ -52,12 +51,8 @@ module Travis
 
           def keys(value)
             keys = schema.keys.map(&:to_s)
-            keys = value.keys.map { |key| match(keys, key) || key }
+            keys = value.keys.map { |key| schema.match(keys, key) || key }
             keys.map(&:to_sym)
-          end
-
-          def match(keys, key)
-            Match.new(keys, key.to_s, schema.stop).run
           end
         end
       end
