@@ -198,7 +198,7 @@ describe Travis::Yml, 'deploy' do
               branch: master
         )
         it { should serialize_to deploy: [provider: 'heroku', script: 'str', on: { branch: ['master'] }] }
-        it { should have_msg [:warn, :deploy, :unknown_key, key: :script, value: 'str'] }
+        it { should have_msg [:warn, :deploy, :unknown_key, key: :script, value: 'str', provider: :heroku] }
       end
 
       describe 'repo' do

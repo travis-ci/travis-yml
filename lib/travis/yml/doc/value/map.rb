@@ -80,6 +80,12 @@ module Travis
             super.merge(value)
           end
 
+          def msg(level, code, args = {})
+            key, value = opts[:detected], self[opts[:detected]]
+            args = args.merge(key => value.value.to_sym) if key && value
+            super
+          end
+
           def serialize
             value.map { |key, obj| [key, obj.serialize] }.to_h
           end

@@ -70,7 +70,7 @@ module Travis
 
             def define
               normal
-              prefix :branch, only: :str, deprecated: :deploy_on_prefix_branch
+              prefix :branch, only: :str
 
               map :branch,       to: :branches, alias: :branches
               map :repo,         to: :str
@@ -85,8 +85,8 @@ module Travis
               export
             end
 
-            # ugh. we do not want to include all of :languages, but only the keys
-            # that are also expand keys
+            # as per the docs we do not want to include all of :languages, but
+            # only the keys that are also expand keys
             def language_keys
               keys = root.node.expand_keys
               opts = Type.exports[:language].values.map(&:opts)
