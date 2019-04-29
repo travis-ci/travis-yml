@@ -20,6 +20,7 @@ end
 
 group :test do
   gem 'awesome_print'
+  gem 'json-schema'
   gem 'rack-test'
   gem 'rake'
   gem 'rspec'
