@@ -124,7 +124,7 @@ module Travis
             !!@errored
           end
 
-          def msg(level, code, args = [])
+          def msg(level, code, args = {})
             msg = [level, full_key, code]
             msg << args unless args.empty?
             root.msgs << msg unless root.msgs.include?(msg)

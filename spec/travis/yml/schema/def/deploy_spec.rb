@@ -144,7 +144,6 @@ describe Travis::Yml::Schema::Def::Deploy::Deploy, 'structure' do
                 only: [
                   :str
                 ],
-                deprecated: :deploy_on_prefix_branch
               },
               keys: {
                 branch: {

@@ -23,8 +23,8 @@ describe Travis::Yml, 'puppetforge' do
         password: str
     )
     it { should serialize_to defaults }
-    it { should have_msg [:error, :deploy, :required, key: :user] }
-    it { should_not have_msg [:error, :deploy, :required, key: :password] }
+    it { should have_msg [:error, :deploy, :required, key: :user, provider: :puppetforge] }
+    it { should_not have_msg [:error, :deploy, :required, key: :password, provider: :puppetforge] }
   end
 
   describe 'missing password', defaults: true do
@@ -34,8 +34,8 @@ describe Travis::Yml, 'puppetforge' do
         user: str
     )
     it { should serialize_to defaults }
-    it { should_not have_msg [:error, :deploy, :required, key: :user] }
-    it { should have_msg [:error, :deploy, :required, key: :password] }
+    it { should_not have_msg [:error, :deploy, :required, key: :user, provider: :puppetforge] }
+    it { should have_msg [:error, :deploy, :required, key: :password, provider: :puppetforge] }
   end
 
   describe 'url' do

@@ -47,7 +47,11 @@ module Travis
               return unless enum.enum? && enum.size == 1
               return unless str = value_for(enum, key)
               return unless str.is_a?(String)
-              enum.known?(str) || enum.known?(match(enum, str))
+              return unless enum.known?(str) || enum.known?(match(enum, str))
+              # hmm. this is so msgs can include the :provider key without
+              # having to pass this everytime we create a msg
+              value.opts[:detected] = key
+              true
             end
 
             def normal
