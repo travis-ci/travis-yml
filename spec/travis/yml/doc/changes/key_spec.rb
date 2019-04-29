@@ -1,8 +1,9 @@
-describe Travis::Yml::Doc::Keys do
-  include described_class
+describe Travis::Yml::Doc::Change::Key do
+  let(:schema) { Travis::Yml.expand }
+  let(:change) { described_class.new(schema, nil) }
 
   describe 'clean_key' do
-    subject { clean_key(key) }
+    subject { change.clean_key(key) }
 
     describe 'given _foo' do
       let(:key) { :_foo }
@@ -30,7 +31,9 @@ describe Travis::Yml::Doc::Keys do
     end
   end
 
-  describe 'find_key' do
+  describe 'match_key' do
+    subject { change.match_key(key) }
+
     %w(
       TZ
       after_error
@@ -54,8 +57,8 @@ describe Travis::Yml::Doc::Keys do
     ).map do |key|
       describe "does not correct the key #{key}" do
         let(:schema) { Travis::Yml.expand }
-        let(:keys) { schema.keys + schema.aliases.keys }
-        it { expect(match_key(keys, key)).to eq nil }
+        let(:key) { key }
+        it { should eq nil }
       end
     end
 
@@ -73,8 +76,8 @@ describe Travis::Yml::Doc::Keys do
     ).map do |key|
       describe "does not corrects the key #{key} (stopword)" do
         let(:schema) { Travis::Yml.expand }
-        let(:keys) { schema.keys + schema.aliases.keys }
-        it { expect(match_key(keys, key)).to eq nil }
+        let(:key) { key }
+        it { should eq nil }
       end
     end
 
@@ -292,11 +295,11 @@ describe Travis::Yml::Doc::Keys do
       ['xode_project', 'xcode_project'],
       ['xode_scheme', 'xcode_scheme'],
     ]
-    pairs.map do |one, other|
-      describe "corrects they key #{one} to #{other}" do
+    pairs.map do |key, other|
+      describe "corrects they key #{key} to #{other}" do
         let(:schema) { Travis::Yml.expand }
-        let(:keys) { schema.keys + schema.aliases.keys }
-        it { expect(match_key(keys, one)).to eq other.to_sym }
+        let(:key) { key }
+        it { should eq other.to_sym }
       end
     end
 
@@ -308,11 +311,11 @@ describe Travis::Yml::Doc::Keys do
       ['postgresq', 'postgresql'],
       ['postgressql', 'postgresql'],
     ]
-    pairs.each do |(one, other)|
-      describe "corrects they key #{one} to #{other}" do
+    pairs.each do |(key, other)|
+      describe "corrects they key #{key} to #{other}" do
         let(:schema) { Travis::Yml.expand.map[:addons] }
-        let(:keys) { schema.keys + schema.aliases.keys }
-        it { expect(match_key(keys, one)).to eq other.to_s.to_sym }
+        let(:key) { key }
+        it { should eq other.to_sym }
       end
     end
 
@@ -324,11 +327,11 @@ describe Travis::Yml::Doc::Keys do
       ['diretories', 'directories'],
       ['pacakges', 'packages'],
     ]
-    pairs.each do |(one, other)|
-      describe "corrects they key #{one} to #{other}" do
+    pairs.each do |(key, other)|
+      describe "corrects they key #{key} to #{other}" do
         let(:schema) { Travis::Yml.expand.map[:cache][0] }
-        let(:keys) { schema.keys + schema.aliases.keys }
-        it { expect(match_key(keys, one)).to eq other.to_s.to_sym }
+        let(:key) { key }
+        it { should eq other.to_sym }
       end
     end
 
@@ -347,11 +350,11 @@ describe Travis::Yml::Doc::Keys do
       # ['allowable_failures', 'allowed_failures'], # :thinking_face:
       ['allows_failures', 'allow_failures'],
     ]
-    pairs.each do |(one, other)|
-      describe "corrects they key #{one} to #{other}" do
+    pairs.each do |(key, other)|
+      describe "corrects they key #{key} to #{other}" do
         let(:schema) { Travis::Yml.expand.map[:matrix][0] }
-        let(:keys) { schema.keys + schema.aliases.keys }
-        it { expect(match_key(keys, one)).to eq other.to_s.to_sym }
+        let(:key) { key }
+        it { should eq other.to_sym }
       end
     end
 
@@ -376,11 +379,11 @@ describe Travis::Yml::Doc::Keys do
       ['onfailure', 'on_failure'],
       ['onsuccess', 'on_success'],
     ]
-    pairs.each do |(one, other)|
-      describe "corrects they key #{one} to #{other}" do
+    pairs.each do |(key, other)|
+      describe "corrects they key #{key} to #{other}" do
         let(:schema) { Travis::Yml.expand.map[:notifications][0] }
-        let(:keys) { schema.keys + schema.aliases.keys }
-        it { expect(match_key(keys, one)).to eq other.to_s.to_sym }
+        let(:key) { key }
+        it { should eq other.to_sym }
       end
     end
 
@@ -390,11 +393,11 @@ describe Travis::Yml::Doc::Keys do
       ['recipents', 'recipients'],
       ['recipient', 'recipients'],
     ]
-    pairs.each do |(one, other)|
-      describe "corrects they key #{one} to #{other}" do
+    pairs.each do |(key, other)|
+      describe "corrects they key #{key} to #{other}" do
         let(:schema) { Travis::Yml.expand.map[:notifications][0][:email][0] }
-        let(:keys) { schema.keys + schema.aliases.keys }
-        it { expect(match_key(keys, one)).to eq other.to_s.to_sym }
+        let(:key) { key }
+        it { should eq other.to_sym }
       end
     end
   end

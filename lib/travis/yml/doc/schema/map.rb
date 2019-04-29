@@ -119,7 +119,7 @@ module Travis
           end
 
           def known
-            keys + aliases.keys
+            keys + aliases.keys - Yml.r_keys
           end
           memoize :known
 

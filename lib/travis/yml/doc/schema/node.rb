@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 require 'registry'
+require 'travis/yml/doc/helper/match'
 
 module Travis
   module Yml
@@ -150,37 +151,45 @@ module Travis
             opts[:deprecated]
           end
 
-          STOP = %w(
-            after_vendor
-            branch
-            branches
-            e2e_tests
-            erlang
-            gcc
-            golang
-            html
-            jvm
-            nvm
-            osx
-            pip
-            pgsql
-            postgres
-            prose
-            sdk
-            slack
-            start_script
-            test
-            trusty
-            versions
-            vimscript
-          )
+          STOP = {
+            from: %w(
+              after_vendor
+              branch
+              branches
+              erlang
+              gcc
+              golang
+              html
+              jvm
+              nvm
+              osx
+              pip
+              pgsql
+              postgres
+              prose
+              sdk
+              slack
+              start_script
+              test
+              trusty
+              versions
+              vimscript
+            ),
+            to: %w(
+              elm_tests
+            )
+          }
 
-          def stop?(key)
-            stop.include?(key.to_s)
+          def match(strs, str)
+            Match.new(strs.map(&:to_s), str.to_s, self).run
+          end
+
+          def stop?(from, to = nil)
+            stop[:from].include?(from.to_s) || to && stop[:to].include?(to.to_s)
           end
 
           def stop
-            Yml.keys.map(&:to_s) + STOP
+            { from: STOP[:from] + Yml.keys.map(&:to_s), to: STOP[:to] }
           end
           memoize :stop
 

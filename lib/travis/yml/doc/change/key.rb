@@ -1,13 +1,13 @@
 # frozen_string_literal: true
 require 'travis/yml/doc/change/base'
-require 'travis/yml/doc/helper/keys'
+require 'travis/yml/doc/helper/dict'
 
 module Travis
   module Yml
     module Doc
       module Change
         class Key < Base
-          include Doc::Keys
+          include Doc::Dict
 
           def apply
             key = value.key
@@ -49,8 +49,8 @@ module Travis
           end
 
           def lookup(key)
-            return key unless strict?
-            other = lookup_key(key)
+            return key unless strict? && Dict.key?(key)
+            other = Dict[key].to_sym unless schema.stop?(key, Dict[key])
             return key unless key == other || known?(other) || misplaced?(other)
             warn :find_key, key.to_sym, other.to_sym if key != other
             other
@@ -58,7 +58,7 @@ module Travis
 
           def find(key)
             return key unless strict?
-            other = match_key(allowed, key)
+            other = match_key(key.to_s)
             return key if key == :"_#{other}" # allowed custom keys
             return key unless known?(other) || alias?(other) || misplaced?(other)
             warn :find_key, key.to_sym, other.to_sym if key != other
@@ -88,11 +88,6 @@ module Travis
             schema.misplaced?(key)
           end
 
-          def allowed
-            schema.keys + schema.aliases.keys - Yml.r_keys
-          end
-          memoize :allowed
-
           def info(type, key, other)
             msg :info, type, key, other
           end
@@ -103,6 +98,19 @@ module Travis
 
           def msg(level, type, key, other)
             value.parent.msg level, type, original: key.to_sym, key: other.to_sym
+          end
+
+          def match_key(key)
+            schema.match(schema.known, key.to_s)&.to_sym
+          end
+
+          def clean_key(key)
+            key = key.to_s
+            key = key.tr('- ', '_')
+            key = key.gsub(/(\W)/, '')
+            key = key.gsub(/(^_+|_+$)/, '')
+            key = key.gsub('__', '_')
+            key = key.to_sym
           end
         end
       end
