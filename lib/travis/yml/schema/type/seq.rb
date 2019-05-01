@@ -18,13 +18,17 @@ module Travis
             :seq
           end
 
+          attr_writer :types
+
           def types
             @types ||= []
           end
 
-          # def support
-          #   merge(super, *types.map(&:support))
-          # end
+          def dup
+            node = super
+            node.types = node.types.map(&:dup)
+            node
+          end
 
           def to_h
             Dump.new(self).to_h

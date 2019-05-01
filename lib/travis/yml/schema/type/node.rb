@@ -2,7 +2,6 @@
 require 'forwardable'
 require 'registry'
 require 'travis/yml/schema/type/dump'
-require 'travis/yml/schema/type/forms'
 require 'travis/yml/schema/type/opts'
 
 module Travis
@@ -16,9 +15,9 @@ module Travis
           registry :type
           register :node
 
-          opts %i(changes deprecated flags normal)
+          opts %i(aliases changes deprecated flags normal unique only except)
 
-          attr_writer :namespace
+          attr_writer :namespace, :opts
 
           def initialize(parent = nil, opts = {})
             super(parent)
@@ -27,13 +26,7 @@ module Travis
           end
 
           def resolve(type)
-            Type.resolve(type)
-          end
-
-          def transform(type, opts = {})
-            opts = opts.merge(ivars)
-            node = Node[type].new(parent, opts)
-            node
+            type.is_a?(Class) ? type : Node[type]
           end
 
           def assign(opts)
@@ -106,6 +99,11 @@ module Travis
             @namespace || :type
           end
 
+          def full_id
+            [namespace, id].join('.').to_sym if id
+          end
+          memoize :full_id
+
           def opts
             @opts
           end
@@ -125,7 +123,7 @@ module Travis
           end
 
           def aliases
-            @aliases ||= []
+            opts[:aliases] ||= []
           end
 
           def change?(name)
@@ -156,6 +154,10 @@ module Travis
             @expand_keys ||= []
           end
 
+          def exports
+            @exports ||= []
+          end
+
           def export
             @export = true
           end
@@ -184,14 +186,6 @@ module Travis
             !!@required
           end
 
-          def support?
-            support.any?
-          end
-
-          def support
-            @support ||= {}
-          end
-
           def title?
             !!title
           end
@@ -204,8 +198,12 @@ module Travis
             @description
           end
 
+          def normal?
+            !!opts[:normal]
+          end
+
           def unique?
-            !!@unique
+            !!opts[:unique]
           end
 
           def vars?
@@ -220,8 +218,18 @@ module Travis
           #   root? ? :root : [parent.full_key, id].join('.').split('.').uniq.join('.')
           # end
 
-          def definitions
-            json.definitions
+          def shapeshift(type, opts = {})
+            opts = self.opts.merge(ivars).merge(id: id)
+            opts = except(opts, :aliases, :expand, :keys, :required) if %i(all any).include?(type) # hmmm.
+            Node[type].new(parent, opts)
+          end
+
+          def form
+            Form.apply(self)
+          end
+
+          def definition
+            json.definition
           end
 
           def schema
@@ -229,16 +237,25 @@ module Travis
           end
 
           def json
-            node = Forms.apply(self)
-            Json::Node[node.type].new(node)
+            Json::Node[type].new(self)
+          end
+
+          def dup
+            node = super
+            node.opts = node.opts.dup
+            node
+          end
+
+          def ==(other)
+            namespace == other.namespace && id == other.id
           end
 
           def to_h
             Dump.new(self).to_h
           end
 
-          def dump
-            Dump.new(self).dump
+          def dump(opts = {})
+            Dump.new(self, opts).dump
           end
 
           def inspect

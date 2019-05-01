@@ -45,9 +45,9 @@ module Travis
               map :sudo
               map :env,      to: :env_vars
               map :stage,    to: :str
-              map :compiler, to: :compilers
+              map :compiler
 
-              include :job
+              include :support, :job
 
               export
             end

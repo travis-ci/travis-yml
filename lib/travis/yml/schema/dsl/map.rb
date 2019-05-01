@@ -24,12 +24,8 @@ module Travis
           def map(key, opts = {})
             type = opts[:to] || key
             opts = { key: key }.merge(except(opts, :to))
-
-            node[key] = build(self, type, except(opts, :alias, :only, :except)).node # :required
-
-            mapped_opts(node[key], key, opts).each do |key, opts|
-              node.set key, opts
-            end
+            node[key] = build(self, type, opts).node
+            node.set :required, [key] if node[key].required?
           end
 
           def type(*types)
@@ -54,40 +50,6 @@ module Travis
 
           def strict(obj = nil)
             node.set :strict, !false?(obj)
-          end
-
-          # These can all be passed as options to #map, or defined on the
-          # mapped type, but need to end up on the map.
-          def mapped_opts(obj, key, mapped)
-            obj = obj.lookup if obj.is?(:ref)
-            obj = obj.types.detect(&:map?) || obj if obj.is?(:any) # hmmm.
-            obj = obj.types.detect(&:seq?) || obj if obj.is?(:any)
-
-            opts = %i(alias).map do |attr|
-              [:keys, { key => { aliases:  to_syms(mapped[attr]) } }] if mapped[attr]
-            end.compact.to_h
-
-            opts = merge(opts, %i(deprecated).map do |attr|
-              [:keys, { key => { deprecated:  mapped[attr] } }] if mapped[attr]
-            end.compact.to_h)
-
-            opts = merge(opts, %i(required unique).map do |attr|
-              [attr, [key]] if mapped[attr] || obj.send("#{attr}?")
-            end.compact.to_h)
-
-            opts = merge(opts, %i(only except).map do |attr|
-              [:keys, { key => { attr => to_strs(mapped[attr]) } }] if mapped[attr]
-            end.compact.to_h)
-
-            opts = merge(opts, %i(aliases).map do |attr|
-              [:keys, { key => { attr => to_syms(obj.send(attr)) } }] if obj.send(:"#{attr}?")
-            end.compact.to_h)
-
-            opts = merge(opts, obj.support.map { |attr, opts|
-              [:keys, { key => { attr => to_strs(opts) } }]
-            }.to_h)
-
-            opts
           end
         end
       end

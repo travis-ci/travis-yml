@@ -8,10 +8,10 @@ module Travis
       module Def
         module Addon
           class Snaps < Dsl::Seq
+            registry :addon
             register :snaps
 
             def define
-              namespace :addon
               normal
               type Snap
               export
@@ -19,8 +19,8 @@ module Travis
 
             class Snap < Dsl::Map
               def define
-                normal
                 prefix :name
+
                 map :name,    to: :str
                 map :classic, to: :bool
                 map :channel, to: :str

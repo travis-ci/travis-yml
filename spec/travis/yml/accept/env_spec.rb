@@ -1,6 +1,14 @@
 describe Travis::Yml, 'env' do
   subject { described_class.apply(parse(yaml)) }
 
+  describe 'given a bool' do
+    yaml %(
+      env: true
+    )
+    it { should serialize_to empty }
+    it { should have_msg [:error, :env, :invalid_type, expected: :map, actual: :bool, value: true] }
+  end
+
   describe 'given a var' do
     yaml %(
       env: FOO=foo

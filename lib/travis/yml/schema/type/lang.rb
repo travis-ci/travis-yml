@@ -7,10 +7,6 @@ module Travis
       module Type
         class Lang < Map
           register :lang
-
-          def schema
-            { '$ref': "#/definitions/#{namespace}/#{id}" }
-          end
         end
       end
     end

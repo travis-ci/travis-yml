@@ -16,6 +16,7 @@ module Travis
               map :notification_email,    to: :secure
               map :build_command,         to: :str
               map :build_command_prepend, to: :str
+
               super
             end
 

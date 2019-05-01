@@ -22,9 +22,7 @@ module Travis
             def unsupported
               value.each do |key, value|
                 # if key == :arch
-                #   puts
                 #   p key
-                #   p value.serialize
                 #   p schema.support(key)
                 #   p value.supporting
                 # end

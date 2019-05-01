@@ -36,7 +36,7 @@ describe Travis::Yml, 'matrix' do
         matrix:
           rvm: 2.3
       )
-      it { should serialize_to matrix: { include: [rvm: ['2.3']] } }
+      it { should serialize_to matrix: { include: [rvm: '2.3'] } }
       it { should_not have_msg }
     end
 
@@ -64,7 +64,7 @@ describe Travis::Yml, 'matrix' do
           - rvm: 2.3
           - rvm: 2.4
       )
-      it { should serialize_to matrix: { include: [{ rvm: ['2.3'] }, { rvm: ['2.4'] }] } }
+      it { should serialize_to matrix: { include: [{ rvm: '2.3' }, { rvm: '2.4' }] } }
       it { should_not have_msg }
     end
 
@@ -81,7 +81,7 @@ describe Travis::Yml, 'matrix' do
         allow_failures:
           - rvm: 2.3
       )
-      it { should serialize_to matrix: { allow_failures: [rvm: ['2.3']] } }
+      it { should serialize_to matrix: { allow_failures: [rvm: '2.3'] } }
       it { should_not have_msg }
     end
 
@@ -90,8 +90,8 @@ describe Travis::Yml, 'matrix' do
         allowed_failures:
           - rvm: 2.3
       )
-      it { should serialize_to matrix: { allow_failures: [rvm: ['2.3']] } }
-      it { should have_msg [:warn, :root, :migrate, key: :allow_failures, to: :matrix, value: [rvm: ['2.3']]] }
+      it { should serialize_to matrix: { allow_failures: [rvm: '2.3'] } }
+      it { should have_msg [:warn, :root, :migrate, key: :allow_failures, to: :matrix, value: [rvm: '2.3']] }
     end
   end
 
@@ -112,7 +112,7 @@ describe Travis::Yml, 'matrix' do
             - rvm: 2.3
               stage: str
       )
-      it { should serialize_to matrix: { include: [rvm: ['2.3'], stage: 'str'] } }
+      it { should serialize_to matrix: { include: [rvm: '2.3', stage: 'str'] } }
       it { should_not have_msg }
     end
 
@@ -122,7 +122,7 @@ describe Travis::Yml, 'matrix' do
           include:
             rvm: 2.3
       )
-      it { should serialize_to matrix: { include: [rvm: ['2.3']] } }
+      it { should serialize_to matrix: { include: [rvm: '2.3'] } }
       it { should_not have_msg }
     end
 
@@ -145,7 +145,7 @@ describe Travis::Yml, 'matrix' do
               env:
                 FOO: foo
       )
-      it { should serialize_to matrix: { include: [rvm: ['2.3'], env: [FOO: 'foo']] } }
+      it { should serialize_to matrix: { include: [rvm: '2.3', env: [FOO: 'foo']] } }
       it { should_not have_msg }
     end
 
@@ -156,7 +156,7 @@ describe Travis::Yml, 'matrix' do
             - rvm: 2.3
               env: FOO=foo
       )
-      it { should serialize_to matrix: { include: [rvm: ['2.3'], env: [FOO: 'foo']] } }
+      it { should serialize_to matrix: { include: [rvm: '2.3', env: [FOO: 'foo']] } }
       it { should_not have_msg }
     end
 
@@ -169,10 +169,10 @@ describe Travis::Yml, 'matrix' do
               - FOO=foo
               - BAR=bar
       )
-      it { should serialize_to matrix: { include: [rvm: ['2.3'], env: [{ FOO: 'foo' }, { BAR: 'bar' }]] } }
+      it { should serialize_to matrix: { include: [rvm: '2.3', env: [{ FOO: 'foo' }, { BAR: 'bar' }]] } }
     end
 
-    describe 'given a language' do
+    describe 'given language (str)' do
       yaml %(
         matrix:
           include:
@@ -182,7 +182,18 @@ describe Travis::Yml, 'matrix' do
       it { should_not have_msg }
     end
 
-    describe 'given a language with a typo' do
+    describe 'given language (seq)' do
+      yaml %(
+        matrix:
+          include:
+            language:
+            - ruby
+      )
+      it { should serialize_to matrix: { include: [language: 'ruby'] } }
+      it { should have_msg [:warn, :'matrix.include.language', :unexpected_seq, value: 'ruby'] }
+    end
+
+    describe 'given language with a typo' do
       yaml %(
         matrix:
           include:
@@ -190,6 +201,52 @@ describe Travis::Yml, 'matrix' do
       )
       it { should serialize_to matrix: { include: [language: 'ruby'] } }
       it { should have_msg [:warn, :'matrix.include.language', :find_value, original: 'ruby`', value: 'ruby'] }
+    end
+
+    describe 'given jdk (str)' do
+      yaml %(
+        matrix:
+          include:
+          - language: ruby
+            jdk: str
+      )
+      it { should serialize_to matrix: { include: [language: 'ruby', jdk: 'str'] } }
+      it { should_not have_msg }
+    end
+
+    describe 'given jdk (seq)' do
+      yaml %(
+        matrix:
+          include:
+          - language: ruby
+            jdk:
+            - str
+      )
+      it { should serialize_to matrix: { include: [language: 'ruby', jdk: 'str'] } }
+      it { should have_msg [:warn, :'matrix.include.jdk', :unexpected_seq, value: 'str'] }
+    end
+
+    describe 'given compiler (str)' do
+      yaml %(
+        matrix:
+          include:
+          - language: cpp
+            compiler: str
+      )
+      it { should serialize_to matrix: { include: [language: 'cpp', compiler: 'str'] } }
+      it { should_not have_msg }
+    end
+
+    describe 'given compiler (seq)' do
+      yaml %(
+        matrix:
+          include:
+          - language: cpp
+            compiler:
+            - str
+      )
+      it { should serialize_to matrix: { include: [language: 'cpp', compiler: 'str'] } }
+      it { should have_msg [:warn, :'matrix.include.compiler', :unexpected_seq, value: 'str'] }
     end
 
     describe 'given licenses' do
@@ -212,9 +269,9 @@ describe Travis::Yml, 'matrix' do
             language: node_js - 9
             compiler: gcc
       )
-      it { should serialize_to matrix: { include: [language: 'node_js', compiler: ['gcc']] } }
+      it { should serialize_to matrix: { include: [language: 'node_js', compiler: 'gcc'] } }
       it { should have_msg [:warn, :'matrix.include.language', :clean_value, original: 'node_js - 9', value: 'node_js'] }
-      it { should have_msg [:warn, :'matrix.include.compiler', :unsupported, on_key: :language, on_value: 'node_js', key: :compiler, value: ['gcc']] }
+      it { should have_msg [:warn, :'matrix.include.compiler', :unsupported, on_key: :language, on_value: 'node_js', key: :compiler, value: 'gcc'] }
     end
 
     describe 'given a name' do
@@ -312,7 +369,7 @@ describe Travis::Yml, 'matrix' do
             #{key}:
               rvm: 2.3
         )
-        it { should serialize_to matrix: { key => [rvm: ['2.3']] } }
+        it { should serialize_to matrix: { key => [rvm: '2.3'] } }
         it { should_not have_msg }
       end
 
@@ -322,7 +379,7 @@ describe Travis::Yml, 'matrix' do
             #{key}:
               - rvm: 2.3
         )
-        it { should serialize_to matrix: { key => [rvm: ['2.3']] } }
+        it { should serialize_to matrix: { key => [rvm: '2.3'] } }
         it { should_not have_msg }
       end
 
@@ -341,7 +398,7 @@ describe Travis::Yml, 'matrix' do
             #{key}:
               rvm: 2.3
         )
-        it { should serialize_to language: 'ruby', os: ['linux'], matrix: { key => [rvm: ['2.3']] } }
+        it { should serialize_to language: 'ruby', os: ['linux'], matrix: { key => [rvm: '2.3'] } }
       end
 
       describe 'given language' do
@@ -424,8 +481,8 @@ describe Travis::Yml, 'matrix' do
                 - rvm: 2.3
                   python: 3.5
           )
-          it { should serialize_to language: 'ruby', matrix: { key => [rvm: ['2.3'], python: ['3.5']] } }
-          it { should have_msg [:warn, :"matrix.#{key}.python", :unsupported, on_key: :language, on_value: 'ruby', key: :python, value: ['3.5']] }
+          it { should serialize_to language: 'ruby', matrix: { key => [rvm: '2.3', python: '3.5'] } }
+          it { should have_msg [:warn, :"matrix.#{key}.python", :unsupported, on_key: :language, on_value: 'ruby', key: :python, value: '3.5'] }
         end
 
         describe "language given on matrix.#{key}" do
@@ -436,8 +493,8 @@ describe Travis::Yml, 'matrix' do
                   rvm: 2.3
                   python: 3.5
           )
-          it { should serialize_to matrix: { key => [language: 'ruby', rvm: ['2.3'], python: ['3.5']] } }
-          it { should have_msg [:warn, :"matrix.#{key}.python", :unsupported, on_key: :language, on_value: 'ruby', key: :python, value: ['3.5']] }
+          it { should serialize_to matrix: { key => [language: 'ruby', rvm: '2.3', python: '3.5'] } }
+          it { should have_msg [:warn, :"matrix.#{key}.python", :unsupported, on_key: :language, on_value: 'ruby', key: :python, value: '3.5'] }
         end
 
         describe 'in separate entries' do
@@ -448,8 +505,8 @@ describe Travis::Yml, 'matrix' do
                 - rvm: 2.3
                 - python: 3.5
           )
-          it { should serialize_to language: 'ruby', matrix: { key => [{ rvm: ['2.3'] }, { python: ['3.5'] }] } }
-          it { should have_msg [:warn, :"matrix.#{key}.python", :unsupported, on_key: :language, on_value: 'ruby', key: :python, value: ['3.5']] }
+          it { should serialize_to language: 'ruby', matrix: { key => [{ rvm: '2.3' }, { python: '3.5' }] } }
+          it { should have_msg [:warn, :"matrix.#{key}.python", :unsupported, on_key: :language, on_value: 'ruby', key: :python, value: '3.5'] }
         end
       end
     end
@@ -462,7 +519,7 @@ describe Travis::Yml, 'matrix' do
           allowed_failures:
             rvm: 2.3
       )
-      it { should serialize_to matrix: { allow_failures: [rvm: ['2.3']] } }
+      it { should serialize_to matrix: { allow_failures: [rvm: '2.3'] } }
       it { should have_msg [:info, :matrix, :alias, alias: :allowed_failures, key: :allow_failures] }
     end
 
@@ -479,8 +536,8 @@ describe Travis::Yml, 'matrix' do
     describe 'misplaced on root', v2: true, migrate: true do
       yaml %(
       )
-      it { should serialize_to matrix: { allow_failures: [rvm: ['2.3']] } }
-      it { should have_msg [:warn, :root, :migrate, key: :allow_failures, to: :matrix, value: [rvm: ['2.3']]] }
+      it { should serialize_to matrix: { allow_failures: [rvm: '2.3'] } }
+      it { should have_msg [:warn, :root, :migrate, key: :allow_failures, to: :matrix, value: [rvm: '2.3']] }
     end
 
     describe 'alias allowed_failures, misplaced on root', v2: true, migrate: true do
@@ -488,8 +545,8 @@ describe Travis::Yml, 'matrix' do
         allowed_failures:
           rvm: 2.3
       )
-      it { should serialize_to matrix: { allow_failures: [rvm: ['2.3']] } }
-      it { should have_msg [:warn, :root, :migrate, key: :allow_failures, to: :matrix, value: [rvm: ['2.3']]] }
+      it { should serialize_to matrix: { allow_failures: [rvm: '2.3'] } }
+      it { should have_msg [:warn, :root, :migrate, key: :allow_failures, to: :matrix, value: [rvm: '2.3']] }
     end
   end
 

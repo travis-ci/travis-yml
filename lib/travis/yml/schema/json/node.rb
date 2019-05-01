@@ -15,28 +15,22 @@ module Travis
           def_delegators :node, :description, :export?, :id, :namespace, :title, :type
 
           def schema
-            export? ? ref : to_h
+            to_h
           end
 
-          def definitions
-            export? ? defn(to_h) : {}
+          def definition
+            meta.merge(to_h)
+          end
+
+          def full_id
+            [namespace, id].join(':').to_sym
           end
 
           private
 
-            def defn(schema)
-              { namespace => { id => meta.merge(schema) } }
-            end
-
             def meta
               id = namespace == :type ? node.id : :"#{namespace}_#{node.id}"
               compact('$id': id, title: title, description: description)
-            end
-
-            def ref(*args)
-              opts = args.last.is_a?(Hash) ? args.pop : {}
-              type = args.first || [node.registry_name, id].join('/')
-              { '$ref': "#/definitions/#{type}" }.merge(opts)
             end
 
             def normals?(schemas)
@@ -56,14 +50,6 @@ module Travis
 
             def denormal(schema)
               except(schema, :normal)
-            end
-
-            def jsons(nodes)
-              nodes.map { |node| json(node) }
-            end
-
-            def json(node)
-              Json::Node[node.type].new(node)
             end
 
             def opts

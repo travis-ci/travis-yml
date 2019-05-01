@@ -626,10 +626,17 @@ describe Travis::Yml, configs: true do
     deploy.script
     language
     matrix.fast_finish
+    matrix.allow_failures.rvm
     matrix.include.addons.apt.update
     matrix.include.addons.homebrew.update
     matrix.include.deploy.script
+    matrix.include.go
+    matrix.include.jdk
+    matrix.include.node_js
     matrix.include.os
+    matrix.include.php
+    matrix.include.python
+    matrix.include.rvm
     notifications
     notifications.email.on_failure
     notifications.email.on_success

@@ -24,29 +24,47 @@ module Travis
             # slowing the process down from ~0.12s to ~1.4s.
 
             def new(parent = nil, opts = {})
-              if registry_key && opts.empty? && obj = Type.exported(registry_name, registry_key)
-                obj.export? ? ref(parent, obj) : super(parent, obj)
-              else
-                obj = Type::Node[type].new(parent&.node, namespace: registry_name, id: registry_key)
-
+              caching(opts) do
+                # could all this now live in initialize?
+                obj = Type::Node[type].new(parent&.node, namespace: registry_name, id: id)
                 node = super(parent, obj)
                 node.assign(opts)
                 node.before_define
                 node.define
                 node.after_define
-
-                if node.export?
-                  obj = Type.transform(obj)
-                  Type.export(obj)
-                  ref(node.parent, obj)
-                else
-                  node
-                end
+                node
               end
             end
 
-            def ref(parent, obj)
-              Ref.new(parent, namespace: obj.namespace, id: obj.id)
+            def caching(opts)
+              if cache?(opts) && node = Node.cache[registry_full_key]
+                node
+              else
+                node = yield
+                Node.cache[registry_full_key] = node if cache?(opts)
+                node
+              end
+            end
+
+            def cache?(opts)
+              !!id && opts.empty?
+            end
+
+            def cache
+              @cache ||= {}
+            end
+
+            def id
+              registry_key if def?
+            end
+
+            def def?
+              name.to_s.include?('Def::')
+            end
+
+            # move to Registry
+            def registry_full_key
+              [registry_name, registry_key].join('.').to_sym
             end
           end
 
@@ -68,6 +86,7 @@ module Travis
 
           def parent(*types)
             return super() if types.empty?
+            raise # remove this
             return nil if root?
             parent.is?(*types) ? parent : parent.parent(*types)
           end
@@ -163,10 +182,6 @@ module Travis
             node.set :key, key
           end
 
-          def namespace(namespace)
-            node.set :namespace, namespace
-          end
-
           def normal(*)
             node.set :normal, true
           end
@@ -186,9 +201,7 @@ module Travis
           def supports(key, opts = nil)
             opts = opts ? { key => opts } : key
             opts = symbolize(to_strs(opts))
-            opts.each do |key, opts|
-              node.set :support, key => opts
-            end
+            opts.each { |key, opts| node.set key, opts }
           end
 
           def definitions

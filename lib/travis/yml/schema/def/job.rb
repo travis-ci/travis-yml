@@ -18,14 +18,11 @@ module Travis
           def define
             strict false
 
-            include :languages
-
             map :group
             map :osx_image, to: :str, edge: true, only: { os: :osx } # TODO move the opts to the definition
 
             map :services
             map :addons
-            # TODO shouldn't :branches sit on root?
             map :branches, alias: :branch # TODO move the alias to the definition
             map :cache
             map :deploy,     to: :deploys

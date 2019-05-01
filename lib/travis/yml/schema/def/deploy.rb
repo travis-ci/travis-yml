@@ -72,29 +72,16 @@ module Travis
               normal
               prefix :branch, only: :str
 
+              map :os
               map :branch,       to: :branches, alias: :branches
               map :repo,         to: :str
               map :condition,    to: :seq, type: :str
               map :all_branches, to: :bool
               map :tags,         to: :bool
 
-              language_keys.map do |key, opts|
-                map key, opts.merge(to: :str)
-              end
+              include :support
 
               export
-            end
-
-            # as per the docs we do not want to include all of :languages, but
-            # only the keys that are also expand keys
-            def language_keys
-              keys = root.node.expand_keys
-              opts = Type.exports[:language].values.map(&:opts)
-              opts = only(merge(*opts.map { |opts| opts[:keys] }.compact), *keys)
-              opts = opts.map { |key, opts| [key, only(opts, :aliases)] }.to_h
-              keys = keys - opts.keys - [:env]
-              opts = opts.merge(keys.map { |key| [key, {}] }.to_h)
-              opts
             end
           end
 

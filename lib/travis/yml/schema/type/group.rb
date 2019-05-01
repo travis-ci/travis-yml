@@ -12,20 +12,26 @@ module Travis
           def_delegators :types, :each, :first
 
           def types=(types)
-            @types = flatten(types)
+            @types = types
           end
 
           def types
             @types ||= []
           end
 
-          def flatten(types)
-            types.map { |schema| schema.is_a?(self.class) ? schema.types : schema }.flatten
+          def dup
+            node = super
+            node.types = node.types.map(&:dup)
+            node
           end
 
           def to_h
             Dump.new(self).to_h
           end
+
+          # def flatten(types)
+          #   types.map { |type| type.is_a?(self.class) ? type.types : type }.flatten
+          # end
         end
       end
     end

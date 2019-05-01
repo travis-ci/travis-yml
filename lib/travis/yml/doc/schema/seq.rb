@@ -34,6 +34,11 @@ module Travis
             schema.all_keys
           end
 
+          def supports
+            merge(super, schema.supports)
+          end
+          memoize :supports
+
           def to_h
             { type: type, schema: schema.to_h, opts: opts }
           end

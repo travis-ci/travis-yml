@@ -37,7 +37,6 @@ module Travis
             registry :notification
 
             def define
-              namespace :notification
               normal
 
               map :enabled,  to: :bool
@@ -50,16 +49,17 @@ module Travis
           end
 
           class Templates < Dsl::Seq
+            registry :notification
             register :templates
 
             def define
-              namespace :notification
               type :template
               export
             end
           end
 
           class Template < Dsl::Str
+            registry :notification
             register :template
 
             VARS = %w(
@@ -85,18 +85,16 @@ module Travis
             )
 
             def define
-              namespace :notification
               vars *VARS
               export
             end
           end
 
           class Frequency < Dsl::Enum
+            registry :notification
             register :frequency
 
             def define
-              namespace :notification
-
               value :always, alias: 'true'
               value :never,  alias: 'false'
               value :change, alias: 'changed'

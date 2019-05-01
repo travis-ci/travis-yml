@@ -10,8 +10,9 @@ module Travis
             register :sauce_connect
 
             def define
-              # change :enable
-              map :enabled,             to: :bool # TODO what is this useful for?
+              change :enable
+
+              map :enabled,             to: :bool
               map :username,            to: :secure
               map :access_key,          to: :secure
               map :direct_domains,      to: :str

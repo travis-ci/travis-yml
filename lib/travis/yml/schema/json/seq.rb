@@ -10,24 +10,28 @@ module Travis
 
           def_delegators :node, :prefix
 
-          def definitions
-            defs = merge(*jsons(node).map(&:definitions))
-            defs = merge(defn(to_h), defs) if export?
-            defs.sort.to_h
+          # def definitions
+          #   # # defs = merge(*jsons(node).map(&:definitions))
+          #   # defs = {}
+          #   # defs = merge(defn(to_h), defs) if export?
+          #   # defs.sort.to_h
+          #   fail
+          # end
+
+          def to_h
+            # puts caller[0..10]
+            # puts
+            schema = { type: :array, items: items }
+            compact(schema.merge(opts))
           end
 
           private
 
-            def to_h
-              schema = { type: :array, items: items }
-              schema = compact(schema.merge(opts))
-            end
-
             def items
               case node.size
               when 0 then { type: :string }
-              when 1 then json(node.first).schema
-              else any(jsons(node).map(&:schema))
+              when 1 then node.first.schema
+              else any(node.map(&:schema))
               end
             end
 

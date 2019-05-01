@@ -70,18 +70,21 @@ module Travis
         apply(Load.apply(parts), opts)
       end
 
+      # move this to Doc::Schema?
       def expand
+        # schema
+        # return
         bench { Doc::Schema.build(schema) }
       end
       memoize :expand
 
       def schema
-        bench { Schema.json }
+        Schema.json
       end
       memoize :schema
 
       def write
-        bench { File.write('schema.json', JSON.pretty_generate(schema)) }
+        File.write('schema.json', JSON.pretty_generate(schema))
       end
 
       def apply(input, opts = {})

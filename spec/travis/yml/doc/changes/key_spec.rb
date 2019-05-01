@@ -42,6 +42,7 @@ describe Travis::Yml::Doc::Change::Key do
       cards
       codecov
       dd
+      e2e_tests
       java
       mac_before_install
       make_install
