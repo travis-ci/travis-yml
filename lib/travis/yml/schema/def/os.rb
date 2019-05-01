@@ -43,7 +43,7 @@ module Travis
           end
         end
 
-        class Os < Dsl::Enum
+        class Os < Dsl::Str
           register :os
 
           def define

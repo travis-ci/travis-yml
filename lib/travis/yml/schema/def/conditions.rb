@@ -1,10 +1,10 @@
-require 'travis/yml/schema/dsl/enum'
+require 'travis/yml/schema/dsl/str'
 
 module Travis
   module Yml
     module Schema
       module Def
-        class Conditions < Dsl::Enum
+        class Conditions < Dsl::Str
           register :conditions
 
           def define

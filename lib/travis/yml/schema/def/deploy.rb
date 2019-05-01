@@ -1,5 +1,4 @@
 # frozen_string_literal: true
-require 'travis/yml/schema/dsl/enum'
 require 'travis/yml/schema/dsl/map'
 require 'travis/yml/schema/dsl/seq'
 
@@ -44,7 +43,7 @@ module Travis
 
               prefix :provider
 
-              map :provider,      to: :enum, values: registry_key, required: true, strict: true
+              map :provider,      to: :str, values: registry_key, required: true, strict: true
               map :on,            to: :conditions
               map :allow_failure, to: :bool
               map :skip_cleanup,  to: :bool

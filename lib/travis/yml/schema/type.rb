@@ -1,7 +1,6 @@
 require 'travis/yml/schema/type/all'
 require 'travis/yml/schema/type/any'
 require 'travis/yml/schema/type/bool'
-require 'travis/yml/schema/type/enum'
 require 'travis/yml/schema/type/lang'
 require 'travis/yml/schema/type/map'
 require 'travis/yml/schema/type/node'

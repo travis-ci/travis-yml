@@ -61,7 +61,7 @@ describe Travis::Yml, 'deploy' do
           provider: heroku
     )
     it { should serialize_to empty }
-    it { should have_msg [:error, :'deploy.provider', :invalid_type, expected: :enum, actual: :map, value: { provider: 'heroku' }] }
+    it { should have_msg [:error, :'deploy.provider', :invalid_type, expected: :str, actual: :map, value: { provider: 'heroku' }] }
   end
 
   describe 'given a map' do

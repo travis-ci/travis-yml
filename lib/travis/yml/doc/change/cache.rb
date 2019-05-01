@@ -26,7 +26,7 @@ module Travis
             end
 
             def from_bool
-              value.warn(:deprecated, deprecation: :cache_enable_all, value: value.value)
+              value.warn(:deprecated, deprecation: :cache_enable_all, value: value.value) if true?(value.value)
               build(bool_keys.map { |key| { key => value.value } }.inject(&:merge))
             end
 

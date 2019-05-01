@@ -13,7 +13,7 @@ describe Travis::Yml, 'invalid_type' do
     describe 'given a num' do
       let(:value) { { language: 1 } }
       it { should serialize_to language: 'ruby' }
-      it { should have_msg [:info, :language, :cast, given_value: 1, given_type: :num, value: '1', type: :enum] }
+      it { should have_msg [:info, :language, :cast, given_value: 1, given_type: :num, value: '1', type: :str] }
       it { should have_msg [:warn, :language, :unknown_default, value: '1', default: 'ruby'] }
     end
   end
@@ -56,7 +56,7 @@ describe Travis::Yml, 'invalid_type' do
     describe 'given a map' do
       let(:value) { { os: { name: 'linux' } } }
       it { should serialize_to empty }
-      it { should have_msg [:error, :os, :invalid_type, expected: :enum, actual: :map, value: { name: 'linux' }] }
+      it { should have_msg [:error, :os, :invalid_type, expected: :str, actual: :map, value: { name: 'linux' }] }
     end
   end
 

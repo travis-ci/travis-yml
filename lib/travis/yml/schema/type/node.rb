@@ -49,9 +49,9 @@ module Travis
           def opt(key, obj)
             case obj
             when Hash
-              @opts[key] = merge(@opts[key] || {}, obj) if obj.any?
+              @opts[key] = merge(@opts[key] || {}, obj) unless obj.empty?
             when Array
-              @opts[key] = (@opts[key] || []).concat(obj).uniq if obj.any?
+              @opts[key] = (@opts[key] || []).concat(obj).uniq unless obj.empty?
             else
               obj.nil? ? @opts.delete(key) : @opts[key] = obj
             end
@@ -60,9 +60,9 @@ module Travis
           def ivar(key, obj)
             case obj
             when Hash
-              super(key, merge(super(key) || {}, obj)) if obj.any?
+              super(key, merge(super(key) || {}, obj)) unless obj.empty?
             when Array
-              super(key, (super(key) || []).concat(obj).uniq) if obj.any?
+              super(key, (super(key) || []).concat(obj).uniq) unless obj.empty?
             else
               super(key, obj)
             end

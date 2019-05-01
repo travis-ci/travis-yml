@@ -84,7 +84,7 @@ describe Travis::Yml, 'os' do
     )
     let(:value) { { os: ['linux', os: 'osx'] } }
     it { should serialize_to os: ['linux'] }
-    it { should have_msg [:error, :os, :invalid_type, expected: :enum, actual: :map, value: { os: 'osx' }] }
+    it { should have_msg [:error, :os, :invalid_type, expected: :str, actual: :map, value: { os: 'osx' }] }
   end
 
   describe 'defaults to osx for objective-c', defaults: true do
@@ -122,7 +122,7 @@ describe Travis::Yml, 'os' do
       osx_image: str
     )
     it { should serialize_to os: ['linux'], osx_image: 'str' }
-    it { should have_msg [:error, :os, :invalid_type, expected: :enum, actual: :map, value: { os: 'osx' }] }
+    it { should have_msg [:error, :os, :invalid_type, expected: :str, actual: :map, value: { os: 'osx' }] }
     it { should have_msg [:warn, :osx_image, :unsupported, on_key: :os, on_value: 'linux', key: :osx_image, value: 'str'] }
   end
 end

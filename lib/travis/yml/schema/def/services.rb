@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 require 'travis/yml/schema/dsl/seq'
-require 'travis/yml/schema/dsl/enum'
+require 'travis/yml/schema/dsl/str'
 
 module Travis
   module Yml
@@ -16,7 +16,7 @@ module Travis
           end
         end
 
-        class Service < Dsl::Enum
+        class Service < Dsl::Str
           register :service
 
           def define

@@ -1,7 +1,6 @@
 require 'travis/yml/doc/schema/any'
 require 'travis/yml/doc/schema/bool'
 require 'travis/yml/doc/schema/select'
-require 'travis/yml/doc/schema/enum'
 require 'travis/yml/doc/schema/factory'
 require 'travis/yml/doc/schema/map'
 require 'travis/yml/doc/schema/node'

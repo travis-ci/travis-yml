@@ -5,12 +5,10 @@ module Travis
   module Yml
     module Schema
       module Json
-        class Ref < Scalar
+        class Ref < Node
           register :ref
 
           def to_h
-            # ref(node.ref)
-            # type = args.first || [node.namespace, id].join('/')
             { '$ref': "#/definitions/#{namespace}/#{id}" }.merge(opts)
           end
         end

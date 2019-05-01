@@ -13,7 +13,7 @@ module Travis
               prefix :rooms
 
               map :rooms,            to: :seq, type: :secure
-              map :format,           to: :enum, values: [:html, :text]
+              map :format,           to: :str, values: [:html, :text]
               map :notify,           to: :bool
               map :on_pull_requests, to: :bool
               map :template,         to: :templates

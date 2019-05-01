@@ -32,7 +32,7 @@ module Travis
               map :subnet_ids,            to: :seq
               map :dead_letter_config,    to: :str
               map :kms_key_arn,           to: :str
-              map :tracing_mode,          to: :enum, values: %i(Active PassThrough) #, default: :PassThrough
+              map :tracing_mode,          to: :str, values: %i(Active PassThrough) #, default: :PassThrough
               map :publish,               to: :bool
               map :function_tags,         to: :secure # TODO ?
             end
