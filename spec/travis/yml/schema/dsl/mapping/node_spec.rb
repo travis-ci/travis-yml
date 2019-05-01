@@ -47,19 +47,16 @@ describe Travis::Yml::Schema::Dsl::Map, 'mapping a node' do
 
   describe 'unique' do
     let(:define) { -> { map :foo, to: :str, unique: true } }
-    it { expect(foo).to_not have_opts }
-    it { expect(map).to have_opts unique: [:foo] }
+    it { expect(foo).to have_opts unique: true }
   end
 
   describe 'only' do
     let(:define) { -> { map :foo, to: :str, only: { os: 'linux' } } }
-    it { expect(foo).to_not have_opts }
-    it { expect(map).to have_opts keys: { foo: { only: { os: ['linux'] } } } }
+    it { expect(foo).to have_opts only: { os: ['linux'] } }
   end
 
   describe 'except' do
     let(:define) { -> { map :foo, to: :str, except: { os: 'linux' } } }
-    it { expect(foo).to_not have_opts }
-    it { expect(map).to have_opts keys: { foo: { except: { os: ['linux'] } } } }
+    it { expect(foo).to have_opts except: { os: ['linux'] } }
   end
 end

@@ -1,31 +1,19 @@
-describe Travis::Yml::Schema::Def::Elm, 'structure' do
-  describe 'definitions' do
-    subject { Travis::Yml.schema[:definitions][:language][:elm] }
+describe Travis::Yml::Schema::Def::Elm, 'schema' do
+  subject { Travis::Yml.schema[:definitions][:language][:elm] }
 
-    # it { puts JSON.pretty_generate(subject) }
+  # it { puts JSON.pretty_generate(subject) }
 
-    it do
-      should eq(
-        '$id': :language_elm,
+  it do
+    should eq(
+      '$id': :language_elm,
         title: 'Language Elm',
         type: :object,
         properties: {
           elm: {
-            '$ref': '#/definitions/type/strs'
-          },
-          node_js: {
-            '$ref': '#/definitions/type/strs'
-          },
-          elm_format: {
-            type: :string
-          },
-          elm_test: {
-            type: :string
-          }
-        },
-        normal: true,
-        keys: {
-          elm: {
+            '$ref': '#/definitions/type/strs',
+            flags: [
+              :expand
+            ],
             only: {
               language: [
                 'elm'
@@ -33,6 +21,10 @@ describe Travis::Yml::Schema::Def::Elm, 'structure' do
             }
           },
           node_js: {
+            '$ref': '#/definitions/type/strs',
+            flags: [
+              :expand
+            ],
             only: {
               language: [
                 'elm'
@@ -40,6 +32,7 @@ describe Travis::Yml::Schema::Def::Elm, 'structure' do
             }
           },
           elm_format: {
+            type: :string,
             only: {
               language: [
                 'elm'
@@ -47,14 +40,15 @@ describe Travis::Yml::Schema::Def::Elm, 'structure' do
             }
           },
           elm_test: {
+            type: :string,
             only: {
               language: [
                 'elm'
               ]
             }
           }
-        }
-      )
-    end
+        },
+        normal: true
+    )
   end
 end

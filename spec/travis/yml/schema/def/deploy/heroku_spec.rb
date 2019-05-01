@@ -1,12 +1,11 @@
-describe Travis::Yml::Schema::Def::Deploy::Heroku, 'structure' do
-  describe 'definitions' do
-    subject { Travis::Yml.schema[:definitions][:deploy][:heroku] }
+describe Travis::Yml::Schema::Def::Deploy::Heroku, 'schema' do
+  subject { Travis::Yml.schema[:definitions][:deploy][:heroku] }
 
-    # it { puts JSON.pretty_generate(subject) }
+  # it { puts JSON.pretty_generate(subject) }
 
-    it do
-      should eq(
-        '$id': :deploy_heroku,
+  it do
+    should eq(
+      '$id': :deploy_heroku,
         title: 'Deploy Heroku',
         anyOf: [
           {
@@ -104,17 +103,6 @@ describe Travis::Yml::Schema::Def::Deploy::Heroku, 'structure' do
           }
         ],
         normal: true
-      )
-    end
-  end
-
-  describe 'schema' do
-    subject { described_class.new.schema }
-
-    it do
-      should eq(
-        '$ref': '#/definitions/deploy/heroku'
-      )
-    end
+    )
   end
 end

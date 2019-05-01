@@ -13,7 +13,7 @@ module Travis
           }
 
           def schema
-            merge(SCHEMA, super, definitions: definitions, expand: expand_keys)
+            merge(SCHEMA, definition, definitions: definitions, expand: expand_keys)
           end
 
           def definitions

@@ -9,13 +9,13 @@ describe Travis::Yml::Schema::Dsl::Map, 'mapping a enum' do
 
   describe 'strict' do
     describe 'given true' do
-      let(:define) { -> { map :foo, to: :enum, strict: true } }
+      let(:define) { -> { map :foo, to: :str, strict: true } }
       it { expect(foo).to have_opts strict: true }
       it { expect(map).to_not have_opts }
     end
 
     describe 'given false' do
-      let(:define) { -> { map :foo, to: :enum, strict: false } }
+      let(:define) { -> { map :foo, to: :str, strict: false } }
       it { expect(foo).to have_opts strict: false }
       it { expect(map).to_not have_opts }
     end

@@ -1,16 +1,14 @@
-describe Travis::Yml::Schema::Def::Shell, 'structure' do
-  describe 'definitions' do
-    subject { Travis::Yml.schema[:definitions][:language][:shell] }
+describe Travis::Yml::Schema::Def::Shell, 'schema' do
+  subject { Travis::Yml.schema[:definitions][:language][:shell] }
 
-    # it { puts JSON.pretty_generate(subject) }
+  # it { puts JSON.pretty_generate(subject) }
 
-    it do
-      should eq(
-        '$id': :language_shell,
+  it do
+    should eq(
+      '$id': :language_shell,
         title: 'Language Shell',
         type: :object,
         normal: true
-      )
-    end
+    )
   end
 end

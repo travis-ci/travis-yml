@@ -54,6 +54,8 @@ module Travis
             # cannot use the standard :secure definition because that also
             # allows a plain string
             add Class.new(Dsl::Map) {
+              register :env_secure
+
               def define
                 normal
                 map :secure, to: :str

@@ -1,23 +1,46 @@
-describe Travis::Yml::Schema::Def::Smalltalk, 'structure' do
-  describe 'definitions' do
-    subject { Travis::Yml.schema[:definitions][:language][:smalltalk] }
+describe Travis::Yml::Schema::Def::Smalltalk, 'schema' do
+  subject { Travis::Yml.schema[:definitions][:language][:smalltalk] }
 
-    # it { puts JSON.pretty_generate(subject) }
+  # it { puts JSON.pretty_generate(subject) }
 
-    it do
-      should eq(
-        '$id': :language_smalltalk,
+  it do
+    should eq(
+      '$id': :language_smalltalk,
         title: 'Language Smalltalk',
         type: :object,
         properties: {
           smalltalk: {
-            '$ref': '#/definitions/type/strs'
+            '$ref': '#/definitions/type/strs',
+            flags: [
+              :expand
+            ],
+            only: {
+              language: [
+                'smalltalk'
+              ]
+            }
           },
           smalltalk_config: {
-            '$ref': '#/definitions/type/strs'
+            '$ref': '#/definitions/type/strs',
+            flags: [
+              :expand
+            ],
+            only: {
+              language: [
+                'smalltalk'
+              ]
+            }
           },
           smalltalk_vm: {
-            '$ref': '#/definitions/type/strs'
+            '$ref': '#/definitions/type/strs',
+            flags: [
+              :expand
+            ],
+            only: {
+              language: [
+                'smalltalk'
+              ]
+            }
           },
           smalltalk_edge: {
             type: :object,
@@ -29,41 +52,15 @@ describe Travis::Yml::Schema::Def::Smalltalk, 'structure' do
                 type: :string
               }
             },
-            additionalProperties: false
+            additionalProperties: false,
+            only: {
+              language: [
+                'smalltalk'
+              ]
+            }
           }
         },
-        normal: true,
-        keys: {
-          smalltalk: {
-            only: {
-              language: [
-                'smalltalk'
-              ]
-            }
-          },
-          smalltalk_config: {
-            only: {
-              language: [
-                'smalltalk'
-              ]
-            }
-          },
-          smalltalk_vm: {
-            only: {
-              language: [
-                'smalltalk'
-              ]
-            }
-          },
-          smalltalk_edge: {
-            only: {
-              language: [
-                'smalltalk'
-              ]
-            }
-          }
-        }
-      )
-    end
+        normal: true
+    )
   end
 end

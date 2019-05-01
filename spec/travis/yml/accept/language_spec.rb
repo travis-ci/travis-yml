@@ -4,7 +4,7 @@ describe Travis::Yml, 'language' do
   describe 'defaults to ruby', defaults: true do
     yaml ''
     it { should serialize_to language: 'ruby', os: ['linux'] }
-    it { should have_msg [:info, :language, :default, default: 'ruby'] }
+    it { should have_msg [:info, :language, :default, key: :language, default: 'ruby'] }
   end
 
   langs = Travis::Yml::Schema::Def::Lang.registry
@@ -57,7 +57,7 @@ describe Travis::Yml, 'language' do
     )
     it { should serialize_to defaults }
     it { should have_msg [:error, :language, :invalid_type, expected: :str, actual: :map, value: { php: 'hhvm' }] }
-    it { should have_msg [:info, :language, :default, default: 'ruby'] }
+    it { should have_msg [:info, :language, :default, key: :language, default: 'ruby'] }
   end
 
   describe 'given an alias' do
@@ -118,6 +118,6 @@ describe Travis::Yml, 'language' do
       language: __connie__
     )
     it { should serialize_to language: '__connie__' }
-    it { should have_msg [:warn, :language, :deprecated, deprecation: :deprecated_value, value: '__connie__']  }
+    it { should have_msg [:warn, :language, :deprecated_value, value: '__connie__', info: 'experimental stack language']  }
   end
 end

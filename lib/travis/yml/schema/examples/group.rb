@@ -21,7 +21,7 @@ module Travis
           register :any
 
           def examples
-            expand.map(&:example)
+            expand.map(&:example).uniq
           end
 
           def expand

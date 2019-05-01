@@ -1,11 +1,9 @@
-describe Travis::Yml, 'matrix', matrix: true do
-  # Testing only what the Matrix class does,
-  # without relying on the parsing step
-  let(:matrix) { described_class.matrix(input) }
+describe Travis::Yml, 'matrix' do
+  let(:matrix) { described_class.matrix(config) }
   let(:axes)   { matrix.axes }
 
   describe 'no matrix' do
-    let(:input) { {} }
+    let(:config) { {} }
 
     let(:rows) do
       [{}]
@@ -15,7 +13,7 @@ describe Travis::Yml, 'matrix', matrix: true do
   end
 
   describe 'matrix (1)' do
-    let(:input) do
+    let(:config) do
       {
         rvm: ['2.2'],
         gemfile: ['a']
@@ -32,7 +30,7 @@ describe Travis::Yml, 'matrix', matrix: true do
   end
 
   describe 'matrix (1 from include, redundant expand key at root)' do
-    let(:input) do
+    let(:config) do
       {
         os: 'linux',
         matrix: {
@@ -53,7 +51,7 @@ describe Travis::Yml, 'matrix', matrix: true do
   end
 
   describe 'matrix (1 from include, multi-value expand key at root)' do
-    let(:input) do
+    let(:config) do
       {
         os: ['linux', 'osx'],
         matrix: {
@@ -76,7 +74,7 @@ describe Travis::Yml, 'matrix', matrix: true do
   end
 
   describe 'matrix (1 with non-expand key at root)' do
-    let(:input) do
+    let(:config) do
       {
         language: 'rust',
         matrix: {
@@ -97,7 +95,7 @@ describe Travis::Yml, 'matrix', matrix: true do
   end
 
   describe 'matrix (2)' do
-    let(:input) do
+    let(:config) do
       {
         rvm: ['2.2', '2.3'],
         gemfile: ['a']
@@ -115,7 +113,7 @@ describe Travis::Yml, 'matrix', matrix: true do
   end
 
   describe 'matrix (3)' do
-    let(:input) do
+    let(:config) do
       {
         env: { matrix: ['foo', 'bar', 'baz'] },
         rvm: ['2.2', '2.3'],
@@ -138,7 +136,7 @@ describe Travis::Yml, 'matrix', matrix: true do
   end
 
   describe 'just env' do
-    let(:input) do
+    let(:config) do
       {
         env:  { matrix: ['foo', 'bar'] },
       }
@@ -155,7 +153,7 @@ describe Travis::Yml, 'matrix', matrix: true do
   end
 
   describe 'with global env' do
-    let(:input) do
+    let(:config) do
       {
         env:  { matrix: ['foo', 'bar'], global: ['baz'] },
         rvm: ['2.2', '2.3'],
@@ -175,7 +173,7 @@ describe Travis::Yml, 'matrix', matrix: true do
   end
 
   describe 'with env array' do
-    let(:input) do
+    let(:config) do
       {
         env: ['FOO=1', 'FOO=2']
       }
@@ -192,7 +190,7 @@ describe Travis::Yml, 'matrix', matrix: true do
   end
 
   describe 'matrix include' do
-    let(:input) do
+    let(:config) do
       {
         env: { matrix: ['foo'] },
         rvm: ['2.2', '2.3'],
@@ -212,7 +210,7 @@ describe Travis::Yml, 'matrix', matrix: true do
   end
 
   describe 'matrix include duplicate' do
-    let(:input) do
+    let(:config) do
       {
         env: { matrix: ['foo'] },
         rvm: ['2.2'],
@@ -230,7 +228,7 @@ describe Travis::Yml, 'matrix', matrix: true do
   end
 
   describe 'matrix exclude (1)' do
-    let(:input) do
+    let(:config) do
       {
         env: { matrix: ['foo', 'bar'] },
         rvm: ['2.2', '2.3'],
@@ -250,7 +248,7 @@ describe Travis::Yml, 'matrix', matrix: true do
   end
 
   describe 'matrix exclude (2)' do
-    let(:input) do
+    let(:config) do
       {
         scala: ['2.11.8'],
         jdk: 'oraclejdk8',
@@ -262,7 +260,7 @@ describe Travis::Yml, 'matrix', matrix: true do
   end
 
   describe 'null env with include' do
-    let(:input) do
+    let(:config) do
       {
         env: nil,
         matrix: { include: [{ rvm: '1.8.7', env: 'foo=bar' }] },
@@ -282,7 +280,7 @@ describe Travis::Yml, 'matrix', matrix: true do
   end
 
   describe 'include as hash' do
-    let(:input) do
+    let(:config) do
       {
         dist: 'trusty',
         matrix: { include: { env: ['distribution=debian'] } }
@@ -299,7 +297,7 @@ describe Travis::Yml, 'matrix', matrix: true do
   end
 
   describe 'removes version' do
-    let(:input) do
+    let(:config) do
       { version: '= 0', language: 'shell' }
     end
 

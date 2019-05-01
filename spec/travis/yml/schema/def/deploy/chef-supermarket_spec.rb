@@ -1,12 +1,11 @@
-describe Travis::Yml::Schema::Def::Deploy::ChefSupermarket, 'structure' do
-  describe 'definitions' do
-    subject { Travis::Yml.schema[:definitions][:deploy][:"chef-supermarket"] }
+describe Travis::Yml::Schema::Def::Deploy::ChefSupermarket, 'schema' do
+  subject { Travis::Yml.schema[:definitions][:deploy][:"chef-supermarket"] }
 
-    # it { puts JSON.pretty_generate(subject) }
+  # it { puts JSON.pretty_generate(subject) }
 
-    it do
-      should eq(
-        '$id': :'deploy_chef-supermarket',
+  it do
+    should eq(
+      '$id': :'deploy_chef-supermarket',
         title: 'Deploy Chef Supermarket',
         anyOf: [
           {
@@ -59,17 +58,6 @@ describe Travis::Yml::Schema::Def::Deploy::ChefSupermarket, 'structure' do
           }
         ],
         normal: true
-      )
-    end
-  end
-
-  describe 'schema' do
-    subject { described_class.new.schema }
-
-    it do
-      should eq(
-        '$ref': '#/definitions/deploy/chef-supermarket'
-      )
-    end
+    )
   end
 end

@@ -1,12 +1,11 @@
-describe Travis::Yml::Schema::Def::Deploy::Surge, 'structure' do
-  describe 'definitions' do
-    subject { Travis::Yml.schema[:definitions][:deploy][:surge] }
+describe Travis::Yml::Schema::Def::Deploy::Surge, 'schema' do
+  subject { Travis::Yml.schema[:definitions][:deploy][:surge] }
 
-    # it { puts JSON.pretty_generate(subject) }
+  # it { puts JSON.pretty_generate(subject) }
 
-    it do
-      should eq(
-        '$id': :deploy_surge,
+  it do
+    should eq(
+      '$id': :deploy_surge,
         title: 'Deploy Surge',
         anyOf: [
           {
@@ -56,17 +55,6 @@ describe Travis::Yml::Schema::Def::Deploy::Surge, 'structure' do
           }
         ],
         normal: true
-      )
-    end
-  end
-
-  describe 'schema' do
-    subject { described_class.new.schema }
-
-    it do
-      should eq(
-        '$ref': '#/definitions/deploy/surge'
-      )
-    end
+    )
   end
 end

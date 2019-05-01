@@ -9,15 +9,11 @@ describe Travis::Yml::Doc::Change::Keys do
           type: :boolean
         },
         foo_bar: {
-          type: :boolean
-        }
-      },
-      keys: {
-        foo_bar: {
+          type: :boolean,
           aliases: [
             :foo
           ]
-        },
+        }
       },
       additionalProperties: false
     }

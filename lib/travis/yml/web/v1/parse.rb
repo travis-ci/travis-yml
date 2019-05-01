@@ -23,10 +23,20 @@ module Travis::Yml
         def parse(env)
           req = Rack::Request.new(env)
           query = Rack::Utils.parse_query(req.query_string)
-          alert = query['alert'] == 'true'
           body = req.body.read
           data = configs?(env) ? configs(body) : body
-          Travis::Yml.load(data, alert: alert)
+          Travis::Yml.load(data, opts(query))
+        end
+
+        def opts(query)
+          {
+            alert:    true?(query['alert']),
+            defaults: true?(query['defaults'])
+          }
+        end
+
+        def true?(obj)
+          obj == 'true'
         end
 
         def configs?(env)

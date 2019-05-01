@@ -85,12 +85,16 @@ module Travis
             types.any? { |type| is_a?(resolve(type)) }
           end
 
-          %i(schema map seq enum secure scalar str num bool ref).each do |type|
+          %i(schema map seq secure scalar str num bool ref).each do |type|
             define_method(:"#{type}?") { is?(type) }
           end
 
           def type
             self.class.type
+          end
+
+          def enum?
+            false
           end
 
           attr_reader :id

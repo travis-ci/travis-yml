@@ -1,12 +1,11 @@
-describe Travis::Yml::Schema::Def::Deploy::S3, 'structure' do
-  describe 'definitions' do
-    subject { Travis::Yml.schema[:definitions][:deploy][:s3] }
+describe Travis::Yml::Schema::Def::Deploy::S3, 'schema' do
+  subject { Travis::Yml.schema[:definitions][:deploy][:s3] }
 
-    # it { puts JSON.pretty_generate(subject) }
+  # it { puts JSON.pretty_generate(subject) }
 
-    it do
-      should eq(
-        '$id': :deploy_s3,
+  it do
+    should eq(
+      '$id': :deploy_s3,
         title: 'Deploy S3',
         anyOf: [
           {
@@ -98,17 +97,6 @@ describe Travis::Yml::Schema::Def::Deploy::S3, 'structure' do
           }
         ],
         normal: true
-      )
-    end
-  end
-
-  describe 'schema' do
-    subject { described_class.new.schema }
-
-    it do
-      should eq(
-        '$ref': '#/definitions/deploy/s3'
-      )
-    end
+    )
   end
 end

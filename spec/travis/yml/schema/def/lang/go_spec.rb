@@ -1,23 +1,40 @@
-describe Travis::Yml::Schema::Def::Go, 'structure' do
-  describe 'definitions' do
-    subject { Travis::Yml.schema[:definitions][:language][:go] }
+describe Travis::Yml::Schema::Def::Go, 'schema' do
+  subject { Travis::Yml.schema[:definitions][:language][:go] }
 
-    # it { puts JSON.pretty_generate(subject) }
+  # it { puts JSON.pretty_generate(subject) }
 
-    it do
-      should eq(
-        '$id': :language_go,
+  it do
+    should eq(
+      '$id': :language_go,
         title: 'Language Go',
         type: :object,
         properties: {
           go: {
-            '$ref': '#/definitions/type/strs'
+            '$ref': '#/definitions/type/strs',
+            flags: [
+              :expand
+            ],
+            only: {
+              language: [
+                'go'
+              ]
+            }
           },
           gobuild_args: {
-            type: :string
+            type: :string,
+            only: {
+              language: [
+                'go'
+              ]
+            }
           },
           go_import_path: {
-            type: :string
+            type: :string,
+            only: {
+              language: [
+                'go'
+              ]
+            }
           },
           gimme_config: {
             type: :object,
@@ -29,41 +46,15 @@ describe Travis::Yml::Schema::Def::Go, 'structure' do
                 type: :boolean
               }
             },
-            additionalProperties: false
+            additionalProperties: false,
+            only: {
+              language: [
+                'go'
+              ]
+            }
           }
         },
-        normal: true,
-        keys: {
-          go: {
-            only: {
-              language: [
-                'go'
-              ]
-            }
-          },
-          gobuild_args: {
-            only: {
-              language: [
-                'go'
-              ]
-            }
-          },
-          go_import_path: {
-            only: {
-              language: [
-                'go'
-              ]
-            }
-          },
-          gimme_config: {
-            only: {
-              language: [
-                'go'
-              ]
-            }
-          }
-        }
-      )
-    end
+        normal: true
+    )
   end
 end

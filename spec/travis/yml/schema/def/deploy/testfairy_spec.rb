@@ -1,12 +1,11 @@
-describe Travis::Yml::Schema::Def::Deploy::Testfairy, 'structure' do
-  describe 'definitions' do
-    subject { Travis::Yml.schema[:definitions][:deploy][:testfairy] }
+describe Travis::Yml::Schema::Def::Deploy::Testfairy, 'schema' do
+  subject { Travis::Yml.schema[:definitions][:deploy][:testfairy] }
 
-    # it { puts JSON.pretty_generate(subject) }
+  # it { puts JSON.pretty_generate(subject) }
 
-    it do
-      should eq(
-        '$id': :deploy_testfairy,
+  it do
+    should eq(
+      '$id': :deploy_testfairy,
         title: 'Deploy Testfairy',
         anyOf: [
           {
@@ -98,17 +97,6 @@ describe Travis::Yml::Schema::Def::Deploy::Testfairy, 'structure' do
           }
         ],
         normal: true
-      )
-    end
-  end
-
-  describe 'schema' do
-    subject { described_class.new.schema }
-
-    it do
-      should eq(
-        '$ref': '#/definitions/deploy/testfairy'
-      )
-    end
+    )
   end
 end

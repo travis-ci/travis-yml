@@ -4,6 +4,5 @@ describe Travis::Yml::Schema::Json::Num do
 
   subject { described_class.new(node.node) }
 
-  it { should_not have_definitions }
   it { should have_schema type: :number }
 end

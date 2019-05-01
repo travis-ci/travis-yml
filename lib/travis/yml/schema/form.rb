@@ -116,6 +116,7 @@ module Travis
             map = form(map)
 
             all = node.shapeshift(:all)
+            all.set :title, node.title
             all.unset :mappings
             all.types = [map].map(&:dup)
             all

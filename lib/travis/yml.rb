@@ -36,10 +36,11 @@ module Travis
       alias:             '%{alias} is an alias for %{actual}, using %{actual}',
       cast:              'casting value %{given_value} (%{given_type}) to %{value} (%{type})',
       default:           'missing %{key}, using the default %{default}',
-      deprecated:        '%{given} is deprecated', # Do we need to say stop using it? or?
+      deprecated_key:    'deprecated key: %{key} (%{info})',
+      deprecated_value:  'deprecated value: %{value} (%{info})',
       downcase:          'using lower case of %{value}',
       duplicate_names:   'duplicate job names: %{value}',
-      edge:              '%{given} is experimental and might be removed or change', # is without notice accurate?
+      edge:              '%{given} is experimental and might change or be removed',
       flagged:           'please email support@travis-ci.com to enable %{given}',
       irrelevant:        'you used %{key}, but it is not relevant for the %{on_key} %{on_value}',
       unsupported:       '%{key} (%{value}) is not supported on the %{on_key} %{on_value}',
@@ -49,8 +50,7 @@ module Travis
       find_value:        'value %{original} is not known, but %{value} is, using %{value}',
       clean_key:         'key %{original} contains unsupported characters, using %{key}',
       clean_value:       'value %{original} is not known, but %{value} is, using %{value}',
-      underscore_key:    'key %{original} is camelcased, using %{key}',
-      migrate:           'migrating %{key} to %{to} (value: %{value})', # does this need action? (answer: yes, it does [Sv])
+      underscore_key:    'key %{original} is not underscored, using %{key}',
       unknown_key:       'dropping unknown key %{key} (%{value})',
       unknown_value:     'dropping unknown value: %{value}',
       unknown_default:   'dropping unknown value: %{value}, defaulting to %{default}',
@@ -98,7 +98,7 @@ module Travis
       end
 
       def matrix(config)
-        Matrix.new(config, expand_keys)
+        Matrix.new(config)
       end
 
       def msg(msg)

@@ -1,51 +1,39 @@
-describe Travis::Yml::Schema::Def::Addon::CodeClimate, 'structure' do
-  describe 'definitions' do
-    subject { Travis::Yml.schema[:definitions][:addon][:code_climate] }
+describe Travis::Yml::Schema::Def::Addon::CodeClimate do
+  subject { Travis::Yml.schema[:definitions][:addon][:code_climate] }
 
-    # it { puts JSON.pretty_generate(described_class.new.exports) }
+  # it { puts JSON.pretty_generate(described_class.new.exports) }
 
-    it do
-      should eq(
-        '$id': :addon_code_climate,
-        title: 'Addon Code Climate',
-        normal: true,
-        anyOf: [
-          {
-            type: :object,
-            properties: {
-              repo_token: {
-                '$ref': '#/definitions/type/secure'
-              }
-            },
-            additionalProperties: false,
-            prefix: {
-              key: :repo_token
-            },
-            normal: true,
-            changes: [
-              {
-                change: :enable
-              }
-            ],
+  it do
+    should eq(
+      '$id': :addon_code_climate,
+      title: 'Addon Code Climate',
+      normal: true,
+      anyOf: [
+        {
+          type: :object,
+          properties: {
+            repo_token: {
+              '$ref': '#/definitions/type/secure'
+            }
           },
-          {
-            '$ref': '#/definitions/type/secure'
+          additionalProperties: false,
+          prefix: {
+            key: :repo_token
           },
-          {
-            type: :boolean
-          }
-        ]
-      )
-    end
-  end
-
-  describe 'schema' do
-    subject { described_class.new.schema }
-
-    it do
-      should eq(
-        '$ref': '#/definitions/addon/code_climate'
-      )
-    end
+          normal: true,
+          changes: [
+            {
+              change: :enable
+            }
+          ],
+        },
+        {
+          '$ref': '#/definitions/type/secure'
+        },
+        {
+          type: :boolean
+        }
+      ]
+    )
   end
 end

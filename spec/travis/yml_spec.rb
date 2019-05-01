@@ -120,9 +120,14 @@ describe Travis::Yml do
       it { should eq '[info] on key: missing :key, using the default default' }
     end
 
-    describe 'deprecated' do
-      let(:msg) { [:info, :key, :deprecated, given: :key, info: 'something'] }
-      it { should eq '[info] on key: :key is deprecated' }
+    describe 'deprecated_key' do
+      let(:msg) { [:info, :key, :deprecated_key, key: :other, info: 'something'] }
+      it { should eq '[info] on key: deprecated key: :other (something)' }
+    end
+
+    describe 'deprecated_value' do
+      let(:msg) { [:info, :key, :deprecated_value, value: :str, info: 'something'] }
+      it { should eq '[info] on key: deprecated value: :str (something)' }
     end
 
     describe 'downcase' do
@@ -132,7 +137,7 @@ describe Travis::Yml do
 
     describe 'edge' do
       let(:msg) { [:info, :key, :edge, given: :key] }
-      it { should eq '[info] on key: :key is experimental and might be removed or change' }
+      it { should eq '[info] on key: :key is experimental and might change or be removed' }
     end
 
     describe 'flagged' do

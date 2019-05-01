@@ -1,12 +1,11 @@
-describe Travis::Yml::Schema::Def::Deploy::Openshift, 'structure' do
-  describe 'definitions' do
-    subject { Travis::Yml.schema[:definitions][:deploy][:openshift] }
+describe Travis::Yml::Schema::Def::Deploy::Openshift, 'schema' do
+  subject { Travis::Yml.schema[:definitions][:deploy][:openshift] }
 
-    # it { puts JSON.pretty_generate(subject) }
+  # it { puts JSON.pretty_generate(subject) }
 
-    it do
-      should eq(
-        '$id': :deploy_openshift,
+  it do
+    should eq(
+      '$id': :deploy_openshift,
         title: 'Deploy Openshift',
         anyOf: [
           {
@@ -89,17 +88,6 @@ describe Travis::Yml::Schema::Def::Deploy::Openshift, 'structure' do
           }
         ],
         normal: true
-      )
-    end
-  end
-
-  describe 'schema' do
-    subject { described_class.new.schema }
-
-    it do
-      should eq(
-        '$ref': '#/definitions/deploy/openshift'
-      )
-    end
+    )
   end
 end

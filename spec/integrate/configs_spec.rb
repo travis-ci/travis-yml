@@ -170,12 +170,11 @@ describe Travis::Yml, configs: true do
     caches
   )
 
-  DEPRECATIONS = %i(
-    cache_enable_all
-    deprecated_value
-    deprecated_sonarcloud_branches
-    deprecated_sonarcloud_github_token
-  )
+  DEPRECATIONS = [
+    { key: :branches, info: 'not supported any more' },
+    { key: :github_token, info: 'not supported any more' },
+    { value: '__sardonyx__', info: 'experimental stack language' }
+  ]
 
   YAML_REFERENCE_TARGETS = %i(
     .apt_sources
@@ -441,8 +440,9 @@ describe Travis::Yml, configs: true do
       file
       file_glob
       github_commit
+      github-token
       if
-      local_dir
+      local-dir
       node
       only
       options
@@ -460,7 +460,7 @@ describe Travis::Yml, configs: true do
       master
       onBranch
       prerelease
-      skip_cleanup
+      skip-cleanup
     ),
     env: %i(
       allow_failures
@@ -836,7 +836,8 @@ describe Travis::Yml, configs: true do
   end
 
   def deprecated?(msg)
-    msg[2] == :deprecated && DEPRECATIONS.include?(msg[3][:deprecation])
+    return unless msg[2] == :deprecated_key || msg[2] == :deprecated_value
+    DEPRECATIONS.include?(msg[3])
   end
 
   # unknown key for YAML references/aliases, would be nice if we could know Psych has resolved a node from this key
@@ -964,8 +965,8 @@ describe Travis::Yml, configs: true do
     return true if msg[2] == :unknown_key && msg[3][:key] == :global_env
     # grondo:flux-core
     return true if msg[2] == :invalid_type && msg[3][:value] == 'skip'
-    # fix this
-    return true if msg == [:warn, :cache, :deprecated, deprecation: :cache_enable_all, value: false]
+    # # fix this
+    # return true if msg == [:warn, :cache, :deprecated, deprecation: :cache_enable_all, value: false]
 
     p msg
     false

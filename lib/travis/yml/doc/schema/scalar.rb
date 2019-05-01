@@ -20,12 +20,8 @@ module Travis
           end
 
           def matches?(value)
-            super and !enum? || known?(value.value) || values.alias?(value.value) || !strict?
+            super and !enum? || known?(value.value) || values.alias?(value.value)
           end
-
-          # def alias?(str)
-          #   str && aliases.key?(str.to_sym)
-          # end
 
           def default?
             defaults.any?
@@ -42,18 +38,6 @@ module Travis
 
           def known?(str)
             values.any? { |value| value.to_s == str }
-          end
-
-          def strict?
-            !!opts[:strict]
-          end
-
-          def each(&block)
-            values.each(&block)
-          end
-
-          def any?(&block)
-            block ? values.any?(&block) : super
           end
 
           def values

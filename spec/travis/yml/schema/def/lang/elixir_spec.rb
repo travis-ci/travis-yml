@@ -1,40 +1,38 @@
-describe Travis::Yml::Schema::Def::Elixir, 'structure' do
-  describe 'definitions' do
-    subject { Travis::Yml.schema[:definitions][:language][:elixir] }
+describe Travis::Yml::Schema::Def::Elixir, 'schema' do
+  subject { Travis::Yml.schema[:definitions][:language][:elixir] }
 
-    # it { puts JSON.pretty_generate(subject) }
+  # it { puts JSON.pretty_generate(subject) }
 
-    it do
-      should eq(
-        '$id': :language_elixir,
+  it do
+    should eq(
+      '$id': :language_elixir,
         title: 'Language Elixir',
         type: :object,
         properties: {
           elixir: {
-            '$ref': '#/definitions/type/strs'
+            '$ref': '#/definitions/type/strs',
+            flags: [
+              :expand
+            ],
+            only: {
+              language: [
+                'elixir'
+              ]
+            }
           },
           otp_release: {
-            '$ref': '#/definitions/type/strs'
+            '$ref': '#/definitions/type/strs',
+            flags: [
+              :expand
+            ],
+            only: {
+              language: [
+                'elixir'
+              ]
+            }
           }
         },
-        normal: true,
-        keys: {
-          elixir: {
-            only: {
-              language: [
-                'elixir'
-              ]
-            }
-          },
-          otp_release: {
-            only: {
-              language: [
-                'elixir'
-              ]
-            }
-          }
-        }
-      )
-    end
+        normal: true
+    )
   end
 end

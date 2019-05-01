@@ -1,11 +1,11 @@
 describe Travis::Yml::Schema::Examples::Any do
-  subject { described_class.new(transform(const.new.node)).examples }
+  subject { described_class.new(const.new.node.form).examples }
 
   describe 'archs' do
     let(:const) do
       Class.new(Travis::Yml::Schema::Dsl::Any) do
         def define
-          arch = Class.new(Travis::Yml::Schema::Dsl::Enum) do
+          arch = Class.new(Travis::Yml::Schema::Dsl::Str) do
             def define
               values 'amd64', 'power'
             end

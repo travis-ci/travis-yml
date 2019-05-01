@@ -3,6 +3,26 @@ describe Travis::Yml::Schema::Json::Secure do
 
   subject { described_class.new(node.node) }
 
-  it { should have_definitions }
-  it { should have_schema '$ref': '#/definitions/type/secure' }
+  it do
+    should have_schema(
+      '$id': :secure,
+      anyOf: [
+        {
+          type: :object,
+          properties: {
+            secure: {
+              type: :string
+            }
+          },
+          additionalProperties: false,
+          maxProperties: 1,
+          normal: true
+        },
+        {
+          type: :string,
+          normal: true
+        }
+      ]
+    )
+  end
 end

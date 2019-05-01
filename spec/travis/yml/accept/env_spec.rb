@@ -278,4 +278,12 @@ describe Travis::Yml, 'env' do
     )
     it { should serialize_to env: { matrix: [{ FOO: 'foo' }, { BAR: "'bar'" }] } }
   end
+
+  describe 'does not underscore keys (env)' do
+    yaml %(
+      env:
+        - API=str
+    )
+    it { should serialize_to env: { matrix: [{ API: 'str' }] } }
+  end
 end

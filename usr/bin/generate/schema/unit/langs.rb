@@ -11,17 +11,15 @@ AI = {
 }
 
 TPL = ERB.new <<~tpl
-describe <%= const.to_s %>, 'structure' do
-  describe 'definitions' do
-    subject { Travis::Yml.schema[:definitions][:language][<%= name.inspect %>] }
+describe <%= const.to_s %> do
+  subject { Travis::Yml.schema[:definitions][:language][<%= name.inspect %>] }
 
-    # it { puts JSON.pretty_generate(subject) }
+  # it { puts JSON.pretty_generate(subject) }
 
-    it do
-      should eq(
-      <%= schema %>
-      )
-    end
+  it do
+    should eq(
+    <%= schema %>
+    )
   end
 end
 tpl

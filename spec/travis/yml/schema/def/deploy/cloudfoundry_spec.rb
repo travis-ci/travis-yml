@@ -1,12 +1,11 @@
-describe Travis::Yml::Schema::Def::Deploy::Cloudfoundry, 'structure' do
-  describe 'definitions' do
-    subject { Travis::Yml.schema[:definitions][:deploy][:cloudfoundry] }
+describe Travis::Yml::Schema::Def::Deploy::Cloudfoundry, 'schema' do
+  subject { Travis::Yml.schema[:definitions][:deploy][:cloudfoundry] }
 
-    # it { puts JSON.pretty_generate(subject) }
+  # it { puts JSON.pretty_generate(subject) }
 
-    it do
-      should eq(
-        '$id': :deploy_cloudfoundry,
+  it do
+    should eq(
+      '$id': :deploy_cloudfoundry,
         title: 'Deploy Cloudfoundry',
         anyOf: [
           {
@@ -77,17 +76,6 @@ describe Travis::Yml::Schema::Def::Deploy::Cloudfoundry, 'structure' do
           }
         ],
         normal: true
-      )
-    end
-  end
-
-  describe 'schema' do
-    subject { described_class.new.schema }
-
-    it do
-      should eq(
-        '$ref': '#/definitions/deploy/cloudfoundry'
-      )
-    end
+    )
   end
 end

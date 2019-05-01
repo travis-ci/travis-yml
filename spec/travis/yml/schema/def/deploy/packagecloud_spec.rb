@@ -1,12 +1,11 @@
-describe Travis::Yml::Schema::Def::Deploy::Packagecloud, 'structure' do
-  describe 'definitions' do
-    subject { Travis::Yml.schema[:definitions][:deploy][:packagecloud] }
+describe Travis::Yml::Schema::Def::Deploy::Packagecloud, 'schema' do
+  subject { Travis::Yml.schema[:definitions][:deploy][:packagecloud] }
 
-    # it { puts JSON.pretty_generate(subject) }
+  # it { puts JSON.pretty_generate(subject) }
 
-    it do
-      should eq(
-        '$id': :deploy_packagecloud,
+  it do
+    should eq(
+      '$id': :deploy_packagecloud,
         title: 'Deploy Packagecloud',
         anyOf: [
           {
@@ -71,17 +70,6 @@ describe Travis::Yml::Schema::Def::Deploy::Packagecloud, 'structure' do
           }
         ],
         normal: true
-      )
-    end
-  end
-
-  describe 'schema' do
-    subject { described_class.new.schema }
-
-    it do
-      should eq(
-        '$ref': '#/definitions/deploy/packagecloud'
-      )
-    end
+    )
   end
 end

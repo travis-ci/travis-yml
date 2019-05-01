@@ -1,4 +1,4 @@
-describe Travis::Yml::Schema::Type::Forms, 'map' do
+describe Travis::Yml::Schema::Form, 'map' do
   let(:dsl)  { Travis::Yml::Schema::Dsl::Map.new }
 
   subject { described_class.apply(dsl.node).to_h }
@@ -65,8 +65,21 @@ describe Travis::Yml::Schema::Type::Forms, 'map' do
           type: :map,
           map: {
             foo: {
-              type: :ref,
-              ref: 'type/strs'
+              type: :any,
+              types: [
+                {
+                  type: :seq,
+                  normal: true,
+                  types: [
+                    {
+                      type: :str
+                    }
+                  ]
+                },
+                {
+                  type: :str
+                }
+              ]
             }
           }
         }
@@ -135,6 +148,7 @@ describe Travis::Yml::Schema::Type::Forms, 'map' do
                 types: [
                   {
                     type: :map,
+                    normal: true,
                     prefix: {
                       key: :bar,
                     },
@@ -152,18 +166,24 @@ describe Travis::Yml::Schema::Type::Forms, 'map' do
             },
           },
           {
-            type: :map,
-            prefix: {
-              key: :bar
-            },
-            map: {
-              bar: {
+            type: :any,
+            types: [
+              {
+                type: :map,
+                normal: true,
+                prefix: {
+                  key: :bar
+                },
+                map: {
+                  bar: {
+                    type: :str
+                  }
+                }
+              },
+              {
                 type: :str
               }
-            }
-          },
-          {
-            type: :str
+            ]
           }
         ]
       )

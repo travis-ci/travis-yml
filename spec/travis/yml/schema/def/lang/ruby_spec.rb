@@ -1,52 +1,23 @@
-describe Travis::Yml::Schema::Def::Ruby, 'structure' do
-  describe 'definitions' do
-    subject { Travis::Yml.schema[:definitions][:language][:ruby] }
+describe Travis::Yml::Schema::Def::Ruby, 'schema' do
+  subject { Travis::Yml.schema[:definitions][:language][:ruby] }
 
-    # it { puts JSON.pretty_generate(subject) }
+  # it { puts JSON.pretty_generate(subject) }
 
-    it do
-      should eq(
-        '$id': :language_ruby,
+  it do
+    should eq(
+      '$id': :language_ruby,
         title: 'Language Ruby',
         type: :object,
         properties: {
           rvm: {
-            '$ref': '#/definitions/type/strs'
-          },
-          gemfile: {
-            '$ref': '#/definitions/type/strs'
-          },
-          jdk: {
-            anyOf: [
-              {
-                type: :array,
-                items: {
-                  type: :string
-                },
-                flags: [
-                  :expand
-                ],
-                normal: true
-              },
-              {
-                type: :string
-              }
-            ],
-            flags: [
-              :expand
-            ]
-          },
-          bundler_args: {
-            type: :string
-          }
-        },
-        normal: true,
-        keys: {
-          rvm: {
+            '$ref': '#/definitions/type/strs',
             aliases: [
               :ruby,
               :rbenv
             ],
+            flags: [
+              :expand
+            ],
             only: {
               language: [
                 'ruby'
@@ -54,8 +25,12 @@ describe Travis::Yml::Schema::Def::Ruby, 'structure' do
             }
           },
           gemfile: {
+            '$ref': '#/definitions/type/strs',
             aliases: [
               :gemfiles
+            ],
+            flags: [
+              :expand
             ],
             only: {
               language: [
@@ -64,6 +39,7 @@ describe Travis::Yml::Schema::Def::Ruby, 'structure' do
             }
           },
           jdk: {
+            '$ref': '#/definitions/type/jdks',
             only: {
               language: [
                 'ruby'
@@ -76,14 +52,15 @@ describe Travis::Yml::Schema::Def::Ruby, 'structure' do
             }
           },
           bundler_args: {
+            type: :string,
             only: {
               language: [
                 'ruby'
               ]
             }
           }
-        }
-      )
-    end
+        },
+        normal: true
+    )
   end
 end

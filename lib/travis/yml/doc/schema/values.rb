@@ -28,6 +28,10 @@ module Travis
             !!value(str)&.deprecated?
           end
 
+          def deprecation(str)
+            value(str)&.deprecation
+          end
+
           def support(str)
             value(str)&.support
           end
@@ -49,7 +53,11 @@ module Travis
           end
 
           def deprecated?
-            !!opts[:deprecated]
+            !!deprecation
+          end
+
+          def deprecation
+            opts[:deprecated]
           end
 
           def aliases

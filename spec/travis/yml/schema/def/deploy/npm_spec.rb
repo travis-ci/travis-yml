@@ -1,12 +1,11 @@
-describe Travis::Yml::Schema::Def::Deploy::Npm, 'structure' do
-  describe 'definitions' do
-    subject { Travis::Yml.schema[:definitions][:deploy][:npm] }
+describe Travis::Yml::Schema::Def::Deploy::Npm, 'schema' do
+  subject { Travis::Yml.schema[:definitions][:deploy][:npm] }
 
-    # it { puts JSON.pretty_generate(subject) }
+  # it { puts JSON.pretty_generate(subject) }
 
-    it do
-      should eq(
-        '$id': :deploy_npm,
+  it do
+    should eq(
+      '$id': :deploy_npm,
         title: 'Deploy Npm',
         anyOf: [
           {
@@ -59,17 +58,6 @@ describe Travis::Yml::Schema::Def::Deploy::Npm, 'structure' do
           }
         ],
         normal: true
-      )
-    end
-  end
-
-  describe 'schema' do
-    subject { described_class.new.schema }
-
-    it do
-      should eq(
-        '$ref': '#/definitions/deploy/npm'
-      )
-    end
+    )
   end
 end

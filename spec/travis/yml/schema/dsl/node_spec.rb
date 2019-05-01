@@ -44,12 +44,11 @@ describe Travis::Yml::Schema::Dsl::Node do
   describe 'unique' do
     before { dsl.unique }
     it { should be_unique }
-    it { should_not have_opts }
+    it { should have_opts unique: true }
   end
 
   describe 'only' do
     before { dsl.supports :only, os: 'linux' }
-    it { should_not have_opts }
-    it { expect(dsl.node.support).to eq only: { os: ['linux'] } }
+    it { expect(dsl.node.opts).to eq only: { os: ['linux'] } }
   end
 end

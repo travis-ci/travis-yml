@@ -1,86 +1,74 @@
-describe Travis::Yml::Schema::Def::Addon::CoverityScan, 'structure' do
-  describe 'definitions' do
-    subject { Travis::Yml.schema[:definitions][:addon][:coverity_scan] }
+describe Travis::Yml::Schema::Def::Addon::CoverityScan do
+  subject { Travis::Yml.schema[:definitions][:addon][:coverity_scan] }
 
-    # it { puts JSON.pretty_generate(subject) }
+  # it { puts JSON.pretty_generate(subject) }
 
-    it do
-      should eq(
-        '$id': :addon_coverity_scan,
-        title: 'Addon Coverity Scan',
-        normal: true,
-        anyOf: [
-          {
-            type: :object,
-            properties: {
-              project: {
-                anyOf: [
-                  {
-                    type: :object,
-                    properties: {
-                      name: {
-                        type: :string
-                      },
-                      version: {
-                        type: :string
-                      },
-                      description: {
-                        type: :string
-                      }
+  it do
+    should eq(
+      '$id': :addon_coverity_scan,
+      title: 'Addon Coverity Scan',
+      normal: true,
+      anyOf: [
+        {
+          type: :object,
+          properties: {
+            project: {
+              anyOf: [
+                {
+                  type: :object,
+                  properties: {
+                    name: {
+                      type: :string
                     },
-                    additionalProperties: false,
-                    prefix: {
-                      key: :name
+                    version: {
+                      type: :string
                     },
-                    required: [
-                      :name
-                    ],
-                    normal: true
+                    description: {
+                      type: :string
+                    }
                   },
-                  {
-                    type: :string
-                  }
-                ]
-              },
-              build_script_url: {
-                type: :string
-              },
-              branch_pattern: {
-                type: :string
-              },
-              notification_email: {
-                '$ref': '#/definitions/type/secure'
-              },
-              build_command: {
-                type: :string
-              },
-              build_command_prepend: {
-                type: :string
-              }
+                  additionalProperties: false,
+                  prefix: {
+                    key: :name
+                  },
+                  required: [
+                    :name
+                  ],
+                  normal: true
+                },
+                {
+                  type: :string
+                }
+              ]
             },
-            additionalProperties: false,
-            changes: [
-              {
-                change: :enable
-              }
-            ],
-            normal: true
+            build_script_url: {
+              type: :string
+            },
+            branch_pattern: {
+              type: :string
+            },
+            notification_email: {
+              '$ref': '#/definitions/type/secure'
+            },
+            build_command: {
+              type: :string
+            },
+            build_command_prepend: {
+              type: :string
+            }
           },
-          {
-            type: :boolean
-          }
-        ]
-      )
-    end
-  end
-
-  describe 'schema' do
-    subject { described_class.new.schema }
-
-    it do
-      should eq(
-        '$ref': '#/definitions/addon/coverity_scan'
-      )
-    end
+          additionalProperties: false,
+          changes: [
+            {
+              change: :enable
+            }
+          ],
+          normal: true
+        },
+        {
+          type: :boolean
+        }
+      ]
+    )
   end
 end

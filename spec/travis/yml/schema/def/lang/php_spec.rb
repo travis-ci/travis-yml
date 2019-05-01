@@ -1,25 +1,19 @@
-describe Travis::Yml::Schema::Def::Php, 'structure' do
-  describe 'definitions' do
-    subject { Travis::Yml.schema[:definitions][:language][:php] }
+describe Travis::Yml::Schema::Def::Php, 'schema' do
+  subject { Travis::Yml.schema[:definitions][:language][:php] }
 
-    # it { puts JSON.pretty_generate(subject) }
+  # it { puts JSON.pretty_generate(subject) }
 
-    it do
-      should eq(
-        '$id': :language_php,
+  it do
+    should eq(
+      '$id': :language_php,
         title: 'Language Php',
         type: :object,
         properties: {
           php: {
-            '$ref': '#/definitions/type/strs'
-          },
-          composer_args: {
-            type: :string
-          }
-        },
-        normal: true,
-        keys: {
-          php: {
+            '$ref': '#/definitions/type/strs',
+            flags: [
+              :expand
+            ],
             only: {
               language: [
                 'php'
@@ -27,14 +21,15 @@ describe Travis::Yml::Schema::Def::Php, 'structure' do
             }
           },
           composer_args: {
+            type: :string,
             only: {
               language: [
                 'php'
               ]
             }
           }
-        }
-      )
-    end
+        },
+        normal: true
+    )
   end
 end

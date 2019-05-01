@@ -1,4 +1,4 @@
-describe Travis::Yml::Schema::Type::Forms, 'seq' do
+describe Travis::Yml::Schema::Form, 'seq' do
   let(:dsl) { Travis::Yml::Schema::Dsl::Seq.new }
 
   subject { described_class.apply(dsl.node).to_h }
@@ -16,9 +16,22 @@ describe Travis::Yml::Schema::Type::Forms, 'seq' do
     it do
       should eq(
         {
-          type: :ref,
+          type: :any,
           export: true,
-          ref: 'type/strs',
+          types: [
+            {
+              normal: true,
+              type: :seq,
+              types: [
+                {
+                  type: :str
+                }
+              ]
+            },
+            {
+              type: :str
+            }
+          ]
         }
       )
     end
@@ -30,11 +43,27 @@ describe Travis::Yml::Schema::Type::Forms, 'seq' do
     it do
       should eq(
         {
-          type: :ref,
+          type: :any,
           export: true,
-          ref: 'type/strs',
-          flags: [
-            :edge
+          types: [
+            {
+              type: :seq,
+              normal: true,
+              types: [
+                {
+                  type: :str,
+                  flags: [
+                    :edge
+                  ]
+                }
+              ],
+            },
+            {
+              type: :str,
+              flags: [
+                :edge
+              ]
+            }
           ]
         }
       )
@@ -89,7 +118,33 @@ describe Travis::Yml::Schema::Type::Forms, 'seq' do
               normal: true,
               types: [
                 {
+                  type: :any,
+                  types: [
+                    {
+                      type: :map,
+                      normal: true,
+                      prefix: {
+                        key: :foo
+                      },
+                      map: {
+                        foo: {
+                          type: :str
+                        }
+                      }
+                    },
+                    {
+                      type: :str
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              type: :any,
+              types: [
+                {
                   type: :map,
+                  normal: true,
                   prefix: {
                     key: :foo
                   },
@@ -98,30 +153,11 @@ describe Travis::Yml::Schema::Type::Forms, 'seq' do
                       type: :str
                     }
                   }
-                }
-              ]
-            },
-            {
-              type: :map,
-              prefix: {
-                key: :foo
-              },
-              map: {
-                foo: {
-                  type: :str
-                }
-              }
-            },
-            {
-              type: :seq,
-              types: [
+                },
                 {
                   type: :str
                 }
               ]
-            },
-            {
-              type: :str
             }
           ]
         }
