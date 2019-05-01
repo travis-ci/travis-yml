@@ -9,11 +9,11 @@ module Travis
           register :str
 
           def examples
-            ["#{example} one", "#{example} two"]
+            enum? ? enum[0, 2] : ["#{example} one", "#{example} two"]
           end
 
           def example
-            node.example || opts[:example] || 'string'
+            node.example || opts[:example] || enum? ? enum.first : 'string'
           end
         end
       end

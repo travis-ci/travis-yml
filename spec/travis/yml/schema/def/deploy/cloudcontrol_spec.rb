@@ -1,12 +1,11 @@
-describe Travis::Yml::Schema::Def::Deploy::Cloudcontrol, 'structure' do
-  describe 'definitions' do
-    subject { Travis::Yml.schema[:definitions][:deploy][:cloudcontrol] }
+describe Travis::Yml::Schema::Def::Deploy::Cloudcontrol, 'schema' do
+  subject { Travis::Yml.schema[:definitions][:deploy][:cloudcontrol] }
 
-    # it { puts JSON.pretty_generate(subject) }
+  # it { puts JSON.pretty_generate(subject) }
 
-    it do
-      should eq(
-        '$id': :deploy_cloudcontrol,
+  it do
+    should eq(
+      '$id': :deploy_cloudcontrol,
         title: 'Deploy Cloudcontrol',
         anyOf: [
           {
@@ -59,17 +58,6 @@ describe Travis::Yml::Schema::Def::Deploy::Cloudcontrol, 'structure' do
           }
         ],
         normal: true
-      )
-    end
-  end
-
-  describe 'schema' do
-    subject { described_class.new.schema }
-
-    it do
-      should eq(
-        '$ref': '#/definitions/deploy/cloudcontrol'
-      )
-    end
+    )
   end
 end

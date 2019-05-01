@@ -70,7 +70,7 @@ module Travis
             !!opts[:deprecated]
           end
 
-          def deprecated
+          def deprecation
             opts[:deprecated]
           end
 

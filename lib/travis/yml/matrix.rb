@@ -2,7 +2,7 @@
 
 module Travis
   module Yml
-    class Matrix < Obj.new(:config, :keys)
+    class Matrix < Obj.new(:config)
       def rows
         rows = expand
         rows = with_included(rows)
@@ -121,12 +121,12 @@ module Travis
         end
 
         def keys
-          @keys ||= (config.keys & super).select { |k| ![[], nil].include?(config[k]) }
+          @keys ||= (config.keys & expand_keys).select { |k| ![[], nil].include?(config[k]) }
         end
 
-        # def expand_keys
-        #   schema.expand_keys
-        # end
+        def expand_keys
+          Yml.expand_keys
+        end
     end
   end
 end

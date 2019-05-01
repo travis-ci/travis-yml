@@ -11,27 +11,15 @@ AI = {
 }
 
 TPL = ERB.new <<~tpl
-describe <%= const %>, 'structure' do
-  describe 'definitions' do
-    subject { Travis::Yml.schema[:definitions][:deploy][<%= name.inspect %>] }
+describe <%= const %> do
+  subject { Travis::Yml.schema[:definitions][:deploy][<%= name.inspect %>] }
 
-    # it { puts JSON.pretty_generate(subject) }
+  # it { puts JSON.pretty_generate(subject) }
 
-    it do
-      should eq(
-      <%= schema %>
-      )
-    end
-  end
-
-  describe 'schema' do
-    subject { described_class.new.schema }
-
-    it do
-      should eq(
-        '$ref': '#/definitions/deploy/<%= name %>'
-      )
-    end
+  it do
+    should eq(
+    <%= schema %>
+    )
   end
 end
 tpl

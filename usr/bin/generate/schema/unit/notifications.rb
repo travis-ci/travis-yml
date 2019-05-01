@@ -12,8 +12,8 @@ OPTS = {
 
 TPL = {
   any: <<~tpl,
-    describe <%= const.to_s %>, 'structure', slow: true do
-      describe 'exports' do
+    describe <%= const.to_s %>, slow: true do
+      describe 'schema' do
         subject { described_class.new.exports[<%= name.inspect %>] }
 
         xit { puts JSON.pretty_generate(subject) }
@@ -32,20 +32,10 @@ TPL = {
           )
         end
       end
-
-      describe 'schema' do
-        subject { described_class.new.schema }
-
-        it do
-          should eq(
-            '$ref': '#/definitions/<%= name %>'
-          )
-        end
-      end
     end
   tpl
   obj: <<~tpl
-    describe <%= const.to_s %>, 'structure' do
+    describe <%= const.to_s %> do
       describe 'exports' do
         subject { described_class.new.exports[<%= name.inspect %>] }
 

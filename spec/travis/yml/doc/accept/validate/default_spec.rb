@@ -5,26 +5,26 @@ describe Travis::Yml::Doc::Validate, 'default', required: true, defaults: true d
     describe 'given a str' do
       let(:value) { { language: 'ruby' } }
       it { should serialize_to defaults }
-      it { should_not have_msg [:info, :language, :default, default: 'ruby'] }
-      it { should have_msg [:info, :os, :default, default: 'linux'] }
+      it { should_not have_msg [:info, :language, :default, key: :language, default: 'ruby'] }
+      it { should have_msg [:info, :os, :default, key: :os, default: 'linux'] }
     end
 
     describe 'given an empty string' do
       let(:value) { { language: '' } }
       it { should serialize_to defaults }
-      it { should have_msg [:info, :language, :default, default: 'ruby'] }
+      it { should have_msg [:info, :language, :default, key: :language, default: 'ruby'] }
     end
 
     describe 'given nil' do
       let(:value) { { language: nil } }
       it { should serialize_to defaults }
-      it { should have_msg [:info, :language, :default, default: 'ruby'] }
+      it { should have_msg [:info, :language, :default, key: :language, default: 'ruby'] }
     end
 
     describe 'missing key' do
       let(:value) { {} }
       it { should serialize_to defaults }
-      it { should have_msg [:info, :language, :default, default: 'ruby'] }
+      it { should have_msg [:info, :language, :default, key: :language, default: 'ruby'] }
     end
   end
 

@@ -1,85 +1,19 @@
-describe Travis::Yml::Schema::Def::R, 'structure' do
-  describe 'definitions' do
-    subject { Travis::Yml.schema[:definitions][:language][:r] }
+describe Travis::Yml::Schema::Def::R, 'schema' do
+  subject { Travis::Yml.schema[:definitions][:language][:r] }
 
-    # it { puts JSON.pretty_generate(subject) }
+  # it { puts JSON.pretty_generate(subject) }
 
-    it do
-      should eq(
-        '$id': :language_r,
+  it do
+    should eq(
+      '$id': :language_r,
         title: 'Language R',
         type: :object,
         properties: {
           r: {
-            '$ref': '#/definitions/type/strs'
-          },
-          r_packages: {
-            '$ref': '#/definitions/type/strs'
-          },
-          r_binary_packages: {
-            '$ref': '#/definitions/type/strs'
-          },
-          r_github_packages: {
-            '$ref': '#/definitions/type/strs'
-          },
-          apt_packages: {
-            '$ref': '#/definitions/type/strs'
-          },
-          bioc_packages: {
-            '$ref': '#/definitions/type/strs'
-          },
-          brew_packages: {
-            '$ref': '#/definitions/type/strs'
-          },
-          bioc: {
-            type: :string
-          },
-          bioc_check: {
-            type: :boolean
-          },
-          bioc_required: {
-            type: :boolean
-          },
-          bioc_use_devel: {
-            type: :boolean
-          },
-          cran: {
-            type: :string
-          },
-          disable_homebrew: {
-            type: :boolean
-          },
-          latex: {
-            type: :boolean
-          },
-          pandoc: {
-            type: :boolean
-          },
-          pandoc_version: {
-            type: :string
-          },
-          r_build_args: {
-            type: :string
-          },
-          r_check_args: {
-            type: :string
-          },
-          r_check_revdep: {
-            type: :boolean
-          },
-          warnings_are_errors: {
-            type: :boolean
-          },
-          remotes: {
-            type: :string
-          },
-          repos: {
-            type: :object
-          }
-        },
-        normal: true,
-        keys: {
-          r: {
+            '$ref': '#/definitions/type/strs',
+            flags: [
+              :expand
+            ],
             only: {
               language: [
                 'r'
@@ -87,6 +21,7 @@ describe Travis::Yml::Schema::Def::R, 'structure' do
             }
           },
           r_packages: {
+            '$ref': '#/definitions/type/strs',
             only: {
               language: [
                 'r'
@@ -94,6 +29,7 @@ describe Travis::Yml::Schema::Def::R, 'structure' do
             }
           },
           r_binary_packages: {
+            '$ref': '#/definitions/type/strs',
             only: {
               language: [
                 'r'
@@ -101,6 +37,7 @@ describe Travis::Yml::Schema::Def::R, 'structure' do
             }
           },
           r_github_packages: {
+            '$ref': '#/definitions/type/strs',
             only: {
               language: [
                 'r'
@@ -108,6 +45,7 @@ describe Travis::Yml::Schema::Def::R, 'structure' do
             }
           },
           apt_packages: {
+            '$ref': '#/definitions/type/strs',
             only: {
               language: [
                 'r'
@@ -115,6 +53,7 @@ describe Travis::Yml::Schema::Def::R, 'structure' do
             }
           },
           bioc_packages: {
+            '$ref': '#/definitions/type/strs',
             only: {
               language: [
                 'r'
@@ -122,6 +61,7 @@ describe Travis::Yml::Schema::Def::R, 'structure' do
             }
           },
           brew_packages: {
+            '$ref': '#/definitions/type/strs',
             only: {
               language: [
                 'r'
@@ -129,6 +69,7 @@ describe Travis::Yml::Schema::Def::R, 'structure' do
             }
           },
           bioc: {
+            type: :string,
             only: {
               language: [
                 'r'
@@ -136,6 +77,7 @@ describe Travis::Yml::Schema::Def::R, 'structure' do
             }
           },
           bioc_check: {
+            type: :boolean,
             only: {
               language: [
                 'r'
@@ -143,6 +85,7 @@ describe Travis::Yml::Schema::Def::R, 'structure' do
             }
           },
           bioc_required: {
+            type: :boolean,
             aliases: [
               :use_bioc
             ],
@@ -153,6 +96,7 @@ describe Travis::Yml::Schema::Def::R, 'structure' do
             }
           },
           bioc_use_devel: {
+            type: :boolean,
             only: {
               language: [
                 'r'
@@ -160,6 +104,7 @@ describe Travis::Yml::Schema::Def::R, 'structure' do
             }
           },
           cran: {
+            type: :string,
             only: {
               language: [
                 'r'
@@ -167,6 +112,7 @@ describe Travis::Yml::Schema::Def::R, 'structure' do
             }
           },
           disable_homebrew: {
+            type: :boolean,
             only: {
               language: [
                 'r'
@@ -174,6 +120,7 @@ describe Travis::Yml::Schema::Def::R, 'structure' do
             }
           },
           latex: {
+            type: :boolean,
             only: {
               language: [
                 'r'
@@ -181,6 +128,7 @@ describe Travis::Yml::Schema::Def::R, 'structure' do
             }
           },
           pandoc: {
+            type: :boolean,
             only: {
               language: [
                 'r'
@@ -188,6 +136,7 @@ describe Travis::Yml::Schema::Def::R, 'structure' do
             }
           },
           pandoc_version: {
+            type: :string,
             only: {
               language: [
                 'r'
@@ -195,6 +144,7 @@ describe Travis::Yml::Schema::Def::R, 'structure' do
             }
           },
           r_build_args: {
+            type: :string,
             only: {
               language: [
                 'r'
@@ -202,6 +152,7 @@ describe Travis::Yml::Schema::Def::R, 'structure' do
             }
           },
           r_check_args: {
+            type: :string,
             only: {
               language: [
                 'r'
@@ -209,6 +160,7 @@ describe Travis::Yml::Schema::Def::R, 'structure' do
             }
           },
           r_check_revdep: {
+            type: :boolean,
             only: {
               language: [
                 'r'
@@ -216,6 +168,7 @@ describe Travis::Yml::Schema::Def::R, 'structure' do
             }
           },
           warnings_are_errors: {
+            type: :boolean,
             only: {
               language: [
                 'r'
@@ -223,6 +176,7 @@ describe Travis::Yml::Schema::Def::R, 'structure' do
             }
           },
           remotes: {
+            type: :string,
             only: {
               language: [
                 'r'
@@ -230,14 +184,15 @@ describe Travis::Yml::Schema::Def::R, 'structure' do
             }
           },
           repos: {
+            type: :object,
             only: {
               language: [
                 'r'
               ]
             }
           }
-        }
-      )
-    end
+        },
+        normal: true
+    )
   end
 end

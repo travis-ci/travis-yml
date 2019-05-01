@@ -1,12 +1,11 @@
-describe Travis::Yml::Schema::Def::Deploy::Launchpad, 'structure' do
-  describe 'definitions' do
-    subject { Travis::Yml.schema[:definitions][:deploy][:launchpad] }
+describe Travis::Yml::Schema::Def::Deploy::Launchpad, 'schema' do
+  subject { Travis::Yml.schema[:definitions][:deploy][:launchpad] }
 
-    # it { puts JSON.pretty_generate(subject) }
+  # it { puts JSON.pretty_generate(subject) }
 
-    it do
-      should eq(
-        '$id': :deploy_launchpad,
+  it do
+    should eq(
+      '$id': :deploy_launchpad,
         title: 'Deploy Launchpad',
         anyOf: [
           {
@@ -62,17 +61,6 @@ describe Travis::Yml::Schema::Def::Deploy::Launchpad, 'structure' do
           }
         ],
         normal: true
-      )
-    end
-  end
-
-  describe 'schema' do
-    subject { described_class.new.schema }
-
-    it do
-      should eq(
-        '$ref': '#/definitions/deploy/launchpad'
-      )
-    end
+    )
   end
 end

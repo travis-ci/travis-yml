@@ -23,9 +23,9 @@ module Travis
 
             def flag
               edge_key         if edge_key?
-              edge_value       if edge_value?
+              # edge_value       if edge_value?
               # flagged          if schema.flagged?
-              deprecated       if deprecated?
+              # deprecated       if deprecated?
               deprecated_key   if deprecated_key?
               deprecated_value if deprecated_value?
               value
@@ -39,48 +39,45 @@ module Travis
               value.info :edge
             end
 
-            def edge_value?
-              # schema.fixed? && !!schema.values.find { |v| v.edge? && v.value == value.value }
-            end
-
-            def edge_value
-              value.info :edge, value: value.value
-            end
+            # def edge_value?
+            #   schema.fixed? && !!schema.values.find { |v| v.edge? && v.value == value.value }
+            # end
+            #
+            # def edge_value
+            #   value.info :edge, value: value.value
+            # end
 
             # def flagged
             #   value.info :flagged, given: value.key
             # end
 
-            def deprecated?
-              schema.deprecated?
-            end
-
-            def deprecated
-              value.warn :deprecated, deprecation: schema.deprecated
-            end
-
-            def deprecated_key?
-              schema.map? # && schema.deprecated_key?(value.key)
-            end
-
-            def deprecated_key
-              value.keys.each do |key|
-                next unless deprecation = schema.deprecated_key(key)
-                value.warn :deprecated, deprecation: deprecation
-              end
-            end
+            # def deprecated?
+            #   schema.deprecated?
+            # end
+            #
+            # def deprecated
+            #   value.warn :deprecated, key: value.key, info: schema.deprecation
+            # end
 
             def deprecated_value?
               schema.enum? && value.str? && schema.values.deprecated?(value.value)
             end
 
             def deprecated_value
-              value.warn :deprecated, deprecation: :deprecated_value, value: value.value
+              deprecation = schema.values.deprecation(value.value)
+              value.warn :deprecated_value, value: value.value, info: deprecation
             end
 
-            # def info
-            #   deprecated_value? ? value.deprecated : schema.deprecated
-            # end
+            def deprecated_key?
+              schema.map?
+            end
+
+            def deprecated_key
+              value.keys.each do |key|
+                next unless deprecation = schema[key]&.deprecation
+                value.warn :deprecated_key, key: key, info: deprecation
+              end
+            end
         end
       end
     end

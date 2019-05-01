@@ -1,12 +1,11 @@
-describe Travis::Yml::Schema::Def::Deploy::Appfog, 'structure' do
-  describe 'definitions' do
-    subject { Travis::Yml.schema[:definitions][:deploy][:appfog] }
+describe Travis::Yml::Schema::Def::Deploy::Appfog, 'schema' do
+  subject { Travis::Yml.schema[:definitions][:deploy][:appfog] }
 
-    # it { puts JSON.pretty_generate(subject) }
+  # it { puts JSON.pretty_generate(subject) }
 
-    it do
-      should eq(
-        '$id': :deploy_appfog,
+  it do
+    should eq(
+      '$id': :deploy_appfog,
         title: 'Deploy Appfog',
         anyOf: [
           {
@@ -110,17 +109,6 @@ describe Travis::Yml::Schema::Def::Deploy::Appfog, 'structure' do
           }
         ],
         normal: true
-      )
-    end
-  end
-
-  describe 'schema' do
-    subject { described_class.new.schema }
-
-    it do
-      should eq(
-        '$ref': '#/definitions/deploy/appfog'
-      )
-    end
+    )
   end
 end

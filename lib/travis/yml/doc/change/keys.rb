@@ -8,10 +8,14 @@ module Travis
       module Change
         class Keys < Base
           def apply
-            value.map? ? change(value) : value
+            apply? ? change(value) : value
           end
 
           private
+
+            def apply?
+              schema.map? && schema.strict? && value.map?
+            end
 
             def change(value)
               value = required(value) if defaults?
@@ -26,13 +30,19 @@ module Travis
 
             def fix_keys(value)
               value.keys.inject(value) do |parent, key|
-                next parent if known?(key)
+                next parent if known?(key) || custom?(key)
                 node = parent[key]
                 key  = Key.new(schema, node, opts).apply
                 next parent if key == node.key && known?(key)
                 parent.move(node.key, key)
                 parent
               end
+            end
+
+            CUSTOM = %w(_ .)
+
+            def custom?(key)
+              CUSTOM.include?(key.to_s[0])
             end
 
             def known?(key)

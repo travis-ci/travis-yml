@@ -1,4 +1,4 @@
-describe Travis::Yml::Schema::Dsl::Enum do
+describe Travis::Yml::Schema::Dsl::Str do
   let(:dsl) { Class.new(described_class).new }
 
   subject { dsl.node}

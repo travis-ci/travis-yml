@@ -13,6 +13,10 @@ module Travis
 
           opts %i(defaults enum values)
 
+          def enum?
+            !enum.empty?
+          end
+
           def enum
             opts[:enum]
           end

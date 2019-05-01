@@ -1,51 +1,22 @@
-describe Travis::Yml::Schema::Def::ObjectiveC, 'structure' do
-  describe 'definitions' do
-    subject { Travis::Yml.schema[:definitions][:language][:"objective-c"] }
+describe Travis::Yml::Schema::Def::ObjectiveC, 'schema' do
+  subject { Travis::Yml.schema[:definitions][:language][:"objective-c"] }
 
-    # it { puts JSON.pretty_generate(subject) }
+  # it { puts JSON.pretty_generate(subject) }
 
-    it do
-      should eq(
-        '$id': :'language_objective-c',
+  it do
+    should eq(
+      '$id': :'language_objective-c',
         title: 'Language Objective C',
         type: :object,
         properties: {
           rvm: {
-            '$ref': '#/definitions/type/strs'
-          },
-          gemfile: {
-            '$ref': '#/definitions/type/strs'
-          },
-          xcode_scheme: {
-            '$ref': '#/definitions/type/strs'
-          },
-          xcode_sdk: {
-            '$ref': '#/definitions/type/strs'
-          },
-          podfile: {
-            type: :string
-          },
-          bundler_args: {
-            type: :string
-          },
-          xcode_destination: {
-            type: :string
-          },
-          xcode_project: {
-            type: :string
-          },
-          xcode_workspace: {
-            type: :string
-          },
-          xctool_args: {
-            type: :string
-          }
-        },
-        normal: true,
-        keys: {
-          rvm: {
+            '$ref': '#/definitions/type/strs',
             aliases: [
-              :ruby
+              :ruby,
+              :rbenv
+            ],
+            flags: [
+              :expand
             ],
             only: {
               language: [
@@ -54,6 +25,10 @@ describe Travis::Yml::Schema::Def::ObjectiveC, 'structure' do
             }
           },
           gemfile: {
+            '$ref': '#/definitions/type/strs',
+            flags: [
+              :expand
+            ],
             only: {
               language: [
                 'objective-c'
@@ -61,6 +36,10 @@ describe Travis::Yml::Schema::Def::ObjectiveC, 'structure' do
             }
           },
           xcode_scheme: {
+            '$ref': '#/definitions/type/strs',
+            flags: [
+              :expand
+            ],
             only: {
               language: [
                 'objective-c'
@@ -68,6 +47,10 @@ describe Travis::Yml::Schema::Def::ObjectiveC, 'structure' do
             }
           },
           xcode_sdk: {
+            '$ref': '#/definitions/type/strs',
+            flags: [
+              :expand
+            ],
             only: {
               language: [
                 'objective-c'
@@ -75,6 +58,7 @@ describe Travis::Yml::Schema::Def::ObjectiveC, 'structure' do
             }
           },
           podfile: {
+            type: :string,
             only: {
               language: [
                 'objective-c'
@@ -82,6 +66,7 @@ describe Travis::Yml::Schema::Def::ObjectiveC, 'structure' do
             }
           },
           bundler_args: {
+            type: :string,
             only: {
               language: [
                 'objective-c'
@@ -89,6 +74,7 @@ describe Travis::Yml::Schema::Def::ObjectiveC, 'structure' do
             }
           },
           xcode_destination: {
+            type: :string,
             only: {
               language: [
                 'objective-c'
@@ -96,6 +82,7 @@ describe Travis::Yml::Schema::Def::ObjectiveC, 'structure' do
             }
           },
           xcode_project: {
+            type: :string,
             only: {
               language: [
                 'objective-c'
@@ -103,6 +90,7 @@ describe Travis::Yml::Schema::Def::ObjectiveC, 'structure' do
             }
           },
           xcode_workspace: {
+            type: :string,
             only: {
               language: [
                 'objective-c'
@@ -110,14 +98,15 @@ describe Travis::Yml::Schema::Def::ObjectiveC, 'structure' do
             }
           },
           xctool_args: {
+            type: :string,
             only: {
               language: [
                 'objective-c'
               ]
             }
           }
-        }
-      )
-    end
+        },
+        normal: true
+    )
   end
 end

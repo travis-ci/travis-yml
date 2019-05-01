@@ -1,12 +1,11 @@
-describe Travis::Yml::Schema::Def::Deploy::Scalingo, 'structure' do
-  describe 'definitions' do
-    subject { Travis::Yml.schema[:definitions][:deploy][:scalingo] }
+describe Travis::Yml::Schema::Def::Deploy::Scalingo, 'schema' do
+  subject { Travis::Yml.schema[:definitions][:deploy][:scalingo] }
 
-    # it { puts JSON.pretty_generate(subject) }
+  # it { puts JSON.pretty_generate(subject) }
 
-    it do
-      should eq(
-        '$id': :deploy_scalingo,
+  it do
+    should eq(
+      '$id': :deploy_scalingo,
         title: 'Deploy Scalingo',
         anyOf: [
           {
@@ -32,7 +31,10 @@ describe Travis::Yml::Schema::Def::Deploy::Scalingo, 'structure' do
                 '$ref': '#/definitions/deploy/edge'
               },
               username: {
-                '$ref': '#/definitions/type/secure'
+                '$ref': '#/definitions/type/secure',
+                aliases: [
+                  :user
+                ]
               },
               password: {
                 '$ref': '#/definitions/type/secure'
@@ -57,14 +59,7 @@ describe Travis::Yml::Schema::Def::Deploy::Scalingo, 'structure' do
             },
             required: [
               :provider
-            ],
-            keys: {
-              username: {
-                aliases: [
-                  :user
-                ]
-              }
-            }
+            ]
           },
           {
             type: :string,
@@ -75,17 +70,6 @@ describe Travis::Yml::Schema::Def::Deploy::Scalingo, 'structure' do
           }
         ],
         normal: true
-      )
-    end
-  end
-
-  describe 'schema' do
-    subject { described_class.new.schema }
-
-    it do
-      should eq(
-        '$ref': '#/definitions/deploy/scalingo'
-      )
-    end
+    )
   end
 end

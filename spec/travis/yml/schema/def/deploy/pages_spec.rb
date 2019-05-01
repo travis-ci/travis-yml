@@ -1,12 +1,11 @@
-describe Travis::Yml::Schema::Def::Deploy::Pages, 'structure' do
-  describe 'definitions' do
-    subject { Travis::Yml.schema[:definitions][:deploy][:pages] }
+describe Travis::Yml::Schema::Def::Deploy::Pages, 'schema' do
+  subject { Travis::Yml.schema[:definitions][:deploy][:pages] }
 
-    # it { puts JSON.pretty_generate(subject) }
+  # it { puts JSON.pretty_generate(subject) }
 
-    it do
-      should eq(
-        '$id': :deploy_pages,
+  it do
+    should eq(
+      '$id': :deploy_pages,
         title: 'Deploy Pages',
         anyOf: [
           {
@@ -95,17 +94,6 @@ describe Travis::Yml::Schema::Def::Deploy::Pages, 'structure' do
           }
         ],
         normal: true
-      )
-    end
-  end
-
-  describe 'schema' do
-    subject { described_class.new.schema }
-
-    it do
-      should eq(
-        '$ref': '#/definitions/deploy/pages'
-      )
-    end
+    )
   end
 end

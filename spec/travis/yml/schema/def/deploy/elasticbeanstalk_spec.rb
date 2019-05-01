@@ -1,12 +1,11 @@
-describe Travis::Yml::Schema::Def::Deploy::Elasticbeanstalk, 'structure' do
-  describe 'definitions' do
-    subject { Travis::Yml.schema[:definitions][:deploy][:elasticbeanstalk] }
+describe Travis::Yml::Schema::Def::Deploy::Elasticbeanstalk, 'schema' do
+  subject { Travis::Yml.schema[:definitions][:deploy][:elasticbeanstalk] }
 
-    # it { puts JSON.pretty_generate(subject) }
+  # it { puts JSON.pretty_generate(subject) }
 
-    it do
-      should eq(
-        '$id': :deploy_elasticbeanstalk,
+  it do
+    should eq(
+      '$id': :deploy_elasticbeanstalk,
         title: 'Deploy Elasticbeanstalk',
         anyOf: [
           {
@@ -101,17 +100,6 @@ describe Travis::Yml::Schema::Def::Deploy::Elasticbeanstalk, 'structure' do
           }
         ],
         normal: true
-      )
-    end
-  end
-
-  describe 'schema' do
-    subject { described_class.new.schema }
-
-    it do
-      should eq(
-        '$ref': '#/definitions/deploy/elasticbeanstalk'
-      )
-    end
+    )
   end
 end

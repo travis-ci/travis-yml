@@ -16,10 +16,6 @@ module Spec
       def build_value(value, opts = {})
         Travis::Yml::Doc::Value.build(nil, nil, value, opts)
       end
-
-      def transform(node)
-        Travis::Yml::Schema::Type.transform(node)
-      end
     end
   end
 end

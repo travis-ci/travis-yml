@@ -1,12 +1,11 @@
-describe Travis::Yml::Schema::Def::Deploy::Modulus, 'structure' do
-  describe 'definitions' do
-    subject { Travis::Yml.schema[:definitions][:deploy][:modulus] }
+describe Travis::Yml::Schema::Def::Deploy::Modulus, 'schema' do
+  subject { Travis::Yml.schema[:definitions][:deploy][:modulus] }
 
-    # it { puts JSON.pretty_generate(subject) }
+  # it { puts JSON.pretty_generate(subject) }
 
-    it do
-      should eq(
-        '$id': :deploy_modulus,
+  it do
+    should eq(
+      '$id': :deploy_modulus,
         title: 'Deploy Modulus',
         anyOf: [
           {
@@ -56,17 +55,6 @@ describe Travis::Yml::Schema::Def::Deploy::Modulus, 'structure' do
           }
         ],
         normal: true
-      )
-    end
-  end
-
-  describe 'schema' do
-    subject { described_class.new.schema }
-
-    it do
-      should eq(
-        '$ref': '#/definitions/deploy/modulus'
-      )
-    end
+    )
   end
 end

@@ -1,66 +1,54 @@
 describe Travis::Yml::Schema::Def::Notification::Flowdock, 'structure' do
-  describe 'definitions' do
-    subject { Travis::Yml.schema[:definitions][:notification][:flowdock] }
+  subject { Travis::Yml.schema[:definitions][:notification][:flowdock] }
 
-    # it { puts JSON.pretty_generate(subject) }
+  # it { puts JSON.pretty_generate(subject) }
 
-    it do
-      should eq(
-        '$id': :notification_flowdock,
-        title: 'Notification Flowdock',
-        normal: true,
-        anyOf: [
-          {
-            type: :object,
-            properties: {
-              enabled: {
-                type: :boolean
-              },
-              disabled: {
-                type: :boolean
-              },
-              api_token: {
-               '$ref': '#/definitions/type/secure'
-              },
-              template: {
-                '$ref': '#/definitions/notification/templates'
-              },
-              on_success: {
-                '$ref': '#/definitions/notification/frequency'
-              },
-              on_failure: {
-                '$ref': '#/definitions/notification/frequency'
-              }
+  it do
+    should eq(
+      '$id': :notification_flowdock,
+      title: 'Notification Flowdock',
+      normal: true,
+      anyOf: [
+        {
+          type: :object,
+          properties: {
+            enabled: {
+              type: :boolean
             },
-            additionalProperties: false,
-            normal: true,
-            prefix: {
-              key: :api_token
+            disabled: {
+              type: :boolean
             },
-            changes: [
-              {
-                change: :enable,
-              }
-            ]
+            api_token: {
+             '$ref': '#/definitions/type/secure'
+            },
+            template: {
+              '$ref': '#/definitions/notification/templates'
+            },
+            on_success: {
+              '$ref': '#/definitions/notification/frequency'
+            },
+            on_failure: {
+              '$ref': '#/definitions/notification/frequency'
+            }
           },
-          {
-            '$ref': '#/definitions/type/secure'
+          additionalProperties: false,
+          normal: true,
+          prefix: {
+            key: :api_token
           },
-          {
-            type: :boolean
-          }
-        ]
-      )
-    end
-  end
-
-  describe 'schema' do
-    subject { described_class.new.schema }
-
-    it do
-      should eq(
-        '$ref': '#/definitions/notification/flowdock'
-      )
-    end
+          changes: [
+            {
+              change: :enable,
+            }
+          ]
+        },
+        {
+          '$ref': '#/definitions/type/secure'
+        },
+        {
+          type: :boolean
+        }
+      ]
+    )
   end
 end

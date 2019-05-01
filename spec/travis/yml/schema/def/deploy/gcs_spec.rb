@@ -1,12 +1,11 @@
-describe Travis::Yml::Schema::Def::Deploy::Gcs, 'structure' do
-  describe 'definitions' do
-    subject { Travis::Yml.schema[:definitions][:deploy][:gcs] }
+describe Travis::Yml::Schema::Def::Deploy::Gcs, 'schema' do
+  subject { Travis::Yml.schema[:definitions][:deploy][:gcs] }
 
-    # it { puts JSON.pretty_generate(subject) }
+  # it { puts JSON.pretty_generate(subject) }
 
-    it do
-      should eq(
-        '$id': :deploy_gcs,
+  it do
+    should eq(
+      '$id': :deploy_gcs,
         title: 'Deploy Gcs',
         anyOf: [
           {
@@ -77,17 +76,6 @@ describe Travis::Yml::Schema::Def::Deploy::Gcs, 'structure' do
           }
         ],
         normal: true
-      )
-    end
-  end
-
-  describe 'schema' do
-    subject { described_class.new.schema }
-
-    it do
-      should eq(
-        '$ref': '#/definitions/deploy/gcs'
-      )
-    end
+    )
   end
 end

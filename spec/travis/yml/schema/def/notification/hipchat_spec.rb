@@ -1,79 +1,67 @@
 describe Travis::Yml::Schema::Def::Notification::Hipchat, 'structure' do
-  describe 'definitions' do
-    subject { Travis::Yml.schema[:definitions][:notification][:hipchat] }
+  subject { Travis::Yml.schema[:definitions][:notification][:hipchat] }
 
-    # it { puts JSON.pretty_generate(subject) }
+  # it { puts JSON.pretty_generate(subject) }
 
-    it do
-      should eq(
-        '$id': :notification_hipchat,
-        title: 'Notification Hipchat',
-        normal: true,
-        anyOf: [
-          {
-            type: :object,
-            properties: {
-              enabled: {
-                type: :boolean
-              },
-              disabled: {
-                type: :boolean
-              },
-              rooms: {
-                '$ref': '#/definitions/type/secures'
-              },
-              format: {
-                type: :string,
-                enum: [
-                  'html',
-                  'text'
-                ]
-              },
-              notify: {
-                type: :boolean
-              },
-              on_pull_requests: {
-                type: :boolean
-              },
-              template: {
-                '$ref': '#/definitions/notification/templates'
-              },
-              on_success: {
-                '$ref': '#/definitions/notification/frequency'
-              },
-              on_failure: {
-                '$ref': '#/definitions/notification/frequency'
-              }
+  it do
+    should eq(
+      '$id': :notification_hipchat,
+      title: 'Notification Hipchat',
+      normal: true,
+      anyOf: [
+        {
+          type: :object,
+          properties: {
+            enabled: {
+              type: :boolean
             },
-            additionalProperties: false,
-            normal: true,
-            prefix: {
-              key: :rooms
+            disabled: {
+              type: :boolean
             },
-            changes: [
-              {
-                change: :enable,
-              }
-            ]
+            rooms: {
+              '$ref': '#/definitions/type/secures'
+            },
+            format: {
+              type: :string,
+              enum: [
+                'html',
+                'text'
+              ]
+            },
+            notify: {
+              type: :boolean
+            },
+            on_pull_requests: {
+              type: :boolean
+            },
+            template: {
+              '$ref': '#/definitions/notification/templates'
+            },
+            on_success: {
+              '$ref': '#/definitions/notification/frequency'
+            },
+            on_failure: {
+              '$ref': '#/definitions/notification/frequency'
+            }
           },
-          {
-            '$ref': '#/definitions/type/secures'
+          additionalProperties: false,
+          normal: true,
+          prefix: {
+            key: :rooms
           },
-          {
-            type: :boolean
-          }
-        ]
-      )
-    end
-  end
-
-  describe 'schema' do
-    subject { described_class.new.schema }
-
-    it do
-      should eq(
-        '$ref': '#/definitions/notification/hipchat'
-      )
-    end
+          changes: [
+            {
+              change: :enable,
+            }
+          ]
+        },
+        {
+          '$ref': '#/definitions/type/secures'
+        },
+        {
+          type: :boolean
+        }
+      ]
+    )
   end
 end

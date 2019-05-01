@@ -1,12 +1,11 @@
-describe Travis::Yml::Schema::Def::Deploy::Cloudfiles, 'structure' do
-  describe 'definitions' do
-    subject { Travis::Yml.schema[:definitions][:deploy][:cloudfiles] }
+describe Travis::Yml::Schema::Def::Deploy::Cloudfiles, 'schema' do
+  subject { Travis::Yml.schema[:definitions][:deploy][:cloudfiles] }
 
-    # it { puts JSON.pretty_generate(subject) }
+  # it { puts JSON.pretty_generate(subject) }
 
-    it do
-      should eq(
-        '$id': :deploy_cloudfiles,
+  it do
+    should eq(
+      '$id': :deploy_cloudfiles,
         title: 'Deploy Cloudfiles',
         anyOf: [
           {
@@ -65,17 +64,6 @@ describe Travis::Yml::Schema::Def::Deploy::Cloudfiles, 'structure' do
           }
         ],
         normal: true
-      )
-    end
-  end
-
-  describe 'schema' do
-    subject { described_class.new.schema }
-
-    it do
-      should eq(
-        '$ref': '#/definitions/deploy/cloudfiles'
-      )
-    end
+    )
   end
 end

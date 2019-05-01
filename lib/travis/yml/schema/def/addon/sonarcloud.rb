@@ -14,8 +14,8 @@ module Travis
               map :organization, to: :str
               map :token,        to: :secure
 
-              map :github_token, to: :secure, deprecated: :deprecated_sonarcloud_github_token
-              map :branches,     to: :seq,    deprecated: :deprecated_sonarcloud_branches
+              map :github_token, to: :secure, deprecated: 'not supported any more'
+              map :branches,     to: :seq,    deprecated: 'not supported any more'
 
               super
             end

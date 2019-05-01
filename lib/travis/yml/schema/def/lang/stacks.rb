@@ -12,7 +12,7 @@ module Travis
 
             def define
               internal
-              deprecated :experimental_stack_language
+              deprecated 'experimental stack language'
             end
           end
 

@@ -1,12 +1,11 @@
-describe Travis::Yml::Schema::Def::Deploy::AzureWebApps, 'structure' do
-  describe 'definitions' do
-    subject { Travis::Yml.schema[:definitions][:deploy][:azure_web_apps] }
+describe Travis::Yml::Schema::Def::Deploy::AzureWebApps, 'schema' do
+  subject { Travis::Yml.schema[:definitions][:deploy][:azure_web_apps] }
 
-    # it { puts JSON.pretty_generate(subject) }
+  # it { puts JSON.pretty_generate(subject) }
 
-    it do
-      should eq(
-        '$id': :deploy_azure_web_apps,
+  it do
+    should eq(
+      '$id': :deploy_azure_web_apps,
         title: 'Deploy Azure Web Apps',
         anyOf: [
           {
@@ -65,17 +64,6 @@ describe Travis::Yml::Schema::Def::Deploy::AzureWebApps, 'structure' do
           }
         ],
         normal: true
-      )
-    end
-  end
-
-  describe 'schema' do
-    subject { described_class.new.schema }
-
-    it do
-      should eq(
-        '$ref': '#/definitions/deploy/azure_web_apps'
-      )
-    end
+    )
   end
 end

@@ -1,17 +1,24 @@
-describe Travis::Yml::Schema::Def::Dart, 'structure' do
-  describe 'definitions' do
-    subject { Travis::Yml.schema[:definitions][:language][:dart] }
+describe Travis::Yml::Schema::Def::Dart, 'schema' do
+  subject { Travis::Yml.schema[:definitions][:language][:dart] }
 
-    # it { puts JSON.pretty_generate(subject) }
+  # it { puts JSON.pretty_generate(subject) }
 
-    it do
-      should eq(
-        '$id': :language_dart,
+  it do
+    should eq(
+      '$id': :language_dart,
         title: 'Language Dart',
         type: :object,
         properties: {
           dart: {
-            '$ref': '#/definitions/type/strs'
+            '$ref': '#/definitions/type/strs',
+            flags: [
+              :expand
+            ],
+            only: {
+              language: [
+                'dart'
+              ]
+            }
           },
           dart_task: {
             anyOf: [
@@ -44,27 +51,37 @@ describe Travis::Yml::Schema::Def::Dart, 'structure' do
                       type: :string
                     }
                   ]
-                }
+                },
+                normal: true
+              },
+              {
+                type: :object,
+                properties: {
+                  test: {
+                    type: :string
+                  },
+                  dartanalyzer: {
+                    type: :string
+                  },
+                  dartfmt: {
+                    type: :boolean
+                  },
+                  install_dartium: {
+                    type: :boolean
+                  },
+                  xvfb: {
+                    type: :boolean
+                  }
+                },
+                additionalProperties: false
+              },
+              {
+                type: :string
               }
             ],
             flags: [
               :expand
-            ]
-          },
-          with_content_shell: {
-            type: :boolean
-          }
-        },
-        normal: true,
-        keys: {
-          dart: {
-            only: {
-              language: [
-                'dart'
-              ]
-            }
-          },
-          dart_task: {
+            ],
             only: {
               language: [
                 'dart'
@@ -72,14 +89,15 @@ describe Travis::Yml::Schema::Def::Dart, 'structure' do
             }
           },
           with_content_shell: {
+            type: :boolean,
             only: {
               language: [
                 'dart'
               ]
             }
           }
-        }
-      )
-    end
+        },
+        normal: true
+    )
   end
 end

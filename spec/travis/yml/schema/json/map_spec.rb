@@ -4,8 +4,6 @@ describe Travis::Yml::Schema::Json::Map do
 
   subject { described_class.new(node.node) }
 
-  it { should_not have_definitions }
-
   describe 'max_size' do
     let(:opts) { { max_size: 1 } }
 
@@ -73,10 +71,10 @@ describe Travis::Yml::Schema::Json::Map do
         additionalProperties: false,
         properties: {
           foo: {
-            type: :string
+            type: :string,
+            unique: true
           }
         },
-        unique: [:foo]
       )
     end
   end
@@ -109,7 +107,24 @@ describe Travis::Yml::Schema::Json::Map do
                 type: :object
               },
               {
-                '$ref': '#/definitions/type/secure'
+                '$id': :secure,
+                anyOf: [
+                  {
+                    type: :object,
+                    properties: {
+                      secure: {
+                        type: :string
+                      }
+                    },
+                    additionalProperties: false,
+                    maxProperties: 1,
+                    normal: true
+                  },
+                  {
+                    type: :string,
+                    normal: true
+                  }
+                ]
               },
             ]
           }

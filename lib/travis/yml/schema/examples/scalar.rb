@@ -13,6 +13,14 @@ module Travis
           def example
             self.class.example
           end
+
+          def enum?
+            node.enum?
+          end
+
+          def enum
+            node.opts[:enum] || []
+          end
         end
       end
     end

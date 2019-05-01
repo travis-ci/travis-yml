@@ -1,45 +1,19 @@
-describe Travis::Yml::Schema::Def::Scala, 'structure' do
-  describe 'definitions' do
-    subject { Travis::Yml.schema[:definitions][:language][:scala] }
+describe Travis::Yml::Schema::Def::Scala, 'schema' do
+  subject { Travis::Yml.schema[:definitions][:language][:scala] }
 
-    # it { puts JSON.pretty_generate(subject) }
+  # it { puts JSON.pretty_generate(subject) }
 
-    it do
-      should eq(
-        '$id': :language_scala,
+  it do
+    should eq(
+      '$id': :language_scala,
         title: 'Language Scala',
         type: :object,
         properties: {
           scala: {
-            '$ref': '#/definitions/type/strs'
-          },
-          jdk: {
-            anyOf: [
-              {
-                type: :array,
-                items: {
-                  type: :string
-                },
-                flags: [
-                  :expand
-                ],
-                normal: true
-              },
-              {
-                type: :string
-              }
-            ],
+            '$ref': '#/definitions/type/strs',
             flags: [
               :expand
-            ]
-          },
-          sbt_args: {
-            type: :string
-          }
-        },
-        normal: true,
-        keys: {
-          scala: {
+            ],
             only: {
               language: [
                 'scala'
@@ -47,6 +21,7 @@ describe Travis::Yml::Schema::Def::Scala, 'structure' do
             }
           },
           jdk: {
+            '$ref': '#/definitions/type/jdks',
             only: {
               language: [
                 'scala'
@@ -59,14 +34,15 @@ describe Travis::Yml::Schema::Def::Scala, 'structure' do
             }
           },
           sbt_args: {
+            type: :string,
             only: {
               language: [
                 'scala'
               ]
             }
           }
-        }
-      )
-    end
+        },
+        normal: true
+    )
   end
 end

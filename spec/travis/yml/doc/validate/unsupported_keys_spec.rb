@@ -12,17 +12,13 @@ describe Travis::Yml::Doc::Validate, 'unsupported_keys' do
           }
         },
         arch: {
-          type: :string
-        }
-      },
-      additionalProperties: false,
-      keys: {
-        arch: {
+          type: :string,
           only: {
             os: ['linux']
           }
         }
-      }
+      },
+      additionalProperties: false,
     }
   end
 

@@ -1,12 +1,11 @@
-describe Travis::Yml::Schema::Def::Deploy::Rubygems, 'structure' do
-  describe 'definitions' do
-    subject { Travis::Yml.schema[:definitions][:deploy][:rubygems] }
+describe Travis::Yml::Schema::Def::Deploy::Rubygems, 'schema' do
+  subject { Travis::Yml.schema[:definitions][:deploy][:rubygems] }
 
-    # it { puts JSON.pretty_generate(subject) }
+  # it { puts JSON.pretty_generate(subject) }
 
-    it do
-      should eq(
-        '$id': :deploy_rubygems,
+  it do
+    should eq(
+      '$id': :deploy_rubygems,
         title: 'Deploy Rubygems',
         anyOf: [
           {
@@ -89,17 +88,6 @@ describe Travis::Yml::Schema::Def::Deploy::Rubygems, 'structure' do
           }
         ],
         normal: true
-      )
-    end
-  end
-
-  describe 'schema' do
-    subject { described_class.new.schema }
-
-    it do
-      should eq(
-        '$ref': '#/definitions/deploy/rubygems'
-      )
-    end
+    )
   end
 end

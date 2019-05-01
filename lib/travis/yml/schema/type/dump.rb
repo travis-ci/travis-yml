@@ -53,12 +53,12 @@ module Travis
 
             compact(
               id: node.id,
-              obj_id: node.object_id,
+              # obj_id: node.object_id,
               type: node.type,
               normal: node.normal? ? true : nil,
               export: node.export? ? true : nil,
               # examples: node.examples
-            ) #.merge(node.opts)
+            ).merge(compact(node.opts))
           end
 
           alias secure obj

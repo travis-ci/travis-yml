@@ -1,12 +1,11 @@
-describe Travis::Yml::Schema::Def::Deploy::Engineyard, 'structure' do
-  describe 'definitions' do
-    subject { Travis::Yml.schema[:definitions][:deploy][:engineyard] }
+describe Travis::Yml::Schema::Def::Deploy::Engineyard, 'schema' do
+  subject { Travis::Yml.schema[:definitions][:deploy][:engineyard] }
 
-    # it { puts JSON.pretty_generate(subject) }
+  # it { puts JSON.pretty_generate(subject) }
 
-    it do
-      should eq(
-        '$id': :deploy_engineyard,
+  it do
+    should eq(
+      '$id': :deploy_engineyard,
         title: 'Deploy Engineyard',
         anyOf: [
           {
@@ -92,17 +91,6 @@ describe Travis::Yml::Schema::Def::Deploy::Engineyard, 'structure' do
           }
         ],
         normal: true
-      )
-    end
-  end
-
-  describe 'schema' do
-    subject { described_class.new.schema }
-
-    it do
-      should eq(
-        '$ref': '#/definitions/deploy/engineyard'
-      )
-    end
+    )
   end
 end

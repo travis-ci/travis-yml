@@ -1,5 +1,4 @@
 require 'travis/yml/schema/examples/bool'
-require 'travis/yml/schema/examples/enum'
 require 'travis/yml/schema/examples/group'
 require 'travis/yml/schema/examples/map'
 require 'travis/yml/schema/examples/num'

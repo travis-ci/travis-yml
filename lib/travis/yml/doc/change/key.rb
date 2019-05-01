@@ -9,6 +9,8 @@ module Travis
         class Key < Base
           include Doc::Dict
 
+          FILTERS = %i(strip underscore clean lookup find)
+
           def apply
             key = value.key
             key = dealias(key) if !known?(key) && alias?(key)
@@ -17,33 +19,32 @@ module Travis
           end
 
           def fix(key)
-            %i(strip underscore clean lookup find).each do |name|
+            FILTERS.each do |name|
               key = send(name, key)
               key = dealias(key) if !known?(key) && alias?(key)
               key = key.to_sym
-              return key if known?(key) || value.key != key && misplaced?(key)
+              return key if known?(key)
             end
             key
           end
 
           def strip(key)
             other = super(key).to_sym
-            return key if !known?(other) || misplaced?(other)
+            return key if !known?(other)
             warn :strip_key, key.to_sym, other.to_sym if key.to_s != other.to_s
             other
           end
 
           def underscore(key)
             other = strict? ? super(key).to_sym : key.to_s.tr('-', '_').to_sym
-            return key unless known?(other) || misplaced?(other)
+            return key unless known?(other)
             info :underscore_key, key.to_sym, other.to_sym if key.to_s != other.to_s
             other
           end
 
           def clean(key)
             other = clean_key(key)
-            return key if key == :"_#{other}" # allowed custom keys
-            return key unless known?(other) || misplaced?(other)
+            return key unless known?(other)
             warn :clean_key, key.to_sym, other.to_sym if key.to_s != other.to_s
             other
           end
@@ -51,7 +52,7 @@ module Travis
           def lookup(key)
             return key unless strict? && Dict.key?(key)
             other = Dict[key].to_sym unless schema.stop?(key, Dict[key])
-            return key unless key == other || known?(other) || misplaced?(other)
+            return key unless key == other || known?(other)
             warn :find_key, key.to_sym, other.to_sym if key != other
             other
           end
@@ -59,8 +60,7 @@ module Travis
           def find(key)
             return key unless strict?
             other = match_key(key.to_s)
-            return key if key == :"_#{other}" # allowed custom keys
-            return key unless known?(other) || alias?(other) || misplaced?(other)
+            return key unless known?(other) || alias?(other)
             warn :find_key, key.to_sym, other.to_sym if key != other
             other
           end

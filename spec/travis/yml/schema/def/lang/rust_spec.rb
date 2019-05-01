@@ -1,30 +1,27 @@
-describe Travis::Yml::Schema::Def::Rust, 'structure' do
-  describe 'definitions' do
-    subject { Travis::Yml.schema[:definitions][:language][:rust] }
+describe Travis::Yml::Schema::Def::Rust, 'schema' do
+  subject { Travis::Yml.schema[:definitions][:language][:rust] }
 
-    # it { puts JSON.pretty_generate(subject) }
+  # it { puts JSON.pretty_generate(subject) }
 
-    it do
-      should eq(
-        '$id': :language_rust,
+  it do
+    should eq(
+      '$id': :language_rust,
         title: 'Language Rust',
         type: :object,
         properties: {
           rust: {
-            '$ref': '#/definitions/type/strs'
-          }
-        },
-        normal: true,
-        keys: {
-          rust: {
+            '$ref': '#/definitions/type/strs',
+            flags: [
+              :expand
+            ],
             only: {
               language: [
                 'rust'
               ]
             }
           }
-        }
-      )
-    end
+        },
+        normal: true
+    )
   end
 end
