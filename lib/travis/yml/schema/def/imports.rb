@@ -23,7 +23,7 @@ module Travis
             normal
             prefix :source
             map :source, to: :str
-            map :mode, to: :enum, values: ['merge', 'deep_merge']
+            # map :mode, to: :enum, values: ['merge', 'deep_merge']
             export
           end
         end

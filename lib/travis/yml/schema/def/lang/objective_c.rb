@@ -11,7 +11,7 @@ module Travis
           def define
             aliases :objective_c, :swift
 
-            matrix :rvm,            alias: :ruby
+            matrix :rvm,            alias: [:ruby, :rbenv]
             matrix :gemfile
             matrix :xcode_scheme
             matrix :xcode_sdk

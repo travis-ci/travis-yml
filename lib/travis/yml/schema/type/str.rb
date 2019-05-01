@@ -15,30 +15,15 @@ module Travis
           opts %i(downcase format vars)
 
           def self.type
-            :str
+            registry_key
           end
         end
 
-        # anyOf: [
-        #   {
-        #     type: :array,
-        #     minItems: 1,
-        #     items: {
-        #       anyOf: [
-        #         { type: :string }
-        #       ]
-        #     },
-        #     normal: true
-        #   },
-        #   {
-        #     type: :string
-        #   }
-        # ]
         class Strs < Seq
           register :strs
 
           def self.type
-            :strs
+            registry_key
           end
 
           def namespace

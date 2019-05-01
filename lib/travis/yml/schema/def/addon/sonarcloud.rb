@@ -7,17 +7,17 @@ module Travis
     module Schema
       module Def
         module Addon
-          class Sonarcloud < Dsl::Map
+          class Sonarcloud < Addon
             register :sonarcloud
 
             def define
-              namespace :addon
-
               map :organization, to: :str
               map :token,        to: :secure
 
               map :github_token, to: :secure, deprecated: :deprecated_sonarcloud_github_token
               map :branches,     to: :seq,    deprecated: :deprecated_sonarcloud_branches
+
+              super
             end
           end
         end

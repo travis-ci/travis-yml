@@ -7,11 +7,11 @@ module Travis
       module Def
         module Addon
           class Jwts < Dsl::Seq
+            registry :addon
             register :jwts
 
             def define
               title 'JSON Web Tokens'
-              namespace :addon
               type :secure
               export
             end

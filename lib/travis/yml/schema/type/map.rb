@@ -12,7 +12,7 @@ module Travis
 
           register :map
 
-          opts %i(keys max_size prefix required unique)
+          opts %i(max_size prefix required)
 
           def self.type
             :map
@@ -20,8 +20,10 @@ module Travis
 
           def_delegators :mappings, :[]=, :[], :each, :keys, :key?, :values
 
+          attr_writer :types, :mappings
+
           def types
-            @types ||= {}
+            @types ||= []
           end
 
           def mappings
@@ -50,6 +52,13 @@ module Travis
 
           def strict?
             mappings.empty? || false?(@strict) ? false : true
+          end
+
+          def dup
+            node = super
+            node.types = node.types.map(&:dup)
+            node.mappings = node.map { |key, node| [key, node.dup] }.to_h
+            node
           end
 
           def to_h

@@ -99,4 +99,8 @@ describe Travis::Yml::Helper::Obj do
   describe :titleize do
     it { expect(titleize('foo_bar')).to eq 'Foo Bar' }
   end
+
+  describe :underscore do
+    xit { expect(titleize('__FooBar__')).to eq 'foo_bar' }
+  end
 end

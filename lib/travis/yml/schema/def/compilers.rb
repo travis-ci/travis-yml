@@ -9,8 +9,16 @@ module Travis
           register :compilers
 
           def define
-            supports :only, language: %i(c cpp)
+            type :compiler
             export
+          end
+        end
+
+        class Compiler < Dsl::Str
+          register :compiler
+
+          def define
+            supports :only, language: %i(c cpp)
           end
         end
       end

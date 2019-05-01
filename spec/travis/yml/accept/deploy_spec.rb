@@ -299,7 +299,7 @@ describe Travis::Yml, 'deploy' do
               python: 2.7
         )
         it { should serialize_to language: 'ruby', deploy: [provider: 'heroku', on: { python: '2.7' }] }
-        it { should_not have_msg }
+        it { should have_msg [:warn, :'deploy.on.python', :unsupported, on_key: :language, on_value: 'ruby', key: :python, value: '2.7'] }
       end
 
       describe 'unknown key' do

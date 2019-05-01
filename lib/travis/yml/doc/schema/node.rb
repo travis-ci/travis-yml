@@ -10,13 +10,16 @@ module Travis
           include Registry
 
           def self.opts
-            @opts ||= %i(id type changes deprecated flags normal required strict)
+            @opts ||= %i(id type aliases changes deprecated flags normal only
+              except required strict unique)
           end
 
           def initialize(opts)
             validate_opts(opts)
             super
           end
+
+          attr_writer :opts
 
           def matches?(value)
             value && value.is?(type) || value.none?
@@ -59,6 +62,26 @@ module Travis
             opts[:changes]
           end
 
+          def default?
+            false
+          end
+
+          def deprecated?
+            !!opts[:deprecated]
+          end
+
+          def deprecated
+            opts[:deprecated]
+          end
+
+          def edge?
+            flags.include?(:edge)
+          end
+
+          def flags
+            opts[:flags] ||= []
+          end
+
           def normal?
             !!opts[:normal]
           end
@@ -83,33 +106,6 @@ module Travis
             @silent ||= []
           end
 
-          # def full_key
-          #   root? ? :root : [parent.full_key, key].join('.').split('.').compact.uniq.join('.')
-          # end
-
-          # def name
-          #   opts[:name]
-          # end
-
-          # def lookup?
-          #   is_a?(Lookup)
-          # end
-
-          # def changes
-          #   Array(opts[:change])
-          # end
-          # memoize :changes
-
-          # def validators
-          #   Array(opts[:validate])
-          # end
-          # memoize :validators
-
-          # def cast
-          #   opts[:cast] || :str
-          # end
-          # memoize :cast
-
           def strict?
             false?(opts[:strict]) ? false : true
           end
@@ -123,32 +119,16 @@ module Travis
             opts[:prefix]
           end
 
-          def aliases
-            {}
-          end
-
-          def default?
-            false
-          end
-
           def required?
             !!opts[:required]
           end
 
-          def edge?
-            flags.include?(:edge)
+          def unique?
+            !!opts[:normal]
           end
 
-          def flags
-            opts[:flags] ||= []
-          end
-
-          def deprecated?
-            !!opts[:deprecated]
-          end
-
-          def deprecated
-            opts[:deprecated]
+          def match(strs, str)
+            Match.new(strs.map(&:to_s), str.to_s, self).run
           end
 
           STOP = {
@@ -176,13 +156,9 @@ module Travis
               vimscript
             ),
             to: %w(
-              elm_tests
+              elm_test
             )
           }
-
-          def match(strs, str)
-            Match.new(strs.map(&:to_s), str.to_s, self).run
-          end
 
           def stop?(from, to = nil)
             stop[:from].include?(from.to_s) || to && stop[:to].include?(to.to_s)
@@ -197,9 +173,19 @@ module Travis
             []
           end
 
+          def supports
+            only(opts, :only, :except)
+          end
+
           def validate_opts(opts)
             keys = opts.keys - self.class.opts
             raise "Unknown opts on #{type}: #{keys}" if keys.any?
+          end
+
+          def dup
+            node = super
+            node.opts = node.opts.dup
+            node
           end
 
           def to_h

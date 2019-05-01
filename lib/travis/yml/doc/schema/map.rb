@@ -10,7 +10,7 @@ module Travis
 
           def self.opts
             @opts ||= super + %i(aliases format detect expand keys max_size
-              prefix required strict support unique)
+              prefix required strict unique) # support
           end
 
           attr_writer :map
@@ -59,9 +59,8 @@ module Travis
           end
 
           def aliases
-            compact(opts[:keys].map do |key, opts|
-              opts.fetch(:aliases, []).map { |name| [name, key] }
-            end.flatten(1).to_h)
+            aliases = map.values.map(&:opts).map { |opts| opts[:aliases] }
+            compact(invert(keys.zip(aliases)))
           end
           memoize :aliases
 
@@ -87,8 +86,13 @@ module Travis
           end
 
           def deprecated_key(key)
-            opts[:keys]&.fetch(key, {})&.fetch(:deprecated, nil)
+            deprecated_keys[key]
           end
+
+          def deprecated_keys
+            map.map { |key, node| [key, node.deprecated] }.to_h
+          end
+          memoize :deprecated_keys
 
           def required?(key = nil)
             key ? required.include?(key) : !!opts[:required]
@@ -103,8 +107,9 @@ module Travis
           end
 
           def unique
-            opts[:unique] || []
+            map { |key, schema| key if schema.unique? }.compact.keys
           end
+          memoize :unique
 
           def max_size?
             !!opts[:max_size]
@@ -141,8 +146,13 @@ module Travis
           end
 
           def support(key)
-            only(opts[:keys][key] || {}, :only, :except)
+            supports[key] || {}
           end
+
+          def supports
+            compact(map.map { |key, schema| [key, schema.supports] }.to_h)
+          end
+          memoize :supports
 
           def to_h
             compact(id: id, key: key, type: type, value: map.map { |key, obj| [key, obj.to_h] }.to_h, opts: opts)

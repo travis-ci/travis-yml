@@ -7,27 +7,10 @@ module Travis
     module Schema
       module Type
         class Secure < Scalar
-          # anyOf: [
-          #   {
-          #     type: :object,
-          #     properties: {
-          #       secure: {
-          #         type: :string
-          #       }
-          #     },
-          #     additionalProperties: false,
-          #     maxProperties: 1,
-          #     normal: true
-          #   },
-          #   {
-          #     type: :string,
-          #     normal: true
-          #   }
-          # ]
           register :secure
 
           def self.type
-            :secure
+            registry_key
           end
 
           def namespace
@@ -41,23 +24,17 @@ module Travis
           def export?
             true
           end
+
+          def secure?
+            true
+          end
         end
 
         class Secures < Seq
-          # anyOf: [
-          #   {
-          #     type: :array,
-          #     items: { '$ref': '#/definitions/secure' },
-          #     normal: true
-          #   },
-          #   {
-          #     '$ref': '#/definitions/secure'
-          #   }
-          # ]
           register :secures
 
           def self.type
-            :secures
+            registry_key
           end
 
           def namespace

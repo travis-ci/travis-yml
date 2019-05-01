@@ -50,6 +50,11 @@ module Travis
             map(&:all_keys)
           end
 
+          def supports
+            merge(super, *map(&:supports))
+          end
+          memoize :supports
+
           def to_h
             compact(id: id, key: key, type: type, schemas: schemas&.map(&:to_h), opts: opts)
           end

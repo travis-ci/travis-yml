@@ -10,7 +10,7 @@ module Travis
 
           def define
             matrix :python
-            map :virtualenv, to: :virtualenv, strict: false, alias: :virtual_env
+            map :virtualenv, to: :virtualenv
           end
         end
 
@@ -18,6 +18,8 @@ module Travis
           register :virtualenv
 
           def define
+            strict false # why?
+            aliases :virtual_env
             map :system_site_packages, to: :bool
           end
         end

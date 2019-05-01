@@ -2,7 +2,6 @@ require 'travis/yml/schema/type/all'
 require 'travis/yml/schema/type/any'
 require 'travis/yml/schema/type/bool'
 require 'travis/yml/schema/type/enum'
-require 'travis/yml/schema/type/forms'
 require 'travis/yml/schema/type/lang'
 require 'travis/yml/schema/type/map'
 require 'travis/yml/schema/type/node'
@@ -21,7 +20,8 @@ module Travis
       module Type
         extend self
 
-        # Expands Any and Seq nodes to Seq nodes or other types, e.g.
+        # Expands Any and Seq nodes to Seq nodes or other types (used by
+        # Schema::Docs). E.g.:
         #
         #   any(seq(map, str), bool) => [seq(map), seq(str), bool]
         #   any(map, str)            => [map, str]
@@ -39,34 +39,6 @@ module Travis
           else
             [node]
           end
-        end
-
-        def exported(namespace, id)
-          exports[namespace]&.fetch(id, nil)
-        end
-
-        def export(obj)
-          # raise "cannot export a ref #{obj.inspect}" if obj.ref?
-          exports[obj.namespace] ||= {}
-          exports[obj.namespace][obj.id] = obj
-        end
-
-        def exports
-          @exports ||= {
-            type: {
-              strs: transform(Strs.new),
-              secures: transform(Secures.new),
-              secure: transform(Secure.new),
-            }
-          }
-        end
-
-        def resolve(type)
-          type.is_a?(Class) ? type : Node[type]
-        end
-
-        def transform(node)
-          Type::Forms.apply(node)
         end
       end
     end

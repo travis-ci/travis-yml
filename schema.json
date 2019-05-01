@@ -1,65 +1,79 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
-  "title": "JSON schema for Travis CI configuration files",
+  "allOf": [
+    {
+      "type": "object",
+      "properties": {
+        "version": {
+          "$ref": "#/definitions/type/version"
+        },
+        "import": {
+          "$ref": "#/definitions/type/imports"
+        },
+        "language": {
+          "$ref": "#/definitions/type/language"
+        },
+        "os": {
+          "$ref": "#/definitions/type/oss"
+        },
+        "arch": {
+          "$ref": "#/definitions/type/archs"
+        },
+        "dist": {
+          "$ref": "#/definitions/type/dist"
+        },
+        "sudo": {
+          "$ref": "#/definitions/type/sudo"
+        },
+        "env": {
+          "$ref": "#/definitions/type/env"
+        },
+        "compiler": {
+          "$ref": "#/definitions/type/compilers"
+        },
+        "stages": {
+          "$ref": "#/definitions/type/stages"
+        },
+        "matrix": {
+          "$ref": "#/definitions/type/matrix",
+          "aliases": [
+            "jobs"
+          ]
+        },
+        "notifications": {
+          "$ref": "#/definitions/type/notifications"
+        },
+        "stack": {
+          "$ref": "#/definitions/type/stack"
+        },
+        "conditions": {
+          "$ref": "#/definitions/type/conditions"
+        },
+        "filter_secrets": {
+          "type": "boolean"
+        },
+        "trace": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "language",
+        "os"
+      ]
+    },
+    {
+      "$ref": "#/definitions/type/languages"
+    },
+    {
+      "$ref": "#/definitions/type/job"
+    }
+  ],
+  "required": [
+    "language",
+    "os"
+  ],
   "definitions": {
     "type": {
-      "secure": {
-        "$id": "secure",
-        "anyOf": [
-          {
-            "type": "object",
-            "properties": {
-              "secure": {
-                "type": "string"
-              }
-            },
-            "additionalProperties": false,
-            "maxProperties": 1,
-            "normal": true
-          },
-          {
-            "type": "string",
-            "normal": true
-          }
-        ],
-        "title": "Secure"
-      },
-      "secures": {
-        "$id": "secures",
-        "anyOf": [
-          {
-            "type": "array",
-            "items": {
-              "$ref": "#/definitions/type/secure"
-            },
-            "normal": true
-          },
-          {
-            "$ref": "#/definitions/type/secure"
-          }
-        ],
-        "title": "Secures"
-      },
-      "strs": {
-        "$id": "strs",
-        "anyOf": [
-          {
-            "type": "array",
-            "minItems": 1,
-            "items": {
-              "anyOf": [
-                {
-                  "type": "string"
-                }
-              ]
-            },
-            "normal": true
-          },
-          {
-            "type": "string"
-          }
-        ]
-      },
       "addons": {
         "$id": "addons",
         "title": "Addons",
@@ -112,30 +126,7 @@
             "$ref": "#/definitions/type/secures"
           },
           "sonarcloud": {
-            "type": "object",
-            "properties": {
-              "organization": {
-                "type": "string"
-              },
-              "token": {
-                "$ref": "#/definitions/type/secure"
-              },
-              "github_token": {
-                "$ref": "#/definitions/type/secure"
-              },
-              "branches": {
-                "$ref": "#/definitions/type/strs"
-              }
-            },
-            "additionalProperties": false,
-            "keys": {
-              "github_token": {
-                "deprecated": "deprecated_sonarcloud_github_token"
-              },
-              "branches": {
-                "deprecated": "deprecated_sonarcloud_branches"
-              }
-            }
+            "$ref": "#/definitions/addon/sonarcloud"
           },
           "srcclr": {
             "anyOf": [
@@ -156,7 +147,10 @@
             "type": "string"
           },
           "postgresql": {
-            "type": "string"
+            "type": "string",
+            "aliases": [
+              "postgres"
+            ]
           },
           "rethinkdb": {
             "type": "string"
@@ -165,14 +159,7 @@
             "$ref": "#/definitions/type/deploys"
           }
         },
-        "additionalProperties": false,
-        "keys": {
-          "postgresql": {
-            "aliases": [
-              "postgres"
-            ]
-          }
-        }
+        "additionalProperties": false
       },
       "arch": {
         "$id": "arch",
@@ -180,6 +167,11 @@
         "description": "The architecture that will be selected for the build environment.",
         "type": "string",
         "downcase": true,
+        "only": {
+          "os": [
+            "linux"
+          ]
+        },
         "enum": [
           "amd64",
           "ppc64le"
@@ -207,7 +199,12 @@
           {
             "type": "array",
             "items": {
-              "$ref": "#/definitions/type/arch"
+              "$ref": "#/definitions/type/arch",
+              "only": {
+                "os": [
+                  "linux"
+                ]
+              }
             },
             "flags": [
               "expand"
@@ -215,7 +212,12 @@
             "normal": true
           },
           {
-            "$ref": "#/definitions/type/arch"
+            "$ref": "#/definitions/type/arch",
+            "only": {
+              "os": [
+                "linux"
+              ]
+            }
           }
         ],
         "flags": [
@@ -234,27 +236,29 @@
                 "$ref": "#/definitions/type/strs"
               },
               "except": {
-                "$ref": "#/definitions/type/strs"
-              }
-            },
-            "additionalProperties": false,
-            "normal": true,
-            "prefix": {
-              "key": "only"
-            },
-            "keys": {
-              "except": {
+                "$ref": "#/definitions/type/strs",
                 "aliases": [
                   "exclude"
                 ]
               }
+            },
+            "additionalProperties": false,
+            "aliases": [
+              "branch"
+            ],
+            "normal": true,
+            "prefix": {
+              "key": "only"
             }
           },
           {
             "$ref": "#/definitions/type/strs"
           }
         ],
-        "normal": true
+        "normal": true,
+        "aliases": [
+          "branch"
+        ]
       },
       "cache": {
         "$id": "cache",
@@ -330,13 +334,31 @@
           {
             "type": "array",
             "items": {
-              "type": "string"
+              "type": "string",
+              "only": {
+                "language": [
+                  "c",
+                  "cpp"
+                ]
+              }
             },
+            "flags": [
+              "expand"
+            ],
             "normal": true
           },
           {
-            "type": "string"
+            "type": "string",
+            "only": {
+              "language": [
+                "c",
+                "cpp"
+              ]
+            }
           }
+        ],
+        "flags": [
+          "expand"
         ]
       },
       "conditions": {
@@ -542,13 +564,6 @@
             "properties": {
               "source": {
                 "type": "string"
-              },
-              "mode": {
-                "type": "string",
-                "enum": [
-                  "merge",
-                  "deep_merge"
-                ]
               }
             },
             "additionalProperties": false,
@@ -579,102 +594,131 @@
           }
         ]
       },
+      "jdks": {
+        "$id": "jdks",
+        "title": "Jdks",
+        "anyOf": [
+          {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "flags": [
+              "expand"
+            ],
+            "only": {
+              "language": [
+                "android"
+              ]
+            },
+            "except": {
+              "os": [
+                "osx"
+              ]
+            },
+            "normal": true
+          },
+          {
+            "type": "string"
+          }
+        ],
+        "flags": [
+          "expand"
+        ],
+        "only": {
+          "language": [
+            "android"
+          ]
+        },
+        "except": {
+          "os": [
+            "osx"
+          ]
+        }
+      },
       "job": {
         "$id": "job",
         "title": "Job",
-        "allOf": [
-          {
-            "type": "object",
-            "properties": {
-              "group": {
-                "$ref": "#/definitions/type/group"
-              },
-              "osx_image": {
-                "type": "string",
-                "flags": [
-                  "edge"
-                ]
-              },
-              "services": {
-                "$ref": "#/definitions/type/services"
-              },
-              "addons": {
-                "$ref": "#/definitions/type/addons"
-              },
-              "branches": {
-                "$ref": "#/definitions/type/branches"
-              },
-              "cache": {
-                "$ref": "#/definitions/type/cache"
-              },
-              "deploy": {
-                "$ref": "#/definitions/type/deploys"
-              },
-              "git": {
-                "$ref": "#/definitions/type/git"
-              },
-              "source_key": {
-                "$ref": "#/definitions/type/secure"
-              },
-              "if": {
-                "type": "string"
-              },
-              "before_install": {
-                "$ref": "#/definitions/type/strs"
-              },
-              "install": {
-                "$ref": "#/definitions/type/strs"
-              },
-              "after_install": {
-                "$ref": "#/definitions/type/strs"
-              },
-              "before_script": {
-                "$ref": "#/definitions/type/strs"
-              },
-              "script": {
-                "$ref": "#/definitions/type/strs"
-              },
-              "after_script": {
-                "$ref": "#/definitions/type/strs"
-              },
-              "after_result": {
-                "$ref": "#/definitions/type/strs"
-              },
-              "after_success": {
-                "$ref": "#/definitions/type/strs"
-              },
-              "after_failure": {
-                "$ref": "#/definitions/type/strs"
-              },
-              "before_deploy": {
-                "$ref": "#/definitions/type/strs"
-              },
-              "after_deploy": {
-                "$ref": "#/definitions/type/strs"
-              },
-              "before_cache": {
-                "$ref": "#/definitions/type/strs"
-              }
-            },
-            "keys": {
-              "osx_image": {
-                "only": {
-                  "os": [
-                    "osx"
-                  ]
-                }
-              },
-              "branches": {
-                "aliases": [
-                  "branch"
-                ]
-              }
+        "type": "object",
+        "properties": {
+          "group": {
+            "$ref": "#/definitions/type/group"
+          },
+          "osx_image": {
+            "type": "string",
+            "flags": [
+              "edge"
+            ],
+            "only": {
+              "os": [
+                "osx"
+              ]
             }
           },
-          {
-            "$ref": "#/definitions/type/languages"
+          "services": {
+            "$ref": "#/definitions/type/services"
+          },
+          "addons": {
+            "$ref": "#/definitions/type/addons"
+          },
+          "branches": {
+            "$ref": "#/definitions/type/branches",
+            "aliases": [
+              "branch"
+            ]
+          },
+          "cache": {
+            "$ref": "#/definitions/type/cache"
+          },
+          "deploy": {
+            "$ref": "#/definitions/type/deploys"
+          },
+          "git": {
+            "$ref": "#/definitions/type/git"
+          },
+          "source_key": {
+            "$ref": "#/definitions/type/secure"
+          },
+          "if": {
+            "type": "string"
+          },
+          "before_install": {
+            "$ref": "#/definitions/type/strs"
+          },
+          "install": {
+            "$ref": "#/definitions/type/strs"
+          },
+          "after_install": {
+            "$ref": "#/definitions/type/strs"
+          },
+          "before_script": {
+            "$ref": "#/definitions/type/strs"
+          },
+          "script": {
+            "$ref": "#/definitions/type/strs"
+          },
+          "after_script": {
+            "$ref": "#/definitions/type/strs"
+          },
+          "after_result": {
+            "$ref": "#/definitions/type/strs"
+          },
+          "after_success": {
+            "$ref": "#/definitions/type/strs"
+          },
+          "after_failure": {
+            "$ref": "#/definitions/type/strs"
+          },
+          "before_deploy": {
+            "$ref": "#/definitions/type/strs"
+          },
+          "after_deploy": {
+            "$ref": "#/definitions/type/strs"
+          },
+          "before_cache": {
+            "$ref": "#/definitions/type/strs"
           }
-        ]
+        }
       },
       "language": {
         "$id": "language",
@@ -938,35 +982,35 @@
                 "$ref": "#/definitions/type/matrix_entries"
               },
               "allow_failures": {
-                "$ref": "#/definitions/type/matrix_entries"
-              },
-              "fast_finish": {
-                "type": "boolean"
-              }
-            },
-            "additionalProperties": false,
-            "normal": true,
-            "prefix": {
-              "key": "include"
-            },
-            "keys": {
-              "allow_failures": {
+                "$ref": "#/definitions/type/matrix_entries",
                 "aliases": [
                   "allowed_failures"
                 ]
               },
               "fast_finish": {
+                "type": "boolean",
                 "aliases": [
                   "fast_failure"
                 ]
               }
+            },
+            "additionalProperties": false,
+            "aliases": [
+              "jobs"
+            ],
+            "normal": true,
+            "prefix": {
+              "key": "include"
             }
           },
           {
             "$ref": "#/definitions/type/matrix_entries"
           }
         ],
-        "normal": true
+        "normal": true,
+        "aliases": [
+          "jobs"
+        ]
       },
       "matrix_entries": {
         "$id": "matrix_entries",
@@ -975,12 +1019,18 @@
           {
             "type": "array",
             "items": {
-              "$ref": "#/definitions/type/matrix_entry"
+              "$ref": "#/definitions/type/matrix_entry",
+              "aliases": [
+                "jobs"
+              ]
             },
             "normal": true
           },
           {
-            "$ref": "#/definitions/type/matrix_entry"
+            "$ref": "#/definitions/type/matrix_entry",
+            "aliases": [
+              "jobs"
+            ]
           }
         ]
       },
@@ -992,7 +1042,8 @@
             "type": "object",
             "properties": {
               "name": {
-                "type": "string"
+                "type": "string",
+                "unique": true
               },
               "language": {
                 "$ref": "#/definitions/type/language"
@@ -1001,7 +1052,12 @@
                 "$ref": "#/definitions/type/os"
               },
               "arch": {
-                "$ref": "#/definitions/type/arch"
+                "$ref": "#/definitions/type/arch",
+                "only": {
+                  "os": [
+                    "linux"
+                  ]
+                }
               },
               "dist": {
                 "$ref": "#/definitions/type/dist"
@@ -1016,21 +1072,7 @@
                 "type": "string"
               },
               "compiler": {
-                "$ref": "#/definitions/type/compilers"
-              }
-            },
-            "unique": [
-              "name"
-            ],
-            "keys": {
-              "arch": {
-                "only": {
-                  "os": [
-                    "linux"
-                  ]
-                }
-              },
-              "compiler": {
+                "type": "string",
                 "only": {
                   "language": [
                     "c",
@@ -1038,11 +1080,20 @@
                   ]
                 }
               }
-            }
+            },
+            "aliases": [
+              "jobs"
+            ]
+          },
+          {
+            "$ref": "#/definitions/type/support"
           },
           {
             "$ref": "#/definitions/type/job"
           }
+        ],
+        "aliases": [
+          "jobs"
         ]
       },
       "notifications": {
@@ -1056,7 +1107,10 @@
                 "$ref": "#/definitions/notification/campfire"
               },
               "email": {
-                "$ref": "#/definitions/notification/email"
+                "$ref": "#/definitions/notification/email",
+                "aliases": [
+                  "emails"
+                ]
               },
               "flowdock": {
                 "$ref": "#/definitions/notification/flowdock"
@@ -1074,7 +1128,10 @@
                 "$ref": "#/definitions/notification/slack"
               },
               "webhooks": {
-                "$ref": "#/definitions/notification/webhooks"
+                "$ref": "#/definitions/notification/webhooks",
+                "aliases": [
+                  "webhook"
+                ]
               },
               "on_success": {
                 "$ref": "#/definitions/notification/frequency"
@@ -1088,18 +1145,6 @@
             "prefix": {
               "key": "email"
             },
-            "keys": {
-              "email": {
-                "aliases": [
-                  "emails"
-                ]
-              },
-              "webhooks": {
-                "aliases": [
-                  "webhook"
-                ]
-              }
-            },
             "changes": [
               {
                 "change": "inherit",
@@ -1111,7 +1156,10 @@
             ]
           },
           {
-            "$ref": "#/definitions/notification/email"
+            "$ref": "#/definitions/notification/email",
+            "aliases": [
+              "emails"
+            ]
           }
         ],
         "normal": true
@@ -1230,6 +1278,43 @@
         ],
         "flags": [
           "expand"
+        ]
+      },
+      "secure": {
+        "$id": "secure",
+        "title": "Secure",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "secure": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false,
+            "maxProperties": 1,
+            "normal": true
+          },
+          {
+            "type": "string",
+            "normal": true
+          }
+        ]
+      },
+      "secures": {
+        "$id": "secures",
+        "title": "Secures",
+        "anyOf": [
+          {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/type/secure"
+            },
+            "normal": true
+          },
+          {
+            "$ref": "#/definitions/type/secure"
+          }
         ]
       },
       "service": {
@@ -1358,6 +1443,27 @@
           }
         ]
       },
+      "strs": {
+        "$id": "strs",
+        "title": "Strs",
+        "anyOf": [
+          {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                }
+              ]
+            },
+            "normal": true
+          },
+          {
+            "type": "string"
+          }
+        ]
+      },
       "sudo": {
         "$id": "sudo",
         "title": "Sudo",
@@ -1370,6 +1476,127 @@
             "type": "string"
           }
         ]
+      },
+      "support": {
+        "$id": "support",
+        "title": "Support",
+        "anyOf": [
+          {
+            "$ref": "#/definitions/support/android_support"
+          },
+          {
+            "$ref": "#/definitions/support/c_support"
+          },
+          {
+            "$ref": "#/definitions/support/clojure_support"
+          },
+          {
+            "$ref": "#/definitions/support/cpp_support"
+          },
+          {
+            "$ref": "#/definitions/support/crystal_support"
+          },
+          {
+            "$ref": "#/definitions/support/csharp_support"
+          },
+          {
+            "$ref": "#/definitions/support/d_support"
+          },
+          {
+            "$ref": "#/definitions/support/dart_support"
+          },
+          {
+            "$ref": "#/definitions/support/elixir_support"
+          },
+          {
+            "$ref": "#/definitions/support/elm_support"
+          },
+          {
+            "$ref": "#/definitions/support/erlang_support"
+          },
+          {
+            "$ref": "#/definitions/support/go_support"
+          },
+          {
+            "$ref": "#/definitions/support/groovy_support"
+          },
+          {
+            "$ref": "#/definitions/support/haskell_support"
+          },
+          {
+            "$ref": "#/definitions/support/haxe_support"
+          },
+          {
+            "$ref": "#/definitions/support/java_support"
+          },
+          {
+            "$ref": "#/definitions/support/julia_support"
+          },
+          {
+            "$ref": "#/definitions/support/nix_support"
+          },
+          {
+            "$ref": "#/definitions/support/node_js_support"
+          },
+          {
+            "$ref": "#/definitions/support/objective-c_support"
+          },
+          {
+            "$ref": "#/definitions/support/perl_support"
+          },
+          {
+            "$ref": "#/definitions/support/perl6_support"
+          },
+          {
+            "$ref": "#/definitions/support/php_support"
+          },
+          {
+            "$ref": "#/definitions/support/python_support"
+          },
+          {
+            "$ref": "#/definitions/support/r_support"
+          },
+          {
+            "$ref": "#/definitions/support/ruby_support"
+          },
+          {
+            "$ref": "#/definitions/support/rust_support"
+          },
+          {
+            "$ref": "#/definitions/support/scala_support"
+          },
+          {
+            "$ref": "#/definitions/support/shell_support"
+          },
+          {
+            "$ref": "#/definitions/support/smalltalk_support"
+          },
+          {
+            "$ref": "#/definitions/support/__connie___support"
+          },
+          {
+            "$ref": "#/definitions/support/__amethyst___support"
+          },
+          {
+            "$ref": "#/definitions/support/__garnet___support"
+          },
+          {
+            "$ref": "#/definitions/support/__stevonnie___support"
+          },
+          {
+            "$ref": "#/definitions/support/__opal___support"
+          },
+          {
+            "$ref": "#/definitions/support/__sardonyx___support"
+          },
+          {
+            "$ref": "#/definitions/support/__onion___support"
+          },
+          {
+            "$ref": "#/definitions/support/__cookiecat___support"
+          }
+        ],
+        "normal": true
       },
       "version": {
         "$id": "version",
@@ -1387,30 +1614,44 @@
             "type": "object",
             "properties": {
               "packages": {
-                "$ref": "#/definitions/type/strs"
+                "$ref": "#/definitions/type/strs",
+                "aliases": [
+                  "package"
+                ]
               },
               "sources": {
                 "anyOf": [
                   {
                     "type": "array",
                     "items": {
-                      "type": "object",
-                      "properties": {
-                        "name": {
-                          "type": "string"
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "name": {
+                              "type": "string"
+                            },
+                            "sourceline": {
+                              "type": "string"
+                            },
+                            "key_url": {
+                              "type": "string"
+                            }
+                          },
+                          "additionalProperties": false,
+                          "prefix": {
+                            "key": "name"
+                          },
+                          "normal": true
                         },
-                        "sourceline": {
-                          "type": "string"
-                        },
-                        "key_url": {
+                        {
                           "type": "string"
                         }
-                      },
-                      "additionalProperties": false,
-                      "prefix": {
-                        "key": "name"
-                      }
+                      ]
                     },
+                    "aliases": [
+                      "source"
+                    ],
                     "normal": true
                   },
                   {
@@ -1429,17 +1670,15 @@
                     "additionalProperties": false,
                     "prefix": {
                       "key": "name"
-                    }
-                  },
-                  {
-                    "type": "array",
-                    "items": {
-                      "type": "string"
-                    }
+                    },
+                    "normal": true
                   },
                   {
                     "type": "string"
                   }
+                ],
+                "aliases": [
+                  "source"
                 ]
               },
               "dist": {
@@ -1453,18 +1692,6 @@
             "prefix": {
               "key": "packages"
             },
-            "keys": {
-              "packages": {
-                "aliases": [
-                  "package"
-                ]
-              },
-              "sources": {
-                "aliases": [
-                  "source"
-                ]
-              }
-            },
             "normal": true,
             "changes": [
               {
@@ -1473,7 +1700,10 @@
             ]
           },
           {
-            "$ref": "#/definitions/type/strs"
+            "$ref": "#/definitions/type/strs",
+            "aliases": [
+              "package"
+            ]
           },
           {
             "type": "boolean"
@@ -1498,10 +1728,22 @@
                 "type": "string"
               },
               "key": {
-                "$ref": "#/definitions/type/secure"
+                "$ref": "#/definitions/type/secure",
+                "aliases": [
+                  "aws_access_key_id",
+                  "aws_access_key",
+                  "access_key_id",
+                  "access_key"
+                ]
               },
               "secret": {
-                "$ref": "#/definitions/type/secure"
+                "$ref": "#/definitions/type/secure",
+                "aliases": [
+                  "aws_secret_access_key",
+                  "aws_secret_key",
+                  "secret_access_key",
+                  "secret_key"
+                ]
               },
               "paths": {
                 "$ref": "#/definitions/type/strs"
@@ -1525,7 +1767,10 @@
                 "type": "number"
               },
               "region": {
-                "type": "string"
+                "type": "string",
+                "aliases": [
+                  "s3_region"
+                ]
               },
               "permissions": {
                 "type": "string"
@@ -1538,29 +1783,6 @@
               }
             },
             "additionalProperties": false,
-            "keys": {
-              "key": {
-                "aliases": [
-                  "aws_access_key_id",
-                  "aws_access_key",
-                  "access_key_id",
-                  "access_key"
-                ]
-              },
-              "secret": {
-                "aliases": [
-                  "aws_secret_access_key",
-                  "aws_secret_key",
-                  "secret_access_key",
-                  "secret_key"
-                ]
-              },
-              "region": {
-                "aliases": [
-                  "s3_region"
-                ]
-              }
-            },
             "normal": true,
             "changes": [
               {
@@ -1806,12 +2028,12 @@
               }
             },
             "additionalProperties": false,
-            "normal": true,
             "changes": [
               {
                 "change": "enable"
               }
-            ]
+            ],
+            "normal": true
           },
           {
             "type": "boolean"
@@ -1826,22 +2048,30 @@
           {
             "type": "array",
             "items": {
-              "type": "object",
-              "properties": {
-                "name": {
-                  "type": "string"
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string"
+                    },
+                    "classic": {
+                      "type": "boolean"
+                    },
+                    "channel": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": false,
+                  "prefix": {
+                    "key": "name"
+                  },
+                  "normal": true
                 },
-                "classic": {
-                  "type": "boolean"
-                },
-                "channel": {
+                {
                   "type": "string"
                 }
-              },
-              "additionalProperties": false,
-              "prefix": {
-                "key": "name"
-              }
+              ]
             },
             "normal": true
           },
@@ -1861,18 +2091,2319 @@
             "additionalProperties": false,
             "prefix": {
               "key": "name"
-            }
-          },
-          {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
+            },
+            "normal": true
           },
           {
             "type": "string"
           }
         ]
+      },
+      "sonarcloud": {
+        "$id": "addon_sonarcloud",
+        "title": "Addon Sonarcloud",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "organization": {
+                "type": "string"
+              },
+              "token": {
+                "$ref": "#/definitions/type/secure"
+              },
+              "github_token": {
+                "$ref": "#/definitions/type/secure",
+                "deprecated": "deprecated_sonarcloud_github_token"
+              },
+              "branches": {
+                "$ref": "#/definitions/type/strs",
+                "deprecated": "deprecated_sonarcloud_branches"
+              }
+            },
+            "additionalProperties": false,
+            "normal": true,
+            "changes": [
+              {
+                "change": "enable"
+              }
+            ]
+          },
+          {
+            "type": "boolean"
+          }
+        ],
+        "normal": true
+      }
+    },
+    "language": {
+      "__amethyst__": {
+        "$id": "language___amethyst__",
+        "title": "Language Amethyst",
+        "type": "object",
+        "normal": true,
+        "flags": [
+          "internal"
+        ]
+      },
+      "__connie__": {
+        "$id": "language___connie__",
+        "title": "Language Connie",
+        "type": "object",
+        "normal": true,
+        "flags": [
+          "internal"
+        ]
+      },
+      "__cookiecat__": {
+        "$id": "language___cookiecat__",
+        "title": "Language Cookiecat",
+        "type": "object",
+        "normal": true,
+        "flags": [
+          "internal"
+        ]
+      },
+      "__garnet__": {
+        "$id": "language___garnet__",
+        "title": "Language Garnet",
+        "type": "object",
+        "normal": true,
+        "flags": [
+          "internal"
+        ]
+      },
+      "__onion__": {
+        "$id": "language___onion__",
+        "title": "Language Onion",
+        "type": "object",
+        "normal": true,
+        "flags": [
+          "internal"
+        ]
+      },
+      "__opal__": {
+        "$id": "language___opal__",
+        "title": "Language Opal",
+        "type": "object",
+        "normal": true,
+        "flags": [
+          "internal"
+        ]
+      },
+      "__sardonyx__": {
+        "$id": "language___sardonyx__",
+        "title": "Language Sardonyx",
+        "type": "object",
+        "normal": true,
+        "flags": [
+          "internal"
+        ]
+      },
+      "__stevonnie__": {
+        "$id": "language___stevonnie__",
+        "title": "Language Stevonnie",
+        "type": "object",
+        "normal": true,
+        "flags": [
+          "internal"
+        ]
+      },
+      "android": {
+        "$id": "language_android",
+        "title": "Language Android",
+        "type": "object",
+        "properties": {
+          "jdk": {
+            "$ref": "#/definitions/type/jdks",
+            "only": {
+              "language": [
+                "android"
+              ]
+            },
+            "except": {
+              "os": [
+                "osx"
+              ]
+            }
+          },
+          "android": {
+            "type": "object",
+            "properties": {
+              "components": {
+                "$ref": "#/definitions/type/strs"
+              },
+              "licenses": {
+                "$ref": "#/definitions/type/strs"
+              }
+            },
+            "additionalProperties": false,
+            "only": {
+              "language": [
+                "android"
+              ]
+            }
+          }
+        },
+        "normal": true
+      },
+      "c": {
+        "$id": "language_c",
+        "title": "Language C",
+        "type": "object",
+        "normal": true
+      },
+      "clojure": {
+        "$id": "language_clojure",
+        "title": "Language Clojure",
+        "type": "object",
+        "properties": {
+          "jdk": {
+            "$ref": "#/definitions/type/jdks",
+            "only": {
+              "language": [
+                "clojure"
+              ]
+            },
+            "except": {
+              "os": [
+                "osx"
+              ]
+            }
+          },
+          "lein": {
+            "type": "string",
+            "only": {
+              "language": [
+                "clojure"
+              ]
+            }
+          }
+        },
+        "normal": true
+      },
+      "cpp": {
+        "$id": "language_cpp",
+        "title": "Language Cpp",
+        "type": "object",
+        "normal": true
+      },
+      "crystal": {
+        "$id": "language_crystal",
+        "title": "Language Crystal",
+        "type": "object",
+        "properties": {
+          "crystal": {
+            "$ref": "#/definitions/type/strs",
+            "flags": [
+              "expand"
+            ],
+            "only": {
+              "language": [
+                "crystal"
+              ]
+            }
+          }
+        },
+        "normal": true
+      },
+      "csharp": {
+        "$id": "language_csharp",
+        "title": "Language Csharp",
+        "type": "object",
+        "properties": {
+          "dotnet": {
+            "$ref": "#/definitions/type/strs",
+            "flags": [
+              "expand"
+            ],
+            "only": {
+              "language": [
+                "csharp"
+              ]
+            }
+          },
+          "mono": {
+            "$ref": "#/definitions/type/strs",
+            "flags": [
+              "expand"
+            ],
+            "only": {
+              "language": [
+                "csharp"
+              ]
+            }
+          },
+          "solution": {
+            "$ref": "#/definitions/type/strs",
+            "flags": [
+              "expand"
+            ],
+            "only": {
+              "language": [
+                "csharp"
+              ]
+            }
+          }
+        },
+        "normal": true
+      },
+      "d": {
+        "$id": "language_d",
+        "title": "Language D",
+        "type": "object",
+        "properties": {
+          "d": {
+            "$ref": "#/definitions/type/strs",
+            "flags": [
+              "expand"
+            ],
+            "only": {
+              "language": [
+                "d"
+              ]
+            }
+          }
+        },
+        "normal": true
+      },
+      "dart": {
+        "$id": "language_dart",
+        "title": "Language Dart",
+        "type": "object",
+        "properties": {
+          "dart": {
+            "$ref": "#/definitions/type/strs",
+            "flags": [
+              "expand"
+            ],
+            "only": {
+              "language": [
+                "dart"
+              ]
+            }
+          },
+          "dart_task": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "test": {
+                          "type": "string"
+                        },
+                        "dartanalyzer": {
+                          "type": "string"
+                        },
+                        "dartfmt": {
+                          "type": "boolean"
+                        },
+                        "install_dartium": {
+                          "type": "boolean"
+                        },
+                        "xvfb": {
+                          "type": "boolean"
+                        }
+                      },
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
+                },
+                "normal": true
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "test": {
+                    "type": "string"
+                  },
+                  "dartanalyzer": {
+                    "type": "string"
+                  },
+                  "dartfmt": {
+                    "type": "boolean"
+                  },
+                  "install_dartium": {
+                    "type": "boolean"
+                  },
+                  "xvfb": {
+                    "type": "boolean"
+                  }
+                },
+                "additionalProperties": false
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "flags": [
+              "expand"
+            ],
+            "only": {
+              "language": [
+                "dart"
+              ]
+            }
+          },
+          "with_content_shell": {
+            "type": "boolean",
+            "only": {
+              "language": [
+                "dart"
+              ]
+            }
+          }
+        },
+        "normal": true
+      },
+      "elixir": {
+        "$id": "language_elixir",
+        "title": "Language Elixir",
+        "type": "object",
+        "properties": {
+          "elixir": {
+            "$ref": "#/definitions/type/strs",
+            "flags": [
+              "expand"
+            ],
+            "only": {
+              "language": [
+                "elixir"
+              ]
+            }
+          },
+          "otp_release": {
+            "$ref": "#/definitions/type/strs",
+            "flags": [
+              "expand"
+            ],
+            "only": {
+              "language": [
+                "elixir"
+              ]
+            }
+          }
+        },
+        "normal": true
+      },
+      "elm": {
+        "$id": "language_elm",
+        "title": "Language Elm",
+        "type": "object",
+        "properties": {
+          "elm": {
+            "$ref": "#/definitions/type/strs",
+            "flags": [
+              "expand"
+            ],
+            "only": {
+              "language": [
+                "elm"
+              ]
+            }
+          },
+          "node_js": {
+            "$ref": "#/definitions/type/strs",
+            "flags": [
+              "expand"
+            ],
+            "only": {
+              "language": [
+                "elm"
+              ]
+            }
+          },
+          "elm_format": {
+            "type": "string",
+            "only": {
+              "language": [
+                "elm"
+              ]
+            }
+          },
+          "elm_test": {
+            "type": "string",
+            "only": {
+              "language": [
+                "elm"
+              ]
+            }
+          }
+        },
+        "normal": true
+      },
+      "erlang": {
+        "$id": "language_erlang",
+        "title": "Language Erlang",
+        "type": "object",
+        "properties": {
+          "otp_release": {
+            "$ref": "#/definitions/type/strs",
+            "flags": [
+              "expand"
+            ],
+            "only": {
+              "language": [
+                "erlang"
+              ]
+            }
+          }
+        },
+        "normal": true
+      },
+      "go": {
+        "$id": "language_go",
+        "title": "Language Go",
+        "type": "object",
+        "properties": {
+          "go": {
+            "$ref": "#/definitions/type/strs",
+            "flags": [
+              "expand"
+            ],
+            "only": {
+              "language": [
+                "go"
+              ]
+            }
+          },
+          "gobuild_args": {
+            "type": "string",
+            "only": {
+              "language": [
+                "go"
+              ]
+            }
+          },
+          "go_import_path": {
+            "type": "string",
+            "only": {
+              "language": [
+                "go"
+              ]
+            }
+          },
+          "gimme_config": {
+            "type": "object",
+            "properties": {
+              "url": {
+                "type": "string"
+              },
+              "force_reinstall": {
+                "type": "boolean"
+              }
+            },
+            "additionalProperties": false,
+            "only": {
+              "language": [
+                "go"
+              ]
+            }
+          }
+        },
+        "normal": true
+      },
+      "groovy": {
+        "$id": "language_groovy",
+        "title": "Language Groovy",
+        "type": "object",
+        "properties": {
+          "jdk": {
+            "$ref": "#/definitions/type/jdks",
+            "only": {
+              "language": [
+                "groovy"
+              ]
+            },
+            "except": {
+              "os": [
+                "osx"
+              ]
+            }
+          }
+        },
+        "normal": true
+      },
+      "haskell": {
+        "$id": "language_haskell",
+        "title": "Language Haskell",
+        "type": "object",
+        "properties": {
+          "ghc": {
+            "$ref": "#/definitions/type/strs",
+            "flags": [
+              "expand"
+            ],
+            "only": {
+              "language": [
+                "haskell"
+              ]
+            }
+          }
+        },
+        "normal": true
+      },
+      "haxe": {
+        "$id": "language_haxe",
+        "title": "Language Haxe",
+        "type": "object",
+        "properties": {
+          "haxe": {
+            "$ref": "#/definitions/type/strs",
+            "flags": [
+              "expand"
+            ],
+            "only": {
+              "language": [
+                "haxe"
+              ]
+            }
+          },
+          "hxml": {
+            "$ref": "#/definitions/type/strs",
+            "only": {
+              "language": [
+                "haxe"
+              ]
+            }
+          },
+          "neko": {
+            "type": "string",
+            "only": {
+              "language": [
+                "haxe"
+              ]
+            }
+          }
+        },
+        "normal": true
+      },
+      "java": {
+        "$id": "language_java",
+        "title": "Language Java",
+        "type": "object",
+        "properties": {
+          "jdk": {
+            "$ref": "#/definitions/type/jdks",
+            "only": {
+              "language": [
+                "java"
+              ]
+            },
+            "except": {
+              "os": [
+                "osx"
+              ]
+            }
+          }
+        },
+        "normal": true
+      },
+      "julia": {
+        "$id": "language_julia",
+        "title": "Language Julia",
+        "type": "object",
+        "properties": {
+          "julia": {
+            "$ref": "#/definitions/type/strs",
+            "flags": [
+              "expand"
+            ],
+            "only": {
+              "language": [
+                "julia"
+              ]
+            }
+          }
+        },
+        "normal": true
+      },
+      "nix": {
+        "$id": "language_nix",
+        "title": "Language Nix",
+        "type": "object",
+        "properties": {
+          "nix": {
+            "$ref": "#/definitions/type/strs",
+            "flags": [
+              "expand"
+            ],
+            "only": {
+              "language": [
+                "nix"
+              ]
+            }
+          }
+        },
+        "normal": true
+      },
+      "node_js": {
+        "$id": "language_node_js",
+        "title": "Language Node Js",
+        "type": "object",
+        "properties": {
+          "node_js": {
+            "$ref": "#/definitions/type/strs",
+            "aliases": [
+              "node"
+            ],
+            "flags": [
+              "expand"
+            ],
+            "only": {
+              "language": [
+                "node_js"
+              ]
+            }
+          },
+          "npm_args": {
+            "type": "string",
+            "only": {
+              "language": [
+                "node_js"
+              ]
+            }
+          }
+        },
+        "normal": true
+      },
+      "objective-c": {
+        "$id": "language_objective-c",
+        "title": "Language Objective C",
+        "type": "object",
+        "properties": {
+          "rvm": {
+            "$ref": "#/definitions/type/strs",
+            "aliases": [
+              "ruby",
+              "rbenv"
+            ],
+            "flags": [
+              "expand"
+            ],
+            "only": {
+              "language": [
+                "objective-c"
+              ]
+            }
+          },
+          "gemfile": {
+            "$ref": "#/definitions/type/strs",
+            "flags": [
+              "expand"
+            ],
+            "only": {
+              "language": [
+                "objective-c"
+              ]
+            }
+          },
+          "xcode_scheme": {
+            "$ref": "#/definitions/type/strs",
+            "flags": [
+              "expand"
+            ],
+            "only": {
+              "language": [
+                "objective-c"
+              ]
+            }
+          },
+          "xcode_sdk": {
+            "$ref": "#/definitions/type/strs",
+            "flags": [
+              "expand"
+            ],
+            "only": {
+              "language": [
+                "objective-c"
+              ]
+            }
+          },
+          "podfile": {
+            "type": "string",
+            "only": {
+              "language": [
+                "objective-c"
+              ]
+            }
+          },
+          "bundler_args": {
+            "type": "string",
+            "only": {
+              "language": [
+                "objective-c"
+              ]
+            }
+          },
+          "xcode_destination": {
+            "type": "string",
+            "only": {
+              "language": [
+                "objective-c"
+              ]
+            }
+          },
+          "xcode_project": {
+            "type": "string",
+            "only": {
+              "language": [
+                "objective-c"
+              ]
+            }
+          },
+          "xcode_workspace": {
+            "type": "string",
+            "only": {
+              "language": [
+                "objective-c"
+              ]
+            }
+          },
+          "xctool_args": {
+            "type": "string",
+            "only": {
+              "language": [
+                "objective-c"
+              ]
+            }
+          }
+        },
+        "normal": true
+      },
+      "perl": {
+        "$id": "language_perl",
+        "title": "Language Perl",
+        "type": "object",
+        "properties": {
+          "perl": {
+            "$ref": "#/definitions/type/strs",
+            "flags": [
+              "expand"
+            ],
+            "only": {
+              "language": [
+                "perl"
+              ]
+            }
+          }
+        },
+        "normal": true
+      },
+      "perl6": {
+        "$id": "language_perl6",
+        "title": "Language Perl6",
+        "type": "object",
+        "properties": {
+          "perl6": {
+            "$ref": "#/definitions/type/strs",
+            "flags": [
+              "expand"
+            ],
+            "only": {
+              "language": [
+                "perl6"
+              ]
+            }
+          }
+        },
+        "normal": true
+      },
+      "php": {
+        "$id": "language_php",
+        "title": "Language Php",
+        "type": "object",
+        "properties": {
+          "php": {
+            "$ref": "#/definitions/type/strs",
+            "flags": [
+              "expand"
+            ],
+            "only": {
+              "language": [
+                "php"
+              ]
+            }
+          },
+          "composer_args": {
+            "type": "string",
+            "only": {
+              "language": [
+                "php"
+              ]
+            }
+          }
+        },
+        "normal": true
+      },
+      "python": {
+        "$id": "language_python",
+        "title": "Language Python",
+        "type": "object",
+        "properties": {
+          "python": {
+            "$ref": "#/definitions/type/strs",
+            "flags": [
+              "expand"
+            ],
+            "only": {
+              "language": [
+                "python"
+              ]
+            }
+          },
+          "virtualenv": {
+            "type": "object",
+            "properties": {
+              "system_site_packages": {
+                "type": "boolean"
+              }
+            },
+            "only": {
+              "language": [
+                "python"
+              ]
+            },
+            "aliases": [
+              "virtual_env"
+            ]
+          }
+        },
+        "normal": true
+      },
+      "r": {
+        "$id": "language_r",
+        "title": "Language R",
+        "type": "object",
+        "properties": {
+          "r": {
+            "$ref": "#/definitions/type/strs",
+            "flags": [
+              "expand"
+            ],
+            "only": {
+              "language": [
+                "r"
+              ]
+            }
+          },
+          "r_packages": {
+            "$ref": "#/definitions/type/strs",
+            "only": {
+              "language": [
+                "r"
+              ]
+            }
+          },
+          "r_binary_packages": {
+            "$ref": "#/definitions/type/strs",
+            "only": {
+              "language": [
+                "r"
+              ]
+            }
+          },
+          "r_github_packages": {
+            "$ref": "#/definitions/type/strs",
+            "only": {
+              "language": [
+                "r"
+              ]
+            }
+          },
+          "apt_packages": {
+            "$ref": "#/definitions/type/strs",
+            "only": {
+              "language": [
+                "r"
+              ]
+            }
+          },
+          "bioc_packages": {
+            "$ref": "#/definitions/type/strs",
+            "only": {
+              "language": [
+                "r"
+              ]
+            }
+          },
+          "brew_packages": {
+            "$ref": "#/definitions/type/strs",
+            "only": {
+              "language": [
+                "r"
+              ]
+            }
+          },
+          "bioc": {
+            "type": "string",
+            "only": {
+              "language": [
+                "r"
+              ]
+            }
+          },
+          "bioc_check": {
+            "type": "boolean",
+            "only": {
+              "language": [
+                "r"
+              ]
+            }
+          },
+          "bioc_required": {
+            "type": "boolean",
+            "aliases": [
+              "use_bioc"
+            ],
+            "only": {
+              "language": [
+                "r"
+              ]
+            }
+          },
+          "bioc_use_devel": {
+            "type": "boolean",
+            "only": {
+              "language": [
+                "r"
+              ]
+            }
+          },
+          "cran": {
+            "type": "string",
+            "only": {
+              "language": [
+                "r"
+              ]
+            }
+          },
+          "disable_homebrew": {
+            "type": "boolean",
+            "only": {
+              "language": [
+                "r"
+              ]
+            }
+          },
+          "latex": {
+            "type": "boolean",
+            "only": {
+              "language": [
+                "r"
+              ]
+            }
+          },
+          "pandoc": {
+            "type": "boolean",
+            "only": {
+              "language": [
+                "r"
+              ]
+            }
+          },
+          "pandoc_version": {
+            "type": "string",
+            "only": {
+              "language": [
+                "r"
+              ]
+            }
+          },
+          "r_build_args": {
+            "type": "string",
+            "only": {
+              "language": [
+                "r"
+              ]
+            }
+          },
+          "r_check_args": {
+            "type": "string",
+            "only": {
+              "language": [
+                "r"
+              ]
+            }
+          },
+          "r_check_revdep": {
+            "type": "boolean",
+            "only": {
+              "language": [
+                "r"
+              ]
+            }
+          },
+          "warnings_are_errors": {
+            "type": "boolean",
+            "only": {
+              "language": [
+                "r"
+              ]
+            }
+          },
+          "remotes": {
+            "type": "string",
+            "only": {
+              "language": [
+                "r"
+              ]
+            }
+          },
+          "repos": {
+            "type": "object",
+            "only": {
+              "language": [
+                "r"
+              ]
+            }
+          }
+        },
+        "normal": true
+      },
+      "ruby": {
+        "$id": "language_ruby",
+        "title": "Language Ruby",
+        "type": "object",
+        "properties": {
+          "rvm": {
+            "$ref": "#/definitions/type/strs",
+            "aliases": [
+              "ruby",
+              "rbenv"
+            ],
+            "flags": [
+              "expand"
+            ],
+            "only": {
+              "language": [
+                "ruby"
+              ]
+            }
+          },
+          "gemfile": {
+            "$ref": "#/definitions/type/strs",
+            "aliases": [
+              "gemfiles"
+            ],
+            "flags": [
+              "expand"
+            ],
+            "only": {
+              "language": [
+                "ruby"
+              ]
+            }
+          },
+          "jdk": {
+            "$ref": "#/definitions/type/jdks",
+            "only": {
+              "language": [
+                "ruby"
+              ]
+            },
+            "except": {
+              "os": [
+                "osx"
+              ]
+            }
+          },
+          "bundler_args": {
+            "type": "string",
+            "only": {
+              "language": [
+                "ruby"
+              ]
+            }
+          }
+        },
+        "normal": true
+      },
+      "rust": {
+        "$id": "language_rust",
+        "title": "Language Rust",
+        "type": "object",
+        "properties": {
+          "rust": {
+            "$ref": "#/definitions/type/strs",
+            "flags": [
+              "expand"
+            ],
+            "only": {
+              "language": [
+                "rust"
+              ]
+            }
+          }
+        },
+        "normal": true
+      },
+      "scala": {
+        "$id": "language_scala",
+        "title": "Language Scala",
+        "type": "object",
+        "properties": {
+          "scala": {
+            "$ref": "#/definitions/type/strs",
+            "flags": [
+              "expand"
+            ],
+            "only": {
+              "language": [
+                "scala"
+              ]
+            }
+          },
+          "jdk": {
+            "$ref": "#/definitions/type/jdks",
+            "only": {
+              "language": [
+                "scala"
+              ]
+            },
+            "except": {
+              "os": [
+                "osx"
+              ]
+            }
+          },
+          "sbt_args": {
+            "type": "string",
+            "only": {
+              "language": [
+                "scala"
+              ]
+            }
+          }
+        },
+        "normal": true
+      },
+      "shell": {
+        "$id": "language_shell",
+        "title": "Language Shell",
+        "type": "object",
+        "normal": true
+      },
+      "smalltalk": {
+        "$id": "language_smalltalk",
+        "title": "Language Smalltalk",
+        "type": "object",
+        "properties": {
+          "smalltalk": {
+            "$ref": "#/definitions/type/strs",
+            "flags": [
+              "expand"
+            ],
+            "only": {
+              "language": [
+                "smalltalk"
+              ]
+            }
+          },
+          "smalltalk_config": {
+            "$ref": "#/definitions/type/strs",
+            "flags": [
+              "expand"
+            ],
+            "only": {
+              "language": [
+                "smalltalk"
+              ]
+            }
+          },
+          "smalltalk_vm": {
+            "$ref": "#/definitions/type/strs",
+            "flags": [
+              "expand"
+            ],
+            "only": {
+              "language": [
+                "smalltalk"
+              ]
+            }
+          },
+          "smalltalk_edge": {
+            "type": "object",
+            "properties": {
+              "source": {
+                "type": "string"
+              },
+              "branch": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false,
+            "only": {
+              "language": [
+                "smalltalk"
+              ]
+            }
+          }
+        },
+        "normal": true
+      }
+    },
+    "support": {
+      "__amethyst___support": {
+        "$id": "support___amethyst___support",
+        "title": "Support Amethyst Support",
+        "type": "object",
+        "normal": true
+      },
+      "__connie___support": {
+        "$id": "support___connie___support",
+        "title": "Support Connie Support",
+        "type": "object",
+        "normal": true
+      },
+      "__cookiecat___support": {
+        "$id": "support___cookiecat___support",
+        "title": "Support Cookiecat Support",
+        "type": "object",
+        "normal": true
+      },
+      "__garnet___support": {
+        "$id": "support___garnet___support",
+        "title": "Support Garnet Support",
+        "type": "object",
+        "normal": true
+      },
+      "__onion___support": {
+        "$id": "support___onion___support",
+        "title": "Support Onion Support",
+        "type": "object",
+        "normal": true
+      },
+      "__opal___support": {
+        "$id": "support___opal___support",
+        "title": "Support Opal Support",
+        "type": "object",
+        "normal": true
+      },
+      "__sardonyx___support": {
+        "$id": "support___sardonyx___support",
+        "title": "Support Sardonyx Support",
+        "type": "object",
+        "normal": true
+      },
+      "__stevonnie___support": {
+        "$id": "support___stevonnie___support",
+        "title": "Support Stevonnie Support",
+        "type": "object",
+        "normal": true
+      },
+      "android_support": {
+        "$id": "support_android_support",
+        "title": "Support Android Support",
+        "type": "object",
+        "properties": {
+          "jdk": {
+            "type": "string",
+            "only": {
+              "language": [
+                "android"
+              ]
+            }
+          },
+          "android": {
+            "type": "object",
+            "properties": {
+              "components": {
+                "$ref": "#/definitions/type/strs"
+              },
+              "licenses": {
+                "$ref": "#/definitions/type/strs"
+              }
+            },
+            "additionalProperties": false,
+            "only": {
+              "language": [
+                "android"
+              ]
+            }
+          }
+        },
+        "normal": true
+      },
+      "c_support": {
+        "$id": "support_c_support",
+        "title": "Support C Support",
+        "type": "object",
+        "normal": true
+      },
+      "clojure_support": {
+        "$id": "support_clojure_support",
+        "title": "Support Clojure Support",
+        "type": "object",
+        "properties": {
+          "jdk": {
+            "type": "string",
+            "only": {
+              "language": [
+                "clojure"
+              ]
+            }
+          },
+          "lein": {
+            "type": "string",
+            "only": {
+              "language": [
+                "clojure"
+              ]
+            }
+          }
+        },
+        "normal": true
+      },
+      "cpp_support": {
+        "$id": "support_cpp_support",
+        "title": "Support Cpp Support",
+        "type": "object",
+        "normal": true
+      },
+      "crystal_support": {
+        "$id": "support_crystal_support",
+        "title": "Support Crystal Support",
+        "type": "object",
+        "properties": {
+          "crystal": {
+            "type": "string",
+            "only": {
+              "language": [
+                "crystal"
+              ]
+            }
+          }
+        },
+        "normal": true
+      },
+      "csharp_support": {
+        "$id": "support_csharp_support",
+        "title": "Support Csharp Support",
+        "type": "object",
+        "properties": {
+          "dotnet": {
+            "type": "string",
+            "only": {
+              "language": [
+                "csharp"
+              ]
+            }
+          },
+          "mono": {
+            "type": "string",
+            "only": {
+              "language": [
+                "csharp"
+              ]
+            }
+          },
+          "solution": {
+            "type": "string",
+            "only": {
+              "language": [
+                "csharp"
+              ]
+            }
+          }
+        },
+        "normal": true
+      },
+      "d_support": {
+        "$id": "support_d_support",
+        "title": "Support D Support",
+        "type": "object",
+        "properties": {
+          "d": {
+            "type": "string",
+            "only": {
+              "language": [
+                "d"
+              ]
+            }
+          }
+        },
+        "normal": true
+      },
+      "dart_support": {
+        "$id": "support_dart_support",
+        "title": "Support Dart Support",
+        "type": "object",
+        "properties": {
+          "dart": {
+            "type": "string",
+            "only": {
+              "language": [
+                "dart"
+              ]
+            }
+          },
+          "dart_task": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "test": {
+                          "type": "string"
+                        },
+                        "dartanalyzer": {
+                          "type": "string"
+                        },
+                        "dartfmt": {
+                          "type": "boolean"
+                        },
+                        "install_dartium": {
+                          "type": "boolean"
+                        },
+                        "xvfb": {
+                          "type": "boolean"
+                        }
+                      },
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
+                },
+                "normal": true
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "test": {
+                    "type": "string"
+                  },
+                  "dartanalyzer": {
+                    "type": "string"
+                  },
+                  "dartfmt": {
+                    "type": "boolean"
+                  },
+                  "install_dartium": {
+                    "type": "boolean"
+                  },
+                  "xvfb": {
+                    "type": "boolean"
+                  }
+                },
+                "additionalProperties": false
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "only": {
+              "language": [
+                "dart"
+              ]
+            }
+          },
+          "with_content_shell": {
+            "type": "boolean",
+            "only": {
+              "language": [
+                "dart"
+              ]
+            }
+          }
+        },
+        "normal": true
+      },
+      "elixir_support": {
+        "$id": "support_elixir_support",
+        "title": "Support Elixir Support",
+        "type": "object",
+        "properties": {
+          "elixir": {
+            "type": "string",
+            "only": {
+              "language": [
+                "elixir"
+              ]
+            }
+          },
+          "otp_release": {
+            "type": "string",
+            "only": {
+              "language": [
+                "elixir"
+              ]
+            }
+          }
+        },
+        "normal": true
+      },
+      "elm_support": {
+        "$id": "support_elm_support",
+        "title": "Support Elm Support",
+        "type": "object",
+        "properties": {
+          "elm": {
+            "type": "string",
+            "only": {
+              "language": [
+                "elm"
+              ]
+            }
+          },
+          "node_js": {
+            "type": "string",
+            "only": {
+              "language": [
+                "elm"
+              ]
+            }
+          },
+          "elm_format": {
+            "type": "string",
+            "only": {
+              "language": [
+                "elm"
+              ]
+            }
+          },
+          "elm_test": {
+            "type": "string",
+            "only": {
+              "language": [
+                "elm"
+              ]
+            }
+          }
+        },
+        "normal": true
+      },
+      "erlang_support": {
+        "$id": "support_erlang_support",
+        "title": "Support Erlang Support",
+        "type": "object",
+        "properties": {
+          "otp_release": {
+            "type": "string",
+            "only": {
+              "language": [
+                "erlang"
+              ]
+            }
+          }
+        },
+        "normal": true
+      },
+      "go_support": {
+        "$id": "support_go_support",
+        "title": "Support Go Support",
+        "type": "object",
+        "properties": {
+          "go": {
+            "type": "string",
+            "only": {
+              "language": [
+                "go"
+              ]
+            }
+          },
+          "gobuild_args": {
+            "type": "string",
+            "only": {
+              "language": [
+                "go"
+              ]
+            }
+          },
+          "go_import_path": {
+            "type": "string",
+            "only": {
+              "language": [
+                "go"
+              ]
+            }
+          },
+          "gimme_config": {
+            "type": "object",
+            "properties": {
+              "url": {
+                "type": "string"
+              },
+              "force_reinstall": {
+                "type": "boolean"
+              }
+            },
+            "additionalProperties": false,
+            "only": {
+              "language": [
+                "go"
+              ]
+            }
+          }
+        },
+        "normal": true
+      },
+      "groovy_support": {
+        "$id": "support_groovy_support",
+        "title": "Support Groovy Support",
+        "type": "object",
+        "properties": {
+          "jdk": {
+            "type": "string",
+            "only": {
+              "language": [
+                "groovy"
+              ]
+            }
+          }
+        },
+        "normal": true
+      },
+      "haskell_support": {
+        "$id": "support_haskell_support",
+        "title": "Support Haskell Support",
+        "type": "object",
+        "properties": {
+          "ghc": {
+            "type": "string",
+            "only": {
+              "language": [
+                "haskell"
+              ]
+            }
+          }
+        },
+        "normal": true
+      },
+      "haxe_support": {
+        "$id": "support_haxe_support",
+        "title": "Support Haxe Support",
+        "type": "object",
+        "properties": {
+          "haxe": {
+            "type": "string",
+            "only": {
+              "language": [
+                "haxe"
+              ]
+            }
+          },
+          "hxml": {
+            "$ref": "#/definitions/type/strs",
+            "only": {
+              "language": [
+                "haxe"
+              ]
+            }
+          },
+          "neko": {
+            "type": "string",
+            "only": {
+              "language": [
+                "haxe"
+              ]
+            }
+          }
+        },
+        "normal": true
+      },
+      "java_support": {
+        "$id": "support_java_support",
+        "title": "Support Java Support",
+        "type": "object",
+        "properties": {
+          "jdk": {
+            "type": "string",
+            "only": {
+              "language": [
+                "java"
+              ]
+            }
+          }
+        },
+        "normal": true
+      },
+      "julia_support": {
+        "$id": "support_julia_support",
+        "title": "Support Julia Support",
+        "type": "object",
+        "properties": {
+          "julia": {
+            "type": "string",
+            "only": {
+              "language": [
+                "julia"
+              ]
+            }
+          }
+        },
+        "normal": true
+      },
+      "nix_support": {
+        "$id": "support_nix_support",
+        "title": "Support Nix Support",
+        "type": "object",
+        "properties": {
+          "nix": {
+            "type": "string",
+            "only": {
+              "language": [
+                "nix"
+              ]
+            }
+          }
+        },
+        "normal": true
+      },
+      "node_js_support": {
+        "$id": "support_node_js_support",
+        "title": "Support Node Js Support",
+        "type": "object",
+        "properties": {
+          "node_js": {
+            "type": "string",
+            "aliases": [
+              "node"
+            ],
+            "only": {
+              "language": [
+                "node_js"
+              ]
+            }
+          },
+          "npm_args": {
+            "type": "string",
+            "only": {
+              "language": [
+                "node_js"
+              ]
+            }
+          }
+        },
+        "normal": true
+      },
+      "objective-c_support": {
+        "$id": "support_objective-c_support",
+        "title": "Support Objective C Support",
+        "type": "object",
+        "properties": {
+          "rvm": {
+            "type": "string",
+            "aliases": [
+              "ruby",
+              "rbenv"
+            ],
+            "only": {
+              "language": [
+                "objective-c"
+              ]
+            }
+          },
+          "gemfile": {
+            "type": "string",
+            "only": {
+              "language": [
+                "objective-c"
+              ]
+            }
+          },
+          "xcode_scheme": {
+            "type": "string",
+            "only": {
+              "language": [
+                "objective-c"
+              ]
+            }
+          },
+          "xcode_sdk": {
+            "type": "string",
+            "only": {
+              "language": [
+                "objective-c"
+              ]
+            }
+          },
+          "podfile": {
+            "type": "string",
+            "only": {
+              "language": [
+                "objective-c"
+              ]
+            }
+          },
+          "bundler_args": {
+            "type": "string",
+            "only": {
+              "language": [
+                "objective-c"
+              ]
+            }
+          },
+          "xcode_destination": {
+            "type": "string",
+            "only": {
+              "language": [
+                "objective-c"
+              ]
+            }
+          },
+          "xcode_project": {
+            "type": "string",
+            "only": {
+              "language": [
+                "objective-c"
+              ]
+            }
+          },
+          "xcode_workspace": {
+            "type": "string",
+            "only": {
+              "language": [
+                "objective-c"
+              ]
+            }
+          },
+          "xctool_args": {
+            "type": "string",
+            "only": {
+              "language": [
+                "objective-c"
+              ]
+            }
+          }
+        },
+        "normal": true
+      },
+      "perl6_support": {
+        "$id": "support_perl6_support",
+        "title": "Support Perl6 Support",
+        "type": "object",
+        "properties": {
+          "perl6": {
+            "type": "string",
+            "only": {
+              "language": [
+                "perl6"
+              ]
+            }
+          }
+        },
+        "normal": true
+      },
+      "perl_support": {
+        "$id": "support_perl_support",
+        "title": "Support Perl Support",
+        "type": "object",
+        "properties": {
+          "perl": {
+            "type": "string",
+            "only": {
+              "language": [
+                "perl"
+              ]
+            }
+          }
+        },
+        "normal": true
+      },
+      "php_support": {
+        "$id": "support_php_support",
+        "title": "Support Php Support",
+        "type": "object",
+        "properties": {
+          "php": {
+            "type": "string",
+            "only": {
+              "language": [
+                "php"
+              ]
+            }
+          },
+          "composer_args": {
+            "type": "string",
+            "only": {
+              "language": [
+                "php"
+              ]
+            }
+          }
+        },
+        "normal": true
+      },
+      "python_support": {
+        "$id": "support_python_support",
+        "title": "Support Python Support",
+        "type": "object",
+        "properties": {
+          "python": {
+            "type": "string",
+            "only": {
+              "language": [
+                "python"
+              ]
+            }
+          },
+          "virtualenv": {
+            "type": "object",
+            "properties": {
+              "system_site_packages": {
+                "type": "boolean"
+              }
+            },
+            "only": {
+              "language": [
+                "python"
+              ]
+            },
+            "aliases": [
+              "virtual_env"
+            ]
+          }
+        },
+        "normal": true
+      },
+      "r_support": {
+        "$id": "support_r_support",
+        "title": "Support R Support",
+        "type": "object",
+        "properties": {
+          "r": {
+            "type": "string",
+            "only": {
+              "language": [
+                "r"
+              ]
+            }
+          },
+          "r_packages": {
+            "$ref": "#/definitions/type/strs",
+            "only": {
+              "language": [
+                "r"
+              ]
+            }
+          },
+          "r_binary_packages": {
+            "$ref": "#/definitions/type/strs",
+            "only": {
+              "language": [
+                "r"
+              ]
+            }
+          },
+          "r_github_packages": {
+            "$ref": "#/definitions/type/strs",
+            "only": {
+              "language": [
+                "r"
+              ]
+            }
+          },
+          "apt_packages": {
+            "$ref": "#/definitions/type/strs",
+            "only": {
+              "language": [
+                "r"
+              ]
+            }
+          },
+          "bioc_packages": {
+            "$ref": "#/definitions/type/strs",
+            "only": {
+              "language": [
+                "r"
+              ]
+            }
+          },
+          "brew_packages": {
+            "$ref": "#/definitions/type/strs",
+            "only": {
+              "language": [
+                "r"
+              ]
+            }
+          },
+          "bioc": {
+            "type": "string",
+            "only": {
+              "language": [
+                "r"
+              ]
+            }
+          },
+          "bioc_check": {
+            "type": "boolean",
+            "only": {
+              "language": [
+                "r"
+              ]
+            }
+          },
+          "bioc_required": {
+            "type": "boolean",
+            "aliases": [
+              "use_bioc"
+            ],
+            "only": {
+              "language": [
+                "r"
+              ]
+            }
+          },
+          "bioc_use_devel": {
+            "type": "boolean",
+            "only": {
+              "language": [
+                "r"
+              ]
+            }
+          },
+          "cran": {
+            "type": "string",
+            "only": {
+              "language": [
+                "r"
+              ]
+            }
+          },
+          "disable_homebrew": {
+            "type": "boolean",
+            "only": {
+              "language": [
+                "r"
+              ]
+            }
+          },
+          "latex": {
+            "type": "boolean",
+            "only": {
+              "language": [
+                "r"
+              ]
+            }
+          },
+          "pandoc": {
+            "type": "boolean",
+            "only": {
+              "language": [
+                "r"
+              ]
+            }
+          },
+          "pandoc_version": {
+            "type": "string",
+            "only": {
+              "language": [
+                "r"
+              ]
+            }
+          },
+          "r_build_args": {
+            "type": "string",
+            "only": {
+              "language": [
+                "r"
+              ]
+            }
+          },
+          "r_check_args": {
+            "type": "string",
+            "only": {
+              "language": [
+                "r"
+              ]
+            }
+          },
+          "r_check_revdep": {
+            "type": "boolean",
+            "only": {
+              "language": [
+                "r"
+              ]
+            }
+          },
+          "warnings_are_errors": {
+            "type": "boolean",
+            "only": {
+              "language": [
+                "r"
+              ]
+            }
+          },
+          "remotes": {
+            "type": "string",
+            "only": {
+              "language": [
+                "r"
+              ]
+            }
+          },
+          "repos": {
+            "type": "object",
+            "only": {
+              "language": [
+                "r"
+              ]
+            }
+          }
+        },
+        "normal": true
+      },
+      "ruby_support": {
+        "$id": "support_ruby_support",
+        "title": "Support Ruby Support",
+        "type": "object",
+        "properties": {
+          "rvm": {
+            "type": "string",
+            "aliases": [
+              "ruby",
+              "rbenv"
+            ],
+            "only": {
+              "language": [
+                "ruby"
+              ]
+            }
+          },
+          "gemfile": {
+            "type": "string",
+            "aliases": [
+              "gemfiles"
+            ],
+            "only": {
+              "language": [
+                "ruby"
+              ]
+            }
+          },
+          "jdk": {
+            "type": "string",
+            "only": {
+              "language": [
+                "ruby"
+              ]
+            }
+          },
+          "bundler_args": {
+            "type": "string",
+            "only": {
+              "language": [
+                "ruby"
+              ]
+            }
+          }
+        },
+        "normal": true
+      },
+      "rust_support": {
+        "$id": "support_rust_support",
+        "title": "Support Rust Support",
+        "type": "object",
+        "properties": {
+          "rust": {
+            "type": "string",
+            "only": {
+              "language": [
+                "rust"
+              ]
+            }
+          }
+        },
+        "normal": true
+      },
+      "scala_support": {
+        "$id": "support_scala_support",
+        "title": "Support Scala Support",
+        "type": "object",
+        "properties": {
+          "scala": {
+            "type": "string",
+            "only": {
+              "language": [
+                "scala"
+              ]
+            }
+          },
+          "jdk": {
+            "type": "string",
+            "only": {
+              "language": [
+                "scala"
+              ]
+            }
+          },
+          "sbt_args": {
+            "type": "string",
+            "only": {
+              "language": [
+                "scala"
+              ]
+            }
+          }
+        },
+        "normal": true
+      },
+      "shell_support": {
+        "$id": "support_shell_support",
+        "title": "Support Shell Support",
+        "type": "object",
+        "normal": true
+      },
+      "smalltalk_support": {
+        "$id": "support_smalltalk_support",
+        "title": "Support Smalltalk Support",
+        "type": "object",
+        "properties": {
+          "smalltalk": {
+            "type": "string",
+            "only": {
+              "language": [
+                "smalltalk"
+              ]
+            }
+          },
+          "smalltalk_config": {
+            "$ref": "#/definitions/type/strs",
+            "only": {
+              "language": [
+                "smalltalk"
+              ]
+            }
+          },
+          "smalltalk_vm": {
+            "$ref": "#/definitions/type/strs",
+            "only": {
+              "language": [
+                "smalltalk"
+              ]
+            }
+          },
+          "smalltalk_edge": {
+            "type": "object",
+            "properties": {
+              "source": {
+                "type": "string"
+              },
+              "branch": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false,
+            "only": {
+              "language": [
+                "smalltalk"
+              ]
+            }
+          }
+        },
+        "normal": true
       }
     },
     "deploy": {
@@ -2451,10 +4982,16 @@
             "normal": true
           },
           {
+            "type": "string"
+          },
+          {
             "type": "object",
             "normal": true,
             "deprecated": "branch_specific_option_hash"
           }
+        ],
+        "aliases": [
+          "branches"
         ]
       },
       "cargo": {
@@ -2942,163 +5479,53 @@
         "title": "Deploy Conditions",
         "anyOf": [
           {
-            "type": "object",
-            "properties": {
-              "branch": {
-                "$ref": "#/definitions/deploy/branches"
+            "allOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "os": {
+                    "$ref": "#/definitions/type/os"
+                  },
+                  "branch": {
+                    "$ref": "#/definitions/deploy/branches",
+                    "aliases": [
+                      "branches"
+                    ]
+                  },
+                  "repo": {
+                    "type": "string"
+                  },
+                  "condition": {
+                    "$ref": "#/definitions/type/strs"
+                  },
+                  "all_branches": {
+                    "type": "boolean"
+                  },
+                  "tags": {
+                    "type": "boolean"
+                  }
+                },
+                "additionalProperties": false,
+                "prefix": {
+                  "key": "branch",
+                  "only": [
+                    "str"
+                  ]
+                }
               },
-              "repo": {
-                "type": "string"
-              },
-              "condition": {
-                "$ref": "#/definitions/type/strs"
-              },
-              "all_branches": {
-                "type": "boolean"
-              },
-              "tags": {
-                "type": "boolean"
-              },
-              "jdk": {
-                "type": "string"
-              },
-              "crystal": {
-                "type": "string"
-              },
-              "dotnet": {
-                "type": "string"
-              },
-              "mono": {
-                "type": "string"
-              },
-              "solution": {
-                "type": "string"
-              },
-              "d": {
-                "type": "string"
-              },
-              "dart": {
-                "type": "string"
-              },
-              "dart_task": {
-                "type": "string"
-              },
-              "elixir": {
-                "type": "string"
-              },
-              "otp_release": {
-                "type": "string"
-              },
-              "elm": {
-                "type": "string"
-              },
-              "node_js": {
-                "type": "string"
-              },
-              "go": {
-                "type": "string"
-              },
-              "ghc": {
-                "type": "string"
-              },
-              "haxe": {
-                "type": "string"
-              },
-              "julia": {
-                "type": "string"
-              },
-              "nix": {
-                "type": "string"
-              },
-              "rvm": {
-                "type": "string"
-              },
-              "gemfile": {
-                "type": "string"
-              },
-              "xcode_scheme": {
-                "type": "string"
-              },
-              "xcode_sdk": {
-                "type": "string"
-              },
-              "perl": {
-                "type": "string"
-              },
-              "perl6": {
-                "type": "string"
-              },
-              "php": {
-                "type": "string"
-              },
-              "python": {
-                "type": "string"
-              },
-              "r": {
-                "type": "string"
-              },
-              "rust": {
-                "type": "string"
-              },
-              "scala": {
-                "type": "string"
-              },
-              "smalltalk": {
-                "type": "string"
-              },
-              "smalltalk_config": {
-                "type": "string"
-              },
-              "smalltalk_vm": {
-                "type": "string"
-              },
-              "arch": {
-                "type": "string"
-              },
-              "compiler": {
-                "type": "string"
-              },
-              "os": {
-                "type": "string"
+              {
+                "$ref": "#/definitions/type/support"
               }
-            },
-            "additionalProperties": false,
-            "normal": true,
-            "prefix": {
-              "key": "branch",
-              "only": [
-                "str"
-              ]
-            },
-            "keys": {
-              "branch": {
-                "aliases": [
-                  "branches"
-                ]
-              },
-              "node_js": {
-                "aliases": [
-                  "node"
-                ]
-              },
-              "rvm": {
-                "aliases": [
-                  "ruby",
-                  "rbenv"
-                ]
-              },
-              "gemfile": {
-                "aliases": [
-                  "gemfiles"
-                ]
-              }
-            }
+            ],
+            "normal": true
           },
           {
-            "$ref": "#/definitions/deploy/branches"
+            "$ref": "#/definitions/deploy/branches",
+            "aliases": [
+              "branches"
+            ]
           }
-        ],
-        "normal": true
+        ]
       },
       "deis": {
         "$id": "deploy_deis",
@@ -4942,7 +7369,10 @@
                 "$ref": "#/definitions/deploy/edge"
               },
               "username": {
-                "$ref": "#/definitions/type/secure"
+                "$ref": "#/definitions/type/secure",
+                "aliases": [
+                  "user"
+                ]
               },
               "password": {
                 "$ref": "#/definitions/type/secure"
@@ -4967,14 +7397,7 @@
             },
             "required": [
               "provider"
-            ],
-            "keys": {
-              "username": {
-                "aliases": [
-                  "user"
-                ]
-              }
-            }
+            ]
           },
           {
             "type": "string",
@@ -5237,1416 +7660,6 @@
         "normal": true
       }
     },
-    "language": {
-      "__amethyst__": {
-        "$id": "language___amethyst__",
-        "title": "Language   Amethyst",
-        "type": "object",
-        "normal": true,
-        "flags": [
-          "internal"
-        ]
-      },
-      "__connie__": {
-        "$id": "language___connie__",
-        "title": "Language   Connie",
-        "type": "object",
-        "normal": true,
-        "flags": [
-          "internal"
-        ]
-      },
-      "__cookiecat__": {
-        "$id": "language___cookiecat__",
-        "title": "Language   Cookiecat",
-        "type": "object",
-        "normal": true,
-        "flags": [
-          "internal"
-        ]
-      },
-      "__garnet__": {
-        "$id": "language___garnet__",
-        "title": "Language   Garnet",
-        "type": "object",
-        "normal": true,
-        "flags": [
-          "internal"
-        ]
-      },
-      "__onion__": {
-        "$id": "language___onion__",
-        "title": "Language   Onion",
-        "type": "object",
-        "normal": true,
-        "flags": [
-          "internal"
-        ]
-      },
-      "__opal__": {
-        "$id": "language___opal__",
-        "title": "Language   Opal",
-        "type": "object",
-        "normal": true,
-        "flags": [
-          "internal"
-        ]
-      },
-      "__sardonyx__": {
-        "$id": "language___sardonyx__",
-        "title": "Language   Sardonyx",
-        "type": "object",
-        "normal": true,
-        "flags": [
-          "internal"
-        ]
-      },
-      "__stevonnie__": {
-        "$id": "language___stevonnie__",
-        "title": "Language   Stevonnie",
-        "type": "object",
-        "normal": true,
-        "flags": [
-          "internal"
-        ]
-      },
-      "android": {
-        "$id": "language_android",
-        "title": "Language Android",
-        "type": "object",
-        "properties": {
-          "jdk": {
-            "anyOf": [
-              {
-                "type": "array",
-                "items": {
-                  "type": "string"
-                },
-                "flags": [
-                  "expand"
-                ],
-                "normal": true
-              },
-              {
-                "type": "string"
-              }
-            ],
-            "flags": [
-              "expand"
-            ]
-          },
-          "android": {
-            "type": "object",
-            "properties": {
-              "components": {
-                "$ref": "#/definitions/type/strs"
-              },
-              "licenses": {
-                "$ref": "#/definitions/type/strs"
-              }
-            },
-            "additionalProperties": false
-          }
-        },
-        "normal": true,
-        "keys": {
-          "jdk": {
-            "only": {
-              "language": [
-                "android"
-              ]
-            },
-            "except": {
-              "os": [
-                "osx"
-              ]
-            }
-          },
-          "android": {
-            "only": {
-              "language": [
-                "android"
-              ]
-            }
-          }
-        }
-      },
-      "c": {
-        "$id": "language_c",
-        "title": "Language C",
-        "type": "object",
-        "normal": true
-      },
-      "clojure": {
-        "$id": "language_clojure",
-        "title": "Language Clojure",
-        "type": "object",
-        "properties": {
-          "jdk": {
-            "anyOf": [
-              {
-                "type": "array",
-                "items": {
-                  "type": "string"
-                },
-                "flags": [
-                  "expand"
-                ],
-                "normal": true
-              },
-              {
-                "type": "string"
-              }
-            ],
-            "flags": [
-              "expand"
-            ]
-          },
-          "lein": {
-            "type": "string"
-          }
-        },
-        "normal": true,
-        "keys": {
-          "jdk": {
-            "only": {
-              "language": [
-                "clojure"
-              ]
-            },
-            "except": {
-              "os": [
-                "osx"
-              ]
-            }
-          },
-          "lein": {
-            "only": {
-              "language": [
-                "clojure"
-              ]
-            }
-          }
-        }
-      },
-      "cpp": {
-        "$id": "language_cpp",
-        "title": "Language Cpp",
-        "type": "object",
-        "normal": true
-      },
-      "crystal": {
-        "$id": "language_crystal",
-        "title": "Language Crystal",
-        "type": "object",
-        "properties": {
-          "crystal": {
-            "$ref": "#/definitions/type/strs"
-          }
-        },
-        "normal": true,
-        "keys": {
-          "crystal": {
-            "only": {
-              "language": [
-                "crystal"
-              ]
-            }
-          }
-        }
-      },
-      "csharp": {
-        "$id": "language_csharp",
-        "title": "Language Csharp",
-        "type": "object",
-        "properties": {
-          "dotnet": {
-            "$ref": "#/definitions/type/strs"
-          },
-          "mono": {
-            "$ref": "#/definitions/type/strs"
-          },
-          "solution": {
-            "$ref": "#/definitions/type/strs"
-          }
-        },
-        "normal": true,
-        "keys": {
-          "dotnet": {
-            "only": {
-              "language": [
-                "csharp"
-              ]
-            }
-          },
-          "mono": {
-            "only": {
-              "language": [
-                "csharp"
-              ]
-            }
-          },
-          "solution": {
-            "only": {
-              "language": [
-                "csharp"
-              ]
-            }
-          }
-        }
-      },
-      "d": {
-        "$id": "language_d",
-        "title": "Language D",
-        "type": "object",
-        "properties": {
-          "d": {
-            "$ref": "#/definitions/type/strs"
-          }
-        },
-        "normal": true,
-        "keys": {
-          "d": {
-            "only": {
-              "language": [
-                "d"
-              ]
-            }
-          }
-        }
-      },
-      "dart": {
-        "$id": "language_dart",
-        "title": "Language Dart",
-        "type": "object",
-        "properties": {
-          "dart": {
-            "$ref": "#/definitions/type/strs"
-          },
-          "dart_task": {
-            "anyOf": [
-              {
-                "type": "array",
-                "items": {
-                  "anyOf": [
-                    {
-                      "type": "object",
-                      "properties": {
-                        "test": {
-                          "type": "string"
-                        },
-                        "dartanalyzer": {
-                          "type": "string"
-                        },
-                        "dartfmt": {
-                          "type": "boolean"
-                        },
-                        "install_dartium": {
-                          "type": "boolean"
-                        },
-                        "xvfb": {
-                          "type": "boolean"
-                        }
-                      },
-                      "additionalProperties": false
-                    },
-                    {
-                      "type": "string"
-                    }
-                  ]
-                }
-              }
-            ],
-            "flags": [
-              "expand"
-            ]
-          },
-          "with_content_shell": {
-            "type": "boolean"
-          }
-        },
-        "normal": true,
-        "keys": {
-          "dart": {
-            "only": {
-              "language": [
-                "dart"
-              ]
-            }
-          },
-          "dart_task": {
-            "only": {
-              "language": [
-                "dart"
-              ]
-            }
-          },
-          "with_content_shell": {
-            "only": {
-              "language": [
-                "dart"
-              ]
-            }
-          }
-        }
-      },
-      "elixir": {
-        "$id": "language_elixir",
-        "title": "Language Elixir",
-        "type": "object",
-        "properties": {
-          "elixir": {
-            "$ref": "#/definitions/type/strs"
-          },
-          "otp_release": {
-            "$ref": "#/definitions/type/strs"
-          }
-        },
-        "normal": true,
-        "keys": {
-          "elixir": {
-            "only": {
-              "language": [
-                "elixir"
-              ]
-            }
-          },
-          "otp_release": {
-            "only": {
-              "language": [
-                "elixir"
-              ]
-            }
-          }
-        }
-      },
-      "elm": {
-        "$id": "language_elm",
-        "title": "Language Elm",
-        "type": "object",
-        "properties": {
-          "elm": {
-            "$ref": "#/definitions/type/strs"
-          },
-          "node_js": {
-            "$ref": "#/definitions/type/strs"
-          },
-          "elm_format": {
-            "type": "string"
-          },
-          "elm_test": {
-            "type": "string"
-          }
-        },
-        "normal": true,
-        "keys": {
-          "elm": {
-            "only": {
-              "language": [
-                "elm"
-              ]
-            }
-          },
-          "node_js": {
-            "only": {
-              "language": [
-                "elm"
-              ]
-            }
-          },
-          "elm_format": {
-            "only": {
-              "language": [
-                "elm"
-              ]
-            }
-          },
-          "elm_test": {
-            "only": {
-              "language": [
-                "elm"
-              ]
-            }
-          }
-        }
-      },
-      "erlang": {
-        "$id": "language_erlang",
-        "title": "Language Erlang",
-        "type": "object",
-        "properties": {
-          "otp_release": {
-            "$ref": "#/definitions/type/strs"
-          }
-        },
-        "normal": true,
-        "keys": {
-          "otp_release": {
-            "only": {
-              "language": [
-                "erlang"
-              ]
-            }
-          }
-        }
-      },
-      "go": {
-        "$id": "language_go",
-        "title": "Language Go",
-        "type": "object",
-        "properties": {
-          "go": {
-            "$ref": "#/definitions/type/strs"
-          },
-          "gobuild_args": {
-            "type": "string"
-          },
-          "go_import_path": {
-            "type": "string"
-          },
-          "gimme_config": {
-            "type": "object",
-            "properties": {
-              "url": {
-                "type": "string"
-              },
-              "force_reinstall": {
-                "type": "boolean"
-              }
-            },
-            "additionalProperties": false
-          }
-        },
-        "normal": true,
-        "keys": {
-          "go": {
-            "only": {
-              "language": [
-                "go"
-              ]
-            }
-          },
-          "gobuild_args": {
-            "only": {
-              "language": [
-                "go"
-              ]
-            }
-          },
-          "go_import_path": {
-            "only": {
-              "language": [
-                "go"
-              ]
-            }
-          },
-          "gimme_config": {
-            "only": {
-              "language": [
-                "go"
-              ]
-            }
-          }
-        }
-      },
-      "groovy": {
-        "$id": "language_groovy",
-        "title": "Language Groovy",
-        "type": "object",
-        "properties": {
-          "jdk": {
-            "anyOf": [
-              {
-                "type": "array",
-                "items": {
-                  "type": "string"
-                },
-                "flags": [
-                  "expand"
-                ],
-                "normal": true
-              },
-              {
-                "type": "string"
-              }
-            ],
-            "flags": [
-              "expand"
-            ]
-          }
-        },
-        "normal": true,
-        "keys": {
-          "jdk": {
-            "only": {
-              "language": [
-                "groovy"
-              ]
-            },
-            "except": {
-              "os": [
-                "osx"
-              ]
-            }
-          }
-        }
-      },
-      "haskell": {
-        "$id": "language_haskell",
-        "title": "Language Haskell",
-        "type": "object",
-        "properties": {
-          "ghc": {
-            "$ref": "#/definitions/type/strs"
-          }
-        },
-        "normal": true,
-        "keys": {
-          "ghc": {
-            "only": {
-              "language": [
-                "haskell"
-              ]
-            }
-          }
-        }
-      },
-      "haxe": {
-        "$id": "language_haxe",
-        "title": "Language Haxe",
-        "type": "object",
-        "properties": {
-          "haxe": {
-            "$ref": "#/definitions/type/strs"
-          },
-          "hxml": {
-            "$ref": "#/definitions/type/strs"
-          },
-          "neko": {
-            "type": "string"
-          }
-        },
-        "normal": true,
-        "keys": {
-          "haxe": {
-            "only": {
-              "language": [
-                "haxe"
-              ]
-            }
-          },
-          "hxml": {
-            "only": {
-              "language": [
-                "haxe"
-              ]
-            }
-          },
-          "neko": {
-            "only": {
-              "language": [
-                "haxe"
-              ]
-            }
-          }
-        }
-      },
-      "java": {
-        "$id": "language_java",
-        "title": "Language Java",
-        "type": "object",
-        "properties": {
-          "jdk": {
-            "anyOf": [
-              {
-                "type": "array",
-                "items": {
-                  "type": "string"
-                },
-                "flags": [
-                  "expand"
-                ],
-                "normal": true
-              },
-              {
-                "type": "string"
-              }
-            ],
-            "flags": [
-              "expand"
-            ]
-          }
-        },
-        "normal": true,
-        "keys": {
-          "jdk": {
-            "only": {
-              "language": [
-                "java"
-              ]
-            },
-            "except": {
-              "os": [
-                "osx"
-              ]
-            }
-          }
-        }
-      },
-      "julia": {
-        "$id": "language_julia",
-        "title": "Language Julia",
-        "type": "object",
-        "properties": {
-          "julia": {
-            "$ref": "#/definitions/type/strs"
-          }
-        },
-        "normal": true,
-        "keys": {
-          "julia": {
-            "only": {
-              "language": [
-                "julia"
-              ]
-            }
-          }
-        }
-      },
-      "nix": {
-        "$id": "language_nix",
-        "title": "Language Nix",
-        "type": "object",
-        "properties": {
-          "nix": {
-            "$ref": "#/definitions/type/strs"
-          }
-        },
-        "normal": true,
-        "keys": {
-          "nix": {
-            "only": {
-              "language": [
-                "nix"
-              ]
-            }
-          }
-        }
-      },
-      "node_js": {
-        "$id": "language_node_js",
-        "title": "Language Node Js",
-        "type": "object",
-        "properties": {
-          "node_js": {
-            "$ref": "#/definitions/type/strs"
-          },
-          "npm_args": {
-            "type": "string"
-          }
-        },
-        "normal": true,
-        "keys": {
-          "node_js": {
-            "aliases": [
-              "node"
-            ],
-            "only": {
-              "language": [
-                "node_js"
-              ]
-            }
-          },
-          "npm_args": {
-            "only": {
-              "language": [
-                "node_js"
-              ]
-            }
-          }
-        }
-      },
-      "objective-c": {
-        "$id": "language_objective-c",
-        "title": "Language Objective C",
-        "type": "object",
-        "properties": {
-          "rvm": {
-            "$ref": "#/definitions/type/strs"
-          },
-          "gemfile": {
-            "$ref": "#/definitions/type/strs"
-          },
-          "xcode_scheme": {
-            "$ref": "#/definitions/type/strs"
-          },
-          "xcode_sdk": {
-            "$ref": "#/definitions/type/strs"
-          },
-          "podfile": {
-            "type": "string"
-          },
-          "bundler_args": {
-            "type": "string"
-          },
-          "xcode_destination": {
-            "type": "string"
-          },
-          "xcode_project": {
-            "type": "string"
-          },
-          "xcode_workspace": {
-            "type": "string"
-          },
-          "xctool_args": {
-            "type": "string"
-          }
-        },
-        "normal": true,
-        "keys": {
-          "rvm": {
-            "aliases": [
-              "ruby"
-            ],
-            "only": {
-              "language": [
-                "objective-c"
-              ]
-            }
-          },
-          "gemfile": {
-            "only": {
-              "language": [
-                "objective-c"
-              ]
-            }
-          },
-          "xcode_scheme": {
-            "only": {
-              "language": [
-                "objective-c"
-              ]
-            }
-          },
-          "xcode_sdk": {
-            "only": {
-              "language": [
-                "objective-c"
-              ]
-            }
-          },
-          "podfile": {
-            "only": {
-              "language": [
-                "objective-c"
-              ]
-            }
-          },
-          "bundler_args": {
-            "only": {
-              "language": [
-                "objective-c"
-              ]
-            }
-          },
-          "xcode_destination": {
-            "only": {
-              "language": [
-                "objective-c"
-              ]
-            }
-          },
-          "xcode_project": {
-            "only": {
-              "language": [
-                "objective-c"
-              ]
-            }
-          },
-          "xcode_workspace": {
-            "only": {
-              "language": [
-                "objective-c"
-              ]
-            }
-          },
-          "xctool_args": {
-            "only": {
-              "language": [
-                "objective-c"
-              ]
-            }
-          }
-        }
-      },
-      "perl": {
-        "$id": "language_perl",
-        "title": "Language Perl",
-        "type": "object",
-        "properties": {
-          "perl": {
-            "$ref": "#/definitions/type/strs"
-          }
-        },
-        "normal": true,
-        "keys": {
-          "perl": {
-            "only": {
-              "language": [
-                "perl"
-              ]
-            }
-          }
-        }
-      },
-      "perl6": {
-        "$id": "language_perl6",
-        "title": "Language Perl6",
-        "type": "object",
-        "properties": {
-          "perl6": {
-            "$ref": "#/definitions/type/strs"
-          }
-        },
-        "normal": true,
-        "keys": {
-          "perl6": {
-            "only": {
-              "language": [
-                "perl6"
-              ]
-            }
-          }
-        }
-      },
-      "php": {
-        "$id": "language_php",
-        "title": "Language Php",
-        "type": "object",
-        "properties": {
-          "php": {
-            "$ref": "#/definitions/type/strs"
-          },
-          "composer_args": {
-            "type": "string"
-          }
-        },
-        "normal": true,
-        "keys": {
-          "php": {
-            "only": {
-              "language": [
-                "php"
-              ]
-            }
-          },
-          "composer_args": {
-            "only": {
-              "language": [
-                "php"
-              ]
-            }
-          }
-        }
-      },
-      "python": {
-        "$id": "language_python",
-        "title": "Language Python",
-        "type": "object",
-        "properties": {
-          "python": {
-            "$ref": "#/definitions/type/strs"
-          },
-          "virtualenv": {
-            "type": "object",
-            "properties": {
-              "system_site_packages": {
-                "type": "boolean"
-              }
-            }
-          }
-        },
-        "normal": true,
-        "keys": {
-          "python": {
-            "only": {
-              "language": [
-                "python"
-              ]
-            }
-          },
-          "virtualenv": {
-            "aliases": [
-              "virtual_env"
-            ],
-            "only": {
-              "language": [
-                "python"
-              ]
-            }
-          }
-        }
-      },
-      "r": {
-        "$id": "language_r",
-        "title": "Language R",
-        "type": "object",
-        "properties": {
-          "r": {
-            "$ref": "#/definitions/type/strs"
-          },
-          "r_packages": {
-            "$ref": "#/definitions/type/strs"
-          },
-          "r_binary_packages": {
-            "$ref": "#/definitions/type/strs"
-          },
-          "r_github_packages": {
-            "$ref": "#/definitions/type/strs"
-          },
-          "apt_packages": {
-            "$ref": "#/definitions/type/strs"
-          },
-          "bioc_packages": {
-            "$ref": "#/definitions/type/strs"
-          },
-          "brew_packages": {
-            "$ref": "#/definitions/type/strs"
-          },
-          "bioc": {
-            "type": "string"
-          },
-          "bioc_check": {
-            "type": "boolean"
-          },
-          "bioc_required": {
-            "type": "boolean"
-          },
-          "bioc_use_devel": {
-            "type": "boolean"
-          },
-          "cran": {
-            "type": "string"
-          },
-          "disable_homebrew": {
-            "type": "boolean"
-          },
-          "latex": {
-            "type": "boolean"
-          },
-          "pandoc": {
-            "type": "boolean"
-          },
-          "pandoc_version": {
-            "type": "string"
-          },
-          "r_build_args": {
-            "type": "string"
-          },
-          "r_check_args": {
-            "type": "string"
-          },
-          "r_check_revdep": {
-            "type": "boolean"
-          },
-          "warnings_are_errors": {
-            "type": "boolean"
-          },
-          "remotes": {
-            "type": "string"
-          },
-          "repos": {
-            "type": "object"
-          }
-        },
-        "normal": true,
-        "keys": {
-          "r": {
-            "only": {
-              "language": [
-                "r"
-              ]
-            }
-          },
-          "r_packages": {
-            "only": {
-              "language": [
-                "r"
-              ]
-            }
-          },
-          "r_binary_packages": {
-            "only": {
-              "language": [
-                "r"
-              ]
-            }
-          },
-          "r_github_packages": {
-            "only": {
-              "language": [
-                "r"
-              ]
-            }
-          },
-          "apt_packages": {
-            "only": {
-              "language": [
-                "r"
-              ]
-            }
-          },
-          "bioc_packages": {
-            "only": {
-              "language": [
-                "r"
-              ]
-            }
-          },
-          "brew_packages": {
-            "only": {
-              "language": [
-                "r"
-              ]
-            }
-          },
-          "bioc": {
-            "only": {
-              "language": [
-                "r"
-              ]
-            }
-          },
-          "bioc_check": {
-            "only": {
-              "language": [
-                "r"
-              ]
-            }
-          },
-          "bioc_required": {
-            "aliases": [
-              "use_bioc"
-            ],
-            "only": {
-              "language": [
-                "r"
-              ]
-            }
-          },
-          "bioc_use_devel": {
-            "only": {
-              "language": [
-                "r"
-              ]
-            }
-          },
-          "cran": {
-            "only": {
-              "language": [
-                "r"
-              ]
-            }
-          },
-          "disable_homebrew": {
-            "only": {
-              "language": [
-                "r"
-              ]
-            }
-          },
-          "latex": {
-            "only": {
-              "language": [
-                "r"
-              ]
-            }
-          },
-          "pandoc": {
-            "only": {
-              "language": [
-                "r"
-              ]
-            }
-          },
-          "pandoc_version": {
-            "only": {
-              "language": [
-                "r"
-              ]
-            }
-          },
-          "r_build_args": {
-            "only": {
-              "language": [
-                "r"
-              ]
-            }
-          },
-          "r_check_args": {
-            "only": {
-              "language": [
-                "r"
-              ]
-            }
-          },
-          "r_check_revdep": {
-            "only": {
-              "language": [
-                "r"
-              ]
-            }
-          },
-          "warnings_are_errors": {
-            "only": {
-              "language": [
-                "r"
-              ]
-            }
-          },
-          "remotes": {
-            "only": {
-              "language": [
-                "r"
-              ]
-            }
-          },
-          "repos": {
-            "only": {
-              "language": [
-                "r"
-              ]
-            }
-          }
-        }
-      },
-      "ruby": {
-        "$id": "language_ruby",
-        "title": "Language Ruby",
-        "type": "object",
-        "properties": {
-          "rvm": {
-            "$ref": "#/definitions/type/strs"
-          },
-          "gemfile": {
-            "$ref": "#/definitions/type/strs"
-          },
-          "jdk": {
-            "anyOf": [
-              {
-                "type": "array",
-                "items": {
-                  "type": "string"
-                },
-                "flags": [
-                  "expand"
-                ],
-                "normal": true
-              },
-              {
-                "type": "string"
-              }
-            ],
-            "flags": [
-              "expand"
-            ]
-          },
-          "bundler_args": {
-            "type": "string"
-          }
-        },
-        "normal": true,
-        "keys": {
-          "rvm": {
-            "aliases": [
-              "ruby",
-              "rbenv"
-            ],
-            "only": {
-              "language": [
-                "ruby"
-              ]
-            }
-          },
-          "gemfile": {
-            "aliases": [
-              "gemfiles"
-            ],
-            "only": {
-              "language": [
-                "ruby"
-              ]
-            }
-          },
-          "jdk": {
-            "only": {
-              "language": [
-                "ruby"
-              ]
-            },
-            "except": {
-              "os": [
-                "osx"
-              ]
-            }
-          },
-          "bundler_args": {
-            "only": {
-              "language": [
-                "ruby"
-              ]
-            }
-          }
-        }
-      },
-      "rust": {
-        "$id": "language_rust",
-        "title": "Language Rust",
-        "type": "object",
-        "properties": {
-          "rust": {
-            "$ref": "#/definitions/type/strs"
-          }
-        },
-        "normal": true,
-        "keys": {
-          "rust": {
-            "only": {
-              "language": [
-                "rust"
-              ]
-            }
-          }
-        }
-      },
-      "scala": {
-        "$id": "language_scala",
-        "title": "Language Scala",
-        "type": "object",
-        "properties": {
-          "scala": {
-            "$ref": "#/definitions/type/strs"
-          },
-          "jdk": {
-            "anyOf": [
-              {
-                "type": "array",
-                "items": {
-                  "type": "string"
-                },
-                "flags": [
-                  "expand"
-                ],
-                "normal": true
-              },
-              {
-                "type": "string"
-              }
-            ],
-            "flags": [
-              "expand"
-            ]
-          },
-          "sbt_args": {
-            "type": "string"
-          }
-        },
-        "normal": true,
-        "keys": {
-          "scala": {
-            "only": {
-              "language": [
-                "scala"
-              ]
-            }
-          },
-          "jdk": {
-            "only": {
-              "language": [
-                "scala"
-              ]
-            },
-            "except": {
-              "os": [
-                "osx"
-              ]
-            }
-          },
-          "sbt_args": {
-            "only": {
-              "language": [
-                "scala"
-              ]
-            }
-          }
-        }
-      },
-      "shell": {
-        "$id": "language_shell",
-        "title": "Language Shell",
-        "type": "object",
-        "normal": true
-      },
-      "smalltalk": {
-        "$id": "language_smalltalk",
-        "title": "Language Smalltalk",
-        "type": "object",
-        "properties": {
-          "smalltalk": {
-            "$ref": "#/definitions/type/strs"
-          },
-          "smalltalk_config": {
-            "$ref": "#/definitions/type/strs"
-          },
-          "smalltalk_vm": {
-            "$ref": "#/definitions/type/strs"
-          },
-          "smalltalk_edge": {
-            "type": "object",
-            "properties": {
-              "source": {
-                "type": "string"
-              },
-              "branch": {
-                "type": "string"
-              }
-            },
-            "additionalProperties": false
-          }
-        },
-        "normal": true,
-        "keys": {
-          "smalltalk": {
-            "only": {
-              "language": [
-                "smalltalk"
-              ]
-            }
-          },
-          "smalltalk_config": {
-            "only": {
-              "language": [
-                "smalltalk"
-              ]
-            }
-          },
-          "smalltalk_vm": {
-            "only": {
-              "language": [
-                "smalltalk"
-              ]
-            }
-          },
-          "smalltalk_edge": {
-            "only": {
-              "language": [
-                "smalltalk"
-              ]
-            }
-          }
-        }
-      }
-    },
     "notification": {
       "campfire": {
         "$id": "notification_campfire",
@@ -6718,6 +7731,9 @@
               }
             },
             "additionalProperties": false,
+            "aliases": [
+              "emails"
+            ],
             "prefix": {
               "key": "recipients"
             },
@@ -6735,7 +7751,10 @@
             "type": "boolean"
           }
         ],
-        "normal": true
+        "normal": true,
+        "aliases": [
+          "emails"
+        ]
       },
       "flowdock": {
         "$id": "notification_flowdock",
@@ -6877,7 +7896,10 @@
             "type": "object",
             "properties": {
               "channels": {
-                "$ref": "#/definitions/type/secures"
+                "$ref": "#/definitions/type/secures",
+                "aliases": [
+                  "channel"
+                ]
               },
               "channel_key": {
                 "$ref": "#/definitions/type/secure"
@@ -6917,13 +7939,6 @@
             "prefix": {
               "key": "channels"
             },
-            "keys": {
-              "channels": {
-                "aliases": [
-                  "channel"
-                ]
-              }
-            },
             "normal": true,
             "changes": [
               {
@@ -6932,7 +7947,10 @@
             ]
           },
           {
-            "$ref": "#/definitions/type/secures"
+            "$ref": "#/definitions/type/secures",
+            "aliases": [
+              "channel"
+            ]
           },
           {
             "type": "boolean"
@@ -7107,6 +8125,9 @@
               }
             },
             "additionalProperties": false,
+            "aliases": [
+              "webhook"
+            ],
             "prefix": {
               "key": "urls"
             },
@@ -7124,7 +8145,10 @@
             "type": "boolean"
           }
         ],
-        "normal": true
+        "normal": true,
+        "aliases": [
+          "webhook"
+        ]
       }
     }
   },
@@ -7164,89 +8188,5 @@
     "solution",
     "xcode_scheme",
     "xcode_sdk"
-  ],
-  "allOf": [
-    {
-      "type": "object",
-      "properties": {
-        "version": {
-          "$ref": "#/definitions/type/version"
-        },
-        "import": {
-          "$ref": "#/definitions/type/imports"
-        },
-        "language": {
-          "$ref": "#/definitions/type/language"
-        },
-        "os": {
-          "$ref": "#/definitions/type/oss"
-        },
-        "arch": {
-          "$ref": "#/definitions/type/archs"
-        },
-        "dist": {
-          "$ref": "#/definitions/type/dist"
-        },
-        "sudo": {
-          "$ref": "#/definitions/type/sudo"
-        },
-        "env": {
-          "$ref": "#/definitions/type/env"
-        },
-        "compiler": {
-          "$ref": "#/definitions/type/compilers"
-        },
-        "matrix": {
-          "$ref": "#/definitions/type/matrix"
-        },
-        "stages": {
-          "$ref": "#/definitions/type/stages"
-        },
-        "notifications": {
-          "$ref": "#/definitions/type/notifications"
-        },
-        "stack": {
-          "$ref": "#/definitions/type/stack"
-        },
-        "conditions": {
-          "$ref": "#/definitions/type/conditions"
-        },
-        "filter_secrets": {
-          "type": "boolean"
-        },
-        "trace": {
-          "type": "boolean"
-        }
-      },
-      "required": [
-        "language",
-        "os"
-      ],
-      "keys": {
-        "arch": {
-          "only": {
-            "os": [
-              "linux"
-            ]
-          }
-        },
-        "compiler": {
-          "only": {
-            "language": [
-              "c",
-              "cpp"
-            ]
-          }
-        },
-        "matrix": {
-          "aliases": [
-            "jobs"
-          ]
-        }
-      }
-    },
-    {
-      "$ref": "#/definitions/type/job"
-    }
   ]
 }

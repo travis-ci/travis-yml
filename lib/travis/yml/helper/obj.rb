@@ -126,6 +126,10 @@ module Travis
           [only(hash, *keys), except(hash, *keys)]
         end
 
+        def invert(hash)
+          hash.map { |key, obj| Array(obj).map { |obj| [obj, key] } }.flatten(1).to_h
+        end
+
         MERGE = -> (_, lft, rgt) do
           if lft.is_a?(::Hash) && rgt.is_a?(::Hash)
             lft.merge(rgt, &MERGE)
@@ -149,7 +153,7 @@ module Travis
         end
 
         def titleize(string)
-          string.to_s.split(/[_\-]/).map(&:capitalize).join(' ').strip
+          compact(string.to_s.split(/[_\-]/)).map(&:capitalize).join(' ').strip
         end
 
         def underscore(str)

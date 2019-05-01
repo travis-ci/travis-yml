@@ -17,12 +17,6 @@ module Travis
           def_delegators :node, :values, :keys, :max_size, :strict?, :prefix?,
             :prefix
 
-          def definitions
-            defs = merge(*jsons(values).map(&:definitions))
-            defs = merge(defs, defn(to_h)) if export?
-            defs.sort.to_h
-          end
-
           def to_h
             schema = {
               type: :object,
@@ -37,16 +31,16 @@ module Travis
 
             def properties
               map = except(node, *patterns)
-              map.map { |key, node| [key, json(node).schema] }.to_h if map.any?
+              map.map { |key, node| [key, node.schema] }.to_h if map.any?
             end
 
             def pattern_properties
               case node.types.size
               when 0
                 map = only(node, *patterns)
-                map.map { |key, node| [key, json(node).schema] }.to_h if map.any?
+                map.map { |key, node| [key, node.schema] }.to_h if map.any?
               when 1
-                { '.*': json(node.types.first).schema }
+                { '.*': node.types.first.schema }
               when 2
                 { '.*': any(node.types) }
               end
@@ -56,16 +50,12 @@ module Travis
               @patterns ||= node.keys.select { |key| key.to_s =~ PATTERN }
             end
 
-            # def opts
-            #   merge(except(super, :keys), super[:keys] || {})
-            # end
-
             def remap(opts)
               opts.map { |key, value| [REMAP[key] || key, value] }.to_h
             end
 
             def any(nodes, opts = {})
-              any = { anyOf: nodes.map { |node| json(node).schema } }
+              any = { anyOf: nodes.map(&:schema) }
               any.merge(except(opts, :normal))
             end
         end

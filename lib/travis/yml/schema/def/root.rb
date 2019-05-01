@@ -26,8 +26,6 @@ module Travis
           def define
             title 'JSON schema for Travis CI configuration files'
 
-            strict false
-
             map    :version
             map    :import,         to: :imports
             map    :language,       required: true
@@ -37,15 +35,19 @@ module Travis
             map    :sudo
             matrix :env
             matrix :compiler,       to: :compilers
-            map    :matrix,         alias: :jobs
             map    :stages
+            map    :matrix,         alias: :jobs
             map    :notifications
             map    :stack
             map    :conditions,     to: :conditions #, default: :v1
             map    :filter_secrets, to: :bool
             map    :trace,          to: :bool
 
-            include :job
+            include :languages, :job
+
+            # map :foo, to: :str, alias: [:foo], required: true, unique: true, only: { language: :osx }, deprecated: :bar
+
+            strict false
           end
         end
       end

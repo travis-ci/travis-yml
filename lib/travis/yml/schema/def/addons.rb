@@ -7,10 +7,9 @@ module Travis
       module Def
         module Addon
           class Addon < Dsl::Map
-            registry :addons
+            registry :addon
 
             def define
-              namespace :addon
               normal
               change :enable
               export
@@ -45,6 +44,7 @@ module Travis
                 add :bool, normal: true
               end
             end
+
             map :srcclr,          to: type
             map :firefox,         to: :str
             map :mariadb,         to: :str

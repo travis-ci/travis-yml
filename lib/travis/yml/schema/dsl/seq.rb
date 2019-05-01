@@ -18,13 +18,13 @@ module Travis
             types = types.map { |type| build(self, type, opts).node }
             node.set :types, types
 
-            # shouldn't this happen in Map#mapped_opts?
-            objs = types.map do |obj|
-              obj = obj.lookup if obj.type == :ref
-              obj.support.each do |key, opts|
-                node.parent.set :keys, { node.key => { key => to_strs(opts) } } if node.parent
-              end
-            end
+            # # shouldn't this happen in Map#mapped_opts?
+            # objs = types.map do |obj|
+            #   obj = obj.lookup if obj.type == :ref
+            #   obj.support.each do |key, opts|
+            #     node.parent.set :keys, { node.key => { key => to_strs(opts) } } if node.parent
+            #   end
+            # end
           end
         end
       end

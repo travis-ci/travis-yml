@@ -12,6 +12,7 @@ module Travis
           def define
             supports :except, os: :osx
             type :jdk
+            export
           end
         end
 

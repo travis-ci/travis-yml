@@ -9,7 +9,9 @@ module Travis
           register :ref
 
           def to_h
-            ref(node.ref)
+            # ref(node.ref)
+            # type = args.first || [node.namespace, id].join('/')
+            { '$ref': "#/definitions/#{namespace}/#{id}" }.merge(opts)
           end
         end
       end

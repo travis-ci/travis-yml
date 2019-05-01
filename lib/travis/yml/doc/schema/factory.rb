@@ -64,19 +64,24 @@ module Travis
             def join(type, schema)
               objs = schema[type].map do |obj|
                 obj = resolve(obj)
-                key = %i(oneOf allOf).detect { |key| obj.key?(key) }
+                key = %i(anyOf allOf oneOf).detect { |key| obj.key?(key) }
                 key ? join(key, obj) : obj
               end
 
+              # p schema.keys if schema[:$id] == :support
               obj = merge(*objs)
               schema = except(schema, type)
-              schema = merge(schema, obj)
+              schema = merge(schema, except(obj, :$id, :title))
               schema = schema.merge(strict: true)
               schema
             end
 
+            def join?(schema)
+              %i(languages support).include?(schema[:$id])
+            end
+
             def any(schema)
-              return build(join(:anyOf, schema)) if schema[:$id] == :languages
+              return build(join(:anyOf, schema)) if join?(schema)
               node = Any.new(normalize(schema))
               node.schemas = build(schema[:anyOf])
               node
@@ -89,7 +94,7 @@ module Travis
             end
 
             def map(schema)
-              node = Map.new({ keys: {} }.merge(normalize(schema)))
+              node = Map.new(normalize(schema))
               node.map = mappings(schema)
               if patterns = schema[:patternProperties]
                 raise if patterns.size > 1
@@ -129,7 +134,10 @@ module Travis
             end
 
             def ref(schema)
-              definition(schema[:'$ref'])
+              opts = except(schema, :'$ref')
+              node = definition(schema[:'$ref']).dup
+              node.opts = node.opts.merge(opts)
+              node
             end
 
             def definition(ref)
@@ -182,7 +190,6 @@ module Travis
               schema = remap(schema)
               schema = schema.merge(id: schema[:id].to_sym) if schema[:id]
               schema = schema.merge(strict: strict?(schema)) if schema[:type] == :object
-              schema = schema.merge(aliases: aliases(schema)) if schema[:aliases]
               except(schema, *DROP)
             end
 
@@ -192,36 +199,11 @@ module Travis
               false?(schema[:additionalProperties])
             end
 
-            def aliases(schema)
-              aliases = schema[:aliases]
-              return aliases unless aliases.values.first.is_a?(Array)
-              aliases.map { |key, names| names.map { |name| [name, key] } }.flatten(1).to_h
-            end
-
             def remap(hash)
               hash.map { |key, value| [REMAP[key] || key, value] }.to_h
             end
-
-            def except(hash, *keys)
-              hash.reject { |key, _| keys.include?(key) }
-            end
-
-            # MERGE = -> (_, lft, rgt) do
-            #   if lft.is_a?(::Hash) && rgt.is_a?(::Hash)
-            #     lft.merge(rgt, &MERGE)
-            #   elsif lft.is_a?(::Array) && rgt.is_a?(::Array)
-            #     lft.dup.concat(rgt).uniq
-            #   else
-            #     rgt
-            #   end
-            # end
-            #
-            # def merge(*objs)
-            #   Array(objs).flatten.inject { |lft, rgt| lft.merge(rgt, &MERGE) } || {}
-            # end
         end
       end
     end
   end
 end
-
