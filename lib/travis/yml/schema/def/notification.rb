@@ -1,5 +1,5 @@
 require 'travis/yml/schema/def/notification'
-require 'travis/yml/schema/dsl/enum'
+require 'travis/yml/schema/dsl/str'
 require 'travis/yml/schema/dsl/map'
 require 'travis/yml/schema/dsl/seq'
 
@@ -90,7 +90,7 @@ module Travis
             end
           end
 
-          class Frequency < Dsl::Enum
+          class Frequency < Dsl::Str
             registry :notification
             register :frequency
 

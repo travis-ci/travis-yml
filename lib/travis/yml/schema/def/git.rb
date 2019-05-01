@@ -9,7 +9,7 @@ module Travis
           register :git
 
           def define
-            map :strategy,         to: :enum, values: [:clone, :tarball]
+            map :strategy,         to: :str, values: [:clone, :tarball]
             map :quiet,            to: :bool
             map :depth,            to: :any, add: [:num, :bool]
             map :submodules,       to: :bool

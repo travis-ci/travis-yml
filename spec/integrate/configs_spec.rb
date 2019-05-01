@@ -630,6 +630,7 @@ describe Travis::Yml, configs: true do
     matrix.include.addons.apt.update
     matrix.include.addons.homebrew.update
     matrix.include.deploy.script
+    matrix.include.compiler
     matrix.include.go
     matrix.include.jdk
     matrix.include.node_js

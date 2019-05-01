@@ -1,11 +1,11 @@
 # frozen_string_literal: true
-require 'travis/yml/schema/dsl/enum'
+require 'travis/yml/schema/dsl/str'
 
 module Travis
   module Yml
     module Schema
       module Def
-        class Stack < Dsl::Enum
+        class Stack < Dsl::Str
           NAMES = %i(connie amethyst garnet stevonnie opal sardonyx onion cookiecat)
 
           register :stack

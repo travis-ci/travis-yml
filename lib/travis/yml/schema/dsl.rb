@@ -1,7 +1,6 @@
 require 'travis/yml/schema/dsl/all'
 require 'travis/yml/schema/dsl/any'
 require 'travis/yml/schema/dsl/bool'
-require 'travis/yml/schema/dsl/enum'
 require 'travis/yml/schema/dsl/lang'
 require 'travis/yml/schema/dsl/map'
 require 'travis/yml/schema/dsl/num'

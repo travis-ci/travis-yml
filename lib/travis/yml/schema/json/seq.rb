@@ -5,22 +5,12 @@ module Travis
   module Yml
     module Schema
       module Json
-        class Seq < Scalar
+        class Seq < Node
           register :seq
 
           def_delegators :node, :prefix
 
-          # def definitions
-          #   # # defs = merge(*jsons(node).map(&:definitions))
-          #   # defs = {}
-          #   # defs = merge(defn(to_h), defs) if export?
-          #   # defs.sort.to_h
-          #   fail
-          # end
-
           def to_h
-            # puts caller[0..10]
-            # puts
             schema = { type: :array, items: items }
             compact(schema.merge(opts))
           end

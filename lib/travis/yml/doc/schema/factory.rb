@@ -28,8 +28,6 @@ module Travis
               bool(schema)
             elsif schema[:type] == :number
               num(schema)
-            elsif schema[:type] == :string && schema.key?(:enum)
-              enum(schema)
             elsif schema[:type] == :string
               str(schema)
             elsif schema[:type] == :object
@@ -113,14 +111,6 @@ module Travis
               Secure.new(normalize(schema).merge(strict: !schema.key?(:anyOf))) # ??
             end
 
-            def enum(schema) # ugh.
-              schema = normalize(schema)
-              values = merge(*schema[:enum].map { |value| { value.to_sym => {} } })
-              values = values.merge(schema[:values] || {})
-              values = values.map { |key, value| { value: key.to_s }.merge(value) }
-              Enum.new(except(schema, :enum).merge(values: values))
-            end
-
             def str(schema)
               Str.new(normalize(schema))
             end
@@ -190,7 +180,15 @@ module Travis
               schema = remap(schema)
               schema = schema.merge(id: schema[:id].to_sym) if schema[:id]
               schema = schema.merge(strict: strict?(schema)) if schema[:type] == :object
+              schema = schema.merge(values: values(schema)) if schema[:enum]
               except(schema, *DROP)
+            end
+
+            def values(schema) # ugh.
+              values = schema[:enum].map { |obj| obj.is_a?(String) ? obj.to_sym : obj }
+              values = merge(*values.map { |obj| { obj => {} } })
+              values = values.merge(schema[:values] || {})
+              values.map { |key, obj| { value: schema[:type] == :string ? key.to_s : key }.merge(obj) }
             end
 
             def strict?(schema)

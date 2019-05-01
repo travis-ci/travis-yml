@@ -11,7 +11,15 @@ module Travis
 
           register :scalar
 
-          opts %i(defaults)
+          opts %i(defaults enum values)
+
+          def enum
+            opts[:enum]
+          end
+
+          def strict?
+            false?(opts[:strict]) ? false : true
+          end
         end
       end
     end

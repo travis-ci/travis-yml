@@ -1,5 +1,5 @@
 # frozen_string_literal: true
-require 'travis/yml/schema/dsl/enum'
+require 'travis/yml/schema/dsl/str'
 require 'travis/yml/schema/dsl/lang'
 require 'travis/yml/schema/dsl/one'
 
@@ -7,10 +7,10 @@ module Travis
   module Yml
     module Schema
       module Def
-        # Enum that is mapped on root on the :language key. The Language enum
-        # (allowed strings) is populated by the Lang::* instances (language
+        # Mapped on root on the :language key. The Language values (known
+        # names) are populated by the Lang::* instances (language
         # implementations), rather than here (see Dsl::Lang#before_define).
-        class Language < Dsl::Enum
+        class Language < Dsl::Str
           register :language
 
           def self.instances

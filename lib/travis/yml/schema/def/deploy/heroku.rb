@@ -21,7 +21,7 @@ module Travis
             end
           end
 
-          class HerokuStrategy < Dsl::Enum
+          class HerokuStrategy < Dsl::Str
             register :heroku_strategy
 
             def define

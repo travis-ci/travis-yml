@@ -25,7 +25,7 @@ module Travis
             map :apt_packages,    to: :seq
             map :artifacts
             map :browserstack
-            map :chrome,          to: :enum, values: %i(stable beta)
+            map :chrome,          to: :str, values: %i(stable beta)
             map :code_climate
             map :coverity_scan
             map :homebrew

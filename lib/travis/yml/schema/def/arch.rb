@@ -1,5 +1,5 @@
 # frozen_string_literal: true
-require 'travis/yml/schema/dsl/enum'
+require 'travis/yml/schema/dsl/str'
 require 'travis/yml/schema/dsl/seq'
 
 module Travis
@@ -22,7 +22,7 @@ module Travis
           end
         end
 
-        class Arch < Dsl::Enum
+        class Arch < Dsl::Str
           register :arch
 
           def define

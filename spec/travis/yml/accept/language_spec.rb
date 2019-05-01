@@ -56,7 +56,7 @@ describe Travis::Yml, 'language' do
         php: hhvm
     )
     it { should serialize_to defaults }
-    it { should have_msg [:error, :language, :invalid_type, expected: :enum, actual: :map, value: { php: 'hhvm' }] }
+    it { should have_msg [:error, :language, :invalid_type, expected: :str, actual: :map, value: { php: 'hhvm' }] }
     it { should have_msg [:info, :language, :default, default: 'ruby'] }
   end
 

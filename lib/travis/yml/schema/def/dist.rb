@@ -1,11 +1,11 @@
 # frozen_string_literal: true
-require 'travis/yml/schema/dsl/enum'
+require 'travis/yml/schema/dsl/str'
 
 module Travis
   module Yml
     module Schema
       module Def
-        class Dist < Dsl::Enum
+        class Dist < Dsl::Str
           register :dist
 
           def define

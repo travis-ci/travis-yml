@@ -16,7 +16,7 @@ describe Travis::Yml, 'cache' do
       cache: false
     )
     it { should serialize_to cache: types.map { |type| [type, false] }.to_h }
-    it { should have_msg [:warn, :cache, :deprecated, deprecation: :cache_enable_all, value: false] }
+    it { should_not have_msg }
   end
 
   describe 'given a string' do
