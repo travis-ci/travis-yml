@@ -110,7 +110,7 @@ describe Travis::Yml, 'cache' do
         - unknown: true
     )
     it { should serialize_to cache: { apt: true, unknown: true } }
-    it { should have_msg [:warn, :cache, :unknown_key, key: :unknown, value: true] }
+    it { should have_msg [:warn, :cache, :unknown_key, key: 'unknown', value: true] }
   end
 
   describe 'given a map' do
@@ -160,7 +160,7 @@ describe Travis::Yml, 'cache' do
         directory: foo
     )
     it { should serialize_to cache: { directories: ['foo'] } }
-    it { should have_msg [:warn, :cache, :find_key, original: :directory, key: :directories] }
+    it { should have_msg [:warn, :cache, :find_key, original: 'directory', key: 'directories'] }
   end
 
   describe 'branch' do

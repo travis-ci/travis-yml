@@ -42,7 +42,7 @@ module Travis
             end
 
             def applies?(map)
-              key = schema.opts[:detect]
+              key = schema.opts[:detect].to_s
               return unless enum = map[key]
               return unless enum.enum? && enum.size == 1
               return unless str = value_for(enum, key)

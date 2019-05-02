@@ -49,7 +49,7 @@ module Travis
           end
 
           def all_keys
-            [:secure]
+            []
           end
         end
       end

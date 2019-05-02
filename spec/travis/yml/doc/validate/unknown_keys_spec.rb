@@ -12,7 +12,7 @@ describe Travis::Yml::Doc::Validate, 'unknown_keys' do
 
     describe 'given an unknown key' do
       let(:value) { { bar: 'bar' } }
-      it { should have_msg [:warn, :root, :unknown_key, key: :bar, value: 'bar'] }
+      it { should have_msg [:warn, :root, :unknown_key, key: 'bar', value: 'bar'] }
       it { should serialize_to bar: 'bar' }
     end
   end

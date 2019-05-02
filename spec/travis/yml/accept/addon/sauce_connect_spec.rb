@@ -92,6 +92,6 @@ describe Travis::Yml, 'addon: sauce_connect' do
           sauce_connect: true
     )
     it { should serialize_to addons: { sauce_connect: { enabled: true } } }
-    it { should have_msg [:warn, :'addons.sauce_connect', :migrate, key: :sauce_connect, to: :addons, value: true] }
+    it { should have_msg [:warn, :'addons.sauce_connect', :migrate, key: 'sauce_connect', to: 'addons', value: true] }
   end
 end

@@ -4,7 +4,7 @@ describe Travis::Yml, 'language' do
   describe 'defaults to ruby', defaults: true do
     yaml ''
     it { should serialize_to language: 'ruby', os: ['linux'] }
-    it { should have_msg [:info, :language, :default, key: :language, default: 'ruby'] }
+    it { should have_msg [:info, :language, :default, key: 'language', default: 'ruby'] }
   end
 
   langs = Travis::Yml::Schema::Def::Lang.registry
@@ -50,6 +50,16 @@ describe Travis::Yml, 'language' do
     it { should serialize_to language: 'c' }
   end
 
+  describe 'given a seq with an unknown value' do
+    yaml %(
+      language:
+      - none
+    )
+    it { should serialize_to language: 'ruby' }
+    it { should have_msg [:warn, :language, :unexpected_seq, value: 'none'] }
+    it { should have_msg [:warn, :language, :unknown_default, value: 'none', default: 'ruby'] }
+  end
+
   describe 'given a map', defaults: true do
     yaml %(
       language:
@@ -57,7 +67,7 @@ describe Travis::Yml, 'language' do
     )
     it { should serialize_to defaults }
     it { should have_msg [:error, :language, :invalid_type, expected: :str, actual: :map, value: { php: 'hhvm' }] }
-    it { should have_msg [:info, :language, :default, key: :language, default: 'ruby'] }
+    it { should have_msg [:info, :language, :default, key: 'language', default: 'ruby'] }
   end
 
   describe 'given an alias' do
@@ -93,7 +103,7 @@ describe Travis::Yml, 'language' do
     )
     it { should serialize_to language: 'node_js', compiler: ['gcc'] }
     it { should have_msg [:warn, :language, :clean_value, original: 'node_js - 9', value: 'node_js'] }
-    it { should have_msg [:warn, :compiler, :unsupported, on_key: :language, on_value: 'node_js', key: :compiler, value: ['gcc']] }
+    it { should have_msg [:warn, :compiler, :unsupported, on_key: 'language', on_value: 'node_js', key: 'compiler', value: ['gcc']] }
   end
 
   describe 'uppercased alias with non-word chars' do

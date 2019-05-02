@@ -77,23 +77,23 @@ describe Travis::Yml do
 
     describe 'root' do
       let(:node) { schema }
-      it { expect(node.keys).to include :language }
-      it { expect(node.keys).to include :rvm }
-      it { expect(node.keys).to include :addons }
+      it { expect(node.keys).to include 'language' }
+      it { expect(node.keys).to include 'rvm' }
+      it { expect(node.keys).to include 'addons' }
     end
 
     describe 'matrix_entry' do
-      let(:node) { schema.map[:matrix][0][:include][0].schema }
-      it { expect(node.keys).to include :language }
-      it { expect(node.keys).to include :rvm }
-      it { expect(node.keys).to include :addons }
+      let(:node) { schema.map['matrix'][0]['include'][0].schema }
+      it { expect(node.keys).to include 'language' }
+      it { expect(node.keys).to include 'rvm' }
+      it { expect(node.keys).to include 'addons' }
     end
 
     describe 'deploy_condition' do
-      let(:node) { schema.map[:deploy][0].schema[0][0][:on][0] }
-      it { expect(node.keys).to include :branch }
-      it { expect(node.keys).to include :rvm }
-      it { expect(node.keys).to_not include :addons }
+      let(:node) { schema.map['deploy'][0].schema[0][0]['on'][0] }
+      it { expect(node.keys).to include 'branch' }
+      it { expect(node.keys).to include 'rvm' }
+      it { expect(node.keys).to_not include 'addons' }
     end
   end
 

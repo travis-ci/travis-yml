@@ -39,7 +39,7 @@ describe Travis::Yml, 'addon: sonarcloud' do
           branches: str
     )
     it { should serialize_to addons: { sonarcloud: { branches: ['str'] } } }
-    it { should have_msg [:warn, :'addons.sonarcloud', :deprecated_key, key: :branches, info: 'not supported any more'] }
+    it { should have_msg [:warn, :'addons.sonarcloud', :deprecated_key, key: 'branches', info: 'not supported any more'] }
     it { expect(msgs.size).to eq 1 }
   end
 
@@ -51,7 +51,7 @@ describe Travis::Yml, 'addon: sonarcloud' do
           - str
     )
     it { should serialize_to addons: { sonarcloud: { branches: ['str'] } } }
-    it { should have_msg [:warn, :'addons.sonarcloud', :deprecated_key, key: :branches, info: 'not supported any more'] }
+    it { should have_msg [:warn, :'addons.sonarcloud', :deprecated_key, key: 'branches', info: 'not supported any more'] }
     it { expect(msgs.size).to eq 1 }
   end
 
@@ -62,7 +62,7 @@ describe Travis::Yml, 'addon: sonarcloud' do
           github_token: str
     )
     it { should serialize_to addons: { sonarcloud: { github_token: 'str' } } }
-    it { should have_msg [:warn, :'addons.sonarcloud', :deprecated_key, key: :github_token, info: 'not supported any more'] }
+    it { should have_msg [:warn, :'addons.sonarcloud', :deprecated_key, key: 'github_token', info: 'not supported any more'] }
     it { expect(msgs.size).to eq 1 }
   end
 
@@ -74,7 +74,7 @@ describe Travis::Yml, 'addon: sonarcloud' do
             secure: str
     )
     it { should serialize_to addons: { sonarcloud: { github_token: { secure: 'str' } } } }
-    it { should have_msg [:warn, :'addons.sonarcloud', :deprecated_key, key: :github_token, info: 'not supported any more'] }
+    it { should have_msg [:warn, :'addons.sonarcloud', :deprecated_key, key: 'github_token', info: 'not supported any more'] }
     it { expect(msgs.size).to eq 1 }
   end
 end

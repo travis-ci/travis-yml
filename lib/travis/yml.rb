@@ -9,7 +9,6 @@ require 'json'
 require 'yaml'
 require 'travis/yml/errors'
 require 'travis/yml/doc'
-require 'travis/yml/helper/deyaml'
 require 'travis/yml/load'
 require 'travis/yml/matrix'
 require 'travis/yml/schema'
@@ -24,13 +23,19 @@ module Travis
       os:       'linux'
     }
 
+    # These exist so we can parametrize things a little for testing (e.g. so
+    # tests don't break elsewhere just because a default has changed here).
+
     OPTS = {
-      required: true,
-      defaults: true
+      alert:    true,    # alert on secures that accept a string
+      empty:    false,   # warn on empty keys
+      line:     true,    # add line numbers to messages
+      defaults: true     # add defaults to required keys
     }
 
     # These are meant as examples. Clients will want to determine their own
     # representations.
+
     MSGS = {
       alert:             'this string should probably be encrypted',
       alias:             '%{alias} is an alias for %{actual}, using %{actual}',
@@ -64,7 +69,7 @@ module Travis
     }
 
     class << self
-      include Helper::Deyaml, Memoize
+      include Memoize
 
       def load(parts, opts = {})
         apply(Load.apply(parts), opts)
@@ -87,11 +92,10 @@ module Travis
         File.write('schema.json', JSON.pretty_generate(schema))
       end
 
-      def apply(input, opts = {})
-        unexpected_format! unless input.is_a?(Hash)
+      def apply(value, opts = {})
+        unexpected_format! unless value.is_a?(Hash)
         opts = OPTS.merge(opts) unless ENV['env'] == 'test'
-        input = deyaml(input)
-        node = Doc.build(input, opts)
+        node = Doc.build(value, opts)
         node = Doc.change(expand, node)
         node = Doc.validate(expand, node)
         node
@@ -115,7 +119,7 @@ module Travis
 
       # R's known keys on root should definitely be reduced
       def r_keys
-        %i(
+        %w(
           r_packages
           r_binary_packages
           r_github_packages

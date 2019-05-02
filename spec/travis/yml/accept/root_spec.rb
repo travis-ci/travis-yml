@@ -4,8 +4,8 @@ describe Travis::Yml, 'root' do
   describe 'default', defaults: true do
     yaml ''
     it { should serialize_to defaults }
-    it { should have_msg [:info, :language, :default, key: :language, default: 'ruby'] }
-    it { should have_msg [:info, :os, :default, key: :os, default: 'linux'] }
+    it { should have_msg [:info, :language, :default, key: 'language', default: 'ruby'] }
+    it { should have_msg [:info, :os, :default, key: 'os', default: 'linux'] }
   end
 
   describe 'given a non-hash' do
@@ -36,7 +36,7 @@ describe Travis::Yml, 'root' do
         csript: ./foo
       )
       it { should serialize_to script: ['./foo'] }
-      it { should have_msg [:warn, :root, :find_key, original: :csript, key: :script] }
+      it { should have_msg [:warn, :root, :find_key, original: 'csript', key: 'script'] }
     end
 
     describe 'a camelized key' do
@@ -44,7 +44,7 @@ describe Travis::Yml, 'root' do
         Language: ruby
       )
       it { should serialize_to language: 'ruby' }
-      it { should have_msg [:info, :root, :underscore_key, original: :Language, key: :language] }
+      it { should have_msg [:info, :root, :underscore_key, original: 'Language', key: 'language'] }
     end
 
     describe 'a dasherized key' do
@@ -52,7 +52,7 @@ describe Travis::Yml, 'root' do
         before-script: ./foo
       )
       it { should serialize_to before_script: ['./foo'] }
-      it { should have_msg [:info, :root, :underscore_key, original: :'before-script', key: :before_script] }
+      it { should have_msg [:info, :root, :underscore_key, original: 'before-script', key: 'before_script'] }
     end
 
     describe 'a key supported by default language', support: true do
@@ -60,7 +60,7 @@ describe Travis::Yml, 'root' do
         rubi: 2.3
       )
       it { should serialize_to rvm: ['2.3'] }
-      it { should have_msg [:warn, :root, :find_key, original: :rubi, key: :ruby] }
+      it { should have_msg [:warn, :root, :find_key, original: 'rubi', key: 'ruby'] }
     end
 
     describe 'a key supported by given language' do
@@ -69,7 +69,7 @@ describe Travis::Yml, 'root' do
         pyhton: 2.7
       )
       it { should serialize_to language: 'python', python: ['2.7'] }
-      it { should have_msg [:warn, :root, :find_key, original: :pyhton, key: :python] }
+      it { should have_msg [:warn, :root, :find_key, original: 'pyhton', key: 'python'] }
     end
 
     describe 'a key supported by os' do
@@ -78,7 +78,7 @@ describe Travis::Yml, 'root' do
         xcode_prject: project
       )
       it { should serialize_to language: 'objective-c', xcode_project: 'project' }
-      it { should have_msg [:warn, :root, :find_key, original: :xcode_prject, key: :xcode_project] }
+      it { should have_msg [:warn, :root, :find_key, original: 'xcode_prject', key: 'xcode_project'] }
     end
 
     describe 'a key unsupported by given language' do
@@ -87,8 +87,8 @@ describe Travis::Yml, 'root' do
         pyhton: 2.7
       )
       it { should serialize_to language: 'ruby', python: ['2.7'] }
-      it { should have_msg [:warn, :root, :find_key, original: :pyhton, key: :python] }
-      it { should have_msg [:warn, :python, :unsupported, on_key: :language, on_value: 'ruby', key: :python, value: ['2.7']] }
+      it { should have_msg [:warn, :root, :find_key, original: 'pyhton', key: 'python'] }
+      it { should have_msg [:warn, :python, :unsupported, on_key: 'language', on_value: 'ruby', key: 'python', value: ['2.7']] }
     end
   end
 
@@ -97,7 +97,7 @@ describe Travis::Yml, 'root' do
       unknown: foo
     )
     it { should serialize_to unknown: 'foo' }
-    it { should have_msg [:warn, :root, :unknown_key, key: :unknown, value: 'foo'] }
+    it { should have_msg [:warn, :root, :unknown_key, key: 'unknown', value: 'foo'] }
   end
 
   describe 'drops an unknown key (2)' do
@@ -105,7 +105,7 @@ describe Travis::Yml, 'root' do
       cd: foo
     )
     it { should serialize_to cd: 'foo' }
-    it { should have_msg [:warn, :root, :unknown_key, key: :cd, value: 'foo'] }
+    it { should have_msg [:warn, :root, :unknown_key, key: 'cd', value: 'foo'] }
   end
 
   describe 'source_key' do
@@ -170,7 +170,7 @@ describe Travis::Yml, 'root' do
         foo: foo
     )
     it { should serialize_to foo: { foo: 'foo' } }
-    it { should have_msg [:warn, :root, :unknown_key, key: :foo, value: { foo: 'foo' }] }
+    it { should have_msg [:warn, :root, :unknown_key, key: 'foo', value: { foo: 'foo' }] }
   end
 
   describe 'given a misplaced key (up)', v2: true, migrate: true do
@@ -179,7 +179,7 @@ describe Travis::Yml, 'root' do
         rvm: 2.4
     )
     it { should serialize_to matrix: { allow_failures: [rvm: '2.4'] } }
-    it { should have_msg [:warn, :root, :migrate, key: :allow_failures, to: :matrix, value: [rvm: '2.4']] }
+    it { should have_msg [:warn, :root, :migrate, key: 'allow_failures', to: 'matrix', value: [rvm: '2.4']] }
   end
 
   describe 'given a misplaced key (up), with the target being present, and nil', v2: true, migrate: true do
@@ -190,7 +190,7 @@ describe Travis::Yml, 'root' do
     )
     let(:input) { { matrix: nil, allow_failures: [rvm: '2.4'] } }
     it { should serialize_to matrix: { allow_failures: [rvm: '2.4'] } }
-    it { should have_msg [:warn, :root, :migrate, key: :allow_failures, to: :matrix, value: [rvm: '2.4']] }
+    it { should have_msg [:warn, :root, :migrate, key: 'allow_failures', to: 'matrix', value: [rvm: '2.4']] }
     it { expect(msgs.size).to eq 1 }
   end
 
@@ -203,7 +203,7 @@ describe Travis::Yml, 'root' do
           rvm: 2.4
     )
     it { should serialize_to matrix: { include: [{ env: ['FOO=foo'] }], allow_failures: [rvm: '2.4'] } }
-    it { should have_msg [:warn, :root, :migrate, key: :allow_failures, to: :matrix, value: [rvm: '2.4']] }
+    it { should have_msg [:warn, :root, :migrate, key: 'allow_failures', to: 'matrix', value: [rvm: '2.4']] }
     it { expect(msgs.size).to eq 1 }
   end
 
@@ -215,7 +215,7 @@ describe Travis::Yml, 'root' do
         rvm: 2.4
     )
     it { should serialize_to matrix: { include: [{ env: ['FOO=foo'] }], allow_failures: [rvm: '2.4'] } }
-    it { should have_msg [:warn, :root, :migrate, key: :allow_failures, to: :matrix, value: [rvm: '2.4']] }
+    it { should have_msg [:warn, :root, :migrate, key: 'allow_failures', to: 'matrix', value: [rvm: '2.4']] }
     it { expect(msgs.size).to eq 1 }
   end
 
@@ -225,7 +225,7 @@ describe Travis::Yml, 'root' do
         script: ./foo
     )
     it { should serialize_to script: ['./foo'] }
-    it { should have_msg [:warn, :addons, :migrate, key: :script, to: :root, value: 'foo'] }
+    it { should have_msg [:warn, :addons, :migrate, key: 'script', to: 'root', value: 'foo'] }
     it { expect(msgs.size).to eq 1 }
   end
 
@@ -239,7 +239,7 @@ describe Travis::Yml, 'root' do
             repo_token: token
     )
     it { should serialize_to addons: { apt: { sources: ['source'] }, code_climate: { repo_token: 'token' } } }
-    it { should have_msg [:warn, :'addons.apt', :migrate, key: :code_climate, to: :addons, value: { repo_token: 'token' }] }
+    it { should have_msg [:warn, :'addons.apt', :migrate, key: 'code_climate', to: 'addons', value: { repo_token: 'token' }] }
     it { expect(msgs.size).to eq 1 }
   end
 
@@ -248,6 +248,18 @@ describe Travis::Yml, 'root' do
       file: file
     )
     it { should serialize_to file: 'file' }
-    it { should have_msg [:warn, :root, :unknown_key, key: :file, value: 'file'] }
+    it { should have_msg [:warn, :root, :unknown_key, key: 'file', value: 'file'] }
+  end
+
+  describe 'line number info', line: true do
+    describe 'unknown_key' do
+      yaml "unknown: str"
+      it { should have_msg [:warn, :root, :unknown_key, key: 'unknown', value: 'str', line: 0] }
+    end
+
+    describe 'line number info on msgs', line: true do
+      yaml "\nscript: { foo: bar }"
+      it { should have_msg [:error, :script, :invalid_type, expected: :str, actual: :map, value: { foo: 'bar' }, line: 1] }
+    end
   end
 end

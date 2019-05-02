@@ -66,7 +66,6 @@ module Travis
                 key ? join(key, obj) : obj
               end
 
-              # p schema.keys if schema[:$id] == :support
               obj = merge(*objs)
               schema = except(schema, type)
               schema = merge(schema, except(obj, :$id, :title))
@@ -104,7 +103,7 @@ module Travis
 
             def mappings(schema)
               map = schema[:properties] ? schema[:properties] : {}
-              map.map { |key, schema| [key, build(schema)] }.to_h
+              map.map { |key, schema| [key.to_s, build(schema)] }.to_h
             end
 
             def secure(schema)
@@ -124,9 +123,8 @@ module Travis
             end
 
             def ref(schema)
-              opts = except(schema, :'$ref')
               node = definition(schema[:'$ref']).dup
-              node.opts = node.opts.merge(opts)
+              node.opts = node.opts.merge(normalize(schema))
               node
             end
 
@@ -154,11 +152,13 @@ module Travis
             end
 
             DROP = %i(
+              $ref
               additionalProperties
               allOf
               anyOf
               definitions
               description
+              enum
               examples
               items
               maxProperties
@@ -179,16 +179,32 @@ module Travis
             def normalize(schema)
               schema = remap(schema)
               schema = schema.merge(id: schema[:id].to_sym) if schema[:id]
+              schema = schema.merge(aliases: to_strs(schema[:aliases])) if schema[:aliases]
+              schema = schema.merge(required: to_strs(schema[:required])) if schema[:required]
               schema = schema.merge(strict: strict?(schema)) if schema[:type] == :object
               schema = schema.merge(values: values(schema)) if schema[:enum]
+              schema = schema.merge(defaults: defaults(schema)) if schema[:defaults]
+              schema = schema.merge(support(schema)) if schema[:only] || schema[:except]
               except(schema, *DROP)
             end
 
-            def values(schema) # ugh.
-              values = schema[:enum].map { |obj| obj.is_a?(String) ? obj.to_sym : obj }
-              values = merge(*values.map { |obj| { obj => {} } })
-              values = values.merge(schema[:values] || {})
-              values.map { |key, obj| { value: schema[:type] == :string ? key.to_s : key }.merge(obj) }
+            def defaults(schema)
+              defaults = schema[:defaults]
+              defaults = defaults.map { |obj| obj.merge(support(obj)) }
+              defaults
+            end
+
+            def values(schema)
+              values = schema[:values] || {}
+              others = schema[:enum].map(&:to_s) - values.keys
+              values = others.inject(values) { |values, key| values.merge(key => {}) }
+              values = values.map { |key, value| value.merge(value: key.to_s) }
+              values = values.map { |value| value.merge(support(value)) }
+              values
+            end
+
+            def support(schema)
+              only(schema, :only, :except).map { |key, opts| [key, stringify(opts)] }.to_h
             end
 
             def strict?(schema)

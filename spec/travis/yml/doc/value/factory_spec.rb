@@ -56,7 +56,7 @@ describe Travis::Yml::Doc::Value, 'factory' do
   end
 
   describe 'given a secure' do
-    let(:value) { { secure: 'secure' } }
+    let(:value) { { 'secure' => 'secure' } }
     it { should be_secure }
     it { should serialize_to secure: 'secure' }
   end

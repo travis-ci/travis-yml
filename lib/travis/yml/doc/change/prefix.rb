@@ -20,7 +20,7 @@ module Travis
           end
 
           def prefixed?
-            value.map? && value.key?(schema.prefix[:key])
+            value.map? && value.key?(key)
           end
 
           def matches?
@@ -35,12 +35,12 @@ module Travis
           def prefix_map
             return value if value.keys.all? { |key| schema.known?(key) }
             known, other = split(value.value, *schema.keys)
-            other = build({ schema.prefix[:key] => other }.merge(known))
+            other = build({ key => other }.merge(known))
             matching(other)
           end
 
           def prefix_obj
-            other = build(schema.prefix[:key] => value)
+            other = build(key => value)
             matching(other)
           end
 
@@ -52,7 +52,11 @@ module Travis
           def keys(value)
             keys = schema.keys.map(&:to_s)
             keys = value.keys.map { |key| schema.match(keys, key) || key }
-            keys.map(&:to_sym)
+            keys
+          end
+
+          def key
+            schema.prefix[:key].to_s
           end
         end
       end

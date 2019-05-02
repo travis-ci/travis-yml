@@ -6,7 +6,7 @@ describe Travis::Yml, 'addon: firefox' do
       addons:
         firefox: 15
     )
-    it { should serialize_to addons: { firefox: '15' } }
+    it { should serialize_to addons: { firefox: 15 } }
     it { should_not have_msg }
   end
 
@@ -15,7 +15,7 @@ describe Travis::Yml, 'addon: firefox' do
       addons:
         firefox: '15'
     )
-    it { should serialize_to addons: { firefox: '15' } }
+    it { should serialize_to addons: { firefox: 15 } }
     it { should_not have_msg }
   end
 end

@@ -45,8 +45,8 @@ module Travis
               end
             end
 
-            def supporting(key)
-              Array(super()[key])
+            def supporting(key = nil)
+              key ? Array(super()[key]) : super()
             end
         end
       end

@@ -1,10 +1,6 @@
 describe Travis::Yml, 'notifications: hipchat' do
   subject { described_class.apply(parse(yaml)) }
 
-  # map :format,           to: :enum, values: [:html, :text]
-  # map :notify,           to: :bool
-  # map :on_pull_requests, to: :bool
-
   describe 'given true' do
     yaml %(
       notifications:
@@ -209,6 +205,6 @@ describe Travis::Yml, 'notifications: hipchat' do
           unknown: str
     )
     it { should serialize_to notifications: { hipchat: { unknown: 'str' } } }
-    it { should have_msg [:warn, :'notifications.hipchat', :unknown_key, key: :unknown, value: 'str'] }
+    it { should have_msg [:warn, :'notifications.hipchat', :unknown_key, key: 'unknown', value: 'str'] }
   end
 end

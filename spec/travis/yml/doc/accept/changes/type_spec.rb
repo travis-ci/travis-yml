@@ -1,8 +1,8 @@
 describe Travis::Yml::Doc::Change do
-  subject { described_class.apply(schema, build_value(value)) }
+  subject { described_class.apply(schema, build_value(value, opts)) }
 
   describe 'addons.code_climate' do
-    let(:schema) { Travis::Yml.expand[:addons][:code_climate] }
+    let(:schema) { Travis::Yml.expand['addons']['code_climate'] }
 
     describe 'a str' do
       let(:value) { 'foo' }
@@ -26,7 +26,7 @@ describe Travis::Yml::Doc::Change do
   end
 
   describe 'addons.apt' do
-    let(:schema) { Travis::Yml.expand[:addons][:apt] }
+    let(:schema) { Travis::Yml.expand['addons']['apt'] }
 
     describe 'a str' do
       let(:value) { 'foo' }
@@ -75,7 +75,7 @@ describe Travis::Yml::Doc::Change do
   end
 
   describe 'archs' do
-    let(:schema) { Travis::Yml.expand[:arch] }
+    let(:schema) { Travis::Yml.expand['arch'] }
 
     describe 'a str' do
       let(:value) { 'amd64' }
@@ -99,7 +99,7 @@ describe Travis::Yml::Doc::Change do
   end
 
   describe 'branches' do
-    let(:schema) { Travis::Yml.expand[:branches] }
+    let(:schema) { Travis::Yml.expand['branches'] }
 
     describe 'a str' do
       let(:value) { 'foo' }
@@ -123,7 +123,7 @@ describe Travis::Yml::Doc::Change do
   end
 
   describe 'deploy' do
-    let(:schema) { Travis::Yml.expand[:deploy] }
+    let(:schema) { Travis::Yml.expand['deploy'] }
 
     describe 'a str' do
       let(:value) { 'heroku' }
@@ -146,13 +146,13 @@ describe Travis::Yml::Doc::Change do
     end
 
     describe 'a seq of maps with an unknown key' do
-      let(:value) { [{ provider: 'script' }, { provider: 'heroku', foo: 'foo' }] }
+      let(:value) { [{ provider: 'script' }, { provider: 'heroku', 'foo' => 'foo' }] }
       it { should serialize_to [{ provider: 'script' }, { provider: 'heroku', foo: 'foo' }] }
     end
   end
 
   describe 'env' do
-    let(:schema) { Travis::Yml.expand[:env] }
+    let(:schema) { Travis::Yml.expand['env'] }
 
     describe 'a str' do
       let(:value) { 'foo' }
@@ -185,7 +185,7 @@ describe Travis::Yml::Doc::Change do
     end
 
     describe 'a secure' do
-      let(:value) { { secure: 'foo' } }
+      let(:value) { { 'secure' => 'foo' } }
       it { should serialize_to matrix: [secure: 'foo'] }
     end
 
@@ -195,23 +195,23 @@ describe Travis::Yml::Doc::Change do
     end
 
     describe 'a map' do
-      let(:value) { { FOO: 'foo', BAR: 'bar' } }
+      let(:value) { { 'FOO' => 'foo', 'BAR' => 'bar' } }
       it { should serialize_to matrix: [{ FOO: 'foo' }, { BAR: 'bar' }] }
     end
 
     describe 'a seq of maps' do
-      let(:value) { [{ FOO: 'foo', BAR: 'bar' }, { BAZ: 'baz' }] }
+      let(:value) { [{ 'FOO' => 'foo', 'BAR' => 'bar' }, { 'BAZ' => 'baz' }] }
       it { should serialize_to matrix: [{ FOO: 'foo' }, { BAR: 'bar' }, { BAZ: 'baz' }] }
     end
 
     describe 'a seq of mixed vars, maps, and secures' do
       let(:value) do
         [
-          { FOO: 'foo', BAR: 'bar' },
-          { BAZ: 'baz' },
+          { 'FOO' => 'foo', 'BAR' => 'bar' },
+          { 'BAZ' => 'baz' },
           'BUZ=buz',
           'BAM=bam BUM=bum',
-          { secure: 'secure' }
+          { 'secure' => 'secure' }
         ]
       end
 
@@ -230,7 +230,7 @@ describe Travis::Yml::Doc::Change do
   end
 
   describe 'env.matrix' do
-    let(:schema) { Travis::Yml.expand[:env] }
+    let(:schema) { Travis::Yml.expand['env'] }
 
     describe 'a str' do
       let(:value) { { matrix: 'foo' } }
@@ -274,7 +274,7 @@ describe Travis::Yml::Doc::Change do
   end
 
   describe 'imports' do
-    let(:schema) { Travis::Yml.expand[:import] }
+    let(:schema) { Travis::Yml.expand['import'] }
 
     describe 'a str' do
       let(:value) { 'foo' }
@@ -298,7 +298,7 @@ describe Travis::Yml::Doc::Change do
   end
 
   describe 'matrix.include' do
-    let(:schema) { Travis::Yml.expand[:matrix] }
+    let(:schema) { Travis::Yml.expand['matrix'] }
 
     describe 'a str' do
       let(:value) { { include: ['foo'] } }
@@ -322,7 +322,7 @@ describe Travis::Yml::Doc::Change do
   end
 
   describe 'notifications' do
-    let(:schema) { Travis::Yml.expand[:notifications] }
+    let(:schema) { Travis::Yml.expand['notifications'] }
 
     describe 'a str' do
       let(:value) { 'foo' }
@@ -335,23 +335,23 @@ describe Travis::Yml::Doc::Change do
     end
 
     describe 'a map with a str' do
-      let(:value) { { recipients: 'foo' } }
+      let(:value) { { 'recipients' => 'foo' } }
       it { should serialize_to email: { recipients: ['foo'] } }
     end
 
     describe 'a map with a seq' do
-      let(:value) { { recipients: ['foo'] } }
+      let(:value) { { 'recipients' => ['foo'] } }
       it { should serialize_to email: { recipients: ['foo'] } }
     end
 
     describe 'seq of maps' do
-      let(:value) { [recipients: 'foo'] }
+      let(:value) { ['recipients' => 'foo'] }
       it { should serialize_to email: { recipients: ['foo'] } }
     end
   end
 
   describe 'notifications.email' do
-    let(:schema) { Travis::Yml.expand[:notifications] }
+    let(:schema) { Travis::Yml.expand['notifications'] }
 
     describe 'a str' do
       let(:value) { { email: 'foo' } }
@@ -380,7 +380,7 @@ describe Travis::Yml::Doc::Change do
   end
 
   describe 'os' do
-    let(:schema) { Travis::Yml.expand[:os] }
+    let(:schema) { Travis::Yml.expand['os'] }
 
     describe 'a str' do
       let(:value) { 'linux' }
@@ -404,7 +404,7 @@ describe Travis::Yml::Doc::Change do
   end
 
   describe 'services' do
-    let(:schema) { Travis::Yml.expand[:services] }
+    let(:schema) { Travis::Yml.expand['services'] }
 
     describe 'a str' do
       let(:value) { 'redis' }
@@ -428,7 +428,7 @@ describe Travis::Yml::Doc::Change do
   end
 
   describe 'stages' do
-    let(:schema) { Travis::Yml.expand[:stages] }
+    let(:schema) { Travis::Yml.expand['stages'] }
 
     describe 'a str' do
       let(:value) { 'foo' }
@@ -452,7 +452,7 @@ describe Travis::Yml::Doc::Change do
   end
 
   describe 'sudo' do
-    let(:schema) { Travis::Yml.expand[:sudo] }
+    let(:schema) { Travis::Yml.expand['sudo'] }
 
     describe 'a str' do
       let(:value) { 'required' }

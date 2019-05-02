@@ -74,7 +74,7 @@ describe Travis::Yml, 'notifications: email' do
           template: str
     )
     it { should serialize_to notifications: { email: { template: 'str' } } }
-    it { should have_msg [:warn, :'notifications.email', :unknown_key, key: :template, value: 'str'] }
+    it { should have_msg [:warn, :'notifications.email', :unknown_key, key: 'template', value: 'str'] }
   end
 
   describe 'emails (alias)' do
@@ -83,7 +83,7 @@ describe Travis::Yml, 'notifications: email' do
         emails: str
     )
     it { should serialize_to notifications: { email: { recipients: ['str'] } } }
-    it { should have_msg [:info, :notifications, :alias, alias: :emails, key: :email] }
+    it { should have_msg [:info, :notifications, :alias, alias: 'emails', key: 'email'] }
   end
 
   describe 'recipients' do
@@ -156,7 +156,7 @@ describe Travis::Yml, 'notifications: email' do
           unknown: str
       )
       it { should serialize_to notifications: { unknown: 'str' } }
-      it { should have_msg [:warn, :notifications, :unknown_key, key: :unknown, value: 'str'] }
+      it { should have_msg [:warn, :notifications, :unknown_key, key: 'unknown', value: 'str'] }
     end
 
     describe 'prefixes with :email, given a hash with the key :recipients, and a string' do
@@ -204,7 +204,7 @@ describe Travis::Yml, 'notifications: email' do
             unknown: str
       )
       it { should serialize_to notifications: { email: { unknown: 'str' } } }
-      it { should have_msg [:warn, :'notifications.email', :unknown_key, key: :unknown, value: 'str'] }
+      it { should have_msg [:warn, :'notifications.email', :unknown_key, key: 'unknown', value: 'str'] }
     end
 
     describe 'given a mixed array of hashes and strings' do
@@ -261,7 +261,7 @@ describe Travis::Yml, 'notifications: email' do
 
       )
       it { should serialize_to notifications: { email: { enabled: true, recipients: ['str'], on_success: 'change' } } }
-      it { should have_msg [:warn, :notifications, :migrate, key: :recipients, to: :email, value: ['str']] }
+      it { should have_msg [:warn, :notifications, :migrate, key: 'recipients', to: 'email', value: ['str']] }
     end
   end
 
@@ -290,6 +290,6 @@ describe Travis::Yml, 'notifications: email' do
     )
 
     it { should serialize_to notifications: { email: { recipients: ['str'] }, skip_join: true } }
-    it { should have_msg [:warn, :notifications, :unknown_key, key: :skip_join, value: true] }
+    it { should have_msg [:warn, :notifications, :unknown_key, key: 'skip_join', value: true] }
   end
 end

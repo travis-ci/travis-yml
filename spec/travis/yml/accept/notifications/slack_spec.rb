@@ -46,8 +46,8 @@ describe Travis::Yml, 'notifications: slack' do
           slack: str
     )
     it { should serialize_to notifications: { slack: { secure: 'secure', slack: 'str' } } }
-    it { should have_msg [:warn, :'notifications.slack', :unknown_key, key: :secure, value: 'secure'] }
-    it { should have_msg [:warn, :'notifications.slack', :unknown_key, key: :slack, value: 'str'] }
+    it { should have_msg [:warn, :'notifications.slack', :unknown_key, key: 'secure', value: 'secure'] }
+    it { should have_msg [:warn, :'notifications.slack', :unknown_key, key: 'slack', value: 'str'] }
   end
 
   describe 'given disabled: true' do
@@ -249,7 +249,7 @@ describe Travis::Yml, 'notifications: slack' do
           unknown: str
     )
     it { should serialize_to notifications: { slack: { unknown: 'str' } } }
-    it { should have_msg [:warn, :'notifications.slack', :unknown_key, key: :unknown, value: 'str'] }
+    it { should have_msg [:warn, :'notifications.slack', :unknown_key, key: 'unknown', value: 'str'] }
   end
 end
 

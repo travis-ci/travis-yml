@@ -49,7 +49,7 @@ describe Travis::Yml, 'services' do
       - xvfb
     )
     it { should serialize_to dist: 'trusty', services: ['xvfb'] }
-    it { should have_msg [:warn, :services, :unsupported, on_key: :dist, on_value: 'trusty', key: :services, value: 'xvfb'] }
+    it { should have_msg [:warn, :services, :unsupported, on_key: 'dist', on_value: 'trusty', key: 'services', value: 'xvfb'] }
   end
 
   describe 'typo' do

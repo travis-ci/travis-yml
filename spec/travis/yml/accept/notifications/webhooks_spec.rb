@@ -161,13 +161,13 @@ describe Travis::Yml, 'notifications: webhooks' do
           unknown: str
     )
     it { should serialize_to notifications: { webhooks: { unknown: 'str' } } }
-    it { should have_msg [:warn, :'notifications.webhooks', :unknown_key, key: :unknown, value: 'str'] }
+    it { should have_msg [:warn, :'notifications.webhooks', :unknown_key, key: 'unknown', value: 'str'] }
   end
 
   describe 'given a hash with an unknown template var on a misplaced key', v2: true, migrate: true do
     let(:input) { { notifications: { webhooks: { urls: 'room' }, template: ['%{wat}'] } } }
     it { should serialize_to empty }
-    it { should have_msg [:error, :notifications, :misplaced_key, key: :template, value: ['%{wat}']] }
+    it { should have_msg [:error, :notifications, :misplaced_key, key: 'template', value: ['%{wat}']] }
   end
 end
 

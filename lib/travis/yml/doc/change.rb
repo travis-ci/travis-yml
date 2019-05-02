@@ -20,6 +20,7 @@ module Travis
 
         def apply(schema, value)
           other = build(schema, value).apply
+          # p other.keys if other.map?
           other
         end
 

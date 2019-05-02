@@ -66,7 +66,7 @@ module Travis
             add Class.new(Dsl::Map) {
               def define
                 normal
-                map :'^(?!global|matrix)', to: :str
+                map :'^(?!global|matrix)', to: :any, type: [:str, :num, :bool]
                 strict false
                 max_size 1 # TODO this isn't true
               end

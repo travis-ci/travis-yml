@@ -19,6 +19,7 @@ module Travis
             }
 
             def build(parent, key, value, opts = {})
+              # puts caller[0..15] if key == :enabled
               value = value.value if value.is_a?(Node)
               type = TYPES[value.class] || raise("Unknown type: #{value}")
               send(type, parent, key, value, opts)
@@ -56,7 +57,7 @@ module Travis
               end
 
               def secure?(value)
-                value.key?(:secure) && value.keys.size == 1
+                value.key?('secure') && value.keys.size == 1
               end
           end
 

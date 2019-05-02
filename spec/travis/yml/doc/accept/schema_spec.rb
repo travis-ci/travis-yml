@@ -14,19 +14,19 @@ describe Travis::Yml::Doc::Schema do
   end
 
   describe 'language' do
-    subject { schema[:language] }
+    subject { schema['language'] }
     it { should be_enum }
     it { should have_values 'ruby', 'shell' }
   end
 
   describe 'env' do
-    subject { schema[:env] }
+    subject { schema['env'] }
     it { should be_any }
   end
 
   describe 'aliases' do
     subject { schema.aliases }
-    it { should include jobs: :matrix }
+    it { should include 'jobs' => 'matrix' }
   end
 
   # describe 'env.matrix' do

@@ -49,7 +49,7 @@ describe Travis::Yml, docs: true do
   paths = Dir['spec/fixtures/docs*/**/*.yml'].sort
   paths = paths.reject { |path| SKIP.any? { |skip| path.include?(skip) } }
 
-  let(:defaults) { { language: lang } }
+  let(:defaults) { { 'language' => lang } }
   let(:msgs)     { applied.msgs }
 
   subject { described_class.apply(defaults.merge(config)) }

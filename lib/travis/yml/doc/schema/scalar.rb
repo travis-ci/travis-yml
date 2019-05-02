@@ -8,7 +8,7 @@ module Travis
       module Schema
         class Scalar < Node
           def self.opts
-            @opts ||= super + %i(defaults enum values strict)
+            @opts ||= super + %i(defaults values strict)
           end
 
           def scalar?

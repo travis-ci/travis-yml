@@ -21,11 +21,6 @@ module Travis
 
             def unsupported
               value.each do |key, value|
-                # if key == :arch
-                #   p key
-                #   p schema.support(key)
-                #   p value.supporting
-                # end
                 support = Value::Support.new(schema.support(key), value.supporting, key)
                 msgs(value, support.msgs) unless support.supported?
               end
@@ -33,7 +28,7 @@ module Travis
 
             def msgs(value, msgs)
               msgs.each do |msg|
-                value.warn :unsupported, msg.merge(key: value.key, value: value.serialize)
+                value.warn :unsupported, msg.merge(key: value.key, value: value.serialize, line: value.key.line)
               end
             end
         end

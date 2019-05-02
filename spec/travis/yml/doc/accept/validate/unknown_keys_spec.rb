@@ -1,15 +1,15 @@
-describe Travis::Yml, 'unknown_keys' do
-  subject { described_class.apply(value) }
+describe Travis::Yml, 'unknown_keys', line: true do
+  subject { described_class.apply(parse(yaml), opts) }
 
   describe 'given a known key' do
-    let(:value) { { language: 'ruby' } }
+    yaml 'language: ruby'
     it { should serialize_to language: 'ruby' }
     it { should_not have_msg }
   end
 
   describe 'given an unknown key' do
-    let(:value) { { foo: 'foo' } }
-    it { should serialize_to foo: 'foo' }
-    it { should have_msg [:warn, :root, :unknown_key, key: :foo, value: 'foo'] }
+    yaml 'unknown: str'
+    it { should serialize_to unknown: 'str' }
+    it { should have_msg [:warn, :root, :unknown_key, key: 'unknown', value: 'str', line: 0] }
   end
 end

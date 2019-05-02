@@ -35,10 +35,10 @@ module Travis
             end
 
             def from_str
-              str = schema.match(bool_keys.map(&:to_s), value.value) || value.value
+              str = schema.match(bool_keys, value.value) || value.value
               value.info(:find_value, original: value.value, value: str) unless value.value == str
-              return value unless bool_keys.map(&:to_s).include?(str)
-              build(str.to_sym => true)
+              return value unless bool_keys.include?(str)
+              build(str => true)
             end
 
             def from_seq
@@ -49,21 +49,21 @@ module Travis
             end
 
             def dirs
-              dirs = maps.map { |value| value[:directories] if value.key?(:directories) }
+              dirs = maps.map { |value| value['directories'].value if value.key?('directories') }
               dirs = dirs.compact.flatten
               dirs = dirs + strs
-              dirs.any? ? { directories: dirs } : {}
+              dirs.any? ? { 'directories' => dirs } : {}
             end
 
             def bools
               bools = value.value.map do |value|
                 case value.type
                 when :str
-                  key = value.value.to_sym
+                  key = value.value
                   { key => true } if schema[key]&.bool?
                 when :map
                   keys = value.keys.all? { |key| schema[key]&.bool? }
-                  only(value.serialize, *keys)
+                  only(value, *keys)
                 end
               end
               bools = bools.compact
@@ -72,23 +72,23 @@ module Travis
             memoize :bools
 
             def maps
-              value.select(&:map?).map(&:serialize)
+              value.select(&:map?) #.map(&:serialize)
             end
 
             def strs
-              value.select(&:str?).map(&:serialize) - bool_keys.map(&:to_s)
+              value.select(&:str?).map(&:value) - bool_keys.map(&:to_s)
             end
 
             def others
-              others = maps.map { |value| except(value, :directories) }.inject(&:merge) || {}
+              others = maps.map { |value| except(value, 'directories') }.inject(&:merge) || {}
             end
 
             def dir?(value)
-              value.map? && value.key?(:directories)
+              value.map? && value.key?('directories')
             end
 
             def bool_keys
-              schema.keys.select { |key| schema[key].bool? } - [:edge]
+              schema.keys.select { |key| schema[key].bool? } - ['edge']
             end
             memoize :bool_keys
         end

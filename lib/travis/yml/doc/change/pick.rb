@@ -7,7 +7,8 @@ module Travis
       module Change
         class Pick < Base
           def apply
-            pick? ? pick : value
+            other = pick? ? pick : value
+            other
           end
 
           def pick?
@@ -19,7 +20,7 @@ module Travis
             when :seq
               !schema.matches?(value) && schema.matches?(value.first)
             else
-              schema.matches?(change(value.first))
+              schema.matches?(change(value.first)) || schema.scalar? && value.first.scalar?
             end
           end
 

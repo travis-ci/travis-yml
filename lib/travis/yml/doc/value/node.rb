@@ -11,10 +11,6 @@ module Travis
 
           attr_writer :key, :value, :completed
 
-          # def completed?
-          #   !!@completed
-          # end
-
           def root
             @root ||= root? ? self : parent.root
           end
@@ -85,14 +81,12 @@ module Travis
             blank?(value) && !false?(value)
           end
 
-          # SUPPORTING = [:language, :os]
-          #
-          # def supporting
-          #   parent ? parent.supporting : opts[:supporting] || {}
-          # end
-
           def alert?
             enabled?(:alert)
+          end
+
+          def line?
+            enabled?(:line)
           end
 
           def enabled?(key)
@@ -126,9 +120,15 @@ module Travis
 
           def msg(level, code, args = {})
             msg = [level, full_key, code]
-            msg << args unless args.empty?
+            msg << line(args) unless args.empty?
             root.msgs << msg unless root.msgs.include?(msg)
             self
+          end
+
+          def line(args)
+            return except(args, :line) unless line?
+            args[:line] ||= key.line
+            compact(args)
           end
 
           def msgs
@@ -173,18 +173,6 @@ module Travis
             )
             '#<%s %s>' % [type, pairs.map { |pair| pair.join('=') }.join(' ')]
           end
-
-          # def verify_parents
-          #   walk do |node, level|
-          #     case node.type
-          #     when :map
-          #       node.each { |key, child| puts "#{' ' * (level * 2)}#{child.key} #{[node.object_id, child.parent.object_id] unless node.object_id == child.parent.object_id}" }
-          #     when :seq
-          #       node.each { |child| puts "#{' ' * (level * 2)}#{child.key} #{[node.object_id, child.parent.object_id] unless node.object_id == child.parent.object_id}" }
-          #     end
-          #   end
-          #   puts
-          # end
         end
       end
     end

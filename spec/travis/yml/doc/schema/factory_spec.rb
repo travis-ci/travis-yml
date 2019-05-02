@@ -36,7 +36,7 @@ describe Travis::Yml::Doc::Schema, 'build' do
     let(:opts) { {} }
 
     it { should be_map }
-    it { expect(subject[:foo]).to be_str }
+    it { expect(subject['foo']).to be_str }
 
     describe 'by default' do
       let(:opts) { {} }
@@ -70,7 +70,7 @@ describe Travis::Yml::Doc::Schema, 'build' do
     it { should be_seq }
     it { should have_schema :map }
     it { expect(subject.schema).to_not be_strict }
-    it { expect(subject.schema[:foo]).to be_str }
+    it { expect(subject.schema['foo']).to be_str }
   end
 
   describe 'a secure' do
@@ -139,8 +139,8 @@ describe Travis::Yml::Doc::Schema, 'build' do
 
     it { should be_map }
     it { expect(subject.id).to eq :foo }
-    it { expect(subject[:foo]).to be_str }
-    it { expect(subject[:bar]).to be_bool }
+    it { expect(subject['foo']).to be_str }
+    it { expect(subject['bar']).to be_bool }
   end
 
   # describe 'a oneOf (with refs)' do
@@ -191,7 +191,7 @@ describe Travis::Yml::Doc::Schema, 'build' do
     end
 
     it { should be_map }
-    it { expect(subject[:foo]).to be_str }
+    it { expect(subject['foo']).to be_str }
   end
 
   describe 'a schema (allOf)' do
@@ -221,7 +221,7 @@ describe Travis::Yml::Doc::Schema, 'build' do
     end
 
     it { should be_map }
-    it { expect(subject[:foo]).to be_str }
-    it { expect(subject[:bar]).to be_bool }
+    it { expect(subject['foo']).to be_str }
+    it { expect(subject['bar']).to be_bool }
   end
 end

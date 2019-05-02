@@ -42,12 +42,12 @@ module Travis
             map[key]
           end
 
-          def keys
-            map.keys
-          end
-
           def key?(key)
             map.key?(key)
+          end
+
+          def keys
+            map.keys
           end
 
           def values
@@ -59,7 +59,8 @@ module Travis
           end
 
           def aliases
-            aliases = map.values.map(&:opts).map { |opts| opts[:aliases] }
+            opts = map.values.map(&:opts)
+            aliases = opts.map { |opts| opts[:aliases] }
             compact(invert(keys.zip(aliases)))
           end
           memoize :aliases
@@ -120,29 +121,16 @@ module Travis
           end
 
           def known?(key)
-            known.include?(key&.to_sym)
+            known.include?(key)
           end
 
           def known
-            keys + aliases.keys - Yml.r_keys
+            map.keys + aliases.keys # - Yml.r_keys
           end
           memoize :known
 
-          def misplaced?(key)
-            misplaced.include?(key&.to_sym)
-          end
-
-          def misplaced
-            Yml.keys - known
-          end
-          memoize :misplaced
-
           def expand_keys
             opts[:expand]
-          end
-
-          def all_keys
-            map.keys
           end
 
           def support(key)
