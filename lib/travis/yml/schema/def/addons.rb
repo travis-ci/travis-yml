@@ -46,7 +46,7 @@ module Travis
             end
 
             map :srcclr,          to: type
-            map :firefox,         to: :str
+            map :firefox,         to: :any, type: [:num, :str]
             map :mariadb,         to: :str
             map :postgresql,      to: :str, alias: :postgres
             map :rethinkdb,       to: :str

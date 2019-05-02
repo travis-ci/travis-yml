@@ -21,7 +21,7 @@ describe Travis::Yml::Schema::Def::Addons do
   it { should include sauce_connect: { '$ref': '#/definitions/addon/sauce_connect' } }
   it { should include snaps: { '$ref': '#/definitions/addon/snaps' } }
   it { should include ssh_known_hosts: { '$ref': '#/definitions/type/secures' } }
-  it { should include firefox: { type: :string } }
+  it { should include firefox: { anyOf: [{ type: :number }, { type: :string }] } }
   it { should include mariadb: { type: :string } }
   it { should include postgresql: { type: :string, aliases: [:postgres] } }
   it { should include rethinkdb: { type: :string } }

@@ -79,6 +79,7 @@ describe Travis::Yml, configs: true do
       current
     ),
     service: %w(
+      ~
       alsa
       docker-compose
       haveged
@@ -90,14 +91,14 @@ describe Travis::Yml, configs: true do
       sqlite3
       zookeeper
     ),
-    stage: %i(
+    stage: %w(
       after_error
     ),
     event: [
-      :on_start,         # on notifications other than webhooks
-      :on_cancel,        # on notifications other than webhooks
-      :on_pull_requests, # on notifications other than slack
-      :on_change,
+      'on_start',         # on notifications other than webhooks
+      'on_cancel',        # on notifications other than webhooks
+      'on_pull_requests', # on notifications other than slack
+      'on_change',
     ],
     value: %w(
       jhunt@starkandwayne.com
@@ -132,6 +133,7 @@ describe Travis::Yml, configs: true do
     distro
     esudo
     evn
+    False
     globale
     keep-hisotry
     langauge
@@ -151,6 +153,7 @@ describe Travis::Yml, configs: true do
     sourcees
     sudo;
     state
+    True
     trust
     webhools
   ) << 'change  always' << 'always  always' << 'never     always'
@@ -171,12 +174,12 @@ describe Travis::Yml, configs: true do
   )
 
   DEPRECATIONS = [
-    { key: :branches, info: 'not supported any more' },
-    { key: :github_token, info: 'not supported any more' },
+    { key: 'branches', info: 'not supported any more' },
+    { key: 'github_token', info: 'not supported any more' },
     { value: '__sardonyx__', info: 'experimental stack language' }
   ]
 
-  YAML_REFERENCE_TARGETS = %i(
+  YAML_REFERENCE_TARGETS = %w(
     .apt_sources
     .check_moban
     .disable_global
@@ -367,7 +370,7 @@ describe Travis::Yml, configs: true do
     x_base_steps
   )
 
-  YAML_CUSTOM_CONFIG = %i(
+  YAML_CUSTOM_CONFIG = %w(
     coverage
     dd
     travisBuddy
@@ -375,7 +378,7 @@ describe Travis::Yml, configs: true do
   )
 
   UNKNOWN_KEYS = {
-    addons: %i(
+    addons: %w(
       addons
       branches
       google-chrome
@@ -387,7 +390,7 @@ describe Travis::Yml, configs: true do
       sources
       ulimit
     ),
-    'addons.apt': %i(
+    'addons.apt': %w(
       cache
       chrome
       config
@@ -395,27 +398,27 @@ describe Travis::Yml, configs: true do
       packages-without-jansson
       ssh_known_hosts
     ),
-    'addons.artifacts': %i(
+    'addons.artifacts': %w(
       acl
       provider
     ),
     # is conditions on coverity_scan actually unknown?
-    'addons.coverity_scan': %i(
+    'addons.coverity_scan': %w(
       condition
     ),
-    'addons.coverity_scan.project': %i(
+    'addons.coverity_scan.project': %w(
       branch_pattern
       build_command
     ),
-    'addons.sonarcloud': %i(
+    'addons.sonarcloud': %w(
       script
     ),
-    branches: %i(
+    branches: %w(
       branches
       global
       submodules
     ),
-    cache: %i(
+    cache: %w(
       before_cache
       branches
       cache
@@ -425,7 +428,7 @@ describe Travis::Yml, configs: true do
       override
       python
     ),
-    deploy: %i(
+    deploy: %w(
       access
       after_deploy
       all_branches
@@ -451,10 +454,11 @@ describe Travis::Yml, configs: true do
       repo
       script
       tags
+      true
       upload_docs
       verbose
     ),
-    'deploy.on': %i(
+    'deploy.on': %w(
       distributions
       java
       master
@@ -462,27 +466,29 @@ describe Travis::Yml, configs: true do
       prerelease
       skip-cleanup
     ),
-    env: %i(
+    env: %w(
       allow_failures
       fast_finish
+      general
       os
       secure
     ),
-    git: %i(
+    git: %w(
       clone
       go_import_path
     ),
     # is sudo on matrix actually unknown?
-    matrix: %i(
+    matrix: %w(
       before_install
+      env
       global
       sudo
     ),
-    'matrix.allow_failures': %i(
+    'matrix.allow_failures': %w(
       canfail
     ),
     # should filter_secrets be valid?
-    'matrix.include': %i(
+    'matrix.include': %w(
       allow_failures
       apt
       canfail
@@ -502,36 +508,37 @@ describe Travis::Yml, configs: true do
       skip_cleanup
       version
     ),
-    'matrix.include.addons': %i(
+    'matrix.include.addons': %w(
       cache
       sources
       sonarqube
     ),
-    'matrix.include.addons.apt': %i(
+    'matrix.include.addons.apt': %w(
       config
       sources
     ),
-    'matrix.include.cache': %i(
+    'matrix.include.cache': %w(
       override
     ),
     # it's kinda fun that travis-ci/dpl has invalid keys on the rubygems
     # provider (script and if)
-    'matrix.include.deploy': %i(
+    'matrix.include.deploy': %w(
       app
       repo
       github_commit
       if
       overwrite
       script
+      true
     ),
     # TODO master should probably be allowed here, shouldn't it?
-    'matrix.include.deploy.on': %i(
+    'matrix.include.deploy.on': %w(
       on
       script
       master
     ),
     # notifications.if would make a ton of sense, actually
-    notifications: %i(
+    notifications: %w(
       branches
       channels
       if
@@ -541,29 +548,29 @@ describe Travis::Yml, configs: true do
       urls
       use_notice
     ),
-    'notifications.email': %i(
+    'notifications.email': %w(
       slack
     ),
-    'notifications.hipchat': %i(
+    'notifications.hipchat': %w(
       secure
     ),
-    'notifications.irc': %i(
+    'notifications.irc': %w(
       branches
       only
       on_error
     ),
-    'notifications.slack': %i(
+    'notifications.slack': %w(
       email
       format
       on
       secure
       slack
     ),
-    'notifications.webhooks': %i(
+    'notifications.webhooks': %w(
       slack
     ),
     # is name actually unknown on root? or does it propagate to the jobs?
-    root: %i(
+    root: %w(
       after_success:before_script
       allow_failure
       allow_failures
@@ -606,13 +613,14 @@ describe Travis::Yml, configs: true do
       stage
       sudo_required
       tags
+      true
       test
       versions
       webhooks
       wttd-notifications
       yarn
     ),
-    stages: %i(
+    stages: %w(
       branches
     ),
   }
@@ -663,6 +671,8 @@ describe Travis::Yml, configs: true do
       matrix.allow_failures
     ),
     seq: %i(
+      env.matrix.include
+      env.matrix.general
       matrix
     ),
     # on scripts this is often caused by YAML parsing a quoted string with a colon into a map
@@ -677,6 +687,10 @@ describe Travis::Yml, configs: true do
       matrix.include.after_script
       after_success
     ),
+    secure: %i(
+      env.matrix.DJANGO_SECRET_KEY
+      env.global.github_token
+    )
   }
 
   INVALID_CONDITIONS = [
@@ -951,7 +965,7 @@ describe Travis::Yml, configs: true do
     return true if yaml_custom_config?(msg)    # people using .travis.yml as a config store that they parse at build time
     return true if questionable_env?(msg)      # should investigate these again
 
-    return true if unknown_key?(msg)           # actually misplaced keys
+    return true if unknown_key?(msg)           # actually misplaced or unknown keys
     return true if invalid_seq?(msg)           # actually invalid seqs
     return true if invalid_type?(msg)          # actually invalid types
     return true if invalid_env_var?(msg)       # actually invalid env vars

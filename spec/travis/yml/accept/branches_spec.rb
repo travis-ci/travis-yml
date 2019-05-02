@@ -6,7 +6,7 @@ describe Travis::Yml, 'branches' do
       branches: true
     )
     it { should serialize_to branches: { only: ['true'] } }
-    it { should have_msg [:info, :'branches.only', :cast, given_value: true, given_type: :bool, value: 'true', type: :str] }
+    xit { should have_msg [:info, :'branches.only', :cast, given_value: true, given_type: :bool, value: 'true', type: :str] }
   end
 
   describe 'given a string' do
@@ -100,7 +100,7 @@ describe Travis::Yml, 'branches' do
         exclude: master
     )
     it { should serialize_to branches: { except: ['master'] } }
-    it { should have_msg [:info, :branches, :alias, alias: :exclude, key: :except] }
+    it { should have_msg [:info, :branches, :alias, alias: 'exclude', key: 'except'] }
   end
 
   describe 'given an unknown key' do
@@ -109,6 +109,6 @@ describe Travis::Yml, 'branches' do
         foo: master
     )
     it { should serialize_to branches: { foo: 'master' } }
-    it { should have_msg [:warn, :branches, :unknown_key, key: :foo, value: 'master'] }
+    it { should have_msg [:warn, :branches, :unknown_key, key: 'foo', value: 'master'] }
   end
 end

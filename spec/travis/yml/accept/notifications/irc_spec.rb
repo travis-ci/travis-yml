@@ -341,7 +341,7 @@ describe Travis::Yml, 'notifications: irc' do
           unknown: str
     )
     it { should serialize_to notifications: { irc: { unknown: 'str' } } }
-    it { should have_msg [:warn, :'notifications.irc', :unknown_key, key: :unknown, value: 'str'] }
+    it { should have_msg [:warn, :'notifications.irc', :unknown_key, key: 'unknown', value: 'str'] }
   end
 
   describe 'given a hash with an unknown template var on a misplaced key' do
@@ -353,7 +353,7 @@ describe Travis::Yml, 'notifications: irc' do
         template: str
     )
     it { should serialize_to notifications: { irc: { channels: ['room'] }, template: 'str' } }
-    it { should have_msg [:warn, :notifications, :unknown_key, key: :template, value: 'str'] }
+    it { should have_msg [:warn, :notifications, :unknown_key, key: 'template', value: 'str'] }
   end
 end
 

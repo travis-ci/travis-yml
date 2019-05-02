@@ -54,6 +54,6 @@ describe Travis::Yml, 'dist' do
       - trusty
     )
     it { should serialize_to os: ['osx'], dist: 'trusty' }
-    it { should have_msg [:warn, :dist, :unsupported, on_key: :os, on_value: 'osx', key: :dist, value: 'trusty'] }
+    it { should have_msg [:warn, :dist, :unsupported, on_key: 'os', on_value: 'osx', key: 'dist', value: 'trusty'] }
   end
 end

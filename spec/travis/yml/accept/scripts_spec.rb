@@ -43,7 +43,7 @@ describe Travis::Yml, 'scripts' do
       - ./foo
     )
     it { should serialize_to script: ['1', './foo'] }
-    it { should_not have_msg }
+    it { should have_msg [:info, :script, :cast, given_value: 1, given_type: :num, type: :str, value: '1'] }
   end
 
   describe 'given a seq with a bool and a str' do
@@ -53,7 +53,7 @@ describe Travis::Yml, 'scripts' do
       - ./foo
     )
     it { should serialize_to script: ['true', './foo'] }
-    it { should have_msg [:info, :script, :cast, given_value: true, given_type: :bool, value: 'true', type: :str] }
+    it { should have_msg [:info, :script, :cast, given_value: true, given_type: :bool, type: :str, value: 'true'] }
   end
 
   describe 'commented lines (from our docs?)' do

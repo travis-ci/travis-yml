@@ -51,7 +51,7 @@ describe Travis::Yml, 'addon: apt' do
             package: str
       )
       it { should serialize_to addons: { apt: { packages: ['str'] } } }
-      it { should have_msg [:info, :'addons.apt', :alias, alias: :package, key: :packages] }
+      it { should have_msg [:info, :'addons.apt', :alias, alias: 'package', key: 'packages'] }
     end
 
     describe 'given a nested array (happens when using aliases)' do
@@ -152,7 +152,7 @@ describe Travis::Yml, 'addon: apt' do
             source: str
       )
       it { should serialize_to addons: { apt: { sources: [name: 'str'] } } }
-      it { should have_msg [:info, :'addons.apt', :alias, alias: :source, key: :sources] }
+      it { should have_msg [:info, :'addons.apt', :alias, alias: 'source', key: 'sources'] }
     end
 
     describe 'given a map with :name' do

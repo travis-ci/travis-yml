@@ -26,8 +26,8 @@ module Travis
                 value = change(schema[key], value) unless value.map?
                 next [key, value] unless value.map?
                 values = only(self.value, *keys - value.keys)
-                values = values.map { |key, value| [key, value.serialize] }.to_h
-                [key, value.serialize.merge(values)]
+                values = values.map { |key, value| [key, value] }.to_h
+                [key, value.value.merge(values)]
               end
               build(except(other.to_h, *keys))
             end
@@ -37,7 +37,7 @@ module Travis
             end
 
             def keys
-              schema.change(:inherit)[:keys]
+              schema.change(:inherit)[:keys].map(&:to_s)
             end
         end
       end

@@ -30,12 +30,12 @@ describe Travis::Yml::Load do
 
   describe 'given a single string' do
     let(:parts) { api }
-    it { should eq 'script' => './api', 'env' => { 'api' => true, 'foo' => '1' }  }
+    it { should eq 'script' => './api', 'env' => { 'api' => true, 'foo' => 1 }  }
   end
 
   describe 'given an array of strings (defaults to merge)' do
     let(:parts) { [api, travis_yml, import] }
-    it { should eq 'script' => './api', 'env' => { 'api' => true, 'foo' => '1' }  }
+    it { should eq 'script' => './api', 'env' => { 'api' => true, 'foo' => 1 }  }
   end
 
   describe 'given an array of Parts' do
@@ -49,13 +49,13 @@ describe Travis::Yml::Load do
 
     describe 'merge' do
       let(:mode) { :merge }
-      it { should eq 'script' => './api', 'env' => { 'api' => true, 'foo' => '1' }  }
+      it { should eq 'script' => './api', 'env' => { 'api' => true, 'foo' => 1 }  }
     end
 
     describe 'deep_merge' do
       let(:mode) { :deep_merge }
-      it { should eq 'script' => './api', 'env' => { 'api' => true, 'foo' => '1', 'travis_yml' => true, 'import' => true }  }
-      it { expect(subject['env'].to_a).to eq [['import', true], ['foo', '1'], ['travis_yml', true], ['api', true]] }
+      it { should eq 'script' => './api', 'env' => { 'api' => true, 'foo' => 1, 'travis_yml' => true, 'import' => true }  }
+      it { expect(subject['env'].to_a).to eq [['import', true], ['foo', 1], ['travis_yml', true], ['api', true]] }
     end
   end
 end

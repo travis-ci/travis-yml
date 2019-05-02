@@ -143,7 +143,14 @@
             ]
           },
           "firefox": {
-            "type": "string"
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              }
+            ]
           },
           "mariadb": {
             "type": "string"
@@ -478,7 +485,17 @@
             "type": "object",
             "patternProperties": {
               "^(?!global|matrix)": {
-                "type": "string"
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "boolean"
+                  }
+                ]
               }
             },
             "normal": true,

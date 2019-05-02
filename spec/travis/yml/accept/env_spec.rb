@@ -1,14 +1,6 @@
 describe Travis::Yml, 'env' do
   subject { described_class.apply(parse(yaml)) }
 
-  describe 'given a bool' do
-    yaml %(
-      env: true
-    )
-    it { should serialize_to empty }
-    it { should have_msg [:error, :env, :invalid_type, expected: :map, actual: :bool, value: true] }
-  end
-
   describe 'given a var' do
     yaml %(
       env: FOO=foo
@@ -144,13 +136,13 @@ describe Travis::Yml, 'env' do
   describe 'given a map mixing known, unknown, and misplaced keys', v2: true, migrate: true do
     let(:value) { { env: { FOO: 'foo', matrix: { BAR: 'bar' }, before_script: 'foo' } } }
     # it { should serialize_to env: { matrix: [{ FOO: 'foo' }, { 'before_script=foo' }, { BAR: 'bar' }] } }
-    it { should have_msg [:warn, :env, :migrate_keys, keys: [:FOO, :before_script], to: :matrix] }
+    it { should have_msg [:warn, :env, :migrate_keys, keys: [:FOO, :before_script], to: 'matrix'] }
   end
 
   describe 'given a map mixing known and unknown keys holding arrays', v2: true, migrate: true do
     let(:value) { { env: { general: [FOO: 'foo'], matrix: [BAR: 'bar'] } } }
     it { should serialize_to env: { matrix: [BAR: 'bar', FOO: 'foo'] } }
-    it { should have_msg [:warn, :env, :migrate_keys, keys: [:general], to: :matrix] }
+    it { should have_msg [:warn, :env, :migrate_keys, keys: [:general], to: 'matrix'] }
   end
 
   describe 'given global' do
@@ -215,7 +207,7 @@ describe Travis::Yml, 'env' do
               secure: secure
       )
       it { should serialize_to env: { global: [{ secure: 'secure' }] } }
-      it { should have_msg [:warn, :root, :migrate, key: :global, to: :env, value: { secure: 'secure' }] }
+      it { should have_msg [:warn, :root, :migrate, key: 'global', to: 'env', value: { secure: 'secure' }] }
     end
 
     describe 'mixing secure and global keys' do
@@ -263,6 +255,24 @@ describe Travis::Yml, 'env' do
     end
   end
 
+  describe 'given true' do
+    yaml %(
+      env: true
+    )
+    it { should serialize_to empty }
+    it { should have_msg [:error, :env, :invalid_type, expected: :map, actual: :bool, value: true] }
+  end
+
+  describe 'given a nested map' do
+    yaml %(
+      env:
+        one:
+          two: str
+    )
+    it { should serialize_to env: { matrix: [{ one: nil }] } }
+    it { should have_msg [:error, :'env.matrix.one', :invalid_type, expected: :str, actual: :map, value: { two: 'str' }] }
+  end
+
   describe 'given a seq of strings, with an empty cache' do # ??
     yaml %(
       cache:
@@ -285,5 +295,16 @@ describe Travis::Yml, 'env' do
         - API=str
     )
     it { should serialize_to env: { matrix: [{ API: 'str' }] } }
+  end
+
+  describe 'misplaced key with secure' do
+    yaml %(
+      env:
+        global:
+        - FOO: str
+        BAR:
+          secure: str
+    )
+    it { should serialize_to env: { global: [{ FOO: 'str' }], BAR: nil } }
   end
 end

@@ -13,6 +13,7 @@ module Travis
 
           def apply
             key = value.key
+            raise key.inspect if key.is_a?(Symbol)
             key = dealias(key) if !known?(key) && alias?(key)
             key = fix(key)     if !known?(key)
             key
@@ -22,38 +23,37 @@ module Travis
             FILTERS.each do |name|
               key = send(name, key)
               key = dealias(key) if !known?(key) && alias?(key)
-              key = key.to_sym
               return key if known?(key)
             end
             key
           end
 
           def strip(key)
-            other = super(key).to_sym
+            other = super(key)
             return key if !known?(other)
-            warn :strip_key, key.to_sym, other.to_sym if key.to_s != other.to_s
+            info :strip_key, key, other if key != other
             other
           end
 
           def underscore(key)
-            other = strict? ? super(key).to_sym : key.to_s.tr('-', '_').to_sym
+            other = strict? ? super(key) : key.to_s.tr('-', '_')
             return key unless known?(other)
-            info :underscore_key, key.to_sym, other.to_sym if key.to_s != other.to_s
+            info :underscore_key, key, other if key != other
             other
           end
 
           def clean(key)
             other = clean_key(key)
             return key unless known?(other)
-            warn :clean_key, key.to_sym, other.to_sym if key.to_s != other.to_s
+            info :clean_key, key, other if key != other
             other
           end
 
           def lookup(key)
             return key unless strict? && Dict.key?(key)
-            other = Dict[key].to_sym unless schema.stop?(key, Dict[key])
+            other = Dict[key] unless schema.stop?(key, Dict[key])
             return key unless key == other || known?(other)
-            warn :find_key, key.to_sym, other.to_sym if key != other
+            warn :find_key, key, other if key != other
             other
           end
 
@@ -61,12 +61,12 @@ module Travis
             return key unless strict?
             other = match_key(key.to_s)
             return key unless known?(other) || alias?(other)
-            warn :find_key, key.to_sym, other.to_sym if key != other
+            warn :find_key, key, other if key != other
             other
           end
 
           def dealias(key)
-            other = schema.aliases[key.to_sym]
+            other = schema.aliases[key]
             return key if !other || key == other
             value.parent.info :alias, alias: key, key: other
             other
@@ -84,10 +84,6 @@ module Travis
             schema.alias?(key)
           end
 
-          def misplaced?(key)
-            schema.misplaced?(key)
-          end
-
           def info(type, key, other)
             msg :info, type, key, other
           end
@@ -97,11 +93,11 @@ module Travis
           end
 
           def msg(level, type, key, other)
-            value.parent.msg level, type, original: key.to_sym, key: other.to_sym
+            value.parent.msg level, type, original: key, key: other
           end
 
           def match_key(key)
-            schema.match(schema.known, key.to_s)&.to_sym
+            schema.match(schema.known - Yml.r_keys, key.to_s)
           end
 
           def clean_key(key)
@@ -110,7 +106,7 @@ module Travis
             key = key.gsub(/(\W)/, '')
             key = key.gsub(/(^_+|_+$)/, '')
             key = key.gsub('__', '_')
-            key = key.to_sym
+            key
           end
         end
       end

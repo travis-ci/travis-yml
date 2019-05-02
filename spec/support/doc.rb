@@ -1,7 +1,7 @@
 module Spec
   module Support
     module Doc
-      OPTS = [:alert, :defaults, :empty]
+      OPTS = [:alert, :defaults, :empty, :line]
 
       def self.included(const)
         const.let(:empty) { {} }
@@ -14,7 +14,11 @@ module Spec
       end
 
       def build_value(value, opts = {})
-        Travis::Yml::Doc::Value.build(nil, nil, value, opts)
+        Travis::Yml::Doc::Value.build(nil, nil, stringify(value), opts)
+      end
+
+      def stringify(obj)
+        Travis::Yml::Helper::Obj.stringify(obj)
       end
     end
   end

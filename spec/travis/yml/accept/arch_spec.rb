@@ -90,6 +90,6 @@ describe Travis::Yml, 'arch' do
       arch: amd64
     )
     it { should serialize_to os: ['osx'], arch: ['amd64'] }
-    it { should have_msg [:warn, :arch, :unsupported, on_key: :os, on_value: 'osx', key: :arch, value: ['amd64']] }
+    it { should have_msg [:warn, :arch, :unsupported, on_key: 'os', on_value: 'osx', key: 'arch', value: ['amd64']] }
   end
 end

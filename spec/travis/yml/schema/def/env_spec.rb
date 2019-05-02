@@ -87,7 +87,17 @@ describe Travis::Yml::Schema::Def::Env do
             type: :object,
             patternProperties: {
               '^(?!global|matrix)': {
-                type: :string
+                anyOf: [
+                  {
+                    type: :string
+                  },
+                  {
+                    type: :number
+                  },
+                  {
+                    type: :boolean
+                  }
+                ]
               }
             },
             maxProperties: 1,

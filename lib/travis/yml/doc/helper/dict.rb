@@ -23,9 +23,7 @@ module Travis
 
         def read
           lines = File.read(PATH).split("\n")
-          parts = lines.map { |line| split(line) }
-          parts = parts.map { |key, value| [key.to_sym, value] }
-          parts.to_h
+          lines.map { |line| split(line) }.to_h
         end
 
         def split(str)

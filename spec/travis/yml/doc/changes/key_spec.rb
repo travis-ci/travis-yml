@@ -6,28 +6,28 @@ describe Travis::Yml::Doc::Change::Key do
     subject { change.clean_key(key) }
 
     describe 'given _foo' do
-      let(:key) { :_foo }
-      it { should eq :foo }
+      let(:key) { '_foo' }
+      it { should eq 'foo' }
     end
 
     describe 'given foo-bar' do
-      let(:key) { :'foo-bar' }
-      it { should eq :foo_bar }
+      let(:key) { 'foo-bar' }
+      it { should eq 'foo_bar' }
     end
 
     describe 'given foo--bar' do
-      let(:key) { :'foo-bar' }
-      it { should eq :foo_bar }
+      let(:key) { 'foo-bar' }
+      it { should eq 'foo_bar' }
     end
 
     describe 'given foo bar' do
-      let(:key) { :'foo bar' }
-      it { should eq :foo_bar }
+      let(:key) { 'foo bar' }
+      it { should eq 'foo_bar' }
     end
 
     describe 'given foo-1' do
-      let(:key) { :'foo-*' }
-      it { should eq :foo }
+      let(:key) { 'foo-*' }
+      it { should eq 'foo' }
     end
   end
 
@@ -37,6 +37,7 @@ describe Travis::Yml::Doc::Change::Key do
     %w(
       TZ
       after_error
+      binary_packages
       c
       cabal
       cards
@@ -300,7 +301,7 @@ describe Travis::Yml::Doc::Change::Key do
       describe "corrects they key #{key} to #{other}" do
         let(:schema) { Travis::Yml.expand }
         let(:key) { key }
-        it { should eq other.to_sym }
+        it { should eq other }
       end
     end
 
@@ -314,9 +315,9 @@ describe Travis::Yml::Doc::Change::Key do
     ]
     pairs.each do |(key, other)|
       describe "corrects they key #{key} to #{other}" do
-        let(:schema) { Travis::Yml.expand.map[:addons] }
+        let(:schema) { Travis::Yml.expand.map['addons'] }
         let(:key) { key }
-        it { should eq other.to_sym }
+        it { should eq other }
       end
     end
 
@@ -330,9 +331,9 @@ describe Travis::Yml::Doc::Change::Key do
     ]
     pairs.each do |(key, other)|
       describe "corrects they key #{key} to #{other}" do
-        let(:schema) { Travis::Yml.expand.map[:cache][0] }
+        let(:schema) { Travis::Yml.expand.map['cache'][0] }
         let(:key) { key }
-        it { should eq other.to_sym }
+        it { should eq other }
       end
     end
 
@@ -353,9 +354,9 @@ describe Travis::Yml::Doc::Change::Key do
     ]
     pairs.each do |(key, other)|
       describe "corrects they key #{key} to #{other}" do
-        let(:schema) { Travis::Yml.expand.map[:matrix][0] }
+        let(:schema) { Travis::Yml.expand.map['matrix'][0] }
         let(:key) { key }
-        it { should eq other.to_sym }
+        it { should eq other }
       end
     end
 
@@ -382,9 +383,9 @@ describe Travis::Yml::Doc::Change::Key do
     ]
     pairs.each do |(key, other)|
       describe "corrects they key #{key} to #{other}" do
-        let(:schema) { Travis::Yml.expand.map[:notifications][0] }
+        let(:schema) { Travis::Yml.expand.map['notifications'][0] }
         let(:key) { key }
-        it { should eq other.to_sym }
+        it { should eq other }
       end
     end
 
@@ -396,9 +397,9 @@ describe Travis::Yml::Doc::Change::Key do
     ]
     pairs.each do |(key, other)|
       describe "corrects they key #{key} to #{other}" do
-        let(:schema) { Travis::Yml.expand.map[:notifications][0][:email][0] }
+        let(:schema) { Travis::Yml.expand.map['notifications'][0]['email'][0] }
         let(:key) { key }
-        it { should eq other.to_sym }
+        it { should eq other }
       end
     end
   end

@@ -4,7 +4,7 @@ describe Travis::Yml, 'os' do
   describe 'defaults to linux', defaults: true do
     yaml ''
     it { should serialize_to defaults }
-    it { should have_msg [:info, :os, :default, key: :os, default: 'linux'] }
+    it { should have_msg [:info, :os, :default, key: 'os', default: 'linux'] }
   end
 
   describe 'given a string' do
@@ -92,7 +92,7 @@ describe Travis::Yml, 'os' do
       language: objective-c
     )
     it { should serialize_to language: 'objective-c', os: ['osx'] }
-    it { should have_msg [:info, :os, :default, key: :os, default: 'osx'] }
+    it { should have_msg [:info, :os, :default, key: 'os', default: 'osx'] }
   end
 
   describe 'an os unsupported by the language' do
@@ -101,7 +101,7 @@ describe Travis::Yml, 'os' do
       language: php
     )
     it { should serialize_to os: ['osx'], language: 'php' }
-    it { should have_msg [:warn, :os, :unsupported, on_key: :language, on_value: 'php', key: :os, value: 'osx'] }
+    it { should have_msg [:warn, :os, :unsupported, on_key: 'language', on_value: 'php', key: 'os', value: 'osx'] }
   end
 
   describe 'complains about jdk on osx' do
@@ -111,7 +111,7 @@ describe Travis::Yml, 'os' do
       jdk: default
     )
     it { should serialize_to os: ['osx'], language: 'java', jdk: ['default'] }
-    it { should have_msg [:warn, :jdk, :unsupported, on_key: :os, on_value: 'osx', key: :jdk, value: ['default']] }
+    it { should have_msg [:warn, :jdk, :unsupported, on_key: 'os', on_value: 'osx', key: 'jdk', value: ['default']] }
   end
 
   describe 'given a mixed, nested seq, with an unsupported key on root' do
@@ -123,6 +123,6 @@ describe Travis::Yml, 'os' do
     )
     it { should serialize_to os: ['linux'], osx_image: 'str' }
     it { should have_msg [:error, :os, :invalid_type, expected: :str, actual: :map, value: { os: 'osx' }] }
-    it { should have_msg [:warn, :osx_image, :unsupported, on_key: :os, on_value: 'linux', key: :osx_image, value: 'str'] }
+    it { should have_msg [:warn, :osx_image, :unsupported, on_key: 'os', on_value: 'linux', key: 'osx_image', value: 'str'] }
   end
 end

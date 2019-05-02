@@ -1,36 +1,36 @@
-describe Travis::Yml, 'empty', empty: true do
-  subject { described_class.apply(value, opts) }
+describe Travis::Yml, 'empty', empty: true, line: true do
+  subject { described_class.apply(parse(yaml), opts) }
 
-  describe 'seq' do
+  describe 'os' do
     describe 'given a seq' do
-      let(:value) { { os: ['linux', 'osx'] } }
+      yaml 'os: [linux, osx]'
       it { should_not have_msg }
     end
 
     describe 'given an empty array' do
-      let(:value) { { os: [] } }
+      yaml 'os: []'
       it { should have_msg [:warn, :os, :empty] }
     end
 
     describe 'given nil' do
-      let(:value) { { os: nil } }
+      yaml 'os:'
       it { should have_msg [:warn, :os, :empty] }
     end
   end
 
-  describe 'map' do
+  describe 'cache.bundler' do
     describe 'given a map' do
-      let(:value) { { cache: { bundler: true } } }
+      yaml 'cache: { bundler: true }'
       it { should_not have_msg }
     end
 
     describe 'given an empty map' do
-      let(:value) { { cache: {} } }
+      yaml 'cache: {}'
       it { should have_msg [:warn, :cache, :empty] }
     end
 
     describe 'given nil' do
-      let(:value) { { cache: nil } }
+      yaml 'cache:'
       it { should have_msg [:warn, :cache, :empty] }
     end
   end

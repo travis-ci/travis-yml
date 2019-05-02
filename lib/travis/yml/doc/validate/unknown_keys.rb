@@ -32,10 +32,6 @@ module Travis
               parent
             end
 
-            def misplaced?(key)
-              Yml.keys.include?(key)
-            end
-
             def silent?(key)
                schema.silent?(key)
             end
@@ -45,7 +41,7 @@ module Travis
             end
 
             def warn(parent, type, value)
-              parent.msg :warn, type, key: value.key, value: value.serialize
+              parent.msg :warn, type, key: value.key, value: value.serialize, line: value.key.line
             end
         end
       end

@@ -15,6 +15,6 @@ describe Travis::Yml::Doc, 'build' do
 
   subject { build_schema(schema) }
 
-  it { expect(subject[:foo]).to be_str }
+  it { expect(subject['foo']).to be_str }
   it { expect(subject.strict?).to be true }
 end

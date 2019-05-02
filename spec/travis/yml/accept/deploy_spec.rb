@@ -72,7 +72,7 @@ describe Travis::Yml, 'deploy' do
           foo: foo
       )
       it { should serialize_to language: 'ruby', os: ['linux'] }
-      it { should have_msg [:error, :deploy, :required, key: :provider] }
+      it { should have_msg [:error, :deploy, :required, key: 'provider'] }
     end
 
     describe 'with a provider' do
@@ -198,7 +198,7 @@ describe Travis::Yml, 'deploy' do
               branch: master
         )
         it { should serialize_to deploy: [provider: 'heroku', script: 'str', on: { branch: ['master'] }] }
-        it { should have_msg [:warn, :deploy, :unknown_key, key: :script, value: 'str', provider: :heroku] }
+        it { should have_msg [:warn, :deploy, :unknown_key, key: 'script', value: 'str', provider: 'heroku'] }
       end
 
       describe 'repo' do
@@ -287,7 +287,7 @@ describe Travis::Yml, 'deploy' do
               ruby: 2.3.1
         )
         it { should serialize_to deploy: [provider: 'heroku', on: { rvm: '2.3.1' }] }
-        it { should have_msg [:info, :'deploy.on', :alias, alias: :ruby, key: :rvm] }
+        it { should have_msg [:info, :'deploy.on', :alias, alias: 'ruby', key: 'rvm'] }
       end
 
       describe 'language specific key python on ruby' do
@@ -299,7 +299,7 @@ describe Travis::Yml, 'deploy' do
               python: 2.7
         )
         it { should serialize_to language: 'ruby', deploy: [provider: 'heroku', on: { python: '2.7' }] }
-        it { should have_msg [:warn, :'deploy.on.python', :unsupported, on_key: :language, on_value: 'ruby', key: :python, value: '2.7'] }
+        it { should have_msg [:warn, :'deploy.on.python', :unsupported, on_key: 'language', on_value: 'ruby', key: 'python', value: '2.7'] }
       end
 
       describe 'unknown key' do
@@ -311,7 +311,7 @@ describe Travis::Yml, 'deploy' do
               unknown: str
         )
         it { should serialize_to language: 'ruby', deploy: [provider: 'heroku', on: { unknown: 'str' }] }
-        it { should have_msg [:warn, :'deploy.on', :unknown_key, key: :unknown, value: 'str'] }
+        it { should have_msg [:warn, :'deploy.on', :unknown_key, key: 'unknown', value: 'str'] }
       end
     end
 
@@ -337,7 +337,7 @@ describe Travis::Yml, 'deploy' do
             tags: true
       )
       # not possible because deploy is not strict?
-      it { should have_msg [:warn, :deploy, :migrate, key: :tags, to: :on, value: true] }
+      it { should have_msg [:warn, :deploy, :migrate, key: 'tags', to: 'on', value: true] }
     end
   end
 
@@ -412,8 +412,8 @@ describe Travis::Yml, 'deploy' do
         api_key: api_key
     )
     it { should serialize_to deploy: [provider: 'heroku', edge: true, api_key: 'api_key'] }
-    it { should have_msg [:warn, :root, :migrate, key: :provider, to: :deploy, value: 'heroku'] }
-    it { should have_msg [:warn, :root, :migrate, key: :api_key, to: :deploy, value: 'api_key'] }
+    it { should have_msg [:warn, :root, :migrate, key: 'provider', to: 'deploy', value: 'heroku'] }
+    it { should have_msg [:warn, :root, :migrate, key: 'api_key', to: 'deploy', value: 'api_key'] }
   end
 
   describe 'misplaced keys (2)', v2: true, migrate: true do
@@ -424,8 +424,8 @@ describe Travis::Yml, 'deploy' do
       api_key: api_key
     )
     it { should serialize_to deploy: [provider: 'heroku', edge: true, api_key: 'api_key'] }
-    it { should have_msg [:warn, :root, :migrate, key: :provider, to: :deploy, value: 'heroku'] }
-    it { should have_msg [:warn, :root, :migrate, key: :api_key, to: :deploy, value: 'api_key'] }
+    it { should have_msg [:warn, :root, :migrate, key: 'provider', to: 'deploy', value: 'heroku'] }
+    it { should have_msg [:warn, :root, :migrate, key: 'api_key', to: 'deploy', value: 'api_key'] }
   end
 
   describe 'misplaced key that would result in an invalid node if migrated' do
@@ -433,6 +433,6 @@ describe Travis::Yml, 'deploy' do
       file: file
     )
     it { should serialize_to file: 'file' }
-    it { should have_msg [:warn, :root, :unknown_key, key: :file, value: 'file'] }
+    it { should have_msg [:warn, :root, :unknown_key, key: 'file', value: 'file'] }
   end
 end

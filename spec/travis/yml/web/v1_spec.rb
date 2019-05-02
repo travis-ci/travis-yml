@@ -65,10 +65,10 @@ describe Travis::Yml::Web::V1 do
     it 'returns full messages' do
       post '/parse?defaults=true', 'rvm: 2.3', {}
       expect(body['full_messages']).to include(
-        '[info] on language: missing :language, using the default ruby'
+        '[info] on language: missing language, using the default ruby'
       )
       expect(body['full_messages']).to include(
-        '[info] on os: missing :os, using the default linux'
+        '[info] on os: missing os, using the default linux'
       )
     end
 
@@ -176,7 +176,7 @@ describe Travis::Yml::Web::V1 do
       it { expect(body['config']['language']).to eq 'ruby' }
       it { expect(body['config']['rvm']).to eq ['2.6.2'] }
       it { expect(body['config']['script']).to eq ['./script'] }
-      it { expect(body['config']['env']['matrix']).to eq [{ 'API' => true }, { 'FOO' => '1' }] }
+      it { expect(body['config']['env']['matrix']).to eq [{ 'API' => true }, { 'FOO' => 1 }] }
       it { puts body['full_messages'] }
     end
 
@@ -187,7 +187,7 @@ describe Travis::Yml::Web::V1 do
       it { expect(body['config']['language']).to eq 'ruby' }
       it { expect(body['config']['rvm']).to eq ['2.6.2'] }
       it { expect(body['config']['script']).to eq ['./script'] }
-      it { expect(body['config']['env']['matrix']).to eq [{ 'IMPORT' => true }, { 'FOO' => '1' }, { 'TRAVIS_YML' => true }, { 'API' => true }] }
+      it { expect(body['config']['env']['matrix']).to eq [{ 'IMPORT' => true }, { 'FOO' => 1 }, { 'TRAVIS_YML' => true }, { 'API' => true }] }
     end
   end
 

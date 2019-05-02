@@ -13,6 +13,7 @@ module Travis
             node.types.concat(types)
           end
           alias add type # remove this
+          alias types type
         end
       end
     end

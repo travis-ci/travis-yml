@@ -9,8 +9,7 @@ module Travis
           register :invalid_type
 
           def apply
-            # invalid_seq if apply? && invalid_seq?
-            apply? && invalid_obj? ? invalid_obj : value
+            apply? && invalid? ? invalid : value
           end
 
           private
@@ -19,23 +18,15 @@ module Travis
               value.given?
             end
 
-            def invalid_seq?
-              schema.seq? && value.seq? && !value.all? { |value| schema.schema.is?(value.type) }
-            end
-
-            def invalid_obj?
-              !schema.is?(value.type) && !(schema.enum? && value.scalar?) # ugh.
-            end
-
-            # would need something like schema.full_type, which would have to be able to
-            # resolve :any schemas
-            #
-            # def invalid_seq
-            #   value.error :invalid_type, expected: :"seq(#{schema.schema.type})", actual: :"seq(#{value.type})", value: value.serialize
-            #   blank
+            # def invalid_seq?
+            #   schema.seq? && value.seq? && !value.all? { |value| schema.schema.is?(value.type) }
             # end
 
-            def invalid_obj
+            def invalid?
+              !schema.is?(value.type) # && !(schema.enum? && value.scalar?) # ugh.
+            end
+
+            def invalid
               value.error :invalid_type, expected: schema.type, actual: value.type, value: value.serialize
               blank
             end

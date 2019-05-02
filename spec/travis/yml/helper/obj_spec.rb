@@ -1,5 +1,3 @@
-require 'travis/yml/helper/obj'
-
 describe Travis::Yml::Helper::Obj do
   include Travis::Yml::Helper::Obj
 

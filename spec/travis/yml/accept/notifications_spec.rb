@@ -60,7 +60,7 @@ describe Travis::Yml, 'notifications' do
           emails: true
       )
       it { should serialize_to notifications: { email: { enabled: true } } }
-      it { should have_msg [:info, :notifications, :alias, alias: :emails, key: :email] }
+      it { should have_msg [:info, :notifications, :alias, alias: 'emails', key: 'email'] }
     end
 
     describe 'typo emaik' do
@@ -69,7 +69,7 @@ describe Travis::Yml, 'notifications' do
           emaik: true
       )
       it { should serialize_to notifications: { email: { enabled: true } } }
-      it { should_not have_msg [:warn, :notifications, :find_key, original: :emailk, key: :emails] }
+      it { should_not have_msg [:warn, :notifications, :find_key, original: 'emailk', key: 'emails'] }
     end
 
     describe 'given a seq with a map with a str' do
@@ -117,7 +117,7 @@ describe Travis::Yml, 'notifications' do
           - me@email.com
     )
     it { should serialize_to notifications: { email: { recipients: ['me@email.com'] } } }
-    it { should have_msg [:warn, :root, :find_key, original: :notification, key: :notifications] }
+    it { should have_msg [:warn, :root, :find_key, original: 'notification', key: 'notifications'] }
   end
 
   describe 'selects change for :change' do
@@ -137,7 +137,7 @@ describe Travis::Yml, 'notifications' do
         on_failure: true
     )
     it { should serialize_to notifications: { email: { enabled: true, on_failure: 'always' } } }
-    it { should have_msg [:info, :'notifications.email.on_failure', :alias, alias: 'true', value: 'always'] }
+    it { should have_msg [:info, :'notifications.on_failure', :alias, alias: 'true', value: 'always'] }
   end
 
   describe 'given on-sucsess (typo, dasherized)' do
@@ -147,7 +147,7 @@ describe Travis::Yml, 'notifications' do
           on-sucsess: :change
     )
     it { should serialize_to notifications: { email: { on_success: 'change' } } }
-    it { should have_msg [:warn, :'notifications.email', :find_key, original: :'on-sucsess', key: :on_success] }
+    it { should have_msg [:warn, :'notifications.email', :find_key, original: 'on-sucsess', key: 'on_success'] }
   end
 
   describe 'given a seq with a map' do

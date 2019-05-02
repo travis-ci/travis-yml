@@ -28,7 +28,7 @@ module Travis
             end
 
             def apply?
-              schema.map? && schema.key?(:enabled) && value.scalar? && !value.none?
+              schema.map? && schema.key?('enabled') && value.scalar? && !value.none?
             end
 
             def enable?
@@ -36,8 +36,7 @@ module Travis
             end
 
             def enable
-              other = value.serialize
-              build(enabled: casted)
+              build('enabled' => casted)
             end
 
             def casted
@@ -51,18 +50,18 @@ module Travis
             end
 
             def apply?
-              value.map? && value.key?(:disabled)
+              value.map? && value.key?('disabled')
             end
 
             def normalize
-              other = value.serialize.merge(enabled: enabled)
-              other = compact(except(other, :disabled))
+              other = value.value.merge('enabled' => enabled)
+              other = compact(except(other, 'disabled'))
               build(other)
             end
 
             def enabled
-              obj = value[:enabled]  and return cast(obj)
-              obj = value[:disabled] and return !cast(obj)
+              obj = value['enabled']  and return cast(obj)
+              obj = value['disabled'] and return !cast(obj)
               nil
             end
             memoize :enabled

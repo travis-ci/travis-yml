@@ -1,15 +1,21 @@
-describe Travis::Yml, 'unsupported_keys' do
-  subject { described_class.apply(value) }
+describe Travis::Yml, 'unsupported_keys', line: true do
+  subject { described_class.apply(parse(yaml), opts) }
 
   describe 'given a supported key' do
-    let(:value) { { os: ['osx'], osx_image: 'str' } }
+    yaml %(
+      os: osx
+      osx_image: str
+    )
     it { should serialize_to os: ['osx'], osx_image: 'str' }
-    it { should_not have_msg [:warn, :osx_image, :unsupported, on_key: :os, on_value: 'osx', key: :osx_image, value: 'str'] }
+    it { should_not have_msg [:warn, :osx_image, :unsupported, on_key: 'os', on_value: 'osx', key: 'osx_image', value: 'str', line: 2] }
   end
 
-  describe 'given an unknown key' do
-    let(:value) { { os: ['linux'], osx_image: 'str' } }
+  describe 'given an unsupported key' do
+    yaml %(
+      os: linux
+      osx_image: str
+    )
     it { should serialize_to os: ['linux'], osx_image: 'str' }
-    it { should have_msg [:warn, :osx_image, :unsupported, on_key: :os, on_value: 'linux', key: :osx_image, value: 'str'] }
+    it { should have_msg [:warn, :osx_image, :unsupported, on_key: 'os', on_value: 'linux', key: 'osx_image', value: 'str', line: 2] }
   end
 end

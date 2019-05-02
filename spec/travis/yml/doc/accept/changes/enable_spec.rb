@@ -1,15 +1,15 @@
 describe Travis::Yml, 'enable' do
-  subject { described_class.apply(value) }
+  subject { described_class.apply(parse(yaml), opts) }
 
   describe 'notifications' do
     describe 'given true' do
-      let(:value) { { notifications: true } }
+      yaml 'notifications: true'
       it { should serialize_to notifications: { email: { enabled: true } } }
       it { should_not have_msg }
     end
 
     describe 'given yes' do
-      let(:value) { { notifications: 'yes' } }
+      yaml 'notifications: yes'
       it { should serialize_to notifications: { email: { enabled: true } } }
       it { should_not have_msg }
     end
@@ -17,26 +17,32 @@ describe Travis::Yml, 'enable' do
 
   describe 'notifications.email' do
     describe 'given true' do
-      let(:value) { { notifications: { email: true } } }
+      yaml 'notifications: { email: true }'
       it { should serialize_to notifications: { email: { enabled: true } } }
       it { should_not have_msg }
     end
 
     describe 'given yes' do
-      let(:value) { { notifications: { email: 'yes' } } }
+      yaml 'notifications: { email: yes }'
       it { should serialize_to notifications: { email: { enabled: true } } }
       it { should_not have_msg }
     end
   end
 
   describe 'given a seq with a hash with a bool' do
-    let(:value) { { notifications: [{ email: true }] } }
+    yaml %(
+      notifications:
+        - email: true
+    )
     it { should serialize_to notifications: { email: { enabled: true } } }
     it { should have_msg [:warn, :notifications, :unexpected_seq, value: { email: true }] }
   end
 
   describe 'given a seq with a map with a bool on an alias' do
-    let(:value) { { notifications: [{ emails: true }] } }
+    yaml %(
+      notifications:
+        - emails: true
+    )
     it { should serialize_to notifications: { email: { enabled: true } } }
     it { should have_msg [:warn, :notifications, :unexpected_seq, value: { email: true }] }
   end

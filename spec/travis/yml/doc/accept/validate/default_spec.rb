@@ -1,50 +1,75 @@
-describe Travis::Yml::Doc::Validate, 'default', required: true, defaults: true do
-  subject { Travis::Yml.apply(value, opts) }
+describe Travis::Yml::Doc::Validate, 'default', defaults: true, line: true do
+  subject { Travis::Yml.apply(parse(yaml), opts) }
 
   describe 'language, os, dist' do
     describe 'given a str' do
-      let(:value) { { language: 'ruby' } }
+      yaml 'language: ruby'
       it { should serialize_to defaults }
-      it { should_not have_msg [:info, :language, :default, key: :language, default: 'ruby'] }
-      it { should have_msg [:info, :os, :default, key: :os, default: 'linux'] }
+      it { should_not have_msg [:info, :language, :default, key: 'language', default: 'ruby'] }
+      it { should have_msg [:info, :os, :default, key: 'os', default: 'linux'] }
     end
 
     describe 'given an empty string' do
-      let(:value) { { language: '' } }
+      yaml 'language: ""'
       it { should serialize_to defaults }
-      it { should have_msg [:info, :language, :default, key: :language, default: 'ruby'] }
+      it { should have_msg [:info, :language, :default, key: 'language', default: 'ruby'] }
     end
 
     describe 'given nil' do
-      let(:value) { { language: nil } }
+      yaml 'language:'
       it { should serialize_to defaults }
-      it { should have_msg [:info, :language, :default, key: :language, default: 'ruby'] }
+      it { should have_msg [:info, :language, :default, key: 'language', default: 'ruby'] }
     end
 
     describe 'missing key' do
-      let(:value) { {} }
+      yaml '{}'
       it { should serialize_to defaults }
-      it { should have_msg [:info, :language, :default, key: :language, default: 'ruby'] }
+      it { should have_msg [:info, :language, :default, key: 'language', default: 'ruby'] }
     end
   end
 
   describe 'addons.coverity_scan.project.name' do
     describe 'given a value' do
-      let(:value) { defaults.merge(addons: { coverity_scan: { project: { name: 'name' } } }) }
-      it { should serialize_to value }
-      it { should_not have_msg }
+      yaml %(
+        addons:
+          coverity_scan:
+            project:
+              name: name
+      )
+      it do
+        should serialize_to(
+          language: 'ruby',
+          os: ['linux'],
+          addons: {
+            coverity_scan: {
+              project: {
+                name: 'name'
+              }
+            }
+          }
+        )
+      end
     end
 
     describe 'given nil' do
-      let(:value) { defaults.merge(addons: { coverity_scan: { project: { name: nil } } }) }
+      yaml %(
+        addons:
+          coverity_scan:
+            project:
+              name:
+      )
       it { should serialize_to defaults }
-      it { should have_msg [:error, :'addons.coverity_scan.project', :required, key: :name] }
+      it { should have_msg [:error, :'addons.coverity_scan.project', :required, key: 'name', line: 3] }
     end
 
     describe 'missing key' do
-      let(:value) { defaults.merge(addons: { coverity_scan: { project: {} } }) }
+      yaml %(
+        addons:
+          coverity_scan:
+            project: {}
+      )
       it { should serialize_to defaults }
-      it { should have_msg [:error, :'addons.coverity_scan.project', :required, key: :name] }
+      it { should have_msg [:error, :'addons.coverity_scan.project', :required, key: 'name', line: 3] }
     end
   end
 end

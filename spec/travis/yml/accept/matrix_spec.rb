@@ -17,7 +17,7 @@ describe Travis::Yml, 'matrix' do
           fast_finish: true
       )
       it { should serialize_to matrix: { fast_finish: true } }
-      it { should have_msg [:info, :root, :alias, alias: :jobs, key: :matrix] }
+      it { should have_msg [:info, :root, :alias, alias: 'jobs', key: 'matrix'] }
     end
 
     describe 'alias fast_failure' do
@@ -26,7 +26,7 @@ describe Travis::Yml, 'matrix' do
           fast_failure: true
       )
       it { should serialize_to matrix: { fast_finish: true } }
-      it { should have_msg [:info, :matrix, :alias, alias: :fast_failure, key: :fast_finish] }
+      it { should have_msg [:info, :matrix, :alias, alias: 'fast_failure', key: 'fast_finish'] }
     end
   end
 
@@ -91,7 +91,7 @@ describe Travis::Yml, 'matrix' do
           - rvm: 2.3
       )
       it { should serialize_to matrix: { allow_failures: [rvm: '2.3'] } }
-      it { should have_msg [:warn, :root, :migrate, key: :allow_failures, to: :matrix, value: [rvm: '2.3']] }
+      it { should have_msg [:warn, :root, :migrate, key: 'allow_failures', to: 'matrix', value: [rvm: '2.3']] }
     end
   end
 
@@ -271,7 +271,7 @@ describe Travis::Yml, 'matrix' do
       )
       it { should serialize_to matrix: { include: [language: 'node_js', compiler: 'gcc'] } }
       it { should have_msg [:warn, :'matrix.include.language', :clean_value, original: 'node_js - 9', value: 'node_js'] }
-      it { should have_msg [:warn, :'matrix.include.compiler', :unsupported, on_key: :language, on_value: 'node_js', key: :compiler, value: 'gcc'] }
+      it { should have_msg [:warn, :'matrix.include.compiler', :unsupported, on_key: 'language', on_value: 'node_js', key: 'compiler', value: 'gcc'] }
     end
 
     describe 'given a name' do
@@ -337,6 +337,18 @@ describe Travis::Yml, 'matrix' do
         it { should serialize_to empty }
         it { should have_msg [:error, :'matrix.include.if', :invalid_condition, condition: '= foo'] }
       end
+    end
+
+    describe 'given a misplaced env' do
+      yaml %(
+        matrix:
+          include:
+            - os: linux
+          env:
+            - FOO=str
+      )
+      it { should serialize_to matrix: { include: [os: 'linux'], env: ['FOO=str'] } }
+      it { should have_msg [:warn, :matrix, :unknown_key, key: 'env', value: ['FOO=str']] }
     end
 
     describe 'given a misplaced key' do
@@ -482,7 +494,7 @@ describe Travis::Yml, 'matrix' do
                   python: 3.5
           )
           it { should serialize_to language: 'ruby', matrix: { key => [rvm: '2.3', python: '3.5'] } }
-          it { should have_msg [:warn, :"matrix.#{key}.python", :unsupported, on_key: :language, on_value: 'ruby', key: :python, value: '3.5'] }
+          it { should have_msg [:warn, :"matrix.#{key}.python", :unsupported, on_key: 'language', on_value: 'ruby', key: 'python', value: '3.5'] }
         end
 
         describe "language given on matrix.#{key}" do
@@ -494,7 +506,7 @@ describe Travis::Yml, 'matrix' do
                   python: 3.5
           )
           it { should serialize_to matrix: { key => [language: 'ruby', rvm: '2.3', python: '3.5'] } }
-          it { should have_msg [:warn, :"matrix.#{key}.python", :unsupported, on_key: :language, on_value: 'ruby', key: :python, value: '3.5'] }
+          it { should have_msg [:warn, :"matrix.#{key}.python", :unsupported, on_key: 'language', on_value: 'ruby', key: 'python', value: '3.5'] }
         end
 
         describe 'in separate entries' do
@@ -506,7 +518,7 @@ describe Travis::Yml, 'matrix' do
                 - python: 3.5
           )
           it { should serialize_to language: 'ruby', matrix: { key => [{ rvm: '2.3' }, { python: '3.5' }] } }
-          it { should have_msg [:warn, :"matrix.#{key}.python", :unsupported, on_key: :language, on_value: 'ruby', key: :python, value: '3.5'] }
+          it { should have_msg [:warn, :"matrix.#{key}.python", :unsupported, on_key: 'language', on_value: 'ruby', key: 'python', value: '3.5'] }
         end
       end
     end
@@ -520,7 +532,7 @@ describe Travis::Yml, 'matrix' do
             rvm: 2.3
       )
       it { should serialize_to matrix: { allow_failures: [rvm: '2.3'] } }
-      it { should have_msg [:info, :matrix, :alias, alias: :allowed_failures, key: :allow_failures] }
+      it { should have_msg [:info, :matrix, :alias, alias: 'allowed_failures', key: 'allow_failures'] }
     end
 
     describe 'allow_failures given a seq of strings (common mistake)' do
@@ -537,7 +549,7 @@ describe Travis::Yml, 'matrix' do
       yaml %(
       )
       it { should serialize_to matrix: { allow_failures: [rvm: '2.3'] } }
-      it { should have_msg [:warn, :root, :migrate, key: :allow_failures, to: :matrix, value: [rvm: '2.3']] }
+      it { should have_msg [:warn, :root, :migrate, key: 'allow_failures', to: 'matrix', value: [rvm: '2.3']] }
     end
 
     describe 'alias allowed_failures, misplaced on root', v2: true, migrate: true do
@@ -546,7 +558,7 @@ describe Travis::Yml, 'matrix' do
           rvm: 2.3
       )
       it { should serialize_to matrix: { allow_failures: [rvm: '2.3'] } }
-      it { should have_msg [:warn, :root, :migrate, key: :allow_failures, to: :matrix, value: [rvm: '2.3']] }
+      it { should have_msg [:warn, :root, :migrate, key: 'allow_failures', to: 'matrix', value: [rvm: '2.3']] }
     end
   end
 
@@ -559,7 +571,7 @@ describe Travis::Yml, 'matrix' do
           - apt:
     )
     it { should serialize_to matrix: { include: [addons: { apt: { packages: ['clang'] } }] } }
-    it { should have_msg [:warn, :'matrix.include', :migrate, key: :apt, to: :addons, value: { packages: ['clang'] }] }
-    it { should have_msg [:warn, :'matrix.include', :migrate, key: :apt, to: :addons, value: nil] }
+    it { should have_msg [:warn, :'matrix.include', :migrate, key: 'apt', to: 'addons', value: { packages: ['clang'] }] }
+    it { should have_msg [:warn, :'matrix.include', :migrate, key: 'apt', to: 'addons', value: nil] }
   end
 end

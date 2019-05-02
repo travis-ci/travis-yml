@@ -49,14 +49,14 @@ module Travis
         VALIDATORS = {
           map: [
             InvalidType, UnknownKeys, UnsupportedKeys, Compact, Required,
-            Empty, Flags
+            Empty, Flags, Condition
           ],
           seq: [
             InvalidType, Compact, Empty, Unique, Flags
           ],
           obj: [
             InvalidType, UnknownValue, UnsupportedValue, Default, Alert, Flags,
-            Format, Condition, Template
+            Format, Template
           ]
         }
 
@@ -108,9 +108,9 @@ module Travis
 
           def mappings
             value.keys.inject(value) do |map, key|
-              next map unless schema.map[key]
+              next map unless child = schema.map[key] || schema.schema
               value = map[key] || Value.build(map, key, nil)
-              value = Validate.apply(schema.map[key], value)
+              value = Validate.apply(child, value)
               value.parent[key] = value
               value.parent
             end

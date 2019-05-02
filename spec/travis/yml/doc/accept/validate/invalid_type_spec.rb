@@ -1,76 +1,79 @@
-describe Travis::Yml, 'invalid_type' do
-  let(:empty) { {} }
+describe Travis::Yml, 'invalid_type', line: true do
+  subject { described_class.apply(parse(yaml), opts) }
 
-  subject { described_class.apply(value) }
-
-  describe 'str' do
+  describe 'language' do
     describe 'given a str' do
-      let(:value) { { language: 'ruby' } }
-      it { should serialize_to value }
+      yaml 'language: ruby'
+      it { should serialize_to language: 'ruby' }
       it { should_not have_msg }
     end
 
     describe 'given a num' do
-      let(:value) { { language: 1 } }
+      yaml 'language: 1'
       it { should serialize_to language: 'ruby' }
-      it { should have_msg [:info, :language, :cast, given_value: 1, given_type: :num, value: '1', type: :str] }
-      it { should have_msg [:warn, :language, :unknown_default, value: '1', default: 'ruby'] }
+      it { should have_msg [:warn, :language, :unknown_default, value: '1', default: 'ruby', line: 0] }
     end
   end
 
-  describe 'num' do
+  describe 'git.depth' do
     describe 'given a num' do
-      let(:value) { { git: { depth: 1 } } }
-      it { should serialize_to value }
+      yaml 'git: { depth: 1 }'
+      it { should serialize_to git: { depth: 1 } }
       it { should_not have_msg }
     end
 
     describe 'given a str' do
-      let(:value) { { git: { depth: 'one' } } }
+      yaml 'git: { depth: true }'
       it { should serialize_to git: { depth: true } } # hmmm.
       it { should_not have_msg }
     end
   end
 
-  describe 'bool' do
+  describe 'cache.bundler' do
     describe 'given a bool' do
-      let(:value) { { cache: { bundler: true } } }
-      it { should serialize_to value }
-      it { should_not have_msg }
-    end
-
-    describe 'given a str' do
-      let(:value) { { cache: { bundler: 'true' } } }
+      yaml 'cache: { bundler: true }'
       it { should serialize_to cache: { bundler: true } }
       it { should_not have_msg }
     end
+
+    describe 'given the str "true"' do
+      yaml 'cache: { bundler: "true" }'
+      it { should serialize_to cache: { bundler: true } }
+      it { should_not have_msg }
+    end
+
+    describe 'given any str' do
+      yaml 'cache: { bundler: str }'
+      xit { should serialize_to cache: { bundler: true } }
+      xit { should_not have_msg }
+    end
   end
 
-  describe 'seq' do
+  describe 'os' do
     describe 'given a seq' do
-      let(:value) { { os: ['linux', 'osx'] } }
-      it { should serialize_to value }
+      yaml 'os: [linux, osx]'
+      it { should serialize_to os: ['linux', 'osx'] }
       it { should_not have_msg }
     end
 
     describe 'given a map' do
-      let(:value) { { os: { name: 'linux' } } }
+      yaml 'os: { name: linux }'
       it { should serialize_to empty }
-      it { should have_msg [:error, :os, :invalid_type, expected: :str, actual: :map, value: { name: 'linux' }] }
+      it { should have_msg [:error, :os, :invalid_type, expected: :str, actual: :map, value: { name: 'linux' }, line: 0] }
     end
   end
 
-  describe 'map' do
+  describe 'git' do
     describe 'given a map' do
-      let(:value) { { git: { strategy: 'clone' } } }
-      it { should serialize_to value }
+      yaml 'git: { strategy: clone }'
+      it { should serialize_to git: { strategy: 'clone' } }
       it { should_not have_msg }
     end
 
     describe 'given a str' do
-      let(:value) { { git: 'str' } }
+      yaml 'git: str'
       it { should serialize_to empty }
-      it { should have_msg [:error, :git, :invalid_type, expected: :map, actual: :str, value: 'str'] }
+      it { should have_msg [:error, :git, :invalid_type, expected: :map, actual: :str, value: 'str', line: 0] }
     end
   end
 end

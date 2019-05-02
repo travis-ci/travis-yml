@@ -61,7 +61,7 @@ module Travis
           end
 
           def delete(node)
-            node = self[node] if node.is_a?(Symbol)
+            node = self[node] unless node.is_a?(Node)
             value.delete(node.key)
           end
 
@@ -70,10 +70,9 @@ module Travis
             self
           end
 
-          SUPPORTING = [:language, :os, :dist]
+          SUPPORTING = %w(language os dist)
 
           def supporting
-            # return opts[:supporting] if opts[:supporting]
             keys  = SUPPORTING.select { |key| key?(key) && self[key].given? }
             value = keys.map { |key| [key, compact(self[key].serialize)] }.to_h
             value = value.reject { |_, value| value.nil? || value.empty? }
@@ -82,12 +81,12 @@ module Travis
 
           def msg(level, code, args = {})
             key, value = opts[:detected], self[opts[:detected]]
-            args = args.merge(key => value.value.to_sym) if key && value
+            args = args.merge(key.to_sym => value.value) if key && value
             super
           end
 
           def serialize
-            value.map { |key, obj| [key, obj.serialize] }.to_h
+            value.map { |key, obj| [key.to_sym, obj.serialize] }.to_h
           end
         end
       end

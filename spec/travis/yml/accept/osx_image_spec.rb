@@ -17,7 +17,7 @@ describe Travis::Yml, 'osx_image' do
         osx_image: xcode8.2
       )
       it { should serialize_to os: ['linux'], osx_image: 'xcode8.2' }
-      it { should have_msg [:warn, :osx_image, :unsupported, on_key: :os, on_value: 'linux', key: :osx_image, value: 'xcode8.2'] }
+      it { should have_msg [:warn, :osx_image, :unsupported, on_key: 'os', on_value: 'linux', key: 'osx_image', value: 'xcode8.2'] }
     end
 
     describe 'on multios' do
@@ -28,7 +28,7 @@ describe Travis::Yml, 'osx_image' do
         osx_image: xcode8.2
       )
       it { should serialize_to os: ['linux', 'osx'], osx_image: 'xcode8.2' }
-      it { should_not have_msg [:warn, :osx_image, :unsupported, on_key: :os, on_value: 'linux', key: :osx_image, value: 'xcode8.2'] }
+      it { should_not have_msg [:warn, :osx_image, :unsupported, on_key: 'os', on_value: 'linux', key: 'osx_image', value: 'xcode8.2'] }
     end
   end
 

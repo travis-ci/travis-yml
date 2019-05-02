@@ -205,6 +205,6 @@ describe Travis::Yml, 'notifications: flowdock' do
           unknown: str
     )
     it { should serialize_to notifications: { flowdock: { unknown: 'str' } } }
-    it { should have_msg [:warn, :'notifications.flowdock', :unknown_key, key: :unknown, value: 'str'] }
+    it { should have_msg [:warn, :'notifications.flowdock', :unknown_key, key: 'unknown', value: 'str'] }
   end
 end

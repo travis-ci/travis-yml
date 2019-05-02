@@ -8,7 +8,9 @@ module Travis
       module Change
         class EnvVars < Base
           def apply
-            apply? ? env_vars : value
+            other = apply? ? env_vars : value
+            # p other.serialize
+            other
           end
 
           private
@@ -20,26 +22,24 @@ module Travis
             def env_vars
               vars = value.seq? ? value.value : [value]
               vars = vars.map do |value|
-                value = parse(value) if value.str?
-                value = split(value) if value.map?
-                value = [{}] if value.none?
-                value
+                vars = value.value
+                vars = parse(value, vars) if value.str?
+                vars = split(vars) if value.map?
+                vars || [{}]
               end
               build(vars.flatten(1))
             end
 
-            def split(value)
-              value.map { |key, value| { key => value } }
+            def split(vars)
+              vars.empty? ? [{}] : vars.map { |key, obj| { key => obj } }
             end
 
-            def parse(value)
-              str = value.value
-              vars = str.empty? ? [[]] : ShVars.parse(str)
-              vars = vars.map { |pair| pair.empty? ? {} : symbolize([pair].to_h) }
-              build(vars)
+            def parse(value, vars)
+              vars = vars.empty? ? [[]] : ShVars.parse(vars)
+              vars.map { |pair| pair.empty? ? {} : [pair].to_h }
             rescue ShVars::ParseError => e
-              value.error :invalid_env_var, var: str
-              none
+              value.error :invalid_env_var, var: vars
+              [{}]
             end
         end
       end
