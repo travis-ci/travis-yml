@@ -24,8 +24,8 @@ describe Travis::Yml::Doc::Schema do
     it { should be_any }
   end
 
-  describe 'aliases' do
-    subject { schema.aliases }
+  describe 'key_aliases' do
+    subject { schema.key_aliases }
     it { should include 'jobs' => 'matrix' }
   end
 

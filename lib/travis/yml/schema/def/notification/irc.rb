@@ -14,7 +14,7 @@ module Travis
 
               prefix :channels
 
-              map :channels,          to: :seq, type: :secure, alias: :channel
+              map :channels,          to: Channels
               map :channel_key,       to: :secure
               map :password,          to: :secure
               map :nickserv_password, to: :secure
@@ -24,6 +24,13 @@ module Travis
               map :template,          to: :templates
 
               super
+            end
+
+            class Channels < Dsl::Seq
+              def define
+                aliases :channel
+                type :secure, strict: false
+              end
             end
           end
         end

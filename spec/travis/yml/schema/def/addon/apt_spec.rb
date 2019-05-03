@@ -76,9 +76,6 @@ describe Travis::Yml::Schema::Def::Addon::Apt do
                   type: :string
                 }
               ],
-              aliases: [
-                :source
-              ]
             },
             dist: {
               type: :string
@@ -100,9 +97,6 @@ describe Travis::Yml::Schema::Def::Addon::Apt do
         },
         {
           '$ref': '#/definitions/type/strs',
-          aliases: [
-            :package
-          ]
         },
         {
           type: :boolean

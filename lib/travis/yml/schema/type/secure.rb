@@ -7,7 +7,11 @@ module Travis
     module Schema
       module Type
         class Secure < Scalar
+          include Opts
+
           register :secure
+
+          opts %i(strict)
 
           def self.type
             registry_key
@@ -27,6 +31,10 @@ module Travis
 
           def secure?
             true
+          end
+
+          def strict?
+            !opts[:strict].is_a?(FalseClass)
           end
         end
 

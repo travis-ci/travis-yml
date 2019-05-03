@@ -1,4 +1,4 @@
-describe Travis::Yml::Schema::Def::Deploy::Cloudfiles, 'schema' do
+describe Travis::Yml::Schema::Def::Deploy::Cloudfiles do
   subject { Travis::Yml.schema[:definitions][:deploy][:cloudfiles] }
 
   # it { puts JSON.pretty_generate(subject) }
@@ -19,7 +19,10 @@ describe Travis::Yml::Schema::Def::Deploy::Cloudfiles, 'schema' do
                 strict: true
               },
               on: {
-                '$ref': '#/definitions/deploy/conditions'
+                '$ref': '#/definitions/deploy/conditions',
+                aliases: [
+                  :true
+                ]
               },
               allow_failure: {
                 type: :boolean
@@ -31,7 +34,8 @@ describe Travis::Yml::Schema::Def::Deploy::Cloudfiles, 'schema' do
                 '$ref': '#/definitions/deploy/edge'
               },
               username: {
-                '$ref': '#/definitions/type/secure'
+                '$ref': '#/definitions/type/secure',
+                strict: false
               },
               api_key: {
                 '$ref': '#/definitions/type/secure'

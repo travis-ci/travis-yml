@@ -9,7 +9,7 @@ module Travis
 
             def define
               map :controller,  to: :str
-              map :username,    to: :secure
+              map :username,    to: :secure, strict: false
               map :password,    to: :secure
               map :app,         to: :str
               map :cli_version, to: :str

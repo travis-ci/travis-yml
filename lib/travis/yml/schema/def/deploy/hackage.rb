@@ -8,7 +8,7 @@ module Travis
             register :hackage
 
             def define
-              map :username, to: :secure
+              map :username, to: :secure, strict: false
               map :password, to: :secure
             end
           end

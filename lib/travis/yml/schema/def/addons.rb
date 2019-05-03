@@ -34,14 +34,22 @@ module Travis
             map :jwt,             to: :jwts
             map :sauce_connect,   to: :sauce_connect
             map :snaps
-            map :ssh_known_hosts, to: :seq, type: :secure
+
+            # turn this into a proper addon definition
+            type = Class.new(Dsl::Seq) do
+              def define
+                type :secure, strict: false
+              end
+            end
+
+            map :ssh_known_hosts, to: type
             map :sonarcloud
 
             # turn this into a proper addon definition. the map allows the key debug: true
             type = Class.new(Dsl::Any) do
               def define
-                add :map,  normal: true, strict: false
-                add :bool, normal: true
+                type :map,  normal: true, strict: false
+                type :bool, normal: true
               end
             end
 

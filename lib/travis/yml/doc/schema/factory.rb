@@ -107,7 +107,7 @@ module Travis
             end
 
             def secure(schema)
-              Secure.new(normalize(schema).merge(strict: !schema.key?(:anyOf))) # ??
+              Secure.new(normalize(schema))
             end
 
             def str(schema)

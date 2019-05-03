@@ -9,7 +9,7 @@ module Travis
             register :pypi
 
             def define
-              map :user,             to: :secure
+              map :user,             to: :secure, strict: false
               map :password,         to: :secure
               map :api_key,          to: :secure
               map :server,           to: :str

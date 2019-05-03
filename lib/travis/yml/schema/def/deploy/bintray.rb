@@ -9,7 +9,7 @@ module Travis
 
             def define
               map :file,       to: :str
-              map :user,       to: :secure
+              map :user,       to: :secure, strict: false
               map :key,        to: :secure
               map :passphrase, to: :secure
               map :dry_run,    to: :bool

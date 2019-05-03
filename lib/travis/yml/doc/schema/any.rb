@@ -50,6 +50,11 @@ module Travis
             map(&:all_keys)
           end
 
+          def aliases
+            [super, map(&:aliases)].flatten
+          end
+          memoize :aliases
+
           def supports
             merge(super, *map(&:supports))
           end

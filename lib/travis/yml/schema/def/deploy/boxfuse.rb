@@ -10,7 +10,7 @@ module Travis
             register :boxfuse
 
             def define
-              map :user,       to: :secure
+              map :user,       to: :secure, strict: false
               map :secret,     to: :secure
               map :configfile, to: :str
               map :payload,    to: :str

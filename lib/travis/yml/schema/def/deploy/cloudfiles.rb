@@ -9,7 +9,7 @@ module Travis
             register :cloudfiles
 
             def define
-              map :username,  to: :secure
+              map :username,  to: :secure, strict: false
               map :api_key,   to: :secure
               map :region,    to: :str
               map :container, to: :str

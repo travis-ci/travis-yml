@@ -8,9 +8,6 @@ describe Travis::Yml::Schema::Def::Notification::Webhooks, 'structure' do
       '$id': :notification_webhooks,
       title: 'Notification Webhooks',
       normal: true,
-      aliases: [
-        :webhook
-      ],
       anyOf: [
         {
           type: :object,
@@ -22,7 +19,20 @@ describe Travis::Yml::Schema::Def::Notification::Webhooks, 'structure' do
               type: :boolean
             },
             urls: {
-              '$ref': '#/definitions/type/secures'
+              anyOf: [
+                {
+                  type: :array,
+                  normal: true,
+                  items: {
+                    '$ref': '#/definitions/type/secure',
+                    strict: false
+                  }
+                },
+                {
+                  '$ref': '#/definitions/type/secure',
+                  strict: false
+                },
+              ]
             },
             on_start: {
               '$ref': '#/definitions/notification/frequency'
@@ -55,7 +65,16 @@ describe Travis::Yml::Schema::Def::Notification::Webhooks, 'structure' do
           ]
         },
         {
-          '$ref': '#/definitions/type/secures'
+          type: :array,
+          normal: true, # this should not be normal
+          items: {
+            '$ref': '#/definitions/type/secure',
+            strict: false
+          }
+        },
+        {
+          '$ref': '#/definitions/type/secure',
+          strict: false
         },
         {
           type: :boolean

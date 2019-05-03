@@ -11,7 +11,8 @@ describe Travis::Yml, 'launchpad' do
           oauth_token_secret: str
       )
       it { should serialize_to deploy: [provider: 'launchpad', slug: 'str', oauth_token: 'str', oauth_token_secret: 'str'] }
-      it { should_not have_msg }
+      it { should have_msg [:alert, :'deploy.oauth_token', :secure, given: :str] }
+      it { should have_msg [:alert, :'deploy.oauth_token_secret', :secure, given: :str] }
     end
 
     describe 'given secures' do

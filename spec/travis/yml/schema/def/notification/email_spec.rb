@@ -8,9 +8,6 @@ describe Travis::Yml::Schema::Def::Notification::Email, 'structure' do
       '$id': :notification_email,
       title: 'Notification Email',
       normal: true,
-      aliases: [
-        :emails
-      ],
       anyOf: [
         {
           type: :object,
@@ -22,7 +19,20 @@ describe Travis::Yml::Schema::Def::Notification::Email, 'structure' do
               type: :boolean
             },
             recipients: {
-              '$ref': '#/definitions/type/secures'
+              anyOf: [
+                {
+                  type: :array,
+                  normal: true,
+                  items: {
+                    '$ref': '#/definitions/type/secure',
+                    strict: false
+                  }
+                },
+                {
+                  '$ref': '#/definitions/type/secure',
+                  strict: false
+                },
+              ]
             },
             on_success: {
               '$ref': '#/definitions/notification/frequency'
@@ -46,7 +56,16 @@ describe Travis::Yml::Schema::Def::Notification::Email, 'structure' do
           ]
         },
         {
-          '$ref': '#/definitions/type/secures'
+          type: :array,
+          items: {
+            '$ref': '#/definitions/type/secure',
+            strict: false
+          },
+          normal: true # this should not be normal
+        },
+        {
+          '$ref': '#/definitions/type/secure',
+          strict: false
         },
         {
           type: :boolean

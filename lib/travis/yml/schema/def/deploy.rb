@@ -44,7 +44,7 @@ module Travis
               prefix :provider
 
               map :provider,      to: :str, values: registry_key, required: true, strict: true
-              map :on,            to: :conditions
+              map :on,            to: :conditions, alias: :true
               map :allow_failure, to: :bool
               map :skip_cleanup,  to: :bool
               map :edge,          to: :edge
@@ -72,7 +72,7 @@ module Travis
               prefix :branch, only: :str
 
               map :os
-              map :branch,       to: :branches, alias: :branches
+              map :branch,       to: :branches #, alias: :branches
               map :repo,         to: :str
               map :condition,    to: :seq, type: :str
               map :all_branches, to: :bool

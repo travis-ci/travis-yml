@@ -9,17 +9,21 @@ module Travis
           register :alert
 
           def apply
-            alert? ? alert : value
+            apply? && alert? ? alert : value
           end
 
           private
 
+            def apply?
+              value.alert?
+            end
+
             def alert?
-              schema.secure? && !value.secure? && value.alert?
+              schema.secure? && schema.strict? && value.str?
             end
 
             def alert
-              value.alert :secure
+              value.alert :secure, given: value.type
               value
             end
         end

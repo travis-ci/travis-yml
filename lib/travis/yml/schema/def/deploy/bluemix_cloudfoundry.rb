@@ -9,7 +9,7 @@ module Travis
             register :bluemixcloudfoundry
 
             def define
-              map :username,            to: :secure
+              map :username,            to: :secure, strict: false
               map :password,            to: :secure
               map :organization,        to: :str
               map :api,                 to: :str

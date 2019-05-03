@@ -13,12 +13,18 @@ module Travis
               aliases :webhook
               prefix :urls
 
-              map :urls,      to: :seq, type: :secure
+              map :urls,      to: Urls
               map :on_start,  to: :frequency
               map :on_cancel, to: :frequency
               map :on_error,  to: :frequency
 
               super
+            end
+
+            class Urls < Dsl::Seq
+              def define
+                type :secure, strict: false
+              end
             end
           end
         end

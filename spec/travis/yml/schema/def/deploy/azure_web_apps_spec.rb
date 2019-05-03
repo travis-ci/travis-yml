@@ -1,4 +1,4 @@
-describe Travis::Yml::Schema::Def::Deploy::AzureWebApps, 'schema' do
+describe Travis::Yml::Schema::Def::Deploy::AzureWebApps do
   subject { Travis::Yml.schema[:definitions][:deploy][:azure_web_apps] }
 
   # it { puts JSON.pretty_generate(subject) }
@@ -19,7 +19,10 @@ describe Travis::Yml::Schema::Def::Deploy::AzureWebApps, 'schema' do
                 strict: true
               },
               on: {
-                '$ref': '#/definitions/deploy/conditions'
+                '$ref': '#/definitions/deploy/conditions',
+                aliases: [
+                  :true
+                ]
               },
               allow_failure: {
                 type: :boolean
@@ -37,7 +40,8 @@ describe Travis::Yml::Schema::Def::Deploy::AzureWebApps, 'schema' do
                 type: :string
               },
               username: {
-                '$ref': '#/definitions/type/secure'
+                '$ref': '#/definitions/type/secure',
+                strict: false
               },
               password: {
                 '$ref': '#/definitions/type/secure'

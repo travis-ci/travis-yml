@@ -12,9 +12,15 @@ module Travis
             def define
               prefix :recipients
 
-              map :recipients, to: :seq, type: :secure
+              map :recipients, to: Recipients
 
               super
+            end
+
+            class Recipients < Dsl::Seq
+              def define
+                type :secure, strict: false
+              end
             end
           end
         end

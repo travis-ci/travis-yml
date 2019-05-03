@@ -6,7 +6,11 @@ module Travis
     module Schema
       module Type
         class Ref < Node
+          include Opts
+
           register :ref
+
+          opts %i(strict)
 
           def self.type
             :ref

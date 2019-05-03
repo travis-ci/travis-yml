@@ -10,7 +10,7 @@ module Travis
             register :packagecloud
 
             def define
-              map :username,     to: :secure
+              map :username,     to: :secure, strict: false
               map :token,        to: :secure
               map :repository,   to: :str
               map :local_dir,    to: :str

@@ -1,9 +1,4 @@
 describe Travis::Yml::Schema::Def::Deploy::Deploy do
-  # describe 'deploys' do
-  #   subject { Travis::Yml::Schema::Def::Deploy::Deploys.new(nil, {}).definitions[:type][:deploys] }
-  #   it { puts JSON.pretty_generate(subject)[0..400] }
-  # end
-
   describe 'conditions' do
     subject { Travis::Yml.schema[:definitions][:deploy][:conditions] }
 
@@ -19,6 +14,9 @@ describe Travis::Yml::Schema::Def::Deploy::Deploy do
               {
                 type: :object,
                 additionalProperties: false,
+                aliases: [
+                  :true
+                ],
                 prefix: {
                   key: :branch,
                   only: [
@@ -28,9 +26,6 @@ describe Travis::Yml::Schema::Def::Deploy::Deploy do
                 properties: {
                   branch: {
                     '$ref': '#/definitions/deploy/branches',
-                    aliases: [
-                      :branches
-                    ]
                   },
                   os: {
                     '$ref': '#/definitions/type/os',
@@ -57,9 +52,6 @@ describe Travis::Yml::Schema::Def::Deploy::Deploy do
           },
           {
             '$ref': '#/definitions/deploy/branches',
-            aliases: [
-              :branches
-            ]
           }
         ]
       )

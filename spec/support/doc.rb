@@ -6,7 +6,11 @@ module Spec
       def self.included(const)
         const.let(:empty) { {} }
         const.let(:defaults) { { language: 'ruby', os: ['linux'] } }
-        const.let(:opts) { |ctx| ctx.metadata.select { |key, _| OPTS.include?(key) }.to_h }
+
+        const.let(:opts) do |ctx|
+          opts = ctx.metadata.select { |key, _| OPTS.include?(key) }.to_h
+          opts.merge(alert: true)
+        end
       end
 
       def build_schema(schema)
