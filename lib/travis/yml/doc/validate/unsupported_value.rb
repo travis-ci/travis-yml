@@ -17,7 +17,7 @@ module Travis
           private
 
             def apply?
-              schema.enum? && value.scalar? && !!support
+              enabled? && schema.enum? && value.scalar? && !!support
             end
 
             def unsupported?
@@ -35,6 +35,10 @@ module Travis
               Value::Support.new(support, value.supporting, value.value)
             end
             memoize :support
+
+            def enabled?
+              value.support?
+            end
         end
       end
     end

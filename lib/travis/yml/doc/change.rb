@@ -19,9 +19,7 @@ module Travis
         extend self
 
         def apply(schema, value)
-          other = build(schema, value).apply
-          # p other.keys if other.map?
-          other
+          build(schema, value).apply
         end
 
         def build(schema, value)
@@ -120,17 +118,6 @@ module Travis
         end
 
         class Scalar < Node
-          # Should see if we can make all changes recurse (like Pick and Inherit currently do)
-          # by the way of doing something like:
-          #
-          #   def change(value)
-          #     changes.inject(value) do |value, const|
-          #       other = const.new(schema, value, opts).apply
-          #       other = change(other) unless other == value
-          #       other
-          #     end
-          #   end
-
           def apply
             changes.inject(value) do |value, change|
               change.new(schema, value, opts).apply
@@ -140,73 +127,6 @@ module Travis
 
         class Secure < Scalar
         end
-
-        # module Report
-        #   def self.included(const)
-        #     const.extend Module.new {
-        #       def report(name)
-        #         prepend Module.new {
-        #           define_method(name) do |*args|
-        #             self.level += 1
-        #             Report.new(self, :before, name).report
-        #             super(*args).tap do |other|
-        #               Report.new(self, :after, name, other).report
-        #               self.ix += 1
-        #               self.level -= 1
-        #             end
-        #           end
-        #         }
-        #       end
-        #     }
-        #   end
-        #
-        #   attr_writer :level, :ix
-        #
-        #   def level
-        #     @level ||= parent ? parent.level : 0
-        #   end
-        #
-        #   def ix
-        #     @ix ||= 0
-        #   end
-        #
-        #   class Report < Struct.new(:change, :stage, :name, :other)
-        #     def report
-        #       parts = [' ' * (change.level * 2)]
-        #       parts << schema.object_id.to_s[-3, 3]
-        #       parts << "#{green("#{type}#{".#{change.ix}" if change.is_a?(Any)}")}"
-        #       parts << " #{stage}: #{name} schema"
-        #       parts << blue("id=#{schema.id}") if schema.id
-        #       parts << "key=#{schema.key}"
-        #       parts << "(normal)" if schema.normal?
-        #       parts << "wants #{blue(schema.type.inspect)}, value is #{blue(value.type.inspect)} #{value.serialize.inspect}."
-        #       parts << "schema #{schema.matches?(value) ? green('matches!') : red('does not match')}" if stage == :after
-        #       puts parts.join(' ')
-        #     end
-        #
-        #     def schema
-        #       change.schema
-        #     end
-        #
-        #     def value
-        #       change.value
-        #     end
-        #
-        #     def type
-        #       change.class.name.split('::').last
-        #     end
-        #
-        #     def red(str);       "\e[31m#{str}\e[0m" end
-        #     def green(str);     "\e[32m#{str}\e[0m" end
-        #     def blue(str);      "\e[34m#{str}\e[0m" end
-        #     def magenta(str);   "\e[35m#{str}\e[0m" end
-        #     def cyan(str);      "\e[36m#{str}\e[0m" end
-        #     def gray(str);      "\e[37m#{str}\e[0m" end
-        #
-        #     def bold(str);      "\e[1m#{str}\e[22m" end
-        #     def underline(str); "\e[4m#{str}\e[24m" end
-        #   end
-        # end
       end
     end
   end

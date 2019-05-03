@@ -7,7 +7,7 @@ module Travis
     module Doc
       module Change
         class Keys < Base
-          DROP = /^\W*(configured|result|fetching_failed|parsing_failed|merge_mode)\W*$/
+          INTERNAL = /^\W*(configured|result|fetching_failed|parsing_failed|merge_mode)\W*$/
 
           def apply
             apply? ? change(value) : value
@@ -21,7 +21,7 @@ module Travis
 
             def change(value)
               value = required(value) if defaults?
-              value = drop_keys(value)
+              value = internal(value)
               value = fix_keys(value)
               value
             end
@@ -31,9 +31,9 @@ module Travis
               build(keys.uniq.map { |key| [key, value[key] || none] }.to_h)
             end
 
-            def drop_keys(value)
+            def internal(value)
               value.keys.each do |key|
-                value.delete(key) if DROP =~ key
+                value.delete(key) if INTERNAL =~ key
               end
               value
             end

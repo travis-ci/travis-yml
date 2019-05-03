@@ -9,12 +9,12 @@ module Travis
         class Key < Base
           include Doc::Dict
 
-          FILTERS = %i(strip underscore clean lookup find)
+          FILTERS = %i(strip underscore clean find)
 
           def apply
             key = value.key
             key = dealias(key) if !known?(key) && alias?(key)
-            key = fix(key)     if !known?(key)
+            key = fix(key)     if !known?(key) && fix_keys?
             key
           end
 
@@ -48,18 +48,22 @@ module Travis
             other
           end
 
+          def find(key)
+            lookup(key) || match(key) || key
+          end
+
           def lookup(key)
-            return key unless strict? && Dict.key?(key)
+            return unless strict? && Dict.key?(key)
             other = Dict[key] unless schema.stop?(key, Dict[key])
-            return key unless key == other || known?(other)
+            return unless known?(other)
             warn :find_key, key, other if key != other
             other
           end
 
-          def find(key)
-            return key unless strict?
+          def match(key)
+            return unless strict?
             other = match_key(key.to_s)
-            return key unless known?(other) || alias?(other)
+            return unless known?(other) || alias?(other)
             warn :find_key, key, other if key != other
             other
           end
@@ -69,6 +73,10 @@ module Travis
             return key if !other || key == other
             value.parent.info :alias, alias: key, key: other
             other
+          end
+
+          def fix_keys?
+            value.fix_keys?
           end
 
           def strict?

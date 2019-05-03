@@ -8,7 +8,7 @@ module Travis
             register :elasticbeanstalk
 
             def define
-              map :access_key_id,           to: :secure
+              map :access_key_id,           to: :secure, strict: false
               map :secret_access_key,       to: :secure
               map :region,                  to: :str
               map :app,                     to: :map, type: :str

@@ -15,7 +15,7 @@ module Travis
             register :lambda
 
             def define
-              map :access_key_id,         to: :secure #, required: true
+              map :access_key_id,         to: :secure, strict: false #, required: true
               map :secret_access_key,     to: :secure #, required: true
               map :region,                to: :str
               map :function_name,         to: :str #, required: true

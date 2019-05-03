@@ -1,5 +1,5 @@
 describe Travis::Yml, 'services' do
-  subject { described_class.apply(parse(yaml)) }
+  subject { described_class.apply(parse(yaml), opts) }
 
   known = %w(
     cassandra

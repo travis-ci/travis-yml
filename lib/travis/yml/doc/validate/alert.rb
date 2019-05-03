@@ -15,15 +15,19 @@ module Travis
           private
 
             def apply?
-              value.alert?
+              schema.secure? && schema.strict? && value.alert?
             end
 
             def alert?
-              schema.secure? && schema.strict? && value.str?
+              value.str? && !env_var?(value.value)
+            end
+
+            def env_var?(str)
+              str.start_with?('$') && !str.include?(':$')
             end
 
             def alert
-              value.alert :secure, given: value.type
+              value.alert :secure, type: value.type
               value
             end
         end

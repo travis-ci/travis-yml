@@ -60,8 +60,6 @@ module Travis
             # end
 
             def deprecated_value?
-              # p schema.values.value(value.value)
-              # p value.value
               schema.enum? && value.str? && schema.values.deprecated?(value.value)
             end
 

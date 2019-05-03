@@ -9,8 +9,6 @@ module Travis
 
         BOOLS = [TrueClass, FalseClass]
 
-        # Boolean = Class.new
-
         def is?(obj, *types)
           types.any? { |type| obj.is_a?(type) }
         end

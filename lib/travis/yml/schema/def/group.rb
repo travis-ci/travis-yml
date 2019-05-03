@@ -9,7 +9,6 @@ module Travis
           register :group
 
           def define
-            # default :stable
             downcase
             export
           end

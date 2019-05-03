@@ -482,19 +482,8 @@
         "anyOf": [
           {
             "type": "object",
-            "properties": {
-              "secure": {
-                "type": "string"
-              }
-            },
-            "additionalProperties": false,
-            "normal": true,
-            "maxProperties": 1
-          },
-          {
-            "type": "object",
             "patternProperties": {
-              "^(?!global|matrix)": {
+              "^(?!global|matrix|secure)": {
                 "anyOf": [
                   {
                     "type": "string"
@@ -508,6 +497,16 @@
                 ]
               }
             },
+            "normal": true
+          },
+          {
+            "type": "object",
+            "properties": {
+              "secure": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false,
             "normal": true,
             "maxProperties": 1
           },
@@ -1755,7 +1754,8 @@
                   "aws_access_key",
                   "access_key_id",
                   "access_key"
-                ]
+                ],
+                "strict": false
               },
               "secret": {
                 "$ref": "#/definitions/type/secure",
@@ -5790,7 +5790,8 @@
                 "$ref": "#/definitions/deploy/edge"
               },
               "access_key_id": {
-                "$ref": "#/definitions/type/secure"
+                "$ref": "#/definitions/type/secure",
+                "strict": false
               },
               "secret_access_key": {
                 "$ref": "#/definitions/type/secure"
@@ -6116,7 +6117,8 @@
                 "$ref": "#/definitions/deploy/edge"
               },
               "access_key_id": {
-                "$ref": "#/definitions/type/secure"
+                "$ref": "#/definitions/type/secure",
+                "strict": false
               },
               "secret_access_key": {
                 "$ref": "#/definitions/type/secure"
@@ -6351,7 +6353,8 @@
                 "$ref": "#/definitions/deploy/edge"
               },
               "access_key_id": {
-                "$ref": "#/definitions/type/secure"
+                "$ref": "#/definitions/type/secure",
+                "strict": false
               },
               "secret_access_key": {
                 "$ref": "#/definitions/type/secure"
@@ -6728,7 +6731,8 @@
                 "$ref": "#/definitions/deploy/edge"
               },
               "access_key_id": {
-                "$ref": "#/definitions/type/secure"
+                "$ref": "#/definitions/type/secure",
+                "strict": false
               },
               "secret_access_key": {
                 "$ref": "#/definitions/type/secure"
@@ -7427,7 +7431,8 @@
                 "$ref": "#/definitions/deploy/edge"
               },
               "access_key_id": {
-                "$ref": "#/definitions/type/secure"
+                "$ref": "#/definitions/type/secure",
+                "strict": false
               },
               "secret_access_key": {
                 "$ref": "#/definitions/type/secure"

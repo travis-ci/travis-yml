@@ -1,5 +1,4 @@
 require 'travis/yml/doc/value/bool'
-require 'travis/yml/doc/value/cast'
 require 'travis/yml/doc/value/factory'
 require 'travis/yml/doc/value/map'
 require 'travis/yml/doc/value/none'

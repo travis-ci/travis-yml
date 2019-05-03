@@ -1,7 +1,7 @@
 describe Travis::Yml, 'cache' do
   let(:types) { Travis::Yml::Schema::Def::Cache::TYPES }
 
-  subject { described_class.apply(parse(yaml)) }
+  subject { described_class.apply(parse(yaml), opts) }
 
   describe 'given true' do
     yaml %(

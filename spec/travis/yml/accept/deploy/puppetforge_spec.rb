@@ -48,8 +48,8 @@ describe Travis::Yml, 'puppetforge' do
           url: str
       )
       it { should serialize_to deploy: [provider: 'puppetforge', user: 'str', password: 'str', url: 'str'] }
-      it { should_not have_msg [:alert, :'deploy.user', :secure, given: :str] }
-      it { should have_msg [:alert, :'deploy.password', :secure, given: :str] }
+      it { should_not have_msg [:alert, :'deploy.user', :secure, type: :str] }
+      it { should have_msg [:alert, :'deploy.password', :secure, type: :str] }
     end
   end
 end

@@ -1,5 +1,5 @@
 describe Travis::Yml::Doc::Change::Keys do
-  subject { described_class.new(build_schema(schema), build_value(value)).apply }
+  subject { described_class.new(build_schema(schema), build_value(value, opts)).apply }
 
   let(:schema) do
     {

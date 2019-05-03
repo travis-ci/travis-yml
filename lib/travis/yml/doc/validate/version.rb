@@ -18,8 +18,6 @@ module Travis
           private
 
             def invalid?
-              # # TODO should be able to version other types, too
-              # schema.fixed? && value.scalar? && version? && !satisfied?
               schema.root?
             end
 

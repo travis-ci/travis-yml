@@ -34,7 +34,8 @@ describe Travis::Yml::Schema::Def::Deploy::Gcs do
                 '$ref': '#/definitions/deploy/edge'
               },
               access_key_id: {
-                '$ref': '#/definitions/type/secure'
+                '$ref': '#/definitions/type/secure',
+                strict: false
               },
               secret_access_key: {
                 '$ref': '#/definitions/type/secure'

@@ -1,5 +1,4 @@
 # frozen_string_literal: true
-# require 'travis/yml/doc/helper/support'
 require 'travis/yml/doc/validate/base'
 
 module Travis
@@ -16,7 +15,6 @@ module Travis
           private
 
             def apply?
-              # relevant?
               enabled? && schema.map? && value.map?
             end
 

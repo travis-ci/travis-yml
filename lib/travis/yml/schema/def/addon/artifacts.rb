@@ -26,12 +26,10 @@ module Travis
             }
 
             def define
-              # change :enable
-
               map :enabled,       to: :bool
               map :bucket,        to: :str
               map :endpoint,      to: :str
-              map :key,           to: :secure, alias: ALIASES[:key]
+              map :key,           to: :secure, alias: ALIASES[:key], strict: false
               map :secret,        to: :secure, alias: ALIASES[:secret]
               map :paths,         to: :seq
 

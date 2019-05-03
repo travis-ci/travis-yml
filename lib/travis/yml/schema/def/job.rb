@@ -37,8 +37,8 @@ module Travis
             map :script,         to: :seq
             map :after_script,   to: :seq
             map :after_result,   to: :seq
-            map :after_success,  to: :seq #, alias: :on_success
-            map :after_failure,  to: :seq #, alias: :on_failure ?
+            map :after_success,  to: :seq
+            map :after_failure,  to: :seq
             map :before_deploy,  to: :seq
             map :after_deploy,   to: :seq
             map :before_cache,   to: :seq

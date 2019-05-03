@@ -1,5 +1,5 @@
 describe Travis::Yml, 'arch' do
-  subject { described_class.apply(parse(yaml)) }
+  subject { described_class.apply(parse(yaml), opts) }
 
   known = %w(
     amd64

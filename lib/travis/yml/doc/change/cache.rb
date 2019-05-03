@@ -72,7 +72,7 @@ module Travis
             memoize :bools
 
             def maps
-              value.select(&:map?) #.map(&:serialize)
+              value.select(&:map?)
             end
 
             def strs

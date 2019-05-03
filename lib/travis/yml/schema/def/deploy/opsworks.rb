@@ -11,7 +11,7 @@ module Travis
             register :opsworks
 
             def define
-              map :access_key_id,         to: :secure
+              map :access_key_id,         to: :secure, strict: false
               map :secret_access_key,     to: :secure
               map :region,                to: :str
               map :app_id,                to: :str

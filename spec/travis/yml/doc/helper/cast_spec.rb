@@ -1,4 +1,4 @@
-describe Travis::Yml::Doc::Value::Cast do
+describe Travis::Yml::Doc::Cast do
   let(:cast) { described_class.new(value, type) }
 
   describe 'a str' do

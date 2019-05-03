@@ -1,5 +1,5 @@
 describe Travis::Yml::Doc::Validate, 'unsupported_value' do
-  subject { described_class.apply(build_schema(schema), build_value(value)) }
+  subject { described_class.apply(build_schema(schema), build_value(value, opts)) }
 
   describe 'map' do
     let(:schema) do

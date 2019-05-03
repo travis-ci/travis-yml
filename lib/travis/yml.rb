@@ -27,11 +27,13 @@ module Travis
     # tests don't break elsewhere just because a default has changed here).
 
     OPTS = {
-      alert:    true,    # alert on secures that accept a string
-      empty:    false,   # warn on empty keys
-      line:     true,    # add line numbers to messages
-      defaults: true,    # add defaults to required keys
-      drop:     false    # drop unknown keys and values
+      alert:     true,   # alert on secures that accept a string
+      defaults:  true,   # add defaults to required keys
+      empty:     false,  # warn on empty keys
+      line:      true,   # add line numbers to messages
+      drop:      false,  # drop unknown keys and values
+      keys:      true,   # try fixing unknown keys
+      support:   false,  # warn about features unsupported on the given language, os etc
     }
 
     # These are meant as examples. Clients will want to determine their own
