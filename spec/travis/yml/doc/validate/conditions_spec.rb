@@ -11,7 +11,7 @@ describe Travis::Yml::Doc::Validate, 'conditions' do
 
   describe 'given an empty str' do
     let(:value) { { if: 'and true' } }
-    it { should serialize_to if: nil } # hmm.
+    it { should serialize_to empty }
     it { should have_msg [:error, :if, :invalid_condition, condition: 'and true'] }
   end
 end
