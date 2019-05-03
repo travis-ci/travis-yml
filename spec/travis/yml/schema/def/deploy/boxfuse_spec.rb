@@ -1,4 +1,4 @@
-describe Travis::Yml::Schema::Def::Deploy::Boxfuse, 'schema' do
+describe Travis::Yml::Schema::Def::Deploy::Boxfuse do
   subject { Travis::Yml.schema[:definitions][:deploy][:boxfuse] }
 
   # it { puts JSON.pretty_generate(subject) }
@@ -19,7 +19,10 @@ describe Travis::Yml::Schema::Def::Deploy::Boxfuse, 'schema' do
                 strict: true
               },
               on: {
-                '$ref': '#/definitions/deploy/conditions'
+                '$ref': '#/definitions/deploy/conditions',
+                aliases: [
+                  :true
+                ]
               },
               allow_failure: {
                 type: :boolean
@@ -31,7 +34,8 @@ describe Travis::Yml::Schema::Def::Deploy::Boxfuse, 'schema' do
                 '$ref': '#/definitions/deploy/edge'
               },
               user: {
-                '$ref': '#/definitions/type/secure'
+                '$ref': '#/definitions/type/secure',
+                strict: false
               },
               secret: {
                 '$ref': '#/definitions/type/secure'

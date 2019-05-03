@@ -11,6 +11,10 @@ module Travis
           def self.type
             :secure
           end
+
+          def strict(value = true)
+            node.set :strict, value
+          end
         end
       end
     end

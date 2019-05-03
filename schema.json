@@ -125,7 +125,20 @@
             "$ref": "#/definitions/addon/snaps"
           },
           "ssh_known_hosts": {
-            "$ref": "#/definitions/type/secures"
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/type/secure",
+                  "strict": false
+                },
+                "normal": true
+              },
+              {
+                "$ref": "#/definitions/type/secure",
+                "strict": false
+              }
+            ]
           },
           "sonarcloud": {
             "$ref": "#/definitions/addon/sonarcloud"
@@ -264,10 +277,7 @@
             "$ref": "#/definitions/type/strs"
           }
         ],
-        "normal": true,
-        "aliases": [
-          "branch"
-        ]
+        "normal": true
       },
       "cache": {
         "$id": "cache",
@@ -1033,10 +1043,7 @@
             "$ref": "#/definitions/type/matrix_entries"
           }
         ],
-        "normal": true,
-        "aliases": [
-          "jobs"
-        ]
+        "normal": true
       },
       "matrix_entries": {
         "$id": "matrix_entries",
@@ -1117,9 +1124,6 @@
           {
             "$ref": "#/definitions/type/job"
           }
-        ],
-        "aliases": [
-          "jobs"
         ]
       },
       "notifications": {
@@ -1182,10 +1186,7 @@
             ]
           },
           {
-            "$ref": "#/definitions/notification/email",
-            "aliases": [
-              "emails"
-            ]
+            "$ref": "#/definitions/notification/email"
           }
         ],
         "normal": true
@@ -1702,9 +1703,6 @@
                   {
                     "type": "string"
                   }
-                ],
-                "aliases": [
-                  "source"
                 ]
               },
               "dist": {
@@ -1726,10 +1724,7 @@
             ]
           },
           {
-            "$ref": "#/definitions/type/strs",
-            "aliases": [
-              "package"
-            ]
+            "$ref": "#/definitions/type/strs"
           },
           {
             "type": "boolean"
@@ -1830,10 +1825,12 @@
             "type": "object",
             "properties": {
               "username": {
-                "$ref": "#/definitions/type/secure"
+                "$ref": "#/definitions/type/secure",
+                "strict": false
               },
               "access_key": {
-                "$ref": "#/definitions/type/secure"
+                "$ref": "#/definitions/type/secure",
+                "strict": false
               },
               "forcelocal": {
                 "type": "boolean"
@@ -1945,7 +1942,8 @@
                 "type": "string"
               },
               "notification_email": {
-                "$ref": "#/definitions/type/secure"
+                "$ref": "#/definitions/type/secure",
+                "strict": false
               },
               "build_command": {
                 "type": "string"
@@ -2038,7 +2036,8 @@
                 "type": "boolean"
               },
               "username": {
-                "$ref": "#/definitions/type/secure"
+                "$ref": "#/definitions/type/secure",
+                "strict": false
               },
               "access_key": {
                 "$ref": "#/definitions/type/secure"
@@ -4448,7 +4447,10 @@
                 "strict": true
               },
               "on": {
-                "$ref": "#/definitions/deploy/conditions"
+                "$ref": "#/definitions/deploy/conditions",
+                "aliases": [
+                  "true"
+                ]
               },
               "allow_failure": {
                 "type": "boolean"
@@ -4460,7 +4462,8 @@
                 "$ref": "#/definitions/deploy/edge"
               },
               "username": {
-                "$ref": "#/definitions/type/secure"
+                "$ref": "#/definitions/type/secure",
+                "strict": false
               },
               "password": {
                 "$ref": "#/definitions/type/secure"
@@ -4509,7 +4512,10 @@
                 "strict": true
               },
               "on": {
-                "$ref": "#/definitions/deploy/conditions"
+                "$ref": "#/definitions/deploy/conditions",
+                "aliases": [
+                  "true"
+                ]
               },
               "allow_failure": {
                 "type": "boolean"
@@ -4521,7 +4527,8 @@
                 "$ref": "#/definitions/deploy/edge"
               },
               "user": {
-                "$ref": "#/definitions/type/secure"
+                "$ref": "#/definitions/type/secure",
+                "strict": false
               },
               "api_key": {
                 "$ref": "#/definitions/type/secure"
@@ -4615,7 +4622,10 @@
                 "strict": true
               },
               "on": {
-                "$ref": "#/definitions/deploy/conditions"
+                "$ref": "#/definitions/deploy/conditions",
+                "aliases": [
+                  "true"
+                ]
               },
               "allow_failure": {
                 "type": "boolean"
@@ -4688,7 +4698,10 @@
                 "strict": true
               },
               "on": {
-                "$ref": "#/definitions/deploy/conditions"
+                "$ref": "#/definitions/deploy/conditions",
+                "aliases": [
+                  "true"
+                ]
               },
               "allow_failure": {
                 "type": "boolean"
@@ -4706,7 +4719,8 @@
                 "type": "string"
               },
               "username": {
-                "$ref": "#/definitions/type/secure"
+                "$ref": "#/definitions/type/secure",
+                "strict": false
               },
               "password": {
                 "$ref": "#/definitions/type/secure"
@@ -4749,7 +4763,10 @@
                 "strict": true
               },
               "on": {
-                "$ref": "#/definitions/deploy/conditions"
+                "$ref": "#/definitions/deploy/conditions",
+                "aliases": [
+                  "true"
+                ]
               },
               "allow_failure": {
                 "type": "boolean"
@@ -4764,7 +4781,8 @@
                 "type": "string"
               },
               "user": {
-                "$ref": "#/definitions/type/secure"
+                "$ref": "#/definitions/type/secure",
+                "strict": false
               },
               "key": {
                 "$ref": "#/definitions/type/secure"
@@ -4810,7 +4828,10 @@
                 "strict": true
               },
               "on": {
-                "$ref": "#/definitions/deploy/conditions"
+                "$ref": "#/definitions/deploy/conditions",
+                "aliases": [
+                  "true"
+                ]
               },
               "allow_failure": {
                 "type": "boolean"
@@ -4865,7 +4886,10 @@
                 "strict": true
               },
               "on": {
-                "$ref": "#/definitions/deploy/conditions"
+                "$ref": "#/definitions/deploy/conditions",
+                "aliases": [
+                  "true"
+                ]
               },
               "allow_failure": {
                 "type": "boolean"
@@ -4877,7 +4901,8 @@
                 "$ref": "#/definitions/deploy/edge"
               },
               "username": {
-                "$ref": "#/definitions/type/secure"
+                "$ref": "#/definitions/type/secure",
+                "strict": false
               },
               "password": {
                 "$ref": "#/definitions/type/secure"
@@ -4938,7 +4963,10 @@
                 "strict": true
               },
               "on": {
-                "$ref": "#/definitions/deploy/conditions"
+                "$ref": "#/definitions/deploy/conditions",
+                "aliases": [
+                  "true"
+                ]
               },
               "allow_failure": {
                 "type": "boolean"
@@ -4950,7 +4978,8 @@
                 "$ref": "#/definitions/deploy/edge"
               },
               "user": {
-                "$ref": "#/definitions/type/secure"
+                "$ref": "#/definitions/type/secure",
+                "strict": false
               },
               "secret": {
                 "$ref": "#/definitions/type/secure"
@@ -5015,9 +5044,6 @@
             "normal": true,
             "deprecated": "branch_specific_option_hash"
           }
-        ],
-        "aliases": [
-          "branches"
         ]
       },
       "cargo": {
@@ -5035,7 +5061,10 @@
                 "strict": true
               },
               "on": {
-                "$ref": "#/definitions/deploy/conditions"
+                "$ref": "#/definitions/deploy/conditions",
+                "aliases": [
+                  "true"
+                ]
               },
               "allow_failure": {
                 "type": "boolean"
@@ -5084,7 +5113,10 @@
                 "strict": true
               },
               "on": {
-                "$ref": "#/definitions/deploy/conditions"
+                "$ref": "#/definitions/deploy/conditions",
+                "aliases": [
+                  "true"
+                ]
               },
               "allow_failure": {
                 "type": "boolean"
@@ -5136,7 +5168,10 @@
                 "strict": true
               },
               "on": {
-                "$ref": "#/definitions/deploy/conditions"
+                "$ref": "#/definitions/deploy/conditions",
+                "aliases": [
+                  "true"
+                ]
               },
               "allow_failure": {
                 "type": "boolean"
@@ -5191,7 +5226,10 @@
                 "strict": true
               },
               "on": {
-                "$ref": "#/definitions/deploy/conditions"
+                "$ref": "#/definitions/deploy/conditions",
+                "aliases": [
+                  "true"
+                ]
               },
               "allow_failure": {
                 "type": "boolean"
@@ -5240,7 +5278,10 @@
                 "strict": true
               },
               "on": {
-                "$ref": "#/definitions/deploy/conditions"
+                "$ref": "#/definitions/deploy/conditions",
+                "aliases": [
+                  "true"
+                ]
               },
               "allow_failure": {
                 "type": "boolean"
@@ -5252,7 +5293,8 @@
                 "$ref": "#/definitions/deploy/edge"
               },
               "email": {
-                "$ref": "#/definitions/type/secure"
+                "$ref": "#/definitions/type/secure",
+                "strict": false
               },
               "password": {
                 "$ref": "#/definitions/type/secure"
@@ -5295,7 +5337,10 @@
                 "strict": true
               },
               "on": {
-                "$ref": "#/definitions/deploy/conditions"
+                "$ref": "#/definitions/deploy/conditions",
+                "aliases": [
+                  "true"
+                ]
               },
               "allow_failure": {
                 "type": "boolean"
@@ -5307,7 +5352,8 @@
                 "$ref": "#/definitions/deploy/edge"
               },
               "username": {
-                "$ref": "#/definitions/type/secure"
+                "$ref": "#/definitions/type/secure",
+                "strict": false
               },
               "api_key": {
                 "$ref": "#/definitions/type/secure"
@@ -5356,7 +5402,10 @@
                 "strict": true
               },
               "on": {
-                "$ref": "#/definitions/deploy/conditions"
+                "$ref": "#/definitions/deploy/conditions",
+                "aliases": [
+                  "true"
+                ]
               },
               "allow_failure": {
                 "type": "boolean"
@@ -5368,7 +5417,8 @@
                 "$ref": "#/definitions/deploy/edge"
               },
               "username": {
-                "$ref": "#/definitions/type/secure"
+                "$ref": "#/definitions/type/secure",
+                "strict": false
               },
               "password": {
                 "$ref": "#/definitions/type/secure"
@@ -5429,7 +5479,10 @@
                 "strict": true
               },
               "on": {
-                "$ref": "#/definitions/deploy/conditions"
+                "$ref": "#/definitions/deploy/conditions",
+                "aliases": [
+                  "true"
+                ]
               },
               "allow_failure": {
                 "type": "boolean"
@@ -5441,7 +5494,8 @@
                 "$ref": "#/definitions/deploy/edge"
               },
               "access_key_id": {
-                "$ref": "#/definitions/type/secure"
+                "$ref": "#/definitions/type/secure",
+                "strict": false
               },
               "secret_access_key": {
                 "$ref": "#/definitions/type/secure"
@@ -5513,10 +5567,7 @@
                     "$ref": "#/definitions/type/os"
                   },
                   "branch": {
-                    "$ref": "#/definitions/deploy/branches",
-                    "aliases": [
-                      "branches"
-                    ]
+                    "$ref": "#/definitions/deploy/branches"
                   },
                   "repo": {
                     "type": "string"
@@ -5532,6 +5583,9 @@
                   }
                 },
                 "additionalProperties": false,
+                "aliases": [
+                  "true"
+                ],
                 "prefix": {
                   "key": "branch",
                   "only": [
@@ -5546,10 +5600,7 @@
             "normal": true
           },
           {
-            "$ref": "#/definitions/deploy/branches",
-            "aliases": [
-              "branches"
-            ]
+            "$ref": "#/definitions/deploy/branches"
           }
         ]
       },
@@ -5568,7 +5619,10 @@
                 "strict": true
               },
               "on": {
-                "$ref": "#/definitions/deploy/conditions"
+                "$ref": "#/definitions/deploy/conditions",
+                "aliases": [
+                  "true"
+                ]
               },
               "allow_failure": {
                 "type": "boolean"
@@ -5583,7 +5637,8 @@
                 "type": "string"
               },
               "username": {
-                "$ref": "#/definitions/type/secure"
+                "$ref": "#/definitions/type/secure",
+                "strict": false
               },
               "password": {
                 "$ref": "#/definitions/type/secure"
@@ -5629,7 +5684,10 @@
                 "strict": true
               },
               "on": {
-                "$ref": "#/definitions/deploy/conditions"
+                "$ref": "#/definitions/deploy/conditions",
+                "aliases": [
+                  "true"
+                ]
               },
               "allow_failure": {
                 "type": "boolean"
@@ -5717,7 +5775,10 @@
                 "strict": true
               },
               "on": {
-                "$ref": "#/definitions/deploy/conditions"
+                "$ref": "#/definitions/deploy/conditions",
+                "aliases": [
+                  "true"
+                ]
               },
               "allow_failure": {
                 "type": "boolean"
@@ -5814,7 +5875,10 @@
                 "strict": true
               },
               "on": {
-                "$ref": "#/definitions/deploy/conditions"
+                "$ref": "#/definitions/deploy/conditions",
+                "aliases": [
+                  "true"
+                ]
               },
               "allow_failure": {
                 "type": "boolean"
@@ -5826,7 +5890,8 @@
                 "$ref": "#/definitions/deploy/edge"
               },
               "username": {
-                "$ref": "#/definitions/type/secure"
+                "$ref": "#/definitions/type/secure",
+                "strict": false
               },
               "password": {
                 "$ref": "#/definitions/type/secure"
@@ -5902,7 +5967,10 @@
                 "strict": true
               },
               "on": {
-                "$ref": "#/definitions/deploy/conditions"
+                "$ref": "#/definitions/deploy/conditions",
+                "aliases": [
+                  "true"
+                ]
               },
               "allow_failure": {
                 "type": "boolean"
@@ -5957,7 +6025,10 @@
                 "strict": true
               },
               "on": {
-                "$ref": "#/definitions/deploy/conditions"
+                "$ref": "#/definitions/deploy/conditions",
+                "aliases": [
+                  "true"
+                ]
               },
               "allow_failure": {
                 "type": "boolean"
@@ -6030,7 +6101,10 @@
                 "strict": true
               },
               "on": {
-                "$ref": "#/definitions/deploy/conditions"
+                "$ref": "#/definitions/deploy/conditions",
+                "aliases": [
+                  "true"
+                ]
               },
               "allow_failure": {
                 "type": "boolean"
@@ -6103,7 +6177,10 @@
                 "strict": true
               },
               "on": {
-                "$ref": "#/definitions/deploy/conditions"
+                "$ref": "#/definitions/deploy/conditions",
+                "aliases": [
+                  "true"
+                ]
               },
               "allow_failure": {
                 "type": "boolean"
@@ -6115,7 +6192,8 @@
                 "$ref": "#/definitions/deploy/edge"
               },
               "username": {
-                "$ref": "#/definitions/type/secure"
+                "$ref": "#/definitions/type/secure",
+                "strict": false
               },
               "password": {
                 "$ref": "#/definitions/type/secure"
@@ -6155,7 +6233,10 @@
                 "strict": true
               },
               "on": {
-                "$ref": "#/definitions/deploy/conditions"
+                "$ref": "#/definitions/deploy/conditions",
+                "aliases": [
+                  "true"
+                ]
               },
               "allow_failure": {
                 "type": "boolean"
@@ -6255,7 +6336,10 @@
                 "strict": true
               },
               "on": {
-                "$ref": "#/definitions/deploy/conditions"
+                "$ref": "#/definitions/deploy/conditions",
+                "aliases": [
+                  "true"
+                ]
               },
               "allow_failure": {
                 "type": "boolean"
@@ -6365,7 +6449,10 @@
                 "strict": true
               },
               "on": {
-                "$ref": "#/definitions/deploy/conditions"
+                "$ref": "#/definitions/deploy/conditions",
+                "aliases": [
+                  "true"
+                ]
               },
               "allow_failure": {
                 "type": "boolean"
@@ -6423,7 +6510,10 @@
                 "strict": true
               },
               "on": {
-                "$ref": "#/definitions/deploy/conditions"
+                "$ref": "#/definitions/deploy/conditions",
+                "aliases": [
+                  "true"
+                ]
               },
               "allow_failure": {
                 "type": "boolean"
@@ -6475,7 +6565,10 @@
                 "strict": true
               },
               "on": {
-                "$ref": "#/definitions/deploy/conditions"
+                "$ref": "#/definitions/deploy/conditions",
+                "aliases": [
+                  "true"
+                ]
               },
               "allow_failure": {
                 "type": "boolean"
@@ -6487,7 +6580,8 @@
                 "$ref": "#/definitions/deploy/edge"
               },
               "email": {
-                "$ref": "#/definitions/type/secure"
+                "$ref": "#/definitions/type/secure",
+                "strict": false
               },
               "api_key": {
                 "$ref": "#/definitions/type/secure"
@@ -6530,7 +6624,10 @@
                 "strict": true
               },
               "on": {
-                "$ref": "#/definitions/deploy/conditions"
+                "$ref": "#/definitions/deploy/conditions",
+                "aliases": [
+                  "true"
+                ]
               },
               "allow_failure": {
                 "type": "boolean"
@@ -6542,7 +6639,8 @@
                 "$ref": "#/definitions/deploy/edge"
               },
               "user": {
-                "$ref": "#/definitions/type/secure"
+                "$ref": "#/definitions/type/secure",
+                "strict": false
               },
               "password": {
                 "$ref": "#/definitions/type/secure"
@@ -6615,7 +6713,10 @@
                 "strict": true
               },
               "on": {
-                "$ref": "#/definitions/deploy/conditions"
+                "$ref": "#/definitions/deploy/conditions",
+                "aliases": [
+                  "true"
+                ]
               },
               "allow_failure": {
                 "type": "boolean"
@@ -6691,7 +6792,10 @@
                 "strict": true
               },
               "on": {
-                "$ref": "#/definitions/deploy/conditions"
+                "$ref": "#/definitions/deploy/conditions",
+                "aliases": [
+                  "true"
+                ]
               },
               "allow_failure": {
                 "type": "boolean"
@@ -6703,7 +6807,8 @@
                 "$ref": "#/definitions/deploy/edge"
               },
               "username": {
-                "$ref": "#/definitions/type/secure"
+                "$ref": "#/definitions/type/secure",
+                "strict": false
               },
               "token": {
                 "$ref": "#/definitions/type/secure"
@@ -6758,7 +6863,10 @@
                 "strict": true
               },
               "on": {
-                "$ref": "#/definitions/deploy/conditions"
+                "$ref": "#/definitions/deploy/conditions",
+                "aliases": [
+                  "true"
+                ]
               },
               "allow_failure": {
                 "type": "boolean"
@@ -6986,7 +7094,10 @@
                 "strict": true
               },
               "on": {
-                "$ref": "#/definitions/deploy/conditions"
+                "$ref": "#/definitions/deploy/conditions",
+                "aliases": [
+                  "true"
+                ]
               },
               "allow_failure": {
                 "type": "boolean"
@@ -6998,7 +7109,8 @@
                 "$ref": "#/definitions/deploy/edge"
               },
               "user": {
-                "$ref": "#/definitions/type/secure"
+                "$ref": "#/definitions/type/secure",
+                "strict": false
               },
               "password": {
                 "$ref": "#/definitions/type/secure"
@@ -7043,7 +7155,10 @@
                 "strict": true
               },
               "on": {
-                "$ref": "#/definitions/deploy/conditions"
+                "$ref": "#/definitions/deploy/conditions",
+                "aliases": [
+                  "true"
+                ]
               },
               "allow_failure": {
                 "type": "boolean"
@@ -7055,7 +7170,8 @@
                 "$ref": "#/definitions/deploy/edge"
               },
               "user": {
-                "$ref": "#/definitions/type/secure"
+                "$ref": "#/definitions/type/secure",
+                "strict": false
               },
               "password": {
                 "$ref": "#/definitions/type/secure"
@@ -7113,7 +7229,10 @@
                 "strict": true
               },
               "on": {
-                "$ref": "#/definitions/deploy/conditions"
+                "$ref": "#/definitions/deploy/conditions",
+                "aliases": [
+                  "true"
+                ]
               },
               "allow_failure": {
                 "type": "boolean"
@@ -7125,7 +7244,8 @@
                 "$ref": "#/definitions/deploy/edge"
               },
               "user": {
-                "$ref": "#/definitions/type/secure"
+                "$ref": "#/definitions/type/secure",
+                "strict": false
               },
               "password": {
                 "$ref": "#/definitions/type/secure"
@@ -7204,7 +7324,10 @@
                 "strict": true
               },
               "on": {
-                "$ref": "#/definitions/deploy/conditions"
+                "$ref": "#/definitions/deploy/conditions",
+                "aliases": [
+                  "true"
+                ]
               },
               "allow_failure": {
                 "type": "boolean"
@@ -7289,7 +7412,10 @@
                 "strict": true
               },
               "on": {
-                "$ref": "#/definitions/deploy/conditions"
+                "$ref": "#/definitions/deploy/conditions",
+                "aliases": [
+                  "true"
+                ]
               },
               "allow_failure": {
                 "type": "boolean"
@@ -7383,7 +7509,10 @@
                 "strict": true
               },
               "on": {
-                "$ref": "#/definitions/deploy/conditions"
+                "$ref": "#/definitions/deploy/conditions",
+                "aliases": [
+                  "true"
+                ]
               },
               "allow_failure": {
                 "type": "boolean"
@@ -7396,6 +7525,7 @@
               },
               "username": {
                 "$ref": "#/definitions/type/secure",
+                "strict": false,
                 "aliases": [
                   "user"
                 ]
@@ -7450,7 +7580,10 @@
                 "strict": true
               },
               "on": {
-                "$ref": "#/definitions/deploy/conditions"
+                "$ref": "#/definitions/deploy/conditions",
+                "aliases": [
+                  "true"
+                ]
               },
               "allow_failure": {
                 "type": "boolean"
@@ -7499,7 +7632,10 @@
                 "strict": true
               },
               "on": {
-                "$ref": "#/definitions/deploy/conditions"
+                "$ref": "#/definitions/deploy/conditions",
+                "aliases": [
+                  "true"
+                ]
               },
               "allow_failure": {
                 "type": "boolean"
@@ -7554,7 +7690,10 @@
                 "strict": true
               },
               "on": {
-                "$ref": "#/definitions/deploy/conditions"
+                "$ref": "#/definitions/deploy/conditions",
+                "aliases": [
+                  "true"
+                ]
               },
               "allow_failure": {
                 "type": "boolean"
@@ -7606,7 +7745,10 @@
                 "strict": true
               },
               "on": {
-                "$ref": "#/definitions/deploy/conditions"
+                "$ref": "#/definitions/deploy/conditions",
+                "aliases": [
+                  "true"
+                ]
               },
               "allow_failure": {
                 "type": "boolean"
@@ -7741,7 +7883,20 @@
             "type": "object",
             "properties": {
               "recipients": {
-                "$ref": "#/definitions/type/secures"
+                "anyOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/definitions/type/secure",
+                      "strict": false
+                    },
+                    "normal": true
+                  },
+                  {
+                    "$ref": "#/definitions/type/secure",
+                    "strict": false
+                  }
+                ]
               },
               "enabled": {
                 "type": "boolean"
@@ -7771,16 +7926,22 @@
             ]
           },
           {
-            "$ref": "#/definitions/type/secures"
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/type/secure",
+              "strict": false
+            },
+            "normal": true
+          },
+          {
+            "$ref": "#/definitions/type/secure",
+            "strict": false
           },
           {
             "type": "boolean"
           }
         ],
-        "normal": true,
-        "aliases": [
-          "emails"
-        ]
+        "normal": true
       },
       "flowdock": {
         "$id": "notification_flowdock",
@@ -7922,9 +8083,22 @@
             "type": "object",
             "properties": {
               "channels": {
-                "$ref": "#/definitions/type/secures",
-                "aliases": [
-                  "channel"
+                "anyOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/definitions/type/secure",
+                      "strict": false
+                    },
+                    "aliases": [
+                      "channel"
+                    ],
+                    "normal": true
+                  },
+                  {
+                    "$ref": "#/definitions/type/secure",
+                    "strict": false
+                  }
                 ]
               },
               "channel_key": {
@@ -7973,10 +8147,19 @@
             ]
           },
           {
-            "$ref": "#/definitions/type/secures",
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/type/secure",
+              "strict": false
+            },
             "aliases": [
               "channel"
-            ]
+            ],
+            "normal": true
+          },
+          {
+            "$ref": "#/definitions/type/secure",
+            "strict": false
           },
           {
             "type": "boolean"
@@ -8126,7 +8309,20 @@
             "type": "object",
             "properties": {
               "urls": {
-                "$ref": "#/definitions/type/secures"
+                "anyOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/definitions/type/secure",
+                      "strict": false
+                    },
+                    "normal": true
+                  },
+                  {
+                    "$ref": "#/definitions/type/secure",
+                    "strict": false
+                  }
+                ]
               },
               "on_start": {
                 "$ref": "#/definitions/notification/frequency"
@@ -8165,16 +8361,22 @@
             ]
           },
           {
-            "$ref": "#/definitions/type/secures"
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/type/secure",
+              "strict": false
+            },
+            "normal": true
+          },
+          {
+            "$ref": "#/definitions/type/secure",
+            "strict": false
           },
           {
             "type": "boolean"
           }
         ],
-        "normal": true,
-        "aliases": [
-          "webhook"
-        ]
+        "normal": true
       }
     }
   },

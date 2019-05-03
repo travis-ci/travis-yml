@@ -13,7 +13,7 @@ module Travis
             register :codedeploy
 
             def define
-              map :access_key_id,       to: :secure
+              map :access_key_id,       to: :secure, strict: false
               map :secret_access_key,   to: :secure
               map :application,         to: :str
               map :deployment_group,    to: :str

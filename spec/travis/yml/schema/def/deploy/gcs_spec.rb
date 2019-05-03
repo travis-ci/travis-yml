@@ -1,4 +1,4 @@
-describe Travis::Yml::Schema::Def::Deploy::Gcs, 'schema' do
+describe Travis::Yml::Schema::Def::Deploy::Gcs do
   subject { Travis::Yml.schema[:definitions][:deploy][:gcs] }
 
   # it { puts JSON.pretty_generate(subject) }
@@ -19,7 +19,10 @@ describe Travis::Yml::Schema::Def::Deploy::Gcs, 'schema' do
                 strict: true
               },
               on: {
-                '$ref': '#/definitions/deploy/conditions'
+                '$ref': '#/definitions/deploy/conditions',
+                aliases: [
+                  :true
+                ]
               },
               allow_failure: {
                 type: :boolean

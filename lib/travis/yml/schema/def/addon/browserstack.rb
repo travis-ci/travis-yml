@@ -10,8 +10,8 @@ module Travis
             register :browserstack
 
             def define
-              map :username,     to: :secure
-              map :access_key,   to: :secure
+              map :username,     to: :secure, strict: false
+              map :access_key,   to: :secure, strict: false
               map :forcelocal,   to: :bool
               map :only,         to: :str
               map :app_path,     to: :str

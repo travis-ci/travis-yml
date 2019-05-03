@@ -8,7 +8,7 @@ module Travis
             register :npm
 
             def define
-              map :email,   to: :secure
+              map :email,   to: :secure, strict: false
               map :api_key, to: :secure
               map :tag,     to: :str
             end

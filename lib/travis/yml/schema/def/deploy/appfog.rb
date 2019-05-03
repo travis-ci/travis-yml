@@ -16,7 +16,7 @@ module Travis
             register :appfog
 
             def define
-              map :user,         to: :secure
+              map :user,         to: :secure, strict: false
               map :api_key,      to: :secure
               map :address,      to: :seq
               map :metadata,     to: :str

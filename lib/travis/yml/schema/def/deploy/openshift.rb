@@ -9,7 +9,7 @@ module Travis
             register :openshift
 
             def define
-              map :user,              to: :secure
+              map :user,              to: :secure, strict: false
               map :password,          to: :secure
               map :domain,            to: :map, type: :str
               map :app,               to: :map, type: :str

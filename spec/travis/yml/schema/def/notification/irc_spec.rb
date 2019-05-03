@@ -19,9 +19,22 @@ describe Travis::Yml::Schema::Def::Notification::Irc, 'structure' do
               type: :boolean
             },
             channels: {
-              '$ref': '#/definitions/type/secures',
-              aliases: [
-                :channel
+              anyOf: [
+                {
+                  type: :array,
+                  normal: true,
+                  aliases: [
+                    :channel
+                  ],
+                  items: {
+                    '$ref': '#/definitions/type/secure',
+                    strict: false
+                  }
+                },
+                {
+                  '$ref': '#/definitions/type/secure',
+                  strict: false
+                },
               ]
             },
             channel_key: {
@@ -64,10 +77,19 @@ describe Travis::Yml::Schema::Def::Notification::Irc, 'structure' do
           ],
         },
         {
-          '$ref': '#/definitions/type/secures',
+          type: :array,
+          normal: true,
           aliases: [
             :channel
-          ]
+          ],
+          items: {
+            '$ref': '#/definitions/type/secure',
+            strict: false
+          }
+        },
+        {
+          '$ref': '#/definitions/type/secure',
+          strict: false
         },
         {
           type: :boolean

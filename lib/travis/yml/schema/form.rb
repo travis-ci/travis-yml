@@ -179,7 +179,7 @@ module Travis
           #
           def includes(node)
             all = node.shapeshift(:all)
-            all.unset :prefix, :includes, :changes, :keys, :normal, :required, :unique
+            all.unset :prefix, :aliases, :changes, :includes, :normal, :required, :unique
             all.types = [node, *node.includes].map(&:dup)
 
             all.types.each.with_index do |node, ix|
@@ -203,7 +203,7 @@ module Travis
           #
           def prefix(node, child, prefix)
             any = node.shapeshift(:any)
-            any.unset :prefix, :changes, :keys, :required, :unique
+            any.unset :aliases, :changes, :prefix, :required, :unique
             any.types = [node, child].map(&:dup)
 
             child.example = node.examples[prefix]
@@ -211,6 +211,7 @@ module Travis
             any.types.each.with_index do |node, ix|
               node.set :export, false if ix == 0
               node.set :normal, ix == 0 ? true : nil
+              node.unset :aliases if ix > 0
               node.parent = any
             end
 
@@ -232,7 +233,7 @@ module Travis
           def typed(node)
             any = node.shapeshift(:any)
             any.types = [node, *node.types].map(&:dup)
-            any.unset :prefix, :changes, :keys, :normal, :required, :unique
+            any.unset :prefix, :aliases, :changes, :normal, :required, :unique
 
             any.types.each.with_index do |node, ix|
               node.parent = any
@@ -254,7 +255,7 @@ module Travis
             else
               any = node.shapeshift(:any)
               any.types = [node].map(&:dup)
-              any.unset :changes, :keys
+              any.unset :aliases, :changes
             end
 
             any.types << Type::Bool.new(node.parent)
@@ -275,13 +276,8 @@ module Travis
 
           def apply(node)
             node.types << Type::Str.new(node) unless node.any?
-
-            # other = defined(node) # does this ever happen?
-            # return other if other
-
             node = form_seq(node)
             node = wrap(node)
-
             node
           end
 
@@ -328,7 +324,7 @@ module Travis
 
             any = node.shapeshift(:any)
             any.types = types
-            any.unset :changes, :keys, :normal, :required, :unique
+            any.unset :aliases, :changes, :normal, :required, :unique
 
             any.each.with_index do |node, ix|
               node.set :export, false if ix == 0
@@ -340,22 +336,6 @@ module Travis
 
             any
           end
-
-          # # For the predefined types :strs and :secures we can simply
-          # # shapeshift to these.
-          # #
-          # def defined(node)
-          #   type = detect(node, :str, :secure)
-          #   node.shapeshift("#{type}s".to_sym) if type
-          # end
-          #
-          # def detect(node, *types)
-          #   types.detect { |type| all?(node, type) }
-          # end
-          #
-          # def all?(node, type)
-          #   !node.id && node.seq? && !node.normal? && node.all?(&:"#{type}?")
-          # end
         end
       end
     end

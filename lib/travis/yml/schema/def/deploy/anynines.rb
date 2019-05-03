@@ -8,7 +8,7 @@ module Travis
             register :anynines
 
             def define
-              map :username,     to: :secure
+              map :username,     to: :secure, strict: false
               map :password,     to: :secure
               map :organization, to: :str
               map :space,        to: :str

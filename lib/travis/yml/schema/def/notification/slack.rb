@@ -12,8 +12,8 @@ module Travis
             def define
               prefix :rooms
 
-              map :rooms,            to: :seq, type: :secure
-              map :template,         to: :templates
+              map :rooms,    to: :seq, type: :secure
+              map :template, to: :templates
 
               super
 

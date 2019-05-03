@@ -129,7 +129,6 @@ describe Travis::Yml, configs: true do
     distro
     esudo
     evn
-    False
     globale
     keep-hisotry
     langauge
@@ -149,7 +148,6 @@ describe Travis::Yml, configs: true do
     sourcees
     sudo;
     state
-    True
     trust
     webhools
   ) << 'change  always' << 'always  always' << 'never     always'
@@ -262,12 +260,12 @@ describe Travis::Yml, configs: true do
       repo
       script
       tags
-      true
       upload_docs
       verbose
     ),
     'deploy.on': %w(
       distributions
+      branches
       java
       master
       onBranch
@@ -337,13 +335,13 @@ describe Travis::Yml, configs: true do
       if
       overwrite
       script
-      true
     ),
     # TODO master should probably be allowed here, shouldn't it?
     'matrix.include.deploy.on': %w(
+      branches
+      master
       on
       script
-      master
     ),
     # notifications.if would make a ton of sense, actually
     notifications: %w(
@@ -490,6 +488,7 @@ describe Travis::Yml, configs: true do
       deploy.api_key
       deploy.env
       deploy.on.branch
+      env.matrix
       matrix.include.cache.directories
       matrix.include.script
       matrix.include.after_script

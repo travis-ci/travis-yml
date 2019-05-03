@@ -38,7 +38,7 @@ module Travis
             add(node)
             # hmmm. we'd want to pass options that have been passed to the
             # mapping, but this information is not available anymore.
-            ref(node, only(node.opts, :aliases, :deprecated, :only, :except))
+            ref(node, only(node.opts, :aliases, :deprecated, :only, :except, :strict))
           else
             node
           end
@@ -61,6 +61,7 @@ module Travis
 
         def all?(node, type)
           return unless !node.id && node.seq? && !node.normal?
+          return if node.any? { |node| node.opts.any? }
           node.none? || node.all? { |node| node.send(:"#{type}?") || node.ref? && node.id == type }
         end
       end

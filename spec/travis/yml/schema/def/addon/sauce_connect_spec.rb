@@ -16,7 +16,8 @@ describe Travis::Yml::Schema::Def::Addon::SauceConnect do
               type: :boolean
             },
             username: {
-              '$ref': '#/definitions/type/secure'
+              '$ref': '#/definitions/type/secure',
+              strict: false
             },
             access_key: {
               '$ref': '#/definitions/type/secure'

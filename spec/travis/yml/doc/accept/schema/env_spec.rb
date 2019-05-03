@@ -4,7 +4,7 @@ describe Travis::Yml::Doc::Schema, 'matrix' do
   describe 'env with a map matrix: str' do
     let(:schema) { Travis::Yml.expand['env'] }
     let(:value)  { 'foo' }
-    it { should be false }
+    it { should be true }
   end
 
   describe 'env with a secure' do

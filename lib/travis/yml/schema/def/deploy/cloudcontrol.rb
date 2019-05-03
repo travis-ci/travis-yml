@@ -8,7 +8,7 @@ module Travis
             register :cloudcontrol
 
             def define
-              map :email,      to: :secure
+              map :email,      to: :secure, strict: false
               map :password,   to: :secure
               map :deployment, to: :str
             end

@@ -23,14 +23,12 @@ describe Travis::Yml, 'source_key' do
   end
 
   describe 'given :alert' do
-    let(:opts)  { { alert: true } }
-
     describe 'given a string' do
       yaml %(
         source_key: key
       )
       it { should serialize_to source_key: 'key' }
-      it { should have_msg [:alert, :source_key, :secure] }
+      it { should have_msg [:alert, :source_key, :secure, given: :str] }
     end
 
     describe 'given a secure var' do

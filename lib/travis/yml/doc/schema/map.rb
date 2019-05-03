@@ -54,16 +54,23 @@ module Travis
             map.values
           end
 
-          def alias?(key)
-            aliases.key?(key)
+          def key_alias?(key)
+            key_aliases.key?(key)
           end
 
-          def aliases
-            opts = map.values.map(&:opts)
-            aliases = opts.map { |opts| opts[:aliases] }
-            compact(invert(keys.zip(aliases)))
+          def key_aliases
+            aliases = map.map { |key, node| [key, node.aliases] }.to_h
+            # if map.key?('on')
+            #   p map['on'].schemas[0].aliases
+            #   p map['on'].schemas[1].opts
+            #   p map['on'].schemas[1].schemas[0].aliases
+            #   p map['on'].schemas[1].schemas[1].aliases
+            #   p map['on'].schemas[1].schemas[2].aliases
+            #   p invert(compact(aliases))
+            # end
+            invert(compact(aliases))
           end
-          memoize :aliases
+          memoize :key_aliases
 
           def format
             opts[:format]
@@ -129,7 +136,7 @@ module Travis
           end
 
           def known
-            map.keys + aliases.keys # - Yml.r_keys
+            map.keys + key_aliases.keys # - Yml.r_keys
           end
           memoize :known
 
@@ -152,7 +159,7 @@ module Travis
 
           def all_keys
             keys = map.map { |key, node| [key, node.all_keys] }
-            keys + aliases.values
+            keys + key_aliases.values
             keys.flatten.compact.uniq.sort
           end
         end

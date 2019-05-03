@@ -9,9 +9,6 @@ describe Travis::Yml::Schema::Def::Matrix do
         '$id': :matrix,
         title: 'Matrix',
         normal: true,
-        aliases: [
-          :jobs
-        ],
         anyOf: [
           {
             type: :object,

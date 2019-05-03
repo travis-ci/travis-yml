@@ -6,8 +6,6 @@ module Travis
     module Doc
       module Schema
         class Seq < Node
-          include Enumerable
-
           attr_accessor :schema
 
           def matches?(value)
@@ -33,6 +31,11 @@ module Travis
           def all_keys
             schema.all_keys
           end
+
+          def aliases
+            [super, schema.aliases].flatten
+          end
+          memoize :aliases
 
           def supports
             merge(super, schema.supports)

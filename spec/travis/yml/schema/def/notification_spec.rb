@@ -64,9 +64,6 @@ describe Travis::Yml::Schema::Def::Notification::Notifications do
         },
         {
           '$ref': '#/definitions/notification/email',
-          aliases: [
-            :emails
-          ]
         }
       ],
     )

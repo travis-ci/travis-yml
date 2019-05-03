@@ -114,7 +114,7 @@ describe Travis::Yml, 'root' do
         source_key: key
       )
       it { should serialize_to source_key: 'key' }
-      it { should_not have_msg }
+      it { should have_msg [:alert, :source_key, :secure, given: :str] }
     end
 
     describe 'given a secure var' do

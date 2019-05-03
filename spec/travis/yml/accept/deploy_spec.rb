@@ -313,6 +313,18 @@ describe Travis::Yml, 'deploy' do
         it { should serialize_to language: 'ruby', deploy: [provider: 'heroku', on: { unknown: 'str' }] }
         it { should have_msg [:warn, :'deploy.on', :unknown_key, key: 'unknown', value: 'str'] }
       end
+
+      describe 'alias true' do
+        yaml %(
+          deploy:
+            provider: heroku
+            true:
+              repo: str
+        )
+        it { should serialize_to deploy: [provider: 'heroku', on: { repo: 'str' }] }
+        it { should have_msg [:info, :deploy, :alias, alias: 'true', key: 'on', provider: 'heroku'] }
+        xit { should have_msg [:warn, :'deploy.on', :deprecated_key, key: 'on'] }
+      end
     end
 
     describe 'branch specific option hashes (holy shit. example for a valid hash from travis-build)' do
@@ -402,6 +414,18 @@ describe Travis::Yml, 'deploy' do
     )
     xit { should serialize_to deploy: [provider: 'heroku', run: { production: 'production' }] }
     xit { should have_msg [:warn, :'deploy.run', :deprecated, given: :run, info: :branch_specific_option_hash] }
+  end
+
+  describe 'branches.only' do
+    yaml %(
+      deploy:
+        - provider: heroku
+          branches:
+            only:
+              - master
+    )
+    it { should serialize_to deploy: [provider: 'heroku', branches: { only: ['master'] }] }
+    it { should have_msg [:warn, :deploy, :unknown_key, key: 'branches', value: { only: ['master'] }, provider: 'heroku'] }
   end
 
   describe 'misplaced keys', v2: true, migrate: true do

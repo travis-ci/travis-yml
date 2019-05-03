@@ -6,26 +6,18 @@ module Travis
     module Doc
       module Schema
         class Secure < Any
-          # A secure will by default accept either a secure hash (i.e. a hash
-          # with a single key :secure mapping to a string), or a string. A
-          # strict secure will not accept a string, but only a secure hash.
-          #
-          # Secures are not strict by default so we accept various options,
-          # e.g. on deploy providers and notifications that can be secure vars
-          # or just strings, such as :username or :room. We still want them to
-          # map to :secure so we can alert on any secures that accept a string.
-          #
-          # However, env vars can not accept strings, but only strict secures
-          # due to the various formats that the :env key accepts, where we only
-          # want to allow strings that match a format that includes an equal
-          # sign.
+          # A secure accepts either a secure hash (i.e. a hash with a single
+          # key :secure mapping to a string), or a string. A strict secure will
+          # also accept a string, but trigger an :alert message. Secures are
+          # strict by default, and have to be flagged as not strict in the
+          # schema definition.
 
           def self.opts
             @opts ||= super + %i(max_size strict)
           end
 
           def matches?(value)
-            value.secure? || !strict? && value.str?
+            value.secure? || value.str?
           end
 
           def type
@@ -41,7 +33,7 @@ module Travis
           end
 
           def strict?
-            !!opts[:strict]
+            !opts[:strict].is_a?(FalseClass)
           end
 
           def vars?

@@ -10,7 +10,7 @@ module Travis
             def define
               map :site,     to: :str
               map :slot,     to: :str
-              map :username, to: :secure
+              map :username, to: :secure, strict: false
               map :password, to: :secure
               map :verbose,  to: :bool
             end

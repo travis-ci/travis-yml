@@ -9,7 +9,7 @@ module Travis
             register :puppetforge
 
             def define
-              map :user,     to: :secure, required: true
+              map :user,     to: :secure, required: true, strict: false
               map :password, to: :secure, required: true
               map :url,      to: :str
             end

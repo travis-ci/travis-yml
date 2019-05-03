@@ -10,9 +10,6 @@ describe Travis::Yml::Schema::Def::Branches do
       title: 'Branches',
       description: 'The branches your build will be run on.',
       normal: true,
-      aliases: [
-        :branch
-      ],
       anyOf: [
         {
           type: :object,

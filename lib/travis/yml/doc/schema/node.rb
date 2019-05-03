@@ -46,6 +46,10 @@ module Travis
             is?(:any)
           end
 
+          def aliases
+            opts[:aliases] ||= []
+          end
+
           def inherit?
             change?(:inherit)
           end
