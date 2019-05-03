@@ -63,4 +63,87 @@ describe LessYAML do
     )
     it { should eq 'secure' => 'OmN/NWiXQ6JQ' }
   end
+
+  describe 'reference (map)' do
+    yaml %(
+      foo: &ref
+        one: str
+      bar: *ref
+    )
+    it do
+      should eq(
+        'foo' => { 'one' => 'str' },
+        'bar' => { 'one' => 'str' },
+        __anchors__: ['foo']
+      )
+    end
+  end
+
+  describe 'reference (map)' do
+    yaml %(
+      foo: &ref
+        one: str
+      bar:
+        <<: *ref
+        two: str
+    )
+    it do
+      should eq(
+        'foo' => { 'one' => 'str' },
+        'bar' => { 'one' => 'str', 'two' => 'str' },
+        __anchors__: ['foo']
+      )
+    end
+  end
+
+  describe 'nested reference (map)' do
+    yaml %(
+      root:
+        foo: &ref
+          one: str
+      bar:
+        <<: *ref
+    )
+    it do
+      should eq(
+        'root' => { 'foo' => { 'one' => 'str' } },
+        'bar' => { 'one' => 'str' },
+        __anchors__: ['foo']
+      )
+    end
+  end
+
+  describe 'reference (seq)' do
+    yaml %(
+      foo: &ref
+        - one
+      bar:
+        - *ref
+    )
+    it do
+      should eq(
+        'foo' => ['one'],
+        'bar' => [['one']],
+        __anchors__: ['foo']
+      )
+    end
+  end
+
+  describe 'reference (seq)' do
+    yaml %(
+      foo: &ref
+        |-
+          str
+      bar:
+        - *ref
+    )
+    it do
+      should eq(
+        'foo' => 'str',
+        'bar' => ['str'],
+        __anchors__: ['foo']
+      )
+    end
+  end
+
 end

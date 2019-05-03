@@ -219,7 +219,7 @@ describe Travis::Yml, 'addon: apt' do
             - *sources
             - two
     )
-    it { should serialize_to addons: { apt: { sources: [{ name: 'one' }, { name: 'two' }] } } }
+    it { should serialize_to _sources: ['one'], addons: { apt: { sources: [{ name: 'one' }, { name: 'two' }] } } }
     it { should_not have_msg }
   end
 end

@@ -5,7 +5,7 @@ require 'psych'
 require 'less_yaml/load'
 
 class Object
-  attr_accessor :line
+  attr_accessor :line, :anchors
 end
 
 class Key < String
@@ -61,13 +61,42 @@ module LessYAML
 
   class PsychHandler
     prepend Module.new {
+      attr_accessor :last_scalar, :anchor_keys
+
+      def anchor_keys
+        @anchor_keys ||= []
+      end
+
       def event_location(start_line, *)
         @line = start_line
       end
 
       def scalar(value, anchor, tag, plain, quoted, style)
-        return super if tag || value == '<<'
-        value = [:__line__, value, @line, quoted]
+        anchor_keys << last_scalar if anchor
+        self.last_scalar = value
+        value = [:__line__, value, @line, quoted] unless tag || value == '<<'
+        super
+      end
+
+      def start_mapping(anchor, tag, implicit, style)
+        anchor_keys << last_scalar if anchor
+        super
+      end
+
+      def start_sequence(anchor, tag, implicit, style)
+        anchor_keys << last_scalar if anchor
+        super
+      end
+
+      def end_current_structure
+        super
+        @current_structure.anchors = anchor_keys if @current_structure
+      end
+
+      def end_document(implicit)
+        anchors = @result.anchors || []
+        @result = @result.merge(__anchors__: anchors) if @result.is_a?(Hash) && !anchors.empty?
+        @block.call(@result)
         super
       end
     }
@@ -75,9 +104,6 @@ module LessYAML
 
   class Transform
     ToFloat.class_eval do
-      # if this raises our monkeypatch is probably outdated.
-      raise unless instance_method(:transform?)
-
       prepend Module.new {
         def transform?(value)
           [false, value]

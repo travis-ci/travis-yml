@@ -94,18 +94,6 @@ module Travis
             false
           end
 
-          # def silence(*keys)
-          #   silent.concat(keys).uniq!
-          # end
-
-          def silent?(key)
-            silent.include?(key) || key.to_s.start_with?('_')
-          end
-
-          def silent
-            @silent ||= []
-          end
-
           def strict?
             false?(opts[:strict]) ? false : true
           end

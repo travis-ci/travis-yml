@@ -13,7 +13,6 @@ module Travis
 
           def apply
             key = value.key
-            raise key.inspect if key.is_a?(Symbol)
             key = dealias(key) if !known?(key) && alias?(key)
             key = fix(key)     if !known?(key)
             key

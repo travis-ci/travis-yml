@@ -92,7 +92,7 @@ describe Travis::Yml, 'root' do
     end
   end
 
-  describe 'drops an unknown key' do
+  describe 'does not drop an unknown key' do
     yaml %(
       unknown: foo
     )
@@ -100,7 +100,7 @@ describe Travis::Yml, 'root' do
     it { should have_msg [:warn, :root, :unknown_key, key: 'unknown', value: 'foo'] }
   end
 
-  describe 'drops an unknown key (2)' do
+  describe 'does not drop an unknown key (2)' do
     yaml %(
       cd: foo
     )

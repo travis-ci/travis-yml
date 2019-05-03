@@ -19,7 +19,6 @@ module Travis
             }
 
             def build(parent, key, value, opts = {})
-              # puts caller[0..15] if key == :enabled
               value = value.value if value.is_a?(Node)
               type = TYPES[value.class] || raise("Unknown type: #{value}")
               send(type, parent, key, value, opts)
@@ -44,6 +43,7 @@ module Travis
               end
 
               def map(parent, key, value, opts)
+                opts[:anchors] = value.delete(:__anchors__) if value.key?(:__anchors__)
                 const = secure?(value) ? Secure : Map
                 map = const.new(parent, key, nil, opts)
                 map.value = value.map { |key, obj| [key, build(map, key, obj, opts)] }.to_h
