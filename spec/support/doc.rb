@@ -17,6 +17,10 @@ module Spec
         Travis::Yml::Doc::Value.build(nil, nil, stringify(value), opts)
       end
 
+      def build_part(str, src = nil, mode = nil)
+        Travis::Yml::Parts::Part.new(str, src, mode)
+      end
+
       def stringify(obj)
         Travis::Yml::Helper::Obj.stringify(obj)
       end
