@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 require 'travis/yml/doc/change/base'
-require 'travis/yml/doc/value/cast'
+require 'travis/yml/doc/helper/cast'
 
 module Travis
   module Yml
@@ -40,7 +40,7 @@ module Travis
             end
 
             def casted
-              @casted ||= Doc::Value::Cast.new(value.value, :bool).apply
+              @casted ||= Doc::Cast.new(value.value, :bool).apply
             end
           end
 
@@ -67,7 +67,7 @@ module Travis
             memoize :enabled
 
             def cast(value)
-              Doc::Value::Cast.new(value.value, :bool).apply
+              Doc::Cast.new(value.value, :bool).apply
             end
           end
         end

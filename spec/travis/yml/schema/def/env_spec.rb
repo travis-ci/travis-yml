@@ -74,19 +74,8 @@ describe Travis::Yml::Schema::Def::Env do
         anyOf: [
           {
             type: :object,
-            properties: {
-              secure: {
-                type: :string
-              }
-            },
-            additionalProperties: false,
-            maxProperties: 1,
-            normal: true
-          },
-          {
-            type: :object,
             patternProperties: {
-              '^(?!global|matrix)': {
+              '^(?!global|matrix|secure)': {
                 anyOf: [
                   {
                     type: :string
@@ -100,6 +89,16 @@ describe Travis::Yml::Schema::Def::Env do
                 ]
               }
             },
+            normal: true,
+          },
+          {
+            type: :object,
+            properties: {
+              secure: {
+                type: :string
+              }
+            },
+            additionalProperties: false,
             maxProperties: 1,
             normal: true
           },

@@ -51,6 +51,14 @@ module Travis
           register :env_var
 
           def define
+            add Class.new(Dsl::Map) {
+              def define
+                normal
+                map :'^(?!global|matrix|secure)', to: :any, type: [:str, :num, :bool]
+                strict false
+              end
+            }
+
             # cannot use the standard :secure definition because that also
             # allows a plain string
             add Class.new(Dsl::Map) {
@@ -60,15 +68,6 @@ module Travis
                 normal
                 map :secure, to: :str
                 max_size 1
-              end
-            }
-
-            add Class.new(Dsl::Map) {
-              def define
-                normal
-                map :'^(?!global|matrix)', to: :any, type: [:str, :num, :bool]
-                strict false
-                max_size 1 # TODO this isn't true
               end
             }
 

@@ -1,5 +1,5 @@
 describe Travis::Yml, 'osx_image' do
-  subject { described_class.apply(parse(yaml)) }
+  subject { described_class.apply(parse(yaml), opts) }
 
   describe 'osx_image' do
     describe 'on osx' do

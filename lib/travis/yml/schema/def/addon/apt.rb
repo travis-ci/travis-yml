@@ -21,7 +21,6 @@ module Travis
 
             class Sources < Dsl::Seq
               def define
-                # normal
                 type Source
               end
             end

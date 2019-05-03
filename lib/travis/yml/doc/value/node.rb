@@ -93,8 +93,16 @@ module Travis
             enabled?(:alert)
           end
 
+          def fix_keys?
+            enabled?(:keys)
+          end
+
           def line?
             enabled?(:line)
+          end
+
+          def support?
+            enabled?(:support)
           end
 
           def enabled?(key)
@@ -161,7 +169,7 @@ module Travis
           end
 
           def supporting
-            parent ? parent.supporting : {} # opts[:supporting] || ...
+            parent ? parent.supporting : {}
           end
 
           def serialize

@@ -9,8 +9,6 @@ module Travis
           register :unknown_value
 
           def apply
-            # puts
-            # p *value.msgs
             apply? && unknown? ? unknown : value
           end
 
@@ -21,8 +19,6 @@ module Travis
             end
 
             def unknown?
-              # p schema
-              # p schema.known?(value.value)
               !schema.known?(value.value)
             end
 

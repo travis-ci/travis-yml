@@ -11,7 +11,7 @@ module Travis
             register :gcs
 
             def define
-              map :access_key_id,     to: :secure
+              map :access_key_id,     to: :secure, strict: false
               map :secret_access_key, to: :secure
               map :bucket,            to: :str
               map :upload_dir,        to: :str

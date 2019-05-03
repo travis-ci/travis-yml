@@ -32,10 +32,6 @@ module Travis
             build(parent, key, value.map(&block), opts)
           end
 
-          # def given?
-          #   super && all?(&:given?)
-          # end
-
           def insert(ix, *others)
             others.each do |other|
               other.key = key

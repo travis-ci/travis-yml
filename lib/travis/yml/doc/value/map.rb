@@ -45,7 +45,7 @@ module Travis
           end
 
           def []=(key, node)
-            node.parent.delete(node) if node.parent # && node.parent != self
+            node.parent.delete(node) if node.parent
             node.parent = self
             node.key = key
             value[key] = node

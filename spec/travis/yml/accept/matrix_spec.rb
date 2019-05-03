@@ -172,6 +172,19 @@ describe Travis::Yml, 'matrix' do
       it { should serialize_to matrix: { include: [rvm: '2.3', env: [{ FOO: 'foo' }, { BAR: 'bar' }]] } }
     end
 
+    describe 'given env.global with a seq of maps' do
+      yaml %(
+        matrix:
+          include:
+            - env:
+                global:
+                  - FOO: true
+      )
+      # this isn't great, but fixing it would end up with confusing error messages
+      it { should serialize_to matrix: { include: [env: [global: [{ FOO: true }]]] } }
+      it { should_not have_msg }
+    end
+
     describe 'given language (str)' do
       yaml %(
         matrix:

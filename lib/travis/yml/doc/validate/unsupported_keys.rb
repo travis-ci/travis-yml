@@ -16,7 +16,7 @@ module Travis
           private
 
             def apply?
-              value.map? && value.given?
+              enabled? && value.map? && value.given?
             end
 
             def unsupported
@@ -30,6 +30,10 @@ module Travis
               msgs.each do |msg|
                 value.warn :unsupported, msg.merge(key: value.key, value: value.serialize, line: value.key.line)
               end
+            end
+
+            def enabled?
+              value.support?
             end
         end
       end

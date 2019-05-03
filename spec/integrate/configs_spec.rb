@@ -1,3 +1,4 @@
+require 'fileutils'
 require 'yaml'
 
 def symbolize(obj)
@@ -10,6 +11,8 @@ end
 #   [:error, :"matrix.include.deploy", :invalid_type, {:expected=>:map, :actual=>:str, :value=>"skip"}]
 
 describe Travis::Yml, configs: true do
+  before(:all) { FileUtils.rm_f('log/alert.log') }
+
   skip = [
     'andela:ah-frontend-thor',                 # addons: codeclimate (not sure if this should pass)
     'ApollosProject:apollos-prototype',        # bogus deploy.master: true (not sure if this should pass)
@@ -438,12 +441,15 @@ describe Travis::Yml, configs: true do
     deploy.api_key
     deploy.password
     deploy.script
+    env.matrix.general
     language
     matrix.fast_finish
     matrix.allow_failures.rvm
     matrix.include.addons.apt.update
     matrix.include.addons.homebrew.update
     matrix.include.deploy.script
+    matrix.include.env
+    matrix.include.env.global
     matrix.include.compiler
     matrix.include.go
     matrix.include.jdk
@@ -622,6 +628,14 @@ describe Travis::Yml, configs: true do
     block ? block.call(msg[3][:value]) : true
   end
 
+  def alert?(msg)
+    return unless msg[0] == :alert
+    repo = path.sub(%r(spec/fixtures/configs/[^/]+/), '').sub(':', '/').sub('.yml', '')
+    url = "https://github.com/#{repo}/blob/master/.travis.yml"
+    File.open('log/alert.log', 'a+') { |f| f.puts("#{url} #{msg.inspect}") }
+    true
+  end
+
   def filter(msg)
     return true if msg[0] == :info
     # return true if msg[0] == :warn
@@ -636,6 +650,7 @@ describe Travis::Yml, configs: true do
     return true if unknown?(:event, msg)
     return true if unknown?(:value, msg)
 
+    return true if alert?(msg)
     return true if typo?(msg)
     return true if potential_alias?(msg)
     return true if deprecated?(msg)
@@ -674,10 +689,11 @@ describe Travis::Yml, configs: true do
 
   configs = paths.map { |path| [path, File.read(path)] }
 
-  subject { described_class.apply(parse(yaml)) }
+  subject { described_class.apply(parse(yaml), alert: true, keys: true) }
 
   configs.each do |path, config|
     describe path.sub('spec/fixtures/configs/', '') do
+      let(:path) { path }
       yaml config
       it { should_not have_msg(method(:filter)) }
     end

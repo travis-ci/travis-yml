@@ -72,7 +72,7 @@ module Travis
               prefix :branch, only: :str
 
               map :os
-              map :branch,       to: :branches #, alias: :branches
+              map :branch,       to: :branches
               map :repo,         to: :str
               map :condition,    to: :seq, type: :str
               map :all_branches, to: :bool

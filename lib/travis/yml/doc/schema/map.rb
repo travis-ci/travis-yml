@@ -60,14 +60,6 @@ module Travis
 
           def key_aliases
             aliases = map.map { |key, node| [key, node.aliases] }.to_h
-            # if map.key?('on')
-            #   p map['on'].schemas[0].aliases
-            #   p map['on'].schemas[1].opts
-            #   p map['on'].schemas[1].schemas[0].aliases
-            #   p map['on'].schemas[1].schemas[1].aliases
-            #   p map['on'].schemas[1].schemas[2].aliases
-            #   p invert(compact(aliases))
-            # end
             invert(compact(aliases))
           end
           memoize :key_aliases
@@ -136,7 +128,7 @@ module Travis
           end
 
           def known
-            map.keys + key_aliases.keys # - Yml.r_keys
+            map.keys + key_aliases.keys - Yml.r_keys
           end
           memoize :known
 

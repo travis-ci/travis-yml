@@ -9,7 +9,7 @@ module Spec
 
         const.let(:opts) do |ctx|
           opts = ctx.metadata.select { |key, _| OPTS.include?(key) }.to_h
-          opts.merge(alert: true)
+          opts.merge(alert: true, keys: true, support: true)
         end
       end
 

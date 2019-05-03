@@ -108,7 +108,7 @@ module Travis
 
           def mappings
             value.keys.inject(value) do |map, key|
-              next map unless child = schema.map[key] || schema.schema
+              next map unless child = schema.map[key] # || schema.schema
               value = map[key] || Value.build(map, key, nil)
               value = Validate.apply(child, value)
               value.parent[key] = value

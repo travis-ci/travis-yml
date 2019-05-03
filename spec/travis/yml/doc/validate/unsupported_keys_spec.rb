@@ -1,5 +1,5 @@
 describe Travis::Yml::Doc::Validate, 'unsupported_keys' do
-  subject { described_class.apply(build_schema(schema), build_value(value)) }
+  subject { described_class.apply(build_schema(schema), build_value(value, opts)) }
 
   let(:schema) do
     {

@@ -7,7 +7,7 @@ describe Travis::Yml::Doc::Validate, 'alert' do
     describe 'given a str' do
       let(:value) { 'str' }
       it { should serialize_to 'str' }
-      it { should have_msg [:alert, :root, :secure, given: :str] }
+      it { should have_msg [:alert, :root, :secure, type: :str] }
     end
 
     describe 'given a secure' do

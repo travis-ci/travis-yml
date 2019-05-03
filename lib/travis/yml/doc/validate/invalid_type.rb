@@ -18,12 +18,8 @@ module Travis
               value.given?
             end
 
-            # def invalid_seq?
-            #   schema.seq? && value.seq? && !value.all? { |value| schema.schema.is?(value.type) }
-            # end
-
             def invalid?
-              !schema.is?(value.type) # && !(schema.enum? && value.scalar?) # ugh.
+              !schema.is?(value.type)
             end
 
             def invalid

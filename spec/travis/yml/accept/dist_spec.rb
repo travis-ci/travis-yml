@@ -1,5 +1,5 @@
 describe Travis::Yml, 'dist' do
-  subject { described_class.apply(parse(yaml)) }
+  subject { described_class.apply(parse(yaml), opts) }
 
   describe 'no default' do
     yaml ''

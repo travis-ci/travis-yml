@@ -1,6 +1,4 @@
 describe Travis::Yml, 'deploy' do
-  let(:opts) { {} }
-
   subject { described_class.apply(parse(yaml), opts) }
 
   describe 'given true' do

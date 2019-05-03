@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 require 'travis/yml/doc/change/base'
-require 'travis/yml/doc/value/cast'
+require 'travis/yml/doc/helper/cast'
 
 module Travis
   module Yml
@@ -32,7 +32,7 @@ module Travis
             end
 
             def caster
-              @caster ||= Doc::Value::Cast.new(value.value, schema.type)
+              @caster ||= Doc::Cast.new(value.value, schema.type)
             end
 
             def store_msgs

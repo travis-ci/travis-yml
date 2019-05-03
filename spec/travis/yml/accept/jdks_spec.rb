@@ -1,5 +1,5 @@
 describe Travis::Yml, 'jdk' do
-  subject { described_class.apply(parse(yaml)) }
+  subject { described_class.apply(parse(yaml), opts) }
 
   describe 'on linux, ruby, jruby' do
     yaml %(

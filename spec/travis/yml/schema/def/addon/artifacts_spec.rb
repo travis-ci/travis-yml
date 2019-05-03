@@ -29,6 +29,7 @@ describe Travis::Yml::Schema::Def::Addon::Artifacts do
                 :access_key_id,
                 :access_key
               ],
+              strict: false,
             },
             secret: {
               '$ref': '#/definitions/type/secure',

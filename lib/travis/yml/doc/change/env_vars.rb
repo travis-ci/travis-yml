@@ -8,9 +8,7 @@ module Travis
       module Change
         class EnvVars < Base
           def apply
-            other = apply? ? env_vars : value
-            # p other.serialize
-            other
+            apply? ? env_vars : value
           end
 
           private

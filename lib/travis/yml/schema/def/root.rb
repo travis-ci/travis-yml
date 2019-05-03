@@ -39,13 +39,11 @@ module Travis
             map    :matrix,         alias: :jobs
             map    :notifications
             map    :stack
-            map    :conditions,     to: :conditions #, default: :v1
+            map    :conditions,     to: :conditions
             map    :filter_secrets, to: :bool
             map    :trace,          to: :bool
 
             include :languages, :job
-
-            # map :foo, to: :str, alias: [:foo], required: true, unique: true, only: { language: :osx }, deprecated: :bar
 
             strict false
           end

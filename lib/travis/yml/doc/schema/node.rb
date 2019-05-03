@@ -189,8 +189,6 @@ module Travis
             pairs = compact(
               id: id,
               map: (map? && map.keys.any?) ? map.map { |key, obj| [key, obj.class.name.sub('Travis::Yml::Doc::Schema::', '').downcase.to_sym] }.to_h : nil,
-              # schemas: respond_to?(:schemas) && schemas ? "[#{schemas.map(&:inspect).join(', ')}]" : nil,
-              # schema: respond_to?(:schema) ? schema.inspect : nil,
               opts: opts.any? ? opts : nil
             )
             '#<%s %s>' % [type, pairs.map { |pair| pair.join('=') }.join(' ')]
