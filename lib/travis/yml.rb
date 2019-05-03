@@ -30,7 +30,8 @@ module Travis
       alert:    true,    # alert on secures that accept a string
       empty:    false,   # warn on empty keys
       line:     true,    # add line numbers to messages
-      defaults: true     # add defaults to required keys
+      defaults: true,    # add defaults to required keys
+      drop:     false    # drop unknown keys and values
     }
 
     # These are meant as examples. Clients will want to determine their own

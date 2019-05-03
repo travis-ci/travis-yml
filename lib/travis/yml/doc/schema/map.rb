@@ -25,7 +25,7 @@ module Travis
               if key?(key)
                 map[key].matches?(value)
               else
-                silent?(key) || !strict? && formatted?(key)
+                custom?(key) || !strict? && formatted?(key)
               end
             end
           end
@@ -71,6 +71,10 @@ module Travis
 
           def formatted?(key)
             !format || Regexp.new(format).match?(key.to_s)
+          end
+
+          def custom?(key)
+            key.start_with?('_') || key.start_with?('.')
           end
 
           def default?(key = nil)

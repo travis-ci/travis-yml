@@ -9,7 +9,7 @@ module Travis
         class Node < Obj.new(:parent, :key, :value, :opts)
           include Factory
 
-          attr_writer :key, :value, :completed
+          attr_writer :key, :value, :anchors
 
           def root
             @root ||= root? ? self : parent.root
@@ -27,6 +27,14 @@ module Travis
           def key=(key)
             @id = nil
             @key = key
+          end
+
+          def anchor?(key)
+            anchors.include?(key)
+          end
+
+          def anchors
+            opts[:anchors] ||= []
           end
 
           def type

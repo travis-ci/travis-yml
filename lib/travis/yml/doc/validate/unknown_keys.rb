@@ -10,9 +10,13 @@ module Travis
 
           def apply
             return value unless apply?
-            value.keys.inject(value) do |parent, key|
-              next parent unless unknown?(parent[key])
-              unknown(parent, key, parent[key])
+            value.keys.inject(value) do |map, key|
+              next map if schema.custom?(key)
+              value = map[key]
+              next map unless unknown?(value)
+              type = map.anchor?(key) ? :anchor : :unknown
+              send(type, map, key, value)
+              map
             end
           end
 
@@ -26,22 +30,25 @@ module Travis
               value && value.given? && !schema.key?(value.key)
             end
 
-            def unknown(parent, key, value)
-              warn(parent, :unknown_key, value) unless silent?(key)
-              parent.delete(value) if drop? || silent?(key)
-              parent
+            def anchor(map, key, value)
+              warn_anchor(map, value)
             end
 
-            def silent?(key)
-               schema.silent?(key)
+            def unknown(map, key, value)
+              warn_unknown(map, value)
+              map.delete(value) if drop?
             end
 
             def drop?
-              opts[:unknown_keys] == 'drop'
+              !!opts[:drop]
             end
 
-            def warn(parent, type, value)
-              parent.msg :warn, type, key: value.key, value: value.serialize, line: value.key.line
+            def warn_unknown(map, value)
+              map.msg :warn, :unknown_key, key: value.key, value: value.serialize, line: value.key.line
+            end
+
+            def warn_anchor(map, value)
+              map.msg :warn, :deprecated_key, key: value.key, info: 'anchor on a non-private key'
             end
         end
       end

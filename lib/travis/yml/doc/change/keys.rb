@@ -49,10 +49,8 @@ module Travis
               end
             end
 
-            CUSTOM = %w(_ .)
-
             def custom?(key)
-              CUSTOM.include?(key.to_s[0])
+              schema.custom?(key)
             end
 
             def known?(key)

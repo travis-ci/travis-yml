@@ -12,4 +12,14 @@ describe Travis::Yml, 'unknown_keys', line: true do
     it { should serialize_to unknown: 'str' }
     it { should have_msg [:warn, :root, :unknown_key, key: 'unknown', value: 'str', line: 0] }
   end
+
+  describe 'given an unknown key has an anchor' do
+    yaml %(
+      unknown: &ref
+        script: ./str
+      <<: *ref
+    )
+    it { should serialize_to unknown: { script: './str' }, script: ['./str'] }
+    it { should have_msg [:warn, :root, :deprecated_key, key: 'unknown', info: 'anchor on a non-private key'] }
+  end
 end

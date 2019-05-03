@@ -50,14 +50,21 @@ describe Travis::Yml::Doc::Value, 'factory' do
   end
 
   describe 'given a hash' do
-    let(:value) { { bar: :baz } }
+    let(:value) { { foo: :bar } }
     it { should be_map }
-    it { should serialize_to bar: 'baz' }
+    it { should serialize_to foo: 'bar' }
   end
 
   describe 'given a secure' do
     let(:value) { { 'secure' => 'secure' } }
     it { should be_secure }
     it { should serialize_to secure: 'secure' }
+  end
+
+  describe 'given a hash with anchors' do
+    let(:value) { { foo: :bar, __anchors__: ['baz'] } }
+    it { should be_map }
+    it { should serialize_to foo: 'bar' }
+    it { should have_attributes anchors: ['baz'] }
   end
 end

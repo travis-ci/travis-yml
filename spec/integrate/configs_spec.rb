@@ -8,10 +8,6 @@ end
 #
 #   # should `skip` be a generic feature? (grondo:flux-core)
 #   [:error, :"matrix.include.deploy", :invalid_type, {:expected=>:map, :actual=>:str, :value=>"skip"}]
-#
-#   # somehow relax env vars so that doesn't raise an error, but maybe just a warning?
-#   [:error, :env, :invalid_type, {:expected=>:map, :actual=>:seq, :value=>["USER_LANGUAGE=en USER_REGION=US'"]}]
-#
 
 describe Travis::Yml, configs: true do
   skip = [
@@ -179,200 +175,12 @@ describe Travis::Yml, configs: true do
     { value: '__sardonyx__', info: 'experimental stack language' }
   ]
 
-  YAML_REFERENCE_TARGETS = %w(
-    .apt_sources
-    .check_moban
-    .disable_global
-    .mixins
-    .org.ruby-lang.ci.matrix-definitions
-    .deploy_job_template
-    DEPLOY_TO_GITHUB
-    GH_TOKEN
-    INSTALL_AWS
-    INSTALL_GECKODRIVER
-    INSTALL_NODE_VIA_NVM
-    addons_shortcuts
-    aliases
-    apt_targets
-    aws_deploy_pants_pex
-    aws_get_pants_pex
-    default_test_config
-    base_build_wheels
-    base_deploy
-    base_deploy_stable_muliplatform_pex
-    base_deploy_unstable_multiplatform_pex
-    base_jvm_tests
-    base_linux_build_engine
-    base_linux_build_wheels
-    base_linux_config
-    base_linux_test_config
-    base_osx_10_12_sanity_check
-    base_osx_10_13_sanity_check
-    base_osx_build_engine
-    base_osx_build_wheels
-    base_osx_config
-    base_osx_sanity_check
-    base_osx_test_config
-    base_rust_lints
-    base_rust_tests
-    cargo_audit
-    cmake_install
-    cmake_script
-    common_sources
-    conan-linux
-    conan-osx
-    defaults
-    defaults_go
-    defaults_js
-    docker_cmake_install
-    docker_cmake_script
-    docker_make_script
-    docker_template
-    doctr
-    e2e_tests
-    eccube_setup
-    flake8-steps
-    install_linux
-    install_mongo
-    node_js_defaults
-    docker_defaults
-    include_base
-    install_osx
-    integration_script
-    java_11
-    java_8
-    karma_runner
-    linux
-    linux-ppc64le
-    linux32_install
-    linux64_install
-    linux_apt_template
-    linux_rust_clippy
-    linux_rust_tests
-    linux_template
-    linux_with_fuse
-    linux-gcc-7
-    linux-gcc-8
-    linux_clang
-    linux_gcc
-    mpi_linux_clang
-    mpi_linux_gcc
-    osx_clang
-    mac_before_install
-    macos_template
-    make_install
-    make_script
-    max_amd64_conf
-    max_amd64_deps
-    max_x86_conf
-    max_x86_deps
-    min_amd64_conf
-    min_amd64_deps
-    native_engine_cache_config
-    node-preset
-    node_js-steps
-    osx
-    osx_rust_tests
-    package_api_setup
-    packagecloud_deb_template
-    packagecloud_rpm_template
-    pants_run_cache_config
-    pkg_deps_prereqs_distro
-    pkg_deps_devtools
-    pkg_deps_doctools
-    pkg_deps_prereqs
-    pkg_deps_prereqs_distro
-    pkg_deps_prereqs_source
-    pkg_deps_zproject
-    pkg_src_zeromq_ubuntu12
-    pkg_src_zeromq_ubuntu14
-    pkg_src_zeromq_ubuntu16
-    py27_deploy_stable_multiplatform_pex
-    py27_deploy_unstable_multiplatform_pex
-    py27_jvm_tests
-    py27_lint
-    py27_linux_build_engine
-    py27_linux_build_wheels_ucs2
-    py27_linux_build_wheels_ucs4
-    py27_linux_config
-    py27_linux_test_config
-    py27_osx_10_12_sanity_check
-    py27_osx_10_13_sanity_check
-    py27_osx_build_engine
-    py27_osx_build_wheels_ucs2
-    py27_osx_build_wheels_ucs4
-    py27_osx_config
-    py27_osx_platform_tests
-    py27_osx_test_config
-    py36_deploy_stable_multiplatform_pex
-    py36_deploy_unstable_multiplatform_pex
-    py36_jvm_tests
-    py36_lint
-    py36_linux_build_engine
-    py36_linux_build_wheels
-    py36_linux_config
-    py36_linux_test_config
-    py36_osx_10_12_sanity_check
-    py36_osx_10_13_sanity_check
-    py36_osx_build_engine
-    py36_osx_build_wheels
-    py36_osx_config
-    py36_osx_platform_tests
-    py36_osx_test_config
-    py37_jvm_tests
-    py37_lint
-    py37_linux_build_engine
-    py37_linux_config
-    py37_linux_test_config
-    py37_osx_10_12_sanity_check
-    py37_osx_10_13_sanity_check
-    py37_osx_build_engine
-    py37_osx_config
-    py37_osx_platform_tests
-    py37_osx_test_config
-    run_tests_under_pantsd
-    scala_version_211
-    scala_version_212
-    scala_version_213
-    scoot_integration_tests
-    script-anchors
-    stage_generic_linux
-    stage_generic_linuxg
-    stage_linux_36
-    stage_linux_36g
-    stage_linux_37
-    stage_linux_37_omp
-    stage_linux_37_ompg
-    stage_linux_37_openblas
-    stage_linux_37_openblasg
-    stage_linux_37g
-    stage_osx
-    stage_osxg
-    templates
-    testSmokeCy
-    testPostDeploy
-    travis_docker_image
-    unit_script
-    windows_template
-    x-ccache-setup-steps
-    x-linux-27-shard
-    x-linux-37-shard
-    x-linux-pypy-shard
-    x-linux-shard
-    x-osx-27-shard
-    x-osx-37-shard
-    x-osx-shard
-    x-osx-ssl
-    x-py27
-    x-py37
-    x-pyenv-shard
-    x-pypy
-    x_base_steps
-  )
-
   YAML_CUSTOM_CONFIG = %w(
+    addons_shortcuts
     coverage
     dd
+    doctr
+    templates
     travisBuddy
     SECRET_KEY_BASE=593146e0067b8b14fcdcd5ebfc0b4b0e987a889f
   )
@@ -705,125 +513,6 @@ describe Travis::Yml, configs: true do
     notifications.hipchat.format
   )
 
-  # how much of this is true?
-  UNSUPPORTED = {
-    android: %w(
-      cpp
-    ),
-    bundler_args: %w(
-      java
-      node_js
-      python
-    ),
-    compiler: %w(
-      java
-      erlang
-      generic
-      nix
-      node_js
-      objective-c
-      php
-      python
-      r
-      ruby
-      shell
-    ),
-    d: %w(
-      generic
-      shell
-    ),
-    dist: %w(
-      osx
-    ),
-    go: %w(
-      python
-    ),
-    jdk: %w(
-      c
-      cpp
-      go
-      node_js
-      objective-c
-      php
-      python
-      osx
-    ),
-    node_js: %w(
-      android
-      cpp
-      clojure
-      csharp
-      generic
-      go
-      java
-      groovy
-      ruby
-      rust
-      objective-c
-      php
-      python
-      scala
-      shell
-    ),
-    pandoc_version: %w(
-      php
-    ),
-    perl: %w(
-      node_js
-    ),
-    python: %w(
-      android
-      c
-      cpp
-      csharp
-      erlang
-      generic
-      go
-      java
-      node_js
-      php
-      ruby
-      scala
-      shell
-    ),
-    rvm: %w(
-      cpp
-      erlang
-      go
-      java
-      node_js
-      python
-    ),
-    scala: %w(
-      java
-    ),
-    smalltalk: %w(
-      bash
-      shell
-    ),
-    osx_image: %w(
-      linux
-    ),
-    osx: %w(
-      perl
-      scala
-    ),
-    solution: %w(
-      node_js
-    ),
-    virtualenv: %(
-      cpp
-      node_js
-    ),
-    warnings_are_errors: %w(
-      python
-    ),
-    windows: %w(
-      sh
-      php
-    ),
-  }
-
   def unknown?(key, msg)
     KEYS[key].include?(msg[1]) && (UNKNOWN[key].include?(msg[3][:key]) || UNKNOWN[key].include?(msg[3][:value]))
   end
@@ -854,9 +543,8 @@ describe Travis::Yml, configs: true do
     DEPRECATIONS.include?(msg[3])
   end
 
-  # unknown key for YAML references/aliases, would be nice if we could know Psych has resolved a node from this key
-  def yaml_reference_target?(msg)
-    msg[2] == :unknown_key && YAML_REFERENCE_TARGETS.include?(msg[3][:key]) && %i(root matrix).include?(msg[1])
+  def yaml_anchor_key?(msg)
+    msg[2] == :deprecated_key && msg[3][:info] == 'anchor on a non-private key'
   end
 
   # unkown keys that look like the user might parse .travis.yml during the build
@@ -927,9 +615,6 @@ describe Travis::Yml, configs: true do
   def unsupported?(msg)
     # i think i found enough of these to know that this is probably way too spammy
     return true if msg[2] == :unsupported
-    # return false unless msg[2] == :unsupported
-    # return true if UNSUPPORTED[msg[3][:key]]&.include?(msg[3][:on_value])
-    # msg[3][:value].is_a?(String) && UNSUPPORTED[msg[3][:value].to_sym]&.include?(msg[3][:on_value])
   end
 
   def unknown_value(msg, &block)
@@ -961,7 +646,7 @@ describe Travis::Yml, configs: true do
 
     return true if unknown_value(msg) { |value| value.include?('%{repository}') } # template string on hipchat.format
 
-    return true if yaml_reference_target?(msg) # people using unknown keys for storing yaml references
+    return true if yaml_anchor_key?(msg)       # people using unknown keys for storing yaml anchors
     return true if yaml_custom_config?(msg)    # people using .travis.yml as a config store that they parse at build time
     return true if questionable_env?(msg)      # should investigate these again
 
@@ -979,8 +664,6 @@ describe Travis::Yml, configs: true do
     return true if msg[2] == :unknown_key && msg[3][:key] == :global_env
     # grondo:flux-core
     return true if msg[2] == :invalid_type && msg[3][:value] == 'skip'
-    # # fix this
-    # return true if msg == [:warn, :cache, :deprecated, deprecation: :cache_enable_all, value: false]
 
     p msg
     false
