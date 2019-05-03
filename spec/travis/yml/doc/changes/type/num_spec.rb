@@ -30,7 +30,7 @@ describe Travis::Yml::Doc::Change::Scalar do
 
   describe 'given an array of strs' do
     let(:value) { ['str'] }
-    it { should serialize_to ['str'] }
+    it { should serialize_to 'str' }
   end
 
   describe 'given an array of nums' do

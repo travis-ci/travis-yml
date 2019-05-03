@@ -305,6 +305,6 @@ describe Travis::Yml, 'env' do
         BAR:
           secure: str
     )
-    it { should serialize_to env: { global: [{ FOO: 'str' }], BAR: nil } }
+    it { should serialize_to env: { global: [FOO: 'str'], matrix: [BAR: nil] } }
   end
 end
