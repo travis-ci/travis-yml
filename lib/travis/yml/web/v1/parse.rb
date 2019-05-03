@@ -23,9 +23,9 @@ module Travis::Yml
         def parse(env)
           req = Rack::Request.new(env)
           query = Rack::Utils.parse_query(req.query_string)
-          body = req.body.read
-          data = configs?(env) ? configs(body) : body
-          Travis::Yml.load(data, opts(query))
+          body  = req.body.read
+          parts = configs?(env) ? configs(body) : [config(body)]
+          Travis::Yml.load(parts, opts(query))
         end
 
         def opts(query)
@@ -43,11 +43,13 @@ module Travis::Yml
           env['CONTENT_TYPE'] == MIME_TYPE
         end
 
-        PREFIX = 'config://'
+        def config(body)
+          Parts::Part.new(body)
+        end
 
         def configs(json)
           Oj.load(json).map do |part|
-            Part.new(*part.values_at(*%w(config source merge_mode)))
+            Parts::Part.new(*part.values_at(*%w(config source merge_mode)))
           end
         end
       end

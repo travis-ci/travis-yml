@@ -9,7 +9,7 @@ require 'json'
 require 'yaml'
 require 'travis/yml/errors'
 require 'travis/yml/doc'
-require 'travis/yml/load'
+require 'travis/yml/parts'
 require 'travis/yml/matrix'
 require 'travis/yml/schema'
 require 'travis/yml/support/less_yaml'
@@ -73,7 +73,7 @@ module Travis
       include Memoize
 
       def load(parts, opts = {})
-        apply(Load.apply(parts), opts)
+        apply(Parts.load(parts), opts)
       end
 
       # move this to Doc::Schema?

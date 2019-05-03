@@ -5,7 +5,7 @@ require 'psych'
 require 'less_yaml/load'
 
 class Object
-  attr_accessor :line, :anchors
+  attr_accessor :src, :line, :anchors
 end
 
 class Key < String
@@ -36,14 +36,23 @@ module LessYAML
         obj.map { |key, obj| [line(key, true), line(obj)] }.to_h
       elsif obj.is_a?(Array) && obj.first != :__line__
         obj.map { |obj| line(obj) }
+      elsif obj.is_a?(Array) && key
+        key(*obj)
       elsif obj.is_a?(Array)
-        _, obj, line, quoted = *obj
-        obj = key ? Key.new(obj.to_s) : quoted ? obj : cast(obj)
-        obj.line = line unless obj.frozen?
-        obj
+        value(*obj)
       else
         obj
       end
+    end
+
+    def key(_, obj, line, _)
+      obj = Key.new(obj.to_s)
+      obj.line = line
+      obj
+    end
+
+    def value(_, obj, _, quoted)
+      quoted ? obj : cast(obj)
     end
 
     INT = /\A[\d]+\Z/

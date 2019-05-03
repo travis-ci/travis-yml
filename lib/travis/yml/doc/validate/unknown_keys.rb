@@ -44,11 +44,13 @@ module Travis
             end
 
             def warn_unknown(map, value)
-              map.msg :warn, :unknown_key, key: value.key, value: value.serialize, line: value.key.line
+              map.msg :warn, :unknown_key, key: value.key, value: value.serialize,
+                line: value.key.line, src: value.key.src
             end
 
             def warn_anchor(map, value)
-              map.msg :warn, :deprecated_key, key: value.key, info: 'anchor on a non-private key'
+              map.msg :warn, :deprecated_key, key: value.key, info: 'anchor on a non-private key',
+                line: value.key.line, src: value.key.src
             end
         end
       end

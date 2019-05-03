@@ -1,5 +1,5 @@
 describe Travis::Yml, 'unknown_keys', line: true do
-  subject { described_class.apply(parse(yaml), opts) }
+  subject { described_class.load(build_part(yaml, '.travis.yml'), opts) }
 
   describe 'given a known key' do
     yaml 'language: ruby'
@@ -10,16 +10,16 @@ describe Travis::Yml, 'unknown_keys', line: true do
   describe 'given an unknown key' do
     yaml 'unknown: str'
     it { should serialize_to unknown: 'str' }
-    it { should have_msg [:warn, :root, :unknown_key, key: 'unknown', value: 'str', line: 0] }
+    it { should have_msg [:warn, :root, :unknown_key, key: 'unknown', value: 'str', line: 0, src: '.travis.yml'] }
   end
 
   describe 'given an unknown key has an anchor' do
-    yaml %(
+    yaml <<~yaml
       unknown: &ref
         script: ./str
       <<: *ref
-    )
+    yaml
     it { should serialize_to unknown: { script: './str' }, script: ['./str'] }
-    it { should have_msg [:warn, :root, :deprecated_key, key: 'unknown', info: 'anchor on a non-private key'] }
+    it { should have_msg [:warn, :root, :deprecated_key, key: 'unknown', info: 'anchor on a non-private key', line: 0, src: '.travis.yml'] }
   end
 end

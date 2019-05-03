@@ -1,54 +1,6 @@
-require 'travis/yml/part'
-
 module Travis
   module Yml
-    module Load
-      def self.apply(parts)
-        parts = [parts] unless parts.is_a?(Array)
-        parts = parts.map { |part| Parse.new(part).apply }
-        Merge.new(parts).apply.to_h
-      end
-
-      class Parse
-        attr_reader :part
-
-        def initialize(part)
-          @part = part
-        end
-
-        def apply
-          hash = send(:"parse_#{format}")
-          unexpected_format! unless hash.is_a?(Hash)
-          config_for(hash)
-        end
-
-        private
-
-          def format
-            part.start_with?('{') ? :json : :yaml
-          end
-
-          def parse_json
-            Oj.load(part.to_s)
-          end
-
-          def parse_yaml
-            LessYAML.load(part.to_s, raise_on_unknown_tag: true) || {}
-          end
-
-          def config_for(hash)
-            Config.new(hash).tap do |config|
-              next unless part.respond_to?(:src)
-              config.merge_mode = part.merge_mode
-              config.src = part.src
-            end
-          end
-
-          def unexpected_format!
-            raise UnexpectedConfigFormat, 'Input must be a hash'
-          end
-      end
-
+    module Parts
       # With the following config sources, sent/included in this order:
       #
       #   # from api payload
@@ -93,10 +45,6 @@ module Travis
       #   keeping the key in the same place, but overwriting the value.
 
       class Merge < Struct.new(:parts)
-        DEEP_MERGE = -> (key, lft, rgt) do
-          lft.is_a?(Hash) && lft.is_a?(Hash) ? lft.merge(rgt, &DEEP_MERGE) : rgt
-        end
-
         def apply
           parts.inject do |lft, rgt|
             send(merge_mode(rgt), rgt.to_h, lft.to_h)
@@ -113,12 +61,35 @@ module Travis
             rgt
           end
 
+          # We cannot use Ruby's Hash#merge because it keeps the left hand side
+          # key object. We need to have the right hand side key win if it is
+          # present on both sides, so we retain the correct src and line.
           def merge(lft, rgt)
-            lft.merge(rgt)
+            keys(lft, rgt).inject({}) do |hash, key|
+              hash[key] = rgt.key?(key) ? rgt[key] : lft[key]
+              hash
+            end
           end
 
           def deep_merge(lft, rgt)
-            lft.merge(rgt, &DEEP_MERGE)
+            keys(lft, rgt).inject({}) do |hash, key|
+              hash[key] = if lft[key].is_a?(Hash) && rgt[key].is_a?(Hash)
+                deep_merge(lft[key], rgt[key])
+              elsif rgt.key?(key)
+                rgt[key]
+              else
+                lft[key]
+              end
+              hash
+            end
+          end
+
+          # Keep the order of keys, but use the key from the right hand side if
+          # present on both sides.
+          def keys(lft, rgt)
+            lft, rgt = lft.keys, rgt.keys
+            lft = lft.map { |key| (ix = rgt.index(key)) ? rgt[ix] : key }
+            lft.concat(rgt).uniq
           end
       end
     end
