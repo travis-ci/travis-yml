@@ -24,7 +24,11 @@ module Travis
 
             def invalid
               value.error :invalid_type, expected: schema.type, actual: value.type, value: value.serialize
-              blank
+              drop? ? blank : value
+            end
+
+            def drop?
+              value.drop? && !(schema.scalar? && value.scalar?)
             end
         end
       end

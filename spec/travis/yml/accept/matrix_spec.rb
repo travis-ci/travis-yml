@@ -96,7 +96,7 @@ describe Travis::Yml, 'matrix' do
   end
 
   describe 'include' do
-    describe 'given true' do
+    describe 'given true', drop: true do
       yaml %(
         matrix:
           include: true
@@ -126,7 +126,7 @@ describe Travis::Yml, 'matrix' do
       it { should_not have_msg }
     end
 
-    describe 'given a nested map with a broken env string (missing newline)' do
+    describe 'given a nested map with a broken env string (missing newline)', drop: true do
       yaml %(
         matrix:
           include:
@@ -408,7 +408,7 @@ describe Travis::Yml, 'matrix' do
         it { should_not have_msg }
       end
 
-      describe 'given true' do
+      describe 'given true', drop: true do
         yaml %(
           matrix:
             #{key}: true
@@ -548,7 +548,7 @@ describe Travis::Yml, 'matrix' do
       it { should have_msg [:info, :matrix, :alias, alias: 'allowed_failures', key: 'allow_failures'] }
     end
 
-    describe 'allow_failures given a seq of strings (common mistake)' do
+    describe 'allow_failures given a seq of strings (common mistake)', drop: true do
       yaml %(
         matrix:
           allowed_failures:

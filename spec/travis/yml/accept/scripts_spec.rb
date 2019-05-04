@@ -1,5 +1,5 @@
 describe Travis::Yml, 'scripts' do
-  subject { described_class.apply(parse(yaml)) }
+  subject { described_class.apply(parse(yaml), opts) }
 
   stages = %i(
     before_install
@@ -67,7 +67,7 @@ describe Travis::Yml, 'scripts' do
     it { should_not have_msg }
   end
 
-  describe 'a str that parses into a map' do
+  describe 'a str that parses into a map', drop: true do
     yaml %(
       script:
         - echo "== Foo: ==

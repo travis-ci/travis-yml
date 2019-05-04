@@ -84,7 +84,7 @@ describe Travis::Yml, 'git' do
         git:
           strategy: unknown
       )
-      it { should serialize_to empty }
+      it { should serialize_to git: { strategy: 'unknown' } }
       it { should have_msg [:error, :'git.strategy', :unknown_value, value: 'unknown'] }
     end
   end

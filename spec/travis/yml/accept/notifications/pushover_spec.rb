@@ -1,5 +1,5 @@
 describe Travis::Yml, 'notifications: pushover' do
-  subject { described_class.apply(parse(yaml)) }
+  subject { described_class.apply(parse(yaml), opts) }
 
   describe 'given true' do
     yaml %(
@@ -59,7 +59,7 @@ describe Travis::Yml, 'notifications: pushover' do
     it { should_not have_msg }
   end
 
-  describe 'given a str' do
+  describe 'given a str', drop: true do
     yaml %(
       notifications:
         pushover: str
@@ -68,7 +68,7 @@ describe Travis::Yml, 'notifications: pushover' do
     it { should have_msg [:error, :'notifications.pushover', :invalid_type, expected: :map, actual: :str, value: 'str'] }
   end
 
-  describe 'given a secure' do
+  describe 'given a secure', drop: true do
     yaml %(
       notifications:
         pushover:
@@ -78,7 +78,7 @@ describe Travis::Yml, 'notifications: pushover' do
     it { should have_msg [:error, :'notifications.pushover', :invalid_type, expected: :map, actual: :secure, value: { secure: 'secure' }] }
   end
 
-  describe 'given a seq of strs' do
+  describe 'given a seq of strs', drop: true do
     yaml %(
       notifications:
         pushover:
@@ -97,7 +97,7 @@ describe Travis::Yml, 'notifications: pushover' do
             api_key: str
       )
       it { should serialize_to notifications: { pushover: { api_key: ['str'] } } }
-      it { should_not have_msg }
+      it { should have_msg [:alert, :'notifications.pushover.api_key', :secure, type: :str] }
     end
 
     describe 'given a hash with a secure' do
@@ -120,7 +120,7 @@ describe Travis::Yml, 'notifications: pushover' do
             - other
       )
       it { should serialize_to notifications: { pushover: { api_key: ['str', 'other'] } } }
-      it { should_not have_msg }
+      it { should have_msg [:alert, :'notifications.pushover.api_key', :secure, type: :str] }
     end
   end
 
@@ -132,7 +132,7 @@ describe Travis::Yml, 'notifications: pushover' do
             users: str
       )
       it { should serialize_to notifications: { pushover: { users: ['str'] } } }
-      it { should_not have_msg }
+      it { should have_msg [:alert, :'notifications.pushover.users', :secure, type: :str] }
     end
 
     describe 'given a hash with a secure' do
@@ -155,7 +155,7 @@ describe Travis::Yml, 'notifications: pushover' do
             - bar
       )
       it { should serialize_to notifications: { pushover: { users: ['foo', 'bar'] } } }
-      it { should_not have_msg }
+      it { should have_msg [:alert, :'notifications.pushover.users', :secure, type: :str] }
     end
   end
 
@@ -210,10 +210,11 @@ describe Travis::Yml, 'notifications: pushover' do
           yaml %(
             notifications:
               pushover:
-                api_key: str
+                api_key:
+                  secure: secure
               #{status}: #{value}
           )
-          it { should serialize_to notifications: { pushover: { api_key: ['str'], status => value } } }
+          it { should serialize_to notifications: { pushover: { api_key: [secure: 'secure'], status => value } } }
           it { should_not have_msg }
         end
       end

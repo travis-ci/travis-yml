@@ -18,7 +18,7 @@ module Travis
             def change
               value = self.value
               value = dealias(value) if unknown?(value) && alias?(value)
-              value = fix(value)     if unknown?(value)
+              value = fix(value)     if unknown?(value) && fix?
               value
             end
 
@@ -68,6 +68,10 @@ module Travis
             def dealias(value)
               value.info :alias, alias: value.value, value: aliased(value)
               value.set(aliased(value))
+            end
+
+            def fix?
+              value.fix?
             end
 
             def alias?(value)

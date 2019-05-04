@@ -69,7 +69,7 @@ module Travis
             end
 
             def deprecated_key?
-              schema.map?
+              schema.map? && value.map?
             end
 
             def deprecated_key

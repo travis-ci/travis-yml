@@ -22,10 +22,16 @@ describe Travis::Yml, 'invalid_type', line: true do
       it { should_not have_msg }
     end
 
-    describe 'given a str' do
+    describe 'given a bool' do
       yaml 'git: { depth: true }'
-      it { should serialize_to git: { depth: true } } # hmmm.
-      it { should_not have_msg }
+      it { should serialize_to git: { depth: true } }
+      it { should_not have_msg } # hmmm.
+    end
+
+    describe 'given a str' do
+      yaml 'git: { depth: str }'
+      it { should serialize_to git: { depth: 'str' } }
+      it { should have_msg [:error, :'git.depth', :invalid_type, expected: :num, actual: :str, value: 'str', line: 0] }
     end
   end
 

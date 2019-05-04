@@ -22,7 +22,7 @@ describe Travis::Yml, 'cast' do
 
     describe 'given 1' do
       yaml 'filter_secrets: 1'
-      it { should serialize_to empty }
+      it { should serialize_to filter_secrets: 1 }
       it { should have_msg [:error, :filter_secrets, :invalid_type, expected: :bool, actual: :num, value: 1] }
     end
   end
@@ -71,13 +71,13 @@ describe Travis::Yml, 'cast' do
   describe 'git.submodules_depth' do
     describe 'given true' do
       yaml 'git: { submodules_depth: true }'
-      it { should serialize_to empty }
+      it { should serialize_to git: { submodules_depth: true } }
       it { should have_msg [:error, :'git.submodules_depth', :invalid_type, expected: :num, actual: :bool, value: true] }
     end
 
     describe 'given "str"' do
       yaml 'git: { submodules_depth: "str" }'
-      it { should serialize_to empty }
+      it { should serialize_to git: { submodules_depth: 'str' } }
       it { should have_msg [:error, :'git.submodules_depth', :invalid_type, expected: :num, actual: :str, value: 'str'] }
     end
 

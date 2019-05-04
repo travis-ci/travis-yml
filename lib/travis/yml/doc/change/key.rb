@@ -14,8 +14,15 @@ module Travis
           def apply
             key = value.key
             key = dealias(key) if !known?(key) && alias?(key)
-            key = fix(key)     if !known?(key) && fix_keys?
+            key = fix(key)     if !known?(key) && fix?
             key
+          end
+
+          def dealias(key)
+            other = schema.key_aliases[key]
+            return key if !other || key == other
+            value.parent.info :alias, alias: key, key: other
+            other
           end
 
           def fix(key)
@@ -68,15 +75,8 @@ module Travis
             other
           end
 
-          def dealias(key)
-            other = schema.key_aliases[key]
-            return key if !other || key == other
-            value.parent.info :alias, alias: key, key: other
-            other
-          end
-
-          def fix_keys?
-            value.fix_keys?
+          def fix?
+            value.fix?
           end
 
           def strict?
@@ -110,8 +110,8 @@ module Travis
           def clean_key(key)
             key = key.to_s
             key = key.tr('- ', '_')
-            key = key.gsub(/(\W)/, '')
-            key = key.gsub(/(^_+|_+$)/, '')
+            key = key.gsub(/[^\w\.\_]/, '')
+            key = key.gsub(/(^__+|_+$)/, '')
             key = key.gsub('__', '_')
             key
           end

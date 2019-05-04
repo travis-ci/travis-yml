@@ -24,7 +24,7 @@ module Travis
 
             def required
               missing.each { |key| value.error :required, key: key }
-              blank
+              drop? ? blank : value
             end
 
             def missing
@@ -37,7 +37,11 @@ module Travis
             end
 
             def enabled?
-              value.enabled?(:defaults)
+              value.defaults?
+            end
+
+            def drop?
+              value.drop?
             end
         end
       end

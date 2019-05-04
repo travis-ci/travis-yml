@@ -57,7 +57,7 @@ describe Travis::Yml, 'arch' do
     it { should serialize_to arch: ['amd64', 'ppc64le'] }
   end
 
-  describe 'given a map' do
+  describe 'given a map', drop: true do
     yaml %(
       arch:
         name: amd64
@@ -70,7 +70,7 @@ describe Travis::Yml, 'arch' do
     yaml %(
       arch: unknown
     )
-    it { should serialize_to empty }
+    it { should serialize_to arch: ['unknown'] }
     it { should have_msg [:error, :arch, :unknown_value, value: 'unknown'] }
   end
 
@@ -80,7 +80,7 @@ describe Travis::Yml, 'arch' do
       - amd64
       - unknown
     )
-    it { should serialize_to arch: ['amd64'] }
+    it { should serialize_to arch: ['amd64', 'unknown'] }
     it { should have_msg [:error, :arch, :unknown_value, value: 'unknown'] }
   end
 

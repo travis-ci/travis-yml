@@ -30,13 +30,29 @@ describe Travis::Yml::Doc::Validate, 'unsupported_keys' do
 
   describe 'given an unknown key' do
     let(:value) { { os: ['osx'], arch: 'str' } }
-    it { should serialize_to os: ['osx'], arch: 'str' }
-    it { should have_msg [:warn, :arch, :unsupported, on_key: 'os', on_value: 'osx', key: 'arch', value: 'str'] }
+
+    describe 'support turned off (default)', support: false do
+      it { should serialize_to os: ['osx'], arch: 'str' }
+      it { should_not have_msg }
+    end
+
+    describe 'support turned on', support: true do
+      it { should serialize_to os: ['osx'], arch: 'str' }
+      it { should have_msg [:warn, :arch, :unsupported, on_key: 'os', on_value: 'osx', key: 'arch', value: 'str'] }
+    end
   end
 
   describe 'given an unknown key on multiple supporting values (multi-ox)' do
     let(:value) { { os: ['linux', 'osx'], arch: 'str' } }
-    it { should serialize_to os: ['linux', 'osx'], arch: 'str' }
-    it { should_not have_msg }
+
+    describe 'support turned off (default)', support: false do
+      it { should serialize_to os: ['linux', 'osx'], arch: 'str' }
+      it { should_not have_msg }
+    end
+
+    describe 'support turned on', support: true do
+      it { should serialize_to os: ['linux', 'osx'], arch: 'str' }
+      it { should_not have_msg }
+    end
   end
 end

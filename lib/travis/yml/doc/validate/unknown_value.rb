@@ -15,7 +15,7 @@ module Travis
           private
 
             def apply?
-              schema.enum? && value.given?
+              schema.enum? && value.str? && value.given?
             end
 
             def unknown?
@@ -28,7 +28,7 @@ module Travis
 
             def unknown_value
               value.error :unknown_value, value: value.value
-              none
+              drop? ? none : value
             end
 
             def unknown_default
@@ -44,6 +44,10 @@ module Travis
               end
             end
             memoize :default
+
+            def drop?
+              value.drop?
+            end
         end
       end
     end

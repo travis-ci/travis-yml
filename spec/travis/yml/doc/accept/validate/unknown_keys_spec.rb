@@ -9,8 +9,16 @@ describe Travis::Yml, 'unknown_keys', line: true do
 
   describe 'given an unknown key' do
     yaml 'unknown: str'
-    it { should serialize_to unknown: 'str' }
-    it { should have_msg [:warn, :root, :unknown_key, key: 'unknown', value: 'str', line: 0, src: '.travis.yml'] }
+
+    describe 'drop turned off (default)' do
+      it { should serialize_to unknown: 'str' }
+      it { should have_msg [:warn, :root, :unknown_key, key: 'unknown', value: 'str', line: 0, src: '.travis.yml'] }
+    end
+
+    describe 'drop turned on', drop: true do
+      it { should serialize_to empty }
+      it { should have_msg [:warn, :root, :unknown_key, key: 'unknown', value: 'str', line: 0, src: '.travis.yml'] }
+    end
   end
 
   describe 'given an unknown key has an anchor' do

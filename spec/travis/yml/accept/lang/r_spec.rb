@@ -1,5 +1,5 @@
 describe Travis::Yml, 'r' do
-  subject { described_class.apply(parse(yaml)) }
+  subject { described_class.apply(parse(yaml), opts) }
 
   describe 'r' do
     describe 'given a seq of strs' do
@@ -275,7 +275,7 @@ describe Travis::Yml, 'r' do
   end
 
   describe 'repos' do
-    describe 'given a str' do
+    describe 'given a str', drop: true do
       yaml %(
         repos: str
       )

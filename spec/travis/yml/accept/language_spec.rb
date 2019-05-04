@@ -60,7 +60,7 @@ describe Travis::Yml, 'language' do
     it { should have_msg [:warn, :language, :unknown_default, value: 'none', default: 'ruby'] }
   end
 
-  describe 'given a map', defaults: true do
+  describe 'given a map', defaults: true, drop: true do
     yaml %(
       language:
         php: hhvm

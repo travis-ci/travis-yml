@@ -1,5 +1,5 @@
 describe Travis::Yml, 'stack' do
-  subject { described_class.apply(parse(yaml)) }
+  subject { described_class.apply(parse(yaml), opts) }
 
   Travis::Yml::Schema::Def::Stack::NAMES.each do |value|
     describe "given #{value}" do
@@ -22,7 +22,7 @@ describe Travis::Yml, 'stack' do
     yaml %(
       stack: unknown
     )
-    it { should serialize_to empty }
+    it { should serialize_to stack: 'unknown' }
     it { should have_msg [:error, :stack, :unknown_value, value: 'unknown'] }
   end
 end
