@@ -102,7 +102,7 @@ describe Travis::Yml do
 
     describe 'alert' do
       let(:msg) { [:error, :key, :alert] }
-      it { should eq '[error] on key: this string should probably be encrypted' }
+      it { should eq '[error] on key: this should be an encrypted string' }
     end
 
     describe 'alias' do
@@ -112,12 +112,12 @@ describe Travis::Yml do
 
     describe 'cast' do
       let(:msg) { [:info, :key, :cast, given_value: 'foo', given_type: :str, value: true, type: :bool] }
-      it { should eq '[info] on key: casting value foo (:str) to true (:bool)' }
+      it { should eq '[info] on key: casting value "foo" (:str) to true (:bool)' }
     end
 
     describe 'default' do
       let(:msg) { [:info, :key, :default, key: :key, default: 'default'] }
-      it { should eq '[info] on key: missing :key, using the default default' }
+      it { should eq '[info] on key: missing key, using the default default' }
     end
 
     describe 'deprecated_key' do
@@ -145,11 +145,6 @@ describe Travis::Yml do
       it { should eq '[info] on key: please email support@travis-ci.com to enable :key' }
     end
 
-    describe 'irrelevant' do
-      let(:msg) { [:info, :key, :irrelevant, on_key: :language, on_value: 'ruby', key: :key, value: 'value'] }
-      it { should eq '[info] on key: you used :key, but it is not relevant for the :language ruby' }
-    end
-
     describe 'unsupported' do
       let(:msg) { [:info, :key, :unsupported, on_key: :language, on_value: 'ruby', key: :key, value: 'value'] }
       it { should eq '[info] on key: :key (value) is not supported on the :language ruby' }
@@ -157,12 +152,17 @@ describe Travis::Yml do
 
     describe 'required' do
       let(:msg) { [:info, :key, :required, key: :key] }
-      it { should eq '[info] on key: you need to specify :key' }
+      it { should eq '[info] on key: missing required key :key' }
     end
 
     describe 'empty' do
       let(:msg) { [:info, :key, :empty, key: :key] }
       it { should eq '[info] on key: dropping empty section :key' }
+    end
+
+    describe 'unexpected_seq' do
+      let(:msg) { [:info, :key, :unexpected_seq, value: 'value'] }
+      it { should eq '[info] on key: unexpected sequence, using the first value (value)' }
     end
 
     describe 'unkown_key' do
@@ -193,11 +193,6 @@ describe Travis::Yml do
     describe 'invalid_format' do
       let(:msg) { [:info, :key, :invalid_format, value: 'value'] }
       it { should eq '[info] on key: dropping invalid format value' }
-    end
-
-    describe 'invalid_seq' do
-      let(:msg) { [:info, :key, :unexpected_seq, value: 'value'] }
-      it { should eq '[info] on key: unexpected sequence, using the first value (value)' }
     end
   end
 

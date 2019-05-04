@@ -27,13 +27,14 @@ describe Travis::Yml, 'dist' do
       dist: TRUSTY
     )
     it { should serialize_to dist: 'trusty' }
+    it { should have_msg [:info, :dist, :downcase, value: 'TRUSTY'] }
   end
 
   describe 'given an unknown value' do
     yaml %(
       dist: unknown
     )
-    it { should serialize_to empty }
+    it { should serialize_to dist: 'unknown' }
     it { should have_msg [:error, :dist, :unknown_value, value: 'unknown'] }
   end
 

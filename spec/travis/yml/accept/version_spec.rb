@@ -1,5 +1,5 @@
 describe Travis::Yml, 'version' do
-  subject { described_class.apply(parse(yaml)) }
+  subject { described_class.apply(parse(yaml), opts) }
 
   describe 'a valid version' do
     yaml %(
@@ -10,7 +10,7 @@ describe Travis::Yml, 'version' do
     it { should_not have_msg }
   end
 
-  describe 'an invalid version' do
+  describe 'an invalid version', drop: true do
     yaml %(
       version: not-a-version
     )

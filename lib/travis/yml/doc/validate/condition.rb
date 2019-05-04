@@ -19,7 +19,7 @@ module Travis
           private
 
             def apply?
-              schema.map? && schema.key?('if')
+              schema.map? && schema.key?('if') && value.map?
             end
 
             def condition?

@@ -37,7 +37,7 @@ describe Travis::Yml, 'launchpad' do
         oauth_token: str
         oauth_token_secret: str
     )
-    it { should serialize_to defaults }
+    it { should serialize_to **defaults, deploy: [provider: 'launchpad', oauth_token: 'str', oauth_token_secret: 'str'] }
     it { should have_msg [:error, :deploy, :required, key: 'slug', provider: 'launchpad'] }
     it { should_not have_msg [:error, :deploy, :required, key: 'oauth_token', provider: 'launchpad'] }
   end
@@ -49,7 +49,7 @@ describe Travis::Yml, 'launchpad' do
         slug: str
         oauth_token_secret: str
     )
-    it { should serialize_to defaults }
+    it { should serialize_to **defaults, deploy: [provider: 'launchpad', slug: 'str', oauth_token_secret: 'str'] }
     it { should_not have_msg [:error, :deploy, :required, key: 'slug', provider: 'launchpad'] }
     it { should have_msg [:error, :deploy, :required, key: 'oauth_token', provider: 'launchpad'] }
   end
@@ -61,7 +61,7 @@ describe Travis::Yml, 'launchpad' do
         slug: str
         oauth_token: str
     )
-    it { should serialize_to defaults }
+    it { should serialize_to **defaults, deploy: [provider: 'launchpad', slug: 'str', oauth_token: 'str'] }
     it { should_not have_msg [:error, :deploy, :required, key: 'slug', provider: 'launchpad'] }
     it { should have_msg [:error, :deploy, :required, key: 'oauth_token_secret', provider: 'launchpad'] }
   end

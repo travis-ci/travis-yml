@@ -9,7 +9,15 @@ describe Travis::Yml, 'unknown_value', line: true do
 
   describe 'given an unknown value' do
     yaml 'git: { strategy: unknown }'
-    it { should serialize_to empty }
-    it { should have_msg [:error, :'git.strategy', :unknown_value, value: 'unknown', line: 0] }
+
+    describe 'drop turned off (default)' do
+      it { should serialize_to git: { strategy: 'unknown' } }
+      it { should have_msg [:error, :'git.strategy', :unknown_value, value: 'unknown', line: 0] }
+    end
+
+    describe 'drop turned on', drop: true do
+      it { should serialize_to empty }
+      it { should have_msg [:error, :'git.strategy', :unknown_value, value: 'unknown', line: 0] }
+    end
   end
 end

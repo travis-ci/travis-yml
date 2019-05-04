@@ -56,6 +56,30 @@ describe LessYAML do
     it { should eq 'str' => '1.10' }
   end
 
+  describe 'strings containing a colon (unquoted)' do
+    yaml <<~yaml
+      foo:
+        - bar: baz
+    yaml
+    it { should eq 'foo' => ['bar' => 'baz'] }
+  end
+
+  describe 'strings containing a colon (single quoted)' do
+    yaml <<~yaml
+      foo:
+        - 'bar: baz'
+    yaml
+    it { should eq 'foo' => ['bar: baz'] }
+  end
+
+  describe 'strings containing a colon (double quoted)' do
+    yaml <<~yaml
+      foo:
+        - "bar: baz"
+    yaml
+    it { should eq 'foo' => ['bar: baz'] }
+  end
+
   describe 'loading a binary' do
     yaml %(
       secure: !!binary |

@@ -177,7 +177,7 @@ describe Travis::Yml::Web::V1 do
       it { expect(body['config']['rvm']).to eq ['2.6.2'] }
       it { expect(body['config']['script']).to eq ['./script'] }
       it { expect(body['config']['env']['matrix']).to eq [{ 'API' => 'true' }, { 'FOO' => '1' }] }
-      it { puts body['full_messages'] }
+      it { expect(body['full_messages']).to include '[info] on env.matrix.API: casting value true (:bool) to "true" (:str)' }
     end
 
     describe 'merge_mode: deep_merge' do

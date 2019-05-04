@@ -93,8 +93,16 @@ module Travis
             enabled?(:alert)
           end
 
-          def fix_keys?
-            enabled?(:keys)
+          def defaults?
+            enabled?(:defaults)
+          end
+
+          def drop?
+            enabled?(:drop)
+          end
+
+          def fix?
+            enabled?(:fix)
           end
 
           def line?
@@ -107,6 +115,10 @@ module Travis
 
           def enabled?(key)
             !!opts[key]
+          end
+
+          def errored?
+            !!@errored
           end
 
           def debug(code, *args)
@@ -130,10 +142,6 @@ module Travis
             msg(:alert, code, *args)
           end
 
-          def errored?
-            !!@errored
-          end
-
           def msg(level, code, args = {})
             msg = [level, full_key, code]
             msg << line(args) unless args.empty?
@@ -148,8 +156,10 @@ module Travis
             compact(args)
           end
 
+          # hmmm. msgs are stored in opts so they get propagated to other nodes
+          # that are created during Change and Validate.
           def msgs
-            opts[:msgs] ||= []
+            @opts[:msgs] ||= []
           end
 
           def full_key(ext = true)

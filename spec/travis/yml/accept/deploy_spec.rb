@@ -1,7 +1,7 @@
 describe Travis::Yml, 'deploy' do
   subject { described_class.apply(parse(yaml), opts) }
 
-  describe 'given true' do
+  describe 'given true', drop: true do
     yaml %(
       deploy: true
     )
@@ -48,11 +48,11 @@ describe Travis::Yml, 'deploy' do
       deploy:
         - provider: unknown
     )
-    it { should serialize_to empty }
+    it { should serialize_to deploy: [provider: 'unknown'] }
     it { should have_msg [:error, :'deploy.provider', :unknown_value, value: 'unknown'] }
   end
 
-  describe 'invalid type on provider' do
+  describe 'invalid type on provider', drop: true do
     yaml %(
       deploy:
         provider:
@@ -63,22 +63,21 @@ describe Travis::Yml, 'deploy' do
   end
 
   describe 'given a map' do
-    describe 'without a provider' do
-      let(:opts) { { defaults: true } }
-      yaml %(
-        deploy:
-          foo: foo
-      )
-      it { should serialize_to language: 'ruby', os: ['linux'] }
-      it { should have_msg [:error, :deploy, :required, key: 'provider'] }
-    end
-
     describe 'with a provider' do
       yaml %(
         deploy:
           provider: heroku
       )
       it { should serialize_to deploy: [provider: 'heroku'] }
+    end
+
+    describe 'with a missing provider', defaults: true do
+      yaml %(
+        deploy:
+          - strategy: git
+      )
+      it { should serialize_to language: 'ruby', os: ['linux'], deploy: [strategy: 'git'] }
+      it { should have_msg [:error, :'deploy', :required, key: 'provider'] }
     end
 
     # TODO check if we really need :heroku to be non-strict
@@ -262,7 +261,7 @@ describe Travis::Yml, 'deploy' do
             on:
               tags: str
         )
-        it { should serialize_to deploy: [provider: 'heroku'] }
+        it { should serialize_to deploy: [provider: 'heroku', on: { tags: 'str' }] }
         it { should have_msg [:error, :'deploy.on.tags', :invalid_type, expected: :bool, actual: :str, value: 'str'] }
       end
 

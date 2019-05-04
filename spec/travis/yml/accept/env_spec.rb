@@ -1,5 +1,5 @@
 describe Travis::Yml, 'env' do
-  subject { described_class.apply(parse(yaml)) }
+  subject { described_class.apply(parse(yaml), opts) }
 
   describe 'given a var' do
     yaml %(
@@ -255,7 +255,7 @@ describe Travis::Yml, 'env' do
     end
   end
 
-  describe 'given true' do
+  describe 'given true', drop: true do
     yaml %(
       env: true
     )

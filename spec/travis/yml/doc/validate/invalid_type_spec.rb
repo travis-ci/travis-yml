@@ -12,26 +12,26 @@ describe Travis::Yml::Doc::Validate, 'invalid_type' do
 
     describe 'given a num' do
       let(:value) { 1 }
+      it { should serialize_to 1 }
       it { should have_msg [:error, :root, :invalid_type, expected: :str, actual: :num, value: value] }
-      it { should serialize_to nil }
     end
 
     describe 'given a bool' do
       let(:value) { true }
+      it { should serialize_to true }
       it { should have_msg [:error, :root, :invalid_type, expected: :str, actual: :bool, value: value] }
-      it { should serialize_to nil }
     end
 
     describe 'given a seq' do
       let(:value) { ['foo', 'bar'] }
-      it { should have_msg [:error, :root, :invalid_type, expected: :str, actual: :seq, value: value] }
       it { should serialize_to nil }
+      it { should have_msg [:error, :root, :invalid_type, expected: :str, actual: :seq, value: value] }
     end
 
     describe 'given a map' do
       let(:value) { { foo: 'bar' } }
-      it { should have_msg [:error, :root, :invalid_type, expected: :str, actual: :map, value: value] }
       it { should serialize_to nil }
+      it { should have_msg [:error, :root, :invalid_type, expected: :str, actual: :map, value: value] }
     end
   end
 
@@ -40,8 +40,8 @@ describe Travis::Yml::Doc::Validate, 'invalid_type' do
 
     describe 'given a str' do
       let(:value) { 'bar' }
+      it { should serialize_to 'bar' }
       it { should have_msg [:error, :root, :invalid_type, expected: :num, actual: :str, value: value] }
-      it { should serialize_to nil }
     end
 
     describe 'given a num' do
@@ -52,20 +52,20 @@ describe Travis::Yml::Doc::Validate, 'invalid_type' do
 
     describe 'given a bool' do
       let(:value) { true }
+      it { should serialize_to true }
       it { should have_msg [:error, :root, :invalid_type, expected: :num, actual: :bool, value: value] }
-      it { should serialize_to nil }
     end
 
     describe 'given a seq' do
       let(:value) { ['foo', 'bar'] }
-      it { should have_msg [:error, :root, :invalid_type, expected: :num, actual: :seq, value: value] }
       it { should serialize_to nil }
+      it { should have_msg [:error, :root, :invalid_type, expected: :num, actual: :seq, value: value] }
     end
 
     describe 'given a map' do
       let(:value) { { foo: 'bar' } }
-      it { should have_msg [:error, :root, :invalid_type, expected: :num, actual: :map, value: value] }
       it { should serialize_to nil }
+      it { should have_msg [:error, :root, :invalid_type, expected: :num, actual: :map, value: value] }
     end
   end
 
@@ -74,32 +74,32 @@ describe Travis::Yml::Doc::Validate, 'invalid_type' do
 
     describe 'given a str' do
       let(:value) { 'bar' }
+      it { should serialize_to 'bar' }
       it { should have_msg [:error, :root, :invalid_type, expected: :bool, actual: :str, value: value] }
-      it { should serialize_to nil }
     end
 
     describe 'given a num' do
       let(:value) { 1 }
+      it { should serialize_to 1 }
       it { should have_msg [:error, :root, :invalid_type, expected: :bool, actual: :num, value: value] }
-      it { should serialize_to nil }
     end
 
     describe 'given a bool' do
       let(:value) { true }
-      it { should_not have_msg }
       it { should serialize_to value }
+      it { should_not have_msg }
     end
 
     describe 'given a seq' do
       let(:value) { ['foo', 'bar'] }
-      it { should have_msg [:error, :root, :invalid_type, expected: :bool, actual: :seq, value: value] }
       it { should serialize_to nil }
+      it { should have_msg [:error, :root, :invalid_type, expected: :bool, actual: :seq, value: value] }
     end
 
     describe 'given a map' do
       let(:value) { { foo: 'bar' } }
-      it { should have_msg [:error, :root, :invalid_type, expected: :bool, actual: :map, value: value] }
       it { should serialize_to nil }
+      it { should have_msg [:error, :root, :invalid_type, expected: :bool, actual: :map, value: value] }
     end
   end
 
@@ -114,32 +114,32 @@ describe Travis::Yml::Doc::Validate, 'invalid_type' do
 
     describe 'given a num' do
       let(:value) { 1 }
-      it { should have_msg [:error, :root, :invalid_type, expected: :secure, actual: :num, value: value] }
       it { should serialize_to nil }
+      it { should have_msg [:error, :root, :invalid_type, expected: :secure, actual: :num, value: value] }
     end
 
     describe 'given a bool' do
       let(:value) { true }
-      it { should have_msg [:error, :root, :invalid_type, expected: :secure, actual: :bool, value: value] }
       it { should serialize_to nil }
+      it { should have_msg [:error, :root, :invalid_type, expected: :secure, actual: :bool, value: value] }
     end
 
     describe 'given a secure' do
       let(:value) { { secure: 'bar' } }
-      it { should_not have_msg }
       it { should serialize_to value }
+      it { should_not have_msg }
     end
 
     describe 'given a seq' do
       let(:value) { ['foo', 'bar'] }
-      it { should have_msg [:error, :root, :invalid_type, expected: :secure, actual: :seq, value: value] }
       it { should serialize_to nil }
+      it { should have_msg [:error, :root, :invalid_type, expected: :secure, actual: :seq, value: value] }
     end
 
     describe 'given a map' do
       let(:value) { { foo: 'bar' } }
-      it { should have_msg [:error, :root, :invalid_type, expected: :secure, actual: :map, value: value] }
       it { should serialize_to nil }
+      it { should have_msg [:error, :root, :invalid_type, expected: :secure, actual: :map, value: value] }
     end
   end
 
@@ -148,32 +148,32 @@ describe Travis::Yml::Doc::Validate, 'invalid_type' do
 
     describe 'given a str' do
       let(:value) { 'bar' }
-      it { should have_msg [:error, :root, :invalid_type, expected: :seq, actual: :str, value: value] }
       it { should serialize_to [] }
+      it { should have_msg [:error, :root, :invalid_type, expected: :seq, actual: :str, value: value] }
     end
 
     describe 'given a num' do
       let(:value) { 1 }
-      it { should have_msg [:error, :root, :invalid_type, expected: :seq, actual: :num, value: value] }
       it { should serialize_to [] }
+      it { should have_msg [:error, :root, :invalid_type, expected: :seq, actual: :num, value: value] }
     end
 
     describe 'given a bool' do
       let(:value) { true }
-      it { should have_msg [:error, :root, :invalid_type, expected: :seq, actual: :bool, value: value] }
       it { should serialize_to [] }
+      it { should have_msg [:error, :root, :invalid_type, expected: :seq, actual: :bool, value: value] }
     end
 
     describe 'given a seq' do
       let(:value) { ['foo', 'bar'] }
-      it { should_not have_msg }
       it { should serialize_to value }
+      it { should_not have_msg }
     end
 
     describe 'given a map' do
       let(:value) { { foo: 'bar' } }
-      it { should have_msg [:error, :root, :invalid_type, expected: :seq, actual: :map, value: value] }
       it { should serialize_to [] }
+      it { should have_msg [:error, :root, :invalid_type, expected: :seq, actual: :map, value: value] }
     end
   end
 
@@ -182,32 +182,32 @@ describe Travis::Yml::Doc::Validate, 'invalid_type' do
 
     describe 'given a str' do
       let(:value) { 'bar' }
-      it { should have_msg [:error, :root, :invalid_type, expected: :map, actual: :str, value: value] }
       it { should serialize_to empty }
+      it { should have_msg [:error, :root, :invalid_type, expected: :map, actual: :str, value: value] }
     end
 
     describe 'given a num' do
       let(:value) { 1 }
-      it { should have_msg [:error, :root, :invalid_type, expected: :map, actual: :num, value: value] }
       it { should serialize_to empty }
+      it { should have_msg [:error, :root, :invalid_type, expected: :map, actual: :num, value: value] }
     end
 
     describe 'given a bool' do
       let(:value) { true }
-      it { should have_msg [:error, :root, :invalid_type, expected: :map, actual: :bool, value: value] }
       it { should serialize_to empty }
+      it { should have_msg [:error, :root, :invalid_type, expected: :map, actual: :bool, value: value] }
     end
 
     describe 'given a seq' do
       let(:value) { ['foo', 'bar'] }
-      it { should have_msg [:error, :root, :invalid_type, expected: :map, actual: :seq, value: value] }
       it { should serialize_to empty }
+      it { should have_msg [:error, :root, :invalid_type, expected: :map, actual: :seq, value: value] }
     end
 
     describe 'given a map' do
       let(:value) { { foo: 'bar' } }
-      it { should_not have_msg }
       it { should serialize_to value }
+      it { should_not have_msg }
     end
   end
 end

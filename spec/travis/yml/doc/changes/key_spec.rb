@@ -5,8 +5,28 @@ describe Travis::Yml::Doc::Change::Key do
   describe 'clean_key' do
     subject { change.clean_key(key) }
 
-    describe 'given _foo' do
+    describe 'given .foo (custom key)' do
+      let(:key) { '.foo' }
+      it { should eq '.foo' }
+    end
+
+    describe 'given _foo (custom key)' do
       let(:key) { '_foo' }
+      it { should eq '_foo' }
+    end
+
+    describe 'given __foo' do
+      let(:key) { '__foo' }
+      it { should eq 'foo' }
+    end
+
+    describe 'given foo_' do
+      let(:key) { 'foo_' }
+      it { should eq 'foo' }
+    end
+
+    describe 'given foo__' do
+      let(:key) { 'foo__' }
       it { should eq 'foo' }
     end
 
@@ -25,7 +45,7 @@ describe Travis::Yml::Doc::Change::Key do
       it { should eq 'foo_bar' }
     end
 
-    describe 'given foo-1' do
+    describe 'given foo-*' do
       let(:key) { 'foo-*' }
       it { should eq 'foo' }
     end

@@ -24,7 +24,11 @@ module Travis
 
             def invalid
               value.error :invalid_format, format: schema.format, value: value.value
-              none
+              drop? ? none : value
+            end
+
+            def drop?
+              value.drop?
             end
         end
       end

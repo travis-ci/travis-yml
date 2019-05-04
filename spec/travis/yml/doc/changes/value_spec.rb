@@ -1,5 +1,5 @@
 describe Travis::Yml::Doc::Change::Value do
-  subject { described_class.new(build_schema(schema), build_value(value)).apply }
+  subject { described_class.new(build_schema(schema), build_value(value, opts)).apply }
 
   let(:schema) { { type: :string, enum: ['foo'], values: { foo: { aliases: ['bar'] } } } }
 

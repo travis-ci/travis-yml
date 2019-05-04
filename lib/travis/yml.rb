@@ -30,42 +30,40 @@ module Travis
       alert:     true,   # alert on secures that accept a string
       defaults:  true,   # add defaults to required keys
       empty:     false,  # warn on empty keys
+      fix:       true,   # try fixing unknown keys and values
       line:      true,   # add line numbers to messages
-      drop:      false,  # drop unknown keys and values
-      keys:      true,   # try fixing unknown keys
       support:   false,  # warn about features unsupported on the given language, os etc
+      drop:      false,  # drop unknown keys and values, and values missing required keys
     }
 
     # These are meant as examples. Clients will want to determine their own
     # representations.
 
     MSGS = {
-      alert:             'this string should probably be encrypted',
+      alert:             'this should be an encrypted string',
       alias:             '%{alias} is an alias for %{actual}, using %{actual}',
-      cast:              'casting value %{given_value} (%{given_type}) to %{value} (%{type})',
+      cast:              'casting value %<given_value>p (%<given_type>p) to %<value>p (%<type>p)',
       default:           'missing %{key}, using the default %{default}',
-      deprecated_key:    'deprecated key: %{key} (%{info})',
-      deprecated_value:  'deprecated value: %{value} (%{info})',
+      deprecated_key:    'deprecated key: %<key>p (%{info})',
+      deprecated_value:  'deprecated value: %<value>p (%{info})',
       downcase:          'using lower case of %{value}',
       duplicate_names:   'duplicate job names: %{value}',
-      edge:              '%{given} is experimental and might change or be removed',
-      flagged:           'please email support@travis-ci.com to enable %{given}',
-      irrelevant:        'you used %{key}, but it is not relevant for the %{on_key} %{on_value}',
-      unsupported:       '%{key} (%{value}) is not supported on the %{on_key} %{on_value}',
-      required:          'you need to specify %{key}',
-      empty:             'dropping empty section %{key}',
+      edge:              '%<given>p is experimental and might change or be removed',
+      flagged:           'please email support@travis-ci.com to enable %<given>p',
+      required:          'missing required key %<key>p',
+      empty:             'dropping empty section %<key>p',
       find_key:          'key %{original} is not known, but %{key} is, using %{key}',
       find_value:        'value %{original} is not known, but %{value} is, using %{value}',
       clean_key:         'key %{original} contains unsupported characters, using %{key}',
       clean_value:       'value %{original} is not known, but %{value} is, using %{value}',
       underscore_key:    'key %{original} is not underscored, using %{key}',
-      unknown_key:       'dropping unknown key %{key} (%{value})',
+      unexpected_seq:    'unexpected sequence, using the first value (%{value})',
+      unknown_key:       'dropping unknown key %<key>p (%{value})',
       unknown_value:     'dropping unknown value: %{value}',
       unknown_default:   'dropping unknown value: %{value}, defaulting to %{default}',
-      unknown_var:       'unknown template variable %{var}',
-      unexpected_seq:    'unexpected sequence, using the first value (%{value})',
-      invalid_key:       '%{key} is not a valid key',
-      invalid_type:      'dropping unexpected %{actual}, expected %{expected} (%{value})',
+      unknown_var:       'unknown template variable %<var>p',
+      unsupported:       '%<key>p (%{value}) is not supported on the %<on_key>p %{on_value}',
+      invalid_type:      'dropping unexpected %<actual>p, expected %<expected>p (%{value})',
       invalid_format:    'dropping invalid format %{value}',
       invalid_condition: 'invalid condition: %{condition}',
       invalid_env_var:   'invalid env var: %{var}',
@@ -111,7 +109,7 @@ module Travis
       def msg(msg)
         level, key, code, args = msg
         msg = MSGS[code] || raise(UnknownMessage, 'Unknown message %p' % code)
-        msg = msg % args.map { |key, value| [key, value.is_a?(Symbol) ? value.inspect : value] }.to_h if args
+        msg = msg % args if args
         msg = '[%s] on %s: %s' % [level, key, msg]
         msg
       end

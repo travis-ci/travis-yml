@@ -76,7 +76,7 @@ describe Travis::Yml, 'os' do
     end
   end
 
-  describe 'given a mixed, nested seq' do
+  describe 'given a mixed, nested seq', drop: true do
     yaml %(
       os:
       - linux
@@ -114,7 +114,7 @@ describe Travis::Yml, 'os' do
     it { should have_msg [:warn, :jdk, :unsupported, on_key: 'os', on_value: 'osx', key: 'jdk', value: ['default']] }
   end
 
-  describe 'given a mixed, nested seq, with an unsupported key on root' do
+  describe 'given a mixed, nested seq, with an unsupported key on root', drop: true do
     yaml %(
       os:
       - linux
