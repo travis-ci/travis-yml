@@ -27,8 +27,9 @@ module Travis
             end
 
             def required(node)
-              keys = schema.required + value.keys
-              build(keys.uniq.map { |key| [key, value[key] || none] }.to_h)
+              keys = schema.required.map { |key| ::Key.new(key) }
+              keys = concat(keys, value.keys).uniq
+              build(keys.map { |key| [key, value[key] || none] }.to_h)
             end
 
             def internal(value)
@@ -44,7 +45,7 @@ module Travis
                 node = parent[key]
                 key  = Key.new(schema, node, opts).apply
                 next parent if key == node.key && known?(key)
-                parent.move(node.key, key)
+                parent.move(node.key, node.key.copy(key))
                 parent
               end
             end
@@ -63,6 +64,13 @@ module Travis
 
             def defaults?
               value.enabled?(:defaults)
+            end
+
+            # Keep the order of keys, but use the key from the right hand side if
+            # present on both sides.
+            def concat(lft, rgt)
+              lft = lft.map { |key| (ix = rgt.index(key)) ? rgt[ix] : key }
+              lft.concat(rgt)
             end
         end
       end

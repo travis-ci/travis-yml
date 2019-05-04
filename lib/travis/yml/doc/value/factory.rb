@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+require 'travis/yml/support/yaml'
 
 module Travis
   module Yml
@@ -15,12 +16,14 @@ module Travis
               Integer    => :num,
               String     => :str,
               Symbol     => :str,
-              NilClass   => :none
+              NilClass   => :none,
+              Yaml::Hash => :map,
             }
 
             def build(parent, key, value, opts = {})
               value = value.value if value.is_a?(Node)
               type = TYPES[value.class] || raise("Unknown type: #{value}")
+              opts[:anchors] = value.anchors if value.is_a?(Yaml::Hash) && value.anchors
               send(type, parent, key, value, opts)
             end
 
@@ -43,7 +46,6 @@ module Travis
               end
 
               def map(parent, key, value, opts)
-                opts[:anchors] = value.delete(:__anchors__) if value.key?(:__anchors__)
                 const = secure?(value) ? Secure : Map
                 map = const.new(parent, key, nil, opts)
                 map.value = value.map { |key, obj| [key, build(map, key, obj, opts)] }.to_h

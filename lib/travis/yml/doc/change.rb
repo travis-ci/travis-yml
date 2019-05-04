@@ -19,7 +19,12 @@ module Travis
         extend self
 
         def apply(schema, value)
-          build(schema, value).apply
+          # puts
+          # p value.keys.map { |key| [key, key.line] } if value.map?
+          # puts caller[0..5]
+          other = build(schema, value).apply
+          # p other.keys.map { |key| [key, key.line] } if other.map?
+          other
         end
 
         def build(schema, value)

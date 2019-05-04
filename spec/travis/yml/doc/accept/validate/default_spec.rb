@@ -12,13 +12,13 @@ describe Travis::Yml::Doc::Validate, 'default', defaults: true, line: true do
     describe 'given an empty string' do
       yaml 'language: ""'
       it { should serialize_to defaults }
-      it { should have_msg [:info, :language, :default, key: 'language', default: 'ruby'] }
+      it { should have_msg [:info, :language, :default, key: 'language', default: 'ruby', line: 0] }
     end
 
     describe 'given nil' do
       yaml 'language:'
       it { should serialize_to defaults }
-      it { should have_msg [:info, :language, :default, key: 'language', default: 'ruby'] }
+      it { should have_msg [:info, :language, :default, key: 'language', default: 'ruby', line: 0] }
     end
 
     describe 'missing key' do

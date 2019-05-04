@@ -10,7 +10,7 @@ module Spec
       end
 
       def parse(yaml)
-        LessYAML.load(yaml) || {}
+        ::Yaml.load(yaml) || {}
       end
     end
   end

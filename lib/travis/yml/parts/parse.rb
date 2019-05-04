@@ -1,3 +1,5 @@
+require 'travis/yml/support/yaml'
+
 module Travis
   module Yml
     module Parts
@@ -19,14 +21,16 @@ module Travis
 
           def assign(obj)
             case obj
-            when Hash  then obj.map { |key, obj| [key(key), assign(obj)] }.to_h
-            when Array then obj.map { |obj| assign(obj) }
-            else obj
+            when Hash
+              obj.replace(obj.map { |key, obj| [src(key), assign(obj)] }.to_h)
+            when Array
+              obj.map { |obj| assign(obj) }
+            else
+              obj
             end
           end
 
-          def key(key)
-            return key unless key.is_a?(String)
+          def src(key)
             key = Key.new(key) unless key.is_a?(Key)
             key.src = part.src
             key
@@ -41,7 +45,7 @@ module Travis
           end
 
           def yaml
-            LessYAML.load(part.str, raise_on_unknown_tag: true) || {}
+            Yaml.load(part.str) || {}
           end
 
           def unexpected_format!

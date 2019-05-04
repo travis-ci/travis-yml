@@ -64,8 +64,16 @@ describe Travis::Yml, 'invalid_type', line: true do
 
     describe 'given a map' do
       yaml 'os: { name: linux }'
-      it { should serialize_to empty }
-      it { should have_msg [:error, :os, :invalid_type, expected: :str, actual: :map, value: { name: 'linux' }, line: 0] }
+
+      describe 'drop turned off (default)' do
+        it { should serialize_to os: [name: 'linux'] }
+        it { should have_msg [:error, :os, :invalid_type, expected: :str, actual: :map, value: { name: 'linux' }, line: 0] }
+      end
+
+      describe 'drop turned on', drop: true do
+        it { should serialize_to empty }
+        it { should have_msg [:error, :os, :invalid_type, expected: :str, actual: :map, value: { name: 'linux' }, line: 0] }
+      end
     end
   end
 
@@ -78,8 +86,16 @@ describe Travis::Yml, 'invalid_type', line: true do
 
     describe 'given a str' do
       yaml 'git: str'
-      it { should serialize_to empty }
-      it { should have_msg [:error, :git, :invalid_type, expected: :map, actual: :str, value: 'str', line: 0] }
+
+      describe 'drop turned off (default)' do
+        it { should serialize_to git: 'str' }
+        it { should have_msg [:error, :git, :invalid_type, expected: :map, actual: :str, value: 'str', line: 0] }
+      end
+
+      describe 'drop turned on', drop: true do
+        it { should serialize_to empty }
+        it { should have_msg [:error, :git, :invalid_type, expected: :map, actual: :str, value: 'str', line: 0] }
+      end
     end
   end
 end

@@ -1,5 +1,6 @@
 require 'erb'
 require 'fileutils'
+require 'yaml'
 
 module Travis
   module Yml

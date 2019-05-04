@@ -151,8 +151,8 @@ module Travis
 
           def line(args)
             return except(args, :line, :src) unless line?
-            args[:line] ||= key.line
-            args[:src] ||= key.src
+            args[:line] ||= key&.line
+            args[:src] ||= key&.src
             compact(args)
           end
 

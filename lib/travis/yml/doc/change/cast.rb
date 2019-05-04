@@ -57,7 +57,6 @@ module Travis
 
             def str2num?
               # e.g. `git: depth: 10`, as given in our docs
-              # LessYaml parse numbers to strings in order to avoid issues with
               # e.g. `node_js: 2.10` being parsed into `node_js: 2.1`
               value.str? && schema.num?
             end

@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 require 'registry'
+require 'yaml'
 
 module Travis
   module Yml

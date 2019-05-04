@@ -1,6 +1,6 @@
 require 'yaml'
 
-describe Travis::Yml, docs: true do
+describe Travis::Yml, docs: true, alert: false do
   SKIP = [
     # ignore
     'docs_2016/deployment/006',       # example with an unknown awesome-experimental-provider
@@ -35,7 +35,7 @@ describe Travis::Yml, docs: true do
   }
 
   def load_config(path)
-    LessYAML.load(File.read(path))
+    Yaml.load(File.read(path))
   end
 
   def detect_lang(config)
@@ -52,7 +52,7 @@ describe Travis::Yml, docs: true do
   let(:defaults) { { 'language' => lang } }
   let(:msgs)     { applied.msgs }
 
-  subject { described_class.apply(defaults.merge(config)) }
+  subject { described_class.apply(defaults.merge(config), opts) }
 
   paths.each do |path|
     name = path.sub('spec/fixtures/docs/', '').sub('.yml', '')
