@@ -84,7 +84,7 @@ describe Travis::Yml, 'cache', line: true do
     it { should have_msg [:warn, :cache, :unknown_key, key: 'unknown', value: 'str', line: 5] }
   end
 
-  describe 'given a seq with a map on directories' do
+  describe 'given a seq with a map on directories', drop: true do
     yaml %(
       cache:
         directories:

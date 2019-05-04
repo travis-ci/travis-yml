@@ -19,15 +19,31 @@ module Spec
       end
 
       def build_value(value, opts = {})
-        Travis::Yml::Doc::Value.build(nil, nil, stringify(value), opts)
+        Travis::Yml::Doc::Value.build(nil, nil, keyify(value), opts)
       end
 
       def build_part(str, src = nil, mode = nil)
         Travis::Yml::Parts::Part.new(str, src, mode)
       end
 
-      def stringify(obj)
-        Travis::Yml::Helper::Obj.stringify(obj)
+      def keyify(obj)
+        case obj
+        when ::Hash, ::Yaml::Hash
+          ::Yaml::Hash.new(obj.map { |key, obj| [to_key(key), keyify(obj)] }.to_h)
+        when Array
+          obj.map { |obj| keyify(obj) }
+        else
+          obj
+        end
+      end
+
+      def to_key(key)
+        case key
+        when String, Symbol
+          ::Key.new(key.to_s)
+        else
+          raise
+        end
       end
     end
   end

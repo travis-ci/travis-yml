@@ -7,11 +7,11 @@ end
 dpls = Dir['spec/fixtures/dpl/*.yml'].sort.map do |path|
   name = path.sub('spec/fixtures/dpl/', '').sub('.yml', '')
   name = 'azure_web_apps' if name == 'AzureWebApps' # fix readme?
-  [name, symbolize(YAML.load(File.read(path)))]
+  [name, symbolize(Yaml.load(File.read(path)))]
 end
 
-describe Travis::Yml, dpl: true do
-  subject { described_class.apply(parse(yaml)) }
+describe Travis::Yml, dpl: true, alert: false do
+  subject { described_class.apply(parse(yaml), opts) }
 
   def filter(msg)
     msg[2] == :underscore_key # ||

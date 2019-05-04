@@ -1,5 +1,5 @@
-describe Travis::Yml::Doc::Validate, 'invalid_type' do
-  subject { described_class.apply(build_schema(schema), build_value(value)) }
+describe Travis::Yml::Doc::Validate, 'invalid_type', drop: true do
+  subject { described_class.apply(build_schema(schema), build_value(value, opts)) }
 
   describe 'str' do
     let(:schema) { { type: :string } }
@@ -108,8 +108,8 @@ describe Travis::Yml::Doc::Validate, 'invalid_type' do
 
     describe 'given a str' do
       let(:value) { 'bar' }
-      it { should_not have_msg }
       it { should serialize_to value }
+      it { should have_msg [:alert, :root, :secure, type: :str] }
     end
 
     describe 'given a num' do

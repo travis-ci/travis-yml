@@ -6,13 +6,12 @@ require 'travis/yml/helper/obj'
 Obj.include Memoize, Travis::Yml::Helper::Obj
 
 require 'json'
-require 'yaml'
 require 'travis/yml/errors'
 require 'travis/yml/doc'
 require 'travis/yml/parts'
 require 'travis/yml/matrix'
 require 'travis/yml/schema'
-require 'travis/yml/support/less_yaml'
+require 'travis/yml/support/yaml'
 
 Integer = Fixnum unless defined?(Integer) # Ruby 2.4
 

@@ -62,7 +62,7 @@ describe Travis::Yml::Doc::Value, 'factory' do
   end
 
   describe 'given a hash with anchors' do
-    let(:value) { { foo: :bar, __anchors__: ['baz'] } }
+    let(:value) { Yaml::Hash.new(foo: :bar).tap { |hash| hash.anchors = ['baz'] } }
     it { should be_map }
     it { should serialize_to foo: 'bar' }
     it { should have_attributes anchors: ['baz'] }
