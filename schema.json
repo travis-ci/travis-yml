@@ -4503,119 +4503,6 @@
         ],
         "normal": true
       },
-      "appfog": {
-        "$id": "deploy_appfog",
-        "title": "Deploy Appfog",
-        "anyOf": [
-          {
-            "type": "object",
-            "properties": {
-              "provider": {
-                "type": "string",
-                "enum": [
-                  "appfog"
-                ],
-                "strict": true
-              },
-              "on": {
-                "$ref": "#/definitions/deploy/conditions",
-                "aliases": [
-                  "true"
-                ]
-              },
-              "run": {
-                "type": "string"
-              },
-              "allow_failure": {
-                "type": "boolean"
-              },
-              "skip_cleanup": {
-                "type": "boolean"
-              },
-              "edge": {
-                "$ref": "#/definitions/deploy/edge"
-              },
-              "user": {
-                "$ref": "#/definitions/type/secure",
-                "strict": false
-              },
-              "api_key": {
-                "$ref": "#/definitions/type/secure"
-              },
-              "address": {
-                "$ref": "#/definitions/type/strs"
-              },
-              "metadata": {
-                "type": "string"
-              },
-              "after_deploy": {
-                "$ref": "#/definitions/type/strs"
-              },
-              "app": {
-                "anyOf": [
-                  {
-                    "type": "object",
-                    "patternProperties": {
-                      ".*": {
-                        "type": "string"
-                      }
-                    }
-                  },
-                  {
-                    "type": "string"
-                  }
-                ]
-              },
-              "email": {
-                "anyOf": [
-                  {
-                    "type": "object",
-                    "patternProperties": {
-                      ".*": {
-                        "$ref": "#/definitions/type/secure"
-                      }
-                    }
-                  },
-                  {
-                    "$ref": "#/definitions/type/secure"
-                  }
-                ]
-              },
-              "password": {
-                "anyOf": [
-                  {
-                    "type": "object",
-                    "patternProperties": {
-                      ".*": {
-                        "$ref": "#/definitions/type/secure"
-                      }
-                    }
-                  },
-                  {
-                    "$ref": "#/definitions/type/secure"
-                  }
-                ]
-              }
-            },
-            "additionalProperties": false,
-            "normal": true,
-            "prefix": {
-              "key": "provider"
-            },
-            "required": [
-              "provider"
-            ]
-          },
-          {
-            "type": "string",
-            "enum": [
-              "appfog"
-            ],
-            "strict": true
-          }
-        ],
-        "normal": true
-      },
       "atlas": {
         "$id": "deploy_atlas",
         "title": "Deploy Atlas",
@@ -5685,64 +5572,6 @@
         ],
         "normal": true
       },
-      "divshot": {
-        "$id": "deploy_divshot",
-        "title": "Deploy Divshot",
-        "anyOf": [
-          {
-            "type": "object",
-            "properties": {
-              "provider": {
-                "type": "string",
-                "enum": [
-                  "divshot"
-                ],
-                "strict": true
-              },
-              "on": {
-                "$ref": "#/definitions/deploy/conditions",
-                "aliases": [
-                  "true"
-                ]
-              },
-              "run": {
-                "type": "string"
-              },
-              "allow_failure": {
-                "type": "boolean"
-              },
-              "skip_cleanup": {
-                "type": "boolean"
-              },
-              "edge": {
-                "$ref": "#/definitions/deploy/edge"
-              },
-              "api_key": {
-                "$ref": "#/definitions/type/secure"
-              },
-              "environment": {
-                "type": "string"
-              }
-            },
-            "additionalProperties": false,
-            "normal": true,
-            "prefix": {
-              "key": "provider"
-            },
-            "required": [
-              "provider"
-            ]
-          },
-          {
-            "type": "string",
-            "enum": [
-              "divshot"
-            ],
-            "strict": true
-          }
-        ],
-        "normal": true
-      },
       "edge": {
         "$id": "deploy_edge",
         "title": "Deploy Edge",
@@ -6631,64 +6460,6 @@
         ],
         "normal": true
       },
-      "modulus": {
-        "$id": "deploy_modulus",
-        "title": "Deploy Modulus",
-        "anyOf": [
-          {
-            "type": "object",
-            "properties": {
-              "provider": {
-                "type": "string",
-                "enum": [
-                  "modulus"
-                ],
-                "strict": true
-              },
-              "on": {
-                "$ref": "#/definitions/deploy/conditions",
-                "aliases": [
-                  "true"
-                ]
-              },
-              "run": {
-                "type": "string"
-              },
-              "allow_failure": {
-                "type": "boolean"
-              },
-              "skip_cleanup": {
-                "type": "boolean"
-              },
-              "edge": {
-                "$ref": "#/definitions/deploy/edge"
-              },
-              "api_key": {
-                "$ref": "#/definitions/type/secure"
-              },
-              "project_name": {
-                "type": "string"
-              }
-            },
-            "additionalProperties": false,
-            "normal": true,
-            "prefix": {
-              "key": "provider"
-            },
-            "required": [
-              "provider"
-            ]
-          },
-          {
-            "type": "string",
-            "enum": [
-              "modulus"
-            ],
-            "strict": true
-          }
-        ],
-        "normal": true
-      },
       "npm": {
         "$id": "deploy_npm",
         "title": "Deploy Npm",
@@ -7117,9 +6888,6 @@
             "$ref": "#/definitions/deploy/anynines"
           },
           {
-            "$ref": "#/definitions/deploy/appfog"
-          },
-          {
             "$ref": "#/definitions/deploy/atlas"
           },
           {
@@ -7162,9 +6930,6 @@
             "$ref": "#/definitions/deploy/deis"
           },
           {
-            "$ref": "#/definitions/deploy/divshot"
-          },
-          {
             "$ref": "#/definitions/deploy/elasticbeanstalk"
           },
           {
@@ -7193,9 +6958,6 @@
           },
           {
             "$ref": "#/definitions/deploy/launchpad"
-          },
-          {
-            "$ref": "#/definitions/deploy/modulus"
           },
           {
             "$ref": "#/definitions/deploy/npm"

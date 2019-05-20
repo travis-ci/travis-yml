@@ -145,7 +145,6 @@ describe Travis::Yml::Schema::Def::Root do
         edge
         providers
         anynines
-        appfog
         atlas
         azure_web_apps
         bintray
@@ -160,7 +159,6 @@ describe Travis::Yml::Schema::Def::Root do
         cloudfoundry
         codedeploy
         deis
-        divshot
         elasticbeanstalk
         engineyard
         firebase
@@ -171,7 +169,6 @@ describe Travis::Yml::Schema::Def::Root do
         heroku
         lambda
         launchpad
-        modulus
         npm
         openshift
         opsworks
