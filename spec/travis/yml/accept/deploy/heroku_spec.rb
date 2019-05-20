@@ -13,17 +13,17 @@ describe Travis::Yml, 'heroku' do
     end
   end
 
-  describe 'buildpack' do
-    describe 'given a str' do
-      yaml %(
-        deploy:
-          provider: heroku
-          buildpack: str
-      )
-      it { should serialize_to deploy: [provider: 'heroku', buildpack: 'str'] }
-      it { should_not have_msg }
-    end
-  end
+  # describe 'buildpack' do
+  #   describe 'given a str' do
+  #     yaml %(
+  #       deploy:
+  #         provider: heroku
+  #         buildpack: str
+  #     )
+  #     it { should serialize_to deploy: [provider: 'heroku', buildpack: 'str'] }
+  #     it { should_not have_msg }
+  #   end
+  # end
 
   describe 'app' do
     describe 'given a str' do

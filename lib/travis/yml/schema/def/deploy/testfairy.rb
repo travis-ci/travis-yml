@@ -19,7 +19,7 @@ module Travis
               map :auto_update,          to: :bool
               map :video_quality,        to: :str
               map :screenshot_quality,   to: :str
-              map :screenshot_interval,  to: :str
+              map :screenshot_interval,  to: :num
               map :max_duration,         to: :str
               map :advanced_options,     to: :str
               map :data_only_wifi,       to: :bool

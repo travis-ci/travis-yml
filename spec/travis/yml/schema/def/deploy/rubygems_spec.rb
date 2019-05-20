@@ -24,6 +24,9 @@ describe Travis::Yml::Schema::Def::Deploy::Rubygems do
                   :true
                 ]
               },
+              run: {
+                type: :string
+              },
               allow_failure: {
                 type: :boolean
               },
@@ -34,6 +37,38 @@ describe Travis::Yml::Schema::Def::Deploy::Rubygems do
                 '$ref': '#/definitions/deploy/edge'
               },
               api_key: {
+                anyOf: [
+                  {
+                    type: :object,
+                    patternProperties: {
+                      '.*': {
+                        '$ref': '#/definitions/type/secure'
+                      }
+                    }
+                  },
+                  {
+                    '$ref': '#/definitions/type/secure'
+                  }
+                ]
+              },
+              username: {
+                anyOf: [
+                  {
+                    type: :object,
+                    patternProperties: {
+                      '.*': {
+                        '$ref': '#/definitions/type/secure',
+                        # strict: false
+                      }
+                    }
+                  },
+                  {
+                    '$ref': '#/definitions/type/secure',
+                    # strict: false
+                  }
+                ]
+              },
+              password: {
                 anyOf: [
                   {
                     type: :object,
@@ -70,6 +105,9 @@ describe Travis::Yml::Schema::Def::Deploy::Rubygems do
                 type: :string
               },
               gemspec_glob: {
+                type: :string
+              },
+              host: {
                 type: :string
               }
             },

@@ -8,6 +8,8 @@ module Travis
             register :surge
 
             def define
+              map :login,   to: :secure, strict: false
+              map :token,   to: :secure
               map :project, to: :str
               map :domain,  to: :str
             end

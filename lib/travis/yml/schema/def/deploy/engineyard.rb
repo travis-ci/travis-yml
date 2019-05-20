@@ -9,9 +9,10 @@ module Travis
             register :engineyard
 
             def define
-              map :username,    to: :secure, strict: false
+              map :email,       to: :secure, strict: false
               map :password,    to: :secure
               map :api_key,     to: :secure
+              map :account,     to: :secure, strict: false
               map :app,         to: :map, type: :str
               map :environment, to: :map, type: :str
               map :migrate,     to: :str

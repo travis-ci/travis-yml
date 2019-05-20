@@ -154,9 +154,8 @@ describe Travis::Yml::Schema::Def::Root do
         boxfuse
         cargo
         catalyze
-        chef-supermarket
+        chef_supermarket
         cloud66
-        cloudcontrol
         cloudfiles
         cloudfoundry
         codedeploy
@@ -168,6 +167,7 @@ describe Travis::Yml::Schema::Def::Root do
         gae
         gcs
         hackage
+        hephy
         heroku
         lambda
         launchpad
@@ -187,6 +187,7 @@ describe Travis::Yml::Schema::Def::Root do
         snap
         surge
         testfairy
+        transifex
       ),
       language: %i(
         __amethyst__

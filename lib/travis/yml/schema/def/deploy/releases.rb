@@ -15,7 +15,7 @@ module Travis
             register :releases
 
             def define
-              map :user,               to: :secure, strict: false
+              map :username,           to: :secure, strict: false, alias: :user
               map :password,           to: :secure
               map :api_key,            to: :secure
               map :repo,               to: :str

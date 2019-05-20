@@ -50,4 +50,17 @@ describe Travis::Yml, 'anynines' do
       it { should_not have_msg }
     end
   end
+
+  describe 'manifest' do
+    describe 'given a str' do
+      yaml %(
+        deploy:
+          - provider: anynines
+            manifest: str
+      )
+
+      it { should serialize_to deploy: [provider: 'anynines', manifest: 'str'] }
+      it { should_not have_msg }
+    end
+  end
 end

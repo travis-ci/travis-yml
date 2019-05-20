@@ -80,9 +80,9 @@ describe Travis::Yml, 'opsworks' do
       yaml %(
         deploy:
           provider: opsworks
-          wait_until_deployed: str
+          wait_until_deployed: true
       )
-      it { should serialize_to deploy: [provider: 'opsworks', wait_until_deployed: 'str'] }
+      it { should serialize_to deploy: [provider: 'opsworks', wait_until_deployed: true] }
       it { should_not have_msg }
     end
   end

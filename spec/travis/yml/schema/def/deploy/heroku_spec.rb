@@ -24,6 +24,9 @@ describe Travis::Yml::Schema::Def::Deploy::Heroku do
                   :true
                 ]
               },
+              run: {
+                type: :string
+              },
               allow_failure: {
                 type: :boolean
               },
@@ -44,9 +47,6 @@ describe Travis::Yml::Schema::Def::Deploy::Heroku do
                   'api',
                   'git'
                 ]
-              },
-              buildpack: {
-                type: :string
               },
               app: {
                 anyOf: [
@@ -86,6 +86,9 @@ describe Travis::Yml::Schema::Def::Deploy::Heroku do
               },
               run: {
                 '$ref': '#/definitions/type/strs'
+              },
+              git: {
+                type: :string
               }
             },
             additionalProperties: false,

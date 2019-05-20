@@ -35,6 +35,8 @@ module Travis
               map :tracing_mode,          to: :str, values: %i(Active PassThrough) #, default: :PassThrough
               map :publish,               to: :bool
               map :function_tags,         to: :secure # TODO ?
+              map :dot_match,             to: :bool
+              map :dead_letter_arn,       to: :str
             end
           end
         end

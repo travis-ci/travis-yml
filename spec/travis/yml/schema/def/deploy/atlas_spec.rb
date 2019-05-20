@@ -24,6 +24,9 @@ describe Travis::Yml::Schema::Def::Deploy::Atlas do
                   :true
                 ]
               },
+              run: {
+                type: :string
+              },
               allow_failure: {
                 type: :boolean
               },
@@ -56,6 +59,12 @@ describe Travis::Yml::Schema::Def::Deploy::Atlas do
               },
               vcs: {
                 type: :boolean
+              },
+              paths: {
+                '$ref': '#/definitions/type/strs'
+              },
+              args: {
+                type: :string
               },
               version: {
                 type: :boolean

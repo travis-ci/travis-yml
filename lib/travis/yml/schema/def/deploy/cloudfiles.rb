@@ -13,6 +13,7 @@ module Travis
               map :api_key,   to: :secure
               map :region,    to: :str
               map :container, to: :str
+              map :glob,      to: :str
               map :dot_match, to: :bool
             end
           end

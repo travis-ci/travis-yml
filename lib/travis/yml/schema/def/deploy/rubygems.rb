@@ -8,18 +8,15 @@ module Travis
             register :rubygems
 
             def define
-              # TODO according to the docs :gem can be a :str or a :map
-              # https://docs.travis-ci.com/user/deployment/rubygems/#gem-to-release
-              #
-              #   gem:
-              #     master: my-gem
-              #     old: my-gem-old
-
               map :api_key,      to: :map, type: :secure
+              # TODO strict does not end up on the secure
+              map :username,     to: :map, type: :secure, strict: false
+              map :password,     to: :map, type: :secure
               map :gem,          to: :map, type: :str
               map :file,         to: :str
               map :gemspec,      to: :str
               map :gemspec_glob, to: :str
+              map :host,         to: :str
             end
           end
         end

@@ -10,13 +10,16 @@ module Travis
             register :packagecloud
 
             def define
-              map :username,     to: :secure, strict: false
-              map :token,        to: :secure
-              map :repository,   to: :str
-              map :local_dir,    to: :str
-              map :dist,         to: :str
-              map :package_glob, to: :str
-              map :force,        to: :bool
+              map :username,        to: :secure, strict: false
+              map :token,           to: :secure
+              map :repository,      to: :str
+              map :local_dir,       to: :str
+              map :dist,            to: :str
+              map :package_glob,    to: :str
+              map :force,           to: :bool
+              map :connect_timeout, to: :num
+              map :read_timeout,    to: :num
+              map :write_timeout,   to: :num
             end
           end
         end

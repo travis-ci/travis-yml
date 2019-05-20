@@ -45,6 +45,7 @@ module Travis
 
               map :provider,      to: :str, values: registry_key, required: true, strict: true
               map :on,            to: :conditions, alias: :true
+              map :run,           to: :str
               map :allow_failure, to: :bool
               map :skip_cleanup,  to: :bool
               map :edge,          to: :edge
@@ -141,7 +142,6 @@ require 'travis/yml/schema/def/deploy/cargo'
 require 'travis/yml/schema/def/deploy/catalyze'
 require 'travis/yml/schema/def/deploy/chef_supermarket'
 require 'travis/yml/schema/def/deploy/cloud66'
-require 'travis/yml/schema/def/deploy/cloudcontrol'
 require 'travis/yml/schema/def/deploy/cloudfiles'
 require 'travis/yml/schema/def/deploy/cloudfoundry'
 require 'travis/yml/schema/def/deploy/codedeploy'
@@ -153,6 +153,7 @@ require 'travis/yml/schema/def/deploy/firebase'
 require 'travis/yml/schema/def/deploy/gae'
 require 'travis/yml/schema/def/deploy/gcs'
 require 'travis/yml/schema/def/deploy/hackage'
+require 'travis/yml/schema/def/deploy/hephy'
 require 'travis/yml/schema/def/deploy/heroku'
 require 'travis/yml/schema/def/deploy/lambda'
 require 'travis/yml/schema/def/deploy/launchpad'
@@ -172,3 +173,4 @@ require 'travis/yml/schema/def/deploy/script'
 require 'travis/yml/schema/def/deploy/snap'
 require 'travis/yml/schema/def/deploy/surge'
 require 'travis/yml/schema/def/deploy/testfairy'
+require 'travis/yml/schema/def/deploy/transifex'

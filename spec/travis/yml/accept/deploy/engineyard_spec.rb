@@ -1,15 +1,15 @@
 describe Travis::Yml, 'engineyard' do
   subject { described_class.apply(parse(yaml)) }
 
-  describe 'username' do
+  describe 'email' do
     describe 'given a secure' do
       yaml %(
         deploy:
           provider: engineyard
-          username:
+          email:
             secure: secure
       )
-      it { should serialize_to deploy: [provider: 'engineyard', username: { secure: 'secure' }] }
+      it { should serialize_to deploy: [provider: 'engineyard', email: { secure: 'secure' }] }
       it { should_not have_msg }
     end
   end

@@ -24,6 +24,9 @@ describe Travis::Yml::Schema::Def::Deploy::Opsworks do
                   :true
                 ]
               },
+              run: {
+                type: :string
+              },
               allow_failure: {
                 type: :boolean
               },
@@ -56,13 +59,16 @@ describe Travis::Yml::Schema::Def::Deploy::Opsworks do
                 type: :boolean
               },
               wait_until_deployed: {
-                type: :string
+                type: :boolean
               },
               custom_json: {
                 type: :string
               },
-              update_app_on_success: {
-                type: :boolean
+              update_on_success: {
+                type: :boolean,
+                aliases: [
+                  :update_app_on_success
+                ]
               }
             },
             additionalProperties: false,

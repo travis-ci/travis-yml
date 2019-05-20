@@ -3,12 +3,15 @@ require 'yaml'
 describe Travis::Yml, docs: true, alert: false do
   SKIP = [
     # ignore
-    'docs_2016/deployment/006',       # example with an unknown awesome-experimental-provider
-    'docs_2016/encryption-keys/008',  # strings without a = are not valid env vars any more
-    'docs/deployment/010',            # example with an unknown awesome-experimental-provider
-    'docs/encryption-keys/001',       # incomplete .travis.yml (secure on root)
-    'docs/encryption-keys/009',       # strings without a = are not valid env vars any more
-    'docs/reference/windows/001',     # example missing language
+    'docs_2016/deployment/006',            # example with an unknown awesome-experimental-provider
+    'docs_2016/encryption-keys/008',       # strings without a = are not valid env vars any more
+    'docs/deployment/010',                 # example with an unknown awesome-experimental-provider
+    'docs/encryption-keys/001',            # incomplete .travis.yml (secure on root)
+    'docs/encryption-keys/009',            # strings without a = are not valid env vars any more
+    'docs/reference/windows/001',          # example missing language
+    'docs/deployment/002',                 # using dead cloudcontrol example
+    'docs/deployment/opsworks/007',        # using dashed option names
+    'docs/deployment/chefsupermarket/001', # using dashed provider name
 
     # filter
     'docs/enterprise',                # not travis.yml snippets. gotta filter these using {: data-file=".travis.yml"}

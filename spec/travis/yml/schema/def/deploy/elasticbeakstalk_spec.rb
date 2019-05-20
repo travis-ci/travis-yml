@@ -24,6 +24,9 @@ describe Travis::Yml::Schema::Def::Deploy::Elasticbeanstalk do
                   :true
                 ]
               },
+              run: {
+                type: :string
+              },
               allow_failure: {
                 type: :boolean
               },
@@ -73,6 +76,12 @@ describe Travis::Yml::Schema::Def::Deploy::Elasticbeanstalk do
                   }
                 ]
               },
+              description: {
+                type: :string
+              },
+              label: {
+                type: :string
+              },
               zip_file: {
                 type: :string
               },
@@ -83,6 +92,9 @@ describe Travis::Yml::Schema::Def::Deploy::Elasticbeanstalk do
                 type: :string
               },
               only_create_app_version: {
+                type: :boolean
+              },
+              wait_until_deployed: {
                 type: :boolean
               }
             },

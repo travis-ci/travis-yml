@@ -24,6 +24,9 @@ describe Travis::Yml::Schema::Def::Deploy::Cloud66 do
                   :true
                 ]
               },
+              run: {
+                type: :string
+              },
               allow_failure: {
                 type: :boolean
               },

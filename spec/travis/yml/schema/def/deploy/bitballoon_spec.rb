@@ -24,6 +24,9 @@ describe Travis::Yml::Schema::Def::Deploy::Bitballoon do
                   :true
                 ]
               },
+              run: {
+                type: :string
+              },
               allow_failure: {
                 type: :boolean
               },
@@ -33,13 +36,13 @@ describe Travis::Yml::Schema::Def::Deploy::Bitballoon do
               edge: {
                 '$ref': '#/definitions/deploy/edge'
               },
-              'access-token': {
+              access_token: {
                 '$ref': '#/definitions/type/secure'
               },
-              'site-id': {
+              site_id: {
                 '$ref': '#/definitions/type/secure'
               },
-              'local-dir': {
+              local_dir: {
                 type: :string
               }
             },

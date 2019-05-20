@@ -4,8 +4,8 @@ module Travis
     module Schema
       module Def
         module Deploy
-          class Deis < Deploy
-            register :deis
+          class Hephy < Deploy
+            register :hephy
 
             def define
               map :controller,  to: :str

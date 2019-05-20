@@ -4,16 +4,14 @@ module Travis
     module Schema
       module Def
         module Deploy
-          class Deis < Deploy
-            register :deis
+          class Transifex < Deploy
+            register :transifex
 
             def define
-              map :controller,  to: :str
               map :username,    to: :secure, strict: false
               map :password,    to: :secure
-              map :app,         to: :str
+              map :hostname,    to: :str
               map :cli_version, to: :str
-              map :verbose,     to: :bool
             end
           end
         end

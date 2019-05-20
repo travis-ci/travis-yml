@@ -24,6 +24,9 @@ describe Travis::Yml::Schema::Def::Deploy::Gae do
                   :true
                 ]
               },
+              run: {
+                type: :string
+              },
               allow_failure: {
                 type: :boolean
               },

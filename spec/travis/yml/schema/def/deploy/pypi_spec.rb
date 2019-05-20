@@ -24,6 +24,9 @@ describe Travis::Yml::Schema::Def::Deploy::Pypi do
                   :true
                 ]
               },
+              run: {
+                type: :string
+              },
               allow_failure: {
                 type: :boolean
               },
@@ -33,9 +36,12 @@ describe Travis::Yml::Schema::Def::Deploy::Pypi do
               edge: {
                 '$ref': '#/definitions/deploy/edge'
               },
-              user: {
+              username: {
                 '$ref': '#/definitions/type/secure',
-                strict: false
+                strict: false,
+                aliases: [
+                  :user
+                ]
               },
               password: {
                 '$ref': '#/definitions/type/secure'
@@ -57,7 +63,16 @@ describe Travis::Yml::Schema::Def::Deploy::Pypi do
               },
               skip_upload_docs: {
                 type: :boolean
-              }
+              },
+              setuptools_version: {
+                type: :string
+              },
+              twine_version: {
+                type: :string
+              },
+              wheel_version: {
+                type: :string
+              },
             },
             additionalProperties: false,
             normal: true,

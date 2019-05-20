@@ -24,6 +24,9 @@ describe Travis::Yml::Schema::Def::Deploy::Surge do
                   :true
                 ]
               },
+              run: {
+                type: :string
+              },
               allow_failure: {
                 type: :boolean
               },
@@ -32,6 +35,13 @@ describe Travis::Yml::Schema::Def::Deploy::Surge do
               },
               edge: {
                 '$ref': '#/definitions/deploy/edge'
+              },
+              login: {
+                '$ref': '#/definitions/type/secure',
+                strict: false
+              },
+              token: {
+                '$ref': '#/definitions/type/secure',
               },
               project: {
                 type: :string

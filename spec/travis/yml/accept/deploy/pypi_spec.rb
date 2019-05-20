@@ -6,10 +6,10 @@ describe Travis::Yml, 'pypi' do
       yaml %(
         deploy:
           provider: pypi
-          user:
+          username:
             secure: secure
       )
-      it { should serialize_to deploy: [provider: 'pypi', user: { secure: 'secure' }] }
+      it { should serialize_to deploy: [provider: 'pypi', username: { secure: 'secure' }] }
       it { should_not have_msg }
     end
   end

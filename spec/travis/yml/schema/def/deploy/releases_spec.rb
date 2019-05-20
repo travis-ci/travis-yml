@@ -24,6 +24,9 @@ describe Travis::Yml::Schema::Def::Deploy::Releases do
                   :true
                 ]
               },
+              run: {
+                type: :string
+              },
               allow_failure: {
                 type: :boolean
               },
@@ -33,9 +36,12 @@ describe Travis::Yml::Schema::Def::Deploy::Releases do
               edge: {
                 '$ref': '#/definitions/deploy/edge'
               },
-              user: {
+              username: {
                 '$ref': '#/definitions/type/secure',
-                strict: false
+                strict: false,
+                aliases: [
+                  :user
+                ]
               },
               password: {
                 '$ref': '#/definitions/type/secure'

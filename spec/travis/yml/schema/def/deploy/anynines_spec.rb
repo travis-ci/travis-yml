@@ -24,6 +24,9 @@ describe Travis::Yml::Schema::Def::Deploy::Anynines do
                   :true
                 ]
               },
+              run: {
+                type: :string
+              },
               allow_failure: {
                 type: :boolean
               },
@@ -47,6 +50,9 @@ describe Travis::Yml::Schema::Def::Deploy::Anynines do
                 type: :string
               },
               app_name: {
+                type: :string
+              },
+              manifest: {
                 type: :string
               }
             },

@@ -19,12 +19,14 @@ module Travis
               map :deployment_group,    to: :str
               map :revision_type,       to: :str, values: %i(s3 github) #, ignore_case: true TODO
               map :commit_id,           to: :str
+              map :description,         to: :str
               map :repository,          to: :str
               map :region,              to: :str
               map :wait_until_deployed, to: :bool
               map :bucket,              to: :str
               map :key,                 to: :str
               map :bundle_type,         to: :str
+              map :endpoint,            to: :str
             end
           end
         end
