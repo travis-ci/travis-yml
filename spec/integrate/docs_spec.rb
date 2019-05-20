@@ -10,6 +10,7 @@ describe Travis::Yml, docs: true, alert: false do
     'docs/encryption-keys/009',            # strings without a = are not valid env vars any more
     'docs/reference/windows/001',          # example missing language
     'docs/deployment/002',                 # using dead cloudcontrol example
+    'docs/deployment/005',                 # using dead appfog example
     'docs/deployment/opsworks/007',        # using dashed option names
     'docs/deployment/chefsupermarket/001', # using dashed provider name
 
