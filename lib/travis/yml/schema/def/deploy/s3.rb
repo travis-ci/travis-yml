@@ -26,6 +26,7 @@ module Travis
               map :default_text_charset,   to: :str
               map :server_side_encryption, to: :bool
               map :endpoint,               to: :str
+              map :max_threads,            to: :num
             end
           end
         end

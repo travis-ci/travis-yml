@@ -24,6 +24,9 @@ describe Travis::Yml::Schema::Def::Deploy::Codedeploy do
                   :true
                 ]
               },
+              run: {
+                type: :string
+              },
               allow_failure: {
                 type: :boolean
               },
@@ -53,6 +56,9 @@ describe Travis::Yml::Schema::Def::Deploy::Codedeploy do
                   'github'
                 ]
               },
+              description: {
+                type: :string
+              },
               commit_id: {
                 type: :string
               },
@@ -72,6 +78,9 @@ describe Travis::Yml::Schema::Def::Deploy::Codedeploy do
                 type: :string
               },
               bundle_type: {
+                type: :string
+              },
+              endpoint: {
                 type: :string
               }
             },

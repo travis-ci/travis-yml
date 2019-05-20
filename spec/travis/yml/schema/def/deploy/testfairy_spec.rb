@@ -24,6 +24,9 @@ describe Travis::Yml::Schema::Def::Deploy::Testfairy do
                   :true
                 ]
               },
+              run: {
+                type: :string
+              },
               allow_failure: {
                 type: :boolean
               },
@@ -58,7 +61,7 @@ describe Travis::Yml::Schema::Def::Deploy::Testfairy do
                 type: :string
               },
               screenshot_interval: {
-                type: :string
+                type: :number
               },
               max_duration: {
                 type: :string

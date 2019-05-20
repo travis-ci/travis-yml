@@ -24,6 +24,9 @@ describe Travis::Yml::Schema::Def::Deploy::Engineyard do
                   :true
                 ]
               },
+              run: {
+                type: :string
+              },
               allow_failure: {
                 type: :boolean
               },
@@ -33,12 +36,16 @@ describe Travis::Yml::Schema::Def::Deploy::Engineyard do
               edge: {
                 '$ref': '#/definitions/deploy/edge'
               },
-              username: {
+              email: {
                 '$ref': '#/definitions/type/secure',
                 strict: false
               },
               password: {
                 '$ref': '#/definitions/type/secure'
+              },
+              account: {
+                '$ref': '#/definitions/type/secure',
+                strict: false
               },
               api_key: {
                 '$ref': '#/definitions/type/secure'

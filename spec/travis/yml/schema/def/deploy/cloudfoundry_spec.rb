@@ -24,6 +24,9 @@ describe Travis::Yml::Schema::Def::Deploy::Cloudfoundry do
                   :true
                 ]
               },
+              run: {
+                type: :string
+              },
               allow_failure: {
                 type: :boolean
               },

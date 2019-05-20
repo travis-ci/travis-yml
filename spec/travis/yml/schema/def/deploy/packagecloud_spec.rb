@@ -24,6 +24,9 @@ describe Travis::Yml::Schema::Def::Deploy::Packagecloud do
                   :true
                 ]
               },
+              run: {
+                type: :string
+              },
               allow_failure: {
                 type: :boolean
               },
@@ -54,7 +57,16 @@ describe Travis::Yml::Schema::Def::Deploy::Packagecloud do
               },
               force: {
                 type: :boolean
-              }
+              },
+              connect_timeout: {
+                type: :number
+              },
+              read_timeout: {
+                type: :number
+              },
+              write_timeout: {
+                type: :number
+              },
             },
             additionalProperties: false,
             normal: true,

@@ -114,9 +114,9 @@ describe Travis::Yml, 'testfairy' do
       yaml %(
         deploy:
           provider: testfairy
-          screenshot_interval: str
+          screenshot_interval: 1
       )
-      it { should serialize_to deploy: [provider: 'testfairy', screenshot_interval: 'str'] }
+      it { should serialize_to deploy: [provider: 'testfairy', screenshot_interval: 1] }
       it { should_not have_msg }
     end
   end

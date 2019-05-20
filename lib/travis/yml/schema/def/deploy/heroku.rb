@@ -12,12 +12,13 @@ module Travis
 
             def define
               map :strategy,  to: :heroku_strategy
-              map :buildpack, to: :str
-              map :app,       to: :map, type: :str
               map :api_key,   to: :map, type: :secure
               map :username,  to: :secure
               map :password,  to: :secure
+              map :app,       to: :map, type: :str
+              map :git,       to: :str
               map :run,       to: :seq
+              # map :buildpack, to: :str
             end
           end
 

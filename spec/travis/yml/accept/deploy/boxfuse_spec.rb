@@ -27,14 +27,14 @@ describe Travis::Yml, 'boxfuse' do
     end
   end
 
-  describe 'configfile' do
+  describe 'config_file' do
     describe 'given a str' do
       yaml %(
         deploy:
           provider: boxfuse
-          configfile: str
+          config_file: str
       )
-      it { should serialize_to deploy: [provider: 'boxfuse', configfile: 'str'] }
+      it { should serialize_to deploy: [provider: 'boxfuse', config_file: 'str'] }
       it { should_not have_msg }
     end
   end

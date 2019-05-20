@@ -1,12 +1,12 @@
-describe Travis::Yml::Schema::Def::Deploy::Cloudcontrol do
-  subject { Travis::Yml.schema[:definitions][:deploy][:cloudcontrol] }
+describe Travis::Yml::Schema::Def::Deploy::ChefSupermarket do
+  subject { Travis::Yml.schema[:definitions][:deploy][:chef_supermarket] }
 
   # it { puts JSON.pretty_generate(subject) }
 
   it do
     should eq(
-      '$id': :deploy_cloudcontrol,
-        title: 'Deploy Cloudcontrol',
+      '$id': :'deploy_chef_supermarket',
+        title: 'Deploy Chef Supermarket',
         anyOf: [
           {
             type: :object,
@@ -14,7 +14,7 @@ describe Travis::Yml::Schema::Def::Deploy::Cloudcontrol do
               provider: {
                 type: :string,
                 enum: [
-                  'cloudcontrol'
+                  'chef_supermarket'
                 ],
                 strict: true
               },
@@ -23,6 +23,9 @@ describe Travis::Yml::Schema::Def::Deploy::Cloudcontrol do
                 aliases: [
                   :true
                 ]
+              },
+              run: {
+                type: :string
               },
               allow_failure: {
                 type: :boolean
@@ -33,14 +36,16 @@ describe Travis::Yml::Schema::Def::Deploy::Cloudcontrol do
               edge: {
                 '$ref': '#/definitions/deploy/edge'
               },
-              email: {
-                '$ref': '#/definitions/type/secure',
-                strict: false
-              },
-              password: {
+              user_id: {
                 '$ref': '#/definitions/type/secure'
               },
-              deployment: {
+              client_key: {
+                '$ref': '#/definitions/type/secure'
+              },
+              cookbook_name: {
+                type: :string
+              },
+              cookbook_category: {
                 type: :string
               }
             },
@@ -56,7 +61,7 @@ describe Travis::Yml::Schema::Def::Deploy::Cloudcontrol do
           {
             type: :string,
             enum: [
-              'cloudcontrol'
+              'chef_supermarket'
             ],
             strict: true
           }

@@ -24,6 +24,9 @@ describe Travis::Yml::Schema::Def::Deploy::Lambda do
                   :true
                 ]
               },
+              run: {
+                type: :string
+              },
               allow_failure: {
                 type: :boolean
               },
@@ -97,6 +100,12 @@ describe Travis::Yml::Schema::Def::Deploy::Lambda do
               },
               function_tags: {
                 '$ref': '#/definitions/type/secure'
+              },
+              dot_match: {
+                type: :boolean
+              },
+              dead_letter_arn: {
+                type: :string
               }
             },
             additionalProperties: false,

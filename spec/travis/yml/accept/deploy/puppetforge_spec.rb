@@ -22,7 +22,7 @@ describe Travis::Yml, 'puppetforge' do
         provider: puppetforge
         password: str
     )
-    it { should serialize_to **defaults, deploy: [{ provider: 'puppetforge', password: 'str'}] }
+    it { should serialize_to **defaults, deploy: [provider: 'puppetforge', password: 'str'] }
     it { should have_msg [:error, :deploy, :required, key: 'user', provider: 'puppetforge'] }
     it { should_not have_msg [:error, :deploy, :required, key: 'password', provider: 'puppetforge'] }
   end
@@ -33,7 +33,7 @@ describe Travis::Yml, 'puppetforge' do
         provider: puppetforge
         user: str
     )
-    it { should serialize_to **defaults, deploy: [{ provider: 'puppetforge', user: 'str'}] }
+    it { should serialize_to **defaults, deploy: [provider: 'puppetforge', user: 'str'] }
     it { should_not have_msg [:error, :deploy, :required, key: 'user', provider: 'puppetforge'] }
     it { should have_msg [:error, :deploy, :required, key: 'password', provider: 'puppetforge'] }
   end

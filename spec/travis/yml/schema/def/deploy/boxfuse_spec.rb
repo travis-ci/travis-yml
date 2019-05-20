@@ -24,6 +24,9 @@ describe Travis::Yml::Schema::Def::Deploy::Boxfuse do
                   :true
                 ]
               },
+              run: {
+                type: :string
+              },
               allow_failure: {
                 type: :boolean
               },
@@ -40,8 +43,11 @@ describe Travis::Yml::Schema::Def::Deploy::Boxfuse do
               secret: {
                 '$ref': '#/definitions/type/secure'
               },
-              configfile: {
-                type: :string
+              config_file: {
+                type: :string,
+                aliases: [
+                  :configfile
+                ]
               },
               payload: {
                 type: :string

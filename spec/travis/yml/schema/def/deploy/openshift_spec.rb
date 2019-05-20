@@ -24,6 +24,9 @@ describe Travis::Yml::Schema::Def::Deploy::Openshift do
                   :true
                 ]
               },
+              run: {
+                type: :string
+              },
               allow_failure: {
                 type: :boolean
               },

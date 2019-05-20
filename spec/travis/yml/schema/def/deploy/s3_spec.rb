@@ -24,6 +24,9 @@ describe Travis::Yml::Schema::Def::Deploy::S3 do
                   :true
                 ]
               },
+              run: {
+                type: :string
+              },
               allow_failure: {
                 type: :boolean
               },
@@ -81,6 +84,9 @@ describe Travis::Yml::Schema::Def::Deploy::S3 do
               },
               endpoint: {
                 type: :string
+              },
+              max_threads: {
+                type: :number
               }
             },
             additionalProperties: false,

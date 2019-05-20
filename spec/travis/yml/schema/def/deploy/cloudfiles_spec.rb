@@ -24,6 +24,9 @@ describe Travis::Yml::Schema::Def::Deploy::Cloudfiles do
                   :true
                 ]
               },
+              run: {
+                type: :string
+              },
               allow_failure: {
                 type: :boolean
               },
@@ -44,6 +47,9 @@ describe Travis::Yml::Schema::Def::Deploy::Cloudfiles do
                 type: :string
               },
               container: {
+                type: :string
+              },
+              glob: {
                 type: :string
               },
               dot_match: {

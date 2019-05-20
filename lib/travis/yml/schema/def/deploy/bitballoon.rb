@@ -9,9 +9,9 @@ module Travis
             register :bitballoon
 
             def define
-              map :'access-token', to: :secure
-              map :'site-id',      to: :secure
-              map :'local-dir',    to: :str
+              map :access_token, to: :secure
+              map :site_id,      to: :secure
+              map :local_dir,    to: :str
             end
           end
         end

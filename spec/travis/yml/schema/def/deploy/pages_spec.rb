@@ -24,6 +24,9 @@ describe Travis::Yml::Schema::Def::Deploy::Pages do
                   :true
                 ]
               },
+              run: {
+                type: :string
+              },
               allow_failure: {
                 type: :boolean
               },

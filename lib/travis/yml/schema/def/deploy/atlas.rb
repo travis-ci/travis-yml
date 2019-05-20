@@ -19,6 +19,8 @@ module Travis
               map :debug,    to: :bool
               map :vcs,      to: :bool
               map :version,  to: :bool
+              map :paths,    to: :seq
+              map :args,     to: :str
             end
           end
         end

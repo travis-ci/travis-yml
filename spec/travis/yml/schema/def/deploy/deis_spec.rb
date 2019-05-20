@@ -24,6 +24,9 @@ describe Travis::Yml::Schema::Def::Deploy::Deis do
                   :true
                 ]
               },
+              run: {
+                type: :string
+              },
               allow_failure: {
                 type: :boolean
               },
@@ -48,6 +51,9 @@ describe Travis::Yml::Schema::Def::Deploy::Deis do
               },
               cli_version: {
                 type: :string
+              },
+              verbose: {
+                type: :boolean
               }
             },
             additionalProperties: false,

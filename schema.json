@@ -4452,6 +4452,9 @@
                   "true"
                 ]
               },
+              "run": {
+                "type": "string"
+              },
               "allow_failure": {
                 "type": "boolean"
               },
@@ -4475,6 +4478,9 @@
                 "type": "string"
               },
               "app_name": {
+                "type": "string"
+              },
+              "manifest": {
                 "type": "string"
               }
             },
@@ -4516,6 +4522,9 @@
                 "aliases": [
                   "true"
                 ]
+              },
+              "run": {
+                "type": "string"
               },
               "allow_failure": {
                 "type": "boolean"
@@ -4627,6 +4636,9 @@
                   "true"
                 ]
               },
+              "run": {
+                "type": "string"
+              },
               "allow_failure": {
                 "type": "boolean"
               },
@@ -4662,6 +4674,12 @@
               },
               "version": {
                 "type": "boolean"
+              },
+              "paths": {
+                "$ref": "#/definitions/type/strs"
+              },
+              "args": {
+                "type": "string"
               }
             },
             "additionalProperties": false,
@@ -4702,6 +4720,9 @@
                 "aliases": [
                   "true"
                 ]
+              },
+              "run": {
+                "type": "string"
               },
               "allow_failure": {
                 "type": "boolean"
@@ -4768,6 +4789,9 @@
                   "true"
                 ]
               },
+              "run": {
+                "type": "string"
+              },
               "allow_failure": {
                 "type": "boolean"
               },
@@ -4833,6 +4857,9 @@
                   "true"
                 ]
               },
+              "run": {
+                "type": "string"
+              },
               "allow_failure": {
                 "type": "boolean"
               },
@@ -4842,13 +4869,13 @@
               "edge": {
                 "$ref": "#/definitions/deploy/edge"
               },
-              "access-token": {
+              "access_token": {
                 "$ref": "#/definitions/type/secure"
               },
-              "site-id": {
+              "site_id": {
                 "$ref": "#/definitions/type/secure"
               },
-              "local-dir": {
+              "local_dir": {
                 "type": "string"
               }
             },
@@ -4890,6 +4917,9 @@
                 "aliases": [
                   "true"
                 ]
+              },
+              "run": {
+                "type": "string"
               },
               "allow_failure": {
                 "type": "boolean"
@@ -4968,6 +4998,9 @@
                   "true"
                 ]
               },
+              "run": {
+                "type": "string"
+              },
               "allow_failure": {
                 "type": "boolean"
               },
@@ -4984,8 +5017,11 @@
               "secret": {
                 "$ref": "#/definitions/type/secure"
               },
-              "configfile": {
-                "type": "string"
+              "config_file": {
+                "type": "string",
+                "aliases": [
+                  "configfile"
+                ]
               },
               "payload": {
                 "type": "string"
@@ -5066,6 +5102,9 @@
                   "true"
                 ]
               },
+              "run": {
+                "type": "string"
+              },
               "allow_failure": {
                 "type": "boolean"
               },
@@ -5118,6 +5157,9 @@
                   "true"
                 ]
               },
+              "run": {
+                "type": "string"
+              },
               "allow_failure": {
                 "type": "boolean"
               },
@@ -5153,8 +5195,8 @@
         ],
         "normal": true
       },
-      "chef-supermarket": {
-        "$id": "deploy_chef-supermarket",
+      "chef_supermarket": {
+        "$id": "deploy_chef_supermarket",
         "title": "Deploy Chef Supermarket",
         "anyOf": [
           {
@@ -5163,7 +5205,7 @@
               "provider": {
                 "type": "string",
                 "enum": [
-                  "chef-supermarket"
+                  "chef_supermarket"
                 ],
                 "strict": true
               },
@@ -5172,6 +5214,9 @@
                 "aliases": [
                   "true"
                 ]
+              },
+              "run": {
+                "type": "string"
               },
               "allow_failure": {
                 "type": "boolean"
@@ -5187,6 +5232,9 @@
               },
               "client_key": {
                 "$ref": "#/definitions/type/secure"
+              },
+              "cookbook_name": {
+                "type": "string"
               },
               "cookbook_category": {
                 "type": "string"
@@ -5204,7 +5252,7 @@
           {
             "type": "string",
             "enum": [
-              "chef-supermarket"
+              "chef_supermarket"
             ],
             "strict": true
           }
@@ -5230,6 +5278,9 @@
                 "aliases": [
                   "true"
                 ]
+              },
+              "run": {
+                "type": "string"
               },
               "allow_failure": {
                 "type": "boolean"
@@ -5263,65 +5314,6 @@
         ],
         "normal": true
       },
-      "cloudcontrol": {
-        "$id": "deploy_cloudcontrol",
-        "title": "Deploy Cloudcontrol",
-        "anyOf": [
-          {
-            "type": "object",
-            "properties": {
-              "provider": {
-                "type": "string",
-                "enum": [
-                  "cloudcontrol"
-                ],
-                "strict": true
-              },
-              "on": {
-                "$ref": "#/definitions/deploy/conditions",
-                "aliases": [
-                  "true"
-                ]
-              },
-              "allow_failure": {
-                "type": "boolean"
-              },
-              "skip_cleanup": {
-                "type": "boolean"
-              },
-              "edge": {
-                "$ref": "#/definitions/deploy/edge"
-              },
-              "email": {
-                "$ref": "#/definitions/type/secure",
-                "strict": false
-              },
-              "password": {
-                "$ref": "#/definitions/type/secure"
-              },
-              "deployment": {
-                "type": "string"
-              }
-            },
-            "additionalProperties": false,
-            "normal": true,
-            "prefix": {
-              "key": "provider"
-            },
-            "required": [
-              "provider"
-            ]
-          },
-          {
-            "type": "string",
-            "enum": [
-              "cloudcontrol"
-            ],
-            "strict": true
-          }
-        ],
-        "normal": true
-      },
       "cloudfiles": {
         "$id": "deploy_cloudfiles",
         "title": "Deploy Cloudfiles",
@@ -5341,6 +5333,9 @@
                 "aliases": [
                   "true"
                 ]
+              },
+              "run": {
+                "type": "string"
               },
               "allow_failure": {
                 "type": "boolean"
@@ -5362,6 +5357,9 @@
                 "type": "string"
               },
               "container": {
+                "type": "string"
+              },
+              "glob": {
                 "type": "string"
               },
               "dot_match": {
@@ -5406,6 +5404,9 @@
                 "aliases": [
                   "true"
                 ]
+              },
+              "run": {
+                "type": "string"
               },
               "allow_failure": {
                 "type": "boolean"
@@ -5484,6 +5485,9 @@
                   "true"
                 ]
               },
+              "run": {
+                "type": "string"
+              },
               "allow_failure": {
                 "type": "boolean"
               },
@@ -5516,6 +5520,9 @@
               "commit_id": {
                 "type": "string"
               },
+              "description": {
+                "type": "string"
+              },
               "repository": {
                 "type": "string"
               },
@@ -5532,6 +5539,9 @@
                 "type": "string"
               },
               "bundle_type": {
+                "type": "string"
+              },
+              "endpoint": {
                 "type": "string"
               }
             },
@@ -5624,6 +5634,9 @@
                   "true"
                 ]
               },
+              "run": {
+                "type": "string"
+              },
               "allow_failure": {
                 "type": "boolean"
               },
@@ -5648,6 +5661,9 @@
               },
               "cli_version": {
                 "type": "string"
+              },
+              "verbose": {
+                "type": "boolean"
               }
             },
             "additionalProperties": false,
@@ -5688,6 +5704,9 @@
                 "aliases": [
                   "true"
                 ]
+              },
+              "run": {
+                "type": "string"
               },
               "allow_failure": {
                 "type": "boolean"
@@ -5780,6 +5799,9 @@
                   "true"
                 ]
               },
+              "run": {
+                "type": "string"
+              },
               "allow_failure": {
                 "type": "boolean"
               },
@@ -5829,6 +5851,12 @@
                   }
                 ]
               },
+              "description": {
+                "type": "string"
+              },
+              "label": {
+                "type": "string"
+              },
               "zip_file": {
                 "type": "string"
               },
@@ -5839,6 +5867,9 @@
                 "type": "string"
               },
               "only_create_app_version": {
+                "type": "boolean"
+              },
+              "wait_until_deployed": {
                 "type": "boolean"
               }
             },
@@ -5881,6 +5912,9 @@
                   "true"
                 ]
               },
+              "run": {
+                "type": "string"
+              },
               "allow_failure": {
                 "type": "boolean"
               },
@@ -5890,7 +5924,7 @@
               "edge": {
                 "$ref": "#/definitions/deploy/edge"
               },
-              "username": {
+              "email": {
                 "$ref": "#/definitions/type/secure",
                 "strict": false
               },
@@ -5899,6 +5933,10 @@
               },
               "api_key": {
                 "$ref": "#/definitions/type/secure"
+              },
+              "account": {
+                "$ref": "#/definitions/type/secure",
+                "strict": false
               },
               "app": {
                 "anyOf": [
@@ -5973,6 +6011,9 @@
                   "true"
                 ]
               },
+              "run": {
+                "type": "string"
+              },
               "allow_failure": {
                 "type": "boolean"
               },
@@ -6030,6 +6071,9 @@
                 "aliases": [
                   "true"
                 ]
+              },
+              "run": {
+                "type": "string"
               },
               "allow_failure": {
                 "type": "boolean"
@@ -6106,6 +6150,9 @@
                 "aliases": [
                   "true"
                 ]
+              },
+              "run": {
+                "type": "string"
               },
               "allow_failure": {
                 "type": "boolean"
@@ -6184,6 +6231,9 @@
                   "true"
                 ]
               },
+              "run": {
+                "type": "string"
+              },
               "allow_failure": {
                 "type": "boolean"
               },
@@ -6220,6 +6270,77 @@
         ],
         "normal": true
       },
+      "hephy": {
+        "$id": "deploy_hephy",
+        "title": "Deploy Hephy",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "provider": {
+                "type": "string",
+                "enum": [
+                  "hephy"
+                ],
+                "strict": true
+              },
+              "on": {
+                "$ref": "#/definitions/deploy/conditions",
+                "aliases": [
+                  "true"
+                ]
+              },
+              "run": {
+                "type": "string"
+              },
+              "allow_failure": {
+                "type": "boolean"
+              },
+              "skip_cleanup": {
+                "type": "boolean"
+              },
+              "edge": {
+                "$ref": "#/definitions/deploy/edge"
+              },
+              "controller": {
+                "type": "string"
+              },
+              "username": {
+                "$ref": "#/definitions/type/secure",
+                "strict": false
+              },
+              "password": {
+                "$ref": "#/definitions/type/secure"
+              },
+              "app": {
+                "type": "string"
+              },
+              "cli_version": {
+                "type": "string"
+              },
+              "verbose": {
+                "type": "boolean"
+              }
+            },
+            "additionalProperties": false,
+            "normal": true,
+            "prefix": {
+              "key": "provider"
+            },
+            "required": [
+              "provider"
+            ]
+          },
+          {
+            "type": "string",
+            "enum": [
+              "hephy"
+            ],
+            "strict": true
+          }
+        ],
+        "normal": true
+      },
       "heroku": {
         "$id": "deploy_heroku",
         "title": "Deploy Heroku",
@@ -6240,6 +6361,9 @@
                   "true"
                 ]
               },
+              "run": {
+                "$ref": "#/definitions/type/strs"
+              },
               "allow_failure": {
                 "type": "boolean"
               },
@@ -6259,24 +6383,6 @@
                 "enum": [
                   "api",
                   "git"
-                ]
-              },
-              "buildpack": {
-                "type": "string"
-              },
-              "app": {
-                "anyOf": [
-                  {
-                    "type": "object",
-                    "patternProperties": {
-                      ".*": {
-                        "type": "string"
-                      }
-                    }
-                  },
-                  {
-                    "type": "string"
-                  }
                 ]
               },
               "api_key": {
@@ -6300,8 +6406,23 @@
               "password": {
                 "$ref": "#/definitions/type/secure"
               },
-              "run": {
-                "$ref": "#/definitions/type/strs"
+              "app": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "patternProperties": {
+                      ".*": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  {
+                    "type": "string"
+                  }
+                ]
+              },
+              "git": {
+                "type": "string"
               }
             },
             "additionalProperties": false,
@@ -6342,6 +6463,9 @@
                 "aliases": [
                   "true"
                 ]
+              },
+              "run": {
+                "type": "string"
               },
               "allow_failure": {
                 "type": "boolean"
@@ -6416,6 +6540,12 @@
               },
               "function_tags": {
                 "$ref": "#/definitions/type/secure"
+              },
+              "dot_match": {
+                "type": "boolean"
+              },
+              "dead_letter_arn": {
+                "type": "string"
               }
             },
             "additionalProperties": false,
@@ -6456,6 +6586,9 @@
                 "aliases": [
                   "true"
                 ]
+              },
+              "run": {
+                "type": "string"
               },
               "allow_failure": {
                 "type": "boolean"
@@ -6518,6 +6651,9 @@
                   "true"
                 ]
               },
+              "run": {
+                "type": "string"
+              },
               "allow_failure": {
                 "type": "boolean"
               },
@@ -6572,6 +6708,9 @@
                 "aliases": [
                   "true"
                 ]
+              },
+              "run": {
+                "type": "string"
               },
               "allow_failure": {
                 "type": "boolean"
@@ -6631,6 +6770,9 @@
                 "aliases": [
                   "true"
                 ]
+              },
+              "run": {
+                "type": "string"
               },
               "allow_failure": {
                 "type": "boolean"
@@ -6721,6 +6863,9 @@
                   "true"
                 ]
               },
+              "run": {
+                "type": "string"
+              },
               "allow_failure": {
                 "type": "boolean"
               },
@@ -6753,13 +6898,16 @@
                 "type": "boolean"
               },
               "wait_until_deployed": {
-                "type": "string"
+                "type": "boolean"
               },
               "custom_json": {
                 "type": "string"
               },
-              "update_app_on_success": {
-                "type": "boolean"
+              "update_on_success": {
+                "type": "boolean",
+                "aliases": [
+                  "update_app_on_success"
+                ]
               }
             },
             "additionalProperties": false,
@@ -6801,6 +6949,9 @@
                   "true"
                 ]
               },
+              "run": {
+                "type": "string"
+              },
               "allow_failure": {
                 "type": "boolean"
               },
@@ -6831,6 +6982,15 @@
               },
               "force": {
                 "type": "boolean"
+              },
+              "connect_timeout": {
+                "type": "number"
+              },
+              "read_timeout": {
+                "type": "number"
+              },
+              "write_timeout": {
+                "type": "number"
               }
             },
             "additionalProperties": false,
@@ -6871,6 +7031,9 @@
                 "aliases": [
                   "true"
                 ]
+              },
+              "run": {
+                "type": "string"
               },
               "allow_failure": {
                 "type": "boolean"
@@ -6981,13 +7144,10 @@
             "$ref": "#/definitions/deploy/catalyze"
           },
           {
-            "$ref": "#/definitions/deploy/chef-supermarket"
+            "$ref": "#/definitions/deploy/chef_supermarket"
           },
           {
             "$ref": "#/definitions/deploy/cloud66"
-          },
-          {
-            "$ref": "#/definitions/deploy/cloudcontrol"
           },
           {
             "$ref": "#/definitions/deploy/cloudfiles"
@@ -7021,6 +7181,9 @@
           },
           {
             "$ref": "#/definitions/deploy/hackage"
+          },
+          {
+            "$ref": "#/definitions/deploy/hephy"
           },
           {
             "$ref": "#/definitions/deploy/heroku"
@@ -7078,6 +7241,9 @@
           },
           {
             "$ref": "#/definitions/deploy/testfairy"
+          },
+          {
+            "$ref": "#/definitions/deploy/transifex"
           }
         ],
         "normal": true,
@@ -7102,6 +7268,9 @@
                 "aliases": [
                   "true"
                 ]
+              },
+              "run": {
+                "type": "string"
               },
               "allow_failure": {
                 "type": "boolean"
@@ -7164,6 +7333,9 @@
                   "true"
                 ]
               },
+              "run": {
+                "type": "string"
+              },
               "allow_failure": {
                 "type": "boolean"
               },
@@ -7173,9 +7345,12 @@
               "edge": {
                 "$ref": "#/definitions/deploy/edge"
               },
-              "user": {
+              "username": {
                 "$ref": "#/definitions/type/secure",
-                "strict": false
+                "strict": false,
+                "aliases": [
+                  "user"
+                ]
               },
               "password": {
                 "$ref": "#/definitions/type/secure"
@@ -7197,6 +7372,15 @@
               },
               "skip_upload_docs": {
                 "type": "boolean"
+              },
+              "setuptools_version": {
+                "type": "string"
+              },
+              "twine_version": {
+                "type": "string"
+              },
+              "wheel_version": {
+                "type": "string"
               }
             },
             "additionalProperties": false,
@@ -7238,6 +7422,9 @@
                   "true"
                 ]
               },
+              "run": {
+                "type": "string"
+              },
               "allow_failure": {
                 "type": "boolean"
               },
@@ -7247,9 +7434,12 @@
               "edge": {
                 "$ref": "#/definitions/deploy/edge"
               },
-              "user": {
+              "username": {
                 "$ref": "#/definitions/type/secure",
-                "strict": false
+                "strict": false,
+                "aliases": [
+                  "user"
+                ]
               },
               "password": {
                 "$ref": "#/definitions/type/secure"
@@ -7333,6 +7523,9 @@
                   "true"
                 ]
               },
+              "run": {
+                "type": "string"
+              },
               "allow_failure": {
                 "type": "boolean"
               },
@@ -7343,6 +7536,36 @@
                 "$ref": "#/definitions/deploy/edge"
               },
               "api_key": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "patternProperties": {
+                      ".*": {
+                        "$ref": "#/definitions/type/secure"
+                      }
+                    }
+                  },
+                  {
+                    "$ref": "#/definitions/type/secure"
+                  }
+                ]
+              },
+              "username": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "patternProperties": {
+                      ".*": {
+                        "$ref": "#/definitions/type/secure"
+                      }
+                    }
+                  },
+                  {
+                    "$ref": "#/definitions/type/secure"
+                  }
+                ]
+              },
+              "password": {
                 "anyOf": [
                   {
                     "type": "object",
@@ -7379,6 +7602,9 @@
                 "type": "string"
               },
               "gemspec_glob": {
+                "type": "string"
+              },
+              "host": {
                 "type": "string"
               }
             },
@@ -7420,6 +7646,9 @@
                 "aliases": [
                   "true"
                 ]
+              },
+              "run": {
+                "type": "string"
               },
               "allow_failure": {
                 "type": "boolean"
@@ -7478,6 +7707,9 @@
               },
               "endpoint": {
                 "type": "string"
+              },
+              "max_threads": {
+                "type": "number"
               }
             },
             "additionalProperties": false,
@@ -7518,6 +7750,9 @@
                 "aliases": [
                   "true"
                 ]
+              },
+              "run": {
+                "type": "string"
               },
               "allow_failure": {
                 "type": "boolean"
@@ -7590,6 +7825,9 @@
                   "true"
                 ]
               },
+              "run": {
+                "type": "string"
+              },
               "allow_failure": {
                 "type": "boolean"
               },
@@ -7641,6 +7879,9 @@
                 "aliases": [
                   "true"
                 ]
+              },
+              "run": {
+                "type": "string"
               },
               "allow_failure": {
                 "type": "boolean"
@@ -7700,6 +7941,9 @@
                   "true"
                 ]
               },
+              "run": {
+                "type": "string"
+              },
               "allow_failure": {
                 "type": "boolean"
               },
@@ -7708,6 +7952,13 @@
               },
               "edge": {
                 "$ref": "#/definitions/deploy/edge"
+              },
+              "login": {
+                "$ref": "#/definitions/type/secure",
+                "strict": false
+              },
+              "token": {
+                "$ref": "#/definitions/type/secure"
               },
               "project": {
                 "type": "string"
@@ -7755,6 +8006,9 @@
                   "true"
                 ]
               },
+              "run": {
+                "type": "string"
+              },
               "allow_failure": {
                 "type": "boolean"
               },
@@ -7789,7 +8043,7 @@
                 "type": "string"
               },
               "screenshot_interval": {
-                "type": "string"
+                "type": "number"
               },
               "max_duration": {
                 "type": "string"
@@ -7826,6 +8080,71 @@
             "type": "string",
             "enum": [
               "testfairy"
+            ],
+            "strict": true
+          }
+        ],
+        "normal": true
+      },
+      "transifex": {
+        "$id": "deploy_transifex",
+        "title": "Deploy Transifex",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "provider": {
+                "type": "string",
+                "enum": [
+                  "transifex"
+                ],
+                "strict": true
+              },
+              "on": {
+                "$ref": "#/definitions/deploy/conditions",
+                "aliases": [
+                  "true"
+                ]
+              },
+              "run": {
+                "type": "string"
+              },
+              "allow_failure": {
+                "type": "boolean"
+              },
+              "skip_cleanup": {
+                "type": "boolean"
+              },
+              "edge": {
+                "$ref": "#/definitions/deploy/edge"
+              },
+              "username": {
+                "$ref": "#/definitions/type/secure",
+                "strict": false
+              },
+              "password": {
+                "$ref": "#/definitions/type/secure"
+              },
+              "hostname": {
+                "type": "string"
+              },
+              "cli_version": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false,
+            "normal": true,
+            "prefix": {
+              "key": "provider"
+            },
+            "required": [
+              "provider"
+            ]
+          },
+          {
+            "type": "string",
+            "enum": [
+              "transifex"
             ],
             "strict": true
           }

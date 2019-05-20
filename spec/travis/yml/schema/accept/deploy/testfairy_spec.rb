@@ -77,8 +77,8 @@ describe Travis::Yml, 'accept deploy', slow: true do
     end
 
     describe 'screenshot_interval' do
-      it { should validate deploy: { provider: :testfairy, screenshot_interval: 'str' } }
-      it { should_not validate deploy: { provider: :testfairy, screenshot_interval: 1 } }
+      it { should validate deploy: { provider: :testfairy, screenshot_interval: 1 } }
+      it { should_not validate deploy: { provider: :testfairy, screenshot_interval: 'str' } }
       it { should_not validate deploy: { provider: :testfairy, screenshot_interval: true } }
       it { should_not validate deploy: { provider: :testfairy, screenshot_interval: ['str'] } }
       it { should_not validate deploy: { provider: :testfairy, screenshot_interval: {:foo=>'foo'} } }

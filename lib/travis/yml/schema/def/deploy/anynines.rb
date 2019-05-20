@@ -13,6 +13,7 @@ module Travis
               map :organization, to: :str
               map :space,        to: :str
               map :app_name,     to: :str
+              map :manifest,     to: :str
             end
           end
         end
