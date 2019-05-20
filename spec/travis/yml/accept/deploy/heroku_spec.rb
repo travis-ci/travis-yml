@@ -13,17 +13,41 @@ describe Travis::Yml, 'heroku' do
     end
   end
 
-  # describe 'buildpack' do
-  #   describe 'given a str' do
-  #     yaml %(
-  #       deploy:
-  #         provider: heroku
-  #         buildpack: str
-  #     )
-  #     it { should serialize_to deploy: [provider: 'heroku', buildpack: 'str'] }
-  #     it { should_not have_msg }
-  #   end
-  # end
+  describe 'api_key' do
+    describe 'given a secure' do
+      yaml %(
+        deploy:
+          provider: heroku
+          api_key:
+            secure: secure
+      )
+      it { should serialize_to deploy: [provider: 'heroku', api_key: { secure: 'secure' }] }
+      it { should_not have_msg }
+    end
+  end
+
+  describe 'username' do
+    describe 'given a secure' do
+      yaml %(
+        deploy:
+          provider: heroku
+          username:
+            secure: secure
+      )
+      it { should serialize_to deploy: [provider: 'heroku', username: { secure: 'secure' }] }
+      it { should_not have_msg }
+    end
+
+    describe 'given a str' do
+      yaml %(
+        deploy:
+          provider: heroku
+          username: str
+      )
+      it { should serialize_to deploy: [provider: 'heroku', username: 'str'] }
+      it { should_not have_msg }
+    end
+  end
 
   describe 'app' do
     describe 'given a str' do
@@ -49,15 +73,14 @@ describe Travis::Yml, 'heroku' do
     end
   end
 
-  describe 'api_key' do
-    describe 'given a secure' do
+  describe 'git' do
+    describe 'given a str' do
       yaml %(
         deploy:
           provider: heroku
-          api_key:
-            secure: secure
+          git: str
       )
-      it { should serialize_to deploy: [provider: 'heroku', api_key: { secure: 'secure' }] }
+      it { should serialize_to deploy: [provider: 'heroku', git: 'str'] }
       it { should_not have_msg }
     end
   end

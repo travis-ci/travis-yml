@@ -134,4 +134,28 @@ describe Travis::Yml, 'codedeploy' do
       it { should_not have_msg }
     end
   end
+
+  describe 'description' do
+    describe 'given a str' do
+      yaml %(
+        deploy:
+          provider: codedeploy
+          description: str
+      )
+      it { should serialize_to deploy: [provider: 'codedeploy', description: 'str'] }
+      it { should_not have_msg }
+    end
+  end
+
+  describe 'endpoint' do
+    describe 'given a str' do
+      yaml %(
+        deploy:
+          provider: codedeploy
+          endpoint: str
+      )
+      it { should serialize_to deploy: [provider: 'codedeploy', endpoint: 'str'] }
+      it { should_not have_msg }
+    end
+  end
 end

@@ -86,4 +86,40 @@ describe Travis::Yml, 'packagecloud' do
       it { should_not have_msg }
     end
   end
+
+  describe 'connect_timeout' do
+    describe 'given a num' do
+      yaml %(
+        deploy:
+          provider: packagecloud
+          connect_timeout: 1
+      )
+      it { should serialize_to deploy: [provider: 'packagecloud', connect_timeout: 1] }
+      it { should_not have_msg }
+    end
+  end
+
+  describe 'read_timeout' do
+    describe 'given a num' do
+      yaml %(
+        deploy:
+          provider: packagecloud
+          read_timeout: 1
+      )
+      it { should serialize_to deploy: [provider: 'packagecloud', read_timeout: 1] }
+      it { should_not have_msg }
+    end
+  end
+
+  describe 'write_timeout' do
+    describe 'given a num' do
+      yaml %(
+        deploy:
+          provider: packagecloud
+          write_timeout: 1
+      )
+      it { should serialize_to deploy: [provider: 'packagecloud', write_timeout: 1] }
+      it { should_not have_msg }
+    end
+  end
 end

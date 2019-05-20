@@ -1,7 +1,6 @@
 describe Travis::Yml, 'cloudfiles' do
   subject { described_class.apply(parse(yaml)) }
 
-
   describe 'username' do
     describe 'given a secure' do
       yaml %(
@@ -48,6 +47,18 @@ describe Travis::Yml, 'cloudfiles' do
           container: str
       )
       it { should serialize_to deploy: [provider: 'cloudfiles', container: 'str'] }
+      it { should_not have_msg }
+    end
+  end
+
+  describe 'glob' do
+    describe 'given a str' do
+      yaml %(
+        deploy:
+          provider: cloudfiles
+          glob: str
+      )
+      it { should serialize_to deploy: [provider: 'cloudfiles', glob: 'str'] }
       it { should_not have_msg }
     end
   end

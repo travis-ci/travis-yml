@@ -40,6 +40,29 @@ describe Travis::Yml, 'engineyard' do
     end
   end
 
+  describe 'account' do
+    describe 'given a secure' do
+      yaml %(
+        deploy:
+          provider: engineyard
+          account:
+            secure: secure
+      )
+      it { should serialize_to deploy: [provider: 'engineyard', account: { secure: 'secure' }] }
+      it { should_not have_msg }
+    end
+
+    describe 'given a str' do
+      yaml %(
+        deploy:
+          provider: engineyard
+          account: str
+      )
+      it { should serialize_to deploy: [provider: 'engineyard', account: 'str'] }
+      it { should_not have_msg }
+    end
+  end
+
   describe 'app' do
     describe 'given a str' do
       yaml %(

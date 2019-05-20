@@ -99,6 +99,30 @@ describe Travis::Yml, 'elasticbeanstalk' do
     end
   end
 
+  describe 'description' do
+    describe 'given a str' do
+      yaml %(
+        deploy:
+          provider: elasticbeanstalk
+          description: str
+      )
+      it { should serialize_to deploy: [provider: 'elasticbeanstalk', description: 'str'] }
+      it { should_not have_msg }
+    end
+  end
+
+  describe 'label' do
+    describe 'given a str' do
+      yaml %(
+        deploy:
+          provider: elasticbeanstalk
+          label: str
+      )
+      it { should serialize_to deploy: [provider: 'elasticbeanstalk', label: 'str'] }
+      it { should_not have_msg }
+    end
+  end
+
   describe 'only_create_app_version' do
     describe 'given a bool' do
       yaml %(
@@ -107,6 +131,18 @@ describe Travis::Yml, 'elasticbeanstalk' do
           only_create_app_version: true
       )
       it { should serialize_to deploy: [provider: 'elasticbeanstalk', only_create_app_version: true] }
+      it { should_not have_msg }
+    end
+  end
+
+  describe 'wait_until_deployed' do
+    describe 'given a bool' do
+      yaml %(
+        deploy:
+          provider: elasticbeanstalk
+          wait_until_deployed: true
+      )
+      it { should serialize_to deploy: [provider: 'elasticbeanstalk', wait_until_deployed: true] }
       it { should_not have_msg }
     end
   end
