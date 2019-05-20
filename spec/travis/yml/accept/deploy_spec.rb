@@ -401,6 +401,29 @@ describe Travis::Yml, 'deploy' do
     end
   end
 
+  describe 'run' do
+    describe 'given a seq' do
+      yaml %(
+        deploy:
+          provider: heroku
+          run:
+          - ./cmd
+      )
+      it { should serialize_to deploy: [provider: 'heroku', run: ['./cmd']] }
+      it { should_not have_msg }
+    end
+
+    describe 'given a str' do
+      yaml %(
+        deploy:
+          provider: heroku
+          run: ./cmd
+      )
+      it { should serialize_to deploy: [provider: 'heroku', run: ['./cmd']] }
+      it { should_not have_msg }
+    end
+  end
+
   # kinda hard to support if we want strict structure on deploy keys
   describe 'option specific branch hashes (deprecated, according to travis-build)' do
     yaml %(

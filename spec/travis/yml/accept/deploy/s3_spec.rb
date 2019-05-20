@@ -182,4 +182,16 @@ describe Travis::Yml, 's3' do
       it { should_not have_msg }
     end
   end
+
+  describe 'max_threads' do
+    describe 'given a num' do
+      yaml %(
+        deploy:
+          provider: s3
+          max_threads: 1
+      )
+      it { should serialize_to deploy: [provider: 's3', max_threads: 1] }
+      it { should_not have_msg }
+    end
+  end
 end

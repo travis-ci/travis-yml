@@ -142,4 +142,39 @@ describe Travis::Yml, 'atlas' do
       it { should_not have_msg }
     end
   end
+
+  describe 'paths' do
+    describe 'given a seq' do
+      yaml %(
+        deploy:
+          provider: atlas
+          paths:
+          - str
+      )
+      it { should serialize_to deploy: [provider: 'atlas', paths: ['str']] }
+      it { should_not have_msg }
+    end
+
+    describe 'given a str' do
+      yaml %(
+        deploy:
+          provider: atlas
+          paths: str
+      )
+      it { should serialize_to deploy: [provider: 'atlas', paths: ['str']] }
+      it { should_not have_msg }
+    end
+  end
+
+  describe 'args' do
+    describe 'given a str' do
+      yaml %(
+        deploy:
+          provider: atlas
+          args: str
+      )
+      it { should serialize_to deploy: [provider: 'atlas', args: 'str'] }
+      it { should_not have_msg }
+    end
+  end
 end

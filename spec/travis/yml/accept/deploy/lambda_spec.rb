@@ -264,4 +264,28 @@ describe Travis::Yml, 'lambda' do
       it { should_not have_msg }
     end
   end
+
+  describe 'dot_match' do
+    describe 'given a bool' do
+      yaml %(
+        deploy:
+          provider: lambda
+          dot_match: true
+      )
+      it { should serialize_to deploy: [provider: 'lambda', dot_match: true] }
+      it { should_not have_msg }
+    end
+  end
+
+  describe 'dead_letter_arn' do
+    describe 'given a str' do
+      yaml %(
+        deploy:
+          provider: lambda
+          dead_letter_arn: str
+      )
+      it { should serialize_to deploy: [provider: 'lambda', dead_letter_arn: 'str'] }
+      it { should_not have_msg }
+    end
+  end
 end
