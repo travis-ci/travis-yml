@@ -9,6 +9,10 @@ rackup      DefaultRackup
 port        ENV['PORT']     || 3000
 environment ENV['RACK_ENV'] || 'development'
 
+before_fork do
+  Travis::Yml.expand
+end
+
 on_worker_boot do
 end
 
