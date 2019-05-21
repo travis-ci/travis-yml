@@ -333,6 +333,7 @@ describe Travis::Yml, configs: true do
     # provider (script and if)
     'matrix.include.deploy': %w(
       app
+      buildpack
       repo
       github_commit
       if
@@ -453,6 +454,7 @@ describe Travis::Yml, configs: true do
     matrix.include.compiler
     matrix.include.go
     matrix.include.jdk
+    matrix.include.name
     matrix.include.node_js
     matrix.include.os
     matrix.include.php

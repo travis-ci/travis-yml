@@ -1,0 +1,91 @@
+# Recipe for build and integration testing on Travis-CI
+
+# Try beta version of new travis-yml checker
+version: "= 0"
+# For extra debugging of failed jobs, see
+# https://docs.travis-ci.com/user/common-build-problems/#Troubleshooting-Locally-in-a-Docker-Image
+
+os: linux
+language: cpp
+sudo: false
+
+# Different compiler or env are supposed to trigger different caches, but I had a hard time diagnosing problems
+# in gromacs-gmxapi until I specified a separate ccache for each matrix build element.
+# Note the heuristics for whether cache is shared or distinct:
+# https://docs.travis-ci.com/user/caching/#Caches-and-build-matrices
+cache:
+  pip: true
+  directories:
+    # Note: if a cache store forks due to a stage with parallel jobs that Travis identifies as part of the same flow,
+    # we must make sure that the parallel jobs do not write to any of the same caches. Also note that all stages use the
+    # same cache, so early stage jobs may see caches from later stages from previous builds in the same branch.
+    - $HOME/.ccache_gmxapi
+# Allows us to build and install GROMACS in one CI stage, then use the installation in a subsequent stage
+#    - $HOME/install
+
+compiler: gcc
+
+env:
+# Python 2.7 and 3.6 are the only generations provided by pyenv on Travis-CI out-of-the-box
+  - CI_MPI=0 PY=2.7
+  - CI_MPI=0 PY=3.4
+  - CI_MPI=0 PY=3.6
+
+addons:
+  apt:
+    sources:
+    - ubuntu-toolchain-r-test
+    packages:
+    - doxygen
+    - g++-6
+    - libblas-dev
+    - libcr-dev
+    - libfftw3-dev
+    - liblapack-dev
+    - libmpich-dev
+    - libxml2-dev
+    - mpich
+
+# Set up for all jobs
+before_install:
+  - source ./ci_scripts/set_compilers
+  - export CCACHE_DIR=$HOME/.ccache_gmxapi
+  - source ./ci_scripts/set_python
+
+install:
+  - export CCACHE_DIR=$HOME/.ccache_gmxapi
+  - ccache -s
+  - ./ci_scripts/install_cmake.sh
+# 0.0.8 Does not currently attempt to be compatible with GROMACS 2019.
+#  - ./ci_scripts/install_gromacs_2019.sh
+  - if [ "${TRAVIS_BRANCH}" != "master" ] ; then ./ci_scripts/install_gromacs_devel.sh ; fi
+
+before_script:
+  - export CCACHE_DIR=$HOME/.ccache_gmxapi
+  - ccache -s
+  - eval $(./ci_scripts/prepare_python.sh)
+
+script:
+# 0.0.8 Does not currently attempt to be compatible with GROMACS 2019.
+#  - source $HOME/install/gromacs_2019/bin/GMXRC && ./ci_scripts/test_installers.sh
+#  - source $HOME/install/gromacs_2019/bin/GMXRC && ./ci_scripts/pygmx.sh
+#  - ./ci_scripts/sample_restraint.sh release-0_0_7
+# The following scripting structure looks funny, but exists to control the
+# failure exit points and Travis-CI output.
+  - |
+    if [ "${TRAVIS_BRANCH}" != master ] ; then
+      source $HOME/install/gromacs_devel/bin/GMXRC && ./ci_scripts/test_installers.sh
+    fi
+  - |
+    if [ "${TRAVIS_BRANCH}" != master ] ; then
+      source $HOME/install/gromacs_devel/bin/GMXRC && ./ci_scripts/pygmx.sh
+    fi
+  - |
+    if [ "${TRAVIS_BRANCH}" != master ] ; then
+      ./ci_scripts/sample_restraint.sh devel
+    fi
+
+# At some point, we should test more types of interactions between components, such as both static and dynamically
+# linked builds, and components built with different compilers.
+#
+# Reference https://docs.travis-ci.com/user/customizing-the-build/#The-Build-Lifecycle
