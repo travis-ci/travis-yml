@@ -1,8 +1,6 @@
 describe Yaml do
   subject { described_class.load(yaml) }
 
-  it { expect { YAML.load('str') }.to raise_error(NoMethodError) }
-
   describe 'empty string' do
     yaml ''
     it { should be false }

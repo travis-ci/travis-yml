@@ -3,7 +3,7 @@ require 'psych'
 require 'yaml'
 require 'travis/yml/support/key'
 
-YAML.singleton_class.undef_method(:load)
+# YAML.singleton_class.undef_method(:load)
 
 module Yaml
   extend self
