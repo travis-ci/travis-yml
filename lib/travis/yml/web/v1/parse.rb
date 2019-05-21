@@ -30,14 +30,14 @@ module Travis::Yml
         end
 
         def opts(query)
-          {
+          compact(
             alert:    true?(query['alert']),
             defaults: true?(query['defaults'])
-          }
+          )
         end
 
         def true?(obj)
-          obj == 'true'
+          obj == 'true' unless obj.nil?
         end
 
         def configs?(env)
@@ -56,6 +56,10 @@ module Travis::Yml
 
         def capture(error)
           Raven.capture_exception(error, message: error.message, extra: { env: env }) if defined?(Raven)
+        end
+
+        def compact(hash)
+          hash.reject { |_, value| value.nil? }
         end
       end
     end
