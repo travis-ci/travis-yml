@@ -100,14 +100,9 @@ describe Travis::Yml do
   describe 'msg' do
     subject { described_class.msg(msg) }
 
-    describe 'alert' do
-      let(:msg) { [:error, :key, :alert] }
-      it { should eq '[error] on key: this should be an encrypted string' }
-    end
-
     describe 'alias' do
-      let(:msg) { [:info, :key, :alias, alias: 'rvm', key: 'ruby'] }
-      it { should eq '[info] on key: rvm is an alias for ruby, using ruby' }
+      let(:msg) { [:info, :key, :alias, type: :key, alias: 'rvm', obj: 'ruby'] }
+      it { should eq '[info] on key: rvm is an alias for ruby, using ruby (key)' }
     end
 
     describe 'cast' do
@@ -153,6 +148,11 @@ describe Travis::Yml do
     describe 'required' do
       let(:msg) { [:info, :key, :required, key: :key] }
       it { should eq '[info] on key: missing required key :key' }
+    end
+
+    describe 'secure' do
+      let(:msg) { [:error, :key, :secure] }
+      it { should eq '[error] on key: expected an encrypted string' }
     end
 
     describe 'empty' do

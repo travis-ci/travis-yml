@@ -75,7 +75,7 @@ describe Travis::Yml, 'language' do
       language: jvm
     )
     it { should serialize_to language: 'java' }
-    it { should have_msg [:info, :language, :alias, alias: 'jvm', value: 'java'] }
+    it { should have_msg [:info, :language, :alias, type: :value, alias: 'jvm', obj: 'java'] }
   end
 
   describe 'given a seq' do

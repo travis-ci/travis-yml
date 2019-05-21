@@ -284,7 +284,7 @@ describe Travis::Yml, 'deploy' do
               ruby: 2.3.1
         )
         it { should serialize_to deploy: [provider: 'heroku', on: { rvm: '2.3.1' }] }
-        it { should have_msg [:info, :'deploy.on', :alias, alias: 'ruby', key: 'rvm'] }
+        it { should have_msg [:info, :'deploy.on', :alias, type: :key, alias: 'ruby', obj: 'rvm'] }
       end
 
       describe 'language specific key python on ruby' do
@@ -319,7 +319,7 @@ describe Travis::Yml, 'deploy' do
               repo: str
         )
         it { should serialize_to deploy: [provider: 'heroku', on: { repo: 'str' }] }
-        it { should have_msg [:info, :deploy, :alias, alias: 'true', key: 'on', provider: 'heroku'] }
+        it { should have_msg [:info, :deploy, :alias, type: :key, alias: 'true', obj: 'on', provider: 'heroku'] }
         xit { should have_msg [:warn, :'deploy.on', :deprecated_key, key: 'on'] }
       end
     end

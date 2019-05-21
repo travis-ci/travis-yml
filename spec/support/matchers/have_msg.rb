@@ -7,7 +7,7 @@ RSpec::Matchers.define :have_msg do |msg = nil|
     when Method
       msgs.any?
     when Array, Hash
-      msgs.include?(msg)
+      msg && msgs.include?(msg) && Travis::Yml.msg(msg)
     when nil
       msgs.any?
     else

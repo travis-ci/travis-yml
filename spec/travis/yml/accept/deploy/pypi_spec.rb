@@ -33,7 +33,7 @@ describe Travis::Yml, 'pypi' do
             secure: str
       )
       it { should serialize_to deploy: [provider: 'pypi', username: { secure: 'str' }] }
-      it { should have_msg [:info, :deploy, :alias, alias: 'user', key: 'username', provider: 'pypi'] }
+      it { should have_msg [:info, :deploy, :alias, type: :key, alias: 'user', obj: 'username', provider: 'pypi'] }
     end
   end
 

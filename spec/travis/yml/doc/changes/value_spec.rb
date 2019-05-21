@@ -12,7 +12,7 @@ describe Travis::Yml::Doc::Change::Value do
   describe 'given an alias' do
     let(:value) { 'bar' }
     it { should serialize_to 'foo' }
-    it { should have_msg [:info, :root, :alias, alias: 'bar', value: 'foo'] }
+    it { should have_msg [:info, :root, :alias, type: :value, alias: 'bar', obj: 'foo'] }
   end
 
   describe 'given a str containing a newline char' do
