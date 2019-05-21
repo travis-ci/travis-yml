@@ -111,7 +111,7 @@ module Travis
           end
 
           def unique
-            map { |key, schema| key if schema.unique? }.compact.keys
+            map.map { |key, schema| key if schema.unique? }.compact
           end
           memoize :unique
 

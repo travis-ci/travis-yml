@@ -9,30 +9,47 @@ describe Travis::Yml::Doc::Validate, 'unique' do
           type: :object,
           properties: {
             name: {
-              type: :string
+              type: :string,
+              unique: true
             },
             email: {
+              type: :string,
+              unique: true
+            },
+            other: {
               type: :string
             }
-          },
-          unique: [
-            :name,
-            :email
-          ]
+          }
         }
       }
     end
 
     describe 'given multiple dupes on one key' do
-      let(:value) { [{ name: 'one' }, { name: 'one' }, { name: 'two' }, { name: 'two' }] }
+      let(:value) do
+        [
+          { name: 'one', other: 'other' },
+          { name: 'one', other: 'other' },
+          { name: 'two', other: 'other' },
+          { name: 'two', other: 'other' }
+        ]
+      end
+
       it { should serialize_to value }
       it { should have_msg [:info, :root, :duplicate, duplicates: 'name: one, two'] }
     end
 
     describe 'given dupes on multiple keys' do
-      let(:value) { [{ name: 'one' }, { name: 'one' }, { email: 'str' }, { email: 'str' }] }
+      let(:value) do
+        [
+          { name: 'one', other: 'other' },
+          { name: 'one', other: 'other' },
+          { email: 'two', other: 'other' },
+          { email: 'two', other: 'other' }
+        ]
+      end
+
       it { should serialize_to value }
-      it { should have_msg [:info, :root, :duplicate, duplicates: 'name: one, email: str'] }
+      it { should have_msg [:info, :root, :duplicate, duplicates: 'name: one, email: two'] }
     end
   end
 end

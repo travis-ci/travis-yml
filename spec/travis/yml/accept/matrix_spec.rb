@@ -587,4 +587,19 @@ describe Travis::Yml, 'matrix' do
     it { should have_msg [:warn, :'matrix.include', :migrate, key: 'apt', to: 'addons', value: { packages: ['clang'] }] }
     it { should have_msg [:warn, :'matrix.include', :migrate, key: 'apt', to: 'addons', value: nil] }
   end
+
+  describe 'duplicate values' do
+    yaml %(
+      matrix:
+        include:
+          - if: type = cron
+            node_js: 10.7
+            env: TRY_CONFIG=ember-beta
+          - if: type = cron
+            node_js: 10.7
+            env: TRY_CONFIG=ember-data-beta
+          - node_js: 10.7
+    )
+    it { should_not have_msg }
+  end
 end

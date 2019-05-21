@@ -116,7 +116,7 @@ module Travis
           end
 
           def unique?
-            !!opts[:normal]
+            !!opts[:unique]
           end
 
           def match(strs, str)
