@@ -40,7 +40,7 @@ module Travis
 
     MSGS = {
       alert:             'this should be an encrypted string',
-      alias:             '%{alias} is an alias for %{actual}, using %{actual}',
+      alias:             '%{alias} is an alias for %{key}, using %{key}',
       cast:              'casting value %<given_value>p (%<given_type>p) to %<value>p (%<type>p)',
       default:           'missing %{key}, using the default %{default}',
       deprecated_key:    'deprecated key: %<key>p (%{info})',
