@@ -46,7 +46,7 @@ module Travis
       deprecated_key:    'deprecated key: %<key>p (%{info})',
       deprecated_value:  'deprecated value: %<value>p (%{info})',
       downcase:          'using lower case of %{value}',
-      duplicate:         'duplicate values: %{name}',
+      duplicate:         'duplicate values: %{duplicates}',
       edge:              '%<given>p is experimental and might change or be removed',
       flagged:           'please email support@travis-ci.com to enable %<given>p',
       required:          'missing required key %<key>p',
@@ -113,6 +113,7 @@ module Travis
         msg = msg % args if args
         msg = '[%s] on %s: %s' % [level, key, msg]
         msg
+      # rescue KeyError => e
       end
 
       def keys

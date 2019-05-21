@@ -26,14 +26,14 @@ module Travis
             end
 
             def dupes
-              unique.map { |key| dupes_on(key) }.inject(&:merge)
+              unique.map { |key| dupes_on(key) }.compact
             end
             memoize :dupes
 
             def dupes_on(key)
               values = values_on(key)
               dupes = values.select { |value| values.count(value) > 1 }
-              compact(key.to_sym => dupes.uniq.join(', '))
+              [key.to_sym, dupes.uniq.join(', ')].join(': ') if dupes.any?
             end
 
             def values_on(key)
@@ -49,7 +49,7 @@ module Travis
             end
 
             def warn
-              value.info :duplicate, dupes
+              value.info :duplicate, duplicates: dupes.join(', ')
             end
 
             def compact(obj)
