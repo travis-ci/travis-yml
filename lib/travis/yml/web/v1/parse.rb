@@ -17,6 +17,7 @@ module Travis::Yml
         rescue Travis::Yml::InputError, Psych::SyntaxError => error
           [400, headers, body(Decorators::Error, error)]
         rescue Travis::Yml::InternalError, KeyError => error
+          Raven.capture_exception(error, message: error.message, extra: { env: env })
           [500, headers, body(Decorators::Error, error)]
         end
 

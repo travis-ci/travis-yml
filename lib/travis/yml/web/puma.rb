@@ -15,7 +15,7 @@ end
 lowlevel_error_handler do |error, env|
   Raven.capture_exception(
     error,
-    message: ex.message,
+    message: error.message,
     extra: { puma: env },
     transaction: 'Puma'
   )
