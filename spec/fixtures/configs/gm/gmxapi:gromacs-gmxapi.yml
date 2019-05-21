@@ -1,0 +1,98 @@
+# Recipe for build and integration testing on Travis-CI
+
+# Try beta version of new travis-yml checker
+version: "= 0"
+# For extra debugging of failed jobs, see
+# https://docs.travis-ci.com/user/common-build-problems/#Troubleshooting-Locally-in-a-Docker-Image
+
+os: linux
+language: cpp
+sudo: false
+
+# Different compiler or env are supposed to trigger different caches, but I had a hard time diagnosing problems
+# in gromacs-gmxapi until I specified a separate ccache for each matrix build element.
+# Note the heuristics for whether cache is shared or distinct:
+# https://docs.travis-ci.com/user/caching/#Caches-and-build-matrices
+cache:
+  pip: true
+  apt: true
+  directories:
+    # Note: if a cache store forks due to a stage with parallel jobs that Travis identifies as part of the same flow,
+    # we must make sure that the parallel jobs do not write to any of the same caches. Also note that all stages use the
+    # same cache, so early stage jobs may see caches from later stages from previous builds in the same branch.
+    - $HOME/.ccache_gromacs
+    - $HOME/.ccache_py
+
+compiler: gcc
+
+env:
+# Python 2.7 and 3.6 are the only generations provided by pyenv on Travis-CI out-of-the-box
+  - CI_MPI=0 GCC=5 PY=2.7
+  - CI_MPI=0 GCC=7 PY=3.6
+  - CI_MPI=1 GCC=7 PY=2.7
+  - CI_MPI=1 GCC=5 PY=3.6
+
+addons:
+  apt:
+    sources:
+    - ubuntu-toolchain-r-test
+    packages:
+    - cmake
+    - cmake-data
+    - doxygen
+    - g++-5
+    - gcc-5
+    - g++-7
+    - gcc-7
+    - libblas-dev
+    - libcr-dev
+    - libfftw3-dev
+    - liblapack-dev
+    - libmpich-dev
+    - libxml2-dev
+
+# Set up for all jobs
+before_install:
+  - export CCACHE_COMPILERCHECK=content
+  - export CCACHE_DIR=$HOME/.ccache_gromacs
+  # Install mpich for the current compiler
+  - export MPICH_DIR=$HOME/mpich-install
+  - ./ci_scripts/install_mpich.sh
+  - export PATH=$MPICH_DIR/bin:$PATH
+  # Select the Python version from latest minor releases known to pyenv on Travis-CI
+  - pyenv whence python${PY} && export PY_VER=`pyenv whence python${PY} | tail -1`
+  - pyenv shell $PY_VER && pyenv shell
+  - pyenv prefix ${PY_VER} && export PYTHON_PREFIX=`pyenv prefix ${PY_VER}`
+  - pyenv which python && export PYTHON=`pyenv which python`
+  - source ./ci_scripts/set_compilers
+
+install:
+  - export CCACHE_DIR=$HOME/.ccache_gromacs
+  - ccache -s
+  - ./ci_scripts/install_gromacs.sh
+
+before_script:
+  - export CCACHE_DIR=$HOME/.ccache_py
+  - ccache -s
+  - pip install --upgrade pip setuptools
+  - pip install --upgrade packaging scikit-build
+  - pip install --no-cache-dir --upgrade --no-binary ":all:" --force-reinstall networkx mpi4py MarkupSafe
+  - pip install pytest numpy networkx sphinx sphinx_rtd_theme
+
+script:
+  # Note that as of gromacs-gmxapi 0.0.6, gmxapi ensemble management is not compatible with MPI-enabled gromacs-gmxapi
+  - if [ "${CI_MPI}" = 0 ] ; then source $HOME/install/gromacs/bin/GMXRC && ./ci_scripts/pygmx_0_0_6.sh ; fi
+  - if [ "${CI_MPI}" = 0 ] ; then ./ci_scripts/sample_restraint.sh v0.0.6 ; fi
+  - |
+    if [ "${TRAVIS_BRANCH}" != master -a "${CI_MPI}" = 0 ]
+        then source $HOME/install/gromacs/bin/GMXRC && ./ci_scripts/pygmx_devel.sh
+    fi
+  - |
+    if [ "${TRAVIS_BRANCH}" != master -a "${CI_MPI}" = 0 ] ; then
+      ./ci_scripts/sample_restraint.sh devel
+    fi
+
+# At some point, we should test more types of interactions between components, such as both static and dynamically
+# linked builds, and components built with different compilers.
+#
+# Reference https://docs.travis-ci.com/user/customizing-the-build/#The-Build-Lifecycle
