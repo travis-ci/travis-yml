@@ -21,7 +21,7 @@ module Travis
           def dealias(key)
             other = schema.key_aliases[key]
             return key if !other || key == other
-            value.parent.info :alias, alias: key, key: other
+            value.parent.info :alias, type: :key, alias: key, obj: other
             other
           end
 

@@ -33,7 +33,7 @@ module Travis
             def dupes_on(key)
               values = values_on(key)
               dupes = values.select { |value| values.count(value) > 1 }
-              compact(key.to_sym => dupes.uniq)
+              compact(key.to_sym => dupes.uniq.join(', '))
             end
 
             def values_on(key)

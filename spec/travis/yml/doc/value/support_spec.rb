@@ -5,6 +5,17 @@ describe Travis::Yml::Doc::Value::Support do
 
   subject { described_class.new(support, supporting, obj) }
 
+  matcher :have_msg do |msg = nil|
+    match do |node|
+      case msg
+      when Array, Hash
+        msg && node.msgs.include?(msg)
+      when nil
+        node.msgs.any?
+      end
+    end
+  end
+
   describe 'arch' do
     let(:obj) { :arch }
 

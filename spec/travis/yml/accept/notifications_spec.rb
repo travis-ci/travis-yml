@@ -60,7 +60,7 @@ describe Travis::Yml, 'notifications' do
           emails: true
       )
       it { should serialize_to notifications: { email: { enabled: true } } }
-      it { should have_msg [:info, :notifications, :alias, alias: 'emails', key: 'email'] }
+      it { should have_msg [:info, :notifications, :alias, type: :key, alias: 'emails', obj: 'email'] }
     end
 
     describe 'typo emaik' do
@@ -137,7 +137,7 @@ describe Travis::Yml, 'notifications' do
         on_failure: true
     )
     it { should serialize_to notifications: { email: { enabled: true, on_failure: 'always' } } }
-    it { should have_msg [:info, :'notifications.on_failure', :alias, alias: 'true', value: 'always'] }
+    it { should have_msg [:info, :'notifications.on_failure', :alias, type: :value, alias: 'true', obj: 'always'] }
   end
 
   describe 'given on-sucsess (typo, dasherized)' do

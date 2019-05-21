@@ -26,13 +26,13 @@ describe Travis::Yml::Doc::Validate, 'unique' do
     describe 'given multiple dupes on one key' do
       let(:value) { [{ name: 'one' }, { name: 'one' }, { name: 'two' }, { name: 'two' }] }
       it { should serialize_to value }
-      it { should have_msg [:info, :root, :duplicate, name: ['one', 'two']] }
+      it { should have_msg [:info, :root, :duplicate, name: 'one, two'] }
     end
 
     describe 'given dupes on multiple keys' do
       let(:value) { [{ name: 'one' }, { name: 'one' }, { email: 'str' }, { email: 'str' }] }
       it { should serialize_to value }
-      it { should have_msg [:info, :root, :duplicate, name: ['one'], email: ['str']] }
+      it { should have_msg [:info, :root, :duplicate, name: 'one', email: 'str'] }
     end
   end
 end

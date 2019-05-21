@@ -100,7 +100,7 @@ describe Travis::Yml, 'branches' do
         exclude: master
     )
     it { should serialize_to branches: { except: ['master'] } }
-    it { should have_msg [:info, :branches, :alias, alias: 'exclude', key: 'except'] }
+    it { should have_msg [:info, :branches, :alias, type: :key, alias: 'exclude', obj: 'except'] }
   end
 
   describe 'given an unknown key' do

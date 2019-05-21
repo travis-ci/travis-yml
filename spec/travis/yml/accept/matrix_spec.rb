@@ -17,7 +17,7 @@ describe Travis::Yml, 'matrix' do
           fast_finish: true
       )
       it { should serialize_to matrix: { fast_finish: true } }
-      it { should have_msg [:info, :root, :alias, alias: 'jobs', key: 'matrix'] }
+      it { should have_msg [:info, :root, :alias, type: :key, alias: 'jobs', obj: 'matrix'] }
     end
 
     describe 'alias fast_failure' do
@@ -26,7 +26,7 @@ describe Travis::Yml, 'matrix' do
           fast_failure: true
       )
       it { should serialize_to matrix: { fast_finish: true } }
-      it { should have_msg [:info, :matrix, :alias, alias: 'fast_failure', key: 'fast_finish'] }
+      it { should have_msg [:info, :matrix, :alias, type: :key, alias: 'fast_failure', obj: 'fast_finish'] }
     end
   end
 
@@ -305,7 +305,7 @@ describe Travis::Yml, 'matrix' do
             - name: name
       )
       it { should serialize_to matrix: { include: [{ name: 'name' }, { name: 'name' }] } }
-      it { should have_msg [:info, :'matrix.include', :duplicate, name: ['name']] }
+      it { should have_msg [:info, :'matrix.include', :duplicate, name: 'name'] }
     end
 
     describe 'given addons' do
@@ -545,7 +545,7 @@ describe Travis::Yml, 'matrix' do
             rvm: 2.3
       )
       it { should serialize_to matrix: { allow_failures: [rvm: '2.3'] } }
-      it { should have_msg [:info, :matrix, :alias, alias: 'allowed_failures', key: 'allow_failures'] }
+      it { should have_msg [:info, :matrix, :alias, type: :key, alias: 'allowed_failures', obj: 'allow_failures'] }
     end
 
     describe 'allow_failures given a seq of strings (common mistake)', drop: true do

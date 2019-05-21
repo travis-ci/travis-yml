@@ -66,7 +66,7 @@ module Travis
             end
 
             def dealias(value)
-              value.info :alias, alias: value.value, value: aliased(value)
+              value.info :alias, type: :value, alias: value.value, obj: aliased(value)
               value.set(aliased(value))
             end
 
