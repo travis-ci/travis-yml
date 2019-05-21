@@ -17,7 +17,7 @@ module Travis::Yml
         rescue Travis::Yml::InputError, Psych::SyntaxError => error
           [400, headers, body(Decorators::Error, error)]
         rescue Travis::Yml::InternalError, KeyError => error
-          Raven.capture_exception(error, message: error.message, extra: { env: env })
+          capture(error)
           [500, headers, body(Decorators::Error, error)]
         end
 
@@ -52,6 +52,10 @@ module Travis::Yml
           Oj.load(json).map do |part|
             Parts::Part.new(*part.values_at(*%w(config source merge_mode)))
           end
+        end
+
+        def capture(error)
+          Raven.capture_exception(error, message: error.message, extra: { env: env }) if defined?(Raven)
         end
       end
     end
