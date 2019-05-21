@@ -11,3 +11,13 @@ environment ENV['RACK_ENV'] || 'development'
 
 on_worker_boot do
 end
+
+lowlevel_error_handler do |error, env|
+  Raven.capture_exception(
+    error,
+    message: ex.message,
+    extra: { puma: env },
+    transaction: 'Puma'
+  )
+  [500, {}, ['{}']]
+end
