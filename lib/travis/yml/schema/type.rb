@@ -31,7 +31,7 @@ module Travis
           when Any
             node.types.map { |node| expand(node) }.flatten
           when Seq
-            nodes = node.types.map { |node| expand(node) }.flatten
+            nodes = node.types.map { |node| expand(node) }.flatten.compact
             nodes.map { |node| Seq.new(node.parent, types: [node]) }
           when Ref
             expand(node.lookup)

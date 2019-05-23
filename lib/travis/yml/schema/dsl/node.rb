@@ -190,6 +190,10 @@ module Travis
             node.set :required, true
           end
 
+          def summary(summary)
+            node.set :summary, summary
+          end
+
           def title(title)
             node.set :title, title
           end

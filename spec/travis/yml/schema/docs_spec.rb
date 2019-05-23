@@ -1,5 +1,5 @@
 describe Travis::Yml::Schema::Docs do
-  subject { described_class.write }
+  subject { described_class.generate }
 
-  # it { subject }
+  it { subject }
 end

@@ -36,8 +36,8 @@ module Travis
             normal
             prefix :only
 
-            map :only,   to: :seq
-            map :except, to: :seq, alias: :exclude
+            map :only,   to: :seq #, desc: 'Branches to include'
+            map :except, to: :seq, alias: :exclude #, desc: 'Branches to exclude'
 
             export
           end

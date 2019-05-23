@@ -23,8 +23,8 @@ module Travis
           end
 
           def lookup
-            node = Type.exported(namespace, id)
-            node if node.is_a?(Node)
+            # node = Type.exported(namespace, id)
+            # node if node.is_a?(Node)
           end
         end
       end

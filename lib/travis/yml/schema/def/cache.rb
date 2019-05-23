@@ -10,6 +10,8 @@ module Travis
 
           TYPES = %i(apt bundler cargo ccache cocoapods npm packages pip yarn)
 
+          # desc edge: 'Whether to use an edge version of the cache tooling'
+
           def define
             normal
 
