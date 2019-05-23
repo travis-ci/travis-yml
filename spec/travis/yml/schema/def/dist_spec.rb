@@ -7,6 +7,7 @@ describe Travis::Yml::Schema::Def::Dist do
     should eq(
       '$id': :dist,
       title: 'Dist',
+      summary: 'Build environment distribution',
       type: :string,
       enum: [
         'trusty',

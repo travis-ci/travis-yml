@@ -10,6 +10,7 @@ module Travis
           register :services
 
           def define
+            summary 'Services to set up and start'
             normal
             export
             type Service

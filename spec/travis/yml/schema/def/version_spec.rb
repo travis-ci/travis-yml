@@ -5,6 +5,7 @@ describe Travis::Yml::Schema::Def::Version do
     should eq(
       '$id': :version,
       title: 'Version',
+      summary: 'Build config specification version',
       type: :string,
       pattern: '^(~>|>|>=|=|<=|<) (\d+(?:\.\d+)?(?:\.\d+)?)$'
     )

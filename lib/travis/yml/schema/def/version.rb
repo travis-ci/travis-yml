@@ -11,7 +11,7 @@ module Travis
           VERSION = '^(~>|>|>=|=|<=|<) (\d+(?:\.\d+)?(?:\.\d+)?)$'
 
           def define
-            # summary 'Build config schema version'
+            summary 'Build config specification version'
             format VERSION
             export
           end

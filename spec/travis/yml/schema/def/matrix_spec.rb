@@ -8,6 +8,7 @@ describe Travis::Yml::Schema::Def::Matrix do
       should eq(
         '$id': :matrix,
         title: 'Matrix',
+        summary: 'Build matrix definitions',
         normal: true,
         anyOf: [
           {
@@ -90,7 +91,7 @@ describe Travis::Yml::Schema::Def::Matrix do
     it { should include os: { '$ref': '#/definitions/type/os' } }
     it { should include arch: { '$ref': '#/definitions/type/arch', only: { os: ['linux'] } } }
     it { should include dist: { '$ref': '#/definitions/type/dist' } }
-    it { should include sudo: { '$ref': '#/definitions/type/sudo' } }
+    it { should include sudo: { '$ref': '#/definitions/type/sudo', deprecated: 'this key has no effect anymore' } }
     it { should include env: { '$ref': '#/definitions/type/env_vars' } }
     it { should include compiler: { type: :string, only: { language: ['c', 'cpp'] } } }
     it { should include stage: { type: :string } }

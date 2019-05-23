@@ -11,10 +11,12 @@ module Travis
           register :stack
 
           def define
+            summary 'Build environment stack'
             downcase
             edge
             value *NAMES
             export
+            internal true
           end
         end
       end

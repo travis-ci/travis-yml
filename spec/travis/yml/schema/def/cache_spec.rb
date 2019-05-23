@@ -7,6 +7,7 @@ describe Travis::Yml::Schema::Def::Cache do
     should eq(
       '$id': :cache,
       title: 'Cache',
+      summary: 'Cache settings to speed up the build',
       normal: true,
       anyOf: [
         {
@@ -40,6 +41,7 @@ describe Travis::Yml::Schema::Def::Cache do
               type: :boolean
             },
             edge: {
+              summary: 'Whether to use an edge version of the cache tooling',
               type: :boolean,
               flags: [
                 :edge

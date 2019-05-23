@@ -8,6 +8,7 @@ describe Travis::Yml::Schema::Def::Notification::Notifications do
     should eq(
       '$id': :notifications,
       title: 'Notifications',
+      summary: 'Notification targets to notify on build results',
       normal: true,
       anyOf: [
         {

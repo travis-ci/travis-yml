@@ -9,6 +9,7 @@ module Travis
           register :compilers
 
           def define
+            summary 'Compilers to set up'
             type :compiler
             export
           end

@@ -9,7 +9,9 @@ module Travis
           register :group
 
           def define
+            summary 'Build environment group'
             downcase
+            internal
             export
           end
         end

@@ -96,6 +96,7 @@ describe Travis::Yml::Schema::Def::Root do
         cache
         compilers
         conditions
+        condition
         deploys
         dist
         env
@@ -302,10 +303,10 @@ describe Travis::Yml::Schema::Def::Root do
       it { should include os:             { '$ref': '#/definitions/type/oss' } }
       it { should include stack:          { '$ref': '#/definitions/type/stack' } }
       it { should include stages:         { '$ref': '#/definitions/type/stages' } }
-      it { should include sudo:           { '$ref': '#/definitions/type/sudo' } }
+      it { should include sudo:           { '$ref': '#/definitions/type/sudo', deprecated: 'this key has no effect anymore' } }
       it { should include version:        { '$ref': '#/definitions/type/version' } }
-      it { should include filter_secrets: { type: :boolean } }
-      it { should include trace:          { type: :boolean } }
+      it { should include filter_secrets: { type: :boolean, flags: [:internal], summary: 'Whether to filter secrets from the log output' } }
+      it { should include trace:          { type: :boolean, flags: [:internal], summary: 'Whether to trace the build script' } }
     end
 
     describe 'map' do

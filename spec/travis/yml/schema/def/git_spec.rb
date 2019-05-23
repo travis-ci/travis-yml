@@ -7,6 +7,7 @@ describe Travis::Yml::Schema::Def::Git do
     should eq(
       '$id': :git,
       title: 'Git',
+      summary: 'Git settings',
       type: :object,
       properties: {
         strategy: {

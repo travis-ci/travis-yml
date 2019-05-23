@@ -11,6 +11,8 @@ module Travis
           register :env
 
           def define
+            summary 'Environment variables to set up'
+
             add Class.new(Dsl::Map) {
               def define
                 normal

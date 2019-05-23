@@ -10,6 +10,7 @@ module Travis
           register :imports
 
           def define
+            summary 'Import build configuration snippets'
             normal
             type :import
             export

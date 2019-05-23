@@ -10,6 +10,8 @@ module Travis
           register :matrix
 
           def define
+            summary 'Build matrix definitions'
+
             normal
             prefix :include
 

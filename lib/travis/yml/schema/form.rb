@@ -209,6 +209,7 @@ module Travis
             child.example = node.examples[prefix]
 
             any.types.each.with_index do |node, ix|
+              node.unset :description, :summary, :title
               node.set :export, false if ix == 0
               node.set :normal, ix == 0 ? true : nil
               node.unset :aliases if ix > 0
@@ -327,6 +328,7 @@ module Travis
             any.unset :aliases, :changes, :normal, :required, :unique
 
             any.each.with_index do |node, ix|
+              node.unset :description, :summary, :title
               node.set :export, false if ix == 0
               node.set :normal, ix == 0 ? true : nil
               node.parent = any

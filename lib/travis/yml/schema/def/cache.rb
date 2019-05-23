@@ -10,16 +10,16 @@ module Travis
 
           TYPES = %i(apt bundler cargo ccache cocoapods npm packages pip yarn)
 
-          # desc edge: 'Whether to use an edge version of the cache tooling'
-
           def define
+            summary 'Cache settings to speed up the build'
+
             normal
 
             TYPES.each do |type|
               map type, to: :bool
             end
 
-            map :edge,        to: :bool, edge: true
+            map :edge,        to: :bool, edge: true, summary: 'Whether to use an edge version of the cache tooling'
             map :directories, to: :seq
             map :timeout,     to: :num
             map :branch,      to: :str

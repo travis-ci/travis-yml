@@ -9,6 +9,7 @@ describe Travis::Yml::Schema::Def::Services do
       should eq(
         '$id': :services,
         title: 'Services',
+        summary: 'Services to set up and start',
         anyOf: [
           {
             type: :array,
@@ -25,7 +26,7 @@ describe Travis::Yml::Schema::Def::Services do
     end
   end
 
-  describe 'services' do
+  describe 'service' do
     subject { Travis::Yml.schema[:definitions][:type][:service] }
 
     it do

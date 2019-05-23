@@ -8,6 +8,7 @@ describe Travis::Yml::Schema::Def::Stages do
       should eq(
         '$id': :stages,
         title: 'Stages',
+        summary: 'Build stages definition',
         anyOf: [
           {
             type: :array,

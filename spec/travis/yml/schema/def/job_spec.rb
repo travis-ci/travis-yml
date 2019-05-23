@@ -46,47 +46,52 @@ describe Travis::Yml::Schema::Def::Job do
         git: {
           '$ref': '#/definitions/type/git'
         },
-        source_key: {
-          '$ref': '#/definitions/type/secure'
-        },
         if: {
-          type: :string
+          '$ref': '#/definitions/type/condition'
         },
         before_install: {
-          '$ref': '#/definitions/type/strs'
+          '$ref': '#/definitions/type/strs',
+          summary: 'Scripts to run before the install stage'
         },
         install: {
-          '$ref': '#/definitions/type/strs'
+          '$ref': '#/definitions/type/strs',
+          summary: 'Scripts to run at the install stage'
         },
         after_install: {
-          '$ref': '#/definitions/type/strs'
+          '$ref': '#/definitions/type/strs',
+          summary: 'Scripts to run after the install stage'
         },
         before_script: {
-          '$ref': '#/definitions/type/strs'
+          '$ref': '#/definitions/type/strs',
+          summary: 'Scripts to run before the script stage'
         },
         script: {
-          '$ref': '#/definitions/type/strs'
-        },
-        after_script: {
-          '$ref': '#/definitions/type/strs'
-        },
-        after_result: {
-          '$ref': '#/definitions/type/strs'
+          '$ref': '#/definitions/type/strs',
+          summary: 'Scripts to run at the script stage'
         },
         after_success: {
-          '$ref': '#/definitions/type/strs'
+          '$ref': '#/definitions/type/strs',
+          summary: 'Scripts to run after a successful script stage'
         },
         after_failure: {
-          '$ref': '#/definitions/type/strs'
+          '$ref': '#/definitions/type/strs',
+          summary: 'Scripts to run after a failing script stage'
         },
-        before_deploy: {
-          '$ref': '#/definitions/type/strs'
-        },
-        after_deploy: {
-          '$ref': '#/definitions/type/strs'
+        after_script: {
+          '$ref': '#/definitions/type/strs',
+          summary: 'Scripts to run after the script stage'
         },
         before_cache: {
-          '$ref': '#/definitions/type/strs'
+          '$ref': '#/definitions/type/strs',
+          summary: 'Scripts to run before storing a build cache'
+        },
+        before_deploy: {
+          '$ref': '#/definitions/type/strs',
+          summary: 'Scripts to run before the deploy stage'
+        },
+        after_deploy: {
+          '$ref': '#/definitions/type/strs',
+          summary: 'Scripts to run after the deploy stage'
         }
       },
     )
