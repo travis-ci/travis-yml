@@ -25,8 +25,12 @@
         "dist": {
           "$ref": "#/definitions/type/dist"
         },
+        "stack": {
+          "$ref": "#/definitions/type/stack"
+        },
         "sudo": {
-          "$ref": "#/definitions/type/sudo"
+          "$ref": "#/definitions/type/sudo",
+          "deprecated": "this key has no effect anymore"
         },
         "env": {
           "$ref": "#/definitions/type/env"
@@ -46,27 +50,22 @@
         "notifications": {
           "$ref": "#/definitions/type/notifications"
         },
-        "stack": {
-          "$ref": "#/definitions/type/stack"
-        },
         "conditions": {
           "$ref": "#/definitions/type/conditions"
         },
         "filter_secrets": {
           "type": "boolean",
-          "summary": "Whether to filter secrets",
-          "defaults": [
-            {
-              "value": true
-            }
-          ]
+          "flags": [
+            "internal"
+          ],
+          "summary": "Whether to filter secrets from the log output"
         },
         "trace": {
           "type": "boolean",
-          "summary": "Whether to trace the build script",
           "flags": [
             "internal"
-          ]
+          ],
+          "summary": "Whether to trace the build script"
         }
       },
       "required": [
@@ -255,7 +254,8 @@
         ],
         "flags": [
           "expand"
-        ]
+        ],
+        "summary": "Build environment architecture"
       },
       "branches": {
         "$id": "branches",
@@ -288,6 +288,7 @@
             "$ref": "#/definitions/type/strs"
           }
         ],
+        "summary": "Include or exclude branches from being built",
         "normal": true
       },
       "cache": {
@@ -328,7 +329,8 @@
                 "type": "boolean",
                 "flags": [
                   "edge"
-                ]
+                ],
+                "summary": "Whether to use an edge version of the cache tooling"
               },
               "directories": {
                 "$ref": "#/definitions/type/strs"
@@ -355,6 +357,7 @@
             "$ref": "#/definitions/type/strs"
           }
         ],
+        "summary": "Cache settings to speed up the build",
         "normal": true
       },
       "compilers": {
@@ -389,12 +392,23 @@
         ],
         "flags": [
           "expand"
-        ]
+        ],
+        "summary": "Compilers to set up"
+      },
+      "condition": {
+        "$id": "condition",
+        "title": "Condition",
+        "type": "string",
+        "summary": "Condition to determine whether or not a build, stage, or job should be run"
       },
       "conditions": {
         "$id": "conditions",
         "title": "Conditions",
         "type": "string",
+        "flags": [
+          "internal"
+        ],
+        "summary": "Conditions support version",
         "enum": [
           "v0",
           "v1"
@@ -414,12 +428,14 @@
           {
             "$ref": "#/definitions/deploy/providers"
           }
-        ]
+        ],
+        "summary": "Deployment configs"
       },
       "dist": {
         "$id": "dist",
         "title": "Dist",
         "type": "string",
+        "summary": "Build environment distribution",
         "downcase": true,
         "enum": [
           "trusty",
@@ -485,7 +501,8 @@
         ],
         "flags": [
           "expand"
-        ]
+        ],
+        "summary": "Environment variables to set up"
       },
       "env_var": {
         "$id": "env_var",
@@ -586,13 +603,18 @@
             "type": "string"
           }
         },
-        "additionalProperties": false
+        "additionalProperties": false,
+        "summary": "Git settings"
       },
       "group": {
         "$id": "group",
         "title": "Group",
         "type": "string",
-        "downcase": true
+        "summary": "Build environment group",
+        "downcase": true,
+        "flags": [
+          "internal"
+        ]
       },
       "import": {
         "$id": "import",
@@ -638,7 +660,8 @@
           {
             "$ref": "#/definitions/type/import"
           }
-        ]
+        ],
+        "summary": "Import build configuration snippets"
       },
       "jdks": {
         "$id": "jdks",
@@ -722,11 +745,8 @@
           "git": {
             "$ref": "#/definitions/type/git"
           },
-          "source_key": {
-            "$ref": "#/definitions/type/secure"
-          },
           "if": {
-            "type": "string"
+            "$ref": "#/definitions/type/condition"
           },
           "before_install": {
             "$ref": "#/definitions/type/strs",
@@ -748,14 +768,6 @@
             "$ref": "#/definitions/type/strs",
             "summary": "Scripts to run at the script stage"
           },
-          "after_script": {
-            "$ref": "#/definitions/type/strs",
-            "summary": "Scripts to run after the script stage"
-          },
-          "after_result": {
-            "$ref": "#/definitions/type/strs",
-            "summary": "Scripts to run after [umm, wat? i do not think this exists]"
-          },
           "after_success": {
             "$ref": "#/definitions/type/strs",
             "summary": "Scripts to run after a successful script stage"
@@ -764,6 +776,14 @@
             "$ref": "#/definitions/type/strs",
             "summary": "Scripts to run after a failing script stage"
           },
+          "after_script": {
+            "$ref": "#/definitions/type/strs",
+            "summary": "Scripts to run after the script stage"
+          },
+          "before_cache": {
+            "$ref": "#/definitions/type/strs",
+            "summary": "Scripts to run before storing a build cache"
+          },
           "before_deploy": {
             "$ref": "#/definitions/type/strs",
             "summary": "Scripts to run before the deploy stage"
@@ -771,10 +791,6 @@
           "after_deploy": {
             "$ref": "#/definitions/type/strs",
             "summary": "Scripts to run after the deploy stage"
-          },
-          "before_cache": {
-            "$ref": "#/definitions/type/strs",
-            "summary": "Scripts to run after before storing a build cache"
           }
         }
       },
@@ -782,6 +798,7 @@
         "$id": "language",
         "title": "Language",
         "type": "string",
+        "summary": "Language support",
         "downcase": true,
         "defaults": [
           {
@@ -1065,6 +1082,7 @@
             "$ref": "#/definitions/type/matrix_entries"
           }
         ],
+        "summary": "Build matrix definitions",
         "normal": true
       },
       "matrix_entries": {
@@ -1118,7 +1136,8 @@
                 "$ref": "#/definitions/type/dist"
               },
               "sudo": {
-                "$ref": "#/definitions/type/sudo"
+                "$ref": "#/definitions/type/sudo",
+                "deprecated": "this key has no effect anymore"
               },
               "env": {
                 "$ref": "#/definitions/type/env_vars"
@@ -1211,6 +1230,7 @@
             "$ref": "#/definitions/notification/email"
           }
         ],
+        "summary": "Notification targets to notify on build results",
         "normal": true
       },
       "os": {
@@ -1327,7 +1347,8 @@
         ],
         "flags": [
           "expand"
-        ]
+        ],
+        "summary": "Build environment operating systems"
       },
       "secure": {
         "$id": "secure",
@@ -1430,15 +1451,18 @@
           {
             "$ref": "#/definitions/type/service"
           }
-        ]
+        ],
+        "summary": "Services to set up and start"
       },
       "stack": {
         "$id": "stack",
         "title": "Stack",
         "type": "string",
+        "summary": "Build environment stack",
         "downcase": true,
         "flags": [
-          "edge"
+          "edge",
+          "internal"
         ],
         "enum": [
           "connie",
@@ -1490,7 +1514,8 @@
           {
             "$ref": "#/definitions/type/stage"
           }
-        ]
+        ],
+        "summary": "Build stages definition"
       },
       "strs": {
         "$id": "strs",
@@ -1524,7 +1549,9 @@
           {
             "type": "string"
           }
-        ]
+        ],
+        "summary": "Whether to allow sudo access",
+        "deprecated": "this key has no effect anymore"
       },
       "support": {
         "$id": "support",
@@ -1651,6 +1678,7 @@
         "$id": "version",
         "title": "Version",
         "type": "string",
+        "summary": "Build config specification version",
         "pattern": "^(~>|>|>=|=|<=|<) (\\d+(?:\\.\\d+)?(?:\\.\\d+)?)$"
       }
     },

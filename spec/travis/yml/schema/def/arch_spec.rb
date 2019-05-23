@@ -9,6 +9,7 @@ describe Travis::Yml::Schema::Def::Archs do
       should eq(
         '$id': :archs,
         title: 'Architectures',
+        summary: 'Build environment architecture',
         description: 'The architectures that will be selected for the build environments.',
         anyOf: [
           {

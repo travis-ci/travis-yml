@@ -11,6 +11,8 @@ module Travis
           # deprecated in favor of :if
 
           def define
+            summary 'Include or exclude branches from being built'
+
             description <<~str
               The branches your build will be run on.
             str

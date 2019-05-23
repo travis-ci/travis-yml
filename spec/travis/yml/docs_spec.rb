@@ -17,6 +17,6 @@ describe Travis::Yml::Docs do
 
   describe 'walk' do
     let(:ids) { [] }
-    it { root.walk { |node| puts node.render } }
+    # it { root.walk { |node| puts node.render } }
   end
 end

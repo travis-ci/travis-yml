@@ -8,6 +8,7 @@ describe Travis::Yml::Schema::Def::Branches do
     should eq(
       '$id': :branches,
       title: 'Branches',
+      summary: 'Include or exclude branches from being built',
       description: 'The branches your build will be run on.',
       normal: true,
       anyOf: [

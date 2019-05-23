@@ -17,6 +17,7 @@ module Travis
             register :deploys
 
             def define
+              summary 'Deployment configs'
               normal
               type Providers
               export

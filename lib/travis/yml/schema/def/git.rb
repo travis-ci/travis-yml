@@ -9,6 +9,8 @@ module Travis
           register :git
 
           def define
+            summary 'Git settings'
+
             map :strategy,         to: :str, values: [:clone, :tarball]
             map :quiet,            to: :bool
             map :depth,            to: :any, add: [:num, :bool]

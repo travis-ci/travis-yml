@@ -123,7 +123,6 @@ describe Travis::Yml::Doc::Change::Key do
       ['after_succcess', 'after_success'],
       ['after_succes', 'after_success'],
       ['after_sucess', 'after_success'],
-      ['after_test', 'after_result'],
       ['afterscript', 'after_script'],
       ['aftersuccess', 'after_success'],
       ['anguage', 'language'],

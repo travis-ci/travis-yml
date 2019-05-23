@@ -8,6 +8,7 @@ describe Travis::Yml::Schema::Def::Imports do
       should eq(
         '$id': :imports,
         title: 'Imports',
+        summary: 'Import build configuration snippets',
         anyOf: [
           {
             type: :array,

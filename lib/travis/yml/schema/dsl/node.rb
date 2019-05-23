@@ -145,7 +145,7 @@ module Travis
           end
           alias change changes
 
-          def deprecated(obj)
+          def deprecated(obj = true)
             node.set :deprecated, obj
           end
 

@@ -6,13 +6,12 @@ describe Travis::Yml, 'scripts' do
     install
     before_script
     script
-    after_script
-    after_result
     after_success
     after_failure
+    after_script
+    before_cache
     before_deploy
     after_deploy
-    before_cache
   )
 
   stages.each do |stage|

@@ -37,6 +37,8 @@ module Travis
           register :oss
 
           def define
+            summary 'Build environment operating systems'
+
             normal
             type Os
             export

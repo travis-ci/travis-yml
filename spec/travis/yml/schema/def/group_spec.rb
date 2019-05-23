@@ -7,8 +7,10 @@ describe Travis::Yml::Schema::Def::Group do
     should eq(
       '$id': :group,
       title: 'Group',
+      summary: 'Build environment group',
       type: :string,
-      downcase: true
+      downcase: true,
+      flags: [:internal]
     )
   end
 end

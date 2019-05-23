@@ -10,6 +10,7 @@ module Travis
           register :stages
 
           def define
+            summary 'Build stages definition'
             normal
             type :stage
             export

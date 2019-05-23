@@ -8,6 +8,7 @@ describe Travis::Yml::Schema::Def::Compilers do
       should eq(
         '$id': :compilers,
         title: 'Compilers',
+        summary: 'Compilers to set up',
         flags: [
           :expand
         ],

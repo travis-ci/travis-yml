@@ -172,6 +172,7 @@ describe Travis::Yml, configs: true do
   )
 
   DEPRECATIONS = [
+    { key: 'sudo', info: 'this key has no effect anymore' },
     { key: 'branches', info: 'not supported any more' },
     { key: 'github_token', info: 'not supported any more' },
     { value: '__sardonyx__', info: 'experimental stack language' }

@@ -7,6 +7,7 @@ describe Travis::Yml::Schema::Def::Stack do
     should eq(
       '$id': :stack,
       title: 'Stack',
+      summary: 'Build environment stack',
       type: :string,
       enum: [
         'connie',
@@ -20,7 +21,8 @@ describe Travis::Yml::Schema::Def::Stack do
       ],
       downcase: true,
       flags: [
-        :edge
+        :edge,
+        :internal
       ]
     )
   end

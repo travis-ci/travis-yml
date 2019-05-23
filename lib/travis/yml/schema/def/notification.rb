@@ -14,6 +14,8 @@ module Travis
             register :notifications
 
             def define
+              summary 'Notification targets to notify on build results'
+
               normal
               prefix :email
 

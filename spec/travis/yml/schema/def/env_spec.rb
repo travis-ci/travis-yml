@@ -8,6 +8,7 @@ describe Travis::Yml::Schema::Def::Env do
       should eq(
         '$id': :env,
         title: 'Env',
+        summary: 'Environment variables to set up',
         anyOf: [
           {
             type: :object,

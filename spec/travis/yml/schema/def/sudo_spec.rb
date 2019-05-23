@@ -5,6 +5,8 @@ describe Travis::Yml::Schema::Def::Sudo do
     should eq(
       '$id': :sudo,
       title: 'Sudo',
+      summary: 'Whether to allow sudo access',
+      deprecated: 'this key has no effect anymore',
       anyOf: [
         {
           type: :boolean,

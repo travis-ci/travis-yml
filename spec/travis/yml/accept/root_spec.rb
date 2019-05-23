@@ -108,24 +108,6 @@ describe Travis::Yml, 'root' do
     it { should have_msg [:warn, :root, :unknown_key, key: 'cd', value: 'foo'] }
   end
 
-  describe 'source_key' do
-    describe 'given a string' do
-      yaml %(
-        source_key: key
-      )
-      it { should serialize_to source_key: 'key' }
-      it { should have_msg [:alert, :source_key, :secure, type: :str] }
-    end
-
-    describe 'given a secure var' do
-      yaml %(
-        source_key:
-          secure: secure
-      )
-      it { should serialize_to source_key: { secure: 'secure' } }
-    end
-  end
-
   describe 'condition' do
     describe 'valid' do
       yaml %(

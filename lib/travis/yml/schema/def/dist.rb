@@ -9,6 +9,8 @@ module Travis
           register :dist
 
           def define
+            summary 'Build environment distribution'
+
             downcase
 
             value :trusty,        only: { os: :linux }

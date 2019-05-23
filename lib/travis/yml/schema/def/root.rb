@@ -38,16 +38,16 @@ module Travis
             matrix :os,             required: true, to: :oss
             matrix :arch,           to: :archs
             map    :dist
+            map    :stack
             map    :sudo
             matrix :env
             matrix :compiler,       to: :compilers
             map    :stages
             map    :matrix,         alias: :jobs
             map    :notifications
-            map    :stack
-            map    :conditions,     to: :conditions
-            map    :filter_secrets, to: :bool, summary: 'Whether to filter secrets', default: true
-            map    :trace,          to: :bool, summary: 'Whether to trace the build script', internal: true
+            map    :conditions,     to: :conditions, internal: true
+            map    :filter_secrets, to: :bool, internal: true, summary: 'Whether to filter secrets from the log output'
+            map    :trace,          to: :bool, internal: true, summary: 'Whether to trace the build script'
 
             include :languages, :job
 
