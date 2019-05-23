@@ -11,6 +11,7 @@ end
 #   [:error, :"matrix.include.deploy", :invalid_type, {:expected=>:map, :actual=>:str, :value=>"skip"}]
 
 describe Travis::Yml, configs: true do
+  before(:all) { FileUtils.mkdir_p('log') }
   before(:all) { FileUtils.rm_f('log/alert.log') }
 
   skip = [

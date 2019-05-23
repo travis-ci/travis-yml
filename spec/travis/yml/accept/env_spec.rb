@@ -121,6 +121,16 @@ describe Travis::Yml, 'env' do
     it { should_not have_msg }
   end
 
+  describe 'given a secure and another key' do
+    yaml %(
+      env:
+        secure: secure
+        FOO: foo
+    )
+    it { should serialize_to env: { matrix: [{ secure: 'secure', FOO: 'foo' }] } }
+    it { should_not have_msg }
+  end
+
   describe 'given a seq of secures' do
     yaml %(
       env:

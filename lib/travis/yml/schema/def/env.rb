@@ -54,7 +54,7 @@ module Travis
             add Class.new(Dsl::Map) {
               def define
                 normal
-                map :'^(?!global|matrix|secure)', to: :any, type: [:str, :num, :bool]
+                map :'^(?!global|matrix)', to: :any, type: [:str, :num, :bool]
                 strict false
               end
             }
