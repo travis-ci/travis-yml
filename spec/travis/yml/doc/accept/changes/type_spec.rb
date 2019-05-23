@@ -176,12 +176,12 @@ describe Travis::Yml::Doc::Change do
 
     describe 'several vars' do
       let(:value) { 'FOO=foo BAR=bar' }
-      it { should serialize_to matrix: [{ FOO: 'foo', }, { BAR: 'bar' }] }
+      it { should serialize_to matrix: [{ FOO: 'foo', BAR: 'bar' }] }
     end
 
     describe 'a seq of vars' do
       let(:value) { ['FOO=foo BAR=bar', 'BAZ=baz'] }
-      it { should serialize_to matrix: [{ FOO: 'foo' }, { BAR: 'bar' }, { BAZ: 'baz' }] }
+      it { should serialize_to matrix: [{ FOO: 'foo', BAR: 'bar' }, { BAZ: 'baz' }] }
     end
 
     describe 'a secure' do
@@ -196,12 +196,12 @@ describe Travis::Yml::Doc::Change do
 
     describe 'a map' do
       let(:value) { { 'FOO' => 'foo', 'BAR' => 'bar' } }
-      it { should serialize_to matrix: [{ FOO: 'foo' }, { BAR: 'bar' }] }
+      it { should serialize_to matrix: [{ FOO: 'foo', BAR: 'bar' }] }
     end
 
     describe 'a seq of maps' do
       let(:value) { [{ 'FOO' => 'foo', 'BAR' => 'bar' }, { 'BAZ' => 'baz' }] }
-      it { should serialize_to matrix: [{ FOO: 'foo' }, { BAR: 'bar' }, { BAZ: 'baz' }] }
+      it { should serialize_to matrix: [{ FOO: 'foo', BAR: 'bar' }, { BAZ: 'baz' }] }
     end
 
     describe 'a seq of mixed vars, maps, and secures' do
@@ -217,12 +217,10 @@ describe Travis::Yml::Doc::Change do
 
       it do
         should serialize_to matrix: [
-          { FOO: 'foo' },
-          { BAR: 'bar' },
+          { FOO: 'foo', BAR: 'bar' },
           { BAZ: 'baz' },
           { BUZ: 'buz' },
-          { BAM: 'bam' },
-          { BUM: 'bum' },
+          { BAM: 'bam', BUM: 'bum' },
           { secure: 'secure' }
         ]
       end

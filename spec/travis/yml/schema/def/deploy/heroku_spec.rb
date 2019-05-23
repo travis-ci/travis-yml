@@ -24,9 +24,6 @@ describe Travis::Yml::Schema::Def::Deploy::Heroku do
                   :true
                 ]
               },
-              run: {
-                type: :string
-              },
               allow_failure: {
                 type: :boolean
               },

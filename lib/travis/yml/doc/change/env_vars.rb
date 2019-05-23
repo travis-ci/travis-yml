@@ -18,23 +18,39 @@ module Travis
             end
 
             def env_vars
-              vars = value.seq? ? value.value : [value]
-              vars = vars.map do |value|
-                vars = value.value
-                vars = parse(value, vars) if value.str?
-                vars = split(vars) if value.map?
-                vars || [{}]
+              vars = case value.type
+              when :map then env_vars_map
+              when :seq then env_vars_seq
+              when :str then env_vars_str
+              else env_vars_scalar
               end
-              build(vars.flatten(1))
+              build(vars)
             end
 
-            def split(vars)
-              vars.empty? ? [{}] : vars.map { |key, obj| { key => obj } }
+            def env_vars_map
+              [value.value]
+            end
+
+            def env_vars_seq
+              value.value.map do |value|
+                vars = value.value
+                vars = parse(value, vars) if value.str?
+                vars || [{}]
+              end.flatten(1)
+            end
+
+            def env_vars_str
+              parse(value, value.value)
+            end
+
+            def env_vars_scalar
+              value.value
             end
 
             def parse(value, vars)
               vars = vars.empty? ? [[]] : ShVars.parse(vars)
-              vars.map { |pair| pair.empty? ? {} : [pair].to_h }
+              vars = vars.map { |pair| pair.empty? ? {} : [pair].to_h }
+              vars.inject(&:merge)
             rescue ShVars::ParseError => e
               value.error :invalid_env_var, var: vars
               [{}]

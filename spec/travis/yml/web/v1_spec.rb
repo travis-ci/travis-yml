@@ -176,7 +176,7 @@ describe Travis::Yml::Web::V1 do
       it { expect(body['config']['language']).to eq 'ruby' }
       it { expect(body['config']['rvm']).to eq ['2.6.2'] }
       it { expect(body['config']['script']).to eq ['./script'] }
-      it { expect(body['config']['env']['matrix']).to eq [{ 'API' => 'true' }, { 'FOO' => '1' }] }
+      it { expect(body['config']['env']['matrix']).to eq [{ 'API' => 'true', 'FOO' => '1' }] }
       it { expect(body['full_messages']).to include '[info] on env.matrix.API: casting value true (:bool) to "true" (:str)' }
     end
 
@@ -187,7 +187,7 @@ describe Travis::Yml::Web::V1 do
       it { expect(body['config']['language']).to eq 'ruby' }
       it { expect(body['config']['rvm']).to eq ['2.6.2'] }
       it { expect(body['config']['script']).to eq ['./script'] }
-      it { expect(body['config']['env']['matrix']).to eq [{ 'IMPORT' => 'true' }, { 'FOO' => '1' }, { 'TRAVIS_YML' => 'true' }, { 'API' => 'true' }] }
+      it { expect(body['config']['env']['matrix']).to eq [{ 'IMPORT' => 'true', 'FOO' => '1', 'TRAVIS_YML' => 'true', 'API' => 'true' }] }
     end
   end
 

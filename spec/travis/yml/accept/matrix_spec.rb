@@ -443,7 +443,7 @@ describe Travis::Yml, 'matrix' do
               #{key}:
                 env: 'FOO=foo BAR=bar'
           )
-          it { should serialize_to matrix: { key => [env: [{ FOO: 'foo' }, { BAR: 'bar' }]] } }
+          it { should serialize_to matrix: { key => [env: [{ FOO: 'foo', BAR: 'bar' }]] } }
           it { should_not have_msg }
         end
 
@@ -467,7 +467,7 @@ describe Travis::Yml, 'matrix' do
                   FOO: foo
                   BAR: bar
           )
-          it { should serialize_to matrix: { key => [env: [{ FOO: 'foo' }, { BAR: 'bar' }]] } }
+          it { should serialize_to matrix: { key => [env: [{ FOO: 'foo', BAR: 'bar' }]] } }
           it { should_not have_msg }
         end
 

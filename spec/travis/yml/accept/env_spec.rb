@@ -17,13 +17,30 @@ describe Travis::Yml, 'env' do
     it { should_not have_msg }
   end
 
+  describe 'given vars on a str' do
+    yaml %(
+      env: FOO=foo BAR=bar
+    )
+    it { should serialize_to env: { matrix: [{ FOO: 'foo', BAR: 'bar' }] } }
+    it { should_not have_msg }
+  end
+
+  describe 'given vars on an array of strs' do
+    yaml %(
+      env:
+        - FOO=foo BAR=bar
+    )
+    it { should serialize_to env: { matrix: [{ FOO: 'foo', BAR: 'bar' }] } }
+    it { should_not have_msg }
+  end
+
   describe 'given vars on a multiline str' do
     yaml %(
       env:
         FOO=foo
         BAR=bar
     )
-    it { should serialize_to env: { matrix: [{ FOO: 'foo' }, { BAR: 'bar' }] } }
+    it { should serialize_to env: { matrix: [{ FOO: 'foo', BAR: 'bar' }] } }
     it { should_not have_msg }
   end
 
@@ -70,7 +87,7 @@ describe Travis::Yml, 'env' do
         - FOO=foo
         - BAR=bar BAZ=baz
     )
-    it { should serialize_to env: { matrix: [{}, { FOO: 'foo' }, { BAR: 'bar' }, { BAZ: 'baz' }] } }
+    it { should serialize_to env: { matrix: [{}, { FOO: 'foo' }, { BAR: 'bar', BAZ: 'baz' }] } }
     it { should_not have_msg }
   end
 
@@ -81,7 +98,7 @@ describe Travis::Yml, 'env' do
         - FOO=foo
         - BAR=bar BAZ=baz
     )
-    it { should serialize_to env: { matrix: [{}, { FOO: 'foo' }, { BAR: 'bar' }, { BAZ: 'baz' }] } }
+    it { should serialize_to env: { matrix: [{}, { FOO: 'foo' }, { BAR: 'bar', BAZ: 'baz' }] } }
     it { should_not have_msg }
   end
 
@@ -91,11 +108,11 @@ describe Travis::Yml, 'env' do
         FOO: foo
         BAR: bar
     )
-    it { should serialize_to env: { matrix: [{ FOO: 'foo' }, { BAR: 'bar' }] } }
+    it { should serialize_to env: { matrix: [{ FOO: 'foo', BAR: 'bar' }] } }
     it { should_not have_msg }
   end
 
-  describe 'given a single secures' do
+  describe 'given a single secure' do
     yaml %(
       env:
         secure: secure
@@ -115,6 +132,16 @@ describe Travis::Yml, 'env' do
   end
 
   describe 'given a seq of maps' do
+    yaml %(
+      env:
+        - FOO: foo
+        - BAR: bar
+    )
+    it { should serialize_to env: { matrix: [{ FOO: 'foo' }, { BAR: 'bar' }] } }
+    it { should_not have_msg }
+  end
+
+  describe 'given a seq of maps and secures' do
     yaml %(
       env:
         - FOO: foo
@@ -173,7 +200,7 @@ describe Travis::Yml, 'env' do
             FOO: foo
             BAR: bar
       )
-      it { should serialize_to env: { global: [{ FOO: 'foo' }, { BAR: 'bar' }] } }
+      it { should serialize_to env: { global: [{ FOO: 'foo', BAR: 'bar' }] } }
       it { should_not have_msg }
     end
 
@@ -250,7 +277,7 @@ describe Travis::Yml, 'env' do
             FOO: foo
             BAR: bar
       )
-      it { should serialize_to env: { matrix: [{ FOO: 'foo' }, { BAR: 'bar' }] } }
+      it { should serialize_to env: { matrix: [{ FOO: 'foo', BAR: 'bar' }] } }
       it { should_not have_msg }
     end
   end
@@ -286,7 +313,7 @@ describe Travis::Yml, 'env' do
       env:
         - FOO=foo "BAR='bar'"
     )
-    it { should serialize_to env: { matrix: [{ FOO: 'foo' }, { BAR: "'bar'" }] } }
+    it { should serialize_to env: { matrix: [{ FOO: 'foo', BAR: "'bar'" }] } }
   end
 
   describe 'does not underscore keys (env)' do
