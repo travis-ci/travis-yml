@@ -26,6 +26,12 @@ module Travis
           def define
             title 'JSON schema for Travis CI configuration files'
 
+            description <<~str
+              The root node of your build config.
+
+              For details on the build lifecycle see [docs](...).
+            str
+
             map    :version
             map    :import,         to: :imports
             map    :language,       required: true
@@ -40,8 +46,8 @@ module Travis
             map    :notifications
             map    :stack
             map    :conditions,     to: :conditions
-            map    :filter_secrets, to: :bool
-            map    :trace,          to: :bool
+            map    :filter_secrets, to: :bool, summary: 'Whether to filter secrets', default: true
+            map    :trace,          to: :bool, summary: 'Whether to trace the build script', internal: true
 
             include :languages, :job
 

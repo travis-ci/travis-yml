@@ -8,6 +8,7 @@ Obj.include Memoize, Travis::Yml::Helper::Obj
 require 'json'
 require 'travis/yml/errors'
 require 'travis/yml/doc'
+require 'travis/yml/docs'
 require 'travis/yml/parts'
 require 'travis/yml/matrix'
 require 'travis/yml/schema'

@@ -15,7 +15,7 @@ module Travis
           registry :type
           register :node
 
-          opts %i(aliases changes deprecated flags normal unique only except)
+          opts %i(aliases changes deprecated flags normal unique only except summary)
 
           attr_writer :namespace, :opts
 

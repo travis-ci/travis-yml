@@ -139,7 +139,11 @@ module Travis
         end
 
         def print
-          puts pages.map(&:render)
+          puts generate
+        end
+
+        def generate
+          pages.map(&:render)
         end
 
         def pages
@@ -151,8 +155,8 @@ module Travis
         end
 
         def nodes
-          Schema.schema
-          nodes = Schema::Type.exports.values.map(&:values).flatten
+          nodes = Schema.exports
+          # nodes = Schema::Type.exports.values.map(&:values).flatten
           nodes = nodes.reject(&:internal?)
           nodes = sort(nodes)
           nodes
