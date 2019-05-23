@@ -75,7 +75,7 @@ describe Travis::Yml::Schema::Def::Env do
           {
             type: :object,
             patternProperties: {
-              '^(?!global|matrix|secure)': {
+              '^(?!global|matrix)': {
                 anyOf: [
                   {
                     type: :string
