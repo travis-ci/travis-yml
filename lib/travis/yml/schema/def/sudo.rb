@@ -10,10 +10,13 @@ module Travis
 
           def define
             summary 'Whether to allow sudo access'
+            example 'required'
+            deprecated 'this key has no effect anymore'
+
             add :bool, normal: true
             add :str
+
             export
-            deprecated 'this key has no effect anymore'
           end
         end
       end

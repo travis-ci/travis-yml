@@ -36,8 +36,14 @@ describe Travis::Yml::Schema::Def::Stages do
           {
             type: :object,
             properties: {
-              name: { type: :string },
-              if: { type: :string }
+              name: {
+                type: :string,
+                example: 'unit tests'
+              },
+              if: {
+                type: :string,
+                example: 'branch = master'
+              }
             },
             additionalProperties: false,
             prefix: {
@@ -46,7 +52,8 @@ describe Travis::Yml::Schema::Def::Stages do
             normal: true
           },
           {
-            type: :string
+            type: :string,
+            example: 'unit tests'
           }
         ]
       )

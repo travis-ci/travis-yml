@@ -21,13 +21,13 @@ module Travis
           register :stage
 
           def define
-            examples \
-              name: 'job name',
-              if: 'branch = master'
+            # examples \
+            #   name: 'job name',
+            #   if: 'branch = master'
 
             prefix :name
-            map :name, to: :str
-            map :if,   to: :str
+            map :name, to: :str, eg: 'unit tests'
+            map :if,   to: :str, eg: 'branch = master'
             export
           end
         end

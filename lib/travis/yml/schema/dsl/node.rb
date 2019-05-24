@@ -169,10 +169,10 @@ module Travis
             node.set :flags, [:edge]
           end
 
-          def example(examples)
-            node.set :examples, examples
+          def example(example)
+            node.set :example, example
           end
-          alias examples example
+          alias eg example
 
           def internal(*)
             node.set :flags, [:internal]

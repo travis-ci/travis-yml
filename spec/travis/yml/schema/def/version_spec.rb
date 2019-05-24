@@ -7,6 +7,7 @@ describe Travis::Yml::Schema::Def::Version do
       title: 'Version',
       summary: 'Build config specification version',
       type: :string,
+      flags: [:internal],
       pattern: '^(~>|>|>=|=|<=|<) (\d+(?:\.\d+)?(?:\.\d+)?)$'
     )
   end

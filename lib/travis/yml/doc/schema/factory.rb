@@ -159,7 +159,7 @@ module Travis
               definitions
               description
               enum
-              examples
+              example
               items
               maxProperties
               minItems

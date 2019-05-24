@@ -21,6 +21,8 @@ module Travis
           register :addons
 
           def define
+            summary 'Build addons to activate'
+
             map :apt
             map :apt_packages,    to: :seq
             map :artifacts

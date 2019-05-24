@@ -32,7 +32,6 @@ module Travis
               For details on the build lifecycle see [docs](...).
             str
 
-            map    :version
             map    :import,         to: :imports
             map    :language,       required: true
             matrix :os,             required: true, to: :oss
@@ -45,6 +44,8 @@ module Travis
             map    :stages
             map    :matrix,         alias: :jobs
             map    :notifications
+
+            map    :version,        internal: true
             map    :conditions,     to: :conditions, internal: true
             map    :filter_secrets, to: :bool, internal: true, summary: 'Whether to filter secrets from the log output'
             map    :trace,          to: :bool, internal: true, summary: 'Whether to trace the build script'

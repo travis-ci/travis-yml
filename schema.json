@@ -7,9 +7,6 @@
     {
       "type": "object",
       "properties": {
-        "version": {
-          "$ref": "#/definitions/type/version"
-        },
         "import": {
           "$ref": "#/definitions/type/imports"
         },
@@ -49,6 +46,9 @@
         },
         "notifications": {
           "$ref": "#/definitions/type/notifications"
+        },
+        "version": {
+          "$ref": "#/definitions/type/version"
         },
         "conditions": {
           "$ref": "#/definitions/type/conditions"
@@ -191,7 +191,8 @@
             "$ref": "#/definitions/type/deploys"
           }
         },
-        "additionalProperties": false
+        "additionalProperties": false,
+        "summary": "Build addons to activate"
       },
       "arch": {
         "$id": "arch",
@@ -624,14 +625,17 @@
             "type": "object",
             "properties": {
               "source": {
-                "type": "string"
+                "type": "string",
+                "summary": "The source to import build config from",
+                "example": "other/repo/import.yml@v1"
               },
               "mode": {
                 "type": "string",
                 "enum": [
                   "merge",
                   "deep_merge"
-                ]
+                ],
+                "summary": "How to merge the imported config into the target config"
               }
             },
             "additionalProperties": false,
@@ -641,7 +645,8 @@
             }
           },
           {
-            "type": "string"
+            "type": "string",
+            "example": "other/repo/import.yml@v1"
           }
         ],
         "normal": true
@@ -649,6 +654,7 @@
       "imports": {
         "$id": "imports",
         "title": "Imports",
+        "description": "Import YAML config snippets that can be shared across repositories.\n\nSee [the docs](...) for details.",
         "anyOf": [
           {
             "type": "array",
@@ -661,7 +667,7 @@
             "$ref": "#/definitions/type/import"
           }
         ],
-        "summary": "Import build configuration snippets"
+        "summary": "Build configuration imports"
       },
       "jdks": {
         "$id": "jdks",
@@ -715,14 +721,15 @@
           },
           "osx_image": {
             "type": "string",
-            "flags": [
-              "edge"
-            ],
+            "summary": "OSX image to use for the build environment",
             "only": {
               "os": [
                 "osx"
               ]
-            }
+            },
+            "flags": [
+              "edge"
+            ]
           },
           "services": {
             "$ref": "#/definitions/type/services"
@@ -1483,10 +1490,12 @@
             "type": "object",
             "properties": {
               "name": {
-                "type": "string"
+                "type": "string",
+                "example": "unit tests"
               },
               "if": {
-                "type": "string"
+                "type": "string",
+                "example": "branch = master"
               }
             },
             "additionalProperties": false,
@@ -1496,7 +1505,8 @@
             "normal": true
           },
           {
-            "type": "string"
+            "type": "string",
+            "example": "unit tests"
           }
         ]
       },
@@ -1551,6 +1561,7 @@
           }
         ],
         "summary": "Whether to allow sudo access",
+        "example": "required",
         "deprecated": "this key has no effect anymore"
       },
       "support": {
@@ -1678,6 +1689,9 @@
         "$id": "version",
         "title": "Version",
         "type": "string",
+        "flags": [
+          "internal"
+        ],
         "summary": "Build config specification version",
         "pattern": "^(~>|>|>=|=|<=|<) (\\d+(?:\\.\\d+)?(?:\\.\\d+)?)$"
       }

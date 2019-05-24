@@ -1,3 +1,3 @@
-<% map do |key, node| -%>
-  * `<%= key %>`: <%= node.summary %> <% if node.path %>[details](<%= node.path %>)<% end %>
+<% mappings.each do |key, node| -%>
+  * `<%= key %>`: <%= node.info %>
 <% end -%>
