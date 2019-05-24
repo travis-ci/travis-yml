@@ -15,7 +15,7 @@ module Travis
           end
 
           def enum?
-            node.enum?
+            node.opts.key?(:enum)
           end
 
           def enum

@@ -206,7 +206,7 @@ module Travis
             any.unset :aliases, :changes, :prefix, :required, :unique
             any.types = [node, child].map(&:dup)
 
-            child.example = node.examples[prefix]
+            # child.example = node.examples[prefix]
 
             any.types.each.with_index do |node, ix|
               node.unset :description, :summary, :title

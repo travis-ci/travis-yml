@@ -13,7 +13,7 @@ module Travis
           end
 
           def example
-            node.example || opts[:example] || enum? ? enum.first : 'string'
+            node.example or opts[:example] or enum? ? enum.first : 'string'
           end
         end
       end

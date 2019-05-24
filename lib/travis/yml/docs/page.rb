@@ -26,6 +26,8 @@
 # fast_finish: whether to fast finish the build (see [link to docs])
 
 require 'forwardable'
+require 'yaml'
+require 'travis/yml/schema'
 
 module Travis
   module Yml
@@ -45,7 +47,7 @@ module Travis
           BASE_TYPES = %i(strs)
 
           def path
-            "/ref/#{id}" if id
+            "/v1/docs/#{id}" if id && !base_type?
           end
 
           def base_type?
@@ -63,6 +65,13 @@ module Travis
             File.read(File.expand_path("../tpl/#{name}.erb.md", __FILE__))
           end
 
+          def info
+            info = [summary]
+            info << '(deprecated)' if deprecated?
+            info << "[details](#{path})" if path
+            info.join(' ')
+          end
+
           def title
             root? ? 'Root' : node.title
           end
@@ -75,12 +84,59 @@ module Travis
             node.summary || "(summarize #{id})"
           end
 
-          def walk(&block)
-            yield self if id
+          def examples
+            []
+          end
+
+          def flags
+            node.flags
+          end
+
+          def deprecated?
+            node.deprecated?
+          end
+
+          def internal?
+            node.internal?
+          end
+
+          DISPLAY_TYPES = {
+            seq: 'Sequence of %ss',
+            map: 'Map',
+            str: 'String',
+            num: 'Number',
+            bool: 'Boolean'
+          }
+
+          def display_type
+            DISPLAY_TYPES[node.type]
+          end
+
+          def pages
+            [self]
+          end
+
+          def walk(obj = nil, &block)
+            yield *[obj].compact, self if id && !internal?
+            obj
           end
 
           def build(schema)
             Page.build(schema)
+          end
+
+          def indent(str, width)
+            strs = str.split("\n")
+            [strs.shift, strs.map { |str| (' ' * width * 2) + str }].join("\n")
+          end
+
+          def yaml(obj)
+            obj = stringify(obj)
+            yml = YAML.dump(obj)
+            yml = yml.sub(/^--- ?/, '')
+            yml = yml.sub("...\n", '')
+            yml = yml.sub("'on'", 'on')
+            yml.strip
           end
 
           def inspect
@@ -89,9 +145,31 @@ module Travis
         end
 
         class Any < Base
+          def types
+            node.schemas.map(&:types).flatten
+          end
+
+          def display_types
+            types.map { |node| build(node).display_type }
+          end
+
+          def mappings
+            return unless node = types.detect { |schema| schema.type == :map }
+            node.mappings.map { |key, schema| [key, build(schema)] }.to_h
+          end
+
+          def examples
+            Yml::Schema::Examples.build(node).examples.map do |example|
+              # key = node.key || node.namespace
+              node.key ? { node.key => example } : example
+            end
+          end
         end
 
         class Seq < Base
+          def display_type
+            DISPLAY_TYPES[:seq] % build(node.schema).display_type.downcase
+          end
         end
 
         class Map < Base
@@ -111,9 +189,10 @@ module Travis
             super
           end
 
-          def walk(&block)
-            yield self
-            mappings.each { |_, page| page.walk(&block) }
+          def walk(obj = nil, &block)
+            yield *[obj].compact, self
+            mappings.each { |_, page| page.walk(*[obj].compact, &block) }
+            obj
           end
         end
 

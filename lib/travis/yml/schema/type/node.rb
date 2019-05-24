@@ -15,7 +15,7 @@ module Travis
           registry :type
           register :node
 
-          opts %i(aliases changes deprecated flags normal unique only except summary)
+          opts %i(aliases changes deprecated example flags normal summary unique only except)
 
           attr_writer :namespace, :opts
 
@@ -120,7 +120,7 @@ module Travis
             self.class.opts.include?(key)
           end
 
-          attr_accessor :example
+          # attr_accessor :example
 
           def aliases?
             aliases.any?
@@ -142,12 +142,13 @@ module Travis
             opts[:deprecated]
           end
 
-          def examples?
-            examples.any?
-          end
+          # def examples?
+          #   examples.any?
+          # end
 
-          def examples
-            @examples ||= {}
+          def example
+            # @examples ||= {}
+            opts[:example]
           end
 
           def expand_key(key)

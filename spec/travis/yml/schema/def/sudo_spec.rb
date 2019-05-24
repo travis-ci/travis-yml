@@ -6,6 +6,7 @@ describe Travis::Yml::Schema::Def::Sudo do
       '$id': :sudo,
       title: 'Sudo',
       summary: 'Whether to allow sudo access',
+      example: 'required',
       deprecated: 'this key has no effect anymore',
       anyOf: [
         {

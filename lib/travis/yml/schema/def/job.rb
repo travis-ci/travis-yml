@@ -5,6 +5,7 @@ require 'travis/yml/schema/def/cache'
 require 'travis/yml/schema/def/deploy'
 require 'travis/yml/schema/def/git'
 require 'travis/yml/schema/def/group'
+require 'travis/yml/schema/def/osx_image'
 require 'travis/yml/schema/def/services'
 require 'travis/yml/schema/dsl/map'
 
@@ -23,7 +24,7 @@ module Travis
             strict false
 
             map :group
-            map :osx_image, to: :str, edge: true, only: { os: :osx } # TODO move the opts to the definition
+            map :osx_image
 
             map :services
             map :addons

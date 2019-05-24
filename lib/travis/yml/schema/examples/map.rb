@@ -15,7 +15,8 @@ module Travis
           def example
             obj = node.map do |key, child|
               next if key == :disabled || inherit?(key)
-              opts = { example: node.examples[key] }
+              # opts = { example: node.examples[key] }
+              opts = { example: node.example }
               child = build(child, opts)
               [key, child.example]
             end.compact.to_h
@@ -43,7 +44,7 @@ module Travis
           end
 
           def anys
-            node.select { |_, node| node.is?(:any) }.to_h
+            node.select { |_, node| node.type == :any }.to_h
           end
 
           def others

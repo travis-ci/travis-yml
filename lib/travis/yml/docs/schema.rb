@@ -10,12 +10,20 @@ module Travis
             @opts = opts
           end
 
+          def type
+            self.class.name.split('::').last.downcase.to_sym
+          end
+
           def root?
             parents.empty?
           end
 
           def inspect
             'node'
+          end
+
+          def key
+            opts[:key]
           end
 
           def id
@@ -33,14 +41,63 @@ module Travis
           def description
             opts[:description]
           end
+
+          def example
+            opts[:example]
+          end
+
+          def flags
+            opts[:flags]
+          end
+
+          def deprecated?
+            !!opts[:deprecated]
+          end
+
+          def internal?
+            !!opts[:internal]
+          end
+
+          def required?
+            !!opts[:required]
+          end
+
+          def types
+            [self]
+          end
         end
 
         class Any < Node
+          include Enumerable
+
           attr_accessor :schemas
+
+          def each(&block)
+            schemas.each(&block)
+          end
+
+          def types
+            schemas.map(&:types).flatten
+          end
         end
 
         class Seq < Node
+          include Enumerable
+
           attr_accessor :schema
+
+          def initialize(parent, opts, schema = nil)
+            @schema = schema
+            super(parent, opts)
+          end
+
+          def each(&block)
+            yield schema
+          end
+
+          def types
+            schema.types.map { |schema| Seq.new(nil, opts, schema) }
+          end
         end
 
         class Map < Node
@@ -65,6 +122,13 @@ module Travis
         end
 
         class Scalar < Node
+          def type
+            opts[:type]
+          end
+
+          def enum
+            opts[:enum]
+          end
         end
 
         module Factory
@@ -178,7 +242,7 @@ module Travis
           def mappings(parent, schema)
             map = schema[:properties] ? schema[:properties] : {}
             map = map.reject { |key, schema| Array(schema[:flags]).include?(:internal) }
-            map.map { |key, schema| [key, build(parent, schema)] }.to_h
+            map.map { |key, schema| [key, build(parent, schema.merge(key: key))] }.to_h
           end
 
           def secure(parent, schema)
@@ -233,7 +297,6 @@ module Travis
             allOf
             anyOf
             definitions
-            enum
             examples
             items
             maxProperties

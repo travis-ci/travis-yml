@@ -8,7 +8,8 @@ describe Travis::Yml::Schema::Def::Imports do
       should eq(
         '$id': :imports,
         title: 'Imports',
-        summary: 'Import build configuration snippets',
+        description: "Import YAML config snippets that can be shared across repositories.\n\nSee [the docs](...) for details.",
+        summary: 'Build configuration imports',
         anyOf: [
           {
             type: :array,
@@ -37,8 +38,16 @@ describe Travis::Yml::Schema::Def::Imports do
           {
             type: :object,
             properties: {
-              source: { type: :string },
-              mode: { type: :string, enum: ['merge', 'deep_merge'] }
+              source: {
+                type: :string,
+                summary: 'The source to import build config from',
+                example: 'other/repo/import.yml@v1'
+              },
+              mode: {
+                type: :string,
+                enum: ['merge', 'deep_merge'],
+                summary: 'How to merge the imported config into the target config'
+              }
             },
             additionalProperties: false,
             normal: true,
@@ -47,7 +56,8 @@ describe Travis::Yml::Schema::Def::Imports do
             },
           },
           {
-            type: :string
+            type: :string,
+            example: 'other/repo/import.yml@v1'
           }
         ]
       )
