@@ -5,8 +5,8 @@ describe Travis::Yml::Schema::Def::Deploy::ChefSupermarket do
 
   it do
     should eq(
-      '$id': :'deploy_chef_supermarket',
-        title: 'Deploy Chef Supermarket',
+      '$id': :chef_supermarket,
+        title: 'Chef Supermarket',
         anyOf: [
           {
             type: :object,

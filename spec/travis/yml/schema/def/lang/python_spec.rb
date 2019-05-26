@@ -1,12 +1,12 @@
-describe Travis::Yml::Schema::Def::Python, 'schema' do
+describe Travis::Yml::Schema::Def::Python do
   subject { Travis::Yml.schema[:definitions][:language][:python] }
 
   # it { puts JSON.pretty_generate(subject) }
 
   it do
     should eq(
-      '$id': :language_python,
-        title: 'Language Python',
+      '$id': :python,
+        title: 'Python',
         type: :object,
         properties: {
           python: {

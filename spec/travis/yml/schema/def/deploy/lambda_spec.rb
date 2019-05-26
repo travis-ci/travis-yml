@@ -5,8 +5,8 @@ describe Travis::Yml::Schema::Def::Deploy::Lambda do
 
   it do
     should eq(
-      '$id': :deploy_lambda,
-        title: 'Deploy Lambda',
+      '$id': :lambda,
+        title: 'Lambda',
         anyOf: [
           {
             type: :object,

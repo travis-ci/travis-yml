@@ -5,8 +5,8 @@ describe Travis::Yml::Schema::Def::Deploy::Cloudfoundry do
 
   it do
     should eq(
-      '$id': :deploy_cloudfoundry,
-        title: 'Deploy Cloudfoundry',
+      '$id': :cloudfoundry,
+        title: 'Cloudfoundry',
         anyOf: [
           {
             type: :object,

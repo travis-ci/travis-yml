@@ -1,12 +1,12 @@
-describe Travis::Yml::Schema::Def::Dart, 'schema' do
+describe Travis::Yml::Schema::Def::Dart do
   subject { Travis::Yml.schema[:definitions][:language][:dart] }
 
   # it { puts JSON.pretty_generate(subject) }
 
   it do
     should eq(
-      '$id': :language_dart,
-        title: 'Language Dart',
+      '$id': :dart,
+        title: 'Dart',
         type: :object,
         properties: {
           dart: {

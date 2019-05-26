@@ -1,12 +1,12 @@
-describe Travis::Yml::Schema::Def::Php, 'schema' do
+describe Travis::Yml::Schema::Def::Php do
   subject { Travis::Yml.schema[:definitions][:language][:php] }
 
   # it { puts JSON.pretty_generate(subject) }
 
   it do
     should eq(
-      '$id': :language_php,
-        title: 'Language Php',
+      '$id': :php,
+        title: 'Php',
         type: :object,
         properties: {
           php: {

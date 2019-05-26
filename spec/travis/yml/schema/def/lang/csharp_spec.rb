@@ -1,12 +1,12 @@
-describe Travis::Yml::Schema::Def::Csharp, 'schema' do
+describe Travis::Yml::Schema::Def::Csharp do
   subject { Travis::Yml.schema[:definitions][:language][:csharp] }
 
   # it { puts JSON.pretty_generate(subject) }
 
   it do
     should eq(
-      '$id': :language_csharp,
-        title: 'Language Csharp',
+      '$id': :csharp,
+        title: 'Csharp',
         type: :object,
         properties: {
           dotnet: {

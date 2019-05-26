@@ -1,12 +1,12 @@
-describe Travis::Yml::Schema::Def::Haskell, 'schema' do
+describe Travis::Yml::Schema::Def::Haskell do
   subject { Travis::Yml.schema[:definitions][:language][:haskell] }
 
   # it { puts JSON.pretty_generate(subject) }
 
   it do
     should eq(
-      '$id': :language_haskell,
-        title: 'Language Haskell',
+      '$id': :haskell,
+        title: 'Haskell',
         type: :object,
         properties: {
           ghc: {

@@ -5,8 +5,8 @@ describe Travis::Yml::Schema::Def::Deploy::Bintray do
 
   it do
     should eq(
-      '$id': :deploy_bintray,
-        title: 'Deploy Bintray',
+      '$id': :bintray,
+        title: 'Bintray',
         anyOf: [
           {
             type: :object,

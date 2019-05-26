@@ -1,12 +1,12 @@
-describe Travis::Yml::Schema::Def::Java, 'schema' do
+describe Travis::Yml::Schema::Def::Java do
   subject { Travis::Yml.schema[:definitions][:language][:java] }
 
   # it { puts JSON.pretty_generate(subject) }
 
   it do
     should eq(
-      '$id': :language_java,
-        title: 'Language Java',
+      '$id': :java,
+        title: 'Java',
         type: :object,
         properties: {
           jdk: {

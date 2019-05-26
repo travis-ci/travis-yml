@@ -2,7 +2,17 @@
 
 <%= description %>
 
-<% if flags -%>
+<% if deprecated? -%>
+*Deprecated: <%= deprecated %>*
+<% end -%>
+
+## Known on
+
+<% parents.select(&:id).each do |parent| -%>
+  * [<%= parent.title %>](<%= parent.path %>)
+<% end -%>
+
+<% if flags.any? -%>
 ## Flags
 
 <% flags.each do |flag| -%>
@@ -14,11 +24,19 @@
 ## Types
 
 <% display_types.each do |type| -%>
-* <%= type %>
+  * <%= type %>
 <% end -%>
 <% end -%>
 
-<% if mappings -%>
+<% if enum -%>
+## Known values
+
+<% enum.each do |value| -%>
+  * `<%= value %>`
+<% end -%>
+<% end -%>
+
+<% if mappings && mappings.any? -%>
 ## Keys
 
 If given a map, the following keys are supported:

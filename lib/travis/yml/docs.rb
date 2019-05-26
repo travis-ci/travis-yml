@@ -6,17 +6,15 @@ module Travis
     module Docs
       extend self, Helper::Obj
 
-      def index
-        pages.map do |_, page|
-          "* [#{page.title}](/v1/docs/#{page.id})" # #{page.namespace}/
-        end.join("\n")
+      def index(current)
+        Page::Index.new(pages, current).render
       end
 
       def pages
         @pages ||= begin
-          pages = root.walk([]) { |pages, node| pages << node.pages }
-          pages = pages.flatten.map { |page| [page.id.to_s, page] }
-          pages = pages.sort.to_h
+          pages = root.pages.uniq(&:full_id)
+          pages = pages.map { |page| [page.full_id, page] }
+          pages = pages.to_h.sort.to_h
           only(pages, :root).merge(except(pages, :root))
         end
       end

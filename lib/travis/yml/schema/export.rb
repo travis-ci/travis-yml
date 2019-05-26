@@ -45,7 +45,7 @@ module Travis
         end
 
         def ref(node, opts = {})
-          opts = opts.merge(namespace: node.namespace, id: node.id )
+          opts = opts.merge(namespace: node.namespace, id: node.id)
           Type::Ref.new(node.parent, opts)
         end
 

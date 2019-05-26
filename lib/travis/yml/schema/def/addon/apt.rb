@@ -11,11 +11,19 @@ module Travis
             register :apt
 
             def define
+              summary 'Install APT packages and sources'
+
+              description <<~str
+                Install APT packages and sources without using apt-get commands in a before_install script manually.
+
+                Please see [our documentation](/user/installing-dependencies/#installing-packages-with-the-apt-addon) for details.
+              str
+
               prefix :packages
-              map :packages, to: :seq, alias: :package
-              map :sources,  to: Sources, alias: :source
-              map :dist,     to: :str
-              map :update,   to: :bool
+              map :packages, to: :seq, alias: :package, summary: 'Package names', eg: 'cmake'
+              map :sources,  to: Sources, alias: :source, summary: 'Package sources', eg: 'ubuntu-toolchain-r-test'
+              map :dist,     to: :str, summary: 'Distribution'
+              map :update,   to: :bool, summary: 'Whether to run apt-get update'
               super
             end
 

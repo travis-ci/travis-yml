@@ -5,8 +5,8 @@ describe Travis::Yml::Schema::Def::Notification::Campfire, 'structure' do
 
   it do
     should eq(
-      '$id': :notification_campfire,
-      title: 'Notification Campfire',
+      '$id': :campfire,
+      title: 'Campfire',
       normal: true,
       anyOf: [
         {

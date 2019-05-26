@@ -1,12 +1,12 @@
-describe Travis::Yml::Schema::Def::Julia, 'schema' do
+describe Travis::Yml::Schema::Def::Julia do
   subject { Travis::Yml.schema[:definitions][:language][:julia] }
 
   # it { puts JSON.pretty_generate(subject) }
 
   it do
     should eq(
-      '$id': :language_julia,
-        title: 'Language Julia',
+      '$id': :julia,
+        title: 'Julia',
         type: :object,
         properties: {
           julia: {

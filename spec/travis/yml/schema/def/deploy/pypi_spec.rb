@@ -5,8 +5,8 @@ describe Travis::Yml::Schema::Def::Deploy::Pypi do
 
   it do
     should eq(
-      '$id': :deploy_pypi,
-        title: 'Deploy Pypi',
+      '$id': :pypi,
+        title: 'Pypi',
         anyOf: [
           {
             type: :object,
@@ -72,7 +72,7 @@ describe Travis::Yml::Schema::Def::Deploy::Pypi do
               },
               wheel_version: {
                 type: :string
-              },
+              }
             },
             additionalProperties: false,
             normal: true,

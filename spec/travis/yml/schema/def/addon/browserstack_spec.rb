@@ -5,8 +5,8 @@ describe Travis::Yml::Schema::Def::Addon::Browserstack do
 
   it do
     should eq(
-      '$id': :addon_browserstack,
-      title: 'Addon Browserstack',
+      '$id': :browserstack,
+      title: 'Browserstack',
       normal: true,
       anyOf: [
         {
@@ -21,13 +21,16 @@ describe Travis::Yml::Schema::Def::Addon::Browserstack do
               strict: false
             },
             app_path: {
-              type: :string
+              type: :string,
+              summary: 'Path to the app file'
             },
             forcelocal: {
-              type: :boolean
+              type: :boolean,
+              summary: 'Force all network traffic to be resolved via the build environment VM'
             },
             only: {
-              type: :string
+              type: :string,
+              summary: 'Restrict local testing access to the specified local servers/directories'
             },
             proxyHost: {
               type: :string

@@ -5,8 +5,8 @@ describe Travis::Yml::Schema::Def::Deploy::Anynines do
 
   it do
     should eq(
-      '$id': :deploy_anynines,
-        title: 'Deploy Anynines',
+      '$id': :anynines,
+        title: 'Anynines',
         anyOf: [
           {
             type: :object,

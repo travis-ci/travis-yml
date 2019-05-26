@@ -5,8 +5,8 @@ describe Travis::Yml::Schema::Def::Deploy::Transifex do
 
   it do
     should eq(
-      '$id': :deploy_transifex,
-        title: 'Deploy Transifex',
+      '$id': :transifex,
+        title: 'Transifex',
         anyOf: [
           {
             type: :object,

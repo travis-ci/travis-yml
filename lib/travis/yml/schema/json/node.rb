@@ -29,7 +29,6 @@ module Travis
           private
 
             def meta
-              id = namespace == :type ? node.id : :"#{namespace}_#{node.id}"
               compact('$id': id, title: title, description: description)
             end
 

@@ -5,8 +5,8 @@ describe Travis::Yml::Schema::Def::Deploy::Engineyard do
 
   it do
     should eq(
-      '$id': :deploy_engineyard,
-        title: 'Deploy Engineyard',
+      '$id': :engineyard,
+        title: 'Engineyard',
         anyOf: [
           {
             type: :object,
@@ -43,12 +43,12 @@ describe Travis::Yml::Schema::Def::Deploy::Engineyard do
               password: {
                 '$ref': '#/definitions/type/secure'
               },
+              api_key: {
+                '$ref': '#/definitions/type/secure'
+              },
               account: {
                 '$ref': '#/definitions/type/secure',
                 strict: false
-              },
-              api_key: {
-                '$ref': '#/definitions/type/secure'
               },
               app: {
                 anyOf: [

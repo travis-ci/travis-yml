@@ -5,8 +5,8 @@ describe Travis::Yml::Schema::Def::Deploy::Heroku do
 
   it do
     should eq(
-      '$id': :deploy_heroku,
-        title: 'Deploy Heroku',
+      '$id': :heroku,
+        title: 'Heroku',
         anyOf: [
           {
             type: :object,
@@ -23,6 +23,9 @@ describe Travis::Yml::Schema::Def::Deploy::Heroku do
                 aliases: [
                   :true
                 ]
+              },
+              run: {
+                '$ref': '#/definitions/type/strs'
               },
               allow_failure: {
                 type: :boolean
@@ -43,21 +46,6 @@ describe Travis::Yml::Schema::Def::Deploy::Heroku do
                 enum: [
                   'api',
                   'git'
-                ]
-              },
-              app: {
-                anyOf: [
-                  {
-                    type: :object,
-                    patternProperties: {
-                      '.*': {
-                        type: :string
-                      }
-                    }
-                  },
-                  {
-                    type: :string
-                  }
                 ]
               },
               api_key: {
@@ -81,8 +69,20 @@ describe Travis::Yml::Schema::Def::Deploy::Heroku do
               password: {
                 '$ref': '#/definitions/type/secure'
               },
-              run: {
-                '$ref': '#/definitions/type/strs'
+              app: {
+                anyOf: [
+                  {
+                    type: :object,
+                    patternProperties: {
+                      '.*': {
+                        type: :string
+                      }
+                    }
+                  },
+                  {
+                    type: :string
+                  }
+                ]
               },
               git: {
                 type: :string

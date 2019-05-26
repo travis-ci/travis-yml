@@ -4,7 +4,7 @@ require 'travis/yml'
 module Travis::Yml::Web::V1
   module Decorators
     class Config
-      LEVELS = %i(error warn info unknown)
+      LEVELS = %i(alert error warn info unknown)
 
       def initialize(config)
         @config = config
@@ -38,7 +38,7 @@ module Travis::Yml::Web::V1
       end
 
       def sort(msgs)
-        msgs.sort_by { |msg| LEVELS.index(msg.first || :unknown) }
+        msgs.sort_by { |msg| LEVELS.index(msg.first || :unknown) || LEVELS[:unknown] }
       end
     end
   end

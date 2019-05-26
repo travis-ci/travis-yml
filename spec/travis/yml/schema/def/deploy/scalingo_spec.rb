@@ -5,8 +5,8 @@ describe Travis::Yml::Schema::Def::Deploy::Scalingo do
 
   it do
     should eq(
-      '$id': :deploy_scalingo,
-        title: 'Deploy Scalingo',
+      '$id': :scalingo,
+        title: 'Scalingo',
         anyOf: [
           {
             type: :object,

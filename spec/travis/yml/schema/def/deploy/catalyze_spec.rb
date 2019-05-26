@@ -5,8 +5,8 @@ describe Travis::Yml::Schema::Def::Deploy::Catalyze do
 
   it do
     should eq(
-      '$id': :deploy_catalyze,
-        title: 'Deploy Catalyze',
+      '$id': :catalyze,
+        title: 'Catalyze',
         anyOf: [
           {
             type: :object,

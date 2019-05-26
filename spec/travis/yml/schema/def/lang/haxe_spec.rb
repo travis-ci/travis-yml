@@ -1,12 +1,12 @@
-describe Travis::Yml::Schema::Def::Haxe, 'schema' do
+describe Travis::Yml::Schema::Def::Haxe do
   subject { Travis::Yml.schema[:definitions][:language][:haxe] }
 
   # it { puts JSON.pretty_generate(subject) }
 
   it do
     should eq(
-      '$id': :language_haxe,
-        title: 'Language Haxe',
+      '$id': :haxe,
+        title: 'Haxe',
         type: :object,
         properties: {
           haxe: {

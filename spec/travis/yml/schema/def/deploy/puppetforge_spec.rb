@@ -5,8 +5,8 @@ describe Travis::Yml::Schema::Def::Deploy::Puppetforge do
 
   it do
     should eq(
-      '$id': :deploy_puppetforge,
-        title: 'Deploy Puppetforge',
+      '$id': :puppetforge,
+        title: 'Puppetforge',
         anyOf: [
           {
             type: :object,

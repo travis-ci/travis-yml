@@ -89,6 +89,7 @@
       "addons": {
         "$id": "addons",
         "title": "Addons",
+        "description": "Build addons enable additional built-in functionality, such as\ninstalling build dependencies, system setup tasks, and integrations\nwith external services.",
         "type": "object",
         "properties": {
           "apt": {
@@ -261,32 +262,37 @@
       "branches": {
         "$id": "branches",
         "title": "Branches",
-        "description": "The branches your build will be run on.",
+        "description": "Include or exclude branches for your build to be run on.\n\nThis is a legacy setting, use the more powerful condition (`if`) to define branches for your build to be run on.",
         "anyOf": [
           {
             "type": "object",
             "properties": {
               "only": {
-                "$ref": "#/definitions/type/strs"
+                "$ref": "#/definitions/type/strs",
+                "summary": "Branches to include",
+                "example": "master"
               },
               "except": {
                 "$ref": "#/definitions/type/strs",
                 "aliases": [
                   "exclude"
-                ]
+                ],
+                "summary": "Branches to exclude",
+                "example": "development"
               }
             },
             "additionalProperties": false,
-            "aliases": [
-              "branch"
-            ],
             "normal": true,
             "prefix": {
               "key": "only"
-            }
+            },
+            "aliases": [
+              "branch"
+            ]
           },
           {
-            "$ref": "#/definitions/type/strs"
+            "$ref": "#/definitions/type/strs",
+            "example": "master"
           }
         ],
         "summary": "Include or exclude branches from being built",
@@ -400,7 +406,8 @@
         "$id": "condition",
         "title": "Condition",
         "type": "string",
-        "summary": "Condition to determine whether or not a build, stage, or job should be run"
+        "summary": "Condition to determine whether or not a build, stage, or job should be run",
+        "example": "branch = master"
       },
       "conditions": {
         "$id": "conditions",
@@ -1491,11 +1498,11 @@
             "properties": {
               "name": {
                 "type": "string",
+                "summary": "The name of the stage",
                 "example": "unit tests"
               },
               "if": {
-                "type": "string",
-                "example": "branch = master"
+                "$ref": "#/definitions/type/condition"
               }
             },
             "additionalProperties": false,
@@ -1698,8 +1705,9 @@
     },
     "addon": {
       "apt": {
-        "$id": "addon_apt",
-        "title": "Addon Apt",
+        "$id": "apt",
+        "title": "Apt",
+        "description": "Install APT packages and sources without using apt-get commands in a before_install script manually.\n\nPlease see [our documentation](/user/installing-dependencies/#installing-packages-with-the-apt-addon) for details.",
         "anyOf": [
           {
             "type": "object",
@@ -1708,7 +1716,9 @@
                 "$ref": "#/definitions/type/strs",
                 "aliases": [
                   "package"
-                ]
+                ],
+                "summary": "Package names",
+                "example": "cmake"
               },
               "sources": {
                 "anyOf": [
@@ -1743,6 +1753,7 @@
                     "aliases": [
                       "source"
                     ],
+                    "example": "ubuntu-toolchain-r-test",
                     "normal": true
                   },
                   {
@@ -1767,13 +1778,17 @@
                   {
                     "type": "string"
                   }
-                ]
+                ],
+                "summary": "Package sources",
+                "example": "ubuntu-toolchain-r-test"
               },
               "dist": {
-                "type": "string"
+                "type": "string",
+                "summary": "Distribution"
               },
               "update": {
-                "type": "boolean"
+                "type": "boolean",
+                "summary": "Whether to run apt-get update"
               }
             },
             "additionalProperties": false,
@@ -1788,29 +1803,35 @@
             ]
           },
           {
-            "$ref": "#/definitions/type/strs"
+            "$ref": "#/definitions/type/strs",
+            "example": "cmake"
           },
           {
             "type": "boolean"
           }
         ],
+        "summary": "Install APT packages and sources",
         "normal": true
       },
       "artifacts": {
-        "$id": "addon_artifacts",
-        "title": "Addon Artifacts",
+        "$id": "artifacts",
+        "title": "Artifacts",
+        "description": "Automatically upload your build artifacts to Amazon S3 at the end of a build, after the `after_script` phase.\n\nPlease see [our documentation](https://docs.travis-ci.com/user/uploading-artifacts/) for details.",
         "anyOf": [
           {
             "type": "object",
             "properties": {
               "enabled": {
-                "type": "boolean"
+                "type": "boolean",
+                "summary": "Enable or disable uploading artifacts"
               },
               "bucket": {
-                "type": "string"
+                "type": "string",
+                "summary": "The S3 bucket to upload to"
               },
               "endpoint": {
-                "type": "string"
+                "type": "string",
+                "summary": "The S3 compatible endpoint to upload to"
               },
               "key": {
                 "$ref": "#/definitions/type/secure",
@@ -1831,8 +1852,16 @@
                   "secret_key"
                 ]
               },
+              "region": {
+                "type": "string",
+                "aliases": [
+                  "s3_region"
+                ],
+                "summary": "The S3 region"
+              },
               "paths": {
-                "$ref": "#/definitions/type/strs"
+                "$ref": "#/definitions/type/strs",
+                "summary": "Paths to the files to upload"
               },
               "branch": {
                 "type": "string"
@@ -1852,12 +1881,6 @@
               "max_size": {
                 "type": "number"
               },
-              "region": {
-                "type": "string",
-                "aliases": [
-                  "s3_region"
-                ]
-              },
               "permissions": {
                 "type": "string"
               },
@@ -1869,6 +1892,7 @@
               }
             },
             "additionalProperties": false,
+            "summary": "Upload build artifacts at the end of the build",
             "normal": true,
             "changes": [
               {
@@ -1880,11 +1904,12 @@
             "type": "boolean"
           }
         ],
+        "summary": "Upload build artifacts at the end of the build",
         "normal": true
       },
       "browserstack": {
-        "$id": "addon_browserstack",
-        "title": "Addon Browserstack",
+        "$id": "browserstack",
+        "title": "Browserstack",
         "anyOf": [
           {
             "type": "object",
@@ -1898,13 +1923,16 @@
                 "strict": false
               },
               "forcelocal": {
-                "type": "boolean"
+                "type": "boolean",
+                "summary": "Force all network traffic to be resolved via the build environment VM"
               },
               "only": {
-                "type": "string"
+                "type": "string",
+                "summary": "Restrict local testing access to the specified local servers/directories"
               },
               "app_path": {
-                "type": "string"
+                "type": "string",
+                "summary": "Path to the app file"
               },
               "proxyHost": {
                 "type": "string"
@@ -1934,8 +1962,8 @@
         "normal": true
       },
       "code_climate": {
-        "$id": "addon_code_climate",
-        "title": "Addon Code Climate",
+        "$id": "code_climate",
+        "title": "Code Climate",
         "anyOf": [
           {
             "type": "object",
@@ -1965,8 +1993,8 @@
         "normal": true
       },
       "coverity_scan": {
-        "$id": "addon_coverity_scan",
-        "title": "Addon Coverity Scan",
+        "$id": "coverity_scan",
+        "title": "Coverity Scan",
         "anyOf": [
           {
             "type": "object",
@@ -2032,8 +2060,8 @@
         "normal": true
       },
       "homebrew": {
-        "$id": "addon_homebrew",
-        "title": "Addon Homebrew",
+        "$id": "homebrew",
+        "title": "Homebrew",
         "anyOf": [
           {
             "type": "object",
@@ -2075,7 +2103,7 @@
         "normal": true
       },
       "jwts": {
-        "$id": "addon_jwts",
+        "$id": "jwts",
         "title": "JSON Web Tokens",
         "anyOf": [
           {
@@ -2091,8 +2119,8 @@
         ]
       },
       "sauce_connect": {
-        "$id": "addon_sauce_connect",
-        "title": "Addon Sauce Connect",
+        "$id": "sauce_connect",
+        "title": "Sauce Connect",
         "anyOf": [
           {
             "type": "object",
@@ -2132,8 +2160,8 @@
         "normal": true
       },
       "snaps": {
-        "$id": "addon_snaps",
-        "title": "Addon Snaps",
+        "$id": "snaps",
+        "title": "Snaps",
         "anyOf": [
           {
             "type": "array",
@@ -2190,8 +2218,8 @@
         ]
       },
       "sonarcloud": {
-        "$id": "addon_sonarcloud",
-        "title": "Addon Sonarcloud",
+        "$id": "sonarcloud",
+        "title": "Sonarcloud",
         "anyOf": [
           {
             "type": "object",
@@ -2228,8 +2256,8 @@
     },
     "language": {
       "__amethyst__": {
-        "$id": "language___amethyst__",
-        "title": "Language Amethyst",
+        "$id": "__amethyst__",
+        "title": "Amethyst",
         "type": "object",
         "normal": true,
         "flags": [
@@ -2237,8 +2265,8 @@
         ]
       },
       "__connie__": {
-        "$id": "language___connie__",
-        "title": "Language Connie",
+        "$id": "__connie__",
+        "title": "Connie",
         "type": "object",
         "normal": true,
         "flags": [
@@ -2246,8 +2274,8 @@
         ]
       },
       "__cookiecat__": {
-        "$id": "language___cookiecat__",
-        "title": "Language Cookiecat",
+        "$id": "__cookiecat__",
+        "title": "Cookiecat",
         "type": "object",
         "normal": true,
         "flags": [
@@ -2255,8 +2283,8 @@
         ]
       },
       "__garnet__": {
-        "$id": "language___garnet__",
-        "title": "Language Garnet",
+        "$id": "__garnet__",
+        "title": "Garnet",
         "type": "object",
         "normal": true,
         "flags": [
@@ -2264,8 +2292,8 @@
         ]
       },
       "__onion__": {
-        "$id": "language___onion__",
-        "title": "Language Onion",
+        "$id": "__onion__",
+        "title": "Onion",
         "type": "object",
         "normal": true,
         "flags": [
@@ -2273,8 +2301,8 @@
         ]
       },
       "__opal__": {
-        "$id": "language___opal__",
-        "title": "Language Opal",
+        "$id": "__opal__",
+        "title": "Opal",
         "type": "object",
         "normal": true,
         "flags": [
@@ -2282,8 +2310,8 @@
         ]
       },
       "__sardonyx__": {
-        "$id": "language___sardonyx__",
-        "title": "Language Sardonyx",
+        "$id": "__sardonyx__",
+        "title": "Sardonyx",
         "type": "object",
         "normal": true,
         "flags": [
@@ -2291,8 +2319,8 @@
         ]
       },
       "__stevonnie__": {
-        "$id": "language___stevonnie__",
-        "title": "Language Stevonnie",
+        "$id": "__stevonnie__",
+        "title": "Stevonnie",
         "type": "object",
         "normal": true,
         "flags": [
@@ -2300,8 +2328,8 @@
         ]
       },
       "android": {
-        "$id": "language_android",
-        "title": "Language Android",
+        "$id": "android",
+        "title": "Android",
         "type": "object",
         "properties": {
           "jdk": {
@@ -2338,14 +2366,14 @@
         "normal": true
       },
       "c": {
-        "$id": "language_c",
-        "title": "Language C",
+        "$id": "c",
+        "title": "C",
         "type": "object",
         "normal": true
       },
       "clojure": {
-        "$id": "language_clojure",
-        "title": "Language Clojure",
+        "$id": "clojure",
+        "title": "Clojure",
         "type": "object",
         "properties": {
           "jdk": {
@@ -2373,14 +2401,14 @@
         "normal": true
       },
       "cpp": {
-        "$id": "language_cpp",
-        "title": "Language Cpp",
+        "$id": "cpp",
+        "title": "Cpp",
         "type": "object",
         "normal": true
       },
       "crystal": {
-        "$id": "language_crystal",
-        "title": "Language Crystal",
+        "$id": "crystal",
+        "title": "Crystal",
         "type": "object",
         "properties": {
           "crystal": {
@@ -2398,8 +2426,8 @@
         "normal": true
       },
       "csharp": {
-        "$id": "language_csharp",
-        "title": "Language Csharp",
+        "$id": "csharp",
+        "title": "Csharp",
         "type": "object",
         "properties": {
           "dotnet": {
@@ -2439,8 +2467,8 @@
         "normal": true
       },
       "d": {
-        "$id": "language_d",
-        "title": "Language D",
+        "$id": "d",
+        "title": "D",
         "type": "object",
         "properties": {
           "d": {
@@ -2458,8 +2486,8 @@
         "normal": true
       },
       "dart": {
-        "$id": "language_dart",
-        "title": "Language Dart",
+        "$id": "dart",
+        "title": "Dart",
         "type": "object",
         "properties": {
           "dart": {
@@ -2553,8 +2581,8 @@
         "normal": true
       },
       "elixir": {
-        "$id": "language_elixir",
-        "title": "Language Elixir",
+        "$id": "elixir",
+        "title": "Elixir",
         "type": "object",
         "properties": {
           "elixir": {
@@ -2583,8 +2611,8 @@
         "normal": true
       },
       "elm": {
-        "$id": "language_elm",
-        "title": "Language Elm",
+        "$id": "elm",
+        "title": "Elm",
         "type": "object",
         "properties": {
           "elm": {
@@ -2629,8 +2657,8 @@
         "normal": true
       },
       "erlang": {
-        "$id": "language_erlang",
-        "title": "Language Erlang",
+        "$id": "erlang",
+        "title": "Erlang",
         "type": "object",
         "properties": {
           "otp_release": {
@@ -2648,8 +2676,8 @@
         "normal": true
       },
       "go": {
-        "$id": "language_go",
-        "title": "Language Go",
+        "$id": "go",
+        "title": "Go",
         "type": "object",
         "properties": {
           "go": {
@@ -2700,8 +2728,8 @@
         "normal": true
       },
       "groovy": {
-        "$id": "language_groovy",
-        "title": "Language Groovy",
+        "$id": "groovy",
+        "title": "Groovy",
         "type": "object",
         "properties": {
           "jdk": {
@@ -2721,8 +2749,8 @@
         "normal": true
       },
       "haskell": {
-        "$id": "language_haskell",
-        "title": "Language Haskell",
+        "$id": "haskell",
+        "title": "Haskell",
         "type": "object",
         "properties": {
           "ghc": {
@@ -2740,8 +2768,8 @@
         "normal": true
       },
       "haxe": {
-        "$id": "language_haxe",
-        "title": "Language Haxe",
+        "$id": "haxe",
+        "title": "Haxe",
         "type": "object",
         "properties": {
           "haxe": {
@@ -2775,8 +2803,8 @@
         "normal": true
       },
       "java": {
-        "$id": "language_java",
-        "title": "Language Java",
+        "$id": "java",
+        "title": "Java",
         "type": "object",
         "properties": {
           "jdk": {
@@ -2796,8 +2824,8 @@
         "normal": true
       },
       "julia": {
-        "$id": "language_julia",
-        "title": "Language Julia",
+        "$id": "julia",
+        "title": "Julia",
         "type": "object",
         "properties": {
           "julia": {
@@ -2815,8 +2843,8 @@
         "normal": true
       },
       "nix": {
-        "$id": "language_nix",
-        "title": "Language Nix",
+        "$id": "nix",
+        "title": "Nix",
         "type": "object",
         "properties": {
           "nix": {
@@ -2834,8 +2862,8 @@
         "normal": true
       },
       "node_js": {
-        "$id": "language_node_js",
-        "title": "Language Node Js",
+        "$id": "node_js",
+        "title": "Node Js",
         "type": "object",
         "properties": {
           "node_js": {
@@ -2864,8 +2892,8 @@
         "normal": true
       },
       "objective-c": {
-        "$id": "language_objective-c",
-        "title": "Language Objective C",
+        "$id": "objective-c",
+        "title": "Objective C",
         "type": "object",
         "properties": {
           "rvm": {
@@ -2968,8 +2996,8 @@
         "normal": true
       },
       "perl": {
-        "$id": "language_perl",
-        "title": "Language Perl",
+        "$id": "perl",
+        "title": "Perl",
         "type": "object",
         "properties": {
           "perl": {
@@ -2987,8 +3015,8 @@
         "normal": true
       },
       "perl6": {
-        "$id": "language_perl6",
-        "title": "Language Perl6",
+        "$id": "perl6",
+        "title": "Perl6",
         "type": "object",
         "properties": {
           "perl6": {
@@ -3006,8 +3034,8 @@
         "normal": true
       },
       "php": {
-        "$id": "language_php",
-        "title": "Language Php",
+        "$id": "php",
+        "title": "Php",
         "type": "object",
         "properties": {
           "php": {
@@ -3033,8 +3061,8 @@
         "normal": true
       },
       "python": {
-        "$id": "language_python",
-        "title": "Language Python",
+        "$id": "python",
+        "title": "Python",
         "type": "object",
         "properties": {
           "python": {
@@ -3068,8 +3096,8 @@
         "normal": true
       },
       "r": {
-        "$id": "language_r",
-        "title": "Language R",
+        "$id": "r",
+        "title": "R",
         "type": "object",
         "properties": {
           "r": {
@@ -3258,8 +3286,8 @@
         "normal": true
       },
       "ruby": {
-        "$id": "language_ruby",
-        "title": "Language Ruby",
+        "$id": "ruby",
+        "title": "Ruby",
         "type": "object",
         "properties": {
           "rvm": {
@@ -3316,8 +3344,8 @@
         "normal": true
       },
       "rust": {
-        "$id": "language_rust",
-        "title": "Language Rust",
+        "$id": "rust",
+        "title": "Rust",
         "type": "object",
         "properties": {
           "rust": {
@@ -3335,8 +3363,8 @@
         "normal": true
       },
       "scala": {
-        "$id": "language_scala",
-        "title": "Language Scala",
+        "$id": "scala",
+        "title": "Scala",
         "type": "object",
         "properties": {
           "scala": {
@@ -3375,14 +3403,14 @@
         "normal": true
       },
       "shell": {
-        "$id": "language_shell",
-        "title": "Language Shell",
+        "$id": "shell",
+        "title": "Shell",
         "type": "object",
         "normal": true
       },
       "smalltalk": {
-        "$id": "language_smalltalk",
-        "title": "Language Smalltalk",
+        "$id": "smalltalk",
+        "title": "Smalltalk",
         "type": "object",
         "properties": {
           "smalltalk": {
@@ -3441,56 +3469,56 @@
     },
     "support": {
       "__amethyst___support": {
-        "$id": "support___amethyst___support",
-        "title": "Support Amethyst Support",
+        "$id": "__amethyst___support",
+        "title": "Amethyst Support",
         "type": "object",
         "normal": true
       },
       "__connie___support": {
-        "$id": "support___connie___support",
-        "title": "Support Connie Support",
+        "$id": "__connie___support",
+        "title": "Connie Support",
         "type": "object",
         "normal": true
       },
       "__cookiecat___support": {
-        "$id": "support___cookiecat___support",
-        "title": "Support Cookiecat Support",
+        "$id": "__cookiecat___support",
+        "title": "Cookiecat Support",
         "type": "object",
         "normal": true
       },
       "__garnet___support": {
-        "$id": "support___garnet___support",
-        "title": "Support Garnet Support",
+        "$id": "__garnet___support",
+        "title": "Garnet Support",
         "type": "object",
         "normal": true
       },
       "__onion___support": {
-        "$id": "support___onion___support",
-        "title": "Support Onion Support",
+        "$id": "__onion___support",
+        "title": "Onion Support",
         "type": "object",
         "normal": true
       },
       "__opal___support": {
-        "$id": "support___opal___support",
-        "title": "Support Opal Support",
+        "$id": "__opal___support",
+        "title": "Opal Support",
         "type": "object",
         "normal": true
       },
       "__sardonyx___support": {
-        "$id": "support___sardonyx___support",
-        "title": "Support Sardonyx Support",
+        "$id": "__sardonyx___support",
+        "title": "Sardonyx Support",
         "type": "object",
         "normal": true
       },
       "__stevonnie___support": {
-        "$id": "support___stevonnie___support",
-        "title": "Support Stevonnie Support",
+        "$id": "__stevonnie___support",
+        "title": "Stevonnie Support",
         "type": "object",
         "normal": true
       },
       "android_support": {
-        "$id": "support_android_support",
-        "title": "Support Android Support",
+        "$id": "android_support",
+        "title": "Android Support",
         "type": "object",
         "properties": {
           "jdk": {
@@ -3522,14 +3550,14 @@
         "normal": true
       },
       "c_support": {
-        "$id": "support_c_support",
-        "title": "Support C Support",
+        "$id": "c_support",
+        "title": "C Support",
         "type": "object",
         "normal": true
       },
       "clojure_support": {
-        "$id": "support_clojure_support",
-        "title": "Support Clojure Support",
+        "$id": "clojure_support",
+        "title": "Clojure Support",
         "type": "object",
         "properties": {
           "jdk": {
@@ -3552,14 +3580,14 @@
         "normal": true
       },
       "cpp_support": {
-        "$id": "support_cpp_support",
-        "title": "Support Cpp Support",
+        "$id": "cpp_support",
+        "title": "Cpp Support",
         "type": "object",
         "normal": true
       },
       "crystal_support": {
-        "$id": "support_crystal_support",
-        "title": "Support Crystal Support",
+        "$id": "crystal_support",
+        "title": "Crystal Support",
         "type": "object",
         "properties": {
           "crystal": {
@@ -3574,8 +3602,8 @@
         "normal": true
       },
       "csharp_support": {
-        "$id": "support_csharp_support",
-        "title": "Support Csharp Support",
+        "$id": "csharp_support",
+        "title": "Csharp Support",
         "type": "object",
         "properties": {
           "dotnet": {
@@ -3606,8 +3634,8 @@
         "normal": true
       },
       "d_support": {
-        "$id": "support_d_support",
-        "title": "Support D Support",
+        "$id": "d_support",
+        "title": "D Support",
         "type": "object",
         "properties": {
           "d": {
@@ -3622,8 +3650,8 @@
         "normal": true
       },
       "dart_support": {
-        "$id": "support_dart_support",
-        "title": "Support Dart Support",
+        "$id": "dart_support",
+        "title": "Dart Support",
         "type": "object",
         "properties": {
           "dart": {
@@ -3711,8 +3739,8 @@
         "normal": true
       },
       "elixir_support": {
-        "$id": "support_elixir_support",
-        "title": "Support Elixir Support",
+        "$id": "elixir_support",
+        "title": "Elixir Support",
         "type": "object",
         "properties": {
           "elixir": {
@@ -3735,8 +3763,8 @@
         "normal": true
       },
       "elm_support": {
-        "$id": "support_elm_support",
-        "title": "Support Elm Support",
+        "$id": "elm_support",
+        "title": "Elm Support",
         "type": "object",
         "properties": {
           "elm": {
@@ -3775,8 +3803,8 @@
         "normal": true
       },
       "erlang_support": {
-        "$id": "support_erlang_support",
-        "title": "Support Erlang Support",
+        "$id": "erlang_support",
+        "title": "Erlang Support",
         "type": "object",
         "properties": {
           "otp_release": {
@@ -3791,8 +3819,8 @@
         "normal": true
       },
       "go_support": {
-        "$id": "support_go_support",
-        "title": "Support Go Support",
+        "$id": "go_support",
+        "title": "Go Support",
         "type": "object",
         "properties": {
           "go": {
@@ -3840,8 +3868,8 @@
         "normal": true
       },
       "groovy_support": {
-        "$id": "support_groovy_support",
-        "title": "Support Groovy Support",
+        "$id": "groovy_support",
+        "title": "Groovy Support",
         "type": "object",
         "properties": {
           "jdk": {
@@ -3856,8 +3884,8 @@
         "normal": true
       },
       "haskell_support": {
-        "$id": "support_haskell_support",
-        "title": "Support Haskell Support",
+        "$id": "haskell_support",
+        "title": "Haskell Support",
         "type": "object",
         "properties": {
           "ghc": {
@@ -3872,8 +3900,8 @@
         "normal": true
       },
       "haxe_support": {
-        "$id": "support_haxe_support",
-        "title": "Support Haxe Support",
+        "$id": "haxe_support",
+        "title": "Haxe Support",
         "type": "object",
         "properties": {
           "haxe": {
@@ -3904,8 +3932,8 @@
         "normal": true
       },
       "java_support": {
-        "$id": "support_java_support",
-        "title": "Support Java Support",
+        "$id": "java_support",
+        "title": "Java Support",
         "type": "object",
         "properties": {
           "jdk": {
@@ -3920,8 +3948,8 @@
         "normal": true
       },
       "julia_support": {
-        "$id": "support_julia_support",
-        "title": "Support Julia Support",
+        "$id": "julia_support",
+        "title": "Julia Support",
         "type": "object",
         "properties": {
           "julia": {
@@ -3936,8 +3964,8 @@
         "normal": true
       },
       "nix_support": {
-        "$id": "support_nix_support",
-        "title": "Support Nix Support",
+        "$id": "nix_support",
+        "title": "Nix Support",
         "type": "object",
         "properties": {
           "nix": {
@@ -3952,8 +3980,8 @@
         "normal": true
       },
       "node_js_support": {
-        "$id": "support_node_js_support",
-        "title": "Support Node Js Support",
+        "$id": "node_js_support",
+        "title": "Node Js Support",
         "type": "object",
         "properties": {
           "node_js": {
@@ -3979,8 +4007,8 @@
         "normal": true
       },
       "objective-c_support": {
-        "$id": "support_objective-c_support",
-        "title": "Support Objective C Support",
+        "$id": "objective-c_support",
+        "title": "Objective C Support",
         "type": "object",
         "properties": {
           "rvm": {
@@ -4071,8 +4099,8 @@
         "normal": true
       },
       "perl6_support": {
-        "$id": "support_perl6_support",
-        "title": "Support Perl6 Support",
+        "$id": "perl6_support",
+        "title": "Perl6 Support",
         "type": "object",
         "properties": {
           "perl6": {
@@ -4087,8 +4115,8 @@
         "normal": true
       },
       "perl_support": {
-        "$id": "support_perl_support",
-        "title": "Support Perl Support",
+        "$id": "perl_support",
+        "title": "Perl Support",
         "type": "object",
         "properties": {
           "perl": {
@@ -4103,8 +4131,8 @@
         "normal": true
       },
       "php_support": {
-        "$id": "support_php_support",
-        "title": "Support Php Support",
+        "$id": "php_support",
+        "title": "Php Support",
         "type": "object",
         "properties": {
           "php": {
@@ -4127,8 +4155,8 @@
         "normal": true
       },
       "python_support": {
-        "$id": "support_python_support",
-        "title": "Support Python Support",
+        "$id": "python_support",
+        "title": "Python Support",
         "type": "object",
         "properties": {
           "python": {
@@ -4159,8 +4187,8 @@
         "normal": true
       },
       "r_support": {
-        "$id": "support_r_support",
-        "title": "Support R Support",
+        "$id": "r_support",
+        "title": "R Support",
         "type": "object",
         "properties": {
           "r": {
@@ -4346,8 +4374,8 @@
         "normal": true
       },
       "ruby_support": {
-        "$id": "support_ruby_support",
-        "title": "Support Ruby Support",
+        "$id": "ruby_support",
+        "title": "Ruby Support",
         "type": "object",
         "properties": {
           "rvm": {
@@ -4393,8 +4421,8 @@
         "normal": true
       },
       "rust_support": {
-        "$id": "support_rust_support",
-        "title": "Support Rust Support",
+        "$id": "rust_support",
+        "title": "Rust Support",
         "type": "object",
         "properties": {
           "rust": {
@@ -4409,8 +4437,8 @@
         "normal": true
       },
       "scala_support": {
-        "$id": "support_scala_support",
-        "title": "Support Scala Support",
+        "$id": "scala_support",
+        "title": "Scala Support",
         "type": "object",
         "properties": {
           "scala": {
@@ -4441,14 +4469,14 @@
         "normal": true
       },
       "shell_support": {
-        "$id": "support_shell_support",
-        "title": "Support Shell Support",
+        "$id": "shell_support",
+        "title": "Shell Support",
         "type": "object",
         "normal": true
       },
       "smalltalk_support": {
-        "$id": "support_smalltalk_support",
-        "title": "Support Smalltalk Support",
+        "$id": "smalltalk_support",
+        "title": "Smalltalk Support",
         "type": "object",
         "properties": {
           "smalltalk": {
@@ -4498,8 +4526,8 @@
     },
     "deploy": {
       "anynines": {
-        "$id": "deploy_anynines",
-        "title": "Deploy Anynines",
+        "$id": "anynines",
+        "title": "Anynines",
         "anyOf": [
           {
             "type": "object",
@@ -4569,8 +4597,8 @@
         "normal": true
       },
       "atlas": {
-        "$id": "deploy_atlas",
-        "title": "Deploy Atlas",
+        "$id": "atlas",
+        "title": "Atlas",
         "anyOf": [
           {
             "type": "object",
@@ -4654,8 +4682,8 @@
         "normal": true
       },
       "azure_web_apps": {
-        "$id": "deploy_azure_web_apps",
-        "title": "Deploy Azure Web Apps",
+        "$id": "azure_web_apps",
+        "title": "Azure Web Apps",
         "anyOf": [
           {
             "type": "object",
@@ -4722,8 +4750,8 @@
         "normal": true
       },
       "bintray": {
-        "$id": "deploy_bintray",
-        "title": "Deploy Bintray",
+        "$id": "bintray",
+        "title": "Bintray",
         "anyOf": [
           {
             "type": "object",
@@ -4790,8 +4818,8 @@
         "normal": true
       },
       "bitballoon": {
-        "$id": "deploy_bitballoon",
-        "title": "Deploy Bitballoon",
+        "$id": "bitballoon",
+        "title": "Bitballoon",
         "anyOf": [
           {
             "type": "object",
@@ -4851,8 +4879,8 @@
         "normal": true
       },
       "bluemixcloudfoundry": {
-        "$id": "deploy_bluemixcloudfoundry",
-        "title": "Deploy Bluemixcloudfoundry",
+        "$id": "bluemixcloudfoundry",
+        "title": "Bluemixcloudfoundry",
         "anyOf": [
           {
             "type": "object",
@@ -4931,8 +4959,8 @@
         "normal": true
       },
       "boxfuse": {
-        "$id": "deploy_boxfuse",
-        "title": "Deploy Boxfuse",
+        "$id": "boxfuse",
+        "title": "Boxfuse",
         "anyOf": [
           {
             "type": "object",
@@ -5014,8 +5042,8 @@
         "normal": true
       },
       "branches": {
-        "$id": "deploy_branches",
-        "title": "Deploy Branches",
+        "$id": "branches",
+        "title": "Branches",
         "anyOf": [
           {
             "type": "array",
@@ -5035,8 +5063,8 @@
         ]
       },
       "cargo": {
-        "$id": "deploy_cargo",
-        "title": "Deploy Cargo",
+        "$id": "cargo",
+        "title": "Cargo",
         "anyOf": [
           {
             "type": "object",
@@ -5090,8 +5118,8 @@
         "normal": true
       },
       "catalyze": {
-        "$id": "deploy_catalyze",
-        "title": "Deploy Catalyze",
+        "$id": "catalyze",
+        "title": "Catalyze",
         "anyOf": [
           {
             "type": "object",
@@ -5148,8 +5176,8 @@
         "normal": true
       },
       "chef_supermarket": {
-        "$id": "deploy_chef_supermarket",
-        "title": "Deploy Chef Supermarket",
+        "$id": "chef_supermarket",
+        "title": "Chef Supermarket",
         "anyOf": [
           {
             "type": "object",
@@ -5212,8 +5240,8 @@
         "normal": true
       },
       "cloud66": {
-        "$id": "deploy_cloud66",
-        "title": "Deploy Cloud66",
+        "$id": "cloud66",
+        "title": "Cloud66",
         "anyOf": [
           {
             "type": "object",
@@ -5267,8 +5295,8 @@
         "normal": true
       },
       "cloudfiles": {
-        "$id": "deploy_cloudfiles",
-        "title": "Deploy Cloudfiles",
+        "$id": "cloudfiles",
+        "title": "Cloudfiles",
         "anyOf": [
           {
             "type": "object",
@@ -5338,8 +5366,8 @@
         "normal": true
       },
       "cloudfoundry": {
-        "$id": "deploy_cloudfoundry",
-        "title": "Deploy Cloudfoundry",
+        "$id": "cloudfoundry",
+        "title": "Cloudfoundry",
         "anyOf": [
           {
             "type": "object",
@@ -5418,8 +5446,8 @@
         "normal": true
       },
       "codedeploy": {
-        "$id": "deploy_codedeploy",
-        "title": "Deploy Codedeploy",
+        "$id": "codedeploy",
+        "title": "Codedeploy",
         "anyOf": [
           {
             "type": "object",
@@ -5517,8 +5545,8 @@
         "normal": true
       },
       "conditions": {
-        "$id": "deploy_conditions",
-        "title": "Deploy Conditions",
+        "$id": "conditions",
+        "title": "Conditions",
         "anyOf": [
           {
             "allOf": [
@@ -5567,8 +5595,8 @@
         ]
       },
       "deis": {
-        "$id": "deploy_deis",
-        "title": "Deploy Deis",
+        "$id": "deis",
+        "title": "Deis",
         "anyOf": [
           {
             "type": "object",
@@ -5638,8 +5666,8 @@
         "normal": true
       },
       "edge": {
-        "$id": "deploy_edge",
-        "title": "Deploy Edge",
+        "$id": "edge",
+        "title": "Edge",
         "anyOf": [
           {
             "type": "object",
@@ -5674,8 +5702,8 @@
         ]
       },
       "elasticbeanstalk": {
-        "$id": "deploy_elasticbeanstalk",
-        "title": "Deploy Elasticbeanstalk",
+        "$id": "elasticbeanstalk",
+        "title": "Elasticbeanstalk",
         "anyOf": [
           {
             "type": "object",
@@ -5787,8 +5815,8 @@
         "normal": true
       },
       "engineyard": {
-        "$id": "deploy_engineyard",
-        "title": "Deploy Engineyard",
+        "$id": "engineyard",
+        "title": "Engineyard",
         "anyOf": [
           {
             "type": "object",
@@ -5886,8 +5914,8 @@
         "normal": true
       },
       "firebase": {
-        "$id": "deploy_firebase",
-        "title": "Deploy Firebase",
+        "$id": "firebase",
+        "title": "Firebase",
         "anyOf": [
           {
             "type": "object",
@@ -5947,8 +5975,8 @@
         "normal": true
       },
       "gae": {
-        "$id": "deploy_gae",
-        "title": "Deploy Gae",
+        "$id": "gae",
+        "title": "Gae",
         "anyOf": [
           {
             "type": "object",
@@ -6026,8 +6054,8 @@
         "normal": true
       },
       "gcs": {
-        "$id": "deploy_gcs",
-        "title": "Deploy Gcs",
+        "$id": "gcs",
+        "title": "Gcs",
         "anyOf": [
           {
             "type": "object",
@@ -6106,8 +6134,8 @@
         "normal": true
       },
       "hackage": {
-        "$id": "deploy_hackage",
-        "title": "Deploy Hackage",
+        "$id": "hackage",
+        "title": "Hackage",
         "anyOf": [
           {
             "type": "object",
@@ -6165,8 +6193,8 @@
         "normal": true
       },
       "hephy": {
-        "$id": "deploy_hephy",
-        "title": "Deploy Hephy",
+        "$id": "hephy",
+        "title": "Hephy",
         "anyOf": [
           {
             "type": "object",
@@ -6236,8 +6264,8 @@
         "normal": true
       },
       "heroku": {
-        "$id": "deploy_heroku",
-        "title": "Deploy Heroku",
+        "$id": "heroku",
+        "title": "Heroku",
         "anyOf": [
           {
             "type": "object",
@@ -6339,8 +6367,8 @@
         "normal": true
       },
       "lambda": {
-        "$id": "deploy_lambda",
-        "title": "Deploy Lambda",
+        "$id": "lambda",
+        "title": "Lambda",
         "anyOf": [
           {
             "type": "object",
@@ -6462,8 +6490,8 @@
         "normal": true
       },
       "launchpad": {
-        "$id": "deploy_launchpad",
-        "title": "Deploy Launchpad",
+        "$id": "launchpad",
+        "title": "Launchpad",
         "anyOf": [
           {
             "type": "object",
@@ -6526,8 +6554,8 @@
         "normal": true
       },
       "npm": {
-        "$id": "deploy_npm",
-        "title": "Deploy Npm",
+        "$id": "npm",
+        "title": "Npm",
         "anyOf": [
           {
             "type": "object",
@@ -6588,8 +6616,8 @@
         "normal": true
       },
       "openshift": {
-        "$id": "deploy_openshift",
-        "title": "Deploy Openshift",
+        "$id": "openshift",
+        "title": "Openshift",
         "anyOf": [
           {
             "type": "object",
@@ -6680,8 +6708,8 @@
         "normal": true
       },
       "opsworks": {
-        "$id": "deploy_opsworks",
-        "title": "Deploy Opsworks",
+        "$id": "opsworks",
+        "title": "Opsworks",
         "anyOf": [
           {
             "type": "object",
@@ -6766,8 +6794,8 @@
         "normal": true
       },
       "packagecloud": {
-        "$id": "deploy_packagecloud",
-        "title": "Deploy Packagecloud",
+        "$id": "packagecloud",
+        "title": "Packagecloud",
         "anyOf": [
           {
             "type": "object",
@@ -6849,8 +6877,8 @@
         "normal": true
       },
       "pages": {
-        "$id": "deploy_pages",
-        "title": "Deploy Pages",
+        "$id": "pages",
+        "title": "Pages",
         "anyOf": [
           {
             "type": "object",
@@ -6946,8 +6974,8 @@
         "normal": true
       },
       "providers": {
-        "$id": "deploy_providers",
-        "title": "Deploy Providers",
+        "$id": "providers",
+        "title": "Providers",
         "anyOf": [
           {
             "$ref": "#/definitions/deploy/anynines"
@@ -7077,8 +7105,8 @@
         "detect": "provider"
       },
       "puppetforge": {
-        "$id": "deploy_puppetforge",
-        "title": "Deploy Puppetforge",
+        "$id": "puppetforge",
+        "title": "Puppetforge",
         "anyOf": [
           {
             "type": "object",
@@ -7141,8 +7169,8 @@
         "normal": true
       },
       "pypi": {
-        "$id": "deploy_pypi",
-        "title": "Deploy Pypi",
+        "$id": "pypi",
+        "title": "Pypi",
         "anyOf": [
           {
             "type": "object",
@@ -7230,8 +7258,8 @@
         "normal": true
       },
       "releases": {
-        "$id": "deploy_releases",
-        "title": "Deploy Releases",
+        "$id": "releases",
+        "title": "Releases",
         "anyOf": [
           {
             "type": "object",
@@ -7331,8 +7359,8 @@
         "normal": true
       },
       "rubygems": {
-        "$id": "deploy_rubygems",
-        "title": "Deploy Rubygems",
+        "$id": "rubygems",
+        "title": "Rubygems",
         "anyOf": [
           {
             "type": "object",
@@ -7455,8 +7483,8 @@
         "normal": true
       },
       "s3": {
-        "$id": "deploy_s3",
-        "title": "Deploy S3",
+        "$id": "s3",
+        "title": "S3",
         "anyOf": [
           {
             "type": "object",
@@ -7559,8 +7587,8 @@
         "normal": true
       },
       "scalingo": {
-        "$id": "deploy_scalingo",
-        "title": "Deploy Scalingo",
+        "$id": "scalingo",
+        "title": "Scalingo",
         "anyOf": [
           {
             "type": "object",
@@ -7633,8 +7661,8 @@
         "normal": true
       },
       "script": {
-        "$id": "deploy_script",
-        "title": "Deploy Script",
+        "$id": "script",
+        "title": "Script",
         "anyOf": [
           {
             "type": "object",
@@ -7688,8 +7716,8 @@
         "normal": true
       },
       "snap": {
-        "$id": "deploy_snap",
-        "title": "Deploy Snap",
+        "$id": "snap",
+        "title": "Snap",
         "anyOf": [
           {
             "type": "object",
@@ -7749,8 +7777,8 @@
         "normal": true
       },
       "surge": {
-        "$id": "deploy_surge",
-        "title": "Deploy Surge",
+        "$id": "surge",
+        "title": "Surge",
         "anyOf": [
           {
             "type": "object",
@@ -7814,8 +7842,8 @@
         "normal": true
       },
       "testfairy": {
-        "$id": "deploy_testfairy",
-        "title": "Deploy Testfairy",
+        "$id": "testfairy",
+        "title": "Testfairy",
         "anyOf": [
           {
             "type": "object",
@@ -7914,8 +7942,8 @@
         "normal": true
       },
       "transifex": {
-        "$id": "deploy_transifex",
-        "title": "Deploy Transifex",
+        "$id": "transifex",
+        "title": "Transifex",
         "anyOf": [
           {
             "type": "object",
@@ -7981,8 +8009,8 @@
     },
     "notification": {
       "campfire": {
-        "$id": "notification_campfire",
-        "title": "Notification Campfire",
+        "$id": "campfire",
+        "title": "Campfire",
         "anyOf": [
           {
             "type": "object",
@@ -8027,8 +8055,8 @@
         "normal": true
       },
       "email": {
-        "$id": "notification_email",
-        "title": "Notification Email",
+        "$id": "email",
+        "title": "Email",
         "anyOf": [
           {
             "type": "object",
@@ -8095,8 +8123,8 @@
         "normal": true
       },
       "flowdock": {
-        "$id": "notification_flowdock",
-        "title": "Notification Flowdock",
+        "$id": "flowdock",
+        "title": "Flowdock",
         "anyOf": [
           {
             "type": "object",
@@ -8141,8 +8169,8 @@
         "normal": true
       },
       "frequency": {
-        "$id": "notification_frequency",
-        "title": "Notification Frequency",
+        "$id": "frequency",
+        "title": "Frequency",
         "type": "string",
         "enum": [
           "always",
@@ -8168,8 +8196,8 @@
         }
       },
       "hipchat": {
-        "$id": "notification_hipchat",
-        "title": "Notification Hipchat",
+        "$id": "hipchat",
+        "title": "Hipchat",
         "anyOf": [
           {
             "type": "object",
@@ -8227,7 +8255,7 @@
         "normal": true
       },
       "irc": {
-        "$id": "notification_irc",
+        "$id": "irc",
         "title": "IRC",
         "anyOf": [
           {
@@ -8319,8 +8347,8 @@
         "normal": true
       },
       "pushover": {
-        "$id": "notification_pushover",
-        "title": "Notification Pushover",
+        "$id": "pushover",
+        "title": "Pushover",
         "anyOf": [
           {
             "type": "object",
@@ -8362,8 +8390,8 @@
         "normal": true
       },
       "slack": {
-        "$id": "notification_slack",
-        "title": "Notification Slack",
+        "$id": "slack",
+        "title": "Slack",
         "anyOf": [
           {
             "type": "object",
@@ -8411,8 +8439,8 @@
         "normal": true
       },
       "template": {
-        "$id": "notification_template",
-        "title": "Notification Template",
+        "$id": "template",
+        "title": "Template",
         "type": "string",
         "vars": [
           "repository",
@@ -8437,8 +8465,8 @@
         ]
       },
       "templates": {
-        "$id": "notification_templates",
-        "title": "Notification Templates",
+        "$id": "templates",
+        "title": "Templates",
         "anyOf": [
           {
             "type": "array",
@@ -8453,8 +8481,8 @@
         ]
       },
       "webhooks": {
-        "$id": "notification_webhooks",
-        "title": "Notification Webhooks",
+        "$id": "webhooks",
+        "title": "Webhooks",
         "anyOf": [
           {
             "type": "object",

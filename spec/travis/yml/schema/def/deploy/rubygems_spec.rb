@@ -5,8 +5,8 @@ describe Travis::Yml::Schema::Def::Deploy::Rubygems do
 
   it do
     should eq(
-      '$id': :deploy_rubygems,
-        title: 'Deploy Rubygems',
+      '$id': :rubygems,
+        title: 'Rubygems',
         anyOf: [
           {
             type: :object,
@@ -57,14 +57,12 @@ describe Travis::Yml::Schema::Def::Deploy::Rubygems do
                     type: :object,
                     patternProperties: {
                       '.*': {
-                        '$ref': '#/definitions/type/secure',
-                        # strict: false
+                        '$ref': '#/definitions/type/secure'
                       }
                     }
                   },
                   {
-                    '$ref': '#/definitions/type/secure',
-                    # strict: false
+                    '$ref': '#/definitions/type/secure'
                   }
                 ]
               },

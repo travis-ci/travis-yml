@@ -5,8 +5,8 @@ describe Travis::Yml::Schema::Def::Deploy::Testfairy do
 
   it do
     should eq(
-      '$id': :deploy_testfairy,
-        title: 'Deploy Testfairy',
+      '$id': :testfairy,
+        title: 'Testfairy',
         anyOf: [
           {
             type: :object,

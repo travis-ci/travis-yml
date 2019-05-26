@@ -27,7 +27,7 @@ module Travis::Yml::Web
               }
               #index ul {
                 margin: 0;
-                padding: 0;
+                padding-left: 1em;
               }
               #index li {
                 list-style-type: none;
@@ -83,7 +83,7 @@ module Travis::Yml::Web
       end
 
       def page(path)
-        Erb.new(LAYOUT).render(content(path), index)
+        Erb.new(LAYOUT).render(content(path), index(path))
       end
 
       def content(path)
@@ -94,8 +94,8 @@ module Travis::Yml::Web
         Rack::Markdown::Renderer.render(markdown)
       end
 
-      def index
-        markdown(Travis::Yml::Docs.index)
+      def index(path)
+        markdown(Travis::Yml::Docs.index(path))
       end
 
       def pages

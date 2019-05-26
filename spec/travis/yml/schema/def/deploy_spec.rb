@@ -6,8 +6,8 @@ describe Travis::Yml::Schema::Def::Deploy::Deploy do
 
     it do
       should eq(
-        '$id': :deploy_conditions,
-        title: 'Deploy Conditions',
+        '$id': :conditions,
+        title: 'Conditions',
         anyOf: [
           {
             allOf: [

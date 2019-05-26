@@ -5,7 +5,7 @@ describe Travis::Yml::Schema::Def::Addon::Jwts do
 
   it do
     should eq(
-      '$id': :addon_jwts,
+      '$id': :jwts,
       title: 'JSON Web Tokens',
       anyOf: [
         {

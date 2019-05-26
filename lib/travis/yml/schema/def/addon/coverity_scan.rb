@@ -10,7 +10,7 @@ module Travis
             register :coverity_scan
 
             def define
-              map :project, to: Project
+              map :project,               to: Project
               map :build_script_url,      to: :str
               map :branch_pattern,        to: :str
               map :notification_email,    to: :secure, strict: false

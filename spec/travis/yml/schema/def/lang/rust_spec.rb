@@ -1,12 +1,12 @@
-describe Travis::Yml::Schema::Def::Rust, 'schema' do
+describe Travis::Yml::Schema::Def::Rust do
   subject { Travis::Yml.schema[:definitions][:language][:rust] }
 
   # it { puts JSON.pretty_generate(subject) }
 
   it do
     should eq(
-      '$id': :language_rust,
-        title: 'Language Rust',
+      '$id': :rust,
+        title: 'Rust',
         type: :object,
         properties: {
           rust: {

@@ -5,8 +5,8 @@ describe Travis::Yml::Schema::Def::Deploy::Gae do
 
   it do
     should eq(
-      '$id': :deploy_gae,
-        title: 'Deploy Gae',
+      '$id': :gae,
+        title: 'Gae',
         anyOf: [
           {
             type: :object,

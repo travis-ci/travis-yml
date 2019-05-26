@@ -1,12 +1,12 @@
-describe Travis::Yml::Schema::Def::Elixir, 'schema' do
+describe Travis::Yml::Schema::Def::Elixir do
   subject { Travis::Yml.schema[:definitions][:language][:elixir] }
 
   # it { puts JSON.pretty_generate(subject) }
 
   it do
     should eq(
-      '$id': :language_elixir,
-        title: 'Language Elixir',
+      '$id': :elixir,
+        title: 'Elixir',
         type: :object,
         properties: {
           elixir: {

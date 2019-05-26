@@ -11,7 +11,7 @@ module Travis
 
             def define
               prefix :repo_token
-              map :repo_token, to: :secure
+              map :repo_token, to: :secure, summary: 'The repo token'
               super
             end
           end

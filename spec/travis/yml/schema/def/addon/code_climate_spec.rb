@@ -5,8 +5,8 @@ describe Travis::Yml::Schema::Def::Addon::CodeClimate do
 
   it do
     should eq(
-      '$id': :addon_code_climate,
-      title: 'Addon Code Climate',
+      '$id': :code_climate,
+      title: 'Code Climate',
       normal: true,
       anyOf: [
         {

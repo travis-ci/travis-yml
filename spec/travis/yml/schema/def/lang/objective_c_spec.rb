@@ -1,12 +1,12 @@
-describe Travis::Yml::Schema::Def::ObjectiveC, 'schema' do
+describe Travis::Yml::Schema::Def::ObjectiveC do
   subject { Travis::Yml.schema[:definitions][:language][:"objective-c"] }
 
   # it { puts JSON.pretty_generate(subject) }
 
   it do
     should eq(
-      '$id': :'language_objective-c',
-        title: 'Language Objective C',
+      '$id': :'objective-c',
+        title: 'Objective C',
         type: :object,
         properties: {
           rvm: {

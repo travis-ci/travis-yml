@@ -5,8 +5,8 @@ describe Travis::Yml::Schema::Def::Deploy::AzureWebApps do
 
   it do
     should eq(
-      '$id': :deploy_azure_web_apps,
-        title: 'Deploy Azure Web Apps',
+      '$id': :azure_web_apps,
+        title: 'Azure Web Apps',
         anyOf: [
           {
             type: :object,

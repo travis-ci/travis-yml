@@ -21,6 +21,7 @@ module Travis
 
           def define
             summary 'Condition to determine whether or not a build, stage, or job should be run'
+            example 'branch = master'
             export
           end
         end

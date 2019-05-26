@@ -5,8 +5,8 @@ describe Travis::Yml::Schema::Def::Deploy::Npm do
 
   it do
     should eq(
-      '$id': :deploy_npm,
-        title: 'Deploy Npm',
+      '$id': :npm,
+        title: 'Npm',
         anyOf: [
           {
             type: :object,

@@ -10,11 +10,13 @@ module Travis
             register :browserstack
 
             def define
-              map :username,     to: :secure, strict: false
-              map :access_key,   to: :secure, strict: false
-              map :forcelocal,   to: :bool
-              map :only,         to: :str
-              map :app_path,     to: :str
+              map :username,     to: :secure, strict: false, summary: 'Browserstack username'
+              map :access_key,   to: :secure, strict: false, summary: 'Browserstack access key'
+              map :forcelocal,   to: :bool, summary: 'Force all network traffic to be resolved via the build environment VM'
+              map :only,         to: :str, summary: 'Restrict local testing access to the specified local servers/directories'
+              map :app_path,     to: :str, summary: 'Path to the app file'
+
+              # TODO alias these to underscored options
               map :proxyHost,    to: :str
               map :proxyPort,    to: :str
               map :proxyUser,    to: :str

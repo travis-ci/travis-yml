@@ -1,12 +1,12 @@
-describe Travis::Yml::Schema::Def::Nix, 'schema' do
+describe Travis::Yml::Schema::Def::Nix do
   subject { Travis::Yml.schema[:definitions][:language][:nix] }
 
   # it { puts JSON.pretty_generate(subject) }
 
   it do
     should eq(
-      '$id': :language_nix,
-        title: 'Language Nix',
+      '$id': :nix,
+        title: 'Nix',
         type: :object,
         properties: {
           nix: {
