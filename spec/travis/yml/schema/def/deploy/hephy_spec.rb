@@ -5,8 +5,8 @@ describe Travis::Yml::Schema::Def::Deploy::Hephy do
 
   it do
     should eq(
-      '$id': :deploy_hephy,
-        title: 'Deploy Hephy',
+      '$id': :hephy,
+        title: 'Hephy',
         anyOf: [
           {
             type: :object,

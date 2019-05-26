@@ -1,12 +1,12 @@
-describe Travis::Yml::Schema::Def::Go, 'schema' do
+describe Travis::Yml::Schema::Def::Go do
   subject { Travis::Yml.schema[:definitions][:language][:go] }
 
   # it { puts JSON.pretty_generate(subject) }
 
   it do
     should eq(
-      '$id': :language_go,
-        title: 'Language Go',
+      '$id': :go,
+        title: 'Go',
         type: :object,
         properties: {
           go: {

@@ -5,8 +5,8 @@ describe Travis::Yml::Schema::Def::Addon::Homebrew do
 
   it do
     should eq(
-      '$id': :addon_homebrew,
-      title: 'Addon Homebrew',
+      '$id': :homebrew,
+      title: 'Homebrew',
       normal: true,
       anyOf: [
         {

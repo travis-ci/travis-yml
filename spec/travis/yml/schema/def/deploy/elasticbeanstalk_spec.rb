@@ -5,8 +5,8 @@ describe Travis::Yml::Schema::Def::Deploy::Elasticbeanstalk do
 
   it do
     should eq(
-      '$id': :deploy_elasticbeanstalk,
-        title: 'Deploy Elasticbeanstalk',
+      '$id': :elasticbeanstalk,
+        title: 'Elasticbeanstalk',
         anyOf: [
           {
             type: :object,

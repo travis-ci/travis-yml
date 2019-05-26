@@ -5,8 +5,8 @@ describe Travis::Yml::Schema::Def::Deploy::Cloudfiles do
 
   it do
     should eq(
-      '$id': :deploy_cloudfiles,
-        title: 'Deploy Cloudfiles',
+      '$id': :cloudfiles,
+        title: 'Cloudfiles',
         anyOf: [
           {
             type: :object,

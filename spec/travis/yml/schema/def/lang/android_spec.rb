@@ -1,12 +1,12 @@
-describe Travis::Yml::Schema::Def::Android, 'schema' do
+describe Travis::Yml::Schema::Def::Android do
   subject { Travis::Yml.schema[:definitions][:language][:android] }
 
   # it { puts JSON.pretty_generate(subject) }
 
   it do
     should eq(
-      '$id': :language_android,
-        title: 'Language Android',
+      '$id': :android,
+        title: 'Android',
         type: :object,
         properties: {
           jdk: {

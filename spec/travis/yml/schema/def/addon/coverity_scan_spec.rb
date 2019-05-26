@@ -5,8 +5,8 @@ describe Travis::Yml::Schema::Def::Addon::CoverityScan do
 
   it do
     should eq(
-      '$id': :addon_coverity_scan,
-      title: 'Addon Coverity Scan',
+      '$id': :coverity_scan,
+      title: 'Coverity Scan',
       normal: true,
       anyOf: [
         {

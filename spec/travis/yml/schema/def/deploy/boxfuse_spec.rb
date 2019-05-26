@@ -5,8 +5,8 @@ describe Travis::Yml::Schema::Def::Deploy::Boxfuse do
 
   it do
     should eq(
-      '$id': :deploy_boxfuse,
-        title: 'Deploy Boxfuse',
+      '$id': :boxfuse,
+        title: 'Boxfuse',
         anyOf: [
           {
             type: :object,

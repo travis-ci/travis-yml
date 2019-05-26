@@ -54,7 +54,6 @@ end
 
 providers = %i(
   anynines
-  appfog
   atlas
   azure_web_apps
   bintray
@@ -62,24 +61,22 @@ providers = %i(
   bluemixcloudfoundry
   boxfuse
   catalyze
-  chef-supermarket
+  chef_supermarket
   cloud66
-  cloudcontrol
   cloudfiles
   cloudfoundry
   codedeploy
   deis
-  divshot
   elasticbeanstalk
   engineyard
   firebase
   gae
   gcs
   hackage
+  hephy
   heroku
   lambda
   launchpad
-  modulus
   npm
   openshift
   opsworks
@@ -94,6 +91,7 @@ providers = %i(
   script
   surge
   testfairy
+  transifex
 )
 # providers = [:'chef-supermarket']
 

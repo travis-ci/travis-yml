@@ -1,12 +1,12 @@
-describe Travis::Yml::Schema::Def::Groovy, 'schema' do
+describe Travis::Yml::Schema::Def::Groovy do
   subject { Travis::Yml.schema[:definitions][:language][:groovy] }
 
   # it { puts JSON.pretty_generate(subject) }
 
   it do
     should eq(
-      '$id': :language_groovy,
-        title: 'Language Groovy',
+      '$id': :groovy,
+        title: 'Groovy',
         type: :object,
         properties: {
           jdk: {

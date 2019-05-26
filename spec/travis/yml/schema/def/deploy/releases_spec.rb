@@ -5,8 +5,8 @@ describe Travis::Yml::Schema::Def::Deploy::Releases do
 
   it do
     should eq(
-      '$id': :deploy_releases,
-        title: 'Deploy Releases',
+      '$id': :releases,
+        title: 'Releases',
         anyOf: [
           {
             type: :object,

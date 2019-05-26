@@ -6,8 +6,8 @@ describe Travis::Yml::Schema::Def::Addon::Snaps do
 
   it do
     should eq(
-      '$id': :addon_snaps,
-      title: 'Addon Snaps',
+      '$id': :snaps,
+      title: 'Snaps',
       anyOf: [
         {
           type: :array,

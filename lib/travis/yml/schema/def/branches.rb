@@ -8,38 +8,21 @@ module Travis
         class Branches < Dsl::Map
           register :branches
 
-          # deprecated in favor of :if
-
           def define
             summary 'Include or exclude branches from being built'
 
             description <<~str
-              The branches your build will be run on.
-            str
+              Include or exclude branches for your build to be run on.
 
-            # examples <<~str,
-            #   branch: master
-            # str
-            # <<~str,
-            #   branch:
-            #     only: master
-            #     except: unstable
-            # str
-            # <<~str,
-            #   branch:
-            #     only:
-            #       - master
-            #       - development
-            #     except:
-            #       - unstable
-            #       - experiment
-            # str
+              This is a legacy setting, use the more powerful condition (`if`) to define branches for your build to be run on.
+            str
 
             normal
             prefix :only
+            aliases :branch
 
-            map :only,   to: :seq #, desc: 'Branches to include'
-            map :except, to: :seq, alias: :exclude #, desc: 'Branches to exclude'
+            map :only,   to: :seq, summary: 'Branches to include', eg: 'master'
+            map :except, to: :seq, alias: :exclude, summary: 'Branches to exclude', eg: 'development'
 
             export
           end

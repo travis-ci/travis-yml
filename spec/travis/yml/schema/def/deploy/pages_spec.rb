@@ -5,8 +5,8 @@ describe Travis::Yml::Schema::Def::Deploy::Pages do
 
   it do
     should eq(
-      '$id': :deploy_pages,
-        title: 'Deploy Pages',
+      '$id': :pages,
+        title: 'Pages',
         anyOf: [
           {
             type: :object,

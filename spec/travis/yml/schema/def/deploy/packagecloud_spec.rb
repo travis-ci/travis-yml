@@ -5,8 +5,8 @@ describe Travis::Yml::Schema::Def::Deploy::Packagecloud do
 
   it do
     should eq(
-      '$id': :deploy_packagecloud,
-        title: 'Deploy Packagecloud',
+      '$id': :packagecloud,
+        title: 'Packagecloud',
         anyOf: [
           {
             type: :object,
@@ -66,7 +66,7 @@ describe Travis::Yml::Schema::Def::Deploy::Packagecloud do
               },
               write_timeout: {
                 type: :number
-              },
+              }
             },
             additionalProperties: false,
             normal: true,

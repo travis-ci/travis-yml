@@ -5,8 +5,8 @@ describe Travis::Yml::Schema::Def::Deploy::Launchpad do
 
   it do
     should eq(
-      '$id': :deploy_launchpad,
-        title: 'Deploy Launchpad',
+      '$id': :launchpad,
+        title: 'Launchpad',
         anyOf: [
           {
             type: :object,

@@ -5,8 +5,8 @@ describe Travis::Yml::Schema::Def::Deploy::S3 do
 
   it do
     should eq(
-      '$id': :deploy_s3,
-        title: 'Deploy S3',
+      '$id': :s3,
+        title: 'S3',
         anyOf: [
           {
             type: :object,

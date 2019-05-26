@@ -1,12 +1,12 @@
-describe Travis::Yml::Schema::Def::Scala, 'schema' do
+describe Travis::Yml::Schema::Def::Scala do
   subject { Travis::Yml.schema[:definitions][:language][:scala] }
 
   # it { puts JSON.pretty_generate(subject) }
 
   it do
     should eq(
-      '$id': :language_scala,
-        title: 'Language Scala',
+      '$id': :scala,
+        title: 'Scala',
         type: :object,
         properties: {
           scala: {

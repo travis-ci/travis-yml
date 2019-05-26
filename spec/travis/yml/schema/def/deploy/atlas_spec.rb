@@ -5,8 +5,8 @@ describe Travis::Yml::Schema::Def::Deploy::Atlas do
 
   it do
     should eq(
-      '$id': :deploy_atlas,
-        title: 'Deploy Atlas',
+      '$id': :atlas,
+        title: 'Atlas',
         anyOf: [
           {
             type: :object,
@@ -60,14 +60,14 @@ describe Travis::Yml::Schema::Def::Deploy::Atlas do
               vcs: {
                 type: :boolean
               },
+              version: {
+                type: :boolean
+              },
               paths: {
                 '$ref': '#/definitions/type/strs'
               },
               args: {
                 type: :string
-              },
-              version: {
-                type: :boolean
               }
             },
             additionalProperties: false,

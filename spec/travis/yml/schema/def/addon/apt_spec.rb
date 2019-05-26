@@ -1,12 +1,13 @@
 describe Travis::Yml::Schema::Def::Addon::Apt do
-  subject { Travis::Yml.schema[:definitions][:addon][:apt] }
+  subject { except(Travis::Yml.schema[:definitions][:addon][:apt], :description) }
 
   # it { puts JSON.pretty_generate(subject) }
 
   it do
     should eq(
-      '$id': :addon_apt,
-      title: 'Addon Apt',
+      '$id': :apt,
+      title: 'Apt',
+      summary: 'Install APT packages and sources',
       normal: true,
       anyOf: [
         {
@@ -14,14 +15,19 @@ describe Travis::Yml::Schema::Def::Addon::Apt do
           properties: {
             packages: {
               '$ref': '#/definitions/type/strs',
+              summary: 'Package names',
+              example: 'cmake',
               aliases: [
                 :package
               ]
             },
             sources: {
+              summary: 'Package sources',
+              example: 'ubuntu-toolchain-r-test',
               anyOf: [
                 {
                   type: :array,
+                  example: 'ubuntu-toolchain-r-test',
                   items: {
                     anyOf: [
                       {
@@ -29,7 +35,7 @@ describe Travis::Yml::Schema::Def::Addon::Apt do
                         normal: true,
                         properties: {
                           name: {
-                            type: :string
+                            type: :string,
                           },
                           sourceline: {
                             type: :string
@@ -78,10 +84,12 @@ describe Travis::Yml::Schema::Def::Addon::Apt do
               ],
             },
             dist: {
-              type: :string
+              type: :string,
+              summary: 'Distribution'
             },
             update: {
-              type: :boolean
+              type: :boolean,
+              summary: 'Whether to run apt-get update'
             }
           },
           additionalProperties: false,
@@ -97,6 +105,7 @@ describe Travis::Yml::Schema::Def::Addon::Apt do
         },
         {
           '$ref': '#/definitions/type/strs',
+          example: 'cmake'
         },
         {
           type: :boolean

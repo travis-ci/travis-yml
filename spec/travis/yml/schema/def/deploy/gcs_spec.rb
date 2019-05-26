@@ -5,8 +5,8 @@ describe Travis::Yml::Schema::Def::Deploy::Gcs do
 
   it do
     should eq(
-      '$id': :deploy_gcs,
-        title: 'Deploy Gcs',
+      '$id': :gcs,
+        title: 'Gcs',
         anyOf: [
           {
             type: :object,

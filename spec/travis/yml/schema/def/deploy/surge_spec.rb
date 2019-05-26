@@ -5,8 +5,8 @@ describe Travis::Yml::Schema::Def::Deploy::Surge do
 
   it do
     should eq(
-      '$id': :deploy_surge,
-        title: 'Deploy Surge',
+      '$id': :surge,
+        title: 'Surge',
         anyOf: [
           {
             type: :object,
@@ -41,7 +41,7 @@ describe Travis::Yml::Schema::Def::Deploy::Surge do
                 strict: false
               },
               token: {
-                '$ref': '#/definitions/type/secure',
+                '$ref': '#/definitions/type/secure'
               },
               project: {
                 type: :string

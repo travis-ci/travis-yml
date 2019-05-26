@@ -5,8 +5,8 @@ describe Travis::Yml::Schema::Def::Notification::Pushover, 'structure' do
 
   it do
     should eq(
-      '$id': :notification_pushover,
-      title: 'Notification Pushover',
+      '$id': :pushover,
+      title: 'Pushover',
       normal: true,
       anyOf: [
         {

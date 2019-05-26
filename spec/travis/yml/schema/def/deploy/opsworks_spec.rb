@@ -5,8 +5,8 @@ describe Travis::Yml::Schema::Def::Deploy::Opsworks do
 
   it do
     should eq(
-      '$id': :deploy_opsworks,
-        title: 'Deploy Opsworks',
+      '$id': :opsworks,
+        title: 'Opsworks',
         anyOf: [
           {
             type: :object,

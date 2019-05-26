@@ -196,7 +196,7 @@ module Travis
           end
 
           def title
-            @title ||= titleize(namespace == :type ? id : "#{namespace}_#{id}")
+            @title ||= titleize(id)
           end
 
           def description

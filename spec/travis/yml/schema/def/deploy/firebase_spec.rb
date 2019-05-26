@@ -5,8 +5,8 @@ describe Travis::Yml::Schema::Def::Deploy::Firebase do
 
   it do
     should eq(
-      '$id': :deploy_firebase,
-        title: 'Deploy Firebase',
+      '$id': :firebase,
+        title: 'Firebase',
         anyOf: [
           {
             type: :object,

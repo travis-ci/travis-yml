@@ -23,6 +23,12 @@ module Travis
           def define
             summary 'Build addons to activate'
 
+            description <<~str
+              Build addons enable additional built-in functionality, such as
+              installing build dependencies, system setup tasks, and integrations
+              with external services.
+            str
+
             map :apt
             map :apt_packages,    to: :seq
             map :artifacts

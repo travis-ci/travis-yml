@@ -1,28 +1,34 @@
 describe Travis::Yml::Schema::Def::Addon::Artifacts do
-  subject { Travis::Yml.schema[:definitions][:addon][:artifacts] }
+  subject { except(Travis::Yml.schema[:definitions][:addon][:artifacts], :description) }
 
   # it { puts JSON.pretty_generate(subject) }
 
   it do
     should eq(
-      '$id': :addon_artifacts,
-      title: 'Addon Artifacts',
+      '$id': :artifacts,
+      title: 'Artifacts',
+      summary: 'Upload build artifacts at the end of the build',
       normal: true,
       anyOf: [
         {
           type: :object,
+          summary: 'Upload build artifacts at the end of the build',
           properties: {
             enabled: {
-              type: :boolean
+              type: :boolean,
+              summary: 'Enable or disable uploading artifacts'
             },
             bucket: {
-              type: :string
+              type: :string,
+              summary: 'The S3 bucket to upload to'
             },
             endpoint: {
-              type: :string
+              type: :string,
+              summary: 'The S3 compatible endpoint to upload to'
             },
             key: {
               '$ref': '#/definitions/type/secure',
+              # summary: 'The S3 access key id',
               aliases: [
                 :aws_access_key_id,
                 :aws_access_key,
@@ -33,6 +39,7 @@ describe Travis::Yml::Schema::Def::Addon::Artifacts do
             },
             secret: {
               '$ref': '#/definitions/type/secure',
+              # summary: 'The S3 secret access key',
               aliases: [
                 :aws_secret_access_key,
                 :aws_secret_key,
@@ -41,7 +48,8 @@ describe Travis::Yml::Schema::Def::Addon::Artifacts do
               ],
             },
             paths: {
-              '$ref': '#/definitions/type/strs'
+              '$ref': '#/definitions/type/strs',
+              summary: 'Paths to the files to upload'
             },
             branch: {
               type: :string
@@ -63,6 +71,7 @@ describe Travis::Yml::Schema::Def::Addon::Artifacts do
             },
             region: {
               type: :string,
+              summary: 'The S3 region',
               aliases: [
                 :s3_region
               ]

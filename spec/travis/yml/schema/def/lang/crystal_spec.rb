@@ -1,12 +1,12 @@
-describe Travis::Yml::Schema::Def::Crystal, 'schema' do
+describe Travis::Yml::Schema::Def::Crystal do
   subject { Travis::Yml.schema[:definitions][:language][:crystal] }
 
   # it { puts JSON.pretty_generate(subject) }
 
   it do
     should eq(
-      '$id': :language_crystal,
-        title: 'Language Crystal',
+      '$id': :crystal,
+        title: 'Crystal',
         type: :object,
         properties: {
           crystal: {

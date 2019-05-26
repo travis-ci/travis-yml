@@ -1,12 +1,12 @@
-describe Travis::Yml::Schema::Def::R, 'schema' do
+describe Travis::Yml::Schema::Def::R do
   subject { Travis::Yml.schema[:definitions][:language][:r] }
 
   # it { puts JSON.pretty_generate(subject) }
 
   it do
     should eq(
-      '$id': :language_r,
-        title: 'Language R',
+      '$id': :r,
+        title: 'R',
         type: :object,
         properties: {
           r: {

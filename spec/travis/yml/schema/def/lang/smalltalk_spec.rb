@@ -1,12 +1,12 @@
-describe Travis::Yml::Schema::Def::Smalltalk, 'schema' do
+describe Travis::Yml::Schema::Def::Smalltalk do
   subject { Travis::Yml.schema[:definitions][:language][:smalltalk] }
 
   # it { puts JSON.pretty_generate(subject) }
 
   it do
     should eq(
-      '$id': :language_smalltalk,
-        title: 'Language Smalltalk',
+      '$id': :smalltalk,
+        title: 'Smalltalk',
         type: :object,
         properties: {
           smalltalk: {

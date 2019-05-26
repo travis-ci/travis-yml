@@ -26,8 +26,8 @@ module Travis
             #   if: 'branch = master'
 
             prefix :name
-            map :name, to: :str, eg: 'unit tests'
-            map :if,   to: :str, eg: 'branch = master'
+            map :name, to: :str, summary: 'The name of the stage', eg: 'unit tests'
+            map :if,   to: :condition
             export
           end
         end

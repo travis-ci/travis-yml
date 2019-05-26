@@ -28,7 +28,7 @@ module Travis
 
             map :services
             map :addons
-            map :branches, alias: :branch # TODO move the alias to the definition
+            map :branches
             map :cache
             map :deploy,     to: :deploys
             map :git

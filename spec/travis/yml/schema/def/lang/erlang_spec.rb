@@ -1,12 +1,12 @@
-describe Travis::Yml::Schema::Def::Erlang, 'schema' do
+describe Travis::Yml::Schema::Def::Erlang do
   subject { Travis::Yml.schema[:definitions][:language][:erlang] }
 
   # it { puts JSON.pretty_generate(subject) }
 
   it do
     should eq(
-      '$id': :language_erlang,
-        title: 'Language Erlang',
+      '$id': :erlang,
+        title: 'Erlang',
         type: :object,
         properties: {
           otp_release: {

@@ -38,11 +38,11 @@ describe Travis::Yml::Schema::Def::Stages do
             properties: {
               name: {
                 type: :string,
+                summary: 'The name of the stage',
                 example: 'unit tests'
               },
               if: {
-                type: :string,
-                example: 'branch = master'
+                '$ref': '#/definitions/type/condition',
               }
             },
             additionalProperties: false,

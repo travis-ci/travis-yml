@@ -5,8 +5,8 @@ describe Travis::Yml::Schema::Def::Deploy::Hackage do
 
   it do
     should eq(
-      '$id': :deploy_hackage,
-        title: 'Deploy Hackage',
+      '$id': :hackage,
+        title: 'Hackage',
         anyOf: [
           {
             type: :object,

@@ -5,8 +5,8 @@ describe Travis::Yml::Schema::Def::Deploy::Codedeploy do
 
   it do
     should eq(
-      '$id': :deploy_codedeploy,
-        title: 'Deploy Codedeploy',
+      '$id': :codedeploy,
+        title: 'Codedeploy',
         anyOf: [
           {
             type: :object,
@@ -56,10 +56,10 @@ describe Travis::Yml::Schema::Def::Deploy::Codedeploy do
                   'github'
                 ]
               },
-              description: {
+              commit_id: {
                 type: :string
               },
-              commit_id: {
+              description: {
                 type: :string
               },
               repository: {

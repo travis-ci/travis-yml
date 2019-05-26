@@ -5,8 +5,8 @@ describe Travis::Yml::Schema::Def::Deploy::Script do
 
   it do
     should eq(
-      '$id': :deploy_script,
-        title: 'Deploy Script',
+      '$id': :script,
+        title: 'Script',
         anyOf: [
           {
             type: :object,

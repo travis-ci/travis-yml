@@ -5,8 +5,8 @@ describe Travis::Yml::Schema::Def::Deploy::Openshift do
 
   it do
     should eq(
-      '$id': :deploy_openshift,
-        title: 'Deploy Openshift',
+      '$id': :openshift,
+        title: 'Openshift',
         anyOf: [
           {
             type: :object,

@@ -5,8 +5,8 @@ describe Travis::Yml::Schema::Def::Deploy::Bitballoon do
 
   it do
     should eq(
-      '$id': :deploy_bitballoon,
-        title: 'Deploy Bitballoon',
+      '$id': :bitballoon,
+        title: 'Bitballoon',
         anyOf: [
           {
             type: :object,

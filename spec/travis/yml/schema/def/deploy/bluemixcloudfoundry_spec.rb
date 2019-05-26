@@ -5,8 +5,8 @@ describe Travis::Yml::Schema::Def::Deploy::BluemixCloudfoundry do
 
   it do
     should eq(
-      '$id': :deploy_bluemixcloudfoundry,
-        title: 'Deploy Bluemixcloudfoundry',
+      '$id': :bluemixcloudfoundry,
+        title: 'Bluemixcloudfoundry',
         anyOf: [
           {
             type: :object,

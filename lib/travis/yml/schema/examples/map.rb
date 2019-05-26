@@ -16,7 +16,7 @@ module Travis
             obj = node.map do |key, child|
               next if key == :disabled || inherit?(key)
               # opts = { example: node.examples[key] }
-              opts = { example: node.example }
+              opts = { example: child.example }
               child = build(child, opts)
               [key, child.example]
             end.compact.to_h

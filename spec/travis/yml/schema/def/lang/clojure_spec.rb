@@ -1,12 +1,12 @@
-describe Travis::Yml::Schema::Def::Clojure, 'schema' do
+describe Travis::Yml::Schema::Def::Clojure do
   subject { Travis::Yml.schema[:definitions][:language][:clojure] }
 
   # it { puts JSON.pretty_generate(subject) }
 
   it do
     should eq(
-      '$id': :language_clojure,
-        title: 'Language Clojure',
+      '$id': :clojure,
+        title: 'Clojure',
         type: :object,
         properties: {
           jdk: {
