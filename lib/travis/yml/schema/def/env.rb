@@ -18,8 +18,8 @@ module Travis
                 normal
                 prefix :matrix
 
-                map :global, to: :env_vars #, summary: 'Global environment variables to be defined on all jobs'
-                map :matrix, to: :env_vars #, summary: 'Environment variables that expand the build matrix (i.e. that create one job per entry)'
+                map :global, to: :env_vars, summary: 'Global environment variables to be defined on all jobs'
+                map :matrix, to: :env_vars, summary: 'Environment variables that expand the build matrix (i.e. that create one job per entry)'
               end
             }
 

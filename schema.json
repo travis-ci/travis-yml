@@ -8,50 +8,64 @@
       "type": "object",
       "properties": {
         "import": {
-          "$ref": "#/definitions/type/imports"
+          "$ref": "#/definitions/type/imports",
+          "summary": "Build configuration imports"
         },
         "language": {
-          "$ref": "#/definitions/type/language"
+          "$ref": "#/definitions/type/language",
+          "summary": "Language support"
         },
         "os": {
-          "$ref": "#/definitions/type/oss"
+          "$ref": "#/definitions/type/oss",
+          "summary": "Build environment operating systems"
         },
         "arch": {
-          "$ref": "#/definitions/type/archs"
+          "$ref": "#/definitions/type/archs",
+          "summary": "Build environment architecture"
         },
         "dist": {
-          "$ref": "#/definitions/type/dist"
+          "$ref": "#/definitions/type/dist",
+          "summary": "Build environment distribution"
         },
         "stack": {
-          "$ref": "#/definitions/type/stack"
+          "$ref": "#/definitions/type/stack",
+          "summary": "Build environment stack"
         },
         "sudo": {
           "$ref": "#/definitions/type/sudo",
+          "summary": "Whether to allow sudo access",
           "deprecated": "this key has no effect anymore"
         },
         "env": {
-          "$ref": "#/definitions/type/env"
+          "$ref": "#/definitions/type/env",
+          "summary": "Environment variables to set up"
         },
         "compiler": {
-          "$ref": "#/definitions/type/compilers"
+          "$ref": "#/definitions/type/compilers",
+          "summary": "Compilers to set up"
         },
         "stages": {
-          "$ref": "#/definitions/type/stages"
+          "$ref": "#/definitions/type/stages",
+          "summary": "Build stages definition"
         },
         "matrix": {
           "$ref": "#/definitions/type/matrix",
           "aliases": [
             "jobs"
-          ]
+          ],
+          "summary": "Build matrix definitions"
         },
         "notifications": {
-          "$ref": "#/definitions/type/notifications"
+          "$ref": "#/definitions/type/notifications",
+          "summary": "Notification targets to notify on build results"
         },
         "version": {
-          "$ref": "#/definitions/type/version"
+          "$ref": "#/definitions/type/version",
+          "summary": "Build config specification version"
         },
         "conditions": {
-          "$ref": "#/definitions/type/conditions"
+          "$ref": "#/definitions/type/conditions",
+          "summary": "Conditions support version"
         },
         "filter_secrets": {
           "type": "boolean",
@@ -93,13 +107,15 @@
         "type": "object",
         "properties": {
           "apt": {
-            "$ref": "#/definitions/addon/apt"
+            "$ref": "#/definitions/addon/apt",
+            "summary": "Install APT packages and sources"
           },
           "apt_packages": {
             "$ref": "#/definitions/type/strs"
           },
           "artifacts": {
-            "$ref": "#/definitions/addon/artifacts"
+            "$ref": "#/definitions/addon/artifacts",
+            "summary": "Upload build artifacts at the end of the build"
           },
           "browserstack": {
             "$ref": "#/definitions/addon/browserstack"
@@ -189,11 +205,11 @@
             "type": "string"
           },
           "deploy": {
-            "$ref": "#/definitions/type/deploys"
+            "$ref": "#/definitions/type/deploys",
+            "summary": "Deployment configs"
           }
         },
-        "additionalProperties": false,
-        "summary": "Build addons to activate"
+        "additionalProperties": false
       },
       "arch": {
         "$id": "arch",
@@ -256,8 +272,7 @@
         ],
         "flags": [
           "expand"
-        ],
-        "summary": "Build environment architecture"
+        ]
       },
       "branches": {
         "$id": "branches",
@@ -295,7 +310,6 @@
             "example": "master"
           }
         ],
-        "summary": "Include or exclude branches from being built",
         "normal": true
       },
       "cache": {
@@ -364,7 +378,6 @@
             "$ref": "#/definitions/type/strs"
           }
         ],
-        "summary": "Cache settings to speed up the build",
         "normal": true
       },
       "compilers": {
@@ -399,14 +412,12 @@
         ],
         "flags": [
           "expand"
-        ],
-        "summary": "Compilers to set up"
+        ]
       },
       "condition": {
         "$id": "condition",
         "title": "Condition",
         "type": "string",
-        "summary": "Condition to determine whether or not a build, stage, or job should be run",
         "example": "branch = master"
       },
       "conditions": {
@@ -416,7 +427,6 @@
         "flags": [
           "internal"
         ],
-        "summary": "Conditions support version",
         "enum": [
           "v0",
           "v1"
@@ -436,14 +446,12 @@
           {
             "$ref": "#/definitions/deploy/providers"
           }
-        ],
-        "summary": "Deployment configs"
+        ]
       },
       "dist": {
         "$id": "dist",
         "title": "Dist",
         "type": "string",
-        "summary": "Build environment distribution",
         "downcase": true,
         "enum": [
           "trusty",
@@ -491,10 +499,12 @@
             "type": "object",
             "properties": {
               "global": {
-                "$ref": "#/definitions/type/env_vars"
+                "$ref": "#/definitions/type/env_vars",
+                "summary": "Global environment variables to be defined on all jobs"
               },
               "matrix": {
-                "$ref": "#/definitions/type/env_vars"
+                "$ref": "#/definitions/type/env_vars",
+                "summary": "Environment variables that expand the build matrix (i.e. that create one job per entry)"
               }
             },
             "additionalProperties": false,
@@ -509,8 +519,7 @@
         ],
         "flags": [
           "expand"
-        ],
-        "summary": "Environment variables to set up"
+        ]
       },
       "env_var": {
         "$id": "env_var",
@@ -611,14 +620,12 @@
             "type": "string"
           }
         },
-        "additionalProperties": false,
-        "summary": "Git settings"
+        "additionalProperties": false
       },
       "group": {
         "$id": "group",
         "title": "Group",
         "type": "string",
-        "summary": "Build environment group",
         "downcase": true,
         "flags": [
           "internal"
@@ -673,8 +680,7 @@
           {
             "$ref": "#/definitions/type/import"
           }
-        ],
-        "summary": "Build configuration imports"
+        ]
       },
       "jdks": {
         "$id": "jdks",
@@ -724,7 +730,8 @@
         "type": "object",
         "properties": {
           "group": {
-            "$ref": "#/definitions/type/group"
+            "$ref": "#/definitions/type/group",
+            "summary": "Build environment group"
           },
           "osx_image": {
             "type": "string",
@@ -739,28 +746,35 @@
             ]
           },
           "services": {
-            "$ref": "#/definitions/type/services"
+            "$ref": "#/definitions/type/services",
+            "summary": "Services to set up and start"
           },
           "addons": {
-            "$ref": "#/definitions/type/addons"
+            "$ref": "#/definitions/type/addons",
+            "summary": "Build addons to activate"
           },
           "branches": {
             "$ref": "#/definitions/type/branches",
+            "summary": "Include or exclude branches from being built",
             "aliases": [
               "branch"
             ]
           },
           "cache": {
-            "$ref": "#/definitions/type/cache"
+            "$ref": "#/definitions/type/cache",
+            "summary": "Cache settings to speed up the build"
           },
           "deploy": {
-            "$ref": "#/definitions/type/deploys"
+            "$ref": "#/definitions/type/deploys",
+            "summary": "Deployment configs"
           },
           "git": {
-            "$ref": "#/definitions/type/git"
+            "$ref": "#/definitions/type/git",
+            "summary": "Git settings"
           },
           "if": {
-            "$ref": "#/definitions/type/condition"
+            "$ref": "#/definitions/type/condition",
+            "summary": "Condition to determine whether or not a build, stage, or job should be run"
           },
           "before_install": {
             "$ref": "#/definitions/type/strs",
@@ -812,7 +826,6 @@
         "$id": "language",
         "title": "Language",
         "type": "string",
-        "summary": "Language support",
         "downcase": true,
         "defaults": [
           {
@@ -1096,7 +1109,6 @@
             "$ref": "#/definitions/type/matrix_entries"
           }
         ],
-        "summary": "Build matrix definitions",
         "normal": true
       },
       "matrix_entries": {
@@ -1133,7 +1145,8 @@
                 "unique": true
               },
               "language": {
-                "$ref": "#/definitions/type/language"
+                "$ref": "#/definitions/type/language",
+                "summary": "Language support"
               },
               "os": {
                 "$ref": "#/definitions/type/os"
@@ -1147,10 +1160,12 @@
                 }
               },
               "dist": {
-                "$ref": "#/definitions/type/dist"
+                "$ref": "#/definitions/type/dist",
+                "summary": "Build environment distribution"
               },
               "sudo": {
                 "$ref": "#/definitions/type/sudo",
+                "summary": "Whether to allow sudo access",
                 "deprecated": "this key has no effect anymore"
               },
               "env": {
@@ -1244,7 +1259,6 @@
             "$ref": "#/definitions/notification/email"
           }
         ],
-        "summary": "Notification targets to notify on build results",
         "normal": true
       },
       "os": {
@@ -1361,8 +1375,7 @@
         ],
         "flags": [
           "expand"
-        ],
-        "summary": "Build environment operating systems"
+        ]
       },
       "secure": {
         "$id": "secure",
@@ -1465,14 +1478,12 @@
           {
             "$ref": "#/definitions/type/service"
           }
-        ],
-        "summary": "Services to set up and start"
+        ]
       },
       "stack": {
         "$id": "stack",
         "title": "Stack",
         "type": "string",
-        "summary": "Build environment stack",
         "downcase": true,
         "flags": [
           "edge",
@@ -1502,7 +1513,8 @@
                 "example": "unit tests"
               },
               "if": {
-                "$ref": "#/definitions/type/condition"
+                "$ref": "#/definitions/type/condition",
+                "summary": "Condition to determine whether or not a build, stage, or job should be run"
               }
             },
             "additionalProperties": false,
@@ -1531,8 +1543,7 @@
           {
             "$ref": "#/definitions/type/stage"
           }
-        ],
-        "summary": "Build stages definition"
+        ]
       },
       "strs": {
         "$id": "strs",
@@ -1567,7 +1578,6 @@
             "type": "string"
           }
         ],
-        "summary": "Whether to allow sudo access",
         "example": "required",
         "deprecated": "this key has no effect anymore"
       },
@@ -1699,7 +1709,6 @@
         "flags": [
           "internal"
         ],
-        "summary": "Build config specification version",
         "pattern": "^(~>|>|>=|=|<=|<) (\\d+(?:\\.\\d+)?(?:\\.\\d+)?)$"
       }
     },
@@ -1810,7 +1819,6 @@
             "type": "boolean"
           }
         ],
-        "summary": "Install APT packages and sources",
         "normal": true
       },
       "artifacts": {
@@ -1835,6 +1843,7 @@
               },
               "key": {
                 "$ref": "#/definitions/type/secure",
+                "summary": "The S3 access key id",
                 "aliases": [
                   "aws_access_key_id",
                   "aws_access_key",
@@ -1845,6 +1854,7 @@
               },
               "secret": {
                 "$ref": "#/definitions/type/secure",
+                "summary": "The S3 secret access key",
                 "aliases": [
                   "aws_secret_access_key",
                   "aws_secret_key",
@@ -1892,7 +1902,6 @@
               }
             },
             "additionalProperties": false,
-            "summary": "Upload build artifacts at the end of the build",
             "normal": true,
             "changes": [
               {
@@ -1904,7 +1913,6 @@
             "type": "boolean"
           }
         ],
-        "summary": "Upload build artifacts at the end of the build",
         "normal": true
       },
       "browserstack": {
@@ -1916,11 +1924,13 @@
             "properties": {
               "username": {
                 "$ref": "#/definitions/type/secure",
-                "strict": false
+                "strict": false,
+                "summary": "Browserstack username"
               },
               "access_key": {
                 "$ref": "#/definitions/type/secure",
-                "strict": false
+                "strict": false,
+                "summary": "Browserstack access key"
               },
               "forcelocal": {
                 "type": "boolean",
@@ -1969,7 +1979,8 @@
             "type": "object",
             "properties": {
               "repo_token": {
-                "$ref": "#/definitions/type/secure"
+                "$ref": "#/definitions/type/secure",
+                "summary": "The repo token"
               }
             },
             "additionalProperties": false,
