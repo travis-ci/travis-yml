@@ -38,7 +38,9 @@ module Travis
             add(node)
             # hmmm. we'd want to pass options that have been passed to the
             # mapping, but this information is not available anymore.
-            ref(node, only(node.opts, :aliases, :deprecated, :only, :except, :strict))
+            opts = only(node.opts, :aliases, :deprecated, :only, :except, :strict, :summary)
+            node.opts.delete(:summary)
+            ref(node, opts)
           else
             node
           end
