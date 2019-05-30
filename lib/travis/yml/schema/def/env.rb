@@ -1,19 +1,17 @@
 # frozen_string_literal: true
-require 'travis/yml/schema/dsl/any'
-require 'travis/yml/schema/dsl/map'
-require 'travis/yml/schema/dsl/seq'
+require 'travis/yml/schema/type'
 
 module Travis
   module Yml
     module Schema
       module Def
-        class Env < Dsl::Any
+        class Env < Type::Any
           register :env
 
           def define
             summary 'Environment variables to set up'
 
-            add Class.new(Dsl::Map) {
+            type Class.new(Type::Map) {
               def define
                 normal
                 prefix :matrix
@@ -23,19 +21,17 @@ module Travis
               end
             }
 
-            add EnvVars
-
-            # change :env_vars
+            type :env_vars
 
             export
           end
         end
 
-        class EnvVars < Dsl::Any
+        class EnvVars < Type::Any
           register :env_vars
 
           def define
-            add Class.new(Dsl::Seq) {
+            type Class.new(Type::Seq) {
               def define
                 normal
                 type :env_var
@@ -43,17 +39,17 @@ module Travis
               end
             }
 
-            add EnvVar
+            type :env_var
 
             export
           end
         end
 
-        class EnvVar < Dsl::Any
+        class EnvVar < Type::Any
           register :env_var
 
           def define
-            add Class.new(Dsl::Map) {
+            type Class.new(Type::Map) {
               def define
                 normal
                 map :'^(?!global|matrix)', to: :any, type: [:str, :num, :bool]
@@ -63,7 +59,7 @@ module Travis
 
             # cannot use the standard :secure definition because that also
             # allows a plain string
-            add Class.new(Dsl::Map) {
+            type Class.new(Type::Map) {
               register :env_secure
 
               def define
@@ -73,7 +69,7 @@ module Travis
               end
             }
 
-            add :str, format: '^[^=]+=[^=]*$'
+            type :str, format: '^[^=]+=[^=]*$'
 
             export
           end
@@ -82,4 +78,3 @@ module Travis
     end
   end
 end
-

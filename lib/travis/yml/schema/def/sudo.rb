@@ -1,11 +1,11 @@
 # frozen_string_literal: true
-require 'travis/yml/schema/dsl/any'
+require 'travis/yml/schema/type'
 
 module Travis
   module Yml
     module Schema
       module Def
-        class Sudo < Dsl::Any
+        class Sudo < Type::Any
           register :sudo
 
           def define
@@ -13,8 +13,8 @@ module Travis
             example 'required'
             deprecated 'this key has no effect anymore'
 
-            add :bool, normal: true
-            add :str
+            type :bool, normal: true
+            type :str
 
             export
           end

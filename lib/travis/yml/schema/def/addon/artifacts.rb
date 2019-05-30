@@ -1,5 +1,5 @@
 # frozen_string_literal: true
-require 'travis/yml/schema/dsl/map'
+require 'travis/yml/schema/type'
 
 module Travis
   module Yml
@@ -55,8 +55,6 @@ module Travis
               map :permissions,   to: :str
               map :working_dir,   to: :str
               map :cache_control, to: :str
-
-              super
             end
           end
         end

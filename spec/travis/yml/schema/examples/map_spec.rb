@@ -2,12 +2,8 @@ describe Travis::Yml::Schema::Examples::Map do
   let(:const) do
     Class.new(Travis::Yml::Schema::Dsl::Map) {
       def define
-        examples \
-          one: 'Uno',
-          two: 'Duo'
-
-        map :one, to: :str, required: true
-        map :two, to: :str
+        map :one, to: :str, eg: 'uno', required: true
+        map :two, to: :str, eg: 'duo'
         map :three, to: Class.new(Travis::Yml::Schema::Dsl::Any) {
           def define
             add :seq, type: :str
@@ -22,9 +18,9 @@ describe Travis::Yml::Schema::Examples::Map do
 
   xit do
     should eq [
-      { one: 'Uno', two: 'string' },
-      { one: 'Uno', two: 1 },
-      { one: 'Uno', two: true },
+      { one: 'uno', two: 'string' },
+      { one: 'uno', two: 1 },
+      { one: 'uno', two: true },
     ]
   end
 end

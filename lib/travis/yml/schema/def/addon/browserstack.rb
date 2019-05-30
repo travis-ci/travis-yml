@@ -1,5 +1,5 @@
 # frozen_string_literal: true
-require 'travis/yml/schema/dsl/map'
+require 'travis/yml/schema/type'
 
 module Travis
   module Yml
@@ -10,17 +10,17 @@ module Travis
             register :browserstack
 
             def define
-              map :username,     to: :secure, strict: false, summary: 'Browserstack username'
-              map :access_key,   to: :secure, strict: false, summary: 'Browserstack access key'
-              map :forcelocal,   to: :bool, summary: 'Force all network traffic to be resolved via the build environment VM'
-              map :only,         to: :str, summary: 'Restrict local testing access to the specified local servers/directories'
-              map :app_path,     to: :str, summary: 'Path to the app file'
+              map :username,   to: :secure, strict: false, summary: 'Browserstack username'
+              map :access_key, to: :secure, summary: 'Browserstack access key'
+              map :forcelocal, to: :bool, summary: 'Force all network traffic to be resolved via the build environment VM'
+              map :only,       to: :str, summary: 'Restrict local testing access to the specified local servers/directories'
+              map :app_path,   to: :str, summary: 'Path to the app file'
 
               # TODO alias these to underscored options
-              map :proxyHost,    to: :str
-              map :proxyPort,    to: :str
-              map :proxyUser,    to: :str
-              map :proxyPass,    to: :secure
+              map :proxyHost,  to: :str
+              map :proxyPort,  to: :str
+              map :proxyUser,  to: :str
+              map :proxyPass,  to: :secure
 
               # TODO from travis-build
               #
@@ -36,8 +36,6 @@ module Travis
               # [:proxy_port] || config[:proxyPort]
               # [:proxy_user] || config[:proxyUser]
               # [:proxy_pass] || config[:proxyPass]
-
-              super
             end
           end
         end

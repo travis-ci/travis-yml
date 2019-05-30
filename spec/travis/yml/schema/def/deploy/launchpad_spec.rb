@@ -25,7 +25,7 @@ describe Travis::Yml::Schema::Def::Deploy::Launchpad do
                 ]
               },
               run: {
-                type: :string
+                '$ref': '#/definitions/type/strs',
               },
               allow_failure: {
                 type: :boolean
@@ -52,10 +52,10 @@ describe Travis::Yml::Schema::Def::Deploy::Launchpad do
               key: :provider
             },
             required: [
-              :provider,
               :slug,
               :oauth_token,
-              :oauth_token_secret
+              :oauth_token_secret,
+              :provider,
             ]
           },
           {

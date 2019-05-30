@@ -1,4 +1,4 @@
-# frozen_string_literal: true
+require 'registry'
 require 'travis/yml/schema/type/node'
 
 module Travis
@@ -6,32 +6,64 @@ module Travis
     module Schema
       module Type
         class Group < Node
-          extend Forwardable
-          include Enumerable
+          attr_writer :types
 
-          def_delegators :types, :each, :first
-
-          def types=(types)
-            @types = types
+          def initialize(parent = nil, attrs = {})
+            super
+            types(attrs[:types]) if attrs[:types] # hrmmm.
           end
 
-          def types
-            @types ||= []
+          def types(*types)
+            return @types ||= [] unless types.any?
+            types = types.flatten
+            attrs = types.last.is_a?(Hash) ? types.pop : {}
+            types = types.map { |type| type.is_a?(Node) ? type : build(type, attrs) }
+            self.types.concat(types)
           end
 
-          def dup
-            node = super
-            node.types = node.types.map(&:dup)
-            node
+          def expand_keys
+            super + types.map(&:expand_keys).flatten
+          end
+        end
+
+        class Any < Group
+          include Opts
+
+          register :any
+
+          opt_names %i(detect)
+
+          def type(*args)
+            args.any? ? types(*args) : :any
           end
 
-          def to_h
-            Dump.new(self).to_h
+          def detect(detect)
+            attrs[:detect] = detect
           end
+        end
 
-          # def flatten(types)
-          #   types.map { |type| type.is_a?(self.class) ? type.types : type }.flatten
-          # end
+        class All < Group
+          register :all
+
+          def type(*args)
+            args.any? ? types(*args) : :all
+          end
+        end
+
+        class One < Group
+          register :one
+
+          def type(*args)
+            args.any? ? types(*args) : :one
+          end
+        end
+
+        class Seq < Group
+          register :seq
+
+          def type(*args)
+            args.any? ? types(*args) : :seq
+          end
         end
       end
     end

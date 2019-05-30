@@ -1,11 +1,11 @@
 # frozen_string_literal: true
-require 'travis/yml/schema/dsl/str'
+require 'travis/yml/schema/type'
 
 module Travis
   module Yml
     module Schema
       module Def
-        class Group < Dsl::Str
+        class Group < Type::Str
           register :group
 
           def define
@@ -19,4 +19,3 @@ module Travis
     end
   end
 end
-

@@ -14,9 +14,6 @@ describe Travis::Yml::Schema::Def::Deploy::Deploy do
               {
                 type: :object,
                 additionalProperties: false,
-                aliases: [
-                  :true
-                ],
                 prefix: {
                   key: :branch,
                   only: [

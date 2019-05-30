@@ -1,11 +1,10 @@
 # frozen_string_literal: true
-require 'travis/yml/schema/dsl/lang'
 
 module Travis
   module Yml
     module Schema
       module Def
-        class NodeJs < Lang
+        class NodeJs < Type::Lang
           register :node_js
 
           def define

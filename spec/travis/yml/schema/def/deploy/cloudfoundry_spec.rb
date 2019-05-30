@@ -25,7 +25,7 @@ describe Travis::Yml::Schema::Def::Deploy::Cloudfoundry do
                 ]
               },
               run: {
-                type: :string
+                '$ref': '#/definitions/type/strs',
               },
               allow_failure: {
                 type: :boolean

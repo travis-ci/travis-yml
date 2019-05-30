@@ -8,15 +8,13 @@ module Travis
         class Scalar < Node
           register :scalar
 
-          TYPES = {
-            bool: :boolean,
-            num:  :number,
-            str:  :string,
-            enum: :string,
-          }
-
           def type
-            TYPES[node.type] || raise("Unknown type: #{node.type}")
+            case node
+            when Type::Bool then :boolean
+            when Type::Num  then :number
+            when Type::Str  then :string
+            else raise("Unknown type: #{node.class}")
+            end
           end
 
           def to_h

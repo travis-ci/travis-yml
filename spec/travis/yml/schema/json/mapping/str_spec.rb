@@ -1,65 +1,190 @@
 describe Travis::Yml::Schema::Json::Map, 'mapping to any node' do
-  let(:map) { Travis::Yml::Schema::Dsl::Map.new }
+  def const(define)
+    Class.new(Travis::Yml::Schema::Type::Map) do
+      define_method(:define, &define)
+    end
+  end
 
-  subject { described_class.new(map).node.schema }
-
-  it { should eq type: :object }
+  subject { const(define).new }
 
   describe 'alias' do
-    before { map.map :foo, to: :str, alias: :bar }
-    it { should include properties: { foo: hash_including(aliases: anything) } }
-    it { should_not include alias: anything }
-    it { should_not include properties: { foo: hash_including(alias: anything) } }
+    let(:define) { -> { map :foo, to: :str, alias: :bar } }
+
+    it do
+      should have_schema(
+        type: :object,
+        properties: {
+          foo: {
+            type: :string,
+            aliases: [
+              :bar
+            ]
+          }
+        },
+        additionalProperties: false
+      )
+    end
   end
 
   describe 'change' do
-    before { map.map :foo, to: :str, change: :change }
-    it { should_not include changes: anything }
-    it { should include properties: { foo: hash_including(changes: [change: :change]) } }
+    let(:define) { -> { map :foo, to: :str, change: :change } }
+
+    it do
+      should have_schema(
+        type: :object,
+        properties: {
+          foo: {
+            type: :string,
+            changes: [
+              {
+                change: :change
+              }
+            ]
+          }
+        },
+        additionalProperties: false
+      )
+    end
   end
 
   describe 'deprecated' do
-    before { map.map :foo, to: :str, deprecated: true }
-    it { should_not include deprecated: anything }
-    it { should include properties: { foo: hash_including(deprecated: true) } }
+    let(:define) { -> { map :foo, to: :str, deprecated: 'deprecated' } }
+
+    it do
+      should have_schema(
+        type: :object,
+        properties: {
+          foo: {
+            type: :string,
+            deprecated: 'deprecated'
+          }
+        },
+        additionalProperties: false,
+      )
+    end
   end
 
   describe 'edge' do
-    before { map.map :foo, to: :str, edge: true }
-    it { should_not include flags: anything }
-    it { should include properties: { foo: hash_including(flags: [:edge]) } }
+    let(:define) { -> { map :foo, to: :str, edge: true } }
+
+    it do
+      should have_schema(
+        type: :object,
+        properties: {
+          foo: {
+            type: :string,
+            flags: [
+              :edge
+            ]
+          }
+        },
+        additionalProperties: false,
+      )
+    end
   end
 
   describe 'internal' do
-    before { map.map :foo, to: :str, internal: true }
-    it { should_not include flags: anything }
-    it { should include properties: { foo: hash_including(flags: [:internal]) } }
+    let(:define) { -> { map :foo, to: :str, internal: true } }
+
+    it do
+      should have_schema(
+        type: :object,
+        properties: {
+          foo: {
+            type: :string,
+            flags: [
+              :internal
+            ]
+          }
+        },
+        additionalProperties: false,
+      )
+    end
   end
 
   # describe 'expand' do
-  #   before { map.map :foo, to: :str, expand: true }
+  #   before { const.map :foo, to: :str, expand: true }
   #   it { should_not include expand: anything }
   #   it { should_not include properties: { foo: hash_including(expand: anything) } }
   # end
 
   describe 'required' do
-    before { map.map :foo, to: :str, required: true }
-    it { should include required: [:foo] }
-    it { should_not include properties: { foo: hash_including(required: anything) } }
+    let(:define) { -> { map :foo, to: :str, required: true } }
+
+    it do
+      should have_schema(
+        type: :object,
+        properties: {
+          foo: {
+            type: :string,
+          }
+        },
+        additionalProperties: false,
+        required: [
+          :foo
+        ]
+      )
+    end
   end
 
   describe 'unique' do
-    before { map.map :foo, to: :str, unique: true }
-    it { should include properties: { foo: hash_including(unique: anything) } }
+    let(:define) { -> { map :foo, to: :str, unique: true } }
+
+    it do
+      should have_schema(
+        type: :object,
+        properties: {
+          foo: {
+            type: :string,
+            flags: [
+              :unique
+            ]
+          }
+        },
+        additionalProperties: false,
+      )
+    end
   end
 
   describe 'only' do
-    before { map.map :foo, to: :str, only: { os: 'linux' } }
-    it { should include properties: { foo: hash_including(only: anything) } }
+    let(:define) { -> { map :foo, to: :str, only: { os: 'linux' } } }
+
+    it do
+      should have_schema(
+        type: :object,
+        properties: {
+          foo: {
+            type: :string,
+            only: {
+              os: [
+                'linux'
+              ]
+            }
+          }
+        },
+        additionalProperties: false
+      )
+    end
   end
 
   describe 'except' do
-    before { map.map :foo, to: :str, except: { os: 'linux' } }
-    it { should include properties: { foo: hash_including(except: anything) } }
+    let(:define) { -> { map :foo, to: :str, except: { os: 'linux' } } }
+
+    it do
+      should have_schema(
+        type: :object,
+        properties: {
+          foo: {
+            type: :string,
+            except: {
+              os: [
+                'linux'
+              ]
+            }
+          }
+        },
+        additionalProperties: false
+      )
+    end
   end
 end

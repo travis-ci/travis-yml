@@ -7,8 +7,8 @@ describe Travis::Yml, 'language' do
     it { should have_msg [:info, :language, :default, key: 'language', default: 'ruby'] }
   end
 
-  langs = Travis::Yml::Schema::Def::Lang.registry
-  langs = langs.select { |key, const| const < Travis::Yml::Schema::Def::Lang }
+  langs = Travis::Yml::Schema::Type::Lang.registry
+  langs = langs.select { |key, const| const < Travis::Yml::Schema::Type::Lang }
   langs.each do |language, const|
     describe 'known' do
       yaml %(

@@ -1,12 +1,11 @@
 # frozen_string_literal: true
 require 'travis/yml/schema/def/lang/jdks'
-require 'travis/yml/schema/dsl/map'
 
 module Travis
   module Yml
     module Schema
       module Def
-        class Android < Lang
+        class Android < Type::Lang
           register :android
 
           def define
@@ -15,7 +14,7 @@ module Travis
           end
         end
 
-        class AndroidConfig < Dsl::Map
+        class AndroidConfig < Type::Map
           register :android_config
 
           def define

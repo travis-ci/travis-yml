@@ -9,11 +9,11 @@ module Travis
           register :seq
 
           def example
-            node.map { |node| build(node).examples }.flatten
+            node.types.map { |node| build(node).examples }.flatten
           end
 
           def expand
-            nodes = node.map { |node| build(node).expand }.flatten.map(&:node)
+            nodes = node.types.map { |node| build(node).expand }.flatten.map(&:node)
             nodes.map { |node| Seq.new(Type::Seq.new(nil, types: [node])) }
           end
         end

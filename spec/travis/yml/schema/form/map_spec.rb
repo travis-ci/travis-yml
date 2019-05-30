@@ -1,12 +1,14 @@
 describe Travis::Yml::Schema::Form, 'map' do
-  let(:dsl)  { Travis::Yml::Schema::Dsl::Map.new }
+  def const(define)
+    Class.new(Travis::Yml::Schema::Type::Map) do
+      define_method(:define, &define)
+    end
+  end
 
-  subject { described_class.apply(dsl.node).to_h }
+  subject { Travis::Yml::Schema::Type::Node.build(const(define)).to_h }
 
   describe 'default' do
-    before do
-      dsl.map :foo, to: :str
-    end
+    let(:define) { -> { map :foo, to: :str } }
 
     it do
       should eq(
@@ -23,17 +25,19 @@ describe Travis::Yml::Schema::Form, 'map' do
   end
 
   describe 'with a map' do
-    let(:map) do
-      Class.new(Travis::Yml::Schema::Dsl::Map) do
+    let!(:foo) do
+      Class.new(Travis::Yml::Schema::Type::Map) do
+        register :foo
+
         def define
           map :bar, to: :str
         end
       end
     end
 
-    before do
-      dsl.map :foo, to: map
-    end
+    let(:define) { -> { map :foo, to: :foo } }
+
+    after { foo.unregister }
 
     it do
       should eq(
@@ -54,10 +58,46 @@ describe Travis::Yml::Schema::Form, 'map' do
     end
   end
 
-  describe 'with a seq' do
-    before do
-      dsl.map :foo, to: :seq
+  describe 'with a seq (default :str)' do
+    let(:define) { -> { map :foo, to: :seq } }
+
+    it do
+      should eq(
+        {
+          type: :map,
+          map: {
+            foo: {
+              type: :ref,
+              id: :strs,
+              ref: :'type/strs'
+            }
+          }
+        }
+      )
     end
+  end
+
+  describe 'with a seq (:str)' do
+    let(:define) { -> { map :foo, to: :seq, type: :str } }
+
+    it do
+      should eq(
+        {
+          type: :map,
+          map: {
+            foo: {
+              type: :ref,
+              id: :strs,
+              ref: :'type/strs'
+            }
+          }
+        }
+      )
+    end
+  end
+
+  describe 'with a seq (:num)' do
+    let(:define) { -> { map :foo, to: :seq, type: :num } }
 
     it do
       should eq(
@@ -72,12 +112,12 @@ describe Travis::Yml::Schema::Form, 'map' do
                   normal: true,
                   types: [
                     {
-                      type: :str
+                      type: :num
                     }
                   ]
                 },
                 {
-                  type: :str
+                  type: :num
                 }
               ]
             }
@@ -88,9 +128,11 @@ describe Travis::Yml::Schema::Form, 'map' do
   end
 
   describe 'with a prefix' do
-    before do
-      dsl.prefix :foo
-      dsl.map :foo, to: :str
+    let(:define) do
+      -> do
+        prefix :foo
+        map :foo, to: :str
+      end
     end
 
     it do
@@ -118,8 +160,10 @@ describe Travis::Yml::Schema::Form, 'map' do
   end
 
   describe 'nested with prefixes' do
-    let(:map) do
-      Class.new(Travis::Yml::Schema::Dsl::Map) do
+    let!(:foo) do
+      Class.new(Travis::Yml::Schema::Type::Map) do
+        register :foo
+
         def define
           prefix :bar
           map :bar, to: :str
@@ -127,10 +171,14 @@ describe Travis::Yml::Schema::Form, 'map' do
       end
     end
 
-    before do
-      dsl.prefix :foo
-      dsl.map :foo, to: map
+    let(:define) do
+      -> do
+        prefix :foo
+        map :foo, to: :foo
+      end
     end
+
+    after { foo.unregister }
 
     it do
       should eq(
@@ -191,12 +239,14 @@ describe Travis::Yml::Schema::Form, 'map' do
   end
 
   describe 'with change: :enable' do
-    before do
-      dsl.map :foo, to: :str
-      dsl.change :enable
+    let(:define) do
+      -> do
+        map :foo, to: :str
+        change :enable
+      end
     end
 
-    xit do
+    it do
       should eq(
         {
           type: :any,
@@ -225,9 +275,7 @@ describe Travis::Yml::Schema::Form, 'map' do
   end
 
   describe 'with a type' do
-    before do
-      dsl.type :str
-    end
+    let(:define) { -> { types :str } }
 
     it do
       should eq(
@@ -235,8 +283,9 @@ describe Travis::Yml::Schema::Form, 'map' do
         types: [
           {
             type: :map,
-            map: {
-            }
+            types: [
+              type: :str
+            ]
           },
           {
             type: :str,

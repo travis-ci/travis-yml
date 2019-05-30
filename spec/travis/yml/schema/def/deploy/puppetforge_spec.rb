@@ -11,6 +11,16 @@ describe Travis::Yml::Schema::Def::Deploy::Puppetforge do
           {
             type: :object,
             properties: {
+              user: {
+                '$ref': '#/definitions/type/secure',
+                strict: false
+              },
+              password: {
+                '$ref': '#/definitions/type/secure'
+              },
+              url: {
+                type: :string
+              },
               provider: {
                 type: :string,
                 enum: [
@@ -25,7 +35,7 @@ describe Travis::Yml::Schema::Def::Deploy::Puppetforge do
                 ]
               },
               run: {
-                type: :string
+                '$ref': '#/definitions/type/strs',
               },
               allow_failure: {
                 type: :boolean
@@ -36,16 +46,6 @@ describe Travis::Yml::Schema::Def::Deploy::Puppetforge do
               edge: {
                 '$ref': '#/definitions/deploy/edge'
               },
-              user: {
-                '$ref': '#/definitions/type/secure',
-                strict: false
-              },
-              password: {
-                '$ref': '#/definitions/type/secure'
-              },
-              url: {
-                type: :string
-              }
             },
             additionalProperties: false,
             normal: true,
@@ -53,9 +53,9 @@ describe Travis::Yml::Schema::Def::Deploy::Puppetforge do
               key: :provider
             },
             required: [
-              :provider,
               :user,
-              :password
+              :password,
+              :provider,
             ]
           },
           {

@@ -9,9 +9,6 @@ describe Travis::Yml::Schema::Def::Compilers do
         '$id': :compilers,
         title: 'Compilers',
         summary: 'Compilers to set up',
-        flags: [
-          :expand
-        ],
         anyOf: [
           {
             type: :array,
@@ -25,9 +22,6 @@ describe Travis::Yml::Schema::Def::Compilers do
               }
             },
             normal: true,
-            flags: [
-              :expand
-            ]
           },
           {
             type: :string,

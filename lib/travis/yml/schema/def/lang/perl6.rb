@@ -1,11 +1,10 @@
 # frozen_string_literal: true
-require 'travis/yml/schema/dsl/lang'
 
 module Travis
   module Yml
     module Schema
       module Def
-        class Perl6 < Lang
+        class Perl6 < Type::Lang
           register :perl6
 
           def define

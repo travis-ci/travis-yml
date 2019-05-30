@@ -1,23 +1,22 @@
 # frozen_string_literal: true
-require 'travis/yml/schema/dsl/seq'
-require 'travis/yml/schema/dsl/str'
+require 'travis/yml/schema/type'
 
 module Travis
   module Yml
     module Schema
       module Def
-        class Services < Dsl::Seq
+        class Services < Type::Seq
           register :services
 
           def define
             summary 'Services to set up and start'
             normal
             export
-            type Service
+            type :service
           end
         end
 
-        class Service < Dsl::Str
+        class Service < Type::Str
           register :service
 
           def define

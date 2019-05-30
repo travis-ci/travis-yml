@@ -18,10 +18,10 @@ module Travis
           private
 
             def items
-              case node.size
+              case node.types.size
               when 0 then { type: :string }
-              when 1 then node.first.schema
-              else any(node.map(&:schema))
+              when 1 then node.types.first.schema
+              else any(node.types.map(&:schema))
               end
             end
 

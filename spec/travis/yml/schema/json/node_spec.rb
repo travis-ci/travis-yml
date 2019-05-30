@@ -1,11 +1,7 @@
 describe Travis::Yml::Schema::Json::Str do
-  let(:node) { Travis::Yml::Schema::Dsl::Str.new(nil, opts) }
-  let(:opts) { {} }
+  let(:node) { Travis::Yml::Schema::Type::Str.new }
 
-  subject { described_class.new(node.node) }
+  subject { described_class.new(node) }
 
-  describe 'edge' do
-    let(:opts) { { edge: true } }
-    it { should have_schema type: :string, flags: [:edge] }
-  end
+  it { should have_schema type: :string }
 end

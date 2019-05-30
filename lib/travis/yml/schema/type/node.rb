@@ -1,6 +1,7 @@
-# frozen_string_literal: true
 require 'forwardable'
 require 'registry'
+require 'travis/yml/schema/export'
+require 'travis/yml/schema/form'
 require 'travis/yml/schema/type/dump'
 require 'travis/yml/schema/type/opts'
 
@@ -8,230 +9,262 @@ module Travis
   module Yml
     module Schema
       module Type
-        class Node < Obj.new(parent: nil)
-          extend Forwardable
-          include Opts, Registry
+        class Node < Obj.new(parent: nil, attrs: {})
+          extend Forwardable, Helper::Obj
+          include Registry, Opts
 
           registry :type
-          register :node
 
-          opts %i(aliases changes deprecated example flags normal summary unique only except)
+          opt_names %i(aliases changes deprecated example flags normal description
+            summary title only except)
 
-          attr_writer :namespace, :opts
+          class << self
+            def build(type, attrs = {})
+              caching(resolve(type), attrs) do |type|
+                node = type.new(self, only(attrs, :types))
+                node = Form.apply(node)
+                node = Export.apply(node)
+                node.assign(except(attrs, :types))
+                node
+              end
+            end
 
-          def initialize(parent = nil, opts = {})
-            super(parent)
-            @opts = {}
-            assign(opts)
-          end
+            def caching(type, attrs)
+              if type.cache?(attrs) && node = cache[type.registry_full_key]
+                node
+              else
+                node = yield type
+                cache[type.registry_full_key] = node if type.cache?(attrs)
+                node
+              end
+            end
 
-          def resolve(type)
-            type.is_a?(Class) ? type : Node[type]
-          end
+            def cache?(attrs)
+              def? && registry_key && attrs.empty?
+            end
 
-          def assign(opts)
-            opts.each do |key, value|
-              set(key, value)
+            def cache
+              @cache ||= superclass.respond_to?(:cache) ? superclass.cache : {}
+            end
+
+            def exports
+              @exports ||= superclass.respond_to?(:exports) ? superclass.exports : {}
+            end
+
+            def def?
+              name.to_s.include?('Def::')
+            end
+
+            def is?(*types)
+              types.any? { |type| self < Node[type] }
+            end
+
+            def resolve(type)
+              type.is_a?(Class) ? type : lookup(type)
+            end
+
+            def registry_full_key
+              [registry_name, registry_key].join('.').to_sym
             end
           end
 
-          def set(key, obj)
-            opt?(key) ? opt(key, obj) : ivar(key, obj)
+          def_delegators :'self.class', :build, :resolve, :def?
+
+          def initialize(parent = nil, attrs = {})
+            super(parent, attrs)
+            before_define
+            define
+            after_define
           end
 
-          def unset(*keys)
-            keys.each do |key|
-              opt(key, nil)
-              ivar(key, nil)
-            end
+          def before_define
           end
 
-          def opt(key, obj)
-            case obj
-            when Hash
-              @opts[key] = merge(@opts[key] || {}, obj) unless obj.empty?
-            when Array
-              @opts[key] = (@opts[key] || []).concat(obj).uniq unless obj.empty?
-            else
-              obj.nil? ? @opts.delete(key) : @opts[key] = obj
-            end
+          def define
           end
 
-          def ivar(key, obj)
-            case obj
-            when Hash
-              super(key, merge(super(key) || {}, obj)) unless obj.empty?
-            when Array
-              super(key, (super(key) || []).concat(obj).uniq) unless obj.empty?
-            else
-              super(key, obj)
-            end
+          def after_define
           end
 
-          def root
-            parent ? parent.root : self
-          end
+          # def root?
+          #   parent.nil?
+          # end
+          #
+          # def root
+          #   root? ? self : parent.root
+          # end
 
-          def root?
-            parent.nil?
-          end
-
-          def parent(*types)
-            return super() if types.empty?
-            is?(*types) ? self : parent.parent(*types)
+          def type(*args)
+            types(*args) if args.any?
           end
 
           def is?(*types)
-            types.any? { |type| is_a?(resolve(type)) }
+            types.any? { |type| is_a?(Node[type]) }
           end
 
-          %i(schema map seq secure scalar str num bool ref).each do |type|
-            define_method(:"#{type}?") { is?(type) }
+          def any?
+            is?(:any)
           end
 
-          def type
-            self.class.type
+          def seq?
+            is?(:seq)
           end
 
-          def enum?
-            false
+          def str?
+            is?(:str)
           end
 
-          attr_reader :id
-
-          def namespace
-            @namespace || :type
+          def secure?
+            is?(:secure)
           end
 
-          def full_id
-            [namespace, id].join('.').to_sym if id
-          end
-          memoize :full_id
-
-          def opts
-            @opts
+          def ref?
+            is?(:ref)
           end
 
-          def opts?
-            @opts&.any?
+          def assign(attrs)
+            attrs.each { |key, obj| send(key, obj) if respond_to?(key) }
           end
 
-          def opt?(key)
-            self.class.opts.include?(key)
+          def set(key, value)
+            attrs[key] = value
           end
 
-          # attr_accessor :example
-
-          def aliases?
-            aliases.any?
+          def unset(*keys)
+            keys.each { |key| attrs.delete(key) }
           end
 
-          def aliases
-            opts[:aliases] ||= []
+          def ref
+            :"#{namespace}/#{id}" if id
           end
 
-          def change?(name)
-            changes.any? { |change| change[:change] == name }
+          def namespace(str = nil)
+            str ? attrs[:namespace] = str : attrs[:namespace] || registry_name
           end
 
-          def changes
-            opts[:changes] ||= []
+          def id(str = nil)
+            str ? attrs[:id] = str : attrs[:id] ||= def? ? registry_key : nil
           end
 
-          def deprecated?
-            opts[:deprecated]
+          def key(key = nil)
+            key ? attrs[:key] = key : attrs[:key]
           end
 
-          # def examples?
-          #   examples.any?
-          # end
-
-          def example
-            # @examples ||= {}
-            opts[:example]
-          end
-
-          def expand_key(key)
-            expand_keys.push(key).sort!.uniq!
+          def expand?
+            Array(attrs[:flags]).include?(:expand)
           end
 
           def expand_keys
-            @expand_keys ||= []
+            expand? ? [key].compact : []
           end
 
-          def exports
-            @exports ||= []
+          def aliases(*strs)
+            attrs[:aliases] = strs.flatten
           end
 
-          def export
-            @export = true
+          def change?(name)
+            Array(opts[:changes]).any? { |change| change[:change] == name }
+          end
+
+          def change(name, opts = {})
+            changes << { change: name }.merge(opts)
+          end
+
+          def changes(*changes)
+            attrs[:changes] ||= []
+          end
+
+          def deprecated(str = nil)
+            str ? attrs[:deprecated] = str : attrs[:deprecated]
+          end
+
+          def description(str = nil)
+            str ? attrs[:description] = str.chomp : attrs[:description]
+          end
+
+          def edge(*)
+            flags << :edge
+          end
+
+          def example(str = nil)
+            str ? attrs[:example] = str : attrs[:example]
+          end
+
+          def expand(*)
+            flags << :expand
           end
 
           def export?
-            !!@export
+            !!attrs[:export]
           end
 
-          def flags?
-            flags.any?
+          def export(obj = true)
+            attrs[:export] = obj
           end
 
           def flags
-            @opts[:flags] ||= []
+            attrs[:flags] ||= []
           end
 
           def internal?
-            flags.include?(:internal)
+            !!attrs[:internal]
           end
 
-          def key
-            @key
-          end
-
-          def required?
-            !!@required
-          end
-
-          def title?
-            !!title
-          end
-
-          def title
-            @title ||= titleize(id)
-          end
-
-          def description
-            @description
+          def internal(*)
+            flags << :internal
           end
 
           def normal?
-            !!opts[:normal]
+            !!attrs[:normal]
           end
 
-          def unique?
-            !!opts[:unique]
+          def normal(*)
+            attrs[:normal] = true
           end
 
-          def vars?
-            @opts&.key?(:vars)
+          def required?
+            !!attrs[:required]
           end
 
-          def ivars
-            super.map { |key, value| [key.to_s.sub('@', '').to_sym, value] }.to_h
+          def required(*)
+            attrs[:required] = true
           end
 
-          # def full_key
-          #   root? ? :root : [parent.full_key, id].join('.').split('.').uniq.join('.')
+          def summary(str = nil)
+            str ? attrs[:summary] = str : attrs[:summary]
+          end
+
+          def supports(key, opts = nil)
+            attrs.update(symbolize(to_strs(opts ? { key => opts } : key)))
+          end
+
+          def title(str = nil)
+            str ? attrs[:title] = str : attrs[:title] || titleize(id)
+          end
+
+          def unique(*)
+            flags << :unique
+          end
+
+          def opts
+            only(compact(attrs), *self.class.opt_names)
+          end
+
+          # maybe declare attrs, just like opts, and use ivars, rather than the hash?
+          def shapeshift(type, attrs = {})
+            attrs = attrs.merge(self.attrs)
+            attrs = attrs.merge(namespace: namespace, id: id, export: export?)
+            attrs = except(attrs, :aliases, :expand, :keys, :required) if is?(:all) || is?(:any) # hmmm.
+            Node[type].new(parent, attrs)
+          end
+
+          # def export
+          #   Export.apply(self)
           # end
-
-          def shapeshift(type, opts = {})
-            opts = self.opts.merge(ivars).merge(id: id)
-            opts = except(opts, :aliases, :expand, :keys, :required) if %i(all any).include?(type) # hmmm.
-            Node[type].new(parent, opts)
-          end
-
-          def form
-            Form.apply(self)
-          end
+          #
+          # def form
+          #   Form.apply(self)
+          # end
 
           def definition
             json.definition
@@ -247,12 +280,8 @@ module Travis
 
           def dup
             node = super
-            node.opts = node.opts.dup
+            node.attrs = node.attrs.dup
             node
-          end
-
-          def ==(other)
-            namespace == other.namespace && id == other.id
           end
 
           def to_h
@@ -264,9 +293,14 @@ module Travis
           end
 
           def inspect
-            vars = ivars.reject { |name, value| name == :parent || value.nil? }
+            vars = ivars.reject { |name, value| name == :@parent || value.nil? }
             vars = vars.map { |name, value| "#{name}=#{value.inspect}" }.join(' ')
-            "#<#{self.class.name.sub('Travis::Yml::Schema::Type::', '')}#{" #{vars}" unless vars.empty?}>"
+            name = (self.class.name || type.to_s.capitalize).sub('Travis::Yml::Schema::', '')
+            "#<#{name}#{" #{vars}" unless vars.empty?}>"
+          end
+
+          def ==(other)
+            self.class == other.class && id == other.id
           end
         end
       end

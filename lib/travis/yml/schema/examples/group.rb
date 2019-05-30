@@ -25,7 +25,7 @@ module Travis
           end
 
           def expand
-            node.map { |node| build(node).expand }.flatten
+            node.types.map { |type| build(type).expand }.flatten
           end
         end
       end

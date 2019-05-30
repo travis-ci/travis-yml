@@ -1,18 +1,18 @@
 # frozen_string_literal: true
-require 'travis/yml/schema/dsl/map'
-require 'travis/yml/schema/dsl/seq'
+require 'travis/yml/schema/type'
 
 module Travis
   module Yml
     module Schema
       module Def
-        class Matrix < Dsl::Map
+        class Matrix < Type::Map
           register :matrix
 
           def define
             summary 'Build matrix definitions'
 
             normal
+            aliases :jobs
             prefix :include
 
             map :include,        to: :matrix_entries
@@ -22,37 +22,37 @@ module Travis
 
             export
           end
+        end
 
-          class Entries < Dsl::Seq
-            register :matrix_entries
+        class MatrixEntries < Type::Seq
+          register :matrix_entries
 
-            def define
-              type :matrix_entry
-              export
-            end
+          def define
+            type :matrix_entry
+            export
           end
+        end
 
-          class Entry < Dsl::Map
-            register :matrix_entry
+        class Entry < Type::Map
+          register :matrix_entry
 
-            def define
-              strict false
-              aliases :jobs
+          def define
+            strict false
+            aliases :jobs
 
-              map :name,     to: :str, unique: true
-              map :language
-              map :os
-              map :arch
-              map :dist
-              map :sudo
-              map :env,      to: :env_vars
-              map :stage,    to: :str
-              map :compiler
+            map :name,     to: :str, unique: true
+            map :language
+            map :os
+            map :arch
+            map :dist
+            map :sudo
+            map :env,      to: :env_vars
+            map :stage,    to: :str
+            map :compiler
 
-              include :support, :job
+            includes :support, :job
 
-              export
-            end
+            export
           end
         end
       end

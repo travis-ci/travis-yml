@@ -1,5 +1,5 @@
 # frozen_string_literal: true
-require 'travis/yml/schema/dsl/seq'
+require 'travis/yml/schema/type'
 
 module Travis
   module Yml
@@ -33,19 +33,19 @@ module Travis
           windows: %i(win)
         }
 
-        class Oss < Dsl::Seq
+        class Oss < Type::Seq
           register :oss
 
           def define
             summary 'Build environment operating systems'
 
             normal
-            type Os
+            types :os
             export
           end
         end
 
-        class Os < Dsl::Str
+        class Os < Type::Str
           register :os
 
           def define

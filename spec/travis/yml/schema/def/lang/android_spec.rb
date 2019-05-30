@@ -6,41 +6,39 @@ describe Travis::Yml::Schema::Def::Android do
   it do
     should eq(
       '$id': :android,
-        title: 'Android',
-        type: :object,
-        properties: {
-          jdk: {
-            '$ref': '#/definitions/type/jdks',
-            only: {
-              language: [
-                'android'
-              ]
+      title: 'Android',
+      type: :object,
+      properties: {
+        jdk: {
+          '$ref': '#/definitions/type/jdks',
+          flags: [
+            :expand
+          ],
+          only: {
+            language: [
+              'android'
+            ]
+          },
+        },
+        android: {
+          type: :object,
+          properties: {
+            components: {
+              '$ref': '#/definitions/type/strs'
             },
-            except: {
-              os: [
-                'osx'
-              ]
+            licenses: {
+              '$ref': '#/definitions/type/strs'
             }
           },
-          android: {
-            type: :object,
-            properties: {
-              components: {
-                '$ref': '#/definitions/type/strs'
-              },
-              licenses: {
-                '$ref': '#/definitions/type/strs'
-              }
-            },
-            additionalProperties: false,
-            only: {
-              language: [
-                'android'
-              ]
-            }
+          additionalProperties: false,
+          only: {
+            language: [
+              'android'
+            ]
           }
-        },
-        normal: true
+        }
+      },
+      normal: true
     )
   end
 end

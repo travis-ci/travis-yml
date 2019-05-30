@@ -12,7 +12,6 @@ describe Travis::Yml::Schema::Def::Addon::Artifacts do
       anyOf: [
         {
           type: :object,
-          summary: 'Upload build artifacts at the end of the build',
           properties: {
             enabled: {
               type: :boolean,
@@ -28,7 +27,7 @@ describe Travis::Yml::Schema::Def::Addon::Artifacts do
             },
             key: {
               '$ref': '#/definitions/type/secure',
-              # summary: 'The S3 access key id',
+              summary: 'The S3 access key id',
               aliases: [
                 :aws_access_key_id,
                 :aws_access_key,
@@ -39,7 +38,7 @@ describe Travis::Yml::Schema::Def::Addon::Artifacts do
             },
             secret: {
               '$ref': '#/definitions/type/secure',
-              # summary: 'The S3 secret access key',
+              summary: 'The S3 secret access key',
               aliases: [
                 :aws_secret_access_key,
                 :aws_secret_key,

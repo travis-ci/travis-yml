@@ -1,6 +1,5 @@
 # frozen_string_literal: true
-require 'travis/yml/schema/dsl/map'
-require 'travis/yml/schema/dsl/seq'
+require 'travis/yml/schema/type'
 
 module Travis
   module Yml
@@ -16,8 +15,6 @@ module Travis
 
               map :github_token, to: :secure, deprecated: 'not supported any more'
               map :branches,     to: :seq,    deprecated: 'not supported any more'
-
-              super
             end
           end
         end

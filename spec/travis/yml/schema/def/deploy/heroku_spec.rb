@@ -25,7 +25,7 @@ describe Travis::Yml::Schema::Def::Deploy::Heroku do
                 ]
               },
               run: {
-                '$ref': '#/definitions/type/strs'
+                '$ref': '#/definitions/type/strs',
               },
               allow_failure: {
                 type: :boolean

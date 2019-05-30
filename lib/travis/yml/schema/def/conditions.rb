@@ -1,10 +1,11 @@
-require 'travis/yml/schema/dsl/str'
+# frozen_string_literal: true
+require 'travis/yml/schema/type'
 
 module Travis
   module Yml
     module Schema
       module Def
-        class Conditions < Dsl::Str
+        class Conditions < Type::Str
           register :conditions
 
           def define
@@ -12,11 +13,12 @@ module Travis
             # default :v1
             value :v0
             value :v1
+            internal
             export
           end
         end
 
-        class Condition < Dsl::Str
+        class Condition < Type::Str
           register :condition
 
           def define

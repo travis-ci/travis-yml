@@ -1,11 +1,11 @@
 # frozen_string_literal: true
-require 'travis/yml/schema/dsl/str'
+require 'travis/yml/schema/type'
 
 module Travis
   module Yml
     module Schema
       module Def
-        class Version < Dsl::Str
+        class Version < Type::Str
           register :version
 
           VERSION = '^(~>|>|>=|=|<=|<) (\d+(?:\.\d+)?(?:\.\d+)?)$'
@@ -13,6 +13,7 @@ module Travis
           def define
             summary 'Build config specification version'
             format VERSION
+            internal
             export
           end
         end

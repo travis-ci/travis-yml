@@ -1,6 +1,5 @@
 describe Travis::Yml::Schema::Def::Notification::Notifications do
   subject { Travis::Yml.schema[:definitions][:type][:notifications] }
-  # subject { described_class.new.definitions[:type][:notifications] }
 
   # it { puts JSON.pretty_generate(subject) }
 
@@ -18,10 +17,7 @@ describe Travis::Yml::Schema::Def::Notification::Notifications do
               '$ref': '#/definitions/notification/campfire'
             },
             email: {
-              '$ref': '#/definitions/notification/email',
-              aliases: [
-                :emails
-              ]
+              '$ref': '#/definitions/notification/email'
             },
             flowdock: {
               '$ref': '#/definitions/notification/flowdock'
@@ -39,10 +35,7 @@ describe Travis::Yml::Schema::Def::Notification::Notifications do
               '$ref': '#/definitions/notification/slack'
             },
             webhooks: {
-              '$ref': '#/definitions/notification/webhooks',
-              aliases: [
-                :webhook
-              ]
+              '$ref': '#/definitions/notification/webhooks'
             },
             on_success: {
               '$ref': '#/definitions/notification/frequency'

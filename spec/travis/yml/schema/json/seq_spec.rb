@@ -1,23 +1,28 @@
 describe Travis::Yml::Schema::Json::Seq do
-  let(:node) { Travis::Yml::Schema::Dsl::Seq.new(nil, opts) }
+  def const(define)
+    Class.new(Travis::Yml::Schema::Type::Seq) do
+      define_method(:define, &define)
+    end
+  end
 
-  subject { described_class.new(node.node) }
+  subject { const(define).new }
 
   describe 'given :str' do
-    let(:opts) { { type: :str } }
+    let(:define) { -> { types :str, edge: true } }
 
     it do
       should have_schema(
         type: :array,
         items: {
-          type: :string
+          type: :string,
+          flags: [:edge]
         }
       )
     end
   end
 
   describe 'given multiple types' do
-    let(:opts) { { type: [:str, :bool] } }
+    let(:define) { -> { types :str, :bool } }
 
     it do
       should have_schema(

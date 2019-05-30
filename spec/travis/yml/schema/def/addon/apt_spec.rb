@@ -27,7 +27,6 @@ describe Travis::Yml::Schema::Def::Addon::Apt do
               anyOf: [
                 {
                   type: :array,
-                  example: 'ubuntu-toolchain-r-test',
                   items: {
                     anyOf: [
                       {
@@ -54,9 +53,6 @@ describe Travis::Yml::Schema::Def::Addon::Apt do
                       }
                     ]
                   },
-                  aliases: [
-                    :source
-                  ],
                   normal: true
                 },
                 {
@@ -81,6 +77,9 @@ describe Travis::Yml::Schema::Def::Addon::Apt do
                 {
                   type: :string
                 }
+              ],
+              aliases: [
+                :source
               ],
             },
             dist: {

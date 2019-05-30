@@ -11,7 +11,7 @@ module Travis
 
           def self.opts
             @opts ||= %i(id type aliases changes deprecated flags normal only
-              except required strict unique)
+              except required strict)
           end
 
           def initialize(opts)
@@ -116,7 +116,7 @@ module Travis
           end
 
           def unique?
-            !!opts[:unique]
+            flags.include?(:unique)
           end
 
           def match(strs, str)

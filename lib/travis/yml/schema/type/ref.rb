@@ -10,21 +10,39 @@ module Travis
 
           register :ref
 
-          opts %i(strict)
+          # allow all opt_names defined on any type
+          opt_names Node.registry.values.map(&:opt_names).flatten.uniq - Node.opt_names
 
-          def self.type
+          def type
             :ref
           end
 
-          attr_reader :namespace, :id
+          def secure?
+            id == :secure
+          end
 
-          def ref
-            "#{namespace}/#{id}"
+          # def ref
+          #   "#{namespace}/#{id}".to_sym
+          # end
+
+          def namespace(str = nil)
+            str ? attrs[:namespace] = str : attrs[:namespace]
+          end
+
+          def id(str = nil)
+            str ? attrs[:id] = str : attrs[:id]
+          end
+
+          def strict(obj = true)
+            attrs[:strict] = obj
+          end
+
+          def export?
+            false
           end
 
           def lookup
-            # node = Type.exported(namespace, id)
-            # node if node.is_a?(Node)
+            Node.exports[ref]
           end
         end
       end

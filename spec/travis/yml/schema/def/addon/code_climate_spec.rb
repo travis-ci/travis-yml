@@ -13,7 +13,8 @@ describe Travis::Yml::Schema::Def::Addon::CodeClimate do
           type: :object,
           properties: {
             repo_token: {
-              '$ref': '#/definitions/type/secure'
+              '$ref': '#/definitions/type/secure',
+              summary: 'Code Climate repo token'
             }
           },
           additionalProperties: false,

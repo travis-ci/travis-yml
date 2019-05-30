@@ -1,12 +1,11 @@
 # frozen_string_literal: true
-require 'travis/yml/schema/dsl/seq'
-require 'travis/yml/schema/dsl/str'
+require 'travis/yml/schema/type'
 
 module Travis
   module Yml
     module Schema
       module Def
-        class Jdks < Dsl::Seq
+        class Jdks < Type::Seq
           register :jdks
 
           def define
@@ -16,7 +15,7 @@ module Travis
           end
         end
 
-        class Jdk < Dsl::Str
+        class Jdk < Type::Str
           register :jdk
 
           def define

@@ -24,20 +24,20 @@ module Travis
               patternProperties: pattern_properties,
               additionalProperties: strict? ? false : nil,
             }
-            compact(schema.merge(opts))
+            compact(schema.merge(except(opts, :strict)))
           end
 
           private
 
             def properties
-              map = except(node, *patterns)
+              map = except(node.mappings, *patterns)
               map.map { |key, node| [key, node.schema] }.to_h if map.any?
             end
 
             def pattern_properties
               case node.types.size
               when 0
-                map = only(node, *patterns)
+                map = only(node.mappings, *patterns)
                 map.map { |key, node| [key, node.schema] }.to_h if map.any?
               when 1
                 { '.*': node.types.first.schema }

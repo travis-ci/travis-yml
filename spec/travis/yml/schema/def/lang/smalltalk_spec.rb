@@ -6,61 +6,61 @@ describe Travis::Yml::Schema::Def::Smalltalk do
   it do
     should eq(
       '$id': :smalltalk,
-        title: 'Smalltalk',
-        type: :object,
-        properties: {
-          smalltalk: {
-            '$ref': '#/definitions/type/strs',
-            flags: [
-              :expand
-            ],
-            only: {
-              language: [
-                'smalltalk'
-              ]
-            }
-          },
-          smalltalk_config: {
-            '$ref': '#/definitions/type/strs',
-            flags: [
-              :expand
-            ],
-            only: {
-              language: [
-                'smalltalk'
-              ]
-            }
-          },
-          smalltalk_vm: {
-            '$ref': '#/definitions/type/strs',
-            flags: [
-              :expand
-            ],
-            only: {
-              language: [
-                'smalltalk'
-              ]
-            }
-          },
-          smalltalk_edge: {
-            type: :object,
-            properties: {
-              source: {
-                type: :string
-              },
-              branch: {
-                type: :string
-              }
-            },
-            additionalProperties: false,
-            only: {
-              language: [
-                'smalltalk'
-              ]
-            }
+      title: 'Smalltalk',
+      type: :object,
+      properties: {
+        smalltalk: {
+          '$ref': '#/definitions/type/strs',
+          flags: [
+            :expand
+          ],
+          only: {
+            language: [
+              'smalltalk'
+            ]
           }
         },
-        normal: true
+        smalltalk_config: {
+          '$ref': '#/definitions/type/strs',
+          flags: [
+            :expand
+          ],
+          only: {
+            language: [
+              'smalltalk'
+            ]
+          }
+        },
+        smalltalk_vm: {
+          '$ref': '#/definitions/type/strs',
+          flags: [
+            :expand
+          ],
+          only: {
+            language: [
+              'smalltalk'
+            ]
+          }
+        },
+        smalltalk_edge: {
+          type: :object,
+          properties: {
+            source: {
+              type: :string
+            },
+            branch: {
+              type: :string
+            }
+          },
+          additionalProperties: false,
+          only: {
+            language: [
+              'smalltalk'
+            ]
+          }
+        }
+      },
+      normal: true
     )
   end
 end
