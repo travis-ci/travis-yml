@@ -52,7 +52,11 @@ module Travis
             end
 
             def opts
-              @opts ||= compact(remap(node.opts.to_h))
+              @opts ||= compact(remap(filter(node.opts)))
+            end
+
+            def filter(opts)
+              opts.reject { |key, value| key == :required && bool?(value) }.to_h
             end
 
             def remap(opts)

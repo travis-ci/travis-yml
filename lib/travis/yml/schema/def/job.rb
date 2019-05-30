@@ -7,18 +7,18 @@ require 'travis/yml/schema/def/git'
 require 'travis/yml/schema/def/group'
 require 'travis/yml/schema/def/osx_image'
 require 'travis/yml/schema/def/services'
-require 'travis/yml/schema/dsl/map'
+require 'travis/yml/schema/type'
 
 module Travis
   module Yml
     module Schema
       module Def
-        class Job < Dsl::Map
+        class Job < Type::Map
           register :job
 
-          URLS = {
-            lifecycle: 'https://docs.travis-ci.com/user/job-lifecycle'
-          }
+          # URLS = {
+          #   lifecycle: 'https://docs.travis-ci.com/user/job-lifecycle'
+          # }
 
           def define
             strict false

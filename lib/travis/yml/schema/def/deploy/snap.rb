@@ -19,4 +19,3 @@ module Travis
     end
   end
 end
-

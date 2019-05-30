@@ -14,13 +14,13 @@ require 'travis/yml/schema/def/stack'
 require 'travis/yml/schema/def/stages'
 require 'travis/yml/schema/def/sudo'
 require 'travis/yml/schema/def/version'
-require 'travis/yml/schema/dsl/schema'
+require 'travis/yml/schema/type'
 
 module Travis
   module Yml
     module Schema
       module Def
-        class Root < Dsl::Schema
+        class Root < Type::Schema
           register :root
 
           def define
@@ -45,12 +45,12 @@ module Travis
             map    :matrix,         alias: :jobs
             map    :notifications
 
-            map    :version,        internal: true
-            map    :conditions,     to: :conditions, internal: true
+            map    :version
+            map    :conditions,     to: :conditions
             map    :filter_secrets, to: :bool, internal: true, summary: 'Whether to filter secrets from the log output'
             map    :trace,          to: :bool, internal: true, summary: 'Whether to trace the build script'
 
-            include :languages, :job
+            includes :languages, :job
 
             strict false
           end

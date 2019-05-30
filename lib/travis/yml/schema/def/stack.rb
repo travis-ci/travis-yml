@@ -1,12 +1,12 @@
 # frozen_string_literal: true
-require 'travis/yml/schema/dsl/str'
+require 'travis/yml/schema/type'
 
 module Travis
   module Yml
     module Schema
       module Def
-        class Stack < Dsl::Str
-          NAMES = %i(connie amethyst garnet stevonnie opal sardonyx onion cookiecat)
+        class Stack < Type::Str
+          STACKS = %i(connie amethyst garnet stevonnie opal sardonyx onion cookiecat)
 
           register :stack
 
@@ -14,7 +14,7 @@ module Travis
             summary 'Build environment stack'
             downcase
             edge
-            value *NAMES
+            value *STACKS
             export
             internal true
           end

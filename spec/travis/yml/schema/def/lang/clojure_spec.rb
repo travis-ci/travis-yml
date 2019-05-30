@@ -6,32 +6,30 @@ describe Travis::Yml::Schema::Def::Clojure do
   it do
     should eq(
       '$id': :clojure,
-        title: 'Clojure',
-        type: :object,
-        properties: {
-          jdk: {
-            '$ref': '#/definitions/type/jdks',
-            only: {
-              language: [
-                'clojure'
-              ]
-            },
-            except: {
-              os: [
-                'osx'
-              ]
-            }
+      title: 'Clojure',
+      type: :object,
+      properties: {
+        jdk: {
+          '$ref': '#/definitions/type/jdks',
+          flags: [
+            :expand
+          ],
+          only: {
+            language: [
+              'clojure'
+            ]
           },
-          lein: {
-            type: :string,
-            only: {
-              language: [
-                'clojure'
-              ]
-            }
-          }
         },
-        normal: true
+        lein: {
+          type: :string,
+          only: {
+            language: [
+              'clojure'
+            ]
+          }
+        }
+      },
+      normal: true
     )
   end
 end

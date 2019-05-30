@@ -1,11 +1,10 @@
 # frozen_string_literal: true
-require 'travis/yml/schema/dsl/lang'
 
 module Travis
   module Yml
     module Schema
       module Def
-        class Go < Lang
+        class Go < Type::Lang
           register :go
 
           def define
@@ -19,7 +18,7 @@ module Travis
           end
         end
 
-        class GimmeConfig < Dsl::Map
+        class GimmeConfig < Type::Map
           register :gimme_config
 
           def define

@@ -10,11 +10,15 @@ describe Travis::Yml::Doc::Validate, 'unique' do
           properties: {
             name: {
               type: :string,
-              unique: true
+              flags: [
+                :unique
+              ]
             },
             email: {
               type: :string,
-              unique: true
+              flags: [
+                :unique
+              ]
             },
             other: {
               type: :string

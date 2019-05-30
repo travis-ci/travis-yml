@@ -1,11 +1,10 @@
 # frozen_string_literal: true
-require 'travis/yml/schema/dsl/lang'
 
 module Travis
   module Yml
     module Schema
       module Def
-        class Elixir < Lang
+        class Elixir < Type::Lang
           register :elixir
 
           def define

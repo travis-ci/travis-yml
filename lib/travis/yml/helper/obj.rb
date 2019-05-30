@@ -9,9 +9,9 @@ module Travis
 
         BOOLS = [TrueClass, FalseClass]
 
-        def is?(obj, *types)
-          types.any? { |type| obj.is_a?(type) }
-        end
+        # def is?(obj, *types)
+        #   types.any? { |type| obj.is_a?(type) }
+        # end
 
         def str?(obj)
           obj.is_a?(String)
@@ -47,9 +47,9 @@ module Travis
           !present?(obj)
         end
 
-        def empty?(obj)
-          obj.respond_to?(:empty?) && obj.empty?
-        end
+        # def empty?(obj)
+        #   obj.respond_to?(:empty?) && obj.empty?
+        # end
 
         def to_array(obj)
           obj.is_a?(Array) ? obj : [obj].compact
@@ -103,10 +103,10 @@ module Travis
           case obj
           when Hash
             obj = obj.map { |key, obj| [key, compact(obj)] }.to_h
-            obj.reject { |_, obj| obj.nil? || empty?(obj) }
+            obj.reject { |_, obj| obj.nil? || obj.respond_to?(:empty?) && obj.empty? }
           when Array
             obj = obj.map { |obj| compact(obj) }
-            obj.compact.reject { |obj| empty?(obj) }
+            obj.compact.reject { |obj| obj.respond_to?(:empty?) && obj.empty? }
           else
             obj
           end
@@ -184,6 +184,10 @@ module Travis
           else
             instance_variable_set(key, obj)
           end
+        end
+
+        def deep_dup(obj)
+          Marshal.load(Marshal.dump(obj))
         end
 
         extend self

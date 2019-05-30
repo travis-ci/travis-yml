@@ -1,5 +1,5 @@
 # frozen_string_literal: true
-require 'travis/yml/schema/dsl/map'
+require 'travis/yml/schema/type'
 
 module Travis
   module Yml
@@ -11,8 +11,7 @@ module Travis
 
             def define
               prefix :repo_token
-              map :repo_token, to: :secure, summary: 'The repo token'
-              super
+              map :repo_token, to: :secure, summary: 'Code Climate repo token'
             end
           end
         end

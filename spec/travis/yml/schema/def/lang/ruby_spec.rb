@@ -6,61 +6,59 @@ describe Travis::Yml::Schema::Def::Ruby do
   it do
     should eq(
       '$id': :ruby,
-        title: 'Ruby',
-        type: :object,
-        properties: {
-          rvm: {
-            '$ref': '#/definitions/type/strs',
-            aliases: [
-              :ruby,
-              :rbenv
-            ],
-            flags: [
-              :expand
-            ],
-            only: {
-              language: [
-                'ruby'
-              ]
-            }
-          },
-          gemfile: {
-            '$ref': '#/definitions/type/strs',
-            aliases: [
-              :gemfiles
-            ],
-            flags: [
-              :expand
-            ],
-            only: {
-              language: [
-                'ruby'
-              ]
-            }
-          },
-          jdk: {
-            '$ref': '#/definitions/type/jdks',
-            only: {
-              language: [
-                'ruby'
-              ]
-            },
-            except: {
-              os: [
-                'osx'
-              ]
-            }
-          },
-          bundler_args: {
-            type: :string,
-            only: {
-              language: [
-                'ruby'
-              ]
-            }
+      title: 'Ruby',
+      type: :object,
+      properties: {
+        rvm: {
+          '$ref': '#/definitions/type/strs',
+          aliases: [
+            :ruby,
+            :rbenv
+          ],
+          flags: [
+            :expand
+          ],
+          only: {
+            language: [
+              'ruby'
+            ]
           }
         },
-        normal: true
+        gemfile: {
+          '$ref': '#/definitions/type/strs',
+          aliases: [
+            :gemfiles
+          ],
+          flags: [
+            :expand
+          ],
+          only: {
+            language: [
+              'ruby'
+            ]
+          }
+        },
+        jdk: {
+          '$ref': '#/definitions/type/jdks',
+          flags: [
+            :expand
+          ],
+          only: {
+            language: [
+              'ruby'
+            ]
+          },
+        },
+        bundler_args: {
+          type: :string,
+          only: {
+            language: [
+              'ruby'
+            ]
+          }
+        }
+      },
+      normal: true
     )
   end
 end

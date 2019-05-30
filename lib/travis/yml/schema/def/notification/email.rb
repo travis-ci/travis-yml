@@ -1,5 +1,5 @@
 # frozen_string_literal: true
-require 'travis/yml/schema/dsl/map'
+require 'travis/yml/schema/type'
 
 module Travis
   module Yml
@@ -10,17 +10,18 @@ module Travis
             register :email
 
             def define
+              aliases :emails
               prefix :recipients
 
-              map :recipients, to: Recipients
-
-              super
+              map :recipients, to: :email_recipients
             end
+          end
 
-            class Recipients < Dsl::Seq
-              def define
-                type :secure, strict: false
-              end
+          class EmailRecipients < Type::Seq
+            register :email_recipients
+
+            def define
+              type :secure, strict: false
             end
           end
         end

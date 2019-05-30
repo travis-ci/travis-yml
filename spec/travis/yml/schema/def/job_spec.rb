@@ -34,9 +34,6 @@ describe Travis::Yml::Schema::Def::Job do
         },
         branches: {
           '$ref': '#/definitions/type/branches',
-          aliases: [
-            :branch
-          ]
         },
         cache: {
           '$ref': '#/definitions/type/cache'

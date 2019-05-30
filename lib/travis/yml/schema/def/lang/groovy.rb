@@ -1,12 +1,11 @@
 # frozen_string_literal: true
 require 'travis/yml/schema/def/lang/jdks'
-require 'travis/yml/schema/dsl/lang'
 
 module Travis
   module Yml
     module Schema
       module Def
-        class Groovy < Lang
+        class Groovy < Type::Lang
           register :groovy
 
           def define

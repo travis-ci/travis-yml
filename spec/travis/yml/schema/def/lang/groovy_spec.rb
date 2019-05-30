@@ -5,25 +5,23 @@ describe Travis::Yml::Schema::Def::Groovy do
 
   it do
     should eq(
-      '$id': :groovy,
-        title: 'Groovy',
-        type: :object,
-        properties: {
-          jdk: {
-            '$ref': '#/definitions/type/jdks',
-            only: {
-              language: [
-                'groovy'
-              ]
-            },
-            except: {
-              os: [
-                'osx'
-              ]
-            }
-          }
-        },
-        normal: true
+    '$id': :groovy,
+      title: 'Groovy',
+      type: :object,
+      properties: {
+        jdk: {
+          '$ref': '#/definitions/type/jdks',
+          flags: [
+            :expand
+          ],
+          only: {
+            language: [
+              'groovy'
+            ]
+          },
+        }
+      },
+      normal: true
     )
   end
 end

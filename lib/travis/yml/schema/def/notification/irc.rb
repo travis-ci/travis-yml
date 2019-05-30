@@ -1,5 +1,5 @@
 # frozen_string_literal: true
-require 'travis/yml/schema/dsl/map'
+require 'travis/yml/schema/type'
 
 module Travis
   module Yml
@@ -14,7 +14,7 @@ module Travis
 
               prefix :channels
 
-              map :channels,          to: Channels
+              map :channels,          to: :irc_channels
               map :channel_key,       to: :secure
               map :password,          to: :secure
               map :nickserv_password, to: :secure
@@ -22,15 +22,15 @@ module Travis
               map :use_notice,        to: :bool
               map :skip_join,         to: :bool
               map :template,          to: :templates
-
-              super
             end
+          end
 
-            class Channels < Dsl::Seq
-              def define
-                aliases :channel
-                type :secure, strict: false
-              end
+          class IrcChannels < Type::Seq
+            register :irc_channels
+
+            def define
+              aliases :channel
+              type :secure, strict: false
             end
           end
         end

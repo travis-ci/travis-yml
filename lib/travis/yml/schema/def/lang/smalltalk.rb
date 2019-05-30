@@ -1,11 +1,10 @@
 # frozen_string_literal: true
-require 'travis/yml/schema/dsl/lang'
 
 module Travis
   module Yml
     module Schema
       module Def
-        class Smalltalk < Lang
+        class Smalltalk < Type::Lang
           register :smalltalk
 
           def define
@@ -13,15 +12,12 @@ module Travis
             matrix :smalltalk_config, to: :seq
             matrix :smalltalk_vm,     to: :seq
 
-            map :smalltalk_edge, to: Edge
-          end
-
-          # not mentioned in the docs
-          class Edge < Dsl::Map
-            def define
-              map :source, to: :str
-              map :branch, to: :str
-            end
+            map :smalltalk_edge, to: Class.new(Type::Map) {
+              def define
+                map :source, to: :str
+                map :branch, to: :str
+              end
+            }
           end
         end
       end

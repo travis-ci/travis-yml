@@ -16,17 +16,11 @@ describe Travis::Yml::Schema::Def::Oss do
               '$ref': '#/definitions/type/os'
             },
             normal: true,
-            flags: [
-              :expand
-            ]
           },
           {
             '$ref': '#/definitions/type/os'
           }
         ],
-        flags: [
-          :expand
-        ]
       )
     end
   end

@@ -10,7 +10,7 @@ module Travis
 
           def self.opts
             @opts ||= super + %i(aliases format detect expand keys max_size
-              prefix required strict unique) # support
+              prefix required strict) # support
           end
 
           attr_writer :map

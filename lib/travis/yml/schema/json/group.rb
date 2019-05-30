@@ -7,7 +7,7 @@ module Travis
       module Json
         class Group < Node
           def to_h
-            schemas = node.reject(&:internal?).map(&:schema)
+            schemas = node.types.reject(&:internal?).map(&:schema)
             schemas = schemas.map { |schema| schema.key?(key) ? schema[key] : schema }
             schemas = schemas.flatten.uniq
             compact({ key => schemas }.merge(opts))

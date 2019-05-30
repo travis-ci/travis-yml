@@ -18,16 +18,21 @@ module Travis
 
           def definitions
             objs = Hash.new { |hash, key| hash[key] = {} }
-            node.exports.each { |node| objs[node.namespace][node.id] = node.definition }
+            exports.each { |node| objs[node.namespace][node.id] = node.definition }
             objs = sort(objs)
             objs
           end
 
           def expand_keys
-            node.expand_keys.sort
+            keys = node.expand_keys + exports.map(&:expand_keys)
+            keys.flatten.uniq.sort
           end
 
-          ORDER = [:type, :addon, :deploy, :language, :notification]
+          def exports
+            Type::Node.exports.values
+          end
+
+          ORDER = [:type, :addon, :deploy, :language, :support, :notification]
 
           def sort(objs)
             objs = objs.map { |key, objs| [key, objs.sort.to_h] }.to_h

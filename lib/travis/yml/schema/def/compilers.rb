@@ -1,11 +1,11 @@
 # frozen_string_literal: true
-require 'travis/yml/schema/dsl/seq'
+require 'travis/yml/schema/type'
 
 module Travis
   module Yml
     module Schema
       module Def
-        class Compilers < Dsl::Seq
+        class Compilers < Type::Seq
           register :compilers
 
           def define
@@ -15,7 +15,7 @@ module Travis
           end
         end
 
-        class Compiler < Dsl::Str
+        class Compiler < Type::Str
           register :compiler
 
           def define

@@ -1,27 +1,30 @@
 # frozen_string_literal: true
-require 'travis/yml/schema/dsl/lang'
 
 module Travis
   module Yml
     module Schema
       module Def
-        class Dart < Lang
+        class Dart < Type::Lang
           register :dart
 
           def define
             matrix :dart
-            matrix :dart_task, to: Tasks
+            matrix :dart_task, to: :dart_tasks
 
             map :with_content_shell, to: :bool
           end
 
-          class Tasks < Dsl::Any
+          class Tasks < Type::Seq
+            register :dart_tasks
+
             def define
-              add :seq, type: [Task, :str]
+              type :any, types: [:dart_task, :str]
             end
           end
 
-          class Task < Dsl::Map
+          class Task < Type::Map
+            register :dart_task
+
             def define
               map :test, to: :str
               map :dartanalyzer, to: :str

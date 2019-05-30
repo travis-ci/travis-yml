@@ -1,5 +1,5 @@
 # frozen_string_literal: true
-require 'travis/yml/schema/dsl/map'
+require 'travis/yml/schema/type'
 
 module Travis
   module Yml
@@ -10,16 +10,12 @@ module Travis
             register :sauce_connect
 
             def define
-              change :enable
-
               map :enabled,             to: :bool
               map :username,            to: :secure, strict: false
               map :access_key,          to: :secure
               map :direct_domains,      to: :str
               map :tunnel_domains,      to: :str
               map :no_ssl_bump_domains, to: :str
-
-              super
             end
           end
         end

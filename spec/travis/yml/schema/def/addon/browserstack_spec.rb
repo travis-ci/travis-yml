@@ -14,11 +14,12 @@ describe Travis::Yml::Schema::Def::Addon::Browserstack do
           properties: {
             username: {
               '$ref': '#/definitions/type/secure',
+              summary: 'Browserstack username',
               strict: false
             },
             access_key: {
               '$ref': '#/definitions/type/secure',
-              strict: false
+              summary: 'Browserstack access key',
             },
             app_path: {
               type: :string,

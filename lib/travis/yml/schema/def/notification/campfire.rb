@@ -1,5 +1,5 @@
 # frozen_string_literal: true
-require 'travis/yml/schema/dsl/map'
+require 'travis/yml/schema/type'
 
 module Travis
   module Yml
@@ -14,8 +14,6 @@ module Travis
 
               map :rooms,    to: :seq, type: :secure
               map :template, to: :templates
-
-              super
             end
           end
         end

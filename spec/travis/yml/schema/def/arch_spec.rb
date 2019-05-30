@@ -1,7 +1,6 @@
 describe Travis::Yml::Schema::Def::Archs do
   describe 'archs' do
     subject { Travis::Yml.schema[:definitions][:type][:archs] }
-    # subject { described_class.new.definitions[:type][:archs] }
 
     # it { puts JSON.pretty_generate(subject) }
 
@@ -16,28 +15,12 @@ describe Travis::Yml::Schema::Def::Archs do
             type: :array,
             items: {
               '$ref': '#/definitions/type/arch',
-              only: {
-                os: [
-                  'linux'
-                ]
-              }
             },
-            flags: [
-              :expand
-            ],
             normal: true,
           },
           {
             '$ref': '#/definitions/type/arch',
-            only: {
-              os: [
-                'linux'
-              ]
-            }
           }
-        ],
-        flags: [
-          :expand
         ],
       )
     end

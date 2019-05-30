@@ -1,12 +1,11 @@
 # frozen_string_literal: true
-require 'travis/yml/schema/dsl/map'
-require 'travis/yml/schema/dsl/seq'
+require 'travis/yml/schema/type'
 
 module Travis
   module Yml
     module Schema
       module Def
-        class Imports < Dsl::Seq
+        class Imports < Type::Seq
           register :imports
 
           def define
@@ -26,7 +25,7 @@ module Travis
           end
         end
 
-        class Import < Dsl::Map
+        class Import < Type::Map
           register :import
 
           def define

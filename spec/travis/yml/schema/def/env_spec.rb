@@ -1,8 +1,8 @@
 describe Travis::Yml::Schema::Def::Env do
-  # it { puts JSON.pretty_generate(subject) }
-
   describe 'env' do
     subject { Travis::Yml.schema[:definitions][:type][:env] }
+
+    # it { puts JSON.pretty_generate(subject) }
 
     it do
       should eq(
@@ -14,10 +14,12 @@ describe Travis::Yml::Schema::Def::Env do
             type: :object,
             properties: {
               global: {
-                '$ref': '#/definitions/type/env_vars'
+                '$ref': '#/definitions/type/env_vars',
+                summary: 'Global environment variables to be defined on all jobs'
               },
               matrix: {
-                '$ref': '#/definitions/type/env_vars'
+                '$ref': '#/definitions/type/env_vars',
+                summary: 'Environment variables that expand the build matrix (i.e. that create one job per entry)'
               }
             },
             additionalProperties: false,
@@ -30,9 +32,6 @@ describe Travis::Yml::Schema::Def::Env do
             '$ref': '#/definitions/type/env_vars'
           }
         ],
-        flags: [
-          :expand
-        ]
       )
     end
   end

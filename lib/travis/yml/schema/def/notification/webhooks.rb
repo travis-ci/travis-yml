@@ -1,5 +1,5 @@
 # frozen_string_literal: true
-require 'travis/yml/schema/dsl/map'
+require 'travis/yml/schema/type'
 
 module Travis
   module Yml
@@ -13,18 +13,18 @@ module Travis
               aliases :webhook
               prefix :urls
 
-              map :urls,      to: Urls
+              map :urls,      to: :webhook_urls
               map :on_start,  to: :frequency
               map :on_cancel, to: :frequency
               map :on_error,  to: :frequency
-
-              super
             end
+          end
 
-            class Urls < Dsl::Seq
-              def define
-                type :secure, strict: false
-              end
+          class WebhookUrls < Type::Seq
+            register :webhook_urls
+
+            def define
+              type :secure, strict: false
             end
           end
         end

@@ -1,12 +1,11 @@
 # frozen_string_literal: true
-require 'travis/yml/schema/dsl/str'
-require 'travis/yml/schema/dsl/seq'
+require 'travis/yml/schema/type'
 
 module Travis
   module Yml
     module Schema
       module Def
-        class Archs < Dsl::Seq
+        class Archs < Type::Seq
           register :archs
 
           def define
@@ -19,12 +18,12 @@ module Travis
             str
 
             normal
-            type Arch
+            type :arch
             export
           end
         end
 
-        class Arch < Dsl::Str
+        class Arch < Type::Str
           register :arch
 
           def define

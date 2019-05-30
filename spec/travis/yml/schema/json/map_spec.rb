@@ -1,11 +1,14 @@
 describe Travis::Yml::Schema::Json::Map do
-  let(:node) { Travis::Yml::Schema::Dsl::Map.new(nil, opts) }
-  let(:opts) { {} }
+  def const(define)
+    Class.new(Travis::Yml::Schema::Type::Map) do
+      define_method(:define, &define)
+    end
+  end
 
-  subject { described_class.new(node.node) }
+  subject { const(define).new }
 
   describe 'max_size' do
-    let(:opts) { { max_size: 1 } }
+    let(:define) { -> { max_size 1 } }
 
     it do
       should have_schema(
@@ -17,6 +20,8 @@ describe Travis::Yml::Schema::Json::Map do
 
   describe 'strict' do
     describe 'default' do
+      let(:define) { -> {} }
+
       it do
         should have_schema(
           type: :object,
@@ -25,17 +30,18 @@ describe Travis::Yml::Schema::Json::Map do
     end
 
     describe 'strict (given true)' do
-      let(:opts) { { strict: true } }
+      let(:define) { -> { strict true } }
 
       it do
         should have_schema(
           type: :object,
+          additionalProperties: false
         )
       end
     end
 
     describe 'strict (given false)' do
-      let(:opts) { { strict: false } }
+      let(:define) { -> { strict false } }
 
       it do
         should have_schema(
@@ -46,7 +52,7 @@ describe Travis::Yml::Schema::Json::Map do
   end
 
   describe 'required' do
-    before { node.map :foo, to: :str, required: true }
+    let(:define) { -> { map :foo, to: :str, required: true } }
 
     it do
       should have_schema(
@@ -63,7 +69,7 @@ describe Travis::Yml::Schema::Json::Map do
   end
 
   describe 'unique' do
-    before { node.map :foo, to: :str, unique: true }
+    let(:define) { -> { map :foo, to: :str, unique: true } }
 
     it do
       should have_schema(
@@ -72,7 +78,9 @@ describe Travis::Yml::Schema::Json::Map do
         properties: {
           foo: {
             type: :string,
-            unique: true
+            flags: [
+              :unique
+            ]
           }
         },
       )
@@ -80,7 +88,7 @@ describe Travis::Yml::Schema::Json::Map do
   end
 
   describe 'given a type' do
-    let(:opts) { { type: :str } }
+    let(:define) { -> { types :str } }
 
     it do
       should have_schema(
@@ -95,7 +103,7 @@ describe Travis::Yml::Schema::Json::Map do
   end
 
   describe 'given types' do
-    let(:opts) { { type: [:map, :secure] } }
+    let(:define) { -> { types :map, :secure } }
 
     it do
       should have_schema(
@@ -107,24 +115,7 @@ describe Travis::Yml::Schema::Json::Map do
                 type: :object
               },
               {
-                '$id': :secure,
-                anyOf: [
-                  {
-                    type: :object,
-                    properties: {
-                      secure: {
-                        type: :string
-                      }
-                    },
-                    additionalProperties: false,
-                    maxProperties: 1,
-                    normal: true
-                  },
-                  {
-                    type: :string,
-                    normal: true
-                  }
-                ]
+                '$ref': '#/definitions/type/secure',
               },
             ]
           }

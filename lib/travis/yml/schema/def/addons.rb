@@ -1,15 +1,15 @@
 # frozen_string_literal: true
-require 'travis/yml/schema/dsl/map'
+require 'travis/yml/schema/type'
 
 module Travis
   module Yml
     module Schema
       module Def
         module Addon
-          class Addon < Dsl::Map
+          class Addon < Type::Map
             registry :addon
 
-            def define
+            def after_define
               normal
               change :enable
               export
@@ -17,7 +17,7 @@ module Travis
           end
         end
 
-        class Addons < Dsl::Map
+        class Addons < Type::Map
           register :addons
 
           def define
@@ -44,24 +44,21 @@ module Travis
             map :snaps
 
             # turn this into a proper addon definition
-            type = Class.new(Dsl::Seq) do
+            map :ssh_known_hosts, to: Class.new(Type::Seq) {
               def define
                 type :secure, strict: false
               end
-            end
-
-            map :ssh_known_hosts, to: type
+            }
             map :sonarcloud
 
             # turn this into a proper addon definition. the map allows the key debug: true
-            type = Class.new(Dsl::Any) do
+            map :srcclr, to: Class.new(Type::Any) {
               def define
                 type :map,  normal: true, strict: false
                 type :bool, normal: true
               end
-            end
+            }
 
-            map :srcclr,          to: type
             map :firefox,         to: :any, type: [:num, :str]
             map :mariadb,         to: :str
             map :postgresql,      to: :str, alias: :postgres

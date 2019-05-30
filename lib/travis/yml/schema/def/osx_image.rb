@@ -1,11 +1,11 @@
 # frozen_string_literal: true
-require 'travis/yml/schema/dsl/seq'
+require 'travis/yml/schema/type'
 
 module Travis
   module Yml
     module Schema
       module Def
-        class OsxImage < Dsl::Str
+        class OsxImage < Type::Str
           register :osx_image
 
           def define

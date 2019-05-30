@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 #
-# The lands of transformers, shapeshifters, and (gasp) ...
+# Behold, the lands of transformers, shapeshifters, and (gasp) ...
 #
 #                     .......
 #                       '.   ''..
@@ -80,25 +80,26 @@ module Travis
           class << self
             def form(node)
               return node unless registered?(node.type)
-              caching(node) { self[node.type].new.apply(node) }
+              # caching(node) { self[node.type].new.apply(node) }
+              self[node.type].new.apply(node)
             end
 
-            def caching(node)
-              if node.id && cache.key?(node.id)
-                cache[node.full_id]
-              elsif cache.key?(node.object_id)
-                cache[node.object_id]
-              else
-                other = yield
-                cache[node.object_id] = other
-                cache[node.full_id] = other if node.id
-                other
-              end
-            end
-
-            def cache
-              @cache ||= {}
-            end
+            # def caching(node)
+            #   if node.id && cache.key?(node.id)
+            #     cache[node.full_id]
+            #   elsif cache.key?(node.object_id)
+            #     cache[node.object_id]
+            #   else
+            #     other = yield
+            #     cache[node.object_id] = other
+            #     cache[node.full_id] = other if node.id
+            #     other
+            #   end
+            # end
+            #
+            # def cache
+            #   @cache ||= {}
+            # end
           end
 
           def form(node)
@@ -110,45 +111,37 @@ module Travis
           register :schema
 
           def apply(node)
-            node = form_exports(node)
-
             map = node.shapeshift(:map)
+            map.mappings.replace(node.mappings)
+            map.includes.replace(node.includes)
+            map.unset :title, :description
             map = form(map)
 
             all = node.shapeshift(:all)
             all.set :title, node.title
             all.unset :mappings
-            all.types = [map].map(&:dup)
+            all.types = [map]
             all
           end
-
-          def form_exports(node)
-            node.exports.replace(node.exports.map { |node|
-              other = form(node)
-              # p [node.type, node.id, other.id] unless node.id && other.id
-              other
-            })
-            node
-          end
         end
 
-        class Group < Node
-          register :any
-          register :all
-          register :one
-
-          def apply(node)
-            node.types.replace(node.map { |node| form(node) })
-            node
-          end
-        end
+        # class Group < Node
+        #   register :any
+        #   register :all
+        #   register :one
+        #
+        #   def apply(node)
+        #     # node.types.replace(node.types.map { |node| form(node) })
+        #     node
+        #   end
+        # end
 
         class Map < Node
           register :map
 
           def apply(node)
-            node = form_includes(node) if node.includes?
-            node = form_map(node)
+            # node = form_includes(node) if node.includes?
+            # node = form_map(node)
 
             other = includes(node) if node.includes?
             other = prefix(other || node, node[node.prefix[:key]], node.prefix) if node.prefix?
@@ -159,7 +152,7 @@ module Travis
           end
 
           def form_map(node)
-            map = node.map { |key, node| [key, form(node)] }.to_h
+            map = node.mappings.map { |key, node| [key, form(node)] }.to_h
             node.mappings.replace(map)
             node
           end
@@ -220,12 +213,12 @@ module Travis
           end
 
           # If the Map has a type (i.e. it is not strict) we also accept the
-          # schema. Therefore the Map gets transformed into an Any with the
-          # same Map, and the Map's schema.
+          # type. Therefore the Map gets transformed into an Any with the same
+          # Map, and the Map's type.
           #
           # E.g. if the Map's schema is Str:
           #
-          #   map(schema: str) -> any(map, str)
+          #   map(type: str) -> any(map, str)
           #
           # This is useful e.g. for deploy providers that want to accept a
           # secure or a map with arbitrary keys that map to secures, like
@@ -262,6 +255,7 @@ module Travis
             any.types << Type::Bool.new(node.parent)
 
             any.types.each.with_index do |node, ix|
+              node.unset :description, :summary, :title
               node.set :export, false if ix == 0
               node.set :normal, ix == 0 ? true : nil
               node.parent = any
@@ -276,14 +270,15 @@ module Travis
           register :strs
 
           def apply(node)
-            node.types << Type::Str.new(node) unless node.any?
-            node = form_seq(node)
+            return node if node.is?(:strs, :secures)
+            node.types << Type::Str.new(node) unless node.types.any?
+            # node = form_seq(node)
             node = wrap(node)
             node
           end
 
           def form_seq(node)
-            node.types.replace(node.map { |node| form(node) })
+            node.types.replace(node.types.map { |node| form(node) })
             node
           end
 
@@ -321,13 +316,20 @@ module Travis
             #   [seq, type]
             # end.flatten
 
-            types = [node, *node.types].map(&:dup)
-
             any = node.shapeshift(:any)
+            return any if any.is?(:ref)
+
+            # seqs = node.types.map do |type|
+            #   node.shapeshift(:seq, types: [type.dup])
+            # end
+            # types = seqs + node.types
+            types = [node, *node.types].map(&:dup)
+            # p node.id
+
             any.types = types
             any.unset :aliases, :changes, :normal, :required, :unique
 
-            any.each.with_index do |node, ix|
+            any.types.each.with_index do |node, ix|
               node.unset :description, :summary, :title
               node.set :export, false if ix == 0
               node.set :normal, ix == 0 ? true : nil

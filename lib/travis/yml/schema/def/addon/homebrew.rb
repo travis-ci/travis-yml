@@ -1,6 +1,5 @@
 # frozen_string_literal: true
-require 'travis/yml/schema/dsl/map'
-require 'travis/yml/schema/dsl/seq'
+require 'travis/yml/schema/type'
 
 module Travis
   module Yml
@@ -18,8 +17,6 @@ module Travis
               map :casks,    to: :seq
               map :taps,     to: :seq
               map :brewfile, to: :str
-
-              super
             end
           end
         end

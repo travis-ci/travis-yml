@@ -6,43 +6,41 @@ describe Travis::Yml::Schema::Def::Scala do
   it do
     should eq(
       '$id': :scala,
-        title: 'Scala',
-        type: :object,
-        properties: {
-          scala: {
-            '$ref': '#/definitions/type/strs',
-            flags: [
-              :expand
-            ],
-            only: {
-              language: [
-                'scala'
-              ]
-            }
-          },
-          jdk: {
-            '$ref': '#/definitions/type/jdks',
-            only: {
-              language: [
-                'scala'
-              ]
-            },
-            except: {
-              os: [
-                'osx'
-              ]
-            }
-          },
-          sbt_args: {
-            type: :string,
-            only: {
-              language: [
-                'scala'
-              ]
-            }
+      title: 'Scala',
+      type: :object,
+      properties: {
+        scala: {
+          '$ref': '#/definitions/type/strs',
+          flags: [
+            :expand
+          ],
+          only: {
+            language: [
+              'scala'
+            ]
           }
         },
-        normal: true
+        jdk: {
+          '$ref': '#/definitions/type/jdks',
+          flags: [
+            :expand
+          ],
+          only: {
+            language: [
+              'scala'
+            ]
+          },
+        },
+        sbt_args: {
+          type: :string,
+          only: {
+            language: [
+              'scala'
+            ]
+          }
+        }
+      },
+      normal: true
     )
   end
 end

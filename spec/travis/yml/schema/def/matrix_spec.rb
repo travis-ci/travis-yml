@@ -35,12 +35,12 @@ describe Travis::Yml::Schema::Def::Matrix do
             },
             additionalProperties: false,
             normal: true,
+            aliases: [
+              :jobs
+            ],
             prefix: {
               key: :include
             },
-            aliases: [
-              :jobs
-            ]
           },
           {
             '$ref': '#/definitions/type/matrix_entries'
@@ -64,17 +64,11 @@ describe Travis::Yml::Schema::Def::Matrix do
             type: :array,
             items: {
               '$ref': '#/definitions/type/matrix_entry',
-              aliases: [
-                :jobs
-              ]
             },
             normal: true,
           },
           {
             '$ref': '#/definitions/type/matrix_entry',
-            aliases: [
-              :jobs
-            ]
           }
         ]
       )
@@ -86,12 +80,12 @@ describe Travis::Yml::Schema::Def::Matrix do
 
     # it { puts JSON.pretty_generate(subject) }
 
-    it { should include name: { type: :string, unique: true } }
+    it { should include name: { type: :string, flags: [:unique] } }
     # it { should include language: { '$ref': '#/definitions/type/language' } }
     it { should include os: { '$ref': '#/definitions/type/os' } }
-    it { should include arch: { '$ref': '#/definitions/type/arch', only: { os: ['linux'] } } }
+    it { should include arch: { '$ref': '#/definitions/type/arch' } }
     it { should include dist: { '$ref': '#/definitions/type/dist' } }
-    it { should include sudo: { '$ref': '#/definitions/type/sudo', deprecated: 'this key has no effect anymore' } }
+    it { should include sudo: { '$ref': '#/definitions/type/sudo' } }
     it { should include env: { '$ref': '#/definitions/type/env_vars' } }
     it { should include compiler: { type: :string, only: { language: ['c', 'cpp'] } } }
     it { should include stage: { type: :string } }

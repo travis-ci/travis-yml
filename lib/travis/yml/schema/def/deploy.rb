@@ -1,6 +1,5 @@
 # frozen_string_literal: true
-require 'travis/yml/schema/dsl/map'
-require 'travis/yml/schema/dsl/seq'
+require 'travis/yml/schema/type'
 
 module Travis
   module Yml
@@ -13,40 +12,40 @@ module Travis
             consts.map(&:registry_key).sort.compact
           end
 
-          class Deploys < Dsl::Seq
+          class Deploys < Type::Seq
             register :deploys
 
             def define
               summary 'Deployment configs'
               normal
-              type Providers
+              type :providers
               export
             end
           end
 
-          class Providers < Dsl::Any
+          class Providers < Type::Any
             registry :deploy
             register :providers
 
             def define
               normal
-              add *Def::Deploy.provider_names
+              types *Def::Deploy.provider_names
               detect :provider
               export
             end
           end
 
-          class Deploy < Dsl::Map
+          class Deploy < Type::Map
             registry :deploy
 
-            def before_define
+            def after_define
               normal
 
               prefix :provider
 
               map :provider,      to: :str, values: registry_key, required: true, strict: true
               map :on,            to: :conditions, alias: :true
-              map :run,           to: :str
+              map :run,           to: :seq
               map :allow_failure, to: :bool
               map :skip_cleanup,  to: :bool
               map :edge,          to: :edge
@@ -65,7 +64,7 @@ module Travis
             end
           end
 
-          class Conditions < Dsl::Map
+          class Conditions < Type::Map
             registry :deploy
             register :conditions
 
@@ -80,24 +79,24 @@ module Travis
               map :all_branches, to: :bool
               map :tags,         to: :bool
 
-              include :support
+              includes :support
 
               export
             end
           end
 
-          class Branches < Dsl::Any
+          class Branches < Type::Any
             registry :deploy
             register :branches
 
             def define
-              add :seq, normal: true
-              add Branch
+              type :seq, normal: true
+              type :branch
               export
             end
           end
 
-          class Branch < Dsl::Map
+          class Branch < Type::Map
             registry :deploy
             register :branch
 
@@ -109,7 +108,7 @@ module Travis
             end
           end
 
-          class Edge < Dsl::Map
+          class Edge < Type::Map
             registry :deploy
             register :edge
 

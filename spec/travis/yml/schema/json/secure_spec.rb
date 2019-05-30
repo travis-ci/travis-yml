@@ -1,7 +1,5 @@
 describe Travis::Yml::Schema::Json::Secure do
-  let(:node) { Travis::Yml::Schema::Dsl::Secure.new(nil, {}) }
-
-  subject { described_class.new(node.node) }
+  subject { Travis::Yml::Schema::Type::Secure.new }
 
   it do
     should have_schema(

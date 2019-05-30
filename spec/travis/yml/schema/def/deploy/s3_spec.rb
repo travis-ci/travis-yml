@@ -25,7 +25,7 @@ describe Travis::Yml::Schema::Def::Deploy::S3 do
                 ]
               },
               run: {
-                type: :string
+                '$ref': '#/definitions/type/strs',
               },
               allow_failure: {
                 type: :boolean

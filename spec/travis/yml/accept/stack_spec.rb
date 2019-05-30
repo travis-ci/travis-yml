@@ -1,7 +1,7 @@
 describe Travis::Yml, 'stack' do
   subject { described_class.apply(parse(yaml), opts) }
 
-  Travis::Yml::Schema::Def::Stack::NAMES.each do |value|
+  Travis::Yml::Schema::Def::Stack::STACKS.each do |value|
     describe "given #{value}" do
       yaml %(
         stack: #{value}

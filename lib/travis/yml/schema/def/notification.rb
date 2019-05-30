@@ -1,7 +1,4 @@
-require 'travis/yml/schema/def/notification'
-require 'travis/yml/schema/dsl/str'
-require 'travis/yml/schema/dsl/map'
-require 'travis/yml/schema/dsl/seq'
+require 'travis/yml/schema/type'
 
 module Travis
   module Yml
@@ -10,7 +7,7 @@ module Travis
         module Notification
           STATUSES = %i(on_success on_failure)
 
-          class Notifications < Dsl::Map
+          class Notifications < Type::Map
             register :notifications
 
             def define
@@ -20,7 +17,7 @@ module Travis
               prefix :email
 
               map :campfire, to: :campfire
-              map :email,    to: :email, alias: :emails
+              map :email,    to: :email
               map :flowdock, to: :flowdock
               map :hipchat,  to: :hipchat
               map :irc,      to: :irc
@@ -35,10 +32,10 @@ module Travis
             end
           end
 
-          class Notification < Dsl::Map
+          class Notification < Type::Map
             registry :notification
 
-            def define
+            def after_define
               normal
 
               map :enabled,  to: :bool
@@ -50,7 +47,7 @@ module Travis
             end
           end
 
-          class Templates < Dsl::Seq
+          class Templates < Type::Seq
             registry :notification
             register :templates
 
@@ -60,39 +57,38 @@ module Travis
             end
           end
 
-          class Template < Dsl::Str
+          class Template < Type::Str
             registry :notification
             register :template
 
-            VARS = %w(
-              repository
-              repository_slug
-              repository_name
-              build_number
-              build_id
-              build_url
-              branch
-              commit
-              commit_subject
-              commit_message
-              author
-              pull_request
-              pull_request_number
-              pull_request_url
-              compare_url
-              result
-              duration
-              elapsed_time
-              message
-            )
-
             def define
-              vars *VARS
+              vars *%w(
+                repository
+                repository_slug
+                repository_name
+                build_number
+                build_id
+                build_url
+                branch
+                commit
+                commit_subject
+                commit_message
+                author
+                pull_request
+                pull_request_number
+                pull_request_url
+                compare_url
+                result
+                duration
+                elapsed_time
+                message
+              )
+
               export
             end
           end
 
-          class Frequency < Dsl::Str
+          class Frequency < Type::Str
             registry :notification
             register :frequency
 

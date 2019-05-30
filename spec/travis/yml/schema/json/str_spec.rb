@@ -1,23 +1,24 @@
 describe Travis::Yml::Schema::Json::Str do
-  let(:node) { Travis::Yml::Schema::Dsl::Str.new(nil, opts) }
-  let(:opts) { {} }
+  def const(define)
+    Class.new(Travis::Yml::Schema::Type::Str) do
+      define_method(:define, &define)
+    end
+  end
 
-  subject { described_class.new(node.node) }
-
-  it { should have_schema type: :string }
+  subject { const(define).new }
 
   describe 'downcase' do
-    let(:opts) { { downcase: true } }
+    let(:define) { -> { downcase } }
     it { should have_schema type: :string, downcase: true }
   end
 
   describe 'format' do
-    let(:opts) { { format: '.*' } }
+    let(:define) { -> { format '.*' } }
     it { should have_schema type: :string, pattern: '.*' }
   end
 
   describe 'vars' do
-    let(:opts) { { vars: ['str'] } }
-    it { should have_schema type: :string, vars: ['str'] }
+    let(:define) { -> { vars 'one', 'two' } }
+    it { should have_schema type: :string, vars: ['one', 'two'] }
   end
 end

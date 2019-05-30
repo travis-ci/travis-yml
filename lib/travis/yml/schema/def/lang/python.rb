@@ -1,11 +1,10 @@
 # frozen_string_literal: true
-require 'travis/yml/schema/dsl/lang'
 
 module Travis
   module Yml
     module Schema
       module Def
-        class Python < Lang
+        class Python < Type::Lang
           register :python
 
           def define
@@ -14,7 +13,7 @@ module Travis
           end
         end
 
-        class Virtualenv < Dsl::Map
+        class Virtualenv < Type::Map
           register :virtualenv
 
           def define

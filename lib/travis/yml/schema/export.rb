@@ -9,38 +9,38 @@ module Travis
         # replacing them with references.
 
         def apply(node)
-          export_includes(node) if node.respond_to?(:includes)
-          export_types(node) if node.respond_to?(:types)
-          export_map(node) if node.respond_to?(:mappings)
+          # export_includes(node) if node.respond_to?(:includes)
+          # export_types(node) if node.respond_to?(:types)
+          # export_map(node) if node.respond_to?(:mappings)
+          # # p node[:user] if node.is_a?(Def::Deploy::Puppetforge)
           export(node)
         end
 
-        def export_includes(node)
-          includes = node.includes.map { |type| apply(type) }
-          node.includes.replace(includes)
-        end
-
-        def export_types(node)
-          types = node.types.map { |type| apply(type) }
-          node.types.replace(types)
-        end
-
-        def export_map(node)
-          map = node.mappings.map { |key, value| [key, apply(value)] }.to_h
-          node.mappings.replace(map)
-        end
+        # def export_includes(node)
+        #   includes = node.includes.map { |type| apply(type) }
+        #   node.includes.replace(includes)
+        # end
+        #
+        # def export_types(node)
+        #   types = node.types.map { |type| apply(type) }
+        #   node.types.replace(types)
+        # end
+        #
+        # def export_map(node)
+        #   map = node.mappings.map { |key, value| [key, apply(value)] }.to_h
+        #   node.mappings.replace(map)
+        # end
 
         def export(node)
-          if other = defined(node)
-            add(other)
-            ref(other, node.opts)
-          elsif node.export?
-            add(node)
-            # hmmm. we'd want to pass options that have been passed to the
-            # mapping, but this information is not available anymore.
-            opts = only(node.opts, :aliases, :deprecated, :only, :except, :strict, :summary)
-            node.opts.delete(:summary)
-            ref(node, opts)
+          if node.export?
+            store(node)
+            ref(node)
+          elsif other = defined(node)
+            store(other)
+            ref(other, node.attrs)
+          elsif node.secure?
+            store(node)
+            ref(node, node.attrs)
           else
             node
           end
@@ -51,21 +51,35 @@ module Travis
           Type::Ref.new(node.parent, opts)
         end
 
-        def add(node)
-          exports = node.root.exports
-          exports << node unless exports.include?(node)
+        def store(node)
+          Type::Node.exports[node.ref.to_sym] ||= node
         end
 
         def defined(node)
-          type = %i(str secure).detect { |type| all?(node, type) }
-          Type::Node["#{type}s"].new(node.parent) if type
+          type = %i(strs secures).detect { |type| send(:"#{type}?", node) }
+          Type::Node[type].new(node.parent) if type
         end
 
-        def all?(node, type)
-          return unless !node.id && node.seq? && !node.normal?
-          return if node.any? { |node| node.opts.any? }
-          node.none? || node.all? { |node| node.send(:"#{type}?") || node.ref? && node.id == type }
+        def strs?(node)
+          return false unless node.any?
+          return false if node.types.any?(&:export?) || node.types.size != 2
+          return false if node.types.any? { |type| except(type.opts, :normal).any? }
+          node.types.all? { |node| node.str? || node.seq? && node.types.all?(&:str?) }
         end
+
+        def secures?(node)
+          return false unless node.any?
+          return false if node.types.any?(&:export?) || node.types.size != 2
+          return false if node.types.any? { |type| except(type.opts, :normal).any? }
+          node.types.all? { |node| node.secure? || node.seq? && node.types.all?(&:secure?) }
+        end
+
+        # def all?(node, type)
+        #   return if node.id || !node.seq? # || node.normal?
+        #   return if node.types.any? { |type| type.opts.any? }
+        #   # return true if node.types.none?
+        #   node.types.all? { |node| node.is?(type) || node.is?(:ref) && node.id == type }
+        # end
       end
     end
   end

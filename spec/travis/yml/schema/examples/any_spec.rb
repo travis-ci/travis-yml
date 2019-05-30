@@ -1,18 +1,12 @@
 describe Travis::Yml::Schema::Examples::Any do
-  subject { described_class.new(const.new.node.form).examples }
+  let(:node) { Travis::Yml::Schema::Type::Node.build(const) }
+  subject { described_class.new(node).examples }
 
   describe 'archs' do
     let(:const) do
-      Class.new(Travis::Yml::Schema::Dsl::Any) do
+      Class.new(Travis::Yml::Schema::Type::Seq) do
         def define
-          arch = Class.new(Travis::Yml::Schema::Dsl::Str) do
-            def define
-              values 'amd64', 'power'
-            end
-          end
-
-          add :seq, type: arch
-          add arch
+          type :str, values: ['amd64', 'power']
         end
       end
     end
@@ -29,17 +23,13 @@ describe Travis::Yml::Schema::Examples::Any do
 
   describe 'stages' do
     let(:const) do
-      Class.new(Travis::Yml::Schema::Dsl::Seq) do
+      Class.new(Travis::Yml::Schema::Type::Seq) do
         def define
-          type Class.new(Travis::Yml::Schema::Dsl::Map) {
+          type Class.new(Travis::Yml::Schema::Type::Map) {
             def define
-              examples \
-                name: 'job name',
-                if: 'branch = master'
-
               prefix :name
-              map :name, to: :str
-              map :if, to: :str
+              map :name, to: :str, eg: 'job name'
+              map :if, to: :str, eg: 'branch = master'
             end
           }
         end

@@ -28,13 +28,18 @@ module Travis
           end
 
           def map(node)
-            obj(node).merge(map: node.map { |key, node| [key, to_h(node)] }.to_h)
+            obj(node).merge(
+              compact(
+                types: node.types.map { |node| to_h(node) },
+                map: node.mappings.map { |key, node| [key, to_h(node)] }.to_h,
+              )
+            )
           end
 
           alias schema map
 
           def group(node)
-            obj(node).merge(types: node.map { |node| to_h(node) })
+            obj(node).merge(types: node.types.map { |node| to_h(node) })
           end
 
           alias any group
@@ -44,7 +49,7 @@ module Travis
           alias strs group
 
           def seq(node)
-            obj(node).merge(types: node.map { |node| to_h(node) })
+            obj(node).merge(types: node.types.map { |node| to_h(node) })
           end
 
           def ref(node)
