@@ -13,6 +13,7 @@ module Travis
 
           def define
             summary 'Language support'
+            example 'ruby'
             downcase
             default :ruby,          only: { os: [:linux, :windows] }
             default :'objective-c', only: { os: [:osx] }

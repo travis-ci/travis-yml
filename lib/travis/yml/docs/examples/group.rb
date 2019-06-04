@@ -6,26 +6,34 @@ module Travis
     module Docs
       module Examples
         class Group < Node
-          register :seq
         end
 
-        class All < Group
-          register :all
-        end
-
-        class One < Group
-          register :one
-        end
+        # class All < Group
+        #   register :all
+        # end
+        #
+        # class One < Group
+        #   register :one
+        # end
 
         class Any < Group
           register :any
 
           def examples
-            expand.map(&:example).uniq
+            node.expand.map { |node| build(node).example }.uniq
           end
 
-          def expand
-            node.types.map { |type| build(type).expand }.flatten
+          def example
+            examples.first
+          end
+        end
+
+        class Seq < Node
+          register :seq
+
+          def example
+            return [node.example] if node.example
+            build(node.schema).examples
           end
         end
       end

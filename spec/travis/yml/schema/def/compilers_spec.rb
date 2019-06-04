@@ -14,6 +14,7 @@ describe Travis::Yml::Schema::Def::Compilers do
             type: :array,
             items: {
               type: :string,
+              example: 'gcc',
               only: {
                 language: [
                   'c',
@@ -25,6 +26,7 @@ describe Travis::Yml::Schema::Def::Compilers do
           },
           {
             type: :string,
+            example: 'gcc',
             only: {
               language: [
                 'c',

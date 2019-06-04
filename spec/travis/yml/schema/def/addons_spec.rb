@@ -20,7 +20,7 @@ describe Travis::Yml::Schema::Def::Addons do
   it { should include jwt: { '$ref': '#/definitions/addon/jwts' } }
   it { should include sauce_connect: { '$ref': '#/definitions/addon/sauce_connect' } }
   it { should include snaps: { '$ref': '#/definitions/addon/snaps' } }
-  it { should include firefox: { anyOf: [{ type: :number }, { type: :string }] } }
+  it { should include firefox: { anyOf: [{ type: :number }, { type: :string }], example: '68.0b1' } }
   it { should include mariadb: { type: :string } }
   it { should include postgresql: { type: :string, aliases: [:postgres] } }
   it { should include rethinkdb: { type: :string } }

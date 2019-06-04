@@ -40,15 +40,15 @@ module Travis
             strict false
             aliases :jobs
 
-            map :name,     to: :str, unique: true
             map :language
             map :os
-            map :arch
             map :dist
+            map :arch
             map :sudo
             map :env,      to: :env_vars
-            map :stage,    to: :str
             map :compiler
+            map :name,     to: :str, unique: true
+            map :stage,    to: :str
 
             includes :support, :job
 

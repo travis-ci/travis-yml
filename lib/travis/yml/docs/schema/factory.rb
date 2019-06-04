@@ -91,29 +91,34 @@ module Travis
             return build(parent, join(:anyOf, schema)) if join?(schema)
             node = Any.new(parent, normalize(schema))
             node.schemas = build(node, schema[:anyOf])
+            # p node if node.opts[:key] == :branches
+            # p node.opts[:example]
             node
           end
 
           def seq(parent, schema)
             node = Seq.new(parent, normalize(schema))
             node.schema = build(node, schema[:items]) if schema[:items]
+            # node.schema.opts[:example] ||= schema[:example] if node.schema
             node
           end
 
           def map(parent, schema)
             node = Map.new(parent, normalize(schema))
-            node.mappings = mappings(node, schema)
+            parent = node.id ? node : parent || node
+            node.mappings = mappings(parent, schema)
             if patterns = schema[:patternProperties]
               raise if patterns.size > 1
               node.opts[:format] = patterns.keys.first.to_s
-              node.schema = build(node, patterns.values.first)
+              node.schema = build(parent, patterns.values.first)
             end
             node
           end
 
           def mappings(parent, schema)
             map = schema[:properties] ? schema[:properties] : {}
-            map.map { |key, schema| [key, build(parent, schema.merge(key: key))] }.to_h
+            map = map.map { |key, schema| [key, build(parent, schema.merge(key: key))] }.to_h
+            map
           end
 
           def secure(parent, schema)
@@ -133,8 +138,9 @@ module Travis
           end
 
           def ref(parent, schema)
-            node = definition(schema[:'$ref']).dup
+            node = definition(schema[:'$ref']).clone
             node.parents << parent unless node.parents.include?(parent)
+            node.parents.sort_by! { |node| node.root? ? 0 : 1 }
             node.opts = node.opts.merge(normalize(schema))
             node
           end

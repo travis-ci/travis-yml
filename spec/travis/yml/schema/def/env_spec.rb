@@ -74,6 +74,9 @@ describe Travis::Yml::Schema::Def::Env do
         anyOf: [
           {
             type: :object,
+            example: {
+              FOO: 'foo'
+            },
             patternProperties: {
               '^(?!global|matrix)': {
                 anyOf: [
@@ -104,6 +107,7 @@ describe Travis::Yml::Schema::Def::Env do
           },
           {
             type: :string,
+            example: 'FOO=foo',
             pattern: '^[^=]+=[^=]*$'
           }
         ]

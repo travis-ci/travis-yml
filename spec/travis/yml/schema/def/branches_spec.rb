@@ -22,7 +22,7 @@ describe Travis::Yml::Schema::Def::Branches do
             except: {
               '$ref': '#/definitions/type/strs',
               summary: 'Branches to exclude',
-              example: 'development',
+              example: 'develop',
               aliases: [
                 :exclude
               ]

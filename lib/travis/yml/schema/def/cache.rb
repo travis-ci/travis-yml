@@ -20,7 +20,7 @@ module Travis
             end
 
             map :edge,        to: :bool, edge: true, summary: 'Whether to use an edge version of the cache tooling'
-            map :directories, to: :seq
+            map :directories, to: :seq, eg: './path'
             map :timeout,     to: :num
             map :branch,      to: :str
 

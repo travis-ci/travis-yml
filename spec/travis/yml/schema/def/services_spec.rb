@@ -3,7 +3,6 @@ require 'travis/yml/schema/def/services'
 describe Travis::Yml::Schema::Def::Services do
   describe 'services' do
     subject { Travis::Yml.schema[:definitions][:type][:services] }
-    # subject { described_class.new.definitions[:type][:services] }
 
     it do
       should eq(
@@ -34,6 +33,10 @@ describe Travis::Yml::Schema::Def::Services do
         '$id': :service,
         title: 'Service',
         type: :string,
+        example: [
+          'postgresql',
+          'redis'
+        ],
         enum: [
           'cassandra',
           'couchdb',

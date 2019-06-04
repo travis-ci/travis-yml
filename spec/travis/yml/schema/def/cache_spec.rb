@@ -48,7 +48,8 @@ describe Travis::Yml::Schema::Def::Cache do
               ]
             },
             directories: {
-              '$ref': '#/definitions/type/strs'
+              '$ref': '#/definitions/type/strs',
+              example: './path'
             },
             timeout: {
               type: :number
@@ -69,7 +70,8 @@ describe Travis::Yml::Schema::Def::Cache do
           ]
         },
         {
-          '$ref': '#/definitions/type/strs'
+          '$ref': '#/definitions/type/strs',
+          example: './path'
         }
       ]
     )

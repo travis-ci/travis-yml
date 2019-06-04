@@ -22,6 +22,7 @@ module Travis
 
           def define
             prefix :name
+
             map :name, to: :str, summary: 'The name of the stage', eg: 'unit tests'
             map :if,   to: :condition
 

@@ -9,6 +9,7 @@ module Travis
           register :dist
 
           def define
+            title 'Distribution'
             summary 'Build environment distribution'
 
             downcase

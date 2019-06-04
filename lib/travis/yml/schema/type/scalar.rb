@@ -34,7 +34,7 @@ module Travis
             attrs[:enum].concat(to_strs(objs.map { |obj| obj[:value] })).uniq!
 
             attrs[:values] ||= {}
-            attrs[:values].update(to_vals(objs))
+            attrs[:values] = merge(attrs[:values], to_vals(objs))
           end
           alias values value
 
@@ -45,13 +45,23 @@ module Travis
           def to_vals(objs)
             keys = objs.map { |obj| obj[:value] }
             keys = keys.map { |key| key.is_a?(String) ? key.to_sym : key }
-            objs = objs.map { |obj| obj.map { |key, obj| [REMAP[key] || key, obj] }.to_h }
-            objs = objs.map { |obj| obj.merge(aliases: to_strs(obj[:aliases])) }
-            objs = objs.map { |obj| obj.merge(only: to_strs(obj[:only])) }
-            objs = objs.map { |obj| obj.merge(except: to_strs(obj[:except])) }
-            objs = keys.zip(objs)
-            vals = objs.map { |key, obj| [key, except(obj, :value)] }.to_h
-            merge(compact(vals))
+            vals = keys.zip(objs.map { |obj| to_val(obj) }).to_h
+            merge(vals)
+          end
+
+          def to_val(obj)
+            obj = obj.map { |key, obj| [REMAP[key] || key, obj] }.to_h
+
+            obj = %i(aliases only except).inject(obj) do |obj, key|
+              obj.merge(key => to_strs(obj[key]))
+            end
+
+            obj = %i(internal).inject(obj) do |obj, key|
+              obj[:flags] = Array(obj[:flags]) << key if obj[key]
+              except(obj, key)
+            end
+
+            except(obj, :value)
           end
         end
 
