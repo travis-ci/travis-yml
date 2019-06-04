@@ -1,7 +1,4 @@
 require 'travis/yml/schema/def'
-require 'travis/yml/schema/examples'
-require 'travis/yml/schema/export'
-require 'travis/yml/schema/form'
 require 'travis/yml/schema/json'
 require 'travis/yml/schema/type'
 
@@ -12,31 +9,11 @@ module Travis
 
       def json
         node = schema
-        # node = export(node)
-        # node = form(node)
-
-        bench(:json) do
-          Json::Schema.new(node).schema
-        end
+        bench(:json) { Json::Schema.new(node).schema }
       end
 
-      # def form(schema)
-      #   bench(:form) do
-      #     Form.apply(schema)
-      #   end
-      # end
-      #
-      # def export(schema)
-      #   bench(:export) do
-      #     Export.apply(schema)
-      #   end
-      # end
-
       def schema
-        bench(:define) do
-          Def.define
-          Def.root
-        end
+        bench(:define) { Type::Node.build(:root) }
       end
 
       def bench(key = nil)

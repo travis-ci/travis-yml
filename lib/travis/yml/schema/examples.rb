@@ -1,8 +1,0 @@
-require 'travis/yml/schema/examples/bool'
-require 'travis/yml/schema/examples/group'
-require 'travis/yml/schema/examples/map'
-require 'travis/yml/schema/examples/num'
-require 'travis/yml/schema/examples/ref'
-require 'travis/yml/schema/examples/secure'
-require 'travis/yml/schema/examples/seq'
-require 'travis/yml/schema/examples/str'

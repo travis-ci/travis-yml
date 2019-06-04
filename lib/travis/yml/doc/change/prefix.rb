@@ -34,7 +34,7 @@ module Travis
 
           def prefix_map
             return value if value.keys.all? { |key| schema.known?(key) }
-            known, other = split(value.value, *schema.keys)
+            other, known = split(value.value, *schema.keys)
             other = build({ key => other }.merge(known))
             matching(other)
           end

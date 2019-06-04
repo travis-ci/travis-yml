@@ -121,7 +121,7 @@ module Travis
         end
 
         def split(hash, *keys)
-          [only(hash, *keys), except(hash, *keys)]
+          [except(hash, *keys), only(hash, *keys)]
         end
 
         def invert(hash)

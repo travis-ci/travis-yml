@@ -33,13 +33,16 @@ module Travis
         class Str < Scalar
           register :str
 
-          def opts
-            opts = super
-            compact(except(opts.merge(pattern: opts[:format]), :format))
+          REMAP = {
+            format: :pattern
+          }
+
+          def remap(opts)
+            opts.map { |key, value| [REMAP[key] || key, value] }.to_h
           end
         end
 
-        # can we export these and remove them from the hardcoded schema defintion?
+        # can we get rid of these hardcoded schema definitions?
 
         class Strs < Node
           register :strs

@@ -65,7 +65,6 @@ module Travis
               type: node.type,
               normal: node.normal? ? true : nil,
               export: node.export? ? true : nil,
-              # examples: node.examples
             ).merge(compact(node.opts))
           end
 

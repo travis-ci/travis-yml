@@ -5,14 +5,12 @@ module Travis
     module Schema
       module Type
         class Map < Group
-          include Opts
-
           register :map
 
-          opt_names %i(max_size prefix required strict)
+          opts %i(max_size prefix required strict)
 
-          def type(*args)
-            args.any? ? types(*args) : :map
+          def self.type
+            :map
           end
 
           def keys
@@ -36,31 +34,6 @@ module Travis
             keys.each { |key| map(key, attrs) }
           end
 
-          # class Mapping < Node
-          #   attr_reader :node
-          #
-          #   def initialize(node, attrs)
-          #     @node = node
-          #     node = build(node.type)
-          #     remap(attrs).each { |key, value| node.send(key, value) }
-          #     super(nil, node.attrs)
-          #   end
-          #
-          #   def required?
-          #     super || node.required?
-          #   end
-          #
-          #   REMAP = {
-          #     alias: :aliases,
-          #     eg: :example,
-          #     type: :types
-          #   }
-          #
-          #   def remap(attrs)
-          #     attrs.map { |key, obj| [REMAP[key] || key, obj] }.to_h
-          #   end
-          # end
-
           REMAP = {
             alias: :aliases,
             eg: :example,
@@ -69,13 +42,9 @@ module Travis
 
           def map(key, attrs = {})
             type = attrs[:to] || key
-            attrs = { key: key }.merge(except(attrs, :to))
-            attrs = attrs.map { |key, obj| [REMAP[key] || key, obj] }.to_h
-            # mappings[key] = [type, Mapping.new(type, attrs).attrs]
-            # mappings[key] = Mapping.new(build(type), attrs)
-            support, attrs = split(attrs, :only, :except)
-            attrs = attrs.merge(supports: support) if support.any?
-            mappings[key] = build(type, attrs)
+            attrs = except(attrs, :to).map { |key, obj| [REMAP[key] || key, obj] }.to_h
+            attrs, support = split(attrs, :only, :except)
+            mappings[key] = build(type, attrs.merge(key: key, supports: support))
           end
 
           def mappings

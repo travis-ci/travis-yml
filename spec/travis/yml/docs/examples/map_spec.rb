@@ -1,4 +1,4 @@
-describe Travis::Yml::Schema::Examples::Map do
+describe Travis::Yml::Docs::Examples::Map do
   let(:const) do
     Class.new(Travis::Yml::Schema::Dsl::Map) {
       def define

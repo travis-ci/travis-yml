@@ -6,12 +6,10 @@ module Travis
     module Schema
       module Type
         class Ref < Node
-          include Opts
-
           register :ref
 
-          # allow all opt_names defined on any type
-          opt_names Node.registry.values.map(&:opt_names).flatten.uniq - Node.opt_names
+          # allow all opt names defined on any type
+          opts Node.registry.values.map(&:opts).flatten.uniq - Node.opts
 
           def type
             :ref
@@ -20,10 +18,6 @@ module Travis
           def secure?
             id == :secure
           end
-
-          # def ref
-          #   "#{namespace}/#{id}".to_sym
-          # end
 
           def namespace(str = nil)
             str ? attrs[:namespace] = str : attrs[:namespace]

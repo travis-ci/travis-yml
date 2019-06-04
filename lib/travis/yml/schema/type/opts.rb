@@ -6,14 +6,14 @@ module Travis
       module Type
         module Opts
           def self.included(const)
-            const.define_singleton_method :opt_names do |names = nil|
-              return const.instance_variable_get(:@opt_names) unless names
-
-              names = const.superclass.opt_names + names if const.superclass.respond_to?(:opt_names)
-              dups = names.select{ |opt| names.count(opt) > 1 }.uniq
-              raise "duplicate opt names on #{const}: #{dups}" if dups.any?
-
-              const.instance_variable_set(:@opt_names, names.uniq)
+            class << const
+              def opts(opts = nil)
+                return @opts ||= superclass.respond_to?(:opts) ? superclass.opts : [] unless opts
+                opts = superclass.opts + opts if superclass.respond_to?(:opts)
+                dups = opts.select{ |opt| opts.count(opt) > 1 }.uniq
+                raise "duplicate opt names on #{const}: #{dups}" if dups.any?
+                @opts = opts
+              end
             end
           end
         end
