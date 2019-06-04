@@ -9,46 +9,41 @@ module Travis
           register :map
 
           def examples
-            expand.map(&:example)
+            return [node.example] if node.example
+
+            expand.map do |map|
+              map.map do |key, node|
+                next if key == :disabled || inherit?(key)
+                [key, build(node).example]
+              end.compact.to_h
+            end
           end
 
           def example
-            obj = node.map do |key, child|
-              next if key == :disabled || inherit?(key)
-              # opts = { example: node.examples[key] }
-              opts = { example: child.example }
-              child = build(child, opts)
-              [key, child.example]
-            end.compact.to_h
+            examples.first
           end
 
           def expand
-            maps = []
+            nodes = []
+            map = required.merge(others)
 
-            maps << required.merge(others).map do |key, node|
-              nodes = Array(build(node).expand)
-              nodes.map { |node| [key, node.node] }
-            end.flatten(1).to_h
-
-            anys.each do |key, any|
-              nodes = Array(build(any).expand)
-              nodes = nodes.map { |node| required.merge(key => node.node) }
-              maps.concat nodes
+            nodes << map.map do |key, node|
+              node = node.expand.first
+              [key, node]
             end
 
-            maps.map { |map| Map.new(Type::Map.new(nil, mappings: map)) }
+            nodes + map.map do |key, node|
+              nodes = node.expand
+              nodes[1..-1].map { |node| [key, node] } if nodes.size > 1
+            end.compact
           end
 
           def required
             node.select { |_, node| node.required? }.to_h
           end
 
-          def anys
-            node.select { |_, node| node.type == :any }.to_h
-          end
-
           def others
-            except(node.mappings, *required.keys, *anys.keys)
+            except(node.mappings, *required.keys).to_a[0, 3].to_h
           end
 
           def inherit?(key)
@@ -58,12 +53,10 @@ module Travis
           def inherits
             changes.select { |change| change[:change] == :inherit }
           end
-          memoize :inherits
 
           def changes
             node.opts[:changes] || []
           end
-          memoize :changes
         end
       end
     end

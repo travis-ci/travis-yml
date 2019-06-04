@@ -51,6 +51,7 @@ module Travis
           def define
             type Class.new(Type::Map) {
               def define
+                example FOO: 'foo'
                 normal
                 map :'^(?!global|matrix)', to: :any, type: [:str, :num, :bool]
                 strict false
@@ -69,7 +70,7 @@ module Travis
               end
             }
 
-            type :str, format: '^[^=]+=[^=]*$'
+            type :str, format: '^[^=]+=[^=]*$', eg: 'FOO=foo'
 
             export
           end

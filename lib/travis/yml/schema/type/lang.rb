@@ -25,7 +25,9 @@ module Travis
             self.class.const_set(:Support, const)
             build(const) # forces an export
             language.value(registry_key)
+          end
 
+          def after_define
             normal
             strict false
             export
@@ -37,6 +39,10 @@ module Travis
 
           def deprecated(obj)
             language.value(registry_key, deprecated: obj)
+          end
+
+          def internal
+            language.value(registry_key, internal: true)
           end
 
           def map(key, opts = {})

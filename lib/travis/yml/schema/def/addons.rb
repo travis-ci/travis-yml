@@ -59,7 +59,7 @@ module Travis
               end
             }
 
-            map :firefox,         to: :any, type: [:num, :str]
+            map :firefox,         to: :any, type: [:num, :str], eg: '68.0b1'
             map :mariadb,         to: :str
             map :postgresql,      to: :str, alias: :postgres
             map :rethinkdb,       to: :str

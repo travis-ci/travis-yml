@@ -87,7 +87,7 @@ describe Travis::Yml::Schema::Def::Matrix do
     it { should include dist: { '$ref': '#/definitions/type/dist' } }
     it { should include sudo: { '$ref': '#/definitions/type/sudo' } }
     it { should include env: { '$ref': '#/definitions/type/env_vars' } }
-    it { should include compiler: { type: :string, only: { language: ['c', 'cpp'] } } }
+    it { should include compiler: { type: :string, only: { language: ['c', 'cpp'] }, example: 'gcc' } }
     it { should include stage: { type: :string } }
   end
 end

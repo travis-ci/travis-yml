@@ -19,6 +19,7 @@ module Travis
           register :compiler
 
           def define
+            example 'gcc'
             supports :only, language: %i(c cpp)
           end
         end

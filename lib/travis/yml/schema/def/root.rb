@@ -32,13 +32,13 @@ module Travis
               For details on the build lifecycle see [docs](...).
             str
 
-            map    :import,         to: :imports
             map    :language,       required: true
             matrix :os,             required: true, to: :oss
-            matrix :arch,           to: :archs
             map    :dist
+            matrix :arch,           to: :archs
             map    :stack
             map    :sudo
+            map    :import,         to: :imports
             matrix :env
             matrix :compiler,       to: :compilers
             map    :stages

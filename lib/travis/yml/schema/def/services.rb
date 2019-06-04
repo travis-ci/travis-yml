@@ -22,6 +22,8 @@ module Travis
           def define
             downcase
 
+            example %w(postgresql redis)
+
             value :cassandra
             value :couchdb
             value :docker

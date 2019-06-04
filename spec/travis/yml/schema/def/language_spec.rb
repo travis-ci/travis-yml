@@ -8,6 +8,7 @@ describe Travis::Yml::Schema::Def::Language do
       '$id': :language,
       title: 'Language',
       summary: 'Language support',
+      example: 'ruby',
       type: :string,
       enum: [
         'android',
@@ -107,28 +108,52 @@ describe Travis::Yml::Schema::Def::Language do
           ]
         },
         __connie__: {
-          deprecated: 'experimental stack language'
+          deprecated: 'experimental stack language',
+          flags: [
+            :internal
+          ]
         },
         __amethyst__: {
-          deprecated: 'experimental stack language'
+          deprecated: 'experimental stack language',
+          flags: [
+            :internal
+          ]
         },
         __garnet__: {
-          deprecated: 'experimental stack language'
+          deprecated: 'experimental stack language',
+          flags: [
+            :internal
+          ]
         },
         __stevonnie__: {
-          deprecated: 'experimental stack language'
+          deprecated: 'experimental stack language',
+          flags: [
+            :internal
+          ]
         },
         __opal__: {
-          deprecated: 'experimental stack language'
+          deprecated: 'experimental stack language',
+          flags: [
+            :internal
+          ]
         },
         __sardonyx__: {
-          deprecated: 'experimental stack language'
+          deprecated: 'experimental stack language',
+          flags: [
+            :internal
+          ]
         },
         __onion__: {
-          deprecated: 'experimental stack language'
+          deprecated: 'experimental stack language',
+          flags: [
+            :internal
+          ]
         },
         __cookiecat__: {
-          deprecated: 'experimental stack language'
+          deprecated: 'experimental stack language',
+          flags: [
+            :internal
+          ]
         }
       }
     )

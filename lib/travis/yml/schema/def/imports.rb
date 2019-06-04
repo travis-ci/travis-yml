@@ -32,7 +32,7 @@ module Travis
             normal
             prefix :source
 
-            map :source, to: :str, summary: 'The source to import build config from', eg: 'other/repo/import.yml@v1'
+            map :source, to: :str, summary: 'The source to import build config from', eg: './import.yml@v1'
             map :mode, to: :str, values: ['merge', 'deep_merge'], summary: 'How to merge the imported config into the target config'
 
             export

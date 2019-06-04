@@ -15,11 +15,6 @@ module Travis
           def example
             "[ref:#{node.ref}]"
           end
-
-          def expand
-            other = node.lookup
-            other ? build(other).expand : self
-          end
         end
       end
     end

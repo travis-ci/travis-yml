@@ -22,7 +22,7 @@ module Travis
             aliases :branch
 
             map :only,   to: :seq, summary: 'Branches to include', eg: 'master'
-            map :except, to: :seq, alias: :exclude, summary: 'Branches to exclude', eg: 'development'
+            map :except, to: :seq, alias: :exclude, summary: 'Branches to exclude', eg: 'develop'
 
             export
           end

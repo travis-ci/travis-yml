@@ -5,7 +5,7 @@ describe Travis::Yml::Schema::Type::Str do
         default :one, only: { os: [:one] }
         default :two, only: { os: [:two] }
         strict false
-        value :one, only: { os: [:one] }
+        value :one, internal: true, only: { os: [:one] }
         value :two
       end
     end
@@ -16,5 +16,17 @@ describe Travis::Yml::Schema::Type::Str do
   it { should have_opt defaults: [{ value: 'one', only: { os: ['one'] } }, { value: 'two', only: { os: ['two'] } }] }
   it { should have_opt strict: false }
   it { should have_opt enum: ['one', 'two'] }
-  it { should have_opt values: { one: { only: { os: ['one'] } } } }
+  it { should have_opt values: { one: { flags: [:internal], only: { os: ['one'] } } } }
+
+  describe 'values' do
+    let(:node) { Class.new(described_class).new }
+
+    before do
+      node.value :one, internal: true
+      node.value :one, aliases: [:uno]
+    end
+
+    it { expect(node.opts[:enum]).to eq ['one'] }
+    it { expect(node.opts[:values]).to eq one: { aliases: ['uno'], flags: [:internal] } }
+  end
 end

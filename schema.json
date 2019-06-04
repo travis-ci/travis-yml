@@ -7,9 +7,6 @@
     {
       "type": "object",
       "properties": {
-        "import": {
-          "$ref": "#/definitions/type/imports"
-        },
         "language": {
           "$ref": "#/definitions/type/language"
         },
@@ -19,20 +16,23 @@
             "expand"
           ]
         },
+        "dist": {
+          "$ref": "#/definitions/type/dist"
+        },
         "arch": {
           "$ref": "#/definitions/type/archs",
           "flags": [
             "expand"
           ]
         },
-        "dist": {
-          "$ref": "#/definitions/type/dist"
-        },
         "stack": {
           "$ref": "#/definitions/type/stack"
         },
         "sudo": {
           "$ref": "#/definitions/type/sudo"
+        },
+        "import": {
+          "$ref": "#/definitions/type/imports"
         },
         "env": {
           "$ref": "#/definitions/type/env",
@@ -181,7 +181,8 @@
               {
                 "type": "string"
               }
-            ]
+            ],
+            "example": "68.0b1"
           },
           "mariadb": {
             "type": "string"
@@ -269,7 +270,7 @@
                   "exclude"
                 ],
                 "summary": "Branches to exclude",
-                "example": "development"
+                "example": "develop"
               }
             },
             "additionalProperties": false,
@@ -331,7 +332,8 @@
                 "summary": "Whether to use an edge version of the cache tooling"
               },
               "directories": {
-                "$ref": "#/definitions/type/strs"
+                "$ref": "#/definitions/type/strs",
+                "example": "./path"
               },
               "timeout": {
                 "type": "number"
@@ -352,7 +354,8 @@
             ]
           },
           {
-            "$ref": "#/definitions/type/strs"
+            "$ref": "#/definitions/type/strs",
+            "example": "./path"
           }
         ],
         "summary": "Cache settings to speed up the build",
@@ -366,6 +369,7 @@
             "type": "array",
             "items": {
               "type": "string",
+              "example": "gcc",
               "only": {
                 "language": [
                   "c",
@@ -377,6 +381,7 @@
           },
           {
             "type": "string",
+            "example": "gcc",
             "only": {
               "language": [
                 "c",
@@ -426,7 +431,7 @@
       },
       "dist": {
         "$id": "dist",
-        "title": "Dist",
+        "title": "Distribution",
         "type": "string",
         "summary": "Build environment distribution",
         "downcase": true,
@@ -517,6 +522,9 @@
                 ]
               }
             },
+            "example": {
+              "FOO": "foo"
+            },
             "normal": true
           },
           {
@@ -532,7 +540,8 @@
           },
           {
             "type": "string",
-            "pattern": "^[^=]+=[^=]*$"
+            "pattern": "^[^=]+=[^=]*$",
+            "example": "FOO=foo"
           }
         ]
       },
@@ -618,7 +627,7 @@
               "source": {
                 "type": "string",
                 "summary": "The source to import build config from",
-                "example": "other/repo/import.yml@v1"
+                "example": "./import.yml@v1"
               },
               "mode": {
                 "type": "string",
@@ -637,7 +646,7 @@
           },
           {
             "type": "string",
-            "example": "other/repo/import.yml@v1"
+            "example": "./import.yml@v1"
           }
         ],
         "normal": true
@@ -778,6 +787,7 @@
         "title": "Language",
         "type": "string",
         "summary": "Language support",
+        "example": "ruby",
         "downcase": true,
         "defaults": [
           {
@@ -876,27 +886,51 @@
             ]
           },
           "__connie__": {
+            "flags": [
+              "internal"
+            ],
             "deprecated": "experimental stack language"
           },
           "__amethyst__": {
+            "flags": [
+              "internal"
+            ],
             "deprecated": "experimental stack language"
           },
           "__garnet__": {
+            "flags": [
+              "internal"
+            ],
             "deprecated": "experimental stack language"
           },
           "__stevonnie__": {
+            "flags": [
+              "internal"
+            ],
             "deprecated": "experimental stack language"
           },
           "__opal__": {
+            "flags": [
+              "internal"
+            ],
             "deprecated": "experimental stack language"
           },
           "__sardonyx__": {
+            "flags": [
+              "internal"
+            ],
             "deprecated": "experimental stack language"
           },
           "__onion__": {
+            "flags": [
+              "internal"
+            ],
             "deprecated": "experimental stack language"
           },
           "__cookiecat__": {
+            "flags": [
+              "internal"
+            ],
             "deprecated": "experimental stack language"
           }
         }
@@ -1087,23 +1121,17 @@
           {
             "type": "object",
             "properties": {
-              "name": {
-                "type": "string",
-                "flags": [
-                  "unique"
-                ]
-              },
               "language": {
                 "$ref": "#/definitions/type/language"
               },
               "os": {
                 "$ref": "#/definitions/type/os"
               },
-              "arch": {
-                "$ref": "#/definitions/type/arch"
-              },
               "dist": {
                 "$ref": "#/definitions/type/dist"
+              },
+              "arch": {
+                "$ref": "#/definitions/type/arch"
               },
               "sudo": {
                 "$ref": "#/definitions/type/sudo"
@@ -1111,17 +1139,24 @@
               "env": {
                 "$ref": "#/definitions/type/env_vars"
               },
-              "stage": {
-                "type": "string"
-              },
               "compiler": {
                 "type": "string",
+                "example": "gcc",
                 "only": {
                   "language": [
                     "c",
                     "cpp"
                   ]
                 }
+              },
+              "name": {
+                "type": "string",
+                "flags": [
+                  "unique"
+                ]
+              },
+              "stage": {
+                "type": "string"
               }
             },
             "aliases": [
@@ -1349,6 +1384,10 @@
         "title": "Service",
         "type": "string",
         "downcase": true,
+        "example": [
+          "postgresql",
+          "redis"
+        ],
         "enum": [
           "cassandra",
           "couchdb",
@@ -5678,73 +5717,49 @@
         "$id": "__amethyst__",
         "title": "Amethyst",
         "type": "object",
-        "normal": true,
-        "flags": [
-          "internal"
-        ]
+        "normal": true
       },
       "__connie__": {
         "$id": "__connie__",
         "title": "Connie",
         "type": "object",
-        "normal": true,
-        "flags": [
-          "internal"
-        ]
+        "normal": true
       },
       "__cookiecat__": {
         "$id": "__cookiecat__",
         "title": "Cookiecat",
         "type": "object",
-        "normal": true,
-        "flags": [
-          "internal"
-        ]
+        "normal": true
       },
       "__garnet__": {
         "$id": "__garnet__",
         "title": "Garnet",
         "type": "object",
-        "normal": true,
-        "flags": [
-          "internal"
-        ]
+        "normal": true
       },
       "__onion__": {
         "$id": "__onion__",
         "title": "Onion",
         "type": "object",
-        "normal": true,
-        "flags": [
-          "internal"
-        ]
+        "normal": true
       },
       "__opal__": {
         "$id": "__opal__",
         "title": "Opal",
         "type": "object",
-        "normal": true,
-        "flags": [
-          "internal"
-        ]
+        "normal": true
       },
       "__sardonyx__": {
         "$id": "__sardonyx__",
         "title": "Sardonyx",
         "type": "object",
-        "normal": true,
-        "flags": [
-          "internal"
-        ]
+        "normal": true
       },
       "__stevonnie__": {
         "$id": "__stevonnie__",
         "title": "Stevonnie",
         "type": "object",
-        "normal": true,
-        "flags": [
-          "internal"
-        ]
+        "normal": true
       },
       "android": {
         "$id": "android",

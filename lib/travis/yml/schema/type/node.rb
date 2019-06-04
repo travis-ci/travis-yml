@@ -114,7 +114,13 @@ module Travis
             is?(:ref)
           end
 
+          REMAP = {
+            alias: :aliases,
+            eg: :example,
+          }
+
           def assign(attrs)
+            attrs = attrs.map { |key, obj| [REMAP[key] || key, obj] }.to_h
             attrs.each { |key, obj| send(key, obj) if respond_to?(key) }
           end
 
@@ -140,14 +146,6 @@ module Travis
 
           def key(key = nil)
             key ? attrs[:key] = key : attrs[:key]
-          end
-
-          def expand?
-            Array(attrs[:flags]).include?(:expand)
-          end
-
-          def expand_keys
-            expand? ? [key].compact : []
           end
 
           def aliases(*strs)
@@ -182,8 +180,16 @@ module Travis
             str ? attrs[:example] = str : attrs[:example]
           end
 
+          def expand?
+            Array(attrs[:flags]).include?(:expand)
+          end
+
           def expand(*)
             flags << :expand
+          end
+
+          def expand_keys
+            expand? ? [key].compact : []
           end
 
           def export?
@@ -199,11 +205,11 @@ module Travis
           end
 
           def internal?
-            !!attrs[:internal]
+            flags.include?(:internal)
           end
 
-          def internal(*)
-            flags << :internal
+          def internal(obj = true)
+            flags << :internal if obj
           end
 
           def normal?

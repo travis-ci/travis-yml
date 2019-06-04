@@ -41,7 +41,7 @@ describe Travis::Yml::Schema::Def::Imports do
               source: {
                 type: :string,
                 summary: 'The source to import build config from',
-                example: 'other/repo/import.yml@v1'
+                example: './import.yml@v1'
               },
               mode: {
                 type: :string,
@@ -57,7 +57,7 @@ describe Travis::Yml::Schema::Def::Imports do
           },
           {
             type: :string,
-            example: 'other/repo/import.yml@v1'
+            example: './import.yml@v1'
           }
         ]
       )
