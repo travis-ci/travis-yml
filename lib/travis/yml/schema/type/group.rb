@@ -9,8 +9,12 @@ module Travis
           attr_writer :types
 
           def initialize(parent = nil, attrs = {})
+            types(attrs[:types]) if attrs[:types]
             super
-            types(attrs[:types]) if attrs[:types] # hrmmm.
+          end
+
+          def type(*args)
+            args.any? ? types(*args) : self.class.type
           end
 
           def types(*types)
@@ -27,14 +31,12 @@ module Travis
         end
 
         class Any < Group
-          include Opts
-
           register :any
 
-          opt_names %i(detect)
+          opts %i(detect)
 
-          def type(*args)
-            args.any? ? types(*args) : :any
+          def self.type
+            :any
           end
 
           def detect(detect)
@@ -45,24 +47,24 @@ module Travis
         class All < Group
           register :all
 
-          def type(*args)
-            args.any? ? types(*args) : :all
+          def self.type
+            :all
           end
         end
 
         class One < Group
           register :one
 
-          def type(*args)
-            args.any? ? types(*args) : :one
+          def self.type
+            :one
           end
         end
 
         class Seq < Group
           register :seq
 
-          def type(*args)
-            args.any? ? types(*args) : :seq
+          def self.type
+            :seq
           end
         end
       end

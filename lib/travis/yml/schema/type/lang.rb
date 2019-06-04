@@ -14,7 +14,6 @@ module Travis
         # attention to these.
         class Lang < Map
           registry :language
-          registry # fix lazy registry initialization in registry
 
           def self.support
             const_get(:Support)

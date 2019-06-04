@@ -1,8 +1,8 @@
 require 'forwardable'
 require 'registry'
-require 'travis/yml/schema/export'
-require 'travis/yml/schema/form'
 require 'travis/yml/schema/type/dump'
+require 'travis/yml/schema/type/export'
+require 'travis/yml/schema/type/form'
 require 'travis/yml/schema/type/opts'
 
 module Travis
@@ -15,7 +15,7 @@ module Travis
 
           registry :type
 
-          opt_names %i(aliases changes deprecated example flags normal description
+          opts %i(aliases changes deprecated example flags normal description
             summary title only except)
 
           class << self
@@ -85,14 +85,6 @@ module Travis
 
           def after_define
           end
-
-          # def root?
-          #   parent.nil?
-          # end
-          #
-          # def root
-          #   root? ? self : parent.root
-          # end
 
           def type(*args)
             types(*args) if args.any?
@@ -247,24 +239,14 @@ module Travis
           end
 
           def opts
-            only(compact(attrs), *self.class.opt_names)
+            only(compact(attrs), *self.class.opts)
           end
 
-          # maybe declare attrs, just like opts, and use ivars, rather than the hash?
           def shapeshift(type, attrs = {})
             attrs = attrs.merge(self.attrs)
             attrs = attrs.merge(namespace: namespace, id: id, export: export?)
-            attrs = except(attrs, :aliases, :expand, :keys, :required) if is?(:all) || is?(:any) # hmmm.
             Node[type].new(parent, attrs)
           end
-
-          # def export
-          #   Export.apply(self)
-          # end
-          #
-          # def form
-          #   Form.apply(self)
-          # end
 
           def definition
             json.definition

@@ -1,4 +1,4 @@
-describe Travis::Yml::Schema::Examples::Any do
+describe Travis::Yml::Docs::Examples::Any do
   let(:node) { Travis::Yml::Schema::Type::Node.build(const) }
   subject { described_class.new(node).examples }
 

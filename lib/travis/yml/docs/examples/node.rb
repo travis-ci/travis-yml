@@ -4,7 +4,7 @@ require 'yaml'
 
 module Travis
   module Yml
-    module Schema
+    module Docs
       module Examples
         def self.build(node, opts = {})
           node ? Node[node.type].new(node, opts) : []

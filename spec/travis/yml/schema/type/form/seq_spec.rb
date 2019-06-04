@@ -1,4 +1,4 @@
-describe Travis::Yml::Schema::Form, 'seq' do
+describe Travis::Yml::Schema::Type::Form, 'seq' do
   def const(define)
     Class.new(Travis::Yml::Schema::Type::Seq) do
       define_method(:define, &define)

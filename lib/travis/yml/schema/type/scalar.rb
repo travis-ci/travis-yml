@@ -6,9 +6,7 @@ module Travis
     module Schema
       module Type
         class Scalar < Node
-          include Opts
-
-          opt_names %i(defaults enum strict values)
+          opts %i(defaults enum strict values)
 
           def default(value, opts = {})
             value = value.to_s if str?
@@ -74,10 +72,9 @@ module Travis
         end
 
         class Str < Scalar
-          include Opts
-
           register :str
-          opt_names %i(downcase format vars)
+
+          opts %i(downcase format vars)
 
           def type
             :str
@@ -97,10 +94,9 @@ module Travis
         end
 
         class Secure < Node
-          include Opts
-
           register :secure
-          opt_names %i(strict)
+
+          opts %i(strict)
 
           def type
             :secure

@@ -1,4 +1,4 @@
-describe Travis::Yml::Schema::Form, 'map' do
+describe Travis::Yml::Schema::Type::Form, 'map' do
   def const(define)
     Class.new(Travis::Yml::Schema::Type::Map) do
       define_method(:define, &define)

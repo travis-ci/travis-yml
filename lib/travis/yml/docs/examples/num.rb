@@ -1,9 +1,9 @@
 # frozen_string_literal: true
-require 'travis/yml/schema/examples/scalar'
+require 'travis/yml/docs/examples/scalar'
 
 module Travis
   module Yml
-    module Schema
+    module Docs
       module Examples
         class Num < Scalar
           register :num

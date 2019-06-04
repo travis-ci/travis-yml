@@ -1,3 +1,4 @@
+require 'travis/yml/docs/examples'
 require 'travis/yml/docs/page'
 require 'travis/yml/docs/schema'
 

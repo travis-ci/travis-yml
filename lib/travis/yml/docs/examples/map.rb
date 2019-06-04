@@ -1,9 +1,9 @@
 # frozen_string_literal: true
-require 'travis/yml/schema/examples/node'
+require 'travis/yml/docs/examples/node'
 
 module Travis
   module Yml
-    module Schema
+    module Docs
       module Examples
         class Map < Node
           register :map
