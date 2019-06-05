@@ -11,14 +11,10 @@ module Travis
 
           attr_reader :includes, :mappings
 
-          def initialize(node)
+          def initialize(node, opts)
+            super
             @mappings = node.map { |key, schema| [key, build(schema)] }.reject { |_, node| node.internal? }.to_h
             @includes = node.includes.map { |schema| build(schema) }
-            super
-          end
-
-          def render(name = :map, opts = {})
-            super
           end
 
           def pages

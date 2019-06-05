@@ -1,16 +1,33 @@
 describe Travis::Yml::Schema::Def::Conditions do
-  subject { Travis::Yml.schema[:definitions][:type][:conditions] }
+  describe 'conditions' do
+    subject { Travis::Yml.schema[:definitions][:type][:conditions] }
 
-  # it { puts JSON.pretty_generate(subject) }
+    it do
+      should eq(
+        '$id': :conditions,
+        type: :string,
+        title: 'Conditions',
+        summary: 'Conditions support version',
+        enum: ['v0', 'v1'],
+        flags: [:internal]
+      )
+    end
+  end
 
-  it do
-    should eq(
-      '$id': :conditions,
-      title: 'Conditions',
-      summary: 'Conditions support version',
-      type: :string,
-      enum: ['v0', 'v1'],
-      flags: [:internal]
-    )
+  describe 'condition' do
+    subject { except(Travis::Yml.schema[:definitions][:type][:condition], :description) }
+
+    it do
+      should eq(
+        '$id': :condition,
+        type: :string,
+        title: 'If',
+        summary: 'Condition to determine whether or not a build, stage, or job should be run',
+        example: 'branch = master',
+        see: {
+          'Conditional Builds, Stages, and Jobs' => 'https://docs.travis-ci.com/user/conditional-builds-stages-jobs/'
+        }
+      )
+    end
   end
 end

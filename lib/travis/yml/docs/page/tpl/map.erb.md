@@ -2,42 +2,13 @@
 
 <%= description %>
 
-<% if deprecated? -%>
-*Deprecated: <%= deprecated %>*
-<% end -%>
-
-<% if parents.any? -%>
-## Known on
-
-<% parents.select(&:id).each do |parent| -%>
-  * [<%= parent.title %>](<%= parent.path %>)
-<% end -%>
-<% end -%>
-
-<% if flags.any? -%>
-## Flags
-
-<% flags.each do |flag| -%>
-  * <%= flag %>
-<% end -%>
-<% end -%>
+<%= render :deprecated %>
+<%= render :see %>
+<%= render :parents %>
+<%= render :flags %>
 
 ## Keys
 
-<%= render(:mappings) %>
-<% if includes.any? -%>
-## Shared keys
-
-<% includes.each do |include| -%>
-<%= render(:include, include: include) %>
-<% end -%>
-<% end -%>
-
-<% if examples.any? -%>
-## Examples
-<% examples.each do |example| %>
-```yaml
-<%= indent(yaml(example), 0) %>
-```
-<% end -%>
-<% end -%>
+<%= render :mappings  %>
+<%= render :includes %>
+<%= render :examples %>

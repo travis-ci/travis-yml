@@ -10,8 +10,8 @@ module Travis
       module Page
         extend self
 
-        def build(schema)
-          const_get(schema.class.name.split('::').last).new(schema)
+        def build(schema, opts = {})
+          const_get(schema.class.name.split('::').last).new(schema, opts)
         end
       end
     end

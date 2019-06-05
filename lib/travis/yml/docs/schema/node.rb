@@ -36,14 +36,6 @@ module Travis
             opts[:id]
           end
 
-          def summary
-            opts[:summary]
-          end
-
-          def title
-            opts[:title]
-          end
-
           def description
             opts[:description]
           end
@@ -80,16 +72,28 @@ module Travis
             values.select { |value| Array(value[:flags]).include?(:internal) }.map { |value| value[:value] }.map(&:to_s)
           end
 
-          def values
-            Array(opts[:values])
-          end
-
           def internal?
             flags.include?(:internal)
           end
 
           def required?
             !!opts[:required]
+          end
+
+          def see
+            opts[:see]
+          end
+
+          def summary
+            opts[:summary]
+          end
+
+          def title
+            opts[:title]
+          end
+
+          def values
+            Array(opts[:values])
           end
 
           def expand

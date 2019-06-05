@@ -166,6 +166,7 @@ module Travis
               oneOf
               patternProperties
               properties
+              see
               summary
               title
             )

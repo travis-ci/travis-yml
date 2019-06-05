@@ -142,24 +142,12 @@
           "snaps": {
             "$ref": "#/definitions/addon/snaps"
           },
-          "ssh_known_hosts": {
-            "anyOf": [
-              {
-                "type": "array",
-                "items": {
-                  "$ref": "#/definitions/type/secure",
-                  "strict": false
-                },
-                "normal": true
-              },
-              {
-                "$ref": "#/definitions/type/secure",
-                "strict": false
-              }
-            ]
-          },
           "sonarcloud": {
             "$ref": "#/definitions/addon/sonarcloud"
+          },
+          "ssh_known_hosts": {
+            "$ref": "#/definitions/type/secures",
+            "strict": false
           },
           "srcclr": {
             "anyOf": [
@@ -394,10 +382,14 @@
       },
       "condition": {
         "$id": "condition",
-        "title": "Condition",
+        "title": "If",
+        "description": "Include or exclude builds, stages, and jobs by specifying conditions in your\nbuild configuration. These are evaluated when your build is being configured.",
         "type": "string",
         "summary": "Condition to determine whether or not a build, stage, or job should be run",
-        "example": "branch = master"
+        "example": "branch = master",
+        "see": {
+          "Conditional Builds, Stages, and Jobs": "https://docs.travis-ci.com/user/conditional-builds-stages-jobs/"
+        }
       },
       "conditions": {
         "$id": "conditions",

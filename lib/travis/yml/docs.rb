@@ -11,18 +11,18 @@ module Travis
         Page::Index.new(pages, current).render
       end
 
-      def pages
+      def pages(opts = {})
         @pages ||= begin
-          pages = root.pages.uniq(&:full_id)
+          pages = root(opts).pages.uniq(&:full_id)
           pages = pages.map { |page| [page.full_id, page] }
           pages = pages.to_h.sort.to_h
           only(pages, :root).merge(except(pages, :root))
         end
       end
 
-      def root
+      def root(opts)
         schema = Schema::Factory.build(nil, Yml.schema)
-        Page.build(schema)
+        Page.build(schema, opts)
       end
     end
   end

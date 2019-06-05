@@ -28,9 +28,9 @@ module Travis
 
             description <<~str
               The root node of your build config.
-
-              For details on the build lifecycle see [docs](...).
             str
+
+            see 'Job lifecycle' => 'https://docs.travis-ci.com/user/job-lifecycle/'
 
             map    :language,       required: true
             matrix :os,             required: true, to: :oss

@@ -66,7 +66,8 @@ module Travis::Yml::Web
 
       def get(env)
         req = Rack::Request.new(env)
-        path = req.path_info.chomp(?/).sub(%r(/docs/), '')
+        path = req.path_info.chomp(?/).sub(%r(/docs/?), '')
+        path = 'node/root' if path.empty?
         exists?(path) ? ok(path) : not_found
       end
 
@@ -99,7 +100,7 @@ module Travis::Yml::Web
       end
 
       def pages
-        Travis::Yml::Docs.pages
+        Travis::Yml::Docs.pages(path: '/v1/docs')
       end
 
       def headers

@@ -19,6 +19,10 @@ module Travis
             stage
           )
 
+          def render
+            super(:index)
+          end
+
           def pages
             pages = super.values
             pages = pages.reject { |page| HIDE.include?(page.id) }

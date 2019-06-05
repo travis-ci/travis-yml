@@ -16,7 +16,7 @@ module Travis
           registry :type
 
           opts %i(aliases changes deprecated example flags normal description
-            summary title only except)
+            see summary title only except)
 
           class << self
             def build(type, attrs = {})
@@ -226,6 +226,10 @@ module Travis
 
           def required(*)
             attrs[:required] = true
+          end
+
+          def see(urls = nil)
+            urls ? see.update(urls) : attrs[:see] ||= {}
           end
 
           def summary(str = nil)

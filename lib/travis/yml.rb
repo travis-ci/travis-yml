@@ -78,10 +78,7 @@ module Travis
         apply(Parts.load(parts), opts)
       end
 
-      # move this to Doc::Schema?
       def expand
-        # schema
-        # return
         bench { Doc::Schema.build(schema) }
       end
       memoize :expand

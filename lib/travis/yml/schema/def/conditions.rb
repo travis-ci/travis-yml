@@ -10,7 +10,6 @@ module Travis
 
           def define
             summary 'Conditions support version'
-            # default :v1
             value :v0
             value :v1
             internal
@@ -22,8 +21,19 @@ module Travis
           register :condition
 
           def define
+            title 'If'
+
+            description <<~str
+              Include or exclude builds, stages, and jobs by specifying conditions in your
+              build configuration. These are evaluated when your build is being configured.
+            str
+
             summary 'Condition to determine whether or not a build, stage, or job should be run'
+
             example 'branch = master'
+
+            see 'Conditional Builds, Stages, and Jobs' => 'https://docs.travis-ci.com/user/conditional-builds-stages-jobs/'
+
             export
           end
         end

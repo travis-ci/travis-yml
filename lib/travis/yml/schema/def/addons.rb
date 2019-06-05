@@ -42,14 +42,8 @@ module Travis
             map :jwt,             to: :jwts
             map :sauce_connect,   to: :sauce_connect
             map :snaps
-
-            # turn this into a proper addon definition
-            map :ssh_known_hosts, to: Class.new(Type::Seq) {
-              def define
-                type :secure, strict: false
-              end
-            }
             map :sonarcloud
+            map :ssh_known_hosts, to: :secures, strict: false
 
             # turn this into a proper addon definition. the map allows the key debug: true
             map :srcclr, to: Class.new(Type::Any) {

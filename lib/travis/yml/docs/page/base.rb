@@ -5,23 +5,55 @@ module Travis
   module Yml
     module Docs
       module Page
-        class Base < Obj.new(:node)
+        class Base < Obj.new(:node, :opts)
           extend Forwardable
           include Render
 
           def_delegators :node, :namespace, :id, :root?, :aliases, :deprecated,
-            :deprecated?, :enum, :examples, :flags, :internal?, :summary
+            :deprecated?, :examples, :flags, :internal?, :see, :summary
 
           attr_accessor :children
 
           BASE_TYPES = %i(strs secure secures)
 
+          DISPLAY_TYPES = {
+            seq: 'Sequence of %s',
+            map: 'Map',
+            str: 'String',
+            num: 'Number',
+            bool: 'Boolean',
+            enum: 'Enum (%s)',
+            secure: 'Secure'
+          }
+
+          def type
+            node.type
+          end
+
+          def mappings
+            {}
+          end
+
+          def display_types
+            [display_type]
+          end
+
+          def display_type
+            if publish? && !scalar?
+              "[#{title}](#{path})"
+            elsif scalar? && enum
+              DISPLAY_TYPES[:enum] % DISPLAY_TYPES[node.type]
+            else
+              DISPLAY_TYPES[node.type]
+            end
+          end
+
           def full_id
-            [namespace != :type ? namespace : nil, id].compact.join('/') if id
+            ['node', namespace != :type ? namespace : nil, id].compact.join('/') if id
           end
 
           def path
-            "/v1/docs/#{full_id}" if full_id && !base_type?
+            "#{opts[:path]}/#{full_id}" if full_id && !base_type?
           end
 
           def parents
@@ -57,17 +89,10 @@ module Travis
             join(node.description) if node.description
           end
 
-          DISPLAY_TYPES = {
-            seq: 'Sequence of %s',
-            map: 'Map',
-            str: 'String',
-            num: 'Number',
-            bool: 'Boolean',
-            secure: 'Secure'
-          }
-
-          def display_type
-            publish? ? "[#{title}](#{path})": DISPLAY_TYPES[node.type]
+          def enum
+            return unless enum = node.enum
+            enum = enum[0, 10] << '...' if enum.size > 10
+            enum
           end
 
           def pages
@@ -78,17 +103,16 @@ module Travis
             id && !internal? && !base_type?
           end
 
-          def singular?
-            # parents.any? { |parent| parent.id == "#{id}s".to_sym }
-            false
-          end
-
           def base_type?
             BASE_TYPES.include?(id)
           end
 
+          def scalar?
+            is_a?(Scalar)
+          end
+
           def build(schema)
-            Page.build(schema)
+            Page.build(schema, opts)
           end
 
           def join(str)

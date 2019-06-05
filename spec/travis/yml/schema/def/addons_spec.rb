@@ -24,26 +24,5 @@ describe Travis::Yml::Schema::Def::Addons do
   it { should include mariadb: { type: :string } }
   it { should include postgresql: { type: :string, aliases: [:postgres] } }
   it { should include rethinkdb: { type: :string } }
-
-
-  it do
-    should include(
-      ssh_known_hosts: {
-        anyOf: [
-          {
-            type: :array,
-            normal: true,
-            items: {
-              '$ref': '#/definitions/type/secure',
-              strict: false
-            }
-          },
-          {
-            '$ref': '#/definitions/type/secure',
-            strict: false
-          },
-        ]
-      }
-    )
-  end
+  it { should include ssh_known_hosts: { '$ref': '#/definitions/type/secures', strict: false } }
 end
