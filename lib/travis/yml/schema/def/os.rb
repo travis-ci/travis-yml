@@ -37,6 +37,7 @@ module Travis
           register :oss
 
           def define
+            title 'Operating systems'
             summary 'Build environment operating systems'
 
             normal

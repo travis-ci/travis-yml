@@ -12,7 +12,7 @@ module Travis
           attr_reader :includes, :mappings
 
           def initialize(node)
-            @mappings = node.map { |key, schema| [key, build(schema)] }.to_h
+            @mappings = node.map { |key, schema| [key, build(schema)] }.reject { |_, node| node.internal? }.to_h
             @includes = node.includes.map { |schema| build(schema) }
             super
           end
@@ -22,9 +22,6 @@ module Travis
           end
 
           def pages
-            # p includes.first.mappings[:group].class if includes.any?
-            # p includes.first.pages.map(&:id).sort.uniq if includes.any?
-            # p includes.map(&:pages).flatten.map(&:id).uniq.sort if includes.any?
             [self, *includes.map(&:pages), *mappings.values.map(&:pages)].flatten
           end
 
