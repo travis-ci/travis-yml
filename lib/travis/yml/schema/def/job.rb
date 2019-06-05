@@ -23,16 +23,16 @@ module Travis
           def define
             strict false
 
-            map :group
-            map :osx_image
-
-            map :services
             map :addons
             map :branches
             map :cache
             map :deploy,     to: :deploys
             map :git
             map :if,         to: :condition
+            map :services
+
+            map :group
+            map :osx_image
 
             map :before_install, to: :seq, summary: 'Scripts to run before the install stage'
             map :install,        to: :seq, summary: 'Scripts to run at the install stage'

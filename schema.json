@@ -297,6 +297,10 @@
           {
             "type": "object",
             "properties": {
+              "directories": {
+                "$ref": "#/definitions/type/strs",
+                "example": "./path"
+              },
               "apt": {
                 "type": "boolean"
               },
@@ -330,10 +334,6 @@
                   "edge"
                 ],
                 "summary": "Whether to use an edge version of the cache tooling"
-              },
-              "directories": {
-                "$ref": "#/definitions/type/strs",
-                "example": "./path"
               },
               "timeout": {
                 "type": "number"
@@ -700,24 +700,6 @@
         "title": "Job",
         "type": "object",
         "properties": {
-          "group": {
-            "$ref": "#/definitions/type/group"
-          },
-          "osx_image": {
-            "type": "string",
-            "summary": "OSX image to use for the build environment",
-            "only": {
-              "os": [
-                "osx"
-              ]
-            },
-            "flags": [
-              "edge"
-            ]
-          },
-          "services": {
-            "$ref": "#/definitions/type/services"
-          },
           "addons": {
             "$ref": "#/definitions/type/addons"
           },
@@ -735,6 +717,24 @@
           },
           "if": {
             "$ref": "#/definitions/type/condition"
+          },
+          "services": {
+            "$ref": "#/definitions/type/services"
+          },
+          "group": {
+            "$ref": "#/definitions/type/group"
+          },
+          "osx_image": {
+            "type": "string",
+            "summary": "OSX image to use for the build environment",
+            "only": {
+              "os": [
+                "osx"
+              ]
+            },
+            "flags": [
+              "edge"
+            ]
           },
           "before_install": {
             "$ref": "#/definitions/type/strs",
@@ -1327,7 +1327,7 @@
       },
       "oss": {
         "$id": "oss",
-        "title": "Oss",
+        "title": "Operating systems",
         "anyOf": [
           {
             "type": "array",

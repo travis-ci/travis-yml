@@ -15,12 +15,13 @@ module Travis
 
             normal
 
+            map :directories, to: :seq, eg: './path'
+
             TYPES.each do |type|
               map type, to: :bool
             end
 
             map :edge,        to: :bool, edge: true, summary: 'Whether to use an edge version of the cache tooling'
-            map :directories, to: :seq, eg: './path'
             map :timeout,     to: :num
             map :branch,      to: :str
 

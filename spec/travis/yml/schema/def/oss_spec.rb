@@ -7,7 +7,7 @@ describe Travis::Yml::Schema::Def::Oss do
     it do
       should eq(
         '$id': :oss,
-        title: 'Oss',
+        title: 'Operating systems',
         summary: 'Build environment operating systems',
         anyOf: [
           {

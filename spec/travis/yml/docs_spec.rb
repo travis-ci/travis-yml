@@ -5,7 +5,7 @@ describe Travis::Yml::Docs do
   describe 'root' do
     it { expect(root.render).to include '# Root' }
     it { expect(root.render).to include '* `import`' }
-    it { expect(root.render).to include '* `group`' }
+    it { expect(root.render).to include '* `addons`' }
     it { expect(root.path).to eq '/v1/docs/root' }
     # it { puts root.render }
   end

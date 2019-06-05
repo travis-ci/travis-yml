@@ -7,8 +7,21 @@ module Travis
         class Index < Obj.new(:pages, :current)
           include Helper::Obj, Render
 
+          HIDE = %i(
+            arch
+            env_var
+            env_vars
+            import
+            matrix_entries
+            matrix_entry
+            os
+            service
+            stage
+          )
+
           def pages
             pages = super.values
+            pages = pages.reject { |page| HIDE.include?(page.id) }
             root  = pages.detect(&:root?)
             pages = pages - [root]
             groups = pages.group_by(&:namespace)
