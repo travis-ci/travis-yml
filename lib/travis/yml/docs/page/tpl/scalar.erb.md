@@ -1,9 +1,9 @@
 # <%= title %>
 <%= description %>
-<%= render :deprecated %>
-<%= render :see %>
-<%= render :parents %>
-<%= render :flags %>
-<%= render :types %>
-<%= render :enum %>
-<%= render :examples %>
+<%= render 'shared/deprecated' %>
+<%= render 'shared/see' %>
+<%= render 'shared/parents' %>
+<%= render 'shared/flags' %>
+<%= render 'shared/types' %>
+<%= render 'shared/enum' %>
+<%= render 'shared/examples' %>

@@ -1,19 +1,19 @@
 # <%= title %>
 
 <%= description %>
-<%= render :deprecated %>
-<%= render :see %>
-<%= render :parents %>
-<%= render :flags %>
-<%= render :types %>
-<%= render :enum %>
+<%= render 'shared/deprecated' %>
+<%= render 'shared/see' %>
+<%= render 'shared/parents' %>
+<%= render 'shared/flags' %>
+<%= render 'shared/types' %>
+<%= render 'shared/enum' %>
 
 <% if mappings && mappings.any? -%>
 ## Keys
 
 If given a map, the following keys are supported:
 
-<%= render(:mappings) %>
+<%= render 'shared/mappings' %>
 <% end -%>
 
-<%= render :examples %>
+<%= render 'shared/examples' %>

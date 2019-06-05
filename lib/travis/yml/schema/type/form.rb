@@ -213,7 +213,7 @@ module Travis
               any.types << Type::Bool.new(node.parent)
 
               any.types.each.with_index do |node, ix|
-                node.unset :description, :summary, :title
+                node.unset :description, :summary, :title, :see
                 node.set :export, false if ix == 0
                 node.set :normal, ix == 0 ? true : nil
                 node.parent = any
@@ -285,7 +285,7 @@ module Travis
               any.unset :aliases, :changes, :normal, :required, :unique
 
               any.types.each.with_index do |node, ix|
-                node.unset :description, :summary, :title
+                node.unset :description, :summary, :title, :see
                 node.set :export, false if ix == 0
                 node.set :normal, ix == 0 ? true : nil
                 node.parent = any

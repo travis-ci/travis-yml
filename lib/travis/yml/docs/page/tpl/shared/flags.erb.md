@@ -2,6 +2,6 @@
 ## Flags
 
 <% flags.each do |flag| -%>
-  * <%= flag %>
+  * [<%= flag.capitalize %>](<%= path_to(:flags) %>)
 <% end -%>
 <% end -%>

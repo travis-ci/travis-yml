@@ -11,8 +11,13 @@ module Travis
 
           def display_type
             child = build(node.schema)
-            type = child.publish? ? "[#{child.title}](#{child.path})" : DISPLAY_TYPES[child.node.type]
-            DISPLAY_TYPES[:seq] % type
+            # type = child.publish? ? "[#{child.title}](#{child.path})" : DISPLAY_TYPES[child.node.type]
+            # DISPLAY_TYPES[:seq] % type
+            if child.publish?
+              [DISPLAY_TYPES[:seq] % child.title, child.path]
+            else
+              [DISPLAY_TYPES[:seq] % type, path_to(type)]
+            end
           end
         end
       end

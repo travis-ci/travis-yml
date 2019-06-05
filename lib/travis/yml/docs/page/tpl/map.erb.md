@@ -2,13 +2,13 @@
 
 <%= description %>
 
-<%= render :deprecated %>
-<%= render :see %>
-<%= render :parents %>
-<%= render :flags %>
+<%= render 'shared/deprecated' %>
+<%= render 'shared/see' %>
+<%= render 'shared/parents' %>
+<%= render 'shared/flags' %>
 
 ## Keys
 
-<%= render :mappings  %>
-<%= render :includes %>
-<%= render :examples %>
+<%= render 'shared/mappings' %>
+<%= render 'shared/includes' %>
+<%= render 'shared/examples' %>

@@ -25,7 +25,7 @@ module Travis
 
           def pages
             pages = super.values
-            pages = pages.reject { |page| HIDE.include?(page.id) }
+            pages = pages.reject { |page| hide?(page) }
             root  = pages.detect(&:root?)
             pages = pages - [root]
             groups = pages.group_by(&:namespace)
@@ -35,6 +35,10 @@ module Travis
             curr = pages[current.to_sym]
             curr.children = groups[current.sub(/s$/, '').to_sym] if curr
             pages.values
+          end
+
+          def hide?(page)
+            HIDE.include?(page.id) || page.is_a?(Static)
           end
 
           def active?(page)

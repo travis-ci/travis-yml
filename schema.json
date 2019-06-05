@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-04/schema#",
   "$id": "root",
   "title": "JSON schema for Travis CI configuration files",
-  "description": "The root node of your build config.\n\nFor details on the build lifecycle see [docs](...).",
+  "description": "The root node of your build config.",
   "allOf": [
     {
       "type": "object",
@@ -79,6 +79,9 @@
           "summary": "Whether to trace the build script"
         }
       },
+      "see": {
+        "Job lifecycle": "https://docs.travis-ci.com/user/job-lifecycle/"
+      },
       "required": [
         "language",
         "os"
@@ -91,6 +94,9 @@
       "$ref": "#/definitions/type/job"
     }
   ],
+  "see": {
+    "Job lifecycle": "https://docs.travis-ci.com/user/job-lifecycle/"
+  },
   "definitions": {
     "type": {
       "addons": {
@@ -1681,7 +1687,7 @@
       "apt": {
         "$id": "apt",
         "title": "Apt",
-        "description": "Install APT packages and sources without using apt-get commands in a before_install script manually.\n\nPlease see [our documentation](/user/installing-dependencies/#installing-packages-with-the-apt-addon) for details.",
+        "description": "Install APT packages and sources without using apt-get commands in a before_install script manually.",
         "anyOf": [
           {
             "type": "object",
@@ -1784,6 +1790,9 @@
           }
         ],
         "summary": "Install APT packages and sources",
+        "see": {
+          "Installing Packages with the APT Addon": "https://docs.travis-ci.com/user/installing-dependencies/#installing-packages-with-the-apt-addon"
+        },
         "normal": true
       },
       "artifacts": {

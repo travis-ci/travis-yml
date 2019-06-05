@@ -1,5 +1,5 @@
 describe Travis::Yml::Schema::Def::Addon::Apt do
-  subject { except(Travis::Yml.schema[:definitions][:addon][:apt], :description) }
+  subject { except(Travis::Yml.schema[:definitions][:addon][:apt], :description, :see) }
 
   # it { puts JSON.pretty_generate(subject) }
 

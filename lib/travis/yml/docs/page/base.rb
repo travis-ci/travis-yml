@@ -40,11 +40,11 @@ module Travis
 
           def display_type
             if publish? && !scalar?
-              "[#{title}](#{path})"
+              [title => path]
             elsif scalar? && enum
-              DISPLAY_TYPES[:enum] % DISPLAY_TYPES[node.type]
+              [DISPLAY_TYPES[:enum] % DISPLAY_TYPES[node.type], path_to('types')]
             else
-              DISPLAY_TYPES[node.type]
+              [DISPLAY_TYPES[node.type], path_to('types')]
             end
           end
 
@@ -53,7 +53,11 @@ module Travis
           end
 
           def path
-            "#{opts[:path]}/#{full_id}" if full_id && !base_type?
+            path_to(full_id) if full_id && !base_type?
+          end
+
+          def path_to(*segments)
+            [opts[:path], *segments].join('/')
           end
 
           def parents

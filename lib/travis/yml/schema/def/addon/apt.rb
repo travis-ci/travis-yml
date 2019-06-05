@@ -14,9 +14,9 @@ module Travis
 
               description <<~str
                 Install APT packages and sources without using apt-get commands in a before_install script manually.
-
-                Please see [our documentation](/user/installing-dependencies/#installing-packages-with-the-apt-addon) for details.
               str
+
+              see 'Installing Packages with the APT Addon' => 'https://docs.travis-ci.com/user/installing-dependencies/#installing-packages-with-the-apt-addon'
 
               prefix :packages
               map :packages, to: :seq, alias: :package, summary: 'Package names', eg: 'cmake'
