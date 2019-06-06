@@ -84,6 +84,21 @@ module Travis
             end
           end
 
+          def deep_merge_append(lft, rgt)
+            keys(lft, rgt).inject({}) do |hash, key|
+              hash[key] = if lft[key].is_a?(Hash) && rgt[key].is_a?(Hash)
+                deep_merge_append(lft[key], rgt[key])
+              elsif lft[key].is_a?(Array) && rgt[key].is_a?(Array)
+                lft[key] + rgt[key]
+              elsif rgt.key?(key)
+                rgt[key]
+              else
+                lft[key]
+              end
+              hash
+            end
+          end
+
           # Keep the order of keys, but use the key from the right hand side if
           # present on both sides.
           def keys(lft, rgt)

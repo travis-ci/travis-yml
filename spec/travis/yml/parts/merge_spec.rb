@@ -38,13 +38,41 @@ describe Travis::Yml::Parts::Merge do
 
   describe 'merge' do
     let(:mode) { :merge }
-    it { should eq 'script' => './api', 'env' => { 'api' => true, 'foo' => 1 }  }
+
+    it do
+      should eq(
+        'script' => './api',
+        'env' => {
+          'api' => true,
+          'foo' => 1
+        }
+      )
+    end
   end
 
   describe 'deep_merge' do
     let(:mode) { :deep_merge }
-    it { should eq 'script' => './api', 'env' => { 'foo' => 1, 'import' => true, 'travis_yml' => true, 'api' => true }  }
-    it { expect(subject['env'].to_a).to eq [['foo', 1], ['import', true], ['travis_yml', true], ['api', true]] }
+
+    it do
+      should eq(
+        'script' => './api',
+        'env' => {
+          'foo' => 1,
+          'import' => true,
+          'travis_yml' => true,
+          'api' => true
+        }
+      )
+    end
+
+    it do
+      expect(subject['env'].to_a).to eq [
+        ['foo', 1],
+        ['import', true],
+        ['travis_yml', true],
+        ['api', true]
+      ]
+    end
   end
 
   describe 'src and line' do
@@ -129,6 +157,15 @@ describe Travis::Yml::Parts::Merge do
     subject { described_class.new.send(:deep_merge, lft, rgt) }
 
     it { should eq foo: { foo: nil, bar: 'two' }, bar: nil }
+  end
+
+  describe 'deep_merge_append' do
+    let(:lft) { { foo: { foo: ['one'], bar: ['one'] } } }
+    let(:rgt) { { foo: { bar: ['two'], foo: ['two'] } } }
+
+    subject { described_class.new.send(:deep_merge_append, lft, rgt) }
+
+    it { should eq foo: { foo: ['one', 'two'], bar: ['one', 'two'] } }
   end
 
   describe 'merge and src' do
