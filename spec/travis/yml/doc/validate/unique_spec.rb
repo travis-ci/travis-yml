@@ -39,7 +39,7 @@ describe Travis::Yml::Doc::Validate, 'unique' do
       end
 
       it { should serialize_to value }
-      it { should have_msg [:info, :root, :duplicate, duplicates: 'name: one, two'] }
+      it { should have_msg [:info, :root, :duplicate, values: 'name: one, two'] }
     end
 
     describe 'given dupes on multiple keys' do
@@ -53,7 +53,7 @@ describe Travis::Yml::Doc::Validate, 'unique' do
       end
 
       it { should serialize_to value }
-      it { should have_msg [:info, :root, :duplicate, duplicates: 'name: one, email: two'] }
+      it { should have_msg [:info, :root, :duplicate, values: 'name: one, email: two'] }
     end
   end
 end

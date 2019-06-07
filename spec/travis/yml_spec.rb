@@ -132,11 +132,11 @@ describe Travis::Yml do
 
     describe 'edge' do
       let(:msg) { [:info, :key, :edge, given: :key] }
-      it { should eq '[info] on key: :key is experimental and might change or be removed' }
+      it { should eq '[info] on key: this key is experimental and might change or be removed' }
     end
 
     describe 'flagged' do
-      let(:msg) { [:info, :key, :flagged, given: :key] }
+      let(:msg) { [:info, :key, :flagged, key: :key] }
       it { should eq '[info] on key: please email support@travis-ci.com to enable :key' }
     end
 

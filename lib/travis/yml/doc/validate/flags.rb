@@ -48,7 +48,7 @@ module Travis
             # end
 
             # def flagged
-            #   value.info :flagged, given: value.key
+            #   value.info :flagged, key: value.key
             # end
 
             # def deprecated?

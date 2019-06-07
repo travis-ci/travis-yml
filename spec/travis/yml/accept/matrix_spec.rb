@@ -305,7 +305,7 @@ describe Travis::Yml, 'matrix' do
             - name: name
       )
       it { should serialize_to matrix: { include: [{ name: 'name' }, { name: 'name' }] } }
-      it { should have_msg [:info, :'matrix.include', :duplicate, duplicates: 'name: name'] }
+      it { should have_msg [:info, :'matrix.include', :duplicate, values: 'name: name'] }
     end
 
     describe 'given addons' do

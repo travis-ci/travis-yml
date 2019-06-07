@@ -32,7 +32,7 @@ describe Travis::Yml::Doc::Change::Cache do
   describe 'given true' do
     let(:value) { true }
     it { should serialize_to apt: true, bundler: true, cargo: true }
-    it { should have_msg [:warn, :root, :deprecated, deprecation: :cache_enable_all, value: true] }
+    it { should_not have_msg }
   end
 
   describe 'given apt' do
