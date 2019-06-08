@@ -7,6 +7,7 @@ describe Travis::Yml::Web::V1 do
   let(:headers) { last_response.headers }
   let(:body)    { Oj.load(last_response.body) }
   let(:app)     { described_class }
+  let(:params)  { { } }
 
   describe 'GET /' do
     it 'is ok' do
@@ -143,10 +144,11 @@ describe Travis::Yml::Web::V1 do
     let(:travis_yml) do
       <<~yml
         rvm: 2.2.2
-        script: ./script
         env:
           TRAVIS_YML: true
           FOO: 2
+        script: !seq+append
+          - ./travis_yml
       yml
     end
 
@@ -156,6 +158,8 @@ describe Travis::Yml::Web::V1 do
         env:
           IMPORT: true
           FOO: 3
+        script:
+          - ./import
       yml
     end
 
@@ -167,27 +171,80 @@ describe Travis::Yml::Web::V1 do
       ]
     end
 
-    before { post '/parse', Oj.dump(data), headers }
+    before { post '/parse?line=true', Oj.dump(data), headers }
 
     describe 'merge_mode: merge' do
       let(:mode) { 'merge' }
 
       it { expect(status).to eq 200 }
-      it { expect(body['config']['language']).to eq 'ruby' }
-      it { expect(body['config']['rvm']).to eq ['2.6.2'] }
-      it { expect(body['config']['script']).to eq ['./script'] }
-      it { expect(body['config']['env']['matrix']).to eq [{ 'API' => 'true', 'FOO' => '1' }] }
-      it { expect(body['full_messages']).to include '[info] on env.matrix.API: casting value true (:bool) to "true" (:str)' }
+
+      it do
+        expect(body['config']).to eq(
+          'language' => 'ruby',
+          'rvm' => [
+            '2.6.2'
+          ],
+          'env' => {
+            'matrix' => [
+              'API' => 'true',
+              'FOO' => '1'
+            ]
+          },
+          'script' => [
+            './travis_yml'
+          ]
+        )
+      end
+
+      it do
+        expect(body['messages']).to include(
+          'level' => 'info',
+          'code' => 'cast',
+          'key' => 'env.matrix.API',
+          'args' => {
+            'given_type' => 'bool',
+            'given_value' => true,
+            'type' => 'str',
+            'value' => 'true',
+            'src' => 'api',
+            'line' => 2
+          }
+        )
+      end
+
+      it do
+        expect(body['full_messages']).to include(
+          '[info] on env.matrix.API: casting value true (:bool) to "true" (:str)'
+        )
+      end
     end
 
     describe 'merge_mode: deep_merge' do
       let(:mode) { 'deep_merge' }
 
       it { expect(status).to eq 200 }
-      it { expect(body['config']['language']).to eq 'ruby' }
-      it { expect(body['config']['rvm']).to eq ['2.6.2'] }
-      it { expect(body['config']['script']).to eq ['./script'] }
-      it { expect(body['config']['env']['matrix']).to eq [{ 'IMPORT' => 'true', 'FOO' => '1', 'TRAVIS_YML' => 'true', 'API' => 'true' }] }
+
+      it do
+        expect(body['config']).to eq(
+          'language' => 'ruby',
+          'rvm' => [
+            '2.6.2'
+          ],
+          'env' => {
+            'matrix' => [
+              'API' => 'true',
+              'FOO' => '1',
+              'TRAVIS_YML' => 'true',
+              'IMPORT' => 'true'
+            ]
+          },
+          'script' => [
+            './import',
+            './travis_yml'
+          ]
+        )
+      end
+
     end
   end
 

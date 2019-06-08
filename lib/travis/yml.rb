@@ -60,7 +60,7 @@ module Travis
       strip_key:         'key %{original} contains whitespace, using %{key}',
       underscore_key:    'key %{original} is not underscored, using %{key}',
       unexpected_seq:    'unexpected sequence, using the first value (%{value})',
-      unknown_key:       'dropping unknown key %<key>p (%{value})',
+      unknown_key:       'unknown key %<key>p (%{value})',
       unknown_value:     'dropping unknown value: %{value}',
       unknown_default:   'dropping unknown value: %{value}, defaulting to %{default}',
       unknown_var:       'unknown template variable %<var>p',

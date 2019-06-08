@@ -28,9 +28,9 @@ module Spec
 
       def keyify(obj)
         case obj
-        when ::Hash, ::Yaml::Hash
-          ::Yaml::Hash.new(obj.map { |key, obj| [to_key(key), keyify(obj)] }.to_h)
-        when Array
+        when ::Hash, Map
+          ::Map.new(obj.map { |key, obj| [to_key(key), keyify(obj)] }.to_h)
+        when Array, Seq
           obj.map { |obj| keyify(obj) }
         else
           obj

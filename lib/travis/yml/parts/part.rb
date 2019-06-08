@@ -12,6 +12,7 @@ module Travis
           @str = str.strip
           @src = src
           self.merge_mode = merge_mode
+          @data = Parse.new(self).apply
         end
 
         def merge_mode=(mode)
@@ -20,12 +21,18 @@ module Travis
           @merge_mode = mode
         end
 
+        # def merge_mode
+        #   opts = Array(data.opts[:merge])
+        #   mode = opts.&(MERGE_MODES).first
+        #   mode = [mode, :append].join('_').to_sym if opts.include?(:append)
+        #   mode || @merge_mode
+        # end
+
         def ==(other)
           str == other
         end
 
         def to_h
-          @data = Parse.new(self).apply unless data
           data
         end
 

@@ -30,14 +30,8 @@ module Travis::Yml
         end
 
         def opts(query)
-          compact(
-            alert:    true?(query['alert']),
-            defaults: true?(query['defaults'])
-          )
-        end
-
-        def true?(obj)
-          obj == 'true' unless obj.nil?
+          keys = OPTS.keys.map(&:to_s) & query.keys
+          symbolize(keys.map { |key| [key, query[key.to_s] == 'true'] }.to_h)
         end
 
         def configs?(env)
@@ -56,6 +50,10 @@ module Travis::Yml
 
         def capture(error)
           Raven.capture_exception(error, message: error.message, extra: { env: env }) if defined?(Raven)
+        end
+
+        def symbolize(hash)
+          hash.map { |key, value| [key.to_sym, value] }.to_h
         end
 
         def compact(hash)

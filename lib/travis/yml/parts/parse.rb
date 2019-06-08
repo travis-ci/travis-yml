@@ -24,7 +24,7 @@ module Travis
             when Hash
               obj.replace(obj.map { |key, obj| [src(key), assign(obj)] }.to_h)
             when Array
-              obj.map { |obj| assign(obj) }
+              obj.replace(obj.map { |obj| assign(obj) })
             else
               obj
             end

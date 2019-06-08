@@ -30,10 +30,14 @@ describe Travis::Yml::Parts::Merge do
 
   let(:parts) do
     [
-      Travis::Yml::Parts::Part.new(api, 'api.yml', nil),
-      Travis::Yml::Parts::Part.new(travis_yml, '.travis.yml', mode),
-      Travis::Yml::Parts::Part.new(import, 'import.yml', mode)
+      part(api, 'api.yml', nil),
+      part(travis_yml, '.travis.yml', mode),
+      part(import, 'import.yml', mode)
     ]
+  end
+
+  def part(yaml, source = nil, mode = nil)
+    Travis::Yml::Parts::Part.new(yaml, source, mode)
   end
 
   describe 'merge' do
@@ -57,20 +61,20 @@ describe Travis::Yml::Parts::Merge do
       should eq(
         'script' => './api',
         'env' => {
+          'api' => true,
           'foo' => 1,
-          'import' => true,
           'travis_yml' => true,
-          'api' => true
+          'import' => true,
         }
       )
     end
 
     it do
       expect(subject['env'].to_a).to eq [
+        ['api', true],
         ['foo', 1],
-        ['import', true],
         ['travis_yml', true],
-        ['api', true]
+        ['import', true],
       ]
     end
   end
@@ -95,20 +99,20 @@ describe Travis::Yml::Parts::Merge do
       it { should have_attributes src: 'api.yml', line: 1 }
     end
 
-    describe 'foo' do
+    describe 'api' do
       subject { merged['env'].keys[0] }
+
+      it { should be_a Key }
+      it { should eq 'api' }
+      it { should have_attributes src: 'api.yml', line: 2 }
+    end
+
+    describe 'foo' do
+      subject { merged['env'].keys[1] }
 
       it { should be_a Key }
       it { should eq 'foo' }
       it { should have_attributes src: 'api.yml', line: 3 }
-    end
-
-    describe 'import' do
-      subject { merged['env'].keys[1] }
-
-      it { should be_a Key }
-      it { should eq 'import' }
-      it { should have_attributes src: 'import.yml', line: 3 }
     end
 
     describe 'travis_yml' do
@@ -119,74 +123,65 @@ describe Travis::Yml::Parts::Merge do
       it { should have_attributes src: '.travis.yml', line: 2 }
     end
 
-    describe 'api' do
+    describe 'import' do
       subject { merged['env'].keys[3] }
 
       it { should be_a Key }
-      it { should eq 'api' }
-      it { should have_attributes src: 'api.yml', line: 2 }
+      it { should eq 'import' }
+      it { should have_attributes src: 'import.yml', line: 3 }
     end
   end
 
-  def key(key, src)
-    Key.new(key).tap { |key| key.src = src }
-  end
+  describe 'merge tags' do
+    let(:parts) { [part(lft), part(rgt)] }
 
-  describe 'merge' do
-    let(:lft) { { foo: 'one', bar: 'one' } }
-    let(:rgt) { { baz: 'two', foo: 'two' } }
+    let(:rgt) do
+      %(
+        foo:
+          bar:
+          - one
+      )
+    end
 
-    subject { described_class.new.send(:merge, lft, rgt) }
+    describe 'deep_merge+append on root' do
+      let(:lft) do
+        %(
+          !map+deep_merge+append
+          foo:
+            bar:
+            - two
+        )
+      end
 
-    it { should eq foo: 'two', bar: 'one', baz: 'two' }
-  end
+      it { should eq 'foo' => { 'bar' => ['one', 'two'] } }
+    end
 
-  describe 'deep_merge (1)' do
-    let(:lft) { { foo: { foo: 'one', bar: 'one' }, bar: 'one' } }
-    let(:rgt) { { baz: 'two', foo: { bar: 'two', foo: 'two' } } }
+    describe 'deep_merge on root, deep_merge+append on child' do
+      let(:lft) do
+        %(
+          !map+deep_merge
+          foo:
+            !map+deep_merge+append
+            bar:
+            - two
+        )
+      end
 
-    subject { described_class.new.send(:deep_merge, lft, rgt) }
+      it { expect(subject['foo']['bar']).to be_a Seq }
+      it { should eq 'foo' => { 'bar' => ['one', 'two'] } }
+    end
 
-    it { should eq foo: { foo: 'two', bar: 'two' }, bar: 'one', baz: 'two' }
-  end
+    describe 'deep_merge on root, append on child' do
+      let(:lft) do
+        %(
+          !map+deep_merge
+          foo:
+            bar: !seq+append
+            - two
+        )
+      end
 
-  describe 'deep_merge (2)' do
-    let(:lft) { { foo: { foo: 'one', bar: nil }, bar: 'one' } }
-    let(:rgt) { { bar: nil, foo: { bar: 'two', foo: nil } } }
-
-    subject { described_class.new.send(:deep_merge, lft, rgt) }
-
-    it { should eq foo: { foo: nil, bar: 'two' }, bar: nil }
-  end
-
-  describe 'deep_merge_append' do
-    let(:lft) { { foo: { foo: ['one'], bar: ['one'] } } }
-    let(:rgt) { { foo: { bar: ['two'], foo: ['two'] } } }
-
-    subject { described_class.new.send(:deep_merge_append, lft, rgt) }
-
-    it { should eq foo: { foo: ['one', 'two'], bar: ['one', 'two'] } }
-  end
-
-  describe 'merge and src' do
-    let(:lft) { { key('foo', 'one') => 'one' } }
-    let(:rgt) { { key('foo', 'two') => 'two' } }
-
-    subject { described_class.new.send(:merge, lft, rgt) }
-
-    it { should eq 'foo' => 'two' }
-    it { expect(subject.keys[0]).to eq 'foo' }
-    it { expect(subject.keys[0].src).to eq 'two' }
-  end
-
-  describe 'deep_merge and src' do
-    let(:lft) { { key('foo', 'one') => 'one' } }
-    let(:rgt) { { key('foo', 'two') => 'two' } }
-
-    subject { described_class.new.send(:deep_merge, lft, rgt) }
-
-    it { should eq 'foo' => 'two' }
-    it { expect(subject.keys[0]).to eq 'foo' }
-    it { expect(subject.keys[0].src).to eq 'two' }
+      it { should eq 'foo' => { 'bar' => ['one', 'two'] } }
+    end
   end
 end

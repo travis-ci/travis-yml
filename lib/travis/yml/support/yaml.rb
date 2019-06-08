@@ -2,15 +2,26 @@
 require 'psych'
 require 'yaml'
 require 'travis/yml/support/key'
+require 'travis/yml/support/map'
+require 'travis/yml/support/seq'
 
 # YAML.singleton_class.undef_method(:load)
+
+Psych.add_tag('!map+replace', Map)
+Psych.add_tag('!map+merge', Map)
+Psych.add_tag('!map+merge+append', Map)
+Psych.add_tag('!map+deep_merge', Map)
+Psych.add_tag('!map+deep_merge+prepend', Map)
+Psych.add_tag('!map+deep_merge+append', Map)
+Psych.add_tag('!seq+prepend', Seq)
+Psych.add_tag('!seq+append', Seq)
 
 module Yaml
   extend self
 
   def load(yaml)
     return false unless node = parse(yaml)
-    loader = Loader.new(['Symbol'], [])
+    loader = Loader.new(['Map', 'Seq', 'Symbol'], [])
     scanner = ScalarScanner.new(loader)
     visitor = Visitor.new(scanner, loader)
     visitor.accept(node)
@@ -24,14 +35,6 @@ module Yaml
 
   Loader = Psych::ClassLoader::Restricted
   Parser = Psych::Parser
-
-  class Hash < ::Hash
-    attr_accessor :anchors
-
-    def initialize(hash = {})
-      replace(hash)
-    end
-  end
 
   class Psych::Nodes::Node
     attr_accessor :anchors
@@ -86,14 +89,25 @@ module Yaml
       super
     end
 
+    def visit_Psych_Nodes_Scalar(node)
+      scalar = super
+      scalar.is_a?(Symbol) ? scalar.to_s : scalar
+    end
+
+    def visit_Psych_Nodes_Sequence(node)
+      Seq.new(super, node)
+    end
+
     def to_key(node)
-      node.value = Key.new(node.value.to_s, node.start_line)
+      key = node.value.to_s
+      key = key[1..-1] if key[0] == ':'
+      node.value = Key.new(key, node.start_line)
       node
     end
 
     def revive_hash(hash, node)
-      hash = Hash.new(super)
-      hash.anchors = node.anchors
+      hash = Map.new(super, node)
+      hash.opts[:anchors] = node.anchors
       hash
     end
 

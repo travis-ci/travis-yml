@@ -9,7 +9,9 @@ module Travis
           class << self
             TYPES = {
               Hash       => :map,
+              Map        => :map,
               Array      => :seq,
+              Seq        => :seq,
               TrueClass  => :bool,
               FalseClass => :bool,
               Float      => :num,
@@ -17,13 +19,12 @@ module Travis
               String     => :str,
               Symbol     => :str,
               NilClass   => :none,
-              Yaml::Hash => :map,
             }
 
             def build(parent, key, value, opts = {})
               value = value.value if value.is_a?(Node)
               type = TYPES[value.class] || raise("Unknown type: #{value}")
-              opts[:anchors] = value.anchors if value.is_a?(Yaml::Hash) && value.anchors
+              opts[:anchors] = value.opts[:anchors] if value.is_a?(::Map)
               send(type, parent, key, value, opts)
             end
 

@@ -100,7 +100,7 @@ module Travis
           end
 
           def msg(level, type, key, other)
-            value.parent.msg level, type, original: key, key: other
+            value.parent.msg level, type, original: key, key: other, line: key.line, src: key.src
           end
 
           def match_key(key)

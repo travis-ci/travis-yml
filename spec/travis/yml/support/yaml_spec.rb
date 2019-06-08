@@ -56,6 +56,11 @@ describe Yaml do
     it { should eq 'str' }
   end
 
+  describe 'symbol' do
+    yaml ':sym'
+    it { should eq 'sym' }
+  end
+
   describe 'integer' do
     yaml '1'
     it { should eq 1 }
@@ -66,14 +71,19 @@ describe Yaml do
     it { should eq '1.10' }
   end
 
-  describe 'symbol' do
-    yaml ':sym'
-    it { should eq :sym } # should be a string
-  end
-
   describe 'sequence' do
     yaml '- str'
     it { should eq ['str'] }
+  end
+
+  describe 'map with a key str' do
+    yaml 'str: str'
+    it { should eq 'str' => 'str' }
+  end
+
+  describe 'map with a key :sym' do
+    yaml ':sym: str'
+    it { should eq 'sym' => 'str' }
   end
 
   describe 'map with a key true' do
@@ -165,7 +175,7 @@ describe Yaml do
     it { should eq 'foo' => ['bar' => { 'baz' => 'str' }] }
 
     describe 'root' do
-      it { should be_a Yaml::Hash }
+      it { should be_a Map }
       it { expect(subject.keys[0]).to eq 'foo' }
       it { expect(subject.keys[0]).to be_a Key }
       it { expect(subject.keys[0].line).to eq 0 }
@@ -173,7 +183,7 @@ describe Yaml do
 
     describe 'foo' do
       subject { super()['foo'][0] }
-      it { should be_a Yaml::Hash }
+      it { should be_a Map }
       it { expect(subject.keys[0]).to eq 'bar' }
       it { expect(subject.keys[0]).to be_a Key }
       it { expect(subject.keys[0].line).to eq 1 }
@@ -181,7 +191,7 @@ describe Yaml do
 
     describe 'bar' do
       subject { super()['foo'][0]['bar'] }
-      it { should be_a Yaml::Hash }
+      it { should be_a Map }
       it { expect(subject.keys[0]).to eq 'baz' }
       it { expect(subject.keys[0]).to be_a Key }
       it { expect(subject.keys[0].line).to eq 2 }
@@ -195,7 +205,7 @@ describe Yaml do
       bar: *ref
     )
     it { should eq 'foo' => { 'one' => 'str' }, 'bar' => { 'one' => 'str' } }
-    it { should have_attributes anchors: ['foo'] }
+    it { should have_attributes opts: { anchors: ['foo'] } }
   end
 
   describe 'anchor keys (map)' do
@@ -207,7 +217,7 @@ describe Yaml do
         two: str
     )
     it { should eq 'foo' => { 'one' => 'str' }, 'bar' => { 'one' => 'str', 'two' => 'str' } }
-    it { should have_attributes anchors: ['foo'] }
+    it { should have_attributes opts: { anchors: ['foo'] } }
   end
 
   describe 'nested anchor keys (map)' do
@@ -220,7 +230,7 @@ describe Yaml do
         <<: *foo
     )
     it { should eq 'root' => { 'foo' => { 'one' => 'str' } }, 'bar' => { 'foo' => { 'one' => 'str' },  'one' => 'str' } }
-    it { should have_attributes anchors: ['root', 'foo'] }
+    it { should have_attributes opts: { anchors: ['root', 'foo'] } }
   end
 
   describe 'anchor keys (seq)' do
@@ -231,7 +241,7 @@ describe Yaml do
         - *ref
     )
     it { should eq 'foo' => ['one'], 'bar' => [['one']] }
-    it { should have_attributes anchors: ['foo'] }
+    it { should have_attributes opts: { anchors: ['foo'] } }
   end
 
   describe 'anchor keys (seq)' do
@@ -243,6 +253,47 @@ describe Yaml do
         - *ref
     )
     it { should eq 'foo' => 'str', 'bar' => ['str'] }
-    it { should have_attributes anchors: ['foo'] }
+    it { should have_attributes opts: { anchors: ['foo'] } }
+  end
+
+  describe 'merge modes (map, 1)' do
+    yaml %(
+      !map+deep_merge+append
+      foo: bar
+    )
+    it { should eq 'foo' => 'bar' }
+    it { should be_a Map }
+    it { should have_attributes opts: { merge: [:deep_merge, :append] } }
+  end
+
+  describe 'merge modes (map, 2)' do
+    yaml %(
+      foo: !map+deep_merge+append
+        bar:
+        - baz
+    )
+    it { should eq 'foo' => { 'bar' => ['baz'] } }
+    it { should be_a Map }
+    it { expect(subject['foo']).to have_attributes opts: { merge: [:deep_merge, :append] } }
+  end
+
+  describe 'merge modes (seq, 1)' do
+    yaml %(
+      !seq+append
+      - one
+    )
+    it { should eq ['one'] }
+    it { should be_a Seq }
+    it { should have_attributes opts: { merge: [:append] } }
+  end
+
+  describe 'merge modes (seq, 2)' do
+    yaml %(
+      foo: !seq+append
+        - one
+    )
+    it { should eq 'foo' => ['one'] }
+    it { expect(subject['foo']).to be_a Seq }
+    it { expect(subject['foo']).to have_attributes opts: { merge: [:append] } }
   end
 end
