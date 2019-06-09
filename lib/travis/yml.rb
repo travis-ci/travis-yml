@@ -95,9 +95,7 @@ module Travis
       def apply(value, opts = {})
         unexpected_format! unless value.is_a?(Hash)
         opts = OPTS.merge(opts) unless ENV['env'] == 'test'
-        node = Doc.build(value, opts)
-        node = Doc.change(expand, node)
-        node = Doc.validate(expand, node)
+        node = Doc.apply(expand, value, opts)
         node
       end
 

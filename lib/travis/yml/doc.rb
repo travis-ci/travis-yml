@@ -8,6 +8,12 @@ module Travis
     module Doc
       extend self
 
+      def apply(schema, value, opts = {})
+        node = build(value, opts)
+        node = change(schema, node)
+        validate(schema, node)
+      end
+
       def build(value, opts = {})
         Value.build(nil, nil, value, opts)
       end

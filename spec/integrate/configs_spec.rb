@@ -606,11 +606,14 @@ describe Travis::Yml, configs: true do
     secure:"Dupdb/HgNXKu8kOo7/RcpMCAyEZA8hLw77nVPTxXUo39UUI/ipnbUfRHamiWC2/MCqTEHu+1eReCmuFj2ULk4g+vi/8VYjrmX1TiHwikIFEAGrRRK0VkuWegqloYtXuxa7gtuQ96PWjqJ48op/WYyYvKiH0cFOMHsZOt5cl9PL4="
     MAIN_CMD='flake8 count --select=F, E101, E111, E112, E113, E401, E402, E711, E722 --max-line-length=110' SETUP_CMD='gwcs"
     CI_BUILD_TARGET="sitltest-rover sitltest-sub""
+    PHOEBE_ENABLE_PLOTTING = 'FALSE'
+    WEBSITE_CHANGED = git diff --name-only $TRAVIS_COMMIT_RANGE | grep -E "website/|docs/"
   vars
 
   def invalid_env_var?(msg)
     return false unless msg[2] == :invalid_env_var
-    INVALID_ENV_VARS.include?(msg[3][:var]) || msg[3][:var].include?('CONDA_ENVIRONMENT')
+    var = msg[3][:var]
+    INVALID_ENV_VARS.include?(var) || var.include?('CONDA_ENVIRONMENT') || var.start_with?('==') || var.start_with?('if ')
   end
 
   def invalid_condition?(msg)

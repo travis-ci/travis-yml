@@ -9,12 +9,12 @@ describe Travis::Yml, 'empty', empty: true, line: true do
 
     describe 'given an empty array' do
       yaml 'os: []'
-      it { should have_msg [:warn, :os, :empty] }
+      it { should have_msg [:warn, :os, :empty, key: 'os', line: 0] }
     end
 
     describe 'given nil' do
       yaml 'os:'
-      it { should have_msg [:warn, :os, :empty] }
+      it { should have_msg [:warn, :os, :empty, key: 'os', line: 0] }
     end
   end
 
@@ -26,12 +26,12 @@ describe Travis::Yml, 'empty', empty: true, line: true do
 
     describe 'given an empty map' do
       yaml 'cache: {}'
-      it { should have_msg [:warn, :cache, :empty] }
+      it { should have_msg [:warn, :cache, :empty, key: 'cache', line: 0] }
     end
 
     describe 'given nil' do
       yaml 'cache:'
-      it { should have_msg [:warn, :cache, :empty] }
+      it { should have_msg [:warn, :cache, :empty, key: 'cache', line: 0] }
     end
   end
 end

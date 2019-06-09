@@ -21,7 +21,7 @@ module Travis
           end
 
           def empty
-            value.msg :warn, :empty if warn?
+            value.msg :warn, :empty, key: value.key if warn?
             blank
           end
 

@@ -21,7 +21,7 @@ module Travis
           def dealias(key)
             other = schema.key_aliases[key]
             return key if !other || key == other
-            value.parent.info :alias, type: :key, alias: key, obj: other
+            value.parent.info :alias, type: :key, alias: key, obj: other, line: key.line, src: key.src
             other
           end
 
@@ -37,7 +37,7 @@ module Travis
           def strip(key)
             other = super(key)
             return key if !known?(other)
-            info :strip_key, key, other if key != other
+            warn :strip_key, key, other if key != other
             other
           end
 
@@ -51,7 +51,7 @@ module Travis
           def clean(key)
             other = clean_key(key)
             return key unless known?(other)
-            info :clean_key, key, other if key != other
+            warn :clean_key, key, other if key != other
             other
           end
 
@@ -64,7 +64,7 @@ module Travis
             other = Dict[key] unless schema.stop?(key, Dict[key])
             return unless known?(other)
             warn :find_key, key, other if key != other
-            other
+            key.copy(other)
           end
 
           def match(key)
@@ -72,7 +72,7 @@ module Travis
             other = match_key(key.to_s)
             return unless known?(other) || alias?(other)
             warn :find_key, key, other if key != other
-            other
+            key.copy(other)
           end
 
           def fix?
