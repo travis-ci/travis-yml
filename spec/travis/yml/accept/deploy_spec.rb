@@ -52,6 +52,15 @@ describe Travis::Yml, 'deploy' do
     it { should have_msg [:error, :'deploy.provider', :unknown_value, value: 'unknown'] }
   end
 
+  describe 'missing provider', defaults: true do
+    yaml %(
+      deploy:
+        - unknown: unknown
+    )
+    it { should serialize_to language: 'ruby', os: ['linux'], deploy: [unknown: 'unknown'] }
+    it { should have_msg [:error, :'deploy', :required, key: 'provider'] }
+  end
+
   describe 'invalid type on provider', drop: true do
     yaml %(
       deploy:
