@@ -45,7 +45,7 @@ describe Travis::Yml, 'conditions' do
           if: true
         )
         it { should serialize_to conditions: 'v1', if: 'true' }
-        xit { should have_msg [:info, :if, :cast, given_value: true, given_type: :bool, value: 'true', type: :str] }
+        it { should have_msg [:info, :if, :cast, given_value: true, given_type: :bool, value: 'true', type: :str] }
       end
 
       describe 'true (str)' do
@@ -80,7 +80,7 @@ describe Travis::Yml, 'conditions' do
           if: true
         )
         it { should serialize_to if: 'true' }
-        xit { should have_msg [:info, :if, :cast, given_value: true, given_type: :bool, value: 'true', type: :str] }
+        it { should have_msg [:info, :if, :cast, given_value: true, given_type: :bool, value: 'true', type: :str] }
       end
 
       describe '= foo' do

@@ -300,14 +300,14 @@ describe Travis::Yml, 'env' do
     it { should have_msg [:error, :env, :invalid_type, expected: :map, actual: :bool, value: true] }
   end
 
-  describe 'given a nested map' do
+  describe 'given a nested map', drop: true do
     yaml %(
       env:
         one:
           two: str
     )
-    xit { should serialize_to env: { matrix: [{ one: nil }] } }
-    xit { should have_msg [:error, :'env.matrix.one', :invalid_type, expected: :str, actual: :map, value: { two: 'str' }] }
+    it { should serialize_to env: { matrix: [{ one: nil }] } }
+    it { should have_msg [:error, :'env.matrix.one', :invalid_type, expected: :str, actual: :map, value: { two: 'str' }] }
   end
 
   describe 'given a seq of strings, with an empty cache' do # ??

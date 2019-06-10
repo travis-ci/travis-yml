@@ -490,6 +490,7 @@ describe Travis::Yml, configs: true do
       env.matrix.include
       env.matrix.general
       matrix
+      matrix.include.env.global
     ),
     # on scripts this is often caused by YAML parsing a quoted string with a colon into a map
     map: %i(

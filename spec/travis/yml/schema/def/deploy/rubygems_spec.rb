@@ -57,12 +57,14 @@ describe Travis::Yml::Schema::Def::Deploy::Rubygems do
                     type: :object,
                     patternProperties: {
                       '.*': {
-                        '$ref': '#/definitions/type/secure'
+                        '$ref': '#/definitions/type/secure',
+                        strict: false
                       }
                     }
                   },
                   {
-                    '$ref': '#/definitions/type/secure'
+                    '$ref': '#/definitions/type/secure',
+                    strict: false
                   }
                 ],
                 aliases: [

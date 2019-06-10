@@ -22,7 +22,7 @@ describe Travis::Yml, 'rubygems', alert: true do
             production: str
       )
       it { should serialize_to deploy: [provider: 'rubygems', username: { production: 'str' }] }
-      xit { should_not have_msg [:alert, :'deploy.username', :secure, type: :str] }
+      it { should_not have_msg [:alert, :'deploy.username', :secure, type: :str] }
     end
 
     describe 'given a secure' do
@@ -43,7 +43,7 @@ describe Travis::Yml, 'rubygems', alert: true do
           username: str
       )
       it { should serialize_to deploy: [provider: 'rubygems', username: 'str'] }
-      xit { should_not have_msg [:alert, :'deploy.username', :secure, type: :str] }
+      it { should_not have_msg [:alert, :'deploy.username', :secure, type: :str] }
     end
 
     describe 'given a secure on alias user' do

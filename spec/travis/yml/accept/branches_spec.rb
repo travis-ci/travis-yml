@@ -6,7 +6,7 @@ describe Travis::Yml, 'branches' do
       branches: true
     )
     it { should serialize_to branches: { only: ['true'] } }
-    xit { should have_msg [:info, :'branches.only', :cast, given_value: true, given_type: :bool, value: 'true', type: :str] }
+    it { should have_msg [:info, :'branches.only', :cast, given_value: true, given_type: :bool, value: 'true', type: :str] }
   end
 
   describe 'given a string' do

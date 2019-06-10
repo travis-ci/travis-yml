@@ -88,7 +88,7 @@ describe Travis::Yml::Parts::Merge do
 
       it { should be_a Key }
       it { should eq 'script' }
-      xit { should have_attributes src: 'api', line: 0 }
+      it { should have_attributes src: 'api.yml', line: 0 }
     end
 
     describe 'env' do
