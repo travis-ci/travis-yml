@@ -47,7 +47,10 @@ describe Travis::Yml::Schema::Def::Deploy::Scalingo do
                 '$ref': '#/definitions/type/secure'
               },
               api_key: {
-                '$ref': '#/definitions/type/secure'
+                '$ref': '#/definitions/type/secure',
+                aliases: [
+                  :api_token
+                ]
               },
               remote: {
                 type: :string

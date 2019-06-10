@@ -42,6 +42,20 @@ describe Travis::Yml, 'scalingo' do
     end
   end
 
+  describe 'api_token' do
+    describe 'given a secure' do
+      yaml %(
+        deploy:
+          provider: scalingo
+          api_token:
+            secure: secure
+      )
+      it { should serialize_to deploy: [provider: 'scalingo', api_key: { secure: 'secure' }] }
+      it { should have_msg [:info, :deploy, :alias, type: :key, alias: 'api_token', obj: 'api_key', provider: 'scalingo'] }
+      xit { should have_msg [:warn, :deploy, :deprecated_key, :api_token] }
+    end
+  end
+
   describe 'remote' do
     describe 'given a str' do
       yaml %(

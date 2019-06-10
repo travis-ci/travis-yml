@@ -64,8 +64,11 @@ describe Travis::Yml::Schema::Def::Deploy::Boxfuse do
               image: {
                 type: :string
               },
-              extra_args: {
-                type: :string
+              args: {
+                type: :string,
+                aliases: [
+                  :extra_args
+                ]
               }
             },
             additionalProperties: false,

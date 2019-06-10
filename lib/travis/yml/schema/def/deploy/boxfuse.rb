@@ -18,7 +18,7 @@ module Travis
               map :version,     to: :str
               map :env,         to: :str
               map :image,       to: :str
-              map :extra_args,  to: :str
+              map :args,        to: :str, alias: :extra_args
             end
           end
         end

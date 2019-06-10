@@ -11,7 +11,7 @@ describe Travis::Yml, 'rubygems', alert: true do
               secure: str
       )
       it { should serialize_to deploy: [provider: 'rubygems', username: { production: { secure: 'str' } }] }
-      xit { should have_msg [:alert, :'deploy.username', :secure, type: :str] }
+      it { should_not have_msg }
     end
 
     describe 'given a map with strs' do
@@ -22,7 +22,7 @@ describe Travis::Yml, 'rubygems', alert: true do
             production: str
       )
       it { should serialize_to deploy: [provider: 'rubygems', username: { production: 'str' }] }
-      xit { should have_msg [:alert, :'deploy.username', :secure, type: :str] }
+      xit { should_not have_msg [:alert, :'deploy.username', :secure, type: :str] }
     end
 
     describe 'given a secure' do
@@ -43,7 +43,18 @@ describe Travis::Yml, 'rubygems', alert: true do
           username: str
       )
       it { should serialize_to deploy: [provider: 'rubygems', username: 'str'] }
-      it { should have_msg [:alert, :'deploy.username', :secure, type: :str] }
+      xit { should_not have_msg [:alert, :'deploy.username', :secure, type: :str] }
+    end
+
+    describe 'given a secure on alias user' do
+      yaml %(
+        deploy:
+          provider: rubygems
+          user:
+            secure: str
+      )
+      it { should serialize_to deploy: [provider: 'rubygems', username: { secure: 'str' }] }
+      it { should have_msg [:info, :deploy, :alias, type: :key, alias: 'user', obj: 'username', provider: 'rubygems'] }
     end
   end
 

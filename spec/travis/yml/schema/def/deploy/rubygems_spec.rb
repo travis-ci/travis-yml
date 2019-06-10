@@ -64,6 +64,9 @@ describe Travis::Yml::Schema::Def::Deploy::Rubygems do
                   {
                     '$ref': '#/definitions/type/secure'
                   }
+                ],
+                aliases: [
+                  :user
                 ]
               },
               password: {

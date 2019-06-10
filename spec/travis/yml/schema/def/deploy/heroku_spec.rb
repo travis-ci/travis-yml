@@ -64,7 +64,10 @@ describe Travis::Yml::Schema::Def::Deploy::Heroku do
                 ]
               },
               username: {
-                '$ref': '#/definitions/type/secure'
+                '$ref': '#/definitions/type/secure',
+                aliases: [
+                  :user
+                ]
               },
               password: {
                 '$ref': '#/definitions/type/secure'

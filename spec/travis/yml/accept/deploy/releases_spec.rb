@@ -1,7 +1,7 @@
 describe Travis::Yml, 'releases' do
   subject { described_class.apply(parse(yaml)) }
 
-  describe 'user' do
+  describe 'username' do
     describe 'given a secure' do
       yaml %(
         deploy:
@@ -11,6 +11,39 @@ describe Travis::Yml, 'releases' do
       )
       it { should serialize_to deploy: [provider: 'releases', username: { secure: 'secure' }] }
       it { should_not have_msg }
+    end
+
+    describe 'given a str' do
+      yaml %(
+        deploy:
+          provider: releases
+          username: str
+      )
+      it { should serialize_to deploy: [provider: 'releases', username: 'str'] }
+      it { should_not have_msg }
+    end
+  end
+
+  describe 'user (alias)' do
+    describe 'given a secure' do
+      yaml %(
+        deploy:
+          provider: releases
+          user:
+            secure: secure
+      )
+      it { should serialize_to deploy: [provider: 'releases', username: { secure: 'secure' }] }
+      it { should have_msg [:info, :deploy, :alias, type: :key, alias: 'user', obj: 'username', provider: 'releases'] }
+    end
+
+    describe 'given a str' do
+      yaml %(
+        deploy:
+          provider: releases
+          user: str
+      )
+      it { should serialize_to deploy: [provider: 'releases', username: 'str'] }
+      it { should have_msg [:info, :deploy, :alias, type: :key, alias: 'user', obj: 'username', provider: 'releases'] }
     end
   end
 

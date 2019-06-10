@@ -12,7 +12,7 @@ module Travis
             def define
               map :username, to: :secure, strict: false, alias: :user
               map :password, to: :secure
-              map :api_key,  to: :secure
+              map :api_key,  to: :secure, alias: :api_token
               map :remote,   to: :str
               map :branch,   to: :str
               map :app,      to: :str

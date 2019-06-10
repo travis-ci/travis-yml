@@ -49,6 +49,29 @@ describe Travis::Yml, 'heroku' do
     end
   end
 
+  describe 'user (alias)' do
+    describe 'given a secure' do
+      yaml %(
+        deploy:
+          provider: heroku
+          user:
+            secure: secure
+      )
+      it { should serialize_to deploy: [provider: 'heroku', username: { secure: 'secure' }] }
+      it { should have_msg [:info, :deploy, :alias, type: :key, alias: 'user', obj: 'username', provider: 'heroku'] }
+    end
+
+    describe 'given a str' do
+      yaml %(
+        deploy:
+          provider: heroku
+          user: str
+      )
+      it { should serialize_to deploy: [provider: 'heroku', username: 'str'] }
+      it { should have_msg [:info, :deploy, :alias, type: :key, alias: 'user', obj: 'username', provider: 'heroku'] }
+    end
+  end
+
   describe 'app' do
     describe 'given a str' do
       yaml %(

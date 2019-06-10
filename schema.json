@@ -2708,8 +2708,11 @@
               "image": {
                 "type": "string"
               },
-              "extra_args": {
-                "type": "string"
+              "args": {
+                "type": "string",
+                "aliases": [
+                  "extra_args"
+                ]
               },
               "provider": {
                 "type": "string",
@@ -4004,7 +4007,10 @@
                 ]
               },
               "username": {
-                "$ref": "#/definitions/type/secure"
+                "$ref": "#/definitions/type/secure",
+                "aliases": [
+                  "user"
+                ]
               },
               "password": {
                 "$ref": "#/definitions/type/secure"
@@ -5099,6 +5105,9 @@
                   {
                     "$ref": "#/definitions/type/secure"
                   }
+                ],
+                "aliases": [
+                  "user"
                 ]
               },
               "password": {
@@ -5310,7 +5319,10 @@
                 "$ref": "#/definitions/type/secure"
               },
               "api_key": {
-                "$ref": "#/definitions/type/secure"
+                "$ref": "#/definitions/type/secure",
+                "aliases": [
+                  "api_token"
+                ]
               },
               "remote": {
                 "type": "string"
