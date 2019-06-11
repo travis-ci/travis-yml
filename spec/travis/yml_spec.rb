@@ -167,7 +167,7 @@ describe Travis::Yml do
 
     describe 'unkown_key' do
       let(:msg) { [:info, :key, :unknown_key, key: :key, value: 'value'] }
-      it { should eq '[info] on key: dropping unknown key :key (value)' }
+      it { should eq '[info] on key: unknown key :key (value)' }
     end
 
     describe 'unknown_value' do
