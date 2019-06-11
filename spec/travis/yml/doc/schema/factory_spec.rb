@@ -6,7 +6,7 @@ describe Travis::Yml::Doc::Schema, 'build' do
   end
 
   matcher :have_value do |value, opts = {}|
-    match { |node| node.values.any? { |obj| obj.to_s == value && opts.all? { |k, v| obj.opts[k] == v } } }
+    match { |node| node.values.any? { |obj| obj.value == value && opts.all? { |k, v| obj.opts[k] == v } } }
   end
 
   describe 'a boolean' do

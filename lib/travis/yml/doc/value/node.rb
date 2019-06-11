@@ -183,7 +183,7 @@ module Travis
             parent ? parent.supporting : {}
           end
 
-          def serialize
+          def serialize(*)
             value
           end
 

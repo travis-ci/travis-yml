@@ -87,7 +87,7 @@ module Travis
             end
 
             def values
-              schema.values.map(&:to_s)
+              schema.values.map(&:value)
             end
 
             def detect(*strs)

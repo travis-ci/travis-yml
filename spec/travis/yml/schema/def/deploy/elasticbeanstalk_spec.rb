@@ -101,7 +101,10 @@ describe Travis::Yml::Schema::Def::Deploy::Elasticbeanstalk do
             additionalProperties: false,
             normal: true,
             prefix: {
-              key: :provider
+              key: :provider,
+              only: [
+                :str
+              ]
             },
             required: [
               :provider

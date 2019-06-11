@@ -30,8 +30,7 @@ describe Travis::Yml::Docs::Examples do
     it do
       should eq [
         { cache: { directories: ['./path'], apt: true, bundler: true } },
-        { cache: ['./path'] },
-        { cache: './path' }
+        { cache: false }
       ]
     end
   end

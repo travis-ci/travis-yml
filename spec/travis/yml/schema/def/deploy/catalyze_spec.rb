@@ -46,7 +46,10 @@ describe Travis::Yml::Schema::Def::Deploy::Catalyze do
             additionalProperties: false,
             normal: true,
             prefix: {
-              key: :provider
+              key: :provider,
+              only: [
+                :str
+              ]
             },
             required: [
               :provider

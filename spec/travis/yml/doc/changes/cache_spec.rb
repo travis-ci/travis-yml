@@ -11,9 +11,6 @@ describe Travis::Yml::Doc::Change::Cache do
         bundler: {
           type: :boolean
         },
-        cargo: {
-          type: :boolean
-        },
         directories: {
           type: :array,
           items: {
@@ -31,13 +28,19 @@ describe Travis::Yml::Doc::Change::Cache do
 
   describe 'given true' do
     let(:value) { true }
-    it { should serialize_to apt: true, bundler: true, cargo: true }
+    it { should serialize_to true }
     it { should_not have_msg }
   end
 
   describe 'given apt' do
     let(:value) { 'apt' }
     it { should serialize_to apt: true }
+    it { should_not have_msg }
+  end
+
+  describe 'given a string' do
+    let(:value) { 'str' }
+    it { should serialize_to directories: ['str'] }
     it { should_not have_msg }
   end
 
@@ -73,14 +76,14 @@ describe Travis::Yml::Doc::Change::Cache do
 
   describe 'given a seq with apt, directories, and an unknown str' do
     let(:value) { [:apt, :unknown, directories: ['str']] }
-    it { should serialize_to apt: true, directories: ['str', 'unknown'] }
+    it { should serialize_to apt: true, directories: ['unknown', 'str'] }
     it { should_not have_msg }
   end
 
   describe 'given a seq with apt, directories, and an unknown str in a seq' do
     let(:value) { [:apt, [:unknown], directories: ['str']] }
     # rewrite Change::Cache to not drop unexpected things
-    it { should serialize_to apt: true, directories: ['str'] }
+    it { should serialize_to apt: true, directories: ['unknown', 'str'] }
     it { should_not have_msg }
   end
 

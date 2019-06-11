@@ -19,9 +19,9 @@ module Travis
             values.any?
           end
 
-          def matches?(value)
-            super and !enum? || known?(value.value) || values.alias?(value.value)
-          end
+          # def matches?(value)
+          #   super and !enum? || known?(value.value) || values.alias?(value.value)
+          # end
 
           def default?
             defaults.any?
@@ -36,8 +36,8 @@ module Travis
             values.size
           end
 
-          def known?(str)
-            values.any? { |value| value.to_s == str }
+          def known?(value)
+            values.any? { |v| v == value } # .to_s
           end
 
           def values

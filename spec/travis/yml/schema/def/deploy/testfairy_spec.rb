@@ -88,7 +88,10 @@ describe Travis::Yml::Schema::Def::Deploy::Testfairy do
             additionalProperties: false,
             normal: true,
             prefix: {
-              key: :provider
+              key: :provider,
+              only: [
+                :str
+              ]
             },
             required: [
               :provider

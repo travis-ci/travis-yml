@@ -50,7 +50,10 @@ describe Travis::Yml::Schema::Def::Deploy::Puppetforge do
             additionalProperties: false,
             normal: true,
             prefix: {
-              key: :provider
+              key: :provider,
+              only: [
+                :str
+              ]
             },
             required: [
               :user,

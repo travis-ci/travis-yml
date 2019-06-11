@@ -61,7 +61,7 @@ module Travis
           end
 
           def aliases
-            Array(opts[:aliases]).map { |name| [name, to_s] }.to_h
+            Array(opts[:aliases]).map { |name| [name, value] }.to_h
           end
 
           def support
@@ -72,14 +72,13 @@ module Travis
           def value
             opts[:value]
           end
-          alias to_s value
 
           def to_sym
-            to_s.to_sym
+            value.to_sym rescue nil
           end
 
-          def ==(str)
-            to_s == str
+          def ==(other)
+            value == other
           end
         end
       end

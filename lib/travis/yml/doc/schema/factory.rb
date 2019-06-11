@@ -198,9 +198,10 @@ module Travis
 
             def values(schema)
               values = schema[:values] || {}
-              others = schema[:enum].map(&:to_s) - values.keys
+              values = values.map { |key, value| [to_str(key), value] }.to_h
+              others = schema[:enum].map(&method(:to_str)) - values.keys.map(&:to_s)
               values = others.inject(values) { |values, key| values.merge(key => {}) }
-              values = values.map { |key, value| value.merge(value: key.to_s) }
+              values = values.map { |key, value| value.merge(value: to_str(key)) }
               values = values.map { |value| value.merge(support(value)) }
               values
             end
@@ -217,6 +218,10 @@ module Travis
 
             def remap(hash)
               hash.map { |key, value| [REMAP[key] || key, value] }.to_h
+            end
+
+            def to_str(obj)
+              obj.is_a?(Symbol) ? obj.to_s : obj
             end
         end
       end

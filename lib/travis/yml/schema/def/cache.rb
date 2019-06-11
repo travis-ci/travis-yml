@@ -5,7 +5,7 @@ module Travis
   module Yml
     module Schema
       module Def
-        class Cache < Type::Map
+        class Cache < Type::Any
           register :cache
 
           TYPES = %i(apt bundler cargo ccache cocoapods npm packages pip yarn)
@@ -13,20 +13,26 @@ module Travis
           def define
             summary 'Cache settings to speed up the build'
 
-            normal
+            type Class.new(Type::Map) {
+              def define
+                normal
 
-            map :directories, to: :seq, eg: './path'
+                map :directories, to: :seq, eg: './path'
 
-            TYPES.each do |type|
-              map type, to: :bool
-            end
+                TYPES.each do |type|
+                  map type, to: :bool
+                end
 
-            map :edge,        to: :bool, edge: true, summary: 'Whether to use an edge version of the cache tooling'
-            map :timeout,     to: :num
-            map :branch,      to: :str
+                map :edge,    to: :bool, summary: 'Whether to use an edge version of the cache tooling'
+                map :timeout, to: :num
+                map :branch,  to: :str # not documented?
 
-            prefix :directories
-            change :cache
+                # prefix :directories
+                change :cache
+              end
+            }
+
+            type :bool, values: [false], normal: true
 
             export
           end

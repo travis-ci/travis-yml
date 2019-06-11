@@ -70,7 +70,7 @@ module Travis
             end
 
             def match(enum, str)
-              schema.match(enum.values.map(&:to_s), str)
+              schema.match(enum.values.map(&:value), str)
             end
 
             def maps(schema)

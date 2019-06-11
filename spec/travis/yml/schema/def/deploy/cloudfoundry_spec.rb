@@ -68,7 +68,10 @@ describe Travis::Yml::Schema::Def::Deploy::Cloudfoundry do
             additionalProperties: false,
             normal: true,
             prefix: {
-              key: :provider
+              key: :provider,
+              only: [
+                :str
+              ]
             },
             required: [
               :provider

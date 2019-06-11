@@ -8,7 +8,6 @@ describe Travis::Yml::Schema::Def::Cache do
       '$id': :cache,
       title: 'Cache',
       summary: 'Cache settings to speed up the build',
-      normal: true,
       anyOf: [
         {
           type: :object,
@@ -42,10 +41,7 @@ describe Travis::Yml::Schema::Def::Cache do
             },
             edge: {
               summary: 'Whether to use an edge version of the cache tooling',
-              type: :boolean,
-              flags: [
-                :edge
-              ]
+              type: :boolean
             },
             directories: {
               '$ref': '#/definitions/type/strs',
@@ -60,9 +56,6 @@ describe Travis::Yml::Schema::Def::Cache do
           },
           additionalProperties: false,
           normal: true,
-          prefix: {
-            key: :directories
-          },
           changes: [
             {
               change: :cache
@@ -70,8 +63,11 @@ describe Travis::Yml::Schema::Def::Cache do
           ]
         },
         {
-          '$ref': '#/definitions/type/strs',
-          example: './path'
+          type: :boolean,
+          enum: [
+            false
+          ],
+          normal: true
         }
       ]
     )

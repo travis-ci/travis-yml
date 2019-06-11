@@ -18,79 +18,61 @@ module Travis
             end
 
             def caches?
-              respond_to?(:"from_#{value.type}", true)
+              respond_to?(:"apply_#{value.type}", true)
             end
 
             def caches
-              send(:"from_#{value.type}")
+              send(:"apply_#{value.type}")
             end
 
-            def from_bool
-              build(bool_keys.map { |key| { key => value.value } }.inject(&:merge))
-            end
-
-            def from_num
-              value
-            end
-
-            def from_str
+            def apply_str
               str = schema.match(bool_keys, value.value) || value.value
               value.info(:find_value, original: value.value, value: str) unless value.value == str
-              return value unless bool_keys.include?(str)
-              build(str => true)
+              build(str(str))
             end
 
-            def from_seq
-              other = bools.inject(&:merge) || {}
-              other = other.merge(dirs)
-              other = other.merge(others)
-              build(other)
+            def apply_seq
+              build(merge(*seq(value.serialize(false)).flatten))
             end
 
-            def dirs
-              dirs = maps.map { |value| value['directories'].value if value.key?('directories') }
-              dirs = dirs.compact.flatten
-              dirs = dirs + strs
-              dirs.any? ? { 'directories' => dirs } : {}
-            end
-
-            def bools
-              bools = value.value.map do |value|
-                case value.type
-                when :str
-                  key = value.value
-                  { key => true } if schema[key]&.bool?
-                when :map
-                  keys = value.keys.all? { |key| schema[key]&.bool? }
-                  only(value, *keys)
+            def seq(seq)
+              seq.map do |value|
+                case value
+                when Array
+                  seq(value)
+                when Hash
+                  map(value)
+                else
+                  str(value)
                 end
               end
-              bools = bools.compact
-              bools.any? ? bools.reject(&:empty?) : []
-            end
-            memoize :bools
-
-            def maps
-              value.select(&:map?)
             end
 
-            def strs
-              value.select(&:str?).map(&:value) - bool_keys.map(&:to_s)
+            def map(map)
+              map.map do |key, value|
+                if bool?(key)
+                  { key => true }
+                elsif key == 'directories'
+                  { key => value }
+                else
+                  { key => value }
+                end
+              end
             end
 
-            def others
-              others = maps.map { |value| except(value, 'directories') }.inject(&:merge) || {}
+            def str(str)
+              bool?(str) ? { str => true } : { 'directories' => [str] }
             end
 
-            def dir?(value)
-              value.map? && value.key?('directories')
+            def bool?(str)
+              bool_keys.include?(str)
             end
 
             def bool_keys
               schema.keys.select { |key| schema[key].bool? } - ['edge']
             end
             memoize :bool_keys
-        end
+          end
       end
     end
   end

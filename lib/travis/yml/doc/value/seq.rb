@@ -58,8 +58,8 @@ module Travis
             value.clear
           end
 
-          def serialize
-            value.map(&:serialize)
+          def serialize(symbolize = true)
+            value.map { |value| value.serialize(symbolize) }
           end
         end
       end

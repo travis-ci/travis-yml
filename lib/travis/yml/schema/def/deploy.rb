@@ -41,7 +41,7 @@ module Travis
             def after_define
               normal
 
-              prefix :provider
+              prefix :provider, only: :str
 
               map :provider,      to: :str, values: registry_key, required: true, strict: true
               map :on,            to: :conditions, alias: :true

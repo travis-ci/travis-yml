@@ -41,15 +41,15 @@ module Travis
           register :num
 
           def example
-            node.example ? Array(node.example).first : 1
+            node.example ? Array(node.example).first : enum? ? enum[0] : 1
           end
         end
 
         class Bool < Scalar
           register :bool
 
-          def self.example
-            true
+          def example
+            enum? ? enum[0] : true
           end
         end
 

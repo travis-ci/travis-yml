@@ -15,7 +15,7 @@ module Travis
           private
 
             def apply?
-              schema.enum? && value.str? && value.given?
+              schema.enum? && value.scalar? && value.given?
             end
 
             def unknown?

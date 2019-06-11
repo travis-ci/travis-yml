@@ -43,7 +43,10 @@ describe Travis::Yml::Schema::Def::Deploy::Cloud66 do
             additionalProperties: false,
             normal: true,
             prefix: {
-              key: :provider
+              key: :provider,
+              only: [
+                :str
+              ]
             },
             required: [
               :provider

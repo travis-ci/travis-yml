@@ -68,7 +68,10 @@ describe Travis::Yml::Schema::Def::Deploy::BluemixCloudfoundry do
             additionalProperties: false,
             normal: true,
             prefix: {
-              key: :provider
+              key: :provider,
+              only: [
+                :str
+              ]
             },
             required: [
               :provider

@@ -80,8 +80,8 @@ module Travis
         class Any < Node
           def apply
             schemas = Schema.select(schema, value)
-            child = schemas.detect { |schema| schema.matches?(value) } || schemas.first
-            Validate.apply(child, value)
+            schema = schemas.detect { |schema| schema.matches?(value) } || schemas.first
+            Validate.apply(schema, value)
           end
         end
 

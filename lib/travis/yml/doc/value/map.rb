@@ -85,8 +85,8 @@ module Travis
             super
           end
 
-          def serialize
-            value.map { |key, obj| [key.to_sym, obj.serialize] }.to_h
+          def serialize(symbolize = true)
+            value.map { |key, obj| [symbolize ? key.to_sym : key, obj.serialize] }.to_h
           end
         end
       end
