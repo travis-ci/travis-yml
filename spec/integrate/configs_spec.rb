@@ -512,15 +512,44 @@ describe Travis::Yml, configs: true do
   }
 
   INVALID_CONDITIONS = [
-    '(branch = dev) AND (type IS cron)' # invalid condition (should be type = cron)
+    '(branch = dev) AND (type IS cron)' # should be type = cron
+  ]
+
+  INVALID_ENV_VARS = <<~vars.split("\n")
+    TESTS="1" ODOO_REPO="OCA/OCB
+    USER_LANGUAGE=en USER_REGION=US'
+    USER_LANGUAGE=fr USER_REGION=FR'
+    USER_LANGUAGE=ja USER_REGION=JP'
+    PYTHON_VERSION=3.5 SPHINX_VERSION='1.5' SETUPTOOLS_VERSION=30 CONDA_DEPENDENCIES=`echo $CONDA_DEPENDENCIES sphinx-astropy 'numpydoc<0.9'`"
+    SETUP_CMD='test' CONDA_ENVIRONMENT='conda_environment.yml' TEST_CMD="python -c $'import matplotlib\ntry:\n    import scipy\nexcept ImportError:\n    pass\nelse:\n    raise RuntimeError'"
+    SETUP_CMD='test' CONDA_ENVIRONMENT='conda_environment.yml' TEST_CMD="python -c $'import matplotlib\ntry:\n    import scipy\nexcept ImportError:\n    pass\nelse:\n    raise RuntimeError'"
+    SETUP_CMD='test' CONDA_ENVIRONMENT='conda_environment.yml' CONDA_DEPENDENCIES="scipy" TEST_CMD="python -c $'import matplotlib\nimport scipy'"
+    DISTRIB="conda" EXAMPLES="true" PYTHON=3.7"
+    APPS='[{"app":"ops","chart":"ops","namespace":"ops","deployment":"api"}]
+    GIT_EARLIEST_SUPPORTED_VERSION="v2.0.0
+    BUILD=stack STACK=stack --resolver=11.22'
+    USER_LANGUAGE=en USER_REGION=US'
+    FLEX_HOME=build-dep/bin/flex/"
+    secure:"Dupdb/HgNXKu8kOo7/RcpMCAyEZA8hLw77nVPTxXUo39UUI/ipnbUfRHamiWC2/MCqTEHu+1eReCmuFj2ULk4g+vi/8VYjrmX1TiHwikIFEAGrRRK0VkuWegqloYtXuxa7gtuQ96PWjqJ48op/WYyYvKiH0cFOMHsZOt5cl9PL4="
+    MAIN_CMD='flake8 count --select=F, E101, E111, E112, E113, E401, E402, E711, E722 --max-line-length=110' SETUP_CMD='gwcs"
+    CI_BUILD_TARGET="sitltest-rover sitltest-sub""
+    PHOEBE_ENABLE_PLOTTING = 'FALSE'
+    WEBSITE_CHANGED = git diff --name-only $TRAVIS_COMMIT_RANGE | grep -E "website/|docs/"
+  vars
+
+  ENUMS = %i(
+    deploy.provider
+    matrix.include.deploy.provider
+    notifications.hipchat.format
+  )
+
+  UNKNOWN_VALUES = [
+    'grunt release',
+    'skip'
   ]
 
   UNKNOWN_VARS = %w(
     repository_name,
-  )
-
-  ENUMS = %i(
-    notifications.hipchat.format
   )
 
   def unknown?(key, msg)
@@ -589,28 +618,6 @@ describe Travis::Yml, configs: true do
     return true if msg[1] == :'matrix.include.env' && msg[3][:value].key?(:global) # results in 'global=[{:FOO=>"foo"}]' in production https://travis-ci.org/svenfuchs/test/builds/525372730
   end
 
-  INVALID_ENV_VARS = <<~vars.split("\n")
-    TESTS="1" ODOO_REPO="OCA/OCB
-    USER_LANGUAGE=en USER_REGION=US'
-    USER_LANGUAGE=fr USER_REGION=FR'
-    USER_LANGUAGE=ja USER_REGION=JP'
-    PYTHON_VERSION=3.5 SPHINX_VERSION='1.5' SETUPTOOLS_VERSION=30 CONDA_DEPENDENCIES=`echo $CONDA_DEPENDENCIES sphinx-astropy 'numpydoc<0.9'`"
-    SETUP_CMD='test' CONDA_ENVIRONMENT='conda_environment.yml' TEST_CMD="python -c $'import matplotlib\ntry:\n    import scipy\nexcept ImportError:\n    pass\nelse:\n    raise RuntimeError'"
-    SETUP_CMD='test' CONDA_ENVIRONMENT='conda_environment.yml' TEST_CMD="python -c $'import matplotlib\ntry:\n    import scipy\nexcept ImportError:\n    pass\nelse:\n    raise RuntimeError'"
-    SETUP_CMD='test' CONDA_ENVIRONMENT='conda_environment.yml' CONDA_DEPENDENCIES="scipy" TEST_CMD="python -c $'import matplotlib\nimport scipy'"
-    DISTRIB="conda" EXAMPLES="true" PYTHON=3.7"
-    APPS='[{"app":"ops","chart":"ops","namespace":"ops","deployment":"api"}]
-    GIT_EARLIEST_SUPPORTED_VERSION="v2.0.0
-    BUILD=stack STACK=stack --resolver=11.22'
-    USER_LANGUAGE=en USER_REGION=US'
-    FLEX_HOME=build-dep/bin/flex/"
-    secure:"Dupdb/HgNXKu8kOo7/RcpMCAyEZA8hLw77nVPTxXUo39UUI/ipnbUfRHamiWC2/MCqTEHu+1eReCmuFj2ULk4g+vi/8VYjrmX1TiHwikIFEAGrRRK0VkuWegqloYtXuxa7gtuQ96PWjqJ48op/WYyYvKiH0cFOMHsZOt5cl9PL4="
-    MAIN_CMD='flake8 count --select=F, E101, E111, E112, E113, E401, E402, E711, E722 --max-line-length=110' SETUP_CMD='gwcs"
-    CI_BUILD_TARGET="sitltest-rover sitltest-sub""
-    PHOEBE_ENABLE_PLOTTING = 'FALSE'
-    WEBSITE_CHANGED = git diff --name-only $TRAVIS_COMMIT_RANGE | grep -E "website/|docs/"
-  vars
-
   def invalid_env_var?(msg)
     return false unless msg[2] == :invalid_env_var
     var = msg[3][:var]
@@ -633,7 +640,7 @@ describe Travis::Yml, configs: true do
   def unknown_value(msg, &block)
     return false unless  msg[2] == :unknown_value
     return false unless ENUMS.include?(msg[1])
-    block ? block.call(msg[3][:value]) : true
+    UNKNOWN_VALUES.include?(msg[3][:value]) || block.call(msg[3][:value])
   end
 
   def alert?(msg)
