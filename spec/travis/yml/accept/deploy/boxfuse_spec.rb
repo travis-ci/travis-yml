@@ -112,18 +112,6 @@ describe Travis::Yml, 'boxfuse' do
     end
   end
 
-  describe 'args' do
-    describe 'given a str' do
-      yaml %(
-        deploy:
-          provider: boxfuse
-          args: str
-      )
-      it { should serialize_to deploy: [provider: 'boxfuse', args: 'str'] }
-      it { should_not have_msg }
-    end
-  end
-
   describe 'extra_args' do
     describe 'given a str' do
       yaml %(
@@ -131,9 +119,8 @@ describe Travis::Yml, 'boxfuse' do
           provider: boxfuse
           extra_args: str
       )
-      it { should serialize_to deploy: [provider: 'boxfuse', args: 'str'] }
-      it { should have_msg [:info, :deploy, :alias, type: :key, alias: 'extra_args', obj: 'args', provider: 'boxfuse'] }
-      xit { should have_msg [:warn, :deploy, :deprecated_key, :extra_args] }
+      it { should serialize_to deploy: [provider: 'boxfuse', extra_args: 'str'] }
+      it { should_not have_msg }
     end
   end
 end
