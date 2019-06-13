@@ -36,15 +36,14 @@ module Travis
 
             map :before_install, to: :seq, summary: 'Scripts to run before the install stage'
             map :install,        to: :seq, summary: 'Scripts to run at the install stage'
-            map :after_install,  to: :seq, summary: 'Scripts to run after the install stage'
             map :before_script,  to: :seq, summary: 'Scripts to run before the script stage'
             map :script,         to: :seq, summary: 'Scripts to run at the script stage'
+            map :before_cache,   to: :seq, summary: 'Scripts to run before storing a build cache'
             map :after_success,  to: :seq, summary: 'Scripts to run after a successful script stage'
             map :after_failure,  to: :seq, summary: 'Scripts to run after a failing script stage'
-            map :after_script,   to: :seq, summary: 'Scripts to run after the script stage'
-            map :before_cache,   to: :seq, summary: 'Scripts to run before storing a build cache'
             map :before_deploy,  to: :seq, summary: 'Scripts to run before the deploy stage'
             map :after_deploy,   to: :seq, summary: 'Scripts to run after the deploy stage'
+            map :after_script,   to: :seq, summary: 'Scripts to run as the last stage'
 
             export
           end
