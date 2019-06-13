@@ -23,6 +23,7 @@ module Travis
               map :sources,  to: :apt_sources, alias: :source, summary: 'Package sources', eg: 'ubuntu-toolchain-r-test'
               map :dist,     to: :str, summary: 'Distribution'
               map :update,   to: :bool, summary: 'Whether to run apt-get update'
+              map :config,   to: :apt_config
             end
           end
 
@@ -42,6 +43,14 @@ module Travis
               map :name,       to: :str
               map :sourceline, to: :str
               map :key_url,    to: :str
+            end
+          end
+
+          class AptConfig < Type::Map
+            register :apt_config
+
+            def define
+              map :retries, to: :bool
             end
           end
         end

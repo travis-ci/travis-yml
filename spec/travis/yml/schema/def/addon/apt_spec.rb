@@ -13,6 +13,15 @@ describe Travis::Yml::Schema::Def::Addon::Apt do
         {
           type: :object,
           properties: {
+            config: {
+              type: :object,
+              additionalProperties: false,
+              properties: {
+                retries: {
+                  type: :boolean
+                }
+              }
+            },
             packages: {
               '$ref': '#/definitions/type/strs',
               summary: 'Package names',
