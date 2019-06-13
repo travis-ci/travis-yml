@@ -300,6 +300,7 @@ describe Travis::Yml, configs: true do
     ),
     # should filter_secrets be valid?
     'matrix.include': %w(
+      after_install
       allow_failures
       apt
       canfail
@@ -383,6 +384,7 @@ describe Travis::Yml, configs: true do
     ),
     # is name actually unknown on root? or does it propagate to the jobs?
     root: %w(
+      after_install
       after_success:before_script
       allow_failure
       allow_failures
