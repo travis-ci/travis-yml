@@ -112,7 +112,7 @@ describe Travis::Yml do
 
     describe 'default' do
       let(:msg) { [:info, :key, :default, key: :key, default: 'default'] }
-      it { should eq '[info] on key: missing key, using the default default' }
+      it { should eq '[info] on key: missing key, using the default "default"' }
     end
 
     describe 'deprecated_key' do
