@@ -66,7 +66,7 @@ describe Travis::Yml::Web::V1 do
     it 'returns full messages' do
       post '/parse?defaults=true', 'rvm: 2.3', {}
       expect(body['full_messages']).to include(
-        '[info] on language: missing language, using the default ruby'
+        '[info] on language: missing language, using the default "ruby"'
       )
       expect(body['full_messages']).to include(
         '[info] on os: missing os, using the default linux'
