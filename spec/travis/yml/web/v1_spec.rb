@@ -69,7 +69,7 @@ describe Travis::Yml::Web::V1 do
         '[info] on language: missing language, using the default "ruby"'
       )
       expect(body['full_messages']).to include(
-        '[info] on os: missing os, using the default linux'
+        '[info] on os: missing os, using the default "linux"'
       )
     end
 
