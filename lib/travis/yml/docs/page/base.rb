@@ -10,7 +10,7 @@ module Travis
           include Render
 
           def_delegators :node, :namespace, :id, :root?, :aliases, :deprecated,
-            :deprecated?, :examples, :flags, :internal?, :see, :summary
+            :deprecated?, :enum, :examples, :flags, :internal?, :see, :summary
 
           attr_accessor :children
 
@@ -78,7 +78,7 @@ module Travis
             info = []
             info << 'deprecated' if deprecated?
             info << "alias: #{aliases.map { |name| "`#{name}`" }.join(', ')}" if aliases
-            info << "known values: #{enum.map { |value| "`#{value}`" }.join(', ')}" if enum
+            info << "known values: #{trunc(enum).map { |value| "`#{value}`" }.join(', ')}" if enum
             info = "(#{info.join(', ')})" if info.any?
             info = [summary, info].flatten.compact
             info << "[details](#{path})" if path
@@ -93,8 +93,8 @@ module Travis
             join(node.description) if node.description
           end
 
-          def enum
-            return unless enum = node.enum
+          def trunc(enum)
+            return unless enum
             enum = enum[0, 10] << '...' if enum.size > 10
             enum
           end
