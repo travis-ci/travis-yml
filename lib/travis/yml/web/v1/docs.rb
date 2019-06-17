@@ -21,15 +21,15 @@ module Travis::Yml::Web
               body {
                 display: flex;
               }
-              #index {
+              #menu {
                 padding: 0px 90px 0px 0px;
                 background-color: white;
               }
-              #index ul {
+              #menu ul, #index ul {
                 margin: 0;
                 padding-left: 1em;
               }
-              #index li {
+              #menu li, #index ul {
                 list-style-type: none;
               }
               #content {
@@ -53,8 +53,8 @@ module Travis::Yml::Web
             </style>
           </head>
           <body>
-            <div id="index">
-              <%= index %>
+            <div id="menu">
+              <%= menu %>
             </div>
             <div id="content">
               <%= content %>
@@ -84,7 +84,7 @@ module Travis::Yml::Web
       end
 
       def page(path)
-        Erb.new(LAYOUT).render(content(path), index(path))
+        Erb.new(LAYOUT).render(content(path), menu(path))
       end
 
       def content(path)
@@ -95,8 +95,8 @@ module Travis::Yml::Web
         Rack::Markdown::Renderer.render(markdown)
       end
 
-      def index(path)
-        markdown(Travis::Yml::Docs.index(path))
+      def menu(path)
+        markdown(Travis::Yml::Docs.menu(current: path, path: '/v1/docs'))
       end
 
       def pages
@@ -108,7 +108,7 @@ module Travis::Yml::Web
       end
 
       class Erb < Struct.new(:tpl)
-        def render(content, index)
+        def render(content, menu)
           ERB.new(tpl).result(binding)
         end
       end

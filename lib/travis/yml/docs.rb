@@ -7,22 +7,28 @@ module Travis
     module Docs
       extend self, Helper::Obj
 
-      def index(current)
-        Page::Index.new(pages, current).render
+      def menu(opts)
+        Page::Menu.new(pages, opts).render
       end
 
       def pages(opts = {})
         @pages ||= begin
           pages = root(opts).pages.uniq(&:full_id)
-          pages = pages + [page(:types), page(:flags)]
+          pages = pages + [static(:types, opts), static(:flags, opts)]
           pages = pages.map { |page| [page.full_id, page] }
           pages = pages.to_h.sort.to_h
-          only(pages, :root).merge(except(pages, :root))
+          pages = pages.merge('index' => index(pages, opts))
+          pages = only(pages, :root).merge(except(pages, :root))
+          pages
         end
       end
 
-      def page(name)
-        Page::Static.new(name)
+      def index(pages, opts)
+        Page::Index.new(pages.values.flatten, opts)
+      end
+
+      def static(name, opts)
+        Page::Static.new(name, opts)
       end
 
       def root(opts = {})
