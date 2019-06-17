@@ -25,7 +25,7 @@ describe Travis::Yml::Schema::Def::Conditions do
         summary: 'Condition to determine whether or not a build, stage, or job should be run',
         example: 'branch = master',
         see: {
-          'Conditional Builds, Stages, and Jobs' => 'https://docs.travis-ci.com/user/conditional-builds-stages-jobs/'
+          'Conditional Builds, Stages, and Jobs': 'https://docs.travis-ci.com/user/conditional-builds-stages-jobs/'
         }
       )
     end

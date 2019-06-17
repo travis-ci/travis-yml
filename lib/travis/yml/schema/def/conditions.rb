@@ -32,7 +32,7 @@ module Travis
 
             example 'branch = master'
 
-            see 'Conditional Builds, Stages, and Jobs' => 'https://docs.travis-ci.com/user/conditional-builds-stages-jobs/'
+            see 'Conditional Builds, Stages, and Jobs': 'https://docs.travis-ci.com/user/conditional-builds-stages-jobs/'
 
             export
           end

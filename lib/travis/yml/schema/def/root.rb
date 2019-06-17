@@ -30,7 +30,7 @@ module Travis
               The root node of your build config.
             str
 
-            see 'Job lifecycle' => 'https://docs.travis-ci.com/user/job-lifecycle/'
+            see 'Job lifecycle': 'https://docs.travis-ci.com/user/job-lifecycle/'
 
             map    :language,       required: true
             matrix :os,             required: true, to: :oss
