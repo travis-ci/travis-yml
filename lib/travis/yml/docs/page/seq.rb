@@ -16,7 +16,7 @@ module Travis
             if child.publish?
               [DISPLAY_TYPES[:seq] % child.title, child.path]
             else
-              [DISPLAY_TYPES[:seq] % type, path_to(type)]
+              [DISPLAY_TYPES[:seq] % child.type.to_s.capitalize, path_to(child.type)]
             end
           end
         end
