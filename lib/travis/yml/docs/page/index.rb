@@ -38,7 +38,7 @@ module Travis
           end
 
           def hide?(page)
-            HIDE.include?(page.id) || page.is_a?(Static)
+            HIDE.include?(page.id) || page.is_a?(Static) || page.deprecated?
           end
 
           def active?(page)
