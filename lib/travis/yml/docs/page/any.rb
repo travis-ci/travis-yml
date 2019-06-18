@@ -10,6 +10,12 @@ module Travis
             [self, *pages].select(&:publish?)
           end
 
+          # def children
+          #   normals = node.schemas.select(&:normal?)
+          #   pages = normals.map { |node| build(node).pages }.flatten
+          #   pages.map(&:children).flatten.compact.uniq
+          # end
+
           def types
             node.expand
           end

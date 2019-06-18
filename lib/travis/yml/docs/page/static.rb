@@ -22,6 +22,10 @@ module Travis
             name.to_s.capitalize
           end
 
+          def static?
+            true
+          end
+
           def render
             super("static/#{name}")
           end

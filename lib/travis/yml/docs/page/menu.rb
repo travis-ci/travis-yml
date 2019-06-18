@@ -7,18 +7,6 @@ module Travis
         class Menu < Obj.new(:pages, :opts)
           include Helper::Obj, Render
 
-          HIDE = %i(
-            arch
-            env_var
-            env_vars
-            import
-            matrix_entries
-            matrix_entry
-            os
-            service
-            stage
-          )
-
           def render
             super(:menu)
           end
@@ -32,8 +20,9 @@ module Travis
             pages = [root, *groups[:type], *groups[nil]]
             pages = pages.map(&:id).zip(pages).to_h
             groups = except(groups, :type)
-            curr = pages[current.to_sym]
-            curr.children = groups[current.sub(/s$/, '').to_sym] if curr
+            # curr = pages[current.to_sym]
+            # # this sucks, really gotta find a way for the page itself to know its children
+            # curr.children = groups[current.sub(/s$/, '').to_sym] if curr
             pages.values
           end
 
@@ -46,7 +35,7 @@ module Travis
           end
 
           def current
-            opts[:current]
+            opts[:current].to_s.sub('node/', '')
           end
         end
       end

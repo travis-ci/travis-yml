@@ -5,6 +5,7 @@ require 'travis/yml/docs/page/menu'
 require 'travis/yml/docs/page/scalar'
 require 'travis/yml/docs/page/seq'
 require 'travis/yml/docs/page/static'
+require 'travis/yml/docs/page/tree'
 
 module Travis
   module Yml

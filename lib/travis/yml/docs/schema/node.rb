@@ -76,6 +76,10 @@ module Travis
             flags.include?(:internal)
           end
 
+          def normal?
+            !!opts[:normal]
+          end
+
           def required?
             !!opts[:required]
           end

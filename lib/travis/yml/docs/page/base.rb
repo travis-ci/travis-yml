@@ -30,6 +30,10 @@ module Travis
             node.type
           end
 
+          # def children
+          #   []
+          # end
+
           def mappings
             {}
           end
@@ -40,7 +44,7 @@ module Travis
 
           def display_type
             if publish? && !scalar?
-              [title => path]
+              [title, path]
             elsif scalar? && enum
               [DISPLAY_TYPES[:enum] % DISPLAY_TYPES[node.type], path_to('types')]
             else
@@ -115,6 +119,10 @@ module Travis
             is_a?(Scalar)
           end
 
+          def static?
+            false
+          end
+
           def build(schema)
             Page.build(schema, opts)
           end
@@ -152,6 +160,12 @@ module Travis
 
           def inspect
             'page'
+          end
+
+          def inspect
+            type = self.class.name.sub('Travis::Yml::Docs::', '')
+            pairs = compact(id: id, type: type)
+            '#<%s %s>' % [type, pairs.map { |pair| pair.join('=') }.join(' ')]
           end
         end
       end

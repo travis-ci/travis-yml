@@ -21,6 +21,10 @@ module Travis
             [self, *includes.map(&:pages), *mappings.values.map(&:pages)].flatten
           end
 
+          # def children
+          #   mappings.values.select(&:publish?)
+          # end
+
           # def walk(obj = nil, &block)
           #   yield *[obj].compact, self
           #   mappings.each { |_, page| page.walk(*[obj].compact, &block) }
