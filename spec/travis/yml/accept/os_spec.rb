@@ -121,8 +121,8 @@ describe Travis::Yml, 'os' do
       - os: osx
       osx_image: str
     )
-    it { should serialize_to os: ['linux'], osx_image: 'str' }
+    it { should serialize_to os: ['linux'], osx_image: ['str'] }
     it { should have_msg [:error, :os, :invalid_type, expected: :str, actual: :map, value: { os: 'osx' }] }
-    it { should have_msg [:warn, :osx_image, :unsupported, on_key: 'os', on_value: 'linux', key: 'osx_image', value: 'str'] }
+    it { should have_msg [:warn, :osx_image, :unsupported, on_key: 'os', on_value: 'linux', key: 'osx_image', value: ['str']] }
   end
 end

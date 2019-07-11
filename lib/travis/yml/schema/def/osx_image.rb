@@ -5,13 +5,12 @@ module Travis
   module Yml
     module Schema
       module Def
-        class OsxImage < Type::Str
+        class OsxImage < Type::Seq
           register :osx_image
 
           def define
             summary 'OSX image to use for the build environment'
             supports :only, os: :osx
-            edge
           end
         end
       end

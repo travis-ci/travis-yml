@@ -719,7 +719,23 @@
             "$ref": "#/definitions/type/group"
           },
           "osx_image": {
-            "type": "string",
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "only": {
+                  "os": [
+                    "osx"
+                  ]
+                },
+                "normal": true
+              },
+              {
+                "type": "string"
+              }
+            ],
             "summary": "OSX image to use for the build environment",
             "only": {
               "os": [
@@ -727,7 +743,6 @@
               ]
             },
             "flags": [
-              "edge",
               "expand"
             ]
           },

@@ -19,7 +19,7 @@ describe Travis::Yml, 'root' do
       os: osx
       language: ruby
     )
-    it { should serialize_to language: 'ruby', os: ['osx'], osx_image: 'image'  }
+    it { should serialize_to language: 'ruby', os: ['osx'], osx_image: ['image'] }
   end
 
   describe 'given an invalid type' do
