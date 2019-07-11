@@ -5,7 +5,8 @@ module Travis
     module Support
       class Merge < Obj.new(:lft, :rgt, :merge_mode)
         def apply
-          mode = lft.merge_mode || self.merge_mode || :merge
+          mode = lft.merge_mode if lft.respond_to?(:merge_mode)
+          mode ||= self.merge_mode || :merge
           send(mode, lft, rgt)
         end
 
