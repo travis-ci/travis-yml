@@ -189,6 +189,18 @@ describe Travis::Yml, 'matrix' do
     it { expect(matrix.rows).to eq rows }
   end
 
+  describe 'duplicate jobs' do
+    let(:config) do
+      [
+        { os: 'linux', osx_image: nil },
+        { os: 'linux', osx_image: nil },
+        { os: 'osx', osx_image: 'xcode9.4' },
+        { os: 'osx', osx_image: 'xcode10.2' }
+      ]
+    end
+
+  end
+
   describe 'matrix include' do
     let(:config) do
       {
