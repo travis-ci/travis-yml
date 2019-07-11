@@ -32,7 +32,7 @@ module Travis
             map :services
 
             map :group
-            map :osx_image
+            matrix :osx_image
 
             map :before_install, to: :seq, summary: 'Scripts to run before the install stage'
             map :install,        to: :seq, summary: 'Scripts to run at the install stage'

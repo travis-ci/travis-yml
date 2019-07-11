@@ -39,6 +39,7 @@ describe Travis::Yml do
         nix
         node_js
         os
+        osx_image
         otp_release
         perl
         perl6

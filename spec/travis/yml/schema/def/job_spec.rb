@@ -39,7 +39,8 @@ describe Travis::Yml::Schema::Def::Job do
           type: :string,
           summary: 'OSX image to use for the build environment',
           flags: [
-            :edge
+            :edge,
+            :expand
           ],
           only: {
             os: [
