@@ -3,7 +3,7 @@ require 'json'
 describe Travis::Yml::Schema::Def::Job do
   subject { Travis::Yml.schema[:definitions][:type][:job] }
 
-  xit { puts JSON.pretty_generate(subject) }
+  # it { puts JSON.pretty_generate(subject) }
 
   it do
     should eq(
@@ -36,17 +36,32 @@ describe Travis::Yml::Schema::Def::Job do
           '$ref': '#/definitions/type/group'
         },
         osx_image: {
-          type: :string,
-          summary: 'OSX image to use for the build environment',
-          flags: [
-            :edge,
-            :expand
+          anyOf: [
+            {
+              type: :array,
+              items: {
+                type: :string
+              },
+              only: {
+                os: [
+                  'osx'
+                ]
+              },
+              normal: true
+            },
+            {
+              type: :string
+            }
           ],
+          summary: 'OSX image to use for the build environment',
           only: {
             os: [
               'osx'
             ]
-          }
+          },
+          flags: [
+            :expand,
+          ]
         },
         before_install: {
           '$ref': '#/definitions/type/strs',
