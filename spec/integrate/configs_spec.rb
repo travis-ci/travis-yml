@@ -121,6 +121,7 @@ describe Travis::Yml, configs: true do
     _addons
     after_acript
     alwayss
+    api-key
     before_srcipt
     bundle
     chnage
@@ -175,6 +176,7 @@ describe Travis::Yml, configs: true do
     { key: 'sudo', info: 'this key has no effect anymore' },
     { key: 'branches', info: 'not supported any more' },
     { key: 'github_token', info: 'not supported any more' },
+    { key: 'skip_cleanup', info: 'not supported in dpl v2, use cleanup' },
     { value: '__sardonyx__', info: 'experimental stack language' }
   ]
 
@@ -581,7 +583,7 @@ describe Travis::Yml, configs: true do
 
   def deprecated?(msg)
     return unless msg[2] == :deprecated_key || msg[2] == :deprecated_value
-    DEPRECATIONS.include?(msg[3])
+    DEPRECATIONS.include?(msg[3].reject { |key, _| key == :provider })
   end
 
   def yaml_anchor_key?(msg)

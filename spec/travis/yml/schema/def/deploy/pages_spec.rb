@@ -67,7 +67,7 @@ describe Travis::Yml::Schema::Def::Deploy::Pages do
               github_url: {
                 type: :string
               },
-              no_keep_history: {
+              keep_history: {
                 type: :boolean
               },
               verbose: {

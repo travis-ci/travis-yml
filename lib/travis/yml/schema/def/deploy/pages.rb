@@ -18,7 +18,7 @@ module Travis
               map :email,              to: :str
               map :name,               to: :str
               map :github_url,         to: :str
-              map :no_keep_history,    to: :bool
+              map :keep_history,       to: :bool
               map :verbose,            to: :bool
               map :allow_empty_commit, to: :bool
               map :committer_from_gh,  to: :bool
