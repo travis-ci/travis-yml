@@ -25,14 +25,14 @@ describe Travis::Yml, 'snap' do
     end
   end
 
-  describe 'skip_cleanup' do
+  describe 'cleanup' do
     describe 'given a str' do
       yaml %(
         deploy:
           provider: snap
-          skip_cleanup: true
+          cleanup: true
       )
-      it { should serialize_to deploy: [provider: 'snap', skip_cleanup: true] }
+      it { should serialize_to deploy: [provider: 'snap', cleanup: true] }
       it { should_not have_msg }
     end
   end

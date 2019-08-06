@@ -16,9 +16,11 @@ describe Travis::Yml, dpl: true, alert: false do
     config = Dpl::Examples.new(provider).full_config
     config = config.merge(provider: name)
 
+    filter = ->(msg) { msg[2] == :deprecated_key && msg[3][:key] == 'skip_cleanup' }
+
     describe provider.registry_key.to_s do
       yaml YAML.dump(stringify(deploy: [config]))
-      it { should_not have_msg }
+      it { should_not have_msg(&filter) }
     end
   end
 

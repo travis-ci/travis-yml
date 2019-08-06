@@ -30,8 +30,12 @@ describe Travis::Yml::Schema::Def::Deploy::Hackage do
               allow_failure: {
                 type: :boolean
               },
-              skip_cleanup: {
+              cleanup: {
                 type: :boolean
+              },
+              skip_cleanup: {
+                type: :boolean,
+                deprecated: 'not supported in dpl v2, use cleanup'
               },
               edge: {
                 '$ref': '#/definitions/deploy/edge'

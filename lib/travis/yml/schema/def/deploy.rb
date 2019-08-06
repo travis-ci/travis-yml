@@ -47,7 +47,8 @@ module Travis
               map :on,            to: :conditions, alias: :true
               map :run,           to: :seq
               map :allow_failure, to: :bool
-              map :skip_cleanup,  to: :bool
+              map :cleanup,       to: :bool
+              map :skip_cleanup,  to: :bool, deprecated: 'not supported in dpl v2, use cleanup'
               map :edge,          to: :edge
 
               # so called option specific branch hashes are valid, but
