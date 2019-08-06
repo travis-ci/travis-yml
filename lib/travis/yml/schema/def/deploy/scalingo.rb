@@ -10,12 +10,14 @@ module Travis
             register :scalingo
 
             def define
-              map :username, to: :secure, strict: false, alias: :user
-              map :password, to: :secure
-              map :api_key,  to: :secure, alias: :api_token
-              map :remote,   to: :str
-              map :branch,   to: :str
-              map :app,      to: :str
+              map :api_token, to: :secure, alias: :api_key
+              map :username,  to: :secure, strict: false, alias: :user
+              map :password,  to: :secure
+              map :remote,    to: :str
+              map :branch,    to: :str
+              map :app,       to: :str
+              map :region,    to: :str
+              map :timeout,   to: :num
             end
           end
         end

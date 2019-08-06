@@ -11,6 +11,25 @@ describe Travis::Yml::Schema::Def::Deploy::Openshift do
           {
             type: :object,
             properties: {
+              token: {
+                '$ref': '#/definitions/type/secure',
+              },
+              user: {
+                '$ref': '#/definitions/type/secure',
+                strict: false
+              },
+              password: {
+                '$ref': '#/definitions/type/secure'
+              },
+              server: {
+                type: :string
+              },
+              project: {
+                type: :string
+              },
+              app: {
+                type: :string
+              },
               provider: {
                 type: :string,
                 enum: [
@@ -40,46 +59,6 @@ describe Travis::Yml::Schema::Def::Deploy::Openshift do
               edge: {
                 '$ref': '#/definitions/deploy/edge'
               },
-              user: {
-                '$ref': '#/definitions/type/secure',
-                strict: false
-              },
-              password: {
-                '$ref': '#/definitions/type/secure'
-              },
-              domain: {
-                anyOf: [
-                  {
-                    type: :object,
-                    patternProperties: {
-                      '.*': {
-                        type: :string
-                      }
-                    }
-                  },
-                  {
-                    type: :string
-                  }
-                ]
-              },
-              app: {
-                anyOf: [
-                  {
-                    type: :object,
-                    patternProperties: {
-                      '.*': {
-                        type: :string
-                      }
-                    }
-                  },
-                  {
-                    type: :string
-                  }
-                ]
-              },
-              deployment_branch: {
-                type: :string
-              }
             },
             additionalProperties: false,
             normal: true,

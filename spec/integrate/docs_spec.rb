@@ -18,6 +18,24 @@ describe Travis::Yml, docs: true, alert: false do
     'docs/enterprise',                # not travis.yml snippets. gotta filter these using {: data-file=".travis.yml"}
     'docs/languages/r/015',
     'docs/languages/julia/002',
+
+    # update docs for dpl v2
+    'docs_2016/deployment/deis/001',
+    'docs_2016/deployment/deis/002',
+    'docs_2016/deployment/openshift/001',
+    'docs_2016/deployment/openshift/007',
+    'docs/deployment/bitballoon/001',
+    'docs/deployment/bitballoon/002',
+    'docs/deployment/catalyze/001',
+    'docs/deployment/catalyze/003',
+    'docs/deployment/deis/001',
+    'docs/deployment/openshift/001',
+    'docs/deployment/openshift/003',
+    'docs/deployment/openshift/004',
+    'docs/deployment/openshift/009',
+    'docs/deployment/pages/001',
+    'docs/deployment/openshift/001',
+    'docs/deployment/openshift/007',
   ]
 
   LANG = {

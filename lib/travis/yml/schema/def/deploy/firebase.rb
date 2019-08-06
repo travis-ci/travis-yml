@@ -11,6 +11,7 @@ module Travis
               map :project,  to: :str
               map :token,    to: :secure
               map :message,  to: :str
+              map :only,     to: :str
             end
           end
         end

@@ -1,20 +1,38 @@
-describe Travis::Yml::Schema::Def::Deploy::Catalyze do
-  subject { Travis::Yml.schema[:definitions][:deploy][:catalyze] }
+describe Travis::Yml::Schema::Def::Deploy::Netlify do
+  subject { Travis::Yml.schema[:definitions][:deploy][:netlify] }
 
   # it { puts JSON.pretty_generate(subject) }
 
   it do
     should eq(
-      '$id': :catalyze,
-        title: 'Catalyze',
+      '$id': :netlify,
+        title: 'Netlify',
         anyOf: [
           {
             type: :object,
             properties: {
+              site: {
+                type: :string
+              },
+              auth: {
+                '$ref': '#/definitions/type/secure'
+              },
+              dir: {
+                type: :string
+              },
+              functions: {
+                type: :string
+              },
+              message: {
+                type: :string
+              },
+              prod: {
+                type: :boolean
+              },
               provider: {
                 type: :string,
                 enum: [
-                  'catalyze'
+                  'netlify'
                 ],
                 strict: true
               },
@@ -40,12 +58,6 @@ describe Travis::Yml::Schema::Def::Deploy::Catalyze do
               edge: {
                 '$ref': '#/definitions/deploy/edge'
               },
-              target: {
-                type: :string
-              },
-              path: {
-                type: :string
-              }
             },
             additionalProperties: false,
             normal: true,
@@ -62,7 +74,7 @@ describe Travis::Yml::Schema::Def::Deploy::Catalyze do
           {
             type: :string,
             enum: [
-              'catalyze'
+              'netlify'
             ],
             strict: true
           }

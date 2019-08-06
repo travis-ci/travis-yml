@@ -149,17 +149,15 @@ describe Travis::Yml::Schema::Def::Root do
         atlas
         azure_web_apps
         bintray
-        bitballoon
         bluemixcloudfoundry
         boxfuse
         cargo
-        catalyze
         chef_supermarket
         cloud66
         cloudfiles
         cloudfoundry
         codedeploy
-        deis
+        datica
         elasticbeanstalk
         engineyard
         firebase
@@ -170,6 +168,7 @@ describe Travis::Yml::Schema::Def::Root do
         heroku
         lambda
         launchpad
+        netlify
         npm
         openshift
         opsworks

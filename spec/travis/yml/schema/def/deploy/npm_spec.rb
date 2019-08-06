@@ -11,6 +11,25 @@ describe Travis::Yml::Schema::Def::Deploy::Npm do
           {
             type: :object,
             properties: {
+              registry: {
+                type: :string
+              },
+              email: {
+                '$ref': '#/definitions/type/secure',
+                strict: false
+              },
+              api_token: {
+                '$ref': '#/definitions/type/secure',
+                aliases: [
+                  :api_key
+                ]
+              },
+              access: {
+                type: :string
+              },
+              tag: {
+                type: :string
+              },
               provider: {
                 type: :string,
                 enum: [
@@ -40,16 +59,6 @@ describe Travis::Yml::Schema::Def::Deploy::Npm do
               edge: {
                 '$ref': '#/definitions/deploy/edge'
               },
-              email: {
-                '$ref': '#/definitions/type/secure',
-                strict: false
-              },
-              api_key: {
-                '$ref': '#/definitions/type/secure'
-              },
-              tag: {
-                type: :string
-              }
             },
             additionalProperties: false,
             normal: true,

@@ -11,6 +11,22 @@ describe Travis::Yml::Schema::Def::Deploy::Transifex do
           {
             type: :object,
             properties: {
+              api_token: {
+                '$ref': '#/definitions/type/secure'
+              },
+              username: {
+                '$ref': '#/definitions/type/secure',
+                strict: false
+              },
+              password: {
+                '$ref': '#/definitions/type/secure'
+              },
+              hostname: {
+                type: :string
+              },
+              cli_version: {
+                type: :string
+              },
               provider: {
                 type: :string,
                 enum: [
@@ -39,19 +55,6 @@ describe Travis::Yml::Schema::Def::Deploy::Transifex do
               },
               edge: {
                 '$ref': '#/definitions/deploy/edge'
-              },
-              username: {
-                '$ref': '#/definitions/type/secure',
-                strict: false
-              },
-              password: {
-                '$ref': '#/definitions/type/secure'
-              },
-              hostname: {
-                type: :string
-              },
-              cli_version: {
-                type: :string
               }
             },
             additionalProperties: false,

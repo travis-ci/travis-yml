@@ -27,18 +27,6 @@ describe Travis::Yml, 'openshift' do
     end
   end
 
-  describe 'domain' do
-    describe 'given a str' do
-      yaml %(
-        deploy:
-          provider: openshift
-          domain: str
-      )
-      it { should serialize_to deploy: [provider: 'openshift', domain: 'str'] }
-      it { should_not have_msg }
-    end
-  end
-
   describe 'app' do
     describe 'given a str' do
       yaml %(
@@ -47,18 +35,6 @@ describe Travis::Yml, 'openshift' do
           app: str
       )
       it { should serialize_to deploy: [provider: 'openshift', app: 'str'] }
-      it { should_not have_msg }
-    end
-  end
-
-  describe 'deployment_branch' do
-    describe 'given a str' do
-      yaml %(
-        deploy:
-          provider: openshift
-          deployment_branch: str
-      )
-      it { should serialize_to deploy: [provider: 'openshift', deployment_branch: 'str'] }
       it { should_not have_msg }
     end
   end

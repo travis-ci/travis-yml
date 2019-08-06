@@ -59,6 +59,9 @@ describe Travis::Yml::Schema::Def::Deploy::BluemixCloudfoundry do
               region: {
                 type: :string
               },
+              buildpack: {
+                type: :string
+              },
               manifest: {
                 type: :string
               },

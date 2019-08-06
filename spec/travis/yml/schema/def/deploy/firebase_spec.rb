@@ -11,6 +11,18 @@ describe Travis::Yml::Schema::Def::Deploy::Firebase do
           {
             type: :object,
             properties: {
+              project: {
+                type: :string
+              },
+              token: {
+                '$ref': '#/definitions/type/secure'
+              },
+              message: {
+                type: :string
+              },
+              only: {
+                type: :string
+              },
               provider: {
                 type: :string,
                 enum: [
@@ -40,15 +52,6 @@ describe Travis::Yml::Schema::Def::Deploy::Firebase do
               edge: {
                 '$ref': '#/definitions/deploy/edge'
               },
-              project: {
-                type: :string
-              },
-              token: {
-                '$ref': '#/definitions/type/secure'
-              },
-              message: {
-                type: :string
-              }
             },
             additionalProperties: false,
             normal: true,

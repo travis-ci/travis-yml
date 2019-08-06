@@ -14,15 +14,15 @@ describe Travis::Yml, 'npm' do
     end
   end
 
-  describe 'api_key' do
+  describe 'api_token' do
     describe 'given a secure' do
       yaml %(
         deploy:
           provider: npm
-          api_key:
+          api_token:
             secure: secure
       )
-      it { should serialize_to deploy: [provider: 'npm', api_key: { secure: 'secure' }] }
+      it { should serialize_to deploy: [provider: 'npm', api_token: { secure: 'secure' }] }
       it { should_not have_msg }
     end
   end

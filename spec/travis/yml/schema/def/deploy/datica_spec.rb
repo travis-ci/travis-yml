@@ -1,12 +1,12 @@
-describe Travis::Yml::Schema::Def::Deploy::Deis do
-  subject { Travis::Yml.schema[:definitions][:deploy][:deis] }
+describe Travis::Yml::Schema::Def::Deploy::Datica do
+  subject { Travis::Yml.schema[:definitions][:deploy][:datica] }
 
   # it { puts JSON.pretty_generate(subject) }
 
   it do
     should eq(
-      '$id': :deis,
-        title: 'Deis',
+      '$id': :datica,
+        title: 'Datica',
         anyOf: [
           {
             type: :object,
@@ -14,7 +14,7 @@ describe Travis::Yml::Schema::Def::Deploy::Deis do
               provider: {
                 type: :string,
                 enum: [
-                  'deis'
+                  'datica'
                 ],
                 strict: true
               },
@@ -40,24 +40,11 @@ describe Travis::Yml::Schema::Def::Deploy::Deis do
               edge: {
                 '$ref': '#/definitions/deploy/edge'
               },
-              controller: {
+              target: {
                 type: :string
               },
-              username: {
-                '$ref': '#/definitions/type/secure',
-                strict: false
-              },
-              password: {
-                '$ref': '#/definitions/type/secure'
-              },
-              app: {
+              path: {
                 type: :string
-              },
-              cli_version: {
-                type: :string
-              },
-              verbose: {
-                type: :boolean
               }
             },
             additionalProperties: false,
@@ -75,7 +62,7 @@ describe Travis::Yml::Schema::Def::Deploy::Deis do
           {
             type: :string,
             enum: [
-              'deis'
+              'datica'
             ],
             strict: true
           }

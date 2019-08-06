@@ -2280,6 +2280,9 @@
               "app_name": {
                 "type": "string"
               },
+              "buildpack": {
+                "type": "string"
+              },
               "manifest": {
                 "type": "string"
               },
@@ -2577,74 +2580,6 @@
         ],
         "normal": true
       },
-      "bitballoon": {
-        "$id": "bitballoon",
-        "title": "Bitballoon",
-        "anyOf": [
-          {
-            "type": "object",
-            "properties": {
-              "access_token": {
-                "$ref": "#/definitions/type/secure"
-              },
-              "site_id": {
-                "$ref": "#/definitions/type/secure"
-              },
-              "local_dir": {
-                "type": "string"
-              },
-              "provider": {
-                "type": "string",
-                "enum": [
-                  "bitballoon"
-                ],
-                "strict": true
-              },
-              "on": {
-                "$ref": "#/definitions/deploy/conditions",
-                "aliases": [
-                  "true"
-                ]
-              },
-              "run": {
-                "$ref": "#/definitions/type/strs"
-              },
-              "allow_failure": {
-                "type": "boolean"
-              },
-              "cleanup": {
-                "type": "boolean"
-              },
-              "skip_cleanup": {
-                "type": "boolean",
-                "deprecated": "not supported in dpl v2, use cleanup"
-              },
-              "edge": {
-                "$ref": "#/definitions/deploy/edge"
-              }
-            },
-            "additionalProperties": false,
-            "normal": true,
-            "prefix": {
-              "key": "provider",
-              "only": [
-                "str"
-              ]
-            },
-            "required": [
-              "provider"
-            ]
-          },
-          {
-            "type": "string",
-            "enum": [
-              "bitballoon"
-            ],
-            "strict": true
-          }
-        ],
-        "normal": true
-      },
       "bluemixcloudfoundry": {
         "$id": "bluemixcloudfoundry",
         "title": "Bluemixcloudfoundry",
@@ -2669,6 +2604,9 @@
                 "type": "string"
               },
               "region": {
+                "type": "string"
+              },
+              "buildpack": {
                 "type": "string"
               },
               "manifest": {
@@ -2893,71 +2831,6 @@
             "type": "string",
             "enum": [
               "cargo"
-            ],
-            "strict": true
-          }
-        ],
-        "normal": true
-      },
-      "catalyze": {
-        "$id": "catalyze",
-        "title": "Catalyze",
-        "anyOf": [
-          {
-            "type": "object",
-            "properties": {
-              "target": {
-                "type": "string"
-              },
-              "path": {
-                "type": "string"
-              },
-              "provider": {
-                "type": "string",
-                "enum": [
-                  "catalyze"
-                ],
-                "strict": true
-              },
-              "on": {
-                "$ref": "#/definitions/deploy/conditions",
-                "aliases": [
-                  "true"
-                ]
-              },
-              "run": {
-                "$ref": "#/definitions/type/strs"
-              },
-              "allow_failure": {
-                "type": "boolean"
-              },
-              "cleanup": {
-                "type": "boolean"
-              },
-              "skip_cleanup": {
-                "type": "boolean",
-                "deprecated": "not supported in dpl v2, use cleanup"
-              },
-              "edge": {
-                "$ref": "#/definitions/deploy/edge"
-              }
-            },
-            "additionalProperties": false,
-            "normal": true,
-            "prefix": {
-              "key": "provider",
-              "only": [
-                "str"
-              ]
-            },
-            "required": [
-              "provider"
-            ]
-          },
-          {
-            "type": "string",
-            "enum": [
-              "catalyze"
             ],
             "strict": true
           }
@@ -3201,6 +3074,9 @@
               "key": {
                 "type": "string"
               },
+              "buildpack": {
+                "type": "string"
+              },
               "manifest": {
                 "type": "string"
               },
@@ -3415,36 +3291,23 @@
           }
         ]
       },
-      "deis": {
-        "$id": "deis",
-        "title": "Deis",
+      "datica": {
+        "$id": "datica",
+        "title": "Datica",
         "anyOf": [
           {
             "type": "object",
             "properties": {
-              "controller": {
+              "target": {
                 "type": "string"
               },
-              "username": {
-                "$ref": "#/definitions/type/secure",
-                "strict": false
-              },
-              "password": {
-                "$ref": "#/definitions/type/secure"
-              },
-              "app": {
+              "path": {
                 "type": "string"
-              },
-              "cli_version": {
-                "type": "string"
-              },
-              "verbose": {
-                "type": "boolean"
               },
               "provider": {
                 "type": "string",
                 "enum": [
-                  "deis"
+                  "datica"
                 ],
                 "strict": true
               },
@@ -3486,7 +3349,7 @@
           {
             "type": "string",
             "enum": [
-              "deis"
+              "datica"
             ],
             "strict": true
           }
@@ -3769,6 +3632,9 @@
                 "$ref": "#/definitions/type/secure"
               },
               "message": {
+                "type": "string"
+              },
+              "only": {
                 "type": "string"
               },
               "provider": {
@@ -4454,6 +4320,83 @@
         ],
         "normal": true
       },
+      "netlify": {
+        "$id": "netlify",
+        "title": "Netlify",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "site": {
+                "type": "string"
+              },
+              "auth": {
+                "$ref": "#/definitions/type/secure"
+              },
+              "dir": {
+                "type": "string"
+              },
+              "functions": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              },
+              "prod": {
+                "type": "boolean"
+              },
+              "provider": {
+                "type": "string",
+                "enum": [
+                  "netlify"
+                ],
+                "strict": true
+              },
+              "on": {
+                "$ref": "#/definitions/deploy/conditions",
+                "aliases": [
+                  "true"
+                ]
+              },
+              "run": {
+                "$ref": "#/definitions/type/strs"
+              },
+              "allow_failure": {
+                "type": "boolean"
+              },
+              "cleanup": {
+                "type": "boolean"
+              },
+              "skip_cleanup": {
+                "type": "boolean",
+                "deprecated": "not supported in dpl v2, use cleanup"
+              },
+              "edge": {
+                "$ref": "#/definitions/deploy/edge"
+              }
+            },
+            "additionalProperties": false,
+            "normal": true,
+            "prefix": {
+              "key": "provider",
+              "only": [
+                "str"
+              ]
+            },
+            "required": [
+              "provider"
+            ]
+          },
+          {
+            "type": "string",
+            "enum": [
+              "netlify"
+            ],
+            "strict": true
+          }
+        ],
+        "normal": true
+      },
       "npm": {
         "$id": "npm",
         "title": "Npm",
@@ -4461,12 +4404,21 @@
           {
             "type": "object",
             "properties": {
+              "registry": {
+                "type": "string"
+              },
+              "api_token": {
+                "$ref": "#/definitions/type/secure",
+                "aliases": [
+                  "api_key"
+                ]
+              },
               "email": {
                 "$ref": "#/definitions/type/secure",
                 "strict": false
               },
-              "api_key": {
-                "$ref": "#/definitions/type/secure"
+              "access": {
+                "type": "string"
               },
               "tag": {
                 "type": "string"
@@ -4530,6 +4482,9 @@
           {
             "type": "object",
             "properties": {
+              "token": {
+                "$ref": "#/definitions/type/secure"
+              },
               "user": {
                 "$ref": "#/definitions/type/secure",
                 "strict": false
@@ -4537,37 +4492,13 @@
               "password": {
                 "$ref": "#/definitions/type/secure"
               },
-              "domain": {
-                "anyOf": [
-                  {
-                    "type": "object",
-                    "patternProperties": {
-                      ".*": {
-                        "type": "string"
-                      }
-                    }
-                  },
-                  {
-                    "type": "string"
-                  }
-                ]
+              "server": {
+                "type": "string"
+              },
+              "project": {
+                "type": "string"
               },
               "app": {
-                "anyOf": [
-                  {
-                    "type": "object",
-                    "patternProperties": {
-                      ".*": {
-                        "type": "string"
-                      }
-                    }
-                  },
-                  {
-                    "type": "string"
-                  }
-                ]
-              },
-              "deployment_branch": {
                 "type": "string"
               },
               "provider": {
@@ -4839,7 +4770,7 @@
               "github_url": {
                 "type": "string"
               },
-              "keep_history": {
+              "no_keep_history": {
                 "type": "boolean"
               },
               "verbose": {
@@ -4926,9 +4857,6 @@
             "$ref": "#/definitions/deploy/bintray"
           },
           {
-            "$ref": "#/definitions/deploy/bitballoon"
-          },
-          {
             "$ref": "#/definitions/deploy/bluemixcloudfoundry"
           },
           {
@@ -4936,9 +4864,6 @@
           },
           {
             "$ref": "#/definitions/deploy/cargo"
-          },
-          {
-            "$ref": "#/definitions/deploy/catalyze"
           },
           {
             "$ref": "#/definitions/deploy/chef_supermarket"
@@ -4956,7 +4881,7 @@
             "$ref": "#/definitions/deploy/codedeploy"
           },
           {
-            "$ref": "#/definitions/deploy/deis"
+            "$ref": "#/definitions/deploy/datica"
           },
           {
             "$ref": "#/definitions/deploy/elasticbeanstalk"
@@ -4987,6 +4912,9 @@
           },
           {
             "$ref": "#/definitions/deploy/launchpad"
+          },
+          {
+            "$ref": "#/definitions/deploy/netlify"
           },
           {
             "$ref": "#/definitions/deploy/npm"
@@ -5047,9 +4975,12 @@
           {
             "type": "object",
             "properties": {
-              "user": {
+              "username": {
                 "$ref": "#/definitions/type/secure",
-                "strict": false
+                "strict": false,
+                "aliases": [
+                  "user"
+                ]
               },
               "password": {
                 "$ref": "#/definitions/type/secure"
@@ -5096,7 +5027,7 @@
               ]
             },
             "required": [
-              "user",
+              "username",
               "password",
               "provider"
             ]
@@ -5569,6 +5500,12 @@
           {
             "type": "object",
             "properties": {
+              "api_token": {
+                "$ref": "#/definitions/type/secure",
+                "aliases": [
+                  "api_key"
+                ]
+              },
               "username": {
                 "$ref": "#/definitions/type/secure",
                 "strict": false,
@@ -5579,12 +5516,6 @@
               "password": {
                 "$ref": "#/definitions/type/secure"
               },
-              "api_key": {
-                "$ref": "#/definitions/type/secure",
-                "aliases": [
-                  "api_token"
-                ]
-              },
               "remote": {
                 "type": "string"
               },
@@ -5593,6 +5524,12 @@
               },
               "app": {
                 "type": "string"
+              },
+              "region": {
+                "type": "string"
+              },
+              "timeout": {
+                "type": "number"
               },
               "provider": {
                 "type": "string",
@@ -5962,6 +5899,9 @@
           {
             "type": "object",
             "properties": {
+              "api_token": {
+                "$ref": "#/definitions/type/secure"
+              },
               "username": {
                 "$ref": "#/definitions/type/secure",
                 "strict": false

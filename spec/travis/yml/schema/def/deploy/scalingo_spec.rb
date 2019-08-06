@@ -11,6 +11,37 @@ describe Travis::Yml::Schema::Def::Deploy::Scalingo do
           {
             type: :object,
             properties: {
+              api_token: {
+                '$ref': '#/definitions/type/secure',
+                aliases: [
+                  :api_key
+                ]
+              },
+              username: {
+                '$ref': '#/definitions/type/secure',
+                strict: false,
+                aliases: [
+                  :user
+                ]
+              },
+              password: {
+                '$ref': '#/definitions/type/secure'
+              },
+              remote: {
+                type: :string
+              },
+              branch: {
+                type: :string
+              },
+              region: {
+                type: :string
+              },
+              app: {
+                type: :string
+              },
+              timeout: {
+                type: :number
+              },
               provider: {
                 type: :string,
                 enum: [
@@ -40,31 +71,6 @@ describe Travis::Yml::Schema::Def::Deploy::Scalingo do
               edge: {
                 '$ref': '#/definitions/deploy/edge'
               },
-              username: {
-                '$ref': '#/definitions/type/secure',
-                strict: false,
-                aliases: [
-                  :user
-                ]
-              },
-              password: {
-                '$ref': '#/definitions/type/secure'
-              },
-              api_key: {
-                '$ref': '#/definitions/type/secure',
-                aliases: [
-                  :api_token
-                ]
-              },
-              remote: {
-                type: :string
-              },
-              branch: {
-                type: :string
-              },
-              app: {
-                type: :string
-              }
             },
             additionalProperties: false,
             normal: true,

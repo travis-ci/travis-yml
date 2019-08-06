@@ -56,6 +56,9 @@ describe Travis::Yml::Schema::Def::Deploy::Anynines do
               app_name: {
                 type: :string
               },
+              buildpack: {
+                type: :string
+              },
               manifest: {
                 type: :string
               }

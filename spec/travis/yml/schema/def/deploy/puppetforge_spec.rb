@@ -11,9 +11,12 @@ describe Travis::Yml::Schema::Def::Deploy::Puppetforge do
           {
             type: :object,
             properties: {
-              user: {
+              username: {
                 '$ref': '#/definitions/type/secure',
-                strict: false
+                strict: false,
+                aliases: [
+                  :user
+                ]
               },
               password: {
                 '$ref': '#/definitions/type/secure'
@@ -60,7 +63,7 @@ describe Travis::Yml::Schema::Def::Deploy::Puppetforge do
               ]
             },
             required: [
-              :user,
+              :username,
               :password,
               :provider,
             ]

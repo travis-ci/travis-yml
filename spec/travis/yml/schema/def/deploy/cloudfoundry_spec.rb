@@ -59,6 +59,9 @@ describe Travis::Yml::Schema::Def::Deploy::Cloudfoundry do
               key: {
                 type: :string
               },
+              buildpack: {
+                type: :string
+              },
               manifest: {
                 type: :string
               },

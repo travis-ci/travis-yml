@@ -19,7 +19,7 @@ group :development do
 end
 
 group :test do
-  gem 'dpl', git: 'https://github.com/travis-ci/dpl.git', ref: 'sf-dpl2'
+  gem 'dpl', git: 'https://github.com/travis-ci/dpl.git', ref: 'dpl-2'
   gem 'awesome_print'
   gem 'json-schema'
   gem 'rack-test'

@@ -1,14 +1,14 @@
-describe Travis::Yml, 'catalyze' do
+describe Travis::Yml, 'datica' do
   subject { described_class.apply(parse(yaml)) }
 
   describe 'target' do
     describe 'given a str' do
       yaml %(
         deploy:
-          provider: catalyze
+          provider: datica
           target: str
       )
-      it { should serialize_to deploy: [provider: 'catalyze', target: 'str'] }
+      it { should serialize_to deploy: [provider: 'datica', target: 'str'] }
       it { should_not have_msg }
     end
   end
@@ -17,10 +17,10 @@ describe Travis::Yml, 'catalyze' do
     describe 'given a str' do
       yaml %(
         deploy:
-          provider: catalyze
+          provider: datica
           path: str
       )
-      it { should serialize_to deploy: [provider: 'catalyze', path: 'str'] }
+      it { should serialize_to deploy: [provider: 'datica', path: 'str'] }
       it { should_not have_msg }
     end
   end

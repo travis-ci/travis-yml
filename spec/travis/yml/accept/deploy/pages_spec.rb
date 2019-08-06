@@ -110,14 +110,14 @@ describe Travis::Yml, 'pages' do
     end
   end
 
-  describe 'keep_history' do
+  describe 'no_keep_history' do
     describe 'given a bool' do
       yaml %(
         deploy:
           provider: pages
-          keep_history: true
+          no_keep_history: true
       )
-      it { should serialize_to deploy: [provider: 'pages', keep_history: true] }
+      it { should serialize_to deploy: [provider: 'pages', no_keep_history: true] }
       it { should_not have_msg }
     end
   end

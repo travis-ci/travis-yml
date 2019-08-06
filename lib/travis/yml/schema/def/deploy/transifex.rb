@@ -8,6 +8,7 @@ module Travis
             register :transifex
 
             def define
+              map :api_token,   to: :secure
               map :username,    to: :secure, strict: false
               map :password,    to: :secure
               map :hostname,    to: :str

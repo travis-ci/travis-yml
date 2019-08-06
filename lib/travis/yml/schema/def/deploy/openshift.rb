@@ -4,16 +4,16 @@ module Travis
     module Schema
       module Def
         module Deploy
-          # dpl readme does not mention deployment_branch
           class Openshift < Deploy
             register :openshift
 
             def define
-              map :user,              to: :secure, strict: false
-              map :password,          to: :secure
-              map :domain,            to: :map, type: :str
-              map :app,               to: :map, type: :str
-              map :deployment_branch, to: :str
+              map :token,    to: :secure
+              map :user,     to: :secure, strict: false
+              map :password, to: :secure
+              map :server,   to: :str
+              map :project,  to: :str
+              map :app,      to: :str
             end
           end
         end
