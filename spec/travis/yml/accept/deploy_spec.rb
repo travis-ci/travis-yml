@@ -390,11 +390,7 @@ describe Travis::Yml, 'deploy' do
           provider: heroku
           edge: true
       )
-      # this used to be edge: true, but we now aim at one single, normal form
-      # downstream code will probably be happy with this anyway, but we should
-      # check travis-build and dpl
-      it { should serialize_to deploy: [provider: 'heroku', edge: { enabled: true }] }
-      it { should have_msg [:info, :'deploy.edge', :edge] }
+      it { should serialize_to deploy: [provider: 'heroku', edge: true] }
     end
 
     describe 'given a map' do
@@ -406,7 +402,6 @@ describe Travis::Yml, 'deploy' do
             branch: branch
       )
       it { should serialize_to deploy: [provider: 'heroku', edge: { source: 'source', branch: 'branch' }] }
-      it { should have_msg [:info, :'deploy.edge', :edge] }
     end
   end
 

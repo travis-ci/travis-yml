@@ -109,18 +109,18 @@ module Travis
             end
           end
 
-          class Edge < Type::Map
+          class Edge < Type::Any
             registry :deploy
             register :edge
 
             def define
-              edge
-
-              map :enabled, to: :bool
-              map :source, to: :str
-              map :branch, to: :str
-
-              change :enable
+              types :bool, Class.new(Type::Map) {
+                def define
+                  map :enabled, to: :bool
+                  map :source, to: :str
+                  map :branch, to: :str
+                end
+              }
               export
             end
           end
