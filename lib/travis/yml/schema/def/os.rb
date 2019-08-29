@@ -30,8 +30,7 @@ module Travis
         ALIAS = {
           linux:   %i(ubuntu),
           osx:     %i(mac macos macosx ios),
-          windows: %i(win),
-          freebsd: %i(bsd netbsd openbsd)
+          windows: %i(win)
         }
 
         class Oss < Type::Seq
