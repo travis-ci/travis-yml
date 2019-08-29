@@ -36,6 +36,7 @@ describe Travis::Yml::Schema::Def::Oss do
         enum: [
           'linux',
           'osx',
+          'freebsd',
           'windows'
         ],
         defaults: [
@@ -77,6 +78,13 @@ describe Travis::Yml::Schema::Def::Oss do
         ],
         downcase: true,
         values: {
+          freebsd: {
+            except: {
+              language: [
+                'objective-c'
+              ]
+            }
+          },
           linux: {
             aliases: [
               'ubuntu'

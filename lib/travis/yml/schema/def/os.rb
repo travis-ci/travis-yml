@@ -13,6 +13,9 @@ module Travis
         # languages are supported, not the other way around
 
         EXCEPT = {
+          freebsd: {
+            language: %i(objective-c)
+          },
           linux: {
             language: %i(objective-c)
           },
@@ -54,12 +57,11 @@ module Travis
 
             default :linux,   except: EXCEPT[:linux]
             default :osx,     except: EXCEPT[:osx]
-            default :freebsd,   except: EXCEPT[:freebsd]
             default :windows, only:   ONLY[:windows]
 
             value   :linux,   alias: ALIAS[:linux],   except: EXCEPT[:linux]
             value   :osx,     alias: ALIAS[:osx],     except: EXCEPT[:osx]
-            value   :freebsd,     alias: ALIAS[:freebsd],     except: EXCEPT[:freebsd]
+            value   :freebsd,                         except: EXCEPT[:freebsd]
             value   :windows, alias: ALIAS[:windows], only:   ONLY[:windows]
 
             export

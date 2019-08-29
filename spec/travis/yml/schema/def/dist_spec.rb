@@ -13,10 +13,18 @@ describe Travis::Yml::Schema::Def::Dist do
         'trusty',
         'precise',
         'xenial',
+        'bionic',
         'server-2016'
       ],
       downcase: true,
       values: {
+        bionic: {
+          only: {
+            os: [
+              'linux'
+            ]
+          }
+        },
         trusty: {
           only: {
             os: [
