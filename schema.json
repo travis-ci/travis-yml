@@ -433,6 +433,7 @@
           "trusty",
           "precise",
           "xenial",
+          "bionic",
           "server-2016"
         ],
         "values": {
@@ -451,6 +452,13 @@
             }
           },
           "xenial": {
+            "only": {
+              "os": [
+                "linux"
+              ]
+            }
+          },
+          "bionic": {
             "only": {
               "os": [
                 "linux"
@@ -852,6 +860,9 @@
           "__opal__",
           "__sardonyx__",
           "__onion__",
+          "__ubuntu_1804__",
+          "__ubuntu_1804_minimal",
+          "__freebsd_12__",
           "__cookiecat__"
         ],
         "values": {
@@ -1252,6 +1263,14 @@
             }
           },
           {
+            "value": "freebsd",
+            "except": {
+              "language": [
+                "objective-c"
+              ]
+            }
+          },
+          {
             "value": "osx",
             "except": {
               "language": [
@@ -1281,6 +1300,7 @@
         ],
         "enum": [
           "linux",
+          "freebsd",
           "osx",
           "windows"
         ],
@@ -1288,6 +1308,18 @@
           "linux": {
             "aliases": [
               "ubuntu"
+            ],
+            "except": {
+              "language": [
+                "objective-c"
+              ]
+            }
+          },
+          "freebsd": {
+            "aliases": [
+              "bsd",
+              "openbsd",
+              "netbsd"
             ],
             "except": {
               "language": [

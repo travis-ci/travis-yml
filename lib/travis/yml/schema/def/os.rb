@@ -30,7 +30,8 @@ module Travis
         ALIAS = {
           linux:   %i(ubuntu),
           osx:     %i(mac macos macosx ios),
-          windows: %i(win)
+          windows: %i(win),
+          freebsd: %i(bsd netbsd openbsd)
         }
 
         class Oss < Type::Seq
@@ -54,10 +55,12 @@ module Travis
 
             default :linux,   except: EXCEPT[:linux]
             default :osx,     except: EXCEPT[:osx]
+            default :freebsd,   except: EXCEPT[:freebsd]
             default :windows, only:   ONLY[:windows]
 
             value   :linux,   alias: ALIAS[:linux],   except: EXCEPT[:linux]
             value   :osx,     alias: ALIAS[:osx],     except: EXCEPT[:osx]
+            value   :freebsd,     alias: ALIAS[:freebsd],     except: EXCEPT[:freebsd]
             value   :windows, alias: ALIAS[:windows], only:   ONLY[:windows]
 
             export
