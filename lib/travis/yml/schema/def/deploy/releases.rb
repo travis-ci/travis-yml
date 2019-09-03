@@ -23,14 +23,14 @@ module Travis
               map :file_glob,          to: :bool
               map :overwrite,          to: :bool
 
-              map :body,               to: :str
               map :draft,              to: :bool
               map :name,               to: :str
               map :prerelease,         to: :bool
               map :release_number,     to: :str
+              map :release_notes,      to: :str
+              map :release_notes_file, to: :str
               map :tag_name,           to: :str
               map :target_commitish,   to: :str
-              map :'preserve-history', to: :bool
             end
           end
         end

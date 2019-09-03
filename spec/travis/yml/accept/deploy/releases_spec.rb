@@ -144,14 +144,26 @@ describe Travis::Yml, 'releases' do
     end
   end
 
-  describe 'prerelease' do
-    describe 'given a bool' do
+  describe 'release_notes' do
+    describe 'given a str' do
       yaml %(
         deploy:
           provider: releases
-          prerelease: true
+          release_notes: str
       )
-      it { should serialize_to deploy: [provider: 'releases', prerelease: true] }
+      it { should serialize_to deploy: [provider: 'releases', release_notes: 'str'] }
+      it { should_not have_msg }
+    end
+  end
+
+  describe 'release_notes_file' do
+    describe 'given a str' do
+      yaml %(
+        deploy:
+          provider: releases
+          release_notes_file: str
+      )
+      it { should serialize_to deploy: [provider: 'releases', release_notes_file: 'str'] }
       it { should_not have_msg }
     end
   end

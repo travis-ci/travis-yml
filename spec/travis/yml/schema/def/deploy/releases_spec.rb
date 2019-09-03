@@ -65,9 +65,6 @@ describe Travis::Yml::Schema::Def::Deploy::Releases do
               overwrite: {
                 type: :boolean
               },
-              body: {
-                type: :string
-              },
               draft: {
                 type: :boolean
               },
@@ -80,14 +77,17 @@ describe Travis::Yml::Schema::Def::Deploy::Releases do
               release_number: {
                 type: :string
               },
+              release_notes: {
+                type: :string
+              },
+              release_notes_file: {
+                type: :string
+              },
               tag_name: {
                 type: :string
               },
               target_commitish: {
                 type: :string
-              },
-              'preserve-history': {
-                type: :boolean
               }
             },
             additionalProperties: false,
