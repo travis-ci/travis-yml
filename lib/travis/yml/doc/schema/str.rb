@@ -7,7 +7,7 @@ module Travis
       module Schema
         class Str < Scalar
           def self.opts
-            @opts ||= super + %i(downcase format vars)
+            @opts ||= super + %i(downcase format ignore_case vars)
           end
 
           def matches?(value)
@@ -32,6 +32,14 @@ module Travis
 
           def formatted?(str)
             Regexp.new(format).match?(str.to_s)
+          end
+
+          def ignore_case?
+            !!opts[:ignore_case]
+          end
+
+          def known?(value)
+            super(value, ignore_case: ignore_case?)
           end
 
           def vars?

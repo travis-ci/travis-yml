@@ -55,6 +55,7 @@ describe Travis::Yml::Schema::Def::Deploy::Codedeploy do
               },
               revision_type: {
                 type: :string,
+                ignore_case: true,
                 enum: [
                   's3',
                   'github'
@@ -80,6 +81,7 @@ describe Travis::Yml::Schema::Def::Deploy::Codedeploy do
               },
               file_exists_behavior: {
                 type: :string,
+                ignore_case: true,
                 enum: [
                   'disallow',
                   'overwrite',

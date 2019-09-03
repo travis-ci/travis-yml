@@ -4,7 +4,7 @@ describe Travis::Yml::Schema::Type::Map do
       def define
         map :other, to: :str, alias: :others, edge: true, default: 'default',
           strict: false, values: %w(one two), downcase: true, format: 'format',
-          summary: 'summary', eg: 'example'
+          ignore_case: true, summary: 'summary', eg: 'example'
       end
     end
   end
@@ -17,6 +17,7 @@ describe Travis::Yml::Schema::Type::Map do
   it { should have_opt flags: [:edge] }
   it { should have_opt defaults: [value: 'default'] }
   it { should have_opt format: 'format' }
+  it { should have_opt ignore_case: true }
   it { should have_opt strict: false }
   it { should have_opt enum: %w(one two) }
   it { should have_opt summary: 'summary' }

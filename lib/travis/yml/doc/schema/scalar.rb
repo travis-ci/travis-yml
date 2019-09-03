@@ -36,8 +36,9 @@ module Travis
             values.size
           end
 
-          def known?(value)
-            values.any? { |v| v == value } # .to_s
+          def known?(value, opts = {})
+            op = is?(:str) && opts[:ignore_case] ? :casecmp? : :==
+            values.map(&:value).any? { |known| known.send(op, value) }
           end
 
           def values

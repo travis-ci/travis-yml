@@ -84,7 +84,7 @@ module Travis
         class Str < Scalar
           register :str
 
-          opts %i(downcase format vars)
+          opts %i(downcase format ignore_case vars)
 
           def type
             :str
@@ -96,6 +96,10 @@ module Travis
 
           def format(format)
             attrs[:format] = format
+          end
+
+          def ignore_case(*)
+            attrs[:ignore_case] = true
           end
 
           def vars(*vars)

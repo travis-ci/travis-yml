@@ -83,6 +83,23 @@ describe Travis::Yml::Schema::Json::Map, 'mapping to any node' do
     end
   end
 
+  describe 'ignore_case' do
+    let(:define) { -> { map :foo, to: :str, ignore_case: true } }
+
+    it do
+      should have_schema(
+        type: :object,
+        properties: {
+          foo: {
+            type: :string,
+            ignore_case: true
+          }
+        },
+        additionalProperties: false,
+      )
+    end
+  end
+
   describe 'internal' do
     let(:define) { -> { map :foo, to: :str, internal: true } }
 

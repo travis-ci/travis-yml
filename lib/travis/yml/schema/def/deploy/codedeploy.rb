@@ -17,7 +17,7 @@ module Travis
               map :secret_access_key,    to: :secure
               map :application,          to: :str
               map :deployment_group,     to: :str
-              map :revision_type,        to: :str, values: %i(s3 github) #, ignore_case: true TODO
+              map :revision_type,        to: :str, values: %i(s3 github), ignore_case: true
               map :commit_id,            to: :str
               map :description,          to: :str
               map :repository,           to: :str
