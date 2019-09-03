@@ -158,6 +158,7 @@ describe Travis::Yml::Schema::Def::Root do
         cloudfoundry
         cloudformation
         codedeploy
+        convox
         datica
         elasticbeanstalk
         engineyard
