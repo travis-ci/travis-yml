@@ -77,8 +77,11 @@ describe Travis::Yml::Schema::Def::Deploy::Lambda do
               runtime: {
                 type: :string
               },
-              environment_variables: {
-                '$ref': '#/definitions/type/secure'
+              environment: {
+                '$ref': '#/definitions/type/secures',
+                aliases: [
+                  :environment_variables
+                ]
               },
               security_group_ids: {
                 '$ref': '#/definitions/type/strs'
@@ -92,18 +95,24 @@ describe Travis::Yml::Schema::Def::Deploy::Lambda do
               kms_key_arn: {
                 type: :string
               },
+              layers: {
+                '$ref': '#/definitions/type/strs'
+              },
               tracing_mode: {
                 type: :string,
                 enum: [
                   'Active',
                   'PassThrough'
+                ],
+                defaults: [
+                  value: 'PassThrough'
                 ]
               },
               publish: {
                 type: :boolean
               },
               function_tags: {
-                '$ref': '#/definitions/type/secure'
+                '$ref': '#/definitions/type/secures'
               },
               dot_match: {
                 type: :boolean

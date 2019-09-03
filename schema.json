@@ -4176,11 +4176,14 @@
               "runtime": {
                 "type": "string"
               },
-              "environment_variables": {
-                "$ref": "#/definitions/type/secure"
-              },
               "security_group_ids": {
                 "$ref": "#/definitions/type/strs"
+              },
+              "environment": {
+                "$ref": "#/definitions/type/secures",
+                "aliases": [
+                  "environment_variables"
+                ]
               },
               "subnet_ids": {
                 "$ref": "#/definitions/type/strs"
@@ -4196,13 +4199,21 @@
                 "enum": [
                   "Active",
                   "PassThrough"
+                ],
+                "defaults": [
+                  {
+                    "value": "PassThrough"
+                  }
                 ]
+              },
+              "layers": {
+                "$ref": "#/definitions/type/strs"
               },
               "publish": {
                 "type": "boolean"
               },
               "function_tags": {
-                "$ref": "#/definitions/type/secure"
+                "$ref": "#/definitions/type/secures"
               },
               "dot_match": {
                 "type": "boolean"

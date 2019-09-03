@@ -147,15 +147,27 @@ describe Travis::Yml, 'lambda' do
     end
   end
 
-  describe 'environment_variables' do
+  describe 'environment' do
+    describe 'given a str' do
+      yaml %(
+        deploy:
+          provider: lambda
+          environment: str
+      )
+      it { should serialize_to deploy: [provider: 'lambda', environment: ['str']] }
+      it { should_not have_msg }
+    end
+  end
+
+  describe 'environment_variables (alias)' do
     describe 'given a str' do
       yaml %(
         deploy:
           provider: lambda
           environment_variables: str
       )
-      it { should serialize_to deploy: [provider: 'lambda', environment_variables: 'str'] }
-      it { should_not have_msg }
+      it { should serialize_to deploy: [provider: 'lambda', environment: ['str']] }
+      it { should have_msg [:info, :deploy, :alias, type: :key, alias: 'environment_variables', obj: 'environment', provider: 'lambda'] }
     end
   end
 
@@ -260,7 +272,7 @@ describe Travis::Yml, 'lambda' do
           provider: lambda
           function_tags: str
       )
-      it { should serialize_to deploy: [provider: 'lambda', function_tags: 'str'] }
+      it { should serialize_to deploy: [provider: 'lambda', function_tags: ['str']] }
       it { should_not have_msg }
     end
   end
