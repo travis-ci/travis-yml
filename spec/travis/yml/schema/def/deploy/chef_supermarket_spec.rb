@@ -46,10 +46,19 @@ describe Travis::Yml::Schema::Def::Deploy::ChefSupermarket do
               client_key: {
                 '$ref': '#/definitions/type/secure'
               },
-              cookbook_name: {
-                type: :string
+              name: {
+                type: :string,
+                aliases: [
+                  :cookbook_name
+                ]
               },
-              cookbook_category: {
+              category: {
+                type: :string,
+                aliases: [
+                  :cookbook_category
+                ]
+              },
+              dir: {
                 type: :string
               }
             },

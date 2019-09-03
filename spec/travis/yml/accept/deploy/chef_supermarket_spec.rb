@@ -32,9 +32,9 @@ describe Travis::Yml, 'chef_supermarket' do
       yaml %(
         deploy:
           provider: chef_supermarket
-          cookbook_category: str
+          category: str
       )
-      it { should serialize_to deploy: [provider: 'chef_supermarket', cookbook_category: 'str'] }
+      it { should serialize_to deploy: [provider: 'chef_supermarket', category: 'str'] }
       it { should_not have_msg }
     end
   end
