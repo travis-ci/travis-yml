@@ -9,7 +9,9 @@ module Travis
             register :pages
 
             def define
+              map :strategy,           to: :str, default: 'git', values: %w(api git)
               map :github_token,       to: :secure
+              map :deploy_key,         to: :str
               map :repo,               to: :str
               map :target_branch,      to: :str
               map :local_dir,          to: :str
@@ -21,6 +23,7 @@ module Travis
               map :keep_history,       to: :bool
               map :verbose,            to: :bool
               map :allow_empty_commit, to: :bool
+              map :commit_message,     to: :str
               map :committer_from_gh,  to: :bool
               map :deployment_file,    to: :bool
               map :detect_encoding,    to: :bool # TODO validate this, it's being used and Dpl::Provider has the method, not sure.

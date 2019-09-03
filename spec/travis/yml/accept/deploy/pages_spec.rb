@@ -14,6 +14,18 @@ describe Travis::Yml, 'pages' do
     end
   end
 
+  describe 'deploy_key' do
+    describe 'given a str' do
+      yaml %(
+        deploy:
+          provider: pages
+          deploy_key: str
+      )
+      it { should serialize_to deploy: [provider: 'pages', deploy_key: 'str'] }
+      it { should_not have_msg }
+    end
+  end
+
   describe 'repo' do
     describe 'given a str' do
       yaml %(
@@ -115,9 +127,9 @@ describe Travis::Yml, 'pages' do
       yaml %(
         deploy:
           provider: pages
-          keep_history: true
+          keep_history: false
       )
-      it { should serialize_to deploy: [provider: 'pages', keep_history: true] }
+      it { should serialize_to deploy: [provider: 'pages', keep_history: false] }
       it { should_not have_msg }
     end
   end
@@ -142,6 +154,18 @@ describe Travis::Yml, 'pages' do
           allow_empty_commit: true
       )
       it { should serialize_to deploy: [provider: 'pages', allow_empty_commit: true] }
+      it { should_not have_msg }
+    end
+  end
+
+  describe 'commit_message' do
+    describe 'given a str' do
+      yaml %(
+        deploy:
+          provider: pages
+          commit_message: str
+      )
+      it { should serialize_to deploy: [provider: 'pages', commit_message: 'str'] }
       it { should_not have_msg }
     end
   end

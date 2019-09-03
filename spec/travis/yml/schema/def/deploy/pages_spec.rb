@@ -40,8 +40,23 @@ describe Travis::Yml::Schema::Def::Deploy::Pages do
               edge: {
                 '$ref': '#/definitions/deploy/edge'
               },
+              strategy: {
+                type: :string,
+                defaults: [
+                  {
+                    value: 'git'
+                  }
+                ],
+                enum: [
+                  'api',
+                  'git'
+                ]
+              },
               github_token: {
                 '$ref': '#/definitions/type/secure'
+              },
+              deploy_key: {
+                type: :string
               },
               repo: {
                 type: :string
@@ -75,6 +90,9 @@ describe Travis::Yml::Schema::Def::Deploy::Pages do
               },
               allow_empty_commit: {
                 type: :boolean
+              },
+              commit_message: {
+                type: :string
               },
               committer_from_gh: {
                 type: :boolean

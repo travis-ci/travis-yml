@@ -8,7 +8,7 @@ end
 describe Travis::Yml, dpl: true, alert: false do
   subject { described_class.apply(parse(yaml), opts) }
 
-  skip = %i(heroku help)
+  skip = %i(heroku pages help)
   providers = Dpl::Provider.registry.reject { |key, _| skip.include?(key) }.map(&:last)
 
   providers.each do |provider|
@@ -25,7 +25,7 @@ describe Travis::Yml, dpl: true, alert: false do
   end
 
   describe 'list of providers' do
-    let(:dpl) { Dpl::Provider.registry.keys - %i(help catalyze chef-supermarket heroku:api heroku:git) }
+    let(:dpl) { Dpl::Provider.registry.keys - %i(help catalyze chef-supermarket heroku:api heroku:git pages:api pages:git) }
     let(:yml) { Travis::Yml::Schema::Def::Deploy.provider_names }
     it { expect(dpl.sort).to eq yml.sort }
   end
