@@ -111,6 +111,30 @@ describe Travis::Yml, 'codedeploy' do
     end
   end
 
+  describe 'file_exists_behavior overwrite' do
+    describe 'given a str' do
+      yaml %(
+        deploy:
+          provider: codedeploy
+          file_exists_behavior: overwrite
+      )
+      it { should serialize_to deploy: [provider: 'codedeploy', file_exists_behavior: 'overwrite'] }
+      it { should_not have_msg }
+    end
+  end
+
+  describe 'file_exists_behavior OVERWRITE' do
+    describe 'given a str' do
+      yaml %(
+        deploy:
+          provider: codedeploy
+          file_exists_behavior: OVERWRITE
+      )
+      xit { should serialize_to deploy: [provider: 'codedeploy', file_exists_behavior: 'OVERWRITE'] }
+      xit { should_not have_msg }
+    end
+  end
+
   describe 'bucket' do
     describe 'given a str' do
       yaml %(

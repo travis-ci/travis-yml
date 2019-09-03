@@ -78,6 +78,14 @@ describe Travis::Yml::Schema::Def::Deploy::Codedeploy do
               bucket: {
                 type: :string
               },
+              file_exists_behavior: {
+                type: :string,
+                enum: [
+                  'disallow',
+                  'overwrite',
+                  'retain'
+                ]
+              },
               key: {
                 type: :string
               },

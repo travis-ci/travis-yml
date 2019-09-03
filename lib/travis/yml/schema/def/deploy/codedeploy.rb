@@ -13,20 +13,21 @@ module Travis
             register :codedeploy
 
             def define
-              map :access_key_id,       to: :secure, strict: false
-              map :secret_access_key,   to: :secure
-              map :application,         to: :str
-              map :deployment_group,    to: :str
-              map :revision_type,       to: :str, values: %i(s3 github) #, ignore_case: true TODO
-              map :commit_id,           to: :str
-              map :description,         to: :str
-              map :repository,          to: :str
-              map :region,              to: :str
-              map :wait_until_deployed, to: :bool
-              map :bucket,              to: :str
-              map :key,                 to: :str
-              map :bundle_type,         to: :str
-              map :endpoint,            to: :str
+              map :access_key_id,        to: :secure, strict: false
+              map :secret_access_key,    to: :secure
+              map :application,          to: :str
+              map :deployment_group,     to: :str
+              map :revision_type,        to: :str, values: %i(s3 github) #, ignore_case: true TODO
+              map :commit_id,            to: :str
+              map :description,          to: :str
+              map :repository,           to: :str
+              map :region,               to: :str
+              map :file_exists_behavior, to: :str, values: %i(disallow overwrite retain), ignore_case: true
+              map :wait_until_deployed,  to: :bool
+              map :bucket,               to: :str
+              map :key,                  to: :str
+              map :bundle_type,          to: :str
+              map :endpoint,             to: :str
             end
           end
         end
