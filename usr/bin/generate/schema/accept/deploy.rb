@@ -52,7 +52,7 @@ def examples(prop)
 end
 
 def spec(name)
-  const = Travis::Yml::Schema::Type::Node[name]
+  const = Travis::Yml::Schema::Def::Deploy::Providers[name]
   schema = const.new.exports[name][:anyOf][0]
   exports = schema[:properties]
   required = schema[:required]
@@ -103,7 +103,7 @@ providers = %i(
   surge
   testfairy
 )
-# providers = [:atlas]
+providers = [:cloudformation, :convox]
 
 path = "spec/travis/yml/schema/accept/deploy/%s_spec.rb"
 

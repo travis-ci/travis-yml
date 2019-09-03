@@ -156,6 +156,7 @@ describe Travis::Yml::Schema::Def::Root do
         cloud66
         cloudfiles
         cloudfoundry
+        cloudformation
         codedeploy
         datica
         elasticbeanstalk
