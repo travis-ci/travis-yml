@@ -26,4 +26,16 @@ describe Travis::Yml, 'npm' do
       it { should_not have_msg }
     end
   end
+
+  describe 'src' do
+    describe 'given a str' do
+      yaml %(
+        deploy:
+          provider: npm
+          src: str
+      )
+      it { should serialize_to deploy: [provider: 'npm', src: 'str'] }
+      it { should_not have_msg }
+    end
+  end
 end

@@ -12,6 +12,7 @@ module Travis
               map :api_token, to: :secure, alias: :api_key
               map :email,     to: :secure, strict: false
               map :access,    to: :str, enum: %w(public private)
+              map :src,       to: :str
               map :tag,       to: :str
             end
           end

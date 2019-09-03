@@ -27,6 +27,9 @@ describe Travis::Yml::Schema::Def::Deploy::Npm do
               access: {
                 type: :string
               },
+              src: {
+                type: :string
+              },
               tag: {
                 type: :string
               },
