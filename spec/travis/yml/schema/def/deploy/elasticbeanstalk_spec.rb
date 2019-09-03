@@ -50,6 +50,9 @@ describe Travis::Yml::Schema::Def::Deploy::Elasticbeanstalk do
               region: {
                 type: :string
               },
+              bucket: {
+                type: :string
+              },
               app: {
                 anyOf: [
                   {

@@ -11,6 +11,7 @@ module Travis
               map :access_key_id,           to: :secure, strict: false
               map :secret_access_key,       to: :secure
               map :region,                  to: :str
+              map :bucket,                  to: :str
               map :app,                     to: :map, type: :str
               map :env,                     to: :map, type: :str # docs are unclear on this, but users seem to expect this?
               map :description,             to: :str
