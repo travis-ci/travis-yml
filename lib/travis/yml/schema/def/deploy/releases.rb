@@ -27,7 +27,7 @@ module Travis
               map :name,               to: :str
               map :prerelease,         to: :bool
               map :release_number,     to: :str
-              map :release_notes,      to: :str
+              map :release_notes,      to: :str, alias: :body
               map :release_notes_file, to: :str
               map :tag_name,           to: :str
               map :target_commitish,   to: :str

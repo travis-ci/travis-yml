@@ -78,7 +78,10 @@ describe Travis::Yml::Schema::Def::Deploy::Releases do
                 type: :string
               },
               release_notes: {
-                type: :string
+                type: :string,
+                aliases: [
+                  :body
+                ]
               },
               release_notes_file: {
                 type: :string
