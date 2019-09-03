@@ -14,7 +14,7 @@ module Travis
               map :api_key,     to: :secure
               map :account,     to: :secure, strict: false
               map :app,         to: :map, type: :str
-              map :environment, to: :map, type: :str
+              map :env,         to: :map, type: :str, alias: :environment
               map :migrate,     to: :str
             end
           end

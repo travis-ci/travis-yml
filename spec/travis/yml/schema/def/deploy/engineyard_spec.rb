@@ -69,7 +69,7 @@ describe Travis::Yml::Schema::Def::Deploy::Engineyard do
                   }
                 ]
               },
-              environment: {
+              env: {
                 anyOf: [
                   {
                     type: :object,
@@ -82,6 +82,9 @@ describe Travis::Yml::Schema::Def::Deploy::Engineyard do
                   {
                     type: :string
                   }
+                ],
+                aliases: [
+                  :environment
                 ]
               },
               migrate: {
