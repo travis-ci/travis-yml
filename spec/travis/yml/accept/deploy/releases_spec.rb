@@ -60,7 +60,20 @@ describe Travis::Yml, 'releases' do
     end
   end
 
-  describe 'api_key' do
+  describe 'token' do
+    describe 'given a secure' do
+      yaml %(
+        deploy:
+          provider: releases
+          token:
+            secure: secure
+      )
+      it { should serialize_to deploy: [provider: 'releases', token: { secure: 'secure' }] }
+      it { should_not have_msg }
+    end
+  end
+
+  describe 'api_key (alias)' do
     describe 'given a secure' do
       yaml %(
         deploy:
@@ -68,8 +81,8 @@ describe Travis::Yml, 'releases' do
           api_key:
             secure: secure
       )
-      it { should serialize_to deploy: [provider: 'releases', api_key: { secure: 'secure' }] }
-      it { should_not have_msg }
+      it { should serialize_to deploy: [provider: 'releases', token: { secure: 'secure' }] }
+      it { should have_msg [:info, :deploy, :alias, type: :key, alias: 'api_key', obj: 'token', provider: 'releases'] }
     end
   end
 

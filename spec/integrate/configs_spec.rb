@@ -445,9 +445,9 @@ describe Travis::Yml, configs: true do
     addons
     addons.artifacts.branch
     addons.coverity_scan.build_command
-    deploy.api_key
     deploy.password
     deploy.script
+    deploy.token
     env.matrix.general
     language
     matrix.fast_finish
@@ -500,9 +500,9 @@ describe Travis::Yml, configs: true do
     map: %i(
       arch
       after_failure
-      deploy.api_key
       deploy.env
       deploy.on.branch
+      deploy.token
       env.matrix
       matrix.include.cache.directories
       matrix.include.script

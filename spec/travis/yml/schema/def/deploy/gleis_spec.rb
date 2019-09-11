@@ -1,20 +1,35 @@
-describe Travis::Yml::Schema::Def::Deploy::Atlas do
-  subject { Travis::Yml.schema[:definitions][:deploy][:atlas] }
+describe Travis::Yml::Schema::Def::Deploy::Gleis do
+  subject { Travis::Yml.schema[:definitions][:deploy][:gleis] }
 
   # it { puts JSON.pretty_generate(subject) }
 
   it do
     should eq(
-      '$id': :atlas,
-        title: 'Atlas',
+      '$id': :gleis,
+        title: 'Gleis',
         anyOf: [
           {
             type: :object,
             properties: {
+              app: {
+                type: :string
+              },
+              username: {
+                type: :string
+              },
+              password: {
+                '$ref': '#/definitions/type/secure'
+              },
+              key_name: {
+                type: :string
+              },
+              verbose: {
+                type: :boolean
+              },
               provider: {
                 type: :string,
                 enum: [
-                  'atlas'
+                  'gleis'
                 ],
                 strict: true
               },
@@ -40,39 +55,6 @@ describe Travis::Yml::Schema::Def::Deploy::Atlas do
               edge: {
                 '$ref': '#/definitions/deploy/edge'
               },
-              token: {
-                '$ref': '#/definitions/type/secure'
-              },
-              app: {
-                type: :string
-              },
-              exclude: {
-                '$ref': '#/definitions/type/strs'
-              },
-              include: {
-                '$ref': '#/definitions/type/strs'
-              },
-              address: {
-                type: :string
-              },
-              metadata: {
-                '$ref': '#/definitions/type/strs'
-              },
-              debug: {
-                type: :boolean
-              },
-              vcs: {
-                type: :boolean
-              },
-              version: {
-                type: :boolean
-              },
-              paths: {
-                '$ref': '#/definitions/type/strs'
-              },
-              args: {
-                type: :string
-              }
             },
             additionalProperties: false,
             normal: true,
@@ -89,7 +71,7 @@ describe Travis::Yml::Schema::Def::Deploy::Atlas do
           {
             type: :string,
             enum: [
-              'atlas'
+              'gleis'
             ],
             strict: true
           }

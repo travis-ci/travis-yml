@@ -10,7 +10,7 @@ module Travis
 
             def define
               map :strategy,           to: :str, default: 'git', values: %w(api git)
-              map :github_token,       to: :secure
+              map :token,              to: :secure, alias: :github_token
               map :deploy_key,         to: :str
               map :repo,               to: :str
               map :target_branch,      to: :str
@@ -19,7 +19,7 @@ module Travis
               map :project_name,       to: :str
               map :email,              to: :str
               map :name,               to: :str
-              map :github_url,         to: :str
+              map :url,                to: :str, alias: :github_url
               map :keep_history,       to: :bool
               map :verbose,            to: :bool
               map :allow_empty_commit, to: :bool

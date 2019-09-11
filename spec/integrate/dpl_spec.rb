@@ -25,8 +25,15 @@ describe Travis::Yml, dpl: true, alert: false do
   end
 
   describe 'list of providers' do
-    let(:dpl) { Dpl::Provider.registry.keys - %i(help catalyze chef-supermarket heroku:api heroku:git pages:api pages:git) }
+    let(:ignore) { %i(help api git catalyze chef-supermarket) }
+
+    let(:dpl) do
+      keys = Dpl::Provider.registry.keys - ignore
+      keys.map { |key| key.to_s.split(':').first.to_sym }.uniq
+    end
+
     let(:yml) { Travis::Yml::Schema::Def::Deploy.provider_names }
+
     it { expect(dpl.sort).to eq yml.sort }
   end
 end
