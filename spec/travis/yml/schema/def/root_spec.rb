@@ -146,7 +146,6 @@ describe Travis::Yml::Schema::Def::Root do
         edge
         providers
         anynines
-        atlas
         azure_web_apps
         bintray
         bluemixcloudfoundry
@@ -165,6 +164,7 @@ describe Travis::Yml::Schema::Def::Root do
         firebase
         gae
         gcs
+        gleis
         hackage
         hephy
         heroku

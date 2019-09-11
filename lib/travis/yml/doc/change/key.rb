@@ -19,7 +19,7 @@ module Travis
           end
 
           def dealias(key)
-            other = schema.key_aliases[key]
+            other = schema.key_aliases[key] || schema.key_aliases[key.to_s.tr('-', '_')]
             return key if !other || key == other
             value.parent.info :alias, type: :key, alias: key, obj: other, line: key.line, src: key.src
             other
@@ -88,7 +88,7 @@ module Travis
           end
 
           def alias?(key)
-            schema.key_alias?(key)
+            schema.key_alias?(key) || schema.key_alias?(key.to_s.tr('-', '_'))
           end
 
           def info(type, key, other)

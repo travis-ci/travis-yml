@@ -50,8 +50,11 @@ describe Travis::Yml::Schema::Def::Deploy::Releases do
               password: {
                 '$ref': '#/definitions/type/secure'
               },
-              api_key: {
-                '$ref': '#/definitions/type/secure'
+              token: {
+                '$ref': '#/definitions/type/secure',
+                aliases: [
+                  :api_key
+                ]
               },
               repo: {
                 type: :string
