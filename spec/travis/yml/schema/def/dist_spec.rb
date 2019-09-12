@@ -13,6 +13,7 @@ describe Travis::Yml::Schema::Def::Dist do
         'trusty',
         'precise',
         'xenial',
+        'bionic',
         'server-2016'
       ],
       downcase: true,
@@ -32,6 +33,13 @@ describe Travis::Yml::Schema::Def::Dist do
           }
         },
         xenial: {
+          only: {
+            os: [
+              'linux'
+            ]
+          }
+        },
+        bionic: {
           only: {
             os: [
               'linux'
