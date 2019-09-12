@@ -17,6 +17,7 @@ module Travis
             value :trusty,        only: { os: :linux }
             value :precise,       only: { os: :linux }
             value :xenial,        only: { os: :linux }
+            value :bionic,        only: { os: :linux }
             value :'server-2016', only: { os: :windows }, edge: true
 
             export
