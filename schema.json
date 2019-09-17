@@ -148,6 +148,9 @@
           "snaps": {
             "$ref": "#/definitions/addon/snaps"
           },
+          "pkg": {
+            "$ref": "#/definitions/addon/pkg"
+          },
           "sonarcloud": {
             "$ref": "#/definitions/addon/sonarcloud"
           },
@@ -2127,6 +2130,48 @@
             "$ref": "#/definitions/type/secure"
           }
         ]
+      },
+      "pkg": {
+        "$id": "pkg",
+        "title": "Pkg",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "packages": {
+                "$ref": "#/definitions/type/strs",
+                "aliases": [
+                  "package"
+                ],
+                "summary": "Package names",
+                "example": "cmake"
+              },
+              "branch": {
+                "type": "string",
+                "summary": "Packages branch",
+                "example": "quarterly"
+              }
+            },
+            "additionalProperties": false,
+            "prefix": {
+              "key": "packages"
+            },
+            "normal": true,
+            "changes": [
+              {
+                "change": "enable"
+              }
+            ]
+          },
+          {
+            "$ref": "#/definitions/type/strs",
+            "example": "cmake"
+          },
+          {
+            "type": "boolean"
+          }
+        ],
+        "normal": true
       },
       "sauce_connect": {
         "$id": "sauce_connect",
