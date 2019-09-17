@@ -42,6 +42,7 @@ module Travis
             map :jwt,             to: :jwts
             map :sauce_connect,   to: :sauce_connect
             map :snaps
+            map :pkg
             map :sonarcloud
             map :ssh_known_hosts, to: :secures, strict: false
 
@@ -76,4 +77,5 @@ require 'travis/yml/schema/def/addon/homebrew'
 require 'travis/yml/schema/def/addon/jwts'
 require 'travis/yml/schema/def/addon/sauce_connect'
 require 'travis/yml/schema/def/addon/snaps'
+require 'travis/yml/schema/def/addon/pkg'
 require 'travis/yml/schema/def/addon/sonarcloud'
