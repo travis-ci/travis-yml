@@ -41,7 +41,7 @@ describe Travis::Yml::Schema::Def::Deploy::Cloud66 do
                 '$ref': '#/definitions/deploy/edge'
               },
               redeployment_hook: {
-                type: :string
+                '$ref': '#/definitions/type/secure',
               }
             },
             additionalProperties: false,

@@ -8,7 +8,7 @@ module Travis
             register :cloud66
 
             def define
-              map :redeployment_hook, to: :str
+              map :redeployment_hook, to: :secure
             end
           end
         end
