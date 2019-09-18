@@ -70,6 +70,9 @@ describe Travis::Yml::Schema::Def::Deploy::Cloudfoundry do
               },
               app_name: {
                 type: :string
+              },
+              logout: {
+                type: :boolean
               }
             },
             additionalProperties: false,

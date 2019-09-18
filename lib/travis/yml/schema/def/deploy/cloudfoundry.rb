@@ -21,6 +21,7 @@ module Travis
               map :manifest,            to: :str
               map :skip_ssl_validation, to: :bool
               map :app_name,            to: :str
+              map :logout,              to: :bool
             end
           end
         end
