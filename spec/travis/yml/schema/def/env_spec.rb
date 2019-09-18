@@ -88,6 +88,9 @@ describe Travis::Yml::Schema::Def::Env do
                   },
                   {
                     type: :boolean
+                  },
+                  {
+                    '$ref': '#/definitions/type/secure'
                   }
                 ]
               }

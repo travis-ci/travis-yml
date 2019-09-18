@@ -53,7 +53,7 @@ module Travis
               def define
                 example FOO: 'foo'
                 normal
-                map :'^(?!global|matrix)', to: :any, type: [:str, :num, :bool]
+                map :'^(?!global|matrix)', to: :any, type: [:str, :num, :bool, :secure]
                 strict false
               end
             }

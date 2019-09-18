@@ -106,9 +106,10 @@ describe Travis::Yml, 'env' do
     yaml %(
       env:
         FOO: foo
-        BAR: bar
+        BAR:
+          secure: str
     )
-    it { should serialize_to env: { matrix: [{ FOO: 'foo', BAR: 'bar' }] } }
+    it { should serialize_to env: { matrix: [{ FOO: 'foo', BAR: { secure: 'str' } }] } }
     it { should_not have_msg }
   end
 
