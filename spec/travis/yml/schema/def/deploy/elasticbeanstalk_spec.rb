@@ -103,6 +103,9 @@ describe Travis::Yml::Schema::Def::Deploy::Elasticbeanstalk do
               },
               wait_until_deployed: {
                 type: :boolean
+              },
+              debug: {
+                type: :boolean
               }
             },
             additionalProperties: false,

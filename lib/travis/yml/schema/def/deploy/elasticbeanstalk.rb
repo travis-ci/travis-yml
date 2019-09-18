@@ -21,6 +21,7 @@ module Travis
               map :bucket_path,             to: :str
               map :only_create_app_version, to: :bool
               map :wait_until_deployed,     to: :bool
+              map :debug,                   to: :bool
             end
           end
         end
