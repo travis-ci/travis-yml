@@ -40,6 +40,9 @@ describe Travis::Yml::Schema::Def::Deploy::Gcs do
               edge: {
                 '$ref': '#/definitions/deploy/edge'
               },
+              key_file: {
+                type: :string
+              },
               access_key_id: {
                 '$ref': '#/definitions/type/secure',
                 strict: false
