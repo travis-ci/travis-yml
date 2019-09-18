@@ -45,7 +45,7 @@ describe Travis::Yml, 'conditions' do
           if: true
         )
         it { should serialize_to conditions: 'v1', if: 'true' }
-        it { should have_msg [:info, :if, :cast, given_value: true, given_type: :bool, value: 'true', type: :str] }
+        it { should_not have_msg }
       end
 
       describe 'true (str)' do
@@ -80,7 +80,7 @@ describe Travis::Yml, 'conditions' do
           if: true
         )
         it { should serialize_to if: 'true' }
-        it { should have_msg [:info, :if, :cast, given_value: true, given_type: :bool, value: 'true', type: :str] }
+        it { should_not have_msg }
       end
 
       describe '= foo' do
@@ -100,6 +100,7 @@ describe Travis::Yml, 'conditions' do
           - if: 'branch = master'
       )
       it { should serialize_to stages: [if: 'branch = master'] }
+      it { should_not have_msg }
     end
   end
 
@@ -110,6 +111,7 @@ describe Travis::Yml, 'conditions' do
           - if: 'branch = master'
       )
       it { should serialize_to matrix: { include: [if: 'branch = master'] } }
+      it { should have_msg [:info, :root, :alias, type: :key, alias: 'jobs', obj: 'matrix'] }
     end
   end
 end

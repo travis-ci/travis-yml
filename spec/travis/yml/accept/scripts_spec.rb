@@ -52,7 +52,7 @@ describe Travis::Yml, 'scripts' do
       - ./foo
     )
     it { should serialize_to script: ['true', './foo'] }
-    it { should have_msg [:info, :script, :cast, given_value: true, given_type: :bool, type: :str, value: 'true'] }
+    it { should_not have_msg }
   end
 
   describe 'commented lines (from our docs?)' do

@@ -32,7 +32,7 @@ describe Travis::Yml, 'cast' do
       yaml 'group: true'
       let(:value) { { group: true } }
       it { should serialize_to group: 'true' }
-      it { should have_msg [:info, :group, :cast, given_value: true, given_type: :bool, value: 'true', type: :str] }
+      it { should_not have_msg }
     end
 
     describe 'given "str"' do
@@ -52,7 +52,7 @@ describe Travis::Yml, 'cast' do
     describe 'given true' do
       yaml 'script: true'
       it { should serialize_to script: ['true'] }
-      it { should have_msg [:info, :script, :cast, given_value: true, given_type: :bool, value: 'true', type: :str] }
+      it { should_not have_msg }
     end
 
     describe 'given "str"' do

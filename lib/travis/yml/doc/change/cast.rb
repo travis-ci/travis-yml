@@ -46,13 +46,12 @@ module Travis
             end
 
             def msg?
-              # !bool2str? # && !num2str? # && !str2bool?
-              !str2bool? && !str2num?
+              !bool2str? && !str2bool? && !str2num?
             end
 
             def bool2str?
               # e.g. `install: true`, as given in our docs
-              [true, false].include?(value) && schema.cast == :str
+              value.bool? && schema.str?
             end
 
             def str2num?

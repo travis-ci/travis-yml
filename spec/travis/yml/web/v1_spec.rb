@@ -200,21 +200,21 @@ describe Travis::Yml::Web::V1 do
         expect(body['messages']).to include(
           'level' => 'info',
           'code' => 'cast',
-          'key' => 'env.matrix.API',
+          'key' => 'env.matrix.FOO',
           'args' => {
-            'given_type' => 'bool',
-            'given_value' => true,
+            'given_type' => 'num',
+            'given_value' => 1,
             'type' => 'str',
-            'value' => 'true',
+            'value' => '1',
             'src' => 'api',
-            'line' => 2
+            'line' => 3
           }
         )
       end
 
       it do
         expect(body['full_messages']).to include(
-          '[info] on env.matrix.API: casting value true (:bool) to "true" (:str)'
+          '[info] on env.matrix.FOO: casting value 1 (:num) to "1" (:str)'
         )
       end
     end

@@ -19,7 +19,7 @@ describe Travis::Yml::Doc::Change::Cast do
     describe 'given a bool' do
       let(:value) { true }
       it { should serialize_to 'true' }
-      it { should have_msg [:info, :root, :cast, given_value: true, given_type: :bool, value: 'true', type: :str] }
+      it { should_not have_msg }
     end
 
     describe 'given a seq' do
