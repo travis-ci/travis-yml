@@ -13,7 +13,7 @@ describe Travis::Yml::Doc::Change::Cast do
     describe 'given a number' do
       let(:value) { 1 }
       it { should serialize_to '1' }
-      it { should have_msg [:info, :root, :cast, given_value: 1, given_type: :num, value: '1', type: :str] }
+      it { should_not have_msg }
     end
 
     describe 'given a bool' do

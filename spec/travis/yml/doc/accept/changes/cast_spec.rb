@@ -44,7 +44,7 @@ describe Travis::Yml, 'cast' do
     describe 'given 1' do
       yaml 'group: 1'
       it { should serialize_to group: '1' }
-      it { should have_msg [:info, :group, :cast, given_value: 1, given_type: :num, value: '1', type: :str] }
+      it { should_not have_msg }
     end
   end
 
@@ -64,7 +64,7 @@ describe Travis::Yml, 'cast' do
     describe 'given 1' do
       yaml 'script: 1'
       it { should serialize_to script: ['1'] }
-      it { should have_msg [:info, :script, :cast, given_value: 1, given_type: :num, value: '1', type: :str] }
+      it { should_not have_msg }
     end
   end
 

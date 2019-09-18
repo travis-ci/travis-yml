@@ -138,6 +138,7 @@ describe Travis::Yml::Web::V1 do
         env:
           API: true
           FOO: 1
+        unknown: str
       yml
     end
 
@@ -192,29 +193,28 @@ describe Travis::Yml::Web::V1 do
           },
           'script' => [
             './travis_yml'
-          ]
+          ],
+          'unknown' => 'str'
         )
       end
 
       it do
         expect(body['messages']).to include(
-          'level' => 'info',
-          'code' => 'cast',
-          'key' => 'env.matrix.FOO',
+          'level' => 'warn',
+          'code' => 'unknown_key',
+          'key' => 'root',
           'args' => {
-            'given_type' => 'num',
-            'given_value' => 1,
-            'type' => 'str',
-            'value' => '1',
+            'key' => 'unknown',
+            'value' => 'str',
             'src' => 'api',
-            'line' => 3
+            'line' => 4
           }
         )
       end
 
       it do
         expect(body['full_messages']).to include(
-          '[info] on env.matrix.FOO: casting value 1 (:num) to "1" (:str)'
+          '[warn] on root: unknown key "unknown" (str)'
         )
       end
     end
@@ -241,7 +241,8 @@ describe Travis::Yml::Web::V1 do
           'script' => [
             './import',
             './travis_yml'
-          ]
+          ],
+          'unknown' => 'str'
         )
       end
 

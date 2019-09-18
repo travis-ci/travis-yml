@@ -41,7 +41,6 @@ module Travis
 
     MSGS = {
       alias:             '%{alias} is an alias for %{obj}, using %{obj} (%{type})',
-      cast:              'casting value %<given_value>p (%<given_type>p) to %<value>p (%<type>p)',
       default:           'missing %{key}, using the default %<default>p',
       deprecated:        'deprecated: %{info}',
       deprecated_key:    'deprecated key: %<key>p (%{info})',

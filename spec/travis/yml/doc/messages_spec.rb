@@ -56,7 +56,7 @@ describe Travis::Yml::Doc, 'messages', alert: true, defaults: true, empty: true,
   describe 'cast' do
     yaml 'one: 1'
     it { should serialize_to one: '1' }
-    it { should have_msg [:info, :one, :cast, given_value: 1, given_type: :num, value: '1', type: :str, line: 0] }
+    # it { should have_msg [:info, :one, :cast, given_value: 1, given_type: :num, value: '1', type: :str, line: 0] }
   end
 
   describe 'default' do
