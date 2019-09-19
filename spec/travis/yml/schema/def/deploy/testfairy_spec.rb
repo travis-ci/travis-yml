@@ -58,34 +58,7 @@ describe Travis::Yml::Schema::Def::Deploy::Testfairy do
               auto_update: {
                 type: :boolean
               },
-              video_quality: {
-                type: :string
-              },
-              screenshot_quality: {
-                type: :string
-              },
-              screenshot_interval: {
-                type: :number
-              },
-              max_duration: {
-                type: :string
-              },
               advanced_options: {
-                type: :string
-              },
-              data_only_wifi: {
-                type: :boolean
-              },
-              record_on_background: {
-                type: :boolean
-              },
-              video: {
-                type: :boolean
-              },
-              icon_watermark: {
-                type: :boolean
-              },
-              metrics: {
                 type: :string
               }
             },
