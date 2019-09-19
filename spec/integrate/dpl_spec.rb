@@ -47,9 +47,8 @@ describe Travis::Yml, dpl: true, alert: false do
     end
 
     describe "#{provider.registry_key.to_s} options" do
-      skip = %i(stage backtrace fold help)
       provider.opts.each do |opt|
-        next if skip.include?(opt.name)
+        next if opt.internal? || skip.include?(opt.name)
         it(opt.name) { expect(opt).to be_declared_on(name) }
       end
     end

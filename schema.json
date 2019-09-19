@@ -4651,8 +4651,9 @@
           {
             "type": "object",
             "properties": {
-              "registry": {
-                "type": "string"
+              "email": {
+                "$ref": "#/definitions/type/secure",
+                "strict": false
               },
               "api_token": {
                 "$ref": "#/definitions/type/secure",
@@ -4660,17 +4661,19 @@
                   "api_key"
                 ]
               },
-              "email": {
-                "$ref": "#/definitions/type/secure",
-                "strict": false
-              },
               "access": {
+                "type": "string"
+              },
+              "registry": {
                 "type": "string"
               },
               "src": {
                 "type": "string"
               },
               "tag": {
+                "type": "string"
+              },
+              "auth_method": {
                 "type": "string"
               },
               "provider": {
@@ -5339,9 +5342,6 @@
               "password": {
                 "$ref": "#/definitions/type/secure"
               },
-              "api_key": {
-                "$ref": "#/definitions/type/secure"
-              },
               "server": {
                 "type": "string"
               },
@@ -5354,7 +5354,13 @@
               "skip_existing": {
                 "type": "boolean"
               },
-              "skip_upload_docs": {
+              "upload_docs": {
+                "type": "boolean"
+              },
+              "twine_check": {
+                "type": "boolean"
+              },
+              "remove_build_dir": {
                 "type": "boolean"
               },
               "setuptools_version": {
@@ -5688,13 +5694,19 @@
               "region": {
                 "type": "string"
               },
+              "endpoint": {
+                "type": "string"
+              },
               "upload_dir": {
                 "type": "string"
               },
-              "storage_class": {
+              "local_dir": {
                 "type": "string"
               },
-              "local_dir": {
+              "dot_match": {
+                "type": "boolean"
+              },
+              "acl": {
                 "type": "string"
               },
               "detect_encoding": {
@@ -5706,26 +5718,29 @@
               "expires": {
                 "type": "string"
               },
-              "acl": {
-                "type": "string"
-              },
-              "dot_match": {
-                "type": "boolean"
-              },
-              "index_document_suffix": {
-                "type": "string"
-              },
               "default_text_charset": {
+                "type": "string"
+              },
+              "storage_class": {
                 "type": "string"
               },
               "server_side_encryption": {
                 "type": "boolean"
               },
-              "endpoint": {
+              "index_document_suffix": {
                 "type": "string"
+              },
+              "overwrite": {
+                "type": "boolean"
+              },
+              "force_path_style": {
+                "type": "boolean"
               },
               "max_threads": {
                 "type": "number"
+              },
+              "verbose": {
+                "type": "boolean"
               },
               "provider": {
                 "type": "string",

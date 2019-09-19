@@ -14,19 +14,22 @@ module Travis
               map :secret_access_key,      to: :secure
               map :bucket,                 to: :str
               map :region,                 to: :str
+              map :endpoint,               to: :str
               map :upload_dir,             to: :str
-              map :storage_class,          to: :str
               map :local_dir,              to: :str
+              map :dot_match,              to: :bool
+              map :acl,                    to: :str
               map :detect_encoding,        to: :bool
               map :cache_control,          to: :str
               map :expires,                to: :str
-              map :acl,                    to: :str
-              map :dot_match,              to: :bool
-              map :index_document_suffix,  to: :str
               map :default_text_charset,   to: :str
+              map :storage_class,          to: :str
               map :server_side_encryption, to: :bool
-              map :endpoint,               to: :str
+              map :index_document_suffix,  to: :str
+              map :overwrite,              to: :bool
+              map :force_path_style,       to: :bool
               map :max_threads,            to: :num
+              map :verbose,                to: :bool
             end
           end
         end
