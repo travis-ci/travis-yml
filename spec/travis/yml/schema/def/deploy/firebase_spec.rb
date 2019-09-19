@@ -23,6 +23,9 @@ describe Travis::Yml::Schema::Def::Deploy::Firebase do
               only: {
                 type: :string
               },
+              force: {
+                type: :boolean
+              },
               provider: {
                 type: :string,
                 enum: [

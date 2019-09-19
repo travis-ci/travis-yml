@@ -12,6 +12,7 @@ module Travis
               map :token,    to: :secure
               map :message,  to: :str
               map :only,     to: :str
+              map :force,    to: :bool
             end
           end
         end
