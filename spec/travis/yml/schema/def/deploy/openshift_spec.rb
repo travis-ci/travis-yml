@@ -11,18 +11,11 @@ describe Travis::Yml::Schema::Def::Deploy::Openshift do
           {
             type: :object,
             properties: {
-              token: {
-                '$ref': '#/definitions/type/secure',
-              },
-              user: {
-                '$ref': '#/definitions/type/secure',
-                strict: false
-              },
-              password: {
-                '$ref': '#/definitions/type/secure'
-              },
               server: {
                 type: :string
+              },
+              token: {
+                '$ref': '#/definitions/type/secure',
               },
               project: {
                 type: :string
