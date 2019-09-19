@@ -33,6 +33,9 @@ describe Travis::Yml::Schema::Def::Deploy::Npm do
               tag: {
                 type: :string
               },
+              auth_method: {
+                type: :string
+              },
               provider: {
                 type: :string,
                 enum: [

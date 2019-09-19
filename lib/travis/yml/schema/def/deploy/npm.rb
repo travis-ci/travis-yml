@@ -8,12 +8,13 @@ module Travis
             register :npm
 
             def define
-              map :registry,  to: :str
-              map :api_token, to: :secure, alias: :api_key
-              map :email,     to: :secure, strict: false
-              map :access,    to: :str, enum: %w(public private)
-              map :src,       to: :str
-              map :tag,       to: :str
+              map :email,       to: :secure, strict: false
+              map :api_token,   to: :secure, alias: :api_key
+              map :access,      to: :str, enum: %w(public private)
+              map :registry,    to: :str
+              map :src,         to: :str
+              map :tag,         to: :str
+              map :auth_method, to: :str
             end
           end
         end
