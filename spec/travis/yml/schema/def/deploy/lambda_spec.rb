@@ -117,9 +117,6 @@ describe Travis::Yml::Schema::Def::Deploy::Lambda do
               dot_match: {
                 type: :boolean
               },
-              dead_letter_arn: {
-                type: :string
-              }
             },
             additionalProperties: false,
             normal: true,

@@ -37,7 +37,6 @@ module Travis
               map :publish,               to: :bool
               map :function_tags,         to: :secures
               map :dot_match,             to: :bool
-              map :dead_letter_arn,       to: :str
             end
           end
         end
