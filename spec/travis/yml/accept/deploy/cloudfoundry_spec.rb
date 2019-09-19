@@ -63,18 +63,6 @@ describe Travis::Yml, 'cloudfoundry' do
     end
   end
 
-  describe 'key' do
-    describe 'given a str' do
-      yaml %(
-        deploy:
-          provider: cloudfoundry
-          key: str
-      )
-      it { should serialize_to deploy: [provider: 'cloudfoundry', key: 'str'] }
-      it { should_not have_msg }
-    end
-  end
-
   describe 'manifest' do
     describe 'given a str' do
       yaml %(

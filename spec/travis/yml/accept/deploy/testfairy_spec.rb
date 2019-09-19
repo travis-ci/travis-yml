@@ -85,54 +85,6 @@ describe Travis::Yml, 'testfairy' do
     end
   end
 
-  describe 'video_quality' do
-    describe 'given a str' do
-      yaml %(
-        deploy:
-          provider: testfairy
-          video_quality: str
-      )
-      it { should serialize_to deploy: [provider: 'testfairy', video_quality: 'str'] }
-      it { should_not have_msg }
-    end
-  end
-
-  describe 'screenshot_quality' do
-    describe 'given a str' do
-      yaml %(
-        deploy:
-          provider: testfairy
-          screenshot_quality: str
-      )
-      it { should serialize_to deploy: [provider: 'testfairy', screenshot_quality: 'str'] }
-      it { should_not have_msg }
-    end
-  end
-
-  describe 'screenshot_interval' do
-    describe 'given a str' do
-      yaml %(
-        deploy:
-          provider: testfairy
-          screenshot_interval: 1
-      )
-      it { should serialize_to deploy: [provider: 'testfairy', screenshot_interval: 1] }
-      it { should_not have_msg }
-    end
-  end
-
-  describe 'max_duration' do
-    describe 'given a str' do
-      yaml %(
-        deploy:
-          provider: testfairy
-          max_duration: str
-      )
-      it { should serialize_to deploy: [provider: 'testfairy', max_duration: 'str'] }
-      it { should_not have_msg }
-    end
-  end
-
   describe 'advanced_options' do
     describe 'given a str' do
       yaml %(
@@ -141,66 +93,6 @@ describe Travis::Yml, 'testfairy' do
           advanced_options: str
       )
       it { should serialize_to deploy: [provider: 'testfairy', advanced_options: 'str'] }
-      it { should_not have_msg }
-    end
-  end
-
-  describe 'data_only_wifi' do
-    describe 'given a bool' do
-      yaml %(
-        deploy:
-          provider: testfairy
-          data_only_wifi: true
-      )
-      it { should serialize_to deploy: [provider: 'testfairy', data_only_wifi: true] }
-      it { should_not have_msg }
-    end
-  end
-
-  describe 'record_on_backgroup' do
-    describe 'given a bool' do
-      yaml %(
-        deploy:
-          provider: testfairy
-          record_on_background: true
-      )
-      it { should serialize_to deploy: [provider: 'testfairy', record_on_background: true] }
-      it { should_not have_msg }
-    end
-  end
-
-  describe 'video' do
-    describe 'given a bool' do
-      yaml %(
-        deploy:
-          provider: testfairy
-          video: true
-      )
-      it { should serialize_to deploy: [provider: 'testfairy', video: true] }
-      it { should_not have_msg }
-    end
-  end
-
-  describe 'icon_watermark' do
-    describe 'given a bool' do
-      yaml %(
-        deploy:
-          provider: testfairy
-          icon_watermark: true
-      )
-      it { should serialize_to deploy: [provider: 'testfairy', icon_watermark: true] }
-      it { should_not have_msg }
-    end
-  end
-
-  describe 'metrics' do
-    describe 'given a str' do
-      yaml %(
-        deploy:
-          provider: testfairy
-          metrics: str
-      )
-      it { should serialize_to deploy: [provider: 'testfairy', metrics: 'str'] }
       it { should_not have_msg }
     end
   end

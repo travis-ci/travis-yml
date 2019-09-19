@@ -217,14 +217,14 @@ describe Travis::Yml, 'lambda' do
     end
   end
 
-  describe 'dead_letter_config' do
+  describe 'dead_letter_arn' do
     describe 'given a str' do
       yaml %(
         deploy:
           provider: lambda
-          dead_letter_config: str
+          dead_letter_arn: str
       )
-      it { should serialize_to deploy: [provider: 'lambda', dead_letter_config: 'str'] }
+      it { should serialize_to deploy: [provider: 'lambda', dead_letter_arn: 'str'] }
       it { should_not have_msg }
     end
   end

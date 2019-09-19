@@ -51,16 +51,4 @@ describe Travis::Yml, 'bintray' do
       it { should_not have_msg }
     end
   end
-
-  describe 'dry_run' do
-    describe 'given a bool' do
-      yaml %(
-        deploy:
-          provider: bintray
-          dry_run: true
-      )
-      it { should serialize_to deploy: [provider: 'bintray', dry_run: true] }
-      it { should_not have_msg }
-    end
-  end
 end

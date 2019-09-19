@@ -93,18 +93,6 @@ describe Travis::Yml, 'rubygems', alert: true do
     end
   end
 
-  describe 'file' do
-    describe 'given a str' do
-      yaml %(
-        deploy:
-          provider: rubygems
-          file: str
-      )
-      it { should serialize_to deploy: [provider: 'rubygems', file: 'str'] }
-      it { should_not have_msg }
-    end
-  end
-
   describe 'gemspec' do
     describe 'given a str' do
       yaml %(

@@ -51,6 +51,18 @@ describe Travis::Yml, 'elasticbeanstalk' do
     end
   end
 
+  describe 'bucket_name (alias)' do
+    describe 'given a str' do
+      yaml %(
+        deploy:
+          provider: elasticbeanstalk
+          bucket_name: str
+      )
+      it { should serialize_to deploy: [provider: 'elasticbeanstalk', bucket: 'str'] }
+      it { should have_msg [:info, :deploy, :alias, type: :key, alias: 'bucket_name', obj: 'bucket', provider: 'elasticbeanstalk'] }
+    end
+  end
+
   describe 'app' do
     describe 'given a str' do
       yaml %(
@@ -83,18 +95,6 @@ describe Travis::Yml, 'elasticbeanstalk' do
           zip_file: str
       )
       it { should serialize_to deploy: [provider: 'elasticbeanstalk', zip_file: 'str'] }
-      it { should_not have_msg }
-    end
-  end
-
-  describe 'bucket_name' do
-    describe 'given a str' do
-      yaml %(
-        deploy:
-          provider: elasticbeanstalk
-          bucket_name: str
-      )
-      it { should serialize_to deploy: [provider: 'elasticbeanstalk', bucket_name: 'str'] }
       it { should_not have_msg }
     end
   end

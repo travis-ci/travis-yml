@@ -100,18 +100,6 @@ describe Travis::Yml, 'boxfuse' do
     end
   end
 
-  describe 'image' do
-    describe 'given a str' do
-      yaml %(
-        deploy:
-          provider: boxfuse
-          image: str
-      )
-      it { should serialize_to deploy: [provider: 'boxfuse', image: 'str'] }
-      it { should_not have_msg }
-    end
-  end
-
   describe 'extra_args' do
     describe 'given a str' do
       yaml %(

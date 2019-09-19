@@ -50,19 +50,6 @@ describe Travis::Yml, 'pypi' do
     end
   end
 
-  describe 'api_key' do
-    describe 'given a secure' do
-      yaml %(
-        deploy:
-          provider: pypi
-          api_key:
-            secure: secure
-      )
-      it { should serialize_to deploy: [provider: 'pypi', api_key: { secure: 'secure' }] }
-      it { should_not have_msg }
-    end
-  end
-
   describe 'server' do
     describe 'given a str' do
       yaml %(
