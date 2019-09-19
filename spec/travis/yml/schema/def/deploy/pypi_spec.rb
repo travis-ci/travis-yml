@@ -50,9 +50,6 @@ describe Travis::Yml::Schema::Def::Deploy::Pypi do
               password: {
                 '$ref': '#/definitions/type/secure'
               },
-              api_key: {
-                '$ref': '#/definitions/type/secure'
-              },
               server: {
                 type: :string
               },
@@ -65,7 +62,13 @@ describe Travis::Yml::Schema::Def::Deploy::Pypi do
               skip_existing: {
                 type: :boolean
               },
-              skip_upload_docs: {
+              upload_docs: {
+                type: :boolean
+              },
+              twine_check: {
+                type: :boolean
+              },
+              remove_build_dir: {
                 type: :boolean
               },
               setuptools_version: {
