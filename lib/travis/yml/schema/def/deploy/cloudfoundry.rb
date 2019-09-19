@@ -16,7 +16,6 @@ module Travis
               map :organization,        to: :str
               map :api,                 to: :str
               map :space,               to: :str
-              map :key,                 to: :str
               map :buildpack,           to: :str
               map :manifest,            to: :str
               map :skip_ssl_validation, to: :bool
