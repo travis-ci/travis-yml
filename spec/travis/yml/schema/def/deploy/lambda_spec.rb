@@ -89,7 +89,7 @@ describe Travis::Yml::Schema::Def::Deploy::Lambda do
               subnet_ids: {
                 '$ref': '#/definitions/type/strs'
               },
-              dead_letter_config: {
+              dead_letter_arn: {
                 type: :string
               },
               kms_key_arn: {

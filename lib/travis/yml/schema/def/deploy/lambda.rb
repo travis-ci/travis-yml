@@ -30,7 +30,7 @@ module Travis
               map :security_group_ids,    to: :strs
               map :environment,           to: :secures, alias: :environment_variables
               map :subnet_ids,            to: :strs
-              map :dead_letter_config,    to: :str
+              map :dead_letter_arn,       to: :str
               map :kms_key_arn,           to: :str
               map :tracing_mode,          to: :str, values: %i(Active PassThrough), default: :PassThrough
               map :layers,                to: :strs
