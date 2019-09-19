@@ -32,6 +32,8 @@ describe Travis::Yml, dpl: true, alert: false do
   matcher :have_opt do |opt|
     match do |provider|
       providers = Dpl::Provider.registry.select { |key, _| key.to_s.start_with?(provider.to_s) }.map(&:last)
+      return true if providers.any? { |provider| provider.opts[opt] }
+      opt = opt.to_s.sub(/(no_|skip_)/, '').to_sym
       providers.any? { |provider| provider.opts[opt] }
     end
   end
@@ -41,25 +43,25 @@ describe Travis::Yml, dpl: true, alert: false do
   skip = %i(heroku pages help)
   providers = Dpl::Provider.registry.reject { |key, _| skip.include?(key) }.map(&:last)
 
-  # providers.each do |provider|
-  #   name = provider.registry_key.to_s.split(':').first
-  #   config = Dpl::Examples.new(provider).full_config
-  #   config = config.merge(provider: name)
-  #
-  #   filter = ->(msg) { msg[2] == :deprecated_key && msg[3][:key] == 'skip_cleanup' }
-  #
-  #   describe "#{provider.registry_key} example config" do
-  #     yaml YAML.dump(stringify(deploy: [config])).gsub('!ruby/regexp ', '')
-  #     it { should_not have_msg(&filter) }
-  #   end
-  #
-  #   describe "#{provider.registry_key} dpl options" do
-  #     provider.opts.each do |opt|
-  #       next if opt.internal? || opt.name == :help
-  #       it(opt.name) { expect(opt).to be_known_opt(name) }
-  #     end
-  #   end
-  # end
+  providers.each do |provider|
+    name = provider.registry_key.to_s.split(':').first
+    config = Dpl::Examples.new(provider).full_config
+    config = config.merge(provider: name)
+
+    filter = ->(msg) { msg[2] == :deprecated_key && msg[3][:key] == 'skip_cleanup' }
+
+    describe "#{provider.registry_key} example config" do
+      yaml YAML.dump(stringify(deploy: [config])).gsub('!ruby/regexp ', '')
+      it { should_not have_msg(&filter) }
+    end
+
+    describe "#{provider.registry_key} dpl options" do
+      provider.opts.each do |opt|
+        next if opt.internal? || opt.name == :help
+        it(opt.name) { expect(opt).to be_known_opt(name) }
+      end
+    end
+  end
 
   Travis::Yml.schema[:definitions][:deploy].each do |provider, schema|
     describe "#{provider} declared options" do
