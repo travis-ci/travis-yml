@@ -73,6 +73,9 @@ describe Travis::Yml::Schema::Def::Deploy::Cloudfoundry do
               },
               logout: {
                 type: :boolean
+              },
+              v3: {
+                type: :boolean
               }
             },
             additionalProperties: false,
