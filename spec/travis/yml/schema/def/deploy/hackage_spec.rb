@@ -46,6 +46,9 @@ describe Travis::Yml::Schema::Def::Deploy::Hackage do
               },
               password: {
                 '$ref': '#/definitions/type/secure'
+              },
+              publish: {
+                type: :boolean
               }
             },
             additionalProperties: false,
