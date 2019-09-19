@@ -58,8 +58,16 @@ describe Travis::Yml::Schema::Def::Deploy::Gae do
               promote: {
                 type: :boolean
               },
+              no_promote: {
+                type: :boolean,
+                deprecated: 'use promote: false'
+              },
               stop_previous_version: {
                 type: :boolean
+              },
+              no_stop_previous_version: {
+                type: :boolean,
+                deprecated: 'use stop_previous_version: false'
               },
               install_sdk: {
                 type: :boolean

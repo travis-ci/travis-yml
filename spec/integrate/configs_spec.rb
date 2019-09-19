@@ -177,6 +177,9 @@ describe Travis::Yml, configs: true do
     { key: 'branches', info: 'not supported any more' },
     { key: 'github_token', info: 'not supported any more' },
     { key: 'skip_cleanup', info: 'not supported in dpl v2, use cleanup' },
+    { key: 'skip_upload_docs', info: 'use upload_docs: false' },
+    { key: 'no_promote', info: 'use promote: false' },
+    { key: 'no_stop_previous_version', info: 'use stop_previous_version: false' },
     { value: '__sardonyx__', info: 'experimental stack language' }
   ]
 
@@ -252,7 +255,10 @@ describe Travis::Yml, configs: true do
       condition
       client_id
       client_secret
+      default
+      detect_encoding
       deploy
+      dry-run
       file
       file_glob
       github_commit
@@ -339,6 +345,8 @@ describe Travis::Yml, configs: true do
     'matrix.include.deploy': %w(
       app
       buildpack
+      default
+      dry-run
       repo
       github_commit
       if

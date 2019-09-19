@@ -65,6 +65,10 @@ describe Travis::Yml::Schema::Def::Deploy::Pypi do
               upload_docs: {
                 type: :boolean
               },
+              skip_upload_docs: {
+                type: :boolean,
+                deprecated: 'use upload_docs: false'
+              },
               twine_check: {
                 type: :boolean
               },

@@ -15,6 +15,7 @@ module Travis
               map :docs_dir,           to: :str
               map :skip_existing,      to: :bool
               map :upload_docs,        to: :bool
+              map :skip_upload_docs,   to: :bool, deprecated: 'use upload_docs: false'
               map :twine_check,        to: :bool
               map :remove_build_dir,   to: :bool
               map :setuptools_version, to: :str
