@@ -29,39 +29,47 @@ describe Travis::Yml, dpl: true, alert: false do
     end
   end
 
+  matcher :have_opt do |opt|
+    match do |provider|
+      providers = Dpl::Provider.registry.select { |key, _| key.to_s.start_with?(provider.to_s) }.map(&:last)
+      providers.any? { |provider| provider.opts[opt] }
+    end
+  end
+
   subject { described_class.apply(parse(yaml), opts) }
 
   skip = %i(heroku pages help)
   providers = Dpl::Provider.registry.reject { |key, _| skip.include?(key) }.map(&:last)
 
-  providers.each do |provider|
-    name = provider.registry_key.to_s.split(':').first
-    config = Dpl::Examples.new(provider).full_config
-    config = config.merge(provider: name)
+  # providers.each do |provider|
+  #   name = provider.registry_key.to_s.split(':').first
+  #   config = Dpl::Examples.new(provider).full_config
+  #   config = config.merge(provider: name)
+  #
+  #   filter = ->(msg) { msg[2] == :deprecated_key && msg[3][:key] == 'skip_cleanup' }
+  #
+  #   describe "#{provider.registry_key} example config" do
+  #     yaml YAML.dump(stringify(deploy: [config])).gsub('!ruby/regexp ', '')
+  #     it { should_not have_msg(&filter) }
+  #   end
+  #
+  #   describe "#{provider.registry_key} dpl options" do
+  #     provider.opts.each do |opt|
+  #       next if opt.internal? || opt.name == :help
+  #       it(opt.name) { expect(opt).to be_known_opt(name) }
+  #     end
+  #   end
+  # end
 
-    filter = ->(msg) { msg[2] == :deprecated_key && msg[3][:key] == 'skip_cleanup' }
-
-    describe "#{provider.registry_key.to_s} example config" do
-      yaml YAML.dump(stringify(deploy: [config])).gsub('!ruby/regexp ', '')
-      it { should_not have_msg(&filter) }
-    end
-
-    describe "#{provider.registry_key.to_s} dpl options" do
-      provider.opts.each do |opt|
-        next if opt.internal? || opt.name == :help
-        it(opt.name) { expect(opt).to be_known_opt(name) }
-      end
-    end
-
-    describe "#{provider.registry_key.to_s} declared options" do
+  Travis::Yml.schema[:definitions][:deploy].each do |provider, schema|
+    describe "#{provider} declared options" do
       skip = %i(provider on allow_failure skip_cleanup)
-      schema = Travis::Yml.schema[:definitions][:deploy][name.to_sym][:anyOf][0][:properties]
+      next unless schema = schema[:anyOf][0][:properties]
       schema = schema.reject { |key, _| skip.include?(key) }
       schema.each do |key, schema|
         describe key.to_s do
           let(:opt) { provider.opts[key] }
-          it { expect(opt).to_not be_nil }
-          # it { p provider.opts[key], schema }
+          it { expect(provider).to have_opt(key) }
         end
       end
     end
@@ -80,4 +88,3 @@ describe Travis::Yml, dpl: true, alert: false do
     it { expect(dpl.sort).to eq yml.sort }
   end
 end
-
