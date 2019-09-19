@@ -6,6 +6,29 @@ def stringify(hash)
 end
 
 describe Travis::Yml, dpl: true, alert: false do
+  matcher :be_declared_on do |provider|
+    match do |opt|
+      yaml = <<~str
+        deploy:
+        - provider: #{provider}
+          #{opt.name}: #{value(opt)}
+      str
+      msgs = described_class.apply(parse(yaml), opts).msgs
+      @msgs = msgs.select { |msg| msg[2] == :unknown_key }
+      @msgs.empty?
+    end
+
+    def value(opt)
+      if opt.flag?
+        true
+      elsif opt.secret?
+        "\n    secure: str"
+      else
+        'str'
+      end
+    end
+  end
+
   subject { described_class.apply(parse(yaml), opts) }
 
   skip = %i(heroku pages help)
@@ -18,9 +41,17 @@ describe Travis::Yml, dpl: true, alert: false do
 
     filter = ->(msg) { msg[2] == :deprecated_key && msg[3][:key] == 'skip_cleanup' }
 
-    describe provider.registry_key.to_s do
+    describe "#{provider.registry_key.to_s} example config" do
       yaml YAML.dump(stringify(deploy: [config])).gsub('!ruby/regexp ', '')
       it { should_not have_msg(&filter) }
+    end
+
+    describe "#{provider.registry_key.to_s} options" do
+      skip = %i(stage backtrace fold help)
+      provider.opts.each do |opt|
+        next if skip.include?(opt.name)
+        it(opt.name) { expect(opt).to be_declared_on(name) }
+      end
     end
   end
 
