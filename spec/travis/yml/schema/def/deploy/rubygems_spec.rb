@@ -105,9 +105,6 @@ describe Travis::Yml::Schema::Def::Deploy::Rubygems do
                   }
                 ]
               },
-              file: {
-                type: :string
-              },
               gemspec: {
                 type: :string
               },
