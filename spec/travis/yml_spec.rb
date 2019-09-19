@@ -106,11 +106,6 @@ describe Travis::Yml do
       it { should eq '[info] on key: rvm is an alias for ruby, using ruby (key)' }
     end
 
-    describe 'cast' do
-      let(:msg) { [:info, :key, :cast, given_value: 'foo', given_type: :str, value: true, type: :bool] }
-      it { should eq '[info] on key: casting value "foo" (:str) to true (:bool)' }
-    end
-
     describe 'default' do
       let(:msg) { [:info, :key, :default, key: :key, default: 'default'] }
       it { should eq '[info] on key: missing key, using the default "default"' }
