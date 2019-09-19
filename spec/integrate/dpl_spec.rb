@@ -6,7 +6,7 @@ def stringify(hash)
 end
 
 describe Travis::Yml, dpl: true, alert: false do
-  matcher :be_declared_on do |provider|
+  matcher :be_known_opt do |provider|
     match do |opt|
       yaml = <<~str
         deploy:
@@ -46,10 +46,23 @@ describe Travis::Yml, dpl: true, alert: false do
       it { should_not have_msg(&filter) }
     end
 
-    describe "#{provider.registry_key.to_s} options" do
+    describe "#{provider.registry_key.to_s} dpl options" do
       provider.opts.each do |opt|
-        next if opt.internal? || skip.include?(opt.name)
-        it(opt.name) { expect(opt).to be_declared_on(name) }
+        next if opt.internal? || opt.name == :help
+        it(opt.name) { expect(opt).to be_known_opt(name) }
+      end
+    end
+
+    describe "#{provider.registry_key.to_s} declared options" do
+      skip = %i(provider on allow_failure skip_cleanup)
+      schema = Travis::Yml.schema[:definitions][:deploy][name.to_sym][:anyOf][0][:properties]
+      schema = schema.reject { |key, _| skip.include?(key) }
+      schema.each do |key, schema|
+        describe key.to_s do
+          let(:opt) { provider.opts[key] }
+          it { expect(opt).to_not be_nil }
+          # it { p provider.opts[key], schema }
+        end
       end
     end
   end
