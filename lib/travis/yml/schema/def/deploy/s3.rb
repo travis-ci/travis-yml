@@ -20,8 +20,8 @@ module Travis
               map :dot_match,              to: :bool
               map :acl,                    to: :str
               map :detect_encoding,        to: :bool
-              map :cache_control,          to: :str
-              map :expires,                to: :str
+              map :cache_control,          to: :strs
+              map :expires,                to: :strs
               map :default_text_charset,   to: :str
               map :storage_class,          to: :str
               map :server_side_encryption, to: :bool

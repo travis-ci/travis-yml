@@ -70,7 +70,7 @@ describe Travis::Yml, 'packagecloud' do
           provider: packagecloud
           package_glob: str
       )
-      it { should serialize_to deploy: [provider: 'packagecloud', package_glob: 'str'] }
+      it { should serialize_to deploy: [provider: 'packagecloud', package_glob: ['str']] }
       it { should_not have_msg }
     end
   end

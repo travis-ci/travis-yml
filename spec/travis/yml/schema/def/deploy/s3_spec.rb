@@ -72,10 +72,10 @@ describe Travis::Yml::Schema::Def::Deploy::S3 do
                 type: :boolean
               },
               cache_control: {
-                type: :string
+                '$ref': '#/definitions/type/strs',
               },
               expires: {
-                type: :string
+                '$ref': '#/definitions/type/strs',
               },
               default_text_charset: {
                 type: :string

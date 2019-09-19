@@ -47,7 +47,7 @@ describe Travis::Yml::Schema::Def::Deploy::Gae do
                 type: :string
               },
               config: {
-                type: :string
+                '$ref': '#/definitions/type/strs',
               },
               version: {
                 type: :string

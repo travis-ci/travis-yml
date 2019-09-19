@@ -13,7 +13,7 @@ module Travis
             def define
               map :project,                  to: :str
               map :keyfile,                  to: :str
-              map :config,                   to: :str
+              map :config,                   to: :strs
               map :version,                  to: :str
               map :verbosity,                to: :str
               map :promote,                  to: :bool

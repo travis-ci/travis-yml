@@ -15,7 +15,7 @@ module Travis
               map :repository,      to: :str
               map :local_dir,       to: :str
               map :dist,            to: :str
-              map :package_glob,    to: :str
+              map :package_glob,    to: :strs
               map :force,           to: :bool
               map :connect_timeout, to: :num
               map :read_timeout,    to: :num

@@ -32,7 +32,7 @@ describe Travis::Yml, 'gae' do
           provider: gae
           config: str
       )
-      it { should serialize_to deploy: [provider: 'gae', config: 'str'] }
+      it { should serialize_to deploy: [provider: 'gae', config: ['str']] }
       it { should_not have_msg }
     end
   end

@@ -54,10 +54,10 @@ describe Travis::Yml::Schema::Def::Deploy::Opsworks do
                 type: :string
               },
               instance_ids: {
-                type: :string
+                '$ref': '#/definitions/type/strs',
               },
               layer_ids: {
-                type: :string
+                '$ref': '#/definitions/type/strs',
               },
               migrate: {
                 type: :boolean

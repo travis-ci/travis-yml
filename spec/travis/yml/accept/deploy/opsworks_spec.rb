@@ -46,7 +46,7 @@ describe Travis::Yml, 'opsworks' do
           provider: opsworks
           instance_ids: str
       )
-      it { should serialize_to deploy: [provider: 'opsworks', instance_ids: 'str'] }
+      it { should serialize_to deploy: [provider: 'opsworks', instance_ids: ['str']] }
       it { should_not have_msg }
     end
   end
@@ -58,7 +58,7 @@ describe Travis::Yml, 'opsworks' do
           provider: opsworks
           layer_ids: str
       )
-      it { should serialize_to deploy: [provider: 'opsworks', layer_ids: 'str'] }
+      it { should serialize_to deploy: [provider: 'opsworks', layer_ids: ['str']] }
       it { should_not have_msg }
     end
   end

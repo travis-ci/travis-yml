@@ -106,7 +106,7 @@ describe Travis::Yml, 's3' do
           provider: s3
           cache_control: str
       )
-      it { should serialize_to deploy: [provider: 's3', cache_control: 'str'] }
+      it { should serialize_to deploy: [provider: 's3', cache_control: ['str']] }
       it { should_not have_msg }
     end
   end
@@ -118,7 +118,7 @@ describe Travis::Yml, 's3' do
           provider: s3
           expires: str
       )
-      it { should serialize_to deploy: [provider: 's3', expires: 'str'] }
+      it { should serialize_to deploy: [provider: 's3', expires: ['str']] }
       it { should_not have_msg }
     end
   end
