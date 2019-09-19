@@ -26,7 +26,6 @@ module Travis
               map :commit_message,     to: :str
               map :committer_from_gh,  to: :bool
               map :deployment_file,    to: :bool
-              map :detect_encoding,    to: :bool # TODO validate this, it's being used and Dpl::Provider has the method, not sure.
             end
           end
         end

@@ -105,9 +105,6 @@ describe Travis::Yml::Schema::Def::Deploy::Pages do
               },
               deployment_file: {
                 type: :boolean
-              },
-              detect_encoding: {
-                type: :boolean
               }
             },
             additionalProperties: false,
