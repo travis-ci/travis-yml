@@ -52,20 +52,17 @@ describe Travis::Yml::Schema::Def::Deploy::Gae do
               version: {
                 type: :string
               },
-              no_promote: {
-                type: :boolean
-              },
-              no_stop_previous_version: {
-                type: :boolean
-              },
-              default: {
-                type: :boolean
-              },
               verbosity: {
                 type: :string
               },
-              docker_build: {
-                type: :string
+              promote: {
+                type: :boolean
+              },
+              stop_previous_version: {
+                type: :boolean
+              },
+              install_sdk: {
+                type: :boolean
               }
             },
             additionalProperties: false,
