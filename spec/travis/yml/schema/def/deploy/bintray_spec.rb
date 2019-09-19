@@ -40,9 +40,6 @@ describe Travis::Yml::Schema::Def::Deploy::Bintray do
               edge: {
                 '$ref': '#/definitions/deploy/edge'
               },
-              file: {
-                type: :string
-              },
               user: {
                 '$ref': '#/definitions/type/secure',
                 strict: false
@@ -50,11 +47,14 @@ describe Travis::Yml::Schema::Def::Deploy::Bintray do
               key: {
                 '$ref': '#/definitions/type/secure'
               },
+              file: {
+                type: :string
+              },
               passphrase: {
                 '$ref': '#/definitions/type/secure'
               },
-              dry_run: {
-                type: :boolean
+              url: {
+                type: :string
               }
             },
             additionalProperties: false,

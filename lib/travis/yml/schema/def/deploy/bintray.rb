@@ -8,11 +8,11 @@ module Travis
             register :bintray
 
             def define
-              map :file,       to: :str
               map :user,       to: :secure, strict: false
               map :key,        to: :secure
+              map :file,       to: :str
               map :passphrase, to: :secure
-              map :dry_run,    to: :bool
+              map :url,        to: :str
             end
           end
         end
