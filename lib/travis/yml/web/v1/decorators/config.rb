@@ -13,10 +13,10 @@ module Travis::Yml::Web::V1
       def call
         result = @config.serialize
         {
-          'version' => 'v1',
-          'messages' => messages,
-          'full_messages' => full_messages,
-          'config' => result
+          version: 'v1',
+          messages: messages,
+          full_messages: full_messages,
+          config: result
         }
       end
 
@@ -24,12 +24,15 @@ module Travis::Yml::Web::V1
 
       def messages
         sort(@config.msgs).map do |level, key, code, args|
-          {
-            'level' => level,
-            'key' => key,
-            'code' => code,
-            'args' => args
-          }
+          compact(
+            type: 'config',
+            level: level,
+            key: key,
+            code: code,
+            args: except(args, :src, :line),
+            src: args[:src],
+            line: args[:line]
+          )
         end
       end
 
@@ -39,6 +42,14 @@ module Travis::Yml::Web::V1
 
       def sort(msgs)
         msgs.sort_by { |msg| LEVELS.index(msg.first || :unknown) || LEVELS[:unknown] }
+      end
+
+      def compact(hash, *keys)
+        hash.reject { |_, value| value.nil? }.to_h
+      end
+
+      def except(hash, *keys)
+        hash.reject { |key, _| keys.include?(key) }.to_h
       end
     end
   end
