@@ -50,16 +50,18 @@ describe Travis::Yml::Web::V1 do
     it 'returns structured message attrs' do
       post '/parse?defaults=true', 'rvm: 2.3', {}
       expect(body['messages']).to include(
+        'type' => 'config',
         'level' => 'info',
         'key' => 'language',
         'code' => 'default',
-        'args' => { 'key' => 'language', 'default' => 'ruby' }
+        'args' => { 'key' => 'language', 'default' => 'ruby' },
       )
       expect(body['messages']).to include(
+        'type' => 'config',
         'level' => 'info',
         'key' => 'os',
         'code' => 'default',
-        'args' => { 'key' => 'os', 'default' => 'linux' }
+        'args' => { 'key' => 'os', 'default' => 'linux' },
       )
     end
 
@@ -200,15 +202,16 @@ describe Travis::Yml::Web::V1 do
 
       it do
         expect(body['messages']).to include(
+          'type' => 'config',
           'level' => 'warn',
           'code' => 'unknown_key',
           'key' => 'root',
           'args' => {
             'key' => 'unknown',
             'value' => 'str',
-            'src' => 'api',
-            'line' => 4
-          }
+          },
+          'src' => 'api',
+          'line' => 4,
         )
       end
 
