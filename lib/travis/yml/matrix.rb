@@ -134,7 +134,7 @@ module Travis
         end
 
         def expand_keys
-          Yml.expand_keys
+          Yml.expand_keys - [:matrix] + [:env] # TODO
         end
     end
   end

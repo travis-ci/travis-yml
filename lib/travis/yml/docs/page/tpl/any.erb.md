@@ -1,10 +1,9 @@
 # <%= title %>
 
-<%= description %>
+<%= render 'shared/description' %>
 <%= render 'shared/deprecated' %>
 <%= render 'shared/see' %>
 <%= render 'shared/parents' %>
-<%= render 'shared/flags' %>
 <%= render 'shared/types' %>
 <%= render 'shared/enum' %>
 

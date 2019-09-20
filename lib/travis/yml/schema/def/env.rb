@@ -11,13 +11,26 @@ module Travis
           def define
             summary 'Environment variables to set up'
 
+            description <<~str
+              The key `env` defines env vars that will be defined in the build
+              environment.
+
+              Env vars can be specified as global or matrix vars. Global vars
+              will be defined on every job in the build's job matrix. Matrix
+              vars will expand the matrix, i.e. create one additional job per
+              entry.
+
+              Env vars can be given either as strings or maps. If given as a
+              string they can contain multiple key/value pairs.
+            str
+
             type Class.new(Type::Map) {
               def define
                 normal
                 prefix :matrix
 
                 map :global, to: :env_vars, summary: 'Global environment variables to be defined on all jobs'
-                map :matrix, to: :env_vars, summary: 'Environment variables that expand the build matrix (i.e. that create one job per entry)'
+                matrix :matrix, to: :env_vars, summary: 'Environment variables that expand the build matrix (creating one job per entry)'
               end
             }
 
@@ -31,6 +44,8 @@ module Travis
           register :env_vars
 
           def define
+            summary 'Environment variables to set up'
+
             type Class.new(Type::Seq) {
               def define
                 normal

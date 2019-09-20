@@ -11,7 +11,7 @@ module Travis
           def define
             title 'Architectures'
 
-            summary 'Build environment architecture'
+            summary 'Build environment architectures'
 
             description <<~str
               The architectures that will be selected for the build environments.
@@ -29,13 +29,11 @@ module Travis
           def define
             title 'Architecture'
 
+            summary 'Build environment architecture'
+
             description <<~str
               The architecture that will be selected for the build environment.
             str
-
-            # examples <<~str
-            #   arch: amd64
-            # str
 
             downcase
 

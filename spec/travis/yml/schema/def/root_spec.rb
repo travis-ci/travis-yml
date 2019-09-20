@@ -296,7 +296,7 @@ describe Travis::Yml::Schema::Def::Root do
       it { should include compiler:       { '$ref': '#/definitions/type/compilers', flags: [:expand] } }
       it { should include conditions:     { '$ref': '#/definitions/type/conditions' } }
       it { should include dist:           { '$ref': '#/definitions/type/dist' } }
-      it { should include env:            { '$ref': '#/definitions/type/env', flags: [:expand] } }
+      it { should include env:            { '$ref': '#/definitions/type/env' } }
       it { should include import:         { '$ref': '#/definitions/type/imports' } }
       # it { should include language:       { '$ref': '#/definitions/type/language' } }
       it { should include matrix:         { '$ref': '#/definitions/type/matrix', aliases: [:jobs] } }

@@ -39,7 +39,7 @@ module Travis
             map    :stack
             map    :sudo
             map    :import,         to: :imports
-            matrix :env
+            map    :env
             matrix :compiler,       to: :compilers
             map    :stages
             map    :matrix,         alias: :jobs

@@ -35,10 +35,7 @@
           "$ref": "#/definitions/type/imports"
         },
         "env": {
-          "$ref": "#/definitions/type/env",
-          "flags": [
-            "expand"
-          ]
+          "$ref": "#/definitions/type/env"
         },
         "compiler": {
           "$ref": "#/definitions/type/compilers",
@@ -202,6 +199,7 @@
         "title": "Architecture",
         "description": "The architecture that will be selected for the build environment.",
         "type": "string",
+        "summary": "Build environment architecture",
         "downcase": true,
         "only": {
           "os": [
@@ -243,7 +241,7 @@
             "$ref": "#/definitions/type/arch"
           }
         ],
-        "summary": "Build environment architecture"
+        "summary": "Build environment architectures"
       },
       "branches": {
         "$id": "branches",
@@ -478,6 +476,7 @@
       "env": {
         "$id": "env",
         "title": "Env",
+        "description": "The key `env` defines env vars that will be defined in the build\nenvironment.\n\nEnv vars can be specified as global or matrix vars. Global vars\nwill be defined on every job in the build's job matrix. Matrix\nvars will expand the matrix, i.e. create one additional job per\nentry.\n\nEnv vars can be given either as strings or maps. If given as a\nstring they can contain multiple key/value pairs.",
         "anyOf": [
           {
             "type": "object",
@@ -488,7 +487,10 @@
               },
               "matrix": {
                 "$ref": "#/definitions/type/env_vars",
-                "summary": "Environment variables that expand the build matrix (i.e. that create one job per entry)"
+                "summary": "Environment variables that expand the build matrix (creating one job per entry)",
+                "flags": [
+                  "expand"
+                ]
               }
             },
             "additionalProperties": false,
@@ -569,7 +571,8 @@
           {
             "$ref": "#/definitions/type/env_var"
           }
-        ]
+        ],
+        "summary": "Environment variables to set up"
       },
       "git": {
         "$id": "git",
@@ -8989,13 +8992,13 @@
     "dotnet",
     "elixir",
     "elm",
-    "env",
     "gemfile",
     "ghc",
     "go",
     "haxe",
     "jdk",
     "julia",
+    "matrix",
     "mono",
     "nix",
     "node_js",
