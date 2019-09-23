@@ -8,6 +8,9 @@ module Travis
           register :python
 
           def define
+            title 'Python'
+            summary 'Python language support'
+            see 'Building a Python Project': 'https://docs.travis-ci.com/user/languages/python/'
             matrix :python
             map :virtualenv, to: :virtualenv
           end

@@ -5,19 +5,20 @@ module Travis
     module Docs
       module Page
         class Index < Base
-          def initialize(pages, opts)
-            super(nil, opts)
+          def initialize(parent, pages, opts)
+            super(parent, nil, nil, opts)
             @pages = pages
           end
 
-          def render
-            super(:index)
+          def render(opts = {})
+            super(:index, opts.merge(layout: true))
           end
 
           def pages
             pages = @pages.reject { |page| hide?(page) }
             root  = pages.detect(&:root?)
-            pages = pages.sort_by(&:id)
+            pages = pages.group_by(&:id).map { |_, pages| pages.sort_by { |page| page.path.length }.first }.flatten
+            pages = pages.sort_by(&:title)
             pages
           end
 
@@ -35,9 +36,14 @@ module Travis
           def title
             'Index'
           end
+          alias menu_title title
 
           def path
             path_to('index')
+          end
+
+          def publish?
+            true
           end
 
           def internal?

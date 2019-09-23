@@ -10,6 +10,9 @@ module Travis
             register :coverity_scan
 
             def define
+              summary 'CoverityScan settings'
+              see 'The Coverity Scan Addon for Travis CI': 'https://scan.coverity.com/travis_ci'
+
               map :project,               to: :coverity_scan_project
               map :build_script_url,      to: :str
               map :branch_pattern,        to: :str

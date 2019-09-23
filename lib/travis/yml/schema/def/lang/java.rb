@@ -9,6 +9,9 @@ module Travis
           register :java
 
           def define
+            title 'Java'
+            summary 'Java language support'
+            see 'Building a Java Project': 'https://docs.travis-ci.com/user/languages/java/'
             aliases :jvm
             matrix :jdk, to: :jdks
           end

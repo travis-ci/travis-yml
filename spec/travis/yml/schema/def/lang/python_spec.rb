@@ -4,9 +4,11 @@ describe Travis::Yml::Schema::Def::Python do
   # it { puts JSON.pretty_generate(subject) }
 
   it do
-    should eq(
+    should include(
       '$id': :python,
         title: 'Python',
+        summary: instance_of(String),
+        see: instance_of(Hash),
         type: :object,
         properties: {
           python: {

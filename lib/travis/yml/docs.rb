@@ -5,7 +5,9 @@ require 'travis/yml/docs/schema'
 module Travis
   module Yml
     module Docs
-      extend self, Helper::Obj
+      extend self, Helper::Obj, Page::Render
+
+      DIR = 'public/docs'
 
       HIDE = %i(
         arch
@@ -20,37 +22,54 @@ module Travis
         tree
       )
 
-      def menu(opts)
-        Page::Menu.new(pages, opts).render
+      STATIC = %i(
+        matrix_expansion
+        types
+      )
+
+      def generate
+        pages.each { |path, page| write(path, page) }
+        puts
+      end
+
+      def write(path, page)
+        file = "#{DIR}#{path}.md"
+        FileUtils.mkpath(File.dirname(file))
+        File.write(file, page.render(current: path))
+        print '.'
       end
 
       def pages(opts = {})
         @pages ||= begin
           root = self.root(opts)
-          pages = root.pages.uniq(&:full_id)
-          pages = pages + [static(:types, opts), static(:flags, opts)]
-          pages = pages.map { |page| [page.full_id, page] }
+          pages = root.pages # .uniq(&:full_id)
+          pages = pages + statics(opts)
+          pages = pages + [index(pages, opts)]
+          pages = pages.select(&:path)
+          pages = pages.map { |page| [page.path, page] }
           pages = pages.to_h.sort.to_h
-          pages = pages.merge('index' => index(pages, opts), 'tree' => tree(root, opts))
           pages = only(pages, :root).merge(except(pages, :root))
           pages
         end
       end
 
       def index(pages, opts)
-        Page::Index.new(pages.values.flatten, opts)
+        Page::Index.new(root, pages, opts)
       end
 
-      def tree(root, opts)
-        Page::Tree.new(root, opts)
-      end
-
-      def static(name, opts)
-        Page::Static.new(name, opts)
+      def statics(opts)
+        STATIC.map { |name| Page::Static.new(root, name, opts) }
       end
 
       def root(opts = {})
-        Page.build(schema, opts)
+        Page.build(nil, nil, schema, opts)
+      end
+
+      def languages
+        parent = schema[:language]
+        schemas = Yml.schema[:definitions][:language]
+        langs = schemas.map { |key, schema| Schema::Factory.build(parent, schema) }
+        langs.reject(&:internal?).sort_by(&:title)
       end
 
       def schema

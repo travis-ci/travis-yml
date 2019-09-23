@@ -10,6 +10,14 @@ module Travis
 
           def define
             summary 'Build stages definition'
+
+            description <<~str
+              Build stages group jobs, and run jobs in each stage in parallel,
+              but run one stage after another sequentially.
+            str
+
+            see 'Build Stages': 'https://docs.travis-ci.com/user/build-stages/'
+
             normal
             type :stage
 

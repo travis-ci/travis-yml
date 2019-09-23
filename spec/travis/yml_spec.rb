@@ -28,13 +28,13 @@ describe Travis::Yml do
         dotnet
         elixir
         elm
-        env
         gemfile
         ghc
         go
         haxe
         jdk
         julia
+        matrix
         mono
         nix
         node_js

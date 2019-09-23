@@ -4,11 +4,13 @@ describe Travis::Yml::Schema::Def::Cpp do
   # it { puts JSON.pretty_generate(subject) }
 
   it do
-    should eq(
+    should include(
       '$id': :cpp,
-        title: 'Cpp',
-        type: :object,
-        normal: true
+      title: 'C++',
+      summary: instance_of(String),
+      see: instance_of(Hash),
+      type: :object,
+      normal: true
     )
   end
 end

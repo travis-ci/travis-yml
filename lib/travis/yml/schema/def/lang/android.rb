@@ -9,6 +9,10 @@ module Travis
           register :android
 
           def define
+            title 'Android'
+            summary 'Android support'
+            see 'Building an Android Project': 'https://docs.travis-ci.com/user/languages/android/'
+
             matrix :jdk, to: :jdks
             map :android, to: AndroidConfig
           end
@@ -18,8 +22,8 @@ module Travis
           register :android_config
 
           def define
-            map :components, to: :seq
-            map :licenses,   to: :seq
+            map :components, to: :seq, summary: 'Android components to use'
+            map :licenses,   to: :seq, summary: 'Android licenses to use'
           end
         end
       end

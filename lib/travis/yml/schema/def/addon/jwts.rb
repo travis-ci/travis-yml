@@ -12,6 +12,8 @@ module Travis
 
             def define
               title 'JSON Web Tokens'
+              see 'JWT addon will be deprecated on April 17': 'https://blog.travis-ci.com/2018-01-23-jwt-addon-is-deprecated'
+              deprecated 'Discontinued as of April 17, 2018'
               type :secure
               export
             end

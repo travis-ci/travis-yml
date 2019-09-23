@@ -11,7 +11,8 @@ module Travis
             register :snaps
 
             def define
-              normal
+              summary 'Ubuntu Snaps to install'
+              see 'Snap Store': 'https://docs.travis-ci.com/user/deployment/snaps/'
 
               type Class.new(Type::Map) {
                 def define
@@ -22,6 +23,7 @@ module Travis
                 end
               }
 
+              normal
               export
             end
           end

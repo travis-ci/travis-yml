@@ -4,10 +4,12 @@ describe Travis::Yml::Schema::Def::Language do
   # it { puts JSON.pretty_generate(subject) }
 
   it do
-    should eq(
+    should include(
       '$id': :language,
       title: 'Language',
-      summary: 'Language support',
+      summary: instance_of(String),
+      description: instance_of(String),
+      see: instance_of(Hash),
       example: 'ruby',
       type: :string,
       enum: [

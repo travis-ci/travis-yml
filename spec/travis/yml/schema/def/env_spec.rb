@@ -5,22 +5,12 @@ describe Travis::Yml::Schema::Def::Env do
     # it { puts JSON.pretty_generate(subject) }
 
     it do
-      should eq(
+      should include(
         '$id': :env,
         title: 'Env',
-        summary: 'Environment variables to set up',
-        description: <<~str.chomp,
-          The key `env` defines env vars that will be defined in the build
-          environment.
-
-          Env vars can be specified as global or matrix vars. Global vars
-          will be defined on every job in the build's job matrix. Matrix
-          vars will expand the matrix, i.e. create one additional job per
-          entry.
-
-          Env vars can be given either as strings or maps. If given as a
-          string they can contain multiple key/value pairs.
-        str
+        summary: instance_of(String),
+        description: instance_of(String),
+        see: instance_of(Hash),
         anyOf: [
           {
             type: :object,

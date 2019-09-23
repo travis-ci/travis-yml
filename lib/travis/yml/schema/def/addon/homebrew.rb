@@ -10,6 +10,9 @@ module Travis
             register :homebrew
 
             def define
+              summary 'Homebrew packages to install'
+              see 'Installing Packages on macOS': 'https://docs.travis-ci.com/user/installing-dependencies/#installing-packages-on-macos'
+
               prefix :packages
 
               map :update,   to: :bool

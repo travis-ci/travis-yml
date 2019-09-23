@@ -11,16 +11,17 @@ module Travis
 
             def define
               title 'IRC'
+              see 'Configuring IRC notifications': 'https://docs.travis-ci.com/user/notifications/#configuring-irc-notifications'
 
               prefix :channels
 
-              map :channels,          to: :irc_channels
-              map :channel_key,       to: :secure
-              map :password,          to: :secure
-              map :nickserv_password, to: :secure
-              map :nick,              to: :secure
-              map :use_notice,        to: :bool
-              map :skip_join,         to: :bool
+              map :channels,          to: :irc_channels, summary: 'IRC channels to notify'
+              map :channel_key,       to: :secure, summary: 'IRC channel key (password)'
+              map :password,          to: :secure, summary: 'IRC user password'
+              map :nickserv_password, to: :secure, summary: 'IRC nickserv password'
+              map :nick,              to: :secure, summary: 'IRC Nick name'
+              map :use_notice,        to: :bool, summary: 'Whether to use notices instead of regular messages'
+              map :skip_join,         to: :bool, summary: 'Whether to skip joining the channel'
               map :template,          to: :templates
             end
           end

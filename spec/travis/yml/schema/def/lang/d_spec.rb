@@ -4,9 +4,11 @@ describe Travis::Yml::Schema::Def::D do
   # it { puts JSON.pretty_generate(subject) }
 
   it do
-    should eq(
+    should include(
       '$id': :d,
         title: 'D',
+        summary: instance_of(String),
+        see: instance_of(Hash),
         type: :object,
         properties: {
           d: {

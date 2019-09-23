@@ -4,10 +4,12 @@ describe Travis::Yml::Schema::Def::Git do
   # it { puts JSON.pretty_generate(subject) }
 
   it do
-    should eq(
+    should include(
       '$id': :git,
       title: 'Git',
-      summary: 'Git settings',
+      summary: instance_of(String),
+      description: instance_of(String),
+      see: instance_of(Hash),
       type: :object,
       properties: {
         strategy: {
@@ -15,10 +17,12 @@ describe Travis::Yml::Schema::Def::Git do
           enum: [
             'clone',
             'tarball'
-          ]
+          ],
+          summary: instance_of(String),
         },
         quiet: {
-          type: :boolean
+          type: :boolean,
+          summary: instance_of(String),
         },
         depth: {
           anyOf: [
@@ -28,19 +32,24 @@ describe Travis::Yml::Schema::Def::Git do
             {
               type: :boolean
             }
-          ]
+          ],
+          summary: instance_of(String),
         },
         lfs_skip_smudge: {
-          type: :boolean
+          type: :boolean,
+          summary: instance_of(String),
         },
         sparse_checkout: {
-          type: :string
+          type: :string,
+          summary: instance_of(String),
         },
         submodules: {
-          type: :boolean
+          type: :boolean,
+          summary: instance_of(String),
         },
         submodules_depth: {
-          type: :number
+          type: :number,
+          summary: instance_of(String),
         }
       },
       additionalProperties: false

@@ -13,19 +13,28 @@ module Travis
           def define
             summary 'Cache settings to speed up the build'
 
+            description <<~str
+              Activates caching content that does not often change in order to speed up the build process.
+
+              There are built-in caching strategies for #{TYPES.map { |type| "`#{type}`" }.join(', ')}.
+              For other scenarios the generic `directory` option can be used.
+            str
+
+            see 'Caching Dependencies and Directories': 'https://docs.travis-ci.com/user/caching/'
+
             type Class.new(Type::Map) {
               def define
                 normal
 
-                map :directories, to: :seq, eg: './path'
+                map :directories, to: :strs, summary: 'Generic directory caching strategy', eg: './path'
 
                 TYPES.each do |type|
-                  map type, to: :bool
+                  map type, to: :bool, summary: "Use the #{type} caching strategy"
                 end
 
-                map :edge,    to: :bool, summary: 'Whether to use an edge version of the cache tooling'
-                map :timeout, to: :num
-                map :branch,  to: :str # not documented?
+                map :timeout,     to: :num,  summary: 'Timeout for the cache tooling', default: 3
+                map :edge,        to: :bool, summary: 'Use an edge version of the cache tooling'
+                map :branch,      to: :str
 
                 # prefix :directories
                 change :cache

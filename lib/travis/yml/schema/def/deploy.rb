@@ -16,7 +16,9 @@ module Travis
             register :deploys
 
             def define
-              summary 'Deployment configs'
+              title 'Deployments'
+              summary 'Deployment target configurations'
+              see 'Deployment (v2)': 'https://docs.travis-ci.com/user/deployment-v2'
               normal
               type :providers
               export

@@ -5,10 +5,21 @@ module Travis
     module Docs
       module Page
         class Tree < Base
-          def render
-            # super(:tree)
-            ''
+          def initialize(parent, node, opts)
+            super(parent, nil, node, opts)
           end
+
+          def render(*args)
+            super(:tree, layout: true)
+          end
+
+          def publish?
+            true
+          end
+
+          # def render_node(obj)
+          #   obj.render('tree/node', opts)
+          # end
 
           # def id
           #   :tree

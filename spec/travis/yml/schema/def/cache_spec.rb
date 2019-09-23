@@ -4,51 +4,69 @@ describe Travis::Yml::Schema::Def::Cache do
   # it { puts JSON.pretty_generate(subject) }
 
   it do
-    should eq(
+    should include(
       '$id': :cache,
       title: 'Cache',
-      summary: 'Cache settings to speed up the build',
+      summary: instance_of(String),
+      description: instance_of(String),
+      see: instance_of(Hash),
       anyOf: [
         {
           type: :object,
           properties: {
             apt: {
-              type: :boolean
+              type: :boolean,
+              summary: instance_of(String),
             },
             bundler: {
-              type: :boolean
+              type: :boolean,
+              summary: instance_of(String),
             },
             cargo: {
-              type: :boolean
+              type: :boolean,
+              summary: instance_of(String),
             },
             ccache: {
-              type: :boolean
+              type: :boolean,
+              summary: instance_of(String),
             },
             cocoapods: {
-              type: :boolean
+              type: :boolean,
+              summary: instance_of(String),
             },
             npm: {
-              type: :boolean
+              type: :boolean,
+              summary: instance_of(String),
             },
             packages: {
-              type: :boolean
+              type: :boolean,
+              summary: instance_of(String),
             },
             pip: {
-              type: :boolean
+              type: :boolean,
+              summary: instance_of(String),
             },
             yarn: {
-              type: :boolean
-            },
-            edge: {
-              summary: 'Whether to use an edge version of the cache tooling',
-              type: :boolean
+              type: :boolean,
+              summary: instance_of(String),
             },
             directories: {
               '$ref': '#/definitions/type/strs',
+              summary: instance_of(String),
               example: './path'
             },
+            edge: {
+              type: :boolean,
+              summary: instance_of(String),
+            },
             timeout: {
-              type: :number
+              type: :number,
+              summary: instance_of(String),
+              defaults: [
+                {
+                  value: 3
+                }
+              ]
             },
             branch: {
               type: :string

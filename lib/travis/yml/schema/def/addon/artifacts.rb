@@ -26,7 +26,8 @@ module Travis
             }
 
             def define
-              summary 'Upload build artifacts at the end of the build'
+              summary 'Build artifacts to upload at the end of the build'
+              see 'Uploading Artifacts on Travis CI': 'https://docs.travis-ci.com/user/uploading-artifacts/'
 
               description <<~str
                 Automatically upload your build artifacts to Amazon S3 at the end of a build, after the `after_script` phase.

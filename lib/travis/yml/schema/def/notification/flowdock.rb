@@ -10,9 +10,11 @@ module Travis
             register :flowdock
 
             def define
+              see 'Configuring Flowdock notifications': 'https://docs.travis-ci.com/user/notifications/#configuring-flowdock-notifications'
+
               prefix :api_token
 
-              map :api_token, to: :secure
+              map :api_token, to: :secure, summary: 'Flowdock API token'
               map :template,  to: :templates
             end
           end

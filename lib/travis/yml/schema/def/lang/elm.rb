@@ -8,6 +8,9 @@ module Travis
           register :elm
 
           def define
+            title 'Elm'
+            summary 'Elm language support'
+            see 'Building an Elm Project': 'https://docs.travis-ci.com/user/languages/elm/'
             matrix :elm
             matrix :node_js
 

@@ -4,9 +4,11 @@ describe Travis::Yml::Schema::Def::Erlang do
   # it { puts JSON.pretty_generate(subject) }
 
   it do
-    should eq(
+    should include(
       '$id': :erlang,
         title: 'Erlang',
+        summary: instance_of(String),
+        see: instance_of(Hash),
         type: :object,
         properties: {
           otp_release: {

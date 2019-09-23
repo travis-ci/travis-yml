@@ -10,6 +10,9 @@ module Travis
             register :browserstack
 
             def define
+              summary 'Browserstack settings'
+              see 'Using BrowserStack with Travis CI': 'https://docs.travis-ci.com/user/browserstack/'
+
               map :username,   to: :secure, strict: false, summary: 'Browserstack username'
               map :access_key, to: :secure, summary: 'Browserstack access key'
               map :forcelocal, to: :bool, summary: 'Force all network traffic to be resolved via the build environment VM'

@@ -5,11 +5,12 @@ describe Travis::Yml::Schema::Def::Imports do
     # it { puts JSON.pretty_generate(subject) }
 
     it do
-      should eq(
+      should include(
         '$id': :imports,
         title: 'Imports',
-        description: "Import YAML config snippets that can be shared across repositories.\n\nSee [the docs](...) for details.",
-        summary: 'Build configuration imports',
+        summary: instance_of(String),
+        description: instance_of(String),
+        # see: instance_of(Hash),
         anyOf: [
           {
             type: :array,

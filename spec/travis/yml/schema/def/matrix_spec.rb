@@ -5,7 +5,7 @@ describe Travis::Yml::Schema::Def::Matrix do
     # it { puts JSON.pretty_generate(subject) }
 
     it do
-      should eq(
+      should include(
         '$id': :matrix,
         title: 'Matrix',
         summary: 'Build matrix definitions',
@@ -15,19 +15,23 @@ describe Travis::Yml::Schema::Def::Matrix do
             type: :object,
             properties: {
               include: {
-                '$ref': '#/definitions/type/matrix_entries'
+                '$ref': '#/definitions/type/matrix_entries',
+                summary: instance_of(String)
               },
               exclude: {
-                '$ref': '#/definitions/type/matrix_entries'
+                '$ref': '#/definitions/type/matrix_entries',
+                summary: instance_of(String)
               },
               allow_failures: {
                 '$ref': '#/definitions/type/matrix_entries',
+                summary: instance_of(String),
                 aliases: [
                   :allowed_failures
                 ]
               },
               fast_finish: {
                 type: :boolean,
+                summary: instance_of(String),
                 aliases: [
                   :fast_failure
                 ]
@@ -41,6 +45,7 @@ describe Travis::Yml::Schema::Def::Matrix do
             prefix: {
               key: :include
             },
+            see: instance_of(Hash),
           },
           {
             '$ref': '#/definitions/type/matrix_entries'

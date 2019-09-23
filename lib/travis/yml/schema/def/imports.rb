@@ -15,8 +15,6 @@ module Travis
 
             description <<~str
               Import YAML config snippets that can be shared across repositories.
-
-              See [the docs](...) for details.
             str
 
             normal

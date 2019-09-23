@@ -9,6 +9,9 @@ module Travis
 
           def define
             aliases :'c++'
+            title 'C++'
+            summary 'C++ language support'
+            see 'Building a C++ Project': 'https://docs.travis-ci.com/user/languages/c++/'
           end
         end
       end

@@ -8,6 +8,9 @@ module Travis
           register :rust
 
           def define
+            title 'Rust'
+            summary 'Rust language support'
+            see 'Building a Rust Project': 'https://docs.travis-ci.com/user/languages/rust/'
             matrix :rust
           end
         end

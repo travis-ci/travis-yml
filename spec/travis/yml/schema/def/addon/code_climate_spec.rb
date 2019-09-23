@@ -4,9 +4,11 @@ describe Travis::Yml::Schema::Def::Addon::CodeClimate do
   # it { puts JSON.pretty_generate(described_class.new.exports) }
 
   it do
-    should eq(
+    should include(
       '$id': :code_climate,
       title: 'Code Climate',
+      summary: instance_of(String),
+      see: instance_of(Hash),
       normal: true,
       anyOf: [
         {

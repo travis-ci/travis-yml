@@ -4,9 +4,11 @@ describe Travis::Yml::Schema::Def::Addon::Sonarcloud do
   # it { puts JSON.pretty_generate(subject) }
 
   it do
-    should eq(
+    should include(
       '$id': :sonarcloud,
       title: 'Sonarcloud',
+      summary: instance_of(String),
+      see: instance_of(Hash),
       anyOf: [
         {
           type: :object,

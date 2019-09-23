@@ -39,10 +39,12 @@ module Travis
 
           def deprecated(obj)
             language.value(registry_key, deprecated: obj)
+            super
           end
 
           def internal
             language.value(registry_key, internal: true)
+            super
           end
 
           def map(key, opts = {})

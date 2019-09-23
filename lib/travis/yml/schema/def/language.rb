@@ -12,8 +12,23 @@ module Travis
           register :language
 
           def define
-            summary 'Language support'
+            summary 'Language support to enable'
+
+            description <<~str
+              The key `language` selects the language support used for the build.
+
+              Language supports define additional root level keys, e.g. for selecting
+              the language runtime version. Some of these keys will expand additional
+              jobs in the build matrix, such as the key `python` on Python language
+              support.
+            str
+
+
+            see 'Languages': 'https://docs.travis-ci.com/user/languages/',
+                'Build Matrix': 'https://docs.travis-ci.com/user/build-matrix/'
+
             example 'ruby'
+
             downcase
             default :ruby,          only: { os: [:linux, :windows] }
             default :'objective-c', only: { os: [:osx] }

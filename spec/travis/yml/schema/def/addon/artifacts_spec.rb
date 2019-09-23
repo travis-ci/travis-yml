@@ -4,10 +4,11 @@ describe Travis::Yml::Schema::Def::Addon::Artifacts do
   # it { puts JSON.pretty_generate(subject) }
 
   it do
-    should eq(
+    should include(
       '$id': :artifacts,
       title: 'Artifacts',
-      summary: 'Upload build artifacts at the end of the build',
+      summary: instance_of(String),
+      see: instance_of(Hash),
       normal: true,
       anyOf: [
         {

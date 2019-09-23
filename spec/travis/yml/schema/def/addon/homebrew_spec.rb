@@ -4,9 +4,11 @@ describe Travis::Yml::Schema::Def::Addon::Homebrew do
    # it { puts JSON.pretty_generate(subject) }
 
   it do
-    should eq(
+    should include(
       '$id': :homebrew,
       title: 'Homebrew',
+      summary: instance_of(String),
+      see: instance_of(Hash),
       normal: true,
       anyOf: [
         {

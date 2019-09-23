@@ -39,6 +39,7 @@ module Travis
           def define
             title 'Operating systems'
             summary 'Build environment operating systems'
+            see 'Build Environment Overview': 'https://docs.travis-ci.com/user/reference/overview/'
 
             normal
             types :os

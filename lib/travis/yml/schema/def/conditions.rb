@@ -23,12 +23,12 @@ module Travis
           def define
             title 'If'
 
+            summary 'Condition to determine whether or not a build, stage, or job should be run'
+
             description <<~str
               Include or exclude builds, stages, and jobs by specifying conditions in your
               build configuration. These are evaluated when your build is being configured.
             str
-
-            summary 'Condition to determine whether or not a build, stage, or job should be run'
 
             example 'branch = master'
 

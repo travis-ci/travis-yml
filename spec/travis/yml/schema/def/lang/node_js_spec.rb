@@ -4,35 +4,37 @@ describe Travis::Yml::Schema::Def::NodeJs do
   # it { puts JSON.pretty_generate(subject) }
 
   it do
-    should eq(
+    should include(
       '$id': :node_js,
-        title: 'Node Js',
-        type: :object,
-        properties: {
-          node_js: {
-            '$ref': '#/definitions/type/strs',
-            aliases: [
-              :node
-            ],
-            flags: [
-              :expand
-            ],
-            only: {
-              language: [
-                'node_js'
-              ]
-            }
-          },
-          npm_args: {
-            type: :string,
-            only: {
-              language: [
-                'node_js'
-              ]
-            }
+      title: 'Javascript',
+      summary: instance_of(String),
+      see: instance_of(Hash),
+      type: :object,
+      properties: {
+        node_js: {
+          '$ref': '#/definitions/type/strs',
+          aliases: [
+            :node
+          ],
+          flags: [
+            :expand
+          ],
+          only: {
+            language: [
+              'node_js'
+            ]
           }
         },
-        normal: true
+        npm_args: {
+          type: :string,
+          only: {
+            language: [
+              'node_js'
+            ]
+          }
+        }
+      },
+      normal: true
     )
   end
 end

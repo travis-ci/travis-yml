@@ -16,14 +16,14 @@ module Travis
               normal
               prefix :email
 
-              map :campfire, to: :campfire
-              map :email,    to: :email
-              map :flowdock, to: :flowdock
-              map :hipchat,  to: :hipchat
-              map :irc,      to: :irc
-              map :pushover, to: :pushover
-              map :slack,    to: :slack
-              map :webhooks, to: :webhooks
+              map :campfire, to: :campfire, summary: 'Campfire notification settings'
+              map :email,    to: :email, summary: 'Email notification settings'
+              map :flowdock, to: :flowdock, summary: 'Flowdock notification settings'
+              map :hipchat,  to: :hipchat, summary: 'Hipchat notification settings'
+              map :irc,      to: :irc, summary: 'IRC notification settings'
+              map :pushover, to: :pushover, summary: 'Pushover notification settings'
+              map :slack,    to: :slack, summary: 'Slack notification settings'
+              map :webhooks, to: :webhooks, summary: 'Webhook notification settings'
               maps *STATUSES, to: :frequency
 
               change :inherit, keys: STATUSES
@@ -38,9 +38,9 @@ module Travis
             def after_define
               normal
 
-              map :enabled,  to: :bool
-              map :disabled, to: :bool
               maps *STATUSES, to: :frequency
+              map :enabled,  to: :bool, summary: 'Whether to enable these notifications'
+              map :disabled, to: :bool, summary: 'Whether to disable these notifications'
 
               change :enable
               export
@@ -52,6 +52,7 @@ module Travis
             register :templates
 
             def define
+              summary 'Templates to use for the notification message'
               type :template
               export
             end
@@ -93,6 +94,7 @@ module Travis
             register :frequency
 
             def define
+              summary 'Notification frequency'
               value :always, alias: 'true'
               value :never,  alias: 'false'
               value :change, alias: 'changed'

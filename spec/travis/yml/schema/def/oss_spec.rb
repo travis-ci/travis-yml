@@ -5,10 +5,11 @@ describe Travis::Yml::Schema::Def::Oss do
     # it { puts JSON.pretty_generate(subject) }
 
     it do
-      should eq(
+      should include(
         '$id': :oss,
         title: 'Operating systems',
         summary: 'Build environment operating systems',
+        see: instance_of(Hash),
         anyOf: [
           {
             type: :array,

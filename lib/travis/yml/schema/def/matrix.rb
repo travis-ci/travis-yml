@@ -10,15 +10,16 @@ module Travis
 
           def define
             summary 'Build matrix definitions'
+            see 'Build Matrix': 'https://docs.travis-ci.com/user/build-matrix/'
 
             normal
             aliases :jobs
             prefix :include
 
-            map :include,        to: :matrix_entries
-            map :exclude,        to: :matrix_entries
-            map :allow_failures, to: :matrix_entries, alias: :allowed_failures
-            map :fast_finish,    to: :bool, alias: :fast_failure
+            map :include,        to: :matrix_entries, summary: 'Jobs to include to the build matrix'
+            map :exclude,        to: :matrix_entries, summary: 'Attributes of jobs to exclude from the build matrix'
+            map :allow_failures, to: :matrix_entries, alias: :allowed_failures, summary: 'Attributes of jobs that are allowed to fail'
+            map :fast_finish,    to: :bool, alias: :fast_failure, summary: 'Allow the build to fail fast'
 
             export
           end

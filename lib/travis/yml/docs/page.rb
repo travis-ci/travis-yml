@@ -1,5 +1,7 @@
 require 'travis/yml/docs/page/any'
+require 'travis/yml/docs/page/deploy'
 require 'travis/yml/docs/page/index'
+require 'travis/yml/docs/page/lang'
 require 'travis/yml/docs/page/map'
 require 'travis/yml/docs/page/menu'
 require 'travis/yml/docs/page/scalar'
@@ -13,8 +15,13 @@ module Travis
       module Page
         extend self
 
-        def build(schema, opts = {})
-          const_get(schema.class.name.split('::').last).new(schema, opts)
+        def build(parent, key, schema, opts = {})
+          const = case schema.id
+          when :language then Lang
+          when :deploys  then Deploy
+          else const_get(schema.class.name.split('::').last)
+          end
+          const.new(parent, key, schema, opts)
         end
       end
     end

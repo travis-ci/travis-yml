@@ -9,6 +9,7 @@ module Travis
           register :jdks
 
           def define
+            summary 'JDK versions'
             supports :except, os: :osx
             type :jdk
             export

@@ -6,6 +6,6 @@ describe Travis::Yml::Docs do
     it { expect(root.render).to include '# Root' }
     it { expect(root.render).to include '* `import`' }
     it { expect(root.render).to include '* `addons`' }
-    it { expect(root.path).to eq '/path/to/node/root' }
+    it { expect(root.path).to eq '/path/to/nodes' }
   end
 end

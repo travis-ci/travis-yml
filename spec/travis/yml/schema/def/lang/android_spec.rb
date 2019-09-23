@@ -4,9 +4,11 @@ describe Travis::Yml::Schema::Def::Android do
   # it { puts JSON.pretty_generate(subject) }
 
   it do
-    should eq(
+    should include(
       '$id': :android,
       title: 'Android',
+      summary: instance_of(String),
+      see: instance_of(Hash),
       type: :object,
       properties: {
         jdk: {
@@ -24,10 +26,12 @@ describe Travis::Yml::Schema::Def::Android do
           type: :object,
           properties: {
             components: {
-              '$ref': '#/definitions/type/strs'
+              '$ref': '#/definitions/type/strs',
+              summary: instance_of(String)
             },
             licenses: {
-              '$ref': '#/definitions/type/strs'
+              '$ref': '#/definitions/type/strs',
+              summary: instance_of(String)
             }
           },
           additionalProperties: false,

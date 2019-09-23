@@ -5,10 +5,12 @@ describe Travis::Yml::Schema::Def::Stages do
     # it { puts JSON.pretty_generate(subject) }
 
     it do
-      should eq(
+      should include(
         '$id': :stages,
         title: 'Stages',
         summary: 'Build stages definition',
+        description: instance_of(String),
+        see: instance_of(Hash),
         anyOf: [
           {
             type: :array,

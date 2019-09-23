@@ -10,6 +10,9 @@ module Travis
             register :sonarcloud
 
             def define
+              summary 'Sonarcloud settings'
+              see 'Using SonarCloud with Travis CI': 'https://docs.travis-ci.com/user/sonarcloud/'
+
               map :organization, to: :str
               map :token,        to: :secure
 

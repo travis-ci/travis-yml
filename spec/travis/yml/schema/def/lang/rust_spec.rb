@@ -4,9 +4,11 @@ describe Travis::Yml::Schema::Def::Rust do
   # it { puts JSON.pretty_generate(subject) }
 
   it do
-    should eq(
+    should include(
       '$id': :rust,
         title: 'Rust',
+        summary: instance_of(String),
+        see: instance_of(Hash),
         type: :object,
         properties: {
           rust: {

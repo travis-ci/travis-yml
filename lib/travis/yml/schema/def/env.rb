@@ -24,6 +24,9 @@ module Travis
               string they can contain multiple key/value pairs.
             str
 
+            see 'Environment Variables': 'https://docs.travis-ci.com/user/environment-variables/',
+                'Build Matrix': 'https://docs.travis-ci.com/user/build-matrix/'
+
             type Class.new(Type::Map) {
               def define
                 normal

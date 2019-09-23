@@ -4,31 +4,35 @@ describe Travis::Yml::Schema::Def::Notification::Campfire, 'structure' do
   # it { puts JSON.pretty_generate(subject) }
 
   it do
-    should eq(
+    should include(
       '$id': :campfire,
       title: 'Campfire',
       normal: true,
+      see: instance_of(Hash),
       anyOf: [
         {
           type: :object,
           properties: {
             rooms: {
-              '$ref': '#/definitions/type/secures'
+              '$ref': '#/definitions/type/secures',
+              summary: instance_of(String)
             },
             template: {
               '$ref': '#/definitions/notification/templates'
-            },
-            enabled: {
-              type: :boolean
-            },
-            disabled: {
-              type: :boolean
             },
             on_success: {
               '$ref': '#/definitions/notification/frequency'
             },
             on_failure: {
               '$ref': '#/definitions/notification/frequency'
+            },
+            enabled: {
+              type: :boolean,
+              summary: instance_of(String)
+            },
+            disabled: {
+              type: :boolean,
+              summary: instance_of(String)
             },
           },
           additionalProperties: false,

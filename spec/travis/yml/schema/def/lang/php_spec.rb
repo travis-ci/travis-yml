@@ -4,32 +4,34 @@ describe Travis::Yml::Schema::Def::Php do
   # it { puts JSON.pretty_generate(subject) }
 
   it do
-    should eq(
+    should include(
       '$id': :php,
-        title: 'Php',
-        type: :object,
-        properties: {
-          php: {
-            '$ref': '#/definitions/type/strs',
-            flags: [
-              :expand
-            ],
-            only: {
-              language: [
-                'php'
-              ]
-            }
-          },
-          composer_args: {
-            type: :string,
-            only: {
-              language: [
-                'php'
-              ]
-            }
+      title: 'PHP',
+      summary: instance_of(String),
+      see: instance_of(Hash),
+      type: :object,
+      properties: {
+        php: {
+          '$ref': '#/definitions/type/strs',
+          flags: [
+            :expand
+          ],
+          only: {
+            language: [
+              'php'
+            ]
           }
         },
-        normal: true
+        composer_args: {
+          type: :string,
+          only: {
+            language: [
+              'php'
+            ]
+          }
+        }
+      },
+      normal: true
     )
   end
 end

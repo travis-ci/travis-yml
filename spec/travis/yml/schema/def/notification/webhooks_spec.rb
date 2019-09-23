@@ -4,19 +4,22 @@ describe Travis::Yml::Schema::Def::Notification::Webhooks, 'structure' do
   # it { puts JSON.pretty_generate(subject) }
 
   it do
-    should eq(
+    should include(
       '$id': :webhooks,
       title: 'Webhooks',
+      see: instance_of(Hash),
       normal: true,
       anyOf: [
         {
           type: :object,
           properties: {
             enabled: {
-              type: :boolean
+              type: :boolean,
+              summary: instance_of(String)
             },
             disabled: {
-              type: :boolean
+              type: :boolean,
+              summary: instance_of(String)
             },
             urls: {
               anyOf: [
@@ -32,22 +35,23 @@ describe Travis::Yml::Schema::Def::Notification::Webhooks, 'structure' do
                   '$ref': '#/definitions/type/secure',
                   strict: false
                 },
-              ]
+              ],
+              summary: instance_of(String)
             },
             on_start: {
-              '$ref': '#/definitions/notification/frequency'
+              '$ref': '#/definitions/notification/frequency',
             },
             on_cancel: {
-              '$ref': '#/definitions/notification/frequency'
+              '$ref': '#/definitions/notification/frequency',
             },
             on_error: {
-              '$ref': '#/definitions/notification/frequency'
+              '$ref': '#/definitions/notification/frequency',
             },
             on_success: {
-              '$ref': '#/definitions/notification/frequency'
+              '$ref': '#/definitions/notification/frequency',
             },
             on_failure: {
-              '$ref': '#/definitions/notification/frequency'
+              '$ref': '#/definitions/notification/frequency',
             }
           },
           additionalProperties: false,

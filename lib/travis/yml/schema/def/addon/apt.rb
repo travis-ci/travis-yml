@@ -10,7 +10,7 @@ module Travis
             register :apt
 
             def define
-              summary 'Install APT packages and sources'
+              summary 'APT packages and sources to install'
 
               description <<~str
                 Install APT packages and sources without using apt-get commands in a before_install script manually.

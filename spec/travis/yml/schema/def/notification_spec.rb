@@ -4,7 +4,7 @@ describe Travis::Yml::Schema::Def::Notification::Notifications do
   # it { puts JSON.pretty_generate(subject) }
 
   it do
-    should eq(
+    should include(
       '$id': :notifications,
       title: 'Notifications',
       summary: 'Notification targets to notify on build results',
@@ -14,28 +14,36 @@ describe Travis::Yml::Schema::Def::Notification::Notifications do
           type: :object,
           properties: {
             campfire: {
-              '$ref': '#/definitions/notification/campfire'
+              '$ref': '#/definitions/notification/campfire',
+              summary: instance_of(String)
             },
             email: {
-              '$ref': '#/definitions/notification/email'
+              '$ref': '#/definitions/notification/email',
+              summary: instance_of(String)
             },
             flowdock: {
-              '$ref': '#/definitions/notification/flowdock'
+              '$ref': '#/definitions/notification/flowdock',
+              summary: instance_of(String)
             },
             hipchat: {
-              '$ref': '#/definitions/notification/hipchat'
+              '$ref': '#/definitions/notification/hipchat',
+              summary: instance_of(String)
             },
             irc: {
-              '$ref': '#/definitions/notification/irc'
+              '$ref': '#/definitions/notification/irc',
+              summary: instance_of(String)
             },
             pushover: {
-              '$ref': '#/definitions/notification/pushover'
+              '$ref': '#/definitions/notification/pushover',
+              summary: instance_of(String)
             },
             slack: {
-              '$ref': '#/definitions/notification/slack'
+              '$ref': '#/definitions/notification/slack',
+              summary: instance_of(String)
             },
             webhooks: {
-              '$ref': '#/definitions/notification/webhooks'
+              '$ref': '#/definitions/notification/webhooks',
+              summary: instance_of(String)
             },
             on_success: {
               '$ref': '#/definitions/notification/frequency'

@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 require 'oj'
-require 'rack/markdown'
 require 'travis/yml/web/route'
 
 module Travis::Yml::Web
