@@ -8,7 +8,9 @@ module Travis::Yml::Web
 
       def get(env)
         req = Rack::Request.new(env)
-        path = "/v1#{req.path_info.chomp(?/)}"
+        path = req.path_info.chomp(?/).sub(%r(/docs), '')
+        path = '/nodes' if path.empty?
+        path = "/v1/docs#{path}"
         exists?(path) ? ok(path) : not_found
       end
 
