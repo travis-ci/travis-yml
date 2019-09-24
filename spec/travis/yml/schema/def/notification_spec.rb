@@ -14,35 +14,123 @@ describe Travis::Yml::Schema::Def::Notification::Notifications do
           type: :object,
           properties: {
             campfire: {
-              '$ref': '#/definitions/notification/campfire',
+              anyOf: [
+                {
+                  type: :array,
+                  items: {
+                    '$ref': '#/definitions/notification/campfire',
+                  },
+                  normal: true
+                },
+                {
+                  '$ref': '#/definitions/notification/campfire',
+                }
+              ],
               summary: instance_of(String)
             },
             email: {
-              '$ref': '#/definitions/notification/email',
+              anyOf: [
+                {
+                  type: :array,
+                  items: {
+                    '$ref': '#/definitions/notification/email',
+                  },
+                  normal: true
+                },
+                {
+                  '$ref': '#/definitions/notification/email',
+                }
+              ],
               summary: instance_of(String)
             },
             flowdock: {
-              '$ref': '#/definitions/notification/flowdock',
+              anyOf: [
+                {
+                  type: :array,
+                  items: {
+                    '$ref': '#/definitions/notification/flowdock',
+                  },
+                  normal: true
+                },
+                {
+                  '$ref': '#/definitions/notification/flowdock',
+                }
+              ],
               summary: instance_of(String)
             },
             hipchat: {
-              '$ref': '#/definitions/notification/hipchat',
+              anyOf: [
+                {
+                  type: :array,
+                  items: {
+                    '$ref': '#/definitions/notification/hipchat',
+                  },
+                  normal: true
+                },
+                {
+                  '$ref': '#/definitions/notification/hipchat',
+                }
+              ],
               summary: instance_of(String)
             },
             irc: {
-              '$ref': '#/definitions/notification/irc',
+              anyOf: [
+                {
+                  type: :array,
+                  items: {
+                    '$ref': '#/definitions/notification/irc',
+                  },
+                  normal: true
+                },
+                {
+                  '$ref': '#/definitions/notification/irc',
+                }
+              ],
               summary: instance_of(String)
             },
             pushover: {
-              '$ref': '#/definitions/notification/pushover',
+              anyOf: [
+                {
+                  type: :array,
+                  items: {
+                    '$ref': '#/definitions/notification/pushover',
+                  },
+                  normal: true
+                },
+                {
+                  '$ref': '#/definitions/notification/pushover',
+                }
+              ],
               summary: instance_of(String)
             },
             slack: {
-              '$ref': '#/definitions/notification/slack',
+              anyOf: [
+                {
+                  type: :array,
+                  items: {
+                    '$ref': '#/definitions/notification/slack',
+                  },
+                  normal: true
+                },
+                {
+                  '$ref': '#/definitions/notification/slack',
+                }
+              ],
               summary: instance_of(String)
             },
             webhooks: {
-              '$ref': '#/definitions/notification/webhooks',
+              anyOf: [
+                {
+                  type: :array,
+                  items: {
+                    '$ref': '#/definitions/notification/webhooks',
+                  },
+                  normal: true
+                },
+                {
+                  '$ref': '#/definitions/notification/webhooks',
+                }
+              ],
               summary: instance_of(String)
             },
             on_success: {
@@ -63,6 +151,13 @@ describe Travis::Yml::Schema::Def::Notification::Notifications do
               keys: [:on_success, :on_failure]
             }
           ],
+        },
+        {
+          type: :array,
+          items: {
+            '$ref': '#/definitions/notification/email',
+          },
+          normal: true
         },
         {
           '$ref': '#/definitions/notification/email',

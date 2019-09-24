@@ -23,13 +23,28 @@ module Travis
 
             def inherit
               other = value.map do |key, value|
-                value = change(schema[key], value) unless value.map?
-                next [key, value] unless value.map?
-                values = only(self.value, *keys - value.keys)
-                values = values.map { |key, value| [key, value] }.to_h
-                [key, value.value.merge(values)]
+                value = change(schema[key], value) unless value.map? || value.seq?
+                next [key, value] unless value.map? || value.seq?
+                value = case value.type
+                when :seq then inherit_seq(value)
+                when :map then inherit_map(value)
+                end
+                [key, value]
               end
               build(except(other.to_h, *keys))
+            end
+
+            def inherit_seq(value)
+              other = value.value.map do |value|
+                value.map? ? inherit_map(value) : value
+              end
+              build(other)
+            end
+
+            def inherit_map(value)
+              values = only(self.value, *keys - value.keys)
+              values = values.map { |key, value| [key, value] }.to_h
+              value.value.merge(values)
             end
 
             def change(schema, value)

@@ -324,27 +324,27 @@ describe Travis::Yml::Doc::Change do
 
     describe 'a str' do
       let(:value) { 'foo' }
-      it { should serialize_to email: { recipients: ['foo'] } }
+      it { should serialize_to email: [recipients: ['foo']] }
     end
 
     describe 'a seq of strs' do
       let(:value) { ['foo'] }
-      it { should serialize_to email: { recipients: ['foo'] } }
+      it { should serialize_to email: [recipients: ['foo']] }
     end
 
     describe 'a map with a str' do
       let(:value) { { 'recipients' => 'foo' } }
-      it { should serialize_to email: { recipients: ['foo'] } }
+      it { should serialize_to email: [recipients: ['foo']] }
     end
 
     describe 'a map with a seq' do
       let(:value) { { 'recipients' => ['foo'] } }
-      it { should serialize_to email: { recipients: ['foo'] } }
+      it { should serialize_to email: [recipients: ['foo']] }
     end
 
     describe 'seq of maps' do
       let(:value) { ['recipients' => 'foo'] }
-      it { should serialize_to email: { recipients: ['foo'] } }
+      it { should serialize_to email: [recipients: ['foo']] }
     end
   end
 
@@ -353,27 +353,27 @@ describe Travis::Yml::Doc::Change do
 
     describe 'a str' do
       let(:value) { { email: 'foo' } }
-      it { should serialize_to email: { recipients: ['foo'] } }
+      it { should serialize_to email: [recipients: ['foo']] }
     end
 
     describe 'a seq of strs' do
       let(:value) { { email: ['foo'] } }
-      it { should serialize_to email: { recipients: ['foo'] } }
+      it { should serialize_to email: [recipients: ['foo']] }
     end
 
     describe 'a map with a str' do
       let(:value) { { email: { recipients: 'foo' } } }
-      it { should serialize_to email: { recipients: ['foo'] } }
+      it { should serialize_to email: [recipients: ['foo']] }
     end
 
     describe 'a map with a seq' do
       let(:value) { { email: { recipients: ['foo'] } } }
-      it { should serialize_to email: { recipients: ['foo'] } }
+      it { should serialize_to email: [recipients: ['foo']] }
     end
 
     describe 'seq of maps' do
       let(:value) { { email: [recipients: 'foo'] } }
-      it { should serialize_to email: { recipients: ['foo'] } }
+      it { should serialize_to email: [recipients: ['foo']] }
     end
   end
 

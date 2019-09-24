@@ -6,7 +6,7 @@ describe Travis::Yml, 'notifications: webhooks' do
       notifications:
         webhooks: true
     )
-    it { should serialize_to notifications: { webhooks: { enabled: true } } }
+    it { should serialize_to notifications: { webhooks: [enabled: true] } }
     it { should_not have_msg }
   end
 
@@ -15,7 +15,7 @@ describe Travis::Yml, 'notifications: webhooks' do
       notifications:
         webhooks: false
     )
-    it { should serialize_to notifications: { webhooks: { enabled: false } } }
+    it { should serialize_to notifications: { webhooks: [enabled: false] } }
     it { should_not have_msg }
   end
 
@@ -25,7 +25,7 @@ describe Travis::Yml, 'notifications: webhooks' do
         webhooks:
           disabled: true
     )
-    it { should serialize_to notifications: { webhooks: { enabled: false } } }
+    it { should serialize_to notifications: { webhooks: [enabled: false] } }
     it { should_not have_msg }
   end
 
@@ -35,7 +35,7 @@ describe Travis::Yml, 'notifications: webhooks' do
         webhooks:
           enabled: false
     )
-    it { should serialize_to notifications: { webhooks: { enabled: false } } }
+    it { should serialize_to notifications: { webhooks: [enabled: false] } }
     it { should_not have_msg }
   end
 
@@ -45,7 +45,7 @@ describe Travis::Yml, 'notifications: webhooks' do
         webhooks:
           enabled: true
     )
-    it { should serialize_to notifications: { webhooks: { enabled: true } } }
+    it { should serialize_to notifications: { webhooks: [enabled: true] } }
     it { should_not have_msg }
   end
 
@@ -55,7 +55,7 @@ describe Travis::Yml, 'notifications: webhooks' do
         webhooks:
           disabled: false
     )
-    it { should serialize_to notifications: { webhooks: { enabled: true } } }
+    it { should serialize_to notifications: { webhooks: [enabled: true] } }
     it { should_not have_msg }
   end
 
@@ -64,7 +64,7 @@ describe Travis::Yml, 'notifications: webhooks' do
       notifications:
         webhooks: str
     )
-    it { should serialize_to notifications: { webhooks: { urls: ['str'] } } }
+    it { should serialize_to notifications: { webhooks: [urls: ['str']] } }
     it { should_not have_msg }
   end
 
@@ -74,7 +74,7 @@ describe Travis::Yml, 'notifications: webhooks' do
         webhooks:
           secure: secure
     )
-    it { should serialize_to notifications: { webhooks: { urls: [secure: 'secure'] } } }
+    it { should serialize_to notifications: { webhooks: [urls: [secure: 'secure']] } }
     it { should_not have_msg }
   end
 
@@ -85,7 +85,7 @@ describe Travis::Yml, 'notifications: webhooks' do
           - foo
           - bar
     )
-    it { should serialize_to notifications: { webhooks: { urls: ['foo', 'bar'] } } }
+    it { should serialize_to notifications: { webhooks: [{ urls: ['foo'] }, { urls: ['bar'] }] } }
     it { should_not have_msg }
   end
 
@@ -96,7 +96,7 @@ describe Travis::Yml, 'notifications: webhooks' do
           webhooks:
             urls: str
       )
-      it { should serialize_to notifications: { webhooks: { urls: ['str'] } } }
+      it { should serialize_to notifications: { webhooks: [urls: ['str']] } }
       it { should_not have_msg }
     end
 
@@ -107,7 +107,7 @@ describe Travis::Yml, 'notifications: webhooks' do
             urls:
               secure: secure
       )
-      it { should serialize_to notifications: { webhooks: { urls: [secure: 'secure'] } } }
+      it { should serialize_to notifications: { webhooks: [urls: [secure: 'secure']] } }
       it { should_not have_msg }
     end
 
@@ -119,7 +119,7 @@ describe Travis::Yml, 'notifications: webhooks' do
             - foo
             - bar
       )
-      it { should serialize_to notifications: { webhooks: { urls: ['foo', 'bar'] } } }
+      it { should serialize_to notifications: { webhooks: [urls: ['foo', 'bar']] } }
       it { should_not have_msg }
     end
   end
@@ -133,7 +133,7 @@ describe Travis::Yml, 'notifications: webhooks' do
               webhooks:
                 #{status}: #{value}
           )
-          it { should serialize_to notifications: { webhooks: { status => value } } }
+          it { should serialize_to notifications: { webhooks: [status => value] } }
           it { should_not have_msg }
         end
       end
@@ -147,7 +147,7 @@ describe Travis::Yml, 'notifications: webhooks' do
               webhooks: str
               #{status}: #{value}
           )
-          it { should serialize_to notifications: { webhooks: { urls: ['str'], status => value } } }
+          it { should serialize_to notifications: { webhooks: [urls: ['str'], status => value] } }
           it { should_not have_msg }
         end
       end
@@ -160,7 +160,7 @@ describe Travis::Yml, 'notifications: webhooks' do
         webhooks:
           unknown: str
     )
-    it { should serialize_to notifications: { webhooks: { unknown: 'str' } } }
+    it { should serialize_to notifications: { webhooks: [unknown: 'str'] } }
     it { should have_msg [:warn, :'notifications.webhooks', :unknown_key, key: 'unknown', value: 'str'] }
   end
 

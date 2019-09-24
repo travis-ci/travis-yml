@@ -6,7 +6,7 @@ describe Travis::Yml, 'notifications: pushover' do
       notifications:
         pushover: true
     )
-    it { should serialize_to notifications: { pushover: { enabled: true } } }
+    it { should serialize_to notifications: { pushover: [enabled: true] } }
     it { should_not have_msg }
   end
 
@@ -15,7 +15,7 @@ describe Travis::Yml, 'notifications: pushover' do
       notifications:
         pushover: false
     )
-    it { should serialize_to notifications: { pushover: { enabled: false } } }
+    it { should serialize_to notifications: { pushover: [enabled: false] } }
     it { should_not have_msg }
   end
 
@@ -25,7 +25,7 @@ describe Travis::Yml, 'notifications: pushover' do
         pushover:
           disabled: true
     )
-    it { should serialize_to notifications: { pushover: { enabled: false } } }
+    it { should serialize_to notifications: { pushover: [enabled: false] } }
     it { should_not have_msg }
   end
 
@@ -35,7 +35,7 @@ describe Travis::Yml, 'notifications: pushover' do
         pushover:
           enabled: false
     )
-    it { should serialize_to notifications: { pushover: { enabled: false } } }
+    it { should serialize_to notifications: { pushover: [enabled: false] } }
     it { should_not have_msg }
   end
 
@@ -45,7 +45,7 @@ describe Travis::Yml, 'notifications: pushover' do
         pushover:
           enabled: true
     )
-    it { should serialize_to notifications: { pushover: { enabled: true } } }
+    it { should serialize_to notifications: { pushover: [enabled: true] } }
     it { should_not have_msg }
   end
 
@@ -55,7 +55,7 @@ describe Travis::Yml, 'notifications: pushover' do
         pushover:
           disabled: false
     )
-    it { should serialize_to notifications: { pushover: { enabled: true } } }
+    it { should serialize_to notifications: { pushover: [enabled: true] } }
     it { should_not have_msg }
   end
 
@@ -83,10 +83,9 @@ describe Travis::Yml, 'notifications: pushover' do
       notifications:
         pushover:
           - str
-          - other
     )
     it { should serialize_to empty }
-    it { should have_msg [:error, :'notifications.pushover', :invalid_type, expected: :map, actual: :seq, value: ['str', 'other']] }
+    it { should have_msg [:error, :'notifications.pushover', :invalid_type, expected: :map, actual: :str, value: 'str'] }
   end
 
   describe 'api_key' do
@@ -96,7 +95,7 @@ describe Travis::Yml, 'notifications: pushover' do
           pushover:
             api_key: str
       )
-      it { should serialize_to notifications: { pushover: { api_key: ['str'] } } }
+      it { should serialize_to notifications: { pushover: [api_key: ['str']] } }
       it { should have_msg [:alert, :'notifications.pushover.api_key', :secure, type: :str] }
     end
 
@@ -107,7 +106,7 @@ describe Travis::Yml, 'notifications: pushover' do
             api_key:
               secure: secure
       )
-      it { should serialize_to notifications: { pushover: { api_key: [secure: 'secure'] } } }
+      it { should serialize_to notifications: { pushover: [api_key: [secure: 'secure']] } }
       it { should_not have_msg }
     end
 
@@ -119,7 +118,7 @@ describe Travis::Yml, 'notifications: pushover' do
             - str
             - other
       )
-      it { should serialize_to notifications: { pushover: { api_key: ['str', 'other'] } } }
+      it { should serialize_to notifications: { pushover: [api_key: ['str', 'other']] } }
       it { should have_msg [:alert, :'notifications.pushover.api_key', :secure, type: :str] }
     end
   end
@@ -131,7 +130,7 @@ describe Travis::Yml, 'notifications: pushover' do
           pushover:
             users: str
       )
-      it { should serialize_to notifications: { pushover: { users: ['str'] } } }
+      it { should serialize_to notifications: { pushover: [users: ['str']] } }
       it { should have_msg [:alert, :'notifications.pushover.users', :secure, type: :str] }
     end
 
@@ -142,7 +141,7 @@ describe Travis::Yml, 'notifications: pushover' do
             users:
               secure: secure
       )
-      it { should serialize_to notifications: { pushover: { users: [secure: 'secure'] } } }
+      it { should serialize_to notifications: { pushover: [users: [secure: 'secure']] } }
       it { should_not have_msg }
     end
 
@@ -154,7 +153,7 @@ describe Travis::Yml, 'notifications: pushover' do
             - foo
             - bar
       )
-      it { should serialize_to notifications: { pushover: { users: ['foo', 'bar'] } } }
+      it { should serialize_to notifications: { pushover: [users: ['foo', 'bar']] } }
       it { should have_msg [:alert, :'notifications.pushover.users', :secure, type: :str] }
     end
   end
@@ -166,7 +165,7 @@ describe Travis::Yml, 'notifications: pushover' do
           pushover:
             template: "%{repository}"
       )
-      it { should serialize_to notifications: { pushover: { template: ['%{repository}'] } } }
+      it { should serialize_to notifications: { pushover: [template: ['%{repository}']] } }
       it { should_not have_msg }
     end
 
@@ -176,7 +175,7 @@ describe Travis::Yml, 'notifications: pushover' do
           pushover:
             template: "%{unknown}"
       )
-      it { should serialize_to notifications: { pushover: { template: ['%{unknown}'] } } }
+      it { should serialize_to notifications: { pushover: [template: ['%{unknown}']] } }
       it { should have_msg [:warn, :'notifications.pushover.template', :unknown_var, var: 'unknown'] }
     end
 
@@ -187,7 +186,7 @@ describe Travis::Yml, 'notifications: pushover' do
             template:
               - "%{repository}"
       )
-      it { should serialize_to notifications: { pushover: { template: ['%{repository}'] } } }
+      it { should serialize_to notifications: { pushover: [template: ['%{repository}']] } }
       it { should_not have_msg }
     end
 
@@ -198,7 +197,7 @@ describe Travis::Yml, 'notifications: pushover' do
             template:
             - "%{unknown}"
       )
-      it { should serialize_to notifications: { pushover: { template: ['%{unknown}'] } } }
+      it { should serialize_to notifications: { pushover: [template: ['%{unknown}']] } }
       it { should have_msg [:warn, :'notifications.pushover.template', :unknown_var, var: 'unknown'] }
     end
   end
@@ -214,7 +213,7 @@ describe Travis::Yml, 'notifications: pushover' do
                   secure: secure
               #{status}: #{value}
           )
-          it { should serialize_to notifications: { pushover: { api_key: [secure: 'secure'], status => value } } }
+          it { should serialize_to notifications: { pushover: [api_key: [secure: 'secure'], status => value] } }
           it { should_not have_msg }
         end
       end
@@ -227,7 +226,7 @@ describe Travis::Yml, 'notifications: pushover' do
         pushover:
           unknown: str
     )
-    it { should serialize_to notifications: { pushover: { unknown: 'str' } } }
+    it { should serialize_to notifications: { pushover: [unknown: 'str'] } }
     it { should have_msg [:warn, :'notifications.pushover', :unknown_key, key: 'unknown', value: 'str'] }
   end
 end

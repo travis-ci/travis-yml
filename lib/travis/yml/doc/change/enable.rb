@@ -32,7 +32,7 @@ module Travis
             end
 
             def enable?
-              !value.str? or value.value != casted
+              value.bool? || %w(yes no).include?(value.value)
             end
 
             def enable

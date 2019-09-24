@@ -6,7 +6,7 @@ describe Travis::Yml, 'notifications: flowdock' do
       notifications:
         flowdock: true
     )
-    it { should serialize_to notifications: { flowdock: { enabled: true } } }
+    it { should serialize_to notifications: { flowdock: [enabled: true] } }
     it { should_not have_msg }
   end
 
@@ -15,7 +15,7 @@ describe Travis::Yml, 'notifications: flowdock' do
       notifications:
         flowdock: false
     )
-    it { should serialize_to notifications: { flowdock: { enabled: false } } }
+    it { should serialize_to notifications: { flowdock: [enabled: false] } }
     it { should_not have_msg }
   end
 
@@ -25,7 +25,7 @@ describe Travis::Yml, 'notifications: flowdock' do
         flowdock:
           disabled: true
     )
-    it { should serialize_to notifications: { flowdock: { enabled: false } } }
+    it { should serialize_to notifications: { flowdock: [enabled: false] } }
     it { should_not have_msg }
   end
 
@@ -35,7 +35,7 @@ describe Travis::Yml, 'notifications: flowdock' do
         flowdock:
           enabled: false
     )
-    it { should serialize_to notifications: { flowdock: { enabled: false } } }
+    it { should serialize_to notifications: { flowdock: [enabled: false] } }
     it { should_not have_msg }
   end
 
@@ -45,7 +45,7 @@ describe Travis::Yml, 'notifications: flowdock' do
         flowdock:
           enabled: true
     )
-    it { should serialize_to notifications: { flowdock: { enabled: true } } }
+    it { should serialize_to notifications: { flowdock: [enabled: true] } }
     it { should_not have_msg }
   end
 
@@ -55,7 +55,7 @@ describe Travis::Yml, 'notifications: flowdock' do
         flowdock:
           disabled: false
     )
-    it { should serialize_to notifications: { flowdock: { enabled: true } } }
+    it { should serialize_to notifications: { flowdock: [enabled: true] } }
     it { should_not have_msg }
   end
 
@@ -64,7 +64,7 @@ describe Travis::Yml, 'notifications: flowdock' do
       notifications:
         flowdock: str
     )
-    it { should serialize_to notifications: { flowdock: { api_token: 'str' } } }
+    it { should serialize_to notifications: { flowdock: [api_token: 'str'] } }
     it { should_not have_msg }
   end
 
@@ -74,7 +74,7 @@ describe Travis::Yml, 'notifications: flowdock' do
         flowdock:
           secure: secure
     )
-    it { should serialize_to notifications: { flowdock: { api_token: { secure: 'secure' } } } }
+    it { should serialize_to notifications: { flowdock: [api_token: { secure: 'secure' }] } }
     it { should_not have_msg }
   end
 
@@ -82,11 +82,11 @@ describe Travis::Yml, 'notifications: flowdock' do
     yaml %(
       notifications:
         flowdock:
-          - str
-          - other
+          - one
+          - two
     )
-    it { should serialize_to notifications: { flowdock: { api_token: 'str' } } }
-    it { should have_msg [:warn, :'notifications.flowdock.api_token', :unexpected_seq, value: 'str'] }
+    it { should serialize_to notifications: { flowdock: [{ api_token: 'one' }, { api_token: 'two' }] } }
+    it { should_not have_msg }
   end
 
   describe 'api_token' do
@@ -96,7 +96,7 @@ describe Travis::Yml, 'notifications: flowdock' do
           flowdock:
             api_token: str
       )
-      it { should serialize_to notifications: { flowdock: { api_token: 'str' } } }
+      it { should serialize_to notifications: { flowdock: [api_token: 'str'] } }
       it { should_not have_msg }
     end
 
@@ -107,7 +107,7 @@ describe Travis::Yml, 'notifications: flowdock' do
             api_token:
               secure: secure
       )
-      it { should serialize_to notifications: { flowdock: { api_token: { secure: 'secure' } } } }
+      it { should serialize_to notifications: { flowdock: [api_token: { secure: 'secure' }] } }
       it { should_not have_msg }
     end
 
@@ -119,7 +119,7 @@ describe Travis::Yml, 'notifications: flowdock' do
             - str
             - other
       )
-      it { should serialize_to notifications: { flowdock: { api_token: 'str' } } }
+      it { should serialize_to notifications: { flowdock: [api_token: 'str'] } }
       it { should have_msg [:warn, :'notifications.flowdock.api_token', :unexpected_seq, value: 'str'] }
     end
   end
@@ -131,7 +131,7 @@ describe Travis::Yml, 'notifications: flowdock' do
           flowdock:
             template: "%{repository}"
       )
-      it { should serialize_to notifications: { flowdock: { template: ['%{repository}'] } } }
+      it { should serialize_to notifications: { flowdock: [template: ['%{repository}']] } }
       it { should_not have_msg }
     end
 
@@ -141,7 +141,7 @@ describe Travis::Yml, 'notifications: flowdock' do
           flowdock:
             template: "%{unknown}"
       )
-      it { should serialize_to notifications: { flowdock: { template: ['%{unknown}'] } } }
+      it { should serialize_to notifications: { flowdock: [template: ['%{unknown}']] } }
       it { should have_msg [:warn, :'notifications.flowdock.template', :unknown_var, var: 'unknown'] }
     end
 
@@ -152,7 +152,7 @@ describe Travis::Yml, 'notifications: flowdock' do
             template:
               - "%{repository}"
       )
-      it { should serialize_to notifications: { flowdock: { template: ['%{repository}'] } } }
+      it { should serialize_to notifications: { flowdock: [template: ['%{repository}']] } }
       it { should_not have_msg }
     end
 
@@ -163,7 +163,7 @@ describe Travis::Yml, 'notifications: flowdock' do
             template:
             - "%{unknown}"
       )
-      it { should serialize_to notifications: { flowdock: { template: ['%{unknown}'] } } }
+      it { should serialize_to notifications: { flowdock: [template: ['%{unknown}']] } }
       it { should have_msg [:warn, :'notifications.flowdock.template', :unknown_var, var: 'unknown'] }
     end
   end
@@ -177,7 +177,7 @@ describe Travis::Yml, 'notifications: flowdock' do
               flowdock:
                 #{status}: #{value}
           )
-          it { should serialize_to notifications: { flowdock: { status => value } } }
+          it { should serialize_to notifications: { flowdock: [status => value] } }
           it { should_not have_msg }
         end
       end
@@ -191,7 +191,7 @@ describe Travis::Yml, 'notifications: flowdock' do
               flowdock: str
               #{status}: #{value}
           )
-          it { should serialize_to notifications: { flowdock: { api_token: 'str', status => value } } }
+          it { should serialize_to notifications: { flowdock: [api_token: 'str', status => value] } }
           it { should_not have_msg }
         end
       end
@@ -204,7 +204,7 @@ describe Travis::Yml, 'notifications: flowdock' do
         flowdock:
           unknown: str
     )
-    it { should serialize_to notifications: { flowdock: { unknown: 'str' } } }
+    it { should serialize_to notifications: { flowdock: [unknown: 'str'] } }
     it { should have_msg [:warn, :'notifications.flowdock', :unknown_key, key: 'unknown', value: 'str'] }
   end
 end

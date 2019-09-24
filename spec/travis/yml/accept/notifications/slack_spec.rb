@@ -6,7 +6,7 @@ describe Travis::Yml, 'notifications: slack' do
       notifications:
         slack: true
     )
-    it { should serialize_to notifications: { slack: { enabled: true } } }
+    it { should serialize_to notifications: { slack: [enabled: true] } }
     it { should_not have_msg }
   end
 
@@ -15,7 +15,7 @@ describe Travis::Yml, 'notifications: slack' do
       notifications:
         slack: false
     )
-    it { should serialize_to notifications: { slack: { enabled: false } } }
+    it { should serialize_to notifications: { slack: [enabled: false] } }
     it { should_not have_msg }
   end
 
@@ -24,7 +24,7 @@ describe Travis::Yml, 'notifications: slack' do
       notifications:
         slack: str
     )
-    it { should serialize_to notifications: { slack: { rooms: ['str'] } } }
+    it { should serialize_to notifications: { slack: [rooms: ['str']] } }
     it { should_not have_msg }
   end
 
@@ -34,7 +34,7 @@ describe Travis::Yml, 'notifications: slack' do
         slack:
           secure: secure
     )
-    it { should serialize_to notifications: { slack: { rooms: [secure: 'secure'] } } }
+    it { should serialize_to notifications: { slack: [rooms: [secure: 'secure']] } }
     it { should_not have_msg }
   end
 
@@ -45,7 +45,7 @@ describe Travis::Yml, 'notifications: slack' do
           secure: secure
           slack: str
     )
-    it { should serialize_to notifications: { slack: { secure: 'secure', slack: 'str' } } }
+    it { should serialize_to notifications: { slack: [secure: 'secure', slack: 'str'] } }
     it { should have_msg [:warn, :'notifications.slack', :unknown_key, key: 'secure', value: 'secure'] }
     it { should have_msg [:warn, :'notifications.slack', :unknown_key, key: 'slack', value: 'str'] }
   end
@@ -56,7 +56,7 @@ describe Travis::Yml, 'notifications: slack' do
         slack:
           disabled: true
     )
-    it { should serialize_to notifications: { slack: { enabled: false } } }
+    it { should serialize_to notifications: { slack: [enabled: false] } }
     it { should_not have_msg }
   end
 
@@ -66,7 +66,7 @@ describe Travis::Yml, 'notifications: slack' do
         slack:
           enabled: false
     )
-    it { should serialize_to notifications: { slack: { enabled: false } } }
+    it { should serialize_to notifications: { slack: [enabled: false] } }
     it { should_not have_msg }
   end
 
@@ -76,7 +76,7 @@ describe Travis::Yml, 'notifications: slack' do
         slack:
           enabled: true
     )
-    it { should serialize_to notifications: { slack: { enabled: true } } }
+    it { should serialize_to notifications: { slack: [enabled: true] } }
     it { should_not have_msg }
   end
 
@@ -86,7 +86,7 @@ describe Travis::Yml, 'notifications: slack' do
         slack:
           disabled: false
     )
-    it { should serialize_to notifications: { slack: { enabled: true } } }
+    it { should serialize_to notifications: { slack: [enabled: true] } }
     it { should_not have_msg }
   end
 
@@ -97,7 +97,7 @@ describe Travis::Yml, 'notifications: slack' do
           - foo
           - bar
     )
-    it { should serialize_to notifications: { slack: { rooms: ['foo', 'bar'] } } }
+    it { should serialize_to notifications: { slack: [{ rooms: ['foo'] }, { rooms: ['bar'] }] } }
     it { should_not have_msg }
   end
 
@@ -107,7 +107,7 @@ describe Travis::Yml, 'notifications: slack' do
         slack:
           - secure: secure
     )
-    it { should serialize_to notifications: { slack: { rooms: [secure: 'secure'] } } }
+    it { should serialize_to notifications: { slack: [rooms: [secure: 'secure']] } }
     it { should_not have_msg }
   end
 
@@ -118,7 +118,7 @@ describe Travis::Yml, 'notifications: slack' do
           slack:
             rooms: str
       )
-      it { should serialize_to notifications: { slack: { rooms: ['str'] } } }
+      it { should serialize_to notifications: { slack: [rooms: ['str']] } }
       it { should_not have_msg }
     end
 
@@ -129,7 +129,7 @@ describe Travis::Yml, 'notifications: slack' do
             rooms:
               secure: secure
       )
-      it { should serialize_to notifications: { slack: { rooms: [secure: 'secure'] } } }
+      it { should serialize_to notifications: { slack: [rooms: [secure: 'secure']] } }
       it { should_not have_msg }
     end
 
@@ -141,7 +141,7 @@ describe Travis::Yml, 'notifications: slack' do
             - foo
             - bar
       )
-      it { should serialize_to notifications: { slack: { rooms: ['foo', 'bar'] } } }
+      it { should serialize_to notifications: { slack: [rooms: ['foo', 'bar']] } }
       it { should_not have_msg }
     end
   end
@@ -153,7 +153,7 @@ describe Travis::Yml, 'notifications: slack' do
           slack:
             on_pull_requests: true
       )
-      it { should serialize_to notifications: { slack: { on_pull_requests: true } } }
+      it { should serialize_to notifications: { slack: [on_pull_requests: true] } }
       it { should_not have_msg }
     end
 
@@ -163,7 +163,7 @@ describe Travis::Yml, 'notifications: slack' do
           slack:
             on_pull_requests: yes
       )
-      it { should serialize_to notifications: { slack: { on_pull_requests: true } } }
+      it { should serialize_to notifications: { slack: [on_pull_requests: true] } }
       it { should_not have_msg }
     end
   end
@@ -175,7 +175,7 @@ describe Travis::Yml, 'notifications: slack' do
           slack:
             template: "%{repository}"
       )
-      it { should serialize_to notifications: { slack: { template: ['%{repository}'] } } }
+      it { should serialize_to notifications: { slack: [template: ['%{repository}']] } }
       it { should_not have_msg }
     end
 
@@ -185,7 +185,7 @@ describe Travis::Yml, 'notifications: slack' do
           slack:
             template: "%{unknown}"
       )
-      it { should serialize_to notifications: { slack: { template: ['%{unknown}'] } } }
+      it { should serialize_to notifications: { slack: [template: ['%{unknown}']] } }
       it { should have_msg [:warn, :'notifications.slack.template', :unknown_var, var: 'unknown'] }
     end
 
@@ -196,7 +196,7 @@ describe Travis::Yml, 'notifications: slack' do
             template:
               - "%{repository}"
       )
-      it { should serialize_to notifications: { slack: { template: ['%{repository}'] } } }
+      it { should serialize_to notifications: { slack: [template: ['%{repository}']] } }
       it { should_not have_msg }
     end
 
@@ -207,7 +207,7 @@ describe Travis::Yml, 'notifications: slack' do
             template:
             - "%{unknown}"
       )
-      it { should serialize_to notifications: { slack: { template: ['%{unknown}'] } } }
+      it { should serialize_to notifications: { slack: [template: ['%{unknown}']] } }
       it { should have_msg [:warn, :'notifications.slack.template', :unknown_var, var: 'unknown'] }
     end
   end
@@ -221,7 +221,7 @@ describe Travis::Yml, 'notifications: slack' do
               slack:
                 #{status}: #{value}
           )
-          it { should serialize_to notifications: { slack: { status => value } } }
+          it { should serialize_to notifications: { slack: [status => value] } }
           it { should_not have_msg }
         end
       end
@@ -235,7 +235,7 @@ describe Travis::Yml, 'notifications: slack' do
               slack: str
               #{status}: #{value}
           )
-          it { should serialize_to notifications: { slack: { rooms: ['str'], status => value } } }
+          it { should serialize_to notifications: { slack: [rooms: ['str'], status => value] } }
           it { should_not have_msg }
         end
       end
@@ -248,7 +248,7 @@ describe Travis::Yml, 'notifications: slack' do
         slack:
           unknown: str
     )
-    it { should serialize_to notifications: { slack: { unknown: 'str' } } }
+    it { should serialize_to notifications: { slack: [unknown: 'str'] } }
     it { should have_msg [:warn, :'notifications.slack', :unknown_key, key: 'unknown', value: 'str'] }
   end
 end

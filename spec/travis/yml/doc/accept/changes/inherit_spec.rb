@@ -10,7 +10,7 @@ describe Travis::Yml, 'inherit' do
             recipients:
               - str
       )
-      it { should serialize_to notifications: { email: { recipients: ['str'], on_success: 'always' } } }
+      it { should serialize_to notifications: { email: [recipients: ['str'], on_success: 'always'] } }
       it { should_not have_msg }
     end
   end

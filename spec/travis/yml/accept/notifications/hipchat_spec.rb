@@ -6,7 +6,7 @@ describe Travis::Yml, 'notifications: hipchat' do
       notifications:
         hipchat: true
     )
-    it { should serialize_to notifications: { hipchat: { enabled: true } } }
+    it { should serialize_to notifications: { hipchat: [enabled: true] } }
     it { should_not have_msg }
   end
 
@@ -15,7 +15,7 @@ describe Travis::Yml, 'notifications: hipchat' do
       notifications:
         hipchat: false
     )
-    it { should serialize_to notifications: { hipchat: { enabled: false } } }
+    it { should serialize_to notifications: { hipchat: [enabled: false] } }
     it { should_not have_msg }
   end
 
@@ -25,7 +25,7 @@ describe Travis::Yml, 'notifications: hipchat' do
         hipchat:
           disabled: true
     )
-    it { should serialize_to notifications: { hipchat: { enabled: false } } }
+    it { should serialize_to notifications: { hipchat: [enabled: false] } }
     it { should_not have_msg }
   end
 
@@ -35,7 +35,7 @@ describe Travis::Yml, 'notifications: hipchat' do
         hipchat:
           enabled: false
     )
-    it { should serialize_to notifications: { hipchat: { enabled: false } } }
+    it { should serialize_to notifications: { hipchat: [enabled: false] } }
     it { should_not have_msg }
   end
 
@@ -45,7 +45,7 @@ describe Travis::Yml, 'notifications: hipchat' do
         hipchat:
           enabled: true
     )
-    it { should serialize_to notifications: { hipchat: { enabled: true } } }
+    it { should serialize_to notifications: { hipchat: [enabled: true] } }
     it { should_not have_msg }
   end
 
@@ -55,7 +55,7 @@ describe Travis::Yml, 'notifications: hipchat' do
         hipchat:
           disabled: false
     )
-    it { should serialize_to notifications: { hipchat: { enabled: true } } }
+    it { should serialize_to notifications: { hipchat: [enabled: true] } }
     it { should_not have_msg }
   end
 
@@ -64,7 +64,7 @@ describe Travis::Yml, 'notifications: hipchat' do
       notifications:
         hipchat: str
     )
-    it { should serialize_to notifications: { hipchat: { rooms: ['str'] } } }
+    it { should serialize_to notifications: { hipchat: [rooms: ['str']] } }
     it { should_not have_msg }
   end
 
@@ -74,7 +74,7 @@ describe Travis::Yml, 'notifications: hipchat' do
         hipchat:
           secure: secure
     )
-    it { should serialize_to notifications: { hipchat: { rooms: [secure: 'secure'] } } }
+    it { should serialize_to notifications: { hipchat: [rooms: [secure: 'secure']] } }
     it { should_not have_msg }
   end
 
@@ -85,7 +85,7 @@ describe Travis::Yml, 'notifications: hipchat' do
           - foo
           - bar
     )
-    it { should serialize_to notifications: { hipchat: { rooms: ['foo', 'bar'] } } }
+    it { should serialize_to notifications: { hipchat: [{ rooms: ['foo'] }, { rooms: ['bar'] }] } }
     it { should_not have_msg }
   end
 
@@ -96,7 +96,7 @@ describe Travis::Yml, 'notifications: hipchat' do
           hipchat:
             rooms: str
       )
-      it { should serialize_to notifications: { hipchat: { rooms: ['str'] } } }
+      it { should serialize_to notifications: { hipchat: [rooms: ['str']] } }
       it { should_not have_msg }
     end
 
@@ -107,7 +107,7 @@ describe Travis::Yml, 'notifications: hipchat' do
             rooms:
               secure: secure
       )
-      it { should serialize_to notifications: { hipchat: { rooms: [secure: 'secure'] } } }
+      it { should serialize_to notifications: { hipchat: [rooms: [secure: 'secure']] } }
       it { should_not have_msg }
     end
 
@@ -119,7 +119,7 @@ describe Travis::Yml, 'notifications: hipchat' do
             - foo
             - bar
       )
-      it { should serialize_to notifications: { hipchat: { rooms: ['foo', 'bar'] } } }
+      it { should serialize_to notifications: { hipchat: [rooms: ['foo', 'bar']] } }
       it { should_not have_msg }
     end
   end
@@ -131,7 +131,7 @@ describe Travis::Yml, 'notifications: hipchat' do
           hipchat:
             template: "%{repository}"
       )
-      it { should serialize_to notifications: { hipchat: { template: ['%{repository}'] } } }
+      it { should serialize_to notifications: { hipchat: [template: ['%{repository}']] } }
       it { should_not have_msg }
     end
 
@@ -141,7 +141,7 @@ describe Travis::Yml, 'notifications: hipchat' do
           hipchat:
             template: "%{unknown}"
       )
-      it { should serialize_to notifications: { hipchat: { template: ['%{unknown}'] } } }
+      it { should serialize_to notifications: { hipchat: [template: ['%{unknown}']] } }
       it { should have_msg [:warn, :'notifications.hipchat.template', :unknown_var, var: 'unknown'] }
     end
 
@@ -152,7 +152,7 @@ describe Travis::Yml, 'notifications: hipchat' do
             template:
               - "%{repository}"
       )
-      it { should serialize_to notifications: { hipchat: { template: ['%{repository}'] } } }
+      it { should serialize_to notifications: { hipchat: [template: ['%{repository}']] } }
       it { should_not have_msg }
     end
 
@@ -163,7 +163,7 @@ describe Travis::Yml, 'notifications: hipchat' do
             template:
             - "%{unknown}"
       )
-      it { should serialize_to notifications: { hipchat: { template: ['%{unknown}'] } } }
+      it { should serialize_to notifications: { hipchat: [template: ['%{unknown}']] } }
       it { should have_msg [:warn, :'notifications.hipchat.template', :unknown_var, var: 'unknown'] }
     end
   end
@@ -177,7 +177,7 @@ describe Travis::Yml, 'notifications: hipchat' do
               hipchat:
                 #{status}: #{value}
           )
-          it { should serialize_to notifications: { hipchat: { status => value } } }
+          it { should serialize_to notifications: { hipchat: [status => value] } }
           it { should_not have_msg }
         end
       end
@@ -191,7 +191,7 @@ describe Travis::Yml, 'notifications: hipchat' do
               hipchat: str
               #{status}: #{value}
           )
-          it { should serialize_to notifications: { hipchat: { rooms: ['str'], status => value } } }
+          it { should serialize_to notifications: { hipchat: [rooms: ['str'], status => value] } }
           it { should_not have_msg }
         end
       end
@@ -204,7 +204,7 @@ describe Travis::Yml, 'notifications: hipchat' do
         hipchat:
           unknown: str
     )
-    it { should serialize_to notifications: { hipchat: { unknown: 'str' } } }
+    it { should serialize_to notifications: { hipchat: [unknown: 'str'] } }
     it { should have_msg [:warn, :'notifications.hipchat', :unknown_key, key: 'unknown', value: 'str'] }
   end
 end

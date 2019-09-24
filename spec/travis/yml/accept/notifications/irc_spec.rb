@@ -6,7 +6,7 @@ describe Travis::Yml, 'notifications: irc' do
       notifications:
         irc: true
     )
-    it { should serialize_to notifications: { irc: { enabled: true } } }
+    it { should serialize_to notifications: { irc: [enabled: true] } }
     it { should_not have_msg }
   end
 
@@ -15,7 +15,7 @@ describe Travis::Yml, 'notifications: irc' do
       notifications:
         irc: false
     )
-    it { should serialize_to notifications: { irc: { enabled: false } } }
+    it { should serialize_to notifications: { irc: [enabled: false] } }
     it { should_not have_msg }
   end
 
@@ -25,7 +25,7 @@ describe Travis::Yml, 'notifications: irc' do
         irc:
           disabled: true
     )
-    it { should serialize_to notifications: { irc: { enabled: false } } }
+    it { should serialize_to notifications: { irc: [enabled: false] } }
     it { should_not have_msg }
   end
 
@@ -35,7 +35,7 @@ describe Travis::Yml, 'notifications: irc' do
         irc:
           enabled: false
     )
-    it { should serialize_to notifications: { irc: { enabled: false } } }
+    it { should serialize_to notifications: { irc: [enabled: false] } }
     it { should_not have_msg }
   end
 
@@ -45,7 +45,7 @@ describe Travis::Yml, 'notifications: irc' do
         irc:
           enabled: true
     )
-    it { should serialize_to notifications: { irc: { enabled: true } } }
+    it { should serialize_to notifications: { irc: [enabled: true] } }
     it { should_not have_msg }
   end
 
@@ -55,7 +55,7 @@ describe Travis::Yml, 'notifications: irc' do
         irc:
           disabled: false
     )
-    it { should serialize_to notifications: { irc: { enabled: true } } }
+    it { should serialize_to notifications: { irc: [enabled: true] } }
     it { should_not have_msg }
   end
 
@@ -64,7 +64,7 @@ describe Travis::Yml, 'notifications: irc' do
       notifications:
         irc: str
     )
-    it { should serialize_to notifications: { irc: { channels: ['str'] } } }
+    it { should serialize_to notifications: { irc: [channels: ['str']] } }
     it { should_not have_msg }
   end
 
@@ -74,7 +74,7 @@ describe Travis::Yml, 'notifications: irc' do
         irc:
           secure: secure
     )
-    it { should serialize_to notifications: { irc: { channels: [secure: 'secure'] } } }
+    it { should serialize_to notifications: { irc: [channels: [secure: 'secure']] } }
     it { should_not have_msg }
   end
 
@@ -85,7 +85,7 @@ describe Travis::Yml, 'notifications: irc' do
           - foo
           - bar
     )
-    it { should serialize_to notifications: { irc: { channels: ['foo', 'bar'] } } }
+    it { should serialize_to notifications: { irc: [{ channels: ['foo'] }, { channels: ['bar'] }] } }
     it { should_not have_msg }
   end
 
@@ -96,7 +96,7 @@ describe Travis::Yml, 'notifications: irc' do
           irc:
             channels: str
       )
-      it { should serialize_to notifications: { irc: { channels: ['str'] } } }
+      it { should serialize_to notifications: { irc: [channels: ['str']] } }
       it { should_not have_msg }
     end
 
@@ -107,7 +107,7 @@ describe Travis::Yml, 'notifications: irc' do
             channels:
               secure: secure
       )
-      it { should serialize_to notifications: { irc: { channels: [secure: 'secure'] } } }
+      it { should serialize_to notifications: { irc: [channels: [secure: 'secure']] } }
       it { should_not have_msg }
     end
 
@@ -119,7 +119,7 @@ describe Travis::Yml, 'notifications: irc' do
             - foo
             - bar
       )
-      it { should serialize_to notifications: { irc: { channels: ['foo', 'bar'] } } }
+      it { should serialize_to notifications: { irc: [channels: ['foo', 'bar']] } }
       it { should_not have_msg }
     end
   end
@@ -131,7 +131,7 @@ describe Travis::Yml, 'notifications: irc' do
           irc:
             channel_key: str
       )
-      it { should serialize_to notifications: { irc: { channel_key: 'str' } } }
+      it { should serialize_to notifications: { irc: [channel_key: 'str'] } }
       it { should_not have_msg }
     end
 
@@ -142,7 +142,7 @@ describe Travis::Yml, 'notifications: irc' do
             channel_key:
               secure: secure
       )
-      it { should serialize_to notifications: { irc: { channel_key: { secure: 'secure' } } } }
+      it { should serialize_to notifications: { irc: [channel_key: { secure: 'secure' }] } }
       it { should_not have_msg }
     end
   end
@@ -154,7 +154,7 @@ describe Travis::Yml, 'notifications: irc' do
           irc:
             password: str
       )
-      it { should serialize_to notifications: { irc: { password: 'str' } } }
+      it { should serialize_to notifications: { irc: [password: 'str'] } }
       it { should_not have_msg }
     end
 
@@ -165,7 +165,7 @@ describe Travis::Yml, 'notifications: irc' do
             password:
               secure: secure
       )
-      it { should serialize_to notifications: { irc: { password: { secure: 'secure' } } } }
+      it { should serialize_to notifications: { irc: [password: { secure: 'secure' }] } }
       it { should_not have_msg }
     end
   end
@@ -177,7 +177,7 @@ describe Travis::Yml, 'notifications: irc' do
           irc:
             nickserv_password: str
       )
-      it { should serialize_to notifications: { irc: { nickserv_password: 'str' } } }
+      it { should serialize_to notifications: { irc: [nickserv_password: 'str'] } }
       it { should_not have_msg }
     end
 
@@ -188,7 +188,7 @@ describe Travis::Yml, 'notifications: irc' do
             nickserv_password:
               secure: secure
       )
-      it { should serialize_to notifications: { irc: { nickserv_password: { secure: 'secure' } } } }
+      it { should serialize_to notifications: { irc: [nickserv_password: { secure: 'secure' }] } }
       it { should_not have_msg }
     end
   end
@@ -200,7 +200,7 @@ describe Travis::Yml, 'notifications: irc' do
           irc:
             nick: str
       )
-      it { should serialize_to notifications: { irc: { nick: 'str' } } }
+      it { should serialize_to notifications: { irc: [nick: 'str'] } }
       it { should_not have_msg }
     end
 
@@ -211,7 +211,7 @@ describe Travis::Yml, 'notifications: irc' do
             nick:
               secure: secure
       )
-      it { should serialize_to notifications: { irc: { nick: { secure: 'secure' } } } }
+      it { should serialize_to notifications: { irc: [nick: { secure: 'secure' }] } }
       it { should_not have_msg }
     end
   end
@@ -223,7 +223,7 @@ describe Travis::Yml, 'notifications: irc' do
           irc:
             use_notice: true
       )
-      it { should serialize_to notifications: { irc: { use_notice: true } } }
+      it { should serialize_to notifications: { irc: [use_notice: true] } }
       it { should_not have_msg }
     end
 
@@ -233,7 +233,7 @@ describe Travis::Yml, 'notifications: irc' do
           irc:
             use_notice: yes
       )
-      it { should serialize_to notifications: { irc: { use_notice: true } } }
+      it { should serialize_to notifications: { irc: [use_notice: true] } }
       it { should_not have_msg }
     end
   end
@@ -245,7 +245,7 @@ describe Travis::Yml, 'notifications: irc' do
           irc:
             skip_join: true
       )
-      it { should serialize_to notifications: { irc: { skip_join: true } } }
+      it { should serialize_to notifications: { irc: [skip_join: true] } }
       it { should_not have_msg }
     end
 
@@ -255,7 +255,7 @@ describe Travis::Yml, 'notifications: irc' do
           irc:
             skip_join: yes
       )
-      it { should serialize_to notifications: { irc: { skip_join: true } } }
+      it { should serialize_to notifications: { irc: [skip_join: true] } }
       it { should_not have_msg }
     end
   end
@@ -267,7 +267,7 @@ describe Travis::Yml, 'notifications: irc' do
           irc:
             template: "%{repository}"
       )
-      it { should serialize_to notifications: { irc: { template: ['%{repository}'] } } }
+      it { should serialize_to notifications: { irc: [template: ['%{repository}']] } }
       it { should_not have_msg }
     end
 
@@ -277,7 +277,7 @@ describe Travis::Yml, 'notifications: irc' do
           irc:
             template: "%{unknown}"
       )
-      it { should serialize_to notifications: { irc: { template: ['%{unknown}'] } } }
+      it { should serialize_to notifications: { irc: [template: ['%{unknown}']] } }
       it { should have_msg [:warn, :'notifications.irc.template', :unknown_var, var: 'unknown'] }
     end
 
@@ -288,7 +288,7 @@ describe Travis::Yml, 'notifications: irc' do
             template:
               - "%{repository}"
       )
-      it { should serialize_to notifications: { irc: { template: ['%{repository}'] } } }
+      it { should serialize_to notifications: { irc: [template: ['%{repository}']] } }
       it { should_not have_msg }
     end
 
@@ -299,7 +299,7 @@ describe Travis::Yml, 'notifications: irc' do
             template:
             - "%{unknown}"
       )
-      it { should serialize_to notifications: { irc: { template: ['%{unknown}'] } } }
+      it { should serialize_to notifications: { irc: [template: ['%{unknown}']] } }
       it { should have_msg [:warn, :'notifications.irc.template', :unknown_var, var: 'unknown'] }
     end
   end
@@ -313,7 +313,7 @@ describe Travis::Yml, 'notifications: irc' do
               irc:
                 #{status}: #{value}
           )
-          it { should serialize_to notifications: { irc: { status => value } } }
+          it { should serialize_to notifications: { irc: [status => value] } }
           it { should_not have_msg }
         end
       end
@@ -327,7 +327,7 @@ describe Travis::Yml, 'notifications: irc' do
               irc: str
               #{status}: #{value}
           )
-          it { should serialize_to notifications: { irc: { channels: ['str'], status => value } } }
+          it { should serialize_to notifications: { irc: [channels: ['str'], status => value] } }
           it { should_not have_msg }
         end
       end
@@ -340,7 +340,7 @@ describe Travis::Yml, 'notifications: irc' do
         irc:
           unknown: str
     )
-    it { should serialize_to notifications: { irc: { unknown: 'str' } } }
+    it { should serialize_to notifications: { irc: [unknown: 'str'] } }
     it { should have_msg [:warn, :'notifications.irc', :unknown_key, key: 'unknown', value: 'str'] }
   end
 
@@ -352,7 +352,7 @@ describe Travis::Yml, 'notifications: irc' do
           - room
         template: str
     )
-    it { should serialize_to notifications: { irc: { channels: ['room'] }, template: 'str' } }
+    it { should serialize_to notifications: { irc: [channels: ['room']], template: 'str' } }
     it { should have_msg [:warn, :notifications, :unknown_key, key: 'template', value: 'str'] }
   end
 end

@@ -1275,35 +1275,123 @@
             "type": "object",
             "properties": {
               "campfire": {
-                "$ref": "#/definitions/notification/campfire",
+                "anyOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/definitions/notification/campfire"
+                    },
+                    "normal": true
+                  },
+                  {
+                    "$ref": "#/definitions/notification/campfire"
+                  }
+                ],
                 "summary": "Campfire notification settings"
               },
               "email": {
-                "$ref": "#/definitions/notification/email",
+                "anyOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/definitions/notification/email"
+                    },
+                    "normal": true
+                  },
+                  {
+                    "$ref": "#/definitions/notification/email"
+                  }
+                ],
                 "summary": "Email notification settings"
               },
               "flowdock": {
-                "$ref": "#/definitions/notification/flowdock",
+                "anyOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/definitions/notification/flowdock"
+                    },
+                    "normal": true
+                  },
+                  {
+                    "$ref": "#/definitions/notification/flowdock"
+                  }
+                ],
                 "summary": "Flowdock notification settings"
               },
               "hipchat": {
-                "$ref": "#/definitions/notification/hipchat",
+                "anyOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/definitions/notification/hipchat"
+                    },
+                    "normal": true
+                  },
+                  {
+                    "$ref": "#/definitions/notification/hipchat"
+                  }
+                ],
                 "summary": "Hipchat notification settings"
               },
               "irc": {
-                "$ref": "#/definitions/notification/irc",
+                "anyOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/definitions/notification/irc"
+                    },
+                    "normal": true
+                  },
+                  {
+                    "$ref": "#/definitions/notification/irc"
+                  }
+                ],
                 "summary": "IRC notification settings"
               },
               "pushover": {
-                "$ref": "#/definitions/notification/pushover",
+                "anyOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/definitions/notification/pushover"
+                    },
+                    "normal": true
+                  },
+                  {
+                    "$ref": "#/definitions/notification/pushover"
+                  }
+                ],
                 "summary": "Pushover notification settings"
               },
               "slack": {
-                "$ref": "#/definitions/notification/slack",
+                "anyOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/definitions/notification/slack"
+                    },
+                    "normal": true
+                  },
+                  {
+                    "$ref": "#/definitions/notification/slack"
+                  }
+                ],
                 "summary": "Slack notification settings"
               },
               "webhooks": {
-                "$ref": "#/definitions/notification/webhooks",
+                "anyOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/definitions/notification/webhooks"
+                    },
+                    "normal": true
+                  },
+                  {
+                    "$ref": "#/definitions/notification/webhooks"
+                  }
+                ],
                 "summary": "Webhook notification settings"
               },
               "on_success": {
@@ -1327,6 +1415,13 @@
                 ]
               }
             ]
+          },
+          {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/notification/email"
+            },
+            "normal": true
           },
           {
             "$ref": "#/definitions/notification/email"
