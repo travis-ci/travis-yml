@@ -5,6 +5,14 @@ module Travis
     module Docs
       module Page
         class Any < Base
+          def id
+            super || node.schemas.detect(&:id)&.id # ugh. notification anys do not have an id atm ...
+          end
+
+          def title
+            super || node.schemas.detect(&:title)&.title # ugh. notification anys do not have a title atm ...
+          end
+
           def types
             node.expand
           end

@@ -31,9 +31,13 @@ module Travis
         class Seq < Node
           register :seq
 
-          def example
+          def examples
             return [node.example] if node.example
             build(node.schema).examples
+          end
+
+          def example
+            examples
           end
         end
       end

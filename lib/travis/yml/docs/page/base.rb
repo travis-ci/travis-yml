@@ -122,7 +122,7 @@ module Travis
 
           def title_with_key
             parts = []
-            parts << title unless BASE_TYPES.include?(title.downcase.to_sym)
+            parts << title unless BASE_TYPES.include?(title&.downcase&.to_sym)
             parts << key if key && key != id.to_s.sub(/s$/, '').to_sym && key != title.downcase.to_sym && !title.downcase.include?(key.to_s)
             parts = parts.compact
             parts[1] = "(#{parts[1]})" if parts[1]
