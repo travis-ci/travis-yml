@@ -21,7 +21,7 @@ describe Travis::Yml, 'env' do
     yaml %(
       env: FOO=foo BAR=bar
     )
-    it { should serialize_to env: { matrix: [{ FOO: 'foo', BAR: 'bar' }] } }
+    it { should serialize_to env: { matrix: [FOO: 'foo', BAR: 'bar'] } }
     it { should_not have_msg }
   end
 
@@ -30,7 +30,7 @@ describe Travis::Yml, 'env' do
       env:
         - FOO=foo BAR=bar
     )
-    it { should serialize_to env: { matrix: [{ FOO: 'foo', BAR: 'bar' }] } }
+    it { should serialize_to env: { matrix: [FOO: 'foo', BAR: 'bar'] } }
     it { should_not have_msg }
   end
 
@@ -40,7 +40,7 @@ describe Travis::Yml, 'env' do
         FOO=foo
         BAR=bar
     )
-    it { should serialize_to env: { matrix: [{ FOO: 'foo', BAR: 'bar' }] } }
+    it { should serialize_to env: { matrix: [FOO: 'foo', BAR: 'bar'] } }
     it { should_not have_msg }
   end
 
@@ -57,7 +57,7 @@ describe Travis::Yml, 'env' do
       env:
         secure: secure
     )
-    it { should serialize_to env: { matrix: [{ secure: 'secure' }] } }
+    it { should serialize_to env: { matrix: [secure: 'secure'] } }
     it { should_not have_msg }
   end
 
