@@ -1,331 +1,316 @@
 describe Travis::Yml, 'matrix' do
+  def self.expands_to(rows)
+    it { should eq rows }
+  end
+
+  let(:config) { described_class.apply(parse(yaml)).serialize }
   let(:matrix) { described_class.matrix(config) }
-  let(:axes)   { matrix.axes }
+
+  subject { matrix.rows }
 
   describe 'no matrix' do
-    let(:config) { {} }
-
-    let(:rows) do
-      [{}]
-    end
-
-    it { expect(matrix.rows).to eq rows }
+    yaml ''
+    expands_to [{}]
   end
 
   describe 'matrix (1)' do
-    let(:config) do
-      {
-        rvm: ['2.2'],
-        gemfile: ['a']
-      }
-    end
+    yaml %(
+      rvm: 2.2
+      gemfile: str
+    )
 
-    let(:rows) do
-      [
-        { rvm: '2.2', gemfile: 'a' }
-      ]
-    end
-
-    it { expect(matrix.rows).to eq rows }
+    expands_to [
+      { rvm: '2.2', gemfile: 'str' }
+    ]
   end
 
   describe 'matrix (1 from include, redundant expand key at root)' do
-    let(:config) do
-      {
-        os: 'linux',
-        matrix: {
-          include: [
-            { os: 'osx', env: 'foo' }
-          ]
-        }
-      }
-    end
+    yaml %(
+      os: linux
+      matrix:
+        include:
+          - os: osx
+            env: FOO=foo
+    )
 
-    let(:rows) do
-      [
-        { os: 'osx', env: ['foo'] }
-      ]
-    end
-
-    it { expect(matrix.rows).to eq rows }
+    expands_to [
+      { os: 'osx', env: [FOO: 'foo'] }
+    ]
   end
 
   describe 'matrix (1 from include, multi-value expand key at root)' do
-    let(:config) do
-      {
-        os: ['linux', 'osx'],
-        matrix: {
-          include: [
-            { env: 'foo' }
-          ]
-        }
-      }
-    end
+    yaml %(
+      os:
+      - linux
+      - osx
+      matrix:
+        include:
+          - env: FOO=foo
+    )
 
-    let(:rows) do
-      [
-        { os: 'linux' },
-        { os: 'osx' },
-        { os: 'linux', env: ['foo'] }
-      ]
-    end
-
-    it { expect(matrix.rows).to eq rows }
+    expands_to [
+      { os: 'linux' },
+      { os: 'osx' },
+      { os: 'linux', env: [FOO: 'foo'] }
+    ]
   end
 
   describe 'matrix (1 with non-expand key at root)' do
-    let(:config) do
-      {
-        language: 'rust',
-        matrix: {
-          include: [
-            { env: 'foo' }
-          ]
-        }
-      }
-    end
+    yaml %(
+    language: rust
+    matrix:
+      include:
+        env: FOO=foo
+    )
 
-    let(:rows) do
-      [
-        { language: 'rust', env: ['foo'] }
-      ]
-    end
-
-    it { expect(matrix.rows).to eq rows }
+    expands_to [
+      { language: 'rust', env: [FOO: 'foo'] }
+    ]
   end
 
   describe 'matrix (2)' do
-    let(:config) do
-      {
-        rvm: ['2.2', '2.3'],
-        gemfile: ['a']
-      }
-    end
+    yaml %(
+      rvm:
+      - 2.2
+      - 2.3
+      gemfile:
+      - str
+    )
 
-    let(:rows) do
-      [
-        { rvm: '2.2', gemfile: 'a' },
-        { rvm: '2.3', gemfile: 'a' }
-      ]
-    end
-
-    it { expect(matrix.rows).to eq rows }
+    expands_to [
+      { rvm: '2.2', gemfile: 'str' },
+      { rvm: '2.3', gemfile: 'str' }
+    ]
   end
 
   describe 'matrix (3)' do
-    let(:config) do
-      {
-        env: { matrix: ['foo', 'bar', 'baz'] },
-        rvm: ['2.2', '2.3'],
-        gemfile: ['a']
-      }
-    end
+    yaml %(
+      env:
+        matrix:
+        - FOO=foo
+        - BAR=bar
+        - BAZ=baz
+      rvm:
+      - 2.2
+      - 2.3
+      gemfile:
+      - str
+    )
 
-    let(:rows) do
-      [
-        { env: ['foo'], rvm: '2.2', gemfile: 'a' },
-        { env: ['foo'], rvm: '2.3', gemfile: 'a' },
-        { env: ['bar'], rvm: '2.2', gemfile: 'a' },
-        { env: ['bar'], rvm: '2.3', gemfile: 'a' },
-        { env: ['baz'], rvm: '2.2', gemfile: 'a' },
-        { env: ['baz'], rvm: '2.3', gemfile: 'a' }
-      ]
-    end
-
-    it { expect(matrix.rows).to eq rows }
+    expands_to [
+      { env: [FOO: 'foo'], rvm: '2.2', gemfile: 'str' },
+      { env: [FOO: 'foo'], rvm: '2.3', gemfile: 'str' },
+      { env: [BAR: 'bar'], rvm: '2.2', gemfile: 'str' },
+      { env: [BAR: 'bar'], rvm: '2.3', gemfile: 'str' },
+      { env: [BAZ: 'baz'], rvm: '2.2', gemfile: 'str' },
+      { env: [BAZ: 'baz'], rvm: '2.3', gemfile: 'str' }
+    ]
   end
 
-  describe 'just env' do
-    let(:config) do
-      {
-        env: { matrix: [{ FOO: 'foo' }, { BAR: 'bar' }] },
-      }
-    end
+  describe 'env.matrix strs' do
+    yaml %(
+      env:
+        matrix:
+        - FOO=foo BAR=bar
+        - BAZ=baz
+    )
 
-    let(:rows) do
-      [
-        { env: [FOO: 'foo'] },
-        { env: [BAR: 'bar'] }
-      ]
-    end
-
-    it { expect(matrix.rows).to eq rows }
+    expands_to [
+      { env: [FOO: 'foo', BAR: 'bar'] },
+      { env: [BAZ: 'baz'] }
+    ]
   end
 
-  describe 'with global env' do
-    let(:config) do
-      {
-        env:  { matrix: ['foo', 'bar'], global: ['baz'] },
-        rvm: ['2.2', '2.3'],
-      }
-    end
+  describe 'env.matrix hashes' do
+    yaml %(
+      env:
+        matrix:
+        - FOO: foo
+        - BAR: bar
+    )
 
-    let(:rows) do
-      [
-        { env: ['foo', 'baz'], rvm: '2.2' },
-        { env: ['foo', 'baz'], rvm: '2.3' },
-        { env: ['bar', 'baz'], rvm: '2.2' },
-        { env: ['bar', 'baz'], rvm: '2.3' }
-      ]
-    end
-
-    it { expect(matrix.rows).to eq rows }
+    expands_to [
+      { env: [FOO: 'foo'] },
+      { env: [BAR: 'bar'] }
+    ]
   end
 
-  describe 'with env array' do
-    let(:config) do
-      {
-        env: ['FOO=1', 'FOO=2']
-      }
-    end
+  describe 'env.matrix one hash' do
+    yaml %(
+      env:
+        matrix:
+          FOO: foo
+          BAR: bar
+    )
 
-    let(:rows) do
-      [
-        { env: ['FOO=1'] },
-        { env: ['FOO=2'] }
-      ]
-    end
+    expands_to [
+      { env: [FOO: 'foo', BAR: 'bar'] },
+    ]
+  end
 
-    it { expect(matrix.rows).to eq rows }
+  describe 'env.matrix and env.global' do
+    yaml %(
+      env:
+        matrix:
+          - FOO: foo
+          - BAR: bar
+        global:
+          - BAZ: baz
+      rvm:
+      - 2.2
+      - 2.3
+    )
+
+    expands_to [
+      { env: [{ FOO: 'foo' }, { BAZ: 'baz' }], rvm: '2.2' },
+      { env: [{ FOO: 'foo' }, { BAZ: 'baz' }], rvm: '2.3' },
+      { env: [{ BAR: 'bar' }, { BAZ: 'baz' }], rvm: '2.2' },
+      { env: [{ BAR: 'bar' }, { BAZ: 'baz' }], rvm: '2.3' }
+    ]
+  end
+
+  describe 'env strs' do
+    yaml %(
+    env:
+      - FOO=1
+      - FOO=2
+    )
+
+    expands_to [
+      { env: [FOO: '1'] },
+      { env: [FOO: '2'] }
+    ]
   end
 
   describe 'duplicate jobs' do
-    let(:config) do
-      {
-        os: ['linux', 'osx'],
-        osx_image: ['xcode9.4', 'xcode10.2']
-      }
-    end
+    yaml %(
+      os:
+      - linux
+      - osx
+      osx_image:
+      - xcode9.4
+      - xcode10.2
+    )
 
-    let(:rows) do
-      [
-        { os: 'linux' },
-        { os: 'osx', osx_image: 'xcode9.4' },
-        { os: 'osx', osx_image: 'xcode10.2' }
-      ]
-    end
-
-    it { expect(matrix.rows).to eq rows }
+    expands_to [
+      { os: 'linux' },
+      { os: 'osx', osx_image: 'xcode9.4' },
+      { os: 'osx', osx_image: 'xcode10.2' }
+    ]
   end
 
   describe 'matrix include' do
-    let(:config) do
-      {
-        env: { matrix: ['foo'] },
-        rvm: ['2.2', '2.3'],
-        matrix: { include: [{ env: 'bar', rvm: '2.4' }] },
-      }
-    end
+    yaml %(
+      env:
+        matrix: FOO=foo
+      rvm:
+      - 2.2
+      - 2.3
+      matrix:
+        include:
+          - env: BAR=bar
+            rvm: 2.4
+    )
 
-    let(:rows) do
-      [
-        { env: ['foo'], rvm: '2.2' },
-        { env: ['foo'], rvm: '2.3' },
-        { env: ['bar'], rvm: '2.4' }
-      ]
-    end
-
-    it { expect(matrix.rows).to eq rows }
+    expands_to [
+      { env: [FOO: 'foo'], rvm: '2.2' },
+      { env: [FOO: 'foo'], rvm: '2.3' },
+      { env: [BAR: 'bar'], rvm: '2.4' }
+    ]
   end
 
   describe 'matrix include duplicate' do
-    let(:config) do
-      {
-        env: { matrix: ['foo'] },
-        rvm: ['2.2'],
-        matrix: { include: [{ env: 'foo', rvm: '2.2' }] },
-      }
-    end
+    yaml %(
+      env:
+        matrix: FOO=foo
+      rvm:
+      - 2.2
+      matrix:
+        include:
+          - env: FOO=foo
+            rvm: 2.2
+    )
 
-    let(:rows) do
-      [
-        { env: ['foo'], rvm: '2.2' }
-      ]
-    end
-
-    it { expect(matrix.rows).to eq rows }
+    expands_to [
+      { env: [FOO: 'foo'], rvm: '2.2' }
+    ]
   end
 
   describe 'matrix exclude (1)' do
-    let(:config) do
-      {
-        env: { matrix: ['foo', 'bar'] },
-        rvm: ['2.2', '2.3'],
-        matrix: { exclude: [{ env: 'bar', rvm: '2.3' }] },
-      }
-    end
+    yaml %(
+      env:
+        matrix:
+        - FOO=foo
+        - BAR=bar
+      rvm:
+      - 2.2
+      - 2.3
+      matrix:
+        exclude:
+          - env: BAR=bar
+            rvm: 2.3
+    )
 
-    let(:rows) do
-      [
-        { env: ['foo'], rvm: '2.2' },
-        { env: ['foo'], rvm: '2.3' },
-        { env: ['bar'], rvm: '2.2' }
-      ]
-    end
-
-    it { expect(matrix.rows).to eq rows }
+    expands_to [
+      { env: [FOO: 'foo'], rvm: '2.2' },
+      { env: [FOO: 'foo'], rvm: '2.3' },
+      { env: [BAR: 'bar'], rvm: '2.2' }
+    ]
   end
 
   describe 'matrix exclude (2)' do
-    let(:config) do
-      {
-        scala: ['2.11.8'],
-        jdk: 'oraclejdk8',
-        matrix: { exclude: [{ scala: '2.11.8', jdk: 'oraclejdk8' }] },
-      }
-    end
+    yaml %(
+      scala: 2.11.8
+      jdk: oraclejdk8
+      matrix:
+        exclude:
+        - scala: 2.11.8
+          jdk: oraclejdk8
+    )
 
-    it { expect(matrix.rows).to eq [] }
+    expands_to []
   end
 
   describe 'null env with include' do
-    let(:config) do
-      {
-        env: nil,
-        matrix: { include: [{ rvm: '1.8.7', env: 'foo=bar' }] },
-        rvm: ['2.2', '2.3']
-      }
-    end
+    yaml %(
+      env:
+      rvm:
+      - 2.2
+      - 2.3
+      matrix:
+        include:
+        - rvm: 1.8.7
+          env: FOO=foo
+    )
 
-    let(:rows) do
-      [
-        { rvm: '2.2' },
-        { rvm: '2.3' },
-        { rvm: '1.8.7', env: ['foo=bar'] }
-      ]
-    end
-
-    it { expect(matrix.rows).to eq rows }
+    expands_to [
+      { rvm: '2.2' },
+      { rvm: '2.3' },
+      { rvm: '1.8.7', env: [FOO: 'foo'] }
+    ]
   end
 
   describe 'include as hash' do
-    let(:config) do
-      {
-        dist: 'trusty',
-        matrix: { include: { env: ['distribution=debian'] } }
-      }
-    end
+    yaml %(
+      dist: trusty
+      matrix:
+        include:
+          env: FOO=foo
+    )
 
-    let(:rows) do
-      [
-        { dist: 'trusty', env: ['distribution=debian'] }
-      ]
-    end
-
-    it { expect(matrix.rows).to eq rows }
+    expands_to [
+      { dist: 'trusty', env: [FOO: 'foo'] }
+    ]
   end
 
   describe 'removes version' do
-    let(:config) do
-      { version: '= 0', language: 'shell' }
-    end
+    yaml %(
+      language: shell
+      version: '= 0'
+    )
 
-    let(:rows) do
-      [
-        { language: 'shell' }
-      ]
-    end
-
-    it { expect(matrix.rows).to eq rows }
+    expands_to [
+      { language: 'shell' }
+    ]
   end
 end
