@@ -26,8 +26,8 @@ module Travis
       private
 
         def expand
-          rows = Array(values.inject { |lft, rgt| lft.product(rgt) } || [])
-          rows = rows.map { |row| keys.zip(Array(row).flatten).to_h }
+          rows = wrap(values.inject { |lft, rgt| lft.product(rgt) } || [])
+          rows = rows.map { |row| keys.zip(wrap(row).flatten).to_h }
           rows
         end
 
@@ -36,7 +36,7 @@ module Travis
           # expand values, and we also have matrix includes, remove the row
           # because it's probably an unnecessary duplicate.
           # TODO: verify this
-          if rows.size == 1 && only(rows.first, *expand_keys).all? { |_, v| Array(v).size == 1 } && included.any?
+          if rows.size == 1 && only(rows.first, *expand_keys).all? { |_, v| wrap(v).size == 1 } && included.any?
             included
           else
             rows + included
@@ -48,7 +48,7 @@ module Travis
         end
 
         def with_env_arrays(rows)
-          rows.each { |row| row[:env] = Array(row[:env]) if row[:env] }
+          rows.each { |row| row[:env] = wrap(row[:env]) if row[:env] }
         end
 
         def with_global_env(rows)
@@ -63,14 +63,14 @@ module Travis
         def with_os(rows)
           return rows unless config[:os]
           rows.map do |row|
-            { os: Array(config[:os]).first }.merge(row)
+            { os: wrap(config[:os]).first }.merge(row)
           end
         end
 
         def with_arch(rows)
           return rows unless config[:arch]
           rows.map do |row|
-            { arch: Array(config[:arch]).first }.merge(row)
+            { arch: wrap(config[:arch]).first }.merge(row)
           end
         end
 
@@ -108,7 +108,7 @@ module Travis
         def values
           values = config.select { |key, value| keys.include?(key) && ![[], nil].include?(value) }
           values = values.map { |key, value| key == :env && value.is_a?(Hash) ? value[:matrix] : value }
-          values = values.map { |value| Array(value) }
+          values = values.map { |value| wrap(value) }
           values
         end
 
@@ -135,6 +135,10 @@ module Travis
 
         def expand_keys
           Yml.expand_keys - [:matrix] + [:env] # TODO
+        end
+
+        def wrap(obj)
+          obj.is_a?(Array) ? obj : [obj]
         end
     end
   end

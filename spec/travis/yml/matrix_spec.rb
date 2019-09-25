@@ -138,14 +138,14 @@ describe Travis::Yml, 'matrix' do
   describe 'just env' do
     let(:config) do
       {
-        env:  { matrix: ['foo', 'bar'] },
+        env: { matrix: [{ FOO: 'foo' }, { BAR: 'bar' }] },
       }
     end
 
     let(:rows) do
       [
-        { env: ['foo'] },
-        { env: ['bar'] }
+        { env: [FOO: 'foo'] },
+        { env: [BAR: 'bar'] }
       ]
     end
 
