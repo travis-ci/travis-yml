@@ -422,12 +422,13 @@
       "condition": {
         "$id": "condition",
         "title": "If",
-        "description": "Include or exclude builds, stages, and jobs by specifying conditions in your\nbuild configuration. These are evaluated when your build is being configured.",
+        "description": "Include or exclude builds, stages, jobs, and notifications by specifying conditions in your\nbuild configuration. These are evaluated when your build is being configured.",
         "type": "string",
-        "summary": "Condition to determine whether or not a build, stage, or job should be run",
+        "summary": "Condition to determine if a build, stage, or job should be run, or a notification sent",
         "example": "branch = master",
         "see": {
-          "Conditional Builds, Stages, and Jobs": "https://docs.travis-ci.com/user/conditional-builds-stages-jobs/"
+          "Conditional Builds, Stages, and Jobs": "https://docs.travis-ci.com/user/conditional-builds-stages-jobs/",
+          "Conditional Notifications": "TBD"
         }
       },
       "conditions": {
@@ -8823,6 +8824,9 @@
               "template": {
                 "$ref": "#/definitions/notification/templates"
               },
+              "if": {
+                "$ref": "#/definitions/type/condition"
+              },
               "on_success": {
                 "$ref": "#/definitions/notification/frequency"
               },
@@ -8884,6 +8888,9 @@
                   }
                 ],
                 "summary": "Email addresses to notify"
+              },
+              "if": {
+                "$ref": "#/definitions/type/condition"
               },
               "on_success": {
                 "$ref": "#/definitions/notification/frequency"
@@ -8948,6 +8955,9 @@
               },
               "template": {
                 "$ref": "#/definitions/notification/templates"
+              },
+              "if": {
+                "$ref": "#/definitions/type/condition"
               },
               "on_success": {
                 "$ref": "#/definitions/notification/frequency"
@@ -9045,6 +9055,9 @@
               "template": {
                 "$ref": "#/definitions/notification/templates"
               },
+              "if": {
+                "$ref": "#/definitions/type/condition"
+              },
               "on_success": {
                 "$ref": "#/definitions/notification/frequency"
               },
@@ -9137,6 +9150,9 @@
               "template": {
                 "$ref": "#/definitions/notification/templates"
               },
+              "if": {
+                "$ref": "#/definitions/type/condition"
+              },
               "on_success": {
                 "$ref": "#/definitions/notification/frequency"
               },
@@ -9205,6 +9221,9 @@
               "template": {
                 "$ref": "#/definitions/notification/templates"
               },
+              "if": {
+                "$ref": "#/definitions/type/condition"
+              },
               "on_success": {
                 "$ref": "#/definitions/notification/frequency"
               },
@@ -9254,6 +9273,9 @@
               "on_pull_requests": {
                 "type": "boolean",
                 "summary": "Whether to notify on pull requests"
+              },
+              "if": {
+                "$ref": "#/definitions/type/condition"
               },
               "on_success": {
                 "$ref": "#/definitions/notification/frequency"
@@ -9368,6 +9390,9 @@
               },
               "on_error": {
                 "$ref": "#/definitions/notification/frequency"
+              },
+              "if": {
+                "$ref": "#/definitions/type/condition"
               },
               "on_success": {
                 "$ref": "#/definitions/notification/frequency"

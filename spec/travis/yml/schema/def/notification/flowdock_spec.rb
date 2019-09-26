@@ -28,6 +28,9 @@ describe Travis::Yml::Schema::Def::Notification::Flowdock, 'structure' do
             template: {
               '$ref': '#/definitions/notification/templates'
             },
+            if: {
+              '$ref': '#/definitions/type/condition'
+            },
             on_success: {
               '$ref': '#/definitions/notification/frequency'
             },

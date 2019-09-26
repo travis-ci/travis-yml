@@ -20,6 +20,9 @@ describe Travis::Yml::Schema::Def::Notification::Slack, 'structure' do
             template: {
               '$ref': '#/definitions/notification/templates',
             },
+            if: {
+              '$ref': '#/definitions/type/condition'
+            },
             on_pull_requests: {
               type: :boolean,
               summary: instance_of(String)
