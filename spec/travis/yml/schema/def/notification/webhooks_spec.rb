@@ -38,6 +38,9 @@ describe Travis::Yml::Schema::Def::Notification::Webhooks, 'structure' do
               ],
               summary: instance_of(String)
             },
+            if: {
+              '$ref': '#/definitions/type/condition'
+            },
             on_start: {
               '$ref': '#/definitions/notification/frequency',
             },

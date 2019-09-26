@@ -38,6 +38,7 @@ module Travis
             def after_define
               normal
 
+              map :if, to: :condition
               maps *STATUSES, to: :frequency
               map :enabled,  to: :bool, summary: 'Whether to enable these notifications'
               map :disabled, to: :bool, summary: 'Whether to disable these notifications'

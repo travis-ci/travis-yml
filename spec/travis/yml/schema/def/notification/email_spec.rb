@@ -38,6 +38,9 @@ describe Travis::Yml::Schema::Def::Notification::Email, 'structure' do
               ],
               summary: instance_of(String)
             },
+            if: {
+              '$ref': '#/definitions/type/condition'
+            },
             on_success: {
               '$ref': '#/definitions/notification/frequency'
             },

@@ -178,4 +178,38 @@ describe Travis::Yml, 'notifications' do
     )
     it { should serialize_to notifications: { email: [enabled: true], irc: [channels: ['channel']] } }
   end
+
+  describe 'if' do
+    describe 'given a valid condition' do
+      yaml %(
+        notifications:
+          campfire:
+            if: branch = master
+      )
+      it { should serialize_to notifications: { campfire: [if: 'branch = master'] } }
+      it { should_not have_msg }
+    end
+
+    describe 'given an invalid condition' do
+      yaml %(
+        notifications:
+          campfire:
+            if: '?!'
+      )
+      it { should serialize_to empty }
+      it { should have_msg [:error, :'notifications.campfire.if', :invalid_condition, condition: '?!'] }
+    end
+
+    describe 'given a seq of strs' do
+      yaml %(
+        notifications:
+          campfire:
+            if:
+            - branch = master
+            - tag is present
+      )
+      it { should serialize_to notifications: { campfire: [if: 'branch = master'] } }
+      it { should have_msg [:warn, :'notifications.campfire.if', :unexpected_seq, value: 'branch = master'] }
+    end
+  end
 end
