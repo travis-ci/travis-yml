@@ -59,7 +59,7 @@ describe Travis::Yml, 'elasticbeanstalk' do
           bucket_name: str
       )
       it { should serialize_to deploy: [provider: 'elasticbeanstalk', bucket: 'str'] }
-      it { should have_msg [:info, :deploy, :alias, type: :key, alias: 'bucket_name', obj: 'bucket', provider: 'elasticbeanstalk'] }
+      it { should have_msg [:info, :deploy, :alias_key, alias: 'bucket_name', key: 'bucket', provider: 'elasticbeanstalk'] }
     end
   end
 

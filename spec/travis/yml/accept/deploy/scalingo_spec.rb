@@ -51,7 +51,7 @@ describe Travis::Yml, 'scalingo' do
             secure: secure
       )
       it { should serialize_to deploy: [provider: 'scalingo', api_token: { secure: 'secure' }] }
-      it { should have_msg [:info, :deploy, :alias, type: :key, alias: 'api_key', obj: 'api_token', provider: 'scalingo'] }
+      it { should have_msg [:info, :deploy, :alias_key, alias: 'api_key', key: 'api_token', provider: 'scalingo'] }
       xit { should have_msg [:warn, :deploy, :deprecated_key, :api_key] }
     end
   end

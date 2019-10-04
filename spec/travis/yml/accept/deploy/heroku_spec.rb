@@ -58,7 +58,7 @@ describe Travis::Yml, 'heroku' do
             secure: secure
       )
       it { should serialize_to deploy: [provider: 'heroku', username: { secure: 'secure' }] }
-      it { should have_msg [:info, :deploy, :alias, type: :key, alias: 'user', obj: 'username', provider: 'heroku'] }
+      it { should have_msg [:info, :deploy, :alias_key, alias: 'user', key: 'username', provider: 'heroku'] }
     end
 
     describe 'given a str' do
@@ -68,7 +68,7 @@ describe Travis::Yml, 'heroku' do
           user: str
       )
       it { should serialize_to deploy: [provider: 'heroku', username: 'str'] }
-      it { should have_msg [:info, :deploy, :alias, type: :key, alias: 'user', obj: 'username', provider: 'heroku'] }
+      it { should have_msg [:info, :deploy, :alias_key, alias: 'user', key: 'username', provider: 'heroku'] }
     end
   end
 

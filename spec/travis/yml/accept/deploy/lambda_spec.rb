@@ -167,7 +167,7 @@ describe Travis::Yml, 'lambda' do
           environment_variables: str
       )
       it { should serialize_to deploy: [provider: 'lambda', environment: ['str']] }
-      it { should have_msg [:info, :deploy, :alias, type: :key, alias: 'environment_variables', obj: 'environment', provider: 'lambda'] }
+      it { should have_msg [:info, :deploy, :alias_key, alias: 'environment_variables', key: 'environment', provider: 'lambda'] }
     end
   end
 

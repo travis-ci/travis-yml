@@ -40,7 +40,8 @@ module Travis
     # representations.
 
     MSGS = {
-      alias:             '%{alias} is an alias for %{obj}, using %{obj} (%{type})',
+      alias_key:         'the key %{alias} is an alias for %{key}, using %{key}',
+      alias_value:       'the value %{alias} is an alias for %{value}, using %{value}',
       default:           'missing %{key}, using the default %<default>p',
       deprecated:        'deprecated: %{info}',
       deprecated_key:    'deprecated key: %<key>p (%{info})',

@@ -83,7 +83,7 @@ describe Travis::Yml, 'notifications: email' do
         emails: str
     )
     it { should serialize_to notifications: { email: [recipients: ['str']] } }
-    it { should have_msg [:info, :notifications, :alias, type: :key, alias: 'emails', obj: 'email'] }
+    it { should have_msg [:info, :notifications, :alias_key, alias: 'emails', key: 'email'] }
   end
 
   describe 'recipients' do
