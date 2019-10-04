@@ -16,6 +16,6 @@ describe Travis::Yml, 'addon: postgresql' do
         postgres: 9.1
     )
     it { should serialize_to addons: { postgresql: '9.1' } }
-    it { should have_msg [:info, :addons, :alias, type: :key, alias: 'postgres', obj: 'postgresql'] }
+    it { should have_msg [:info, :addons, :alias_key, alias: 'postgres', key: 'postgresql'] }
   end
 end

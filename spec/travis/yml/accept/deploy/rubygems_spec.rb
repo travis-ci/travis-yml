@@ -54,7 +54,7 @@ describe Travis::Yml, 'rubygems', alert: true do
             secure: str
       )
       it { should serialize_to deploy: [provider: 'rubygems', username: { secure: 'str' }] }
-      it { should have_msg [:info, :deploy, :alias, type: :key, alias: 'user', obj: 'username', provider: 'rubygems'] }
+      it { should have_msg [:info, :deploy, :alias_key, alias: 'user', key: 'username', provider: 'rubygems'] }
     end
   end
 

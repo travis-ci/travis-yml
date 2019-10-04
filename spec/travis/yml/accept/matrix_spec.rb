@@ -17,7 +17,7 @@ describe Travis::Yml, 'matrix' do
           fast_finish: true
       )
       it { should serialize_to matrix: { fast_finish: true } }
-      it { should have_msg [:info, :root, :alias, type: :key, alias: 'jobs', obj: 'matrix'] }
+      it { should have_msg [:info, :root, :alias_key, alias: 'jobs', key: 'matrix'] }
     end
 
     describe 'alias fast_failure' do
@@ -26,7 +26,7 @@ describe Travis::Yml, 'matrix' do
           fast_failure: true
       )
       it { should serialize_to matrix: { fast_finish: true } }
-      it { should have_msg [:info, :matrix, :alias, type: :key, alias: 'fast_failure', obj: 'fast_finish'] }
+      it { should have_msg [:info, :matrix, :alias_key, alias: 'fast_failure', key: 'fast_finish'] }
     end
   end
 
@@ -544,7 +544,7 @@ describe Travis::Yml, 'matrix' do
             rvm: 2.3
       )
       it { should serialize_to matrix: { allow_failures: [rvm: '2.3'] } }
-      it { should have_msg [:info, :matrix, :alias, type: :key, alias: 'allowed_failures', obj: 'allow_failures'] }
+      it { should have_msg [:info, :matrix, :alias_key, alias: 'allowed_failures', key: 'allow_failures'] }
     end
 
     describe 'allow_failures given a seq of strings (common mistake)', drop: true do

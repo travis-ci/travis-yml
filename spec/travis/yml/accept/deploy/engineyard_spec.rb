@@ -110,7 +110,7 @@ describe Travis::Yml, 'engineyard' do
             master: staging
       )
       it { should serialize_to deploy: [provider: 'engineyard', env: { master: 'staging' }] }
-      it { should have_msg [:info, :deploy, :alias, type: :key, alias: 'environment', obj: 'env', provider: 'engineyard'] }
+      it { should have_msg [:info, :deploy, :alias_key, alias: 'environment', key: 'env', provider: 'engineyard'] }
     end
   end
 

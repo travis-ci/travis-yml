@@ -90,6 +90,6 @@ describe Travis::Yml::Doc::Change::Keys do
   describe 'an alias to a known key' do
     let(:value) { { foo: true } }
     it { should serialize_to foo_bar: true }
-    it { should have_msg [:info, :root, :alias, type: :key, alias: 'foo', obj: 'foo_bar'] }
+    it { should have_msg [:info, :root, :alias_key, alias: 'foo', key: 'foo_bar'] }
   end
 end

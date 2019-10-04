@@ -33,7 +33,7 @@ describe Travis::Yml, 'releases' do
             secure: secure
       )
       it { should serialize_to deploy: [provider: 'releases', username: { secure: 'secure' }] }
-      it { should have_msg [:info, :deploy, :alias, type: :key, alias: 'user', obj: 'username', provider: 'releases'] }
+      it { should have_msg [:info, :deploy, :alias_key, alias: 'user', key: 'username', provider: 'releases'] }
     end
 
     describe 'given a str' do
@@ -43,7 +43,7 @@ describe Travis::Yml, 'releases' do
           user: str
       )
       it { should serialize_to deploy: [provider: 'releases', username: 'str'] }
-      it { should have_msg [:info, :deploy, :alias, type: :key, alias: 'user', obj: 'username', provider: 'releases'] }
+      it { should have_msg [:info, :deploy, :alias_key, alias: 'user', key: 'username', provider: 'releases'] }
     end
   end
 
@@ -82,7 +82,7 @@ describe Travis::Yml, 'releases' do
             secure: secure
       )
       it { should serialize_to deploy: [provider: 'releases', token: { secure: 'secure' }] }
-      it { should have_msg [:info, :deploy, :alias, type: :key, alias: 'api_key', obj: 'token', provider: 'releases'] }
+      it { should have_msg [:info, :deploy, :alias_key, alias: 'api_key', key: 'token', provider: 'releases'] }
     end
   end
 

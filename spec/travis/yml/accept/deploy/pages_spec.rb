@@ -23,7 +23,7 @@ describe Travis::Yml, 'pages' do
             secure: secure
       )
       it { should serialize_to deploy: [provider: 'pages', token: { secure: 'secure' }] }
-      it { should have_msg [:info, :deploy, :alias, type: :key, alias: 'github_token', obj: 'token', provider: 'pages'] }
+      it { should have_msg [:info, :deploy, :alias_key, alias: 'github_token', key: 'token', provider: 'pages'] }
     end
   end
 
@@ -36,7 +36,7 @@ describe Travis::Yml, 'pages' do
             secure: secure
       )
       it { should serialize_to deploy: [provider: 'pages', token: { secure: 'secure' }] }
-      it { should have_msg [:info, :deploy, :alias, type: :key, alias: 'github-token', obj: 'token', provider: 'pages'] }
+      it { should have_msg [:info, :deploy, :alias_key, alias: 'github-token', key: 'token', provider: 'pages'] }
     end
   end
 
@@ -156,7 +156,7 @@ describe Travis::Yml, 'pages' do
           github_url: str
       )
       it { should serialize_to deploy: [provider: 'pages', url: 'str'] }
-      it { should have_msg [:info, :deploy, :alias, type: :key, alias: 'github_url', obj: 'url', provider: 'pages'] }
+      it { should have_msg [:info, :deploy, :alias_key, alias: 'github_url', key: 'url', provider: 'pages'] }
     end
   end
 

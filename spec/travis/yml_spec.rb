@@ -101,9 +101,14 @@ describe Travis::Yml do
   describe 'msg' do
     subject { described_class.msg(msg) }
 
-    describe 'alias' do
-      let(:msg) { [:info, :key, :alias, type: :key, alias: 'rvm', obj: 'ruby'] }
-      it { should eq '[info] on key: rvm is an alias for ruby, using ruby (key)' }
+    describe 'alias_key' do
+      let(:msg) { [:info, :key, :alias_key, alias: 'rvm', key: 'ruby'] }
+      it { should eq '[info] on key: the key rvm is an alias for ruby, using ruby' }
+    end
+
+    describe 'alias_value' do
+      let(:msg) { [:info, :key, :alias_value, alias: 'rvm', value: 'ruby'] }
+      it { should eq '[info] on key: the value rvm is an alias for ruby, using ruby' }
     end
 
     describe 'default' do

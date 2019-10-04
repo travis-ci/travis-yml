@@ -44,13 +44,13 @@ describe Travis::Yml::Doc, 'messages', alert: true, defaults: true, empty: true,
   describe 'alias (key)' do
     yaml 'uno: one'
     it { should serialize_to one: 'one' }
-    it { should have_msg [:info, :root, :alias, type: :key, alias: 'uno', obj: 'one', line: 0] }
+    it { should have_msg [:info, :root, :alias_key, alias: 'uno', key: 'one', line: 0] }
   end
 
   describe 'alias (value)' do
     yaml 'one: uno'
     it { should serialize_to one: 'one' }
-    it { should have_msg [:info, :one, :alias, type: :value, alias: 'uno', obj: 'one', line: 0] }
+    it { should have_msg [:info, :one, :alias_value, alias: 'uno', value: 'one', line: 0] }
   end
 
   describe 'cast' do
