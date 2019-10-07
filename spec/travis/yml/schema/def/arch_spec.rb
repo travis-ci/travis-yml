@@ -38,6 +38,7 @@ describe Travis::Yml::Schema::Def::Archs do
         type: :string,
         enum: [
           'amd64',
+          'arm64',
           'ppc64le',
         ],
         downcase: true,

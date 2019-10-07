@@ -39,6 +39,7 @@ module Travis
 
             supports :only, os: :linux
             value :amd64, alias: :x86_64
+            value :arm64
             value :ppc64le, alias: %i(power ppc ppc64)
 
             export
