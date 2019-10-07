@@ -3,6 +3,7 @@ describe Travis::Yml, 'arch' do
 
   known = %w(
     amd64
+    arm64
     ppc64le
   )
 

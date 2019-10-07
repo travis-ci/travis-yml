@@ -6,7 +6,7 @@ describe Travis::Yml::Docs::Examples do
 
     it do
       should eq [
-        { arch: ['amd64', 'ppc64le'] },
+        { arch: ['amd64', 'arm64'] },
         { arch: 'amd64' }
       ]
     end
