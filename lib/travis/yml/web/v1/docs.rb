@@ -6,32 +6,42 @@ module Travis::Yml::Web
     class Docs
       include Route
 
+      attr_reader :pages, :path
+
       def get(env)
+        @env = env
         req = Rack::Request.new(env)
-        path = req.path_info.chomp(?/).sub(%r(/docs), '')
-        path = '/nodes' if path.empty?
-        path = "/v1/docs#{path}"
-        exists?(path) ? ok(path) : not_found
+        path = req.path_info.chomp(?/)
+        @prefix = 'docs' if path.sub!(%r(docs), '')
+        path = 'nodes' if path.empty?
+        path = path.sub(%r(^/), '')
+        @path = [prefix, path].compact.join('/')
+        exists? ? ok : not_found
       end
 
-      def ok(path)
-        [200, headers, [page(path)]]
+      def ok
+        [200, headers, [page]]
       end
 
       def not_found
         [404, headers, ['Not found']]
       end
 
-      def exists?(path)
+      def exists?
         pages.key?(path)
       end
 
-      def page(path)
+      def page
         pages[path].render(format: :html)
       end
 
       def pages
-        Travis::Yml::Docs.pages(path: '/v1/docs')
+        Travis::Yml::Docs.pages(path: prefix)
+      end
+
+      def prefix
+        prefix = [@env[:prefix], @prefix].compact.join('/')
+        prefix.empty? || prefix.start_with?('/') ? prefix : "/#{prefix}"
       end
 
       def headers

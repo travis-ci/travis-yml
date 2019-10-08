@@ -1,4 +1,4 @@
-* [<%= title %>](<%= path %>)
+* [<%= root.menu_title %>](<%= root.path %>)
 <% pages.each do |node| -%>
 * [<%= node.menu_title %>](<%= node.path %>)
 <% active?(node) && Array(node.children).each do |child| -%>

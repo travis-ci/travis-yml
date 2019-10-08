@@ -3,7 +3,7 @@ describe Travis::Yml::Docs do
   let(:root) { described_class.root(path: '/path/to') }
 
   describe 'root' do
-    it { expect(root.render).to include '# Root' }
+    it { expect(root.render).to include '# Travis CI Build Config Reference' }
     it { expect(root.render).to include '* `import`' }
     it { expect(root.render).to include '* `addons`' }
     it { expect(root.path).to eq '/path/to/nodes' }

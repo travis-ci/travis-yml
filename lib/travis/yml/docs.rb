@@ -25,6 +25,7 @@ module Travis
       STATIC = %i(
         matrix_expansion
         types
+        explore
       )
 
       def generate
@@ -40,7 +41,8 @@ module Travis
       end
 
       def pages(opts = {})
-        @pages ||= begin
+        @pages ||= {}
+        @pages[opts[:path]] ||= begin
           root = self.root(opts)
           pages = root.pages # .uniq(&:full_id)
           pages = pages + statics(opts)
