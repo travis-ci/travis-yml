@@ -8,20 +8,25 @@ module Travis
           extend Forwardable
           include Helper::Obj, Render
 
-          def_delegators :root, :path, :title
+          def_delegators :root, :title
 
           def render
             super(:menu, opts)
           end
 
+          def path
+            root.path
+          end
+
           def root
-            Docs.root(opts)
+            @root ||= Docs.root(opts)
           end
 
           def pages
             pages = root.children[0..1]
             pages = pages + root.children[2..-1].sort_by(&:title)
-            pages = pages + Docs.statics(opts) + [Docs.index([], opts)]
+            pages = pages + Docs.statics(opts)
+            pages.insert(-2, Docs.index([], opts))
             pages
           end
 

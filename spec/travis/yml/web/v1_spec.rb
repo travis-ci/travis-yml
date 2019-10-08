@@ -15,14 +15,9 @@ describe Travis::Yml::Web::V1 do
       expect(status).to eq 200
     end
 
-    it 'is json' do
+    it 'is html' do
       get '/'
-      expect(headers['Content-Type']).to eq 'application/json'
-    end
-
-    it 'returns version' do
-      get '/'
-      expect(body['version']).to eq 'v1'
+      expect(headers['Content-Type']).to eq 'text/html'
     end
   end
 

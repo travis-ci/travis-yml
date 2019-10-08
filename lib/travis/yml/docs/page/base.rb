@@ -112,11 +112,12 @@ module Travis
           end
 
           def title
-            return 'Root' if root?
+            return 'Travis CI build config reference' if root?
             publish? ? node.title : titleized_key
           end
 
           def menu_title
+            return 'Home' if root?
             titleize(key) || node.title
           end
 
