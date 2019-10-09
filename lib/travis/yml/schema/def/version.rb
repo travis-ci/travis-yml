@@ -12,8 +12,8 @@ module Travis
 
           def define
             summary 'Build config specification version'
+            example '>= 1.0.0'
             format VERSION
-            internal
             export
           end
         end
