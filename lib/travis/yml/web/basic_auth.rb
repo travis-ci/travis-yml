@@ -8,7 +8,7 @@ module Travis::Yml::Web
     end
 
     def call(env)
-      return not_authenticated unless authenticated?(env)
+      return not_authenticated unless get?(env) || authenticated?(env)
       @app.call(env)
     end
 
@@ -16,6 +16,10 @@ module Travis::Yml::Web
 
     def config
       @config ||= Travis::Yml::Web::Config.load
+    end
+
+    def get?(env)
+      env['REQUEST_METHOD'] == 'GET'
     end
 
     def authenticated?(env)
