@@ -20,7 +20,7 @@ schema.
 
 Applying the specification to a build configuration produces structured
 messages on the levels `info`, `warn`, and `error`. Such messages include a
-message code (e.g.  `unknown_key`, `unsupported_value` etc.) and arguments
+message code (e.g.  `unknown_key`, `deprecated_key` etc.) and arguments
 (e.g. the given key, value) so they can be translated to human readable
 messages by clients. These can be used in the UI, and links to the
 documentation, suggesting fixes.
@@ -35,7 +35,7 @@ config.serialize
 # {
 #   language: 'ruby',
 #   os: ['linux'],
-#   rvm: '2.3'
+#   rvm: ['2.3']
 # }
 
 config.msgs
@@ -122,10 +122,16 @@ Classes in `Schema::Def` use classes in `Schema::Type` to build a tree of nodes
 that define allowed keys, types, and various options in a readable and succinct
 way (using a DSL for describing the schema).
 
-This tree is then serialized by classes in `Schema::JSON` to a lengthy Hash
-which serves as a specification in the form of a JSON Schema.
+Nodes on this tree that match certain well-known patterns are then transformed
+according to these patterns using classes in `Schema::Type::Form`. E.g. a
+sequence of strings always also accepts a single string, which will then
+automatically be wrapped into a sequence during the config normalization
+process. Therefore the JSON Schema needs to accept both forms.
 
-A good starting point for exploring the definition is the [root node](https://github.com/travis-ci/travis-yml/blob/master/lib/travis/yml/schema/def/root.rb).
+The resulting tree is then serialized by classes in `Schema::Json` to a large
+Hash which serves as a specification in the form of a JSON Schema.
+
+A good starting point for exploring the schema definition is the [root node](https://github.com/travis-ci/travis-yml/blob/master/lib/travis/yml/schema/def/root.rb).
 
 Examples for various nodes on this specification can be found in the tests, e.g.
 for the [git](https://github.com/travis-ci/travis-yml/blob/master/spec/travis/yml/schema/def/git_spec.rb),
@@ -149,15 +155,18 @@ Schema's mechanism for defining and referencing shared sub schemas. All nodes
 that have a registered definition class are exported as such a defined sub
 schema, and then referenced on the respective nodes that use them.
 
+TBD: mention JSON Schema limitations, and how travis-yml interprets particular
+types (all, any) in a specific way that is not defined by JSON Schema.
+
 ## Loading the spec
 
-Before the schema can be applied to an actual build configuration it will be
-expanded (i.e. shared sections will be included to nodes that require them),
-and turned into an object oriented representation, so non-parametrized methods
-can be memoized for better performance.
+Before the tree representing the schema can be applied to an actual build
+configuration it will be turned into another object oriented representation
+optimized for this purpose, so non-parametrized methods can be memoized for
+better performance.
 
-The method `Travis::Yml.expand` returns a fully expanded, object oriented
-tree.
+The method `Travis::Yml.expand` returns this object oriented tree, using
+classes in `Doc::Schema`.
 
 ## Applying the spec to a build config
 
@@ -196,7 +205,6 @@ When the schema is applied to a build configuration three things happen:
 
 Examples of type specific change strategies:
 
-* `cast`: try casting the value to another type if required by the spec (e.g. the string `"true"` to the boolean `true`)
 * `downcase`: downcase a string if required by the spec
 * `keys`: add required keys, and attempt to fix an unknown key by removing special chars and finding typos (uses a dictionary, as well levenshtein and similar simple strategies)
 * `prefix`: turn the given value into a hash with a prefix key (e.g. turning `env: ["FOO=bar"]` into `env: { matrix: ["FOO=foo"] }`)
@@ -210,17 +218,6 @@ Section specific change strategies:
 * `enable`: normalize `enabled` and `disabled` values, set `enabled` if missing (used by, for example, `notifications`)
 * `inherit`: inherit certain keys from the parent node if present (used by, for example, `notifications`)
 
-          map: [
-            InvalidType, UnknownKeys, UnsupportedKeys, Compact, Required,
-            Empty, Flags, Condition
-          ],
-          seq: [
-            InvalidType, Compact, Empty, Unique, Flags
-          ],
-          obj: [
-            InvalidType, UnknownValue, UnsupportedValue, Default, Alert, Flags,
-            Format, Template
-
 Examples of the validations:
 
 * `alert`: add an `alert` level message if a node that expects a secure string accepts a plain string
@@ -232,6 +229,9 @@ Examples of the validations:
 * `template`: drop the value if the given template string uses unknown variables
 * `unknown_keys`: add an `error` level message for an unknown key
 * `unknown_value`: add an `error` level message for an unknown value
+
+Env vars given as strings will be parsed into hashes using the library [sh_vars](https://github.com/svenfuchs/sh_vars).
+Conditions will be parsed using the library [travis-conditions](https://github.com/travis-ci/travis-conditions).
 
 ### Summary
 
@@ -270,10 +270,10 @@ will be expanded to:
 
 ```ruby
 [
-  { language: 'ruby', ruby: '2.2', env: 'FOO=foo' },
-  { language: 'ruby', ruby: '2.2', env: 'BAR=bar' },
-  { language: 'ruby', ruby: '2.3', env: 'FOO=foo' },
-  { language: 'ruby', ruby: '2.3', env: 'BAR=bar' },
+  { language: 'ruby', ruby: '2.2', env: { FOO: 'foo' } },
+  { language: 'ruby', ruby: '2.2', env: { BAR: 'bar' } },
+  { language: 'ruby', ruby: '2.3', env: { FOO: 'foo' } },
+  { language: 'ruby', ruby: '2.3', env: { BAR: 'bar' } },
 ]
 ```
 
