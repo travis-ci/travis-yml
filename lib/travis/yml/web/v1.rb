@@ -16,11 +16,11 @@ module Travis::Yml::Web
 
     def router
       @router ||= Router.new(
-        '/css/*'   => V1::Css.new,
-        '/parse'   => V1::Parse.new,
-        '/expand'  => V1::Expand.new,
-        # '/explore' => V1::Static.new,
-        '/*'       => V1::Docs.new,
+        '/favicon.ico' => V1::Static.new,
+        '/css/*'  => V1::Static.new,
+        '/parse'  => V1::Parse.new,
+        '/expand' => V1::Expand.new,
+        '/*'      => V1::Docs.new,
       )
     end
   end

@@ -7,11 +7,16 @@ module Travis::Yml::Web
     class Static
       include Route
 
+      CONTENT_TYPES = {
+        'css'  => 'text/css',
+        'html' => 'text/html',
+        'ico'  => 'image/vnd.microsoft.icon'
+      }
+
       attr_reader :env
 
       def get(env)
         @env = env
-        # path = '/index.html' if path.empty?
         exists? ? ok : not_found
       end
 
@@ -24,7 +29,8 @@ module Travis::Yml::Web
       end
 
       def exists?
-        File.exists?(file)
+        # File.exists?(file)
+        !!file
       end
 
       def read
@@ -32,11 +38,15 @@ module Travis::Yml::Web
       end
 
       def file
-        "./public#{path.sub('..', '')}.html"
+        @file ||= Dir["./public#{path.sub('..', '')}"].first
+      end
+
+      def ext
+        File.extname(file).sub('.', '')
       end
 
       def headers
-        { 'Content-Type' => 'text/html' }
+        { 'Content-Type' => CONTENT_TYPES[ext] }
       end
 
       def path
