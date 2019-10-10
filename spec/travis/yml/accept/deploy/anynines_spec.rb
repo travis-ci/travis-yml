@@ -1,5 +1,5 @@
 describe Travis::Yml, 'anynines' do
-  subject { described_class.apply(parse(yaml)) }
+  subject { described_class.apply(parse(yaml), opts) }
 
   describe 'username' do
     describe 'given a secure' do
@@ -24,6 +24,16 @@ describe Travis::Yml, 'anynines' do
       )
       it { should serialize_to deploy: [provider: 'anynines', password: { secure: 'secure' }] }
       it { should_not have_msg }
+    end
+
+    describe 'given a str', alert: true do
+      yaml %(
+        deploy:
+          provider: anynines
+          password: str
+      )
+      it { should serialize_to deploy: [provider: 'anynines', password: 'str'] }
+      it { should have_msg [:alert, :'deploy.password', :secure, type: :str] }
     end
   end
 

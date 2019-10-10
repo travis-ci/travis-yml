@@ -1,7 +1,7 @@
-describe Travis::Yml, 'addon: artifacts' do
+describe Travis::Yml, 'addon: artifacts', alert: true do
   let(:namespace) { %i(addons artifacts) }
 
-  subject { described_class.apply(parse(yaml)) }
+  subject { described_class.apply(parse(yaml), opts) }
 
   describe 'given true' do
     yaml %(
@@ -22,23 +22,49 @@ describe Travis::Yml, 'addon: artifacts' do
   end
 
   describe 'key' do
-    yaml %(
-      addons:
-        artifacts:
-          key: key
-    )
-    it { should serialize_to addons: { artifacts: { key: 'key' } } }
-    it { should_not have_msg }
+    describe 'given a str' do
+      yaml %(
+        addons:
+          artifacts:
+            key: key
+      )
+      it { should serialize_to addons: { artifacts: { key: 'key' } } }
+      it { should_not have_msg }
+    end
+
+    describe 'given a secure' do
+      yaml %(
+        addons:
+          artifacts:
+            key:
+              secure: secure
+      )
+      it { should serialize_to addons: { artifacts: { key: { secure: 'secure' } } } }
+      it { should_not have_msg }
+    end
   end
 
   describe 'secret' do
-    yaml %(
-      addons:
-        artifacts:
-          secret: secret
-    )
-    it { should serialize_to addons: { artifacts: { secret: 'secret' } } }
-    it { should_not have_msg }
+    describe 'given a str' do
+      yaml %(
+        addons:
+          artifacts:
+            secret: secret
+      )
+      it { should serialize_to addons: { artifacts: { secret: 'secret' } } }
+      it { should have_msg [:alert, :'addons.artifacts.secret', :secure, type: :str] }
+    end
+
+    describe 'given a secure' do
+      yaml %(
+        addons:
+          artifacts:
+            secret:
+              secure: secure
+      )
+      it { should serialize_to addons: { artifacts: { secret: { secure: 'secure' } } } }
+      it { should_not have_msg }
+    end
   end
 
   describe 'paths' do
