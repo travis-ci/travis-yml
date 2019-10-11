@@ -47,14 +47,14 @@ describe Travis::Yml::Web::V1 do
       expect(body['messages']).to include(
         'type' => 'config',
         'level' => 'info',
-        'key' => 'language',
+        'key' => 'root',
         'code' => 'default',
         'args' => { 'key' => 'language', 'default' => 'ruby' },
       )
       expect(body['messages']).to include(
         'type' => 'config',
         'level' => 'info',
-        'key' => 'os',
+        'key' => 'root',
         'code' => 'default',
         'args' => { 'key' => 'os', 'default' => 'linux' },
       )
@@ -63,10 +63,10 @@ describe Travis::Yml::Web::V1 do
     it 'returns full messages' do
       post '/parse?defaults=true', 'rvm: 2.3', {}
       expect(body['full_messages']).to include(
-        '[info] on language: missing language, using the default "ruby"'
+        '[info] on root: missing language, using the default "ruby"'
       )
       expect(body['full_messages']).to include(
-        '[info] on os: missing os, using the default "linux"'
+        '[info] on root: missing os, using the default "linux"'
       )
     end
 

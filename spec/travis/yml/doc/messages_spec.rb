@@ -62,7 +62,7 @@ describe Travis::Yml::Doc, 'messages', alert: true, defaults: true, empty: true,
   describe 'default' do
     yaml 'two: duo'
     it { should serialize_to one: 'uno', two: 'duo' }
-    it { should have_msg [:info, :one, :default, key: 'one', default: 'uno'] }
+    it { should have_msg [:info, :root, :default, key: 'one', default: 'uno'] }
   end
 
   describe 'deprecated' do

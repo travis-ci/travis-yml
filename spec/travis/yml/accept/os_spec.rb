@@ -4,7 +4,7 @@ describe Travis::Yml, 'os' do
   describe 'defaults to linux', defaults: true do
     yaml ''
     it { should serialize_to defaults }
-    it { should have_msg [:info, :os, :default, key: 'os', default: 'linux'] }
+    it { should have_msg [:info, :root, :default, key: 'os', default: 'linux'] }
   end
 
   describe 'given a string' do
@@ -92,7 +92,7 @@ describe Travis::Yml, 'os' do
       language: objective-c
     )
     it { should serialize_to language: 'objective-c', os: ['osx'] }
-    it { should have_msg [:info, :os, :default, key: 'os', default: 'osx'] }
+    it { should have_msg [:info, :root, :default, key: 'os', default: 'osx'] }
   end
 
   describe 'an os unsupported by the language' do

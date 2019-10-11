@@ -4,8 +4,8 @@ describe Travis::Yml, 'root' do
   describe 'default', defaults: true do
     yaml ''
     it { should serialize_to defaults }
-    it { should have_msg [:info, :language, :default, key: 'language', default: 'ruby'] }
-    it { should have_msg [:info, :os, :default, key: 'os', default: 'linux'] }
+    it { should have_msg [:info, :root, :default, key: 'language', default: 'ruby'] }
+    it { should have_msg [:info, :root, :default, key: 'os', default: 'linux'] }
   end
 
   describe 'given a non-hash' do
