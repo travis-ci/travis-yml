@@ -42,6 +42,7 @@ module Travis
     MSGS = {
       alias_key:         'the key %{alias} is an alias for %{key}, using %{key}',
       alias_value:       'the value %{alias} is an alias for %{value}, using %{value}',
+      overwrite:         'using both %{key} and %{other}. %{key} overwrites %{other}',
       default:           'missing %{key}, using the default %<default>p',
       deprecated:        'deprecated: %{info}',
       deprecated_key:    'deprecated key: %<key>p (%{info})',

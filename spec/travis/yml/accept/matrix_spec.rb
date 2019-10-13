@@ -20,6 +20,30 @@ describe Travis::Yml, 'matrix' do
       it { should have_msg [:info, :root, :alias_key, alias: 'jobs', key: 'matrix'] }
     end
 
+    describe 'overwrite, using both matrix and jobs (1)' do
+      yaml %(
+        matrix:
+          fast_finish: true
+        jobs:
+          - script: one
+      )
+      it { should serialize_to matrix: { include: [script: ['one']] } }
+      it { should have_msg [:info, :root, :alias_key, alias: 'jobs', key: 'matrix'] }
+      it { should have_msg [:error, :root, :overwrite, key: 'jobs', other: 'matrix'] }
+    end
+
+    describe 'overwrite, using both matrix and jobs (2)' do
+      yaml %(
+        jobs:
+          - script: one
+        matrix:
+          fast_finish: true
+      )
+      it { should serialize_to matrix: { include: [script: ['one']] } }
+      it { should have_msg [:info, :root, :alias_key, alias: 'jobs', key: 'matrix'] }
+      it { should have_msg [:error, :root, :overwrite, key: 'jobs', other: 'matrix'] }
+    end
+
     describe 'alias fast_failure' do
       yaml %(
         matrix:

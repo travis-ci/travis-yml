@@ -585,6 +585,10 @@ describe Travis::Yml, configs: true do
     %i(clean_key clean_value find_key find_value).include?(msg[2]) && TYPOS.include?(msg[3][:original].to_s)
   end
 
+  def overwrite?(msg)
+    msg[2] == :overwrite
+  end
+
   def potential_alias?(msg)
     %i(find_key find_value).include?(msg[2]) && POTENTIAL_ALIASES.include?(msg[3][:original].to_s) ||
     %i(unknown_key).include?(msg[2]) && POTENTIAL_ALIASES.include?(msg[3][:key].to_s)
@@ -680,6 +684,7 @@ describe Travis::Yml, configs: true do
 
     return true if alert?(msg)
     return true if typo?(msg)
+    return true if overwrite?(msg)
     return true if potential_alias?(msg)
     return true if deprecated?(msg)
 
