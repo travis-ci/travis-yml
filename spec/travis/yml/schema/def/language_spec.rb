@@ -26,6 +26,7 @@ describe Travis::Yml::Schema::Def::Language do
         'erlang',
         'go',
         'groovy',
+        'hack',
         'haskell',
         'haxe',
         'java',

@@ -210,6 +210,7 @@ describe Travis::Yml::Schema::Def::Root do
         erlang
         go
         groovy
+        hack
         haskell
         haxe
         java

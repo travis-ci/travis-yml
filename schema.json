@@ -911,6 +911,7 @@
           "erlang",
           "go",
           "groovy",
+          "hack",
           "haskell",
           "haxe",
           "java",
@@ -1066,6 +1067,9 @@
           },
           {
             "$ref": "#/definitions/language/groovy"
+          },
+          {
+            "$ref": "#/definitions/language/hack"
           },
           {
             "$ref": "#/definitions/language/haskell"
@@ -1465,10 +1469,10 @@
             "value": "windows",
             "only": {
               "language": [
-                "c",
-                "cpp",
+                "csharp",
                 "go",
                 "node_js",
+                "powershell",
                 "rust",
                 "shell"
               ]
@@ -1516,10 +1520,10 @@
             ],
             "only": {
               "language": [
-                "c",
-                "cpp",
+                "csharp",
                 "go",
                 "node_js",
+                "powershell",
                 "rust",
                 "shell"
               ]
@@ -1804,6 +1808,9 @@
           },
           {
             "$ref": "#/definitions/support/groovy_support"
+          },
+          {
+            "$ref": "#/definitions/support/hack_support"
           },
           {
             "$ref": "#/definitions/support/haskell_support"
@@ -7015,6 +7022,37 @@
         },
         "normal": true
       },
+      "hack": {
+        "$id": "hack",
+        "title": "Hack",
+        "type": "object",
+        "properties": {
+          "hhvm": {
+            "$ref": "#/definitions/type/strs",
+            "flags": [
+              "expand"
+            ],
+            "only": {
+              "language": [
+                "hack"
+              ]
+            }
+          },
+          "php": {
+            "$ref": "#/definitions/type/strs",
+            "flags": [
+              "expand"
+            ],
+            "only": {
+              "language": [
+                "hack"
+              ]
+            }
+          }
+        },
+        "summary": "Hack support",
+        "normal": true
+      },
       "haskell": {
         "$id": "haskell",
         "title": "Haskell",
@@ -8169,6 +8207,30 @@
             "only": {
               "language": [
                 "groovy"
+              ]
+            }
+          }
+        },
+        "normal": true
+      },
+      "hack_support": {
+        "$id": "hack_support",
+        "title": "Hack Support",
+        "type": "object",
+        "properties": {
+          "hhvm": {
+            "type": "string",
+            "only": {
+              "language": [
+                "hack"
+              ]
+            }
+          },
+          "php": {
+            "type": "string",
+            "only": {
+              "language": [
+                "hack"
               ]
             }
           }
@@ -9467,6 +9529,7 @@
     "ghc",
     "go",
     "haxe",
+    "hhvm",
     "jdk",
     "julia",
     "matrix",
