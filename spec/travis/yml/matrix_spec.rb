@@ -219,6 +219,52 @@ describe Travis::Yml, 'matrix' do
     ]
   end
 
+  describe 'matrix include inheriting a global matrix key' do
+    yaml %(
+      rvm: 2.4
+      matrix:
+        include:
+          - rvm: 2.2
+          - name: str
+    )
+
+    expands_to [
+      { rvm: '2.2' },
+      { rvm: '2.4', name: 'str' }
+    ]
+  end
+
+  describe 'matrix include inheriting not env' do
+    yaml %(
+      env: FOO=foo
+      matrix:
+        include:
+          - name: one
+          - name: two
+    )
+
+    expands_to [
+      { name: 'one' },
+      { name: 'two' }
+    ]
+  end
+
+  describe 'matrix include inheriting env' do
+    yaml %(
+      env:
+        global: FOO=foo
+      matrix:
+        include:
+          - name: one
+          - name: two
+    )
+
+    expands_to [
+      { env: [FOO: 'foo'], name: 'one' },
+      { env: [FOO: 'foo'], name: 'two' }
+    ]
+  end
+
   describe 'matrix include duplicate' do
     yaml %(
       env:

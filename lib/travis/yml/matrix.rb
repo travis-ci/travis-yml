@@ -11,8 +11,7 @@ module Travis
         rows = with_env_arrays(rows)
         rows = with_global_env(rows)
         rows = with_shared(rows)
-        rows = with_os(rows)
-        rows = with_arch(rows)
+        rows = with_global(rows)
         rows = without_unsupported(rows)
         rows = cleaned(rows)
         rows = uniq(rows)
@@ -60,18 +59,18 @@ module Travis
           rows.map { |row| shared.merge(row) }
         end
 
-        def with_os(rows)
-          return rows unless config[:os]
+        def with_global(rows)
           rows.map do |row|
-            { os: wrap(config[:os]).first }.merge(row)
+            global.inject(row) do |row, (key, value)|
+              row[key] ||= value
+              row
+            end
           end
         end
 
-        def with_arch(rows)
-          return rows unless config[:arch]
-          rows.map do |row|
-            { arch: wrap(config[:arch]).first }.merge(row)
-          end
+        def global
+          global = config.select { |key, _| key != :env && keys.include?(key) }.to_h
+          global.map { |key, value| [key, wrap(value).first] }.to_h
         end
 
         def without_unsupported(rows)
