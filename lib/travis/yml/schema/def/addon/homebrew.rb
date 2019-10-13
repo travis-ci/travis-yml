@@ -19,7 +19,7 @@ module Travis
               map :packages, to: :seq
               map :casks,    to: :seq
               map :taps,     to: :seq
-              map :brewfile, to: :str
+              map :brewfile, to: [:bool, :str]
             end
           end
         end

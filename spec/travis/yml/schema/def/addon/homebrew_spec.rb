@@ -27,7 +27,14 @@ describe Travis::Yml::Schema::Def::Addon::Homebrew do
               '$ref': '#/definitions/type/strs'
             },
             brewfile: {
-              type: :string
+              anyOf: [
+                {
+                  type: :boolean
+                },
+                {
+                  type: :string
+                }
+              ]
             }
           },
           additionalProperties: false,
