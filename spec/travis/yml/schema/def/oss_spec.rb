@@ -66,10 +66,10 @@ describe Travis::Yml::Schema::Def::Oss do
             value: 'windows',
             only: {
               language: [
-                'c',
-                'cpp',
+                'csharp',
                 'go',
                 'node_js',
+                'powershell',
                 'rust',
                 'shell',
               ]
@@ -113,10 +113,10 @@ describe Travis::Yml::Schema::Def::Oss do
             ],
             only: {
               language: [
-                'c',
-                'cpp',
+                'csharp',
                 'go',
                 'node_js',
+                'powershell',
                 'rust',
                 'shell',
               ]
