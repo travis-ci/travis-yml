@@ -12,6 +12,7 @@ describe Travis::Yml::Schema::Def::Addons do
   it { should include apt_packages: { '$ref': '#/definitions/type/strs', summary: instance_of(String) } }
   it { should include browserstack: { '$ref': '#/definitions/addon/browserstack' } }
   it { should include artifacts: { '$ref': '#/definitions/addon/artifacts' } }
+  it { should include chrome: { type: :string, enum: ['stable', 'beta'], downcase: true, summary: instance_of(String) } }
   it { should include code_climate: { '$ref': '#/definitions/addon/code_climate' } }
   it { should include coverity_scan: { '$ref': '#/definitions/addon/coverity_scan' } }
   it { should include homebrew: { '$ref': '#/definitions/addon/homebrew' } }

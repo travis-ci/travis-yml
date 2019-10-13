@@ -33,7 +33,7 @@ module Travis
             map :apt_packages,    to: :seq, summary: 'APT package names to install'
             map :artifacts
             map :browserstack
-            map :chrome,          to: :str, values: %i(stable beta), summary: 'Chrome version to use'
+            map :chrome,          to: :str, values: %i(stable beta), downcase: true, summary: 'Chrome version to use'
             map :code_climate
             map :coverity_scan
             map :homebrew
