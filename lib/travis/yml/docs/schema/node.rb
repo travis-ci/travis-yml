@@ -72,6 +72,10 @@ module Travis
             opts[:example]
           end
 
+          def format
+            opts[:format]
+          end
+
           def aliases
             opts[:aliases]
           end

@@ -21,8 +21,8 @@ module Travis
 
           def layout(content, opts)
             ERB.new(tpl(:layout), nil, '-').result_with_hash(
-              content: format(content, opts[:format]),
-              menu: format(menu, opts[:format])
+              content: formatted(content, opts[:format]),
+              menu: formatted(menu, opts[:format])
             )
           end
 
@@ -41,7 +41,7 @@ module Travis
             File.read(Dir[File.expand_path("../../tpl/#{name}.*", __FILE__)].first)
           end
 
-          def format(str, format)
+          def formatted(str, format)
             case format
             when :html
               markdown.render(str)

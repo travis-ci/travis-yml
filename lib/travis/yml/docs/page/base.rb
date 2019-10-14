@@ -144,6 +144,10 @@ module Travis
             defaults.map { |value| value[:value] }.join(', ')
           end
 
+          def format
+            node.format
+          end
+
           def trunc(enum)
             return unless enum
             enum = enum[0, 10] << '...' if enum.size > 10

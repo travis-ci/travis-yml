@@ -32,6 +32,7 @@ describe Travis::Yml do
         ghc
         go
         haxe
+        hhvm
         jdk
         julia
         matrix
