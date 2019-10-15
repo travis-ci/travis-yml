@@ -6,8 +6,8 @@ require 'travis/yml/schema/def/dist'
 require 'travis/yml/schema/def/env'
 require 'travis/yml/schema/def/imports'
 require 'travis/yml/schema/def/job'
+require 'travis/yml/schema/def/jobs'
 require 'travis/yml/schema/def/language'
-require 'travis/yml/schema/def/matrix'
 require 'travis/yml/schema/def/notification'
 require 'travis/yml/schema/def/os'
 require 'travis/yml/schema/def/stack'
@@ -42,7 +42,7 @@ module Travis
             map    :env
             matrix :compiler,       to: :compilers
             map    :stages
-            map    :matrix,         alias: :jobs
+            map    :jobs,           alias: :matrix
             map    :notifications
 
             map    :version

@@ -87,13 +87,13 @@ module Travis
         end
 
         def included
-          return [] unless config[:matrix]
-          [config[:matrix][:include] || []].flatten
+          return [] unless config[:jobs]
+          [config[:jobs][:include] || []].flatten
         end
 
         def excluded
-          return [] unless config[:matrix]
-          [config[:matrix][:exclude] || []].flatten
+          return [] unless config[:jobs]
+          [config[:jobs][:exclude] || []].flatten
         end
 
         def excluded?(row)
@@ -106,13 +106,13 @@ module Travis
 
         def values
           values = config.select { |key, value| keys.include?(key) && ![[], nil].include?(value) }
-          values = values.map { |key, value| key == :env && value.is_a?(Hash) ? value[:matrix] : value }
+          values = values.map { |key, value| key == :env && value.is_a?(Hash) && value.key?(:matrix) ? value[:matrix] : value }
           values = values.map { |value| wrap(value) }
           values
         end
 
         def shared
-          @shared ||= config.reject { |key, value| key == :matrix || keys.include?(key) || [[], nil].include?(value) }
+          @shared ||= config.reject { |key, value| key == :jobs || keys.include?(key) || [[], nil].include?(value) }
         end
 
         def cleaned(rows)
@@ -133,7 +133,7 @@ module Travis
         end
 
         def expand_keys
-          Yml.expand_keys - [:matrix] + [:env] # TODO
+          Yml.expand_keys - [:jobs] + [:env] # TODO
         end
 
         def wrap(obj)

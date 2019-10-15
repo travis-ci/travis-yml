@@ -84,8 +84,8 @@ describe Travis::Yml do
       it { expect(node.keys).to include 'addons' }
     end
 
-    describe 'matrix_entry' do
-      let(:node) { schema.map['matrix'][0]['include'][0].schema }
+    describe 'jobs_entry' do
+      let(:node) { schema.map['jobs'][0]['include'][0].schema }
       it { expect(node.keys).to include 'language' }
       it { expect(node.keys).to include 'rvm' }
       it { expect(node.keys).to include 'addons' }
