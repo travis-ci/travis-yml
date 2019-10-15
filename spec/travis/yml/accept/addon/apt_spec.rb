@@ -85,7 +85,7 @@ describe Travis::Yml, 'addon: apt' do
       it { should_not have_msg }
     end
 
-    describe 'given seq references including seq references on matrix.include.addons.apt.packages (yes, people do this)' do
+    describe 'given seq references including seq references on jobs.include.addons.apt.packages (yes, people do this)' do
       yaml %(
         one: &one
           - one
@@ -93,7 +93,7 @@ describe Travis::Yml, 'addon: apt' do
         two: &two
           - *one
 
-        matrix:
+        jobs:
           include:
           - addons:
               apt:
@@ -106,7 +106,7 @@ describe Travis::Yml, 'addon: apt' do
         should serialize_to(
           one: ['one'],
           two: [['one']],
-          matrix: {
+          jobs: {
             include: [
               addons: {
                 apt: {

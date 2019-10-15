@@ -373,7 +373,7 @@ describe Travis::Yml::Doc::Change::Key do
     ]
     pairs.each do |(key, other)|
       describe "corrects they key #{key} to #{other}" do
-        let(:schema) { Travis::Yml.expand.map['matrix'][0] }
+        let(:schema) { Travis::Yml.expand.map['jobs'][0] }
         let(:key) { key }
         it { should eq other }
       end

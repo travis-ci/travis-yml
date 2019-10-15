@@ -1,29 +1,30 @@
-describe Travis::Yml::Schema::Def::Matrix do
-  describe 'matrix' do
-    subject { Travis::Yml.schema[:definitions][:type][:matrix] }
+describe Travis::Yml::Schema::Def::Jobs do
+  describe 'jobs' do
+    subject { Travis::Yml.schema[:definitions][:type][:jobs] }
 
     # it { puts JSON.pretty_generate(subject) }
 
     it do
       should include(
-        '$id': :matrix,
-        title: 'Matrix',
+        '$id': :jobs,
+        title: 'Job Matrix',
         summary: 'Build matrix definitions',
+        see: instance_of(Hash),
         normal: true,
         anyOf: [
           {
             type: :object,
             properties: {
               include: {
-                '$ref': '#/definitions/type/matrix_entries',
+                '$ref': '#/definitions/type/jobs_entries',
                 summary: instance_of(String)
               },
               exclude: {
-                '$ref': '#/definitions/type/matrix_entries',
+                '$ref': '#/definitions/type/jobs_entries',
                 summary: instance_of(String)
               },
               allow_failures: {
-                '$ref': '#/definitions/type/matrix_entries',
+                '$ref': '#/definitions/type/jobs_entries',
                 summary: instance_of(String),
                 aliases: [
                   :allowed_failures
@@ -40,7 +41,7 @@ describe Travis::Yml::Schema::Def::Matrix do
             additionalProperties: false,
             normal: true,
             aliases: [
-              :jobs
+              :matrix
             ],
             prefix: {
               key: :include
@@ -48,40 +49,40 @@ describe Travis::Yml::Schema::Def::Matrix do
             see: instance_of(Hash),
           },
           {
-            '$ref': '#/definitions/type/matrix_entries'
+            '$ref': '#/definitions/type/jobs_entries'
           }
         ]
       )
     end
   end
 
-  describe 'matrix_entries' do
-    subject { Travis::Yml.schema[:definitions][:type][:matrix_entries] }
+  describe 'jobs_entries' do
+    subject { Travis::Yml.schema[:definitions][:type][:jobs_entries] }
 
     # it { puts JSON.pretty_generate(subject) }
 
     it do
       should eq(
-        '$id': :matrix_entries,
-        title: 'Matrix Entries',
+        '$id': :jobs_entries,
+        title: 'Job Matrix Entries',
         anyOf: [
           {
             type: :array,
             items: {
-              '$ref': '#/definitions/type/matrix_entry',
+              '$ref': '#/definitions/type/jobs_entry',
             },
             normal: true,
           },
           {
-            '$ref': '#/definitions/type/matrix_entry',
+            '$ref': '#/definitions/type/jobs_entry',
           }
         ]
       )
     end
   end
 
-  describe 'matrix_entry' do
-    subject { Travis::Yml.schema[:definitions][:type][:matrix_entry][:allOf][0][:properties] }
+  describe 'jobs_entry' do
+    subject { Travis::Yml.schema[:definitions][:type][:jobs_entry][:allOf][0][:properties] }
 
     # it { puts JSON.pretty_generate(subject) }
 

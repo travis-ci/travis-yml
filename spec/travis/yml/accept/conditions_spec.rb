@@ -110,8 +110,8 @@ describe Travis::Yml, 'conditions' do
         jobs:
           - if: 'branch = master'
       )
-      it { should serialize_to matrix: { include: [if: 'branch = master'] } }
-      it { should have_msg [:info, :root, :alias_key, alias: 'jobs', key: 'matrix'] }
+      it { should serialize_to jobs: { include: [if: 'branch = master'] } }
+      it { should_not have_msg }
     end
   end
 end

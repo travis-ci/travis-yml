@@ -5,39 +5,42 @@ module Travis
   module Yml
     module Schema
       module Def
-        class Matrix < Type::Map
-          register :matrix
+        class Jobs < Type::Map
+          register :jobs
 
           def define
+            title 'Job Matrix'
             summary 'Build matrix definitions'
             see 'Build Matrix': 'https://docs.travis-ci.com/user/build-matrix/'
 
             normal
-            aliases :jobs
+            aliases :matrix
             prefix :include
 
-            map :include,        to: :matrix_entries, summary: 'Jobs to include to the build matrix'
-            map :exclude,        to: :matrix_entries, summary: 'Attributes of jobs to exclude from the build matrix'
-            map :allow_failures, to: :matrix_entries, alias: :allowed_failures, summary: 'Attributes of jobs that are allowed to fail'
+            map :include,        to: :jobs_entries, summary: 'Jobs to include to the build matrix'
+            map :exclude,        to: :jobs_entries, summary: 'Attributes of jobs to exclude from the build matrix'
+            map :allow_failures, to: :jobs_entries, alias: :allowed_failures, summary: 'Attributes of jobs that are allowed to fail'
             map :fast_finish,    to: :bool, alias: :fast_failure, summary: 'Allow the build to fail fast'
 
             export
           end
         end
 
-        class MatrixEntries < Type::Seq
-          register :matrix_entries
+        class JobsEntries < Type::Seq
+          register :jobs_entries
 
           def define
-            type :matrix_entry
+            title 'Job Matrix Entries'
+            type :jobs_entry
             export
           end
         end
 
-        class Entry < Type::Map
-          register :matrix_entry
+        class JobsEntry < Type::Map
+          register :jobs_entry
 
           def define
+            title 'Job Matrix Entry'
             strict false
             aliases :jobs
 

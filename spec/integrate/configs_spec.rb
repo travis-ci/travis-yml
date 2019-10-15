@@ -8,7 +8,7 @@ end
 # accept:
 #
 #   # should `skip` be a generic feature? (grondo:flux-core)
-#   [:error, :"matrix.include.deploy", :invalid_type, {:expected=>:map, :actual=>:str, :value=>"skip"}]
+#   [:error, :"jobs.include.deploy", :invalid_type, {:expected=>:map, :actual=>:str, :value=>"skip"}]
 
 describe Travis::Yml, configs: true do
   before(:all) { FileUtils.mkdir_p('log') }
@@ -24,11 +24,11 @@ describe Travis::Yml, configs: true do
   KEYS = {
     language: %i(
       language
-      matrix.include.language
+      jobs.include.language
     ),
     dist: %i(
       dist
-      matrix.include.dist
+      jobs.include.dist
     ),
     event: %i(
       notifications
@@ -40,16 +40,16 @@ describe Travis::Yml, configs: true do
     os: %i(
       linux-ppc64le
       os
-      matrix.include.os
-      matrix.exclude.os
+      jobs.include.os
+      jobs.exclude.os
     ),
     stage: %i(
       root
-      matrix.include
+      jobs.include
     ),
     service: %i(
       services
-      matrix.include.services
+      jobs.include.services
     ),
     value: %i(
       notifications.email.on_failure
@@ -297,18 +297,18 @@ describe Travis::Yml, configs: true do
       clone
       go_import_path
     ),
-    # is sudo on matrix actually unknown?
-    matrix: %w(
+    # is sudo on jobs actually unknown?
+    jobs: %w(
       before_install
       env
       global
       sudo
     ),
-    'matrix.allow_failures': %w(
+    'jobs.allow_failures': %w(
       canfail
     ),
     # should filter_secrets be valid?
-    'matrix.include': %w(
+    'jobs.include': %w(
       after_install
       allow_failures
       apt
@@ -329,21 +329,21 @@ describe Travis::Yml, configs: true do
       skip_cleanup
       version
     ),
-    'matrix.include.addons': %w(
+    'jobs.include.addons': %w(
       cache
       sources
       sonarqube
     ),
-    'matrix.include.addons.apt': %w(
+    'jobs.include.addons.apt': %w(
       config
       sources
     ),
-    'matrix.include.cache': %w(
+    'jobs.include.cache': %w(
       override
     ),
     # it's kinda fun that travis-ci/dpl has invalid keys on the rubygems
     # provider (script and if)
-    'matrix.include.deploy': %w(
+    'jobs.include.deploy': %w(
       app
       buildpack
       default
@@ -355,7 +355,7 @@ describe Travis::Yml, configs: true do
       script
     ),
     # TODO master should probably be allowed here, shouldn't it?
-    'matrix.include.deploy.on': %w(
+    'jobs.include.deploy.on': %w(
       branches
       master
       on
@@ -459,22 +459,23 @@ describe Travis::Yml, configs: true do
     deploy.token
     env.matrix.general
     language
-    matrix.fast_finish
-    matrix.allow_failures.rvm
-    matrix.include.addons.apt.update
-    matrix.include.addons.homebrew.update
-    matrix.include.deploy.script
-    matrix.include.env
-    matrix.include.env.global
-    matrix.include.compiler
-    matrix.include.go
-    matrix.include.jdk
-    matrix.include.name
-    matrix.include.node_js
-    matrix.include.os
-    matrix.include.php
-    matrix.include.python
-    matrix.include.rvm
+    jobs.fast_finish
+    jobs.allow_failures.rvm
+    jobs.include.addons.apt.update
+    jobs.include.addons.homebrew.update
+    jobs.include.deploy.script
+    jobs.include.env
+    jobs.include.env.global
+    jobs.include.env.matrix
+    jobs.include.compiler
+    jobs.include.go
+    jobs.include.jdk
+    jobs.include.name
+    jobs.include.node_js
+    jobs.include.os
+    jobs.include.php
+    jobs.include.python
+    jobs.include.rvm
     notifications
     notifications.email.on_failure
     notifications.email.on_success
@@ -486,24 +487,24 @@ describe Travis::Yml, configs: true do
   INVALID_TYPE = {
     # people often "turn off" sections in huge matrices
     bool: %i(
-      matrix.include.deploy
-      matrix.include.addons
-      matrix.allow_failures.addons
-      matrix.allow_failures.deploy
+      jobs.include.deploy
+      jobs.include.addons
+      jobs.allow_failures.addons
+      jobs.allow_failures.deploy
     ),
     str: %i(
       deploy
       deploy.prerelease
       deploy.on.all_branches
-      matrix.include.addons
-      matrix.include.deploy.prerelease
-      matrix.allow_failures
+      jobs.include.addons
+      jobs.include.deploy.prerelease
+      jobs.allow_failures
     ),
     seq: %i(
       env.matrix.include
       env.matrix.general
-      matrix
-      matrix.include.env.global
+      jobs
+      jobs.include.env.global
     ),
     # on scripts this is often caused by YAML parsing a quoted string with a colon into a map
     map: %i(
@@ -513,9 +514,9 @@ describe Travis::Yml, configs: true do
       deploy.on.branch
       deploy.token
       env.matrix
-      matrix.include.cache.directories
-      matrix.include.script
-      matrix.include.after_script
+      jobs.include.cache.directories
+      jobs.include.script
+      jobs.include.after_script
       after_success
     ),
     secure: %i(
@@ -552,7 +553,7 @@ describe Travis::Yml, configs: true do
 
   ENUMS = %i(
     deploy.provider
-    matrix.include.deploy.provider
+    jobs.include.deploy.provider
     notifications.hipchat.format
   )
 
@@ -614,7 +615,7 @@ describe Travis::Yml, configs: true do
   end
 
   def questionable_env?(msg)
-    return false unless msg[2] == :unknown_key && msg[1] == :matrix && msg[3][:key] == :env
+    return false unless msg[2] == :unknown_key && msg[1] == :jobs && msg[3][:key] == :env
     value = msg[3][:value]
     return true if value.is_a?(Hash)  && value.key?(:global)    # e.g. elmsln:elmsln
     return true if value.is_a?(Array) && value[0].is_a?(String)
@@ -631,8 +632,8 @@ describe Travis::Yml, configs: true do
     return true if INVALID_TYPE[msg[3][:actual]]&.include?(msg[1])
     return true if msg[1] == :env && msg[3][:value].include?('global -')
     return true if msg[1] == :env && msg[3][:value].any? { |str| str.is_a?(String) && str =~ /^[^']+'$/ } # bogus single quote at the end
-    return true if msg[1] == :'matrix.include.env' && msg[3][:value].key?(:matrix)
-    return true if msg[1] == :'matrix.include.env' && msg[3][:value].key?(:global) # results in 'global=[{:FOO=>"foo"}]' in production https://travis-ci.org/svenfuchs/test/builds/525372730
+    return true if msg[1] == :'jobs.include.env' && msg[3][:value].key?(:jobs)
+    return true if msg[1] == :'jobs.include.env' && msg[3][:value].key?(:global) # results in 'global=[{:FOO=>"foo"}]' in production https://travis-ci.org/svenfuchs/test/builds/525372730
   end
 
   def invalid_env_var?(msg)

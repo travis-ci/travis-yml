@@ -295,8 +295,8 @@ describe Travis::Yml::Doc::Change do
     end
   end
 
-  describe 'matrix.include' do
-    let(:schema) { Travis::Yml.expand['matrix'] }
+  describe 'jobs.include' do
+    let(:schema) { Travis::Yml.expand['jobs'] }
 
     describe 'a str' do
       let(:value) { { include: ['foo'] } }

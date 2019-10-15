@@ -108,11 +108,11 @@ describe Travis::Yml::Schema::Def::Root do
         imports
         jdks
         job
+        jobs
+        jobs_entries
+        jobs_entry
         language
         languages
-        matrix
-        matrix_entries
-        matrix_entry
         notifications
         os
         oss
@@ -281,8 +281,8 @@ describe Travis::Yml::Schema::Def::Root do
           env
           filter_secrets
           import
+          jobs
           language
-          matrix
           notifications
           os
           stack
@@ -300,7 +300,7 @@ describe Travis::Yml::Schema::Def::Root do
       it { should include env:            { '$ref': '#/definitions/type/env' } }
       it { should include import:         { '$ref': '#/definitions/type/imports' } }
       # it { should include language:       { '$ref': '#/definitions/type/language' } }
-      it { should include matrix:         { '$ref': '#/definitions/type/matrix', aliases: [:jobs] } }
+      it { should include jobs:           { '$ref': '#/definitions/type/jobs', aliases: [:matrix] } }
       it { should include notifications:  { '$ref': '#/definitions/type/notifications' } }
       it { should include os:             { '$ref': '#/definitions/type/oss', flags: [:expand] } }
       it { should include stack:          { '$ref': '#/definitions/type/stack' } }

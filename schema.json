@@ -46,10 +46,10 @@
         "stages": {
           "$ref": "#/definitions/type/stages"
         },
-        "matrix": {
-          "$ref": "#/definitions/type/matrix",
+        "jobs": {
+          "$ref": "#/definitions/type/jobs",
           "aliases": [
-            "jobs"
+            "matrix"
           ]
         },
         "notifications": {
@@ -866,6 +866,132 @@
           }
         }
       },
+      "jobs": {
+        "$id": "jobs",
+        "title": "Job Matrix",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "include": {
+                "$ref": "#/definitions/type/jobs_entries",
+                "summary": "Jobs to include to the build matrix"
+              },
+              "exclude": {
+                "$ref": "#/definitions/type/jobs_entries",
+                "summary": "Attributes of jobs to exclude from the build matrix"
+              },
+              "allow_failures": {
+                "$ref": "#/definitions/type/jobs_entries",
+                "aliases": [
+                  "allowed_failures"
+                ],
+                "summary": "Attributes of jobs that are allowed to fail"
+              },
+              "fast_finish": {
+                "type": "boolean",
+                "aliases": [
+                  "fast_failure"
+                ],
+                "summary": "Allow the build to fail fast"
+              }
+            },
+            "additionalProperties": false,
+            "see": {
+              "Build Matrix": "https://docs.travis-ci.com/user/build-matrix/"
+            },
+            "normal": true,
+            "aliases": [
+              "matrix"
+            ],
+            "prefix": {
+              "key": "include"
+            }
+          },
+          {
+            "$ref": "#/definitions/type/jobs_entries"
+          }
+        ],
+        "summary": "Build matrix definitions",
+        "see": {
+          "Build Matrix": "https://docs.travis-ci.com/user/build-matrix/"
+        },
+        "normal": true
+      },
+      "jobs_entries": {
+        "$id": "jobs_entries",
+        "title": "Job Matrix Entries",
+        "anyOf": [
+          {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/type/jobs_entry"
+            },
+            "normal": true
+          },
+          {
+            "$ref": "#/definitions/type/jobs_entry"
+          }
+        ]
+      },
+      "jobs_entry": {
+        "$id": "jobs_entry",
+        "title": "Job Matrix Entry",
+        "allOf": [
+          {
+            "type": "object",
+            "properties": {
+              "language": {
+                "$ref": "#/definitions/type/language"
+              },
+              "os": {
+                "$ref": "#/definitions/type/os"
+              },
+              "dist": {
+                "$ref": "#/definitions/type/dist"
+              },
+              "arch": {
+                "$ref": "#/definitions/type/arch"
+              },
+              "sudo": {
+                "$ref": "#/definitions/type/sudo"
+              },
+              "env": {
+                "$ref": "#/definitions/type/env_vars"
+              },
+              "compiler": {
+                "type": "string",
+                "example": "gcc",
+                "only": {
+                  "language": [
+                    "c",
+                    "cpp"
+                  ]
+                }
+              },
+              "name": {
+                "type": "string",
+                "flags": [
+                  "unique"
+                ]
+              },
+              "stage": {
+                "type": "string"
+              }
+            },
+            "title": "Job Matrix Entry",
+            "aliases": [
+              "jobs"
+            ]
+          },
+          {
+            "$ref": "#/definitions/type/support"
+          },
+          {
+            "$ref": "#/definitions/type/job"
+          }
+        ]
+      },
       "language": {
         "$id": "language",
         "title": "Language",
@@ -1148,131 +1274,6 @@
           }
         ],
         "normal": true
-      },
-      "matrix": {
-        "$id": "matrix",
-        "title": "Matrix",
-        "anyOf": [
-          {
-            "type": "object",
-            "properties": {
-              "include": {
-                "$ref": "#/definitions/type/matrix_entries",
-                "summary": "Jobs to include to the build matrix"
-              },
-              "exclude": {
-                "$ref": "#/definitions/type/matrix_entries",
-                "summary": "Attributes of jobs to exclude from the build matrix"
-              },
-              "allow_failures": {
-                "$ref": "#/definitions/type/matrix_entries",
-                "aliases": [
-                  "allowed_failures"
-                ],
-                "summary": "Attributes of jobs that are allowed to fail"
-              },
-              "fast_finish": {
-                "type": "boolean",
-                "aliases": [
-                  "fast_failure"
-                ],
-                "summary": "Allow the build to fail fast"
-              }
-            },
-            "additionalProperties": false,
-            "see": {
-              "Build Matrix": "https://docs.travis-ci.com/user/build-matrix/"
-            },
-            "normal": true,
-            "aliases": [
-              "jobs"
-            ],
-            "prefix": {
-              "key": "include"
-            }
-          },
-          {
-            "$ref": "#/definitions/type/matrix_entries"
-          }
-        ],
-        "summary": "Build matrix definitions",
-        "see": {
-          "Build Matrix": "https://docs.travis-ci.com/user/build-matrix/"
-        },
-        "normal": true
-      },
-      "matrix_entries": {
-        "$id": "matrix_entries",
-        "title": "Matrix Entries",
-        "anyOf": [
-          {
-            "type": "array",
-            "items": {
-              "$ref": "#/definitions/type/matrix_entry"
-            },
-            "normal": true
-          },
-          {
-            "$ref": "#/definitions/type/matrix_entry"
-          }
-        ]
-      },
-      "matrix_entry": {
-        "$id": "matrix_entry",
-        "title": "Matrix Entry",
-        "allOf": [
-          {
-            "type": "object",
-            "properties": {
-              "language": {
-                "$ref": "#/definitions/type/language"
-              },
-              "os": {
-                "$ref": "#/definitions/type/os"
-              },
-              "dist": {
-                "$ref": "#/definitions/type/dist"
-              },
-              "arch": {
-                "$ref": "#/definitions/type/arch"
-              },
-              "sudo": {
-                "$ref": "#/definitions/type/sudo"
-              },
-              "env": {
-                "$ref": "#/definitions/type/env_vars"
-              },
-              "compiler": {
-                "type": "string",
-                "example": "gcc",
-                "only": {
-                  "language": [
-                    "c",
-                    "cpp"
-                  ]
-                }
-              },
-              "name": {
-                "type": "string",
-                "flags": [
-                  "unique"
-                ]
-              },
-              "stage": {
-                "type": "string"
-              }
-            },
-            "aliases": [
-              "jobs"
-            ]
-          },
-          {
-            "$ref": "#/definitions/type/support"
-          },
-          {
-            "$ref": "#/definitions/type/job"
-          }
-        ]
       },
       "notifications": {
         "$id": "notifications",
