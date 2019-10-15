@@ -183,7 +183,7 @@ describe Travis::Yml::Web::V1 do
             '2.6.2'
           ],
           'env' => {
-            'matrix' => [
+            'jobs' => [
               'API' => 'true',
               'FOO' => '1'
             ]
@@ -229,7 +229,7 @@ describe Travis::Yml::Web::V1 do
             '2.6.2'
           ],
           'env' => {
-            'matrix' => [
+            'jobs' => [
               'API' => 'true',
               'FOO' => '1',
               'TRAVIS_YML' => 'true',

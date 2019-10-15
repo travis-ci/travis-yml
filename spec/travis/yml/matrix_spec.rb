@@ -27,7 +27,7 @@ describe Travis::Yml, 'matrix' do
   describe 'matrix (1 from include, redundant expand key at root)' do
     yaml %(
       os: linux
-      matrix:
+      jobs:
         include:
           - os: osx
             env: FOO=foo
@@ -43,7 +43,7 @@ describe Travis::Yml, 'matrix' do
       os:
       - linux
       - osx
-      matrix:
+      jobs:
         include:
           - env: FOO=foo
     )
@@ -58,7 +58,7 @@ describe Travis::Yml, 'matrix' do
   describe 'matrix (1 with non-expand key at root)' do
     yaml %(
     language: rust
-    matrix:
+    jobs:
       include:
         env: FOO=foo
     )
@@ -86,7 +86,7 @@ describe Travis::Yml, 'matrix' do
   describe 'matrix (3)' do
     yaml %(
       env:
-        matrix:
+        jobs:
         - FOO=foo
         - BAR=bar
         - BAZ=baz
@@ -107,10 +107,10 @@ describe Travis::Yml, 'matrix' do
     ]
   end
 
-  describe 'env.matrix strs' do
+  describe 'env.jobs strs' do
     yaml %(
       env:
-        matrix:
+        jobs:
         - FOO=foo BAR=bar
         - BAZ=baz
     )
@@ -121,10 +121,10 @@ describe Travis::Yml, 'matrix' do
     ]
   end
 
-  describe 'env.matrix hashes' do
+  describe 'env.jobs hashes' do
     yaml %(
       env:
-        matrix:
+        jobs:
         - FOO: foo
         - BAR: bar
     )
@@ -135,10 +135,10 @@ describe Travis::Yml, 'matrix' do
     ]
   end
 
-  describe 'env.matrix one hash' do
+  describe 'env.jobs one hash' do
     yaml %(
       env:
-        matrix:
+        jobs:
           FOO: foo
           BAR: bar
     )
@@ -148,10 +148,10 @@ describe Travis::Yml, 'matrix' do
     ]
   end
 
-  describe 'env.matrix and env.global' do
+  describe 'env.jobs and env.global' do
     yaml %(
       env:
-        matrix:
+        jobs:
           - FOO: foo
           - BAR: bar
         global:
@@ -199,14 +199,14 @@ describe Travis::Yml, 'matrix' do
     ]
   end
 
-  describe 'matrix include' do
+  describe 'jobs include' do
     yaml %(
       env:
-        matrix: FOO=foo
+        jobs: FOO=foo
       rvm:
       - 2.2
       - 2.3
-      matrix:
+      jobs:
         include:
           - env: BAR=bar
             rvm: 2.4
@@ -219,10 +219,10 @@ describe Travis::Yml, 'matrix' do
     ]
   end
 
-  describe 'matrix include inheriting a global matrix key' do
+  describe 'jobs include inheriting a global matrix key' do
     yaml %(
       rvm: 2.4
-      matrix:
+      jobs:
         include:
           - rvm: 2.2
           - name: str
@@ -234,10 +234,10 @@ describe Travis::Yml, 'matrix' do
     ]
   end
 
-  describe 'matrix include inheriting not env' do
+  describe 'jobs include inheriting not env' do
     yaml %(
       env: FOO=foo
-      matrix:
+      jobs:
         include:
           - name: one
           - name: two
@@ -249,11 +249,11 @@ describe Travis::Yml, 'matrix' do
     ]
   end
 
-  describe 'matrix include inheriting env' do
+  describe 'jobs include inheriting env' do
     yaml %(
       env:
         global: FOO=foo
-      matrix:
+      jobs:
         include:
           - name: one
           - name: two
@@ -265,13 +265,13 @@ describe Travis::Yml, 'matrix' do
     ]
   end
 
-  describe 'matrix include duplicate' do
+  describe 'jobs include duplicate' do
     yaml %(
       env:
-        matrix: FOO=foo
+        jobs: FOO=foo
       rvm:
       - 2.2
-      matrix:
+      jobs:
         include:
           - env: FOO=foo
             rvm: 2.2
@@ -282,16 +282,16 @@ describe Travis::Yml, 'matrix' do
     ]
   end
 
-  describe 'matrix exclude (1)' do
+  describe 'jobs exclude (1)' do
     yaml %(
       env:
-        matrix:
+        jobs:
         - FOO=foo
         - BAR=bar
       rvm:
       - 2.2
       - 2.3
-      matrix:
+      jobs:
         exclude:
           - env: BAR=bar
             rvm: 2.3
@@ -304,11 +304,11 @@ describe Travis::Yml, 'matrix' do
     ]
   end
 
-  describe 'matrix exclude (2)' do
+  describe 'jobs exclude (2)' do
     yaml %(
       scala: 2.11.8
       jdk: oraclejdk8
-      matrix:
+      jobs:
         exclude:
         - scala: 2.11.8
           jdk: oraclejdk8
@@ -323,7 +323,7 @@ describe Travis::Yml, 'matrix' do
       rvm:
       - 2.2
       - 2.3
-      matrix:
+      jobs:
         include:
         - rvm: 1.8.7
           env: FOO=foo
@@ -339,7 +339,7 @@ describe Travis::Yml, 'matrix' do
   describe 'include as hash' do
     yaml %(
       dist: trusty
-      matrix:
+      jobs:
         include:
           env: FOO=foo
     )

@@ -17,11 +17,14 @@ describe Travis::Yml::Schema::Def::Env do
             properties: {
               global: {
                 '$ref': '#/definitions/type/env_vars',
-                summary: 'Global environment variables to be defined on all jobs'
+                summary: instance_of(String),
               },
-              matrix: {
+              jobs: {
                 '$ref': '#/definitions/type/env_vars',
-                summary: 'Environment variables that expand the build matrix (creating one job per entry)',
+                summary: instance_of(String),
+                aliases: [
+                  :matrix
+                ],
                 flags: [
                   :expand
                 ]
@@ -30,7 +33,7 @@ describe Travis::Yml::Schema::Def::Env do
             additionalProperties: false,
             normal: true,
             prefix: {
-              key: :matrix
+              key: :jobs
             },
           },
           {
@@ -84,7 +87,7 @@ describe Travis::Yml::Schema::Def::Env do
               FOO: 'foo'
             },
             patternProperties: {
-              '^(?!global|matrix)': {
+              '^(?!global|jobs|matrix)': {
                 anyOf: [
                   {
                     type: :string

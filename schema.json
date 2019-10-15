@@ -524,7 +524,7 @@
       "env": {
         "$id": "env",
         "title": "Env",
-        "description": "The key `env` defines env vars that will be defined in the build\nenvironment.\n\nEnv vars can be specified as global or matrix vars. Global vars\nwill be defined on every job in the build's job matrix. Matrix\nvars will expand the matrix, i.e. create one additional job per\nentry.\n\nEnv vars can be given either as strings or maps. If given as a\nstring they can contain multiple key/value pairs.",
+        "description": "The key `env` defines env vars that will be defined in the build\nenvironment.\n\nEnv vars can be specified as global or job vars. Global vars will\nbe defined on every job in the build's job matrix. Job vars will\nexpand the build matrix, i.e. create one additional job per entry.\n\nEnv vars can be given either as strings or maps. If given as a\nstring they can contain multiple key/value pairs.",
         "anyOf": [
           {
             "type": "object",
@@ -533,8 +533,11 @@
                 "$ref": "#/definitions/type/env_vars",
                 "summary": "Global environment variables to be defined on all jobs"
               },
-              "matrix": {
+              "jobs": {
                 "$ref": "#/definitions/type/env_vars",
+                "aliases": [
+                  "matrix"
+                ],
                 "summary": "Environment variables that expand the build matrix (creating one job per entry)",
                 "flags": [
                   "expand"
@@ -544,7 +547,7 @@
             "additionalProperties": false,
             "normal": true,
             "prefix": {
-              "key": "matrix"
+              "key": "jobs"
             }
           },
           {
@@ -564,7 +567,7 @@
           {
             "type": "object",
             "patternProperties": {
-              "^(?!global|matrix)": {
+              "^(?!global|jobs|matrix)": {
                 "anyOf": [
                   {
                     "type": "string"
@@ -9532,8 +9535,8 @@
     "haxe",
     "hhvm",
     "jdk",
+    "jobs",
     "julia",
-    "matrix",
     "mono",
     "nix",
     "node_js",

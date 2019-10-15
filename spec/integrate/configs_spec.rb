@@ -457,7 +457,7 @@ describe Travis::Yml, configs: true do
     deploy.password
     deploy.script
     deploy.token
-    env.matrix.general
+    env.jobs.general
     language
     jobs.fast_finish
     jobs.allow_failures.rvm
@@ -501,8 +501,8 @@ describe Travis::Yml, configs: true do
       jobs.allow_failures
     ),
     seq: %i(
-      env.matrix.include
-      env.matrix.general
+      env.jobs.include
+      env.jobs.general
       jobs
       jobs.include.env.global
     ),
@@ -513,14 +513,14 @@ describe Travis::Yml, configs: true do
       deploy.env
       deploy.on.branch
       deploy.token
-      env.matrix
+      env.jobs
       jobs.include.cache.directories
       jobs.include.script
       jobs.include.after_script
       after_success
     ),
     secure: %i(
-      env.matrix.DJANGO_SECRET_KEY
+      env.jobs.DJANGO_SECRET_KEY
       env.global.github_token
     )
   }
