@@ -106,7 +106,7 @@ module Travis
 
         def values
           values = config.select { |key, value| keys.include?(key) && ![[], nil].include?(value) }
-          values = values.map { |key, value| key == :env && value.is_a?(Hash) && value.key?(:matrix) ? value[:matrix] : value }
+          values = values.map { |key, value| key == :env && value.is_a?(Hash) && value.key?(:jobs) ? value[:jobs] : value }
           values = values.map { |value| wrap(value) }
           values
         end

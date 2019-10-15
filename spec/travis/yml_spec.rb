@@ -34,8 +34,8 @@ describe Travis::Yml do
         haxe
         hhvm
         jdk
+        jobs
         julia
-        matrix
         mono
         nix
         node_js

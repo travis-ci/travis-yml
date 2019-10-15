@@ -72,7 +72,7 @@ describe Travis::Yml::Docs::Examples do
 
     it do
       should eq [
-        { env: { global: [{ FOO: 'foo' }], matrix: [{ FOO: 'foo' }] } },
+        { env: { global: [{ FOO: 'foo' }], jobs: [{ FOO: 'foo' }] } },
         { env: [{ FOO: 'foo' }] },
         { env: [{ secure: 'encrypted string' }] },
         { env: ['FOO=foo'] },
