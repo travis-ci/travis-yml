@@ -77,7 +77,7 @@ module Travis
           end
 
           def ids
-            return ['nodes'] if root?
+            return ['ref'] if root?
             ids = [key, id].uniq
             ids = ids[0, 1] if "#{ids[0]}s".to_sym == ids[1]
             [parent.ids, ids].flatten.compact
@@ -88,7 +88,9 @@ module Travis
           end
 
           def path_to(*segments)
-            [opts[:path], *segments].flatten.join('/')
+            path = [opts[:path], *segments].flatten.compact.join('/')
+            path = '/' if path == 'ref'
+            path.start_with?('/') ? path : "/#{path}"
           end
 
           def info

@@ -8,14 +8,23 @@ module Travis::Yml::Web
 
       attr_reader :pages, :path
 
+      # def get(env)
+      #   @env = env
+      #   req = Rack::Request.new(env)
+      #   path = req.path_info.chomp(?/)
+      #   @prefix = 'docs' if path.sub!(%r(docs), '')
+      #   path = 'nodes' if path.empty?
+      #   path = path.sub(%r(^/), '')
+      #   @path = [prefix, path].compact.join('/')
+      #   exists? ? ok : not_found
+      # end
+
       def get(env)
         @env = env
         req = Rack::Request.new(env)
         path = req.path_info.chomp(?/)
-        @prefix = 'docs' if path.sub!(%r(docs), '')
-        path = 'nodes' if path.empty?
-        path = path.sub(%r(^/), '')
-        @path = [prefix, path].compact.join('/')
+        path = '/' if path.empty?
+        @path = path
         exists? ? ok : not_found
       end
 
@@ -36,13 +45,17 @@ module Travis::Yml::Web
       end
 
       def pages
-        Travis::Yml::Docs.pages(path: prefix)
+        Travis::Yml::Docs.pages
       end
 
-      def prefix
-        prefix = [@env[:prefix], @prefix].compact.join('/')
-        prefix.empty? || prefix.start_with?('/') ? prefix : "/#{prefix}"
-      end
+      # def pages
+      #   Travis::Yml::Docs.pages(path: prefix)
+      # end
+      #
+      # def prefix
+      #   prefix = [@env[:prefix], @prefix].compact.join('/')
+      #   prefix.empty? || prefix.start_with?('/') ? prefix : "/#{prefix}"
+      # end
 
       def headers
         { 'Content-Type' => 'text/html' }
