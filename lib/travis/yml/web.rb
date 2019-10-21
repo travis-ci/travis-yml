@@ -14,7 +14,7 @@ module Travis
         path_info = req.path_info.split(?/)[1]
         path_info = "" if !path_info
         prefix = ?/ + path_info
-        version = versions.each do |p, app|
+        versions.each do |p, app|
           if p == prefix
             req.path_info = req.path_info[p.size..-1]
             req.script_name = req.script_name + p

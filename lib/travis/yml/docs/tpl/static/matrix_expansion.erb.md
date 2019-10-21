@@ -1,9 +1,9 @@
 # Matrix Expansion
 
-A build contains one or more jobs to run in parallel or [stages](<%= path_to('nodes/stages') %>).
+A build contains one or more jobs to run in parallel or [stages](<%= path_to('ref/stages') %>).
 
 These jobs come out of the build matrix expansion. Additional jobs can be added
-manually using the [matrix](<%= path_to('nodes/matrix') %>) key.
+manually using the [matrix](<%= path_to('ref/matrix') %>) key.
 
 The build matrix expansion is driven by matrix expansion keys that are defined
 in the build configuration. If no expansion keys are given, or they only have
@@ -47,7 +47,7 @@ The following expansion keys are known:
 * `arch`
 * `env.matrix` (also `env` due to [normalization of maps](<%= path_to('types#map') %>), if no key `global` or `matrix` is present)
 
-The following expansion keys are supported depending on the [language](<%= path_to('nodes/language') %>) selected:
+The following expansion keys are supported depending on the [language](<%= path_to('ref/language') %>) selected:
 
 <% Yml.expand_keys.-(%i(os arch matrix)).each do |key| %>
 * `<%= key %>`

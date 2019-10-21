@@ -61,7 +61,7 @@ import:
 Many map nodes define a default prefix key, which allows the node to accept the
 type that the prefix key maps to.
 
-For example the [Branches](<%= path_to('nodes/branches') %>) node expects a
+For example the [Branches](<%= path_to('ref/branches') %>) node expects a
 map, and defines the key `only` to be the default prefix key, which expects a
 sequence of strings.
 

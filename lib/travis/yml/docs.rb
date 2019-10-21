@@ -40,13 +40,12 @@ module Travis
         print '.'
       end
 
-      def pages(opts = {})
-        @pages ||= {}
-        @pages[opts[:path]] ||= begin
-          root = self.root(opts)
+      def pages
+        @pages ||= begin
+          root = self.root
           pages = root.pages # .uniq(&:full_id)
-          pages = pages + statics(opts)
-          pages = pages + [index(pages, opts)]
+          pages = pages + statics
+          pages = pages + [index(pages)]
           pages = pages.select(&:path)
           pages = pages.map { |page| [page.path, page] }
           pages = pages.to_h.sort.to_h
@@ -55,11 +54,11 @@ module Travis
         end
       end
 
-      def index(pages, opts)
+      def index(pages, opts = {})
         Page::Index.new(root, pages, opts)
       end
 
-      def statics(opts)
+      def statics(opts = {})
         STATIC.map { |name| Page::Static.new(root, name, opts) }
       end
 
