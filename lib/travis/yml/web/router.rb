@@ -10,9 +10,9 @@ module Travis::Yml::Web
       path = req.path_info.chomp(?/)
       path = ?/ if path.empty?
 
-      @map.each do |pattern, app|
+      @map.each do |pattern, const|
         next if path.nil? || pattern.nil?
-        return app.call(env) if match?(pattern, path)
+        return const.new.call(env) if match?(pattern, path)
       end
 
       [404, {}, []]
