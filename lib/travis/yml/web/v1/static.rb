@@ -29,20 +29,15 @@ module Travis::Yml::Web
       end
 
       def exists?
-        # File.exists?(file)
-        !!file
+        File.exists?(path)
       end
 
       def read
-        File.read(file)
-      end
-
-      def file
-        @file ||= Dir["./public#{path.sub('..', '')}"].first
+        File.read(path)
       end
 
       def ext
-        File.extname(file).sub('.', '')
+        File.extname(path).sub('.', '')
       end
 
       def headers
@@ -50,7 +45,7 @@ module Travis::Yml::Web
       end
 
       def path
-        @path ||= req.path_info.chomp(?/)
+        @path ||= "./public/#{req.path_info.gsub('..', '').chomp(?/)}"
       end
 
       def req
