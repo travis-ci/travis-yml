@@ -5,17 +5,12 @@
 <% end %>
 
 <% if root? %>
-This is the reference documentation for build configuration on Travis CI.
-Build configuration usually is stored in the file `.travis.yml` in your
-repository, but also can be sent via API.
+Welcome to the Travis CI Build Config Reference which documents the Travis CI Build Configuration. 
+You can find the build config in the `.travis.yml` file in your repository or in the API.
 
-You can explore, and experiment with build config YAML snippets using
-the [config explorer](/explore).
+Use the [Travis CI Build Config Explorer](/explore) to explore and experiment with build config YAML snippets.
 
-The Travis CI build config format is formally specified using a [JSON
-Schema](https://github.com/travis-ci/travis-yml/blob/master/schema.json).
-This specification is used by Travis CI in order to normalize and
-validate build configs (this is currently in beta, and [needs to be
+The Travis CI build config format has been specified using a [JSON Schema](https://github.com/travis-ci/travis-yml/blob/master/schema.json) and Travis CI uses it to normalize and validate build configs (this is currently in beta, and [needs to be
 activated](https://docs.travis-ci.com/user/build-config-validation)).
 <% else %>
 <%= description %>
