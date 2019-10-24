@@ -45,14 +45,9 @@ module Travis
                 node = parent[key]
                 key  = Key.new(schema, node, opts).apply
                 next parent if key == node.key && known?(key)
-                overwrite(parent, node.key, key) if parent.key?(key) && key != node.key
                 parent.move(node.key, node.key.copy(key))
                 parent
               end
-            end
-
-            def overwrite(parent, one, other)
-              parent.error :overwrite, key: one, other: other
             end
 
             def custom?(key)

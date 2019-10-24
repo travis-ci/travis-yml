@@ -31,12 +31,21 @@ describe Travis::Yml, 'root' do
   end
 
   describe 'corrects' do
-    describe 'a known key' do
+    describe 'a typo' do
       yaml %(
         csript: ./foo
       )
       it { should serialize_to script: ['./foo'] }
       it { should have_msg [:warn, :root, :find_key, original: 'csript', key: 'script'] }
+    end
+
+    describe 'a typo on a key with a default', defaults: true do
+      yaml %(
+        langauge: shell
+      )
+      it { should serialize_to language: 'shell', os: ['linux'] }
+      it { should have_msg [:warn, :root, :find_key, original: 'langauge', key: 'language'] }
+      it { should_not have_msg [:error, :root, :overwrite, key: 'langauge', other: 'language'] }
     end
 
     describe 'a camelized key' do

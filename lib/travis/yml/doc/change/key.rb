@@ -22,6 +22,7 @@ module Travis
             other = schema.key_aliases[key] || schema.key_aliases[key.to_s.tr('-', '_')]
             return key if !other || key == other
             value.parent.info :alias_key, alias: key, key: other, line: key.line, src: key.src
+            value.parent.error :overwrite, key: key, other: other if value.parent.key?(other)
             other
           end
 
