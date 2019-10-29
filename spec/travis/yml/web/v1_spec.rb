@@ -237,8 +237,8 @@ describe Travis::Yml::Web::V1 do
             ]
           },
           'script' => [
-            './import',
-            './travis_yml'
+            './travis_yml',
+            './import'
           ],
           'unknown' => 'str'
         )
