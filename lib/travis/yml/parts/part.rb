@@ -4,7 +4,13 @@ module Travis
   module Yml
     module Parts
       class Part
-        MERGE_MODES = %i(merge deep_merge replace)
+        MERGE_MODES = %i(
+          merge
+          deep_merge
+          deep_merge_append
+          deep_merge_prepend
+          replace
+        )
 
         attr_reader :str, :data, :src, :merge_mode
 
@@ -20,13 +26,6 @@ module Travis
           unknown_merge_mode!(mode) if mode && !MERGE_MODES.include?(mode)
           @merge_mode = mode
         end
-
-        # def merge_mode
-        #   opts = Array(data.opts[:merge])
-        #   mode = opts.&(MERGE_MODES).first
-        #   mode = [mode, :append].join('_').to_sym if opts.include?(:append)
-        #   mode || @merge_mode
-        # end
 
         def ==(other)
           str == other

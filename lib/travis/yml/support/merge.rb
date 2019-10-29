@@ -51,12 +51,27 @@ module Travis
           end
         end
 
+        def deep_merge_prepend(lft, rgt)
+          keys(lft, rgt).inject(lft) do |hash, key|
+            hash[key] = if hashes?(lft[key], rgt[key])
+              send(mode(lft[key]) || :deep_merge_prepend, lft[key], rgt[key])
+            elsif arrays?(lft[key], rgt[key])
+              send(mode(lft[key]) || :prepend, lft[key], rgt[key])
+            elsif lft.key?(key)
+              lft[key]
+            else
+              rgt[key]
+            end
+            hash
+          end
+        end
+
         def prepend(lft, rgt)
-          lft.replace(lft + rgt)
+          lft.replace(rgt + lft)
         end
 
         def append(lft, rgt)
-          lft.replace(rgt + lft)
+          lft.replace(lft + rgt)
         end
 
         def mode(obj)
