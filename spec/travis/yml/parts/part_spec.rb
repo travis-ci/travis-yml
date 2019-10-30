@@ -14,11 +14,6 @@ describe Travis::Yml::Parts::Part do
   end
 
   describe 'merge_mode' do
-    describe 'merge mode defaults to :merge' do
-      let(:merge_mode) { nil }
-      it { expect(subject.merge_mode).to eq :merge }
-    end
-
     describe 'given a symbol' do
       let(:merge_mode) { :replace }
       it { expect(subject.merge_mode).to eq :replace }
