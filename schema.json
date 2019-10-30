@@ -43,6 +43,12 @@
             "expand"
           ]
         },
+        "osx_image": {
+          "$ref": "#/definitions/type/osx_images",
+          "flags": [
+            "expand"
+          ]
+        },
         "stages": {
           "$ref": "#/definitions/type/stages"
         },
@@ -799,34 +805,6 @@
           "group": {
             "$ref": "#/definitions/type/group"
           },
-          "osx_image": {
-            "anyOf": [
-              {
-                "type": "array",
-                "items": {
-                  "type": "string"
-                },
-                "only": {
-                  "os": [
-                    "osx"
-                  ]
-                },
-                "normal": true
-              },
-              {
-                "type": "string"
-              }
-            ],
-            "summary": "OSX image to use for the build environment",
-            "only": {
-              "os": [
-                "osx"
-              ]
-            },
-            "flags": [
-              "expand"
-            ]
-          },
           "before_install": {
             "$ref": "#/definitions/type/strs",
             "summary": "Scripts to run before the install stage"
@@ -955,6 +933,15 @@
               },
               "arch": {
                 "$ref": "#/definitions/type/arch"
+              },
+              "osx_image": {
+                "type": "string",
+                "summary": "OSX image to use for the build environment",
+                "only": {
+                  "os": [
+                    "osx"
+                  ]
+                }
               },
               "sudo": {
                 "$ref": "#/definitions/type/sudo"
@@ -1554,6 +1541,33 @@
         "see": {
           "Build Environment Overview": "https://docs.travis-ci.com/user/reference/overview/"
         }
+      },
+      "osx_images": {
+        "$id": "osx_images",
+        "title": "Osx Images",
+        "anyOf": [
+          {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "summary": "OSX image to use for the build environment",
+              "only": {
+                "os": [
+                  "osx"
+                ]
+              }
+            },
+            "normal": true
+          },
+          {
+            "type": "string",
+            "only": {
+              "os": [
+                "osx"
+              ]
+            }
+          }
+        ]
       },
       "secure": {
         "$id": "secure",

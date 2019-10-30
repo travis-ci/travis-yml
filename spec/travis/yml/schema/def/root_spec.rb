@@ -116,6 +116,7 @@ describe Travis::Yml::Schema::Def::Root do
         notifications
         os
         oss
+        osx_images
         secure
         secures
         service
@@ -285,6 +286,7 @@ describe Travis::Yml::Schema::Def::Root do
           language
           notifications
           os
+          osx_image
           stack
           stages
           sudo
