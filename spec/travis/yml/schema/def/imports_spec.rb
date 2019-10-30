@@ -46,7 +46,7 @@ describe Travis::Yml::Schema::Def::Imports do
               },
               mode: {
                 type: :string,
-                enum: ['merge', 'deep_merge'],
+                enum: ['merge', 'deep_merge', 'deep_merge_append', 'deep_merge_prepend'],
                 summary: 'How to merge the imported config into the target config'
               }
             },
