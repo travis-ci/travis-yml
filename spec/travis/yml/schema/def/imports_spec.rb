@@ -48,6 +48,9 @@ describe Travis::Yml::Schema::Def::Imports do
                 type: :string,
                 enum: ['merge', 'deep_merge', 'deep_merge_append', 'deep_merge_prepend'],
                 summary: instance_of(String)
+              },
+              if: {
+                '$ref': '#/definitions/type/condition'
               }
             },
             additionalProperties: false,

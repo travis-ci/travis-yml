@@ -430,9 +430,9 @@
       "condition": {
         "$id": "condition",
         "title": "If",
-        "description": "Include or exclude builds, stages, jobs, and notifications by specifying conditions in your\nbuild configuration. These are evaluated when your build is being configured.",
+        "description": "Include or exclude builds, stages, jobs, imports, and notifications by specifying\nconditions in your build configuration. These are evaluated when your build is\nbeing configured.",
         "type": "string",
-        "summary": "Condition to determine if a build, stage, or job should be run, or a notification sent",
+        "summary": "Condition to determine if a build, stage, or job should be run, a config source imported, or a notification sent",
         "example": "branch = master",
         "see": {
           "Conditional Builds, Stages, and Jobs": "https://docs.travis-ci.com/user/conditional-builds-stages-jobs/",
@@ -718,6 +718,9 @@
                   "deep_merge_prepend"
                 ],
                 "summary": "How to merge the imported config into the target config (defaults to deep_merge_append)"
+              },
+              "if": {
+                "$ref": "#/definitions/type/condition"
               }
             },
             "additionalProperties": false,
