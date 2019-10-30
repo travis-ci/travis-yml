@@ -152,7 +152,37 @@ describe Travis::Yml::Parts::Merge do
     end
   end
 
-  describe 'merge mode and merge tags (merge tag wins)' do
+  describe 'default merge mode on nested imports' do
+    let(:parts) { [part(one), part(two), part(three)] }
+
+    let(:one) do
+      <<~yml
+      env:
+        global:
+          - ONE=one
+      yml
+    end
+
+    let(:two) do
+      <<~yml
+        env:
+          global:
+            - TWO=two
+      yml
+    end
+
+    let(:three) do
+      <<~yml
+        env:
+          global:
+            - THREE=three
+      yml
+    end
+
+    it { should eq env: { global: ['ONE=one', 'TWO=two', 'THREE=three'] } }
+  end
+
+  describe 'merge mode and merge tags' do
     let(:parts) { [part(one), part(two, nil, :deep_merge_append), part(three, nil, :deep_merge)] }
 
     let(:one) do
