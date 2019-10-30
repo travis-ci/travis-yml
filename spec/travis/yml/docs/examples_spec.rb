@@ -99,9 +99,9 @@ describe Travis::Yml::Docs::Examples do
 
     it do
       should eq [
-        { import: [{ source: './import.yml@v1', mode: 'merge' }] },
+        { import: [{ source: './import.yml@v1', mode: 'merge', if: 'branch = master' }] },
         { import: ['./import.yml@v1'] },
-        { import: { source: './import.yml@v1', mode: 'merge' } },
+        { import: { source: './import.yml@v1', mode: 'merge', if: 'branch = master' } },
         { import: './import.yml@v1' }
       ]
     end
