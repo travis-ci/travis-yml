@@ -31,7 +31,7 @@ describe Travis::Yml::Schema::Def::Imports do
     subject { Travis::Yml.schema[:definitions][:type][:import] }
 
     it do
-      should eq(
+      should include(
         '$id': :import,
         title: 'Import',
         normal: true,
@@ -47,7 +47,7 @@ describe Travis::Yml::Schema::Def::Imports do
               mode: {
                 type: :string,
                 enum: ['merge', 'deep_merge', 'deep_merge_append', 'deep_merge_prepend'],
-                summary: 'How to merge the imported config into the target config'
+                summary: instance_of(String)
               }
             },
             additionalProperties: false,

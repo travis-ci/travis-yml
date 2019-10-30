@@ -153,41 +153,33 @@ describe Travis::Yml::Parts::Merge do
   end
 
   describe 'merge mode and merge tags (merge tag wins)' do
-    let(:parts) { [part(lft), part(rgt, nil, :deep_merge)] }
+    let(:parts) { [part(one), part(two, nil, :deep_merge_append), part(three, nil, :deep_merge)] }
 
-    let(:rgt) do
+    let(:one) do
       <<~yml
-        foo:
-          bar:
-          - two
-        baz: buz
+      env:
+        global: !seq+append
+          - ONE=one
       yml
     end
 
-    describe 'merge mode replace, merge tag replace on root' do
-      let(:lft) do
-        <<~yml
-          foo:
-            bar: !seq+append
-            - one
-        yml
-      end
-
-      it { should eq foo: { bar: ['one', 'two'] }, baz: 'buz' }
+    let(:two) do
+      <<~yml
+        env:
+          global:
+            - TWO=two
+      yml
     end
 
-    describe 'merge mode replace, merge tag replace on child' do
-      let(:lft) do
-        <<~yml
-          foo:
-            bar: !seq+append
-            - one
-        yml
-      end
-
-      it { should eq foo: { bar: ['one', 'two'] }, baz: 'buz' }
+    let(:three) do
+      <<~yml
+        env:
+          global:
+            - THREE=three
+      yml
     end
 
+    it { should eq env: { global: ['ONE=one', 'TWO=two', 'THREE=three'] } }
   end
 
   describe 'src and line' do
