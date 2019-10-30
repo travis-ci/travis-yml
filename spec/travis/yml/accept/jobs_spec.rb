@@ -140,6 +140,16 @@ describe Travis::Yml, 'jobs' do
       it { should_not have_msg }
     end
 
+    describe 'given osx_image' do
+      yaml %(
+        jobs:
+          include:
+            - osx_image: str
+      )
+      it { should serialize_to jobs: { include: [osx_image: 'str'] } }
+      it { should_not have_msg }
+    end
+
     describe 'given a map' do
       yaml %(
         jobs:

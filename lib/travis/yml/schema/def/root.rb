@@ -41,6 +41,7 @@ module Travis
             map    :import,         to: :imports
             map    :env
             matrix :compiler,       to: :compilers
+            matrix :osx_image,      to: :osx_images
             map    :stages
             map    :jobs,           alias: :matrix
             map    :notifications
