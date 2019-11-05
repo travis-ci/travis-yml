@@ -11,6 +11,7 @@ module Travis
 
         TRUE    = /^(#{TRUES.join('|')})$/
         FALSE   = /^(#{FALSES.join('|')})$/
+        BOOLEAN = /^(#{BOOLS.join('|')})$/
 
         def apply
           send(:"to_#{type}", value)
@@ -46,17 +47,33 @@ module Travis
             when Numeric then value
             when FALSE   then false
             when TRUE    then true
-            when String  then match(value)
+            when String  then str_to_bool(value)
             else !!value
             end
           end
 
-          def match(value)
+          def str_to_bool(value)
+            other = clean(value)
+            return other unless other.nil?
+            other = match(value)
+            return other unless other.nil?
+            value
+          end
+
+          def clean(value)
             value = value.gsub(/\W/, '')
+            return if value == self.value || BOOLEAN !~ value
+            value = to_bool(value)
+            msgs << [:clean_value, original: self.value, value: value]
+            value
+          end
+
+          def match(value)
             matched = Match.new(BOOLS, value).run
-            return self.value if matched.nil?
-            msgs << [:find_value, original: value, value: matched]
-            to_bool(matched)
+            return if matched.nil?
+            value = to_bool(matched)
+            msgs << [:find_value, original: self.value, value: value]
+            value
           end
       end
     end
