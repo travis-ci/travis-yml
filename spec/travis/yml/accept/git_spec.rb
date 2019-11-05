@@ -88,4 +88,43 @@ describe Travis::Yml, 'git' do
       it { should have_msg [:error, :'git.strategy', :unknown_value, value: 'unknown'] }
     end
   end
+
+  describe 'autocrlf' do
+    describe 'true' do
+      yaml %(
+        git:
+          autocrlf: true
+      )
+      it { should serialize_to git: { autocrlf: 'true' } }
+      it { should_not have_msg }
+    end
+
+    describe 'false' do
+      yaml %(
+        git:
+          autocrlf: false
+      )
+      it { should serialize_to git: { autocrlf: 'false' } }
+      it { should_not have_msg }
+    end
+
+    describe 'input' do
+      yaml %(
+        git:
+          autocrlf: input
+      )
+      it { should serialize_to git: { autocrlf: 'input' } }
+      it { should_not have_msg }
+    end
+
+    describe 'invalid' do
+      yaml %(
+        git:
+          autocrlf: invalid
+      )
+      it { should serialize_to git: { autocrlf: 'invalid' } }
+      it { should have_msg [:error, :'git.autocrlf', :unknown_value, value: 'invalid'] }
+    end
+
+  end
 end

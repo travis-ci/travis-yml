@@ -12,6 +12,15 @@ describe Travis::Yml::Schema::Def::Git do
       see: instance_of(Hash),
       type: :object,
       properties: {
+        autocrlf: {
+          type: :string,
+          enum: [
+            'true',
+            'false',
+            'input'
+          ],
+          summary: instance_of(String),
+        },
         strategy: {
           type: :string,
           enum: [
