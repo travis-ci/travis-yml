@@ -18,15 +18,12 @@ describe Travis::Yml::Schema::Def::Git do
               type: :boolean,
               enum: [
                 true,
-                false,
-                'input'
+                false
               ]
             },
             {
               type: :string,
               enum: [
-                true,
-                false,
                 'input'
               ]
             }
