@@ -20,7 +20,7 @@ module Travis
 
           class << self
             def build(type, attrs = {})
-              return build(:any, types: type) if type.is_a?(Array)
+              return build(:any, attrs.merge(types: type)) if type.is_a?(Array)
               caching(resolve(type), attrs) do |type|
                 node = type.new(self, only(attrs, :types))
                 node = Form.apply(node)
@@ -118,6 +118,7 @@ module Travis
           REMAP = {
             alias: :aliases,
             eg: :example,
+            enum: :value,
           }
 
           def assign(attrs)

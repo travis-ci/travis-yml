@@ -486,9 +486,9 @@ describe Travis::Yml, 'jobs' do
               #{key}:
                 env:
                   - FOO=foo
-                  - BAR=bar
+                  - FOO=bar
           )
-          it { should serialize_to jobs: { key => [env: [{ FOO: 'foo' }, { BAR: 'bar' }]] } }
+          it { should serialize_to jobs: { key => [env: [{ FOO: 'foo' }, { FOO: 'bar' }]] } }
           it { should_not have_msg }
         end
 
@@ -498,9 +498,9 @@ describe Travis::Yml, 'jobs' do
               #{key}:
                 env:
                   FOO: foo
-                  BAR: bar
+                  FOO: bar
           )
-          it { should serialize_to jobs: { key => [env: [{ FOO: 'foo', BAR: 'bar' }]] } }
+          it { should serialize_to jobs: { key => [env: [{ FOO: 'foo', FOO: 'bar' }]] } }
           it { should_not have_msg }
         end
 

@@ -95,7 +95,8 @@ describe Travis::Yml, 'git' do
         git:
           autocrlf: true
       )
-      it { should serialize_to git: { autocrlf: 'true' } }
+      let(:value) { { git: { autocrlf: true } } }
+      it { should serialize_to git: { autocrlf: true } }
       it { should_not have_msg }
     end
 
@@ -104,7 +105,8 @@ describe Travis::Yml, 'git' do
         git:
           autocrlf: false
       )
-      it { should serialize_to git: { autocrlf: 'false' } }
+      let(:value) { { git: { autocrlf: false } } }
+      it { should serialize_to git: { autocrlf: false } }
       it { should_not have_msg }
     end
 
@@ -113,6 +115,7 @@ describe Travis::Yml, 'git' do
         git:
           autocrlf: input
       )
+      let(:value) { { git: { autocrlf: 'input' } } }
       it { should serialize_to git: { autocrlf: 'input' } }
       it { should_not have_msg }
     end
@@ -122,9 +125,9 @@ describe Travis::Yml, 'git' do
         git:
           autocrlf: invalid
       )
+      let(:value) { { git: { autocrlf: 'invalid' } } }
       it { should serialize_to git: { autocrlf: 'invalid' } }
       it { should have_msg [:error, :'git.autocrlf', :unknown_value, value: 'invalid'] }
     end
-
   end
 end

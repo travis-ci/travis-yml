@@ -28,6 +28,7 @@ module Travis
           def value(*objs)
             objs = objs.flatten
             opts = objs.last.is_a?(Hash) ? objs.pop : {}
+            # objs = objs.select { |obj| matches?(obj) }
             objs = objs.map { |obj| { value: obj }.merge(opts) }
 
             attrs[:enum] ||= []

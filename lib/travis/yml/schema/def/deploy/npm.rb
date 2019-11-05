@@ -10,7 +10,7 @@ module Travis
             def define
               map :email,       to: :secure, strict: false
               map :api_token,   to: :secure, alias: :api_key
-              map :access,      to: :str, enum: %w(public private)
+              map :access,      to: :str, values: %w(public private)
               map :registry,    to: :str
               map :src,         to: :str
               map :tag,         to: :str
