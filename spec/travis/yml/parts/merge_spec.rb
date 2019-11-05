@@ -183,7 +183,7 @@ describe Travis::Yml::Parts::Merge do
   end
 
   describe 'merge mode and merge tags' do
-    let(:parts) { [part(one), part(two, nil, :deep_merge_append), part(three, nil, :deep_merge)] }
+    let(:parts) { [part(one), part(two, nil, :deep_merge), part(three)] }
 
     let(:one) do
       <<~yml

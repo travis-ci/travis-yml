@@ -78,19 +78,19 @@ describe Travis::Yml::Doc::Cast do
         it { expect(cast.apply).to eq 'foo' }
       end
 
-      %w(ture tru true# true/ .true true;).each do |str|
-        describe str do
-          let(:value) { str }
-          it { expect(cast.apply).to be true }
-        end
-      end
-
-      %w(fakse fals false, false` falsedc flase).each do |str|
-        describe str do
-          let(:value) { str }
-          it { expect(cast.apply).to be false }
-        end
-      end
+      # %w(ture tru true# true/ .true true;).each do |str|
+      #   describe str do
+      #     let(:value) { str }
+      #     it { expect(cast.apply).to be true }
+      #   end
+      # end
+      #
+      # %w(fakse fals false, false` falsedc flase).each do |str|
+      #   describe str do
+      #     let(:value) { str }
+      #     it { expect(cast.apply).to be false }
+      #   end
+      # end
     end
   end
 

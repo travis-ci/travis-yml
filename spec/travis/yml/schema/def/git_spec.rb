@@ -13,11 +13,23 @@ describe Travis::Yml::Schema::Def::Git do
       type: :object,
       properties: {
         autocrlf: {
-          type: :string,
-          enum: [
-            'true',
-            'false',
-            'input'
+          anyOf: [
+            {
+              type: :boolean,
+              enum: [
+                true,
+                false,
+                'input'
+              ]
+            },
+            {
+              type: :string,
+              enum: [
+                true,
+                false,
+                'input'
+              ]
+            }
           ],
           summary: instance_of(String),
         },

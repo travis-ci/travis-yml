@@ -9,8 +9,8 @@ module Travis
         FALSES  = ['false', 'off', 'no', 'disabled', 'not required']
         BOOLS   = TRUES + FALSES
 
-        TRUE    = /(#{TRUES.join('|')})/
-        FALSE   = /(#{FALSES.join('|')})/
+        TRUE    = /^(#{TRUES.join('|')})$/
+        FALSE   = /^(#{FALSES.join('|')})$/
 
         def apply
           send(:"to_#{type}", value)

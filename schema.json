@@ -681,11 +681,23 @@
             "summary": "Populate the working directory sparsely"
           },
           "autocrlf": {
-            "type": "string",
-            "enum": [
-              "true",
-              "false",
-              "input"
+            "anyOf": [
+              {
+                "type": "boolean",
+                "enum": [
+                  true,
+                  false,
+                  "input"
+                ]
+              },
+              {
+                "type": "string",
+                "enum": [
+                  true,
+                  false,
+                  "input"
+                ]
+              }
             ],
             "summary": "Specify handling of line endings when cloning repository"
           }
@@ -4933,7 +4945,11 @@
                 ]
               },
               "access": {
-                "type": "string"
+                "type": "string",
+                "enum": [
+                  "public",
+                  "private"
+                ]
               },
               "registry": {
                 "type": "string"

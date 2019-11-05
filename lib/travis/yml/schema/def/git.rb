@@ -25,7 +25,7 @@ module Travis
             map :submodules_depth, to: :num, summary: 'Number of commits to fetch for submodules'
             map :lfs_skip_smudge,  to: :bool, summary: 'Skip fetching the git-lfs files during the initial git clone'
             map :sparse_checkout,  to: :str, summary: 'Populate the working directory sparsely'
-            map :autocrlf,         to: :str, values: [:true, :false, :input], summary: 'Specify handling of line endings when cloning repository'
+            map :autocrlf,         to: [:bool, :str], values: [true, false, 'input'], summary: 'Specify handling of line endings when cloning repository'
 
             export
           end
