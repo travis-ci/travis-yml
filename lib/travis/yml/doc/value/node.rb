@@ -152,8 +152,8 @@ module Travis
 
           def with_line(args)
             return except(args, :line, :src) unless line?
-            args[:line] ||= key&.line
-            args[:src] ||= key&.src
+            args[:line] ||= key&.line rescue nil
+            args[:src] ||= key&.src rescue nil
             compact(args)
           end
 
