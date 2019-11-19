@@ -199,7 +199,37 @@ describe Travis::Yml, 'matrix' do
     ]
   end
 
-  describe 'jobs include' do
+  describe 'env and jobs include' do
+    yaml %(
+      env: FOO=foo
+      jobs:
+        include:
+          - name: one
+          - name: two
+    )
+
+    expands_to [
+      { env: [FOO: 'foo'], name: 'one' },
+      { env: [FOO: 'foo'], name: 'two' },
+    ]
+  end
+
+  describe 'rvm and jobs include' do
+    yaml %(
+      rvm: 2.5
+      jobs:
+        include:
+          - name: one
+          - name: two
+    )
+
+    expands_to [
+      { rvm: '2.5', name: 'one' },
+      { rvm: '2.5', name: 'two' },
+    ]
+  end
+
+  describe 'jobs include (1)' do
     yaml %(
       env:
         jobs: FOO=foo
@@ -219,6 +249,23 @@ describe Travis::Yml, 'matrix' do
     ]
   end
 
+  describe 'jobs include (2)' do
+    yaml %(
+      env:
+        global:
+          FOO: foo
+      jobs:
+        include:
+          - name: one
+          - name: two
+    )
+
+    expands_to [
+      { env: [FOO: 'foo'], name: 'one' },
+      { env: [FOO: 'foo'], name: 'two' },
+    ]
+  end
+
   describe 'jobs include inheriting a global matrix key' do
     yaml %(
       rvm: 2.4
@@ -234,7 +281,7 @@ describe Travis::Yml, 'matrix' do
     ]
   end
 
-  describe 'jobs include inheriting not env' do
+  describe 'jobs include inheriting env' do
     yaml %(
       env: FOO=foo
       jobs:
@@ -244,8 +291,8 @@ describe Travis::Yml, 'matrix' do
     )
 
     expands_to [
-      { name: 'one' },
-      { name: 'two' }
+      { env: [FOO: 'foo'], name: 'one' },
+      { env: [FOO: 'foo'], name: 'two' }
     ]
   end
 
