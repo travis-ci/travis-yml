@@ -10,6 +10,7 @@ module Travis
         rows = without_excluded(rows)
         rows = with_env_arrays(rows)
         rows = with_global_env(rows)
+        rows = with_first_env(rows)
         rows = with_shared(rows)
         rows = with_global(rows)
         rows = without_unsupported(rows)
@@ -51,7 +52,14 @@ module Travis
         end
 
         def with_global_env(rows)
-          rows.each { |row| (row[:env] ||= []).concat(global_env) } if global_env
+          rows.each { |row| (row[:env] ||= []).concat(global_env).uniq! } if global_env
+          rows
+        end
+
+        # The legacy implementation picked the first env var out of `env.jobs` if
+        # jobs listed in `jobs.include` if they do not define a key `env` already.
+        def with_first_env(rows)
+          rows.each { |row| (row[:env] ||= []).concat([first_env]).uniq! unless row[:env] } if first_env
           rows
         end
 
@@ -102,6 +110,16 @@ module Travis
 
         def global_env
           config[:env] && config[:env].is_a?(Hash) && config[:env][:global]
+        end
+
+        def first_env
+          case env = config[:env]
+          when Array
+            env.first
+          when Hash
+            env.fetch(:jobs, nil)&.first
+          end
+        rescue nil
         end
 
         def values
