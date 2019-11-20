@@ -14,7 +14,7 @@ module Travis::Yml
 
         def post(env)
           [200, headers, body(Decorators::Config, parse(env))]
-        rescue Travis::Yml::InputError, Psych::SyntaxError => error
+        rescue Travis::Yml::InputError, Psych::SyntaxError, Oj::ParseError => error
           [400, headers, body(Decorators::Error, error)]
         rescue Travis::Yml::InternalError, KeyError => error
           capture(error)
