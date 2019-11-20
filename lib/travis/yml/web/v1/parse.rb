@@ -14,11 +14,14 @@ module Travis::Yml
 
         def post(env)
           [200, headers, body(Decorators::Config, parse(env))]
-        rescue Travis::Yml::InputError, Psych::SyntaxError, Oj::ParseError => error
-          [400, headers, body(Decorators::Error, error)]
-        rescue Travis::Yml::InternalError, KeyError => error
-          capture(error)
-          [500, headers, body(Decorators::Error, error)]
+        rescue Travis::Yml::InputError, Psych::SyntaxError, Oj::ParseError => e
+          [400, headers, body(Decorators::Error, e)]
+        rescue Travis::Yml::InternalError, KeyError => e
+          capture(e)
+          [500, headers, body(Decorators::Error, e)]
+        rescue => e
+          capture(e)
+          raise
         end
 
         def parse(env)

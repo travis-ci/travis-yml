@@ -500,7 +500,7 @@ describe Travis::Yml, 'jobs' do
                   FOO: foo
                   FOO: bar
           )
-          it { should serialize_to jobs: { key => [env: [{ FOO: 'foo', FOO: 'bar' }]] } }
+          it { should serialize_to jobs: { key => [env: [{ FOO: 'bar' }]] } }
           it { should_not have_msg }
         end
 
