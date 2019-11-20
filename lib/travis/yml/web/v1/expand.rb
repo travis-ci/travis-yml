@@ -13,11 +13,12 @@ module Travis::Yml::Web
         req = Rack::Request.new(env)
         body = req.body.read
         config = Oj.load(body, symbol_keys: true, mode: :strict, empty_string: false)
+        config = config[:config] if config[:config]
         rows = Travis::Yml.matrix(config).rows
 
         [200, headers, body(Decorators::Matrix, rows)]
-      rescue Oj::Error, EncodingError => error
-        [400, headers, body(Decorators::Error, error)]
+      rescue Oj::Error, EncodingError => e
+        [400, headers, body(Decorators::Error, e)]
       end
     end
   end
