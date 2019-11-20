@@ -17,18 +17,18 @@ module Travis::Yml
         rescue Travis::Yml::InputError, Psych::SyntaxError, Oj::ParseError => e
           [400, headers, body(Decorators::Error, e)]
         rescue Travis::Yml::InternalError, KeyError => e
-          capture(e)
+          capture(e, body: @body)
           [500, headers, body(Decorators::Error, e)]
         rescue => e
-          capture(e)
+          capture(e, body: @body)
           raise
         end
 
         def parse(env)
           req = Rack::Request.new(env)
           query = Rack::Utils.parse_query(req.query_string)
-          body  = req.body.read
-          parts = configs?(env) ? configs(body) : [config(body)]
+          @body = req.body.read
+          parts = configs?(env) ? configs(@body) : [config(@body)]
           Travis::Yml.load(parts, opts(query))
         end
 
@@ -51,8 +51,8 @@ module Travis::Yml
           end
         end
 
-        def capture(error)
-          Raven.capture_exception(error, message: error.message, extra: { env: env }) if defined?(Raven)
+        def capture(error, extra)
+          Raven.capture_exception(error, message: error.message, extra: extra.merge(env: env)) if defined?(Raven)
         end
 
         def symbolize(hash)
