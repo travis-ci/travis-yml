@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'travis/yml/helper/condition'
+
 module Travis
   module Yml
     class Matrix < Obj.new(:config, :data)
@@ -107,7 +109,8 @@ module Travis
         def excluded?(row)
           excluded.any? do |excluded|
             next unless excluded.respond_to?(:all?)
-            excluded.all? { |key, value| wrap(row[key]) == wrap(value) }
+            next unless Condition.new(excluded, data).accept?
+            except(excluded, :if).all? { |key, value| wrap(row[key]) == wrap(value) }
           end
         end
 
