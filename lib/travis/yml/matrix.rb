@@ -95,12 +95,12 @@ module Travis
         end
 
         def included
-          return [] unless config.is_a?(Hash) && config[:jobs]
+          return [] unless config.is_a?(Hash) && config[:jobs].is_a?(Hash)
           [config[:jobs][:include] || []].flatten
         end
 
         def excluded
-          return [] unless config.is_a?(Hash) && config[:jobs]
+          return [] unless config.is_a?(Hash) && config[:jobs].is_a?(Hash)
           [config[:jobs][:exclude] || []].flatten
         end
 
