@@ -101,7 +101,8 @@ module Travis
       end
 
       def matrix(config)
-        Matrix.new(config)
+        config, data = config.values_at(:config, :data) if config[:config]
+        Matrix.new(config, data)
       end
 
       def msg(msg)

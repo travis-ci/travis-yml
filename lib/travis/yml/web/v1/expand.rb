@@ -12,9 +12,8 @@ module Travis::Yml::Web
       def post(env)
         req = Rack::Request.new(env)
         body = req.body.read
-        config = Oj.load(body, symbol_keys: true, mode: :strict, empty_string: false)
-        config, data = config.values_at(:config, :data) if config[:config]
-        rows = Travis::Yml.matrix(config, data || {}).rows
+        data = Oj.load(body, symbol_keys: true, mode: :strict, empty_string: false)
+        rows = Travis::Yml.matrix(data).rows
 
         [200, headers, body(Decorators::Matrix, rows)]
       rescue Oj::Error, EncodingError => e
