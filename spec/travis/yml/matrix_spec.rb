@@ -364,6 +364,19 @@ describe Travis::Yml, 'matrix' do
     expands_to []
   end
 
+  describe 'jobs exclude (3)' do
+    yaml %(
+      env:
+        - FOO=one BAR=one
+        - FOO=two BAR=two
+      jobs:
+        exclude:
+          - env: FOO=one BAR=one
+    )
+
+    expands_to [env: [FOO: 'two', BAR: 'two']]
+  end
+
   describe 'null env with include' do
     yaml %(
       env:

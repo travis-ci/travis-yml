@@ -105,7 +105,10 @@ module Travis
         end
 
         def excluded?(row)
-          excluded.any? { |excluded| excluded.all? { |key, value| wrap(row[key]) == wrap(value) } }
+          excluded.any? do |excluded|
+            next unless excluded.respond_to?(:all?)
+            excluded.all? { |key, value| wrap(row[key]) == wrap(value) }
+          end
         end
 
         def global_env
