@@ -249,22 +249,22 @@ describe Travis::Yml::Web::V1 do
 
   describe 'POST /expand' do
     it 'is ok' do
-      post '/expand', '{"rvm":"2.3"}', {}
+      post '/expand', '{ "config": { "rvm" : "2.3" } }', {}
       expect(status).to eq 200
     end
 
     it 'is json' do
-      post '/expand', '{"rvm":"2.3"}', {}
+      post '/expand', '{ "config": { "rvm" : "2.3" } }', {}
       expect(headers['Content-Type']).to eq 'application/json'
     end
 
     it 'returns version' do
-      post '/expand', '{"rvm":"2.3"}', {}
+      post '/expand', '{ "config": { "rvm" : "2.3" } }', {}
       expect(body['version']).to eq 'v1'
     end
 
     it 'returns expanded matrix' do
-      post '/expand', '{"rvm":"2.3"}', {}
+      post '/expand', '{ "config": { "rvm" : "2.3" } }', {}
       expect(body['matrix']).to eq [{ 'rvm' => '2.3' }]
     end
 

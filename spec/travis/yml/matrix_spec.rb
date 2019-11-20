@@ -380,15 +380,29 @@ describe Travis::Yml, 'matrix' do
   describe 'conditional jobs exclude (1)' do
     yaml %(
       env:
-        - FOO=one BAR=one
-        - FOO=two BAR=two
+        - FOO=one
+        - FOO=two
       jobs:
         exclude:
-          - env: FOO=one BAR=one
-            if: branch = master
+          - env: FOO=one
+            if: true
     )
 
-    expands_to [env: [FOO: 'two', BAR: 'two']]
+    expands_to [env: [FOO: 'two']]
+  end
+
+  describe 'conditional jobs exclude (2)' do
+    yaml %(
+      env:
+        - FOO=one
+        - FOO=two
+      jobs:
+        exclude:
+          - env: FOO=one
+            if: false
+    )
+
+    expands_to [{ env: [FOO: 'one'] }, { env: [FOO: 'two'] }]
   end
 
   describe 'null env with include' do
