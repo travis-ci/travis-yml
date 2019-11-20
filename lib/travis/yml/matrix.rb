@@ -2,7 +2,7 @@
 
 module Travis
   module Yml
-    class Matrix < Obj.new(:config)
+    class Matrix < Obj.new(:config, :data)
       def rows
         rows = expand
         rows = with_included(rows)
