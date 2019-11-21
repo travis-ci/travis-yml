@@ -12,6 +12,7 @@ module Travis::Yml::Web
       def post(env)
         req = Rack::Request.new(env)
         body = req.body.read
+        req.body.rewind
         data = Oj.load(body, symbol_keys: true, mode: :strict, empty_string: false)
         rows = Travis::Yml.matrix(data).rows
 

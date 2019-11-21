@@ -16,18 +16,13 @@ module Travis::Yml
           [200, headers, body(Decorators::Config, parse(env))]
         rescue Travis::Yml::InputError, Psych::SyntaxError, Oj::ParseError => e
           [400, headers, body(Decorators::Error, e)]
-        rescue Travis::Yml::InternalError, KeyError => e
-          capture(e)
-          [500, headers, body(Decorators::Error, e)]
-        rescue => e
-          capture(e)
-          raise
         end
 
         def parse(env)
           req = Rack::Request.new(env)
           query = Rack::Utils.parse_query(req.query_string)
           @body = req.body.read
+          req.body.rewind
           parts = configs?(env) ? configs(@body) : [config(@body)]
           Travis::Yml.load(parts, opts(query))
         end
@@ -49,11 +44,6 @@ module Travis::Yml
           Oj.load(json).map do |part|
             Parts::Part.new(*part.values_at(*%w(config source merge_mode)))
           end
-        end
-
-        def capture(error)
-          p [:debug_body, @body.inspect]
-          Raven.capture_exception(error, message: error.message, extra: { env: env, body: @body }) if defined?(Raven)
         end
 
         def symbolize(hash)
