@@ -109,21 +109,21 @@ describe Travis::Yml::Web::V1 do
       end
     end
 
-    context 'internal error' do
-      before do
-        allow(Travis::Yml).to receive(:load).and_raise(Travis::Yml::StackTooHigh, 'Stack size 100000')
-        post '/parse', 'rvm: 2.3', {}
-      end
-
-      it 'is internal server error' do
-        expect(status).to eq 500
-      end
-
-      it 'returns error' do
-        expect(body['error_type']).to eq 'stack_too_high'
-        expect(body['error_message']).to eq 'Stack size 100000'
-      end
-    end
+    # context 'internal error' do
+    #   before do
+    #     allow(Travis::Yml).to receive(:load).and_raise(Travis::Yml::StackTooHigh, 'Stack size 100000')
+    #     post '/parse', 'rvm: 2.3', {}
+    #   end
+    #
+    #   it 'is internal server error' do
+    #     expect(status).to eq 500
+    #   end
+    #
+    #   it 'returns error' do
+    #     expect(body['error_type']).to eq 'stack_too_high'
+    #     expect(body['error_message']).to eq 'Stack size 100000'
+    #   end
+    # end
   end
 
   describe 'POST /parse (multipart)' do
