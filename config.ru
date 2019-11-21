@@ -20,6 +20,7 @@ end
 
 if dsn = ENV['SENTRY_DSN']
   Raven.configure do |config|
+    config.processors -= [Raven::Processor::PostData] # send POST data
     config.dsn = dsn
   end
   use Raven::Rack
