@@ -17,10 +17,10 @@ module Travis::Yml
         rescue Travis::Yml::InputError, Psych::SyntaxError, Oj::ParseError => e
           [400, headers, body(Decorators::Error, e)]
         rescue Travis::Yml::InternalError, KeyError => e
-          capture(e, body: @body)
+          capture(e)
           [500, headers, body(Decorators::Error, e)]
         rescue => e
-          capture(e, body: @body)
+          capture(e)
           raise
         end
 
@@ -51,8 +51,9 @@ module Travis::Yml
           end
         end
 
-        def capture(error, extra)
-          Raven.capture_exception(error, message: error.message, extra: extra.merge(env: env)) if defined?(Raven)
+        def capture(error)
+          p [:debug_body, @body.inspect]
+          Raven.capture_exception(error, message: error.message, extra: { env: env, body: @body }) if defined?(Raven)
         end
 
         def symbolize(hash)
