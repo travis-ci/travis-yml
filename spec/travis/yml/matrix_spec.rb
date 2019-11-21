@@ -182,7 +182,7 @@ describe Travis::Yml, 'matrix' do
     ]
   end
 
-  describe 'duplicate jobs' do
+  describe 'osx_image on linux' do
     yaml %(
       os:
       - linux
@@ -196,6 +196,40 @@ describe Travis::Yml, 'matrix' do
       { os: 'linux' },
       { os: 'osx', osx_image: 'xcode9.4' },
       { os: 'osx', osx_image: 'xcode10.2' }
+    ]
+  end
+
+  describe 'arch on osx' do
+    yaml %(
+      os:
+      - linux
+      - osx
+      arch:
+      - amd64
+      - arm64
+    )
+
+    expands_to [
+      { os: 'linux', arch: 'amd64' },
+      { os: 'linux', arch: 'arm64' },
+      { os: 'osx' },
+    ]
+  end
+
+  describe 'arch on windows' do
+    yaml %(
+      os:
+      - linux
+      - windows
+      arch:
+      - amd64
+      - arm64
+    )
+
+    expands_to [
+      { os: 'linux', arch: 'amd64' },
+      { os: 'linux', arch: 'arm64' },
+      { os: 'windows' },
     ]
   end
 

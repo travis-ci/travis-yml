@@ -85,8 +85,8 @@ module Travis
 
         def without_unsupported(rows)
           rows.map do |row|
-            # TODO inspect the schema for supported keys, rather than hardcoding this
             row.delete(:osx_image) unless row[:os] == 'osx'
+            row.delete(:arch) unless row[:os] == 'linux'
             row
           end
         end
