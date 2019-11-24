@@ -143,7 +143,7 @@ module Travis
           end
 
           def msg(level, code, args = {})
-            args = compact(with_line(args))
+            args = with_line(args)
             msg = [level, full_key, code]
             msg << args unless args.empty?
             root.msgs << msg unless root.msgs.include?(msg)
