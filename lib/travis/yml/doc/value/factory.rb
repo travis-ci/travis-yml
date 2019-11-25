@@ -16,6 +16,7 @@ module Travis
               FalseClass => :bool,
               Float      => :num,
               Integer    => :num,
+              Key        => :str,
               String     => :str,
               Symbol     => :str,
               NilClass   => :none,

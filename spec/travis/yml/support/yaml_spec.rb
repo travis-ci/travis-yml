@@ -256,6 +256,17 @@ describe Yaml do
     it { should have_attributes opts: { anchors: ['foo'] } }
   end
 
+  describe 'broken anchor (user input, not sure if this is right)' do
+    yaml %(
+      &a:  5
+      b: *a
+      c:
+       <<: *a
+    )
+
+    it { should eq '' => 5, 'b' => '', 'c' => { '<<' => '' } }
+  end
+
   describe 'merge modes (map, 1)' do
     yaml %(
       !map+deep_merge+append
