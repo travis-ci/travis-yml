@@ -530,6 +530,28 @@ describe Travis::Yml, 'jobs' do
         it { should_not have_msg }
       end
 
+      describe 'given a condition' do
+        describe 'valid' do
+          yaml %(
+            jobs:
+              #{key}:
+                - if: 'branch = master'
+          )
+          it { should serialize_to jobs: { key => [if: 'branch = master'] } }
+          it { should_not have_msg }
+        end
+
+        describe 'invalid' do
+          yaml %(
+            jobs:
+              #{key}:
+                if: '= foo'
+          )
+          it { should serialize_to empty }
+          it { should have_msg [:error, :"jobs.#{key}.if", :invalid_condition, condition: '= foo'] }
+        end
+      end
+
       describe 'given an unsupported key' do
         describe 'language given on root' do
           yaml %(
