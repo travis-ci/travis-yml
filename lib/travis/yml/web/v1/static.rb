@@ -17,7 +17,7 @@ module Travis::Yml::Web
 
       def get(env)
         @env = env
-        exists? ? ok : not_found
+        file? ? ok : not_found
       end
 
       def ok
@@ -28,8 +28,8 @@ module Travis::Yml::Web
         [404, headers, ['Not found']]
       end
 
-      def exists?
-        File.exists?(path)
+      def file?
+        File.file?(path)
       end
 
       def read
