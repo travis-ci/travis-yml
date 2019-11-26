@@ -111,7 +111,10 @@ module Travis
         msg = msg % args if args
         msg = '[%s] on %s: %s' % [level, key, msg]
         msg
-      # rescue KeyError => e
+      rescue KeyError => e
+        msg = "unable to generate message (level: %s, key: %s, code: %s, args: %s)" % [level, key, code, args]
+        Raven.capture_message(msg) if defined?(Raven)
+        msg
       end
 
       def keys

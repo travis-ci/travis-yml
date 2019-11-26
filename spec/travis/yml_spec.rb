@@ -196,6 +196,11 @@ describe Travis::Yml do
       let(:msg) { [:info, :key, :invalid_format, value: 'value'] }
       it { should eq '[info] on key: dropping invalid format value' }
     end
+
+    describe 'key error' do
+      let(:msg) { [:info, :key, :unknown_value, foo: :bar] }
+      it { should eq 'unable to generate message (level: info, key: key, code: unknown_value, args: {:foo=>:bar})' }
+    end
   end
 
   describe 'memoized methods on Obj subclasses' do
