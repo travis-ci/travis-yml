@@ -99,6 +99,7 @@ module Yaml
     end
 
     def to_key(node)
+      raise unacceptable_key(node) unless node.respond_to?(:value)
       key = node.value.to_s
       key = key[1..-1] if key[0] == ':'
       node.value = Key.new(key, node.start_line)
@@ -122,6 +123,10 @@ module Yaml
       # Psych's implementation
       # @st.fetch(o.anchor) { raise BadAlias, "Unknown alias: #{o.anchor}" }
       @st[node.anchor]
+    end
+
+    def unacceptable_key(node)
+      Psych::SyntaxError.new(nil, node.start_line, node.start_column, nil, "unacceptable key (#{node.class.name.split('::').last.downcase})", nil)
     end
   end
 end

@@ -267,6 +267,15 @@ describe Yaml do
     it { should eq '' => 5, 'b' => '', 'c' => { '<<' => '' } }
   end
 
+  describe 'map with a map as a key' do
+    yaml %(
+    foo:
+      { bar: baz }: buz
+    )
+
+    it { expect { subject }.to raise_error Psych::SyntaxError }
+  end
+
   describe 'merge modes (map, 1)' do
     yaml %(
       !map+deep_merge+append
