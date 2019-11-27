@@ -209,6 +209,7 @@ describe Travis::Yml::Schema::Def::Root do
         elixir
         elm
         erlang
+        generic
         go
         groovy
         hack

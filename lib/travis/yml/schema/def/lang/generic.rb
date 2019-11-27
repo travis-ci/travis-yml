@@ -4,14 +4,13 @@ module Travis
   module Yml
     module Schema
       module Def
-        class Shell < Type::Lang
-          register :shell
+        class Generic < Type::Lang
+          register :generic
 
           def define
-            title 'Shell'
-            summary 'Shell language support'
+            title 'Generic'
+            summary 'Generic language support'
             see 'Minimal and Generic images': 'https://docs.travis-ci.com/user/languages/minimal-and-generic/'
-            aliases *%i(bash minimal sh)
           end
         end
       end

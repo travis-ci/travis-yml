@@ -1048,6 +1048,7 @@
           "elixir",
           "elm",
           "erlang",
+          "generic",
           "go",
           "groovy",
           "hack",
@@ -1109,7 +1110,6 @@
           "shell": {
             "aliases": [
               "bash",
-              "generic",
               "minimal",
               "sh"
             ]
@@ -1200,6 +1200,9 @@
           },
           {
             "$ref": "#/definitions/language/erlang"
+          },
+          {
+            "$ref": "#/definitions/language/generic"
           },
           {
             "$ref": "#/definitions/language/go"
@@ -1843,6 +1846,9 @@
           },
           {
             "$ref": "#/definitions/support/erlang_support"
+          },
+          {
+            "$ref": "#/definitions/support/generic_support"
           },
           {
             "$ref": "#/definitions/support/go_support"
@@ -6988,6 +6994,16 @@
         },
         "normal": true
       },
+      "generic": {
+        "$id": "generic",
+        "title": "Generic",
+        "type": "object",
+        "summary": "Generic language support",
+        "see": {
+          "Minimal and Generic images": "https://docs.travis-ci.com/user/languages/minimal-and-generic/"
+        },
+        "normal": true
+      },
       "go": {
         "$id": "go",
         "title": "Go",
@@ -8191,6 +8207,12 @@
             }
           }
         },
+        "normal": true
+      },
+      "generic_support": {
+        "$id": "generic_support",
+        "title": "Generic Support",
+        "type": "object",
         "normal": true
       },
       "go_support": {
