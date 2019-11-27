@@ -24,6 +24,7 @@ describe Travis::Yml::Schema::Def::Language do
         'elixir',
         'elm',
         'erlang',
+        'generic',
         'go',
         'groovy',
         'hack',
@@ -105,7 +106,6 @@ describe Travis::Yml::Schema::Def::Language do
         shell: {
           aliases: [
             'bash',
-            'generic',
             'minimal',
             'sh'
           ]

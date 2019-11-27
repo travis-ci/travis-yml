@@ -165,6 +165,7 @@ describe Travis::Yml, configs: true do
     service
     fail_fast
     lang
+    general
     username
     add_ons
     allow_failure
