@@ -5,6 +5,7 @@ describe Travis::Yml, 'arch' do
     amd64
     arm64
     ppc64le
+    s390x
   )
 
   known.each do |value|

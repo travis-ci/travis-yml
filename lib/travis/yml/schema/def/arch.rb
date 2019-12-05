@@ -41,6 +41,7 @@ module Travis
             value :amd64, alias: :x86_64
             value :arm64
             value :ppc64le, alias: %i(power ppc ppc64)
+            value :s390x
 
             export
           end

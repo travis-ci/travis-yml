@@ -4,6 +4,7 @@ describe Travis::Yml, 'accept', slow: true do
   describe 'arch' do
     it { should validate arch: 'amd64' }
     it { should validate arch: 'ppc64le' }
+    it { should validate arch: 's390x' }
     it { should validate arch: ['amd64'] }
 
     it { should_not validate arch: 'not-an-arch' }
