@@ -40,6 +40,7 @@ describe Travis::Yml::Schema::Def::Archs do
           'amd64',
           'arm64',
           'ppc64le',
+          's390x'
         ],
         downcase: true,
         values: {
