@@ -17,7 +17,8 @@ WORKDIR /app
 COPY Gemfile       /app
 COPY Gemfile.lock  /app
 
-RUN bundle install --without test
+RUN gem install bundler -v '2.0.1'
+RUN bundle install --deployment --without development test
 
 # Copy app files into app folder
 COPY . /app
