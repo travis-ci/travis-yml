@@ -5,10 +5,19 @@ cache: bundler
 before_install:
 - gem install bundler
 
-script:
-- bundle exec rspec spec
-- bundle exec rspec spec/integrate/configs_spec.rb --tag configs
+jobs:
+  include:
+    - stage: "testing time"
+      script:
+        - bundle exec rspec spec
+        - bundle exec rspec spec/integrate/configs_spec.rb --tag configs
 
-# - bundle exec bin/spec > spec.json
-# - git diff --stat --exit-code
-# - git diff --stat --cached --exit-code
+        # - bundle exec bin/spec > spec.json
+        # - git diff --stat --exit-code
+        # - git diff --stat --cached --exit-code
+    - stage: ":ship: it to quay.io"
+      language: ruby
+      before_install: skip
+      install: skip
+      script: make ship
+      if: type = cron OR commit_message =~ /ship:docker/ OR env(SHIP_DOCKER) = true
