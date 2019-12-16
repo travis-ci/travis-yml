@@ -27,7 +27,7 @@ DOCKER ?= docker
 
 .PHONY: docker-build
 docker-build:
-	$(DOCKER) build --build-arg -t $(DOCKER_DEST) .
+	$(DOCKER) build -t $(DOCKER_DEST) .
 
 .PHONY: docker-login
 docker-login:
