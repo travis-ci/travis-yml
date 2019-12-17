@@ -19,5 +19,6 @@ COPY . /app
 
 RUN gem install bundler -v '2.0.1'
 RUN bundle install --deployment --without development test --clean
+RUN gem install --user-install executable-hooks
 
 CMD bundle exec puma -C lib/travis/yml/web/puma.rb
