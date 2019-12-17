@@ -16,6 +16,8 @@ jobs:
         # - git diff --stat --cached --exit-code
     - stage: ":ship: it to quay.io"
       language: ruby
+      cache: 
+        bundler: false
       before_install: skip
       install: skip
       script: make ship
