@@ -6,7 +6,7 @@ require 'travis/yml/web'
 env = Travis::Yml::Web::Env
 
 if env.production?
-  use Rack::SslEnforcer
+  use Rack::SslEnforcer unless ENV['TRAVIS_ENTERPRISE']
   use Travis::Yml::Web::BasicAuth
 
 elsif env.staging?
