@@ -6,7 +6,7 @@ gem 'redcarpet'
 
 group :web do
   gem 'puma', '~> 3.12.0'
-  gem 'rack', '~> 2.0.6'
+  gem 'rack', '~> 2.0.8'
   gem 'rack-cors', '~> 1.0.2'
   gem 'rack-ssl-enforcer', '~> 0.2.9'
   gem 'sentry-raven', '~> 2.9.0'
