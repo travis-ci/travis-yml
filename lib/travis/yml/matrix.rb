@@ -98,7 +98,16 @@ module Travis
 
         def included
           return [] unless config.is_a?(Hash) && config[:jobs].is_a?(Hash)
-          [config[:jobs][:include] || []].flatten.select { |row| row.is_a?(Hash) }
+          rows = [config[:jobs][:include] || []].flatten.select { |row| row.is_a?(Hash) }
+          with_stages(rows)
+        end
+
+        def with_stages(rows)
+          rows.inject(nil) do |stage, row|
+            row[:stage] ||= stage if stage
+            row[:stage] || stage
+          end
+          rows
         end
 
         def excluded

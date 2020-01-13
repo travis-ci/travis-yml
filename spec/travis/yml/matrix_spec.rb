@@ -481,4 +481,25 @@ describe Travis::Yml, 'matrix' do
       { language: 'shell' }
     ]
   end
+
+  describe 'stages with matching env vars' do
+    yaml %(
+      env:
+        - ONE=one
+        - TWO=two
+
+      jobs:
+        include:
+          - stage: one
+            env: ONE=one
+          - env: TWO=two
+    )
+
+    expands_to [
+      { env: [ONE: 'one'] },
+      { env: [TWO: 'two'] },
+      { env: [ONE: 'one'], stage: 'one' },
+      { env: [TWO: 'two'], stage: 'one' },
+    ]
+  end
 end
