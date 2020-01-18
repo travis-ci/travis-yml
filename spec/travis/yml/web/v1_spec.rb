@@ -243,7 +243,28 @@ describe Travis::Yml::Web::V1 do
           'unknown' => 'str'
         )
       end
+    end
 
+    describe 'merge_mode: deep_merge with two arrays' do
+      let(:data) do
+        [
+          { 'config' => JSON.dump('env' => { 'global' => ['BAR=bar'] }) },
+          { 'config' => JSON.dump('env' => { 'global' => ['FOO=foo'] }), 'merge_mode' => 'deep_merge' },
+        ]
+      end
+
+      it { expect(body['config']).to eq 'env' => { 'global' => [{ 'BAR' => 'bar' }] } }
+    end
+
+    describe 'merge_mode: deep_merge_append with two arrays' do
+      let(:data) do
+        [
+          { 'config' => JSON.dump('env' => { 'global' => ['BAR=bar'] }) },
+          { 'config' => JSON.dump('env' => { 'global' => ['FOO=foo'] }), 'merge_mode' => 'deep_merge_append' },
+        ]
+      end
+
+      it { expect(body['config']).to eq 'env' => { 'global' => [{ 'BAR' => 'bar' }, { 'FOO' => 'foo' }] } }
     end
   end
 

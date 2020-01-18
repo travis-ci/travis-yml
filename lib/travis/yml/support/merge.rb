@@ -25,7 +25,7 @@ module Travis
           keys(lft, rgt).inject(lft) do |hash, key|
             hash[key] = if hashes?(lft[key], rgt[key])
               send(mode(lft[key]) || :deep_merge, lft[key], rgt[key])
-            elsif arrays?(lft[key], rgt[key]) && mode = lft[key].merge_mode
+            elsif arrays?(lft[key], rgt[key]) && lft[key].respond_to?(:merge_mode) && mode = lft[key].merge_mode
               send(mode, lft[key], rgt[key])
             elsif lft.key?(key)
               lft[key]
