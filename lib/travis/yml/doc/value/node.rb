@@ -154,7 +154,9 @@ module Travis
             return except(args, :line, :src) unless line?
             args[:line] ||= key&.line rescue nil
             args[:src] ||= key&.src rescue nil
-            compact(args)
+            args.delete(:line) unless args[:line]
+            args.delete(:src) unless args[:src]
+            args
           end
 
           # hmmm. msgs are stored in opts so they get propagated to other nodes

@@ -242,6 +242,14 @@ describe Travis::Yml, 'root' do
     it { should have_msg [:warn, :root, :unknown_key, key: 'file', value: 'file'] }
   end
 
+  describe 'given a broken map', line: true do
+    yaml %(
+      node_js: {"8"}
+    )
+
+    it { should have_msg [:error, :node_js, :invalid_type, expected: :str, actual: :map, value: { '8': nil }, line: 1] }
+  end
+
   describe 'line number info', line: true do
     describe 'unknown_key' do
       yaml "unknown: str"
