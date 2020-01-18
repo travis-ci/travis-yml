@@ -103,6 +103,29 @@ describe Travis::Yml, 'env' do
     it { should_not have_msg }
   end
 
+  describe 'given a seq with a nested seq with vars' do
+    yaml %(
+      env:
+        -
+          - FOO=foo
+        - BAR=bar
+    )
+    it { should serialize_to env: { jobs: [{ FOO: 'foo' }, { BAR: 'bar' }] } }
+    it { should_not have_msg }
+  end
+
+  describe 'given a seq with a nested nested seq with vars' do
+    yaml %(
+      env:
+        -
+          -
+            - FOO=foo
+        - BAR=bar
+    )
+    it { should serialize_to env: { jobs: [{ FOO: 'foo' }, { BAR: 'bar' }] } }
+    it { should_not have_msg }
+  end
+
   describe 'given a map' do
     yaml %(
       env:
