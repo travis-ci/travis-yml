@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Travis::Yml::Web::V1 do
+describe Travis::Yml::Web::App do
   include Rack::Test::Methods
 
   let(:status)  { last_response.status }
@@ -17,7 +17,7 @@ describe Travis::Yml::Web::V1 do
 
     it 'is html' do
       get '/'
-      expect(headers['Content-Type']).to eq 'text/html'
+      expect(headers['Content-Type']).to eq 'text/html;charset=utf-8'
     end
   end
 
@@ -277,11 +277,6 @@ describe Travis::Yml::Web::V1 do
     it 'is json' do
       post '/expand', '{ "config": { "rvm" : "2.3" } }', {}
       expect(headers['Content-Type']).to eq 'application/json'
-    end
-
-    it 'returns version' do
-      post '/expand', '{ "config": { "rvm" : "2.3" } }', {}
-      expect(body['version']).to eq 'v1'
     end
 
     it 'returns expanded matrix' do

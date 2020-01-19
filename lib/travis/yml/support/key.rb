@@ -7,7 +7,7 @@ class Key < String
     super(str)
   end
 
-  %i(downcase gsub sub tr to_s).each do |name|
+  %i(downcase gsub sub tr).each do |name|
     define_method(name) do |*args, &block|
       obj = Key.new(super(*args, &block))
       obj.line = line
