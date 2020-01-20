@@ -21,7 +21,7 @@ module Travis
         attr_reader :metrics
 
         def setup
-          @metrics = Travis::Metrics.setup(config.metrics, logger)
+          @metrics ||= Travis::Metrics.setup(config.metrics.to_h, logger)
         end
 
         def config
