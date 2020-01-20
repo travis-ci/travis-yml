@@ -16,8 +16,8 @@ module Travis
 
           def key(env)
             key = case path(env)
-            when %r(^(v1/)?/expand$) then :expand
-            when %r(^(v1/)?/parse$) then :parse
+            when %r(^(/v1)?/expand$) then :expand
+            when %r(^(/v1)?/parse$) then :parse
             when %r(^(/css/*|favicon.ico)$) then :static
             else get?(env) ? :docs : :unknown_request
             end
