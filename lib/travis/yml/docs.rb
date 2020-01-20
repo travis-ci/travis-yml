@@ -34,9 +34,10 @@ module Travis
       end
 
       def write(path, page)
-        file = "#{DIR}#{path}.md"
+        path = '/home' if path == '/'
+        file = "#{DIR}#{path}.html"
         FileUtils.mkpath(File.dirname(file))
-        File.write(file, page.render(current: path))
+        File.write(file, page.render(current: path, format: :html))
         print '.'
       end
 

@@ -44,18 +44,19 @@ module Travis
           use Rack::SslEnforcer unless config.enterprise?
           use Sentry if ENV['SENTRY_DSN']
           use Auth, config.auth_keys
+          use Metrics
         end
+
+        use Expand
+        use Parse
+        use Static, 'public'
+        use Static, 'public/docs'
+        # use Docs
 
         get '/uptime' do
           status 200
           uptime.to_s
         end
-
-        use Metrics
-        use Expand
-        use Parse
-        use Static
-        use Docs
 
         private
 
