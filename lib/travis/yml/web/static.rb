@@ -10,14 +10,15 @@ module Travis
           ico:  'image/vnd.microsoft.icon'
         }
 
-        attr_reader :env
+        attr_reader :dir
 
-        get '/favicon.ico' do
-          exists? ? ok : not_found
+        def initialize(app, dir)
+          @dir = dir
+          super(app)
         end
 
-        get '/css/*' do
-          exists? ? ok : not_found
+        get '*' do
+          exists? ? ok : pass
         end
 
         def ok
@@ -27,19 +28,26 @@ module Travis
         end
 
         def exists?
-          File.file?(path)
+          File.file?(file)
         end
 
         def read
-          File.read(path)
+          File.read(file)
         end
 
         def ext
-          File.extname(path).sub('.', '')
+          File.extname(file).sub('.', '')
+        end
+
+        def file
+          @file ||= "#{dir}#{path}"
         end
 
         def path
-          @path ||= "public#{request.path_info.gsub('..', '')}"
+          path = request.path_info.gsub('..', '')
+          path = '/home' if path == '/'
+          path = "#{path}.html" if File.extname(path).empty?
+          path
         end
       end
     end
