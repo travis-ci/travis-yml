@@ -8,6 +8,7 @@ group :web do
   gem 'puma', '~> 3.12.0'
   gem 'sinatra'
   gem 'sinatra-contrib'
+  gem 'rack-cors'
   gem 'rack-ssl-enforcer', '~> 0.2.9'
   gem 'sentry-raven', '~> 2.9.0'
   gem 'travis-config', '~> 1.1.3'

@@ -17,9 +17,9 @@
         var parseSpin = document.getElementById('parse-spin');
         var expandedSpin = document.getElementById('expanded-spin');
 
-        var token = 'jfnCqbJlbvxZlX40uE0DKg';
-        var parseURL = 'https://yml-staging.travis-ci.org/v1/parse';
-        var expandURL = 'https://yml-staging.travis-ci.org/v1/expand';
+        var token = "<%= ENV['API_TOKEN'] || 'jfnCqbJlbvxZlX40uE0DKg' %>";
+        var parseURL = "<%= ENV['URL_PARSE'] || 'https://yml-staging.travis-ci.org/v1/parse' %>";
+        var expandURL = "<%= ENV['URL_EXPAND'] || 'https://yml-staging.travis-ci.org/v1/expand' %>";
 
         var throttle = function(fn, ms, scope) {
           var wait = false;

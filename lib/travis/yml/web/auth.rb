@@ -12,14 +12,14 @@ module Travis
         end
 
         def call(env)
-          return not_authenticated unless get?(env) || authenticated?(env)
+          return not_authenticated if post?(env) && !authenticated?(env)
           app.call(env)
         end
 
         private
 
-        def get?(env)
-          env['REQUEST_METHOD'] == 'GET'
+        def post?(env)
+          env['REQUEST_METHOD'] == 'POST'
         end
 
         def authenticated?(env)
