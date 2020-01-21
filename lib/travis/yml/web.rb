@@ -1,6 +1,7 @@
 # #frozen_string_literal: true
 
 require 'logger'
+require 'rack/cors'
 require 'rack/ssl-enforcer'
 require 'sinatra'
 require 'sinatra/json'
@@ -38,6 +39,13 @@ module Travis
 
         def self.config
           Web.config
+        end
+
+        use Rack::Cors, debug: true, logger: Logger.new($stdout) do
+          allow do
+            origins '*'
+            resource '*', headers: :any, methods: :any
+          end
         end
 
         configure :production, :staging do
