@@ -125,7 +125,7 @@ describe Travis::Yml, 'jobs' do
         jobs:
           include: true
       )
-      it { should serialize_to empty }
+      it { should serialize_to jobs: { include: [] } }
       it { should have_msg [:error, :"jobs.include", :invalid_type, expected: :map, actual: :bool, value: true] }
     end
 
@@ -167,7 +167,7 @@ describe Travis::Yml, 'jobs' do
             mono:
               4.0.5env: EDITOR=nvim
       )
-      it { should serialize_to empty }
+      it { should serialize_to jobs: { include: [] } }
       it { should have_msg [:error, :'jobs.include.mono', :invalid_type, expected: :str, actual: :map, value: { :'4.0.5env' => 'EDITOR=nvim' }] }
     end
 
@@ -380,7 +380,7 @@ describe Travis::Yml, 'jobs' do
             include:
               if: '= foo'
         )
-        it { should serialize_to empty }
+        it { should serialize_to jobs: { include: [] } }
         it { should have_msg [:error, :'jobs.include.if', :invalid_condition, condition: '= foo'] }
       end
     end
@@ -446,7 +446,7 @@ describe Travis::Yml, 'jobs' do
           jobs:
             #{key}: true
         )
-        it { should serialize_to empty }
+          it { should serialize_to jobs: { key => [] } }
         it { should have_msg [:error, :"jobs.#{key}", :invalid_type, expected: :map, actual: :bool, value: true] }
       end
 
@@ -547,7 +547,7 @@ describe Travis::Yml, 'jobs' do
               #{key}:
                 if: '= foo'
           )
-          it { should serialize_to empty }
+          it { should serialize_to jobs: { key => [] } }
           it { should have_msg [:error, :"jobs.#{key}.if", :invalid_condition, condition: '= foo'] }
         end
       end
@@ -609,7 +609,7 @@ describe Travis::Yml, 'jobs' do
           allowed_failures:
             - 2.3
       )
-      it { should serialize_to empty }
+      it { should serialize_to jobs: { allow_failures: [] } }
       it { should have_msg [:error, :'jobs.allow_failures', :invalid_type, expected: :map, actual: :str, value: '2.3'] }
     end
 

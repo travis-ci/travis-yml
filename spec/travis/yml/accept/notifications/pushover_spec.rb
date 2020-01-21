@@ -64,7 +64,7 @@ describe Travis::Yml, 'notifications: pushover' do
       notifications:
         pushover: str
     )
-    it { should serialize_to empty }
+    it { should serialize_to notifications: { pushover: [] } }
     it { should have_msg [:error, :'notifications.pushover', :invalid_type, expected: :map, actual: :str, value: 'str'] }
   end
 
@@ -74,7 +74,7 @@ describe Travis::Yml, 'notifications: pushover' do
         pushover:
           secure: secure
     )
-    it { should serialize_to empty }
+    it { should serialize_to notifications: { pushover: [] } }
     it { should have_msg [:error, :'notifications.pushover', :invalid_type, expected: :map, actual: :secure, value: { secure: 'secure' }] }
   end
 
@@ -84,7 +84,7 @@ describe Travis::Yml, 'notifications: pushover' do
         pushover:
           - str
     )
-    it { should serialize_to empty }
+    it { should serialize_to notifications: { pushover: [] } }
     it { should have_msg [:error, :'notifications.pushover', :invalid_type, expected: :map, actual: :str, value: 'str'] }
   end
 

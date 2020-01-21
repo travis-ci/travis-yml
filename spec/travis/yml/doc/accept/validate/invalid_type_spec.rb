@@ -71,7 +71,7 @@ describe Travis::Yml, 'invalid_type', line: true do
       end
 
       describe 'drop turned on', drop: true do
-        it { should serialize_to empty }
+        it { should serialize_to os: [] }
         it { should have_msg [:error, :os, :invalid_type, expected: :str, actual: :map, value: { name: 'linux' }, line: 0] }
       end
     end
