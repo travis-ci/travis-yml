@@ -1,0 +1,101 @@
+<html>
+  <head>
+    <link rel="stylesheet" type="text/css" href="/css/docs/styles.css" />
+    <link rel="stylesheet" type="text/css" href="/css/docs/syntax.css" />
+    <script type="text/javascript" src="https://unpkg.com/whatwg-fetch@2.0.3/fetch.js"></script>
+    <script type="text/javascript" src="/js/explore.js"></script>
+    <script type="text/javascript">
+      window.token = "jfnCqbJlbvxZlX40uE0DKg";
+      window.parseURL = "https://yml-staging.travis-ci.org/v1/parse";
+      window.expandURL = "https://yml-staging.travis-ci.org/v1/expand";
+    </script>
+  </head>
+  <body>
+    <div id="menu">
+      <ul>
+<li><a href="/">Home</a></li>
+<li><a href="/ref/language">Language</a></li>
+<li><a href="/ref/os">Os</a></li>
+<li><a href="/ref/job/addons">Addons</a></li>
+<li><a href="/ref/arch">Arch</a></li>
+<li><a href="/ref/job/branches">Branches</a></li>
+<li><a href="/ref/job/cache">Cache</a></li>
+<li><a href="/ref/compiler">Compiler</a></li>
+<li><a href="/ref/job/deploy">Deploy</a></li>
+<li><a href="/ref/dist">Dist</a></li>
+<li><a href="/ref/env">Env</a></li>
+<li><a href="/ref/job/git">Git</a></li>
+<li><a href="/ref/job/if/condition">If</a></li>
+<li><a href="/ref/import">Import</a></li>
+<li><a href="/ref/jobs">Jobs</a></li>
+<li><a href="/ref/notifications">Notifications</a></li>
+<li><a href="/ref/osx_image">Osx Image</a></li>
+<li><a href="/ref/job/services">Services</a></li>
+<li><a href="/ref/stages">Stages</a></li>
+<li><a href="/ref/version">Version</a></li>
+<li><a href="/matrix_expansion">Matrix Expansion</a></li>
+<li><a href="/types">Types</a></li>
+<li><a href="/index">Index</a></li>
+<li><a href="/explore">Explore</a></li>
+</ul>
+
+    </div>
+    <div id="content">
+      <h1 id="cache">Cache</h1>
+
+<p><em>Cache settings to speed up the build</em></p>
+
+<p>Activates caching content that does not often change in order to speed up the build process.</p>
+
+<p>There are built-in caching strategies for <code>apt</code>, <code>bundler</code>, <code>cargo</code>, <code>ccache</code>, <code>cocoapods</code>, <code>npm</code>, <code>packages</code>, <code>pip</code>, <code>yarn</code>. For other scenarios the generic <code>directory</code> option can be used.</p>
+
+<h2 id="see-also">See also</h2>
+
+<ul>
+<li><a href="https://docs.travis-ci.com/user/caching/">Caching Dependencies and Directories</a></li>
+</ul>
+
+<h2 id="types">Types</h2>
+
+<ul>
+<li><a href="/types">Map</a></li>
+<li><a href="/types">Enum (Boolean)</a></li>
+</ul>
+
+<h2 id="keys">Keys</h2>
+
+<p>If given a map, the following keys are supported:</p>
+
+<ul>
+<li><p><code>directories</code> &mdash; Generic directory caching strategy (type: sequence of string, or string, e.g.: <code>./path</code>)</p></li>
+<li><p><code>apt</code> &mdash; Use the apt caching strategy (type: boolean)</p></li>
+<li><p><code>bundler</code> &mdash; Use the bundler caching strategy (type: boolean)</p></li>
+<li><p><code>cargo</code> &mdash; Use the cargo caching strategy (type: boolean)</p></li>
+<li><p><code>ccache</code> &mdash; Use the ccache caching strategy (type: boolean)</p></li>
+<li><p><code>cocoapods</code> &mdash; Use the cocoapods caching strategy (type: boolean)</p></li>
+<li><p><code>npm</code> &mdash; Use the npm caching strategy (type: boolean)</p></li>
+<li><p><code>packages</code> &mdash; Use the packages caching strategy (type: boolean)</p></li>
+<li><p><code>pip</code> &mdash; Use the pip caching strategy (type: boolean)</p></li>
+<li><p><code>yarn</code> &mdash; Use the yarn caching strategy (type: boolean)</p></li>
+<li><p><code>timeout</code> &mdash; Timeout for the cache tooling (type: number, default: <code>3</code>)</p></li>
+<li><p><code>edge</code> &mdash; Use an edge version of the cache tooling (type: boolean)</p></li>
+<li><p><code>branch</code> &mdash; (type: string)</p></li>
+</ul>
+
+<h2 id="examples">Examples</h2>
+
+<pre><code class="yaml">cache:
+  directories:
+  - &quot;./path&quot;
+  apt: true
+  bundler: true
+</code></pre>
+
+<pre><code class="yaml">cache: false
+
+</code></pre>
+
+    </div>
+    <div class="corner-ribbon">Beta</div>
+  </body>
+</html>

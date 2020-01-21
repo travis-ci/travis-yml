@@ -1,0 +1,117 @@
+<html>
+  <head>
+    <link rel="stylesheet" type="text/css" href="/css/docs/styles.css" />
+    <link rel="stylesheet" type="text/css" href="/css/docs/syntax.css" />
+    <script type="text/javascript" src="https://unpkg.com/whatwg-fetch@2.0.3/fetch.js"></script>
+    <script type="text/javascript" src="/js/explore.js"></script>
+    <script type="text/javascript">
+      window.token = "jfnCqbJlbvxZlX40uE0DKg";
+      window.parseURL = "https://yml-staging.travis-ci.org/v1/parse";
+      window.expandURL = "https://yml-staging.travis-ci.org/v1/expand";
+    </script>
+  </head>
+  <body>
+    <div id="menu">
+      <ul>
+<li><a href="/">Home</a></li>
+<li><a href="/ref/language">Language</a></li>
+<li><a href="/ref/os">Os</a></li>
+<li><a href="/ref/job/addons">Addons</a></li>
+<li><a href="/ref/arch">Arch</a></li>
+<li><a href="/ref/job/branches">Branches</a></li>
+<li><a href="/ref/job/cache">Cache</a></li>
+<li><a href="/ref/compiler">Compiler</a></li>
+<li><a href="/ref/job/deploy">Deploy</a></li>
+<li><a href="/ref/dist">Dist</a></li>
+<li><a href="/ref/env">Env</a></li>
+<li><a href="/ref/job/git">Git</a></li>
+<li><a href="/ref/job/if/condition">If</a></li>
+<li><a href="/ref/import">Import</a></li>
+<li><a href="/ref/jobs">Jobs</a>
+
+<ul>
+<li><a href="/ref/jobs/include/jobs_entries">Include</a></li>
+<li><a href="/ref/jobs/exclude/jobs_entries">Exclude</a></li>
+<li><a href="/ref/jobs/allow_failures/jobs_entries">Allow Failures</a></li>
+</ul></li>
+<li><a href="/ref/notifications">Notifications</a></li>
+<li><a href="/ref/osx_image">Osx Image</a></li>
+<li><a href="/ref/job/services">Services</a></li>
+<li><a href="/ref/stages">Stages</a></li>
+<li><a href="/ref/version">Version</a></li>
+<li><a href="/matrix_expansion">Matrix Expansion</a></li>
+<li><a href="/types">Types</a></li>
+<li><a href="/index">Index</a></li>
+<li><a href="/explore">Explore</a></li>
+</ul>
+
+    </div>
+    <div id="content">
+      <h1 id="job-matrix-entries-exclude">Job Matrix Entries (exclude)</h1>
+
+<p><em>Attributes of jobs to exclude from the build matrix</em></p>
+
+<h2 id="types">Types</h2>
+
+<ul>
+<li><a href="/types">Sequence of Job Matrix Entry</a></li>
+<li><a href="/ref/jobs/exclude/jobs_entries/jobs_entry">Job Matrix Entry</a></li>
+</ul>
+
+<h2 id="keys">Keys</h2>
+
+<p>If given a map, the following keys are supported:</p>
+
+<ul>
+<li><p><code>language</code> &mdash; Language support to enable (type: enum (string), known values: <code>android</code>, <code>c</code>, <code>clojure</code>, <code>cpp</code>, <code>crystal</code>, <code>csharp</code>, <code>d</code>, <code>dart</code>, <code>elixir</code>, <code>elm</code>, <code>...</code>, default: <code>ruby, objective-c</code>, e.g.: <code>ruby</code>, see: <a href="https://docs.travis-ci.com/user/languages/">Languages</a>, <a href="https://docs.travis-ci.com/user/build-matrix/">Build Matrix</a>)</p></li>
+<li><p><code>os</code> &mdash; (type: enum (string), known values: <code>linux</code>, <code>osx</code>, <code>windows</code>, default: <code>linux, osx, windows</code>)</p></li>
+<li><p><code>dist</code> &mdash; Build environment distribution (type: enum (string), known values: <code>trusty</code>, <code>precise</code>, <code>xenial</code>, <code>bionic</code>, <code>server-2016</code>, see: <a href="https://docs.travis-ci.com/user/reference/overview/#virtualization-environments">Virtualization environments</a>)</p></li>
+<li><p><code>arch</code> &mdash; Build environment architecture (type: enum (string), known values: <code>amd64</code>, <code>arm64</code>, <code>ppc64le</code>, <code>s390x</code>)</p></li>
+<li><p><code>osx_image</code> &mdash; OSX image to use for the build environment (type: string)</p></li>
+<li><p><code>sudo</code> &mdash; Whether to allow sudo access (<strong>deprecated</strong>, type: boolean, or string, e.g.: <code>required</code>)</p></li>
+<li><p><code>env</code> &mdash; Environment variables to set up (type: sequence of map, sequence of secure, sequence of string, map, secure, or string)</p></li>
+<li><p><code>compiler</code> &mdash; (type: string, e.g.: <code>gcc</code>)</p></li>
+<li><p><code>name</code> &mdash; (type: string)</p></li>
+<li><p><code>stage</code> &mdash; (type: string)</p></li>
+</ul>
+
+<h2 id="shared-keys">Shared keys</h2>
+
+<ul>
+<li><code>addons</code>: Build addons to activate <a href="/ref/jobs/exclude/jobs_entries/job/addons">details</a></li>
+<li><code>branches</code>: Include or exclude branches from being built <a href="/ref/jobs/exclude/jobs_entries/job/branches">details</a></li>
+<li><code>cache</code>: Cache settings to speed up the build <a href="/ref/jobs/exclude/jobs_entries/job/cache">details</a></li>
+<li><code>deploy</code>: Deployment target configurations <a href="/ref/jobs/exclude/jobs_entries/job/deploy">details</a></li>
+<li><code>git</code>: Git settings <a href="/ref/jobs/exclude/jobs_entries/job/git">details</a></li>
+<li><code>if</code>: Condition to determine if a build, stage, or job should be run, a config source imported, or a notification sent <a href="/ref/jobs/exclude/jobs_entries/job/if/condition">details</a></li>
+<li><code>services</code>: Services to set up and start <a href="/ref/jobs/exclude/jobs_entries/job/services">details</a></li>
+<li><code>before_install</code>: Scripts to run before the install stage </li>
+<li><code>install</code>: Scripts to run at the install stage </li>
+<li><code>before_script</code>: Scripts to run before the script stage </li>
+<li><code>script</code>: Scripts to run at the script stage </li>
+<li><code>before_cache</code>: Scripts to run before storing a build cache </li>
+<li><code>after_success</code>: Scripts to run after a successful script stage </li>
+<li><code>after_failure</code>: Scripts to run after a failing script stage </li>
+<li><code>before_deploy</code>: Scripts to run before the deploy stage </li>
+<li><code>after_deploy</code>: Scripts to run after the deploy stage </li>
+<li><code>after_script</code>: Scripts to run as the last stage </li>
+</ul>
+
+<h2 id="examples">Examples</h2>
+
+<pre><code class="yaml">exclude:
+- language: ruby
+  os: linux
+  dist: trusty
+</code></pre>
+
+<pre><code class="yaml">exclude:
+  language: ruby
+  os: linux
+  dist: trusty
+</code></pre>
+
+    </div>
+    <div class="corner-ribbon">Beta</div>
+  </body>
+</html>

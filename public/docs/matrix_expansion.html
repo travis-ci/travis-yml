@@ -1,0 +1,136 @@
+<html>
+  <head>
+    <link rel="stylesheet" type="text/css" href="/css/docs/styles.css" />
+    <link rel="stylesheet" type="text/css" href="/css/docs/syntax.css" />
+    <script type="text/javascript" src="https://unpkg.com/whatwg-fetch@2.0.3/fetch.js"></script>
+    <script type="text/javascript" src="/js/explore.js"></script>
+    <script type="text/javascript">
+      window.token = "jfnCqbJlbvxZlX40uE0DKg";
+      window.parseURL = "https://yml-staging.travis-ci.org/v1/parse";
+      window.expandURL = "https://yml-staging.travis-ci.org/v1/expand";
+    </script>
+  </head>
+  <body>
+    <div id="menu">
+      <ul>
+<li><a href="/">Home</a></li>
+<li><a href="/ref/language">Language</a></li>
+<li><a href="/ref/os">Os</a></li>
+<li><a href="/ref/job/addons">Addons</a></li>
+<li><a href="/ref/arch">Arch</a></li>
+<li><a href="/ref/job/branches">Branches</a></li>
+<li><a href="/ref/job/cache">Cache</a></li>
+<li><a href="/ref/compiler">Compiler</a></li>
+<li><a href="/ref/job/deploy">Deploy</a></li>
+<li><a href="/ref/dist">Dist</a></li>
+<li><a href="/ref/env">Env</a></li>
+<li><a href="/ref/job/git">Git</a></li>
+<li><a href="/ref/job/if/condition">If</a></li>
+<li><a href="/ref/import">Import</a></li>
+<li><a href="/ref/jobs">Jobs</a></li>
+<li><a href="/ref/notifications">Notifications</a></li>
+<li><a href="/ref/osx_image">Osx Image</a></li>
+<li><a href="/ref/job/services">Services</a></li>
+<li><a href="/ref/stages">Stages</a></li>
+<li><a href="/ref/version">Version</a></li>
+<li><a href="/matrix_expansion">Matrix Expansion</a></li>
+<li><a href="/types">Types</a></li>
+<li><a href="/index">Index</a></li>
+<li><a href="/explore">Explore</a></li>
+</ul>
+
+    </div>
+    <div id="content">
+      <h1 id="matrix-expansion">Matrix Expansion</h1>
+
+<p>A build contains one or more jobs to run in parallel or <a href="/ref/stages">stages</a>.</p>
+
+<p>These jobs come out of the build matrix expansion. Additional jobs can be added
+manually using the <a href="/ref/matrix">matrix</a> key.</p>
+
+<p>The build matrix expansion is driven by matrix expansion keys that are defined
+in the build configuration. If no expansion keys are given, or they only have
+a single value each, then the resulting build will only have a single job.</p>
+
+<p>For example, the keys <code>os</code> and <code>python</code> (on Python builds) are matrix expansion
+keys.</p>
+
+<p>If just <code>os</code> is given as:</p>
+
+<pre><code class="yaml">os:
+- linux
+- osx
+</code></pre>
+
+<p>Then the resulting build will have two jobs, one configured to run on <code>os:
+linux</code>, one on <code>os: osx</code>.</p>
+
+<p>If both <code>os</code> and <code>python</code> are given as:</p>
+
+<pre><code class="yaml">os:
+- linux
+- osx
+
+python:
+- 2.7
+- 3.6
+- 3.7
+</code></pre>
+
+<p>Then the resulting build will have 6 jobs, combining each <code>os</code> with each one of
+the <code>python</code> versions.</p>
+
+<h2 id="matrix-expansion-keys">Matrix expansion keys</h2>
+
+<p>The following expansion keys are known:</p>
+
+<ul>
+<li><code>os</code></li>
+<li><code>arch</code></li>
+<li><code>env.matrix</code> (also <code>env</code> due to <a href="/types#map">normalization of maps</a>, if no key <code>global</code> or <code>matrix</code> is present)</li>
+</ul>
+
+<p>The following expansion keys are supported depending on the <a href="/ref/language">language</a> selected:</p>
+
+<ul>
+<li><p><code>compiler</code></p></li>
+<li><p><code>crystal</code></p></li>
+<li><p><code>d</code></p></li>
+<li><p><code>dart</code></p></li>
+<li><p><code>dart_task</code></p></li>
+<li><p><code>dotnet</code></p></li>
+<li><p><code>elixir</code></p></li>
+<li><p><code>elm</code></p></li>
+<li><p><code>gemfile</code></p></li>
+<li><p><code>ghc</code></p></li>
+<li><p><code>go</code></p></li>
+<li><p><code>haxe</code></p></li>
+<li><p><code>hhvm</code></p></li>
+<li><p><code>jdk</code></p></li>
+<li><p><code>jobs</code></p></li>
+<li><p><code>julia</code></p></li>
+<li><p><code>mono</code></p></li>
+<li><p><code>nix</code></p></li>
+<li><p><code>node_js</code></p></li>
+<li><p><code>osx_image</code></p></li>
+<li><p><code>otp_release</code></p></li>
+<li><p><code>perl</code></p></li>
+<li><p><code>perl6</code></p></li>
+<li><p><code>php</code></p></li>
+<li><p><code>python</code></p></li>
+<li><p><code>r</code></p></li>
+<li><p><code>rust</code></p></li>
+<li><p><code>rvm</code></p></li>
+<li><p><code>scala</code></p></li>
+<li><p><code>smalltalk</code></p></li>
+<li><p><code>smalltalk_config</code></p></li>
+<li><p><code>smalltalk_vm</code></p></li>
+<li><p><code>solution</code></p></li>
+<li><p><code>xcode_scheme</code></p></li>
+<li><p><code>xcode_sdk</code></p></li>
+</ul>
+
+    </div>
+    <div class="corner-ribbon">Beta</div>
+  </body>
+</html>

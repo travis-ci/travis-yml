@@ -1,0 +1,109 @@
+<html>
+  <head>
+    <link rel="stylesheet" type="text/css" href="/css/docs/styles.css" />
+    <link rel="stylesheet" type="text/css" href="/css/docs/syntax.css" />
+    <script type="text/javascript" src="https://unpkg.com/whatwg-fetch@2.0.3/fetch.js"></script>
+    <script type="text/javascript" src="/js/explore.js"></script>
+    <script type="text/javascript">
+      window.token = "jfnCqbJlbvxZlX40uE0DKg";
+      window.parseURL = "https://yml-staging.travis-ci.org/v1/parse";
+      window.expandURL = "https://yml-staging.travis-ci.org/v1/expand";
+    </script>
+  </head>
+  <body>
+    <div id="menu">
+      <ul>
+<li><a href="/">Home</a></li>
+<li><a href="/ref/language">Language</a></li>
+<li><a href="/ref/os">Os</a></li>
+<li><a href="/ref/job/addons">Addons</a></li>
+<li><a href="/ref/arch">Arch</a></li>
+<li><a href="/ref/job/branches">Branches</a></li>
+<li><a href="/ref/job/cache">Cache</a></li>
+<li><a href="/ref/compiler">Compiler</a></li>
+<li><a href="/ref/job/deploy">Deploy</a></li>
+<li><a href="/ref/dist">Dist</a></li>
+<li><a href="/ref/env">Env</a></li>
+<li><a href="/ref/job/git">Git</a></li>
+<li><a href="/ref/job/if/condition">If</a></li>
+<li><a href="/ref/import">Import</a></li>
+<li><a href="/ref/jobs">Jobs</a>
+
+<ul>
+<li><a href="/ref/jobs/include/jobs_entries">Include</a></li>
+<li><a href="/ref/jobs/exclude/jobs_entries">Exclude</a></li>
+<li><a href="/ref/jobs/allow_failures/jobs_entries">Allow Failures</a></li>
+</ul></li>
+<li><a href="/ref/notifications">Notifications</a></li>
+<li><a href="/ref/osx_image">Osx Image</a></li>
+<li><a href="/ref/job/services">Services</a></li>
+<li><a href="/ref/stages">Stages</a></li>
+<li><a href="/ref/version">Version</a></li>
+<li><a href="/matrix_expansion">Matrix Expansion</a></li>
+<li><a href="/types">Types</a></li>
+<li><a href="/index">Index</a></li>
+<li><a href="/explore">Explore</a></li>
+</ul>
+
+    </div>
+    <div id="content">
+      <h1 id="artifacts">Artifacts</h1>
+
+<p><em>Build artifacts to upload at the end of the build</em></p>
+
+<p>Automatically upload your build artifacts to Amazon S3 at the end of a build, after the <code>after_script</code> phase.</p>
+
+<p>Please see <a href="https://docs.travis-ci.com/user/uploading-artifacts/">our documentation</a> for details.</p>
+
+<h2 id="see-also">See also</h2>
+
+<ul>
+<li><a href="https://docs.travis-ci.com/user/uploading-artifacts/">Uploading Artifacts on Travis CI</a></li>
+</ul>
+
+<h2 id="types">Types</h2>
+
+<ul>
+<li><a href="/types">Map</a></li>
+<li><a href="/types">Boolean</a></li>
+</ul>
+
+<h2 id="keys">Keys</h2>
+
+<p>If given a map, the following keys are supported:</p>
+
+<ul>
+<li><p><code>enabled</code> &mdash; Enable or disable uploading artifacts (type: boolean)</p></li>
+<li><p><code>bucket</code> &mdash; The S3 bucket to upload to (type: string)</p></li>
+<li><p><code>endpoint</code> &mdash; The S3 compatible endpoint to upload to (type: string)</p></li>
+<li><p><code>key</code> &mdash; The S3 access key id (type: secure, alias: <code>aws_access_key_id</code>, <code>aws_access_key</code>, <code>access_key_id</code>, <code>access_key</code>)</p></li>
+<li><p><code>secret</code> &mdash; The S3 secret access key (type: secure, alias: <code>aws_secret_access_key</code>, <code>aws_secret_key</code>, <code>secret_access_key</code>, <code>secret_key</code>)</p></li>
+<li><p><code>region</code> &mdash; The S3 region (type: string, alias: <code>s3_region</code>)</p></li>
+<li><p><code>paths</code> &mdash; Paths to the files to upload (type: sequence of string, or string)</p></li>
+<li><p><code>branch</code> &mdash; (type: string)</p></li>
+<li><p><code>log_format</code> &mdash; (type: string)</p></li>
+<li><p><code>target_paths</code> &mdash; (type: sequence of string, or string)</p></li>
+<li><p><code>debug</code> &mdash; (type: boolean)</p></li>
+<li><p><code>concurrency</code> &mdash; (type: number)</p></li>
+<li><p><code>max_size</code> &mdash; (type: number)</p></li>
+<li><p><code>permissions</code> &mdash; (type: string)</p></li>
+<li><p><code>working_dir</code> &mdash; (type: string)</p></li>
+<li><p><code>cache_control</code> &mdash; (type: string)</p></li>
+</ul>
+
+<h2 id="examples">Examples</h2>
+
+<pre><code class="yaml">artifacts:
+  enabled: true
+  bucket: string
+  endpoint: string
+</code></pre>
+
+<pre><code class="yaml">artifacts: true
+
+</code></pre>
+
+    </div>
+    <div class="corner-ribbon">Beta</div>
+  </body>
+</html>

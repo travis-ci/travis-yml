@@ -1,0 +1,113 @@
+<html>
+  <head>
+    <link rel="stylesheet" type="text/css" href="/css/docs/styles.css" />
+    <link rel="stylesheet" type="text/css" href="/css/docs/syntax.css" />
+    <script type="text/javascript" src="https://unpkg.com/whatwg-fetch@2.0.3/fetch.js"></script>
+    <script type="text/javascript" src="/js/explore.js"></script>
+    <script type="text/javascript">
+      window.token = "jfnCqbJlbvxZlX40uE0DKg";
+      window.parseURL = "https://yml-staging.travis-ci.org/v1/parse";
+      window.expandURL = "https://yml-staging.travis-ci.org/v1/expand";
+    </script>
+  </head>
+  <body>
+    <div id="menu">
+      <ul>
+<li><a href="/">Home</a></li>
+<li><a href="/ref/language">Language</a></li>
+<li><a href="/ref/os">Os</a></li>
+<li><a href="/ref/job/addons">Addons</a></li>
+<li><a href="/ref/arch">Arch</a></li>
+<li><a href="/ref/job/branches">Branches</a></li>
+<li><a href="/ref/job/cache">Cache</a></li>
+<li><a href="/ref/compiler">Compiler</a></li>
+<li><a href="/ref/job/deploy">Deploy</a></li>
+<li><a href="/ref/dist">Dist</a></li>
+<li><a href="/ref/env">Env</a></li>
+<li><a href="/ref/job/git">Git</a></li>
+<li><a href="/ref/job/if/condition">If</a></li>
+<li><a href="/ref/import">Import</a></li>
+<li><a href="/ref/jobs">Jobs</a>
+
+<ul>
+<li><a href="/ref/jobs/include/jobs_entries">Include</a></li>
+<li><a href="/ref/jobs/exclude/jobs_entries">Exclude</a></li>
+<li><a href="/ref/jobs/allow_failures/jobs_entries">Allow Failures</a></li>
+</ul></li>
+<li><a href="/ref/notifications">Notifications</a></li>
+<li><a href="/ref/osx_image">Osx Image</a></li>
+<li><a href="/ref/job/services">Services</a></li>
+<li><a href="/ref/stages">Stages</a></li>
+<li><a href="/ref/version">Version</a></li>
+<li><a href="/matrix_expansion">Matrix Expansion</a></li>
+<li><a href="/types">Types</a></li>
+<li><a href="/index">Index</a></li>
+<li><a href="/explore">Explore</a></li>
+</ul>
+
+    </div>
+    <div id="content">
+      <h1 id="job-matrix-jobs">Job Matrix (jobs)</h1>
+
+<p><em>Build matrix definitions</em></p>
+
+<p>This node uses the key <code>include</code> as a <a href="/types#map">default prefix</a> if not given a <a href="/types">map</a>.</p>
+
+<h2 id="see-also">See also</h2>
+
+<ul>
+<li><a href="https://docs.travis-ci.com/user/build-matrix/">Build Matrix</a></li>
+</ul>
+
+<h2 id="types">Types</h2>
+
+<ul>
+<li><a href="/types">Map</a></li>
+<li><a href="/types">Sequence of Job Matrix Entry</a></li>
+<li><a href="/ref/jobs/jobs_entry">Job Matrix Entry</a></li>
+</ul>
+
+<h2 id="keys">Keys</h2>
+
+<p>If given a map, the following keys are supported:</p>
+
+<ul>
+<li><p><code>include</code> &mdash; Jobs to include to the build matrix (type: sequence of job matrix entry, or job matrix entry) <a href="/ref/jobs/include/jobs_entries">details</a></p></li>
+<li><p><code>exclude</code> &mdash; Attributes of jobs to exclude from the build matrix (type: sequence of job matrix entry, or job matrix entry) <a href="/ref/jobs/exclude/jobs_entries">details</a></p></li>
+<li><p><code>allow_failures</code> &mdash; Attributes of jobs that are allowed to fail (type: sequence of job matrix entry, or job matrix entry, alias: <code>allowed_failures</code>) <a href="/ref/jobs/allow_failures/jobs_entries">details</a></p></li>
+<li><p><code>fast_finish</code> &mdash; Allow the build to fail fast (type: boolean, alias: <code>fast_failure</code>)</p></li>
+</ul>
+
+<h2 id="examples">Examples</h2>
+
+<pre><code class="yaml">jobs:
+  include:
+  - language: ruby
+    os: linux
+    dist: trusty
+  exclude:
+  - language: ruby
+    os: linux
+    dist: trusty
+  allow_failures:
+  - language: ruby
+    os: linux
+    dist: trusty
+</code></pre>
+
+<pre><code class="yaml">jobs:
+- language: ruby
+  os: linux
+  dist: trusty
+</code></pre>
+
+<pre><code class="yaml">jobs:
+  language: ruby
+  os: linux
+  dist: trusty
+</code></pre>
+
+    </div>
+    <div class="corner-ribbon">Beta</div>
+  </body>
+</html>

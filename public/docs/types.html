@@ -1,0 +1,140 @@
+<html>
+  <head>
+    <link rel="stylesheet" type="text/css" href="/css/docs/styles.css" />
+    <link rel="stylesheet" type="text/css" href="/css/docs/syntax.css" />
+    <script type="text/javascript" src="https://unpkg.com/whatwg-fetch@2.0.3/fetch.js"></script>
+    <script type="text/javascript" src="/js/explore.js"></script>
+    <script type="text/javascript">
+      window.token = "jfnCqbJlbvxZlX40uE0DKg";
+      window.parseURL = "https://yml-staging.travis-ci.org/v1/parse";
+      window.expandURL = "https://yml-staging.travis-ci.org/v1/expand";
+    </script>
+  </head>
+  <body>
+    <div id="menu">
+      <ul>
+<li><a href="/">Home</a></li>
+<li><a href="/ref/language">Language</a></li>
+<li><a href="/ref/os">Os</a></li>
+<li><a href="/ref/job/addons">Addons</a></li>
+<li><a href="/ref/arch">Arch</a></li>
+<li><a href="/ref/job/branches">Branches</a></li>
+<li><a href="/ref/job/cache">Cache</a></li>
+<li><a href="/ref/compiler">Compiler</a></li>
+<li><a href="/ref/job/deploy">Deploy</a></li>
+<li><a href="/ref/dist">Dist</a></li>
+<li><a href="/ref/env">Env</a></li>
+<li><a href="/ref/job/git">Git</a></li>
+<li><a href="/ref/job/if/condition">If</a></li>
+<li><a href="/ref/import">Import</a></li>
+<li><a href="/ref/jobs">Jobs</a></li>
+<li><a href="/ref/notifications">Notifications</a></li>
+<li><a href="/ref/osx_image">Osx Image</a></li>
+<li><a href="/ref/job/services">Services</a></li>
+<li><a href="/ref/stages">Stages</a></li>
+<li><a href="/ref/version">Version</a></li>
+<li><a href="/matrix_expansion">Matrix Expansion</a></li>
+<li><a href="/types">Types</a></li>
+<li><a href="/index">Index</a></li>
+<li><a href="/explore">Explore</a></li>
+</ul>
+
+    </div>
+    <div id="content">
+      <h1 id="types">Types</h1>
+
+<p>The type names chosen in the Travis CI build configuration specification are
+borrowed from both YAML and JSON Schema.</p>
+
+<p>However, they add additional meaning in that complex types allow accepting
+simpler types by applying normalization through well-known patterns.</p>
+
+<h2 id="sequence">Sequence</h2>
+
+<p>An ordered sequence (an array, a list) of elements that allows duplicates.</p>
+
+<p>For example:</p>
+
+<pre><code class="yaml">env:
+- FOO=foo
+- BAR=bar
+</code></pre>
+
+<pre><code class="yaml">import:
+- ./one.yml@v1
+- ./two.yml@v1
+</code></pre>
+
+<p>Sequences of a given type always also accept the type itself, and normalize
+it by wrapping into a sequence.</p>
+
+<p>For example:</p>
+
+<pre><code class="yaml">os: linux
+</code></pre>
+
+<p>Because the <code>os</code> node expects a sequence of strings this will be normalized to:</p>
+
+<pre><code class="yaml">os:
+- linux
+</code></pre>
+
+<h2 id="map">Map</h2>
+
+<p>A map (a hash, a dictionary) of key/value pairs.</p>
+
+<p>For example:</p>
+
+<pre><code class="yaml">env:
+  FOO: foo
+  BAR: bar
+</code></pre>
+
+<pre><code class="yaml">import:
+  source: ./one.yml@v1
+  mode: deep_merge
+</code></pre>
+
+<p>Many map nodes define a default prefix key, which allows the node to accept the
+type that the prefix key maps to.</p>
+
+<p>For example the <a href="/ref/branches">Branches</a> node expects a
+map, and defines the key <code>only</code> to be the default prefix key, which expects a
+sequence of strings.</p>
+
+<p>Therefor:</p>
+
+<pre><code class="yaml">branches:
+- master
+</code></pre>
+
+<p>This will be normalized to:</p>
+
+<pre><code class="yaml">branches:
+  only:
+  - master
+</code></pre>
+
+<p>Together with the normalization <a href="#sequence">sequences</a> apply:</p>
+
+<pre><code class="yaml">branches: master
+</code></pre>
+
+<p>This will be normalized to the same normal form:</p>
+
+<pre><code class="yaml">branches:
+  only:
+  - master
+</code></pre>
+
+<h2 id="enum">Enum</h2>
+
+<p>A scalar (string, number, or boolean) allowing one out of several known values.</p>
+
+<p>For example, the key <code>dist</code> accepts any of the following values:
+<code>trusty</code>, <code>precise</code>, <code>xenial</code>, <code>bionic</code>, <code>server-2016</code>.</p>
+
+    </div>
+    <div class="corner-ribbon">Beta</div>
+  </body>
+</html>
