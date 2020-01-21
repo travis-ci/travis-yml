@@ -5,7 +5,7 @@ describe Travis::Yml, 'deploy' do
     yaml %(
       deploy: true
     )
-    it { should serialize_to empty }
+    it { should serialize_to deploy: [] }
     it { should have_msg [:error, :deploy, :invalid_type, expected: :map, actual: :bool, value: true] }
   end
 
@@ -13,7 +13,7 @@ describe Travis::Yml, 'deploy' do
     yaml %(
       deploy:
     )
-    it { should serialize_to empty }
+    it { should serialize_to deploy: [] }
     it { should_not have_msg }
   end
 
@@ -67,7 +67,7 @@ describe Travis::Yml, 'deploy' do
         provider:
           provider: heroku
     )
-    it { should serialize_to empty }
+    it { should serialize_to deploy: [] }
     it { should have_msg [:error, :'deploy.provider', :invalid_type, expected: :str, actual: :map, value: { provider: 'heroku' }] }
   end
 

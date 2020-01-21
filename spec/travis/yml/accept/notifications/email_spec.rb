@@ -6,7 +6,7 @@ describe Travis::Yml, 'notifications: email' do
       notifications:
         email:
     )
-    it { should serialize_to empty }
+    it { should serialize_to notifications: { email: [] } }
   end
 
   describe 'given true' do

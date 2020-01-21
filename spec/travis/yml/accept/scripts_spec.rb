@@ -25,6 +25,14 @@ describe Travis::Yml, 'scripts' do
     end
   end
 
+  describe 'given false' do
+    yaml %(
+      script: false
+    )
+    it { should serialize_to script: ['false'] }
+    it { should_not have_msg }
+  end
+
   describe 'given a seq' do
     yaml %(
       script:
@@ -32,6 +40,14 @@ describe Travis::Yml, 'scripts' do
       - ./bar
     )
     it { should serialize_to script: ['./foo', './bar'] }
+    it { should_not have_msg }
+  end
+
+  describe 'given an empty seq' do
+    yaml %(
+      script: []
+    )
+    it { should serialize_to script: [] }
     it { should_not have_msg }
   end
 

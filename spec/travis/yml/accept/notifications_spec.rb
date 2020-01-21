@@ -41,7 +41,7 @@ describe Travis::Yml, 'notifications' do
         notifications:
           email:
       )
-      it { should serialize_to empty }
+    it { should serialize_to notifications: { email: [] } }
       it { should_not have_msg }
     end
 
@@ -196,7 +196,7 @@ describe Travis::Yml, 'notifications' do
           campfire:
             if: '?!'
       )
-      it { should serialize_to empty }
+      it { should serialize_to notifications: { campfire: [] } }
       it { should have_msg [:error, :'notifications.campfire.if', :invalid_condition, condition: '?!'] }
     end
 
