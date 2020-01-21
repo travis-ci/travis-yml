@@ -7,6 +7,7 @@ module Travis
         TYPES = {
           css:  'text/css',
           html: 'text/html',
+          js:   'text/javascript',
           ico:  'image/vnd.microsoft.icon'
         }
 
