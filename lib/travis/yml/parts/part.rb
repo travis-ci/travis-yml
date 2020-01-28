@@ -17,7 +17,7 @@ module Travis
         def initialize(str, src = nil, merge_mode = nil)
           @str = str.strip
           @src = src
-          self.merge_mode = merge_mode
+          self.merge_mode = Array(merge_mode).first
           @data = Parse.new(self).apply
         end
 
