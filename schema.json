@@ -310,7 +310,7 @@
       "cache": {
         "$id": "cache",
         "title": "Cache",
-        "description": "Activates caching content that does not often change in order to speed up the build process.\n\nThere are built-in caching strategies for `apt`, `bundler`, `cargo`, `ccache`, `cocoapods`, `npm`, `packages`, `pip`, `yarn`.\nFor other scenarios the generic `directory` option can be used.",
+        "description": "Activates caching content that does not often change in order to speed up the build process.\n\nThere are built-in caching strategies for `apt`, `bundler`, `cargo`, `ccache`, `cocoapods`, `npm`, `packages`, `pip`, `shards`, `yarn`.\nFor other scenarios the generic `directory` option can be used.",
         "anyOf": [
           {
             "type": "object",
@@ -351,6 +351,10 @@
               "pip": {
                 "type": "boolean",
                 "summary": "Use the pip caching strategy"
+              },
+              "shards": {
+                "type": "boolean",
+                "summary": "Use the shards caching strategy"
               },
               "yarn": {
                 "type": "boolean",
