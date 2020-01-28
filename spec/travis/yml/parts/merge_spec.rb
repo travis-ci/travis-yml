@@ -96,6 +96,23 @@ describe Travis::Yml::Parts::Merge do
         )
       end
     end
+
+    describe 'deep-merge' do
+      let(:mode) { :deep_merge }
+
+      it do
+        should eq(
+          language: 'shell',
+          script: './api',
+          env: {
+            api: true,
+            foo: 1,
+            travis_yml: true,
+            import: true,
+          }
+        )
+      end
+    end
   end
 
   describe 'merge tags' do

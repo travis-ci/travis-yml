@@ -22,6 +22,7 @@ module Travis
         end
 
         def merge_mode=(mode)
+          mode = mode.to_s.gsub('-', '_') if mode
           mode = mode&.to_sym
           unknown_merge_mode!(mode) if mode && !MERGE_MODES.include?(mode)
           @merge_mode = mode
