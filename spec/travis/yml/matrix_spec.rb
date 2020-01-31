@@ -3,7 +3,7 @@ describe Travis::Yml, 'matrix' do
     it { should eq rows }
   end
 
-  let(:config) { described_class.apply(parse(yaml)).serialize }
+  let(:config) { described_class.apply(parse(yaml), opts).serialize }
   let(:matrix) { described_class.matrix(config) }
 
   subject { matrix.rows }
@@ -179,6 +179,19 @@ describe Travis::Yml, 'matrix' do
     expands_to [
       { env: [FOO: '1'] },
       { env: [FOO: '2'] }
+    ]
+  end
+
+  describe 'os matrix with no language', defaults: true do
+    yaml %(
+      os:
+      - linux
+      - osx
+    )
+
+    expands_to [
+      { language: 'ruby', os: 'linux' },
+      { language: 'ruby', os: 'osx' }
     ]
   end
 
