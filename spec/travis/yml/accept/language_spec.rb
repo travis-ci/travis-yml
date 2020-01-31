@@ -7,6 +7,22 @@ describe Travis::Yml, 'language' do
     it { should have_msg [:info, :root, :default, key: 'language', default: 'ruby'] }
   end
 
+  describe 'defaults to objective-c on osx', defaults: true do
+    yaml 'os: osx'
+    it { should serialize_to language: 'objective-c', os: ['osx'] }
+    it { should have_msg [:info, :root, :default, key: 'language', default: 'objective-c'] }
+  end
+
+  describe 'defaults to objective-c on linux and osx', defaults: true do
+    yaml %(
+      os:
+      - linux
+      - osx
+    )
+    it { should serialize_to language: 'ruby', os: ['linux', 'osx'] }
+    it { should have_msg [:info, :root, :default, key: 'language', default: 'ruby'] }
+  end
+
   langs = Travis::Yml::Schema::Type::Lang.registry
   langs = langs.select { |key, const| const < Travis::Yml::Schema::Type::Lang }
   langs.each do |language, const|
