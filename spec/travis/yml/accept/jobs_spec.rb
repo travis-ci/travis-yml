@@ -630,6 +630,18 @@ describe Travis::Yml, 'jobs' do
     end
   end
 
+  describe 'overwriting keys' do
+    yaml %(
+      bundler_args: '--arg'
+      jobs:
+        include:
+        - bundler_args: ''
+    )
+
+    it { should serialize_to bundler_args: '--arg', jobs: { include: [bundler_args: ''] } }
+    it { should_not have_msg }
+  end
+
   describe 'misplaced keys', v2: true, migrate: true do
     yaml %(
       jobs:

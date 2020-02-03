@@ -86,7 +86,11 @@ module Travis
           end
 
           def missing?
-            blank?(value) && !false?(value)
+            value.nil? || map? && empty?
+          end
+
+          def empty?
+            value.respond_to?(:empty?) && value.empty?
           end
 
           def alert?

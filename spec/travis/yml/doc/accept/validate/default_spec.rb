@@ -11,8 +11,8 @@ describe Travis::Yml::Doc::Validate, 'default', defaults: true, line: true do
 
     describe 'given an empty string' do
       yaml 'language: ""'
-      it { should serialize_to defaults }
-      it { should have_msg [:info, :root, :default, key: 'language', default: 'ruby', line: 0] }
+      it { should serialize_to language: '', os: ['linux'] }
+      it { should_not have_msg [:info, :root, :default, key: 'language'] }
     end
 
     describe 'given nil' do

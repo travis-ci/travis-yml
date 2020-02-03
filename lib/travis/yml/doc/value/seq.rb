@@ -12,10 +12,6 @@ module Travis
             :seq
           end
 
-          def missing?
-            false
-          end
-
           def first
             value.first
           end
