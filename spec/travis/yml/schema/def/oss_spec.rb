@@ -37,7 +37,8 @@ describe Travis::Yml::Schema::Def::Oss do
         enum: [
           'linux',
           'osx',
-          'windows'
+          'windows',
+          'linux-ppc64le'
         ],
         defaults: [
           {
@@ -88,6 +89,9 @@ describe Travis::Yml::Schema::Def::Oss do
               ]
             }
           },
+          # 'linux-ppc64le': {
+          #   deprecated: 'use os: linux, arch: ppc64le'
+          # },
           osx: {
             aliases: [
               'mac',
