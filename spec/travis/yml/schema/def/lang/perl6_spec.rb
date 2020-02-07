@@ -7,8 +7,8 @@ describe Travis::Yml::Schema::Def::Perl6 do
     should include(
       '$id': :perl6,
       title: 'Perl 6',
-      summary: instance_of(String),
-      see: instance_of(Hash),
+      summary: kind_of(String),
+      see: kind_of(Hash),
       type: :object,
       properties: {
         perl6: {

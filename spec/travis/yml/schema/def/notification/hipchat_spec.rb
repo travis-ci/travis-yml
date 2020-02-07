@@ -8,14 +8,14 @@ describe Travis::Yml::Schema::Def::Notification::Hipchat, 'structure' do
       '$id': :hipchat,
       title: 'Hipchat',
       normal: true,
-      see: instance_of(Hash),
+      see: kind_of(Hash),
       anyOf: [
         {
           type: :object,
           properties: {
             rooms: {
               '$ref': '#/definitions/type/secures',
-              summary: instance_of(String)
+              summary: kind_of(String)
             },
             format: {
               type: :string,
@@ -23,18 +23,18 @@ describe Travis::Yml::Schema::Def::Notification::Hipchat, 'structure' do
                 'html',
                 'text'
               ],
-              summary: instance_of(String)
+              summary: kind_of(String)
             },
             notify: {
               type: :boolean,
-              summary: instance_of(String)
+              summary: kind_of(String)
             },
             if: {
               '$ref': '#/definitions/type/condition'
             },
             on_pull_requests: {
               type: :boolean,
-              summary: instance_of(String)
+              summary: kind_of(String)
             },
             template: {
               '$ref': '#/definitions/notification/templates'
@@ -47,11 +47,11 @@ describe Travis::Yml::Schema::Def::Notification::Hipchat, 'structure' do
             },
             enabled: {
               type: :boolean,
-              summary: instance_of(String)
+              summary: kind_of(String)
             },
             disabled: {
               type: :boolean,
-              summary: instance_of(String)
+              summary: kind_of(String)
             }
           },
           additionalProperties: false,

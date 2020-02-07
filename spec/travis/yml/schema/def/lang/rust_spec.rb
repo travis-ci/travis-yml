@@ -7,8 +7,8 @@ describe Travis::Yml::Schema::Def::Rust do
     should include(
       '$id': :rust,
         title: 'Rust',
-        summary: instance_of(String),
-        see: instance_of(Hash),
+        summary: kind_of(String),
+        see: kind_of(Hash),
         type: :object,
         properties: {
           rust: {

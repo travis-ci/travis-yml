@@ -7,7 +7,7 @@ describe Travis::Yml::Schema::Def::Notification::Webhooks, 'structure' do
     should include(
       '$id': :webhooks,
       title: 'Webhooks',
-      see: instance_of(Hash),
+      see: kind_of(Hash),
       normal: true,
       anyOf: [
         {
@@ -15,11 +15,11 @@ describe Travis::Yml::Schema::Def::Notification::Webhooks, 'structure' do
           properties: {
             enabled: {
               type: :boolean,
-              summary: instance_of(String)
+              summary: kind_of(String)
             },
             disabled: {
               type: :boolean,
-              summary: instance_of(String)
+              summary: kind_of(String)
             },
             urls: {
               anyOf: [
@@ -36,7 +36,7 @@ describe Travis::Yml::Schema::Def::Notification::Webhooks, 'structure' do
                   strict: false
                 },
               ],
-              summary: instance_of(String)
+              summary: kind_of(String)
             },
             if: {
               '$ref': '#/definitions/type/condition'

@@ -7,6 +7,8 @@ module Travis
       module Value
         module Factory
           class << self
+            include Helper::Obj
+
             TYPES = {
               Hash       => :map,
               Map        => :map,
@@ -25,8 +27,8 @@ module Travis
             def build(parent, key, value, opts = {})
               value = value.value if value.is_a?(Node)
               type = TYPES[value.class] || raise("Unknown type: #{value}")
-              opts[:anchors] = value.opts[:anchors] if value.is_a?(::Map)
-              send(type, parent, key, value, opts)
+              node = send(type, parent, key, value, opts)
+              node
             end
 
             private
@@ -49,8 +51,10 @@ module Travis
 
               def map(parent, key, value, opts)
                 const = secure?(value) ? Secure : Map
-                map = const.new(parent, key, nil, opts)
-                map.value = value.map { |key, obj| [key, build(map, key, obj, opts)] }.to_h
+                opts = opts.merge(value.opts) if value.is_a?(::Map)
+                map = const.new(parent, key, nil, except(opts, :warnings))
+                map.value = value.map { |key, obj| [key, build(map, key, obj, opts)] }.to_map
+                warnings(map, value.opts[:warnings]) if value.is_a?(::Map)
                 map
               end
 
@@ -62,6 +66,13 @@ module Travis
 
               def secure?(value)
                 value.key?('secure') && value.keys.size == 1
+              end
+
+              def warnings(node, msgs)
+                Array(msgs).each do |msg|
+                  key = /Duplicate key (.*)/ =~ msg && $1
+                  node.error :duplicate_key, key: key
+                end
               end
           end
 

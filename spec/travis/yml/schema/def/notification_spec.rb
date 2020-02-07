@@ -26,7 +26,7 @@ describe Travis::Yml::Schema::Def::Notification::Notifications do
                   '$ref': '#/definitions/notification/campfire',
                 }
               ],
-              summary: instance_of(String)
+              summary: kind_of(String)
             },
             email: {
               anyOf: [
@@ -41,7 +41,7 @@ describe Travis::Yml::Schema::Def::Notification::Notifications do
                   '$ref': '#/definitions/notification/email',
                 }
               ],
-              summary: instance_of(String)
+              summary: kind_of(String)
             },
             flowdock: {
               anyOf: [
@@ -56,7 +56,7 @@ describe Travis::Yml::Schema::Def::Notification::Notifications do
                   '$ref': '#/definitions/notification/flowdock',
                 }
               ],
-              summary: instance_of(String)
+              summary: kind_of(String)
             },
             hipchat: {
               anyOf: [
@@ -71,7 +71,7 @@ describe Travis::Yml::Schema::Def::Notification::Notifications do
                   '$ref': '#/definitions/notification/hipchat',
                 }
               ],
-              summary: instance_of(String)
+              summary: kind_of(String)
             },
             irc: {
               anyOf: [
@@ -86,7 +86,7 @@ describe Travis::Yml::Schema::Def::Notification::Notifications do
                   '$ref': '#/definitions/notification/irc',
                 }
               ],
-              summary: instance_of(String)
+              summary: kind_of(String)
             },
             pushover: {
               anyOf: [
@@ -101,7 +101,7 @@ describe Travis::Yml::Schema::Def::Notification::Notifications do
                   '$ref': '#/definitions/notification/pushover',
                 }
               ],
-              summary: instance_of(String)
+              summary: kind_of(String)
             },
             slack: {
               anyOf: [
@@ -116,7 +116,7 @@ describe Travis::Yml::Schema::Def::Notification::Notifications do
                   '$ref': '#/definitions/notification/slack',
                 }
               ],
-              summary: instance_of(String)
+              summary: kind_of(String)
             },
             webhooks: {
               anyOf: [
@@ -131,7 +131,7 @@ describe Travis::Yml::Schema::Def::Notification::Notifications do
                   '$ref': '#/definitions/notification/webhooks',
                 }
               ],
-              summary: instance_of(String)
+              summary: kind_of(String)
             },
             on_success: {
               '$ref': '#/definitions/notification/frequency'

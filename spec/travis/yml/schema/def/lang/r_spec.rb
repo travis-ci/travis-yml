@@ -7,8 +7,8 @@ describe Travis::Yml::Schema::Def::R do
     should include(
       '$id': :r,
         title: 'R',
-        summary: instance_of(String),
-        see: instance_of(Hash),
+        summary: kind_of(String),
+        see: kind_of(Hash),
         type: :object,
         properties: {
           r: {

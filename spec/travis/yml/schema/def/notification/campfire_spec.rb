@@ -8,14 +8,14 @@ describe Travis::Yml::Schema::Def::Notification::Campfire, 'structure' do
       '$id': :campfire,
       title: 'Campfire',
       normal: true,
-      see: instance_of(Hash),
+      see: kind_of(Hash),
       anyOf: [
         {
           type: :object,
           properties: {
             rooms: {
               '$ref': '#/definitions/type/secures',
-              summary: instance_of(String)
+              summary: kind_of(String)
             },
             template: {
               '$ref': '#/definitions/notification/templates'
@@ -31,11 +31,11 @@ describe Travis::Yml::Schema::Def::Notification::Campfire, 'structure' do
             },
             enabled: {
               type: :boolean,
-              summary: instance_of(String)
+              summary: kind_of(String)
             },
             disabled: {
               type: :boolean,
-              summary: instance_of(String)
+              summary: kind_of(String)
             },
           },
           additionalProperties: false,

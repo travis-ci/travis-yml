@@ -7,8 +7,8 @@ describe Travis::Yml::Schema::Def::Addon::Sonarcloud do
     should include(
       '$id': :sonarcloud,
       title: 'Sonarcloud',
-      summary: instance_of(String),
-      see: instance_of(Hash),
+      summary: kind_of(String),
+      see: kind_of(Hash),
       anyOf: [
         {
           type: :object,

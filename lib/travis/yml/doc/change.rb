@@ -114,7 +114,7 @@ module Travis
               child = schema[key] || schema.strict? ? schema[key] : schema.schema
               [key, child ? Change.apply(child, value) : value]
             end
-            build(other.to_h)
+            build(other.to_map)
           end
         end
 

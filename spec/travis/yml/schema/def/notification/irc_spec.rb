@@ -8,18 +8,18 @@ describe Travis::Yml::Schema::Def::Notification::Irc, 'structure' do
       '$id': :irc,
       title: 'IRC',
       normal: true,
-      see: instance_of(Hash),
+      see: kind_of(Hash),
       anyOf: [
         {
           type: :object,
           properties: {
             enabled: {
               type: :boolean,
-              summary: instance_of(String)
+              summary: kind_of(String)
             },
             disabled: {
               type: :boolean,
-              summary: instance_of(String)
+              summary: kind_of(String)
             },
             channels: {
               anyOf: [
@@ -39,31 +39,31 @@ describe Travis::Yml::Schema::Def::Notification::Irc, 'structure' do
                   strict: false
                 },
               ],
-              summary: instance_of(String)
+              summary: kind_of(String)
             },
             channel_key: {
               '$ref': '#/definitions/type/secure',
-              summary: instance_of(String)
+              summary: kind_of(String)
             },
             password: {
              '$ref': '#/definitions/type/secure',
-              summary: instance_of(String)
+              summary: kind_of(String)
             },
             nickserv_password: {
              '$ref': '#/definitions/type/secure',
-              summary: instance_of(String)
+              summary: kind_of(String)
             },
             nick: {
              '$ref': '#/definitions/type/secure',
-              summary: instance_of(String)
+              summary: kind_of(String)
             },
             use_notice: {
               type: :boolean,
-              summary: instance_of(String)
+              summary: kind_of(String)
             },
             skip_join: {
               type: :boolean,
-              summary: instance_of(String)
+              summary: kind_of(String)
             },
             template: {
               '$ref': '#/definitions/notification/templates'

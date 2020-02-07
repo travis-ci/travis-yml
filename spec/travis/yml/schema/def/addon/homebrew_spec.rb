@@ -7,8 +7,8 @@ describe Travis::Yml::Schema::Def::Addon::Homebrew do
     should include(
       '$id': :homebrew,
       title: 'Homebrew',
-      summary: instance_of(String),
-      see: instance_of(Hash),
+      summary: kind_of(String),
+      see: kind_of(Hash),
       normal: true,
       anyOf: [
         {

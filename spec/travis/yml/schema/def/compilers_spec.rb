@@ -8,8 +8,8 @@ describe Travis::Yml::Schema::Def::Compilers do
       should include(
         '$id': :compilers,
         title: 'Compilers',
-        summary: instance_of(String),
-        see: instance_of(Hash),
+        summary: kind_of(String),
+        see: kind_of(Hash),
         anyOf: [
           {
             type: :array,

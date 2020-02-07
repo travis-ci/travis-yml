@@ -8,9 +8,9 @@ describe Travis::Yml::Schema::Def::Imports do
       should include(
         '$id': :imports,
         title: 'Imports',
-        summary: instance_of(String),
-        description: instance_of(String),
-        # see: instance_of(Hash),
+        summary: kind_of(String),
+        description: kind_of(String),
+        # see: kind_of(Hash),
         anyOf: [
           {
             type: :array,
@@ -48,7 +48,7 @@ describe Travis::Yml::Schema::Def::Imports do
               mode: {
                 type: :string,
                 enum: ['merge', 'deep_merge', 'deep_merge_append', 'deep_merge_prepend'],
-                summary: instance_of(String)
+                summary: kind_of(String)
               },
               if: {
                 '$ref': '#/definitions/type/condition'

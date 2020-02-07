@@ -7,8 +7,8 @@ describe Travis::Yml::Schema::Def::Haxe do
     should include(
       '$id': :haxe,
         title: 'Haxe',
-        summary: instance_of(String),
-        see: instance_of(Hash),
+        summary: kind_of(String),
+        see: kind_of(Hash),
         type: :object,
         properties: {
           haxe: {

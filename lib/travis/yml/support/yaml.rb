@@ -37,7 +37,7 @@ module Yaml
   Parser = Psych::Parser
 
   class Psych::Nodes::Node
-    attr_accessor :anchors
+    attr_accessor :anchors, :warnings
   end
 
   class Handler < Psych::Handlers::DocumentStream
@@ -46,6 +46,10 @@ module Yaml
     def anchors
       @anchors ||= []
     end
+
+    # def warnings
+    #   @warnings ||= []
+    # end
 
     def scalar(value, anchor, *args)
       anchors << last_scalar if anchor
@@ -61,9 +65,19 @@ module Yaml
 
       define_method(:"end_#{type}") do
         node = super()
+        unique_keys(node) if type == :mapping
         node.anchors = anchors
         node
       end
+    end
+
+    def unique_keys(node)
+      keys = node.children.each_slice(2).map(&:first)
+      keys = keys.select { |node| node.respond_to?(:value) }
+      keys = keys.map(&:value) - ['<<']
+      dups = keys.select { |key| keys.count(key) > 1 }.uniq
+      msgs = dups.map { |key| "Duplicate key #{key}" }
+      node.warnings = msgs if msgs.any?
     end
   end
 
@@ -108,7 +122,8 @@ module Yaml
 
     def revive_hash(hash, node)
       hash = Map.new(super, node)
-      hash.opts[:anchors] = node.anchors
+      hash.opts[:anchors] = node.anchors if node.anchors&.any?
+      hash.opts[:warnings] = node.warnings if node.warnings&.any?
       hash
     end
 

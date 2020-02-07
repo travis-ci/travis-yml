@@ -8,20 +8,20 @@ describe Travis::Yml::Schema::Def::Env do
       should include(
         '$id': :env,
         title: 'Env',
-        summary: instance_of(String),
-        description: instance_of(String),
-        see: instance_of(Hash),
+        summary: kind_of(String),
+        description: kind_of(String),
+        see: kind_of(Hash),
         anyOf: [
           {
             type: :object,
             properties: {
               global: {
                 '$ref': '#/definitions/type/env_vars',
-                summary: instance_of(String),
+                summary: kind_of(String),
               },
               jobs: {
                 '$ref': '#/definitions/type/env_vars',
-                summary: instance_of(String),
+                summary: kind_of(String),
                 aliases: [
                   :matrix
                 ],

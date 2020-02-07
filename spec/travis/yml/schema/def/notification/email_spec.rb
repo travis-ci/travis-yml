@@ -8,18 +8,18 @@ describe Travis::Yml::Schema::Def::Notification::Email, 'structure' do
       '$id': :email,
       title: 'Email',
       normal: true,
-      see: instance_of(Hash),
+      see: kind_of(Hash),
       anyOf: [
         {
           type: :object,
           properties: {
             enabled: {
               type: :boolean,
-              summary: instance_of(String)
+              summary: kind_of(String)
             },
             disabled: {
               type: :boolean,
-              summary: instance_of(String)
+              summary: kind_of(String)
             },
             recipients: {
               anyOf: [
@@ -36,7 +36,7 @@ describe Travis::Yml::Schema::Def::Notification::Email, 'structure' do
                   strict: false
                 },
               ],
-              summary: instance_of(String)
+              summary: kind_of(String)
             },
             if: {
               '$ref': '#/definitions/type/condition'

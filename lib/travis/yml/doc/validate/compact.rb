@@ -29,7 +29,7 @@ module Travis
           end
 
           def compact_map
-            value.reject { |_, value| value.missing? }.to_h
+            value.reject { |_, value| value.missing? }.to_map
           end
 
           def values

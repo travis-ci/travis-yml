@@ -31,7 +31,7 @@ module Travis
                 end
                 [key, value]
               end
-              build(except(other.to_h, *keys))
+              build(except(other.to_map, *keys))
             end
 
             def inherit_seq(value)
@@ -43,7 +43,7 @@ module Travis
 
             def inherit_map(value)
               values = only(self.value, *keys - value.keys)
-              values = values.map { |key, value| [key, value] }.to_h
+              values = values.map { |key, value| [key, value] }.to_map
               value.value.merge(values)
             end
 

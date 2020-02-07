@@ -316,4 +316,14 @@ describe Yaml do
     it { expect(subject['foo']).to be_a Seq }
     it { expect(subject['foo']).to have_attributes opts: { merge: [:append] } }
   end
+
+  describe 'duplicate keys' do
+    yaml %(
+      one: one
+      one: two
+    )
+    it { should eq 'one' => 'two' }
+    it { should be_a Map }
+    it { should have_attributes opts: { warnings: ['Duplicate key one'] } }
+  end
 end

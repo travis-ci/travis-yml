@@ -8,8 +8,8 @@ describe Travis::Yml::Schema::Def::Addon::Snaps do
     should include(
       '$id': :snaps,
       title: 'Snaps',
-      summary: instance_of(String),
-      see: instance_of(Hash),
+      summary: kind_of(String),
+      see: kind_of(Hash),
       anyOf: [
         {
           type: :array,

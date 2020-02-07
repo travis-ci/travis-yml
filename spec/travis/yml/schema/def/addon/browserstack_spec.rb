@@ -8,8 +8,8 @@ describe Travis::Yml::Schema::Def::Addon::Browserstack do
       '$id': :browserstack,
       title: 'Browserstack',
       normal: true,
-      summary: instance_of(String),
-      see: instance_of(Hash),
+      summary: kind_of(String),
+      see: kind_of(Hash),
       anyOf: [
         {
           type: :object,
