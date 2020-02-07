@@ -9,7 +9,7 @@ describe Travis::Yml::Schema::Def::Jobs do
         '$id': :jobs,
         title: 'Job Matrix',
         summary: 'Build matrix definitions',
-        see: instance_of(Hash),
+        see: kind_of(Hash),
         normal: true,
         anyOf: [
           {
@@ -17,22 +17,22 @@ describe Travis::Yml::Schema::Def::Jobs do
             properties: {
               include: {
                 '$ref': '#/definitions/type/jobs_entries',
-                summary: instance_of(String)
+                summary: kind_of(String)
               },
               exclude: {
                 '$ref': '#/definitions/type/jobs_entries',
-                summary: instance_of(String)
+                summary: kind_of(String)
               },
               allow_failures: {
                 '$ref': '#/definitions/type/jobs_entries',
-                summary: instance_of(String),
+                summary: kind_of(String),
                 aliases: [
                   :allowed_failures
                 ]
               },
               fast_finish: {
                 type: :boolean,
-                summary: instance_of(String),
+                summary: kind_of(String),
                 aliases: [
                   :fast_failure
                 ]
@@ -46,7 +46,7 @@ describe Travis::Yml::Schema::Def::Jobs do
             prefix: {
               key: :include
             },
-            see: instance_of(Hash),
+            see: kind_of(Hash),
           },
           {
             '$ref': '#/definitions/type/jobs_entries'

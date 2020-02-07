@@ -7,8 +7,8 @@ describe Travis::Yml::Schema::Def::NodeJs do
     should include(
       '$id': :node_js,
       title: 'Javascript',
-      summary: instance_of(String),
-      see: instance_of(Hash),
+      summary: kind_of(String),
+      see: kind_of(Hash),
       type: :object,
       properties: {
         node_js: {

@@ -7,8 +7,8 @@ describe Travis::Yml::Schema::Def::Smalltalk do
     should include(
       '$id': :smalltalk,
       title: 'Smalltalk',
-      summary: instance_of(String),
-      see: instance_of(Hash),
+      summary: kind_of(String),
+      see: kind_of(Hash),
       type: :object,
       properties: {
         smalltalk: {

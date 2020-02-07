@@ -9,7 +9,7 @@ describe Travis::Yml::Schema::Def::Oss do
         '$id': :oss,
         title: 'Operating systems',
         summary: 'Build environment operating systems',
-        see: instance_of(Hash),
+        see: kind_of(Hash),
         anyOf: [
           {
             type: :array,

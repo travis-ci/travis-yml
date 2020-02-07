@@ -7,8 +7,8 @@ describe Travis::Yml::Schema::Def::Dist do
     should include(
       '$id': :dist,
       title: 'Distribution',
-      summary: instance_of(String),
-      see: instance_of(Hash),
+      summary: kind_of(String),
+      see: kind_of(Hash),
       type: :string,
       enum: [
         'trusty',

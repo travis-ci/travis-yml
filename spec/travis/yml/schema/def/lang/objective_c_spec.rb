@@ -7,8 +7,8 @@ describe Travis::Yml::Schema::Def::ObjectiveC do
     should include(
       '$id': :'objective-c',
       title: 'Objective-C',
-      summary: instance_of(String),
-      see: instance_of(Hash),
+      summary: kind_of(String),
+      see: kind_of(Hash),
       type: :object,
       properties: {
         rvm: {

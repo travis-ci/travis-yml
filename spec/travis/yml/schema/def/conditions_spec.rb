@@ -22,12 +22,9 @@ describe Travis::Yml::Schema::Def::Conditions do
         '$id': :condition,
         type: :string,
         title: 'If',
-        summary: instance_of(String),
+        summary: kind_of(String),
         example: 'branch = master',
-        see: {
-          'Conditional Builds, Stages, and Jobs': 'https://docs.travis-ci.com/user/conditional-builds-stages-jobs/',
-          'Conditional Notifications': 'TBD'
-        }
+        see: kind_of(Hash)
       )
     end
   end

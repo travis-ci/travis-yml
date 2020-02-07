@@ -8,22 +8,22 @@ describe Travis::Yml::Schema::Def::Notification::Flowdock, 'structure' do
       '$id': :flowdock,
       title: 'Flowdock',
       normal: true,
-      see: instance_of(Hash),
+      see: kind_of(Hash),
       anyOf: [
         {
           type: :object,
           properties: {
             enabled: {
               type: :boolean,
-              summary: instance_of(String)
+              summary: kind_of(String)
             },
             disabled: {
               type: :boolean,
-              summary: instance_of(String)
+              summary: kind_of(String)
             },
             api_token: {
              '$ref': '#/definitions/type/secure',
-              summary: instance_of(String)
+              summary: kind_of(String)
             },
             template: {
               '$ref': '#/definitions/notification/templates'

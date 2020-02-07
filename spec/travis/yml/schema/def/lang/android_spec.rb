@@ -7,8 +7,8 @@ describe Travis::Yml::Schema::Def::Android do
     should include(
       '$id': :android,
       title: 'Android',
-      summary: instance_of(String),
-      see: instance_of(Hash),
+      summary: kind_of(String),
+      see: kind_of(Hash),
       type: :object,
       properties: {
         jdk: {
@@ -27,11 +27,11 @@ describe Travis::Yml::Schema::Def::Android do
           properties: {
             components: {
               '$ref': '#/definitions/type/strs',
-              summary: instance_of(String)
+              summary: kind_of(String)
             },
             licenses: {
               '$ref': '#/definitions/type/strs',
-              summary: instance_of(String)
+              summary: kind_of(String)
             }
           },
           additionalProperties: false,

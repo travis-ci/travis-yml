@@ -8,18 +8,18 @@ describe Travis::Yml::Schema::Def::Notification::Pushover, 'structure' do
       '$id': :pushover,
       title: 'Pushover',
       normal: true,
-      see: instance_of(Hash),
+      see: kind_of(Hash),
       anyOf: [
         {
           type: :object,
           properties: {
             api_key: {
               '$ref': '#/definitions/type/secures',
-              summary: instance_of(String)
+              summary: kind_of(String)
             },
             users: {
               '$ref': '#/definitions/type/secures',
-              summary: instance_of(String)
+              summary: kind_of(String)
             },
             template: {
               '$ref': '#/definitions/notification/templates',
@@ -35,11 +35,11 @@ describe Travis::Yml::Schema::Def::Notification::Pushover, 'structure' do
             },
             enabled: {
               type: :boolean,
-              summary: instance_of(String)
+              summary: kind_of(String)
             },
             disabled: {
               type: :boolean,
-              summary: instance_of(String)
+              summary: kind_of(String)
             },
           },
           additionalProperties: false,

@@ -7,8 +7,8 @@ describe Travis::Yml::Schema::Def::Addon::CodeClimate do
     should include(
       '$id': :code_climate,
       title: 'Code Climate',
-      summary: instance_of(String),
-      see: instance_of(Hash),
+      summary: kind_of(String),
+      see: kind_of(Hash),
       normal: true,
       anyOf: [
         {

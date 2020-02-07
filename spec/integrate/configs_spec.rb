@@ -670,11 +670,12 @@ describe Travis::Yml, configs: true do
     true
   end
 
-  def filter(msg)
+  def filter(path, msg)
     return true if msg[0] == :info
     # return true if msg[0] == :warn
     # return false
 
+    return true if msg[2] == :duplicate_key
     return true if broken?(:language, msg)
     return true if unknown?(:language, msg)
     return true if unknown?(:os, msg)
@@ -714,6 +715,8 @@ describe Travis::Yml, configs: true do
     # grondo:flux-core
     return true if msg[2] == :invalid_type && msg[3][:value] == 'skip'
 
+    puts
+    puts path
     p msg
     false
   end
@@ -730,7 +733,7 @@ describe Travis::Yml, configs: true do
     describe path.sub('spec/fixtures/configs/', '') do
       let(:path) { path }
       yaml config
-      it { should_not have_msg(method(:filter)) }
+      it { should_not have_msg(->(msg) { filter(path, msg) }) }
     end
   end
 end

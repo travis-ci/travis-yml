@@ -5,7 +5,7 @@ RSpec::Matchers.define :have_msg do |msg = nil|
     msgs = msgs.reject(&block_arg) if block_arg
 
     result = case msg
-    when Method
+    when Method, Proc
       msgs.any?
     when Array, Hash
       msg && msgs.include?(msg) && Travis::Yml.msg(msg)

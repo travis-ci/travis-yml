@@ -7,61 +7,61 @@ describe Travis::Yml::Schema::Def::Cache do
     should include(
       '$id': :cache,
       title: 'Cache',
-      summary: instance_of(String),
-      description: instance_of(String),
-      see: instance_of(Hash),
+      summary: kind_of(String),
+      description: kind_of(String),
+      see: kind_of(Hash),
       anyOf: [
         {
           type: :object,
           properties: {
             apt: {
               type: :boolean,
-              summary: instance_of(String),
+              summary: kind_of(String),
             },
             bundler: {
               type: :boolean,
-              summary: instance_of(String),
+              summary: kind_of(String),
             },
             cargo: {
               type: :boolean,
-              summary: instance_of(String),
+              summary: kind_of(String),
             },
             ccache: {
               type: :boolean,
-              summary: instance_of(String),
+              summary: kind_of(String),
             },
             cocoapods: {
               type: :boolean,
-              summary: instance_of(String),
+              summary: kind_of(String),
             },
             npm: {
               type: :boolean,
-              summary: instance_of(String),
+              summary: kind_of(String),
             },
             packages: {
               type: :boolean,
-              summary: instance_of(String),
+              summary: kind_of(String),
             },
             pip: {
               type: :boolean,
-              summary: instance_of(String),
+              summary: kind_of(String),
             },
             yarn: {
               type: :boolean,
-              summary: instance_of(String),
+              summary: kind_of(String),
             },
             directories: {
               '$ref': '#/definitions/type/strs',
-              summary: instance_of(String),
+              summary: kind_of(String),
               example: './path'
             },
             edge: {
               type: :boolean,
-              summary: instance_of(String),
+              summary: kind_of(String),
             },
             timeout: {
               type: :number,
-              summary: instance_of(String),
+              summary: kind_of(String),
               defaults: [
                 {
                   value: 3

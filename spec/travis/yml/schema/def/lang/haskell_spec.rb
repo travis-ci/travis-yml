@@ -7,8 +7,8 @@ describe Travis::Yml::Schema::Def::Haskell do
     should include(
       '$id': :haskell,
         title: 'Haskell',
-        summary: instance_of(String),
-        see: instance_of(Hash),
+        summary: kind_of(String),
+        see: kind_of(Hash),
         type: :object,
         properties: {
           ghc: {

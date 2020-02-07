@@ -7,8 +7,8 @@ describe Travis::Yml::Schema::Def::C do
     should include(
       '$id': :c,
         title: 'C',
-        summary: instance_of(String),
-        see: instance_of(Hash),
+        summary: kind_of(String),
+        see: kind_of(Hash),
         type: :object,
         normal: true
     )

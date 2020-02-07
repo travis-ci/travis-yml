@@ -7,8 +7,8 @@ describe Travis::Yml::Schema::Def::Scala do
     should include(
       '$id': :scala,
       title: 'Scala',
-      summary: instance_of(String),
-      see: instance_of(Hash),
+      summary: kind_of(String),
+      see: kind_of(Hash),
       type: :object,
       properties: {
         scala: {

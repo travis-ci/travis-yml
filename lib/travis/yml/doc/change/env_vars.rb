@@ -49,7 +49,7 @@ module Travis
 
             def parse(value, vars)
               vars = vars.empty? ? [[]] : ShVars.parse(vars)
-              vars = vars.map { |pair| pair&.empty? ? {} : [pair].to_h }
+              vars = vars.map { |pair| pair&.empty? ? {} : [pair].to_map }
               vars.inject(&:merge)
             rescue ShVars::ParseError => e
               value.error :invalid_env_var, var: vars

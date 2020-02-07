@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 require 'registry'
+require 'travis/yml/support/map'
 
 module Travis
   module Yml
@@ -9,7 +10,7 @@ module Travis
           include Registry
 
           OBJS = {
-            map:  {},
+            map:  ::Map.new,
             seq:  [],
           }
 

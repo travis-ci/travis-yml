@@ -29,7 +29,7 @@ module Travis
             def required(node)
               keys = schema.required.map { |key| ::Key.new(key) }
               keys = concat(keys, value.keys).uniq
-              build(keys.map { |key| [key, value[key] || none] }.to_h)
+              build(keys.map { |key| [key, value[key] || none] }.to_map)
             end
 
             def internal(value)

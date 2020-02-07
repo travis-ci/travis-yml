@@ -45,7 +45,7 @@ module Travis
           end
 
           def yaml
-            Yaml.load(part.str) || {}
+            Yaml.load(part.str) || Map.new
           end
 
           def unexpected_format!

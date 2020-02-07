@@ -7,15 +7,15 @@ describe Travis::Yml::Schema::Def::Addon::Jwts do
     should include(
       '$id': :jwts,
       title: 'JSON Web Tokens',
-      deprecated: instance_of(String),
-      see: instance_of(Hash),
+      deprecated: kind_of(String),
+      see: kind_of(Hash),
       anyOf: [
         {
           type: :array,
           items: {
             '$ref': '#/definitions/type/secure'
           },
-          deprecated: instance_of(String),
+          deprecated: kind_of(String),
           normal: true
         },
         {

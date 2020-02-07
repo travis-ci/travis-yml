@@ -9,8 +9,8 @@ describe Travis::Yml::Schema::Def::Stages do
         '$id': :stages,
         title: 'Stages',
         summary: 'Build stages definition',
-        description: instance_of(String),
-        see: instance_of(Hash),
+        description: kind_of(String),
+        see: kind_of(Hash),
         anyOf: [
           {
             type: :array,

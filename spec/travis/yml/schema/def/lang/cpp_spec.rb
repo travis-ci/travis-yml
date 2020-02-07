@@ -7,8 +7,8 @@ describe Travis::Yml::Schema::Def::Cpp do
     should include(
       '$id': :cpp,
       title: 'C++',
-      summary: instance_of(String),
-      see: instance_of(Hash),
+      summary: kind_of(String),
+      see: kind_of(Hash),
       type: :object,
       normal: true
     )

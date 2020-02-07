@@ -7,9 +7,9 @@ describe Travis::Yml::Schema::Def::Language do
     should include(
       '$id': :language,
       title: 'Language',
-      summary: instance_of(String),
-      description: instance_of(String),
-      see: instance_of(Hash),
+      summary: kind_of(String),
+      description: kind_of(String),
+      see: kind_of(Hash),
       example: 'ruby',
       type: :string,
       enum: [

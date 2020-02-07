@@ -261,4 +261,23 @@ describe Travis::Yml, 'root' do
       it { should have_msg [:error, :script, :invalid_type, expected: :str, actual: :map, value: { foo: 'bar' }, line: 1] }
     end
   end
+
+  describe 'duplicate keys (1)' do
+    yaml %(
+      one: 1
+      one: 2
+    )
+    it { should have_msg [:error, :root, :duplicate_key, key: 'one'] }
+    it { should_not have_msg [:error, :env, :duplicate_key, key: 'one'] }
+  end
+
+  describe 'duplicate keys (2)' do
+    yaml %(
+      env:
+        one: 1
+        one: 2
+    )
+    it { should_not have_msg [:error, :root, :duplicate_key, key: 'one'] }
+    it { should have_msg [:error, :env, :duplicate_key, key: 'one'] }
+  end
 end

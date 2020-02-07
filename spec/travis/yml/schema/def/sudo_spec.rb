@@ -7,7 +7,7 @@ describe Travis::Yml::Schema::Def::Sudo do
       title: 'Sudo',
       summary: 'Whether to allow sudo access',
       example: 'required',
-      deprecated: instance_of(String),
+      deprecated: kind_of(String),
       anyOf: [
         {
           type: :boolean,

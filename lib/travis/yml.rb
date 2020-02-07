@@ -49,6 +49,7 @@ module Travis
       deprecated_value:  'deprecated value: %<value>p (%{info})',
       downcase:          'using lower case of %{value}',
       duplicate:         'duplicate values: %{values}',
+      duplicate_key:     'duplicate key: %{key}',
       edge:              'this key is experimental and might change or be removed',
       flagged:           'please email support@travis-ci.com to enable %<key>p',
       required:          'missing required key %<key>p',
