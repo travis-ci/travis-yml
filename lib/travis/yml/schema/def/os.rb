@@ -60,6 +60,7 @@ module Travis
             value   :linux,   alias: ALIAS[:linux],   except: EXCEPT[:linux]
             value   :osx,     alias: ALIAS[:osx],     except: EXCEPT[:osx]
             value   :windows, alias: ALIAS[:windows], only:   ONLY[:windows]
+            value   :'linux-ppc64le' #, deprecated: 'use os: linux, arch: ppc64le'
 
             export
           end

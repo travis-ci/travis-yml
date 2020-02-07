@@ -45,6 +45,14 @@ describe Travis::Yml, 'os' do
       it { should serialize_to language: 'ruby', os: ['linux'] }
       it { should have_msg [:warn, :os, :unknown_default, value: 'unknown', default: 'linux'] }
     end
+
+    describe 'given deprecated linux-ppc64le' do
+      yaml %(
+        os: linux-ppc64le
+      )
+      it { should serialize_to os: ['linux-ppc64le'] }
+      # it { should have_msg [:warn, :os, :deprecated_value, value: 'linux-ppc64le', info: 'use os: linux, arch: ppc64le'] }
+    end
   end
 
   describe 'given a seq' do
