@@ -15,7 +15,7 @@ module Travis
         attr_reader :str, :data, :src, :merge_mode
 
         def initialize(str, src = nil, merge_mode = nil)
-          @str = str.strip
+          @str = str.to_s.strip
           @src = src
           self.merge_mode = Array(merge_mode).first
           @data = Parse.new(self).apply
