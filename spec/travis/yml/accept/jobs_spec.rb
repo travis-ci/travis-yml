@@ -501,7 +501,7 @@ describe Travis::Yml, 'jobs' do
                   FOO: bar
           )
           it { should serialize_to jobs: { key => [env: [{ FOO: 'bar' }]] } }
-          it { should_not have_msg }
+          it { should have_msg [:error, :"jobs.#{key}.env", :duplicate_key, key: 'FOO'] }
         end
 
         describe 'given as a seq of maps' do
