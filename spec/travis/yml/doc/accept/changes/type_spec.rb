@@ -275,23 +275,23 @@ describe Travis::Yml::Doc::Change do
     let(:schema) { Travis::Yml.expand['import'] }
 
     describe 'a str' do
-      let(:value) { 'foo' }
-      it { should serialize_to [source: 'foo'] }
+      let(:value) { 'foo.yml' }
+      it { should serialize_to [source: 'foo.yml'] }
     end
 
     describe 'a seq of strs' do
-      let(:value) { ['foo'] }
-      it { should serialize_to [source: 'foo'] }
+      let(:value) { ['foo.yml'] }
+      it { should serialize_to [source: 'foo.yml'] }
     end
 
     describe 'a map' do
-      let(:value) { { source: 'foo' } }
-      it { should serialize_to [source: 'foo'] }
+      let(:value) { { source: 'foo.yml' } }
+      it { should serialize_to [source: 'foo.yml'] }
     end
 
     describe 'seq of maps' do
-      let(:value) { [source: 'foo'] }
-      it { should serialize_to [source: 'foo'] }
+      let(:value) { [source: 'foo.yml'] }
+      it { should serialize_to [source: 'foo.yml'] }
     end
   end
 
