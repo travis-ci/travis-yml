@@ -14,6 +14,7 @@ require 'travis/yml/schema/def/stack'
 require 'travis/yml/schema/def/stages'
 require 'travis/yml/schema/def/sudo'
 require 'travis/yml/schema/def/version'
+require 'travis/yml/schema/def/virt'
 require 'travis/yml/schema/type'
 
 module Travis
@@ -36,6 +37,7 @@ module Travis
             matrix :os,             required: true, to: :oss
             map    :dist
             matrix :arch,           to: :archs
+            map    :virt
             map    :stack
             map    :sudo
             map    :import,         to: :imports

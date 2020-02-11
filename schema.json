@@ -25,6 +25,9 @@
             "expand"
           ]
         },
+        "virt": {
+          "$ref": "#/definitions/type/virt"
+        },
         "stack": {
           "$ref": "#/definitions/type/stack"
         },
@@ -1948,6 +1951,20 @@
         "summary": "Build config specification version",
         "example": ">= 1.0.0",
         "pattern": "^(~>|>|>=|=|<=|<) (\\d+(?:\\.\\d+)?(?:\\.\\d+)?)$"
+      },
+      "virt": {
+        "$id": "virt",
+        "title": "Virtualization",
+        "type": "string",
+        "summary": "Build environment virtualization",
+        "aliases": [
+          "virtualization"
+        ],
+        "downcase": true,
+        "enum": [
+          "lxd",
+          "vm"
+        ]
       }
     },
     "addon": {
