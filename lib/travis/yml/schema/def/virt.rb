@@ -14,7 +14,7 @@ module Travis
             # see 'Virtualization environments': 'https://docs.travis-ci.com/user/reference/overview/#virtualization-environments'
 
             aliases :virtualization
-
+            internal
             downcase
 
             value :lxd
