@@ -24,7 +24,7 @@ module Travis
           def handle
             status 200
             json Parse::Config.new(load).to_h
-          rescue Travis::Yml::InputError, Psych::SyntaxError, Oj::ParseError => e
+          rescue Yml::InputError => e
             status 400
             error(e)
           end

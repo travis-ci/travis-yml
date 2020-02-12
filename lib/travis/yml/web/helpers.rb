@@ -13,7 +13,6 @@ module Travis
 
         def error(e)
           Oj.generate(
-            version: 'v1',
             error_type: error_type(e),
             error_message: e.message,
           )

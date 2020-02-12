@@ -12,7 +12,7 @@ module Travis
 
         def apply
           obj = parse
-          unexpected_format! unless obj.is_a?(Hash)
+          invalid_format unless obj.is_a?(Hash)
           obj = assign(obj)
           obj
         end
@@ -38,10 +38,12 @@ module Travis
 
           def parse
             Yaml.load(part.str) || Map.new
+          rescue Psych::SyntaxError => e
+            raise SyntaxError, e.message
           end
 
-          def unexpected_format!
-            raise UnexpectedConfigFormat, 'Input must be a hash'
+          def invalid_format
+            raise InvalidConfigFormat, 'Input must parse into a hash'
           end
       end
     end

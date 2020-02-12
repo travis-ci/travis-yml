@@ -7,9 +7,9 @@ require 'sinatra'
 require 'sinatra/json'
 require 'travis/yml'
 require 'travis/yml/web/auth'
-require 'travis/yml/web/config'
 require 'travis/yml/web/docs'
 require 'travis/yml/web/expand'
+require 'travis/yml/web/configs'
 require 'travis/yml/web/metrics'
 require 'travis/yml/web/parse'
 require 'travis/yml/web/sentry'
@@ -25,10 +25,6 @@ module Travis
           @metrics ||= Travis::Metrics.setup(config.metrics.to_h, logger)
         end
 
-        def config
-          @config ||= Config.load
-        end
-
         def logger
           Logger.new($stdout)
         end
@@ -38,7 +34,7 @@ module Travis
         STARTED_AT = Time.now
 
         def self.config
-          Web.config
+          Yml.config
         end
 
         use Rack::Cors, debug: true, logger: Logger.new($stdout) do
@@ -56,6 +52,7 @@ module Travis
         end
 
         use Expand
+        use Configs
         use Parse
         use Static, 'public'
         use Static, 'public/docs'

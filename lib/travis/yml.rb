@@ -6,6 +6,8 @@ require 'travis/yml/helper/obj'
 Obj.include Memoize, Travis::Yml::Helper::Obj
 
 require 'json'
+require 'travis/yml/config'
+require 'travis/yml/configs'
 require 'travis/yml/errors'
 require 'travis/yml/doc'
 require 'travis/yml/docs'
@@ -71,10 +73,16 @@ module Travis
       invalid_format:    'dropping invalid format %{value}',
       invalid_condition: 'invalid condition: %{condition}',
       invalid_env_var:   'invalid env var: %{var}',
+      skip_import:       'skipping import %{source}, condition does not match: %{condition}',
+      unknown_import:    'import not found: %{source}'
     }
 
     class << self
       include Memoize
+
+      def config
+        @config ||= Config.load
+      end
 
       def load(parts, opts = {})
         apply(Parts.load(parts), opts)
@@ -95,8 +103,8 @@ module Travis
       end
 
       def apply(value, opts = {})
-        unexpected_format! unless value.is_a?(Hash)
-        opts = OPTS.merge(opts) unless ENV['env'] == 'test'
+        invalid_format unless value.is_a?(Hash)
+        opts = OPTS.merge(opts) unless ENV['ENV'] == 'test'
         node = Doc.apply(expand, value, opts)
         node
       end
@@ -104,6 +112,10 @@ module Travis
       def matrix(config)
         config, data = config.values_at(:config, :data) if config[:config]
         Matrix.new(config, data)
+      end
+
+      def configs(*args)
+        Configs.new(*args)
       end
 
       def msg(msg)
@@ -154,8 +166,8 @@ module Travis
         expand.expand_keys
       end
 
-      def unexpected_format!
-        raise UnexpectedConfigFormat, 'Input must be a hash'
+      def invalid_format
+        raise InvalidConfigFormat, 'Input must parse into a hash'
       end
 
       def bench(key = nil)
