@@ -12,6 +12,7 @@ module Travis
             title 'Imports'
 
             summary 'Build configuration imports'
+            see 'Build Config Imports': 'https://docs.travis-ci.com/user/build-config-imports/'
 
             description <<~str
               Import YAML config snippets that can be shared across repositories.
@@ -32,7 +33,7 @@ module Travis
             normal
             prefix :source
 
-            map :source, to: :str, summary: 'The source to import build config from', eg: './import.yml@v1', format: SOURCE
+            map :source, to: :str, summary: 'The source to import build config from', eg: './import.yml@v1'
             map :mode,   to: :str, values: ['merge', 'deep_merge', 'deep_merge_append', 'deep_merge_prepend'], summary: 'How to merge the imported config into the target config (defaults to deep_merge_append)'
             map :if,     to: :condition
 

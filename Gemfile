@@ -28,6 +28,7 @@ group :test do
   gem 'rack-test'
   gem 'rake'
   gem 'rspec'
+  gem 'webmock'
 end
 
 gemspec

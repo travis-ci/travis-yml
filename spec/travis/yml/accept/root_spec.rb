@@ -10,7 +10,7 @@ describe Travis::Yml, 'root' do
 
   describe 'given a non-hash' do
     yaml 'foo'
-    it { expect { subject }.to raise_error(Travis::Yml::UnexpectedConfigFormat) }
+    it { expect { subject }.to raise_error(Travis::Yml::InvalidConfigFormat) }
   end
 
   describe 'moves required keys to the front' do
