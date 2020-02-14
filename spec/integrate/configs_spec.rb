@@ -176,8 +176,8 @@ describe Travis::Yml, configs: true do
   DEPRECATIONS = [
     { key: 'jwt', info: 'Discontinued as of April 17, 2018' },
     { key: 'sudo', info: 'The key `sudo` has no effect anymore.' },
-    { key: 'branches', info: 'not supported any more' },
-    { key: 'github_token', info: 'not supported any more' },
+    { key: 'branches', info: 'setting a branch is deprecated' },
+    { key: 'github_token', info: 'setting a GitHub token is deprecated' },
     { key: 'skip_cleanup', info: 'not supported in dpl v2, use cleanup' },
     { key: 'skip_upload_docs', info: 'use upload_docs: false' },
     { key: 'no_promote', info: 'use promote: false' },
