@@ -13,6 +13,9 @@ describe Travis::Yml::Schema::Def::Addon::Sonarcloud do
         {
           type: :object,
           properties: {
+            enabled: {
+              type: :boolean
+            },
             organization: {
               type: :string
             },
@@ -21,11 +24,11 @@ describe Travis::Yml::Schema::Def::Addon::Sonarcloud do
             },
             github_token: {
               '$ref': '#/definitions/type/secure',
-              deprecated: 'not supported any more'
+              deprecated: 'setting a GitHub token is deprecated'
             },
             branches: {
               '$ref': '#/definitions/type/strs',
-              deprecated: 'not supported any more'
+              deprecated: 'setting a branch is deprecated'
             }
           },
           additionalProperties: false,
