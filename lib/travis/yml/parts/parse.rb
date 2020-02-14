@@ -11,7 +11,7 @@ module Travis
         end
 
         def apply
-          obj = send(format)
+          obj = parse
           unexpected_format! unless obj.is_a?(Hash)
           obj = assign(obj)
           obj
@@ -36,15 +36,7 @@ module Travis
             key
           end
 
-          def format
-            part.str.start_with?('{') ? :json : :yaml
-          end
-
-          def json
-            Oj.load(part.str)
-          end
-
-          def yaml
+          def parse
             Yaml.load(part.str) || Map.new
           end
 
