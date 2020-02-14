@@ -15,7 +15,7 @@ module Travis
         attr_reader :str, :data, :src, :merge_mode
 
         def initialize(str, src = nil, merge_mode = nil)
-          @str = str.to_s.strip
+          @str = normalize(str.to_s)
           @src = src
           self.merge_mode = Array(merge_mode).first
           @data = Parse.new(self).apply
@@ -34,6 +34,17 @@ module Travis
 
         def to_h
           data
+        end
+
+        def normalize(str)
+          str = str.encode('UTF-8', 'binary', invalid: :replace, undef: :replace, replace: '')
+          str = squiggle(str)
+          str.strip
+        end
+
+        def squiggle(str)
+          width = str =~ /( *)\S/ && $1.size
+          str.lines.map { |line| line.gsub(/^ {#{width}}/, '') }.join
         end
 
         def unknown_merge_mode!(mode)

@@ -1,5 +1,5 @@
 describe Travis::Yml, 'root' do
-  subject { described_class.apply(parse(yaml), opts) }
+  subject { described_class.load(yaml, opts) }
 
   describe 'default', defaults: true do
     yaml ''
@@ -247,7 +247,7 @@ describe Travis::Yml, 'root' do
       node_js: {"8"}
     )
 
-    it { should have_msg [:error, :node_js, :invalid_type, expected: :str, actual: :map, value: { '8': nil }, line: 1] }
+    it { should have_msg [:error, :node_js, :invalid_type, expected: :str, actual: :map, value: { '8': nil }, line: 0] }
   end
 
   describe 'line number info', line: true do
@@ -258,7 +258,7 @@ describe Travis::Yml, 'root' do
 
     describe 'line number info on msgs', line: true do
       yaml "\nscript: { foo: bar }"
-      it { should have_msg [:error, :script, :invalid_type, expected: :str, actual: :map, value: { foo: 'bar' }, line: 1] }
+      it { should have_msg [:error, :script, :invalid_type, expected: :str, actual: :map, value: { foo: 'bar' }, line: 0] }
     end
   end
 
@@ -279,5 +279,11 @@ describe Travis::Yml, 'root' do
     )
     it { should_not have_msg [:error, :root, :duplicate_key, key: 'one'] }
     it { should have_msg [:error, :env, :duplicate_key, key: 'one'] }
+  end
+
+  describe 'given an invalid byte sequence in utf-8', line: true do
+    yaml "if: tag =~ ^v\255"
+
+    it { should_not have_msg }
   end
 end
