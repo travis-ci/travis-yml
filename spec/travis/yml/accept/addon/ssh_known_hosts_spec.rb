@@ -1,5 +1,5 @@
 describe Travis::Yml, 'addon: ssh_known_hosts' do
-  subject { described_class.apply(parse(yaml)) }
+  subject { described_class.load(yaml) }
 
   describe 'given a seq of secures' do
     yaml %(

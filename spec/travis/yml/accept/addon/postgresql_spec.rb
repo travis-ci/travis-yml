@@ -1,5 +1,5 @@
 describe Travis::Yml, 'addon: postgresql' do
-  subject { described_class.apply(parse(yaml)) }
+  subject { described_class.load(yaml) }
 
   describe 'postgresql' do
     yaml %(

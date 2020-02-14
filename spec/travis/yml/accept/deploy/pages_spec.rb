@@ -1,5 +1,5 @@
 describe Travis::Yml, 'pages' do
-  subject { described_class.apply(parse(yaml)) }
+  subject { described_class.load(yaml) }
 
   describe 'token' do
     describe 'given a secure' do

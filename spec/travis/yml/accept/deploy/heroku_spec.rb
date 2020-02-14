@@ -1,5 +1,5 @@
 describe Travis::Yml, 'heroku' do
-  subject { described_class.apply(parse(yaml)) }
+  subject { described_class.load(yaml) }
 
   describe 'strategy' do
     describe 'given a enum' do

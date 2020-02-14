@@ -1,5 +1,5 @@
 describe Travis::Yml, 'gcs' do
-  subject { described_class.apply(parse(yaml)) }
+  subject { described_class.load(yaml) }
 
   describe 'key_file' do
     describe 'given a str' do

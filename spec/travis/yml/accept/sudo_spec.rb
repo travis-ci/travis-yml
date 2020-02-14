@@ -1,5 +1,5 @@
 describe Travis::Yml, 'sudo' do
-  subject { described_class.apply(parse(yaml)) }
+  subject { described_class.load(yaml) }
 
   describe 'no default' do
     yaml %(

@@ -1,5 +1,5 @@
 describe Travis::Yml, 'opsworks' do
-  subject { described_class.apply(parse(yaml)) }
+  subject { described_class.load(yaml) }
 
   describe 'access_key_id' do
     describe 'given a secure' do

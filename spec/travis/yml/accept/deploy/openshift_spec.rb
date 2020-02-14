@@ -1,5 +1,5 @@
 describe Travis::Yml, 'openshift' do
-  subject { described_class.apply(parse(yaml)) }
+  subject { described_class.load(yaml) }
 
   describe 'server' do
     describe 'given a str' do

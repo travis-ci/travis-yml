@@ -1,5 +1,5 @@
 describe Travis::Yml, 'addon: apt' do
-  subject { described_class.apply(parse(yaml)) }
+  subject { described_class.load(yaml) }
 
   describe 'given a str' do
     yaml %(

@@ -1,5 +1,5 @@
 describe Travis::Yml, 'boxfuse' do
-  subject { described_class.apply(parse(yaml)) }
+  subject { described_class.load(yaml) }
 
   describe 'user' do
     describe 'given a secure' do

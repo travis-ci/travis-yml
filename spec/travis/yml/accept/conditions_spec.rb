@@ -1,5 +1,5 @@
 describe Travis::Yml, 'conditions' do
-  subject { described_class.apply(parse(yaml)) }
+  subject { described_class.load(yaml) }
 
   describe 'build' do
     describe 'v0' do

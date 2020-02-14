@@ -1,5 +1,5 @@
 describe Travis::Yml, 'notifications: email' do
-  subject { described_class.apply(parse(yaml)) }
+  subject { described_class.load(yaml) }
 
   describe 'given nil' do
     yaml %(

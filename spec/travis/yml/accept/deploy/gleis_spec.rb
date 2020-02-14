@@ -1,5 +1,5 @@
 describe Travis::Yml, 'gleis' do
-  subject { described_class.apply(parse(yaml)) }
+  subject { described_class.load(yaml) }
 
   describe 'app' do
     describe 'given a str' do

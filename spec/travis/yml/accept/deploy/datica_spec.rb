@@ -1,5 +1,5 @@
 describe Travis::Yml, 'datica' do
-  subject { described_class.apply(parse(yaml)) }
+  subject { described_class.load(yaml) }
 
   describe 'target' do
     describe 'given a str' do

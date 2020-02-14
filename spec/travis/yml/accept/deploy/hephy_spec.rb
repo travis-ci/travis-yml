@@ -1,5 +1,5 @@
 describe Travis::Yml, 'hephy' do
-  subject { described_class.apply(parse(yaml)) }
+  subject { described_class.load(yaml) }
 
   describe 'controller' do
     describe 'given a str' do

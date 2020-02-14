@@ -1,5 +1,5 @@
 describe Travis::Yml, 's3' do
-  subject { described_class.apply(parse(yaml)) }
+  subject { described_class.load(yaml) }
 
   describe 'access_key_id' do
     describe 'given a secure' do

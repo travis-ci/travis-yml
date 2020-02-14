@@ -1,5 +1,5 @@
 describe Travis::Yml, 'perl' do
-  subject { described_class.apply(parse(yaml)) }
+  subject { described_class.load(yaml) }
   
   describe 'perl' do
     describe 'given a seq of strs' do

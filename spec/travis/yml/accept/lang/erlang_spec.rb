@@ -1,5 +1,5 @@
 describe Travis::Yml, 'erlang' do
-  subject { described_class.apply(parse(yaml)) }
+  subject { described_class.load(yaml) }
   
   describe 'otp_release' do
     describe 'given a seq of strs' do

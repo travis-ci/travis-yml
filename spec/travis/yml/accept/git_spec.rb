@@ -1,5 +1,5 @@
 describe Travis::Yml, 'git' do
-  subject { described_class.apply(parse(yaml)) }
+  subject { described_class.load(yaml) }
 
   describe 'quiet' do
     yaml %(

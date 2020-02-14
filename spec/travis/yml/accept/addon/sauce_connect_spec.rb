@@ -1,5 +1,5 @@
 describe Travis::Yml, 'addon: sauce_connect' do
-  subject { described_class.apply(parse(yaml)) }
+  subject { described_class.load(yaml) }
 
   describe 'given true' do
     yaml %(

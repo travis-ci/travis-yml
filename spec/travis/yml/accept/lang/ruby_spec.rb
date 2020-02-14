@@ -1,5 +1,5 @@
 describe Travis::Yml, 'ruby' do
-  subject { described_class.apply(parse(yaml)) }
+  subject { described_class.load(yaml) }
 
   describe 'rvm' do
     describe 'given a seq of strs' do

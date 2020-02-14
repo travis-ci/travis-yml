@@ -1,5 +1,5 @@
 describe Travis::Yml, 'convox' do
-  subject { described_class.apply(parse(yaml)) }
+  subject { described_class.load(yaml) }
 
   describe 'host' do
     describe 'given a str' do

@@ -1,5 +1,5 @@
 describe Travis::Yml, 'engineyard' do
-  subject { described_class.apply(parse(yaml)) }
+  subject { described_class.load(yaml) }
 
   describe 'email' do
     describe 'given a secure' do
