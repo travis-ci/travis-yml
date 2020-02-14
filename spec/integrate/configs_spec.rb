@@ -727,7 +727,7 @@ describe Travis::Yml, configs: true do
 
   configs = paths.map { |path| [path, File.read(path)] }
 
-  subject { described_class.apply(parse(yaml), alert: true, fix: true) }
+  subject { described_class.load(yaml, alert: true, fix: true) }
 
   configs.each do |path, config|
     describe path.sub('spec/fixtures/configs/', '') do
