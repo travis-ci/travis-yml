@@ -160,18 +160,6 @@ describe Travis::Yml, 'cloudformation' do
     end
   end
 
-  describe 'session_token' do
-    describe 'given a str' do
-      yaml %(
-        deploy:
-          provider: cloudformation
-          session_token: str
-      )
-      it { should serialize_to deploy: [provider: 'cloudformation', session_token: 'str'] }
-      it { should_not have_msg }
-    end
-  end
-
   describe 'parameters' do
     describe 'given strs' do
       yaml %(

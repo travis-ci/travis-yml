@@ -164,8 +164,10 @@ describe Travis::Yml::Schema::Def::Root do
         elasticbeanstalk
         engineyard
         firebase
+        flynn
         gae
         gcs
+        git_push
         gleis
         hackage
         hephy
