@@ -3343,9 +3343,6 @@
               "create_timeout": {
                 "type": "number"
               },
-              "session_token": {
-                "type": "string"
-              },
               "parameters": {
                 "$ref": "#/definitions/type/strs"
               },
@@ -4156,6 +4153,69 @@
         ],
         "normal": true
       },
+      "flynn": {
+        "$id": "flynn",
+        "title": "Flynn",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "git": {
+                "$ref": "#/definitions/type/secure",
+                "strict": false
+              },
+              "provider": {
+                "type": "string",
+                "enum": [
+                  "flynn"
+                ],
+                "strict": true
+              },
+              "on": {
+                "$ref": "#/definitions/deploy/conditions",
+                "aliases": [
+                  "true"
+                ]
+              },
+              "run": {
+                "$ref": "#/definitions/type/strs"
+              },
+              "allow_failure": {
+                "type": "boolean"
+              },
+              "cleanup": {
+                "type": "boolean"
+              },
+              "skip_cleanup": {
+                "type": "boolean",
+                "deprecated": "not supported in dpl v2, use cleanup"
+              },
+              "edge": {
+                "$ref": "#/definitions/deploy/edge"
+              }
+            },
+            "additionalProperties": false,
+            "normal": true,
+            "prefix": {
+              "key": "provider",
+              "only": [
+                "str"
+              ]
+            },
+            "required": [
+              "provider"
+            ]
+          },
+          {
+            "type": "string",
+            "enum": [
+              "flynn"
+            ],
+            "strict": true
+          }
+        ],
+        "normal": true
+      },
       "gae": {
         "$id": "gae",
         "title": "Gae",
@@ -4331,6 +4391,110 @@
             "type": "string",
             "enum": [
               "gcs"
+            ],
+            "strict": true
+          }
+        ],
+        "normal": true
+      },
+      "git_push": {
+        "$id": "git_push",
+        "title": "Git Push",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "token": {
+                "$ref": "#/definitions/type/secure",
+                "aliases": [
+                  "github_token"
+                ]
+              },
+              "deploy_key": {
+                "type": "string"
+              },
+              "repo": {
+                "type": "string"
+              },
+              "branch": {
+                "type": "string"
+              },
+              "base_branch": {
+                "type": "string"
+              },
+              "commit_message": {
+                "type": "string"
+              },
+              "allow_empty_commit": {
+                "type": "boolean"
+              },
+              "allow_same_branch": {
+                "type": "boolean"
+              },
+              "force": {
+                "type": "boolean"
+              },
+              "local_dir": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "email": {
+                "type": "string"
+              },
+              "host": {
+                "type": "string"
+              },
+              "enterprise": {
+                "type": "boolean"
+              },
+              "provider": {
+                "type": "string",
+                "enum": [
+                  "git_push"
+                ],
+                "strict": true
+              },
+              "on": {
+                "$ref": "#/definitions/deploy/conditions",
+                "aliases": [
+                  "true"
+                ]
+              },
+              "run": {
+                "$ref": "#/definitions/type/strs"
+              },
+              "allow_failure": {
+                "type": "boolean"
+              },
+              "cleanup": {
+                "type": "boolean"
+              },
+              "skip_cleanup": {
+                "type": "boolean",
+                "deprecated": "not supported in dpl v2, use cleanup"
+              },
+              "edge": {
+                "$ref": "#/definitions/deploy/edge"
+              }
+            },
+            "additionalProperties": false,
+            "normal": true,
+            "prefix": {
+              "key": "provider",
+              "only": [
+                "str"
+              ]
+            },
+            "required": [
+              "provider"
+            ]
+          },
+          {
+            "type": "string",
+            "enum": [
+              "git_push"
             ],
             "strict": true
           }
@@ -5480,10 +5644,16 @@
             "$ref": "#/definitions/deploy/firebase"
           },
           {
+            "$ref": "#/definitions/deploy/flynn"
+          },
+          {
             "$ref": "#/definitions/deploy/gae"
           },
           {
             "$ref": "#/definitions/deploy/gcs"
+          },
+          {
+            "$ref": "#/definitions/deploy/git_push"
           },
           {
             "$ref": "#/definitions/deploy/gleis"
