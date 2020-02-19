@@ -7,37 +7,39 @@ require 'travis/yml/configs/travis/repo'
 module Travis
   module Yml
     module Configs
-      class Repos
-        include Synchronize
+      module Model
+        class Repos
+          include Synchronize
 
-        attr_reader :repos, :mutex, :mutexes
+          attr_reader :repos, :mutex, :mutexes
 
-        def initialize
-          @repos = {}
-          @mutex = Mutex.new
-          @mutexes = {}
-        end
-
-        def [](slug)
-          mutex_for(slug).synchronize do
-            return repos[slug] if repos.key?(slug)
-            repo = repos[slug] = Repo.new(fetch(slug))
-            repo
+          def initialize
+            @repos = {}
+            @mutex = Mutex.new
+            @mutexes = {}
           end
-        end
 
-        def []=(slug, repo)
-          repos[slug] = repo
-        end
+          def [](slug)
+            mutex_for(slug).synchronize do
+              return repos[slug] if repos.key?(slug)
+              repo = repos[slug] = Repo.new(fetch(slug))
+              repo
+            end
+          end
 
-        def fetch(slug)
-          Travis::Repo.new(slug).fetch
-        end
+          def []=(slug, repo)
+            repos[slug] = repo
+          end
 
-        def mutex_for(slug)
-          mutexes[slug] ||= Mutex.new
+          def fetch(slug)
+            Travis::Repo.new(slug).fetch
+          end
+
+          def mutex_for(slug)
+            mutexes[slug] ||= Mutex.new
+          end
+          synchronize :mutex
         end
-        synchronize :mutex
       end
     end
   end

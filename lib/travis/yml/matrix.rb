@@ -20,6 +20,7 @@ module Travis
         rows = uniq(rows)
         rows
       end
+      alias jobs rows
 
       def axes
         keys
@@ -118,9 +119,15 @@ module Travis
         def excluded?(row)
           excluded.any? do |excluded|
             next unless excluded.respond_to?(:all?)
-            next unless Condition.new(excluded, data).accept?
+            next unless accept?(:excluded, excluded)
             except(excluded, :if).all? { |key, value| wrap(row[key]) == wrap(value) }
           end
+        end
+
+        def accept?(type, config)
+          return true if Condition.new(config, data).accept?
+          # TODO generate message
+          false
         end
 
         def global_env
@@ -149,7 +156,8 @@ module Travis
         end
 
         def cleaned(rows)
-          rows.map { |row| except(row, :version) }
+          # TODO are there other keys that do not make sense on a job config?
+          rows.map { |row| except(row, :version, :stages) }
         end
 
         def uniq(rows)
@@ -166,7 +174,7 @@ module Travis
         end
 
         def expand_keys
-          Yml.expand_keys - [:jobs] + [:env] # TODO
+          Yml.expand_keys - [:jobs] + [:env] # TODO allow nested matrix expansion keys, like env.jobs
         end
 
         def wrap(obj)

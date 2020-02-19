@@ -7,6 +7,8 @@ describe Travis::Yml::Configs do
   let(:opts)    { { token: 'token', data: data } }
   let(:configs) { described_class.new(repo, ref, config, mode, data, opts) }
   let(:msgs)    { subject.msgs.to_a }
+  let(:jobs)    { subject.jobs }
+  let(:stages)  { subject.stages }
   let(:setting) { true }
 
   let(:travis_yml) { 'import: one/one.yml' }
@@ -101,6 +103,7 @@ describe Travis::Yml::Configs do
     end
   end
 
+  # TODO complete these
   describe 'reencrypt' do
     let(:repo) { { slug: 'travis-ci/travis-yml', private: true, token: 'token' } }
     before { stub_repo('travis-ci/other', private: private, default_branch: 'default', config_imports: true) }
@@ -125,7 +128,9 @@ describe Travis::Yml::Configs do
       let(:private) { true }
       let(:travis_yml) { 'import: travis-ci/other:one.yml' }
       let(:one_yml) { "env:\n  - secure: str" }
-      it { subject }
+      before { allow_any_instance_of(Travis::Yml::Configs::Model::Key).to receive(:decrypt) }
+      before { allow_any_instance_of(Travis::Yml::Configs::Model::Key).to receive(:encrypt) }
+      xit { subject }
     end
   end
 
@@ -336,7 +341,7 @@ describe Travis::Yml::Configs do
     end
   end
 
-  describe 'order' do
+  describe 'import order is depth first' do
     let(:repo) { { slug: 'owner/repo', token: 'token' } }
     let(:travis_yml) { 'import: [.travis.yml, 1.yml]' }
     let(:y1) { 'import: [2.yml, 5.yml, 6.yml]' }
@@ -362,6 +367,84 @@ describe Travis::Yml::Configs do
         owner/repo:5.yml@ref
         owner/repo:6.yml@ref
       )
+    end
+  end
+
+  describe 'stages and allow_failures' do
+    let(:travis_yml) { yaml }
+
+    describe 'no stages section' do
+      yaml %(
+        jobs:
+          include:
+            - name: one
+              stage: one
+            - name: two
+            - name: three
+              stage: two
+            - name: four
+          allow_failures:
+            - name: one
+            - name: four
+      )
+
+      it do
+        expect(stages).to eq [
+          { name: 'One' },
+          { name: 'Two' }
+        ]
+      end
+
+      it do
+        expect(jobs).to eq [
+          { name: 'two',   stage: 'One' },
+          { name: 'one',   stage: 'One', allow_failure: true },
+          { name: 'three', stage: 'Two' },
+          { name: 'four',  stage: 'Two', allow_failure: true }
+        ]
+      end
+    end
+
+    describe 'no stages section' do
+      yaml %(
+        stages:
+          - one
+          - two
+        jobs:
+          include:
+            - name: three
+              stage: two
+            - name: four
+            - name: two
+              stage: one
+            - name: one
+            - name: six
+              stage: three
+            - name: five
+          allow_failures:
+            - name: two
+            - name: four
+            - name: six
+      )
+
+      it do
+        expect(stages).to eq [
+          { name: 'One' },
+          { name: 'Two' },
+          { name: 'Three' }
+        ]
+      end
+
+      it do
+        expect(jobs).to eq [
+          { name: 'one',   stage: 'One' },
+          { name: 'two',   stage: 'One', allow_failure: true },
+          { name: 'three', stage: 'Two' },
+          { name: 'four',  stage: 'Two', allow_failure: true },
+          { name: 'five',  stage: 'Three' },
+          { name: 'six',   stage: 'Three', allow_failure: true }
+        ]
+      end
     end
   end
 end

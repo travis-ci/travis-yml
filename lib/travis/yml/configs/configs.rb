@@ -1,7 +1,10 @@
 # require 'travis/gatekeeper/helpers/metrics'
 require 'travis/yml/helper/msgs'
 require 'travis/yml/helper/obj'
+require 'travis/yml/configs/allow_failures'
 require 'travis/yml/configs/model/repos'
+require 'travis/yml/configs/reorder'
+require 'travis/yml/configs/stages'
 require 'travis/yml/configs/config/api'
 require 'travis/yml/configs/config/file'
 require 'travis/yml/configs/ctx'
@@ -12,7 +15,7 @@ module Travis
       class Configs < Struct.new(:repo, :ref, :raw, :mode, :data, :opts)
         include Enumerable, Helper::Obj # Helpers::Metrics
 
-        attr_reader :configs, :config, :matrix
+        attr_reader :configs, :config, :stages, :jobs
 
         # + make GET /request/:id?include=request.messages work to spare an API request
         # + allow including the repo's GitHub app token on /repo/:id when authenticated internally.
@@ -20,7 +23,6 @@ module Travis
         #
         # - move notification filtering to Hub (Yml seems the wrong place)
         # - fix Web /:repo/config
-        # - fix Web specs 😬
         #
         # + complete reencryption
         # - add metrics
@@ -29,7 +31,10 @@ module Travis
           fetch
           merge
           reencrypt
-          expand
+          expand_matrix
+          expand_stages
+          allow_failures
+          reorder
         end
 
         def msgs
@@ -48,7 +53,8 @@ module Travis
           {
             raw_configs: configs.map(&:to_h),
             config: config,
-            matrix: matrix,
+            matrix: jobs,
+            stages: stages,
             messages: msgs.messages,
             full_messages: msgs.full_messages
           }
@@ -77,8 +83,20 @@ module Travis
             @config = repo.reencrypt(config, keys) if keys.any?
           end
 
-          def expand
-            @matrix = Yml.matrix(config: config, data: data).rows
+          def expand_matrix
+            @jobs = Yml.matrix(config: config, data: data).rows
+          end
+
+          def expand_stages
+            @stages, @jobs = Stages.new(config[:stages], jobs).apply
+          end
+
+          def allow_failures
+            @jobs = AllowFailures.new(config.dig(:jobs, :allow_failures), jobs, data).apply
+          end
+
+          def reorder
+            @jobs = Reorder.new(stages, jobs).apply
           end
 
           def travis_yml
@@ -100,7 +118,11 @@ module Travis
           end
 
           def repo
-            @repo ||= super[:token] ? Repo.new(super) : Repos.new[super[:slug]]
+            @repo ||= if super[:token]
+              Model::Repo.new(super)
+            else
+              Model::Repos.new[super[:slug]]
+            end
           end
       end
     end
