@@ -25,6 +25,10 @@ module Travis
           @metrics ||= Travis::Metrics.setup(config.metrics.to_h, logger)
         end
 
+        def config
+          Yml.config
+        end
+
         def logger
           Logger.new($stdout)
         end
@@ -34,7 +38,7 @@ module Travis
         STARTED_AT = Time.now
 
         def self.config
-          Yml.config
+          Web.config
         end
 
         use Rack::Cors, debug: true, logger: Logger.new($stdout) do
