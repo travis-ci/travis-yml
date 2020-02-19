@@ -220,6 +220,49 @@
         "additionalProperties": false,
         "summary": "Build addons to activate"
       },
+      "allow_failures": {
+        "$id": "allow_failures",
+        "title": "Job Matrix Entries",
+        "anyOf": [
+          {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/type/allow_failures_entry"
+            },
+            "normal": true
+          },
+          {
+            "$ref": "#/definitions/type/allow_failures_entry"
+          }
+        ]
+      },
+      "allow_failures_entry": {
+        "$id": "allow_failures_entry",
+        "title": "Job Matrix Entry",
+        "allOf": [
+          {
+            "type": "object",
+            "properties": {
+              "branch": {
+                "type": "string",
+                "deprecated": "use conditional allow_failures using :if"
+              }
+            },
+            "title": "Job Matrix Entry",
+            "see": {
+              "Jobs that are allowed to fail": "https://docs.travis-ci.com/user/customizing-the-build#jobs-that-are-allowed-to-fail",
+              "Conditionally allowing jobs to fail": "https://docs.travis-ci.com/user/conditional-builds-stages-jobs#conditionally-allowing-jobs-to-fail"
+            }
+          },
+          {
+            "$ref": "#/definitions/type/jobs_entry"
+          }
+        ],
+        "see": {
+          "Jobs that are allowed to fail": "https://docs.travis-ci.com/user/customizing-the-build#jobs-that-are-allowed-to-fail",
+          "Conditionally allowing jobs to fail": "https://docs.travis-ci.com/user/conditional-builds-stages-jobs#conditionally-allowing-jobs-to-fail"
+        }
+      },
       "arch": {
         "$id": "arch",
         "title": "Architecture",
@@ -892,7 +935,7 @@
                 "summary": "Attributes of jobs to exclude from the build matrix"
               },
               "allow_failures": {
-                "$ref": "#/definitions/type/jobs_entries",
+                "$ref": "#/definitions/type/allow_failures",
                 "aliases": [
                   "allowed_failures"
                 ],
@@ -908,7 +951,8 @@
             },
             "additionalProperties": false,
             "see": {
-              "Build Matrix": "https://docs.travis-ci.com/user/build-matrix/"
+              "Build Matrix": "https://docs.travis-ci.com/user/build-matrix/",
+              "Customizing the build": "https://docs.travis-ci.com/user/customizing-the-build#build-matrix"
             },
             "normal": true,
             "aliases": [
@@ -924,7 +968,8 @@
         ],
         "summary": "Build matrix definitions",
         "see": {
-          "Build Matrix": "https://docs.travis-ci.com/user/build-matrix/"
+          "Build Matrix": "https://docs.travis-ci.com/user/build-matrix/",
+          "Customizing the build": "https://docs.travis-ci.com/user/customizing-the-build#build-matrix"
         },
         "normal": true
       },
@@ -987,6 +1032,9 @@
                     "cpp"
                   ]
                 }
+              },
+              "branches": {
+                "$ref": "#/definitions/type/branches"
               },
               "name": {
                 "type": "string",

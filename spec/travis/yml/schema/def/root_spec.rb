@@ -90,6 +90,8 @@ describe Travis::Yml::Schema::Def::Root do
     definitions = {
       type: %i(
         addons
+        allow_failures
+        allow_failures_entry
         arch
         archs
         branches

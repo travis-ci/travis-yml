@@ -593,7 +593,7 @@ describe Travis::Yml, 'jobs' do
   end
 
   describe 'allow_failures' do
-    describe "alias allowed_failures" do
+    describe 'alias allowed_failures' do
       yaml %(
         jobs:
           allowed_failures:
@@ -601,6 +601,17 @@ describe Travis::Yml, 'jobs' do
       )
       it { should serialize_to jobs: { allow_failures: [rvm: '2.3'] } }
       it { should have_msg [:info, :jobs, :alias_key, alias: 'allowed_failures', key: 'allow_failures'] }
+    end
+
+    describe 'given a branch' do
+      yaml %(
+        jobs:
+          allow_failures:
+            - rvm: 2.3
+              branch: master
+      )
+      it { should serialize_to jobs: { allow_failures: [rvm: '2.3', branch: 'master'] } }
+      it { should have_msg [:warn, :'jobs.allow_failures', :deprecated_key, key: 'branch', info: 'use conditional allow_failures using :if'] }
     end
 
     describe 'allow_failures given a seq of strings (common mistake)', drop: true do

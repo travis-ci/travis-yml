@@ -24,7 +24,7 @@ describe Travis::Yml::Schema::Def::Jobs do
                 summary: kind_of(String)
               },
               allow_failures: {
-                '$ref': '#/definitions/type/jobs_entries',
+                '$ref': '#/definitions/type/allow_failures',
                 summary: kind_of(String),
                 aliases: [
                   :allowed_failures
