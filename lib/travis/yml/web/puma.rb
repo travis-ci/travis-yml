@@ -16,7 +16,7 @@ before_fork do
 end
 
 on_worker_boot do
-  Travis::Yml::Web.setup
+  Travis::Yml.setup
 end
 
 lowlevel_error_handler do |error, env|

@@ -6,10 +6,10 @@ module Travis
           prepend Module.new {
             define_method(name) do |*args, &block|
               start = Time.now
-              super(*args, &block).tap do
-                self.class.instruments.each do |instrument|
-                  instrument.call(name, args, start, Time.now)
-                end
+              super(*args, &block)
+            ensure
+              self.class.instruments.each do |instrument|
+                instrument.call(self, name, args, start, Time.now)
               end
             end
           }

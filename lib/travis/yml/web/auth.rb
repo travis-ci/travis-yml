@@ -12,11 +12,19 @@ module Travis
         end
 
         def call(env)
-          return not_authenticated if post?(env) && !authenticated?(env)
+          return not_authenticated if auth?(env) && !authenticated?(env)
           app.call(env)
         end
 
         private
+
+        def auth?(env)
+          post?(env) && !configs?(env)
+        end
+
+        def configs?(env)
+          env['PATH_INFO'] == '/configs'
+        end
 
         def post?(env)
           env['REQUEST_METHOD'] == 'POST'
@@ -29,7 +37,7 @@ module Travis
         end
 
         def not_authenticated
-          [401, { 'WWW-Authenticate' => 'Basic realm="Restricted area"' }, []]
+          [401, {}, []]
         end
       end
     end

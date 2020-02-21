@@ -10,8 +10,8 @@ module Travis
         post '/configs' do
           status 200
           json configs.to_h
-        rescue Yml::Error => e
-          raise if e.internal?
+        rescue Yml::Error, Oj::Error, EncodingError => e
+          raise if e.respond_to?(:internal?) && e.internal?
           status 400
           error(e)
         end
@@ -29,20 +29,33 @@ module Travis
           def opts
             keys = OPTS.keys.map(&:to_s) & params.keys
             opts = symbolize(keys.map { |key| [key, params[key.to_s] == 'true'] }.to_h)
-            # TODO merge in tokens from headers
+            opts = opts.merge(token: token, internal: internal?)
             opts
+          end
+
+          def token
+            match_auth(/token (.+)/)
+          end
+
+          def internal?
+            return false unless auth
+            match_auth(/internal:(.+)/) == config[:auth][:internal]
+          end
+
+          def match_auth(pattern)
+            auth.to_s =~ pattern && $1
+          end
+
+          def auth
+            request_headers[:authorization]
           end
 
           def data
             Oj.load(request_body, symbol_keys: true, mode: :strict, empty_string: false)
           end
 
-          def request_body
-            request.body.read.tap { request.body.rewind }
-          end
-
-          def symbolize(hash)
-            hash.map { |key, value| [key.to_sym, value] }.to_h
+          def config
+            Web.config
           end
       end
     end

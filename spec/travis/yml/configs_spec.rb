@@ -1,10 +1,15 @@
 describe Travis::Yml::Configs do
-  let(:repo)    { { slug: 'travis-ci/travis-yml', default_branch: 'master', token: 'token' } }
+  let(:private_key) { PRIVATE_KEYS[:one] }
+  let(:repo_token) { 'repo-token' }
+  let(:user_token) { 'user-token' }
+  let(:private) { false }
+  let(:imports) { true }
+  let(:repo)    { { slug: 'travis-ci/travis-yml', private: private, default_branch: 'master', token: repo_token, private_key: private_key, allow_config_imports: imports } }
   let(:ref)     { 'ref' }
   let(:config)  { nil }
   let(:data)    { nil }
   let(:mode)    { nil }
-  let(:opts)    { { token: 'token', data: data } }
+  let(:opts)    { { token: user_token, data: data } }
   let(:configs) { described_class.new(repo, ref, config, mode, data, opts) }
   let(:msgs)    { subject.msgs.to_a }
   let(:jobs)    { subject.jobs }
@@ -15,6 +20,7 @@ describe Travis::Yml::Configs do
   let(:one_yml)    { 'script: ./one' }
   let(:two_yml)    { 'script: ./two' }
 
+  before { stub_repo(repo[:slug], token: user_token) } # authorization
   before { stub_content(repo[:slug], '.travis.yml', travis_yml) }
   before { stub_content(repo[:slug], 'one/one.yml', one_yml) }
   before { stub_content(repo[:slug], 'one/two.yml', two_yml) }
@@ -26,26 +32,36 @@ describe Travis::Yml::Configs do
   end
 
   describe 'push' do
-    let(:url) { "repo/#{repo[:slug].sub('/', '%2F')}?representation=internal" }
+    let(:repo_url) { "repo/#{repo[:slug].sub('/', '%2F')}?representation=internal" }
+    let(:auth_url) { "repo/#{repo[:slug].sub('/', '%2F')}" }
 
     describe 'given a repo token' do
       imports %w(
         travis-ci/travis-yml:.travis.yml@ref
         travis-ci/travis-yml:one/one.yml@ref
       )
-      it { expect { subject }.to_not have_api_request :get, url }
+      it { expect { subject }.to_not have_api_request :get, repo_url }
+      it { expect { subject }.to_not have_api_request :get, repo_url }
     end
 
-    describe 'not given a repo token' do
-      let(:repo) { { slug: 'travis-ci/travis-yml' } }
-      before { stub_repo(repo[:slug], private: true) }
-      it { expect { subject }.to have_api_request :get, url }
+    describe 'not given a repo token on a public repo' do
+      let(:repo_token) { nil }
+      let(:private) { false }
+      before { stub_repo(repo[:slug], internal: true, body: repo.merge(token: repo_token)) }
+      it { expect { subject }.to have_api_request :get, repo_url }
+      it { expect { subject }.to_not have_api_request :get, auth_url }
+    end
+
+    describe 'not given a repo token on a private repo' do
+      let(:repo_token) { nil }
+      let(:private) { true }
+      before { stub_repo(repo[:slug], internal: true, body: repo.merge(token: repo_token)) }
+      it { expect { subject }.to have_api_request :get, repo_url }
+      it { expect { subject }.to have_api_request :get, auth_url, token: user_token }
     end
   end
 
   describe 'api' do
-    let(:config) { 'env: API=true' }
-
     describe 'by default (imports .travis.yml)' do
       let(:config) { 'script: ./api' }
 
@@ -80,7 +96,7 @@ describe Travis::Yml::Configs do
 
     before { stub_content('other/other', 'one.yml', one_yml) }
     before { stub_content('other/other', 'two.yml', one_yml) }
-    before { stub_repo('other/other', private: false, default_branch: 'default') }
+    before { stub_repo('other/other', internal: true, body: { private: false, default_branch: 'default' }) }
 
     describe "defaults the repo to the parent config's repo" do
       let(:one_yml) { 'import: two.yml@master' }
@@ -103,34 +119,62 @@ describe Travis::Yml::Configs do
     end
   end
 
-  # TODO complete these
   describe 'reencrypt' do
-    let(:repo) { { slug: 'travis-ci/travis-yml', private: true, token: 'token' } }
-    before { stub_repo('travis-ci/other', private: private, default_branch: 'default', config_imports: true) }
+    before { stub_repo('travis-ci/other', internal: true, body: { private: private, default_branch: 'default', config_imports: true, private_key: PRIVATE_KEYS[:two] }) }
+    before { stub_repo('other/other', internal: true, body: { private: private, default_branch: 'default', config_imports: true, private_key: PRIVATE_KEYS[:two] }) }
     before { stub_content('travis-ci/other', 'one.yml', one_yml) }
+    before { stub_content('other/other', 'one.yml', one_yml) }
+
+    let(:encrypted) { encrypt('secret') }
+    let(:one_yml) { "env:\n  - secure: '#{encrypted}'" }
+    let(:var) { subject.config[:env][:jobs][0][:secure] }
 
     describe 'local config' do
       let(:private) { false }
       let(:travis_yml) { 'import: one/one.yml' }
+      before { expect_any_instance_of(Travis::Yml::Configs::Model::Repo).to receive(:reencrypt).never }
+      it { subject }
     end
 
-    describe 'remote, public config' do
-      let(:private) { false }
-      let(:travis_yml) { 'import: travis-ci/other:one.yml' }
+    describe 'same owner' do
+      describe 'public config' do
+        let(:travis_yml) { 'import: travis-ci/other:one.yml' }
+        let(:private) { false }
+        it { expect(var).to_not eq encrypted }
+        it { expect(decrypt(var)).to eq 'secret' }
+      end
+
+      describe 'private config on the same owner' do
+        let(:travis_yml) { 'import: travis-ci/other:one.yml' }
+        let(:private) { true }
+        it { expect(var).to_not eq encrypted }
+        it { expect(decrypt(var)).to eq 'secret' }
+      end
     end
 
-    describe 'remote, private config without secure vars' do
-      let(:private) { true }
-      let(:travis_yml) { 'import: travis-ci/other:one.yml' }
+    describe 'foreign owner' do
+      describe 'public config' do
+        let(:travis_yml) { 'import: other/other:one.yml' }
+        let(:private) { false }
+        it { expect(var).to eq encrypted }
+        it { expect { decrypt(var) }.to raise_error OpenSSL::OpenSSLError }
+      end
+
+      describe 'private config on the same owner' do
+        let(:travis_yml) { 'import: other/other:one.yml' }
+        let(:private) { true }
+        it { expect { subject }.to raise_error Travis::Yml::Configs::Errors::InvalidOwnership }
+      end
     end
 
-    describe 'remote, private config with secure vars' do
-      let(:private) { true }
-      let(:travis_yml) { 'import: travis-ci/other:one.yml' }
-      let(:one_yml) { "env:\n  - secure: str" }
-      before { allow_any_instance_of(Travis::Yml::Configs::Model::Key).to receive(:decrypt) }
-      before { allow_any_instance_of(Travis::Yml::Configs::Model::Key).to receive(:encrypt) }
-      xit { subject }
+    def decrypt(str)
+      key = OpenSSL::PKey::RSA.new(PRIVATE_KEYS[:one])
+      key.private_decrypt(Base64.decode64(str))
+    end
+
+    def encrypt(str)
+      key = OpenSSL::PKey::RSA.new(PRIVATE_KEYS[:two])
+      Base64.strict_encode64(key.public_encrypt(str))
     end
   end
 
@@ -150,7 +194,7 @@ describe Travis::Yml::Configs do
 
     before { stub_content('other/other', 'one/one.yml', one_yml) }
     before { stub_content('other/other', 'one/two.yml', two_yml) }
-    before { stub_repo('other/other', default_branch: 'default') }
+    before { stub_repo('other/other', internal: true, body: { default_branch: 'default' }) }
 
     imports %w(
       travis-ci/travis-yml:.travis.yml@ref
@@ -201,11 +245,11 @@ describe Travis::Yml::Configs do
   end
 
   describe 'visibility' do
-    let(:repo) { { slug: 'travis-ci/travis-yml', private: visibilities[0] == :private, token: 'token' } }
+    let(:repo) { { slug: 'travis-ci/travis-yml', private: visibilities[0] == :private, token: repo_token, private_key: private_key, allow_config_imports: imports } }
     let(:travis_yml) { "import: #{other}:one.yml" }
 
     before { stub_content(other, 'one.yml', one_yml) }
-    before { stub_repo(other, private: visibilities[1] == :private, config_imports: setting) }
+    before { stub_repo(other, internal: true, body: { private: visibilities[1] == :private, config_imports: setting }) }
 
     describe 'a public repo referencing a public repo' do
       let(:other) { 'other/other' }
@@ -323,7 +367,7 @@ describe Travis::Yml::Configs do
     let(:travis_yml) { 'import: other/other:one.yml' }
 
     before { stub_content('other/other', 'one.yml', one_yml) }
-    before { stub_repo('other/other', status: status) }
+    before { stub_repo('other/other', internal: true, status: status) }
 
     describe '401' do
       let(:status) { 401 }
@@ -342,7 +386,7 @@ describe Travis::Yml::Configs do
   end
 
   describe 'import order is depth first' do
-    let(:repo) { { slug: 'owner/repo', token: 'token' } }
+    let(:repo) { { slug: 'owner/repo', token: repo_token, private: true } }
     let(:travis_yml) { 'import: [.travis.yml, 1.yml]' }
     let(:y1) { 'import: [2.yml, 5.yml, 6.yml]' }
     let(:y2) { 'import: [3.yml]' }
@@ -352,7 +396,7 @@ describe Travis::Yml::Configs do
     let(:y6) { 'script: ./6' }
 
     before { stub_content(repo[:slug], '.travis.yml', travis_yml) }
-    before { stub_repo(repo[:slug], repo) }
+    before { stub_repo(repo[:slug], internal: true, body: repo) }
     before { 1.upto(6) { |i| stub_content(repo[:slug], "#{i}.yml", send(:"y#{i}")) } }
 
     subject { configs.tap(&:load).map(&:to_s) }

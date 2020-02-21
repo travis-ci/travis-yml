@@ -1,5 +1,6 @@
 require 'faraday_middleware'
 require 'travis/yml/configs/github/error'
+require 'travis/yml/helper/metrics'
 require 'travis/yml/helper/obj'
 
 module Travis
@@ -7,7 +8,7 @@ module Travis
     module Configs
       module Github
         class Client < Struct.new(:token)
-          include Helper::Obj
+          include Helper::Metrics, Helper::Obj
 
           HEADERS  = {
             'User-Agent': 'Travis-CI-Yml/Faraday',
@@ -20,6 +21,7 @@ module Travis
           rescue Faraday::Error => e
             raise error(:get, path, e)
           end
+          time :get, key: 'github.get'
 
           def client
             Faraday.new(url: url, headers: HEADERS, ssl: ssl) do |c|

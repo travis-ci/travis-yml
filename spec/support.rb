@@ -1,5 +1,6 @@
 require 'support/doc'
 require 'support/hash'
+require 'support/keys'
 require 'support/matchers'
 require 'support/node'
 require 'support/webmock'

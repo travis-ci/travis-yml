@@ -123,7 +123,7 @@ module Travis
           private
 
             def store
-              ctx.imports.store(self)
+              ctx.fetch.store(self)
             end
 
             def msg(*msg)
@@ -131,7 +131,7 @@ module Travis
             end
 
             def msgs
-              ctx.imports.msgs
+              ctx.fetch.msgs
             end
 
             def invalid_ownership?

@@ -80,8 +80,18 @@ module Travis
     class << self
       include Memoize
 
+      attr_reader :metrics
+
+      def setup
+        @metrics ||= Travis::Metrics.setup(config.metrics.to_h, logger)
+      end
+
       def config
         @config ||= Config.load
+      end
+
+      def logger
+        @logger ||= Logger.new($stdout)
       end
 
       def load(parts, opts = {})

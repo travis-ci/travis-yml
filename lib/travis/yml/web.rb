@@ -19,18 +19,16 @@ module Travis
   module Yml
     module Web
       class << self
-        attr_reader :metrics
-
-        def setup
-          @metrics ||= Travis::Metrics.setup(config.metrics.to_h, logger)
-        end
-
         def config
           Yml.config
         end
 
         def logger
-          Logger.new($stdout)
+          Yml.logger
+        end
+
+        def metrics
+          Yml.metrics
         end
       end
 
