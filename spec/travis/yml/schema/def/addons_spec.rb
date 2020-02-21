@@ -21,7 +21,7 @@ describe Travis::Yml::Schema::Def::Addons do
   it { should include jwt: { '$ref': '#/definitions/addon/jwts' } }
   it { should include sauce_connect: { '$ref': '#/definitions/addon/sauce_connect' } }
   it { should include snaps: { '$ref': '#/definitions/addon/snaps' } }
-  it { should include firefox: { anyOf: [{ type: :number }, { type: :string }], example: '68.0b1', summary: kind_of(String) } }
+  it { should include firefox: { type: :string, example: '68.0b1', summary: kind_of(String) } }
   it { should include mariadb: { type: :string, summary: kind_of(String) } }
   it { should include postgresql: { type: :string, aliases: [:postgres], summary: kind_of(String) } }
   it { should include rethinkdb: { type: :string, summary: kind_of(String) } }

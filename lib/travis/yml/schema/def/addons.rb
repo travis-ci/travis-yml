@@ -55,7 +55,7 @@ module Travis
             map :sonarcloud
             map :ssh_known_hosts, to: :secures, strict: false, summary: 'Hosts to add to ~/.ssh/known_hosts', see: { 'Adding to SSH Known Hosts': 'https://docs.travis-ci.com/user/ssh-known-hosts/' }
 
-            map :firefox,         to: :any, type: [:num, :str], eg: '68.0b1', summary: 'Firefox version to use'
+            map :firefox,         to: :str, summary: 'Firefox version to use', eg: '68.0b1'
             map :mariadb,         to: :str, summary: 'MariaDB version to use'
             map :postgresql,      to: :str, alias: :postgres, summary: 'Postgres version to use'
             map :rethinkdb,       to: :str, summary: 'RethinkDB version to use'
