@@ -87,6 +87,18 @@ describe Travis::Yml, 's3' do
     end
   end
 
+  describe 'glob' do
+    describe 'given a str' do
+      yaml %(
+        deploy:
+          provider: s3
+          glob: str
+      )
+      it { should serialize_to deploy: [provider: 's3', glob: 'str'] }
+      it { should_not have_msg }
+    end
+  end
+
   describe 'detect_encoding' do
     describe 'given a bool' do
       yaml %(

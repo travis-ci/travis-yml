@@ -62,6 +62,9 @@ describe Travis::Yml::Schema::Def::Deploy::S3 do
               local_dir: {
                 type: :string
               },
+              glob: {
+                type: :string
+              },
               dot_match: {
                 type: :boolean
               },

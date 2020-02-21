@@ -17,6 +17,7 @@ module Travis
               map :endpoint,               to: :str
               map :upload_dir,             to: :str
               map :local_dir,              to: :str
+              map :glob,                   to: :str
               map :dot_match,              to: :bool
               map :acl,                    to: :str
               map :detect_encoding,        to: :bool
