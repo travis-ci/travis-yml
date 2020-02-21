@@ -1,4 +1,4 @@
-# require 'travis/gatekeeper/helpers/metrics'
+require 'travis/yml/helper/metrics'
 require 'travis/yml/helper/msgs'
 require 'travis/yml/helper/obj'
 require 'travis/yml/configs/allow_failures'
@@ -13,19 +13,13 @@ module Travis
   module Yml
     module Configs
       class Configs < Struct.new(:repo, :ref, :raw, :mode, :data, :opts)
-        include Enumerable, Helper::Obj # Helpers::Metrics
+        include Enumerable, Helper::Metrics, Helper::Obj, Memoize
 
         attr_reader :configs, :config, :stages, :jobs
 
-        # + make GET /request/:id?include=request.messages work to spare an API request
-        # + allow including the repo's GitHub app token on /repo/:id when authenticated internally.
-        # + include settings and private key in Api /repo/:id payload if authenticated internally
-        #
         # - move notification filtering to Hub (Yml seems the wrong place)
-        # - fix Web /:repo/config
-        #
-        # + complete reencryption
-        # - add metrics
+        # - add job filtering, applying conditions only if data was given
+        # - api does not seem to have github app pem files set up everywhere
 
         def load
           fetch
@@ -67,37 +61,45 @@ module Travis
         private
 
           def fetch
-            imports.load(raw ? api : travis_yml)
-            @configs = imports.configs.reject(&:empty?)
-            msgs.concat(imports.msgs)
+            fetch = ctx.fetch
+            fetch.load(raw ? api : travis_yml)
+            @configs = fetch.configs.reject(&:empty?)
+            msgs.concat(fetch.msgs)
           end
+          time :fetch
 
           def merge
             doc = Yml.load(configs.map(&:part))
             @config = except(doc.serialize, :import)
             msgs.concat(doc.msgs)
           end
+          time :merge
 
           def reencrypt
             keys = configs.select(&:reencrypt?).map(&:repo).uniq.map(&:key)
             @config = repo.reencrypt(config, keys) if keys.any?
           end
+          time :reencrypt
 
           def expand_matrix
             @jobs = Yml.matrix(config: config, data: data).rows
           end
+          time :expand_matrix
 
           def expand_stages
             @stages, @jobs = Stages.new(config[:stages], jobs).apply
           end
+          time :expand_stages
 
           def allow_failures
             @jobs = AllowFailures.new(config.dig(:jobs, :allow_failures), jobs, data).apply
           end
+          time :allow_failures
 
           def reorder
             @jobs = Reorder.new(stages, jobs).apply
           end
+          time :reorder
 
           def travis_yml
             Config.travis_yml(ctx, nil, repo.slug, ref, mode)
@@ -107,22 +109,14 @@ module Travis
             Config::Api.new(ctx, repo.slug, ref, raw, mode)
           end
 
-          def imports
-            ctx.imports
+          def repo
+            repo = Model::Repo.new(super)
+            repo.complete? ? ctx.repos[repo.slug] = repo : ctx.repos[repo.slug]
           end
+          memoize :repo
 
           def ctx
-            @ctx ||= Ctx.new(data, opts).tap do |ctx|
-              ctx.repos[repo.slug] = repo if repo.token
-            end
-          end
-
-          def repo
-            @repo ||= if super[:token]
-              Model::Repo.new(super)
-            else
-              Model::Repos.new[super[:slug]]
-            end
+            @ctx ||= Ctx.new(data, opts)
           end
       end
     end

@@ -8,7 +8,7 @@ describe Travis::Yml::Web::App, 'POST /configs' do
   let(:headers) { last_response.headers }
   let(:body)    { Oj.load(last_response.body, symbol_keys: true) }
   let(:data)    { { repo: repo, type: type, ref: ref, mode: 'deep_merge_prepend' } }
-  let(:repo)    { { slug: 'travis-ci/travis-yml', token: 'token' } }
+  let(:repo)    { { slug: 'travis-ci/travis-yml', token: 'token', private: false, private_key: 'key', allow_config_imports: true } }
   let(:type)    { :push }
   let(:ref)     { 'ref' }
 

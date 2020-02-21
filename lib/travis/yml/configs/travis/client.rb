@@ -1,35 +1,38 @@
+require 'faraday'
 require 'faraday_middleware'
 require 'travis/yml/configs/travis/error'
 require 'travis/yml/helper/instrument'
+require 'travis/yml/helper/metrics'
 require 'travis/yml/helper/obj'
 
 module Travis
   module Yml
     module Configs
       module Travis
-        class Client
-          include Helper::Obj, Yml::Instrument
+        class Client < Struct.new(:opts)
+          include Helper::Metrics, Helper::Obj, Yml::Instrument
 
           HEADERS  = {
             'User-Agent': 'Travis-CI-Yml/Faraday',
             'Travis-API-Version': '3',
           }
 
-          def get(path, opts = {})
-            client.get(path, opts)
+          def get(path, params = {})
+            client.get(path, params)
           rescue Faraday::Error => e
             raise error(:get, path, e)
           end
+          time :get, key: 'travis.get'
           instrument :get
 
           def client
             Faraday.new(url: url, headers: HEADERS, ssl: ssl) do |c|
               c.use FaradayMiddleware::FollowRedirects
-              c.request  :authorization, :internal, "admin:#{token}" if token
+              c.request  :authorization, *auth
               c.request  :retry
               c.response :raise_error
-              # c.response :logger
               c.adapter  :net_http
+              # c.response :logger
             end
           end
 
@@ -41,16 +44,17 @@ module Travis
             compact(config[:ssl].to_h.merge(config[:travis][:ssl] || {}))
           end
 
-          def token
-            config[:travis][:token]
-          end
-
-          def config
-            Yml.config
+          def auth
+            auth = opts[:auth] || raise('no auth provided')
+            opts[:auth]&.to_a&.flatten
           end
 
           def error(method, path, e)
             Error.new(method, path, e.response[:status], e.response[:body])
+          end
+
+          def config
+            Yml.config
           end
         end
       end

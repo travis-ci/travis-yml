@@ -19,6 +19,7 @@ group :development do
   gem 'foreman'
   gem 'neatjson'
   gem 'pry'
+  gem 'irb'
 end
 
 group :test do

@@ -11,6 +11,13 @@ module Travis
           request.body.read.tap { request.body.rewind }
         end
 
+        def request_headers
+          env.inject({}) do |headers, (key, value)|
+            headers[$1.downcase.to_sym] = value if key =~ /^http_(.*)/i
+            headers
+          end
+        end
+
         def error(e)
           Oj.generate(
             error_type: error_type(e),
@@ -26,6 +33,10 @@ module Travis
           str = str.gsub(/([A-Z])([A-Z])/, '\1_\2')
           str = str.gsub(/([a-z])([A-Z])/, '\1_\2')
           str.downcase
+        end
+
+        def symbolize(hash)
+          hash.map { |key, value| [key.to_sym, value] }.to_h
         end
       end
     end

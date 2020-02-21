@@ -10,7 +10,7 @@ module Spec
       end
 
       def api_request(*args)
-        api_requests << %i(method args start end).zip(args).to_h
+        api_requests << %i(client method args start end).zip(args).to_h
       end
 
       def stub_content(repo, path, data)
@@ -21,19 +21,23 @@ module Spec
         stub_request(:get, url).to_return(body: body, status: status)
       end
 
-      def stub_repo(slug, data)
-        data = { body: data } unless data.key?(:status) || data.key?(:body)
-        url = "https://api.travis-ci.com/repo/#{slug.sub('/', '%2F')}?representation=internal"
+      def stub_repo(slug, data = {})
+        url = "https://api.travis-ci.com/repo/#{slug.sub('/', '%2F')}"
+        url = "#{url}?representation=internal" if data[:internal]
+
         body = data[:body] && JSON.dump(data[:body].merge(
           slug: slug,
           default_branch: { name: data[:body][:default_branch] },
           user_settings: { settings: data[:body].delete(:config_imports) ? [name: 'config_imports', value: true] : [] }
         ))
         status = data[:status] || 200
-        stub_request(:get, url).to_return(body: body, status: status)
+        auth = 'internal yml:token' if data[:internal]
+        auth = "token #{data[:token]}" if data[:token]
+
+        stub = stub_request(:get, url)
+        stub = stub.with(headers: { 'Authorization' => auth }) if auth
+        stub.to_return(body: body, status: status)
       end
     end
   end
 end
-
-

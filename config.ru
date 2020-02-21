@@ -1,5 +1,5 @@
 require 'travis/yml/web'
 
-# Travis::Yml::Web.setup
+Travis::Yml.setup
 
 run Travis::Yml::Web::App.new
