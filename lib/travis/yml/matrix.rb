@@ -1,10 +1,13 @@
 # frozen_string_literal: true
 
 require 'travis/yml/helper/condition'
+require 'travis/yml/helper/obj'
 
 module Travis
   module Yml
     class Matrix < Obj.new(:config, :data)
+      include Helper::Obj
+
       def rows
         rows = expand
         rows = with_included(rows)
@@ -18,6 +21,7 @@ module Travis
         rows = without_unsupported(rows)
         rows = cleaned(rows)
         rows = uniq(rows)
+        rows = filter(rows)
         rows
       end
       alias jobs rows
@@ -124,10 +128,20 @@ module Travis
           end
         end
 
+        def filter(rows)
+          rows.select { |row| accept?(:job, row) }
+        end
+
         def accept?(type, config)
+          data = data_for(config)
+          return true unless data
           return true if Condition.new(config, data).accept?
           # TODO generate message
           false
+        end
+
+        def data_for(config)
+          only(config, *%i(language os dist env)).merge(data) if data
         end
 
         def global_env
