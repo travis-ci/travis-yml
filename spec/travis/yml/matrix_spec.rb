@@ -3,8 +3,9 @@ describe Travis::Yml, 'matrix' do
     it { should eq rows }
   end
 
+  let(:data)   { {} }
   let(:config) { described_class.apply(parse(yaml), opts).serialize }
-  let(:matrix) { described_class.matrix(config) }
+  let(:matrix) { described_class.matrix(config: config, data: data) }
 
   subject { matrix.rows }
 
@@ -374,6 +375,52 @@ describe Travis::Yml, 'matrix' do
     expands_to [
       { env: [FOO: 'foo'], rvm: '2.2' }
     ]
+  end
+
+  describe 'conditional jobs.include' do
+    describe 'branch' do
+      yaml %(
+        jobs:
+          include:
+            - env: FOO=one
+            - env: FOO=two
+              if: branch = master
+      )
+
+      describe 'matches' do
+        let(:data) { { branch: 'master' } }
+        expands_to [{ env: [FOO: 'one'] }, { env: [FOO: 'two'], if: 'branch = master' }]
+      end
+
+      describe 'does not match' do
+        let(:data) { { branch: 'other' } }
+        expands_to [{ env: [FOO: 'one'] }]
+      end
+    end
+
+    describe 'env matches' do
+      yaml %(
+        jobs:
+          include:
+            - env: FOO=one
+            - env: FOO=two
+              if: env(FOO) = two
+      )
+
+      expands_to [{ env: [FOO: 'one'] }, { env: [FOO: 'two'], if: 'env(FOO) = two' }]
+    end
+
+    describe 'env does not match' do
+      yaml %(
+        jobs:
+          include:
+            - env: FOO=one
+            - env: FOO=two
+              if: env(FOO) = one
+      )
+
+      expands_to [{ env: [FOO: 'one'] }]
+    end
   end
 
   describe 'jobs exclude (1)' do

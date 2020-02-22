@@ -17,8 +17,9 @@ module Travis
 
         attr_reader :configs, :config, :stages, :jobs
 
+        # - some data, such as env vars need to be added from the config to
+        #   data before processing conditions
         # - move notification filtering to Hub (Yml seems the wrong place)
-        # - add job filtering, applying conditions only if data was given
         # - api does not seem to have github app pem files set up everywhere
 
         def load
