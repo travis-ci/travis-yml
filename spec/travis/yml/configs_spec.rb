@@ -223,7 +223,7 @@ describe Travis::Yml::Configs do
     it { expect(subject.map(&:mode)).to eq [nil, :merge, :deep_merge] }
   end
 
-  describe 'given a condition' do
+  describe 'conditional imports' do
     let(:travis_yml) do
       <<~yml
         import:
@@ -242,6 +242,38 @@ describe Travis::Yml::Configs do
     )
 
     it { expect(msgs).to include [:info, :import, :skip_import, source: 'travis-ci/travis-yml:one/two.yml@ref', condition: 'type = pull_request'] }
+  end
+
+  describe 'conditional jobs' do
+    let(:travis_yml) do
+      <<~yml
+        jobs:
+          include:
+          - name: one
+            if: type = api
+      yml
+    end
+
+    let(:data) { { type: 'push' } }
+
+    it { expect(msgs).to include [:info, :'jobs.include', :skip_job, number: 1, condition: 'type = api'] }
+  end
+
+  describe 'conditional exclude' do
+    let(:travis_yml) do
+      <<~yml
+        jobs:
+          include:
+            - name: one
+          exclude:
+          - name: one
+            if: type = api
+      yml
+    end
+
+    let(:data) { { type: 'push' } }
+
+    it { expect(msgs).to include [:info, :'jobs.exclude', :skip_exclude, number: 1, condition: 'type = api'] }
   end
 
   describe 'visibility' do

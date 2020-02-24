@@ -17,8 +17,6 @@ module Travis
 
         attr_reader :configs, :config, :stages, :jobs
 
-        # - some data, such as env vars need to be added from the config to
-        #   data before processing conditions
         # - move notification filtering to Hub (Yml seems the wrong place)
         # - api does not seem to have github app pem files set up everywhere
 
@@ -83,7 +81,9 @@ module Travis
           time :reencrypt
 
           def expand_matrix
-            @jobs = Yml.matrix(config: config, data: data).rows
+            matrix = Yml.matrix(config: config, data: data)
+            @jobs = matrix.jobs
+            msgs.concat(matrix.msgs)
           end
           time :expand_matrix
 
