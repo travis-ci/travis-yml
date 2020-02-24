@@ -15,16 +15,8 @@ group :web do
   gem 'travis-metrics', git: 'https://github.com/travis-ci/travis-metrics', ref: 'sf-unfork'
 end
 
-group :development do
-  gem 'foreman'
-  gem 'neatjson'
-  gem 'pry'
-  gem 'irb'
-end
-
 group :test do
   gem 'dpl', git: 'https://github.com/travis-ci/dpl.git'
-  gem 'awesome_print'
   gem 'json-schema'
   gem 'rack-test'
   gem 'rake'
