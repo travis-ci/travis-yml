@@ -1,3 +1,4 @@
+require 'cgi'
 require 'travis/yml/helper/obj'
 require 'travis/yml/configs/errors'
 require 'travis/yml/configs/travis/client'
@@ -21,7 +22,7 @@ module Travis
           private
 
             def path
-              "repo/#{slug.to_s.sub('/', '%2F')}"
+              "repo/#{url_encode(slug)}"
             end
 
             def get(path, opts)
@@ -47,6 +48,10 @@ module Travis
               settings = attrs.dig('user_settings', 'settings') || []
               setting = settings.detect { |setting| setting['name'] == 'config_imports' }
               setting ? setting['value'] : false
+            end
+
+            def url_encode(str)
+              CGI.escape(str)
             end
 
             def client(opts)
