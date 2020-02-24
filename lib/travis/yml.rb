@@ -73,6 +73,8 @@ module Travis
       invalid_format:    'dropping invalid format %{value}',
       invalid_condition: 'invalid condition: %{condition}',
       invalid_env_var:   'invalid env var: %{var}',
+      skip_job:          'skipping job #%{number}, condition does not match: %{condition}',
+      skip_exclude:      'skipping jobs exclude rule #%{number}, condition does not match: %{condition}',
       skip_import:       'skipping import %{source}, condition does not match: %{condition}',
       unknown_import:    'import not found: %{source}'
     }

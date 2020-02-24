@@ -8,7 +8,7 @@ module Travis
     class Matrix < Obj.new(:config, :data)
       include Helper::Obj
 
-      def rows
+      def jobs
         rows = expand
         rows = with_included(rows)
         rows = with_default(rows)
@@ -24,10 +24,14 @@ module Travis
         rows = filter(rows)
         rows
       end
-      alias jobs rows
+      alias rows jobs
 
       def axes
         keys
+      end
+
+      def msgs
+        @msgs ||= []
       end
 
       private
@@ -123,20 +127,20 @@ module Travis
         def excluded?(row)
           excluded.any? do |excluded|
             next unless excluded.respond_to?(:all?)
-            next unless accept?(:excluded, excluded)
+            next unless accept?(:exclude, :'jobs.exclude', excluded)
             except(excluded, :if).all? { |key, value| wrap(row[key]) == wrap(value) }
           end
         end
 
         def filter(rows)
-          rows.select { |row| accept?(:job, row) }
+          rows.select { |row| accept?(:job, :'jobs.include', row) }
         end
 
-        def accept?(type, config)
+        def accept?(type, key, config, ix = 0)
           data = data_for(config)
           return true unless data
           return true if Condition.new(config, data).accept?
-          # TODO generate message
+          msgs << [:info, key, :"skip_#{type}", number: ix + 1, condition: config[:if]]
           false
         end
 
@@ -171,7 +175,7 @@ module Travis
 
         def cleaned(rows)
           # TODO are there other keys that do not make sense on a job config?
-          rows.map { |row| except(row, :version, :stages) }
+          rows.map { |row| except(row, :version, :stages, :notifications) }
         end
 
         def uniq(rows)
