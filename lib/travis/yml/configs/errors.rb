@@ -51,7 +51,7 @@ module Travis
 
         def api_error(*args)
           case args.last.status
-          when 401 then unauthorized(*args)
+          when 401, 403 then unauthorized(*args)
           when 404 then not_found(*args)
           when 500 then server_error(*args)
           else raise(args.last)
