@@ -19,7 +19,7 @@ module Travis
 
           def get(path, params = {})
             client.get(path, params)
-          rescue Faraday::Error => e
+          rescue Error, Faraday::Error => e
             raise error(:get, path, e)
           end
           time :get, key: 'travis.get'

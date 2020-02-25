@@ -1,4 +1,5 @@
 require 'cgi'
+require 'oj'
 require 'travis/yml/helper/obj'
 require 'travis/yml/configs/errors'
 require 'travis/yml/configs/travis/client'

@@ -1,6 +1,7 @@
 # frozen_string_literal: true
-require 'obj'
+require 'logger'
 require 'memoize'
+require 'obj'
 require 'travis/yml/helper/obj'
 
 Obj.include Memoize, Travis::Yml::Helper::Obj

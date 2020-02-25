@@ -1,6 +1,5 @@
 # #frozen_string_literal: true
 
-require 'logger'
 require 'rack/cors'
 require 'rack/ssl-enforcer'
 require 'sinatra'
