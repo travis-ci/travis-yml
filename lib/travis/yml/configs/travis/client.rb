@@ -50,7 +50,9 @@ module Travis
           end
 
           def error(method, path, e)
-            Error.new(method, path, e.response[:status], e.response[:body])
+            msg = e.response[:body]
+            msg = Oj.parse(msg)['error_message'] rescue msg
+            Error.new(method, path, e.response[:status], msg)
           end
 
           def config
