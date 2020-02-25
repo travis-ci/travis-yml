@@ -11,8 +11,6 @@ module Travis
           status 200
           json configs.to_h
         rescue Yml::Error, Oj::Error, EncodingError => e
-          raise if e.respond_to?(:internal?) && e.internal?
-          status 400
           error(e)
         end
 

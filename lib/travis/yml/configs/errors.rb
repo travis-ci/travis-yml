@@ -19,7 +19,7 @@ module Travis
           end
 
           def internal?
-            status != 404
+            status == 500
           end
         end
 

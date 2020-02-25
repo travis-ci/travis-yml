@@ -406,6 +406,11 @@ describe Travis::Yml::Configs do
       it { expect { subject }.to raise_error Travis::Yml::Configs::Unauthorized }
     end
 
+    describe '403' do
+      let(:status) { 403 }
+      it { expect { subject }.to raise_error Travis::Yml::Configs::Unauthorized }
+    end
+
     describe '404' do
       let(:status) { 404 }
       it { expect { subject }.to raise_error Travis::Yml::Configs::NotFound }

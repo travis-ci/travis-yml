@@ -20,6 +20,10 @@ module Travis
             get(path, auth: internal_auth, representation: :internal)
           end
 
+          def to_s
+            slug
+          end
+
           private
 
             def path

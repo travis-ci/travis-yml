@@ -17,50 +17,70 @@ describe Travis::Yml::Web::App, 'POST /configs' do
 
   before { stub_content(repo[:slug], '.travis.yml', travis_yml) }
   before { stub_content(repo[:slug], 'one.yml', one_yml) }
-  before { post '/configs', Oj.generate(data), defaults: true }
 
-  it { expect(status).to eq 200 }
-  it { expect(headers['Content-Type']).to eq 'application/json' }
+  context do
+    before { post '/configs', Oj.generate(data), defaults: true }
 
-  it do
-    expect(body[:raw_configs]).to eq [
-      {
-        source: 'travis-ci/travis-yml:.travis.yml@ref',
-        config: travis_yml,
-        mode: 'deep_merge_prepend'
-      },
-      {
-        source: 'travis-ci/travis-yml:one.yml@ref',
-        config: one_yml,
-        mode: nil
-      }
-    ]
+    it { expect(status).to eq 200 }
+    it { expect(headers['Content-Type']).to eq 'application/json' }
+
+    it do
+      expect(body[:raw_configs]).to eq [
+        {
+          source: 'travis-ci/travis-yml:.travis.yml@ref',
+          config: travis_yml,
+          mode: 'deep_merge_prepend'
+        },
+        {
+          source: 'travis-ci/travis-yml:one.yml@ref',
+          config: one_yml,
+          mode: nil
+        }
+      ]
+    end
+
+    it do
+      expect(body[:config]).to eq(
+        script: ['./one']
+      )
+    end
+
+    it do
+      expect(body[:matrix]).to eq [
+        script: ['./one']
+      ]
+    end
   end
 
-  it do
-    expect(body[:config]).to eq(
-      script: ['./one']
-    )
-  end
+  describe 'travis api errors' do
+    let(:travis_yml) { 'import: other/other:one.yml' }
 
-  it do
-    expect(body[:matrix]).to eq [
-      script: ['./one']
-    ]
-  end
+    before { stub_content('other/other', 'one.yml', one_yml) }
+    before { stub_repo('other/other', internal: true, status: status) }
+    subject { post '/configs', Oj.generate(data), defaults: true }
 
-  # describe 'error handling' do
-  #   before do
-  #     post '/expand', '', {}
-  #   end
-  #
-  #   it 'is bad request' do
-  #     expect(status).to eq 400
-  #   end
-  #
-  #   it 'returns error' do
-  #     expect(body['error_type']).to eq 'encoding_error'
-  #     expect(body['error_message']).to match /Empty input.*at line 1, column 1/
-  #   end
-  # end
+    context do
+      before { subject }
+
+      describe '401' do
+        let(:status) { 401 }
+        it { expect(status).to eq status }
+      end
+
+      describe '403' do
+        let(:status) { 403 }
+        it { expect(status).to eq status }
+      end
+
+      describe '404' do
+        let(:status) { 404 }
+        it { expect(status).to eq status }
+      end
+    end
+
+    describe '500' do
+      let(:status) { 500 }
+      it { expect { subject }.to raise_error Travis::Yml::Configs::ServerError }
+    end
+  end
 end

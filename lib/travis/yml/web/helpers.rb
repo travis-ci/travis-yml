@@ -19,10 +19,9 @@ module Travis
         end
 
         def error(e)
-          Oj.generate(
-            error_type: error_type(e),
-            error_message: e.message,
-          )
+          raise if e.respond_to?(:internal?) && e.internal?
+          status e.respond_to?(:status) ? e.status : 400
+          Oj.generate(error_type: error_type(e), error_message: e.message)
         end
 
         def error_type(e)
