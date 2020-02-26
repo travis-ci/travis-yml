@@ -37,7 +37,7 @@ module Travis
 
           def internal?
             return false unless auth
-            match_auth(/internal:(.+)/) == config[:auth][:internal]
+            match_auth(/internal (.+)/) == config[:auth][:internal]
           end
 
           def match_auth(pattern)
