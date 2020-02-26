@@ -57,6 +57,38 @@ describe Travis::Yml::Support::Merge do
     it { expect(subject.keys.first.line).to eq 2 }
   end
 
+  describe 'deep_merge_append' do
+    let(:mode) { :deep_merge_append }
+    it { should eq 'foo' => { 'one' => ['one', 'two'], 'two' => 'two' }, 'bar' => 'bar' }
+    it { expect(subject.keys.first).to be_a Key }
+    it { expect(subject.keys.first.line).to eq 2 }
+  end
+
+  describe 'deep_merge_patch' do
+    let(:mode) { :deep_merge_patch }
+
+    let(:lft) do
+      parse %(
+        foo:
+          bar:
+          - one: two
+          -
+          - three: three
+      )
+    end
+
+    let(:rgt) do
+      parse %(
+        foo:
+          bar:
+          - one: one
+          - two: two
+      )
+    end
+
+    it { should eq 'foo' => { 'bar' => [{ 'one' => 'two' }, { 'two' => 'two' }, { 'three' => 'three'}] } }
+  end
+
   describe 'merge tags (1)' do
     let(:lft) do
       parse %(
