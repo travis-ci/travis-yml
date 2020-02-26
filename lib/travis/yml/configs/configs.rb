@@ -111,7 +111,7 @@ module Travis
           end
 
           def repo
-            repo = Model::Repo.new(super)
+            repo = Model::Repo.new(super || {})
             repo.complete? ? ctx.repos[repo.slug] = repo : ctx.repos[repo.slug]
           end
           memoize :repo
