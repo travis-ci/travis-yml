@@ -175,7 +175,7 @@ module Travis
 
         def cleaned(rows)
           # TODO are there other keys that do not make sense on a job config?
-          rows.map { |row| except(row, :version, :stages, :notifications) }
+          rows.map { |row| except(row, :import, :stages, :notifications, :version) }
         end
 
         def uniq(rows)

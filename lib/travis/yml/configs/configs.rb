@@ -69,7 +69,7 @@ module Travis
 
           def merge
             doc = Yml.load(configs.map(&:part))
-            @config = except(doc.serialize, :import)
+            @config = doc.serialize
             msgs.concat(doc.msgs)
           end
           time :merge
