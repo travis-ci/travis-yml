@@ -6,14 +6,15 @@ describe Travis::Yml::Configs do
   let(:imports) { true }
   let(:repo)    { { slug: 'travis-ci/travis-yml', private: private, default_branch: 'master', token: repo_token, private_key: private_key, allow_config_imports: imports } }
   let(:ref)     { 'ref' }
-  let(:config)  { nil }
+  let(:raw)     { nil }
   let(:data)    { nil }
   let(:mode)    { nil }
   let(:opts)    { { token: user_token, data: data } }
-  let(:configs) { described_class.new(repo, ref, config, mode, data, opts) }
-  let(:msgs)    { subject.msgs.to_a }
+  let(:configs) { described_class.new(repo, ref, raw, mode, data, opts) }
+  let(:config)  { subject.config }
   let(:jobs)    { subject.jobs }
   let(:stages)  { subject.stages }
+  let(:msgs)    { subject.msgs.to_a }
   let(:setting) { true }
 
   let(:travis_yml) { 'import: one/one.yml' }
@@ -63,7 +64,7 @@ describe Travis::Yml::Configs do
 
   describe 'api' do
     describe 'by default (imports .travis.yml)' do
-      let(:config) { 'script: ./api' }
+      let(:raw) { 'script: ./api' }
 
       imports %w(
         api
@@ -73,7 +74,7 @@ describe Travis::Yml::Configs do
     end
 
     describe 'given imports (skips .travis.yml)' do
-      let(:config) { 'import: one/one.yml' }
+      let(:raw) { 'import: one/one.yml' }
 
       imports %w(
         api
@@ -82,7 +83,7 @@ describe Travis::Yml::Configs do
     end
 
     describe 'merge_mode replace (skips all)' do
-      let(:config) { 'import: one/one.yml' }
+      let(:raw) { 'import: one/one.yml' }
       let(:mode) { :replace }
 
       imports %w(
@@ -274,6 +275,24 @@ describe Travis::Yml::Configs do
     let(:data) { { type: 'push' } }
 
     it { expect(msgs).to include [:info, :'jobs.exclude', :skip_exclude, number: 1, condition: 'type = api'] }
+  end
+
+  describe 'matrix expansion does not alter the merged request config' do
+    let(:travis_yml) do
+      <<~yml
+        env:
+          global:
+          - ONE=one
+        jobs:
+          include:
+            - name: one
+            - name: two
+      yml
+    end
+
+    let(:data) { { type: 'push' } }
+
+    it { expect(config).to eq env: { global: [ONE: 'one'] }, jobs: { include: [{ name: 'one' }, { name: 'two' }] } }
   end
 
   describe 'visibility' do

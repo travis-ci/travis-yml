@@ -81,7 +81,7 @@ module Travis
           time :reencrypt
 
           def expand_matrix
-            matrix = Yml.matrix(config: config, data: data)
+            matrix = Yml.matrix(config: deep_dup(config), data: data)
             @jobs = matrix.jobs
             msgs.concat(matrix.msgs)
           end
