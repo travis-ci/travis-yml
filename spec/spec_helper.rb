@@ -6,8 +6,6 @@ require 'travis/yml'
 require 'travis/yml/web'
 require 'support'
 
-Travis::Yml.setup
-
 RSpec.configure do |c|
   c.include Spec::Support::Doc
   c.include Spec::Support::Hash

@@ -13,7 +13,6 @@ environment ENV['RACK_ENV'] || 'development'
 
 before_fork do
   Travis::Yml.expand
-  Travis::Yml.setup
 end
 
 lowlevel_error_handler do |error, env|
