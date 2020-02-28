@@ -149,6 +149,22 @@ describe Travis::Yml, 'matrix' do
     ]
   end
 
+  describe 'env.global' do
+    yaml %(
+      env:
+        global:
+          - FOO=foo
+      rvm:
+      - 2.2
+      - 2.3
+    )
+
+    expands_to [
+      { env: [{ FOO: 'foo' }], rvm: '2.2' },
+      { env: [{ FOO: 'foo' }], rvm: '2.3' },
+    ]
+  end
+
   describe 'env.jobs and env.global' do
     yaml %(
       env:

@@ -59,7 +59,15 @@ module Travis
         end
 
         def with_env_arrays(rows)
-          rows.each { |row| row[:env] = wrap(row[:env]) if row[:env] }
+          rows.each { |row| row[:env] = with_env_array(row[:env]) if row[:env] }
+        end
+
+        def with_env_array(env)
+          case env
+          when Hash  then compact(wrap(except(env, :global)))
+          when Array then env.map { |env| with_env_array(env) }.flatten(1)
+          else wrap(env)
+          end
         end
 
         def with_global_env(rows)
