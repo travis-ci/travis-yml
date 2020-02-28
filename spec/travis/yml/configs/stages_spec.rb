@@ -13,19 +13,19 @@ describe Travis::Yml::Configs::Stages do
     describe 'no stages section (1)' do
       let(:config) { nil }
       let(:jobs) { [{ stage: 'one' }, {}, { stage: 'two' }, {}] }
-      it { should eq %w(One One Two Two) }
+      it { should eq %w(one one two two) }
     end
 
     describe 'no stages section (2)' do
       let(:config) { nil }
       let(:jobs) { [{}, {}, { stage: 'one' }, {}] }
-      it { should eq %w(Test Test One One) }
+      it { should eq %w(test test one one) }
     end
 
     describe 'stages section' do
       let(:config) { [{ name: 'one' }, { name: 'two' } ] }
       let(:jobs) { [{ stage: 'three' }, { stage: 'two' }, {}, { stage: 'one' }, {}, { stage: 'four' }] }
-      it { should eq %w(Three Two Two One One Four) }
+      it { should eq %w(three two two one one four) }
     end
   end
 
@@ -41,24 +41,36 @@ describe Travis::Yml::Configs::Stages do
     describe 'no stages section (1)' do
       let(:config) { nil }
       let(:jobs) { [{ stage: 'one' }, {}, { stage: 'two' }, {}] }
-      it { should eq [{ name: 'One' }, { name: 'Two' }] }
+      it { should eq [{ name: 'one' }, { name: 'two' }] }
     end
 
     describe 'no stages section (2)' do
       let(:config) { nil }
       let(:jobs) { [{}, {}, { stage: 'one' }, {}] }
-      it { should eq [{ name: 'Test' }, { name: 'One' }] }
+      it { should eq [{ name: 'test' }, { name: 'one' }] }
     end
 
     describe 'stages section' do
       let(:config) { [{ name: 'one', if: 'true' }, { name: 'two' } ] }
       let(:jobs) { [{ stage: 'three' }, { stage: 'two' }, {}, { stage: 'one' }, {}, { stage: 'four' }] }
+
       it do
         should eq [
-          { name: 'One', if: 'true' },
-          { name: 'Two' },
-          { name: 'Three' },
-          { name: 'Four' }
+          { name: 'one', if: 'true' },
+          { name: 'two' },
+          { name: 'three' },
+          { name: 'four' }
+        ]
+      end
+    end
+
+    describe 'stages section with an empty stage' do
+      let(:config) { [{ name: 'empty' }, { name: 'one' } ] }
+      let(:jobs) { [{ stage: 'one' }, { stage: 'one' }] }
+
+      it do
+        should eq [
+          { name: 'one' }
         ]
       end
     end

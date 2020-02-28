@@ -19,7 +19,6 @@ module Travis
         def assign_names
           jobs.inject(DEFAULT_STAGE) do |name, job|
             job.stage ||= name
-            job.stage = job.stage.to_s.capitalize
           end
         end
 
@@ -29,8 +28,9 @@ module Travis
 
         def stages
           names.map.with_index do |name, ix|
+            next unless job?(name)
             stage(name) || { name: name }
-          end
+          end.compact
         end
 
         def stage(name)
@@ -40,7 +40,11 @@ module Travis
         def names
           names = configs.map { |stage| stage[:name] }
           names = names + jobs.map(&:stage)
-          names.compact.map(&:capitalize).uniq
+          names.compact.uniq
+        end
+
+        def job?(stage)
+          jobs.any? { |job| job.stage == stage }
         end
 
         def jobs
@@ -50,7 +54,6 @@ module Travis
         def configs
           @configs ||= Array(super).map do |config|
             config[:name] ||= DEFAULT_STAGE
-            config[:name].capitalize!
             config
           end
         end
