@@ -1,6 +1,6 @@
+require 'travis/yml/configs/model/job'
 require 'travis/yml/helper/condition'
 require 'travis/yml/helper/obj'
-require 'travis/yml/configs/model/job'
 
 module Travis
   module Yml

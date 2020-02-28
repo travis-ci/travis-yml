@@ -89,7 +89,7 @@ module Travis
           time :expand_matrix
 
           def expand_stages
-            @stages, @jobs = Stages.new(config[:stages], jobs).apply
+            @stages, @jobs = Stages.new(config[:stages], jobs, data).apply
           end
           time :expand_stages
 

@@ -1,5 +1,6 @@
 describe Travis::Yml::Configs::Stages do
-  let(:stages) { described_class.new(config, jobs) }
+  let(:stages) { described_class.new(config, jobs, data) }
+  let(:data) { {} }
 
   describe 'stage names' do
     subject { stages.apply.last.map { |job| job[:stage] } }
@@ -71,6 +72,35 @@ describe Travis::Yml::Configs::Stages do
       it do
         should eq [
           { name: 'one' }
+        ]
+      end
+    end
+  end
+
+  describe 'conditional stages' do
+    let(:config) { [{ name: 'one' }, { name: 'two', if: 'branch = other' } ] }
+    let(:jobs) { [{ stage: 'one' }, { stage: 'two' }] }
+
+    subject { stages.apply }
+
+    describe 'matches' do
+      let(:data) { { branch: 'other' } }
+
+      it do
+        should eq [
+          [{ name: 'one' }, { name: 'two', if: 'branch = other' }],
+          [{ stage: 'one' }, { stage: 'two' }]
+        ]
+      end
+    end
+
+    describe 'does not match' do
+      let(:data) { { branch: 'master' } }
+
+      it do
+        should eq [
+          [{ name: 'one' }],
+          [{ stage: 'one' }]
         ]
       end
     end

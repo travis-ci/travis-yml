@@ -509,17 +509,17 @@ describe Travis::Yml::Configs do
 
       it do
         expect(stages).to eq [
-          { name: 'One' },
-          { name: 'Two' }
+          { name: 'one' },
+          { name: 'two' }
         ]
       end
 
       it do
         expect(jobs).to eq [
-          { name: 'two',   stage: 'One' },
-          { name: 'one',   stage: 'One', allow_failure: true },
-          { name: 'three', stage: 'Two' },
-          { name: 'four',  stage: 'Two', allow_failure: true }
+          { name: 'two',   stage: 'one' },
+          { name: 'one',   stage: 'one', allow_failure: true },
+          { name: 'three', stage: 'two' },
+          { name: 'four',  stage: 'two', allow_failure: true }
         ]
       end
     end
@@ -548,20 +548,20 @@ describe Travis::Yml::Configs do
 
       it do
         expect(stages).to eq [
-          { name: 'One' },
-          { name: 'Two' },
-          { name: 'Three' }
+          { name: 'one' },
+          { name: 'two' },
+          { name: 'three' }
         ]
       end
 
       it do
         expect(jobs).to eq [
-          { name: 'one',   stage: 'One' },
-          { name: 'two',   stage: 'One', allow_failure: true },
-          { name: 'three', stage: 'Two' },
-          { name: 'four',  stage: 'Two', allow_failure: true },
-          { name: 'five',  stage: 'Three' },
-          { name: 'six',   stage: 'Three', allow_failure: true }
+          { name: 'one',   stage: 'one' },
+          { name: 'two',   stage: 'one', allow_failure: true },
+          { name: 'three', stage: 'two' },
+          { name: 'four',  stage: 'two', allow_failure: true },
+          { name: 'five',  stage: 'three' },
+          { name: 'six',   stage: 'three', allow_failure: true }
         ]
       end
     end
