@@ -101,11 +101,7 @@ module Travis
         end
 
         def without_unsupported(rows)
-          rows.map do |row|
-            row.delete(:osx_image) unless row[:os] == 'osx'
-            row.delete(:arch) unless row[:os] == 'linux'
-            row
-          end
+          rows.map { |row| row.select { |key, value| supported?(row, key, value) }.to_h }
         end
 
         def with_default(rows)
@@ -140,6 +136,13 @@ module Travis
           end
         end
 
+        # move this to Yml::Doc.supported?
+        def supported?(job, key, value)
+          supporting = stringify(only(job, :language, :os, :arch))
+          support = Yml.expand.support(key.to_s)
+          Yml::Doc::Value::Support.new(support, supporting, value).supported?
+        end
+
         def filter(rows)
           rows.select { |row| accept?(:job, :'jobs.include', row) }
         end
@@ -171,14 +174,14 @@ module Travis
         end
 
         def values
-          values = config.select { |key, value| keys.include?(key) && ![[], nil].include?(value) }
+          values = only(config, *keys)
           values = values.map { |key, value| key == :env && value.is_a?(Hash) && value.key?(:jobs) ? value[:jobs] : value }
           values = values.map { |value| wrap(value) }
           values
         end
 
         def shared
-          @shared ||= config.reject { |key, value| key == :jobs || keys.include?(key) || [[], nil].include?(value) }
+          @shared ||= config.reject { |key, value| key == :jobs || keys.include?(key) || blank?(value) }
         end
 
         def cleaned(rows)
@@ -196,11 +199,19 @@ module Travis
         end
 
         def keys
-          @keys ||= (config.keys & expand_keys).select { |k| ![[], nil].include?(config[k]) }
+          @keys ||= (config.keys & expand_keys).reject { |key| blank?(config[key]) }
         end
 
         def expand_keys
           Yml.expand_keys - [:jobs] + [:env] # TODO allow nested matrix expansion keys, like env.jobs
+        end
+
+        def blank?(obj)
+          case obj
+          when Array, Hash, String then obj.empty?
+          when NilClass then true
+          else false
+          end
         end
 
         def wrap(obj)

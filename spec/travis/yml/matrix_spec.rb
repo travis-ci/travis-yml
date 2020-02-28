@@ -199,6 +199,17 @@ describe Travis::Yml, 'matrix' do
     ]
   end
 
+  describe 'matrix key unsupported by language' do
+    yaml %(
+      language: c
+      python: 3.7
+    )
+
+    expands_to [
+      { language: 'c' },
+    ]
+  end
+
   describe 'os matrix with no language', defaults: true do
     yaml %(
       os:
