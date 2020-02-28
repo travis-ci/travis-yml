@@ -470,6 +470,25 @@ describe Travis::Yml::Configs do
     end
   end
 
+  describe 'allow_failure with global env' do
+    let(:travis_yml) do
+      <<~yml
+        env:
+          global:
+            - FOO=foo
+        matrix:
+          fast_finish: true
+          include:
+            - env: BAR=bar
+            - env: BAZ=baz
+          allow_failures:
+            - env: BAZ=baz
+      yml
+    end
+
+    it { expect(jobs.map { |c| c[:allow_failure] }).to eq [nil, true] }
+  end
+
   describe 'stages and allow_failures' do
     let(:travis_yml) { yaml }
 

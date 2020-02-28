@@ -17,6 +17,7 @@ module Travis
 
         attr_reader :configs, :config, :stages, :jobs
 
+        # - complete specs in configs/allow_failures
         # - move notification filtering to Hub (Yml seems the wrong place)
         # - api does not seem to have github app pem files set up everywhere
 
@@ -93,7 +94,7 @@ module Travis
           time :expand_stages
 
           def allow_failures
-            @jobs = AllowFailures.new(config.dig(:jobs, :allow_failures), jobs, data).apply
+            @jobs = AllowFailures.new(config, jobs, data).apply
           end
           time :allow_failures
 

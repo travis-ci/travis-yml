@@ -5,7 +5,7 @@ require 'travis/yml/configs/model/job'
 module Travis
   module Yml
     module Configs
-      class AllowFailures < Struct.new(:configs, :jobs, :data)
+      class AllowFailures < Struct.new(:config, :jobs, :data)
         include Helper::Obj
 
         DEFAULT_STAGE = 'test'
@@ -40,10 +40,15 @@ module Travis
         end
 
         def matches?(job, config)
-          config.all? do |key, value|
-            if key == :branch
+          except(config, :if).all? do |key, value|
+            case key
+            when :branch
               # TODO deprecated in favor of conditional allow_failures
-              data[:branch] == value
+              data[:branch ] == value
+            when :env
+              # TODO this wouldn't have to be a special case if we'd match
+              # for inclusion (see below)
+              matches_env?(job[key], config[key])
             else
               # TODO if this is a hash or array we should not match for
               # equality, but inclusion (partial allow_failure matching)
@@ -52,12 +57,17 @@ module Travis
           end
         end
 
+        def matches_env?(lft, rgt)
+          lft = lft - (config.dig(:env, :global) || [])
+          lft == rgt
+        end
+
         def jobs
           @jobs ||= super.map { |attrs| Model::Job.new(attrs) }
         end
 
         def configs
-          @configs ||= Array(super).map { |config| except(config, :if) }
+          @configs ||= Array(config.dig(:jobs, :allow_failures))
         end
       end
     end

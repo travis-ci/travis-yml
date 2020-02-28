@@ -3,7 +3,7 @@ describe Travis::Yml::Configs::AllowFailures do
   let(:jobs) { Travis::Yml.matrix(config).jobs }
   let(:data) { {} }
 
-  subject { described_class.new(config.dig(:jobs, :allow_failures), jobs, data).apply }
+  subject { described_class.new(config, jobs, data).apply }
 
   describe 'no allowed failures' do
     yaml %(
