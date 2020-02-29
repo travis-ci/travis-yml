@@ -7,6 +7,7 @@ module Travis
       define enterprise: false,
              auth_keys:  ['abc123'],
              auth:       { internal: 'token' },
+             oauth2:     {},
              github:     { url: 'https://api.github.com', ssl: {} },
              travis:     { url: 'https://api.travis-ci.com', app: 'yml', token: 'token', ssl: {} },
              metrics:    { reporter: 'librato' },

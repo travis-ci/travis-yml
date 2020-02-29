@@ -16,8 +16,8 @@ module Travis
             'Accept-Charset': 'utf-8'
           }
 
-          def get(path, opts = {})
-            client.get(path, opts)
+          def get(path, params = {})
+            client.get(path, params.merge(oauth))
           rescue Faraday::Error => e
             raise error(:get, path, e)
           end
@@ -36,6 +36,10 @@ module Travis
 
           def url
             config[:github][:url]
+          end
+
+          def oauth
+            compact(only(config.oauth2.to_h, :client_id, :client_secret))
           end
 
           def ssl

@@ -566,7 +566,7 @@ describe Travis::Yml::Configs do
       end
     end
 
-    describe 'capitalized stage name Test' do
+    describe 'capitalized stage name Test in stages' do
       yaml %(
         stages:
           - name: Other
@@ -596,6 +596,75 @@ describe Travis::Yml::Configs do
         expect(stages).to eq [
           { name: 'Other' },
           { name: 'Test' },
+        ]
+      end
+    end
+
+    describe 'capitalized stage name Test in jobs' do
+      yaml %(
+        stages:
+          - name: other
+          - name: test
+        env:
+          jobs:
+            - ONE=one
+            - TWO=two
+        jobs:
+          include:
+            - stage: Other
+              name: other
+            - stage: Test
+              name: test
+      )
+
+      it do
+        expect(jobs).to eq [
+          { stage: 'Other', name: 'other', env: [ONE: 'one'] },
+          { stage: 'Test', env: [ONE: 'one'] },
+          { stage: 'Test', env: [TWO: 'two'] },
+          { stage: 'Test', name: 'test', env: [ONE: 'one'] },
+        ]
+      end
+
+      it do
+        expect(stages).to eq [
+          { name: 'Other' },
+          { name: 'Test' },
+        ]
+      end
+    end
+
+    describe 'wat' do
+      yaml %(
+        env:
+          - ONE=one
+          - TWO=two
+        stages:
+          - One
+          - Test
+          - Two
+        jobs:
+          include:
+            - stage: One
+              name: one
+            - stage: Two
+              name: two
+      )
+
+      it do
+        expect(jobs).to eq [
+          { stage: 'One', name: 'one', env: [ONE: 'one'] },
+          { stage: 'Test', env: [ONE: 'one'] },
+          { stage: 'Test', env: [TWO: 'two'] },
+          { stage: 'Two', name: 'two', env: [ONE: 'one'] },
+        ]
+      end
+
+      it do
+        expect(stages).to eq [
+          { name: 'One' },
+          { name: 'Test' },
+          { name: 'Two' },
         ]
       end
     end
