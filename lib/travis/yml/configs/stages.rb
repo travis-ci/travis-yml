@@ -13,7 +13,7 @@ module Travis
 
         include Model
 
-        DEFAULT_STAGE = 'test'
+        DEFAULT_NAME = 'test'
 
         def apply
           assign_names && filter if stages?
@@ -21,7 +21,7 @@ module Travis
         end
 
         def assign_names
-          jobs.inject(DEFAULT_STAGE) do |name, job|
+          jobs.inject(default_name) do |name, job|
             job.stage ||= name
           end
         end
@@ -61,9 +61,14 @@ module Travis
           names.compact.uniq
         end
 
+        def default_name
+          name = names.detect { |name| name.downcase == DEFAULT_NAME }
+          name || DEFAULT_NAME
+        end
+
         def configs
           @configs ||= Array(super).map do |config|
-            config[:name] ||= DEFAULT_STAGE
+            config[:name] ||= default_name
             config
           end
         end
