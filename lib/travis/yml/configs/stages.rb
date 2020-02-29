@@ -11,67 +11,74 @@ module Travis
         # section, but are present in the jobs list, will be appended to the
         # stages section, i.e. sorted to the end of the list.
 
-        include Model
+        include Model, Memoize
 
         DEFAULT_NAME = 'test'
 
         def apply
-          assign_names && filter if stages?
-          [stages.map(&:attrs), jobs.map(&:attrs)]
+          return result unless stages?
+          assign_names
+          filter_stages
+          filter_jobs
+          result
         end
 
-        def assign_names
-          jobs.inject(default_name) do |name, job|
-            job.stage ||= name
+        private
+
+          def stages?
+            configs.any? || jobs.map(&:stage).any?
           end
-        end
 
-        def filter
-          @stages = stages.select { |stage| accept?(stage) }.reject { |stage| empty?(stage) }
-          @jobs = jobs.select { |job| stages.map(&:name).include?(job.stage) }
-        end
-
-        def stages?
-          !configs.empty? || !names.empty?
-        end
-
-        def accept?(stage)
-          Condition.new(stage.attrs, data).accept?
-        end
-
-        def empty?(stage)
-          jobs.none? { |job| job.stage == stage.name }
-        end
-
-        def jobs
-          @jobs ||= super.map { |attrs| Job.new(attrs) }
-        end
-
-        def stages
-          @stages ||= names.map { |name| stage(name) }
-        end
-
-        def stage(name)
-          Stage.new(configs.detect { |attrs| attrs[:name] == name } || { name: name })
-        end
-
-        def names
-          names = configs.map { |stage| stage[:name] }
-          names = names + jobs.map(&:stage)
-          names.compact.uniq
-        end
-
-        def default_name
-          name = names.detect { |name| name.downcase == DEFAULT_NAME }
-          name || DEFAULT_NAME
-        end
-
-        def configs
-          @configs ||= Array(super).map do |config|
-            config[:name] ||= default_name
-            config
+          def result
+            [stages.map(&:attrs), jobs.map(&:attrs)]
           end
-        end
+
+          def assign_names
+            jobs.inject(default_name) do |name, job|
+              job.stage ||= name
+            end
+          end
+
+          def filter_stages
+            @stages = stages.select { |stage| accept?(stage) }.reject { |stage| empty?(stage) }
+          end
+
+          def filter_jobs
+            @jobs = jobs.select { |job| stages.map(&:name).map(&:downcase).include?(job.stage.downcase) }
+          end
+
+          def stages
+            @stages ||= configs.dup.concat(job_stages).map { |attrs| Stage.new(attrs) }.uniq
+          end
+
+          def job_stages
+            jobs.map(&:stage).compact.map { |name| { name: name } }
+          end
+
+          def jobs
+            @jobs ||= super.map { |attrs| Job.new(attrs) }
+          end
+
+          def configs
+            Array(super)
+          end
+
+          def accept?(stage)
+            Condition.new(stage.attrs, data).accept?
+          end
+
+          def empty?(stage)
+            jobs.none? { |job| stage.includes?(job) }
+          end
+
+          def default_name
+            @default_name ||= names.detect { |name| name.downcase == DEFAULT_NAME } || DEFAULT_NAME
+          end
+
+          def names
+            names = configs.map { |stage| stage[:name] } + jobs.map(&:stage)
+            names.compact.uniq
+          end
       end
     end
   end

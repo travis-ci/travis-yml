@@ -14,17 +14,10 @@ module Travis
             end
 
             def process(obj)
-              encrypt(keys.inject(obj) { |obj, key| decrypt(obj, key) })
+              key.encrypt(keys.inject(obj) { |obj, key| key.decrypt(obj) })
             rescue OpenSSL::OpenSSLError => e
+              p e.message
               obj
-            end
-
-            def decrypt(str, key)
-              key.decrypt(str)
-            end
-
-            def encrypt(str)
-              key.encrypt(str)
             end
 
             def walk(obj = config, &block)

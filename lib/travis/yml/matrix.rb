@@ -135,7 +135,20 @@ module Travis
         def excluded?(job)
           excluded.any? do |excluded|
             next unless accept?(:exclude, :'jobs.exclude', excluded)
-            except(excluded, :if).all? { |key, value| wrap(job[key]) == wrap(value) }
+            except(excluded, :if).all? do |key, value|
+              case key
+              when :env
+                # TODO this wouldn't have to be a special case if we'd match
+                # for inclusion (see below)
+                env = job[:env]
+                env = env - (config.dig(:env, :global) || []) if env
+                env == value
+              else
+                # TODO if this is a hash or array we should not match for
+                # equality, but inclusion (partial job.exclude matching)
+                wrap(job[key]) == wrap(value)
+              end
+            end
           end
         end
 

@@ -11,11 +11,15 @@ module Travis
         end
 
         def order(job)
-          [names.index(job[:stage]).to_s.rjust(5, '0'), job[:allow_failure]].join('.')
+          ix = []
+          ix << names.index(job[:stage].to_s.downcase)
+          ix << job[:allow_failure]
+          ix << jobs.index(job)
+          ix.map { |ix| ix.to_s.rjust(5, '0') }.join('.')
         end
 
         def names
-          stages.map { |stage| stage[:name] }
+          stages.map { |stage| stage[:name] }.map(&:downcase)
         end
         memoize :names
       end

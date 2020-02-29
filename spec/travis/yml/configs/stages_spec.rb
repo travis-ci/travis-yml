@@ -105,4 +105,44 @@ describe Travis::Yml::Configs::Stages do
       end
     end
   end
+
+  describe 'case insensitive stage names' do
+    subject { stages.apply }
+
+    describe 'stage name capitalized' do
+      let(:config) { [name: 'One'] }
+      let(:jobs) { [stage: 'one'] }
+
+      it do
+        should eq [
+          [{ name: 'One' }],
+          [{ stage: 'one' }]
+        ]
+      end
+    end
+
+    describe 'job stage capitalized' do
+      let(:config) { [name: 'one'] }
+      let(:jobs) { [stage: 'One'] }
+
+      it do
+        should eq [
+          [{ name: 'one' }],
+          [{ stage: 'One' }]
+        ]
+      end
+    end
+
+    describe 'default stage name out of matrix expansion' do
+      let(:config) { [{ name: 'other' }, { name: 'test' }] }
+      let(:jobs) { [{}, { stage: 'other' }, { stage: 'test' }] }
+
+      it do
+        should eq [
+          [{ name: 'other' }, { name: 'test' }],
+          [{ stage: 'test' }, { stage: 'other' }, { stage: 'test' }]
+        ]
+      end
+    end
+  end
 end

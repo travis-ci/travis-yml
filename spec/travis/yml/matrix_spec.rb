@@ -498,6 +498,30 @@ describe Travis::Yml, 'matrix' do
     expands_to [env: [FOO: 'two', BAR: 'two']]
   end
 
+  describe 'jobs exclude with global env' do
+    yaml %(
+      language: python
+
+      python:
+        - 3.7
+
+      env:
+        global:
+          - FOO=foo
+        matrix:
+          - ONE=one
+          - TWO=two
+
+      jobs:
+        exclude:
+          - env: TWO=two
+    )
+
+    expands_to [
+      { env: [{ ONE: 'one' }, { FOO: 'foo' }], language: 'python', python: '3.7' }
+    ]
+  end
+
   describe 'conditional jobs exclude (1)' do
     yaml %(
       env:

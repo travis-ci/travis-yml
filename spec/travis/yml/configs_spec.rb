@@ -620,51 +620,16 @@ describe Travis::Yml::Configs do
       it do
         expect(jobs).to eq [
           { stage: 'Other', name: 'other', env: [ONE: 'one'] },
-          { stage: 'Test', env: [ONE: 'one'] },
-          { stage: 'Test', env: [TWO: 'two'] },
+          { stage: 'test', env: [ONE: 'one'] },
+          { stage: 'test', env: [TWO: 'two'] },
           { stage: 'Test', name: 'test', env: [ONE: 'one'] },
         ]
       end
 
       it do
         expect(stages).to eq [
-          { name: 'Other' },
-          { name: 'Test' },
-        ]
-      end
-    end
-
-    describe 'wat' do
-      yaml %(
-        env:
-          - ONE=one
-          - TWO=two
-        stages:
-          - One
-          - Test
-          - Two
-        jobs:
-          include:
-            - stage: One
-              name: one
-            - stage: Two
-              name: two
-      )
-
-      it do
-        expect(jobs).to eq [
-          { stage: 'One', name: 'one', env: [ONE: 'one'] },
-          { stage: 'Test', env: [ONE: 'one'] },
-          { stage: 'Test', env: [TWO: 'two'] },
-          { stage: 'Two', name: 'two', env: [ONE: 'one'] },
-        ]
-      end
-
-      it do
-        expect(stages).to eq [
-          { name: 'One' },
-          { name: 'Test' },
-          { name: 'Two' },
+          { name: 'other' },
+          { name: 'test' },
         ]
       end
     end
