@@ -58,7 +58,7 @@ module Travis
         end
 
         def matches_env?(lft, rgt)
-          lft = lft - (config.dig(:env, :global) || [])
+          lft = lft - (config.dig(:env, :global) || []) if lft
           lft == rgt
         end
 
