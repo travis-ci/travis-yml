@@ -141,7 +141,7 @@ module Travis
                 # TODO this wouldn't have to be a special case if we'd match
                 # for inclusion (see below)
                 env = job[:env]
-                env = env - (config.dig(:env, :global) || []) if env
+                env = env - (config[:env].is_a?(Hash) && config[:env][:global] || []) if env
                 env == value
               else
                 # TODO if this is a hash or array we should not match for

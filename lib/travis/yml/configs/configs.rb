@@ -17,6 +17,8 @@ module Travis
 
         attr_reader :configs, :config, :stages, :jobs
 
+        # - consider alerting on secure values that are shorter than 100 chars or
+        #   is not base64 decoded: Base64.encode64(Base64.decode64(str)) == str
         # - complete specs in configs/allow_failures
         # - move notification filtering to Hub (Yml seems the wrong place)
         # - api does not seem to have github app pem files set up everywhere
