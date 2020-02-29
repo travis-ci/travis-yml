@@ -6,23 +6,22 @@ require 'travis/yml/helper/obj'
 module Travis
   module Yml
     class Matrix < Obj.new(:config, :data)
-      include Helper::Obj
+      include Helper::Obj, Memoize
+
+      DROP = %i(jobs import stages notifications version)
 
       def jobs
-        rows = expand
-        rows = with_included(rows)
-        rows = with_default(rows)
-        rows = without_excluded(rows)
-        rows = with_env_arrays(rows)
-        rows = with_global_env(rows)
-        rows = with_first_env(rows)
-        rows = with_shared(rows)
-        rows = with_global(rows)
-        rows = without_unsupported(rows)
-        rows = cleaned(rows)
-        rows = uniq(rows)
-        rows = filter(rows)
-        rows
+        jobs = expand                    # expand jobs from matrix expansion keys
+        jobs = with_included(jobs)       # add jobs from jobs.include
+        jobs = with_default(jobs)        # default job if no job has been generated so far
+        jobs = with_shared(jobs)         # shared non-matrix keys from root, e.g. language
+        jobs = with_global(jobs)         # inherit first value from matrix keys from root to jobs.include
+        jobs = with_env(jobs)            # normalize env to arrays (still required?), add global env
+        jobs = without_excluded(jobs)    # reject jobs matching jobs.exclude
+        jobs = without_unsupported(jobs) # drop unsupported keys
+        jobs = jobs.uniq                 # drop duplicate jobs
+        jobs = filter(jobs)              # filter jobs based on condition
+        jobs
       end
       alias rows jobs
 
@@ -37,29 +36,52 @@ module Travis
       private
 
         def expand
-          rows = wrap(values.inject { |lft, rgt| lft.product(rgt) } || [])
-          rows = rows.map { |row| keys.zip(wrap(row).flatten).to_h }
-          rows
+          jobs = wrap(values.inject { |lft, rgt| lft.product(rgt) } || [])
+          jobs = jobs.map { |job| keys.zip(wrap(job).flatten).to_h }
+          jobs
         end
 
-        def with_included(rows)
-          # If there's one row at this point, and it has single-entry
-          # expand values, and we also have matrix includes, remove the row
-          # because it's probably an unnecessary duplicate.
-          # TODO: verify this
-          if rows.size == 1 && only(rows.first, *expand_keys).all? { |_, v| wrap(v).size == 1 } && included.any?
-            included
-          else
-            rows + included
-          end
+        def with_included(jobs)
+          single_matrix_job_expanded?(jobs) ? included : jobs + included
         end
 
-        def without_excluded(rows)
-          rows.delete_if { |row| excluded?(row) }
+        # If there's one job at this point, and it has single-entry expand
+        # values, and we also have matrix includes, remove the job because it's
+        # probably an unnecessary duplicate.
+        def single_matrix_job_expanded?(jobs)
+          return false if jobs.size != 1 || included.empty?
+          only(jobs.first, *keys).values.all? { |value| wrap(value).size == 1 }
         end
 
-        def with_env_arrays(rows)
-          rows.each { |row| row[:env] = with_env_array(row[:env]) if row[:env] }
+        def with_default(jobs)
+          jobs << shared if jobs.empty?
+          jobs
+        end
+
+        def with_shared(jobs)
+          jobs.map { |job| shared.merge(job) }
+        end
+
+        def shared
+          @shared ||= config.select { |key, value| shared_key?(key) && !blank?(value) }
+        end
+
+        def with_global(jobs)
+          jobs.map { |job| global.merge(job) }
+        end
+
+        def global
+          only(config, *keys - [:env]).map { |key, value| [key, wrap(value).first] }.to_h
+        end
+
+        def with_env(jobs)
+          jobs = with_env_arrays(jobs)
+          jobs = with_global_env(jobs)
+          with_first_env(jobs)
+        end
+
+        def with_env_arrays(jobs)
+          jobs.each { |job| job[:env] = with_env_array(job[:env]) if job[:env] }
         end
 
         def with_env_array(env)
@@ -70,57 +92,39 @@ module Travis
           end
         end
 
-        def with_global_env(rows)
-          rows.each { |row| (row[:env] ||= []).concat(global_env).uniq! } if global_env
-          rows
+        def with_global_env(jobs)
+          jobs.each { |job| (job[:env] ||= []).concat(global_env).uniq! } if global_env
+          jobs
         end
 
-        # The legacy implementation picked the first env var out of `env.jobs` if
+        # The legacy implementation picked the first env var out of `env.jobs` to
         # jobs listed in `jobs.include` if they do not define a key `env` already.
-        def with_first_env(rows)
-          rows.each { |row| (row[:env] ||= []).concat([first_env]).uniq! unless row[:env] } if first_env
-          rows
+        def with_first_env(jobs)
+          jobs.each { |job| (job[:env] ||= []).concat([first_env]).uniq! unless job[:env] } if first_env
+          jobs
         end
 
-        def with_shared(rows)
-          rows.map { |row| shared.merge(row) }
+        def without_excluded(jobs)
+          jobs.delete_if { |job| excluded?(job) }
         end
 
-        def with_global(rows)
-          rows.map do |row|
-            global.inject(row) do |row, (key, value)|
-              row[key] ||= value
-              row
-            end
-          end
-        end
-
-        def global
-          global = config.select { |key, _| key != :env && keys.include?(key) }.to_h
-          global.map { |key, value| [key, wrap(value).first] }.to_h
-        end
-
-        def without_unsupported(rows)
-          rows.map { |row| row.select { |key, value| supported?(row, key, value) }.to_h }
-        end
-
-        def with_default(rows)
-          rows << shared if rows.empty?
-          rows
+        def without_unsupported(jobs)
+          jobs.map { |job| job.select { |key, value| supported?(job, key, value) }.to_h }
         end
 
         def included
           return [] unless config.is_a?(Hash) && config[:jobs].is_a?(Hash)
-          rows = [config[:jobs][:include] || []].flatten.select { |row| row.is_a?(Hash) }
-          with_stages(rows)
+          jobs = [config[:jobs][:include] || []].flatten.select { |job| job.is_a?(Hash) }
+          with_stages(jobs)
         end
+        memoize :included
 
-        def with_stages(rows)
-          rows.inject(nil) do |stage, row|
-            row[:stage] ||= stage if stage
-            row[:stage] || stage
+        def with_stages(jobs)
+          jobs.inject(nil) do |stage, job|
+            job[:stage] ||= stage if stage
+            job[:stage] || stage
           end
-          rows
+          jobs
         end
 
         def excluded
@@ -128,11 +132,10 @@ module Travis
           [config[:jobs][:exclude] || []].flatten
         end
 
-        def excluded?(row)
+        def excluded?(job)
           excluded.any? do |excluded|
-            next unless excluded.respond_to?(:all?)
             next unless accept?(:exclude, :'jobs.exclude', excluded)
-            except(excluded, :if).all? { |key, value| wrap(row[key]) == wrap(value) }
+            except(excluded, :if).all? { |key, value| wrap(job[key]) == wrap(value) }
           end
         end
 
@@ -143,8 +146,8 @@ module Travis
           Yml::Doc::Value::Support.new(support, supporting, value).supported?
         end
 
-        def filter(rows)
-          rows.select { |row| accept?(:job, :'jobs.include', row) }
+        def filter(jobs)
+          jobs.select { |job| accept?(:job, :'jobs.include', job) }
         end
 
         def accept?(type, key, config, ix = 0)
@@ -175,31 +178,22 @@ module Travis
 
         def values
           values = only(config, *keys)
-          values = values.map { |key, value| key == :env && value.is_a?(Hash) && value.key?(:jobs) ? value[:jobs] : value }
+          values = values.map { |key, value| env_jobs(key, value) || value }
           values = values.map { |value| wrap(value) }
           values
         end
 
-        def shared
-          @shared ||= config.reject { |key, value| key == :jobs || keys.include?(key) || blank?(value) }
-        end
-
-        def cleaned(rows)
-          # TODO are there other keys that do not make sense on a job config?
-          rows.map { |row| except(row, :import, :stages, :notifications, :version) }
-        end
-
-        def uniq(rows)
-          keys = rows.map(&:keys).flatten.uniq
-          rows.each.with_index do |one, i|
-            rows.delete_if.with_index do |other, j|
-              only(other, *keys) == only(one, *keys) unless i == j
-            end
-          end
+        def env_jobs(key, obj)
+          obj[:jobs] if key == :env && obj.is_a?(Hash) && obj.key?(:jobs)
         end
 
         def keys
-          @keys ||= (config.keys & expand_keys).reject { |key| blank?(config[key]) }
+          compact(config).keys & expand_keys
+        end
+        memoize :keys
+
+        def shared_key?(key)
+          !expand_keys.include?(key) && !DROP.include?(key)
         end
 
         def expand_keys
