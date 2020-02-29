@@ -67,7 +67,9 @@ module Travis
         end
 
         def configs
-          @configs ||= Array(config.dig(:jobs, :allow_failures))
+          @configs ||= Array(config.dig(:jobs, :allow_failures)).select do |config|
+            config.is_a?(Hash)
+          end
         end
       end
     end
