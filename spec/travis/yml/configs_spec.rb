@@ -633,29 +633,5 @@ describe Travis::Yml::Configs do
         ]
       end
     end
-
-    describe 'wat' do
-      yaml %(
-      language: julia
-      os:
-        - linux
-        - osx
-      julia:
-        - 1.0
-        - 1.1
-        - 1.2
-        - nightly
-      matrix:
-        allow_failures:
-          - julia: nightly
-      notifications:
-        email: false
-      after_success:
-        # push coverage results to Codecov
-        - julia -e 'import Pkg; Pkg.add("Coverage"); using Coverage; Codecov.submit(Codecov.process_folder())')
-      it do
-        p jobs.map { |c| c[:allow_failure] }
-      end
-    end
   end
 end

@@ -356,9 +356,11 @@ describe Travis::Yml, 'matrix' do
     ]
   end
 
-  describe 'jobs include inheriting env' do
+  describe 'jobs include inheriting env (legacy)' do
     yaml %(
-      env: FOO=foo
+      env:
+        global: FOO=foo
+        jobs: BAR=bar
       jobs:
         include:
           - name: one
@@ -366,8 +368,8 @@ describe Travis::Yml, 'matrix' do
     )
 
     expands_to [
-      { env: [FOO: 'foo'], name: 'one' },
-      { env: [FOO: 'foo'], name: 'two' }
+      { env: [{ FOO: 'foo' }, { BAR: 'bar' }], name: 'one' },
+      { env: [{ FOO: 'foo' }, { BAR: 'bar' }], name: 'two' }
     ]
   end
 

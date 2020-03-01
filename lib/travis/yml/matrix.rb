@@ -81,8 +81,9 @@ module Travis
 
         def with_env(jobs)
           jobs = with_env_arrays(jobs)
+          jobs = with_first_env(jobs)
           jobs = with_global_env(jobs)
-          with_first_env(jobs)
+          jobs
         end
 
         def with_env_arrays(jobs)
