@@ -179,10 +179,10 @@ describe Travis::Yml, 'matrix' do
     )
 
     expands_to [
-      { rvm: '2.2', env: [{ FOO: 'foo' }, { BAZ: 'baz' }] },
-      { rvm: '2.2', env: [{ BAR: 'bar' }, { BAZ: 'baz' }] },
-      { rvm: '2.3', env: [{ FOO: 'foo' }, { BAZ: 'baz' }] },
-      { rvm: '2.3', env: [{ BAR: 'bar' }, { BAZ: 'baz' }] }
+      { rvm: '2.2', env: [{ BAZ: 'baz' }, { FOO: 'foo' }] },
+      { rvm: '2.2', env: [{ BAZ: 'baz' }, { BAR: 'bar' }] },
+      { rvm: '2.3', env: [{ BAZ: 'baz' }, { FOO: 'foo' }] },
+      { rvm: '2.3', env: [{ BAZ: 'baz' }, { BAR: 'bar' }] }
     ]
   end
 
@@ -518,7 +518,7 @@ describe Travis::Yml, 'matrix' do
     )
 
     expands_to [
-      { env: [{ ONE: 'one' }, { FOO: 'foo' }], language: 'python', python: '3.7' }
+      { env: [{ FOO: 'foo' }, { ONE: 'one' }], language: 'python', python: '3.7' }
     ]
   end
 

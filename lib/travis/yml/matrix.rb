@@ -98,7 +98,7 @@ module Travis
         end
 
         def with_global_env(jobs)
-          jobs.each { |job| (job[:env] ||= []).concat(global_env).uniq! } if global_env
+          jobs.each { |job| job[:env] = global_env.+(job[:env] || []).uniq } if global_env
           jobs
         end
 
