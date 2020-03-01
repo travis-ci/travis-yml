@@ -261,7 +261,7 @@ describe Travis::Yml::Configs do
   end
 
   describe 'conditional job.include matching config' do
-    let(:raw) { 'env: ONE=one' }
+    let(:raw) { 'env: ONE=one TWO=two' }
 
     let(:travis_yml) do
       <<~yml

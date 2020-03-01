@@ -10,8 +10,9 @@ module Travis
 
       DROP = %i(jobs import stages notifications version)
 
-      def initialize(config, *)
+      def initialize(config, data)
         config = sort(config)
+        data = compact(data)
         super
       end
 
