@@ -24,22 +24,22 @@ module Travis
         end
 
         def allow_failure(config, job)
-          if accept?(config)
+          if accept?(config, job.attrs || {})
             job.allow_failure = true
           else
             # TODO generate a message
           end
         end
 
-        def accept?(config)
-          Condition.new(config, data).accept?
+        def accept?(config, job)
+          Condition.new(config, job.merge(data)).accept?
         end
 
         def select(config)
-          jobs.select { |job| matches?(job, config) }
+          jobs.select { |job| matches?(config, job) }
         end
 
-        def matches?(job, config)
+        def matches?(config, job)
           except(config, :if).all? do |key, value|
             case key
             when :branch

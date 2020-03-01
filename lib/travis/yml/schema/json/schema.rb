@@ -25,7 +25,7 @@ module Travis
 
           def expand_keys
             keys = node.expand_keys + exports.map(&:expand_keys)
-            keys.flatten.uniq.sort
+            keys.flatten.uniq
           end
 
           def exports

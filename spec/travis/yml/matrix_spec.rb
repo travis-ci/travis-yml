@@ -99,12 +99,12 @@ describe Travis::Yml, 'matrix' do
     )
 
     expands_to [
-      { env: [FOO: 'foo'], rvm: '2.2', gemfile: 'str' },
-      { env: [FOO: 'foo'], rvm: '2.3', gemfile: 'str' },
-      { env: [BAR: 'bar'], rvm: '2.2', gemfile: 'str' },
-      { env: [BAR: 'bar'], rvm: '2.3', gemfile: 'str' },
-      { env: [BAZ: 'baz'], rvm: '2.2', gemfile: 'str' },
-      { env: [BAZ: 'baz'], rvm: '2.3', gemfile: 'str' }
+      { rvm: '2.2', gemfile: 'str', env: [FOO: 'foo'] },
+      { rvm: '2.2', gemfile: 'str', env: [BAR: 'bar'] },
+      { rvm: '2.2', gemfile: 'str', env: [BAZ: 'baz'] },
+      { rvm: '2.3', gemfile: 'str', env: [FOO: 'foo'] },
+      { rvm: '2.3', gemfile: 'str', env: [BAR: 'bar'] },
+      { rvm: '2.3', gemfile: 'str', env: [BAZ: 'baz'] }
     ]
   end
 
@@ -160,8 +160,8 @@ describe Travis::Yml, 'matrix' do
     )
 
     expands_to [
-      { env: [{ FOO: 'foo' }], rvm: '2.2' },
-      { env: [{ FOO: 'foo' }], rvm: '2.3' },
+      { rvm: '2.2', env: [{ FOO: 'foo' }] },
+      { rvm: '2.3', env: [{ FOO: 'foo' }] },
     ]
   end
 
@@ -179,10 +179,10 @@ describe Travis::Yml, 'matrix' do
     )
 
     expands_to [
-      { env: [{ FOO: 'foo' }, { BAZ: 'baz' }], rvm: '2.2' },
-      { env: [{ FOO: 'foo' }, { BAZ: 'baz' }], rvm: '2.3' },
-      { env: [{ BAR: 'bar' }, { BAZ: 'baz' }], rvm: '2.2' },
-      { env: [{ BAR: 'bar' }, { BAZ: 'baz' }], rvm: '2.3' }
+      { rvm: '2.2', env: [{ FOO: 'foo' }, { BAZ: 'baz' }] },
+      { rvm: '2.2', env: [{ BAR: 'bar' }, { BAZ: 'baz' }] },
+      { rvm: '2.3', env: [{ FOO: 'foo' }, { BAZ: 'baz' }] },
+      { rvm: '2.3', env: [{ BAR: 'bar' }, { BAZ: 'baz' }] }
     ]
   end
 
@@ -466,9 +466,9 @@ describe Travis::Yml, 'matrix' do
     )
 
     expands_to [
-      { env: [FOO: 'foo'], rvm: '2.2' },
-      { env: [FOO: 'foo'], rvm: '2.3' },
-      { env: [BAR: 'bar'], rvm: '2.2' }
+      { rvm: '2.2', env: [FOO: 'foo'] },
+      { rvm: '2.2', env: [BAR: 'bar'] },
+      { rvm: '2.3', env: [FOO: 'foo'] }
     ]
   end
 

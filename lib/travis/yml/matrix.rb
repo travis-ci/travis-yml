@@ -10,6 +10,11 @@ module Travis
 
       DROP = %i(jobs import stages notifications version)
 
+      def initialize(config, *)
+        config = sort(config)
+        super
+      end
+
       def jobs
         jobs = expand                    # expand jobs from matrix expansion keys
         jobs = with_included(jobs)       # add jobs from jobs.include
@@ -210,7 +215,12 @@ module Travis
         end
 
         def expand_keys
-          Yml.expand_keys - [:jobs] + [:env] # TODO allow nested matrix expansion keys, like env.jobs
+          Yml.expand_keys + [:env] # TODO allow nested matrix expansion keys, like env.jobs
+        end
+        memoize :expand_keys
+
+        def sort(config)
+          config.sort_by { |key, _| expand_keys.index(key) || 99 }.to_h
         end
 
         def blank?(obj)

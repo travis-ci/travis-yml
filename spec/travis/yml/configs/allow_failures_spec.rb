@@ -79,6 +79,24 @@ describe Travis::Yml::Configs::AllowFailures do
     end
   end
 
+  describe 'empty section with condition' do
+    yaml %(
+      env:
+        jobs:
+          - ONE=one
+          - TWO=two
+      jobs:
+        allow_failures:
+          - if: env(TWO) = two
+    )
+    it do
+      should eq [
+        { env: [ONE: 'one'] },
+        { env: [TWO: 'two'], allow_failure: true },
+      ]
+    end
+  end
+
   # describe 'matching env' do
   #   let(:config) do
   #     [

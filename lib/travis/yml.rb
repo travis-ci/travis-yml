@@ -174,7 +174,7 @@ module Travis
       memoize :r_keys
 
       def expand_keys
-        expand.expand_keys
+        expand.expand_keys - [:jobs] # TODO
       end
 
       def invalid_format

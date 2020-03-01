@@ -30,7 +30,8 @@ module Travis
           expand_matrix
           expand_stages
           allow_failures
-          reorder
+          reorder_jobs
+          unique_jobs
         end
 
         def msgs
@@ -93,17 +94,18 @@ module Travis
           def expand_stages
             @stages, @jobs = Stages.new(config[:stages], jobs, data).apply
           end
-          time :expand_stages
 
           def allow_failures
             @jobs = AllowFailures.new(config, jobs, data).apply
           end
-          time :allow_failures
 
-          def reorder
+          def reorder_jobs
             @jobs = Reorder.new(stages, jobs).apply
           end
-          time :reorder
+
+          def unique_jobs
+            @jobs = jobs.uniq
+          end
 
           def travis_yml
             Config.travis_yml(ctx, nil, repo.slug, ref, mode)
@@ -118,6 +120,10 @@ module Travis
             repo.complete? ? ctx.repos[repo.slug] = repo : ctx.repos[repo.slug]
           end
           memoize :repo
+
+          def data
+            super || {}
+          end
 
           def ctx
             @ctx ||= Ctx.new(data, opts)
