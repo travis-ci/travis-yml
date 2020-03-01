@@ -245,7 +245,7 @@ describe Travis::Yml::Configs do
     it { expect(msgs).to include [:info, :import, :skip_import, source: 'travis-ci/travis-yml:one/two.yml@ref', condition: 'type = pull_request'] }
   end
 
-  describe 'conditional jobs' do
+  describe 'conditional job.include matching data' do
     let(:travis_yml) do
       <<~yml
         jobs:
@@ -258,6 +258,36 @@ describe Travis::Yml::Configs do
     let(:data) { { type: 'push' } }
 
     it { expect(msgs).to include [:info, :'jobs.include', :skip_job, number: 1, condition: 'type = api'] }
+  end
+
+  describe 'conditional job.include matching config' do
+    let(:raw) { 'env: ONE=one' }
+
+    let(:travis_yml) do
+      <<~yml
+        jobs:
+          include:
+          - name: one
+            if: env(ONE) = two
+      yml
+    end
+
+    it { expect(msgs).to include [:info, :'jobs.include', :skip_job, number: 1, condition: 'env(ONE) = two'] }
+  end
+
+  describe 'conditional job.include matching global config' do
+    let(:raw) { 'env: { global: ONE=one }' }
+
+    let(:travis_yml) do
+      <<~yml
+        jobs:
+          include:
+          - name: one
+            if: env(ONE) = two
+      yml
+    end
+
+    it { expect(msgs).to include [:info, :'jobs.include', :skip_job, number: 1, condition: 'env(ONE) = two'] }
   end
 
   describe 'conditional exclude' do
