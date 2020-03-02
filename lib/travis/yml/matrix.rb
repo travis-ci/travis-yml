@@ -150,6 +150,8 @@ module Travis
                 env = job[:env]
                 env = env - (config[:env].is_a?(Hash) && config[:env][:global] || []) if env
                 env == value
+              when :stage
+                job[:stage] == value || job[:stage].nil? && value.downcase == 'test'
               else
                 # TODO if this is a hash or array we should not match for
                 # equality, but inclusion (partial job.exclude matching)
