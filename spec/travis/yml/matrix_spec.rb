@@ -108,6 +108,19 @@ describe Travis::Yml, 'matrix' do
     ]
   end
 
+  describe 'env strs' do
+    yaml %(
+    env:
+      - FOO=1
+      - FOO=2
+    )
+
+    expands_to [
+      { env: [FOO: '1'] },
+      { env: [FOO: '2'] }
+    ]
+  end
+
   describe 'env.jobs strs' do
     yaml %(
       env:
@@ -186,16 +199,18 @@ describe Travis::Yml, 'matrix' do
     ]
   end
 
-  describe 'env strs' do
+  describe 'empty var on env.jobs overwriting env.global' do
     yaml %(
-    env:
-      - FOO=1
-      - FOO=2
+      env:
+        global:
+        - ONE: one
+      jobs:
+        include:
+          - env: ONE=
     )
 
     expands_to [
-      { env: [FOO: '1'] },
-      { env: [FOO: '2'] }
+      { env: [{ ONE: 'one' }, { ONE: '' }] },
     ]
   end
 

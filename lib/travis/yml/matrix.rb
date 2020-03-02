@@ -93,7 +93,7 @@ module Travis
 
         def with_env_array(env)
           case env
-          when Hash  then compact(wrap(except(env, :global)))
+          when Hash  then wrap(except(env, :global)).reject(&:empty?)
           when Array then env.map { |env| with_env_array(env) }.flatten(1)
           else wrap(env)
           end
