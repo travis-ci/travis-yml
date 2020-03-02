@@ -18,7 +18,7 @@ describe Travis::Yml do
 
   describe 'expand_keys' do
     it do
-      expect(described_class.expand_keys).to eq %i(
+      expect(described_class.expand_keys.sort).to eq %i(
         arch
         compiler
         crystal
@@ -34,7 +34,6 @@ describe Travis::Yml do
         haxe
         hhvm
         jdk
-        jobs
         julia
         mono
         nix
