@@ -2,6 +2,7 @@ require 'travis/yml/helper/metrics'
 require 'travis/yml/helper/msgs'
 require 'travis/yml/helper/obj'
 require 'travis/yml/configs/allow_failures'
+require 'travis/yml/configs/filter'
 require 'travis/yml/configs/model/repos'
 require 'travis/yml/configs/reorder'
 require 'travis/yml/configs/stages'
@@ -20,12 +21,12 @@ module Travis
         # - consider alerting on secure values that are shorter than 100 chars or
         #   is not base64 decoded: Base64.encode64(Base64.decode64(str)) == str
         # - complete specs in configs/allow_failures
-        # - move notification filtering to Hub (Yml seems the wrong place)
         # - api does not seem to have github app pem files set up everywhere
 
         def load
           fetch
           merge
+          filter
           reencrypt
           expand_matrix
           expand_stages
@@ -76,13 +77,17 @@ module Travis
             @config = doc.serialize
             msgs.concat(doc.msgs)
           end
-          time :merge
+
+          def filter
+            filter = Filter.new(config, data)
+            @config = filter.apply
+            msgs.concat(filter.msgs)
+          end
 
           def reencrypt
             keys = configs.select(&:reencrypt?).map(&:repo).uniq.map(&:key)
             @config = repo.reencrypt(config, keys) if keys.any?
           end
-          time :reencrypt
 
           def expand_matrix
             matrix = Yml.matrix(config: deep_dup(config), data: data)
