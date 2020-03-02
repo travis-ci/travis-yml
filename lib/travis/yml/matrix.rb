@@ -8,7 +8,7 @@ module Travis
     class Matrix < Obj.new(:config, :data)
       include Helper::Obj, Memoize
 
-      DROP = %i(jobs import stages notifications version)
+      DROP = %i(jobs import stages notifications version allow_failure)
 
       def initialize(config, data)
         config = sort(config)
