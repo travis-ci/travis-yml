@@ -179,6 +179,26 @@ describe Travis::Yml::Configs do
     end
   end
 
+  describe 'filtering conditional notifications' do
+    let(:travis_yml) do
+      <<~str
+        notifications:
+          email:
+            if: branch = master
+      str
+    end
+
+    describe 'condition matching branch' do
+      let(:data) { { branch: 'master' } }
+      it { expect(subject.config[:notifications]).to eq email: [if: 'branch = master'] }
+    end
+
+    describe 'condition not matching branch' do
+      let(:data) { { branch: 'other' } }
+      it { expect(subject.config[:notifications]).to be_nil }
+    end
+  end
+
   describe 'expanding relative paths (local)' do
     let(:one_yml) { 'import: ./two.yml' }
 
