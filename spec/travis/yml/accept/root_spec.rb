@@ -136,7 +136,6 @@ describe Travis::Yml, 'root' do
   end
 
   ignore = %w(
-    merge_mode
     .configured
     :.configured
     :".configured"

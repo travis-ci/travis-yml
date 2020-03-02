@@ -7,7 +7,7 @@ module Travis
     module Doc
       module Change
         class Keys < Base
-          INTERNAL = /^\W*(configured|result|fetching_failed|parsing_failed|merge_mode)\W*$/
+          INTERNAL = /^\W*(configured|result|fetching_failed|parsing_failed)\W*$/
 
           def apply
             apply? ? change(value) : value

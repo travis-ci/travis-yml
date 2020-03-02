@@ -51,6 +51,32 @@ describe Travis::Yml::Web::App, 'POST /configs' do
         script: ['./one']
       ]
     end
+
+    describe 'api' do
+      let(:config) { JSON.dump(merge_mode: 'merge') }
+      let(:data) { { repo: repo, type: type, ref: ref, config: config } }
+      let(:travis_yml) { 'import: { source: one.yml, mode: deep_merge_prepend }' }
+
+      it do
+        expect(body[:raw_configs]).to eq [
+          {
+            source: 'api',
+            config: config,
+            mode: 'merge'
+          },
+          {
+            source: 'travis-ci/travis-yml:.travis.yml@ref',
+            config: travis_yml,
+            mode: 'merge'
+          },
+          {
+            source: 'travis-ci/travis-yml:one.yml@ref',
+            config: one_yml,
+            mode: 'deep_merge_prepend'
+          }
+        ]
+      end
+    end
   end
 
   describe 'travis api errors' do
