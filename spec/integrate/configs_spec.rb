@@ -323,6 +323,7 @@ describe Travis::Yml, configs: true do
       filter_secrets
       fortran
       licenses
+      merge_mode
       notifications
       on
       only
