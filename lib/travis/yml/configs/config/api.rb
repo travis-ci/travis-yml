@@ -28,7 +28,7 @@ module Travis
           end
 
           def mode
-            super || config.delete(:mode)
+            super || config.delete(:merge_mode) || config.delete(:mode)
           end
 
           def to_s

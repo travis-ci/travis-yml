@@ -663,39 +663,5 @@ describe Travis::Yml::Configs do
         ]
       end
     end
-
-    describe 'wat' do
-      yaml %(
-        stages:
-          - test
-          - name: build
-            if: type = push AND tag IS blank AND branch != "master"
-          - name: deploy
-            if: type = push AND branch == "master"
-
-        jobs:
-          include:
-            - name: test
-
-            - stage: build
-              name: build
-
-            - stage: Deploy
-              name: deploy
-      )
-
-      let(:data) { { type: 'push', branch: 'master' } }
-
-      it do
-        expect(jobs).to eq [
-          { name: 'test' },
-          { name: 'deploy', stage: 'Deploy' },
-        ]
-        expect(stages).to eq [
-          { name: 'test' },
-          { name: 'deploy' },
-        ]
-      end
-    end
   end
 end
