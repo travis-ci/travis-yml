@@ -68,21 +68,21 @@ module Travis
             fetch = ctx.fetch
             fetch.load(raw ? api : travis_yml)
             @configs = fetch.configs.reject(&:empty?)
-            msgs.concat(fetch.msgs)
+            # msgs.concat(fetch.msgs)
           end
           time :fetch
 
           def merge
             doc = Yml.load(configs.map(&:part))
             @config = doc.serialize
-            msgs.concat(doc.msgs)
+            # msgs.concat(doc.msgs)
           end
 
           def filter
             filter = Filter.new(config, jobs, data).tap(&:apply)
             @config = filter.config
             @jobs = filter.jobs
-            msgs.concat(filter.msgs)
+            # msgs.concat(filter.msgs)
           end
 
           def reencrypt
@@ -93,7 +93,7 @@ module Travis
           def expand_matrix
             matrix = Yml.matrix(config: deep_dup(config), data: data)
             @jobs = matrix.jobs
-            msgs.concat(matrix.msgs)
+            # msgs.concat(matrix.msgs)
           end
           time :expand_matrix
 
