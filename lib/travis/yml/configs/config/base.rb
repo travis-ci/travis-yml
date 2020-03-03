@@ -51,8 +51,43 @@ module Travis
           end
           memoize :imports
 
+          # Flattening the tree should result in a unique array of configs
+          # ordered by the order resulting in walking the tree depth-first.
+          # However, we load the tree breadth-first and load times vary.
+          # Configs with the same source are only loaded once. So, nodes that
+          # are supposed to be kept in a higher order position may not have
+          # been loaded.
+          #
+          # For example:
+          #
+          #   - a
+          #     - a.1
+          #       - x
+          #   - b
+          #     - x
+          #
+          # We load a and b in parallel. a then loads a.1, which then tries to
+          # load x. However, in the meantime b will have loaded x already, so
+          # a.1 will end up with an x that has not been loaded.
+          #
+          # Therefor we swap nodes that have not been loaded but need to be
+          # kept with nodes that have been loaded but needed to be uniq'ed
+          # away.
           def flatten
-            skip? ? [] : [self].compact + imports.map(&:flatten).flatten
+            return [] if circular? || !matches?
+            sort([self].compact + imports.map(&:flatten).flatten).uniq(&:to_s)
+          end
+
+          def sort(configs)
+            configs.dup.each.with_index do |lft, i|
+              next if lft.imports.any?
+              rgt = configs.detect { |rgt| lft.to_s == rgt.to_s && rgt.imports.any? }
+              configs[i] = configs.delete(rgt)
+            end
+          end
+
+          def circular?
+            parents.map(&:to_s).include?(to_s)
           end
 
           def matches?
@@ -60,6 +95,7 @@ module Travis
             msg :info, :import, :skip_import, source: to_s, condition: import[:if]
             false
           end
+          memoize :matches?
 
           def validate
             return if root?
@@ -74,6 +110,10 @@ module Travis
 
           def root?
             parent.nil?
+          end
+
+          def parents
+            root? ? [] : parent.parents + [parent]
           end
 
           def local?
