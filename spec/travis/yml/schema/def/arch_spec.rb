@@ -8,7 +8,7 @@ describe Travis::Yml::Schema::Def::Archs do
       should eq(
         '$id': :archs,
         title: 'Architectures',
-        summary: 'Build environment architecture',
+        summary: 'Build environment architectures',
         description: 'The architectures that will be selected for the build environments.',
         anyOf: [
           {
@@ -33,11 +33,14 @@ describe Travis::Yml::Schema::Def::Archs do
       should eq(
         '$id': :arch,
         title: 'Architecture',
+        summary: 'Build environment architecture',
         description: 'The architecture that will be selected for the build environment.',
         type: :string,
         enum: [
           'amd64',
+          'arm64',
           'ppc64le',
+          's390x'
         ],
         downcase: true,
         values: {

@@ -1,5 +1,5 @@
 describe Travis::Yml, 'cloudfoundry' do
-  subject { described_class.apply(parse(yaml)) }
+  subject { described_class.load(yaml) }
 
   describe 'username' do
     describe 'given a secure' do
@@ -59,18 +59,6 @@ describe Travis::Yml, 'cloudfoundry' do
           space: str
       )
       it { should serialize_to deploy: [provider: 'cloudfoundry', space: 'str'] }
-      it { should_not have_msg }
-    end
-  end
-
-  describe 'key' do
-    describe 'given a str' do
-      yaml %(
-        deploy:
-          provider: cloudfoundry
-          key: str
-      )
-      it { should serialize_to deploy: [provider: 'cloudfoundry', key: 'str'] }
       it { should_not have_msg }
     end
   end

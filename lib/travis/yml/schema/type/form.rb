@@ -160,7 +160,7 @@ module Travis
               any.types = [node, child].map(&:dup)
 
               any.types.each.with_index do |node, ix|
-                node.unset :description, :summary, :title
+                node.unset :description, :summary, :title, :flags
                 node.set :export, false if ix == 0
                 node.set :normal, ix == 0 ? true : nil
                 node.unset :aliases if ix > 0

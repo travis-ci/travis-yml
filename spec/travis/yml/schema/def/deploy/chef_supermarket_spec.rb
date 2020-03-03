@@ -41,10 +41,10 @@ describe Travis::Yml::Schema::Def::Deploy::ChefSupermarket do
                 '$ref': '#/definitions/deploy/edge'
               },
               user_id: {
-                '$ref': '#/definitions/type/secure'
+                type: :string,
               },
               client_key: {
-                '$ref': '#/definitions/type/secure'
+                type: :string,
               },
               name: {
                 type: :string,

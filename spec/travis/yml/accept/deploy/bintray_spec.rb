@@ -1,5 +1,5 @@
 describe Travis::Yml, 'bintray' do
-  subject { described_class.apply(parse(yaml)) }
+  subject { described_class.load(yaml) }
 
   describe 'file' do
     describe 'given a str' do
@@ -48,18 +48,6 @@ describe Travis::Yml, 'bintray' do
             secure: secure
       )
       it { should serialize_to deploy: [provider: 'bintray', passphrase: { secure: 'secure' }] }
-      it { should_not have_msg }
-    end
-  end
-
-  describe 'dry_run' do
-    describe 'given a bool' do
-      yaml %(
-        deploy:
-          provider: bintray
-          dry_run: true
-      )
-      it { should serialize_to deploy: [provider: 'bintray', dry_run: true] }
       it { should_not have_msg }
     end
   end

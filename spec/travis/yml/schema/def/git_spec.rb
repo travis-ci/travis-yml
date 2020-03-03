@@ -4,21 +4,43 @@ describe Travis::Yml::Schema::Def::Git do
   # it { puts JSON.pretty_generate(subject) }
 
   it do
-    should eq(
+    should include(
       '$id': :git,
       title: 'Git',
-      summary: 'Git settings',
+      summary: kind_of(String),
+      description: kind_of(String),
+      see: kind_of(Hash),
       type: :object,
       properties: {
+        autocrlf: {
+          anyOf: [
+            {
+              type: :boolean,
+              enum: [
+                true,
+                false
+              ]
+            },
+            {
+              type: :string,
+              enum: [
+                'input'
+              ]
+            }
+          ],
+          summary: kind_of(String),
+        },
         strategy: {
           type: :string,
           enum: [
             'clone',
             'tarball'
-          ]
+          ],
+          summary: kind_of(String),
         },
         quiet: {
-          type: :boolean
+          type: :boolean,
+          summary: kind_of(String),
         },
         depth: {
           anyOf: [
@@ -28,19 +50,24 @@ describe Travis::Yml::Schema::Def::Git do
             {
               type: :boolean
             }
-          ]
+          ],
+          summary: kind_of(String),
         },
         lfs_skip_smudge: {
-          type: :boolean
+          type: :boolean,
+          summary: kind_of(String),
         },
         sparse_checkout: {
-          type: :string
+          type: :string,
+          summary: kind_of(String),
         },
         submodules: {
-          type: :boolean
+          type: :boolean,
+          summary: kind_of(String),
         },
         submodules_depth: {
-          type: :number
+          type: :number,
+          summary: kind_of(String),
         }
       },
       additionalProperties: false

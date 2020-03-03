@@ -4,19 +4,22 @@ describe Travis::Yml::Schema::Def::Notification::Email, 'structure' do
   # it { puts JSON.pretty_generate(subject) }
 
   it do
-    should eq(
+    should include(
       '$id': :email,
       title: 'Email',
       normal: true,
+      see: kind_of(Hash),
       anyOf: [
         {
           type: :object,
           properties: {
             enabled: {
-              type: :boolean
+              type: :boolean,
+              summary: kind_of(String)
             },
             disabled: {
-              type: :boolean
+              type: :boolean,
+              summary: kind_of(String)
             },
             recipients: {
               anyOf: [
@@ -32,7 +35,11 @@ describe Travis::Yml::Schema::Def::Notification::Email, 'structure' do
                   '$ref': '#/definitions/type/secure',
                   strict: false
                 },
-              ]
+              ],
+              summary: kind_of(String)
+            },
+            if: {
+              '$ref': '#/definitions/type/condition'
             },
             on_success: {
               '$ref': '#/definitions/notification/frequency'

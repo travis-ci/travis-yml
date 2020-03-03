@@ -10,10 +10,12 @@ module Travis
             register :email
 
             def define
+              see 'Configuring Email notifications': 'https://docs.travis-ci.com/user/notifications/#configuring-email-notifications'
+
               aliases :emails
               prefix :recipients
 
-              map :recipients, to: :email_recipients
+              map :recipients, to: :email_recipients, summary: 'Email addresses to notify'
             end
           end
 

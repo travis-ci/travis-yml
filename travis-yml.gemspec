@@ -24,4 +24,6 @@ Gem::Specification.new do |s|
   s.add_dependency 'regstry', '~> 1.0.2'
   s.add_dependency 'sh_vars', '~> 1.0.0'
   s.add_dependency 'travis-conditions', '~> 1.0.5'
+  s.add_dependency 'faraday'
+  s.add_dependency 'faraday_middleware'
 end

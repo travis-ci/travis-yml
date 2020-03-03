@@ -25,9 +25,9 @@ module Travis
             end
           end
 
-          def clone
+          def dup
             node = super
-            node.schema = schema.clone
+            node.schema = schema.dup
             node
           end
         end

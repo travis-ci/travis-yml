@@ -8,6 +8,9 @@ module Travis
           register :nix
 
           def define
+            title 'Nix'
+            summary 'Nix support'
+            see 'Building a Nix Project': 'https://docs.travis-ci.com/user/languages/nix/'
             matrix :nix
           end
         end

@@ -4,10 +4,12 @@ describe Travis::Yml::Schema::Def::Addon::Browserstack do
   # it { puts JSON.pretty_generate(subject) }
 
   it do
-    should eq(
+    should include(
       '$id': :browserstack,
       title: 'Browserstack',
       normal: true,
+      summary: kind_of(String),
+      see: kind_of(Hash),
       anyOf: [
         {
           type: :object,

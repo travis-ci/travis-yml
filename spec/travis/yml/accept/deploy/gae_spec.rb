@@ -1,5 +1,5 @@
 describe Travis::Yml, 'gae' do
-  subject { described_class.apply(parse(yaml)) }
+  subject { described_class.load(yaml) }
 
   describe 'project' do
     describe 'given a str' do
@@ -32,7 +32,7 @@ describe Travis::Yml, 'gae' do
           provider: gae
           config: str
       )
-      it { should serialize_to deploy: [provider: 'gae', config: 'str'] }
+      it { should serialize_to deploy: [provider: 'gae', config: ['str']] }
       it { should_not have_msg }
     end
   end
@@ -49,26 +49,26 @@ describe Travis::Yml, 'gae' do
     end
   end
 
-  describe 'no_promote' do
+  describe 'promote' do
     describe 'given a bool' do
       yaml %(
         deploy:
           provider: gae
-          no_promote: true
+          promote: true
       )
-      it { should serialize_to deploy: [provider: 'gae', no_promote: true] }
+      it { should serialize_to deploy: [provider: 'gae', promote: true] }
       it { should_not have_msg }
     end
   end
 
-  describe 'no_stop_previous_version' do
+  describe 'stop_previous_version' do
     describe 'given a bool' do
       yaml %(
         deploy:
           provider: gae
-          no_stop_previous_version: true
+          stop_previous_version: true
       )
-      it { should serialize_to deploy: [provider: 'gae', no_stop_previous_version: true] }
+      it { should serialize_to deploy: [provider: 'gae', stop_previous_version: true] }
       it { should_not have_msg }
     end
   end

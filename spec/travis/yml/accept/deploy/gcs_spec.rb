@@ -1,5 +1,17 @@
 describe Travis::Yml, 'gcs' do
-  subject { described_class.apply(parse(yaml)) }
+  subject { described_class.load(yaml) }
+
+  describe 'key_file' do
+    describe 'given a str' do
+      yaml %(
+        deploy:
+          provider: gcs
+          key_file: str
+      )
+      it { should serialize_to deploy: [provider: 'gcs', key_file: 'str'] }
+      it { should_not have_msg }
+    end
+  end
 
   describe 'access_key_id' do
     describe 'given a secure' do

@@ -8,6 +8,10 @@ module Travis
           register :smalltalk
 
           def define
+            title 'Smalltalk'
+            summary 'Smalltalk language support'
+            see 'Building a Smalltalk Project': 'https://docs.travis-ci.com/user/languages/smalltalk/'
+
             matrix :smalltalk
             matrix :smalltalk_config, to: :seq
             matrix :smalltalk_vm,     to: :seq

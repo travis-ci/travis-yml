@@ -21,10 +21,10 @@ module Travis
             @includes ||= []
           end
 
-          def clone
+          def dup
             node = super
-            node.mappings = mappings.map { |key, obj| [key, obj.clone] }.to_h
-            # node.includes = includes.map(&:clone)
+            node.mappings = mappings.map { |key, obj| [key, obj.dup] }.to_h
+            # node.includes = includes.map(&:dup)
             node
           end
         end

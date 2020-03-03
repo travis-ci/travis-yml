@@ -65,9 +65,6 @@ describe Travis::Yml::Schema::Def::Deploy::Boxfuse do
               env: {
                 type: :string
               },
-              image: {
-                type: :string
-              },
               extra_args: {
                 type: :string
               }

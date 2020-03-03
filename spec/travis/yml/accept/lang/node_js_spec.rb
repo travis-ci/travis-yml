@@ -1,5 +1,5 @@
 describe Travis::Yml, 'node_js' do
-  subject { described_class.apply(parse(yaml)) }
+  subject { described_class.load(yaml) }
 
   describe 'node' do
     describe 'given a seq of strs' do

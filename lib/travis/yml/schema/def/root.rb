@@ -6,14 +6,15 @@ require 'travis/yml/schema/def/dist'
 require 'travis/yml/schema/def/env'
 require 'travis/yml/schema/def/imports'
 require 'travis/yml/schema/def/job'
+require 'travis/yml/schema/def/jobs'
 require 'travis/yml/schema/def/language'
-require 'travis/yml/schema/def/matrix'
 require 'travis/yml/schema/def/notification'
 require 'travis/yml/schema/def/os'
 require 'travis/yml/schema/def/stack'
 require 'travis/yml/schema/def/stages'
 require 'travis/yml/schema/def/sudo'
 require 'travis/yml/schema/def/version'
+require 'travis/yml/schema/def/virt'
 require 'travis/yml/schema/type'
 
 module Travis
@@ -36,13 +37,15 @@ module Travis
             matrix :os,             required: true, to: :oss
             map    :dist
             matrix :arch,           to: :archs
+            map    :virt
             map    :stack
             map    :sudo
             map    :import,         to: :imports
-            matrix :env
+            map    :env
             matrix :compiler,       to: :compilers
+            matrix :osx_image,      to: :osx_images
             map    :stages
-            map    :matrix,         alias: :jobs
+            map    :jobs,           alias: :matrix
             map    :notifications
 
             map    :version

@@ -1,52 +1,8 @@
 #!/usr/bin/env ruby
 
-require 'fileutils'
-require 'yaml'
+require 'travis/yml'
 
-def parse(yaml, file, ix)
-  config = YAML.load(yaml)
-  raise 'not a hash' unless config.is_a?(Hash)
-  config
-rescue => e
-  puts
-  puts "unable to parse #{file}, chunk #{ix}"
-  puts e.message
-  puts yaml
-  raise
-end
+$stdout.sync = true
+puts 'Generating docs ...'
 
-def unindent(str)
-  width = str.scan(/^[ \t]*(?=\S)/).min.size || 0
-  str.gsub(/^[ \t]{#{width}}/, '')
-end
-
-source = '../docs-travis-ci-com/user'
-target = 'spec/fixtures/docs'
-
-FileUtils.rm_rf(target)
-
-PATTERN = /```yaml(.*?)```\s*>?\s*{:\s*data-file="([^"]+)"\s*}/m
-
-Dir["#{source}/**/*.md"].sort.each do |path|
-  content = File.read(path)
-  path = path.sub(source, '').sub('.md', '')
-  path = [target, path].join
-
-  yamls = content.scan(PATTERN)
-  yamls = yamls.select { |_, src| src == '.travis.yml' }
-  yamls = yamls.map(&:first)
-
-  yamls.each.with_index do |yaml, ix|
-    yaml = unindent(yaml).strip
-    yaml = yaml.gsub(/^\s*(\.)+$/, '')
-    yaml = yaml.gsub('[always|never|change]', 'always')
-    yaml = yaml.gsub('⋮', '')
-    yaml = yaml.split("\n").map { |line| line.sub(/^> ?/, '') }.join("\n")
-
-    config = parse(yaml, path, ix)
-
-    ix = ix.+(1).to_s.rjust(3, '0')
-    FileUtils.mkdir_p(path)
-    File.write("#{path}/#{ix}.yml", yaml)
-  end
-end
+Travis::Yml::Docs.generate

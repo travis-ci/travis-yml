@@ -3,7 +3,9 @@ describe Travis::Yml, 'arch' do
 
   known = %w(
     amd64
+    arm64
     ppc64le
+    s390x
   )
 
   known.each do |value|
@@ -62,7 +64,7 @@ describe Travis::Yml, 'arch' do
       arch:
         name: amd64
     )
-    it { should serialize_to empty }
+    it { should serialize_to arch: [] }
     it { should have_msg [:error, :arch, :invalid_type, expected: :str, actual: :map, value: { name: 'amd64' }] }
   end
 

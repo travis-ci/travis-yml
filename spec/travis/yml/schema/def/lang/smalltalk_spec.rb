@@ -4,9 +4,11 @@ describe Travis::Yml::Schema::Def::Smalltalk do
   # it { puts JSON.pretty_generate(subject) }
 
   it do
-    should eq(
+    should include(
       '$id': :smalltalk,
       title: 'Smalltalk',
+      summary: kind_of(String),
+      see: kind_of(Hash),
       type: :object,
       properties: {
         smalltalk: {

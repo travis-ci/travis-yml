@@ -8,6 +8,9 @@ module Travis
           register :node_js
 
           def define
+            title 'Javascript'
+            summary 'Javascript language support'
+            see 'Building a Javascript Project': 'https://docs.travis-ci.com/user/languages/javascript/'
             aliases :javascript, :js, :node
 
             matrix :node_js, alias: [:node]

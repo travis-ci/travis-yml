@@ -1,12 +1,12 @@
 describe Travis::Yml, 'notifications: email' do
-  subject { described_class.apply(parse(yaml)) }
+  subject { described_class.load(yaml) }
 
   describe 'given nil' do
     yaml %(
       notifications:
         email:
     )
-    it { should serialize_to empty }
+    it { should serialize_to notifications: { email: [] } }
   end
 
   describe 'given true' do
@@ -14,7 +14,7 @@ describe Travis::Yml, 'notifications: email' do
       notifications:
         email: true
     )
-    it { should serialize_to notifications: { email: { enabled: true } } }
+    it { should serialize_to notifications: { email: [enabled: true] } }
     it { should_not have_msg }
   end
 
@@ -23,7 +23,7 @@ describe Travis::Yml, 'notifications: email' do
       notifications:
         email: false
     )
-    it { should serialize_to notifications: { email: { enabled: false } } }
+    it { should serialize_to notifications: { email: [enabled: false] } }
     it { should_not have_msg }
   end
 
@@ -33,7 +33,7 @@ describe Travis::Yml, 'notifications: email' do
         email:
           enabled: true
     )
-    it { should serialize_to notifications: { email: { enabled: true } } }
+    it { should serialize_to notifications: { email: [enabled: true] } }
     it { should_not have_msg }
   end
 
@@ -43,7 +43,7 @@ describe Travis::Yml, 'notifications: email' do
         email:
           enabled: false
     )
-    it { should serialize_to notifications: { email: { enabled: false } } }
+    it { should serialize_to notifications: { email: [enabled: false] } }
     it { should_not have_msg }
   end
 
@@ -53,7 +53,7 @@ describe Travis::Yml, 'notifications: email' do
         email:
           disabled: true
     )
-    it { should serialize_to notifications: { email: { enabled: false } } }
+    it { should serialize_to notifications: { email: [enabled: false] } }
     it { should_not have_msg }
   end
 
@@ -63,7 +63,7 @@ describe Travis::Yml, 'notifications: email' do
         email:
           disabled: false
     )
-    it { should serialize_to notifications: { email: { enabled: true } } }
+    it { should serialize_to notifications: { email: [enabled: true] } }
     it { should_not have_msg }
   end
 
@@ -73,7 +73,7 @@ describe Travis::Yml, 'notifications: email' do
         email:
           template: str
     )
-    it { should serialize_to notifications: { email: { template: 'str' } } }
+    it { should serialize_to notifications: { email: [template: 'str'] } }
     it { should have_msg [:warn, :'notifications.email', :unknown_key, key: 'template', value: 'str'] }
   end
 
@@ -82,8 +82,8 @@ describe Travis::Yml, 'notifications: email' do
       notifications:
         emails: str
     )
-    it { should serialize_to notifications: { email: { recipients: ['str'] } } }
-    it { should have_msg [:info, :notifications, :alias, type: :key, alias: 'emails', obj: 'email'] }
+    it { should serialize_to notifications: { email: [recipients: ['str']] } }
+    it { should have_msg [:info, :notifications, :alias_key, alias: 'emails', key: 'email'] }
   end
 
   describe 'recipients' do
@@ -93,7 +93,7 @@ describe Travis::Yml, 'notifications: email' do
           email: str
 
       )
-      it { should serialize_to notifications: { email: { recipients: ['str'] } } }
+      it { should serialize_to notifications: { email: [recipients: ['str']] } }
       it { should_not have_msg }
     end
 
@@ -103,7 +103,7 @@ describe Travis::Yml, 'notifications: email' do
           email:
           - str
       )
-      it { should serialize_to notifications: { email: { recipients: ['str'] } } }
+      it { should serialize_to notifications: { email: [recipients: ['str']] } }
       it { should_not have_msg }
     end
 
@@ -114,8 +114,8 @@ describe Travis::Yml, 'notifications: email' do
             - recipients:
               - str
       )
-      it { should serialize_to notifications: { email: { recipients: ['str'] } } }
-      it { should have_msg [:warn, :'notifications.email', :unexpected_seq, value: { recipients: ['str'] }] }
+      it { should serialize_to notifications: { email: [recipients: ['str']] } }
+      it { should_not have_msg }
     end
 
     describe 'given an array with a secure' do
@@ -125,8 +125,8 @@ describe Travis::Yml, 'notifications: email' do
             - recipients:
               - secure: secure
       )
-      it { should serialize_to notifications: { email: { recipients: [secure: 'secure'] } } }
-      it { should have_msg [:warn, :'notifications.email', :unexpected_seq, value: { recipients: [secure: 'secure'] }] }
+      it { should serialize_to notifications: { email: [recipients: [secure: 'secure']] } }
+      it { should_not have_msg }
     end
 
     describe 'given a hash with a string' do
@@ -135,7 +135,7 @@ describe Travis::Yml, 'notifications: email' do
           email:
             recipients: str
       )
-      it { should serialize_to notifications: { email: { recipients: ['str'] } } }
+      it { should serialize_to notifications: { email: [recipients: ['str']] } }
       it { should_not have_msg }
     end
 
@@ -146,7 +146,7 @@ describe Travis::Yml, 'notifications: email' do
             recipients:
               - str
       )
-      it { should serialize_to notifications: { email: { recipients: ['str'] } } }
+      it { should serialize_to notifications: { email: [recipients: ['str']] } }
       it { should_not have_msg }
     end
 
@@ -164,7 +164,7 @@ describe Travis::Yml, 'notifications: email' do
         notifications:
           recipients: str
       )
-      it { should serialize_to notifications: { email: {  recipients: ['str'] } } }
+      it { should serialize_to notifications: { email: [ recipients: ['str']] } }
       it { should_not have_msg }
     end
 
@@ -174,7 +174,7 @@ describe Travis::Yml, 'notifications: email' do
           recipients:
             - str
       )
-      it { should serialize_to notifications: { email: {  recipients: ['str'] } } }
+      it { should serialize_to notifications: { email: [ recipients: ['str']] } }
       it { should_not have_msg }
     end
 
@@ -183,7 +183,7 @@ describe Travis::Yml, 'notifications: email' do
         notifications:
           email: str
       )
-      it { should serialize_to notifications: { email: {  recipients: ['str'] } } }
+      it { should serialize_to notifications: { email: [ recipients: ['str']] } }
       it { should_not have_msg }
     end
 
@@ -193,7 +193,7 @@ describe Travis::Yml, 'notifications: email' do
           email:
             - str
       )
-      it { should serialize_to notifications: { email: { recipients: ['str'] } } }
+      it { should serialize_to notifications: { email: [recipients: ['str']] } }
       it { should_not have_msg }
     end
 
@@ -203,7 +203,7 @@ describe Travis::Yml, 'notifications: email' do
           email:
             unknown: str
       )
-      it { should serialize_to notifications: { email: { unknown: 'str' } } }
+      it { should serialize_to notifications: { email: [unknown: 'str'] } }
       it { should have_msg [:warn, :'notifications.email', :unknown_key, key: 'unknown', value: 'str'] }
     end
 
@@ -214,8 +214,8 @@ describe Travis::Yml, 'notifications: email' do
             - str
             - on_success: change
       )
-      it { should serialize_to notifications: { email: { recipients: ['str'] } } }
-      it { should have_msg [:warn, :'notifications.email', :unexpected_seq, value: 'str'] }
+      it { should serialize_to notifications: { email: [{ recipients: ['str'] }, { on_success: 'change' }] } }
+      it { should_not have_msg }
     end
 
     describe 'given a mixed array of hashes and secure' do
@@ -225,8 +225,8 @@ describe Travis::Yml, 'notifications: email' do
             - secure: secure
             - on_success: change
       )
-      it { should serialize_to notifications: { email: { recipients: [secure: 'secure'] } } }
-      it { should have_msg [:warn, :'notifications.email', :unexpected_seq, value: { secure: 'secure' }] }
+      it { should serialize_to notifications: { email: [{ recipients: [secure: 'secure'] }, { on_success: 'change' }] } }
+      it { should_not have_msg }
     end
 
     describe 'prefixes with :email, given a hash with the key :recipients, and a key :email', v2: true, migrate: true do
@@ -237,7 +237,7 @@ describe Travis::Yml, 'notifications: email' do
           recipients:
             - str
       )
-      it { should serialize_to notifications: { email: { recipients: ['str'], on_success: 'always' } } }
+      it { should serialize_to notifications: { email: [recipients: ['str'], on_success: 'always'] } }
       it { should_not have_msg }
     end
 
@@ -247,7 +247,7 @@ describe Travis::Yml, 'notifications: email' do
           email: false
         email: str
       )
-      it { should serialize_to notifications: { email: { enabled: true, recipients: ['str'] } } }
+      it { should serialize_to notifications: { email: [enabled: true, recipients: ['str']] } }
       it { should_not have_msg }
     end
 
@@ -260,7 +260,7 @@ describe Travis::Yml, 'notifications: email' do
           - str
 
       )
-      it { should serialize_to notifications: { email: { enabled: true, recipients: ['str'], on_success: 'change' } } }
+      it { should serialize_to notifications: { email: [enabled: true, recipients: ['str'], on_success: 'change'] } }
       it { should have_msg [:warn, :notifications, :migrate, key: 'recipients', to: 'email', value: ['str']] }
     end
   end
@@ -274,7 +274,7 @@ describe Travis::Yml, 'notifications: email' do
               email:
                 #{status}: #{value}
           )
-          it { should serialize_to notifications: { email: { status.to_sym => value } } }
+          it { should serialize_to notifications: { email: [status.to_sym => value] } }
           it { should_not have_msg }
         end
       end
@@ -289,7 +289,7 @@ describe Travis::Yml, 'notifications: email' do
         skip_join: true
     )
 
-    it { should serialize_to notifications: { email: { recipients: ['str'] }, skip_join: true } }
+    it { should serialize_to notifications: { email: [recipients: ['str']], skip_join: true } }
     it { should have_msg [:warn, :notifications, :unknown_key, key: 'skip_join', value: true] }
   end
 end

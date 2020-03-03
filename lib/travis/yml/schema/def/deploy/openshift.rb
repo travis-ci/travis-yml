@@ -8,10 +8,8 @@ module Travis
             register :openshift
 
             def define
-              map :token,    to: :secure
-              map :user,     to: :secure, strict: false
-              map :password, to: :secure
               map :server,   to: :str
+              map :token,    to: :secure
               map :project,  to: :str
               map :app,      to: :str
             end

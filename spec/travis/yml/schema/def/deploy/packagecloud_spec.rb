@@ -57,7 +57,7 @@ describe Travis::Yml::Schema::Def::Deploy::Packagecloud do
                 type: :string
               },
               package_glob: {
-                type: :string
+                '$ref': '#/definitions/type/strs',
               },
               force: {
                 type: :boolean

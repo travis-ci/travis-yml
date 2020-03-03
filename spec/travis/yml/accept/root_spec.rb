@@ -1,16 +1,16 @@
 describe Travis::Yml, 'root' do
-  subject { described_class.apply(parse(yaml), opts) }
+  subject { described_class.load(yaml, opts) }
 
   describe 'default', defaults: true do
     yaml ''
     it { should serialize_to defaults }
-    it { should have_msg [:info, :language, :default, key: 'language', default: 'ruby'] }
-    it { should have_msg [:info, :os, :default, key: 'os', default: 'linux'] }
+    it { should have_msg [:info, :root, :default, key: 'language', default: 'ruby'] }
+    it { should have_msg [:info, :root, :default, key: 'os', default: 'linux'] }
   end
 
   describe 'given a non-hash' do
     yaml 'foo'
-    it { expect { subject }.to raise_error(Travis::Yml::UnexpectedConfigFormat) }
+    it { expect { subject }.to raise_error(Travis::Yml::InvalidConfigFormat) }
   end
 
   describe 'moves required keys to the front' do
@@ -31,12 +31,21 @@ describe Travis::Yml, 'root' do
   end
 
   describe 'corrects' do
-    describe 'a known key' do
+    describe 'a typo' do
       yaml %(
         csript: ./foo
       )
       it { should serialize_to script: ['./foo'] }
       it { should have_msg [:warn, :root, :find_key, original: 'csript', key: 'script'] }
+    end
+
+    describe 'a typo on a key with a default', defaults: true do
+      yaml %(
+        langauge: shell
+      )
+      it { should serialize_to language: 'shell', os: ['linux'] }
+      it { should have_msg [:warn, :root, :find_key, original: 'langauge', key: 'language'] }
+      it { should_not have_msg [:error, :root, :overwrite, key: 'langauge', other: 'language'] }
     end
 
     describe 'a camelized key' do
@@ -127,7 +136,6 @@ describe Travis::Yml, 'root' do
   end
 
   ignore = %w(
-    merge_mode
     .configured
     :.configured
     :".configured"
@@ -233,6 +241,14 @@ describe Travis::Yml, 'root' do
     it { should have_msg [:warn, :root, :unknown_key, key: 'file', value: 'file'] }
   end
 
+  describe 'given a broken map', line: true do
+    yaml %(
+      node_js: {"8"}
+    )
+
+    it { should have_msg [:error, :node_js, :invalid_type, expected: :str, actual: :map, value: { '8': nil }, line: 0] }
+  end
+
   describe 'line number info', line: true do
     describe 'unknown_key' do
       yaml "unknown: str"
@@ -241,7 +257,32 @@ describe Travis::Yml, 'root' do
 
     describe 'line number info on msgs', line: true do
       yaml "\nscript: { foo: bar }"
-      it { should have_msg [:error, :script, :invalid_type, expected: :str, actual: :map, value: { foo: 'bar' }, line: 1] }
+      it { should have_msg [:error, :script, :invalid_type, expected: :str, actual: :map, value: { foo: 'bar' }, line: 0] }
     end
+  end
+
+  describe 'duplicate keys (1)' do
+    yaml %(
+      one: 1
+      one: 2
+    )
+    it { should have_msg [:error, :root, :duplicate_key, key: 'one'] }
+    it { should_not have_msg [:error, :env, :duplicate_key, key: 'one'] }
+  end
+
+  describe 'duplicate keys (2)' do
+    yaml %(
+      env:
+        one: 1
+        one: 2
+    )
+    it { should_not have_msg [:error, :root, :duplicate_key, key: 'one'] }
+    it { should have_msg [:error, :env, :duplicate_key, key: 'one'] }
+  end
+
+  describe 'given an invalid byte sequence in utf-8', line: true do
+    yaml "if: tag =~ ^v\255"
+
+    it { should_not have_msg }
   end
 end

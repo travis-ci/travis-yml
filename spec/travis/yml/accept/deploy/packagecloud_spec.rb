@@ -1,5 +1,5 @@
 describe Travis::Yml, 'packagecloud' do
-  subject { described_class.apply(parse(yaml)) }
+  subject { described_class.load(yaml) }
 
   describe 'username' do
     describe 'given a secure' do
@@ -70,7 +70,7 @@ describe Travis::Yml, 'packagecloud' do
           provider: packagecloud
           package_glob: str
       )
-      it { should serialize_to deploy: [provider: 'packagecloud', package_glob: 'str'] }
+      it { should serialize_to deploy: [provider: 'packagecloud', package_glob: ['str']] }
       it { should_not have_msg }
     end
   end

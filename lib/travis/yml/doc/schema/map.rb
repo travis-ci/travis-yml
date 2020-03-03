@@ -73,7 +73,7 @@ module Travis
           end
 
           def custom?(key)
-            key.start_with?('_') || key.start_with?('.')
+            key.to_s.start_with?('_') || key.to_s.start_with?('.')
           end
 
           def default?(key = nil)

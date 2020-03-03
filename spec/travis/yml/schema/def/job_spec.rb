@@ -35,34 +35,6 @@ describe Travis::Yml::Schema::Def::Job do
         group: {
           '$ref': '#/definitions/type/group'
         },
-        osx_image: {
-          anyOf: [
-            {
-              type: :array,
-              items: {
-                type: :string
-              },
-              only: {
-                os: [
-                  'osx'
-                ]
-              },
-              normal: true
-            },
-            {
-              type: :string
-            }
-          ],
-          summary: 'OSX image to use for the build environment',
-          only: {
-            os: [
-              'osx'
-            ]
-          },
-          flags: [
-            :expand,
-          ]
-        },
         before_install: {
           '$ref': '#/definitions/type/strs',
           summary: 'Scripts to run before the install stage'

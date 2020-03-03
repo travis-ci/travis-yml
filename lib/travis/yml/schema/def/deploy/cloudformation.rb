@@ -21,7 +21,6 @@ module Travis
               map :wait,              to: :bool
               map :wait_timeout,      to: :num
               map :create_timeout,    to: :num
-              map :session_token,     to: :str
               map :parameters,        to: :strs
               map :output_file,       to: :str
             end

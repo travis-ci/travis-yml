@@ -52,8 +52,11 @@ describe Travis::Yml::Schema::Def::Deploy::Pages do
                   'git'
                 ]
               },
-              github_token: {
-                '$ref': '#/definitions/type/secure'
+              token: {
+                '$ref': '#/definitions/type/secure',
+                aliases: [
+                  :github_token
+                ]
               },
               deploy_key: {
                 type: :string
@@ -79,8 +82,11 @@ describe Travis::Yml::Schema::Def::Deploy::Pages do
               name: {
                 type: :string
               },
-              github_url: {
-                type: :string
+              url: {
+                type: :string,
+                aliases: [
+                  :github_url
+                ]
               },
               keep_history: {
                 type: :boolean
@@ -98,9 +104,6 @@ describe Travis::Yml::Schema::Def::Deploy::Pages do
                 type: :boolean
               },
               deployment_file: {
-                type: :boolean
-              },
-              detect_encoding: {
                 type: :boolean
               }
             },

@@ -6,7 +6,7 @@ module Travis
       class Merge < Obj.new(:lft, :rgt, :merge_mode)
         def apply
           mode = lft.merge_mode if lft.respond_to?(:merge_mode)
-          mode ||= self.merge_mode || :merge
+          mode ||= self.merge_mode || :deep_merge_append
           send(mode, lft, rgt)
         end
 
@@ -25,7 +25,7 @@ module Travis
           keys(lft, rgt).inject(lft) do |hash, key|
             hash[key] = if hashes?(lft[key], rgt[key])
               send(mode(lft[key]) || :deep_merge, lft[key], rgt[key])
-            elsif arrays?(lft[key], rgt[key]) && mode = lft[key].merge_mode
+            elsif arrays?(lft[key], rgt[key]) && lft[key].respond_to?(:merge_mode) && mode = lft[key].merge_mode
               send(mode, lft[key], rgt[key])
             elsif lft.key?(key)
               lft[key]
@@ -51,12 +51,27 @@ module Travis
           end
         end
 
+        def deep_merge_prepend(lft, rgt)
+          keys(lft, rgt).inject(lft) do |hash, key|
+            hash[key] = if hashes?(lft[key], rgt[key])
+              send(mode(lft[key]) || :deep_merge_prepend, lft[key], rgt[key])
+            elsif arrays?(lft[key], rgt[key])
+              send(mode(lft[key]) || :prepend, lft[key], rgt[key])
+            elsif lft.key?(key)
+              lft[key]
+            else
+              rgt[key]
+            end
+            hash
+          end
+        end
+
         def prepend(lft, rgt)
-          lft.replace(lft + rgt)
+          lft.replace(rgt + lft)
         end
 
         def append(lft, rgt)
-          lft.replace(rgt + lft)
+          lft.replace(lft + rgt)
         end
 
         def mode(obj)

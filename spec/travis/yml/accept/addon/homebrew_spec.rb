@@ -1,5 +1,5 @@
 describe Travis::Yml, 'addon: homebrew' do
-  subject { described_class.apply(parse(yaml)) }
+  subject { described_class.load(yaml) }
 
   describe 'given a string' do
     yaml %(
@@ -118,6 +118,16 @@ describe Travis::Yml, 'addon: homebrew' do
   end
 
   describe 'brewfile' do
+    describe 'given a bool' do
+      yaml %(
+        addons:
+          homebrew:
+            brewfile: true
+      )
+      it { should serialize_to addons: { homebrew: { brewfile: true } } }
+      it { should_not have_msg }
+    end
+
     describe 'given a string' do
       yaml %(
         addons:

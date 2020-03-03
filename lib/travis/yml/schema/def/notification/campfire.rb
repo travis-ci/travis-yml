@@ -10,9 +10,11 @@ module Travis
             register :campfire
 
             def define
+              see 'Configuring Campfire notifications': 'https://docs.travis-ci.com/user/notifications/#configuring-campfire-notifications'
+
               prefix :rooms
 
-              map :rooms,    to: :seq, type: :secure
+              map :rooms,    to: :seq, type: :secure, summary: 'Campfire rooms to notify'
               map :template, to: :templates
             end
           end

@@ -8,7 +8,7 @@ describe Travis::Yml, 'template', line: true do
           slack:
             template: str
       )
-      it { should serialize_to notifications: { slack: { template: ['str'] } } }
+      it { should serialize_to notifications: { slack: [template: ['str']] } }
       it { should_not have_msg }
     end
 
@@ -18,7 +18,7 @@ describe Travis::Yml, 'template', line: true do
           slack:
             template: '%{repository}'
       )
-      it { should serialize_to notifications: { slack: { template: ['%{repository}'] } } }
+      it { should serialize_to notifications: { slack: [template: ['%{repository}']] } }
       it { should_not have_msg }
     end
 
@@ -28,7 +28,7 @@ describe Travis::Yml, 'template', line: true do
           slack:
             template: '%{unknown}'
       )
-      it { should serialize_to notifications: { slack: { template: ['%{unknown}'] } } }
+      it { should serialize_to notifications: { slack: [template: ['%{unknown}']] } }
       it { should have_msg [:warn, :'notifications.slack.template', :unknown_var, var: 'unknown', line: 3] }
     end
   end

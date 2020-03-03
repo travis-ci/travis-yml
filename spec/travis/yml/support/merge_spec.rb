@@ -6,7 +6,7 @@ describe Travis::Yml::Support::Merge do
       # comment
       foo:
         one:
-        - two
+        - one
     )
   end
 
@@ -14,7 +14,7 @@ describe Travis::Yml::Support::Merge do
     parse %(
       foo:
         one:
-        - one
+        - two
         two: two
       bar: bar
     )
@@ -26,19 +26,19 @@ describe Travis::Yml::Support::Merge do
 
   describe 'replace' do
     let(:mode) { :replace }
-    it { should eq 'foo' => { 'one' => ['two'] } }
+    it { should eq 'foo' => { 'one' => ['one'] } }
   end
 
   describe 'merge' do
     let(:mode) { :merge }
-    it { should eq 'foo' => { 'one' => ['two'] }, 'bar' => 'bar' }
+    it { should eq 'foo' => { 'one' => ['one'] }, 'bar' => 'bar' }
     it { expect(subject.keys.first).to be_a Key }
     it { expect(subject.keys.first.line).to eq 2 }
   end
 
   describe 'deep_merge' do
     let(:mode) { :deep_merge }
-    it { should eq 'foo' => { 'one' => ['two'], 'two' => 'two' }, 'bar' => 'bar' }
+    it { should eq 'foo' => { 'one' => ['one'], 'two' => 'two' }, 'bar' => 'bar' }
     it { expect(subject.keys.first).to be_a Key }
     it { expect(subject.keys.first.line).to eq 2 }
   end
@@ -50,31 +50,35 @@ describe Travis::Yml::Support::Merge do
     it { expect(subject.keys.first.line).to eq 2 }
   end
 
+  describe 'deep_merge_prepend' do
+    let(:mode) { :deep_merge_prepend }
+    it { should eq 'bar' => 'bar', 'foo' => { 'two' => 'two', 'one' => ['two', 'one'] } }
+    it { expect(subject.keys.first).to be_a Key }
+    it { expect(subject.keys.first.line).to eq 2 }
+  end
+
   describe 'merge tags (1)' do
     let(:lft) do
       parse %(
         !map+deep_merge+append
         foo:
           one:
-          - two
+          - one
       )
     end
     it { should eq 'foo' => { 'one' => ['one', 'two'], 'two' => 'two' }, 'bar' => 'bar' }
   end
 
   describe 'merge tags (2)' do
-    let(:mode) { :deep_merge }
-
     let(:lft) do
       parse %(
+        !map+deep_merge+prepend
         foo:
-          !map+deep_merge+append
           one:
-          - two
+          - one
       )
     end
-
-    it { should eq 'foo' => { 'one' => ['one', 'two'], 'two' => 'two' }, 'bar' => 'bar' }
+    it { should eq 'foo' => { 'one' => ['two', 'one'], 'two' => 'two' }, 'bar' => 'bar' }
   end
 
   describe 'merge tags (3)' do
@@ -83,11 +87,55 @@ describe Travis::Yml::Support::Merge do
     let(:lft) do
       parse %(
         foo:
-          one: !seq+append
-          - two
+          !map+deep_merge+append
+          one:
+          - one
       )
     end
 
     it { should eq 'foo' => { 'one' => ['one', 'two'], 'two' => 'two' }, 'bar' => 'bar' }
+  end
+
+  describe 'merge tags (4)' do
+    let(:mode) { :deep_merge }
+
+    let(:lft) do
+      parse %(
+        foo:
+          !map+deep_merge+prepend
+          one:
+          - one
+      )
+    end
+
+    it { should eq 'foo' => { 'one' => ['two', 'one'], 'two' => 'two' }, 'bar' => 'bar' }
+  end
+
+  describe 'merge tags (5)' do
+    let(:mode) { :deep_merge }
+
+    let(:lft) do
+      parse %(
+        foo:
+          one: !seq+append
+          - one
+      )
+    end
+
+    it { should eq 'foo' => { 'one' => ['one', 'two'], 'two' => 'two' }, 'bar' => 'bar' }
+  end
+
+  describe 'merge tags (6)' do
+    let(:mode) { :deep_merge }
+
+    let(:lft) do
+      parse %(
+        foo:
+          one: !seq+prepend
+          - one
+      )
+    end
+
+    it { should eq 'foo' => { 'one' => ['two', 'one'], 'two' => 'two' }, 'bar' => 'bar' }
   end
 end

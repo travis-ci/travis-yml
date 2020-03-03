@@ -8,6 +8,9 @@ module Travis
           register :perl
 
           def define
+            title 'Perl'
+            summary 'Perl language support'
+            see 'Building a Perl Project': 'https://docs.travis-ci.com/user/languages/perl/'
             matrix :perl
           end
         end

@@ -3,6 +3,8 @@ workers Integer(ENV['WEB_CONCURRENCY'] || 2)
 threads_count = Integer(ENV['MAX_THREADS'] || 5)
 threads threads_count, threads_count
 
+require 'travis/yml/web'
+
 preload_app!
 
 rackup      DefaultRackup
@@ -11,9 +13,6 @@ environment ENV['RACK_ENV'] || 'development'
 
 before_fork do
   Travis::Yml.expand
-end
-
-on_worker_boot do
 end
 
 lowlevel_error_handler do |error, env|

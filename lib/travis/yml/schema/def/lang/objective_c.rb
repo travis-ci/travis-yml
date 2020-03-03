@@ -8,6 +8,9 @@ module Travis
           register :'objective-c'
 
           def define
+            title 'Objective-C'
+            summary 'Objective-C language support'
+            see 'Building an Objective-C Project': 'https://docs.travis-ci.com/user/languages/objective-c/'
             aliases :objective_c, :swift
 
             matrix :rvm,            alias: [:ruby, :rbenv]

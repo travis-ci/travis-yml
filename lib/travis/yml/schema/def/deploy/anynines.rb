@@ -15,6 +15,7 @@ module Travis
               map :app_name,     to: :str
               map :buildpack,    to: :str
               map :manifest,     to: :str
+              map :logout,       to: :bool
             end
           end
         end

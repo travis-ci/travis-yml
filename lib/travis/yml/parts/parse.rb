@@ -11,8 +11,8 @@ module Travis
         end
 
         def apply
-          obj = send(format)
-          unexpected_format! unless obj.is_a?(Hash)
+          obj = parse
+          invalid_format unless obj.is_a?(Hash)
           obj = assign(obj)
           obj
         end
@@ -36,20 +36,14 @@ module Travis
             key
           end
 
-          def format
-            part.str.start_with?('{') ? :json : :yaml
+          def parse
+            Yaml.load(part.str) || Map.new
+          rescue Psych::SyntaxError => e
+            raise SyntaxError, e.message
           end
 
-          def json
-            Oj.load(part.str)
-          end
-
-          def yaml
-            Yaml.load(part.str) || {}
-          end
-
-          def unexpected_format!
-            raise UnexpectedConfigFormat, 'Input must be a hash'
+          def invalid_format
+            raise InvalidConfigFormat, 'Input must parse into a hash'
           end
       end
     end

@@ -90,6 +90,8 @@ describe Travis::Yml::Schema::Def::Root do
     definitions = {
       type: %i(
         addons
+        allow_failures
+        allow_failures_entry
         arch
         archs
         branches
@@ -108,14 +110,15 @@ describe Travis::Yml::Schema::Def::Root do
         imports
         jdks
         job
+        jobs
+        jobs_entries
+        jobs_entry
         language
         languages
-        matrix
-        matrix_entries
-        matrix_entry
         notifications
         os
         oss
+        osx_images
         secure
         secures
         service
@@ -127,6 +130,7 @@ describe Travis::Yml::Schema::Def::Root do
         sudo
         support
         version
+        virt
       ),
       addon: %i(
         apt
@@ -147,7 +151,6 @@ describe Travis::Yml::Schema::Def::Root do
         edge
         providers
         anynines
-        atlas
         azure_web_apps
         bintray
         bluemixcloudfoundry
@@ -164,8 +167,11 @@ describe Travis::Yml::Schema::Def::Root do
         elasticbeanstalk
         engineyard
         firebase
+        flynn
         gae
         gcs
+        git_push
+        gleis
         hackage
         hephy
         heroku
@@ -209,8 +215,10 @@ describe Travis::Yml::Schema::Def::Root do
         elixir
         elm
         erlang
+        generic
         go
         groovy
+        hack
         haskell
         haxe
         java
@@ -281,15 +289,17 @@ describe Travis::Yml::Schema::Def::Root do
           env
           filter_secrets
           import
+          jobs
           language
-          matrix
           notifications
           os
+          osx_image
           stack
           stages
           sudo
           trace
           version
+          virt
         )
       end
 
@@ -297,10 +307,10 @@ describe Travis::Yml::Schema::Def::Root do
       it { should include compiler:       { '$ref': '#/definitions/type/compilers', flags: [:expand] } }
       it { should include conditions:     { '$ref': '#/definitions/type/conditions' } }
       it { should include dist:           { '$ref': '#/definitions/type/dist' } }
-      it { should include env:            { '$ref': '#/definitions/type/env', flags: [:expand] } }
+      it { should include env:            { '$ref': '#/definitions/type/env' } }
       it { should include import:         { '$ref': '#/definitions/type/imports' } }
       # it { should include language:       { '$ref': '#/definitions/type/language' } }
-      it { should include matrix:         { '$ref': '#/definitions/type/matrix', aliases: [:jobs] } }
+      it { should include jobs:           { '$ref': '#/definitions/type/jobs', aliases: [:matrix] } }
       it { should include notifications:  { '$ref': '#/definitions/type/notifications' } }
       it { should include os:             { '$ref': '#/definitions/type/oss', flags: [:expand] } }
       it { should include stack:          { '$ref': '#/definitions/type/stack' } }

@@ -5,27 +5,35 @@ describe Travis::Yml::Schema::Def::Env do
     # it { puts JSON.pretty_generate(subject) }
 
     it do
-      should eq(
+      should include(
         '$id': :env,
         title: 'Env',
-        summary: 'Environment variables to set up',
+        summary: kind_of(String),
+        description: kind_of(String),
+        see: kind_of(Hash),
         anyOf: [
           {
             type: :object,
             properties: {
               global: {
                 '$ref': '#/definitions/type/env_vars',
-                summary: 'Global environment variables to be defined on all jobs'
+                summary: kind_of(String),
               },
-              matrix: {
+              jobs: {
                 '$ref': '#/definitions/type/env_vars',
-                summary: 'Environment variables that expand the build matrix (i.e. that create one job per entry)'
+                summary: kind_of(String),
+                aliases: [
+                  :matrix
+                ],
+                flags: [
+                  :expand
+                ]
               }
             },
             additionalProperties: false,
             normal: true,
             prefix: {
-              key: :matrix
+              key: :jobs
             },
           },
           {
@@ -43,6 +51,7 @@ describe Travis::Yml::Schema::Def::Env do
       should eq(
         '$id': :env_vars,
         title: 'Env Vars',
+        summary: 'Environment variables to set up',
         anyOf: [
           {
             type: :array,
@@ -78,7 +87,7 @@ describe Travis::Yml::Schema::Def::Env do
               FOO: 'foo'
             },
             patternProperties: {
-              '^(?!global|matrix)': {
+              '^(?!global|jobs|matrix)': {
                 anyOf: [
                   {
                     type: :string
@@ -88,6 +97,9 @@ describe Travis::Yml::Schema::Def::Env do
                   },
                   {
                     type: :boolean
+                  },
+                  {
+                    '$ref': '#/definitions/type/secure'
                   }
                 ]
               }

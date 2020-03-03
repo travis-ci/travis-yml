@@ -4,10 +4,11 @@ describe Travis::Yml::Schema::Def::Dist do
   # it { puts JSON.pretty_generate(subject) }
 
   it do
-    should eq(
+    should include(
       '$id': :dist,
       title: 'Distribution',
-      summary: 'Build environment distribution',
+      summary: kind_of(String),
+      see: kind_of(Hash),
       type: :string,
       enum: [
         'trusty',

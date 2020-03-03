@@ -9,6 +9,9 @@ module Travis
           register :ruby
 
           def define
+            title 'Ruby'
+            summary 'Ruby language support'
+            see 'Building a Ruby Project': 'https://docs.travis-ci.com/user/languages/ruby/'
             matrix :rvm, alias: [:ruby, :rbenv]
             matrix :gemfile, alias: :gemfiles
             matrix :jdk, to: :jdks

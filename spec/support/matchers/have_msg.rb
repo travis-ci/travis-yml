@@ -4,8 +4,8 @@ RSpec::Matchers.define :have_msg do |msg = nil|
     msgs = msgs.reject(&msg) if msg.is_a?(Method) || msg.is_a?(Proc)
     msgs = msgs.reject(&block_arg) if block_arg
 
-    case msg
-    when Method
+    result = case msg
+    when Method, Proc
       msgs.any?
     when Array, Hash
       msg && msgs.include?(msg) && Travis::Yml.msg(msg)
@@ -14,6 +14,10 @@ RSpec::Matchers.define :have_msg do |msg = nil|
     else
       raise
     end
+
+    expect(msg).to generate_msg if msg.is_a?(Array)
+
+    result
   end
 
   def trunc(str)

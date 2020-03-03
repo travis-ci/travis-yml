@@ -1,0 +1,155 @@
+<html>
+  <head>
+    <link rel="stylesheet" type="text/css" href="/css/docs/styles.css" />
+    <link rel="stylesheet" type="text/css" href="/css/docs/syntax.css" />
+    <script type="text/javascript" src="https://unpkg.com/whatwg-fetch@2.0.3/fetch.js"></script>
+    <script type="text/javascript" src="/js/explore.js"></script>
+    <script type="text/javascript">
+      window.token = "jfnCqbJlbvxZlX40uE0DKg";
+      window.parseURL = "https://yml-staging.travis-ci.org/v1/parse";
+      window.expandURL = "https://yml-staging.travis-ci.org/v1/expand";
+    </script>
+  </head>
+  <body>
+    <div id="menu">
+      <ul>
+<li><a href="/">Home</a></li>
+<li><a href="/ref/language">Language</a></li>
+<li><a href="/ref/os">Os</a></li>
+<li><a href="/ref/job/addons">Addons</a></li>
+<li><a href="/ref/arch">Arch</a></li>
+<li><a href="/ref/job/branches">Branches</a></li>
+<li><a href="/ref/job/cache">Cache</a></li>
+<li><a href="/ref/compiler">Compiler</a></li>
+<li><a href="/ref/job/deploy">Deploy</a></li>
+<li><a href="/ref/dist">Dist</a></li>
+<li><a href="/ref/env">Env</a></li>
+<li><a href="/ref/job/git">Git</a></li>
+<li><a href="/ref/job/if/condition">If</a></li>
+<li><a href="/ref/import">Import</a></li>
+<li><a href="/ref/jobs">Jobs</a></li>
+<li><a href="/ref/notifications">Notifications</a>
+
+<ul>
+<li><a href="/ref/notifications/campfire">Campfire</a></li>
+<li><a href="/ref/notifications/email">Email</a></li>
+<li><a href="/ref/notifications/flowdock">Flowdock</a></li>
+<li><a href="/ref/notifications/hipchat">Hipchat</a></li>
+<li><a href="/ref/notifications/irc">Irc</a></li>
+<li><a href="/ref/notifications/pushover">Pushover</a></li>
+<li><a href="/ref/notifications/slack">Slack</a></li>
+<li><a href="/ref/notifications/webhooks">Webhooks</a></li>
+<li><a href="/ref/notifications/on_success/frequency">On Success</a></li>
+<li><a href="/ref/notifications/on_failure/frequency">On Failure</a></li>
+</ul></li>
+<li><a href="/ref/osx_image">Osx Image</a></li>
+<li><a href="/ref/job/services">Services</a></li>
+<li><a href="/ref/stages">Stages</a></li>
+<li><a href="/ref/version">Version</a></li>
+<li><a href="/matrix_expansion">Matrix Expansion</a></li>
+<li><a href="/types">Types</a></li>
+<li><a href="/index">Index</a></li>
+<li><a href="/explore">Explore</a></li>
+</ul>
+
+    </div>
+    <div id="content">
+      <h1 id="notifications">Notifications</h1>
+
+<p><em>Notification targets to notify on build results</em></p>
+
+<p>This node uses the key <code>email</code> as a <a href="/types#map">default prefix</a> if not given a <a href="/types">map</a>.</p>
+
+<h2 id="types">Types</h2>
+
+<ul>
+<li><a href="/types">Map</a></li>
+<li><a href="/types">Sequence of Map</a></li>
+<li><a href="/types">Sequence of Sequence of Secure</a></li>
+<li><a href="/types">Sequence of Secure</a></li>
+<li><a href="/types">Sequence of Boolean</a></li>
+<li><a href="/types">Secure</a></li>
+<li><a href="/types">Boolean</a></li>
+</ul>
+
+<h2 id="keys">Keys</h2>
+
+<p>If given a map, the following keys are supported:</p>
+
+<ul>
+<li><p><code>campfire</code> &mdash; Campfire notification settings (type: sequence of map, sequence of sequence of secure, sequence of secure, sequence of boolean, map, secure, or boolean) <a href="/ref/notifications/campfire">details</a></p></li>
+<li><p><code>email</code> &mdash; Email notification settings (type: sequence of map, sequence of sequence of secure, sequence of secure, sequence of boolean, map, secure, or boolean) <a href="/ref/notifications/email">details</a></p></li>
+<li><p><code>flowdock</code> &mdash; Flowdock notification settings (type: sequence of map, sequence of secure, sequence of boolean, map, secure, or boolean) <a href="/ref/notifications/flowdock">details</a></p></li>
+<li><p><code>hipchat</code> &mdash; Hipchat notification settings (type: sequence of map, sequence of sequence of secure, sequence of secure, sequence of boolean, map, secure, or boolean) <a href="/ref/notifications/hipchat">details</a></p></li>
+<li><p><code>irc</code> &mdash; IRC notification settings (type: sequence of map, sequence of sequence of secure, sequence of secure, sequence of boolean, map, secure, or boolean) <a href="/ref/notifications/irc">details</a></p></li>
+<li><p><code>pushover</code> &mdash; Pushover notification settings (type: sequence of map, sequence of boolean, map, or boolean) <a href="/ref/notifications/pushover">details</a></p></li>
+<li><p><code>slack</code> &mdash; Slack notification settings (type: sequence of map, sequence of sequence of secure, sequence of secure, sequence of boolean, map, secure, or boolean) <a href="/ref/notifications/slack">details</a></p></li>
+<li><p><code>webhooks</code> &mdash; Webhook notification settings (type: sequence of map, sequence of sequence of secure, sequence of secure, sequence of boolean, map, secure, or boolean) <a href="/ref/notifications/webhooks">details</a></p></li>
+<li><p><code>on_success</code> &mdash; Notification frequency (type: enum (string), known values: <code>always</code>, <code>never</code>, <code>change</code>) <a href="/ref/notifications/on_success/frequency">details</a></p></li>
+<li><p><code>on_failure</code> &mdash; Notification frequency (type: enum (string), known values: <code>always</code>, <code>never</code>, <code>change</code>) <a href="/ref/notifications/on_failure/frequency">details</a></p></li>
+</ul>
+
+<h2 id="examples">Examples</h2>
+
+<pre><code class="yaml">notifications:
+  campfire:
+  - rooms:
+    - secure: encrypted string
+    template:
+    - string
+    if: branch = master
+  - rooms:
+      secure: encrypted string
+  - template: string
+  email:
+  - recipients:
+    - secure: encrypted string
+    if: branch = master
+    on_success: always
+  - recipients:
+      secure: encrypted string
+  flowdock:
+  - api_token:
+      secure: encrypted string
+    template:
+    - string
+    if: branch = master
+  - template: string
+</code></pre>
+
+<pre><code class="yaml">notifications:
+- recipients:
+  - secure: encrypted string
+  if: branch = master
+  on_success: always
+- recipients:
+    secure: encrypted string
+</code></pre>
+
+<pre><code class="yaml">notifications:
+- secure: encrypted string
+</code></pre>
+
+<pre><code class="yaml">notifications:
+- true
+</code></pre>
+
+<pre><code class="yaml">notifications:
+  recipients:
+  - secure: encrypted string
+  if: branch = master
+  on_success: always
+</code></pre>
+
+<pre><code class="yaml">notifications:
+  secure: encrypted string
+</code></pre>
+
+<pre><code class="yaml">notifications: true
+
+</code></pre>
+
+    </div>
+    <div class="corner-ribbon">Beta</div>
+  </body>
+</html>

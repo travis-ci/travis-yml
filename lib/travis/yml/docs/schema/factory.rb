@@ -58,7 +58,8 @@ module Travis
             node = nodes.first
             node.opts = normalize(except(schema, :allOf))
             node.includes = nodes[1..-1].reject { |node| [:languages, :support].include?(node.id) }
-            node.includes.each { |include| include.parents << node }
+            node.includes.each { |include| include.parent = node }
+            node.includes.each(&:included)
             node
           end
 
@@ -91,15 +92,12 @@ module Travis
             return build(parent, join(:anyOf, schema)) if join?(schema)
             node = Any.new(parent, normalize(schema))
             node.schemas = build(node, schema[:anyOf])
-            # p node if node.opts[:key] == :branches
-            # p node.opts[:example]
             node
           end
 
           def seq(parent, schema)
             node = Seq.new(parent, normalize(schema))
             node.schema = build(node, schema[:items]) if schema[:items]
-            # node.schema.opts[:example] ||= schema[:example] if node.schema
             node
           end
 
@@ -118,6 +116,7 @@ module Travis
           def mappings(parent, schema)
             map = schema[:properties] ? schema[:properties] : {}
             map = map.map { |key, schema| [key, build(parent, schema.merge(key: key))] }.to_h
+            # p map[:depth] if map[:depth]
             map
           end
 
@@ -138,9 +137,8 @@ module Travis
           end
 
           def ref(parent, schema)
-            node = definition(schema[:'$ref']).clone
-            node.parents << parent unless node.parents.include?(parent)
-            node.parents.sort_by! { |node| node.root? ? 0 : 1 }
+            node = definition(schema[:'$ref']).dup
+            node.parent = parent
             node.opts = node.opts.merge(normalize(schema))
             node
           end

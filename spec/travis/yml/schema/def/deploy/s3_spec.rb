@@ -53,44 +53,56 @@ describe Travis::Yml::Schema::Def::Deploy::S3 do
               region: {
                 type: :string
               },
+              endpoint: {
+                type: :string
+              },
               upload_dir: {
                 type: :string
               },
-              storage_class: {
+              local_dir: {
                 type: :string
               },
-              local_dir: {
+              glob: {
+                type: :string
+              },
+              dot_match: {
+                type: :boolean
+              },
+              acl: {
                 type: :string
               },
               detect_encoding: {
                 type: :boolean
               },
               cache_control: {
-                type: :string
+                '$ref': '#/definitions/type/strs',
               },
               expires: {
-                type: :string
-              },
-              acl: {
-                type: :string
-              },
-              dot_match: {
-                type: :boolean
-              },
-              index_document_suffix: {
-                type: :string
+                '$ref': '#/definitions/type/strs',
               },
               default_text_charset: {
+                type: :string
+              },
+              storage_class: {
                 type: :string
               },
               server_side_encryption: {
                 type: :boolean
               },
-              endpoint: {
+              index_document_suffix: {
                 type: :string
+              },
+              overwrite: {
+                type: :boolean
+              },
+              force_path_style: {
+                type: :boolean
               },
               max_threads: {
                 type: :number
+              },
+              verbose: {
+                type: :boolean
               }
             },
             additionalProperties: false,

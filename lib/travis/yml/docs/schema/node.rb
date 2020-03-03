@@ -5,10 +5,10 @@ module Travis
         class Node
           include Helper::Obj
 
-          attr_accessor :parents, :opts
+          attr_accessor :parent, :opts
 
           def initialize(parent, opts)
-            @parents = [parent].compact
+            @parent = parent
             @opts = opts
           end
 
@@ -16,12 +16,36 @@ module Travis
             self.class.name.split('::').last.downcase.to_sym
           end
 
+          def included
+            @included = true
+          end
+
+          def included?
+            !!@included
+          end
+
           def root?
-            parents.empty?
+            parent.nil?
+          end
+
+          def any?
+            type == :any
           end
 
           def seq?
             type == :seq
+          end
+
+          def map?
+            type == :map
+          end
+
+          def str?
+            type == :str
+          end
+
+          def strs?
+            id == :strs
           end
 
           def key
@@ -40,8 +64,16 @@ module Travis
             opts[:description]
           end
 
+          def defaults
+            opts[:defaults]
+          end
+
           def example
             opts[:example]
+          end
+
+          def format
+            opts[:format]
           end
 
           def aliases
@@ -80,6 +112,10 @@ module Travis
             !!opts[:normal]
           end
 
+          def prefix
+            opts[:prefix]
+          end
+
           def required?
             !!opts[:required]
           end
@@ -110,9 +146,9 @@ module Travis
             end
           end
 
-          def clone
+          def dup
             node = super
-            node.opts = opts.clone
+            node.opts = opts.dup
             node
           end
 

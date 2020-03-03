@@ -10,10 +10,12 @@ module Travis
             register :webhooks
 
             def define
+              see 'Configuring Webhook notifications': 'https://docs.travis-ci.com/user/notifications/#configuring-webhook-notifications'
+
               aliases :webhook
               prefix :urls
 
-              map :urls,      to: :webhook_urls
+              map :urls,      to: :webhook_urls, summary: 'Webhook URLs to notify'
               map :on_start,  to: :frequency
               map :on_cancel, to: :frequency
               map :on_error,  to: :frequency

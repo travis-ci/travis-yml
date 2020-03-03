@@ -1,5 +1,5 @@
 describe Travis::Yml, 'firebase' do
-  subject { described_class.apply(parse(yaml)) }
+  subject { described_class.load(yaml) }
 
   describe 'project' do
     describe 'given a str' do

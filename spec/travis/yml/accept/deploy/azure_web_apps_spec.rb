@@ -1,5 +1,5 @@
 describe Travis::Yml, 'azure_web_apps' do
-  subject { described_class.apply(parse(yaml)) }
+  subject { described_class.load(yaml) }
 
   describe 'site' do
     describe 'given a str' do

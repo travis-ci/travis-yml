@@ -11,6 +11,7 @@ module Travis
           def define
             title 'Distribution'
             summary 'Build environment distribution'
+            see 'Virtualization environments': 'https://docs.travis-ci.com/user/reference/overview/#virtualization-environments'
 
             downcase
 

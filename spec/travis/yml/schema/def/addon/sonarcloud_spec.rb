@@ -4,13 +4,18 @@ describe Travis::Yml::Schema::Def::Addon::Sonarcloud do
   # it { puts JSON.pretty_generate(subject) }
 
   it do
-    should eq(
+    should include(
       '$id': :sonarcloud,
       title: 'Sonarcloud',
+      summary: kind_of(String),
+      see: kind_of(Hash),
       anyOf: [
         {
           type: :object,
           properties: {
+            enabled: {
+              type: :boolean
+            },
             organization: {
               type: :string
             },
@@ -19,11 +24,11 @@ describe Travis::Yml::Schema::Def::Addon::Sonarcloud do
             },
             github_token: {
               '$ref': '#/definitions/type/secure',
-              deprecated: 'not supported any more'
+              deprecated: 'setting a GitHub token is deprecated'
             },
             branches: {
               '$ref': '#/definitions/type/strs',
-              deprecated: 'not supported any more'
+              deprecated: 'setting a branch is deprecated'
             }
           },
           additionalProperties: false,

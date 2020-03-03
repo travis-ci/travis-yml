@@ -11,7 +11,7 @@ module Travis
           def define
             summary 'Whether to allow sudo access'
             example 'required'
-            deprecated 'this key has no effect anymore'
+            deprecated 'The key `sudo` has no effect anymore.'
 
             type :bool, normal: true
             type :str

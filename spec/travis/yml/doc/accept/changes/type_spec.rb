@@ -156,52 +156,52 @@ describe Travis::Yml::Doc::Change do
 
     describe 'a str' do
       let(:value) { 'foo' }
-      it { should serialize_to matrix: [foo: ''] }
+      it { should serialize_to jobs: [foo: ''] }
     end
 
     describe 'a seq of strs' do
       let(:value) { ['foo'] }
-      it { should serialize_to matrix: [foo: ''] }
+      it { should serialize_to jobs: [foo: ''] }
     end
 
     describe 'a var' do
       let(:value) { 'FOO=foo' }
-      it { should serialize_to matrix: [FOO: 'foo'] }
+      it { should serialize_to jobs: [FOO: 'foo'] }
     end
 
     describe 'an empty var' do
       let(:value) { 'FOO=' }
-      it { should serialize_to matrix: [FOO: ''] }
+      it { should serialize_to jobs: [FOO: ''] }
     end
 
     describe 'several vars' do
       let(:value) { 'FOO=foo BAR=bar' }
-      it { should serialize_to matrix: [{ FOO: 'foo', BAR: 'bar' }] }
+      it { should serialize_to jobs: [{ FOO: 'foo', BAR: 'bar' }] }
     end
 
     describe 'a seq of vars' do
       let(:value) { ['FOO=foo BAR=bar', 'BAZ=baz'] }
-      it { should serialize_to matrix: [{ FOO: 'foo', BAR: 'bar' }, { BAZ: 'baz' }] }
+      it { should serialize_to jobs: [{ FOO: 'foo', BAR: 'bar' }, { BAZ: 'baz' }] }
     end
 
     describe 'a secure' do
       let(:value) { { 'secure' => 'foo' } }
-      it { should serialize_to matrix: [secure: 'foo'] }
+      it { should serialize_to jobs: [secure: 'foo'] }
     end
 
     describe 'a seq of secures' do
       let(:value) { [secure: 'foo'] }
-      it { should serialize_to matrix: [secure: 'foo'] }
+      it { should serialize_to jobs: [secure: 'foo'] }
     end
 
     describe 'a map' do
       let(:value) { { 'FOO' => 'foo', 'BAR' => 'bar' } }
-      it { should serialize_to matrix: [{ FOO: 'foo', BAR: 'bar' }] }
+      it { should serialize_to jobs: [{ FOO: 'foo', BAR: 'bar' }] }
     end
 
     describe 'a seq of maps' do
       let(:value) { [{ 'FOO' => 'foo', 'BAR' => 'bar' }, { 'BAZ' => 'baz' }] }
-      it { should serialize_to matrix: [{ FOO: 'foo', BAR: 'bar' }, { BAZ: 'baz' }] }
+      it { should serialize_to jobs: [{ FOO: 'foo', BAR: 'bar' }, { BAZ: 'baz' }] }
     end
 
     describe 'a seq of mixed vars, maps, and secures' do
@@ -216,7 +216,7 @@ describe Travis::Yml::Doc::Change do
       end
 
       it do
-        should serialize_to matrix: [
+        should serialize_to jobs: [
           { FOO: 'foo', BAR: 'bar' },
           { BAZ: 'baz' },
           { BUZ: 'buz' },
@@ -227,47 +227,47 @@ describe Travis::Yml::Doc::Change do
     end
   end
 
-  describe 'env.matrix' do
+  describe 'env.jobs' do
     let(:schema) { Travis::Yml.expand['env'] }
 
     describe 'a str' do
-      let(:value) { { matrix: 'foo' } }
-      it { should serialize_to matrix: [foo: ''] }
+      let(:value) { { jobs: 'foo' } }
+      it { should serialize_to jobs: [foo: ''] }
     end
 
     describe 'a seq of strs' do
-      let(:value) { { matrix: ['foo'] } }
-      it { should serialize_to matrix: [foo: ''] }
+      let(:value) { { jobs: ['foo'] } }
+      it { should serialize_to jobs: [foo: ''] }
     end
 
     describe 'a var' do
-      let(:value) { { matrix: 'FOO=foo' } }
-      it { should serialize_to matrix: [FOO: 'foo'] }
+      let(:value) { { jobs: 'FOO=foo' } }
+      it { should serialize_to jobs: [FOO: 'foo'] }
     end
 
     describe 'a seq of vars' do
-      let(:value) { { matrix: ['FOO=foo', 'BAR=bar'] } }
-      it { should serialize_to matrix: [{ FOO: 'foo' }, { BAR: 'bar' }] }
+      let(:value) { { jobs: ['FOO=foo', 'BAR=bar'] } }
+      it { should serialize_to jobs: [{ FOO: 'foo' }, { BAR: 'bar' }] }
     end
 
     describe 'a secure' do
-      let(:value) { { matrix: { secure: 'foo' } } }
-      it { should serialize_to matrix: [secure: 'foo'] }
+      let(:value) { { jobs: { secure: 'foo' } } }
+      it { should serialize_to jobs: [secure: 'foo'] }
     end
 
     describe 'a seq of secures' do
-      let(:value) { { matrix: [secure: 'foo'] } }
-      it { should serialize_to matrix: [secure: 'foo'] }
+      let(:value) { { jobs: [secure: 'foo'] } }
+      it { should serialize_to jobs: [secure: 'foo'] }
     end
 
     describe 'a map' do
-      let(:value) { { matrix: { foo: 'foo' } } }
-      it { should serialize_to matrix: [foo: 'foo'] }
+      let(:value) { { jobs: { foo: 'foo' } } }
+      it { should serialize_to jobs: [foo: 'foo'] }
     end
 
     describe 'a seq of maps' do
-      let(:value) { { matrix: [foo: 'foo'] } }
-      it { should serialize_to matrix: [foo: 'foo'] }
+      let(:value) { { jobs: [foo: 'foo'] } }
+      it { should serialize_to jobs: [foo: 'foo'] }
     end
   end
 
@@ -275,28 +275,28 @@ describe Travis::Yml::Doc::Change do
     let(:schema) { Travis::Yml.expand['import'] }
 
     describe 'a str' do
-      let(:value) { 'foo' }
-      it { should serialize_to [source: 'foo'] }
+      let(:value) { 'foo.yml' }
+      it { should serialize_to [source: 'foo.yml'] }
     end
 
     describe 'a seq of strs' do
-      let(:value) { ['foo'] }
-      it { should serialize_to [source: 'foo'] }
+      let(:value) { ['foo.yml'] }
+      it { should serialize_to [source: 'foo.yml'] }
     end
 
     describe 'a map' do
-      let(:value) { { source: 'foo' } }
-      it { should serialize_to [source: 'foo'] }
+      let(:value) { { source: 'foo.yml' } }
+      it { should serialize_to [source: 'foo.yml'] }
     end
 
     describe 'seq of maps' do
-      let(:value) { [source: 'foo'] }
-      it { should serialize_to [source: 'foo'] }
+      let(:value) { [source: 'foo.yml'] }
+      it { should serialize_to [source: 'foo.yml'] }
     end
   end
 
-  describe 'matrix.include' do
-    let(:schema) { Travis::Yml.expand['matrix'] }
+  describe 'jobs.include' do
+    let(:schema) { Travis::Yml.expand['jobs'] }
 
     describe 'a str' do
       let(:value) { { include: ['foo'] } }
@@ -324,27 +324,27 @@ describe Travis::Yml::Doc::Change do
 
     describe 'a str' do
       let(:value) { 'foo' }
-      it { should serialize_to email: { recipients: ['foo'] } }
+      it { should serialize_to email: [recipients: ['foo']] }
     end
 
     describe 'a seq of strs' do
       let(:value) { ['foo'] }
-      it { should serialize_to email: { recipients: ['foo'] } }
+      it { should serialize_to email: [recipients: ['foo']] }
     end
 
     describe 'a map with a str' do
       let(:value) { { 'recipients' => 'foo' } }
-      it { should serialize_to email: { recipients: ['foo'] } }
+      it { should serialize_to email: [recipients: ['foo']] }
     end
 
     describe 'a map with a seq' do
       let(:value) { { 'recipients' => ['foo'] } }
-      it { should serialize_to email: { recipients: ['foo'] } }
+      it { should serialize_to email: [recipients: ['foo']] }
     end
 
     describe 'seq of maps' do
       let(:value) { ['recipients' => 'foo'] }
-      it { should serialize_to email: { recipients: ['foo'] } }
+      it { should serialize_to email: [recipients: ['foo']] }
     end
   end
 
@@ -353,27 +353,27 @@ describe Travis::Yml::Doc::Change do
 
     describe 'a str' do
       let(:value) { { email: 'foo' } }
-      it { should serialize_to email: { recipients: ['foo'] } }
+      it { should serialize_to email: [recipients: ['foo']] }
     end
 
     describe 'a seq of strs' do
       let(:value) { { email: ['foo'] } }
-      it { should serialize_to email: { recipients: ['foo'] } }
+      it { should serialize_to email: [recipients: ['foo']] }
     end
 
     describe 'a map with a str' do
       let(:value) { { email: { recipients: 'foo' } } }
-      it { should serialize_to email: { recipients: ['foo'] } }
+      it { should serialize_to email: [recipients: ['foo']] }
     end
 
     describe 'a map with a seq' do
       let(:value) { { email: { recipients: ['foo'] } } }
-      it { should serialize_to email: { recipients: ['foo'] } }
+      it { should serialize_to email: [recipients: ['foo']] }
     end
 
     describe 'seq of maps' do
       let(:value) { { email: [recipients: 'foo'] } }
-      it { should serialize_to email: { recipients: ['foo'] } }
+      it { should serialize_to email: [recipients: ['foo']] }
     end
   end
 

@@ -8,6 +8,9 @@ module Travis
           register :go
 
           def define
+            title 'Go'
+            summary 'Go language support'
+            see 'Building a Go Project': 'https://docs.travis-ci.com/user/languages/go/'
             aliases :golang
 
             matrix :go

@@ -4,7 +4,7 @@ describe Travis::Yml, 'os' do
   describe 'defaults to linux', defaults: true do
     yaml ''
     it { should serialize_to defaults }
-    it { should have_msg [:info, :os, :default, key: 'os', default: 'linux'] }
+    it { should have_msg [:info, :root, :default, key: 'os', default: 'linux'] }
   end
 
   describe 'given a string' do
@@ -44,6 +44,14 @@ describe Travis::Yml, 'os' do
       )
       it { should serialize_to language: 'ruby', os: ['linux'] }
       it { should have_msg [:warn, :os, :unknown_default, value: 'unknown', default: 'linux'] }
+    end
+
+    describe 'given deprecated linux-ppc64le' do
+      yaml %(
+        os: linux-ppc64le
+      )
+      it { should serialize_to os: ['linux-ppc64le'] }
+      # it { should have_msg [:warn, :os, :deprecated_value, value: 'linux-ppc64le', info: 'use os: linux, arch: ppc64le'] }
     end
   end
 
@@ -92,7 +100,7 @@ describe Travis::Yml, 'os' do
       language: objective-c
     )
     it { should serialize_to language: 'objective-c', os: ['osx'] }
-    it { should have_msg [:info, :os, :default, key: 'os', default: 'osx'] }
+    it { should have_msg [:info, :root, :default, key: 'os', default: 'osx'] }
   end
 
   describe 'an os unsupported by the language' do

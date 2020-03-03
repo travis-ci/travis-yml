@@ -1,5 +1,5 @@
 describe Travis::Yml, 'addons' do
-  subject { described_class.apply(parse(yaml)) }
+  subject { described_class.load(yaml) }
 
   describe 'drops an unknown addon' do
     yaml %(

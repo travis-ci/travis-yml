@@ -7,7 +7,7 @@ module Travis
     module Doc
       module Change
         class Keys < Base
-          INTERNAL = /^\W*(configured|result|fetching_failed|parsing_failed|merge_mode)\W*$/
+          INTERNAL = /^\W*(configured|result|fetching_failed|parsing_failed)\W*$/
 
           def apply
             apply? ? change(value) : value
@@ -29,7 +29,7 @@ module Travis
             def required(node)
               keys = schema.required.map { |key| ::Key.new(key) }
               keys = concat(keys, value.keys).uniq
-              build(keys.map { |key| [key, value[key] || none] }.to_h)
+              build(keys.map { |key| [key, value[key] || none] }.to_map)
             end
 
             def internal(value)

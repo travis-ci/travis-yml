@@ -5,8 +5,8 @@ module Travis
         class Static < Base
           attr_reader :name
 
-          def initialize(name, opts)
-            super(nil, opts)
+          def initialize(parent, name, opts)
+            super(parent, nil, nil, opts)
             @name = name
           end
 
@@ -19,15 +19,20 @@ module Travis
           end
 
           def title
-            name.to_s.capitalize
+            titleize(name)
           end
+          alias menu_title title
 
           def static?
             true
           end
 
-          def render
-            super("static/#{name}")
+          def publish?
+            true
+          end
+
+          def render(opts = {})
+            super("static/#{name}", opts.merge(layout: true))
           end
         end
       end

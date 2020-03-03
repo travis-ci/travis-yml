@@ -10,6 +10,7 @@ module Travis
 
           def define
             summary 'Compilers to set up'
+            see 'Choosing compilers to test against': 'https://docs.travis-ci.com/user/languages/c/#choosing-compilers-to-test-against'
             type :compiler
             export
           end

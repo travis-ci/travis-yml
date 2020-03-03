@@ -8,6 +8,9 @@ module Travis
           register :dart
 
           def define
+            title 'Dart'
+            summary 'Dart language support'
+            see 'Building a Dart Project': 'https://docs.travis-ci.com/user/languages/dart/'
             matrix :dart
             matrix :dart_task, to: :dart_tasks
 

@@ -56,9 +56,6 @@ describe Travis::Yml::Schema::Def::Deploy::Cloudfoundry do
               space: {
                 type: :string
               },
-              key: {
-                type: :string
-              },
               buildpack: {
                 type: :string
               },
@@ -70,6 +67,12 @@ describe Travis::Yml::Schema::Def::Deploy::Cloudfoundry do
               },
               app_name: {
                 type: :string
+              },
+              logout: {
+                type: :boolean
+              },
+              v3: {
+                type: :boolean
               }
             },
             additionalProperties: false,

@@ -86,7 +86,11 @@ module Travis
           end
 
           def missing?
-            blank?(value) && !false?(value)
+            value.nil? || map? && empty?
+          end
+
+          def empty?
+            value.respond_to?(:empty?) && value.empty?
           end
 
           def alert?
@@ -143,18 +147,20 @@ module Travis
           end
 
           def msg(level, code, args = {})
-            args = compact(line(args))
+            args = with_line(args)
             msg = [level, full_key, code]
             msg << args unless args.empty?
             root.msgs << msg unless root.msgs.include?(msg)
             self
           end
 
-          def line(args)
+          def with_line(args)
             return except(args, :line, :src) unless line?
-            args[:line] ||= key&.line
-            args[:src] ||= key&.src
-            compact(args)
+            args[:line] ||= key&.line rescue nil
+            args[:src] ||= key&.src rescue nil
+            args.delete(:line) unless args[:line]
+            args.delete(:src) unless args[:src]
+            args
           end
 
           # hmmm. msgs are stored in opts so they get propagated to other nodes

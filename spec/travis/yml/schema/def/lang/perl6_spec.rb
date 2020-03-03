@@ -4,24 +4,26 @@ describe Travis::Yml::Schema::Def::Perl6 do
   # it { puts JSON.pretty_generate(subject) }
 
   it do
-    should eq(
+    should include(
       '$id': :perl6,
-        title: 'Perl6',
-        type: :object,
-        properties: {
-          perl6: {
-            '$ref': '#/definitions/type/strs',
-            flags: [
-              :expand
-            ],
-            only: {
-              language: [
-                'perl6'
-              ]
-            }
+      title: 'Perl 6',
+      summary: kind_of(String),
+      see: kind_of(Hash),
+      type: :object,
+      properties: {
+        perl6: {
+          '$ref': '#/definitions/type/strs',
+          flags: [
+            :expand
+          ],
+          only: {
+            language: [
+              'perl6'
+            ]
           }
-        },
-        normal: true
+        }
+      },
+      normal: true
     )
   end
 end

@@ -27,7 +27,7 @@ module Travis
 
             def only
               support.fetch(:only, {}).each do |key, value|
-                next if supporting(key) & value == value # multios
+                next if supporting(key).&(value).size == 1 # multios
                 msg(key, supporting(key) - value)
               end
             end

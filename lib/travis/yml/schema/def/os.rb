@@ -23,7 +23,7 @@ module Travis
 
         ONLY = {
           windows: {
-            language: %i(c cpp go node_js rust shell)
+            language: %i(csharp go node_js powershell rust shell)
           }
         }
 
@@ -39,6 +39,7 @@ module Travis
           def define
             title 'Operating systems'
             summary 'Build environment operating systems'
+            see 'Build Environment Overview': 'https://docs.travis-ci.com/user/reference/overview/'
 
             normal
             types :os
@@ -59,6 +60,7 @@ module Travis
             value   :linux,   alias: ALIAS[:linux],   except: EXCEPT[:linux]
             value   :osx,     alias: ALIAS[:osx],     except: EXCEPT[:osx]
             value   :windows, alias: ALIAS[:windows], only:   ONLY[:windows]
+            value   :'linux-ppc64le' #, deprecated: 'use os: linux, arch: ppc64le'
 
             export
           end

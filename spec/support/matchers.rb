@@ -1,6 +1,8 @@
 require 'support/matchers/deprecate'
 require 'support/matchers/expand'
+require 'support/matchers/generate_msg'
 require 'support/matchers/have_aliases'
+require 'support/matchers/have_api_request'
 require 'support/matchers/have_msg'
 require 'support/matchers/have_attr'
 require 'support/matchers/have_opt'

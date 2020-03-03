@@ -4,9 +4,11 @@ describe Travis::Yml::Schema::Def::Shell do
   # it { puts JSON.pretty_generate(subject) }
 
   it do
-    should eq(
+    should include(
       '$id': :shell,
         title: 'Shell',
+        summary: kind_of(String),
+        see: kind_of(Hash),
         type: :object,
         normal: true
     )

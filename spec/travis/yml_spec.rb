@@ -18,7 +18,7 @@ describe Travis::Yml do
 
   describe 'expand_keys' do
     it do
-      expect(described_class.expand_keys).to eq %i(
+      expect(described_class.expand_keys.sort).to eq %i(
         arch
         compiler
         crystal
@@ -28,11 +28,11 @@ describe Travis::Yml do
         dotnet
         elixir
         elm
-        env
         gemfile
         ghc
         go
         haxe
+        hhvm
         jdk
         julia
         mono
@@ -83,8 +83,8 @@ describe Travis::Yml do
       it { expect(node.keys).to include 'addons' }
     end
 
-    describe 'matrix_entry' do
-      let(:node) { schema.map['matrix'][0]['include'][0].schema }
+    describe 'jobs_entry' do
+      let(:node) { schema.map['jobs'][0]['include'][0].schema }
       it { expect(node.keys).to include 'language' }
       it { expect(node.keys).to include 'rvm' }
       it { expect(node.keys).to include 'addons' }
@@ -101,14 +101,14 @@ describe Travis::Yml do
   describe 'msg' do
     subject { described_class.msg(msg) }
 
-    describe 'alias' do
-      let(:msg) { [:info, :key, :alias, type: :key, alias: 'rvm', obj: 'ruby'] }
-      it { should eq '[info] on key: rvm is an alias for ruby, using ruby (key)' }
+    describe 'alias_key' do
+      let(:msg) { [:info, :key, :alias_key, alias: 'rvm', key: 'ruby'] }
+      it { should eq '[info] on key: the key rvm is an alias for ruby, using ruby' }
     end
 
-    describe 'cast' do
-      let(:msg) { [:info, :key, :cast, given_value: 'foo', given_type: :str, value: true, type: :bool] }
-      it { should eq '[info] on key: casting value "foo" (:str) to true (:bool)' }
+    describe 'alias_value' do
+      let(:msg) { [:info, :key, :alias_value, alias: 'rvm', value: 'ruby'] }
+      it { should eq '[info] on key: the value rvm is an alias for ruby, using ruby' }
     end
 
     describe 'default' do
@@ -194,6 +194,11 @@ describe Travis::Yml do
     describe 'invalid_format' do
       let(:msg) { [:info, :key, :invalid_format, value: 'value'] }
       it { should eq '[info] on key: dropping invalid format value' }
+    end
+
+    describe 'key error' do
+      let(:msg) { [:info, :key, :unknown_value, foo: :bar] }
+      it { should eq 'unable to generate message (level: info, key: key, code: unknown_value, args: {:foo=>:bar})' }
     end
   end
 

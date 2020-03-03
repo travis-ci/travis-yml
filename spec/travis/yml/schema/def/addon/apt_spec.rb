@@ -4,10 +4,11 @@ describe Travis::Yml::Schema::Def::Addon::Apt do
   # it { puts JSON.pretty_generate(subject) }
 
   it do
-    should eq(
+    should include(
       '$id': :apt,
       title: 'Apt',
-      summary: 'Install APT packages and sources',
+      summary: kind_of(String),
+      # see: kind_of(Hash), # ?
       normal: true,
       anyOf: [
         {

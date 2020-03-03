@@ -1,11 +1,14 @@
 # frozen_string_literal: true
-require 'obj'
+require 'logger'
 require 'memoize'
+require 'obj'
 require 'travis/yml/helper/obj'
 
 Obj.include Memoize, Travis::Yml::Helper::Obj
 
 require 'json'
+require 'travis/yml/config'
+require 'travis/yml/configs'
 require 'travis/yml/errors'
 require 'travis/yml/doc'
 require 'travis/yml/docs'
@@ -40,14 +43,16 @@ module Travis
     # representations.
 
     MSGS = {
-      alias:             '%{alias} is an alias for %{obj}, using %{obj} (%{type})',
-      cast:              'casting value %<given_value>p (%<given_type>p) to %<value>p (%<type>p)',
+      alias_key:         'the key %{alias} is an alias for %{key}, using %{key}',
+      alias_value:       'the value %{alias} is an alias for %{value}, using %{value}',
+      overwrite:         'both %{key} and %{other} given. %{key} overwrites %{other}',
       default:           'missing %{key}, using the default %<default>p',
       deprecated:        'deprecated: %{info}',
       deprecated_key:    'deprecated key: %<key>p (%{info})',
       deprecated_value:  'deprecated value: %<value>p (%{info})',
       downcase:          'using lower case of %{value}',
       duplicate:         'duplicate values: %{values}',
+      duplicate_key:     'duplicate key: %{key}',
       edge:              'this key is experimental and might change or be removed',
       flagged:           'please email support@travis-ci.com to enable %<key>p',
       required:          'missing required key %<key>p',
@@ -69,10 +74,26 @@ module Travis
       invalid_format:    'dropping invalid format %{value}',
       invalid_condition: 'invalid condition: %{condition}',
       invalid_env_var:   'invalid env var: %{var}',
+      skip_job:          'skipping job #%{number}, condition does not match: %{condition}',
+      skip_exclude:      'skipping jobs exclude rule #%{number}, condition does not match: %{condition}',
+      skip_import:       'skipping import %{source}, condition does not match: %{condition}',
+      unknown_import:    'import not found: %{source}'
     }
 
     class << self
       include Memoize
+
+      def metrics
+        @metrics ||= Travis::Metrics.setup(config.metrics.to_h, logger)
+      end
+
+      def config
+        @config ||= Config.load
+      end
+
+      def logger
+        @logger ||= Logger.new($stdout)
+      end
 
       def load(parts, opts = {})
         apply(Parts.load(parts), opts)
@@ -93,14 +114,19 @@ module Travis
       end
 
       def apply(value, opts = {})
-        unexpected_format! unless value.is_a?(Hash)
-        opts = OPTS.merge(opts) unless ENV['env'] == 'test'
+        invalid_format unless value.is_a?(Hash)
+        opts = OPTS.merge(opts) unless ENV['ENV'] == 'test'
         node = Doc.apply(expand, value, opts)
         node
       end
 
       def matrix(config)
-        Matrix.new(config)
+        config, data = config.values_at(:config, :data) if config[:config]
+        Matrix.new(config, data)
+      end
+
+      def configs(*args)
+        Configs.new(*args)
       end
 
       def msg(msg)
@@ -109,7 +135,10 @@ module Travis
         msg = msg % args if args
         msg = '[%s] on %s: %s' % [level, key, msg]
         msg
-      # rescue KeyError => e
+      rescue KeyError => e
+        msg = "unable to generate message (level: %s, key: %s, code: %s, args: %s)" % [level, key, code, args]
+        Raven.capture_message(msg) if defined?(Raven)
+        msg
       end
 
       def keys
@@ -145,11 +174,11 @@ module Travis
       memoize :r_keys
 
       def expand_keys
-        expand.expand_keys
+        expand.expand_keys - [:jobs] # TODO
       end
 
-      def unexpected_format!
-        raise UnexpectedConfigFormat, 'Input must be a hash'
+      def invalid_format
+        raise InvalidConfigFormat, 'Input must parse into a hash'
       end
 
       def bench(key = nil)

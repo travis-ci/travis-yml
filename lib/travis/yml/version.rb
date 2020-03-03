@@ -2,7 +2,7 @@
 module Travis
   module Yml
     # version of this gem
-    VERSION = '0.0.1'
+    VERSION = '1.0.0'
 
     # version of the specification (what is specified)
     SPEC_VERSION = '1.0.0'

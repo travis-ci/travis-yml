@@ -73,23 +73,50 @@ describe Travis::Yml::Doc::Cast do
         it { expect(cast.apply).to be true }
       end
 
+      describe 'unknown' do
+        let(:value) { 'unknown' }
+        it { expect(cast.apply).to eq 'unknown' }
+      end
+
       describe 'any string' do
         let(:value) { 'foo' }
         it { expect(cast.apply).to eq 'foo' }
       end
 
-      %w(ture tru true# true/ .true true;).each do |str|
+      %w(true# true/ .true true;).each do |str|
         describe str do
           let(:value) { str }
+          before { cast.apply }
           it { expect(cast.apply).to be true }
+          it { expect(cast.msgs).to eq [[:clean_value, original: str, value: true]] }
         end
       end
 
-      %w(fakse fals false, false` falsedc flase).each do |str|
+      %w(ture tru).each do |str|
         describe str do
           let(:value) { str }
-          it { expect(cast.apply).to be false }
+          before { cast.apply }
+          it { expect(cast.apply).to be true }
+          it { expect(cast.msgs).to eq [[:find_value, original: str, value: true]] }
         end
+      end
+
+      %w(fakse fals falsedc flase).each do |str|
+        describe str do
+          let(:value) { str }
+          before { cast.apply }
+          it { expect(cast.apply).to be false }
+          it { expect(cast.msgs).to eq [[:find_value, original: str, value: false]] }
+        end
+
+      %w(false, false`).each do |str|
+        describe str do
+          let(:value) { str }
+          before { cast.apply }
+          it { expect(cast.apply).to be false }
+          it { expect(cast.msgs).to eq [[:clean_value, original: str, value: false]] }
+        end
+      end
       end
     end
   end

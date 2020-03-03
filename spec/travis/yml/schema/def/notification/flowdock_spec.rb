@@ -4,25 +4,32 @@ describe Travis::Yml::Schema::Def::Notification::Flowdock, 'structure' do
   # it { puts JSON.pretty_generate(subject) }
 
   it do
-    should eq(
+    should include(
       '$id': :flowdock,
       title: 'Flowdock',
       normal: true,
+      see: kind_of(Hash),
       anyOf: [
         {
           type: :object,
           properties: {
             enabled: {
-              type: :boolean
+              type: :boolean,
+              summary: kind_of(String)
             },
             disabled: {
-              type: :boolean
+              type: :boolean,
+              summary: kind_of(String)
             },
             api_token: {
-             '$ref': '#/definitions/type/secure'
+             '$ref': '#/definitions/type/secure',
+              summary: kind_of(String)
             },
             template: {
               '$ref': '#/definitions/notification/templates'
+            },
+            if: {
+              '$ref': '#/definitions/type/condition'
             },
             on_success: {
               '$ref': '#/definitions/notification/frequency'

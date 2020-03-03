@@ -1,7 +1,20 @@
 describe Travis::Yml, 'pages' do
-  subject { described_class.apply(parse(yaml)) }
+  subject { described_class.load(yaml) }
 
-  describe 'github_token' do
+  describe 'token' do
+    describe 'given a secure' do
+      yaml %(
+        deploy:
+          provider: pages
+          token:
+            secure: secure
+      )
+      it { should serialize_to deploy: [provider: 'pages', token: { secure: 'secure' }] }
+      it { should_not have_msg }
+    end
+  end
+
+  describe 'github_token (alias)' do
     describe 'given a secure' do
       yaml %(
         deploy:
@@ -9,8 +22,21 @@ describe Travis::Yml, 'pages' do
           github_token:
             secure: secure
       )
-      it { should serialize_to deploy: [provider: 'pages', github_token: { secure: 'secure' }] }
-      it { should_not have_msg }
+      it { should serialize_to deploy: [provider: 'pages', token: { secure: 'secure' }] }
+      it { should have_msg [:info, :deploy, :alias_key, alias: 'github_token', key: 'token', provider: 'pages'] }
+    end
+  end
+
+  describe 'github-token (dashed alias)' do
+    describe 'given a secure' do
+      yaml %(
+        deploy:
+          provider: pages
+          github-token:
+            secure: secure
+      )
+      it { should serialize_to deploy: [provider: 'pages', token: { secure: 'secure' }] }
+      it { should have_msg [:info, :deploy, :alias_key, alias: 'github-token', key: 'token', provider: 'pages'] }
     end
   end
 
@@ -110,15 +136,27 @@ describe Travis::Yml, 'pages' do
     end
   end
 
-  describe 'github_url' do
+  describe 'url' do
+    describe 'given a str' do
+      yaml %(
+        deploy:
+          provider: pages
+          url: str
+      )
+      it { should serialize_to deploy: [provider: 'pages', url: 'str'] }
+      it { should_not have_msg }
+    end
+  end
+
+  describe 'github_url (alias)' do
     describe 'given a str' do
       yaml %(
         deploy:
           provider: pages
           github_url: str
       )
-      it { should serialize_to deploy: [provider: 'pages', github_url: 'str'] }
-      it { should_not have_msg }
+      it { should serialize_to deploy: [provider: 'pages', url: 'str'] }
+      it { should have_msg [:info, :deploy, :alias_key, alias: 'github_url', key: 'url', provider: 'pages'] }
     end
   end
 

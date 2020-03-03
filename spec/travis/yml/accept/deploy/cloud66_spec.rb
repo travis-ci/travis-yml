@@ -1,5 +1,5 @@
 describe Travis::Yml, 'cloud66' do
-  subject { described_class.apply(parse(yaml)) }
+  subject { described_class.load(yaml) }
 
   describe 'redeployment_hook' do
     describe 'given a str' do

@@ -51,9 +51,6 @@ describe Travis::Yml::Schema::Def::Deploy::Cloudformation do
               create_timeout: {
                 type: :number
               },
-              session_token: {
-                type: :string
-              },
               parameters: {
                 '$ref': '#/definitions/type/strs'
               },

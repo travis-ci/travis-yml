@@ -10,11 +10,15 @@ module Travis
             register :sonarcloud
 
             def define
+              summary 'Sonarcloud settings'
+              see 'Using SonarCloud with Travis CI': 'https://docs.travis-ci.com/user/sonarcloud/'
+
+              map :enabled,      to: :bool
               map :organization, to: :str
               map :token,        to: :secure
 
-              map :github_token, to: :secure, deprecated: 'not supported any more'
-              map :branches,     to: :seq,    deprecated: 'not supported any more'
+              map :github_token, to: :secure, deprecated: 'setting a GitHub token is deprecated'
+              map :branches,     to: :seq,    deprecated: 'setting a branch is deprecated'
             end
           end
         end

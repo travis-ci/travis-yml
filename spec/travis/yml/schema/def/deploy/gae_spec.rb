@@ -47,25 +47,30 @@ describe Travis::Yml::Schema::Def::Deploy::Gae do
                 type: :string
               },
               config: {
-                type: :string
+                '$ref': '#/definitions/type/strs',
               },
               version: {
                 type: :string
               },
-              no_promote: {
-                type: :boolean
-              },
-              no_stop_previous_version: {
-                type: :boolean
-              },
-              default: {
-                type: :boolean
-              },
               verbosity: {
                 type: :string
               },
-              docker_build: {
-                type: :string
+              promote: {
+                type: :boolean
+              },
+              no_promote: {
+                type: :boolean,
+                deprecated: 'use promote: false'
+              },
+              stop_previous_version: {
+                type: :boolean
+              },
+              no_stop_previous_version: {
+                type: :boolean,
+                deprecated: 'use stop_previous_version: false'
+              },
+              install_sdk: {
+                type: :boolean
               }
             },
             additionalProperties: false,

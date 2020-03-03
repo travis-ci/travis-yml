@@ -25,12 +25,19 @@ describe Travis::Yml::Schema::Def::Deploy::Npm do
                 ]
               },
               access: {
-                type: :string
+                type: :string,
+                enum: [
+                  'public',
+                  'private'
+                ]
               },
               src: {
                 type: :string
               },
               tag: {
+                type: :string
+              },
+              auth_method: {
                 type: :string
               },
               provider: {

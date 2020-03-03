@@ -6,7 +6,7 @@ describe Travis::Yml, 'branches' do
       branches: true
     )
     it { should serialize_to branches: { only: ['true'] } }
-    it { should have_msg [:info, :'branches.only', :cast, given_value: true, given_type: :bool, value: 'true', type: :str] }
+    it { should_not have_msg }
   end
 
   describe 'given a string' do
@@ -14,6 +14,7 @@ describe Travis::Yml, 'branches' do
       branches: master
     )
     it { should serialize_to branches: { only: ['master'] } }
+    it { should_not have_msg }
   end
 
   describe 'given a seq' do
@@ -23,6 +24,7 @@ describe Travis::Yml, 'branches' do
     )
     let(:value) { { branches: [only: 'master'] } }
     it { should serialize_to branches: { only: ['master'] } }
+    it { should_not have_msg }
   end
 
   describe 'given a typo on the key' do
@@ -30,6 +32,7 @@ describe Travis::Yml, 'branches' do
       barnches: master
     )
     it { should serialize_to branches: { only: ['master'] } }
+    it { should have_msg [:warn, :root, :find_key, original: 'barnches', key: 'branches'] }
   end
 
   describe 'only' do
@@ -39,6 +42,7 @@ describe Travis::Yml, 'branches' do
           only: master
       )
       it { should serialize_to branches: { only: ['master'] } }
+      it { should_not have_msg }
     end
 
     describe 'given a seq' do
@@ -48,6 +52,7 @@ describe Travis::Yml, 'branches' do
           - master
       )
       it { should serialize_to branches: { only: ['master'] } }
+      it { should_not have_msg }
     end
 
     describe 'given a seq of hashes' do
@@ -56,6 +61,7 @@ describe Travis::Yml, 'branches' do
         - only: master
       )
       it { should serialize_to branches: { only: ['master'] } }
+      it { should have_msg [:warn, :branches, :unexpected_seq, value: { only: 'master' }] }
     end
 
     describe 'given a typo on the key' do
@@ -64,6 +70,7 @@ describe Travis::Yml, 'branches' do
           olny: master
       )
       it { should serialize_to branches: { only: ['master'] } }
+      it { should have_msg [:warn, :branches, :find_key, original: 'olny', key: 'only'] }
     end
   end
 
@@ -74,6 +81,7 @@ describe Travis::Yml, 'branches' do
           except: master
       )
       it { should serialize_to branches: { except: ['master'] } }
+      it { should_not have_msg }
     end
 
     describe 'given a seq' do
@@ -83,6 +91,7 @@ describe Travis::Yml, 'branches' do
           - master
       )
       it { should serialize_to branches: { except: ['master'] } }
+      it { should_not have_msg }
     end
 
     describe 'given a seq of hashes' do
@@ -91,6 +100,7 @@ describe Travis::Yml, 'branches' do
           - except: master
       )
       it { should serialize_to branches: { except: ['master'] } }
+      it { should have_msg [:warn, :branches, :unexpected_seq, value: { except: 'master' }] }
     end
   end
 
@@ -100,7 +110,7 @@ describe Travis::Yml, 'branches' do
         exclude: master
     )
     it { should serialize_to branches: { except: ['master'] } }
-    it { should have_msg [:info, :branches, :alias, type: :key, alias: 'exclude', obj: 'except'] }
+    it { should have_msg [:info, :branches, :alias_key, alias: 'exclude', key: 'except'] }
   end
 
   describe 'given an unknown key' do

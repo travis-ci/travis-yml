@@ -4,9 +4,11 @@ describe Travis::Yml::Schema::Def::Addon::Homebrew do
    # it { puts JSON.pretty_generate(subject) }
 
   it do
-    should eq(
+    should include(
       '$id': :homebrew,
       title: 'Homebrew',
+      summary: kind_of(String),
+      see: kind_of(Hash),
       normal: true,
       anyOf: [
         {
@@ -25,7 +27,14 @@ describe Travis::Yml::Schema::Def::Addon::Homebrew do
               '$ref': '#/definitions/type/strs'
             },
             brewfile: {
-              type: :string
+              anyOf: [
+                {
+                  type: :boolean
+                },
+                {
+                  type: :string
+                }
+              ]
             }
           },
           additionalProperties: false,

@@ -5,10 +5,11 @@ describe Travis::Yml::Schema::Def::Oss do
     # it { puts JSON.pretty_generate(subject) }
 
     it do
-      should eq(
+      should include(
         '$id': :oss,
         title: 'Operating systems',
         summary: 'Build environment operating systems',
+        see: kind_of(Hash),
         anyOf: [
           {
             type: :array,
@@ -36,7 +37,8 @@ describe Travis::Yml::Schema::Def::Oss do
         enum: [
           'linux',
           'osx',
-          'windows'
+          'windows',
+          'linux-ppc64le'
         ],
         defaults: [
           {
@@ -65,10 +67,10 @@ describe Travis::Yml::Schema::Def::Oss do
             value: 'windows',
             only: {
               language: [
-                'c',
-                'cpp',
+                'csharp',
                 'go',
                 'node_js',
+                'powershell',
                 'rust',
                 'shell',
               ]
@@ -87,6 +89,9 @@ describe Travis::Yml::Schema::Def::Oss do
               ]
             }
           },
+          # 'linux-ppc64le': {
+          #   deprecated: 'use os: linux, arch: ppc64le'
+          # },
           osx: {
             aliases: [
               'mac',
@@ -112,10 +117,10 @@ describe Travis::Yml::Schema::Def::Oss do
             ],
             only: {
               language: [
-                'c',
-                'cpp',
+                'csharp',
                 'go',
                 'node_js',
+                'powershell',
                 'rust',
                 'shell',
               ]

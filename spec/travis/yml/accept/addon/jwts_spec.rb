@@ -1,5 +1,5 @@
 describe Travis::Yml, 'addon: jwts' do
-  subject { described_class.apply(parse(yaml)) }
+  subject { described_class.load(yaml) }
 
   describe 'given a str' do
     yaml %(
@@ -7,7 +7,7 @@ describe Travis::Yml, 'addon: jwts' do
         jwt: foo
     )
     it { should serialize_to addons: { jwt: ['foo'] } }
-    it { should_not have_msg }
+    it { should have_msg [:warn, :addons, :deprecated_key, key: 'jwt', info: 'Discontinued as of April 17, 2018'] }
   end
 
   describe 'given a secure' do
@@ -17,7 +17,6 @@ describe Travis::Yml, 'addon: jwts' do
           secure: foo
     )
     it { should serialize_to addons: { jwt: [secure: 'foo'] } }
-    it { should_not have_msg }
   end
 
   describe 'given a seq of strs' do
@@ -27,7 +26,6 @@ describe Travis::Yml, 'addon: jwts' do
         - foo
     )
     it { should serialize_to addons: { jwt: ['foo'] } }
-    it { should_not have_msg }
   end
 
   describe 'given a seq of secures' do
@@ -37,6 +35,5 @@ describe Travis::Yml, 'addon: jwts' do
         - secure: foo
     )
     it { should serialize_to addons: { jwt: [secure: 'foo'] } }
-    it { should_not have_msg }
   end
 end

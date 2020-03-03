@@ -25,6 +25,10 @@ module Travis
             self.types.concat(types)
           end
 
+          def values(value)
+            types.each { |type| type.value(*value) }
+          end
+
           def expand_keys
             super + types.map(&:expand_keys).flatten
           end

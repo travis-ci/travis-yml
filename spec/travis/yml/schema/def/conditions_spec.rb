@@ -18,15 +18,13 @@ describe Travis::Yml::Schema::Def::Conditions do
     subject { except(Travis::Yml.schema[:definitions][:type][:condition], :description) }
 
     it do
-      should eq(
+      should include(
         '$id': :condition,
         type: :string,
         title: 'If',
-        summary: 'Condition to determine whether or not a build, stage, or job should be run',
+        summary: kind_of(String),
         example: 'branch = master',
-        see: {
-          'Conditional Builds, Stages, and Jobs': 'https://docs.travis-ci.com/user/conditional-builds-stages-jobs/'
-        }
+        see: kind_of(Hash)
       )
     end
   end

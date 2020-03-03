@@ -4,19 +4,22 @@ describe Travis::Yml::Schema::Def::Notification::Irc, 'structure' do
   # it { puts JSON.pretty_generate(subject) }
 
   it do
-    should eq(
+    should include(
       '$id': :irc,
       title: 'IRC',
       normal: true,
+      see: kind_of(Hash),
       anyOf: [
         {
           type: :object,
           properties: {
             enabled: {
-              type: :boolean
+              type: :boolean,
+              summary: kind_of(String)
             },
             disabled: {
-              type: :boolean
+              type: :boolean,
+              summary: kind_of(String)
             },
             channels: {
               anyOf: [
@@ -35,28 +38,38 @@ describe Travis::Yml::Schema::Def::Notification::Irc, 'structure' do
                   '$ref': '#/definitions/type/secure',
                   strict: false
                 },
-              ]
+              ],
+              summary: kind_of(String)
             },
             channel_key: {
-              '$ref': '#/definitions/type/secure'
+              '$ref': '#/definitions/type/secure',
+              summary: kind_of(String)
             },
             password: {
-             '$ref': '#/definitions/type/secure'
+             '$ref': '#/definitions/type/secure',
+              summary: kind_of(String)
             },
             nickserv_password: {
-             '$ref': '#/definitions/type/secure'
+             '$ref': '#/definitions/type/secure',
+              summary: kind_of(String)
             },
             nick: {
-             '$ref': '#/definitions/type/secure'
+             '$ref': '#/definitions/type/secure',
+              summary: kind_of(String)
             },
             use_notice: {
-              type: :boolean
+              type: :boolean,
+              summary: kind_of(String)
             },
             skip_join: {
-              type: :boolean
+              type: :boolean,
+              summary: kind_of(String)
             },
             template: {
               '$ref': '#/definitions/notification/templates'
+            },
+            if: {
+              '$ref': '#/definitions/type/condition'
             },
             on_success: {
               '$ref': '#/definitions/notification/frequency'

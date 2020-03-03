@@ -9,6 +9,9 @@ module Travis
           register :groovy
 
           def define
+            title 'Groovy'
+            summary 'Groovy language support'
+            see 'Building a Groovy Project': 'https://docs.travis-ci.com/user/languages/groovy/'
             matrix :jdk, to: :jdks
           end
         end

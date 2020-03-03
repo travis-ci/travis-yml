@@ -8,6 +8,10 @@ module Travis
         class Scalar < Node
           opts %i(defaults enum strict values)
 
+          def matches?(*)
+            true
+          end
+
           def default(value, opts = {})
             value = value.to_s if str?
             value = { value: value }.merge(opts)
@@ -28,6 +32,7 @@ module Travis
           def value(*objs)
             objs = objs.flatten
             opts = objs.last.is_a?(Hash) ? objs.pop : {}
+            objs = objs.select { |obj| matches?(obj) }
             objs = objs.map { |obj| { value: obj }.merge(opts) }
 
             attrs[:enum] ||= []
@@ -71,6 +76,10 @@ module Travis
           def type
             :bool
           end
+
+          def matches?(obj)
+            obj.is_a?(TrueClass) || obj.is_a?(FalseClass)
+          end
         end
 
         class Num < Scalar
@@ -78,6 +87,10 @@ module Travis
 
           def type
             :num
+          end
+
+          def matches?(obj)
+            obj.is_a?(Numeric)
           end
         end
 
@@ -88,6 +101,10 @@ module Travis
 
           def type
             :str
+          end
+
+          def matches?(obj)
+            obj.is_a?(String) || obj.is_a?(Symbol)
           end
 
           def downcase(*)

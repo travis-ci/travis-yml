@@ -8,6 +8,9 @@ module Travis
           register :crystal
 
           def define
+            title 'Crystal'
+            summary 'Crystal language support'
+            see 'Building a Crystal Project': 'https://docs.travis-ci.com/user/languages/crystal/'
             matrix :crystal
           end
         end

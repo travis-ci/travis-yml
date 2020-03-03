@@ -1,5 +1,5 @@
 describe Travis::Yml, 'haskell' do
-  subject { described_class.apply(parse(yaml)) }
+  subject { described_class.load(yaml) }
   
   describe 'ghc' do
     describe 'given a seq of strs' do

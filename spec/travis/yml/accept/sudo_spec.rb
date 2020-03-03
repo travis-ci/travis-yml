@@ -1,5 +1,5 @@
 describe Travis::Yml, 'sudo' do
-  subject { described_class.apply(parse(yaml)) }
+  subject { described_class.load(yaml) }
 
   describe 'no default' do
     yaml %(
@@ -14,7 +14,7 @@ describe Travis::Yml, 'sudo' do
       sudo: true
     )
     it { should serialize_to sudo: true }
-    it { should have_msg [:warn, :root, :deprecated_key, key: 'sudo', info: 'this key has no effect anymore'] }
+    it { should have_msg [:warn, :root, :deprecated_key, key: 'sudo', info: 'The key `sudo` has no effect anymore.'] }
   end
 
   describe 'given the string on' do
@@ -22,7 +22,6 @@ describe Travis::Yml, 'sudo' do
       sudo: on
     )
     it { should serialize_to sudo: true }
-    it { should have_msg [:warn, :root, :deprecated_key, key: 'sudo', info: 'this key has no effect anymore'] }
   end
 
   describe 'given the string yes' do
@@ -30,7 +29,6 @@ describe Travis::Yml, 'sudo' do
       sudo: yes
     )
     it { should serialize_to sudo: true }
-    it { should have_msg [:warn, :root, :deprecated_key, key: 'sudo', info: 'this key has no effect anymore'] }
   end
 
   describe 'given the string enabled' do
@@ -38,7 +36,6 @@ describe Travis::Yml, 'sudo' do
       sudo: enabled
     )
     it { should serialize_to sudo: true }
-    it { should have_msg [:warn, :root, :deprecated_key, key: 'sudo', info: 'this key has no effect anymore'] }
   end
 
   describe 'given the string required' do
@@ -46,7 +43,6 @@ describe Travis::Yml, 'sudo' do
       sudo: required
     )
     it { should serialize_to sudo: true }
-    it { should have_msg [:warn, :root, :deprecated_key, key: 'sudo', info: 'this key has no effect anymore'] }
   end
 
   describe 'given false' do
@@ -54,7 +50,6 @@ describe Travis::Yml, 'sudo' do
       sudo: false
     )
     it { should serialize_to sudo: false }
-    it { should have_msg [:warn, :root, :deprecated_key, key: 'sudo', info: 'this key has no effect anymore'] }
   end
 
   describe 'given the string off' do
@@ -62,7 +57,6 @@ describe Travis::Yml, 'sudo' do
       sudo: off
     )
     it { should serialize_to sudo: false }
-    it { should have_msg [:warn, :root, :deprecated_key, key: 'sudo', info: 'this key has no effect anymore'] }
   end
 
   describe 'given the string no' do
@@ -70,7 +64,6 @@ describe Travis::Yml, 'sudo' do
       sudo: no
     )
     it { should serialize_to sudo: false }
-    it { should have_msg [:warn, :root, :deprecated_key, key: 'sudo', info: 'this key has no effect anymore'] }
   end
 
   describe 'given the string disabled' do
@@ -78,7 +71,6 @@ describe Travis::Yml, 'sudo' do
       sudo: disabled
     )
     it { should serialize_to sudo: false }
-    it { should have_msg [:warn, :root, :deprecated_key, key: 'sudo', info: 'this key has no effect anymore'] }
   end
 
   describe 'given the string not required' do
@@ -86,6 +78,5 @@ describe Travis::Yml, 'sudo' do
       sudo: 'not required'
     )
     it { should serialize_to sudo: false }
-    it { should have_msg [:warn, :root, :deprecated_key, key: 'sudo', info: 'this key has no effect anymore'] }
   end
 end

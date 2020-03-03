@@ -1,5 +1,5 @@
 describe Travis::Yml, 'pypi' do
-  subject { described_class.apply(parse(yaml)) }
+  subject { described_class.load(yaml) }
 
   describe 'username' do
     describe 'given a secure' do
@@ -33,7 +33,7 @@ describe Travis::Yml, 'pypi' do
             secure: str
       )
       it { should serialize_to deploy: [provider: 'pypi', username: { secure: 'str' }] }
-      it { should have_msg [:info, :deploy, :alias, type: :key, alias: 'user', obj: 'username', provider: 'pypi'] }
+      it { should have_msg [:info, :deploy, :alias_key, alias: 'user', key: 'username', provider: 'pypi'] }
     end
   end
 
@@ -46,19 +46,6 @@ describe Travis::Yml, 'pypi' do
             secure: secure
       )
       it { should serialize_to deploy: [provider: 'pypi', password: { secure: 'secure' }] }
-      it { should_not have_msg }
-    end
-  end
-
-  describe 'api_key' do
-    describe 'given a secure' do
-      yaml %(
-        deploy:
-          provider: pypi
-          api_key:
-            secure: secure
-      )
-      it { should serialize_to deploy: [provider: 'pypi', api_key: { secure: 'secure' }] }
       it { should_not have_msg }
     end
   end

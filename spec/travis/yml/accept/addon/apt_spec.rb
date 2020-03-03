@@ -1,5 +1,5 @@
 describe Travis::Yml, 'addon: apt' do
-  subject { described_class.apply(parse(yaml)) }
+  subject { described_class.load(yaml) }
 
   describe 'given a str' do
     yaml %(
@@ -51,7 +51,7 @@ describe Travis::Yml, 'addon: apt' do
             package: str
       )
       it { should serialize_to addons: { apt: { packages: ['str'] } } }
-      it { should have_msg [:info, :'addons.apt', :alias, type: :key, alias: 'package', obj: 'packages'] }
+      it { should have_msg [:info, :'addons.apt', :alias_key, alias: 'package', key: 'packages'] }
     end
 
     describe 'given a nested array (happens when using aliases)' do
@@ -85,7 +85,7 @@ describe Travis::Yml, 'addon: apt' do
       it { should_not have_msg }
     end
 
-    describe 'given seq references including seq references on matrix.include.addons.apt.packages (yes, people do this)' do
+    describe 'given seq references including seq references on jobs.include.addons.apt.packages (yes, people do this)' do
       yaml %(
         one: &one
           - one
@@ -93,7 +93,7 @@ describe Travis::Yml, 'addon: apt' do
         two: &two
           - *one
 
-        matrix:
+        jobs:
           include:
           - addons:
               apt:
@@ -106,7 +106,7 @@ describe Travis::Yml, 'addon: apt' do
         should serialize_to(
           one: ['one'],
           two: [['one']],
-          matrix: {
+          jobs: {
             include: [
               addons: {
                 apt: {
@@ -152,7 +152,7 @@ describe Travis::Yml, 'addon: apt' do
             source: str
       )
       it { should serialize_to addons: { apt: { sources: [name: 'str'] } } }
-      it { should have_msg [:info, :'addons.apt', :alias, type: :key, alias: 'source', obj: 'sources'] }
+      it { should have_msg [:info, :'addons.apt', :alias_key, alias: 'source', key: 'sources'] }
     end
 
     describe 'given a map with :name' do

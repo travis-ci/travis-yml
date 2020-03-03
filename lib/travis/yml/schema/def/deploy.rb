@@ -16,7 +16,9 @@ module Travis
             register :deploys
 
             def define
-              summary 'Deployment configs'
+              title 'Deployments'
+              summary 'Deployment target configurations'
+              see 'Deployment (v2)': 'https://docs.travis-ci.com/user/deployment-v2'
               normal
               type :providers
               export
@@ -132,7 +134,6 @@ end
 
 require 'travis/yml/schema/def/deploy'
 require 'travis/yml/schema/def/deploy/anynines'
-require 'travis/yml/schema/def/deploy/atlas'
 require 'travis/yml/schema/def/deploy/azure_web_apps'
 require 'travis/yml/schema/def/deploy/bintray'
 require 'travis/yml/schema/def/deploy/bluemix_cloudfoundry'
@@ -149,8 +150,11 @@ require 'travis/yml/schema/def/deploy/convox'
 require 'travis/yml/schema/def/deploy/elasticbeanstalk'
 require 'travis/yml/schema/def/deploy/engineyard'
 require 'travis/yml/schema/def/deploy/firebase'
+require 'travis/yml/schema/def/deploy/flynn'
+require 'travis/yml/schema/def/deploy/gleis'
 require 'travis/yml/schema/def/deploy/gae'
 require 'travis/yml/schema/def/deploy/gcs'
+require 'travis/yml/schema/def/deploy/git_push'
 require 'travis/yml/schema/def/deploy/hackage'
 require 'travis/yml/schema/def/deploy/hephy'
 require 'travis/yml/schema/def/deploy/heroku'

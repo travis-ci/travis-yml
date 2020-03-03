@@ -71,7 +71,7 @@ describe Travis::Yml::Doc::Validate, 'empty', empty: true do
     describe 'given an empty seq' do
       let(:value) { [] }
       it { should serialize_to [] }
-      it { should have_msg [:warn, :root, :empty]}
+      it { should have_msg [:warn, :root, :empty, key: nil]}
     end
   end
 
@@ -87,7 +87,7 @@ describe Travis::Yml::Doc::Validate, 'empty', empty: true do
     describe 'given an empty map' do
       let(:value) { {} }
       it { should serialize_to({}) }
-      it { should have_msg [:warn, :root, :empty]}
+      it { should have_msg [:warn, :root, :empty, key: nil]}
     end
   end
 end

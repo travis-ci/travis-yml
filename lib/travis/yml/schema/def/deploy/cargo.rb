@@ -9,6 +9,7 @@ module Travis
 
             def define
               map :token, to: :secure
+              map :allow_dirty, to: :bool
             end
           end
         end

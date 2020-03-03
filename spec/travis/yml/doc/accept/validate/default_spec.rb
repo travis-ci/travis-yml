@@ -5,26 +5,26 @@ describe Travis::Yml::Doc::Validate, 'default', defaults: true, line: true do
     describe 'given a str' do
       yaml 'language: ruby'
       it { should serialize_to defaults }
-      it { should_not have_msg [:info, :language, :default, key: 'language', default: 'ruby'] }
-      it { should have_msg [:info, :os, :default, key: 'os', default: 'linux'] }
+      it { should_not have_msg [:info, :root, :default, key: 'language', default: 'ruby'] }
+      it { should have_msg [:info, :root, :default, key: 'os', default: 'linux'] }
     end
 
     describe 'given an empty string' do
       yaml 'language: ""'
-      it { should serialize_to defaults }
-      it { should have_msg [:info, :language, :default, key: 'language', default: 'ruby', line: 0] }
+      it { should serialize_to language: '', os: ['linux'] }
+      it { should_not have_msg [:info, :root, :default, key: 'language'] }
     end
 
     describe 'given nil' do
       yaml 'language:'
       it { should serialize_to defaults }
-      it { should have_msg [:info, :language, :default, key: 'language', default: 'ruby', line: 0] }
+      it { should have_msg [:info, :root, :default, key: 'language', default: 'ruby', line: 0] }
     end
 
     describe 'missing key' do
       yaml '{}'
       it { should serialize_to defaults }
-      it { should have_msg [:info, :language, :default, key: 'language', default: 'ruby'] }
+      it { should have_msg [:info, :root, :default, key: 'language', default: 'ruby'] }
     end
   end
 

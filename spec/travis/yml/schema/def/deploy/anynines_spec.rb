@@ -61,6 +61,9 @@ describe Travis::Yml::Schema::Def::Deploy::Anynines do
               },
               manifest: {
                 type: :string
+              },
+              logout: {
+                type: :boolean
               }
             },
             additionalProperties: false,

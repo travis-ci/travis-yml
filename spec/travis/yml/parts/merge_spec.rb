@@ -10,6 +10,7 @@ describe Travis::Yml::Parts::Merge do
 
   let(:travis_yml) do
     <<~yaml
+      language: shell
       script: ./travis_yml
       env:
         travis_yml: true
@@ -26,8 +27,6 @@ describe Travis::Yml::Parts::Merge do
     yaml
   end
 
-  subject { described_class.new(parts).apply }
-
   let(:parts) do
     [
       part(api, 'api.yml', nil),
@@ -36,47 +35,198 @@ describe Travis::Yml::Parts::Merge do
     ]
   end
 
+  subject { symbolize(described_class.new(parts).apply) }
+
   def part(yaml, source = nil, mode = nil)
     Travis::Yml::Parts::Part.new(yaml, source, mode)
   end
 
-  describe 'merge' do
-    let(:mode) { :merge }
+  describe 'merge_mode' do
+    describe 'replace' do
+      let(:mode) { :replace }
 
-    it do
-      should eq(
-        'script' => './api',
-        'env' => {
-          'api' => true,
-          'foo' => 1
-        }
-      )
+      it do
+        should eq(
+          script: './api',
+          env: {
+            api: true,
+            foo: 1
+          }
+        )
+      end
+    end
+
+    describe 'merge' do
+      let(:mode) { :merge }
+
+      it do
+        should eq(
+          language: 'shell',
+          script: './api',
+          env: {
+            api: true,
+            foo: 1
+          }
+        )
+      end
+    end
+
+    describe 'deep_merge' do
+      let(:mode) { :deep_merge }
+
+      it do
+        should eq(
+          language: 'shell',
+          script: './api',
+          env: {
+            api: true,
+            foo: 1,
+            travis_yml: true,
+            import: true,
+          }
+        )
+      end
+
+      it do
+        expect(subject[:env]).to eq(
+          api: true,
+          foo: 1,
+          travis_yml: true,
+          import: true
+        )
+      end
+    end
+
+    describe 'deep-merge' do
+      let(:mode) { :deep_merge }
+
+      it do
+        should eq(
+          language: 'shell',
+          script: './api',
+          env: {
+            api: true,
+            foo: 1,
+            travis_yml: true,
+            import: true,
+          }
+        )
+      end
     end
   end
 
-  describe 'deep_merge' do
-    let(:mode) { :deep_merge }
+  describe 'merge tags' do
+    let(:parts) { [part(lft), part(rgt)] }
 
-    it do
-      should eq(
-        'script' => './api',
-        'env' => {
-          'api' => true,
-          'foo' => 1,
-          'travis_yml' => true,
-          'import' => true,
-        }
-      )
+    let(:rgt) do
+      <<~yml
+        foo:
+          bar:
+          - two
+      yml
     end
 
-    it do
-      expect(subject['env'].to_a).to eq [
-        ['api', true],
-        ['foo', 1],
-        ['travis_yml', true],
-        ['import', true],
-      ]
+    describe 'deep_merge+append on root' do
+      let(:lft) do
+        <<~yml
+          !map+deep_merge+append
+          foo:
+            bar:
+            - one
+        yml
+      end
+
+      it { expect(subject[:foo][:bar]).to be_a Array } # Seq??
+      it { should eq foo: { bar: ['one', 'two'] } }
     end
+
+    describe 'deep_merge on root, deep_merge+append on child' do
+      let(:lft) do
+        <<~yml
+          !map+deep_merge
+          foo:
+            !map+deep_merge+append
+            bar:
+            - one
+        yml
+      end
+
+      it { expect(subject[:foo][:bar]).to be_a Array } # Seq??
+      it { should eq foo: { bar: ['one', 'two'] } }
+    end
+
+    describe 'deep_merge on root, append on child' do
+      let(:lft) do
+        <<~yml
+          !map+deep_merge
+          foo:
+            bar: !seq+append
+            - one
+        yml
+      end
+
+      it { should eq foo: { bar: ['one', 'two'] } }
+    end
+  end
+
+  describe 'default merge mode on nested imports' do
+    let(:parts) { [part(one), part(two), part(three)] }
+
+    let(:one) do
+      <<~yml
+      env:
+        global:
+          - ONE=one
+      yml
+    end
+
+    let(:two) do
+      <<~yml
+        env:
+          global:
+            - TWO=two
+      yml
+    end
+
+    let(:three) do
+      <<~yml
+        env:
+          global:
+            - THREE=three
+      yml
+    end
+
+    it { should eq env: { global: ['ONE=one', 'TWO=two', 'THREE=three'] } }
+  end
+
+  describe 'merge mode and merge tags' do
+    let(:parts) { [part(one), part(two, nil, :deep_merge), part(three)] }
+
+    let(:one) do
+      <<~yml
+      env:
+        global: !seq+append
+          - ONE=one
+      yml
+    end
+
+    let(:two) do
+      <<~yml
+        env:
+          global:
+            - TWO=two
+      yml
+    end
+
+    let(:three) do
+      <<~yml
+        env:
+          global:
+            - THREE=three
+      yml
+    end
+
+    it { should eq env: { global: ['ONE=one', 'TWO=two', 'THREE=three'] } }
   end
 
   describe 'src and line' do
@@ -120,7 +270,7 @@ describe Travis::Yml::Parts::Merge do
 
       it { should be_a Key }
       it { should eq 'travis_yml' }
-      it { should have_attributes src: '.travis.yml', line: 2 }
+      it { should have_attributes src: '.travis.yml', line: 3 }
     end
 
     describe 'import' do
@@ -132,56 +282,4 @@ describe Travis::Yml::Parts::Merge do
     end
   end
 
-  describe 'merge tags' do
-    let(:parts) { [part(lft), part(rgt)] }
-
-    let(:rgt) do
-      %(
-        foo:
-          bar:
-          - one
-      )
-    end
-
-    describe 'deep_merge+append on root' do
-      let(:lft) do
-        %(
-          !map+deep_merge+append
-          foo:
-            bar:
-            - two
-        )
-      end
-
-      it { should eq 'foo' => { 'bar' => ['one', 'two'] } }
-    end
-
-    describe 'deep_merge on root, deep_merge+append on child' do
-      let(:lft) do
-        %(
-          !map+deep_merge
-          foo:
-            !map+deep_merge+append
-            bar:
-            - two
-        )
-      end
-
-      it { expect(subject['foo']['bar']).to be_a Seq }
-      it { should eq 'foo' => { 'bar' => ['one', 'two'] } }
-    end
-
-    describe 'deep_merge on root, append on child' do
-      let(:lft) do
-        %(
-          !map+deep_merge
-          foo:
-            bar: !seq+append
-            - two
-        )
-      end
-
-      it { should eq 'foo' => { 'bar' => ['one', 'two'] } }
-    end
-  end
 end

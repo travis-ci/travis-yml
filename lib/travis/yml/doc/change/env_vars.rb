@@ -32,7 +32,7 @@ module Travis
             end
 
             def env_vars_seq
-              value.value.map do |value|
+              value.flatten.map do |value|
                 vars = value.value
                 vars = parse(value, vars) if value.str?
                 vars || [{}]
@@ -49,7 +49,7 @@ module Travis
 
             def parse(value, vars)
               vars = vars.empty? ? [[]] : ShVars.parse(vars)
-              vars = vars.map { |pair| pair.empty? ? {} : [pair].to_h }
+              vars = vars.map { |pair| pair&.empty? ? {} : [pair].to_map }
               vars.inject(&:merge)
             rescue ShVars::ParseError => e
               value.error :invalid_env_var, var: vars

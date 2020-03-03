@@ -17,16 +17,7 @@ module Travis
               map :testers_groups,       to: :str
               map :notify,               to: :bool
               map :auto_update,          to: :bool
-              map :video_quality,        to: :str
-              map :screenshot_quality,   to: :str
-              map :screenshot_interval,  to: :num
-              map :max_duration,         to: :str
               map :advanced_options,     to: :str
-              map :data_only_wifi,       to: :bool
-              map :record_on_background, to: :bool
-              map :video,                to: :bool
-              map :icon_watermark,       to: :bool
-              map :metrics,              to: :str
             end
           end
         end

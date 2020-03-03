@@ -4,9 +4,11 @@ describe Travis::Yml::Schema::Def::Crystal do
   # it { puts JSON.pretty_generate(subject) }
 
   it do
-    should eq(
+    should include(
       '$id': :crystal,
         title: 'Crystal',
+        summary: kind_of(String),
+        see: kind_of(Hash),
         type: :object,
         properties: {
           crystal: {

@@ -1,5 +1,5 @@
 describe Travis::Yml, 'boxfuse' do
-  subject { described_class.apply(parse(yaml)) }
+  subject { described_class.load(yaml) }
 
   describe 'user' do
     describe 'given a secure' do
@@ -47,7 +47,7 @@ describe Travis::Yml, 'boxfuse' do
           configfile: str
       )
       it { should serialize_to deploy: [provider: 'boxfuse', config_file: 'str'] }
-      it { should have_msg [:info, :deploy, :alias, type: :key, alias: 'configfile', obj: 'config_file', provider: 'boxfuse'] }
+      it { should have_msg [:info, :deploy, :alias_key, alias: 'configfile', key: 'config_file', provider: 'boxfuse'] }
       xit { should have_msg [:warn, :deploy, :deprecated_key, :configfile] }
     end
   end
@@ -96,18 +96,6 @@ describe Travis::Yml, 'boxfuse' do
           env: str
       )
       it { should serialize_to deploy: [provider: 'boxfuse', env: 'str'] }
-      it { should_not have_msg }
-    end
-  end
-
-  describe 'image' do
-    describe 'given a str' do
-      yaml %(
-        deploy:
-          provider: boxfuse
-          image: str
-      )
-      it { should serialize_to deploy: [provider: 'boxfuse', image: 'str'] }
       it { should_not have_msg }
     end
   end

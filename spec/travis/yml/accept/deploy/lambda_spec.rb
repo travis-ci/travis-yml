@@ -1,5 +1,5 @@
 describe Travis::Yml, 'lambda' do
-  subject { described_class.apply(parse(yaml)) }
+  subject { described_class.load(yaml) }
 
   describe 'access_key_id' do
     describe 'given a secure' do
@@ -167,7 +167,7 @@ describe Travis::Yml, 'lambda' do
           environment_variables: str
       )
       it { should serialize_to deploy: [provider: 'lambda', environment: ['str']] }
-      it { should have_msg [:info, :deploy, :alias, type: :key, alias: 'environment_variables', obj: 'environment', provider: 'lambda'] }
+      it { should have_msg [:info, :deploy, :alias_key, alias: 'environment_variables', key: 'environment', provider: 'lambda'] }
     end
   end
 
@@ -217,14 +217,14 @@ describe Travis::Yml, 'lambda' do
     end
   end
 
-  describe 'dead_letter_config' do
+  describe 'dead_letter_arn' do
     describe 'given a str' do
       yaml %(
         deploy:
           provider: lambda
-          dead_letter_config: str
+          dead_letter_arn: str
       )
-      it { should serialize_to deploy: [provider: 'lambda', dead_letter_config: 'str'] }
+      it { should serialize_to deploy: [provider: 'lambda', dead_letter_arn: 'str'] }
       it { should_not have_msg }
     end
   end

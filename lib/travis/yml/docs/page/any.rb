@@ -5,33 +5,59 @@ module Travis
     module Docs
       module Page
         class Any < Base
-          def pages
-            pages = node.schemas.map { |node| build(node).pages }.flatten
-            [self, *pages].select(&:publish?)
+          def id
+            super || node.schemas.detect(&:id)&.id # ugh. notification anys do not have an id atm ...
           end
 
-          # def children
-          #   normals = node.schemas.select(&:normal?)
-          #   pages = normals.map { |node| build(node).pages }.flatten
-          #   pages.map(&:children).flatten.compact.uniq
-          # end
+          def title
+            super || node.schemas.detect(&:title)&.title # ugh. notification anys do not have a title atm ...
+          end
 
           def types
             node.expand
           end
 
+          def display_type
+            types = display_types.map(&:first)
+            types = [types[0..-2].join(', '), types[-1]].join(', or ')
+            [types, nil]
+          end
+
           def display_types
-            types.map { |node| build(node).display_type }.uniq
+            types.map { |node| build(self, nil, node).display_type }.uniq
           end
 
           def enum
-            node = types.detect { |schema| schema.type == :str }
-            node.enum if node
+            types.detect(&:str?)&.enum
+          end
+
+          def prefix
+            types.detect(&:map?)&.prefix unless id == :deploys
           end
 
           def mappings
-            return unless node = types.detect { |schema| schema.type == :map }
-            node.mappings.map { |key, schema| [key, build(schema)] }.to_h
+            return unless map = types.detect(&:map?)
+            map.mappings.map { |key, schema| [key, build(self, key, schema)] }.to_h
+          end
+
+          def includes
+            return unless map = types.detect(&:map?)
+            map.includes.map { |schema| build(self, nil, schema) }
+          end
+
+          def pages
+            pages = node.schemas.map { |node| build(self, nil, node).pages }.flatten
+            pages = [self, *pages].select(&:publish?)
+            pages
+          end
+
+          def children
+            [mappings&.values, includes].compact.flatten.select(&:publish?).reject(&:deprecated?)
+          end
+
+          def base_type?
+            return true if super
+            children.all?(&:base_type?)
           end
         end
       end

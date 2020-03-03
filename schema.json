@@ -25,6 +25,9 @@
             "expand"
           ]
         },
+        "virt": {
+          "$ref": "#/definitions/type/virt"
+        },
         "stack": {
           "$ref": "#/definitions/type/stack"
         },
@@ -35,10 +38,7 @@
           "$ref": "#/definitions/type/imports"
         },
         "env": {
-          "$ref": "#/definitions/type/env",
-          "flags": [
-            "expand"
-          ]
+          "$ref": "#/definitions/type/env"
         },
         "compiler": {
           "$ref": "#/definitions/type/compilers",
@@ -46,13 +46,19 @@
             "expand"
           ]
         },
+        "osx_image": {
+          "$ref": "#/definitions/type/osx_images",
+          "flags": [
+            "expand"
+          ]
+        },
         "stages": {
           "$ref": "#/definitions/type/stages"
         },
-        "matrix": {
-          "$ref": "#/definitions/type/matrix",
+        "jobs": {
+          "$ref": "#/definitions/type/jobs",
           "aliases": [
-            "jobs"
+            "matrix"
           ]
         },
         "notifications": {
@@ -109,7 +115,8 @@
             "$ref": "#/definitions/addon/apt"
           },
           "apt_packages": {
-            "$ref": "#/definitions/type/strs"
+            "$ref": "#/definitions/type/strs",
+            "summary": "APT package names to install"
           },
           "artifacts": {
             "$ref": "#/definitions/addon/artifacts"
@@ -122,7 +129,9 @@
             "enum": [
               "stable",
               "beta"
-            ]
+            ],
+            "downcase": true,
+            "summary": "Chrome version to use"
           },
           "code_climate": {
             "$ref": "#/definitions/addon/code_climate"
@@ -134,10 +143,12 @@
             "$ref": "#/definitions/addon/homebrew"
           },
           "hostname": {
-            "type": "string"
+            "type": "string",
+            "summary": "Hostname to set on the build environment"
           },
           "hosts": {
-            "$ref": "#/definitions/type/strs"
+            "$ref": "#/definitions/type/strs",
+            "summary": "Hosts to add to /etc/hosts"
           },
           "jwt": {
             "$ref": "#/definitions/addon/jwts"
@@ -145,18 +156,8 @@
           "sauce_connect": {
             "$ref": "#/definitions/addon/sauce_connect"
           },
-          "snaps": {
-            "$ref": "#/definitions/addon/snaps"
-          },
           "pkg": {
             "$ref": "#/definitions/addon/pkg"
-          },
-          "sonarcloud": {
-            "$ref": "#/definitions/addon/sonarcloud"
-          },
-          "ssh_known_hosts": {
-            "$ref": "#/definitions/type/secures",
-            "strict": false
           },
           "srcclr": {
             "anyOf": [
@@ -168,43 +169,102 @@
                 "type": "boolean",
                 "normal": true
               }
-            ]
+            ],
+            "summary": "SourceClear settings"
+          },
+          "snaps": {
+            "$ref": "#/definitions/addon/snaps"
+          },
+          "sonarcloud": {
+            "$ref": "#/definitions/addon/sonarcloud"
+          },
+          "ssh_known_hosts": {
+            "$ref": "#/definitions/type/secures",
+            "strict": false,
+            "summary": "Hosts to add to ~/.ssh/known_hosts",
+            "see": {
+              "Adding to SSH Known Hosts": "https://docs.travis-ci.com/user/ssh-known-hosts/"
+            }
           },
           "firefox": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "string"
-              }
-            ],
+            "type": "string",
+            "summary": "Firefox version to use",
             "example": "68.0b1"
           },
           "mariadb": {
-            "type": "string"
+            "type": "string",
+            "summary": "MariaDB version to use"
           },
           "postgresql": {
             "type": "string",
             "aliases": [
               "postgres"
-            ]
+            ],
+            "summary": "Postgres version to use"
           },
           "rethinkdb": {
-            "type": "string"
+            "type": "string",
+            "summary": "RethinkDB version to use"
           },
           "deploy": {
-            "$ref": "#/definitions/type/deploys"
+            "$ref": "#/definitions/type/deploys",
+            "flags": [
+              "internal"
+            ]
           }
         },
         "additionalProperties": false,
         "summary": "Build addons to activate"
+      },
+      "allow_failures": {
+        "$id": "allow_failures",
+        "title": "Job Matrix Entries",
+        "anyOf": [
+          {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/type/allow_failures_entry"
+            },
+            "normal": true
+          },
+          {
+            "$ref": "#/definitions/type/allow_failures_entry"
+          }
+        ]
+      },
+      "allow_failures_entry": {
+        "$id": "allow_failures_entry",
+        "title": "Job Matrix Entry",
+        "allOf": [
+          {
+            "type": "object",
+            "properties": {
+              "branch": {
+                "type": "string",
+                "deprecated": "use conditional allow_failures using :if"
+              }
+            },
+            "title": "Job Matrix Entry",
+            "see": {
+              "Jobs that are allowed to fail": "https://docs.travis-ci.com/user/customizing-the-build#jobs-that-are-allowed-to-fail",
+              "Conditionally allowing jobs to fail": "https://docs.travis-ci.com/user/conditional-builds-stages-jobs#conditionally-allowing-jobs-to-fail"
+            }
+          },
+          {
+            "$ref": "#/definitions/type/jobs_entry"
+          }
+        ],
+        "see": {
+          "Jobs that are allowed to fail": "https://docs.travis-ci.com/user/customizing-the-build#jobs-that-are-allowed-to-fail",
+          "Conditionally allowing jobs to fail": "https://docs.travis-ci.com/user/conditional-builds-stages-jobs#conditionally-allowing-jobs-to-fail"
+        }
       },
       "arch": {
         "$id": "arch",
         "title": "Architecture",
         "description": "The architecture that will be selected for the build environment.",
         "type": "string",
+        "summary": "Build environment architecture",
         "downcase": true,
         "only": {
           "os": [
@@ -213,7 +273,9 @@
         },
         "enum": [
           "amd64",
-          "ppc64le"
+          "arm64",
+          "ppc64le",
+          "s390x"
         ],
         "values": {
           "amd64": {
@@ -246,7 +308,7 @@
             "$ref": "#/definitions/type/arch"
           }
         ],
-        "summary": "Build environment architecture"
+        "summary": "Build environment architectures"
       },
       "branches": {
         "$id": "branches",
@@ -290,47 +352,64 @@
       "cache": {
         "$id": "cache",
         "title": "Cache",
+        "description": "Activates caching content that does not often change in order to speed up the build process.\n\nThere are built-in caching strategies for `apt`, `bundler`, `cargo`, `ccache`, `cocoapods`, `npm`, `packages`, `pip`, `yarn`.\nFor other scenarios the generic `directory` option can be used.",
         "anyOf": [
           {
             "type": "object",
             "properties": {
               "directories": {
                 "$ref": "#/definitions/type/strs",
+                "summary": "Generic directory caching strategy",
                 "example": "./path"
               },
               "apt": {
-                "type": "boolean"
+                "type": "boolean",
+                "summary": "Use the apt caching strategy"
               },
               "bundler": {
-                "type": "boolean"
+                "type": "boolean",
+                "summary": "Use the bundler caching strategy"
               },
               "cargo": {
-                "type": "boolean"
+                "type": "boolean",
+                "summary": "Use the cargo caching strategy"
               },
               "ccache": {
-                "type": "boolean"
+                "type": "boolean",
+                "summary": "Use the ccache caching strategy"
               },
               "cocoapods": {
-                "type": "boolean"
+                "type": "boolean",
+                "summary": "Use the cocoapods caching strategy"
               },
               "npm": {
-                "type": "boolean"
+                "type": "boolean",
+                "summary": "Use the npm caching strategy"
               },
               "packages": {
-                "type": "boolean"
+                "type": "boolean",
+                "summary": "Use the packages caching strategy"
               },
               "pip": {
-                "type": "boolean"
+                "type": "boolean",
+                "summary": "Use the pip caching strategy"
               },
               "yarn": {
-                "type": "boolean"
+                "type": "boolean",
+                "summary": "Use the yarn caching strategy"
+              },
+              "timeout": {
+                "type": "number",
+                "summary": "Timeout for the cache tooling",
+                "defaults": [
+                  {
+                    "value": 3
+                  }
+                ]
               },
               "edge": {
                 "type": "boolean",
-                "summary": "Whether to use an edge version of the cache tooling"
-              },
-              "timeout": {
-                "type": "number"
+                "summary": "Use an edge version of the cache tooling"
               },
               "branch": {
                 "type": "string"
@@ -352,7 +431,10 @@
             "normal": true
           }
         ],
-        "summary": "Cache settings to speed up the build"
+        "summary": "Cache settings to speed up the build",
+        "see": {
+          "Caching Dependencies and Directories": "https://docs.travis-ci.com/user/caching/"
+        }
       },
       "compilers": {
         "$id": "compilers",
@@ -383,17 +465,21 @@
             }
           }
         ],
-        "summary": "Compilers to set up"
+        "summary": "Compilers to set up",
+        "see": {
+          "Choosing compilers to test against": "https://docs.travis-ci.com/user/languages/c/#choosing-compilers-to-test-against"
+        }
       },
       "condition": {
         "$id": "condition",
         "title": "If",
-        "description": "Include or exclude builds, stages, and jobs by specifying conditions in your\nbuild configuration. These are evaluated when your build is being configured.",
+        "description": "Include or exclude builds, stages, jobs, imports, and notifications by specifying\nconditions in your build configuration. These are evaluated when your build is\nbeing configured.",
         "type": "string",
-        "summary": "Condition to determine whether or not a build, stage, or job should be run",
+        "summary": "Condition to determine if a build, stage, or job should be run, a config source imported, or a notification sent",
         "example": "branch = master",
         "see": {
-          "Conditional Builds, Stages, and Jobs": "https://docs.travis-ci.com/user/conditional-builds-stages-jobs/"
+          "Conditional Builds, Stages, and Jobs": "https://docs.travis-ci.com/user/conditional-builds-stages-jobs/",
+          "Conditional Notifications": "TBD"
         }
       },
       "conditions": {
@@ -411,7 +497,7 @@
       },
       "deploys": {
         "$id": "deploys",
-        "title": "Deploys",
+        "title": "Deployments",
         "anyOf": [
           {
             "type": "array",
@@ -424,13 +510,19 @@
             "$ref": "#/definitions/deploy/providers"
           }
         ],
-        "summary": "Deployment configs"
+        "summary": "Deployment target configurations",
+        "see": {
+          "Deployment (v2)": "https://docs.travis-ci.com/user/deployment-v2"
+        }
       },
       "dist": {
         "$id": "dist",
         "title": "Distribution",
         "type": "string",
         "summary": "Build environment distribution",
+        "see": {
+          "Virtualization environments": "https://docs.travis-ci.com/user/reference/overview/#virtualization-environments"
+        },
         "downcase": true,
         "enum": [
           "trusty",
@@ -481,6 +573,7 @@
       "env": {
         "$id": "env",
         "title": "Env",
+        "description": "The key `env` defines env vars that will be defined in the build\nenvironment.\n\nEnv vars can be specified as global or job vars. Global vars will\nbe defined on every job in the build's job matrix. Job vars will\nexpand the build matrix, i.e. create one additional job per entry.\n\nEnv vars can be given either as strings or maps. If given as a\nstring they can contain multiple key/value pairs.",
         "anyOf": [
           {
             "type": "object",
@@ -489,22 +582,32 @@
                 "$ref": "#/definitions/type/env_vars",
                 "summary": "Global environment variables to be defined on all jobs"
               },
-              "matrix": {
+              "jobs": {
                 "$ref": "#/definitions/type/env_vars",
-                "summary": "Environment variables that expand the build matrix (i.e. that create one job per entry)"
+                "aliases": [
+                  "matrix"
+                ],
+                "summary": "Environment variables that expand the build matrix (creating one job per entry)",
+                "flags": [
+                  "expand"
+                ]
               }
             },
             "additionalProperties": false,
             "normal": true,
             "prefix": {
-              "key": "matrix"
+              "key": "jobs"
             }
           },
           {
             "$ref": "#/definitions/type/env_vars"
           }
         ],
-        "summary": "Environment variables to set up"
+        "summary": "Environment variables to set up",
+        "see": {
+          "Environment Variables": "https://docs.travis-ci.com/user/environment-variables/",
+          "Build Matrix": "https://docs.travis-ci.com/user/build-matrix/"
+        }
       },
       "env_var": {
         "$id": "env_var",
@@ -513,7 +616,7 @@
           {
             "type": "object",
             "patternProperties": {
-              "^(?!global|matrix)": {
+              "^(?!global|jobs|matrix)": {
                 "anyOf": [
                   {
                     "type": "string"
@@ -523,6 +626,9 @@
                   },
                   {
                     "type": "boolean"
+                  },
+                  {
+                    "$ref": "#/definitions/type/secure"
                   }
                 ]
               }
@@ -569,11 +675,13 @@
           {
             "$ref": "#/definitions/type/env_var"
           }
-        ]
+        ],
+        "summary": "Environment variables to set up"
       },
       "git": {
         "$id": "git",
         "title": "Git",
+        "description": "These settings can be used in order to customize how the repository\nis cloned with Git.",
         "type": "object",
         "properties": {
           "strategy": {
@@ -581,10 +689,8 @@
             "enum": [
               "clone",
               "tarball"
-            ]
-          },
-          "quiet": {
-            "type": "boolean"
+            ],
+            "summary": "Strategy to use for fetching commits"
           },
           "depth": {
             "anyOf": [
@@ -594,23 +700,53 @@
               {
                 "type": "boolean"
               }
-            ]
+            ],
+            "summary": "Number of commmits to fetch, or false to clone all commits"
+          },
+          "quiet": {
+            "type": "boolean",
+            "summary": "Silence git clone log output"
           },
           "submodules": {
-            "type": "boolean"
+            "type": "boolean",
+            "summary": "Avoid cloning submodules if given false"
           },
           "submodules_depth": {
-            "type": "number"
+            "type": "number",
+            "summary": "Number of commits to fetch for submodules"
           },
           "lfs_skip_smudge": {
-            "type": "boolean"
+            "type": "boolean",
+            "summary": "Skip fetching the git-lfs files during the initial git clone"
           },
           "sparse_checkout": {
-            "type": "string"
+            "type": "string",
+            "summary": "Populate the working directory sparsely"
+          },
+          "autocrlf": {
+            "anyOf": [
+              {
+                "type": "boolean",
+                "enum": [
+                  true,
+                  false
+                ]
+              },
+              {
+                "type": "string",
+                "enum": [
+                  "input"
+                ]
+              }
+            ],
+            "summary": "Specify handling of line endings when cloning repository"
           }
         },
         "additionalProperties": false,
-        "summary": "Git settings"
+        "summary": "Git settings",
+        "see": {
+          "Customizing the Build": "https://docs.travis-ci.com/user/customizing-the-build/"
+        }
       },
       "group": {
         "$id": "group",
@@ -638,9 +774,14 @@
                 "type": "string",
                 "enum": [
                   "merge",
-                  "deep_merge"
+                  "deep_merge",
+                  "deep_merge_append",
+                  "deep_merge_prepend"
                 ],
-                "summary": "How to merge the imported config into the target config"
+                "summary": "How to merge the imported config into the target config (defaults to deep_merge_append)"
+              },
+              "if": {
+                "$ref": "#/definitions/type/condition"
               }
             },
             "additionalProperties": false,
@@ -659,7 +800,7 @@
       "imports": {
         "$id": "imports",
         "title": "Imports",
-        "description": "Import YAML config snippets that can be shared across repositories.\n\nSee [the docs](...) for details.",
+        "description": "Import YAML config snippets that can be shared across repositories.",
         "anyOf": [
           {
             "type": "array",
@@ -672,7 +813,10 @@
             "$ref": "#/definitions/type/import"
           }
         ],
-        "summary": "Build configuration imports"
+        "summary": "Build configuration imports",
+        "see": {
+          "Build Config Imports": "https://docs.travis-ci.com/user/build-config-imports/"
+        }
       },
       "jdks": {
         "$id": "jdks",
@@ -694,6 +838,7 @@
             "type": "string"
           }
         ],
+        "summary": "JDK versions",
         "except": {
           "os": [
             "osx"
@@ -728,34 +873,6 @@
           },
           "group": {
             "$ref": "#/definitions/type/group"
-          },
-          "osx_image": {
-            "anyOf": [
-              {
-                "type": "array",
-                "items": {
-                  "type": "string"
-                },
-                "only": {
-                  "os": [
-                    "osx"
-                  ]
-                },
-                "normal": true
-              },
-              {
-                "type": "string"
-              }
-            ],
-            "summary": "OSX image to use for the build environment",
-            "only": {
-              "os": [
-                "osx"
-              ]
-            },
-            "flags": [
-              "expand"
-            ]
           },
           "before_install": {
             "$ref": "#/definitions/type/strs",
@@ -799,11 +916,156 @@
           }
         }
       },
+      "jobs": {
+        "$id": "jobs",
+        "title": "Job Matrix",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "include": {
+                "$ref": "#/definitions/type/jobs_entries",
+                "summary": "Jobs to include to the build matrix"
+              },
+              "exclude": {
+                "$ref": "#/definitions/type/jobs_entries",
+                "summary": "Attributes of jobs to exclude from the build matrix"
+              },
+              "allow_failures": {
+                "$ref": "#/definitions/type/allow_failures",
+                "aliases": [
+                  "allowed_failures"
+                ],
+                "summary": "Attributes of jobs that are allowed to fail"
+              },
+              "fast_finish": {
+                "type": "boolean",
+                "aliases": [
+                  "fast_failure"
+                ],
+                "summary": "Allow the build to fail fast"
+              }
+            },
+            "additionalProperties": false,
+            "see": {
+              "Build Matrix": "https://docs.travis-ci.com/user/build-matrix/",
+              "Customizing the build": "https://docs.travis-ci.com/user/customizing-the-build#build-matrix"
+            },
+            "normal": true,
+            "aliases": [
+              "matrix"
+            ],
+            "prefix": {
+              "key": "include"
+            }
+          },
+          {
+            "$ref": "#/definitions/type/jobs_entries"
+          }
+        ],
+        "summary": "Build matrix definitions",
+        "see": {
+          "Build Matrix": "https://docs.travis-ci.com/user/build-matrix/",
+          "Customizing the build": "https://docs.travis-ci.com/user/customizing-the-build#build-matrix"
+        },
+        "normal": true
+      },
+      "jobs_entries": {
+        "$id": "jobs_entries",
+        "title": "Job Matrix Entries",
+        "anyOf": [
+          {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/type/jobs_entry"
+            },
+            "normal": true
+          },
+          {
+            "$ref": "#/definitions/type/jobs_entry"
+          }
+        ]
+      },
+      "jobs_entry": {
+        "$id": "jobs_entry",
+        "title": "Job Matrix Entry",
+        "allOf": [
+          {
+            "type": "object",
+            "properties": {
+              "language": {
+                "$ref": "#/definitions/type/language"
+              },
+              "os": {
+                "$ref": "#/definitions/type/os"
+              },
+              "dist": {
+                "$ref": "#/definitions/type/dist"
+              },
+              "arch": {
+                "$ref": "#/definitions/type/arch"
+              },
+              "osx_image": {
+                "type": "string",
+                "summary": "OSX image to use for the build environment",
+                "only": {
+                  "os": [
+                    "osx"
+                  ]
+                }
+              },
+              "sudo": {
+                "$ref": "#/definitions/type/sudo"
+              },
+              "env": {
+                "$ref": "#/definitions/type/env_vars"
+              },
+              "compiler": {
+                "type": "string",
+                "example": "gcc",
+                "only": {
+                  "language": [
+                    "c",
+                    "cpp"
+                  ]
+                }
+              },
+              "branches": {
+                "$ref": "#/definitions/type/branches"
+              },
+              "name": {
+                "type": "string",
+                "flags": [
+                  "unique"
+                ]
+              },
+              "stage": {
+                "type": "string"
+              }
+            },
+            "title": "Job Matrix Entry",
+            "aliases": [
+              "jobs"
+            ]
+          },
+          {
+            "$ref": "#/definitions/type/support"
+          },
+          {
+            "$ref": "#/definitions/type/job"
+          }
+        ]
+      },
       "language": {
         "$id": "language",
         "title": "Language",
+        "description": "The key `language` selects the language support used for the build.\n\nLanguage supports define additional root level keys, e.g. for selecting\nthe language runtime version. Some of these keys will expand additional\njobs in the build matrix, such as the key `python` on Python language\nsupport.",
         "type": "string",
-        "summary": "Language support",
+        "summary": "Language support to enable",
+        "see": {
+          "Languages": "https://docs.travis-ci.com/user/languages/",
+          "Build Matrix": "https://docs.travis-ci.com/user/build-matrix/"
+        },
         "example": "ruby",
         "downcase": true,
         "defaults": [
@@ -837,8 +1099,10 @@
           "elixir",
           "elm",
           "erlang",
+          "generic",
           "go",
           "groovy",
+          "hack",
           "haskell",
           "haxe",
           "java",
@@ -897,7 +1161,6 @@
           "shell": {
             "aliases": [
               "bash",
-              "generic",
               "minimal",
               "sh"
             ]
@@ -990,10 +1253,16 @@
             "$ref": "#/definitions/language/erlang"
           },
           {
+            "$ref": "#/definitions/language/generic"
+          },
+          {
             "$ref": "#/definitions/language/go"
           },
           {
             "$ref": "#/definitions/language/groovy"
+          },
+          {
+            "$ref": "#/definitions/language/hack"
           },
           {
             "$ref": "#/definitions/language/haskell"
@@ -1073,121 +1342,6 @@
         ],
         "normal": true
       },
-      "matrix": {
-        "$id": "matrix",
-        "title": "Matrix",
-        "anyOf": [
-          {
-            "type": "object",
-            "properties": {
-              "include": {
-                "$ref": "#/definitions/type/matrix_entries"
-              },
-              "exclude": {
-                "$ref": "#/definitions/type/matrix_entries"
-              },
-              "allow_failures": {
-                "$ref": "#/definitions/type/matrix_entries",
-                "aliases": [
-                  "allowed_failures"
-                ]
-              },
-              "fast_finish": {
-                "type": "boolean",
-                "aliases": [
-                  "fast_failure"
-                ]
-              }
-            },
-            "additionalProperties": false,
-            "normal": true,
-            "aliases": [
-              "jobs"
-            ],
-            "prefix": {
-              "key": "include"
-            }
-          },
-          {
-            "$ref": "#/definitions/type/matrix_entries"
-          }
-        ],
-        "summary": "Build matrix definitions",
-        "normal": true
-      },
-      "matrix_entries": {
-        "$id": "matrix_entries",
-        "title": "Matrix Entries",
-        "anyOf": [
-          {
-            "type": "array",
-            "items": {
-              "$ref": "#/definitions/type/matrix_entry"
-            },
-            "normal": true
-          },
-          {
-            "$ref": "#/definitions/type/matrix_entry"
-          }
-        ]
-      },
-      "matrix_entry": {
-        "$id": "matrix_entry",
-        "title": "Matrix Entry",
-        "allOf": [
-          {
-            "type": "object",
-            "properties": {
-              "language": {
-                "$ref": "#/definitions/type/language"
-              },
-              "os": {
-                "$ref": "#/definitions/type/os"
-              },
-              "dist": {
-                "$ref": "#/definitions/type/dist"
-              },
-              "arch": {
-                "$ref": "#/definitions/type/arch"
-              },
-              "sudo": {
-                "$ref": "#/definitions/type/sudo"
-              },
-              "env": {
-                "$ref": "#/definitions/type/env_vars"
-              },
-              "compiler": {
-                "type": "string",
-                "example": "gcc",
-                "only": {
-                  "language": [
-                    "c",
-                    "cpp"
-                  ]
-                }
-              },
-              "name": {
-                "type": "string",
-                "flags": [
-                  "unique"
-                ]
-              },
-              "stage": {
-                "type": "string"
-              }
-            },
-            "aliases": [
-              "jobs"
-            ]
-          },
-          {
-            "$ref": "#/definitions/type/support"
-          },
-          {
-            "$ref": "#/definitions/type/job"
-          }
-        ]
-      },
       "notifications": {
         "$id": "notifications",
         "title": "Notifications",
@@ -1196,28 +1350,124 @@
             "type": "object",
             "properties": {
               "campfire": {
-                "$ref": "#/definitions/notification/campfire"
+                "anyOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/definitions/notification/campfire"
+                    },
+                    "normal": true
+                  },
+                  {
+                    "$ref": "#/definitions/notification/campfire"
+                  }
+                ],
+                "summary": "Campfire notification settings"
               },
               "email": {
-                "$ref": "#/definitions/notification/email"
+                "anyOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/definitions/notification/email"
+                    },
+                    "normal": true
+                  },
+                  {
+                    "$ref": "#/definitions/notification/email"
+                  }
+                ],
+                "summary": "Email notification settings"
               },
               "flowdock": {
-                "$ref": "#/definitions/notification/flowdock"
+                "anyOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/definitions/notification/flowdock"
+                    },
+                    "normal": true
+                  },
+                  {
+                    "$ref": "#/definitions/notification/flowdock"
+                  }
+                ],
+                "summary": "Flowdock notification settings"
               },
               "hipchat": {
-                "$ref": "#/definitions/notification/hipchat"
+                "anyOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/definitions/notification/hipchat"
+                    },
+                    "normal": true
+                  },
+                  {
+                    "$ref": "#/definitions/notification/hipchat"
+                  }
+                ],
+                "summary": "Hipchat notification settings"
               },
               "irc": {
-                "$ref": "#/definitions/notification/irc"
+                "anyOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/definitions/notification/irc"
+                    },
+                    "normal": true
+                  },
+                  {
+                    "$ref": "#/definitions/notification/irc"
+                  }
+                ],
+                "summary": "IRC notification settings"
               },
               "pushover": {
-                "$ref": "#/definitions/notification/pushover"
+                "anyOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/definitions/notification/pushover"
+                    },
+                    "normal": true
+                  },
+                  {
+                    "$ref": "#/definitions/notification/pushover"
+                  }
+                ],
+                "summary": "Pushover notification settings"
               },
               "slack": {
-                "$ref": "#/definitions/notification/slack"
+                "anyOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/definitions/notification/slack"
+                    },
+                    "normal": true
+                  },
+                  {
+                    "$ref": "#/definitions/notification/slack"
+                  }
+                ],
+                "summary": "Slack notification settings"
               },
               "webhooks": {
-                "$ref": "#/definitions/notification/webhooks"
+                "anyOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/definitions/notification/webhooks"
+                    },
+                    "normal": true
+                  },
+                  {
+                    "$ref": "#/definitions/notification/webhooks"
+                  }
+                ],
+                "summary": "Webhook notification settings"
               },
               "on_success": {
                 "$ref": "#/definitions/notification/frequency"
@@ -1240,6 +1490,13 @@
                 ]
               }
             ]
+          },
+          {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/notification/email"
+            },
+            "normal": true
           },
           {
             "$ref": "#/definitions/notification/email"
@@ -1280,10 +1537,10 @@
             "value": "windows",
             "only": {
               "language": [
-                "c",
-                "cpp",
+                "csharp",
                 "go",
                 "node_js",
+                "powershell",
                 "rust",
                 "shell"
               ]
@@ -1293,7 +1550,8 @@
         "enum": [
           "linux",
           "osx",
-          "windows"
+          "windows",
+          "linux-ppc64le"
         ],
         "values": {
           "linux": {
@@ -1331,10 +1589,10 @@
             ],
             "only": {
               "language": [
-                "c",
-                "cpp",
+                "csharp",
                 "go",
                 "node_js",
+                "powershell",
                 "rust",
                 "shell"
               ]
@@ -1357,7 +1615,37 @@
             "$ref": "#/definitions/type/os"
           }
         ],
-        "summary": "Build environment operating systems"
+        "summary": "Build environment operating systems",
+        "see": {
+          "Build Environment Overview": "https://docs.travis-ci.com/user/reference/overview/"
+        }
+      },
+      "osx_images": {
+        "$id": "osx_images",
+        "title": "Osx Images",
+        "anyOf": [
+          {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "summary": "OSX image to use for the build environment",
+              "only": {
+                "os": [
+                  "osx"
+                ]
+              }
+            },
+            "normal": true
+          },
+          {
+            "type": "string",
+            "only": {
+              "os": [
+                "osx"
+              ]
+            }
+          }
+        ]
       },
       "secure": {
         "$id": "secure",
@@ -1519,6 +1807,7 @@
       "stages": {
         "$id": "stages",
         "title": "Stages",
+        "description": "Build stages group jobs, and run jobs in each stage in parallel,\nbut run one stage after another sequentially.",
         "anyOf": [
           {
             "type": "array",
@@ -1531,7 +1820,10 @@
             "$ref": "#/definitions/type/stage"
           }
         ],
-        "summary": "Build stages definition"
+        "summary": "Build stages definition",
+        "see": {
+          "Build Stages": "https://docs.travis-ci.com/user/build-stages/"
+        }
       },
       "strs": {
         "$id": "strs",
@@ -1568,7 +1860,7 @@
         ],
         "summary": "Whether to allow sudo access",
         "example": "required",
-        "deprecated": "this key has no effect anymore"
+        "deprecated": "The key `sudo` has no effect anymore."
       },
       "support": {
         "$id": "support",
@@ -1608,10 +1900,16 @@
             "$ref": "#/definitions/support/erlang_support"
           },
           {
+            "$ref": "#/definitions/support/generic_support"
+          },
+          {
             "$ref": "#/definitions/support/go_support"
           },
           {
             "$ref": "#/definitions/support/groovy_support"
+          },
+          {
+            "$ref": "#/definitions/support/hack_support"
           },
           {
             "$ref": "#/definitions/support/haskell_support"
@@ -1696,9 +1994,24 @@
         "title": "Version",
         "type": "string",
         "summary": "Build config specification version",
-        "pattern": "^(~>|>|>=|=|<=|<) (\\d+(?:\\.\\d+)?(?:\\.\\d+)?)$",
+        "example": ">= 1.0.0",
+        "pattern": "^(~>|>|>=|=|<=|<) (\\d+(?:\\.\\d+)?(?:\\.\\d+)?)$"
+      },
+      "virt": {
+        "$id": "virt",
+        "title": "Virtualization",
+        "type": "string",
+        "summary": "Build environment virtualization",
+        "aliases": [
+          "virtualization"
+        ],
         "flags": [
           "internal"
+        ],
+        "downcase": true,
+        "enum": [
+          "lxd",
+          "vm"
         ]
       }
     },
@@ -1817,7 +2130,7 @@
             "type": "boolean"
           }
         ],
-        "summary": "Install APT packages and sources",
+        "summary": "APT packages and sources to install",
         "see": {
           "Installing Packages with the APT Addon": "https://docs.travis-ci.com/user/installing-dependencies/#installing-packages-with-the-apt-addon"
         },
@@ -1915,7 +2228,10 @@
             "type": "boolean"
           }
         ],
-        "summary": "Upload build artifacts at the end of the build",
+        "summary": "Build artifacts to upload at the end of the build",
+        "see": {
+          "Uploading Artifacts on Travis CI": "https://docs.travis-ci.com/user/uploading-artifacts/"
+        },
         "normal": true
       },
       "browserstack": {
@@ -1971,6 +2287,10 @@
             "type": "boolean"
           }
         ],
+        "summary": "Browserstack settings",
+        "see": {
+          "Using BrowserStack with Travis CI": "https://docs.travis-ci.com/user/browserstack/"
+        },
         "normal": true
       },
       "code_climate": {
@@ -2003,6 +2323,10 @@
             "type": "boolean"
           }
         ],
+        "summary": "CodeClimate settings",
+        "see": {
+          "Using Code Climate with Travis CI": "https://docs.travis-ci.com/user/code-climate/"
+        },
         "normal": true
       },
       "coverity_scan": {
@@ -2070,6 +2394,10 @@
             "type": "boolean"
           }
         ],
+        "summary": "CoverityScan settings",
+        "see": {
+          "The Coverity Scan Addon for Travis CI": "https://scan.coverity.com/travis_ci"
+        },
         "normal": true
       },
       "homebrew": {
@@ -2092,7 +2420,14 @@
                 "$ref": "#/definitions/type/strs"
               },
               "brewfile": {
-                "type": "string"
+                "anyOf": [
+                  {
+                    "type": "boolean"
+                  },
+                  {
+                    "type": "string"
+                  }
+                ]
               }
             },
             "additionalProperties": false,
@@ -2113,6 +2448,10 @@
             "type": "boolean"
           }
         ],
+        "summary": "Homebrew packages to install",
+        "see": {
+          "Installing Packages on macOS": "https://docs.travis-ci.com/user/installing-dependencies/#installing-packages-on-macos"
+        },
         "normal": true
       },
       "jwts": {
@@ -2124,12 +2463,17 @@
             "items": {
               "$ref": "#/definitions/type/secure"
             },
+            "deprecated": "Discontinued as of April 17, 2018",
             "normal": true
           },
           {
             "$ref": "#/definitions/type/secure"
           }
-        ]
+        ],
+        "see": {
+          "JWT addon will be deprecated on April 17": "https://blog.travis-ci.com/2018-01-23-jwt-addon-is-deprecated"
+        },
+        "deprecated": "Discontinued as of April 17, 2018"
       },
       "pkg": {
         "$id": "pkg",
@@ -2212,6 +2556,10 @@
             "type": "boolean"
           }
         ],
+        "summary": "SourceConnect settings",
+        "see": {
+          "Using Sauce Labs with Travis CI": "https://docs.travis-ci.com/user/sauce-connect/"
+        },
         "normal": true
       },
       "snaps": {
@@ -2270,7 +2618,11 @@
           {
             "type": "string"
           }
-        ]
+        ],
+        "summary": "Ubuntu Snaps to install",
+        "see": {
+          "Snap Store": "https://docs.travis-ci.com/user/deployment/snaps/"
+        }
       },
       "sonarcloud": {
         "$id": "sonarcloud",
@@ -2279,6 +2631,9 @@
           {
             "type": "object",
             "properties": {
+              "enabled": {
+                "type": "boolean"
+              },
               "organization": {
                 "type": "string"
               },
@@ -2287,11 +2642,11 @@
               },
               "github_token": {
                 "$ref": "#/definitions/type/secure",
-                "deprecated": "not supported any more"
+                "deprecated": "setting a GitHub token is deprecated"
               },
               "branches": {
                 "$ref": "#/definitions/type/strs",
-                "deprecated": "not supported any more"
+                "deprecated": "setting a branch is deprecated"
               }
             },
             "additionalProperties": false,
@@ -2306,6 +2661,10 @@
             "type": "boolean"
           }
         ],
+        "summary": "Sonarcloud settings",
+        "see": {
+          "Using SonarCloud with Travis CI": "https://docs.travis-ci.com/user/sonarcloud/"
+        },
         "normal": true
       }
     },
@@ -2338,6 +2697,9 @@
               },
               "manifest": {
                 "type": "string"
+              },
+              "logout": {
+                "type": "boolean"
               },
               "provider": {
                 "type": "string",
@@ -2385,98 +2747,6 @@
             "type": "string",
             "enum": [
               "anynines"
-            ],
-            "strict": true
-          }
-        ],
-        "normal": true
-      },
-      "atlas": {
-        "$id": "atlas",
-        "title": "Atlas",
-        "anyOf": [
-          {
-            "type": "object",
-            "properties": {
-              "token": {
-                "$ref": "#/definitions/type/secure"
-              },
-              "app": {
-                "type": "string"
-              },
-              "exclude": {
-                "$ref": "#/definitions/type/strs"
-              },
-              "include": {
-                "$ref": "#/definitions/type/strs"
-              },
-              "address": {
-                "type": "string"
-              },
-              "metadata": {
-                "$ref": "#/definitions/type/strs"
-              },
-              "debug": {
-                "type": "boolean"
-              },
-              "vcs": {
-                "type": "boolean"
-              },
-              "version": {
-                "type": "boolean"
-              },
-              "paths": {
-                "$ref": "#/definitions/type/strs"
-              },
-              "args": {
-                "type": "string"
-              },
-              "provider": {
-                "type": "string",
-                "enum": [
-                  "atlas"
-                ],
-                "strict": true
-              },
-              "on": {
-                "$ref": "#/definitions/deploy/conditions",
-                "aliases": [
-                  "true"
-                ]
-              },
-              "run": {
-                "$ref": "#/definitions/type/strs"
-              },
-              "allow_failure": {
-                "type": "boolean"
-              },
-              "cleanup": {
-                "type": "boolean"
-              },
-              "skip_cleanup": {
-                "type": "boolean",
-                "deprecated": "not supported in dpl v2, use cleanup"
-              },
-              "edge": {
-                "$ref": "#/definitions/deploy/edge"
-              }
-            },
-            "additionalProperties": false,
-            "normal": true,
-            "prefix": {
-              "key": "provider",
-              "only": [
-                "str"
-              ]
-            },
-            "required": [
-              "provider"
-            ]
-          },
-          {
-            "type": "string",
-            "enum": [
-              "atlas"
             ],
             "strict": true
           }
@@ -2565,9 +2835,6 @@
           {
             "type": "object",
             "properties": {
-              "file": {
-                "type": "string"
-              },
               "user": {
                 "$ref": "#/definitions/type/secure",
                 "strict": false
@@ -2575,11 +2842,14 @@
               "key": {
                 "$ref": "#/definitions/type/secure"
               },
+              "file": {
+                "type": "string"
+              },
               "passphrase": {
                 "$ref": "#/definitions/type/secure"
               },
-              "dry_run": {
-                "type": "boolean"
+              "url": {
+                "type": "string"
               },
               "provider": {
                 "type": "string",
@@ -2671,6 +2941,9 @@
               "app_name": {
                 "type": "string"
               },
+              "logout": {
+                "type": "boolean"
+              },
               "provider": {
                 "type": "string",
                 "enum": [
@@ -2755,9 +3028,6 @@
               "env": {
                 "type": "string"
               },
-              "image": {
-                "type": "string"
-              },
               "extra_args": {
                 "type": "string"
               },
@@ -2838,6 +3108,9 @@
               "token": {
                 "$ref": "#/definitions/type/secure"
               },
+              "allow_dirty": {
+                "type": "boolean"
+              },
               "provider": {
                 "type": "string",
                 "enum": [
@@ -2898,10 +3171,10 @@
             "type": "object",
             "properties": {
               "user_id": {
-                "$ref": "#/definitions/type/secure"
+                "type": "string"
               },
               "client_key": {
-                "$ref": "#/definitions/type/secure"
+                "type": "string"
               },
               "name": {
                 "type": "string",
@@ -2978,7 +3251,7 @@
             "type": "object",
             "properties": {
               "redeployment_hook": {
-                "type": "string"
+                "$ref": "#/definitions/type/secure"
               },
               "provider": {
                 "type": "string",
@@ -3157,9 +3430,6 @@
               "create_timeout": {
                 "type": "number"
               },
-              "session_token": {
-                "type": "string"
-              },
               "parameters": {
                 "$ref": "#/definitions/type/strs"
               },
@@ -3241,9 +3511,6 @@
               "space": {
                 "type": "string"
               },
-              "key": {
-                "type": "string"
-              },
               "buildpack": {
                 "type": "string"
               },
@@ -3255,6 +3522,12 @@
               },
               "app_name": {
                 "type": "string"
+              },
+              "logout": {
+                "type": "boolean"
+              },
+              "v3": {
+                "type": "boolean"
               },
               "provider": {
                 "type": "string",
@@ -3676,7 +3949,10 @@
                 "type": "string"
               },
               "bucket": {
-                "type": "string"
+                "type": "string",
+                "aliases": [
+                  "bucket_name"
+                ]
               },
               "app": {
                 "anyOf": [
@@ -3717,9 +3993,6 @@
               "zip_file": {
                 "type": "string"
               },
-              "bucket_name": {
-                "type": "string"
-              },
               "bucket_path": {
                 "type": "string"
               },
@@ -3727,6 +4000,9 @@
                 "type": "boolean"
               },
               "wait_until_deployed": {
+                "type": "boolean"
+              },
+              "debug": {
                 "type": "boolean"
               },
               "provider": {
@@ -3909,6 +4185,9 @@
               "only": {
                 "type": "string"
               },
+              "force": {
+                "type": "boolean"
+              },
               "provider": {
                 "type": "string",
                 "enum": [
@@ -3961,6 +4240,69 @@
         ],
         "normal": true
       },
+      "flynn": {
+        "$id": "flynn",
+        "title": "Flynn",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "git": {
+                "$ref": "#/definitions/type/secure",
+                "strict": false
+              },
+              "provider": {
+                "type": "string",
+                "enum": [
+                  "flynn"
+                ],
+                "strict": true
+              },
+              "on": {
+                "$ref": "#/definitions/deploy/conditions",
+                "aliases": [
+                  "true"
+                ]
+              },
+              "run": {
+                "$ref": "#/definitions/type/strs"
+              },
+              "allow_failure": {
+                "type": "boolean"
+              },
+              "cleanup": {
+                "type": "boolean"
+              },
+              "skip_cleanup": {
+                "type": "boolean",
+                "deprecated": "not supported in dpl v2, use cleanup"
+              },
+              "edge": {
+                "$ref": "#/definitions/deploy/edge"
+              }
+            },
+            "additionalProperties": false,
+            "normal": true,
+            "prefix": {
+              "key": "provider",
+              "only": [
+                "str"
+              ]
+            },
+            "required": [
+              "provider"
+            ]
+          },
+          {
+            "type": "string",
+            "enum": [
+              "flynn"
+            ],
+            "strict": true
+          }
+        ],
+        "normal": true
+      },
       "gae": {
         "$id": "gae",
         "title": "Gae",
@@ -3975,25 +4317,30 @@
                 "type": "string"
               },
               "config": {
-                "type": "string"
+                "$ref": "#/definitions/type/strs"
               },
               "version": {
                 "type": "string"
               },
-              "no_promote": {
-                "type": "boolean"
-              },
-              "no_stop_previous_version": {
-                "type": "boolean"
-              },
-              "default": {
-                "type": "boolean"
-              },
               "verbosity": {
                 "type": "string"
               },
-              "docker_build": {
-                "type": "string"
+              "promote": {
+                "type": "boolean"
+              },
+              "no_promote": {
+                "type": "boolean",
+                "deprecated": "use promote: false"
+              },
+              "stop_previous_version": {
+                "type": "boolean"
+              },
+              "no_stop_previous_version": {
+                "type": "boolean",
+                "deprecated": "use stop_previous_version: false"
+              },
+              "install_sdk": {
+                "type": "boolean"
               },
               "provider": {
                 "type": "string",
@@ -4054,6 +4401,9 @@
           {
             "type": "object",
             "properties": {
+              "key_file": {
+                "type": "string"
+              },
               "access_key_id": {
                 "$ref": "#/definitions/type/secure",
                 "strict": false
@@ -4134,6 +4484,184 @@
         ],
         "normal": true
       },
+      "git_push": {
+        "$id": "git_push",
+        "title": "Git Push",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "token": {
+                "$ref": "#/definitions/type/secure",
+                "aliases": [
+                  "github_token"
+                ]
+              },
+              "deploy_key": {
+                "type": "string"
+              },
+              "repo": {
+                "type": "string"
+              },
+              "branch": {
+                "type": "string"
+              },
+              "base_branch": {
+                "type": "string"
+              },
+              "commit_message": {
+                "type": "string"
+              },
+              "allow_empty_commit": {
+                "type": "boolean"
+              },
+              "allow_same_branch": {
+                "type": "boolean"
+              },
+              "force": {
+                "type": "boolean"
+              },
+              "local_dir": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "email": {
+                "type": "string"
+              },
+              "host": {
+                "type": "string"
+              },
+              "enterprise": {
+                "type": "boolean"
+              },
+              "provider": {
+                "type": "string",
+                "enum": [
+                  "git_push"
+                ],
+                "strict": true
+              },
+              "on": {
+                "$ref": "#/definitions/deploy/conditions",
+                "aliases": [
+                  "true"
+                ]
+              },
+              "run": {
+                "$ref": "#/definitions/type/strs"
+              },
+              "allow_failure": {
+                "type": "boolean"
+              },
+              "cleanup": {
+                "type": "boolean"
+              },
+              "skip_cleanup": {
+                "type": "boolean",
+                "deprecated": "not supported in dpl v2, use cleanup"
+              },
+              "edge": {
+                "$ref": "#/definitions/deploy/edge"
+              }
+            },
+            "additionalProperties": false,
+            "normal": true,
+            "prefix": {
+              "key": "provider",
+              "only": [
+                "str"
+              ]
+            },
+            "required": [
+              "provider"
+            ]
+          },
+          {
+            "type": "string",
+            "enum": [
+              "git_push"
+            ],
+            "strict": true
+          }
+        ],
+        "normal": true
+      },
+      "gleis": {
+        "$id": "gleis",
+        "title": "Gleis",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "app": {
+                "type": "string"
+              },
+              "username": {
+                "type": "string"
+              },
+              "password": {
+                "$ref": "#/definitions/type/secure"
+              },
+              "key_name": {
+                "type": "string"
+              },
+              "verbose": {
+                "type": "boolean"
+              },
+              "provider": {
+                "type": "string",
+                "enum": [
+                  "gleis"
+                ],
+                "strict": true
+              },
+              "on": {
+                "$ref": "#/definitions/deploy/conditions",
+                "aliases": [
+                  "true"
+                ]
+              },
+              "run": {
+                "$ref": "#/definitions/type/strs"
+              },
+              "allow_failure": {
+                "type": "boolean"
+              },
+              "cleanup": {
+                "type": "boolean"
+              },
+              "skip_cleanup": {
+                "type": "boolean",
+                "deprecated": "not supported in dpl v2, use cleanup"
+              },
+              "edge": {
+                "$ref": "#/definitions/deploy/edge"
+              }
+            },
+            "additionalProperties": false,
+            "normal": true,
+            "prefix": {
+              "key": "provider",
+              "only": [
+                "str"
+              ]
+            },
+            "required": [
+              "provider"
+            ]
+          },
+          {
+            "type": "string",
+            "enum": [
+              "gleis"
+            ],
+            "strict": true
+          }
+        ],
+        "normal": true
+      },
       "hackage": {
         "$id": "hackage",
         "title": "Hackage",
@@ -4147,6 +4675,9 @@
               },
               "password": {
                 "$ref": "#/definitions/type/secure"
+              },
+              "publish": {
+                "type": "boolean"
               },
               "provider": {
                 "type": "string",
@@ -4447,7 +4978,7 @@
               "subnet_ids": {
                 "$ref": "#/definitions/type/strs"
               },
-              "dead_letter_config": {
+              "dead_letter_arn": {
                 "type": "string"
               },
               "kms_key_arn": {
@@ -4476,9 +5007,6 @@
               },
               "dot_match": {
                 "type": "boolean"
-              },
-              "dead_letter_arn": {
-                "type": "string"
               },
               "provider": {
                 "type": "string",
@@ -4687,8 +5215,9 @@
           {
             "type": "object",
             "properties": {
-              "registry": {
-                "type": "string"
+              "email": {
+                "$ref": "#/definitions/type/secure",
+                "strict": false
               },
               "api_token": {
                 "$ref": "#/definitions/type/secure",
@@ -4696,17 +5225,23 @@
                   "api_key"
                 ]
               },
-              "email": {
-                "$ref": "#/definitions/type/secure",
-                "strict": false
-              },
               "access": {
+                "type": "string",
+                "enum": [
+                  "public",
+                  "private"
+                ]
+              },
+              "registry": {
                 "type": "string"
               },
               "src": {
                 "type": "string"
               },
               "tag": {
+                "type": "string"
+              },
+              "auth_method": {
                 "type": "string"
               },
               "provider": {
@@ -4768,18 +5303,11 @@
           {
             "type": "object",
             "properties": {
-              "token": {
-                "$ref": "#/definitions/type/secure"
-              },
-              "user": {
-                "$ref": "#/definitions/type/secure",
-                "strict": false
-              },
-              "password": {
-                "$ref": "#/definitions/type/secure"
-              },
               "server": {
                 "type": "string"
+              },
+              "token": {
+                "$ref": "#/definitions/type/secure"
               },
               "project": {
                 "type": "string"
@@ -4860,10 +5388,10 @@
                 "type": "string"
               },
               "instance_ids": {
-                "type": "string"
+                "$ref": "#/definitions/type/strs"
               },
               "layer_ids": {
-                "type": "string"
+                "$ref": "#/definitions/type/strs"
               },
               "migrate": {
                 "type": "boolean"
@@ -4956,7 +5484,7 @@
                 "type": "string"
               },
               "package_glob": {
-                "type": "string"
+                "$ref": "#/definitions/type/strs"
               },
               "force": {
                 "type": "boolean"
@@ -5041,8 +5569,11 @@
                   "git"
                 ]
               },
-              "github_token": {
-                "$ref": "#/definitions/type/secure"
+              "token": {
+                "$ref": "#/definitions/type/secure",
+                "aliases": [
+                  "github_token"
+                ]
               },
               "deploy_key": {
                 "type": "string"
@@ -5068,8 +5599,11 @@
               "name": {
                 "type": "string"
               },
-              "github_url": {
-                "type": "string"
+              "url": {
+                "type": "string",
+                "aliases": [
+                  "github_url"
+                ]
               },
               "keep_history": {
                 "type": "boolean"
@@ -5087,9 +5621,6 @@
                 "type": "boolean"
               },
               "deployment_file": {
-                "type": "boolean"
-              },
-              "detect_encoding": {
                 "type": "boolean"
               },
               "provider": {
@@ -5152,9 +5683,6 @@
             "$ref": "#/definitions/deploy/anynines"
           },
           {
-            "$ref": "#/definitions/deploy/atlas"
-          },
-          {
             "$ref": "#/definitions/deploy/azure_web_apps"
           },
           {
@@ -5203,10 +5731,19 @@
             "$ref": "#/definitions/deploy/firebase"
           },
           {
+            "$ref": "#/definitions/deploy/flynn"
+          },
+          {
             "$ref": "#/definitions/deploy/gae"
           },
           {
             "$ref": "#/definitions/deploy/gcs"
+          },
+          {
+            "$ref": "#/definitions/deploy/git_push"
+          },
+          {
+            "$ref": "#/definitions/deploy/gleis"
           },
           {
             "$ref": "#/definitions/deploy/hackage"
@@ -5369,9 +5906,6 @@
               "password": {
                 "$ref": "#/definitions/type/secure"
               },
-              "api_key": {
-                "$ref": "#/definitions/type/secure"
-              },
               "server": {
                 "type": "string"
               },
@@ -5384,7 +5918,17 @@
               "skip_existing": {
                 "type": "boolean"
               },
+              "upload_docs": {
+                "type": "boolean"
+              },
               "skip_upload_docs": {
+                "type": "boolean",
+                "deprecated": "use upload_docs: false"
+              },
+              "twine_check": {
+                "type": "boolean"
+              },
+              "remove_build_dir": {
                 "type": "boolean"
               },
               "setuptools_version": {
@@ -5465,8 +6009,11 @@
               "password": {
                 "$ref": "#/definitions/type/secure"
               },
-              "api_key": {
-                "$ref": "#/definitions/type/secure"
+              "token": {
+                "$ref": "#/definitions/type/secure",
+                "aliases": [
+                  "api_key"
+                ]
               },
               "repo": {
                 "type": "string"
@@ -5631,9 +6178,6 @@
                   }
                 ]
               },
-              "file": {
-                "type": "string"
-              },
               "gemspec": {
                 "type": "string"
               },
@@ -5715,44 +6259,56 @@
               "region": {
                 "type": "string"
               },
+              "endpoint": {
+                "type": "string"
+              },
               "upload_dir": {
                 "type": "string"
               },
-              "storage_class": {
+              "local_dir": {
                 "type": "string"
               },
-              "local_dir": {
+              "glob": {
+                "type": "string"
+              },
+              "dot_match": {
+                "type": "boolean"
+              },
+              "acl": {
                 "type": "string"
               },
               "detect_encoding": {
                 "type": "boolean"
               },
               "cache_control": {
-                "type": "string"
+                "$ref": "#/definitions/type/strs"
               },
               "expires": {
-                "type": "string"
-              },
-              "acl": {
-                "type": "string"
-              },
-              "dot_match": {
-                "type": "boolean"
-              },
-              "index_document_suffix": {
-                "type": "string"
+                "$ref": "#/definitions/type/strs"
               },
               "default_text_charset": {
+                "type": "string"
+              },
+              "storage_class": {
                 "type": "string"
               },
               "server_side_encryption": {
                 "type": "boolean"
               },
-              "endpoint": {
+              "index_document_suffix": {
                 "type": "string"
+              },
+              "overwrite": {
+                "type": "boolean"
+              },
+              "force_path_style": {
+                "type": "boolean"
               },
               "max_threads": {
                 "type": "number"
+              },
+              "verbose": {
+                "type": "boolean"
               },
               "provider": {
                 "type": "string",
@@ -6123,34 +6679,7 @@
               "auto_update": {
                 "type": "boolean"
               },
-              "video_quality": {
-                "type": "string"
-              },
-              "screenshot_quality": {
-                "type": "string"
-              },
-              "screenshot_interval": {
-                "type": "number"
-              },
-              "max_duration": {
-                "type": "string"
-              },
               "advanced_options": {
-                "type": "string"
-              },
-              "data_only_wifi": {
-                "type": "boolean"
-              },
-              "record_on_background": {
-                "type": "boolean"
-              },
-              "video": {
-                "type": "boolean"
-              },
-              "icon_watermark": {
-                "type": "boolean"
-              },
-              "metrics": {
                 "type": "string"
               },
               "provider": {
@@ -6286,48 +6815,80 @@
         "$id": "__amethyst__",
         "title": "Amethyst",
         "type": "object",
+        "flags": [
+          "internal"
+        ],
+        "deprecated": "experimental stack language",
         "normal": true
       },
       "__connie__": {
         "$id": "__connie__",
         "title": "Connie",
         "type": "object",
+        "flags": [
+          "internal"
+        ],
+        "deprecated": "experimental stack language",
         "normal": true
       },
       "__cookiecat__": {
         "$id": "__cookiecat__",
         "title": "Cookiecat",
         "type": "object",
+        "flags": [
+          "internal"
+        ],
+        "deprecated": "experimental stack language",
         "normal": true
       },
       "__garnet__": {
         "$id": "__garnet__",
         "title": "Garnet",
         "type": "object",
+        "flags": [
+          "internal"
+        ],
+        "deprecated": "experimental stack language",
         "normal": true
       },
       "__onion__": {
         "$id": "__onion__",
         "title": "Onion",
         "type": "object",
+        "flags": [
+          "internal"
+        ],
+        "deprecated": "experimental stack language",
         "normal": true
       },
       "__opal__": {
         "$id": "__opal__",
         "title": "Opal",
         "type": "object",
+        "flags": [
+          "internal"
+        ],
+        "deprecated": "experimental stack language",
         "normal": true
       },
       "__sardonyx__": {
         "$id": "__sardonyx__",
         "title": "Sardonyx",
         "type": "object",
+        "flags": [
+          "internal"
+        ],
+        "deprecated": "experimental stack language",
         "normal": true
       },
       "__stevonnie__": {
         "$id": "__stevonnie__",
         "title": "Stevonnie",
         "type": "object",
+        "flags": [
+          "internal"
+        ],
+        "deprecated": "experimental stack language",
         "normal": true
       },
       "android": {
@@ -6350,10 +6911,12 @@
             "type": "object",
             "properties": {
               "components": {
-                "$ref": "#/definitions/type/strs"
+                "$ref": "#/definitions/type/strs",
+                "summary": "Android components to use"
               },
               "licenses": {
-                "$ref": "#/definitions/type/strs"
+                "$ref": "#/definitions/type/strs",
+                "summary": "Android licenses to use"
               }
             },
             "additionalProperties": false,
@@ -6364,12 +6927,20 @@
             }
           }
         },
+        "summary": "Android support",
+        "see": {
+          "Building an Android Project": "https://docs.travis-ci.com/user/languages/android/"
+        },
         "normal": true
       },
       "c": {
         "$id": "c",
         "title": "C",
         "type": "object",
+        "summary": "C language support",
+        "see": {
+          "Building a C Project": "https://docs.travis-ci.com/user/languages/c/"
+        },
         "normal": true
       },
       "clojure": {
@@ -6397,12 +6968,20 @@
             }
           }
         },
+        "summary": "Clojure language support",
+        "see": {
+          "Building a Clojure Project": "https://docs.travis-ci.com/user/languages/clojure/"
+        },
         "normal": true
       },
       "cpp": {
         "$id": "cpp",
-        "title": "Cpp",
+        "title": "C++",
         "type": "object",
+        "summary": "C++ language support",
+        "see": {
+          "Building a C++ Project": "https://docs.travis-ci.com/user/languages/c++/"
+        },
         "normal": true
       },
       "crystal": {
@@ -6422,11 +7001,15 @@
             }
           }
         },
+        "summary": "Crystal language support",
+        "see": {
+          "Building a Crystal Project": "https://docs.travis-ci.com/user/languages/crystal/"
+        },
         "normal": true
       },
       "csharp": {
         "$id": "csharp",
-        "title": "Csharp",
+        "title": "C#",
         "type": "object",
         "properties": {
           "dotnet": {
@@ -6463,6 +7046,10 @@
             }
           }
         },
+        "summary": "C# language support",
+        "see": {
+          "Building a C# Project": "https://docs.travis-ci.com/user/languages/csharp/"
+        },
         "normal": true
       },
       "d": {
@@ -6481,6 +7068,10 @@
               ]
             }
           }
+        },
+        "summary": "D language support",
+        "see": {
+          "Building a D Project": "https://docs.travis-ci.com/user/languages/d/"
         },
         "normal": true
       },
@@ -6577,6 +7168,10 @@
             }
           }
         },
+        "summary": "Dart language support",
+        "see": {
+          "Building a Dart Project": "https://docs.travis-ci.com/user/languages/dart/"
+        },
         "normal": true
       },
       "elixir": {
@@ -6606,6 +7201,10 @@
               ]
             }
           }
+        },
+        "summary": "Elixir language support",
+        "see": {
+          "Building an Elixir Project": "https://docs.travis-ci.com/user/languages/elixir/"
         },
         "normal": true
       },
@@ -6653,6 +7252,10 @@
             }
           }
         },
+        "summary": "Elm language support",
+        "see": {
+          "Building an Elm Project": "https://docs.travis-ci.com/user/languages/elm/"
+        },
         "normal": true
       },
       "erlang": {
@@ -6671,6 +7274,20 @@
               ]
             }
           }
+        },
+        "summary": "Erlang language support",
+        "see": {
+          "Building an Erlang Project": "https://docs.travis-ci.com/user/languages/erlang/"
+        },
+        "normal": true
+      },
+      "generic": {
+        "$id": "generic",
+        "title": "Generic",
+        "type": "object",
+        "summary": "Generic language support",
+        "see": {
+          "Minimal and Generic images": "https://docs.travis-ci.com/user/languages/minimal-and-generic/"
         },
         "normal": true
       },
@@ -6724,6 +7341,10 @@
             }
           }
         },
+        "summary": "Go language support",
+        "see": {
+          "Building a Go Project": "https://docs.travis-ci.com/user/languages/go/"
+        },
         "normal": true
       },
       "groovy": {
@@ -6743,6 +7364,41 @@
             }
           }
         },
+        "summary": "Groovy language support",
+        "see": {
+          "Building a Groovy Project": "https://docs.travis-ci.com/user/languages/groovy/"
+        },
+        "normal": true
+      },
+      "hack": {
+        "$id": "hack",
+        "title": "Hack",
+        "type": "object",
+        "properties": {
+          "hhvm": {
+            "$ref": "#/definitions/type/strs",
+            "flags": [
+              "expand"
+            ],
+            "only": {
+              "language": [
+                "hack"
+              ]
+            }
+          },
+          "php": {
+            "$ref": "#/definitions/type/strs",
+            "flags": [
+              "expand"
+            ],
+            "only": {
+              "language": [
+                "hack"
+              ]
+            }
+          }
+        },
+        "summary": "Hack support",
         "normal": true
       },
       "haskell": {
@@ -6761,6 +7417,10 @@
               ]
             }
           }
+        },
+        "summary": "Haskell language support",
+        "see": {
+          "Building a Haskell Project": "https://docs.travis-ci.com/user/languages/haskell/"
         },
         "normal": true
       },
@@ -6797,6 +7457,10 @@
             }
           }
         },
+        "summary": "Haxe language support",
+        "see": {
+          "Building a Haxe Project": "https://docs.travis-ci.com/user/languages/haxe/"
+        },
         "normal": true
       },
       "java": {
@@ -6815,6 +7479,10 @@
               ]
             }
           }
+        },
+        "summary": "Java language support",
+        "see": {
+          "Building a Java Project": "https://docs.travis-ci.com/user/languages/java/"
         },
         "normal": true
       },
@@ -6835,6 +7503,10 @@
             }
           }
         },
+        "summary": "Julia language support",
+        "see": {
+          "Building a Julia Project": "https://docs.travis-ci.com/user/languages/julia/"
+        },
         "normal": true
       },
       "nix": {
@@ -6854,11 +7526,15 @@
             }
           }
         },
+        "summary": "Nix support",
+        "see": {
+          "Building a Nix Project": "https://docs.travis-ci.com/user/languages/nix/"
+        },
         "normal": true
       },
       "node_js": {
         "$id": "node_js",
-        "title": "Node Js",
+        "title": "Javascript",
         "type": "object",
         "properties": {
           "node_js": {
@@ -6884,11 +7560,15 @@
             }
           }
         },
+        "summary": "Javascript language support",
+        "see": {
+          "Building a Javascript Project": "https://docs.travis-ci.com/user/languages/javascript/"
+        },
         "normal": true
       },
       "objective-c": {
         "$id": "objective-c",
-        "title": "Objective C",
+        "title": "Objective-C",
         "type": "object",
         "properties": {
           "rvm": {
@@ -6988,6 +7668,10 @@
             }
           }
         },
+        "summary": "Objective-C language support",
+        "see": {
+          "Building an Objective-C Project": "https://docs.travis-ci.com/user/languages/objective-c/"
+        },
         "normal": true
       },
       "perl": {
@@ -7007,11 +7691,15 @@
             }
           }
         },
+        "summary": "Perl language support",
+        "see": {
+          "Building a Perl Project": "https://docs.travis-ci.com/user/languages/perl/"
+        },
         "normal": true
       },
       "perl6": {
         "$id": "perl6",
-        "title": "Perl6",
+        "title": "Perl 6",
         "type": "object",
         "properties": {
           "perl6": {
@@ -7026,11 +7714,15 @@
             }
           }
         },
+        "summary": "Perl 6 language support",
+        "see": {
+          "Building a Perl 6 Project": "https://docs.travis-ci.com/user/languages/perl6/"
+        },
         "normal": true
       },
       "php": {
         "$id": "php",
-        "title": "Php",
+        "title": "PHP",
         "type": "object",
         "properties": {
           "php": {
@@ -7052,6 +7744,10 @@
               ]
             }
           }
+        },
+        "summary": "PHP language support",
+        "see": {
+          "Building a PHP Project": "https://docs.travis-ci.com/user/languages/php/"
         },
         "normal": true
       },
@@ -7087,6 +7783,10 @@
               ]
             }
           }
+        },
+        "summary": "Python language support",
+        "see": {
+          "Building a Python Project": "https://docs.travis-ci.com/user/languages/python/"
         },
         "normal": true
       },
@@ -7278,6 +7978,10 @@
             }
           }
         },
+        "summary": "R language support",
+        "see": {
+          "Building an R Project": "https://docs.travis-ci.com/user/languages/clojure/"
+        },
         "normal": true
       },
       "ruby": {
@@ -7334,6 +8038,10 @@
             }
           }
         },
+        "summary": "Ruby language support",
+        "see": {
+          "Building a Ruby Project": "https://docs.travis-ci.com/user/languages/ruby/"
+        },
         "normal": true
       },
       "rust": {
@@ -7352,6 +8060,10 @@
               ]
             }
           }
+        },
+        "summary": "Rust language support",
+        "see": {
+          "Building a Rust Project": "https://docs.travis-ci.com/user/languages/rust/"
         },
         "normal": true
       },
@@ -7391,12 +8103,20 @@
             }
           }
         },
+        "summary": "Scala language support",
+        "see": {
+          "Building a Scala Project": "https://docs.travis-ci.com/user/languages/scala/"
+        },
         "normal": true
       },
       "shell": {
         "$id": "shell",
         "title": "Shell",
         "type": "object",
+        "summary": "Shell language support",
+        "see": {
+          "Minimal and Generic images": "https://docs.travis-ci.com/user/languages/minimal-and-generic/"
+        },
         "normal": true
       },
       "smalltalk": {
@@ -7454,6 +8174,10 @@
               ]
             }
           }
+        },
+        "summary": "Smalltalk language support",
+        "see": {
+          "Building a Smalltalk Project": "https://docs.travis-ci.com/user/languages/smalltalk/"
         },
         "normal": true
       }
@@ -7524,10 +8248,12 @@
             "type": "object",
             "properties": {
               "components": {
-                "$ref": "#/definitions/type/strs"
+                "$ref": "#/definitions/type/strs",
+                "summary": "Android components to use"
               },
               "licenses": {
-                "$ref": "#/definitions/type/strs"
+                "$ref": "#/definitions/type/strs",
+                "summary": "Android licenses to use"
               }
             },
             "additionalProperties": false,
@@ -7770,6 +8496,12 @@
         },
         "normal": true
       },
+      "generic_support": {
+        "$id": "generic_support",
+        "title": "Generic Support",
+        "type": "object",
+        "normal": true
+      },
       "go_support": {
         "$id": "go_support",
         "title": "Go Support",
@@ -7829,6 +8561,30 @@
             "only": {
               "language": [
                 "groovy"
+              ]
+            }
+          }
+        },
+        "normal": true
+      },
+      "hack_support": {
+        "$id": "hack_support",
+        "title": "Hack Support",
+        "type": "object",
+        "properties": {
+          "hhvm": {
+            "type": "string",
+            "only": {
+              "language": [
+                "hack"
+              ]
+            }
+          },
+          "php": {
+            "type": "string",
+            "only": {
+              "language": [
+                "hack"
               ]
             }
           }
@@ -8485,22 +9241,28 @@
             "type": "object",
             "properties": {
               "rooms": {
-                "$ref": "#/definitions/type/secures"
+                "$ref": "#/definitions/type/secures",
+                "summary": "Campfire rooms to notify"
               },
               "template": {
                 "$ref": "#/definitions/notification/templates"
               },
-              "enabled": {
-                "type": "boolean"
-              },
-              "disabled": {
-                "type": "boolean"
+              "if": {
+                "$ref": "#/definitions/type/condition"
               },
               "on_success": {
                 "$ref": "#/definitions/notification/frequency"
               },
               "on_failure": {
                 "$ref": "#/definitions/notification/frequency"
+              },
+              "enabled": {
+                "type": "boolean",
+                "summary": "Whether to enable these notifications"
+              },
+              "disabled": {
+                "type": "boolean",
+                "summary": "Whether to disable these notifications"
               }
             },
             "additionalProperties": false,
@@ -8521,6 +9283,9 @@
             "type": "boolean"
           }
         ],
+        "see": {
+          "Configuring Campfire notifications": "https://docs.travis-ci.com/user/notifications/#configuring-campfire-notifications"
+        },
         "normal": true
       },
       "email": {
@@ -8544,19 +9309,25 @@
                     "$ref": "#/definitions/type/secure",
                     "strict": false
                   }
-                ]
+                ],
+                "summary": "Email addresses to notify"
               },
-              "enabled": {
-                "type": "boolean"
-              },
-              "disabled": {
-                "type": "boolean"
+              "if": {
+                "$ref": "#/definitions/type/condition"
               },
               "on_success": {
                 "$ref": "#/definitions/notification/frequency"
               },
               "on_failure": {
                 "$ref": "#/definitions/notification/frequency"
+              },
+              "enabled": {
+                "type": "boolean",
+                "summary": "Whether to enable these notifications"
+              },
+              "disabled": {
+                "type": "boolean",
+                "summary": "Whether to disable these notifications"
               }
             },
             "additionalProperties": false,
@@ -8589,6 +9360,9 @@
             "type": "boolean"
           }
         ],
+        "see": {
+          "Configuring Email notifications": "https://docs.travis-ci.com/user/notifications/#configuring-email-notifications"
+        },
         "normal": true
       },
       "flowdock": {
@@ -8599,22 +9373,28 @@
             "type": "object",
             "properties": {
               "api_token": {
-                "$ref": "#/definitions/type/secure"
+                "$ref": "#/definitions/type/secure",
+                "summary": "Flowdock API token"
               },
               "template": {
                 "$ref": "#/definitions/notification/templates"
               },
-              "enabled": {
-                "type": "boolean"
-              },
-              "disabled": {
-                "type": "boolean"
+              "if": {
+                "$ref": "#/definitions/type/condition"
               },
               "on_success": {
                 "$ref": "#/definitions/notification/frequency"
               },
               "on_failure": {
                 "$ref": "#/definitions/notification/frequency"
+              },
+              "enabled": {
+                "type": "boolean",
+                "summary": "Whether to enable these notifications"
+              },
+              "disabled": {
+                "type": "boolean",
+                "summary": "Whether to disable these notifications"
               }
             },
             "additionalProperties": false,
@@ -8635,12 +9415,16 @@
             "type": "boolean"
           }
         ],
+        "see": {
+          "Configuring Flowdock notifications": "https://docs.travis-ci.com/user/notifications/#configuring-flowdock-notifications"
+        },
         "normal": true
       },
       "frequency": {
         "$id": "frequency",
         "title": "Frequency",
         "type": "string",
+        "summary": "Notification frequency",
         "enum": [
           "always",
           "never",
@@ -8672,35 +9456,44 @@
             "type": "object",
             "properties": {
               "rooms": {
-                "$ref": "#/definitions/type/secures"
+                "$ref": "#/definitions/type/secures",
+                "summary": "Hipchat rooms to notify (needs to include the API token)"
               },
               "format": {
                 "type": "string",
                 "enum": [
                   "html",
                   "text"
-                ]
+                ],
+                "summary": "Format to use for the notication"
               },
               "notify": {
-                "type": "boolean"
+                "type": "boolean",
+                "summary": "Whether to trigger a user notification (using v2)"
               },
               "on_pull_requests": {
-                "type": "boolean"
+                "type": "boolean",
+                "summary": "Whether to notify on pull requests"
               },
               "template": {
                 "$ref": "#/definitions/notification/templates"
               },
-              "enabled": {
-                "type": "boolean"
-              },
-              "disabled": {
-                "type": "boolean"
+              "if": {
+                "$ref": "#/definitions/type/condition"
               },
               "on_success": {
                 "$ref": "#/definitions/notification/frequency"
               },
               "on_failure": {
                 "$ref": "#/definitions/notification/frequency"
+              },
+              "enabled": {
+                "type": "boolean",
+                "summary": "Whether to enable these notifications"
+              },
+              "disabled": {
+                "type": "boolean",
+                "summary": "Whether to disable these notifications"
               }
             },
             "additionalProperties": false,
@@ -8721,6 +9514,9 @@
             "type": "boolean"
           }
         ],
+        "see": {
+          "Configuring Hipchat notifications": "https://docs.travis-ci.com/user/notifications/#configuring-hipchat-notifications"
+        },
         "normal": true
       },
       "irc": {
@@ -8747,40 +9543,52 @@
                     "$ref": "#/definitions/type/secure",
                     "strict": false
                   }
-                ]
+                ],
+                "summary": "IRC channels to notify"
               },
               "channel_key": {
-                "$ref": "#/definitions/type/secure"
+                "$ref": "#/definitions/type/secure",
+                "summary": "IRC channel key (password)"
               },
               "password": {
-                "$ref": "#/definitions/type/secure"
+                "$ref": "#/definitions/type/secure",
+                "summary": "IRC user password"
               },
               "nickserv_password": {
-                "$ref": "#/definitions/type/secure"
+                "$ref": "#/definitions/type/secure",
+                "summary": "IRC nickserv password"
               },
               "nick": {
-                "$ref": "#/definitions/type/secure"
+                "$ref": "#/definitions/type/secure",
+                "summary": "IRC Nick name"
               },
               "use_notice": {
-                "type": "boolean"
+                "type": "boolean",
+                "summary": "Whether to use notices instead of regular messages"
               },
               "skip_join": {
-                "type": "boolean"
+                "type": "boolean",
+                "summary": "Whether to skip joining the channel"
               },
               "template": {
                 "$ref": "#/definitions/notification/templates"
               },
-              "enabled": {
-                "type": "boolean"
-              },
-              "disabled": {
-                "type": "boolean"
+              "if": {
+                "$ref": "#/definitions/type/condition"
               },
               "on_success": {
                 "$ref": "#/definitions/notification/frequency"
               },
               "on_failure": {
                 "$ref": "#/definitions/notification/frequency"
+              },
+              "enabled": {
+                "type": "boolean",
+                "summary": "Whether to enable these notifications"
+              },
+              "disabled": {
+                "type": "boolean",
+                "summary": "Whether to disable these notifications"
               }
             },
             "additionalProperties": false,
@@ -8813,6 +9621,9 @@
             "type": "boolean"
           }
         ],
+        "see": {
+          "Configuring IRC notifications": "https://docs.travis-ci.com/user/notifications/#configuring-irc-notifications"
+        },
         "normal": true
       },
       "pushover": {
@@ -8822,26 +9633,33 @@
           {
             "type": "object",
             "properties": {
-              "enabled": {
-                "type": "boolean"
-              },
-              "disabled": {
-                "type": "boolean"
-              },
               "api_key": {
-                "$ref": "#/definitions/type/secures"
+                "$ref": "#/definitions/type/secures",
+                "summary": "Pushover API key"
               },
               "users": {
-                "$ref": "#/definitions/type/secures"
+                "$ref": "#/definitions/type/secures",
+                "summary": "Pushover users"
               },
               "template": {
                 "$ref": "#/definitions/notification/templates"
+              },
+              "if": {
+                "$ref": "#/definitions/type/condition"
               },
               "on_success": {
                 "$ref": "#/definitions/notification/frequency"
               },
               "on_failure": {
                 "$ref": "#/definitions/notification/frequency"
+              },
+              "enabled": {
+                "type": "boolean",
+                "summary": "Whether to enable these notifications"
+              },
+              "disabled": {
+                "type": "boolean",
+                "summary": "Whether to disable these notifications"
               }
             },
             "additionalProperties": false,
@@ -8856,6 +9674,9 @@
             "type": "boolean"
           }
         ],
+        "see": {
+          "Configuring Pushover notifications": "https://docs.travis-ci.com/user/notifications/#configuring-pushover-notifications"
+        },
         "normal": true
       },
       "slack": {
@@ -8866,25 +9687,32 @@
             "type": "object",
             "properties": {
               "rooms": {
-                "$ref": "#/definitions/type/secures"
+                "$ref": "#/definitions/type/secures",
+                "summary": "Slack channels to notify"
               },
               "template": {
                 "$ref": "#/definitions/notification/templates"
               },
               "on_pull_requests": {
-                "type": "boolean"
+                "type": "boolean",
+                "summary": "Whether to notify on pull requests"
               },
-              "enabled": {
-                "type": "boolean"
-              },
-              "disabled": {
-                "type": "boolean"
+              "if": {
+                "$ref": "#/definitions/type/condition"
               },
               "on_success": {
                 "$ref": "#/definitions/notification/frequency"
               },
               "on_failure": {
                 "$ref": "#/definitions/notification/frequency"
+              },
+              "enabled": {
+                "type": "boolean",
+                "summary": "Whether to enable these notifications"
+              },
+              "disabled": {
+                "type": "boolean",
+                "summary": "Whether to disable these notifications"
               }
             },
             "additionalProperties": false,
@@ -8905,6 +9733,9 @@
             "type": "boolean"
           }
         ],
+        "see": {
+          "Configuring Slack notifications": "https://docs.travis-ci.com/user/notifications/#configuring-slack-notifications"
+        },
         "normal": true
       },
       "template": {
@@ -8947,7 +9778,8 @@
           {
             "$ref": "#/definitions/notification/template"
           }
-        ]
+        ],
+        "summary": "Templates to use for the notification message"
       },
       "webhooks": {
         "$id": "webhooks",
@@ -8970,7 +9802,8 @@
                     "$ref": "#/definitions/type/secure",
                     "strict": false
                   }
-                ]
+                ],
+                "summary": "Webhook URLs to notify"
               },
               "on_start": {
                 "$ref": "#/definitions/notification/frequency"
@@ -8981,17 +9814,22 @@
               "on_error": {
                 "$ref": "#/definitions/notification/frequency"
               },
-              "enabled": {
-                "type": "boolean"
-              },
-              "disabled": {
-                "type": "boolean"
+              "if": {
+                "$ref": "#/definitions/type/condition"
               },
               "on_success": {
                 "$ref": "#/definitions/notification/frequency"
               },
               "on_failure": {
                 "$ref": "#/definitions/notification/frequency"
+              },
+              "enabled": {
+                "type": "boolean",
+                "summary": "Whether to enable these notifications"
+              },
+              "disabled": {
+                "type": "boolean",
+                "summary": "Whether to disable these notifications"
               }
             },
             "additionalProperties": false,
@@ -9024,46 +9862,50 @@
             "type": "boolean"
           }
         ],
+        "see": {
+          "Configuring Webhook notifications": "https://docs.travis-ci.com/user/notifications/#configuring-webhook-notifications"
+        },
         "normal": true
       }
     }
   },
   "expand": [
+    "os",
     "arch",
     "compiler",
+    "osx_image",
+    "jobs",
+    "jdk",
     "crystal",
+    "dotnet",
+    "mono",
+    "solution",
     "d",
     "dart",
     "dart_task",
-    "dotnet",
     "elixir",
-    "elm",
-    "env",
-    "gemfile",
-    "ghc",
-    "go",
-    "haxe",
-    "jdk",
-    "julia",
-    "mono",
-    "nix",
-    "node_js",
-    "os",
-    "osx_image",
     "otp_release",
+    "elm",
+    "node_js",
+    "go",
+    "hhvm",
+    "php",
+    "ghc",
+    "haxe",
+    "julia",
+    "nix",
+    "rvm",
+    "gemfile",
+    "xcode_scheme",
+    "xcode_sdk",
     "perl",
     "perl6",
-    "php",
     "python",
     "r",
     "rust",
-    "rvm",
     "scala",
     "smalltalk",
     "smalltalk_config",
-    "smalltalk_vm",
-    "solution",
-    "xcode_scheme",
-    "xcode_sdk"
+    "smalltalk_vm"
   ]
 }

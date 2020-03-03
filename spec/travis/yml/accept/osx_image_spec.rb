@@ -50,6 +50,6 @@ describe Travis::Yml, 'osx_image' do
           - os: osx
             osx_image: xcode8.2
     )
-    it { should serialize_to matrix: { include: [os: 'osx', osx_image: ['xcode8.2']] } }
+    it { should serialize_to jobs: { include: [os: 'osx', osx_image: 'xcode8.2'] } }
   end
 end

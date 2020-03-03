@@ -4,9 +4,11 @@ describe Travis::Yml::Schema::Def::Elm do
   # it { puts JSON.pretty_generate(subject) }
 
   it do
-    should eq(
+    should include(
       '$id': :elm,
         title: 'Elm',
+        summary: kind_of(String),
+        see: kind_of(Hash),
         type: :object,
         properties: {
           elm: {

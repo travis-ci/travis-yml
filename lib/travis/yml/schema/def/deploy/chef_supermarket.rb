@@ -9,8 +9,8 @@ module Travis
             register :chef_supermarket
 
             def define
-              map :user_id,    to: :secure
-              map :client_key, to: :secure
+              map :user_id,    to: :str
+              map :client_key, to: :str
               map :name,       to: :str, alias: :cookbook_name
               map :category,   to: :str, alias: :cookbook_category
               map :dir,        to: :str

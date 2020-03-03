@@ -11,25 +11,20 @@ module Travis
 
           attr_reader :includes, :mappings
 
-          def initialize(node, opts)
+          def initialize(parent, key, node, opts)
             super
-            @mappings = node.map { |key, schema| [key, build(schema)] }.reject { |_, node| node.internal? }.to_h
-            @includes = node.includes.map { |schema| build(schema) }
+            @mappings = node.map { |key, schema| [key, build(self, key, schema)] }.reject { |_, node| node.internal? }.to_h
+            @includes = node.includes.map { |schema| build(self, key, schema) }
           end
 
           def pages
-            [self, *includes.map(&:pages), *mappings.values.map(&:pages)].flatten
+            [self, *includes.map(&:pages), *mappings.values.map(&:pages)].flatten.select(&:publish?)
           end
 
-          # def children
-          #   mappings.values.select(&:publish?)
-          # end
-
-          # def walk(obj = nil, &block)
-          #   yield *[obj].compact, self
-          #   mappings.each { |_, page| page.walk(*[obj].compact, &block) }
-          #   obj
-          # end
+          def children
+            # return [] if id == :deploys || id == :deploy
+            [mappings.values, includes.map(&:children)].flatten.select(&:publish?).reject(&:deprecated?)
+          end
         end
       end
     end

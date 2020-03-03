@@ -31,7 +31,7 @@ module Travis
 
             def default
               default = supported&.value || defaults.first.value
-              value.info :default, key: value.key, default: default
+              info :default, key: value.key, default: default, line: value.key.line, src: value.key.src
               build(value.parent, value.key, schema.seq? ? [default] : default, value.opts)
             end
 
@@ -59,6 +59,12 @@ module Travis
 
             def enabled?
               value.enabled?(:defaults)
+            end
+
+            def info(*args)
+              node = value.parent
+              node = node.parent if node.seq? && node.key == value.key
+              node.info(*args)
             end
         end
       end

@@ -4,10 +4,12 @@ describe Travis::Yml::Schema::Def::Language do
   # it { puts JSON.pretty_generate(subject) }
 
   it do
-    should eq(
+    should include(
       '$id': :language,
       title: 'Language',
-      summary: 'Language support',
+      summary: kind_of(String),
+      description: kind_of(String),
+      see: kind_of(Hash),
       example: 'ruby',
       type: :string,
       enum: [
@@ -22,8 +24,10 @@ describe Travis::Yml::Schema::Def::Language do
         'elixir',
         'elm',
         'erlang',
+        'generic',
         'go',
         'groovy',
+        'hack',
         'haskell',
         'haxe',
         'java',
@@ -102,7 +106,6 @@ describe Travis::Yml::Schema::Def::Language do
         shell: {
           aliases: [
             'bash',
-            'generic',
             'minimal',
             'sh'
           ]

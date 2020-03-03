@@ -139,4 +139,13 @@ describe Travis::Yml::Doc::Value::Support do
       it { should have_msg on_key: :language, on_value: 'php' }
     end
   end
+
+  describe 'multi-os' do
+    let(:support) { { only: { os: ['linux', 'windows'] } } }
+    let(:supporting) { { os: ['linux', 'osx'] } }
+    let(:obj) { :linux }
+
+    it { should be_supported }
+    it { should_not have_msg }
+  end
 end

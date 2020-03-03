@@ -54,7 +54,7 @@ describe Travis::Yml, 'rubygems', alert: true do
             secure: str
       )
       it { should serialize_to deploy: [provider: 'rubygems', username: { secure: 'str' }] }
-      it { should have_msg [:info, :deploy, :alias, type: :key, alias: 'user', obj: 'username', provider: 'rubygems'] }
+      it { should have_msg [:info, :deploy, :alias_key, alias: 'user', key: 'username', provider: 'rubygems'] }
     end
   end
 
@@ -89,18 +89,6 @@ describe Travis::Yml, 'rubygems', alert: true do
           gem: str
       )
       it { should serialize_to deploy: [provider: 'rubygems', gem: 'str'] }
-      it { should_not have_msg }
-    end
-  end
-
-  describe 'file' do
-    describe 'given a str' do
-      yaml %(
-        deploy:
-          provider: rubygems
-          file: str
-      )
-      it { should serialize_to deploy: [provider: 'rubygems', file: 'str'] }
       it { should_not have_msg }
     end
   end

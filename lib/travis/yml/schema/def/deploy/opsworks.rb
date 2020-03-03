@@ -15,8 +15,8 @@ module Travis
               map :secret_access_key,     to: :secure
               map :region,                to: :str
               map :app_id,                to: :str
-              map :instance_ids,          to: :str
-              map :layer_ids,             to: :str
+              map :instance_ids,          to: :strs
+              map :layer_ids,             to: :strs
               map :migrate,               to: :bool
               map :wait_until_deployed,   to: :str
               map :custom_json,           to: :str

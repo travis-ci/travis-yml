@@ -1,5 +1,5 @@
 describe Travis::Yml, 'snap' do
-  subject { described_class.apply(parse(yaml)) }
+  subject { described_class.load(yaml) }
 
   describe 'snap' do
     describe 'given a str' do

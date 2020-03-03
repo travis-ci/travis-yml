@@ -54,6 +54,10 @@ module Travis
             nodes.each { |node| value.delete(node) }
           end
 
+          def flatten
+            value.map { |value| value.is_a?(Seq) ? value.flatten : value }.flatten
+          end
+
           def clear
             value.clear
           end

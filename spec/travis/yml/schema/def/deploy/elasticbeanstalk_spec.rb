@@ -51,7 +51,10 @@ describe Travis::Yml::Schema::Def::Deploy::Elasticbeanstalk do
                 type: :string
               },
               bucket: {
-                type: :string
+                type: :string,
+                aliases: [
+                  :bucket_name
+                ]
               },
               app: {
                 anyOf: [
@@ -92,9 +95,6 @@ describe Travis::Yml::Schema::Def::Deploy::Elasticbeanstalk do
               zip_file: {
                 type: :string
               },
-              bucket_name: {
-                type: :string
-              },
               bucket_path: {
                 type: :string
               },
@@ -102,6 +102,9 @@ describe Travis::Yml::Schema::Def::Deploy::Elasticbeanstalk do
                 type: :boolean
               },
               wait_until_deployed: {
+                type: :boolean
+              },
+              debug: {
                 type: :boolean
               }
             },

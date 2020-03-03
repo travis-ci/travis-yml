@@ -1,5 +1,5 @@
 describe Travis::Yml, 'cloudformation' do
-  subject { described_class.apply(parse(yaml)) }
+  subject { described_class.load(yaml) }
 
   describe 'access_key_id' do
     describe 'given a secure' do
@@ -156,18 +156,6 @@ describe Travis::Yml, 'cloudformation' do
           create_timeout: 1
       )
       it { should serialize_to deploy: [provider: 'cloudformation', create_timeout: 1] }
-      it { should_not have_msg }
-    end
-  end
-
-  describe 'session_token' do
-    describe 'given a str' do
-      yaml %(
-        deploy:
-          provider: cloudformation
-          session_token: str
-      )
-      it { should serialize_to deploy: [provider: 'cloudformation', session_token: 'str'] }
       it { should_not have_msg }
     end
   end

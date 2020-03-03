@@ -9,6 +9,9 @@ module Travis
           register :scala
 
           def define
+            title 'Scala'
+            summary 'Scala language support'
+            see 'Building a Scala Project': 'https://docs.travis-ci.com/user/languages/scala/'
             matrix :scala
             matrix :jdk, to: :jdks
             map :sbt_args, to: :str

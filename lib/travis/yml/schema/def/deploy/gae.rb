@@ -13,13 +13,14 @@ module Travis
             def define
               map :project,                  to: :str
               map :keyfile,                  to: :str
-              map :config,                   to: :str
+              map :config,                   to: :strs
               map :version,                  to: :str
-              map :no_promote,               to: :bool
-              map :no_stop_previous_version, to: :bool
-              map :default,                  to: :bool
               map :verbosity,                to: :str
-              map :docker_build,             to: :str
+              map :promote,                  to: :bool
+              map :no_promote,               to: :bool, deprecated: 'use promote: false'
+              map :stop_previous_version,    to: :bool
+              map :no_stop_previous_version, to: :bool, deprecated: 'use stop_previous_version: false'
+              map :install_sdk,              to: :bool
             end
           end
         end

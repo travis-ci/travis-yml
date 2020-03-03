@@ -1,0 +1,100 @@
+<html>
+  <head>
+    <link rel="stylesheet" type="text/css" href="/css/docs/styles.css" />
+    <link rel="stylesheet" type="text/css" href="/css/docs/syntax.css" />
+    <script type="text/javascript" src="https://unpkg.com/whatwg-fetch@2.0.3/fetch.js"></script>
+    <script type="text/javascript" src="/js/explore.js"></script>
+    <script type="text/javascript">
+      window.token = "jfnCqbJlbvxZlX40uE0DKg";
+      window.parseURL = "https://yml-staging.travis-ci.org/v1/parse";
+      window.expandURL = "https://yml-staging.travis-ci.org/v1/expand";
+    </script>
+  </head>
+  <body>
+    <div id="menu">
+      <ul>
+<li><a href="/">Home</a></li>
+<li><a href="/ref/language">Language</a></li>
+<li><a href="/ref/os">Os</a></li>
+<li><a href="/ref/job/addons">Addons</a></li>
+<li><a href="/ref/arch">Arch</a></li>
+<li><a href="/ref/job/branches">Branches</a></li>
+<li><a href="/ref/job/cache">Cache</a></li>
+<li><a href="/ref/compiler">Compiler</a></li>
+<li><a href="/ref/job/deploy">Deploy</a></li>
+<li><a href="/ref/dist">Dist</a></li>
+<li><a href="/ref/env">Env</a></li>
+<li><a href="/ref/job/git">Git</a></li>
+<li><a href="/ref/job/if/condition">If</a></li>
+<li><a href="/ref/import">Import</a>
+
+<ul>
+<li><a href="/ref/import/if/condition">If</a></li>
+</ul></li>
+<li><a href="/ref/jobs">Jobs</a></li>
+<li><a href="/ref/notifications">Notifications</a></li>
+<li><a href="/ref/osx_image">Osx Image</a></li>
+<li><a href="/ref/job/services">Services</a></li>
+<li><a href="/ref/stages">Stages</a></li>
+<li><a href="/ref/version">Version</a></li>
+<li><a href="/matrix_expansion">Matrix Expansion</a></li>
+<li><a href="/types">Types</a></li>
+<li><a href="/index">Index</a></li>
+<li><a href="/explore">Explore</a></li>
+</ul>
+
+    </div>
+    <div id="content">
+      <h1 id="imports">Imports</h1>
+
+<p><em>Build configuration imports</em></p>
+
+<p>Import YAML config snippets that can be shared across repositories.</p>
+
+<p>This node uses the key <code>source</code> as a <a href="/types#map">default prefix</a> if not given a <a href="/types">map</a>.</p>
+
+<h2 id="types">Types</h2>
+
+<ul>
+<li><a href="/types">Sequence of Map</a></li>
+<li><a href="/types">Sequence of String</a></li>
+<li><a href="/types">Map</a></li>
+<li><a href="/types">String</a></li>
+</ul>
+
+<h2 id="keys">Keys</h2>
+
+<p>If given a map, the following keys are supported:</p>
+
+<ul>
+<li><p><code>source</code> &mdash; The source to import build config from (type: string, e.g.: <code>./import.yml@v1</code>)</p></li>
+<li><p><code>mode</code> &mdash; How to merge the imported config into the target config (defaults to deep<em>merge</em>append) (type: enum (string), known values: <code>merge</code>, <code>deep_merge</code>, <code>deep_merge_append</code>, <code>deep_merge_prepend</code>)</p></li>
+<li><p><code>if</code> &mdash; Condition to determine if a build, stage, or job should be run, a config source imported, or a notification sent (type: string, e.g.: <code>branch = master</code>, see: <a href="https://docs.travis-ci.com/user/conditional-builds-stages-jobs/">Conditional Builds, Stages, and Jobs</a>, <a href="TBD">Conditional Notifications</a>)</p></li>
+</ul>
+
+<h2 id="examples">Examples</h2>
+
+<pre><code class="yaml">import:
+- source: &quot;./import.yml@v1&quot;
+  mode: merge
+  if: branch = master
+</code></pre>
+
+<pre><code class="yaml">import:
+- &quot;./import.yml@v1&quot;
+</code></pre>
+
+<pre><code class="yaml">import:
+  source: &quot;./import.yml@v1&quot;
+  mode: merge
+  if: branch = master
+</code></pre>
+
+<pre><code class="yaml">import: &quot;./import.yml@v1&quot;
+
+</code></pre>
+
+    </div>
+    <div class="corner-ribbon">Beta</div>
+  </body>
+</html>

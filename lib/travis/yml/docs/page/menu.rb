@@ -4,38 +4,42 @@ module Travis
   module Yml
     module Docs
       module Page
-        class Menu < Obj.new(:pages, :opts)
+        class Menu < Obj.new(:opts)
+          extend Forwardable
           include Helper::Obj, Render
 
+          def_delegators :root, :title
+
           def render
-            super(:menu)
+            super(:menu, opts)
+          end
+
+          def path
+            root.path
+          end
+
+          def root
+            @root ||= Docs.root(opts)
           end
 
           def pages
-            pages = super.values
-            pages = pages.reject { |page| hide?(page) }
-            root  = pages.detect(&:root?)
-            pages = pages - [root]
-            groups = pages.group_by(&:namespace)
-            pages = [root, *groups[:type], *groups[nil]]
-            pages = pages.map(&:id).zip(pages).to_h
-            groups = except(groups, :type)
-            # curr = pages[current.to_sym]
-            # # this sucks, really gotta find a way for the page itself to know its children
-            # curr.children = groups[current.sub(/s$/, '').to_sym] if curr
-            pages.values
+            pages = root.children[0..1]
+            pages = pages + root.children[2..-1].sort_by(&:title)
+            pages = pages + Docs.statics(opts)
+            pages.insert(-2, Docs.index([], opts))
+            pages
           end
 
           def hide?(page)
-            HIDE.include?(page.id) || page.is_a?(Static) || page.deprecated?
+            HIDE.include?(page.id) || page.is_a?(Static) || page.deprecated? || page.included?
           end
 
           def active?(page)
-            page.path =~ /#{current.split('/').first}s?$/
+            current&.include?(page.path.to_s)
           end
 
           def current
-            opts[:current].to_s.sub('node/', '')
+            opts[:current]
           end
         end
       end

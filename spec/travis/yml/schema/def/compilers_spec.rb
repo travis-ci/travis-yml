@@ -5,10 +5,11 @@ describe Travis::Yml::Schema::Def::Compilers do
     # it { puts JSON.pretty_generate(subject[:compilers]) }
 
     it do
-      should eq(
+      should include(
         '$id': :compilers,
         title: 'Compilers',
-        summary: 'Compilers to set up',
+        summary: kind_of(String),
+        see: kind_of(Hash),
         anyOf: [
           {
             type: :array,

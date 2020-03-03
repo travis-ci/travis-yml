@@ -10,6 +10,9 @@ module Travis
             register :sauce_connect
 
             def define
+              summary 'SourceConnect settings'
+              see 'Using Sauce Labs with Travis CI': 'https://docs.travis-ci.com/user/sauce-connect/'
+
               map :enabled,             to: :bool
               map :username,            to: :secure, strict: false
               map :access_key,          to: :secure

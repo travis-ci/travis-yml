@@ -256,6 +256,26 @@ describe Yaml do
     it { should have_attributes opts: { anchors: ['foo'] } }
   end
 
+  describe 'broken anchor (user input, not sure if this is right)' do
+    yaml %(
+      &a:  5
+      b: *a
+      c:
+       <<: *a
+    )
+
+    it { should eq '' => 5, 'b' => '', 'c' => { '<<' => '' } }
+  end
+
+  describe 'map with a map as a key' do
+    yaml %(
+    foo:
+      { bar: baz }: buz
+    )
+
+    it { expect { subject }.to raise_error Psych::SyntaxError }
+  end
+
   describe 'merge modes (map, 1)' do
     yaml %(
       !map+deep_merge+append
@@ -295,5 +315,15 @@ describe Yaml do
     it { should eq 'foo' => ['one'] }
     it { expect(subject['foo']).to be_a Seq }
     it { expect(subject['foo']).to have_attributes opts: { merge: [:append] } }
+  end
+
+  describe 'duplicate keys' do
+    yaml %(
+      one: one
+      one: two
+    )
+    it { should eq 'one' => 'two' }
+    it { should be_a Map }
+    it { should have_attributes opts: { warnings: ['Duplicate key one'] } }
   end
 end

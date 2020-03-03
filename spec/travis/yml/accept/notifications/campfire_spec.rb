@@ -1,12 +1,12 @@
 describe Travis::Yml, 'notifications: campfire' do
-  subject { described_class.apply(parse(yaml)) }
+  subject { described_class.load(yaml) }
 
   describe 'given true' do
     yaml %(
       notifications:
         campfire: true
     )
-    it { should serialize_to notifications: { campfire: { enabled: true } } }
+    it { should serialize_to notifications: { campfire: [enabled: true] } }
     it { should_not have_msg }
   end
 
@@ -15,7 +15,7 @@ describe Travis::Yml, 'notifications: campfire' do
       notifications:
         campfire: false
     )
-    it { should serialize_to notifications: { campfire: { enabled: false } } }
+    it { should serialize_to notifications: { campfire: [enabled: false] } }
     it { should_not have_msg }
   end
 
@@ -25,7 +25,7 @@ describe Travis::Yml, 'notifications: campfire' do
         campfire:
           disabled: true
     )
-    it { should serialize_to notifications: { campfire: { enabled: false } } }
+    it { should serialize_to notifications: { campfire: [enabled: false] } }
     it { should_not have_msg }
   end
 
@@ -35,7 +35,7 @@ describe Travis::Yml, 'notifications: campfire' do
         campfire:
           enabled: false
     )
-    it { should serialize_to notifications: { campfire: { enabled: false } } }
+    it { should serialize_to notifications: { campfire: [enabled: false] } }
     it { should_not have_msg }
   end
 
@@ -45,7 +45,7 @@ describe Travis::Yml, 'notifications: campfire' do
         campfire:
           enabled: true
     )
-    it { should serialize_to notifications: { campfire: { enabled: true } } }
+    it { should serialize_to notifications: { campfire: [enabled: true] } }
     it { should_not have_msg }
   end
 
@@ -55,7 +55,7 @@ describe Travis::Yml, 'notifications: campfire' do
         campfire:
           disabled: false
     )
-    it { should serialize_to notifications: { campfire: { enabled: true } } }
+    it { should serialize_to notifications: { campfire: [enabled: true] } }
     it { should_not have_msg }
   end
 
@@ -64,7 +64,7 @@ describe Travis::Yml, 'notifications: campfire' do
       notifications:
         campfire: str
     )
-    it { should serialize_to notifications: { campfire: { rooms: ['str'] } } }
+    it { should serialize_to notifications: { campfire: [rooms: ['str']] } }
     it { should_not have_msg }
   end
 
@@ -74,7 +74,7 @@ describe Travis::Yml, 'notifications: campfire' do
         campfire:
           secure: secure
     )
-    it { should serialize_to notifications: { campfire: { rooms: [secure: 'secure'] } } }
+    it { should serialize_to notifications: { campfire: [rooms: [secure: 'secure']] } }
     it { should_not have_msg }
   end
 
@@ -85,7 +85,7 @@ describe Travis::Yml, 'notifications: campfire' do
           - foo
           - bar
     )
-    it { should serialize_to notifications: { campfire: { rooms: ['foo', 'bar'] } } }
+    it { should serialize_to notifications: { campfire: [{ rooms: ['foo'] }, { rooms: ['bar'] }] } }
     it { should_not have_msg }
   end
 
@@ -96,7 +96,7 @@ describe Travis::Yml, 'notifications: campfire' do
           campfire:
             rooms: str
       )
-      it { should serialize_to notifications: { campfire: { rooms: ['str'] } } }
+      it { should serialize_to notifications: { campfire: [rooms: ['str']] } }
       it { should_not have_msg }
     end
 
@@ -107,7 +107,7 @@ describe Travis::Yml, 'notifications: campfire' do
             rooms:
               secure: secure
       )
-      it { should serialize_to notifications: { campfire: { rooms: [secure: 'secure'] } } }
+      it { should serialize_to notifications: { campfire: [rooms: [secure: 'secure']] } }
       it { should_not have_msg }
     end
 
@@ -119,7 +119,7 @@ describe Travis::Yml, 'notifications: campfire' do
             - foo
             - bar
       )
-      it { should serialize_to notifications: { campfire: { rooms: ['foo', 'bar'] } } }
+      it { should serialize_to notifications: { campfire: [rooms: ['foo', 'bar']] } }
       it { should_not have_msg }
     end
   end
@@ -131,7 +131,7 @@ describe Travis::Yml, 'notifications: campfire' do
           campfire:
             template: "%{repository}"
       )
-      it { should serialize_to notifications: { campfire: { template: ['%{repository}'] } } }
+      it { should serialize_to notifications: { campfire: [template: ['%{repository}']] } }
       it { should_not have_msg }
     end
 
@@ -141,7 +141,7 @@ describe Travis::Yml, 'notifications: campfire' do
           campfire:
             template: "%{unknown}"
       )
-      it { should serialize_to notifications: { campfire: { template: ['%{unknown}'] } } }
+      it { should serialize_to notifications: { campfire: [template: ['%{unknown}']] } }
       it { should have_msg [:warn, :'notifications.campfire.template', :unknown_var, var: 'unknown'] }
     end
 
@@ -152,7 +152,7 @@ describe Travis::Yml, 'notifications: campfire' do
             template:
               - "%{repository}"
       )
-      it { should serialize_to notifications: { campfire: { template: ['%{repository}'] } } }
+      it { should serialize_to notifications: { campfire: [template: ['%{repository}']] } }
       it { should_not have_msg }
     end
 
@@ -163,7 +163,7 @@ describe Travis::Yml, 'notifications: campfire' do
             template:
             - "%{unknown}"
       )
-      it { should serialize_to notifications: { campfire: { template: ['%{unknown}'] } } }
+      it { should serialize_to notifications: { campfire: [template: ['%{unknown}']] } }
       it { should have_msg [:warn, :'notifications.campfire.template', :unknown_var, var: 'unknown'] }
     end
   end
@@ -177,7 +177,7 @@ describe Travis::Yml, 'notifications: campfire' do
               campfire:
                 #{status}: #{value}
           )
-          it { should serialize_to notifications: { campfire: { status => value } } }
+          it { should serialize_to notifications: { campfire: [status => value] } }
           it { should_not have_msg }
         end
       end
@@ -191,7 +191,7 @@ describe Travis::Yml, 'notifications: campfire' do
               campfire: str
               #{status}: #{value}
           )
-          it { should serialize_to notifications: { campfire: { rooms: ['str'], status => value } } }
+          it { should serialize_to notifications: { campfire: [rooms: ['str'], status => value] } }
           it { should_not have_msg }
         end
       end
@@ -204,7 +204,7 @@ describe Travis::Yml, 'notifications: campfire' do
         campfire:
           unknown: str
     )
-    it { should serialize_to notifications: { campfire: { unknown: 'str' } } }
+    it { should serialize_to notifications: { campfire: [unknown: 'str'] } }
     it { should have_msg [:warn, :'notifications.campfire', :unknown_key, key: 'unknown', value: 'str'] }
   end
 

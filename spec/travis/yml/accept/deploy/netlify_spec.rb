@@ -1,5 +1,5 @@
 describe Travis::Yml, 'netlify' do
-  subject { described_class.apply(parse(yaml)) }
+  subject { described_class.load(yaml) }
 
   describe 'auth' do
     describe 'given a secure' do
