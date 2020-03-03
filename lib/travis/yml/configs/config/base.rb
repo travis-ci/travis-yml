@@ -80,8 +80,8 @@ module Travis
 
           def sort(configs)
             configs.dup.each.with_index do |lft, i|
-              next if lft.imports.any?
-              rgt = configs.detect { |rgt| lft.to_s == rgt.to_s && rgt.imports.any? }
+              next if lft.loaded?
+              rgt = configs.detect { |rgt| lft.to_s == rgt.to_s && rgt.loaded? }
               configs[i] = configs.delete(rgt)
             end
           end
