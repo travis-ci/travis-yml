@@ -30,7 +30,7 @@ module Travis
             level: level,
             key: key,
             code: code,
-            args: except(args, :src, :line),
+            args: except(args || {}, :src, :line),
             src: args[:src],
             line: args[:line]
           )
