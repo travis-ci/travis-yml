@@ -115,6 +115,7 @@ module Travis
           jobs.delete_if { |job| excluded?(job) }
         end
 
+        # Should this drop the entire job instead?
         def without_unsupported(jobs)
           jobs.map { |job| job.select { |key, value| supported?(job, key, value) }.to_h }
         end
@@ -161,13 +162,6 @@ module Travis
           end
         end
 
-        # move this to Yml::Doc.supported?
-        def supported?(job, key, value)
-          supporting = stringify(only(job, :language, :os, :arch))
-          support = Yml.expand.support(key.to_s)
-          Yml::Doc::Value::Support.new(support, supporting, value).supported?
-        end
-
         def filter(jobs)
           jobs.select { |job| accept?(:job, :'jobs.include', job) }
         end
@@ -211,7 +205,8 @@ module Travis
         end
 
         def keys
-          compact(config).keys & expand_keys
+          keys = compact(config).keys & expand_keys
+          keys.select { |key| supported?(config, key, config[key]) }
         end
         memoize :keys
 
@@ -226,6 +221,13 @@ module Travis
 
         def sort(config)
           config.sort_by { |key, _| expand_keys.index(key) || 99 }.to_h
+        end
+
+        # move this to Yml::Doc.supported?
+        def supported?(config, key, value)
+          supporting = stringify(only(config, :language, :os, :arch))
+          support = Yml.expand.support(key.to_s)
+          Yml::Doc::Value::Support.new(support, supporting, value).supported?
         end
 
         def blank?(obj)
