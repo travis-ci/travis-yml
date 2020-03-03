@@ -25,16 +25,20 @@ module Travis
 
       def messages
         msgs.map do |level, key, code, args|
-          compact(
-            type: 'config',
-            level: level,
-            key: key,
-            code: code,
-            args: except(args || {}, :src, :line),
-            src: args[:src],
-            line: args[:line]
-          )
+          message(level, key, code, args || {})
         end
+      end
+
+      def message(level, key, code, args)
+        compact(
+          type: 'config',
+          level: level,
+          key: key,
+          code: code,
+          args: except(args, :src, :line),
+          src: args[:src],
+          line: args[:line]
+        )
       end
 
       def full_messages
