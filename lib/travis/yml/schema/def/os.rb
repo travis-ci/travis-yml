@@ -16,6 +16,9 @@ module Travis
           linux: {
             language: %i(objective-c)
           },
+          freebsd: {
+            language: %i(objective-c)
+          },
           osx: {
             language: %i(php perl erlang groovy clojure scala haskell)
           }
@@ -29,6 +32,7 @@ module Travis
 
         ALIAS = {
           linux:   %i(ubuntu),
+          freebsd: %i(bsd),
           osx:     %i(mac macos macosx ios),
           windows: %i(win)
         }
@@ -54,10 +58,12 @@ module Travis
             downcase
 
             default :linux,   except: EXCEPT[:linux]
+            default :freebsd, except: EXCEPT[:freebsd]
             default :osx,     except: EXCEPT[:osx]
             default :windows, only:   ONLY[:windows]
 
             value   :linux,   alias: ALIAS[:linux],   except: EXCEPT[:linux]
+            value   :freebsd, alias: ALIAS[:freebsd], except: EXCEPT[:freebsd]
             value   :osx,     alias: ALIAS[:osx],     except: EXCEPT[:osx]
             value   :windows, alias: ALIAS[:windows], only:   ONLY[:windows]
             value   :'linux-ppc64le' #, deprecated: 'use os: linux, arch: ppc64le'
