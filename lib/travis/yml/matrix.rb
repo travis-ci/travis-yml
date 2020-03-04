@@ -168,6 +168,7 @@ module Travis
 
         def accept?(type, key, config, ix = 0)
           data = data_for(config)
+          p [type, config[:if], data]
           return true unless data
           return true if Condition.new(config, data).accept?
           msgs << [:info, key, :"skip_#{type}", number: ix + 1, condition: config[:if]]
@@ -176,7 +177,7 @@ module Travis
 
         def data_for(config)
           config = {} unless config.is_a?(Hash)
-          data.merge(only(config, *%i(language os dist env))) if data
+          data.merge(config) if data
         end
 
         def global_env
