@@ -143,7 +143,7 @@ module Travis
         def excluded?(job)
           excluded.any? do |excluded|
             next unless excluded.is_a?(Hash)
-            next unless accept?(:exclude, :'jobs.exclude', job.merge(if: excluded[:if]))
+            next unless accept?(:exclude, :'jobs.exclude', excluded[:if], job)
             except(excluded, :if).all? do |key, value|
               case key
               when :env
@@ -164,13 +164,13 @@ module Travis
         end
 
         def filter(jobs)
-          jobs.select { |job| accept?(:job, :'jobs.include', job) }
+          jobs.select { |job| accept?(:job, :'jobs.include', job[:if], job) }
         end
 
-        def accept?(type, key, config, ix = 0)
+        def accept?(type, key, cond, config, ix = 0)
           data = data_for(config)
           return true unless data
-          return true if Condition.new(config, data).accept?
+          return true if Condition.new(cond, config, data).accept?
           msgs << [:info, key, :"skip_#{type}", number: ix + 1, condition: config[:if]]
           false
         end

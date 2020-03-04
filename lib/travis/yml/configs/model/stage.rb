@@ -7,6 +7,10 @@ module Travis
             attrs[:name]
           end
 
+          def cond
+            attrs[:if]
+          end
+
           def includes?(job)
             name.downcase == job.stage.downcase
           end

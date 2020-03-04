@@ -91,7 +91,7 @@ module Travis
           end
 
           def matches?
-            return true if Condition.new(import, data).accept?
+            return true if Condition.new(import[:if], import, data).accept?
             msg :info, :import, :skip_import, source: to_s, condition: import[:if]
             false
           end

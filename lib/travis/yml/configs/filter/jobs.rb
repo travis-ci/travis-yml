@@ -13,7 +13,7 @@ module Travis
 
           def accept?(job, ix = 0)
             data = data_for(job)
-            return true if Condition.new(job, data).accept?
+            return true if Condition.new(job[:if], job, data).accept?
             msgs << [:info, key, :"skip_job", number: ix + 1, condition: job[:if]]
             false
           end

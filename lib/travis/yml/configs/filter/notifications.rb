@@ -20,7 +20,7 @@ module Travis
               when Array
                 config.map { |config| filter(key, config) }
               when Hash
-                config.map { |key, config| [key, filter(key, config)] }.to_h if accept?(key, config)
+                config.map { |key, config| [key, filter(key, config)] }.to_h if accept?(key, config[:if])
               else
                 config
               end
@@ -28,20 +28,19 @@ module Travis
               config if present?(config)
             end
 
-            def accept?(key, config)
-              return true unless config.key?(:if)
-              return true if Condition.new(config, self.config.merge(data)).accept?
-              msgs << msg(key, config)
+            def accept?(key, cond)
+              return true if Condition.new(cond, config, data).accept?
+              msgs << msg(key, cond)
               false
             end
 
-            def msg(key, config)
+            def msg(key, cond)
               {
                 type:  'config',
                 level: :info,
                 key:   :"notifications.#{key}",
                 code:  :condition,
-                args:  { target: key, condition: config[:if] }
+                args:  { target: key, condition: cond }
               }
             end
 

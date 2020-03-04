@@ -116,7 +116,7 @@ describe Travis::Yml::Configs::Filter, 'notifications' do
   describe 'given a condition using env' do
     describe 'env var present' do
       let(:config) { { email: { recipients: 'me@email.com', if: 'env(FOO)' } } }
-      let(:env) { { FOO: 'foo' } }
+      let(:env) { { global: { FOO: 'foo' } } }
       it { should have_config email: { recipients: 'me@email.com', if: 'env(FOO)' } }
       it { should_not have_msg }
     end

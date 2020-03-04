@@ -3,11 +3,14 @@ require 'travis/yml/helper/obj'
 
 module Travis
   module Yml
-    class Condition < Struct.new(:config, :data)
+    class Condition
       include Helper::Obj, Memoize
 
-      def initialize(data, config)
-        super(symbolize(data || {}), symbolize(config || {}))
+      attr_reader :cond, :data
+
+      def initialize(cond, config, data)
+        @cond = normalize(cond)
+        @data = merge(data, config.dup)
       end
 
       def accept?
@@ -17,13 +20,14 @@ module Travis
         raise InvalidCondition, e.message
       end
 
-      def cond
-        return unless config.is_a?(Hash) && config.key?(:if) && !config[:if].nil?
-        cond = config[:if]
-        cond = cond.to_s unless cond.is_a?(Array) || cond.is_a?(Hash)
-        cond
+      def normalize(cond)
+        cond.to_s unless cond.nil? || cond.is_a?(Array) || cond.is_a?(Hash)
       end
-      memoize :cond
+
+      def merge(data, config)
+        config[:env] = config[:env][:global] if config[:env].is_a?(Hash) && config[:env].key?(:global)
+        super
+      end
 
       def to_s
         "IF #{config[:if]}"
