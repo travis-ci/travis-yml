@@ -23,6 +23,12 @@ module Travis
         # - complete specs in configs/allow_failures
         # - api does not seem to have github app pem files set up everywhere
 
+        # collating env.jobs with env.global during matrix expansion makes it
+        # impossible to reproduce Gatekeeper's allow_failures logic with regards
+        # to equality of env vars, as at this point the original env.jobs vars
+        # are unknown. (unless we do something wild, like abusing Ruby's taint
+        # feature or similar)
+
         def load
           fetch
           merge

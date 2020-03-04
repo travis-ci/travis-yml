@@ -542,8 +542,7 @@ describe Travis::Yml::Configs do
         env:
           global:
             - FOO=foo
-        matrix:
-          fast_finish: true
+        jobs:
           include:
             - env: BAR=bar
             - env: BAZ=baz
@@ -553,6 +552,25 @@ describe Travis::Yml::Configs do
     end
 
     it { expect(jobs.map { |c| c[:allow_failure] }).to eq [nil, true] }
+  end
+
+  describe 'allow_failure matching both per-job and global env vars' do
+    let(:travis_yml) do
+      <<~yml
+        env:
+          global:
+            - FOO=foo
+        jobs:
+          include:
+            - env: BAR=bar
+          allow_failures:
+            - env:
+              - FOO=foo
+              - BAR=bar
+      yml
+    end
+
+    it { expect(jobs.map { |c| c[:allow_failure] }).to eq [true] }
   end
 
   describe 'stages and allow_failures' do
@@ -700,13 +718,13 @@ describe Travis::Yml::Configs do
       end
     end
 
-    # describe 'wat' do
-    #   yaml %(
-    #   )
-    #
-    #   it do
-    #     puts jobs.size
-    #   end
-    # end
+    describe 'wat' do
+      yaml %(
+      )
+
+      it do
+        puts jobs.size
+      end
+    end
   end
 end

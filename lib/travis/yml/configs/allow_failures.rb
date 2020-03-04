@@ -58,8 +58,15 @@ module Travis
         end
 
         def matches_env?(lft, rgt)
-          lft = lft - (config[:env].is_a?(Hash) && config[:env][:global] || []) if lft
-          lft == rgt
+          return false unless lft
+          global = config[:env].is_a?(Hash) && config[:env][:global] || []
+          lft = lft - global if lft
+          return true if lft == rgt
+          others = rgt - lft
+          # this is not accurate, but tries to work around the fact that
+          # env.jobs and env.global have been clobbered during matrix expansion
+          # and we can now no longer know the original per-jobs vars
+          others.all? { |var| global.include?(var) }
         end
 
         def jobs
