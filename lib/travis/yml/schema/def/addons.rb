@@ -41,6 +41,7 @@ module Travis
             map :hosts,           to: :seq, summary: 'Hosts to add to /etc/hosts'
             map :jwt,             to: :jwts
             map :sauce_connect
+            map :pkg
 
             # turn this into a proper addon definition. the map allows the key debug: true
             map :srcclr, to: Class.new(Type::Any) {
@@ -78,4 +79,5 @@ require 'travis/yml/schema/def/addon/homebrew'
 require 'travis/yml/schema/def/addon/jwts'
 require 'travis/yml/schema/def/addon/sauce_connect'
 require 'travis/yml/schema/def/addon/snaps'
+require 'travis/yml/schema/def/addon/pkg'
 require 'travis/yml/schema/def/addon/sonarcloud'

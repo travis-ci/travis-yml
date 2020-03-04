@@ -156,6 +156,9 @@
           "sauce_connect": {
             "$ref": "#/definitions/addon/sauce_connect"
           },
+          "pkg": {
+            "$ref": "#/definitions/addon/pkg"
+          },
           "srcclr": {
             "anyOf": [
               {
@@ -2490,6 +2493,48 @@
           "JWT addon will be deprecated on April 17": "https://blog.travis-ci.com/2018-01-23-jwt-addon-is-deprecated"
         },
         "deprecated": "Discontinued as of April 17, 2018"
+      },
+      "pkg": {
+        "$id": "pkg",
+        "title": "Pkg",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "packages": {
+                "$ref": "#/definitions/type/strs",
+                "aliases": [
+                  "package"
+                ],
+                "summary": "Package names",
+                "example": "cmake"
+              },
+              "branch": {
+                "type": "string",
+                "summary": "Packages branch",
+                "example": "quarterly"
+              }
+            },
+            "additionalProperties": false,
+            "prefix": {
+              "key": "packages"
+            },
+            "normal": true,
+            "changes": [
+              {
+                "change": "enable"
+              }
+            ]
+          },
+          {
+            "$ref": "#/definitions/type/strs",
+            "example": "cmake"
+          },
+          {
+            "type": "boolean"
+          }
+        ],
+        "normal": true
       },
       "sauce_connect": {
         "$id": "sauce_connect",
