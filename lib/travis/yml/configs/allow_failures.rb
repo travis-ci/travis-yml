@@ -32,7 +32,7 @@ module Travis
         end
 
         def accept?(config, job)
-          Condition.new(config, job.merge(data)).accept?
+          Condition.new(config, data.merge(job)).accept?
         end
 
         def select(config)
