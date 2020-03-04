@@ -176,7 +176,7 @@ module Travis
 
         def data_for(config)
           config = {} unless config.is_a?(Hash)
-          only(config, *%i(language os dist env)).merge(data) if data
+          data.merge(only(config, *%i(language os dist env))) if data
         end
 
         def global_env
