@@ -18,7 +18,7 @@ describe Travis::Yml, 'addon: pkg' do
           package: str
     )
     it { should serialize_to addons: { pkg: { packages: ['str'] } } }
-    it { should have_msg [:info, :'addons.pkg', :alias, type: :key, alias: 'package', obj: 'packages'] }
+    it { should have_msg [:info, :'addons.pkg', :alias_key, alias: 'package', key: 'packages'] }
   end
 
   describe 'packages given a seq' do
@@ -40,7 +40,7 @@ describe Travis::Yml, 'addon: pkg' do
           - str
     )
     it { should serialize_to addons: { pkg: { packages: ['str'] } } }
-    it { should have_msg [:info, :'addons.pkg', :alias, type: :key, alias: 'package', obj: 'packages'] }
+    it { should have_msg [:info, :'addons.pkg', :alias_key, alias: 'package', key: 'packages'] }
   end
 
   describe 'branch given a string' do
