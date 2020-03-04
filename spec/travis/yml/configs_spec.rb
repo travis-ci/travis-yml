@@ -737,5 +737,14 @@ describe Travis::Yml::Configs do
       it { expect(stages.size).to eq 2 }
       it { expect(jobs.size).to eq 3 }
     end
+
+    # describe 'wat' do
+    #   yaml %(
+    #   )
+    #
+    #   it do
+    #     p jobs.size
+    #   end
+    # end
   end
 end

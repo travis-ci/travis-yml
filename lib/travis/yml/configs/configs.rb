@@ -19,16 +19,25 @@ module Travis
         attr_reader :configs, :config, :stages, :jobs
 
         # - restore messages
+        # - add an acceptance test suite testing all the things through web?
         # - consider alerting on secure values that are shorter than 100 chars or
         #   is not base64 decoded: Base64.encode64(Base64.decode64(str)) == str
         # - complete specs in configs/allow_failures
         # - api does not seem to have github app pem files set up everywhere
 
         # collating env.jobs with env.global during matrix expansion makes it
-        # impossible to reproduce Gatekeeper's allow_failures logic with regards
-        # to equality of env vars, as at this point the original env.jobs vars
-        # are unknown. (unless we do something wild, like abusing Ruby's taint
-        # feature or similar)
+        # impossible to reproduce Gatekeeper's jobs.allow_failures and
+        # jobs.exclude logic with regards to equality of env vars, as at this
+        # point the original env.jobs vars are unknown. (unless we do something
+        # wild, like abusing Ruby's taint feature or similar)
+
+        # setting defaults early vs matrix expansion: if Yml sets defaults on
+        # matrix expansion keys, then the matrix expansion logic has no way to
+        # figure out if the original config had matrix expansion keys set or
+        # not. this resulted in the choice to always reject a single job coming
+        # out of the matrix expansion. in order to address that we could either
+        # use the msgs produced or mark defaults added to the config in some
+        # other way. see https://travisci.slack.com/archives/C5E02QW64/p1582052445034800
 
         def load
           fetch

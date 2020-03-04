@@ -142,7 +142,8 @@ module Travis
 
         def excluded?(job)
           excluded.any? do |excluded|
-            next unless accept?(:exclude, :'jobs.exclude', excluded)
+            next unless excluded.is_a?(Hash)
+            next unless accept?(:exclude, :'jobs.exclude', job.merge(if: excluded[:if]))
             except(excluded, :if).all? do |key, value|
               case key
               when :env
@@ -176,7 +177,7 @@ module Travis
 
         def data_for(config)
           config = {} unless config.is_a?(Hash)
-          data.merge(only(config, *%i(language os dist env))) if data
+          data.merge(config) if data
         end
 
         def global_env

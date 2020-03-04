@@ -583,6 +583,19 @@ describe Travis::Yml, 'matrix' do
     expands_to [{ env: [FOO: 'one'] }, { env: [FOO: 'two'] }]
   end
 
+  describe 'conditional jobs exclude matching env' do
+    yaml %(
+      env:
+        - FOO=one
+        - FOO=two
+      jobs:
+        exclude:
+          - if: env(FOO) = two
+    )
+
+    expands_to [{ env: [FOO: 'one'] }]
+  end
+
   describe 'null env with include' do
     yaml %(
       env:
