@@ -37,6 +37,7 @@ describe Travis::Yml::Schema::Def::Oss do
         enum: [
           'linux',
           'osx',
+          'freebsd',
           'windows',
           'linux-ppc64le'
         ],
@@ -60,6 +61,14 @@ describe Travis::Yml::Schema::Def::Oss do
                 'clojure',
                 'scala',
                 'haskell'
+              ]
+            }
+          },
+          {
+            value: 'freebsd',
+            except: {
+              language: [
+                'objective-c'
               ]
             }
           },
@@ -108,6 +117,16 @@ describe Travis::Yml::Schema::Def::Oss do
                 'clojure',
                 'scala',
                 'haskell',
+              ]
+            }
+          },
+          freebsd: {
+            aliases: [
+              'bsd'
+            ],
+            except: {
+              language: [
+                'objective-c'
               ]
             }
           },

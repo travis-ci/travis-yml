@@ -142,6 +142,7 @@ describe Travis::Yml::Schema::Def::Root do
         jwts
         sauce_connect
         snaps
+        pkg
         sonarcloud
       ),
       deploy: %i(

@@ -12,6 +12,7 @@ describe Travis::Yml, 'os' do
       linux
       osx
       windows
+      freebsd
     )
 
     known.each do |value|
@@ -61,8 +62,9 @@ describe Travis::Yml, 'os' do
         os:
         - linux
         - osx
+        - freebsd
       )
-      it { should serialize_to os: ['linux', 'osx'] }
+      it { should serialize_to os: ['linux', 'osx', 'freebsd'] }
     end
 
     describe 'aliases' do
@@ -79,8 +81,9 @@ describe Travis::Yml, 'os' do
         os:
           - LINUX
           - OSX
+          - FREEBSD
       )
-      it { should serialize_to os: ['linux', 'osx'] }
+      it { should serialize_to os: ['linux', 'osx', 'freebsd'] }
     end
   end
 
