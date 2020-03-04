@@ -12,7 +12,7 @@ module Travis
             def define
               prefix :packages
 
-              map :packages, to: :seq, alias: :package, summary: 'Package names', eg: 'cmake'
+              map :packages, to: :seq, summary: 'Package names', eg: 'cmake'
               map :branch, to: :str, summary: 'Packages branch', eg: 'quarterly'
             end
           end
