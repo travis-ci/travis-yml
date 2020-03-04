@@ -225,6 +225,22 @@ describe Travis::Yml, 'matrix' do
     ]
   end
 
+  describe 'matrix key unsupported by the language does not leave bogus job' do
+    yaml %(
+      language: shell
+      compiler:
+        - gcc
+        - clang
+      matrix:
+        include:
+          - env: ONE=one
+    )
+
+    expands_to [
+      { language: 'shell', env: [ONE: 'one'] }
+    ]
+  end
+
   describe 'os matrix with no language', defaults: true do
     yaml %(
       os:

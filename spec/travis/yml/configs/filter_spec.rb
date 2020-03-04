@@ -5,11 +5,12 @@ describe Travis::Yml::Configs::Filter, 'notifications' do
   let(:msg) { { type: 'config', level: :info, key: :'notifications.email', code: :condition, args: { target: :email, condition: 'false' } } }
   let(:env) { {} }
 
-  subject { described_class.new({ env: env, notifications: config }, data) }
+  subject { described_class.new({ env: env, notifications: config }, [], data) }
 
   matcher :have_config do |expected|
     match do |filter|
-      actual = filter.apply[:notifications]
+      filter.apply
+      actual = filter.config[:notifications]
       expected ? actual == expected : !actual.nil?
     end
   end

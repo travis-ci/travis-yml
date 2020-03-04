@@ -18,7 +18,7 @@ module Travis
       end
 
       def cond
-        return unless config.key?(:if) && !config[:if].nil?
+        return unless config.is_a?(Hash) && config.key?(:if) && !config[:if].nil?
         cond = config[:if]
         cond = cond.to_s unless cond.is_a?(Array) || cond.is_a?(Hash)
         cond

@@ -4,12 +4,16 @@ module Travis
   module Yml
     module Configs
       class Filter
-        class Notifications < Struct.new(:config, :data, :msgs)
+        class Notifications < Obj.new(:config, :jobs, :data, :msgs)
           def apply
-            compact(config.merge(notifications: filter(nil, config[:notifications])))
+            @config = compact(config.merge(notifications: notifications))
           end
 
           private
+
+            def notifications
+              filter(nil, config[:notifications])
+            end
 
             def filter(key, config)
               config = case config

@@ -327,6 +327,22 @@ describe Travis::Yml::Configs do
     it { expect(msgs).to include [:info, :'jobs.exclude', :skip_exclude, number: 1, condition: 'type = api'] }
   end
 
+  describe 'job.exclude matching default stage name' do
+    let(:travis_yml) do
+      <<~yml
+        env:
+          - ONE=one
+          - TWO=two
+        jobs:
+          exclude:
+          - env: TWO=two
+            stage: test
+      yml
+    end
+
+    it { expect(jobs).to eq [env: [ONE: 'one']] }
+  end
+
   describe 'matrix expansion does not alter the merged request config' do
     let(:travis_yml) do
       <<~yml
@@ -683,5 +699,14 @@ describe Travis::Yml::Configs do
         ]
       end
     end
+
+    # describe 'wat' do
+    #   yaml %(
+    #   )
+    #
+    #   it do
+    #     puts jobs.size
+    #   end
+    # end
   end
 end

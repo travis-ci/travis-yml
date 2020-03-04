@@ -115,6 +115,7 @@ module Travis
           jobs.delete_if { |job| excluded?(job) }
         end
 
+        # Should this drop the entire job instead?
         def without_unsupported(jobs)
           jobs.map { |job| job.select { |key, value| supported?(job, key, value) }.to_h }
         end
@@ -150,6 +151,8 @@ module Travis
                 env = job[:env]
                 env = env - (config[:env].is_a?(Hash) && config[:env][:global] || []) if env
                 env == value
+              when :stage
+                job[:stage] == value || job[:stage].nil? && value.downcase == 'test'
               else
                 # TODO if this is a hash or array we should not match for
                 # equality, but inclusion (partial job.exclude matching)
@@ -157,13 +160,6 @@ module Travis
               end
             end
           end
-        end
-
-        # move this to Yml::Doc.supported?
-        def supported?(job, key, value)
-          supporting = stringify(only(job, :language, :os, :arch))
-          support = Yml.expand.support(key.to_s)
-          Yml::Doc::Value::Support.new(support, supporting, value).supported?
         end
 
         def filter(jobs)
@@ -209,7 +205,8 @@ module Travis
         end
 
         def keys
-          compact(config).keys & expand_keys
+          keys = compact(config).keys & expand_keys
+          keys.select { |key| supported?(config, key, config[key]) }
         end
         memoize :keys
 
@@ -224,6 +221,13 @@ module Travis
 
         def sort(config)
           config.sort_by { |key, _| expand_keys.index(key) || 99 }.to_h
+        end
+
+        # move this to Yml::Doc.supported?
+        def supported?(config, key, value)
+          supporting = stringify(only(config, :language, :os, :arch))
+          support = Yml.expand.support(key.to_s)
+          Yml::Doc::Value::Support.new(support, supporting, value).supported?
         end
 
         def blank?(obj)

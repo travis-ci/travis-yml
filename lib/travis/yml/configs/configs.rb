@@ -26,10 +26,10 @@ module Travis
         def load
           fetch
           merge
-          filter
           reencrypt
           expand_matrix
           expand_stages
+          filter
           allow_failures
           reorder_jobs
           unique_jobs
@@ -79,8 +79,9 @@ module Travis
           end
 
           def filter
-            filter = Filter.new(config, data)
-            @config = filter.apply
+            filter = Filter.new(config, jobs, data).tap(&:apply)
+            @config = filter.config
+            @jobs = filter.jobs
             msgs.concat(filter.msgs)
           end
 
