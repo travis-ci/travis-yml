@@ -5,7 +5,7 @@ require 'travis/yml/helper/condition'
 module Travis
   module Yml
     module Configs
-      class Stages < Struct.new(:configs, :jobs, :data)
+      class Stages < Struct.new(:config, :jobs, :data)
         # This will use the stage order defined in the :stages section, or an
         # empty array if none. Any stage names that not present in the stages
         # section, but are present in the jobs list, will be appended to the
@@ -44,7 +44,7 @@ module Travis
           end
 
           def filter_jobs
-            @jobs = jobs.select { |job| stages.map(&:name).map(&:downcase).include?(job.stage.downcase) }
+            @jobs = jobs.select { |job| stages.any? { |stage| stage.name.casecmp(job.stage) == 0 } }
           end
 
           def stages
@@ -55,20 +55,24 @@ module Travis
             jobs.map(&:stage).compact.map { |name| { name: name } }
           end
 
+          def jobs_on(stage)
+            jobs.select { |job| job.stage.casecmp(stage.name) == 0 }
+          end
+
           def jobs
             @jobs ||= super.map { |attrs| Job.new(attrs) }
           end
 
-          def configs
-            Array(super)
-          end
-
           def accept?(stage)
-            Condition.new(stage.attrs, data).accept?
+            jobs_on(stage).any? { |job| Condition.new(stage.attrs, data.merge(job.attrs)).accept? }
           end
 
           def empty?(stage)
             jobs.none? { |job| stage.includes?(job) }
+          end
+
+          def configs
+            Array(config[:stages])
           end
 
           def default_name

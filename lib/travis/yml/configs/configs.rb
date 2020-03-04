@@ -105,7 +105,7 @@ module Travis
           time :expand_matrix
 
           def expand_stages
-            @stages, @jobs = Stages.new(config[:stages], jobs, data).apply
+            @stages, @jobs = Stages.new(config, jobs, data).apply
           end
 
           def allow_failures
