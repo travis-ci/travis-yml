@@ -704,4 +704,11 @@ describe Travis::Yml, 'matrix' do
       { env: [TWO: 'two'], stage: 'one' },
     ]
   end
+
+  # describe 'wat' do
+  #   yaml %(
+  #   )
+  #
+  #   it { p subject.size }
+  # end
 end

@@ -151,6 +151,7 @@ module Travis
                 # for inclusion (see below)
                 env = job[:env]
                 env = env - (config[:env].is_a?(Hash) && config[:env][:global] || []) if env
+                env = env - config[:global_env] if config[:global_env].is_a?(Array)
                 env == value
               when :stage
                 job[:stage] == value || job[:stage].nil? && value.downcase == 'test'
