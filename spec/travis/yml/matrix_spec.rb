@@ -481,6 +481,51 @@ describe Travis::Yml, 'matrix' do
 
       expands_to [{ env: [FOO: 'one'] }]
     end
+
+    describe 'global.env matches' do
+      yaml %(
+        env:
+          global:
+            - ONE=one
+
+        jobs:
+          include:
+            - if: env(ONE) IS present
+              name: one
+
+            - if: env(ONE) IS present
+              name: two
+              env:
+                - TWO=two
+      )
+
+      expands_to [
+        { if: 'env(ONE) IS present', name: 'one', env: [{ ONE: 'one' }] },
+        { if: 'env(ONE) IS present', name: 'two', env: [{ ONE: 'one' }, { TWO: 'two' }] }
+      ]
+    end
+
+    describe 'global.env matches' do
+      yaml %(
+        global_env:
+          - ONE: one
+
+        jobs:
+          include:
+            - if: env(ONE) IS present
+              name: one
+
+            - if: env(ONE) IS present
+              name: two
+              env:
+                - TWO=two
+      )
+
+      expands_to [
+        { if: 'env(ONE) IS present', name: 'one', env: [{ ONE: 'one' }] },
+        { if: 'env(ONE) IS present', name: 'two', env: [{ ONE: 'one' }, { TWO: 'two' }] }
+      ]
+    end
   end
 
   describe 'jobs exclude (1)' do

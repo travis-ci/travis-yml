@@ -8,7 +8,7 @@ module Travis
     class Matrix < Obj.new(:config, :data)
       include Helper::Obj, Memoize
 
-      DROP = %i(jobs import stages notifications version allow_failure)
+      DROP = %i(jobs import stages notifications version allow_failure global_env)
 
       def initialize(config, data)
         config = sort(config)
@@ -181,7 +181,8 @@ module Travis
         end
 
         def global_env
-          config[:env] && config[:env].is_a?(Hash) && config[:env][:global]
+          env = config[:env] && config[:env].is_a?(Hash) && config[:env][:global]
+          env || config[:global_env] # BC Gatekeeper matrix expansion
         end
 
         def first_env
