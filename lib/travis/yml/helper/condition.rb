@@ -16,7 +16,10 @@ module Travis
       def accept?
         return true unless cond
         Travis::Conditions.eval(cond, data, version: :v1)
-      rescue Travis::Conditions::Error, ArgumentError, RegexpError, TypeError => e
+      rescue TypeError, ArgumentError => e
+        Raven.capture_exception(e, extra: { condition: cond, data: data }) if defined?(Raven)
+        raise InvalidCondition, e.message
+      rescue Travis::Conditions::Error, RegexpError => e
         raise InvalidCondition, e.message
       end
 
