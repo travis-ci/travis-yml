@@ -21,6 +21,7 @@ module Travis
           def dealias(key)
             other = schema.key_aliases[key] || schema.key_aliases[key.to_s.tr('-', '_')]
             return key if !other || key == other
+            key = ::Key.new(key) unless key.is_a?(Key)
             value.parent.info :alias_key, alias: key, key: other, line: key.line, src: key.src
             value.parent.error :overwrite, key: key, other: other if value.parent.key?(other)
             other
@@ -101,6 +102,7 @@ module Travis
           end
 
           def msg(level, type, key, other)
+            key = ::Key.new(key) unless key.is_a?(Key)
             value.parent.msg level, type, original: key, key: other, line: key.line, src: key.src
           end
 
