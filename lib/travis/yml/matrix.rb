@@ -169,7 +169,6 @@ module Travis
         end
 
         def accept?(type, key, cond, config, ix = 0)
-          data = data_for(config)
           return true unless data
           return true if Condition.new(cond, config, data).accept?
           msgs << [:info, key, :"skip_#{type}", number: ix + 1, condition: config[:if]]
@@ -177,11 +176,6 @@ module Travis
         rescue InvalidCondition => e
           Raven.capture_exception(e, extra: { type: type, condition: cond, data: data }) if defined?(Raven)
           false
-        end
-
-        def data_for(config)
-          config = {} unless config.is_a?(Hash)
-          data.merge(config) if data
         end
 
         def global_env

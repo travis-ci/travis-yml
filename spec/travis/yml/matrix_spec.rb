@@ -505,25 +505,24 @@ describe Travis::Yml, 'matrix' do
       ]
     end
 
-    describe 'global.env matches' do
+    describe 'settings env var matches, with global env var present' do
       yaml %(
-        global_env:
-          - ONE: one
+        env:
+          global:
+            - GLOBAL=true
 
         jobs:
           include:
-            - if: env(ONE) IS present
-              name: one
-
-            - if: env(ONE) IS present
-              name: two
-              env:
-                - TWO=two
+            - name: one
+            - name: two
+              if: env(SETTING) is present
       )
 
+      let(:data) { { env: [SETTING: true] } }
+
       expands_to [
-        { if: 'env(ONE) IS present', name: 'one', env: [{ ONE: 'one' }] },
-        { if: 'env(ONE) IS present', name: 'two', env: [{ ONE: 'one' }, { TWO: 'two' }] }
+        { name: 'one', env: [GLOBAL: 'true'] },
+        { name: 'two', env: [GLOBAL: 'true'], if: 'env(SETTING) is present' },
       ]
     end
   end
