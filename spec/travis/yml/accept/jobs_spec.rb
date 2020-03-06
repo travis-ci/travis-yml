@@ -92,11 +92,12 @@ describe Travis::Yml, 'jobs' do
       it { should_not have_msg }
     end
 
-    describe 'given a seq of strings (misplaced env.jobs)' do
+    describe 'given a seq of strings (misplaced env.jobs)', drop: true do
       yaml %(
         jobs:
           - FOO=foo
       )
+      it { should serialize_to empty }
       it { should have_msg [:error, :jobs, :invalid_type, expected: :map, actual: :seq, value: ['FOO=foo']] }
     end
 
