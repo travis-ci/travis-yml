@@ -38,7 +38,7 @@ describe Travis::Yml::Configs::Filter, 'notifications' do
   describe 'given an array of hashes with a failing condition' do
     let(:config) { [email: { recipients: 'me@email.com', if: 'false' }] }
     it { should_not have_config }
-    it { should have_msg [:info, :'notifications.email', :skip_notification, type: :email, condition: 'false'] }
+    it { should have_msg [:info, :'notifications.email', :skip_notification, type: :email, number: 1, condition: 'false'] }
   end
 
   describe 'given a hash with no condition' do
@@ -56,7 +56,7 @@ describe Travis::Yml::Configs::Filter, 'notifications' do
   describe 'given a hash with a failing condition' do
     let(:config) { { email: { recipients: 'me@email.com', if: 'false' } } }
     it { should_not have_config }
-    it { should have_msg [:info, :'notifications.email', :skip_notification, type: :email, condition: 'false'] }
+    it { should have_msg [:info, :'notifications.email', :skip_notification, type: :email, number: 1, condition: 'false'] }
   end
 
   describe 'given a hash with a false value' do
@@ -124,7 +124,7 @@ describe Travis::Yml::Configs::Filter, 'notifications' do
     describe 'env var missing' do
       let(:config) { { email: { recipients: 'me@email.com', if: 'env(FOO)' } } }
       it { should_not have_config }
-    it { should have_msg [:info, :'notifications.email', :skip_notification, type: :email, condition: 'env(FOO)'] }
+    it { should have_msg [:info, :'notifications.email', :skip_notification, type: :email, number: 1, condition: 'env(FOO)'] }
     end
   end
 
@@ -138,7 +138,7 @@ describe Travis::Yml::Configs::Filter, 'notifications' do
     describe 'branch does not match' do
       let(:config) { { email: { recipients: 'me@email.com', if: 'branch = other' } } }
       it { should_not have_config }
-      it { should have_msg [:info, :'notifications.email', :skip_notification, type: :email, condition: 'branch = other'] }
+      it { should have_msg [:info, :'notifications.email', :skip_notification, type: :email, number: 1, condition: 'branch = other'] }
     end
   end
 end

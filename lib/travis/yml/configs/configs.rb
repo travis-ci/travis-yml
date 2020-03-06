@@ -114,11 +114,15 @@ module Travis
           time :expand_matrix
 
           def expand_stages
-            @stages, @jobs = Stages.new(config, jobs, data).apply
+            stages = Stages.new(config, jobs, data)
+            @stages, @jobs = stages.apply
+            msgs.concat(stages.msgs)
           end
 
           def allow_failures
-            @jobs = AllowFailures.new(config, jobs, data).apply
+            allow_failures = AllowFailures.new(config, jobs, data)
+            @jobs = allow_failures.apply
+            msgs.concat(allow_failures.msgs)
           end
 
           def reorder_jobs

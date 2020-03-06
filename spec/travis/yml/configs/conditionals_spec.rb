@@ -22,6 +22,7 @@ describe Travis::Yml::Configs, 'conditionals' do
       )
 
       it { should eq 0 }
+      it { should have_msg [:info, :'jobs.include', :skip_job, number: 1, condition: 'false'] }
     end
 
     describe 'matching branch' do
@@ -32,6 +33,7 @@ describe Travis::Yml::Configs, 'conditionals' do
       )
 
       it { should eq 1 }
+      it { should_not have_msg }
     end
 
     describe 'matching name' do
@@ -43,6 +45,7 @@ describe Travis::Yml::Configs, 'conditionals' do
       )
 
       xit { should eq 1 }
+      xit { should_not have_msg }
     end
 
     describe 'matching env (given as repo setting)' do
@@ -53,6 +56,7 @@ describe Travis::Yml::Configs, 'conditionals' do
       )
 
       it { should eq 1 }
+      it { should_not have_msg }
     end
 
     describe 'matching env (given as env.global)' do
@@ -66,6 +70,7 @@ describe Travis::Yml::Configs, 'conditionals' do
       )
 
       it { should eq 1 }
+      it { should_not have_msg }
     end
 
     describe 'matching env (given as env.jobs, picking the first entry)' do
@@ -79,6 +84,7 @@ describe Travis::Yml::Configs, 'conditionals' do
       )
 
       it { should eq 1 }
+      it { should_not have_msg }
     end
 
     describe 'matching env (given as jobs.include.env)' do
@@ -90,6 +96,7 @@ describe Travis::Yml::Configs, 'conditionals' do
       )
 
       it { should eq 1 }
+      it { should_not have_msg }
     end
 
     describe 'invalid condition' do
@@ -119,6 +126,7 @@ describe Travis::Yml::Configs, 'conditionals' do
       )
 
       it { should eq 0 }
+      it { should have_msg [:info, :stages, :skip_stage, number: 1, condition: 'false'] }
     end
 
     describe 'matching branch' do
@@ -132,6 +140,7 @@ describe Travis::Yml::Configs, 'conditionals' do
       )
 
       it { should eq 1 }
+      it { should_not have_msg }
     end
 
     describe 'matching env (given as repo setting)' do
@@ -145,6 +154,7 @@ describe Travis::Yml::Configs, 'conditionals' do
       )
 
       it { should eq 1 }
+      it { should_not have_msg }
     end
 
     describe 'matching env (given as env.global)' do
@@ -158,32 +168,35 @@ describe Travis::Yml::Configs, 'conditionals' do
       )
 
       it { should eq 1 }
+      it { should_not have_msg }
     end
 
     describe 'matching env (given as env.jobs)' do
       yaml %(
         env:
           jobs:
-            ONE: one
+            one: one
         stages:
           - name: test
-            if: env(ONE) = one
+            if: env(one) = one
       )
 
       it { should eq 0 }
+      it { should have_msg [:info, :stages, :skip_stage, number: 1, condition: 'env(one) = one'] }
     end
 
     describe 'matching env (given as jobs.include.env)' do
       yaml %(
         stages:
           - name: test
-            if: env(ONE) = one
+            if: env(one) = one
         jobs:
           include:
-          - env: ONE=one
+          - env: one=one
       )
 
       it { should eq 0 }
+      it { should have_msg [:info, :stages, :skip_stage, number: 1, condition: 'env(one) = one'] }
     end
 
     describe 'invalid condition' do
@@ -214,6 +227,7 @@ describe Travis::Yml::Configs, 'conditionals' do
       )
 
       it { should eq 1 }
+      it { should have_msg [:info, :'jobs.exclude', :skip_exclude, number: 1, condition: 'false'] }
     end
 
     describe 'matching branch' do
@@ -226,6 +240,7 @@ describe Travis::Yml::Configs, 'conditionals' do
       )
 
       it { should eq 0 }
+      it { should_not have_msg }
     end
 
     describe 'matching env (given as repo setting)' do
@@ -238,6 +253,7 @@ describe Travis::Yml::Configs, 'conditionals' do
       )
 
       it { should eq 0 }
+      it { should_not have_msg }
     end
 
     describe 'matching env (given as env.global)' do
@@ -253,6 +269,7 @@ describe Travis::Yml::Configs, 'conditionals' do
       )
 
       it { should eq 0 }
+      it { should_not have_msg }
     end
 
     describe 'matching env (given as env.jobs, picking the first entry)' do
@@ -268,6 +285,7 @@ describe Travis::Yml::Configs, 'conditionals' do
       )
 
       it { should eq 0 }
+      it { should_not have_msg }
     end
 
     describe 'matching env (given as jobs.include.env)' do
@@ -280,6 +298,7 @@ describe Travis::Yml::Configs, 'conditionals' do
       )
 
       it { should eq 0 }
+      it { should_not have_msg }
     end
 
     describe 'invalid condition' do
@@ -308,6 +327,7 @@ describe Travis::Yml::Configs, 'conditionals' do
       )
 
       it { expect(subject).to eq [false] }
+      it { should have_msg [:info, :'jobs.allow_failures', :skip_allow_failure, number: 1, condition: 'false'] }
     end
 
     describe 'matching branch' do
@@ -320,6 +340,7 @@ describe Travis::Yml::Configs, 'conditionals' do
       )
 
       it { expect(subject).to eq [true] }
+      it { should_not have_msg }
     end
 
     describe 'matching env (given as repo setting)' do
@@ -332,6 +353,7 @@ describe Travis::Yml::Configs, 'conditionals' do
       )
 
       it { expect(subject).to eq [true] }
+      it { should_not have_msg }
     end
 
     describe 'matching env (given as env.global)' do
@@ -347,6 +369,7 @@ describe Travis::Yml::Configs, 'conditionals' do
       )
 
       it { expect(subject).to eq [true] }
+      it { should_not have_msg }
     end
 
     describe 'matching env (given as env.jobs, picking the first entry)' do
@@ -362,6 +385,7 @@ describe Travis::Yml::Configs, 'conditionals' do
       )
 
       it { expect(subject).to eq [true] }
+      it { should_not have_msg }
     end
 
     describe 'matching env (given as jobs.include.env)' do
@@ -374,6 +398,7 @@ describe Travis::Yml::Configs, 'conditionals' do
       )
 
       it { expect(jobs.size).to eq 1 }
+      it { should_not have_msg }
     end
 
     describe 'invalid condition' do
@@ -400,6 +425,7 @@ describe Travis::Yml::Configs, 'conditionals' do
       )
 
       it { expect(subject).to be_nil }
+      it { should have_msg [:info, :'notifications.email', :skip_notification, type: :email, number: 1, condition: 'false'] }
     end
 
     describe 'matching branch' do
@@ -410,6 +436,7 @@ describe Travis::Yml::Configs, 'conditionals' do
       )
 
       it { expect(subject.size).to eq 1 }
+      it { should_not have_msg }
     end
 
     describe 'matching env (given as repo setting)' do
@@ -420,6 +447,7 @@ describe Travis::Yml::Configs, 'conditionals' do
       )
 
       it { expect(subject.size).to eq 1 }
+      it { should_not have_msg }
     end
 
     describe 'matching env (given as env.global)' do
@@ -433,6 +461,7 @@ describe Travis::Yml::Configs, 'conditionals' do
       )
 
       it { expect(subject.size).to eq 1 }
+      it { should_not have_msg }
     end
 
     describe 'matching env (given as env.notifications, picking the first entry)' do
@@ -446,6 +475,7 @@ describe Travis::Yml::Configs, 'conditionals' do
       )
 
       it { expect(subject).to be_nil } # notifications are not per job
+      it { should have_msg [:info, :'notifications.email', :skip_notification, type: :email, number: 1, condition: 'env(ONE) = one'] }
     end
 
     describe 'matching env (given as notifications.include.env)' do
@@ -459,6 +489,7 @@ describe Travis::Yml::Configs, 'conditionals' do
       )
 
       it { expect(subject).to be_nil } # notifications are not per job
+      it { should have_msg [:info, :'notifications.email', :skip_notification, type: :email, number: 1, condition: 'env(ONE) = one'] }
     end
 
     describe 'invalid condition' do

@@ -23,6 +23,10 @@ module Travis
           result
         end
 
+        def msgs
+          @msgs ||= []
+        end
+
         private
 
           def stages?
@@ -40,7 +44,7 @@ module Travis
           end
 
           def filter_stages
-            @stages = stages.select { |stage| accept?(stage) }.reject { |stage| empty?(stage) }
+            @stages = stages.select.with_index { |stage, ix| accept?(stage, ix) }.reject { |stage| empty?(stage) }
           end
 
           def filter_jobs
@@ -63,8 +67,10 @@ module Travis
             @jobs ||= super.map { |attrs| Job.new(attrs) }
           end
 
-          def accept?(stage)
-            Condition.new(stage.cond, config, data).accept?
+          def accept?(stage, ix)
+            return true if Condition.new(stage.cond, config, data).accept?
+            msgs << [:info, :stages, :skip_stage, number: ix + 1, condition: stage.cond]
+            false
           end
 
           def empty?(stage)

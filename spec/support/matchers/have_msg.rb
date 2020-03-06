@@ -25,7 +25,9 @@ RSpec::Matchers.define :have_msg do |msg = nil|
   end
 
   failure_message do |node|
-    if node.msgs.any?
+    msgs = node.respond_to?(:msgs) ? node.msgs : self.msgs
+
+    if msgs.any?
       <<~str
         expected the node
 
@@ -37,7 +39,7 @@ RSpec::Matchers.define :have_msg do |msg = nil|
 
         but it has the following msgs:
 
-          #{node.msgs.map(&:to_s).join("\n  ")}
+          #{msgs.map(&:to_s).join("\n  ")}
       str
     else
       <<~str
@@ -55,6 +57,8 @@ RSpec::Matchers.define :have_msg do |msg = nil|
   end
 
   failure_message_when_negated do |node|
+    msgs = node.respond_to?(:msgs) ? node.msgs : self.msgs
+
     if msg.is_a?(Array)
       <<~str
         expected the node
@@ -67,7 +71,7 @@ RSpec::Matchers.define :have_msg do |msg = nil|
 
         but it does:
 
-          #{node.msgs.map(&:to_s).join("\n  ")}
+          #{msgs.map(&:to_s).join("\n  ")}
       str
     else
       <<~str
@@ -77,7 +81,7 @@ RSpec::Matchers.define :have_msg do |msg = nil|
 
         to not have any msgs, but it does:
 
-          #{node.msgs.map(&:to_s).join("\n  ")}
+          #{msgs.map(&:to_s).join("\n  ")}
       str
     end
   end

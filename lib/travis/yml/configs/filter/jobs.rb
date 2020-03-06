@@ -6,12 +6,12 @@ module Travis
           include Helper::Obj
 
           def apply
-            @jobs = jobs.select do |job|
-              accept?(job)
+            @jobs = jobs.select.with_index do |job, ix|
+              accept?(job, ix)
             end
           end
 
-          def accept?(job, ix = 0)
+          def accept?(job)
             data = data_for(job)
             return true if Condition.new(job[:if], job, data).accept?
             msgs << [:info, key, :"skip_job", number: ix + 1, condition: job[:if]]

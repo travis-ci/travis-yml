@@ -15,12 +15,12 @@ module Travis
               filter(nil, config[:notifications])
             end
 
-            def filter(key, config)
+            def filter(key, config, ix = 0)
               config = case config
               when Array
-                config.map { |config| filter(key, config) }
+                config.map.with_index { |config| filter(key, config, ix) }
               when Hash
-                config.map { |key, config| [key, filter(key, config)] }.to_h if accept?(key, config[:if])
+                config.map { |key, config| [key, filter(key, config)] }.to_h if accept?(key, config[:if], ix)
               else
                 config
               end
@@ -28,9 +28,9 @@ module Travis
               config if present?(config)
             end
 
-            def accept?(type, cond)
+            def accept?(type, cond, ix)
               return true if Condition.new(cond, config, data).accept?
-              msgs << [:info, :"notifications.#{type}", :skip_notification, type: type, condition: cond]
+              msgs << [:info, :"notifications.#{type}", :skip_notification, type: type, number: ix + 1, condition: cond]
               false
             end
 
