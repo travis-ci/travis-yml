@@ -1,6 +1,6 @@
 RSpec::Matchers.define :have_msg do |msg = nil|
   match do |node|
-    msgs = node.msgs
+    msgs = node.respond_to?(:msgs) ? node.msgs : self.msgs
     msgs = msgs.reject(&msg) if msg.is_a?(Method) || msg.is_a?(Proc)
     msgs = msgs.reject(&block_arg) if block_arg
 

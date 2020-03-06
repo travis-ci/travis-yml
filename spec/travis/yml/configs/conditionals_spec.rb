@@ -6,7 +6,7 @@ describe Travis::Yml::Configs, 'conditionals' do
   let(:config) { configs.config }
   let(:jobs)   { configs.jobs }
   let(:stages) { configs.stages }
-  # let(:msgs)   { subject.msgs.to_a } TODO
+  let(:msgs)   { configs.msgs.to_a }
 
   before { stub_repo(repo[:slug], internal: true, body: repo.merge(token: 'token')) }
   before { stub_content(repo[:slug], '.travis.yml', yaml) }
@@ -91,6 +91,18 @@ describe Travis::Yml::Configs, 'conditionals' do
 
       it { should eq 1 }
     end
+
+    describe 'invalid condition' do
+      yaml %(
+        jobs:
+          include:
+            - name: one
+            - name: two
+              if: '= kaputt'
+      )
+      it { should eq 1 }
+      it { should have_msg [:error, :'jobs.include.if', :invalid_condition, condition: '= kaputt'] }
+    end
   end
 
   describe 'stages' do
@@ -172,6 +184,20 @@ describe Travis::Yml::Configs, 'conditionals' do
       )
 
       it { should eq 0 }
+    end
+
+    describe 'invalid condition' do
+      yaml %(
+        stages:
+          - name: test
+            if: '= kaputt'
+          - name: other
+        jobs:
+          include:
+          - env: ONE=one
+      )
+      it { should eq 1 }
+      it { should have_msg [:error, :'stages.if', :invalid_condition, condition: '= kaputt'] }
     end
   end
 
@@ -255,6 +281,18 @@ describe Travis::Yml::Configs, 'conditionals' do
 
       it { should eq 0 }
     end
+
+    describe 'invalid condition' do
+      yaml %(
+        jobs:
+          include:
+          - env: ONE=one
+          exclude:
+            if: '= kaputt'
+      )
+      it { should eq 1 }
+      it { should have_msg [:error, :'jobs.exclude.if', :invalid_condition, condition: '= kaputt'] }
+    end
   end
 
   describe 'allow_failures' do
@@ -332,10 +370,22 @@ describe Travis::Yml::Configs, 'conditionals' do
           include:
           - env: ONE=one
           allow_failures:
-            if: env(ONE) = one
+          - if: env(ONE) = one
       )
 
       it { expect(jobs.size).to eq 1 }
+    end
+
+    describe 'invalid condition' do
+      yaml %(
+        jobs:
+          include:
+          - env: ONE=one
+          allow_failures:
+          - if: '= kaputt'
+      )
+      it { should eq [false] }
+      it { should have_msg [:error, :'jobs.allow_failures.if', :invalid_condition, condition: '= kaputt'] }
     end
   end
 
@@ -409,6 +459,20 @@ describe Travis::Yml::Configs, 'conditionals' do
       )
 
       it { expect(subject).to be_nil } # notifications are not per job
+    end
+
+    describe 'invalid condition' do
+      yaml %(
+        jobs:
+          include:
+          - env: ONE=one
+        notifications:
+          email:
+          - recipients: 'me@email.com'
+            if: '= kaputt'
+      )
+      it { expect(subject).to be_nil }
+      it { expect(msgs).to include [:error, :'notifications.email.if', :invalid_condition, condition: '= kaputt'] }
     end
   end
 end

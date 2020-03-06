@@ -2,8 +2,9 @@ describe Travis::Yml::Configs::AllowFailures do
   let(:config) { Travis::Yml.load(yaml).serialize }
   let(:jobs) { Travis::Yml.matrix(config).jobs }
   let(:data) { {} }
+  let(:obj)  { described_class.new(config, jobs, data) }
 
-  subject { described_class.new(config, jobs, data).apply }
+  subject { obj.apply }
 
   describe 'no allowed failures' do
     yaml %(
@@ -111,6 +112,25 @@ describe Travis::Yml::Configs::AllowFailures do
       should eq [
         { env: [{ ONE: 'one', TWO: 'two' }] },
         { env: [{ ONE: 'one', THREE: 'three' }] },
+      ]
+    end
+  end
+
+  describe 'invalid condition' do
+    yaml %(
+      jobs:
+        allow_failures:
+          - name: two
+            if: '= kaput'
+
+        include:
+          - name: one
+          - name: two
+    )
+    it do
+      should eq [
+        { name: 'one' },
+        { name: 'two' },
       ]
     end
   end
