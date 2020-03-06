@@ -718,26 +718,6 @@ describe Travis::Yml::Configs do
       end
     end
 
-    describe 'conditional stage matching an env var picked into jobs.include (legacy)' do
-      yaml %(
-        env:
-          - ONE=one TWO=two
-          - THREE=three
-
-        stages:
-          - test
-          - name: two
-            if: env(TWO) = two
-
-        jobs:
-          include:
-            - stage: two
-      )
-
-      it { expect(stages.size).to eq 2 }
-      it { expect(jobs.size).to eq 3 }
-    end
-
     # describe 'wat' do
     #   yaml %(
     #   )

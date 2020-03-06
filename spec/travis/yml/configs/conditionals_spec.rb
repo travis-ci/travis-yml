@@ -158,7 +158,7 @@ describe Travis::Yml::Configs, 'conditionals' do
             if: env(ONE) = one
       )
 
-      it { should eq 1 }
+      it { should eq 0 }
     end
 
     describe 'matching env (given as jobs.include.env)' do
@@ -171,7 +171,7 @@ describe Travis::Yml::Configs, 'conditionals' do
           - env: ONE=one
       )
 
-      it { should eq 1 }
+      it { should eq 0 }
     end
   end
 

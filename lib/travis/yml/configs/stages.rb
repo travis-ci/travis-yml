@@ -64,7 +64,7 @@ module Travis
           end
 
           def accept?(stage)
-            jobs_on(stage).any? { |job| Condition.new(stage.cond, job.attrs, data).accept? }
+            Condition.new(stage.cond, config, data).accept?
           end
 
           def empty?(stage)
