@@ -174,6 +174,9 @@ module Travis
           return true if Condition.new(cond, config, data).accept?
           msgs << [:info, key, :"skip_#{type}", number: ix + 1, condition: config[:if]]
           false
+        rescue InvalidCondition => e
+          Raven.capture_exception(e, extra: { type: type, condition: cond, data: data }) if defined?(Raven)
+          false
         end
 
         def data_for(config)
