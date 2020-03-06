@@ -97,6 +97,24 @@ describe Travis::Yml::Configs::AllowFailures do
     end
   end
 
+  describe 'does not match if extra env vars are given' do
+    yaml %(
+      jobs:
+        allow_failures:
+          - env: TWO=two
+
+        include:
+          - env: ONE=one TWO=two
+          - env: ONE=one THREE=three
+    )
+    it do
+      should eq [
+        { env: [{ ONE: 'one', TWO: 'two' }] },
+        { env: [{ ONE: 'one', THREE: 'three' }] },
+      ]
+    end
+  end
+
   # describe 'matching env' do
   #   let(:config) do
   #     [
