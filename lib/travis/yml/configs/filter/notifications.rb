@@ -28,20 +28,10 @@ module Travis
               config if present?(config)
             end
 
-            def accept?(key, cond)
+            def accept?(type, cond)
               return true if Condition.new(cond, config, data).accept?
-              msgs << msg(key, cond)
+              msgs << [:info, :"notifications.#{type}", :skip_notification, type: type, condition: cond]
               false
-            end
-
-            def msg(key, cond)
-              {
-                type:  'config',
-                level: :info,
-                key:   :"notifications.#{key}",
-                code:  :condition,
-                args:  { target: key, condition: cond }
-              }
             end
 
             def present?(obj)

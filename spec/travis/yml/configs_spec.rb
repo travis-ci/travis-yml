@@ -723,7 +723,6 @@ describe Travis::Yml::Configs do
     #   )
     #
     #   it do
-    #     p jobs.size
     #   end
     # end
   end
