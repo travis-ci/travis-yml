@@ -148,7 +148,7 @@ describe Travis::Yml do
 
     describe 'required' do
       let(:msg) { [:info, :key, :required, key: :key] }
-      it { should eq '[info] on key: missing required key :key' }
+      it { should eq '[info] on key: missing required key: key' }
     end
 
     describe 'secure' do
@@ -158,7 +158,7 @@ describe Travis::Yml do
 
     describe 'empty' do
       let(:msg) { [:info, :key, :empty, key: :key] }
-      it { should eq '[info] on key: dropping empty section :key' }
+      it { should eq '[info] on key: dropping empty key: key' }
     end
 
     describe 'unexpected_seq' do

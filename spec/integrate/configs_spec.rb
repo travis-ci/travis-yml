@@ -671,6 +671,10 @@ describe Travis::Yml, configs: true do
     true
   end
 
+  def empty_secure?(msg)
+    msg[2] == :empty && msg[1].to_s.end_with?('.secure')
+  end
+
   def filter(path, msg)
     return true if msg[0] == :info
     # return true if msg[0] == :warn
@@ -687,6 +691,7 @@ describe Travis::Yml, configs: true do
     return true if unknown?(:value, msg)
 
     return true if alert?(msg)
+    return true if empty_secure?(msg)
     return true if typo?(msg)
     return true if overwrite?(msg)
     return true if potential_alias?(msg)

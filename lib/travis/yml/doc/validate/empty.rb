@@ -13,7 +13,7 @@ module Travis
           end
 
           def apply?
-            schema.seq? || schema.map?
+            schema.seq? || schema.map? || value.secure?
           end
 
           def empty?
@@ -21,12 +21,12 @@ module Travis
           end
 
           def empty
-            value.msg :warn, :empty, key: value.key if warn?
+            value.msg :warn, :empty, key: value.full_key.to_s if warn?
             blank
           end
 
           def warn?
-            !value.errored? && value.enabled?(:empty)
+            value.secure? || !value.errored? && value.enabled?(:empty)
           end
         end
       end

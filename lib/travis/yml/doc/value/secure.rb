@@ -9,6 +9,14 @@ module Travis
           def type
             :secure
           end
+
+          def given?
+            value.is_a?(Hash) && value['secure']&.str?
+          end
+
+          def full_key
+            [super, :secure].join('.').to_sym
+          end
         end
       end
     end

@@ -55,8 +55,8 @@ module Travis
             InvalidType, Compact, Empty, Unique, Flags
           ],
           obj: [
-            InvalidType, UnknownValue, UnsupportedValue, Default, Alert, Flags,
-            Format, Template
+            InvalidType, UnknownValue, UnsupportedValue, Default, Alert, Empty,
+            Flags, Format, Template
           ]
         }
 
@@ -93,8 +93,9 @@ module Travis
           end
 
           def items(schema, value)
-            value.map do |value|
-              Validate.apply(schema, value)
+            value = value.map do |value|
+              value = Validate.apply(schema, value)
+              value unless value.is?(:none)
             end
           end
         end
