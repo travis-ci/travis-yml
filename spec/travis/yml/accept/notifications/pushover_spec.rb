@@ -75,7 +75,7 @@ describe Travis::Yml, 'notifications: pushover' do
           secure: secure
     )
     it { should serialize_to notifications: { pushover: [] } }
-    it { should have_msg [:error, :'notifications.pushover', :invalid_type, expected: :map, actual: :secure, value: { secure: 'secure' }] }
+    it { should have_msg [:error, :'notifications.pushover.secure', :invalid_type, expected: :map, actual: :secure, value: { secure: 'secure' }] }
   end
 
   describe 'given a seq of strs', drop: true do

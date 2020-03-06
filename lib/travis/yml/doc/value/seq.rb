@@ -29,7 +29,7 @@ module Travis
           end
 
           def map(&block)
-            build(parent, key, value.map(&block), opts)
+            build(parent, key, value.map(&block).compact, opts)
           end
 
           def insert(ix, *others)

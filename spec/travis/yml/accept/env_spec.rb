@@ -62,6 +62,16 @@ describe Travis::Yml, 'env' do
     it { should_not have_msg }
   end
 
+  describe 'given a secure with a nil value' do
+    yaml %(
+      env:
+        - ONE=one
+        - secure:
+    )
+    it { should serialize_to env: { jobs: [ONE: 'one'] } }
+    it { should have_msg [:warn, :'env.jobs.secure', :empty, key: 'env.jobs.secure'] }
+  end
+
   describe 'given a seq of vars' do
     yaml %(
       env:
