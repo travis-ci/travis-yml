@@ -20,7 +20,7 @@ module Travis
 
         def error(e)
           raise if e.respond_to?(:internal?) && e.internal?
-          status e.respond_to?(:status) ? e.status : 400
+          status 400
           Oj.generate(error_type: error_type(e), error_message: e.message)
         end
 

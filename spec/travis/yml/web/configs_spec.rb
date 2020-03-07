@@ -91,17 +91,17 @@ describe Travis::Yml::Web::App, 'POST /configs' do
 
       describe '401' do
         let(:status) { 401 }
-        it { expect(status).to eq status }
+        it { expect(last_response.status).to eq 400 }
       end
 
       describe '403' do
         let(:status) { 403 }
-        it { expect(status).to eq status }
+        it { expect(last_response.status).to eq 400 }
       end
 
       describe '404' do
         let(:status) { 404 }
-        it { expect(status).to eq status }
+        it { expect(last_response.status).to eq 400 }
       end
     end
 
