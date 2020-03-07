@@ -71,7 +71,7 @@ module Travis
             # this is not accurate, but tries to work around the fact that
             # env.jobs and env.global have been clobbered during matrix expansion
             # and we can now no longer know the original per-jobs vars
-            others.all? { |var| global.include?(var) }
+            others.any? && others.all? { |var| global.include?(var) }
           end
 
           def jobs

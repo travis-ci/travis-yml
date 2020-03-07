@@ -98,20 +98,34 @@ describe Travis::Yml::Configs::AllowFailures do
     end
   end
 
-  describe 'does not match if extra env vars are given' do
+  describe 'does not match if extra env vars are given (1)' do
     yaml %(
       jobs:
+        include:
+          - env:
+            - ONE=one
+            - TWO=two
         allow_failures:
-          - env: TWO=two
+            - env: ONE=one
+    )
+    it do
+      should eq [
+        { env: [{ ONE: 'one' }, { TWO: 'two' }] },
+      ]
+    end
+  end
 
+  describe 'does not match if extra env vars are given (2)' do
+    yaml %(
+      jobs:
         include:
           - env: ONE=one TWO=two
-          - env: ONE=one THREE=three
+        allow_failures:
+          - env: TWO=two
     )
     it do
       should eq [
         { env: [{ ONE: 'one', TWO: 'two' }] },
-        { env: [{ ONE: 'one', THREE: 'three' }] },
       ]
     end
   end
