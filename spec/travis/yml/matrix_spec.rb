@@ -458,7 +458,7 @@ describe Travis::Yml, 'matrix' do
       end
     end
 
-    describe 'env matches' do
+    describe 'matches env on job' do
       yaml %(
         jobs:
           include:
@@ -470,7 +470,7 @@ describe Travis::Yml, 'matrix' do
       expands_to [{ env: [FOO: 'one'] }, { env: [FOO: 'two'], if: 'env(FOO) = two' }]
     end
 
-    describe 'env does not match' do
+    describe 'does not match env on job' do
       yaml %(
         jobs:
           include:
@@ -482,7 +482,7 @@ describe Travis::Yml, 'matrix' do
       expands_to [{ env: [FOO: 'one'] }]
     end
 
-    describe 'global.env matches' do
+    describe 'matches global.env' do
       yaml %(
         env:
           global:
@@ -505,7 +505,7 @@ describe Travis::Yml, 'matrix' do
       ]
     end
 
-    describe 'settings env var matches, with global env var present' do
+    describe 'matches settings env var, with env.global present' do
       yaml %(
         env:
           global:

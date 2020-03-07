@@ -171,7 +171,7 @@ describe Travis::Yml::Configs, 'conditionals' do
       it { should_not have_msg }
     end
 
-    describe 'matching env (given as env.jobs)' do
+    describe 'matching env (given as env.jobs, BC for Gatekeeper build config normalization)' do
       yaml %(
         env:
           jobs:
@@ -181,8 +181,10 @@ describe Travis::Yml::Configs, 'conditionals' do
             if: env(one) = one
       )
 
-      it { should eq 0 }
-      it { should have_msg [:info, :stages, :skip_stage, number: 1, condition: 'env(one) = one'] }
+      # it { should eq 0 }
+      # it { should have_msg [:info, :stages, :skip_stage, number: 1, condition: 'env(one) = one'] }
+      it { should eq 1 }
+      it { should_not have_msg }
     end
 
     describe 'matching env (given as jobs.include.env)' do
@@ -464,7 +466,7 @@ describe Travis::Yml::Configs, 'conditionals' do
       it { should_not have_msg }
     end
 
-    describe 'matching env (given as env.notifications, picking the first entry)' do
+    describe 'matching env (given as env.notifications, BC for Gatekeeper build config normalization)' do
       yaml %(
         env:
           jobs:
@@ -474,8 +476,8 @@ describe Travis::Yml::Configs, 'conditionals' do
           - if: env(ONE) = one
       )
 
-      it { expect(subject).to be_nil } # notifications are not per job
-      it { should have_msg [:info, :'notifications.email', :skip_notification, type: :email, number: 1, condition: 'env(ONE) = one'] }
+      it { expect(subject.size).to eq 1 }
+      it { should_not have_msg }
     end
 
     describe 'matching env (given as notifications.include.env)' do

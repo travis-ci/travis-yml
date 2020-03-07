@@ -135,6 +135,12 @@ describe Travis::Yml::Configs::AllowFailures do
     end
   end
 
+  # describe 'wat' do
+  #   yaml %(
+  #   )
+  #   it { p subject }
+  # end
+
   # describe 'matching env' do
   #   let(:config) do
   #     [

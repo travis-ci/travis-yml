@@ -28,7 +28,26 @@ module Travis
       end
 
       def merge(data, config)
-        config[:env] = config[:env][:global] if config[:env].is_a?(Hash) && config[:env].key?(:global)
+        # This should merge env.global only, but Gatekeeper's build config
+        # normalization moves env.jobs to env and there are existing configs
+        # relying on this.
+        #
+        # E.g.: https://travis-ci.org/mlpack/ensmallen/builds/659436019/config
+        #
+        #   env:
+        #     - ONE=one
+        #   stages:
+        #     - name: one
+        #       if: 'env(ONE) = one'
+        #   jobs:
+        #     include:
+        #       - stage: one
+        #         name: one
+        #
+        # Yml moves env to env.jobs, but Gatekeeper's build config normalization
+        # moves it back to env, using _that_ config internally for filtering
+        # stages and POSTing it to /expand, which filters jobs.
+        config[:env] = super(*config[:env].values_at(:global, :jobs).compact) if config[:env].is_a?(Hash)
         super
       end
 
