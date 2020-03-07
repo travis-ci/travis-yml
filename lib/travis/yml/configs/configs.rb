@@ -7,7 +7,7 @@ require 'travis/yml/configs/model/repos'
 require 'travis/yml/configs/reorder'
 require 'travis/yml/configs/stages'
 require 'travis/yml/configs/config/api'
-require 'travis/yml/configs/config/file'
+require 'travis/yml/configs/config/travis_yml'
 require 'travis/yml/configs/ctx'
 
 module Travis
@@ -134,7 +134,7 @@ module Travis
           end
 
           def travis_yml
-            Config.travis_yml(ctx, nil, repo.slug, ref, mode)
+            Config::TravisYml.new(ctx, nil, repo.slug, ref, mode)
           end
 
           def api

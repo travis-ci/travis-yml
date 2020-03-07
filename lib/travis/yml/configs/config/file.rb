@@ -46,6 +46,8 @@ module Travis
 
             def fetch
               Github::Content.new(repo.slug, path, ref, repo.token).content
+            rescue NotFound => e
+              required? ? raise : nil
             end
         end
       end

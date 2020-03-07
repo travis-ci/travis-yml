@@ -1,4 +1,5 @@
 require 'travis/yml/configs/config/base'
+require 'travis/yml/configs/config/travis_yml'
 
 module Travis
   module Yml
@@ -8,6 +9,10 @@ module Travis
           include Base, Memoize
 
           attr_reader :parent, :path
+
+          def api?
+            true
+          end
 
           def load(&block)
             super
@@ -42,7 +47,7 @@ module Travis
             end
 
             def travis_yml
-              Config.travis_yml(ctx, self, repo.slug, ref, mode)
+              TravisYml.new(ctx, self, repo.slug, ref, mode)
             end
         end
       end

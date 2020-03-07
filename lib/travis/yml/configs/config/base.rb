@@ -8,10 +8,6 @@ module Travis
   module Yml
     module Configs
       module Config
-        def self.travis_yml(ctx, parent, slug, ref, mode)
-          Config::File.new(ctx, parent, source: "#{slug}:.travis.yml@#{ref}", mode: mode)
-        end
-
         module Base
           extend Forwardable
           include Helper::Obj, Errors, Memoize
@@ -20,6 +16,14 @@ module Travis
           def_delegators :repo, :allow_config_imports?, :owner_name, :private?, :public?
 
           attr_reader :on_loaded
+
+          def api?
+            false
+          end
+
+          def travis_yml?
+            false
+          end
 
           def repo
             @repo ||= ctx.repos[slug]
@@ -174,6 +178,10 @@ module Travis
               ctx.fetch.msgs
             end
 
+            def required?
+              !parent&.api? || !travis_yml?
+            end
+
             def invalid_ownership?
               parent.private? && private? && parent.owner_name != owner_name
             end
@@ -198,7 +206,7 @@ module Travis
             end
 
             def parse(str)
-              Yml.load(str, defaults: false).serialize
+              Yml.load(str, defaults: false).serialize if str
             end
         end
       end

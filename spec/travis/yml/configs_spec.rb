@@ -462,21 +462,54 @@ describe Travis::Yml::Configs do
   end
 
   describe 'github api errors' do
-    before { stub_content(repo[:slug], 'one/one.yml', status: status) }
+    describe 'on .travis_yml' do
+      before { stub_content(repo[:slug], '.travis.yml', status: status) }
 
-    describe '401' do
-      let(:status) { 401 }
-      it { expect { subject }.to raise_error Travis::Yml::Configs::Unauthorized }
+      describe '401' do
+        let(:status) { 401 }
+        it { expect { subject }.to raise_error Travis::Yml::Configs::Unauthorized }
+      end
+
+      describe '404 (api build request)' do
+        let(:raw) { 'script: ./api' }
+        let(:status) { 404 }
+        it { expect { subject }.to_not raise_error }
+      end
+
+      describe '404 (non-api build request)' do
+        let(:status) { 404 }
+        it { expect { subject }.to raise_error Travis::Yml::Configs::NotFound }
+      end
+
+      describe '500' do
+        let(:status) { 500 }
+        it { expect { subject }.to raise_error Travis::Yml::Configs::ServerError }
+      end
     end
 
-    describe '404' do
-      let(:status) { 404 }
-      it { expect { subject }.to raise_error Travis::Yml::Configs::NotFound }
-    end
+    describe 'on import' do
+      before { stub_content(repo[:slug], 'one/one.yml', status: status) }
 
-    describe '500' do
-      let(:status) { 500 }
-      it { expect { subject }.to raise_error Travis::Yml::Configs::ServerError }
+      describe '401' do
+        let(:status) { 401 }
+        it { expect { subject }.to raise_error Travis::Yml::Configs::Unauthorized }
+      end
+
+      describe '404 (api build request)' do
+        let(:raw) { 'script: ./api' }
+        let(:status) { 404 }
+        it { expect { subject }.to raise_error Travis::Yml::Configs::NotFound }
+      end
+
+      describe '404 (non-api build request)' do
+        let(:status) { 404 }
+        it { expect { subject }.to raise_error Travis::Yml::Configs::NotFound }
+      end
+
+      describe '500' do
+        let(:status) { 500 }
+        it { expect { subject }.to raise_error Travis::Yml::Configs::ServerError }
+      end
     end
   end
 
