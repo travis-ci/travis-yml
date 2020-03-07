@@ -10,6 +10,10 @@ module Travis
             @owner_name ||= slug.split('/').first
           end
 
+          def github_id
+            attrs[:github_id]
+          end
+
           def slug
             attrs[:slug]
           end
@@ -46,7 +50,7 @@ module Travis
             Model::Config.new(config, keys, key).reencrypt
           end
 
-          REQUIRED = %i(private private_key allow_config_imports)
+          REQUIRED = %i(github_id private private_key allow_config_imports)
 
           def complete?
             return false unless REQUIRED.all? { |key| given?(key) }

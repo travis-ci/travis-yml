@@ -1,14 +1,14 @@
 describe Travis::Yml::Configs do
   let(:user_token) { nil }
   let(:internal) { false }
-  let(:repo)    { { slug: 'travis-ci/travis-yml', private: private, default_branch: 'master', token: 'repo_token', private_key: 'private_key', allow_config_imports: true } }
+  let(:repo)    { { github_id: 1, slug: 'travis-ci/travis-yml', private: private, default_branch: 'master', token: 'repo_token', private_key: 'private_key', allow_config_imports: true } }
   let(:opts)    { { token: user_token, internal: internal } }
   let(:configs) { described_class.new(repo, 'ref', nil, nil, nil, opts) }
 
   let(:travis_yml) { 'language: shell' }
 
   before { stub_repo(repo[:slug], token: user_token, status: status) }
-  before { stub_content(repo[:slug], '.travis.yml', travis_yml) }
+  before { stub_content(repo[:github_id], '.travis.yml', travis_yml) }
 
   subject { configs.tap(&:load) }
 

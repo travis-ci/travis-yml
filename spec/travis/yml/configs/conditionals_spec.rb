@@ -1,5 +1,5 @@
 describe Travis::Yml::Configs, 'conditionals' do
-  let(:repo)    { { slug: 'travis-ci/travis-yml' } }
+  let(:repo)    { { github_id: 1, slug: 'travis-ci/travis-yml' } }
   let(:configs) { described_class.new(repo, 'master', nil, nil, data, opts).tap(&:load) }
   let(:data)    { { branch: 'master', env: [{ SETTING: 'on' }] } }
 
@@ -9,7 +9,7 @@ describe Travis::Yml::Configs, 'conditionals' do
   let(:msgs)   { configs.msgs.to_a }
 
   before { stub_repo(repo[:slug], internal: true, body: repo.merge(token: 'token')) }
-  before { stub_content(repo[:slug], '.travis.yml', yaml) }
+  before { stub_content(repo[:github_id], '.travis.yml', yaml) }
 
   describe 'jobs' do
     subject { jobs.size }

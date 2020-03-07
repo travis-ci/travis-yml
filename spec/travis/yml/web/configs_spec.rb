@@ -8,15 +8,15 @@ describe Travis::Yml::Web::App, 'POST /configs' do
   let(:headers) { last_response.headers }
   let(:body)    { Oj.load(last_response.body, symbol_keys: true) }
   let(:data)    { { repo: repo, type: type, ref: ref, mode: 'deep_merge_prepend' } }
-  let(:repo)    { { slug: 'travis-ci/travis-yml', token: 'token', private: false, private_key: 'key', allow_config_imports: true } }
+  let(:repo)    { { github_id: 1, slug: 'travis-ci/travis-yml', token: 'token', private: false, private_key: 'key', allow_config_imports: true } }
   let(:type)    { :push }
   let(:ref)     { 'ref' }
 
   let(:travis_yml) { 'import: one.yml' }
   let(:one_yml)    { 'script: ./one' }
 
-  before { stub_content(repo[:slug], '.travis.yml', travis_yml) }
-  before { stub_content(repo[:slug], 'one.yml', one_yml) }
+  before { stub_content(repo[:github_id], '.travis.yml', travis_yml) }
+  before { stub_content(repo[:github_id], 'one.yml', one_yml) }
 
   context do
     before { post '/configs', Oj.generate(data), defaults: true }

@@ -5,7 +5,7 @@ module Travis
   module Yml
     module Configs
       module Github
-        class Content < Struct.new(:slug, :path, :ref, :token)
+        class Content < Struct.new(:repo, :path, :ref)
           include Base64, Errors
 
           def content
@@ -15,11 +15,12 @@ module Travis
           private
 
             def fetch
-              resp = client.get("repos/#{slug}/contents/#{path}", ref: ref)
+              path = "repositories/#{repo.github_id}/contents/#{self.path}"
+              resp = client.get(path, ref: ref)
               data = Oj.load(resp.body)
               decode64(data['content'])
             rescue Github::Error => e
-              api_error('GitHub', :file, [slug, path].join(':'), e)
+              api_error('GitHub', :file, [repo.slug, path].join(':'), e)
             rescue TypeError => e
               nil
             end
@@ -41,7 +42,7 @@ module Travis
             end
 
             def client
-              Client.new(token)
+              Client.new(repo.token)
             end
         end
       end

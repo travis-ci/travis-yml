@@ -13,9 +13,9 @@ module Spec
         api_requests << %i(client method args start end).zip(args).to_h
       end
 
-      def stub_content(repo, path, data)
+      def stub_content(github_id, path, data)
         data = { body: data } if data.is_a?(String)
-        url = %r(https://api.github.com/repos/#{repo}/contents/#{path})
+        url = %r(https://api.github.com/repositories/#{github_id}/contents/#{path})
         body = JSON.dump(content: Base64.encode64(data[:body])) if data[:body]
         status = data[:status] || 200
         stub_request(:get, url).to_return(body: body, status: status)
