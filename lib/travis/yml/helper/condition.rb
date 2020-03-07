@@ -6,15 +6,17 @@ module Travis
     class Condition
       include Helper::Obj, Memoize
 
-      attr_reader :cond, :data
+      attr_reader :cond, :config, :data
 
       def initialize(cond, config, data)
         @cond = normalize(cond)
-        @data = merge(data, config.dup)
+        @config = config
+        @data = data
       end
 
       def accept?
         return true unless cond
+        data = merge(self.data, config.dup)
         Travis::Conditions.eval(cond, data, version: :v1)
       rescue TypeError, ArgumentError => e
         Raven.capture_exception(e, extra: { condition: cond, data: data }) if defined?(Raven)
@@ -47,7 +49,7 @@ module Travis
         # Yml moves env to env.jobs, but Gatekeeper's build config normalization
         # moves it back to env, using _that_ config internally for filtering
         # stages and POSTing it to /expand, which filters jobs.
-        config[:env] = super(*config[:env].values_at(:global, :jobs).compact) if config[:env].is_a?(Hash)
+        config[:env] = super(*config[:env].values_at(:global, :jobs, :matrix).flatten.compact) if config[:env].is_a?(Hash)
         super
       end
 
