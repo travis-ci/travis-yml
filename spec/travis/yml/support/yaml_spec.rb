@@ -56,6 +56,11 @@ describe Yaml do
     it { should eq 'str' }
   end
 
+  describe 'timestamp' do
+    yaml '2020-01-01 00:00:00 -0000'
+    it { should eq '2020-01-01 00:00:00 -0000' }
+  end
+
   describe 'symbol' do
     yaml ':sym'
     it { should eq 'sym' }
@@ -109,6 +114,11 @@ describe Yaml do
   describe 'map with a float' do
     yaml 'str: 1.10'
     it { should eq 'str' => '1.10' }
+  end
+
+  describe 'map with a timestamp' do
+    yaml 'str: 2020-01-01 00:00:00 -0000'
+    it { should eq 'str' => '2020-01-01 00:00:00 -0000' }
   end
 
   describe 'map with bad indentation' do

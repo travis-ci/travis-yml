@@ -88,6 +88,7 @@ module Yaml
       case str
       when FLOAT then str
       when KEEP  then str
+      when TIME  then str
       else super
       end
     end
