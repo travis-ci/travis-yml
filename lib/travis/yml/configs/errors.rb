@@ -27,14 +27,12 @@ module Travis
         UnknownRepo = Class.new(InputError)
         SyntaxError = Class.new(InputError)
         NotFound = Class.new(ApiError)
-        Unauthenticated = Class.new(ApiError)
         Unauthorized = Class.new(ApiError)
         ServerError = Class.new(ApiError)
 
         MSGS = {
           syntax_error: 'Syntax error, could not parse %s',
           not_found: '%s %s not found on %s (%s)',
-          unauthenticated: 'Unable to access private repo %s without providing a user token',
           unauthorized: 'Unable to authenticate with %s for %s %s (%s)',
           server_error: 'Error retrieving %s from %s (%s)'
         }
@@ -54,10 +52,6 @@ module Travis
 
         def invalid_ref(ref)
           raise InvalidRef.new(ref)
-        end
-
-        def unauthenticated(slug)
-          raise Unauthenticated.new(MSGS[:unauthenticated] % slug, 401)
         end
 
         def unauthorized(service, type, ref, e)

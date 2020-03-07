@@ -18,7 +18,6 @@ module Travis
 
         attr_reader :configs, :config, :stages, :jobs
 
-        # - restore messages
         # - add an acceptance test suite testing all the things through web?
         # - consider alerting on secure values that are shorter than 100 chars or
         #   is not base64 decoded: Base64.encode64(Base64.decode64(str)) == str

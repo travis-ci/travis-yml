@@ -12,14 +12,6 @@ module Travis
           @repos ||= Model::Repos.new
         end
 
-        def internal?
-          !!opts[:internal]
-        end
-
-        def user_token
-          opts[:token]
-        end
-
         def data
           super || {}
         end

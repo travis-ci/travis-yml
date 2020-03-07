@@ -8,31 +8,11 @@ require 'travis/yml/configs/model/repos'
 module Travis
   module Yml
     module Configs
-      # Fetches .travis.yml and all imported configs from GitHub asynchronously,
-      # walking the tree depth-first.
-      #
-      # Authorization scenarios:
-      #
-      # * Full access to public configs for unauthenticated requests (e.g. from config.travis-ci.com)
-      # * Authenticated access to private configs a user has access to (e.g. from the UI on travis-ci.com)
-      # * Full access to private configs when authenticated internally (e.g. Gatekeeper)
-      #
-      # Access to private imports is protected by:
-      #
-      # * Only allowing to import private configs from the same repo owner
-      # * Only allowing to import private configs if the setting :allow_config_imports is on
-      #
-      # Authorizing access to the main repo:
-      #
-      # * if we are authenticated internally it's ok to just fetch it
-      # * if the repo is public it's ok to just fetch it
-      # * if the repo is private it needs to be authenticated in a separate call using the user's token
-      #
       class Fetch
         extend Forwardable
         include Errors, Synchronize
 
-        def_delegators :ctx, :error, :internal?, :user_token
+        def_delegators :ctx, :error
         def_delegators :config, :repo, :ref, :path
 
         attr_reader :ctx, :config, :sources, :msgs, :mutex, :queue, :threads
@@ -48,7 +28,6 @@ module Travis
 
         def load(config)
           @config = config
-          authorize if authorize?
           config.load(&method(:on_load))
           threads.each(&:join)
         end
@@ -70,14 +49,6 @@ module Travis
         synchronize :store
 
         private
-
-          def authorize?
-            repo.private? && !internal?
-          end
-
-          def authorize
-            thread { repo.authorize(user_token) }
-          end
 
           def push(config)
             config.imports.each do |config|

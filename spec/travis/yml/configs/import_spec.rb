@@ -42,7 +42,6 @@ describe Travis::Yml::Configs do
         travis-ci/travis-yml:one/one.yml@ref
       )
       it { expect { subject }.to_not have_api_request :get, repo_url }
-      it { expect { subject }.to_not have_api_request :get, repo_url }
     end
 
     describe 'not given a repo token on a public repo' do
@@ -50,7 +49,6 @@ describe Travis::Yml::Configs do
       let(:private) { false }
       before { stub_repo(repo[:slug], internal: true, body: repo.merge(token: repo_token)) }
       it { expect { subject }.to_not have_api_request :get, repo_url }
-      it { expect { subject }.to_not have_api_request :get, auth_url }
     end
 
     describe 'not given a repo token on a private repo' do
@@ -58,7 +56,6 @@ describe Travis::Yml::Configs do
       let(:private) { true }
       before { stub_repo(repo[:slug], internal: true, body: repo.merge(token: repo_token)) }
       it { expect { subject }.to have_api_request :get, repo_url }
-      it { expect { subject }.to have_api_request :get, auth_url, token: user_token }
     end
   end
 

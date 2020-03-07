@@ -45,8 +45,7 @@ module Travis
           end
 
           def auth
-            auth = opts[:auth] || raise('no auth provided')
-            opts[:auth]&.to_a&.flatten
+            [:internal, "#{config[:travis][:app]}:#{config[:travis][:token]}"]
           end
 
           def error(method, path, e)

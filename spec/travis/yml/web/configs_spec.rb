@@ -17,9 +17,10 @@ describe Travis::Yml::Web::App, 'POST /configs' do
 
   before { stub_content(repo[:github_id], '.travis.yml', travis_yml) }
   before { stub_content(repo[:github_id], 'one.yml', one_yml) }
+  before { header 'Authorization', 'internal token' }
 
   context do
-    before { post '/configs', Oj.generate(data), defaults: true }
+    before { post '/configs', Oj.generate(data) }
 
     it { expect(status).to eq 200 }
     it { expect(headers['Content-Type']).to eq 'application/json' }

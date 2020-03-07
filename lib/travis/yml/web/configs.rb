@@ -7,11 +7,15 @@ module Travis
       class Configs < Sinatra::Base
         include Helpers
 
+        before '/configs' do
+          halt 401 unless internal?
+        end
+
         post '/configs' do
           status 200
           json configs.to_h
         rescue Yml::Error, Oj::Error, EncodingError => e
-          error(e)
+          error e
         end
 
         private
@@ -27,25 +31,16 @@ module Travis
           def opts
             keys = OPTS.keys.map(&:to_s) & params.keys
             opts = symbolize(keys.map { |key| [key, params[key.to_s] == 'true'] }.to_h)
-            opts = opts.merge(token: token, internal: internal?)
             opts
           end
 
-          def token
-            match_auth(/token (.+)/)
-          end
-
           def internal?
-            return false unless auth
-            match_auth(/internal (.+)/) == config[:auth][:internal]
+            auth = auth_header =~ /internal (.+)/ && $1
+            auth == config[:auth][:internal]
           end
 
-          def match_auth(pattern)
-            auth.to_s =~ pattern && $1
-          end
-
-          def auth
-            request_headers[:authorization]
+          def auth_header
+            request_headers[:authorization].to_s
           end
 
           def data

@@ -11,13 +11,8 @@ module Travis
         class Repo < Struct.new(:slug)
           include Errors, Helper::Obj
 
-          def authorize(user_token)
-            unauthenticated(slug) unless user_token
-            get(path, auth: { token: user_token })
-          end
-
           def fetch
-            get(path, auth: internal_auth, representation: :internal)
+            get(path, representation: :internal)
           end
 
           def to_s
@@ -62,10 +57,6 @@ module Travis
 
             def client(opts)
               Client.new(opts)
-            end
-
-            def internal_auth
-              { internal: "#{config[:travis][:app]}:#{config[:travis][:token]}" }
             end
 
             def config

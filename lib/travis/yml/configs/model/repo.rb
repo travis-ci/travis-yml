@@ -42,10 +42,6 @@ module Travis
             @key ||= Key.new(attrs[:private_key])
           end
 
-          def authorize(user_token)
-            Travis::Repo.new(slug).authorize(user_token)
-          end
-
           def reencrypt(config, keys)
             Model::Config.new(config, keys, key).reencrypt
           end
