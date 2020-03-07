@@ -46,10 +46,15 @@ module Travis
             Model::Config.new(config, keys, key).reencrypt
           end
 
+          REQUIRED = %i(private private_key allow_config_imports)
+
           def complete?
-            %i(private token private_key allow_config_imports).all? do |key|
-              attrs.key?(key) && !attrs[key].nil?
-            end
+            return false unless REQUIRED.all? { |key| given?(key) }
+            public? || given?(:token)
+          end
+
+          def given?(key)
+            attrs.key?(key) && !attrs[key].nil?
           end
 
           def ==(other)
