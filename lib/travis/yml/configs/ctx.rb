@@ -23,6 +23,18 @@ module Travis
         def data
           super || {}
         end
+
+        def error(*msg)
+          msg(:error, *msg)
+        end
+
+        def msg(*msg)
+          msgs << msg
+        end
+
+        def msgs
+          fetch.msgs
+        end
       end
     end
   end

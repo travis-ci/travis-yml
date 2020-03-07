@@ -12,7 +12,7 @@ module Travis
           extend Forwardable
           include Helper::Obj, Errors, Memoize
 
-          def_delegators :ctx, :data, :opts
+          def_delegators :ctx, :data, :opts, :msg
           def_delegators :repo, :allow_config_imports?, :owner_name, :private?, :public?
 
           attr_reader :on_loaded
@@ -78,8 +78,9 @@ module Travis
           # kept with nodes that have been loaded but needed to be uniq'ed
           # away.
           def flatten
-            return [] if circular? || !matches?
-            sort([self].compact + imports.map(&:flatten).flatten).uniq(&:to_s)
+            return [] if errored? || circular? || !matches?
+            configs = sort([self].compact + imports.map(&:flatten).flatten)
+            configs.uniq(&:to_s).reject(&:skip?)
           end
 
           def sort(configs)
@@ -100,13 +101,6 @@ module Travis
             false
           end
           memoize :matches?
-
-          def validate
-            return if root?
-            invalid_ownership(repo) if invalid_ownership?
-            invalid_visibility(repo) if invalid_visibility?
-            not_allowed(repo) if not_allowed?
-          end
 
           def root
             root? ? self : parent.root
@@ -170,16 +164,12 @@ module Travis
               ctx.fetch.store(self)
             end
 
-            def msg(*msg)
-              msgs << msg
-            end
-
-            def msgs
-              ctx.fetch.msgs
-            end
-
-            def required?
-              !parent&.api? || !travis_yml?
+            def validate
+              return true if root?
+              invalid_ownership if invalid_ownership?
+              invalid_visibility if invalid_visibility?
+              not_allowed if not_allowed?
+              !errored?
             end
 
             def invalid_ownership?
@@ -194,6 +184,26 @@ module Travis
               remote? && private? && !allow_config_imports?
             end
 
+            def invalid_ownership
+              error :import, :invalid_ownership, owner: repo.owner_name
+            end
+
+            def invalid_visibility
+              error :import, :invalid_visibility, repo: slug
+            end
+
+            def not_allowed
+              error :import, :import_not_allowed, repo: slug
+            end
+
+            def required?
+              !parent&.api? || !travis_yml?
+            end
+
+            def errored?
+              !!@errored
+            end
+
             def secure?(obj)
               case obj
               when Hash
@@ -203,6 +213,11 @@ module Travis
               else
                 false
               end
+            end
+
+            def error(*msg)
+              @errored = true
+              ctx.error(*msg)
             end
 
             def parse(str)

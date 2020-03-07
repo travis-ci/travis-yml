@@ -32,7 +32,7 @@ module Travis
         extend Forwardable
         include Errors, Synchronize
 
-        def_delegators :ctx, :internal?, :user_token
+        def_delegators :ctx, :error, :internal?, :user_token
         def_delegators :config, :repo, :ref, :path
 
         attr_reader :ctx, :config, :sources, :msgs, :mutex, :queue, :threads
@@ -64,6 +64,7 @@ module Travis
         def store(config)
           return unless import?(config)
           sources << config.to_s
+          sources.uniq!
           push(config)
         end
         synchronize :store
@@ -91,8 +92,7 @@ module Travis
           end
 
           def on_load
-            too_many_imports(size, max_imports) if limit?
-            configs.each(&:validate)
+            error :import, :too_many_imports, max: max_imports if limit?
           end
 
           def import?(config)

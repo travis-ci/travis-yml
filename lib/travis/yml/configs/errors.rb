@@ -23,12 +23,7 @@ module Travis
           end
         end
 
-        InvalidConfig = Class.new(InputError)
         InvalidRef = Class.new(InputError)
-        InvalidVisibility = Class.new(InputError)
-        InvalidOwnership = Class.new(InputError)
-        NotAllowed = Class.new(InputError)
-        TooManyImports = Class.new(InputError)
         UnknownRepo = Class.new(InputError)
         SyntaxError = Class.new(InputError)
         NotFound = Class.new(ApiError)
@@ -37,11 +32,6 @@ module Travis
         ServerError = Class.new(ApiError)
 
         MSGS = {
-          invalid_ref: 'Invalid config reference: %s',
-          invalid_visibility: 'Private repo %s referenced from a public repo',
-          invalid_ownership: 'Cannot import a private config file from another owner (%s)',
-          not_allowed: 'Importing from the private repo %s is not allowed as per its settings',
-          too_many_imports: 'Too many imports: %s, max: %s',
           syntax_error: 'Syntax error, could not parse %s',
           not_found: '%s %s not found on %s (%s)',
           unauthenticated: 'Unable to access private repo %s without providing a user token',
@@ -63,23 +53,7 @@ module Travis
         end
 
         def invalid_ref(ref)
-          raise InvalidRef.new(MSGS[:invalid_ref] % ref)
-        end
-
-        def too_many_imports(count, max)
-          raise TooManyImports.new(MSGS[:too_many_imports] % [count, max])
-        end
-
-        def invalid_visibility(repo)
-          raise InvalidVisibility.new(MSGS[:invalid_visibility] % repo.slug)
-        end
-
-        def invalid_ownership(repo)
-          raise InvalidOwnership.new(MSGS[:invalid_ownership] % repo.owner_name)
-        end
-
-        def not_allowed(repo)
-          raise NotAllowed.new(MSGS[:not_allowed] % repo.slug)
+          raise InvalidRef.new(ref)
         end
 
         def unauthenticated(slug)

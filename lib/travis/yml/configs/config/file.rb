@@ -13,9 +13,12 @@ module Travis
           def load(&block)
             super
             _, @path, @ref = expand(source)
+            return unless validate
             @raw = fetch
             @config = parse(raw)
             store
+          rescue InvalidRef => e
+            error :import, :invalid_ref, ref: e.message
           ensure
             loaded
           end

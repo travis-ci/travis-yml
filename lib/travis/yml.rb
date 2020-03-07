@@ -74,12 +74,17 @@ module Travis
       invalid_format:     'dropping invalid format %{value}',
       invalid_condition:  'invalid condition: %{condition}',
       invalid_env_var:    'invalid env var: %{var}',
+      invalid_ref:        'invalid import reference: %s',
       skip_allow_failure: 'skipping jobs allow failure rule #%{number} because its condition does not match: %{condition}',
       skip_exclude:       'skipping jobs exclude rule #%{number} because its condition does not match: %{condition}',
       skip_import:        'skipping import %{source} because its condition does not match: %{condition}',
       skip_job:           'skipping job #%{number} because its condition does not match: %{condition}',
       skip_notification:  'skipping notification %{type} #%{number}, condition does not match: %{condition}',
       skip_stage:         'skipping stage #%{number} because its condition does not match: %{condition}',
+      invalid_ownership:  'Cannot import a private config file from another owner (%s)',
+      invalid_visibility: 'Private repo %s referenced from a public repo',
+      import_not_allowed: 'importing from private repo %{repo} is not allowed as per its settings',
+      too_many_imports:   'Too many imports, max: %{max}',
       unknown_import:     'import not found: %{source}'
     }
 
