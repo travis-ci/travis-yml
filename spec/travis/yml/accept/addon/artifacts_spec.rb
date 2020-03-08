@@ -37,9 +37,9 @@ describe Travis::Yml, 'addon: artifacts', alert: true do
         addons:
           artifacts:
             key:
-              secure: secure
+              secure: #{secure}
       )
-      it { should serialize_to addons: { artifacts: { key: { secure: 'secure' } } } }
+      it { should serialize_to addons: { artifacts: { key: { secure: secure } } } }
       it { should_not have_msg }
     end
   end
@@ -60,9 +60,9 @@ describe Travis::Yml, 'addon: artifacts', alert: true do
         addons:
           artifacts:
             secret:
-              secure: secure
+              secure: #{secure}
       )
-      it { should serialize_to addons: { artifacts: { secret: { secure: 'secure' } } } }
+      it { should serialize_to addons: { artifacts: { secret: { secure: secure } } } }
       it { should_not have_msg }
     end
   end

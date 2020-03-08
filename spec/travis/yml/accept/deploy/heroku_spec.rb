@@ -19,9 +19,9 @@ describe Travis::Yml, 'heroku' do
         deploy:
           provider: heroku
           api_key:
-            secure: secure
+            secure: #{secure}
       )
-      it { should serialize_to deploy: [provider: 'heroku', api_key: { secure: 'secure' }] }
+      it { should serialize_to deploy: [provider: 'heroku', api_key: { secure: secure }] }
       it { should_not have_msg }
     end
   end
@@ -32,9 +32,9 @@ describe Travis::Yml, 'heroku' do
         deploy:
           provider: heroku
           username:
-            secure: secure
+            secure: #{secure}
       )
-      it { should serialize_to deploy: [provider: 'heroku', username: { secure: 'secure' }] }
+      it { should serialize_to deploy: [provider: 'heroku', username: { secure: secure }] }
       it { should_not have_msg }
     end
 
@@ -55,9 +55,9 @@ describe Travis::Yml, 'heroku' do
         deploy:
           provider: heroku
           user:
-            secure: secure
+            secure: #{secure}
       )
-      it { should serialize_to deploy: [provider: 'heroku', username: { secure: 'secure' }] }
+      it { should serialize_to deploy: [provider: 'heroku', username: { secure: secure }] }
       it { should have_msg [:info, :deploy, :alias_key, alias: 'user', key: 'username', provider: 'heroku'] }
     end
 

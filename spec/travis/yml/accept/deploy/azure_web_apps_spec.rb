@@ -31,9 +31,9 @@ describe Travis::Yml, 'azure_web_apps' do
         deploy:
           provider: azure_web_apps
           username:
-            secure: secure
+            secure: #{secure}
       )
-      it { should serialize_to deploy: [provider: 'azure_web_apps', username: { secure: 'secure' }] }
+      it { should serialize_to deploy: [provider: 'azure_web_apps', username: { secure: secure }] }
       it { should_not have_msg }
     end
   end
@@ -44,9 +44,9 @@ describe Travis::Yml, 'azure_web_apps' do
         deploy:
           provider: azure_web_apps
           password:
-            secure: secure
+            secure: #{secure}
       )
-      it { should serialize_to deploy: [provider: 'azure_web_apps', password: { secure: 'secure' }] }
+      it { should serialize_to deploy: [provider: 'azure_web_apps', password: { secure: secure }] }
       it { should_not have_msg }
     end
   end

@@ -143,7 +143,7 @@ describe Travis::Yml do
 
     describe 'unsupported' do
       let(:msg) { [:info, :key, :unsupported, on_key: :language, on_value: 'ruby', key: :key, value: 'value'] }
-      it { should eq '[info] on key: :key (value) is not supported on the :language ruby' }
+      it { should eq '[info] on key: key (value) is not supported on language ruby' }
     end
 
     describe 'required' do
@@ -188,7 +188,7 @@ describe Travis::Yml do
 
     describe 'invalid_type' do
       let(:msg) { [:info, :key, :invalid_type, actual: :seq, expected: :map, value: 'value'] }
-      it { should eq '[info] on key: dropping unexpected :seq, expected :map (value)' }
+      it { should eq '[info] on key: dropping unexpected seq, expected map (value)' }
     end
 
     describe 'invalid_format' do

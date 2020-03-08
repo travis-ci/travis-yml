@@ -14,9 +14,9 @@ describe Travis::Yml, 'addon: jwts' do
     yaml %(
       addons:
         jwt:
-          secure: foo
+          secure: #{secure}
     )
-    it { should serialize_to addons: { jwt: [secure: 'foo'] } }
+    it { should serialize_to addons: { jwt: [secure: secure] } }
   end
 
   describe 'given a seq of strs' do
@@ -32,8 +32,8 @@ describe Travis::Yml, 'addon: jwts' do
     yaml %(
       addons:
         jwt:
-        - secure: foo
+        - secure: #{secure}
     )
-    it { should serialize_to addons: { jwt: [secure: 'foo'] } }
+    it { should serialize_to addons: { jwt: [secure: secure] } }
   end
 end

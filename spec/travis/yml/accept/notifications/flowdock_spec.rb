@@ -72,9 +72,9 @@ describe Travis::Yml, 'notifications: flowdock' do
     yaml %(
       notifications:
         flowdock:
-          secure: secure
+          secure: #{secure}
     )
-    it { should serialize_to notifications: { flowdock: [api_token: { secure: 'secure' }] } }
+    it { should serialize_to notifications: { flowdock: [api_token: { secure: secure }] } }
     it { should_not have_msg }
   end
 
@@ -105,9 +105,9 @@ describe Travis::Yml, 'notifications: flowdock' do
         notifications:
           flowdock:
             api_token:
-              secure: secure
+              secure: #{secure}
       )
-      it { should serialize_to notifications: { flowdock: [api_token: { secure: 'secure' }] } }
+      it { should serialize_to notifications: { flowdock: [api_token: { secure: secure }] } }
       it { should_not have_msg }
     end
 

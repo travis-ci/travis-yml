@@ -7,9 +7,9 @@ describe Travis::Yml, 'scalingo' do
         deploy:
           provider: scalingo
           username:
-            secure: secure
+            secure: #{secure}
       )
-      it { should serialize_to deploy: [provider: 'scalingo', username: { secure: 'secure' }] }
+      it { should serialize_to deploy: [provider: 'scalingo', username: { secure: secure }] }
       it { should_not have_msg }
       it { should_not have_msg }
       it { should_not have_msg }
@@ -22,9 +22,9 @@ describe Travis::Yml, 'scalingo' do
         deploy:
           provider: scalingo
           password:
-            secure: secure
+            secure: #{secure}
       )
-      it { should serialize_to deploy: [provider: 'scalingo', password: { secure: 'secure' }] }
+      it { should serialize_to deploy: [provider: 'scalingo', password: { secure: secure }] }
       it { should_not have_msg }
     end
   end
@@ -35,9 +35,9 @@ describe Travis::Yml, 'scalingo' do
         deploy:
           provider: scalingo
           api_token:
-            secure: secure
+            secure: #{secure}
       )
-      it { should serialize_to deploy: [provider: 'scalingo', api_token: { secure: 'secure' }] }
+      it { should serialize_to deploy: [provider: 'scalingo', api_token: { secure: secure }] }
       it { should_not have_msg }
     end
   end
@@ -48,9 +48,9 @@ describe Travis::Yml, 'scalingo' do
         deploy:
           provider: scalingo
           api_key:
-            secure: secure
+            secure: #{secure}
       )
-      it { should serialize_to deploy: [provider: 'scalingo', api_token: { secure: 'secure' }] }
+      it { should serialize_to deploy: [provider: 'scalingo', api_token: { secure: secure }] }
       it { should have_msg [:info, :deploy, :alias_key, alias: 'api_key', key: 'api_token', provider: 'scalingo'] }
       xit { should have_msg [:warn, :deploy, :deprecated_key, :api_key] }
     end

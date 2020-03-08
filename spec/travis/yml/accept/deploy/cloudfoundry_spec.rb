@@ -7,9 +7,9 @@ describe Travis::Yml, 'cloudfoundry' do
         deploy:
           provider: cloudfoundry
           username:
-            secure: secure
+            secure: #{secure}
       )
-      it { should serialize_to deploy: [provider: 'cloudfoundry', username: { secure: 'secure' }] }
+      it { should serialize_to deploy: [provider: 'cloudfoundry', username: { secure: secure }] }
       it { should_not have_msg }
     end
   end
@@ -20,9 +20,9 @@ describe Travis::Yml, 'cloudfoundry' do
         deploy:
           provider: cloudfoundry
           password:
-            secure: secure
+            secure: #{secure}
       )
-      it { should serialize_to deploy: [provider: 'cloudfoundry', password: { secure: 'secure' }] }
+      it { should serialize_to deploy: [provider: 'cloudfoundry', password: { secure: secure }] }
       it { should_not have_msg }
     end
   end

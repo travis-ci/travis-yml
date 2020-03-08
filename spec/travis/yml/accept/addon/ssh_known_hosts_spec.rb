@@ -5,10 +5,9 @@ describe Travis::Yml, 'addon: ssh_known_hosts' do
     yaml %(
       addons:
         ssh_known_hosts:
-        - secure: one
-        - secure: two
+        - secure: #{secure}
     )
-    it { should serialize_to addons: { ssh_known_hosts: [{ secure: 'one', }, { secure: 'two' }] } }
+    it { should serialize_to addons: { ssh_known_hosts: [{ secure: secure }] } }
     it { should_not have_msg }
   end
 
@@ -27,9 +26,9 @@ describe Travis::Yml, 'addon: ssh_known_hosts' do
     yaml %(
       addons:
         ssh_known_hosts:
-          secure: one
+          secure: #{secure}
     )
-    it { should serialize_to addons: { ssh_known_hosts: [{ secure: 'one', }] } }
+    it { should serialize_to addons: { ssh_known_hosts: [{ secure: secure }] } }
     it { should_not have_msg }
   end
 

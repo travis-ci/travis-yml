@@ -7,9 +7,9 @@ describe Travis::Yml, 'boxfuse' do
         deploy:
           provider: boxfuse
           user:
-            secure: secure
+            secure: #{secure}
       )
-      it { should serialize_to deploy: [provider: 'boxfuse', user: { secure: 'secure' }] }
+      it { should serialize_to deploy: [provider: 'boxfuse', user: { secure: secure }] }
       it { should_not have_msg }
     end
   end
@@ -20,9 +20,9 @@ describe Travis::Yml, 'boxfuse' do
         deploy:
           provider: boxfuse
           secret:
-            secure: secure
+            secure: #{secure}
       )
-      it { should serialize_to deploy: [provider: 'boxfuse', secret: { secure: 'secure' }] }
+      it { should serialize_to deploy: [provider: 'boxfuse', secret: { secure: secure }] }
       it { should_not have_msg }
     end
   end

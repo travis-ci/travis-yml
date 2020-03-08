@@ -19,9 +19,9 @@ describe Travis::Yml, 'firebase' do
         deploy:
           provider: firebase
           token:
-            secure: secure
+            secure: #{secure}
       )
-      it { should serialize_to deploy: [provider: 'firebase', token: { secure: 'secure' }] }
+      it { should serialize_to deploy: [provider: 'firebase', token: { secure: secure }] }
       it { should_not have_msg }
     end
   end

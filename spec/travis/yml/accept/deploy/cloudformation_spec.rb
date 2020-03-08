@@ -7,9 +7,9 @@ describe Travis::Yml, 'cloudformation' do
         deploy:
           provider: cloudformation
           access_key_id:
-            secure: secure
+            secure: #{secure}
       )
-      it { should serialize_to deploy: [provider: 'cloudformation', access_key_id: { secure: 'secure' }] }
+      it { should serialize_to deploy: [provider: 'cloudformation', access_key_id: { secure: secure }] }
       it { should_not have_msg }
     end
   end
@@ -20,9 +20,9 @@ describe Travis::Yml, 'cloudformation' do
         deploy:
           provider: cloudformation
           secret_access_key:
-            secure: secure
+            secure: #{secure}
       )
-      it { should serialize_to deploy: [provider: 'cloudformation', secret_access_key: { secure: 'secure' }] }
+      it { should serialize_to deploy: [provider: 'cloudformation', secret_access_key: { secure: secure }] }
       it { should_not have_msg }
     end
   end

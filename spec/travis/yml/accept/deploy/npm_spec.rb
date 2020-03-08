@@ -7,9 +7,9 @@ describe Travis::Yml, 'npm' do
         deploy:
           provider: npm
           email:
-            secure: secure
+            secure: #{secure}
       )
-      it { should serialize_to deploy: [provider: 'npm', email: { secure: 'secure' }] }
+      it { should serialize_to deploy: [provider: 'npm', email: { secure: secure }] }
       it { should_not have_msg }
     end
   end
@@ -20,9 +20,9 @@ describe Travis::Yml, 'npm' do
         deploy:
           provider: npm
           api_token:
-            secure: secure
+            secure: #{secure}
       )
-      it { should serialize_to deploy: [provider: 'npm', api_token: { secure: 'secure' }] }
+      it { should serialize_to deploy: [provider: 'npm', api_token: { secure: secure }] }
       it { should_not have_msg }
     end
   end

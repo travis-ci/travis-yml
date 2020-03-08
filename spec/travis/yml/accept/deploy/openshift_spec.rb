@@ -19,9 +19,9 @@ describe Travis::Yml, 'openshift' do
         deploy:
           provider: openshift
           token:
-            secure: secure
+            secure: #{secure}
       )
-      it { should serialize_to deploy: [provider: 'openshift', token: { secure: 'secure' }] }
+      it { should serialize_to deploy: [provider: 'openshift', token: { secure: secure }] }
       it { should_not have_msg }
     end
   end

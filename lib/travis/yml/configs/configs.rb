@@ -19,10 +19,7 @@ module Travis
         attr_reader :configs, :config, :stages, :jobs
 
         # - add an acceptance test suite testing all the things through web?
-        # - consider alerting on secure values that are shorter than 100 chars or
-        #   is not base64 decoded: Base64.encode64(Base64.decode64(str)) == str
         # - complete specs in configs/allow_failures
-        # - api does not seem to have github app pem files set up everywhere
 
         # our Api does not allow retrieving repos by their github_id. that's a
         # problem because we have several repos that have been renamed on

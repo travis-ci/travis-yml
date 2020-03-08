@@ -7,9 +7,9 @@ describe Travis::Yml, 'surge', alert: true do
         deploy:
           provider: surge
           login:
-            secure: str
+            secure: #{secure}
       )
-      it { should serialize_to deploy: [provider: 'surge', login: { secure: 'str' }] }
+      it { should serialize_to deploy: [provider: 'surge', login: { secure: secure }] }
       it { should_not have_msg }
     end
 
@@ -30,9 +30,9 @@ describe Travis::Yml, 'surge', alert: true do
         deploy:
           provider: surge
           token:
-            secure: str
+            secure: #{secure}
       )
-      it { should serialize_to deploy: [provider: 'surge', token: { secure: 'str' }] }
+      it { should serialize_to deploy: [provider: 'surge', token: { secure: secure }] }
       it { should_not have_msg }
     end
 

@@ -7,9 +7,9 @@ describe Travis::Yml, 'transifex', alert: true do
         deploy:
           provider: transifex
           username:
-            secure: str
+            secure: #{secure}
       )
-      it { should serialize_to deploy: [provider: 'transifex', username: { secure: 'str' }] }
+      it { should serialize_to deploy: [provider: 'transifex', username: { secure: secure }] }
       it { should_not have_msg }
     end
 
@@ -30,9 +30,9 @@ describe Travis::Yml, 'transifex', alert: true do
         deploy:
           provider: transifex
           password:
-            secure: str
+            secure: #{secure}
       )
-      it { should serialize_to deploy: [provider: 'transifex', password: { secure: 'str' }] }
+      it { should serialize_to deploy: [provider: 'transifex', password: { secure: secure }] }
       it { should_not have_msg }
     end
 

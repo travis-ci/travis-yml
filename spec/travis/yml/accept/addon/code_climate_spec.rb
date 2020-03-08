@@ -14,9 +14,9 @@ describe Travis::Yml, 'addon: code_climate' do
     yaml %(
       addons:
         code_climate:
-          secure: token
+          secure: #{secure}
     )
-    it { should serialize_to addons: { code_climate: { repo_token: { secure: 'token' } } } }
+    it { should serialize_to addons: { code_climate: { repo_token: { secure: secure } } } }
     it { should_not have_msg }
   end
 
@@ -35,9 +35,9 @@ describe Travis::Yml, 'addon: code_climate' do
       addons:
         code_climate:
           repo_token:
-            secure: token
+            secure: #{secure}
     )
-    it { should serialize_to addons: { code_climate: { repo_token: { secure: 'token' } } } }
+    it { should serialize_to addons: { code_climate: { repo_token: { secure: secure } } } }
     it { should_not have_msg }
   end
 end

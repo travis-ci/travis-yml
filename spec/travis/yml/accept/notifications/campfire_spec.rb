@@ -72,9 +72,9 @@ describe Travis::Yml, 'notifications: campfire' do
     yaml %(
       notifications:
         campfire:
-          secure: secure
+          secure: #{secure}
     )
-    it { should serialize_to notifications: { campfire: [rooms: [secure: 'secure']] } }
+    it { should serialize_to notifications: { campfire: [rooms: [secure: secure]] } }
     it { should_not have_msg }
   end
 
@@ -105,9 +105,9 @@ describe Travis::Yml, 'notifications: campfire' do
         notifications:
           campfire:
             rooms:
-              secure: secure
+              secure: #{secure}
       )
-      it { should serialize_to notifications: { campfire: [rooms: [secure: 'secure']] } }
+      it { should serialize_to notifications: { campfire: [rooms: [secure: secure]] } }
       it { should_not have_msg }
     end
 

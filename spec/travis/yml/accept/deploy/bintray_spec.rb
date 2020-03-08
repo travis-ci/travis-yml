@@ -19,9 +19,9 @@ describe Travis::Yml, 'bintray' do
         deploy:
           provider: bintray
           user:
-            secure: secure
+            secure: #{secure}
       )
-      it { should serialize_to deploy: [provider: 'bintray', user: { secure: 'secure' }] }
+      it { should serialize_to deploy: [provider: 'bintray', user: { secure: secure }] }
       it { should_not have_msg }
     end
   end
@@ -32,9 +32,9 @@ describe Travis::Yml, 'bintray' do
         deploy:
           provider: bintray
           key:
-            secure: secure
+            secure: #{secure}
       )
-      it { should serialize_to deploy: [provider: 'bintray', key: { secure: 'secure' }] }
+      it { should serialize_to deploy: [provider: 'bintray', key: { secure: secure }] }
       it { should_not have_msg }
     end
   end
@@ -45,9 +45,9 @@ describe Travis::Yml, 'bintray' do
         deploy:
           provider: bintray
           passphrase:
-            secure: secure
+            secure: #{secure}
       )
-      it { should serialize_to deploy: [provider: 'bintray', passphrase: { secure: 'secure' }] }
+      it { should serialize_to deploy: [provider: 'bintray', passphrase: { secure: secure }] }
       it { should_not have_msg }
     end
   end

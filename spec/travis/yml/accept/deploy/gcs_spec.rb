@@ -19,9 +19,9 @@ describe Travis::Yml, 'gcs' do
         deploy:
           provider: gcs
           access_key_id:
-            secure: secure
+            secure: #{secure}
       )
-      it { should serialize_to deploy: [provider: 'gcs', access_key_id: { secure: 'secure' }] }
+      it { should serialize_to deploy: [provider: 'gcs', access_key_id: { secure: secure }] }
       it { should_not have_msg }
     end
   end
@@ -32,9 +32,9 @@ describe Travis::Yml, 'gcs' do
         deploy:
           provider: gcs
           secret_access_key:
-            secure: secure
+            secure: #{secure}
       )
-      it { should serialize_to deploy: [provider: 'gcs', secret_access_key: { secure: 'secure' }] }
+      it { should serialize_to deploy: [provider: 'gcs', secret_access_key: { secure: secure }] }
       it { should_not have_msg }
     end
   end

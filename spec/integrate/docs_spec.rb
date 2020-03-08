@@ -72,7 +72,8 @@ describe Travis::Yml, docs: true, alert: false do
     ],
     type: [
       :deprecated, # cache_enable_all seems to be documented?
-      :deprecated_key
+      :deprecated_key,
+      :invalid_secure
     ],
     msgs: [
       [:warn, :deploy, :empty] # repeated examples for `after_deploy` scripts that have an empty deploy section

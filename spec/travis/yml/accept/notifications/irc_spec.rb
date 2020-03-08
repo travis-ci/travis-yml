@@ -72,9 +72,9 @@ describe Travis::Yml, 'notifications: irc' do
     yaml %(
       notifications:
         irc:
-          secure: secure
+          secure: #{secure}
     )
-    it { should serialize_to notifications: { irc: [channels: [secure: 'secure']] } }
+    it { should serialize_to notifications: { irc: [channels: [secure: secure]] } }
     it { should_not have_msg }
   end
 
@@ -105,9 +105,9 @@ describe Travis::Yml, 'notifications: irc' do
         notifications:
           irc:
             channels:
-              secure: secure
+              secure: #{secure}
       )
-      it { should serialize_to notifications: { irc: [channels: [secure: 'secure']] } }
+      it { should serialize_to notifications: { irc: [channels: [secure: secure]] } }
       it { should_not have_msg }
     end
 
@@ -140,9 +140,9 @@ describe Travis::Yml, 'notifications: irc' do
         notifications:
           irc:
             channel_key:
-              secure: secure
+              secure: #{secure}
       )
-      it { should serialize_to notifications: { irc: [channel_key: { secure: 'secure' }] } }
+      it { should serialize_to notifications: { irc: [channel_key: { secure: secure }] } }
       it { should_not have_msg }
     end
   end
@@ -163,9 +163,9 @@ describe Travis::Yml, 'notifications: irc' do
         notifications:
           irc:
             password:
-              secure: secure
+              secure: #{secure}
       )
-      it { should serialize_to notifications: { irc: [password: { secure: 'secure' }] } }
+      it { should serialize_to notifications: { irc: [password: { secure: secure }] } }
       it { should_not have_msg }
     end
   end
@@ -186,9 +186,9 @@ describe Travis::Yml, 'notifications: irc' do
         notifications:
           irc:
             nickserv_password:
-              secure: secure
+              secure: #{secure}
       )
-      it { should serialize_to notifications: { irc: [nickserv_password: { secure: 'secure' }] } }
+      it { should serialize_to notifications: { irc: [nickserv_password: { secure: secure }] } }
       it { should_not have_msg }
     end
   end
@@ -209,9 +209,9 @@ describe Travis::Yml, 'notifications: irc' do
         notifications:
           irc:
             nick:
-              secure: secure
+              secure: #{secure}
       )
-      it { should serialize_to notifications: { irc: [nick: { secure: 'secure' }] } }
+      it { should serialize_to notifications: { irc: [nick: { secure: secure }] } }
       it { should_not have_msg }
     end
   end

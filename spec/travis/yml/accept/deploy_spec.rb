@@ -114,9 +114,9 @@ describe Travis::Yml, 'deploy' do
         deploy:
           provider: heroku
           api_key:
-            secure: secure
+            secure: #{secure}
       )
-      it { should serialize_to deploy: [provider: 'heroku', api_key: { secure: 'secure' }] }
+      it { should serialize_to deploy: [provider: 'heroku', api_key: { secure: secure }] }
     end
   end
 
@@ -154,9 +154,9 @@ describe Travis::Yml, 'deploy' do
         deploy:
           - provider: heroku
             api_key:
-              secure: secure
+              secure: #{secure}
       )
-      it { should serialize_to deploy: [provider: 'heroku', api_key: { secure: 'secure' }] }
+      it { should serialize_to deploy: [provider: 'heroku', api_key: { secure: secure }] }
       it { should_not have_msg }
     end
   end

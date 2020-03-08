@@ -124,8 +124,14 @@ describe Travis::Yml::Doc::Validate, 'invalid_type', drop: true do
       it { should have_msg [:error, :root, :invalid_type, expected: :secure, actual: :bool, value: value] }
     end
 
-    describe 'given a secure' do
-      let(:value) { { secure: 'bar' } }
+    describe 'given a secure (plain)' do
+      let(:value) { { secure: 'str' } }
+      it { should serialize_to value }
+      it { should have_msg [:warn, :'root.secure', :invalid_secure, value: value] }
+    end
+
+    describe 'given a secure (base64)' do
+      let(:value) { { secure: Base64.encode64('str') } }
       it { should serialize_to value }
       it { should_not have_msg }
     end

@@ -8,9 +8,9 @@ describe Travis::Yml, 'rubygems', alert: true do
           provider: rubygems
           username:
             production:
-              secure: str
+              secure: #{secure}
       )
-      it { should serialize_to deploy: [provider: 'rubygems', username: { production: { secure: 'str' } }] }
+      it { should serialize_to deploy: [provider: 'rubygems', username: { production: { secure: secure } }] }
       it { should_not have_msg }
     end
 
@@ -30,9 +30,9 @@ describe Travis::Yml, 'rubygems', alert: true do
         deploy:
           provider: rubygems
           username:
-            secure: str
+            secure: #{secure}
       )
-      it { should serialize_to deploy: [provider: 'rubygems', username: { secure: 'str' }] }
+      it { should serialize_to deploy: [provider: 'rubygems', username: { secure: secure }] }
       it { should_not have_msg }
     end
 
@@ -51,9 +51,9 @@ describe Travis::Yml, 'rubygems', alert: true do
         deploy:
           provider: rubygems
           user:
-            secure: str
+            secure: #{secure}
       )
-      it { should serialize_to deploy: [provider: 'rubygems', username: { secure: 'str' }] }
+      it { should serialize_to deploy: [provider: 'rubygems', username: { secure: secure }] }
       it { should have_msg [:info, :deploy, :alias_key, alias: 'user', key: 'username', provider: 'rubygems'] }
     end
   end
@@ -64,9 +64,9 @@ describe Travis::Yml, 'rubygems', alert: true do
         deploy:
           provider: rubygems
           api_key:
-            secure: str
+            secure: #{secure}
       )
-      it { should serialize_to deploy: [provider: 'rubygems', api_key: { secure: 'str' }] }
+      it { should serialize_to deploy: [provider: 'rubygems', api_key: { secure: secure }] }
       it { should_not have_msg }
     end
 

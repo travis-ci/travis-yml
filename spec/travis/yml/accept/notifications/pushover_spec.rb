@@ -72,10 +72,10 @@ describe Travis::Yml, 'notifications: pushover' do
     yaml %(
       notifications:
         pushover:
-          secure: secure
+          secure: #{secure}
     )
     it { should serialize_to notifications: { pushover: [] } }
-    it { should have_msg [:error, :'notifications.pushover.secure', :invalid_type, expected: :map, actual: :secure, value: { secure: 'secure' }] }
+    it { should have_msg [:error, :'notifications.pushover.secure', :invalid_type, expected: :map, actual: :secure, value: { secure: secure }] }
   end
 
   describe 'given a seq of strs', drop: true do
@@ -104,9 +104,9 @@ describe Travis::Yml, 'notifications: pushover' do
         notifications:
           pushover:
             api_key:
-              secure: secure
+              secure: #{secure}
       )
-      it { should serialize_to notifications: { pushover: [api_key: [secure: 'secure']] } }
+      it { should serialize_to notifications: { pushover: [api_key: [secure: secure]] } }
       it { should_not have_msg }
     end
 
@@ -139,9 +139,9 @@ describe Travis::Yml, 'notifications: pushover' do
         notifications:
           pushover:
             users:
-              secure: secure
+              secure: #{secure}
       )
-      it { should serialize_to notifications: { pushover: [users: [secure: 'secure']] } }
+      it { should serialize_to notifications: { pushover: [users: [secure: secure]] } }
       it { should_not have_msg }
     end
 
@@ -210,10 +210,10 @@ describe Travis::Yml, 'notifications: pushover' do
             notifications:
               pushover:
                 api_key:
-                  secure: secure
+                  secure: #{secure}
               #{status}: #{value}
           )
-          it { should serialize_to notifications: { pushover: [api_key: [secure: 'secure'], status => value] } }
+          it { should serialize_to notifications: { pushover: [api_key: [secure: secure], status => value] } }
           it { should_not have_msg }
         end
       end

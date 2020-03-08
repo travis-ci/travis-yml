@@ -7,9 +7,9 @@ describe Travis::Yml, 'opsworks' do
         deploy:
           provider: opsworks
           access_key_id:
-            secure: secure
+            secure: #{secure}
       )
-      it { should serialize_to deploy: [provider: 'opsworks', access_key_id: { secure: 'secure' }] }
+      it { should serialize_to deploy: [provider: 'opsworks', access_key_id: { secure: secure }] }
       it { should_not have_msg }
     end
   end
@@ -20,9 +20,9 @@ describe Travis::Yml, 'opsworks' do
         deploy:
           provider: opsworks
           secret_access_key:
-            secure: secure
+            secure: #{secure}
       )
-      it { should serialize_to deploy: [provider: 'opsworks', secret_access_key: { secure: 'secure' }] }
+      it { should serialize_to deploy: [provider: 'opsworks', secret_access_key: { secure: secure }] }
       it { should_not have_msg }
     end
   end

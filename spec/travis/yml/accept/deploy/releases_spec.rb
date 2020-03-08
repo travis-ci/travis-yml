@@ -7,9 +7,9 @@ describe Travis::Yml, 'releases' do
         deploy:
           provider: releases
           username:
-            secure: secure
+            secure: #{secure}
       )
-      it { should serialize_to deploy: [provider: 'releases', username: { secure: 'secure' }] }
+      it { should serialize_to deploy: [provider: 'releases', username: { secure: secure }] }
       it { should_not have_msg }
     end
 
@@ -30,9 +30,9 @@ describe Travis::Yml, 'releases' do
         deploy:
           provider: releases
           user:
-            secure: secure
+            secure: #{secure}
       )
-      it { should serialize_to deploy: [provider: 'releases', username: { secure: 'secure' }] }
+      it { should serialize_to deploy: [provider: 'releases', username: { secure: secure }] }
       it { should have_msg [:info, :deploy, :alias_key, alias: 'user', key: 'username', provider: 'releases'] }
     end
 
@@ -53,9 +53,9 @@ describe Travis::Yml, 'releases' do
         deploy:
           provider: releases
           password:
-            secure: secure
+            secure: #{secure}
       )
-      it { should serialize_to deploy: [provider: 'releases', password: { secure: 'secure' }] }
+      it { should serialize_to deploy: [provider: 'releases', password: { secure: secure }] }
       it { should_not have_msg }
     end
   end
@@ -66,9 +66,9 @@ describe Travis::Yml, 'releases' do
         deploy:
           provider: releases
           token:
-            secure: secure
+            secure: #{secure}
       )
-      it { should serialize_to deploy: [provider: 'releases', token: { secure: 'secure' }] }
+      it { should serialize_to deploy: [provider: 'releases', token: { secure: secure }] }
       it { should_not have_msg }
     end
   end
@@ -79,9 +79,9 @@ describe Travis::Yml, 'releases' do
         deploy:
           provider: releases
           api_key:
-            secure: secure
+            secure: #{secure}
       )
-      it { should serialize_to deploy: [provider: 'releases', token: { secure: 'secure' }] }
+      it { should serialize_to deploy: [provider: 'releases', token: { secure: secure }] }
       it { should have_msg [:info, :deploy, :alias_key, alias: 'api_key', key: 'token', provider: 'releases'] }
     end
   end

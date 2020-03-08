@@ -553,6 +553,36 @@ describe Travis::Yml, configs: true do
     WEBSITE_CHANGED = git diff --name-only $TRAVIS_COMMIT_RANGE | grep -E "website/|docs/"
   vars
 
+  INVALID_SECURES = [
+    '<encrypted github access token>',
+    '$GITHUB_TOKEN',
+    '$SONAR_TOKEN',
+    '$SONARCLOUD_TOKEN',
+    '9df3e061-02c9-473b-b4df-0e0239178a5a',
+    '$ARTIFACTS_SECRET',
+    '$AWS_SECRET_ACCESS_KEY',
+    '$BINTRAY_TOKEN',
+    '$GH_TOKEN',
+    '$NPM_TOKEN',
+    '$SLACK_NOTIFICATIONS',
+    '$SLACK_TOKEN',
+    '${GH_TOKEN}',
+    '${SLACK_INTEGRATION_KEY}',
+    '${SONAR_TOKEN}',
+    '${SONAR_TOKEN}',
+    '${SONAR_TOKEN}',
+    '${VLO_DEPLOY_TOKEN}',
+    '****visit the project page on scan.coverity.com to get the token****',
+    'PLEASE_REPLACE_ME',
+    '1/OylsAC4o83Rry0RcwPwn0YGzAokOzRd0j5vyxVnjUkM',
+    'IhEskTMEAsBNYTQCpDSlvDxIJK5cu1r2V',
+    'O_cda5pWDBAP-O3_0nG5RQ',
+    'O_cda5pWDBAP-O3_0nG5RQ',
+    'eb6e0454-e844-4a1a-a695-2d5830897566',
+    'f2d7e482-f6a1-4fbf-b12b-fabba407e57d',
+    'g3L0XaiaUjUeBoNMLXx4pdz+7JudZhFGPY1mOX1WkC4B0zo+M/tGdhLLz/',
+  ]
+
   ENUMS = %i(
     deploy.provider
     jobs.include.deploy.provider
@@ -675,6 +705,10 @@ describe Travis::Yml, configs: true do
     msg[2] == :empty && msg[1].to_s.end_with?('.secure')
   end
 
+  def invalid_secure?(msg)
+    msg[2] == :invalid_secure && INVALID_SECURES.include?(msg[3][:value][:secure])
+  end
+
   def filter(path, msg)
     return true if msg[0] == :info
     # return true if msg[0] == :warn
@@ -692,6 +726,7 @@ describe Travis::Yml, configs: true do
 
     return true if alert?(msg)
     return true if empty_secure?(msg)
+    return true if invalid_secure?(msg)
     return true if typo?(msg)
     return true if overwrite?(msg)
     return true if potential_alias?(msg)
