@@ -27,7 +27,7 @@ module Travis
             Faraday.new(url: url, headers: HEADERS, ssl: ssl) do |c|
               c.use FaradayMiddleware::FollowRedirects
               c.request :authorization, :token, token if token
-              c.request :retry
+              c.request  :retry, retry_statuses: [500, 503]
               c.response :raise_error
               # c.response :logger
               c.adapter :net_http
