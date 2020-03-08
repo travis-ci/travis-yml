@@ -131,7 +131,7 @@ module Travis
           end
 
           def empty?
-            raw.nil? || raw.empty?
+            raw.nil? || raw.strip.empty?
           end
 
           def skip
