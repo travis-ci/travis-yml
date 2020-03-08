@@ -20,7 +20,7 @@ module Travis
               data = Oj.load(resp.body)
               decode64(data['content'])
             rescue Github::Error => e
-              api_error('GitHub', :file, [repo.slug, path].join(':'), e)
+              api_error('GitHub', :file, [repo.slug, self.path].join(':'), e)
             rescue TypeError => e
               nil
             end

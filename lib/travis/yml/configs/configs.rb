@@ -24,11 +24,9 @@ module Travis
         # - complete specs in configs/allow_failures
         # - api does not seem to have github app pem files set up everywhere
 
-        # collating env.jobs with env.global during matrix expansion makes it
-        # impossible to reproduce Gatekeeper's jobs.allow_failures and
-        # jobs.exclude logic with regards to equality of env vars, as at this
-        # point the original env.jobs vars are unknown. (unless we do something
-        # wild, like abusing Ruby's taint feature or similar)
+        # our Api does not allow retrieving repos by their github_id. that's a
+        # problem because we have several repos that have been renamed on
+        # GitHub without us knowing because of missing OAuth tokens.
 
         # setting defaults early vs matrix expansion: if Yml sets defaults on
         # matrix expansion keys, then the matrix expansion logic has no way to

@@ -80,8 +80,42 @@ describe Travis::Yml::Web::App, 'POST /configs' do
     end
   end
 
+  describe 'errors' do
+    let(:body) { symbolize(JSON.parse(last_response.body)) }
+    before { post '/configs', Oj.generate(data), defaults: true }
+
+    describe 'syntax error' do
+      let(:travis_yml) { '{' }
+      it { expect(last_response.status).to eq 400 }
+      it do
+        expect(body).to eq(
+          error: {
+            type: 'syntax_error',
+            source: 'travis-ci/travis-yml:.travis.yml@ref',
+            message: '(<unknown>): did not find expected node content while parsing a flow node at line 2 column 1 (source: travis-ci/travis-yml:.travis.yml@ref)'
+          }
+        )
+      end
+    end
+
+    describe 'invalid config format' do
+      let(:travis_yml) { 'str' }
+      it { expect(last_response.status).to eq 400 }
+      it do
+        expect(body).to eq(
+          error: {
+            type: 'invalid_config_format',
+            source: 'travis-ci/travis-yml:.travis.yml@ref',
+            message: 'Input must parse into a hash (source: travis-ci/travis-yml:.travis.yml@ref)'
+          }
+        )
+      end
+    end
+  end
+
   describe 'travis api errors' do
     let(:travis_yml) { 'import: other/other:one.yml' }
+    let(:body) { symbolize(JSON.parse(last_response.body)) }
 
     before { stub_content('other/other', 'one.yml', one_yml) }
     before { stub_repo('other/other', internal: true, status: status) }
@@ -93,22 +127,110 @@ describe Travis::Yml::Web::App, 'POST /configs' do
       describe '401' do
         let(:status) { 401 }
         it { expect(last_response.status).to eq 400 }
+        it do
+          expect(body).to eq(
+            error: {
+              type: 'unauthorized',
+              service: 'travis_ci',
+              ref: 'other/other',
+              message: 'Unable to authenticate with Travis CI for repo other/other (Travis CI GET repo/other%2Fother responded with 401)'
+            }
+          )
+        end
       end
 
       describe '403' do
         let(:status) { 403 }
         it { expect(last_response.status).to eq 400 }
+        it do
+          expect(body).to eq(
+            error: {
+              type: 'unauthorized',
+              service: 'travis_ci',
+              ref: 'other/other',
+              message: 'Unable to authenticate with Travis CI for repo other/other (Travis CI GET repo/other%2Fother responded with 403)'
+            }
+          )
+        end
       end
 
       describe '404' do
         let(:status) { 404 }
         it { expect(last_response.status).to eq 400 }
+        it do
+          expect(body).to eq(
+            error: {
+              type: 'repo_not_found',
+              service: 'travis_ci',
+              ref: 'other/other',
+              message: 'Repo other/other not found on Travis CI (Travis CI GET repo/other%2Fother responded with 404)'
+            }
+          )
+        end
       end
     end
 
     describe '500' do
       let(:status) { 500 }
       it { expect { subject }.to raise_error Travis::Yml::Configs::ServerError }
+    end
+  end
+
+  describe 'github api errors' do
+    let(:travis_yml) { 'import: other/other:one.yml' }
+    let(:body) { symbolize(JSON.parse(last_response.body)) }
+
+    before { stub_repo('other/other', internal: true, body: { github_id: 1 }) }
+    before { stub_content(1, 'one.yml', status: status) }
+    subject { post '/configs', Oj.generate(data), defaults: true }
+
+    context do
+      before { subject }
+
+      describe '401' do
+        let(:status) { 401 }
+        it { expect(last_response.status).to eq 400 }
+        it do
+          expect(body).to eq(
+            error: {
+              type: 'unauthorized',
+              service: 'github',
+              ref: 'other/other:one.yml',
+              message: 'Unable to authenticate with GitHub for file other/other:one.yml (GitHub GET repositories/1/contents/one.yml responded with 401)'
+            }
+          )
+        end
+      end
+
+      describe '403' do
+        let(:status) { 403 }
+        it { expect(last_response.status).to eq 400 }
+        it do
+          expect(body).to eq(
+            error: {
+              type: 'unauthorized',
+              service: 'github',
+              ref: 'other/other:one.yml',
+              message: 'Unable to authenticate with GitHub for file other/other:one.yml (GitHub GET repositories/1/contents/one.yml responded with 403)'
+            }
+          )
+        end
+      end
+
+      describe '404' do
+        let(:status) { 404 }
+        it { expect(last_response.status).to eq 400 }
+        it do
+          expect(body).to eq(
+            error: {
+              type: 'file_not_found',
+              service: 'github',
+              ref: 'other/other:one.yml',
+              message: 'File other/other:one.yml not found on GitHub (GitHub GET repositories/1/contents/one.yml responded with 404)'
+            }
+          )
+        end
+      end
     end
   end
 end

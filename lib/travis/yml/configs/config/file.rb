@@ -17,8 +17,12 @@ module Travis
             @raw = fetch
             @config = parse(raw)
             store
+          rescue ApiError
+            raise
           rescue InvalidRef => e
             error :import, :invalid_ref, ref: e.message
+          rescue Error => e
+            raise e.class.new(e.message, e.data.merge(source: to_s))
           ensure
             loaded
           end

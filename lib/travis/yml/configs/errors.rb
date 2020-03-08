@@ -13,9 +13,10 @@ module Travis
         class ApiError < Error
           attr_reader :status
 
-          def initialize(message, status)
+          def initialize(msg, status, data)
             @status = status
-            super(message)
+            data[:service] = data[:service] == 'Travis CI' ? :travis_ci : :github
+            super(msg, data)
           end
 
           def internal?
@@ -24,14 +25,12 @@ module Travis
         end
 
         InvalidRef   = Class.new(InputError)
-        SyntaxError  = Class.new(InputError)
         Unauthorized = Class.new(ApiError)
         RepoNotFound = Class.new(ApiError)
         FileNotFound = Class.new(ApiError)
         ServerError  = Class.new(ApiError)
 
         MSGS = {
-          syntax_error:   'Syntax error, could not parse %s',
           repo_not_found: 'Repo %s not found on %s (%s)',
           file_not_found: 'File %s not found on %s (%s)',
           unauthorized:   'Unable to authenticate with %s for %s %s (%s)',
@@ -47,25 +46,24 @@ module Travis
           end
         end
 
-        def syntax_error
-          raise SyntaxError.new(MSGS[:syntax_error] % to_s)
-        end
-
         def invalid_ref(ref)
           raise InvalidRef.new(ref)
         end
 
         def unauthorized(service, type, ref, e)
-          raise Unauthorized.new(MSGS[:unauthorized] % [service, type, ref, e.message], e.status)
+          msg = MSGS[:unauthorized] % [service, type, ref, e.message]
+          raise Unauthorized.new(msg, e.status, service: service, ref: ref)
         end
 
         def not_found(service, type, ref, e)
+          msg = MSGS[:"#{type}_not_found"] % [ref, service, e.message]
           const = self.class.const_get("#{type.capitalize}NotFound")
-          raise const.new(MSGS[:"#{type}_not_found"] % [ref, service, e.message], e.status)
+          raise const.new(msg, e.status, service: service, ref: ref)
         end
 
         def server_error(service, type, ref, e)
-          raise ServerError.new(MSGS[:server_error] % [to_s, service, e.message], e.status)
+          msg = MSGS[:server_error] % [to_s, service, e.message]
+          raise ServerError.new(msg, e.status, service: service, ref: ref)
         end
       end
     end

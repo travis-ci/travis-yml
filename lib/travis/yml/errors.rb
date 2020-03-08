@@ -1,7 +1,15 @@
 # frozen_string_literal: true
 module Travis
   module Yml
-    class Error < StandardError; end
+    class Error < StandardError
+      attr_reader :data
+
+      def initialize(msg, data = {})
+        @data = data
+        msg = "#{msg} (source: #{data[:source]})" if data[:source]
+        super(msg)
+      end
+    end
 
     # Errors relating to implementation
     class InternalError < Error; def internal?; true end; end
