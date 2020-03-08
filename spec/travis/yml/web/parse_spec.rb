@@ -89,8 +89,8 @@ describe Travis::Yml::Web::App do
       end
 
       it 'returns error' do
-        expect(body['error_type']).to eq 'invalid_config_format'
-        expect(body['error_message']).to eq 'Input must parse into a hash'
+        expect(body['error']['type']).to eq 'invalid_config_format'
+        expect(body['error']['message']).to eq 'Input must parse into a hash'
       end
     end
 
@@ -104,8 +104,8 @@ describe Travis::Yml::Web::App do
       end
 
       it 'returns syntax error' do
-        expect(body['error_type']).to eq 'syntax_error'
-        expect(body['error_message']).to match 'did not find expected alphabetic or numeric character while scanning an alias'
+        expect(body['error']['type']).to eq 'syntax_error'
+        expect(body['error']['message']).to match 'did not find expected alphabetic or numeric character while scanning an alias'
       end
     end
 
@@ -120,8 +120,8 @@ describe Travis::Yml::Web::App do
     #   end
     #
     #   it 'returns error' do
-    #     expect(body['error_type']).to eq 'stack_too_high'
-    #     expect(body['error_message']).to eq 'Stack size 100000'
+    #     expect(body['error']['type']).to eq 'stack_too_high'
+    #     expect(body['error']['message']).to eq 'Stack size 100000'
     #   end
     # end
   end

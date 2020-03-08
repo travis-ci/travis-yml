@@ -321,7 +321,7 @@ describe Travis::Yml::Configs do
 
       describe '404 (non-api build request)' do
         let(:status) { 404 }
-        it { expect { subject }.to raise_error Travis::Yml::Configs::NotFound }
+        it { expect { subject }.to raise_error Travis::Yml::Configs::FileNotFound }
       end
 
       describe '500' do
@@ -341,12 +341,12 @@ describe Travis::Yml::Configs do
       describe '404 (api build request)' do
         let(:raw) { 'script: ./api' }
         let(:status) { 404 }
-        it { expect { subject }.to raise_error Travis::Yml::Configs::NotFound }
+        it { expect { subject }.to raise_error Travis::Yml::Configs::FileNotFound }
       end
 
       describe '404 (non-api build request)' do
         let(:status) { 404 }
-        it { expect { subject }.to raise_error Travis::Yml::Configs::NotFound }
+        it { expect { subject }.to raise_error Travis::Yml::Configs::FileNotFound }
       end
 
       describe '500' do
@@ -374,7 +374,7 @@ describe Travis::Yml::Configs do
 
     describe '404' do
       let(:status) { 404 }
-      it { expect { subject }.to raise_error Travis::Yml::Configs::NotFound }
+      it { expect { subject }.to raise_error Travis::Yml::Configs::RepoNotFound }
     end
 
     describe '500' do

@@ -34,8 +34,8 @@ describe Travis::Yml::Web::App, 'POST /expand' do
     end
 
     it 'returns error' do
-      expect(body['error_type']).to eq 'encoding_error'
-      expect(body['error_message']).to match /Empty input.*at line 1, column 1/
+      expect(body['error']['type']).to eq 'encoding_error'
+      expect(body['error']['message']).to match /Empty input.*at line 1, column 1/
     end
   end
 end

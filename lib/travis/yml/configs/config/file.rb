@@ -49,7 +49,7 @@ module Travis
 
             def fetch
               Github::Content.new(repo, path, ref).content
-            rescue NotFound => e
+            rescue FileNotFound => e
               required? ? raise : nil
             end
         end

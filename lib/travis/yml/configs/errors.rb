@@ -23,18 +23,19 @@ module Travis
           end
         end
 
-        InvalidRef = Class.new(InputError)
-        UnknownRepo = Class.new(InputError)
-        SyntaxError = Class.new(InputError)
-        NotFound = Class.new(ApiError)
+        InvalidRef   = Class.new(InputError)
+        SyntaxError  = Class.new(InputError)
         Unauthorized = Class.new(ApiError)
-        ServerError = Class.new(ApiError)
+        RepoNotFound = Class.new(ApiError)
+        FileNotFound = Class.new(ApiError)
+        ServerError  = Class.new(ApiError)
 
         MSGS = {
-          syntax_error: 'Syntax error, could not parse %s',
-          not_found: '%s %s not found on %s (%s)',
-          unauthorized: 'Unable to authenticate with %s for %s %s (%s)',
-          server_error: 'Error retrieving %s from %s (%s)'
+          syntax_error:   'Syntax error, could not parse %s',
+          repo_not_found: 'Repo %s not found on %s (%s)',
+          file_not_found: 'File %s not found on %s (%s)',
+          unauthorized:   'Unable to authenticate with %s for %s %s (%s)',
+          server_error:   'Error retrieving %s from %s (%s)'
         }
 
         def api_error(*args)
@@ -59,7 +60,8 @@ module Travis
         end
 
         def not_found(service, type, ref, e)
-          raise NotFound.new(MSGS[:not_found] % [type.capitalize, ref, service, e.message], e.status)
+          const = self.class.const_get("#{type.capitalize}NotFound")
+          raise const.new(MSGS[:"#{type}_not_found"] % [ref, service, e.message], e.status)
         end
 
         def server_error(service, type, ref, e)
