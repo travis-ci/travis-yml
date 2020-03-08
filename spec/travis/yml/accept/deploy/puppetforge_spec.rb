@@ -7,11 +7,11 @@ describe Travis::Yml, 'puppetforge' do
         deploy:
           provider: puppetforge
           username:
-            secure: secure
+            secure: #{secure}
           password:
-            secure: secure
+            secure: #{secure}
       )
-      it { should serialize_to deploy: [provider: 'puppetforge', username: { secure: 'secure' }, password: { secure: 'secure' }] }
+      it { should serialize_to deploy: [provider: 'puppetforge', username: { secure: secure }, password: { secure: secure }] }
       it { should_not have_msg }
     end
   end

@@ -7,9 +7,9 @@ describe Travis::Yml, 'anynines' do
         deploy:
           provider: anynines
           username:
-            secure: secure
+            secure: #{secure}
       )
-      it { should serialize_to deploy: [provider: 'anynines', username: { secure: 'secure' }] }
+      it { should serialize_to deploy: [provider: 'anynines', username: { secure: secure }] }
       it { should_not have_msg }
     end
   end
@@ -20,9 +20,9 @@ describe Travis::Yml, 'anynines' do
         deploy:
           provider: anynines
           password:
-            secure: secure
+            secure: #{secure}
       )
-      it { should serialize_to deploy: [provider: 'anynines', password: { secure: 'secure' }] }
+      it { should serialize_to deploy: [provider: 'anynines', password: { secure: secure }] }
       it { should_not have_msg }
     end
 

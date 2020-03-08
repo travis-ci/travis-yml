@@ -53,9 +53,9 @@ describe Travis::Yml, 'snap' do
         deploy:
           provider: snap
           token:
-            secure: str
+            secure: #{secure}
       )
-      it { should serialize_to deploy: [provider: 'snap', token: { secure: 'str' }] }
+      it { should serialize_to deploy: [provider: 'snap', token: { secure: secure }] }
       it { should_not have_msg }
     end
   end

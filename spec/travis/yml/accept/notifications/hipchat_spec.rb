@@ -72,9 +72,9 @@ describe Travis::Yml, 'notifications: hipchat' do
     yaml %(
       notifications:
         hipchat:
-          secure: secure
+          secure: #{secure}
     )
-    it { should serialize_to notifications: { hipchat: [rooms: [secure: 'secure']] } }
+    it { should serialize_to notifications: { hipchat: [rooms: [secure: secure]] } }
     it { should_not have_msg }
   end
 
@@ -105,9 +105,9 @@ describe Travis::Yml, 'notifications: hipchat' do
         notifications:
           hipchat:
             rooms:
-              secure: secure
+              secure: #{secure}
       )
-      it { should serialize_to notifications: { hipchat: [rooms: [secure: 'secure']] } }
+      it { should serialize_to notifications: { hipchat: [rooms: [secure: secure]] } }
       it { should_not have_msg }
     end
 

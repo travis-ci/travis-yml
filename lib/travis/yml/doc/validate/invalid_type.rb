@@ -9,7 +9,10 @@ module Travis
           register :invalid_type
 
           def apply
-            apply? && invalid? ? invalid : value
+            return value unless apply?
+            return invalid_secure if invalid_secure?
+            return invalid_type if invalid_type?
+            value
           end
 
           private
@@ -18,11 +21,20 @@ module Travis
               value.given?
             end
 
-            def invalid?
-              !schema.is?(value.type)
+            def invalid_secure?
+              schema.secure? && schema.strict? && value.secure? && !value.encoded?
             end
 
-            def invalid
+            def invalid_type?
+              !schema.is?(value.type) || invalid_secure?
+            end
+
+            def invalid_secure
+              value.warn :invalid_secure, value: value.serialize
+              value
+            end
+
+            def invalid_type
               value.error :invalid_type, expected: schema.type, actual: value.type, value: value.serialize
               drop? ? blank : value
             end

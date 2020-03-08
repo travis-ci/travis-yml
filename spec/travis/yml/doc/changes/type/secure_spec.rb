@@ -34,7 +34,7 @@ describe Travis::Yml::Doc::Change::Secure do
   end
 
   describe 'given a secure' do
-    let(:value) { { secure: 'bar' } }
+    let(:value) { { secure: encode64('bar') } }
     it { should serialize_to value }
   end
 end

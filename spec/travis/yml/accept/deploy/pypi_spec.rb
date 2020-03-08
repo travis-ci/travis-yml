@@ -7,9 +7,9 @@ describe Travis::Yml, 'pypi' do
         deploy:
           provider: pypi
           username:
-            secure: str
+            secure: #{secure}
       )
-      it { should serialize_to deploy: [provider: 'pypi', username: { secure: 'str' }] }
+      it { should serialize_to deploy: [provider: 'pypi', username: { secure: secure }] }
       it { should_not have_msg }
     end
 
@@ -30,9 +30,9 @@ describe Travis::Yml, 'pypi' do
         deploy:
           provider: pypi
           user:
-            secure: str
+            secure: #{secure}
       )
-      it { should serialize_to deploy: [provider: 'pypi', username: { secure: 'str' }] }
+      it { should serialize_to deploy: [provider: 'pypi', username: { secure: secure }] }
       it { should have_msg [:info, :deploy, :alias_key, alias: 'user', key: 'username', provider: 'pypi'] }
     end
   end
@@ -43,9 +43,9 @@ describe Travis::Yml, 'pypi' do
         deploy:
           provider: pypi
           password:
-            secure: secure
+            secure: #{secure}
       )
-      it { should serialize_to deploy: [provider: 'pypi', password: { secure: 'secure' }] }
+      it { should serialize_to deploy: [provider: 'pypi', password: { secure: secure }] }
       it { should_not have_msg }
     end
   end

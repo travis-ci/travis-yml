@@ -123,9 +123,9 @@ describe Travis::Yml, 'notifications: email' do
         notifications:
           email:
             - recipients:
-              - secure: secure
+              - secure: #{secure}
       )
-      it { should serialize_to notifications: { email: [recipients: [secure: 'secure']] } }
+      it { should serialize_to notifications: { email: [recipients: [secure: secure]] } }
       it { should_not have_msg }
     end
 
@@ -222,10 +222,10 @@ describe Travis::Yml, 'notifications: email' do
       yaml %(
         notifications:
           email:
-            - secure: secure
+            - secure: #{secure}
             - on_success: change
       )
-      it { should serialize_to notifications: { email: [{ recipients: [secure: 'secure'] }, { on_success: 'change' }] } }
+      it { should serialize_to notifications: { email: [{ recipients: [secure: secure] }, { on_success: 'change' }] } }
       it { should_not have_msg }
     end
 

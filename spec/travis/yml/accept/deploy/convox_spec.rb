@@ -43,9 +43,9 @@ describe Travis::Yml, 'convox' do
         deploy:
           provider: convox
           password:
-            secure: secure
+            secure: #{secure}
       )
-      it { should serialize_to deploy: [provider: 'convox', password: { secure: 'secure' }] }
+      it { should serialize_to deploy: [provider: 'convox', password: { secure: secure }] }
       it { should_not have_msg }
     end
   end

@@ -25,9 +25,9 @@ describe Travis::Yml, 'addon: sauce_connect' do
         addons:
           sauce_connect:
             username:
-              secure: secure
+              secure: #{secure}
       )
-      it { should serialize_to addons: { sauce_connect: { username: { secure: 'secure' } } } }
+      it { should serialize_to addons: { sauce_connect: { username: { secure: secure } } } }
       it { should_not have_msg }
     end
   end
@@ -48,9 +48,9 @@ describe Travis::Yml, 'addon: sauce_connect' do
         addons:
           sauce_connect:
             access_key:
-              secure: secure
+              secure: #{secure}
       )
-      it { should serialize_to addons: { sauce_connect: { access_key: { secure: 'secure' } } } }
+      it { should serialize_to addons: { sauce_connect: { access_key: { secure: secure } } } }
       it { should_not have_msg }
     end
   end

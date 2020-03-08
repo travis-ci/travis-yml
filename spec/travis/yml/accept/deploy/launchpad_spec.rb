@@ -21,11 +21,11 @@ describe Travis::Yml, 'launchpad' do
           provider: launchpad
           slug: str
           oauth_token:
-            secure: secure
+            secure: #{secure}
           oauth_token_secret:
-            secure: secure
+            secure: #{secure}
       )
-      it { should serialize_to deploy: [provider: 'launchpad', slug: 'str', oauth_token: { secure: 'secure' }, oauth_token_secret: { secure: 'secure' }] }
+      it { should serialize_to deploy: [provider: 'launchpad', slug: 'str', oauth_token: { secure: secure }, oauth_token_secret: { secure: secure }] }
       it { should_not have_msg }
     end
   end

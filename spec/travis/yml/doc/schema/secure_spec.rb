@@ -27,7 +27,7 @@ describe Travis::Yml::Doc::Schema::Secure do
     end
 
     describe 'given a secure' do
-      let(:value) { { secure: 'str' } }
+      let(:value) { { secure: encode64('str') } }
       it { should be true }
     end
 

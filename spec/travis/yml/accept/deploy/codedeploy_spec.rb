@@ -7,9 +7,9 @@ describe Travis::Yml, 'codedeploy' do
         deploy:
           provider: codedeploy
           access_key_id:
-            secure: secure
+            secure: #{secure}
       )
-      it { should serialize_to deploy: [provider: 'codedeploy', access_key_id: { secure: 'secure' }] }
+      it { should serialize_to deploy: [provider: 'codedeploy', access_key_id: { secure: secure }] }
       it { should_not have_msg }
     end
   end
@@ -20,9 +20,9 @@ describe Travis::Yml, 'codedeploy' do
         deploy:
           provider: codedeploy
           secret_access_key:
-            secure: secure
+            secure: #{secure}
       )
-      it { should serialize_to deploy: [provider: 'codedeploy', secret_access_key: { secure: 'secure' }] }
+      it { should serialize_to deploy: [provider: 'codedeploy', secret_access_key: { secure: secure }] }
       it { should_not have_msg }
     end
   end

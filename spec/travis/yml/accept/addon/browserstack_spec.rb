@@ -28,9 +28,9 @@ describe Travis::Yml, 'addon: browserstack' do
         addons:
           browserstack:
             access_key:
-              secure: str
+              secure: #{secure}
       )
-      it { should serialize_to addons: { browserstack: { access_key: { secure: 'str' } } } }
+      it { should serialize_to addons: { browserstack: { access_key: { secure: secure } } } }
       it { should_not have_msg }
     end
   end
@@ -123,9 +123,9 @@ describe Travis::Yml, 'addon: browserstack' do
         addons:
           browserstack:
             proxyPass:
-              secure: str
+              secure: #{secure}
       )
-      it { should serialize_to addons: { browserstack: { proxyPass: { secure: 'str' } } } }
+      it { should serialize_to addons: { browserstack: { proxyPass: { secure: secure } } } }
       it { should_not have_msg }
     end
   end

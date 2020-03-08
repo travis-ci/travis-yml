@@ -7,9 +7,9 @@ describe Travis::Yml, 'netlify' do
         deploy:
           provider: netlify
           auth:
-            secure: secure
+            secure: #{secure}
       )
-      it { should serialize_to deploy: [provider: 'netlify', 'auth': { secure: 'secure' }] }
+      it { should serialize_to deploy: [provider: 'netlify', 'auth': { secure: secure }] }
       it { should_not have_msg }
     end
   end

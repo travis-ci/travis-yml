@@ -17,9 +17,9 @@ describe Travis::Yml, 'cargo' do
         deploy:
           provider: cargo
           token:
-            secure: str
+            secure: #{secure}
       )
-      it { should serialize_to deploy: [provider: 'cargo', token: { secure: 'str' }] }
+      it { should serialize_to deploy: [provider: 'cargo', token: { secure: secure }] }
       it { should_not have_msg }
     end
   end

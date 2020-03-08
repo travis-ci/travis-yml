@@ -7,9 +7,9 @@ describe Travis::Yml, 'engineyard' do
         deploy:
           provider: engineyard
           email:
-            secure: secure
+            secure: #{secure}
       )
-      it { should serialize_to deploy: [provider: 'engineyard', email: { secure: 'secure' }] }
+      it { should serialize_to deploy: [provider: 'engineyard', email: { secure: secure }] }
       it { should_not have_msg }
     end
   end
@@ -20,9 +20,9 @@ describe Travis::Yml, 'engineyard' do
         deploy:
           provider: engineyard
           password:
-            secure: secure
+            secure: #{secure}
       )
-      it { should serialize_to deploy: [provider: 'engineyard', password: { secure: 'secure' }] }
+      it { should serialize_to deploy: [provider: 'engineyard', password: { secure: secure }] }
       it { should_not have_msg }
     end
   end
@@ -33,9 +33,9 @@ describe Travis::Yml, 'engineyard' do
         deploy:
           provider: engineyard
           api_key:
-            secure: secure
+            secure: #{secure}
       )
-      it { should serialize_to deploy: [provider: 'engineyard', api_key: { secure: 'secure' }] }
+      it { should serialize_to deploy: [provider: 'engineyard', api_key: { secure: secure }] }
       it { should_not have_msg }
     end
   end
@@ -46,9 +46,9 @@ describe Travis::Yml, 'engineyard' do
         deploy:
           provider: engineyard
           account:
-            secure: secure
+            secure: #{secure}
       )
-      it { should serialize_to deploy: [provider: 'engineyard', account: { secure: 'secure' }] }
+      it { should serialize_to deploy: [provider: 'engineyard', account: { secure: secure }] }
       it { should_not have_msg }
     end
 

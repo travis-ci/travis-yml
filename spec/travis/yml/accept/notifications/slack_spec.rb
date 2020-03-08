@@ -32,9 +32,9 @@ describe Travis::Yml, 'notifications: slack' do
     yaml %(
       notifications:
         slack:
-          secure: secure
+          secure: #{secure}
     )
-    it { should serialize_to notifications: { slack: [rooms: [secure: 'secure']] } }
+    it { should serialize_to notifications: { slack: [rooms: [secure: secure]] } }
     it { should_not have_msg }
   end
 
@@ -42,11 +42,11 @@ describe Travis::Yml, 'notifications: slack' do
     yaml %(
       notifications:
         slack:
-          secure: secure
+          secure: #{secure}
           slack: str
     )
-    it { should serialize_to notifications: { slack: [secure: 'secure', slack: 'str'] } }
-    it { should have_msg [:warn, :'notifications.slack', :unknown_key, key: 'secure', value: 'secure'] }
+    it { should serialize_to notifications: { slack: [secure: secure, slack: 'str'] } }
+    it { should have_msg [:warn, :'notifications.slack', :unknown_key, key: 'secure', value: secure] }
     it { should have_msg [:warn, :'notifications.slack', :unknown_key, key: 'slack', value: 'str'] }
   end
 
@@ -105,9 +105,9 @@ describe Travis::Yml, 'notifications: slack' do
     yaml %(
       notifications:
         slack:
-          - secure: secure
+          - secure: #{secure}
     )
-    it { should serialize_to notifications: { slack: [rooms: [secure: 'secure']] } }
+    it { should serialize_to notifications: { slack: [rooms: [secure: secure]] } }
     it { should_not have_msg }
   end
 
@@ -127,9 +127,9 @@ describe Travis::Yml, 'notifications: slack' do
         notifications:
           slack:
             rooms:
-              secure: secure
+              secure: #{secure}
       )
-      it { should serialize_to notifications: { slack: [rooms: [secure: 'secure']] } }
+      it { should serialize_to notifications: { slack: [rooms: [secure: secure]] } }
       it { should_not have_msg }
     end
 

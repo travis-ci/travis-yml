@@ -11,8 +11,8 @@ describe Travis::Yml::Doc::Validate, 'alert' do
     end
 
     describe 'given a secure' do
-      let(:value) { { secure: 'str' } }
-      it { should serialize_to secure: 'str' }
+      let(:value) { { secure: encode64('str') } }
+      it { should serialize_to secure: encode64('str') }
       it { should_not have_msg }
     end
   end

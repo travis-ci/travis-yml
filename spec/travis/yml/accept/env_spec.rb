@@ -56,9 +56,9 @@ describe Travis::Yml, 'env' do
   describe 'given a secure' do
     yaml %(
       env:
-        secure: secure
+        secure: #{secure}
     )
-    it { should serialize_to env: { jobs: [secure: 'secure'] } }
+    it { should serialize_to env: { jobs: [secure: secure] } }
     it { should_not have_msg }
   end
 
@@ -141,38 +141,37 @@ describe Travis::Yml, 'env' do
       env:
         FOO: foo
         BAR:
-          secure: str
+          secure: #{secure}
     )
-    it { should serialize_to env: { jobs: [{ FOO: 'foo', BAR: { secure: 'str' } }] } }
+    it { should serialize_to env: { jobs: [{ FOO: 'foo', BAR: { secure: secure } }] } }
     it { should_not have_msg }
   end
 
   describe 'given a single secure' do
     yaml %(
       env:
-        secure: secure
+        secure: #{secure}
     )
-    it { should serialize_to env: { jobs: [{ secure: 'secure' }] } }
+    it { should serialize_to env: { jobs: [{ secure: secure }] } }
     it { should_not have_msg }
   end
 
   describe 'given a secure and another key' do
     yaml %(
       env:
-        secure: secure
+        secure: #{secure}
         FOO: foo
     )
-    it { should serialize_to env: { jobs: [{ secure: 'secure', FOO: 'foo' }] } }
+    it { should serialize_to env: { jobs: [{ secure: secure, FOO: 'foo' }] } }
     it { should_not have_msg }
   end
 
   describe 'given a seq of secures' do
     yaml %(
       env:
-        - secure: one
-        - secure: two
+        - secure: #{secure}
     )
-    it { should serialize_to env: { jobs: [{ secure: 'one' }, { secure: 'two' }] } }
+    it { should serialize_to env: { jobs: [{ secure: secure }] } }
     it { should_not have_msg }
   end
 
@@ -190,9 +189,9 @@ describe Travis::Yml, 'env' do
     yaml %(
       env:
         - FOO: foo
-        - BAR: bar
+        - secure: #{secure}
     )
-    it { should serialize_to env: { jobs: [{ FOO: 'foo' }, { BAR: 'bar' }] } }
+    it { should serialize_to env: { jobs: [{ FOO: 'foo' }, { secure: secure }] } }
     it { should_not have_msg }
   end
 
@@ -274,22 +273,22 @@ describe Travis::Yml, 'env' do
       yaml %(
         env:
           global:
-            secure: secure
+            secure: #{secure}
             global:
-              secure: secure
+              secure: #{secure}
       )
-      it { should serialize_to env: { global: [{ secure: 'secure' }] } }
-      it { should have_msg [:warn, :root, :migrate, key: 'global', to: 'env', value: { secure: 'secure' }] }
+      it { should serialize_to env: { global: [{ secure: secure }] } }
+      it { should have_msg [:warn, :root, :migrate, key: 'global', to: 'env', value: { secure: secure }] }
     end
 
     describe 'mixing secure and global keys' do
       yaml %(
         env:
-          secure: secure
+          secure: #{secure}
           global:
-            secure: secure
+            secure: #{secure}
       )
-      it { should serialize_to env: { jobs: [{ secure: 'secure' }], global: [{ secure: 'secure' }] } }
+      it { should serialize_to env: { jobs: [{ secure: secure }], global: [{ secure: secure }] } }
       it { should_not have_msg }
     end
   end
@@ -408,8 +407,8 @@ describe Travis::Yml, 'env' do
         global:
         - FOO: str
         BAR:
-          secure: str
+          secure: #{secure}
     )
-    it { should serialize_to env: { global: [FOO: 'str'], jobs: [BAR: { secure: 'str' }] } }
+    it { should serialize_to env: { global: [FOO: 'str'], jobs: [BAR: { secure: secure }] } }
   end
 end
