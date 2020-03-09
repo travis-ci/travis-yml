@@ -55,25 +55,6 @@ describe Travis::Yml::Schema::Def::Language do
         '__cookiecat__'
       ],
       downcase: true,
-      defaults: [
-        {
-          value: 'ruby',
-          only: {
-            os: [
-              'linux',
-              'windows'
-            ]
-          }
-        },
-        {
-          value: 'objective-c',
-          only: {
-            os: [
-              'osx'
-            ]
-          }
-        },
-      ],
       values: {
         cpp: {
           aliases: [

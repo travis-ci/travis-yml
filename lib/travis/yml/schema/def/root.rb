@@ -24,6 +24,20 @@ module Travis
         class Root < Type::Schema
           register :root
 
+          DEFAULT = {
+            language: [
+              { value: :ruby, only: { os: [:linux, :windows] } },
+              { value: :'objective-c', only: { os: [:osx] } }
+            ],
+            dist: [
+              { value: :xenial, only: { os: [:linux, :'linux-ppc64le'] } }
+            ],
+            os: [
+              { value: :linux, except: { language: 'objective-c' } },
+              { value: :osx, only: { language: 'objective-c' } }
+            ]
+          }
+
           def define
             title 'JSON schema for Travis CI configuration files'
 
@@ -33,9 +47,9 @@ module Travis
 
             see 'Job lifecycle': 'https://docs.travis-ci.com/user/job-lifecycle/'
 
-            map    :language,       required: true
-            matrix :os,             required: true, to: :oss
-            map    :dist,           required: true
+            map    :language,       default: DEFAULT[:language]
+            matrix :os,             default: DEFAULT[:os], to: :oss
+            map    :dist,           default: DEFAULT[:dist]
             matrix :arch,           to: :archs
             map    :virt
             map    :stack

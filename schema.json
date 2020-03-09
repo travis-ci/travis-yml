@@ -8,16 +8,64 @@
       "type": "object",
       "properties": {
         "language": {
-          "$ref": "#/definitions/type/language"
+          "$ref": "#/definitions/type/language",
+          "defaults": [
+            {
+              "value": "ruby",
+              "only": {
+                "os": [
+                  "linux",
+                  "windows"
+                ]
+              }
+            },
+            {
+              "value": "objective-c",
+              "only": {
+                "os": [
+                  "osx"
+                ]
+              }
+            }
+          ]
         },
         "os": {
           "$ref": "#/definitions/type/oss",
+          "defaults": [
+            {
+              "value": "linux",
+              "except": {
+                "language": [
+                  "objective-c"
+                ]
+              }
+            },
+            {
+              "value": "osx",
+              "only": {
+                "language": [
+                  "objective-c"
+                ]
+              }
+            }
+          ],
           "flags": [
             "expand"
           ]
         },
         "dist": {
-          "$ref": "#/definitions/type/dist"
+          "$ref": "#/definitions/type/dist",
+          "defaults": [
+            {
+              "value": "xenial",
+              "only": {
+                "os": [
+                  "linux",
+                  "linux-ppc64le"
+                ]
+              }
+            }
+          ]
         },
         "arch": {
           "$ref": "#/definitions/type/archs",
@@ -87,12 +135,7 @@
       },
       "see": {
         "Job lifecycle": "https://docs.travis-ci.com/user/job-lifecycle/"
-      },
-      "required": [
-        "language",
-        "os",
-        "dist"
-      ]
+      }
     },
     {
       "$ref": "#/definitions/type/languages"
@@ -525,17 +568,6 @@
           "Virtualization environments": "https://docs.travis-ci.com/user/reference/overview/#virtualization-environments"
         },
         "downcase": true,
-        "defaults": [
-          {
-            "value": "xenial",
-            "only": {
-              "os": [
-                "linux",
-                "linux-ppc64le"
-              ]
-            }
-          }
-        ],
         "enum": [
           "trusty",
           "precise",
@@ -1081,25 +1113,6 @@
         },
         "example": "ruby",
         "downcase": true,
-        "defaults": [
-          {
-            "value": "ruby",
-            "only": {
-              "os": [
-                "linux",
-                "windows"
-              ]
-            }
-          },
-          {
-            "value": "objective-c",
-            "only": {
-              "os": [
-                "osx"
-              ]
-            }
-          }
-        ],
         "enum": [
           "android",
           "c",
@@ -1523,35 +1536,6 @@
         "title": "Os",
         "type": "string",
         "downcase": true,
-        "defaults": [
-          {
-            "value": "linux",
-            "except": {
-              "language": [
-                "objective-c"
-              ]
-            }
-          },
-          {
-            "value": "osx"
-          },
-          {
-            "value": "windows",
-            "except": {
-              "language": [
-                "objective-c"
-              ]
-            }
-          },
-          {
-            "value": "freebsd",
-            "except": {
-              "language": [
-                "objective-c"
-              ]
-            }
-          }
-        ],
         "enum": [
           "linux",
           "osx",

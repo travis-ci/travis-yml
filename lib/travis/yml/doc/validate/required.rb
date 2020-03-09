@@ -28,8 +28,7 @@ module Travis
             end
 
             def missing
-              keys = schema.required.select { |key| !value[key] || value[key].missing? }
-              keys.reject { |key| unsupported_defaults?(key) }
+              schema.required.select { |key| !value[key] || value[key].missing? }
             end
             memoize :missing
 

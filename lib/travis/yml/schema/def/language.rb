@@ -8,7 +8,7 @@ module Travis
         # Mapped on root on the :language key. The Language values (known
         # names) are populated by the Lang::* instances (language
         # implementations), rather than here (see Type::Lang#before_define).
-        class Language < Type::Language
+        class Language < Type::Str
           register :language
 
           def define
@@ -30,8 +30,6 @@ module Travis
             example 'ruby'
 
             downcase
-            default :ruby,          only: { os: [:linux, :windows] }
-            default :'objective-c', only: { os: [:osx] }
             export
           end
         end

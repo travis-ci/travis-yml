@@ -111,18 +111,6 @@ module Travis
               node = other || node
             end
 
-            def form_map(node)
-              map = node.mappings.map { |key, node| [key, form(node)] }.to_h
-              node.mappings.replace(map)
-              node
-            end
-
-            def form_includes(node)
-              includes = node.includes.map { |node| form(node) }
-              node.includes.replace(includes)
-              node
-            end
-
             # If a Map has any includes then we turn this into an All holding
             # the Map and all of its includes.
             #

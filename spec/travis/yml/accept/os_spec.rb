@@ -44,7 +44,7 @@ describe Travis::Yml, 'os' do
         os: unknown
       )
       xit { should serialize_to defaults }
-      it { should have_msg [:warn, :os, :unknown_default, value: 'unknown', default: 'linux'] }
+      it { should have_msg [:error, :os, :unknown_value, value: 'unknown'] }
     end
 
     describe 'given deprecated linux-ppc64le' do

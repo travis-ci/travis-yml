@@ -154,6 +154,14 @@ module Travis
             keys + key_aliases.values
             keys.flatten.compact.uniq.sort
           end
+
+          def dup
+            # dup'ing the entire map is extremely expensive, so let's hope we
+            # won't ever run into any issues with that.
+            # @map = map.map { |key, node| [key, node.dup] }.to_h
+            # @schema = schema.dup if schema
+            super
+          end
         end
       end
     end

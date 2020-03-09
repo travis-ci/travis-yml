@@ -53,8 +53,8 @@ describe Travis::Yml, 'language' do
     yaml %(
       language: sql
     )
-    it { should serialize_to defaults }
-    it { should have_msg [:warn, :language, :unknown_default, value: 'sql', default: 'ruby'] }
+    it { should serialize_to language: 'sql', os: ['linux'], dist: 'xenial' }
+    it { should have_msg [:error, :language, :unknown_value, value: 'sql'] }
   end
 
   describe 'given a seq' do
@@ -77,11 +77,11 @@ describe Travis::Yml, 'language' do
   describe 'given a seq with an unknown value' do
     yaml %(
       language:
-      - none
+      - unknown
     )
-    it { should serialize_to language: 'ruby' }
-    it { should have_msg [:warn, :language, :unexpected_seq, value: 'none'] }
-    it { should have_msg [:warn, :language, :unknown_default, value: 'none', default: 'ruby'] }
+    it { should serialize_to language: 'unknown' }
+    it { should have_msg [:warn, :language, :unexpected_seq, value: 'unknown'] }
+    it { should have_msg [:error, :language, :unknown_value, value: 'unknown'] }
   end
 
   describe 'given a map', defaults: true, drop: true do

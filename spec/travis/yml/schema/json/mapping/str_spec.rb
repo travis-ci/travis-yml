@@ -125,6 +125,25 @@ describe Travis::Yml::Schema::Json::Map, 'mapping to any node' do
   #   it { should_not include properties: { foo: hash_including(expand: anything) } }
   # end
 
+  describe 'default' do
+    let(:define) { -> { map :foo, to: :str, default: 'str' } }
+
+    it do
+      should have_schema(
+        type: :object,
+        properties: {
+          foo: {
+            type: :string,
+            defaults: [
+              value: 'str'
+            ]
+          }
+        },
+        additionalProperties: false,
+      )
+    end
+  end
+
   describe 'required' do
     let(:define) { -> { map :foo, to: :str, required: true } }
 

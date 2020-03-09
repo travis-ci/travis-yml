@@ -67,7 +67,6 @@ module Travis
       unexpected_seq:     'unexpected sequence, using the first value (%{value})',
       unknown_key:        'unknown key %<key>p (%{value})',
       unknown_value:      'dropping unknown value: %{value}',
-      unknown_default:    'dropping unknown value: %{value}, defaulting to %{default}',
       unknown_var:        'unknown template variable %<var>p',
       unsupported:        '%{key} (%{value}) is not supported on %{on_key} %{on_value}',
       invalid_type:       'dropping unexpected %{actual}, expected %{expected} (%{value})',

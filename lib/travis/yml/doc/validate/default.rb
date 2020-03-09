@@ -40,13 +40,16 @@ module Travis
             end
 
             def supported
-              schema.defaults.detect { |value| support(value).supported? }
+              schema.defaults.detect do |default|
+                support(default).supported?
+              end
             end
             memoize :supported
 
-            def support(value)
-              support = defaults.support(value.value)
-              Value::Support.new(support, supporting, value.value)
+            def support(default)
+              support = schema.values.support(default.value)
+              support = schema.defaults.support(default.value) if support.nil? || support.empty?
+              Value::Support.new(support, supporting, default.value)
             end
 
             def defaults

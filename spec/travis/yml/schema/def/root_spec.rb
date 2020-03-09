@@ -306,31 +306,20 @@ describe Travis::Yml::Schema::Def::Root do
       it { should include arch:           { '$ref': '#/definitions/type/archs', flags: [:expand] } }
       it { should include compiler:       { '$ref': '#/definitions/type/compilers', flags: [:expand] } }
       it { should include conditions:     { '$ref': '#/definitions/type/conditions' } }
-      it { should include dist:           { '$ref': '#/definitions/type/dist' } }
+      it { should include dist:           { '$ref': '#/definitions/type/dist', defaults: [{ value: 'xenial', only: { os: ['linux'] } }] } }
       it { should include env:            { '$ref': '#/definitions/type/env' } }
       it { should include import:         { '$ref': '#/definitions/type/imports' } }
       # it { should include language:       { '$ref': '#/definitions/type/language' } }
       it { should include jobs:           { '$ref': '#/definitions/type/jobs', aliases: [:matrix] } }
       it { should include notifications:  { '$ref': '#/definitions/type/notifications' } }
-      it { should include os:             { '$ref': '#/definitions/type/oss', flags: [:expand] } }
+      it { should include os:             { '$ref': '#/definitions/type/oss', flags: [:expand], defaults: [{ value: 'linux', except: { language: ['objective-c'] } }, { value: 'osx', only: { language: ['objective-c'] } }] } }
+
       it { should include stack:          { '$ref': '#/definitions/type/stack' } }
       it { should include stages:         { '$ref': '#/definitions/type/stages' } }
       it { should include sudo:           { '$ref': '#/definitions/type/sudo' } }
       it { should include version:        { '$ref': '#/definitions/type/version' } }
       it { should include filter_secrets: { type: :boolean, flags: [:internal], summary: 'Whether to filter secrets from the log output' } }
       it { should include trace:          { type: :boolean, flags: [:internal], summary: 'Whether to trace the build script' } }
-    end
-
-    describe 'map' do
-      subject { Travis::Yml.schema[:allOf][0] }
-
-      it do
-        should include required: [
-          :language,
-          :os,
-          :dist
-        ]
-      end
     end
   end
 end

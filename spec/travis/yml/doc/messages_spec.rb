@@ -189,11 +189,6 @@ describe Travis::Yml::Doc, 'messages', alert: true, defaults: true, empty: true,
     it { should have_msg [:error, :one, :unknown_value, value: 'unknown', line: 0] }
   end
 
-  describe 'unknown_default' do
-    yaml 'one: two'
-    it { should have_msg [:warn, :one, :unknown_default, value: 'two', default: 'uno', line: 0] }
-  end
-
   describe 'unknown_var' do
     let(:schema) { { type: :object, properties: { one: { type: :string, vars: ['var'] } } } }
     yaml 'one: "%{unknown}"'
