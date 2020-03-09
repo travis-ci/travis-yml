@@ -90,7 +90,8 @@
       },
       "required": [
         "language",
-        "os"
+        "os",
+        "dist"
       ]
     },
     {
@@ -524,6 +525,16 @@
           "Virtualization environments": "https://docs.travis-ci.com/user/reference/overview/#virtualization-environments"
         },
         "downcase": true,
+        "defaults": [
+          {
+            "value": "xenial",
+            "only": {
+              "os": [
+                "linux"
+              ]
+            }
+          }
+        ],
         "enum": [
           "trusty",
           "precise",

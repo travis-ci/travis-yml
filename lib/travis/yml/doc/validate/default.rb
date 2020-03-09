@@ -22,7 +22,7 @@ module Travis
             end
 
             def default?
-              schema.default? && value.missing?
+              schema.default? && value.missing? && supported&.value
             end
 
             def invalid_type?
@@ -30,7 +30,7 @@ module Travis
             end
 
             def default
-              default = supported&.value || defaults.first.value
+              default = supported&.value
               info :default, key: value.key, default: default, line: value.key.line, src: value.key.src
               build(value.parent, value.key, schema.seq? ? [default] : default, value.opts)
             end

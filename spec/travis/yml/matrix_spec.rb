@@ -249,7 +249,7 @@ describe Travis::Yml, 'matrix' do
     )
 
     expands_to [
-      { language: 'ruby', os: 'linux' },
+      { language: 'ruby', os: 'linux', dist: 'xenial' },
       { language: 'ruby', os: 'osx' }
     ]
   end

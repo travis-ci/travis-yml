@@ -76,6 +76,7 @@ describe Travis::Yml::Web::App do
         'warn',
         'info',
         'info',
+        'info',
       ]
     end
 

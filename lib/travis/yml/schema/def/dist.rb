@@ -15,6 +15,8 @@ module Travis
 
             downcase
 
+            default :xenial,        only: { os: :linux }
+
             value :trusty,        only: { os: :linux }
             value :precise,       only: { os: :linux }
             value :xenial,        only: { os: :linux }

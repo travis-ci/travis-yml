@@ -206,7 +206,7 @@ module Travis
 
         def keys
           keys = compact(config).keys & expand_keys
-          keys.select { |key| supported?(config, key, config[key]) }
+          keys.select { |key| supported_key?(config, key, config[key]) }
         end
         memoize :keys
 
@@ -224,9 +224,21 @@ module Travis
         end
 
         # move this to Yml::Doc.supported?
-        def supported?(config, key, value)
-          supporting = stringify(only(config, :language, :os, :arch))
+        def supported?(job, key, value)
+          supported_key?(job, key, value) && supported_value?(job, key, value)
+        end
+
+        def supported_key?(job, key, value)
+          supporting = stringify(only(job, :language, :os, :arch))
           support = Yml.expand.support(key.to_s)
+          Yml::Doc::Value::Support.new(support, supporting, value).supported?
+        end
+
+        def supported_value?(job, key, value)
+          supporting = stringify(only(job, :language, :os, :arch))
+          schema = Yml.expand[key.to_s]
+          schema = schema.detect(&:scalar?) if schema&.is?(:any)
+          return true unless schema && support = schema.values.support(value)
           Yml::Doc::Value::Support.new(support, supporting, value).supported?
         end
 

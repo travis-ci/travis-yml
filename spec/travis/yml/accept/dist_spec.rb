@@ -22,6 +22,40 @@ describe Travis::Yml, 'dist' do
     end
   end
 
+  describe 'default', defaults: true do
+    describe 'no os given', defaults: true do
+      yaml ''
+      it { should serialize_to os: ['linux'], dist: 'xenial', language: 'ruby' }
+      it { should have_msg [:info, :root, :default, key: 'dist', default: 'xenial'] }
+    end
+
+    describe 'on linux', defaults: true do
+      yaml %(
+        os: linux
+      )
+      it { should serialize_to os: ['linux'], dist: 'xenial', language: 'ruby' }
+      it { should have_msg [:info, :root, :default, key: 'dist', default: 'xenial'] }
+    end
+
+    describe 'on windows', defaults: true do
+      yaml %(
+        language: shell
+        os: windows
+      )
+      it { should serialize_to os: ['windows'], language: 'shell' }
+      it { should_not have_msg }
+    end
+
+    describe 'on oxs', defaults: true do
+      yaml %(
+        language: ruby
+        os: osx
+      )
+      it { should serialize_to os: ['osx'], language: 'ruby' }
+      it { should_not have_msg }
+    end
+  end
+
   describe 'ignores case' do
     yaml %(
       dist: TRUSTY
@@ -34,8 +68,8 @@ describe Travis::Yml, 'dist' do
     yaml %(
       dist: unknown
     )
-    it { should serialize_to dist: 'unknown' }
-    it { should have_msg [:error, :dist, :unknown_value, value: 'unknown'] }
+    it { should serialize_to dist: 'xenial' }
+    it { should have_msg [:warn, :dist, :unknown_default, value: 'unknown', default: 'xenial'] }
   end
 
   describe 'given a seq' do

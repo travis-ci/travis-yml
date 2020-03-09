@@ -6,11 +6,18 @@ module Spec
 
       def self.included(const)
         const.let(:empty) { {} }
-        const.let(:defaults) { { language: 'ruby', os: ['linux'] } }
+        const.let(:defaults) { { language: 'ruby', os: ['linux'], dist: 'xenial' } }
+        const.let(:secure) { strict_encode64('secure') }
 
         const.let(:opts) do |ctx|
           opts = ctx.metadata.select { |key, _| KEYS.include?(key) }.to_h
           OPTS.merge(opts)
+        end
+
+        const.instance_eval do
+          def secure
+            Base64.strict_encode64('secure')
+          end
         end
       end
 

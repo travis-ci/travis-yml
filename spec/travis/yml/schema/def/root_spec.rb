@@ -327,7 +327,8 @@ describe Travis::Yml::Schema::Def::Root do
       it do
         should include required: [
           :language,
-          :os
+          :os,
+          :dist
         ]
       end
     end

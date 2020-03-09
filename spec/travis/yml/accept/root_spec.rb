@@ -43,7 +43,7 @@ describe Travis::Yml, 'root' do
       yaml %(
         langauge: shell
       )
-      it { should serialize_to language: 'shell', os: ['linux'] }
+      it { should serialize_to language: 'shell', os: ['linux'], dist: 'xenial' }
       it { should have_msg [:warn, :root, :find_key, original: 'langauge', key: 'language'] }
       it { should_not have_msg [:error, :root, :overwrite, key: 'langauge', other: 'language'] }
     end

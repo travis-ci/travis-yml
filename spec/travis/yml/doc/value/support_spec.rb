@@ -16,6 +16,24 @@ describe Travis::Yml::Doc::Value::Support do
     end
   end
 
+  describe 'dist' do
+    let(:obj) { :dist }
+
+    let(:support) { { only: { os: [ 'linux' ] } } }
+
+    describe 'on linux' do
+      let(:os) { 'linux' }
+      it { should be_supported }
+      it { should_not have_msg }
+    end
+
+    describe 'on windows' do
+      let(:os) { 'windows' }
+      it { should_not be_supported }
+      it { should have_msg on_key: :os, on_value: 'windows' }
+    end
+  end
+
   describe 'arch' do
     let(:obj) { :arch }
 
