@@ -35,7 +35,7 @@ module Travis
 
             map    :language,       required: true
             matrix :os,             required: true, to: :oss
-            map    :dist
+            map    :dist,           required: true
             matrix :arch,           to: :archs
             map    :virt
             map    :stack

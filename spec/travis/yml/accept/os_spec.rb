@@ -43,7 +43,7 @@ describe Travis::Yml, 'os' do
       yaml %(
         os: unknown
       )
-      it { should serialize_to language: 'ruby', os: ['linux'] }
+      xit { should serialize_to defaults }
       it { should have_msg [:warn, :os, :unknown_default, value: 'unknown', default: 'linux'] }
     end
 

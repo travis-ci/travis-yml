@@ -383,4 +383,10 @@ describe Travis::Yml::Configs do
     end
   end
 
+  # describe 'wat' do
+  #   yaml %(
+  #   )
+  #
+  #   it { p jobs }
+  # end
 end

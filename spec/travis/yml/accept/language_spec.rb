@@ -3,7 +3,7 @@ describe Travis::Yml, 'language' do
 
   describe 'defaults to ruby', defaults: true do
     yaml ''
-    it { should serialize_to language: 'ruby', os: ['linux'] }
+    it { should serialize_to defaults }
     it { should have_msg [:info, :root, :default, key: 'language', default: 'ruby'] }
   end
 
@@ -19,7 +19,7 @@ describe Travis::Yml, 'language' do
       - linux
       - osx
     )
-    it { should serialize_to language: 'ruby', os: ['linux', 'osx'] }
+    it { should serialize_to language: 'ruby', os: ['linux', 'osx'], dist: 'xenial' }
     it { should have_msg [:info, :root, :default, key: 'language', default: 'ruby'] }
   end
 
@@ -45,7 +45,7 @@ describe Travis::Yml, 'language' do
     yaml %(
       language: sql
     )
-    it { should serialize_to language: 'ruby', os: ['linux'] }
+    it { should serialize_to defaults }
     it { should have_msg [:warn, :language, :unknown_default, value: 'sql', default: 'ruby'] }
   end
 
