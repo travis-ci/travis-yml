@@ -176,11 +176,6 @@ describe Travis::Yml do
       it { should eq '[info] on key: dropping unknown value: value' }
     end
 
-    describe 'unknown_default' do
-      let(:msg) { [:info, :key, :unknown_default, value: 'value', default: 'default'] }
-      it { should eq '[info] on key: dropping unknown value: value, defaulting to default' }
-    end
-
     describe 'unknown_var' do
       let(:msg) { [:info, :key, :unknown_var, var: :var] }
       it { should eq '[info] on key: unknown template variable :var' }

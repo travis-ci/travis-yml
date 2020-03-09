@@ -415,8 +415,8 @@ describe Travis::Yml, 'jobs' do
           include:
             - os: unknown
       )
-      it { should serialize_to jobs: { include: [os: 'linux'] } }
-      it { should have_msg [:warn, :'jobs.include.os', :unknown_default, value: 'unknown', default: 'linux'] }
+      it { should serialize_to jobs: { include: [os: 'unknown'] } }
+      it { should have_msg [:error, :'jobs.include.os', :unknown_value, value: 'unknown'] }
     end
   end
 

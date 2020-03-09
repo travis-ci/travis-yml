@@ -6,9 +6,6 @@ module Travis
   module Yml
     module Schema
       module Type
-        class Language < Str
-        end
-
         # Common subclass of all concrete Lang::* language implementations.
         # Enforces common behaviour, so language maintainers do not have to pay
         # attention to these.

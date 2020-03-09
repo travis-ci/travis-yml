@@ -41,35 +41,6 @@ describe Travis::Yml::Schema::Def::Oss do
           'freebsd',
           'linux-ppc64le'
         ],
-        defaults: [
-          {
-            value: 'linux',
-            except: {
-              language: [
-                'objective-c'
-              ]
-            }
-          },
-          {
-            value: 'osx'
-          },
-          {
-            value: 'windows',
-            except: {
-              language: [
-                'objective-c'
-              ]
-            }
-          },
-          {
-            value: 'freebsd',
-            except: {
-              language: [
-                'objective-c'
-              ]
-            }
-          },
-        ],
         downcase: true,
         values: {
           linux: {

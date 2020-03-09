@@ -10,8 +10,8 @@ describe Travis::Yml, 'invalid_type', line: true do
 
     describe 'given a num' do
       yaml 'language: 1'
-      it { should serialize_to language: 'ruby' }
-      it { should have_msg [:warn, :language, :unknown_default, value: '1', default: 'ruby', line: 0] }
+      it { should serialize_to language: '1' }
+      it { should have_msg [:error, :language, :unknown_value, value: '1', line: 0] }
     end
   end
 

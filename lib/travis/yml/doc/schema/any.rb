@@ -14,6 +14,14 @@ module Travis
 
           attr_writer :schemas
 
+          def opts=(opts)
+            @opts = opts
+            # TODO defaults have to be pushed down to child schemas in case
+            # they were defined on the mapping (and thus, the ref). does this
+            # apply to other options, too? also see Seq#opts=
+            schemas.each { |schema| schema.opts = merge(only(opts, :defaults), schema.opts) }
+          end
+
           def matches?(value)
             any? { |schema| schema.matches?(value) }
           end
@@ -39,7 +47,8 @@ module Travis
           end
 
           def default?
-            any?(&:default?)
+            # p schemas.map(&:opts).map(&:keys) if opts[:defaults]
+            opts[:defaults] || any?(&:default?)
           end
 
           def detect?
@@ -59,6 +68,11 @@ module Travis
             merge(super, *map(&:supports))
           end
           memoize :supports
+
+          def dup
+            @schemas = schemas.map(&:dup)
+            super
+          end
 
           def to_h
             compact(id: id, key: key, type: type, schemas: schemas&.map(&:to_h), opts: opts)

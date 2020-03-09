@@ -12,18 +12,15 @@ module Travis
             true
           end
 
-          def default(value, opts = {})
-            value = value.to_s if str?
-            value = { value: value }.merge(opts)
-
-            attrs[:defaults] ||= []
-            attrs[:defaults] << value.merge(support(value))
-          end
-
-          def support(value)
-            support = only(value, :only, :except)
-            support.map { |key, attrs| [key, to_strs(attrs)] }.to_h
-          end
+          # moved to Node for now, see the comment over there
+          #
+          # def default(value, opts = {})
+          #   ...
+          # end
+          #
+          # def support(value)
+          #   ...
+          # end
 
           def strict(obj = true)
             attrs[:strict] = obj

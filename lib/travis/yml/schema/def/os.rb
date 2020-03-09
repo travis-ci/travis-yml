@@ -51,11 +51,6 @@ module Travis
           def define
             downcase
 
-            default :linux,   except: EXCEPT[:linux]
-            default :osx
-            default :windows, except: EXCEPT[:windows]
-            default :freebsd, except: EXCEPT[:freebsd]
-
             value   :linux,   alias: ALIAS[:linux],   except: EXCEPT[:linux]
             value   :osx,     alias: ALIAS[:osx]
             value   :windows, alias: ALIAS[:windows], except: EXCEPT[:windows]
