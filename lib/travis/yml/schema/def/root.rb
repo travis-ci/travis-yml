@@ -27,7 +27,7 @@ module Travis
           DEFAULT = {
             language: [
               { value: :ruby, only: { os: [:linux, :windows] } },
-              { value: :'objective-c', only: { os: [:osx] } }
+              { value: :'objective-c', only: { os: :osx } }
             ],
             dist: [
               { value: :xenial, only: { os: [:linux, :'linux-ppc64le'] } }
