@@ -4,7 +4,7 @@ class Key < String
   def initialize(str, line = nil, src = nil)
     src, line = str.src, str.line if str.respond_to?(:src)
     @line, @src = line, src
-    super(str)
+    super(str.to_s)
   end
 
   %i(downcase gsub sub tr).each do |name|
