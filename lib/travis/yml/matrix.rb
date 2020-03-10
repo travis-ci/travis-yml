@@ -238,7 +238,8 @@ module Travis
           supporting = stringify(only(job, :language, :os, :arch))
           schema = Yml.expand[key.to_s]
           schema = schema.detect(&:scalar?) if schema&.is?(:any)
-          return true unless schema && support = schema.values.support(value)
+          support = schema.values.support(value) if schema && schema.values.respond_to?(:support)
+          return true unless support
           Yml::Doc::Value::Support.new(support, supporting, value).supported?
         end
 
