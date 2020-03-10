@@ -704,6 +704,22 @@ describe Travis::Yml, 'matrix' do
     ]
   end
 
+  describe 'python with an os matrix', defaults: true do
+    yaml %(
+      language: python
+      os:
+      - linux
+      - osx
+      - windows
+    )
+
+    expands_to [
+      { language: 'python', os: 'linux', dist: 'xenial' },
+      { language: 'python', os: 'osx' },
+      { language: 'python', os: 'windows' },
+    ]
+  end
+
   # describe 'wat' do
   #   yaml %(
   #   )
