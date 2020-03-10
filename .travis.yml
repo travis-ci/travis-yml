@@ -1,6 +1,7 @@
 language: ruby
 
 cache: bundler
+
 before_install:
 - gem install bundler -v '2.0.1'
 
@@ -10,13 +11,11 @@ jobs:
       script:
         - bundle exec rspec spec
         - bundle exec rspec spec/integrate/configs_spec.rb --tag configs
+        - bundle exec rspec spec/integrate/matrix_spec.rb --tag matrix
 
-        # - bundle exec bin/spec > spec.json
-        # - git diff --stat --exit-code
-        # - git diff --stat --cached --exit-code
     - stage: ":ship: it to quay.io"
       language: ruby
-      cache: 
+      cache:
         bundler: false
       before_install: skip
       install: skip
