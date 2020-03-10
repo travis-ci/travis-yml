@@ -108,11 +108,11 @@ describe Travis::Yml, 'os' do
 
   describe 'an os unsupported by the language' do
     yaml %(
-      os: osx
-      language: php
+      os: windows
+      language: objective-c
     )
-    it { should serialize_to os: ['osx'], language: 'php' }
-    it { should have_msg [:warn, :os, :unsupported, on_key: 'language', on_value: 'php', key: 'os', value: 'osx'] }
+    it { should serialize_to language: 'objective-c',  os: ['windows'] }
+    it { should have_msg [:warn, :os, :unsupported, on_key: 'language', on_value: 'objective-c', key: 'os', value: 'windows'] }
   end
 
   describe 'complains about jdk on osx' do

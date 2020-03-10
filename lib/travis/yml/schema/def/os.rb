@@ -16,17 +16,11 @@ module Travis
           linux: {
             language: %i(objective-c)
           },
-          osx: {
-            language: %i(php perl erlang groovy clojure scala haskell)
+          windows: {
+            language: %i(objective-c)
           },
           freebsd: {
             language: %i(objective-c)
-          }
-        }
-
-        ONLY = {
-          windows: {
-            language: %i(csharp go node_js powershell rust shell)
           }
         }
 
@@ -58,14 +52,14 @@ module Travis
             downcase
 
             default :linux,   except: EXCEPT[:linux]
-            default :osx,     except: EXCEPT[:osx]
+            default :osx
+            default :windows, except: EXCEPT[:windows]
             default :freebsd, except: EXCEPT[:freebsd]
-            default :windows, only:   ONLY[:windows]
 
             value   :linux,   alias: ALIAS[:linux],   except: EXCEPT[:linux]
-            value   :osx,     alias: ALIAS[:osx],     except: EXCEPT[:osx]
+            value   :osx,     alias: ALIAS[:osx]
+            value   :windows, alias: ALIAS[:windows], except: EXCEPT[:windows]
             value   :freebsd, alias: ALIAS[:freebsd], except: EXCEPT[:freebsd]
-            value   :windows, alias: ALIAS[:windows], only:   ONLY[:windows]
             value   :'linux-ppc64le' #, deprecated: 'use os: linux, arch: ppc64le'
 
             export

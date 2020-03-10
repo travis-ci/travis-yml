@@ -7,6 +7,14 @@ describe Travis::Yml, 'language' do
     it { should have_msg [:info, :root, :default, key: 'language', default: 'ruby'] }
   end
 
+  describe 'defaults to ruby if given os: linux', defaults: true do
+    yaml %(
+      os: unknown
+    )
+    xit { should serialize_to defaults }
+    xit { should have_msg [:info, :root, :default, key: 'language', default: 'ruby'] }
+  end
+
   describe 'defaults to objective-c on osx', defaults: true do
     yaml 'os: osx'
     it { should serialize_to language: 'objective-c', os: ['osx'] }

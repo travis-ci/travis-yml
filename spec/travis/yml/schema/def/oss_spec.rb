@@ -37,8 +37,8 @@ describe Travis::Yml::Schema::Def::Oss do
         enum: [
           'linux',
           'osx',
-          'freebsd',
           'windows',
+          'freebsd',
           'linux-ppc64le'
         ],
         defaults: [
@@ -51,16 +51,13 @@ describe Travis::Yml::Schema::Def::Oss do
             }
           },
           {
-            value: 'osx',
+            value: 'osx'
+          },
+          {
+            value: 'windows',
             except: {
               language: [
-                'php',
-                'perl',
-                'erlang',
-                'groovy',
-                'clojure',
-                'scala',
-                'haskell'
+                'objective-c'
               ]
             }
           },
@@ -69,19 +66,6 @@ describe Travis::Yml::Schema::Def::Oss do
             except: {
               language: [
                 'objective-c'
-              ]
-            }
-          },
-          {
-            value: 'windows',
-            only: {
-              language: [
-                'csharp',
-                'go',
-                'node_js',
-                'powershell',
-                'rust',
-                'shell',
               ]
             }
           },
@@ -108,17 +92,6 @@ describe Travis::Yml::Schema::Def::Oss do
               'macosx',
               'ios'
             ],
-            except: {
-              language: [
-                'php',
-                'perl',
-                'erlang',
-                'groovy',
-                'clojure',
-                'scala',
-                'haskell',
-              ]
-            }
           },
           freebsd: {
             aliases: [
@@ -134,14 +107,9 @@ describe Travis::Yml::Schema::Def::Oss do
             aliases: [
               'win'
             ],
-            only: {
+            except: {
               language: [
-                'csharp',
-                'go',
-                'node_js',
-                'powershell',
-                'rust',
-                'shell',
+                'objective-c'
               ]
             }
           },
