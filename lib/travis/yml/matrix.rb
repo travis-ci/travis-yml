@@ -168,9 +168,9 @@ module Travis
           jobs.select { |job| accept?(:job, :'jobs.include', job[:if], job) }
         end
 
-        def accept?(type, key, cond, config, ix = 0)
+        def accept?(type, key, cond, job, ix = 0)
           return true unless data
-          return true if Condition.new(cond, config, data).accept?
+          return true if Condition.new(cond, job, data).accept?
           msgs << [:info, key, :"skip_#{type}", number: ix + 1, condition: cond]
           false
         rescue InvalidCondition => e

@@ -458,6 +458,42 @@ describe Travis::Yml, 'matrix' do
       end
     end
 
+    describe 'conditional job matching global env' do
+      yaml %(
+        env:
+          global:
+            - SLUG=owner/name
+        jobs:
+          include:
+            - name: one
+              if:  repo = env(SLUG)
+      )
+
+      let(:data) { { repo: 'owner/name' } }
+
+      expands_to [
+        { name: 'one', env: [SLUG: 'owner/name'], if: 'repo = env(SLUG)' }
+      ]
+    end
+
+    describe 'conditional job matching global env with a repo setting present, too' do
+      yaml %(
+        env:
+          global:
+            - SLUG=owner/name
+        jobs:
+          include:
+            - name: one
+              if:  repo = env(SLUG)
+      )
+
+      let(:data) { { repo: 'owner/name', env: [SLUG: 'other'] } }
+
+      expands_to [
+        { name: 'one', env: [SLUG: 'owner/name'], if: 'repo = env(SLUG)' }
+      ]
+    end
+
     describe 'matches env on job' do
       yaml %(
         jobs:
