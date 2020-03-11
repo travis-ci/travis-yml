@@ -32,16 +32,6 @@ module Travis
             end
             memoize :missing
 
-            def unsupported_defaults?(key)
-              return false unless schema[key].respond_to?(:defaults)
-              defaults = schema[key].defaults
-              defaults.any? && defaults.none? { |default| supported?(default) }
-            end
-
-            def supported?(default)
-              Value::Support.new(default.support, value.supporting, default.value).supported?
-            end
-
             def enabled?
               value.defaults?
             end
