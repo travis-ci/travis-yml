@@ -7,6 +7,16 @@ describe Travis::Yml, 'os' do
     it { should have_msg [:info, :root, :default, key: 'os', default: 'linux'] }
   end
 
+  describe 'given multiple values', defaults: true do
+    yaml %(
+      os:
+      - linux
+      - osx
+      - windows
+    )
+    it { should serialize_to language: 'ruby', os: ['linux', 'osx', 'windows'], dist: 'xenial' }
+  end
+
   describe 'given a string' do
     known = %w(
       linux

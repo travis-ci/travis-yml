@@ -158,7 +158,16 @@ describe Travis::Yml::Doc::Value::Support do
     end
   end
 
-  describe 'multi-os' do
+  describe 'language on multi-os' do
+    let(:support) { { only: { os: ['linux', 'windows'] } } }
+    let(:supporting) { { os: ['linux', 'osx', 'windows'] } }
+    let(:obj) { :ruby }
+
+    it { should be_supported }
+    it { should_not have_msg }
+  end
+
+  describe 'os multi-os' do
     let(:support) { { only: { os: ['linux', 'windows'] } } }
     let(:supporting) { { os: ['linux', 'osx'] } }
     let(:obj) { :linux }
