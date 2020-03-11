@@ -1,5 +1,4 @@
 # frozen_string_literal: true
-# require 'travis/yml/doc/helper/support'
 require 'travis/yml/doc/validate/base'
 
 module Travis
@@ -7,8 +6,6 @@ module Travis
     module Doc
       module Validate
         class Flags < Base
-          # include Helper::Support
-
           register :flags
 
           def apply
@@ -18,13 +15,11 @@ module Travis
           private
 
             def flag?
-              value.given? # && relevant?
+              value.given?
             end
 
             def flag
               edge_key         if edge_key?
-              # edge_value       if edge_value?
-              # flagged          if schema.flagged?
               deprecated_key   if deprecated_key?
               deprecated_value if deprecated_value?
               value
@@ -37,18 +32,6 @@ module Travis
             def edge_key
               value.info :edge
             end
-
-            # def edge_value?
-            #   schema.fixed? && !!schema.values.find { |v| v.edge? && v.value == value.value }
-            # end
-            #
-            # def edge_value
-            #   value.info :edge, value: value.value
-            # end
-
-            # def flagged
-            #   value.info :flagged, key: value.key
-            # end
 
             def deprecated_value?
               schema.enum? && value.str? && schema.values.deprecated?(value.value)
