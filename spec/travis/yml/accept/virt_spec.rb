@@ -46,6 +46,36 @@ describe Travis::Yml, 'virt' do
     it { should have_msg [:warn, :virt, :unexpected_seq, value: 'vm'] }
   end
 
+  describe 'on jobs.include' do
+    yaml %(
+      jobs:
+        include:
+          - virt: vm
+    )
+    it { should serialize_to jobs: { include: [virt: 'vm'] } }
+    it { should_not have_msg }
+  end
+
+  describe 'on jobs.allow_failure' do
+    yaml %(
+      jobs:
+        allow_failures:
+          - virt: vm
+    )
+    it { should serialize_to jobs: { allow_failures: [virt: 'vm'] } }
+    it { should_not have_msg }
+  end
+
+  describe 'on jobs.exclude' do
+    yaml %(
+      jobs:
+        exclude:
+          - virt: vm
+    )
+    it { should serialize_to jobs: { exclude: [virt: 'vm'] } }
+    it { should_not have_msg }
+  end
+
   # describe 'unsupported on arch amd64' do
   #   yaml %(
   #     arch:

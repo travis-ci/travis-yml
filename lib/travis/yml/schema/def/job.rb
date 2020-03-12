@@ -23,6 +23,7 @@ module Travis
           def define
             strict false
 
+            map :virt
             map :addons
             map :branches
             map :cache

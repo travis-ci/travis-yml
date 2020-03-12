@@ -299,7 +299,6 @@ describe Travis::Yml::Schema::Def::Root do
           sudo
           trace
           version
-          virt
         )
       end
 

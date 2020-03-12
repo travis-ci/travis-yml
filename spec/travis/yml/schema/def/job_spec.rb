@@ -29,11 +29,14 @@ describe Travis::Yml::Schema::Def::Job do
         if: {
           '$ref': '#/definitions/type/condition'
         },
+        group: {
+          '$ref': '#/definitions/type/group'
+        },
         services: {
           '$ref': '#/definitions/type/services'
         },
-        group: {
-          '$ref': '#/definitions/type/group'
+        virt: {
+          '$ref': '#/definitions/type/virt'
         },
         before_install: {
           '$ref': '#/definitions/type/strs',

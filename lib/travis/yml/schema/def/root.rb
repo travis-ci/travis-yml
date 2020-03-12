@@ -37,7 +37,6 @@ module Travis
             matrix :os,             required: true, to: :oss
             map    :dist,           required: true
             matrix :arch,           to: :archs
-            map    :virt
             map    :stack
             map    :sudo
             map    :import,         to: :imports
