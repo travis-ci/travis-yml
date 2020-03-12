@@ -36,7 +36,8 @@ describe Travis::Yml::Schema::Def::Dist do
         xenial: {
           only: {
             os: [
-              'linux'
+              'linux',
+              'linux-ppc64le'
             ]
           }
         },

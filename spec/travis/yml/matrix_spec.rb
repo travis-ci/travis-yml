@@ -756,6 +756,32 @@ describe Travis::Yml, 'matrix' do
     ]
   end
 
+  describe 'linux-ppc64le and s390x' do
+    yaml %(
+      language: cpp
+      os: linux
+      dist: xenial
+
+      jobs:
+        include:
+          - os: linux-ppc64le
+          - os: linux
+            arch: ppc64le
+          - os: linux
+            arch: s390x
+          - os: linux
+            arch: s390x
+            dist: bionic
+    )
+
+    expands_to [
+      { language: 'cpp', os: 'linux-ppc64le', dist: 'xenial' },
+      { language: 'cpp', os: 'linux', dist: 'xenial', arch: 'ppc64le' },
+      { language: 'cpp', os: 'linux', dist: 'xenial', arch: 's390x' },
+      { language: 'cpp', os: 'linux', dist: 'bionic', arch: 's390x' },
+    ]
+  end
+
   # describe 'wat' do
   #   yaml %(
   #   )
