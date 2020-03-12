@@ -125,14 +125,14 @@ describe Travis::Yml, 'os' do
     it { should have_msg [:warn, :os, :unsupported, on_key: 'language', on_value: 'objective-c', key: 'os', value: 'windows'] }
   end
 
-  describe 'complains about jdk on osx' do
+  describe 'jdk on osx' do
     yaml %(
       os: osx
       language: java
       jdk: default
     )
     it { should serialize_to os: ['osx'], language: 'java', jdk: ['default'] }
-    it { should have_msg [:warn, :jdk, :unsupported, on_key: 'os', on_value: 'osx', key: 'jdk', value: ['default']] }
+    it { should_not have_msg }
   end
 
   describe 'given a mixed, nested seq, with an unsupported key on root', drop: true do
