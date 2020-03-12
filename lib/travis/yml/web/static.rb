@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+require 'digest/sha1'
 
 module Travis
   module Yml
@@ -11,7 +12,7 @@ module Travis
           ico:  'image/vnd.microsoft.icon'
         }
 
-        attr_reader :dir
+        attr_reader :dir, :content
 
         def initialize(app, dir)
           @dir = dir
@@ -24,16 +25,18 @@ module Travis
 
         def ok
           status 200
+          cache_control :public
+          etag digest(content)
           content_type TYPES[ext.to_sym]
-          read
+          content
         end
 
         def exists?
           File.file?(file)
         end
 
-        def read
-          File.read(file)
+        def content
+          @content ||= File.read(file)
         end
 
         def ext
@@ -49,6 +52,10 @@ module Travis
           path = '/home' if path == '/'
           path = "#{path}.html" if File.extname(path).empty?
           path
+        end
+
+        def digest(str)
+          Digest::SHA1.hexdigest(str)
         end
       end
     end
