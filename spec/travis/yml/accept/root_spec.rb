@@ -22,6 +22,14 @@ describe Travis::Yml, 'root' do
     it { should serialize_to language: 'ruby', os: ['osx'], osx_image: ['image'] }
   end
 
+  describe 'does not warn on unknown key merge_mode' do
+    yaml %(
+      merge_mode: merge
+    )
+    it { should serialize_to merge_mode: 'merge' }
+    it { should_not have_msg }
+  end
+
   describe 'given an invalid type' do
     yaml %(
       rvm:

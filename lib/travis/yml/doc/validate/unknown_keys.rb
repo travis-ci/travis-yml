@@ -8,6 +8,8 @@ module Travis
         class UnknownKeys < Base
           register :unknown_keys
 
+          IGNORE = %w(merge_mode)
+
           def apply
             return value unless apply?
             value.keys.inject(value) do |map, key|
@@ -27,7 +29,11 @@ module Travis
             end
 
             def unknown?(value)
-              value && value.given? && !schema.key?(value.key)
+              value && value.given? && !schema.key?(value.key) && !ignore?(value.key)
+            end
+
+            def ignore?(key)
+              IGNORE.include?(key)
             end
 
             def anchor(map, key, value)

@@ -12,7 +12,7 @@ module Travis
     class Matrix
       include Helper::Obj, Memoize
 
-      DROP = %i(jobs import stages notifications version allow_failure global_env)
+      DROP = %i(jobs import stages notifications version allow_failure global_env merge_mode)
 
       attr_reader :config, :data
 
