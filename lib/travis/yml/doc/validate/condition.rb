@@ -31,15 +31,18 @@ module Travis
             end
 
             def validate
-              Conditions.parse(condition.value.to_s, keys: KEYWORDS, version: version)
+              data = KEYWORDS.zip(Array.new(KEYWORDS.size)).to_h
+              Conditions.eval(condition.value.to_s, data, version: version)
               value
-            rescue Conditions::ParseError
-              invalid_condition
+            rescue Conditions::Error => e
+              msg = version == :v1 ? e.message : 'unkonwn error'
+              invalid_condition(msg)
               blank
             end
 
-            def invalid_condition
-              condition.error :invalid_condition, condition: condition.value
+            def invalid_condition(msg)
+              # will have to improve parse error messages
+              condition.error :invalid_condition, condition: condition.value #, message: msg
             end
 
             def version

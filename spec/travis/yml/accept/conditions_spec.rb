@@ -114,4 +114,16 @@ describe Travis::Yml, 'conditions' do
       it { should_not have_msg }
     end
   end
+
+  describe 'job.include' do
+    describe 'foo !~ [z-a]' do
+      yaml %(
+        jobs:
+          include:
+            - if: foo !~ /[z-a]/
+      )
+      it { should serialize_to jobs: { include: [] } }
+      it { should have_msg [:error, :'jobs.include.if', :invalid_condition, condition: 'foo !~ /[z-a]/'] }
+    end
+  end
 end
