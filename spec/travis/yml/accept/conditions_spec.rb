@@ -57,6 +57,15 @@ describe Travis::Yml, 'conditions' do
         it { should_not have_msg }
       end
 
+      describe 'env()' do
+        yaml %(
+          conditions: v1
+          if: env() = str
+        )
+        it { should serialize_to conditions: 'v1', if: 'env() = str' }
+        it { should_not have_msg }
+      end
+
       describe '= foo' do
         yaml %(
           if: '= foo'
