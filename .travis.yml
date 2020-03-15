@@ -10,8 +10,8 @@ jobs:
     - stage: "testing time"
       script:
         - bundle exec rspec spec
-        - bundle exec rspec spec/integrate/configs_spec.rb --tag configs
-        - bundle exec rspec spec/integrate/matrix_spec.rb --tag matrix
+        - bundle exec rspec spec/integrate/configs_spec.rb --tag integration_configs
+        - bundle exec rspec spec/integrate/matrix_spec.rb --tag integration_matrix
 
     - stage: ":ship: it to quay.io"
       language: ruby

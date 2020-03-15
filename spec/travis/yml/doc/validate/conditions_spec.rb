@@ -1,5 +1,5 @@
-describe Travis::Yml::Doc::Validate, 'conditions' do
-  subject { described_class.apply(build_schema(schema), build_value(value)) }
+describe Travis::Yml::Doc::Validate, 'conditions', drop: true do
+  subject { described_class.apply(build_schema(schema), build_value(value, opts)) }
 
   let(:schema) { { type: :object, properties: { if: { type: :string } } } }
 

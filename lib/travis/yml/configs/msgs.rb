@@ -21,6 +21,7 @@ module Travis
 
       def concat(other)
         msgs.concat(other.to_a)
+        msgs.uniq!
       end
 
       def messages

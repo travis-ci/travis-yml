@@ -54,7 +54,8 @@ describe Travis::Yml::Schema::Def::Notification::Irc, 'structure' do
               summary: kind_of(String)
             },
             nick: {
-             '$ref': '#/definitions/type/secure',
+              '$ref': '#/definitions/type/secure',
+              strict: false,
               summary: kind_of(String)
             },
             use_notice: {

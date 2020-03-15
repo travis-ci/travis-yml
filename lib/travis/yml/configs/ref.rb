@@ -23,7 +23,7 @@ module Travis
         private
 
           def parse
-            repo, path, ref = remote || local || invalid_ref(str)
+            repo, path, ref = remote || local || invalid_ref(str.to_s)
             @repo = repo || opts[:repo]
             @path = expand_path(path)
             @ref = ref || opts[:ref]

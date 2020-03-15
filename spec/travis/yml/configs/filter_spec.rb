@@ -37,7 +37,7 @@ describe Travis::Yml::Configs::Filter, 'notifications' do
 
   describe 'given an array of hashes with a failing condition' do
     let(:config) { [email: { recipients: 'me@email.com', if: 'false' }] }
-    it { should_not have_config }
+    it { should have_config [] }
     it { should have_msg [:info, :'notifications.email', :skip_notification, type: :email, number: 1, condition: 'false'] }
   end
 

@@ -12,16 +12,16 @@ module Travis
           end
 
           def includes?(job)
-            name.downcase == job.stage.downcase
+            name&.downcase == job.stage&.downcase
           end
 
           def ==(other)
-            name.downcase == other.name.downcase
+            name&.downcase == other.name&.downcase
           end
           alias :eql? :==
 
           def hash
-            name.downcase.hash
+            name.to_s.downcase.hash
           end
         end
       end

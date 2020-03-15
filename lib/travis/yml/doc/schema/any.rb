@@ -19,7 +19,8 @@ module Travis
             # TODO defaults have to be pushed down to child schemas in case
             # they were defined on the mapping (and thus, the ref). does this
             # apply to other options, too? also see Seq#opts=
-            schemas.each { |schema| schema.opts = merge(only(opts, :defaults), schema.opts) }
+            @schemas = schemas.map(&:dup)
+            schemas.each { |schema| schema.opts = merge(only(opts, :defaults, :strict), schema.opts) }
           end
 
           def matches?(value)

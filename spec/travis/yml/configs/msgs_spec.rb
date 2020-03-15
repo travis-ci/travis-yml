@@ -1,0 +1,40 @@
+describe Travis::Yml::Configs, 'msgs' do
+  let(:repo) { { github_id: 1, slug: 'travis-ci/travis-yml' } }
+
+  before { stub_repo(repo[:slug], internal: true, body: repo.merge(token: 'token')) }
+  before { stub_content(repo[:github_id], '.travis.yml', yaml) }
+
+  subject { described_class.new(repo, 'master', nil, nil, {}, opts).tap(&:load) }
+
+  describe 'defaults', defaults: true do
+    yaml ''
+    it { expect(subject.config).to eq defaults }
+    it { should have_msg [:info, :root, :default, key: 'language', default: 'ruby'] }
+    it { should have_msg [:info, :root, :default, key: 'os', default: 'linux'] }
+    it { should have_msg [:info, :root, :default, key: 'dist', default: 'xenial'] }
+  end
+
+  describe 'empty', empty: true do
+    yaml 'script:'
+    it { expect(subject.config).to eq script: [] }
+    it { should have_msg [:warn, :script, :empty, key: 'script'] }
+  end
+
+  describe 'unknown' do
+    yaml %(
+      unknown: str
+    )
+    it { expect(subject.config).to eq unknown: 'str' }
+    it { should have_msg [:warn, :root, :unknown_key, key: 'unknown', value: 'str'] }
+  end
+
+  describe 'alert', alert: true do
+    yaml %(
+      deploy:
+        - provider: pages
+          token: str
+    )
+    it { expect(subject.config).to eq deploy: [provider: 'pages', token: 'str'] }
+    it { should have_msg [:alert, :'deploy.token', :secure, type: :str] }
+  end
+end

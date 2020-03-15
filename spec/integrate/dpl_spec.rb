@@ -5,7 +5,7 @@ def stringify(hash)
   Travis::Yml::Helper::Obj.stringify(hash)
 end
 
-describe Travis::Yml, dpl: true, alert: false do
+describe Travis::Yml, integration_dpl: true, alert: false do
   matcher :be_known_opt do |provider|
     match do |opt|
       yaml = <<~str

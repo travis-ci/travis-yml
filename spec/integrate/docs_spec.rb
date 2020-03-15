@@ -1,6 +1,6 @@
 require 'yaml'
 
-describe Travis::Yml, docs: true, alert: false do
+describe Travis::Yml, integration_docs: true, alert: false do
   SKIP = [
     # ignore
     'docs_2016/deployment/006',            # example with an unknown awesome-experimental-provider

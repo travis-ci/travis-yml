@@ -1,4 +1,4 @@
-describe Travis::Yml, 'conditions', line: true do
+describe Travis::Yml, 'conditions', drop: true, line: true do
   subject { Travis::Yml.apply(parse(yaml), opts) }
 
   describe 'if' do
