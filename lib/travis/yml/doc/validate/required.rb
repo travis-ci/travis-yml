@@ -28,20 +28,9 @@ module Travis
             end
 
             def missing
-              keys = schema.required.select { |key| !value[key] || value[key].missing? }
-              keys.reject { |key| unsupported_defaults?(key) }
+              schema.required.select { |key| !value[key] || value[key].missing? }
             end
             memoize :missing
-
-            def unsupported_defaults?(key)
-              return false unless schema[key].respond_to?(:defaults)
-              defaults = schema[key].defaults
-              defaults.any? && defaults.none? { |default| supported?(default) }
-            end
-
-            def supported?(default)
-              Value::Support.new(default.support, value.supporting, default.value).supported?
-            end
 
             def enabled?
               value.defaults?

@@ -35,26 +35,15 @@ module Travis
               build(value.parent, value.key, schema.seq? ? [default] : default, value.opts)
             end
 
-            def supported?
-              !!supported
-            end
-
             def supported
-              schema.defaults.detect { |value| support(value).supported? }
+              schema.defaults.detect { |default| support(default).supported? }
             end
             memoize :supported
 
-            def support(value)
-              support = defaults.support(value.value)
-              Value::Support.new(support, supporting, value.value)
-            end
-
-            def defaults
-              schema.defaults
-            end
-
-            def supporting
-              value.supporting
+            def support(default)
+              support = schema.values.support(default.value)
+              support = schema.defaults.support(default.value) if support.nil? || support.empty?
+              Value::Support.new(support, value.supporting, default.value)
             end
 
             def enabled?

@@ -92,4 +92,44 @@ describe Travis::Yml::Doc::Change::Keys do
     it { should serialize_to foo_bar: true }
     it { should have_msg [:info, :root, :alias_key, alias: 'foo', key: 'foo_bar'] }
   end
+
+  describe 'adds a required key', defaults: true do
+    let(:schema) do
+      {
+        type: :object,
+        properties: {
+          one: {
+            type: :string
+          }
+        },
+        required: [
+          'one'
+        ],
+        additionalProperties: false
+      }
+    end
+
+    let(:value) { {} }
+    it { should serialize_to one: nil }
+  end
+
+  describe 'adds keys that have a default (no matter their support)', defaults: true do
+    let(:schema) do
+      {
+        type: :object,
+        properties: {
+          one: {
+            type: :string,
+            defaults: [
+              { value: 'one' }
+            ]
+          }
+        },
+        additionalProperties: false
+      }
+    end
+
+    let(:value) { {} }
+    it { should serialize_to one: nil }
+  end
 end

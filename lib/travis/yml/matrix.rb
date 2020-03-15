@@ -2,29 +2,34 @@
 
 require 'travis/yml/helper/condition'
 require 'travis/yml/helper/obj'
+require 'travis/yml/matrix/env'
+require 'travis/yml/matrix/expand'
+require 'travis/yml/matrix/exclude'
+require 'travis/yml/matrix/support'
 
 module Travis
   module Yml
-    class Matrix < Obj.new(:config, :data)
+    class Matrix
       include Helper::Obj, Memoize
 
-      DROP = %i(jobs import stages notifications version allow_failure global_env)
+      DROP = %i(jobs import stages notifications version allow_failure global_env merge_mode)
+
+      attr_reader :config, :data
 
       def initialize(config, data)
-        config = sort(config)
-        data = compact(data)
-        super
+        @config = sort(config)
+        @data = compact(data)
       end
 
       def jobs
         jobs = expand                    # expand jobs from matrix expansion keys
         jobs = with_included(jobs)       # add jobs from jobs.include
         jobs = with_default(jobs)        # default job if no job has been generated so far
-        jobs = with_shared(jobs)         # shared non-matrix keys from root, e.g. language
-        jobs = with_global(jobs)         # inherit first value from matrix keys from root to jobs.include
+        jobs = with_shared(jobs)         # inherit shared non-matrix keys from root, e.g. language
+        jobs = with_global(jobs)         # inherit the first value from matrix keys from root to jobs.include
         jobs = with_env(jobs)            # normalize env to arrays (still required?), add global env
         jobs = without_excluded(jobs)    # reject jobs matching jobs.exclude
-        jobs = without_unsupported(jobs) # drop unsupported keys
+        jobs = without_unsupported(jobs) # unset unsupported keys
         jobs = jobs.uniq                 # drop duplicate jobs
         jobs = filter(jobs)              # filter jobs based on condition
         jobs
@@ -42,9 +47,7 @@ module Travis
       private
 
         def expand
-          jobs = wrap(values.inject { |lft, rgt| lft.product(rgt) } || [])
-          jobs = jobs.map { |job| keys.zip(wrap(job).flatten).to_h }
-          jobs
+          Expand.new(config, keys).jobs
         end
 
         def with_included(jobs)
@@ -68,56 +71,28 @@ module Travis
           jobs.map { |job| shared.merge(job) }
         end
 
-        def shared
-          @shared ||= config.select { |key, value| shared_key?(key) && !blank?(value) }
-        end
-
         def with_global(jobs)
           jobs.map { |job| global.merge(job) }
         end
 
+        def shared
+          @shared ||= config.select { |key, value| shared_key?(key) && !blank?(value) }
+        end
+
         def global
-          only(config, *keys - [:env]).map { |key, value| [key, wrap(value).first] }.to_h
+          @global ||= only(config, *keys - [:env]).map { |key, value| [key, wrap(value).first] }.to_h
         end
 
         def with_env(jobs)
-          jobs = with_env_arrays(jobs)
-          jobs = with_first_env(jobs)
-          jobs = with_global_env(jobs)
-          jobs
-        end
-
-        def with_env_arrays(jobs)
-          jobs.each { |job| job[:env] = with_env_array(job[:env]) if job[:env] }
-        end
-
-        def with_env_array(env)
-          case env
-          when Hash  then wrap(except(env, :global)).reject(&:empty?)
-          when Array then env.map { |env| with_env_array(env) }.flatten(1)
-          else wrap(env)
-          end
-        end
-
-        def with_global_env(jobs)
-          jobs.each { |job| job[:env] = global_env.+(job[:env] || []).uniq } if global_env
-          jobs
-        end
-
-        # The legacy implementation picked the first env var out of `env.jobs` to
-        # jobs listed in `jobs.include` if they do not define a key `env` already.
-        def with_first_env(jobs)
-          jobs.each { |job| (job[:env] ||= []).concat([first_env]).uniq! unless job[:env] } if first_env
-          jobs
+          Env.new(config, jobs).apply
         end
 
         def without_excluded(jobs)
-          jobs.delete_if { |job| excluded?(job) }
+          jobs.delete_if { |job| Exclude.new(config, job, method(:accept?)).exclude? }
         end
 
-        # Should this drop the entire job instead?
         def without_unsupported(jobs)
-          jobs.map { |job| job.select { |key, value| supported?(job, key, value) }.to_h }
+          jobs.map { |job| job.select { |key, value| support(job, key, value).supported? }.to_h }
         end
 
         def included
@@ -135,35 +110,6 @@ module Travis
           jobs
         end
 
-        def excluded
-          return [] unless config.is_a?(Hash) && config[:jobs].is_a?(Hash)
-          [config[:jobs][:exclude] || []].flatten
-        end
-
-        def excluded?(job)
-          excluded.any? do |excluded|
-            next unless excluded.is_a?(Hash)
-            next unless accept?(:exclude, :'jobs.exclude', excluded[:if], job)
-            except(excluded, :if).all? do |key, value|
-              case key
-              when :env
-                # TODO this wouldn't have to be a special case if we'd match
-                # for inclusion (see below)
-                env = job[:env]
-                env = env - (config[:env].is_a?(Hash) && config[:env][:global] || []) if env
-                env = env - config[:global_env] if config[:global_env].is_a?(Array)
-                env == value
-              when :stage
-                job[:stage] == value || job[:stage].nil? && value.downcase == 'test'
-              else
-                # TODO if this is a hash or array we should not match for
-                # equality, but inclusion (partial job.exclude matching)
-                wrap(job[key]) == wrap(value)
-              end
-            end
-          end
-        end
-
         def filter(jobs)
           jobs.select { |job| accept?(:job, :'jobs.include', job[:if], job) }
         end
@@ -178,35 +124,9 @@ module Travis
           false
         end
 
-        def global_env
-          env = config[:env] && config[:env].is_a?(Hash) && config[:env][:global]
-          env || config[:global_env] # BC Gatekeeper matrix expansion
-        end
-
-        def first_env
-          case env = config[:env]
-          when Array
-            env.first
-          when Hash
-            env.fetch(:jobs, nil)&.first
-          end
-        rescue nil
-        end
-
-        def values
-          values = only(config, *keys)
-          values = values.map { |key, value| env_jobs(key, value) || value }
-          values = values.map { |value| wrap(value) }
-          values
-        end
-
-        def env_jobs(key, obj)
-          obj[:jobs] if key == :env && obj.is_a?(Hash) && obj.key?(:jobs)
-        end
-
         def keys
           keys = compact(config).keys & expand_keys
-          keys.select { |key| supported_key?(config, key, config[key]) }
+          keys.select { |key| support(config, key).supported_key? }
         end
         memoize :keys
 
@@ -223,24 +143,8 @@ module Travis
           config.sort_by { |key, _| expand_keys.index(key) || 99 }.to_h
         end
 
-        # move this to Yml::Doc.supported?
-        def supported?(job, key, value)
-          supported_key?(job, key, value) && supported_value?(job, key, value)
-        end
-
-        def supported_key?(job, key, value)
-          supporting = stringify(only(job, :language, :os, :arch))
-          support = Yml.expand.support(key.to_s)
-          Yml::Doc::Value::Support.new(support, supporting, value).supported?
-        end
-
-        def supported_value?(job, key, value)
-          supporting = stringify(only(job, :language, :os, :arch))
-          schema = Yml.expand[key.to_s]
-          schema = schema.detect(&:scalar?) if schema&.is?(:any)
-          support = schema.values.support(value) if schema && schema.values.respond_to?(:support)
-          return true unless support
-          Yml::Doc::Value::Support.new(support, supporting, value).supported?
+        def support(job, key, value = true)
+          Support.new(job, key, value)
         end
 
         def blank?(obj)

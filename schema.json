@@ -8,16 +8,63 @@
       "type": "object",
       "properties": {
         "language": {
-          "$ref": "#/definitions/type/language"
+          "$ref": "#/definitions/type/language",
+          "defaults": [
+            {
+              "value": "ruby",
+              "except": {
+                "os": [
+                  "osx"
+                ]
+              }
+            },
+            {
+              "value": "objective-c",
+              "only": {
+                "os": [
+                  "osx"
+                ]
+              }
+            }
+          ]
         },
         "os": {
           "$ref": "#/definitions/type/oss",
+          "defaults": [
+            {
+              "value": "linux",
+              "except": {
+                "language": [
+                  "objective-c"
+                ]
+              }
+            },
+            {
+              "value": "osx",
+              "only": {
+                "language": [
+                  "objective-c"
+                ]
+              }
+            }
+          ],
           "flags": [
             "expand"
           ]
         },
         "dist": {
-          "$ref": "#/definitions/type/dist"
+          "$ref": "#/definitions/type/dist",
+          "defaults": [
+            {
+              "value": "xenial",
+              "only": {
+                "os": [
+                  "linux",
+                  "linux-ppc64le"
+                ]
+              }
+            }
+          ]
         },
         "arch": {
           "$ref": "#/definitions/type/archs",
@@ -84,12 +131,7 @@
       },
       "see": {
         "Job lifecycle": "https://docs.travis-ci.com/user/job-lifecycle/"
-      },
-      "required": [
-        "language",
-        "os",
-        "dist"
-      ]
+      }
     },
     {
       "$ref": "#/definitions/type/languages"
@@ -522,17 +564,6 @@
           "Virtualization environments": "https://docs.travis-ci.com/user/reference/overview/#virtualization-environments"
         },
         "downcase": true,
-        "defaults": [
-          {
-            "value": "xenial",
-            "only": {
-              "os": [
-                "linux",
-                "linux-ppc64le"
-              ]
-            }
-          }
-        ],
         "enum": [
           "trusty",
           "precise",
@@ -837,23 +868,13 @@
             "items": {
               "type": "string"
             },
-            "except": {
-              "os": [
-                "osx"
-              ]
-            },
             "normal": true
           },
           {
             "type": "string"
           }
         ],
-        "summary": "JDK versions",
-        "except": {
-          "os": [
-            "osx"
-          ]
-        }
+        "summary": "JDK versions"
       },
       "job": {
         "$id": "job",
@@ -1081,25 +1102,6 @@
         },
         "example": "ruby",
         "downcase": true,
-        "defaults": [
-          {
-            "value": "ruby",
-            "only": {
-              "os": [
-                "linux",
-                "windows"
-              ]
-            }
-          },
-          {
-            "value": "objective-c",
-            "only": {
-              "os": [
-                "osx"
-              ]
-            }
-          }
-        ],
         "enum": [
           "android",
           "c",
@@ -1122,13 +1124,13 @@
           "julia",
           "nix",
           "node_js",
-          "objective-c",
           "perl",
           "perl6",
           "php",
           "python",
           "r",
           "ruby",
+          "objective-c",
           "rust",
           "scala",
           "shell",
@@ -1296,9 +1298,6 @@
             "$ref": "#/definitions/language/node_js"
           },
           {
-            "$ref": "#/definitions/language/objective-c"
-          },
-          {
             "$ref": "#/definitions/language/perl"
           },
           {
@@ -1315,6 +1314,9 @@
           },
           {
             "$ref": "#/definitions/language/ruby"
+          },
+          {
+            "$ref": "#/definitions/language/objective-c"
           },
           {
             "$ref": "#/definitions/language/rust"
@@ -1523,35 +1525,6 @@
         "title": "Os",
         "type": "string",
         "downcase": true,
-        "defaults": [
-          {
-            "value": "linux",
-            "except": {
-              "language": [
-                "objective-c"
-              ]
-            }
-          },
-          {
-            "value": "osx"
-          },
-          {
-            "value": "windows",
-            "except": {
-              "language": [
-                "objective-c"
-              ]
-            }
-          },
-          {
-            "value": "freebsd",
-            "except": {
-              "language": [
-                "objective-c"
-              ]
-            }
-          }
-        ],
         "enum": [
           "linux",
           "osx",
@@ -1930,9 +1903,6 @@
             "$ref": "#/definitions/support/node_js_support"
           },
           {
-            "$ref": "#/definitions/support/objective-c_support"
-          },
-          {
             "$ref": "#/definitions/support/perl_support"
           },
           {
@@ -1949,6 +1919,9 @@
           },
           {
             "$ref": "#/definitions/support/ruby_support"
+          },
+          {
+            "$ref": "#/definitions/support/objective-c_support"
           },
           {
             "$ref": "#/definitions/support/rust_support"
@@ -9894,14 +9867,14 @@
     "haxe",
     "julia",
     "nix",
-    "rvm",
-    "gemfile",
-    "xcode_scheme",
-    "xcode_sdk",
     "perl",
     "perl6",
     "python",
     "r",
+    "rvm",
+    "gemfile",
+    "xcode_scheme",
+    "xcode_sdk",
     "rust",
     "scala",
     "smalltalk",

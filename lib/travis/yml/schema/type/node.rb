@@ -138,6 +138,29 @@ module Travis
             :"#{namespace}/#{id}" if id
           end
 
+          # `default` and `support` really shouldn't sit here but in Scalar.
+          # however, without them being defined on Node they are going to be
+          # missing on Ref, so mapped references won't have these attribute
+          # writers available, and opts won't propagate from a mapped Ref to
+          # the ref's opts and schema.
+          #
+          # maybe we can overwrite `assign` on Ref, instantiate the referenced
+          # object, and grab its attributes instead, or something.
+
+          def default(value, opts = {})
+            value = { value: value }.merge(opts) unless value.is_a?(Hash) || value.is_a?(Array)
+            value = [value] unless value.is_a?(Array)
+            value = value.map { |value| value.merge(support(opts.merge(value))) }
+            value = value.map { |value| value.merge(value: value[:value].is_a?(Symbol) ? value[:value].to_s : value[:value]) }
+            attrs[:defaults] ||= []
+            attrs[:defaults].concat(to_strs(value))
+          end
+
+          def support(value)
+            support = only(value, :only, :except)
+            support.map { |key, attrs| [key, to_strs(attrs)] }.to_h
+          end
+
           def namespace(str = nil)
             str ? attrs[:namespace] = str : attrs[:namespace] || registry_name
           end

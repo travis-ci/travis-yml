@@ -8,7 +8,7 @@ module Travis
         # Mapped on root on the :language key. The Language values (known
         # names) are populated by the Lang::* instances (language
         # implementations), rather than here (see Type::Lang#before_define).
-        class Language < Type::Language
+        class Language < Type::Str
           register :language
 
           def define
@@ -30,8 +30,6 @@ module Travis
             example 'ruby'
 
             downcase
-            default :ruby,          only: { os: [:linux, :windows] }
-            default :'objective-c', only: { os: [:osx] }
             export
           end
         end
@@ -61,13 +59,14 @@ require 'travis/yml/schema/def/lang/java'
 require 'travis/yml/schema/def/lang/julia'
 require 'travis/yml/schema/def/lang/nix'
 require 'travis/yml/schema/def/lang/node_js'
-require 'travis/yml/schema/def/lang/objective_c'
 require 'travis/yml/schema/def/lang/perl'
 require 'travis/yml/schema/def/lang/perl6'
 require 'travis/yml/schema/def/lang/php'
 require 'travis/yml/schema/def/lang/python'
 require 'travis/yml/schema/def/lang/r'
 require 'travis/yml/schema/def/lang/ruby'
+# needs to come after ruby, so the ruby will match first as a default language
+require 'travis/yml/schema/def/lang/objective_c'
 require 'travis/yml/schema/def/lang/rust'
 require 'travis/yml/schema/def/lang/scala'
 require 'travis/yml/schema/def/lang/shell'

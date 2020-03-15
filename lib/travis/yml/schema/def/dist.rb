@@ -15,8 +15,6 @@ module Travis
 
             downcase
 
-            default :xenial,      only: { os: [:linux, :'linux-ppc64le'] }
-
             value :trusty,        only: { os: :linux }
             value :precise,       only: { os: :linux }
             value :xenial,        only: { os: [:linux, :'linux-ppc64le'] }

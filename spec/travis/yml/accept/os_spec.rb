@@ -7,6 +7,16 @@ describe Travis::Yml, 'os' do
     it { should have_msg [:info, :root, :default, key: 'os', default: 'linux'] }
   end
 
+  describe 'given multiple values', defaults: true do
+    yaml %(
+      os:
+      - linux
+      - osx
+      - windows
+    )
+    it { should serialize_to language: 'ruby', os: ['linux', 'osx', 'windows'], dist: 'xenial' }
+  end
+
   describe 'given a string' do
     known = %w(
       linux
@@ -44,7 +54,7 @@ describe Travis::Yml, 'os' do
         os: unknown
       )
       xit { should serialize_to defaults }
-      it { should have_msg [:warn, :os, :unknown_default, value: 'unknown', default: 'linux'] }
+      it { should have_msg [:error, :os, :unknown_value, value: 'unknown'] }
     end
 
     describe 'given deprecated linux-ppc64le' do
@@ -115,14 +125,14 @@ describe Travis::Yml, 'os' do
     it { should have_msg [:warn, :os, :unsupported, on_key: 'language', on_value: 'objective-c', key: 'os', value: 'windows'] }
   end
 
-  describe 'complains about jdk on osx' do
+  describe 'jdk on osx' do
     yaml %(
       os: osx
       language: java
       jdk: default
     )
     it { should serialize_to os: ['osx'], language: 'java', jdk: ['default'] }
-    it { should have_msg [:warn, :jdk, :unsupported, on_key: 'os', on_value: 'osx', key: 'jdk', value: ['default']] }
+    it { should_not have_msg }
   end
 
   describe 'given a mixed, nested seq, with an unsupported key on root', drop: true do

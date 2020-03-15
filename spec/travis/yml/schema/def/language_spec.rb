@@ -34,13 +34,13 @@ describe Travis::Yml::Schema::Def::Language do
         'julia',
         'nix',
         'node_js',
-        'objective-c',
         'perl',
         'perl6',
         'php',
         'python',
         'r',
         'ruby',
+        'objective-c',
         'rust',
         'scala',
         'shell',
@@ -55,25 +55,6 @@ describe Travis::Yml::Schema::Def::Language do
         '__cookiecat__'
       ],
       downcase: true,
-      defaults: [
-        {
-          value: 'ruby',
-          only: {
-            os: [
-              'linux',
-              'windows'
-            ]
-          }
-        },
-        {
-          value: 'objective-c',
-          only: {
-            os: [
-              'osx'
-            ]
-          }
-        },
-      ],
       values: {
         cpp: {
           aliases: [

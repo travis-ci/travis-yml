@@ -68,8 +68,8 @@ describe Travis::Yml, 'dist' do
     yaml %(
       dist: unknown
     )
-    it { should serialize_to dist: 'xenial' }
-    it { should have_msg [:warn, :dist, :unknown_default, value: 'unknown', default: 'xenial'] }
+    it { should serialize_to dist: 'unknown' }
+    it { should have_msg [:error, :dist, :unknown_value, value: 'unknown'] }
   end
 
   describe 'given a seq' do

@@ -20,14 +20,15 @@ module Travis
             end
 
             def change(value)
-              value = required(value) if defaults?
+              value = missing(value) if defaults?
               value = internal(value)
               value = fix_keys(value)
               value
             end
 
-            def required(node)
-              keys = schema.required.map { |key| ::Key.new(key) }
+            def missing(node)
+              keys = schema.required + schema.defaults
+              keys = keys.map { |key| ::Key.new(key) }
               keys = concat(keys, value.keys).uniq
               build(keys.map { |key| [key, value[key] || none] }.to_map)
             end

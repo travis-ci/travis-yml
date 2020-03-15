@@ -8,6 +8,11 @@ module Travis
         class Seq < Node
           attr_accessor :schema
 
+          def opts=(opts)
+            @opts = opts
+            schema.opts = merge(only(opts, :defaults), schema.opts)
+          end
+
           def matches?(value)
             value.none? || matches_seq?(value)
           end
@@ -41,6 +46,11 @@ module Travis
             merge(super, schema.supports)
           end
           memoize :supports
+
+          def dup
+            @schema = schema.dup if schema
+            super
+          end
 
           def to_h
             { type: type, schema: schema.to_h, opts: opts }
