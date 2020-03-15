@@ -1,3 +1,5 @@
+require 'travis/yml/support/key'
+
 class Array
   def to_map
     Map.new(to_h)
@@ -6,7 +8,7 @@ end
 
 class Map < Hash
   def initialize(hash = {}, opts = {})
-    replace(hash)
+    replace(hash.map { |key, value| [key.is_a?(Key) ? key : Key.new(key), value] }.to_h)
     @opts = opts.respond_to?(:tag) ? opts_from(opts.tag) : opts
   end
 

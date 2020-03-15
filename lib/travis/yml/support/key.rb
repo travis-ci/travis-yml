@@ -18,4 +18,8 @@ class Key < String
   def copy(str)
     self.class.new(str, line, src)
   end
+
+  def inspect
+    "#<Key #{super}>"
+  end
 end
