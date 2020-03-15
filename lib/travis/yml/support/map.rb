@@ -29,10 +29,11 @@ class Map < Hash
   end
 
   Hash.instance_methods.each do |name|
-    next if name == :object_id
+    skip = %i(object_id opts anchors warnings)
+    next if skip.include?(name)
     define_method(name) do |*args, &block|
       obj = super(*args, &block)
-      obj = Map.new(obj, opts) if obj.instance_of?(Hash)
+      obj = Map.new(obj, opts) if obj.instance_of?(Hash) && !(%i(send __send__).include?(name) && skip.include?(args[0]))
       obj
     end
   end

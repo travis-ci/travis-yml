@@ -19,7 +19,7 @@ class Key < String
     self.class.new(str, line, src)
   end
 
-  def inspect
-    "#<Key #{super}>"
-  end
+  # def inspect
+  #   "#<Key #{super}>"
+  # end
 end

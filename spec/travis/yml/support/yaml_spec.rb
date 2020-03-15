@@ -286,6 +286,22 @@ describe Yaml do
     it { expect { subject }.to raise_error Psych::SyntaxError }
   end
 
+  describe 'disallowed classes' do
+    describe 'timestamp' do
+      yaml %(
+        foo: 2020-01-01 00:00:00
+      )
+      it { should eq 'foo' => '2020-01-01 00:00:00' }
+    end
+
+    describe 'Highline::String' do
+      yaml %(
+        foo: !ruby/string:HighLine::String bar
+      )
+      it { should eq 'foo' => 'bar' }
+    end
+  end
+
   describe 'merge modes (map, 1)' do
     yaml %(
       !map+deep_merge+append

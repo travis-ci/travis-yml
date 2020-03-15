@@ -105,6 +105,7 @@ module Yaml
     end
 
     def visit_Psych_Nodes_Scalar(node)
+      node.tag = nil if node.tag.to_s.start_with?('!ruby/')
       scalar = super
       scalar.is_a?(Symbol) ? scalar.to_s : scalar
     end
