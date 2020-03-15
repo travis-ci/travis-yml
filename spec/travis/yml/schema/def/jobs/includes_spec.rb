@@ -80,6 +80,9 @@ describe Travis::Yml::Schema::Def::Jobs do
         stage: {
           type: :string
         },
+        allow_failure: {
+          type: :boolean
+        }
       )
     end
   end

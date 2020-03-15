@@ -84,6 +84,7 @@ module Travis
             aliases :jobs
 
             super
+            map :allow_failure, to: :bool
 
             export
           end
