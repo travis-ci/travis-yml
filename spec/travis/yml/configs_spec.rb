@@ -101,7 +101,7 @@ describe Travis::Yml::Configs do
 
     describe 'condition not matching branch' do
       let(:data) { { branch: 'other' } }
-      it { expect(config[:notifications]).to be_nil }
+      it { expect(config[:notifications]).to eq email: [] }
     end
   end
 

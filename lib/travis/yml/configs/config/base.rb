@@ -2,7 +2,6 @@ require 'forwardable'
 require 'travis/yml/helper/obj'
 require 'travis/yml/configs/errors'
 require 'travis/yml/configs/ref'
-require 'travis/yml/parts'
 
 module Travis
   module Yml
@@ -12,7 +11,7 @@ module Travis
           extend Forwardable
           include Helper::Obj, Errors, Memoize
 
-          def_delegators :ctx, :data, :opts, :msg
+          def_delegators :ctx, :data, :opts, :msgs, :msg
           def_delegators :repo, :allow_config_imports?, :owner_name, :private?, :public?
 
           attr_reader :on_loaded
@@ -33,10 +32,6 @@ module Travis
             @config ||= {}
           end
 
-          def part
-            Parts::Part.new(raw, source, mode) # TODO can Config and Part be joined?
-          end
-
           def load(&block)
             @on_loaded = block if root?
           end
@@ -49,7 +44,7 @@ module Travis
           end
 
           def imports
-            imports = Array(config[:import])
+            imports = Array(config['import'])
             imports = imports.select { |import| import.is_a?(Hash) }
             imports.map { |import| Config::File.new(ctx, self, import) }
           end
@@ -96,8 +91,8 @@ module Travis
           end
 
           def matches?
-            return true if Condition.new(import[:if], import, data).accept?
-            msg :info, :import, :skip_import, source: to_s, condition: import[:if]
+            return true if Condition.new(import['if'], import, data).accept?
+            msg :info, :import, :skip_import, source: to_s, condition: import['if']
             false
           end
           memoize :matches?
@@ -146,11 +141,11 @@ module Travis
             skip? || !!@loaded && imports.all?(&:loaded?)
           end
 
-          def mode
-            super&.to_sym
+          def to_h
+            config
           end
 
-          def to_h
+          def serialize
             {
               source: to_s,
               config: raw,
@@ -207,7 +202,7 @@ module Travis
             def secure?(obj)
               case obj
               when Hash
-                obj.key?(:secure) || obj.any? { |_, obj| secure?(obj) }
+                obj.key?('secure') || obj.any? { |_, obj| secure?(obj) }
               when Array
                 obj.any? { |obj| secure?(obj) }
               else
@@ -221,7 +216,11 @@ module Travis
             end
 
             def parse(str)
-              Yml.load(str, defaults: false).serialize if str
+              return unless str
+              opts = OPTS.keys.zip(Array.new(OPTS.size) { false }).to_h
+              doc = Yml.load(str, opts)
+              msgs.concat(doc.msgs)
+              doc.serialize(false)
             end
         end
       end

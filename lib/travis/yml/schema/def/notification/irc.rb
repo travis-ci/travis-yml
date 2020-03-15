@@ -19,7 +19,7 @@ module Travis
               map :channel_key,       to: :secure, summary: 'IRC channel key (password)'
               map :password,          to: :secure, summary: 'IRC user password'
               map :nickserv_password, to: :secure, summary: 'IRC nickserv password'
-              map :nick,              to: :secure, summary: 'IRC Nick name'
+              map :nick,              to: :secure, strict: false, summary: 'IRC Nick name'
               map :use_notice,        to: :bool, summary: 'Whether to use notices instead of regular messages'
               map :skip_join,         to: :bool, summary: 'Whether to skip joining the channel'
               map :template,          to: :templates

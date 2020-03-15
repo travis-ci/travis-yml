@@ -36,7 +36,7 @@ module Travis
       fix:       true,   # try fixing unknown keys and values
       line:      true,   # add line numbers to messages
       support:   false,  # warn about features unsupported on the given language, os etc
-      drop:      false,  # drop unknown keys and values, and values missing required keys
+      drop:      false,  # drop unknown keys and values, invalid conditions, and values missing required keys
     }
 
     # These are meant as examples. Clients will want to determine their own

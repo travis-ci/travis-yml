@@ -37,7 +37,7 @@ module Travis
             rescue Conditions::Error => e
               msg = version == :v1 ? e.message : 'unkonwn error'
               invalid_condition(msg)
-              blank
+              drop? ? blank : value
             end
 
             def invalid_condition(msg)
@@ -47,6 +47,10 @@ module Travis
 
             def version
               value.root['conditions']&.value == 'v0' ? :v0 : :v1
+            end
+
+            def drop?
+              value.drop?
             end
         end
       end

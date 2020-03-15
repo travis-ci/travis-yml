@@ -1,7 +1,7 @@
 require 'fileutils'
 require 'yaml'
 
-describe Travis::Yml, matrix: true do
+describe Travis::Yml, integration_matrix: true do
   paths = Dir['spec/fixtures/configs/**/*.yml'].sort
   paths = paths[0..1_000]
 

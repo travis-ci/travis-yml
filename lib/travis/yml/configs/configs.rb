@@ -1,9 +1,9 @@
 require 'travis/yml/helper/metrics'
-require 'travis/yml/helper/msgs'
 require 'travis/yml/helper/obj'
 require 'travis/yml/configs/allow_failures'
 require 'travis/yml/configs/filter'
 require 'travis/yml/configs/model/repos'
+require 'travis/yml/configs/msgs'
 require 'travis/yml/configs/reorder'
 require 'travis/yml/configs/stages'
 require 'travis/yml/configs/config/api'
@@ -18,6 +18,7 @@ module Travis
 
         attr_reader :configs, :config, :stages, :jobs
 
+        # - handle unknown merge modes on /configs
         # - add an acceptance test suite testing all the things through web?
         # - complete specs in configs/allow_failures
 
@@ -32,6 +33,8 @@ module Travis
         # out of the matrix expansion. in order to address that we could either
         # use the msgs produced or mark defaults added to the config in some
         # other way. see https://travisci.slack.com/archives/C5E02QW64/p1582052445034800
+
+        DROP = %i(import merge_mode)
 
         def load
           fetch
@@ -59,7 +62,7 @@ module Travis
 
         def to_h
           {
-            raw_configs: configs.map(&:to_h),
+            raw_configs: configs.map(&:serialize),
             config: config,
             matrix: jobs,
             stages: stages,
@@ -70,6 +73,10 @@ module Travis
 
         def to_s
           map(&:to_s).join(', ')
+        end
+
+        def serialize
+          symbolize(config)
         end
 
         private
@@ -83,8 +90,8 @@ module Travis
           time :fetch
 
           def merge
-            doc = Yml.load(configs.map(&:part))
-            @config = doc.serialize
+            doc = Yml.apply(Yml::Parts::Merge.new(configs).apply.to_h, opts)
+            @config = except(doc.serialize, *DROP)
             msgs.concat(doc.msgs)
           end
 

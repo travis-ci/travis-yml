@@ -211,7 +211,7 @@ describe Travis::Yml::Configs, 'conditionals' do
           include:
           - env: ONE=one
       )
-      it { should eq 1 }
+      it { should eq 0 }
       it { should have_msg [:error, :'stages.if', :invalid_condition, condition: '= kaputt'] }
     end
   end
@@ -426,7 +426,7 @@ describe Travis::Yml::Configs, 'conditionals' do
           - if: false
       )
 
-      it { expect(subject).to be_nil }
+      it { expect(subject).to eq email: [] }
       it { should have_msg [:info, :'notifications.email', :skip_notification, type: :email, number: 1, condition: 'false'] }
     end
 
@@ -490,7 +490,7 @@ describe Travis::Yml::Configs, 'conditionals' do
           - if: env(ONE) = one
       )
 
-      it { expect(subject).to be_nil } # notifications are not per job
+      it { expect(subject).to eq email: [] } # notifications are not per job
       it { should have_msg [:info, :'notifications.email', :skip_notification, type: :email, number: 1, condition: 'env(ONE) = one'] }
     end
 
@@ -504,7 +504,7 @@ describe Travis::Yml::Configs, 'conditionals' do
           - recipients: 'me@email.com'
             if: '= kaputt'
       )
-      it { expect(subject).to be_nil }
+      it { expect(subject).to eq email: [] }
       it { expect(msgs).to include [:error, :'notifications.email.if', :invalid_condition, condition: '= kaputt'] }
     end
   end

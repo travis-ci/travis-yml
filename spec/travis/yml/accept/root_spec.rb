@@ -125,7 +125,7 @@ describe Travis::Yml, 'root' do
     it { should have_msg [:warn, :root, :unknown_key, key: 'cd', value: 'foo'] }
   end
 
-  describe 'condition' do
+  describe 'condition', drop: true do
     describe 'valid' do
       yaml %(
         if: 'branch = master'

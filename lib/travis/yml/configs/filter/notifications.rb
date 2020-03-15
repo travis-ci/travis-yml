@@ -36,7 +36,7 @@ module Travis
 
             def present?(obj)
               case obj
-              when Array, Hash then !obj.empty?
+              when Hash then !obj.empty?
               else true
               end
             end

@@ -10,11 +10,13 @@ require 'support'
 Travis::Yml.metrics
 
 RSpec.configure do |c|
+  c.include Spec::Support::Acceptance
   c.include Spec::Support::Doc
   c.include Spec::Support::Hash
   c.include Spec::Support::Matchers
   c.include Spec::Support::Node
   c.include Spec::Support::Webmock
+  c.include Spec::Support::With
   c.include Spec::Support::Yaml
   c.include Base64
 

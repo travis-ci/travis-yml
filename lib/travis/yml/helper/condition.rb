@@ -18,11 +18,11 @@ module Travis
         return true unless cond
         data = merge(self.data, config.dup)
         Travis::Conditions.eval(cond, data, version: :v1)
-      rescue TypeError, ArgumentError => e
+      rescue TypeError, ArgumentError, RegexpError => e
         Raven.capture_exception(e, extra: { condition: cond, data: data }) if defined?(Raven)
-        raise InvalidCondition, e.message
-      rescue Travis::Conditions::Error, RegexpError => e
-        raise InvalidCondition, e.message
+        false
+      rescue Travis::Conditions::Error => e
+        false
       end
 
       def normalize(cond)

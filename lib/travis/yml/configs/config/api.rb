@@ -22,9 +22,9 @@ module Travis
           end
 
           def imports
-            return [] if mode == :replace
             imports = super
-            imports.any? ? imports : [travis_yml]
+            imports << travis_yml unless mode == :replace
+            imports
           end
           memoize :imports
 
@@ -33,8 +33,9 @@ module Travis
           end
 
           def mode
-            @mode ||= super || config.delete(:merge_mode) || config.delete(:mode)
+            @mode ||= super&.to_sym || config.delete('merge_mode') || config.delete('mode')
           end
+          alias merge_mode mode
 
           def to_s
             source

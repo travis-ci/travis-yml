@@ -10,7 +10,8 @@ module Travis
 
           def opts=(opts)
             @opts = opts
-            schema.opts = merge(only(opts, :defaults), schema.opts)
+            @schema = schema.dup
+            schema.opts = compact(merge(only(opts, :defaults, :strict), schema.opts))
           end
 
           def matches?(value)

@@ -17,7 +17,7 @@ describe Travis::Yml::Configs do
   let(:msgs)    { subject.msgs.to_a }
   let(:setting) { true }
 
-  let(:travis_yml) { 'import: one/one.yml' }
+  let(:travis_yml) { "import: one/one.yml\nscript: ./travis" }
   let(:one_yml)    { 'script: ./one' }
   let(:two_yml)    { 'script: ./two' }
 
@@ -61,31 +61,41 @@ describe Travis::Yml::Configs do
 
   describe 'api' do
     describe 'by default (imports .travis.yml)' do
-      let(:raw) { 'script: ./api' }
+      let(:raw) { 'script: [./api]' }
+      let(:mode) { :deep_merge_append }
 
       imports %w(
         api
         travis-ci/travis-yml:.travis.yml@ref
         travis-ci/travis-yml:one/one.yml@ref
       )
+
+      it { expect(subject.config).to eq script: %w(./api ./travis ./one) }
     end
 
-    describe 'given imports (skips .travis.yml)' do
-      let(:raw) { 'import: one/one.yml' }
+    describe 'given imports' do
+      let(:raw) { "import: one/one.yml\nscript: [./api]" }
+      let(:mode) { :deep_merge_append }
+
+      imports %w(
+        api
+        travis-ci/travis-yml:one/one.yml@ref
+        travis-ci/travis-yml:.travis.yml@ref
+      )
+
+      it { expect(subject.config).to eq script: %w(./api ./one ./travis) }
+    end
+
+    describe 'merge_mode replace (skips .travis.yml)' do
+      let(:raw) { "import: one/one.yml\nscript: [./api]" }
+      let(:mode) { :replace }
 
       imports %w(
         api
         travis-ci/travis-yml:one/one.yml@ref
       )
-    end
 
-    describe 'merge_mode replace (skips all)' do
-      let(:raw) { 'import: one/one.yml' }
-      let(:mode) { :replace }
-
-      imports %w(
-        api
-      )
+      it { expect(subject.config).to eq script: %w(./api ./one) }
     end
   end
 

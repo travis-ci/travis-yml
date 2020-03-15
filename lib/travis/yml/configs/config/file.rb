@@ -5,10 +5,15 @@ module Travis
   module Yml
     module Configs
       module Config
-        class File < Struct.new(:ctx, :parent, :import)
+        class File < Obj.new(:ctx, :parent, :import)
           include Base
 
           attr_reader :path, :ref, :raw
+
+          def initialize(ctx, parent, import)
+            import = stringify(import)
+            super
+          end
 
           def load(&block)
             super
@@ -28,7 +33,7 @@ module Travis
           end
 
           def source
-            import[:source]
+            import['source']
           end
 
           def slug
@@ -36,8 +41,9 @@ module Travis
           end
 
           def mode
-            import[:mode]&.to_sym
+            import['mode']&.to_sym
           end
+          alias merge_mode mode
 
           def to_s
             "#{repo.slug}:#{path}@#{ref}"
