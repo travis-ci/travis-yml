@@ -256,49 +256,6 @@
         "additionalProperties": false,
         "summary": "Build addons to activate"
       },
-      "allow_failures": {
-        "$id": "allow_failures",
-        "title": "Job Matrix Entries",
-        "anyOf": [
-          {
-            "type": "array",
-            "items": {
-              "$ref": "#/definitions/type/allow_failures_entry"
-            },
-            "normal": true
-          },
-          {
-            "$ref": "#/definitions/type/allow_failures_entry"
-          }
-        ]
-      },
-      "allow_failures_entry": {
-        "$id": "allow_failures_entry",
-        "title": "Job Matrix Entry",
-        "allOf": [
-          {
-            "type": "object",
-            "properties": {
-              "branch": {
-                "type": "string",
-                "deprecated": "use conditional allow_failures using :if"
-              }
-            },
-            "title": "Job Matrix Entry",
-            "see": {
-              "Jobs that are allowed to fail": "https://docs.travis-ci.com/user/customizing-the-build#jobs-that-are-allowed-to-fail",
-              "Conditionally allowing jobs to fail": "https://docs.travis-ci.com/user/conditional-builds-stages-jobs#conditionally-allowing-jobs-to-fail"
-            }
-          },
-          {
-            "$ref": "#/definitions/type/jobs_entry"
-          }
-        ],
-        "see": {
-          "Jobs that are allowed to fail": "https://docs.travis-ci.com/user/customizing-the-build#jobs-that-are-allowed-to-fail",
-          "Conditionally allowing jobs to fail": "https://docs.travis-ci.com/user/conditional-builds-stages-jobs#conditionally-allowing-jobs-to-fail"
-        }
-      },
       "arch": {
         "$id": "arch",
         "title": "Architecture",
@@ -958,15 +915,15 @@
             "type": "object",
             "properties": {
               "include": {
-                "$ref": "#/definitions/type/jobs_entries",
+                "$ref": "#/definitions/type/jobs_includes",
                 "summary": "Jobs to include to the build matrix"
               },
               "exclude": {
-                "$ref": "#/definitions/type/jobs_entries",
+                "$ref": "#/definitions/type/jobs_excludes",
                 "summary": "Attributes of jobs to exclude from the build matrix"
               },
               "allow_failures": {
-                "$ref": "#/definitions/type/allow_failures",
+                "$ref": "#/definitions/type/jobs_allow_failures",
                 "aliases": [
                   "allowed_failures"
                 ],
@@ -994,7 +951,7 @@
             }
           },
           {
-            "$ref": "#/definitions/type/jobs_entries"
+            "$ref": "#/definitions/type/jobs_includes"
           }
         ],
         "summary": "Build matrix definitions",
@@ -1004,25 +961,104 @@
         },
         "normal": true
       },
-      "jobs_entries": {
-        "$id": "jobs_entries",
-        "title": "Job Matrix Entries",
+      "jobs_allow_failure": {
+        "$id": "jobs_allow_failure",
+        "title": "Job Matrix Allow Failure",
+        "allOf": [
+          {
+            "type": "object",
+            "properties": {
+              "language": {
+                "$ref": "#/definitions/type/language"
+              },
+              "os": {
+                "$ref": "#/definitions/type/os"
+              },
+              "dist": {
+                "$ref": "#/definitions/type/dist"
+              },
+              "arch": {
+                "$ref": "#/definitions/type/arch"
+              },
+              "osx_image": {
+                "type": "string",
+                "summary": "OSX image to use for the build environment",
+                "only": {
+                  "os": [
+                    "osx"
+                  ]
+                }
+              },
+              "sudo": {
+                "$ref": "#/definitions/type/sudo"
+              },
+              "env": {
+                "$ref": "#/definitions/type/env_vars"
+              },
+              "compiler": {
+                "type": "string",
+                "example": "gcc",
+                "only": {
+                  "language": [
+                    "c",
+                    "cpp"
+                  ]
+                }
+              },
+              "branches": {
+                "$ref": "#/definitions/type/branches"
+              },
+              "name": {
+                "type": "string",
+                "flags": [
+                  "unique"
+                ]
+              },
+              "stage": {
+                "type": "string"
+              },
+              "branch": {
+                "type": "string",
+                "deprecated": "use conditional allow_failures using :if"
+              }
+            },
+            "title": "Job Matrix Allow Failure",
+            "see": {
+              "Jobs that are allowed to fail": "https://docs.travis-ci.com/user/customizing-the-build#jobs-that-are-allowed-to-fail",
+              "Conditionally allowing jobs to fail": "https://docs.travis-ci.com/user/conditional-builds-stages-jobs#conditionally-allowing-jobs-to-fail"
+            }
+          },
+          {
+            "$ref": "#/definitions/type/support"
+          },
+          {
+            "$ref": "#/definitions/type/job"
+          }
+        ],
+        "see": {
+          "Jobs that are allowed to fail": "https://docs.travis-ci.com/user/customizing-the-build#jobs-that-are-allowed-to-fail",
+          "Conditionally allowing jobs to fail": "https://docs.travis-ci.com/user/conditional-builds-stages-jobs#conditionally-allowing-jobs-to-fail"
+        }
+      },
+      "jobs_allow_failures": {
+        "$id": "jobs_allow_failures",
+        "title": "Job Matrix Allow Failures",
         "anyOf": [
           {
             "type": "array",
             "items": {
-              "$ref": "#/definitions/type/jobs_entry"
+              "$ref": "#/definitions/type/jobs_allow_failure"
             },
             "normal": true
           },
           {
-            "$ref": "#/definitions/type/jobs_entry"
+            "$ref": "#/definitions/type/jobs_allow_failure"
           }
         ]
       },
-      "jobs_entry": {
-        "$id": "jobs_entry",
-        "title": "Job Matrix Entry",
+      "jobs_exclude": {
+        "$id": "jobs_exclude",
+        "title": "Job Matrix Exclude",
         "allOf": [
           {
             "type": "object",
@@ -1077,7 +1113,90 @@
                 "type": "string"
               }
             },
-            "title": "Job Matrix Entry",
+            "title": "Job Matrix Exclude"
+          },
+          {
+            "$ref": "#/definitions/type/support"
+          },
+          {
+            "$ref": "#/definitions/type/job"
+          }
+        ]
+      },
+      "jobs_excludes": {
+        "$id": "jobs_excludes",
+        "title": "Job Matrix Excludes",
+        "anyOf": [
+          {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/type/jobs_exclude"
+            },
+            "normal": true
+          },
+          {
+            "$ref": "#/definitions/type/jobs_exclude"
+          }
+        ]
+      },
+      "jobs_include": {
+        "$id": "jobs_include",
+        "title": "Job Matrix Includes",
+        "allOf": [
+          {
+            "type": "object",
+            "properties": {
+              "language": {
+                "$ref": "#/definitions/type/language"
+              },
+              "os": {
+                "$ref": "#/definitions/type/os"
+              },
+              "dist": {
+                "$ref": "#/definitions/type/dist"
+              },
+              "arch": {
+                "$ref": "#/definitions/type/arch"
+              },
+              "osx_image": {
+                "type": "string",
+                "summary": "OSX image to use for the build environment",
+                "only": {
+                  "os": [
+                    "osx"
+                  ]
+                }
+              },
+              "sudo": {
+                "$ref": "#/definitions/type/sudo"
+              },
+              "env": {
+                "$ref": "#/definitions/type/env_vars"
+              },
+              "compiler": {
+                "type": "string",
+                "example": "gcc",
+                "only": {
+                  "language": [
+                    "c",
+                    "cpp"
+                  ]
+                }
+              },
+              "branches": {
+                "$ref": "#/definitions/type/branches"
+              },
+              "name": {
+                "type": "string",
+                "flags": [
+                  "unique"
+                ]
+              },
+              "stage": {
+                "type": "string"
+              }
+            },
+            "title": "Job Matrix Includes",
             "aliases": [
               "jobs"
             ]
@@ -1087,6 +1206,22 @@
           },
           {
             "$ref": "#/definitions/type/job"
+          }
+        ]
+      },
+      "jobs_includes": {
+        "$id": "jobs_includes",
+        "title": "Job Matrix Includes",
+        "anyOf": [
+          {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/type/jobs_include"
+            },
+            "normal": true
+          },
+          {
+            "$ref": "#/definitions/type/jobs_include"
           }
         ]
       },

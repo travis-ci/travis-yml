@@ -18,33 +18,47 @@ module Travis
             aliases :matrix
             prefix :include
 
-            map :include,        to: :jobs_entries, summary: 'Jobs to include to the build matrix'
-            map :exclude,        to: :jobs_entries, summary: 'Attributes of jobs to exclude from the build matrix'
-            map :allow_failures, to: :allow_failures, alias: :allowed_failures, summary: 'Attributes of jobs that are allowed to fail'
+            map :include,        to: :jobs_includes, summary: 'Jobs to include to the build matrix'
+            map :exclude,        to: :jobs_excludes, summary: 'Attributes of jobs to exclude from the build matrix'
+            map :allow_failures, to: :jobs_allow_failures, alias: :allowed_failures, summary: 'Attributes of jobs that are allowed to fail'
             map :fast_finish,    to: :bool, alias: :fast_failure, summary: 'Allow the build to fail fast'
 
             export
           end
         end
 
-        class JobsEntries < Type::Seq
-          register :jobs_entries
+        class JobsIncludes < Type::Seq
+          register :jobs_includes
 
           def define
-            title 'Job Matrix Entries'
-            type :jobs_entry
+            title 'Job Matrix Includes'
+            type :jobs_include
             export
           end
         end
 
-        class JobsEntry < Type::Map
-          register :jobs_entry
+        class JobsExcludes < Type::Seq
+          register :jobs_excludes
 
           def define
-            title 'Job Matrix Entry'
-            strict false
-            aliases :jobs
+            title 'Job Matrix Excludes'
+            type :jobs_exclude
+            export
+          end
+        end
 
+        class JobsAllowFailures < Type::Seq
+          register :jobs_allow_failures
+
+          def define
+            title 'Job Matrix Allow Failures'
+            type :jobs_allow_failure
+            export
+          end
+        end
+
+        class BaseEntry < Type::Map
+          def define
             map :language
             map :os
             map :dist
@@ -58,39 +72,47 @@ module Travis
             map :stage,    to: :str
 
             includes :support, :job
+          end
+        end
+
+        class JobsInclude < BaseEntry
+          register :jobs_include
+
+          def define
+            title 'Job Matrix Includes'
+            strict false
+            aliases :jobs
+
+            super
 
             export
           end
         end
 
-        # TODO deprecate allow_failures.branch in favor of if. once support for
-        # this has been be removed we can remove these two classes, and use
-        # JobsEntries on :allow_failures instead.
-
-        class AllowFailures < Type::Seq
-          register :allow_failures
+        class JobsExclude < BaseEntry
+          register :jobs_exclude
 
           def define
-            title 'Job Matrix Entries'
-            type :allow_failures_entry
+            title 'Job Matrix Exclude'
+            strict false
+            super
             export
           end
         end
 
-        class AllowFailuresEntry < Type::Map
-          register :allow_failures_entry
+        class JobsAllowFailure < BaseEntry
+          register :jobs_allow_failure
 
           def define
-            title 'Job Matrix Entry'
+            title 'Job Matrix Allow Failure'
 
             see 'Jobs that are allowed to fail': 'https://docs.travis-ci.com/user/customizing-the-build#jobs-that-are-allowed-to-fail',
                 'Conditionally allowing jobs to fail': 'https://docs.travis-ci.com/user/conditional-builds-stages-jobs#conditionally-allowing-jobs-to-fail'
 
             strict false
 
+            super
             map :branch, to: :str, deprecated: 'use conditional allow_failures using :if'
-
-            includes :jobs_entry
 
             export
           end

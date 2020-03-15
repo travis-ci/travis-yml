@@ -90,8 +90,6 @@ describe Travis::Yml::Schema::Def::Root do
     definitions = {
       type: %i(
         addons
-        allow_failures
-        allow_failures_entry
         arch
         archs
         branches
@@ -111,8 +109,12 @@ describe Travis::Yml::Schema::Def::Root do
         jdks
         job
         jobs
-        jobs_entries
-        jobs_entry
+        jobs_allow_failure
+        jobs_allow_failures
+        jobs_include
+        jobs_includes
+        jobs_exclude
+        jobs_excludes
         language
         languages
         notifications
