@@ -32,7 +32,7 @@ module Travis
                   map type, to: :bool, summary: "Use the #{type} caching strategy"
                 end
 
-                map :timeout,     to: :num,  summary: 'Timeout for the cache tooling', default: 3
+                map :timeout,     to: :num,  summary: 'Timeout for the cache tooling'
                 map :edge,        to: :bool, summary: 'Use an edge version of the cache tooling'
                 map :branch,      to: :str
 
