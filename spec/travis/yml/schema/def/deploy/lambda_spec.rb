@@ -104,9 +104,6 @@ describe Travis::Yml::Schema::Def::Deploy::Lambda do
                   'Active',
                   'PassThrough'
                 ],
-                defaults: [
-                  value: 'PassThrough'
-                ]
               },
               publish: {
                 type: :boolean

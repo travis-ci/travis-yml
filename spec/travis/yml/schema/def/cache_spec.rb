@@ -62,11 +62,6 @@ describe Travis::Yml::Schema::Def::Cache do
             timeout: {
               type: :number,
               summary: kind_of(String),
-              defaults: [
-                {
-                  value: 3
-                }
-              ]
             },
             branch: {
               type: :string
