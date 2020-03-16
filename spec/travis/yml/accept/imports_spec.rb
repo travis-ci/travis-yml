@@ -11,7 +11,7 @@ describe Travis::Yml do
       end
 
       with context: :configs do
-        it { should serialize_to empty }
+        it { should serialize_to import: [source: 'not-a-ref'] }
         it { should have_msg [:error, :import, :invalid_ref, ref: 'not-a-ref'] }
       end
     end

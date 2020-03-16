@@ -34,7 +34,7 @@ module Travis
         # use the msgs produced or mark defaults added to the config in some
         # other way. see https://travisci.slack.com/archives/C5E02QW64/p1582052445034800
 
-        DROP = %i(import merge_mode)
+        DROP = %i(merge_mode)
 
         def load
           fetch

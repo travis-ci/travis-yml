@@ -70,7 +70,12 @@ describe Travis::Yml::Configs do
         travis-ci/travis-yml:one/one.yml@ref
       )
 
-      it { expect(subject.config).to eq script: %w(./api ./travis ./one) }
+      it do
+        should serialize_to(
+          import: [source: 'one/one.yml'],
+          script: %w(./api ./travis ./one)
+        )
+      end
     end
 
     describe 'given imports' do
@@ -83,7 +88,12 @@ describe Travis::Yml::Configs do
         travis-ci/travis-yml:.travis.yml@ref
       )
 
-      it { expect(subject.config).to eq script: %w(./api ./one ./travis) }
+      it do
+        should serialize_to(
+          import: [{ source: 'one/one.yml' }, { source: 'one/one.yml' }],
+          script: %w(./api ./one ./travis)
+        )
+      end
     end
 
     describe 'merge_mode replace (skips .travis.yml)' do
@@ -95,7 +105,12 @@ describe Travis::Yml::Configs do
         travis-ci/travis-yml:one/one.yml@ref
       )
 
-      it { expect(subject.config).to eq script: %w(./api ./one) }
+      it do
+        should serialize_to(
+          import: [source: 'one/one.yml'],
+          script: %w(./api ./one)
+        )
+      end
     end
   end
 
