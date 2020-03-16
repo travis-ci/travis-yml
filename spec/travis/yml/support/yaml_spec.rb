@@ -330,7 +330,7 @@ describe Yaml do
     )
     it { should eq ['one'] }
     it { should be_a Seq }
-    it { should have_attributes opts: { merge: [:append] } }
+    it { should have_attributes merge_mode: :append }
   end
 
   describe 'merge modes (seq, 2)' do
@@ -340,7 +340,7 @@ describe Yaml do
     )
     it { should eq 'foo' => ['one'] }
     it { expect(subject['foo']).to be_a Seq }
-    it { expect(subject['foo']).to have_attributes opts: { merge: [:append] } }
+    it { expect(subject['foo']).to have_attributes merge_mode: :append }
   end
 
   describe 'duplicate keys' do

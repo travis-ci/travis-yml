@@ -29,7 +29,7 @@ class Map < Hash
   end
 
   Hash.instance_methods.each do |name|
-    skip = %i(object_id opts anchors warnings)
+    skip = %i(object_id replace opts anchors warnings)
     next if skip.include?(name)
     define_method(name) do |*args, &block|
       obj = super(*args, &block)
