@@ -32,6 +32,10 @@ module Travis
             @config ||= {}
           end
 
+          def part
+            Parts::Part.new(raw, source, mode)
+          end
+
           def load(&block)
             @on_loaded = block if root?
           end

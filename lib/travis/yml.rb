@@ -30,13 +30,14 @@ module Travis
     # tests don't break elsewhere just because a default has changed here).
 
     OPTS = {
-      alert:     true,   # alert on secures that accept a string
-      defaults:  true,   # add defaults to required keys
-      empty:     false,  # warn on empty keys
-      fix:       true,   # try fixing unknown keys and values
-      line:      true,   # add line numbers to messages
-      support:   false,  # warn about features unsupported on the given language, os etc
-      drop:      false,  # drop unknown keys and values, invalid conditions, and values missing required keys
+      alert:    true,   # alert on secures that accept a string
+      defaults: true,   # add defaults to required keys
+      empty:    false,  # warn on empty keys
+      fix:      true,   # try fixing unknown keys and values
+      line:     true,   # add line numbers to messages
+      support:  false,  # warn about features unsupported on the given language, os etc
+      drop:     false,  # drop unknown keys and values, invalid conditions, and values missing required keys
+      merge_normalized: false # whether to normalize configs before merging
     }
 
     # These are meant as examples. Clients will want to determine their own

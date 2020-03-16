@@ -90,7 +90,8 @@ module Travis
           time :fetch
 
           def merge
-            doc = Yml.apply(Yml::Parts::Merge.new(configs).apply.to_h, opts)
+            doc = Yml.apply(Yml::Parts::Merge.new(configs).apply.to_h, opts) if opts[:merge_normalized]
+            doc ||= Yml.load(configs.map(&:part), opts)
             @config = except(doc.serialize, *DROP)
             msgs.concat(doc.msgs)
           end

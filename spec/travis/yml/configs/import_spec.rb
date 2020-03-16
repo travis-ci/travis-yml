@@ -6,11 +6,10 @@ describe Travis::Yml::Configs do
   let(:imports) { true }
   let(:repo)    { { github_id: 1, slug: 'travis-ci/travis-yml', private: private, default_branch: 'master', token: repo_token, private_key: private_key, allow_config_imports: imports } }
   let(:ref)     { 'ref' }
-  let(:raw)     { nil }
+  let(:api)     { nil }
   let(:data)    { nil }
   let(:mode)    { nil }
-  let(:opts)    { { token: user_token, data: data } }
-  let(:configs) { described_class.new(repo, ref, raw, mode, data, opts) }
+  let(:configs) { described_class.new(repo, ref, api, mode, data, opts.merge(token: user_token, data: data)) }
   let(:config)  { subject.config }
   let(:jobs)    { subject.jobs }
   let(:stages)  { subject.stages }
@@ -61,7 +60,7 @@ describe Travis::Yml::Configs do
 
   describe 'api' do
     describe 'by default (imports .travis.yml)' do
-      let(:raw) { 'script: [./api]' }
+      let(:api) { 'script: ./api' }
       let(:mode) { :deep_merge_append }
 
       imports %w(
@@ -70,16 +69,27 @@ describe Travis::Yml::Configs do
         travis-ci/travis-yml:one/one.yml@ref
       )
 
-      it do
-        should serialize_to(
-          import: [source: 'one/one.yml'],
-          script: %w(./api ./travis ./one)
-        )
+      describe 'merge_normalized turned off' do
+        it do
+          should serialize_to(
+            import: [source: 'one/one.yml'],
+            script: %w(./api)
+          )
+        end
+      end
+
+      describe 'merge_normalized turned on', merge_normalized: true do
+        it do
+          should serialize_to(
+            import: [source: 'one/one.yml'],
+            script: %w(./api ./travis ./one)
+          )
+        end
       end
     end
 
     describe 'given imports' do
-      let(:raw) { "import: one/one.yml\nscript: [./api]" }
+      let(:api) { "import: one/one.yml\nscript: ./api" }
       let(:mode) { :deep_merge_append }
 
       imports %w(
@@ -88,16 +98,27 @@ describe Travis::Yml::Configs do
         travis-ci/travis-yml:.travis.yml@ref
       )
 
-      it do
-        should serialize_to(
-          import: [{ source: 'one/one.yml' }, { source: 'one/one.yml' }],
-          script: %w(./api ./one ./travis)
-        )
+      describe 'merge_normalized turned off' do
+        it do
+          should serialize_to(
+            import: [{ source: 'one/one.yml' }],
+            script: %w(./api)
+          )
+        end
+      end
+
+      describe 'merge_normalized turned on', merge_normalized: true do
+        it do
+          should serialize_to(
+            import: [{ source: 'one/one.yml' }, { source: 'one/one.yml' }],
+            script: %w(./api ./one ./travis)
+          )
+        end
       end
     end
 
     describe 'merge_mode replace (skips .travis.yml)' do
-      let(:raw) { "import: one/one.yml\nscript: [./api]" }
+      let(:api) { "import: one/one.yml\nscript: ./api" }
       let(:mode) { :replace }
 
       imports %w(
@@ -105,11 +126,22 @@ describe Travis::Yml::Configs do
         travis-ci/travis-yml:one/one.yml@ref
       )
 
-      it do
-        should serialize_to(
-          import: [source: 'one/one.yml'],
-          script: %w(./api ./one)
-        )
+      describe 'merge_normalized turned off' do
+        it do
+          should serialize_to(
+            import: [source: 'one/one.yml'],
+            script: %w(./api)
+          )
+        end
+      end
+
+      describe 'merge_normalized turned on', merge_normalized: true do
+        it do
+          should serialize_to(
+            import: [source: 'one/one.yml'],
+            script: %w(./api ./one)
+          )
+        end
       end
     end
   end
