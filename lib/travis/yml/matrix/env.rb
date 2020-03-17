@@ -37,7 +37,9 @@ module Travis
 
         def global_env
           env = config[:env] && config[:env].is_a?(Hash) && config[:env][:global]
-          env || config[:global_env] # BC Gatekeeper matrix expansion
+          env = env || config[:global_env] # BC Gatekeeper matrix expansion
+          env = [env] if env.is_a?(String)
+          env
         end
 
         def first_env
