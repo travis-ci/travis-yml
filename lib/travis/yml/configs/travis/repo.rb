@@ -47,7 +47,7 @@ module Travis
 
             def allow_config_imports?(attrs)
               settings = attrs.dig('user_settings', 'settings') || []
-              setting = settings.detect { |setting| setting['name'] == 'config_imports' }
+              setting = settings.detect { |setting| setting['name'] == 'allow_config_imports' }
               setting ? setting['value'] : false
             end
 

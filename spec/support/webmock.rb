@@ -28,7 +28,7 @@ module Spec
         body = data[:body] && JSON.dump(data[:body].merge(
           slug: slug,
           default_branch: { name: data[:body][:default_branch] },
-          user_settings: { settings: data[:body].delete(:config_imports) ? [name: 'config_imports', value: true] : [] }
+          user_settings: { settings: data[:body].delete(:config_imports) ? [name: 'allow_config_imports', value: true] : [] }
         ))
         status = data[:status] || 200
         auth = 'internal yml:token' if data[:internal]
