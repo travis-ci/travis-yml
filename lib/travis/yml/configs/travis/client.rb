@@ -49,7 +49,7 @@ module Travis
           end
 
           def error(method, path, e)
-            msg = e.response[:body]
+            msg = e.response[:body] if e.response
             msg = Oj.parse(msg)['error_message'] rescue msg
             Error.new(method, path, e.response[:status], msg)
           end
