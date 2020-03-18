@@ -50,6 +50,7 @@ module Travis
         # moves it back to env, using _that_ config internally for filtering
         # stages and POSTing it to /expand, which filters jobs.
         config[:env] = super(*config[:env].values_at(:global, :jobs, :matrix).flatten.compact) if config[:env].is_a?(Hash)
+        config[:env] = [config[:env]] if config[:env].is_a?(Hash) || config[:env].is_a?(String)
         super
       end
 

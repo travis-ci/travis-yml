@@ -16,7 +16,6 @@ module Travis
             def process(obj)
               key.encrypt(keys.inject(obj) { |obj, key| key.decrypt(obj) })
             rescue OpenSSL::OpenSSLError => e
-              p e.message
               obj
             end
 

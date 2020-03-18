@@ -171,6 +171,25 @@ describe Travis::Yml::Configs, 'conditionals' do
       it { should_not have_msg }
     end
 
+    describe 'matching env (given as repo setting and env.global)' do
+      yaml %(
+        env:
+         global:
+           - ONE=one
+
+        stages:
+         - name: deploy
+           if: env(SETTING)
+
+        jobs:
+          include:
+            - stage: deploy
+      )
+
+      it { should eq 1 }
+      it { should_not have_msg }
+    end
+
     describe 'matching env (given as env.jobs, BC for Gatekeeper build config normalization)' do
       yaml %(
         env:
@@ -181,8 +200,6 @@ describe Travis::Yml::Configs, 'conditionals' do
             if: env(one) = one
       )
 
-      # it { should eq 0 }
-      # it { should have_msg [:info, :stages, :skip_stage, number: 1, condition: 'env(one) = one'] }
       it { should eq 1 }
       it { should_not have_msg }
     end
