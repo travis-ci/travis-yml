@@ -119,6 +119,7 @@ module Travis
           return true if Condition.new(cond, job, data).accept?
           msgs << [:info, key, :"skip_#{type}", number: ix + 1, condition: cond]
           false
+        # do we actually ever get here?
         rescue InvalidCondition => e
           Raven.capture_exception(e, extra: { type: type, condition: cond, data: data }) if defined?(Raven)
           false

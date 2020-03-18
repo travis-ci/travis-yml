@@ -19,7 +19,7 @@ module Travis
         data = merge(self.data, config.dup)
         Travis::Conditions.eval(cond, data, version: :v1)
       rescue TypeError, ArgumentError, RegexpError => e
-        Raven.capture_exception(e, extra: { condition: cond, data: data }) if defined?(Raven)
+        # Raven.capture_exception(e, extra: { condition: cond, data: data }) if defined?(Raven)
         false
       rescue Travis::Conditions::Error => e
         false
