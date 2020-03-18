@@ -196,7 +196,7 @@ describe Travis::Yml do
               if: '?!'
         )
         it { should serialize_to notifications: { campfire: [] } }
-        it { should have_msg [:error, :'notifications.campfire.if', :invalid_condition, condition: '?!'] }
+        it { should have_msg [:error, :'notifications.campfire.if', :invalid_condition, condition: '?!', message: nil] }
       end
 
       describe 'given a seq of strs' do

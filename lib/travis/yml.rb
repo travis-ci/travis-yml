@@ -73,7 +73,7 @@ module Travis
       invalid_type:       'dropping unexpected %{actual}, expected %{expected} (%{value})',
       invalid_secure:     'invalid value on secure string: %{value}',
       invalid_format:     'dropping invalid format %{value}',
-      invalid_condition:  'invalid condition: %{condition}',
+      invalid_condition:  'invalid condition: %{condition} (%{message})',
       invalid_env_var:    'invalid env var: %{var}',
       invalid_ref:        'invalid import reference: %s',
       skip_allow_failure: 'skipping jobs allow failure rule #%{number} because its condition does not match: %{condition}',
@@ -143,6 +143,7 @@ module Travis
         msg = MSGS[code] || raise(UnknownMessage, 'Unknown message %p' % code)
         msg = msg % args if args
         msg = '[%s] on %s: %s' % [level, key, msg]
+        msg = msg.sub('()', '')
         msg
       rescue KeyError => e
         msg = "unable to generate message (level: %s, key: %s, code: %s, args: %s)" % [level, key, code, args]

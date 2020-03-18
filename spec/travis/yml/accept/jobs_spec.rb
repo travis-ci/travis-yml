@@ -381,7 +381,7 @@ describe Travis::Yml do
                 if: '= foo'
           )
           it { should serialize_to jobs: { include: [] } }
-          it { should have_msg [:error, :'jobs.include.if', :invalid_condition, condition: '= foo'] }
+          it { should have_msg [:error, :'jobs.include.if', :invalid_condition, condition: '= foo', message: nil] }
         end
       end
 
@@ -548,7 +548,7 @@ describe Travis::Yml do
                   if: '= foo'
             )
             it { should serialize_to jobs: { key => [] } }
-            it { should have_msg [:error, :"jobs.#{key}.if", :invalid_condition, condition: '= foo'] }
+            it { should have_msg [:error, :"jobs.#{key}.if", :invalid_condition, condition: '= foo', message: nil] }
           end
         end
 

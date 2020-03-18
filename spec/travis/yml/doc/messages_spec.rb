@@ -271,7 +271,7 @@ describe Travis::Yml::Doc, 'messages', alert: true, defaults: true, empty: true,
   describe 'invalid_condition' do
     let(:schema) { { type: :object, properties: { if: { type: :string } } } }
     yaml 'if: not'
-    it { should have_msg [:error, :if, :invalid_condition, condition: 'not', line: 0] }
+    it { should have_msg [:error, :if, :invalid_condition, condition: 'not', message: nil, line: 0] }
   end
 
   describe 'invalid_env_var' do

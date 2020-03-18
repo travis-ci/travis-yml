@@ -108,7 +108,7 @@ describe Travis::Yml::Configs, 'conditionals' do
               if: '= kaputt'
       )
       it { should eq 1 }
-      it { should have_msg [:error, :'jobs.include.if', :invalid_condition, condition: '= kaputt'] }
+      it { should have_msg [:error, :'jobs.include.if', :invalid_condition, condition: '= kaputt', message: nil] }
     end
   end
 
@@ -229,7 +229,7 @@ describe Travis::Yml::Configs, 'conditionals' do
           - env: ONE=one
       )
       it { should eq 0 }
-      it { should have_msg [:error, :'stages.if', :invalid_condition, condition: '= kaputt'] }
+      it { should have_msg [:error, :'stages.if', :invalid_condition, condition: '= kaputt', message: nil] }
     end
   end
 
@@ -329,7 +329,7 @@ describe Travis::Yml::Configs, 'conditionals' do
             if: '= kaputt'
       )
       it { should eq 1 }
-      it { should have_msg [:error, :'jobs.exclude.if', :invalid_condition, condition: '= kaputt'] }
+      it { should have_msg [:error, :'jobs.exclude.if', :invalid_condition, condition: '= kaputt', message: nil] }
     end
   end
 
@@ -429,7 +429,7 @@ describe Travis::Yml::Configs, 'conditionals' do
           - if: '= kaputt'
       )
       it { should eq [false] }
-      it { should have_msg [:error, :'jobs.allow_failures.if', :invalid_condition, condition: '= kaputt'] }
+      it { should have_msg [:error, :'jobs.allow_failures.if', :invalid_condition, condition: '= kaputt', message: nil] }
     end
   end
 
@@ -522,7 +522,7 @@ describe Travis::Yml::Configs, 'conditionals' do
             if: '= kaputt'
       )
       it { expect(subject).to eq email: [] }
-      it { expect(msgs).to include [:error, :'notifications.email.if', :invalid_condition, condition: '= kaputt'] }
+      it { expect(msgs).to include [:error, :'notifications.email.if', :invalid_condition, condition: '= kaputt', message: nil] }
     end
   end
 end

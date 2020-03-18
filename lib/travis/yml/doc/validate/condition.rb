@@ -35,14 +35,15 @@ module Travis
               Conditions.eval(condition.value.to_s, data, version: version)
               value
             rescue Conditions::Error => e
-              msg = version == :v1 ? e.message : 'unkonwn error'
-              invalid_condition(msg)
+              invalid_condition(e)
               drop? ? blank : value
             end
 
-            def invalid_condition(msg)
-              # will have to improve parse error messages
-              condition.error :invalid_condition, condition: condition.value #, message: msg
+            def invalid_condition(e)
+              # improve parse error messages
+              msg = e.message if version == :v1
+              msg = nil if msg.to_s =~ /^(Could not parse|expected)/
+              condition.error :invalid_condition, condition: condition.serialize, message: msg
             end
 
             def version

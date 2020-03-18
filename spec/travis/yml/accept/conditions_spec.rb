@@ -16,7 +16,7 @@ describe Travis::Yml do
             conditions: v0
             if: true
           )
-          it { should have_msg [:error, :if, :invalid_condition, condition: 'true'] }
+          it { should have_msg [:error, :if, :invalid_condition, condition: 'true', message: nil] }
         end
 
         describe 'true (str)' do
@@ -24,7 +24,7 @@ describe Travis::Yml do
             conditions: v0
             if: 'true'
           )
-          it { should have_msg [:error, :if, :invalid_condition, condition: 'true'] }
+          it { should have_msg [:error, :if, :invalid_condition, condition: 'true', message: nil] }
         end
       end
 
@@ -78,7 +78,15 @@ describe Travis::Yml do
             if: '= foo'
           )
           it { should serialize_to empty }
-          it { should have_msg [:error, :if, :invalid_condition, condition: '= foo'] }
+          it { should have_msg [:error, :if, :invalid_condition, condition: '= foo', message: nil] }
+        end
+
+        describe '$FOO=foo' do
+          yaml %(
+            if: '$FOO=foo'
+          )
+          it { should serialize_to empty }
+          it { should have_msg [:error, :if, :invalid_condition, condition: '$FOO=foo', message: 'Strings cannot start with a dollar (shell code does not work). This can be bypassed by quoting the string.'] }
         end
       end
 
@@ -104,7 +112,7 @@ describe Travis::Yml do
             if: '= foo'
           )
           it { should serialize_to empty }
-          it { should have_msg [:error, :if, :invalid_condition, condition: '= foo'] }
+          it { should have_msg [:error, :if, :invalid_condition, condition: '= foo', message: nil] }
         end
       end
     end
@@ -139,7 +147,7 @@ describe Travis::Yml do
               - if: foo !~ /[z-a]/
         )
         it { should serialize_to jobs: { include: [] } }
-        it { should have_msg [:error, :'jobs.include.if', :invalid_condition, condition: 'foo !~ /[z-a]/'] }
+        it { should have_msg [:error, :'jobs.include.if', :invalid_condition, condition: 'foo !~ /[z-a]/', message: 'Invalid regular expression: /[z-a]/'] }
       end
     end
   end

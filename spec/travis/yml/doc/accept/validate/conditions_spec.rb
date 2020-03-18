@@ -11,7 +11,7 @@ describe Travis::Yml, 'conditions', drop: true, line: true do
     describe 'given an invalid condition' do
       yaml "\nif: and true"
       it { should serialize_to empty }
-      it { should have_msg [:error, :if, :invalid_condition, condition: 'and true', line: 1] }
+      it { should have_msg [:error, :if, :invalid_condition, condition: 'and true', message: nil, line: 1] }
     end
   end
 end

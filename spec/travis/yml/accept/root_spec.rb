@@ -139,7 +139,7 @@ describe Travis::Yml, 'root' do
         if: '= foo'
       )
       it { should serialize_to empty }
-      it { should have_msg [:error, :if, :invalid_condition, condition: '= foo'] }
+      it { should have_msg [:error, :if, :invalid_condition, condition: '= foo', message: nil] }
     end
   end
 
