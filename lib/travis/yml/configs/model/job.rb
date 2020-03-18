@@ -8,7 +8,7 @@ module Travis
           end
 
           def stage
-            attrs[:stage]
+            attrs[:stage] if attrs[:stage].is_a?(String)
           end
 
           def stage=(stage)

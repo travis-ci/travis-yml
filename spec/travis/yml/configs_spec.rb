@@ -302,6 +302,17 @@ describe Travis::Yml::Configs do
     it { expect(config).to eq env: { global: [ONE: 'one'] }, jobs: { include: [{ name: 'one' }, { name: 'two' }] } }
   end
 
+  describe 'invalid stage section' do
+    let(:data) { { branch: 'master' } }
+
+    yaml %(
+      stage:
+      - name: one
+    )
+
+    it { expect { jobs }.to_not raise_error }
+  end
+
   describe 'github api errors' do
     yaml 'import: one/one.yml'
 
