@@ -39,7 +39,7 @@ module Travis
           def parse
             Yaml.load(part.str) || Map.new
           rescue Psych::SyntaxError => e
-            raise SyntaxError, e.message
+            raise ParseError, e.message
           end
 
           def invalid_format

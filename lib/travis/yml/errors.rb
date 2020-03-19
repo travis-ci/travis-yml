@@ -19,7 +19,7 @@ module Travis
 
     # Errors relating to user input
     class InputError < Error; def internal?; false end; end
-    class SyntaxError < InputError; end
+    class ParseError < InputError; end
     class InvalidConfigFormat < InputError; end
     class UnexpectedParentType < InputError; end
     class UnexpectedValue < InputError; end

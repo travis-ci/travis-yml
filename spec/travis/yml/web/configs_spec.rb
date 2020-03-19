@@ -84,13 +84,13 @@ describe Travis::Yml::Web::App, 'POST /configs' do
     let(:body) { symbolize(JSON.parse(last_response.body)) }
     before { post '/configs', Oj.generate(data), defaults: true }
 
-    describe 'syntax error' do
+    describe 'parse error' do
       let(:travis_yml) { '{' }
       it { expect(last_response.status).to eq 400 }
       it do
         expect(body).to eq(
           error: {
-            type: 'syntax_error',
+            type: 'parse_error',
             source: 'travis-ci/travis-yml:.travis.yml@ref',
             message: '(<unknown>): did not find expected node content while parsing a flow node at line 2 column 1 (source: travis-ci/travis-yml:.travis.yml@ref)'
           }

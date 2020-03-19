@@ -104,8 +104,8 @@ describe Travis::Yml::Web::App do
         expect(status).to eq 400
       end
 
-      it 'returns syntax error' do
-        expect(body['error']['type']).to eq 'syntax_error'
+      it 'returns parse error' do
+        expect(body['error']['type']).to eq 'parse_error'
         expect(body['error']['message']).to match 'did not find expected alphabetic or numeric character while scanning an alias'
       end
     end
