@@ -12,20 +12,19 @@ module Travis
       end
 
       def each(&block)
-        msgs.each(&block)
+        to_a.each(&block)
       end
 
       def to_a
-        msgs
+        msgs.uniq
       end
 
       def concat(other)
         msgs.concat(other.to_a)
-        msgs.uniq!
       end
 
       def messages
-        msgs.map do |level, key, code, args|
+        to_a.map do |level, key, code, args|
           message(level, key, code, args || {})
         end
       end
@@ -43,7 +42,7 @@ module Travis
       end
 
       def full_messages
-        msgs.map do |msg|
+        to_a.map do |msg|
           Yml.msg(msg)
         end
       end
