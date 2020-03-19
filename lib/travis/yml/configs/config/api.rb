@@ -33,7 +33,7 @@ module Travis
           end
 
           def mode
-            @mode ||= super&.to_sym || config.delete('merge_mode') || config.delete('mode')
+            @mode ||= super&.to_s&.to_sym || config.delete('merge_mode') || config.delete('mode')
           end
           alias merge_mode mode
 

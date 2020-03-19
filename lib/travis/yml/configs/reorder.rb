@@ -6,16 +6,22 @@ module Travis
       class Reorder < Struct.new(:stages, :jobs)
         include Memoize
 
+        # Order jobs by:
+        #
+        #   * their stage number
+        #   * their allow_failure status
+        #   * their original order
+
         def apply
-          jobs.sort_by { |job| order(job) }
+          jobs.sort_by.with_index { |job, ix| order(job, ix) }
         end
 
-        def order(job)
+        def order(job, index)
           ix = []
           ix << names.index(job[:stage].to_s.downcase)
-          ix << job[:allow_failure]
-          ix << jobs.index(job)
-          ix.map { |ix| ix.to_s.rjust(5, '0') }.join('.')
+          ix << (job[:allow_failure] ? 1 : 0)
+          ix << index
+          ix.map { |ix| ix.to_s.rjust(5) }.join
         end
 
         def names

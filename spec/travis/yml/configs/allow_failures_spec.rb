@@ -1,10 +1,12 @@
-describe Travis::Yml::Configs::AllowFailures do
-  let(:config) { Travis::Yml.load(yaml).serialize }
-  let(:jobs) { Travis::Yml.matrix(config).jobs }
-  let(:data) { {} }
-  let(:obj)  { described_class.new(config, jobs, data) }
+describe Travis::Yml::Configs, 'allow_failures' do
+  let(:repo)    { { github_id: 1, slug: 'travis-ci/travis-yml', private: false, default_branch: 'master', token: 'repo-token', private_key: 'key', allow_config_imports: true } }
+  let(:data)    { {} }
+  let(:configs) { described_class.new(repo, 'ref', nil, nil, data, {}) }
 
-  subject { obj.apply }
+  before { stub_repo(repo[:slug], token: 'user-token') } # authorization
+  before { stub_content(repo[:github_id], '.travis.yml', yaml) }
+
+  subject { configs.tap(&:load).jobs }
 
   describe 'no allowed failures' do
     yaml %(
@@ -37,9 +39,9 @@ describe Travis::Yml::Configs::AllowFailures do
 
     it do
       should eq [
-        { rvm: '2.6.5', gemfile: 'one', allow_failure: true },
         { rvm: '2.6.5', gemfile: 'two' },
         { rvm: '2.7.0', gemfile: 'one' },
+        { rvm: '2.6.5', gemfile: 'one', allow_failure: true },
         { rvm: '2.7.0', gemfile: 'two', allow_failure: true }
       ]
     end
@@ -62,8 +64,8 @@ describe Travis::Yml::Configs::AllowFailures do
 
       it do
         should eq [
-          { rvm: '2.6.5', allow_failure: true },
           { rvm: '2.7.0' },
+          { rvm: '2.6.5', allow_failure: true },
         ]
       end
     end
@@ -145,6 +147,39 @@ describe Travis::Yml::Configs::AllowFailures do
       should eq [
         { name: 'one' },
         { name: 'two' },
+      ]
+    end
+  end
+
+  describe 'with stages' do
+    yaml %(
+      jobs:
+        allow_failures:
+          - env: ONE=one
+
+        include:
+          - stage: one
+            env: ONE=one
+          - stage: one
+            env: TWO=two
+          - stage: two
+            env: ONE=one
+          - stage: two
+            env: TWO=two
+          - stage: three
+            env: ONE=one
+          - stage: three
+            env: TWO=two
+    )
+
+    it do
+      should eq [
+        { stage: 'one', env: [TWO: 'two'] },
+        { stage: 'one', env: [ONE: 'one'], allow_failure: true },
+        { stage: 'two', env: [TWO: 'two'] },
+        { stage: 'two', env: [ONE: 'one'], allow_failure: true },
+        { stage: 'three', env: [TWO: 'two'] },
+        { stage: 'three', env: [ONE: 'one'], allow_failure: true },
       ]
     end
   end
