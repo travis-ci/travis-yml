@@ -16,6 +16,14 @@ module Travis
             'Accept-Charset': 'utf-8'
           }
 
+          RETRY = {
+            max: 8,
+            interval: 0.05,
+            interval_randomness: 0.5,
+            backoff_factor: 2,
+            retry_statuses: [500, 502, 503]
+          }
+
           def get(path, params = {})
             client.get(path, params.merge(oauth))
           rescue Faraday::Error => e
@@ -27,11 +35,16 @@ module Travis
             Faraday.new(url: url, headers: HEADERS, ssl: ssl) do |c|
               c.use FaradayMiddleware::FollowRedirects
               c.request :authorization, :token, token if token
-              c.request  :retry, max: 8, interval: 0.05, interval_randomness: 0.5, backoff_factor: 2, retry_statuses: [500, 502, 503]
+              c.request  :retry, RETRY.merge(retry_block: method(:on_retry))
               c.response :raise_error
               # c.response :logger
               c.adapter :net_http
             end
+          end
+
+          def on_retry(env, opts, retries, e)
+            p [:on_retry, env.keys]
+            logger.info "Status: #{e.response[:status]}. Retrying (#{retries}/8) ..."
           end
 
           def url
@@ -48,6 +61,10 @@ module Travis
 
           def config
             Yml.config
+          end
+
+          def logger
+            Yml.logger
           end
 
           def error(method, path, e)
