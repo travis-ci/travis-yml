@@ -164,6 +164,15 @@ describe Travis::Yml::Configs, 'merging' do
           end
         end
       end
+
+      describe 'api (empty)', defaults: true do
+        let(:api) { '' }
+
+        describe 'replace' do
+          let(:mode) { :replace }
+          it { should serialize_to defaults }
+        end
+      end
     end
 
     describe 'merge_normalized turned on', merge_normalized: true do

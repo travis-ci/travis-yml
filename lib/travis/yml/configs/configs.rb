@@ -84,7 +84,7 @@ module Travis
           def fetch
             fetch = ctx.fetch
             fetch.load(raw ? api : travis_yml)
-            @configs = fetch.configs.reject(&:empty?)
+            @configs = fetch.configs.select { |config| config.api? || !config.empty? }
             msgs.concat(fetch.msgs)
           end
           time :fetch
