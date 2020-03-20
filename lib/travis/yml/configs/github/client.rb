@@ -21,7 +21,7 @@ module Travis
             interval: 0.05,
             interval_randomness: 0.5,
             backoff_factor: 2,
-            retry_statuses: [500, 502, 503]
+            retry_statuses: [500, 502, 503, 504]
           }
 
           def get(path, params = {})
