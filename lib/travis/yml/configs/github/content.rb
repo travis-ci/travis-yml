@@ -18,7 +18,7 @@ module Travis
               path = "repositories/#{repo.github_id}/contents/#{self.path}"
               resp = client.get(path, ref: ref)
               data = Oj.load(resp.body)
-              decode64(data['content'])
+              decode64(data['content'].to_s)
             rescue Github::Error => e
               api_error('GitHub', :file, [repo.slug, self.path].join(':'), e)
             rescue TypeError => e
