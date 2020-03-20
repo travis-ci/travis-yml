@@ -82,11 +82,13 @@ describe Travis::Yml::Web::App, 'POST /configs' do
 
   describe 'errors' do
     let(:body) { symbolize(JSON.parse(last_response.body)) }
-    before { post '/configs', Oj.generate(data), defaults: true }
 
     describe 'parse error' do
       let(:travis_yml) { '{' }
+      before { post '/configs', Oj.generate(data), defaults: true }
+
       it { expect(last_response.status).to eq 400 }
+
       it do
         expect(body).to eq(
           error: {
@@ -100,7 +102,10 @@ describe Travis::Yml::Web::App, 'POST /configs' do
 
     describe 'invalid config format' do
       let(:travis_yml) { 'str' }
+      before { post '/configs', Oj.generate(data), defaults: true }
+
       it { expect(last_response.status).to eq 400 }
+
       it do
         expect(body).to eq(
           error: {
@@ -110,6 +115,13 @@ describe Travis::Yml::Web::App, 'POST /configs' do
           }
         )
       end
+    end
+
+    describe 'internal error' do
+      before { allow(Travis::Yml::Configs).to receive(:new).and_raise StandardError }
+      subject { post '/configs', Oj.generate(data), defaults: true }
+
+      it { expect { subject }.to raise_error StandardError }
     end
   end
 
