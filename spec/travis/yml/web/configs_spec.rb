@@ -54,28 +54,45 @@ describe Travis::Yml::Web::App, 'POST /configs' do
     end
 
     describe 'api' do
-      let(:config) { JSON.dump(merge_mode: 'merge') }
-      let(:data) { { repo: repo, type: type, ref: ref, config: config } }
-      let(:travis_yml) { 'import: { source: one.yml, mode: deep_merge_prepend }' }
+      describe 'merge mode merge' do
+        let(:config) { JSON.dump(merge_mode: 'merge') }
+        let(:data) { { repo: repo, type: type, ref: ref, config: config } }
+        let(:travis_yml) { 'import: { source: one.yml, mode: deep_merge_prepend }' }
 
-      it do
-        expect(body[:raw_configs]).to eq [
-          {
-            source: 'api',
-            config: config,
-            mode: 'merge'
-          },
-          {
-            source: 'travis-ci/travis-yml:.travis.yml@ref',
-            config: travis_yml,
-            mode: 'merge'
-          },
-          {
-            source: 'travis-ci/travis-yml:one.yml@ref',
-            config: one_yml,
-            mode: 'deep_merge_prepend'
-          }
-        ]
+        it do
+          expect(body[:raw_configs]).to eq [
+            {
+              source: 'api',
+              config: config,
+              mode: 'merge'
+            },
+            {
+              source: 'travis-ci/travis-yml:.travis.yml@ref',
+              config: travis_yml,
+              mode: 'merge'
+            },
+            {
+              source: 'travis-ci/travis-yml:one.yml@ref',
+              config: one_yml,
+              mode: 'deep_merge_prepend'
+            }
+          ]
+        end
+      end
+
+      describe 'merge mode replace' do
+        let(:config) { JSON.dump(merge_mode: 'replace') }
+        let(:data) { { repo: repo, type: type, ref: ref, config: config } }
+
+        it do
+          expect(body[:raw_configs]).to eq [
+            {
+              source: 'api',
+              config: config,
+              mode: 'replace'
+            }
+          ]
+        end
       end
     end
   end
