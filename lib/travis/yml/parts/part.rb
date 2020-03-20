@@ -17,11 +17,12 @@ module Travis
         def initialize(str, src = nil, merge_mode = nil)
           @str = normalize(str.to_s)
           @src = src
-          self.merge_mode = Array(merge_mode).first
+          self.merge_mode = merge_mode
           @data = Parse.new(self).apply
         end
 
         def merge_mode=(mode)
+          mode = Array(mode).flatten.first
           mode = mode.to_s.gsub('-', '_') if mode
           mode = mode&.to_sym
           unknown_merge_mode!(mode) if mode && !MERGE_MODES.include?(mode)
