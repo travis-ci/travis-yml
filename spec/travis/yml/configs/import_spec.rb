@@ -9,7 +9,7 @@ describe Travis::Yml::Configs do
   let(:api)     { nil }
   let(:data)    { nil }
   let(:mode)    { nil }
-  let(:configs) { described_class.new(repo, ref, api, mode&.to_s, data, opts.merge(token: user_token, data: data)) }
+  let(:configs) { described_class.new(repo, ref, api ? [config: api, mode: mode&.to_s] : nil, data, opts.merge(token: user_token, data: data)) }
   let(:config)  { subject.config }
   let(:jobs)    { subject.jobs }
   let(:stages)  { subject.stages }

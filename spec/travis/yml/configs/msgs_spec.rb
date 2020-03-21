@@ -4,7 +4,7 @@ describe Travis::Yml::Configs, 'msgs' do
   before { stub_repo(repo[:slug], internal: true, body: repo.merge(token: 'token')) }
   before { stub_content(repo[:github_id], '.travis.yml', yaml) }
 
-  subject { described_class.new(repo, 'master', nil, nil, {}, opts).tap(&:load) }
+  subject { described_class.new(repo, 'master', nil, {}, opts).tap(&:load) }
 
   describe 'merge_normalized not given' do
     describe 'defaults', defaults: true do

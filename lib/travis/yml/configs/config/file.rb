@@ -45,8 +45,24 @@ module Travis
           end
           alias merge_mode mode
 
+          def part
+            Parts::Part.new(raw, source, mode)
+          end
+
+          def empty?
+            raw.to_s.strip.empty?
+          end
+
           def to_s
             "#{repo.slug}:#{path}@#{ref}"
+          end
+
+          def serialize
+            {
+              source: to_s,
+              config: raw,
+              mode: mode
+            }
           end
 
           private

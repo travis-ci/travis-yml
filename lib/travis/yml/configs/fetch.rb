@@ -28,8 +28,9 @@ module Travis
 
         def load(config)
           @config = config
-          config.load(&method(:on_load))
+          config.load
           threads.each(&:join)
+          too_many_imports if limit?
         end
 
         def configs
@@ -63,7 +64,7 @@ module Travis
           end
 
           def on_load
-            error :import, :too_many_imports, max: max_imports if limit?
+            # error :import, :too_many_imports, max: max_imports if limit?
           end
 
           def import?(config)
@@ -89,6 +90,10 @@ module Travis
 
           def max_imports
             Yml.config[:imports][:max]
+          end
+
+          def too_many_imports
+            error :import, :too_many_imports, max: max_imports
           end
 
           # doesn't seem to need this anymore?

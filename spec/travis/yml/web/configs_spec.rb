@@ -7,7 +7,7 @@ describe Travis::Yml::Web::App, 'POST /configs' do
   let(:status)  { last_response.status }
   let(:headers) { last_response.headers }
   let(:body)    { Oj.load(last_response.body, symbol_keys: true) }
-  let(:data)    { { repo: repo, type: type, ref: ref, mode: 'deep_merge_prepend' } }
+  let(:data)    { { repo: repo, type: type, ref: ref } }
   let(:repo)    { { github_id: 1, slug: 'travis-ci/travis-yml', token: 'token', private: false, private_key: 'key', allow_config_imports: true } }
   let(:type)    { :push }
   let(:ref)     { 'ref' }
@@ -30,7 +30,7 @@ describe Travis::Yml::Web::App, 'POST /configs' do
         {
           source: 'travis-ci/travis-yml:.travis.yml@ref',
           config: travis_yml,
-          mode: 'deep_merge_prepend'
+          mode: nil
         },
         {
           source: 'travis-ci/travis-yml:one.yml@ref',
@@ -69,7 +69,7 @@ describe Travis::Yml::Web::App, 'POST /configs' do
             {
               source: 'travis-ci/travis-yml:.travis.yml@ref',
               config: travis_yml,
-              mode: 'merge'
+              mode: nil
             },
             {
               source: 'travis-ci/travis-yml:one.yml@ref',

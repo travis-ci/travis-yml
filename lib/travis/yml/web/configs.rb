@@ -25,7 +25,9 @@ module Travis
           end
 
           def args
-            data.values_at(:repo, :ref, :config, :mode, :data)
+            args = data.values_at(:repo, :ref, :configs, :data)
+            args[2] ||= [only(data, :config, :mode)] if data[:config] # BC
+            args
           end
 
           def opts
@@ -45,6 +47,10 @@ module Travis
 
           def data
             Oj.load(request_body, symbol_keys: true, mode: :strict, empty_string: false)
+          end
+
+          def only(hash, *keys)
+            hash.select { |key, _| keys.include?(key) }
           end
 
           def config

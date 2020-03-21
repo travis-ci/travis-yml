@@ -36,10 +36,10 @@ module Travis
           def client
             Faraday.new(url: url, headers: HEADERS, ssl: ssl) do |c|
               c.use FaradayMiddleware::FollowRedirects
-              c.request  :authorization, *auth
-              c.request  :retry, RETRY.merge(retry_block: method(:on_retry))
+              c.request :authorization, *auth
+              c.request :retry, RETRY.merge(retry_block: method(:on_retry))
               c.response :raise_error
-              c.adapter  :net_http
+              c.adapter :net_http
               # c.response :logger
             end
           end
