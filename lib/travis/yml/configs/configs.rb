@@ -13,7 +13,7 @@ require 'travis/yml/configs/ctx'
 module Travis
   module Yml
     module Configs
-      class Configs < Struct.new(:repo, :ref, :raw, :mode, :data, :opts)
+      class Configs < Struct.new(:repo, :ref, :inputs, :data, :opts)
         include Enumerable, Helper::Metrics, Helper::Obj, Memoize
 
         attr_reader :configs, :config, :stages, :jobs
@@ -83,7 +83,7 @@ module Travis
 
           def fetch
             fetch = ctx.fetch
-            fetch.load(raw ? api : travis_yml)
+            fetch.load(inputs&.any? ? api : travis_yml)
             @configs = fetch.configs.select { |config| config.api? || !config.empty? }
             msgs.concat(fetch.msgs)
           end
@@ -135,12 +135,14 @@ module Travis
             @jobs = jobs.uniq
           end
 
-          def travis_yml
-            Config::TravisYml.new(ctx, nil, repo.slug, ref, mode)
+          def api
+            input = inputs.shift
+            raw, mode = input.values_at(:config, :mode)
+            Config::Api.new(ctx, nil, repo.slug, ref, raw, mode, inputs)
           end
 
-          def api
-            Config::Api.new(ctx, repo.slug, ref, raw, mode)
+          def travis_yml
+            Config::TravisYml.new(ctx, nil, repo.slug, ref)
           end
 
           def repo

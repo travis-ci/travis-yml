@@ -32,10 +32,6 @@ module Travis
             @config ||= {}
           end
 
-          def part
-            Parts::Part.new(raw, source, mode)
-          end
-
           def load(&block)
             @on_loaded = block if root?
           end
@@ -44,7 +40,7 @@ module Travis
             @loaded = true
             return root.loaded unless root?
             return unless loaded?
-            on_loaded.call
+            on_loaded.call if on_loaded
           end
 
           def imports
@@ -129,10 +125,6 @@ module Travis
             repo.owner_name == other.owner_name
           end
 
-          def empty?
-            raw.nil? || raw.strip.empty?
-          end
-
           def skip
             @skip = true
           end
@@ -147,14 +139,6 @@ module Travis
 
           def to_h
             config
-          end
-
-          def serialize
-            {
-              source: to_s,
-              config: raw,
-              mode: mode
-            }
           end
 
           private

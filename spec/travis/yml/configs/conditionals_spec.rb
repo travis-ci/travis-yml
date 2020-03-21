@@ -1,6 +1,6 @@
 describe Travis::Yml::Configs, 'conditionals' do
   let(:repo)    { { github_id: 1, slug: 'travis-ci/travis-yml' } }
-  let(:configs) { described_class.new(repo, 'master', nil, nil, data, opts).tap(&:load) }
+  let(:configs) { described_class.new(repo, 'master', nil, data, opts).tap(&:load) }
   let(:data)    { { branch: 'master', env: [{ SETTING: 'on' }] } }
 
   let(:config) { configs.config }

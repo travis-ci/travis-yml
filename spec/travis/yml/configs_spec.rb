@@ -3,7 +3,7 @@ describe Travis::Yml::Configs do
   let(:raw)     { nil }
   let(:data)    { nil }
   let(:opts)    { { token: 'user-token', data: data } }
-  let(:configs) { described_class.new(repo, 'ref', raw, nil, data, opts) }
+  let(:configs) { described_class.new(repo, 'ref',  raw ? [config: raw, mode: nil] : nil, data, opts) }
 
   let(:config)  { subject.config }
   let(:jobs)    { subject.jobs }

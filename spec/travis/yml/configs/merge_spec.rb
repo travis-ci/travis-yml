@@ -5,7 +5,7 @@ describe Travis::Yml::Configs, 'merging' do
   before { stub_content(repo[:github_id], 'one.yml', one) }
   before { stub_content(repo[:github_id], 'two.yml', two) }
 
-  subject { described_class.new(repo, 'master', api, mode, {}, opts).tap(&:load) }
+  subject { described_class.new(repo, 'master', api ? [config: api, mode: mode] : nil, {}, opts).tap(&:load) }
 
   describe 'merge modes' do
     let(:travis_yml) do
