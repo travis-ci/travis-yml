@@ -45,7 +45,6 @@ module Travis
           end
 
           def on_retry(env, opts, retries, e)
-            p [:on_retry, env.keys]
             logger.info "Status: #{e.response[:status]}. Retrying (#{retries}/8) ..."
           end
 
@@ -62,7 +61,7 @@ module Travis
           end
 
           def error(method, path, e)
-            msg = e.response[:body] if e.response
+            msg = e.response && e.response[:body] if e.response
             msg = Oj.parse(msg)['error_message'] rescue msg
             Error.new(method, path, e.response[:status], msg)
           end
