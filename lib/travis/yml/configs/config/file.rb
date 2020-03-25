@@ -41,7 +41,7 @@ module Travis
           end
 
           def mode
-            import['mode']&.to_s
+            import['mode']
           end
           alias merge_mode mode
 

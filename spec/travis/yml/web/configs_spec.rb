@@ -94,6 +94,13 @@ describe Travis::Yml::Web::App, 'POST /configs' do
           ]
         end
       end
+
+      describe 'merge mode given as an array' do
+        let(:config) { JSON.dump(merge_mode: ['deep_merge']) }
+        let(:data) { { repo: repo, type: type, ref: ref, config: config } }
+
+        it { expect { body }.to_not raise_error }
+      end
     end
   end
 
