@@ -118,7 +118,7 @@ module Travis
           end
 
           def reencrypt?
-            same_owner?(root) && remote? && secure?(config)
+            same_owner?(root) && remote?
           end
 
           def same_owner?(other)
