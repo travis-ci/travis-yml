@@ -174,65 +174,6 @@ describe Travis::Yml::Configs do
     end
   end
 
-  describe 'reencrypt' do
-    before { stub_repo('travis-ci/other', internal: true, body: { github_id: 1, private: private, default_branch: 'default', config_imports: true, private_key: PRIVATE_KEYS[:two] }) }
-    before { stub_repo('other/other', internal: true, body: { github_id: 2, private: private, default_branch: 'default', config_imports: true, private_key: PRIVATE_KEYS[:two] }) }
-    before { stub_content(1, 'one.yml', one_yml) }
-    before { stub_content(2, 'one.yml', one_yml) }
-
-    let(:encrypted) { encrypt('secret') }
-    let(:one_yml) { "env:\n  - secure: '#{encrypted}'" }
-    let(:var) { (subject.config.dig(:env, :jobs)&.first || {})[:secure] }
-
-    describe 'local config' do
-      let(:private) { false }
-      let(:travis_yml) { 'import: one/one.yml' }
-      before { expect_any_instance_of(Travis::Yml::Configs::Model::Repo).to receive(:reencrypt).never }
-      it { subject }
-    end
-
-    describe 'same owner' do
-      describe 'public config' do
-        let(:travis_yml) { 'import: travis-ci/other:one.yml' }
-        let(:private) { false }
-        it { expect(var).to_not eq encrypted }
-        it { expect(decrypt(var)).to eq 'secret' }
-      end
-
-      describe 'private config on the same owner' do
-        let(:travis_yml) { 'import: travis-ci/other:one.yml' }
-        let(:private) { true }
-        it { expect(var).to_not eq encrypted }
-        it { expect(decrypt(var)).to eq 'secret' }
-      end
-    end
-
-    describe 'foreign owner' do
-      describe 'public config' do
-        let(:travis_yml) { 'import: other/other:one.yml' }
-        let(:private) { false }
-        it { expect(var).to eq encrypted }
-        it { expect { decrypt(var) }.to raise_error OpenSSL::OpenSSLError }
-      end
-
-      describe 'private config on the same owner' do
-        let(:travis_yml) { 'import: other/other:one.yml' }
-        let(:private) { true }
-        it { expect(var).to be_nil }
-      end
-    end
-
-    def decrypt(str)
-      key = OpenSSL::PKey::RSA.new(PRIVATE_KEYS[:one])
-      key.private_decrypt(Base64.decode64(str))
-    end
-
-    def encrypt(str)
-      key = OpenSSL::PKey::RSA.new(PRIVATE_KEYS[:two])
-      Base64.strict_encode64(key.public_encrypt(str))
-    end
-  end
-
   describe 'expanding relative paths (local)' do
     let(:one_yml) { 'import: ./two.yml' }
 
