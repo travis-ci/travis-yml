@@ -46,7 +46,7 @@ module Travis
         end
 
         configure :production, :staging do
-          use Rack::SslEnforcer unless config.enterprise?
+          use Rack::SslEnforcer unless config.enterprise? || ENV['DOCKER']
           use Sentry if ENV['SENTRY_DSN']
           use Auth, config.auth_keys
           use Metrics
