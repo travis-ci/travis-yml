@@ -110,8 +110,8 @@ describe Travis::Yml::Configs do
 
       before { expect_any_instance_of(Travis::Yml::Configs::Model::Repo).to receive(:reencrypt).never }
 
-      it { expect(vars).to eq [one, two] }
-      it { expect(decrypt(:one, vars)).to eq %w(secret_one secret_two) }
+      it { expect(vars).to eq [two, one] }
+      it { expect(decrypt(:one, vars)).to eq %w(secret_two secret_one) }
     end
 
     describe 'frm the same owner' do
@@ -122,14 +122,14 @@ describe Travis::Yml::Configs do
         let(:travis_yml) { 'import: travis-ci/other:one.yml' }
         let(:private) { false }
         it { expect(vars).to_not eq [one, two] }
-        it { expect(decrypt(:one, vars)).to eq %w(secret_one secret_two) }
+        it { expect(decrypt(:one, vars)).to eq %w(secret_two secret_one) }
       end
 
       describe 'private config on the same owner' do
         let(:travis_yml) { 'import: travis-ci/other:one.yml' }
         let(:private) { true }
         it { expect(vars).to_not eq [one, two] }
-        it { expect(decrypt(:one, vars)).to eq %w(secret_one secret_two) }
+        it { expect(decrypt(:one, vars)).to eq %w(secret_two secret_one) }
       end
     end
 
@@ -140,7 +140,7 @@ describe Travis::Yml::Configs do
       describe 'public config' do
         let(:travis_yml) { 'import: other/other:one.yml' }
         let(:private) { false }
-        it { expect(vars).to eq [one, two] }
+        it { expect(vars).to eq [two, one] }
         it { expect { decrypt(:one, vars) }.to raise_error OpenSSL::OpenSSLError }
       end
 

@@ -137,7 +137,7 @@ describe Travis::Yml::Parts::Merge do
       end
 
       it { expect(subject[:foo][:bar]).to be_a Array } # Seq??
-      it { should eq foo: { bar: ['one', 'two'] } }
+      it { should eq foo: { bar: ['two', 'one'] } }
     end
 
     describe 'deep_merge on root, deep_merge+append on child' do
@@ -152,7 +152,7 @@ describe Travis::Yml::Parts::Merge do
       end
 
       it { expect(subject[:foo][:bar]).to be_a Array } # Seq??
-      it { should eq foo: { bar: ['one', 'two'] } }
+      it { should eq foo: { bar: ['two', 'one'] } }
     end
 
     describe 'deep_merge on root, append on child' do
@@ -165,7 +165,7 @@ describe Travis::Yml::Parts::Merge do
         yml
       end
 
-      it { should eq foo: { bar: ['one', 'two'] } }
+      it { should eq foo: { bar: ['two', 'one'] } }
     end
   end
 
@@ -196,7 +196,7 @@ describe Travis::Yml::Parts::Merge do
       yml
     end
 
-    it { should eq env: { global: ['ONE=one', 'TWO=two', 'THREE=three'] } }
+    it { should eq env: { global: ['THREE=three', 'TWO=two', 'ONE=one'] } }
   end
 
   describe 'merge mode and merge tags' do
@@ -226,7 +226,7 @@ describe Travis::Yml::Parts::Merge do
       yml
     end
 
-    it { should eq env: { global: ['ONE=one', 'TWO=two', 'THREE=three'] } }
+    it { should eq env: { global: ['THREE=three', 'TWO=two', 'ONE=one'] } }
   end
 
   describe 'src and line' do

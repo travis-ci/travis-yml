@@ -231,15 +231,15 @@ describe Travis::Yml::Web::App do
           ],
           'env' => {
             'jobs' => [
-              'API' => 'true',
-              'FOO' => '1',
+              'IMPORT' => 'true',
               'TRAVIS_YML' => 'true',
-              'IMPORT' => 'true'
+              'FOO' => '1',
+              'API' => 'true',
             ]
           },
           'script' => [
+            './import',
             './travis_yml',
-            './import'
           ],
           'unknown' => 'str'
         )
@@ -265,7 +265,7 @@ describe Travis::Yml::Web::App do
         ]
       end
 
-      it { expect(body['config']).to eq 'env' => { 'global' => [{ 'BAR' => 'bar' }, { 'FOO' => 'foo' }] } }
+      it { expect(body['config']).to eq 'env' => { 'global' => [{ 'FOO' => 'foo' }, { 'BAR' => 'bar' }] } }
     end
   end
 end
