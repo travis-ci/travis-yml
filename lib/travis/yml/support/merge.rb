@@ -67,11 +67,11 @@ module Travis
         end
 
         def prepend(lft, rgt)
-          lft.replace(rgt + lft)
+          lft.replace(lft + rgt)
         end
 
         def append(lft, rgt)
-          lft.replace(lft + rgt)
+          lft.replace(rgt + lft)
         end
 
         def mode(obj)

@@ -44,8 +44,8 @@ describe Travis::Yml::Configs, 'merging' do
           it do
             should serialize_to(
               import: [
-                { source: 'one.yml', mode: 'deep_merge_append' },
                 { source: 'two.yml', mode: 'deep_merge_append' },
+                { source: 'one.yml', mode: 'deep_merge_append' },
               ],
               os: ['linux'],
               script: %w(./travis),
@@ -59,8 +59,8 @@ describe Travis::Yml::Configs, 'merging' do
           it do
             should serialize_to(
               import: [
-                { source: 'two.yml', mode: 'deep_merge_prepend' },
                 { source: 'one.yml', mode: 'deep_merge_prepend' },
+                { source: 'two.yml', mode: 'deep_merge_prepend' },
               ],
               os: ['linux'],
               script: %w(./travis),
@@ -111,8 +111,8 @@ describe Travis::Yml::Configs, 'merging' do
           it do
             should serialize_to(
               import: [
+                { source: 'two.yml', mode: 'deep_merge_append' },
                 { source: 'one.yml', mode: 'deep_merge_append' },
-                { source: 'two.yml', mode: 'deep_merge_append' }
               ],
               os: ['linux'],
               dist: 'xenial',
@@ -127,8 +127,8 @@ describe Travis::Yml::Configs, 'merging' do
           it do
             should serialize_to(
               import: [
+                { source: 'one.yml', mode: 'deep_merge_prepend' },
                 { source: 'two.yml', mode: 'deep_merge_prepend' },
-                { source: 'one.yml', mode: 'deep_merge_prepend' }
               ],
               os: ['linux'],
               dist: 'xenial',
@@ -184,12 +184,12 @@ describe Travis::Yml::Configs, 'merging' do
           it do
             should serialize_to(
               import: [
-                { source: 'one.yml', mode: 'deep_merge_append' },
                 { source: 'two.yml', mode: 'deep_merge_append' },
+                { source: 'one.yml', mode: 'deep_merge_append' },
               ],
               os: ['linux'],
-              script: %w(./travis ./one ./two),
-              env: { jobs: [{ TRAVIS: 'true' }, { ONE: 'true' }] }
+              script: %w(./two ./one ./travis),
+              env: { jobs: [{ ONE: 'true' }, { TRAVIS: 'true' }] }
             )
           end
         end
@@ -199,12 +199,12 @@ describe Travis::Yml::Configs, 'merging' do
           it do
             should serialize_to(
               import: [
-                { source: 'two.yml', mode: 'deep_merge_prepend' },
                 { source: 'one.yml', mode: 'deep_merge_prepend' },
+                { source: 'two.yml', mode: 'deep_merge_prepend' },
               ],
               os: ['linux'],
-              script: %w(./two ./one ./travis),
-              env: { jobs: [{ ONE: 'true' }, { TRAVIS: 'true' }] }
+              script: %w(./travis ./one ./two),
+              env: { jobs: [{ TRAVIS: 'true' }, { ONE: 'true' }] }
             )
           end
         end
@@ -251,13 +251,13 @@ describe Travis::Yml::Configs, 'merging' do
           it do
             should serialize_to(
               import: [
+                { source: 'two.yml', mode: 'deep_merge_append' },
                 { source: 'one.yml', mode: 'deep_merge_append' },
-                { source: 'two.yml', mode: 'deep_merge_append' }
               ],
               os: ['linux'],
               dist: 'xenial',
-              script: %w(./api ./travis ./one ./two),
-              env: { jobs: [{ API: 'true' }, { TRAVIS: 'true' }, { ONE: 'true' }] }
+              script: %w(./two ./one ./travis ./api),
+              env: { jobs: [{ ONE: 'true' }, { TRAVIS: 'true' }, { API: 'true' }] }
             )
           end
         end
@@ -267,13 +267,13 @@ describe Travis::Yml::Configs, 'merging' do
           it do
             should serialize_to(
               import: [
+                { source: 'one.yml', mode: 'deep_merge_prepend' },
                 { source: 'two.yml', mode: 'deep_merge_prepend' },
-                { source: 'one.yml', mode: 'deep_merge_prepend' }
               ],
               os: ['linux'],
               dist: 'xenial',
-              script: %w(./two ./one ./travis ./api),
-              env: { jobs: [{ ONE: 'true' }, { TRAVIS: 'true' }, { API: 'true' }] }
+              script: %w(./api ./travis ./one ./two),
+              env: { jobs: [{ API: 'true' }, { TRAVIS: 'true' }, { ONE: 'true' }] }
             )
           end
         end

@@ -45,14 +45,14 @@ describe Travis::Yml::Support::Merge do
 
   describe 'deep_merge_append' do
     let(:mode) { :deep_merge_append }
-    it { should eq 'foo' => { 'one' => ['one', 'two'], 'two' => 'two' }, 'bar' => 'bar' }
+    it { should eq 'foo' => { 'one' => ['two', 'one'], 'two' => 'two' }, 'bar' => 'bar' }
     it { expect(subject.keys.first).to be_a Key }
     it { expect(subject.keys.first.line).to eq 2 }
   end
 
   describe 'deep_merge_prepend' do
     let(:mode) { :deep_merge_prepend }
-    it { should eq 'bar' => 'bar', 'foo' => { 'two' => 'two', 'one' => ['two', 'one'] } }
+    it { should eq 'bar' => 'bar', 'foo' => { 'two' => 'two', 'one' => ['one', 'two'] } }
     it { expect(subject.keys.first).to be_a Key }
     it { expect(subject.keys.first.line).to eq 2 }
   end
@@ -66,7 +66,7 @@ describe Travis::Yml::Support::Merge do
           - one
       )
     end
-    it { should eq 'foo' => { 'one' => ['one', 'two'], 'two' => 'two' }, 'bar' => 'bar' }
+    it { should eq 'foo' => { 'one' => ['two', 'one'], 'two' => 'two' }, 'bar' => 'bar' }
   end
 
   describe 'merge tags (2)' do
@@ -78,7 +78,7 @@ describe Travis::Yml::Support::Merge do
           - one
       )
     end
-    it { should eq 'foo' => { 'one' => ['two', 'one'], 'two' => 'two' }, 'bar' => 'bar' }
+    it { should eq 'foo' => { 'one' => ['one', 'two'], 'two' => 'two' }, 'bar' => 'bar' }
   end
 
   describe 'merge tags (3)' do
@@ -93,7 +93,7 @@ describe Travis::Yml::Support::Merge do
       )
     end
 
-    it { should eq 'foo' => { 'one' => ['one', 'two'], 'two' => 'two' }, 'bar' => 'bar' }
+    it { should eq 'foo' => { 'one' => ['two', 'one'], 'two' => 'two' }, 'bar' => 'bar' }
   end
 
   describe 'merge tags (4)' do
@@ -108,7 +108,7 @@ describe Travis::Yml::Support::Merge do
       )
     end
 
-    it { should eq 'foo' => { 'one' => ['two', 'one'], 'two' => 'two' }, 'bar' => 'bar' }
+    it { should eq 'foo' => { 'one' => ['one', 'two'], 'two' => 'two' }, 'bar' => 'bar' }
   end
 
   describe 'merge tags (5)' do
@@ -122,7 +122,7 @@ describe Travis::Yml::Support::Merge do
       )
     end
 
-    it { should eq 'foo' => { 'one' => ['one', 'two'], 'two' => 'two' }, 'bar' => 'bar' }
+    it { should eq 'foo' => { 'one' => ['two', 'one'], 'two' => 'two' }, 'bar' => 'bar' }
   end
 
   describe 'merge tags (6)' do
@@ -136,6 +136,6 @@ describe Travis::Yml::Support::Merge do
       )
     end
 
-    it { should eq 'foo' => { 'one' => ['two', 'one'], 'two' => 'two' }, 'bar' => 'bar' }
+    it { should eq 'foo' => { 'one' => ['one', 'two'], 'two' => 'two' }, 'bar' => 'bar' }
   end
 end

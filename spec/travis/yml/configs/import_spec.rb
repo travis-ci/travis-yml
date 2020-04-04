@@ -82,7 +82,7 @@ describe Travis::Yml::Configs do
         it do
           should serialize_to(
             import: [source: 'one/one.yml'],
-            script: %w(./api ./travis ./one)
+            script: %w(./one ./travis ./api)
           )
         end
       end
@@ -111,7 +111,7 @@ describe Travis::Yml::Configs do
         it do
           should serialize_to(
             import: [{ source: 'one/one.yml' }, { source: 'one/one.yml' }],
-            script: %w(./api ./one ./travis)
+            script: %w(./travis ./one ./api)
           )
         end
       end
@@ -139,7 +139,7 @@ describe Travis::Yml::Configs do
         it do
           should serialize_to(
             import: [source: 'one/one.yml'],
-            script: %w(./api ./one)
+            script: %w(./one ./api)
           )
         end
       end
