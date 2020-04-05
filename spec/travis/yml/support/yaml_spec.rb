@@ -309,7 +309,7 @@ describe Yaml do
     )
     it { should eq 'foo' => 'bar' }
     it { should be_a Map }
-    it { should have_attributes opts: { merge_mode: :deep_merge_append } }
+    it { should have_attributes opts: { merge_modes: { rgt: :deep_merge_append } } }
   end
 
   describe 'merge modes (map, 2)' do
@@ -320,7 +320,7 @@ describe Yaml do
     )
     it { should eq 'foo' => { 'bar' => ['baz'] } }
     it { should be_a Map }
-    it { expect(subject['foo']).to have_attributes opts: { merge_mode: :deep_merge_append } }
+    it { expect(subject['foo']).to have_attributes opts: { merge_modes: { rgt: :deep_merge_append } } }
   end
 
   describe 'merge modes (seq, 1)' do
@@ -330,7 +330,7 @@ describe Yaml do
     )
     it { should eq ['one'] }
     it { should be_a Seq }
-    it { should have_attributes merge_mode: :append }
+    it { should have_attributes merge_modes: { rgt: :append } }
   end
 
   describe 'merge modes (seq, 2)' do
@@ -340,7 +340,7 @@ describe Yaml do
     )
     it { should eq 'foo' => ['one'] }
     it { expect(subject['foo']).to be_a Seq }
-    it { expect(subject['foo']).to have_attributes merge_mode: :append }
+    it { expect(subject['foo']).to have_attributes merge_modes: { rgt: :append } }
   end
 
   describe 'duplicate keys' do

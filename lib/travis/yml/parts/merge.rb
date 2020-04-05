@@ -43,9 +43,8 @@ module Travis
 
       class Merge < Struct.new(:parts)
         def apply
-          parts.inject do |lft, rgt|
-            mode = rgt.respond_to?(:merge_mode) ? rgt.merge_mode : :merge
-            Support::Merge.new(lft.to_h, rgt.to_h, mode).apply
+          parts.reverse.inject do |lft, rgt|
+            Support::Merge.new(rgt.to_h, lft.to_h).apply
           end
         end
       end

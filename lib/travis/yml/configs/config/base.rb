@@ -138,7 +138,7 @@ module Travis
           end
 
           def to_h
-            config
+            Map.new(config, merge_modes: merge_modes)
           end
 
           private

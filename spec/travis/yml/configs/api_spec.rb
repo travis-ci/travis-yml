@@ -4,7 +4,7 @@ describe Travis::Yml::Configs do
   let(:config)  { subject.config }
 
   before { stub_content(repo[:github_id], '.travis.yml', travis_yml) }
-  before { stub_content(repo[:github_id], 'one/one.yml', one_yml) }
+  before { stub_content(repo[:github_id], 'one.yml', one_yml) }
 
   subject { configs.tap(&:load) }
 
@@ -19,14 +19,27 @@ describe Travis::Yml::Configs do
     ]
   end
 
-  let(:travis_yml) { "import: one/one.yml\nscript: [./travis]" }
-  let(:one_yml)    { 'script: ./one' }
+  let(:travis_yml) do
+    %(
+      import:
+        - source: one.yml
+          mode: deep_merge_prepend
+      script:
+        - ./travis
+    )
+  end
+
+  let(:one_yml) do
+    %(
+      script: ./one
+    )
+  end
 
   imports %w(
     api
     api.1
     travis-ci/travis-yml:.travis.yml@ref
-    travis-ci/travis-yml:one/one.yml@ref
+    travis-ci/travis-yml:one.yml@ref
   )
 
   describe 'merge_normalized turned off' do
@@ -34,6 +47,6 @@ describe Travis::Yml::Configs do
   end
 
   describe 'merge_normalized turned on', merge_normalized: true do
-    it { should serialize_to script: ['./one', './api.1', './api.2', './travis'] }
+    it { should serialize_to script: ['./api.1', './api.2', './travis', './one'] }
   end
 end

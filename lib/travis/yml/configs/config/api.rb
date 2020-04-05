@@ -9,7 +9,6 @@ module Travis
           include Base, Memoize
 
           attr_reader :path, :input
-          alias merge_mode mode
 
           def api?
             true
@@ -17,7 +16,7 @@ module Travis
 
           def load(&block)
             @config = parse(raw)
-            self.mode ||= config.delete('merge_mode')
+            self.mode ||= config.delete('merge_mode') # || config.merge_mode
             super
             store
             loaded
@@ -25,17 +24,21 @@ module Travis
 
           def imports
             imports = super
-            imports << child unless child.mode == 'replace'
+            imports << child unless child.merge_modes[:lft] == 'replace'
             imports
           end
           memoize :imports
+
+          def merge_modes
+            { lft: mode }
+          end
 
           def source
             ['api', ix > 0 ? ix : nil].compact.join('.')
           end
 
           def part
-            Parts::Part.new(raw, source, mode)
+            Parts::Part.new(raw, source, merge_modes)
           end
 
           def empty?
@@ -70,7 +73,7 @@ module Travis
 
             def api
               input = inputs.shift
-              raw, mode = input.values_at(:config, :mode)
+              raw, mode = input.values_at(:config, :mode) # merge_ ??
               Api.new(ctx, self, slug, ref, raw, mode, inputs)
             end
 
