@@ -304,28 +304,28 @@ describe Yaml do
 
   describe 'merge modes (map, 1)' do
     yaml %(
-      !map+deep_merge+append
+      !deep_merge+append
       foo: bar
     )
     it { should eq 'foo' => 'bar' }
     it { should be_a Map }
-    it { should have_attributes opts: { merge: [:deep_merge, :append] } }
+    it { should have_attributes opts: { merge_mode: :deep_merge_append } }
   end
 
   describe 'merge modes (map, 2)' do
     yaml %(
-      foo: !map+deep_merge+append
+      foo: !deep_merge+append
         bar:
         - baz
     )
     it { should eq 'foo' => { 'bar' => ['baz'] } }
     it { should be_a Map }
-    it { expect(subject['foo']).to have_attributes opts: { merge: [:deep_merge, :append] } }
+    it { expect(subject['foo']).to have_attributes opts: { merge_mode: :deep_merge_append } }
   end
 
   describe 'merge modes (seq, 1)' do
     yaml %(
-      !seq+append
+      !append
       - one
     )
     it { should eq ['one'] }
@@ -335,7 +335,7 @@ describe Yaml do
 
   describe 'merge modes (seq, 2)' do
     yaml %(
-      foo: !seq+append
+      foo: !append
         - one
     )
     it { should eq 'foo' => ['one'] }

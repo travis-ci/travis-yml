@@ -57,85 +57,85 @@ describe Travis::Yml::Support::Merge do
     it { expect(subject.keys.first.line).to eq 2 }
   end
 
-  describe 'merge tags (1)' do
-    let(:lft) do
-      parse %(
-        !map+deep_merge+append
-        foo:
-          one:
-          - one
-      )
-    end
-    it { should eq 'foo' => { 'one' => ['two', 'one'], 'two' => 'two' }, 'bar' => 'bar' }
-  end
-
-  describe 'merge tags (2)' do
-    let(:lft) do
-      parse %(
-        !map+deep_merge+prepend
-        foo:
-          one:
-          - one
-      )
-    end
-    it { should eq 'foo' => { 'one' => ['one', 'two'], 'two' => 'two' }, 'bar' => 'bar' }
-  end
-
-  describe 'merge tags (3)' do
-    let(:mode) { :deep_merge }
-
-    let(:lft) do
-      parse %(
-        foo:
-          !map+deep_merge+append
-          one:
-          - one
-      )
-    end
-
-    it { should eq 'foo' => { 'one' => ['two', 'one'], 'two' => 'two' }, 'bar' => 'bar' }
-  end
-
-  describe 'merge tags (4)' do
-    let(:mode) { :deep_merge }
-
-    let(:lft) do
-      parse %(
-        foo:
-          !map+deep_merge+prepend
-          one:
-          - one
-      )
-    end
-
-    it { should eq 'foo' => { 'one' => ['one', 'two'], 'two' => 'two' }, 'bar' => 'bar' }
-  end
-
-  describe 'merge tags (5)' do
-    let(:mode) { :deep_merge }
-
-    let(:lft) do
-      parse %(
-        foo:
-          one: !seq+append
-          - one
-      )
-    end
-
-    it { should eq 'foo' => { 'one' => ['two', 'one'], 'two' => 'two' }, 'bar' => 'bar' }
-  end
-
-  describe 'merge tags (6)' do
-    let(:mode) { :deep_merge }
-
-    let(:lft) do
-      parse %(
-        foo:
-          one: !seq+prepend
-          - one
-      )
-    end
-
-    it { should eq 'foo' => { 'one' => ['one', 'two'], 'two' => 'two' }, 'bar' => 'bar' }
-  end
+  # describe 'merge tags (1)' do
+  #   let(:lft) do
+  #     parse %(
+  #       !map+deep_merge+append
+  #       foo:
+  #         one:
+  #         - one
+  #     )
+  #   end
+  #   it { should eq 'foo' => { 'one' => ['two', 'one'], 'two' => 'two' }, 'bar' => 'bar' }
+  # end
+  #
+  # describe 'merge tags (2)' do
+  #   let(:lft) do
+  #     parse %(
+  #       !map+deep_merge+prepend
+  #       foo:
+  #         one:
+  #         - one
+  #     )
+  #   end
+  #   it { should eq 'foo' => { 'one' => ['one', 'two'], 'two' => 'two' }, 'bar' => 'bar' }
+  # end
+  #
+  # describe 'merge tags (3)' do
+  #   let(:mode) { :deep_merge }
+  #
+  #   let(:lft) do
+  #     parse %(
+  #       foo:
+  #         !map+deep_merge+append
+  #         one:
+  #         - one
+  #     )
+  #   end
+  #
+  #   it { should eq 'foo' => { 'one' => ['two', 'one'], 'two' => 'two' }, 'bar' => 'bar' }
+  # end
+  #
+  # describe 'merge tags (4)' do
+  #   let(:mode) { :deep_merge }
+  #
+  #   let(:lft) do
+  #     parse %(
+  #       foo:
+  #         !map+deep_merge+prepend
+  #         one:
+  #         - one
+  #     )
+  #   end
+  #
+  #   it { should eq 'foo' => { 'one' => ['one', 'two'], 'two' => 'two' }, 'bar' => 'bar' }
+  # end
+  #
+  # describe 'merge tags (5)' do
+  #   let(:mode) { :deep_merge }
+  #
+  #   let(:lft) do
+  #     parse %(
+  #       foo:
+  #         one: !seq+append
+  #         - one
+  #     )
+  #   end
+  #
+  #   it { should eq 'foo' => { 'one' => ['two', 'one'], 'two' => 'two' }, 'bar' => 'bar' }
+  # end
+  #
+  # describe 'merge tags (6)' do
+  #   let(:mode) { :deep_merge }
+  #
+  #   let(:lft) do
+  #     parse %(
+  #       foo:
+  #         one: !seq+prepend
+  #         - one
+  #     )
+  #   end
+  #
+  #   it { should eq 'foo' => { 'one' => ['one', 'two'], 'two' => 'two' }, 'bar' => 'bar' }
+  # end
 end
