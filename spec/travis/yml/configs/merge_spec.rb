@@ -43,10 +43,6 @@ describe Travis::Yml::Configs, 'merging' do
           let(:mode) { :deep_merge_append }
           it do
             should serialize_to(
-              import: [
-                { source: 'two.yml', mode: 'deep_merge_append' },
-                { source: 'one.yml', mode: 'deep_merge_append' },
-              ],
               os: ['linux'],
               script: %w(./travis),
               env: { jobs: [{ TRAVIS: 'true' }] }
@@ -58,10 +54,6 @@ describe Travis::Yml::Configs, 'merging' do
           let(:mode) { :deep_merge_prepend }
           it do
             should serialize_to(
-              import: [
-                { source: 'one.yml', mode: 'deep_merge_prepend' },
-                { source: 'two.yml', mode: 'deep_merge_prepend' },
-              ],
               os: ['linux'],
               script: %w(./travis),
               env: { jobs: [{ TRAVIS: 'true' }] }
@@ -73,9 +65,6 @@ describe Travis::Yml::Configs, 'merging' do
           let(:mode) { :deep_merge }
           it do
             should serialize_to(
-              import: [
-                { source: 'one.yml', mode: 'deep_merge' },
-              ],
               os: ['linux'],
               script: %w(./travis),
               env: { jobs: [{ TRAVIS: 'true' }] }
@@ -87,9 +76,6 @@ describe Travis::Yml::Configs, 'merging' do
           let(:mode) { :replace }
           it do
             should serialize_to(
-              import: [
-                { source: 'one.yml', mode: 'replace' },
-              ],
               script: %w(./travis),
               env: { jobs: [{ TRAVIS: 'true' }] }
             )
@@ -110,10 +96,6 @@ describe Travis::Yml::Configs, 'merging' do
           let(:mode) { :deep_merge_append }
           it do
             should serialize_to(
-              import: [
-                { source: 'two.yml', mode: 'deep_merge_append' },
-                { source: 'one.yml', mode: 'deep_merge_append' },
-              ],
               os: ['linux'],
               dist: 'xenial',
               script: %w(./api),
@@ -126,10 +108,6 @@ describe Travis::Yml::Configs, 'merging' do
           let(:mode) { :deep_merge_prepend }
           it do
             should serialize_to(
-              import: [
-                { source: 'one.yml', mode: 'deep_merge_prepend' },
-                { source: 'two.yml', mode: 'deep_merge_prepend' },
-              ],
               os: ['linux'],
               dist: 'xenial',
               script: %w(./api),
@@ -142,9 +120,6 @@ describe Travis::Yml::Configs, 'merging' do
           let(:mode) { :deep_merge }
           it do
             should serialize_to(
-              import: [
-                { source: 'one.yml', mode: 'deep_merge' },
-              ],
               os: ['linux'],
               dist: 'xenial',
               script: %w(./api),
@@ -183,10 +158,6 @@ describe Travis::Yml::Configs, 'merging' do
           let(:mode) { :deep_merge_append }
           it do
             should serialize_to(
-              import: [
-                { source: 'two.yml', mode: 'deep_merge_append' },
-                { source: 'one.yml', mode: 'deep_merge_append' },
-              ],
               os: ['linux'],
               script: %w(./two ./one ./travis),
               env: { jobs: [{ ONE: 'true' }, { TRAVIS: 'true' }] }
@@ -198,10 +169,6 @@ describe Travis::Yml::Configs, 'merging' do
           let(:mode) { :deep_merge_prepend }
           it do
             should serialize_to(
-              import: [
-                { source: 'one.yml', mode: 'deep_merge_prepend' },
-                { source: 'two.yml', mode: 'deep_merge_prepend' },
-              ],
               os: ['linux'],
               script: %w(./travis ./one ./two),
               env: { jobs: [{ TRAVIS: 'true' }, { ONE: 'true' }] }
@@ -213,9 +180,6 @@ describe Travis::Yml::Configs, 'merging' do
           let(:mode) { :deep_merge }
           it do
             should serialize_to(
-              import: [
-                { source: 'one.yml', mode: 'deep_merge' },
-              ],
               os: ['linux'],
               script: %w(./travis),
               env: { jobs: [{ TRAVIS: 'true' }] }
@@ -227,9 +191,6 @@ describe Travis::Yml::Configs, 'merging' do
           let(:mode) { :replace }
           it do
             should serialize_to(
-              import: [
-                { source: 'one.yml', mode: 'replace' },
-              ],
               script: %w(./travis),
               env: { jobs: [{ TRAVIS: 'true' }] }
             )
@@ -250,10 +211,6 @@ describe Travis::Yml::Configs, 'merging' do
           let(:mode) { :deep_merge_append }
           it do
             should serialize_to(
-              import: [
-                { source: 'two.yml', mode: 'deep_merge_append' },
-                { source: 'one.yml', mode: 'deep_merge_append' },
-              ],
               os: ['linux'],
               dist: 'xenial',
               script: %w(./two ./one ./travis ./api),
@@ -266,10 +223,6 @@ describe Travis::Yml::Configs, 'merging' do
           let(:mode) { :deep_merge_prepend }
           it do
             should serialize_to(
-              import: [
-                { source: 'one.yml', mode: 'deep_merge_prepend' },
-                { source: 'two.yml', mode: 'deep_merge_prepend' },
-              ],
               os: ['linux'],
               dist: 'xenial',
               script: %w(./api ./travis ./one ./two),
@@ -282,9 +235,6 @@ describe Travis::Yml::Configs, 'merging' do
           let(:mode) { :deep_merge }
           it do
             should serialize_to(
-              import: [
-                { source: 'one.yml', mode: 'deep_merge' },
-              ],
               os: ['linux'],
               dist: 'xenial',
               script: %w(./api),

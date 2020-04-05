@@ -72,7 +72,6 @@ describe Travis::Yml::Configs do
       describe 'merge_normalized turned off' do
         it do
           should serialize_to(
-            import: [source: 'one/one.yml'],
             script: %w(./api)
           )
         end
@@ -81,7 +80,6 @@ describe Travis::Yml::Configs do
       describe 'merge_normalized turned on', merge_normalized: true do
         it do
           should serialize_to(
-            import: [source: 'one/one.yml'],
             script: %w(./one ./travis ./api)
           )
         end
@@ -101,7 +99,6 @@ describe Travis::Yml::Configs do
       describe 'merge_normalized turned off' do
         it do
           should serialize_to(
-            import: [{ source: 'one/one.yml' }],
             script: %w(./api)
           )
         end
@@ -110,7 +107,6 @@ describe Travis::Yml::Configs do
       describe 'merge_normalized turned on', merge_normalized: true do
         it do
           should serialize_to(
-            import: [{ source: 'one/one.yml' }, { source: 'one/one.yml' }],
             script: %w(./travis ./one ./api)
           )
         end
@@ -129,7 +125,6 @@ describe Travis::Yml::Configs do
       describe 'merge_normalized turned off' do
         it do
           should serialize_to(
-            import: [source: 'one/one.yml'],
             script: %w(./api)
           )
         end
@@ -138,7 +133,6 @@ describe Travis::Yml::Configs do
       describe 'merge_normalized turned on', merge_normalized: true do
         it do
           should serialize_to(
-            import: [source: 'one/one.yml'],
             script: %w(./one ./api)
           )
         end

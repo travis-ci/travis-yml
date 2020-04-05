@@ -30,10 +30,10 @@ describe Travis::Yml::Configs do
   )
 
   describe 'merge_normalized turned off' do
-    it { should serialize_to script: ['./api.1'], import: [source: 'one/one.yml'] }
+    it { should serialize_to script: ['./api.1'] }
   end
 
   describe 'merge_normalized turned on', merge_normalized: true do
-    it { should serialize_to script: ['./one', './api.1', './api.2', './travis'], import: [source: 'one/one.yml'] }
+    it { should serialize_to script: ['./one', './api.1', './api.2', './travis'] }
   end
 end
