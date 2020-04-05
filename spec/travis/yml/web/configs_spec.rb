@@ -42,7 +42,6 @@ describe Travis::Yml::Web::App, 'POST /configs' do
 
     it do
       expect(body[:config]).to eq(
-        import: [source: 'one.yml'],
         script: ['./one']
       )
     end
