@@ -146,7 +146,7 @@ describe Travis::Yml::Web::App do
         env:
           TRAVIS_YML: true
           FOO: 2
-        script: !seq+append
+        script: !append
           - ./travis_yml
       yml
     end
@@ -164,8 +164,8 @@ describe Travis::Yml::Web::App do
 
     let(:data) do
       [
-        { 'config' => api,        'source' => 'api',         'merge_mode' => nil },
-        { 'config' => travis_yml, 'source' => '.travis.yml', 'merge_mode' => mode },
+        { 'config' => api,        'source' => 'api',         'merge_mode' => mode },
+        { 'config' => travis_yml, 'source' => '.travis.yml', 'merge_mode' => nil },
         { 'config' => import,     'source' => 'import.yml',  'merge_mode' => mode },
       ]
     end

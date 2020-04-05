@@ -38,7 +38,7 @@ describe Travis::Yml::Parts::Merge do
   subject { symbolize(described_class.new(parts).apply) }
 
   def part(yaml, source = nil, mode = nil)
-    Travis::Yml::Parts::Part.new(yaml, source, mode)
+    Travis::Yml::Parts::Part.new(yaml, source, lft: mode)
   end
 
   describe 'merge_mode' do
@@ -281,5 +281,4 @@ describe Travis::Yml::Parts::Merge do
       it { should have_attributes src: 'import.yml', line: 3 }
     end
   end
-
 end

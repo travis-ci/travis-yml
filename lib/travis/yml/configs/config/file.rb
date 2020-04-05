@@ -40,13 +40,12 @@ module Travis
             @slug ||= Ref.new(source).repo || parent.repo.slug
           end
 
-          def mode
-            import['mode']
+          def merge_modes
+            { lft: import['mode'] || :deep_merge_append } # rgt: config.merge_modes,
           end
-          alias merge_mode mode
 
           def part
-            Parts::Part.new(raw, source, mode)
+            Parts::Part.new(raw, source, merge_modes)
           end
 
           def empty?
@@ -61,7 +60,7 @@ module Travis
             {
               source: to_s,
               config: raw,
-              mode: mode
+              mode: import['mode']
             }
           end
 

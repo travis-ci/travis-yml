@@ -210,7 +210,7 @@ describe Travis::Yml::Configs do
       yml
     end
 
-    it { expect(subject.map(&:mode)).to eq [nil, 'merge', 'deep_merge'] }
+    it { expect(subject.map(&:merge_modes)).to eq [{ lft: :deep_merge_append }, { lft: 'merge' }, { lft: 'deep_merge' }] }
   end
 
   describe 'conditional imports' do
