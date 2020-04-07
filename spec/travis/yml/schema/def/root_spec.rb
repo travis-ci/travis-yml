@@ -133,6 +133,8 @@ describe Travis::Yml::Schema::Def::Root do
         support
         version
         virt
+        workspace
+        workspaces
       ),
       addon: %i(
         apt

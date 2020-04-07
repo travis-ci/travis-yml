@@ -38,6 +38,9 @@ describe Travis::Yml::Schema::Def::Job do
         virt: {
           '$ref': '#/definitions/type/virt'
         },
+        workspaces: {
+          '$ref': '#/definitions/type/workspaces'
+        },
         before_install: {
           '$ref': '#/definitions/type/strs',
           summary: 'Scripts to run before the install stage'
