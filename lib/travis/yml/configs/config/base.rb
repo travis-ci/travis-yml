@@ -91,8 +91,8 @@ module Travis
           end
 
           def matches?
-            return true if Condition.new(import['if'], import, data).accept?
-            msg :info, :import, :skip_import, source: to_s, condition: import['if']
+            return true if Condition.new(defn['if'], defn, data).accept?
+            msg :info, :import, :skip_import, source: to_s, condition: defn['if']
             false
           end
           memoize :matches?

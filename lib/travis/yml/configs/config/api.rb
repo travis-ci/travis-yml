@@ -5,10 +5,16 @@ module Travis
   module Yml
     module Configs
       module Config
-        class Api < Struct.new(:ctx, :parent, :slug, :ref, :raw, :mode, :inputs)
+        class Api < Struct.new(:ctx, :parent, :slug, :ref, :raw, :mode, :defns)
           include Base, Memoize
 
           attr_reader :path, :input
+
+          def initialize(ctx, parent, slug, ref, defns)
+            defn = defns.shift
+            raw, mode = defn.values_at(:config, :mode)
+            super(ctx, parent, slug, ref, raw, mode, defns)
+          end
 
           def api?
             true
@@ -64,17 +70,15 @@ module Travis
           private
 
             def child
-              @child ||= inputs&.any? ? api : travis_yml
+              @child ||= defns&.any? ? api : travis_yml
             end
 
-            def import
+            def defn
               { source: source }
             end
 
             def api
-              input = inputs.shift
-              raw, mode = input.values_at(:config, :mode) # merge_ ??
-              Api.new(ctx, self, slug, ref, raw, mode, inputs)
+              Api.new(ctx, self, slug, ref, defns)
             end
 
             def travis_yml

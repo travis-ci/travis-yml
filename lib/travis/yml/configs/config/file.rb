@@ -5,13 +5,13 @@ module Travis
   module Yml
     module Configs
       module Config
-        class File < Obj.new(:ctx, :parent, :import)
+        class File < Obj.new(:ctx, :parent, :defn)
           include Base
 
           attr_reader :path, :ref, :raw
 
-          def initialize(ctx, parent, import)
-            import = stringify(import)
+          def initialize(ctx, parent, defn)
+            defn = stringify(defn)
             super
           end
 
@@ -33,7 +33,7 @@ module Travis
           end
 
           def source
-            import['source']
+            defn['source']
           end
 
           def slug
@@ -41,7 +41,7 @@ module Travis
           end
 
           def merge_modes
-            { lft: import['mode'] || :deep_merge_append } # rgt: config.merge_modes,
+            { lft: defn['mode'] || :deep_merge_append } # rgt: config.merge_modes,
           end
 
           def part
@@ -60,7 +60,7 @@ module Travis
             {
               source: to_s,
               config: raw,
-              mode: import['mode']
+              mode: defn['mode']
             }
           end
 
