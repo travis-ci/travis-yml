@@ -15,6 +15,7 @@ describe Travis::Yml::Schema::Def::Dist do
         'precise',
         'xenial',
         'bionic',
+        'focal',
         'server-2016'
       ],
       downcase: true,
@@ -48,7 +49,14 @@ describe Travis::Yml::Schema::Def::Dist do
             ]
           }
         },
-        'server-2016': {
+        focal: {
+          only: {
+            os: [
+              'linux'
+            ]
+          }
+        },
+       'server-2016': {
           only: {
             os: [
               'windows'
