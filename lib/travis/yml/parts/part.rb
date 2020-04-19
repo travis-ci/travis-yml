@@ -9,6 +9,7 @@ module Travis
           deep_merge
           deep_merge_append
           deep_merge_prepend
+          deep_merge_patch
           replace
         )
 
