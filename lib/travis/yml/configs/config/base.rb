@@ -205,6 +205,7 @@ module Travis
 
             def parse(str)
               return unless str
+              str = Oj.generate(str) if str.is_a?(Hash)
               opts = OPTS.keys.zip(Array.new(OPTS.size) { false }).to_h
               doc = Yml.load(str, opts)
               msgs.concat(doc.msgs)

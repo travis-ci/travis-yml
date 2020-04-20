@@ -15,7 +15,7 @@ module Travis
         attr_reader :str, :data, :src, :merge_mode
 
         def initialize(str, src = nil, merge_mode = nil)
-          @str = normalize(str.to_s)
+          @str = normalize(str)
           @src = src
           self.merge_mode = merge_mode
           @data = Parse.new(self).apply
@@ -38,7 +38,8 @@ module Travis
         end
 
         def normalize(str)
-          str = str.encode('UTF-8', 'binary', invalid: :replace, undef: :replace, replace: '')
+          str = Oj.generate(str) if str.is_a?(Hash)
+          str = str.to_s.encode('UTF-8', 'binary', invalid: :replace, undef: :replace, replace: '')
           str = squiggle(str)
           str.strip
         end
