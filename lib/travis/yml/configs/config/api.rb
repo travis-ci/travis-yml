@@ -5,15 +5,18 @@ module Travis
   module Yml
     module Configs
       module Config
-        class Api < Struct.new(:ctx, :parent, :slug, :ref, :raw, :mode, :defns)
+        class Api < Struct.new(:ctx, :parent, :slug, :ref, :defns, :mode)
           include Base, Memoize
 
-          attr_reader :path, :input
+          attr_reader :defn, :path, :input
 
-          def initialize(ctx, parent, slug, ref, defns)
-            defn = defns.shift
-            raw, mode = defn.values_at(:config, :mode)
-            super(ctx, parent, slug, ref, raw, mode, defns)
+          def initialize(ctx, parent, slug, ref, defns, mode = nil)
+            super(ctx, parent, slug, ref, defns, mode)
+            @defn = defns.shift.merge(source: source)
+          end
+
+          def raw
+            defn[:config]
           end
 
           def api?
@@ -22,7 +25,7 @@ module Travis
 
           def load(&block)
             @config = parse(raw)
-            self.mode ||= config.delete('merge_mode') # || config.merge_mode
+            defn[:mode] ||= config.delete('merge_mode')
             super
             store
             loaded
@@ -60,11 +63,7 @@ module Travis
           end
 
           def serialize
-            {
-              source: to_s,
-              config: raw,
-              mode: mode
-            }
+            defn
           end
 
           private
@@ -73,16 +72,12 @@ module Travis
               @child ||= defns&.any? ? api : travis_yml
             end
 
-            def defn
-              { source: source }
-            end
-
             def api
-              Api.new(ctx, self, slug, ref, defns)
+              Api.new(ctx, self, slug, ref, defns, defn[:mode])
             end
 
             def travis_yml
-              TravisYml.new(ctx, self, slug, ref, mode)
+              TravisYml.new(ctx, self, slug, ref, defn[:mode])
             end
         end
       end

@@ -41,7 +41,7 @@ module Travis
           end
 
           def merge_modes
-            { lft: defn['mode'] || :deep_merge_append } # rgt: config.merge_modes,
+            { lft: defn['mode'] || :deep_merge_append }
           end
 
           def part

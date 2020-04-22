@@ -12,13 +12,6 @@ describe Travis::Yml::Configs do
     it { expect(subject.map(&:to_s)).to eq sources }
   end
 
-  let(:raws) do
-    [
-      { config: 'script: ./api.1', mode: 'deep_merge_prepend' },
-      { config: 'script: ./api.2', mode: 'deep_merge_prepend' },
-    ]
-  end
-
   let(:travis_yml) do
     %(
       import:
@@ -35,18 +28,51 @@ describe Travis::Yml::Configs do
     )
   end
 
-  imports %w(
-    api
-    api.1
-    travis-ci/travis-yml:.travis.yml@ref
-    travis-ci/travis-yml:one.yml@ref
-  )
+  describe 'merging with .travis.yml' do
+    let(:raws) do
+      [
+        { config: 'script: ./api.1', mode: 'deep_merge_prepend' },
+        { config: 'script: ./api.2', mode: 'deep_merge_prepend' },
+      ]
+    end
 
-  describe 'merge_normalized turned off' do
-    it { should serialize_to script: ['./api.1'] }
+    imports %w(
+      api
+      api.1
+      travis-ci/travis-yml:.travis.yml@ref
+      travis-ci/travis-yml:one.yml@ref
+    )
+
+    describe 'merge_normalized turned off' do
+      it { should serialize_to script: ['./api.1'] }
+    end
+
+    describe 'merge_normalized turned on', merge_normalized: true do
+      it { should serialize_to script: ['./api.1', './api.2', './travis', './one'] }
+    end
   end
 
-  describe 'merge_normalized turned on', merge_normalized: true do
-    it { should serialize_to script: ['./api.1', './api.2', './travis', './one'] }
+  describe 'replacing .travis.yml' do
+    let(:raws) do
+      [
+        { config: 'script: ./api.1', mode: 'deep_merge_prepend' },
+        { config: 'script: ./api.2', mode: 'replace' },
+      ]
+    end
+
+    context do
+      imports %w(
+        api
+        api.1
+      )
+    end
+
+    describe 'merge_normalized turned off' do
+      it { should serialize_to script: ['./api.1'] }
+    end
+
+    describe 'merge_normalized turned on', merge_normalized: true do
+      it { should serialize_to script: ['./api.1', './api.2'] }
+    end
   end
 end

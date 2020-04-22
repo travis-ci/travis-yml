@@ -113,7 +113,7 @@ describe Travis::Yml::Configs do
       end
     end
 
-    describe 'merge_mode replace (skips .travis.yml)' do
+    describe 'merge_mode replace (skips .travis.yml, but keeps the import)' do
       let(:api) { "import: one/one.yml\nscript: ./api" }
       let(:mode) { :replace }
 

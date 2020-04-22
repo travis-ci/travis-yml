@@ -46,7 +46,7 @@ module Travis
           end
 
           def data
-            Oj.load(request_body, symbol_keys: true, mode: :strict, empty_string: false)
+            @data ||= Oj.load(request_body, symbol_keys: true, mode: :strict, empty_string: false)
           end
 
           def only(hash, *keys)

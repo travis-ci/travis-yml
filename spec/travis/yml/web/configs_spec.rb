@@ -55,13 +55,18 @@ describe Travis::Yml::Web::App, 'POST /configs' do
     describe 'api' do
       describe 'merge mode merge' do
         let(:config) { JSON.dump(merge_mode: 'merge') }
-        let(:data) { { repo: repo, type: type, ref: ref, config: config } }
+        let(:data) { { repo: repo, type: type, ref: ref, configs: [{ config: config }, { config: config }] } }
         let(:travis_yml) { 'import: { source: one.yml, mode: deep_merge_prepend }' }
 
         it do
           expect(body[:raw_configs]).to eq [
             {
               source: 'api',
+              config: config,
+              mode: 'merge'
+            },
+            {
+              source: 'api.1',
               config: config,
               mode: 'merge'
             },
@@ -80,8 +85,8 @@ describe Travis::Yml::Web::App, 'POST /configs' do
       end
 
       describe 'merge mode replace' do
-        let(:config) { JSON.dump(merge_mode: 'replace') }
-        let(:data) { { repo: repo, type: type, ref: ref, config: config } }
+        let(:config) { '{}' }
+        let(:data) { { repo: repo, type: type, ref: ref, configs: [config: config, mode: :replace] } }
 
         it do
           expect(body[:raw_configs]).to eq [
@@ -96,7 +101,7 @@ describe Travis::Yml::Web::App, 'POST /configs' do
 
       describe 'merge mode given as an array' do
         let(:config) { JSON.dump(merge_mode: ['deep_merge']) }
-        let(:data) { { repo: repo, type: type, ref: ref, config: config } }
+        let(:data) { { repo: repo, type: type, ref: ref, configs: [config: config] } }
 
         it { expect { body }.to_not raise_error }
       end
