@@ -45,7 +45,8 @@ module Travis
           end
 
           def on_retry(env, opts, retries, e)
-            logger.info "Status: #{e.response[:status]}. Retrying (#{retries}/8) ..."
+            # [:method, :url, :request, :request_headers, :ssl]
+            logger.info "env: #{env}, status: #{e.inspect}. Retrying (#{retries}/8) ..."
           end
 
           def url
