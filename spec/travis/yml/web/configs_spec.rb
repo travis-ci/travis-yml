@@ -7,7 +7,7 @@ describe Travis::Yml::Web::App, 'POST /configs' do
   let(:status)  { last_response.status }
   let(:headers) { last_response.headers }
   let(:body)    { Oj.load(last_response.body, symbol_keys: true) }
-  let(:data)    { { repo: repo, type: type, ref: ref } }
+  let(:data)    { { repo: repo, type: type, ref: ref, configs: respond_to?(:configs) ? configs : nil } }
   let(:repo)    { { github_id: 1, slug: 'travis-ci/travis-yml', token: 'token', private: false, private_key: 'key', allow_config_imports: true } }
   let(:type)    { :push }
   let(:ref)     { 'ref' }
@@ -55,7 +55,7 @@ describe Travis::Yml::Web::App, 'POST /configs' do
     describe 'api' do
       describe 'merge mode merge' do
         let(:config) { JSON.dump(merge_mode: 'merge') }
-        let(:data) { { repo: repo, type: type, ref: ref, configs: [{ config: config }, { config: config }] } }
+        let(:configs) { [{ config: config }, { config: config }] }
         let(:travis_yml) { 'import: { source: one.yml, mode: deep_merge_prepend }' }
 
         it do
@@ -105,6 +105,24 @@ describe Travis::Yml::Web::App, 'POST /configs' do
 
         it { expect { body }.to_not raise_error }
       end
+    end
+  end
+
+
+  describe 'does not generate duplicate messages' do
+    let(:configs) { [{ config: 'api: true', mode: 'deep_merge_append' }] }
+    let(:travis_yml) { 'travis_yml: true' }
+
+    before { post '/configs?defaults=true', Oj.generate(data) }
+
+    it do
+      expect(body[:messages]).to eq [
+        { level: 'info', code: 'default', key: 'root', args: { key: 'language', default: 'ruby' }, type: 'config' },
+        { level: 'info', code: 'default', key: 'root', args: { key: 'os', default: 'linux' }, type: 'config' },
+        { level: 'info', code: 'default', key: 'root', args: { key: 'dist', default: 'xenial' }, type: 'config' },
+        { level: 'warn', code: 'unknown_key', key: 'root', args: { key: 'api', value: true }, type: 'config' },
+        { level: 'warn', code: 'unknown_key', key: 'root', args: { key: 'travis_yml', value: true }, type: 'config' },
+      ]
     end
   end
 

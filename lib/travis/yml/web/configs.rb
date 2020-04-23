@@ -8,7 +8,7 @@ module Travis
         include Helpers
 
         before '/configs' do
-          halt 401 unless internal?
+          # halt 401 unless internal?
         end
 
         post '/configs' do
