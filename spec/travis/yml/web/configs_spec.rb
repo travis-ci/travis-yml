@@ -61,12 +61,12 @@ describe Travis::Yml::Web::App, 'POST /configs' do
         it do
           expect(body[:raw_configs]).to eq [
             {
-              source: 'api',
+              source: 'api.1',
               config: config,
               mode: 'merge'
             },
             {
-              source: 'api.1',
+              source: 'api.2',
               config: config,
               mode: 'merge'
             },

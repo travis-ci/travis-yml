@@ -37,8 +37,8 @@ describe Travis::Yml::Configs do
     end
 
     imports %w(
-      api
       api.1
+      api.2
       travis-ci/travis-yml:.travis.yml@ref
       travis-ci/travis-yml:one.yml@ref
     )
@@ -62,8 +62,8 @@ describe Travis::Yml::Configs do
 
     context do
       imports %w(
-        api
         api.1
+        api.2
       )
     end
 

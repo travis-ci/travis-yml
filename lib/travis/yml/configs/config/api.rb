@@ -12,7 +12,8 @@ module Travis
 
           def initialize(ctx, parent, slug, ref, defns, mode = nil)
             super(ctx, parent, slug, ref, defns, mode)
-            @defn = defns.shift.merge(source: source)
+            @defn = defns.shift
+            defn.update(source: source)
           end
 
           def raw
@@ -43,7 +44,7 @@ module Travis
           end
 
           def source
-            ['api', ix > 0 ? ix : nil].compact.join('.')
+            ['api', child.api? || ix > 0 ? ix + 1 : nil].compact.join('.')
           end
 
           def part
