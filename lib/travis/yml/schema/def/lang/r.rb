@@ -10,7 +10,7 @@ module Travis
           def define
             title 'R'
             summary 'R language support'
-            see 'Building an R Project': 'https://docs.travis-ci.com/user/languages/clojure/'
+            see 'Building an R Project': 'https://docs.travis-ci.com/user/languages/r/'
             matrix :r
 
             map :r_packages,          to: :seq
