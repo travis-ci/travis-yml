@@ -179,6 +179,7 @@ module Travis
           warnings_are_errors
           remotes
           repos
+          use_devtools
         )
       end
       memoize :r_keys

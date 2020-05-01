@@ -192,6 +192,14 @@ describe Travis::Yml::Schema::Def::R do
                 'r'
               ]
             }
+          },
+          use_devtools: {
+            type: :boolean,
+            only: {
+              language: [
+                'r'
+              ]
+            }
           }
         },
         normal: true
