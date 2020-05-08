@@ -129,5 +129,24 @@ describe Travis::Yml do
         it { should have_msg [:error, :'git.autocrlf', :unknown_value, value: 'invalid'] }
       end
     end
+
+    describe 'symlinks' do
+      describe 'true' do
+        yaml %(
+          git:
+            symlinks: true
+        )
+        it { should serialize_to git: { symlinks: true } }
+        it { should_not have_msg }
+      end
+      describe 'false' do
+        yaml %(
+          git:
+            symlinks: false
+        )
+        it { should serialize_to git: { symlinks: false } }
+        it { should_not have_msg }
+      end
+    end
   end
 end

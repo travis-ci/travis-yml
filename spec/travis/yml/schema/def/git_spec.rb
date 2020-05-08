@@ -68,7 +68,11 @@ describe Travis::Yml::Schema::Def::Git do
         submodules_depth: {
           type: :number,
           summary: kind_of(String),
-        }
+        },
+        symlinks: {
+          type: :boolean,
+          summary: kind_of(String),
+        },
       },
       additionalProperties: false
     )
