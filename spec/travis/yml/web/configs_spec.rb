@@ -20,36 +20,38 @@ describe Travis::Yml::Web::App, 'POST /configs' do
   before { header 'Authorization', 'internal token' }
 
   context do
-    before { post '/configs', Oj.generate(data) }
+    context do
+      before { post '/configs', Oj.generate(data) }
 
-    it { expect(status).to eq 200 }
-    it { expect(headers['Content-Type']).to eq 'application/json' }
+      it { expect(status).to eq 200 }
+      it { expect(headers['Content-Type']).to eq 'application/json' }
 
-    it do
-      expect(body[:raw_configs]).to eq [
-        {
-          source: 'travis-ci/travis-yml:.travis.yml@ref',
-          config: travis_yml,
-          mode: nil
-        },
-        {
-          source: 'travis-ci/travis-yml:one.yml@ref',
-          config: one_yml,
-          mode: nil
-        }
-      ]
-    end
+      it do
+        expect(body[:raw_configs]).to eq [
+          {
+            source: 'travis-ci/travis-yml:.travis.yml@ref',
+            config: travis_yml,
+            mode: nil
+          },
+          {
+            source: 'travis-ci/travis-yml:one.yml@ref',
+            config: one_yml,
+            mode: nil
+          }
+        ]
+      end
 
-    it do
-      expect(body[:config]).to eq(
-        script: ['./one']
-      )
-    end
+      it do
+        expect(body[:config]).to eq(
+          script: ['./one']
+        )
+      end
 
-    it do
-      expect(body[:matrix]).to eq [
-        script: ['./one']
-      ]
+      it do
+        expect(body[:matrix]).to eq [
+          script: ['./one']
+        ]
+      end
     end
 
     describe 'api' do
@@ -57,6 +59,8 @@ describe Travis::Yml::Web::App, 'POST /configs' do
         let(:config) { JSON.dump(merge_mode: 'merge') }
         let(:configs) { [{ config: config }, { config: config }] }
         let(:travis_yml) { 'import: { source: one.yml, mode: deep_merge_prepend }' }
+
+        before { post '/configs', Oj.generate(data) }
 
         it do
           expect(body[:raw_configs]).to eq [
@@ -88,6 +92,8 @@ describe Travis::Yml::Web::App, 'POST /configs' do
         let(:config) { '{}' }
         let(:data) { { repo: repo, type: type, ref: ref, configs: [config: config, mode: :replace] } }
 
+        before { post '/configs', Oj.generate(data) }
+
         it do
           expect(body[:raw_configs]).to eq [
             {
@@ -103,7 +109,26 @@ describe Travis::Yml::Web::App, 'POST /configs' do
         let(:config) { JSON.dump(merge_mode: ['deep_merge']) }
         let(:data) { { repo: repo, type: type, ref: ref, configs: [config: config] } }
 
+        before { post '/configs', Oj.generate(data) }
+
         it { expect { body }.to_not raise_error }
+      end
+
+      describe 'empty api config' do
+        let(:configs) { [config: ''] }
+
+        before { stub_content(repo[:github_id], '.travis.yml', status: 404) }
+        before { post '/configs', Oj.generate(data) }
+
+        it do
+          expect(body[:raw_configs]).to eq [
+            {
+              source: 'api',
+              config: '',
+              mode: nil
+            },
+          ]
+        end
       end
     end
   end

@@ -75,4 +75,18 @@ describe Travis::Yml::Configs do
       it { should serialize_to script: ['./api.1', './api.2'] }
     end
   end
+
+  describe 'no .travis.yml present' do
+    before { stub_content(repo[:github_id], '.travis.yml', status: 404) }
+
+    describe 'non-empty api config' do
+      let(:raws) { [config: 'script: ./api'] }
+      imports %w(api)
+    end
+
+    describe 'empty api config' do
+      let(:raws) { [config: ''] }
+      imports %w(api)
+    end
+  end
 end
