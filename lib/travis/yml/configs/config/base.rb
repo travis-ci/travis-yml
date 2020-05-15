@@ -75,15 +75,19 @@ module Travis
           def flatten
             return [] if errored? || circular? || !matches?
             configs = sort([self].compact + imports.map(&:flatten).flatten)
-            configs.uniq(&:to_s).reject(&:skip?)
+            configs = configs.reverse.uniq(&:to_s).reverse
+            configs = configs.reject(&:skip?) if root?
+            configs
           end
 
           def sort(configs)
+            configs = configs.reverse
             configs.dup.each.with_index do |lft, i|
-              next if lft.loaded?
-              rgt = configs.detect { |rgt| lft.to_s == rgt.to_s && rgt.loaded? }
-              configs[i] = configs.delete(rgt)
+              next unless lft.skip?
+              next unless j = configs[i..-1].index { |rgt| lft.to_s == rgt.to_s && !rgt.skip? }
+              configs[i], configs[i + j] = configs[i + j], configs[i]
             end
+            configs.reverse
           end
 
           def circular?
@@ -134,7 +138,8 @@ module Travis
           end
 
           def loaded?
-            skip? || !!@loaded && imports.all?(&:loaded?)
+            # skip? || !!@loaded && imports.all?(&:loaded?)
+            !!@loaded
           end
 
           def to_h
