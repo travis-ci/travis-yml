@@ -1,23 +1,11 @@
-language: ruby
+language: minimal
 
-cache: bundler
+before_script: docker pull ruby:2.6.2-slim
 
 before_install:
-- gem install bundler -v '2.0.1'
+  - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+  - sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+  - sudo apt-get update
+  - sudo apt-get -y -o Dpkg::Options::="--force-confnew" install docker-ce docker-ce-cli
 
-jobs:
-  include:
-    - stage: "testing time"
-      script:
-        - bundle exec rspec spec
-        - bundle exec rspec spec/integrate/configs_spec.rb --tag integration_configs
-        - bundle exec rspec spec/integrate/matrix_spec.rb --tag integration_matrix
-
-    - stage: ":ship: it to quay.io"
-      language: ruby
-      cache:
-        bundler: false
-      before_install: skip
-      install: skip
-      script: make ship
-      if: commit_message =~ /ship:docker/ OR env(SHIP_DOCKER) = true
+script: make ship
