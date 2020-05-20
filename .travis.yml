@@ -1,6 +1,14 @@
 language: ruby
 
 cache: bundler
+env:
+  global:
+    - PATH=/snap/bin:$PATH
+
+addons:
+  snaps:
+  - name: docker
+    channel: latest/beta
 
 before_install:
 - gem install bundler -v '2.0.1'
