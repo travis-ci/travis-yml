@@ -39,6 +39,7 @@ describe Travis::Yml::Schema::Def::Archs do
         enum: [
           'amd64',
           'arm64',
+          'arm64-graviton2',
           'ppc64le',
           's390x'
         ],
