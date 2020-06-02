@@ -51,6 +51,31 @@ module Travis
             end
           end
           memoize :imports
+
+          def merge
+            return {} if errored? || circular? || !matches?
+            # skip all but the last duplicate
+            order_duplicates(flatten2) if root?
+            imports.reverse.map(&:merge).inject(part) do |lft, rgt|
+              Support::Merge.new(lft.to_h, rgt.to_h).apply
+            end
+          end
+
+          def flatten2
+            return [] if errored? || circular? || !matches?
+            configs = sort([self].compact + imports.map(&:flatten2).flatten)
+            configs.uniq(&:to_s)
+          end
+
+          def order_duplicates(configs)
+            p configs.select(&:skip?).size
+            configs.select(&:skip?).each do |lft|
+              rgt = configs.detect { |rgt| lft.to_s == rgt.to_s && !rgt.skip? }
+              p lft, rgt
+              # configs[i] = configs.delete(rgt)
+            end
+          end
+
           # Flattening the tree should result in a unique array of configs
           # ordered by the order resulting in walking the tree depth-first.
           # However, we load the tree breadth-first and load times vary.
