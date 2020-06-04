@@ -58,6 +58,11 @@ describe Travis::Yml::Schema::Def::Archs do
               'ppc',
               'ppc64'
             ]
+          },
+          i386: {
+            aliases: [
+              'x86'
+            ]
           }
         },
         only: {

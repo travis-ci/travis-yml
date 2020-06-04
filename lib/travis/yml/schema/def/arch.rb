@@ -43,6 +43,7 @@ module Travis
             value :"arm64-graviton2"
             value :ppc64le, alias: %i(power ppc ppc64)
             value :i386
+            value :i386, alias: %i(x86)
             value :s390x
 
             export
