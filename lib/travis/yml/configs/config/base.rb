@@ -1,5 +1,6 @@
 require 'forwardable'
 require 'travis/yml/helper/obj'
+require 'travis/yml/configs/config/order'
 require 'travis/yml/configs/errors'
 require 'travis/yml/configs/ref'
 
@@ -32,6 +33,10 @@ module Travis
             @config ||= {}
           end
 
+          def config=(config)
+            @config = config
+          end
+
           def load(&block)
             @on_loaded = block if root?
           end
@@ -53,27 +58,15 @@ module Travis
           memoize :imports
 
           def merge
-            return {} if errored? || circular? || !matches?
-            # skip all but the last duplicate
-            order_duplicates(flatten2) if root?
+            return {} if skip? || errored? || circular? || !matches?
+            order_duplicates if root?
             imports.reverse.map(&:merge).inject(part) do |lft, rgt|
               Support::Merge.new(lft.to_h, rgt.to_h).apply
             end
           end
 
-          def flatten2
-            return [] if errored? || circular? || !matches?
-            configs = sort([self].compact + imports.map(&:flatten2).flatten)
-            configs.uniq(&:to_s)
-          end
-
-          def order_duplicates(configs)
-            p configs.select(&:skip?).size
-            configs.select(&:skip?).each do |lft|
-              rgt = configs.detect { |rgt| lft.to_s == rgt.to_s && !rgt.skip? }
-              p lft, rgt
-              # configs[i] = configs.delete(rgt)
-            end
+          def order_duplicates
+            Order.new(self).run
           end
 
           # Flattening the tree should result in a unique array of configs
@@ -110,6 +103,10 @@ module Travis
               rgt = configs.detect { |rgt| lft.to_s == rgt.to_s && rgt.loaded? }
               configs[i] = configs.delete(rgt)
             end
+          end
+
+          def errored?
+            !!@errored
           end
 
           def circular?
@@ -153,6 +150,10 @@ module Travis
 
           def skip
             @skip = true
+          end
+
+          def unskip
+            @skip = false
           end
 
           def skip?
@@ -207,10 +208,6 @@ module Travis
 
             def required?
               !parent&.api? || !travis_yml?
-            end
-
-            def errored?
-              !!@errored
             end
 
             def secure?(obj)
