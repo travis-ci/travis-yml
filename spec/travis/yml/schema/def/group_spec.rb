@@ -9,7 +9,6 @@ describe Travis::Yml::Schema::Def::Group do
       title: 'Group',
       summary: 'Build environment group',
       type: :string,
-      downcase: true,
       flags: [:internal]
     )
   end
