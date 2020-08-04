@@ -10,7 +10,6 @@ module Travis
 
           def define
             summary 'Build environment group'
-            downcase
             internal
             export
           end
