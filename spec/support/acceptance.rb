@@ -24,10 +24,10 @@ RSpec.shared_examples :acceptance do |examples|
   end
 
   describe Travis::Yml::Configs, context: :configs do
-    let(:repo) { { github_id: 1, slug: 'travis-ci/travis-yml', private: false, token: 'token', private_key: 'key', allow_config_imports: true } }
+    let(:repo) { { id: 1, github_id: 1, slug: 'travis-ci/travis-yml', private: false, token: 'token', private_key: 'key', allow_config_imports: true } }
     let(:data) { { branch: 'master' } }
     subject { described_class.new(repo, 'master', nil, data, opts).tap(&:load) }
-    before { stub_content(repo[:github_id], '.travis.yml', yaml) }
+    before { stub_content(repo[:id], '.travis.yml', yaml) }
     include_examples examples
   end
 end

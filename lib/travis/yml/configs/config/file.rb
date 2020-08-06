@@ -1,4 +1,4 @@
-require 'travis/yml/configs/github/content'
+require 'travis/yml/configs/content'
 require 'travis/yml/configs/config/base'
 
 module Travis
@@ -73,7 +73,7 @@ module Travis
             end
 
             def fetch
-              Github::Content.new(repo, path, ref).content
+              Content.new(repo, path, ref).content
             rescue FileNotFound => e
               required? ? raise : nil
             end
