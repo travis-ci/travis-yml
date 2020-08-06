@@ -1,9 +1,9 @@
 describe Travis::Yml::Configs, 'merging apt' do
-  let(:repo) { { github_id: 1, slug: 'travis-ci/travis-yml', private: false, token: 'token', private_key: 'key', allow_config_imports: true } }
+  let(:repo) { { id: 1, github_id: 1, slug: 'travis-ci/travis-yml', private: false, token: 'token', private_key: 'key', allow_config_imports: true } }
 
-  before { stub_content(repo[:github_id], '.travis.yml', travis_yml) }
-  before { stub_content(repo[:github_id], 'one.yml', one) }
-  before { stub_content(repo[:github_id], 'two.yml', two) }
+  before { stub_content(repo[:id], '.travis.yml', travis_yml) }
+  before { stub_content(repo[:id], 'one.yml', one) }
+  before { stub_content(repo[:id], 'two.yml', two) }
 
   subject { described_class.new(repo, 'master', api ? [config: api, mode: mode] : nil, {}, opts).tap(&:load) }
 

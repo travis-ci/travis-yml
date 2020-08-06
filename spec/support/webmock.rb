@@ -13,10 +13,14 @@ module Spec
         api_requests << %i(client method args start end).zip(args).to_h
       end
 
-      def stub_content(github_id, path, data)
+      def stub_content(id, path, data)
         data = { body: data } if data.is_a?(String)
-        url = %r(https://api.github.com/repositories/#{github_id}/contents/#{path})
-        body = JSON.dump(content: Base64.encode64(data[:body])) if data[:body]
+        url = %r(https://vcs.travis-ci.com/repos/#{id}/contents/#{path})
+        body = { data:
+          {
+            content: Base64.encode64(data[:body])
+          }
+        }.to_json if data[:body]
         status = data[:status] || 200
         stub_request(:get, url).to_return(body: body, status: status)
       end
@@ -27,6 +31,7 @@ module Spec
 
         body = data[:body] && JSON.dump(data[:body].merge(
           slug: slug,
+          id: data[:id] || 1,
           default_branch: { name: data[:body][:default_branch] },
           user_settings: { settings: data[:body].delete(:config_imports) ? [name: 'allow_config_imports', value: true] : [] }
         ))
