@@ -35,6 +35,7 @@ describe Travis::Yml do
         hhvm
         jdk
         julia
+        matlab
         mono
         nix
         node_js

@@ -32,6 +32,7 @@ describe Travis::Yml::Schema::Def::Language do
         'haxe',
         'java',
         'julia',
+        'matlab',
         'nix',
         'node_js',
         'perl',

@@ -766,7 +766,6 @@
         "title": "Group",
         "type": "string",
         "summary": "Build environment group",
-        "downcase": true,
         "flags": [
           "internal"
         ]
@@ -1275,6 +1274,7 @@
           "haxe",
           "java",
           "julia",
+          "matlab",
           "nix",
           "node_js",
           "perl",
@@ -1443,6 +1443,9 @@
           },
           {
             "$ref": "#/definitions/language/julia"
+          },
+          {
+            "$ref": "#/definitions/language/matlab"
           },
           {
             "$ref": "#/definitions/language/nix"
@@ -2048,6 +2051,9 @@
           },
           {
             "$ref": "#/definitions/support/julia_support"
+          },
+          {
+            "$ref": "#/definitions/support/matlab_support"
           },
           {
             "$ref": "#/definitions/support/nix_support"
@@ -7630,6 +7636,29 @@
         },
         "normal": true
       },
+      "matlab": {
+        "$id": "matlab",
+        "title": "Matlab",
+        "type": "object",
+        "properties": {
+          "matlab": {
+            "$ref": "#/definitions/type/strs",
+            "flags": [
+              "expand"
+            ],
+            "only": {
+              "language": [
+                "matlab"
+              ]
+            }
+          }
+        },
+        "summary": "Matlab build support",
+        "see": {
+          "Building a MATLAB Project": "https://docs.travis-ci.com/user/languages/matlab/"
+        },
+        "normal": true
+      },
       "nix": {
         "$id": "nix",
         "title": "Nix",
@@ -8786,6 +8815,22 @@
             "only": {
               "language": [
                 "julia"
+              ]
+            }
+          }
+        },
+        "normal": true
+      },
+      "matlab_support": {
+        "$id": "matlab_support",
+        "title": "Matlab Support",
+        "type": "object",
+        "properties": {
+          "matlab": {
+            "type": "string",
+            "only": {
+              "language": [
+                "matlab"
               ]
             }
           }
@@ -10015,6 +10060,7 @@
     "ghc",
     "haxe",
     "julia",
+    "matlab",
     "nix",
     "perl",
     "perl6",
