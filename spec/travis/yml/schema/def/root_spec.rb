@@ -225,6 +225,7 @@ describe Travis::Yml::Schema::Def::Root do
         haxe
         java
         julia
+        matlab
         nix
         node_js
         objective-c
