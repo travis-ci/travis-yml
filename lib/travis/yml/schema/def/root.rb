@@ -49,7 +49,7 @@ module Travis
 
             map    :language,       default: DEFAULT[:language]
             matrix :os,             default: DEFAULT[:os], to: :oss
-            map    :dist,           default: DEFAULT[:dist]
+            map    :dist,           default: ENV['TRAVIS_DEFAULT_DIST'] || DEFAULT[:dist]
             matrix :arch,           to: :archs
             map    :stack
             map    :sudo
