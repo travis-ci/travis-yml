@@ -16,10 +16,8 @@ module Spec
       def stub_content(id, path, data)
         data = { body: data } if data.is_a?(String)
         url = %r(https://vcs.travis-ci.com/repos/#{id}/contents/#{path})
-        body = { data:
-          {
-            content: Base64.encode64(data[:body])
-          }
+        body = {
+          content: Base64.encode64(data[:body])
         }.to_json if data[:body]
         status = data[:status] || 200
         stub_request(:get, url).to_return(body: body, status: status)
