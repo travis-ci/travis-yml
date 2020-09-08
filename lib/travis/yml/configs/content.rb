@@ -8,6 +8,7 @@ module Travis
         include Base64, Errors
 
         def content
+          puts "test"
           @content ||= normalize(fetch)
         end
 
