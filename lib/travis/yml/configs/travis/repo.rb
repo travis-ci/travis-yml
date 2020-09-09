@@ -8,7 +8,7 @@ module Travis
   module Yml
     module Configs
       module Travis
-        class Repo < Struct.new(:slug)
+        class Repo < Struct.new(:slug, :provider)
           include Errors, Helper::Obj
 
           def fetch
@@ -22,7 +22,8 @@ module Travis
           private
 
             def path
-              "repo/#{url_encode(slug)}"
+              puts "KURWA #{provider}"
+              provider ? "repo/#{provider}/#{url_encode(slug)}" : "repo/#{url_encode(slug)}"
             end
 
             def get(path, opts)
@@ -38,6 +39,7 @@ module Travis
                 github_id: attrs['github_id'],
                 slug: attrs['slug'],
                 private: attrs['private'],
+                vcs_type: attrs['vcs_type'],
                 permissions: attrs['permissions'],
                 default_branch: attrs.dig('default_branch', 'name'),
                 allow_config_imports: allow_config_imports?(attrs),

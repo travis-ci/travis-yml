@@ -11,12 +11,13 @@ module Travis
         class Repos
           include Synchronize
 
-          attr_reader :repos, :mutex, :mutexes
+          attr_reader :repos, :mutex, :mutexes, :provider
 
-          def initialize
+          def initialize(provider = 'github')
             @repos = {}
             @mutex = Mutex.new
             @mutexes = {}
+            @provider = provider
           end
 
           def [](slug)
@@ -32,7 +33,7 @@ module Travis
           end
 
           def fetch(slug)
-            Travis::Repo.new(slug).fetch
+            Travis::Repo.new(slug, provider).fetch
           end
 
           def mutex_for(slug)

@@ -9,7 +9,7 @@ module Travis
         end
 
         def repos
-          @repos ||= Model::Repos.new
+          @repos ||= Model::Repos.new(data[:provider])
         end
 
         def data

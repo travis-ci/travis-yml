@@ -16,7 +16,7 @@ module Travis
       class Configs < Struct.new(:repo, :ref, :defns, :data, :opts)
         include Enumerable, Helper::Metrics, Helper::Obj, Memoize
 
-        attr_reader :configs, :config, :stages, :jobs
+        attr_reader :configs, :config, :stages, :jobs#, :provider
 
         # - handle unknown merge modes on /configs
         # - add an acceptance test suite testing all the things through web?
@@ -145,12 +145,16 @@ module Travis
 
           def repo
             repo = Model::Repo.new(super || {})
+            # @provider = repo.provider
             repo.complete? ? ctx.repos[repo.slug] = repo : ctx.repos[repo.slug]
           end
           memoize :repo
 
           def data
-            super || {}
+            # (super || {}).merge(
+            #   provider: provider
+            # )
+             super || {}
           end
 
           def ctx
