@@ -136,7 +136,7 @@ module Travis
           end
 
           def api
-            Config::Api.new(ctx, nil, repo.slug, ref, defns)
+            Config::Api.new(ctx, nil, repo.slug, ref, defns, nil, repo.provider)
           end
 
           def travis_yml

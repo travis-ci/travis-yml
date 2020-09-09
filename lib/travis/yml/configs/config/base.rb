@@ -25,7 +25,7 @@ module Travis
           end
 
           def repo
-            @repo ||= ctx.repos[slug]
+            @repo ||= ctx.repos[slug, provider]
           end
 
           def config

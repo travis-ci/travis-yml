@@ -39,6 +39,7 @@ module Travis
                 github_id: attrs['github_id'],
                 slug: attrs['slug'],
                 private: attrs['private'],
+                vcs_type: attrs['vcs_type'],
                 permissions: attrs['permissions'],
                 default_branch: attrs.dig('default_branch', 'name'),
                 allow_config_imports: allow_config_imports?(attrs),

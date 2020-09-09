@@ -40,6 +40,11 @@ module Travis
             @slug ||= Ref.new(source).repo || parent.repo.slug
           end
 
+          # todo
+          def provider
+            'github'
+          end
+
           def merge_modes
             { lft: defn['mode'] || :deep_merge_append }
           end

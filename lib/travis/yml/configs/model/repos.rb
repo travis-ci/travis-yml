@@ -11,7 +11,7 @@ module Travis
         class Repos
           include Synchronize
 
-          attr_reader :repos, :mutex, :mutexes, :provider
+          attr_reader :repos, :mutex, :mutexes
 
           def initialize
             @repos = {}
