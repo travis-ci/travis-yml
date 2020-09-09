@@ -46,10 +46,11 @@ module Travis
           def imports
             imports = Array(config['import'])
             imports = imports.select { |import| import.is_a?(Hash) }
-            imports.map { |import| Config::File.new(ctx, self, import) }
+            imports.map do |import|
+              Config::File.new(ctx, self, provider, import)
+            end
           end
           memoize :imports
-
           # Flattening the tree should result in a unique array of configs
           # ordered by the order resulting in walking the tree depth-first.
           # However, we load the tree breadth-first and load times vary.

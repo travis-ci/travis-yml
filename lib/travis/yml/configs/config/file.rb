@@ -5,12 +5,12 @@ module Travis
   module Yml
     module Configs
       module Config
-        class File < Obj.new(:ctx, :parent, :defn)
+        class File < Obj.new(:ctx, :parent, :provider, :defn)
           include Base
 
           attr_reader :path, :ref, :raw
 
-          def initialize(ctx, parent, defn)
+          def initialize(ctx, parent, provider, defn)
             defn = stringify(defn)
             super
           end
@@ -38,11 +38,6 @@ module Travis
 
           def slug
             @slug ||= Ref.new(source).repo || parent.repo.slug
-          end
-
-          # todo
-          def provider
-            'github'
           end
 
           def merge_modes

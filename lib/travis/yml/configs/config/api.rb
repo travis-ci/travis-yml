@@ -10,7 +10,7 @@ module Travis
 
           attr_reader :defn, :path, :input
 
-          def initialize(ctx, parent, slug, ref, defns, mode = nil, provider = 'github')
+          def initialize(ctx, parent, slug, ref, defns, mode = nil, provider = nil)
             super(ctx, parent, slug, ref, defns, mode, provider)
             @defn = defns.shift
             defn.update(source: source)
@@ -74,11 +74,12 @@ module Travis
             end
 
             def api
+              puts "YYYYY #{provider}"
               Api.new(ctx, self, slug, ref, defns, defn[:mode], provider)
             end
 
             def travis_yml
-              TravisYml.new(ctx, self, slug, ref, defn[:mode])
+              TravisYml.new(ctx, self, slug, ref, defn[:mode], provider)
             end
         end
       end

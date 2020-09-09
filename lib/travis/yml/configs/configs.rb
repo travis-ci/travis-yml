@@ -140,7 +140,7 @@ module Travis
           end
 
           def travis_yml
-            Config::TravisYml.new(ctx, nil, repo.slug, ref)
+            Config::TravisYml.new(ctx, nil, repo.slug, ref, nil, repo.provider)
           end
 
           def repo
