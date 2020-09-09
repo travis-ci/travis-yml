@@ -5,6 +5,7 @@ module Travis
     module RemoteVcs
       class Repository < Client
         def content(id:, path:, ref:)
+          logger.info("RemoteVcs Repository #{id}, #{path}")
           request(:get, __method__) do |req|
             req.url "repos/#{id}/contents/#{path}"
             req.params['ref'] = ref
