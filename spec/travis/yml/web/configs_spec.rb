@@ -216,7 +216,7 @@ describe Travis::Yml::Web::App, 'POST /configs' do
               type: 'unauthorized',
               service: 'travis_ci',
               ref: 'other/other',
-              message: 'Unable to authenticate with Travis CI for repo other/other (Travis CI GET repo/other%2Fother responded with 401)'
+              message: 'Unable to authenticate with Travis CI for repo other/other (Travis CI GET repo/github/other%2Fother responded with 401)'
             }
           )
         end
@@ -231,7 +231,7 @@ describe Travis::Yml::Web::App, 'POST /configs' do
               type: 'unauthorized',
               service: 'travis_ci',
               ref: 'other/other',
-              message: 'Unable to authenticate with Travis CI for repo other/other (Travis CI GET repo/other%2Fother responded with 403)'
+              message: 'Unable to authenticate with Travis CI for repo other/other (Travis CI GET repo/github/other%2Fother responded with 403)'
             }
           )
         end
@@ -246,7 +246,7 @@ describe Travis::Yml::Web::App, 'POST /configs' do
               type: 'repo_not_found',
               service: 'travis_ci',
               ref: 'other/other',
-              message: 'Repo other/other not found on Travis CI (Travis CI GET repo/other%2Fother responded with 404)'
+              message: 'Repo other/other not found on Travis CI (Travis CI GET repo/github/other%2Fother responded with 404)'
             }
           )
         end

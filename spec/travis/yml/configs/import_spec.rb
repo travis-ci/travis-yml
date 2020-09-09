@@ -34,8 +34,8 @@ describe Travis::Yml::Configs do
   end
 
   describe 'push' do
-    let(:repo_url) { "repo/#{repo[:slug].sub('/', '%2F')}?representation=internal" }
-    let(:auth_url) { "repo/#{repo[:slug].sub('/', '%2F')}" }
+    let(:repo_url) { "repo/github/#{repo[:slug].sub('/', '%2F')}?representation=internal" }
+    let(:auth_url) { "repo/github/#{repo[:slug].sub('/', '%2F')}" }
 
     describe 'given a repo token' do
       imports %w(

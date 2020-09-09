@@ -50,6 +50,14 @@ module Travis
             Model::Config.new(config, keys, key).reencrypt
           end
 
+          def vcs_type
+            attrs[:vcs_type] || 'github_repository'
+          end
+
+          def provider
+            vcs_type.split('_').first
+          end
+
           REQUIRED = %i(id github_id private private_key allow_config_imports)
 
           def complete?

@@ -24,7 +24,7 @@ module Spec
       end
 
       def stub_repo(slug, data = {})
-        url = "https://api.travis-ci.com/repo/#{slug.sub('/', '%2F')}"
+        url = "https://api.travis-ci.com/repo/github/#{slug.sub('/', '%2F')}"
         url = "#{url}?representation=internal" if data[:internal]
 
         body = data[:body] && JSON.dump(data[:body].merge(

@@ -8,7 +8,7 @@ module Travis
   module Yml
     module Configs
       module Travis
-        class Repo < Struct.new(:slug)
+        class Repo < Struct.new(:slug, :provider)
           include Errors, Helper::Obj
 
           def fetch
@@ -22,7 +22,7 @@ module Travis
           private
 
             def path
-              "repo/#{url_encode(slug)}"
+              "repo/#{provider}/#{url_encode(slug)}"
             end
 
             def get(path, opts)
@@ -35,6 +35,7 @@ module Travis
             def map(attrs)
               {
                 id: attrs['id'],
+                vcs_type: attrs['vcs_type'],
                 github_id: attrs['github_id'],
                 slug: attrs['slug'],
                 private: attrs['private'],
