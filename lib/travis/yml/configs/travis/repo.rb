@@ -26,7 +26,6 @@ module Travis
             end
 
             def get(path, opts)
-              puts "XXXXXXX #{path}"
               resp = client(opts).get(path, only(opts, :representation))
               map(Oj.load(resp.body) || {})
             rescue Error => e
