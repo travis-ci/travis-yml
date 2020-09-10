@@ -1,5 +1,5 @@
 describe Travis::Yml::Configs do
-  let(:repo)    { { id: 1, github_id: 1, slug: 'travis-ci/travis-yml', private: false, default_branch: 'master', token: 'repo-token', private_key: 'key', allow_config_imports: true } }
+  let(:repo)    { { id: 1, github_id: 1, slug: 'travis-ci/travis-yml', private: false, default_branch: 'master', token: 'repo-token', private_key: 'key', allow_config_imports: true, vcs_type: vcs_type } }
   let(:raw)     { nil }
   let(:data)    { nil }
   let(:opts)    { { token: 'user-token', data: data } }
@@ -9,6 +9,8 @@ describe Travis::Yml::Configs do
   let(:jobs)    { subject.jobs }
   let(:stages)  { subject.stages }
   let(:msgs)    { subject.msgs.to_a }
+
+  let(:vcs_type) { 'GithubRepository' }
 
   before { stub_repo(repo[:slug], token: 'user-token') } # authorization
   before { stub_content(repo[:id], '.travis.yml', yaml) }
@@ -375,7 +377,19 @@ describe Travis::Yml::Configs do
 
     describe '401' do
       let(:status) { 401 }
-      it { expect { subject }.to raise_error Travis::Yml::Configs::Unauthorized }
+
+      context 'Default Github provider' do
+        it { expect { subject }.to raise_error Travis::Yml::Configs::Unauthorized }
+      end
+
+      context 'Other VCS provider' do
+        let(:vcs_type) { 'BitbucketRepository' }
+        let(:provider) { 'bitbucket' }
+
+        before { stub_repo('other/other', { internal: true, status: status }, provider) }
+
+        it { expect { subject }.to raise_error Travis::Yml::Configs::Unauthorized }
+      end
     end
 
     describe '403' do

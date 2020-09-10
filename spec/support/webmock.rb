@@ -23,8 +23,8 @@ module Spec
         stub_request(:get, url).to_return(body: body, status: status)
       end
 
-      def stub_repo(slug, data = {})
-        url = "https://api.travis-ci.com/repo/github/#{slug.sub('/', '%2F')}"
+      def stub_repo(slug, data = {}, provider = 'github')
+        url = "https://api.travis-ci.com/repo/#{provider}/#{slug.sub('/', '%2F')}"
         url = "#{url}?representation=internal" if data[:internal]
 
         body = data[:body] && JSON.dump(data[:body].merge(
