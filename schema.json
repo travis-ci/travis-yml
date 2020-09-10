@@ -84,6 +84,9 @@
         "env": {
           "$ref": "#/definitions/type/env"
         },
+        "virt_size": {
+          "$ref": "#/definitions/type/virt_size"
+        },
         "compiler": {
           "$ref": "#/definitions/type/compilers",
           "flags": [
@@ -991,6 +994,9 @@
               "dist": {
                 "$ref": "#/definitions/type/dist"
               },
+              "virt_size": {
+                "$ref": "#/definitions/type/virt_size"
+              },
               "arch": {
                 "$ref": "#/definitions/type/arch"
               },
@@ -1086,6 +1092,9 @@
               "dist": {
                 "$ref": "#/definitions/type/dist"
               },
+              "virt_size": {
+                "$ref": "#/definitions/type/virt_size"
+              },
               "arch": {
                 "$ref": "#/definitions/type/arch"
               },
@@ -1168,6 +1177,9 @@
               },
               "dist": {
                 "$ref": "#/definitions/type/dist"
+              },
+              "virt_size": {
+                "$ref": "#/definitions/type/virt_size"
               },
               "arch": {
                 "$ref": "#/definitions/type/arch"
@@ -2145,6 +2157,55 @@
           "lxd",
           "vm"
         ]
+      },
+      "virt_size": {
+        "$id": "virt_size",
+        "title": "Virtualization Size",
+        "type": "string",
+        "summary": "Build environment compute type(CPU and memory)",
+        "aliases": [
+          "virt_size"
+        ],
+        "flags": [
+          "internal"
+        ],
+        "downcase": true,
+        "enum": [
+          "medium",
+          "large",
+          "x-large",
+          "2x-large"
+        ],
+        "values": {
+          "medium": {
+            "only": {
+              "virt": [
+                "vm"
+              ]
+            }
+          },
+          "large": {
+            "only": {
+              "virt": [
+                "vm"
+              ]
+            }
+          },
+          "x-large": {
+            "only": {
+              "virt": [
+                "vm"
+              ]
+            }
+          },
+          "2x-large": {
+            "only": {
+              "virt": [
+                "vm"
+              ]
+            }
+          }
+        }
       }
     },
     "addon": {

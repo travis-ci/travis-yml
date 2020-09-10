@@ -58,6 +58,9 @@ describe Travis::Yml::Schema::Def::Jobs do
         env: {
           '$ref': '#/definitions/type/env_vars'
         },
+        virt_size: {
+          '$ref': '#/definitions/type/virt_size'
+        },
         compiler: {
           type: :string,
           example: 'gcc',

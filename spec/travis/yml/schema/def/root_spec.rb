@@ -133,6 +133,7 @@ describe Travis::Yml::Schema::Def::Root do
         support
         version
         virt
+        virt_size
       ),
       addon: %i(
         apt
@@ -302,6 +303,7 @@ describe Travis::Yml::Schema::Def::Root do
           sudo
           trace
           version
+          virt_size
         )
       end
 

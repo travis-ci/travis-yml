@@ -55,6 +55,9 @@ describe Travis::Yml::Schema::Def::Jobs do
         sudo: {
           '$ref': '#/definitions/type/sudo'
         },
+        virt_size: {
+          '$ref': '#/definitions/type/virt_size'
+        },
         env: {
           '$ref': '#/definitions/type/env_vars'
         },

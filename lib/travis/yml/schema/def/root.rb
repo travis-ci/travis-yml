@@ -15,6 +15,7 @@ require 'travis/yml/schema/def/stages'
 require 'travis/yml/schema/def/sudo'
 require 'travis/yml/schema/def/version'
 require 'travis/yml/schema/def/virt'
+require 'travis/yml/schema/def/virt_size'
 require 'travis/yml/schema/type'
 
 module Travis
@@ -55,6 +56,7 @@ module Travis
             map    :sudo
             map    :import,         to: :imports
             map    :env
+            map    :virt_size
             matrix :compiler,       to: :compilers
             matrix :osx_image,      to: :osx_images
             map    :stages

@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 require 'travis/yml/schema/type'
+require 'pry'
 
 module Travis
   module Yml
@@ -62,6 +63,7 @@ module Travis
             map :language
             map :os
             map :dist
+            map :virt_size
             map :arch
             map :osx_image
             map :sudo

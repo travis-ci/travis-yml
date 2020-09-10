@@ -22,6 +22,7 @@ group :test do
   gem 'rake'
   gem 'rspec'
   gem 'webmock'
+  gem 'pry'
 end
 
 gemspec
