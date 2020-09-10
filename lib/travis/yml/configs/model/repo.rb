@@ -51,11 +51,11 @@ module Travis
           end
 
           def vcs_type
-            attrs[:vcs_type] || 'github_repository'
+            attrs[:vcs_type] || 'GithubRepository'
           end
 
           def provider
-            vcs_type.split('_').first
+            vcs_type.downcase.gsub('repository', '')
           end
 
           REQUIRED = %i(id github_id private private_key allow_config_imports)
