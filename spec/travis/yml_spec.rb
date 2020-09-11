@@ -54,6 +54,7 @@ describe Travis::Yml do
         smalltalk_config
         smalltalk_vm
         solution
+        vm
         xcode_scheme
         xcode_sdk
       )

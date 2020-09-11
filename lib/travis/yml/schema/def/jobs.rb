@@ -63,7 +63,7 @@ module Travis
             map :language
             map :os
             map :dist
-            map :virt_size
+            map :vm
             map :arch
             map :osx_image
             map :sudo

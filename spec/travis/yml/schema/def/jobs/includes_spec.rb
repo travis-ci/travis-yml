@@ -43,6 +43,9 @@ describe Travis::Yml::Schema::Def::Jobs do
         arch: {
           '$ref': '#/definitions/type/arch'
         },
+        vm: {
+          '$ref': '#/definitions/type/vm'
+        },
         osx_image: {
           type: :string,
           summary: 'OSX image to use for the build environment',
@@ -57,9 +60,6 @@ describe Travis::Yml::Schema::Def::Jobs do
         },
         env: {
           '$ref': '#/definitions/type/env_vars'
-        },
-        virt_size: {
-          '$ref': '#/definitions/type/virt_size'
         },
         compiler: {
           type: :string,

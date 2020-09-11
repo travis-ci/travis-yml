@@ -84,8 +84,11 @@
         "env": {
           "$ref": "#/definitions/type/env"
         },
-        "virt_size": {
-          "$ref": "#/definitions/type/virt_size"
+        "vm": {
+          "$ref": "#/definitions/type/sizes",
+          "flags": [
+            "expand"
+          ]
         },
         "compiler": {
           "$ref": "#/definitions/type/compilers",
@@ -994,8 +997,8 @@
               "dist": {
                 "$ref": "#/definitions/type/dist"
               },
-              "virt_size": {
-                "$ref": "#/definitions/type/virt_size"
+              "vm": {
+                "$ref": "#/definitions/type/vm"
               },
               "arch": {
                 "$ref": "#/definitions/type/arch"
@@ -1092,8 +1095,8 @@
               "dist": {
                 "$ref": "#/definitions/type/dist"
               },
-              "virt_size": {
-                "$ref": "#/definitions/type/virt_size"
+              "vm": {
+                "$ref": "#/definitions/type/vm"
               },
               "arch": {
                 "$ref": "#/definitions/type/arch"
@@ -1178,8 +1181,8 @@
               "dist": {
                 "$ref": "#/definitions/type/dist"
               },
-              "virt_size": {
-                "$ref": "#/definitions/type/virt_size"
+              "vm": {
+                "$ref": "#/definitions/type/vm"
               },
               "arch": {
                 "$ref": "#/definitions/type/arch"
@@ -1896,6 +1899,69 @@
         ],
         "summary": "Services to set up and start"
       },
+      "size": {
+        "$id": "size",
+        "title": "Size",
+        "type": "string",
+        "flags": [
+          "internal"
+        ],
+        "downcase": true,
+        "enum": [
+          "medium",
+          "large",
+          "x-large",
+          "2x-large"
+        ],
+        "values": {
+          "medium": {
+            "only": {
+              "virt": [
+                "vm"
+              ]
+            }
+          },
+          "large": {
+            "only": {
+              "virt": [
+                "vm"
+              ]
+            }
+          },
+          "x-large": {
+            "only": {
+              "virt": [
+                "vm"
+              ]
+            }
+          },
+          "2x-large": {
+            "only": {
+              "virt": [
+                "vm"
+              ]
+            }
+          }
+        }
+      },
+      "sizes": {
+        "$id": "sizes",
+        "title": "Compute type size",
+        "anyOf": [
+          {
+            "type": "object",
+            "patternProperties": {
+              ".*": {
+                "$ref": "#/definitions/type/size"
+              }
+            },
+            "title": "Compute type size"
+          },
+          {
+            "$ref": "#/definitions/type/size"
+          }
+        ]
+      },
       "stack": {
         "$id": "stack",
         "title": "Stack",
@@ -2158,54 +2224,20 @@
           "vm"
         ]
       },
-      "virt_size": {
-        "$id": "virt_size",
+      "vm": {
+        "$id": "vm",
         "title": "Virtualization Size",
-        "type": "string",
-        "summary": "Build environment compute type(CPU and memory)",
-        "aliases": [
-          "virt_size"
-        ],
-        "flags": [
-          "internal"
-        ],
-        "downcase": true,
-        "enum": [
-          "medium",
-          "large",
-          "x-large",
-          "2x-large"
-        ],
-        "values": {
-          "medium": {
-            "only": {
-              "virt": [
-                "vm"
-              ]
-            }
-          },
-          "large": {
-            "only": {
-              "virt": [
-                "vm"
-              ]
-            }
-          },
-          "x-large": {
-            "only": {
-              "virt": [
-                "vm"
-              ]
-            }
-          },
-          "2x-large": {
-            "only": {
-              "virt": [
-                "vm"
-              ]
-            }
+        "description": "Compute type (CPU and memory) to use for Builds",
+        "type": "object",
+        "properties": {
+          "size": {
+            "$ref": "#/definitions/type/sizes",
+            "summary": "Compute size to use for build"
           }
-        }
+        },
+        "additionalProperties": false,
+        "summary": "Build environment compute type(CPU and memory)",
+        "normal": true
       }
     },
     "addon": {
@@ -10100,6 +10132,7 @@
   "expand": [
     "os",
     "arch",
+    "vm",
     "compiler",
     "osx_image",
     "jobs",

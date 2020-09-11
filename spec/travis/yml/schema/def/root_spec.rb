@@ -125,6 +125,8 @@ describe Travis::Yml::Schema::Def::Root do
         secures
         service
         services
+        size
+        sizes
         stack
         stage
         stages
@@ -133,7 +135,7 @@ describe Travis::Yml::Schema::Def::Root do
         support
         version
         virt
-        virt_size
+        vm
       ),
       addon: %i(
         apt
@@ -303,7 +305,7 @@ describe Travis::Yml::Schema::Def::Root do
           sudo
           trace
           version
-          virt_size
+          vm
         )
       end
 
