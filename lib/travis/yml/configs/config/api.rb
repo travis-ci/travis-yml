@@ -74,7 +74,6 @@ module Travis
             end
 
             def api
-              puts "YYYYY #{provider}"
               Api.new(ctx, self, slug, ref, defns, defn[:mode], provider)
             end
 
