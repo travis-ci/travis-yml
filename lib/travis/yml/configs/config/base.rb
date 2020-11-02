@@ -60,7 +60,7 @@ module Travis
           def merge
             return {} if skip? || errored? || circular? || !matches?
             order_duplicates if root?
-            imports.reverse.map(&:merge).inject(part) do |lft, rgt|
+            imports.map(&:merge).inject(part) do |lft, rgt|
               Support::Merge.new(lft.to_h, rgt.to_h).apply
             end
           end
