@@ -71,12 +71,12 @@ describe Travis::Yml::Doc, 'messages', alert: true, defaults: true, empty: true,
 
   describe 'deprecated_key' do
     yaml 'one: one'
-    it { should have_msg [:warn, :root, :deprecated_key, key: 'one', info: 'deprecation', line: 0] }
+    it { should have_msg [:info, :root, :deprecated_key, key: 'one', info: 'deprecation', line: 0] }
   end
 
   describe 'deprecated_value' do
     yaml 'one: "1"'
-    it { should have_msg [:warn, :one, :deprecated_value, value: '1', info: 'deprecation', line: 0] }
+    it { should have_msg [:info, :one, :deprecated_value, value: '1', info: 'deprecation', line: 0] }
   end
 
   describe 'downcase' do

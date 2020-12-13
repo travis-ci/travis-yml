@@ -57,7 +57,7 @@ describe Travis::Yml do
             branches: str
       )
       it { should serialize_to addons: { sonarcloud: { branches: ['str'] } } }
-      it { should have_msg [:warn, :'addons.sonarcloud', :deprecated_key, key: 'branches', info: 'setting a branch is deprecated'] }
+      it { should have_msg [:info, :'addons.sonarcloud', :deprecated_key, key: 'branches', info: 'setting a branch is deprecated'] }
       it { expect(msgs.size).to eq 1 }
     end
 
@@ -69,7 +69,7 @@ describe Travis::Yml do
             - str
       )
       it { should serialize_to addons: { sonarcloud: { branches: ['str'] } } }
-      it { should have_msg [:warn, :'addons.sonarcloud', :deprecated_key, key: 'branches', info: 'setting a branch is deprecated'] }
+      it { should have_msg [:info, :'addons.sonarcloud', :deprecated_key, key: 'branches', info: 'setting a branch is deprecated'] }
       it { expect(msgs.size).to eq 1 }
     end
 
@@ -80,7 +80,7 @@ describe Travis::Yml do
             github_token: str
       )
       it { should serialize_to addons: { sonarcloud: { github_token: 'str' } } }
-      it { should have_msg [:warn, :'addons.sonarcloud', :deprecated_key, key: 'github_token', info: 'setting a GitHub token is deprecated'] }
+      it { should have_msg [:info, :'addons.sonarcloud', :deprecated_key, key: 'github_token', info: 'setting a GitHub token is deprecated'] }
       it { should have_msg [:alert, :'addons.sonarcloud.github_token', :secure, type: :str] }
       it { expect(msgs.size).to eq 2 }
     end
@@ -93,7 +93,7 @@ describe Travis::Yml do
               secure: #{secure}
       )
       it { should serialize_to addons: { sonarcloud: { github_token: { secure: secure } } } }
-      it { should have_msg [:warn, :'addons.sonarcloud', :deprecated_key, key: 'github_token', info: 'setting a GitHub token is deprecated'] }
+      it { should have_msg [:info, :'addons.sonarcloud', :deprecated_key, key: 'github_token', info: 'setting a GitHub token is deprecated'] }
       it { expect(msgs.size).to eq 1 }
     end
   end

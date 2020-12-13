@@ -151,7 +151,7 @@ describe Travis::Yml do
         language: __connie__
       )
       it { should serialize_to language: '__connie__' }
-      it { should have_msg [:warn, :language, :deprecated_value, value: '__connie__', info: 'experimental stack language']  }
+      it { should have_msg [:info, :language, :deprecated_value, value: '__connie__', info: 'experimental stack language']  }
     end
   end
 end
