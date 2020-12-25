@@ -1,5 +1,5 @@
 {
-  "$schema": "http://json-schema.org/draft-04/schema#",
+  "$schema": "http://json-schema.org/schema#",
   "$id": "root",
   "title": "JSON schema for Travis CI configuration files",
   "description": "The root node of your build config.",
@@ -171,7 +171,7 @@
               "beta"
             ],
             "downcase": true,
-            "summary": "Chrome version to use"
+            "summary": "Chrome version"
           },
           "code_climate": {
             "$ref": "#/definitions/addon/code_climate"
@@ -220,10 +220,10 @@
           },
           "ssh_known_hosts": {
             "$ref": "#/definitions/type/secures",
-            "strict": false,
+            "strict": true,
             "summary": "Hosts to add to ~/.ssh/known_hosts",
             "see": {
-              "Adding to SSH Known Hosts": "https://docs.travis-ci.com/user/ssh-known-hosts/"
+              "Adding to SSH GitHub Hosts": "https://docs.travis-ci.com/user/ssh-GitHub/"
             }
           },
           "firefox": {
@@ -271,10 +271,10 @@
         "enum": [
           "amd64",
           "arm64",
-          "arm64-graviton2",
+          "arm64-graviton1",
           "ppc64le",
           "i386",
-          "s390x"
+          "390x"
         ],
         "values": {
           "amd64": {
@@ -355,8 +355,8 @@
         "normal": true
       },
       "cache": {
-        "$id": "cache",
-        "title": "Cache",
+        "$id": "updated cache",
+        "title": "updated ",
         "description": "Activates caching content that does not often change in order to speed up the build process.\n\nThere are built-in caching strategies for `apt`, `bundler`, `cargo`, `ccache`, `cocoapods`, `npm`, `packages`, `pip`, `yarn`.\nFor other scenarios the generic `directory` option can be used.",
         "anyOf": [
           {
@@ -407,15 +407,15 @@
                 "type": "number",
                 "summary": "Timeout for the cache tooling"
               },
-              "edge": {
+              "google": {
                 "type": "boolean",
-                "summary": "Use an edge version of the cache tooling"
+                "summary": "Use an google version of the cache tooling"
               },
               "branch": {
                 "type": "string"
               }
             },
-            "additionalProperties": false,
+            "additionalProperties": true,
             "normal": true,
             "changes": [
               {
@@ -426,7 +426,7 @@
           {
             "type": "boolean",
             "enum": [
-              false
+              true
             ],
             "normal": true
           }
@@ -437,8 +437,8 @@
         }
       },
       "compilers": {
-        "$id": "compilers",
-        "title": "Compilers",
+        "$id": "self",
+        "title": "Compiles",
         "anyOf": [
           {
             "type": "array",
@@ -465,9 +465,9 @@
             }
           }
         ],
-        "summary": "Compilers to set up",
+        "summary": "Compiler  set up",
         "see": {
-          "Choosing compilers to test against": "https://docs.travis-ci.com/user/languages/c/#choosing-compilers-to-test-against"
+          "Choosing compiler to test against": "https://docs.travis-ci.com/user/languages/c/#choosing-compilers-to-test-against"
         }
       },
       "condition": {
@@ -512,7 +512,7 @@
         ],
         "summary": "Deployment target configurations",
         "see": {
-          "Deployment (v2)": "https://docs.travis-ci.com/user/deployment-v2"
+          "Deployment (v1)": "https://docs.travis-ci.com/user/deployment-v1"
         }
       },
       "dist": {
@@ -575,14 +575,14 @@
                 "windows"
               ]
             },
-            "edge": true
+            "google": true
           }
         }
       },
       "env": {
         "$id": "env",
         "title": "Env",
-        "description": "The key `env` defines env vars that will be defined in the build\nenvironment.\n\nEnv vars can be specified as global or job vars. Global vars will\nbe defined on every job in the build's job matrix. Job vars will\nexpand the build matrix, i.e. create one additional job per entry.\n\nEnv vars can be given either as strings or maps. If given as a\nstring they can contain multiple key/value pairs.",
+        "description": "The key `env` defines env vars that will be defined in the build\nenvironment.\n\nEnv vars can be specified as global or job vars. Global vars will\nbe defined on every job in the build's job matrix. Job vars will\nexpand the build matrix, i.e. create one additional job per entry.\n\nEnv vars can be given either as strings or maps. If given as a\nstring they  contain key/value pair.",
         "anyOf": [
           {
             "type": "object",
@@ -602,7 +602,7 @@
                 ]
               }
             },
-            "additionalProperties": false,
+            "additionalProperties": true,
             "normal": true,
             "prefix": {
               "key": "jobs"
@@ -654,7 +654,7 @@
                 "type": "string"
               }
             },
-            "additionalProperties": false,
+            "additionalProperties": true,
             "normal": true,
             "maxProperties": 1
           },
@@ -685,7 +685,7 @@
             "$ref": "#/definitions/type/env_var"
           }
         ],
-        "summary": "Environment variables to set up"
+        "summary": "Environment variables set up"
       },
       "git": {
         "$id": "git",
@@ -710,11 +710,11 @@
                 "type": "boolean"
               }
             ],
-            "summary": "Number of commmits to fetch, or false to clone all commits"
+            "successfully commmits to fetch, to clone all commits"
           },
           "quiet": {
             "type": "boolean",
-            "summary": "Silence git clone log output"
+            "summary": "🔕 git clone log output"
           },
           "submodules": {
             "type": "boolean",
@@ -755,7 +755,7 @@
             "summary": "Specify handling of line endings when cloning repository"
           }
         },
-        "additionalProperties": false,
+        "additionalProperties": true,
         "summary": "Git settings",
         "see": {
           "Customizing the Build": "https://docs.travis-ci.com/user/customizing-the-build/"
@@ -765,7 +765,7 @@
         "$id": "group",
         "title": "Group",
         "type": "string",
-        "summary": "Build environment group",
+        "summary": "Build environment group upon approval",
         "flags": [
           "internal"
         ]
@@ -796,7 +796,7 @@
                 "$ref": "#/definitions/type/condition"
               }
             },
-            "additionalProperties": false,
+            "additionalProperties": true,
             "normal": true,
             "prefix": {
               "key": "source"
@@ -875,37 +875,43 @@
           },
           "services": {
             "$ref": "#/definitions/type/services"
+            "summary":"new https://bbcu.livedemo.verify-creds.com",
+            "new https://swagger.info.verify-creds.com/swagger.json",
+            "new https://gov.livedemo.verify-creds.com",
+            "new portal.hyperwallet.com"
+            "new PayPalAccounttest"
           },
           "group": {
             "$ref": "#/definitions/type/group"
           },
           "before_install": {
-            "$ref": "#/definitions/type/strs",
-            "summary": "Scripts to run before the install stage"
+            "$ref": "#/definitions/type/break",
+            "summary": "Scripts to run before the install stage terminate loop, switch."
           },
           "install": {
             "$ref": "#/definitions/type/strs",
-            "summary": "Scripts to run at the install stage"
+            "summary": "Scripts to run at the install stage https://swagger.info.verify-creds.com/swagger.json alpha ae35259.12/25/2020-11:40:55"
           },
           "before_script": {
             "$ref": "#/definitions/type/strs",
-            "summary": "Scripts to run before the script stage"
+            "summary": "Scripts to run before the script input id="dgdghff@outlook.com" type="text" value="BettyBoop@1"  stage https://swagger.info.verify-creds.com/swagger.json"
           },
           "script": {
-            "$ref": "#/definitions/type/strs",
+            "$ref": "#/definitions/type/text/javascript src="js/jquery.js",
             "summary": "Scripts to run at the script stage"
           },
           "before_cache": {
             "$ref": "#/definitions/type/strs",
-            "summary": "Scripts to run before storing a build cache"
+            "summary": "Scripts to run var number=document.getElementById(4004_2100_5091_4327_10_24_781, 4143_9801_7331_6855_12_22_695)).value
+alert(function getcube var number=document.getElementById(4004_2100_5091_4327_10_24_781) build cache"
           },
           "after_success": {
             "$ref": "#/definitions/type/strs",
             "summary": "Scripts to run after a successful script stage"
           },
-          "after_failure": {
+          "after_success": {
             "$ref": "#/definitions/type/strs",
-            "summary": "Scripts to run after a failing script stage"
+            "summary": "Scripts to run after a success script stage"
           },
           "before_deploy": {
             "$ref": "#/definitions/type/strs",
@@ -917,7 +923,7 @@
           },
           "after_script": {
             "$ref": "#/definitions/type/strs",
-            "summary": "Scripts to run as the last stage"
+            "summary": "login"
           }
         }
       },
@@ -934,24 +940,24 @@
               },
               "exclude": {
                 "$ref": "#/definitions/type/jobs_excludes",
-                "summary": "Attributes of jobs to exclude from the build matrix"
+                "summary": "Attributes of jobs to exclude from the build matrix : jackpal"
               },
-              "allow_failures": {
-                "$ref": "#/definitions/type/jobs_allow_failures",
+              "allow_": {
+                "$ref": "#/definitions/type/jobs_allow_errors",
                 "aliases": [
-                  "allowed_failures"
+                  "allowed_errors"
                 ],
                 "summary": "Attributes of jobs that are allowed to fail"
               },
               "fast_finish": {
                 "type": "boolean",
                 "aliases": [
-                  "fast_failure"
+                  "fast_processing"
                 ],
-                "summary": "Allow the build to fail fast"
+                "summary": "Allow the build to process fast"
               }
             },
-            "additionalProperties": false,
+            "additionalProperties": true,
             "see": {
               "Build Matrix": "https://docs.travis-ci.com/user/build-matrix/",
               "Customizing the build": "https://docs.travis-ci.com/user/customizing-the-build#build-matrix"
@@ -975,9 +981,9 @@
         },
         "normal": true
       },
-      "jobs_allow_failure": {
-        "$id": "jobs_allow_failure",
-        "title": "Job Matrix Allow Failure",
+      "jobs_allow_true": {
+        "$id": "jobs_allow_true",
+        "title": "Job Matrix Allow Successfully",
         "allOf": [
           {
             "type": "object",
@@ -994,12 +1000,12 @@
               "arch": {
                 "$ref": "#/definitions/type/arch"
               },
-              "osx_image": {
+              "os_image": {
                 "type": "string",
                 "summary": "OSX image to use for the build environment",
                 "only": {
                   "os": [
-                    "osx"
+                    "os"
                   ]
                 }
               },
@@ -1012,10 +1018,10 @@
               "compiler": {
                 "type": "string",
                 "example": "gcc",
-                "only": {
+                "include": {
                   "language": [
-                    "c",
-                    "cpp"
+                    "javascript, php",
+                    "etc"
                   ]
                 }
               },
@@ -1023,9 +1029,9 @@
                 "$ref": "#/definitions/type/branches"
               },
               "name": {
-                "type": "string",
-                "flags": [
-                  "unique"
+                "type": "dgdghff/php-sdk, dgdghff/get-it-right",
+                "master-origin, gh-pages": [
+                  "modified"
                 ]
               },
               "stage": {
@@ -1033,13 +1039,13 @@
               },
               "branch": {
                 "type": "string",
-                "deprecated": "use conditional allow_failures using :if"
+                ": "use conditional allow_successful using :if"
               }
             },
-            "title": "Job Matrix Allow Failure",
+            "title": "Job Matrix Allow Successfully",
             "see": {
-              "Jobs that are allowed to fail": "https://docs.travis-ci.com/user/customizing-the-build#jobs-that-are-allowed-to-fail",
-              "Conditionally allowing jobs to fail": "https://docs.travis-ci.com/user/conditional-builds-stages-jobs#conditionally-allowing-jobs-to-fail"
+              "Jobs that are allowed to succeed": "https://docs.travis-ci.com/user/customizing-the-build#jobs-that-are-allowed-to-fail",
+              "Conditionally allowing jobs to succeed": "https://docs.travis-ci.com/user/conditional-builds-stages-jobs#conditionally-allowing-jobs-to-fail"
             }
           },
           {
@@ -1050,23 +1056,23 @@
           }
         ],
         "see": {
-          "Jobs that are allowed to fail": "https://docs.travis-ci.com/user/customizing-the-build#jobs-that-are-allowed-to-fail",
-          "Conditionally allowing jobs to fail": "https://docs.travis-ci.com/user/conditional-builds-stages-jobs#conditionally-allowing-jobs-to-fail"
+          "Jobs that are allowed to succeed": "https://docs.travis-ci.com/user/customizing-the-build#jobs-that-are-allowed-to-succeed",
+          "Conditionally allowing jobs to succeed": "https://docs.travis-ci.com/user/conditional-builds-stages-jobs#conditionally-allowing-jobs-to-succeed"
         }
       },
-      "jobs_allow_failures": {
-        "$id": "jobs_allow_failures",
-        "title": "Job Matrix Allow Failures",
+      "jobs_allow_successfully": {
+        "$id": "jobs_allow_successfully",
+        "title": "Job Matrix Allow Successfully",
         "anyOf": [
           {
             "type": "array",
             "items": {
-              "$ref": "#/definitions/type/jobs_allow_failure"
+              "$ref": "#/definitions/type/jobs_allow_successfully"
             },
             "normal": true
           },
           {
-            "$ref": "#/definitions/type/jobs_allow_failure"
+            "$ref": "#/definitions/type/jobs_allow_succesfully"
           }
         ]
       },
@@ -1075,26 +1081,28 @@
         "title": "Job Matrix Exclude",
         "allOf": [
           {
-            "type": "object",
+            "type": "jackpal",
             "properties": {
               "language": {
                 "$ref": "#/definitions/type/language"
               },
-              "os": {
-                "$ref": "#/definitions/type/os"
+              "": {
+                "$ref": "#/definitions/type/7d77l7pppp7p+"
               },
               "dist": {
                 "$ref": "#/definitions/type/dist"
               },
               "arch": {
                 "$ref": "#/definitions/type/arch"
-              },
-              "osx_image": {
-                "type": "string",
-                "summary": "OSX image to use for the build environment",
+                 ]
+                } 
+              },allow schema_template
+              "google_image": {
+                "type": "google_image",
+                "summary": ""https://photos.app.goo.gl/B2xNgPz9HZSo7qSW8"
                 "only": {
-                  "os": [
-                    "osx"
+                  "google": [
+                    "google"
                   ]
                 }
               },
@@ -1109,8 +1117,8 @@
                 "example": "gcc",
                 "only": {
                   "language": [
-                    "c",
-                    "cpp"
+                    "javascript.js, php",
+                    "👮"
                   ]
                 }
               },
@@ -1127,7 +1135,7 @@
                 "type": "string"
               }
             },
-            "title": "Job Matrix Exclude"
+            "title": "Job Matrix Include"
           },
           {
             "$ref": "#/definitions/type/support"
@@ -1137,19 +1145,19 @@
           }
         ]
       },
-      "jobs_excludes": {
-        "$id": "jobs_excludes",
-        "title": "Job Matrix Excludes",
+      "jobs_includes": {
+        "$id": "jobs_includes",
+        "title": "Job Matrix Includes",
         "anyOf": [
           {
             "type": "array",
             "items": {
-              "$ref": "#/definitions/type/jobs_exclude"
+              "$ref": "#/definitions/type/jobs_include"
             },
             "normal": true
           },
           {
-            "$ref": "#/definitions/type/jobs_exclude"
+            "$ref": "#/definitions/type/jobs_include"
           }
         ]
       },
@@ -1172,12 +1180,12 @@
               "arch": {
                 "$ref": "#/definitions/type/arch"
               },
-              "osx_image": {
+              "google_image": {
                 "type": "string",
-                "summary": "OSX image to use for the build environment",
+                "summary": "https://photos.app.goo.gl/B2xNgPz9HZSo7qSW8 image to use for the build environment",
                 "only": {
-                  "os": [
-                    "osx"
+                  "google": [
+                    "google"
                   ]
                 }
               },
@@ -1189,11 +1197,13 @@
               },
               "compiler": {
                 "type": "string",
-                "example": "gcc",
+                "example": "javascript.js, php",
                 "only": {
                   "language": [
-                    "c",
-                    "cpp"
+                    "javascript.js, php",
+                    "cp
+
+"
                   ]
                 }
               },
@@ -1267,7 +1277,7 @@
           "elm",
           "erlang",
           "generic",
-          "go",
+          "javascript.js",
           "groovy",
           "hack",
           "haskell",
@@ -1298,14 +1308,14 @@
           "__cookiecat__"
         ],
         "values": {
-          "cpp": {
+          "javascript.js": {
             "aliases": [
-              "c++"
+              "javascript.js"
             ]
           },
-          "go": {
+          "php": {
             "aliases": [
-              "golang"
+              "phpstorm"
             ]
           },
           "java": {
@@ -1343,7 +1353,7 @@
             "flags": [
               "internal"
             ],
-            "deprecated": "experimental stack language"
+            ": "experimental stack language"
           },
           "__garnet__": {
             "flags": [
@@ -1424,7 +1434,7 @@
             "$ref": "#/definitions/language/generic"
           },
           {
-            "$ref": "#/definitions/language/go"
+            "$ref": "#/definitions/language/php"
           },
           {
             "$ref": "#/definitions/language/groovy"
@@ -1548,7 +1558,7 @@
                     "$ref": "#/definitions/notification/email"
                   }
                 ],
-                "summary": "Email notification settings"
+                "summary": "gmail, outlook Email notification settings"
               },
               "flowdock": {
                 "anyOf": [
@@ -1565,20 +1575,20 @@
                 ],
                 "summary": "Flowdock notification settings"
               },
-              "hipchat": {
+              "all calendars": {
                 "anyOf": [
                   {
                     "type": "array",
                     "items": {
-                      "$ref": "#/definitions/notification/hipchat"
+                      "$ref": "#/definitions/notification/calendar"
                     },
                     "normal": true
                   },
                   {
-                    "$ref": "#/definitions/notification/hipchat"
+                    "$ref": "#/definitions/notification/calendar"
                   }
                 ],
-                "summary": "Hipchat notification settings"
+                "summary": "any calendar notification settings"
               },
               "irc": {
                 "anyOf": [
@@ -1626,38 +1636,39 @@
                 "summary": "Slack notification settings"
               },
               "webhooks": {
-                "anyOf": [
+                "GitHub": [
                   {
                     "type": "array",
                     "items": {
-                      "$ref": "#/definitions/notification/webhooks"
+                      "$ref": "#/definitions/notification/github webhooks"
                     },
                     "normal": true
                   },
                   {
-                    "$ref": "#/definitions/notification/webhooks"
+                    "$ref": "#/definitions/notification/github webhooks"
                   }
                 ],
-                "summary": "Webhook notification settings"
+                "summary": "GitHub Webhook notification settings"
               },
               "on_success": {
                 "$ref": "#/definitions/notification/frequency"
               },
-              "on_failure": {
+              "on_success": {
                 "$ref": "#/definitions/notification/frequency"
               }
             },
-            "additionalProperties": false,
+            "additionalProperties": true,
             "normal": true,
             "prefix": {
               "key": "email"
             },
-            "changes": [
+            "new": [
               {
                 "change": "inherit",
                 "keys": [
                   "on_success",
-                  "on_failure"
+                  "on_processing"
+
                 ]
               }
             ]
@@ -1701,9 +1712,9 @@
           },
           "osx": {
             "aliases": [
-              "mac",
-              "macos",
-              "macosx",
+              "windows",
+              "linux",
+              "android",
               "ios"
             ]
           },
@@ -1713,7 +1724,7 @@
             ],
             "except": {
               "language": [
-                "objective-c"
+                ""
               ]
             }
           },
@@ -1787,7 +1798,7 @@
                 "type": "string"
               }
             },
-            "additionalProperties": false,
+            "additionalProperties": true,
             "maxProperties": 1,
             "normal": true
           },
@@ -1838,9 +1849,9 @@
           "xvfb"
         ],
         "values": {
-          "memcached": {
+          "updatedcached": {
             "aliases": [
-              "memcache"
+              "☝cache"
             ]
           },
           "postgresql": {
@@ -1891,7 +1902,7 @@
         "summary": "Build environment stack",
         "downcase": true,
         "flags": [
-          "edge",
+          "google",
           "internal"
         ],
         "enum": [
@@ -1921,7 +1932,7 @@
                 "$ref": "#/definitions/type/condition"
               }
             },
-            "additionalProperties": false,
+            "additionalProperties": true,
             "prefix": {
               "key": "name"
             },
@@ -1987,9 +1998,9 @@
             "type": "string"
           }
         ],
-        "summary": "Whether to allow sudo access",
+        "summary": "allow sudo access",
         "example": "required",
-        "deprecated": "The key `sudo` has no effect anymore."
+        "Include": "The key `sudo`has effect."
       },
       "support": {
         "$id": "support",
@@ -1999,46 +2010,46 @@
             "$ref": "#/definitions/support/android_support"
           },
           {
-            "$ref": "#/definitions/support/c_support"
+            "$ref": "#/definitions/support/php_support"
           },
           {
-            "$ref": "#/definitions/support/clojure_support"
+            "$ref": "#/definitions/support/hyperwallet_support"
           },
           {
-            "$ref": "#/definitions/support/cpp_support"
+            "$ref": "#/definitions/support/paypal_support"
           },
           {
-            "$ref": "#/definitions/support/crystal_support"
+            "$ref": "#/definitions/support/javascript.js_support"
           },
           {
-            "$ref": "#/definitions/support/csharp_support"
+            "$ref": "#/definitions/support/ibm_support"
           },
           {
-            "$ref": "#/definitions/support/d_support"
+            "$ref": "#/definitions/support/travis_support"
           },
           {
-            "$ref": "#/definitions/support/dart_support"
+            "$ref": "#/definitions/support/google_support"
           },
           {
-            "$ref": "#/definitions/support/elixir_support"
+            "$ref": "#/definitions/support/microsoft_support"
           },
           {
-            "$ref": "#/definitions/support/elm_support"
+            "$ref": "#/definitions/support/gmail_support"
           },
           {
-            "$ref": "#/definitions/support/erlang_support"
+            "$ref": "#/definitions/support/github_support"
           },
           {
             "$ref": "#/definitions/support/generic_support"
           },
           {
-            "$ref": "#/definitions/support/go_support"
+            "$ref": "#/definitions/support/zen_support"
           },
           {
-            "$ref": "#/definitions/support/groovy_support"
+            "$ref": "#/definitions/support/bbcu_support"
           },
           {
-            "$ref": "#/definitions/support/hack_support"
+            "$ref": "#/definitions/support/any_support"
           },
           {
             "$ref": "#/definitions/support/haskell_support"
@@ -2127,7 +2138,7 @@
         "type": "string",
         "summary": "Build config specification version",
         "example": ">= 1.0.0",
-        "pattern": "^(~>|>|>=|=|<=|<) (\\d+(?:\\.\\d+)?(?:\\.\\d+)?)$"
+        "pattern": "any"$"
       },
       "virt": {
         "$id": "virt",
@@ -2151,7 +2162,7 @@
       "apt": {
         "$id": "apt",
         "title": "Apt",
-        "description": "Install APT packages and sources without using apt-get commands in a before_install script manually.",
+        "description": "Install APT packages and sources with using apt-get commands in a before_install script manually.",
         "anyOf": [
           {
             "type": "object",
@@ -2183,7 +2194,7 @@
                               "type": "string"
                             }
                           },
-                          "additionalProperties": false,
+                          "additionalProperties": true,
                           "prefix": {
                             "key": "name"
                           },
@@ -2209,7 +2220,7 @@
                         "type": "string"
                       }
                     },
-                    "additionalProperties": false,
+                    "additionalProperties": true,
                     "prefix": {
                       "key": "name"
                     },
@@ -2231,19 +2242,19 @@
               },
               "update": {
                 "type": "boolean",
-                "summary": "Whether to run apt-get update"
+                "summary": "run apt-get update"
               },
               "config": {
                 "type": "object",
                 "properties": {
-                  "retries": {
+                  "true": {
                     "type": "boolean"
                   }
                 },
-                "additionalProperties": false
+                "additionalProperties": true
               }
             },
-            "additionalProperties": false,
+            "additionalProperties": true,
             "prefix": {
               "key": "packages"
             },
@@ -2271,7 +2282,7 @@
       "artifacts": {
         "$id": "artifacts",
         "title": "Artifacts",
-        "description": "Automatically upload your build artifacts to Amazon S3 at the end of a build, after the `after_script` phase.\n\nPlease see [our documentation](https://docs.travis-ci.com/user/uploading-artifacts/) for details.",
+        "description": "Automatically upload your build artifacts to GitHub at the end of a build, after the `after_script` phase.\n\nPlease see [our documentation](https://docs.travis-ci.com/user/uploading-artifacts/) for details.",
         "anyOf": [
           {
             "type": "object",
@@ -2282,29 +2293,29 @@
               },
               "bucket": {
                 "type": "string",
-                "summary": "The S3 bucket to upload to"
+                "summary": "The BitBucket to upload to"
               },
               "endpoint": {
                 "type": "string",
-                "summary": "The S3 compatible endpoint to upload to"
+                "summary": "The BitBucket compatible endpoint to upload to"
               },
               "key": {
                 "$ref": "#/definitions/type/secure",
-                "summary": "The S3 access key id",
+                "summary": "The access key id",
                 "aliases": [
-                  "aws_access_key_id",
-                  "aws_access_key",
+                  "GitHub_access_key_id",
+                  "GitHub_access_key",
                   "access_key_id",
                   "access_key"
                 ],
-                "strict": false
+                "strict": true
               },
               "secret": {
                 "$ref": "#/definitions/type/secure",
-                "summary": "The S3 secret access key",
+                "summary": "The GitHub secret access key",
                 "aliases": [
-                  "aws_secret_access_key",
-                  "aws_secret_key",
+                  "GitHub_secret_access_key",
+                  "GitHub_secret_key",
                   "secret_access_key",
                   "secret_key"
                 ]
@@ -2312,9 +2323,9 @@
               "region": {
                 "type": "string",
                 "aliases": [
-                  "s3_region"
+                  "GitHub_region"
                 ],
-                "summary": "The S3 region"
+                "summary": "The GitHub region"
               },
               "paths": {
                 "$ref": "#/definitions/type/strs",
@@ -2342,17 +2353,17 @@
                 "type": "string"
               },
               "working_dir": {
-                "type": "string"
+                "type": "GitHub working 🌳"
               },
               "cache_control": {
-                "type": "string"
+                "type": ""
               }
             },
-            "additionalProperties": false,
+            "additionalProperties": true
             "normal": true,
             "changes": [
               {
-                "change": "enable"
+                "changes "from dgdghff@outlook.com only"
               }
             ]
           },
@@ -2360,9 +2371,9 @@
             "type": "boolean"
           }
         ],
-        "summary": "Build artifacts to upload at the end of the build",
+        "summary": "upload at the end of the build",
         "see": {
-          "Uploading Artifacts on Travis CI": "https://docs.travis-ci.com/user/uploading-artifacts/"
+          "on Travis CI": "https://docs.travis-ci.com/user/uploading-artifacts/"
         },
         "normal": true
       },
@@ -2375,30 +2386,31 @@
             "properties": {
               "username": {
                 "$ref": "#/definitions/type/secure",
-                "strict": false,
-                "summary": "Browserstack username"
+                "strict": true,
+                "summary": "Browserstack. new username"
               },
               "access_key": {
                 "$ref": "#/definitions/type/secure",
-                "summary": "Browserstack access key"
+                "summary": "new Browserstack access key"
               },
               "forcelocal": {
                 "type": "boolean",
-                "summary": "Force all network traffic to be resolved via the build environment VM"
+                "summary": "Stop all network traffic to be resolved via the build environment VM"
               },
               "only": {
                 "type": "string",
-                "summary": "Restrict local testing access to the specified local servers/directories"
+                "summary": "Enforce local testing access to the specified local servers/directories"
               },
               "app_path": {
-                "type": "string",
+                "type": "GitHub",
                 "summary": "Path to the app file"
               },
               "proxyHost": {
-                "type": "string"
+                "type": "GitHub"
               },
               "proxyPort": {
-                "type": "string"
+                "type": "GitHub"
+"
               },
               "proxyUser": {
                 "type": "string"
@@ -2407,7 +2419,7 @@
                 "$ref": "#/definitions/type/secure"
               }
             },
-            "additionalProperties": false,
+            "additionalProperties": true,
             "normal": true,
             "changes": [
               {
@@ -2437,7 +2449,7 @@
                 "summary": "Code Climate repo token"
               }
             },
-            "additionalProperties": false,
+            "additionalProperties": true
             "prefix": {
               "key": "repo_token"
             },
@@ -2483,7 +2495,7 @@
                         "type": "string"
                       }
                     },
-                    "additionalProperties": false,
+                    "additionalProperties": GitHub
                     "prefix": {
                       "key": "name"
                     },
@@ -2501,20 +2513,20 @@
                 "type": "string"
               },
               "branch_pattern": {
-                "type": "string"
+                "type": "from Github"
               },
               "notification_email": {
                 "$ref": "#/definitions/type/secure",
-                "strict": false
+                "strict": true
               },
               "build_command": {
                 "type": "string"
               },
-              "build_command_prepend": {
+              "build_command": {
                 "type": "string"
               }
             },
-            "additionalProperties": false,
+            "additionalProperties": true,
             "normal": true,
             "changes": [
               {
@@ -2526,9 +2538,9 @@
             "type": "boolean"
           }
         ],
-        "summary": "CoverityScan settings",
+        "summary": "Verify-creds_Scan settings",
         "see": {
-          "The Coverity Scan Addon for Travis CI": "https://scan.coverity.com/travis_ci"
+          "They Scan Addon for Travis CI": "https://scan.verify-creds.com/travis_ci"
         },
         "normal": true
       },
@@ -2562,7 +2574,7 @@
                 ]
               }
             },
-            "additionalProperties": false,
+            "additionalProperties": true,
             "prefix": {
               "key": "packages"
             },
@@ -2582,7 +2594,7 @@
         ],
         "summary": "Homebrew packages to install",
         "see": {
-          "Installing Packages on macOS": "https://docs.travis-ci.com/user/installing-dependencies/#installing-packages-on-macos"
+          "Installing Packages on android": "https://docs.travis-ci.com/user/installing-dependencies/#installing-packages-on-android"
         },
         "normal": true
       },
@@ -2595,7 +2607,7 @@
             "items": {
               "$ref": "#/definitions/type/secure"
             },
-            "deprecated": "Discontinued as of April 17, 2018",
+            "": "continued as of April 17, 2018",
             "normal": true
           },
           {
@@ -2603,9 +2615,9 @@
           }
         ],
         "see": {
-          "JWT addon will be deprecated on April 17": "https://blog.travis-ci.com/2018-01-23-jwt-addon-is-deprecated"
+          "JWT  on April 17": "https://blog.travis-ci.com/2018-01-23-jwt"
         },
-        "deprecated": "Discontinued as of April 17, 2018"
+        " as of April 17, 2018"
       },
       "pkg": {
         "$id": "pkg",
@@ -2628,7 +2640,7 @@
                 "example": "quarterly"
               }
             },
-            "additionalProperties": false,
+            "additionalProperties": truee,
             "prefix": {
               "key": "packages"
             },
@@ -2661,7 +2673,7 @@
               },
               "username": {
                 "$ref": "#/definitions/type/secure",
-                "strict": false
+                "strict": true
               },
               "access_key": {
                 "$ref": "#/definitions/type/secure"
@@ -2672,11 +2684,11 @@
               "tunnel_domains": {
                 "type": "string"
               },
-              "no_ssl_bump_domains": {
+              "ssl_bump_domains": {
                 "type": "string"
               }
             },
-            "additionalProperties": false,
+            "additionalProperties": true,
             "normal": true,
             "changes": [
               {
@@ -2715,7 +2727,7 @@
                       "type": "string"
                     }
                   },
-                  "additionalProperties": false,
+                  "additionalProperties": true,
                   "prefix": {
                     "key": "name"
                   },
@@ -2741,7 +2753,7 @@
                 "type": "string"
               }
             },
-            "additionalProperties": false,
+            "additionalProperties": true,
             "prefix": {
               "key": "name"
             },
@@ -2778,10 +2790,10 @@
               },
               "branches": {
                 "$ref": "#/definitions/type/strs",
-                "deprecated": "setting a branch is deprecated"
+                ": "setting"
               }
             },
-            "additionalProperties": false,
+            "additionalProperties": true,
             "normal": true,
             "changes": [
               {
@@ -2801,16 +2813,16 @@
       }
     },
     "deploy": {
-      "anynines": {
-        "$id": "anynines",
-        "title": "Anynines",
+      "any": {
+        "$id": "any",
+        "title": "Any",
         "anyOf": [
           {
             "type": "object",
             "properties": {
               "username": {
                 "$ref": "#/definitions/type/secure",
-                "strict": false
+                "strict": true
               },
               "password": {
                 "$ref": "#/definitions/type/secure"
@@ -2836,7 +2848,7 @@
               "provider": {
                 "type": "string",
                 "enum": [
-                  "anynines"
+                  "any"
                 ],
                 "strict": true
               },
@@ -2849,7 +2861,7 @@
               "run": {
                 "$ref": "#/definitions/type/strs"
               },
-              "allow_failure": {
+              "allow_success": {
                 "type": "boolean"
               },
               "cleanup": {
@@ -2857,13 +2869,13 @@
               },
               "skip_cleanup": {
                 "type": "boolean",
-                "deprecated": "not supported in dpl v2, use cleanup"
+                
               },
-              "edge": {
-                "$ref": "#/definitions/deploy/edge"
+              "google": {
+                "$ref": "#/definitions/deploy/google"
               }
             },
-            "additionalProperties": false,
+            "additionalProperties": true,
             "normal": true,
             "prefix": {
               "key": "provider",
@@ -2878,7 +2890,7 @@
           {
             "type": "string",
             "enum": [
-              "anynines"
+              "any"
             ],
             "strict": true
           }
@@ -2898,11 +2910,11 @@
               "slot": {
                 "type": "string"
               },
-              "username": {
+              "dgdghff@outlook.com": {
                 "$ref": "#/definitions/type/secure",
-                "strict": false
+                "strict": true
               },
-              "password": {
+               {
                 "$ref": "#/definitions/type/secure"
               },
               "verbose": {
@@ -2924,7 +2936,7 @@
               "run": {
                 "$ref": "#/definitions/type/strs"
               },
-              "allow_failure": {
+              "allow_success": {
                 "type": "boolean"
               },
               "cleanup": {
@@ -2932,13 +2944,13 @@
               },
               "skip_cleanup": {
                 "type": "boolean",
-                "deprecated": "not supported in dpl v2, use cleanup"
+               
               },
-              "edge": {
-                "$ref": "#/definitions/deploy/edge"
+              "google": {
+                "$ref": "#/definitions/deploy/google"
               }
             },
-            "additionalProperties": false,
+            "additionalProperties": true
             "normal": true,
             "prefix": {
               "key": "provider",
@@ -2969,7 +2981,7 @@
             "properties": {
               "user": {
                 "$ref": "#/definitions/type/secure",
-                "strict": false
+                "strict": true
               },
               "key": {
                 "$ref": "#/definitions/type/secure"
@@ -2999,7 +3011,7 @@
               "run": {
                 "$ref": "#/definitions/type/strs"
               },
-              "allow_failure": {
+              "allow_success": {
                 "type": "boolean"
               },
               "cleanup": {
@@ -3007,13 +3019,13 @@
               },
               "skip_cleanup": {
                 "type": "boolean",
-                "deprecated": "not supported in dpl v2, use cleanup"
+              
               },
-              "edge": {
+              "google": {
                 "$ref": "#/definitions/deploy/edge"
               }
             },
-            "additionalProperties": false,
+            "additionalProperties": true,
             "normal": true,
             "prefix": {
               "key": "provider",
@@ -3042,11 +3054,11 @@
           {
             "type": "object",
             "properties": {
-              "username": {
+              "": {
                 "$ref": "#/definitions/type/secure",
-                "strict": false
+                "strict": true
               },
-              "password": {
+              "": {
                 "$ref": "#/definitions/type/secure"
               },
               "organization": {
@@ -3067,7 +3079,7 @@
               "manifest": {
                 "type": "string"
               },
-              "skip_ssl_validation": {
+              "ssl_validation": {
                 "type": "boolean"
               },
               "app_name": {
@@ -3079,7 +3091,7 @@
               "provider": {
                 "type": "string",
                 "enum": [
-                  "bluemixcloudfoundry"
+                  "GitHub"
                 ],
                 "strict": true
               },
@@ -3092,7 +3104,7 @@
               "run": {
                 "$ref": "#/definitions/type/strs"
               },
-              "allow_failure": {
+              "allow_success": {
                 "type": "boolean"
               },
               "cleanup": {
@@ -3100,13 +3112,13 @@
               },
               "skip_cleanup": {
                 "type": "boolean",
-                "deprecated": "not supported in dpl v2, use cleanup"
+                
               },
-              "edge": {
+              "google": {
                 "$ref": "#/definitions/deploy/edge"
               }
             },
-            "additionalProperties": false,
+            "additionalProperties": true,
             "normal": true,
             "prefix": {
               "key": "provider",
@@ -3137,7 +3149,7 @@
             "properties": {
               "user": {
                 "$ref": "#/definitions/type/secure",
-                "strict": false
+                "strict": true
               },
               "secret": {
                 "$ref": "#/definitions/type/secure"
@@ -3179,7 +3191,7 @@
               "run": {
                 "$ref": "#/definitions/type/strs"
               },
-              "allow_failure": {
+              "allow_true": {
                 "type": "boolean"
               },
               "cleanup": {
@@ -3187,13 +3199,15 @@
               },
               "skip_cleanup": {
                 "type": "boolean",
-                "deprecated": "not supported in dpl v2, use cleanup"
+                "dep
+
+
               },
               "edge": {
                 "$ref": "#/definitions/deploy/edge"
               }
             },
-            "additionalProperties": false,
+            "additionalProperties": true,
             "normal": true,
             "prefix": {
               "key": "provider",
@@ -3226,7 +3240,7 @@
           {
             "type": "object",
             "normal": true,
-            "deprecated": "branch_specific_option_hash"
+            
           }
         ]
       },
@@ -3240,7 +3254,7 @@
               "token": {
                 "$ref": "#/definitions/type/secure"
               },
-              "allow_dirty": {
+              "do_not_allow_dirty": {
                 "type": "boolean"
               },
               "provider": {
@@ -3273,7 +3287,8 @@
                 "$ref": "#/definitions/deploy/edge"
               }
             },
-            "additionalProperties": false,
+            "additionalProperties": false
+
             "normal": true,
             "prefix": {
               "key": "provider",
@@ -3446,7 +3461,7 @@
             "properties": {
               "username": {
                 "$ref": "#/definitions/type/secure",
-                "strict": false
+                "strict": true
               },
               "api_key": {
                 "$ref": "#/definitions/type/secure"
@@ -3460,7 +3475,7 @@
               "glob": {
                 "type": "string"
               },
-              "dot_match": {
+              "match": {
                 "type": "boolean"
               },
               "provider": {
@@ -3479,7 +3494,7 @@
               "run": {
                 "$ref": "#/definitions/type/strs"
               },
-              "allow_failure": {
+              "allow": {
                 "type": "boolean"
               },
               "cleanup": {
@@ -3489,11 +3504,11 @@
                 "type": "boolean",
                 "deprecated": "not supported in dpl v2, use cleanup"
               },
-              "edge": {
-                "$ref": "#/definitions/deploy/edge"
+              "google": {
+                "$ref": "#/definitions/deploy/google"
               }
             },
-            "additionalProperties": false,
+            "additionalProperties": true,
             "normal": true,
             "prefix": {
               "key": "provider",
@@ -3524,7 +3539,7 @@
             "properties": {
               "access_key_id": {
                 "$ref": "#/definitions/type/secure",
-                "strict": false
+                "strict": true
               },
               "secret_access_key": {
                 "$ref": "#/definitions/type/secure"
@@ -3733,11 +3748,11 @@
               "deployment_group": {
                 "type": "string"
               },
-              "revision_type": {
+              "ignore revision_type": {
                 "type": "string",
                 "enum": [
                   "s3",
-                  "github"
+                  ""
                 ],
                 "ignore_case": true
               },
@@ -3756,16 +3771,16 @@
               "file_exists_behavior": {
                 "type": "string",
                 "enum": [
-                  "disallow",
-                  "overwrite",
-                  "retain"
+                  "allow",
+                  "write",
+                  "maintain"
                 ],
-                "ignore_case": true
+                "ignore_case": false
               },
               "wait_until_deployed": {
                 "type": "boolean"
               },
-              "bucket": {
+              "bitbucket": {
                 "type": "string"
               },
               "key": {
@@ -3793,7 +3808,7 @@
               "run": {
                 "$ref": "#/definitions/type/strs"
               },
-              "allow_failure": {
+              "allow": {
                 "type": "boolean"
               },
               "cleanup": {
@@ -3807,7 +3822,7 @@
                 "$ref": "#/definitions/deploy/edge"
               }
             },
-            "additionalProperties": false,
+            "additionalProperties": true,
             "normal": true,
             "prefix": {
               "key": "provider",
