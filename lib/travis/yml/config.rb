@@ -13,7 +13,8 @@ module Travis
              metrics:    { reporter: 'librato' },
              imports:    { max: 25 },
              ssl:        {},
-             vcs:        { url: 'https://vcs.travis-ci.com', token: 'token' }
+             vcs:        { url: 'https://vcs.travis-ci.com', token: 'token' },
+             log_level:  ENV.fetch("LOG_LEVEL", Logger::WARN)
 
       def metrics
         # TODO fix travis-metrics ...
