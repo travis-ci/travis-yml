@@ -65,6 +65,7 @@ module Travis
             map :arch
             map :osx_image
             map :sudo
+            map :vm
             map :env,      to: :env_vars
             map :compiler
             map :branches
