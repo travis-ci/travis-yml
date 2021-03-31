@@ -15,6 +15,7 @@ require 'travis/yml/schema/def/stages'
 require 'travis/yml/schema/def/sudo'
 require 'travis/yml/schema/def/version'
 require 'travis/yml/schema/def/virt'
+require 'travis/yml/schema/def/vm'
 require 'travis/yml/schema/type'
 
 module Travis
@@ -35,6 +36,9 @@ module Travis
             os: [
               { value: :linux, except: { language: 'objective-c' } },
               { value: :osx, only: { language: 'objective-c' } }
+            ],
+            vm: [
+              { size: 'medium' }
             ]
           }
 
@@ -62,6 +66,7 @@ module Travis
             map    :notifications
 
             map    :version
+            map    :vm,             default: DEFAULT[:vm]
             map    :conditions,     to: :conditions
             map    :filter_secrets, to: :bool, internal: true, summary: 'Whether to filter secrets from the log output'
             map    :trace,          to: :bool, internal: true, summary: 'Whether to trace the build script'
