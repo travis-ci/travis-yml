@@ -54,6 +54,170 @@ describe Travis::Yml::Web::App, 'POST /configs' do
       end
     end
 
+    context 'when in a pull request' do
+      let(:type) { :pull_request }
+      let(:yml_data) { { head_repo: head_repo } }
+      let(:encr) { 'HUJCiQuPbkZkcAPMUa8fqvm98b8s9oL4VyQ9xCzLwR0GHMQt0wROZP0B4Rr1+pbSC9tyEV0WB+jXMKtyxsQrgjO0qZmEbgrAlmn+roApm8Vvp/TQ/ieI69tzfit2OKoyhAdlbjMKclHP8FnbPV34oYa+pIA7BkcgC3OgRSYZL9g=' }
+      let(:travis_yml) { "script: ./one\nenv:\n- FOO: foo\n- secure: #{encr}" }
+
+      before { data[:data] = yml_data }
+
+      context 'when from fork' do
+        let(:head_repo) { 'owner/travis-yml-fork' }
+
+        before { post '/configs', Oj.generate(data) }
+
+        it { expect(status).to eq 200 }
+        it { expect(headers['Content-Type']).to eq 'application/json' }
+
+        it do
+          expect(body[:raw_configs]).to eq [
+            {
+              source: 'travis-ci/travis-yml:.travis.yml@ref',
+              config: travis_yml,
+              mode: nil
+            }
+          ]
+        end
+
+        it do
+          expect(body[:config]).to eq(
+            env: {
+              jobs: [
+                {
+                  FOO: 'foo'
+                },
+                {}
+              ]
+            },
+            script: ['./one']
+          )
+        end
+
+        it do
+          expect(body[:matrix]).to eq [
+            {
+              env: [
+                {
+                  FOO: 'foo'
+                }
+              ],
+              script: ['./one']
+            },
+            {
+              env: [
+                {}
+              ],
+              script: ['./one']
+            }
+          ]
+        end
+
+        context 'when in global env' do
+          let(:travis_yml) { "script: ./one\nenv:\n  global:\n    - FOO: foo\n    # FOO\n    - secure: #{encr}" }
+
+          before { post '/configs', Oj.generate(data) }
+
+          it { expect(status).to eq 200 }
+          it { expect(headers['Content-Type']).to eq 'application/json' }
+
+          it do
+            expect(body[:raw_configs]).to eq [
+              {
+                source: 'travis-ci/travis-yml:.travis.yml@ref',
+                config: travis_yml,
+                mode: nil
+              }
+            ]
+          end
+
+          it do
+            expect(body[:config]).to eq(
+              env: {
+                global: [
+                  {
+                    FOO: 'foo'
+                  },
+                  {}
+                ]
+              },
+              script: ['./one']
+            )
+          end
+
+          it do
+            expect(body[:matrix]).to eq [
+              {
+                env: [
+                  {
+                    FOO: 'foo'
+                  },
+                  {}
+                ],
+                script: ['./one']
+              }
+            ]
+          end
+        end
+      end
+
+      context 'when not from fork' do
+        let(:head_repo) { repo[:slug] }
+
+        before { post '/configs', Oj.generate(data) }
+
+        it { expect(status).to eq 200 }
+        it { expect(headers['Content-Type']).to eq 'application/json' }
+
+        it do
+          expect(body[:raw_configs]).to eq [
+            {
+              source: 'travis-ci/travis-yml:.travis.yml@ref',
+              config: travis_yml,
+              mode: nil
+            }
+          ]
+        end
+
+        it do
+          expect(body[:config]).to eq(
+            env: {
+              jobs: [
+                {
+                  FOO: 'foo'
+                },
+                {
+                  secure: encr
+                }
+              ]
+            },
+            script: ['./one']
+          )
+        end
+
+        it do
+          expect(body[:matrix]).to eq [
+            {
+              env: [
+                {
+                  FOO: 'foo'
+                }
+              ],
+              script: ['./one']
+            },
+            {
+              env: [
+                {
+                  secure: encr
+                }
+              ],
+              script: ['./one']
+            }
+          ]
+        end
+      end
+    end
+
     describe 'api' do
       describe 'merge mode merge' do
         let(:config) { JSON.dump(merge_mode: 'merge') }

@@ -2,7 +2,7 @@ module Travis
   module Yml
     module Configs
       class Filter
-        class Jobs < Struct.new(:config, :jobs, :data, :msgs)
+        class Jobs < Struct.new(:config, :jobs, :data, :repo, :msgs)
           include Helper::Obj
 
           def apply

@@ -97,7 +97,7 @@ module Travis
           end
 
           def filter
-            filter = Filter.new(config, jobs, data).tap(&:apply)
+            filter = Filter.new(config, jobs, data, repo).tap(&:apply)
             @config = filter.config
             @jobs = filter.jobs
             msgs.concat(filter.msgs)

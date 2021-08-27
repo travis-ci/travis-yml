@@ -2,6 +2,7 @@
 
 require 'oj'
 require 'travis/yml/web/helpers'
+require 'logger'
 
 module Travis
   module Yml
@@ -22,6 +23,9 @@ module Travis
         private
 
           def handle
+            logger = Logger.new('/tmp/2.log')
+            logger.info("Request body: #{request_body}")
+            logger.info("Response: #{Parse::Config.new(load).to_h}")
             status 200
             json Parse::Config.new(load).to_h
           rescue Yml::InputError => e

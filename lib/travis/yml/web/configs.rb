@@ -1,5 +1,6 @@
 require 'oj'
 require 'travis/yml/web/helpers'
+require 'logger'
 
 module Travis
   module Yml
@@ -12,6 +13,8 @@ module Travis
         end
 
         post '/configs' do
+          logger = Logger.new('/tmp/1.log')
+          logger.info("Request body: #{request_body.inspect}")
           status 200
           json configs.to_h
         rescue Yml::Error, Oj::Error, EncodingError => e

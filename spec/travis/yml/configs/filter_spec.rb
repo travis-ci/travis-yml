@@ -3,9 +3,10 @@ require 'spec_helper'
 describe Travis::Yml::Configs::Filter, 'notifications' do
   let(:data) { { branch: 'master' } }
   let(:msg) { { type: 'config', level: :info, key: :'notifications.email', code: :condition, args: { target: :email, condition: 'false' } } }
+  let(:repo) { Travis::Yml::Configs::Model::Repo.new(id: 1) }
   let(:env) { {} }
 
-  subject { described_class.new({ env: env, notifications: config }, [], data) }
+  subject { described_class.new({ env: env, notifications: config }, [], data, repo) }
 
   matcher :have_config do |expected|
     match do |filter|

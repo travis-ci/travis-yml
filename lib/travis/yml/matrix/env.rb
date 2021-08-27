@@ -1,13 +1,14 @@
 module Travis
   module Yml
     class Matrix
-      class Env < Obj.new(:config, :jobs)
+      class Env < Obj.new(:config, :data, :jobs)
         # should be able to drop a lot of this once everyone's on /configs
 
         def apply
           jobs = with_env_arrays(self.jobs)
           jobs = with_first_env(jobs)
           jobs = with_global_env(jobs)
+          jobs = with_filtered_env(jobs)
           jobs
         end
 
@@ -35,6 +36,11 @@ module Travis
           jobs
         end
 
+        def with_filtered_env(jobs)
+          jobs.each { |job| filter_env(job) if job[:env] }
+          jobs
+        end
+
         def global_env
           env = config[:env] && config[:env].is_a?(Hash) && config[:env][:global]
           env = env || config[:global_env] # BC Gatekeeper matrix expansion
@@ -54,6 +60,12 @@ module Travis
 
         def wrap(obj)
           obj.is_a?(Array) ? obj : [obj]
+        end
+
+        def filter_env(job)
+          job[:env].each do |hash|
+            hash.delete(:secure) if hash.key?(:secure) && data.key?(:head_repo) && data[:repo] != data[:head_repo]
+          end
         end
       end
     end

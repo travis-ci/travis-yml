@@ -38,4 +38,101 @@ describe Travis::Yml::Web::App, 'POST /expand' do
       expect(body['error']['message']).to match /Empty input.*at line 1, column 1/
     end
   end
+
+  context 'when in a pull request' do
+    let(:type) { :pull_request }
+    let(:repo) { 'travis-ci/travis-yml' }
+    let(:config) do
+      {
+        language: 'ruby',
+        os: %w(linux),
+        dist: 'xenial',
+        arch: %w(amd64),
+        rvm: %w(2.6.3),
+        jobs: {
+          include: [
+            {
+              stage: 'echo 1',
+              script: [
+                'echo $FOO'
+              ]
+            }
+          ],
+        },
+        global_env: [
+          {
+            BAR: 'bar'
+          },
+          {
+            secure: encr
+          }
+        ],
+        group: 'stable'
+      }
+    end
+    let(:data) { { config: config, data: yml_data } }
+    let(:yml_data) { { repo: repo, head_repo: head_repo } }
+    let(:encr) { 'HUJCiQuPbkZkcAPMUa8fqvm98b8s9oL4VyQ9xCzLwR0GHMQt0wROZP0B4Rr1+pbSC9tyEV0WB+jXMKtyxsQrgjO0qZmEbgrAlmn+roApm8Vvp/TQ/ieI69tzfit2OKoyhAdlbjMKclHP8FnbPV34oYa+pIA7BkcgC3OgRSYZL9g=' }
+    let(:travis_yml) { "script: ./one\nenv:\n- FOO: foo\n- secure: #{encr}" }
+
+    context 'when from fork' do
+      let(:head_repo) { 'owner/travis-yml-fork' }
+
+      before { post '/expand', Oj.generate(data) }
+
+      it { expect(status).to eq 200 }
+      it { expect(headers['Content-Type']).to eq 'application/json' }
+
+      it do
+        expect(body['matrix']).to eq(
+          [
+            {
+              'os' => 'linux',
+              'arch' => 'amd64',
+              'rvm' => '2.6.3',
+              'language' => 'ruby',
+              'dist' => 'xenial',
+              'group' => 'stable',
+              'stage' => 'echo 1',
+              'script' => ['echo $FOO'],
+              'env' => [
+                { 'BAR' => 'bar' },
+                {}
+              ]
+            }
+          ]
+        )
+      end
+    end
+
+    context 'when not from fork' do
+      let(:head_repo) { repo }
+
+      before { post '/expand', Oj.generate(data) }
+
+      it { expect(status).to eq 200 }
+      it { expect(headers['Content-Type']).to eq 'application/json' }
+
+      it do
+        expect(body['matrix']).to eq(
+          [
+            {
+              'os' => 'linux',
+              'arch' => 'amd64',
+              'rvm' => '2.6.3',
+              'language' => 'ruby',
+              'dist' => 'xenial',
+              'group' => 'stable',
+              'stage' => 'echo 1',
+              'script' => ['echo $FOO'],
+              'env' => [
+                { 'BAR' => 'bar' },
+                { 'secure' => encr }
+              ]
+            }
+          ]
+        )
+      end
+    end
+  end
 end

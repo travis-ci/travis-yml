@@ -4,7 +4,7 @@ module Travis
   module Yml
     module Configs
       class Filter
-        class Notifications < Obj.new(:config, :jobs, :data, :msgs)
+        class Notifications < Obj.new(:config, :jobs, :data, :repo, :msgs)
           def apply
             @config = compact(config.merge(notifications: notifications))
           end

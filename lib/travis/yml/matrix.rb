@@ -84,7 +84,7 @@ module Travis
         end
 
         def with_env(jobs)
-          Env.new(config, jobs).apply
+          Env.new(config, data, jobs).apply
         end
 
         def without_excluded(jobs)
