@@ -7,7 +7,7 @@ module Travis
         class Env < Obj.new(:config, :jobs, :data, :repo, :msgs)
           def apply
             @config = config.merge(env: filter_config(config[:env])) if config.key?(:env)
-            @jobs = filter_jobs(jobs)
+            @jobs = filter_jobs
           end
 
           private
@@ -25,7 +25,7 @@ module Travis
             end
           end
 
-          def filter_jobs(config)
+          def filter_jobs
             jobs.map do |job|
               if job.key?(:env)
                 job[:env] = filter_config(job[:env])

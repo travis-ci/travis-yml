@@ -1,6 +1,5 @@
 require 'oj'
 require 'travis/yml/web/helpers'
-require 'logger'
 
 module Travis
   module Yml
@@ -19,9 +18,6 @@ module Travis
         private
 
           def handle
-            logger = Logger.new('/tmp/3.log')
-            logger.info("Body: #{request_body}")
-            logger.info("Response: #{expand}")
             status 200
             json matrix: expand
           rescue Oj::Error, EncodingError => e
