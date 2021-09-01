@@ -35,7 +35,6 @@ module Travis
             def map(attrs)
               {
                 id: attrs['id'],
-                vcs_type: attrs['vcs_type'],
                 github_id: attrs['github_id'],
                 slug: attrs['slug'],
                 private: attrs['private'],
