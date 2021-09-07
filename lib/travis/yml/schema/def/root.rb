@@ -10,6 +10,7 @@ require 'travis/yml/schema/def/jobs'
 require 'travis/yml/schema/def/language'
 require 'travis/yml/schema/def/notification'
 require 'travis/yml/schema/def/os'
+require 'travis/yml/schema/def/perforce_test_path'
 require 'travis/yml/schema/def/stack'
 require 'travis/yml/schema/def/stages'
 require 'travis/yml/schema/def/sudo'
@@ -70,6 +71,7 @@ module Travis
             map    :conditions,     to: :conditions
             map    :filter_secrets, to: :bool, internal: true, summary: 'Whether to filter secrets from the log output'
             map    :trace,          to: :bool, internal: true, summary: 'Whether to trace the build script'
+            map    :perforce_test_path
 
             includes :languages, :job
 
