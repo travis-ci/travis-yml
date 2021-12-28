@@ -2175,6 +2175,28 @@
         "see": {
           "Customizing the Build": "https://docs.travis-ci.com/customizing-the-build/"
         }
+      },
+      "lxd_build": {
+        "$id": "lxd_build",
+        "title": "LXD Build",
+        "description": "Build an LXD image",
+        "type": "object",
+        "properties": {
+          "dist": {
+            "$ref": "#/definitions/lxd_build_defs/lxd_dist"
+          },
+          "name": {
+            "$ref": "#/definitions/lxd_build_defs/lxd_name"
+          },
+          "description": {
+            "$ref": "#/definitions/lxd_build_defs/lxd_description"
+          },
+          "commands": {
+            "$ref": "#/definitions/lxd_build_defs/lxd_commands"
+          }
+        },
+        "additionalProperties": false,
+        "summary": "Build an LXD image"
       }
     },
     "addon": {
@@ -10063,6 +10085,61 @@
           "Configuring Webhook notifications": "https://docs.travis-ci.com/user/notifications/#configuring-webhook-notifications"
         },
         "normal": true
+      }
+    },
+    "lxd_build_defs": {
+      "lxd_command": {
+        "$id": "lxd_command",
+        "title": "Lxd Command",
+        "type": "string",
+        "summary": "LXD command",
+        "example": "apt-get -y install python3.8"
+      },
+      "lxd_commands": {
+        "$id": "lxd_commands",
+        "title": "Lxd Commands",
+        "description": "Run commands during LXD image setup",
+        "anyOf": [
+          {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/lxd_build_defs/lxd_command"
+            },
+            "normal": true
+          },
+          {
+            "$ref": "#/definitions/lxd_build_defs/lxd_command"
+          }
+        ],
+        "summary": "LXD image commands"
+      },
+      "lxd_description": {
+        "$id": "lxd_description",
+        "title": "Lxd Description",
+        "type": "string",
+        "summary": "LXD image description",
+        "example": "My custom image description"
+      },
+      "lxd_dist": {
+        "$id": "lxd_dist",
+        "title": "Distribution",
+        "type": "string",
+        "summary": "LXD image Ubuntu distribution",
+        "see": {
+          "Virtualization environments": "https://docs.travis-ci.com/user/reference/overview/#virtualization-environments"
+        },
+        "downcase": true,
+        "enum": [
+          "focal",
+          "bionic"
+        ]
+      },
+      "lxd_name": {
+        "$id": "lxd_name",
+        "title": "Lxd Name",
+        "type": "string",
+        "summary": "LXD image name",
+        "example": "my-custom-image"
       }
     }
   },
