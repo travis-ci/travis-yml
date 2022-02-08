@@ -10,12 +10,14 @@ require 'travis/yml/schema/def/jobs'
 require 'travis/yml/schema/def/language'
 require 'travis/yml/schema/def/notification'
 require 'travis/yml/schema/def/os'
+require 'travis/yml/schema/def/os_custom'
 require 'travis/yml/schema/def/stack'
 require 'travis/yml/schema/def/stages'
 require 'travis/yml/schema/def/sudo'
 require 'travis/yml/schema/def/version'
 require 'travis/yml/schema/def/virt'
 require 'travis/yml/schema/def/vm'
+require 'travis/yml/schema/def/lxd_build'
 require 'travis/yml/schema/type'
 
 module Travis
@@ -53,6 +55,7 @@ module Travis
 
             map    :language,       default: DEFAULT[:language]
             matrix :os,             default: DEFAULT[:os], to: :oss
+            map    :os_custom
             map    :dist,           default: ENV['TRAVIS_DEFAULT_DIST'] || DEFAULT[:dist]
             matrix :arch,           to: :archs
             map    :stack
@@ -64,6 +67,7 @@ module Travis
             map    :stages
             map    :jobs,           alias: :matrix
             map    :notifications
+            map    :lxd_build
 
             map    :version
             map    :vm,             default: DEFAULT[:vm]
