@@ -111,6 +111,14 @@
         "version": {
           "$ref": "#/definitions/type/version"
         },
+        "vm": {
+          "$ref": "#/definitions/type/vm",
+          "defaults": [
+            {
+              "size": "medium"
+            }
+          ]
+        },
         "conditions": {
           "$ref": "#/definitions/type/conditions"
         },
@@ -2145,6 +2153,28 @@
           "lxd",
           "vm"
         ]
+      },
+      "vm": {
+        "$id": "vm",
+        "title": "Vm",
+        "description": "These settings can be used in order to choose VM size",
+        "type": "object",
+        "properties": {
+          "size": {
+            "type": "string",
+            "enum": [
+              "medium",
+              "large",
+              "x-large",
+              "2x-large"
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "summary": "VM size settings",
+        "see": {
+          "Customizing the Build": "https://docs.travis-ci.com/customizing-the-build/"
+        }
       }
     },
     "addon": {

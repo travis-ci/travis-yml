@@ -71,6 +71,9 @@ describe Travis::Yml::Schema::Def::Jobs do
         branches: {
           '$ref': '#/definitions/type/branches'
         },
+        vm: {
+          '$ref': '#/definitions/type/vm'
+        },
         name: {
           type: :string,
           flags: [
