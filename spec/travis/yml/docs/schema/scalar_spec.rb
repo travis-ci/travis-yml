@@ -8,6 +8,6 @@ describe Travis::Yml::Docs::Schema::Scalar do
   it { should have_opt summary: 'Build environment distribution' }
   it { should have_opt type: :str }
   it { should have_opt downcase: true }
-  it { should have_opt enum: %w(trusty precise xenial bionic focal server-2016) }
+  it { should have_opt enum: %w(trusty precise xenial bionic focal server-2016 rhel8) }
 end
 

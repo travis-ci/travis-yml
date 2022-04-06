@@ -16,7 +16,8 @@ describe Travis::Yml::Schema::Def::Dist do
         'xenial',
         'bionic',
         'focal',
-        'server-2016'
+        'server-2016',
+        'rhel8'
       ],
       downcase: true,
       values: {
@@ -63,6 +64,13 @@ describe Travis::Yml::Schema::Def::Dist do
             ]
           },
           edge: true
+        },
+        rhel8: {
+          only: {
+            os: [
+              'linux'
+            ]
+          }
         },
       }
     )
