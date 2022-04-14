@@ -16,6 +16,7 @@ describe Travis::Yml::Schema::Def::Dist do
         'xenial',
         'bionic',
         'focal',
+        'jammy',
         'server-2016',
         'rhel8'
       ],
@@ -51,6 +52,13 @@ describe Travis::Yml::Schema::Def::Dist do
           }
         },
         focal: {
+          only: {
+            os: [
+              'linux'
+            ]
+          }
+        },
+        jammy: {
           only: {
             os: [
               'linux'
