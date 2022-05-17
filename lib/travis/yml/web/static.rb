@@ -14,9 +14,9 @@ module Travis
 
         attr_reader :dir, :content
 
-        def initialize(app, dir)
+        def initialize(app, dir, **kwargs)
           @dir = dir
-          super(app)
+          super(app, **kwargs)
         end
 
         get '*' do
