@@ -17,7 +17,8 @@ describe Travis::Yml::Schema::Def::Dist do
         'bionic',
         'focal',
         'server-2016',
-        'rhel8'
+        'rhel8',
+        'jammy'
       ],
       downcase: true,
       values: {
@@ -57,7 +58,7 @@ describe Travis::Yml::Schema::Def::Dist do
             ]
           }
         },
-       'server-2016': {
+        'server-2016': {
           only: {
             os: [
               'windows'
@@ -66,6 +67,13 @@ describe Travis::Yml::Schema::Def::Dist do
           edge: true
         },
         rhel8: {
+          only: {
+            os: [
+              'linux'
+            ]
+          }
+        },
+        jammy: {
           only: {
             os: [
               'linux'
