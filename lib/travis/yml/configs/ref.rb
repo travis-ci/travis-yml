@@ -6,7 +6,7 @@ module Travis
       class Ref < Struct.new(:str, :opts)
         include Errors
 
-        REMOTE = %r(^([^/]+/[^/]+):(.+?.yml)(?:@([^@]+))?$)
+        REMOTE = %r(^([^/]+/[^/]+):(.+?.yml)(?:@(.+))?$)
         LOCAL  = %r(^(.+.yml)(?:@([^@]+))?$)
 
         attr_reader :parts, :repo, :path, :ref
