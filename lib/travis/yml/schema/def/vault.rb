@@ -8,8 +8,8 @@ module Travis
           register :vault
 
           def define
-            map :api_url, to: :str
-            map :token, to: :secure, strict: true
+            map :api_url, to: :str, required: true
+            map :token, to: :secure, strict: true, required: true
             map :secrets, to: :vault_secrets
 
             export
@@ -27,7 +27,7 @@ module Travis
             register :vault_kv_type
 
             def define
-              map :kv_api_ver, to: :str, values: %w(kv1 kv2), downcase: true, default: 'kv2'
+              map :kv_api_ver, to: :str, values: %w(kv2 kv1), downcase: true, default: 'kv2'
             end
           end
 
