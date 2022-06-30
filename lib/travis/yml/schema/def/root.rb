@@ -14,11 +14,11 @@ require 'travis/yml/schema/def/perforce_test_path'
 require 'travis/yml/schema/def/stack'
 require 'travis/yml/schema/def/stages'
 require 'travis/yml/schema/def/sudo'
+require 'travis/yml/schema/def/vault'
 require 'travis/yml/schema/def/version'
 require 'travis/yml/schema/def/virt'
 require 'travis/yml/schema/def/vm'
 require 'travis/yml/schema/type'
-require 'travis/yml/schema/def/vault'
 
 module Travis
   module Yml
