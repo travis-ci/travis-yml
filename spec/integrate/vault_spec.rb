@@ -6,8 +6,23 @@ describe Travis::Yml, integration_configs: true do
     let(:yaml) { File.read('spec/fixtures/vault_configs/root_valid_scenario.yml') }
 
     it do
-      config = described_class.load(yaml, alert: true, fix: true)
-      expect(config.msgs).to eq([])
+      config = described_class.load(yaml, alert: true, fix: true, defaults: true)
+      expect(config.msgs).to match_array([[:info, :root, :default, {:default=>"ruby", :key=>"language"}],
+                                  [:info, :root, :default, {:default=>"linux", :key=>"os"}],
+                                  [:info, :root, :default, {:default=>"xenial", :key=>"dist"}]])
+
+    end
+  end
+
+  context "when vault has secure token and it is a jobs level" do
+    let(:yaml) { File.read('spec/fixtures/vault_configs/jobs_valid_scenario.yml') }
+
+    it do
+      config = described_class.load(yaml, alert: true, fix: true, defaults: true)
+      expect(config.msgs).to match_array([[:info, :root, :default, {:default=>"ruby", :key=>"language"}],
+                                          [:info, :root, :default, {:default=>"linux", :key=>"os"}],
+                                          [:info, :root, :default, {:default=>"xenial", :key=>"dist"}]])
+
     end
   end
 
