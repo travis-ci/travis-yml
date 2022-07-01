@@ -55,6 +55,9 @@ describe Travis::Yml::Schema::Def::Jobs do
         sudo: {
           '$ref': '#/definitions/type/sudo'
         },
+        vault: {
+          '$ref': '#/definitions/type/vault'
+        },
         vm: {
           '$ref': '#/definitions/type/vm'
         },
