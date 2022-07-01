@@ -14,6 +14,7 @@ require 'travis/yml/schema/def/perforce_test_path'
 require 'travis/yml/schema/def/stack'
 require 'travis/yml/schema/def/stages'
 require 'travis/yml/schema/def/sudo'
+require 'travis/yml/schema/def/vault'
 require 'travis/yml/schema/def/version'
 require 'travis/yml/schema/def/virt'
 require 'travis/yml/schema/def/vm'
@@ -72,6 +73,7 @@ module Travis
             map    :filter_secrets, to: :bool, internal: true, summary: 'Whether to filter secrets from the log output'
             map    :trace,          to: :bool, internal: true, summary: 'Whether to trace the build script'
             map    :perforce_test_path
+            map    :vault,          to: :vault
 
             includes :languages, :job
 

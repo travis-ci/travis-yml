@@ -132,6 +132,7 @@ describe Travis::Yml::Schema::Def::Root do
         strs
         sudo
         support
+        vault
         version
         virt
         vm
@@ -304,6 +305,7 @@ describe Travis::Yml::Schema::Def::Root do
           stages
           sudo
           trace
+          vault
           version
           vm
         )
