@@ -117,6 +117,7 @@ describe Travis::Yml::Schema::Def::Root do
         jobs_excludes
         language
         languages
+        keys
         notifications
         os
         oss
