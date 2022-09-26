@@ -86,6 +86,7 @@ module Travis
 
             super
             map :allow_failure, to: :bool
+            map :vault, to: :vault
 
             export
           end
