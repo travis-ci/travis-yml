@@ -7,19 +7,24 @@ RUN ( \
    apt-get update ; \
    # update to deb 10.8
    apt-get upgrade -y ; \
-   apt-get install -y --no-install-recommends git make gcc g++ \
-   && rm -rf /var/lib/apt/lists/* \
+   apt-get install -y git make gcc g++ \
+   && rm -rf /var/lib/apt/lists/*; \
+   bundle config --global frozen 1;\
+   mkdir -p /app;\
 )
 
 # throw errors if Gemfile has been modified since Gemfile.lock
-RUN bundle config --global frozen 1;
-RUN mkdir -p /app
 WORKDIR /app
 
 # Copy app files into app folder
 COPY . /app
 
-RUN gem install bundler -v '2.0.1'
-RUN bundle install --deployment --without development test --clean
+RUN (\
+   gem install bundler -v '2.0.1'; \
+   bundle install --deployment --without development test --clean; \
+   apt-get remove -y git make gcc g++; \
+   bundle clean && rm -rf /app/vendor/bundle/ruby/2.6.0/cache/*; \
+   for i in `find /app/vendor/ -name \*.o -o -name \*.c -o -name \*.h`; do rm -f $i; done; \
+   )
 
-CMD bundle exec puma -C lib/travis/yml/web/puma.rb
+CMD ["bundle", "exec", "puma", "-C", "lib/travis/yml/web/puma.rb"]
