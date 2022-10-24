@@ -138,6 +138,9 @@
         },
         "perforce_test_path": {
           "$ref": "#/definitions/type/perforce_test_path"
+        },
+        "vault": {
+          "$ref": "#/definitions/type/vault"
         }
       },
       "see": {
@@ -583,12 +586,12 @@
             }
           },
           "jammy": {
-             "only": {
-               "os": [
-                 "linux"
-               ]
-             }
-           },
+            "only": {
+              "os": [
+                "linux"
+              ]
+            }
+          },
           "server-2016": {
             "only": {
               "os": [
@@ -1033,6 +1036,9 @@
               "sudo": {
                 "$ref": "#/definitions/type/sudo"
               },
+              "vm": {
+                "$ref": "#/definitions/type/vm"
+              },
               "env": {
                 "$ref": "#/definitions/type/env_vars"
               },
@@ -1128,6 +1134,9 @@
               "sudo": {
                 "$ref": "#/definitions/type/sudo"
               },
+              "vm": {
+                "$ref": "#/definitions/type/vm"
+              },
               "env": {
                 "$ref": "#/definitions/type/env_vars"
               },
@@ -1211,6 +1220,9 @@
               "sudo": {
                 "$ref": "#/definitions/type/sudo"
               },
+              "vm": {
+                "$ref": "#/definitions/type/vm"
+              },
               "env": {
                 "$ref": "#/definitions/type/env_vars"
               },
@@ -1238,6 +1250,9 @@
               },
               "allow_failure": {
                 "type": "boolean"
+              },
+              "vault": {
+                "$ref": "#/definitions/type/vault"
               }
             },
             "title": "Job Matrix Includes",
@@ -2154,6 +2169,177 @@
         ],
         "normal": true
       },
+      "vault": {
+        "$id": "vault",
+        "title": "Vault",
+        "type": "object",
+        "properties": {
+          "api_url": {
+            "type": "string"
+          },
+          "token": {
+            "$ref": "#/definitions/type/secure",
+            "strict": true
+          },
+          "secrets": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "kv_api_ver": {
+                          "type": "string",
+                          "enum": [
+                            "kv2",
+                            "kv1"
+                          ],
+                          "downcase": true,
+                          "defaults": [
+                            {
+                              "value": "kv2"
+                            }
+                          ]
+                        }
+                      },
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "namespace": {
+                          "anyOf": [
+                            {
+                              "type": "array",
+                              "items": {
+                                "anyOf": [
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "object",
+                                    "properties": {
+                                      "name": {
+                                        "type": "string"
+                                      }
+                                    },
+                                    "additionalProperties": false,
+                                    "required": [
+                                      "name"
+                                    ]
+                                  }
+                                ]
+                              },
+                              "normal": true
+                            },
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "name": {
+                                  "type": "string"
+                                }
+                              },
+                              "additionalProperties": false,
+                              "required": [
+                                "name"
+                              ]
+                            }
+                          ]
+                        }
+                      },
+                      "additionalProperties": false
+                    }
+                  ]
+                },
+                "normal": true
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kv_api_ver": {
+                    "type": "string",
+                    "enum": [
+                      "kv2",
+                      "kv1"
+                    ],
+                    "downcase": true,
+                    "defaults": [
+                      {
+                        "value": "kv2"
+                      }
+                    ]
+                  }
+                },
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "namespace": {
+                    "anyOf": [
+                      {
+                        "type": "array",
+                        "items": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "name": {
+                                  "type": "string"
+                                }
+                              },
+                              "additionalProperties": false,
+                              "required": [
+                                "name"
+                              ]
+                            }
+                          ]
+                        },
+                        "normal": true
+                      },
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "name": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": false,
+                        "required": [
+                          "name"
+                        ]
+                      }
+                    ]
+                  }
+                },
+                "additionalProperties": false
+              }
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "api_url",
+          "token"
+        ]
+      },
       "version": {
         "$id": "version",
         "title": "Version",
@@ -2198,7 +2384,7 @@
         "additionalProperties": false,
         "summary": "VM size settings",
         "see": {
-          "Customizing the Build": "https://docs.travis-ci.com/customizing-the-build/"
+          "Customizing the Build": "https://docs.travis-ci.com/user/customizing-the-build/"
         }
       }
     },
