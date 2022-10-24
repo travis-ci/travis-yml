@@ -1,10 +1,10 @@
 describe Travis::Yml::Configs do
-  let(:repo)    { { github_id: 1, slug: 'travis-ci/travis-yml', private: false, default_branch: 'master', token: 'repo_token', private_key: 'key', allow_config_imports: true } }
+  let(:repo)    { { id: 1, github_id: 1, slug: 'travis-ci/travis-yml', private: false, default_branch: 'master', token: 'repo_token', private_key: 'key', allow_config_imports: true } }
   let(:configs) { described_class.new(repo, 'ref', raws, {}, opts.merge(token: 'user_token', data: {})) }
   let(:config)  { subject.config }
 
-  before { stub_content(repo[:github_id], '.travis.yml', travis_yml) }
-  before { stub_content(repo[:github_id], 'one.yml', one_yml) }
+  before { stub_content(repo[:id], '.travis.yml', travis_yml) }
+  before { stub_content(repo[:id], 'one.yml', one_yml) }
 
   subject { configs.tap(&:load) }
 
@@ -77,7 +77,7 @@ describe Travis::Yml::Configs do
   end
 
   describe 'no .travis.yml present' do
-    before { stub_content(repo[:github_id], '.travis.yml', status: 404) }
+    before { stub_content(repo[:id], '.travis.yml', status: 404) }
 
     describe 'non-empty api config' do
       let(:raws) { [config: 'script: ./api'] }

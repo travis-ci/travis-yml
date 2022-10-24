@@ -1,16 +1,16 @@
-require 'travis/yml/configs/github/content'
+require 'travis/yml/configs/content'
 require 'travis/yml/configs/config/base'
 
 module Travis
   module Yml
     module Configs
       module Config
-        class File < Obj.new(:ctx, :parent, :defn)
+        class File < Obj.new(:ctx, :parent, :provider, :defn)
           include Base
 
           attr_reader :path, :ref, :raw
 
-          def initialize(ctx, parent, defn)
+          def initialize(ctx, parent, provider, defn)
             defn = stringify(defn)
             super
           end
@@ -73,7 +73,7 @@ module Travis
             end
 
             def fetch
-              Github::Content.new(repo, path, ref).content
+              Content.new(repo, path, ref).content
             rescue FileNotFound => e
               required? ? raise : nil
             end

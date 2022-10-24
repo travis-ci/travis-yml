@@ -8,15 +8,15 @@ describe Travis::Yml::Web::App, 'POST /configs' do
   let(:headers) { last_response.headers }
   let(:body)    { Oj.load(last_response.body, symbol_keys: true) }
   let(:data)    { { repo: repo, type: type, ref: ref, configs: respond_to?(:configs) ? configs : nil } }
-  let(:repo)    { { github_id: 1, slug: 'travis-ci/travis-yml', token: 'token', private: false, private_key: 'key', allow_config_imports: true } }
+  let(:repo)    { { id: 1, github_id: 1, slug: 'travis-ci/travis-yml', token: 'token', private: false, private_key: 'key', allow_config_imports: true } }
   let(:type)    { :push }
   let(:ref)     { 'ref' }
 
   let(:travis_yml) { 'import: one.yml' }
   let(:one_yml)    { 'script: ./one' }
 
-  before { stub_content(repo[:github_id], '.travis.yml', travis_yml) }
-  before { stub_content(repo[:github_id], 'one.yml', one_yml) }
+  before { stub_content(repo[:id], '.travis.yml', travis_yml) }
+  before { stub_content(repo[:id], 'one.yml', one_yml) }
   before { header 'Authorization', 'internal token' }
 
   context do
@@ -117,7 +117,7 @@ describe Travis::Yml::Web::App, 'POST /configs' do
       describe 'empty api config' do
         let(:configs) { [config: ''] }
 
-        before { stub_content(repo[:github_id], '.travis.yml', status: 404) }
+        before { stub_content(repo[:id], '.travis.yml', status: 404) }
         before { post '/configs', Oj.generate(data) }
 
         it do
@@ -216,7 +216,7 @@ describe Travis::Yml::Web::App, 'POST /configs' do
               type: 'unauthorized',
               service: 'travis_ci',
               ref: 'other/other',
-              message: 'Unable to authenticate with Travis CI for repo other/other (Travis CI GET repo/other%2Fother responded with 401)'
+              message: 'Unable to authenticate with Travis CI for repo other/other (Travis CI GET repo/github/other%2Fother responded with 401)'
             }
           )
         end
@@ -231,7 +231,7 @@ describe Travis::Yml::Web::App, 'POST /configs' do
               type: 'unauthorized',
               service: 'travis_ci',
               ref: 'other/other',
-              message: 'Unable to authenticate with Travis CI for repo other/other (Travis CI GET repo/other%2Fother responded with 403)'
+              message: 'Unable to authenticate with Travis CI for repo other/other (Travis CI GET repo/github/other%2Fother responded with 403)'
             }
           )
         end
@@ -246,7 +246,7 @@ describe Travis::Yml::Web::App, 'POST /configs' do
               type: 'repo_not_found',
               service: 'travis_ci',
               ref: 'other/other',
-              message: 'Repo other/other not found on Travis CI (Travis CI GET repo/other%2Fother responded with 404)'
+              message: 'Repo other/other not found on Travis CI (Travis CI GET repo/github/other%2Fother responded with 404)'
             }
           )
         end
@@ -279,7 +279,7 @@ describe Travis::Yml::Web::App, 'POST /configs' do
               type: 'unauthorized',
               service: 'github',
               ref: 'other/other:one.yml',
-              message: 'Unable to authenticate with GitHub for file other/other:one.yml (GitHub GET repositories/1/contents/one.yml responded with 401)'
+              message: 'Unable to authenticate with RemoteVcs for file other/other:one.yml ()'
             }
           )
         end
@@ -294,7 +294,7 @@ describe Travis::Yml::Web::App, 'POST /configs' do
               type: 'unauthorized',
               service: 'github',
               ref: 'other/other:one.yml',
-              message: 'Unable to authenticate with GitHub for file other/other:one.yml (GitHub GET repositories/1/contents/one.yml responded with 403)'
+              message: 'Unable to authenticate with RemoteVcs for file other/other:one.yml ()'
             }
           )
         end
@@ -309,7 +309,7 @@ describe Travis::Yml::Web::App, 'POST /configs' do
               type: 'file_not_found',
               service: 'github',
               ref: 'other/other:one.yml',
-              message: 'File other/other:one.yml not found on GitHub (GitHub GET repositories/1/contents/one.yml responded with 404)'
+              message: 'File other/other:one.yml not found on RemoteVcs ()'
             }
           )
         end

@@ -1,5 +1,5 @@
 require 'forwardable'
-require 'thwait'
+#require 'thwait'
 require 'travis/yml/helper/condition'
 require 'travis/yml/helper/synchronize'
 require 'travis/yml/configs/errors'

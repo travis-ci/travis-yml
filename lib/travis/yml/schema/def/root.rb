@@ -10,11 +10,14 @@ require 'travis/yml/schema/def/jobs'
 require 'travis/yml/schema/def/language'
 require 'travis/yml/schema/def/notification'
 require 'travis/yml/schema/def/os'
+require 'travis/yml/schema/def/perforce_test_path'
 require 'travis/yml/schema/def/stack'
 require 'travis/yml/schema/def/stages'
 require 'travis/yml/schema/def/sudo'
+require 'travis/yml/schema/def/vault'
 require 'travis/yml/schema/def/version'
 require 'travis/yml/schema/def/virt'
+require 'travis/yml/schema/def/vm'
 require 'travis/yml/schema/type'
 
 module Travis
@@ -35,6 +38,9 @@ module Travis
             os: [
               { value: :linux, except: { language: 'objective-c' } },
               { value: :osx, only: { language: 'objective-c' } }
+            ],
+            vm: [
+              { size: 'medium' }
             ]
           }
 
@@ -62,9 +68,12 @@ module Travis
             map    :notifications
 
             map    :version
+            map    :vm,             default: DEFAULT[:vm]
             map    :conditions,     to: :conditions
             map    :filter_secrets, to: :bool, internal: true, summary: 'Whether to filter secrets from the log output'
             map    :trace,          to: :bool, internal: true, summary: 'Whether to trace the build script'
+            map    :perforce_test_path
+            map    :vault,          to: :vault
 
             includes :languages, :job
 

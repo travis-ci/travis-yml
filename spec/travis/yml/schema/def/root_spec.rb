@@ -121,6 +121,7 @@ describe Travis::Yml::Schema::Def::Root do
         os
         oss
         osx_images
+        perforce_test_path
         secure
         secures
         service
@@ -131,8 +132,10 @@ describe Travis::Yml::Schema::Def::Root do
         strs
         sudo
         support
+        vault
         version
         virt
+        vm
       ),
       addon: %i(
         apt
@@ -297,11 +300,14 @@ describe Travis::Yml::Schema::Def::Root do
           notifications
           os
           osx_image
+          perforce_test_path
           stack
           stages
           sudo
           trace
+          vault
           version
+          vm
         )
       end
 
