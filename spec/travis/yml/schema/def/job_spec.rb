@@ -46,6 +46,9 @@ describe Travis::Yml::Schema::Def::Job do
           '$ref': '#/definitions/type/strs',
           summary: 'Scripts to run at the install stage'
         },
+        keys: {
+          '$ref': '#/definitions/type/keys'
+        },
         before_script: {
           '$ref': '#/definitions/type/strs',
           summary: 'Scripts to run before the script stage'
