@@ -1,0 +1,110 @@
+<html>
+  <head>
+    <link rel="stylesheet" type="text/css" href="/css/docs/styles.css" />
+    <link rel="stylesheet" type="text/css" href="/css/docs/syntax.css" />
+  </head>
+  <body>
+    <div id="menu">
+      <ul>
+<li><a href="/">Home</a></li>
+<li><a href="/ref/language">Language</a></li>
+<li><a href="/ref/os">Os</a></li>
+<li><a href="/ref/job/addons">Addons</a></li>
+<li><a href="/ref/arch">Arch</a></li>
+<li><a href="/ref/job/branches">Branches</a></li>
+<li><a href="/ref/job/cache">Cache</a></li>
+<li><a href="/ref/compiler">Compiler</a></li>
+<li><a href="/ref/job/deploy">Deploy</a></li>
+<li><a href="/ref/dist">Dist</a></li>
+<li><a href="/ref/env">Env</a></li>
+<li><a href="/ref/job/git">Git</a></li>
+<li><a href="/ref/job/if/condition">If</a></li>
+<li><a href="/ref/import">Import</a></li>
+<li><a href="/ref/jobs">Jobs</a>
+
+<ul>
+<li><a href="/ref/jobs/include/jobs_includes">Include</a></li>
+<li><a href="/ref/jobs/exclude/jobs_excludes">Exclude</a></li>
+<li><a href="/ref/jobs/allow_failures/jobs_allow_failures">Allow Failures</a></li>
+</ul></li>
+<li><a href="/ref/notifications">Notifications</a></li>
+<li><a href="/ref/osx_image">Osx Image</a></li>
+<li><a href="/ref/perforce_test_path">Perforce Test Path</a></li>
+<li><a href="/ref/job/services">Services</a></li>
+<li><a href="/ref/stages">Stages</a></li>
+<li><a href="/ref/vault">Vault</a></li>
+<li><a href="/ref/version">Version</a></li>
+<li><a href="/ref/vm">Vm</a></li>
+<li><a href="/matrix_expansion">Matrix Expansion</a></li>
+<li><a href="/types">Types</a></li>
+<li><a href="/index">Index</a></li>
+<li><a href="/explore">Explore</a></li>
+</ul>
+
+    </div>
+    <div id="content">
+      <h1 id="addons">Addons</h1>
+
+<p><em>Build addons to activate</em></p>
+
+<p>Build addons enable additional built-in functionality, such as installing build dependencies, system setup tasks, and integrations with external services.</p>
+
+<h2 id="keys">Keys</h2>
+
+<ul>
+<li><p><code>apt</code> &mdash; APT packages and sources to install (type: map, sequence of string, string, or boolean) <a href="/ref/jobs/allow_failures/jobs_allow_failures/jobs_allow_failure/job/addons/apt">details</a></p></li>
+<li><p><code>apt_packages</code> &mdash; APT package names to install (type: sequence of string, or string)</p></li>
+<li><p><code>artifacts</code> &mdash; Build artifacts to upload at the end of the build (type: map, or boolean) <a href="/ref/jobs/allow_failures/jobs_allow_failures/jobs_allow_failure/job/addons/artifacts">details</a></p></li>
+<li><p><code>browserstack</code> &mdash; Browserstack settings (type: map, or boolean) <a href="/ref/jobs/allow_failures/jobs_allow_failures/jobs_allow_failure/job/addons/browserstack">details</a></p></li>
+<li><p><code>chrome</code> &mdash; Chrome version to use (type: enum (string), known values: <code>stable</code>, <code>beta</code>)</p></li>
+<li><p><code>code_climate</code> &mdash; CodeClimate settings (type: map, secure, or boolean) <a href="/ref/jobs/allow_failures/jobs_allow_failures/jobs_allow_failure/job/addons/code_climate">details</a></p></li>
+<li><p><code>coverity_scan</code> &mdash; CoverityScan settings (type: map, or boolean) <a href="/ref/jobs/allow_failures/jobs_allow_failures/jobs_allow_failure/job/addons/coverity_scan">details</a></p></li>
+<li><p><code>homebrew</code> &mdash; Homebrew packages to install (type: map, sequence of string, string, or boolean) <a href="/ref/jobs/allow_failures/jobs_allow_failures/jobs_allow_failure/job/addons/homebrew">details</a></p></li>
+<li><p><code>hostname</code> &mdash; Hostname to set on the build environment (type: string)</p></li>
+<li><p><code>hosts</code> &mdash; Hosts to add to /etc/hosts (type: sequence of string, or string)</p></li>
+<li><p><code>jwt</code> &mdash; (<strong>deprecated</strong>, type: sequence of secure, or secure) <a href="/ref/jobs/allow_failures/jobs_allow_failures/jobs_allow_failure/job/addons/jwt">details</a></p></li>
+<li><p><code>sauce_connect</code> &mdash; SourceConnect settings (type: map, or boolean) <a href="/ref/jobs/allow_failures/jobs_allow_failures/jobs_allow_failure/job/addons/sauce_connect">details</a></p></li>
+<li><p><code>pkg</code> &mdash; (type: map, sequence of string, string, or boolean) <a href="/ref/jobs/allow_failures/jobs_allow_failures/jobs_allow_failure/job/addons/pkg">details</a></p></li>
+<li><p><code>srcclr</code> &mdash; SourceClear settings (type: map, or boolean)</p></li>
+<li><p><code>snaps</code> &mdash; Ubuntu Snaps to install (type: sequence of map, sequence of string, map, or string) <a href="/ref/jobs/allow_failures/jobs_allow_failures/jobs_allow_failure/job/addons/snaps">details</a></p></li>
+<li><p><code>sonarcloud</code> &mdash; Sonarcloud settings (type: map, or boolean) <a href="/ref/jobs/allow_failures/jobs_allow_failures/jobs_allow_failure/job/addons/sonarcloud">details</a></p></li>
+<li><p><code>ssh_known_hosts</code> &mdash; Hosts to add to ~/.ssh/known_hosts (type: sequence of secure, or secure, see: <a href="https://docs.travis-ci.com/user/ssh-known-hosts/">Adding to SSH Known Hosts</a>)</p></li>
+<li><p><code>firefox</code> &mdash; Firefox version to use (type: string, e.g.: <code>68.0b1</code>)</p></li>
+<li><p><code>mariadb</code> &mdash; MariaDB version to use (type: string)</p></li>
+<li><p><code>postgresql</code> &mdash; Postgres version to use (type: string, alias: <code>postgres</code>)</p></li>
+<li><p><code>rethinkdb</code> &mdash; RethinkDB version to use (type: string)</p></li>
+</ul>
+
+<h2 id="examples">Examples</h2>
+
+<pre><code class="yaml">addons:
+  apt:
+    packages:
+    - cmake
+    sources:
+    - ubuntu-toolchain-r-test
+    dist: string
+  apt_packages:
+  - string
+  artifacts:
+    enabled: true
+    bucket: string
+    endpoint: string
+</code></pre>
+
+<pre><code class="yaml">addons:
+  apt: true
+</code></pre>
+
+<pre><code class="yaml">addons:
+  apt_packages: string
+</code></pre>
+
+<pre><code class="yaml">addons:
+  artifacts: true
+</code></pre>
+
+    </div>
+    <div class="corner-ribbon">Beta</div>
+  </body>
+</html>

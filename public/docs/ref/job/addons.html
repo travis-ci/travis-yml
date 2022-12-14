@@ -2,13 +2,6 @@
   <head>
     <link rel="stylesheet" type="text/css" href="/css/docs/styles.css" />
     <link rel="stylesheet" type="text/css" href="/css/docs/syntax.css" />
-    <script type="text/javascript" src="https://unpkg.com/whatwg-fetch@2.0.3/fetch.js"></script>
-    <script type="text/javascript" src="/js/explore.js"></script>
-    <script type="text/javascript">
-      window.token = "jfnCqbJlbvxZlX40uE0DKg";
-      window.parseURL = "https://yml-staging.travis-ci.org/v1/parse";
-      window.expandURL = "https://yml-staging.travis-ci.org/v1/expand";
-    </script>
   </head>
   <body>
     <div id="menu">
@@ -26,6 +19,7 @@
 <li><a href="/ref/job/addons/coverity_scan">Coverity Scan</a></li>
 <li><a href="/ref/job/addons/homebrew">Homebrew</a></li>
 <li><a href="/ref/job/addons/sauce_connect">Sauce Connect</a></li>
+<li><a href="/ref/job/addons/pkg">Pkg</a></li>
 <li><a href="/ref/job/addons/snaps">Snaps</a></li>
 <li><a href="/ref/job/addons/sonarcloud">Sonarcloud</a></li>
 </ul></li>
@@ -42,9 +36,12 @@
 <li><a href="/ref/jobs">Jobs</a></li>
 <li><a href="/ref/notifications">Notifications</a></li>
 <li><a href="/ref/osx_image">Osx Image</a></li>
+<li><a href="/ref/perforce_test_path">Perforce Test Path</a></li>
 <li><a href="/ref/job/services">Services</a></li>
 <li><a href="/ref/stages">Stages</a></li>
+<li><a href="/ref/vault">Vault</a></li>
 <li><a href="/ref/version">Version</a></li>
+<li><a href="/ref/vm">Vm</a></li>
 <li><a href="/matrix_expansion">Matrix Expansion</a></li>
 <li><a href="/types">Types</a></li>
 <li><a href="/index">Index</a></li>
@@ -74,11 +71,12 @@
 <li><p><code>hosts</code> &mdash; Hosts to add to /etc/hosts (type: sequence of string, or string)</p></li>
 <li><p><code>jwt</code> &mdash; (<strong>deprecated</strong>, type: sequence of secure, or secure) <a href="/ref/job/addons/jwt">details</a></p></li>
 <li><p><code>sauce_connect</code> &mdash; SourceConnect settings (type: map, or boolean) <a href="/ref/job/addons/sauce_connect">details</a></p></li>
+<li><p><code>pkg</code> &mdash; (type: map, sequence of string, string, or boolean) <a href="/ref/job/addons/pkg">details</a></p></li>
 <li><p><code>srcclr</code> &mdash; SourceClear settings (type: map, or boolean)</p></li>
 <li><p><code>snaps</code> &mdash; Ubuntu Snaps to install (type: sequence of map, sequence of string, map, or string) <a href="/ref/job/addons/snaps">details</a></p></li>
 <li><p><code>sonarcloud</code> &mdash; Sonarcloud settings (type: map, or boolean) <a href="/ref/job/addons/sonarcloud">details</a></p></li>
 <li><p><code>ssh_known_hosts</code> &mdash; Hosts to add to ~/.ssh/known_hosts (type: sequence of secure, or secure, see: <a href="https://docs.travis-ci.com/user/ssh-known-hosts/">Adding to SSH Known Hosts</a>)</p></li>
-<li><p><code>firefox</code> &mdash; Firefox version to use (type: number, or string, e.g.: <code>68.0b1</code>)</p></li>
+<li><p><code>firefox</code> &mdash; Firefox version to use (type: string, e.g.: <code>68.0b1</code>)</p></li>
 <li><p><code>mariadb</code> &mdash; MariaDB version to use (type: string)</p></li>
 <li><p><code>postgresql</code> &mdash; Postgres version to use (type: string, alias: <code>postgres</code>)</p></li>
 <li><p><code>rethinkdb</code> &mdash; RethinkDB version to use (type: string)</p></li>

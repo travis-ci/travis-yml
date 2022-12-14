@@ -102,6 +102,8 @@ module Travis
 
       def logger
         @logger ||= Logger.new($stdout)
+        @logger.level = config.log_level
+        @logger
       end
 
       def load(parts, opts = {})

@@ -1,4 +1,4 @@
-FROM ruby:2.6.6-slim
+FROM ruby:2.6.10-slim
 
 LABEL maintainer Travis CI GmbH <support+travis-live-docker-images@travis-ci.com>
 
@@ -20,7 +20,8 @@ WORKDIR /app
 COPY . /app
 
 RUN (\
-   gem install bundler -v '2.0.1'; \
+   gem install bundler -v '2.3.24'; \
+   gem update --system; \
    bundle install --deployment --without development test --clean; \
    apt-get remove -y git make gcc g++; \
    bundle clean && rm -rf /app/vendor/bundle/ruby/2.6.0/cache/*; \

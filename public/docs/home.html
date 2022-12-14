@@ -2,13 +2,6 @@
   <head>
     <link rel="stylesheet" type="text/css" href="/css/docs/styles.css" />
     <link rel="stylesheet" type="text/css" href="/css/docs/syntax.css" />
-    <script type="text/javascript" src="https://unpkg.com/whatwg-fetch@2.0.3/fetch.js"></script>
-    <script type="text/javascript" src="/js/explore.js"></script>
-    <script type="text/javascript">
-      window.token = "jfnCqbJlbvxZlX40uE0DKg";
-      window.parseURL = "https://yml-staging.travis-ci.org/v1/parse";
-      window.expandURL = "https://yml-staging.travis-ci.org/v1/expand";
-    </script>
   </head>
   <body>
     <div id="menu">
@@ -30,9 +23,12 @@
 <li><a href="/ref/jobs">Jobs</a></li>
 <li><a href="/ref/notifications">Notifications</a></li>
 <li><a href="/ref/osx_image">Osx Image</a></li>
+<li><a href="/ref/perforce_test_path">Perforce Test Path</a></li>
 <li><a href="/ref/job/services">Services</a></li>
 <li><a href="/ref/stages">Stages</a></li>
+<li><a href="/ref/vault">Vault</a></li>
 <li><a href="/ref/version">Version</a></li>
+<li><a href="/ref/vm">Vm</a></li>
 <li><a href="/matrix_expansion">Matrix Expansion</a></li>
 <li><a href="/types">Types</a></li>
 <li><a href="/index">Index</a></li>
@@ -62,18 +58,21 @@ activated</a>).</p>
 
 <ul>
 <li><p><code>language</code> &mdash; Language support to enable (type: enum (string), known values: <code>android</code>, <code>c</code>, <code>clojure</code>, <code>cpp</code>, <code>crystal</code>, <code>csharp</code>, <code>d</code>, <code>dart</code>, <code>elixir</code>, <code>elm</code>, <code>...</code>, default: <code>ruby, objective-c</code>, e.g.: <code>ruby</code>) <a href="/ref/language">details</a></p></li>
-<li><p><code>os</code> &mdash; Build environment operating systems (type: sequence of enum (string), or enum (string), known values: <code>linux</code>, <code>osx</code>, <code>windows</code>) <a href="/ref/os">details</a></p></li>
-<li><p><code>dist</code> &mdash; Build environment distribution (type: enum (string), known values: <code>trusty</code>, <code>precise</code>, <code>xenial</code>, <code>bionic</code>, <code>server-2016</code>) <a href="/ref/dist">details</a></p></li>
-<li><p><code>arch</code> &mdash; Build environment architectures (type: sequence of enum (string), or enum (string), known values: <code>amd64</code>, <code>arm64</code>, <code>ppc64le</code>, <code>s390x</code>) <a href="/ref/arch">details</a></p></li>
+<li><p><code>os</code> &mdash; Build environment operating systems (type: sequence of enum (string), or enum (string), known values: <code>linux</code>, <code>osx</code>, <code>windows</code>, <code>freebsd</code>, <code>linux-ppc64le</code>, default: <code>linux, osx</code>) <a href="/ref/os">details</a></p></li>
+<li><p><code>dist</code> &mdash; Build environment distribution (type: enum (string), known values: <code>trusty</code>, <code>precise</code>, <code>xenial</code>, <code>bionic</code>, <code>focal</code>, <code>jammy</code>, <code>server-2016</code>, <code>rhel8</code>, default: <code>xenial</code>) <a href="/ref/dist">details</a></p></li>
+<li><p><code>arch</code> &mdash; Build environment architectures (type: sequence of enum (string), or enum (string), known values: <code>amd64</code>, <code>arm64</code>, <code>arm64-graviton2</code>, <code>ppc64le</code>, <code>i386</code>, <code>s390x</code>) <a href="/ref/arch">details</a></p></li>
 <li><p><code>sudo</code> &mdash; Whether to allow sudo access (<strong>deprecated</strong>, type: boolean, or string, e.g.: <code>required</code>) <a href="/ref/sudo">details</a></p></li>
 <li><p><code>import</code> &mdash; Build configuration imports (type: sequence of map, sequence of string, map, or string) <a href="/ref/import">details</a></p></li>
 <li><p><code>env</code> &mdash; Environment variables to set up (type: map, sequence of map, sequence of secure, sequence of string, secure, or string) <a href="/ref/env">details</a></p></li>
 <li><p><code>compiler</code> &mdash; Compilers to set up (type: sequence of string, or string) <a href="/ref/compiler">details</a></p></li>
 <li><p><code>osx_image</code> &mdash; (type: sequence of string, or string) <a href="/ref/osx_image">details</a></p></li>
 <li><p><code>stages</code> &mdash; Build stages definition (type: sequence of map, sequence of string, map, or string) <a href="/ref/stages">details</a></p></li>
-<li><p><code>jobs</code> &mdash; Build matrix definitions (type: map, sequence of job matrix entry, or job matrix entry, alias: <code>matrix</code>) <a href="/ref/jobs">details</a></p></li>
+<li><p><code>jobs</code> &mdash; Build matrix definitions (type: map, sequence of job matrix includes, or job matrix includes, alias: <code>matrix</code>) <a href="/ref/jobs">details</a></p></li>
 <li><p><code>notifications</code> &mdash; Notification targets to notify on build results (type: map, sequence of map, sequence of sequence of secure, sequence of secure, sequence of boolean, secure, or boolean) <a href="/ref/notifications">details</a></p></li>
 <li><p><code>version</code> &mdash; Build config specification version (type: string, e.g.: <code>&gt;= 1.0.0</code>) <a href="/ref/version">details</a></p></li>
+<li><p><code>vm</code> &mdash; VM size settings (type: vm, default: ``) <a href="/ref/vm">details</a></p></li>
+<li><p><code>perforce_test_path</code> &mdash; Perforce depot subpath (type: string) <a href="/ref/perforce_test_path">details</a></p></li>
+<li><p><code>vault</code> &mdash; (type: vault) <a href="/ref/vault">details</a></p></li>
 </ul>
 
 <h2 id="shared-keys">Shared keys</h2>
@@ -100,7 +99,13 @@ activated</a>).</p>
 
 <h2 id="examples">Examples</h2>
 
-<pre><code class="yaml">language: ruby
+<pre><code class="yaml">vault:
+  api_url: string
+  token:
+    secure: encrypted string
+  secrets:
+  - string
+language: ruby
 os:
 - linux
 - osx

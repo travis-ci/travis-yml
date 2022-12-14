@@ -2,13 +2,6 @@
   <head>
     <link rel="stylesheet" type="text/css" href="/css/docs/styles.css" />
     <link rel="stylesheet" type="text/css" href="/css/docs/syntax.css" />
-    <script type="text/javascript" src="https://unpkg.com/whatwg-fetch@2.0.3/fetch.js"></script>
-    <script type="text/javascript" src="/js/explore.js"></script>
-    <script type="text/javascript">
-      window.token = "jfnCqbJlbvxZlX40uE0DKg";
-      window.parseURL = "https://yml-staging.travis-ci.org/v1/parse";
-      window.expandURL = "https://yml-staging.travis-ci.org/v1/expand";
-    </script>
   </head>
   <body>
     <div id="menu">
@@ -30,15 +23,18 @@
 <li><a href="/ref/jobs">Jobs</a>
 
 <ul>
-<li><a href="/ref/jobs/include/jobs_entries">Include</a></li>
-<li><a href="/ref/jobs/exclude/jobs_entries">Exclude</a></li>
-<li><a href="/ref/jobs/allow_failures/jobs_entries">Allow Failures</a></li>
+<li><a href="/ref/jobs/include/jobs_includes">Include</a></li>
+<li><a href="/ref/jobs/exclude/jobs_excludes">Exclude</a></li>
+<li><a href="/ref/jobs/allow_failures/jobs_allow_failures">Allow Failures</a></li>
 </ul></li>
 <li><a href="/ref/notifications">Notifications</a></li>
 <li><a href="/ref/osx_image">Osx Image</a></li>
+<li><a href="/ref/perforce_test_path">Perforce Test Path</a></li>
 <li><a href="/ref/job/services">Services</a></li>
 <li><a href="/ref/stages">Stages</a></li>
+<li><a href="/ref/vault">Vault</a></li>
 <li><a href="/ref/version">Version</a></li>
+<li><a href="/ref/vm">Vm</a></li>
 <li><a href="/matrix_expansion">Matrix Expansion</a></li>
 <li><a href="/types">Types</a></li>
 <li><a href="/index">Index</a></li>
@@ -57,14 +53,15 @@
 
 <ul>
 <li><a href="https://docs.travis-ci.com/user/build-matrix/">Build Matrix</a></li>
+<li><a href="https://docs.travis-ci.com/user/customizing-the-build#build-matrix">Customizing the build</a></li>
 </ul>
 
 <h2 id="types">Types</h2>
 
 <ul>
 <li><a href="/types">Map</a></li>
-<li><a href="/types">Sequence of Job Matrix Entry</a></li>
-<li><a href="/ref/jobs/jobs_entry">Job Matrix Entry</a></li>
+<li><a href="/types">Sequence of Job Matrix Includes</a></li>
+<li><a href="/ref/jobs/jobs_include">Job Matrix Includes</a></li>
 </ul>
 
 <h2 id="keys">Keys</h2>
@@ -72,9 +69,9 @@
 <p>If given a map, the following keys are supported:</p>
 
 <ul>
-<li><p><code>include</code> &mdash; Jobs to include to the build matrix (type: sequence of job matrix entry, or job matrix entry) <a href="/ref/jobs/include/jobs_entries">details</a></p></li>
-<li><p><code>exclude</code> &mdash; Attributes of jobs to exclude from the build matrix (type: sequence of job matrix entry, or job matrix entry) <a href="/ref/jobs/exclude/jobs_entries">details</a></p></li>
-<li><p><code>allow_failures</code> &mdash; Attributes of jobs that are allowed to fail (type: sequence of job matrix entry, or job matrix entry, alias: <code>allowed_failures</code>) <a href="/ref/jobs/allow_failures/jobs_entries">details</a></p></li>
+<li><p><code>include</code> &mdash; Jobs to include to the build matrix (type: sequence of job matrix includes, or job matrix includes) <a href="/ref/jobs/include/jobs_includes">details</a></p></li>
+<li><p><code>exclude</code> &mdash; Attributes of jobs to exclude from the build matrix (type: sequence of job matrix exclude, or job matrix exclude) <a href="/ref/jobs/exclude/jobs_excludes">details</a></p></li>
+<li><p><code>allow_failures</code> &mdash; Attributes of jobs that are allowed to fail (type: sequence of job matrix allow failure, or job matrix allow failure, alias: <code>allowed_failures</code>) <a href="/ref/jobs/allow_failures/jobs_allow_failures">details</a></p></li>
 <li><p><code>fast_finish</code> &mdash; Allow the build to fail fast (type: boolean, alias: <code>fast_failure</code>)</p></li>
 </ul>
 
@@ -82,7 +79,13 @@
 
 <pre><code class="yaml">jobs:
   include:
-  - language: ruby
+  - vault:
+      api_url: string
+      token:
+        secure: encrypted string
+      secrets:
+      - string
+    language: ruby
     os: linux
     dist: trusty
   exclude:
@@ -96,12 +99,24 @@
 </code></pre>
 
 <pre><code class="yaml">jobs:
-- language: ruby
+- vault:
+    api_url: string
+    token:
+      secure: encrypted string
+    secrets:
+    - string
+  language: ruby
   os: linux
   dist: trusty
 </code></pre>
 
 <pre><code class="yaml">jobs:
+  vault:
+    api_url: string
+    token:
+      secure: encrypted string
+    secrets:
+    - string
   language: ruby
   os: linux
   dist: trusty
