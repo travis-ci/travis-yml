@@ -138,6 +138,9 @@
         },
         "perforce_test_path": {
           "$ref": "#/definitions/type/perforce_test_path"
+        },
+        "vault": {
+          "$ref": "#/definitions/type/vault"
         }
       },
       "see": {
@@ -262,6 +265,9 @@
             "flags": [
               "internal"
             ]
+          },
+          "sbom": {
+            "$ref": "#/definitions/addon/sbom"
           }
         },
         "additionalProperties": false,
@@ -583,12 +589,12 @@
             }
           },
           "jammy": {
-             "only": {
-               "os": [
-                 "linux"
-               ]
-             }
-           },
+            "only": {
+              "os": [
+                "linux"
+              ]
+            }
+          },
           "server-2016": {
             "only": {
               "os": [
@@ -906,6 +912,9 @@
           "group": {
             "$ref": "#/definitions/type/group"
           },
+          "keys": {
+            "$ref": "#/definitions/type/keys"
+          },
           "before_install": {
             "$ref": "#/definitions/type/strs",
             "summary": "Scripts to run before the install stage"
@@ -1033,6 +1042,9 @@
               "sudo": {
                 "$ref": "#/definitions/type/sudo"
               },
+              "vm": {
+                "$ref": "#/definitions/type/vm"
+              },
               "env": {
                 "$ref": "#/definitions/type/env_vars"
               },
@@ -1128,6 +1140,9 @@
               "sudo": {
                 "$ref": "#/definitions/type/sudo"
               },
+              "vm": {
+                "$ref": "#/definitions/type/vm"
+              },
               "env": {
                 "$ref": "#/definitions/type/env_vars"
               },
@@ -1211,6 +1226,9 @@
               "sudo": {
                 "$ref": "#/definitions/type/sudo"
               },
+              "vm": {
+                "$ref": "#/definitions/type/vm"
+              },
               "env": {
                 "$ref": "#/definitions/type/env_vars"
               },
@@ -1238,6 +1256,9 @@
               },
               "allow_failure": {
                 "type": "boolean"
+              },
+              "vault": {
+                "$ref": "#/definitions/type/vault"
               }
             },
             "title": "Job Matrix Includes",
@@ -1276,9 +1297,13 @@
           {
             "type": "array",
             "items": {
-              "type": "string"
+              "type": "string",
+              "summary": "Custom key"
             },
             "normal": true
+          },
+          {
+            "type": "string"
           }
         ],
         "summary": "Custom keys to use"
@@ -2168,6 +2193,177 @@
         ],
         "normal": true
       },
+      "vault": {
+        "$id": "vault",
+        "title": "Vault",
+        "type": "object",
+        "properties": {
+          "api_url": {
+            "type": "string"
+          },
+          "token": {
+            "$ref": "#/definitions/type/secure",
+            "strict": true
+          },
+          "secrets": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "kv_api_ver": {
+                          "type": "string",
+                          "enum": [
+                            "kv2",
+                            "kv1"
+                          ],
+                          "downcase": true,
+                          "defaults": [
+                            {
+                              "value": "kv2"
+                            }
+                          ]
+                        }
+                      },
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "namespace": {
+                          "anyOf": [
+                            {
+                              "type": "array",
+                              "items": {
+                                "anyOf": [
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "object",
+                                    "properties": {
+                                      "name": {
+                                        "type": "string"
+                                      }
+                                    },
+                                    "additionalProperties": false,
+                                    "required": [
+                                      "name"
+                                    ]
+                                  }
+                                ]
+                              },
+                              "normal": true
+                            },
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "name": {
+                                  "type": "string"
+                                }
+                              },
+                              "additionalProperties": false,
+                              "required": [
+                                "name"
+                              ]
+                            }
+                          ]
+                        }
+                      },
+                      "additionalProperties": false
+                    }
+                  ]
+                },
+                "normal": true
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kv_api_ver": {
+                    "type": "string",
+                    "enum": [
+                      "kv2",
+                      "kv1"
+                    ],
+                    "downcase": true,
+                    "defaults": [
+                      {
+                        "value": "kv2"
+                      }
+                    ]
+                  }
+                },
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "namespace": {
+                    "anyOf": [
+                      {
+                        "type": "array",
+                        "items": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "name": {
+                                  "type": "string"
+                                }
+                              },
+                              "additionalProperties": false,
+                              "required": [
+                                "name"
+                              ]
+                            }
+                          ]
+                        },
+                        "normal": true
+                      },
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "name": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": false,
+                        "required": [
+                          "name"
+                        ]
+                      }
+                    ]
+                  }
+                },
+                "additionalProperties": false
+              }
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "api_url",
+          "token"
+        ]
+      },
       "version": {
         "$id": "version",
         "title": "Version",
@@ -2212,7 +2408,7 @@
         "additionalProperties": false,
         "summary": "VM size settings",
         "see": {
-          "Customizing the Build": "https://docs.travis-ci.com/customizing-the-build/"
+          "Customizing the Build": "https://docs.travis-ci.com/user/customizing-the-build/"
         }
       }
     },
@@ -2760,6 +2956,101 @@
         "summary": "SourceConnect settings",
         "see": {
           "Using Sauce Labs with Travis CI": "https://docs.travis-ci.com/user/sauce-connect/"
+        },
+        "normal": true
+      },
+      "sbom": {
+        "$id": "sbom",
+        "title": "Sbom",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "on": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "branch": {
+                        "$ref": "#/definitions/type/branches"
+                      },
+                      "condition": {
+                        "$ref": "#/definitions/type/strs"
+                      },
+                      "all_branches": {
+                        "type": "boolean"
+                      },
+                      "pr": {
+                        "type": "boolean"
+                      }
+                    },
+                    "additionalProperties": false,
+                    "normal": true,
+                    "prefix": {
+                      "key": "branch",
+                      "only": [
+                        "str"
+                      ]
+                    }
+                  },
+                  {
+                    "$ref": "#/definitions/type/branches"
+                  }
+                ],
+                "normal": true,
+                "aliases": [
+                  "true"
+                ]
+              },
+              "run_phase": {
+                "type": "string",
+                "defaults": [
+                  {
+                    "value": "after_success"
+                  }
+                ],
+                "enum": [
+                  "before_script",
+                  "script",
+                  "after_success",
+                  "after_failure"
+                ]
+              },
+              "output_format": {
+                "type": "string",
+                "defaults": [
+                  {
+                    "value": "cyclonedx-json"
+                  }
+                ],
+                "enum": [
+                  "cyclonedx-json",
+                  "cyclonedx-xml",
+                  "spdx-json"
+                ]
+              },
+              "output_dir": {
+                "type": "string"
+              },
+              "input_dir": {
+                "$ref": "#/definitions/type/strs"
+              }
+            },
+            "additionalProperties": false,
+            "normal": true,
+            "changes": [
+              {
+                "change": "enable"
+              }
+            ]
+          },
+          {
+            "type": "boolean"
+          }
+        ],
+        "summary": "SBOM Generation",
+        "see": {
+          "Using SBOM generation with Travis CI": "https://docs.travis-ci.com/"
         },
         "normal": true
       },

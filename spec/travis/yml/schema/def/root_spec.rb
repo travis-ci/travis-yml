@@ -150,6 +150,7 @@ describe Travis::Yml::Schema::Def::Root do
         snaps
         pkg
         sonarcloud
+        sbom
       ),
       deploy: %i(
         branches
