@@ -37,6 +37,7 @@ module Travis
             value :redis,      alias: :'redis-server'
             value :riak
             value :xvfb,       only: { dist: 'xenial' }
+            value :'cri-dockerd'
 
             export
           end
