@@ -51,14 +51,14 @@ describe Travis::Yml::Schema::Def::Addon::Sbom do
               type: :string,
               defaults: [
                 {
-                  value: :after_success
+                  value: 'after_success'
                 }
               ],
               enum: [
-                :before_script,
-                :script,
-                :after_success,
-                :after_failure
+                'before_script',
+                'script',
+                'after_success',
+                'after_failure'
               ]
             },
             output_format: {
@@ -77,7 +77,7 @@ describe Travis::Yml::Schema::Def::Addon::Sbom do
             output_dir: {
               type: :string
             },
-            input_di: {
+            input_dir: {
               '$ref': '#/definitions/type/strs'
             }
           },
@@ -93,8 +93,8 @@ describe Travis::Yml::Schema::Def::Addon::Sbom do
           type: :boolean
         }
       ],
-      summary: kind_of(String),
-      see: kind_of(Hash),
+      summary: "SBOM Generation",
+      see: {:"Using SBOM generation with Travis CI"=>"https://docs.travis-ci.com/"},
       normal: true
     )
   end
