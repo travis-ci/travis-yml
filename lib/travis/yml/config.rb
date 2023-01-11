@@ -6,7 +6,7 @@ module Travis
     class Config < Travis::Config
       class << self
         def auth_keys
-          ENV['TRAVIS_AUTH_KEYS'] || ['abc123']
+          ENV['TRAVIS_AUTH_KEYS'].split(',') || ['abc123']
         end
 
         def auth_internal
