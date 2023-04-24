@@ -5,11 +5,6 @@ env:
   global:
     - PATH=/snap/bin:$PATH
 
-addons:
-  snaps:
-  - name: docker
-    channel: latest/beta
-
 before_install:
 - gem install bundler -v '2.0.1'
 
@@ -22,6 +17,10 @@ jobs:
         - bundle exec rspec spec/integrate/matrix_spec.rb --tag integration_matrix
 
     - stage: ":ship: it to quay.io"
+      addons:
+        snaps:
+        - name: docker
+          channel: latest/stable
       language: ruby
       cache:
         bundler: false
