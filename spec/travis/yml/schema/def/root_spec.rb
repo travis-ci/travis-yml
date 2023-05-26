@@ -137,6 +137,8 @@ describe Travis::Yml::Schema::Def::Root do
         version
         virt
         vm
+        workspace
+        workspaces
       ),
       addon: %i(
         apt
