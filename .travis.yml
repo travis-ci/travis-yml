@@ -1,31 +1,62 @@
+dist: focal
+
 language: ruby
+rvm: 2.6.6
 
-cache: bundler
-env:
-  global:
-    - PATH=/snap/bin:$PATH
+git:
+  depth: 10
 
-addons:
-  snaps:
-  - name: docker
-    channel: latest/beta
+# Build master and PRs which merge into those branches
+# We don't automatically build other branches when they're pushed; create a PR to cause the CI to run.
+branches:
+  only:
+    - master
+
+cache:
+  bundler: true
+  timeout: 600
+
+stages:
+  - name: prepare cache
+    if: (type = push OR type = pull_request) AND branch = master
+
+  - name: test
+    if: (type = push OR type = pull_request) AND branch = master
+
+  - name: ":ship: it to quay.io"
+    if: commit_message =~ /ship:docker/ OR env(SHIP_DOCKER) = true
 
 before_install:
-- gem install bundler -v '2.0.1'
+  - 'echo ''gem: --no-document'' > ~/.gemrc' # Skip installing documentation
+  - gem install bundler -v $(awk '/BUNDLED WITH/{getline; print}' Gemfile.lock)
 
 jobs:
   include:
-    - stage: "testing time"
+    - stage: prepare cache
+      script: true
+
+    - stage: test
+      name: rspec
       script:
         - bundle exec rspec spec
+
+    - stage: test
+      name: integration_configs
+      script:
         - bundle exec rspec spec/integrate/configs_spec.rb --tag integration_configs
+
+    - stage: test
+      name: integration_matrix
+      script:
         - bundle exec rspec spec/integrate/matrix_spec.rb --tag integration_matrix
 
     - stage: ":ship: it to quay.io"
-      language: ruby
+      dist: jammy
+      language: minimal
       cache:
         bundler: false
+      env:
+        - PATH=/snap/bin:$PATH
       before_install: skip
       install: skip
       script: make ship
-      if: (branch = master and type = push ) OR commit_message =~ /ship:docker/ OR env(SHIP_DOCKER) = true
