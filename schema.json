@@ -909,6 +909,9 @@
           "group": {
             "$ref": "#/definitions/type/group"
           },
+          "workspaces": {
+            "$ref": "#/definitions/type/workspaces"
+          },
           "before_install": {
             "$ref": "#/definitions/type/strs",
             "summary": "Scripts to run before the install stage"
@@ -2386,6 +2389,53 @@
         "summary": "VM size settings",
         "see": {
           "Customizing the Build": "https://docs.travis-ci.com/user/customizing-the-build/"
+        }
+      },
+      "workspace": {
+        "$id": "workspace",
+        "title": "Workspace",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "create": {
+                "type": "boolean"
+              }
+            },
+            "additionalProperties": false,
+            "prefix": {
+              "key": "name"
+            },
+            "normal": true
+          },
+          {
+            "type": "string"
+          }
+        ],
+        "normal": true
+      },
+      "workspaces": {
+        "$id": "workspaces",
+        "title": "Workspaces",
+        "description": "Workspaces allow jobs within the same build to share files. They are\nuseful when you want to use build artifacts from a previous job.\nFor example, you create a cache that can be used in multiple jobs\nin the same build later.",
+        "anyOf": [
+          {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/type/workspace"
+            },
+            "normal": true
+          },
+          {
+            "$ref": "#/definitions/type/workspace"
+          }
+        ],
+        "summary": "Shared build workspaces",
+        "see": {
+          "Workspaces": "https://docs.travis-ci.com/user/using-workspaces"
         }
       }
     },
