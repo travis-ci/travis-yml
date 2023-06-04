@@ -39,7 +39,7 @@ module Travis
 
             def deprecated_value
               deprecation = schema.values.deprecation(value.value)
-              value.warn :deprecated_value, value: value.value, info: deprecation
+              value.info :deprecated_value, value: value.value, info: deprecation
             end
 
             def deprecated_key?
@@ -49,7 +49,7 @@ module Travis
             def deprecated_key
               value.keys.each do |key|
                 next unless deprecation = schema[key]&.deprecation
-                value.warn :deprecated_key, key: key, info: deprecation, line: key.line, src: key.src
+                value.info :deprecated_key, key: key, info: deprecation, line: key.line, src: key.src
               end
             end
         end

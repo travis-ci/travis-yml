@@ -51,7 +51,7 @@ module Travis
             end
 
             def warn_anchor(map, value)
-              map.msg :warn, :deprecated_key, key: value.key, info: 'anchor on a non-private key',
+              map.msg :info, :deprecated_key, key: value.key, info: 'anchor on a non-private key',
                 line: value.key.line, src: value.key.src
             end
 

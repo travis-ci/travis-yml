@@ -13,7 +13,7 @@ describe Travis::Yml do
         sudo: true
       )
       it { should serialize_to sudo: true }
-      it { should have_msg [:warn, :root, :deprecated_key, key: 'sudo', info: 'The key `sudo` has no effect anymore.'] }
+      it { should have_msg [:info, :root, :deprecated_key, key: 'sudo', info: 'The key `sudo` has no effect anymore.'] }
     end
 
     describe 'given the string on' do

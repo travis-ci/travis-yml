@@ -48,7 +48,7 @@ describe Travis::Yml, 'boxfuse' do
       )
       it { should serialize_to deploy: [provider: 'boxfuse', config_file: 'str'] }
       it { should have_msg [:info, :deploy, :alias_key, alias: 'configfile', key: 'config_file', provider: 'boxfuse'] }
-      xit { should have_msg [:warn, :deploy, :deprecated_key, :configfile] }
+      xit { should have_msg [:info, :deploy, :deprecated_key, :configfile] }
     end
   end
 

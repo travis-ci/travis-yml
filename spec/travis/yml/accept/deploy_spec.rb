@@ -328,7 +328,7 @@ describe Travis::Yml do
           )
           it { should serialize_to deploy: [provider: 'heroku', on: { repo: 'str' }] }
           it { should have_msg [:info, :deploy, :alias_key, alias: 'true', key: 'on', provider: 'heroku'] }
-          xit { should have_msg [:warn, :'deploy.on', :deprecated_key, key: 'on'] }
+          xit { should have_msg [:info, :'deploy.on', :deprecated_key, key: 'on'] }
         end
       end
 
@@ -342,7 +342,7 @@ describe Travis::Yml do
                     bucket: production_branch
         )
         xit { should serialize_to deploy: [provider: 'heroku', on: { branch: { production: { bucket: 'production_branch' } } }] }
-        xit { should have_msg [:warn, :'deploy.on.branch', :deprecated, deprecation: :branch_specific_option_hash] }
+        xit { should have_msg [:info, :'deploy.on.branch', :deprecated, deprecation: :branch_specific_option_hash] }
       end
 
       describe 'migrating :tags, with :tags already given', v2: true, migrate: true do
@@ -436,7 +436,7 @@ describe Travis::Yml do
               production: production
       )
       xit { should serialize_to deploy: [provider: 'heroku', run: { production: 'production' }] }
-      xit { should have_msg [:warn, :'deploy.run', :deprecated, given: :run, info: :branch_specific_option_hash] }
+      xit { should have_msg [:info, :'deploy.run', :deprecated, given: :run, info: :branch_specific_option_hash] }
     end
 
     describe 'branches.only' do

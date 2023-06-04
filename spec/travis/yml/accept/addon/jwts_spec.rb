@@ -6,7 +6,7 @@ describe Travis::Yml do
           jwt: foo
       )
       it { should serialize_to addons: { jwt: ['foo'] } }
-      it { should have_msg [:warn, :addons, :deprecated_key, key: 'jwt', info: 'Discontinued as of April 17, 2018'] }
+      it { should have_msg [:info, :addons, :deprecated_key, key: 'jwt', info: 'Discontinued as of April 17, 2018'] }
     end
 
     describe 'given a secure' do
