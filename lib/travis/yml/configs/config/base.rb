@@ -1,5 +1,6 @@
 require 'forwardable'
 require 'travis/yml/helper/obj'
+require 'travis/yml/configs/config/order'
 require 'travis/yml/configs/errors'
 require 'travis/yml/configs/ref'
 
@@ -32,6 +33,10 @@ module Travis
             @config ||= {}
           end
 
+          def config=(config)
+            @config = config
+          end
+
           def load(&block)
             @on_loaded = block if root?
           end
@@ -51,6 +56,19 @@ module Travis
             end
           end
           memoize :imports
+
+          def merge
+            return {} if skip? || errored? || circular? || !matches?
+            order_duplicates if root?
+            imports.map(&:merge).inject(part) do |lft, rgt|
+              Support::Merge.new(lft.to_h, rgt.to_h).apply
+            end
+          end
+
+          def order_duplicates
+            Order.new(self).run
+          end
+
           # Flattening the tree should result in a unique array of configs
           # ordered by the order resulting in walking the tree depth-first.
           # However, we load the tree breadth-first and load times vary.
@@ -85,6 +103,10 @@ module Travis
               rgt = configs.detect { |rgt| lft.to_s == rgt.to_s && rgt.loaded? }
               configs[i] = configs.delete(rgt)
             end
+          end
+
+          def errored?
+            !!@errored
           end
 
           def circular?
@@ -128,6 +150,10 @@ module Travis
 
           def skip
             @skip = true
+          end
+
+          def unskip
+            @skip = false
           end
 
           def skip?
@@ -182,10 +208,6 @@ module Travis
 
             def required?
               !parent&.api? || !travis_yml?
-            end
-
-            def errored?
-              !!@errored
             end
 
             def secure?(obj)

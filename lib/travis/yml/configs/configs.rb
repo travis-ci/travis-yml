@@ -91,6 +91,7 @@ module Travis
 
           def merge
             doc = Yml.apply(Yml::Parts::Merge.new(configs).apply.to_h, opts) if opts[:merge_normalized]
+            doc ||= Yml.load([ctx.fetch.config.merge], opts) if opts[:merge_mode_2] || true
             doc ||= Yml.load(configs.map(&:part), opts)
             @config = except(doc.serialize, *DROP)
             msgs.concat(doc.msgs)

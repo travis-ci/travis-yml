@@ -399,4 +399,84 @@ describe Travis::Yml::Configs do
       )
     end
   end
+
+  describe do
+    let(:repo) { { id: 1, github_id: 1, slug: 'owner/repo', token: repo_token, private: true } }
+
+    let(:travis_yml) do
+      <<~yml
+        script:
+        - ./travis_yml
+        import:
+        - source: one.yml
+          mode: #{mode}
+        - source: two.yml
+          mode: #{mode}
+      yml
+    end
+
+    let(:one) do
+      <<~yml
+        script:
+        - ./one
+        import:
+        - source: nested.yml
+          mode: #{mode}
+      yml
+    end
+
+    let(:two) do
+      <<~yml
+        script:
+        - ./two
+        import:
+        - source: nested.yml
+          mode: #{mode}
+      yml
+    end
+
+    let(:nested) do
+      <<~yml
+        script:
+        - ./nested
+      yml
+    end
+
+    before { stub_repo(repo[:slug], internal: true, body: repo) }
+    before { stub_content(repo[:id], '.travis.yml', travis_yml) }
+    before { stub_content(repo[:id], 'one.yml', one) }
+    before { stub_content(repo[:id], 'two.yml', two) }
+    before { stub_content(repo[:id], 'nested.yml', nested) }
+    before { configs.tap(&:load) }
+
+    describe 'deep_merge_append' do
+      let(:mode) { :deep_merge_append }
+
+      it do
+        expect(configs.config).to eq(
+          script: %w(
+            ./nested
+            ./two
+            ./one
+            ./travis_yml
+          )
+        )
+      end
+    end
+
+    describe 'deep_merge_prepend' do
+      let(:mode) { :deep_merge_prepend }
+
+      it do
+        expect(configs.config).to eq(
+          script: %w(
+            ./travis_yml
+            ./one
+            ./two
+            ./nested
+          )
+        )
+      end
+    end
+  end
 end

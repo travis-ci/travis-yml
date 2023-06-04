@@ -32,7 +32,7 @@ module Travis
           end
 
           def fetch(slug, provider)
-            logger.info "Get Repo for #{slug} #{provider}"
+            logger.info "Get Repo for #{slug} #{provider}" unless ENV['ENV'] == 'test'
             Travis::Repo.new(slug, provider).fetch
           end
 

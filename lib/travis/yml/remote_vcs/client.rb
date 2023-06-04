@@ -23,7 +23,7 @@ module Travis
 
           def request(method, name)
             resp = connection.send(method) { |req| yield(req) }
-            logger.info("RemoteVcs response #{resp.inspect}")
+            logger.info("RemoteVcs response #{resp.inspect}") unless ENV['ENV'] == 'test'
             JSON.parse(resp.body)
           end
 
