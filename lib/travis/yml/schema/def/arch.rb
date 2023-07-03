@@ -37,14 +37,13 @@ module Travis
 
             downcase
 
-            # supports :only, os: :linux
-            value :amd64, alias: %i(x86_64 x64)
-            value :arm64
-            value :"arm64-graviton2"
-            value :ppc64le, alias: %i(power ppc ppc64)
-            value :i386
-            value :i386, alias: %i(x86)
-            value :s390x
+            value :amd64, alias: %i(x86_64 x64), only: { os: [:linux, :osx] }
+            value :arm64, only: { os: [:linux, :osx] }
+            value :"arm64-graviton2", only: { os: [:linux] }
+            value :ppc64le, alias: %i(power ppc ppc64), only: { os: [:linux] }
+            value :i386, only: { os: [:linux] }
+            value :i386, alias: %i(x86), only: { os: [:linux] }
+            value :s390x, only: { os: [:linux] }
 
             export
           end
