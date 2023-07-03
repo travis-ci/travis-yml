@@ -64,11 +64,6 @@ describe Travis::Yml::Schema::Def::Archs do
               'x86'
             ]
           }
-        },
-        only: {
-          os: [
-            'linux'
-          ]
         }
       )
     end

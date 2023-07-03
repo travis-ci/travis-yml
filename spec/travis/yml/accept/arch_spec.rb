@@ -86,13 +86,12 @@ describe Travis::Yml do
       it { should have_msg [:error, :arch, :unknown_value, value: 'unknown'] }
     end
 
-    describe 'no-op for os: osx' do
+    describe 'arm is available on: osx' do
       yaml %(
         os: osx
-        arch: amd64
+        arch: arm64
       )
-      it { should serialize_to os: ['osx'], arch: ['amd64'] }
-      it { should have_msg [:warn, :arch, :unsupported, on_key: 'os', on_value: 'osx', key: 'arch', value: ['amd64']] }
+      it { should serialize_to os: ['osx'], arch: ['arm64'] }
     end
   end
 end

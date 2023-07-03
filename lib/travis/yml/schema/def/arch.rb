@@ -37,7 +37,7 @@ module Travis
 
             downcase
 
-            supports :only, os: :linux
+            # supports :only, os: :linux
             value :amd64, alias: %i(x86_64 x64)
             value :arm64
             value :"arm64-graviton2"
