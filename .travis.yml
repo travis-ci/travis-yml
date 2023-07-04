@@ -6,6 +6,13 @@ rvm: 2.6.10
 git:
   depth: 10
 
+# Build master, enterprise-3.0 and PRs which merge into those branches
+# We don't automatically build other branches when they're pushed; create a PR to cause the CI to run.
+branches:
+  only:
+    - master
+    - enterprise-3.0
+
 cache:
   bundler: true
   timeout: 600
