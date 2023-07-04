@@ -23,6 +23,7 @@ RUN bundle config set --global no-cache 'true' && \
     bundle config set --global jobs `expr $(cat /proc/cpuinfo | grep -c 'cpu cores')` && \
     bundle config set --global retry 3
 
+
 FROM base as builder
 
 # packages required
@@ -47,6 +48,7 @@ LABEL maintainer Travis CI GmbH <support+travis-live-docker-images@travis-ci.com
 
 # Copy gems from builder
 COPY --from=builder /usr/local/bundle /usr/local/bundle
+COPY --from=builder /app/vendor ./vendor
 
 # Copy app files
 COPY . ./
