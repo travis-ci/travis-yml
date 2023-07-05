@@ -284,7 +284,8 @@ describe Travis::Yml, 'matrix' do
     expands_to [
       { os: 'linux', arch: 'amd64' },
       { os: 'linux', arch: 'arm64' },
-      { os: 'osx' },
+      { os: 'osx', arch: 'amd64' },
+      { os: 'osx', arch: 'arm64' },
     ]
   end
 
@@ -301,7 +302,7 @@ describe Travis::Yml, 'matrix' do
     expands_to [
       { os: 'linux', arch: 'amd64' },
       { os: 'linux', arch: 'arm64' },
-      { os: 'windows' },
+      { os: 'windows' }
     ]
   end
 

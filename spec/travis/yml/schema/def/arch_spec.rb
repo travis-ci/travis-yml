@@ -50,25 +50,58 @@ describe Travis::Yml::Schema::Def::Archs do
             aliases: [
               'x86_64',
               'x64',
-            ]
+            ],
+            only: {
+              os: [
+                'linux',
+                'osx'
+              ]
+            }
+          },
+          arm64: {
+            only: {
+              os: [
+                'linux',
+                'osx'
+              ]
+            }
+          },
+          "arm64-graviton2": {
+            only: {
+              os: [
+                'linux'
+              ]
+            }
           },
           ppc64le: {
             aliases: [
               'power',
               'ppc',
               'ppc64'
-            ]
+            ],
+            only: {
+              os: [
+                'linux'
+              ]
+            }
           },
           i386: {
             aliases: [
               'x86'
-            ]
+            ],
+            only: {
+              os: [
+                'linux'
+              ]
+            }
+          },
+          s390x: {
+            only: {
+              os: [
+                'linux'
+              ]
+            }
           }
-        },
-        only: {
-          os: [
-            'linux'
-          ]
         }
       )
     end
