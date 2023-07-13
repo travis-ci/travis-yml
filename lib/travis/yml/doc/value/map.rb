@@ -74,7 +74,7 @@ module Travis
 
           def supporting
             keys  = SUPPORTING.select { |key| key?(key) && self[key].given? }
-            value = keys.map { |key| [key, compact(self[key].serialize)] }.to_h
+            value = keys.map { |key| [key, self[key].serialize] }.to_h
             value = value.reject { |_, value| value.nil? || value.empty? }
             super.merge(value)
           end

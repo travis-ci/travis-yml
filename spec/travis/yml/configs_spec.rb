@@ -339,7 +339,7 @@ describe Travis::Yml::Configs do
 
       describe '500' do
         let(:status) { 500 }
-        it { expect { subject }.to raise_error Travis::Yml::Configs::ServerError }
+        it { expect { subject }.to raise_error Faraday::ServerError }
       end
     end
 
@@ -364,7 +364,7 @@ describe Travis::Yml::Configs do
 
       describe '500' do
         let(:status) { 500 }
-        it { expect { subject }.to raise_error Travis::Yml::Configs::ServerError }
+        it { expect { subject }.to raise_error Faraday::ServerError }
       end
     end
   end
