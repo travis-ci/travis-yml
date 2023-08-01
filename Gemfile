@@ -18,6 +18,7 @@ end
 group :test do
   gem 'dpl', git: 'https://github.com/travis-ci/dpl.git'
   gem 'json-schema'
+  gem 'pry'
   gem 'rack-test'
   gem 'rake'
   gem 'rexml'
