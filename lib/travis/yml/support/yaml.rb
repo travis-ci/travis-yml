@@ -122,12 +122,20 @@ module Yaml
       node
     end
 
-    def revive_hash(hash, node)
+    def revive_hash(hash, node, tagged = false)
       hash = Map.new(super, node)
       hash.opts[:anchors] = node.anchors if node.anchors&.any?
       hash.opts[:warnings] = node.warnings if node.warnings&.any?
       hash
     end
+
+    def deduplicate key
+      if key.is_a?(String) && !key.is_a?(Key)
+        -key
+      else
+        key
+      end
+     end
 
     def deserialize(node)
       node.value.is_a?(Key) ? node.value : super
