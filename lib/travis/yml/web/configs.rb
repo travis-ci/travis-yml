@@ -21,7 +21,6 @@ module Travis
         private
 
           def configs
-            pp args
             Travis::Yml.configs(*args, opts).tap(&:load)
           end
 

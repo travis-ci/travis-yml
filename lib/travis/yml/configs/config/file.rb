@@ -68,7 +68,6 @@ module Travis
 
             def path_suffix
               path_suffix = ''
-              pp ctx
               branch_name = ctx.data[:branch] || repo.default_branch
               if ctx.data[:server_type] == 'subversion' && repo.vcs_type == 'AssemblaRepository'
                 if branch_name == 'trunk'
