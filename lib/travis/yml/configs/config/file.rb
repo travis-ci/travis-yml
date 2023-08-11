@@ -68,17 +68,17 @@ module Travis
 
             def path_suffix
               path_suffix = ''
-              pp repo
-              branch_name = repo.branch || repo.default_branch
-              if repo.server_type == 'subversion' && repo.vcs_type == 'AssemblaRepository'
+              pp parent&.repo
+              branch_name = parent&.repo.branch || parent&.repo.default_branch
+              if parent&.repo.server_type == 'subversion' && parent&.repo.vcs_type == 'AssemblaRepository'
                 if branch_name == 'trunk'
                   path_suffix = "#{branch_name}/"
-                elsif !repo.tag.nil?
+                elsif !parent&.repo.tag.nil?
                   path_suffix = "tags/#{branch_name}/"
                 else
                   path_suffix = "branches/#{branch_name}/"
                 end
-              elsif repo.server_type == 'perforce' && repo.vcs_type == 'AssemblaRepository'
+              elsif parent&.repo.server_type == 'perforce' && parent&.repo.vcs_type == 'AssemblaRepository'
                 path_suffix = "//depot/#{branch_name}/"
               end
             end
