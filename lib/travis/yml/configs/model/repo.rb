@@ -58,6 +58,18 @@ module Travis
             vcs_type.downcase.gsub('repository', '')
           end
 
+          def server_type
+            attrs[:server_type] || 'git'
+          end
+
+          def branch
+            attrs[:branch] || ''
+          end
+
+          def tag
+            attrs[:tag] || nil
+          end
+
           REQUIRED = %i(id github_id private private_key allow_config_imports)
 
           def complete?
