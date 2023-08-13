@@ -8,34 +8,35 @@ module Travis
   module Yml
     module Configs
       module Travis
-        class Repo < Struct.new(:slug, :provider)
+        class Repo < Struct.new(:vcs_id, :provider)
           include Errors, Helper::Obj
 
           def fetch
-            get(path, representation: :internal)
+            get(path, representation: :internal, by_vcs: true)
           end
 
           def to_s
-            slug
+            vcs_id
           end
 
           private
 
             def path
-              "repo/#{provider}/#{url_encode(slug)}"
+              "repo_vcs/#{provider}/#{vcs_id}"
             end
 
             def get(path, opts)
-              resp = client(opts).get(path, only(opts, :representation))
+              resp = client(opts).get(path, only(opts, :representation, :by_vcs))
               map(Oj.load(resp.body) || {})
             rescue Error => e
-              api_error('Travis CI', :repo, slug, e)
+              api_error('Travis CI', :repo, vcs_id, e)
             end
 
             def map(attrs)
               {
                 id: attrs['id'],
                 vcs_type: attrs['vcs_type'],
+                vcs_id: attrs['vcs_id'],
                 github_id: attrs['github_id'],
                 slug: attrs['slug'],
                 private: attrs['private'],

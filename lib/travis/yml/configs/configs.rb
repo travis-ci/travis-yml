@@ -136,16 +136,17 @@ module Travis
           end
 
           def api
-            Config::Api.new(ctx, nil, repo.slug, ref, defns, nil, repo.provider)
+            Config::Api.new(ctx, nil, repo.slug, ref, defns, nil, repo.provider, repo.vcs_id)
           end
 
           def travis_yml
-            Config::TravisYml.new(ctx, nil, repo.slug, ref, nil, repo.provider)
+            Config::TravisYml.new(ctx, nil, repo.slug, ref, nil, repo.provider, repo.vcs_id)
           end
 
           def repo
             repo = Model::Repo.new(super || {})
-            repo.complete? ? ctx.repos[repo.slug] = repo : ctx.repos[repo.slug, repo.provider]
+            key = "#{repo.provider}_#{repo.vcs_id}"
+            repo.complete? ? ctx.repos[key] = repo : ctx.repos[repo.vcs_id, repo.provider]
           end
           memoize :repo
 
