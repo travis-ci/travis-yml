@@ -18,6 +18,10 @@ module Travis
             attrs[:github_id]
           end
 
+          def vcs_id
+            attrs[:vcs_id] || github_id
+          end
+
           def slug
             attrs[:slug]
           end

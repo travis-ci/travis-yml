@@ -5,8 +5,8 @@ module Travis
     module Configs
       module Config
         class TravisYml < File
-          def initialize(ctx, parent, slug, ref, mode = nil, provider = nil)
-            super(ctx, parent, provider, source: "#{slug}:.travis.yml@#{ref}", mode: mode)
+          def initialize(ctx, parent, slug, ref, mode = nil, provider = nil, vcs_id = nil)
+            super(ctx, parent, vcs_id, provider, source: "#{slug}:.travis.yml@#{ref}", mode: mode)
           end
 
           def travis_yml?

@@ -5,13 +5,13 @@ module Travis
   module Yml
     module Configs
       module Config
-        class Api < Struct.new(:ctx, :parent, :slug, :ref, :defns, :mode, :provider)
+        class Api < Struct.new(:ctx, :parent, :slug, :ref, :defns, :mode, :provider, :vcs_id)
           include Base, Memoize
 
           attr_reader :defn, :path, :input
 
-          def initialize(ctx, parent, slug, ref, defns, mode = nil, provider = nil)
-            super(ctx, parent, slug, ref, defns, mode, provider)
+          def initialize(ctx, parent, slug, ref, defns, mode = nil, provider = nil, vcs_id = nil)
+            super(ctx, parent, slug, ref, defns, mode, provider, vcs_id)
             @defn = defns.shift
             defn.update(source: source)
           end
@@ -74,11 +74,11 @@ module Travis
             end
 
             def api
-              Api.new(ctx, self, slug, ref, defns, defn[:mode], provider)
+              Api.new(ctx, self, slug, ref, defns, defn[:mode], provider, vcs_id)
             end
 
             def travis_yml
-              TravisYml.new(ctx, self, slug, ref, defn[:mode], provider)
+              TravisYml.new(ctx, self, slug, ref, defn[:mode], provider, vcs_id)
             end
         end
       end
