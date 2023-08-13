@@ -66,6 +66,25 @@ module Travis
 
           private
 
+            def path_suffix
+              return '' if repo.vcs_type != 'AssemblaRepository'
+
+              branch_name = ctx.data[:branch] || repo.default_branch
+
+              case ctx.data[:server_type]
+              when 'subversion'
+                if branch_name == 'trunk'
+                  "#{branch_name}/"
+                elsif !ctx.data[:tag].nil?
+                  "tags/#{branch_name}/"
+                else
+                  "branches/#{branch_name}/"
+                end
+              when 'perforce'
+                "//depot/#{branch_name}/"
+              end
+            end
+
             def expand(source)
               ref = local? ? parent&.ref : repo.default_branch
               ref = Ref.new(source, repo: repo.slug, ref: ref, path: parent&.path)
@@ -73,7 +92,7 @@ module Travis
             end
 
             def fetch
-              Content.new(repo, path, ref).content
+              Content.new(repo, "#{path_suffix}#{path}", ref).content
             rescue FileNotFound => e
               required? ? raise : nil
             end
