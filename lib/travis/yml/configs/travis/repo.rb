@@ -36,6 +36,7 @@ module Travis
               {
                 id: attrs['id'],
                 vcs_type: attrs['vcs_type'],
+                vcs_id: attrs['vcs_id'],
                 github_id: attrs['github_id'],
                 slug: attrs['slug'],
                 private: attrs['private'],

@@ -5,12 +5,12 @@ module Travis
   module Yml
     module Configs
       module Config
-        class File < Obj.new(:ctx, :parent, :provider, :defn)
+        class File < Obj.new(:ctx, :parent, :vcs_id, :provider, :defn)
           include Base
 
           attr_reader :path, :ref, :raw
 
-          def initialize(ctx, parent, provider, defn)
+          def initialize(ctx, parent, vcs_id, provider, defn)
             defn = stringify(defn)
             super
           end

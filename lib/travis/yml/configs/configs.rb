@@ -136,11 +136,11 @@ module Travis
           end
 
           def api
-            Config::Api.new(ctx, nil, repo.slug, ref, defns, nil, repo.provider)
+            Config::Api.new(ctx, nil, repo.slug, ref, defns, nil, repo.provider, repo.vcs_id)
           end
 
           def travis_yml
-            Config::TravisYml.new(ctx, nil, repo.slug, ref, nil, repo.provider)
+            Config::TravisYml.new(ctx, nil, repo.slug, ref, nil, repo.provider, repo.vcs_id)
           end
 
           def repo
