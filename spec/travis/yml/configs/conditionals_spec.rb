@@ -8,7 +8,7 @@ describe Travis::Yml::Configs, 'conditionals' do
   let(:stages) { configs.stages }
   let(:msgs)   { configs.msgs.to_a }
 
-  before { stub_repo(repo[:vcs_id], repo[:slug], internal: true, body: repo.merge(token: 'token')) }
+  before { stub_repo(repo[:vcs_id], repo[:slug], data: { internal: true, body: repo.merge(token: 'token') }) }
   before { stub_content(repo[:id], '.travis.yml', yaml) }
 
   describe 'jobs' do

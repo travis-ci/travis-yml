@@ -12,7 +12,7 @@ describe Travis::Yml::Configs do
 
   let(:vcs_type) { 'GithubRepository' }
 
-  before { stub_repo(repo[:vcs_id], repo[:slug], token: 'user-token') } # authorization
+  before { stub_repo(repo[:vcs_id], repo[:slug], data: { token: 'user-token' }) } # authorization
   before { stub_content(repo[:id], '.travis.yml', yaml) }
 
   subject { configs.tap(&:load) }
@@ -372,7 +372,7 @@ describe Travis::Yml::Configs do
   describe 'travis api errors' do
     yaml 'import: other/other:one/one.yml'
 
-    before { stub_repo(2, 'other/other', internal: true, status: status) }
+    before { stub_repo(2, 'other/other', data: { internal: true, status: status }, by_slug: true) }
     before { stub_content(2, 'one.yml', 'script: ./one') }
 
     describe '401' do
@@ -386,7 +386,7 @@ describe Travis::Yml::Configs do
         let(:vcs_type) { 'BitbucketRepository' }
         let(:provider) { 'bitbucket' }
 
-        before { stub_repo(2, 'other/other', { internal: true, status: status }, provider) }
+        before { stub_repo(2, 'other/other', data: { internal: true, status: status }, provider: provider, by_slug: true) }
 
         it { expect { subject }.to raise_error Travis::Yml::Configs::Unauthorized }
       end

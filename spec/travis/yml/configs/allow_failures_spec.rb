@@ -3,7 +3,7 @@ describe Travis::Yml::Configs, 'allow_failures' do
   let(:data)    { {} }
   let(:configs) { described_class.new(repo, 'ref', nil, data, {}) }
 
-  before { stub_repo(repo[:vcs_id], repo[:slug], token: 'user-token') } # authorization
+  before { stub_repo(repo[:vcs_id], repo[:slug], data: { token: 'user-token' }) } # authorization
   before { stub_content(repo[:id], '.travis.yml', yaml) }
 
   subject { configs.tap(&:load).jobs }

@@ -201,7 +201,7 @@ describe Travis::Yml::Web::App, 'POST /configs' do
     let(:body) { symbolize(JSON.parse(last_response.body)) }
 
     before { stub_content('other/other', 'one.yml', one_yml) }
-    before { stub_repo(2, 'other/other', internal: true, status: status) }
+    before { stub_repo(2, 'other/other', data: { internal: true, status: status }, by_slug: true) }
     subject { post '/configs', Oj.generate(data), defaults: true }
 
     context do
@@ -263,7 +263,7 @@ describe Travis::Yml::Web::App, 'POST /configs' do
     let(:travis_yml) { 'import: other/other:one.yml' }
     let(:body) { symbolize(JSON.parse(last_response.body)) }
 
-    before { stub_repo(1, 'other/other', internal: true, body: { github_id: 1, vcs_id: 1 }) }
+    before { stub_repo(1, 'other/other', data: { internal: true, body: { github_id: 1, vcs_id: 1 } }, by_slug: true) }
     before { stub_content(1, 'one.yml', status: status) }
     subject { post '/configs', Oj.generate(data), defaults: true }
 

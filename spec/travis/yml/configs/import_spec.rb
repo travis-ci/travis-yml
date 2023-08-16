@@ -20,7 +20,7 @@ describe Travis::Yml::Configs do
   let(:one_yml)    { 'script: ./one' }
   let(:two_yml)    { 'script: ./two' }
 
-  before { stub_repo(repo[:vcs_id], repo[:slug], token: user_token) } # authorization
+  before { stub_repo(repo[:vcs_id], repo[:slug], data: { token: user_token }) } # authorization
   before { stub_content(repo[:id], '.travis.yml', travis_yml) }
   before { stub_content(repo[:id], 'one/one.yml', one_yml) }
   before { stub_content(repo[:id], 'one/two.yml', two_yml) }
@@ -34,8 +34,8 @@ describe Travis::Yml::Configs do
   end
 
   describe 'push' do
-    let(:repo_url) { "repo/github/#{repo[:slug].sub('/', '%2F')}?representation=internal" }
-    let(:auth_url) { "repo/github/#{repo[:slug].sub('/', '%2F')}" }
+    let(:repo_url) { "repo_vcs/github/#{repo[:vcs_id]}?representation=internal" }
+    let(:auth_url) { "repo_vcs/github/#{repo[:vcs_id]}" }
 
     describe 'given a repo token' do
       imports %w(
@@ -48,14 +48,14 @@ describe Travis::Yml::Configs do
     describe 'not given a repo token on a public repo' do
       let(:repo_token) { nil }
       let(:private) { false }
-      before { stub_repo(repo[:vcs_id], repo[:slug], internal: true, body: repo.merge(token: repo_token)) }
+      before { stub_repo(repo[:vcs_id], repo[:slug], data: { internal: true, body: repo.merge(token: repo_token) }) }
       it { expect { subject }.to_not have_api_request :get, repo_url }
     end
 
     describe 'not given a repo token on a private repo' do
       let(:repo_token) { nil }
       let(:private) { true }
-      before { stub_repo(repo[:vcs_id], repo[:slug], internal: true, body: repo.merge(token: repo_token)) }
+      before { stub_repo(repo[:vcs_id], repo[:slug], data: { internal: true, body: repo.merge(token: repo_token) }) }
       it { expect { subject }.to have_api_request :get, repo_url }
     end
   end
@@ -145,7 +145,7 @@ describe Travis::Yml::Configs do
   describe 'remote import' do
     let(:travis_yml) { 'import: other/other:one.yml' }
 
-    before { stub_repo(2, 'other/other', internal: true, body: { id: 2, github_id: 2, vcs_id: 2, private: false, default_branch: 'default' }) }
+    before { stub_repo(2, 'other/other', data: { internal: true, body: { id: 2, github_id: 2, vcs_id: 2, private: false, default_branch: 'default' } }, by_slug: true) }
     before { stub_content(2, 'one.yml', one_yml) }
     before { stub_content(2, 'two.yml', one_yml) }
 
@@ -184,7 +184,7 @@ describe Travis::Yml::Configs do
     let(:travis_yml) { 'import: other/other:one/one.yml' }
     let(:one_yml) { 'import: ./two.yml' }
 
-    before { stub_repo(2, 'other/other', internal: true, body: { id: 2, github_id: 2, vcs_id: 2, default_branch: 'default' }) }
+    before { stub_repo(2, 'other/other', data: { internal: true, body: { id: 2, github_id: 2, vcs_id: 2, default_branch: 'default' } }, by_slug: true) }
     before { stub_content(2, 'one/one.yml', one_yml) }
     before { stub_content(2, 'one/two.yml', two_yml) }
 
@@ -240,8 +240,8 @@ describe Travis::Yml::Configs do
     let(:repo) { { id: 1, slug: 'travis-ci/travis-yml', private: visibilities[0] == :private, token: repo_token, private_key: private_key, allow_config_imports: imports } }
     let(:travis_yml) { "import: #{other}:one.yml" }
 
-    before { stub_repo(repo[:vcs_id], repo[:slug], internal: true, body: repo.merge(token: repo_token)) }
-    before { stub_repo(2, other, internal: true, body: { id: 2, github_id: 2, vcs_id: 2, slug: other, private: visibilities[1] == :private, config_imports: setting }) }
+    before { stub_repo(repo[:vcs_id], repo[:slug], data: { internal: true, body: repo.merge(token: repo_token) }) }
+    before { stub_repo(2, other, data: { internal: true, body: { id: 2, github_id: 2, vcs_id: 2, slug: other, private: visibilities[1] == :private, config_imports: setting } }, by_slug: true) }
     before { stub_content(2, 'one.yml', one_yml) }
 
     describe 'a public repo referencing a public repo' do
@@ -381,7 +381,7 @@ describe Travis::Yml::Configs do
     let(:y5) { 'script: ./5' }
     let(:y6) { 'script: ./6' }
 
-    before { stub_repo(repo[:vcs_id], repo[:slug], internal: true, body: repo) }
+    before { stub_repo(repo[:vcs_id], repo[:slug], data: { internal: true, body: repo }) }
     before { stub_content(repo[:id], '.travis.yml', travis_yml) }
     before { 1.upto(6) { |i| stub_content(repo[:id], "#{i}.yml", send(:"y#{i}")) } }
 
