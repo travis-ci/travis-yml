@@ -74,11 +74,11 @@ module Travis
             end
 
             def api
-              Api.new(ctx, self, slug, ref, defns, defn[:mode], provider)
+              Api.new(ctx, self, slug, ref, defns, defn[:mode], provider, vcs_id)
             end
 
             def travis_yml
-              TravisYml.new(ctx, self, slug, ref, defn[:mode], provider)
+              TravisYml.new(ctx, self, slug, ref, defn[:mode], provider, vcs_id)
             end
         end
       end
