@@ -23,12 +23,13 @@ module Spec
         stub_request(:get, url).to_return(body: body, status: status)
       end
 
-      def stub_repo(slug, data = {}, provider = 'github')
-        url = "https://api.travis-ci.com/repo/#{provider}/#{slug.sub('/', '%2F')}"
+      def stub_repo(vcs_id, slug, data: {}, provider: 'github', by_slug: false)
+        url = by_slug ? "https://api.travis-ci.com/repo/#{provider}/#{CGI.escape(slug)}" : "https://api.travis-ci.com/repo_vcs/#{provider}/#{vcs_id}"
         url = "#{url}?representation=internal" if data[:internal]
 
         body = data[:body] && JSON.dump(data[:body].merge(
           slug: slug,
+          vcs_id: vcs_id,
           id: data[:id] || 1,
           default_branch: { name: data[:body][:default_branch] },
           user_settings: { settings: data[:body].delete(:config_imports) ? [name: 'allow_config_imports', value: true] : [] }

@@ -1,7 +1,7 @@
 describe Travis::Yml::Configs, 'msgs' do
-  let(:repo) { { id: 1, github_id: 1, slug: 'travis-ci/travis-yml' } }
+  let(:repo) { { id: 1, github_id: 1, vcs_id: 1, slug: 'travis-ci/travis-yml' } }
 
-  before { stub_repo(repo[:slug], internal: true, body: repo.merge(token: 'token')) }
+  before { stub_repo(repo[:vcs_id], repo[:slug], data: { internal: true, body: repo.merge(token: 'token') }) }
   before { stub_content(repo[:id], '.travis.yml', yaml) }
 
   subject { described_class.new(repo, 'master', nil, {}, opts).tap(&:load) }

@@ -12,7 +12,7 @@ module Travis
           include Errors, Helper::Obj
 
           def fetch
-            get(path, representation: :internal, by_vcs: true)
+            get(path, representation: :internal)
           end
 
           def to_s
@@ -22,11 +22,15 @@ module Travis
           private
 
             def path
-              "repo_vcs/#{provider}/#{vcs_id}"
+              if url_encode(vcs_id.to_s).match(%r{[^/]+%2[fF][^/]+})
+                "repo/#{provider}/#{url_encode(vcs_id)}"
+              else
+                "repo_vcs/#{provider}/#{vcs_id}"
+              end
             end
 
             def get(path, opts)
-              resp = client(opts).get(path, only(opts, :representation, :by_vcs))
+              resp = client(opts).get(path, only(opts, :representation))
               map(Oj.load(resp.body) || {})
             rescue Error => e
               api_error('Travis CI', :repo, vcs_id, e)

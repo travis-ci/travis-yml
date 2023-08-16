@@ -12,7 +12,16 @@ module Travis
 
           def initialize(ctx, parent, vcs_id, provider, defn)
             defn = stringify(defn)
+            @vcs_id = vcs_id
             super
+          end
+
+          def vcs_id
+            if parent.nil? || (!parent.nil? && parent.repo.slug == slug)
+              @vcs_id
+            else
+              slug
+            end
           end
 
           def load(&block)
