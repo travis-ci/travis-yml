@@ -8,7 +8,7 @@ describe Travis::Yml::Web::App, 'POST /configs' do
   let(:headers) { last_response.headers }
   let(:body)    { Oj.load(last_response.body, symbol_keys: true) }
   let(:data)    { { repo: repo, type: type, ref: ref, configs: respond_to?(:configs) ? configs : nil } }
-  let(:repo)    { { id: 1, github_id: 1, slug: 'travis-ci/travis-yml', token: 'token', private: false, private_key: 'key', allow_config_imports: true } }
+  let(:repo)    { { id: 1, github_id: 1, vcs_id: 1, slug: 'travis-ci/travis-yml', token: 'token', private: false, private_key: 'key', allow_config_imports: true } }
   let(:type)    { :push }
   let(:ref)     { 'ref' }
 
@@ -201,7 +201,7 @@ describe Travis::Yml::Web::App, 'POST /configs' do
     let(:body) { symbolize(JSON.parse(last_response.body)) }
 
     before { stub_content('other/other', 'one.yml', one_yml) }
-    before { stub_repo('other/other', internal: true, status: status) }
+    before { stub_repo(2, 'other/other', internal: true, status: status) }
     subject { post '/configs', Oj.generate(data), defaults: true }
 
     context do
@@ -263,7 +263,7 @@ describe Travis::Yml::Web::App, 'POST /configs' do
     let(:travis_yml) { 'import: other/other:one.yml' }
     let(:body) { symbolize(JSON.parse(last_response.body)) }
 
-    before { stub_repo('other/other', internal: true, body: { github_id: 1 }) }
+    before { stub_repo(1, 'other/other', internal: true, body: { github_id: 1, vcs_id: 1 }) }
     before { stub_content(1, 'one.yml', status: status) }
     subject { post '/configs', Oj.generate(data), defaults: true }
 
