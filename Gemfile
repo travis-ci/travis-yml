@@ -3,6 +3,7 @@ source 'https://rubygems.org'
 ruby File.read('.ruby-version').chomp
 
 gem 'redcarpet'
+gem 'thwait'
 
 group :web do
   gem 'puma', '~> 6.3.0'
@@ -23,7 +24,6 @@ group :test do
   gem 'rake'
   gem 'rexml'
   gem 'rspec'
-  gem 'thwait'
   gem 'webmock'
 end
 
