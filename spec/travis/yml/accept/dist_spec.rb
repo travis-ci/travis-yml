@@ -9,6 +9,8 @@ describe Travis::Yml do
       precise
       trusty
       xenial
+      focal
+      jammy
     )
 
     known.each do |value|

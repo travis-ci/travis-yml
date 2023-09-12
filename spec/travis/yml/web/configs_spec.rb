@@ -7,62 +7,70 @@ describe Travis::Yml::Web::App, 'POST /configs' do
   let(:status)  { last_response.status }
   let(:headers) { last_response.headers }
   let(:body)    { Oj.load(last_response.body, symbol_keys: true) }
-  let(:data)    { { repo: repo, type: type, ref: ref } }
-  let(:repo)    { { github_id: 1, slug: 'travis-ci/travis-yml', token: 'token', private: false, private_key: 'key', allow_config_imports: true } }
+  let(:data)    { { repo: repo, type: type, ref: ref, configs: respond_to?(:configs) ? configs : nil } }
+  let(:repo)    { { id: 1, github_id: 1, slug: 'travis-ci/travis-yml', token: 'token', private: false, private_key: 'key', allow_config_imports: true } }
   let(:type)    { :push }
   let(:ref)     { 'ref' }
 
   let(:travis_yml) { 'import: one.yml' }
   let(:one_yml)    { 'script: ./one' }
 
-  before { stub_content(repo[:github_id], '.travis.yml', travis_yml) }
-  before { stub_content(repo[:github_id], 'one.yml', one_yml) }
+  before { stub_content(repo[:id], '.travis.yml', travis_yml) }
+  before { stub_content(repo[:id], 'one.yml', one_yml) }
   before { header 'Authorization', 'internal token' }
 
   context do
-    before { post '/configs', Oj.generate(data) }
+    context do
+      before { post '/configs', Oj.generate(data) }
 
-    it { expect(status).to eq 200 }
-    it { expect(headers['Content-Type']).to eq 'application/json' }
+      it { expect(status).to eq 200 }
+      it { expect(headers['Content-Type']).to eq 'application/json' }
 
-    it do
-      expect(body[:raw_configs]).to eq [
-        {
-          source: 'travis-ci/travis-yml:.travis.yml@ref',
-          config: travis_yml,
-          mode: nil
-        },
-        {
-          source: 'travis-ci/travis-yml:one.yml@ref',
-          config: one_yml,
-          mode: nil
-        }
-      ]
-    end
+      it do
+        expect(body[:raw_configs]).to eq [
+          {
+            source: 'travis-ci/travis-yml:.travis.yml@ref',
+            config: travis_yml,
+            mode: nil
+          },
+          {
+            source: 'travis-ci/travis-yml:one.yml@ref',
+            config: one_yml,
+            mode: nil
+          }
+        ]
+      end
 
-    it do
-      expect(body[:config]).to eq(
-        import: [source: 'one.yml'],
-        script: ['./one']
-      )
-    end
+      it do
+        expect(body[:config]).to eq(
+          script: ['./one']
+        )
+      end
 
-    it do
-      expect(body[:matrix]).to eq [
-        script: ['./one']
-      ]
+      it do
+        expect(body[:matrix]).to eq [
+          script: ['./one']
+        ]
+      end
     end
 
     describe 'api' do
       describe 'merge mode merge' do
         let(:config) { JSON.dump(merge_mode: 'merge') }
-        let(:data) { { repo: repo, type: type, ref: ref, config: config } }
+        let(:configs) { [{ config: config }, { config: config }] }
         let(:travis_yml) { 'import: { source: one.yml, mode: deep_merge_prepend }' }
+
+        before { post '/configs', Oj.generate(data) }
 
         it do
           expect(body[:raw_configs]).to eq [
             {
-              source: 'api',
+              source: 'api.1',
+              config: config,
+              mode: 'merge'
+            },
+            {
+              source: 'api.2',
               config: config,
               mode: 'merge'
             },
@@ -81,8 +89,10 @@ describe Travis::Yml::Web::App, 'POST /configs' do
       end
 
       describe 'merge mode replace' do
-        let(:config) { JSON.dump(merge_mode: 'replace') }
-        let(:data) { { repo: repo, type: type, ref: ref, config: config } }
+        let(:config) { '{}' }
+        let(:data) { { repo: repo, type: type, ref: ref, configs: [config: config, mode: :replace] } }
+
+        before { post '/configs', Oj.generate(data) }
 
         it do
           expect(body[:raw_configs]).to eq [
@@ -97,10 +107,47 @@ describe Travis::Yml::Web::App, 'POST /configs' do
 
       describe 'merge mode given as an array' do
         let(:config) { JSON.dump(merge_mode: ['deep_merge']) }
-        let(:data) { { repo: repo, type: type, ref: ref, config: config } }
+        let(:data) { { repo: repo, type: type, ref: ref, configs: [config: config] } }
+
+        before { post '/configs', Oj.generate(data) }
 
         it { expect { body }.to_not raise_error }
       end
+
+      describe 'empty api config' do
+        let(:configs) { [config: ''] }
+
+        before { stub_content(repo[:id], '.travis.yml', status: 404) }
+        before { post '/configs', Oj.generate(data) }
+
+        it do
+          expect(body[:raw_configs]).to eq [
+            {
+              source: 'api',
+              config: '',
+              mode: nil
+            },
+          ]
+        end
+      end
+    end
+  end
+
+
+  describe 'does not generate duplicate messages' do
+    let(:configs) { [{ config: 'api: true', mode: 'deep_merge_append' }] }
+    let(:travis_yml) { 'travis_yml: true' }
+
+    before { post '/configs?defaults=true', Oj.generate(data) }
+
+    it do
+      expect(body[:messages]).to eq [
+        { level: 'info', code: 'default', key: 'root', args: { key: 'language', default: 'ruby' }, type: 'config' },
+        { level: 'info', code: 'default', key: 'root', args: { key: 'os', default: 'linux' }, type: 'config' },
+        { level: 'info', code: 'default', key: 'root', args: { key: 'dist', default: 'xenial' }, type: 'config' },
+        { level: 'warn', code: 'unknown_key', key: 'root', args: { key: 'api', value: true }, type: 'config' },
+        { level: 'warn', code: 'unknown_key', key: 'root', args: { key: 'travis_yml', value: true }, type: 'config' },
+      ]
     end
   end
 
@@ -169,7 +216,7 @@ describe Travis::Yml::Web::App, 'POST /configs' do
               type: 'unauthorized',
               service: 'travis_ci',
               ref: 'other/other',
-              message: 'Unable to authenticate with Travis CI for repo other/other (Travis CI GET repo/other%2Fother responded with 401)'
+              message: 'Unable to authenticate with Travis CI for repo other/other (Travis CI GET repo/github/other%2Fother responded with 401)'
             }
           )
         end
@@ -184,7 +231,7 @@ describe Travis::Yml::Web::App, 'POST /configs' do
               type: 'unauthorized',
               service: 'travis_ci',
               ref: 'other/other',
-              message: 'Unable to authenticate with Travis CI for repo other/other (Travis CI GET repo/other%2Fother responded with 403)'
+              message: 'Unable to authenticate with Travis CI for repo other/other (Travis CI GET repo/github/other%2Fother responded with 403)'
             }
           )
         end
@@ -199,7 +246,7 @@ describe Travis::Yml::Web::App, 'POST /configs' do
               type: 'repo_not_found',
               service: 'travis_ci',
               ref: 'other/other',
-              message: 'Repo other/other not found on Travis CI (Travis CI GET repo/other%2Fother responded with 404)'
+              message: 'Repo other/other not found on Travis CI (Travis CI GET repo/github/other%2Fother responded with 404)'
             }
           )
         end
@@ -232,7 +279,7 @@ describe Travis::Yml::Web::App, 'POST /configs' do
               type: 'unauthorized',
               service: 'github',
               ref: 'other/other:one.yml',
-              message: 'Unable to authenticate with GitHub for file other/other:one.yml (GitHub GET repositories/1/contents/one.yml responded with 401)'
+              message: 'Unable to authenticate with RemoteVcs for file other/other:one.yml ()'
             }
           )
         end
@@ -247,7 +294,7 @@ describe Travis::Yml::Web::App, 'POST /configs' do
               type: 'unauthorized',
               service: 'github',
               ref: 'other/other:one.yml',
-              message: 'Unable to authenticate with GitHub for file other/other:one.yml (GitHub GET repositories/1/contents/one.yml responded with 403)'
+              message: 'Unable to authenticate with RemoteVcs for file other/other:one.yml ()'
             }
           )
         end
@@ -262,7 +309,7 @@ describe Travis::Yml::Web::App, 'POST /configs' do
               type: 'file_not_found',
               service: 'github',
               ref: 'other/other:one.yml',
-              message: 'File other/other:one.yml not found on GitHub (GitHub GET repositories/1/contents/one.yml responded with 404)'
+              message: 'File other/other:one.yml not found on RemoteVcs ()'
             }
           )
         end

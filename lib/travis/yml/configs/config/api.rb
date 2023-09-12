@@ -5,11 +5,20 @@ module Travis
   module Yml
     module Configs
       module Config
-        class Api < Struct.new(:ctx, :parent, :slug, :ref, :raw, :mode, :inputs)
+        class Api < Struct.new(:ctx, :parent, :slug, :ref, :defns, :mode, :provider)
           include Base, Memoize
 
-          attr_reader :path, :input
-          alias merge_mode mode
+          attr_reader :defn, :path, :input
+
+          def initialize(ctx, parent, slug, ref, defns, mode = nil, provider = nil)
+            super(ctx, parent, slug, ref, defns, mode, provider)
+            @defn = defns.shift
+            defn.update(source: source)
+          end
+
+          def raw
+            defn[:config]
+          end
 
           def api?
             true
@@ -17,7 +26,7 @@ module Travis
 
           def load(&block)
             @config = parse(raw)
-            self.mode ||= config.delete('merge_mode')
+            defn[:mode] ||= config.delete('merge_mode')
             super
             store
             loaded
@@ -25,17 +34,21 @@ module Travis
 
           def imports
             imports = super
-            imports << child unless child.mode == 'replace'
+            imports << child unless child.merge_modes[:lft] == 'replace'
             imports
           end
           memoize :imports
 
+          def merge_modes
+            { lft: mode }
+          end
+
           def source
-            ['api', ix > 0 ? ix : nil].compact.join('.')
+            ['api', child.api? || ix > 0 ? ix + 1 : nil].compact.join('.')
           end
 
           def part
-            Parts::Part.new(raw, source, mode)
+            Parts::Part.new(raw, source, merge_modes)
           end
 
           def empty?
@@ -51,31 +64,21 @@ module Travis
           end
 
           def serialize
-            {
-              source: to_s,
-              config: raw,
-              mode: mode
-            }
+            defn
           end
 
           private
 
             def child
-              @child ||= inputs&.any? ? api : travis_yml
-            end
-
-            def import
-              { source: source }
+              @child ||= defns&.any? ? api : travis_yml
             end
 
             def api
-              input = inputs.shift
-              raw, mode = input.values_at(:config, :mode)
-              Api.new(ctx, self, slug, ref, raw, mode, inputs)
+              Api.new(ctx, self, slug, ref, defns, defn[:mode], provider)
             end
 
             def travis_yml
-              TravisYml.new(ctx, self, slug, ref, mode)
+              TravisYml.new(ctx, self, slug, ref, defn[:mode], provider)
             end
         end
       end

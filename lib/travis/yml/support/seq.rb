@@ -1,9 +1,10 @@
 class Seq < Array
-  attr_accessor :merge_mode
+  attr_accessor :merge_modes
 
   def initialize(seq = [], merge_mode = nil)
     replace(seq)
-    @merge_mode = merge_mode.respond_to?(:tag) ? merge_mode_from(merge_mode.tag) : merge_mode
+    merge_mode = merge_mode.respond_to?(:tag) ? merge_mode_from(merge_mode.tag) : merge_mode
+    @merge_modes = { rgt: merge_mode }
   end
 
   def init_with(node)
@@ -15,8 +16,8 @@ class Seq < Array
     next if skip.include?(name)
     define_method(name) do |*args, &block|
       obj = super(*args, &block)
-      obj.merge_mode = merge_mode if obj.instance_of?(Seq)
-      obj = Seq.new(obj, merge_mode) if obj.instance_of?(Array)
+      obj = Seq.new(obj) if obj.instance_of?(Array)
+      obj.merge_modes = merge_modes if obj.instance_of?(Seq)
       obj
     end
   end
@@ -24,11 +25,13 @@ class Seq < Array
   private
 
     def merge_mode_from(tag)
-      return unless tag
-      modes = tag.split('+')[1..-1].map(&:to_sym)
-      modes = MODES & modes
-      modes.first
+      mode = tag.to_s.sub(/^!/, '').gsub('+', '_').to_sym
+      mode if MODES.include?(mode)
     end
 
-    MODES = %i(replace prepend append)
+    MODES = %i(
+      replace
+      prepend
+      append
+    )
 end

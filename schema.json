@@ -111,6 +111,14 @@
         "version": {
           "$ref": "#/definitions/type/version"
         },
+        "vm": {
+          "$ref": "#/definitions/type/vm",
+          "defaults": [
+            {
+              "size": "medium"
+            }
+          ]
+        },
         "conditions": {
           "$ref": "#/definitions/type/conditions"
         },
@@ -127,6 +135,9 @@
             "internal"
           ],
           "summary": "Whether to trace the build script"
+        },
+        "perforce_test_path": {
+          "$ref": "#/definitions/type/perforce_test_path"
         }
       },
       "see": {
@@ -271,13 +282,16 @@
         "enum": [
           "amd64",
           "arm64",
+          "arm64-graviton2",
           "ppc64le",
+          "i386",
           "s390x"
         ],
         "values": {
           "amd64": {
             "aliases": [
-              "x86_64"
+              "x86_64",
+              "x64"
             ]
           },
           "ppc64le": {
@@ -285,6 +299,11 @@
               "power",
               "ppc",
               "ppc64"
+            ]
+          },
+          "i386": {
+            "aliases": [
+              "x86"
             ]
           }
         }
@@ -521,7 +540,10 @@
           "precise",
           "xenial",
           "bionic",
-          "server-2016"
+          "focal",
+          "jammy",
+          "server-2016",
+          "rhel8"
         ],
         "values": {
           "trusty": {
@@ -553,6 +575,20 @@
               ]
             }
           },
+          "focal": {
+            "only": {
+              "os": [
+                "linux"
+              ]
+            }
+          },
+          "jammy": {
+             "only": {
+               "os": [
+                 "linux"
+               ]
+             }
+           },
           "server-2016": {
             "only": {
               "os": [
@@ -560,6 +596,13 @@
               ]
             },
             "edge": true
+          },
+          "rhel8": {
+            "only": {
+              "os": [
+                "linux"
+              ]
+            }
           }
         }
       },
@@ -704,6 +747,10 @@
             "type": "boolean",
             "summary": "Avoid cloning submodules if given false"
           },
+          "symlinks": {
+            "type": "boolean",
+            "summary": "Set core.symlinks option to the given value"
+          },
           "submodules_depth": {
             "type": "number",
             "summary": "Number of commits to fetch for submodules"
@@ -746,7 +793,6 @@
         "title": "Group",
         "type": "string",
         "summary": "Build environment group",
-        "downcase": true,
         "flags": [
           "internal"
         ]
@@ -1226,6 +1272,20 @@
           }
         ]
       },
+      "keys": {
+        "$id": "keys",
+        "title": "Keys",
+        "anyOf": [
+          {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "normal": true
+          }
+        ],
+        "summary": "Custom keys to use"
+      },
       "language": {
         "$id": "language",
         "title": "Language",
@@ -1258,6 +1318,7 @@
           "haxe",
           "java",
           "julia",
+          "matlab",
           "nix",
           "node_js",
           "perl",
@@ -1426,6 +1487,9 @@
           },
           {
             "$ref": "#/definitions/language/julia"
+          },
+          {
+            "$ref": "#/definitions/language/matlab"
           },
           {
             "$ref": "#/definitions/language/nix"
@@ -1756,6 +1820,12 @@
           }
         ]
       },
+      "perforce_test_path": {
+        "$id": "perforce_test_path",
+        "title": "Perforce Test Path",
+        "type": "string",
+        "summary": "Perforce depot subpath"
+      },
       "secure": {
         "$id": "secure",
         "title": "Secure",
@@ -2033,6 +2103,9 @@
             "$ref": "#/definitions/support/julia_support"
           },
           {
+            "$ref": "#/definitions/support/matlab_support"
+          },
+          {
             "$ref": "#/definitions/support/nix_support"
           },
           {
@@ -2168,6 +2241,28 @@
         "summary": "Shared build workspaces",
         "see": {
           "Workspaces": "https://docs.travis-ci.com/user/using-workspaces"
+        }
+      },
+      "vm": {
+        "$id": "vm",
+        "title": "Vm",
+        "description": "These settings can be used in order to choose VM size",
+        "type": "object",
+        "properties": {
+          "size": {
+            "type": "string",
+            "enum": [
+              "medium",
+              "large",
+              "x-large",
+              "2x-large"
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "summary": "VM size settings",
+        "see": {
+          "Customizing the Build": "https://docs.travis-ci.com/customizing-the-build/"
         }
       }
     },
@@ -7660,6 +7755,29 @@
         },
         "normal": true
       },
+      "matlab": {
+        "$id": "matlab",
+        "title": "Matlab",
+        "type": "object",
+        "properties": {
+          "matlab": {
+            "$ref": "#/definitions/type/strs",
+            "flags": [
+              "expand"
+            ],
+            "only": {
+              "language": [
+                "matlab"
+              ]
+            }
+          }
+        },
+        "summary": "Matlab build support",
+        "see": {
+          "Building a MATLAB Project": "https://docs.travis-ci.com/user/languages/matlab/"
+        },
+        "normal": true
+      },
       "nix": {
         "$id": "nix",
         "title": "Nix",
@@ -8816,6 +8934,22 @@
             "only": {
               "language": [
                 "julia"
+              ]
+            }
+          }
+        },
+        "normal": true
+      },
+      "matlab_support": {
+        "$id": "matlab_support",
+        "title": "Matlab Support",
+        "type": "object",
+        "properties": {
+          "matlab": {
+            "type": "string",
+            "only": {
+              "language": [
+                "matlab"
               ]
             }
           }
@@ -10045,6 +10179,7 @@
     "ghc",
     "haxe",
     "julia",
+    "matlab",
     "nix",
     "perl",
     "perl6",

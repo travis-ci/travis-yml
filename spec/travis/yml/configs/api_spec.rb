@@ -1,10 +1,10 @@
 describe Travis::Yml::Configs do
-  let(:repo)    { { github_id: 1, slug: 'travis-ci/travis-yml', private: false, default_branch: 'master', token: 'repo_token', private_key: 'key', allow_config_imports: true } }
+  let(:repo)    { { id: 1, github_id: 1, slug: 'travis-ci/travis-yml', private: false, default_branch: 'master', token: 'repo_token', private_key: 'key', allow_config_imports: true } }
   let(:configs) { described_class.new(repo, 'ref', raws, {}, opts.merge(token: 'user_token', data: {})) }
   let(:config)  { subject.config }
 
-  before { stub_content(repo[:github_id], '.travis.yml', travis_yml) }
-  before { stub_content(repo[:github_id], 'one/one.yml', one_yml) }
+  before { stub_content(repo[:id], '.travis.yml', travis_yml) }
+  before { stub_content(repo[:id], 'one.yml', one_yml) }
 
   subject { configs.tap(&:load) }
 
@@ -12,28 +12,81 @@ describe Travis::Yml::Configs do
     it { expect(subject.map(&:to_s)).to eq sources }
   end
 
-  let(:raws) do
-    [
-      { config: 'script: ./api.1', mode: 'deep_merge_prepend' },
-      { config: 'script: ./api.2', mode: 'deep_merge_prepend' },
-    ]
+  let(:travis_yml) do
+    %(
+      import:
+        - source: one.yml
+          mode: deep_merge_prepend
+      script:
+        - ./travis
+    )
   end
 
-  let(:travis_yml) { "import: one/one.yml\nscript: [./travis]" }
-  let(:one_yml)    { 'script: ./one' }
-
-  imports %w(
-    api
-    api.1
-    travis-ci/travis-yml:.travis.yml@ref
-    travis-ci/travis-yml:one/one.yml@ref
-  )
-
-  describe 'merge_normalized turned off' do
-    it { should serialize_to script: ['./api.1'], import: [source: 'one/one.yml'] }
+  let(:one_yml) do
+    %(
+      script: ./one
+    )
   end
 
-  describe 'merge_normalized turned on', merge_normalized: true do
-    it { should serialize_to script: ['./travis', './api.2', './api.1', './one'], import: [source: 'one/one.yml'] }
+  describe 'merging with .travis.yml' do
+    let(:raws) do
+      [
+        { config: 'script: ./api.1', mode: 'deep_merge_prepend' },
+        { config: 'script: ./api.2', mode: 'deep_merge_prepend' },
+      ]
+    end
+
+    imports %w(
+      api.1
+      api.2
+      travis-ci/travis-yml:.travis.yml@ref
+      travis-ci/travis-yml:one.yml@ref
+    )
+
+    describe 'merge_normalized turned off' do
+      it { should serialize_to script: ['./api.1'] }
+    end
+
+    describe 'merge_normalized turned on', merge_normalized: true do
+      it { should serialize_to script: ['./api.1', './api.2', './travis', './one'] }
+    end
+  end
+
+  describe 'replacing .travis.yml' do
+    let(:raws) do
+      [
+        { config: 'script: ./api.1', mode: 'deep_merge_prepend' },
+        { config: 'script: ./api.2', mode: 'replace' },
+      ]
+    end
+
+    context do
+      imports %w(
+        api.1
+        api.2
+      )
+    end
+
+    describe 'merge_normalized turned off' do
+      it { should serialize_to script: ['./api.1'] }
+    end
+
+    describe 'merge_normalized turned on', merge_normalized: true do
+      it { should serialize_to script: ['./api.1', './api.2'] }
+    end
+  end
+
+  describe 'no .travis.yml present' do
+    before { stub_content(repo[:id], '.travis.yml', status: 404) }
+
+    describe 'non-empty api config' do
+      let(:raws) { [config: 'script: ./api'] }
+      imports %w(api)
+    end
+
+    describe 'empty api config' do
+      let(:raws) { [config: ''] }
+      imports %w(api)
+    end
   end
 end

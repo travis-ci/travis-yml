@@ -25,7 +25,7 @@ module Travis
           end
 
           def repo
-            @repo ||= ctx.repos[slug]
+            @repo ||= ctx.repos[slug, provider]
           end
 
           def config
@@ -46,10 +46,11 @@ module Travis
           def imports
             imports = Array(config['import'])
             imports = imports.select { |import| import.is_a?(Hash) }
-            imports.map { |import| Config::File.new(ctx, self, import) }
+            imports.map do |import|
+              Config::File.new(ctx, self, provider, import)
+            end
           end
           memoize :imports
-
           # Flattening the tree should result in a unique array of configs
           # ordered by the order resulting in walking the tree depth-first.
           # However, we load the tree breadth-first and load times vary.
@@ -91,8 +92,8 @@ module Travis
           end
 
           def matches?
-            return true if Condition.new(import['if'], import, data).accept?
-            msg :info, :import, :skip_import, source: to_s, condition: import['if']
+            return true if Condition.new(defn['if'], defn, data).accept?
+            msg :info, :import, :skip_import, source: to_s, condition: defn['if']
             false
           end
           memoize :matches?
@@ -138,7 +139,7 @@ module Travis
           end
 
           def to_h
-            config
+            Map.new(config, merge_modes: merge_modes)
           end
 
           private
@@ -205,9 +206,9 @@ module Travis
 
             def parse(str)
               return unless str
+              str = Oj.generate(str) if str.is_a?(Hash)
               opts = OPTS.keys.zip(Array.new(OPTS.size) { false }).to_h
               doc = Yml.load(str, opts)
-              msgs.concat(doc.msgs)
               doc.serialize(false)
             end
         end

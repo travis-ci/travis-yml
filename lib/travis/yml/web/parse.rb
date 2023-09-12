@@ -43,7 +43,9 @@ module Travis
 
           def configs
             Oj.load(request_body).map do |part|
-              Parts::Part.new(*part.values_at(*%w(config source merge_mode)))
+              config, source, mode = part.values_at(*%w(config source merge_mode))
+              key = source == 'api' ? :rgt : :lft
+              Parts::Part.new(config, source, key => mode)
             end
           end
 

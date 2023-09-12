@@ -7,9 +7,12 @@ class Array
 end
 
 class Map < Hash
+  attr_reader :opts
+
   def initialize(hash = {}, opts = {})
-    replace(hash.map { |key, value| [key.is_a?(Key) ? key : Key.new(key), value] }.to_h)
-    @opts = opts.respond_to?(:tag) ? opts_from(opts.tag) : opts
+    replace(hash.to_a.map { |key, value| [key.is_a?(Key) ? key : Key.new(key), value] }.to_h)
+    opts = opts.respond_to?(:tag) ? opts_from(opts) : opts
+    @opts = opts || {}
   end
 
   def init_with(node)
@@ -20,16 +23,12 @@ class Map < Hash
     Array(opts[:warnings])
   end
 
-  def merge_mode
-    opts = Array(self.opts[:merge])
-    return unless mode = opts.&(MODES).first
-    key  = [:append, :prepend].detect { |key| opts.include?(key) }
-    mode = [mode, key].join('_').to_sym if key
-    mode
+  def merge_modes
+    opts[:merge_modes] || {}
   end
 
   Hash.instance_methods.each do |name|
-    skip = %i(object_id replace opts anchors warnings)
+    skip = %i(object_id replace opts anchors warnings to_a tap instance_of? respond_to? keys key? is_a? default [] []= == equal?)
     next if skip.include?(name)
     define_method(name) do |*args, &block|
       obj = super(*args, &block)
@@ -38,20 +37,23 @@ class Map < Hash
     end
   end
 
-  def opts
-    @opts ||= {}
-  end
-
   def to_h
     dup
   end
 
   private
 
-    def opts_from(tag)
-      tag ? { merge: OPTS & tag.split('+')[1..-1].map(&:to_sym) } : {}
+    def opts_from(node)
+      return {} unless node.tag
+      mode = node.tag.to_s.sub(/^!/, '').gsub('+', '_').to_sym
+      MODES.include?(mode) ? { merge_modes: { rgt: mode } } : {}
     end
 
-    MODES = %i(replace merge deep_merge)
-    OPTS = MODES + %i(prepend append)
+    MODES = %i(
+      replace
+      merge
+      deep_merge
+      deep_merge_append
+      deep_merge_prepend
+    )
 end

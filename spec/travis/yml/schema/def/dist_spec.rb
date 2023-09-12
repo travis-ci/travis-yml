@@ -15,7 +15,10 @@ describe Travis::Yml::Schema::Def::Dist do
         'precise',
         'xenial',
         'bionic',
-        'server-2016'
+        'focal',
+        'jammy',
+        'server-2016',
+        'rhel8'
       ],
       downcase: true,
       values: {
@@ -48,13 +51,34 @@ describe Travis::Yml::Schema::Def::Dist do
             ]
           }
         },
-        'server-2016': {
+        focal: {
+          only: {
+            os: [
+              'linux'
+            ]
+          }
+        },
+        jammy: {
+          only: {
+            os: [
+              'linux'
+            ]
+          }
+        },
+       'server-2016': {
           only: {
             os: [
               'windows'
             ]
           },
           edge: true
+        },
+        rhel8: {
+          only: {
+            os: [
+              'linux'
+            ]
+          }
         },
       }
     )

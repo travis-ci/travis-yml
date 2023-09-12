@@ -65,6 +65,7 @@ module Travis
             map :arch
             map :osx_image
             map :sudo
+            map :vm
             map :env,      to: :env_vars
             map :compiler
             map :branches
@@ -85,6 +86,7 @@ module Travis
 
             super
             map :allow_failure, to: :bool
+            map :vault, to: :vault
 
             export
           end

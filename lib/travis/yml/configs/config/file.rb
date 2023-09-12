@@ -1,17 +1,17 @@
-require 'travis/yml/configs/github/content'
+require 'travis/yml/configs/content'
 require 'travis/yml/configs/config/base'
 
 module Travis
   module Yml
     module Configs
       module Config
-        class File < Obj.new(:ctx, :parent, :import)
+        class File < Obj.new(:ctx, :parent, :provider, :defn)
           include Base
 
           attr_reader :path, :ref, :raw
 
-          def initialize(ctx, parent, import)
-            import = stringify(import)
+          def initialize(ctx, parent, provider, defn)
+            defn = stringify(defn)
             super
           end
 
@@ -33,20 +33,19 @@ module Travis
           end
 
           def source
-            import['source']
+            defn['source']
           end
 
           def slug
             @slug ||= Ref.new(source).repo || parent.repo.slug
           end
 
-          def mode
-            import['mode']
+          def merge_modes
+            { lft: defn['mode'] || :deep_merge_append }
           end
-          alias merge_mode mode
 
           def part
-            Parts::Part.new(raw, source, mode)
+            Parts::Part.new(raw, source, merge_modes)
           end
 
           def empty?
@@ -61,7 +60,7 @@ module Travis
             {
               source: to_s,
               config: raw,
-              mode: mode
+              mode: defn['mode']
             }
           end
 
@@ -74,7 +73,7 @@ module Travis
             end
 
             def fetch
-              Github::Content.new(repo, path, ref).content
+              Content.new(repo, path, ref).content
             rescue FileNotFound => e
               required? ? raise : nil
             end

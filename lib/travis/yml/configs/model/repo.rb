@@ -6,6 +6,10 @@ module Travis
     module Configs
       module Model
         class Repo < Struct.new(:attrs)
+          def id
+            attrs[:id]
+          end
+
           def owner_name
             @owner_name ||= slug.split('/').first
           end
@@ -46,7 +50,15 @@ module Travis
             Model::Config.new(config, keys, key).reencrypt
           end
 
-          REQUIRED = %i(github_id private private_key allow_config_imports)
+          def vcs_type
+            attrs[:vcs_type] || 'GithubRepository'
+          end
+
+          def provider
+            vcs_type.downcase.gsub('repository', '')
+          end
+
+          REQUIRED = %i(id github_id private private_key allow_config_imports)
 
           def complete?
             return false unless REQUIRED.all? { |key| given?(key) }

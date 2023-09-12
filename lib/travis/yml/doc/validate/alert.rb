@@ -28,7 +28,12 @@ module Travis
 
             def alert
               value.alert :secure, type: value.type
+              value.error :secure, message: 'The token value must be put under "secure" section' if error_on_alert?
               value
+            end
+
+            def error_on_alert?
+              value&.parent&.key == 'vault'
             end
         end
       end

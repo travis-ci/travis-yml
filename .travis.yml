@@ -1,6 +1,14 @@
 language: ruby
 
 cache: bundler
+env:
+  global:
+    - PATH=/snap/bin:$PATH
+
+addons:
+  snaps:
+  - name: docker
+    channel: latest/beta
 
 before_install:
 - gem install bundler -v '2.0.1'
@@ -20,4 +28,4 @@ jobs:
       before_install: skip
       install: skip
       script: make ship
-      if: type = cron OR commit_message =~ /ship:docker/ OR env(SHIP_DOCKER) = true
+      if: (branch = master and type = push ) OR commit_message =~ /ship:docker/ OR env(SHIP_DOCKER) = true

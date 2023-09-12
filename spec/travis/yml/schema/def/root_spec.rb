@@ -117,10 +117,12 @@ describe Travis::Yml::Schema::Def::Root do
         jobs_excludes
         language
         languages
+        keys
         notifications
         os
         oss
         osx_images
+        perforce_test_path
         secure
         secures
         service
@@ -131,10 +133,12 @@ describe Travis::Yml::Schema::Def::Root do
         strs
         sudo
         support
+        vault
         version
         virt
         workspace
         workspaces
+        vm
       ),
       addon: %i(
         apt
@@ -227,6 +231,7 @@ describe Travis::Yml::Schema::Def::Root do
         haxe
         java
         julia
+        matlab
         nix
         node_js
         objective-c
@@ -298,11 +303,14 @@ describe Travis::Yml::Schema::Def::Root do
           notifications
           os
           osx_image
+          perforce_test_path
           stack
           stages
           sudo
           trace
+          vault
           version
+          vm
         )
       end
 

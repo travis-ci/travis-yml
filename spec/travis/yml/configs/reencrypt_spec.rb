@@ -1,5 +1,5 @@
 describe Travis::Yml::Configs do
-  let(:repo)    { { github_id: 1, slug: 'travis-ci/travis-yml', private: private, default_branch: 'master', token: 'repo-token', private_key: PRIVATE_KEYS[:one], allow_config_imports: true } }
+  let(:repo)    { { id: 1, github_id: 1, slug: 'travis-ci/travis-yml', private: private, default_branch: 'master', token: 'repo-token', private_key: PRIVATE_KEYS[:one], allow_config_imports: true } }
   let(:configs) { described_class.new(repo, 'ref', nil, nil, opts.merge(token: 'user-token')) }
 
   subject { configs.tap(&:load) }
@@ -15,8 +15,8 @@ describe Travis::Yml::Configs do
   end
 
   before { stub_repo('travis-ci/travis-yml', token: 'user-token') } # authorization
-  before { stub_repo('travis-ci/other', internal: true, body: { github_id: 2, private: private, default_branch: 'default', config_imports: true, private_key: PRIVATE_KEYS[:two] }) }
-  before { stub_repo('other/other', internal: true, body: { github_id: 3, private: private, default_branch: 'default', config_imports: true, private_key: PRIVATE_KEYS[:two] }) }
+  before { stub_repo('travis-ci/other', internal: true, body: { id: 2, github_id: 2, private: private, default_branch: 'default', config_imports: true, private_key: PRIVATE_KEYS[:two] }) }
+  before { stub_repo('other/other', internal: true, body: { id: 3, github_id: 3, private: private, default_branch: 'default', config_imports: true, private_key: PRIVATE_KEYS[:two] }) }
 
   before { stub_content(1, '.travis.yml', travis_yml) }
   before { stub_content(1, 'one.yml', one_yml) }
@@ -110,8 +110,8 @@ describe Travis::Yml::Configs do
 
       before { expect_any_instance_of(Travis::Yml::Configs::Model::Repo).to receive(:reencrypt).never }
 
-      it { expect(vars).to eq [one, two] }
-      it { expect(decrypt(:one, vars)).to eq %w(secret_one secret_two) }
+      it { expect(vars).to eq [two, one] }
+      it { expect(decrypt(:one, vars)).to eq %w(secret_two secret_one) }
     end
 
     describe 'frm the same owner' do
@@ -122,14 +122,14 @@ describe Travis::Yml::Configs do
         let(:travis_yml) { 'import: travis-ci/other:one.yml' }
         let(:private) { false }
         it { expect(vars).to_not eq [one, two] }
-        it { expect(decrypt(:one, vars)).to eq %w(secret_one secret_two) }
+        it { expect(decrypt(:one, vars)).to eq %w(secret_two secret_one) }
       end
 
       describe 'private config on the same owner' do
         let(:travis_yml) { 'import: travis-ci/other:one.yml' }
         let(:private) { true }
         it { expect(vars).to_not eq [one, two] }
-        it { expect(decrypt(:one, vars)).to eq %w(secret_one secret_two) }
+        it { expect(decrypt(:one, vars)).to eq %w(secret_two secret_one) }
       end
     end
 
@@ -140,7 +140,7 @@ describe Travis::Yml::Configs do
       describe 'public config' do
         let(:travis_yml) { 'import: other/other:one.yml' }
         let(:private) { false }
-        it { expect(vars).to eq [one, two] }
+        it { expect(vars).to eq [two, one] }
         it { expect { decrypt(:one, vars) }.to raise_error OpenSSL::OpenSSLError }
       end
 

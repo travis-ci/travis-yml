@@ -3,6 +3,7 @@ describe Travis::Yml do
     known = %w(
       amd64
       arm64
+      arm64-graviton2
       ppc64le
       s390x
     )

@@ -39,14 +39,17 @@ describe Travis::Yml::Schema::Def::Archs do
         enum: [
           'amd64',
           'arm64',
+          'arm64-graviton2',
           'ppc64le',
-          's390x'
+          'i386',
+          's390x',
         ],
         downcase: true,
         values: {
           amd64: {
             aliases: [
-              'x86_64'
+              'x86_64',
+              'x64',
             ]
           },
           ppc64le: {
@@ -54,6 +57,11 @@ describe Travis::Yml::Schema::Def::Archs do
               'power',
               'ppc',
               'ppc64'
+            ]
+          },
+          i386: {
+            aliases: [
+              'x86'
             ]
           }
         },
