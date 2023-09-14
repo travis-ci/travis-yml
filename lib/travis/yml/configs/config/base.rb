@@ -25,7 +25,7 @@ module Travis
           end
 
           def repo
-            @repo ||= ctx.repos[slug, provider]
+            @repo ||= ctx.repos[vcs_id, provider]
           end
 
           def config
@@ -47,7 +47,7 @@ module Travis
             imports = Array(config['import'])
             imports = imports.select { |import| import.is_a?(Hash) }
             imports.map do |import|
-              Config::File.new(ctx, self, provider, import)
+              Config::File.new(ctx, self, vcs_id, provider, import)
             end
           end
           memoize :imports
