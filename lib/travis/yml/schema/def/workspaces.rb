@@ -33,7 +33,7 @@ module Travis
             }
             map :use, to: Class.new(Type::Map) {
               def define
-                map :name, to: :seq, unique: true
+                map :name, to: :strs, unique: true
               end
             }
             export
