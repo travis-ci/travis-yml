@@ -27,15 +27,9 @@ describe Travis::Yml::Schema::Def::Workspaces do
               },
               type: :object
           },
-          use: {
-            additionalProperties: false,
-            properties: {
-              name: {
-                '$ref': "#/definitions/type/strs",
-                flags: [:unique]
-              }
-            },
-            type: :object
+          use:{
+            '$ref': "#/definitions/type/strs",
+            flags: [:unique]
           }
         }
       )

@@ -31,11 +31,7 @@ module Travis
                 normal
               end
             }
-            map :use, to: Class.new(Type::Map) {
-              def define
-                map :name, to: :strs, unique: true
-              end
-            }
+            map :use, to: :strs, unique: true
             export
           end
         end
