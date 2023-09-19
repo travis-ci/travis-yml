@@ -5,7 +5,7 @@ module Travis
   module Yml
     module Schema
       module Def
-        class Workspaces < Type::Seq
+        class Workspaces < Type::Map
           register :workspaces
 
           def define
@@ -23,7 +23,19 @@ module Travis
             see 'Workspaces': 'https://docs.travis-ci.com/user/using-workspaces'
 
             normal
-            type :workspace
+
+            map :create, to: Class.new(Type::Map) {
+              def define
+                map :name, to: :str, unique: true
+                map :paths, to: :seq
+                normal
+              end
+            }
+            map :use, to: Class.new(Type::Map) {
+              def define
+                map :name, to: :seq, unique: true
+              end
+            }
             export
           end
         end
@@ -33,9 +45,6 @@ module Travis
 
           def define
             prefix :name
-
-            map :name, to: :str
-            map :create, to: :bool
 
             normal
             export

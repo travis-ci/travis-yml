@@ -1,35 +1,31 @@
 describe Travis::Yml do
   accept 'workspaces' do
-    describe 'given a str' do
-      yaml %(
-        workspaces: ws1
-      )
-      it { should serialize_to workspaces: [name: 'ws1'] }
-    end
-
-    describe 'given a map' do
+    describe 'create' do
       yaml %(
         workspaces:
-          name: ws1
+          create:
+           name : ws1
+           paths: bin/
       )
-      it { should serialize_to workspaces: [name: 'ws1'] }
+      it { should serialize_to workspaces: { create: { name: 'ws1', paths: ["bin/"]}} }
     end
 
-    describe 'given a seq of strs' do
+    describe 'given a seq of workspaces to use' do
       yaml %(
         workspaces:
-        - ws1
+          use:
+          - ws1
+          - ws2
       )
-      it { should serialize_to workspaces: [name: 'ws1'] }
+      it { should serialize_to workspaces: {use: ["ws1", "ws2"] } }
     end
 
-    describe 'given a seq of maps' do
+    describe 'given a single workspace to use' do
       yaml %(
         workspaces:
-        - name: ws1
-          create: true
+         use : ws1
       )
-      it { should serialize_to workspaces: [name: 'ws1', create: true] }
+      it { should serialize_to workspaces: {use: 'ws1' } }
     end
   end
 end

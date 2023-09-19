@@ -2196,53 +2196,6 @@
           "vm"
         ]
       },
-      "workspace": {
-        "$id": "workspace",
-        "title": "Workspace",
-        "anyOf": [
-          {
-            "type": "object",
-            "properties": {
-              "name": {
-                "type": "string"
-              },
-              "create": {
-                "type": "boolean"
-              }
-            },
-            "additionalProperties": false,
-            "prefix": {
-              "key": "name"
-            },
-            "normal": true
-          },
-          {
-            "type": "string"
-          }
-        ],
-        "normal": true
-      },
-      "workspaces": {
-        "$id": "workspaces",
-        "title": "Workspaces",
-        "description": "Workspaces allow jobs within the same build to share files. They are\nuseful when you want to use build artifacts from a previous job.\nFor example, you create a cache that can be used in multiple jobs\nin the same build later.",
-        "anyOf": [
-          {
-            "type": "array",
-            "items": {
-              "$ref": "#/definitions/type/workspace"
-            },
-            "normal": true
-          },
-          {
-            "$ref": "#/definitions/type/workspace"
-          }
-        ],
-        "summary": "Shared build workspaces",
-        "see": {
-          "Workspaces": "https://docs.travis-ci.com/user/using-workspaces"
-        }
-      },
       "vm": {
         "$id": "vm",
         "title": "Vm",
@@ -2264,6 +2217,48 @@
         "see": {
           "Customizing the Build": "https://docs.travis-ci.com/customizing-the-build/"
         }
+      },
+      "workspaces": {
+        "$id": "workspaces",
+        "title": "Workspaces",
+        "description": "Workspaces allow jobs within the same build to share files. They are\nuseful when you want to use build artifacts from a previous job.\nFor example, you create a cache that can be used in multiple jobs\nin the same build later.",
+        "type": "object",
+        "properties": {
+          "create": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "flags": [
+                  "unique"
+                ]
+              },
+              "paths": {
+                "$ref": "#/definitions/type/strs"
+              }
+            },
+            "additionalProperties": false,
+            "normal": true
+          },
+          "use": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "$ref": "#/definitions/type/strs",
+                "flags": [
+                  "unique"
+                ]
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false,
+        "summary": "Shared build workspaces",
+        "see": {
+          "Workspaces": "https://docs.travis-ci.com/user/using-workspaces"
+        },
+        "normal": true
       }
     },
     "addon": {

@@ -136,7 +136,6 @@ describe Travis::Yml::Schema::Def::Root do
         vault
         version
         virt
-        workspace
         workspaces
         vm
       ),

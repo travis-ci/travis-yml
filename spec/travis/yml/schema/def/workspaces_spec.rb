@@ -13,53 +13,31 @@ describe Travis::Yml::Schema::Def::Workspaces do
         see: {
           Workspaces: kind_of(String)
         },
-        anyOf: [
-          {
-            type: :array,
-            items: {
-              '$ref': '#/definitions/type/workspace',
-            },
-            normal: true,
+        normal: true,
+        properties: {
+          create: {
+              additionalProperties: false,
+              normal: true,
+              properties:{
+                name: {
+                  flags: [:unique],
+                  type: :string
+                },
+                paths: {'$ref': "#/definitions/type/strs"}
+              },
+              type: :object
           },
-          {
-            '$ref': '#/definitions/type/workspace',
-          }
-        ],
-      )
-    end
-  end
-
-  describe 'workspace' do
-    subject { Travis::Yml.schema[:definitions][:type][:workspace] }
-
-    # it { puts JSON.pretty_generate(subject) }
-
-    it do
-      should include(
-        '$id': :workspace,
-        title: 'Workspace',
-        anyOf: [
-          {
-            type: :object,
+          use: {
+            additionalProperties: false,
             properties: {
               name: {
-                type: :string
-              },
-              create: {
-                type: :boolean
+                '$ref': "#/definitions/type/strs",
+                flags: [:unique]
               }
             },
-            prefix: {
-              key: :name
-            },
-            additionalProperties: false,
-            normal: true
-          },
-          {
-            type: :string
+            type: :object
           }
-        ],
-        normal: true
+        }
       )
     end
   end
