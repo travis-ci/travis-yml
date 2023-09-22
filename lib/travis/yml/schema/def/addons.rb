@@ -52,8 +52,6 @@ module Travis
               end
             }
 
-            map :blender, to: :str, summary: 'Blender version'
-            map :tensor_flow, to: :str, summary: 'Tensor Flow version'
             map :snaps
             map :sonarcloud
             map :ssh_known_hosts, to: :secures, strict: false, summary: 'Hosts to add to ~/.ssh/known_hosts', see: { 'Adding to SSH Known Hosts': 'https://docs.travis-ci.com/user/ssh-known-hosts/' }
