@@ -53,4 +53,4 @@ COPY --from=builder /app/vendor ./vendor
 # Copy app files
 COPY . ./
 
-CMD ["bundle", "exec", "puma", "-C", "lib/travis/yml/web/puma.rb"]
+CMD ["sh", "-c", "bundle exec bin/docs && bundle exec puma -C lib/travis/yml/web/puma.rb"]
