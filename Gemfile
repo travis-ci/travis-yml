@@ -5,7 +5,7 @@ ruby File.read('.ruby-version').chomp
 gem 'redcarpet'
 
 group :web do
-  gem 'puma', '~> 4.3.5'
+  gem 'puma', '~> 5.6.4'
   gem 'sinatra'
   gem 'sinatra-contrib'
   gem 'rack-cors'
