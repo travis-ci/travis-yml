@@ -293,4 +293,14 @@ describe Travis::Yml, 'r' do
       it { should_not have_msg }
     end
   end
+
+  describe 'use_devtools' do
+    describe 'given a bool' do
+      yaml %(
+        use_devtools: true
+      )
+      it { should serialize_to use_devtools: true }
+      it { should_not have_msg }
+    end
+  end
 end
