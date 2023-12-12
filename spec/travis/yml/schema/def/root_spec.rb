@@ -135,6 +135,7 @@ describe Travis::Yml::Schema::Def::Root do
         vault
         version
         virt
+        workspaces
         vm
       ),
       addon: %i(
