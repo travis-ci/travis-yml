@@ -215,6 +215,28 @@ describe Travis::Yml::Configs do
     it { expect(subject.map(&:merge_modes)).to eq [{ lft: :deep_merge_append }, { lft: 'merge' }, { lft: 'deep_merge' }] }
   end
 
+  describe 'imports with template path' do
+    let(:data) { { commit_message: 'one' } }
+
+    let(:travis_yml) do
+      <<~yml
+        import:
+          - source: "%{commit_message}/one.yml"
+            mode: merge
+      yml
+    end
+
+    let(:one_yml) do
+      <<~yml
+        import:
+          - source: "%{commit_message}/two.yml"
+            mode: deep_merge
+      yml
+    end
+
+    it { expect(subject.map(&:merge_modes)).to eq [{ lft: :deep_merge_append }, { lft: 'merge' }, { lft: 'deep_merge' }] }
+  end
+
   describe 'conditional imports' do
     let(:travis_yml) do
       <<~yml
