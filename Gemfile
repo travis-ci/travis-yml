@@ -3,7 +3,7 @@ source 'https://rubygems.org'
 ruby File.read('.ruby-version').chomp
 
 gem 'redcarpet'
-gem 'travis-conditions', git: 'https://github.com/travis-ci/travis-conditions', branch: 'dt-match-tcie3'
+gem 'travis-conditions', git: 'https://github.com/travis-ci/travis-conditions'
 
 group :web do
   gem 'puma', '~> 4.3.5'
