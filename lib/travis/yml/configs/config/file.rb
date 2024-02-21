@@ -1,3 +1,4 @@
+require 'cgi'
 require 'travis/yml/configs/content'
 require 'travis/yml/configs/config/base'
 
@@ -9,6 +10,8 @@ module Travis
           include Base
 
           attr_reader :path, :ref, :raw
+
+          PERMITTED_KEYS = %w(commit_message).freeze
 
           def initialize(ctx, parent, provider, defn)
             defn = stringify(defn)
@@ -73,9 +76,15 @@ module Travis
             end
 
             def fetch
-              Content.new(repo, path, ref).content
+              Content.new(repo, interpolated_path, ref).content
             rescue FileNotFound => e
               required? ? raise : nil
+            end
+
+            def interpolated_path
+              new_path = path.gsub(/%{(#{PERMITTED_KEYS.join('|')}|.*)}/) { CGI.escape(ctx.data[$1.to_sym]) }
+
+              "#{path_suffix}#{new_path}"
             end
         end
       end
