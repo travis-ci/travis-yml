@@ -12,7 +12,7 @@ group :web do
   gem 'rack-cors'
   gem 'rack-ssl-enforcer', '~> 0.2.9'
   gem 'sentry-raven', '~> 3.1.2'
-  gem 'travis-config', git: 'https://github.com/travis-ci/travis-config', ref: 'prd-ruby-upgrade-dev'
+  gem 'travis-config', git: 'https://github.com/travis-ci/travis-config'
   gem 'travis-metrics', git: 'https://github.com/travis-ci/travis-metrics', ref: 'sf-unfork'
 end
 
