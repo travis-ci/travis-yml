@@ -909,6 +909,9 @@
           "group": {
             "$ref": "#/definitions/type/group"
           },
+          "workspaces": {
+            "$ref": "#/definitions/type/workspaces"
+          },
           "keys": {
             "$ref": "#/definitions/type/keys"
           },
@@ -2407,6 +2410,42 @@
         "see": {
           "Customizing the Build": "https://docs.travis-ci.com/user/customizing-the-build/"
         }
+      },
+      "workspaces": {
+        "$id": "workspaces",
+        "title": "Workspaces",
+        "description": "Workspaces allow jobs within the same build to share files. They are\nuseful when you want to use build artifacts from a previous job.\nFor example, you create a cache that can be used in multiple jobs\nin the same build later.",
+        "type": "object",
+        "properties": {
+          "create": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "flags": [
+                  "unique"
+                ]
+              },
+              "paths": {
+                "$ref": "#/definitions/type/strs"
+              }
+            },
+            "additionalProperties": false,
+            "normal": true
+          },
+          "use": {
+            "$ref": "#/definitions/type/strs",
+            "flags": [
+              "unique"
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "summary": "Shared build workspaces",
+        "see": {
+          "Workspaces": "https://docs.travis-ci.com/user/using-workspaces"
+        },
+        "normal": true
       }
     },
     "addon": {
