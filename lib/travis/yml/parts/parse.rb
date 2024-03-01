@@ -32,8 +32,9 @@ module Travis
 
           def src(key)
             key = Key.new(key) unless key.is_a?(Key)
-            key.src = part.src
-            key
+            new_key = key.dup
+            new_key.src = part.src
+            new_key
           end
 
           def parse
