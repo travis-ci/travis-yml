@@ -4,10 +4,11 @@ ruby File.read('.ruby-version').chomp
 
 gem 'redcarpet'
 gem 'thwait'
+gem 'travis-conditions', git: 'https://github.com/travis-ci/travis-conditions'
 
 group :web do
   gem 'puma', '~> 6.3.0'
-  gem 'sinatra'
+  gem 'sinatra', '~> 2'
   gem 'sinatra-contrib'
   gem 'rack-cors'
   gem 'rack-ssl-enforcer', '~> 0.2.9'

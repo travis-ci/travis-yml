@@ -1,13 +1,21 @@
 GIT
   remote: https://github.com/travis-ci/dpl.git
-  revision: 8a159e2d1fe5d047c17df190b92e2029cd0712aa
+  revision: 56e5a5c631da074a7aea7e9ecb23596745950edb
   specs:
-    dpl (2.0.0.beta.2)
+    dpl (2.0.3.beta.4)
       cl (~> 1.0)
 
 GIT
+  remote: https://github.com/travis-ci/travis-conditions
+  revision: 5e42bac0739bc7f9deff363e5c9f7ee5a7304d52
+  specs:
+    travis-conditions (1.0.15)
+      parslet (~> 1.8.2)
+      sh_vars (~> 1.0.2)
+
+GIT
   remote: https://github.com/travis-ci/travis-config
-  revision: 601e9a6dcb799dc14944c40153c60aaf935629ee
+  revision: 42b56ca54b9e4341817a7d3dc8fdf61a436e05bb
   specs:
     travis-config (2.0.0)
       hashr (~> 2.0)
@@ -37,34 +45,53 @@ PATH
 GEM
   remote: https://rubygems.org/
   specs:
-    addressable (2.6.0)
-      public_suffix (>= 2.0.2, < 4.0)
+    addressable (2.8.6)
+      public_suffix (>= 2.0.2, < 6.0)
     amatch (0.4.1)
       mize
       tins (~> 1.0)
     atomic (1.1.101)
     avl_tree (1.2.1)
       atomic (~> 1.1)
-    backports (3.15.0)
+    bigdecimal (3.1.6)
     cl (1.2.4)
       regstry (~> 1.0.3)
     coderay (1.1.3)
-    crack (0.4.3)
-      safe_yaml (~> 1.0.0)
-    diff-lcs (1.3)
+    crack (1.0.0)
+      bigdecimal
+      rexml
+    diff-lcs (1.5.1)
     e2mmap (0.1.0)
-    faraday (1.3.0)
+    faraday (1.10.3)
+      faraday-em_http (~> 1.0)
+      faraday-em_synchrony (~> 1.0)
+      faraday-excon (~> 1.1)
+      faraday-httpclient (~> 1.0)
+      faraday-multipart (~> 1.0)
       faraday-net_http (~> 1.0)
-      multipart-post (>= 1.2, < 3)
-      ruby2_keywords
+      faraday-net_http_persistent (~> 1.0)
+      faraday-patron (~> 1.0)
+      faraday-rack (~> 1.0)
+      faraday-retry (~> 1.0)
+      ruby2_keywords (>= 0.0.4)
+    faraday-em_http (1.0.0)
+    faraday-em_synchrony (1.0.0)
+    faraday-excon (1.1.0)
+    faraday-httpclient (1.0.1)
+    faraday-multipart (1.0.4)
+      multipart-post (~> 2)
     faraday-net_http (1.0.1)
+    faraday-net_http_persistent (1.2.0)
+    faraday-patron (1.0.0)
+    faraday-rack (1.0.0)
+    faraday-retry (1.0.3)
     faraday_middleware (1.2.0)
       faraday (~> 1.0)
-    hashdiff (1.0.0)
+    hashdiff (1.1.0)
     hashr (2.0.1)
     hitimes (1.3.1)
-    json-schema (2.8.1)
-      addressable (>= 2.4)
+    json-schema (4.1.1)
+      addressable (>= 2.8)
     memoyze (0.0.1)
     method_source (1.0.0)
     metriks (0.9.9.8)
@@ -75,11 +102,11 @@ GEM
       metriks (>= 0.9.9.6)
     mize (0.4.1)
       protocol (~> 2.0)
-    multi_json (1.14.1)
-    multipart-post (2.1.1)
-    mustermann (1.1.1)
+    multi_json (1.15.0)
+    multipart-post (2.4.0)
+    mustermann (2.0.2)
       ruby2_keywords (~> 0.0.1)
-    nio4r (2.5.9)
+    nio4r (2.7.0)
     oj (3.7.12)
     parslet (1.8.2)
     protocol (2.0.0)
@@ -87,71 +114,68 @@ GEM
     pry (0.14.2)
       coderay (~> 1.1)
       method_source (~> 1.0)
-    public_suffix (3.0.3)
-    puma (6.3.0)
+    public_suffix (5.0.4)
+    puma (6.3.1)
       nio4r (~> 2.0)
-    rack (2.2.3)
-    rack-cors (1.1.1)
+    racc (1.7.3)
+    rack (2.2.8.1)
+    rack-cors (2.0.2)
       rack (>= 2.0.0)
-    rack-protection (2.0.8.1)
+    rack-protection (2.2.4)
       rack
     rack-ssl-enforcer (0.2.9)
-    rack-test (1.1.0)
-      rack (>= 1.0, < 3)
-    rake (13.0.1)
-    redcarpet (3.4.0)
+    rack-test (2.1.0)
+      rack (>= 1.3)
+    rake (13.1.0)
+    redcarpet (3.6.0)
     regstry (1.0.15)
-    rexml (3.2.5)
-    rspec (3.8.0)
-      rspec-core (~> 3.8.0)
-      rspec-expectations (~> 3.8.0)
-      rspec-mocks (~> 3.8.0)
-    rspec-core (3.8.0)
-      rspec-support (~> 3.8.0)
-    rspec-expectations (3.8.3)
+    rexml (3.2.6)
+    rspec (3.13.0)
+      rspec-core (~> 3.13.0)
+      rspec-expectations (~> 3.13.0)
+      rspec-mocks (~> 3.13.0)
+    rspec-core (3.13.0)
+      rspec-support (~> 3.13.0)
+    rspec-expectations (3.13.0)
       diff-lcs (>= 1.2.0, < 2.0)
-      rspec-support (~> 3.8.0)
-    rspec-mocks (3.8.0)
+      rspec-support (~> 3.13.0)
+    rspec-mocks (3.13.0)
       diff-lcs (>= 1.2.0, < 2.0)
-      rspec-support (~> 3.8.0)
-    rspec-support (3.8.0)
+      rspec-support (~> 3.13.0)
+    rspec-support (3.13.1)
     ruby-obj (1.0.0)
-    ruby2_keywords (0.0.2)
-    ruby_parser (3.20.2)
+    ruby2_keywords (0.0.5)
+    ruby_parser (3.21.0)
+      racc (~> 1.5)
       sexp_processor (~> 4.16)
-    safe_yaml (1.0.5)
     sentry-raven (3.1.2)
       faraday (>= 1.0)
-    sexp_processor (4.17.0)
+    sexp_processor (4.17.1)
     sh_vars (1.0.2)
-    sinatra (2.0.8.1)
-      mustermann (~> 1.0)
-      rack (~> 2.0)
-      rack-protection (= 2.0.8.1)
+    sinatra (2.2.4)
+      mustermann (~> 2.0)
+      rack (~> 2.2)
+      rack-protection (= 2.2.4)
       tilt (~> 2.0)
-    sinatra-contrib (2.0.8.1)
-      backports (>= 2.8.2)
+    sinatra-contrib (2.2.4)
       multi_json
-      mustermann (~> 1.0)
-      rack-protection (= 2.0.8.1)
-      sinatra (= 2.0.8.1)
+      mustermann (~> 2.0)
+      rack-protection (= 2.2.4)
+      sinatra (= 2.2.4)
       tilt (~> 2.0)
     sync (0.5.0)
     thwait (0.2.0)
       e2mmap
-    tilt (2.0.10)
-    tins (1.24.1)
+    tilt (2.3.0)
+    tins (1.32.1)
       sync
-    travis-conditions (1.0.13)
-      parslet (~> 1.8.2)
-      sh_vars (~> 1.0.2)
-    webmock (3.8.1)
-      addressable (>= 2.3.6)
+    webmock (3.23.0)
+      addressable (>= 2.8.0)
       crack (>= 0.3.2)
       hashdiff (>= 0.4.0, < 2.0.0)
 
 PLATFORMS
-  ruby
+  x86_64-darwin-22
 
 DEPENDENCIES
   dpl!
@@ -166,16 +190,17 @@ DEPENDENCIES
   rexml
   rspec
   sentry-raven (~> 3.1.2)
-  sinatra
+  sinatra (~> 2)
   sinatra-contrib
   thwait
+  travis-conditions!
   travis-config!
   travis-metrics!
   travis-yml!
   webmock
 
 RUBY VERSION
-   ruby 3.2.2
+   ruby 3.2.2p53
 
 BUNDLED WITH
-   2.4.13
+   2.4.17

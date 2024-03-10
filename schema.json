@@ -13,17 +13,13 @@
             {
               "value": "ruby",
               "except": {
-                "os": [
-                  "osx"
-                ]
+                "os": ["osx"]
               }
             },
             {
               "value": "objective-c",
               "only": {
-                "os": [
-                  "osx"
-                ]
+                "os": ["osx"]
               }
             }
           ]
@@ -34,23 +30,17 @@
             {
               "value": "linux",
               "except": {
-                "language": [
-                  "objective-c"
-                ]
+                "language": ["objective-c"]
               }
             },
             {
               "value": "osx",
               "only": {
-                "language": [
-                  "objective-c"
-                ]
+                "language": ["objective-c"]
               }
             }
           ],
-          "flags": [
-            "expand"
-          ]
+          "flags": ["expand"]
         },
         "dist": {
           "$ref": "#/definitions/type/dist",
@@ -58,19 +48,14 @@
             {
               "value": "xenial",
               "only": {
-                "os": [
-                  "linux",
-                  "linux-ppc64le"
-                ]
+                "os": ["linux", "linux-ppc64le"]
               }
             }
           ]
         },
         "arch": {
           "$ref": "#/definitions/type/archs",
-          "flags": [
-            "expand"
-          ]
+          "flags": ["expand"]
         },
         "stack": {
           "$ref": "#/definitions/type/stack"
@@ -86,24 +71,18 @@
         },
         "compiler": {
           "$ref": "#/definitions/type/compilers",
-          "flags": [
-            "expand"
-          ]
+          "flags": ["expand"]
         },
         "osx_image": {
           "$ref": "#/definitions/type/osx_images",
-          "flags": [
-            "expand"
-          ]
+          "flags": ["expand"]
         },
         "stages": {
           "$ref": "#/definitions/type/stages"
         },
         "jobs": {
           "$ref": "#/definitions/type/jobs",
-          "aliases": [
-            "matrix"
-          ]
+          "aliases": ["matrix"]
         },
         "notifications": {
           "$ref": "#/definitions/type/notifications"
@@ -124,16 +103,12 @@
         },
         "filter_secrets": {
           "type": "boolean",
-          "flags": [
-            "internal"
-          ],
+          "flags": ["internal"],
           "summary": "Whether to filter secrets from the log output"
         },
         "trace": {
           "type": "boolean",
-          "flags": [
-            "internal"
-          ],
+          "flags": ["internal"],
           "summary": "Whether to trace the build script"
         },
         "perforce_test_path": {
@@ -180,10 +155,7 @@
           },
           "chrome": {
             "type": "string",
-            "enum": [
-              "stable",
-              "beta"
-            ],
+            "enum": ["stable", "beta"],
             "downcase": true,
             "summary": "Chrome version to use"
           },
@@ -251,9 +223,7 @@
           },
           "postgresql": {
             "type": "string",
-            "aliases": [
-              "postgres"
-            ],
+            "aliases": ["postgres"],
             "summary": "Postgres version to use"
           },
           "rethinkdb": {
@@ -262,9 +232,7 @@
           },
           "deploy": {
             "$ref": "#/definitions/type/deploys",
-            "flags": [
-              "internal"
-            ]
+            "flags": ["internal"]
           }
         },
         "additionalProperties": false,
@@ -278,9 +246,7 @@
         "summary": "Build environment architecture",
         "downcase": true,
         "only": {
-          "os": [
-            "linux"
-          ]
+          "os": ["linux"]
         },
         "enum": [
           "amd64",
@@ -292,22 +258,37 @@
         ],
         "values": {
           "amd64": {
-            "aliases": [
-              "x86_64",
-              "x64"
-            ]
+            "aliases": ["x86_64", "x64"],
+            "only": {
+              "os": ["linux", "osx"]
+            }
+          },
+          "arm64": {
+            "only": {
+              "os": ["linux", "osx"]
+            }
+          },
+          "arm64-graviton2": {
+            "only": {
+              "os": ["linux"]
+            }
           },
           "ppc64le": {
-            "aliases": [
-              "power",
-              "ppc",
-              "ppc64"
-            ]
+            "aliases": ["power", "ppc", "ppc64"],
+            "only": {
+              "os": ["linux"]
+            }
           },
           "i386": {
-            "aliases": [
-              "x86"
-            ]
+            "only": {
+              "os": ["linux"]
+            },
+            "aliases": ["x86"]
+          },
+          "s390x": {
+            "only": {
+              "os": ["linux"]
+            }
           }
         }
       },
@@ -344,9 +325,7 @@
               },
               "except": {
                 "$ref": "#/definitions/type/strs",
-                "aliases": [
-                  "exclude"
-                ],
+                "aliases": ["exclude"],
                 "summary": "Branches to exclude",
                 "example": "develop"
               }
@@ -356,9 +335,7 @@
             "prefix": {
               "key": "only"
             },
-            "aliases": [
-              "branch"
-            ]
+            "aliases": ["branch"]
           },
           {
             "$ref": "#/definitions/type/strs",
@@ -439,9 +416,7 @@
           },
           {
             "type": "boolean",
-            "enum": [
-              false
-            ],
+            "enum": [false],
             "normal": true
           }
         ],
@@ -460,10 +435,7 @@
               "type": "string",
               "example": "gcc",
               "only": {
-                "language": [
-                  "c",
-                  "cpp"
-                ]
+                "language": ["c", "cpp"]
               }
             },
             "normal": true
@@ -472,10 +444,7 @@
             "type": "string",
             "example": "gcc",
             "only": {
-              "language": [
-                "c",
-                "cpp"
-              ]
+              "language": ["c", "cpp"]
             }
           }
         ],
@@ -501,13 +470,8 @@
         "title": "Conditions",
         "type": "string",
         "summary": "Conditions support version",
-        "enum": [
-          "v0",
-          "v1"
-        ],
-        "flags": [
-          "internal"
-        ]
+        "enum": ["v0", "v1"],
+        "flags": ["internal"]
       },
       "deploys": {
         "$id": "deploys",
@@ -551,60 +515,43 @@
         "values": {
           "trusty": {
             "only": {
-              "os": [
-                "linux"
-              ]
+              "os": ["linux"]
             }
           },
           "precise": {
             "only": {
-              "os": [
-                "linux"
-              ]
+              "os": ["linux"]
             }
           },
           "xenial": {
             "only": {
-              "os": [
-                "linux",
-                "linux-ppc64le"
-              ]
+              "os": ["linux", "linux-ppc64le"]
             }
           },
           "bionic": {
             "only": {
-              "os": [
-                "linux"
-              ]
+              "os": ["linux"]
             }
           },
           "focal": {
             "only": {
-              "os": [
-                "linux"
-              ]
+              "os": ["linux"]
             }
           },
           "jammy": {
             "only": {
-              "os": [
-                "linux"
-              ]
+              "os": ["linux"]
             }
           },
           "server-2016": {
             "only": {
-              "os": [
-                "windows"
-              ]
+              "os": ["windows"]
             },
             "edge": true
           },
           "rhel8": {
             "only": {
-              "os": [
-                "linux"
-              ]
+              "os": ["linux"]
             }
           }
         }
@@ -623,13 +570,9 @@
               },
               "jobs": {
                 "$ref": "#/definitions/type/env_vars",
-                "aliases": [
-                  "matrix"
-                ],
+                "aliases": ["matrix"],
                 "summary": "Environment variables that expand the build matrix (creating one job per entry)",
-                "flags": [
-                  "expand"
-                ]
+                "flags": ["expand"]
               }
             },
             "additionalProperties": false,
@@ -725,10 +668,7 @@
         "properties": {
           "strategy": {
             "type": "string",
-            "enum": [
-              "clone",
-              "tarball"
-            ],
+            "enum": ["clone", "tarball"],
             "summary": "Strategy to use for fetching commits"
           },
           "depth": {
@@ -770,16 +710,11 @@
             "anyOf": [
               {
                 "type": "boolean",
-                "enum": [
-                  true,
-                  false
-                ]
+                "enum": [true, false]
               },
               {
                 "type": "string",
-                "enum": [
-                  "input"
-                ]
+                "enum": ["input"]
               }
             ],
             "summary": "Specify handling of line endings when cloning repository"
@@ -796,9 +731,7 @@
         "title": "Group",
         "type": "string",
         "summary": "Build environment group",
-        "flags": [
-          "internal"
-        ]
+        "flags": ["internal"]
       },
       "import": {
         "$id": "import",
@@ -974,16 +907,12 @@
               },
               "allow_failures": {
                 "$ref": "#/definitions/type/jobs_allow_failures",
-                "aliases": [
-                  "allowed_failures"
-                ],
+                "aliases": ["allowed_failures"],
                 "summary": "Attributes of jobs that are allowed to fail"
               },
               "fast_finish": {
                 "type": "boolean",
-                "aliases": [
-                  "fast_failure"
-                ],
+                "aliases": ["fast_failure"],
                 "summary": "Allow the build to fail fast"
               }
             },
@@ -993,9 +922,7 @@
               "Customizing the build": "https://docs.travis-ci.com/user/customizing-the-build#build-matrix"
             },
             "normal": true,
-            "aliases": [
-              "matrix"
-            ],
+            "aliases": ["matrix"],
             "prefix": {
               "key": "include"
             }
@@ -1034,9 +961,7 @@
                 "type": "string",
                 "summary": "OSX image to use for the build environment",
                 "only": {
-                  "os": [
-                    "osx"
-                  ]
+                  "os": ["osx"]
                 }
               },
               "sudo": {
@@ -1052,10 +977,7 @@
                 "type": "string",
                 "example": "gcc",
                 "only": {
-                  "language": [
-                    "c",
-                    "cpp"
-                  ]
+                  "language": ["c", "cpp"]
                 }
               },
               "branches": {
@@ -1063,9 +985,7 @@
               },
               "name": {
                 "type": "string",
-                "flags": [
-                  "unique"
-                ]
+                "flags": ["unique"]
               },
               "stage": {
                 "type": "string"
@@ -1132,9 +1052,7 @@
                 "type": "string",
                 "summary": "OSX image to use for the build environment",
                 "only": {
-                  "os": [
-                    "osx"
-                  ]
+                  "os": ["osx"]
                 }
               },
               "sudo": {
@@ -1150,10 +1068,7 @@
                 "type": "string",
                 "example": "gcc",
                 "only": {
-                  "language": [
-                    "c",
-                    "cpp"
-                  ]
+                  "language": ["c", "cpp"]
                 }
               },
               "branches": {
@@ -1161,9 +1076,7 @@
               },
               "name": {
                 "type": "string",
-                "flags": [
-                  "unique"
-                ]
+                "flags": ["unique"]
               },
               "stage": {
                 "type": "string"
@@ -1218,9 +1131,7 @@
                 "type": "string",
                 "summary": "OSX image to use for the build environment",
                 "only": {
-                  "os": [
-                    "osx"
-                  ]
+                  "os": ["osx"]
                 }
               },
               "sudo": {
@@ -1236,10 +1147,7 @@
                 "type": "string",
                 "example": "gcc",
                 "only": {
-                  "language": [
-                    "c",
-                    "cpp"
-                  ]
+                  "language": ["c", "cpp"]
                 }
               },
               "branches": {
@@ -1247,9 +1155,7 @@
               },
               "name": {
                 "type": "string",
-                "flags": [
-                  "unique"
-                ]
+                "flags": ["unique"]
               },
               "stage": {
                 "type": "string"
@@ -1262,9 +1168,7 @@
               }
             },
             "title": "Job Matrix Includes",
-            "aliases": [
-              "jobs"
-            ]
+            "aliases": ["jobs"]
           },
           {
             "$ref": "#/definitions/type/support"
@@ -1365,86 +1269,53 @@
         ],
         "values": {
           "cpp": {
-            "aliases": [
-              "c++"
-            ]
+            "aliases": ["c++"]
           },
           "go": {
-            "aliases": [
-              "golang"
-            ]
+            "aliases": ["golang"]
           },
           "java": {
-            "aliases": [
-              "jvm"
-            ]
+            "aliases": ["jvm"]
           },
           "node_js": {
-            "aliases": [
-              "javascript",
-              "js",
-              "node"
-            ]
+            "aliases": ["javascript", "js", "node"]
           },
           "objective-c": {
-            "aliases": [
-              "objective_c",
-              "swift"
-            ]
+            "aliases": ["objective_c", "swift"]
           },
           "shell": {
-            "aliases": [
-              "bash",
-              "minimal",
-              "sh"
-            ]
+            "aliases": ["bash", "minimal", "sh"]
           },
           "__connie__": {
-            "flags": [
-              "internal"
-            ],
+            "flags": ["internal"],
             "deprecated": "experimental stack language"
           },
           "__amethyst__": {
-            "flags": [
-              "internal"
-            ],
+            "flags": ["internal"],
             "deprecated": "experimental stack language"
           },
           "__garnet__": {
-            "flags": [
-              "internal"
-            ],
+            "flags": ["internal"],
             "deprecated": "experimental stack language"
           },
           "__stevonnie__": {
-            "flags": [
-              "internal"
-            ],
+            "flags": ["internal"],
             "deprecated": "experimental stack language"
           },
           "__opal__": {
-            "flags": [
-              "internal"
-            ],
+            "flags": ["internal"],
             "deprecated": "experimental stack language"
           },
           "__sardonyx__": {
-            "flags": [
-              "internal"
-            ],
+            "flags": ["internal"],
             "deprecated": "experimental stack language"
           },
           "__onion__": {
-            "flags": [
-              "internal"
-            ],
+            "flags": ["internal"],
             "deprecated": "experimental stack language"
           },
           "__cookiecat__": {
-            "flags": [
-              "internal"
-            ],
+            "flags": ["internal"],
             "deprecated": "experimental stack language"
           }
         }
@@ -1721,10 +1592,7 @@
             "changes": [
               {
                 "change": "inherit",
-                "keys": [
-                  "on_success",
-                  "on_failure"
-                ]
+                "keys": ["on_success", "on_failure"]
               }
             ]
           },
@@ -1747,50 +1615,27 @@
         "title": "Os",
         "type": "string",
         "downcase": true,
-        "enum": [
-          "linux",
-          "osx",
-          "windows",
-          "freebsd",
-          "linux-ppc64le"
-        ],
+        "enum": ["linux", "osx", "windows", "freebsd", "linux-ppc64le"],
         "values": {
           "linux": {
-            "aliases": [
-              "ubuntu"
-            ],
+            "aliases": ["ubuntu"],
             "except": {
-              "language": [
-                "objective-c"
-              ]
+              "language": ["objective-c"]
             }
           },
           "osx": {
-            "aliases": [
-              "mac",
-              "macos",
-              "macosx",
-              "ios"
-            ]
+            "aliases": ["mac", "macos", "macosx", "ios"]
           },
           "windows": {
-            "aliases": [
-              "win"
-            ],
+            "aliases": ["win"],
             "except": {
-              "language": [
-                "objective-c"
-              ]
+              "language": ["objective-c"]
             }
           },
           "freebsd": {
-            "aliases": [
-              "bsd"
-            ],
+            "aliases": ["bsd"],
             "except": {
-              "language": [
-                "objective-c"
-              ]
+              "language": ["objective-c"]
             }
           }
         }
@@ -1825,9 +1670,7 @@
               "type": "string",
               "summary": "OSX image to use for the build environment",
               "only": {
-                "os": [
-                  "osx"
-                ]
+                "os": ["osx"]
               }
             },
             "normal": true
@@ -1835,9 +1678,7 @@
           {
             "type": "string",
             "only": {
-              "os": [
-                "osx"
-              ]
+              "os": ["osx"]
             }
           }
         ]
@@ -1890,10 +1731,7 @@
         "title": "Service",
         "type": "string",
         "downcase": true,
-        "example": [
-          "postgresql",
-          "redis"
-        ],
+        "example": ["postgresql", "redis"],
         "enum": [
           "cassandra",
           "couchdb",
@@ -1907,34 +1745,25 @@
           "rabbitmq",
           "redis",
           "riak",
-          "xvfb"
+          "xvfb",
+          "cri-dockerd"
         ],
         "values": {
           "memcached": {
-            "aliases": [
-              "memcache"
-            ]
+            "aliases": ["memcache"]
           },
           "postgresql": {
-            "aliases": [
-              "postgres"
-            ]
+            "aliases": ["postgres"]
           },
           "rabbitmq": {
-            "aliases": [
-              "rabbitmq-server"
-            ]
+            "aliases": ["rabbitmq-server"]
           },
           "redis": {
-            "aliases": [
-              "redis-server"
-            ]
+            "aliases": ["redis-server"]
           },
           "xvfb": {
             "only": {
-              "dist": [
-                "xenial"
-              ]
+              "dist": ["xenial"]
             }
           }
         }
@@ -1962,10 +1791,7 @@
         "type": "string",
         "summary": "Build environment stack",
         "downcase": true,
-        "flags": [
-          "edge",
-          "internal"
-        ],
+        "flags": ["edge", "internal"],
         "enum": [
           "connie",
           "amethyst",
@@ -2219,10 +2045,7 @@
                       "properties": {
                         "kv_api_ver": {
                           "type": "string",
-                          "enum": [
-                            "kv2",
-                            "kv1"
-                          ],
+                          "enum": ["kv2", "kv1"],
                           "downcase": true,
                           "defaults": [
                             {
@@ -2253,9 +2076,7 @@
                                       }
                                     },
                                     "additionalProperties": false,
-                                    "required": [
-                                      "name"
-                                    ]
+                                    "required": ["name"]
                                   }
                                 ]
                               },
@@ -2272,9 +2093,7 @@
                                 }
                               },
                               "additionalProperties": false,
-                              "required": [
-                                "name"
-                              ]
+                              "required": ["name"]
                             }
                           ]
                         }
@@ -2293,10 +2112,7 @@
                 "properties": {
                   "kv_api_ver": {
                     "type": "string",
-                    "enum": [
-                      "kv2",
-                      "kv1"
-                    ],
+                    "enum": ["kv2", "kv1"],
                     "downcase": true,
                     "defaults": [
                       {
@@ -2327,9 +2143,7 @@
                                 }
                               },
                               "additionalProperties": false,
-                              "required": [
-                                "name"
-                              ]
+                              "required": ["name"]
                             }
                           ]
                         },
@@ -2346,9 +2160,7 @@
                           }
                         },
                         "additionalProperties": false,
-                        "required": [
-                          "name"
-                        ]
+                        "required": ["name"]
                       }
                     ]
                   }
@@ -2359,10 +2171,7 @@
           }
         },
         "additionalProperties": false,
-        "required": [
-          "api_url",
-          "token"
-        ]
+        "required": ["api_url", "token"]
       },
       "version": {
         "$id": "version",
@@ -2377,17 +2186,10 @@
         "title": "Virtualization",
         "type": "string",
         "summary": "Build environment virtualization",
-        "aliases": [
-          "virtualization"
-        ],
-        "flags": [
-          "internal"
-        ],
+        "aliases": ["virtualization"],
+        "flags": ["internal"],
         "downcase": true,
-        "enum": [
-          "lxd",
-          "vm"
-        ]
+        "enum": ["lxd", "vm"]
       },
       "vm": {
         "$id": "vm",
@@ -2397,12 +2199,7 @@
         "properties": {
           "size": {
             "type": "string",
-            "enum": [
-              "medium",
-              "large",
-              "x-large",
-              "2x-large"
-            ]
+            "enum": ["medium", "large", "x-large", "2x-large"]
           }
         },
         "additionalProperties": false,
@@ -2422,9 +2219,7 @@
             "properties": {
               "name": {
                 "type": "string",
-                "flags": [
-                  "unique"
-                ]
+                "flags": ["unique"]
               },
               "paths": {
                 "$ref": "#/definitions/type/strs"
@@ -2435,9 +2230,7 @@
           },
           "use": {
             "$ref": "#/definitions/type/strs",
-            "flags": [
-              "unique"
-            ]
+            "flags": ["unique"]
           }
         },
         "additionalProperties": false,
@@ -2459,9 +2252,7 @@
             "properties": {
               "packages": {
                 "$ref": "#/definitions/type/strs",
-                "aliases": [
-                  "package"
-                ],
+                "aliases": ["package"],
                 "summary": "Package names",
                 "example": "cmake"
               },
@@ -2520,9 +2311,7 @@
                     "type": "string"
                   }
                 ],
-                "aliases": [
-                  "source"
-                ],
+                "aliases": ["source"],
                 "summary": "Package sources",
                 "example": "ubuntu-toolchain-r-test"
               },
@@ -2612,9 +2401,7 @@
               },
               "region": {
                 "type": "string",
-                "aliases": [
-                  "s3_region"
-                ],
+                "aliases": ["s3_region"],
                 "summary": "The S3 region"
               },
               "paths": {
@@ -2789,9 +2576,7 @@
                       "key": "name"
                     },
                     "normal": true,
-                    "required": [
-                      "name"
-                    ]
+                    "required": ["name"]
                   },
                   {
                     "type": "string"
@@ -2917,9 +2702,7 @@
             "properties": {
               "packages": {
                 "$ref": "#/definitions/type/strs",
-                "aliases": [
-                  "package"
-                ],
+                "aliases": ["package"],
                 "summary": "Package names",
                 "example": "cmake"
               },
@@ -3136,16 +2919,12 @@
               },
               "provider": {
                 "type": "string",
-                "enum": [
-                  "anynines"
-                ],
+                "enum": ["anynines"],
                 "strict": true
               },
               "on": {
                 "$ref": "#/definitions/deploy/conditions",
-                "aliases": [
-                  "true"
-                ]
+                "aliases": ["true"]
               },
               "run": {
                 "$ref": "#/definitions/type/strs"
@@ -3168,19 +2947,13 @@
             "normal": true,
             "prefix": {
               "key": "provider",
-              "only": [
-                "str"
-              ]
+              "only": ["str"]
             },
-            "required": [
-              "provider"
-            ]
+            "required": ["provider"]
           },
           {
             "type": "string",
-            "enum": [
-              "anynines"
-            ],
+            "enum": ["anynines"],
             "strict": true
           }
         ],
@@ -3211,16 +2984,12 @@
               },
               "provider": {
                 "type": "string",
-                "enum": [
-                  "azure_web_apps"
-                ],
+                "enum": ["azure_web_apps"],
                 "strict": true
               },
               "on": {
                 "$ref": "#/definitions/deploy/conditions",
-                "aliases": [
-                  "true"
-                ]
+                "aliases": ["true"]
               },
               "run": {
                 "$ref": "#/definitions/type/strs"
@@ -3243,19 +3012,13 @@
             "normal": true,
             "prefix": {
               "key": "provider",
-              "only": [
-                "str"
-              ]
+              "only": ["str"]
             },
-            "required": [
-              "provider"
-            ]
+            "required": ["provider"]
           },
           {
             "type": "string",
-            "enum": [
-              "azure_web_apps"
-            ],
+            "enum": ["azure_web_apps"],
             "strict": true
           }
         ],
@@ -3286,16 +3049,12 @@
               },
               "provider": {
                 "type": "string",
-                "enum": [
-                  "bintray"
-                ],
+                "enum": ["bintray"],
                 "strict": true
               },
               "on": {
                 "$ref": "#/definitions/deploy/conditions",
-                "aliases": [
-                  "true"
-                ]
+                "aliases": ["true"]
               },
               "run": {
                 "$ref": "#/definitions/type/strs"
@@ -3318,19 +3077,13 @@
             "normal": true,
             "prefix": {
               "key": "provider",
-              "only": [
-                "str"
-              ]
+              "only": ["str"]
             },
-            "required": [
-              "provider"
-            ]
+            "required": ["provider"]
           },
           {
             "type": "string",
-            "enum": [
-              "bintray"
-            ],
+            "enum": ["bintray"],
             "strict": true
           }
         ],
@@ -3379,16 +3132,12 @@
               },
               "provider": {
                 "type": "string",
-                "enum": [
-                  "bluemixcloudfoundry"
-                ],
+                "enum": ["bluemixcloudfoundry"],
                 "strict": true
               },
               "on": {
                 "$ref": "#/definitions/deploy/conditions",
-                "aliases": [
-                  "true"
-                ]
+                "aliases": ["true"]
               },
               "run": {
                 "$ref": "#/definitions/type/strs"
@@ -3411,19 +3160,13 @@
             "normal": true,
             "prefix": {
               "key": "provider",
-              "only": [
-                "str"
-              ]
+              "only": ["str"]
             },
-            "required": [
-              "provider"
-            ]
+            "required": ["provider"]
           },
           {
             "type": "string",
-            "enum": [
-              "bluemixcloudfoundry"
-            ],
+            "enum": ["bluemixcloudfoundry"],
             "strict": true
           }
         ],
@@ -3445,9 +3188,7 @@
               },
               "config_file": {
                 "type": "string",
-                "aliases": [
-                  "configfile"
-                ]
+                "aliases": ["configfile"]
               },
               "payload": {
                 "type": "string"
@@ -3466,16 +3207,12 @@
               },
               "provider": {
                 "type": "string",
-                "enum": [
-                  "boxfuse"
-                ],
+                "enum": ["boxfuse"],
                 "strict": true
               },
               "on": {
                 "$ref": "#/definitions/deploy/conditions",
-                "aliases": [
-                  "true"
-                ]
+                "aliases": ["true"]
               },
               "run": {
                 "$ref": "#/definitions/type/strs"
@@ -3498,19 +3235,13 @@
             "normal": true,
             "prefix": {
               "key": "provider",
-              "only": [
-                "str"
-              ]
+              "only": ["str"]
             },
-            "required": [
-              "provider"
-            ]
+            "required": ["provider"]
           },
           {
             "type": "string",
-            "enum": [
-              "boxfuse"
-            ],
+            "enum": ["boxfuse"],
             "strict": true
           }
         ],
@@ -3546,16 +3277,12 @@
               },
               "provider": {
                 "type": "string",
-                "enum": [
-                  "cargo"
-                ],
+                "enum": ["cargo"],
                 "strict": true
               },
               "on": {
                 "$ref": "#/definitions/deploy/conditions",
-                "aliases": [
-                  "true"
-                ]
+                "aliases": ["true"]
               },
               "run": {
                 "$ref": "#/definitions/type/strs"
@@ -3578,19 +3305,13 @@
             "normal": true,
             "prefix": {
               "key": "provider",
-              "only": [
-                "str"
-              ]
+              "only": ["str"]
             },
-            "required": [
-              "provider"
-            ]
+            "required": ["provider"]
           },
           {
             "type": "string",
-            "enum": [
-              "cargo"
-            ],
+            "enum": ["cargo"],
             "strict": true
           }
         ],
@@ -3611,31 +3332,23 @@
               },
               "name": {
                 "type": "string",
-                "aliases": [
-                  "cookbook_name"
-                ]
+                "aliases": ["cookbook_name"]
               },
               "category": {
                 "type": "string",
-                "aliases": [
-                  "cookbook_category"
-                ]
+                "aliases": ["cookbook_category"]
               },
               "dir": {
                 "type": "string"
               },
               "provider": {
                 "type": "string",
-                "enum": [
-                  "chef_supermarket"
-                ],
+                "enum": ["chef_supermarket"],
                 "strict": true
               },
               "on": {
                 "$ref": "#/definitions/deploy/conditions",
-                "aliases": [
-                  "true"
-                ]
+                "aliases": ["true"]
               },
               "run": {
                 "$ref": "#/definitions/type/strs"
@@ -3658,19 +3371,13 @@
             "normal": true,
             "prefix": {
               "key": "provider",
-              "only": [
-                "str"
-              ]
+              "only": ["str"]
             },
-            "required": [
-              "provider"
-            ]
+            "required": ["provider"]
           },
           {
             "type": "string",
-            "enum": [
-              "chef_supermarket"
-            ],
+            "enum": ["chef_supermarket"],
             "strict": true
           }
         ],
@@ -3688,16 +3395,12 @@
               },
               "provider": {
                 "type": "string",
-                "enum": [
-                  "cloud66"
-                ],
+                "enum": ["cloud66"],
                 "strict": true
               },
               "on": {
                 "$ref": "#/definitions/deploy/conditions",
-                "aliases": [
-                  "true"
-                ]
+                "aliases": ["true"]
               },
               "run": {
                 "$ref": "#/definitions/type/strs"
@@ -3720,19 +3423,13 @@
             "normal": true,
             "prefix": {
               "key": "provider",
-              "only": [
-                "str"
-              ]
+              "only": ["str"]
             },
-            "required": [
-              "provider"
-            ]
+            "required": ["provider"]
           },
           {
             "type": "string",
-            "enum": [
-              "cloud66"
-            ],
+            "enum": ["cloud66"],
             "strict": true
           }
         ],
@@ -3766,16 +3463,12 @@
               },
               "provider": {
                 "type": "string",
-                "enum": [
-                  "cloudfiles"
-                ],
+                "enum": ["cloudfiles"],
                 "strict": true
               },
               "on": {
                 "$ref": "#/definitions/deploy/conditions",
-                "aliases": [
-                  "true"
-                ]
+                "aliases": ["true"]
               },
               "run": {
                 "$ref": "#/definitions/type/strs"
@@ -3798,19 +3491,13 @@
             "normal": true,
             "prefix": {
               "key": "provider",
-              "only": [
-                "str"
-              ]
+              "only": ["str"]
             },
-            "required": [
-              "provider"
-            ]
+            "required": ["provider"]
           },
           {
             "type": "string",
-            "enum": [
-              "cloudfiles"
-            ],
+            "enum": ["cloudfiles"],
             "strict": true
           }
         ],
@@ -3871,16 +3558,12 @@
               },
               "provider": {
                 "type": "string",
-                "enum": [
-                  "cloudformation"
-                ],
+                "enum": ["cloudformation"],
                 "strict": true
               },
               "on": {
                 "$ref": "#/definitions/deploy/conditions",
-                "aliases": [
-                  "true"
-                ]
+                "aliases": ["true"]
               },
               "run": {
                 "$ref": "#/definitions/type/strs"
@@ -3903,19 +3586,13 @@
             "normal": true,
             "prefix": {
               "key": "provider",
-              "only": [
-                "str"
-              ]
+              "only": ["str"]
             },
-            "required": [
-              "provider"
-            ]
+            "required": ["provider"]
           },
           {
             "type": "string",
-            "enum": [
-              "cloudformation"
-            ],
+            "enum": ["cloudformation"],
             "strict": true
           }
         ],
@@ -3964,16 +3641,12 @@
               },
               "provider": {
                 "type": "string",
-                "enum": [
-                  "cloudfoundry"
-                ],
+                "enum": ["cloudfoundry"],
                 "strict": true
               },
               "on": {
                 "$ref": "#/definitions/deploy/conditions",
-                "aliases": [
-                  "true"
-                ]
+                "aliases": ["true"]
               },
               "run": {
                 "$ref": "#/definitions/type/strs"
@@ -3996,19 +3669,13 @@
             "normal": true,
             "prefix": {
               "key": "provider",
-              "only": [
-                "str"
-              ]
+              "only": ["str"]
             },
-            "required": [
-              "provider"
-            ]
+            "required": ["provider"]
           },
           {
             "type": "string",
-            "enum": [
-              "cloudfoundry"
-            ],
+            "enum": ["cloudfoundry"],
             "strict": true
           }
         ],
@@ -4036,10 +3703,7 @@
               },
               "revision_type": {
                 "type": "string",
-                "enum": [
-                  "s3",
-                  "github"
-                ],
+                "enum": ["s3", "github"],
                 "ignore_case": true
               },
               "commit_id": {
@@ -4056,11 +3720,7 @@
               },
               "file_exists_behavior": {
                 "type": "string",
-                "enum": [
-                  "disallow",
-                  "overwrite",
-                  "retain"
-                ],
+                "enum": ["disallow", "overwrite", "retain"],
                 "ignore_case": true
               },
               "wait_until_deployed": {
@@ -4080,16 +3740,12 @@
               },
               "provider": {
                 "type": "string",
-                "enum": [
-                  "codedeploy"
-                ],
+                "enum": ["codedeploy"],
                 "strict": true
               },
               "on": {
                 "$ref": "#/definitions/deploy/conditions",
-                "aliases": [
-                  "true"
-                ]
+                "aliases": ["true"]
               },
               "run": {
                 "$ref": "#/definitions/type/strs"
@@ -4112,19 +3768,13 @@
             "normal": true,
             "prefix": {
               "key": "provider",
-              "only": [
-                "str"
-              ]
+              "only": ["str"]
             },
-            "required": [
-              "provider"
-            ]
+            "required": ["provider"]
           },
           {
             "type": "string",
-            "enum": [
-              "codedeploy"
-            ],
+            "enum": ["codedeploy"],
             "strict": true
           }
         ],
@@ -4161,9 +3811,7 @@
                 "additionalProperties": false,
                 "prefix": {
                   "key": "branch",
-                  "only": [
-                    "str"
-                  ]
+                  "only": ["str"]
                 }
               },
               {
@@ -4222,16 +3870,12 @@
               },
               "provider": {
                 "type": "string",
-                "enum": [
-                  "convox"
-                ],
+                "enum": ["convox"],
                 "strict": true
               },
               "on": {
                 "$ref": "#/definitions/deploy/conditions",
-                "aliases": [
-                  "true"
-                ]
+                "aliases": ["true"]
               },
               "run": {
                 "$ref": "#/definitions/type/strs"
@@ -4254,22 +3898,13 @@
             "normal": true,
             "prefix": {
               "key": "provider",
-              "only": [
-                "str"
-              ]
+              "only": ["str"]
             },
-            "required": [
-              "app",
-              "rack",
-              "password",
-              "provider"
-            ]
+            "required": ["app", "rack", "password", "provider"]
           },
           {
             "type": "string",
-            "enum": [
-              "convox"
-            ],
+            "enum": ["convox"],
             "strict": true
           }
         ],
@@ -4290,16 +3925,12 @@
               },
               "provider": {
                 "type": "string",
-                "enum": [
-                  "datica"
-                ],
+                "enum": ["datica"],
                 "strict": true
               },
               "on": {
                 "$ref": "#/definitions/deploy/conditions",
-                "aliases": [
-                  "true"
-                ]
+                "aliases": ["true"]
               },
               "run": {
                 "$ref": "#/definitions/type/strs"
@@ -4322,19 +3953,13 @@
             "normal": true,
             "prefix": {
               "key": "provider",
-              "only": [
-                "str"
-              ]
+              "only": ["str"]
             },
-            "required": [
-              "provider"
-            ]
+            "required": ["provider"]
           },
           {
             "type": "string",
-            "enum": [
-              "datica"
-            ],
+            "enum": ["datica"],
             "strict": true
           }
         ],
@@ -4383,9 +4008,7 @@
               },
               "bucket": {
                 "type": "string",
-                "aliases": [
-                  "bucket_name"
-                ]
+                "aliases": ["bucket_name"]
               },
               "app": {
                 "anyOf": [
@@ -4440,16 +4063,12 @@
               },
               "provider": {
                 "type": "string",
-                "enum": [
-                  "elasticbeanstalk"
-                ],
+                "enum": ["elasticbeanstalk"],
                 "strict": true
               },
               "on": {
                 "$ref": "#/definitions/deploy/conditions",
-                "aliases": [
-                  "true"
-                ]
+                "aliases": ["true"]
               },
               "run": {
                 "$ref": "#/definitions/type/strs"
@@ -4472,19 +4091,13 @@
             "normal": true,
             "prefix": {
               "key": "provider",
-              "only": [
-                "str"
-              ]
+              "only": ["str"]
             },
-            "required": [
-              "provider"
-            ]
+            "required": ["provider"]
           },
           {
             "type": "string",
-            "enum": [
-              "elasticbeanstalk"
-            ],
+            "enum": ["elasticbeanstalk"],
             "strict": true
           }
         ],
@@ -4540,25 +4153,19 @@
                     "type": "string"
                   }
                 ],
-                "aliases": [
-                  "environment"
-                ]
+                "aliases": ["environment"]
               },
               "migrate": {
                 "type": "string"
               },
               "provider": {
                 "type": "string",
-                "enum": [
-                  "engineyard"
-                ],
+                "enum": ["engineyard"],
                 "strict": true
               },
               "on": {
                 "$ref": "#/definitions/deploy/conditions",
-                "aliases": [
-                  "true"
-                ]
+                "aliases": ["true"]
               },
               "run": {
                 "$ref": "#/definitions/type/strs"
@@ -4581,19 +4188,13 @@
             "normal": true,
             "prefix": {
               "key": "provider",
-              "only": [
-                "str"
-              ]
+              "only": ["str"]
             },
-            "required": [
-              "provider"
-            ]
+            "required": ["provider"]
           },
           {
             "type": "string",
-            "enum": [
-              "engineyard"
-            ],
+            "enum": ["engineyard"],
             "strict": true
           }
         ],
@@ -4623,16 +4224,12 @@
               },
               "provider": {
                 "type": "string",
-                "enum": [
-                  "firebase"
-                ],
+                "enum": ["firebase"],
                 "strict": true
               },
               "on": {
                 "$ref": "#/definitions/deploy/conditions",
-                "aliases": [
-                  "true"
-                ]
+                "aliases": ["true"]
               },
               "run": {
                 "$ref": "#/definitions/type/strs"
@@ -4655,19 +4252,13 @@
             "normal": true,
             "prefix": {
               "key": "provider",
-              "only": [
-                "str"
-              ]
+              "only": ["str"]
             },
-            "required": [
-              "provider"
-            ]
+            "required": ["provider"]
           },
           {
             "type": "string",
-            "enum": [
-              "firebase"
-            ],
+            "enum": ["firebase"],
             "strict": true
           }
         ],
@@ -4686,16 +4277,12 @@
               },
               "provider": {
                 "type": "string",
-                "enum": [
-                  "flynn"
-                ],
+                "enum": ["flynn"],
                 "strict": true
               },
               "on": {
                 "$ref": "#/definitions/deploy/conditions",
-                "aliases": [
-                  "true"
-                ]
+                "aliases": ["true"]
               },
               "run": {
                 "$ref": "#/definitions/type/strs"
@@ -4718,19 +4305,13 @@
             "normal": true,
             "prefix": {
               "key": "provider",
-              "only": [
-                "str"
-              ]
+              "only": ["str"]
             },
-            "required": [
-              "provider"
-            ]
+            "required": ["provider"]
           },
           {
             "type": "string",
-            "enum": [
-              "flynn"
-            ],
+            "enum": ["flynn"],
             "strict": true
           }
         ],
@@ -4777,16 +4358,12 @@
               },
               "provider": {
                 "type": "string",
-                "enum": [
-                  "gae"
-                ],
+                "enum": ["gae"],
                 "strict": true
               },
               "on": {
                 "$ref": "#/definitions/deploy/conditions",
-                "aliases": [
-                  "true"
-                ]
+                "aliases": ["true"]
               },
               "run": {
                 "$ref": "#/definitions/type/strs"
@@ -4809,19 +4386,13 @@
             "normal": true,
             "prefix": {
               "key": "provider",
-              "only": [
-                "str"
-              ]
+              "only": ["str"]
             },
-            "required": [
-              "provider"
-            ]
+            "required": ["provider"]
           },
           {
             "type": "string",
-            "enum": [
-              "gae"
-            ],
+            "enum": ["gae"],
             "strict": true
           }
         ],
@@ -4867,16 +4438,12 @@
               },
               "provider": {
                 "type": "string",
-                "enum": [
-                  "gcs"
-                ],
+                "enum": ["gcs"],
                 "strict": true
               },
               "on": {
                 "$ref": "#/definitions/deploy/conditions",
-                "aliases": [
-                  "true"
-                ]
+                "aliases": ["true"]
               },
               "run": {
                 "$ref": "#/definitions/type/strs"
@@ -4899,19 +4466,13 @@
             "normal": true,
             "prefix": {
               "key": "provider",
-              "only": [
-                "str"
-              ]
+              "only": ["str"]
             },
-            "required": [
-              "provider"
-            ]
+            "required": ["provider"]
           },
           {
             "type": "string",
-            "enum": [
-              "gcs"
-            ],
+            "enum": ["gcs"],
             "strict": true
           }
         ],
@@ -4926,9 +4487,7 @@
             "properties": {
               "token": {
                 "$ref": "#/definitions/type/secure",
-                "aliases": [
-                  "github_token"
-                ]
+                "aliases": ["github_token"]
               },
               "deploy_key": {
                 "type": "string"
@@ -4971,16 +4530,12 @@
               },
               "provider": {
                 "type": "string",
-                "enum": [
-                  "git_push"
-                ],
+                "enum": ["git_push"],
                 "strict": true
               },
               "on": {
                 "$ref": "#/definitions/deploy/conditions",
-                "aliases": [
-                  "true"
-                ]
+                "aliases": ["true"]
               },
               "run": {
                 "$ref": "#/definitions/type/strs"
@@ -5003,19 +4558,13 @@
             "normal": true,
             "prefix": {
               "key": "provider",
-              "only": [
-                "str"
-              ]
+              "only": ["str"]
             },
-            "required": [
-              "provider"
-            ]
+            "required": ["provider"]
           },
           {
             "type": "string",
-            "enum": [
-              "git_push"
-            ],
+            "enum": ["git_push"],
             "strict": true
           }
         ],
@@ -5045,16 +4594,12 @@
               },
               "provider": {
                 "type": "string",
-                "enum": [
-                  "gleis"
-                ],
+                "enum": ["gleis"],
                 "strict": true
               },
               "on": {
                 "$ref": "#/definitions/deploy/conditions",
-                "aliases": [
-                  "true"
-                ]
+                "aliases": ["true"]
               },
               "run": {
                 "$ref": "#/definitions/type/strs"
@@ -5077,19 +4622,13 @@
             "normal": true,
             "prefix": {
               "key": "provider",
-              "only": [
-                "str"
-              ]
+              "only": ["str"]
             },
-            "required": [
-              "provider"
-            ]
+            "required": ["provider"]
           },
           {
             "type": "string",
-            "enum": [
-              "gleis"
-            ],
+            "enum": ["gleis"],
             "strict": true
           }
         ],
@@ -5114,16 +4653,12 @@
               },
               "provider": {
                 "type": "string",
-                "enum": [
-                  "hackage"
-                ],
+                "enum": ["hackage"],
                 "strict": true
               },
               "on": {
                 "$ref": "#/definitions/deploy/conditions",
-                "aliases": [
-                  "true"
-                ]
+                "aliases": ["true"]
               },
               "run": {
                 "$ref": "#/definitions/type/strs"
@@ -5146,19 +4681,13 @@
             "normal": true,
             "prefix": {
               "key": "provider",
-              "only": [
-                "str"
-              ]
+              "only": ["str"]
             },
-            "required": [
-              "provider"
-            ]
+            "required": ["provider"]
           },
           {
             "type": "string",
-            "enum": [
-              "hackage"
-            ],
+            "enum": ["hackage"],
             "strict": true
           }
         ],
@@ -5192,16 +4721,12 @@
               },
               "provider": {
                 "type": "string",
-                "enum": [
-                  "hephy"
-                ],
+                "enum": ["hephy"],
                 "strict": true
               },
               "on": {
                 "$ref": "#/definitions/deploy/conditions",
-                "aliases": [
-                  "true"
-                ]
+                "aliases": ["true"]
               },
               "run": {
                 "$ref": "#/definitions/type/strs"
@@ -5224,19 +4749,13 @@
             "normal": true,
             "prefix": {
               "key": "provider",
-              "only": [
-                "str"
-              ]
+              "only": ["str"]
             },
-            "required": [
-              "provider"
-            ]
+            "required": ["provider"]
           },
           {
             "type": "string",
-            "enum": [
-              "hephy"
-            ],
+            "enum": ["hephy"],
             "strict": true
           }
         ],
@@ -5256,10 +4775,7 @@
                     "value": "api"
                   }
                 ],
-                "enum": [
-                  "api",
-                  "git"
-                ]
+                "enum": ["api", "git"]
               },
               "api_key": {
                 "anyOf": [
@@ -5278,9 +4794,7 @@
               },
               "username": {
                 "$ref": "#/definitions/type/secure",
-                "aliases": [
-                  "user"
-                ]
+                "aliases": ["user"]
               },
               "password": {
                 "$ref": "#/definitions/type/secure"
@@ -5305,16 +4819,12 @@
               },
               "provider": {
                 "type": "string",
-                "enum": [
-                  "heroku"
-                ],
+                "enum": ["heroku"],
                 "strict": true
               },
               "on": {
                 "$ref": "#/definitions/deploy/conditions",
-                "aliases": [
-                  "true"
-                ]
+                "aliases": ["true"]
               },
               "run": {
                 "$ref": "#/definitions/type/strs"
@@ -5337,19 +4847,13 @@
             "normal": true,
             "prefix": {
               "key": "provider",
-              "only": [
-                "str"
-              ]
+              "only": ["str"]
             },
-            "required": [
-              "provider"
-            ]
+            "required": ["provider"]
           },
           {
             "type": "string",
-            "enum": [
-              "heroku"
-            ],
+            "enum": ["heroku"],
             "strict": true
           }
         ],
@@ -5404,9 +4908,7 @@
               },
               "environment": {
                 "$ref": "#/definitions/type/secures",
-                "aliases": [
-                  "environment_variables"
-                ]
+                "aliases": ["environment_variables"]
               },
               "subnet_ids": {
                 "$ref": "#/definitions/type/strs"
@@ -5419,10 +4921,7 @@
               },
               "tracing_mode": {
                 "type": "string",
-                "enum": [
-                  "Active",
-                  "PassThrough"
-                ]
+                "enum": ["Active", "PassThrough"]
               },
               "layers": {
                 "$ref": "#/definitions/type/strs"
@@ -5438,16 +4937,12 @@
               },
               "provider": {
                 "type": "string",
-                "enum": [
-                  "lambda"
-                ],
+                "enum": ["lambda"],
                 "strict": true
               },
               "on": {
                 "$ref": "#/definitions/deploy/conditions",
-                "aliases": [
-                  "true"
-                ]
+                "aliases": ["true"]
               },
               "run": {
                 "$ref": "#/definitions/type/strs"
@@ -5470,19 +4965,13 @@
             "normal": true,
             "prefix": {
               "key": "provider",
-              "only": [
-                "str"
-              ]
+              "only": ["str"]
             },
-            "required": [
-              "provider"
-            ]
+            "required": ["provider"]
           },
           {
             "type": "string",
-            "enum": [
-              "lambda"
-            ],
+            "enum": ["lambda"],
             "strict": true
           }
         ],
@@ -5506,16 +4995,12 @@
               },
               "provider": {
                 "type": "string",
-                "enum": [
-                  "launchpad"
-                ],
+                "enum": ["launchpad"],
                 "strict": true
               },
               "on": {
                 "$ref": "#/definitions/deploy/conditions",
-                "aliases": [
-                  "true"
-                ]
+                "aliases": ["true"]
               },
               "run": {
                 "$ref": "#/definitions/type/strs"
@@ -5538,9 +5023,7 @@
             "normal": true,
             "prefix": {
               "key": "provider",
-              "only": [
-                "str"
-              ]
+              "only": ["str"]
             },
             "required": [
               "slug",
@@ -5551,9 +5034,7 @@
           },
           {
             "type": "string",
-            "enum": [
-              "launchpad"
-            ],
+            "enum": ["launchpad"],
             "strict": true
           }
         ],
@@ -5586,16 +5067,12 @@
               },
               "provider": {
                 "type": "string",
-                "enum": [
-                  "netlify"
-                ],
+                "enum": ["netlify"],
                 "strict": true
               },
               "on": {
                 "$ref": "#/definitions/deploy/conditions",
-                "aliases": [
-                  "true"
-                ]
+                "aliases": ["true"]
               },
               "run": {
                 "$ref": "#/definitions/type/strs"
@@ -5618,19 +5095,13 @@
             "normal": true,
             "prefix": {
               "key": "provider",
-              "only": [
-                "str"
-              ]
+              "only": ["str"]
             },
-            "required": [
-              "provider"
-            ]
+            "required": ["provider"]
           },
           {
             "type": "string",
-            "enum": [
-              "netlify"
-            ],
+            "enum": ["netlify"],
             "strict": true
           }
         ],
@@ -5649,16 +5120,11 @@
               },
               "api_token": {
                 "$ref": "#/definitions/type/secure",
-                "aliases": [
-                  "api_key"
-                ]
+                "aliases": ["api_key"]
               },
               "access": {
                 "type": "string",
-                "enum": [
-                  "public",
-                  "private"
-                ]
+                "enum": ["public", "private"]
               },
               "registry": {
                 "type": "string"
@@ -5674,16 +5140,12 @@
               },
               "provider": {
                 "type": "string",
-                "enum": [
-                  "npm"
-                ],
+                "enum": ["npm"],
                 "strict": true
               },
               "on": {
                 "$ref": "#/definitions/deploy/conditions",
-                "aliases": [
-                  "true"
-                ]
+                "aliases": ["true"]
               },
               "run": {
                 "$ref": "#/definitions/type/strs"
@@ -5706,19 +5168,13 @@
             "normal": true,
             "prefix": {
               "key": "provider",
-              "only": [
-                "str"
-              ]
+              "only": ["str"]
             },
-            "required": [
-              "provider"
-            ]
+            "required": ["provider"]
           },
           {
             "type": "string",
-            "enum": [
-              "npm"
-            ],
+            "enum": ["npm"],
             "strict": true
           }
         ],
@@ -5745,16 +5201,12 @@
               },
               "provider": {
                 "type": "string",
-                "enum": [
-                  "openshift"
-                ],
+                "enum": ["openshift"],
                 "strict": true
               },
               "on": {
                 "$ref": "#/definitions/deploy/conditions",
-                "aliases": [
-                  "true"
-                ]
+                "aliases": ["true"]
               },
               "run": {
                 "$ref": "#/definitions/type/strs"
@@ -5777,19 +5229,13 @@
             "normal": true,
             "prefix": {
               "key": "provider",
-              "only": [
-                "str"
-              ]
+              "only": ["str"]
             },
-            "required": [
-              "provider"
-            ]
+            "required": ["provider"]
           },
           {
             "type": "string",
-            "enum": [
-              "openshift"
-            ],
+            "enum": ["openshift"],
             "strict": true
           }
         ],
@@ -5832,22 +5278,16 @@
               },
               "update_on_success": {
                 "type": "boolean",
-                "aliases": [
-                  "update_app_on_success"
-                ]
+                "aliases": ["update_app_on_success"]
               },
               "provider": {
                 "type": "string",
-                "enum": [
-                  "opsworks"
-                ],
+                "enum": ["opsworks"],
                 "strict": true
               },
               "on": {
                 "$ref": "#/definitions/deploy/conditions",
-                "aliases": [
-                  "true"
-                ]
+                "aliases": ["true"]
               },
               "run": {
                 "$ref": "#/definitions/type/strs"
@@ -5870,19 +5310,13 @@
             "normal": true,
             "prefix": {
               "key": "provider",
-              "only": [
-                "str"
-              ]
+              "only": ["str"]
             },
-            "required": [
-              "provider"
-            ]
+            "required": ["provider"]
           },
           {
             "type": "string",
-            "enum": [
-              "opsworks"
-            ],
+            "enum": ["opsworks"],
             "strict": true
           }
         ],
@@ -5928,16 +5362,12 @@
               },
               "provider": {
                 "type": "string",
-                "enum": [
-                  "packagecloud"
-                ],
+                "enum": ["packagecloud"],
                 "strict": true
               },
               "on": {
                 "$ref": "#/definitions/deploy/conditions",
-                "aliases": [
-                  "true"
-                ]
+                "aliases": ["true"]
               },
               "run": {
                 "$ref": "#/definitions/type/strs"
@@ -5960,19 +5390,13 @@
             "normal": true,
             "prefix": {
               "key": "provider",
-              "only": [
-                "str"
-              ]
+              "only": ["str"]
             },
-            "required": [
-              "provider"
-            ]
+            "required": ["provider"]
           },
           {
             "type": "string",
-            "enum": [
-              "packagecloud"
-            ],
+            "enum": ["packagecloud"],
             "strict": true
           }
         ],
@@ -5992,16 +5416,11 @@
                     "value": "git"
                   }
                 ],
-                "enum": [
-                  "api",
-                  "git"
-                ]
+                "enum": ["api", "git"]
               },
               "token": {
                 "$ref": "#/definitions/type/secure",
-                "aliases": [
-                  "github_token"
-                ]
+                "aliases": ["github_token"]
               },
               "deploy_key": {
                 "type": "string"
@@ -6029,9 +5448,7 @@
               },
               "url": {
                 "type": "string",
-                "aliases": [
-                  "github_url"
-                ]
+                "aliases": ["github_url"]
               },
               "keep_history": {
                 "type": "boolean"
@@ -6053,16 +5470,12 @@
               },
               "provider": {
                 "type": "string",
-                "enum": [
-                  "pages"
-                ],
+                "enum": ["pages"],
                 "strict": true
               },
               "on": {
                 "$ref": "#/definitions/deploy/conditions",
-                "aliases": [
-                  "true"
-                ]
+                "aliases": ["true"]
               },
               "run": {
                 "$ref": "#/definitions/type/strs"
@@ -6085,19 +5498,13 @@
             "normal": true,
             "prefix": {
               "key": "provider",
-              "only": [
-                "str"
-              ]
+              "only": ["str"]
             },
-            "required": [
-              "provider"
-            ]
+            "required": ["provider"]
           },
           {
             "type": "string",
-            "enum": [
-              "pages"
-            ],
+            "enum": ["pages"],
             "strict": true
           }
         ],
@@ -6253,9 +5660,7 @@
               "username": {
                 "$ref": "#/definitions/type/secure",
                 "strict": false,
-                "aliases": [
-                  "user"
-                ]
+                "aliases": ["user"]
               },
               "password": {
                 "$ref": "#/definitions/type/secure"
@@ -6265,16 +5670,12 @@
               },
               "provider": {
                 "type": "string",
-                "enum": [
-                  "puppetforge"
-                ],
+                "enum": ["puppetforge"],
                 "strict": true
               },
               "on": {
                 "$ref": "#/definitions/deploy/conditions",
-                "aliases": [
-                  "true"
-                ]
+                "aliases": ["true"]
               },
               "run": {
                 "$ref": "#/definitions/type/strs"
@@ -6297,21 +5698,13 @@
             "normal": true,
             "prefix": {
               "key": "provider",
-              "only": [
-                "str"
-              ]
+              "only": ["str"]
             },
-            "required": [
-              "username",
-              "password",
-              "provider"
-            ]
+            "required": ["username", "password", "provider"]
           },
           {
             "type": "string",
-            "enum": [
-              "puppetforge"
-            ],
+            "enum": ["puppetforge"],
             "strict": true
           }
         ],
@@ -6327,9 +5720,7 @@
               "username": {
                 "$ref": "#/definitions/type/secure",
                 "strict": false,
-                "aliases": [
-                  "user"
-                ]
+                "aliases": ["user"]
               },
               "password": {
                 "$ref": "#/definitions/type/secure"
@@ -6370,16 +5761,12 @@
               },
               "provider": {
                 "type": "string",
-                "enum": [
-                  "pypi"
-                ],
+                "enum": ["pypi"],
                 "strict": true
               },
               "on": {
                 "$ref": "#/definitions/deploy/conditions",
-                "aliases": [
-                  "true"
-                ]
+                "aliases": ["true"]
               },
               "run": {
                 "$ref": "#/definitions/type/strs"
@@ -6402,19 +5789,13 @@
             "normal": true,
             "prefix": {
               "key": "provider",
-              "only": [
-                "str"
-              ]
+              "only": ["str"]
             },
-            "required": [
-              "provider"
-            ]
+            "required": ["provider"]
           },
           {
             "type": "string",
-            "enum": [
-              "pypi"
-            ],
+            "enum": ["pypi"],
             "strict": true
           }
         ],
@@ -6430,18 +5811,14 @@
               "username": {
                 "$ref": "#/definitions/type/secure",
                 "strict": false,
-                "aliases": [
-                  "user"
-                ]
+                "aliases": ["user"]
               },
               "password": {
                 "$ref": "#/definitions/type/secure"
               },
               "token": {
                 "$ref": "#/definitions/type/secure",
-                "aliases": [
-                  "api_key"
-                ]
+                "aliases": ["api_key"]
               },
               "repo": {
                 "type": "string"
@@ -6469,9 +5846,7 @@
               },
               "release_notes": {
                 "type": "string",
-                "aliases": [
-                  "body"
-                ]
+                "aliases": ["body"]
               },
               "release_notes_file": {
                 "type": "string"
@@ -6484,16 +5859,12 @@
               },
               "provider": {
                 "type": "string",
-                "enum": [
-                  "releases"
-                ],
+                "enum": ["releases"],
                 "strict": true
               },
               "on": {
                 "$ref": "#/definitions/deploy/conditions",
-                "aliases": [
-                  "true"
-                ]
+                "aliases": ["true"]
               },
               "run": {
                 "$ref": "#/definitions/type/strs"
@@ -6516,19 +5887,13 @@
             "normal": true,
             "prefix": {
               "key": "provider",
-              "only": [
-                "str"
-              ]
+              "only": ["str"]
             },
-            "required": [
-              "provider"
-            ]
+            "required": ["provider"]
           },
           {
             "type": "string",
-            "enum": [
-              "releases"
-            ],
+            "enum": ["releases"],
             "strict": true
           }
         ],
@@ -6572,9 +5937,7 @@
                     "strict": false
                   }
                 ],
-                "aliases": [
-                  "user"
-                ]
+                "aliases": ["user"]
               },
               "password": {
                 "anyOf": [
@@ -6617,16 +5980,12 @@
               },
               "provider": {
                 "type": "string",
-                "enum": [
-                  "rubygems"
-                ],
+                "enum": ["rubygems"],
                 "strict": true
               },
               "on": {
                 "$ref": "#/definitions/deploy/conditions",
-                "aliases": [
-                  "true"
-                ]
+                "aliases": ["true"]
               },
               "run": {
                 "$ref": "#/definitions/type/strs"
@@ -6649,19 +6008,13 @@
             "normal": true,
             "prefix": {
               "key": "provider",
-              "only": [
-                "str"
-              ]
+              "only": ["str"]
             },
-            "required": [
-              "provider"
-            ]
+            "required": ["provider"]
           },
           {
             "type": "string",
-            "enum": [
-              "rubygems"
-            ],
+            "enum": ["rubygems"],
             "strict": true
           }
         ],
@@ -6740,16 +6093,12 @@
               },
               "provider": {
                 "type": "string",
-                "enum": [
-                  "s3"
-                ],
+                "enum": ["s3"],
                 "strict": true
               },
               "on": {
                 "$ref": "#/definitions/deploy/conditions",
-                "aliases": [
-                  "true"
-                ]
+                "aliases": ["true"]
               },
               "run": {
                 "$ref": "#/definitions/type/strs"
@@ -6772,19 +6121,13 @@
             "normal": true,
             "prefix": {
               "key": "provider",
-              "only": [
-                "str"
-              ]
+              "only": ["str"]
             },
-            "required": [
-              "provider"
-            ]
+            "required": ["provider"]
           },
           {
             "type": "string",
-            "enum": [
-              "s3"
-            ],
+            "enum": ["s3"],
             "strict": true
           }
         ],
@@ -6799,16 +6142,12 @@
             "properties": {
               "api_token": {
                 "$ref": "#/definitions/type/secure",
-                "aliases": [
-                  "api_key"
-                ]
+                "aliases": ["api_key"]
               },
               "username": {
                 "$ref": "#/definitions/type/secure",
                 "strict": false,
-                "aliases": [
-                  "user"
-                ]
+                "aliases": ["user"]
               },
               "password": {
                 "$ref": "#/definitions/type/secure"
@@ -6830,16 +6169,12 @@
               },
               "provider": {
                 "type": "string",
-                "enum": [
-                  "scalingo"
-                ],
+                "enum": ["scalingo"],
                 "strict": true
               },
               "on": {
                 "$ref": "#/definitions/deploy/conditions",
-                "aliases": [
-                  "true"
-                ]
+                "aliases": ["true"]
               },
               "run": {
                 "$ref": "#/definitions/type/strs"
@@ -6862,19 +6197,13 @@
             "normal": true,
             "prefix": {
               "key": "provider",
-              "only": [
-                "str"
-              ]
+              "only": ["str"]
             },
-            "required": [
-              "provider"
-            ]
+            "required": ["provider"]
           },
           {
             "type": "string",
-            "enum": [
-              "scalingo"
-            ],
+            "enum": ["scalingo"],
             "strict": true
           }
         ],
@@ -6892,16 +6221,12 @@
               },
               "provider": {
                 "type": "string",
-                "enum": [
-                  "script"
-                ],
+                "enum": ["script"],
                 "strict": true
               },
               "on": {
                 "$ref": "#/definitions/deploy/conditions",
-                "aliases": [
-                  "true"
-                ]
+                "aliases": ["true"]
               },
               "run": {
                 "$ref": "#/definitions/type/strs"
@@ -6924,19 +6249,13 @@
             "normal": true,
             "prefix": {
               "key": "provider",
-              "only": [
-                "str"
-              ]
+              "only": ["str"]
             },
-            "required": [
-              "provider"
-            ]
+            "required": ["provider"]
           },
           {
             "type": "string",
-            "enum": [
-              "script"
-            ],
+            "enum": ["script"],
             "strict": true
           }
         ],
@@ -6964,16 +6283,12 @@
               },
               "provider": {
                 "type": "string",
-                "enum": [
-                  "snap"
-                ],
+                "enum": ["snap"],
                 "strict": true
               },
               "on": {
                 "$ref": "#/definitions/deploy/conditions",
-                "aliases": [
-                  "true"
-                ]
+                "aliases": ["true"]
               },
               "run": {
                 "$ref": "#/definitions/type/strs"
@@ -6992,19 +6307,13 @@
             "normal": true,
             "prefix": {
               "key": "provider",
-              "only": [
-                "str"
-              ]
+              "only": ["str"]
             },
-            "required": [
-              "provider"
-            ]
+            "required": ["provider"]
           },
           {
             "type": "string",
-            "enum": [
-              "snap"
-            ],
+            "enum": ["snap"],
             "strict": true
           }
         ],
@@ -7032,16 +6341,12 @@
               },
               "provider": {
                 "type": "string",
-                "enum": [
-                  "surge"
-                ],
+                "enum": ["surge"],
                 "strict": true
               },
               "on": {
                 "$ref": "#/definitions/deploy/conditions",
-                "aliases": [
-                  "true"
-                ]
+                "aliases": ["true"]
               },
               "run": {
                 "$ref": "#/definitions/type/strs"
@@ -7064,19 +6369,13 @@
             "normal": true,
             "prefix": {
               "key": "provider",
-              "only": [
-                "str"
-              ]
+              "only": ["str"]
             },
-            "required": [
-              "provider"
-            ]
+            "required": ["provider"]
           },
           {
             "type": "string",
-            "enum": [
-              "surge"
-            ],
+            "enum": ["surge"],
             "strict": true
           }
         ],
@@ -7112,16 +6411,12 @@
               },
               "provider": {
                 "type": "string",
-                "enum": [
-                  "testfairy"
-                ],
+                "enum": ["testfairy"],
                 "strict": true
               },
               "on": {
                 "$ref": "#/definitions/deploy/conditions",
-                "aliases": [
-                  "true"
-                ]
+                "aliases": ["true"]
               },
               "run": {
                 "$ref": "#/definitions/type/strs"
@@ -7144,19 +6439,13 @@
             "normal": true,
             "prefix": {
               "key": "provider",
-              "only": [
-                "str"
-              ]
+              "only": ["str"]
             },
-            "required": [
-              "provider"
-            ]
+            "required": ["provider"]
           },
           {
             "type": "string",
-            "enum": [
-              "testfairy"
-            ],
+            "enum": ["testfairy"],
             "strict": true
           }
         ],
@@ -7187,16 +6476,12 @@
               },
               "provider": {
                 "type": "string",
-                "enum": [
-                  "transifex"
-                ],
+                "enum": ["transifex"],
                 "strict": true
               },
               "on": {
                 "$ref": "#/definitions/deploy/conditions",
-                "aliases": [
-                  "true"
-                ]
+                "aliases": ["true"]
               },
               "run": {
                 "$ref": "#/definitions/type/strs"
@@ -7219,19 +6504,13 @@
             "normal": true,
             "prefix": {
               "key": "provider",
-              "only": [
-                "str"
-              ]
+              "only": ["str"]
             },
-            "required": [
-              "provider"
-            ]
+            "required": ["provider"]
           },
           {
             "type": "string",
-            "enum": [
-              "transifex"
-            ],
+            "enum": ["transifex"],
             "strict": true
           }
         ],
@@ -7243,9 +6522,7 @@
         "$id": "__amethyst__",
         "title": "Amethyst",
         "type": "object",
-        "flags": [
-          "internal"
-        ],
+        "flags": ["internal"],
         "deprecated": "experimental stack language",
         "normal": true
       },
@@ -7253,9 +6530,7 @@
         "$id": "__connie__",
         "title": "Connie",
         "type": "object",
-        "flags": [
-          "internal"
-        ],
+        "flags": ["internal"],
         "deprecated": "experimental stack language",
         "normal": true
       },
@@ -7263,9 +6538,7 @@
         "$id": "__cookiecat__",
         "title": "Cookiecat",
         "type": "object",
-        "flags": [
-          "internal"
-        ],
+        "flags": ["internal"],
         "deprecated": "experimental stack language",
         "normal": true
       },
@@ -7273,9 +6546,7 @@
         "$id": "__garnet__",
         "title": "Garnet",
         "type": "object",
-        "flags": [
-          "internal"
-        ],
+        "flags": ["internal"],
         "deprecated": "experimental stack language",
         "normal": true
       },
@@ -7283,9 +6554,7 @@
         "$id": "__onion__",
         "title": "Onion",
         "type": "object",
-        "flags": [
-          "internal"
-        ],
+        "flags": ["internal"],
         "deprecated": "experimental stack language",
         "normal": true
       },
@@ -7293,9 +6562,7 @@
         "$id": "__opal__",
         "title": "Opal",
         "type": "object",
-        "flags": [
-          "internal"
-        ],
+        "flags": ["internal"],
         "deprecated": "experimental stack language",
         "normal": true
       },
@@ -7303,9 +6570,7 @@
         "$id": "__sardonyx__",
         "title": "Sardonyx",
         "type": "object",
-        "flags": [
-          "internal"
-        ],
+        "flags": ["internal"],
         "deprecated": "experimental stack language",
         "normal": true
       },
@@ -7313,9 +6578,7 @@
         "$id": "__stevonnie__",
         "title": "Stevonnie",
         "type": "object",
-        "flags": [
-          "internal"
-        ],
+        "flags": ["internal"],
         "deprecated": "experimental stack language",
         "normal": true
       },
@@ -7326,13 +6589,9 @@
         "properties": {
           "jdk": {
             "$ref": "#/definitions/type/jdks",
-            "flags": [
-              "expand"
-            ],
+            "flags": ["expand"],
             "only": {
-              "language": [
-                "android"
-              ]
+              "language": ["android"]
             }
           },
           "android": {
@@ -7349,9 +6608,7 @@
             },
             "additionalProperties": false,
             "only": {
-              "language": [
-                "android"
-              ]
+              "language": ["android"]
             }
           }
         },
@@ -7378,21 +6635,15 @@
         "properties": {
           "jdk": {
             "$ref": "#/definitions/type/jdks",
-            "flags": [
-              "expand"
-            ],
+            "flags": ["expand"],
             "only": {
-              "language": [
-                "clojure"
-              ]
+              "language": ["clojure"]
             }
           },
           "lein": {
             "type": "string",
             "only": {
-              "language": [
-                "clojure"
-              ]
+              "language": ["clojure"]
             }
           }
         },
@@ -7419,13 +6670,9 @@
         "properties": {
           "crystal": {
             "$ref": "#/definitions/type/strs",
-            "flags": [
-              "expand"
-            ],
+            "flags": ["expand"],
             "only": {
-              "language": [
-                "crystal"
-              ]
+              "language": ["crystal"]
             }
           }
         },
@@ -7442,35 +6689,23 @@
         "properties": {
           "dotnet": {
             "$ref": "#/definitions/type/strs",
-            "flags": [
-              "expand"
-            ],
+            "flags": ["expand"],
             "only": {
-              "language": [
-                "csharp"
-              ]
+              "language": ["csharp"]
             }
           },
           "mono": {
             "$ref": "#/definitions/type/strs",
-            "flags": [
-              "expand"
-            ],
+            "flags": ["expand"],
             "only": {
-              "language": [
-                "csharp"
-              ]
+              "language": ["csharp"]
             }
           },
           "solution": {
             "$ref": "#/definitions/type/strs",
-            "flags": [
-              "expand"
-            ],
+            "flags": ["expand"],
             "only": {
-              "language": [
-                "csharp"
-              ]
+              "language": ["csharp"]
             }
           }
         },
@@ -7487,13 +6722,9 @@
         "properties": {
           "d": {
             "$ref": "#/definitions/type/strs",
-            "flags": [
-              "expand"
-            ],
+            "flags": ["expand"],
             "only": {
-              "language": [
-                "d"
-              ]
+              "language": ["d"]
             }
           }
         },
@@ -7510,13 +6741,9 @@
         "properties": {
           "dart": {
             "$ref": "#/definitions/type/strs",
-            "flags": [
-              "expand"
-            ],
+            "flags": ["expand"],
             "only": {
-              "language": [
-                "dart"
-              ]
+              "language": ["dart"]
             }
           },
           "dart_task": {
@@ -7578,21 +6805,15 @@
                 "type": "string"
               }
             ],
-            "flags": [
-              "expand"
-            ],
+            "flags": ["expand"],
             "only": {
-              "language": [
-                "dart"
-              ]
+              "language": ["dart"]
             }
           },
           "with_content_shell": {
             "type": "boolean",
             "only": {
-              "language": [
-                "dart"
-              ]
+              "language": ["dart"]
             }
           }
         },
@@ -7609,24 +6830,16 @@
         "properties": {
           "elixir": {
             "$ref": "#/definitions/type/strs",
-            "flags": [
-              "expand"
-            ],
+            "flags": ["expand"],
             "only": {
-              "language": [
-                "elixir"
-              ]
+              "language": ["elixir"]
             }
           },
           "otp_release": {
             "$ref": "#/definitions/type/strs",
-            "flags": [
-              "expand"
-            ],
+            "flags": ["expand"],
             "only": {
-              "language": [
-                "elixir"
-              ]
+              "language": ["elixir"]
             }
           }
         },
@@ -7643,40 +6856,28 @@
         "properties": {
           "elm": {
             "$ref": "#/definitions/type/strs",
-            "flags": [
-              "expand"
-            ],
+            "flags": ["expand"],
             "only": {
-              "language": [
-                "elm"
-              ]
+              "language": ["elm"]
             }
           },
           "node_js": {
             "$ref": "#/definitions/type/strs",
-            "flags": [
-              "expand"
-            ],
+            "flags": ["expand"],
             "only": {
-              "language": [
-                "elm"
-              ]
+              "language": ["elm"]
             }
           },
           "elm_format": {
             "type": "string",
             "only": {
-              "language": [
-                "elm"
-              ]
+              "language": ["elm"]
             }
           },
           "elm_test": {
             "type": "string",
             "only": {
-              "language": [
-                "elm"
-              ]
+              "language": ["elm"]
             }
           }
         },
@@ -7693,13 +6894,9 @@
         "properties": {
           "otp_release": {
             "$ref": "#/definitions/type/strs",
-            "flags": [
-              "expand"
-            ],
+            "flags": ["expand"],
             "only": {
-              "language": [
-                "erlang"
-              ]
+              "language": ["erlang"]
             }
           }
         },
@@ -7726,29 +6923,21 @@
         "properties": {
           "go": {
             "$ref": "#/definitions/type/strs",
-            "flags": [
-              "expand"
-            ],
+            "flags": ["expand"],
             "only": {
-              "language": [
-                "go"
-              ]
+              "language": ["go"]
             }
           },
           "gobuild_args": {
             "type": "string",
             "only": {
-              "language": [
-                "go"
-              ]
+              "language": ["go"]
             }
           },
           "go_import_path": {
             "type": "string",
             "only": {
-              "language": [
-                "go"
-              ]
+              "language": ["go"]
             }
           },
           "gimme_config": {
@@ -7763,9 +6952,7 @@
             },
             "additionalProperties": false,
             "only": {
-              "language": [
-                "go"
-              ]
+              "language": ["go"]
             }
           }
         },
@@ -7782,13 +6969,9 @@
         "properties": {
           "jdk": {
             "$ref": "#/definitions/type/jdks",
-            "flags": [
-              "expand"
-            ],
+            "flags": ["expand"],
             "only": {
-              "language": [
-                "groovy"
-              ]
+              "language": ["groovy"]
             }
           }
         },
@@ -7805,24 +6988,16 @@
         "properties": {
           "hhvm": {
             "$ref": "#/definitions/type/strs",
-            "flags": [
-              "expand"
-            ],
+            "flags": ["expand"],
             "only": {
-              "language": [
-                "hack"
-              ]
+              "language": ["hack"]
             }
           },
           "php": {
             "$ref": "#/definitions/type/strs",
-            "flags": [
-              "expand"
-            ],
+            "flags": ["expand"],
             "only": {
-              "language": [
-                "hack"
-              ]
+              "language": ["hack"]
             }
           }
         },
@@ -7836,13 +7011,9 @@
         "properties": {
           "ghc": {
             "$ref": "#/definitions/type/strs",
-            "flags": [
-              "expand"
-            ],
+            "flags": ["expand"],
             "only": {
-              "language": [
-                "haskell"
-              ]
+              "language": ["haskell"]
             }
           }
         },
@@ -7859,29 +7030,21 @@
         "properties": {
           "haxe": {
             "$ref": "#/definitions/type/strs",
-            "flags": [
-              "expand"
-            ],
+            "flags": ["expand"],
             "only": {
-              "language": [
-                "haxe"
-              ]
+              "language": ["haxe"]
             }
           },
           "hxml": {
             "$ref": "#/definitions/type/strs",
             "only": {
-              "language": [
-                "haxe"
-              ]
+              "language": ["haxe"]
             }
           },
           "neko": {
             "type": "string",
             "only": {
-              "language": [
-                "haxe"
-              ]
+              "language": ["haxe"]
             }
           }
         },
@@ -7898,13 +7061,9 @@
         "properties": {
           "jdk": {
             "$ref": "#/definitions/type/jdks",
-            "flags": [
-              "expand"
-            ],
+            "flags": ["expand"],
             "only": {
-              "language": [
-                "java"
-              ]
+              "language": ["java"]
             }
           }
         },
@@ -7921,13 +7080,9 @@
         "properties": {
           "julia": {
             "$ref": "#/definitions/type/strs",
-            "flags": [
-              "expand"
-            ],
+            "flags": ["expand"],
             "only": {
-              "language": [
-                "julia"
-              ]
+              "language": ["julia"]
             }
           }
         },
@@ -7944,13 +7099,9 @@
         "properties": {
           "matlab": {
             "$ref": "#/definitions/type/strs",
-            "flags": [
-              "expand"
-            ],
+            "flags": ["expand"],
             "only": {
-              "language": [
-                "matlab"
-              ]
+              "language": ["matlab"]
             }
           }
         },
@@ -7967,13 +7118,9 @@
         "properties": {
           "nix": {
             "$ref": "#/definitions/type/strs",
-            "flags": [
-              "expand"
-            ],
+            "flags": ["expand"],
             "only": {
-              "language": [
-                "nix"
-              ]
+              "language": ["nix"]
             }
           }
         },
@@ -7990,24 +7137,16 @@
         "properties": {
           "node_js": {
             "$ref": "#/definitions/type/strs",
-            "aliases": [
-              "node"
-            ],
-            "flags": [
-              "expand"
-            ],
+            "aliases": ["node"],
+            "flags": ["expand"],
             "only": {
-              "language": [
-                "node_js"
-              ]
+              "language": ["node_js"]
             }
           },
           "npm_args": {
             "type": "string",
             "only": {
-              "language": [
-                "node_js"
-              ]
+              "language": ["node_js"]
             }
           }
         },
@@ -8024,98 +7163,67 @@
         "properties": {
           "rvm": {
             "$ref": "#/definitions/type/strs",
-            "aliases": [
-              "ruby",
-              "rbenv"
-            ],
-            "flags": [
-              "expand"
-            ],
+            "aliases": ["ruby", "rbenv"],
+            "flags": ["expand"],
             "only": {
-              "language": [
-                "objective-c"
-              ]
+              "language": ["objective-c"]
             }
           },
           "gemfile": {
             "$ref": "#/definitions/type/strs",
-            "flags": [
-              "expand"
-            ],
+            "flags": ["expand"],
             "only": {
-              "language": [
-                "objective-c"
-              ]
+              "language": ["objective-c"]
             }
           },
           "xcode_scheme": {
             "$ref": "#/definitions/type/strs",
-            "flags": [
-              "expand"
-            ],
+            "flags": ["expand"],
             "only": {
-              "language": [
-                "objective-c"
-              ]
+              "language": ["objective-c"]
             }
           },
           "xcode_sdk": {
             "$ref": "#/definitions/type/strs",
-            "flags": [
-              "expand"
-            ],
+            "flags": ["expand"],
             "only": {
-              "language": [
-                "objective-c"
-              ]
+              "language": ["objective-c"]
             }
           },
           "podfile": {
             "type": "string",
             "only": {
-              "language": [
-                "objective-c"
-              ]
+              "language": ["objective-c"]
             }
           },
           "bundler_args": {
             "type": "string",
             "only": {
-              "language": [
-                "objective-c"
-              ]
+              "language": ["objective-c"]
             }
           },
           "xcode_destination": {
             "type": "string",
             "only": {
-              "language": [
-                "objective-c"
-              ]
+              "language": ["objective-c"]
             }
           },
           "xcode_project": {
             "type": "string",
             "only": {
-              "language": [
-                "objective-c"
-              ]
+              "language": ["objective-c"]
             }
           },
           "xcode_workspace": {
             "type": "string",
             "only": {
-              "language": [
-                "objective-c"
-              ]
+              "language": ["objective-c"]
             }
           },
           "xctool_args": {
             "type": "string",
             "only": {
-              "language": [
-                "objective-c"
-              ]
+              "language": ["objective-c"]
             }
           }
         },
@@ -8132,13 +7240,9 @@
         "properties": {
           "perl": {
             "$ref": "#/definitions/type/strs",
-            "flags": [
-              "expand"
-            ],
+            "flags": ["expand"],
             "only": {
-              "language": [
-                "perl"
-              ]
+              "language": ["perl"]
             }
           }
         },
@@ -8155,13 +7259,9 @@
         "properties": {
           "perl6": {
             "$ref": "#/definitions/type/strs",
-            "flags": [
-              "expand"
-            ],
+            "flags": ["expand"],
             "only": {
-              "language": [
-                "perl6"
-              ]
+              "language": ["perl6"]
             }
           }
         },
@@ -8178,21 +7278,15 @@
         "properties": {
           "php": {
             "$ref": "#/definitions/type/strs",
-            "flags": [
-              "expand"
-            ],
+            "flags": ["expand"],
             "only": {
-              "language": [
-                "php"
-              ]
+              "language": ["php"]
             }
           },
           "composer_args": {
             "type": "string",
             "only": {
-              "language": [
-                "php"
-              ]
+              "language": ["php"]
             }
           }
         },
@@ -8209,13 +7303,9 @@
         "properties": {
           "python": {
             "$ref": "#/definitions/type/strs",
-            "flags": [
-              "expand"
-            ],
+            "flags": ["expand"],
             "only": {
-              "language": [
-                "python"
-              ]
+              "language": ["python"]
             }
           },
           "virtualenv": {
@@ -8225,13 +7315,9 @@
                 "type": "boolean"
               }
             },
-            "aliases": [
-              "virtual_env"
-            ],
+            "aliases": ["virtual_env"],
             "only": {
-              "language": [
-                "python"
-              ]
+              "language": ["python"]
             }
           }
         },
@@ -8248,184 +7334,136 @@
         "properties": {
           "r": {
             "$ref": "#/definitions/type/strs",
-            "flags": [
-              "expand"
-            ],
+            "flags": ["expand"],
             "only": {
-              "language": [
-                "r"
-              ]
+              "language": ["r"]
             }
           },
           "r_packages": {
             "$ref": "#/definitions/type/strs",
             "only": {
-              "language": [
-                "r"
-              ]
+              "language": ["r"]
             }
           },
           "r_binary_packages": {
             "$ref": "#/definitions/type/strs",
             "only": {
-              "language": [
-                "r"
-              ]
+              "language": ["r"]
             }
           },
           "r_github_packages": {
             "$ref": "#/definitions/type/strs",
             "only": {
-              "language": [
-                "r"
-              ]
+              "language": ["r"]
             }
           },
           "apt_packages": {
             "$ref": "#/definitions/type/strs",
             "only": {
-              "language": [
-                "r"
-              ]
+              "language": ["r"]
             }
           },
           "bioc_packages": {
             "$ref": "#/definitions/type/strs",
             "only": {
-              "language": [
-                "r"
-              ]
+              "language": ["r"]
             }
           },
           "brew_packages": {
             "$ref": "#/definitions/type/strs",
             "only": {
-              "language": [
-                "r"
-              ]
+              "language": ["r"]
             }
           },
           "bioc": {
             "type": "string",
             "only": {
-              "language": [
-                "r"
-              ]
+              "language": ["r"]
             }
           },
           "bioc_check": {
             "type": "boolean",
             "only": {
-              "language": [
-                "r"
-              ]
+              "language": ["r"]
             }
           },
           "bioc_required": {
             "type": "boolean",
-            "aliases": [
-              "use_bioc"
-            ],
+            "aliases": ["use_bioc"],
             "only": {
-              "language": [
-                "r"
-              ]
+              "language": ["r"]
             }
           },
           "bioc_use_devel": {
             "type": "boolean",
             "only": {
-              "language": [
-                "r"
-              ]
+              "language": ["r"]
             }
           },
           "cran": {
             "type": "string",
             "only": {
-              "language": [
-                "r"
-              ]
+              "language": ["r"]
             }
           },
           "disable_homebrew": {
             "type": "boolean",
             "only": {
-              "language": [
-                "r"
-              ]
+              "language": ["r"]
             }
           },
           "latex": {
             "type": "boolean",
             "only": {
-              "language": [
-                "r"
-              ]
+              "language": ["r"]
             }
           },
           "pandoc": {
             "type": "boolean",
             "only": {
-              "language": [
-                "r"
-              ]
+              "language": ["r"]
             }
           },
           "pandoc_version": {
             "type": "string",
             "only": {
-              "language": [
-                "r"
-              ]
+              "language": ["r"]
             }
           },
           "r_build_args": {
             "type": "string",
             "only": {
-              "language": [
-                "r"
-              ]
+              "language": ["r"]
             }
           },
           "r_check_args": {
             "type": "string",
             "only": {
-              "language": [
-                "r"
-              ]
+              "language": ["r"]
             }
           },
           "r_check_revdep": {
             "type": "boolean",
             "only": {
-              "language": [
-                "r"
-              ]
+              "language": ["r"]
             }
           },
           "warnings_are_errors": {
             "type": "boolean",
             "only": {
-              "language": [
-                "r"
-              ]
+              "language": ["r"]
             }
           },
           "remotes": {
             "type": "string",
             "only": {
-              "language": [
-                "r"
-              ]
+              "language": ["r"]
             }
           },
           "repos": {
             "type": "object",
             "only": {
-              "language": [
-                "r"
-              ]
+              "language": ["r"]
             }
           }
         },
@@ -8442,50 +7480,31 @@
         "properties": {
           "rvm": {
             "$ref": "#/definitions/type/strs",
-            "aliases": [
-              "ruby",
-              "rbenv"
-            ],
-            "flags": [
-              "expand"
-            ],
+            "aliases": ["ruby", "rbenv"],
+            "flags": ["expand"],
             "only": {
-              "language": [
-                "ruby"
-              ]
+              "language": ["ruby"]
             }
           },
           "gemfile": {
             "$ref": "#/definitions/type/strs",
-            "aliases": [
-              "gemfiles"
-            ],
-            "flags": [
-              "expand"
-            ],
+            "aliases": ["gemfiles"],
+            "flags": ["expand"],
             "only": {
-              "language": [
-                "ruby"
-              ]
+              "language": ["ruby"]
             }
           },
           "jdk": {
             "$ref": "#/definitions/type/jdks",
-            "flags": [
-              "expand"
-            ],
+            "flags": ["expand"],
             "only": {
-              "language": [
-                "ruby"
-              ]
+              "language": ["ruby"]
             }
           },
           "bundler_args": {
             "type": "string",
             "only": {
-              "language": [
-                "ruby"
-              ]
+              "language": ["ruby"]
             }
           }
         },
@@ -8502,13 +7521,9 @@
         "properties": {
           "rust": {
             "$ref": "#/definitions/type/strs",
-            "flags": [
-              "expand"
-            ],
+            "flags": ["expand"],
             "only": {
-              "language": [
-                "rust"
-              ]
+              "language": ["rust"]
             }
           }
         },
@@ -8525,32 +7540,22 @@
         "properties": {
           "scala": {
             "$ref": "#/definitions/type/strs",
-            "flags": [
-              "expand"
-            ],
+            "flags": ["expand"],
             "only": {
-              "language": [
-                "scala"
-              ]
+              "language": ["scala"]
             }
           },
           "jdk": {
             "$ref": "#/definitions/type/jdks",
-            "flags": [
-              "expand"
-            ],
+            "flags": ["expand"],
             "only": {
-              "language": [
-                "scala"
-              ]
+              "language": ["scala"]
             }
           },
           "sbt_args": {
             "type": "string",
             "only": {
-              "language": [
-                "scala"
-              ]
+              "language": ["scala"]
             }
           }
         },
@@ -8577,35 +7582,23 @@
         "properties": {
           "smalltalk": {
             "$ref": "#/definitions/type/strs",
-            "flags": [
-              "expand"
-            ],
+            "flags": ["expand"],
             "only": {
-              "language": [
-                "smalltalk"
-              ]
+              "language": ["smalltalk"]
             }
           },
           "smalltalk_config": {
             "$ref": "#/definitions/type/strs",
-            "flags": [
-              "expand"
-            ],
+            "flags": ["expand"],
             "only": {
-              "language": [
-                "smalltalk"
-              ]
+              "language": ["smalltalk"]
             }
           },
           "smalltalk_vm": {
             "$ref": "#/definitions/type/strs",
-            "flags": [
-              "expand"
-            ],
+            "flags": ["expand"],
             "only": {
-              "language": [
-                "smalltalk"
-              ]
+              "language": ["smalltalk"]
             }
           },
           "smalltalk_edge": {
@@ -8620,9 +7613,7 @@
             },
             "additionalProperties": false,
             "only": {
-              "language": [
-                "smalltalk"
-              ]
+              "language": ["smalltalk"]
             }
           }
         },
@@ -8690,9 +7681,7 @@
           "jdk": {
             "type": "string",
             "only": {
-              "language": [
-                "android"
-              ]
+              "language": ["android"]
             }
           },
           "android": {
@@ -8709,9 +7698,7 @@
             },
             "additionalProperties": false,
             "only": {
-              "language": [
-                "android"
-              ]
+              "language": ["android"]
             }
           }
         },
@@ -8731,17 +7718,13 @@
           "jdk": {
             "type": "string",
             "only": {
-              "language": [
-                "clojure"
-              ]
+              "language": ["clojure"]
             }
           },
           "lein": {
             "type": "string",
             "only": {
-              "language": [
-                "clojure"
-              ]
+              "language": ["clojure"]
             }
           }
         },
@@ -8761,9 +7744,7 @@
           "crystal": {
             "type": "string",
             "only": {
-              "language": [
-                "crystal"
-              ]
+              "language": ["crystal"]
             }
           }
         },
@@ -8777,25 +7758,19 @@
           "dotnet": {
             "type": "string",
             "only": {
-              "language": [
-                "csharp"
-              ]
+              "language": ["csharp"]
             }
           },
           "mono": {
             "type": "string",
             "only": {
-              "language": [
-                "csharp"
-              ]
+              "language": ["csharp"]
             }
           },
           "solution": {
             "type": "string",
             "only": {
-              "language": [
-                "csharp"
-              ]
+              "language": ["csharp"]
             }
           }
         },
@@ -8809,9 +7784,7 @@
           "d": {
             "type": "string",
             "only": {
-              "language": [
-                "d"
-              ]
+              "language": ["d"]
             }
           }
         },
@@ -8825,9 +7798,7 @@
           "dart": {
             "type": "string",
             "only": {
-              "language": [
-                "dart"
-              ]
+              "language": ["dart"]
             }
           },
           "dart_task": {
@@ -8851,17 +7822,13 @@
             },
             "additionalProperties": false,
             "only": {
-              "language": [
-                "dart"
-              ]
+              "language": ["dart"]
             }
           },
           "with_content_shell": {
             "type": "boolean",
             "only": {
-              "language": [
-                "dart"
-              ]
+              "language": ["dart"]
             }
           }
         },
@@ -8875,17 +7842,13 @@
           "elixir": {
             "type": "string",
             "only": {
-              "language": [
-                "elixir"
-              ]
+              "language": ["elixir"]
             }
           },
           "otp_release": {
             "type": "string",
             "only": {
-              "language": [
-                "elixir"
-              ]
+              "language": ["elixir"]
             }
           }
         },
@@ -8899,33 +7862,25 @@
           "elm": {
             "type": "string",
             "only": {
-              "language": [
-                "elm"
-              ]
+              "language": ["elm"]
             }
           },
           "node_js": {
             "type": "string",
             "only": {
-              "language": [
-                "elm"
-              ]
+              "language": ["elm"]
             }
           },
           "elm_format": {
             "type": "string",
             "only": {
-              "language": [
-                "elm"
-              ]
+              "language": ["elm"]
             }
           },
           "elm_test": {
             "type": "string",
             "only": {
-              "language": [
-                "elm"
-              ]
+              "language": ["elm"]
             }
           }
         },
@@ -8939,9 +7894,7 @@
           "otp_release": {
             "type": "string",
             "only": {
-              "language": [
-                "erlang"
-              ]
+              "language": ["erlang"]
             }
           }
         },
@@ -8961,25 +7914,19 @@
           "go": {
             "type": "string",
             "only": {
-              "language": [
-                "go"
-              ]
+              "language": ["go"]
             }
           },
           "gobuild_args": {
             "type": "string",
             "only": {
-              "language": [
-                "go"
-              ]
+              "language": ["go"]
             }
           },
           "go_import_path": {
             "type": "string",
             "only": {
-              "language": [
-                "go"
-              ]
+              "language": ["go"]
             }
           },
           "gimme_config": {
@@ -8994,9 +7941,7 @@
             },
             "additionalProperties": false,
             "only": {
-              "language": [
-                "go"
-              ]
+              "language": ["go"]
             }
           }
         },
@@ -9010,9 +7955,7 @@
           "jdk": {
             "type": "string",
             "only": {
-              "language": [
-                "groovy"
-              ]
+              "language": ["groovy"]
             }
           }
         },
@@ -9026,17 +7969,13 @@
           "hhvm": {
             "type": "string",
             "only": {
-              "language": [
-                "hack"
-              ]
+              "language": ["hack"]
             }
           },
           "php": {
             "type": "string",
             "only": {
-              "language": [
-                "hack"
-              ]
+              "language": ["hack"]
             }
           }
         },
@@ -9050,9 +7989,7 @@
           "ghc": {
             "type": "string",
             "only": {
-              "language": [
-                "haskell"
-              ]
+              "language": ["haskell"]
             }
           }
         },
@@ -9066,25 +8003,19 @@
           "haxe": {
             "type": "string",
             "only": {
-              "language": [
-                "haxe"
-              ]
+              "language": ["haxe"]
             }
           },
           "hxml": {
             "$ref": "#/definitions/type/strs",
             "only": {
-              "language": [
-                "haxe"
-              ]
+              "language": ["haxe"]
             }
           },
           "neko": {
             "type": "string",
             "only": {
-              "language": [
-                "haxe"
-              ]
+              "language": ["haxe"]
             }
           }
         },
@@ -9098,9 +8029,7 @@
           "jdk": {
             "type": "string",
             "only": {
-              "language": [
-                "java"
-              ]
+              "language": ["java"]
             }
           }
         },
@@ -9114,9 +8043,7 @@
           "julia": {
             "type": "string",
             "only": {
-              "language": [
-                "julia"
-              ]
+              "language": ["julia"]
             }
           }
         },
@@ -9130,9 +8057,7 @@
           "matlab": {
             "type": "string",
             "only": {
-              "language": [
-                "matlab"
-              ]
+              "language": ["matlab"]
             }
           }
         },
@@ -9146,9 +8071,7 @@
           "nix": {
             "type": "string",
             "only": {
-              "language": [
-                "nix"
-              ]
+              "language": ["nix"]
             }
           }
         },
@@ -9161,21 +8084,15 @@
         "properties": {
           "node_js": {
             "type": "string",
-            "aliases": [
-              "node"
-            ],
+            "aliases": ["node"],
             "only": {
-              "language": [
-                "node_js"
-              ]
+              "language": ["node_js"]
             }
           },
           "npm_args": {
             "type": "string",
             "only": {
-              "language": [
-                "node_js"
-              ]
+              "language": ["node_js"]
             }
           }
         },
@@ -9188,86 +8105,63 @@
         "properties": {
           "rvm": {
             "type": "string",
-            "aliases": [
-              "ruby",
-              "rbenv"
-            ],
+            "aliases": ["ruby", "rbenv"],
             "only": {
-              "language": [
-                "objective-c"
-              ]
+              "language": ["objective-c"]
             }
           },
           "gemfile": {
             "type": "string",
             "only": {
-              "language": [
-                "objective-c"
-              ]
+              "language": ["objective-c"]
             }
           },
           "xcode_scheme": {
             "type": "string",
             "only": {
-              "language": [
-                "objective-c"
-              ]
+              "language": ["objective-c"]
             }
           },
           "xcode_sdk": {
             "type": "string",
             "only": {
-              "language": [
-                "objective-c"
-              ]
+              "language": ["objective-c"]
             }
           },
           "podfile": {
             "type": "string",
             "only": {
-              "language": [
-                "objective-c"
-              ]
+              "language": ["objective-c"]
             }
           },
           "bundler_args": {
             "type": "string",
             "only": {
-              "language": [
-                "objective-c"
-              ]
+              "language": ["objective-c"]
             }
           },
           "xcode_destination": {
             "type": "string",
             "only": {
-              "language": [
-                "objective-c"
-              ]
+              "language": ["objective-c"]
             }
           },
           "xcode_project": {
             "type": "string",
             "only": {
-              "language": [
-                "objective-c"
-              ]
+              "language": ["objective-c"]
             }
           },
           "xcode_workspace": {
             "type": "string",
             "only": {
-              "language": [
-                "objective-c"
-              ]
+              "language": ["objective-c"]
             }
           },
           "xctool_args": {
             "type": "string",
             "only": {
-              "language": [
-                "objective-c"
-              ]
+              "language": ["objective-c"]
             }
           }
         },
@@ -9281,9 +8175,7 @@
           "perl6": {
             "type": "string",
             "only": {
-              "language": [
-                "perl6"
-              ]
+              "language": ["perl6"]
             }
           }
         },
@@ -9297,9 +8189,7 @@
           "perl": {
             "type": "string",
             "only": {
-              "language": [
-                "perl"
-              ]
+              "language": ["perl"]
             }
           }
         },
@@ -9313,17 +8203,13 @@
           "php": {
             "type": "string",
             "only": {
-              "language": [
-                "php"
-              ]
+              "language": ["php"]
             }
           },
           "composer_args": {
             "type": "string",
             "only": {
-              "language": [
-                "php"
-              ]
+              "language": ["php"]
             }
           }
         },
@@ -9337,9 +8223,7 @@
           "python": {
             "type": "string",
             "only": {
-              "language": [
-                "python"
-              ]
+              "language": ["python"]
             }
           },
           "virtualenv": {
@@ -9349,13 +8233,9 @@
                 "type": "boolean"
               }
             },
-            "aliases": [
-              "virtual_env"
-            ],
+            "aliases": ["virtual_env"],
             "only": {
-              "language": [
-                "python"
-              ]
+              "language": ["python"]
             }
           }
         },
@@ -9369,180 +8249,134 @@
           "r": {
             "type": "string",
             "only": {
-              "language": [
-                "r"
-              ]
+              "language": ["r"]
             }
           },
           "r_packages": {
             "$ref": "#/definitions/type/strs",
             "only": {
-              "language": [
-                "r"
-              ]
+              "language": ["r"]
             }
           },
           "r_binary_packages": {
             "$ref": "#/definitions/type/strs",
             "only": {
-              "language": [
-                "r"
-              ]
+              "language": ["r"]
             }
           },
           "r_github_packages": {
             "$ref": "#/definitions/type/strs",
             "only": {
-              "language": [
-                "r"
-              ]
+              "language": ["r"]
             }
           },
           "apt_packages": {
             "$ref": "#/definitions/type/strs",
             "only": {
-              "language": [
-                "r"
-              ]
+              "language": ["r"]
             }
           },
           "bioc_packages": {
             "$ref": "#/definitions/type/strs",
             "only": {
-              "language": [
-                "r"
-              ]
+              "language": ["r"]
             }
           },
           "brew_packages": {
             "$ref": "#/definitions/type/strs",
             "only": {
-              "language": [
-                "r"
-              ]
+              "language": ["r"]
             }
           },
           "bioc": {
             "type": "string",
             "only": {
-              "language": [
-                "r"
-              ]
+              "language": ["r"]
             }
           },
           "bioc_check": {
             "type": "boolean",
             "only": {
-              "language": [
-                "r"
-              ]
+              "language": ["r"]
             }
           },
           "bioc_required": {
             "type": "boolean",
-            "aliases": [
-              "use_bioc"
-            ],
+            "aliases": ["use_bioc"],
             "only": {
-              "language": [
-                "r"
-              ]
+              "language": ["r"]
             }
           },
           "bioc_use_devel": {
             "type": "boolean",
             "only": {
-              "language": [
-                "r"
-              ]
+              "language": ["r"]
             }
           },
           "cran": {
             "type": "string",
             "only": {
-              "language": [
-                "r"
-              ]
+              "language": ["r"]
             }
           },
           "disable_homebrew": {
             "type": "boolean",
             "only": {
-              "language": [
-                "r"
-              ]
+              "language": ["r"]
             }
           },
           "latex": {
             "type": "boolean",
             "only": {
-              "language": [
-                "r"
-              ]
+              "language": ["r"]
             }
           },
           "pandoc": {
             "type": "boolean",
             "only": {
-              "language": [
-                "r"
-              ]
+              "language": ["r"]
             }
           },
           "pandoc_version": {
             "type": "string",
             "only": {
-              "language": [
-                "r"
-              ]
+              "language": ["r"]
             }
           },
           "r_build_args": {
             "type": "string",
             "only": {
-              "language": [
-                "r"
-              ]
+              "language": ["r"]
             }
           },
           "r_check_args": {
             "type": "string",
             "only": {
-              "language": [
-                "r"
-              ]
+              "language": ["r"]
             }
           },
           "r_check_revdep": {
             "type": "boolean",
             "only": {
-              "language": [
-                "r"
-              ]
+              "language": ["r"]
             }
           },
           "warnings_are_errors": {
             "type": "boolean",
             "only": {
-              "language": [
-                "r"
-              ]
+              "language": ["r"]
             }
           },
           "remotes": {
             "type": "string",
             "only": {
-              "language": [
-                "r"
-              ]
+              "language": ["r"]
             }
           },
           "repos": {
             "type": "object",
             "only": {
-              "language": [
-                "r"
-              ]
+              "language": ["r"]
             }
           }
         },
@@ -9555,41 +8389,28 @@
         "properties": {
           "rvm": {
             "type": "string",
-            "aliases": [
-              "ruby",
-              "rbenv"
-            ],
+            "aliases": ["ruby", "rbenv"],
             "only": {
-              "language": [
-                "ruby"
-              ]
+              "language": ["ruby"]
             }
           },
           "gemfile": {
             "type": "string",
-            "aliases": [
-              "gemfiles"
-            ],
+            "aliases": ["gemfiles"],
             "only": {
-              "language": [
-                "ruby"
-              ]
+              "language": ["ruby"]
             }
           },
           "jdk": {
             "type": "string",
             "only": {
-              "language": [
-                "ruby"
-              ]
+              "language": ["ruby"]
             }
           },
           "bundler_args": {
             "type": "string",
             "only": {
-              "language": [
-                "ruby"
-              ]
+              "language": ["ruby"]
             }
           }
         },
@@ -9603,9 +8424,7 @@
           "rust": {
             "type": "string",
             "only": {
-              "language": [
-                "rust"
-              ]
+              "language": ["rust"]
             }
           }
         },
@@ -9619,25 +8438,19 @@
           "scala": {
             "type": "string",
             "only": {
-              "language": [
-                "scala"
-              ]
+              "language": ["scala"]
             }
           },
           "jdk": {
             "type": "string",
             "only": {
-              "language": [
-                "scala"
-              ]
+              "language": ["scala"]
             }
           },
           "sbt_args": {
             "type": "string",
             "only": {
-              "language": [
-                "scala"
-              ]
+              "language": ["scala"]
             }
           }
         },
@@ -9657,25 +8470,19 @@
           "smalltalk": {
             "type": "string",
             "only": {
-              "language": [
-                "smalltalk"
-              ]
+              "language": ["smalltalk"]
             }
           },
           "smalltalk_config": {
             "$ref": "#/definitions/type/strs",
             "only": {
-              "language": [
-                "smalltalk"
-              ]
+              "language": ["smalltalk"]
             }
           },
           "smalltalk_vm": {
             "$ref": "#/definitions/type/strs",
             "only": {
-              "language": [
-                "smalltalk"
-              ]
+              "language": ["smalltalk"]
             }
           },
           "smalltalk_edge": {
@@ -9690,9 +8497,7 @@
             },
             "additionalProperties": false,
             "only": {
-              "language": [
-                "smalltalk"
-              ]
+              "language": ["smalltalk"]
             }
           }
         },
@@ -9798,9 +8603,7 @@
               }
             },
             "additionalProperties": false,
-            "aliases": [
-              "emails"
-            ],
+            "aliases": ["emails"],
             "prefix": {
               "key": "recipients"
             },
@@ -9892,26 +8695,16 @@
         "title": "Frequency",
         "type": "string",
         "summary": "Notification frequency",
-        "enum": [
-          "always",
-          "never",
-          "change"
-        ],
+        "enum": ["always", "never", "change"],
         "values": {
           "always": {
-            "aliases": [
-              "true"
-            ]
+            "aliases": ["true"]
           },
           "never": {
-            "aliases": [
-              "false"
-            ]
+            "aliases": ["false"]
           },
           "change": {
-            "aliases": [
-              "changed"
-            ]
+            "aliases": ["changed"]
           }
         }
       },
@@ -9928,10 +8721,7 @@
               },
               "format": {
                 "type": "string",
-                "enum": [
-                  "html",
-                  "text"
-                ],
+                "enum": ["html", "text"],
                 "summary": "Format to use for the notication"
               },
               "notify": {
@@ -10001,9 +8791,7 @@
                       "$ref": "#/definitions/type/secure",
                       "strict": false
                     },
-                    "aliases": [
-                      "channel"
-                    ],
+                    "aliases": ["channel"],
                     "normal": true
                   },
                   {
@@ -10076,9 +8864,7 @@
               "$ref": "#/definitions/type/secure",
               "strict": false
             },
-            "aliases": [
-              "channel"
-            ],
+            "aliases": ["channel"],
             "normal": true
           },
           {
@@ -10301,9 +9087,7 @@
               }
             },
             "additionalProperties": false,
-            "aliases": [
-              "webhook"
-            ],
+            "aliases": ["webhook"],
             "prefix": {
               "key": "urls"
             },
