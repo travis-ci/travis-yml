@@ -1,3 +1,4 @@
+require 'pry'
 describe Travis::Yml, 'matrix defaults', defaults: true do
   def self.expands_to(rows)
     it { expect(matrix.rows).to eq rows }
@@ -124,8 +125,7 @@ describe Travis::Yml, 'matrix defaults', defaults: true do
       - arm64
     )
     expands_to [
-      { language: 'objective-c', os: 'osx', arch: 'amd64' },
-      { language: 'objective-c', os: 'osx', arch: 'arm64' },
+      { language: 'objective-c', os: 'osx' }
     ]
   end
 
@@ -171,8 +171,7 @@ describe Travis::Yml, 'matrix defaults', defaults: true do
     expands_to [
       { language: 'ruby', os: 'linux', arch: 'amd64', dist: 'xenial' },
       { language: 'ruby', os: 'linux', arch: 'arm64', dist: 'xenial' },
-      { language: 'ruby', os: 'osx', arch: 'amd64' },
-      { language: 'ruby', os: 'osx', arch: 'arm64' },
+      { language: 'ruby', os: 'osx' },
       { language: 'ruby', os: 'windows' },
     ]
   end
@@ -191,8 +190,7 @@ describe Travis::Yml, 'matrix defaults', defaults: true do
     expands_to [
       { language: 'ruby', os: 'linux', arch: 'amd64', dist: 'xenial' },
       { language: 'ruby', os: 'linux', arch: 'arm64', dist: 'xenial' },
-      { language: 'ruby', os: 'osx', arch: 'amd64', },
-      { language: 'ruby', os: 'osx', arch: 'arm64', },
+      { language: 'ruby', os: 'osx'},
       { language: 'ruby', os: 'windows'},
     ]
   end
