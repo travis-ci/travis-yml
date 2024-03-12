@@ -1,4 +1,3 @@
-require 'pry'
 describe Travis::Yml, 'matrix defaults', defaults: true do
   def self.expands_to(rows)
     it { expect(matrix.rows).to eq rows }

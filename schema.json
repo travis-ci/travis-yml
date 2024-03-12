@@ -4341,6 +4341,84 @@
         ],
         "normal": true
       },
+      "ecr": {
+        "$id": "ecr",
+        "title": "Ecr",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "access_key_id": {
+                "$ref": "#/definitions/type/secure",
+                "strict": false
+              },
+              "secret_access_key": {
+                "$ref": "#/definitions/type/secure"
+              },
+              "account_id": {
+                "type": "string"
+              },
+              "source": {
+                "type": "string"
+              },
+              "target": {
+                "type": "string"
+              },
+              "region": {
+                "type": "string"
+              },
+              "provider": {
+                "type": "string",
+                "enum": [
+                  "ecr"
+                ],
+                "strict": true
+              },
+              "on": {
+                "$ref": "#/definitions/deploy/conditions",
+                "aliases": [
+                  "true"
+                ]
+              },
+              "run": {
+                "$ref": "#/definitions/type/strs"
+              },
+              "allow_failure": {
+                "type": "boolean"
+              },
+              "cleanup": {
+                "type": "boolean"
+              },
+              "skip_cleanup": {
+                "type": "boolean",
+                "deprecated": "not supported in dpl v2, use cleanup"
+              },
+              "edge": {
+                "$ref": "#/definitions/deploy/edge"
+              }
+            },
+            "additionalProperties": false,
+            "normal": true,
+            "prefix": {
+              "key": "provider",
+              "only": [
+                "str"
+              ]
+            },
+            "required": [
+              "provider"
+            ]
+          },
+          {
+            "type": "string",
+            "enum": [
+              "ecr"
+            ],
+            "strict": true
+          }
+        ],
+        "normal": true
+      },
       "edge": {
         "$id": "edge",
         "title": "Edge",
@@ -4429,9 +4507,6 @@
               },
               "bucket_path": {
                 "type": "string"
-              },
-              "only_create_app_version": {
-                "type": "boolean"
               },
               "wait_until_deployed": {
                 "type": "boolean"
@@ -5725,6 +5800,81 @@
         ],
         "normal": true
       },
+      "nuget": {
+        "$id": "nuget",
+        "title": "Nuget",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "api_key": {
+                "$ref": "#/definitions/type/secure",
+                "strict": false
+              },
+              "registry": {
+                "type": "string"
+              },
+              "src": {
+                "type": "string"
+              },
+              "no_symbols": {
+                "type": "boolean"
+              },
+              "skip_duplicate": {
+                "type": "boolean"
+              },
+              "provider": {
+                "type": "string",
+                "enum": [
+                  "nuget"
+                ],
+                "strict": true
+              },
+              "on": {
+                "$ref": "#/definitions/deploy/conditions",
+                "aliases": [
+                  "true"
+                ]
+              },
+              "run": {
+                "$ref": "#/definitions/type/strs"
+              },
+              "allow_failure": {
+                "type": "boolean"
+              },
+              "cleanup": {
+                "type": "boolean"
+              },
+              "skip_cleanup": {
+                "type": "boolean",
+                "deprecated": "not supported in dpl v2, use cleanup"
+              },
+              "edge": {
+                "$ref": "#/definitions/deploy/edge"
+              }
+            },
+            "additionalProperties": false,
+            "normal": true,
+            "prefix": {
+              "key": "provider",
+              "only": [
+                "str"
+              ]
+            },
+            "required": [
+              "provider"
+            ]
+          },
+          {
+            "type": "string",
+            "enum": [
+              "nuget"
+            ],
+            "strict": true
+          }
+        ],
+        "normal": true
+      },
       "openshift": {
         "$id": "openshift",
         "title": "Openshift",
@@ -6151,6 +6301,9 @@
             "$ref": "#/definitions/deploy/datica"
           },
           {
+            "$ref": "#/definitions/deploy/ecr"
+          },
+          {
             "$ref": "#/definitions/deploy/elasticbeanstalk"
           },
           {
@@ -6194,6 +6347,9 @@
           },
           {
             "$ref": "#/definitions/deploy/npm"
+          },
+          {
+            "$ref": "#/definitions/deploy/nuget"
           },
           {
             "$ref": "#/definitions/deploy/openshift"
