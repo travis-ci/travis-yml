@@ -30,7 +30,7 @@ module Travis
       end
 
       def message(level, key, code, args)
-        compact(
+        {
           type: 'config',
           level: level,
           key: key,
@@ -38,7 +38,7 @@ module Travis
           args: except(args, :src, :line),
           src: args[:src],
           line: args[:line]
-        )
+        }.reject { |_, obj| obj.nil? || obj.respond_to?(:empty?) && obj.empty? }
       end
 
       def full_messages
