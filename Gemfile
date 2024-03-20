@@ -4,6 +4,7 @@ ruby File.read('.ruby-version').chomp
 
 gem 'redcarpet'
 gem 'thwait'
+gem 'travis-conditions', git: 'https://github.com/travis-ci/travis-conditions'
 
 group :web do
   gem 'puma', '~> 6.3.0'
