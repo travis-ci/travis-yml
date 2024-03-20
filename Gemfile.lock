@@ -6,6 +6,14 @@ GIT
       cl (~> 1.0)
 
 GIT
+  remote: https://github.com/travis-ci/travis-conditions
+  revision: 5e42bac0739bc7f9deff363e5c9f7ee5a7304d52
+  specs:
+    travis-conditions (1.0.15)
+      parslet (~> 1.8.2)
+      sh_vars (~> 1.0.2)
+
+GIT
   remote: https://github.com/travis-ci/travis-config
   revision: 601e9a6dcb799dc14944c40153c60aaf935629ee
   specs:
@@ -90,6 +98,7 @@ GEM
     public_suffix (3.0.3)
     puma (6.3.0)
       nio4r (~> 2.0)
+    racc (1.7.3)
     rack (2.2.3)
     rack-cors (1.1.1)
       rack (>= 2.0.0)
@@ -117,12 +126,13 @@ GEM
     rspec-support (3.8.0)
     ruby-obj (1.0.0)
     ruby2_keywords (0.0.2)
-    ruby_parser (3.20.2)
+    ruby_parser (3.21.0)
+      racc (~> 1.5)
       sexp_processor (~> 4.16)
     safe_yaml (1.0.5)
     sentry-raven (3.1.2)
       faraday (>= 1.0)
-    sexp_processor (4.17.0)
+    sexp_processor (4.17.1)
     sh_vars (1.0.2)
     sinatra (2.0.8.1)
       mustermann (~> 1.0)
@@ -140,11 +150,8 @@ GEM
     thwait (0.2.0)
       e2mmap
     tilt (2.0.10)
-    tins (1.24.1)
+    tins (1.32.1)
       sync
-    travis-conditions (1.0.13)
-      parslet (~> 1.8.2)
-      sh_vars (~> 1.0.2)
     webmock (3.8.1)
       addressable (>= 2.3.6)
       crack (>= 0.3.2)
@@ -169,6 +176,7 @@ DEPENDENCIES
   sinatra
   sinatra-contrib
   thwait
+  travis-conditions!
   travis-config!
   travis-metrics!
   travis-yml!
@@ -178,4 +186,4 @@ RUBY VERSION
    ruby 3.2.2
 
 BUNDLED WITH
-   2.4.13
+   2.4.17
