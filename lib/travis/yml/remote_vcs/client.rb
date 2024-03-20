@@ -13,7 +13,7 @@ module Travis
               c.request :retry, max: 5, interval: 0.1, backoff_factor: 2
               c.request :json
               c.use Faraday::Response::RaiseError
-              c.use Faraday::Adapter::NetHttp
+              c.adapter Faraday::Adapter::NetHttp
             end
           end
 

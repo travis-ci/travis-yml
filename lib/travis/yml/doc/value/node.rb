@@ -199,12 +199,12 @@ module Travis
 
           def inspect
             type = self.class.name.sub('Travis::Yml::Doc::', '')
-            pairs = compact(
+            pairs = {
               parent: parent ? [parent.type, parent.key].compact.join(':') : nil,
               key: key,
               value: value.inspect,
               msgs: msgs.any? ? msgs.inspect : nil
-            )
+            }.reject { |_, obj| obj.nil? || obj.empty? }
             '#<%s %s>' % [type, pairs.map { |pair| pair.join('=') }.join(' ')]
           end
         end

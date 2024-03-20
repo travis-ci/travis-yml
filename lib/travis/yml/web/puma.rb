@@ -7,7 +7,7 @@ require 'travis/yml/web'
 
 preload_app!
 
-rackup      DefaultRackup
+rackup      Puma::Configuration::DEFAULTS[:rackup]
 port        ENV['PORT']     || 3000
 environment ENV['RACK_ENV'] || 'development'
 

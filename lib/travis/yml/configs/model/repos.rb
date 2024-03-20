@@ -19,25 +19,26 @@ module Travis
             @mutexes = {}
           end
 
-          def [](slug, provider = 'github')
-            mutex_for(slug).synchronize do
-              return repos[slug] if repos.key?(slug)
-              repo = repos[slug] = Repo.new(fetch(slug, provider))
+          def [](vcs_id, provider = 'github')
+            key = "#{provider}_#{vcs_id}"
+            mutex_for(key).synchronize do
+              return repos[key] if repos.key?(key)
+              repo = repos[key] = Repo.new(fetch(vcs_id, provider))
               repo
             end
           end
 
-          def []=(slug, repo)
-            repos[slug] = repo
+          def []=(key, repo)
+            repos[key] = repo
           end
 
-          def fetch(slug, provider)
-            logger.info "Get Repo for #{slug} #{provider}"
-            Travis::Repo.new(slug, provider).fetch
+          def fetch(vcs_id, provider)
+            logger.info "Get Repo for #{vcs_id} #{provider}"
+            Travis::Repo.new(vcs_id, provider).fetch
           end
 
-          def mutex_for(slug)
-            mutexes[slug] ||= Mutex.new
+          def mutex_for(key)
+            mutexes[key] ||= Mutex.new
           end
           synchronize :mutex
 

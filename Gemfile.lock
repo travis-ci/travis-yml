@@ -6,6 +6,13 @@ GIT
       cl (~> 1.0)
 
 GIT
+  remote: https://github.com/travis-ci/travis-config
+  revision: 601e9a6dcb799dc14944c40153c60aaf935629ee
+  specs:
+    travis-config (2.0.0)
+      hashr (~> 2.0)
+
+GIT
   remote: https://github.com/travis-ci/travis-metrics
   revision: 6dcec59b4e85ef8a0dc10ca07c3a0b39157e9bca
   ref: sf-unfork
@@ -32,7 +39,7 @@ GEM
   specs:
     addressable (2.6.0)
       public_suffix (>= 2.0.2, < 4.0)
-    amatch (0.4.0)
+    amatch (0.4.1)
       mize
       tins (~> 1.0)
     atomic (1.1.101)
@@ -41,38 +48,47 @@ GEM
     backports (3.15.0)
     cl (1.2.4)
       regstry (~> 1.0.3)
+    coderay (1.1.3)
     crack (0.4.3)
       safe_yaml (~> 1.0.0)
     diff-lcs (1.3)
-    faraday (0.15.4)
+    e2mmap (0.1.0)
+    faraday (1.3.0)
+      faraday-net_http (~> 1.0)
       multipart-post (>= 1.2, < 3)
-    faraday_middleware (0.14.0)
-      faraday (>= 0.7.4, < 1.0)
+      ruby2_keywords
+    faraday-net_http (1.0.1)
+    faraday_middleware (1.2.0)
+      faraday (~> 1.0)
     hashdiff (1.0.0)
     hashr (2.0.1)
     hitimes (1.3.1)
     json-schema (2.8.1)
       addressable (>= 2.4)
     memoyze (0.0.1)
+    method_source (1.0.0)
     metriks (0.9.9.8)
       atomic (~> 1.0)
       avl_tree (~> 1.2.0)
       hitimes (~> 1.1)
     metriks-librato_metrics (1.0.6)
       metriks (>= 0.9.9.6)
-    mize (0.4.0)
+    mize (0.4.1)
       protocol (~> 2.0)
     multi_json (1.14.1)
     multipart-post (2.1.1)
     mustermann (1.1.1)
       ruby2_keywords (~> 0.0.1)
-    nio4r (2.5.2)
+    nio4r (2.5.9)
     oj (3.7.12)
     parslet (1.8.2)
     protocol (2.0.0)
       ruby_parser (~> 3.0)
+    pry (0.14.2)
+      coderay (~> 1.1)
+      method_source (~> 1.0)
     public_suffix (3.0.3)
-    puma (4.3.5)
+    puma (6.3.0)
       nio4r (~> 2.0)
     rack (2.2.3)
     rack-cors (1.1.1)
@@ -85,6 +101,7 @@ GEM
     rake (13.0.1)
     redcarpet (3.4.0)
     regstry (1.0.15)
+    rexml (3.2.5)
     rspec (3.8.0)
       rspec-core (~> 3.8.0)
       rspec-expectations (~> 3.8.0)
@@ -100,12 +117,12 @@ GEM
     rspec-support (3.8.0)
     ruby-obj (1.0.0)
     ruby2_keywords (0.0.2)
-    ruby_parser (3.14.2)
-      sexp_processor (~> 4.9)
+    ruby_parser (3.20.2)
+      sexp_processor (~> 4.16)
     safe_yaml (1.0.5)
-    sentry-raven (2.9.0)
-      faraday (>= 0.7.6, < 1.0)
-    sexp_processor (4.14.1)
+    sentry-raven (3.1.2)
+      faraday (>= 1.0)
+    sexp_processor (4.17.0)
     sh_vars (1.0.2)
     sinatra (2.0.8.1)
       mustermann (~> 1.0)
@@ -120,14 +137,14 @@ GEM
       sinatra (= 2.0.8.1)
       tilt (~> 2.0)
     sync (0.5.0)
+    thwait (0.2.0)
+      e2mmap
     tilt (2.0.10)
     tins (1.24.1)
       sync
     travis-conditions (1.0.13)
       parslet (~> 1.8.2)
       sh_vars (~> 1.0.2)
-    travis-config (1.1.3)
-      hashr (~> 2.0)
     webmock (3.8.1)
       addressable (>= 2.3.6)
       crack (>= 0.3.2)
@@ -139,23 +156,26 @@ PLATFORMS
 DEPENDENCIES
   dpl!
   json-schema
-  puma (~> 4.3.5)
+  pry
+  puma (~> 6.3.0)
   rack-cors
   rack-ssl-enforcer (~> 0.2.9)
   rack-test
   rake
   redcarpet
+  rexml
   rspec
-  sentry-raven (~> 2.9.0)
+  sentry-raven (~> 3.1.2)
   sinatra
   sinatra-contrib
-  travis-config (~> 1.1.3)
+  thwait
+  travis-config!
   travis-metrics!
   travis-yml!
   webmock
 
 RUBY VERSION
-   ruby 2.6.6p146
+   ruby 3.2.2
 
 BUNDLED WITH
-   2.0.1
+   2.4.13
