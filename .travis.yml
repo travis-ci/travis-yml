@@ -12,6 +12,7 @@ branches:
   only:
     - master
     - enterprise-3.0
+    - dt-e3-0-update
 
 cache:
   bundler: true
@@ -26,6 +27,7 @@ stages:
     if: commit_message =~ /ship:docker/ OR env(SHIP_DOCKER) = true
 
 before_install:
+  - gem install rubygems-update -v 3.4.22
   - gem update --silent --system 3.4.13
   - 'echo "gem: --no-document" >> ~/.gemrc' # Skip installing documentation
   # - gem install bundler -v $(awk '/BUNDLED WITH/{getline; print}' Gemfile.lock)

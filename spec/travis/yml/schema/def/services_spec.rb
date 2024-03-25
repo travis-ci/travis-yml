@@ -50,7 +50,8 @@ describe Travis::Yml::Schema::Def::Services do
           'rabbitmq',
           'redis',
           'riak',
-          'xvfb'
+          'xvfb',
+          'cri-dockerd'
         ],
         downcase: true,
         values: {
