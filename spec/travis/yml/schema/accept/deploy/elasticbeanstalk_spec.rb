@@ -75,5 +75,14 @@ describe Travis::Yml, 'accept deploy', slow: true do
       it { should_not validate deploy: { provider: :elasticbeanstalk, bucket_path: {:foo=>'foo'} } }
       it { should_not validate deploy: { provider: :elasticbeanstalk, bucket_path: [{:foo=>'foo'}] } }
     end
+
+    describe 'only_create_app_version' do
+      it { should validate deploy: { provider: :elasticbeanstalk, only_create_app_version: true } }
+      it { should_not validate deploy: { provider: :elasticbeanstalk, only_create_app_version: 1 } }
+      it { should_not validate deploy: { provider: :elasticbeanstalk, only_create_app_version: 'str' } }
+      it { should_not validate deploy: { provider: :elasticbeanstalk, only_create_app_version: ['str'] } }
+      it { should_not validate deploy: { provider: :elasticbeanstalk, only_create_app_version: {:foo=>'foo'} } }
+      it { should_not validate deploy: { provider: :elasticbeanstalk, only_create_app_version: [{:foo=>'foo'}] } }
+    end
   end
 end

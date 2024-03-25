@@ -124,7 +124,7 @@ describe Travis::Yml, 'matrix defaults', defaults: true do
       - arm64
     )
     expands_to [
-      { language: 'objective-c', os: 'osx' }
+      { language: 'objective-c', os: 'osx' },
     ]
   end
 
@@ -189,8 +189,8 @@ describe Travis::Yml, 'matrix defaults', defaults: true do
     expands_to [
       { language: 'ruby', os: 'linux', arch: 'amd64', dist: 'xenial' },
       { language: 'ruby', os: 'linux', arch: 'arm64', dist: 'xenial' },
-      { language: 'ruby', os: 'osx'},
-      { language: 'ruby', os: 'windows'},
+      { language: 'ruby', os: 'osx' },
+      { language: 'ruby', os: 'windows' },
     ]
   end
 end

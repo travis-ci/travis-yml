@@ -44,11 +44,6 @@ describe Travis::Yml::Schema::Def::Archs do
           'i386',
           's390x',
         ],
-        only: {
-          os: [
-            'linux'
-          ]
-        },
         downcase: true,
         values: {
           amd64: {
@@ -69,6 +64,11 @@ describe Travis::Yml::Schema::Def::Archs do
               'x86'
             ]
           }
+        },
+        only: {
+          os: [
+            'linux'
+          ]
         }
       )
     end
