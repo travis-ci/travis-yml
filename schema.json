@@ -841,7 +841,7 @@
             "type": "object",
             "properties": {
               "source": {
-                "type": "string",
+                "$ref": "#/definitions/import/import_template",
                 "summary": "The source to import build config from",
                 "example": "./import.yml@v1"
               },
@@ -866,7 +866,7 @@
             }
           },
           {
-            "type": "string",
+            "$ref": "#/definitions/import/import_template",
             "example": "./import.yml@v1"
           }
         ],
@@ -2459,6 +2459,16 @@
           "Workspaces": "https://docs.travis-ci.com/user/using-workspaces"
         },
         "normal": true
+      }
+    },
+    "import": {
+      "import_template": {
+        "$id": "import_template",
+        "title": "Import Template",
+        "type": "string",
+        "vars": [
+          "commit_message"
+        ]
       }
     },
     "addon": {

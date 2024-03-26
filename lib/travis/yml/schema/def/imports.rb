@@ -33,9 +33,22 @@ module Travis
             normal
             prefix :source
 
-            map :source, to: :str, summary: 'The source to import build config from', eg: './import.yml@v1'
+            map :source, to: :import_template, summary: 'The source to import build config from', eg: './import.yml@v1'
             map :mode,   to: :str, values: ['merge', 'deep_merge', 'deep_merge_append', 'deep_merge_prepend'], summary: 'How to merge the imported config into the target config (defaults to deep_merge_append)'
             map :if,     to: :condition
+
+            export
+          end
+        end
+
+        class ImportTemplate < Type::Str
+          registry :import
+          register :import_template
+
+          def define
+            vars *%w(
+              commit_message
+            )
 
             export
           end
