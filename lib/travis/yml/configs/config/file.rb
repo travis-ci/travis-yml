@@ -56,7 +56,7 @@ module Travis
           end
 
           def to_s
-            "#{repo.slug}:#{path}@#{ref}"
+            "#{repo.slug}:#{interpolated_path}@#{ref}"
           end
 
           def serialize
@@ -82,9 +82,7 @@ module Travis
             end
 
             def interpolated_path
-              new_path = path.gsub(/%{(#{PERMITTED_KEYS.join('|')}|.*)}/) { CGI.escape(ctx.data[$1.to_sym]) }
-
-              "#{path_suffix}#{new_path}"
+              path.gsub(/%{(#{PERMITTED_KEYS.join('|')}|.*)}/) { CGI.escape(ctx.data[$1.to_sym]) }
             end
         end
       end
