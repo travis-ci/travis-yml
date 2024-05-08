@@ -40,9 +40,9 @@ describe Travis::Yml::Schema::Def::Imports do
             type: :object,
             properties: {
               source: {
-                type: :string,
-                summary: 'The source to import build config from',
-                example: './import.yml@v1'
+                '$ref': '#/definitions/import/import_template',
+                example:'./import.yml@v1',
+                summary: 'The source to import build config from'
               },
               mode: {
                 type: :string,
@@ -60,7 +60,7 @@ describe Travis::Yml::Schema::Def::Imports do
             },
           },
           {
-            type: :string,
+            '$ref': '#/definitions/import/import_template',
             example: './import.yml@v1'
           }
         ]
