@@ -1,0 +1,45 @@
+FROM ruby:3.2.2-slim
+
+# upgrade
+RUN apt-get update > /dev/null 2>&1 && \
+    apt-get upgrade -y > /dev/null 2>&1 && \
+    apt-get install -y --no-install-recommends git make gcc g++ > /dev/null 2>&1 && \
+    mkdir -p /app/vendor /app/cache; \
+    groupadd -r travis -g 1000 && \
+    useradd -u 1000 -r -g travis -s /bin/sh -c "travis user" -d "/app" travis;\
+    chown -R travis:travis /app; \
+    rm -rf /var/lib/apt/lists/*
+
+# Set app workdir
+WORKDIR /app
+
+# Upgrade rubygems
+RUN gem update --system 3.4.13 > /dev/null 2>&1
+
+USER travis
+# Gem config
+RUN echo "gem: --no-document" >> ~/.gemrc
+
+# Bundle config
+RUN bundle config set --global no-cache 'true' && \
+    bundle config set --global frozen 'true' && \
+    bundle config set --global deployment 'true' && \
+    bundle config set --global without 'development test' && \
+    bundle config set --global clean 'true' && \
+    bundle config set --global jobs `expr $(cat /proc/cpuinfo | grep -c 'cpu cores')` && \
+    bundle config set --global retry 3
+
+
+# Copy .ruby-version and .gemspec into container
+COPY .ruby-version travis-yml.gemspec ./
+COPY ./lib/travis/yml/version.rb ./lib/travis/yml/version.rb
+
+# Copy gemfiles into container
+COPY Gemfile Gemfile.lock ./
+
+# Install gems
+RUN bundle install
+
+COPY . ./
+
+CMD ["sh", "-c", "bundle exec bin/docs && bundle exec puma -C lib/travis/yml/web/puma.rb"]
