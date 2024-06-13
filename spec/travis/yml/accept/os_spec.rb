@@ -61,7 +61,6 @@ describe Travis::Yml do
           os: linux-ppc64le
         )
         it { should serialize_to os: ['linux-ppc64le'] }
-        # it { should have_msg [:warn, :os, :deprecated_value, value: 'linux-ppc64le', info: 'use os: linux, arch: ppc64le'] }
       end
     end
 
