@@ -6,13 +6,6 @@ rvm: 3.2.2
 git:
   depth: 10
 
-# Build master, enterprise-3.0 and PRs which merge into those branches
-# We don't automatically build other branches when they're pushed; create a PR to cause the CI to run.
-branches:
-  only:
-    - master
-    - enterprise-3.0
-
 cache:
   bundler: true
   timeout: 600
@@ -26,6 +19,7 @@ stages:
     if: commit_message =~ /ship:docker/ OR env(SHIP_DOCKER) = true
 
 before_install:
+  - gem install rubygems-update -v 3.4.22
   - gem update --silent --system 3.4.13
   - 'echo "gem: --no-document" >> ~/.gemrc' # Skip installing documentation
   # - gem install bundler -v $(awk '/BUNDLED WITH/{getline; print}' Gemfile.lock)

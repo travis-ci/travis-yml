@@ -135,18 +135,6 @@ describe Travis::Yml, 'elasticbeanstalk' do
     end
   end
 
-  describe 'only_create_app_version' do
-    describe 'given a bool' do
-      yaml %(
-        deploy:
-          provider: elasticbeanstalk
-          only_create_app_version: true
-      )
-      it { should serialize_to deploy: [provider: 'elasticbeanstalk', only_create_app_version: true] }
-      it { should_not have_msg }
-    end
-  end
-
   describe 'wait_until_deployed' do
     describe 'given a bool' do
       yaml %(

@@ -69,7 +69,7 @@ describe Travis::Yml::Configs do
     describe 'from another owner' do
       let(:one) { encrypt(:two, 'secret_one') }
 
-      describe 'public config' do
+      xdescribe 'public config' do # https://github.com/ruby/openssl/issues/732
         let(:travis_yml) { 'import: other/other:one.yml' }
         let(:private) { false }
         it { expect(vars).to eq [one] }
@@ -137,7 +137,7 @@ describe Travis::Yml::Configs do
       let(:one) { encrypt(:two, 'secret_one') }
       let(:two) { encrypt(:two, 'secret_two') }
 
-      describe 'public config' do
+      xdescribe 'public config' do # https://github.com/ruby/openssl/issues/732
         let(:travis_yml) { 'import: other/other:one.yml' }
         let(:private) { false }
         it { expect(vars).to eq [two, one] }
@@ -200,7 +200,7 @@ describe Travis::Yml::Configs do
       let(:one) { encrypt(:two, 'secret_one') }
       let(:two) { encrypt(:two, 'secret_two') }
 
-      describe 'public config' do
+      xdescribe 'public config' do # https://github.com/ruby/openssl/issues/732
         let(:travis_yml) { 'import: other/other:one.yml' }
         let(:private) { false }
         it { expect(vars).to eq [two] }
