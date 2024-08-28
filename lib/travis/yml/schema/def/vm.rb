@@ -17,7 +17,7 @@ module Travis
 
             see 'Customizing the Build': 'https://docs.travis-ci.com/user/customizing-the-build/'
 
-            map :size, to: :str, values: [:medium, :large, :'x-large', :'2x-large']
+            map :size, to: :str, values: [:medium, :large, :'x-large', :'2x-large', :'gpu-medium', :'gpu-xlarge']
             export
           end
         end
