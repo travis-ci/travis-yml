@@ -61,6 +61,7 @@ module Travis
             map :postgresql,      to: :str, alias: :postgres, summary: 'Postgres version to use'
             map :rethinkdb,       to: :str, summary: 'RethinkDB version to use'
             map :deploy,          to: :deploys, internal: true
+            map :sbom
 
             export
           end
@@ -81,3 +82,4 @@ require 'travis/yml/schema/def/addon/sauce_connect'
 require 'travis/yml/schema/def/addon/snaps'
 require 'travis/yml/schema/def/addon/pkg'
 require 'travis/yml/schema/def/addon/sonarcloud'
+require 'travis/yml/schema/def/addon/sbom'

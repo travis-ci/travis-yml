@@ -7,6 +7,7 @@ require 'travis/yml/schema/def/git'
 require 'travis/yml/schema/def/group'
 require 'travis/yml/schema/def/osx_image'
 require 'travis/yml/schema/def/services'
+require 'travis/yml/schema/def/workspaces'
 require 'travis/yml/schema/def/keys'
 require 'travis/yml/schema/type'
 
@@ -33,6 +34,7 @@ module Travis
             map :if,         to: :condition
             map :services
             map :group
+            map :workspaces
             map :keys
 
             map :before_install, to: :seq, summary: 'Scripts to run before the install stage'

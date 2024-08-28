@@ -98,9 +98,6 @@ describe Travis::Yml::Schema::Def::Deploy::Elasticbeanstalk do
               bucket_path: {
                 type: :string
               },
-              only_create_app_version: {
-                type: :boolean
-              },
               wait_until_deployed: {
                 type: :boolean
               },
