@@ -18,7 +18,9 @@ describe Travis::Yml::Schema::Def::VM do
             'medium',
             'large',
             'x-large',
-            '2x-large'
+            '2x-large',
+            'gpu-medium',
+            'gpu-xlarge'
           ]
         },
       },
