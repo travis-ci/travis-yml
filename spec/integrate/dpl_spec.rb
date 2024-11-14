@@ -60,7 +60,7 @@ describe Travis::Yml, integration_dpl: true, alert: false do
     end
 
     def opt
-      @opt ||= opt_names.detect { |opt| break provider.opts[opt] if provider.opts[opt] }
+      @opt ||= opt_names.detect { |opt| break provider.opts[opt] if provider && provider.opts[opt] }
     end
 
     def provider

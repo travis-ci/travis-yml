@@ -265,6 +265,9 @@
             "flags": [
               "internal"
             ]
+          },
+          "sbom": {
+            "$ref": "#/definitions/addon/sbom"
           }
         },
         "additionalProperties": false,
@@ -808,7 +811,7 @@
             "type": "object",
             "properties": {
               "source": {
-                "type": "string",
+                "$ref": "#/definitions/import/import_template",
                 "summary": "The source to import build config from",
                 "example": "./import.yml@v1"
               },
@@ -833,7 +836,7 @@
             }
           },
           {
-            "type": "string",
+            "$ref": "#/definitions/import/import_template",
             "example": "./import.yml@v1"
           }
         ],
@@ -1907,7 +1910,8 @@
           "rabbitmq",
           "redis",
           "riak",
-          "xvfb"
+          "xvfb",
+          "cri-dockerd"
         ],
         "values": {
           "memcached": {
@@ -2401,7 +2405,9 @@
               "medium",
               "large",
               "x-large",
-              "2x-large"
+              "2x-large",
+              "gpu-medium",
+              "gpu-xlarge"
             ]
           }
         },
@@ -2446,6 +2452,16 @@
           "Workspaces": "https://docs.travis-ci.com/user/using-workspaces"
         },
         "normal": true
+      }
+    },
+    "import": {
+      "import_template": {
+        "$id": "import_template",
+        "title": "Import Template",
+        "type": "string",
+        "vars": [
+          "commit_message"
+        ]
       }
     },
     "addon": {
@@ -2992,6 +3008,101 @@
         "summary": "SourceConnect settings",
         "see": {
           "Using Sauce Labs with Travis CI": "https://docs.travis-ci.com/user/sauce-connect/"
+        },
+        "normal": true
+      },
+      "sbom": {
+        "$id": "sbom",
+        "title": "Sbom",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "on": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "branch": {
+                        "$ref": "#/definitions/type/branches"
+                      },
+                      "condition": {
+                        "$ref": "#/definitions/type/strs"
+                      },
+                      "all_branches": {
+                        "type": "boolean"
+                      },
+                      "pr": {
+                        "type": "boolean"
+                      }
+                    },
+                    "additionalProperties": false,
+                    "normal": true,
+                    "prefix": {
+                      "key": "branch",
+                      "only": [
+                        "str"
+                      ]
+                    }
+                  },
+                  {
+                    "$ref": "#/definitions/type/branches"
+                  }
+                ],
+                "normal": true,
+                "aliases": [
+                  "true"
+                ]
+              },
+              "run_phase": {
+                "type": "string",
+                "defaults": [
+                  {
+                    "value": "after_success"
+                  }
+                ],
+                "enum": [
+                  "before_script",
+                  "script",
+                  "after_success",
+                  "after_failure"
+                ]
+              },
+              "output_format": {
+                "type": "string",
+                "defaults": [
+                  {
+                    "value": "cyclonedx-json"
+                  }
+                ],
+                "enum": [
+                  "cyclonedx-json",
+                  "cyclonedx-xml",
+                  "spdx-json"
+                ]
+              },
+              "output_dir": {
+                "type": "string"
+              },
+              "input_dir": {
+                "$ref": "#/definitions/type/strs"
+              }
+            },
+            "additionalProperties": false,
+            "normal": true,
+            "changes": [
+              {
+                "change": "enable"
+              }
+            ]
+          },
+          {
+            "type": "boolean"
+          }
+        ],
+        "summary": "SBOM Generation",
+        "see": {
+          "Using SBOM generation with Travis CI": "https://docs.travis-ci.com/"
         },
         "normal": true
       },
@@ -4340,6 +4451,84 @@
         ],
         "normal": true
       },
+      "ecr": {
+        "$id": "ecr",
+        "title": "Ecr",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "access_key_id": {
+                "$ref": "#/definitions/type/secure",
+                "strict": false
+              },
+              "secret_access_key": {
+                "$ref": "#/definitions/type/secure"
+              },
+              "account_id": {
+                "type": "string"
+              },
+              "source": {
+                "type": "string"
+              },
+              "target": {
+                "type": "string"
+              },
+              "region": {
+                "type": "string"
+              },
+              "provider": {
+                "type": "string",
+                "enum": [
+                  "ecr"
+                ],
+                "strict": true
+              },
+              "on": {
+                "$ref": "#/definitions/deploy/conditions",
+                "aliases": [
+                  "true"
+                ]
+              },
+              "run": {
+                "$ref": "#/definitions/type/strs"
+              },
+              "allow_failure": {
+                "type": "boolean"
+              },
+              "cleanup": {
+                "type": "boolean"
+              },
+              "skip_cleanup": {
+                "type": "boolean",
+                "deprecated": "not supported in dpl v2, use cleanup"
+              },
+              "edge": {
+                "$ref": "#/definitions/deploy/edge"
+              }
+            },
+            "additionalProperties": false,
+            "normal": true,
+            "prefix": {
+              "key": "provider",
+              "only": [
+                "str"
+              ]
+            },
+            "required": [
+              "provider"
+            ]
+          },
+          {
+            "type": "string",
+            "enum": [
+              "ecr"
+            ],
+            "strict": true
+          }
+        ],
+        "normal": true
+      },
       "edge": {
         "$id": "edge",
         "title": "Edge",
@@ -4428,9 +4617,6 @@
               },
               "bucket_path": {
                 "type": "string"
-              },
-              "only_create_app_version": {
-                "type": "boolean"
               },
               "wait_until_deployed": {
                 "type": "boolean"
@@ -5724,6 +5910,81 @@
         ],
         "normal": true
       },
+      "nuget": {
+        "$id": "nuget",
+        "title": "Nuget",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "api_key": {
+                "$ref": "#/definitions/type/secure",
+                "strict": false
+              },
+              "registry": {
+                "type": "string"
+              },
+              "src": {
+                "type": "string"
+              },
+              "no_symbols": {
+                "type": "boolean"
+              },
+              "skip_duplicate": {
+                "type": "boolean"
+              },
+              "provider": {
+                "type": "string",
+                "enum": [
+                  "nuget"
+                ],
+                "strict": true
+              },
+              "on": {
+                "$ref": "#/definitions/deploy/conditions",
+                "aliases": [
+                  "true"
+                ]
+              },
+              "run": {
+                "$ref": "#/definitions/type/strs"
+              },
+              "allow_failure": {
+                "type": "boolean"
+              },
+              "cleanup": {
+                "type": "boolean"
+              },
+              "skip_cleanup": {
+                "type": "boolean",
+                "deprecated": "not supported in dpl v2, use cleanup"
+              },
+              "edge": {
+                "$ref": "#/definitions/deploy/edge"
+              }
+            },
+            "additionalProperties": false,
+            "normal": true,
+            "prefix": {
+              "key": "provider",
+              "only": [
+                "str"
+              ]
+            },
+            "required": [
+              "provider"
+            ]
+          },
+          {
+            "type": "string",
+            "enum": [
+              "nuget"
+            ],
+            "strict": true
+          }
+        ],
+        "normal": true
+      },
       "openshift": {
         "$id": "openshift",
         "title": "Openshift",
@@ -6150,6 +6411,9 @@
             "$ref": "#/definitions/deploy/datica"
           },
           {
+            "$ref": "#/definitions/deploy/ecr"
+          },
+          {
             "$ref": "#/definitions/deploy/elasticbeanstalk"
           },
           {
@@ -6193,6 +6457,9 @@
           },
           {
             "$ref": "#/definitions/deploy/npm"
+          },
+          {
+            "$ref": "#/definitions/deploy/nuget"
           },
           {
             "$ref": "#/definitions/deploy/openshift"

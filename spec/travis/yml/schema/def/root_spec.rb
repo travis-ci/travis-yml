@@ -151,6 +151,7 @@ describe Travis::Yml::Schema::Def::Root do
         snaps
         pkg
         sonarcloud
+        sbom
       ),
       deploy: %i(
         branches
@@ -171,6 +172,7 @@ describe Travis::Yml::Schema::Def::Root do
         codedeploy
         convox
         datica
+        ecr
         elasticbeanstalk
         engineyard
         firebase
@@ -185,6 +187,7 @@ describe Travis::Yml::Schema::Def::Root do
         lambda
         launchpad
         netlify
+        nuget
         npm
         openshift
         opsworks
