@@ -6,6 +6,15 @@ GIT
       cl (~> 1.0)
 
 GIT
+  remote: https://github.com/travis-ci/travis-conditions
+  revision: 48cc6e43a0edc131397913122adfb0bee9a37db7
+  branch: tbt199
+  specs:
+    travis-conditions (1.0.15)
+      parslet (~> 1.8.2)
+      sh_vars (~> 1.0.2)
+
+GIT
   remote: https://github.com/travis-ci/travis-config
   revision: 601e9a6dcb799dc14944c40153c60aaf935629ee
   specs:
@@ -28,7 +37,7 @@ PATH
       faraday
       faraday_middleware
       memoyze (~> 0.0.1)
-      oj (~> 3.7.10)
+      oj (~> 3.16.7)
       regstry (~> 1.0.2)
       ruby-obj (~> 1.0.0)
       sh_vars (~> 1.0.0)
@@ -46,6 +55,7 @@ GEM
     avl_tree (1.2.1)
       atomic (~> 1.1)
     backports (3.15.0)
+    bigdecimal (3.1.8)
     cl (1.2.4)
       regstry (~> 1.0.3)
     coderay (1.1.3)
@@ -80,7 +90,10 @@ GEM
     mustermann (1.1.1)
       ruby2_keywords (~> 0.0.1)
     nio4r (2.5.9)
-    oj (3.7.12)
+    oj (3.16.7)
+      bigdecimal (>= 3.0)
+      ostruct (>= 0.2)
+    ostruct (0.6.1)
     parslet (1.8.2)
     protocol (2.0.0)
       ruby_parser (~> 3.0)
@@ -142,9 +155,6 @@ GEM
     tilt (2.0.10)
     tins (1.24.1)
       sync
-    travis-conditions (1.0.13)
-      parslet (~> 1.8.2)
-      sh_vars (~> 1.0.2)
     webmock (3.8.1)
       addressable (>= 2.3.6)
       crack (>= 0.3.2)
@@ -169,6 +179,7 @@ DEPENDENCIES
   sinatra
   sinatra-contrib
   thwait
+  travis-conditions!
   travis-config!
   travis-metrics!
   travis-yml!
@@ -178,4 +189,4 @@ RUBY VERSION
    ruby 3.2.2
 
 BUNDLED WITH
-   2.4.13
+   2.4.19
