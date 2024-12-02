@@ -9,7 +9,7 @@ module Travis
         class Condition < Base
           register :condition
 
-          KEYWORDS = %i(type fork repo head_repo branch head_branch tag
+          KEYWORDS = %i(type fork repo head_repo branch head_branch tag draft
             sender env)
 
           def apply
