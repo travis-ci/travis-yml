@@ -22,6 +22,17 @@ describe Travis::Yml::Schema::Def::Php do
             ]
           }
         },
+        jdk: {
+          '$ref': '#/definitions/type/jdks',
+          flags: [
+            :expand
+          ],
+          only: {
+            language: [
+              'php'
+            ]
+          },
+        },
         composer_args: {
           type: :string,
           only: {
