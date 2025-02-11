@@ -21,6 +21,7 @@ module Travis
             value :bionic,        only: { os: :linux }
             value :focal,         only: { os: :linux }
             value :jammy,         only: { os: :linux }
+            value :noble,         only: { os: :linux }
             value :'server-2016', only: { os: :windows }, edge: true
             value :rhel8,         only: { os: :linux }
 
