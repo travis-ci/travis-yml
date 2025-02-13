@@ -11,6 +11,7 @@ describe Travis::Yml do
       xenial
       focal
       jammy
+      noble
     )
 
     known.each do |value|
