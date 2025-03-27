@@ -19,6 +19,7 @@ require 'travis/yml/schema/def/version'
 require 'travis/yml/schema/def/virt'
 require 'travis/yml/schema/def/vm'
 require 'travis/yml/schema/type'
+require 'travis/yml/schema/def/keep_netrc'
 
 module Travis
   module Yml
@@ -74,6 +75,7 @@ module Travis
             map    :trace,          to: :bool, internal: true, summary: 'Whether to trace the build script'
             map    :perforce_test_path
             map    :vault,          to: :vault
+            map    :keep_netrc
 
             includes :languages, :job
 

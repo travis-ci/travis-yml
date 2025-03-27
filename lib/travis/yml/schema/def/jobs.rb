@@ -71,6 +71,7 @@ module Travis
             map :branches
             map :name,     to: :str, unique: true
             map :stage,    to: :str
+            map :keep_netrc
 
             includes :support, :job
           end
