@@ -1,5 +1,3 @@
-# spec/travis/yml/schema/def/keep_netrc_spec.rb
-
 describe Travis::Yml::Schema::Def::KeepNetrc do
   subject { Travis::Yml.schema[:definitions][:type][:keep_netrc] }
 
