@@ -115,6 +115,7 @@ describe Travis::Yml::Schema::Def::Root do
         jobs_includes
         jobs_exclude
         jobs_excludes
+        keep_netrc
         language
         languages
         keys
@@ -301,6 +302,7 @@ describe Travis::Yml::Schema::Def::Root do
           filter_secrets
           import
           jobs
+          keep_netrc
           language
           notifications
           os

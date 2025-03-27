@@ -86,6 +86,9 @@ describe Travis::Yml::Schema::Def::Jobs do
         branch: {
           type: :string,
           deprecated: 'use conditional allow_failures using :if'
+        },
+        keep_netrc: {
+          '$ref': '#/definitions/type/keep_netrc'
         }
       )
     end
