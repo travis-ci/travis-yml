@@ -8,7 +8,7 @@ describe Travis::Yml::Schema::Def::KeepNetrc do
   it do
     should include(
       '$id': :keep_netrc,
-      title: 'KeepNetrc',
+      title: 'Keep Netrc',
       summary: 'Whether to retain the `.netrc` file after the build',
       example: 'true',
       anyOf: [
