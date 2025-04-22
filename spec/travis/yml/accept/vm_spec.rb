@@ -42,5 +42,57 @@ describe Travis::Yml do
         it { should_not have_msg }
       end
     end
+
+    describe 'create' do
+      describe 'name' do
+        describe 'my_custom_name' do
+        yaml %(
+          vm:
+            create:
+              name: my_custom_name
+        )
+        let(:value) { { vm: { create: { name: 'my_custom_name' } } } }
+        it { should serialize_to vm: { create: { name: 'my_custom_name' } } }
+        it { should_not have_msg }
+        end
+      end
+    end
+
+    describe 'create' do
+      describe 'name' do
+        describe 'my_custom_name_duplicate' do
+          yaml %(
+            jobs:
+              include:
+                - os: linux
+                  dist: focal
+                  vm:
+                    create:
+                      name: my_custom_name_duplicate
+                - os: linux
+                  dist: focal
+                  vm:
+                    create:
+                      name: my_custom_name_duplicate
+          )
+          it { should have_msg [:error, :"jobs.include.vm.create", :duplicate, { :values => [ "my_custom_name_duplicate" ] } ] }
+        end
+      end
+    end
+
+     describe 'use' do
+      describe 'name' do
+        describe 'my_custom_name' do
+        yaml %(
+          vm:
+            use:
+              name: my_custom_name
+        )
+        let(:value) { { vm: { use: { name: 'my_custom_name' } } } }
+        it { should serialize_to vm: { use: { name: 'my_custom_name' } } }
+        it { should_not have_msg }
+        end
+      end
+    end
   end
 end

@@ -2404,7 +2404,7 @@
       "vm": {
         "$id": "vm",
         "title": "Vm",
-        "description": "These settings can be used in order to choose VM size",
+        "description": "These settings can be used in order to choose VM size and custom image",
         "type": "object",
         "properties": {
           "size": {
@@ -2417,10 +2417,35 @@
               "gpu-medium",
               "gpu-xlarge"
             ]
+          },
+          "create": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false,
+            "example": "my_custom_name",
+            "summary": "The name of the custom image to create",
+            "flags": [
+              "unique_value_globally"
+            ]
+          },
+          "use": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false,
+            "example": "my_custom_name",
+            "summary": "The name of the custom image to use"
           }
         },
         "additionalProperties": false,
-        "summary": "VM size settings",
+        "summary": "VM size and custom image settings",
         "see": {
           "Customizing the Build": "https://docs.travis-ci.com/user/customizing-the-build/"
         }
