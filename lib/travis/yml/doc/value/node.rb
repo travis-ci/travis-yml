@@ -10,6 +10,7 @@ module Travis
           include Factory
 
           attr_writer :key, :value, :anchors
+          attr_accessor :unique_value_globally_already_used
 
           def root
             @root ||= root? ? self : parent.root
@@ -206,16 +207,6 @@ module Travis
               msgs: msgs.any? ? msgs.inspect : nil
             }.reject { |_, obj| obj.nil? || obj.empty? }
             '#<%s %s>' % [type, pairs.map { |pair| pair.join('=') }.join(' ')]
-          end
-
-          def unique_value_globally_already_used
-            @unique_value_globally_already_used = Array.new if @unique_value_globally_already_used == nil
-            @unique_value_globally_already_used
-          end
-  
-          def add_unique_value_globally_already_used(value)
-            @unique_value_globally_already_used = Array.new if @unique_value_globally_already_used == nil
-            @unique_value_globally_already_used << value
           end
         end
       end

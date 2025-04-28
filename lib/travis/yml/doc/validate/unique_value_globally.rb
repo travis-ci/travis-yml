@@ -8,8 +8,6 @@ module Travis
         class UniqueValueGlobally < Base
           register :unique_value_globally
 
-          #@@already_used = Array.new
-
           def apply
             error if apply? && dupes?
             value
@@ -22,8 +20,10 @@ module Travis
             end
 
             def dupes?
-              return true if top_obj != nil && top_obj.unique_value_globally_already_used.include?(value.first.last.value)
-              top_obj.add_unique_value_globally_already_used(value.first.last.value) if top_obj != nil
+              return false if top_obj == nil
+              top_obj.unique_value_globally_already_used ||= []
+              return true if top_obj.unique_value_globally_already_used.include?(value.first.last.value)
+              top_obj.unique_value_globally_already_used << value.first.last.value
               false
             end
 
