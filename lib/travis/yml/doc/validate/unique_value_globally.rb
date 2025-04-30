@@ -20,8 +20,7 @@ module Travis
             end
 
             def dupes?
-              return false if top_obj == nil
-              top_obj.unique_value_globally_already_used ||= []
+              return false if top_obj.nil?
               return true if top_obj.unique_value_globally_already_used.include?(value.first.last.value)
               top_obj.unique_value_globally_already_used << value.first.last.value
               false

@@ -12,6 +12,11 @@ module Travis
           attr_writer :key, :value, :anchors
           attr_accessor :unique_value_globally_already_used
 
+          def initialize(*args)
+            self.unique_value_globally_already_used ||= []
+            super(*args)
+          end
+
           def root
             @root ||= root? ? self : parent.root
           end
