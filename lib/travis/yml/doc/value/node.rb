@@ -9,7 +9,7 @@ module Travis
         class Node < Obj.new(:parent, :key, :value, :opts)
           include Factory
 
-          attr_writer :key, :value, :anchors
+          attr_writer :value, :anchors
           attr_accessor :unique_value_globally_already_used
 
           def initialize(*args)
