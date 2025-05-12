@@ -83,6 +83,9 @@ describe Travis::Yml::Schema::Def::Jobs do
         stage: {
           type: :string
         },
+        keep_netrc: {
+          '$ref': '#/definitions/type/keep_netrc'
+        }
       )
     end
   end

@@ -88,6 +88,9 @@ describe Travis::Yml::Schema::Def::Jobs do
         },
         allow_failure: {
           type: :boolean
+        },
+        keep_netrc: {
+          '$ref': '#/definitions/type/keep_netrc'
         }
       )
     end
