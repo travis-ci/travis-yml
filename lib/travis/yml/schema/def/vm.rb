@@ -34,13 +34,18 @@ module Travis
             end
           end
 
-          class Use < Type::Map
+          class Use < Type::Any
             register :use
 
             def define
-              example 'my_custom_name'
-              summary 'The name of the custom image to use'
-              map :name, to: :str
+              type Class.new(Type::Map) {
+                def define
+                  example 'my_custom_name'
+                  summary 'The name of the custom image to use'
+                  map :name, to: :str
+                end
+              }
+            type :str
             end
           end
         end

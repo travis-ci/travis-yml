@@ -40,15 +40,22 @@ describe Travis::Yml::Schema::Def::VM do
           ]
         },
         use: {
-          additionalProperties: false,
-          example: "my_custom_name",
-          properties: {
-            name: {
+          anyOf: [
+            {
+              additionalProperties: false,
+              example: "my_custom_name",
+              properties: {
+                name: {
+                  type: :string
+                }
+              },
+              summary: "The name of the custom image to use",
+              type: :object
+            },
+            {
               type: :string
             }
-          },
-          summary: "The name of the custom image to use",
-          type: :object
+          ]
         }
       },
       additionalProperties: false

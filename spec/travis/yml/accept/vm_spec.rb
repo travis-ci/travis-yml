@@ -94,5 +94,17 @@ describe Travis::Yml do
         end
       end
     end
+
+     describe 'use' do
+      describe 'my_custom_name' do
+        yaml %(
+          vm:
+            use: my_custom_name
+        )
+        let(:value) { { vm: { use: 'my_custom_name' } } }
+        it { should serialize_to vm: { use: 'my_custom_name' } }
+        it { should_not have_msg }
+      end
+    end
   end
 end

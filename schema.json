@@ -2433,15 +2433,22 @@
             ]
           },
           "use": {
-            "type": "object",
-            "properties": {
-              "name": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": false,
+                "example": "my_custom_name",
+                "summary": "The name of the custom image to use"
+              },
+              {
                 "type": "string"
               }
-            },
-            "additionalProperties": false,
-            "example": "my_custom_name",
-            "summary": "The name of the custom image to use"
+            ]
           }
         },
         "additionalProperties": false,
