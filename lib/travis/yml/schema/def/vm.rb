@@ -45,7 +45,7 @@ module Travis
                   map :name, to: :str
                 end
               }
-            type :str
+              type :str
             end
           end
         end
