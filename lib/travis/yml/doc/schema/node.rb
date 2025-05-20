@@ -119,6 +119,10 @@ module Travis
             flags.include?(:unique)
           end
 
+          def unique_value_globally?
+            flags.include?(:unique_value_globally)
+          end
+
           def match(strs, str)
             Match.new(strs.map(&:to_s), str.to_s, self).run
           end
