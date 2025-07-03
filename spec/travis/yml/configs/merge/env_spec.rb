@@ -85,7 +85,7 @@ describe Travis::Yml::Configs, 'merging env' do
     describe 'api' do
       let(:api) do
         %(
-          dist: xenial
+          dist: focal
           script: ./api
           env: API=true
         )
@@ -96,7 +96,7 @@ describe Travis::Yml::Configs, 'merging env' do
         it do
           should serialize_to(
             os: ['linux'],
-            dist: 'xenial',
+            dist: 'focal',
             script: %w(./api),
             env: { jobs: [{ API: 'true' }] }
           )
@@ -108,7 +108,7 @@ describe Travis::Yml::Configs, 'merging env' do
         it do
           should serialize_to(
             os: ['linux'],
-            dist: 'xenial',
+            dist: 'focal',
             script: %w(./api),
             env: { jobs: [{ API: 'true' }] }
           )
@@ -120,7 +120,7 @@ describe Travis::Yml::Configs, 'merging env' do
         it do
           should serialize_to(
             os: ['linux'],
-            dist: 'xenial',
+            dist: 'focal',
             script: %w(./api),
             env: { jobs: [{ API: 'true' }] }
           )
@@ -131,7 +131,7 @@ describe Travis::Yml::Configs, 'merging env' do
         let(:mode) { :replace }
         it do
           should serialize_to(
-            dist: 'xenial',
+            dist: 'focal',
             script: %w(./api),
             env: { jobs: [{ API: 'true' }] }
           )
@@ -200,7 +200,7 @@ describe Travis::Yml::Configs, 'merging env' do
     describe 'api' do
       let(:api) do
         %(
-          dist: xenial
+          dist: focal
           script: ./api
           env: API=true
         )
@@ -211,7 +211,7 @@ describe Travis::Yml::Configs, 'merging env' do
         it do
           should serialize_to(
             os: ['linux'],
-            dist: 'xenial',
+            dist: 'focal',
             script: %w(./two ./one ./travis ./api),
             env: { jobs: [{ ONE: 'true' }, { TRAVIS: 'true' }, { API: 'true' }] }
           )
@@ -223,7 +223,7 @@ describe Travis::Yml::Configs, 'merging env' do
         it do
           should serialize_to(
             os: ['linux'],
-            dist: 'xenial',
+            dist: 'focal',
             script: %w(./api ./travis ./one ./two),
             env: { jobs: [{ API: 'true' }, { TRAVIS: 'true' }, { ONE: 'true' }] }
           )
@@ -235,7 +235,7 @@ describe Travis::Yml::Configs, 'merging env' do
         it do
           should serialize_to(
             os: ['linux'],
-            dist: 'xenial',
+            dist: 'focal',
             script: %w(./api),
             env: { jobs: [{ API: 'true' }] }
           )
@@ -246,7 +246,7 @@ describe Travis::Yml::Configs, 'merging env' do
         let(:mode) { :replace }
         it do
           should serialize_to(
-            dist: 'xenial',
+            dist: 'focal',
             script: %w(./api),
             env: { jobs: [{ API: 'true' }] }
           )

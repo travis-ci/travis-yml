@@ -249,7 +249,7 @@ describe Travis::Yml, 'matrix' do
     )
 
     expands_to [
-      { language: 'ruby', os: 'linux', dist: 'xenial' },
+      { language: 'ruby', os: 'linux', dist: 'focal' },
       { language: 'ruby', os: 'osx' }
     ]
   end
@@ -750,7 +750,7 @@ describe Travis::Yml, 'matrix' do
     )
 
     expands_to [
-      { language: 'python', os: 'linux', dist: 'xenial' },
+      { language: 'python', os: 'linux', dist: 'focal' },
       { language: 'python', os: 'osx' },
       { language: 'python', os: 'windows' },
     ]
@@ -760,7 +760,7 @@ describe Travis::Yml, 'matrix' do
     yaml %(
       language: cpp
       os: linux
-      dist: xenial
+      dist: focal
 
       jobs:
         include:
@@ -775,8 +775,8 @@ describe Travis::Yml, 'matrix' do
     )
 
     expands_to [
-      { language: 'cpp', os: 'linux-ppc64le', dist: 'xenial' },
-      { language: 'cpp', os: 'linux', dist: 'xenial', arch: 'ppc64le' },
+      { language: 'cpp', os: 'linux-ppc64le', dist: 'focal' },
+      { language: 'cpp', os: 'linux', dist: 'focal', arch: 'ppc64le' },
       { language: 'cpp', os: 'linux', dist: 'xenial', arch: 's390x' },
       { language: 'cpp', os: 'linux', dist: 'bionic', arch: 's390x' },
     ]

@@ -13,7 +13,7 @@ describe Travis::Yml do
         - osx
         - windows
       )
-      it { should serialize_to language: 'ruby', os: ['linux', 'osx', 'windows'], dist: 'xenial' }
+      it { should serialize_to language: 'ruby', os: ['linux', 'osx', 'windows'], dist: 'focal' }
     end
 
     describe 'given a string' do

@@ -14,7 +14,7 @@ describe Travis::Yml, 'matrix defaults', defaults: true do
       os: linux
     )
     expands_to [
-      { language: 'ruby', os: 'linux', dist: 'xenial' }
+      { language: 'ruby', os: 'linux', dist: 'focal' }
     ]
   end
 
@@ -35,7 +35,7 @@ describe Travis::Yml, 'matrix defaults', defaults: true do
       - windows
     )
     expands_to [
-      { language: 'ruby', os: 'linux', dist: 'xenial' },
+      { language: 'ruby', os: 'linux', dist: 'focal' },
       { language: 'ruby', os: 'osx' }, # this should be objective-c, but it's not possible to make that happen with what we have at this point
       { language: 'ruby', os: 'windows' },
     ]
@@ -47,7 +47,7 @@ describe Travis::Yml, 'matrix defaults', defaults: true do
       os: linux
     )
     expands_to [
-      { language: 'ruby', os: 'linux', dist: 'xenial' }
+      { language: 'ruby', os: 'linux', dist: 'focal' }
     ]
   end
 
@@ -60,7 +60,7 @@ describe Travis::Yml, 'matrix defaults', defaults: true do
       - windows
     )
     expands_to [
-      { language: 'ruby', os: 'linux', dist: 'xenial' },
+      { language: 'ruby', os: 'linux', dist: 'focal' },
       { language: 'ruby', os: 'osx' },
       { language: 'ruby', os: 'windows' },
     ]
@@ -75,41 +75,41 @@ describe Travis::Yml, 'matrix defaults', defaults: true do
       - windows
     )
     expands_to [
-      { language: 'python', os: 'linux', dist: 'xenial' },
+      { language: 'python', os: 'linux', dist: 'focal' },
       { language: 'python', os: 'osx' },
       { language: 'python', os: 'windows' },
     ]
   end
 
-  describe 'dist: xenial' do
+  describe 'dist: focal' do
     yaml %(
-      dist: xenial
+      dist: focal
     )
     expands_to [
-      { language: 'ruby', os: 'linux', dist: 'xenial' },
+      { language: 'ruby', os: 'linux', dist: 'focal' },
     ]
   end
 
-  describe 'language: python, dist: xenial' do
+  describe 'language: python, dist: focal' do
     yaml %(
       language: python
-      dist: xenial
+      dist: focal
     )
     expands_to [
-      { language: 'python', os: 'linux', dist: 'xenial' },
+      { language: 'python', os: 'linux', dist: 'focal' },
     ]
   end
 
-  describe 'multi-os, dist: xenial' do
+  describe 'multi-os, dist: focal' do
     yaml %(
       os:
       - linux
       - osx
       - windows
-      dist: xenial
+      dist: focal
     )
     expands_to [
-      { language: 'ruby', os: 'linux', dist: 'xenial' },
+      { language: 'ruby', os: 'linux', dist: 'focal' },
       { language: 'ruby', os: 'osx' },
       { language: 'ruby', os: 'windows' },
     ]
@@ -118,7 +118,7 @@ describe Travis::Yml, 'matrix defaults', defaults: true do
   describe 'language: objective-c, dist, arch' do
     yaml %(
       language: objective-c
-      dist: xenial
+      dist: focal
       arch:
       - amd64
       - arm64
@@ -151,7 +151,7 @@ describe Travis::Yml, 'matrix defaults', defaults: true do
       - two
     )
     expands_to [
-      { language: 'ruby', os: 'linux', dist: 'xenial' },
+      { language: 'ruby', os: 'linux', dist: 'focal' },
       { language: 'ruby', os: 'osx', osx_image: 'one' },
       { language: 'ruby', os: 'osx', osx_image: 'two' },
     ]
@@ -168,14 +168,14 @@ describe Travis::Yml, 'matrix defaults', defaults: true do
       - arm64
     )
     expands_to [
-      { language: 'ruby', os: 'linux', arch: 'amd64', dist: 'xenial' },
-      { language: 'ruby', os: 'linux', arch: 'arm64', dist: 'xenial' },
+      { language: 'ruby', os: 'linux', arch: 'amd64', dist: 'focal' },
+      { language: 'ruby', os: 'linux', arch: 'arm64', dist: 'focal' },
       { language: 'ruby', os: 'osx' },
       { language: 'ruby', os: 'windows' },
     ]
   end
 
-  describe 'multi-os, dist: xenial, multi-arch' do
+  describe 'multi-os, dist: focal, multi-arch' do
     yaml %(
       os:
       - linux
@@ -184,11 +184,11 @@ describe Travis::Yml, 'matrix defaults', defaults: true do
       arch:
       - amd64
       - arm64
-      dist: xenial
+      dist: focal
     )
     expands_to [
-      { language: 'ruby', os: 'linux', arch: 'amd64', dist: 'xenial' },
-      { language: 'ruby', os: 'linux', arch: 'arm64', dist: 'xenial' },
+      { language: 'ruby', os: 'linux', arch: 'amd64', dist: 'focal' },
+      { language: 'ruby', os: 'linux', arch: 'arm64', dist: 'focal' },
       { language: 'ruby', os: 'osx' },
       { language: 'ruby', os: 'windows' },
     ]
