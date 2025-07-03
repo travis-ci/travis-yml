@@ -775,7 +775,7 @@ describe Travis::Yml, 'matrix' do
     )
 
     expands_to [
-      { language: 'cpp', os: 'linux-ppc64le', dist: 'focal' },
+      { language: 'cpp', os: 'linux-ppc64le' },
       { language: 'cpp', os: 'linux', dist: 'focal', arch: 'ppc64le' },
       { language: 'cpp', os: 'linux', dist: 'focal', arch: 's390x' },
       { language: 'cpp', os: 'linux', dist: 'bionic', arch: 's390x' },
