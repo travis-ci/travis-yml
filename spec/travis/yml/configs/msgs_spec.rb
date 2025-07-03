@@ -12,7 +12,7 @@ describe Travis::Yml::Configs, 'msgs' do
       it { expect(subject.config).to eq defaults }
       it { should have_msg [:info, :root, :default, key: 'language', default: 'ruby'] }
       it { should have_msg [:info, :root, :default, key: 'os', default: 'linux'] }
-      it { should have_msg [:info, :root, :default, key: 'dist', default: 'xenial'] }
+      it { should have_msg [:info, :root, :default, key: 'dist', default: 'focal'] }
     end
 
     describe 'empty', empty: true do
@@ -46,7 +46,7 @@ describe Travis::Yml::Configs, 'msgs' do
       it { expect(subject.config).to eq defaults }
       it { should have_msg [:info, :root, :default, key: 'language', default: 'ruby'] }
       it { should have_msg [:info, :root, :default, key: 'os', default: 'linux'] }
-      it { should have_msg [:info, :root, :default, key: 'dist', default: 'xenial'] }
+      it { should have_msg [:info, :root, :default, key: 'dist', default: 'focal'] }
     end
 
     describe 'empty', empty: true do

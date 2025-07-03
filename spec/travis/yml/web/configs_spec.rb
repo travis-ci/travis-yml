@@ -144,7 +144,7 @@ describe Travis::Yml::Web::App, 'POST /configs' do
       expect(body[:messages]).to eq [
         { level: 'info', code: 'default', key: 'root', args: { key: 'language', default: 'ruby' }, type: 'config' },
         { level: 'info', code: 'default', key: 'root', args: { key: 'os', default: 'linux' }, type: 'config' },
-        { level: 'info', code: 'default', key: 'root', args: { key: 'dist', default: 'xenial' }, type: 'config' },
+        { level: 'info', code: 'default', key: 'root', args: { key: 'dist', default: 'focal' }, type: 'config' },
         { level: 'warn', code: 'unknown_key', key: 'root', args: { key: 'api', value: true }, type: 'config' },
         { level: 'warn', code: 'unknown_key', key: 'root', args: { key: 'travis_yml', value: true }, type: 'config' },
       ]

@@ -26,7 +26,7 @@ describe Travis::Yml do
         - linux
         - osx
       )
-      it { should serialize_to language: 'ruby', os: ['linux', 'osx'], dist: 'xenial' }
+      it { should serialize_to language: 'ruby', os: ['linux', 'osx'], dist: 'focal' }
       it { should have_msg [:info, :root, :default, key: 'language', default: 'ruby'] }
     end
 
@@ -52,7 +52,7 @@ describe Travis::Yml do
       yaml %(
         language: sql
       )
-      it { should serialize_to language: 'sql', os: ['linux'], dist: 'xenial' }
+      it { should serialize_to language: 'sql', os: ['linux'], dist: 'focal' }
       it { should have_msg [:error, :language, :unknown_value, value: 'sql'] }
     end
 

@@ -6,7 +6,7 @@ module Spec
 
       def self.included(const)
         const.let(:empty) { {} }
-        const.let(:defaults) { { language: 'ruby', os: ['linux'], dist: 'xenial' } }
+        const.let(:defaults) { { language: 'ruby', os: ['linux'], dist: 'focal' } }
         const.let(:secure) { strict_encode64('secure') }
 
         const.let(:opts) do |ctx|

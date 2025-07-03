@@ -3,7 +3,7 @@ describe Travis::Yml, 'accept', slow: true do
 
   describe 'dist' do
     it { should validate dist: 'precise' }
-    it { should validate dist: 'xenial' }
+    it { should validate dist: 'focal' }
 
     it { should_not validate dist: 'not-a-dist' }
     it { should_not validate dist: ['precise'] }
