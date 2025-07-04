@@ -12,7 +12,7 @@ describe Travis::Yml, integration_configs: true do
           [
             [:info, :root, :default, { default: 'ruby', key: 'language' }],
             [:info, :root, :default, { default: 'linux', key: 'os' }],
-            [:info, :root, :default, { default: 'xenial', key: 'dist' }]
+            [:info, :root, :default, { default: 'focal', key: 'dist' }]
           ]
         )
       end
@@ -27,7 +27,7 @@ describe Travis::Yml, integration_configs: true do
           [
             [:info, :root, :default, { default: 'ruby', key: 'language' }],
             [:info, :root, :default, { default: 'linux', key: 'os' }],
-            [:info, :root, :default, { default: 'xenial', key: 'dist' }],
+            [:info, :root, :default, { default: 'focal', key: 'dist' }],
             [:alert, :"vault.token", :secure, { type: :str }],
             [:error, :'vault.token', :secure, { message: 'The token value must be put under "secure" section' }],
             [:error, :"vault.secrets.kv_api_ver", :unknown_value, { value: 'invalid_value' }],
@@ -56,7 +56,7 @@ describe Travis::Yml, integration_configs: true do
           [
             [:info, :root, :default, { default: 'ruby', key: 'language' }],
             [:info, :root, :default, { default: 'linux', key: 'os' }],
-            [:info, :root, :default, { default: 'xenial', key: 'dist' }]
+            [:info, :root, :default, { default: 'focal', key: 'dist' }]
           ]
         )
       end
@@ -71,7 +71,7 @@ describe Travis::Yml, integration_configs: true do
           [
             [:info, :root, :default, { key: 'language', default: 'ruby' }],
             [:info, :root, :default, { key: 'os', default: 'linux' }],
-            [:info, :root, :default, { key: 'dist', default: 'xenial' }],
+            [:info, :root, :default, { key: 'dist', default: 'focal' }],
             [:alert, :"jobs.include.vault.token", :secure, { type: :str }],
             [:error, :'jobs.include.vault.token', :secure, { message: 'The token value must be put under "secure" section' }],
             [:error, :"jobs.include.vault.secrets.kv_api_ver", :unknown_value, { value: 'invalid_value' }],

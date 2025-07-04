@@ -55,7 +55,8 @@ describe Travis::Yml::Schema::Def::Dist do
         focal: {
           only: {
             os: [
-              'linux'
+              'linux',
+              'linux-ppc64le'
             ]
           }
         },

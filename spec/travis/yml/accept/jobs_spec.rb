@@ -456,7 +456,7 @@ describe Travis::Yml do
               #{key}:
                 rvm: 2.3
           )
-          it { should serialize_to language: 'ruby', os: ['linux'], dist: 'xenial', jobs: { key => [rvm: '2.3'] } }
+          it { should serialize_to language: 'ruby', os: ['linux'], dist: 'focal', jobs: { key => [rvm: '2.3'] } }
         end
 
         describe 'given language' do

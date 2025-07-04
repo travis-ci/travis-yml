@@ -56,7 +56,7 @@ describe Travis::Yml do
         deploy:
           - unknown: unknown
       )
-      it { should serialize_to language: 'ruby', os: ['linux'], dist: 'xenial', deploy: [unknown: 'unknown'] }
+      it { should serialize_to language: 'ruby', os: ['linux'], dist: 'focal', deploy: [unknown: 'unknown'] }
       it { should have_msg [:error, :'deploy', :required, key: 'provider'] }
     end
 
@@ -84,7 +84,7 @@ describe Travis::Yml do
           deploy:
             - strategy: git
         )
-        it { should serialize_to language: 'ruby', os: ['linux'], dist: 'xenial', deploy: [strategy: 'git'] }
+        it { should serialize_to language: 'ruby', os: ['linux'], dist: 'focal', deploy: [strategy: 'git'] }
         it { should have_msg [:error, :'deploy', :required, key: 'provider'] }
       end
 

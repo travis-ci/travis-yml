@@ -321,7 +321,7 @@ describe Travis::Yml::Schema::Def::Root do
       it { should include arch:           { '$ref': '#/definitions/type/archs', flags: [:expand] } }
       it { should include compiler:       { '$ref': '#/definitions/type/compilers', flags: [:expand] } }
       it { should include conditions:     { '$ref': '#/definitions/type/conditions' } }
-      it { should include dist:           { '$ref': '#/definitions/type/dist', defaults: [{ value: 'xenial', only: { os: ['linux', 'linux-ppc64le'] } }] } }
+      it { should include dist:           { '$ref': '#/definitions/type/dist', defaults: [{ value: 'focal', only: { os: ['linux', 'linux-ppc64le'] } }] } }
       it { should include env:            { '$ref': '#/definitions/type/env' } }
       it { should include import:         { '$ref': '#/definitions/type/imports' } }
       # it { should include language:       { '$ref': '#/definitions/type/language' } }

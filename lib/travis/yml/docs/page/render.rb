@@ -20,7 +20,7 @@ module Travis
           end
 
           def layout(content, opts)
-            ERB.new(tpl(:layout), nil, '-').result_with_hash(
+            ERB.new(tpl(:layout), trim_mode: '-').result_with_hash(
               content: formatted(content, opts[:format]),
               menu: formatted(menu, opts[:format])
             )
@@ -30,7 +30,7 @@ module Travis
             name ||= self.class.name.split('::').last.downcase
             scope = binding
             opts.each { |key, value| scope.local_variable_set(key, value) }
-            ERB.new(tpl(name), nil, '-').result(scope)
+            ERB.new(tpl(name), trim_mode: '-').result(scope)
           end
 
           def menu

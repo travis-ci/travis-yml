@@ -27,16 +27,16 @@ describe Travis::Yml do
     describe 'default', defaults: true do
       describe 'no os given', defaults: true do
         yaml ''
-        it { should serialize_to os: ['linux'], dist: 'xenial', language: 'ruby' }
-        it { should have_msg [:info, :root, :default, key: 'dist', default: 'xenial'] }
+        it { should serialize_to os: ['linux'], dist: 'focal', language: 'ruby' }
+        it { should have_msg [:info, :root, :default, key: 'dist', default: 'focal'] }
       end
 
       describe 'on linux', defaults: true do
         yaml %(
           os: linux
         )
-        it { should serialize_to os: ['linux'], dist: 'xenial', language: 'ruby' }
-        it { should have_msg [:info, :root, :default, key: 'dist', default: 'xenial'] }
+        it { should serialize_to os: ['linux'], dist: 'focal', language: 'ruby' }
+        it { should have_msg [:info, :root, :default, key: 'dist', default: 'focal'] }
       end
 
       describe 'on windows', defaults: true do

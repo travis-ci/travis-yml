@@ -34,7 +34,7 @@ module Travis
               { value: :'objective-c', only: { os: :osx } }
             ],
             dist: [
-              { value: :xenial, only: { os: [:linux, :'linux-ppc64le'] } }
+              { value: :focal, only: { os: [:linux, :'linux-ppc64le'] } }
             ],
             os: [
               { value: :linux, except: { language: 'objective-c' } },
