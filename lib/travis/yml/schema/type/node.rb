@@ -273,6 +273,10 @@ module Travis
             flags << :unique
           end
 
+          def unique_value_globally(*)
+            flags << :unique_value_globally
+          end
+
           def opts
             only(compact(attrs), *self.class.opts)
           end
