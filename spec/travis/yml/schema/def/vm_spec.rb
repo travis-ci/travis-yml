@@ -7,11 +7,27 @@ describe Travis::Yml::Schema::Def::VM do
     should include(
       '$id': :vm,
       title: 'Vm',
-      summary: kind_of(String),
-      description: kind_of(String),
-      see: kind_of(Hash),
+      summary: "VM size and custom image settings",
+      description: "These settings can be used in order to choose VM size and custom image",
+      see: {
+        "Customizing the Build": "https://docs.travis-ci.com/user/customizing-the-build/"
+      },
       type: :object,
       properties: {
+        create: {
+          additionalProperties: false,
+          example: "my_custom_name",
+          flags: [
+            :unique_value_globally
+          ],
+          properties: {
+            name: {
+              type: :string
+            }
+          },
+          summary: "The name of the custom image to create",
+          type: :object
+        },
         size: {
           type: :string,
           enum: [
@@ -23,6 +39,24 @@ describe Travis::Yml::Schema::Def::VM do
             'gpu-xlarge'
           ]
         },
+        use: {
+          anyOf: [
+            {
+              additionalProperties: false,
+              example: "my_custom_name",
+              properties: {
+                name: {
+                  type: :string
+                }
+              },
+              summary: "The name of the custom image to use",
+              type: :object
+            },
+            {
+              type: :string
+            }
+          ]
+        }
       },
       additionalProperties: false
     )
