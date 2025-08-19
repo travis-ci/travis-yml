@@ -10,6 +10,7 @@ require 'travis/yml/doc/validate/invalid_type'
 require 'travis/yml/doc/validate/required'
 require 'travis/yml/doc/validate/template'
 require 'travis/yml/doc/validate/unique'
+require 'travis/yml/doc/validate/unique_value_globally'
 require 'travis/yml/doc/validate/unknown_keys'
 require 'travis/yml/doc/validate/unknown_value'
 require 'travis/yml/doc/validate/unsupported_keys'
@@ -48,7 +49,7 @@ module Travis
 
         VALIDATORS = {
           map: [
-            InvalidType, UnknownKeys, UnsupportedKeys, Compact, Required,
+            InvalidType, UniqueValueGlobally, UnknownKeys, UnsupportedKeys, Compact, Required,
             Empty, Flags, Condition
           ],
           seq: [
