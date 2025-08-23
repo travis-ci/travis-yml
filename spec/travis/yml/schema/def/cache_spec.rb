@@ -46,6 +46,10 @@ describe Travis::Yml::Schema::Def::Cache do
               type: :boolean,
               summary: kind_of(String),
             },
+            shards: {
+              type: :boolean,
+              summary: instance_of(String),
+            },
             yarn: {
               type: :boolean,
               summary: kind_of(String),

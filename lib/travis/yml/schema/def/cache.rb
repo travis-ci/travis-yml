@@ -8,7 +8,7 @@ module Travis
         class Cache < Type::Any
           register :cache
 
-          TYPES = %i(apt bundler cargo ccache cocoapods npm packages pip yarn)
+          TYPES = %i(apt bundler cargo ccache cocoapods npm packages pip shards yarn)
 
           def define
             summary 'Cache settings to speed up the build'
