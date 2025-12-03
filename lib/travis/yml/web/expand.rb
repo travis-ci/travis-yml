@@ -20,6 +20,10 @@ module Travis
           def handle
             status 200
             json matrix: expand
+          rescue JSON::ParserError => e
+            status 400
+            # Treat JSON parser errors as encoding errors for backward compatibility
+            error(EncodingError.new(e.message))
           rescue Oj::Error, EncodingError => e
             status 400
             error(e)
