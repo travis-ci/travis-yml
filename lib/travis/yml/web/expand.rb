@@ -37,9 +37,6 @@ module Travis
             Oj.load(request_body, symbol_keys: true, mode: :strict, empty_string: false)
           end
 
-          def request_body
-            request.body.read.tap { request.body.rewind }
-          end
       end
     end
   end

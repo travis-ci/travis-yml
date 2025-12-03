@@ -24,6 +24,10 @@ module Travis
           def handle
             status 200
             json Parse::Config.new(load).to_h
+          rescue JSON::ParserError => e
+            # Treat JSON parser errors as input errors for backward compatibility
+            status 400
+            error(Yml::InputError.new(:invalid_config_format, e.message))
           rescue Yml::InputError => e
             status 400
             error(e)
