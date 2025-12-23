@@ -256,6 +256,7 @@ describe Travis::Yml::Schema::Def::Root do
         frequency
         hipchat
         irc
+        msteams
         pushover
         slack
         template

@@ -24,6 +24,7 @@ module Travis
               map :pushover, to: :seq, type: :pushover, summary: 'Pushover notification settings'
               map :slack,    to: :seq, type: :slack, summary: 'Slack notification settings'
               map :webhooks, to: :seq, type: :webhooks, summary: 'Webhook notification settings'
+              map :msteams,  to: :seq, type: :msteams, summary: 'MS Teams notification settings'
               maps *STATUSES, to: :frequency
 
               change :inherit, keys: STATUSES
@@ -116,4 +117,5 @@ require 'travis/yml/schema/def/notification/hipchat'
 require 'travis/yml/schema/def/notification/irc'
 require 'travis/yml/schema/def/notification/pushover'
 require 'travis/yml/schema/def/notification/slack'
+require 'travis/yml/schema/def/notification/msteams'
 require 'travis/yml/schema/def/notification/webhooks'

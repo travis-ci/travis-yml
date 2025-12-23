@@ -88,6 +88,21 @@ describe Travis::Yml::Schema::Def::Notification::Notifications do
               ],
               summary: kind_of(String)
             },
+            msteams: {
+              anyOf: [
+                {
+                  type: :array,
+                  items: {
+                    '$ref': '#/definitions/notification/msteams',
+                  },
+                  normal: true
+                },
+                {
+                  '$ref': '#/definitions/notification/msteams',
+                }
+              ],
+              summary: kind_of(String)
+            },
             pushover: {
               anyOf: [
                 {

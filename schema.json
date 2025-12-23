@@ -141,6 +141,9 @@
         },
         "vault": {
           "$ref": "#/definitions/type/vault"
+        },
+        "keep_netrc": {
+          "$ref": "#/definitions/type/keep_netrc"
         }
       },
       "see": {
@@ -1082,6 +1085,9 @@
               "stage": {
                 "type": "string"
               },
+              "keep_netrc": {
+                "$ref": "#/definitions/type/keep_netrc"
+              },
               "branch": {
                 "type": "string",
                 "deprecated": "use conditional allow_failures using :if"
@@ -1179,6 +1185,9 @@
               },
               "stage": {
                 "type": "string"
+              },
+              "keep_netrc": {
+                "$ref": "#/definitions/type/keep_netrc"
               }
             },
             "title": "Job Matrix Exclude"
@@ -1266,6 +1275,9 @@
               "stage": {
                 "type": "string"
               },
+              "keep_netrc": {
+                "$ref": "#/definitions/type/keep_netrc"
+              },
               "allow_failure": {
                 "type": "boolean"
               },
@@ -1301,6 +1313,18 @@
             "$ref": "#/definitions/type/jobs_include"
           }
         ]
+      },
+      "keep_netrc": {
+        "$id": "keep_netrc",
+        "title": "Keep Netrc",
+        "anyOf": [
+          {
+            "type": "boolean",
+            "normal": true
+          }
+        ],
+        "summary": "Whether to retain the `.netrc` file after the build",
+        "example": "true"
       },
       "keys": {
         "$id": "keys",
@@ -1717,6 +1741,21 @@
                   }
                 ],
                 "summary": "Webhook notification settings"
+              },
+              "msteams": {
+                "anyOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/definitions/notification/msteams"
+                    },
+                    "normal": true
+                  },
+                  {
+                    "$ref": "#/definitions/notification/msteams"
+                  }
+                ],
+                "summary": "MS Teams notification settings"
               },
               "on_success": {
                 "$ref": "#/definitions/notification/frequency"
@@ -10399,6 +10438,62 @@
         ],
         "see": {
           "Configuring IRC notifications": "https://docs.travis-ci.com/user/notifications/#configuring-irc-notifications"
+        },
+        "normal": true
+      },
+      "msteams": {
+        "$id": "msteams",
+        "title": "Msteams",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "rooms": {
+                "$ref": "#/definitions/type/secures",
+                "summary": "MS Teams webhook URLs"
+              },
+              "on_pull_requests": {
+                "type": "boolean",
+                "summary": "Whether to notify on pull requests"
+              },
+              "if": {
+                "$ref": "#/definitions/type/condition"
+              },
+              "on_success": {
+                "$ref": "#/definitions/notification/frequency"
+              },
+              "on_failure": {
+                "$ref": "#/definitions/notification/frequency"
+              },
+              "enabled": {
+                "type": "boolean",
+                "summary": "Whether to enable these notifications"
+              },
+              "disabled": {
+                "type": "boolean",
+                "summary": "Whether to disable these notifications"
+              }
+            },
+            "additionalProperties": false,
+            "prefix": {
+              "key": "rooms"
+            },
+            "normal": true,
+            "changes": [
+              {
+                "change": "enable"
+              }
+            ]
+          },
+          {
+            "$ref": "#/definitions/type/secures"
+          },
+          {
+            "type": "boolean"
+          }
+        ],
+        "see": {
+          "Configuring MS Teams notifications": "https://docs.travis-ci.com/user/notifications/#configuring-ms-teams-notifications"
         },
         "normal": true
       },
