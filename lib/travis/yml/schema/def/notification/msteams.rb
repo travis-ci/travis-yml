@@ -14,8 +14,16 @@ module Travis
 
               prefix :rooms
 
-              map :rooms,    to: :seq, type: :secure, summary: 'MS Teams webhook URLs'
+              map :rooms,    to: :msteams_urls, summary: 'MS Teams webhook URLs'
               map :on_pull_requests, to: :bool, summary: 'Whether to notify on pull requests'
+            end
+          end
+
+          class MsteamsUrls < Type::Seq
+            register :msteams_urls
+
+            def define
+              type :secure, strict: false
             end
           end
         end
