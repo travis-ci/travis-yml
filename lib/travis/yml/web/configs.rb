@@ -14,6 +14,9 @@ module Travis
         post '/configs' do
           status 200
           json configs.to_h
+        rescue JSON::ParserError => e
+          # Treat JSON parser errors as encoding errors for backward compatibility
+          error(EncodingError.new(e.message))
         rescue Yml::Error, Oj::Error, EncodingError => e
           error e
         end

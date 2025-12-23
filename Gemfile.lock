@@ -36,7 +36,7 @@ PATH
       faraday
       faraday_middleware
       memoyze (~> 0.0.1)
-      oj (~> 3.7.10)
+      oj (~> 3.13.0)
       regstry (~> 1.0.2)
       ruby-obj (~> 1.0.0)
       sh_vars (~> 1.0.0)
@@ -53,6 +53,7 @@ GEM
     atomic (1.1.101)
     avl_tree (1.2.1)
       atomic (~> 1.1)
+    base64 (0.3.0)
     bigdecimal (3.1.6)
     cl (1.2.4)
       regstry (~> 1.0.3)
@@ -92,6 +93,7 @@ GEM
     hitimes (1.3.1)
     json-schema (4.1.1)
       addressable (>= 2.8)
+    logger (1.7.0)
     memoyze (0.0.1)
     method_source (1.0.0)
     metriks (0.9.9.8)
@@ -104,10 +106,10 @@ GEM
       protocol (~> 2.0)
     multi_json (1.15.0)
     multipart-post (2.4.0)
-    mustermann (2.0.2)
+    mustermann (3.0.4)
       ruby2_keywords (~> 0.0.1)
-    nio4r (2.7.0)
-    oj (3.7.12)
+    nio4r (2.7.5)
+    oj (3.13.23)
     parslet (1.8.2)
     protocol (2.0.0)
       ruby_parser (~> 3.0)
@@ -115,21 +117,26 @@ GEM
       coderay (~> 1.1)
       method_source (~> 1.0)
     public_suffix (5.0.4)
-    puma (6.3.1)
+    puma (6.6.1)
       nio4r (~> 2.0)
     racc (1.7.3)
-    rack (2.2.8.1)
+    rack (3.2.4)
     rack-cors (2.0.2)
       rack (>= 2.0.0)
-    rack-protection (2.2.4)
-      rack
+    rack-protection (4.2.1)
+      base64 (>= 0.1.0)
+      logger (>= 1.6.0)
+      rack (>= 3.0.0, < 4)
+    rack-session (2.1.1)
+      base64 (>= 0.1.0)
+      rack (>= 3.0.0)
     rack-ssl-enforcer (0.2.9)
     rack-test (2.1.0)
       rack (>= 1.3)
     rake (13.1.0)
     redcarpet (3.6.0)
     regstry (1.0.15)
-    rexml (3.2.6)
+    rexml (3.4.4)
     rspec (3.13.0)
       rspec-core (~> 3.13.0)
       rspec-expectations (~> 3.13.0)
@@ -152,21 +159,23 @@ GEM
       faraday (>= 1.0)
     sexp_processor (4.17.1)
     sh_vars (1.0.2)
-    sinatra (2.2.4)
-      mustermann (~> 2.0)
-      rack (~> 2.2)
-      rack-protection (= 2.2.4)
+    sinatra (4.2.1)
+      logger (>= 1.6.0)
+      mustermann (~> 3.0)
+      rack (>= 3.0.0, < 4)
+      rack-protection (= 4.2.1)
+      rack-session (>= 2.0.0, < 3)
       tilt (~> 2.0)
-    sinatra-contrib (2.2.4)
-      multi_json
-      mustermann (~> 2.0)
-      rack-protection (= 2.2.4)
-      sinatra (= 2.2.4)
+    sinatra-contrib (4.2.1)
+      multi_json (>= 0.0.2)
+      mustermann (~> 3.0)
+      rack-protection (= 4.2.1)
+      sinatra (= 4.2.1)
       tilt (~> 2.0)
     sync (0.5.0)
     thwait (0.2.0)
       e2mmap
-    tilt (2.3.0)
+    tilt (2.6.1)
     tins (1.32.1)
       sync
     webmock (3.23.0)
@@ -175,6 +184,7 @@ GEM
       hashdiff (>= 0.4.0, < 2.0.0)
 
 PLATFORMS
+  arm64-darwin-21
   arm64-darwin-22
   x86_64-darwin-22
   x86_64-linux
@@ -183,16 +193,17 @@ DEPENDENCIES
   dpl!
   json-schema
   pry
-  puma (~> 6.3.0)
+  puma (~> 6.4, >= 6.4.3)
+  rack (>= 2.2.20)
   rack-cors
   rack-ssl-enforcer (~> 0.2.9)
   rack-test
   rake
   redcarpet
-  rexml
+  rexml (>= 3.3.9)
   rspec
   sentry-raven (~> 3.1.2)
-  sinatra (~> 2)
+  sinatra (~> 4.2)
   sinatra-contrib
   thwait
   travis-conditions!

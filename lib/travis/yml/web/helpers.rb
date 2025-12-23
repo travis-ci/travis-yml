@@ -8,7 +8,8 @@ module Travis
         end
 
         def request_body
-          request.body.read.tap { request.body.rewind }
+          request.body.rewind
+          request.body.read
         end
 
         def request_headers
