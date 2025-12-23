@@ -20,6 +20,10 @@ module Travis
           def handle
             status 200
             json matrix: expand
+          rescue JSON::ParserError => e
+            status 400
+            # Treat JSON parser errors as encoding errors for backward compatibility
+            error(EncodingError.new(e.message))
           rescue Oj::Error, EncodingError => e
             status 400
             error(e)
@@ -33,9 +37,6 @@ module Travis
             Oj.load(request_body, symbol_keys: true, mode: :strict, empty_string: false)
           end
 
-          def request_body
-            request.body.read.tap { request.body.rewind }
-          end
       end
     end
   end
