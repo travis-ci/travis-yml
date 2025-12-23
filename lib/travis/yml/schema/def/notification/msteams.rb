@@ -10,8 +10,8 @@ module Travis
             register :msteams
 
             def define
-              see 'Configuring MS Teams notifications': 'https://docs.travis-ci.com/user/notifications/#configuring-ms-teams-notifications'
-              
+              see 'Configuring Ms Teams notifications': 'https://docs.travis-ci.com/user/notifications/#configuring-ms-teams-notifications'
+
               prefix :rooms
 
               map :rooms,    to: :seq, type: :secure, summary: 'MS Teams webhook URLs'
