@@ -26,7 +26,17 @@ module Travis
             register :webhook_urls
 
             def define
-              type :secure, strict: false
+              # Support both simple strings and objects with url/msteams
+              type [:webhook_url_obj, :secure], strict: false
+            end
+          end
+
+          class WebhookUrlObj < Type::Map
+            register :webhook_url_obj
+
+            def define
+              map :url, to: :secure, summary: 'Webhook URL', required: true
+              map :msteams, to: :bool, summary: 'Use MS Teams Adaptive Card format'
             end
           end
         end

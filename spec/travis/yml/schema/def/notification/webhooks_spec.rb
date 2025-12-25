@@ -27,9 +27,41 @@ describe Travis::Yml::Schema::Def::Notification::Webhooks, 'structure' do
                   type: :array,
                   normal: true,
                   items: {
-                    '$ref': '#/definitions/type/secure',
-                    strict: false
+                    anyOf: [
+                      {
+                        type: :object,
+                        properties: {
+                          url: {
+                            '$ref': '#/definitions/type/secure',
+                            summary: kind_of(String)
+                          },
+                          msteams: {
+                            type: :boolean,
+                            summary: kind_of(String)
+                          }
+                        },
+                        required: [:url]
+                      },
+                      {
+                        '$ref': '#/definitions/type/secure',
+                        strict: false
+                      }
+                    ]
                   }
+                },
+                {
+                  type: :object,
+                  properties: {
+                    url: {
+                      '$ref': '#/definitions/type/secure',
+                      summary: kind_of(String)
+                    },
+                    msteams: {
+                      type: :boolean,
+                      summary: kind_of(String)
+                    }
+                  },
+                  required: [:url]
                 },
                 {
                   '$ref': '#/definitions/type/secure',
@@ -73,11 +105,43 @@ describe Travis::Yml::Schema::Def::Notification::Webhooks, 'structure' do
         },
         {
           type: :array,
-          normal: true, # this should not be normal
+          normal: true,
           items: {
-            '$ref': '#/definitions/type/secure',
-            strict: false
+            anyOf: [
+              {
+                type: :object,
+                properties: {
+                  url: {
+                    '$ref': '#/definitions/type/secure',
+                    summary: kind_of(String)
+                  },
+                  msteams: {
+                    type: :boolean,
+                    summary: kind_of(String)
+                  }
+                },
+                required: [:url]
+              },
+              {
+                '$ref': '#/definitions/type/secure',
+                strict: false
+              }
+            ]
           }
+        },
+        {
+          type: :object,
+          properties: {
+            url: {
+              '$ref': '#/definitions/type/secure',
+              summary: kind_of(String)
+            },
+            msteams: {
+              type: :boolean,
+              summary: kind_of(String)
+            }
+          },
+          required: [:url]
         },
         {
           '$ref': '#/definitions/type/secure',

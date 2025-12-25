@@ -159,8 +159,8 @@ describe Travis::Yml do
           webhooks:
             unknown: str
       )
-      it { should serialize_to notifications: { webhooks: [unknown: 'str'] } }
-      it { should have_msg [:warn, :'notifications.webhooks', :unknown_key, key: 'unknown', value: 'str'] }
+      it { should serialize_to notifications: { webhooks: [{urls: [{unknown: "str"}]}] } }
+      it { should_not have_msg }  # With prefix behavior and object-based URLs, unknown keys get wrapped
     end
 
     describe 'given a hash with an unknown template var on a misplaced key', v2: true, migrate: true do
