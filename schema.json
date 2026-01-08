@@ -141,6 +141,9 @@
         },
         "vault": {
           "$ref": "#/definitions/type/vault"
+        },
+        "keep_netrc": {
+          "$ref": "#/definitions/type/keep_netrc"
         }
       },
       "see": {
@@ -1082,6 +1085,9 @@
               "stage": {
                 "type": "string"
               },
+              "keep_netrc": {
+                "$ref": "#/definitions/type/keep_netrc"
+              },
               "branch": {
                 "type": "string",
                 "deprecated": "use conditional allow_failures using :if"
@@ -1179,6 +1185,9 @@
               },
               "stage": {
                 "type": "string"
+              },
+              "keep_netrc": {
+                "$ref": "#/definitions/type/keep_netrc"
               }
             },
             "title": "Job Matrix Exclude"
@@ -1266,6 +1275,9 @@
               "stage": {
                 "type": "string"
               },
+              "keep_netrc": {
+                "$ref": "#/definitions/type/keep_netrc"
+              },
               "allow_failure": {
                 "type": "boolean"
               },
@@ -1301,6 +1313,18 @@
             "$ref": "#/definitions/type/jobs_include"
           }
         ]
+      },
+      "keep_netrc": {
+        "$id": "keep_netrc",
+        "title": "Keep Netrc",
+        "anyOf": [
+          {
+            "type": "boolean",
+            "normal": true
+          }
+        ],
+        "summary": "Whether to retain the `.netrc` file after the build",
+        "example": "true"
       },
       "keys": {
         "$id": "keys",
@@ -10569,10 +10593,46 @@
                   {
                     "type": "array",
                     "items": {
-                      "$ref": "#/definitions/type/secure",
-                      "strict": false
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "url": {
+                              "$ref": "#/definitions/type/secure",
+                              "summary": "Webhook URL"
+                            },
+                            "msteams": {
+                              "type": "boolean",
+                              "summary": "Use MS Teams Adaptive Card format"
+                            }
+                          },
+                          "required": [
+                            "url"
+                          ]
+                        },
+                        {
+                          "$ref": "#/definitions/type/secure",
+                          "strict": false
+                        }
+                      ]
                     },
                     "normal": true
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "url": {
+                        "$ref": "#/definitions/type/secure",
+                        "summary": "Webhook URL"
+                      },
+                      "msteams": {
+                        "type": "boolean",
+                        "summary": "Use MS Teams Adaptive Card format"
+                      }
+                    },
+                    "required": [
+                      "url"
+                    ]
                   },
                   {
                     "$ref": "#/definitions/type/secure",
@@ -10625,10 +10685,46 @@
           {
             "type": "array",
             "items": {
-              "$ref": "#/definitions/type/secure",
-              "strict": false
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "url": {
+                      "$ref": "#/definitions/type/secure",
+                      "summary": "Webhook URL"
+                    },
+                    "msteams": {
+                      "type": "boolean",
+                      "summary": "Use MS Teams Adaptive Card format"
+                    }
+                  },
+                  "required": [
+                    "url"
+                  ]
+                },
+                {
+                  "$ref": "#/definitions/type/secure",
+                  "strict": false
+                }
+              ]
             },
             "normal": true
+          },
+          {
+            "type": "object",
+            "properties": {
+              "url": {
+                "$ref": "#/definitions/type/secure",
+                "summary": "Webhook URL"
+              },
+              "msteams": {
+                "type": "boolean",
+                "summary": "Use MS Teams Adaptive Card format"
+              }
+            },
+            "required": [
+              "url"
+            ]
           },
           {
             "$ref": "#/definitions/type/secure",
