@@ -172,5 +172,13 @@ describe Travis::Yml, 'accept deploy', slow: true do
       it { should_not validate language: {:foo=>'foo'} }
       it { should_not validate language: [{:foo=>'foo'}] }
     end
+    describe 'use_devtools' do
+      it { should validate language: :r }
+      it { should_not validate language: 1 }
+      it { should_not validate language: true }
+      it { should_not validate language: [:r] }
+      it { should_not validate language: {:foo=>'foo'} }
+      it { should_not validate language: [{:foo=>'foo'}] }
+    end
   end
 end
