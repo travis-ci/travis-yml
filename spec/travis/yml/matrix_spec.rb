@@ -782,6 +782,51 @@ describe Travis::Yml, 'matrix' do
     ]
   end
 
+  describe 'priority at root propagates to expanded jobs' do
+    yaml %(
+      priority: 5
+      rvm:
+      - 2.2
+      - 2.3
+    )
+
+    expands_to [
+      { priority: 5, rvm: '2.2' },
+      { priority: 5, rvm: '2.3' }
+    ]
+  end
+
+  describe 'priority on a matrix.include entry is preserved' do
+    yaml %(
+      jobs:
+        include:
+          - rvm: '2.3'
+            priority: 5
+          - rvm: '2.3'
+    )
+
+    expands_to [
+      { rvm: '2.3', priority: 5 },
+      { rvm: '2.3' }
+    ]
+  end
+
+  describe 'priority on a matrix.include entry overrides root priority' do
+    yaml %(
+      priority: -5
+      jobs:
+        include:
+          - rvm: '2.3'
+            priority: 5
+          - rvm: '2.3'
+    )
+
+    expands_to [
+      { rvm: '2.3', priority: 5 },
+      { rvm: '2.3', priority: -5 }
+    ]
+  end
+
   # describe 'wat' do
   #   yaml %(
   #   )

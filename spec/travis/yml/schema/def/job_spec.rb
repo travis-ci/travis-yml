@@ -52,6 +52,11 @@ describe Travis::Yml::Schema::Def::Job do
         keys: {
           '$ref': '#/definitions/type/keys'
         },
+        priority: {
+          type: :number,
+          enum: [-5, 0, 5],
+          summary: 'Job scheduling priority (5=high, 0=default, -5=low). Org-only feature; requires the build_priorities_org flag.',
+        },
         before_script: {
           '$ref': '#/definitions/type/strs',
           summary: 'Scripts to run before the script stage'
