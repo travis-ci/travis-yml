@@ -36,6 +36,7 @@ module Travis
             map :group
             map :workspaces
             map :keys
+            map :priority, to: :num, values: [-5, 0, 5], summary: 'Job scheduling priority (5=high, 0=default, -5=low). Org-only feature; requires the build_priorities_org flag.'
 
             map :before_install, to: :seq, summary: 'Scripts to run before the install stage'
             map :install,        to: :seq, summary: 'Scripts to run at the install stage'
